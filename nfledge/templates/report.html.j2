@@ -66,7 +66,11 @@ details.howto div { margin-top: 8px; color: var(--muted); font-size: 12.5px; max
 .scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 table { border-collapse: collapse; width: 100%; font-size: 13px; }
 th, td { padding: 8px 10px; text-align: left; white-space: nowrap; vertical-align: middle; }
-thead th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; cursor: pointer; user-select: none; }
+thead th.can-sort { cursor: pointer; } thead th.can-sort:hover { color: var(--ink); }
+thead th.nosort { cursor: default; }
+thead th.sorted-asc::after { content: " \25B2"; font-size: 8px; color: var(--accent); }
+thead th.sorted-desc::after { content: " \25BC"; font-size: 8px; color: var(--accent); }
+thead th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; user-select: none; }
 tbody td { border-bottom: 1px solid var(--line); }
 td.num, th.num { text-align: right; }
 abbr { text-decoration: none; border-bottom: 1px dotted var(--faint); cursor: help; }
@@ -258,6 +262,11 @@ table.power .sub { display: block; margin-top: 2px; font-size: 11px; }
 .doc td { white-space: normal; }
 .doc code { font: 12.5px ui-monospace, SFMono-Regular, Consolas, monospace; background: var(--panel2); padding: 1px 5px; border-radius: 4px; }
 .doc .live { color: var(--accent); font-weight: 700; }
+.doc p > code:only-child { display: block; padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; white-space: pre-wrap; line-height: 1.6; font-size: 12.5px; }
+.doc h3 { font-size: 15px; margin: 28px 0 8px; letter-spacing: -.01em; }
+.doc table { display: block; overflow-x: auto; width: fit-content; max-width: 100%; }
+.doc td, .doc th { padding: 6px 12px; font-variant-numeric: tabular-nums; }
+.doc tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--panel2) 60%, transparent); }
 .stale { margin: 0 0 14px; padding: 10px 14px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--warn) 50%, var(--line)); color: var(--warn); background: color-mix(in srgb, var(--warn) 8%, var(--panel)); font-size: 13px; font-weight: 600; }
 footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 </style>
@@ -302,38 +311,38 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     <div class="scroll">
     <table class="sortable ranks tiles">
       <thead><tr>
-        <th class="num">#</th>
-        <th class="num"><abbr title="FantasyPros expert consensus rank (Fridays); faded 'lw' = last week's">ECR</abbr></th>
-        <th class="stick">Player</th>
-        <th><abbr title="Opponent and its defense vs {{ pos }}s: 1st = toughest (red), 32nd = easiest (green). Opponent-adjusted, from the model.">Matchup</abbr></th>
+        <th class="num" data-first="asc">#</th>
+        <th class="num" data-first="asc"><abbr title="FantasyPros expert consensus rank (Fridays); faded 'lw' = last week's">ECR</abbr></th>
+        <th class="stick" data-first="asc">Player</th>
+        <th data-first="desc"><abbr title="Opponent and its defense vs {{ pos }}s: 1st = toughest (red), 32nd = easiest (green). Opponent-adjusted, from the model.">Matchup</abbr></th>
         <th class="num"><abbr title="Chance he is inactive: injury (practice pattern + game status) or healthy scratch">Inactive</abbr></th>
         <th class="num"><abbr title="Projection; bar = floor to ceiling (10th-90th pct), thick = middle 50%">Projection</abbr></th>
         <th class="num"><abbr title="Season fantasy points per game">FP/G</abbr></th>
-        <th>Tier</th>
-        <th class="hide-sm"><abbr title="Projected stat line; donut = touchdown odds">Expected line</abbr></th>
-        <th>Takeaway</th>
+        <th data-first="asc">Tier</th>
+        <th class="hide-sm nosort"><abbr title="Projected stat line; donut = touchdown odds">Expected line</abbr></th>
+        <th class="nosort">Takeaway</th>
       </tr></thead>
       <tbody>
       {% for r in block.rows %}
         <tr class="main teamrow{% if r.boost >= 1 %} boosted{% endif %}{% if r.avail < 0.5 %} out{% endif %}" style="{{ r.row_style }}" data-name="{{ r.name|lower }}">
           <td class="num rk">{{ r.rank }}</td>
-          <td class="num ecr{{ ' stale' if r.ecr_stale }}"{% if r.ecr_stale %} title="Last week's expert rank; this week's is published Friday"{% endif %}>{{ r.ecr|f0 }}{% if r.ecr_stale %}<sup>lw</sup>{% endif %}</td>
-          <td class="stick"><div class="who">{{ r.logo|safe }}<div><b>{{ r.name }}</b>
+          <td data-v="{{ r.ecr|f0 }}" class="num ecr{{ ' stale' if r.ecr_stale }}"{% if r.ecr_stale %} title="Last week's expert rank; this week's is published Friday"{% endif %}>{{ r.ecr|f0 }}{% if r.ecr_stale %}<sup>lw</sup>{% endif %}</td>
+          <td class="stick" data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.name }}</b>
             {%- if r.status or r.boost >= 1 or r.low_sample %}<div class="badges">
               {%- if r.status %}<span class="flag {{ 'f-out' if r.avail < 0.5 else 'f-q' }}" title="Injury report; practice Wed/Thu/Fri: D = did not practice, L = limited, F = full">{{ r.status }}</span>{% endif %}
               {%- if r.boost >= 1 %}<span class="flag f-up" title="Raised by volume vacated by: {{ r.boost_from }}">+{{ r.boost|f1 }} inj</span>{% endif %}
               {%- if r.low_sample %}<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>{% endif %}
             </div>{% endif %}</div></div></td>
           {% set lvl = {'A': 5, 'B': 4, 'C': 3, 'D': 2, 'F': 1}[r.grade] %}
-          <td class="mu"><div class="mu-row">
+          <td class="mu" data-v="{{ r.dvp_rank }}"><div class="mu-row">
             <span class="opp"><span class="vs">{{ r.home }}</span>{{ r.opp_logo|safe }}<b>{{ r.opp }}</b></span>
             <span class="meter m{{ lvl }}" title="Matchup {{ r.grade }}: {{ r.opp }} is {{ r.dvp }} of 32 vs {{ pos }}s">{% for i in range(5) %}<i class="{{ 'on' if i < lvl }}"></i>{% endfor %}</span>
             <span class="dvp" style="color:{{ r.dvp_color }}" title="{{ r.opp }} defense vs {{ pos }}s: {{ r.dvp }} of 32 (1st = toughest, 32nd = easiest). This week: {{ r.mpts|sgn }} pts vs an average defense.">{{ r.dvp }}</span>
           </div></td>
-          <td class="num" title="{{ r.inactive_why }}"><span class="{{ 'pill pill-bad' if r.inactive >= 0.5 else 'pill pill-warn' if r.inactive >= 0.15 else 'pill pill-soft' if r.inactive >= 0.05 else 'quiet' }}">{{ '<1%' if r.inactive < 0.005 else r.inactive|pct }}</span></td>
-          <td class="num" title="Floor {{ r.p10|f1 }} · middle {{ r.p25|f1 }}-{{ r.p75|f1 }} · ceiling {{ r.p90|f1 }}"><div class="proj"><b>{{ r.proj|f1 }}</b>{{ r.range|safe }}<span class="fc">{{ r.p10|f0 }}&ndash;{{ r.p90|f0 }}</span></div></td>
+          <td class="num" data-v="{{ r.inactive }}" title="{{ r.inactive_why }}"><span class="{{ 'pill pill-bad' if r.inactive >= 0.5 else 'pill pill-warn' if r.inactive >= 0.15 else 'pill pill-soft' if r.inactive >= 0.05 else 'quiet' }}">{{ '<1%' if r.inactive < 0.005 else r.inactive|pct }}</span></td>
+          <td class="num" data-v="{{ r.proj }}" title="Floor {{ r.p10|f1 }} · middle {{ r.p25|f1 }}-{{ r.p75|f1 }} · ceiling {{ r.p90|f1 }}"><div class="proj"><b>{{ r.proj|f1 }}</b>{{ r.range|safe }}<span class="fc">{{ r.p10|f0 }}&ndash;{{ r.p90|f0 }}</span></div></td>
           <td class="num">{{ r.fpg|f1 }}</td>
-          <td><span class="tier t-{{ r.tier.split()[0] }}">{{ r.tier }}</span></td>
+          <td data-v="{{ {'Must start': 1, 'Start': 2, 'Flex': 3, 'Sit': 4}[r.tier] }}"><span class="tier t-{{ r.tier.split()[0] }}">{{ r.tier }}</span></td>
           <td class="line hide-sm">{{ r.line|safe }}</td>
           <td class="take">{{ r.takeaway }}</td>
         </tr>
@@ -403,18 +412,18 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     Colored badges are league ranks (green = top 8, red = bottom 8). <b>Schedule</b>: the average current net rating of opponents already played and still to play (positive = tougher than average; 1st = hardest). Arrows show the move since last week.
   </div></details>
   <div class="card"><div class="scroll"><table class="sortable tiles power">
-    <thead><tr><th class="num">#</th><th>Team</th><th class="num">Net</th><th>Offense</th><th>Defense</th><th>Special teams</th><th>Schedule played</th><th>Schedule left</th><th class="hide-sm">Trend</th></tr></thead>
+    <thead><tr><th class="num" data-first="asc">#</th><th data-first="asc">Team</th><th class="num">Net</th><th>Offense</th><th>Defense</th><th>Special teams</th><th>Schedule played</th><th>Schedule left</th><th class="hide-sm nosort">Trend</th></tr></thead>
     <tbody>
     {% for r in power %}
       <tr class="teamrow" style="{{ r.row_style }}">
-        <td class="num rk"><span class="rkn">{{ r.rank }}</span>{% if r.move > 0 %}<span class="mv up">&#9650;{{ r.move }}</span>{% elif r.move < 0 %}<span class="mv dn">&#9660;{{ -r.move }}</span>{% else %}<span class="mv">&ndash;</span>{% endif %}</td>
-        <td><div class="who">{{ r.logo|safe }}<div><b>{{ r.nick }}</b><span class="sub">{{ r.team }} &middot; {{ r.record }}</span></div></div></td>
-        <td class="num"><div class="netc"><b>{{ r.net|sgn }}</b><span class="sub">likely {{ r.range }}</span></div></td>
-        <td><div class="mc"><span class="mv2">{{ r.off|sgn }}</span><span class="rk-b {{ r.off_rk|rkc }}">{{ r.off_rk|ord }}</span></div><span class="sub">Pass {{ r.off_pass|sgn }} &middot; Run {{ r.off_rush|sgn }}</span></td>
-        <td><div class="mc"><span class="mv2">{{ r.def|sgn }}</span><span class="rk-b {{ r.def_rk|rkc }}">{{ r.def_rk|ord }}</span></div><span class="sub">Pass {{ r.def_pass|sgn }} &middot; Run {{ r.def_rush|sgn }}</span></td>
-        <td><div class="mc"><span class="mv2">{{ r.st|sgn }}</span><span class="rk-b {{ r.st_rk|rkc }}">{{ r.st_rk|ord }}</span></div></td>
-        <td><div class="mc"><span class="mv2">{{ r.sos_past|sgn }}</span><span class="rk-b rkn2">{{ r.sos_past_rk|ord }}</span></div><span class="sub">{{ 'hard' if r.sos_past_rk <= 8 else 'easy' if r.sos_past_rk >= 25 else 'average' }}</span></td>
-        <td><div class="mc"><span class="mv2">{{ r.sos_next|sgn }}</span><span class="rk-b rkn2">{{ r.sos_next_rk|ord }}</span></div><span class="sub">{{ 'hard' if r.sos_next_rk <= 8 else 'easy' if r.sos_next_rk >= 25 else 'average' }}</span></td>
+        <td class="num rk" data-v="{{ r.rank }}"><span class="rkn">{{ r.rank }}</span>{% if r.move > 0 %}<span class="mv up">&#9650;{{ r.move }}</span>{% elif r.move < 0 %}<span class="mv dn">&#9660;{{ -r.move }}</span>{% else %}<span class="mv">&ndash;</span>{% endif %}</td>
+        <td data-v="{{ r.nick }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.nick }}</b><span class="sub">{{ r.team }} &middot; {{ r.record }}</span></div></div></td>
+        <td class="num" data-v="{{ r.net }}"><div class="netc"><b>{{ r.net|sgn }}</b><span class="sub">likely {{ r.range }}</span></div></td>
+        <td data-v="{{ r.off }}"><div class="mc"><span class="mv2">{{ r.off|sgn }}</span><span class="rk-b {{ r.off_rk|rkc }}">{{ r.off_rk|ord }}</span></div><span class="sub">Pass {{ r.off_pass|sgn }} &middot; Run {{ r.off_rush|sgn }}</span></td>
+        <td data-v="{{ r.def }}"><div class="mc"><span class="mv2">{{ r.def|sgn }}</span><span class="rk-b {{ r.def_rk|rkc }}">{{ r.def_rk|ord }}</span></div><span class="sub">Pass {{ r.def_pass|sgn }} &middot; Run {{ r.def_rush|sgn }}</span></td>
+        <td data-v="{{ r.st }}"><div class="mc"><span class="mv2">{{ r.st|sgn }}</span><span class="rk-b {{ r.st_rk|rkc }}">{{ r.st_rk|ord }}</span></div></td>
+        <td data-v="{{ r.sos_past }}"><div class="mc"><span class="mv2">{{ r.sos_past|sgn }}</span><span class="rk-b rkn2">{{ r.sos_past_rk|ord }}</span></div><span class="sub">{{ 'hard' if r.sos_past_rk <= 8 else 'easy' if r.sos_past_rk >= 25 else 'average' }}</span></td>
+        <td data-v="{{ r.sos_next }}"><div class="mc"><span class="mv2">{{ r.sos_next|sgn }}</span><span class="rk-b rkn2">{{ r.sos_next_rk|ord }}</span></div><span class="sub">{{ 'hard' if r.sos_next_rk <= 8 else 'easy' if r.sos_next_rk >= 25 else 'average' }}</span></td>
         <td class="hide-sm">{{ r.spark|safe }}</td>
       </tr>
     {% endfor %}
@@ -429,17 +438,17 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     Players: fantasy points per game, raw vs adjusted for the defenses faced.
   </div></details>
   <div class="card"><div class="scroll"><table class="sortable tiles">
-    <thead><tr><th>Team</th><th class="num">Offense gap</th><th class="num">Defense gap</th><th class="num">Total</th><th>Takeaway</th></tr></thead>
-    <tbody>{% for r in team_luck %}<tr class="teamrow" style="{{ r.row_style }}"><td><div class="who">{{ r.logo|safe }}<b>{{ r.team }}</b></div></td>
+    <thead><tr><th data-first="asc">Team</th><th class="num">Offense gap</th><th class="num">Defense gap</th><th class="num">Total</th><th class="nosort">Takeaway</th></tr></thead>
+    <tbody>{% for r in team_luck %}<tr class="teamrow" style="{{ r.row_style }}"><td data-v="{{ r.team }}"><div class="who">{{ r.logo|safe }}<b>{{ r.team }}</b></div></td>
       <td class="num" title="Raw {{ r.off_raw|sgn }} vs adjusted {{ r.off_adj|sgn }}">{{ r.off_gap|sgn }}</td>
       <td class="num" title="Raw {{ r.def_raw|sgn }} vs adjusted {{ r.def_adj|sgn }}">{{ r.def_gap|sgn }}</td>
-      <td class="num"><span class="valbar">{{ r.total_gap|dbar(8, 90)|safe }}<b>{{ r.total_gap|sgn }}</b></span></td>
+      <td class="num" data-v="{{ r.total_gap }}"><span class="valbar">{{ r.total_gap|dbar(8, 90)|safe }}<b>{{ r.total_gap|sgn }}</b></span></td>
       <td class="take">{{ 'Easy schedule so far: likely worse than the record' if r.total_gap > 2 else 'Tough schedule so far: likely better than the record' if r.total_gap < -2 else '' }}</td></tr>{% endfor %}</tbody>
   </table></div></div>
   <div class="card"><div class="scroll"><table class="sortable tiles">
-    <thead><tr><th>Player</th><th class="num">G</th><th class="num">Raw FP/G</th><th class="num">Adjusted</th><th class="num">Gap</th><th>Takeaway</th></tr></thead>
-    <tbody>{% for r in player_luck %}<tr class="teamrow" style="{{ r.row_style }}"><td><div class="who">{{ r.logo|safe }}<div><b>{{ r.name }}</b><span class="sub">{{ r.pos }} &middot; {{ r.team }}</span></div></div></td><td class="num">{{ r.games }}</td><td class="num">{{ r.raw|f1 }}</td><td class="num">{{ r.adj|f1 }}</td>
-      <td class="num"><span class="valbar">{{ r.gap|dbar(3, 70)|safe }}<b>{{ r.gap|sgn }}</b></span></td><td class="take">{{ r.takeaway if r.gap|abs >= 1 else '' }}</td></tr>{% endfor %}</tbody>
+    <thead><tr><th data-first="asc">Player</th><th class="num">G</th><th class="num">Raw FP/G</th><th class="num">Adjusted</th><th class="num">Gap</th><th class="nosort">Takeaway</th></tr></thead>
+    <tbody>{% for r in player_luck %}<tr class="teamrow" style="{{ r.row_style }}"><td data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.name }}</b><span class="sub">{{ r.pos }} &middot; {{ r.team }}</span></div></div></td><td class="num">{{ r.games }}</td><td class="num">{{ r.raw|f1 }}</td><td class="num">{{ r.adj|f1 }}</td>
+      <td class="num" data-v="{{ r.gap }}"><span class="valbar">{{ r.gap|dbar(3, 70)|safe }}<b>{{ r.gap|sgn }}</b></span></td><td class="take">{{ r.takeaway if r.gap|abs >= 1 else '' }}</td></tr>{% endfor %}</tbody>
   </table></div></div>
 </section>
 
@@ -449,10 +458,10 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     Compares each player's latest game with his previous three. Opportunity share = (carries + targets) / team plays. These are alerts, not model inputs: check the reason (injury ahead of him, demotion, game script) before chasing.
   </div></details>
   <div class="card"><div class="scroll"><table class="sortable tiles">
-    <thead><tr><th>Player</th><th>Snap share</th><th>Opportunity share</th><th class="num">Touches</th><th>Takeaway</th></tr></thead>
-    <tbody>{% for r in roles %}<tr class="teamrow" style="{{ r.row_style }}"><td><div class="who">{{ r.logo|safe }}<div><b>{{ r.name }}</b><span class="sub">{{ r.pos }} &middot; {{ r.team }}{% if r.week != week - 1 %} &middot; wk {{ r.week }}{% endif %}</span></div></div></td>
-      <td><span class="arrow"><span class="from">{{ r.snap_prev|pct }}</span><i>&rarr;</i><b>{{ r.snap_now|pct }}</b></span></td>
-      <td><span class="arrow"><span class="from">{{ r.opp_prev|pct }}</span><i>&rarr;</i><b>{{ r.opp_now|pct }}</b></span></td>
+    <thead><tr><th data-first="asc">Player</th><th><abbr title="Sorts by the size of the jump">Snap share</abbr></th><th><abbr title="Sorts by the size of the jump">Opportunity share</abbr></th><th class="num">Touches</th><th class="nosort">Takeaway</th></tr></thead>
+    <tbody>{% for r in roles %}<tr class="teamrow" style="{{ r.row_style }}"><td data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.name }}</b><span class="sub">{{ r.pos }} &middot; {{ r.team }}{% if r.week != week - 1 %} &middot; wk {{ r.week }}{% endif %}</span></div></div></td>
+      <td data-v="{{ (r.snap_now or 0) - (r.snap_prev or 0) }}"><span class="arrow"><span class="from">{{ r.snap_prev|pct }}</span><i>&rarr;</i><b>{{ r.snap_now|pct }}</b></span></td>
+      <td data-v="{{ (r.opp_now or 0) - (r.opp_prev or 0) }}"><span class="arrow"><span class="from">{{ r.opp_prev|pct }}</span><i>&rarr;</i><b>{{ r.opp_now|pct }}</b></span></td>
       <td class="num">{{ r.touches }}</td><td class="take">{{ r.takeaway }}</td></tr>{% endfor %}</tbody>
   </table></div></div>
 </section>
@@ -463,10 +472,10 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     Every projection used only data available before that week, and every learned piece was trained only on earlier seasons. Fantasy-relevant players who played, on weeks where all methods had a value.
     Average miss = mean absolute error in points (lower is better). Rank correlation = how well each method ordered players within a week (higher is better). Best per row in blue.
   </div></details>
-  <div class="card"><div class="scroll"><table>
+  <div class="card"><div class="scroll"><table class="sortable">
     <thead>
-      <tr><th></th><th></th><th class="bt-group" colspan="4">Average miss (pts)</th><th class="bt-group" colspan="4">Rank correlation</th></tr>
-      <tr><th>Pos</th><th class="num">n</th><th class="num">Model</th><th class="num">Experts</th><th class="num">Vegas</th><th class="num">Raw</th><th class="num">Model</th><th class="num">Experts</th><th class="num">Vegas</th><th class="num">Raw</th></tr>
+      <tr><th class="nosort"></th><th class="nosort"></th><th class="bt-group nosort" colspan="4">Average miss (pts)</th><th class="bt-group nosort" colspan="4">Rank correlation</th></tr>
+      <tr><th data-first="asc">Pos</th><th class="num">n</th><th class="num" data-first="asc">Model</th><th class="num" data-first="asc">Experts</th><th class="num" data-first="asc">Vegas</th><th class="num" data-first="asc">Raw</th><th class="num">Model</th><th class="num">Experts</th><th class="num">Vegas</th><th class="num">Raw</th></tr>
     </thead>
     <tbody>{% for r in backtest %}
       {% set maes = [r.mae_model, r.mae_ecr, r.mae_vegas, r.mae_raw] | reject('none') | list %}
@@ -505,13 +514,37 @@ try {
   const b = t && document.querySelector(`nav.tabs button[data-tab="${t}"]`);
   if (b) b.click();
 } catch (e) {}
-document.querySelectorAll('table.sortable thead tr:last-child th').forEach((th, i) => th.onclick = () => {
-  const tb = th.closest('table').tBodies[0];
-  const mains = [...tb.rows].filter(r => !r.classList.contains('detail'));
-  const dir = th.dataset.dir === 'desc' ? 1 : -1; th.dataset.dir = dir === 1 ? 'asc' : 'desc';
-  const val = r => { const t = r.cells[i].innerText.split(/\r?\n/)[0].replace(/[%+,<]/g, '').trim(); const n = parseFloat(t); return isNaN(n) ? t.toLowerCase() : n; };
-  mains.sort((a, b) => { const x = val(a), y = val(b); if (x === '' || y === '') return x === '' ? 1 : -1; return (x > y ? 1 : x < y ? -1 : 0) * dir; });
-  mains.forEach(r => { const d = r.nextElementSibling && r.nextElementSibling.classList.contains('detail') ? r.nextElementSibling : null; tb.appendChild(r); if (d) tb.appendChild(d); });
+// Sorting: cells carry their real value in data-v (ranks, percentages, tiers); blanks always sort last; the first
+// click uses the header's natural direction (data-first), the next click flips it; detail rows follow their row.
+document.querySelectorAll('table.sortable').forEach(tbl => {
+  const ths = [...tbl.tHead.rows[tbl.tHead.rows.length - 1].cells];
+  const val = (r, i) => {
+    const c = r.cells[i]; if (!c) return null;
+    let t = c.dataset.v;
+    if (t === undefined) t = c.innerText.split(/\r?\n/)[0].replace(/[%+,<]/g, '').trim();
+    if (t === '' || t === 'nan' || t === 'None') return null;
+    const n = Number(t); return isNaN(n) ? t.toLowerCase() : n;
+  };
+  ths.forEach((th, i) => {
+    if (th.classList.contains('nosort')) return;
+    th.classList.add('can-sort');
+    th.onclick = () => {
+      const dir = th.dataset.dir ? (th.dataset.dir === 'asc' ? 'desc' : 'asc') : (th.dataset.first || 'desc');
+      ths.forEach(h => { delete h.dataset.dir; h.classList.remove('sorted-asc', 'sorted-desc'); });
+      th.dataset.dir = dir; th.classList.add('sorted-' + dir);
+      const m = dir === 'asc' ? 1 : -1, tb = tbl.tBodies[0];
+      const mains = [...tb.rows].filter(r => !r.classList.contains('detail'));
+      mains.sort((a, b) => {
+        const x = val(a, i), y = val(b, i);
+        if (x === null || y === null) return x === y ? 0 : x === null ? 1 : -1;
+        return (x > y ? 1 : x < y ? -1 : 0) * m;
+      });
+      mains.forEach(r => {
+        const d = r.nextElementSibling && r.nextElementSibling.classList.contains('detail') ? r.nextElementSibling : null;
+        tb.appendChild(r); if (d) tb.appendChild(d);
+      });
+    };
+  });
 });
 document.querySelectorAll('tr.main').forEach(r => r.onclick = () => {
   const d = r.nextElementSibling; if (!d || !d.classList.contains('detail')) return;

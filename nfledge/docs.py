@@ -168,9 +168,10 @@ def formulas(eng, season: int, week: int) -> str:
 
   # --- team model -----------------------------------------------------------------------------------------------
   add("### 10.1 Team ratings (ridge regression on play EPA)")
-  add("For each unit u (pass, rush, special teams), with play weights w (recency x prior-season decay):")
+  add("For each unit u (pass, rush, special teams), every play's EPA is modeled as:")
   add("`EPA_play = a_u + O[offense] + D[defense] + Q[passer] (pass only) + I x inexperienced QB (pass only) + H_u x home`")
-  add("solved by minimizing `sum w (EPA - prediction)^2 + alpha_u (sum O^2 + sum D^2 + H^2) + alpha_QB sum Q^2 + 1.0 x I^2`.")
+  add("Coefficients minimize the weighted squared error plus ridge penalties:")
+  add("`sum w (EPA - prediction)^2 + alpha_u (sum O^2 + sum D^2 + H^2) + alpha_QB sum Q^2 + 1.0 x I^2`")
   add("| Unit | Intercept a (EPA/play) | Home edge H (per 100 plays) | alpha (teams) | alpha (QBs) |")
   add("|---|---|---|---|---|")
   for u in ("pass", "rush", "st"):
@@ -205,6 +206,7 @@ def formulas(eng, season: int, week: int) -> str:
 
   # --- shares ---------------------------------------------------------------------------------------------------
   add("### 10.3 Usage shares (calibrated next-game share)")
+  add("Next-game share, calibrated on past games:")
   add("`share_next = b0 + b1 x recent share (half-life weighted) + b2 x long-run share (season-weighted)`")
   add("| Share | Position | b0 | b1 recent | b2 long-run |")
   add("|---|---|---|---|---|")
@@ -226,9 +228,10 @@ def formulas(eng, season: int, week: int) -> str:
     add(f"| {STAT_LABEL.get(c, c)} / {OPP_LABEL[opp]} | {grp} | {m.coef[0]:+.3f} | {_f(co.get(f'{c}_per_{opp}'))} | "
         f"{_f(co.get(f'{opp}_adj_per_{opp}'))} | {_f(get('def_'))} | {_f(get('off_'))} | {_f(co.get('home'))} | "
         f"{_f(co.get('implied_pts'), 4)} |")
-  add("Shrunk rate (empirical Bayes): `(sum of player's stat + k x prior mean) / (player's opportunities + k)`, "
-      "with season weights 1.0 / 0.6 / 0.3 for this season and the two before. Prior means by draft tier and "
-      "prior strengths k:")
+  add("The shrunk rate (empirical Bayes) pulls the player toward his position and draft-tier average:")
+  add("`shrunk rate = (player's weighted stat total + k x prior mean) / (player's weighted opportunities + k)`")
+  add("Games are weighted 1.0 / 0.6 / 0.3 for this season and the two before. Prior means by draft tier, and the "
+      "prior strength k (in pseudo-opportunities; larger = noisier stat, more shrinkage):")
   pr = eng.pm.prior
   add("| Stat per opportunity | Group | k | R1 | R2-3 | R4-7 | UDFA |")
   add("|---|---|---|---|---|---|---|")
@@ -237,8 +240,9 @@ def formulas(eng, season: int, week: int) -> str:
     d = 2 if "yd" in c else 4
     add(f"| {STAT_LABEL.get(c, c)} / {OPP_LABEL[opp]} | {grp} | {pr.k.get((opp, grp, c), np.nan):.0f} | "
         + " | ".join("n/a" if np.isnan(v) else f"{v:.{d}f}" for v in mus) + " |")
-  add("Touchdown feature: `expected TDs + n/(n + k_td) x (actual TDs - expected TDs)`, k_td = "
-      f"{eng.cfg['player_model']['td_blend_k']}. Expected-TD rates by distance to the end zone:")
+  add("The touchdown input blends expected TDs toward actual TDs as the sample (n opportunities) grows:")
+  add(f"`TD input = expected TDs + n / (n + {eng.cfg['player_model']['td_blend_k']}) x (actual TDs - expected TDs)`")
+  add("Expected-TD rate per opportunity by yards to the end zone:")
   xt = eng.pm.xtd
   bins = ["1", "2", "3", "4", "5", "6-7", "8-10", "11-15", "16-20", "21-30", "31-50", "51+"]
   add("| Yards to go | " + " | ".join(bins) + " |")
@@ -247,26 +251,29 @@ def formulas(eng, season: int, week: int) -> str:
   add("| Target, end-zone throw | " + " | ".join(f"{xt.tgt.get((i, 1), np.nan):.2f}" for i in range(len(bins))) + " |")
   add("| Target, short of end zone | " + " | ".join(f"{xt.tgt.get((i, 0), np.nan):.2f}" for i in range(len(bins))) + " |")
   pc = eng.cfg["player_model"]
-  add(f"Wind: passing efficiency x (1 - min({pc['wind_penalty_per_mph']} x max(0, wind - "
-      f"{pc['wind_threshold_mph']}), {pc['wind_penalty_cap']})). TD odds: P(k TDs) = e^-x x^k / k! with x = "
-      "expected TDs.")
+  add("Wind adjustment to passing efficiency, and touchdown odds (Poisson, x = expected TDs):")
+  add(f"`passing multiplier = 1 - min({pc['wind_penalty_per_mph']} x max(0, wind mph - {pc['wind_threshold_mph']}), "
+      f"{pc['wind_penalty_cap']})`")
+  add("`P(exactly k TDs) = e^(-x) x^k / k!`")
 
   # --- blend / ranges -------------------------------------------------------------------------------------------
   add("### 10.5 Expert blend, uncertainty and ranges")
+  add("Expert ranks become points, then blend with the model where that helped in testing:")
+  add("| Position | Expert points from rank | Final projection |")
+  add("|---|---|---|")
   for pos in sorted(eng.ecr_map):
     m = eng.ecr_map[pos]
-    line = f"**{pos}**: expert points = {m.coef[0]:.2f} {m.coef[1]:+.2f} x ln(expert rank)"
+    blend = "model only (not blended)"
     if pos in eng.blend:
       b = eng.blend[pos]
-      line += f"; projection = {b.coef[0]:+.2f} + {b.coef[1]:.2f} x model + {b.coef[2]:.2f} x expert points"
-    else:
-      line += "; not blended (model only)"
-    add(line + "  ")
-  add("")
-  add("Spread of outcomes: `sd^2 = a + b x projection`, widened x(1 + 0.6/(1 + games)) relative to an established "
-      "player, x1.2 for low data, x1.25 for injury-boosted roles.")
-  add("| Position | a | b | Floor (10th) / middle (25th-75th) / ceiling (90th) at projection 5, 10, 15, 20 |")
-  add("|---|---|---|---|")
+      blend = f"{b.coef[0]:+.2f} + {b.coef[1]:.2f} x model + {b.coef[2]:.2f} x expert points"
+    add(f"| {pos} | {m.coef[0]:.2f} {m.coef[1]:+.2f} x ln(rank) | {blend} |")
+  add("Spread of outcomes, widened x(1 + 0.6/(1 + games played)) relative to an established player, x1.2 for low "
+      "data and x1.25 for injury-boosted roles:")
+  add("`sd^2 = a + b x projection`")
+  add("Ranges are the 10th / 25th-75th / 90th percentiles of real outcomes after past projections of that size:")
+  add("| Position | a | b | Projection 5 | Projection 10 | Projection 15 | Projection 20 |")
+  add("|---|---|---|---|---|---|---|")
   for pos in sorted(eng.sd_model):
     a, b = eng.sd_model[pos]
     cells = []
@@ -274,8 +281,8 @@ def formulas(eng, season: int, week: int) -> str:
       centers, offs = eng.q_model[pos]
       for x in (5, 10, 15, 20):
         q = [max(0.0, x + np.interp(x, centers, offs[:, k])) for k in range(5)]
-        cells.append(f"{x}: {q[0]:.0f} / {q[1]:.0f}-{q[3]:.0f} / {q[4]:.0f}")
-    add(f"| {pos} | {a:.1f} | {b:.2f} | {'; '.join(cells)} |")
+        cells.append(f"{q[0]:.0f} · {q[1]:.0f}-{q[3]:.0f} · {q[4]:.0f}")
+    add(f"| {pos} | {a:.1f} | {b:.2f} | " + " | ".join(cells) + " |")
 
   # --- availability ---------------------------------------------------------------------------------------------
   im = eng.injury_model
@@ -338,4 +345,16 @@ def formulas(eng, season: int, week: int) -> str:
             if np.abs(w).sum() < 1e-4:
               continue
             add(f"| {share.replace('_share', '')} | {m} | {rcv} | " + " | ".join(f"{v:.3f}" for v in w) + " |")
-  return "\n".join(out)
+  return _blocks(out)
+
+
+def _blocks(lines: list[str]) -> str:
+  """Markdown needs a blank line around tables and between paragraphs; table rows stay contiguous."""
+  md, prev_table = [], False
+  for ln in lines:
+    is_table = ln.startswith("|")
+    if md and not (is_table and prev_table):
+      md.append("")
+    md.append(ln)
+    prev_table = is_table
+  return "\n".join(md)

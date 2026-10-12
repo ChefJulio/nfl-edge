@@ -359,6 +359,7 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
         "ecr_stale": pd.isna(r.ecr) and r.gsis_id in prev_ecr.index, "name": r.full_name, "team_chip": ts.chip(r.team),
         "opp_chip": ts.chip(r.opp), "opp": r.opp, "opp_logo": ts.logo_img(r.opp, 18),
         "dvp": ordinal(int(dvp[r.pos][r.opp])) if r.pos in dvp and r.opp in dvp[r.pos] else "",
+        "dvp_rank": int(r.dvp_rank),
         "dvp_color": rank_color(int(dvp[r.pos][r.opp])) if r.pos in dvp and r.opp in dvp[r.pos] else "",
         "home": "vs" if r.home >= 0 else "@", "proj": r.proj,
         "p10": r.p10, "p25": r.p25, "p50": r.p50, "p75": r.p75, "p90": r.p90,
