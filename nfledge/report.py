@@ -81,9 +81,23 @@ class TeamStyle:
     return (f'<span class="chip" style="background:{bg};color:{fg};border-left-color:{sec}">'
             f'{html.escape(team)}</span>')
 
+  TILE = "#171a20"
+
+  def visible(self, color: str) -> str:
+    """Lighten a team color just enough to show against the dark tile (e.g. black, deep navy)."""
+    c = color
+    for t in (0.0, 0.2, 0.35, 0.5, 0.65):
+      rgb = [int(color.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4)]
+      mixed = "#" + "".join(f"{round(v + (255 - v) * t):02x}" for v in rgb)
+      if contrast(mixed, self.TILE) >= 2.0:
+        return mixed
+      c = mixed
+    return c
+
   def row_style(self, team: str) -> str:
-    bg, sec, fg = self.colors(team)
-    return f"--tc:{bg};--tc2:{sec};--tfg:{fg}"
+    """Dark tile with a thin border traced from the team's primary (left) into its secondary (right)."""
+    bg, sec = self.c.get(team, ("#666666", "#999999"))
+    return f"--tc:{self.visible(bg)};--tc2:{self.visible(sec)};--tfg:#ffffff"
 
   def logo_img(self, team: str, size: int = 18) -> str:
     url = self.logo.get(team)
@@ -338,24 +352,42 @@ def team_tables(eng, season: int, week: int, cfg: dict) -> tuple[list, list]:
     history[w] = net_rating(r)
   hist = pd.DataFrame(history)
   ts = TeamStyle(eng.data.teams)
-  rows = []
   net = net_rating(rb)
+  # Net-rating uncertainty from the bootstrap (pass/rush offense and defense SEs, weighted like the net).
+  w_p, w_r = LEAGUE_PASS_SHARE, 1 - LEAGUE_PASS_SHARE
+  se_net = np.sqrt(w_p ** 2 * (rb.se_off["pass"] ** 2 + rb.se_def["pass"] ** 2)
+                   + w_r ** 2 * (rb.se_off["rush"] ** 2 + rb.se_def["rush"] ** 2))
+  # Likely rank range: simulate ratings within their uncertainty, take the 10th-90th percentile rank.
+  rng = np.random.default_rng(cfg["team_model"]["seed"])
+  sims = rng.normal(net.to_numpy(), se_net.reindex(net.index).to_numpy(), size=(4000, len(net)))
+  sim_rank = (-sims).argsort(axis=1).argsort(axis=1) + 1
+  lo = pd.Series(np.percentile(sim_rank, 10, axis=0), index=net.index).round().astype(int)
+  hi = pd.Series(np.percentile(sim_rank, 90, axis=0), index=net.index).round().astype(int)
+  prev_rank = hist[week - 1].rank(ascending=False) if (week - 1) in hist else None
+  off = w_p * rb.off["pass"] + w_r * rb.off["rush"]
+  dfn = -(w_p * rb.dfn["pass"] + w_r * rb.dfn["rush"])
+  st = rb.off["st"] - rb.dfn["st"]
+  rk = lambda s: s.rank(ascending=False, method="min").astype(int)
+  ranks = {"net": rk(net), "off": rk(off), "def": rk(dfn), "st": rk(st)}
+  rec, sos_p, sos_f = schedule_strength(eng, season, week, net)
+  sos_p_rk, sos_f_rk = rk(sos_p), rk(sos_f)
+  rows = []
   for team in rb.teams:
-    off = LEAGUE_PASS_SHARE * rb.off.at[team, "pass"] + (1 - LEAGUE_PASS_SHARE) * rb.off.at[team, "rush"]
-    dfn = LEAGUE_PASS_SHARE * rb.dfn.at[team, "pass"] + (1 - LEAGUE_PASS_SHARE) * rb.dfn.at[team, "rush"]
-    se = np.sqrt((LEAGUE_PASS_SHARE * rb.se_off.at[team, "pass"]) ** 2 + (LEAGUE_PASS_SHARE * rb.se_def.at[team, "pass"]) ** 2)
+    move = int(prev_rank[team] - ranks["net"][team]) if prev_rank is not None and team in prev_rank else 0
     rows.append({
-      "team": team, "net": per100(net[team]), "off": per100(off), "def": per100(-dfn),
+      "team": team, "nick": ts.nick.get(team, ""), "logo": ts.logo_img(team, 26), "row_style": ts.row_style(team),
+      "record": rec.get(team, ""), "rank": int(ranks["net"][team]), "move": move,
+      "net": per100(net[team]), "range": f"{lo[team]}-{hi[team]}" if lo[team] != hi[team] else f"{lo[team]}",
+      "off": per100(off[team]), "off_rk": int(ranks["off"][team]),
       "off_pass": per100(rb.off.at[team, "pass"]), "off_rush": per100(rb.off.at[team, "rush"]),
+      "def": per100(dfn[team]), "def_rk": int(ranks["def"][team]),
       "def_pass": per100(-rb.dfn.at[team, "pass"]), "def_rush": per100(-rb.dfn.at[team, "rush"]),
-      "st": per100(rb.off.at[team, "st"] - rb.dfn.at[team, "st"]), "se": per100(se),
-      "spark": sparkline(hist.loc[team].tolist()) if team in hist.index else "",
-      "row_style": ts.row_style(team), "logo": ts.logo_img(team), "nick": ts.nick.get(team, ""),
+      "st": per100(st[team]), "st_rk": int(ranks["st"][team]),
+      "sos_past": per100(sos_p.get(team, np.nan)), "sos_past_rk": int(sos_p_rk.get(team, 0)),
+      "sos_next": per100(sos_f.get(team, np.nan)), "sos_next_rk": int(sos_f_rk.get(team, 0)),
+      "spark": sparkline(hist.loc[team].tolist(), width=84, height=22) if team in hist.index else "",
     })
-  power = sorted(rows, key=lambda x: -x["net"])
-  for i, r in enumerate(power, 1):
-    r["rank"] = i
-    r["certainty"] = "Solid" if r["se"] < 2.5 else "Likely" if r["se"] < 4.0 else "Uncertain"
+  power = sorted(rows, key=lambda x: x["rank"])
   # Schedule luck (teams): average strength of opponents actually faced this season, from the ridge
   # coefficients (not raw minus adjusted, which would mostly measure ridge shrinkage).
   luck = []
@@ -379,6 +411,29 @@ def team_tables(eng, season: int, week: int, cfg: dict) -> tuple[list, list]:
     r["total_gap"] = r["off_gap"] + r["def_gap"]
   luck.sort(key=lambda x: -x["total_gap"])
   return power, luck
+
+
+def schedule_strength(eng, season: int, week: int, net: pd.Series):
+  """Records, plus strength of schedule played and remaining: the average current net rating of opponents
+  (positive = tougher than an average schedule)."""
+  s = eng.data.schedules
+  s = s[(s.season == season) & (s.game_type == "REG")]
+  rows = []
+  for g in s.itertuples():
+    for team, opp, pts, opp_pts in ((g.home_team, g.away_team, g.home_score, g.away_score),
+                                    (g.away_team, g.home_team, g.away_score, g.home_score)):
+      rows.append({"team": team, "opp": opp, "week": g.week, "played": pd.notna(pts), "pf": pts, "pa": opp_pts})
+  x = pd.DataFrame(rows)
+  x["team"] = x.team.replace({"LAR": "LA"})
+  x["opp"] = x.opp.replace({"LAR": "LA"})
+  x["opp_net"] = x.opp.map(net)
+  past = x[x.played & (x.week < week)]
+  future = x[~x.played & (x.week >= week)]
+  rec = {}
+  for team, g in past.groupby("team"):
+    w, l, t = int((g.pf > g.pa).sum()), int((g.pf < g.pa).sum()), int((g.pf == g.pa).sum())
+    rec[team] = f"{w}-{l}" + (f"-{t}" if t else "")
+  return rec, past.groupby("team").opp_net.mean(), future.groupby("team").opp_net.mean()
 
 
 def net_rating(r) -> pd.Series:
@@ -572,6 +627,8 @@ def render(ctx: dict, out_path: Path) -> Path:
   env.filters["sgn"] = lambda x: "" if x is None or pd.isna(x) else f"{x:+.1f}"
   env.filters["dbar"] = lambda v, scale=10.0, width=120: diverging_bar(v, scale, width)
   env.filters["abs"] = lambda v: abs(v) if v is not None and not pd.isna(v) else 0
+  env.filters["ord"] = lambda n: "" if not n else f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
+  env.filters["rkc"] = lambda n: "rk1" if n <= 8 else "rk2" if n <= 16 else "rk3" if n <= 24 else "rk4"
   env.filters["pct"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.0%}"
   html_out = env.get_template("report.html.j2").render(**ctx)
   out_path.parent.mkdir(parents=True, exist_ok=True)

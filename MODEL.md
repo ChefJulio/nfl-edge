@@ -33,7 +33,7 @@ fit separately for **passing** (dropbacks, including sacks and scrambles), **rus
 - **Recency.** Plays from this season are weighted with a half-life of **{{ L.hl_team }}** weeks. Last season's plays start at weight **{{ L.prior_weight }}** and fade to zero by week **{{ L.prior_decay }}**.
 - **Quarterbacks.** Passing offense = the team (line, receivers, scheme) + its quarterback + a penalty for inexperienced quarterbacks (fewer than **{{ L.qb_cut }}** career dropbacks). The team and QB shrinkage amounts are tuned jointly. QB shrinkage alpha **{{ L.alpha_qb }}**, inexperienced-QB effect **{{ L.qb_inexp }}** points per 100 dropbacks. Highest current QB effects: {{ L.top_qbs }}.
 - **Home field.** One league-wide edge per unit, learned from recent seasons (currently pass **{{ L.home_pass }}**, rush **{{ L.home_rush }}** points per 100 plays). Neutral-site games get none.
-- **Certainty.** Ratings are refit on **{{ L.bootstrap }}** resamples of games (a cluster bootstrap); the spread of results is the "±" on the Power tab.
+- **Certainty.** Ratings are refit on **{{ L.bootstrap }}** resamples of games (a cluster bootstrap). The Power tab turns that spread into a likely rank range.
 
 Ratings are shown as **points per 100 plays versus an average team**. Higher is better for both offense and defense, because the defense number is flipped so "good" always reads positive.
 
@@ -76,6 +76,9 @@ Ratings are shown as **points per 100 plays versus an average team**. Higher is 
 | Matchup points | Projection against this defense minus projection against an average defense |
 | Tier | Positional rank cutoffs from the config (e.g. QB {{ L.tiers_qb }}) |
 | Net rating (Power) | 58% pass + 42% rush (offense minus defense), plus special teams scaled to play frequency |
+| Likely rank (Power) | 10th-90th percentile rank when every team's net rating is resampled within its bootstrap uncertainty |
+| Schedule played / left (Power) | Average current net rating of opponents already played / still on the schedule (1st = hardest) |
+| Rank movement (Power) | Change in net-rating rank since ratings as of last week |
 | Schedule luck (teams) | Average strength of opponents faced, from their ratings |
 | Schedule luck (players) | Each past game rescaled by how easy that defense is for this player's profile |
 | Role changes | Latest game vs the previous three, snap share +{{ L.snap_jump }} or opportunity share +{{ L.opp_jump }} |
