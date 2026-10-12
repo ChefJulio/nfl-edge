@@ -197,6 +197,8 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
 
   cat = lambda k: pd.concat([f for f in frames[k] if f is not None and len(f)], ignore_index=True)
   pbp = prepare_pbp(cat("pbp"))
+  pbp = pbp.merge(sched[["game_id", "div_game"]], on="game_id", how="left")
+  pbp["div"] = pbp.div_game.fillna(0).astype(int)
   # Respect --week: drop anything at or after the target week of the current season.
   cutoff = lambda df, wk="week": df[~((df.season == current) & (df[wk] > latest))]
   stats = cutoff(cat("stats"))

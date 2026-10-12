@@ -28,7 +28,7 @@ def unit_plays(pbp: pd.DataFrame, cfg: dict) -> dict[str, pd.DataFrame]:
     "rush": live & pbp.is_designed_rush & not_garbage,
     "st": live & pbp.is_st,
   }
-  cols = ["season", "week", "game_id", "posteam", "defteam", "home", "epa"]
+  cols = ["season", "week", "game_id", "posteam", "defteam", "home", "div", "epa"]
   return {u: pbp.loc[m, cols].reset_index(drop=True) for u, m in sel.items()}
 
 
@@ -58,22 +58,28 @@ def asof_weights(season_col: pd.Series, week_col: pd.Series, season: int, target
 # ----------------------------------------------------------------------------------------------------------------
 
 class Design:
-  """Sparse design matrix [1 | offense one-hot | defense one-hot | home] for one unit's plays."""
+  """Sparse design matrix [1 | offense one-hot | defense one-hot | home | home x division game] for one unit.
 
-  def __init__(self, plays: pd.DataFrame, teams: list[str]):
+  Home field is one league-wide term per unit: 20 seasons of results show team-specific home edges do not
+  persist (corr -0.02 season to season) and travel distance / time zones have no measurable effect, but the
+  home edge is ~0.8 pts smaller in division games (p = 0.03) - hence the optional division interaction."""
+
+  def __init__(self, plays: pd.DataFrame, teams: list[str], division: bool = True):
     self.teams = teams
     n = len(teams)
     idx = {t: i for i, t in enumerate(teams)}
     off = plays.posteam.map(idx).to_numpy()
     dfn = plays.defteam.map(idx).to_numpy()
     rows = np.arange(len(plays))
-    data = np.concatenate([np.ones(len(plays)), np.ones(len(plays)), np.ones(len(plays)),
-                           plays.home.to_numpy(dtype=float)])
-    r = np.concatenate([rows, rows, rows, rows])
-    c = np.concatenate([np.zeros(len(plays), int), 1 + off, 1 + n + dfn, np.full(len(plays), 1 + 2 * n)])
-    self.X = sp.csr_matrix((data, (r, c)), shape=(len(plays), 2 * n + 2))
+    h = plays.home.to_numpy(dtype=float)
+    hd = h * plays["div"].to_numpy(dtype=float) if division else np.zeros(len(plays))
+    data = np.concatenate([np.ones(len(plays)), np.ones(len(plays)), np.ones(len(plays)), h, hd])
+    r = np.concatenate([rows, rows, rows, rows, rows])
+    c = np.concatenate([np.zeros(len(plays), int), 1 + off, 1 + n + dfn, np.full(len(plays), 1 + 2 * n),
+                        np.full(len(plays), 2 + 2 * n)])
+    self.X = sp.csr_matrix((data, (r, c)), shape=(len(plays), 2 * n + 3))
     self.y = plays.epa.to_numpy(dtype=float)
-    self.p = 2 * n + 2
+    self.p = 2 * n + 3
 
   def solve(self, w: np.ndarray, alpha: float) -> np.ndarray:
     keep = w > 0
@@ -100,15 +106,16 @@ class Ratings:
   raw_off: pd.DataFrame | None = None  # unadjusted current-season EPA/play (for schedule luck)
   raw_def: pd.DataFrame | None = None
   plays_pg: dict = field(default_factory=dict)  # league plays per team-game per unit
+  home_div: dict = field(default_factory=dict)  # change in home edge for division games
 
-  def expected_epa(self, off_team: str, def_team: str, unit: str, home: int) -> float:
+  def expected_epa(self, off_team: str, def_team: str, unit: str, home: int, div: int = 0) -> float:
     return (self.intercept[unit] + self.off.at[off_team, unit] + self.dfn.at[def_team, unit]
-            + self.home[unit] * home)
+            + (self.home[unit] + self.home_div.get(unit, 0.0) * div) * home)
 
 
 def _unpack(beta: np.ndarray, teams: list[str]):
   n = len(teams)
-  return beta[0], beta[1:1 + n], beta[1 + n:1 + 2 * n], beta[1 + 2 * n]
+  return beta[0], beta[1:1 + n], beta[1 + n:1 + 2 * n], beta[1 + 2 * n], beta[2 + 2 * n]
 
 
 class TeamModel:
@@ -118,8 +125,10 @@ class TeamModel:
     self.cfg = cfg
     self.plays = unit_plays(pbp, cfg)
     self.teams = sorted(set(pbp.posteam.dropna()) | set(pbp.defteam.dropna()))
-    self.designs = {u: Design(p, self.teams) for u, p in self.plays.items()}
+    div = cfg["team_model"].get("division_hfa", True)
+    self.designs = {u: Design(p, self.teams, division=div) for u, p in self.plays.items()}
     self.alphas = {u: 100.0 for u in UNITS}
+    self.cv_loss = {}
     self._cache: dict = {}
 
   # -- fitting ---------------------------------------------------------------------------------------------------
@@ -132,12 +141,12 @@ class TeamModel:
     if key in self._cache and alphas is None:
       return self._cache[key]
     alphas = alphas or self.alphas
-    icpt, home, off, dfn, se_off, se_def = {}, {}, {}, {}, {}, {}
+    icpt, home, off, dfn, se_off, se_def, hdiv = {}, {}, {}, {}, {}, {}, {}
     raw_off, raw_def, plays_pg = {}, {}, {}
     for u in UNITS:
       w = self.weights(u, season, target_week)
       beta = self.designs[u].solve(w, alphas[u])
-      icpt[u], off[u], dfn[u], home[u] = _unpack(beta, self.teams)
+      icpt[u], off[u], dfn[u], home[u], hdiv[u] = _unpack(beta, self.teams)
       p = self.plays[u]
       cur = (p.season == season) & (p.week < target_week)
       if cur.any():
@@ -150,7 +159,7 @@ class TeamModel:
     r = Ratings(season, target_week, self.teams, icpt, home, frame(off), frame(dfn),
                 frame(se_off) if bootstrap else None, frame(se_def) if bootstrap else None,
                 pd.DataFrame(raw_off).reindex(self.teams) if raw_off else None,
-                pd.DataFrame(raw_def).reindex(self.teams) if raw_def else None, plays_pg)
+                pd.DataFrame(raw_def).reindex(self.teams) if raw_def else None, plays_pg, hdiv)
     if alphas is self.alphas:
       self._cache[key] = r
     return r
@@ -166,7 +175,7 @@ class TeamModel:
       mult = np.bincount(rng.integers(0, len(uniq), len(uniq)), minlength=len(uniq))
       wb = w.copy()
       wb[active] = w[active] * mult[codes]
-      _, o, d, _ = _unpack(self.designs[unit].solve(wb, alpha), self.teams)
+      _, o, d, _, _ = _unpack(self.designs[unit].solve(wb, alpha), self.teams)
       offs.append(o)
       dfn_ = d
       defs.append(dfn_)
@@ -196,6 +205,7 @@ class TeamModel:
           err = tg.epa - pg.reindex(tg.index)
           losses[i] += float(np.sum(tg.n * err ** 2))
       best[u] = float(grid[int(np.argmin(losses))])
+      self.cv_loss[u] = float(np.min(losses))
     self.alphas = best
     self._cache.clear()
     return best
@@ -211,6 +221,7 @@ def team_game_ledger(pbp: pd.DataFrame, schedules: pd.DataFrame) -> pd.DataFrame
   led = pd.DataFrame({
     "opp": g.defteam.first(),
     "home": g.home.first(),
+    "div": g["div"].first(),
     "dropbacks": g.is_dropback.sum(),
     "rushes": g.is_designed_rush.sum(),
     "scrambles": g.qb_scramble.sum(),
@@ -279,7 +290,7 @@ def matchup_frame(games: pd.DataFrame) -> pd.DataFrame:
     for team, opp, h in ((g.home_team, g.away_team, 1), (g.away_team, g.home_team, -1)):
       spread = g.spread_line if h == 1 else -g.spread_line if pd.notna(g.spread_line) else np.nan
       rows.append({"game_id": g.game_id, "season": g.season, "week": g.week, "team": team, "opp": opp,
-                   "home": 0 if neutral else h, "spread_team": spread, "total_line": g.total_line,
+                   "home": 0 if neutral else h, "div": int(g.get("div_game") == 1), "spread_team": spread, "total_line": g.total_line,
                    "gameday": g.gameday})
   return pd.DataFrame(rows)
 
@@ -308,8 +319,8 @@ class GameModel:
     g["proe_team"] = g.team.map(vf.proe)
     g["pass_rate_team"] = g.team.map(vf.pass_rate)
     for u in UNITS:
-      g[f"epa_{u}"] = [r.expected_epa(t, o, u, h) for t, o, h in zip(g.team, g.opp, g.home)]
-      g[f"opp_epa_{u}"] = [r.expected_epa(o, t, u, -h) for t, o, h in zip(g.team, g.opp, g.home)]
+      g[f"epa_{u}"] = [r.expected_epa(t, o, u, h, dv) for t, o, h, dv in zip(g.team, g.opp, g.home, g["div"])]
+      g[f"opp_epa_{u}"] = [r.expected_epa(o, t, u, -h, dv) for t, o, h, dv in zip(g.team, g.opp, g.home, g["div"])]
     # Net special-teams edge per game: our ST plays vs theirs, scaled to league ST plays per team-game.
     n_st = r.plays_pg.get("st", 11.0)
     g["st_net"] = n_st * (g.epa_st - g.opp_epa_st)
