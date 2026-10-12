@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import html
+import json
 import math
 from pathlib import Path
 
@@ -9,6 +10,7 @@ import numpy as np
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+from .config import ROOT
 from .team_model import UNITS, game_lines, team_volume_features
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
@@ -99,12 +101,58 @@ class TeamStyle:
     bg, sec = self.c.get(team, ("#666666", "#999999"))
     return f"--tc:{self.visible(bg)};--tc2:{self.visible(sec)};--tfg:#ffffff"
 
+  def logo_bg(self, team: str) -> str:
+    """Team primary or secondary - whichever leaves more of the logo visible (measured from its pixels)."""
+    return self._logo_bgs().get(team, self.c.get(team, ("#666666", "#999999"))[1])
+
+  def _logo_bgs(self) -> dict:
+    if hasattr(self, "_bg_cache"):
+      return self._bg_cache
+    path = ROOT / "cache" / "logo_bg.json"
+    known = json.loads(path.read_text()) if path.exists() else {}
+    for team, url in self.logo.items():
+      if team in known or not url or team not in self.c:
+        continue
+      try:
+        known[team] = pick_logo_bg(url, *self.c[team])
+      except Exception:
+        continue
+    path.parent.mkdir(exist_ok=True)
+    path.write_text(json.dumps(known, indent=1))
+    self._bg_cache = known
+    return known
+
   def logo_img(self, team: str, size: int = 18) -> str:
     url = self.logo.get(team)
     if not url:
       return ""
-    return (f'<span class="logo"><img src="{html.escape(url)}" alt="{html.escape(team)}" width="{size}" '
-            f'height="{size}" loading="lazy"></span>')
+    return (f'<span class="logo" style="background:{self.logo_bg(team)}"><img src="{html.escape(url)}" alt="{html.escape(team)}" '
+            f'width="{size}" height="{size}" loading="lazy"></span>')
+
+
+def pick_logo_bg(url: str, primary: str, secondary: str) -> str:
+  """Fraction of the logo's opaque pixels that would blend into each candidate background (contrast < 1.6);
+  choose the background that hides less of the logo."""
+  import io
+  import urllib.request
+
+  from PIL import Image
+  with urllib.request.urlopen(url, timeout=15) as resp:
+    img = Image.open(io.BytesIO(resp.read())).convert("RGBA").resize((96, 96))
+  px = [p for p in img.getdata() if p[3] > 128]
+  if not px:
+    return secondary
+
+  def hidden(bg: str) -> float:
+    lb = _lum(bg)
+    lost = 0
+    for r, g, b, _ in px:
+      lp = _lum(f"#{r:02x}{g:02x}{b:02x}")
+      hi, lo = max(lp, lb), min(lp, lb)
+      lost += (hi + 0.05) / (lo + 0.05) < 1.6
+    return lost / len(px)
+
+  return primary if hidden(primary) < hidden(secondary) else secondary
 
 
 def range_svg(q10, q25, q75, q90, proj, axis_max, width=120, height=16) -> str:
