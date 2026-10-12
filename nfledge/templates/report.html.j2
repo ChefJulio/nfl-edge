@@ -425,7 +425,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 <section id="tab-power">
   <div class="sec-head"><div><h2>Power rankings</h2><p>Opponent-adjusted team strength in points per 100 plays vs an average team, with strength of schedule.</p></div></div>
   <details class="howto"><summary>How to read</summary><div>
-    <b>Net</b> = offense + defense + special teams, adjusted for opponents; higher is better everywhere, including defense. <b>Likely rank</b> is the 10th-90th percentile rank when ratings are resampled within their uncertainty (200 bootstrap resamples of games): a narrow range means the data has settled, a wide one means a few more games could move the team a lot.
+    <b>Net</b> = offense + defense + special teams, adjusted for opponents; higher is better everywhere, including defense. <b>Rank range</b> is the 10th-90th percentile rank when ratings are resampled within their uncertainty (200 bootstrap resamples of games): a narrow range means the data has settled, a wide one means a few more games could move the team a lot.
     Colored badges are league ranks (green = top 8, red = bottom 8). <b>Schedule</b>: the average current net rating of opponents already played and still to play (positive = tougher than average; 1st = hardest). Arrows show the move since last week.
   </div></details>
   <div class="card"><div class="scroll"><table class="sortable tiles power">
@@ -435,7 +435,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
       <tr class="teamrow" style="{{ r.row_style }}">
         <td class="num rk" data-v="{{ r.rank }}"><span class="rkn">{{ r.rank }}</span>{% if r.move > 0 %}<span class="mv up">&#9650;{{ r.move }}</span>{% elif r.move < 0 %}<span class="mv dn">&#9660;{{ -r.move }}</span>{% else %}<span class="mv">&ndash;</span>{% endif %}</td>
         <td data-v="{{ r.nick }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.nick }}</b><span class="sub">{{ r.team }} &middot; {{ r.record }}</span></div></div></td>
-        <td class="num" data-v="{{ r.net }}"><div class="netc"><b>{{ r.net|sgn }}</b><span class="sub">likely {{ r.range }}</span></div></td>
+        <td class="num" data-v="{{ r.net }}"><div class="netc"><b>{{ r.net|sgn }}</b><span class="sub" title="80% of simulations rank this team between {{ r.range.replace('-', ' and ') }} (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range {{ r.range }}</span></div></td>
         <td data-v="{{ r.off }}"><div class="mc"><span class="mv2">{{ r.off|sgn }}</span><span class="rk-b {{ r.off_rk|rkc }}">{{ r.off_rk|ord }}</span></div></td>
         <td data-v="{{ r.def }}"><div class="mc"><span class="mv2">{{ r.def|sgn }}</span><span class="rk-b {{ r.def_rk|rkc }}">{{ r.def_rk|ord }}</span></div></td>
         {% for v, k in [(r.off_pass, r.off_pass_rk), (r.off_rush, r.off_rush_rk), (r.def_pass, r.def_pass_rk), (r.def_rush, r.def_rush_rk), (r.st, r.st_rk)] %}
