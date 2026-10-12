@@ -23,7 +23,7 @@ def _log(msg):
 class Engine:
   def __init__(self, data: Data, cfg: dict, scoring, positions=POSITIONS):
     self.data, self.cfg, self.scoring, self.positions = data, cfg, scoring, list(positions)
-    self.tm = TeamModel(data.pbp, cfg)
+    self.tm = TeamModel(data.pbp, cfg, data.qb_career)
     self.team_ledger = team_game_ledger(data.pbp, data.schedules)
     self.pm = PlayerModel(data, self.tm, self.team_ledger, cfg, scoring)
     self.actual = actual_points(data.stats, scoring)

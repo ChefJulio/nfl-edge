@@ -352,11 +352,15 @@ def net_rating(r) -> pd.Series:
   return off - dfn + (r.off["st"] - r.dfn["st"]) * 0.18  # ST plays are ~18% as frequent as scrimmage plays
 
 
-def matchups(eng, season: int, week: int, cfg: dict) -> list:
+def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None = None) -> list:
   r = eng.tm.fit(season, week)
   vf = team_volume_features(eng.team_ledger, season, week, eng.cfg)
   games = eng.games(season, week)
-  tp = eng.gm.predict(games, r, vf, use_vegas=False)
+  starters = {}
+  if proj is not None:
+    qbs = proj[(proj.pos == "QB") & ~proj.sits].sort_values("db").groupby("team").tail(1)
+    starters = dict(zip(qbs.team, qbs.gsis_id))
+  tp = eng.gm.predict(games, r, vf, use_vegas=False, starters=starters)
   gl = game_lines(tp, games)
   out = []
   for _, g in gl.iterrows():

@@ -119,7 +119,7 @@ def main():
   ctx = {
     "season": season, "week": week, "pending": data.pending_games, "scoring": scoring.name,
     "generated": time.strftime("%Y-%m-%d %H:%M"), "injury_report": injury_report,
-    "players": rp.player_rankings(eng, proj, season, week, cfg), "games": rp.matchups(eng, season, week, cfg),
+    "players": rp.player_rankings(eng, proj, season, week, cfg), "games": rp.matchups(eng, season, week, cfg, proj),
     "power": power, "team_luck": team_luck, "player_luck": rp.player_luck(eng, proj, season, week),
     "roles": rp.role_changes(eng, season, week, cfg), "backtest": rp.backtest_summary(ev),
     "bt_seasons": " and ".join(map(str, bt_seasons)) or "n/a", "bt_takeaway": backtest_takeaway(ev),

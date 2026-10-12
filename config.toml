@@ -30,6 +30,11 @@ bootstrap_samples = 200
 # shared-stadium games (LA, NY: 7 total) are too few to estimate. Division games show a ~0.8-pt smaller home edge
 # (p=0.03), but adding that term worsened time-split CV on play EPA (4698 vs 4676), so it is off.
 division_hfa = false
+# Quarterback-aware pass offense: offense = team (line, receivers, scheme) + QB effect + an inexperienced-QB
+# term (< qb_inexp_dropbacks career dropbacks). Team/QB ridge penalties tuned jointly by time-split CV.
+qb_effects = true
+qb_inexp_dropbacks = 150
+qb_alpha_grid = [30, 100, 300, 1000, 1e9]
 seed = 7
 
 [player_model]

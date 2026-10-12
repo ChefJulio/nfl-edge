@@ -477,3 +477,7 @@ class InjuryModel:
         continue
       p.at[backup, "db"] = p.at[backup, "db"] + p.at[starter, "db"]
       p.at[backup, "rush"] = p.at[backup, "rush"] + p.at[starter, "db"] * p.at[backup, "scr_rate"]
+      # The whole passing offense (every receiver's supporting cast) now runs through the backup.
+      if "qb_term" in p and pd.notna(p.at[backup, "qb_term"]):
+        team_rows = p.team == team
+        p.loc[team_rows, "off_pass"] = p.loc[team_rows, "off_pass_base"] + p.at[backup, "qb_term"]

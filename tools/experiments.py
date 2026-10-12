@@ -28,6 +28,7 @@ VARIANTS={
  'team_hl_8':variant(team_model__half_life_weeks=8.0),
  'td_k_50':variant(player_model__td_blend_k=50),
  'td_k_400':variant(player_model__td_blend_k=400),
+ 'no_qb_effects':variant(team_model__qb_effects=False),
  'combo':variant(experiments__implied_total=True, player_model__share_half_life_weeks=5.0, team_model__half_life_weeks=3.0),
  'combo_hl8':variant(experiments__implied_total=True, player_model__share_half_life_weeks=8.0, team_model__half_life_weeks=3.0),
  'combo_air':variant(experiments__implied_total=True, experiments__air_yards=True, player_model__share_half_life_weeks=5.0, team_model__half_life_weeks=3.0),

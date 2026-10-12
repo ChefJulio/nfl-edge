@@ -19,7 +19,26 @@ UNITS = ("pass", "rush", "st")
 # Play selection + weighting
 # ----------------------------------------------------------------------------------------------------------------
 
-def unit_plays(pbp: pd.DataFrame, cfg: dict) -> dict[str, pd.DataFrame]:
+def qb_experience(pbp: pd.DataFrame, career: pd.Series | None) -> pd.DataFrame:
+  """Career dropbacks each QB had BEFORE each (season, week): pre-window career attempts + in-window dropbacks
+  from earlier weeks. Feeds the inexperienced-QB term (backups/rookies are below average, but ridge alone
+  would shrink an unknown QB to league average)."""
+  db = pbp[pbp.is_dropback].assign(qb=pbp.passer_player_id.fillna(pbp.rusher_player_id)).dropna(subset=["qb"])
+  g = db.groupby(["qb", "season", "week"]).size().rename("n").reset_index().sort_values(["qb", "season", "week"])
+  g["prior"] = g.groupby("qb").n.cumsum() - g.n
+  if career is not None:
+    g["prior"] = g.prior + g.qb.map(career).fillna(0)
+  return g
+
+
+def prior_dropbacks(qbexp: pd.DataFrame, season: int, week: int) -> pd.Series:
+  """Career dropbacks per QB entering (season, week)."""
+  before = qbexp[(qbexp.season < season) | ((qbexp.season == season) & (qbexp.week < week))]
+  last = before.groupby("qb").tail(1)
+  return pd.Series((last.prior + last.n).to_numpy(), index=last.qb.to_numpy())
+
+
+def unit_plays(pbp: pd.DataFrame, cfg: dict, qbexp: pd.DataFrame | None = None) -> dict[str, pd.DataFrame]:
   tm = cfg["team_model"]
   live = pbp.epa.notna() & pbp.posteam.notna() & pbp.defteam.notna()
   not_garbage = pbp.wp.between(tm["wp_min"], tm["wp_max"])
@@ -29,7 +48,15 @@ def unit_plays(pbp: pd.DataFrame, cfg: dict) -> dict[str, pd.DataFrame]:
     "st": live & pbp.is_st,
   }
   cols = ["season", "week", "game_id", "posteam", "defteam", "home", "div", "epa"]
-  return {u: pbp.loc[m, cols].reset_index(drop=True) for u, m in sel.items()}
+  out = {u: pbp.loc[m, cols].reset_index(drop=True) for u, m in sel.items()}
+  ps = pbp.loc[sel["pass"]]
+  out["pass"]["qb"] = ps.passer_player_id.fillna(ps.rusher_player_id).to_numpy()
+  if qbexp is not None:
+    pri = qbexp.set_index(["qb", "season", "week"]).prior
+    key = pd.MultiIndex.from_arrays([out["pass"].qb, out["pass"].season, out["pass"].week])
+    cut = tm.get("qb_inexp_dropbacks", 150)
+    out["pass"]["qb_inexp"] = (pri.reindex(key).fillna(0).to_numpy() < cut).astype(float)
+  return out
 
 
 def prior_season_weight(target_week: int, cfg: dict) -> float:
@@ -64,7 +91,9 @@ class Design:
   persist (corr -0.02 season to season) and travel distance / time zones have no measurable effect, but the
   home edge is ~0.8 pts smaller in division games (p = 0.03) - hence the optional division interaction."""
 
-  def __init__(self, plays: pd.DataFrame, teams: list[str], division: bool = True):
+  def __init__(self, plays: pd.DataFrame, teams: list[str], division: bool = True, qbs: bool = False):
+    """qbs=True (pass unit) appends a quarterback one-hot block and an inexperienced-QB indicator, so pass
+    offense = team (line, receivers, scheme) + quarterback, each with its own ridge penalty."""
     self.teams = teams
     n = len(teams)
     idx = {t: i for i, t in enumerate(teams)}
@@ -77,11 +106,21 @@ class Design:
     r = np.concatenate([rows, rows, rows, rows, rows])
     c = np.concatenate([np.zeros(len(plays), int), 1 + off, 1 + n + dfn, np.full(len(plays), 1 + 2 * n),
                         np.full(len(plays), 2 + 2 * n)])
-    self.X = sp.csr_matrix((data, (r, c)), shape=(len(plays), 2 * n + 3))
+    self.base_p = 2 * n + 3
+    self.qbs = []
+    if qbs and "qb" in plays:
+      q = plays.qb.fillna("UNK")
+      self.qbs = sorted(q.unique())
+      qi = q.map({k: i for i, k in enumerate(self.qbs)}).to_numpy()
+      inexp = plays["qb_inexp"].to_numpy(dtype=float) if "qb_inexp" in plays else np.zeros(len(plays))
+      data = np.concatenate([data, np.ones(len(plays)), inexp])
+      r = np.concatenate([r, rows, rows])
+      c = np.concatenate([c, self.base_p + qi, np.full(len(plays), self.base_p + len(self.qbs))])
+    self.p = self.base_p + (len(self.qbs) + 1 if self.qbs else 0)
+    self.X = sp.csr_matrix((data, (r, c)), shape=(len(plays), self.p))
     self.y = plays.epa.to_numpy(dtype=float)
-    self.p = 2 * n + 3
 
-  def solve(self, w: np.ndarray, alpha: float) -> np.ndarray:
+  def solve(self, w: np.ndarray, alpha: float, alpha_qb: float = 1e9) -> np.ndarray:
     keep = w > 0
     X = self.X[keep]
     Xw = X.multiply(w[keep][:, None]).tocsr()
@@ -89,6 +128,9 @@ class Design:
     b = Xw.T @ self.y[keep]
     pen = np.full(self.p, alpha)
     pen[0] = 0.0
+    if self.qbs:
+      pen[self.base_p:self.base_p + len(self.qbs)] = alpha_qb
+      pen[-1] = 1.0  # inexperienced-QB indicator: lightly penalized league-level effect
     return np.linalg.solve(A + np.diag(pen) + 1e-9 * np.eye(self.p), b)
 
 
@@ -107,9 +149,21 @@ class Ratings:
   raw_def: pd.DataFrame | None = None
   plays_pg: dict = field(default_factory=dict)  # league plays per team-game per unit
   home_div: dict = field(default_factory=dict)  # change in home edge for division games
+  qb: pd.Series | None = None  # quarterback effects on pass EPA/play (shrunk); team 'pass' offense excludes them
+  qb_inexp: float = 0.0  # extra effect for QBs with little career experience
+  qb_prior: pd.Series | None = None  # career dropbacks entering this week
+  inexp_cut: float = 150.0
 
-  def expected_epa(self, off_team: str, def_team: str, unit: str, home: int, div: int = 0) -> float:
-    return (self.intercept[unit] + self.off.at[off_team, unit] + self.dfn.at[def_team, unit]
+  def qb_term(self, qb) -> float:
+    """Pass EPA/play contribution of a specific quarterback (0 when QB effects are off or QB unknown)."""
+    if self.qb is None or qb is None or (isinstance(qb, float) and np.isnan(qb)):
+      return 0.0
+    prior = self.qb_prior.get(qb, 0.0) if self.qb_prior is not None else 0.0
+    return float(self.qb.get(qb, 0.0)) + self.qb_inexp * float(prior < self.inexp_cut)
+
+  def expected_epa(self, off_team: str, def_team: str, unit: str, home: int, div: int = 0, qb=None) -> float:
+    q = self.qb_term(qb) if unit == "pass" else 0.0
+    return (self.intercept[unit] + self.off.at[off_team, unit] + self.dfn.at[def_team, unit] + q
             + (self.home[unit] + self.home_div.get(unit, 0.0) * div) * home)
 
 
@@ -121,13 +175,17 @@ def _unpack(beta: np.ndarray, teams: list[str]):
 class TeamModel:
   """Holds unit play tables + designs for all loaded seasons; fits ratings as-of any (season, week)."""
 
-  def __init__(self, pbp: pd.DataFrame, cfg: dict):
+  def __init__(self, pbp: pd.DataFrame, cfg: dict, qb_career: pd.Series | None = None):
     self.cfg = cfg
-    self.plays = unit_plays(pbp, cfg)
+    self.use_qb = cfg["team_model"].get("qb_effects", True)
+    self.qbexp = qb_experience(pbp, qb_career)
+    self.plays = unit_plays(pbp, cfg, self.qbexp)
     self.teams = sorted(set(pbp.posteam.dropna()) | set(pbp.defteam.dropna()))
     div = cfg["team_model"].get("division_hfa", True)
-    self.designs = {u: Design(p, self.teams, division=div) for u, p in self.plays.items()}
+    self.designs = {u: Design(p, self.teams, division=div, qbs=(u == "pass" and self.use_qb))
+                    for u, p in self.plays.items()}
     self.alphas = {u: 100.0 for u in UNITS}
+    self.alpha_qb = 1e9
     self.cv_loss = {}
     self._cache: dict = {}
 
@@ -143,10 +201,15 @@ class TeamModel:
     alphas = alphas or self.alphas
     icpt, home, off, dfn, se_off, se_def, hdiv = {}, {}, {}, {}, {}, {}, {}
     raw_off, raw_def, plays_pg = {}, {}, {}
+    qb, qb_inexp = None, 0.0
     for u in UNITS:
       w = self.weights(u, season, target_week)
-      beta = self.designs[u].solve(w, alphas[u])
+      d = self.designs[u]
+      beta = d.solve(w, alphas[u], self.alpha_qb)
       icpt[u], off[u], dfn[u], home[u], hdiv[u] = _unpack(beta, self.teams)
+      if d.qbs:
+        qb = pd.Series(beta[d.base_p:d.base_p + len(d.qbs)], index=d.qbs)
+        qb_inexp = float(beta[-1])
       p = self.plays[u]
       cur = (p.season == season) & (p.week < target_week)
       if cur.any():
@@ -159,7 +222,9 @@ class TeamModel:
     r = Ratings(season, target_week, self.teams, icpt, home, frame(off), frame(dfn),
                 frame(se_off) if bootstrap else None, frame(se_def) if bootstrap else None,
                 pd.DataFrame(raw_off).reindex(self.teams) if raw_off else None,
-                pd.DataFrame(raw_def).reindex(self.teams) if raw_def else None, plays_pg, hdiv)
+                pd.DataFrame(raw_def).reindex(self.teams) if raw_def else None, plays_pg, hdiv,
+                qb, qb_inexp, prior_dropbacks(self.qbexp, season, target_week),
+                float(self.cfg["team_model"].get("qb_inexp_dropbacks", 150)))
     if alphas is self.alphas:
       self._cache[key] = r
     return r
@@ -175,7 +240,7 @@ class TeamModel:
       mult = np.bincount(rng.integers(0, len(uniq), len(uniq)), minlength=len(uniq))
       wb = w.copy()
       wb[active] = w[active] * mult[codes]
-      _, o, d, _, _ = _unpack(self.designs[unit].solve(wb, alpha), self.teams)
+      _, o, d, _, _ = _unpack(self.designs[unit].solve(wb, alpha, self.alpha_qb), self.teams)
       offs.append(o)
       dfn_ = d
       defs.append(dfn_)
@@ -207,8 +272,37 @@ class TeamModel:
       best[u] = float(grid[int(np.argmin(losses))])
       self.cv_loss[u] = float(np.min(losses))
     self.alphas = best
+    if self.use_qb:
+      self._tune_qb_alpha(folds)
     self._cache.clear()
     return best
+
+  def _tune_qb_alpha(self, folds):
+    """Pass unit: tune team and QB penalties jointly (how much of a passing offense is the quarterback vs the
+    rest of the roster is exactly what the data has to decide). 1e9 removes QB effects, so CV can reject them.
+    Walk-forward on 2024-26: CV loss 2974.5 (team 300, QB 300) vs 3017.2 without QB terms."""
+    p, d = self.plays["pass"], self.designs["pass"]
+    qgrid = self.cfg["team_model"].get("qb_alpha_grid", [30, 100, 300, 1000, 1e9])
+    tgrid = [a for a in self.cfg["team_model"]["alpha_grid"] if 30 <= a <= 1000]
+    grid = [(a, b) for a in tgrid for b in qgrid]
+    losses = np.zeros(len(grid))
+    for season, week in folds:
+      test = ((p.season == season) & (p.week == week)).to_numpy()
+      if not test.any():
+        continue
+      w = self.weights("pass", season, week)
+      tg = p[test].groupby(["game_id", "posteam"]).agg(epa=("epa", "mean"), n=("epa", "size"))
+      Xt = d.X[test]
+      keys = [p.game_id[test].to_numpy(), p.posteam[test].to_numpy()]
+      for i, (a, b) in enumerate(grid):
+        pred = Xt @ d.solve(w, a, b)
+        pg = pd.Series(pred).groupby(keys).mean()
+        pg.index.names = ["game_id", "posteam"]
+        losses[i] += float(np.sum(tg.n * (tg.epa - pg.reindex(tg.index)) ** 2))
+    a, b = grid[int(np.argmin(losses))]
+    self.alphas["pass"], self.alpha_qb = float(a), float(b)
+    self.cv_loss["pass"] = float(np.min(losses))
+    self.qb_cv = dict(zip(grid, losses))
 
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -228,6 +322,11 @@ def team_game_ledger(pbp: pd.DataFrame, schedules: pd.DataFrame) -> pd.DataFrame
     "wind": g.game_wind.first(),
     "indoor": g.indoor.first(),
   }).reset_index().rename(columns={"posteam": "team"})
+  dbp = off[off.is_dropback].assign(qb=off.passer_player_id.fillna(off.rusher_player_id)).dropna(subset=["qb"])
+  main_qb = (dbp.groupby(["game_id", "posteam", "qb"]).size().rename("n").reset_index()
+             .sort_values("n").drop_duplicates(["game_id", "posteam"], keep="last")
+             .rename(columns={"posteam": "team"})[["game_id", "team", "qb"]])
+  led = led.merge(main_qb, on=["game_id", "team"], how="left")
   neutral = off[off.wp.between(0.2, 0.8) & (off.qtr <= 3) & off.pass_oe.notna()]
   led = led.merge(neutral.groupby(["game_id", "posteam"]).pass_oe.mean().rename("proe").reset_index()
                   .rename(columns={"posteam": "team"}), on=["game_id", "team"], how="left")
@@ -282,15 +381,16 @@ class Linear:
     return ", ".join([f"b0={self.coef[0]:+.3f}"] + [f"{c}={b:+.3f}" for c, b in zip(self.cols, self.coef[1:])])
 
 
-def matchup_frame(games: pd.DataFrame) -> pd.DataFrame:
-  """Expand schedule games to one row per team (offense perspective)."""
+def matchup_frame(games: pd.DataFrame, starters: dict | None = None) -> pd.DataFrame:
+  """Expand schedule games to one row per team (offense perspective). starters: team -> projected QB."""
   rows = []
   for _, g in games.iterrows():
     neutral = g.get("location") == "Neutral"
     for team, opp, h in ((g.home_team, g.away_team, 1), (g.away_team, g.home_team, -1)):
       spread = g.spread_line if h == 1 else -g.spread_line if pd.notna(g.spread_line) else np.nan
       rows.append({"game_id": g.game_id, "season": g.season, "week": g.week, "team": team, "opp": opp,
-                   "home": 0 if neutral else h, "div": int(g.get("div_game") == 1), "spread_team": spread, "total_line": g.total_line,
+                   "home": 0 if neutral else h, "div": int(g.get("div_game") == 1),
+                   "qb": (starters or {}).get(team), "spread_team": spread, "total_line": g.total_line,
                    "gameday": g.gameday})
   return pd.DataFrame(rows)
 
@@ -319,8 +419,13 @@ class GameModel:
     g["proe_team"] = g.team.map(vf.proe)
     g["pass_rate_team"] = g.team.map(vf.pass_rate)
     for u in UNITS:
-      g[f"epa_{u}"] = [r.expected_epa(t, o, u, h, dv) for t, o, h, dv in zip(g.team, g.opp, g.home, g["div"])]
-      g[f"opp_epa_{u}"] = [r.expected_epa(o, t, u, -h, dv) for t, o, h, dv in zip(g.team, g.opp, g.home, g["div"])]
+      qbs = g.qb.tolist() if "qb" in g else [None] * len(g)
+      qb_of = dict(zip(zip(g.game_id, g.team), qbs))
+      oq = [qb_of.get((gid, o)) for gid, o in zip(g.game_id, g.opp)]
+      g[f"epa_{u}"] = [r.expected_epa(t, o, u, h, dv, q)
+                       for t, o, h, dv, q in zip(g.team, g.opp, g.home, g["div"], qbs)]
+      g[f"opp_epa_{u}"] = [r.expected_epa(o, t, u, -h, dv, q)
+                           for t, o, h, dv, q in zip(g.team, g.opp, g.home, g["div"], oq)]
     # Net special-teams edge per game: our ST plays vs theirs, scaled to league ST plays per team-game.
     n_st = r.plays_pg.get("st", 11.0)
     g["st_net"] = n_st * (g.epa_st - g.opp_epa_st)
@@ -339,10 +444,11 @@ class GameModel:
     self.points = Linear.fit(t, "points", ["off_epa_game", "st_net"], name="points")
     return self
 
-  def predict(self, games: pd.DataFrame, r: Ratings, vf: pd.DataFrame, use_vegas: bool) -> pd.DataFrame:
+  def predict(self, games: pd.DataFrame, r: Ratings, vf: pd.DataFrame, use_vegas: bool,
+              starters: dict | None = None) -> pd.DataFrame:
     """Team-perspective predictions: plays, dropbacks, rushes, expected points. Model-only mode replaces the
     Vegas spread with the model's own margin (one fixed-point iteration) and drops the Vegas total."""
-    g = self._features(matchup_frame(games), r, vf)
+    g = self._features(matchup_frame(games, starters), r, vf)
     if use_vegas and g.spread_team.notna().all() and g.total_line.notna().all():
       g["plays_hat"] = self.plays_vegas.predict(g)
       g["pass_rate_hat"] = self.pass_rate.predict(g)

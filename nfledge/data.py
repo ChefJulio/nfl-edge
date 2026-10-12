@@ -124,6 +124,7 @@ class Data:
   avail_hist: pd.DataFrame | None = None  # labelled practice weeks (did he play?) for completed seasons
   ecr: pd.DataFrame | None = None  # FantasyPros weekly positional expert consensus ranks (pre-game only)
   teams: pd.DataFrame | None = None  # team names + colors
+  qb_career: pd.Series | None = None  # career pass attempts before the loaded window, by gsis_id
 
   def completed_weeks(self, season: int) -> int:
     if season == self.current_season:
@@ -190,6 +191,9 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
     avail_hist = pd.concat(ah, ignore_index=True) if ah else None
   ecr = cache.get("ecr", "all", lambda: load_ecr(nfl, sched), stale=cache.age_hours("ecr", "all") > LIVE_TTL_HOURS)
   teams = cache.get("teams", "all", lambda: nfl.load_teams(), stale=cache.age_hours("teams", "all") > 24 * 90)
+  first = seasons[0]
+  qbc = cache.get("qbcareer", first, lambda: qb_career_before(nfl, first), stale=False)
+  qb_career = qbc.set_index("gsis_id").attempts if qbc is not None else None
   draft = cache.get("draft", "all", lambda: nfl.load_draft_picks(), stale=cache.age_hours("draft", "all") > 24 * 30)
   if new_weeks:
     cache.meta.setdefault("final_games", {})[str(current)] = n_final
@@ -215,7 +219,8 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
   data = Data(current_season=current, latest_week=latest, seasons=seasons, pbp=cutoff(pbp), schedules=sched,
               stats=stats, rosters=rosters, snaps=snaps, injuries=cat("injuries"), depth=depth, draft=draft,
               routes=routes, exclusions=load_exclusions(rosters), pending_games=pending, practice=practice,
-              avail_hist=avail_hist, ecr=ecr, teams=teams)
+              avail_hist=avail_hist, ecr=ecr, teams=teams,
+              qb_career=qb_career)
   _log(f"seasons {seasons}; current {current}, data through week {latest}"
        f"{f' ({pending} game(s) pending)' if pending else ''}; {len(data.pbp):,} plays, {len(stats):,} player-games")
   return data
@@ -323,6 +328,15 @@ def load_ecr(nfl, sched: pd.DataFrame) -> pd.DataFrame:
   e = pd.concat(out, ignore_index=True)
   e = e.sort_values("scrape_date").drop_duplicates(["season", "week", "gsis_id"], keep="last")
   return e[["season", "week", "gsis_id", "pos", "ecr", "sd", "scrape_date"]]
+
+
+def qb_career_before(nfl, first_season: int, start: int = 2006) -> pd.DataFrame:
+  """Career regular-season pass attempts before the loaded window, so veterans are not mistaken for
+  inexperienced QBs at the start of the window."""
+  st = _to_pd(nfl.load_player_stats(list(range(start, first_season))).select(
+    ["player_id", "season_type", "attempts"]))
+  st = st[st.season_type == "REG"]
+  return st.groupby("player_id").attempts.sum().rename_axis("gsis_id").reset_index()
 
 
 def availability_history(nfl, season: int) -> pd.DataFrame:
