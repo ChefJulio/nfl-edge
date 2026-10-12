@@ -206,9 +206,16 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 .g-sub > span { white-space: nowrap; }
 .g-sub {font-size: 11.5px; color: var(--muted); padding: 8px 16px 0; }
 .g-lines { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 16px 6px; }
-.lb { border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; background: var(--panel2); }
+/* Line boxes: the favorite's logo beside the line and a stripe of its color down the left edge. */
+.lb { border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px 9px 15px; background: var(--panel2); box-shadow: inset 4px 0 0 var(--fc, transparent); }
+.lb .big { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lb .big > span { white-space: nowrap; }
+.lb .big .logo { width: 26px; height: 26px; } .lb .big .logo img { width: 19px; height: 19px; }
+@media (max-width: 520px) { .lb .big { font-size: 17px; flex-wrap: nowrap; gap: 6px; } .lb .big small { display: none !important; }
+  .lb .big .logo { width: 22px; height: 22px; } .lb .big .logo img { width: 16px; height: 16px; } .lb { padding: 8px 10px 8px 13px; } }
 .lb small { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
 .lb .big { font-size: 21px; font-weight: 800; letter-spacing: -.01em; line-height: 1.15; }
+.lb .big small, .lb.model .big small { display: inline; font-size: 13px; font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--muted); margin: 0; }
 .lb .tot { font-size: 13px; color: var(--muted); font-weight: 600; margin-top: 1px; }
 .lb .tot b { color: var(--ink); }
 .lb.model { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: color-mix(in srgb, var(--accent) 7%, var(--panel)); }
@@ -221,23 +228,48 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 /* battles: tug of war in the two teams' colors; offense fills from the left, defense from the right */
 .battles { padding: 8px 16px 14px; display: grid; gap: 10px; }
 .bt-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; }
+/* Away team always on the left, home on the right; each group's labels sit over their own team's side. */
 .battle { display: grid; gap: 5px; }
-.bt-head, .bt-row { display: grid; grid-template-columns: 62px 1fr 72px; align-items: center; gap: 10px; }
-.bt-ends { display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 600; color: var(--ink); }
-.bt-ends > span { display: inline-flex; align-items: center; gap: 5px; }
-.battle .logo { width: 18px; height: 18px; } .battle .logo img { width: 13px; height: 13px; }
-.bt-lbl { font-size: 12px; color: var(--muted); }
+/* columns: label | away rank | away margin | bar | home margin | home rank */
+.bt-teams, .bt-grp, .bt-row { display: grid; grid-template-columns: 92px 38px 36px 1fr 36px 38px; align-items: center; gap: 6px; }
+.bt-teams > span, .bt-grp > span:not(.bt-chev) { grid-column: 2 / -1; grid-row: 1; display: inline-flex; align-items: center; gap: 6px; }
+.bt-rk { display: flex; justify-content: center; } .bt-rk .rk-b { min-width: 34px; }
+.bt-teams > span:last-child, .bt-grp > span:last-child { justify-self: end; }
+.bt-teams { font-size: 13px; } .bt-teams b { font-weight: 800; }
+.bt-teams .logo { width: 20px; height: 20px; } .bt-teams .logo img { width: 15px; height: 15px; }
+.bt-grp { font-size: 11.5px; font-weight: 600; color: var(--muted); }
+.bt-lbl { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.bt-v { font-size: 12.5px; font-weight: 800; text-align: right; white-space: nowrap; } .bt-v.r { text-align: left; }
+.bt-v i { font-style: normal; font-weight: 500; color: var(--faint); font-size: 11px; }
 .tug { position: relative; height: 10px; }
-.tug::before { content: ""; position: absolute; inset: 0; border-radius: 5px; background: var(--dc); }
-.tug-o { position: absolute; inset: 0 auto 0 0; border-radius: 5px 0 0 5px; background: var(--oc); }
+.tug::before { content: ""; position: absolute; inset: 0; border-radius: 5px; background: var(--hc); }
+.tug-o { position: absolute; inset: 0 auto 0 0; border-radius: 5px 0 0 5px; background: var(--ac); }
 .tug-mid { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--ink); box-shadow: 0 0 0 1.5px var(--panel); }
-@media (max-width: 520px) { .bt-head, .bt-row { grid-template-columns: 54px 1fr 64px; gap: 8px; } .bt-ends { font-size: 11px; } .bt-win .logo { display: none; } }
-.bt-win { display: inline-flex; align-items: center; gap: 5px; justify-content: flex-end; font-size: 12px; white-space: nowrap; }
-.bt-win b { font-weight: 800; }
-.game details { border-top: 1px solid var(--line); }
-.game details summary { cursor: pointer; padding: 9px 16px; font-size: 12px; color: var(--muted); font-weight: 600; list-style: none; }
-.game details summary::after { content: " +"; } .game details[open] summary::after { content: " -"; }
-.game details table { font-size: 12px; } .game details td, .game details th { padding: 6px 12px; }
+.battle.overall { padding-bottom: 2px; }
+/* Offense-vs-defense groups: the subtotal is always visible; tap to show its passing and running rows. */
+details.grp { border-top: 1px solid var(--line); padding-top: 8px; }
+.battle.extras { border-top: 1px solid var(--line); padding-top: 8px; }
+.battle.extras .tug { height: 8px; }
+details.grp > summary { list-style: none; cursor: pointer; display: grid; gap: 5px; }
+details.grp > summary::-webkit-details-marker { display: none; }
+.bt-grp > .bt-chev { grid-column: 1; grid-row: 1; justify-self: start; font-size: 10.5px; font-weight: 600; color: var(--faint); white-space: nowrap; }
+.bt-chev::before { content: "+ Pass/Run"; } details.grp[open] .bt-chev::before { content: "2 Pass/Run"; }
+details.grp > summary:hover .bt-chev { color: var(--accent); }
+details.grp > summary .bt-lbl { color: var(--ink); font-weight: 600; }
+.bt-units { display: grid; gap: 5px; margin-top: 6px; }
+.bt-units .bt-lbl { padding-left: 10px; }
+.bt-units .tug { height: 8px; }
+.battle.overall .bt-lbl { color: var(--ink); font-weight: 700; }
+.battle.overall .tug { height: 14px; } .battle.overall .tug::before, .battle.overall .tug-o { border-radius: 7px 0 0 7px; }
+.battle.overall .tug::before { border-radius: 7px; }
+.battle.overall .bt-v { font-size: 13.5px; }
+@media (max-width: 520px) { .bt-teams, .bt-grp, .bt-row { grid-template-columns: 64px 32px 30px 1fr 30px 32px; gap: 4px; } .bt-lbl { white-space: normal; line-height: 1.15; }
+  .bt-rk .rk-b { min-width: 30px; } .bt-grp { font-size: 11px; } .bt-v { font-size: 11.5px; }
+  .bt-chev::before { content: "+ P/R"; } details.grp[open] .bt-chev::before { content: "2 P/R"; } }
+.game > details { border-top: 1px solid var(--line); }
+.game > details > summary { cursor: pointer; padding: 9px 16px; font-size: 12px; color: var(--muted); font-weight: 600; list-style: none; }
+.game > details > summary::after { content: " +"; } .game > details[open] > summary::after { content: " -"; }
+.game > details table { font-size: 12px; } .game > details td, .game > details th { padding: 6px 12px; }
 
 /* misc */
 .arrow { display: inline-flex; align-items: center; gap: 6px; }
@@ -330,6 +362,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 </style>
 </head>
 <body>
+{% macro rkchip(r, what) %}<span class="bt-rk">{% if r %}<span class="rk-b sm {{ r|rkc }}" title="{{ what }}: {{ r|ord }} of 32">{{ r|ord }}</span>{% endif %}</span>{% endmacro %}
+{% macro tugrow(x, label=none) %}<div class="bt-row" title="{{ x.title }}">
+  <span class="bt-lbl">{{ label or x.label }}</span>
+  {{ rkchip(x.away_rk, x.away_what) }}
+  <span class="bt-v">{% if x.side == 'away' %}+{{ '%.1f'|format(x.pts) }}{% elif x.side == 'even' %}<i>even</i>{% endif %}</span>
+  <span class="tug"><span class="tug-o" style="width:{{ '%.1f'|format(x.split) }}%"></span><span class="tug-mid"></span></span>
+  <span class="bt-v r">{% if x.side == 'home' %}+{{ '%.1f'|format(x.pts) }}{% elif x.side == 'even' %}<i>even</i>{% endif %}</span>
+  {{ rkchip(x.home_rk, x.home_what) }}
+</div>{% endmacro %}
 <header class="top"><div class="wrap">
   <div class="brand"><h1>NFL <span>Edge</span></h1><div class="wk">{{ season }} &middot; Week {{ week }}</div></div>
   <div class="meta">
@@ -428,7 +469,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   <details class="howto"><summary>How to read</summary><div>
     Model lines come only from opponent-adjusted team ratings (no Vegas inputs), so a disagreement is a genuine second opinion. Spreads use betting notation (favorite minus points).
     Edges appear when the model differs from Vegas by 1+ point on the spread or 1.5+ on the total, and are highlighted at {{ margin_disagree }}+ / {{ total_disagree }}+.
-    <b>Who wins each battle</b> is a tug of war: each offense's passing and running game against the other team's pass and run defense, in the two teams' colors. The offense's color fills from the left, the defense's from the right; whoever pushes past the middle line wins, and the number is how many points that edge is worth <b>this game</b> compared with an average matchup (the per-play edge times that offense's projected dropbacks or runs, so a run edge is never read as equal to a pass edge of the same per-play size). Hover a row for the per-play numbers. Special teams and home field also count toward the model's margin.
+    <b>Who wins each battle</b>: every bar is a tug of war in the two teams' colors, away team always on the left and home team on the right. Whoever pushes past the middle line wins, and the number on the winner's side is how many points that edge is worth <b>this game</b> compared with an average matchup. <b>Overall</b> (top) is the model's margin. Below it, each offense against the other defense: its total is roughly how far above or below average that offense should score. Tap a matchup to split it into passing and running (the per-play edge times that offense's projected dropbacks or runs, so a run edge is never read as equal to a pass edge of the same per-play size). Everything adds up exactly: Overall = both offense-vs-defense matchups + special teams + home field and pace (projected play volume and pass/run mix). The split follows the model's own points formula, so every bar is on the same scale as the model line. Rank chips are each unit's league rank from the Power tab (green top 8, red bottom 8). Hover a row for the per-play numbers.
   </div></details>
   <div class="games">
   {% for g in games %}
@@ -440,26 +481,26 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
       </div>
       <div class="g-sub"><span>{{ g.kickoff }}{% if g.neutral %} &middot; neutral site{% endif %}</span><span>Model score {{ g.score }}</span></div>
       <div class="g-lines">
-        <div class="lb model"><small>Model</small><div class="big">{{ g.model_line }}</div><div class="tot">O/U <b>{{ g.model_total|f1 }}</b></div></div>
-        <div class="lb"><small>Vegas</small><div class="big">{{ g.vegas_line }}</div><div class="tot">O/U <b>{{ g.vegas_total|f1 if g.vegas_total == g.vegas_total else 'n/a' }}</b></div></div>
+        <div class="lb model" style="--fc:{{ g.model_fav.color }}"><small>Model</small><div class="big">{{ g.model_fav.logo|safe }}<span>{{ g.model_by|safe }}</span></div><div class="tot">O/U <b>{{ g.model_total|f1 }}</b></div></div>
+        <div class="lb"{% if g.vegas_fav %} style="--fc:{{ g.vegas_fav.color }}"{% endif %}><small>Vegas</small><div class="big">{% if g.vegas_fav %}{{ g.vegas_fav.logo|safe }}{% endif %}<span>{{ g.vegas_line }}</span></div><div class="tot">O/U <b>{{ g.vegas_total|f1 if g.vegas_total == g.vegas_total else 'n/a' }}</b></div></div>
       </div>
       <div class="edges">
         {% for e in g.edges %}<span class="edge{{ ' strong' if e.strong }}">{{ e.label }}</span>{% else %}<span class="edge none">Model agrees with Vegas</span>{% endfor %}
       </div>
-      <div class="battles">
+      <div class="battles" style="{{ g.bt_style }}">
         <div class="bt-title">Who wins each battle</div>
+        <div class="bt-teams"><span>{{ g.away.logo_sm|safe }}<b>{{ g.away.team }}</b></span><span><b>{{ g.home.team }}</b>{{ g.home.logo_sm|safe }}</span></div>
+        <div class="battle overall">{{ tugrow(g.overall) }}</div>
         {% for b in g.battles %}
-        <div class="battle" style="--oc:{{ b.off_color }};--dc:{{ b.def_color }}">
-          <div class="bt-head"><span></span><span class="bt-ends"><span>{{ b.off_logo|safe }}{{ b.off }} offense</span><span>{{ b.def }} defense{{ b.def_logo|safe }}</span></span><span></span></div>
-          {% for x in b.rows %}
-          <div class="bt-row" title="{{ x.title }}">
-            <span class="bt-lbl">{{ x.label }}</span>
-            <span class="tug"><span class="tug-o" style="width:{{ '%.1f'|format(x.split) }}%"></span><span class="tug-mid"></span></span>
-            <span class="bt-win">{% if x.winner %}{{ x.winner_logo|safe }}<b>{{ x.winner }}</b> +{{ '%.1f'|format(x.pts|abs) }}{% else %}<span class="muted">Even</span>{% endif %}</span>
-          </div>
-          {% endfor %}
-        </div>
+        <details class="battle grp">
+          <summary>
+            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>{{ b.head.left }}</span><span>{{ b.head.right }}</span></div>
+            {{ tugrow(b.head, 'Total') }}
+          </summary>
+          <div class="bt-units">{% for x in b.rows %}{{ tugrow(x) }}{% endfor %}</div>
+        </details>
         {% endfor %}
+        <div class="battle extras">{% for x in g.extras %}{{ tugrow(x) }}{% endfor %}</div>
       </div>
       <details><summary>Team ratings</summary>
         <div class="scroll"><table>

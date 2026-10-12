@@ -1,11 +1,11 @@
 ---
-documented_code_hash: 352b0ab9261b87c8
+documented_code_hash: 41eb95b09975467c
 ---
 # How the model works
 
 NFL Edge projects weekly fantasy points for QBs, RBs, WRs and TEs and rates every team, using only free data. Every number on this site comes from the pipeline below. Values shown in **bold blue** are filled in live from the current build, so they always match what produced this week's report.
 
-**Pipeline, start to finish:** load and cache data, then fit opponent-adjusted team ratings. From those, predict each game's volume and score, project each player's share of that volume and his efficiency, and adjust for availability and injuries. Finally, blend with the expert consensus where that has been shown to help, and attach calibrated ranges. Everything learned from history is trained only on seasons *before* the one being projected or tested.
+**Pipeline, start to finish:** load and cache data, then fit opponent-adjusted team ratings. From those, predict each game's volume and score, project each player's share of that volume and his efficiency, and adjust for availability and injuries. Finally, blend with the expert consensus where that has been shown to help, and attach calibrated ranges. Everything learned from history is trained only on the **{{ L.train_seasons }}** seasons *before* the one being projected or tested (a fixed window, so every backtest season is trained exactly like the live site).
 
 ## 1. Data and refresh
 
@@ -75,6 +75,7 @@ Ratings are estimated per play. On the Power tab they are shown as **points per 
 | Number | Definition |
 |---|---|
 | Matchup rank | The opponent's defense vs the position, 1st (toughest) to 32nd (easiest): the position's fantasy starters projected against every defense, ranked by points allowed. Opponent-adjusted, so not skewed by which offenses a defense has faced. The meter (1-5 bars) and grade follow the rank |
+| Matchup bars (Matchups) | The model margin split exactly along the points formula: each offense-vs-defense battle (per-play edge x projected plays x the fitted points per EPA), special teams (net special-teams EPA x its fitted weight), and home field plus play volume / pass-run mix. Overall = the sum, to the decimal |
 | Matchup points (hover) | Projection against this defense minus projection against an average defense |
 | Tier | League-size buckets for a {{ L.tier_teams }}-team league: QB1 = QB ranks 1-{{ L.tier_teams }}, QB2 = the next {{ L.tier_teams }}, and so on for every position. Pill color is the roster slot the player fills with {{ L.tier_roster }}: green = starter, amber = flex range (best remaining RB/WR/TE), plain = bench |
 | Power values | Points per game vs an average opponent: each unit's per-play rating x league-average plays of that type (pass offense includes the starting QB). Offense = Pass O + Run O, Defense = Pass D + Run D, Net = Offense + Defense + ST. League-average volume means a defense is judged on per-play quality, not on how many plays its own offense left it facing |

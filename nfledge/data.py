@@ -104,6 +104,13 @@ class Cache:
     return float("inf") if ts is None else (time.time() - ts) / 3600
 
 
+# Relocated franchises, plus LAR (rosters/depth/draft) vs LA (play-by-play) for the Rams.
+RELOCATED = {"OAK": "LV", "SD": "LAC", "STL": "LA", "LAR": "LA"}
+TEAM_COLS = {"posteam", "defteam", "home_team", "away_team", "team", "opp", "recent_team", "opponent_team",
+             "opponent", "club_code", "draft_club", "possession_team", "return_team", "td_team", "timeout_team",
+             "penalty_team"}
+
+
 @dataclass
 class Data:
   current_season: int
@@ -126,6 +133,20 @@ class Data:
   teams: pd.DataFrame | None = None  # team names + colors
   qb_career: pd.Series | None = None  # career pass attempts before the loaded window, by gsis_id
   pfr_def: pd.DataFrame | None = None  # PFR weekly advanced defensive stats (pressures, coverage, tackling)
+
+  def __post_init__(self):
+    """One code per franchise across seasons and sources: older nflverse seasons use the codes of the time (OAK
+    before 2020, SD before 2017, STL before 2016), which would split a franchise in two once older history is
+    loaded, and some sources call the Rams LAR.
+    game_id strings keep their original codes (they are only ever joined to each other)."""
+    for name, val in vars(self).items():
+      if name == "teams":
+        continue
+      frames = val.values() if isinstance(val, dict) else [val]
+      for f in frames:
+        if isinstance(f, pd.DataFrame):
+          for col in TEAM_COLS.intersection(f.columns):
+            f[col] = f[col].replace(RELOCATED)
 
   def completed_weeks(self, season: int) -> int:
     if season == self.current_season:

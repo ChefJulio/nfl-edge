@@ -40,6 +40,7 @@ class Engine:
       return self
     t0 = time.time()
     seasons = [s for s in self.data.seasons if s < test_season and s - 1 in self.data.seasons]
+    seasons = seasons[-int(self.cfg["data"].get("train_seasons", 2)):]  # same window as the live site
     folds = [(s, w) for s in seasons for w in range(4, self.data.completed_weeks(s) + 1)]
     self.tm.tune_alphas(folds)
     self.pm.prepare(seasons)

@@ -628,6 +628,20 @@ def diverging_bar(v: float, scale: float, width: int = 120) -> str:
           f'<span class="dbar-fill {cls}" style="left:{left:.1f}%;width:{abs(frac) * 100:.1f}%"></span></span>')
 
 
+UNIT_NAME = {"pass": "Pass", "rush": "Run"}
+
+
+def tug(label: str, away_edge: float, scale: float, away_rk, home_rk, away_what: str, home_what: str,
+        title: str) -> dict:
+  """One tug-of-war bar: away team on the left, home on the right. away_edge = points this game in the away
+  team's favor; the split moves past the middle toward the loser (clipped at 90% of the bar at +/-scale), and the
+  margin is shown on the winner's side ('even' under half a point)."""
+  return {"label": label, "edge": away_edge, "pts": abs(away_edge),
+          "split": 50 + 50 * max(-0.9, min(0.9, away_edge / scale)),
+          "side": "even" if abs(away_edge) < 0.5 else "away" if away_edge > 0 else "home",
+          "away_rk": away_rk, "home_rk": home_rk, "away_what": away_what, "home_what": home_what, "title": title}
+
+
 def _rgb_dist(a: str, b: str) -> float:
   ra, rb = ([int(c.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4)] for c in (a, b))
   return sum((x - y) ** 2 for x, y in zip(ra, rb)) ** 0.5
@@ -644,7 +658,8 @@ def battle_colors(ts: "TeamStyle", away: str, home: str) -> dict:
   return {away: ap, home: "#9aa3b2"}
 
 
-def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None = None) -> list:
+def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None = None,
+             power: list | None = None) -> list:
   """Per game: the headline lines (model vs Vegas, in betting notation), edges where they disagree, and
   where each side's offense has the advantage over the other's defense."""
   r = eng.game_ratings(season, week)
@@ -659,6 +674,14 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
   gl = game_lines(tp, games).merge(games[["game_id", "gametime"]], on="game_id", how="left")
   ts = TeamStyle(eng.data.teams)
   names = ({t.team_abbr: t.team_nick for t in eng.data.teams.itertuples()} if eng.data.teams is not None else {})
+  # League ranks per unit, taken from the Power tab so both tabs always agree.
+  rk = {p["team"]: p for p in power or []}
+  unit_rk = {("pass", "off"): "pass_o_rk", ("rush", "off"): "rush_o_rk", ("pass", "def"): "pass_d_rk",
+             ("rush", "def"): "rush_d_rk"}
+
+  def rank_of(team, key):
+    return int(rk[team][key]) if team in rk else None
+
   out = []
   for _, g in gl.iterrows():
     def side(t):
@@ -682,31 +705,81 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
       edges.append({"label": f"Model expects {abs(dt):.1f} {'more' if dt > 0 else 'fewer'} points "
                              f"({'Over' if dt > 0 else 'Under'})",
                     "strong": abs(dt) >= cfg["report"]["total_disagree"]})
-    # Each battle in points THIS game: per-play edge x that offense's projected plays of that type, so a run edge
-    # (fewer plays) is not read as equal to a pass edge of the same per-play size. Shown as a tug of war in the two
-    # teams' colors: the offense's color fills from the left, the defense's from the right, and the winner pulls
-    # the split past the middle.
-    vol_of = tp.set_index("team")
+    # Who wins each battle, in points THIS game: per-play edge x that offense's projected plays of that type, so a
+    # run edge (fewer plays) is not read as equal to a pass edge of the same per-play size. Every bar is a tug of
+    # war with the away team on the left and the home team on the right. Hierarchy: Overall (the model margin) =
+    # the two offense-vs-defense subtotals + special teams + home field; each subtotal = its passing + running.
+    vol_of = tp[tp.game_id == g.game_id].set_index("team")
     col = battle_colors(ts, g.away_team, g.home_team)
+    a_t, h_t = g.away_team, g.home_team
+    # The bars split the model margin EXACTLY along the points formula
+    #   points = a + b x (dropbacks x E[pass EPA] + rushes x E[rush EPA]) + c x special-teams net,
+    #   E[EPA] = league average + offense + defense (+ QB) + home field,
+    # so Overall = both offense-vs-defense matchups + special teams + home field + play volume.
+    pc = dict(zip(eng.gm.points.cols, eng.gm.points.coef[1:]))
+    b, c_st = float(pc["off_epa_game"]), float(pc["st_net"])
     battles = []
     for o, d in ((away, home), (home, away)):
+      a_role, h_role = ("off", "def") if o is away else ("def", "off")
+      sign = 1 if o is away else -1  # offense edge -> away team's edge
       rows = []
       for unit, label, vcol in (("pass", "Passing", "dropbacks_hat"), ("rush", "Running", "rushes_hat")):
         edge100 = o[f"off_{unit}"] - d[f"def_{unit}"]
-        plays = float(vol_of.at[o["team"], vcol]) if o["team"] in vol_of.index else 30.0
-        pts = edge100 / 100 * plays
-        winner = None if abs(pts) < 0.5 else o["team"] if pts > 0 else d["team"]
-        rows.append({"label": label, "pts": pts, "split": 50 + 50 * max(-0.9, min(0.9, pts / 6.0)),
-                     "winner": winner, "winner_logo": (o if winner == o["team"] else d)["logo_sm"] if winner else "",
-                     "title": f"{edge100:+.1f} per 100 plays x {plays:.0f} projected {label.lower()} plays "
-                              f"= {pts:+.1f} pts vs an average matchup"})
-      battles.append({"off": o["team"], "def": d["team"], "off_logo": o["logo_sm"], "def_logo": d["logo_sm"],
-                      "off_color": col[o["team"]], "def_color": col[d["team"]], "rows": rows,
-                      "total": sum(x["pts"] for x in rows)})
+        plays = float(vol_of.at[o["team"], vcol])
+        pts = b * edge100 / 100 * plays
+        rows.append(tug(label, sign * pts, 6.0,
+                        rank_of(a_t, unit_rk[(unit, a_role)]), rank_of(h_t, unit_rk[(unit, h_role)]),
+                        f"{a_t} {UNIT_NAME[unit]} {a_role[0].upper()}", f"{h_t} {UNIT_NAME[unit]} {h_role[0].upper()}",
+                        f"{o['team']} {label.lower()} vs {d['team']} defense: {edge100:+.1f} EPA per 100 plays x "
+                        f"{plays:.0f} projected plays x {b:.2f} points per EPA = {pts:+.1f} pts for the offense "
+                        f"vs an average matchup"))
+      total = sum(x["edge"] for x in rows)  # away team's edge across both units
+      head = tug(f"{o['team']} offense", total, 8.0, rank_of(a_t, f"{a_role}_rk"), rank_of(h_t, f"{h_role}_rk"),
+                 f"{a_t} {'offense' if a_role == 'off' else 'defense'}",
+                 f"{h_t} {'offense' if h_role == 'off' else 'defense'}",
+                 f"{o['team']} offense vs {d['team']} defense: passing + running = {sign * total:+.1f} pts for the "
+                 f"offense vs an average matchup (roughly its scoring above or below average)")
+      head["left"] = f"{a_t} {'offense' if a_role == 'off' else 'defense'}"
+      head["right"] = f"{h_t} {'offense' if h_role == 'off' else 'defense'}"
+      battles.append({"head": head, "rows": rows})
+    # The rest of the margin, in the away team's favor (positive) or the home team's (negative).
+    va, vh = vol_of.loc[a_t], vol_of.loc[h_t]
+    st = c_st * (float(va.st_net) - float(vh.st_net))
+
+    def base_pts(v):  # league-average EPA on this team's projected play mix
+      return b * (v.dropbacks_hat * r.intercept["pass"] + v.rushes_hat * r.intercept["rush"])
+
+    def home_pts(v):  # home-field EPA on this team's plays (+ for the home team, - for the visitor)
+      return b * v.home * sum(v[col_] * (r.home[u] + r.home_div.get(u, 0.0) * v["div"])
+                              for u, col_ in (("pass", "dropbacks_hat"), ("rush", "rushes_hat")))
+    volume = float(base_pts(va) - base_pts(vh))
+    hfa = float(home_pts(va) - home_pts(vh))
+    st_row = tug("Special teams", st, 8.0, rank_of(a_t, "st_rk"), rank_of(h_t, "st_rk"),
+                 f"{a_t} special teams", f"{h_t} special teams",
+                 f"Special-teams EPA edge x {c_st:.2f} points per EPA (fitted: field position from returns and "
+                 f"coverage is worth more than the plays' own EPA)")
+    other_row = tug("Home & pace", hfa + volume, 8.0, None, None, "", "",
+                    f"Home field {hfa:+.1f} and play volume / pass-run mix {volume:+.1f} (more projected plays, "
+                    f"and more of them passes, mean more scoring chances), in {a_t}'s favor")
+    check = sum(x["head"]["edge"] for x in battles) + st + hfa + volume
+    if abs(check + g.model_margin) > 0.05:  # the bars must sum to the model line; flag it if the formula changes
+      print(f"[report] warning: {g.game_id} matchup bars sum to {-check:+.2f}, model margin {g.model_margin:+.2f}",
+            flush=True)
     out.append({"away": away, "home": home, "kickoff": kickoff_text(g.gameday, g.gametime),
                 "neutral": g.location == "Neutral", "model_line": spread_text(m_fav, g.model_margin),
                 "model_total": g.model_total, "vegas_line": spread_text(v_fav, vm) if pd.notna(vm) else "n/a",
-                "vegas_total": vt, "edges": edges, "battles": battles,
+                "vegas_total": vt, "edges": edges, "battles": battles, "extras": [st_row, other_row],
+                "bt_style": f"--ac:{col[g.away_team]};--hc:{col[g.home_team]}",
+                "model_by": (f"{m_fav} by {abs(g.model_margin):.1f} <small>points</small>"
+                             if abs(g.model_margin) >= 0.05 else "Even"),
+                # The favorite's logo and color on each line box, so the pick reads at a glance.
+                "model_fav": {"logo": ts.logo_img(m_fav, 22), "color": col[m_fav]},
+                "vegas_fav": ({"logo": ts.logo_img(v_fav, 22), "color": col[v_fav]} if pd.notna(vm) else None),
+                # The whole game: the model margin, which adds special teams and home field to the battles below.
+                "overall": tug("Overall", -g.model_margin, 12.0, rank_of(a_t, "rank"), rank_of(h_t, "rank"),
+                               f"{a_t} power rank", f"{h_t} power rank",
+                               f"Model margin: {m_fav} by {abs(g.model_margin):.1f} (both offense-vs-defense "
+                               f"matchups plus special teams and home field)"),
                 "score": f"{g.away_team} {g.away_pts:.0f} - {g.home_team} {g.home_pts:.0f}"})
   return out
 

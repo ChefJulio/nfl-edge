@@ -4,6 +4,10 @@
 # Seasons of history loaded in addition to the current one. Meta-models (volume, efficiency,
 # injury redistribution) are trained only on seasons strictly before the one being projected.
 history_seasons = 3
+# Learned components train on this many seasons immediately before the season being projected (or tested). Fixed
+# rather than "everything loaded", so a long backtest (more history loaded) trains each season exactly the way
+# the live site does, and training cost doesn't grow with the history window.
+train_seasons = 2
 cache_dir = "cache"
 # Daily (Wed/Thu/Fri) practice participation from NFL.com's data API. Unofficial use of the public web client
 # key (may break or conflict with NFL terms); past seasons are fetched once and cached. false = nflverse only.

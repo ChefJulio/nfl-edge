@@ -25,6 +25,8 @@ threads. Numbers are walk-forward backtest results (train on earlier seasons, te
   for membership; using only `ACT` leaks the answer into availability models and drops last week's inactives.
 - **Rosters are per team-week; teams on bye or still to play (MNF) lack the latest week.** Use each team's own
   latest roster week. Using the league-wide max week once dropped entire teams (KC, CAR) from projections.
+- **Franchise codes changed over time** (OAK->LV 2020, SD->LAC 2017, STL->LA 2016; LAR vs LA by source).
+  `Data.__post_init__` maps every team column to current codes; game_id strings keep the originals.
 - **Pending games:** the target week is the first week with no final games. A pending Monday game in the prior
   week must not be treated as played (it once made Allen/Stafford look like scratch risks). Count only games with
   a final score as history.
@@ -82,6 +84,13 @@ threads. Numbers are walk-forward backtest results (train on earlier seasons, te
 - **Matchup ranks:** opponent-adjusted defense-vs-position: position starters projected against all 32 defenses.
   Grade/meter/takeaway all derive from this rank (an earlier separate grade contradicted it).
 
+- **Training window is fixed** (`[data] train_seasons = 2`): learned components train on the 2 seasons before
+  the target. It used to be "every loaded season", so loading 2018+ for a long backtest trained a different
+  (and far slower: alpha tuning re-solves the ridge per week per grid point) model than the site runs.
+- **Points formula weights:** points = a + 0.80 x offensive EPA (volume x expected EPA/play) + 2.5 x net
+  special-teams EPA (2026 fit). The ST weight is large: SEA's 1st-ranked ST is worth ~5 pts vs DEN. Plausibly
+  field position beyond the plays' own EPA, but untested; candidate experiment (constrain or shrink it).
+
 ## 4. Tested and rejected (do not retry without new data/angle)
 | Idea | Result |
 |---|---|
@@ -137,6 +146,10 @@ threads. Numbers are walk-forward backtest results (train on earlier seasons, te
   than Vegas"); "Who wins each battle" tug-of-war bars in the two teams' colors (offense fills from the left,
   defense from the right, winner + points this game on the right). Centered +/- bars were too hard to read.
   `battle_colors` swaps to a secondary when both primaries look alike.
+  Current card: away team always left, home right; Overall (model margin) on top, then the two
+  offense-vs-defense matchups (tap for Pass/Run), then Special teams and Home & pace. Bars are the margin split
+  exactly along the points formula (sum = margin to the decimal; the report warns if not), with Power ranks.
+  Model box reads "SEA by 4.1 points" (owner's wording); Vegas keeps betting notation.
 - Power: points per game, 7 ranked units, rank range (10th-90th pct simulated rank), schedule played/left.
 - Tabs: Rankings, Matchups, Power, Role changes, Model. (Track record folded into Model section 7; Schedule luck
   folded into Power + the Rankings detail row.)

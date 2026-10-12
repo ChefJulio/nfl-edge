@@ -99,6 +99,7 @@ def live_values(eng, cfg: dict, season: int, week: int, bt_res: pd.DataFrame | N
     "wind_thr": f"{pmc['wind_threshold_mph']}", "wind_pen": f"{pmc['wind_penalty_per_mph']:.0%}",
     "wind_cap": f"{pmc['wind_penalty_cap']:.0%}", "blend": blend or "n/a", "coverage": cov,
     "redist_scale": f"{cfg.get('injuries', {}).get('redistribution_scale', 1.0):g}",
+    "train_seasons": f"{cfg['data'].get('train_seasons', 2)}",
     "tier_teams": f"{cfg['tiers']['teams']}",
     "tier_roster": ", ".join(f"{v} {k}" for k, v in cfg["tiers"]["starters"].items()) + f", {cfg['tiers']['flex']} flex",
     "snap_jump": f"{pmc['role_change_snap_jump']:.0%}", "opp_jump": f"{pmc['role_change_opp_jump']:.0%}",
