@@ -211,6 +211,11 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
   p["takeaway"] = [takeaway(r) for _, r in p.iterrows()]
   stats = season_stats(eng, season, week)
   n_weeks = week - 1
+  # Until Friday's expert rankings are out, show last week's rank (display only; never fed to the model).
+  e = eng.data.ecr
+  prev_ecr = (e[(e.season == season) & (e.week == week - 1)].set_index("gsis_id").ecr
+              if e is not None else pd.Series(dtype=float))
+  prev_ecr = prev_ecr[~prev_ecr.index.duplicated()]
   out = {}
   for pos in ("QB", "RB", "WR", "TE"):
     g = p[p.pos == pos].sort_values("proj", ascending=False)
@@ -219,7 +224,8 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
     for _, r in g.iterrows():
       st = stats.loc[r.gsis_id].to_dict() if r.gsis_id in stats.index else None
       rows.append({
-        "rank": int(r.pos_rank), "ecr": r.ecr, "name": r.full_name, "team_chip": ts.chip(r.team),
+        "rank": int(r.pos_rank), "ecr": r.ecr if pd.notna(r.ecr) else prev_ecr.get(r.gsis_id, np.nan),
+        "ecr_stale": pd.isna(r.ecr) and r.gsis_id in prev_ecr.index, "name": r.full_name, "team_chip": ts.chip(r.team),
         "opp_chip": ts.chip(r.opp), "home": "vs" if r.home >= 0 else "@", "proj": r.proj,
         "p10": r.p10, "p25": r.p25, "p50": r.p50, "p75": r.p75, "p90": r.p90,
         "range": range_svg(r.p10, r.p25, r.p75, r.p90, r.proj, axis),

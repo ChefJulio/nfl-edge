@@ -110,6 +110,8 @@ tr.detail td { background: color-mix(in srgb, var(--chip) 55%, var(--panel)); wh
 td.take { font-weight: 600; min-width: 210px; max-width: 300px; }
 table.ranks td { vertical-align: middle; }
 table.ranks td.stick { vertical-align: middle; }
+td.ecr { color: var(--muted); } td.ecr.stale { opacity: .6; font-style: italic; }
+td.ecr sup { font-size: 8.5px; margin-left: 1px; font-style: normal; }
 td.inact { font-variant-numeric: tabular-nums; font-weight: 600; }
 .ia-hi { color: var(--bad); } .ia-md { color: var(--warn); } .ia-lo { color: var(--ink); }
 footer { color: var(--muted); font-size: 12px; max-width: 1200px; margin: 0 auto; padding: 0 16px 30px; }
@@ -144,7 +146,7 @@ footer { color: var(--muted); font-size: 12px; max-width: 1200px; margin: 0 auto
     <table class="sortable ranks">
       <thead><tr>
         <th class="num">#</th>
-        <th class="num"><abbr title="FantasyPros expert consensus positional rank (published Fridays)">ECR</abbr></th>
+        <th class="num"><abbr title="FantasyPros expert consensus positional rank, published Fridays. Faded with 'lw' = last week's rank until this week's is out.">ECR</abbr></th>
         <th class="stick">Player</th>
         <th><abbr title="Team vs opponent. Grade A-F ranks this week's matchups at the position; the number is fantasy points this defense adds or removes vs an average defense">Matchup</abbr></th>
         <th class="num"><abbr title="Chance he is inactive: injury (from the Wed/Thu/Fri practice pattern and game status) or healthy scratch (from his recent active history, depth chart spot and teammates out ahead of him)">Inactive%</abbr></th>
@@ -158,7 +160,7 @@ footer { color: var(--muted); font-size: 12px; max-width: 1200px; margin: 0 auto
       {% for r in block.rows %}
         <tr class="main{% if r.boost >= 1 %} hl{% endif %}{% if r.avail < 0.5 %} out{% endif %}" data-name="{{ r.name|lower }}">
           <td class="num">{{ r.rank }}</td>
-          <td class="num muted">{{ r.ecr|f0 }}</td>
+          <td class="num ecr{{ ' stale' if r.ecr_stale }}"{% if r.ecr_stale %} title="Last week's expert rank (week {{ week - 1 }}). This week's FantasyPros consensus is published Fridays."{% endif %}>{{ r.ecr|f0 }}{% if r.ecr_stale %}<sup>lw</sup>{% endif %}</td>
           <td class="stick"><div class="pname">{{ r.name }}</div>
             <div class="badges">
               {%- if r.status %}<span class="flag {{ 'f-out' if r.avail < 0.5 else 'f-q' }}" title="Injury report (practice Wed/Thu/Fri: D = did not practice, L = limited, F = full) and chance to play from historical practice patterns">{{ r.status }}</span>{% endif %}
@@ -303,18 +305,18 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
   document.querySelectorAll('main section').forEach(s => s.classList.toggle('on', s.id === b.dataset.tab));
   try { localStorage.setItem('nfledge-tab', b.dataset.tab); } catch (e) {}
+  try { history.replaceState(null, '', '#' + b.dataset.tab); } catch (e) {}
 });
 document.querySelectorAll('.posbar button').forEach(b => b.onclick = () => {
   document.querySelectorAll('.posbar button').forEach(x => x.classList.toggle('on', x === b));
   document.querySelectorAll('.posview').forEach(v => v.hidden = v.dataset.pos !== b.dataset.pos);
 });
-try { const t = localStorage.getItem('nfledge-tab'); if (t) { const b = document.querySelector(`nav button[data-tab="${t}"]`); if (b) b.click(); } } catch (e) {}
+try { const t = location.hash.slice(1) || localStorage.getItem('nfledge-tab'); if (t) { const b = document.querySelector(`nav button[data-tab="${t}"]`); if (b) { b.click(); window.scrollTo(0, 0); } } } catch (e) {}
 document.querySelectorAll('table.sortable th').forEach((th, i) => th.onclick = () => {
   const tb = th.closest('table').tBodies[0];
   const mains = [...tb.rows].filter(r => !r.classList.contains('detail'));
   const dir = th.dataset.dir === 'desc' ? 1 : -1; th.dataset.dir = dir === 1 ? 'asc' : 'desc';
-  const val = r => { const t = r.cells[i].innerText.split('
-')[0].replace(/[%+,]/g, '').trim(); const n = parseFloat(t); return isNaN(n) ? t.toLowerCase() : n; };
+  const val = r => { const t = r.cells[i].innerText.split(/\r?\n/)[0].replace(/[%+,]/g, '').trim(); const n = parseFloat(t); return isNaN(n) ? t.toLowerCase() : n; };
   mains.sort((a, b) => { const x = val(a), y = val(b); if (x === '' || y === '') return x === '' ? 1 : -1; return (x > y ? 1 : x < y ? -1 : 0) * dir; });
   mains.forEach(r => { const d = r.nextElementSibling && r.nextElementSibling.classList.contains('detail') ? r.nextElementSibling : null; tb.appendChild(r); if (d) tb.appendChild(d); });
 });

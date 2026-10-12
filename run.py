@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import pickle
 import sys
 import time
 import webbrowser
@@ -18,19 +19,74 @@ from nfledge.data import forecast_wind, load_all
 from nfledge.engine import POSITIONS, Engine
 
 
+def model_code() -> str:
+  """Source of everything that affects model outputs (report.py and templates only change presentation)."""
+  return "".join(p.read_text() for p in sorted((ROOT / "nfledge").glob("*.py")) if p.name != "report.py")
+
+
+def frame_hash(df) -> int:
+  return 0 if df is None else int(pd.util.hash_pandas_object(df, index=False).sum() % (2 ** 61))
+
+
+def state_key(data, cfg, scoring, *extra) -> str:
+  """Changes whenever the inputs that matter change: config, scoring, final games, injury report / practice
+  updates, expert rankings, rosters, or model code."""
+  inj = data.injuries[data.injuries.season == data.current_season]
+  parts = [cfg, scoring.weights, data.latest_week, data.pending_games, len(data.pbp), frame_hash(inj),
+           frame_hash(data.practice), frame_hash(data.ecr), len(data.rosters), model_code(), *extra]
+  return hashlib.sha1(json.dumps(parts, sort_keys=True, default=str).encode()).hexdigest()[:12]
+
+
+def prune(cache_dir: Path, pattern: str, keep: int = 2):
+  files = sorted(cache_dir.glob(pattern), key=lambda p: p.stat().st_mtime, reverse=True)
+  for f in files[keep:]:
+    f.unlink(missing_ok=True)
+
+
+def attach_data(eng, data):
+  eng.data = eng.pm.data = data
+  if getattr(eng, "injury_model", None) is not None:
+    eng.injury_model.data = data
+
+
+def cached_model(data, cfg, scoring, season: int, week: int):
+  """Trained engine + this week's projections, cached on disk. Presentation-only changes (report.py, the
+  template) reuse it, so a re-render takes seconds instead of minutes."""
+  cache_dir = ROOT / cfg["data"]["cache_dir"]
+  path = cache_dir / f"model_{state_key(data, cfg, scoring, season, week)}.pkl"
+  if path.exists():
+    with open(path, "rb") as f:
+      eng, proj = pickle.load(f)
+    attach_data(eng, data)
+    print("[run] reusing cached model + projections (inputs and model code unchanged)", flush=True)
+    return eng, proj
+  eng = Engine(data, cfg, scoring, POSITIONS).train(season)
+  games = eng.games(season, week)
+  if games.empty:
+    sys.exit(f"No regular-season games found for {season} week {week}.")
+  wind = forecast_wind(games.set_index("game_id"))
+  hist_wind = eng.team_ledger.drop_duplicates("game_id").set_index("game_id").wind
+  wind = wind.fillna(hist_wind.reindex(wind.index))
+  proj = eng.project_week(season, week, use_injuries=True, wind=wind)
+  attach_data(eng, None)  # raw data is reloaded every run; keep the cache small
+  with open(path, "wb") as f:
+    pickle.dump((eng, proj), f, protocol=pickle.HIGHEST_PROTOCOL)
+  attach_data(eng, data)
+  prune(cache_dir, "model_*.pkl")
+  return eng, proj
+
+
 def cached_backtest(data, cfg, scoring) -> tuple[pd.DataFrame | None, list[int]]:
-  """Walk-forward backtest over last season + this season so far; cached per (final games, config, scoring)."""
+  """Walk-forward backtest over last season + this season so far; cached per data/config/model-code state."""
   seasons = [data.current_season - 1, data.current_season]
-  code = "".join(p.read_text() for p in sorted((ROOT / "nfledge").glob("*.py")))
-  key = hashlib.sha1(json.dumps([cfg, scoring.weights, data.latest_week, data.pending_games, len(data.pbp), code],
-                                sort_keys=True, default=str).encode()).hexdigest()[:12]
-  path = ROOT / cfg["data"]["cache_dir"] / f"backtest_{key}.parquet"
+  path = ROOT / cfg["data"]["cache_dir"] / f"backtest_{state_key(data, cfg, scoring, 'bt')}.parquet"
   if path.exists():
     return pd.read_parquet(path), seasons
   print("[run] backtesting (cached after the first run for this data/config)...", flush=True)
   eng = Engine(data, cfg, scoring, POSITIONS)
   res = bt.run(eng, seasons, use_injuries=True)
   res.to_parquet(path)
+  prune(path.parent, "backtest_*.parquet")
   return res, seasons
 
 
@@ -50,14 +106,7 @@ def main():
     week = args.week
   print(f"[run] projecting {season} week {week}", flush=True)
 
-  eng = Engine(data, cfg, scoring, POSITIONS).train(season)
-  games = eng.games(season, week)
-  if games.empty:
-    sys.exit(f"No regular-season games found for {season} week {week}.")
-  wind = forecast_wind(games.set_index("game_id"))
-  hist_wind = eng.team_ledger.drop_duplicates("game_id").set_index("game_id").wind
-  wind = wind.fillna(hist_wind.reindex(wind.index))
-  proj = eng.project_week(season, week, use_injuries=True, wind=wind)
+  eng, proj = cached_model(data, cfg, scoring, season, week)
 
   ev, bt_seasons = None, []
   if not args.no_backtest:
@@ -77,9 +126,28 @@ def main():
     "margin_disagree": cfg["report"]["margin_disagree"], "total_disagree": cfg["report"]["total_disagree"],
   }
   out = rp.render(ctx, Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week))
+  check_script(out)
   print(f"[run] wrote {out} in {time.time() - t0:.0f}s")
   if args.open:
     webbrowser.open(out.as_uri())
+
+
+def check_script(path: Path):
+  """Fail loudly if the page's JavaScript does not parse (a syntax error silently kills every button)."""
+  import re
+  import shutil
+  import subprocess
+  import tempfile
+  node = shutil.which("node")
+  if not node:
+    return
+  js = "\n".join(re.findall(r"<script>(.*?)</script>", path.read_text(encoding="utf-8"), re.S))
+  with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False, encoding="utf-8") as f:
+    f.write(js)
+  res = subprocess.run([node, "--check", f.name], capture_output=True, text=True)
+  Path(f.name).unlink(missing_ok=True)
+  if res.returncode != 0:
+    sys.exit(f"[run] report JavaScript has a syntax error:\n{res.stderr}")
 
 
 def backtest_takeaway(ev) -> str:
