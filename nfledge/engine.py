@@ -145,10 +145,14 @@ class Engine:
     r["team"] = team_name_fix(r.team)
     g = self.games(season, week)
     playing = set(g.home_team) | set(g.away_team)
-    c = r[r.team.isin(playing)][["gsis_id", "team", "pos", "full_name"]].drop_duplicates("gsis_id")
+    # A player traded while a team was on bye can sit on two teams' latest rosters: keep his most recent one.
+    c = (r[r.team.isin(playing)].sort_values("week", ascending=False)[["gsis_id", "team", "pos", "full_name"]]
+         .drop_duplicates("gsis_id"))
     dc = depth_for_week(self.data, season, week)
     dc["team"] = team_name_fix(dc.team)
-    c = c.merge(dc[["gsis_id", "rank"]].rename(columns={"rank": "depth_rank"}), on="gsis_id", how="left")
+    # One depth slot per player on his current team (charts can list a player twice: two slots, or a stale team).
+    dc = dc[["gsis_id", "team", "rank"]].sort_values("rank").drop_duplicates(["gsis_id", "team"])
+    c = c.merge(dc.rename(columns={"rank": "depth_rank"}), on=["gsis_id", "team"], how="left")
     return c.reset_index(drop=True)
 
   def project_week(self, season: int, week: int, use_injuries: bool = True, use_vegas: bool = True,
