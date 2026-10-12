@@ -102,17 +102,29 @@ def stat(v, unit, digits=0) -> str:
   return f'<span class="st"><b>{v:.{digits}f}</b><small>{unit}</small></span>'
 
 
-def td_odds(lam: float, label: str = "TD") -> str:
-  """Expected TDs -> chance of exactly 1, exactly 2, 3+ (Poisson; calibrated against backtest outcomes)."""
+def td_donut(lam: float, label: str = "TD") -> str:
+  """Touchdown odds as a small donut: ring segments for 0 / 1 / 2 / 3+ TDs (darker = more), anytime % in the
+  middle. Poisson from the expected-TD rate (backtest: well calibrated)."""
   lam = max(float(lam), 0.0)
   p0 = math.exp(-lam)
-  p1 = lam * p0
-  p2 = lam ** 2 / 2 * p0
-  p3 = max(1 - p0 - p1 - p2, 0.0)
-  tip = f"Anytime {label}: {1 - p0:.0%} (average {lam:.2f} per game)"
-  cells = "".join(f'<span class="tdo"><small>{k}</small><b>{v:.0%}</b></span>'
-                  for k, v in (("1", p1), ("2", p2), ("3+", p3)))
-  return f'<span class="tds" title="{tip}"><small class="tdl">{label}</small>{cells}</span>'
+  probs = [p0, lam * p0, lam ** 2 / 2 * p0]
+  probs.append(max(1 - sum(probs), 0.0))
+  r, sw, size = 13.0, 6.0, 34
+  circ = 2 * math.pi * r
+  segs, start = [], 0.0
+  for k, p in enumerate(probs):
+    if p <= 0.002:
+      continue
+    seg = p * circ
+    segs.append(f'<circle r="{r}" cx="{size / 2}" cy="{size / 2}" class="td{k}" stroke-width="{sw}" fill="none" '
+                f'stroke-dasharray="{seg:.2f} {circ - seg:.2f}" stroke-dashoffset="{-start:.2f}" '
+                f'transform="rotate(-90 {size / 2} {size / 2})"/>')
+    start += seg
+  tip = (f"{label}: anytime {1 - p0:.0%} | exactly 1: {probs[1]:.0%} | 2: {probs[2]:.0%} | 3+: {probs[3]:.0%} "
+         f"(avg {lam:.2f})")
+  return (f'<span class="tdd" title="{tip}"><svg viewBox="0 0 {size} {size}" width="{size}" height="{size}">'
+          f'{"".join(segs)}<text x="{size / 2}" y="{size / 2 + 3.5}" class="tdc">{1 - p0:.0%}</text></svg>'
+          f'<small>{label}</small></span>')
 
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -142,12 +154,16 @@ def season_stats(eng, season: int, week: int) -> pd.DataFrame:
 
 def expected_line(r) -> str:
   if r.pos == "QB":
-    return (stat(r.pass_yd, "pass yd") + stat(r.interception, "INT", 1) + stat(r.rush_yd, "rush yd")
-            + td_odds(r.pass_td, "pass TD") + (td_odds(r.rush_td, "rush TD") if r.rush_td >= 0.15 else ""))
-  if r.pos == "RB":
-    return (stat(r.carries, "car") + stat(r.rush_yd, "rush yd") + stat(r.reception, "rec", 1)
-            + stat(r.rec_yd, "rec yd") + td_odds(r.rush_td + r.rec_td))
-  return stat(r.tgt, "tgt", 1) + stat(r.reception, "rec", 1) + stat(r.rec_yd, "yd") + td_odds(r.rec_td + r.rush_td)
+    stats = stat(r.pass_yd, "pass yd") + stat(r.interception, "INT", 1) + stat(r.rush_yd, "rush yd")
+    tds = td_donut(r.pass_td, "pass TD") + (td_donut(r.rush_td, "rush TD") if r.rush_td >= 0.15 else "")
+  elif r.pos == "RB":
+    stats = (stat(r.carries, "car") + stat(r.rush_yd, "rush yd") + stat(r.reception, "rec", 1)
+             + stat(r.rec_yd, "rec yd"))
+    tds = td_donut(r.rush_td + r.rec_td)
+  else:
+    stats = stat(r.tgt, "tgt", 1) + stat(r.reception, "rec", 1) + stat(r.rec_yd, "yd")
+    tds = td_donut(r.rec_td + r.rush_td)
+  return f'<div class="xl"><div class="xl-st">{stats}</div><div class="xl-td">{tds}</div></div>'
 
 
 def season_line(r, st) -> str:

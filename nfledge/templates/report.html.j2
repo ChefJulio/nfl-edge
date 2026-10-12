@@ -15,15 +15,15 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 -apple-system, "Segoe UI", Roboto, sans-serif; }
-header { padding: 18px 16px 8px; max-width: 1200px; margin: 0 auto; }
+header { padding: 18px 16px 8px; max-width: 1480px; margin: 0 auto; }
 h1 { font-size: 20px; margin: 0 0 4px; }
 .sub { color: var(--muted); font-size: 13px; }
 nav { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
-nav .tabs { display: flex; gap: 4px; overflow-x: auto; max-width: 1200px; margin: 0 auto; padding: 6px 16px; }
+nav .tabs { display: flex; gap: 4px; overflow-x: auto; max-width: 1480px; margin: 0 auto; padding: 6px 16px; }
 nav button { flex: none; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 6px 10px;
              border-radius: 999px; font-size: 13px; cursor: pointer; }
 nav button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
-main { max-width: 1200px; margin: 0 auto; padding: 12px 16px 40px; }
+main { max-width: 1480px; margin: 0 auto; padding: 12px 16px 40px; }
 section { display: none; } section.on { display: block; }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 14px; }
 .card h2 { font-size: 16px; margin: 0 0 6px; }
@@ -79,7 +79,17 @@ tr.out td { opacity: .55; }
 th.stick, td.stick { position: sticky; left: 0; background: var(--panel); z-index: 1; min-width: 150px; white-space: normal; }
 thead th.stick { z-index: 2; }
 tr.hl td.stick { background: var(--hl); }
-td.line { white-space: normal; min-width: 230px; }
+td.line { white-space: normal; min-width: 262px; }
+.xl { display: flex; align-items: center; gap: 8px; }
+.xl-st { display: flex; flex-wrap: wrap; width: 165px; flex: none; }
+.xl-td { display: flex; gap: 6px; flex: none; width: 82px; }
+.tdd { display: inline-flex; flex-direction: column; align-items: center; cursor: help; }
+.tdd small { font-size: 9.5px; color: var(--muted); margin-top: -1px; white-space: nowrap; }
+.tdd .td0 { stroke: var(--line); }
+.tdd .td1 { stroke: color-mix(in srgb, var(--accent) 45%, var(--panel)); }
+.tdd .td2 { stroke: color-mix(in srgb, var(--accent) 75%, var(--panel)); }
+.tdd .td3 { stroke: var(--accent); }
+.tdd .tdc { font-size: 9.5px; font-weight: 700; text-anchor: middle; fill: var(--ink); }
 .st { display: inline-flex; align-items: baseline; gap: 2px; margin: 0 8px 2px 0; white-space: nowrap; }
 .st b { font-weight: 600; font-variant-numeric: tabular-nums; }
 .st small, .tds small { color: var(--muted); font-size: 10.5px; }
@@ -97,7 +107,9 @@ tr.detail td { background: color-mix(in srgb, var(--chip) 55%, var(--panel)); wh
 .wbars .wb-l { font-size: 8px; fill: var(--muted); text-anchor: middle; }
 .byes { margin-top: 10px; font-size: 12.5px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
 .bye { white-space: nowrap; }
-td.take { font-weight: 600; }
+td.take { font-weight: 600; min-width: 210px; max-width: 300px; }
+table.ranks td { vertical-align: middle; }
+table.ranks td.stick { vertical-align: middle; }
 td.inact { font-variant-numeric: tabular-nums; font-weight: 600; }
 .ia-hi { color: var(--bad); } .ia-md { color: var(--warn); } .ia-lo { color: var(--ink); }
 footer { color: var(--muted); font-size: 12px; max-width: 1200px; margin: 0 auto; padding: 0 16px 30px; }
@@ -139,7 +151,7 @@ footer { color: var(--muted); font-size: 12px; max-width: 1200px; margin: 0 auto
         <th class="num"><abbr title="Projection with its realistic range: floor (10th pct) to ceiling (90th pct); thick bar = middle 50%">Projection &amp; range</abbr></th>
         <th class="num"><abbr title="Season fantasy points per game (half PPR)">FP/G</abbr></th>
         <th>Tier</th>
-        <th class="hide-sm"><abbr title="Projected stat line; TD odds = chance of exactly 1, 2, or 3+ touchdowns">Expected line</abbr></th>
+        <th class="hide-sm"><abbr title="Projected stat line. Donut = touchdown odds: ring segments for 0 / 1 / 2 / 3+ TDs (darker = more), center = chance of scoring at least one. Hover for exact odds.">Expected line</abbr></th>
         <th>Takeaway</th>
       </tr></thead>
       <tbody>
@@ -277,7 +289,7 @@ footer { color: var(--muted); font-size: 12px; max-width: 1200px; margin: 0 auto
       <li><b>Injuries</b>: chance to play comes from the Wed/Thu/Fri practice sequence + game status, learned from 2018+ history. Volume from players likely to sit (&lt;50%) is redistributed using where it actually went historically, by position, depth chart rank and current share.</li>
       <li><b>Wind</b> over 15 mph trims passing efficiency (2%/mph, capped).</li>
       <li><b>Range bar</b>: outcomes of past projections of the same size at the position. In backtesting about 80% of actual scores landed between floor and ceiling and about half inside the thick bar, as intended.</li>
-      <li><b>TD odds</b>: chance of exactly 1, 2, or 3+ touchdowns from the expected-TD rate (hover for "anytime" odds). Backtest: predicted 1-TD games 20.7% vs 20.2% actual; 2 TDs 3.9% vs 4.2%.</li>
+      <li><b>TD donut</b>: ring segments show the chance of 0 / 1 / 2 / 3+ touchdowns (darker = more), the center is the chance of at least one; hover for exact odds. Backtest: predicted 1-TD games 20.7% vs 20.2% actual; 2 TDs 3.9% vs 4.2%.</li>
       <li><b>Inactive%</b>: injury risk from the Wed/Thu/Fri practice pattern and game status, or, if he is not on the report, healthy-scratch risk from his recent active/inactive history, depth chart spot and teammates out ahead of him. Early in the week (before Wednesday's report) last week's status is carried forward.</li>
       <li><b>Matchup</b>: grade A-F ranks this week's matchups within the position; the number is fantasy points this defense adds or removes vs an average defense.</li>
     </ul>
