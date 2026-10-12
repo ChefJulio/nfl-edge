@@ -38,6 +38,10 @@ qb_alpha_grid = [30, 100, 300, 1000, 1e9]
 # Pass defense adjusted for starting cornerbacks likely out. Tested and rejected: counting only pre-game-knowable
 # absences, no defensive (or O-line) personnel effect held up out of sample (details in personnel.py).
 cb_adjust = false
+# Plays-per-game model inputs: "base" (own pace, opponent plays allowed, Vegas total/spread). Tested and rejected
+# (no out-of-sample gain in team play counts, 2025 and 2026): "pace" (+ neutral seconds per play) and "extended"
+# (+ pace + expected EPA per play both ways, i.e. drive sustainability).
+volume_features = "base"
 seed = 7
 
 [player_model]

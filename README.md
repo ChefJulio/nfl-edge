@@ -28,6 +28,10 @@ Output: `report/nfl_edge_week{N}.html`. The first run downloads ~4 seasons of da
 6. **Model**: how every number is calculated, the exact fitted formulas and weights, and the walk-forward
    track record (model vs FantasyPros experts vs Vegas-scaled vs raw stats), all from `MODEL.md` with live values.
 
+## For contributors and agents
+Start with `CLAUDE.md` (layout, commands, rules) and `docs/INSIGHTS.md` (data quirks, every backtest result
+including rejected ideas, owner preferences, open threads).
+
 ## Model in brief
 - **Team model** (`team_model.py`): ridge regression of play EPA on offense + defense + home, fit separately
   for pass, rush, special teams. Garbage time (WP outside 10-90%), kneels and spikes removed. Prior season

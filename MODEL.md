@@ -1,5 +1,5 @@
 ---
-documented_code_hash: e98deaf161128680
+documented_code_hash: 333d45eed0efb84d
 ---
 # How the model works
 
@@ -98,6 +98,7 @@ Ideas that sounded right but did not improve out-of-sample accuracy are switched
 - **Defensive and offensive-line absences.** Stat-weighted defender values overfit. Counting only absences knowable before kickoff, no position group (cornerbacks included) or offensive line showed a reliable effect beyond the team rating.
 - **Air-yards share, and snap share as an input.** No consistent gain (snap share stays as a role-change alert).
 - **Route participation.** Not published for the current season.
+- **Time of possession / pace and drive sustainability in the volume model.** Neutral-situation seconds per play and expected EPA per play (offense vs this defense, both ways) did not improve out-of-sample team play counts (plays MAE 6.88 -> 6.87-6.92 on 2025, 6.75 -> 6.78-6.80 on 2026). Drive outcomes are already inside EPA, and time of possession mostly reflects game script, which the Vegas spread captures.
 
 ## 9. Keeping this page current
 

@@ -322,6 +322,17 @@ def team_game_ledger(pbp: pd.DataFrame, schedules: pd.DataFrame) -> pd.DataFrame
     "wind": g.game_wind.first(),
     "indoor": g.indoor.first(),
   }).reset_index().rename(columns={"posteam": "team"})
+  # Neutral-situation pace: seconds between consecutive snaps by the same offense in the same quarter, in close
+  # games before the 4th quarter (excludes hurry-up / clock-killing script). Gaps over 45s (timeouts, reviews,
+  # injuries) are dropped.
+  sc = pbp[pbp.posteam.notna() & (pbp.play_type.isin(["pass", "run"]))].sort_values(["game_id", "play_id"])
+  nxt = sc.groupby("game_id")
+  gap = sc.game_seconds_remaining - nxt.game_seconds_remaining.shift(-1)
+  same = (nxt.posteam.shift(-1) == sc.posteam) & (nxt.qtr.shift(-1) == sc.qtr)
+  neutral_pace = same & gap.between(5, 45) & sc.wp.between(0.2, 0.8) & (sc.qtr <= 3)
+  spp = gap[neutral_pace].groupby([sc.game_id[neutral_pace], sc.posteam[neutral_pace]]).mean()
+  spp = spp.rename("sec_pp").reset_index().rename(columns={"posteam": "team"})
+  led = led.merge(spp, on=["game_id", "team"], how="left")
   dbp = off[off.is_dropback].assign(qb=off.passer_player_id.fillna(off.rusher_player_id)).dropna(subset=["qb"])
   main_qb = (dbp.groupby(["game_id", "posteam", "qb"]).size().rename("n").reset_index()
              .sort_values("n").drop_duplicates(["game_id", "posteam"], keep="last")
@@ -352,11 +363,15 @@ def team_volume_features(ledger: pd.DataFrame, season: int, target_week: int, cf
   out = {}
   for col, name in (("plays", "pace"), ("proe", "proe"), ("pass_rate", "pass_rate"), ("scrambles", "scr_pg")):
     out[name] = (d[col] * d.w).groupby(d.team).sum() / d.w.groupby(d.team).sum()
+  ok = d.sec_pp.notna() if "sec_pp" in d else pd.Series(False, index=d.index)
+  out["sec_pp"] = ((d.sec_pp.where(ok, 0) * d.w * ok).groupby(d.team).sum() / (d.w * ok).groupby(d.team).sum()
+                   if ok.any() else pd.Series(dtype=float))
   out["pace_allowed"] = (d.opp_plays * d.w).groupby(d.opp).sum() / d.w.groupby(d.opp).sum()
   f = pd.DataFrame(out)
   league = {k: float(np.average(d[c], weights=d.w)) for k, c in (("pace", "plays"), ("pass_rate", "pass_rate"))}
+  league_spp = float(d.loc[ok, "sec_pp"].mean()) if ok.any() else 28.0
   return f.fillna({"pace": league["pace"], "pace_allowed": league["pace"], "proe": 0.0,
-                   "pass_rate": league["pass_rate"]})
+                   "pass_rate": league["pass_rate"], "sec_pp": league_spp})
 
 
 @dataclass
@@ -415,6 +430,8 @@ class GameModel:
   def _features(self, g: pd.DataFrame, r: Ratings, vf: pd.DataFrame) -> pd.DataFrame:
     g = g.copy()
     g["pace"] = g.team.map(vf.pace)
+    g["sec_pp"] = g.team.map(vf.sec_pp)
+    g["opp_sec_pp"] = g.opp.map(vf.sec_pp)
     g["opp_pace_allowed"] = g.opp.map(vf.pace_allowed)
     g["proe_team"] = g.team.map(vf.proe)
     g["pass_rate_team"] = g.team.map(vf.pass_rate)
@@ -432,9 +449,12 @@ class GameModel:
     return g
 
   def fit(self, train: pd.DataFrame):
-    self.plays_vegas = Linear.fit(train, "plays", ["pace", "opp_pace_allowed", "total_line", "spread_team"],
+    vf_mode = self.cfg["team_model"].get("volume_features", "base")
+    more = {"base": [], "pace": ["sec_pp", "opp_sec_pp"],
+            "extended": ["sec_pp", "opp_sec_pp", "epa_pass", "epa_rush", "opp_epa_pass", "opp_epa_rush"]}[vf_mode]
+    self.plays_vegas = Linear.fit(train, "plays", ["pace", "opp_pace_allowed", "total_line", "spread_team"] + more,
                                   name="plays (Vegas)")
-    self.plays_model = Linear.fit(train, "plays", ["pace", "opp_pace_allowed"], name="plays (model)")
+    self.plays_model = Linear.fit(train, "plays", ["pace", "opp_pace_allowed"] + more, name="plays (model)")
     self.pass_rate = Linear.fit(train, "pass_rate", ["proe_team", "pass_rate_team", "spread_team"],
                                 weight="plays", name="pass rate")
     t = train.copy()
