@@ -107,3 +107,10 @@ This page is generated from `MODEL.md` in the repository, and the bold values ar
 - **On the page:** this tab shows an "out of date" notice.
 
 After updating the text, run `python tools/model_doc.py --stamp` to record the new fingerprint.
+
+## 10. Formulas and fitted weights
+
+Everything below is generated from the trained model on every build: these are the exact equations and numbers that produced this week's projections. Ratings and EPA are per play unless noted ("per 100 plays" = x100).
+
+{{ L.formulas }}
+
