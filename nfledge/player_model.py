@@ -39,6 +39,12 @@ def EFF_FEATURES(comp: str, opp: str, unit: str, exp: dict | None = None) -> lis
   Optional (config [experiments]): Vegas implied team total; average depth of target for receiving yards."""
   exp = exp or {}
   cols = [f"{comp}_per_{opp}", f"{opp}_adj_per_{opp}", f"def_{unit}", f"off_{unit}", "home"]
+  # Wind as a fitted input to passing efficiency (instead of the fixed penalty): the data sets its size.
+  wind_mode = exp.get("wind_mode", "fixed")
+  if unit == "pass" and wind_mode in ("linear", "quadratic"):
+    cols.append("wind")
+    if wind_mode == "quadratic":
+      cols.append("wind_sq")
   if exp.get("implied_total"):
     cols.append("implied_pts")
   if exp.get("air_yards") and comp == "rec_yd":
@@ -63,6 +69,26 @@ def pos_group(opp: str, pos: pd.Series) -> pd.Series:
   if opp == "rush":
     return pos.where(pos == "QB", "RB")
   return pos.where(pos != "QB", "WR")  # QB targets (trick plays) are negligible; lump with WR
+
+
+def mom_prior(g: pd.DataFrame, num: str, den: str) -> tuple[float, float] | None:
+  """Empirical-Bayes prior for a rate num/den by method of moments over player-seasons: mean = pooled rate,
+  strength k = within-player (game-to-game) variance / between-player variance, in units of den."""
+  g = g[g[den] > 0]
+  if len(g) < 100:
+    return None
+  ps = g.groupby(["gsis_id", "season"])
+  n_i, s_i = ps[den].sum(), ps[num].sum()
+  mean_i = s_i / n_i
+  rate_g = g[num] / g[den]
+  dev = g[den] * (rate_g - mean_i.reindex(pd.MultiIndex.from_frame(g[["gsis_id", "season"]])).to_numpy()) ** 2
+  sigma2 = float(dev.sum() / max(len(g) - len(n_i), 1))
+  big = n_i >= np.percentile(n_i, 50)
+  m, n = mean_i[big], n_i[big]
+  grand = float(s_i.sum() / n_i.sum())
+  tau2 = float(np.average((m - np.average(m, weights=n)) ** 2, weights=n) - sigma2 * np.mean(1.0 / n))
+  k = sigma2 / tau2 if tau2 > 0 else 2000.0
+  return grand, float(np.clip(k, 5.0, 2000.0))
 
 
 def draft_tier(rnd) -> str:
@@ -256,7 +282,31 @@ class PlayerModel:
           kk = sigma2 / tau2 if tau2 > 0 else 2000.0
           k[(opp, grp, c)] = float(np.clip(kk, 5.0, 2000.0))
     self.prior = Prior(mu, mu_pos, k)
+    self._fit_minor_priors(L)
     return self.prior
+
+  # Fixed defaults (mean, strength in pseudo-opportunities) for the small rates; minor_priors = "fitted" replaces
+  # them with method-of-moments estimates from the training seasons.
+  MINOR_DEFAULTS = {"scr_rate": (0.04, 40.0), "fum_rate": (0.005, 150.0), "adot": (7.0, 30.0), "tprr": (0.17, 60.0)}
+
+  def _fit_minor_priors(self, L: pd.DataFrame):
+    self.minor_prior = dict(self.MINOR_DEFAULTS)
+    # Starting QB's share of team dropbacks: measured (the top QB's share in each team-game, injuries included).
+    qb = L[L.pos == "QB"]
+    top = qb.groupby(["game_id", "team"]).db.max() / qb.groupby(["game_id", "team"]).team_db.first()
+    self.starter_db_share = (float(top.mean()) if self.pcfg.get("starter_share") == "fitted" and len(top)
+                             else float(self.pcfg.get("starter_db_share", 0.96)))
+    if self.pcfg.get("minor_priors", "fixed") != "fitted":
+      return
+    touches = L.db + L.rush + L.reception
+    specs = {"scr_rate": (L[L.pos == "QB"], "scrambles", "db"),
+             "fum_rate": (L.assign(touch=touches), "fumble_lost", "touch"),
+             "adot": (L[L.pos.isin(["WR", "TE", "RB"])], "air_yd", "tgt"),
+             "tprr": (L[L.dropbacks_on_field > 0], "tgt", "dropbacks_on_field")}
+    for name, (g, num, den) in specs.items():
+      est = mom_prior(g, num, den)
+      if est is not None:
+        self.minor_prior[name] = est
 
   def _with_adj_epa_season(self, d: pd.DataFrame, opp: str, unit: str) -> pd.DataFrame:
     """Adjusted EPA sum using end-of-season defensive ratings (for prior estimation only)."""
@@ -277,7 +327,7 @@ class PlayerModel:
     w_use = asof_weights(L.season, L.week, season, week, self.cfg, self.pcfg["share_half_life_weeks"])
     # Efficiency weights: flat by season age.
     w_eff = np.select([L.season == season, L.season == season - 1, L.season == season - 2],
-                      list(EFF_SEASON_WEIGHTS), 0.0)
+                      list(self.pcfg.get("eff_season_weights", EFF_SEASON_WEIGHTS)), 0.0)
     L = L.assign(w_use=w_use, w_eff=w_eff)
     g = L.groupby("gsis_id")
     f = pd.DataFrame(index=pd.Index(L.gsis_id.unique(), name="gsis_id"))
@@ -320,17 +370,24 @@ class PlayerModel:
         kk = np.array([self.prior.k.get((opp, gp, c), 100.0) for gp in grp])
         f[f"{c}_per_{opp}"] = (obs.reindex(f.index).fillna(0) + kk * mu) / (n.reindex(f.index).fillna(0) + kk)
     # Scramble rate per dropback and fumbles per touch (shrunk toward position means).
+    # Prior (mean, strength) for each: fitted by method of moments on the training seasons when
+    # minor_priors = "fitted", else the fixed defaults below.
+    mp = self.minor_prior
     n_db = wsum("db", "w_eff")
-    f["scr_rate"] = (wsum("scrambles", "w_eff") + 40 * 0.04) / (n_db + 40)
+    m, k = mp["scr_rate"]
+    f["scr_rate"] = (wsum("scrambles", "w_eff") + k * m) / (n_db + k)
     # Fumbles lost per touch, where QB dropbacks count as touches (sack fumbles are most QB fumbles).
     touches = wsum("db", "w_eff") + wsum("rush", "w_eff") + wsum("reception", "w_eff")
-    f["fum_rate"] = (wsum("fumble_lost", "w_eff") + 150 * 0.005) / (touches + 150)
-    f["adot"] = (wsum("air_yd", "w_eff") + 30 * 7.0) / (wsum("tgt", "w_eff") + 30)
+    m, k = mp["fum_rate"]
+    f["fum_rate"] = (wsum("fumble_lost", "w_eff") + k * m) / (touches + k)
+    m, k = mp["adot"]
+    f["adot"] = (wsum("air_yd", "w_eff") + k * m) / (wsum("tgt", "w_eff") + k)
     has_pct = L.offense_pct.notna()
     f["snap_pct"] = ((L.offense_pct.fillna(0) * L.w_use).groupby(L.gsis_id).sum()
                      / (L.w_use * has_pct).groupby(L.gsis_id).sum().replace(0, np.nan))
     tprr_den = wsum("dropbacks_on_field", "w_eff")
-    f["tprr"] = (wsum("tgt", "w_eff") + 60 * 0.17) / (tprr_den.replace(0, np.nan) + 60)
+    m, k = mp["tprr"]
+    f["tprr"] = (wsum("tgt", "w_eff") + k * m) / (tprr_den.replace(0, np.nan) + k)
     return f
 
   def _mu(self, opp, grp, tier, comp):
@@ -355,6 +412,8 @@ class PlayerModel:
         j["off_pass"] = j.team.map(r.off["pass"]) + np.array([r.qb_term(q) for q in j.qb])
         j["off_rush"] = j.team.map(r.off["rush"])
         j["implied_pts"] = j.total_line / 2 + j.spread_team / 2
+        j["wind"] = j.wind.fillna(0.0).where(~j.indoor.fillna(False).astype(bool), 0.0)
+        j["wind_sq"] = j.wind ** 2
         rows.append(j)
     return pd.concat(rows, ignore_index=True)
 
@@ -405,6 +464,7 @@ class PlayerModel:
     p["implied_pts"] = p.team.map(implied.fillna(tp.points_hat))
     p["snap_pct"] = p.snap_pct.fillna(0.0) if "snap_pct" in p else 0.0
     p["adot"] = p.adot.fillna(7.0) if "adot" in p else 7.0
+    p["wind"] = p.game_id.map(wind).fillna(0.0) if wind is not None else 0.0
     p["tier"] = p.tier.fillna(pd.Series(self.info.tier.reindex(p.gsis_id).fillna("UDFA").to_numpy(),
                                         index=p.index))
     self._fill_rate_priors(p)
@@ -441,7 +501,10 @@ class PlayerModel:
   def stats_from_volume(self, p: pd.DataFrame, wind: pd.Series | None = None, neutral: bool = False) -> pd.DataFrame:
     p = p.copy()
     windpen = 0.0
-    if wind is not None:
+    if "wind" not in p:
+      p["wind"] = 0.0
+    p["wind_sq"] = p.wind.fillna(0.0) ** 2
+    if wind is not None and self.exp.get("wind_mode", "fixed") == "fixed":
       w = p.game_id.map(wind).fillna(0.0)
       over = (w - self.pcfg["wind_threshold_mph"]).clip(lower=0)
       windpen = np.minimum(over * self.pcfg["wind_penalty_per_mph"], self.pcfg["wind_penalty_cap"])
@@ -479,16 +542,18 @@ class PlayerModel:
                  ("games", 0)):
       p[c] = p[c].fillna(v) if c in p else v
 
-  @staticmethod
-  def _qb_starters(p: pd.DataFrame):
-    """One starting QB per team: depth-chart QB1 (column 'depth_rank') when known, else the top share."""
+  def _qb_starters(self, p: pd.DataFrame):
+    """One starting QB per team: depth-chart QB1 (column 'depth_rank') when known, else the top share. The
+    starter's dropback share is at least starter_db_share (fixed default, or measured when starter_share =
+    "fitted")."""
+    starter_share = getattr(self, "starter_db_share", 0.96)
     qb = p[p.pos == "QB"]
     for team, g in qb.groupby("team"):
       if "depth_rank" in g and g.depth_rank.notna().any():
         starter = g.sort_values(["depth_rank", "db_share_hat"], ascending=[True, False]).index[0]
       else:
         starter = g.db_share_hat.idxmax()
-      p.loc[g.index, "db_share_hat"] = np.where(g.index == starter, max(0.96, g.db_share_hat.max()), 0.0)
+      p.loc[g.index, "db_share_hat"] = np.where(g.index == starter, max(starter_share, g.db_share_hat.max()), 0.0)
       p.loc[g.index[g.index != starter], "carry_share_hat"] = 0.0
 
 

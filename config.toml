@@ -39,6 +39,8 @@ division_hfa = false
 qb_effects = true
 qb_inexp_dropbacks = 150
 qb_alpha_grid = [30, 100, 300, 1000, 1e9]
+# Ridge penalty on the inexperienced-QB indicator (one league-level effect, lightly penalized). [backtest pending]
+qb_inexp_alpha = 1.0
 # Pass defense adjusted for starting cornerbacks likely out. Tested and rejected: counting only pre-game-knowable
 # absences, no defensive (or O-line) personnel effect held up out of sample (details in personnel.py).
 cb_adjust = false
@@ -58,6 +60,15 @@ wind_threshold_mph = 15
 wind_penalty_per_mph = 0.02
 wind_penalty_cap = 0.25
 # Role-change alert: snap-share jump (percentage points) vs prior 3-week average.
+# Efficiency look-back: weight of this season, last season and two seasons back. [backtest pending]
+eff_season_weights = [1.0, 0.6, 0.3]
+# Small-rate priors (scramble rate, fumbles per touch, aDOT, targets per route): "fixed" defaults or "fitted"
+# (method of moments on the training seasons). [backtest pending]
+minor_priors = "fixed"
+# Starting QB's minimum share of team dropbacks: "fixed" (starter_db_share) or "fitted" (measured: the top QB's
+# share in each training team-game, injury exits included). [backtest pending]
+starter_share = "fixed"
+starter_db_share = 0.96
 role_change_snap_jump = 0.15
 role_change_opp_jump = 0.08
 
@@ -82,6 +93,9 @@ total_disagree = 4.0
 # implied_total won clearly; air_yards and snap_input did not help consistently.
 implied_total = true    # Vegas implied team total as an efficiency input
 air_yards = false       # air-yards share (volume) + aDOT (receiving yards)
+# Wind: "fixed" = the hand-set penalty in [player_model] (wind_threshold_mph etc.); "linear" / "quadratic" = wind
+# (mph; domes 0) as a fitted input to every passing-efficiency regression, so the data sets its size. [pending]
+wind_mode = "fixed"
 snap_input = false      # snap share as a volume input (spec: flag only, so off unless you opt in)
 # Blend with FantasyPros expert consensus (free, scraped Fridays; only pre-kickoff ranks are used). Backtest:
 # helps RB/WR (and TE in 2025); hurts QB, where the model alone beats the experts.
@@ -91,3 +105,16 @@ ecr_blend_positions = ["RB", "WR", "TE"]
 # Fraction of the learned vacated-volume redistribution applied. Backtest: helps RB, slightly hurts WR;
 # 0.5 keeps teammate projections near-unbiased in both 2025 and 2026.
 redistribution_scale = 0.5
+# Absences redistributed only for players at or above these projected shares. [backtest pending]
+redistribute_min_share = { tgt_share = 0.08, carry_share = 0.15 }
+# Gradient-boosting settings for the practice-availability and healthy-scratch models. [backtest pending]
+gb_iterations = 200
+gb_learning_rate = 0.05
+gb_max_depth = 3
+
+[uncertainty]
+# Range widening relative to an established player: few games played (factor), low-data flag, and roles boosted
+# by a teammate's absence. Overall range calibration is measured; these multipliers are [backtest pending].
+games_factor = 0.6
+low_sample_widen = 1.2
+injury_boost_widen = 1.25

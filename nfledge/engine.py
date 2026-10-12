@@ -205,8 +205,11 @@ class Engine:
     a = p.pos.map(lambda x: self.sd_model.get(x, (25.0, 1.0))[0]) if hasattr(self, "sd_model") else 25.0
     b = p.pos.map(lambda x: self.sd_model.get(x, (25.0, 1.0))[1]) if hasattr(self, "sd_model") else 1.0
     # Widening for thin data / injury-driven roles, relative to a typical established player (4+ games).
-    m = (1 + 0.6 / (1 + p.games.fillna(0))) / (1 + 0.6 / 5)
-    m = m * np.where(p.low_sample, 1.2, 1.0) * np.where(p.injury_boost > 0.5, 1.25, 1.0)
+    u = self.cfg.get("uncertainty", {})
+    gf = float(u.get("games_factor", 0.6))
+    m = (1 + gf / (1 + p.games.fillna(0))) / (1 + gf / 5)
+    m = m * np.where(p.low_sample, float(u.get("low_sample_widen", 1.2)), 1.0)
+    m = m * np.where(p.injury_boost > 0.5, float(u.get("injury_boost_widen", 1.25)), 1.0)
     sd = np.sqrt(a + b * p.proj.clip(lower=0)) * m
     for c in QCOLS:
       p[c] = np.nan

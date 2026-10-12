@@ -74,6 +74,11 @@ class InjuryModel:
     self.hl = cfg["player_model"]["share_half_life_weeks"]
     self.scale = float(cfg.get("injuries", {}).get("redistribution_scale", 1.0))
 
+  def _gb_params(self) -> dict:
+    g = self.cfg.get("injuries", {})
+    return {"max_iter": int(g.get("gb_iterations", 200)), "learning_rate": float(g.get("gb_learning_rate", 0.05)),
+            "max_depth": int(g.get("gb_max_depth", 3))}
+
   # -- fitting ---------------------------------------------------------------------------------------------------
   def fit(self, seasons: list[int]):
     self._fit_status(seasons)
@@ -131,8 +136,7 @@ class InjuryModel:
       return
     X = practice_features(d)
     self.practice_cols = list(X.columns)
-    self.practice_model = HistGradientBoostingClassifier(max_iter=200, learning_rate=0.05, max_depth=3,
-                                                         random_state=0).fit(X, d.played)
+    self.practice_model = HistGradientBoostingClassifier(**self._gb_params(), random_state=0).fit(X, d.played)
 
   def practice_prob(self, rows: pd.DataFrame) -> np.ndarray:
     X = practice_features(rows)[self.practice_cols]
@@ -168,7 +172,8 @@ class InjuryModel:
     # already reflected in the new roster's current-season usage (redistributing them double-counts).
     recent = c.last_season == season
     sig = np.zeros(len(c), bool)
-    for share, thr in SIGNIFICANT.items():
+    min_share = self.cfg.get("injuries", {}).get("redistribute_min_share", SIGNIFICANT)
+    for share, thr in min_share.items():
       sig |= (c[f"{share}_hat"] >= thr).to_numpy()
     c = c[recent & sig].reset_index().rename(columns={"last_team": "team"})
     af = self._absent_frac(season, week)
@@ -345,8 +350,8 @@ class InjuryModel:
       t = self.scratch_table(s)
       rows.append(t[t.final & (t.week <= self.data.completed_weeks(s)) & ~t.on_report & t.observable & (t.week >= 2)])
     d = pd.concat(rows)
-    self.scratch_model = HistGradientBoostingClassifier(max_iter=200, learning_rate=0.05, max_depth=3,
-                                                        random_state=0).fit(d[self.SCRATCH_COLS], d.active)
+    self.scratch_model = HistGradientBoostingClassifier(**self._gb_params(), random_state=0).fit(
+      d[self.SCRATCH_COLS], d.active)
     self._scratch_cache = {}
 
   def scratch_prob(self, season: int, week: int) -> pd.Series:

@@ -15,11 +15,22 @@ whole, since errors within a week share game environments): if it excludes 0, th
 import copy
 import hashlib
 import json
+import os
 import sys
 import time
 from pathlib import Path
 
-import numpy as np
+# Parallel workers each get an equal share of the cores for the math libraries; left alone, every worker's BLAS
+# grabs all cores and they thrash (3 workers x 16 threads made small dense solves crawl). Must run before numpy
+# is imported; worker processes re-run this module top, so they inherit it.
+_jobs = next((int(a.split("=")[1]) for a in sys.argv if a.startswith("--jobs=")), None)
+if _jobs is None:
+  _jobs = int(os.environ.get("NFLEDGE_JOBS", "1"))
+os.environ["NFLEDGE_JOBS"] = str(_jobs)
+for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
+  os.environ.setdefault(_v, str(max(1, (os.cpu_count() or 4) // max(_jobs, 1))))
+
+import numpy as np  # noqa: E402
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -49,17 +60,47 @@ def variant(**kw):
 
 VARIANTS = {
   "baseline": variant(),
+  # --- previously decided on 1-2 seasons; re-checked on 5 ---
   "no_implied_total": variant(experiments__implied_total=False),
   "air_yards": variant(experiments__air_yards=True),
   "snap_input": variant(experiments__snap_input=True),
   "share_hl_3": variant(player_model__share_half_life_weeks=3.0),
   "share_hl_8": variant(player_model__share_half_life_weeks=8.0),
+  "team_hl_2": variant(team_model__half_life_weeks=2.0),
   "team_hl_5": variant(team_model__half_life_weeks=5.0),
   "td_k_50": variant(player_model__td_blend_k=50),
   "td_k_400": variant(player_model__td_blend_k=400),
   "no_qb_effects": variant(team_model__qb_effects=False),
   "redistribution_0": variant(injuries__redistribution_scale=0.0),
   "redistribution_1": variant(injuries__redistribution_scale=1.0),
+  "ecr_blend_all": variant(experiments__ecr_blend_positions=["QB", "RB", "WR", "TE"]),
+  "ecr_blend_none": variant(experiments__ecr_blend_positions=[]),
+  # --- previously hand-set, never tested ---
+  "train_3": variant(data__train_seasons=3),
+  "train_4": variant(data__train_seasons=4),
+  "wind_linear": variant(experiments__wind_mode="linear"),
+  "wind_quadratic": variant(experiments__wind_mode="quadratic"),
+  "wind_off": variant(player_model__wind_penalty_per_mph=0.0),
+  "prior_weight_0": variant(team_model__prior_weight=0.0),
+  "prior_weight_06": variant(team_model__prior_weight=0.6),
+  "prior_decay_4": variant(team_model__prior_decay_week=4),
+  "prior_decay_12": variant(team_model__prior_decay_week=12),
+  "eff_weights_flat": variant(player_model__eff_season_weights=[1.0, 1.0, 1.0]),
+  "eff_weights_steep": variant(player_model__eff_season_weights=[1.0, 0.3, 0.1]),
+  "wp_05_95": variant(team_model__wp_min=0.05, team_model__wp_max=0.95),
+  "wp_20_80": variant(team_model__wp_min=0.20, team_model__wp_max=0.80),
+  "wp_none": variant(team_model__wp_min=0.0, team_model__wp_max=1.0),
+  "minor_fitted": variant(player_model__minor_priors="fitted"),
+  "starter_fitted": variant(player_model__starter_share="fitted"),
+  "qb_inexp_100": variant(team_model__qb_inexp_dropbacks=100),
+  "qb_inexp_300": variant(team_model__qb_inexp_dropbacks=300),
+  "qb_inexp_alpha_10": variant(team_model__qb_inexp_alpha=10.0),
+  "redist_min_low": variant(injuries__redistribute_min_share={"tgt_share": 0.05, "carry_share": 0.10}),
+  "redist_min_high": variant(injuries__redistribute_min_share={"tgt_share": 0.12, "carry_share": 0.20}),
+  "gb_small": variant(injuries__gb_iterations=100, injuries__gb_max_depth=2),
+  "gb_large": variant(injuries__gb_iterations=300, injuries__gb_max_depth=5),
+  "ranges_plain": variant(uncertainty__games_factor=0.0, uncertainty__low_sample_widen=1.0,
+                          uncertainty__injury_boost_widen=1.0),
 }
 
 
@@ -87,6 +128,10 @@ def run_cached(name: str, cfg: dict, data, scoring, season: int) -> pd.DataFrame
   res = B.run(eng, [season], use_injuries=True)
   # What actually happened (opportunities, stats, team volume) for tools/error_breakdown.py.
   res = attach_actual_usage(res, eng.pm.ledger, eng.team_ledger)
+  # The fitted points-formula weights for this season's training, so their stability can be checked over seasons.
+  for c, v in zip(eng.gm.points.cols, eng.gm.points.coef[1:]):
+    res[f"fit_points_{c}"] = float(v)
+  res["fit_alpha_st"] = float(eng.tm.alphas.get("st", np.nan))
   OUT.mkdir(parents=True, exist_ok=True)
   res.to_parquet(path)
   print(f"  {name} {season}: {time.time() - t:.0f}s", flush=True)
@@ -165,6 +210,16 @@ def main():
     done = {t: _job(*t, history) for t in todo}
   results = {n: pd.concat([done[(n, s)] for s in seasons], ignore_index=True) for n in names}
   out = compare(results, names[0])
+  print("
+Range calibration (share of actuals inside; targets 0.80 and 0.50) and availability Brier (players on "
+        "the injury report; lower is better):")
+  for name, res in results.items():
+    d = relevant(res)
+    cov80 = ((d.actual >= d.p10) & (d.actual <= d.p90)).mean()
+    cov50 = ((d.actual >= d.p25) & (d.actual <= d.p75)).mean()
+    rep = res[res.status.fillna("").ne("")]
+    brier = float(((rep.avail - rep.played.astype(float)) ** 2).mean()) if len(rep) else float("nan")
+    print(f"  {name:22s} 10-90: {cov80:.3f}  25-75: {cov50:.3f}  avail Brier: {brier:.4f} (n={len(rep)})")
   print(f"\nSeasons {seasons}; reference = {names[0]}; relevant rows of the reference; MAE in fantasy points.")
   print(out.to_string(index=False, float_format=lambda x: f"{x:.3f}"))
   for s in seasons:

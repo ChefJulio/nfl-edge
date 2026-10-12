@@ -88,8 +88,11 @@ threads. Numbers are walk-forward backtest results (train on earlier seasons, te
   the target. It used to be "every loaded season", so loading 2018+ for a long backtest trained a different
   (and far slower: alpha tuning re-solves the ridge per week per grid point) model than the site runs.
 - **Points formula weights:** points = a + 0.80 x offensive EPA (volume x expected EPA/play) + 2.5 x net
-  special-teams EPA (2026 fit). The ST weight is large: SEA's 1st-ranked ST is worth ~5 pts vs DEN. Plausibly
-  field position beyond the plays' own EPA, but untested; candidate experiment (constrain or shrink it).
+  special-teams EPA (2026 fit; both weights are OLS on ~1,100 training team-games, never hand-set). The ST weight
+  is large: SEA's 1st-ranked ST is worth ~5 pts vs DEN. Open data questions (do not override it by judgment):
+  is it stable across seasons' fits, and does the free fit beat alternatives on out-of-sample margins? One
+  testable explanation: ST ratings are heavily ridge-shrunk (alpha 300), and a regression on a shrunk predictor
+  scales it back up, so the weight may simply undo the shrinkage.
 
 ## 4. Tested and rejected (do not retry without new data/angle)
 | Idea | Result |
