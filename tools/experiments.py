@@ -210,8 +210,8 @@ def main():
     done = {t: _job(*t, history) for t in todo}
   results = {n: pd.concat([done[(n, s)] for s in seasons], ignore_index=True) for n in names}
   out = compare(results, names[0])
-  print("
-Range calibration (share of actuals inside; targets 0.80 and 0.50) and availability Brier (players on "
+  print()
+  print("Range calibration (share of actuals inside; targets 0.80 and 0.50) and availability Brier (players on "
         "the injury report; lower is better):")
   for name, res in results.items():
     d = relevant(res)
