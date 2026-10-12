@@ -114,14 +114,14 @@ def main():
     res, bt_seasons = cached_backtest(data, cfg, scoring)
     ev = bt.evaluate(res, POSITIONS, ecr_only=True)
 
-  power, team_luck = rp.team_tables(eng, season, week, cfg)
+  power, team_luck = rp.team_tables(eng, season, week, cfg, proj)
   inj = data.injuries
   injury_report = bool(((inj.season == season) & (inj.week == week)).any())
   ctx = {
     "season": season, "week": week, "pending": data.pending_games, "scoring": scoring.name,
     "generated": time.strftime("%Y-%m-%d %H:%M"), "injury_report": injury_report,
     "players": rp.player_rankings(eng, proj, season, week, cfg), "games": rp.matchups(eng, season, week, cfg, proj),
-    "power": power, "team_luck": team_luck, "player_luck": rp.player_luck(eng, proj, season, week),
+    "power": power, "team_luck": team_luck, "power_vol": rp.league_volume(eng, season, week, eng.tm.fit(season, week)), "player_luck": rp.player_luck(eng, proj, season, week),
     "roles": rp.role_changes(eng, season, week, cfg), "backtest": rp.backtest_summary(ev),
     "bt_seasons": " and ".join(map(str, bt_seasons)) or "n/a", "bt_takeaway": backtest_takeaway(ev),
     "margin_disagree": cfg["report"]["margin_disagree"], "total_disagree": cfg["report"]["total_disagree"],

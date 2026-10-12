@@ -441,100 +441,153 @@ def takeaway(r) -> str:
   return "; ".join(bits)
 
 
-def team_tables(eng, season: int, week: int, cfg: dict) -> tuple[list, list]:
+def league_volume(eng, season: int, week: int, r) -> dict:
+  """Average plays per team-game this season: dropbacks, designed runs (all situations), special-teams plays."""
+  tl = eng.team_ledger
+  cur = tl[(tl.season == season) & (tl.week < week)]
+  if cur.empty:
+    cur = tl[tl.season == season - 1]
+  return {"pass": float(cur.dropbacks.mean()), "rush": float(cur.rushes.mean()),
+          "st": float(r.plays_pg.get("st", 11.0))}
+
+
+def starters_asof(eng, season: int, week: int) -> dict:
+  """Each team's most recent starting QB before (season, week)."""
+  tl = eng.team_ledger
+  past = tl[((tl.season == season) & (tl.week < week)) | (tl.season < season)].sort_values(["season", "week"])
+  return past.dropna(subset=["qb"]).groupby("team").qb.last().to_dict()
+
+
+def unit_points(r, vol: dict, starters: dict) -> pd.DataFrame:
+  """Points per game vs an average opponent, per unit, at league-average volume (so units add up):
+  Pass O includes the starting QB's effect; defense signs flipped so positive is always good."""
+  qb = pd.Series({t: r.qb_term(starters.get(t)) for t in r.teams})
+  u = pd.DataFrame(index=r.teams)
+  u["pass_o"] = (r.off["pass"] + qb) * vol["pass"]
+  u["rush_o"] = r.off["rush"] * vol["rush"]
+  u["pass_d"] = -r.dfn["pass"] * vol["pass"]
+  u["rush_d"] = -r.dfn["rush"] * vol["rush"]
+  u["st"] = (r.off["st"] - r.dfn["st"]) * vol["st"]
+  u["off"] = u.pass_o + u.rush_o
+  u["def"] = u.pass_d + u.rush_d
+  u["net"] = u["off"] + u["def"] + u["st"]
+  return u
+
+
+def schedule_faced(eng, season: int, week: int, r, starters: dict) -> pd.DataFrame:
+  """Strength of schedule in points per game, unit by unit and weighted by the plays actually involved.
+  Played: every offensive play is charged with the opposing unit it faced (dropbacks vs that pass defense,
+  runs vs that run defense) and every defensive play with the opposing offense (incl. its passer); summed and
+  divided by games. Remaining: each future opponent's units at the team's own average volume.
+  Positive = tougher than average (points the opponents took away / would take away)."""
+  P, R = eng.tm.plays["pass"], eng.tm.plays["rush"]
+  P = P[(P.season == season) & (P.week < week)]
+  R = R[(R.season == season) & (R.week < week)]
+  tl = eng.team_ledger
+  cur = tl[(tl.season == season) & (tl.week < week)]
+  games = cur.groupby("team").size()
+  off_faced = -(P.defteam.map(r.dfn["pass"]).groupby(P.posteam).sum()
+                + R.defteam.map(r.dfn["rush"]).groupby(R.posteam).sum())
+  qbt = P.qb.map(lambda q: r.qb_term(q))
+  def_faced = ((P.posteam.map(r.off["pass"]) + qbt).groupby(P.defteam).sum()
+               + R.posteam.map(r.off["rush"]).groupby(R.defteam).sum())
+  out = pd.DataFrame({"off_past": off_faced / games, "def_past": def_faced / games})
+  # remaining schedule at each team's own average volume
+  db_pg, ru_pg = cur.groupby("team").dropbacks.mean(), cur.groupby("team").rushes.mean()
+  s = eng.data.schedules
+  fut = s[(s.season == season) & (s.game_type == "REG") & s.home_score.isna() & (s.week >= week)]
+  rows = []
+  for g in fut.itertuples():
+    for t, o in ((g.home_team, g.away_team), (g.away_team, g.home_team)):
+      t, o = t.replace("LAR", "LA") if t == "LAR" else t, o.replace("LAR", "LA") if o == "LAR" else o
+      if t not in r.teams or o not in r.teams:
+        continue
+      rows.append({"team": t,
+                   "off_next": -(r.dfn.at[o, "pass"] * db_pg.get(t, np.nan) + r.dfn.at[o, "rush"] * ru_pg.get(t, np.nan)),
+                   "def_next": ((r.off.at[o, "pass"] + r.qb_term(starters.get(o))) * db_pg.get(o, np.nan)
+                                + r.off.at[o, "rush"] * ru_pg.get(o, np.nan))})
+  if rows:
+    out = out.join(pd.DataFrame(rows).groupby("team")[["off_next", "def_next"]].mean(), how="outer")
+  out["past"] = out.off_past + out.def_past
+  out["next"] = out.get("off_next", np.nan) + out.get("def_next", np.nan)
+  # raw offense / defense EPA per game this season (for the luck tab's raw vs adjusted)
+  out["raw_off"] = (P.groupby("posteam").epa.sum() + R.groupby("posteam").epa.sum()) / games
+  out["raw_def"] = -(P.groupby("defteam").epa.sum() + R.groupby("defteam").epa.sum()) / games
+  return out
+
+
+def records(eng, season: int, week: int) -> dict:
+  s = eng.data.schedules
+  s = s[(s.season == season) & (s.game_type == "REG") & s.home_score.notna() & (s.week < week)]
+  rec = {}
+  for g in s.itertuples():
+    for t, pf, pa in ((g.home_team, g.home_score, g.away_score), (g.away_team, g.away_score, g.home_score)):
+      w, l, tie = rec.get(t, (0, 0, 0))
+      rec[t] = (w + (pf > pa), l + (pf < pa), tie + (pf == pa))
+  return {t.replace("LAR", "LA") if t == "LAR" else t: f"{w}-{l}" + (f"-{tie}" if tie else "")
+          for t, (w, l, tie) in rec.items()}
+
+
+def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None = None) -> tuple[list, list]:
   rb = eng.tm.fit(season, week, bootstrap=cfg["team_model"]["bootstrap_samples"])
+  vol = league_volume(eng, season, week, rb)
+  starters = starters_asof(eng, season, week)
+  if proj is not None:  # this week's projected starters (injury-aware) override
+    qbs = proj[(proj.pos == "QB") & ~proj.sits].sort_values("db").groupby("team").tail(1)
+    starters.update(dict(zip(qbs.team, qbs.gsis_id)))
+  u = unit_points(rb, vol, starters)
   history = {}
   for w in range(2, week + 1):
-    r = eng.tm.fit(season, w)
-    history[w] = net_rating(r)
+    rw = eng.tm.fit(season, w)
+    history[w] = unit_points(rw, league_volume(eng, season, w, rw), starters_asof(eng, season, w)).net
   hist = pd.DataFrame(history)
   ts = TeamStyle(eng.data.teams)
-  net = net_rating(rb)
-  # Net-rating uncertainty from the bootstrap (pass/rush offense and defense SEs, weighted like the net).
-  w_p, w_r = LEAGUE_PASS_SHARE, 1 - LEAGUE_PASS_SHARE
-  se_net = np.sqrt(w_p ** 2 * (rb.se_off["pass"] ** 2 + rb.se_def["pass"] ** 2)
-                   + w_r ** 2 * (rb.se_off["rush"] ** 2 + rb.se_def["rush"] ** 2))
-  # Likely rank range: simulate ratings within their uncertainty, take the 10th-90th percentile rank.
+  # Rank range: resample each unit within its bootstrap uncertainty (in points per game), rank the nets.
+  qb = pd.Series({t: rb.qb_term(starters.get(t)) for t in rb.teams})
+  se_net = np.sqrt((vol["pass"] ** 2) * (rb.se_off["pass"] ** 2 + rb.se_def["pass"] ** 2)
+                   + (vol["rush"] ** 2) * (rb.se_off["rush"] ** 2 + rb.se_def["rush"] ** 2))
   rng = np.random.default_rng(cfg["team_model"]["seed"])
-  sims = rng.normal(net.to_numpy(), se_net.reindex(net.index).to_numpy(), size=(4000, len(net)))
+  sims = rng.normal(u.net.to_numpy(), se_net.reindex(u.index).to_numpy(), size=(4000, len(u)))
   sim_rank = (-sims).argsort(axis=1).argsort(axis=1) + 1
-  lo = pd.Series(np.percentile(sim_rank, 10, axis=0), index=net.index).round().astype(int)
-  hi = pd.Series(np.percentile(sim_rank, 90, axis=0), index=net.index).round().astype(int)
+  lo = pd.Series(np.percentile(sim_rank, 10, axis=0), index=u.index).round().astype(int)
+  hi = pd.Series(np.percentile(sim_rank, 90, axis=0), index=u.index).round().astype(int)
   prev_rank = hist[week - 1].rank(ascending=False) if (week - 1) in hist else None
-  off = w_p * rb.off["pass"] + w_r * rb.off["rush"]
-  dfn = -(w_p * rb.dfn["pass"] + w_r * rb.dfn["rush"])
-  st = rb.off["st"] - rb.dfn["st"]
   rk = lambda s: s.rank(ascending=False, method="min").astype(int)
-  ranks = {"net": rk(net), "off": rk(off), "def": rk(dfn), "st": rk(st),
-           "off_pass": rk(rb.off["pass"]), "off_rush": rk(rb.off["rush"]),
-           "def_pass": rk(-rb.dfn["pass"]), "def_rush": rk(-rb.dfn["rush"])}
-  rec, sos_p, sos_f = schedule_strength(eng, season, week, net)
-  sos_p_rk, sos_f_rk = rk(sos_p), rk(sos_f)
+  ranks = {c: rk(u[c]) for c in u.columns}
+  sos = schedule_faced(eng, season, week, rb, starters)
+  sos_rk = {c: rk(sos[c].dropna()) for c in ("past", "next")}
+  rec = records(eng, season, week)
   rows = []
   for team in rb.teams:
     move = int(prev_rank[team] - ranks["net"][team]) if prev_rank is not None and team in prev_rank else 0
+    sp = sos.loc[team] if team in sos.index else pd.Series(dtype=float)
     rows.append({
       "team": team, "nick": ts.nick.get(team, ""), "logo": ts.logo_img(team, 26), "row_style": ts.row_style(team),
       "record": rec.get(team, ""), "rank": int(ranks["net"][team]), "move": move,
-      "net": per100(net[team]), "range": f"{lo[team]}-{hi[team]}" if lo[team] != hi[team] else f"{lo[team]}",
-      "off": per100(off[team]), "off_rk": int(ranks["off"][team]),
-      "off_pass": per100(rb.off.at[team, "pass"]), "off_rush": per100(rb.off.at[team, "rush"]),
-      "def": per100(dfn[team]), "def_rk": int(ranks["def"][team]),
-      "def_pass": per100(-rb.dfn.at[team, "pass"]), "def_rush": per100(-rb.dfn.at[team, "rush"]),
-      "st": per100(st[team]), "st_rk": int(ranks["st"][team]),
-      "off_pass_rk": int(ranks["off_pass"][team]), "off_rush_rk": int(ranks["off_rush"][team]),
-      "def_pass_rk": int(ranks["def_pass"][team]), "def_rush_rk": int(ranks["def_rush"][team]),
-      "sos_past": per100(sos_p.get(team, np.nan)), "sos_past_rk": int(sos_p_rk.get(team, 0)),
-      "sos_next": per100(sos_f.get(team, np.nan)), "sos_next_rk": int(sos_f_rk.get(team, 0)),
+      "range": f"{lo[team]}-{hi[team]}" if lo[team] != hi[team] else f"{lo[team]}",
+      **{c: float(u.at[team, c]) for c in u.columns},
+      **{f"{c}_rk": int(ranks[c][team]) for c in u.columns},
+      "pass_o_pp": per100(rb.off.at[team, "pass"] + qb[team]), "rush_o_pp": per100(rb.off.at[team, "rush"]),
+      "pass_d_pp": per100(-rb.dfn.at[team, "pass"]), "rush_d_pp": per100(-rb.dfn.at[team, "rush"]),
+      "sos_past": float(sp.get("past", np.nan)), "sos_past_rk": int(sos_rk["past"].get(team, 0)),
+      "sos_next": float(sp.get("next", np.nan)), "sos_next_rk": int(sos_rk["next"].get(team, 0)),
+      "sos_past_o": float(sp.get("off_past", np.nan)), "sos_past_d": float(sp.get("def_past", np.nan)),
+      "sos_next_o": float(sp.get("off_next", np.nan)), "sos_next_d": float(sp.get("def_next", np.nan)),
       "spark": sparkline(hist.loc[team].tolist(), width=84, height=22) if team in hist.index else "",
     })
   power = sorted(rows, key=lambda x: x["rank"])
-  # Schedule luck (teams): average strength of opponents actually faced this season, from the ridge
-  # coefficients (not raw minus adjusted, which would mostly measure ridge shrinkage).
+  # Schedule luck (teams): the same played-schedule numbers, with raw vs adjusted per game.
   luck = []
-  if rb.raw_off is not None:
-    w = {"pass": LEAGUE_PASS_SHARE, "rush": 1 - LEAGUE_PASS_SHARE}
-    faced_def, faced_off = 0.0, 0.0
-    for u in ("pass", "rush"):
-      pl = eng.tm.plays[u]
-      pl = pl[(pl.season == season) & (pl.week < week)]
-      faced_def = faced_def + w[u] * pl.defteam.map(rb.dfn[u]).groupby(pl.posteam).mean()
-      faced_off = faced_off + w[u] * pl.posteam.map(rb.off[u]).groupby(pl.defteam).mean()
-    for team in rb.teams:
-      if team not in faced_def.index:
-        continue
-      ro = sum(w[u] * rb.raw_off.at[team, u] for u in w)
-      rd = sum(w[u] * rb.raw_def.at[team, u] for u in w)
-      luck.append({"team": team, "row_style": ts.row_style(team), "logo": ts.logo_img(team), "off_raw": per100(ro), "off_gap": per100(faced_def[team]),
-                   "off_adj": per100(ro - faced_def[team]), "def_raw": per100(-rd),
-                   "def_gap": per100(-faced_off[team]), "def_adj": per100(-(rd - faced_off[team]))})
-  for r in luck:
-    r["total_gap"] = r["off_gap"] + r["def_gap"]
+  for team in rb.teams:
+    if team not in sos.index or pd.isna(sos.at[team, "off_past"]):
+      continue
+    x = sos.loc[team]
+    luck.append({"team": team, "row_style": ts.row_style(team), "logo": ts.logo_img(team),
+                 "off_gap": x.off_past, "def_gap": x.def_past, "total_gap": x.past,
+                 "off_raw": x.raw_off, "off_adj": x.raw_off + x.off_past,
+                 "def_raw": x.raw_def, "def_adj": x.raw_def + x.def_past})
   luck.sort(key=lambda x: -x["total_gap"])
   return power, luck
-
-
-def schedule_strength(eng, season: int, week: int, net: pd.Series):
-  """Records, plus strength of schedule played and remaining: the average current net rating of opponents
-  (positive = tougher than an average schedule)."""
-  s = eng.data.schedules
-  s = s[(s.season == season) & (s.game_type == "REG")]
-  rows = []
-  for g in s.itertuples():
-    for team, opp, pts, opp_pts in ((g.home_team, g.away_team, g.home_score, g.away_score),
-                                    (g.away_team, g.home_team, g.away_score, g.home_score)):
-      rows.append({"team": team, "opp": opp, "week": g.week, "played": pd.notna(pts), "pf": pts, "pa": opp_pts})
-  x = pd.DataFrame(rows)
-  x["team"] = x.team.replace({"LAR": "LA"})
-  x["opp"] = x.opp.replace({"LAR": "LA"})
-  x["opp_net"] = x.opp.map(net)
-  past = x[x.played & (x.week < week)]
-  future = x[~x.played & (x.week >= week)]
-  rec = {}
-  for team, g in past.groupby("team"):
-    w, l, t = int((g.pf > g.pa).sum()), int((g.pf < g.pa).sum()), int((g.pf == g.pa).sum())
-    rec[team] = f"{w}-{l}" + (f"-{t}" if t else "")
-  return rec, past.groupby("team").opp_net.mean(), future.groupby("team").opp_net.mean()
 
 
 def net_rating(r) -> pd.Series:
@@ -612,12 +665,18 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
     if pd.notna(dt) and abs(dt) >= 1.5:
       edges.append({"label": "Lean " + ("Over" if dt > 0 else "Under"), "value": f"{abs(dt):.1f}",
                     "strong": abs(dt) >= cfg["report"]["total_disagree"]})
+    # Each edge in points THIS game: per-play edge x that offense's projected plays of that type, so a run edge
+    # (fewer plays) is not read as equal to a pass edge of the same per-play size.
+    vol_of = tp.set_index("team")
     facets = []
     for o, d in ((away, home), (home, away)):
-      for unit, label in (("pass", "Pass"), ("rush", "Run")):
-        edge = o[f"off_{unit}"] - d[f"def_{unit}"]
-        facets.append({"label": f"{o['team']} {label} O vs {d['team']} {label} D", "edge": edge,
-                       "bar": diverging_bar(edge, 12.0), "row_style": o["row_style"], "team": o["team"]})
+      for unit, label, vcol in (("pass", "Pass", "dropbacks_hat"), ("rush", "Run", "rushes_hat")):
+        edge100 = o[f"off_{unit}"] - d[f"def_{unit}"]
+        plays = float(vol_of.at[o["team"], vcol]) if o["team"] in vol_of.index else 30.0
+        pts = edge100 / 100 * plays
+        facets.append({"label": f"{o['team']} {label} O vs {d['team']} {label} D", "edge": pts, "plays": plays,
+                       "per100": edge100, "bar": diverging_bar(pts, 4.0), "row_style": o["row_style"],
+                       "team": o["team"]})
     out.append({"away": away, "home": home, "kickoff": kickoff_text(g.gameday, g.gametime),
                 "neutral": g.location == "Neutral", "model_line": spread_text(m_fav, g.model_margin),
                 "model_total": g.model_total, "vegas_line": spread_text(v_fav, vm) if pd.notna(vm) else "n/a",

@@ -35,7 +35,9 @@ fit separately for **passing** (dropbacks, including sacks and scrambles), **rus
 - **Home field.** One league-wide edge per unit, learned from recent seasons (currently pass **{{ L.home_pass }}**, rush **{{ L.home_rush }}** points per 100 plays). Neutral-site games get none.
 - **Certainty.** Ratings are refit on **{{ L.bootstrap }}** resamples of games (a cluster bootstrap). The Power tab turns that spread into a rank range: the middle 80% of simulated rankings.
 
-Ratings are shown as **points per 100 plays versus an average team**. Higher is better for both offense and defense, because the defense number is flipped so "good" always reads positive.
+Ratings are estimated per play. On the Power tab they are shown as **points per game versus an average team** (per-play rating x a league-average number of those plays), so the units add up; per-play values appear on hover. Higher is better for both offense and defense, because the defense number is flipped so "good" always reads positive.
+
+**Field position is already accounted for.** EPA judges every play against what was expected from that exact down, distance and field position. A defense handed a short field by its offense's turnover starts the drive already "owing" the high expected points of that spot, and is charged only for what happens beyond that; the turnover itself counts against the offense that committed it. Raw points-allowed would wrongly blame the defense.
 
 ## 3. Game lines
 
@@ -75,11 +77,10 @@ Ratings are shown as **points per 100 plays versus an average team**. Higher is 
 | Matchup rank | The opponent's defense vs the position, 1st (toughest) to 32nd (easiest): the position's fantasy starters projected against every defense, ranked by points allowed. Opponent-adjusted, so not skewed by which offenses a defense has faced. The meter (1-5 bars) and grade follow the rank |
 | Matchup points (hover) | Projection against this defense minus projection against an average defense |
 | Tier | Positional rank cutoffs from the config (e.g. QB {{ L.tiers_qb }}) |
-| Net rating (Power) | 58% pass + 42% rush (offense minus defense), plus special teams scaled to play frequency |
+| Power values | Points per game vs an average opponent: each unit's per-play rating x league-average plays of that type (pass offense includes the starting QB). Offense = Pass O + Run O, Defense = Pass D + Run D, Net = Offense + Defense + ST. League-average volume means a defense is judged on per-play quality, not on how many plays its own offense left it facing |
 | Rank range (Power) | 10th-90th percentile rank when every team's net rating is resampled within its bootstrap uncertainty |
-| Schedule played / left (Power) | Average current net rating of opponents already played / still on the schedule (1st = hardest) |
+| Schedule played / left (Power, Schedule luck) | Points per game the opponents took away (played) or would take away (left), unit by unit: the team's actual dropbacks against each opponent's pass defense and runs against its run defense, plus the offenses its defense faced (incl. their QBs). Re-scored weekly with current ratings; 1st = hardest |
 | Rank movement (Power) | Change in net-rating rank since ratings as of last week |
-| Schedule luck (teams) | Average strength of opponents faced, from their ratings |
 | Schedule luck (players) | Each past game rescaled by how easy that defense is for this player's profile |
 | Role changes | Latest game vs the previous three, snap share +{{ L.snap_jump }} or opportunity share +{{ L.opp_jump }} |
 

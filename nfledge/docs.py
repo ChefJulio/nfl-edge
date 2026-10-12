@@ -181,8 +181,9 @@ def formulas(eng, season: int, week: int) -> str:
         f"{eng.tm.alpha_qb:g} |" if u == "pass" else
         f"| {u} | {r.intercept[u]:+.4f} | {100 * r.home[u]:+.2f} | {eng.tm.alphas[u]:g} | - |")
   add(f"Inexperienced-QB effect I = **{100 * r.qb_inexp:+.2f}** per 100 dropbacks (fewer than "
-      f"{r.inexp_cut:g} career dropbacks). Net rating = 0.58 x (O_pass - D_pass) + 0.42 x (O_rush - D_rush) "
-      f"+ 0.18 x (O_st - D_st). Team values are on the Power tab (x100).")
+      f"{r.inexp_cut:g} career dropbacks). Power-tab values are points per game vs an average opponent: each unit's per-play rating x league-average "
+      f"plays of that type (pass O includes the starting QB's Q + I), so Offense = Pass O + Run O, Defense = Pass D + "
+      f"Run D (signs flipped so positive is good), Net = Offense + Defense + ST.")
   if r.qb is not None and r.qb_prior is not None:
     q = r.qb[r.qb.index.isin(r.qb_prior.index[r.qb_prior >= r.inexp_cut])].sort_values(ascending=False)
     add("Quarterback effects Q (per 100 dropbacks, experienced QBs):")
