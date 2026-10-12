@@ -1,0 +1,3 @@
+player,season,week,reason
+# One row per injury-shortened (or otherwise unrepresentative) game to drop from usage/efficiency.
+# player may be a gsis_id (00-00xxxxx) or an exact full name. Lines starting with # are ignored.

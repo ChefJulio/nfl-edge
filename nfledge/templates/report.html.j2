@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NFL Edge - Week {{ week }}</title>
+<style>
+:root {
+  --bg: #f7f7f5; --panel: #ffffff; --ink: #1d1f23; --muted: #6b7078; --line: #e3e4e6; --accent: #1f6feb;
+  --good: #1a7f37; --bad: #c0362c; --warn: #9a6700; --chip: #eef1f5; --hl: #fff4d6;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #111317; --panel: #191c21; --ink: #e6e8eb; --muted: #9aa1ab; --line: #2a2f37; --accent: #58a6ff;
+          --good: #3fb950; --bad: #f2766b; --warn: #d6a640; --chip: #232830; --hl: #3a3218; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 -apple-system, "Segoe UI", Roboto, sans-serif; }
+header { padding: 18px 16px 8px; max-width: 1200px; margin: 0 auto; }
+h1 { font-size: 20px; margin: 0 0 4px; }
+.sub { color: var(--muted); font-size: 13px; }
+nav { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+nav .tabs { display: flex; gap: 4px; overflow-x: auto; max-width: 1200px; margin: 0 auto; padding: 6px 16px; }
+nav button { flex: none; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 6px 10px;
+             border-radius: 999px; font-size: 13px; cursor: pointer; }
+nav button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+main { max-width: 1200px; margin: 0 auto; padding: 12px 16px 40px; }
+section { display: none; } section.on { display: block; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 14px; }
+.card h2 { font-size: 16px; margin: 0 0 6px; }
+.note { color: var(--muted); font-size: 12.5px; margin: 4px 0 10px; }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 6px 7px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; white-space: nowrap; }
+th { font-weight: 600; color: var(--muted); cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--panel); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.take { white-space: normal; min-width: 220px; font-weight: 700; }
+td.wrap { white-space: normal; min-width: 160px; }
+.pos { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 4px; background: var(--chip); }
+.tier { font-size: 12px; padding: 1px 7px; border-radius: 999px; background: var(--chip); }
+.t-Must { background: var(--good); color: #fff; } .t-Start { background: color-mix(in srgb, var(--good) 25%, var(--panel)); }
+.t-Flex { background: color-mix(in srgb, var(--warn) 25%, var(--panel)); } .t-Sit { color: var(--muted); }
+.g { font-weight: 700; } .g-A { color: var(--good); } .g-B { color: var(--good); opacity: .75; } .g-D { color: var(--bad); opacity: .75; } .g-F { color: var(--bad); }
+.c-High { color: var(--good); } .c-Low { color: var(--bad); } .c-Medium { color: var(--warn); }
+.flag { font-size: 11px; padding: 1px 5px; border-radius: 4px; margin-left: 4px; background: var(--hl); white-space: nowrap; }
+.pos-g { color: var(--good); } .neg-g { color: var(--bad); }
+tr.hl td { background: var(--hl); }
+abbr { text-decoration: underline dotted; cursor: help; }
+.posbar { display: flex; gap: 6px; margin: 6px 0 10px; flex-wrap: wrap; }
+.posbar button { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 6px; padding: 4px 12px; cursor: pointer; }
+.posbar button.on { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.game { display: grid; grid-template-columns: 1fr; gap: 8px; }
+@media (min-width: 760px) { .games { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } }
+.spark { color: var(--accent); vertical-align: middle; }
+.muted { color: var(--muted); }
+.hide-sm { } @media (max-width: 640px) { .hide-sm { display: none; } }
+footer { color: var(--muted); font-size: 12px; max-width: 1200px; margin: 0 auto; padding: 0 16px 30px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>NFL Edge &middot; {{ season }} Week {{ week }}</h1>
+  <div class="sub">Data through week {{ week - 1 }}{% if pending %} ({{ pending }} game still pending){% endif %} &middot; scoring: {{ scoring }} &middot; generated {{ generated }}{% if not injury_report %} &middot; <b>injury report for week {{ week }} not out yet: statuses carried from last week</b>{% endif %}</div>
+</header>
+<nav><div class="tabs">
+  <button data-tab="players" class="on">Player rankings</button>
+  <button data-tab="games">Matchups</button>
+  <button data-tab="power">Power rankings</button>
+  <button data-tab="luck">Schedule luck</button>
+  <button data-tab="roles">Role changes</button>
+  <button data-tab="backtest">Backtest</button>
+  <button data-tab="glossary">Glossary</button>
+</div></nav>
+<main>
+
+<section id="players" class="on">
+  <div class="card">
+    <h2>Weekly rankings</h2>
+    <p class="note">Projected half-PPR points if the player is active. Injured players are never discounted for "light snaps" (NFL availability is yes/no); their chance to play is shown instead. Tap a column header to sort.</p>
+    <div class="posbar">{% for pos in ["QB","RB","WR","TE"] %}<button data-pos="{{ pos }}" class="{{ 'on' if loop.first }}">{{ pos }}</button>{% endfor %}</div>
+    {% for pos, rows in players.items() %}
+    <div class="scroll posview" data-pos="{{ pos }}" {% if not loop.first %}hidden{% endif %}>
+    <table class="sortable">
+      <thead><tr>
+        <th class="num">#</th><th>Player</th><th>Game</th>
+        <th class="num"><abbr title="Projected fantasy points (half PPR), assuming he plays">Proj</abbr></th>
+        <th class="num hide-sm"><abbr title="Typical miss either way (1 standard deviation)">&plusmn;</abbr></th>
+        <th><abbr title="Start/sit tier from positional rank">Tier</abbr></th>
+        <th><abbr title="Confidence: how tight the projection is relative to its size. Low = boom/bust or little data">Conf.</abbr></th>
+        <th><abbr title="Matchup grade: projection vs. this defense compared to an average defense. A = much easier">Match</abbr></th>
+        <th class="hide-sm">Expected line</th>
+        <th class="num hide-sm"><abbr title="FantasyPros expert consensus positional rank (published Fridays)">ECR</abbr></th>
+        <th>Takeaway</th>
+      </tr></thead>
+      <tbody>
+      {% for r in rows %}
+        <tr{% if r.boost >= 1 %} class="hl"{% endif %}>
+          <td class="num">{{ r.rank }}</td>
+          <td>{{ r.name }}{% if r.status %}<span class="flag" title="Injury report status (practice days Wed/Thu/Fri: D = did not practice, L = limited, F = full)">{{ r.status }} &middot; {{ r.avail|pct }}</span>{% endif %}{% if r.boost >= 1 %}<span class="flag" title="Projection raised because of vacated volume: {{ r.boost_from }}">INJ +{{ r.boost|f1 }}</span>{% endif %}{% if r.low_sample %}<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior, so uncertainty is wider">low data</span>{% endif %}</td>
+          <td class="muted">{{ r.team }} {{ r.home }} {{ r.opp }}</td>
+          <td class="num"><b>{{ r.proj|f1 }}</b></td>
+          <td class="num muted hide-sm">{{ r.sd|f1 }}</td>
+          <td><span class="tier t-{{ r.tier.split()[0] }}">{{ r.tier }}</span></td>
+          <td class="c-{{ r.conf }}">{{ r.conf }}</td>
+          <td class="g g-{{ r.grade }}">{{ r.grade }}</td>
+          <td class="muted hide-sm">{{ r.line }}</td>
+          <td class="num muted hide-sm">{{ r.ecr|f1 }}</td>
+          <td class="take">{{ r.takeaway }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section id="games">
+  <div class="card">
+    <h2>Team matchups</h2>
+    <p class="note">Ratings are opponent-adjusted <abbr title="Expected Points Added: how much each play changes the expected score">EPA</abbr>, shown as points per 100 plays vs. an average opponent (0 = average; higher is better for both offense and defense). Model lines use team ratings only (no Vegas inputs) so disagreements are meaningful. Highlighted = model differs from Vegas by &ge;{{ margin_disagree }} pts on the spread or &ge;{{ total_disagree }} on the total.</p>
+    <div class="games">
+    {% for g in games %}
+      <div class="card" style="margin:0">
+        <div><b>{{ g.away.team }} @ {{ g.home.team }}</b> <span class="muted">{{ g.gameday }}{% if g.neutral %} &middot; neutral site{% endif %}</span></div>
+        <div class="scroll"><table>
+          <thead><tr><th></th><th class="num"><abbr title="Passing offense">Pass O</abbr></th><th class="num"><abbr title="Rushing offense">Rush O</abbr></th><th class="num"><abbr title="Pass defense (higher = better)">Pass D</abbr></th><th class="num"><abbr title="Run defense (higher = better)">Rush D</abbr></th><th class="num"><abbr title="Special teams net">ST</abbr></th></tr></thead>
+          <tbody>
+          {% for s in [g.away, g.home] %}
+            <tr><td>{{ s.team }}</td><td class="num">{{ s.off_pass|sgn }}</td><td class="num">{{ s.off_rush|sgn }}</td><td class="num">{{ s.def_pass|sgn }}</td><td class="num">{{ s.def_rush|sgn }}</td><td class="num">{{ s.st|sgn }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table></div>
+        <table style="margin-top:6px">
+          <tr{% if g.flag_m %} class="hl"{% endif %}><td><abbr title="Projected {{ g.home.team }} margin (positive = home wins)">Home margin</abbr></td><td class="num">model {{ g.model_margin|sgn }}</td><td class="num">Vegas {{ g.vegas_margin|sgn }}</td><td class="num">{{ g.d_margin|sgn }}</td></tr>
+          <tr{% if g.flag_t %} class="hl"{% endif %}><td>Total</td><td class="num">model {{ g.model_total|f1 }}</td><td class="num">Vegas {{ g.vegas_total|f1 }}</td><td class="num">{{ g.d_total|sgn }}</td></tr>
+        </table>
+        <p class="take" style="font-weight:700;margin:6px 0 0">{{ g.takeaway }}</p>
+      </div>
+    {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section id="power">
+  <div class="card">
+    <h2>Power rankings</h2>
+    <p class="note">Net = offense + defense + special teams, opponent-adjusted, points per 100 plays vs. average. Certainty comes from 200 bootstrap resamples of games: "Uncertain" teams could move a lot with a few more games. The sparkline is the net rating after each week this season.</p>
+    <div class="scroll"><table class="sortable">
+      <thead><tr><th class="num">#</th><th>Team</th><th class="num">Net</th><th>Trend</th><th class="num">Off</th><th class="num">Def</th><th class="num hide-sm">Pass O</th><th class="num hide-sm">Rush O</th><th class="num">Pass D</th><th class="num">Rush D</th><th class="num">ST</th><th><abbr title="Bootstrap confidence in the rating">Certainty</abbr></th></tr></thead>
+      <tbody>
+      {% for r in power %}
+        <tr><td class="num">{{ r.rank }}</td><td><b>{{ r.team }}</b></td><td class="num"><b>{{ r.net|sgn }}</b></td><td>{{ r.spark|safe }}</td><td class="num">{{ r.off|sgn }}</td><td class="num">{{ r.def|sgn }}</td><td class="num hide-sm">{{ r.off_pass|sgn }}</td><td class="num hide-sm">{{ r.off_rush|sgn }}</td><td class="num">{{ r.def_pass|sgn }}</td><td class="num">{{ r.def_rush|sgn }}</td><td class="num">{{ r.st|sgn }}</td><td>{{ r.certainty }} <span class="muted">&plusmn;{{ r.se|f1 }}</span></td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="luck">
+  <div class="card">
+    <h2>Schedule luck: teams</h2>
+    <p class="note">Gap = how much easier (+) or harder (-) the opponents faced have been than average, in points per 100 plays, from the opponent-adjusted ratings. Adjusted = raw minus that schedule effect. Positive total = record flattered by an easy schedule (expect regression); negative = better than they look.</p>
+    <div class="scroll"><table class="sortable">
+      <thead><tr><th>Team</th><th class="num">Off raw</th><th class="num">Off adj</th><th class="num">Off gap</th><th class="num">Def raw</th><th class="num">Def adj</th><th class="num">Def gap</th><th class="num">Total gap</th><th>Takeaway</th></tr></thead>
+      <tbody>{% for r in team_luck %}<tr><td><b>{{ r.team }}</b></td><td class="num">{{ r.off_raw|sgn }}</td><td class="num">{{ r.off_adj|sgn }}</td><td class="num {{ 'neg-g' if r.off_gap > 0 else 'pos-g' }}">{{ r.off_gap|sgn }}</td><td class="num">{{ r.def_raw|sgn }}</td><td class="num">{{ r.def_adj|sgn }}</td><td class="num {{ 'neg-g' if r.def_gap > 0 else 'pos-g' }}">{{ r.def_gap|sgn }}</td><td class="num"><b>{{ r.total_gap|sgn }}</b></td><td class="take">{{ 'Easy schedule so far - likely worse than record' if r.total_gap > 2 else 'Tough schedule so far - likely better than record' if r.total_gap < -2 else 'Schedule roughly neutral' }}</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </div>
+  <div class="card">
+    <h2>Schedule luck: players</h2>
+    <p class="note">Fantasy points per game, raw vs. adjusted for the defenses faced (each game rescaled by how easy that defense is for this player's profile). Largest gaps shown.</p>
+    <div class="scroll"><table class="sortable">
+      <thead><tr><th>Player</th><th>Pos</th><th>Team</th><th class="num">G</th><th class="num">Raw FP/G</th><th class="num">Adj FP/G</th><th class="num">Gap</th><th>Takeaway</th></tr></thead>
+      <tbody>{% for r in player_luck %}<tr><td>{{ r.name }}</td><td><span class="pos">{{ r.pos }}</span></td><td>{{ r.team }}</td><td class="num">{{ r.games }}</td><td class="num">{{ r.raw|f1 }}</td><td class="num">{{ r.adj|f1 }}</td><td class="num {{ 'neg-g' if r.gap > 0 else 'pos-g' }}"><b>{{ r.gap|sgn }}</b></td><td class="take">{{ r.takeaway }}</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="roles">
+  <div class="card">
+    <h2>Role-change alerts</h2>
+    <p class="note">Players whose snap share or opportunity share (carries + targets as a share of team plays) jumped in their latest game vs. their previous three. These are alerts, not model inputs: confirm the reason (injury ahead of him, demotion, game script) before chasing.</p>
+    <div class="scroll"><table class="sortable">
+      <thead><tr><th>Player</th><th>Pos</th><th>Team</th><th class="num">Wk</th><th class="num">Snap % now</th><th class="num">Before</th><th class="num"><abbr title="(carries + targets) / team plays">Opp share</abbr> now</th><th class="num">Before</th><th class="num">Touches</th><th>Takeaway</th></tr></thead>
+      <tbody>{% for r in roles %}<tr><td>{{ r.name }}</td><td><span class="pos">{{ r.pos }}</span></td><td>{{ r.team }}</td><td class="num">{{ r.week }}</td><td class="num">{{ r.snap_now|pct }}</td><td class="num muted">{{ r.snap_prev|pct }}</td><td class="num">{{ r.opp_now|pct }}</td><td class="num muted">{{ r.opp_prev|pct }}</td><td class="num">{{ r.touches }}</td><td class="take">{{ r.takeaway }}</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="backtest">
+  <div class="card">
+    <h2>Backtest: how well does this predict next week?</h2>
+    <p class="note">Walk-forward on {{ bt_seasons }}: every projection used only data available before that week, and every learned piece was trained only on earlier seasons. Fantasy-relevant players who played, on weeks where all methods had a value. <b>Avg miss</b> = mean absolute error in points (lower is better). <b>Rank corr.</b> = how well each method ordered players within the week (higher is better).</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Pos</th><th class="num">n</th><th class="num">Avg miss: model</th><th class="num">experts</th><th class="num">Vegas-scaled</th><th class="num">raw stats</th><th class="num">Rank corr.: model</th><th class="num">experts</th><th class="num">Vegas-scaled</th><th class="num">raw stats</th></tr></thead>
+      <tbody>{% for r in backtest %}<tr><td><b>{{ r.pos }}</b></td><td class="num">{{ r.n }}</td><td class="num"><b>{{ r.mae_model|f2 }}</b></td><td class="num">{{ r.mae_ecr|f2 }}</td><td class="num">{{ r.mae_vegas|f2 }}</td><td class="num">{{ r.mae_raw|f2 }}</td><td class="num"><b>{{ r.rank_model|f3 }}</b></td><td class="num">{{ r.rank_ecr|f3 }}</td><td class="num">{{ r.rank_vegas|f3 }}</td><td class="num">{{ r.rank_raw|f3 }}</td></tr>{% endfor %}</tbody>
+    </table></div>
+    <p class="note"><b>Takeaway:</b> {{ bt_takeaway }}</p>
+  </div>
+</section>
+
+<section id="glossary">
+  <div class="card">
+    <h2>How to read this</h2>
+    <ul>
+      <li><b>EPA</b> (expected points added): how much a play changed the expected score. Team ratings are EPA per play, adjusted for opponents with ridge regression, shown per 100 plays.</li>
+      <li><b>Opponent-adjusted</b>: a defense that faced three bad offenses gets less credit than its raw numbers suggest.</li>
+      <li><b>Projection</b> = projected volume (team plays &times; pass rate &times; the player's share) &times; efficiency per opportunity (shrunk toward a position &amp; draft-round average when data is thin) &times; matchup. Touchdowns use expected TDs from red-zone and goal-line usage, nudged toward actual TDs.</li>
+      <li><b>Vegas implied total</b> is used as an input (it won in backtesting). RB/WR/TE are blended with FantasyPros expert consensus when available (Fridays); QBs are model-only because the model alone beat the experts there.</li>
+      <li><b>Injuries</b>: chance to play comes from the Wed/Thu/Fri practice sequence + game status, learned from 2018+ history. Volume from players likely to sit (&lt;50%) is redistributed using where it actually went historically, by position, depth chart rank and current share.</li>
+      <li><b>Wind</b> over 15 mph trims passing efficiency (2%/mph, capped).</li>
+    </ul>
+  </div>
+</section>
+</main>
+<footer>nfl-edge &middot; data: nflverse (nflreadpy), NFL.com practice reports, FantasyPros ECR, Open-Meteo forecasts. For entertainment; not betting advice.</footer>
+<script>
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('main section').forEach(s => s.classList.toggle('on', s.id === b.dataset.tab));
+  try { localStorage.setItem('nfledge-tab', b.dataset.tab); } catch (e) {}
+});
+document.querySelectorAll('.posbar button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.posbar button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.posview').forEach(v => v.hidden = v.dataset.pos !== b.dataset.pos);
+});
+try { const t = localStorage.getItem('nfledge-tab'); if (t) { const b = document.querySelector(`nav button[data-tab="${t}"]`); if (b) b.click(); } } catch (e) {}
+document.querySelectorAll('table.sortable th').forEach((th, i) => th.onclick = () => {
+  const tb = th.closest('table').tBodies[0], rows = [...tb.rows];
+  const dir = th.dataset.dir === 'desc' ? 1 : -1; th.dataset.dir = dir === 1 ? 'asc' : 'desc';
+  const val = r => { const t = r.cells[i].innerText.replace(/[%+,]/g, '').trim(); const n = parseFloat(t); return isNaN(n) ? t.toLowerCase() : n; };
+  rows.sort((a, b) => { const x = val(a), y = val(b); return (x > y ? 1 : x < y ? -1 : 0) * dir; });
+  rows.forEach(r => tb.appendChild(r));
+});
+</script>
+</body>
+</html>

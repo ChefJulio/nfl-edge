@@ -1,0 +1,46 @@
+name: Build report and deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Daily refresh: injury reports (Wed-Fri), expert rankings (Fri) and scores change without a push.
+    - cron: "0 14 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      # Data cache carries over between runs so only new weeks / live data are refetched.
+      - uses: actions/cache@v4
+        with:
+          path: cache
+          key: nfl-cache-${{ github.run_id }}
+          restore-keys: nfl-cache-
+      - run: python run.py --out site/index.html
+      - uses: actions/configure-pages@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

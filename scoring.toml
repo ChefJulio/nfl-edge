@@ -1,0 +1,48 @@
+# Fantasy scoring. Pick a preset or set preset = "custom" and edit [custom].
+preset = "half"
+
+[presets.ppr]
+pass_yd = 0.04
+pass_td = 4
+interception = -2
+rush_yd = 0.1
+rush_td = 6
+reception = 1.0
+rec_yd = 0.1
+rec_td = 6
+fumble_lost = -2
+
+[presets.half]
+pass_yd = 0.04
+pass_td = 4
+interception = -2
+rush_yd = 0.1
+rush_td = 6
+reception = 0.5
+rec_yd = 0.1
+rec_td = 6
+fumble_lost = -2
+
+[presets.standard]
+pass_yd = 0.04
+pass_td = 4
+interception = -2
+rush_yd = 0.1
+rush_td = 6
+reception = 0.0
+rec_yd = 0.1
+rec_td = 6
+fumble_lost = -2
+
+[custom]
+pass_yd = 0.04
+pass_td = 6
+interception = -2
+rush_yd = 0.1
+rush_td = 6
+reception = 0.5
+rec_yd = 0.1
+rec_td = 6
+fumble_lost = -2
+# Optional position-specific reception bonus, e.g. TE premium.
+te_reception_bonus = 0.5
