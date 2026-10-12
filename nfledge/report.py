@@ -465,7 +465,9 @@ def team_tables(eng, season: int, week: int, cfg: dict) -> tuple[list, list]:
   dfn = -(w_p * rb.dfn["pass"] + w_r * rb.dfn["rush"])
   st = rb.off["st"] - rb.dfn["st"]
   rk = lambda s: s.rank(ascending=False, method="min").astype(int)
-  ranks = {"net": rk(net), "off": rk(off), "def": rk(dfn), "st": rk(st)}
+  ranks = {"net": rk(net), "off": rk(off), "def": rk(dfn), "st": rk(st),
+           "off_pass": rk(rb.off["pass"]), "off_rush": rk(rb.off["rush"]),
+           "def_pass": rk(-rb.dfn["pass"]), "def_rush": rk(-rb.dfn["rush"])}
   rec, sos_p, sos_f = schedule_strength(eng, season, week, net)
   sos_p_rk, sos_f_rk = rk(sos_p), rk(sos_f)
   rows = []
@@ -480,6 +482,8 @@ def team_tables(eng, season: int, week: int, cfg: dict) -> tuple[list, list]:
       "def": per100(dfn[team]), "def_rk": int(ranks["def"][team]),
       "def_pass": per100(-rb.dfn.at[team, "pass"]), "def_rush": per100(-rb.dfn.at[team, "rush"]),
       "st": per100(st[team]), "st_rk": int(ranks["st"][team]),
+      "off_pass_rk": int(ranks["off_pass"][team]), "off_rush_rk": int(ranks["off_rush"][team]),
+      "def_pass_rk": int(ranks["def_pass"][team]), "def_rush_rk": int(ranks["def_rush"][team]),
       "sos_past": per100(sos_p.get(team, np.nan)), "sos_past_rk": int(sos_p_rk.get(team, 0)),
       "sos_next": per100(sos_f.get(team, np.nan)), "sos_next_rk": int(sos_f_rk.get(team, 0)),
       "spark": sparkline(hist.loc[team].tolist(), width=84, height=22) if team in hist.index else "",

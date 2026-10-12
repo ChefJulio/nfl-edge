@@ -254,6 +254,10 @@ table.power .rk { width: 46px; }
 .rk1 { background: rgba(69,194,107,.24); color: #92e8ab; } .rk2 { background: rgba(69,194,107,.11); color: #c4ecd0; }
 .rk3 { background: rgba(224,176,74,.14); color: #f1d391; } .rk4 { background: rgba(242,120,109,.2); color: #ffb3aa; }
 .rkn2 { background: rgba(255,255,255,.1); color: rgba(255,255,255,.85); }
+.mv3 { font-weight: 600; font-size: 12.5px; min-width: 32px; color: rgba(255,255,255,.88); }
+.rk-b.sm { min-width: 30px; font-size: 9.5px; line-height: 15px; padding: 0 4px; opacity: .92; }
+table.power th.minor { font-size: 10px; } table.power td.minor { padding-left: 6px; padding-right: 6px; }
+table.power .mc { gap: 5px; }
 tr.teamrow .sub { color: rgba(255,255,255,.62); }
 table.power .sub { display: block; margin-top: 2px; font-size: 11px; }
 /* model doc */
@@ -425,16 +429,18 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     Colored badges are league ranks (green = top 8, red = bottom 8). <b>Schedule</b>: the average current net rating of opponents already played and still to play (positive = tougher than average; 1st = hardest). Arrows show the move since last week.
   </div></details>
   <div class="card"><div class="scroll"><table class="sortable tiles power">
-    <thead><tr><th class="num" data-first="asc">#</th><th data-first="asc">Team</th><th class="num">Net</th><th>Offense</th><th>Defense</th><th>Special teams</th><th>Schedule played</th><th>Schedule left</th><th class="hide-sm nosort">Trend</th></tr></thead>
+    <thead><tr><th class="num" data-first="asc">#</th><th data-first="asc">Team</th><th class="num">Net</th><th>Offense</th><th>Defense</th><th class="minor">Pass O</th><th class="minor">Run O</th><th class="minor">Pass D</th><th class="minor">Run D</th><th class="minor">ST</th><th>Schedule played</th><th>Schedule left</th><th class="hide-sm nosort">Trend</th></tr></thead>
     <tbody>
     {% for r in power %}
       <tr class="teamrow" style="{{ r.row_style }}">
         <td class="num rk" data-v="{{ r.rank }}"><span class="rkn">{{ r.rank }}</span>{% if r.move > 0 %}<span class="mv up">&#9650;{{ r.move }}</span>{% elif r.move < 0 %}<span class="mv dn">&#9660;{{ -r.move }}</span>{% else %}<span class="mv">&ndash;</span>{% endif %}</td>
         <td data-v="{{ r.nick }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.nick }}</b><span class="sub">{{ r.team }} &middot; {{ r.record }}</span></div></div></td>
         <td class="num" data-v="{{ r.net }}"><div class="netc"><b>{{ r.net|sgn }}</b><span class="sub">likely {{ r.range }}</span></div></td>
-        <td data-v="{{ r.off }}"><div class="mc"><span class="mv2">{{ r.off|sgn }}</span><span class="rk-b {{ r.off_rk|rkc }}">{{ r.off_rk|ord }}</span></div><span class="sub">Pass {{ r.off_pass|sgn }} &middot; Run {{ r.off_rush|sgn }}</span></td>
-        <td data-v="{{ r.def }}"><div class="mc"><span class="mv2">{{ r.def|sgn }}</span><span class="rk-b {{ r.def_rk|rkc }}">{{ r.def_rk|ord }}</span></div><span class="sub">Pass {{ r.def_pass|sgn }} &middot; Run {{ r.def_rush|sgn }}</span></td>
-        <td data-v="{{ r.st }}"><div class="mc"><span class="mv2">{{ r.st|sgn }}</span><span class="rk-b {{ r.st_rk|rkc }}">{{ r.st_rk|ord }}</span></div></td>
+        <td data-v="{{ r.off }}"><div class="mc"><span class="mv2">{{ r.off|sgn }}</span><span class="rk-b {{ r.off_rk|rkc }}">{{ r.off_rk|ord }}</span></div></td>
+        <td data-v="{{ r.def }}"><div class="mc"><span class="mv2">{{ r.def|sgn }}</span><span class="rk-b {{ r.def_rk|rkc }}">{{ r.def_rk|ord }}</span></div></td>
+        {% for v, k in [(r.off_pass, r.off_pass_rk), (r.off_rush, r.off_rush_rk), (r.def_pass, r.def_pass_rk), (r.def_rush, r.def_rush_rk), (r.st, r.st_rk)] %}
+        <td class="minor" data-v="{{ v }}"><div class="mc"><span class="mv3">{{ v|sgn }}</span><span class="rk-b sm {{ k|rkc }}">{{ k|ord }}</span></div></td>
+        {% endfor %}
         <td data-v="{{ r.sos_past }}"><div class="mc"><span class="mv2">{{ r.sos_past|sgn }}</span><span class="rk-b rkn2">{{ r.sos_past_rk|ord }}</span></div><span class="sub">{{ 'hard' if r.sos_past_rk <= 8 else 'easy' if r.sos_past_rk >= 25 else 'average' }}</span></td>
         <td data-v="{{ r.sos_next }}"><div class="mc"><span class="mv2">{{ r.sos_next|sgn }}</span><span class="rk-b rkn2">{{ r.sos_next_rk|ord }}</span></div><span class="sub">{{ 'hard' if r.sos_next_rk <= 8 else 'easy' if r.sos_next_rk >= 25 else 'average' }}</span></td>
         <td class="hide-sm">{{ r.spark|safe }}</td>
