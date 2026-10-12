@@ -21,6 +21,7 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import nnls
 
+from .data import depth_for_week
 from .team_model import asof_weights
 
 SHARES = {"tgt_share": ("tgt", "team_db"), "carry_share": ("carries", "team_rush")}
@@ -77,6 +78,7 @@ class InjuryModel:
   def fit(self, seasons: list[int]):
     self._fit_status(seasons)
     self._fit_practice(seasons)
+    self._fit_scratch(seasons)
     self._fit_absorption(seasons)
     return self
 
@@ -256,6 +258,104 @@ class InjuryModel:
           i += 1
     return pd.DataFrame(rows)
 
+  # -- healthy scratches -----------------------------------------------------------------------------------------
+  def scratch_table(self, season: int) -> pd.DataFrame:
+    """One row per rostered (ACT) QB/RB/WR/TE per team game this season, including scheduled future games,
+    with as-of features for P(active | not on the injury report) and the realized label for past games."""
+    d = self.data
+    sch = d.schedules[(d.schedules.season == season) & (d.schedules.game_type == "REG")]
+    tg = pd.concat([sch[["week", "home_team", "home_score"]].rename(columns={"home_team": "team"}),
+                    sch[["week", "away_team", "home_score"]].rename(columns={"away_team": "team"})])
+    tg["final"] = tg.home_score.notna()
+    tg = tg.drop(columns=["home_score"])
+    r = d.rosters[(d.rosters.season == season) & d.rosters.gsis_id.notna()].copy()
+    r["team"] = r.team.replace({"LAR": "LA"})
+    r["pos"] = r.position.replace({"FB": "RB", "HB": "RB"})
+    r = r[r.pos.isin(["QB", "RB", "WR", "TE"])]
+    # Future weeks: carry each team's latest roster forward.
+    last_wk = int(r.week.max())
+    fut = tg[tg.week > last_wk]
+    if len(fut):
+      latest = r[r.week == r.groupby("team").week.transform("max")]
+      r = pd.concat([r, fut.merge(latest.drop(columns=["week"]), on="team")], ignore_index=True)
+    # ACT and INA are both the 53-man roster (INA = that week's game-day inactive list, i.e. the outcome).
+    rg = r[r.status.isin(["ACT", "INA"])].merge(tg, on=["week", "team"])[["week", "team", "gsis_id", "pos", "years_exp"]]
+    rg = rg.drop_duplicates(["week", "gsis_id"])
+    rg = rg.merge(tg, on=["week", "team"], how="left")
+    played, observable = self._played_sets()
+    rg["active"] = [(season, w, g) in played for w, g in zip(rg.week, rg.gsis_id)]
+    rg["observable"] = rg.gsis_id.isin(observable)
+    inj = d.injuries[(d.injuries.season == season) & d.injuries.report_status.notna()]
+    on_report = set(zip(inj.week, inj.gsis_id))
+    rg["on_report"] = [(w, g) in on_report for w, g in zip(rg.week, rg.gsis_id)]
+    od = inj[inj.report_status.isin(["Out", "Doubtful"])][["week", "team", "gsis_id"]]
+    # Weeks whose report is not out yet (early in the week): carry last week's Out/Doubtful forward, as the
+    # availability model does, so a backup is not scored as a scratch risk when the starter is likely out.
+    reported = set(zip(d.injuries[d.injuries.season == season].week, d.injuries[d.injuries.season == season].team))
+    carry = od.assign(week=od.week + 1)
+    carry = carry[[(w, t) not in reported for w, t in zip(carry.week, carry.team.replace({"LAR": "LA"}))]]
+    od = pd.concat([od, carry])
+    out_rep = set(zip(od.week, od.gsis_id))
+    L = self.pm.ledger
+    snap = L[L.season == season].groupby(["week", "gsis_id"]).offense_pct.max().rename("snap").reset_index()
+    rg = rg.merge(snap, on=["week", "gsis_id"], how="left")
+    rg["snap"] = rg.snap.astype(float)
+    rg = rg.sort_values(["gsis_id", "week"])
+    # Only games with a final score count as history (a pending Monday game is not an inactive week).
+    done = rg.final.fillna(False).astype(bool) & (rg.week <= self.data.completed_weeks(season))
+    # History excludes injury-report weeks (those absences are injuries, not scratches) and unplayed weeks.
+    hist = (done & ~rg.on_report).astype(int)
+    act = (rg.active & (hist == 1)).astype(int)
+    rg["n_prev"] = hist.groupby(rg.gsis_id).cumsum() - hist
+    rg["act_prev"] = act.groupby(rg.gsis_id).cumsum() - act
+    rg["act_rate"] = (rg.act_prev + 1) / (rg.n_prev + 1.2)  # light prior toward active
+    lastplayed = act.where(hist == 1).groupby(rg.gsis_id).transform(lambda s: s.ffill().shift(1))
+    rg["played_last"] = lastplayed.fillna(-1)
+    sn = rg.snap.where(rg.active & (hist == 1))
+    rg["snap_avg"] = sn.groupby(rg.gsis_id).transform(lambda s: s.expanding().mean().shift(1)).fillna(0)
+    # Depth chart rank + how many players ahead of him at his position are out this week.
+    ranks = []
+    for w in sorted(rg.week.unique()):
+      dc = depth_for_week(self.data, season, int(w))
+      if len(dc):
+        ranks.append(dc.assign(week=w, team=dc.team.replace({"LAR": "LA"}))[["week", "team", "gsis_id", "rank"]])
+    rk = pd.concat(ranks) if ranks else pd.DataFrame(columns=["week", "team", "gsis_id", "rank"])
+    rg = rg.merge(rk.drop_duplicates(["week", "gsis_id"]), on=["week", "team", "gsis_id"], how="left")
+    rg["rank"] = pd.to_numeric(rg["rank"], errors="coerce").fillna(9).clip(upper=9)
+    rg["is_out"] = [(w, g) in out_rep for w, g in zip(rg.week, rg.gsis_id)]
+    grp = rg.groupby(["week", "team", "pos"])
+    # "Ahead" = bigger recent snap share at the same position (injured players drop off the depth chart).
+    out_snap = rg[rg.is_out].groupby(["week", "team", "pos"]).snap_avg.apply(list)
+    rg["ahead_out"] = [sum(1 for x in out_snap.get((w, t, p), []) if x > sa + 0.05)
+                       for w, t, p, sa in zip(rg.week, rg.team, rg.pos, rg.snap_avg)]
+    rg["rookie"] = (pd.to_numeric(rg.years_exp, errors="coerce").fillna(1) == 0).astype(int)
+    for p_ in ("QB", "RB", "WR", "TE"):
+      rg[f"is_{p_}"] = (rg.pos == p_).astype(int)
+    rg["season"] = season
+    return rg
+
+  SCRATCH_COLS = ["n_prev", "act_rate", "played_last", "snap_avg", "rank", "ahead_out", "rookie", "is_QB", "is_RB",
+                  "is_WR", "is_TE"]
+
+  def _fit_scratch(self, seasons):
+    """Gradient-boosted P(active | not on injury report) from as-of role/history features."""
+    from sklearn.ensemble import HistGradientBoostingClassifier
+    rows = []
+    for s in seasons:
+      t = self.scratch_table(s)
+      rows.append(t[t.final & (t.week <= self.data.completed_weeks(s)) & ~t.on_report & t.observable & (t.week >= 2)])
+    d = pd.concat(rows)
+    self.scratch_model = HistGradientBoostingClassifier(max_iter=200, learning_rate=0.05, max_depth=3,
+                                                        random_state=0).fit(d[self.SCRATCH_COLS], d.active)
+    self._scratch_cache = {}
+
+  def scratch_prob(self, season: int, week: int) -> pd.Series:
+    if season not in self._scratch_cache:
+      self._scratch_cache[season] = self.scratch_table(season)
+    t = self._scratch_cache[season]
+    t = t[t.week == week]
+    return pd.Series(self.scratch_model.predict_proba(t[self.SCRATCH_COLS])[:, 1], index=t.gsis_id.to_numpy())
+
   # -- application -----------------------------------------------------------------------------------------------
   def availability(self, p: pd.DataFrame, season: int, week: int) -> pd.DataFrame:
     inj = self.data.injuries
@@ -271,7 +371,10 @@ class InjuryModel:
     use_days = self.practice_model is not None and pr is not None
     if use_days:
       days = pr[(pr.season == season) & (pr.week == week)].drop_duplicates("gsis_id", keep="last").set_index("gsis_id")
+    scratch = self.scratch_prob(season, week)
+    p["scratch_avail"] = p.gsis_id.map(scratch).fillna(1.0)
     for i, row in p.iterrows():
+      p.at[i, "avail"] = p.at[i, "scratch_avail"]  # healthy-scratch risk unless the injury report says more
       if row.team in published and use_days and row.gsis_id in days.index:
         x = days.loc[[row.gsis_id]]
         p.at[i, "avail"] = float(self.practice_prob(x)[0])
@@ -310,17 +413,28 @@ class InjuryModel:
     p["sits"] = p.avail < 0.5
 
     base = p.proj.copy()
+    p0 = p.copy()  # pre-redistribution state for contingent scenarios
     p = self._redistribute(p, sits, wind)
     p["injury_boost"] = (p.proj - base).clip(lower=0)
     p["teammate_out"] = p.team.isin(set(sits.team))
-    p["boost_from"] = p.team.map(sits.groupby("team").full_name.apply(lambda x: ", ".join(x.dropna())))
+    # Name only real contributors as the source of a boost (not low-volume healthy scratches).
+    names = pd.concat([sits[["team", "full_name"]], p.loc[p.sits & (p.proj_no_inj >= 5), ["team", "full_name"]]]).dropna()
+    p["boost_from"] = p.team.map(names.drop_duplicates().groupby("team").full_name.apply(", ".join)).fillna("")
 
-    # Contingent upside: for each Questionable contributor (assumed active), what teammates gain if he sits.
+    # Contingent upside: for each genuinely doubtful player (50-90% to play, assumed active), what teammates gain
+    # if he sits. Recomputed from the pre-redistribution state so nothing is applied twice.
     p["if_sits_gain"], p["if_sits_name"] = 0.0, ""
-    q = cont[(cont.p_play >= 0.5) & (cont.p_play < 1.0)]
-    for _, x in q.iterrows():
-      alt = self._redistribute(p.copy(), pd.concat([sits, x.to_frame().T]), wind)
-      gain = (alt.proj - p.proj).where((p.team == x.team) & (p.gsis_id != x.gsis_id), 0.0)
+    doubt = (p.avail >= 0.5) & (p.avail < 0.9)
+    q = cont[(cont.p_play >= 0.5) & (cont.p_play < 0.9)]
+    qbs = p[doubt & (p.pos == "QB")]
+    scenarios = [(x.gsis_id, x.team, x.full_name, x.to_frame().T) for _, x in q.iterrows()]
+    scenarios += [(x.gsis_id, x.team, x.full_name, None) for _, x in qbs.iterrows()]
+    for gid, team, name, extra in scenarios:
+      alt_p = p0.copy()
+      alt_p.loc[alt_p.gsis_id == gid, "sits"] = True
+      alt = self._redistribute(alt_p, sits if extra is None else pd.concat([sits, extra]), wind)
+      gain = (alt.proj - p.proj).where((p.team == team) & (p.gsis_id != gid), 0.0)
+      x = pd.Series({"full_name": name})
       better = gain > p.if_sits_gain
       p.loc[better, "if_sits_gain"] = gain[better]
       p.loc[better, "if_sits_name"] = x.full_name if isinstance(x.full_name, str) else ""

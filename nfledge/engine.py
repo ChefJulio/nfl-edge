@@ -12,6 +12,8 @@ from .player_model import PlayerModel, actual_points
 from .team_model import GameModel, Linear, TeamModel, team_game_ledger, team_volume_features
 
 POSITIONS = ["QB", "RB", "WR", "TE"]
+QUANTS = (0.10, 0.25, 0.50, 0.75, 0.90)
+QCOLS = ("p10", "p25", "p50", "p75", "p90")
 
 
 def _log(msg):
@@ -72,12 +74,29 @@ class Engine:
       if pos in blend_pos:
         self.blend[pos] = Linear.fit(g, "actual", ["proj", "ecr_pts"], name=f"blend/{pos}")
     d = self.apply_blend(d)
+    self._fit_quantiles(d)
     for pos, g in d.groupby("pos"):
       X = np.column_stack([np.ones(len(g)), g.proj.clip(lower=0)])
       coef, *_ = np.linalg.lstsq(X, (g.actual - g.proj) ** 2, rcond=None)
       self.sd_model[pos] = (max(coef[0], 1.0), max(coef[1], 0.0))
 
   # -- projection ------------------------------------------------------------------------------------------------
+  def _fit_quantiles(self, d: pd.DataFrame):
+    """Empirical outcome ranges: per position, bin train-season projections and take quantiles of what actually
+    happened, stored as offsets from the projection (so ranges are skewed like real fantasy outcomes)."""
+    self.q_model = {}
+    for pos, g in d[d.proj > 0.5].groupby("pos"):
+      edges = np.unique(np.quantile(g.proj, np.linspace(0, 1, 13)))
+      idx = np.digitize(g.proj, edges[1:-1])
+      centers, offs = [], []
+      for b in np.unique(idx):
+        gb = g[idx == b]
+        if len(gb) >= 30:
+          centers.append(gb.proj.mean())
+          offs.append(np.quantile(gb.actual, QUANTS) - gb.proj.mean())
+      if len(centers) >= 3:
+        self.q_model[pos] = (np.array(centers), np.array(offs))
+
   def attach_ecr(self, p: pd.DataFrame, season: int, week: int) -> pd.DataFrame:
     """Expert consensus rank for the week, only if scraped before the player's kickoff (no leakage)."""
     p = p.drop(columns=["ecr", "ecr_pts"], errors="ignore")
@@ -108,9 +127,11 @@ class Engine:
 
   def candidates(self, season: int, week: int) -> pd.DataFrame:
     r = self.data.rosters
-    r = r[(r.season == season) & r.gsis_id.notna()]
-    wk = min(week, int(r.week.max()))
-    r = r[(r.week == wk) & (r.status == "ACT")].copy()
+    r = r[(r.season == season) & r.gsis_id.notna() & (r.week <= week)].copy()
+    # Each team's own latest roster: a league-wide "latest week" drops teams on bye or still to play that week.
+    latest = r.groupby("team").week.transform("max")
+    # ACT + INA = 53-man roster (INA is last game's inactive list; availability models decide this week).
+    r = r[(r.week == latest) & r.status.isin(["ACT", "INA"])].copy()
     r["pos"] = r.position.replace({"FB": "RB", "HB": "RB"})
     r = r[r.pos.isin(self.positions)]
     r["team"] = team_name_fix(r.team)
@@ -144,6 +165,7 @@ class Engine:
       p = self.injury_model.apply(p, season, week, wind)
     p["proj_neutral"] = self.pm.stats_from_volume(p, wind, neutral=True).proj
     p["matchup_pct"] = p.proj / p.proj_neutral.clip(lower=0.5) - 1
+    p["matchup_pts"] = p.proj - p.proj_neutral
     p = self.attach_ecr(p, season, week)
     if blend and self.ecr_map:
       p = self.apply_blend(p)
@@ -158,10 +180,20 @@ class Engine:
   def _uncertainty(self, p: pd.DataFrame) -> pd.DataFrame:
     a = p.pos.map(lambda x: self.sd_model.get(x, (25.0, 1.0))[0]) if hasattr(self, "sd_model") else 25.0
     b = p.pos.map(lambda x: self.sd_model.get(x, (25.0, 1.0))[1]) if hasattr(self, "sd_model") else 1.0
-    sd = np.sqrt(a + b * p.proj.clip(lower=0))
-    sd = sd * (1 + 0.6 / (1 + p.games.fillna(0)))  # low current-season sample -> wider
-    sd = sd * np.where(p.low_sample, 1.2, 1.0)
-    sd = sd * np.where(p.injury_boost > 0.5, 1.25, 1.0)
+    # Widening for thin data / injury-driven roles, relative to a typical established player (4+ games).
+    m = (1 + 0.6 / (1 + p.games.fillna(0))) / (1 + 0.6 / 5)
+    m = m * np.where(p.low_sample, 1.2, 1.0) * np.where(p.injury_boost > 0.5, 1.25, 1.0)
+    sd = np.sqrt(a + b * p.proj.clip(lower=0)) * m
+    for c in QCOLS:
+      p[c] = np.nan
+    for pos, (centers, offs) in getattr(self, "q_model", {}).items():
+      sel = (p.pos == pos).to_numpy()
+      if not sel.any():
+        continue
+      x = p.proj.to_numpy()[sel]
+      for k, c in enumerate(QCOLS):
+        off = np.interp(x, centers, offs[:, k])
+        p.loc[sel, c] = np.clip(x + off * np.asarray(m)[sel], 0, None)
     p["sd"] = sd
     cv = sd / p.proj.clip(lower=1)
     p["confidence"] = np.select([cv <= 0.55, cv <= 0.8], ["High", "Medium"], "Low")

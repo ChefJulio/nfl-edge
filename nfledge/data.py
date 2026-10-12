@@ -123,6 +123,7 @@ class Data:
   practice: pd.DataFrame | None = None  # daily practice participation (NFL.com API), where enabled
   avail_hist: pd.DataFrame | None = None  # labelled practice weeks (did he play?) for completed seasons
   ecr: pd.DataFrame | None = None  # FantasyPros weekly positional expert consensus ranks (pre-game only)
+  teams: pd.DataFrame | None = None  # team names + colors
 
   def completed_weeks(self, season: int) -> int:
     if season == self.current_season:
@@ -188,6 +189,7 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
     ah = [a for a in ah if a is not None and len(a)]
     avail_hist = pd.concat(ah, ignore_index=True) if ah else None
   ecr = cache.get("ecr", "all", lambda: load_ecr(nfl, sched), stale=cache.age_hours("ecr", "all") > LIVE_TTL_HOURS)
+  teams = cache.get("teams", "all", lambda: nfl.load_teams(), stale=cache.age_hours("teams", "all") > 24 * 90)
   draft = cache.get("draft", "all", lambda: nfl.load_draft_picks(), stale=cache.age_hours("draft", "all") > 24 * 30)
   if new_weeks:
     cache.meta.setdefault("final_games", {})[str(current)] = n_final
@@ -211,7 +213,7 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
   data = Data(current_season=current, latest_week=latest, seasons=seasons, pbp=cutoff(pbp), schedules=sched,
               stats=stats, rosters=rosters, snaps=snaps, injuries=cat("injuries"), depth=depth, draft=draft,
               routes=routes, exclusions=load_exclusions(rosters), pending_games=pending, practice=practice,
-              avail_hist=avail_hist, ecr=ecr)
+              avail_hist=avail_hist, ecr=ecr, teams=teams)
   _log(f"seasons {seasons}; current {current}, data through week {latest}"
        f"{f' ({pending} game(s) pending)' if pending else ''}; {len(data.pbp):,} plays, {len(stats):,} player-games")
   return data

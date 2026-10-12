@@ -53,6 +53,53 @@ abbr { text-decoration: underline dotted; cursor: help; }
 .spark { color: var(--accent); vertical-align: middle; }
 .muted { color: var(--muted); }
 .hide-sm { } @media (max-width: 640px) { .hide-sm { display: none; } }
+.toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 6px 0 10px; }
+.toolbar .posbar { margin: 0; }
+#psearch { flex: 1; min-width: 140px; max-width: 260px; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font-size: 13px; }
+.chip { display: inline-block; min-width: 38px; text-align: center; font-size: 11px; font-weight: 700; letter-spacing: .3px; padding: 2px 5px; border-radius: 4px; border-left: 3px solid; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+.vs { color: var(--muted); font-size: 11px; margin: 0 4px; }
+td.mu { white-space: nowrap; }
+td.mu .g { margin-left: 8px; display: inline-block; width: 18px; text-align: center; border-radius: 4px; font-size: 12px; }
+.g-A { background: color-mix(in srgb, var(--good) 22%, transparent); } .g-B { background: color-mix(in srgb, var(--good) 10%, transparent); }
+.g-D { background: color-mix(in srgb, var(--bad) 10%, transparent); } .g-F { background: color-mix(in srgb, var(--bad) 22%, transparent); }
+.mpts { font-size: 12px; margin-left: 5px; font-variant-numeric: tabular-nums; }
+.proj { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
+.proj b { min-width: 34px; text-align: right; font-size: 14px; }
+.fc { font-size: 11px; color: var(--muted); min-width: 34px; text-align: left; font-variant-numeric: tabular-nums; }
+.rng .rng-w { stroke: var(--muted); stroke-width: 1.5; }
+.rng .rng-b { fill: color-mix(in srgb, var(--accent) 55%, transparent); }
+.rng .rng-p { stroke: var(--ink); stroke-width: 2; }
+.pname { font-weight: 600; }
+.badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 2px; }
+.badges .flag { margin: 0; }
+.f-q { background: color-mix(in srgb, var(--warn) 22%, var(--panel)); }
+.f-out { background: color-mix(in srgb, var(--bad) 25%, var(--panel)); }
+.f-up { background: color-mix(in srgb, var(--good) 22%, var(--panel)); }
+tr.out td { opacity: .55; }
+th.stick, td.stick { position: sticky; left: 0; background: var(--panel); z-index: 1; min-width: 150px; white-space: normal; }
+thead th.stick { z-index: 2; }
+tr.hl td.stick { background: var(--hl); }
+td.line { white-space: normal; min-width: 230px; }
+.st { display: inline-flex; align-items: baseline; gap: 2px; margin: 0 8px 2px 0; white-space: nowrap; }
+.st b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.st small, .tds small { color: var(--muted); font-size: 10.5px; }
+.tds { display: inline-flex; align-items: baseline; gap: 6px; padding: 1px 6px; border-radius: 4px; background: var(--chip); white-space: nowrap; cursor: help; }
+.tdo { display: inline-flex; gap: 2px; align-items: baseline; } .tdo b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.tdl { margin-right: 2px; }
+tr.main { cursor: pointer; }
+tr.main.open td { border-bottom-color: transparent; }
+tr.detail td { background: color-mix(in srgb, var(--chip) 55%, var(--panel)); white-space: normal; }
+.dgrid { display: grid; grid-template-columns: 1fr; gap: 10px; padding: 4px 2px; }
+@media (min-width: 760px) { .dgrid { grid-template-columns: 1.2fr 1.4fr auto; } }
+.dh { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 3px; }
+.small { font-size: 12px; }
+.wbars .wb { fill: var(--accent); } .wbars .wb-miss { stroke: var(--muted); stroke-width: 1.5; }
+.wbars .wb-l { font-size: 8px; fill: var(--muted); text-anchor: middle; }
+.byes { margin-top: 10px; font-size: 12.5px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.bye { white-space: nowrap; }
+td.take { font-weight: 600; }
+td.inact { font-variant-numeric: tabular-nums; font-weight: 600; }
+.ia-hi { color: var(--bad); } .ia-md { color: var(--warn); } .ia-lo { color: var(--ink); }
 footer { color: var(--muted); font-size: 12px; max-width: 1200px; margin: 0 auto; padding: 0 16px 30px; }
 </style>
 </head>
@@ -75,40 +122,61 @@ footer { color: var(--muted); font-size: 12px; max-width: 1200px; margin: 0 auto
 <section id="players" class="on">
   <div class="card">
     <h2>Weekly rankings</h2>
-    <p class="note">Projected half-PPR points if the player is active. Injured players are never discounted for "light snaps" (NFL availability is yes/no); their chance to play is shown instead. Tap a column header to sort.</p>
-    <div class="posbar">{% for pos in ["QB","RB","WR","TE"] %}<button data-pos="{{ pos }}" class="{{ 'on' if loop.first }}">{{ pos }}</button>{% endfor %}</div>
-    {% for pos, rows in players.items() %}
+    <p class="note">Half-PPR projections <b>if the player is active</b> (availability is yes/no in the NFL, so injured players show their chance to play instead of a discount). The range bar shows realistic outcomes from past projections like this one: thin line = floor to ceiling (10th to 90th percentile), thick bar = the likely middle half, tick = projection. Tap a row for season stats; tap a header to sort.</p>
+    <div class="toolbar">
+      <div class="posbar">{% for pos in ["QB","RB","WR","TE"] %}<button data-pos="{{ pos }}" class="{{ 'on' if loop.first }}">{{ pos }}</button>{% endfor %}</div>
+      <input type="search" id="psearch" placeholder="Find a player" aria-label="Find a player">
+    </div>
+    {% for pos, block in players.items() %}
     <div class="scroll posview" data-pos="{{ pos }}" {% if not loop.first %}hidden{% endif %}>
-    <table class="sortable">
+    <table class="sortable ranks">
       <thead><tr>
-        <th class="num">#</th><th>Player</th><th>Game</th>
-        <th class="num"><abbr title="Projected fantasy points (half PPR), assuming he plays">Proj</abbr></th>
-        <th class="num hide-sm"><abbr title="Typical miss either way (1 standard deviation)">&plusmn;</abbr></th>
-        <th><abbr title="Start/sit tier from positional rank">Tier</abbr></th>
-        <th><abbr title="Confidence: how tight the projection is relative to its size. Low = boom/bust or little data">Conf.</abbr></th>
-        <th><abbr title="Matchup grade: projection vs. this defense compared to an average defense. A = much easier">Match</abbr></th>
-        <th class="hide-sm">Expected line</th>
-        <th class="num hide-sm"><abbr title="FantasyPros expert consensus positional rank (published Fridays)">ECR</abbr></th>
+        <th class="num">#</th>
+        <th class="num"><abbr title="FantasyPros expert consensus positional rank (published Fridays)">ECR</abbr></th>
+        <th class="stick">Player</th>
+        <th><abbr title="Team vs opponent. Grade A-F ranks this week's matchups at the position; the number is fantasy points this defense adds or removes vs an average defense">Matchup</abbr></th>
+        <th class="num"><abbr title="Chance he is inactive: injury (from the Wed/Thu/Fri practice pattern and game status) or healthy scratch (from his recent active history, depth chart spot and teammates out ahead of him)">Inactive%</abbr></th>
+        <th class="num"><abbr title="Projection with its realistic range: floor (10th pct) to ceiling (90th pct); thick bar = middle 50%">Projection &amp; range</abbr></th>
+        <th class="num"><abbr title="Season fantasy points per game (half PPR)">FP/G</abbr></th>
+        <th>Tier</th>
+        <th class="hide-sm"><abbr title="Projected stat line; TD odds = chance of exactly 1, 2, or 3+ touchdowns">Expected line</abbr></th>
         <th>Takeaway</th>
       </tr></thead>
       <tbody>
-      {% for r in rows %}
-        <tr{% if r.boost >= 1 %} class="hl"{% endif %}>
+      {% for r in block.rows %}
+        <tr class="main{% if r.boost >= 1 %} hl{% endif %}{% if r.avail < 0.5 %} out{% endif %}" data-name="{{ r.name|lower }}">
           <td class="num">{{ r.rank }}</td>
-          <td>{{ r.name }}{% if r.status %}<span class="flag" title="Injury report status (practice days Wed/Thu/Fri: D = did not practice, L = limited, F = full)">{{ r.status }} &middot; {{ r.avail|pct }}</span>{% endif %}{% if r.boost >= 1 %}<span class="flag" title="Projection raised because of vacated volume: {{ r.boost_from }}">INJ +{{ r.boost|f1 }}</span>{% endif %}{% if r.low_sample %}<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior, so uncertainty is wider">low data</span>{% endif %}</td>
-          <td class="muted">{{ r.team }} {{ r.home }} {{ r.opp }}</td>
-          <td class="num"><b>{{ r.proj|f1 }}</b></td>
-          <td class="num muted hide-sm">{{ r.sd|f1 }}</td>
+          <td class="num muted">{{ r.ecr|f0 }}</td>
+          <td class="stick"><div class="pname">{{ r.name }}</div>
+            <div class="badges">
+              {%- if r.status %}<span class="flag {{ 'f-out' if r.avail < 0.5 else 'f-q' }}" title="Injury report (practice Wed/Thu/Fri: D = did not practice, L = limited, F = full) and chance to play from historical practice patterns">{{ r.status }}</span>{% endif %}
+              {%- if r.boost >= 1 %}<span class="flag f-up" title="Projection raised by volume vacated by: {{ r.boost_from }}">+{{ r.boost|f1 }} inj boost</span>{% endif %}
+              {%- if r.low_sample %}<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior, so the range is wider">low data</span>{% endif %}
+            </div></td>
+          <td class="mu">{{ r.team_chip|safe }}<span class="vs">{{ r.home }}</span>{{ r.opp_chip|safe }}
+            <span class="g g-{{ r.grade }}" title="Matchup grade vs the other {{ pos }}s this week">{{ r.grade }}</span><span class="mpts {{ 'pos-g' if r.mpts > 0.05 else 'neg-g' if r.mpts < -0.05 else 'muted' }}" title="Fantasy points vs an average defense">{{ r.mpts|sgn }}</span></td>
+          <td class="num inact {{ 'ia-hi' if r.inactive >= 0.5 else 'ia-md' if r.inactive >= 0.15 else 'ia-lo' if r.inactive >= 0.05 else 'muted' }}" title="{{ r.inactive_why }}">{{ '<1%' if r.inactive < 0.005 else r.inactive|pct }}</td>
+          <td class="num" title="Floor {{ r.p10|f1 }} | middle {{ r.p25|f1 }}-{{ r.p75|f1 }} | ceiling {{ r.p90|f1 }}"><div class="proj"><b>{{ r.proj|f1 }}</b>{{ r.range|safe }}<span class="fc">{{ r.p10|f0 }}&ndash;{{ r.p90|f0 }}</span></div></td>
+          <td class="num">{{ r.fpg|f1 }}</td>
           <td><span class="tier t-{{ r.tier.split()[0] }}">{{ r.tier }}</span></td>
-          <td class="c-{{ r.conf }}">{{ r.conf }}</td>
-          <td class="g g-{{ r.grade }}">{{ r.grade }}</td>
-          <td class="muted hide-sm">{{ r.line }}</td>
-          <td class="num muted hide-sm">{{ r.ecr|f1 }}</td>
+          <td class="line hide-sm">{{ r.line|safe }}</td>
           <td class="take">{{ r.takeaway }}</td>
         </tr>
+        <tr class="detail" hidden><td colspan="10">
+          <div class="dgrid">
+            <div><div class="dh">This week</div><div class="line">{{ r.line|safe }}</div>
+              <div class="muted small">Floor {{ r.p10|f1 }} &middot; median {{ r.p50|f1 }} &middot; ceiling {{ r.p90|f1 }} &middot; confidence {{ r.conf }}</div></div>
+            <div><div class="dh">Season</div><div class="line">{{ r.season|safe }}</div><div class="line">{{ r.usage|safe }}</div>
+              <div class="muted small">{{ r.fpg|f1 }} FP/G &middot; last 3: {{ r.last3|f1 }}</div></div>
+            <div><div class="dh">Points by week</div>{{ r.bars|safe }}</div>
+          </div>
+        </td></tr>
       {% endfor %}
       </tbody>
     </table>
+    {% if block.byes %}
+    <div class="byes"><span class="muted">On bye:</span> {% for b in block.byes %}<span class="bye">{{ b.team_chip|safe }} {{ b.name }} <span class="muted">{{ b.fpg|f1 }} FP/G</span></span>{% endfor %}</div>
+    {% endif %}
     </div>
     {% endfor %}
   </div>
@@ -208,6 +276,10 @@ footer { color: var(--muted); font-size: 12px; max-width: 1200px; margin: 0 auto
       <li><b>Vegas implied total</b> is used as an input (it won in backtesting). RB/WR/TE are blended with FantasyPros expert consensus when available (Fridays); QBs are model-only because the model alone beat the experts there.</li>
       <li><b>Injuries</b>: chance to play comes from the Wed/Thu/Fri practice sequence + game status, learned from 2018+ history. Volume from players likely to sit (&lt;50%) is redistributed using where it actually went historically, by position, depth chart rank and current share.</li>
       <li><b>Wind</b> over 15 mph trims passing efficiency (2%/mph, capped).</li>
+      <li><b>Range bar</b>: outcomes of past projections of the same size at the position. In backtesting about 80% of actual scores landed between floor and ceiling and about half inside the thick bar, as intended.</li>
+      <li><b>TD odds</b>: chance of exactly 1, 2, or 3+ touchdowns from the expected-TD rate (hover for "anytime" odds). Backtest: predicted 1-TD games 20.7% vs 20.2% actual; 2 TDs 3.9% vs 4.2%.</li>
+      <li><b>Inactive%</b>: injury risk from the Wed/Thu/Fri practice pattern and game status, or, if he is not on the report, healthy-scratch risk from his recent active/inactive history, depth chart spot and teammates out ahead of him. Early in the week (before Wednesday's report) last week's status is carried forward.</li>
+      <li><b>Matchup</b>: grade A-F ranks this week's matchups within the position; the number is fantasy points this defense adds or removes vs an average defense.</li>
     </ul>
   </div>
 </section>
@@ -225,12 +297,26 @@ document.querySelectorAll('.posbar button').forEach(b => b.onclick = () => {
 });
 try { const t = localStorage.getItem('nfledge-tab'); if (t) { const b = document.querySelector(`nav button[data-tab="${t}"]`); if (b) b.click(); } } catch (e) {}
 document.querySelectorAll('table.sortable th').forEach((th, i) => th.onclick = () => {
-  const tb = th.closest('table').tBodies[0], rows = [...tb.rows];
+  const tb = th.closest('table').tBodies[0];
+  const mains = [...tb.rows].filter(r => !r.classList.contains('detail'));
   const dir = th.dataset.dir === 'desc' ? 1 : -1; th.dataset.dir = dir === 1 ? 'asc' : 'desc';
-  const val = r => { const t = r.cells[i].innerText.replace(/[%+,]/g, '').trim(); const n = parseFloat(t); return isNaN(n) ? t.toLowerCase() : n; };
-  rows.sort((a, b) => { const x = val(a), y = val(b); return (x > y ? 1 : x < y ? -1 : 0) * dir; });
-  rows.forEach(r => tb.appendChild(r));
+  const val = r => { const t = r.cells[i].innerText.split('
+')[0].replace(/[%+,]/g, '').trim(); const n = parseFloat(t); return isNaN(n) ? t.toLowerCase() : n; };
+  mains.sort((a, b) => { const x = val(a), y = val(b); if (x === '' || y === '') return x === '' ? 1 : -1; return (x > y ? 1 : x < y ? -1 : 0) * dir; });
+  mains.forEach(r => { const d = r.nextElementSibling && r.nextElementSibling.classList.contains('detail') ? r.nextElementSibling : null; tb.appendChild(r); if (d) tb.appendChild(d); });
 });
+document.querySelectorAll('tr.main').forEach(r => r.onclick = e => {
+  const d = r.nextElementSibling; if (!d || !d.classList.contains('detail')) return;
+  d.hidden = !d.hidden; r.classList.toggle('open', !d.hidden);
+});
+const ps = document.getElementById('psearch');
+if (ps) ps.oninput = () => {
+  const q = ps.value.trim().toLowerCase();
+  document.querySelectorAll('table.ranks tr.main').forEach(r => {
+    const show = !q || r.dataset.name.includes(q); r.hidden = !show;
+    const d = r.nextElementSibling; if (d && d.classList.contains('detail') && !show) d.hidden = true;
+  });
+};
 </script>
 </body>
 </html>

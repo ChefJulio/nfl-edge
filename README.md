@@ -16,8 +16,10 @@ Output: `report/nfl_edge_week{N}.html`. The first run downloads ~4 seasons of da
 2018 (a few minutes); later runs only refetch what changed.
 
 ## Report sections
-1. **Player rankings** by position: projection (half PPR, if active), +/- range, confidence, matchup grade,
-   start/sit tier, expert rank, injury flags, bold takeaway.
+1. **Player rankings** by position: projection (half PPR, if active) with a calibrated floor/ceiling range bar,
+   Inactive% (injury + healthy-scratch risk), team-colored matchup with grade and points vs an average defense,
+   season FP/G, start/sit tier, expert rank, stat line with TD odds (1 / 2 / 3+), bold takeaway. Tap a row for
+   season stats and weekly points; bye-week players listed under each table.
 2. **Matchups**: each team's adjusted pass/rush offense and defense and special teams; model margin/total vs
    Vegas, disagreements highlighted.
 3. **Power rankings** with weekly sparklines and bootstrap certainty.
