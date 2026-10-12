@@ -155,7 +155,7 @@ def pick_logo_bg(url: str, primary: str, secondary: str) -> str:
   return primary if hidden(primary) < hidden(secondary) else secondary
 
 
-def range_svg(q10, q25, q75, q90, proj, axis_max, width=120, height=16) -> str:
+def range_svg(q10, q25, q75, q90, proj, axis_max, width=100, height=16) -> str:
   """Floor-to-ceiling whisker (10th-90th pct), likely box (25th-75th), tick at the projection."""
   if any(pd.isna(x) for x in (q10, q25, q75, q90)):
     return ""
@@ -290,6 +290,41 @@ def usage_line(r, st) -> str:
   return "".join(bits)
 
 
+STARTERS = {"QB": 12, "RB": 24, "WR": 36, "TE": 12}
+
+
+def defense_vs_position(eng, p: pd.DataFrame, season: int, week: int) -> dict:
+  """Opponent-adjusted 'defense vs position' ranks: each position's fantasy starters projected against every
+  defense (that defense's ratings in place of this week's opponent, home field neutral); defenses ranked by
+  points allowed. 1st = toughest, 32nd = most generous. Unlike raw fantasy-points-allowed ranks, this is not
+  skewed by which offenses a defense happened to face."""
+  r = eng.game_ratings(season, week)
+  out = {}
+  for pos, n in STARTERS.items():
+    base = p[(p.pos == pos) & (p.avail >= 0.5)].sort_values("proj", ascending=False).head(n)
+    if base.empty:
+      continue
+    allowed = {}
+    for d in r.teams:
+      x = base.assign(def_pass=r.dfn.at[d, "pass"], def_rush=r.dfn.at[d, "rush"], home=0)
+      allowed[d] = float(eng.pm.stats_from_volume(x).proj.mean())
+    s = pd.Series(allowed)
+    out[pos] = s.rank(ascending=True, method="min").astype(int)  # fewest points allowed = 1st (toughest)
+  return out
+
+
+def rank_color(rank: int, n: int = 32) -> str:
+  """1st (toughest) red -> mid neutral -> 32nd (easiest) green."""
+  t = (rank - 1) / max(n - 1, 1)
+  red, mid, green = (255, 131, 120), (214, 218, 224), (84, 209, 122)
+  a, b, u = (red, mid, t / 0.5) if t < 0.5 else (mid, green, (t - 0.5) / 0.5)
+  return "#" + "".join(f"{round(x + (y - x) * u):02x}" for x, y in zip(a, b))
+
+
+def ordinal(n: int) -> str:
+  return f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
+
+
 def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> dict:
   ts = TeamStyle(eng.data.teams)
   p = p.copy()
@@ -298,9 +333,11 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
   p = p[(p.proj >= 0.5) | p.index.isin(qb1)].copy()
   p["pos_rank"] = p.groupby("pos").proj.rank(ascending=False, method="first").astype(int)
   p["tier"] = [start_sit(r, pos, cfg["tiers"]) for r, pos in zip(p.pos_rank, p.pos)]
-  # Grade relative to this week's spread of matchups at the position (opponent effects are modest in size).
-  pct = p.groupby("pos").matchup_pct.rank(pct=True)
-  p["grade"] = np.select([pct >= 0.85, pct >= 0.65, pct > 0.35, pct > 0.15], ["A", "B", "C", "D"], "F")
+  # Matchup = the opponent's defense-vs-position rank (1st toughest .. 32nd easiest); grade and meter follow it,
+  # so the meter, the rank and the takeaway always tell the same story.
+  dvp = defense_vs_position(eng, p, season, week)
+  p["dvp_rank"] = [int(dvp[pos][o]) if pos in dvp and o in dvp[pos] else 16 for pos, o in zip(p.pos, p.opp)]
+  p["grade"] = pd.cut(p.dvp_rank, [0, 6, 12, 19, 26, 32], labels=["F", "D", "C", "B", "A"]).astype(str)
   p["takeaway"] = [takeaway(r) for _, r in p.iterrows()]
   stats = season_stats(eng, season, week)
   n_weeks = week - 1
@@ -320,7 +357,10 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
         "row_style": ts.row_style(r.team), "logo": ts.logo_img(r.team),
         "rank": int(r.pos_rank), "ecr": r.ecr if pd.notna(r.ecr) else prev_ecr.get(r.gsis_id, np.nan),
         "ecr_stale": pd.isna(r.ecr) and r.gsis_id in prev_ecr.index, "name": r.full_name, "team_chip": ts.chip(r.team),
-        "opp_chip": ts.chip(r.opp), "home": "vs" if r.home >= 0 else "@", "proj": r.proj,
+        "opp_chip": ts.chip(r.opp), "opp": r.opp, "opp_logo": ts.logo_img(r.opp, 18),
+        "dvp": ordinal(int(dvp[r.pos][r.opp])) if r.pos in dvp and r.opp in dvp[r.pos] else "",
+        "dvp_color": rank_color(int(dvp[r.pos][r.opp])) if r.pos in dvp and r.opp in dvp[r.pos] else "",
+        "home": "vs" if r.home >= 0 else "@", "proj": r.proj,
         "p10": r.p10, "p25": r.p25, "p50": r.p50, "p75": r.p75, "p90": r.p90,
         "range": range_svg(r.p10, r.p25, r.p75, r.p90, r.proj, axis),
         "grade": r.grade, "mpts": r.matchup_pts, "tier": r.tier, "takeaway": r.takeaway, "conf": r.confidence,
@@ -372,10 +412,10 @@ def takeaway(r) -> str:
     bits.append(f"+{r.injury_boost:.1f} pts from vacated volume ({r.boost_from})")
   if r.if_sits_gain >= 1.0:
     bits.append(f"+{r.if_sits_gain:.1f} more if {r.if_sits_name} sits")
-  if r.grade == "A" and r.matchup_pts >= 0.8:
-    bits.append(f"soft matchup ({r.matchup_pts:+.1f} pts vs avg D)")
-  elif r.grade == "F" and r.matchup_pts <= -0.8:
-    bits.append(f"tough matchup ({r.matchup_pts:+.1f} pts vs avg D)")
+  if r.grade == "A":
+    bits.append(f"soft matchup ({r.opp} {ordinal(r.dvp_rank)} vs {r.pos}s)")
+  elif r.grade == "F":
+    bits.append(f"tough matchup ({r.opp} {ordinal(r.dvp_rank)} vs {r.pos}s)")
   if r.wind_penalty >= 0.05:
     bits.append(f"wind trims passing {r.wind_penalty:.0%}")
   if r.low_sample:

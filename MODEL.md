@@ -72,8 +72,8 @@ Ratings are shown as **points per 100 plays versus an average team**. Higher is 
 
 | Number | Definition |
 |---|---|
-| Matchup grade | A-F rank of this week's matchups within the position |
-| Matchup points | Projection against this defense minus projection against an average defense |
+| Matchup rank | The opponent's defense vs the position, 1st (toughest) to 32nd (easiest): the position's fantasy starters projected against every defense, ranked by points allowed. Opponent-adjusted, so not skewed by which offenses a defense has faced. The meter (1-5 bars) and grade follow the rank |
+| Matchup points (hover) | Projection against this defense minus projection against an average defense |
 | Tier | Positional rank cutoffs from the config (e.g. QB {{ L.tiers_qb }}) |
 | Net rating (Power) | 58% pass + 42% rush (offense minus defense), plus special teams scaled to play frequency |
 | Likely rank (Power) | 10th-90th percentile rank when every team's net rating is resampled within its bootstrap uncertainty |

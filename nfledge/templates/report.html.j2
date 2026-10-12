@@ -123,7 +123,7 @@ td.mu .g { margin-left: 8px; } td.mu .pill { margin-left: 4px; }
 .rng .rng-w { stroke: var(--tfg, var(--muted)); stroke-width: 1.5; opacity: .6; }
 .rng .rng-b { fill: var(--tfg, var(--accent)); opacity: .45; }
 .rng .rng-p { stroke: var(--tfg, var(--ink)); stroke-width: 2.2; }
-td.line { min-width: 300px; }
+td.line { min-width: 280px; }
 .xl { display: flex; align-items: center; gap: 12px; }
 .xl-st { display: flex; flex-wrap: nowrap; gap: 9px; }
 .xl-td { display: flex; gap: 6px; }
@@ -134,7 +134,7 @@ td.line { min-width: 300px; }
 .tdd .td0 { stroke: var(--tfg, var(--muted)); opacity: .18; } .tdd .td1 { stroke: var(--tfg, var(--accent)); opacity: .45; }
 .tdd .td2 { stroke: var(--tfg, var(--accent)); opacity: .72; } .tdd .td3 { stroke: var(--tfg, var(--accent)); }
 .tdd .tdc { font-size: 9.5px; font-weight: 700; text-anchor: middle; fill: var(--tfg, var(--ink)); }
-td.take { white-space: normal; min-width: 220px; max-width: 320px; font-weight: 600; line-height: 1.35; }
+td.take { white-space: normal; min-width: 180px; max-width: 250px; font-weight: 600; line-height: 1.35; }
 tr.main { cursor: pointer; }
 tr.detail td { background: var(--panel2); white-space: normal; border-radius: 6px; }
 .dgrid { display: grid; grid-template-columns: 1fr; gap: 14px; padding: 6px 4px; }
@@ -201,6 +201,28 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 .arrow .from { opacity: .7; } .arrow i { font-style: normal; opacity: .6; }
 .best { font-weight: 800; color: var(--accent); }
 .bt-group { text-align: center !important; border-bottom: 0 !important; }
+/* matchup cell: opponent, 5-segment grade meter, points vs an average defense */
+.mu-row { display: flex; align-items: center; gap: 10px; }
+.opp { display: inline-flex; align-items: center; gap: 6px; min-width: 72px; }
+.opp .vs { font-size: 11px; width: 16px; color: rgba(255,255,255,.55); }
+.opp .logo { width: 20px; height: 20px; } .opp .logo img { width: 15px; height: 15px; }
+.opp b { font-weight: 700; font-size: 12.5px; letter-spacing: .02em; }
+.meter { display: inline-flex; gap: 2px; align-items: flex-end; cursor: help; }
+.meter i { width: 4px; height: 12px; border-radius: 1.5px; background: rgba(255,255,255,.13); }
+.meter.m5 i.on, .meter.m4 i.on { background: #54d17a; } .meter.m3 i.on { background: rgba(255,255,255,.62); }
+.meter.m2 i.on, .meter.m1 i.on { background: #ff8378; }
+.dvp { font-size: 12.5px; font-weight: 700; min-width: 34px; cursor: help; }
+/* translucent chips on dark tiles (light pills glare on dark rows) */
+tr.teamrow .pill { background: rgba(255,255,255,.08); color: rgba(255,255,255,.82); }
+tr.teamrow .pill-good { background: rgba(69,194,107,.17); color: #8fe6a9; }
+tr.teamrow .pill-bad { background: rgba(242,120,109,.18); color: #ffaaa1; }
+tr.teamrow .pill-warn { background: rgba(224,176,74,.17); color: #f3d38c; }
+tr.teamrow .tier { background: rgba(255,255,255,.07); color: rgba(255,255,255,.65); font-weight: 600; }
+tr.teamrow .t-Must { background: rgba(69,194,107,.3); color: #b2f1c4; } tr.teamrow .t-Start { background: rgba(69,194,107,.14); color: #c3ebcf; }
+tr.teamrow .t-Flex { background: rgba(224,176,74,.16); color: #f3d38c; }
+tr.teamrow .flag { background: rgba(255,255,255,.1); color: rgba(255,255,255,.85); }
+tr.teamrow .f-q { background: rgba(224,176,74,.18); color: #f3d38c; } tr.teamrow .f-out { background: rgba(242,120,109,.2); color: #ffaaa1; }
+tr.teamrow .f-up { background: rgba(69,194,107,.18); color: #8fe6a9; }
 /* power */
 table.power td { padding-top: 9px; padding-bottom: 9px; }
 table.power .rk { width: 46px; }
@@ -283,7 +305,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <th class="num">#</th>
         <th class="num"><abbr title="FantasyPros expert consensus rank (Fridays); faded 'lw' = last week's">ECR</abbr></th>
         <th class="stick">Player</th>
-        <th><abbr title="Opponent, matchup grade (A-F vs other {{ pos }}s this week), and fantasy points vs an average defense">Matchup</abbr></th>
+        <th><abbr title="Opponent and its defense vs {{ pos }}s: 1st = toughest (red), 32nd = easiest (green). Opponent-adjusted, from the model.">Matchup</abbr></th>
         <th class="num"><abbr title="Chance he is inactive: injury (practice pattern + game status) or healthy scratch">Inactive</abbr></th>
         <th class="num"><abbr title="Projection; bar = floor to ceiling (10th-90th pct), thick = middle 50%">Projection</abbr></th>
         <th class="num"><abbr title="Season fantasy points per game">FP/G</abbr></th>
@@ -302,7 +324,12 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
               {%- if r.boost >= 1 %}<span class="flag f-up" title="Raised by volume vacated by: {{ r.boost_from }}">+{{ r.boost|f1 }} inj</span>{% endif %}
               {%- if r.low_sample %}<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>{% endif %}
             </div>{% endif %}</div></div></td>
-          <td class="mu"><span class="vs">{{ r.home }}</span>{{ r.opp_chip|safe }}<span class="g g-{{ r.grade }}" title="Matchup grade vs the other {{ pos }}s this week">{{ r.grade }}</span><span class="pill {{ 'pill-good' if r.mpts > 0.05 else 'pill-bad' if r.mpts < -0.05 else 'pill-soft' }}" title="Fantasy points vs an average defense">{{ r.mpts|sgn }}</span></td>
+          {% set lvl = {'A': 5, 'B': 4, 'C': 3, 'D': 2, 'F': 1}[r.grade] %}
+          <td class="mu"><div class="mu-row">
+            <span class="opp"><span class="vs">{{ r.home }}</span>{{ r.opp_logo|safe }}<b>{{ r.opp }}</b></span>
+            <span class="meter m{{ lvl }}" title="Matchup {{ r.grade }}: {{ r.opp }} is {{ r.dvp }} of 32 vs {{ pos }}s">{% for i in range(5) %}<i class="{{ 'on' if i < lvl }}"></i>{% endfor %}</span>
+            <span class="dvp" style="color:{{ r.dvp_color }}" title="{{ r.opp }} defense vs {{ pos }}s: {{ r.dvp }} of 32 (1st = toughest, 32nd = easiest). This week: {{ r.mpts|sgn }} pts vs an average defense.">{{ r.dvp }}</span>
+          </div></td>
           <td class="num" title="{{ r.inactive_why }}"><span class="{{ 'pill pill-bad' if r.inactive >= 0.5 else 'pill pill-warn' if r.inactive >= 0.15 else 'pill pill-soft' if r.inactive >= 0.05 else 'quiet' }}">{{ '<1%' if r.inactive < 0.005 else r.inactive|pct }}</span></td>
           <td class="num" title="Floor {{ r.p10|f1 }} · middle {{ r.p25|f1 }}-{{ r.p75|f1 }} · ceiling {{ r.p90|f1 }}"><div class="proj"><b>{{ r.proj|f1 }}</b>{{ r.range|safe }}<span class="fc">{{ r.p10|f0 }}&ndash;{{ r.p90|f0 }}</span></div></td>
           <td class="num">{{ r.fpg|f1 }}</td>
