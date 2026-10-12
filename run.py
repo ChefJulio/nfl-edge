@@ -33,7 +33,7 @@ def state_key(data, cfg, scoring, *extra) -> str:
   """Changes whenever the inputs that matter change: config, scoring, final games, injury report / practice
   updates, expert rankings, rosters, or model code."""
   inj = data.injuries[data.injuries.season == data.current_season]
-  parts = [cfg, scoring.weights, data.latest_week, data.pending_games, len(data.pbp), frame_hash(inj),
+  parts = [docs.model_config(cfg), scoring.weights, data.latest_week, data.pending_games, len(data.pbp), frame_hash(inj),
            frame_hash(data.practice), frame_hash(data.ecr), len(data.rosters), model_code(), *extra]
   return hashlib.sha1(json.dumps(parts, sort_keys=True, default=str).encode()).hexdigest()[:12]
 
@@ -114,17 +114,18 @@ def main():
     res, bt_seasons = cached_backtest(data, cfg, scoring)
     ev = bt.evaluate(res, POSITIONS, ecr_only=True)
 
-  power, team_luck = rp.team_tables(eng, season, week, cfg, proj)
+  power = rp.team_tables(eng, season, week, cfg, proj)
   inj = data.injuries
   injury_report = bool(((inj.season == season) & (inj.week == week)).any())
   ctx = {
     "season": season, "week": week, "pending": data.pending_games, "scoring": scoring.name,
     "generated": time.strftime("%Y-%m-%d %H:%M"), "injury_report": injury_report,
     "players": rp.player_rankings(eng, proj, season, week, cfg), "games": rp.matchups(eng, season, week, cfg, proj),
-    "power": power, "team_luck": team_luck, "power_vol": rp.league_volume(eng, season, week, eng.tm.fit(season, week)), "player_luck": rp.player_luck(eng, proj, season, week),
+    "power": power, "power_vol": rp.league_volume(eng, season, week, eng.tm.fit(season, week)),
     "roles": rp.role_changes(eng, season, week, cfg), "backtest": rp.backtest_summary(ev),
     "bt_seasons": " and ".join(map(str, bt_seasons)) or "n/a", "bt_takeaway": backtest_takeaway(ev),
-    "margin_disagree": cfg["report"]["margin_disagree"], "total_disagree": cfg["report"]["total_disagree"],
+    "tier_cfg": cfg["tiers"], "margin_disagree": cfg["report"]["margin_disagree"],
+    "total_disagree": cfg["report"]["total_disagree"],
     "model_doc": docs.render(docs.live_values(eng, cfg, season, week, res, ev)),
   }
   if ctx["model_doc"]["stale"]:

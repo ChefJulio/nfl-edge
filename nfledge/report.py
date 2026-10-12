@@ -41,9 +41,18 @@ def sparkline(values, width=90, height=22) -> str:
           f'<circle cx="{width:.1f}" cy="{cy:.1f}" r="2.2" fill="currentColor"/></svg>')
 
 
-def start_sit(rank: int, pos: str, tiers: dict) -> str:
-  t = tiers.get(pos, [5, 12, 18])
-  return "Must start" if rank <= t[0] else "Start" if rank <= t[1] else "Flex" if rank <= t[2] else "Sit"
+def roster_tiers(p: pd.DataFrame, tiers: dict) -> tuple[list, list]:
+  """League-size tiers (QB1 = top `teams` QBs, QB2 = the next `teams`, ...) and the roster slot each player fills
+  in a standard league: 'start' (within teams x starters at his position), 'flex' (among the best remaining
+  flex-eligible players, teams x flex of them, by projection) or 'bench'."""
+  n = int(tiers.get("teams", 10))
+  starters = tiers.get("starters", {})
+  label = [f"{pos}{(r - 1) // n + 1}" for pos, r in zip(p.pos, p.pos_rank)]
+  start = p.pos_rank <= p.pos.map(lambda x: n * int(starters.get(x, 0)))
+  pool = p[~start & p.pos.isin(tiers.get("flex_positions", ["RB", "WR", "TE"]))]
+  flex = p.index.isin(pool.proj.nlargest(n * int(tiers.get("flex", 0))).index)
+  slot = ["start" if s else "flex" if f else "bench" for s, f in zip(start, flex)]
+  return label, slot
 
 
 def _lum(hexcolor: str) -> float:
@@ -340,7 +349,7 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
   qb1 = p[p.pos == "QB"].sort_values("db", ascending=False).groupby("team").head(1).index
   p = p[(p.proj >= 0.5) | p.index.isin(qb1)].copy()
   p["pos_rank"] = p.groupby("pos").proj.rank(ascending=False, method="first").astype(int)
-  p["tier"] = [start_sit(r, pos, cfg["tiers"]) for r, pos in zip(p.pos_rank, p.pos)]
+  p["tier"], p["slot"] = roster_tiers(p, cfg["tiers"])
   # Matchup = the opponent's defense-vs-position rank (1st toughest .. 32nd easiest); grade and meter follow it,
   # so the meter, the rank and the takeaway always tell the same story.
   dvp = defense_vs_position(eng, p, season, week)
@@ -348,6 +357,7 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
   p["grade"] = pd.cut(p.dvp_rank, [0, 6, 12, 19, 26, 32], labels=["F", "D", "C", "B", "A"]).astype(str)
   p["takeaway"] = [takeaway(r) for _, r in p.iterrows()]
   stats = season_stats(eng, season, week)
+  luck = player_luck(eng, p, season, week)
   n_weeks = week - 1
   # Until Friday's expert rankings are out, show last week's rank (display only; never fed to the model).
   e = eng.data.ecr
@@ -372,13 +382,14 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
         "home": "vs" if r.home >= 0 else "@", "proj": r.proj,
         "p10": r.p10, "p25": r.p25, "p50": r.p50, "p75": r.p75, "p90": r.p90,
         "range": range_svg(r.p10, r.p25, r.p75, r.p90, r.proj, axis),
-        "grade": r.grade, "mpts": r.matchup_pts, "tier": r.tier, "takeaway": r.takeaway, "conf": r.confidence,
+        "grade": r.grade, "mpts": r.matchup_pts, "tier": r.tier, "slot": r.slot, "takeaway": r.takeaway, "conf": r.confidence,
         "status": r.status, "avail": r.avail, "inactive": 1 - r.avail,
         "inactive_why": inactive_why(r), "boost": r.injury_boost, "boost_from": r.boost_from or "",
         "low_sample": bool(r.low_sample), "line": expected_line(r),
         "fpg": st["fpg"] if st else np.nan, "last3": st["last3"] if st else np.nan,
         "season": season_line(r, st), "usage": usage_line(r, st),
         "bars": week_bars(st["weeks"] if st else [], n_weeks),
+        "sched": schedule_note(luck.loc[r.gsis_id] if r.gsis_id in luck.index else None),
       })
     out[pos] = {"rows": rows, "byes": bye_rows(eng, stats, ts, pos, season, week)}
   return out
@@ -575,19 +586,7 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
       "sos_next_o": float(sp.get("off_next", np.nan)), "sos_next_d": float(sp.get("def_next", np.nan)),
       "spark": sparkline(hist.loc[team].tolist(), width=84, height=22) if team in hist.index else "",
     })
-  power = sorted(rows, key=lambda x: x["rank"])
-  # Schedule luck (teams): the same played-schedule numbers, with raw vs adjusted per game.
-  luck = []
-  for team in rb.teams:
-    if team not in sos.index or pd.isna(sos.at[team, "off_past"]):
-      continue
-    x = sos.loc[team]
-    luck.append({"team": team, "row_style": ts.row_style(team), "logo": ts.logo_img(team),
-                 "off_gap": x.off_past, "def_gap": x.def_past, "total_gap": x.past,
-                 "off_raw": x.raw_off, "off_adj": x.raw_off + x.off_past,
-                 "def_raw": x.raw_def, "def_adj": x.raw_def + x.def_past})
-  luck.sort(key=lambda x: -x["total_gap"])
-  return power, luck
+  return sorted(rows, key=lambda x: x["rank"])
 
 
 def net_rating(r) -> pd.Series:
@@ -629,6 +628,22 @@ def diverging_bar(v: float, scale: float, width: int = 120) -> str:
           f'<span class="dbar-fill {cls}" style="left:{left:.1f}%;width:{abs(frac) * 100:.1f}%"></span></span>')
 
 
+def _rgb_dist(a: str, b: str) -> float:
+  ra, rb = ([int(c.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4)] for c in (a, b))
+  return sum((x - y) ** 2 for x, y in zip(ra, rb)) ** 0.5
+
+
+def battle_colors(ts: "TeamStyle", away: str, home: str) -> dict:
+  """One bar color per team for a game, visible on the dark card and distinct from each other: the primary
+  colors, falling back to a secondary when the two teams' primaries look alike (e.g. two navy teams)."""
+  ap, asec = (ts.visible(c) for c in ts.c.get(away, ("#666666", "#999999")))
+  hp, hsec = (ts.visible(c) for c in ts.c.get(home, ("#666666", "#999999")))
+  for a, h in ((ap, hp), (ap, hsec), (asec, hp), (asec, hsec)):
+    if _rgb_dist(a, h) >= 110:
+      return {away: a, home: h}
+  return {away: ap, home: "#9aa3b2"}
+
+
 def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None = None) -> list:
   """Per game: the headline lines (model vs Vegas, in betting notation), edges where they disagree, and
   where each side's offense has the advantage over the other's defense."""
@@ -648,6 +663,7 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
   for _, g in gl.iterrows():
     def side(t):
       return {"team": t, "nick": names.get(t, t), "row_style": ts.row_style(t), "logo": ts.logo_img(t, 28),
+              "logo_sm": ts.logo_img(t, 16),
               "qb": qb_name.get(starters.get(t), ""),
               "off_pass": per100(r.off.at[t, "pass"] + r.qb_term(starters.get(t))),
               "off_rush": per100(r.off.at[t, "rush"]), "def_pass": per100(-r.dfn.at[t, "pass"]),
@@ -660,39 +676,49 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
     v_fav = g.home_team if (pd.notna(vm) and vm >= 0) else g.away_team
     edges = []
     if pd.notna(dm) and abs(dm) >= 1.0:
-      edges.append({"label": f"Spread lean {g.home_team if dm > 0 else g.away_team}", "value": f"{abs(dm):.1f}",
+      edges.append({"label": f"Model likes {g.home_team if dm > 0 else g.away_team} by {abs(dm):.1f} more than Vegas",
                     "strong": abs(dm) >= cfg["report"]["margin_disagree"]})
     if pd.notna(dt) and abs(dt) >= 1.5:
-      edges.append({"label": "Lean " + ("Over" if dt > 0 else "Under"), "value": f"{abs(dt):.1f}",
+      edges.append({"label": f"Model expects {abs(dt):.1f} {'more' if dt > 0 else 'fewer'} points "
+                             f"({'Over' if dt > 0 else 'Under'})",
                     "strong": abs(dt) >= cfg["report"]["total_disagree"]})
-    # Each edge in points THIS game: per-play edge x that offense's projected plays of that type, so a run edge
-    # (fewer plays) is not read as equal to a pass edge of the same per-play size.
+    # Each battle in points THIS game: per-play edge x that offense's projected plays of that type, so a run edge
+    # (fewer plays) is not read as equal to a pass edge of the same per-play size. Shown as a tug of war in the two
+    # teams' colors: the offense's color fills from the left, the defense's from the right, and the winner pulls
+    # the split past the middle.
     vol_of = tp.set_index("team")
-    facets = []
+    col = battle_colors(ts, g.away_team, g.home_team)
+    battles = []
     for o, d in ((away, home), (home, away)):
-      for unit, label, vcol in (("pass", "Pass", "dropbacks_hat"), ("rush", "Run", "rushes_hat")):
+      rows = []
+      for unit, label, vcol in (("pass", "Passing", "dropbacks_hat"), ("rush", "Running", "rushes_hat")):
         edge100 = o[f"off_{unit}"] - d[f"def_{unit}"]
         plays = float(vol_of.at[o["team"], vcol]) if o["team"] in vol_of.index else 30.0
         pts = edge100 / 100 * plays
-        facets.append({"label": f"{o['team']} {label} O vs {d['team']} {label} D", "edge": pts, "plays": plays,
-                       "per100": edge100, "bar": diverging_bar(pts, 4.0), "row_style": o["row_style"],
-                       "team": o["team"]})
+        winner = None if abs(pts) < 0.5 else o["team"] if pts > 0 else d["team"]
+        rows.append({"label": label, "pts": pts, "split": 50 + 50 * max(-0.9, min(0.9, pts / 6.0)),
+                     "winner": winner, "winner_logo": (o if winner == o["team"] else d)["logo_sm"] if winner else "",
+                     "title": f"{edge100:+.1f} per 100 plays x {plays:.0f} projected {label.lower()} plays "
+                              f"= {pts:+.1f} pts vs an average matchup"})
+      battles.append({"off": o["team"], "def": d["team"], "off_logo": o["logo_sm"], "def_logo": d["logo_sm"],
+                      "off_color": col[o["team"]], "def_color": col[d["team"]], "rows": rows,
+                      "total": sum(x["pts"] for x in rows)})
     out.append({"away": away, "home": home, "kickoff": kickoff_text(g.gameday, g.gametime),
                 "neutral": g.location == "Neutral", "model_line": spread_text(m_fav, g.model_margin),
                 "model_total": g.model_total, "vegas_line": spread_text(v_fav, vm) if pd.notna(vm) else "n/a",
-                "vegas_total": vt, "edges": edges, "facets": facets,
+                "vegas_total": vt, "edges": edges, "battles": battles,
                 "score": f"{g.away_team} {g.away_pts:.0f} - {g.home_team} {g.home_pts:.0f}"})
   return out
 
 
-def player_luck(eng, p: pd.DataFrame, season: int, week: int) -> list:
+def player_luck(eng, p: pd.DataFrame, season: int, week: int) -> pd.DataFrame:
   """Raw fantasy points/game vs schedule-adjusted: each past game is divided by how favorable that opponent
   was for this player's current profile (projection vs that defense / projection vs average defense)."""
   r = eng.tm.fit(season, week)
   a = eng.actual[(eng.actual.season == season) & (eng.actual.week < week)]
   a = a[a.gsis_id.isin(p.gsis_id)][["gsis_id", "week", "opponent_team", "actual"]]
   if a.empty:
-    return []
+    return pd.DataFrame(columns=["games", "raw", "adj", "gap"])
   base = p.set_index("gsis_id")
   rows = base.loc[a.gsis_id].reset_index()
   rows["opp"] = a.opponent_team.to_numpy()
@@ -711,16 +737,16 @@ def player_luck(eng, p: pd.DataFrame, season: int, week: int) -> list:
   g = a.groupby("gsis_id").agg(games=("actual", "size"), raw=("actual", "mean"), adj=("adj", "mean"))
   g = g[g.games >= 3]
   g["gap"] = g.raw - g.adj
-  g = g.join(base[["full_name", "pos", "team", "proj"]])
-  g = g[g.raw >= 8]
-  g = g.reindex(g.gap.abs().sort_values(ascending=False).index).head(40)
-  ts = TeamStyle(eng.data.teams)
-  return [{"name": x.full_name, "pos": x.pos, "team": x.team, "games": int(x.games), "raw": x.raw, "adj": x.adj,
-           "row_style": ts.row_style(x.team), "logo": ts.logo_img(x.team),
-           "gap": x.gap, "takeaway": ("Stats inflated by soft schedule - sell high" if x.gap >= 1 else
-                                      "Better than his stats - tough schedule so far, buy low" if x.gap <= -1
-                                      else "Schedule-neutral production")}
-          for x in g.itertuples()]
+  return g
+
+
+def schedule_note(x) -> str:
+  """One line for the Rankings detail row: season FP/G with the defenses faced taken out."""
+  if x is None:
+    return ""
+  verdict = ("soft schedule so far: stats a bit inflated" if x.gap >= 1 else
+             "tough schedule so far: better than his stats" if x.gap <= -1 else "schedule-neutral so far")
+  return f"Schedule-adjusted {x.adj:.1f} FP/G ({verdict})"
 
 
 def role_changes(eng, season: int, week: int, cfg: dict) -> list:

@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 333d45eed0efb84d
+documented_code_hash: 352b0ab9261b87c8
 ---
 # How the model works
 
@@ -76,12 +76,12 @@ Ratings are estimated per play. On the Power tab they are shown as **points per 
 |---|---|
 | Matchup rank | The opponent's defense vs the position, 1st (toughest) to 32nd (easiest): the position's fantasy starters projected against every defense, ranked by points allowed. Opponent-adjusted, so not skewed by which offenses a defense has faced. The meter (1-5 bars) and grade follow the rank |
 | Matchup points (hover) | Projection against this defense minus projection against an average defense |
-| Tier | Positional rank cutoffs from the config (e.g. QB {{ L.tiers_qb }}) |
+| Tier | League-size buckets for a {{ L.tier_teams }}-team league: QB1 = QB ranks 1-{{ L.tier_teams }}, QB2 = the next {{ L.tier_teams }}, and so on for every position. Pill color is the roster slot the player fills with {{ L.tier_roster }}: green = starter, amber = flex range (best remaining RB/WR/TE), plain = bench |
 | Power values | Points per game vs an average opponent: each unit's per-play rating x league-average plays of that type (pass offense includes the starting QB). Offense = Pass O + Run O, Defense = Pass D + Run D, Net = Offense + Defense + ST. League-average volume means a defense is judged on per-play quality, not on how many plays its own offense left it facing |
 | Rank range (Power) | 10th-90th percentile rank when every team's net rating is resampled within its bootstrap uncertainty |
-| Schedule played / left (Power, Schedule luck) | Points per game the opponents took away (played) or would take away (left), unit by unit: the team's actual dropbacks against each opponent's pass defense and runs against its run defense, plus the offenses its defense faced (incl. their QBs). Re-scored weekly with current ratings; 1st = hardest |
+| Schedule played / left (Power) | Points per game the opponents took away (played) or would take away (left), unit by unit: the team's actual dropbacks against each opponent's pass defense and runs against its run defense, plus the offenses its defense faced (incl. their QBs). Re-scored weekly with current ratings; 1st = hardest |
 | Rank movement (Power) | Change in net-rating rank since ratings as of last week |
-| Schedule luck (players) | Each past game rescaled by how easy that defense is for this player's profile |
+| Schedule-adjusted FP/G (Rankings, tap a player) | Each past game rescaled by how easy that defense is for this player's profile; a gap of 1+ FP/G from the raw average is called out as a soft or tough schedule |
 | Role changes | Latest game vs the previous three, snap share +{{ L.snap_jump }} or opportunity share +{{ L.opp_jump }} |
 
 ## 7. Validation

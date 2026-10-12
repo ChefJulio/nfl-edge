@@ -38,6 +38,11 @@ nav.tabs .wrap { display: flex; gap: 22px; overflow-x: auto; scrollbar-width: no
 nav.tabs button { flex: none; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font: inherit; font-weight: 600; font-size: 13.5px; padding: 12px 0 10px; cursor: pointer; }
 nav.tabs button:hover { color: var(--ink); }
 nav.tabs button.on { color: var(--ink); border-bottom-color: var(--accent); }
+@media (max-width: 640px) {
+  nav.tabs .wrap { gap: 16px; } nav.tabs button { font-size: 13px; }
+  header.top { padding: 16px 0 10px; }
+  .meta { gap: 5px; } .meta span { font-size: 11px; padding: 2px 8px; }
+}
 main { padding: 20px 0 48px; }
 section { display: none; } section.on { display: block; }
 
@@ -64,6 +69,14 @@ details.howto div { margin-top: 8px; color: var(--muted); font-size: 12.5px; max
 
 /* tables */
 .scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* Floating table header: a .scroll wrapper scrolls sideways, which traps position: sticky inside it, so a copy of
+   the header rides in a zero-height sticky strip just under the tabs (shown once the real one scrolls away) and
+   follows the table's horizontal scroll. Clicks pass through to the real header (sorting). */
+.fhead { position: sticky; top: var(--navh, 45px); height: 0; z-index: 6; visibility: hidden; }
+.fhead.show { visibility: visible; }
+.fhead-in { overflow: hidden; background: var(--panel); border-bottom: 1px solid var(--line); box-shadow: 0 6px 12px -8px rgba(0,0,0,.5); }
+.fhead table { width: auto; table-layout: fixed; margin: 0 !important; border-spacing: 0 !important; }
+.fhead th { overflow: hidden; text-overflow: ellipsis; }
 table { border-collapse: collapse; width: 100%; font-size: 13px; }
 th, td { padding: 8px 10px; text-align: left; white-space: nowrap; vertical-align: middle; }
 thead th.can-sort { cursor: pointer; } thead th.can-sort:hover { color: var(--ink); }
@@ -85,12 +98,13 @@ tr.teamrow { position: relative; }
 tr.teamrow > td { background: #171a20; color: #fff; border: 0; }
 tr.teamrow > td:first-child { border-radius: 6px 0 0 6px; }
 tr.teamrow > td:last-child { border-radius: 0 6px 6px 0; }
-/* Team trim: 2px primary-color border around the row, secondary-color notches centered on each side.
+/* Team trim: 2px primary-color border around the row, with a full-height secondary-color stripe just inside it on
+   the left and right edges (clipped to the rounded inner corners, so it reads as piping).
    One pseudo-element only: a ::before on a table row would be laid out as an extra cell and shift the columns. */
 tr.teamrow::after { content: ""; position: absolute; inset: 0; border-radius: 6px; pointer-events: none; z-index: 4;
   border: 2px solid var(--tc);
-  background: linear-gradient(var(--tc2), var(--tc2)) left center / 4px 42% no-repeat border-box,
-              linear-gradient(var(--tc2), var(--tc2)) right center / 4px 42% no-repeat border-box; }
+  background: linear-gradient(var(--tc2), var(--tc2)) left top / 3px 100% no-repeat padding-box,
+              linear-gradient(var(--tc2), var(--tc2)) right top / 3px 100% no-repeat padding-box; }
 tr.teamrow:hover > td { background: #1e222a; }
 tr.teamrow .quiet, tr.teamrow .sub, tr.teamrow .st small, tr.teamrow .fc, tr.teamrow .vs { color: color-mix(in srgb, var(--tfg) 75%, transparent); }
 tr.teamrow.boosted > td:first-child { box-shadow: inset 3px 0 0 #ffd84d; }
@@ -108,13 +122,27 @@ tr.teamrow.out > td { color: rgba(255,255,255,.55); }
 .g { display: inline-block; width: 20px; text-align: center; border-radius: 5px; font-weight: 800; font-size: 11.5px; line-height: 19px; background: #eef0f3; color: #2a2f37; }
 .g-A { background: #c9ecd4; color: #0c5222; } .g-B { background: #e3f4e8; color: #1e7a3a; } .g-D { background: #fdebe9; color: #a8352a; } .g-F { background: #f9d3ce; color: #8a1d14; }
 .tier { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 0 8px; border-radius: 999px; line-height: 20px; background: #eef0f3; color: #3a3f47; }
-.t-Must { background: #16803c; color: #fff; } .t-Start { background: #dcf2e3; color: #10612a; } .t-Flex { background: #fdefc6; color: #7a5200; }
+.t-start { background: #dcf2e3; color: #10612a; } .t-flex { background: #fdefc6; color: #7a5200; }
 .flag { display: inline-block; font-size: 10.5px; font-weight: 600; padding: 0 6px; border-radius: 4px; line-height: 17px; background: rgba(255,255,255,.92); color: #1d1f23; white-space: nowrap; }
 .f-q { background: #fdefc6; color: #7a5200; } .f-out { background: #fde1dd; color: #9b2218; } .f-up { background: #dcf2e3; color: #10612a; }
 
 /* rankings */
-table.ranks td.stick, table.ranks th.stick { position: sticky; left: 0; z-index: 1; min-width: 190px; white-space: normal; }
-table.ranks thead th.stick { z-index: 3; }
+/* Name columns stay pinned while a wide table scrolls sideways (phones). */
+td.stick, th.stick { position: sticky; left: 0; z-index: 1; }
+thead th.stick { z-index: 3; }
+table.ranks td.stick, table.ranks th.stick { min-width: 190px; white-space: normal; }
+.m-only { display: none; }
+@media (max-width: 640px) {
+  .hide-xs { display: none; }
+  .m-only { display: flex; }
+  table.ranks td.stick { min-width: 0; width: 100%; }
+  table.ranks td.stick .who { width: 100%; }
+  .m-proj { margin-left: auto; flex-direction: column; align-items: flex-end; padding-left: 10px; line-height: 1.15; }
+  .m-proj b { font-size: 16px; font-weight: 800; }
+  .m-proj small { font-size: 10.5px; color: rgba(255,255,255,.7); white-space: nowrap; font-weight: 600; }
+  th, td { padding: 8px 7px; }
+  td.take { min-width: 240px; max-width: 300px; }
+}
 .badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
 td.rk { font-weight: 700; width: 32px; }
 td.ecr { color: color-mix(in srgb, var(--tfg, var(--ink)) 82%, transparent); }
@@ -164,9 +192,9 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 .valbar b { min-width: 42px; text-align: right; }
 
 /* matchups */
-.games { display: grid; grid-template-columns: 1fr; gap: 16px; }
-@media (min-width: 980px) { .games { grid-template-columns: 1fr 1fr; } }
-.game { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
+.games { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+@media (min-width: 980px) { .games { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.game { min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
 .g-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
 .g-team { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--tc); color: var(--tfg); min-height: 62px; }
 .g-team.home { flex-direction: row-reverse; text-align: right; }
@@ -174,7 +202,9 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 .g-team b { font-size: 15px; font-weight: 700; display: block; line-height: 1.15; }
 .g-team small { font-size: 11.5px; opacity: .8; }
 .g-at { padding: 0 10px; font-size: 12px; font-weight: 700; color: var(--muted); background: var(--panel); align-self: stretch; display: grid; place-items: center; }
-.g-sub { display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; color: var(--muted); padding: 8px 16px 0; }
+.g-sub { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 8px; }
+.g-sub > span { white-space: nowrap; }
+.g-sub {font-size: 11.5px; color: var(--muted); padding: 8px 16px 0; }
 .g-lines { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 16px 6px; }
 .lb { border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; background: var(--panel2); }
 .lb small { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
@@ -188,13 +218,22 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 .edge b { font-weight: 800; }
 .edge.strong { background: var(--accent); border-color: var(--accent); color: #fff; }
 .edge.none { color: var(--muted); border-style: dashed; }
-.facets { padding: 6px 16px 12px; display: grid; gap: 5px; }
-.facet { display: grid; grid-template-columns: 22px 1fr 128px 44px; align-items: center; gap: 8px; font-size: 12px; }
-.facet .logo { width: 20px; height: 20px; } .facet .logo img { width: 15px; height: 15px; }
-.facet .lbl { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.facet .v { text-align: right; font-weight: 700; }
-.facet-axis { display: grid; grid-template-columns: 22px 1fr 128px 44px; gap: 8px; font-size: 10px; color: var(--faint); text-transform: uppercase; letter-spacing: .05em; }
-.facet-axis span:nth-child(3) { display: flex; justify-content: space-between; }
+/* battles: tug of war in the two teams' colors; offense fills from the left, defense from the right */
+.battles { padding: 8px 16px 14px; display: grid; gap: 10px; }
+.bt-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; }
+.battle { display: grid; gap: 5px; }
+.bt-head, .bt-row { display: grid; grid-template-columns: 62px 1fr 72px; align-items: center; gap: 10px; }
+.bt-ends { display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 600; color: var(--ink); }
+.bt-ends > span { display: inline-flex; align-items: center; gap: 5px; }
+.battle .logo { width: 18px; height: 18px; } .battle .logo img { width: 13px; height: 13px; }
+.bt-lbl { font-size: 12px; color: var(--muted); }
+.tug { position: relative; height: 10px; }
+.tug::before { content: ""; position: absolute; inset: 0; border-radius: 5px; background: var(--dc); }
+.tug-o { position: absolute; inset: 0 auto 0 0; border-radius: 5px 0 0 5px; background: var(--oc); }
+.tug-mid { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--ink); box-shadow: 0 0 0 1.5px var(--panel); }
+@media (max-width: 520px) { .bt-head, .bt-row { grid-template-columns: 54px 1fr 64px; gap: 8px; } .bt-ends { font-size: 11px; } .bt-win .logo { display: none; } }
+.bt-win { display: inline-flex; align-items: center; gap: 5px; justify-content: flex-end; font-size: 12px; white-space: nowrap; }
+.bt-win b { font-weight: 800; }
 .game details { border-top: 1px solid var(--line); }
 .game details summary { cursor: pointer; padding: 9px 16px; font-size: 12px; color: var(--muted); font-weight: 600; list-style: none; }
 .game details summary::after { content: " +"; } .game details[open] summary::after { content: " -"; }
@@ -222,8 +261,8 @@ tr.teamrow .pill-good { background: rgba(69,194,107,.17); color: #8fe6a9; }
 tr.teamrow .pill-bad { background: rgba(242,120,109,.18); color: #ffaaa1; }
 tr.teamrow .pill-warn { background: rgba(224,176,74,.17); color: #f3d38c; }
 tr.teamrow .tier { background: rgba(255,255,255,.07); color: rgba(255,255,255,.65); font-weight: 600; }
-tr.teamrow .t-Must { background: rgba(69,194,107,.3); color: #b2f1c4; } tr.teamrow .t-Start { background: rgba(69,194,107,.14); color: #c3ebcf; }
-tr.teamrow .t-Flex { background: rgba(224,176,74,.16); color: #f3d38c; }
+tr.teamrow .t-start { background: rgba(69,194,107,.22); color: #b2f1c4; }
+tr.teamrow .t-flex { background: rgba(224,176,74,.16); color: #f3d38c; }
 tr.teamrow .flag { background: rgba(255,255,255,.1); color: rgba(255,255,255,.85); }
 tr.teamrow .f-q { background: rgba(224,176,74,.18); color: #f3d38c; } tr.teamrow .f-out { background: rgba(242,120,109,.2); color: #ffaaa1; }
 tr.teamrow .f-up { background: rgba(69,194,107,.18); color: #8fe6a9; }
@@ -261,7 +300,8 @@ table.power .mc { gap: 5px; }
 tr.teamrow .sub { color: rgba(255,255,255,.62); }
 table.power .sub { display: block; margin-top: 2px; font-size: 11px; }
 /* model doc */
-.doc-layout { display: grid; grid-template-columns: 1fr; gap: 20px; }
+.doc-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+@media (max-width: 640px) { .doc { padding: 16px 16px !important; font-size: 14px !important; } }
 @media (min-width: 1100px) { .doc-layout { grid-template-columns: 220px minmax(0, 1fr); } }
 .toc { display: none; }
 @media (min-width: 1100px) { .toc { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 64px; align-self: start; }
@@ -303,7 +343,6 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   <button data-tab="players" class="on">Rankings</button>
   <button data-tab="games">Matchups</button>
   <button data-tab="power">Power</button>
-  <button data-tab="luck">Schedule luck</button>
   <button data-tab="roles">Role changes</button>
   <button data-tab="model">Model</button>
 </div></nav>
@@ -331,9 +370,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <th class="num" data-first="asc">#</th>
         <th class="num" data-first="asc"><abbr title="FantasyPros expert consensus rank (Fridays); faded 'lw' = last week's">ECR</abbr></th>
         <th class="stick" data-first="asc">Player</th>
-        <th data-first="desc"><abbr title="Opponent and its defense vs {{ pos }}s: 1st = toughest (red), 32nd = easiest (green). Opponent-adjusted, from the model.">Matchup</abbr></th>
+        <th class="hide-xs" data-first="desc"><abbr title="Opponent and its defense vs {{ pos }}s: 1st = toughest (red), 32nd = easiest (green). Opponent-adjusted, from the model.">Matchup</abbr></th>
         <th class="num"><abbr title="Chance he is inactive: injury (practice pattern + game status) or healthy scratch">Inactive</abbr></th>
-        <th class="num"><abbr title="Projection; bar = floor to ceiling (10th-90th pct), thick = middle 50%">Projection</abbr></th>
+        <th class="num hide-xs"><abbr title="Projection; bar = floor to ceiling (10th-90th pct), thick = middle 50%">Projection</abbr></th>
         <th class="num"><abbr title="Season fantasy points per game">FP/G</abbr></th>
         <th data-first="asc">Tier</th>
         <th class="hide-sm nosort"><abbr title="Projected stat line; donut = touchdown odds">Expected line</abbr></th>
@@ -349,17 +388,18 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
               {%- if r.status %}<span class="flag {{ 'f-out' if r.avail < 0.5 else 'f-q' }}" title="Injury report; practice Wed/Thu/Fri: D = did not practice, L = limited, F = full">{{ r.status }}</span>{% endif %}
               {%- if r.boost >= 1 %}<span class="flag f-up" title="Raised by volume vacated by: {{ r.boost_from }}">+{{ r.boost|f1 }} inj</span>{% endif %}
               {%- if r.low_sample %}<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>{% endif %}
-            </div>{% endif %}</div></div></td>
+            </div>{% endif %}</div>
+            <span class="m-only m-proj"><b>{{ r.proj|f1 }}</b><small>{{ r.home }} {{ r.opp }} <span style="color:{{ r.dvp_color }}">{{ r.dvp }}</span></small></span></div></td>
           {% set lvl = {'A': 5, 'B': 4, 'C': 3, 'D': 2, 'F': 1}[r.grade] %}
-          <td class="mu" data-v="{{ r.dvp_rank }}"><div class="mu-row">
+          <td class="mu hide-xs" data-v="{{ r.dvp_rank }}"><div class="mu-row">
             <span class="opp"><span class="vs">{{ r.home }}</span>{{ r.opp_logo|safe }}<b>{{ r.opp }}</b></span>
             <span class="meter m{{ lvl }}" title="Matchup {{ r.grade }}: {{ r.opp }} is {{ r.dvp }} of 32 vs {{ pos }}s">{% for i in range(5) %}<i class="{{ 'on' if i < lvl }}"></i>{% endfor %}</span>
             <span class="dvp" style="color:{{ r.dvp_color }}" title="{{ r.opp }} defense vs {{ pos }}s: {{ r.dvp }} of 32 (1st = toughest, 32nd = easiest). This week: {{ r.mpts|sgn }} pts vs an average defense.">{{ r.dvp }}</span>
           </div></td>
           <td class="num" data-v="{{ r.inactive }}" title="{{ r.inactive_why }}"><span class="{{ 'pill pill-bad' if r.inactive >= 0.5 else 'pill pill-warn' if r.inactive >= 0.15 else 'pill pill-soft' if r.inactive >= 0.05 else 'quiet' }}">{{ '<1%' if r.inactive < 0.005 else r.inactive|pct }}</span></td>
-          <td class="num" data-v="{{ r.proj }}" title="Floor {{ r.p10|f1 }} · middle {{ r.p25|f1 }}-{{ r.p75|f1 }} · ceiling {{ r.p90|f1 }}"><div class="proj"><b>{{ r.proj|f1 }}</b>{{ r.range|safe }}<span class="fc">{{ r.p10|f0 }}&ndash;{{ r.p90|f0 }}</span></div></td>
+          <td class="num hide-xs" data-v="{{ r.proj }}" title="Floor {{ r.p10|f1 }} · middle {{ r.p25|f1 }}-{{ r.p75|f1 }} · ceiling {{ r.p90|f1 }}"><div class="proj"><b>{{ r.proj|f1 }}</b>{{ r.range|safe }}<span class="fc">{{ r.p10|f0 }}&ndash;{{ r.p90|f0 }}</span></div></td>
           <td class="num">{{ r.fpg|f1 }}</td>
-          <td data-v="{{ {'Must start': 1, 'Start': 2, 'Flex': 3, 'Sit': 4}[r.tier] }}"><span class="tier t-{{ r.tier.split()[0] }}">{{ r.tier }}</span></td>
+          <td data-v="{{ r.rank }}"><span class="tier t-{{ r.slot }}" title="{{ {'start': 'Starter in a ' ~ tier_cfg.teams ~ '-team league', 'flex': 'Flex range in a ' ~ tier_cfg.teams ~ '-team league', 'bench': 'Bench depth in a ' ~ tier_cfg.teams ~ '-team league'}[r.slot] }}">{{ r.tier }}</span></td>
           <td class="line hide-sm">{{ r.line|safe }}</td>
           <td class="take">{{ r.takeaway }}</td>
         </tr>
@@ -368,7 +408,8 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
             <div><div class="dh">This week</div><div class="line">{{ r.line|safe }}</div>
               <div class="muted small" style="margin-top:6px">Floor {{ r.p10|f1 }} &middot; median {{ r.p50|f1 }} &middot; ceiling {{ r.p90|f1 }} &middot; confidence {{ r.conf }}</div></div>
             <div><div class="dh">Season</div><div class="line">{{ r.season|safe }}</div><div class="line" style="margin-top:4px">{{ r.usage|safe }}</div>
-              <div class="muted small" style="margin-top:6px">{{ r.fpg|f1 }} FP/G &middot; last 3: {{ r.last3|f1 }}</div></div>
+              <div class="muted small" style="margin-top:6px">{{ r.fpg|f1 }} FP/G &middot; last 3: {{ r.last3|f1 }}</div>
+              {% if r.sched %}<div class="muted small" title="Each past game rescaled by how easy that defense was for his profile">{{ r.sched }}</div>{% endif %}</div>
             <div><div class="dh">Points by week</div>{{ r.bars|safe }}</div>
           </div>
         </td></tr>
@@ -387,7 +428,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   <details class="howto"><summary>How to read</summary><div>
     Model lines come only from opponent-adjusted team ratings (no Vegas inputs), so a disagreement is a genuine second opinion. Spreads use betting notation (favorite minus points).
     Edges appear when the model differs from Vegas by 1+ point on the spread or 1.5+ on the total, and are highlighted at {{ margin_disagree }}+ / {{ total_disagree }}+.
-    The bars show each offense against the opposing defense in <b>points this game</b>: the per-play edge times that offense's projected dropbacks or runs, so a run edge is never read as equal to a pass edge of the same per-play size. Special teams and home field also count toward the model's margin. Right = the offense has the edge, left = the defense does.
+    <b>Who wins each battle</b> is a tug of war: each offense's passing and running game against the other team's pass and run defense, in the two teams' colors. The offense's color fills from the left, the defense's from the right; whoever pushes past the middle line wins, and the number is how many points that edge is worth <b>this game</b> compared with an average matchup (the per-play edge times that offense's projected dropbacks or runs, so a run edge is never read as equal to a pass edge of the same per-play size). Hover a row for the per-play numbers. Special teams and home field also count toward the model's margin.
   </div></details>
   <div class="games">
   {% for g in games %}
@@ -403,12 +444,21 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <div class="lb"><small>Vegas</small><div class="big">{{ g.vegas_line }}</div><div class="tot">O/U <b>{{ g.vegas_total|f1 if g.vegas_total == g.vegas_total else 'n/a' }}</b></div></div>
       </div>
       <div class="edges">
-        {% for e in g.edges %}<span class="edge{{ ' strong' if e.strong }}">{{ e.label }} <b>&middot; {{ e.value }}</b></span>{% else %}<span class="edge none">Model agrees with Vegas</span>{% endfor %}
+        {% for e in g.edges %}<span class="edge{{ ' strong' if e.strong }}">{{ e.label }}</span>{% else %}<span class="edge none">Model agrees with Vegas</span>{% endfor %}
       </div>
-      <div class="facets">
-        <div class="facet-axis"><span></span><span>Offense vs defense (pts this game)</span><span><span>D edge</span><span>O edge</span></span><span></span></div>
-        {% for f in g.facets %}
-        <div class="facet" title="{{ f.per100|sgn }} per 100 plays x {{ '%.0f'|format(f.plays) }} projected plays"><span>{{ (g.away.logo if f.team == g.away.team else g.home.logo)|safe }}</span><span class="lbl">{{ f.label }}</span>{{ f.bar|safe }}<span class="v">{{ f.edge|sgn }}</span></div>
+      <div class="battles">
+        <div class="bt-title">Who wins each battle</div>
+        {% for b in g.battles %}
+        <div class="battle" style="--oc:{{ b.off_color }};--dc:{{ b.def_color }}">
+          <div class="bt-head"><span></span><span class="bt-ends"><span>{{ b.off_logo|safe }}{{ b.off }} offense</span><span>{{ b.def }} defense{{ b.def_logo|safe }}</span></span><span></span></div>
+          {% for x in b.rows %}
+          <div class="bt-row" title="{{ x.title }}">
+            <span class="bt-lbl">{{ x.label }}</span>
+            <span class="tug"><span class="tug-o" style="width:{{ '%.1f'|format(x.split) }}%"></span><span class="tug-mid"></span></span>
+            <span class="bt-win">{% if x.winner %}{{ x.winner_logo|safe }}<b>{{ x.winner }}</b> +{{ '%.1f'|format(x.pts|abs) }}{% else %}<span class="muted">Even</span>{% endif %}</span>
+          </div>
+          {% endfor %}
+        </div>
         {% endfor %}
       </div>
       <details><summary>Team ratings</summary>
@@ -429,12 +479,12 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     Colored badges are league ranks (green = top 8, red = bottom 8). <b>Schedule</b>: points per game the opponents took away (played) or would take away (left), unit by unit: the team's actual dropbacks against each opponent's pass defense and runs against its run defense, plus the offenses its defense faced. Positive = tougher than average; 1st = hardest. Re-scored every week with current ratings. Arrows show the move since last week.
   </div></details>
   <div class="card"><div class="scroll"><table class="sortable tiles power">
-    <thead><tr><th class="num" data-first="asc">#</th><th data-first="asc">Team</th><th class="num">Net</th><th>Offense</th><th>Defense</th><th class="minor">Pass O</th><th class="minor">Run O</th><th class="minor">Pass D</th><th class="minor">Run D</th><th class="minor">ST</th><th>Schedule played</th><th>Schedule left</th><th class="hide-sm nosort">Trend</th></tr></thead>
+    <thead><tr><th class="num" data-first="asc">#</th><th class="stick" data-first="asc">Team</th><th class="num">Net</th><th>Offense</th><th>Defense</th><th class="minor">Pass O</th><th class="minor">Run O</th><th class="minor">Pass D</th><th class="minor">Run D</th><th class="minor">ST</th><th>Schedule played</th><th>Schedule left</th><th class="hide-sm nosort">Trend</th></tr></thead>
     <tbody>
     {% for r in power %}
       <tr class="teamrow" style="{{ r.row_style }}">
         <td class="num rk" data-v="{{ r.rank }}"><span class="rkn">{{ r.rank }}</span>{% if r.move > 0 %}<span class="mv up">&#9650;{{ r.move }}</span>{% elif r.move < 0 %}<span class="mv dn">&#9660;{{ -r.move }}</span>{% else %}<span class="mv">&ndash;</span>{% endif %}</td>
-        <td data-v="{{ r.nick }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.nick }}</b><span class="sub">{{ r.team }} &middot; {{ r.record }}</span></div></div></td>
+        <td class="stick" data-v="{{ r.nick }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.nick }}</b><span class="sub">{{ r.team }} &middot; {{ r.record }}</span></div></div></td>
         <td class="num" data-v="{{ r.net }}"><div class="netc"><b>{{ r.net|sgn }}</b><span class="sub" title="80% of simulations rank this team between {{ r.range.replace('-', ' and ') }} (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range {{ r.range }}</span></div></td>
         <td data-v="{{ r.off }}" title="Pass O {{ r.pass_o|sgn }} + Run O {{ r.rush_o|sgn }}"><div class="mc"><span class="mv2">{{ r.off|sgn }}</span><span class="rk-b {{ r.off_rk|rkc }}">{{ r.off_rk|ord }}</span></div></td>
         <td data-v="{{ r.def }}" title="Pass D {{ r.pass_d|sgn }} + Run D {{ r.rush_d|sgn }}"><div class="mc"><span class="mv2">{{ r.def|sgn }}</span><span class="rk-b {{ r.def_rk|rkc }}">{{ r.def_rk|ord }}</span></div></td>
@@ -450,35 +500,14 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   </table></div></div>
 </section>
 
-<section id="tab-luck">
-  <div class="sec-head"><div><h2>Schedule luck</h2><p>Who has had an easy or hard schedule so far, and what it does to their numbers.</p></div></div>
-  <details class="howto"><summary>How to read</summary><div>
-    Teams: schedule difficulty in points per game (the same numbers as Power), unit by unit and weighted by the plays actually run. Positive = tougher than average, so the raw numbers undersell the team; negative = an easy schedule flattered them. Hover a value for raw vs adjusted.
-    Players: fantasy points per game, raw vs adjusted for the defenses faced.
-  </div></details>
-  <div class="card"><div class="scroll"><table class="sortable tiles">
-    <thead><tr><th data-first="asc">Team</th><th class="num">Defenses faced</th><th class="num">Offenses faced</th><th class="num">Schedule difficulty</th><th class="nosort">Takeaway</th></tr></thead>
-    <tbody>{% for r in team_luck %}<tr class="teamrow" style="{{ r.row_style }}"><td data-v="{{ r.team }}"><div class="who">{{ r.logo|safe }}<b>{{ r.team }}</b></div></td>
-      <td class="num" title="Raw {{ r.off_raw|sgn }} vs adjusted {{ r.off_adj|sgn }}">{{ r.off_gap|sgn }}</td>
-      <td class="num" title="Raw {{ r.def_raw|sgn }} vs adjusted {{ r.def_adj|sgn }}">{{ r.def_gap|sgn }}</td>
-      <td class="num" data-v="{{ r.total_gap }}"><span class="valbar">{{ r.total_gap|dbar(5, 90)|safe }}<b>{{ r.total_gap|sgn }}</b></span></td>
-      <td class="take">{{ 'Tough schedule so far: likely better than the record' if r.total_gap > 1.5 else 'Easy schedule so far: likely worse than the record' if r.total_gap < -1.5 else '' }}</td></tr>{% endfor %}</tbody>
-  </table></div></div>
-  <div class="card"><div class="scroll"><table class="sortable tiles">
-    <thead><tr><th data-first="asc">Player</th><th class="num">G</th><th class="num">Raw FP/G</th><th class="num">Adjusted</th><th class="num">Gap</th><th class="nosort">Takeaway</th></tr></thead>
-    <tbody>{% for r in player_luck %}<tr class="teamrow" style="{{ r.row_style }}"><td data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.name }}</b><span class="sub">{{ r.pos|posb|safe }} {{ r.team }}</span></div></div></td><td class="num">{{ r.games }}</td><td class="num">{{ r.raw|f1 }}</td><td class="num">{{ r.adj|f1 }}</td>
-      <td class="num" data-v="{{ r.gap }}"><span class="valbar">{{ r.gap|dbar(3, 70)|safe }}<b>{{ r.gap|sgn }}</b></span></td><td class="take">{{ r.takeaway if r.gap|abs >= 1 else '' }}</td></tr>{% endfor %}</tbody>
-  </table></div></div>
-</section>
-
 <section id="tab-roles">
   <div class="sec-head"><div><h2>Role changes</h2><p>Snap and opportunity spikes in week {{ week - 1 }} compared with each player's previous three games.</p></div></div>
   <details class="howto"><summary>How to read</summary><div>
     Compares each player's latest game with his previous three. Opportunity share = (carries + targets) / team plays. These are alerts, not model inputs: check the reason (injury ahead of him, demotion, game script) before chasing.
   </div></details>
   <div class="card"><div class="scroll"><table class="sortable tiles">
-    <thead><tr><th data-first="asc">Player</th><th><abbr title="Sorts by the size of the jump">Snap share</abbr></th><th><abbr title="Sorts by the size of the jump">Opportunity share</abbr></th><th class="num">Touches</th><th class="nosort">Takeaway</th></tr></thead>
-    <tbody>{% for r in roles %}<tr class="teamrow" style="{{ r.row_style }}"><td data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.name }}</b><span class="sub">{{ r.pos|posb|safe }} {{ r.team }}{% if r.week != week - 1 %} &middot; wk {{ r.week }}{% endif %}</span></div></div></td>
+    <thead><tr><th class="stick" data-first="asc">Player</th><th><abbr title="Sorts by the size of the jump">Snap share</abbr></th><th><abbr title="Sorts by the size of the jump">Opportunity share</abbr></th><th class="num">Touches</th><th class="nosort">Takeaway</th></tr></thead>
+    <tbody>{% for r in roles %}<tr class="teamrow" style="{{ r.row_style }}"><td class="stick" data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.name }}</b><span class="sub">{{ r.pos|posb|safe }} {{ r.team }}{% if r.week != week - 1 %} &middot; wk {{ r.week }}{% endif %}</span></div></div></td>
       <td data-v="{{ (r.snap_now or 0) - (r.snap_prev or 0) }}"><span class="arrow"><span class="from">{{ r.snap_prev|pct }}</span><i>&rarr;</i><b>{{ r.snap_now|pct }}</b></span></td>
       <td data-v="{{ (r.opp_now or 0) - (r.opp_prev or 0) }}"><span class="arrow"><span class="from">{{ r.opp_prev|pct }}</span><i>&rarr;</i><b>{{ r.opp_now|pct }}</b></span></td>
       <td class="num">{{ r.touches }}</td><td class="take">{{ r.takeaway }}</td></tr>{% endfor %}</tbody>
@@ -547,6 +576,47 @@ document.querySelectorAll('tr.main').forEach(r => r.onclick = () => {
   const d = r.nextElementSibling; if (!d || !d.classList.contains('detail')) return;
   d.hidden = !d.hidden; r.classList.toggle('open', !d.hidden);
 });
+// Floating headers (see .fhead in the CSS).
+const nav = document.querySelector('nav.tabs');
+const setNav = () => document.documentElement.style.setProperty('--navh', nav.offsetHeight + 'px');
+setNav();
+const heads = [];
+document.querySelectorAll('.scroll > table').forEach(tbl => {
+  if (!tbl.tHead || tbl.closest('.game')) return;
+  const sc = tbl.parentElement;
+  const strip = document.createElement('div'); strip.className = 'fhead'; strip.setAttribute('aria-hidden', 'true');
+  const inner = document.createElement('div'); inner.className = 'fhead-in';
+  const copy = document.createElement('table'); copy.className = tbl.className.replace('sortable', '');
+  inner.appendChild(copy); strip.appendChild(inner); sc.parentElement.insertBefore(strip, sc);
+  const build = () => {
+    copy.replaceChildren(tbl.tHead.cloneNode(true));
+    const src = [...tbl.tHead.rows[0].cells], dst = [...copy.tHead.rows[0].cells];
+    let total = 0;
+    dst.forEach((c, i) => {
+      const w = src[i].getBoundingClientRect().width; total += w;
+      c.style.width = c.style.minWidth = c.style.maxWidth = w + 'px';
+      c.onclick = () => { src[i].click(); build(); };
+    });
+    copy.style.width = total + 'px';
+    inner.style.width = sc.clientWidth + 'px';
+    inner.scrollLeft = sc.scrollLeft;
+  };
+  sc.addEventListener('scroll', () => { inner.scrollLeft = sc.scrollLeft; }, { passive: true });
+  heads.push({ tbl, strip, build, built: false });
+});
+const placeHeads = () => {
+  const navh = nav.getBoundingClientRect().bottom;
+  heads.forEach(h => {
+    const r = h.tbl.getBoundingClientRect(), th = h.tbl.tHead.getBoundingClientRect();
+    const show = r.width > 0 && th.top < navh && r.bottom - th.height > navh + 40;
+    if (show && !h.built) { h.build(); h.built = true; }
+    h.strip.classList.toggle('show', show);
+  });
+};
+const rebuild = () => { setNav(); heads.forEach(h => h.built = false); placeHeads(); };
+window.addEventListener('scroll', placeHeads, { passive: true });
+window.addEventListener('resize', rebuild);
+document.addEventListener('click', e => { if (e.target.closest('nav.tabs, .posbar, tr.main, thead')) setTimeout(rebuild, 0); });
 const ps = document.getElementById('psearch');
 if (ps) ps.oninput = () => {
   const q = ps.value.trim().toLowerCase();
@@ -554,6 +624,7 @@ if (ps) ps.oninput = () => {
     const show = !q || r.dataset.name.includes(q); r.hidden = !show;
     const d = r.nextElementSibling; if (d && d.classList.contains('detail') && !show) d.hidden = true;
   });
+  rebuild();
 };
 </script>
 </body>

@@ -18,14 +18,13 @@ Output: `report/nfl_edge_week{N}.html`. The first run downloads ~4 seasons of da
 ## Report sections
 1. **Player rankings** by position: projection (half PPR, if active) with a calibrated floor/ceiling range bar,
    Inactive% (injury + healthy-scratch risk), team-colored matchup with grade and points vs an average defense,
-   season FP/G, start/sit tier, expert rank, stat line with TD odds (1 / 2 / 3+), bold takeaway. Tap a row for
-   season stats and weekly points; bye-week players listed under each table.
-2. **Matchups**: each team's adjusted pass/rush offense and defense and special teams; model margin/total vs
-   Vegas, disagreements highlighted.
-3. **Power rankings** with weekly sparklines and bootstrap certainty.
-4. **Schedule luck**: teams (strength of opponents faced) and players (raw vs schedule-adjusted points/game).
-5. **Role-change alerts**: snap / opportunity share spikes (waiver targets). Alerts only, not model inputs.
-6. **Model**: how every number is calculated, the exact fitted formulas and weights, and the walk-forward
+   season FP/G, league tier (QB1/RB2/WR3...), expert rank, stat line with TD odds (1 / 2 / 3+), bold takeaway. Tap a row for
+   season stats, weekly points and schedule-adjusted FP/G; bye-week players listed under each table.
+2. **Matchups**: model line/total vs Vegas with plain-language edges, and a tug-of-war per battle (each
+   offense's passing and running vs the other defense) in points this game.
+3. **Power rankings**: points per game by unit (7 ranks), rank range, strength of schedule played/left, trend.
+4. **Role-change alerts**: snap / opportunity share spikes (waiver targets). Alerts only, not model inputs.
+5. **Model**: how every number is calculated, the exact fitted formulas and weights, and the walk-forward
    track record (model vs FantasyPros experts vs Vegas-scaled vs raw stats), all from `MODEL.md` with live values.
 
 ## For contributors and agents

@@ -21,11 +21,21 @@ from .config import ROOT
 
 DOC = ROOT / "MODEL.md"
 PRESENTATION = {"report.py", "docs.py"}  # changes here never change model outputs
+PRESENTATION_CFG = {"tiers", "report"}  # config sections only the page reads
+
+
+def model_config(cfg: dict) -> dict:
+  """The config minus display-only sections: what the model cache key and the MODEL.md fingerprint hash, so
+  changing a tier cutoff or report threshold re-renders in seconds instead of retraining."""
+  return {k: v for k, v in cfg.items() if k not in PRESENTATION_CFG}
 
 
 def code_fingerprint() -> str:
+  import json
+  import tomllib
   parts = [p.read_text(encoding="utf-8") for p in sorted((ROOT / "nfledge").glob("*.py")) if p.name not in PRESENTATION]
-  parts.append((ROOT / "config.toml").read_text(encoding="utf-8"))
+  cfg = tomllib.loads((ROOT / "config.toml").read_text(encoding="utf-8"))
+  parts.append(json.dumps(model_config(cfg), sort_keys=True))
   return hashlib.sha1("\n".join(parts).replace("\r\n", "\n").encode()).hexdigest()[:16]
 
 
@@ -89,7 +99,8 @@ def live_values(eng, cfg: dict, season: int, week: int, bt_res: pd.DataFrame | N
     "wind_thr": f"{pmc['wind_threshold_mph']}", "wind_pen": f"{pmc['wind_penalty_per_mph']:.0%}",
     "wind_cap": f"{pmc['wind_penalty_cap']:.0%}", "blend": blend or "n/a", "coverage": cov,
     "redist_scale": f"{cfg.get('injuries', {}).get('redistribution_scale', 1.0):g}",
-    "tiers_qb": " / ".join(map(str, cfg["tiers"]["QB"])),
+    "tier_teams": f"{cfg['tiers']['teams']}",
+    "tier_roster": ", ".join(f"{v} {k}" for k, v in cfg["tiers"]["starters"].items()) + f", {cfg['tiers']['flex']} flex",
     "snap_jump": f"{pmc['role_change_snap_jump']:.0%}", "opp_jump": f"{pmc['role_change_opp_jump']:.0%}",
     "bt_table": _bt_table(ev),
     "formulas": formulas(eng, season, week),

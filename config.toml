@@ -58,11 +58,14 @@ role_change_snap_jump = 0.15
 role_change_opp_jump = 0.08
 
 [tiers]
-# Positional rank cutoffs for start/sit tiers: [must-start, start, flex] (rest = sit).
-QB = [5, 12, 18]
-RB = [8, 24, 36]
-WR = [10, 30, 42]
-TE = [4, 12, 16]
+# Rankings tier labels follow a standard league: tier N = positional ranks (N-1)*teams+1 .. N*teams, so with 10
+# teams QB1 = QB 1-10, QB2 = 11-20, WR3 = 21-30. Pill color marks the roster slot the player fills: a starter
+# (rank within teams x starters), the flex range (best remaining RB/WR/TE for teams x flex spots), or bench.
+# Presentation only: not part of the model cache key or the MODEL.md fingerprint.
+teams = 10
+starters = { QB = 1, RB = 2, WR = 2, TE = 1 }
+flex = 1
+flex_positions = ["RB", "WR", "TE"]
 
 [report]
 output = "report/nfl_edge_week{week}.html"

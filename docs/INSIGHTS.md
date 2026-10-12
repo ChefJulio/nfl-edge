@@ -77,7 +77,8 @@ threads. Numbers are walk-forward backtest results (train on earlier seasons, te
 - **Power tab units:** points per game vs average at league-average volume so units add up; using league-average
   (not actual) volume keeps defenses from being punished for facing more plays behind a bad offense.
 - **Strength of schedule:** unit-aware (team's actual dropbacks vs each opponent's pass D, runs vs run D, plus
-  offenses faced), re-scored weekly with current ratings; Power and Schedule luck share one function.
+  offenses faced), re-scored weekly with current ratings. (A separate Schedule luck tab duplicated Power's
+  "Schedule played" and was removed; player schedule-adjusted FP/G lives in the Rankings detail row.)
 - **Matchup ranks:** opponent-adjusted defense-vs-position: position starters projected against all 32 defenses.
   Grade/meter/takeaway all derive from this rank (an earlier separate grade contradicted it).
 
@@ -113,9 +114,12 @@ threads. Numbers are walk-forward backtest results (train on earlier seasons, te
   by stripping HTML (a text dump hid that tables weren't rendering).
 - **Visual QA:** headless Chrome:
   `chrome.exe --headless=new --disable-gpu --hide-scrollbars --force-dark-mode --blink-settings=preferredColorScheme=0 --window-size=1440,900 --force-device-scale-factor=1.5 --virtual-time-budget=4000 --screenshot=<png> file:///.../report/nfl_edge_week6.html#<tab>`
-  then Read the PNG. For long sections, extract the section into a standalone HTML with the page `<style>`.
+  then Read the PNG. Headless Chrome will not lay out narrower than ~500px and renders a scrolled window badly:
+  for phone width or scrolled states, load the page in a 375px (or 1440px) iframe inside a wrapper HTML and
+  scroll from an injected script.
 - **Caches:** `cache/model_<key>.pkl` (engine + projections; raw data detached to keep it ~36 MB) and
-  `cache/backtest_<key>.parquet`; keys hash config, scoring, data state and model code. Delete them to force a
+  `cache/backtest_<key>.parquet`; keys hash config (minus display-only `[tiers]`/`[report]`, see
+  `docs.model_config`), scoring, data state and model code. Delete them to force a
   retrain. `cache/logo_bg.json` stores per-team logo circle color choices.
 - **Sorting convention:** sortable cells carry `data-v` (raw value); headers take `data-first="asc"` for rank-like
   columns and `class="nosort"` for unsortable ones.
@@ -123,21 +127,33 @@ threads. Numbers are walk-forward backtest results (train on earlier seasons, te
   normalized (Windows and the Linux CI agree).
 
 ## 6. UI decisions (current state)
-- Team rows are dark tiles (#171a20), white text, 2px border in the team primary, secondary-color notches on both
-  sides, 6px radius, 3px gaps. Very dark team colors are lightened just enough to show (`TeamStyle.visible`).
+- Team rows are dark tiles (#171a20), white text, 2px border in the team primary, a full-height 3px secondary
+  stripe just inside the left and right edges (owner found centered notches "silly"), 6px radius, 3px gaps. Very dark team colors are lightened just enough to show (`TeamStyle.visible`).
 - Logo circles: team primary or secondary, chosen per team by measuring which hides less of the logo's pixels.
 - Position badges: QB rose, RB green, WR blue, TE amber, everywhere a position appears.
 - Rankings: Matchup = opponent logo + 5-bar meter + DvP rank colored red (1st, toughest) to green (32nd);
   projection range bar; TD donuts; Inactive%; ECR shows last week's rank faded with "lw" until Friday.
-- Matchups: model vs Vegas lines in betting notation first; edge pills; offense-vs-defense bars in points this game.
+- Matchups: model vs Vegas lines in betting notation first; plain-English edge pills ("Model likes X by 1.1 more
+  than Vegas"); "Who wins each battle" tug-of-war bars in the two teams' colors (offense fills from the left,
+  defense from the right, winner + points this game on the right). Centered +/- bars were too hard to read.
+  `battle_colors` swaps to a secondary when both primaries look alike.
 - Power: points per game, 7 ranked units, rank range (10th-90th pct simulated rank), schedule played/left.
-- Tabs: Rankings, Matchups, Power, Schedule luck, Role changes, Model. (Track record folded into Model section 7.)
+- Tabs: Rankings, Matchups, Power, Role changes, Model. (Track record folded into Model section 7; Schedule luck
+  folded into Power + the Rankings detail row.)
+- Tiers: league-size buckets (QB1 = QB 1-10 in a 10-team league), pill color = roster slot (starter / flex range /
+  bench) for 1QB 2RB 2WR 1TE 1FLEX; `[tiers]` in config.
+- Sticky table headers: `.scroll` wrappers (overflow-x) trap `position: sticky`, so the page script floats a
+  cloned header in a sticky strip under the tabs, synced to column widths and horizontal scroll; clicks forward
+  to the real header.
+- Phone (<=640px): Rankings folds projection + matchup into the pinned player cell and hides those columns;
+  name/team columns are pinned (`.stick`) on every wide table; grids use `minmax(0, 1fr)` so content can't widen
+  the page.
 
 ## 7. Open threads / ideas not yet done
 - **Play-caller / coordinator effects** (owner suggestion: Flores, Reid): test whether a coach's effect follows him
   across teams beyond roster; on hold at owner's request.
-- **IDP fantasy scoring** (tackles/sacks/INTs) was asked about but the owner never answered whether he plays IDP.
+- **IDP fantasy scoring** (tackles/sacks/INTs) was asked about but the owner never answered whether they play IDP.
 - **Next Gen Stats** (separation, RYOE, CPOE) and **FTN charting** (screens, box counts) are free and untested.
 - **Daily practice archive:** `cache/injury_snapshots/` accumulates our own Wed/Thu/Fri history going forward.
-- Light mode and phone layouts have had little visual review.
+- Light mode has had little visual review (phone layouts reviewed 2026-10-12).
 - The 2026 test season is small (weeks 3-5 at time of writing); re-run experiments as it grows.
