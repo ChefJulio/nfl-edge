@@ -394,6 +394,29 @@ class InjuryModel:
           p.at[i, "status"] = f"{rep} last wk"
     return p
 
+  def report_avail(self, season: int, week: int) -> pd.Series:
+    """P(active) for everyone on the injury report (any position, e.g. defenders): practice-sequence model
+    when this week's report is out, else last week's status carried forward."""
+    inj = self.data.injuries
+    inj = inj[(inj.season == season) & (inj.game_type == "REG")].dropna(subset=["gsis_id"])
+    cur = inj[inj.week == week].drop_duplicates("gsis_id", keep="last")
+    out = {}
+    if len(cur):
+      pr = self.data.practice
+      days = (pr[(pr.season == season) & (pr.week == week)].drop_duplicates("gsis_id", keep="last")
+              .set_index("gsis_id") if pr is not None else None)
+      for _, x in cur.iterrows():
+        if self.practice_model is not None and days is not None and x.gsis_id in days.index:
+          out[x.gsis_id] = float(self.practice_prob(days.loc[[x.gsis_id]])[0])
+        else:
+          out[x.gsis_id] = self.prob(_report(x.report_status), _practice(x.practice_status))
+    else:
+      for _, x in inj[inj.week == week - 1].drop_duplicates("gsis_id", keep="last").iterrows():
+        rep = _report(x.report_status)
+        if rep != "None":
+          out[x.gsis_id] = float(self.p_next.get(rep, 1.0))
+    return pd.Series(out, dtype=float)
+
   def apply(self, p: pd.DataFrame, season: int, week: int, wind) -> pd.DataFrame:
     """Binary scenarios, not expected values: NFL availability is yes/no and an active player plays his normal
     role. Each player's line is his projection IF ACTIVE ('avail' = P(plays) is reported alongside, never

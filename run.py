@@ -13,6 +13,7 @@ from pathlib import Path
 import pandas as pd
 
 from nfledge import backtest as bt
+from nfledge import docs
 from nfledge import report as rp
 from nfledge.config import ROOT, load_config, load_scoring
 from nfledge.data import forecast_wind, load_all
@@ -21,7 +22,7 @@ from nfledge.engine import POSITIONS, Engine
 
 def model_code() -> str:
   """Source of everything that affects model outputs (report.py and templates only change presentation)."""
-  return "".join(p.read_text() for p in sorted((ROOT / "nfledge").glob("*.py")) if p.name != "report.py")
+  return "".join(p.read_text() for p in sorted((ROOT / "nfledge").glob("*.py")) if p.name not in ("report.py", "docs.py"))
 
 
 def frame_hash(df) -> int:
@@ -108,7 +109,7 @@ def main():
 
   eng, proj = cached_model(data, cfg, scoring, season, week)
 
-  ev, bt_seasons = None, []
+  ev, bt_seasons, res = None, [], None
   if not args.no_backtest:
     res, bt_seasons = cached_backtest(data, cfg, scoring)
     ev = bt.evaluate(res, POSITIONS, ecr_only=True)
@@ -124,7 +125,10 @@ def main():
     "roles": rp.role_changes(eng, season, week, cfg), "backtest": rp.backtest_summary(ev),
     "bt_seasons": " and ".join(map(str, bt_seasons)) or "n/a", "bt_takeaway": backtest_takeaway(ev),
     "margin_disagree": cfg["report"]["margin_disagree"], "total_disagree": cfg["report"]["total_disagree"],
+    "model_doc": docs.render(docs.live_values(eng, cfg, season, week, res, ev)),
   }
+  if ctx["model_doc"]["stale"]:
+    print("[run] warning: MODEL.md is out of date (model code/config changed); see tools/model_doc.py", flush=True)
   out = rp.render(ctx, Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week))
   check_script(out)
   print(f"[run] wrote {out} in {time.time() - t0:.0f}s")

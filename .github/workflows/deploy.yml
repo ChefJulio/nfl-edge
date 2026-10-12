@@ -37,6 +37,8 @@ jobs:
           path: cache
           key: nfl-cache-${{ github.run_id }}
           restore-keys: nfl-cache-
+      - name: Check the Model tab is current
+        run: python tools/model_doc.py --check || echo "::warning::MODEL.md is out of date - the Model tab may not describe the latest model changes"
       - run: python run.py --out site/index.html
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3

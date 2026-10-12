@@ -44,22 +44,53 @@ def start_sit(rank: int, pos: str, tiers: dict) -> str:
   return "Must start" if rank <= t[0] else "Start" if rank <= t[1] else "Flex" if rank <= t[2] else "Sit"
 
 
+def _lum(hexcolor: str) -> float:
+  """WCAG relative luminance."""
+  h = hexcolor.lstrip("#")
+  ch = [int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+  ch = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4 for c in ch]
+  return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2]
+
+
+def contrast(a: str, b: str) -> float:
+  la, lb = sorted((_lum(a), _lum(b)), reverse=True)
+  return (la + 0.05) / (lb + 0.05)
+
+
 class TeamStyle:
-  """Team-colored chips. Text color picked for contrast against the team's primary color."""
+  """Team colors for chips and full-row backgrounds, with text colors chosen for WCAG contrast: the team's
+  secondary color when it reaches 4.5:1 on the primary, otherwise white or black (whichever contrasts more)."""
 
   def __init__(self, teams: pd.DataFrame | None):
-    self.c = {}
+    self.c, self.logo, self.nick = {}, {}, {}
     if teams is not None:
       for _, t in teams.iterrows():
         self.c[t.team_abbr] = (t.team_color or "#666666", t.team_color2 or "#999999")
+        self.logo[t.team_abbr] = t.get("team_logo_espn")
+        self.nick[t.team_abbr] = t.get("team_nick") or ""
+
+  def colors(self, team: str) -> tuple[str, str, str]:
+    """(background, accent, text)."""
+    bg, sec = self.c.get(team, ("#666666", "#999999"))
+    bw = "#ffffff" if contrast("#ffffff", bg) >= contrast("#111111", bg) else "#111111"
+    text = sec if contrast(sec, bg) >= 4.5 else bw
+    return bg, sec, text
 
   def chip(self, team: str) -> str:
-    bg, edge = self.c.get(team, ("#666666", "#999999"))
-    rgb = [int(bg.lstrip("#")[i:i + 2], 16) / 255 for i in (0, 2, 4)]
-    lum = 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]
-    fg = "#111" if lum > 0.55 else "#fff"
-    return (f'<span class="chip" style="background:{bg};color:{fg};border-left-color:{edge}">'
+    bg, sec, fg = self.colors(team)
+    return (f'<span class="chip" style="background:{bg};color:{fg};border-left-color:{sec}">'
             f'{html.escape(team)}</span>')
+
+  def row_style(self, team: str) -> str:
+    bg, sec, fg = self.colors(team)
+    return f"--tc:{bg};--tc2:{sec};--tfg:{fg}"
+
+  def logo_img(self, team: str, size: int = 18) -> str:
+    url = self.logo.get(team)
+    if not url:
+      return ""
+    return (f'<span class="logo"><img src="{html.escape(url)}" alt="{html.escape(team)}" width="{size}" '
+            f'height="{size}" loading="lazy"></span>')
 
 
 def range_svg(q10, q25, q75, q90, proj, axis_max, width=120, height=16) -> str:
@@ -224,6 +255,7 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
     for _, r in g.iterrows():
       st = stats.loc[r.gsis_id].to_dict() if r.gsis_id in stats.index else None
       rows.append({
+        "row_style": ts.row_style(r.team), "logo": ts.logo_img(r.team),
         "rank": int(r.pos_rank), "ecr": r.ecr if pd.notna(r.ecr) else prev_ecr.get(r.gsis_id, np.nan),
         "ecr_stale": pd.isna(r.ecr) and r.gsis_id in prev_ecr.index, "name": r.full_name, "team_chip": ts.chip(r.team),
         "opp_chip": ts.chip(r.opp), "home": "vs" if r.home >= 0 else "@", "proj": r.proj,
@@ -255,7 +287,8 @@ def bye_rows(eng, stats, ts, pos, season, week) -> list:
   r = r.groupby("team").head(1 if pos == "QB" else 2 if pos in ("RB", "TE") else 3)
   if pos != "QB":
     r = r[r.fpg >= 6]
-  return [{"name": x.full_name, "team_chip": ts.chip(x.team), "fpg": x.fpg, "games": int(x.games)}
+  return [{"name": x.full_name, "team_chip": ts.chip(x.team), "fpg": x.fpg, "games": int(x.games),
+           "logo": ts.logo_img(x.team, 16)}
           for x in r.itertuples()]
 
 
@@ -304,6 +337,7 @@ def team_tables(eng, season: int, week: int, cfg: dict) -> tuple[list, list]:
     r = eng.tm.fit(season, w)
     history[w] = net_rating(r)
   hist = pd.DataFrame(history)
+  ts = TeamStyle(eng.data.teams)
   rows = []
   net = net_rating(rb)
   for team in rb.teams:
@@ -316,6 +350,7 @@ def team_tables(eng, season: int, week: int, cfg: dict) -> tuple[list, list]:
       "def_pass": per100(-rb.dfn.at[team, "pass"]), "def_rush": per100(-rb.dfn.at[team, "rush"]),
       "st": per100(rb.off.at[team, "st"] - rb.dfn.at[team, "st"]), "se": per100(se),
       "spark": sparkline(hist.loc[team].tolist()) if team in hist.index else "",
+      "row_style": ts.row_style(team), "logo": ts.logo_img(team), "nick": ts.nick.get(team, ""),
     })
   power = sorted(rows, key=lambda x: -x["net"])
   for i, r in enumerate(power, 1):
@@ -337,7 +372,7 @@ def team_tables(eng, season: int, week: int, cfg: dict) -> tuple[list, list]:
         continue
       ro = sum(w[u] * rb.raw_off.at[team, u] for u in w)
       rd = sum(w[u] * rb.raw_def.at[team, u] for u in w)
-      luck.append({"team": team, "off_raw": per100(ro), "off_gap": per100(faced_def[team]),
+      luck.append({"team": team, "row_style": ts.row_style(team), "logo": ts.logo_img(team), "off_raw": per100(ro), "off_gap": per100(faced_def[team]),
                    "off_adj": per100(ro - faced_def[team]), "def_raw": per100(-rd),
                    "def_gap": per100(-faced_off[team]), "def_adj": per100(-(rd - faced_off[team]))})
   for r in luck:
@@ -352,37 +387,86 @@ def net_rating(r) -> pd.Series:
   return off - dfn + (r.off["st"] - r.dfn["st"]) * 0.18  # ST plays are ~18% as frequent as scrimmage plays
 
 
+def spread_text(fav: str, margin: float) -> str:
+  """Betting notation: favorite minus points ('SEA -4.1'); 'PK' when within half a point."""
+  if pd.isna(margin):
+    return "n/a"
+  return "PK" if abs(margin) < 0.5 else f"{fav} -{abs(margin):.1f}"
+
+
+def kickoff_text(gameday, gametime) -> str:
+  try:
+    d = pd.Timestamp(gameday)
+    t = pd.Timestamp(f"2000-01-01 {gametime}") if isinstance(gametime, str) and gametime else None
+    return d.strftime("%a %b %-d") + (t.strftime(" · %-I:%M %p ET") if t is not None else "")
+  except (ValueError, TypeError):
+    try:  # Windows strftime has no %-d
+      d = pd.Timestamp(gameday)
+      t = pd.Timestamp(f"2000-01-01 {gametime}") if isinstance(gametime, str) and gametime else None
+      return f"{d:%a %b} {d.day}" + (f" · {t.hour % 12 or 12}:{t:%M} {'PM' if t.hour >= 12 else 'AM'} ET"
+                                     if t is not None else "")
+    except (ValueError, TypeError):
+      return str(gameday)
+
+
+def diverging_bar(v: float, scale: float, width: int = 120) -> str:
+  """Centered bar: right/green for positive, left/red for negative, clipped at +/-scale."""
+  if v is None or pd.isna(v) or not scale:
+    return ""
+  frac = max(-1.0, min(1.0, v / scale)) * 0.5
+  left = 50 if frac >= 0 else 50 + frac * 100
+  cls = "pos" if v >= 0 else "neg"
+  return (f'<span class="dbar" style="width:{width}px"><span class="dbar-mid"></span>'
+          f'<span class="dbar-fill {cls}" style="left:{left:.1f}%;width:{abs(frac) * 100:.1f}%"></span></span>')
+
+
 def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None = None) -> list:
-  r = eng.tm.fit(season, week)
+  """Per game: the headline lines (model vs Vegas, in betting notation), edges where they disagree, and
+  where each side's offense has the advantage over the other's defense."""
+  r = eng.game_ratings(season, week)
   vf = team_volume_features(eng.team_ledger, season, week, eng.cfg)
   games = eng.games(season, week)
   starters = {}
   if proj is not None:
     qbs = proj[(proj.pos == "QB") & ~proj.sits].sort_values("db").groupby("team").tail(1)
     starters = dict(zip(qbs.team, qbs.gsis_id))
+  qb_name = dict(zip(proj.gsis_id, proj.full_name)) if proj is not None else {}
   tp = eng.gm.predict(games, r, vf, use_vegas=False, starters=starters)
-  gl = game_lines(tp, games)
+  gl = game_lines(tp, games).merge(games[["game_id", "gametime"]], on="game_id", how="left")
+  ts = TeamStyle(eng.data.teams)
+  names = ({t.team_abbr: t.team_nick for t in eng.data.teams.itertuples()} if eng.data.teams is not None else {})
   out = []
   for _, g in gl.iterrows():
-    side = lambda t: {
-      "team": t, "off_pass": per100(r.off.at[t, "pass"]), "off_rush": per100(r.off.at[t, "rush"]),
-      "def_pass": per100(-r.dfn.at[t, "pass"]), "def_rush": per100(-r.dfn.at[t, "rush"]),
-      "st": per100(r.off.at[t, "st"] - r.dfn.at[t, "st"])}
+    def side(t):
+      return {"team": t, "nick": names.get(t, t), "row_style": ts.row_style(t), "logo": ts.logo_img(t, 28),
+              "qb": qb_name.get(starters.get(t), ""),
+              "off_pass": per100(r.off.at[t, "pass"] + r.qb_term(starters.get(t))),
+              "off_rush": per100(r.off.at[t, "rush"]), "def_pass": per100(-r.dfn.at[t, "pass"]),
+              "def_rush": per100(-r.dfn.at[t, "rush"]), "st": per100(r.off.at[t, "st"] - r.dfn.at[t, "st"])}
+    away, home = side(g.away_team), side(g.home_team)
     vm, vt = g.spread_line, g.total_line
     dm = g.model_margin - vm if pd.notna(vm) else np.nan
     dt = g.model_total - vt if pd.notna(vt) else np.nan
-    flag_m = pd.notna(dm) and abs(dm) >= cfg["report"]["margin_disagree"]
-    flag_t = pd.notna(dt) and abs(dt) >= cfg["report"]["total_disagree"]
-    fav = g.home_team if g.model_margin >= 0 else g.away_team
-    take = f"Model: {fav} by {abs(g.model_margin):.1f}, total {g.model_total:.1f}."
-    if flag_m:
-      take += f" Leans {g.home_team if dm > 0 else g.away_team} vs the spread ({dm:+.1f})."
-    if flag_t:
-      take += f" Leans {'over' if dt > 0 else 'under'} ({dt:+.1f})."
-    out.append({"away": side(g.away_team), "home": side(g.home_team), "gameday": g.gameday,
-                "neutral": g.location == "Neutral", "model_margin": g.model_margin, "model_total": g.model_total,
-                "vegas_margin": vm, "vegas_total": vt, "d_margin": dm, "d_total": dt, "flag_m": flag_m,
-                "flag_t": flag_t, "takeaway": take})
+    m_fav = g.home_team if g.model_margin >= 0 else g.away_team
+    v_fav = g.home_team if (pd.notna(vm) and vm >= 0) else g.away_team
+    edges = []
+    if pd.notna(dm) and abs(dm) >= 1.0:
+      edges.append({"label": f"Spread lean {g.home_team if dm > 0 else g.away_team}", "value": f"{abs(dm):.1f}",
+                    "strong": abs(dm) >= cfg["report"]["margin_disagree"]})
+    if pd.notna(dt) and abs(dt) >= 1.5:
+      edges.append({"label": "Lean " + ("Over" if dt > 0 else "Under"), "value": f"{abs(dt):.1f}",
+                    "strong": abs(dt) >= cfg["report"]["total_disagree"]})
+    facets = []
+    for o, d in ((away, home), (home, away)):
+      for unit, label in (("pass", "Pass"), ("rush", "Run")):
+        edge = o[f"off_{unit}"] - d[f"def_{unit}"]
+        facets.append({"label": f"{o['team']} {label} O vs {d['team']} {label} D", "edge": edge,
+                       "bar": diverging_bar(edge, 12.0), "row_style": o["row_style"], "team": o["team"]})
+    out.append({"away": away, "home": home, "kickoff": kickoff_text(g.gameday, g.gametime),
+                "neutral": g.location == "Neutral", "model_line": spread_text(m_fav, g.model_margin),
+                "model_total": g.model_total, "vegas_line": spread_text(v_fav, vm) if pd.notna(vm) else "n/a",
+                "vegas_total": vt, "edges": edges, "facets": facets,
+                "score": f"{g.away_team} {g.away_pts:.0f} - {g.home_team} {g.home_pts:.0f}"})
   return out
 
 
@@ -415,7 +499,9 @@ def player_luck(eng, p: pd.DataFrame, season: int, week: int) -> list:
   g = g.join(base[["full_name", "pos", "team", "proj"]])
   g = g[g.raw >= 8]
   g = g.reindex(g.gap.abs().sort_values(ascending=False).index).head(40)
+  ts = TeamStyle(eng.data.teams)
   return [{"name": x.full_name, "pos": x.pos, "team": x.team, "games": int(x.games), "raw": x.raw, "adj": x.adj,
+           "row_style": ts.row_style(x.team), "logo": ts.logo_img(x.team),
            "gap": x.gap, "takeaway": ("Stats inflated by soft schedule - sell high" if x.gap >= 1 else
                                       "Better than his stats - tough schedule so far, buy low" if x.gap <= -1
                                       else "Schedule-neutral production")}
@@ -431,6 +517,7 @@ def role_changes(eng, season: int, week: int, cfg: dict) -> list:
   last_team_week = L.groupby("team").week.max()
   out = []
   thr_s, thr_o = cfg["player_model"]["role_change_snap_jump"], cfg["player_model"]["role_change_opp_jump"]
+  ts = TeamStyle(eng.data.teams)
   for gid, g in L.sort_values("week").groupby("gsis_id"):
     last = g.iloc[-1]
     if last.week != last_team_week.get(last.team):
@@ -443,12 +530,22 @@ def role_changes(eng, season: int, week: int, cfg: dict) -> list:
     if (pd.notna(ds) and ds >= thr_s) or (pd.notna(do) and do >= thr_o):
       name = eng.pm.info.full_name.get(gid, gid)
       out.append({"name": name, "pos": last.pos, "team": last.team, "week": int(last.week),
+                  "row_style": ts.row_style(last.team), "logo": ts.logo_img(last.team),
                   "snap_now": last.offense_pct, "snap_prev": prev_snap, "opp_now": last.opp_share,
                   "opp_prev": prev_opp, "touches": int(last.carries + last.tgt), "score": (ds or 0) + 2 * (do or 0),
-                  "takeaway": ("New full-time role" if (last.offense_pct or 0) >= 0.7 else "Expanding role")
-                  + (" - waiver add" if (last.offense_pct or 0) >= 0.5 else " - watch list")})
+                  "takeaway": role_takeaway(last.offense_pct or 0, last.opp_share or 0, int(last.carries + last.tgt))})
   out.sort(key=lambda x: -x["score"])
   return out[:30]
+
+
+def role_takeaway(snap: float, opp: float, touches: int) -> str:
+  """Waiver advice needs real usage, not just snaps."""
+  used = touches >= 8 or opp >= 0.10
+  if snap >= 0.7 and used:
+    return "Full-time role with real touches: waiver add"
+  if used:
+    return "Growing workload: waiver add"
+  return "Snaps up, touches not yet: watch"
 
 
 def backtest_summary(ev: pd.DataFrame | None) -> list:
@@ -473,6 +570,8 @@ def render(ctx: dict, out_path: Path) -> Path:
   env.filters["f2"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.2f}"
   env.filters["f3"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.3f}"
   env.filters["sgn"] = lambda x: "" if x is None or pd.isna(x) else f"{x:+.1f}"
+  env.filters["dbar"] = lambda v, scale=10.0, width=120: diverging_bar(v, scale, width)
+  env.filters["abs"] = lambda v: abs(v) if v is not None and not pd.isna(v) else 0
   env.filters["pct"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.0%}"
   html_out = env.get_template("report.html.j2").render(**ctx)
   out_path.parent.mkdir(parents=True, exist_ok=True)

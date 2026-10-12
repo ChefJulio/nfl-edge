@@ -6,7 +6,10 @@ import time
 import numpy as np
 import pandas as pd
 
+import copy
+
 from . import injuries as inj
+from .personnel import Personnel
 from .data import Data, depth_for_week, team_name_fix
 from .player_model import PlayerModel, actual_points
 from .team_model import GameModel, Linear, TeamModel, team_game_ledger, team_volume_features
@@ -46,6 +49,10 @@ class Engine:
     train = self.pm.training_rows(seasons, self.positions)
     self.pm.fit_meta(train)
     self.injury_model = inj.InjuryModel(self.data, self.pm, self.cfg).fit(seasons) if use_injuries else None
+    self.personnel = None
+    if use_injuries and self.cfg["team_model"].get("cb_adjust", True):
+      self.personnel = Personnel(self.data, self.cfg).fit(seasons, self.tm, self.team_ledger)
+    self.week_adj = {}
     self._fit_blend_and_uncertainty(seasons)
     self.trained_for = (test_season, use_injuries)
     _log(f"trained for {test_season} on {seasons} in {time.time() - t0:.0f}s; alphas {self.tm.alphas}")
@@ -147,14 +154,16 @@ class Engine:
                    wind: pd.Series | None = None, quiet: bool = False, ratings=None,
                    blend: bool = True) -> pd.DataFrame:
     r = ratings or self.tm.fit(season, week)
+    # Past plays are judged against defenses as they were; this week's opponents get personnel adjustments.
+    r_game = self.game_ratings(season, week, r) if use_injuries else r
     vf = team_volume_features(self.team_ledger, season, week, self.cfg)
     games = self.games(season, week)
-    tp = self.gm.predict(games, r, vf, use_vegas=use_vegas)
+    tp = self.gm.predict(games, r_game, vf, use_vegas=use_vegas)
     f = self.pm.features(season, week, r)
     cands = self.candidates(season, week)
     if wind is None:  # historical games: realized wind from play-by-play
       wind = self.team_ledger.drop_duplicates("game_id").set_index("game_id").wind
-    p = self.pm.project(f, cands, tp, r, wind)
+    p = self.pm.project(f, cands, tp, r_game, wind)
     p["proj_no_inj"] = p.proj
     p["avail"] = 1.0
     p["injury_boost"] = 0.0
@@ -176,6 +185,20 @@ class Engine:
     p["season"], p["week"] = season, week
     self.last_team_preds = tp
     return p
+
+  def game_ratings(self, season: int, week: int, r=None):
+    """Ratings for this week's games: pass defenses adjusted for starting cornerbacks likely out."""
+    r = r or self.tm.fit(season, week)
+    if self.personnel is None or self.injury_model is None:
+      return r
+    adj = self.personnel.week_adjustments(season, week, self.injury_model.report_avail(season, week))
+    self.week_adj[(season, week)] = adj
+    if adj.empty:
+      return r
+    r2 = copy.copy(r)
+    r2.dfn = r.dfn.copy()
+    r2.dfn["pass"] = r.dfn["pass"] + adj.adj_pass.astype(float).reindex(r.dfn.index).fillna(0.0)
+    return r2
 
   def _uncertainty(self, p: pd.DataFrame) -> pd.DataFrame:
     a = p.pos.map(lambda x: self.sd_model.get(x, (25.0, 1.0))[0]) if hasattr(self, "sd_model") else 25.0

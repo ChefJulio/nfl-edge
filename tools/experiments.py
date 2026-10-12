@@ -29,6 +29,7 @@ VARIANTS={
  'td_k_50':variant(player_model__td_blend_k=50),
  'td_k_400':variant(player_model__td_blend_k=400),
  'no_qb_effects':variant(team_model__qb_effects=False),
+ 'no_cb_adjust':variant(team_model__cb_adjust=False),
  'combo':variant(experiments__implied_total=True, player_model__share_half_life_weeks=5.0, team_model__half_life_weeks=3.0),
  'combo_hl8':variant(experiments__implied_total=True, player_model__share_half_life_weeks=8.0, team_model__half_life_weeks=3.0),
  'combo_air':variant(experiments__implied_total=True, experiments__air_yards=True, player_model__share_half_life_weeks=5.0, team_model__half_life_weeks=3.0),
@@ -39,7 +40,7 @@ season=int(sys.argv[2]) if len(sys.argv)>2 else 2025
 rows=[]
 for name in sel:
   t=time.time(); e=Engine(d,VARIANTS[name],sc,positions=POS)
-  res=B.run(e,[season]); ev=B.evaluate(res,POS); ev=ev[ev.subset=='relevant']
+  res=B.run(e,[season],use_injuries=True); ev=B.evaluate(res,POS); ev=ev[ev.subset=='relevant']
   for _,r in ev.iterrows(): rows.append({'variant':name,'pos':r.pos,'mae':r.mae_model,'r':r.r_model,'rank':r.rank_model})
   print(name, f'{time.time()-t:.0f}s', flush=True)
 out=pd.DataFrame(rows)

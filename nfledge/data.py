@@ -125,6 +125,7 @@ class Data:
   ecr: pd.DataFrame | None = None  # FantasyPros weekly positional expert consensus ranks (pre-game only)
   teams: pd.DataFrame | None = None  # team names + colors
   qb_career: pd.Series | None = None  # career pass attempts before the loaded window, by gsis_id
+  pfr_def: pd.DataFrame | None = None  # PFR weekly advanced defensive stats (pressures, coverage, tackling)
 
   def completed_weeks(self, season: int) -> int:
     if season == self.current_season:
@@ -161,7 +162,7 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
   if new_weeks:
     _log(f"new final games for {current}: cached {cached_final}, schedule shows {n_final}")
 
-  frames = {k: [] for k in ("pbp", "stats", "snaps", "rosters", "injuries", "routes")}
+  frames = {k: [] for k in ("pbp", "stats", "snaps", "rosters", "injuries", "routes", "pfr_def")}
   depth = {}
   for s in seasons:
     is_cur = s == current
@@ -171,6 +172,9 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
     frames["stats"].append(cache.get("stats", s, lambda: nfl.load_player_stats([s]).select(STAT_COLS),
                                      stale=pbp_stale))
     frames["snaps"].append(cache.get("snaps", s, lambda: nfl.load_snap_counts([s]), stale=pbp_stale))
+    frames["pfr_def"].append(cache.get("pfrdef", s, lambda: nfl.load_pfr_advstats([s], stat_type="def",
+                                                                                  summary_level="week"),
+                                       stale=pbp_stale))
     frames["routes"].append(cache.get("routes", s, lambda: _routes_from_participation(nfl, s),
                                       stale=pbp_stale and s <= 2025))
     frames["rosters"].append(cache.get("rosters", s, lambda: nfl.load_rosters_weekly([s]), stale=live_stale))
@@ -220,7 +224,7 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
               stats=stats, rosters=rosters, snaps=snaps, injuries=cat("injuries"), depth=depth, draft=draft,
               routes=routes, exclusions=load_exclusions(rosters), pending_games=pending, practice=practice,
               avail_hist=avail_hist, ecr=ecr, teams=teams,
-              qb_career=qb_career)
+              qb_career=qb_career, pfr_def=cutoff(cat("pfr_def")))
   _log(f"seasons {seasons}; current {current}, data through week {latest}"
        f"{f' ({pending} game(s) pending)' if pending else ''}; {len(data.pbp):,} plays, {len(stats):,} player-games")
   return data

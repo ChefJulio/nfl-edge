@@ -25,7 +25,8 @@ Output: `report/nfl_edge_week{N}.html`. The first run downloads ~4 seasons of da
 3. **Power rankings** with weekly sparklines and bootstrap certainty.
 4. **Schedule luck**: teams (strength of opponents faced) and players (raw vs schedule-adjusted points/game).
 5. **Role-change alerts**: snap / opportunity share spikes (waiver targets). Alerts only, not model inputs.
-6. **Backtest**: model vs FantasyPros experts vs Vegas-scaled stats vs raw stats.
+6. **Track record**: model vs FantasyPros experts vs Vegas-scaled stats vs raw stats.
+7. **Model**: how every number is calculated (from `MODEL.md`, with live values).
 
 ## Model in brief
 - **Team model** (`team_model.py`): ridge regression of play EPA on offense + defense + home, fit separately
@@ -54,6 +55,13 @@ participation), FantasyPros ECR via nflverse, Open-Meteo wind forecasts, and NFL
 practice participation. That last one uses the public key nfl.com's own site uses: unofficial, may break or
 conflict with NFL terms. Turn it off with `nfl_api_practice = false` (falls back to final practice status).
 Each run also archives the live injury report so a local daily-practice history accumulates regardless.
+
+## Model documentation (Model tab)
+`MODEL.md` is rendered into the site's Model tab, with live values (tuned parameters, learned coefficients,
+backtest results) filled in at every build. It carries a fingerprint of the model code and `config.toml`; when
+they change without the doc being reviewed, the pre-commit hook blocks the commit, the GitHub build warns, and
+the tab shows an "out of date" banner. One-time setup after cloning: `git config core.hooksPath .githooks`.
+After updating the doc: `python tools/model_doc.py --stamp`.
 
 ## Validating changes
 `python tools/experiments.py baseline,implied_total 2025` backtests config variants side by side (walk-forward,

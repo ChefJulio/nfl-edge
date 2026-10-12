@@ -35,6 +35,9 @@ division_hfa = false
 qb_effects = true
 qb_inexp_dropbacks = 150
 qb_alpha_grid = [30, 100, 300, 1000, 1e9]
+# Pass defense adjusted for starting cornerbacks likely out. Tested and rejected: counting only pre-game-knowable
+# absences, no defensive (or O-line) personnel effect held up out of sample (details in personnel.py).
+cb_adjust = false
 seed = 7
 
 [player_model]
