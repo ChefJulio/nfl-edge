@@ -877,6 +877,12 @@ def backtest_summary(ev: pd.DataFrame | None) -> list:
 # Render
 # ----------------------------------------------------------------------------------------------------------------
 
+def short_name(name: str) -> str:
+  """'Josh Allen' -> 'J. Allen', 'Amon-Ra St. Brown' -> 'A. St. Brown' (the compact pinned column)."""
+  parts = str(name).split(" ", 1)
+  return f"{parts[0][0]}. {parts[1]}" if len(parts) == 2 and parts[0] else str(name)
+
+
 def render(ctx: dict, out_path: Path) -> Path:
   env = Environment(loader=FileSystemLoader(TEMPLATE_DIR), autoescape=select_autoescape(["html", "j2"]))
   env.filters["f0"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.0f}"
@@ -890,6 +896,7 @@ def render(ctx: dict, out_path: Path) -> Path:
   env.filters["rkc"] = lambda n: "rk1" if n <= 8 else "rk2" if n <= 16 else "rk3" if n <= 24 else "rk4"
   env.filters["posb"] = pos_badge
   env.filters["pct"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.0%}"
+  env.filters["short"] = short_name
   html_out = env.get_template("report.html.j2").render(**ctx)
   out_path.parent.mkdir(parents=True, exist_ok=True)
   out_path.write_text(html_out, encoding="utf-8")

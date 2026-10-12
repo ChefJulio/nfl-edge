@@ -130,6 +130,12 @@ tr.teamrow.out > td { color: rgba(255,255,255,.55); }
 /* Name columns stay pinned while a wide table scrolls sideways (phones). */
 td.stick, th.stick { position: sticky; left: 0; z-index: 1; }
 thead th.stick { z-index: 3; }
+/* Compact pinned column: once a table scrolls sideways, the pinned name cell shrinks to logo + short name
+   ("J. Allen", team code) and a shadow marks its edge; it expands again at the far left. */
+.nm-short { display: none; }
+.scroll.compact .nm-full { display: none; } .scroll.compact .nm-short { display: inline; white-space: nowrap; }
+.scroll.compact td.stick .badges, .scroll.compact td.stick .sub, .scroll.compact .m-proj small { display: none !important; }
+.scroll.compact td.stick, .scroll.compact th.stick { min-width: 0 !important; width: auto !important; box-shadow: 8px 0 10px -8px rgba(0,0,0,.85); }
 table.ranks td.stick, table.ranks th.stick { min-width: 190px; white-space: normal; }
 .m-only { display: none; }
 @media (max-width: 640px) {
@@ -424,7 +430,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <tr class="main teamrow{% if r.boost >= 1 %} boosted{% endif %}{% if r.avail < 0.5 %} out{% endif %}" style="{{ r.row_style }}" data-name="{{ r.name|lower }}">
           <td class="num rk">{{ r.rank }}</td>
           <td data-v="{{ r.ecr|f0 }}" class="num ecr{{ ' stale' if r.ecr_stale }}"{% if r.ecr_stale %} title="Last week's expert rank; this week's is published Friday"{% endif %}>{{ r.ecr|f0 }}{% if r.ecr_stale %}<sup>lw</sup>{% endif %}</td>
-          <td class="stick" data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.name }}</b>
+          <td class="stick" data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b><span class="nm-full">{{ r.name }}</span><span class="nm-short">{{ r.name|short }}</span></b>
             {%- if r.status or r.boost >= 1 or r.low_sample %}<div class="badges">
               {%- if r.status %}<span class="flag {{ 'f-out' if r.avail < 0.5 else 'f-q' }}" title="Injury report; practice Wed/Thu/Fri: D = did not practice, L = limited, F = full">{{ r.status }}</span>{% endif %}
               {%- if r.boost >= 1 %}<span class="flag f-up" title="Raised by volume vacated by: {{ r.boost_from }}">+{{ r.boost|f1 }} inj</span>{% endif %}
@@ -525,7 +531,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     {% for r in power %}
       <tr class="teamrow" style="{{ r.row_style }}">
         <td class="num rk" data-v="{{ r.rank }}"><span class="rkn">{{ r.rank }}</span>{% if r.move > 0 %}<span class="mv up">&#9650;{{ r.move }}</span>{% elif r.move < 0 %}<span class="mv dn">&#9660;{{ -r.move }}</span>{% else %}<span class="mv">&ndash;</span>{% endif %}</td>
-        <td class="stick" data-v="{{ r.nick }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.nick }}</b><span class="sub">{{ r.team }} &middot; {{ r.record }}</span></div></div></td>
+        <td class="stick" data-v="{{ r.nick }}"><div class="who">{{ r.logo|safe }}<div><b><span class="nm-full">{{ r.nick }}</span><span class="nm-short">{{ r.team }}</span></b><span class="sub">{{ r.team }} &middot; {{ r.record }}</span></div></div></td>
         <td class="num" data-v="{{ r.net }}"><div class="netc"><b>{{ r.net|sgn }}</b><span class="sub" title="80% of simulations rank this team between {{ r.range.replace('-', ' and ') }} (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range {{ r.range }}</span></div></td>
         <td data-v="{{ r.off }}" title="Pass O {{ r.pass_o|sgn }} + Run O {{ r.rush_o|sgn }}"><div class="mc"><span class="mv2">{{ r.off|sgn }}</span><span class="rk-b {{ r.off_rk|rkc }}">{{ r.off_rk|ord }}</span></div></td>
         <td data-v="{{ r.def }}" title="Pass D {{ r.pass_d|sgn }} + Run D {{ r.rush_d|sgn }}"><div class="mc"><span class="mv2">{{ r.def|sgn }}</span><span class="rk-b {{ r.def_rk|rkc }}">{{ r.def_rk|ord }}</span></div></td>
@@ -548,7 +554,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   </div></details>
   <div class="card"><div class="scroll"><table class="sortable tiles">
     <thead><tr><th class="stick" data-first="asc">Player</th><th><abbr title="Sorts by the size of the jump">Snap share</abbr></th><th><abbr title="Sorts by the size of the jump">Opportunity share</abbr></th><th class="num">Touches</th><th class="nosort">Takeaway</th></tr></thead>
-    <tbody>{% for r in roles %}<tr class="teamrow" style="{{ r.row_style }}"><td class="stick" data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.name }}</b><span class="sub">{{ r.pos|posb|safe }} {{ r.team }}{% if r.week != week - 1 %} &middot; wk {{ r.week }}{% endif %}</span></div></div></td>
+    <tbody>{% for r in roles %}<tr class="teamrow" style="{{ r.row_style }}"><td class="stick" data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b><span class="nm-full">{{ r.name }}</span><span class="nm-short">{{ r.name|short }}</span></b><span class="sub">{{ r.pos|posb|safe }} {{ r.team }}{% if r.week != week - 1 %} &middot; wk {{ r.week }}{% endif %}</span></div></div></td>
       <td data-v="{{ (r.snap_now or 0) - (r.snap_prev or 0) }}"><span class="arrow"><span class="from">{{ r.snap_prev|pct }}</span><i>&rarr;</i><b>{{ r.snap_now|pct }}</b></span></td>
       <td data-v="{{ (r.opp_now or 0) - (r.opp_prev or 0) }}"><span class="arrow"><span class="from">{{ r.opp_prev|pct }}</span><i>&rarr;</i><b>{{ r.opp_now|pct }}</b></span></td>
       <td class="num">{{ r.touches }}</td><td class="take">{{ r.takeaway }}</td></tr>{% endfor %}</tbody>
@@ -658,6 +664,23 @@ const rebuild = () => { setNav(); heads.forEach(h => h.built = false); placeHead
 window.addEventListener('scroll', placeHeads, { passive: true });
 window.addEventListener('resize', rebuild);
 document.addEventListener('click', e => { if (e.target.closest('nav.tabs, .posbar, tr.main, thead')) setTimeout(rebuild, 0); });
+// Compact pinned column (see .scroll.compact in the CSS). Collapsing narrows the first columns, which would
+// slide the content being read; scrollLeft is moved by the same amount so it stays put. Expanding only at the
+// far left (hysteresis) keeps that adjustment from toggling it straight back.
+document.querySelectorAll('.scroll').forEach(sc => {
+  const cell = sc.querySelector('td.stick');
+  if (!cell) return;
+  sc.addEventListener('scroll', () => {
+    const on = sc.classList.contains('compact');
+    const want = on ? sc.scrollLeft > 0 : sc.scrollLeft > 4;
+    if (want === on) return;
+    const before = cell.getBoundingClientRect().width;
+    sc.classList.toggle('compact', want);
+    const delta = before - cell.getBoundingClientRect().width;
+    if (want && delta > 0) sc.scrollLeft = Math.max(1, sc.scrollLeft - delta);
+    rebuild();
+  }, { passive: true });
+});
 const ps = document.getElementById('psearch');
 if (ps) ps.oninput = () => {
   const q = ps.value.trim().toLowerCase();
