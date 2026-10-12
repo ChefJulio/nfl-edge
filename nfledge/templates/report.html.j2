@@ -227,6 +227,20 @@ tr.teamrow .t-Flex { background: rgba(224,176,74,.16); color: #f3d38c; }
 tr.teamrow .flag { background: rgba(255,255,255,.1); color: rgba(255,255,255,.85); }
 tr.teamrow .f-q { background: rgba(224,176,74,.18); color: #f3d38c; } tr.teamrow .f-out { background: rgba(242,120,109,.2); color: #ffaaa1; }
 tr.teamrow .f-up { background: rgba(69,194,107,.18); color: #8fe6a9; }
+/* position badges: one color per position everywhere */
+:root { --qb: #ff6f91; --rb: #34d399; --wr: #60a5fa; --te: #fbbf24; }
+.posb { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .04em; padding: 0 5px; border-radius: 4px; line-height: 16px; margin-right: 3px; vertical-align: 1px; }
+.posb-QB { background: color-mix(in srgb, var(--qb) 20%, transparent); color: var(--qb); }
+.posb-RB { background: color-mix(in srgb, var(--rb) 20%, transparent); color: var(--rb); }
+.posb-WR { background: color-mix(in srgb, var(--wr) 20%, transparent); color: var(--wr); }
+.posb-TE { background: color-mix(in srgb, var(--te) 20%, transparent); color: var(--te); }
+.seg button.pos-QB { color: var(--qb); } .seg button.pos-RB { color: var(--rb); }
+.seg button.pos-WR { color: var(--wr); } .seg button.pos-TE { color: var(--te); }
+.seg button.pos-QB.on { background: color-mix(in srgb, var(--qb) 20%, var(--panel)); }
+.seg button.pos-RB.on { background: color-mix(in srgb, var(--rb) 20%, var(--panel)); }
+.seg button.pos-WR.on { background: color-mix(in srgb, var(--wr) 20%, var(--panel)); }
+.seg button.pos-TE.on { background: color-mix(in srgb, var(--te) 20%, var(--panel)); }
+@media (prefers-color-scheme: light) { :root { --qb: #d6336c; --rb: #0f9f6e; --wr: #2563eb; --te: #b7791f; } }
 /* power */
 table.power td { padding-top: 9px; padding-bottom: 9px; }
 table.power .rk { width: 46px; }
@@ -287,7 +301,6 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   <button data-tab="power">Power</button>
   <button data-tab="luck">Schedule luck</button>
   <button data-tab="roles">Role changes</button>
-  <button data-tab="backtest">Track record</button>
   <button data-tab="model">Model</button>
 </div></nav>
 <main><div class="wrap">
@@ -303,7 +316,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   </div></details>
   <div class="card">
     <div class="toolbar">
-      <div class="seg posbar">{% for pos in ["QB","RB","WR","TE"] %}<button data-pos="{{ pos }}" class="{{ 'on' if loop.first }}">{{ pos }}</button>{% endfor %}</div>
+      <div class="seg posbar">{% for pos in ["QB","RB","WR","TE"] %}<button data-pos="{{ pos }}" class="pos-{{ pos }}{{ ' on' if loop.first }}">{{ pos }}</button>{% endfor %}</div>
       <input type="search" id="psearch" placeholder="Find a player" aria-label="Find a player">
     </div>
     {% for pos, block in players.items() %}
@@ -447,7 +460,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   </table></div></div>
   <div class="card"><div class="scroll"><table class="sortable tiles">
     <thead><tr><th data-first="asc">Player</th><th class="num">G</th><th class="num">Raw FP/G</th><th class="num">Adjusted</th><th class="num">Gap</th><th class="nosort">Takeaway</th></tr></thead>
-    <tbody>{% for r in player_luck %}<tr class="teamrow" style="{{ r.row_style }}"><td data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.name }}</b><span class="sub">{{ r.pos }} &middot; {{ r.team }}</span></div></div></td><td class="num">{{ r.games }}</td><td class="num">{{ r.raw|f1 }}</td><td class="num">{{ r.adj|f1 }}</td>
+    <tbody>{% for r in player_luck %}<tr class="teamrow" style="{{ r.row_style }}"><td data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.name }}</b><span class="sub">{{ r.pos|posb|safe }} {{ r.team }}</span></div></div></td><td class="num">{{ r.games }}</td><td class="num">{{ r.raw|f1 }}</td><td class="num">{{ r.adj|f1 }}</td>
       <td class="num" data-v="{{ r.gap }}"><span class="valbar">{{ r.gap|dbar(3, 70)|safe }}<b>{{ r.gap|sgn }}</b></span></td><td class="take">{{ r.takeaway if r.gap|abs >= 1 else '' }}</td></tr>{% endfor %}</tbody>
   </table></div></div>
 </section>
@@ -459,33 +472,11 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   </div></details>
   <div class="card"><div class="scroll"><table class="sortable tiles">
     <thead><tr><th data-first="asc">Player</th><th><abbr title="Sorts by the size of the jump">Snap share</abbr></th><th><abbr title="Sorts by the size of the jump">Opportunity share</abbr></th><th class="num">Touches</th><th class="nosort">Takeaway</th></tr></thead>
-    <tbody>{% for r in roles %}<tr class="teamrow" style="{{ r.row_style }}"><td data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.name }}</b><span class="sub">{{ r.pos }} &middot; {{ r.team }}{% if r.week != week - 1 %} &middot; wk {{ r.week }}{% endif %}</span></div></div></td>
+    <tbody>{% for r in roles %}<tr class="teamrow" style="{{ r.row_style }}"><td data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b>{{ r.name }}</b><span class="sub">{{ r.pos|posb|safe }} {{ r.team }}{% if r.week != week - 1 %} &middot; wk {{ r.week }}{% endif %}</span></div></div></td>
       <td data-v="{{ (r.snap_now or 0) - (r.snap_prev or 0) }}"><span class="arrow"><span class="from">{{ r.snap_prev|pct }}</span><i>&rarr;</i><b>{{ r.snap_now|pct }}</b></span></td>
       <td data-v="{{ (r.opp_now or 0) - (r.opp_prev or 0) }}"><span class="arrow"><span class="from">{{ r.opp_prev|pct }}</span><i>&rarr;</i><b>{{ r.opp_now|pct }}</b></span></td>
       <td class="num">{{ r.touches }}</td><td class="take">{{ r.takeaway }}</td></tr>{% endfor %}</tbody>
   </table></div></div>
-</section>
-
-<section id="tab-backtest">
-  <div class="sec-head"><div><h2>Track record</h2><p>How well each method predicted next week's fantasy points ({{ bt_seasons }}, walk-forward).</p></div></div>
-  <details class="howto"><summary>How to read</summary><div>
-    Every projection used only data available before that week, and every learned piece was trained only on earlier seasons. Fantasy-relevant players who played, on weeks where all methods had a value.
-    Average miss = mean absolute error in points (lower is better). Rank correlation = how well each method ordered players within a week (higher is better). Best per row in blue.
-  </div></details>
-  <div class="card"><div class="scroll"><table class="sortable">
-    <thead>
-      <tr><th class="nosort"></th><th class="nosort"></th><th class="bt-group nosort" colspan="4">Average miss (pts)</th><th class="bt-group nosort" colspan="4">Rank correlation</th></tr>
-      <tr><th data-first="asc">Pos</th><th class="num">n</th><th class="num" data-first="asc">Model</th><th class="num" data-first="asc">Experts</th><th class="num" data-first="asc">Vegas</th><th class="num" data-first="asc">Raw</th><th class="num">Model</th><th class="num">Experts</th><th class="num">Vegas</th><th class="num">Raw</th></tr>
-    </thead>
-    <tbody>{% for r in backtest %}
-      {% set maes = [r.mae_model, r.mae_ecr, r.mae_vegas, r.mae_raw] | reject('none') | list %}
-      {% set ranks = [r.rank_model, r.rank_ecr, r.rank_vegas, r.rank_raw] | reject('none') | list %}
-      <tr><td><b>{{ r.pos }}</b></td><td class="num muted">{{ r.n }}</td>
-        {% for v in [r.mae_model, r.mae_ecr, r.mae_vegas, r.mae_raw] %}<td class="num{{ ' best' if v == maes|min }}">{{ v|f2 }}</td>{% endfor %}
-        {% for v in [r.rank_model, r.rank_ecr, r.rank_vegas, r.rank_raw] %}<td class="num{{ ' best' if v == ranks|max }}">{{ v|f3 }}</td>{% endfor %}
-      </tr>{% endfor %}</tbody>
-  </table></div>
-  <div class="card-pad muted small">{{ bt_takeaway }}</div></div>
 </section>
 
 <section id="tab-model">

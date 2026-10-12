@@ -25,8 +25,8 @@ Output: `report/nfl_edge_week{N}.html`. The first run downloads ~4 seasons of da
 3. **Power rankings** with weekly sparklines and bootstrap certainty.
 4. **Schedule luck**: teams (strength of opponents faced) and players (raw vs schedule-adjusted points/game).
 5. **Role-change alerts**: snap / opportunity share spikes (waiver targets). Alerts only, not model inputs.
-6. **Track record**: model vs FantasyPros experts vs Vegas-scaled stats vs raw stats.
-7. **Model**: how every number is calculated (from `MODEL.md`, with live values).
+6. **Model**: how every number is calculated, the exact fitted formulas and weights, and the walk-forward
+   track record (model vs FantasyPros experts vs Vegas-scaled vs raw stats), all from `MODEL.md` with live values.
 
 ## Model in brief
 - **Team model** (`team_model.py`): ridge regression of play EPA on offense + defense + home, fit separately

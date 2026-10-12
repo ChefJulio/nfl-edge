@@ -128,6 +128,8 @@ def render(live: dict) -> dict:
     return f'<h2 id="m{n}">{m.group(1)}</h2>'
 
   html = re.sub(r"<h2>(.*?)</h2>", anchor, html)
+  # Position cells in tables get the site's position badges.
+  html = re.sub(r"<td>(QB|RB|WR|TE)</td>", lambda m: f'<td><span class="posb posb-{m.group(1)}">{m.group(1)}</span></td>', html)
   return {"html": html, "toc": toc, "stale": is_stale()}
 
 

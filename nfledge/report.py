@@ -191,6 +191,14 @@ def week_bars(weeks: list, n_weeks: int, width=150, height=34) -> str:
   return f'<svg class="wbars" viewBox="0 0 {width} {height}" width="{width}" height="{height}">{body}</svg>'
 
 
+POSITIONS_ALL = ("QB", "RB", "WR", "TE")
+
+
+def pos_badge(pos: str) -> str:
+  """Position badge, one color per position across the site."""
+  return f'<span class="posb posb-{pos}">{pos}</span>' if pos in POSITIONS_ALL else str(pos)
+
+
 def stat(v, unit, digits=0) -> str:
   return f'<span class="st"><b>{v:.{digits}f}</b><small>{unit}</small></span>'
 
@@ -718,6 +726,7 @@ def render(ctx: dict, out_path: Path) -> Path:
   env.filters["abs"] = lambda v: abs(v) if v is not None and not pd.isna(v) else 0
   env.filters["ord"] = lambda n: "" if not n else f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
   env.filters["rkc"] = lambda n: "rk1" if n <= 8 else "rk2" if n <= 16 else "rk3" if n <= 24 else "rk4"
+  env.filters["posb"] = pos_badge
   env.filters["pct"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.0%}"
   html_out = env.get_template("report.html.j2").render(**ctx)
   out_path.parent.mkdir(parents=True, exist_ok=True)

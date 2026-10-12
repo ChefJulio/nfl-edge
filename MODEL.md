@@ -85,7 +85,7 @@ Ratings are shown as **points per 100 plays versus an average team**. Higher is 
 
 ## 7. Validation
 
-Every number in the Track record tab is **walk-forward**: projections for a week use only data available before it, and every learned component is trained only on earlier seasons. Changes are decided on one season and confirmed on the next. Current results on fantasy-relevant players who played:
+Every validation number on this site is **walk-forward**: projections for a week use only data available before it, and every learned component is trained only on earlier seasons. Changes are decided on one season and confirmed on the next. Current results on fantasy-relevant players who played:
 
 {{ L.bt_table }}
 
