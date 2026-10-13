@@ -53,7 +53,7 @@ class ReturnModel:
     reg = s[s.season.isin(seasons) & (s.game_type == "REG")]
     team_weeks = pd.concat([reg[["season", "week", "home_team"]].rename(columns={"home_team": "team"}),
                             reg[["season", "week", "away_team"]].rename(columns={"away_team": "team"})])
-    team_set = set(map(tuple, team_weeks.itertuples(index=False)))
+    team_set = set(zip(team_weeks.season, team_weeks.team, team_weeks.week))  # (season, team, week)
     nxt = {}  # (season, team, week) -> team's next game week
     for (season, team), g in team_weeks.groupby(["season", "team"]):
       ws = sorted(g.week)
@@ -115,10 +115,17 @@ class ReturnModel:
   def fit_frame(self, d: pd.DataFrame):
     from sklearn.ensemble import HistGradientBoostingClassifier
     self.n_train = len(d)
-    self.model = HistGradientBoostingClassifier(max_iter=200, learning_rate=0.05, max_depth=3,
-                                                categorical_features=[FEATURES.index("inj_code"),
-                                                                      FEATURES.index("pos_code")],
-                                                random_state=0).fit(d[FEATURES], d.back)
+    # After a player returns he is not certain to stay active (re-injury, scratches): measured, not assumed.
+    back = d[d.back]
+    stay = [self.active_after(r.season, r.gsis_id, r.team, int(r.next_week), 1) for r in back.itertuples()]
+    stay = [x for x in stay if x is not None]
+    self.stay_active = float(np.mean(stay)) if stay else 1.0
+    make = lambda: HistGradientBoostingClassifier(  # noqa: E731
+      max_iter=200, learning_rate=0.05, max_depth=3, random_state=0,
+      categorical_features=[FEATURES.index("inj_code"), FEATURES.index("pos_code")])
+    self.model = make().fit(d[FEATURES], d.back)
+    # (An isotonic calibration on leave-one-season-out predictions was tested and made the walk-forward Brier
+    # worse, 0.132 -> 0.136: older seasons' miscalibration doesn't carry forward. Raw model kept.)
     return self
 
   def hazard(self, d: pd.DataFrame) -> np.ndarray:
@@ -133,7 +140,8 @@ class ReturnModel:
     for h in range(horizon):
       p = self.hazard(s)
       back_now = still_out * p
-      out[:, h] = (1 - still_out) + back_now  # once back, assumed active (availability is otherwise this week's)
+      # back this game, or back earlier and still active (measured stay-active rate)
+      out[:, h] = (1 - still_out) * getattr(self, "stay_active", 1.0) + back_now
       still_out = still_out * (1 - p)
       s["missed"] = s.missed + 1
       s["week"] = s.week + 1
