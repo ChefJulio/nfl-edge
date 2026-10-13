@@ -719,6 +719,7 @@
       const sp = sit ? spot(sit, st) : null;
       // The big numbers switch from pregame win chances to the score.
       tile.classList.remove('is-pre', 'toss');
+      const tag = tile.querySelector('.mt-at small'); if (tag) tag.remove();  // pregame "Tossup" label
       ['away', 'home'].forEach(k => {
         const side = tile.querySelector(`.mt-side.${k}`); if (!side) return;
         side.querySelector('.mt-num').textContent = st[k].score;

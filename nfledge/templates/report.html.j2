@@ -489,7 +489,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
           <span class="mt-num">{% if g.final %}{{ sc }}{% else %}{{ pct }}<small>%</small>{% endif %}</span>
           <span class="mt-nm"><b>{{ s.nick }}</b> <small>{{ s.record }}</small></span>
         </div>
-        {% if loop.first %}<span class="mt-at">{{ 'vs' if g.neutral else '@' }}</span>{% endif %}
+        {% if loop.first %}<span class="mt-at">{{ 'vs' if g.neutral else '@' }}{% if f.tossup and not g.final %}<small>Tossup</small>{% endif %}</span>{% endif %}
         {% endfor %}
       </div>
       <div class="mt-st">
@@ -499,7 +499,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
           {% elif g.final.fav_won %}<span class="gf-pick ok">Favorite won &middot; {{ f.pct }}%</span>
           {% else %}<span class="gf-pick miss">Upset &middot; a {{ 100 - f.pct }}% chance</span>{% endif %}
         {% else %}<span>{{ g.kickoff }}{% if g.neutral %} &middot; neutral{% endif %}</span>
-          <span class="mt-odds">{% if f.tossup %}<b>Tossup</b> &middot; {% endif %}{% if g.vegas_line %}<b>{{ g.vegas_line }}</b>{% else %}no line yet{% endif %} &middot; <span title="{{ f.model_why }}">ours {% if f.model_tossup %}tossup{% else %}{{ f.model_fav }} {{ f.model_pct }}%{% endif %}</span></span>{% endif %}
+          <span class="mt-odds">{% if g.vegas_line %}<b>{{ g.vegas_line }}</b>{% else %}no line yet{% endif %} &middot; <span title="{{ f.model_why }}">ours {% if f.model_tossup %}tossup{% else %}{{ f.model_fav }} {{ f.model_pct }}%{% endif %}</span></span>{% endif %}
       </div>
     </a>
   {% endfor %}
