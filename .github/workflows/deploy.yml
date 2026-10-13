@@ -63,7 +63,12 @@ jobs:
           git add -A
           if ! git diff --cached --quiet; then
             git commit -m "Archive weeks ($(date -u +%Y-%m-%d))"
-            git push origin HEAD:archive
+            # Someone may push to archive mid-run (e.g. a manual archive rebuild): rebase onto it and retry. On a
+            # clash this run's files win (-X theirs = the commit being replayed): its snapshot is the newer one.
+            for i in 1 2 3; do
+              git push origin HEAD:archive && break
+              git pull --rebase -X theirs origin archive
+            done
           fi
       # Current week (index.html) and the rest of the season (lookahead pages, rebuilt every run, never committed).
       - run: python run.py --out site/index.html --lookahead
