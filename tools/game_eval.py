@@ -64,7 +64,11 @@ def season_games(base: dict, history: int, season: int) -> tuple[pd.DataFrame, d
       games = sched[sched.week == wk]
       r = tm.fit(season, int(wk))
       vf = team_volume_features(ledger, season, int(wk), c)
-      gl = game_lines(gm.predict(games, r, vf, use_vegas=False), games)
+      # Each team's most recent starting QB before this week (knowable pre-game; the live site uses the projected
+      # starter). Without this the QB effects drop out of the margin entirely.
+      past = ledger[(ledger.season == season) & (ledger.week < wk) | (ledger.season < season)]
+      starters = past.dropna(subset=["qb"]).sort_values(["season", "week"]).groupby("team").qb.last().to_dict()
+      gl = game_lines(gm.predict(games, r, vf, use_vegas=False, starters=starters), games)
       gl = gl.merge(games[["game_id", "home_score", "away_score"]], on="game_id")
       gl["variant"], gl["season"] = name, season
       out.append(gl)

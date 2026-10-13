@@ -114,6 +114,15 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   finds b = 1.6-2.1 (model margins too timid) and a = 2-4 (home under-rated) but applying it raises MAE (10.40 vs
   10.37); team "mistake memory" (recent per-team misses) -0.03 MAE, no ATS change. No learnable systematic error:
   the gap is missing information, not bias. Don't retry handicaps without new information.
+- **Eval fix:** tools/game_eval.py now passes each team's most recent starting QB (it passed none, so QB effects
+  were missing from every model-vs-Vegas number above it): margin MAE 10.66 -> 10.58; ATS still 51.7%.
+- **Miss diagnosis** (tools/miss_diagnosis.py, 1,341 games 2021-26; excess = |model miss| - |Vegas miss|, mean
+  +0.81): **surprise QB change** (game's starter != previous starter; 22% of games) excess 1.51 vs 0.60, 5/6
+  seasons, 42% of all excess (eval uses last week's starter; the site uses projected starters, so verify starter
+  accuracy next); **weeks 17-18** excess 1.48 vs 0.71, 5/5 seasons (resting starters / playoff status: compute
+  clinched/eliminated from standings and test); weather, rest, division, inexperienced QB, weeks 1-3, rating lag:
+  noise. Worst misses: model ~even where Vegas had 13-20 pt favorites (ratings over-shrunk for margins; test
+  margin-tuned shrinkage). The absence tags (Out/Doubtful snap share) came out empty: a join bug to fix first.
 - Implication: the game model's value is structure (battles, Power), not beating lines; fantasy projections already
   use Vegas implied totals. Paths still open: diagnose biggest misses for information gaps; market-implied ratings
   (fit team ratings to posted spreads/totals) for lookahead weeks without lines; Matchups reframe (see section 9).
@@ -216,7 +225,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 - CI: `.github/workflows/deploy.yml` (contents: write for the archive commit; ~4-5 min per run).
 
 ## 9. Open threads / next steps (as of 2026-10-12)
-- **In progress (owner said "do it"):** diagnose the model's biggest game misses (|model - Vegas| >= 5 where Vegas
+- **Done 2026-10-12 (results in section 4):** diagnose the model's biggest game misses. Next, in order: starter
+  accuracy of projected QBs + use the site's starter logic in game_eval; fix absence tags; late-season playoff-status
+  features; margin-tuned shrinkage. Original plan: (|model - Vegas| >= 5 where Vegas
   was closer): tag QB situation (backup/rookie/change), weeks 1-3, usage-weighted key absences + OL/secondary
   absences, rating staleness (recent form vs rating), rest/travel/division/late season, weather, ST/HFA share of
   the margin; compare tag rates in Vegas-closer misses vs overall, per season; hand-review the 20 worst; fix only
