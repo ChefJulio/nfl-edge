@@ -208,7 +208,37 @@ class TeamModel:
   # -- fitting ---------------------------------------------------------------------------------------------------
   def weights(self, unit: str, season: int, target_week: int) -> np.ndarray:
     p = self.plays[unit]
-    return asof_weights(p.season, p.week, season, target_week, self.cfg)
+    w = asof_weights(p.season, p.week, season, target_week, self.cfg)
+    ex = self.cfg.get("experiments", {})
+    if float(ex.get("elite_boost", 0) or 0):
+      w = self._elite_weights(unit, w, ex)
+    return w
+
+  def _elite_weights(self, unit: str, w: np.ndarray, ex: dict) -> np.ndarray:
+    """EXPERIMENT (experiments.elite_*; off unless set): count plays against strong opposing UNITS more. A pass
+    play facing a top pass defense weighs more for that offense, and one facing a top pass offense weighs more
+    for that defense (the same play carries both). Opposing strength comes from an ordinary fit on the same as-of
+    weights, so nothing looks ahead. Modes: "top" = units ranked in the top elite_top get 1 + elite_boost each;
+    "linear" = 1 + elite_boost x (opponent percentile - 0.5), summed over both sides (average weight stays ~1)."""
+    beta = self.designs[unit].solve(w, self.alphas[unit], self.alpha_qb)
+    _, o, d, _, _ = _unpack(beta, self.teams)
+    p = self.plays[unit]
+    active = sorted(set(p.posteam[w > 0]) | set(p.defteam[w > 0]))
+    o = pd.Series(o, index=self.teams).reindex(active)
+    d = pd.Series(d, index=self.teams).reindex(active)
+    off_rank = o.rank(ascending=False)  # 1 = best offense
+    def_rank = d.rank(ascending=True)  # 1 = best defense (least EPA allowed)
+    opp_def = p.defteam.map(def_rank).to_numpy(float)  # the defense this offense faced
+    opp_off = p.posteam.map(off_rank).to_numpy(float)  # the offense this defense faced
+    b = float(ex["elite_boost"])
+    if ex.get("elite_mode", "top") == "linear":
+      n = len(active)
+      pct = lambda r: 1 - (r - 1) / max(n - 1, 1)  # 1 = best, 0 = worst
+      mult = 1 + b * ((pct(opp_def) - 0.5) + (pct(opp_off) - 0.5))
+    else:
+      k = float(ex.get("elite_top", 8))
+      mult = 1 + b * ((opp_def <= k).astype(float) + (opp_off <= k).astype(float))
+    return w * np.nan_to_num(np.clip(mult, 0.05, None), nan=1.0)
 
   def fit(self, season: int, target_week: int, bootstrap: int = 0, alphas: dict | None = None) -> Ratings:
     key = (season, target_week, bootstrap)

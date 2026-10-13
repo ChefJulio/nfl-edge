@@ -49,7 +49,27 @@ def EFF_FEATURES(comp: str, opp: str, unit: str, exp: dict | None = None) -> lis
     cols.append("implied_pts")
   if exp.get("air_yards") and comp == "rec_yd":
     cols.append("adot")
+  # EXPERIMENT: goal-line role. A back whose share of the team's inside-10 carries runs above his overall carry
+  # share (a "vulture") should score more TDs per carry than his history of all carries alone says.
+  if exp.get("gl_share") and comp == "rush_td":
+    cols.append("i10_tilt")
   return cols
+
+
+RB_DEFAULT_CONC = 0.65  # league-typical lead-back share of RB carries, for teams with no history in the window
+
+
+def add_rb_inputs(d: pd.DataFrame, conc: dict | None) -> pd.DataFrame:
+  """Derived inputs for the RB experiments (in place): team committee tendency, its interaction with the
+  player's carry share, and the goal-line tilt (inside-10 carry share minus overall carry share)."""
+  d["team_conc"] = d.team.map(conc or {}).fillna(RB_DEFAULT_CONC).astype(float)
+  cs = d["carry_share"].fillna(0.0) if "carry_share" in d else 0.0
+  d["carry_share_x_conc"] = cs * d.team_conc
+  if "i10_share" in d:
+    d["i10_tilt"] = d.i10_share.fillna(cs) - cs
+  else:
+    d["i10_tilt"] = 0.0
+  return d
 
 
 def SHARE_FEATURES(share: str, exp: dict | None = None) -> list[str]:
@@ -63,6 +83,10 @@ def SHARE_FEATURES(share: str, exp: dict | None = None) -> list[str]:
     cols += ["ay_share", "ay_share_long"]
   if exp.get("snap_input"):
     cols.append("snap_pct")
+  # EXPERIMENT: committee vs bellcow teams. The team's lead-back concentration, and concentration x the player's
+  # own share (on a committee team a big recent share should regress more; on a bellcow team it should stick).
+  if exp.get("rbbc") and share == "carry_share":
+    cols += ["team_conc", "carry_share_x_conc"]
   return cols
 
 
@@ -155,9 +179,10 @@ def build_ledger(pbp: pd.DataFrame, xtd: XTD, team_ledger: pd.DataFrame, snaps: 
   ru = live[((live.rush == 1) | (live.qb_scramble == 1)) & (live.qb_kneel == 0) & live.rusher_player_id.notna()].copy()
   ru = ru.assign(gsis_id=ru.rusher_player_id, rush=1, carries=ru.is_designed_rush.astype(int),
                  scrambles=ru.qb_scramble, rush_epa=ru.epa.fillna(0), rush_yd=ru.rushing_yards.fillna(0),
-                 rush_td=ru.rush_touchdown, rush_xtd=xtd.rush_xtd(ru))
+                 rush_td=ru.rush_touchdown, rush_xtd=xtd.rush_xtd(ru),
+                 carries_i10=(ru.is_designed_rush.astype(bool) & (ru.yardline_100 <= 10)).astype(int))
   b = ru.groupby(base + ["gsis_id"])[["rush", "carries", "scrambles", "rush_epa", "rush_yd", "rush_td",
-                                      "rush_xtd"]].sum()
+                                      "rush_xtd", "carries_i10"]].sum()
 
   tg = XTD._targets(live)
   tg = tg.assign(gsis_id=tg.receiver_player_id, tgt=1, tgt_epa=tg.epa.fillna(0), reception=tg.complete_pass,
@@ -193,6 +218,7 @@ def build_ledger(pbp: pd.DataFrame, xtd: XTD, team_ledger: pd.DataFrame, snaps: 
                                                                               "rushes": "team_rush"})
   led = led.merge(tl, on=["game_id", "team"], how="left")
   led["team_ay"] = led.groupby(["game_id", "team"]).air_yd.transform("sum")
+  led["team_rush_i10"] = led.groupby(["game_id", "team"]).carries_i10.transform("sum")  # designed runs inside the 10
   if routes is not None and len(routes):
     led = led.merge(routes[["season", "week", "gsis_id", "dropbacks_on_field"]], on=["season", "week", "gsis_id"],
                     how="left")
@@ -390,9 +416,17 @@ class PlayerModel:
     # Usage shares (games played only; exclusions removed).
     for name, num, den in (("db_share", "db", "team_db"), ("carry_share", "carries", "team_rush"),
                            ("tgt_share", "tgt", "team_db"), ("route_share", "dropbacks_on_field", "team_db"),
-                           ("ay_share", "air_yd", "team_ay")):
+                           ("ay_share", "air_yd", "team_ay"), ("i10_share", "carries_i10", "team_rush_i10")):
       f[name] = wsum(num, "w_use") / wsum(den, "w_use").replace(0, np.nan)
       f[name + "_long"] = wsum(num, "w_eff") / wsum(den, "w_eff").replace(0, np.nan)
+    # Team committee tendency (experiments.rbbc): in each team-game, the lead back's share of the RBs' designed
+    # carries, averaged over the team's recent games (usage weights). ~1 = bellcow team, ~0.5 = even committee.
+    rb = L[(L.pos == "RB") & (L.carries > 0)]
+    if len(rb):
+      g = rb.groupby(["game_id", "team"]).agg(top=("carries", "max"), tot=("carries", "sum"), w=("w_use", "max"))
+      g = g[(g.tot > 0) & (g.w > 0)]
+      conc = (g.top / g.tot * g.w).groupby(level="team").sum() / g.w.groupby(level="team").sum()
+      f.attrs["team_conc"] = conc.to_dict()
     f["games"] = np.bincount(codes, weights=(L.season == season).to_numpy(float), minlength=len(ids))
     last = L.sort_values(["season", "week"]).groupby("gsis_id").tail(1).set_index("gsis_id")
     f["last_team"] = last.team
@@ -459,6 +493,7 @@ class PlayerModel:
         act = self.ledger[(self.ledger.season == s) & (self.ledger.week == wk) & ~self.ledger.excluded]
         act = act[act.pos.isin(positions)]
         j = act.join(f.drop(columns=["pos", "tier"]), on="gsis_id", how="inner")
+        add_rb_inputs(j, f.attrs.get("team_conc"))
         j = j.merge(self.team_ledger[["game_id", "team", "total_line", "spread_team", "qb"]],
                     on=["game_id", "team"], how="left")
         j["def_pass"] = j.opp.map(r.dfn["pass"])
@@ -527,6 +562,7 @@ class PlayerModel:
     p["tier"] = p.tier.fillna(pd.Series(self.info.tier.reindex(p.gsis_id).fillna("UDFA").to_numpy(),
                                         index=p.index))
     self._fill_rate_priors(p)
+    add_rb_inputs(p, f.attrs.get("team_conc"))
 
     self.share_hats(p)
     self._qb_starters(p)
@@ -552,6 +588,9 @@ class PlayerModel:
     for sh in ("db_share", "carry_share", "tgt_share"):
       if sh in p:
         p[f"{sh}_x_spread"] = p[sh] * p.spread_team.fillna(0.0)
+    if "team_conc" not in p:  # callers that build rows themselves (injury absorption): league-typical team
+      p["team_conc"] = RB_DEFAULT_CONC
+    p["carry_share_x_conc"] = p.carry_share.fillna(0.0) * p.team_conc.fillna(RB_DEFAULT_CONC)
     for share, gps in (("db_share", ["QB"]), ("carry_share", ["QB", "RB", "WR", "TE"]),
                        ("tgt_share", ["RB", "WR", "TE"])):
       p[f"{share}_hat"] = 0.0
@@ -574,6 +613,8 @@ class PlayerModel:
       over = (w - self.pcfg["wind_threshold_mph"]).clip(lower=0)
       windpen = np.minimum(over * self.pcfg["wind_penalty_per_mph"], self.pcfg["wind_penalty_cap"])
     p["wind_penalty"] = windpen
+    if "i10_tilt" not in p:
+      p["i10_tilt"] = 0.0
     q = p.assign(def_pass=0.0, def_rush=0.0, home=0) if neutral else p
     for k in STAT_KEYS:
       p[k] = 0.0

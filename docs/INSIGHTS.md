@@ -302,6 +302,19 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   card ("not on our board" + his actual line from the log when he played). Log docs carry `name` and `espn` (cards
   open without a week row) and per game `gid` + `f` (week file). **Game-log rows (2021+) open that game's matchup**
   (owner: rows are links, not a week picker): now that game's gamecast, `game.html?d=<f>&g=<gid>`.
+  **Owner model ideas tested (2026-10-13), both rejected (switches stay, off):**
+  - Elite-unit weighting (`experiments.elite_boost/elite_top/elite_mode`, `TeamModel._elite_weights`): plays vs
+    top-K opposing units (by the as-of fit) up-weighted. `tools/elite_eval.py` scores next-week team-game EPA/play
+    MSE x1000 (baseline 80.995 over 2021-25): top-8 x2 +0.556 [+0.19,+0.94] worse, top-5 x2 +0.564 worse, linear
+    ramp +0.363 worse; top-3/5 at 1.25-1.5x and top-8/12 at 1.5x all within noise (top-3 1.25x +0.035 [-0.07,+0.15]).
+    Player MAE unchanged. Ridge already adjusts each play for the opponent; elite games are too few to add signal.
+  - RB committee (`experiments.rbbc`: team lead-back carry concentration + interaction in the carry-share model)
+    RB MAE -0.001 [-0.003,+0.001]; goal-line tilt (`experiments.gl_share`: inside-10 share minus carry share in the
+    rush-TD rate model) -0.002 [-0.005,+0.001]; both -0.003 [-0.006,+0.000]. WR "better" -0.001 = noise-level.
+    Concentration persists r=0.36 season to season (inside-10: 0.19); same head coach 0.36 vs new 0.29, CI on the
+    difference [-0.20,+0.34]. 2025 range: SEA 0.54 (most committee) to IND 0.88 (most bellcow). Ledger gained
+    carries_i10 / team_rush_i10 (unused unless gl_share is on). Possible follow-ups if wanted: RB TD-only error,
+    committee teams' range calibration, a display-only bellcow index on team cards.
   **Model tab everywhere (2026-10-13):** archived / lookahead pages used to show a one-line "archived week"
   placeholder. Now the current build writes the tab once to `<site>/model.html` (`templates/model_tab.html.j2`,
   also embedded in index.html) and other weeks fetch it on first view (gamecast.js `loadModelTab`), so every page

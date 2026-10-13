@@ -22,6 +22,7 @@ import pandas as pd
 from scipy.optimize import nnls
 
 from .data import depth_for_week
+from .player_model import RB_DEFAULT_CONC, add_rb_inputs
 from .team_model import asof_weights
 
 SHARES = {"tgt_share": ("tgt", "team_db"), "carry_share": ("carries", "team_rush")}
@@ -168,6 +169,7 @@ class InjuryModel:
   def contributors(self, f: pd.DataFrame, season: int, week: int) -> pd.DataFrame:
     """Recent significant contributors per team with their projected shares (as if healthy)."""
     c = f[f.pos.isin(RECV)].copy()
+    c["team_conc"] = c.last_team.map(f.attrs.get("team_conc") or {}).fillna(RB_DEFAULT_CONC)
     c = self.pm.share_hats(c)
     # Only players who have suited up for the team THIS season can vacate volume: offseason departures are
     # already reflected in the new roster's current-season usage (redistributing them double-counts).
@@ -230,7 +232,9 @@ class InjuryModel:
         act = L[(L.season == s) & (L.week == w)]
         absent = cont[~cont.gsis_id.isin(set(act.gsis_id)) & cont.team.isin(set(act.team))]
         mates = act[act.pos.isin(RECV)][["gsis_id", "team", "pos", "tgt", "carries", "team_db", "team_rush"]]
-        mates = self.pm.share_hats(mates.join(f.drop(columns=["pos"]), on="gsis_id"))
+        mates = mates.join(f.drop(columns=["pos"]), on="gsis_id")
+        add_rb_inputs(mates, f.attrs.get("team_conc"))
+        mates = self.pm.share_hats(mates)
         mates = mates[mates.tgt_share_hat.notna()]
         for share, (num, den) in SHARES.items():
           vac = absent.assign(eff_vac=absent[f"{share}_hat"] * (1 - absent.absent_frac))

@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 9ed5c68f0ed2ba45
+documented_code_hash: 289414b43d1e69a7
 ---
 # How the model works
 
@@ -200,6 +200,12 @@ The table re-tests last season and this one, weeks 3 and later. It covers player
 - **28 pre-game signals.** Only Elo helped, and it shipped as part of our win chance. The rest did nothing: QB tiers, record, point differential, close-game luck, turnovers, streaks, rest, byes, travel, prime time, division games, cold weather, surface, new coaches, referees.
 - **Referees.** No referee or referee-team effect on spread or total results persists from one set of games to the next.
 - **Prior-season carryover in team ratings.** A quick three-season check found more of last season helps weeks 2-8 but hurts later weeks. Not adopted; parked for a fuller test.
+
+**Owner ideas (2026-10-13),** walk-forward on 2021-2025, switched off (config `[experiments]`):
+
+- **Weighting plays against elite opposing units.** Plays facing a top-ranked opposing *unit* (top 3, 5, 8 or 12 by that week's ratings, or a smooth ramp by rank) were given extra weight in the team ratings, 1.25x to 2x. Judged on how well the ratings predict each team-game's efficiency the following week: no setting helped, and doubling the weight against top-5 or top-8 units made predictions measurably worse (pass and run). Player projections were unchanged. The ratings already adjust every play for opponent strength, and the few elite matchups add more noise than information.
+- **Running-back committees.** Each team's lead-back share of RB carries (about 0.54 for the most committee-heavy teams to 0.87 for bellcow teams in 2025) is a moderate team trait (season-to-season correlation 0.36; a returning head coach did not make it reliably stickier). As an input to carry-share projections it changed RB error by -0.001 points (95% interval -0.003 to +0.001): a back's own recent share already carries the information.
+- **Goal-line share.** A back's share of his team's inside-the-10 carries, relative to his overall carry share, as an input to touchdowns per carry: RB error -0.002 (-0.005 to +0.001); together with committee tendency -0.003 (-0.006 to +0.000). Touchdown expectations are already built from where each carry happened, which captures most of a goal-line role. Not adopted under the rule that the interval must exclude zero.
 
 Ideas that sounded right but did not improve out-of-sample accuracy are switched off, not shipped:
 

@@ -127,6 +127,23 @@ VARIANTS = {
   "share_norm_car07_tgt03": variant(experiments__share_normalize_carries=0.7, experiments__share_normalize_tgt=0.3),
   # final per-position linear calibration of projections (too extreme at both ends)
   "calib_linear": variant(experiments__player_calibration="linear"),
+  # 2026-10-13 owner ideas. RB: team committee tendency in the carry-share model; goal-line (inside-10) share
+  # tilt in the rush-TD model; both. Team ratings: plays against elite opposing UNITS weighted up (top-K with
+  # boost b per elite side, or a linear ramp by opponent percentile).
+  "rbbc": variant(experiments__rbbc=True),
+  "gl_share": variant(experiments__gl_share=True),
+  "rb_both": variant(experiments__rbbc=True, experiments__gl_share=True),
+  "elite_t8_b05": variant(experiments__elite_boost=0.5, experiments__elite_top=8),
+  "elite_t8_b1": variant(experiments__elite_boost=1.0, experiments__elite_top=8),
+  "elite_t5_b1": variant(experiments__elite_boost=1.0, experiments__elite_top=5),
+  "elite_t12_b05": variant(experiments__elite_boost=0.5, experiments__elite_top=12),
+  "elite_lin_1": variant(experiments__elite_boost=1.0, experiments__elite_mode="linear"),
+  # owner follow-up: "elite" = top 5 or top 3 only, at lighter and heavier boosts
+  "elite_t5_b025": variant(experiments__elite_boost=0.25, experiments__elite_top=5),
+  "elite_t5_b05": variant(experiments__elite_boost=0.5, experiments__elite_top=5),
+  "elite_t3_b025": variant(experiments__elite_boost=0.25, experiments__elite_top=3),
+  "elite_t3_b05": variant(experiments__elite_boost=0.5, experiments__elite_top=3),
+  "elite_t3_b1": variant(experiments__elite_boost=1.0, experiments__elite_top=3),
   # 2026-10-12 audit outcome, tested together for interactions before adopting
   "adopted": variant(player_model__share_half_life_weeks=3.0, uncertainty__games_factor=0.0,
                      uncertainty__low_sample_widen=1.0, uncertainty__injury_boost_widen=1.0,
