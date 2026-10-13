@@ -1198,6 +1198,8 @@ def render(ctx: dict, out_path: Path) -> Path:
   out_path.write_text(html_out, encoding="utf-8")
   out_path.with_suffix(".json").write_text(week_data(ctx), encoding="utf-8")
   write_site_assets(root_dir, env)
+  if ctx.get("model_doc"):  # the current week: its Model tab is the one every other week's page loads
+    (root_dir / "model.html").write_text(env.get_template("model_tab.html.j2").render(**ctx), encoding="utf-8")
   return out_path
 
 

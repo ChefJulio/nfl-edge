@@ -3,6 +3,34 @@ documented_code_hash: 9ed5c68f0ed2ba45
 ---
 # How the model works
 
+## The short version
+
+NFL Edge makes three kinds of estimates each week: how many fantasy points every quarterback, running back, receiver and tight end will score; how strong every team is; and each team's chance to win its game. Everything here is an estimate with honest error bars, not a pick or a betting tip.
+
+**Grading every play.** Football is made of plays, so we start there. Each play is graded against what normally happens in that exact spot: a 6-yard gain on 3rd-and-5 is great, the same 6 yards on 3rd-and-10 is a failure. Credit and blame are split between the offense and the defense on the field, and adjusted for who they faced, so shredding a great defense counts for more than shredding a bad one. Recent games count most, and last season's play fades out as this one goes on. The result is a rating for every team's passing offense, running offense, pass defense, run defense and special teams. Those ratings are the **Power** rankings, shown as points per game better or worse than an average team.
+
+**Predicting a game.** From those ratings, plus each team's usual pace, we estimate how many plays each team will run, how often it will throw, and how well it should move the ball against this particular opponent.
+
+**Predicting a player.** A player's projection is three things multiplied together:
+
+- *How much of the work he gets:* his share of his team's passes, carries or targets, weighted toward recent games.
+- *How much the team will have:* the plays from the game prediction above.
+- *How productive he is per chance:* yards and touchdowns per target or carry, adjusted for the defense he faces, the teammates around him, and strong wind.
+
+A player with only a few games is pulled toward what is typical for players like him (same position, similar draft slot), so two hot weeks aren't treated as the new normal. As the season goes on, his own numbers take over.
+
+**Injuries.** Practice reports (did not practice / limited / full) and game status turn into a chance he plays. If he is likely out, his share goes to teammates the way it has gone in past absences. Projections are always "if he plays", with the chance he sits shown next to it.
+
+**Experts.** Once the weekly expert rankings come out, they are mixed in for running backs, receivers and tight ends, because testing showed the mix beats either alone. Quarterbacks stay ours alone, because the mix made them worse.
+
+**Ranges.** Instead of one number you also get a floor and a ceiling, based on how real scores have spread around past projections like this one. About 8 times in 10 the actual score lands between them.
+
+**Win chances.** The headline chance is the betting market's, turned into a percentage, because over years of games it has been the most accurate forecast. Next to it is our own independent opinion (team ratings, a score-based team rating, and home field) as a second look. Under {{ L.tossup }}% we call it a tossup. A 70% favorite should still lose about 3 times in 10, so an upset isn't automatically a miss.
+
+**Why trust it.** Every part was tested on past seasons the way it would have worked then, using only information available before each game. A change only stays if that testing shows a clear improvement. The detailed sections below describe every piece, with the live formulas at the end.
+
+## The full pipeline
+
 NFL Edge projects weekly fantasy points for QBs, RBs, WRs and TEs and rates every team, using only free data. Every number on this site comes from the pipeline below. Values shown in **bold blue** are filled in live from the current build, so they always match what produced this week's report.
 
 **Pipeline, start to finish:** load and cache data, then fit opponent-adjusted team ratings. From those, predict each game's volume and score, project each player's share of that volume and his efficiency, and adjust for availability and injuries. Finally, blend with the expert consensus where that has been shown to help, and attach calibrated ranges. Learned components train only on seasons *before* the one being projected or tested, mostly the **{{ L.train_seasons }}** seasons before it. The exceptions use longer history:

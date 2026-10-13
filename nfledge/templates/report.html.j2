@@ -550,16 +550,8 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 
 <section id="tab-model">
   <div class="sec-head"><div><h2>The model</h2><p>How every number on this site is calculated. Blue values are filled in live from this build.</p></div></div>
-  {% if model_doc.stale %}<div class="stale">This description may be out of date: the model code or configuration changed after it was last reviewed.</div>{% endif %}
-  <div class="doc-layout">
-    <nav class="toc">{% for h in model_doc.toc %}<a href="#{{ h.id }}">{{ h.title }}</a>{% endfor %}{% if track %}<a href="#track-record">How often favorites win</a>{% endif %}</nav>
-    <article class="card card-pad doc">{{ model_doc.html|safe }}
-      {% if track %}<h2 id="track-record">How often favorites win</h2>
-      <p>Market chances, {{ track.since }}&ndash;{{ track.season }}. A well-calibrated forecast's favorites win about as often as their chance says; each season is scored with chances fit only on the seasons before it.</p>
-      <table class="trk"><thead><tr><th>Favorite's chance</th><th class="num">Games</th><th class="num">Expected</th><th class="num">Won</th><th class="num">{{ track.season }}</th></tr></thead>
-      <tbody>{% for r in track.rows %}<tr{% if r.tossup %} class="toss"{% endif %}><td>{{ r.label }}</td><td class="num">{{ r.n }}</td><td class="num">{{ '%.0f'|format(r.expected) }}%</td><td class="num"><b>{{ '%.0f'|format(r.actual) }}%</b></td><td class="num">{% if r.n_now %}{{ '%.0f'|format(r.actual_now) }}% <small>of {{ r.n_now }}</small>{% else %}&ndash;{% endif %}</td></tr>{% endfor %}</tbody></table>{% endif %}
-    </article>
-  </div>
+  {% if model_doc %}{% include "model_tab.html.j2" %}
+  {% else %}<div class="model-remote" data-src="{{ root }}model.html"><p class="muted">Loading the model description&hellip;</p></div>{% endif %}
 </section>
 </div></main>
 <footer><div class="wrap">nfl-edge &middot; nflverse, NFL.com practice reports, FantasyPros, Open-Meteo &middot; for entertainment, not betting advice</div></footer>

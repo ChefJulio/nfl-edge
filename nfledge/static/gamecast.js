@@ -1234,6 +1234,21 @@
       if (n.matches && n.matches('tr.main[data-pid]')) { openPlayer(n.dataset.pid); return; }
     }
   });
+  // Archived and lookahead weeks: the Model tab is the current week's (model.html at the site root, written by its
+  // build), loaded the first time the tab is shown so every page describes the same, current model.
+  const loadModelTab = () => {
+    const box = document.querySelector('.model-remote');
+    if (!box || box.dataset.loaded) return;
+    box.dataset.loaded = '1';
+    fetch(box.dataset.src).then(r => r.ok ? r.text() : Promise.reject(new Error(r.status))).then(h => { box.innerHTML = h; })
+      .catch(() => { box.dataset.loaded = ''; box.innerHTML = `<p class="muted">Couldn't load the model description right now. <a href="${esc(siteRoot())}index.html#model">Open it on the current week</a>.</p>`; });
+  };
+  if (CFG.page !== 'game') {
+    const mt = document.querySelector('nav.tabs button[data-tab="model"]');
+    if (mt) mt.addEventListener('click', loadModelTab);
+    const sec = document.getElementById('tab-model');
+    if (sec && sec.classList.contains('on')) loadModelTab();
+  }
   window.NFLE = { openPlayer, closePlayer, openTeam };
   if (CFG.page === 'game') initGame(); else initWeek();
 })();

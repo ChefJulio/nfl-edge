@@ -302,6 +302,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   card ("not on our board" + his actual line from the log when he played). Log docs carry `name` and `espn` (cards
   open without a week row) and per game `gid` + `f` (week file). **Game-log rows (2021+) open that game's matchup**
   (owner: rows are links, not a week picker): now that game's gamecast, `game.html?d=<f>&g=<gid>`.
+  **Model tab everywhere (2026-10-13):** archived / lookahead pages used to show a one-line "archived week"
+  placeholder. Now the current build writes the tab once to `<site>/model.html` (`templates/model_tab.html.j2`,
+  also embedded in index.html) and other weeks fetch it on first view (gamecast.js `loadModelTab`), so every page
+  shows the same, current description. MODEL.md opens with "The short version": a plain-language summary for
+  non-technical, casual fans (owner's request); the technical detail follows unchanged.
   **Strict JSON (2026-10-13):** week files are written through `_json_safe` (NaN / inf -> null, `allow_nan=False`).
   Python's default emitted `NaN` (sos_past in week 1, sos_next on every archived week), which browsers can't parse,
   so the card's week picker said "no page" for ~95 weeks. Python readers (player_logs) never noticed.

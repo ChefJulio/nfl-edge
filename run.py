@@ -133,10 +133,6 @@ def week_nav(data, season: int, week: int, current_week: int, prefix: str) -> di
           "is_current": season == cur and week == current_week, "current_href": f"{prefix}index.html"}
 
 
-ARCHIVE_DOC = {"html": "<p>This is an archived week. The model description, formulas and track record are on the "
-                       "current week's Model tab.</p>", "toc": [], "stale": False}
-
-
 def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict, res=None, ev=None,
                bt_seasons=(), archive: bool = False, lookahead: int = 0) -> dict:
   """Everything the page template needs for one season / week (shared by run.py and tools/build_archive.py)."""
@@ -159,7 +155,9 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
     "score_cfg": rp.scoring_settings(scoring, cfg), "tier_cfg": cfg["tiers"],
     "track": rp.track_record(data.schedules, season, week, cfg["report"]["tossup_below"]),
     "tossup_pct": round(cfg["report"]["tossup_below"] * 100),
-    "model_doc": (ARCHIVE_DOC if (archive or lookahead)
+    # Only the current week renders the Model tab; it is also written to the site root (model.html), which archived
+    # and lookahead pages load, so every page shows the same, current description.
+    "model_doc": (None if (archive or lookahead)
                   else docs.render(docs.live_values(eng, cfg, season, week, res, ev))),
   }
 
