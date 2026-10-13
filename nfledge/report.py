@@ -4,6 +4,7 @@ from __future__ import annotations
 import html
 import json
 import math
+import os
 from pathlib import Path
 
 import numpy as np
@@ -134,16 +135,26 @@ class TeamStyle:
     if hasattr(self, "_bg_cache"):
       return self._bg_cache
     path = ROOT / "cache" / "logo_bg.json"
-    known = json.loads(path.read_text()) if path.exists() else {}
+    # Parallel archive builds share this file: read tolerantly, write only when something new was measured, and
+    # write atomically (temp file + replace) so another process never reads it half-written.
+    try:
+      known = json.loads(path.read_text()) if path.exists() else {}
+    except (ValueError, OSError):
+      known = {}
+    added = False
     for team, url in self.logo.items():
       if team in known or not url or team not in self.c:
         continue
       try:
         known[team] = pick_logo_bg(url, *self.c[team])
+        added = True
       except Exception:
         continue
-    path.parent.mkdir(exist_ok=True)
-    path.write_text(json.dumps(known, indent=1))
+    if added:
+      path.parent.mkdir(exist_ok=True)
+      tmp = path.with_suffix(f".{os.getpid()}.tmp")
+      tmp.write_text(json.dumps(known, indent=1))
+      os.replace(tmp, path)
     self._bg_cache = known
     return known
 
