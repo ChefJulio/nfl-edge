@@ -56,6 +56,7 @@ class Engine:
     self.gm.fit(rows, pts_rows)
     train = self.pm.training_rows(seasons, self.positions)
     self.pm.fit_meta(train)
+    self._fit_share_totals(seasons)
     self.injury_model = inj.InjuryModel(self.data, self.pm, self.cfg).fit(seasons) if use_injuries else None
     self.personnel = None
     if use_injuries and self.cfg["team_model"].get("cb_adjust", True):
@@ -102,6 +103,47 @@ class Engine:
       X = np.column_stack([np.ones(len(g)), g.proj.clip(lower=0)])
       coef, *_ = np.linalg.lstsq(X, (g.actual - g.proj) ** 2, rcond=None)
       self.sd_model[pos] = (max(coef[0], 1.0), max(coef[1], 0.0))
+
+  def _fit_share_totals(self, seasons):
+    """Typical team totals of the shares the model predicts player by player: targets to RB/WR/TE per team
+    dropback, designed carries per team rush. Measured on the training seasons (used by _normalize_shares)."""
+    L = self.pm.ledger
+    L = L[L.season.isin(seasons) & L.pos.isin(["RB", "WR", "TE", "QB"])]
+    g = L.groupby(["game_id", "team"])
+    tg = L[L.pos.isin(["RB", "WR", "TE"])].groupby(["game_id", "team"]).tgt.sum() / g.team_db.first()
+    ca = g.carries.sum() / g.team_rush.first()
+    self.share_totals = {"tgt": float(tg.replace([np.inf, -np.inf], np.nan).median()),
+                         "carries": float(ca.replace([np.inf, -np.inf], np.nan).median())}
+
+  def _normalize_shares(self, p: pd.DataFrame, wind) -> pd.DataFrame:
+    """Shares are predicted player by player, so a team's projected targets or carries can add up to far more or
+    less than a real game holds (projected team target-share totals vary 1.5x as much as actual ones, and players
+    on over-subscribed teams come in over-projected). Each team's totals among players expected to play are pulled
+    toward the measured typical total: share x (1 + a x (typical / projected total - 1)), a =
+    experiments.share_normalize (0 = off, 1 = full constraint), chosen by backtest."""
+    exp = self.cfg.get("experiments", {})
+    a_all = float(exp.get("share_normalize", 0.0))
+    strength = {"tgt": float(exp.get("share_normalize_tgt", a_all)),
+                "carries": float(exp.get("share_normalize_carries", a_all))}
+    tot = getattr(self, "share_totals", None)
+    if max(strength.values()) <= 0 or not tot or p.empty:
+      return p
+    p = p.copy()
+    plays = ~p.get("sits", pd.Series(False, index=p.index)).astype(bool)
+    for vol, team_col, poss, key in (("tgt", "team_db", ["RB", "WR", "TE"], "tgt"),
+                                     ("carries", "team_rush", ["QB", "RB", "WR", "TE"], "carries")):
+      a = strength[key]
+      if a <= 0:
+        continue
+      m = plays & p.pos.isin(poss)
+      share = (p[vol] / p[team_col].replace(0, np.nan)).where(m, 0.0).fillna(0.0)
+      team_sum = share.groupby(p.team).transform("sum")
+      factor = 1 + a * (tot[key] / team_sum.replace(0, np.nan) - 1)
+      factor = factor.where(m, 1.0).fillna(1.0).clip(0.6, 1.6)
+      p[vol] = p[vol] * factor
+      if vol == "carries":
+        p["rush"] = p.rush + p.carries * (1 - 1 / factor)  # rush = carries + scrambles; scale the carry part
+    return self.pm.stats_from_volume(p, wind)
 
   # -- projection ------------------------------------------------------------------------------------------------
   def _fit_quantiles(self, d: pd.DataFrame):
@@ -205,6 +247,7 @@ class Engine:
     p["if_sits_gain"], p["if_sits_name"] = 0.0, ""
     if use_injuries and self.injury_model is not None:
       p = self.injury_model.apply(p, season, week, wind, avail_override, status_override)
+    p = self._normalize_shares(p, wind)
     p["proj_neutral"] = self.pm.stats_from_volume(p, wind, neutral=True).proj
     p["matchup_pct"] = p.proj / p.proj_neutral.clip(lower=0.5) - 1
     p["matchup_pts"] = p.proj - p.proj_neutral

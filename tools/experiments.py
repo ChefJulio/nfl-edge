@@ -117,6 +117,14 @@ VARIANTS = {
   # rookie / backup priors: draft tiers by overall pick instead of round
   "draft_picks_fine": variant(player_model__draft_tier_picks=[10, 32, 64, 100, 160]),
   "draft_picks_mid": variant(player_model__draft_tier_picks=[32, 100]),
+  # usage shares: pull each team's projected target / carry totals toward the measured typical total
+  "share_norm_05": variant(experiments__share_normalize=0.5),
+  "share_norm_10": variant(experiments__share_normalize=1.0),
+  "share_norm_03": variant(experiments__share_normalize=0.3),
+  "share_norm_07": variant(experiments__share_normalize=0.7),
+  "share_norm_tgt05": variant(experiments__share_normalize_tgt=0.5),
+  "share_norm_car05": variant(experiments__share_normalize_carries=0.5),
+  "share_norm_car07_tgt03": variant(experiments__share_normalize_carries=0.7, experiments__share_normalize_tgt=0.3),
   # final per-position linear calibration of projections (too extreme at both ends)
   "calib_linear": variant(experiments__player_calibration="linear"),
   # 2026-10-12 audit outcome, tested together for interactions before adopting

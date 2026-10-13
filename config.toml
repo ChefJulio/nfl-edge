@@ -116,6 +116,14 @@ snap_input = false      # snap share as a volume input (spec: flag only, so off 
 # Blend with FantasyPros expert consensus (free, scraped Fridays; only pre-kickoff ranks are used). Backtest:
 # helps RB/WR (and TE in 2025); hurts QB, where the model alone beats the experts.
 ecr_blend_positions = ["RB", "WR", "TE"]
+# Usage-share normalization: shares are predicted player by player, so a team's projected carries / targets can
+# add up to far more or less than a game holds (projected team target totals vary 1.5x as much as actual ones;
+# players on over-subscribed teams came in over-projected). Each team's totals among players expected to play are
+# pulled toward the measured typical total by this strength (0 off, 1 full). Walk-forward 2021-25: carries 0.7 +
+# targets 0.3 = -0.017 MAE overall (CI excludes 0), RB -0.043 and RB rank correlation .507 -> .525; carries alone
+# carry most of it (targets alone within noise); full strength over-corrects.
+share_normalize_carries = 0.7
+share_normalize_tgt = 0.3
 
 [injuries]
 # Fraction of the learned vacated-volume redistribution applied. Backtest: helps RB, slightly hurts WR;

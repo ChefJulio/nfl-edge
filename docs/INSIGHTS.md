@@ -102,6 +102,15 @@ threads. Numbers are walk-forward backtest results (train on earlier seasons, te
   prior weight/decay, eff season weights, WP window, QB-inexperience cutoff/penalty, TD k, GB size, redistribution
   trigger, team half-life, QB effects (fantasy), ECR for QB. Bias: actuals exceed projections by +0.25 to +0.49
   for relevant RB/WR/TE (unexplained; partly selection of "relevant" rows?).
+- **Usage-share normalization (item 3, 2026-10-12):** projected team totals of target shares vary 1.5x as much as
+  actual (sd .110 vs .076); players on over-subscribed teams over-projected (team sum > 1.0: -1.4 pp share).
+  `Engine._normalize_shares` pulls each team's totals (players expected to play) toward the training-measured typical
+  total. Grid: carries 0.7 + targets 0.3 best (-0.017 MAE, RB -0.043, RB rank .507 -> .525); carries drive it,
+  targets alone no difference; full strength over-corrects. Returning-from-injury teammates: real but small
+  (-0.9 pp when a 25%+ target earner returns, ~2% of rows) and largely absorbed by normalization.
+- **Model vs Vegas on games:** when they pick different winners (367 games 2021-25) Vegas is right 59%; blending
+  any weight of the model's margin into Vegas makes margin MAE worse (9.764 at w=0). The game model adds nothing
+  over closing lines; its value is structure (battles), and fantasy already uses Vegas implied totals.
 - **Rounds 2-4 (2021-25):** wind grid -> 10 mph / 3% / 25% cap adopted (-0.011). No difference: per-position
   share half-life, spread-aware shares (game script already in recent usage), finer draft-pick tiers. Rejected:
   final linear calibration (+0.013, CI excludes 0): projections ARE too extreme at the ends (20+ pt projections

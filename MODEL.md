@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 6b0012c261efcaed
+documented_code_hash: 14deb3cc93e52f0d
 ---
 # How the model works
 
@@ -101,6 +101,7 @@ Every validation number on this site is **walk-forward**: projections for a week
 - *Changed:* usage-share half-life 5 -> 3 weeks (better, interval excludes zero); range-widening multipliers removed (calibration 78.3% / 49.5% -> 80.0% / 50.2% vs targets 80 / 50); small-rate priors (scramble rate, fumbles, aDOT, targets per route) now estimated from data.
 - *Confirmed (alternatives worse):* Vegas implied total (+0.036 without), expert blend for RB/WR/TE (+0.013 without), a fixed-shape wind penalty (no wind or a fitted wind term both hurt TEs), half-strength injury redistribution, the 0.96 starting-QB share.
 - *Insensitive (alternatives within noise, current kept):* training window (2 / 3 / 4 seasons), prior-season weight and fade, efficiency season weights, garbage-time window, QB-experience cutoff and penalty, touchdown blend strength, availability-model size, redistribution trigger, team-rating half-life, QB effects on fantasy points, expert blend for QBs.
+- *Usage shares:* each team's projected carries and targets are now pulled toward the totals a real game holds (carries 70% of the way, targets 30%; strengths chosen by backtest). Shares are predicted player by player, so team totals used to swing more than reality, over-projecting players on crowded backfields. Overall error -0.017, RB -0.043, RB ranking accuracy .507 -> .525.
 - *Follow-up rounds:* wind penalty grid-tuned to 10 mph / 3% per mph / 25% cap (better than the old 15 mph / 2%). No difference: position-specific share half-lives, game-script (spread-aware) shares, finer draft-pick tiers. Rejected: a final linear calibration of projections (worse on average error).
 - *Game model:* the points formula's special-teams weight drifted 0.9-3.3 when fit on two seasons; it now trains on six (weight about 2; margin error 10.71 -> 10.68, never worse in any season, winners 59% -> 61%). Fixed special-teams weights from 0 to 2.5 were all within noise of the fit.
 
