@@ -238,28 +238,39 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 .valbar b { min-width: 42px; text-align: right; }
 
 /* matchups: compact tiles, one per row on phones, as many as fit on wider screens; each opens the gamecast */
-.games { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+.games { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); gap: 12px; }
 .tm-open, .pl-row, .nm-link { cursor: pointer; }
-.mt { display: grid; gap: 0; min-width: 0; text-decoration: none; color: var(--ink); background: var(--panel); border: 1px solid var(--line);
-  border-radius: 12px; box-shadow: var(--shadow); padding: 6px 12px 10px; transition: border-color .15s; }
+/* --ac / --hc = the two teams' colors (picked to be distinct), blending into each other across the middle */
+.mt { display: grid; min-width: 0; overflow: hidden; text-decoration: none; color: var(--ink); border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: var(--shadow); transition: border-color .15s;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--ac) 46%, var(--panel)) 0%, color-mix(in srgb, var(--ac) 20%, var(--panel)) 42%,
+                                     color-mix(in srgb, var(--hc) 20%, var(--panel)) 58%, color-mix(in srgb, var(--hc) 46%, var(--panel)) 100%); }
 .mt:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
-.mt-tm { display: flex; align-items: center; gap: 10px; padding: 5px 0; min-width: 0; border-left: 3px solid var(--tc); padding-left: 8px; margin-left: -12px; }
-.mt-tm .logo { width: 30px; height: 30px; flex: none; } .mt-tm .logo img { width: 22px; height: 22px; }
-.mt-nm { min-width: 0; flex: 1; display: flex; flex-direction: column; line-height: 1.2; }
-.mt-nm b { font-size: 15px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.mt-nm small { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mt-sc { flex: none; font-size: 24px; font-weight: 800; letter-spacing: -.02em; min-width: 30px; text-align: right; }
-.mt-tm.lost { opacity: .5; } .mt-tm.has-ball .mt-nm b::after { content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 6px; border-radius: 50%; background: #c47a2c; vertical-align: 2px; }
-.mt-st { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); margin-top: 4px; padding-top: 7px; }
-.mt-st .mt-line { margin-left: auto; color: var(--ink); font-size: 12.5px; }
-.mt-fin { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-.mt-live { color: var(--ink); font-weight: 700; } .mt-sit { width: 100%; } .mt-red { color: #ff8f84; font-weight: 700; }
-.mt-odds { margin-top: 7px; }
-.mt-bar { position: relative; display: flex; height: 5px; border-radius: 3px; overflow: hidden; }
-.mt-pct { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--muted); margin-top: 5px; }
-.mt-pct b { color: var(--ink); } .mt-odds.toss .mt-pct span:first-child b { color: var(--muted); }
-.wp-a { background: var(--ac); } .wp-h { flex: 1; background: var(--hc); }
-.wp-zone { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, rgba(255,255,255,.22) 0 2px, transparent 2px 5px); border-left: 1px solid rgba(255,255,255,.45); border-right: 1px solid rgba(255,255,255,.45); }
+.mt-main { position: relative; display: grid; grid-template-columns: 62px minmax(0, 1fr) auto minmax(0, 1fr) 62px; grid-template-areas: ". sa at sh .";
+  align-items: center; gap: 0 8px; padding: 14px 10px 10px; min-height: 84px; }
+/* big logos on the outside, spilling past the tile's edges (clipped) and fading softly toward the middle */
+.mt-lg { position: absolute; top: 50%; width: 112px; height: 112px; margin-top: -56px; object-fit: contain; pointer-events: none; }
+.mt-lg.away { left: -26px; -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%);
+  mask-image: linear-gradient(90deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%); }
+.mt-lg.home { right: -26px; -webkit-mask-image: linear-gradient(270deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%);
+  mask-image: linear-gradient(270deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%); }
+.mt-side { position: relative; display: flex; flex-direction: column; min-width: 0; line-height: 1.1; text-shadow: 0 1px 3px rgba(0,0,0,.5); }
+.mt-at { position: relative; }
+.mt-side.away { grid-area: sa; align-items: flex-start; } .mt-side.home { grid-area: sh; align-items: flex-end; text-align: right; }
+.mt-num { font-size: 34px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+.mt-num small { font-size: 16px; font-weight: 700; margin-left: 1px; opacity: .75; }
+.mt-nm { margin-top: 4px; font-size: 12.5px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mt-nm b { font-weight: 700; } .mt-nm small { font-size: 11.5px; color: var(--muted); }
+.mt-at { grid-area: at; font-size: 15px; font-weight: 800; color: var(--muted); }
+.mt-side.dog .mt-num, .mt.toss .mt-num { opacity: .6; }
+.mt-side.lost { opacity: .45; } .mt-lg:has(+ .mt-side.lost) { opacity: .35; }
+.mt-side.has-ball .mt-nm b::after { content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 6px; border-radius: 50%; background: #c47a2c; vertical-align: 1px; }
+.mt-st { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 10px; font-size: 12px; color: var(--muted);
+  padding: 7px 12px 9px; background: color-mix(in srgb, var(--panel) 72%, transparent); border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
+.mt-st b { color: var(--ink); }
+.mt-fin { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+.mt-live { color: var(--ink); font-weight: 700; } .mt-red { color: #ff8f84; font-weight: 700; }
+@media (max-width: 400px) { .mt-main { grid-template-columns: 50px minmax(0, 1fr) auto minmax(0, 1fr) 50px; } .mt-lg { width: 96px; height: 96px; margin-top: -48px; } .mt-num { font-size: 30px; } }
 .nm-link { font: inherit; color: inherit; background: none; border: 0; padding: 0; text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; }
 td.mu .opp.tm-open:hover b, .bye .nm-link:hover { color: var(--accent); }
@@ -496,30 +507,32 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   <div class="sec-head"><div><h2>Matchups</h2></div></div>
   <div class="games">
   {% for g in games %}
-    {# Compact tile; the whole tile opens the game's gamecast (Pregame / Live / Postgame). Live games are painted
-       over by gamecast.js (scores, clock, field position) and lose the pregame odds row. #}
+    {# Tile: logos on the outside fading toward the middle, the two team colors blending across, @ in the center
+       and one big number per side: win chance before kickoff (Vegas, or ours before a line posts), the score once
+       it starts. The whole tile opens the gamecast. Live games are repainted by gamecast.js (paintTiles). #}
     {% set fa, fh = (g.final.away, g.final.home) if g.final else (none, none) %}
     {% set f = g.fc %}
-    <a class="mt{{ ' is-final' if g.final }}" id="g-{{ g.id }}" data-gid="{{ g.id }}" href="{{ root }}game.html?d={{ data_rel }}&amp;g={{ g.id }}" style="{{ g.bt_style }}">
-      {% for s, sc, os in [(g.away, fa, fh), (g.home, fh, fa)] %}
-      <div class="mt-tm {{ 'away' if loop.first else 'home' }}{{ ' lost' if g.final and sc < os }}" style="--tc:{{ g.colors[s.team] }}">
-        {{ s.logo|safe }}<span class="mt-nm"><b>{{ s.nick }}</b><small>{{ s.record }}{% if s.rank %} &middot; Power {{ s.rank|ord }}{% endif %}</small></span>
-        <span class="mt-sc">{{ sc if g.final else '' }}</span>
+    <a class="mt {{ 'is-final' if g.final else 'is-pre' }}{{ ' toss' if f.tossup and not g.final }}" id="g-{{ g.id }}" data-gid="{{ g.id }}" href="{{ root }}game.html?d={{ data_rel }}&amp;g={{ g.id }}" style="{{ g.bt_style }}">
+      <div class="mt-main">
+        {% for s, sc, os, pct in [(g.away, fa, fh, f.p_away), (g.home, fh, fa, f.p_home)] %}
+        {% set side = 'away' if loop.first else 'home' %}
+        {% if s.logo_url %}<img class="mt-lg {{ side }}" src="{{ s.logo_url }}" alt="" loading="lazy">{% endif %}
+        <div class="mt-side {{ side }}{{ ' lost' if g.final and sc < os }}{{ ' dog' if not g.final and not f.tossup and pct < 50 }}">
+          <span class="mt-num">{% if g.final %}{{ sc }}{% else %}{{ pct }}<small>%</small>{% endif %}</span>
+          <span class="mt-nm"><b>{{ s.nick }}</b> <small>{{ s.record }}</small></span>
+        </div>
+        {% if loop.first %}<span class="mt-at">{{ 'vs' if g.neutral else '@' }}</span>{% endif %}
+        {% endfor %}
       </div>
-      {% endfor %}
       <div class="mt-st">
         {% if g.final %}<span class="mt-fin">Final</span>
           {% if not g.final.winner %}<span class="gf-pick toss">Tie</span>
           {% elif f.tossup %}<span class="gf-pick toss">Tossup &middot; {{ g.final.winner }} won</span>
           {% elif g.final.fav_won %}<span class="gf-pick ok">Favorite won &middot; {{ f.pct }}%</span>
           {% else %}<span class="gf-pick miss">Upset &middot; a {{ 100 - f.pct }}% chance</span>{% endif %}
-        {% else %}<span class="mt-when">{{ g.kickoff }}{% if g.neutral %} &middot; neutral{% endif %}</span>{% if g.vegas_line %}<b class="mt-line">{{ g.vegas_line }}</b>{% endif %}{% endif %}
+        {% else %}<span>{{ g.kickoff }}{% if g.neutral %} &middot; neutral{% endif %}</span>
+          <span class="mt-odds">{% if f.tossup %}<b>Tossup</b> &middot; {% endif %}{% if g.vegas_line %}<b>{{ g.vegas_line }}</b>{% else %}no line yet{% endif %} &middot; <span title="{{ f.model_why }}">ours {% if f.model_tossup %}tossup{% else %}{{ f.model_fav }} {{ f.model_pct }}%{% endif %}</span></span>{% endif %}
       </div>
-      {% if not g.final %}<div class="mt-odds{{ ' toss' if f.tossup }}">
-        <div class="mt-bar" role="img" aria-label="{{ g.away.team }} {{ f.p_away }}%, {{ g.home.team }} {{ f.p_home }}%"><span class="wp-a" style="width:{{ f.p_away }}%"></span><span class="wp-h"></span><i class="wp-zone" style="left:{{ 100 - tossup_pct }}%;width:{{ 2 * tossup_pct - 100 }}%"></i></div>
-        <div class="mt-pct"><span>{% if f.src == 'Vegas' %}Vegas {% if f.tossup %}<b>tossup</b>{% else %}<b>{{ f.fav }} {{ f.pct }}%</b>{% endif %}{% else %}No line yet{% endif %}</span>
-          <span title="{{ f.model_why }}">Ours {% if f.model_tossup %}<b>tossup</b>{% else %}<b>{{ f.model_fav }} {{ f.model_pct }}%</b>{% endif %}</span></div>
-      </div>{% endif %}
     </a>
   {% endfor %}
   </div>

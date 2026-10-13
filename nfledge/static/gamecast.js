@@ -717,14 +717,15 @@
       const live = st.state === 'in', g = DATA.games.find(x => x.id === tile.dataset.gid);
       const sit = live ? (st.sit || (LIVE.sums[st.id] && sitFromPlays(LIVE.sums[st.id]))) : null;
       const sp = sit ? spot(sit, st) : null;
-      const rows = tile.querySelectorAll('.mt-tm');
-      ['away', 'home'].forEach((k, i) => {
-        const row = rows[i]; if (!row) return;
-        row.querySelector('.mt-sc').textContent = st[k].score;
-        row.classList.toggle('lost', !live && st[k].score < st[k === 'away' ? 'home' : 'away'].score);
-        row.classList.toggle('has-ball', !!(sp && sp.offense.team === st[k].team));
+      // The big numbers switch from pregame win chances to the score.
+      tile.classList.remove('is-pre', 'toss');
+      ['away', 'home'].forEach(k => {
+        const side = tile.querySelector(`.mt-side.${k}`); if (!side) return;
+        side.querySelector('.mt-num').textContent = st[k].score;
+        side.classList.remove('dog');
+        side.classList.toggle('lost', !live && st[k].score < st[k === 'away' ? 'home' : 'away'].score);
+        side.classList.toggle('has-ball', !!(sp && sp.offense.team === st[k].team));
       });
-      const odds = tile.querySelector('.mt-odds'); if (odds) odds.hidden = true;  // pregame odds, not live ones
       const winner = st.away.score > st.home.score ? st.away.team : st.home.score > st.away.score ? st.home.team : null;
       tile.querySelector('.mt-st').innerHTML = live
         ? `<span class="mt-live"><span class="live-dot"></span>${esc(st.short || '')}</span>${sp && sp.text ? `<span>${esc(sp.offense.team)} ball · ${esc(sp.text)}</span>` : ''}${sp && sp.red ? '<span class="mt-red">red zone</span>' : ''}`

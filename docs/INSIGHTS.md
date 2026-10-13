@@ -304,9 +304,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   (owner: rows are links, not a week picker): now that game's gamecast, `game.html?d=<f>&g=<gid>`.
   **Dark only (2026-10-13):** owner's call; light-theme tokens and `prefers-color-scheme` rules removed.
   **Matchups -> gamecast redesign (2026-10-13, owner):** the Matchups tab is now a dense selector: one compact tile
-  per game (`a.mt`, the whole tile links to `game.html?d=&g=`; 1 per row on phones, auto-fill on desktop). Tile
-  states: pre = kickoff, Vegas spread, Vegas + our win % with a thin split bar; live = painted by `paintTiles`
-  (score, clock, possession dot, down and distance; odds row hidden); final = score + verdict pill. Tile how-to and
+  per game (`a.mt`, the whole tile links to `game.html?d=&g=`; 1 per row on phones, auto-fill min 360px so 3
+  across on desktop). Owner's look: team logos on the outside fading toward the middle (CSS mask), the two
+  `bt_style` colors blending across the tile, @ (vs if neutral) in the center, one big number per side = win %
+  before kickoff (Vegas, or ours before a line; underdog dimmed, both dimmed for a tossup), the score once live /
+  final. Footer: kickoff + Vegas spread + "ours X%"; live = painted by `paintTiles` (clock, down and distance,
+  possession dot); final = verdict pill. The gamecast tab for in-progress games is "Live" (owner: not "active"). Tile how-to and
   the "How often favorites win" table were removed from Matchups (owner: self-explanatory or in the Model tab); the
   table now sits at the end of the Model tab (`#track-record`). The full old tile (odds, battle bars, projected
   plays, team ratings) moved into the gamecast **Pregame** tab, rendered client-side from the week JSON (one
