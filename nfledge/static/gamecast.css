@@ -119,7 +119,9 @@ html.pc-open { overflow: hidden; }
 .tm-pw { display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-end; margin: 4px 0 8px; }
 .tm-units { display: grid; gap: 6px; margin: 6px 0; }
 .tm-u { display: grid; grid-template-columns: 92px 44px 40px 1fr 44px; gap: 6px; align-items: center; font-size: 12.5px; }
-.tm-ul { color: var(--muted); } .tm-uv { font-weight: 800; text-align: right; } .tm-pp { font-size: 11px; text-align: right; }
+.tm-ul { color: var(--muted); padding-left: 12px; }
+.tm-tot { margin-top: 4px; } .tm-tot .tm-ul { color: var(--ink); font-weight: 700; padding-left: 0; } .tm-tot .tm-uv { font-size: 13.5px; }
+.tm-tot .tm-ub { height: 10px; } .tm-uv { font-weight: 800; text-align: right; } .tm-pp { font-size: 11px; text-align: right; }
 .tm-ub { position: relative; height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--muted) 16%, transparent); }
 .tm-ub::after { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--faint); }
 .tm-ub span { position: absolute; top: 0; bottom: 0; border-radius: 4px; } .tm-ub .pos { background: var(--good); } .tm-ub .neg { background: var(--bad); }

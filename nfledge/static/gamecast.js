@@ -523,14 +523,15 @@
           ${g.vegas_line ? `<div><div class="pc-k">Line</div><b>${esc(g.vegas_line)}</b></div>` : ''}</div>` : ''}
         <div class="pc-links" style="margin-top:8px"><a href="${gameHref(g)}">Gamecast &rsaquo;</a>${CFG.page !== 'game' ? `<a href="#games" data-goto="${esc(g.id)}">Matchup card &rsaquo;</a>` : ''}</div></div>`
       : `<div class="pc-box"><div class="pc-k">Week ${DATA.week}</div><b>Bye</b></div>`;
-    const unit = (label, v, rk, pp) => `<div class="tm-u"><span class="tm-ul">${label}</span><span class="tm-uv">${sgn(v)}</span>${rkChip(rk)}
+    const unit = (label, v, rk, pp, total) => `<div class="tm-u${total ? ' tm-tot' : ''}"><span class="tm-ul">${label}</span><span class="tm-uv">${sgn(v)}</span>${rkChip(rk)}
       <span class="tm-ub"><span style="${v >= 0 ? `left:50%;width:${Math.min(50, Math.abs(v) * 10)}%` : `right:50%;width:${Math.min(50, Math.abs(v) * 10)}%`}" class="${v >= 0 ? 'pos' : 'neg'}"></span></span>
       ${pp != null ? `<span class="tm-pp muted" title="EPA per 100 plays">${sgn(pp)}</span>` : '<span></span>'}</div>`;
     const power = pw ? `<div class="pc-box"><div class="pc-k">Power ranking</div>
         <div class="tm-pw"><div><div class="pc-big">${ord(pw.rank)}</div><div class="pc-sub">rank range ${esc(pw.range)}${pw.move ? ` · ${pw.move > 0 ? '▲' : '▼'}${Math.abs(pw.move)} this week` : ''}</div></div>
-          <div><div class="pc-big sm">${sgn(pw.net)} <small>pts/g vs avg</small></div><div class="pc-sub">Offense ${sgn(pw.off)} (${ord(pw.off_rk)}) · Defense ${sgn(pw.def)} (${ord(pw.def_rk)})</div></div></div>
-        <div class="tm-units">${unit('Pass O', pw.pass_o, pw.pass_o_rk, pw.pass_o_pp)}${unit('Run O', pw.rush_o, pw.rush_o_rk, pw.rush_o_pp)}
-          ${unit('Pass D', pw.pass_d, pw.pass_d_rk, pw.pass_d_pp)}${unit('Run D', pw.rush_d, pw.rush_d_rk, pw.rush_d_pp)}${unit('Special teams', pw.st, pw.st_rk, null)}</div>
+          <div><div class="pc-big sm">${sgn(pw.net)} <small>pts/g vs avg</small></div></div></div>
+        <div class="tm-units">${unit('Offense', pw.off, pw.off_rk, null, true)}${unit('Pass O', pw.pass_o, pw.pass_o_rk, pw.pass_o_pp)}${unit('Run O', pw.rush_o, pw.rush_o_rk, pw.rush_o_pp)}
+          ${unit('Defense', pw.def, pw.def_rk, null, true)}${unit('Pass D', pw.pass_d, pw.pass_d_rk, pw.pass_d_pp)}${unit('Run D', pw.rush_d, pw.rush_d_rk, pw.rush_d_pp)}
+          ${unit('Special teams', pw.st, pw.st_rk, null, true)}</div>
         <div class="pc-sub">Points per game vs an average team (opponent-adjusted). Schedule so far ${ord(pw.sos_past_rk)} hardest · rest of season ${ord(pw.sos_next_rk)} hardest.</div>
         ${rankTrend(pw.rank_hist) ? `<div class="pc-k" style="margin-top:10px">Power rank by week</div>${rankTrend(pw.rank_hist)}` : ''}</div>` : '';
     const players = Object.entries(DATA.players).filter(([, p]) => p.team === abbr).sort((a, b) => b[1].proj - a[1].proj);
