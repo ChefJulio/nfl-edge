@@ -27,6 +27,8 @@ a rejected idea without new data or a new angle, and do not "fix" a deliberate c
 .venv\Scripts\python tools/win_prob.py                            # Vegas win-prob calibration; prints tossup_below
 .venv\Scripts\python tools/darts.py                               # 28 pre-game signals vs rank / Vegas (cached base)
 .venv\Scripts\python tools/elo_eval.py                            # fits Elo + our win-chance blend; prints [report.win_model]
+.venv\Scripts\python tools/carryover_eval.py --quick              # prior-season carryover vs game outcomes (parked)
+.venv\Scripts\python tools/referees.py                            # referee effects vs spread / totals (none found)
 .venv\Scripts\python tools/vegas_compare.py                       # model vs Vegas: picks, blends, ATS by edge
 .venv\Scripts\python tools/residual_fix.py                        # walk-forward game-margin handicap tests
 ```

@@ -276,6 +276,17 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   what's clear and test walk-forward on margin MAE and ATS. If nothing stands out, the gap is market information.
 - **Done 2026-10-12:** Matchups tossup / win-chance reframe (section 4). Possible follow-up: a live model track
   record (needs walk-forward model margins for past weeks, e.g. cached from the archive build).
+- **Done 2026-10-12:** "Our model" win % = power rank + fitted Elo + home (section 4). Owner ruled out QB-adjusted
+  Elo (Elo should stay results-only; QB info enters via the rank).
+- **PARKED (owner, 2026-10-12): prior-season carryover in team ratings.** `tools/carryover_eval.py --quick` (3
+  seasons 2022/23/25, 765 games, fixed shipped win formula; current = prior_weight 0.3 fading to 0 by week 8,
+  half-life 3). These knobs were "insensitive" on fantasy MAE but never tested on games. Findings: more carryover
+  clearly helps weeks 2-8 (0.6 fading by wk 13: rank Brier -0.008, margin MAE -0.42 pts early; overall MAE -0.13
+  [-0.24, -0.01]; better-rank pick 61.8% vs 60.0%) but hurts weeks 9+ (+0.004 / +0.08); never fading (1.0 all
+  year) hurts late more (+0.010 / +0.19); half-life 6 no help. The win % blend barely moves (Elo already carries
+  the prior season). Next if resumed: quick round of (0.6, 1.0) x fade by week (8, 10) -- strong start, early
+  fade; then full 6-season walk-forward on the winner (`carryover_eval.py`, ~1 hr, cached per variant) + a fantasy
+  MAE check (tools/experiments.py) before shipping. Beneficiaries: Power ranks, battle bars, fantasy matchups.
 - **Proposed:** market-implied team ratings (fit to posted spreads/totals) for lookahead weeks and a Power "market
   view"; test vs actual margins and future closing lines.
 - **Rebuild the archive** after the share-normalization change (and after any future model change).
