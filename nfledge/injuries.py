@@ -374,6 +374,8 @@ class InjuryModel:
     return pd.Series(self.scratch_model.predict_proba(t[self.SCRATCH_COLS])[:, 1], index=t.gsis_id.to_numpy())
 
   # -- application -----------------------------------------------------------------------------------------------
+  espn_bridge: dict | None = None  # gsis_id -> official designation borrowed from ESPN (live week only; see espn.py)
+
   def availability(self, p: pd.DataFrame, season: int, week: int) -> pd.DataFrame:
     inj = self.data.injuries
     inj = inj[(inj.season == season) & (inj.game_type == "REG")].dropna(subset=["gsis_id"])
@@ -404,12 +406,50 @@ class InjuryModel:
           rep, prac = _report(x.report_status), _practice(x.practice_status)
           p.at[i, "avail"] = self.prob(rep, prac)
           p.at[i, "status"] = rep if rep != "None" else ""
+      elif self.espn_bridge and row.gsis_id in self.espn_bridge:
+        # STOPGAP (unvalidated, see espn.py): this week's report isn't out, but ESPN has injury news from after his
+        # last game. Scored like that designation carried forward from last week.
+        rep = self.espn_bridge[row.gsis_id]
+        p.at[i, "avail"] = float(self.p_next.get(rep, 1.0))
+        p.at[i, "status"] = f"{rep} (ESPN)"
       elif row.gsis_id in prev_map.index:
         rep = _report(prev_map.at[row.gsis_id, "report_status"])
         if rep != "None":
           p.at[i, "avail"] = float(self.p_next.get(rep, 1.0))
           p.at[i, "status"] = f"{rep} last wk"
     return p
+
+  @staticmethod
+  def build_espn_bridge(data, season: int, week: int, feed: pd.DataFrame) -> dict:
+    """STOPGAP early-week bridge (see espn.py): gsis_id -> official designation for players with an ESPN injury
+    status updated on or after their team's last completed game day, for teams whose report for `week` is not out.
+    Empty when there is no feed, or once every report for the week is published."""
+    from .espn import STATUS_MAP
+    if feed is None or feed.empty:
+      return {}
+    inj = data.injuries
+    published = set(inj[(inj.season == season) & (inj.week == week)].team.replace({"LAR": "LA"}))
+    r = data.rosters[(data.rosters.season == season) & data.rosters.espn_id.notna() & data.rosters.gsis_id.notna()]
+    r = r.sort_values("week").drop_duplicates("gsis_id", keep="last")
+    by_espn = {str(e).split(".")[0]: (g, t if t != "LAR" else "LA") for e, g, t in zip(r.espn_id, r.gsis_id, r.team)}
+    s = data.schedules[(data.schedules.season == season) & (data.schedules.game_type == "REG")
+                       & (data.schedules.week < week) & data.schedules.home_score.notna()]
+    last_day = pd.concat([s[["home_team", "gameday"]].set_axis(["team", "day"], axis=1),
+                          s[["away_team", "gameday"]].set_axis(["team", "day"], axis=1)]).groupby("team").day.max()
+    out = {}
+    for x in feed.itertuples():
+      rep = STATUS_MAP.get(str(x.status))
+      hit = by_espn.get(str(x.espn_id))
+      if rep is None or hit is None:
+        continue
+      gsis, team = hit
+      if team in published or team not in last_day.index:
+        continue
+      upd = pd.to_datetime(x.updated, utc=True, errors="coerce")
+      if pd.isna(upd) or upd.tz_convert("America/New_York").date() < pd.Timestamp(last_day[team]).date():
+        continue  # news from before his last game: last week's report already covers it
+      out[gsis] = rep
+    return out
 
   def report_avail(self, season: int, week: int) -> pd.Series:
     """P(active) for everyone on the injury report (any position, e.g. defenders): practice-sequence model

@@ -51,11 +51,14 @@ def attach_data(eng, data):
     eng.injury_model.data = data
 
 
-def cached_model(data, cfg, scoring, season: int, week: int):
+def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict | None = None):
   """Trained engine + this week's projections, cached on disk. Presentation-only changes (report.py, the
-  template) reuse it, so a re-render takes seconds instead of minutes."""
+  template) reuse it, so a re-render takes seconds instead of minutes. espn_bridge (live week only): early-week
+  ESPN injury statuses (InjuryModel.build_espn_bridge); part of the cache key, so new ESPN news re-projects."""
   cache_dir = ROOT / cfg["data"]["cache_dir"]
-  path = cache_dir / f"model_{state_key(data, cfg, scoring, season, week)}.pkl"
+  bridge_key = ("_" + hashlib.sha1(json.dumps(sorted(espn_bridge.items())).encode()).hexdigest()[:8]
+                if espn_bridge else "")
+  path = cache_dir / f"model_{state_key(data, cfg, scoring, season, week)}{bridge_key}.pkl"
   if path.exists():
     with open(path, "rb") as f:
       eng, proj = pickle.load(f)
@@ -63,6 +66,8 @@ def cached_model(data, cfg, scoring, season: int, week: int):
     print("[run] reusing cached model + projections (inputs and model code unchanged)", flush=True)
     return eng, proj
   eng = Engine(data, cfg, scoring, POSITIONS).train(season)
+  if espn_bridge and eng.injury_model is not None:
+    eng.injury_model.espn_bridge = espn_bridge
   games = eng.games(season, week)
   if games.empty:
     sys.exit(f"No regular-season games found for {season} week {week}.")
@@ -198,7 +203,15 @@ def main():
   season, week = data.current_season, (args.week or display_week(data))
   print(f"[run] projecting {season} week {week}", flush=True)
 
-  eng, proj = cached_model(data, cfg, scoring, season, week)
+  # Early-week bridge (STOPGAP, see nfledge/espn.py): the live week only, never --week rebuilds or backtests.
+  bridge = {}
+  if not args.week:
+    from nfledge.espn import fetch_injuries
+    from nfledge.injuries import InjuryModel
+    bridge = InjuryModel.build_espn_bridge(data, season, week, fetch_injuries())
+    if bridge:
+      print(f"[run] ESPN early-week injury news for {len(bridge)} players (official report not out)", flush=True)
+  eng, proj = cached_model(data, cfg, scoring, season, week, espn_bridge=bridge)
 
   ev, bt_seasons, res = None, [], None
   if not args.no_backtest:

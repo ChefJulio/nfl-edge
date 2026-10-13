@@ -9,43 +9,25 @@ Writes <out>/<YYYY-MM-DD>.csv (one row per listed player; an existing file for t
 Unofficial public endpoint (like the NFL.com practice feed): may change without notice; failures are non-fatal.
 """
 import datetime as dt
-import json
 import sys
-import urllib.request
 from pathlib import Path
 
-import pandas as pd
-
-URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries"
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from nfledge.espn import fetch_injuries  # noqa: E402
 
 
 def main():
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
   out = Path(opt.get("out", "site/data/espn_injuries"))
-  try:
-    with urllib.request.urlopen(URL, timeout=30) as resp:
-      feed = json.load(resp)
-  except Exception as e:  # never fail the site build over this
-    print(f"[espn] snapshot skipped: {e}")
-    return
-  rows = []
-  for team in feed.get("injuries", []):
-    for i in team.get("injuries", []):
-      a, det = i.get("athlete", {}), i.get("details", {}) or {}
-      href = (a.get("links") or [{}])[0].get("href", "")
-      espn_id = href.split("/id/")[1].split("/")[0] if "/id/" in href else None
-      rows.append({"espn_id": espn_id, "name": a.get("displayName"), "team": team.get("displayName"),
-                   "status": i.get("status"), "updated": i.get("date"), "type": det.get("type"),
-                   "detail": det.get("detail"), "side": det.get("side"), "return_date": det.get("returnDate"),
-                   "fantasy_status": (det.get("fantasyStatus") or {}).get("abbreviation"),
-                   "comment": (i.get("shortComment") or "")[:300]})
-  if not rows:
-    print("[espn] snapshot skipped: empty feed")
+  df = fetch_injuries()  # never fails the site build: empty on any error
+  if df.empty:
+    print("[espn] snapshot skipped: empty or unavailable feed")
     return
   out.mkdir(parents=True, exist_ok=True)
   path = out / f"{dt.datetime.now(dt.timezone.utc):%Y-%m-%d}.csv"
-  pd.DataFrame(rows).to_csv(path, index=False)
-  print(f"[espn] {len(rows)} injury entries -> {path}")
+  df.to_csv(path, index=False)
+  print(f"[espn] {len(df)} injury entries -> {path}")
 
 
 if __name__ == "__main__":

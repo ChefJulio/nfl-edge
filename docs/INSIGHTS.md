@@ -335,6 +335,17 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
     advance): QB P(1+ rush TD) Brier -0.0002 [-0.0006,+0.0002] no difference, QB MAE +0.0013 [-0.0032,+0.0056];
     pocket/high gap 4.9 -> 4.0 only. OFF. Side finding: QBs over-predicted overall for rush TDs (.175 vs .157):
     a general QB rush-TD calibration issue, not tested yet.
+  **Availability fixes (2026-10-13):**
+  - BUG: healthy-scratch history counted the Monday BUF-LA game (final score in schedules, but nflverse pbp + snaps
+    not published yet) as played-by-nobody: every BUF/LA player looked inactive in week 5 (Allen 21%, Stafford 40%
+    scratch risk). Fix: a game counts as history only once its participation data exists (ledger or snaps).
+  - STOPGAP (owner-approved, UNVALIDATED): ESPN early-week bridge (`nfledge/espn.py`, `InjuryModel.build_espn_bridge`,
+    run.py live week only; part of the model cache key). Out / IR / Doubtful posted after the team's last game, team's
+    report not out -> scored with p_next for that designation, status "X (ESPN)". First run mapped Questionable too
+    (148 players incl. Lamb, Barkley at 27%): ESPN keeps Q on players who played through things, so Q/Day-To-Day
+    are ignored (36 players, 8 fantasy-listed: Deebo 67%). TODO when ~6+ weeks of data/espn_injuries snapshots
+    exist: compare ESPN early-week statuses with who played; refit rates or drop the bridge. Not used for lookahead
+    weeks (ESPN return_date untested there).
   **Model tab everywhere (2026-10-13):** archived / lookahead pages used to show a one-line "archived week"
   placeholder. Now the current build writes the tab once to `<site>/model.html` (`templates/model_tab.html.j2`,
   also embedded in index.html) and other weeks fetch it on first view (gamecast.js `loadModelTab`), so every page

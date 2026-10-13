@@ -599,6 +599,9 @@ def bye_rows(eng, stats, ts, pos, season, week) -> list:
 
 
 def inactive_why(r) -> str:
+  if r.status and r.status.endswith("(ESPN)"):
+    return ("ESPN injury news since his last game (this week's official report isn't out yet): "
+            + r.status.replace(" (ESPN)", ""))
   if r.status:
     return "Injury report + practice pattern: " + r.status
   if r.avail < 0.9:
