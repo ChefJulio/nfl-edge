@@ -180,7 +180,10 @@ class Engine:
 
   def project_week(self, season: int, week: int, use_injuries: bool = True, use_vegas: bool = True,
                    wind: pd.Series | None = None, quiet: bool = False, ratings=None,
-                   blend: bool = True) -> pd.DataFrame:
+                   blend: bool = True, avail_override: dict | None = None, status_override: dict | None = None,
+                   extra_cands: pd.DataFrame | None = None) -> pd.DataFrame:
+    """avail_override / status_override / extra_cands: lookahead weeks, where availability comes from the
+    return-timing model and injured-reserve players expected back are added to the roster."""
     r = ratings or self.tm.fit(season, week)
     # Past plays are judged against defenses as they were; this week's opponents get personnel adjustments.
     r_game = self.game_ratings(season, week, r) if use_injuries else r
@@ -189,6 +192,8 @@ class Engine:
     tp = self.gm.predict(games, r_game, vf, use_vegas=use_vegas)
     f = self.pm.features(season, week, r)
     cands = self.candidates(season, week)
+    if extra_cands is not None and len(extra_cands):
+      cands = pd.concat([cands, extra_cands[~extra_cands.gsis_id.isin(cands.gsis_id)]], ignore_index=True)
     if wind is None:  # historical games: realized wind from play-by-play
       wind = self.team_ledger.drop_duplicates("game_id").set_index("game_id").wind
     p = self.pm.project(f, cands, tp, r_game, wind)
@@ -199,7 +204,7 @@ class Engine:
     p["sits"], p["teammate_out"], p["boost_from"] = False, False, ""
     p["if_sits_gain"], p["if_sits_name"] = 0.0, ""
     if use_injuries and self.injury_model is not None:
-      p = self.injury_model.apply(p, season, week, wind)
+      p = self.injury_model.apply(p, season, week, wind, avail_override, status_override)
     p["proj_neutral"] = self.pm.stats_from_volume(p, wind, neutral=True).proj
     p["matchup_pct"] = p.proj / p.proj_neutral.clip(lower=0.5) - 1
     p["matchup_pts"] = p.proj - p.proj_neutral

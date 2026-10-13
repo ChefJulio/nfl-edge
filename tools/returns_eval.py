@@ -18,15 +18,9 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from nfledge import data as D  # noqa: E402
 from nfledge.config import load_config  # noqa: E402
-from nfledge.returns import ReturnModel  # noqa: E402
+from nfledge.returns import ReturnModel, played_set  # noqa: E402
 
 pd.set_option("display.width", 200)
-
-
-def played_set(data) -> set:
-  sn = data.snaps.dropna(subset=["gsis_id"])
-  any_snap = (sn.offense_snaps.fillna(0) + sn.defense_snaps.fillna(0) + sn.st_snaps.fillna(0)) > 0
-  return set(map(tuple, sn.loc[any_snap, ["season", "week", "gsis_id"]].itertuples(index=False)))
 
 
 def main():

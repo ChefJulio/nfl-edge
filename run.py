@@ -15,6 +15,7 @@ import pandas as pd
 from nfledge import backtest as bt
 from nfledge import docs
 from nfledge import report as rp
+from nfledge import returns
 from nfledge.config import ROOT, load_config, load_scoring
 from nfledge.data import forecast_wind, load_all
 from nfledge.engine import POSITIONS, Engine
@@ -169,8 +170,13 @@ def build_lookahead(eng, data, cfg, scoring, season: int, week: int, site: Path)
   s = data.schedules
   last = int(s[(s.season == season) & (s.game_type == "REG")].week.max())
   t0 = time.time()
-  for w in range(week + 1, last + 1):
-    proj = eng.project_week(season, w, use_injuries=False, quiet=True)
+  weeks = list(range(week + 1, last + 1))
+  # Players out injured now: P(active) each later week from the return-timing model; under 50% he sits and his
+  # volume is redistributed (same binary rule as the current week); injured-reserve players expected back return.
+  avail, status, extra = returns.lookahead_availability(data, week, weeks)
+  for w in weeks:
+    proj = eng.project_week(season, w, use_injuries=True, quiet=True, avail_override=avail.get(w, {}),
+                            status_override=status.get(w, {}), extra_cands=extra.get(w))
     ctx = build_page(eng, data, cfg, scoring, season, w, proj,
                      nav=week_nav(data, season, w, week, prefix="../"), lookahead=w - week)
     check_script(rp.render(ctx, site / str(season) / f"week-{w:02d}.html"))

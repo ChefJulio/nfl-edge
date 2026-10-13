@@ -423,13 +423,20 @@ class InjuryModel:
           out[x.gsis_id] = float(self.p_next.get(rep, 1.0))
     return pd.Series(out, dtype=float)
 
-  def apply(self, p: pd.DataFrame, season: int, week: int, wind) -> pd.DataFrame:
+  def apply(self, p: pd.DataFrame, season: int, week: int, wind, avail_override: dict | None = None,
+            status_override: dict | None = None) -> pd.DataFrame:
     """Binary scenarios, not expected values: NFL availability is yes/no and an active player plays his normal
     role. Each player's line is his projection IF ACTIVE ('avail' = P(plays) is reported alongside, never
     multiplied in). The default team scenario is the likelier one: P(plays) < 0.5 (Out / Doubtful / IR / cut)
     sits and his volume is redistributed; Questionable players are assumed active, and their teammates carry a
     contingent 'if X sits' upside instead."""
-    p = self.availability(p, season, week)
+    if avail_override is None:
+      p = self.availability(p, season, week)
+    else:  # lookahead weeks: P(active) from the return-timing model (no report exists that far out)
+      p = p.copy()
+      p["avail"] = p.gsis_id.map(avail_override).fillna(1.0)
+      p["status"] = p.gsis_id.map(status_override or {}).fillna("")
+      p["scratch_avail"] = 1.0
     f = self.pm.features(season, week, self.pm.tm.fit(season, week))
     cont = self.contributors(f, season, week)
     on_team = set(zip(p.gsis_id, p.team))

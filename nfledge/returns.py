@@ -25,6 +25,68 @@ FEATURES = ["missed", "desig_ir", "desig_ir_return", "desig_pup", "desig_reserve
             "report", "inj_code", "pos_code", "week", "missed_x_ir"]
 
 
+def played_set(data) -> set:
+  """(season, week, gsis_id) for every player-game with any snap (offense, defense or special teams)."""
+  sn = data.snaps.dropna(subset=["gsis_id"])
+  any_snap = (sn.offense_snaps.fillna(0) + sn.defense_snaps.fillna(0) + sn.st_snaps.fillna(0)) > 0
+  played = set(map(tuple, sn.loc[any_snap, ["season", "week", "gsis_id"]].itertuples(index=False)))
+  # Snap counts post a day or two after games; weekly player stats (from play-by-play) land sooner.
+  st = data.stats
+  idc = "player_id" if "player_id" in st else "gsis_id"
+  played |= set(zip(st.season, st.week, st[idc]))
+  return played
+
+
+def lookahead_availability(data, current_week: int, weeks: list[int]) -> tuple[dict, dict, dict]:
+  """For each lookahead week: {gsis_id: P(active)} and {gsis_id: status text} for players out injured now, plus
+  the injured-reserve players expected back that week (to add to the roster). Fit on every injury episode whose
+  outcome is known (walk-forward: nothing from the future)."""
+  season = data.current_season
+  m = ReturnModel(data, played_set(data))
+  st = m.states(sorted(data.seasons))
+  if st.empty:
+    return {}, {}, {}
+  known = (st.season < season) | (st.next_week < current_week)
+  m.fit_frame(st[known])
+  # Each injured player's latest state, including this week's finished games; anyone who has played since that
+  # state is back and drops out.
+  cur = st[(st.season == season) & (st.week <= current_week)].sort_values("week").groupby("gsis_id").tail(1)
+  cur = cur[[not any((season, w, g) in m.played for w in range(int(wk) + 1, current_week + 1))
+             for g, wk in zip(cur.gsis_id, cur.week)]]
+  cur = cur[cur.next_week >= current_week - 1]  # still out as of his team's most recent game
+  if cur.empty:
+    return {w: {} for w in weeks}, {w: {} for w in weeks}, {w: pd.DataFrame() for w in weeks}
+  horizon = 18
+  pa = m.p_active(cur, horizon)
+  s = data.schedules
+  reg = s[(s.season == season) & (s.game_type == "REG")]
+  team_weeks = {t: sorted(set(reg[reg.home_team == t].week) | set(reg[reg.away_team == t].week))
+                for t in set(reg.home_team) | set(reg.away_team)}
+  r = data.rosters
+  last = r[(r.season == season) & r.gsis_id.isin(cur.gsis_id)].sort_values("week").groupby("gsis_id").tail(1)
+  info = last.set_index("gsis_id")
+  avail, status, extra = {}, {}, {}
+  for w in weeks:
+    a, t_, rows = {}, {}, []
+    for i, x in enumerate(cur.itertuples()):
+      tw = team_weeks.get(x.team, [])
+      if w not in tw:
+        continue
+      k = sum(1 for g in tw if x.week < g <= w)  # his team's games from his last state through week w
+      if k < 1 or k > horizon:
+        continue
+      p = float(pa[i, k - 1])
+      a[x.gsis_id] = p
+      t_[x.gsis_id] = f"{p:.0%} to play"
+      if x.gsis_id in info.index and info.at[x.gsis_id, "status"] == "RES" and p >= 0.5:
+        pos = POS_GROUP.get(str(info.at[x.gsis_id, "position"]), "")
+        if pos in ("QB", "RB", "WR", "TE"):
+          rows.append({"gsis_id": x.gsis_id, "team": x.team, "pos": pos,
+                       "full_name": info.at[x.gsis_id, "full_name"], "depth_rank": np.nan})
+    avail[w], status[w], extra[w] = a, t_, pd.DataFrame(rows)
+  return avail, status, extra
+
+
 def _injury_code(s: pd.Series) -> pd.Series:
   m = {k: i for i, k in enumerate(INJURY_GROUPS)}
   return s.map(lambda x: next((m[k] for k in INJURY_GROUPS if isinstance(x, str) and k.lower() in x.lower()),
