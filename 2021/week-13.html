@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NFL Edge · Week 13</title>
-<link rel="stylesheet" href="../assets/gamecast.css?v=e83d069117">
+<link rel="stylesheet" href="../assets/gamecast.css?v=cfef62420f">
 <style>
 :root {
   --bg: #f5f6f8; --panel: #ffffff; --panel2: #f9fafb; --ink: #14161a; --muted: #6a717c; --faint: #9aa1ab;
@@ -247,6 +247,20 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 .game { min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
 .g-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
 .tm-open, .pl-row, .nm-link { cursor: pointer; }
+article.game { scroll-margin-top: calc(var(--navh, 48px) + 10px); }  /* jump-to-tile lands below the sticky tabs */
+.g-head { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important; }
+.g-team { min-width: 0; overflow: hidden; }
+.g-id { min-width: 0; flex: 1 1 auto; } .g-id b, .g-id small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.g-sc, .g-team .logo { flex: none; }
+.g-sc { margin-left: auto; font-size: 32px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+.g-team.home .g-sc { margin-left: 0; margin-right: auto; }
+.g-team.lost .g-sc, .g-team.lost .g-id, .g-team.lost .logo { opacity: .5; }
+.g-fin { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; color: var(--muted); }
+.g-at small { display: block; font-size: 10.5px; font-weight: 700; text-align: center; white-space: nowrap; }
+.g-ab { display: none; }
+@media (max-width: 520px) { .g-head .g-sc { font-size: 28px; } .g-head .g-team { gap: 8px; padding: 10px 10px; min-height: 56px; }
+  .g-head .g-team .logo { width: 30px; height: 30px; } .g-head .g-team .logo img { width: 22px; height: 22px; }
+  .g-head .g-team b { font-size: 16px; } .g-head .g-at { padding: 0 6px; } .g-nick { display: none; } .g-ab { display: inline; } }
 .nm-link { font: inherit; color: inherit; background: none; border: 0; padding: 0; text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; }
 td.mu .opp.tm-open:hover b, .bye .nm-link:hover { color: var(--accent); }
@@ -441,7 +455,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     <span id="livePill" class="live-pill" hidden></span>
     <span>Scoring <b id="scoreName">Half PPR</b></span>
     
-    <span>Updated 2026-10-13 03:16</span>
+    <span>Updated 2026-10-13 03:29</span>
   </div>
 </div></header>
 <nav class="tabs"><div class="wrap">
@@ -6826,13 +6840,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2021_13_DAL_NO" data-gid="2021_13_DAL_NO" data-away="DAL" data-home="NO">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#334e69;--tc2:#b0b7bc;--tfg:#ffffff" data-tm="DAL"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/dal.png" alt="DAL" width="28" height="28" loading="lazy"></span><div><b>Cowboys</b><small class="nm-link" data-open-pid="00-0033077">Dak Prescott</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#d3bc8d;--tc2:#595959;--tfg:#ffffff" data-tm="NO"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/no.png" alt="NO" width="28" height="28" loading="lazy"></span><div><b>Saints</b><small class="nm-link" data-open-pid="00-0032156">Trevor Siemian</small></div></div>
+        
+        
+        <div class="g-team away tm-open" style="--tc:#334e69;--tc2:#b0b7bc;--tfg:#ffffff" data-tm="DAL"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/dal.png" alt="DAL" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Cowboys</span><span class="g-ab">DAL</span></b></div><span class="g-sc">27</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open lost" style="--tc:#d3bc8d;--tc2:#595959;--tfg:#ffffff" data-tm="NO"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/no.png" alt="NO" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Saints</span><span class="g-ab">NO</span></b></div><span class="g-sc">17</span></div>
       </div>
       <div class="g-sub"><span>Thu Dec 2 · 8:20 PM ET</span><a class="gc-link" href="../game.html?d=2021/week-13.json&amp;g=2021_13_DAL_NO">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: DAL 27 &ndash; NO 17</span>
+      <div class="g-final">
         <span class="gf-pick ok">Favorite won</span>
         </div>
       
@@ -6940,13 +6956,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2021_13_TB_ATL" data-gid="2021_13_TB_ATL" data-away="TB" data-home="ATL">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#a71930;--tc2:#5b5955;--tfg:#ffffff" data-tm="TB"><span class="logo" style="background:#322F2B"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/tb.png" alt="TB" width="28" height="28" loading="lazy"></span><div><b>Buccaneers</b><small class="nm-link" data-open-pid="00-0019596">Tom Brady</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#a71930;--tc2:#595959;--tfg:#ffffff" data-tm="ATL"><span class="logo" style="background:#A71930"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/atl.png" alt="ATL" width="28" height="28" loading="lazy"></span><div><b>Falcons</b><small class="nm-link" data-open-pid="00-0026143">Matt Ryan</small></div></div>
+        
+        
+        <div class="g-team away tm-open" style="--tc:#a71930;--tc2:#5b5955;--tfg:#ffffff" data-tm="TB"><span class="logo" style="background:#322F2B"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/tb.png" alt="TB" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Buccaneers</span><span class="g-ab">TB</span></b></div><span class="g-sc">30</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open lost" style="--tc:#a71930;--tc2:#595959;--tfg:#ffffff" data-tm="ATL"><span class="logo" style="background:#A71930"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/atl.png" alt="ATL" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Falcons</span><span class="g-ab">ATL</span></b></div><span class="g-sc">17</span></div>
       </div>
       <div class="g-sub"><span>Sun Dec 5 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2021/week-13.json&amp;g=2021_13_TB_ATL">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: TB 30 &ndash; ATL 17</span>
+      <div class="g-final">
         <span class="gf-pick ok">Favorite won</span>
         </div>
       
@@ -7054,13 +7072,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2021_13_ARI_CHI" data-gid="2021_13_ARI_CHI" data-away="ARI" data-home="CHI">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#97233f;--tc2:#595959;--tfg:#ffffff" data-tm="ARI"><span class="logo" style="background:#97233F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ari.png" alt="ARI" width="28" height="28" loading="lazy"></span><div><b>Cardinals</b><small class="nm-link" data-open-pid="00-0035228">Kyler Murray</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#606875;--tc2:#e64100;--tfg:#ffffff" data-tm="CHI"><span class="logo" style="background:#0B162A"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/chi.png" alt="CHI" width="28" height="28" loading="lazy"></span><div><b>Bears</b><small class="nm-link" data-open-pid="00-0027973">Andy Dalton</small></div></div>
+        
+        
+        <div class="g-team away tm-open" style="--tc:#97233f;--tc2:#595959;--tfg:#ffffff" data-tm="ARI"><span class="logo" style="background:#97233F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ari.png" alt="ARI" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Cardinals</span><span class="g-ab">ARI</span></b></div><span class="g-sc">33</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open lost" style="--tc:#606875;--tc2:#e64100;--tfg:#ffffff" data-tm="CHI"><span class="logo" style="background:#0B162A"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/chi.png" alt="CHI" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Bears</span><span class="g-ab">CHI</span></b></div><span class="g-sc">22</span></div>
       </div>
       <div class="g-sub"><span>Sun Dec 5 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2021/week-13.json&amp;g=2021_13_ARI_CHI">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: ARI 33 &ndash; CHI 22</span>
+      <div class="g-final">
         <span class="gf-pick ok">Favorite won</span>
         </div>
       
@@ -7168,13 +7188,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2021_13_LAC_CIN" data-gid="2021_13_LAC_CIN" data-away="LAC" data-home="CIN">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#007bc7;--tc2:#ffc20e;--tfg:#ffffff" data-tm="LAC"><span class="logo" style="background:#007BC7"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lac.png" alt="LAC" width="28" height="28" loading="lazy"></span><div><b>Chargers</b><small class="nm-link" data-open-pid="00-0036355">Justin Herbert</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#fb4f14;--tc2:#595959;--tfg:#ffffff" data-tm="CIN"><span class="logo" style="background:#FB4F14"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/cin.png" alt="CIN" width="28" height="28" loading="lazy"></span><div><b>Bengals</b><small class="nm-link" data-open-pid="00-0036442">Joe Burrow</small></div></div>
+        
+        
+        <div class="g-team away tm-open" style="--tc:#007bc7;--tc2:#ffc20e;--tfg:#ffffff" data-tm="LAC"><span class="logo" style="background:#007BC7"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lac.png" alt="LAC" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Chargers</span><span class="g-ab">LAC</span></b></div><span class="g-sc">41</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open lost" style="--tc:#fb4f14;--tc2:#595959;--tfg:#ffffff" data-tm="CIN"><span class="logo" style="background:#FB4F14"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/cin.png" alt="CIN" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Bengals</span><span class="g-ab">CIN</span></b></div><span class="g-sc">22</span></div>
       </div>
       <div class="g-sub"><span>Sun Dec 5 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2021/week-13.json&amp;g=2021_13_LAC_CIN">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: LAC 41 &ndash; CIN 22</span>
+      <div class="g-final">
         <span class="gf-pick toss">Tossup &middot; LAC won</span>
         </div>
       
@@ -7283,13 +7305,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2021_13_MIN_DET" data-gid="2021_13_MIN_DET" data-away="MIN" data-home="DET">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#72519c;--tc2:#ffc62f;--tfg:#ffffff" data-tm="MIN"><span class="logo" style="background:#4F2683"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/min.png" alt="MIN" width="28" height="28" loading="lazy"></span><div><b>Vikings</b><small class="nm-link" data-open-pid="00-0029604">Kirk Cousins</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#0076b6;--tc2:#b0b7bc;--tfg:#ffffff" data-tm="DET"><span class="logo" style="background:#0076B6"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/det.png" alt="DET" width="28" height="28" loading="lazy"></span><div><b>Lions</b><small class="nm-link" data-open-pid="00-0033106">Jared Goff</small></div></div>
+        
+        
+        <div class="g-team away tm-open lost" style="--tc:#72519c;--tc2:#ffc62f;--tfg:#ffffff" data-tm="MIN"><span class="logo" style="background:#4F2683"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/min.png" alt="MIN" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Vikings</span><span class="g-ab">MIN</span></b></div><span class="g-sc">27</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open" style="--tc:#0076b6;--tc2:#b0b7bc;--tfg:#ffffff" data-tm="DET"><span class="logo" style="background:#0076B6"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/det.png" alt="DET" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Lions</span><span class="g-ab">DET</span></b></div><span class="g-sc">29</span></div>
       </div>
       <div class="g-sub"><span>Sun Dec 5 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2021/week-13.json&amp;g=2021_13_MIN_DET">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: MIN 27 &ndash; DET 29</span>
+      <div class="g-final">
         <span class="gf-pick miss">Upset &middot; a 28% chance</span></div>
       
       <div class="wp" style="--ac:#72519c;--hc:#0076b6">
@@ -7396,13 +7420,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2021_13_IND_HOU" data-gid="2021_13_IND_HOU" data-away="IND" data-home="HOU">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#33567f;--tc2:#a5acaf;--tfg:#ffffff" data-tm="IND"><span class="logo" style="background:#002C5F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ind.png" alt="IND" width="28" height="28" loading="lazy"></span><div><b>Colts</b><small class="nm-link" data-open-pid="00-0032950">Carson Wentz</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#5b6e78;--tc2:#a71930;--tfg:#ffffff" data-tm="HOU"><span class="logo" style="background:#03202F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/hou.png" alt="HOU" width="28" height="28" loading="lazy"></span><div><b>Texans</b><small class="nm-link" data-open-pid="00-0028118">Tyrod Taylor</small></div></div>
+        
+        
+        <div class="g-team away tm-open" style="--tc:#33567f;--tc2:#a5acaf;--tfg:#ffffff" data-tm="IND"><span class="logo" style="background:#002C5F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ind.png" alt="IND" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Colts</span><span class="g-ab">IND</span></b></div><span class="g-sc">31</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open lost" style="--tc:#5b6e78;--tc2:#a71930;--tfg:#ffffff" data-tm="HOU"><span class="logo" style="background:#03202F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/hou.png" alt="HOU" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Texans</span><span class="g-ab">HOU</span></b></div><span class="g-sc">0</span></div>
       </div>
       <div class="g-sub"><span>Sun Dec 5 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2021/week-13.json&amp;g=2021_13_IND_HOU">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: IND 31 &ndash; HOU 0</span>
+      <div class="g-final">
         <span class="gf-pick ok">Favorite won</span>
         </div>
       
@@ -7510,13 +7536,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2021_13_NYG_MIA" data-gid="2021_13_NYG_MIA" data-away="NYG" data-home="MIA">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#3c4e84;--tc2:#a71930;--tfg:#ffffff" data-tm="NYG"><span class="logo" style="background:#0B2265"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/nyg.png" alt="NYG" width="28" height="28" loading="lazy"></span><div><b>Giants</b><small class="nm-link" data-open-pid="00-0030520">Mike Glennon</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#008e97;--tc2:#f58220;--tfg:#ffffff" data-tm="MIA"><span class="logo" style="background:#008E97"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/mia.png" alt="MIA" width="28" height="28" loading="lazy"></span><div><b>Dolphins</b><small class="nm-link" data-open-pid="00-0036212">Tua Tagovailoa</small></div></div>
+        
+        
+        <div class="g-team away tm-open lost" style="--tc:#3c4e84;--tc2:#a71930;--tfg:#ffffff" data-tm="NYG"><span class="logo" style="background:#0B2265"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/nyg.png" alt="NYG" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Giants</span><span class="g-ab">NYG</span></b></div><span class="g-sc">9</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open" style="--tc:#008e97;--tc2:#f58220;--tfg:#ffffff" data-tm="MIA"><span class="logo" style="background:#008E97"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/mia.png" alt="MIA" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Dolphins</span><span class="g-ab">MIA</span></b></div><span class="g-sc">20</span></div>
       </div>
       <div class="g-sub"><span>Sun Dec 5 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2021/week-13.json&amp;g=2021_13_NYG_MIA">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: NYG 9 &ndash; MIA 20</span>
+      <div class="g-final">
         <span class="gf-pick ok">Favorite won</span>
         </div>
       
@@ -7624,13 +7652,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2021_13_PHI_NYJ" data-gid="2021_13_PHI_NYJ" data-away="PHI" data-home="NYJ">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#337076;--tc2:#a5acaf;--tfg:#ffffff" data-tm="PHI"><span class="logo" style="background:#004C54"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/phi.png" alt="PHI" width="28" height="28" loading="lazy"></span><div><b>Eagles</b><small class="nm-link" data-open-pid="00-0036389">Jalen Hurts</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#336557;--tc2:#595959;--tfg:#ffffff" data-tm="NYJ"><span class="logo" style="background:#003F2D"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/nyj.png" alt="NYJ" width="28" height="28" loading="lazy"></span><div><b>Jets</b><small class="nm-link" data-open-pid="00-0037013">Zach Wilson</small></div></div>
+        
+        
+        <div class="g-team away tm-open" style="--tc:#337076;--tc2:#a5acaf;--tfg:#ffffff" data-tm="PHI"><span class="logo" style="background:#004C54"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/phi.png" alt="PHI" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Eagles</span><span class="g-ab">PHI</span></b></div><span class="g-sc">33</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open lost" style="--tc:#336557;--tc2:#595959;--tfg:#ffffff" data-tm="NYJ"><span class="logo" style="background:#003F2D"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/nyj.png" alt="NYJ" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Jets</span><span class="g-ab">NYJ</span></b></div><span class="g-sc">18</span></div>
       </div>
       <div class="g-sub"><span>Sun Dec 5 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2021/week-13.json&amp;g=2021_13_PHI_NYJ">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: PHI 33 &ndash; NYJ 18</span>
+      <div class="g-final">
         <span class="gf-pick ok">Favorite won</span>
         </div>
       
@@ -7738,13 +7768,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2021_13_JAX_LA" data-gid="2021_13_JAX_LA" data-away="JAX" data-home="LA">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#006778;--tc2:#595959;--tfg:#ffffff" data-tm="JAX"><span class="logo" style="background:#006778"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/jax.png" alt="JAX" width="28" height="28" loading="lazy"></span><div><b>Jaguars</b><small class="nm-link" data-open-pid="00-0036971">Trevor Lawrence</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#335da9;--tc2:#ffd100;--tfg:#ffffff" data-tm="LA"><span class="logo" style="background:#003594"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/lar.png" alt="LA" width="28" height="28" loading="lazy"></span><div><b>Rams</b><small class="nm-link" data-open-pid="00-0026498">Matthew Stafford</small></div></div>
+        
+        
+        <div class="g-team away tm-open lost" style="--tc:#006778;--tc2:#595959;--tfg:#ffffff" data-tm="JAX"><span class="logo" style="background:#006778"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/jax.png" alt="JAX" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Jaguars</span><span class="g-ab">JAX</span></b></div><span class="g-sc">7</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open" style="--tc:#335da9;--tc2:#ffd100;--tfg:#ffffff" data-tm="LA"><span class="logo" style="background:#003594"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/lar.png" alt="LA" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Rams</span><span class="g-ab">LA</span></b></div><span class="g-sc">37</span></div>
       </div>
       <div class="g-sub"><span>Sun Dec 5 · 4:05 PM ET</span><a class="gc-link" href="../game.html?d=2021/week-13.json&amp;g=2021_13_JAX_LA">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: JAX 7 &ndash; LA 37</span>
+      <div class="g-final">
         <span class="gf-pick ok">Favorite won</span>
         </div>
       
@@ -7852,13 +7884,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2021_13_WAS_LV" data-gid="2021_13_WAS_LV" data-away="WAS" data-home="LV">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#7b4343;--tc2:#ffb612;--tfg:#ffffff" data-tm="WAS"><span class="logo" style="background:#5A1414"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/wsh.png" alt="WAS" width="28" height="28" loading="lazy"></span><div><b>Commanders</b><small class="nm-link" data-open-pid="00-0031800">Taylor Heinicke</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#595959;--tc2:#a5acaf;--tfg:#ffffff" data-tm="LV"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/lv.png" alt="LV" width="28" height="28" loading="lazy"></span><div><b>Raiders</b><small class="nm-link" data-open-pid="00-0031280">Derek Carr</small></div></div>
+        
+        
+        <div class="g-team away tm-open" style="--tc:#7b4343;--tc2:#ffb612;--tfg:#ffffff" data-tm="WAS"><span class="logo" style="background:#5A1414"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/wsh.png" alt="WAS" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Commanders</span><span class="g-ab">WAS</span></b></div><span class="g-sc">17</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open lost" style="--tc:#595959;--tc2:#a5acaf;--tfg:#ffffff" data-tm="LV"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/lv.png" alt="LV" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Raiders</span><span class="g-ab">LV</span></b></div><span class="g-sc">15</span></div>
       </div>
       <div class="g-sub"><span>Sun Dec 5 · 4:05 PM ET</span><a class="gc-link" href="../game.html?d=2021/week-13.json&amp;g=2021_13_WAS_LV">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: WAS 17 &ndash; LV 15</span>
+      <div class="g-final">
         <span class="gf-pick toss">Tossup &middot; WAS won</span>
         </div>
       
@@ -7967,13 +8001,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2021_13_BAL_PIT" data-gid="2021_13_BAL_PIT" data-away="BAL" data-home="PIT">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#50458f;--tc2:#9e7c0c;--tfg:#ffffff" data-tm="BAL"><span class="logo" style="background:#241773"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/bal.png" alt="BAL" width="28" height="28" loading="lazy"></span><div><b>Ravens</b><small class="nm-link" data-open-pid="00-0034796">Lamar Jackson</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#595959;--tc2:#ffb612;--tfg:#ffffff" data-tm="PIT"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/pit.png" alt="PIT" width="28" height="28" loading="lazy"></span><div><b>Steelers</b><small class="nm-link" data-open-pid="00-0022924">Ben Roethlisberger</small></div></div>
+        
+        
+        <div class="g-team away tm-open lost" style="--tc:#50458f;--tc2:#9e7c0c;--tfg:#ffffff" data-tm="BAL"><span class="logo" style="background:#241773"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/bal.png" alt="BAL" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Ravens</span><span class="g-ab">BAL</span></b></div><span class="g-sc">19</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open" style="--tc:#595959;--tc2:#ffb612;--tfg:#ffffff" data-tm="PIT"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/pit.png" alt="PIT" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Steelers</span><span class="g-ab">PIT</span></b></div><span class="g-sc">20</span></div>
       </div>
       <div class="g-sub"><span>Sun Dec 5 · 4:25 PM ET</span><a class="gc-link" href="../game.html?d=2021/week-13.json&amp;g=2021_13_BAL_PIT">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: BAL 19 &ndash; PIT 20</span>
+      <div class="g-final">
         <span class="gf-pick miss">Upset &middot; a 37% chance</span></div>
       
       <div class="wp" style="--ac:#50458f;--hc:#ffb612">
@@ -8080,13 +8116,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2021_13_SF_SEA" data-gid="2021_13_SF_SEA" data-away="SF" data-home="SEA">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#aa0000;--tc2:#b3995d;--tfg:#ffffff" data-tm="SF"><span class="logo" style="background:#AA0000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/sf.png" alt="SF" width="28" height="28" loading="lazy"></span><div><b>49ers</b><small class="nm-link" data-open-pid="00-0031345">Jimmy Garoppolo</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#334e69;--tc2:#69be28;--tfg:#ffffff" data-tm="SEA"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/sea.png" alt="SEA" width="28" height="28" loading="lazy"></span><div><b>Seahawks</b><small class="nm-link" data-open-pid="00-0029263">Russell Wilson</small></div></div>
+        
+        
+        <div class="g-team away tm-open lost" style="--tc:#aa0000;--tc2:#b3995d;--tfg:#ffffff" data-tm="SF"><span class="logo" style="background:#AA0000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/sf.png" alt="SF" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">49ers</span><span class="g-ab">SF</span></b></div><span class="g-sc">23</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open" style="--tc:#334e69;--tc2:#69be28;--tfg:#ffffff" data-tm="SEA"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/sea.png" alt="SEA" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Seahawks</span><span class="g-ab">SEA</span></b></div><span class="g-sc">30</span></div>
       </div>
       <div class="g-sub"><span>Sun Dec 5 · 4:25 PM ET</span><a class="gc-link" href="../game.html?d=2021/week-13.json&amp;g=2021_13_SF_SEA">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: SF 23 &ndash; SEA 30</span>
+      <div class="g-final">
         <span class="gf-pick miss">Upset &middot; a 40% chance</span></div>
       
       <div class="wp" style="--ac:#aa0000;--hc:#334e69">
@@ -8193,13 +8231,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2021_13_DEN_KC" data-gid="2021_13_DEN_KC" data-away="DEN" data-home="KC">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#334e69;--tc2:#fb4f14;--tfg:#ffffff" data-tm="DEN"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/den.png" alt="DEN" width="28" height="28" loading="lazy"></span><div><b>Broncos</b><small class="nm-link" data-open-pid="00-0031237">Teddy Bridgewater</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#e31837;--tc2:#ffb612;--tfg:#ffffff" data-tm="KC"><span class="logo" style="background:#E31837"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/kc.png" alt="KC" width="28" height="28" loading="lazy"></span><div><b>Chiefs</b><small class="nm-link" data-open-pid="00-0033873">Patrick Mahomes</small></div></div>
+        
+        
+        <div class="g-team away tm-open lost" style="--tc:#334e69;--tc2:#fb4f14;--tfg:#ffffff" data-tm="DEN"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/den.png" alt="DEN" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Broncos</span><span class="g-ab">DEN</span></b></div><span class="g-sc">9</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open" style="--tc:#e31837;--tc2:#ffb612;--tfg:#ffffff" data-tm="KC"><span class="logo" style="background:#E31837"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/kc.png" alt="KC" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Chiefs</span><span class="g-ab">KC</span></b></div><span class="g-sc">22</span></div>
       </div>
       <div class="g-sub"><span>Sun Dec 5 · 8:20 PM ET</span><a class="gc-link" href="../game.html?d=2021/week-13.json&amp;g=2021_13_DEN_KC">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: DEN 9 &ndash; KC 22</span>
+      <div class="g-final">
         <span class="gf-pick ok">Favorite won</span>
         </div>
       
@@ -8307,13 +8347,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2021_13_NE_BUF" data-gid="2021_13_NE_BUF" data-away="NE" data-home="BUF">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#334e69;--tc2:#c60c30;--tfg:#ffffff" data-tm="NE"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ne.png" alt="NE" width="28" height="28" loading="lazy"></span><div><b>Patriots</b><small class="nm-link" data-open-pid="00-0036972">Mac Jones</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#335ca4;--tc2:#c60c30;--tfg:#ffffff" data-tm="BUF"><span class="logo" style="background:#C60C30"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/buf.png" alt="BUF" width="28" height="28" loading="lazy"></span><div><b>Bills</b><small class="nm-link" data-open-pid="00-0034857">Josh Allen</small></div></div>
+        
+        
+        <div class="g-team away tm-open" style="--tc:#334e69;--tc2:#c60c30;--tfg:#ffffff" data-tm="NE"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ne.png" alt="NE" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Patriots</span><span class="g-ab">NE</span></b></div><span class="g-sc">14</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open lost" style="--tc:#335ca4;--tc2:#c60c30;--tfg:#ffffff" data-tm="BUF"><span class="logo" style="background:#C60C30"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/buf.png" alt="BUF" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Bills</span><span class="g-ab">BUF</span></b></div><span class="g-sc">10</span></div>
       </div>
       <div class="g-sub"><span>Mon Dec 6 · 8:15 PM ET</span><a class="gc-link" href="../game.html?d=2021/week-13.json&amp;g=2021_13_NE_BUF">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: NE 14 &ndash; BUF 10</span>
+      <div class="g-final">
         <span class="gf-pick miss">Upset &middot; a 40% chance</span></div>
       
       <div class="wp" style="--ac:#334e69;--hc:#c60c30">
@@ -9575,6 +9617,6 @@ window.nfleApplyScoring = () => applyScoring();
 })();
 </script>
 <script>window.NFLE_CFG = {"archive": true, "current": false, "data": "2021/week-13.json", "lookahead": 0, "root": "../", "season": 2021, "week": 13};</script>
-<script src="../assets/gamecast.js?v=e83d069117" defer></script>
+<script src="../assets/gamecast.js?v=cfef62420f" defer></script>
 </body>
 </html>

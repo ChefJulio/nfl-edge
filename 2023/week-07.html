@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NFL Edge · Week 7</title>
-<link rel="stylesheet" href="../assets/gamecast.css?v=2b454f09cf">
+<link rel="stylesheet" href="../assets/gamecast.css?v=cfef62420f">
 <style>
 :root {
   --bg: #f5f6f8; --panel: #ffffff; --panel2: #f9fafb; --ink: #14161a; --muted: #6a717c; --faint: #9aa1ab;
@@ -247,6 +247,20 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 .game { min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
 .g-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
 .tm-open, .pl-row, .nm-link { cursor: pointer; }
+article.game { scroll-margin-top: calc(var(--navh, 48px) + 10px); }  /* jump-to-tile lands below the sticky tabs */
+.g-head { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important; }
+.g-team { min-width: 0; overflow: hidden; }
+.g-id { min-width: 0; flex: 1 1 auto; } .g-id b, .g-id small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.g-sc, .g-team .logo { flex: none; }
+.g-sc { margin-left: auto; font-size: 32px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+.g-team.home .g-sc { margin-left: 0; margin-right: auto; }
+.g-team.lost .g-sc, .g-team.lost .g-id, .g-team.lost .logo { opacity: .5; }
+.g-fin { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; color: var(--muted); }
+.g-at small { display: block; font-size: 10.5px; font-weight: 700; text-align: center; white-space: nowrap; }
+.g-ab { display: none; }
+@media (max-width: 520px) { .g-head .g-sc { font-size: 28px; } .g-head .g-team { gap: 8px; padding: 10px 10px; min-height: 56px; }
+  .g-head .g-team .logo { width: 30px; height: 30px; } .g-head .g-team .logo img { width: 22px; height: 22px; }
+  .g-head .g-team b { font-size: 16px; } .g-head .g-at { padding: 0 6px; } .g-nick { display: none; } .g-ab { display: inline; } }
 .nm-link { font: inherit; color: inherit; background: none; border: 0; padding: 0; text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; }
 td.mu .opp.tm-open:hover b, .bye .nm-link:hover { color: var(--accent); }
@@ -441,7 +455,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     <span id="livePill" class="live-pill" hidden></span>
     <span>Scoring <b id="scoreName">Half PPR</b></span>
     
-    <span>Updated 2026-10-13 03:15</span>
+    <span>Updated 2026-10-13 03:28</span>
   </div>
 </div></header>
 <nav class="tabs"><div class="wrap">
@@ -6281,13 +6295,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_07_JAX_NO" data-gid="2023_07_JAX_NO" data-away="JAX" data-home="NO">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#006778;--tc2:#595959;--tfg:#ffffff" data-tm="JAX"><span class="logo" style="background:#006778"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/jax.png" alt="JAX" width="28" height="28" loading="lazy"></span><div><b>Jaguars</b><small class="nm-link" data-open-pid="00-0036971">Trevor Lawrence</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#d3bc8d;--tc2:#595959;--tfg:#ffffff" data-tm="NO"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/no.png" alt="NO" width="28" height="28" loading="lazy"></span><div><b>Saints</b><small class="nm-link" data-open-pid="00-0031280">Derek Carr</small></div></div>
+        
+        
+        <div class="g-team away tm-open" style="--tc:#006778;--tc2:#595959;--tfg:#ffffff" data-tm="JAX"><span class="logo" style="background:#006778"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/jax.png" alt="JAX" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Jaguars</span><span class="g-ab">JAX</span></b></div><span class="g-sc">31</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open lost" style="--tc:#d3bc8d;--tc2:#595959;--tfg:#ffffff" data-tm="NO"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/no.png" alt="NO" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Saints</span><span class="g-ab">NO</span></b></div><span class="g-sc">24</span></div>
       </div>
       <div class="g-sub"><span>Thu Oct 19 · 8:15 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-07.json&amp;g=2023_07_JAX_NO">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: JAX 31 &ndash; NO 24</span>
+      <div class="g-final">
         <span class="gf-pick miss">Upset &middot; a 41% chance</span></div>
       
       <div class="wp" style="--ac:#006778;--hc:#d3bc8d">
@@ -6394,13 +6410,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_07_DET_BAL" data-gid="2023_07_DET_BAL" data-away="DET" data-home="BAL">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#0076b6;--tc2:#b0b7bc;--tfg:#ffffff" data-tm="DET"><span class="logo" style="background:#0076B6"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/det.png" alt="DET" width="28" height="28" loading="lazy"></span><div><b>Lions</b><small class="nm-link" data-open-pid="00-0033106">Jared Goff</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#50458f;--tc2:#9e7c0c;--tfg:#ffffff" data-tm="BAL"><span class="logo" style="background:#241773"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/bal.png" alt="BAL" width="28" height="28" loading="lazy"></span><div><b>Ravens</b><small class="nm-link" data-open-pid="00-0034796">Lamar Jackson</small></div></div>
+        
+        
+        <div class="g-team away tm-open lost" style="--tc:#0076b6;--tc2:#b0b7bc;--tfg:#ffffff" data-tm="DET"><span class="logo" style="background:#0076B6"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/det.png" alt="DET" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Lions</span><span class="g-ab">DET</span></b></div><span class="g-sc">6</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open" style="--tc:#50458f;--tc2:#9e7c0c;--tfg:#ffffff" data-tm="BAL"><span class="logo" style="background:#241773"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/bal.png" alt="BAL" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Ravens</span><span class="g-ab">BAL</span></b></div><span class="g-sc">38</span></div>
       </div>
       <div class="g-sub"><span>Sun Oct 22 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-07.json&amp;g=2023_07_DET_BAL">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: DET 6 &ndash; BAL 38</span>
+      <div class="g-final">
         <span class="gf-pick ok">Favorite won</span>
         </div>
       
@@ -6508,13 +6526,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_07_LV_CHI" data-gid="2023_07_LV_CHI" data-away="LV" data-home="CHI">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#595959;--tc2:#a5acaf;--tfg:#ffffff" data-tm="LV"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/lv.png" alt="LV" width="28" height="28" loading="lazy"></span><div><b>Raiders</b><small class="nm-link" data-open-pid="00-0026625">Brian Hoyer</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#606875;--tc2:#e64100;--tfg:#ffffff" data-tm="CHI"><span class="logo" style="background:#0B162A"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/chi.png" alt="CHI" width="28" height="28" loading="lazy"></span><div><b>Bears</b><small class="nm-link" data-open-pid="00-0038416">Tyson Bagent</small></div></div>
+        
+        
+        <div class="g-team away tm-open lost" style="--tc:#595959;--tc2:#a5acaf;--tfg:#ffffff" data-tm="LV"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/lv.png" alt="LV" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Raiders</span><span class="g-ab">LV</span></b></div><span class="g-sc">12</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open" style="--tc:#606875;--tc2:#e64100;--tfg:#ffffff" data-tm="CHI"><span class="logo" style="background:#0B162A"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/chi.png" alt="CHI" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Bears</span><span class="g-ab">CHI</span></b></div><span class="g-sc">30</span></div>
       </div>
       <div class="g-sub"><span>Sun Oct 22 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-07.json&amp;g=2023_07_LV_CHI">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: LV 12 &ndash; CHI 30</span>
+      <div class="g-final">
         <span class="gf-pick miss">Upset &middot; a 41% chance</span></div>
       
       <div class="wp" style="--ac:#595959;--hc:#e64100">
@@ -6621,13 +6641,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_07_CLE_IND" data-gid="2023_07_CLE_IND" data-away="CLE" data-home="IND">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#ff3c00;--tc2:#5a4a33;--tfg:#ffffff" data-tm="CLE"><span class="logo" style="background:#311D00"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/cle.png" alt="CLE" width="28" height="28" loading="lazy"></span><div><b>Browns</b><small class="nm-link" data-open-pid="00-0033537">Deshaun Watson</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#33567f;--tc2:#a5acaf;--tfg:#ffffff" data-tm="IND"><span class="logo" style="background:#002C5F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ind.png" alt="IND" width="28" height="28" loading="lazy"></span><div><b>Colts</b><small class="nm-link" data-open-pid="00-0035289">Gardner Minshew</small></div></div>
+        
+        
+        <div class="g-team away tm-open" style="--tc:#ff3c00;--tc2:#5a4a33;--tfg:#ffffff" data-tm="CLE"><span class="logo" style="background:#311D00"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/cle.png" alt="CLE" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Browns</span><span class="g-ab">CLE</span></b></div><span class="g-sc">39</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open lost" style="--tc:#33567f;--tc2:#a5acaf;--tfg:#ffffff" data-tm="IND"><span class="logo" style="background:#002C5F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ind.png" alt="IND" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Colts</span><span class="g-ab">IND</span></b></div><span class="g-sc">38</span></div>
       </div>
       <div class="g-sub"><span>Sun Oct 22 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-07.json&amp;g=2023_07_CLE_IND">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: CLE 39 &ndash; IND 38</span>
+      <div class="g-final">
         <span class="gf-pick ok">Favorite won</span>
         </div>
       
@@ -6735,13 +6757,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_07_BUF_NE" data-gid="2023_07_BUF_NE" data-away="BUF" data-home="NE">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#335ca4;--tc2:#c60c30;--tfg:#ffffff" data-tm="BUF"><span class="logo" style="background:#C60C30"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/buf.png" alt="BUF" width="28" height="28" loading="lazy"></span><div><b>Bills</b><small class="nm-link" data-open-pid="00-0034857">Josh Allen</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#334e69;--tc2:#c60c30;--tfg:#ffffff" data-tm="NE"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ne.png" alt="NE" width="28" height="28" loading="lazy"></span><div><b>Patriots</b><small class="nm-link" data-open-pid="00-0036972">Mac Jones</small></div></div>
+        
+        
+        <div class="g-team away tm-open lost" style="--tc:#335ca4;--tc2:#c60c30;--tfg:#ffffff" data-tm="BUF"><span class="logo" style="background:#C60C30"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/buf.png" alt="BUF" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Bills</span><span class="g-ab">BUF</span></b></div><span class="g-sc">25</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open" style="--tc:#334e69;--tc2:#c60c30;--tfg:#ffffff" data-tm="NE"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ne.png" alt="NE" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Patriots</span><span class="g-ab">NE</span></b></div><span class="g-sc">29</span></div>
       </div>
       <div class="g-sub"><span>Sun Oct 22 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-07.json&amp;g=2023_07_BUF_NE">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: BUF 25 &ndash; NE 29</span>
+      <div class="g-final">
         <span class="gf-pick miss">Upset &middot; a 26% chance</span></div>
       
       <div class="wp" style="--ac:#335ca4;--hc:#c60c30">
@@ -6848,13 +6872,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_07_WAS_NYG" data-gid="2023_07_WAS_NYG" data-away="WAS" data-home="NYG">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#7b4343;--tc2:#ffb612;--tfg:#ffffff" data-tm="WAS"><span class="logo" style="background:#5A1414"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/wsh.png" alt="WAS" width="28" height="28" loading="lazy"></span><div><b>Commanders</b><small class="nm-link" data-open-pid="00-0037077">Sam Howell</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#3c4e84;--tc2:#a71930;--tfg:#ffffff" data-tm="NYG"><span class="logo" style="background:#0B2265"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/nyg.png" alt="NYG" width="28" height="28" loading="lazy"></span><div><b>Giants</b><small class="nm-link" data-open-pid="00-0028118">Tyrod Taylor</small></div></div>
+        
+        
+        <div class="g-team away tm-open lost" style="--tc:#7b4343;--tc2:#ffb612;--tfg:#ffffff" data-tm="WAS"><span class="logo" style="background:#5A1414"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/wsh.png" alt="WAS" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Commanders</span><span class="g-ab">WAS</span></b></div><span class="g-sc">7</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open" style="--tc:#3c4e84;--tc2:#a71930;--tfg:#ffffff" data-tm="NYG"><span class="logo" style="background:#0B2265"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/nyg.png" alt="NYG" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Giants</span><span class="g-ab">NYG</span></b></div><span class="g-sc">14</span></div>
       </div>
       <div class="g-sub"><span>Sun Oct 22 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-07.json&amp;g=2023_07_WAS_NYG">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: WAS 7 &ndash; NYG 14</span>
+      <div class="g-final">
         <span class="gf-pick miss">Upset &middot; a 40% chance</span></div>
       
       <div class="wp" style="--ac:#ffb612;--hc:#3c4e84">
@@ -6961,13 +6987,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_07_ATL_TB" data-gid="2023_07_ATL_TB" data-away="ATL" data-home="TB">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#a71930;--tc2:#595959;--tfg:#ffffff" data-tm="ATL"><span class="logo" style="background:#A71930"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/atl.png" alt="ATL" width="28" height="28" loading="lazy"></span><div><b>Falcons</b><small class="nm-link" data-open-pid="00-0038122">Desmond Ridder</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#a71930;--tc2:#5b5955;--tfg:#ffffff" data-tm="TB"><span class="logo" style="background:#322F2B"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/tb.png" alt="TB" width="28" height="28" loading="lazy"></span><div><b>Buccaneers</b><small class="nm-link" data-open-pid="00-0034855">Baker Mayfield</small></div></div>
+        
+        
+        <div class="g-team away tm-open" style="--tc:#a71930;--tc2:#595959;--tfg:#ffffff" data-tm="ATL"><span class="logo" style="background:#A71930"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/atl.png" alt="ATL" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Falcons</span><span class="g-ab">ATL</span></b></div><span class="g-sc">16</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open lost" style="--tc:#a71930;--tc2:#5b5955;--tfg:#ffffff" data-tm="TB"><span class="logo" style="background:#322F2B"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/tb.png" alt="TB" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Buccaneers</span><span class="g-ab">TB</span></b></div><span class="g-sc">13</span></div>
       </div>
       <div class="g-sub"><span>Sun Oct 22 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-07.json&amp;g=2023_07_ATL_TB">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: ATL 16 &ndash; TB 13</span>
+      <div class="g-final">
         <span class="gf-pick miss">Upset &middot; a 40% chance</span></div>
       
       <div class="wp" style="--ac:#a71930;--hc:#9aa3b2">
@@ -7074,13 +7102,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_07_PIT_LA" data-gid="2023_07_PIT_LA" data-away="PIT" data-home="LA">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#595959;--tc2:#ffb612;--tfg:#ffffff" data-tm="PIT"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/pit.png" alt="PIT" width="28" height="28" loading="lazy"></span><div><b>Steelers</b><small class="nm-link" data-open-pid="00-0038102">Kenny Pickett</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#335da9;--tc2:#ffd100;--tfg:#ffffff" data-tm="LA"><span class="logo" style="background:#003594"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/lar.png" alt="LA" width="28" height="28" loading="lazy"></span><div><b>Rams</b><small class="nm-link" data-open-pid="00-0026498">Matthew Stafford</small></div></div>
+        
+        
+        <div class="g-team away tm-open" style="--tc:#595959;--tc2:#ffb612;--tfg:#ffffff" data-tm="PIT"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/pit.png" alt="PIT" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Steelers</span><span class="g-ab">PIT</span></b></div><span class="g-sc">24</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open lost" style="--tc:#335da9;--tc2:#ffd100;--tfg:#ffffff" data-tm="LA"><span class="logo" style="background:#003594"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/lar.png" alt="LA" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Rams</span><span class="g-ab">LA</span></b></div><span class="g-sc">17</span></div>
       </div>
       <div class="g-sub"><span>Sun Oct 22 · 4:05 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-07.json&amp;g=2023_07_PIT_LA">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: PIT 24 &ndash; LA 17</span>
+      <div class="g-final">
         <span class="gf-pick miss">Upset &middot; a 38% chance</span></div>
       
       <div class="wp" style="--ac:#595959;--hc:#ffd100">
@@ -7187,13 +7217,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_07_ARI_SEA" data-gid="2023_07_ARI_SEA" data-away="ARI" data-home="SEA">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#97233f;--tc2:#595959;--tfg:#ffffff" data-tm="ARI"><span class="logo" style="background:#97233F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ari.png" alt="ARI" width="28" height="28" loading="lazy"></span><div><b>Cardinals</b><small class="nm-link" data-open-pid="00-0033949">Joshua Dobbs</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#334e69;--tc2:#69be28;--tfg:#ffffff" data-tm="SEA"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/sea.png" alt="SEA" width="28" height="28" loading="lazy"></span><div><b>Seahawks</b><small class="nm-link" data-open-pid="00-0030565">Geno Smith</small></div></div>
+        
+        
+        <div class="g-team away tm-open lost" style="--tc:#97233f;--tc2:#595959;--tfg:#ffffff" data-tm="ARI"><span class="logo" style="background:#97233F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ari.png" alt="ARI" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Cardinals</span><span class="g-ab">ARI</span></b></div><span class="g-sc">10</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open" style="--tc:#334e69;--tc2:#69be28;--tfg:#ffffff" data-tm="SEA"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/sea.png" alt="SEA" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Seahawks</span><span class="g-ab">SEA</span></b></div><span class="g-sc">20</span></div>
       </div>
       <div class="g-sub"><span>Sun Oct 22 · 4:05 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-07.json&amp;g=2023_07_ARI_SEA">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: ARI 10 &ndash; SEA 20</span>
+      <div class="g-final">
         <span class="gf-pick ok">Favorite won</span>
         </div>
       
@@ -7301,13 +7333,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_07_GB_DEN" data-gid="2023_07_GB_DEN" data-away="GB" data-home="DEN">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#4d5f5a;--tc2:#ffb612;--tfg:#ffffff" data-tm="GB"><span class="logo" style="background:#203731"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/gb.png" alt="GB" width="28" height="28" loading="lazy"></span><div><b>Packers</b><small class="nm-link" data-open-pid="00-0036264">Jordan Love</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#334e69;--tc2:#fb4f14;--tfg:#ffffff" data-tm="DEN"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/den.png" alt="DEN" width="28" height="28" loading="lazy"></span><div><b>Broncos</b><small class="nm-link" data-open-pid="00-0029263">Russell Wilson</small></div></div>
+        
+        
+        <div class="g-team away tm-open lost" style="--tc:#4d5f5a;--tc2:#ffb612;--tfg:#ffffff" data-tm="GB"><span class="logo" style="background:#203731"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/gb.png" alt="GB" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Packers</span><span class="g-ab">GB</span></b></div><span class="g-sc">17</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open" style="--tc:#334e69;--tc2:#fb4f14;--tfg:#ffffff" data-tm="DEN"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/den.png" alt="DEN" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Broncos</span><span class="g-ab">DEN</span></b></div><span class="g-sc">19</span></div>
       </div>
       <div class="g-sub"><span>Sun Oct 22 · 4:25 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-07.json&amp;g=2023_07_GB_DEN">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: GB 17 &ndash; DEN 19</span>
+      <div class="g-final">
         <span class="gf-pick toss">Tossup &middot; DEN won</span>
         </div>
       
@@ -7416,13 +7450,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_07_LAC_KC" data-gid="2023_07_LAC_KC" data-away="LAC" data-home="KC">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#007bc7;--tc2:#ffc20e;--tfg:#ffffff" data-tm="LAC"><span class="logo" style="background:#007BC7"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lac.png" alt="LAC" width="28" height="28" loading="lazy"></span><div><b>Chargers</b><small class="nm-link" data-open-pid="00-0036355">Justin Herbert</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#e31837;--tc2:#ffb612;--tfg:#ffffff" data-tm="KC"><span class="logo" style="background:#E31837"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/kc.png" alt="KC" width="28" height="28" loading="lazy"></span><div><b>Chiefs</b><small class="nm-link" data-open-pid="00-0033873">Patrick Mahomes</small></div></div>
+        
+        
+        <div class="g-team away tm-open lost" style="--tc:#007bc7;--tc2:#ffc20e;--tfg:#ffffff" data-tm="LAC"><span class="logo" style="background:#007BC7"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lac.png" alt="LAC" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Chargers</span><span class="g-ab">LAC</span></b></div><span class="g-sc">17</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open" style="--tc:#e31837;--tc2:#ffb612;--tfg:#ffffff" data-tm="KC"><span class="logo" style="background:#E31837"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/kc.png" alt="KC" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Chiefs</span><span class="g-ab">KC</span></b></div><span class="g-sc">31</span></div>
       </div>
       <div class="g-sub"><span>Sun Oct 22 · 4:25 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-07.json&amp;g=2023_07_LAC_KC">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: LAC 17 &ndash; KC 31</span>
+      <div class="g-final">
         <span class="gf-pick ok">Favorite won</span>
         </div>
       
@@ -7530,13 +7566,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_07_MIA_PHI" data-gid="2023_07_MIA_PHI" data-away="MIA" data-home="PHI">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#008e97;--tc2:#f58220;--tfg:#ffffff" data-tm="MIA"><span class="logo" style="background:#008E97"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/mia.png" alt="MIA" width="28" height="28" loading="lazy"></span><div><b>Dolphins</b><small class="nm-link" data-open-pid="00-0036212">Tua Tagovailoa</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#337076;--tc2:#a5acaf;--tfg:#ffffff" data-tm="PHI"><span class="logo" style="background:#004C54"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/phi.png" alt="PHI" width="28" height="28" loading="lazy"></span><div><b>Eagles</b><small class="nm-link" data-open-pid="00-0036389">Jalen Hurts</small></div></div>
+        
+        
+        <div class="g-team away tm-open lost" style="--tc:#008e97;--tc2:#f58220;--tfg:#ffffff" data-tm="MIA"><span class="logo" style="background:#008E97"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/mia.png" alt="MIA" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Dolphins</span><span class="g-ab">MIA</span></b></div><span class="g-sc">17</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open" style="--tc:#337076;--tc2:#a5acaf;--tfg:#ffffff" data-tm="PHI"><span class="logo" style="background:#004C54"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/phi.png" alt="PHI" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Eagles</span><span class="g-ab">PHI</span></b></div><span class="g-sc">31</span></div>
       </div>
       <div class="g-sub"><span>Sun Oct 22 · 8:20 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-07.json&amp;g=2023_07_MIA_PHI">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: MIA 17 &ndash; PHI 31</span>
+      <div class="g-final">
         <span class="gf-pick ok">Favorite won</span>
         </div>
       
@@ -7644,13 +7682,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_07_SF_MIN" data-gid="2023_07_SF_MIN" data-away="SF" data-home="MIN">
       <div class="g-head">
-        <div class="g-team away tm-open" style="--tc:#aa0000;--tc2:#b3995d;--tfg:#ffffff" data-tm="SF"><span class="logo" style="background:#AA0000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/sf.png" alt="SF" width="28" height="28" loading="lazy"></span><div><b>49ers</b><small class="nm-link" data-open-pid="00-0037834">Brock Purdy</small></div></div>
-        <div class="g-at">@</div>
-        <div class="g-team home tm-open" style="--tc:#72519c;--tc2:#ffc62f;--tfg:#ffffff" data-tm="MIN"><span class="logo" style="background:#4F2683"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/min.png" alt="MIN" width="28" height="28" loading="lazy"></span><div><b>Vikings</b><small class="nm-link" data-open-pid="00-0029604">Kirk Cousins</small></div></div>
+        
+        
+        <div class="g-team away tm-open lost" style="--tc:#aa0000;--tc2:#b3995d;--tfg:#ffffff" data-tm="SF"><span class="logo" style="background:#AA0000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/sf.png" alt="SF" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">49ers</span><span class="g-ab">SF</span></b></div><span class="g-sc">17</span></div>
+        <div class="g-at"><span class="g-fin">FINAL</span></div>
+        <div class="g-team home tm-open" style="--tc:#72519c;--tc2:#ffc62f;--tfg:#ffffff" data-tm="MIN"><span class="logo" style="background:#4F2683"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/min.png" alt="MIN" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Vikings</span><span class="g-ab">MIN</span></b></div><span class="g-sc">22</span></div>
       </div>
       <div class="g-sub"><span>Mon Oct 23 · 8:15 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-07.json&amp;g=2023_07_SF_MIN">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      <div class="g-final"><span class="gf-score">Final: SF 17 &ndash; MIN 22</span>
+      <div class="g-final">
         <span class="gf-pick miss">Upset &middot; a 27% chance</span></div>
       
       <div class="wp" style="--ac:#aa0000;--hc:#72519c">
@@ -8912,6 +8952,6 @@ window.nfleApplyScoring = () => applyScoring();
 })();
 </script>
 <script>window.NFLE_CFG = {"archive": true, "current": false, "data": "2023/week-07.json", "lookahead": 0, "root": "../", "season": 2023, "week": 7};</script>
-<script src="../assets/gamecast.js?v=2b454f09cf" defer></script>
+<script src="../assets/gamecast.js?v=cfef62420f" defer></script>
 </body>
 </html>
