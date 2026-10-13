@@ -74,6 +74,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3915189,Roquan Smith,Baltimore Ravens,Active,2026-10-07T01:04Z,,,,,,Smith recorded six total tackles (one solo) during Sunday's 24-18 win over the Titans.
 4430831,Trenton Simpson,Baltimore Ravens,Active,2026-10-07T00:59Z,,,,,,Simpson recorded nine total tackles (two solo) and an interception during Sunday's 24-18 win over Tennessee.
 4696882,Devontez Walker,Baltimore Ravens,Active,2026-10-06T04:00Z,,,,,,Walker caught one of his two targets for 19 yards during Baltimore's win over the Titans on Sunday.
+4385690,Dalton Kincaid,Buffalo Bills,Active,2026-10-13T05:27Z,,,,,,Kincaid brought in one of two targets for seven yards and recorded a two-point conversion catch in the Bills' 37-34 overtime win over the Rams on Monday night.
+4373678,Khalil Shakir,Buffalo Bills,Active,2026-10-13T05:22Z,,,,,,Shakir brought in all three targets for 80 yards in the Bills' 37-34 overtime win over the Rams on Monday night.
+3918298,Josh Allen,Buffalo Bills,Active,2026-10-13T04:50Z,,,,,,Allen completed 12 of 19 passes for 210 yards with one touchdown and one interception while adding 10 carries for 121 yards and another score and a two-point conversion pass in the Bills' 37-34 overtime win against the Rams on Monday night.
 4379399,James Cook III,Buffalo Bills,Active,2026-10-13T04:15Z,,,,,,"Cook rushed 10 times for 121 yards and a touchdown and brought in his only target for seven yards in the Bills' 37-34 overtime win over the Rams on Monday night. He also committed two fumbles, losing one."
 4030899,Spencer Brown,Buffalo Bills,Questionable,2026-10-13T02:54Z,Back,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Brown (back) has been ruled out for the remainder of Monday night's game versus the Rams.
 4432715,Landon Jackson,Buffalo Bills,Out,2026-10-12T22:56Z,Knee,Not Specified,Not Specified,2026-10-18,INACTIVE,Jackson (knee) is inactive against the Rams on Monday.
@@ -91,13 +94,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362506,Greg Rousseau,Buffalo Bills,Active,2026-10-08T01:09Z,,,,,,Rousseau logged four tackles (two solo) and two passes defensed in the Bills' 29-26 loss to the Patriots on Sunday.
 3915411,Ty Johnson,Buffalo Bills,Active,2026-10-06T04:07Z,,,,,,Johnson rushed once for three yards and caught both of his targets for nine yards Sunday in a loss to New England.
 3930086,Dawson Knox,Buffalo Bills,Active,2026-10-06T02:41Z,,,,,,Knox caught both of his targets for 13 yards in the Bills' 29-26 loss to the Patriots on Sunday.
-4373678,Khalil Shakir,Buffalo Bills,Active,2026-10-06T00:13Z,,,,,,Shakir turned seven catches (on eight targets) into 82 yards during the Bills' 29-26 loss to the Patriots on Sunday. He also lost a fumble.
 4429501,Ray Davis,Buffalo Bills,Active,2026-10-06T00:06Z,,,,,,"Davis logged a four-yard carry, a three-yard reception and returned one kickoff for 29 yards during the Bills' 29-26 loss to the Patriots in Week 4."
 5076951,Jalon Kilgore,Buffalo Bills,Active,2026-10-05T18:30Z,,,,,,
 3917232,Tyler Bass,Buffalo Bills,Active,2026-10-05T02:01Z,,,,,,Bass went 2-for-2 on field-goal attempts and made both of his PATs during Sunday's 29-26 loss to the Patriots.
-4385690,Dalton Kincaid,Buffalo Bills,Active,2026-10-04T23:59Z,,,,,,Kincaid brought in one of two targets for seven yards in the Bills' 29-26 loss to the Patriots on Sunday.
 4635008,Keon Coleman,Buffalo Bills,Active,2026-10-04T23:53Z,,,,,,Coleman secured six of seven targets for 116 yards and a touchdown in the Bills' 29-26 loss to the Patriots on Sunday.
-3918298,Josh Allen,Buffalo Bills,Active,2026-10-04T21:34Z,,,,,,Allen completed 23 of 33 passes for 253 yards with a touchdown and an interception and added five carries for four yards and another score in the Bills' 29-26 loss to the Patriots on Sunday.
 4427348,Te'Cory Couch,Buffalo Bills,Questionable,2026-10-04T18:51Z,Hamstring,Not Specified,Not Specified,2026-10-12,QUESTIONABLE,Couch suffered a hamstring injury Sunday versus New England and is doubtful to return.
 2973051,Taylor Moton,Carolina Panthers,Out,2026-10-12T18:43Z,Illness,Not Specified,Not Specified,2026-10-18,NFI-R,"The Panthers will open the 21-day practice window for Moton (illness) during Week 6 prep, Steve Reed of the Associated Press reports."
 4058925,Tershawn Wharton,Carolina Panthers,Out,2026-10-12T18:21Z,Neck,Surgery,Not Specified,2026-10-18,PUP-R,"Head coach Dave Canales said Monday that the Panthers will open the 21-day practice window for Wharton (neck) this week, Steve Reed of the Associated Press reports."
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
 4430034,Xavier Legette,Carolina Panthers,Injured Reserve,2026-10-03T20:15Z,Knee,Not Specified,Not Specified,2026-11-08,IR,"The Panthers placed Legette (knee) on injured reserve Saturday, Darin Gantt of the team's official site reports."
 4429166,Princely Umanmielen,Carolina Panthers,Active,2026-10-01T19:37Z,,,,,,
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-13T04:00Z,Undisclosed,,,2026-10-18,IR,ir
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-13T05:01Z,Undisclosed,,,2026-10-18,IR,ir
 15168,Case Keenum,Chicago Bears,Active,2026-10-12T21:54Z,,,,,,"Keenum completed 11 of 18 passes for 108 yards, zero touchdowns and one interception while adding a four-yard carry during the Bears' 31-7 loss to the Packers on Sunday. He also lost a fumble."
 4434153,Tyson Bagent,Chicago Bears,Active,2026-10-12T20:20Z,,,,,,"Head coach Ben Johnson said Monday that a decision hasn't been made regarding whether Bagent, Case Keenum or Caleb Williams (hamstring) will take reps with the first-team offense during the Bears' first Week 6 practice Wednesday, Sean Hammond of the Chicago Tribune reports."
 4608686,Kyle Monangai,Chicago Bears,Out,2026-10-12T18:58Z,Toe,Sprain,Not Specified,2026-10-18,QUESTIONABLE,out
@@ -449,7 +449,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2979860,Dalvin Tomlinson,Los Angeles Chargers,Active,2026-10-10T00:41Z,,,,,,Tomlinson (hamstring) doesn't have an injury designation for Sunday's game against the Broncos.
 4690171,Deane Leonard,Los Angeles Chargers,Active,2026-10-09T21:19Z,,,,,,
 4427404,Cam Hart,Los Angeles Chargers,Active,2026-10-09T21:17Z,,,,,,
-4426515,Puka Nacua,Los Angeles Rams,Active,2026-10-13T04:08Z,,,,,,Nacua brought in 17 of 24 targets for 138 yards and a touchdown  and rushed twice for nine yards in the Rams' 37-34 overtime loss to the Bills on Monday night.
+2573401,Tyler Higbee,Los Angeles Rams,Active,2026-10-13T05:17Z,,,,,,Higbee brought in five of six targets for 83 yards in the Rams' 37-34 overtime loss to the Bills on Monday night.
+4429096,Blake Corum,Los Angeles Rams,Active,2026-10-13T05:13Z,,,,,,Corum rushed five times for 19 yards and a touchdown and brought in three of four targets for 53 yards in the Rams' 37-34 overtime loss to the Bills on Monday night.
+16800,Davante Adams,Los Angeles Rams,Active,2026-10-13T05:08Z,,,,,,Adams brought in five of seven targets for 51 yards and two touchdowns in the Rams' 37-34 overtime loss to the Bills on Monday night.
+4430737,Kyren Williams,Los Angeles Rams,Active,2026-10-13T05:04Z,,,,,,Williams rushed 16 times for 49 yards and a touchdown and brought in six of eight targets for 27 yards in the Rams' 37-34 overtime loss to the Bills on Monday night.
+12483,Matthew Stafford,Los Angeles Rams,Active,2026-10-13T04:58Z,,,,,,Stafford completed 40 of 54 passes for 383 yards with three touchdowns and no interceptions in the Rams' 37-34 overtime loss to the Bills on Monday night.
+4426515,Puka Nacua,Los Angeles Rams,Active,2026-10-13T04:08Z,,,,,,Nacua brought in 17 of 24 targets for 138 yards and a touchdown and rushed twice for nine yards in the Rams' 37-34 overtime loss to the Bills on Monday night.
 4249128,Quentin Lake,Los Angeles Rams,Active,2026-10-12T23:03Z,,,,,,"Lake (hip) is active for Monday's game against the Bills, Nate Atkins of The Athletic reports."
 4685522,Ty Simpson,Los Angeles Rams,Out,2026-10-12T23:00Z,Coach's Decision,Not Specified,Not Specified,2026-10-18,INACTIVE,"Simpson (coach's decision) is inactive but will serve as the Rams' emergency third quarterback against the Bills on Monday, Nate Atkins of The Athletic reports."
 4833029,Max Klare,Los Angeles Rams,Out,2026-10-12T22:55Z,Coach's Decision,Not Specified,Not Specified,2026-10-18,INACTIVE,inactive
@@ -466,13 +471,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242557,Colby Parkinson,Los Angeles Rams,Active,2026-10-09T00:13Z,,,,,,"Parkinson (shoulder/knee) was limited in Thursday's practice, Sarah Barshop of ESPN.com reports."
 4875196,Byron Young,Los Angeles Rams,Active,2026-10-08T01:10Z,,,,,,Young recorded six tackles (four solo) including 2.5 sacks and a forced fumble during Sunday's 24-20 win against the Eagles.
 4570037,Terrance Ferguson,Los Angeles Rams,Injured Reserve,2026-10-07T17:52Z,Ankle,Sprain,Not Specified,2026-11-01,IR,"Ferguson (ankle) is expected to be ready to return after his four-game stint on injured reserve, Cameron DaSilva of USA Today reports."
-2573401,Tyler Higbee,Los Angeles Rams,Active,2026-10-06T02:00Z,,,,,,Higbee caught five of six targets for 67 yards in Sunday's 24-20 win over the Eagles.
 4427752,Cam Lampkin,Los Angeles Rams,Active,2026-10-05T18:50Z,,,,,,
 4574716,Harrison Mevis,Los Angeles Rams,Active,2026-10-05T03:17Z,,,,,,Mevis went 1-for-2 on field-goal tries and made all three of his PATs in Sunday's 24-20 win over Philadelphia.
-4429096,Blake Corum,Los Angeles Rams,Active,2026-10-05T03:15Z,,,,,,Corum rushed five times for 14 yards in Sunday's 24-20 win over the Eagles. He added one catch for seven yards on two targets.
-12483,Matthew Stafford,Los Angeles Rams,Active,2026-10-04T21:08Z,,,,,,"Stafford completed 32 of 51 passes for 317 yards, no touchdowns and two interceptions in Sunday's 24-20 win over the Eagles. He also rushed three times for 10 yards."
-16800,Davante Adams,Los Angeles Rams,Active,2026-10-04T21:06Z,,,,,,Adams caught four of nine targets for 32 yards in Sunday's 24-20 win over the Eagles.
-4430737,Kyren Williams,Los Angeles Rams,Active,2026-10-04T20:37Z,,,,,,Williams rushed 16 times for 80 yards and two touchdowns while catching 10 of 13 targets for 67 yards in Sunday's 24-20 win over the Eagles.
 3919510,Alex Bachman,Los Angeles Rams,Active,2026-10-03T23:35Z,,,,,,The Rams signed Bachman from their practice squad to their 53-man roster Saturday.
 4367209,Greg Dulcich,Miami Dolphins,Active,2026-10-13T01:01Z,,,,,,Dulcich caught four of five targets for 37 yards during Sunday's 31-24 loss to the Bengals.
 4371946,Reese Taylor,Miami Dolphins,Out,2026-10-12T19:20Z,Quadriceps,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,out
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4879276,Bryce Lance,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Lance turned five targets into a seven-yard catch during the Saints' 45-24 loss to the Falcons on Monday.
 4702559,Oscar Delp,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Delp was not targeted during Monday's 45-24 loss versus the Falcons.
 4599739,Kendre Miller,New Orleans Saints,Active,2026-10-07T00:08Z,,,,,,Miller rushed six time for nine yards and caught two of three targets while losing a fumble in Monday night's 45-24 loss to Atlanta.
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-13T04:00Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-13T05:01Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4921249,Colton Hood,New York Giants,Questionable,2026-10-12T23:52Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,"Hood (concussion) is considered day-to-day ahead of the Giants' matchup with the Saints in Week 6, Pat Leonard of the New York Daily News reports."
 4430261,Tyler Nubin,New York Giants,Questionable,2026-10-12T23:10Z,Neck,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Nubin (neck) is considered day-to-day ahead of the team's Week 6 matchup with the Saints, Pat Leonard of the New York Daily News reports."
 4240706,Jason Pinnock,New York Giants,Out,2026-10-12T19:30Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,out
