@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NFL Edge · Week {{ week }}</title>
-<link rel="stylesheet" href="{{ root }}assets/gamecast.css">
+<link rel="stylesheet" href="{{ root }}assets/gamecast.css?v={{ asset_v }}">
 <style>
 :root {
   --bg: #f5f6f8; --panel: #ffffff; --panel2: #f9fafb; --ink: #14161a; --muted: #6a717c; --faint: #9aa1ab;
@@ -1008,6 +1008,6 @@ window.nfleApplyScoring = () => applyScoring();
 })();
 </script>
 <script>window.NFLE_CFG = {{ {"root": root, "data": data_rel, "season": season, "week": week, "current": nav.is_current and not lookahead and not archive, "archive": archive, "lookahead": lookahead}|tojson }};</script>
-<script src="{{ root }}assets/gamecast.js" defer></script>
+<script src="{{ root }}assets/gamecast.js?v={{ asset_v }}" defer></script>
 </body>
 </html>

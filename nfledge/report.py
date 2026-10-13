@@ -1134,7 +1134,7 @@ def render(ctx: dict, out_path: Path) -> Path:
   out_path.parent.mkdir(parents=True, exist_ok=True)
   root_dir = (out_path.parent / root).resolve()
   data_rel = out_path.resolve().relative_to(root_dir).with_suffix(".json").as_posix()
-  html_out = env.get_template("report.html.j2").render(**ctx, root=root, data_rel=data_rel)
+  html_out = env.get_template("report.html.j2").render(**ctx, root=root, data_rel=data_rel, asset_v=asset_version())
   out_path.write_text(html_out, encoding="utf-8")
   out_path.with_suffix(".json").write_text(week_data(ctx), encoding="utf-8")
   write_site_assets(root_dir, env)
@@ -1142,6 +1142,17 @@ def render(ctx: dict, out_path: Path) -> Path:
 
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
+
+
+def asset_version() -> str:
+  """Short content hash of the shared assets, added to their links (?v=) so a deploy reaches phones at once
+  instead of after the browser's cache lifetime (GitHub Pages: 10 minutes)."""
+  import hashlib
+  h = hashlib.sha1()
+  for f in sorted(STATIC_DIR.iterdir()):
+    if f.is_file():
+      h.update(f.read_bytes())
+  return h.hexdigest()[:10]
 
 
 def write_site_assets(root_dir: Path, env) -> None:
@@ -1152,4 +1163,4 @@ def write_site_assets(root_dir: Path, env) -> None:
   for f in STATIC_DIR.iterdir():
     if f.is_file():
       (root_dir / "assets" / f.name).write_bytes(f.read_bytes())
-  (root_dir / "game.html").write_text(env.get_template("game.html.j2").render(), encoding="utf-8")
+  (root_dir / "game.html").write_text(env.get_template("game.html.j2").render(asset_v=asset_version()), encoding="utf-8")

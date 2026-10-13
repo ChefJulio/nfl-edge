@@ -101,6 +101,7 @@ html.pc-open { overflow: hidden; }
 .pc-wk .wb-l, .pc-wk .wb-v { font-size: 9px; fill: var(--muted); text-anchor: middle; } .pc-wk .wb-v { fill: var(--ink); font-weight: 700; }
 .pc-take { margin: 10px 2px; font-weight: 600; line-height: 1.4; }
 .pc-newsbox, .pc-logbox { margin-bottom: 10px; }
+.pc .pc-tabs { display: flex; margin: 0 0 10px; } .pc .pc-tabs button { flex: 1; font-size: 13.5px; padding: 7px 10px; }
 /* career game log */
 .lg-leg { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 11px; color: var(--muted); margin: 4px 0 8px; align-items: center; }
 .lg-leg .mr-easy, .lg-leg .mr-ok, .lg-leg .mr-tough, .lg-leg .mr-hard { font-weight: 800; }

@@ -288,7 +288,7 @@
   };
 
   // ----------------------------------------------------------------------------------------------- player card
-  let cardPid = null;
+  let cardPid = null, cardTab = 'ov';  // the open tab survives live refreshes; a new player starts on Overview
   const ensureOverlay = () => {
     let ov = document.getElementById('pcOv');
     if (ov) return ov;
@@ -390,6 +390,9 @@
           ${flags ? `<div class="pc-flags">${flags}</div>` : ''}</div>
       </div>
       ${now}
+      <div class="seg pc-tabs" role="tablist">${[['ov', 'Overview'], ['log', 'Game log'], ...(p.espn && !DATA.archive ? [['news', 'News']] : [])]
+        .map(([k, l]) => `<button type="button" role="tab" data-pt="${k}" class="${cardTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>
       <div class="pc-grid">
         <div class="pc-box"><div class="pc-k">Projection${p.inactive >= 0.05 ? ' (if active)' : ''}</div><div class="pc-big">${f1(s.proj)} <small>pts</small></div>
           ${rangeSvg(s.q, s.proj)}<div class="pc-sub">Floor ${f1(s.q[0])} · middle ${f1(s.q[1])}–${f1(s.q[3])} · ceiling ${f1(s.q[4])} · confidence ${esc(p.conf)}</div></div>
@@ -405,12 +408,18 @@
         <div class="pc-sub">${fpg != null ? `${f1(fpg)} FP/G` : ''}${l3 != null ? ` · last 3: ${f1(l3)}` : ''}${p.sched ? ` · ${esc(p.sched)}` : ''}</div>
         ${nweek >= 1 ? `<div class="pc-k" style="margin-top:10px">Points by week</div>${weekBars(p)}` : ''}</div>
       <p class="pc-take">${esc(p.takeaway)}</p>
-      ${p.espn && !DATA.archive ? '<div class="pc-box pc-newsbox"><div class="pc-k">Recent news</div><div class="pc-news"></div></div>' : ''}
-      <div class="pc-box pc-logbox"><div class="pc-k">Game log · every career game</div><div class="pc-log"></div></div>
+      </div>
+      <div class="pc-tab" data-pt="log"${cardTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every career game</div><div class="pc-log"></div></div></div>
+      ${p.espn && !DATA.archive ? `<div class="pc-tab" data-pt="news"${cardTab === 'news' ? '' : ' hidden'}><div class="pc-box pc-newsbox"><div class="pc-k">Recent news</div><div class="pc-news"></div></div></div>` : ''}
       <div class="pc-links">${g ? `<a href="${gameHref(g)}">${st && st.state === 'in' ? '<span class="live-dot"></span>' : ''}Gamecast: ${esc(g.away.team)} @ ${esc(g.home.team)} &rsaquo;</a>` : ''}
         ${CFG.page !== 'game' && g ? `<a href="#games" data-goto="${esc(g.id)}">Matchup card &rsaquo;</a>` : ''}</div>`;
     const nb = body.querySelector('.pc-news'); if (nb) loadNews(p.espn, nb);
     const lb = body.querySelector('.pc-log'); if (lb) loadLog(pid, lb, p);
+    body.querySelectorAll('.pc-tabs [data-pt]').forEach(b => b.onclick = () => {
+      cardTab = b.dataset.pt;
+      body.querySelectorAll('.pc-tabs [data-pt]').forEach(x => x.classList.toggle('on', x === b));
+      body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.pt !== cardTab; });
+    });
     body.querySelectorAll('[data-goto]').forEach(a => a.onclick = ev => {
       ev.preventDefault(); closePlayer();
       const tab = document.querySelector('nav.tabs button[data-tab="games"]'); if (tab) tab.click();
@@ -421,6 +430,7 @@
     if (!DATA) return;
     const ov = ensureOverlay();
     if (!location.hash.startsWith('#player/')) prevHash = location.hash;
+    if (pid !== cardPid) cardTab = 'ov';
     cardPid = pid;
     renderCard(pid);
     ov.hidden = false;
