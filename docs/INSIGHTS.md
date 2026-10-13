@@ -328,6 +328,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
     Pre-set gate met: RB P(1+ rush TD) Brier -0.000214 [-0.000434, -0.000004], 4/5 seasons better (2022 +0.00006),
     Poisson log-lik -0.7339 -> -0.7333, RB MAE -0.0004 [-0.0018,+0.0009]. Fitted RB weight +0.053 (QB -0.010).
     Gap closed only partly (high-scoring vultures 8.8 -> 7.6 pts): room for a stronger form later.
+  - QB vulturing (owner): RBs whose QB takes many inside-10 runs are NOT over-projected (team_rush_i10 counts QB
+    sneaks, so their i10 share already shrinks): actual .308 vs pred .277 (n=455, noise). Vulture QBs mixed/noise.
+    Real miss = pocket QBs on high-scoring teams over-projected for rush TDs (.085-.088 actual vs .132-.134).
+    Tested `experiments.qb_rush_split` (QB-only scr_frac + implied x designed share in QB rush-TD rate; gate set in
+    advance): QB P(1+ rush TD) Brier -0.0002 [-0.0006,+0.0002] no difference, QB MAE +0.0013 [-0.0032,+0.0056];
+    pocket/high gap 4.9 -> 4.0 only. OFF. Side finding: QBs over-predicted overall for rush TDs (.175 vs .157):
+    a general QB rush-TD calibration issue, not tested yet.
   **Model tab everywhere (2026-10-13):** archived / lookahead pages used to show a one-line "archived week"
   placeholder. Now the current build writes the tab once to `<site>/model.html` (`templates/model_tab.html.j2`,
   also embedded in index.html) and other weeks fetch it on first view (gamecast.js `loadModelTab`), so every page

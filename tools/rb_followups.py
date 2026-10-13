@@ -37,11 +37,13 @@ def ci_mean(x: pd.Series, d: pd.DataFrame) -> tuple[float, float]:
 
 def main():
   # Optional variant name (default gl_share): e.g. gl_struct, the goal-line role scaled by team goal-line volume.
+  # Optional position (default RB): QB scores the QB rushing-TD tests the same way.
   name = sys.argv[1] if len(sys.argv) > 1 else "gl_share"
-  print(f"Variant: {name}")
+  pos = sys.argv[2] if len(sys.argv) > 2 else "RB"
+  print(f"Variant: {name}, position {pos}")
   base, gl = latest("baseline"), latest(name)
   rel = relevant(base)
-  rb = rel[rel.pos == "RB"]
+  rb = rel[rel.pos == pos]
 
   # 1. Touchdown odds -------------------------------------------------------------------------------------------
   j = rb[KEYS + ["rush_td", "a_rush_td"]].merge(gl[KEYS + ["rush_td"]], on=KEYS, suffixes=("_b", "_g"))
@@ -49,7 +51,7 @@ def main():
   pb, pg = 1 - np.exp(-j.rush_td_b), 1 - np.exp(-j.rush_td_g)
   bb, bg = (pb - y) ** 2, (pg - y) ** 2
   lo, hi = ci_mean(bg - bb, j)
-  print(f"1. RB chance of 1+ rushing TD, {len(j)} RB-weeks 2021-2025 (actual rate {y.mean():.3f}; "
+  print(f"1. {pos} chance of 1+ rushing TD, {len(j)} {pos}-weeks 2021-2025 (actual rate {y.mean():.3f}; "
         f"mean predicted: baseline {pb.mean():.3f}, goal-line {pg.mean():.3f})")
   print(f"   Brier: baseline {bb.mean():.4f}  goal-line {bg.mean():.4f}  diff {(bg - bb).mean():+.4f} "
         f"[{lo:+.4f}, {hi:+.4f}] -> {'better' if hi < 0 else 'worse' if lo > 0 else 'no difference'}")
@@ -57,12 +59,18 @@ def main():
   jm = rb[KEYS + ["proj", "actual"]].merge(gl[KEYS + ["proj"]], on=KEYS, suffixes=("_b", "_g"))
   dm = (jm.actual - jm.proj_g).abs() - (jm.actual - jm.proj_b).abs()
   l3, h3 = ci_mean(dm, jm)
-  print(f"   RB fantasy-point error (MAE): diff {dm.mean():+.4f} [{l3:+.4f}, {h3:+.4f}]")
-  # Where it should matter: by goal-line role x team scoring (implied points terciles).
-  tilt = gl.set_index(KEYS).i10_tilt.reindex(pd.MultiIndex.from_frame(j[KEYS])).to_numpy()
-  imp = base.set_index(KEYS).implied_pts.reindex(pd.MultiIndex.from_frame(j[KEYS])).to_numpy()
-  t = pd.DataFrame({"y": y, "base": pb, "var": pg,
-                    "role": np.select([tilt >= 0.10, tilt <= -0.10], ["goal-line heavy", "goal-line light"], "neutral"),
+  print(f"   {pos} fantasy-point error (MAE): diff {dm.mean():+.4f} [{l3:+.4f}, {h3:+.4f}]")
+  # Where it should matter: by goal-line role x team scoring (implied points terciles). RBs: goal-line share vs
+  # carry share; QBs: how often the QB takes his team's inside-10 runs.
+  ix = pd.MultiIndex.from_frame(j[KEYS])
+  imp = base.set_index(KEYS).implied_pts.reindex(ix).to_numpy()
+  if pos == "QB":
+    s = gl.set_index(KEYS).i10_share.reindex(ix).fillna(0).to_numpy()
+    role = np.select([s > 0.25, s >= 0.10], ["takes them often", "sometimes"], "rarely")
+  else:
+    tilt = gl.set_index(KEYS).i10_tilt.reindex(ix).to_numpy()
+    role = np.select([tilt >= 0.10, tilt <= -0.10], ["goal-line heavy", "goal-line light"], "neutral")
+  t = pd.DataFrame({"y": y, "base": pb, "var": pg, "role": role,
                     "team": pd.qcut(imp, 3, labels=["low-scoring", "middle", "high-scoring"])})
   out = t.groupby(["role", "team"], observed=True).agg(n=("y", "size"), actual=("y", "mean"), baseline=("base", "mean"),
                                                        variant=("var", "mean"))
@@ -70,6 +78,8 @@ def main():
   print(out.round(3).to_string())
 
   # 2. Range calibration by committee tendency ------------------------------------------------------------------
+  if pos != "RB":
+    return
   print("\n2. RB range calibration by team committee tendency (as-of lead-back share of RB carries)")
   rb = rb.assign(in80=((rb.actual >= rb.p10) & (rb.actual <= rb.p90)).astype(float),
                  in50=((rb.actual >= rb.p25) & (rb.actual <= rb.p75)).astype(float),

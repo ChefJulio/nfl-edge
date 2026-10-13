@@ -33,7 +33,7 @@ YARD_BINS = [0, 1, 2, 3, 4, 5, 7, 10, 15, 20, 30, 50, 100]
 EFF_SEASON_WEIGHTS = (1.0, 0.6, 0.3)  # current, last, two seasons back
 
 
-def EFF_FEATURES(comp: str, opp: str, unit: str, exp: dict | None = None) -> list[str]:
+def EFF_FEATURES(comp: str, opp: str, unit: str, exp: dict | None = None, group: str | None = None) -> list[str]:
   """Efficiency regression inputs: player's shrunk rate, player's opponent-adjusted EPA/opp, the opponent's
   defensive coefficient (the matchup), our own unit's offensive coefficient (supporting cast), home field.
   Optional (config [experiments]): Vegas implied team total; average depth of target for receiving yards."""
@@ -59,6 +59,11 @@ def EFF_FEATURES(comp: str, opp: str, unit: str, exp: dict | None = None) -> lis
   # the extra TDs per expected goal-line carry: a goal-line back only gains where his team reaches the goal line.
   if exp.get("gl_struct") and comp == "rush_td":
     cols.append("gl_frac")
+  # EXPERIMENT (owner): QB rushing TDs by run type. A pocket QB's runs are mostly scrambles from midfield, so his
+  # team scoring a lot shouldn't raise his rushing-TD rate the way it raises a goal-line runner's. QBs only: the
+  # expected scramble share of his runs, and team scoring x his designed-run share (data sets both weights).
+  if exp.get("qb_rush_split") and comp == "rush_td" and group == "QB":
+    cols += ["scr_frac", "implied_x_designed"]
   return cols
 
 
@@ -67,6 +72,16 @@ GL_TEAM_DEFAULT = 0.08  # league-typical share of a team's designed rushes insid
 
 
 RB_DEFAULT_CONC = 0.65  # league-typical lead-back share of RB carries, for teams with no history in the window
+
+
+def add_qb_rush_inputs(d: pd.DataFrame, scrambles: pd.Series, designed: pd.Series) -> pd.DataFrame:
+  """QB rush-type inputs (in place) from EXPECTED scrambles and designed runs: scr_frac, and team scoring x the
+  designed share. Rows with no expected runs count as half scrambles (they get no rushing volume anyway)."""
+  tot = scrambles + designed
+  d["scr_frac"] = (scrambles / tot.where(tot > 0)).fillna(0.5).clip(0, 1)
+  imp = d.implied_pts if "implied_pts" in d else pd.Series(22.0, index=d.index)
+  d["implied_x_designed"] = imp.fillna(imp.mean() if imp.notna().any() else 22.0) * (1 - d.scr_frac)
+  return d
 
 
 def add_rb_inputs(d: pd.DataFrame, conc: dict | None) -> pd.DataFrame:
@@ -524,6 +539,9 @@ class PlayerModel:
         j["spread_team"] = j.spread_team.fillna(0)
         j["wind"] = j.wind.fillna(0.0).where(~j.indoor.fillna(False).astype(bool), 0.0)
         j["wind_sq"] = j.wind ** 2
+        # Expected (as-of shares x the game's team volume), never this game's own runs: no leakage.
+        add_qb_rush_inputs(j, j.db_share.fillna(0) * j.team_db * j.scr_rate.fillna(0.04),
+                           j.carry_share.fillna(0) * j.team_rush)
         rows.append(j)
     return pd.concat(rows, ignore_index=True)
 
@@ -556,7 +574,7 @@ class PlayerModel:
         for c in comps:
           d = d.assign(**{f"y_{c}": d[c] / d[opp]})
           self.eff_models[(opp, gp, c)] = Linear.fit(
-            d, f"y_{c}", EFF_FEATURES(c, opp, unit, self.exp), weight=opp,
+            d, f"y_{c}", EFF_FEATURES(c, opp, unit, self.exp, gp), weight=opp,
             name=f"{c}/{opp}/{gp}")
     return self
 
@@ -612,6 +630,7 @@ class PlayerModel:
     p["rush"] = p.carries + p.db * p.scr_rate.fillna(0.04) * (p.pos == "QB")
     p["tgt"] = p.tgt_share_hat * p.team_db
     self.add_gl_frac(p)
+    add_qb_rush_inputs(p, p.db * p.scr_rate.fillna(0.04), p.carries)
     return self.stats_from_volume(p, wind)
 
   def share_hats(self, p: pd.DataFrame) -> pd.DataFrame:
@@ -654,6 +673,9 @@ class PlayerModel:
       p["i10_tilt"] = 0.0
     if "gl_frac" not in p:
       self.add_gl_frac(p)
+    if "scr_frac" not in p:
+      add_qb_rush_inputs(p, p.db.fillna(0) * p.scr_rate.fillna(0.04) if "db" in p else 0.0 * p.index.to_series(),
+                         p.carries.fillna(0) if "carries" in p else 0.0 * p.index.to_series())
     q = p.assign(def_pass=0.0, def_rush=0.0, home=0) if neutral else p
     for k in STAT_KEYS:
       p[k] = 0.0

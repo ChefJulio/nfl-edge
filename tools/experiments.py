@@ -135,6 +135,8 @@ VARIANTS = {
   "rb_both": variant(experiments__rbbc=True, experiments__gl_share=True),
   # owner follow-up: goal-line role scaled by how often the team reaches the goal line (structural, not flat)
   "gl_struct": variant(experiments__gl_struct=True),
+  # owner follow-up: QB rushing TDs by run type (scrambles vs designed runs; team scoring boosts designed only)
+  "qb_rush_split": variant(experiments__qb_rush_split=True),
   "elite_t8_b05": variant(experiments__elite_boost=0.5, experiments__elite_top=8),
   "elite_t8_b1": variant(experiments__elite_boost=1.0, experiments__elite_top=8),
   "elite_t5_b1": variant(experiments__elite_boost=1.0, experiments__elite_top=5),
