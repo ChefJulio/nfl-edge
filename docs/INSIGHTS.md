@@ -219,10 +219,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 - **Matchups:** "win chances, not picks" (owner: "we're not a betting site, we're promoting good prediction
   practice"). Track-record table on top. Per game: win-chance box (favorite logo + "Cowboys 80% to win" or
   "Tossup / too close to call", source tag Market or Model, bar split in team colors with the tossup zone hatched,
-  Vegas line + O/U and "Our model: DAL 76%" underneath); away left / home right; Overall bar on top, then the two
-  offense-vs-defense matchups (tap for Pass/Run), Special teams, Home & pace; bars = model margin split exactly
-  along the points formula (ST home effect reported under Home), Power ranks per unit; final score + Favorite won /
-  Upset (with its chance) / Tossup outcome.
+  Vegas line + O/U and "Our model: DAL 76%" underneath); away left / home right. **Owner rule: the model never
+  publicly shows a point spread, score or total, only win %** (spreads are the market's). Battles in EPA per 100
+  plays: the two offense-vs-defense totals (play-weighted; tap for Pass/Run), Special teams (per 100 ST plays),
+  Home field (per play); power-rank chips by the team names; pace as "Projected plays: TB 61 (62% pass)". No
+  Overall bar. The points split still runs internally as a check against the margin. Caveat: bars are no longer
+  on one game-impact scale (an ST edge covers ~11 plays, an offense edge ~60). Final score + Favorite won / Upset
+  (with its chance) / Tossup outcome.
 - **Power:** model margin vs average team by unit (7 ranks), rank range, schedule played/left, trend.
 - Tabs: Rankings, Matchups, Power, Role changes, Model.
 

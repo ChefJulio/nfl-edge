@@ -286,8 +286,12 @@ table.trk td small { color: var(--muted); font-size: 11px; }
 .bt-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; }
 /* Away team always on the left, home on the right; each group's labels sit over their own team's side. */
 .battle { display: grid; gap: 5px; }
-/* columns: label | away rank | away margin | bar | home margin | home rank */
-.bt-teams, .bt-grp, .bt-row { display: grid; grid-template-columns: 92px 38px 36px 1fr 36px 38px; align-items: center; gap: 6px; }
+/* columns: label | away rank | away edge | bar | home edge | home rank */
+.bt-teams, .bt-grp, .bt-row { display: grid; grid-template-columns: 92px 38px 40px 1fr 40px 38px; align-items: center; gap: 6px; }
+.bt-unit { text-transform: none; letter-spacing: 0; font-weight: 600; }
+.bt-teams .bt-rk .rk-b { min-width: 0; }
+.bt-plays { border-top: 1px solid var(--line); padding-top: 8px; font-size: 12px; color: var(--muted); }
+.bt-plays b { color: var(--ink); }
 .bt-teams > span, .bt-grp > span:not(.bt-chev) { grid-column: 2 / -1; grid-row: 1; display: inline-flex; align-items: center; gap: 6px; }
 .bt-rk { display: flex; justify-content: center; } .bt-rk .rk-b { min-width: 34px; }
 .bt-teams > span:last-child, .bt-grp > span:last-child { justify-self: end; }
@@ -301,7 +305,6 @@ table.trk td small { color: var(--muted); font-size: 11px; }
 .tug::before { content: ""; position: absolute; inset: 0; border-radius: 5px; background: var(--hc); }
 .tug-o { position: absolute; inset: 0 auto 0 0; border-radius: 5px 0 0 5px; background: var(--ac); }
 .tug-mid { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--ink); box-shadow: 0 0 0 1.5px var(--panel); }
-.battle.overall { padding-bottom: 2px; }
 /* Offense-vs-defense groups: the subtotal is always visible; tap to show its passing and running rows. */
 details.grp { border-top: 1px solid var(--line); padding-top: 8px; }
 .battle.extras { border-top: 1px solid var(--line); padding-top: 8px; }
@@ -315,11 +318,7 @@ details.grp > summary .bt-lbl { color: var(--ink); font-weight: 600; }
 .bt-units { display: grid; gap: 5px; margin-top: 6px; }
 .bt-units .bt-lbl { padding-left: 10px; }
 .bt-units .tug { height: 8px; }
-.battle.overall .bt-lbl { color: var(--ink); font-weight: 700; }
-.battle.overall .tug { height: 14px; } .battle.overall .tug::before, .battle.overall .tug-o { border-radius: 7px 0 0 7px; }
-.battle.overall .tug::before { border-radius: 7px; }
-.battle.overall .bt-v { font-size: 13.5px; }
-@media (max-width: 520px) { .bt-teams, .bt-grp, .bt-row { grid-template-columns: 64px 32px 30px 1fr 30px 32px; gap: 4px; } .bt-lbl { white-space: normal; line-height: 1.15; }
+@media (max-width: 520px) { .bt-teams, .bt-grp, .bt-row { grid-template-columns: 64px 32px 34px 1fr 34px 32px; gap: 4px; } .bt-lbl { white-space: normal; line-height: 1.15; }
   .bt-rk .rk-b { min-width: 30px; } .bt-grp { font-size: 11px; } .bt-v { font-size: 11.5px; }
   .bt-chev::before { content: "+ P/R"; } details.grp[open] .bt-chev::before { content: "2 P/R"; } }
 .game > details { border-top: 1px solid var(--line); }
@@ -569,7 +568,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     <b>Win chance</b> is the market's: the Vegas spread turned into a probability using how often teams with that spread have actually won. In backtests the market has been a more accurate forecaster than our model, and mixing the model in never helped, so we show the better number. Before lines are posted (lookahead weeks) the model's chance is used. <b>Our model</b> is shown underneath as an independent second opinion built only from team ratings and the projected quarterbacks.
     <b>Tossup</b> means the favorite's chance is under {{ tossup_pct }}% (roughly a spread under 3 points). Historically, favorites in that range won about as often as a coin flip would, so naming one would be false precision. The shaded middle of each bar marks that zone.
     A 70% favorite should still lose 3 times in 10. That is an upset the forecast expected, not a mistake; the track record above shows whether chances at each level came true as often as they claimed.
-    <b>Who wins each battle</b>: every bar is a tug of war in the two teams' colors, away team always on the left and home team on the right. Whoever pushes past the middle line wins, and the number on the winner's side is how many points that edge is worth <b>this game</b> compared with an average matchup. <b>Overall</b> (top) is the model's margin. Below it, each offense against the other defense: its total is roughly how far above or below average that offense should score. Tap a matchup to split it into passing and running (the per-play edge times that offense's projected dropbacks or runs, so a run edge is never read as equal to a pass edge of the same per-play size). Everything adds up exactly: Overall = both offense-vs-defense matchups + special teams + home field and pace (projected play volume and pass/run mix). The split follows the model's own points formula, so every bar is on the same scale as the model line. Rank chips are each unit's league rank from the Power tab (green top 8, red bottom 8). Hover a row for the per-play numbers.
+    <b>Who wins each battle</b> explains our model's win chance. Every bar is a tug of war in the two teams' colors, away team always on the left and home team on the right. Whoever pushes past the middle line wins it, and the number on the winner's side is the edge in <b>EPA per 100 plays</b> (expected points added: how much better each play goes than an average one from the same down, distance and field position). Each offense against the other defense: its offense rating minus the defense's, with the total weighting passing and running by that offense's projected dropbacks and runs. Tap a matchup to split it. Special teams compares the two units per 100 special-teams plays, and home field is the per-play boost the home team gets. Pace has no per-play form, so it is listed as projected plays. Rank chips are league ranks from the Power tab (green top 8, red bottom 8); the chips by the team names are overall power ranks. Hover a row for both teams' ratings. The model turns these into a win chance with the formula on the Model tab; it never publishes a point spread, which is left to the market.
   </div></details>
   {% if track %}<div class="track">
     <div class="bt-title">How often favorites win &middot; market chances, {{ track.since }}&ndash;{{ track.season }}</div>
@@ -585,7 +584,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <div class="g-at">{{ 'vs' if g.neutral else '@' }}</div>
         <div class="g-team home" style="{{ g.home.row_style }}">{{ g.home.logo|safe }}<div><b>{{ g.home.nick }}</b><small>{{ g.home.qb or g.home.team }}</small></div></div>
       </div>
-      <div class="g-sub"><span>{{ g.kickoff }}{% if g.neutral %} &middot; neutral site{% endif %}</span><span>Model score {{ g.score }}</span></div>
+      <div class="g-sub"><span>{{ g.kickoff }}{% if g.neutral %} &middot; neutral site{% endif %}</span></div>
       {% if g.final %}<div class="g-final"><span class="gf-score">Final: {{ g.away.team }} {{ g.final.away }} &ndash; {{ g.home.team }} {{ g.final.home }}</span>
         {% if not g.final.winner %}<span class="gf-pick toss">Tie</span>
         {% elif g.fc.tossup %}<span class="gf-pick toss">Tossup &middot; {{ g.final.winner }} won</span>
@@ -609,9 +608,8 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         </div>{% endif %}
       </div>
       <div class="battles" style="{{ g.bt_style }}">
-        <div class="bt-title">Who wins each battle</div>
-        <div class="bt-teams"><span>{{ g.away.logo_sm|safe }}<b>{{ g.away.team }}</b></span><span><b>{{ g.home.team }}</b>{{ g.home.logo_sm|safe }}</span></div>
-        <div class="battle overall">{{ tugrow(g.overall) }}</div>
+        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
+        <div class="bt-teams"><span>{{ g.away.logo_sm|safe }}<b>{{ g.away.team }}</b>{{ rkchip(g.power_rk[0], g.away.team ~ ' power rank') }}</span><span>{{ rkchip(g.power_rk[1], g.home.team ~ ' power rank') }}<b>{{ g.home.team }}</b>{{ g.home.logo_sm|safe }}</span></div>
         {% for b in g.battles %}
         <details class="battle grp">
           <summary>
@@ -622,6 +620,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         </details>
         {% endfor %}
         <div class="battle extras">{% for x in g.extras %}{{ tugrow(x) }}{% endfor %}</div>
+        <div class="bt-plays">Projected plays: {% for p in g.plays %}{{ p.team }} <b>{{ '%.0f'|format(p.n) }}</b> ({{ '%.0f'|format(p.pass * 100) }}% pass){{ ' &middot; '|safe if not loop.last }}{% endfor %}</div>
       </div>
       <details><summary>Team ratings</summary>
         <div class="scroll"><table>
