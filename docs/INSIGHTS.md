@@ -302,6 +302,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   card ("not on our board" + his actual line from the log when he played). Log docs carry `name` and `espn` (cards
   open without a week row) and per game `gid` + `f` (week file). **Game-log rows (2021+) open that game's matchup**
   (owner: rows are links, not a week picker): now that game's gamecast, `game.html?d=<f>&g=<gid>`.
+  **Strict JSON (2026-10-13):** week files are written through `_json_safe` (NaN / inf -> null, `allow_nan=False`).
+  Python's default emitted `NaN` (sos_past in week 1, sos_next on every archived week), which browsers can't parse,
+  so the card's week picker said "no page" for ~95 weeks. Python readers (player_logs) never noticed.
   **Dark only (2026-10-13):** owner's call; light-theme tokens and `prefers-color-scheme` rules removed.
   **Matchups -> gamecast redesign (2026-10-13, owner):** the Matchups tab is now a dense selector: one compact tile
   per game (`a.mt`, the whole tile links to `game.html?d=&g=`; 1 per row on phones, auto-fill min 360px so 3

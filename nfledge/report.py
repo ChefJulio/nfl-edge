@@ -475,8 +475,26 @@ def week_data(ctx: dict) -> str:
          "power": power, "teams": ctx.get("teams", {}),
          "lookahead": ctx["lookahead"], "tossup_pct": ctx["tossup_pct"], "espn_team": ESPN_TEAM,
          "score": json.loads(ctx["score_cfg"]), "players": players, "games": games}
-  return json.dumps(out, separators=(",", ":"), default=lambda o: float(o) if isinstance(o, (np.floating, np.integer))
-                    else bool(o) if isinstance(o, np.bool_) else None)
+  # Browsers reject NaN / Infinity in JSON (Python writes them happily), and one bad value makes the whole file
+  # unreadable: e.g. sos_past is NaN in week 1 and sos_next on archived weeks. Non-finite numbers become null.
+  return json.dumps(_json_safe(out), separators=(",", ":"), allow_nan=False)
+
+
+def _json_safe(o):
+  """A copy of o with numpy scalars as plain Python values and NaN / +-inf as None (strict JSON)."""
+  if isinstance(o, dict):
+    return {k: _json_safe(v) for k, v in o.items()}
+  if isinstance(o, (list, tuple)):
+    return [_json_safe(v) for v in o]
+  if isinstance(o, np.bool_):
+    return bool(o)
+  if isinstance(o, np.integer):
+    return int(o)
+  if isinstance(o, (float, np.floating)):
+    return float(o) if np.isfinite(o) else None
+  if o is None or isinstance(o, (str, int, bool)):
+    return o
+  return None  # anything else unserializable (the old default's behavior)
 
 
 def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> dict:
