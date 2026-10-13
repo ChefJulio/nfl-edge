@@ -53,8 +53,8 @@
   };
   const pts = (c, w, pos) => c.reduce((t, v, i) => t + (v || 0) * (w[KEYS()[i]] || 0), 0) + (pos === 'TE' ? (c[5] || 0) * (w.te_bonus || 0) : 0);
   // A projection and its range under the viewer's scoring: exact re-score of the stat line, ratio for the rest.
-  const scaled = p => {
-    const w = weights(), built = (DATA && DATA.score && DATA.score.built) || HALF;
+  const scaled = (p, d = DATA) => {
+    const w = weights(), built = (d && d.score && d.score.built) || HALF;
     const base = pts(p.sc.pj, built, p.pos), now = pts(p.sc.pj, w, p.pos);
     const r = base > 0.3 ? now / base : 1;
     return { proj: base > 0.3 ? p.proj * r : now, q: p.q.map(v => v * r), ratio: r };
@@ -64,7 +64,7 @@
     if (DATA) Object.entries(DATA.players).forEach(([pid, p]) => { if (p.espn) m[p.espn] = pid; });
     return m;
   };
-  const teamGame = team => DATA && DATA.games.find(g => g.away.team === team || g.home.team === team);
+  const teamGame = (team, d = DATA) => d && d.games.find(g => g.away.team === team || g.home.team === team);
   const sideOf = (g, team) => g && (g.away.team === team ? g.away : g.home.team === team ? g.home : null);
   const logo = (url, bg, size = 22, alt = '') => url
     ? `<span class="nl" style="background:${esc(bg || '#333')};width:${size + 6}px;height:${size + 6}px"><img src="${esc(url)}" alt="${esc(alt)}" width="${size}" height="${size}" loading="lazy"></span>` : '';
@@ -264,10 +264,10 @@
         if (r.u && r.u.bye) return `<tr class="lg-bye"><td>${r.w}</td><td colspan="${5 + stat.length}">Bye</td></tr>`;
         if (r.u) {
           const pj = projOf(r.u);
-          return `<tr class="lg-up"><td>${r.w}</td>${opp(r.u)}<td class="num">–</td><td class="num">${pj != null ? f1(pj) : '–'}</td><td class="num">–</td><td class="num">–</td>${blank}</tr>`;
+          return `<tr class="lg-up"${tileAttrs(r.u)}><td>${r.w}</td>${opp(r.u)}<td class="num">–</td><td class="num">${pj != null ? f1(pj) : '–'}</td><td class="num">–</td><td class="num">–</td>${blank}</tr>`;
         }
         const g = r.g, v = pts(g.c, w, pos), pj = projOf(g);
-        return `<tr><td>${g.w}</td>${opp(g)}<td class="num lg-fp">${f1(v)}</td>
+        return `<tr${tileAttrs(g)}><td>${g.w}</td>${opp(g)}<td class="num lg-fp">${f1(v)}</td>
           <td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td>
           <td class="num"><span class="lg-rk ${rkClass(g.rk)}">${g.rk}</span></td><td class="num">${g.sn != null ? g.sn : '–'}</td>
           ${stat.map(([, fn]) => `<td class="num">${fn(g)}</td>`).join('')}</tr>`;
@@ -275,20 +275,25 @@
       return `<tbody><tr class="lg-season"><td colspan="${6 + stat.length}"><b>${S.s}</b> ${esc(team)} · ${S.g.length} game${S.g.length === 1 ? '' : 's'}${S.g.length ? ` · ${f1(fpg)} FP/G` : ''}</td></tr>${head}${trs}</tbody>`;
     }).join('');
     const legend = `<div class="lg-leg"><span>Opponent color = our pregame matchup rank (2021 on):</span><span class="mr-easy">easy</span><span class="mr-ok">fair</span><span class="mr-tough">tough</span><span class="mr-hard">hardest</span>
-      <span>· Rank = his ${esc(pos)} finish that week (green = starter in your league size) · Proj = our projection then (green = beat it)</span></div>`;
+      <span>· Rank = his ${esc(pos)} finish that week (green = starter in your league size) · Proj = our projection then (green = beat it) · Tap a game (2021 on) to open its matchup</span></div>`;
     return `${legend}<div class="lg-scroll"><table class="lg">${body}</table></div>`;
   };
-  const loadLog = async (pid, box, p) => {
-    if (!LOGS[pid]) {
-      box.innerHTML = '<p class="pc-sub">Loading game log&hellip;</p>';
-      try { LOGS[pid] = await getJSON(`${siteRoot()}data/players/${encodeURIComponent(pid)}.json`); }
-      catch (e) { if (box.isConnected) box.innerHTML = '<p class="pc-sub">Game log unavailable.</p>'; return; }
-    }
-    if (box.isConnected) box.innerHTML = LOGS[pid].seasons.length || (LOGS[pid].up || []).length ? logHtml(LOGS[pid], p) : '<p class="pc-sub">No NFL games yet.</p>';
-  };
+  // Log rows we have a week page for (2021 on) open that game's matchup tile: in place when it's this page's week,
+  // else on that week's page. g.gid / g.f (week file) come from tools/player_logs.py.
+  const tileAttrs = g => g.gid && g.f ? ` data-gid="${esc(g.gid)}" data-f="${esc(g.f)}" title="Open the matchup"` : '';
+  const wireLogRows = box => box && box.addEventListener('click', e => {
+    if (e.target.closest('button, a, select, input')) return;
+    const tr = e.target.closest('tr[data-gid]'); if (!tr) return;
+    const gid = tr.dataset.gid, f = tr.dataset.f;
+    if (CFG.page !== 'game' && DATA && f === DATA.__rel) { closePlayer(); goToTile(gid); }
+    else location.href = `${siteRoot()}${f.replace(/\.json$/, '.html')}#g-${gid}`;
+  });
+  const LOGP = {};  // pid -> in-flight fetch, so a re-render while loading doesn't refetch
+  const ensureLog = pid => LOGS[pid] ? Promise.resolve(LOGS[pid]) : (LOGP[pid] || (LOGP[pid] =
+    getJSON(`${siteRoot()}data/players/${encodeURIComponent(pid)}.json`).then(L => (LOGS[pid] = L)).catch(() => (LOGS[pid] = { missing: 1, seasons: [] }))));
 
   // ----------------------------------------------------------------------------------------------- player card
-  let cardPid = null, cardTab = 'ov';  // the open tab survives live refreshes; a new player starts on Overview
+  let cardPid = null, cardTab = 'ov';  // the open tab survives live refreshes; a new player starts on Week
   const ensureOverlay = () => {
     let ov = document.getElementById('pcOv');
     if (ov) return ov;
@@ -314,8 +319,8 @@
       <line x1="${x(proj)}" y1="1" x2="${x(proj)}" y2="21" class="rng-p"/>
       <text x="${x(q[0])}" y="25" class="pc-rt">${f0(q[0])}</text><text x="${x(q[4])}" y="25" class="pc-rt" text-anchor="end">${f0(q[4])}</text></svg>`;
   };
-  const weekBars = (p) => {
-    const nweek = (DATA.week || 1) - 1; if (nweek < 1) return '';
+  const weekBars = (p, d) => {
+    const nweek = (d.week || 1) - 1; if (nweek < 1) return '';
     const w = weights(), byW = Object.fromEntries((p.sc.wk || []).map(r => [r[0], pts(r.slice(1), w, p.pos)]));
     const W = 300, H = 70, top = Math.max(10, ...Object.values(byW)), bw = W / nweek;
     let out = '';
@@ -329,9 +334,9 @@
     }
     return `<svg class="pc-wk" viewBox="0 0 ${W} ${H}" width="100%" height="${H}">${out}</svg>`;
   };
-  // Expected line: the week page's own row graphic (TD donuts) when present, else a compact text version.
-  const expectedLine = (pid, p) => {
-    const td = document.querySelector(`tr.main[data-pid="${CSS.escape(pid)}"] td.line`);
+  // Expected line: the week page's own row graphic (TD donuts) when the card shows this page's week, else text.
+  const expectedLine = (pid, p, d) => {
+    const td = d === DATA && document.querySelector(`tr.main[data-pid="${CSS.escape(pid)}"] td.line`);
     if (td) return td.innerHTML;
     const l = p.proj_line || {}, tdp = x => x ? `${Math.round((1 - Math.exp(-x)) * 100)}%` : '';
     const s = (v, u, d = 0) => v ? `<span class="st"><b>${d ? f1(v) : f0(v)}</b><small>${u}</small></span>` : '';
@@ -356,88 +361,168 @@
                  e.carry_share ? `${Math.round(e.carry_share * 100)}% of carries` : ''].filter(Boolean).join(' · ');
     return `${parts.join('')}${use ? `<div class="pc-sub">${use}</div>` : ''}`;
   };
-  const gameHref = g => `${CFG.page === 'game' ? '' : CFG.root}game.html?d=${encodeURIComponent(DATA.__rel || CFG.data)}&g=${encodeURIComponent(g.id)}`;
-  const renderCard = pid => {
-    const p = DATA && DATA.players[pid];
-    const body = document.querySelector('#pcOv .pc-body');
-    if (!p) { body.innerHTML = '<p class="pc-none">No card for this player this week.</p>'; return; }
-    const g = teamGame(p.team), me = sideOf(g, p.team), opp = g && (g.away.team === p.team ? g.home : g.away);
-    const s = scaled(p), w = weights();
-    const ln = LIVE.lines[p.espn], st = g && LIVE.byGame[g.id];
+  // ------------------------------------------------------------------------------------------ card week picker
+  // Cards belong to the player / team, not the page: header, game log and news are always current; a week picker
+  // (default: the page's week) chooses which week's file feeds the weekly section. weeks.json = the site's week list.
+  let WL = null, WLP = null, cardWk = '';
+  const WEEKS = {};  // 'season-week' -> that week's data, null when there's no page for it, a Promise while loading
+  const pageKey = () => DATA ? `${DATA.season}-${DATA.week}` : '';
+  const weekList = () => WLP || (WLP = getJSON(`${siteRoot()}weeks.json`).then(j => (WL = j || {})).catch(() => (WL = {})));
+  const fetchWeek = key => WEEKS[key] !== undefined ? Promise.resolve(WEEKS[key]) : (WEEKS[key] = (async () => {
+    const [s, w] = key.split('-'), wl = await weekList(), href = wl[s] && wl[s][w];
+    if (!href) return null;
+    const rel = href.replace(/\.html$/, '.json');
+    try { const d = await getJSON(siteRoot() + rel); d.__rel = rel; return d; } catch (e) { return null; }
+  })().then(d => (WEEKS[key] = d)));
+  // The selected week's data: DATA for the page's own week, undefined while loading, null when there's no page.
+  const cardData = () => {
+    if (cardWk === pageKey()) return DATA;
+    const v = WEEKS[cardWk];
+    return v instanceof Promise ? undefined : v;
+  };
+  const rerenderCard = () => { if (cardPid) renderCard(cardPid); else if (cardTeam) renderTeam(cardTeam); };
+  // Kick off anything the card is still missing; re-render once it lands (if the same card and week are still up).
+  const cardNeeds = () => {
+    const pid = cardPid, tm = cardTeam, wk = cardWk;
+    const again = () => { if (cardPid === pid && cardTeam === tm && cardWk === wk) rerenderCard(); };
+    if (!WL) weekList().then(again);
+    if (cardData() === undefined) fetchWeek(wk).then(again);
+  };
+  const wkOrder = () => Object.keys(WL || {}).sort((a, b) => a - b)
+    .flatMap(s => Object.keys(WL[s]).sort((a, b) => a - b).map(w => `${s}-${w}`));
+  const wkLabel = d => d === DATA ? `Week ${d.week}` : `${d.season} week ${d.week}`;
+  const pickerHtml = () => {
+    const [cs, cw] = cardWk.split('-'), wl = WL && Object.keys(WL).length ? WL : { [cs]: { [cw]: '' } };
+    const o = wkOrder(), i = o.indexOf(cardWk);
+    const opts = Object.keys(wl).sort((a, b) => b - a).map(s => `<optgroup label="${esc(s)}">${Object.keys(wl[s]).sort((a, b) => a - b).map(w => {
+      const k = `${s}-${w}`;
+      return `<option value="${esc(k)}"${k === cardWk ? ' selected' : ''}>${esc(s)} · Week ${esc(w)}${k === pageKey() ? ' (this page)' : ''}</option>`;
+    }).join('')}</optgroup>`).join('');
+    return `<div class="pc-wkbar"><button type="button" class="pc-wkstep" data-wkstep="-1" aria-label="Previous week"${i <= 0 ? ' disabled' : ''}>&lsaquo;</button>
+      <select class="pc-wkpick" aria-label="Week shown in this card">${opts}</select>
+      <button type="button" class="pc-wkstep" data-wkstep="1" aria-label="Next week"${i < 0 || i >= o.length - 1 ? ' disabled' : ''}>&rsaquo;</button>
+      ${cardWk !== pageKey() ? '<button type="button" class="pc-wkback" data-wkback>Back to this page&rsquo;s week</button>' : ''}</div>`;
+  };
+  const wirePicker = body => {
+    const go = k => { if (k && k !== cardWk) { cardWk = k; rerenderCard(); } };
+    const sel = body.querySelector('.pc-wkpick');
+    if (sel) sel.onchange = () => go(sel.value);
+    body.querySelectorAll('[data-wkstep]').forEach(b => b.onclick = () => { const o = wkOrder(); go(o[o.indexOf(cardWk) + +b.dataset.wkstep]); });
+    const back = body.querySelector('[data-wkback]'); if (back) back.onclick = () => go(pageKey());
+  };
+  const wkWait = d => d === undefined ? '<div class="pc-box"><p class="pc-sub">Loading that week&hellip;</p></div>'
+    : '<div class="pc-box"><p class="pc-sub">We have no page for that week.</p></div>';
+
+  const gameHref = (g, d = DATA) => `${siteRoot()}game.html?d=${encodeURIComponent(d.__rel || CFG.data)}&g=${encodeURIComponent(g.id)}`;
+  // The player's weekly section for the selected week (projection, matchup, availability, season to date).
+  const playerWeek = (pid, p, d) => {
+    const g = teamGame(p.team, d), opp = g && (g.away.team === p.team ? g.home : g.away);
+    const s = scaled(p, d), w = weights(), live = d === DATA;
+    const ln = live ? LIVE.lines[p.espn] : null, st = live && g ? LIVE.byGame[g.id] : null;
     const ac = ln ? ln.line : (p.sc.ac || null);
     let now = '';
     if (ac) {
-      const v = pts(ac, w, p.pos), live = st && st.state === 'in';
-      const tag = live ? `<span class="live-dot"></span>Live · ${esc(st.short || '')}` : 'Final';
-      now = `<div class="pc-now${live ? ' is-live' : ''}"><div class="pc-k">${tag}</div><div class="pc-big">${f1(v)} <small>pts</small></div>
-        <div class="pc-sub">${ln ? esc(statLineText(ln, p.pos)) : ''} ${live ? '' : (v > s.q[3] ? '<b class="good">above his likely range</b>' : v < s.q[1] ? '<b class="bad">below his likely range</b>' : 'within his likely range')}</div></div>`;
+      const v = pts(ac, w, p.pos), isLive = st && st.state === 'in';
+      const tag = isLive ? `<span class="live-dot"></span>Live · ${esc(st.short || '')}` : 'Final';
+      now = `<div class="pc-now${isLive ? ' is-live' : ''}"><div class="pc-k">${tag}</div><div class="pc-big">${f1(v)} <small>pts</small></div>
+        <div class="pc-sub">${ln ? `${esc(statLineText(ln, p.pos))}${isLive ? '' : ' · '}` : ''}${isLive ? '' : (v > s.q[3] ? '<b class="good">above his likely range</b>' : v < s.q[1] ? '<b class="bad">below his likely range</b>' : 'within his likely range')}</div></div>`;
     }
     const pl = p.proj_line || {};
     const vol = [pl.att ? `${f1(pl.att)} pass att` : '', pl.car ? `${f1(pl.car)} carries` : '', pl.tgt ? `${f1(pl.tgt)} targets` : '', pl.rec ? `${f1(pl.rec)} catches` : ''].filter(Boolean).join(' · ');
-    const nweek = (DATA.week || 1) - 1;
+    const nweek = (d.week || 1) - 1;
     const fpg = p.sc.g ? pts(p.sc.ss, w, p.pos) / p.sc.g : null;
     const last = [...(p.sc.wk || [])].sort((a, b) => a[0] - b[0]).slice(-3).map(r => pts(r.slice(1), w, p.pos));
     const l3 = last.length ? last.reduce((a, b) => a + b, 0) / last.length : null;
     const flags = [p.status ? `<span class="flag ${p.inactive >= 0.5 ? 'f-out' : 'f-q'}">${esc(p.status)}</span>` : '',
                    p.boost >= 1 ? `<span class="flag f-up" title="Raised by volume vacated by ${esc(p.boost_from)}">+${f1(p.boost)} from injuries</span>` : '',
                    p.low_sample ? '<span class="flag">low data</span>' : ''].join('');
-    body.innerHTML = `
-      <div class="pc-head" style="--tc:${esc(g ? g.colors[p.team] : '#666')}">
-        ${me ? logo(me.logo_url, me.logo_bg, 34, p.team) : ''}
-        <div class="pc-id"><h3 id="pcName">${esc(p.name)}</h3>
-          <div class="pc-meta"><span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span> <button type="button" class="tm-open pc-tlink" data-tm="${esc(p.team)}">${esc(p.team)}</button> ${opp ? `<span class="muted">${esc(p.home)} <button type="button" class="tm-open pc-tlink" data-tm="${esc(opp.team)}">${esc(opp.team)}</button></span>` : ''}
-            <span class="tier t-${esc(p.slot)}">${esc(p.tier)}</span> <span class="muted">${esc(p.pos)}${p.rank} this week</span></div>
-          ${flags ? `<div class="pc-flags">${flags}</div>` : ''}</div>
-      </div>
+    const html = `
+      <div class="pc-wkmeta"><span class="tier t-${esc(p.slot)}">${esc(p.tier)}</span> <span class="muted">${esc(p.pos)}${p.rank} in ${esc(wkLabel(d).toLowerCase())}</span>
+        ${opp ? `<span class="muted">· <button type="button" class="tm-open pc-tlink" data-tm="${esc(p.team)}">${esc(p.team)}</button> ${esc(p.home)} <button type="button" class="tm-open pc-tlink" data-tm="${esc(opp.team)}">${esc(opp.team)}</button></span>` : ''}
+        ${flags ? `<span class="pc-flags">${flags}</span>` : ''}</div>
       ${now}
-      <div class="seg pc-tabs" role="tablist">${[['ov', 'Overview'], ['log', 'Game log'], ...(p.espn && !DATA.archive ? [['news', 'News']] : [])]
-        .map(([k, l]) => `<button type="button" role="tab" data-pt="${k}" class="${cardTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-      <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>
       <div class="pc-grid">
         <div class="pc-box"><div class="pc-k">Projection${p.inactive >= 0.05 ? ' (if active)' : ''}</div><div class="pc-big">${f1(s.proj)} <small>pts</small></div>
           ${rangeSvg(s.q, s.proj)}<div class="pc-sub">Floor ${f1(s.q[0])} · middle ${f1(s.q[1])}–${f1(s.q[3])} · ceiling ${f1(s.q[4])} · confidence ${esc(p.conf)}</div></div>
-        <div class="pc-box"><div class="pc-k">Expected line</div><div class="line">${expectedLine(pid, p)}</div>${vol ? `<div class="pc-sub">${esc(vol)}</div>` : ''}</div>
+        <div class="pc-box"><div class="pc-k">Expected line</div><div class="line">${expectedLine(pid, p, d)}</div>${vol ? `<div class="pc-sub">${esc(vol)}</div>` : ''}</div>
         <div class="pc-box"><div class="pc-k">Matchup</div>
-          <div class="pc-mu">${g ? `<a class="pc-tile" href="${tileHref(g)}" data-goto="${esc(g.id)}" title="Open the matchup tile">` : ''}${opp ? logo(opp.logo_url, opp.logo_bg, 20, opp.team) : ''}<b>${esc(p.home)} ${esc(p.opp)} &rsaquo;</b>${g ? '</a>' : ''}
+          <div class="pc-mu">${g ? `<a class="pc-tile" href="${tileHref(g, d)}" data-goto="${esc(g.id)}" title="Open the matchup tile">` : ''}${opp ? logo(opp.logo_url, opp.logo_bg, 20, opp.team) : ''}<b>${esc(p.home)} ${esc(p.opp)} &rsaquo;</b>${g ? '</a>' : ''}
             <span style="color:${esc(p.dvp_color)}">${esc(p.dvp)} vs ${esc(p.pos)}s</span> <span class="muted">grade ${esc(p.grade)}</span></div>
           <div class="pc-sub">This defense ${p.mpts >= 0 ? 'adds' : 'takes away'} ${f1(Math.abs(p.mpts))} pts vs an average one.</div></div>
         <div class="pc-box"><div class="pc-k">Availability</div><div class="pc-big sm">${p.inactive < 0.005 ? '<1' : Math.round(p.inactive * 100)}% <small>inactive</small></div>
           <div class="pc-sub">${esc(p.inactive_why)}</div></div>
       </div>
-      <div class="pc-box"><div class="pc-k">Season</div><div class="line">${seasonText(p)}</div>
+      <div class="pc-box"><div class="pc-k">${esc(d.season)} season before week ${esc(d.week)}</div><div class="line">${seasonText(p)}</div>
         <div class="pc-sub">${fpg != null ? `${f1(fpg)} FP/G` : ''}${l3 != null ? ` · last 3: ${f1(l3)}` : ''}${p.sched ? ` · ${esc(p.sched)}` : ''}</div>
-        ${nweek >= 1 ? `<div class="pc-k" style="margin-top:10px">Points by week</div>${weekBars(p)}` : ''}</div>
+        ${nweek >= 1 ? `<div class="pc-k" style="margin-top:10px">Points by week</div>${weekBars(p, d)}` : ''}</div>
       <p class="pc-take">${esc(p.takeaway)}</p>
+      ${g ? `<div class="pc-links"><a href="${gameHref(g, d)}">${st && st.state === 'in' ? '<span class="live-dot"></span>' : ''}Gamecast: ${esc(g.away.team)} @ ${esc(g.home.team)} &rsaquo;</a>
+        <a href="${tileHref(g, d)}" data-goto="${esc(g.id)}">Matchup tile &rsaquo;</a></div>` : ''}`;
+    return html;
+  };
+  // A player we didn't list that week: say so, and show what he did from the career log when he played.
+  const playerOff = (L, d) => {
+    const S = L && (L.seasons || []).find(x => +x.s === +d.season), g = S && S.g.find(x => x.w === +d.week);
+    const pos = L && L.pos;
+    const played = g ? `<div class="pc-now"><div class="pc-k">Final</div><div class="pc-big">${f1(pts(g.c, weights(), pos))} <small>pts</small></div>
+      <div class="pc-sub">${g.h === 0 ? '@' : 'vs'} ${esc(g.o)} · ${ord(g.rk)} among ${esc(pos)}s${g.gid && g.f ? ` · <a href="${siteRoot()}${esc(g.f.replace(/\.json$/, '.html'))}#g-${esc(g.gid)}" data-goto="${esc(g.gid)}">Matchup tile &rsaquo;</a>` : ''}</div></div>` : '';
+    return `${played}<div class="pc-box"><p class="pc-sub">Not on our ${esc(wkLabel(d).toLowerCase())} board: a bye, ruled out, not on a roster yet, or projected too low to list.</p></div>`;
+  };
+  const renderCard = pid => {
+    const body = document.querySelector('#pcOv .pc-body');
+    const d = cardData(), L = LOGS[pid] && !LOGS[pid].missing ? LOGS[pid] : null;
+    const p = d ? d.players[pid] : null;
+    // Identity is current: the career log's roster team / position, else the page's row, else the week's row.
+    const row = (DATA && DATA.players[pid]) || p || Object.values(WEEKS).map(x => x && x.players && x.players[pid]).find(Boolean) || {};
+    const name = row.name || (L && L.name), pos = (L && L.pos) || row.pos, team = (L && L.team) || row.team, espn = row.espn || (L && L.espn);
+    if (!LOGS[pid]) ensureLog(pid).then(() => { if (cardPid === pid) renderCard(pid); });
+    cardNeeds();
+    if (!name) { body.innerHTML = `<p class="pc-none">${LOGS[pid] ? 'No card for this player.' : 'Loading&hellip;'}</p>`; return; }
+    const info = tInfo(team), news = !!espn;
+    if (cardTab === 'news' && !news) cardTab = 'ov';
+    const week = d === undefined || d === null ? wkWait(d) : p ? playerWeek(pid, p, d) : playerOff(L, d);
+    body.innerHTML = `
+      <div class="pc-head" style="--tc:${esc(info.color || '#666')}">
+        ${team ? tLogo(team, 34) : ''}
+        <div class="pc-id"><h3 id="pcName">${esc(name)}</h3>
+          <div class="pc-meta">${pos ? `<span class="posb posb-${esc(pos)}">${esc(pos)}</span>` : ''} ${team ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(team)}">${esc(info.name || team)}</button>` : '<span class="muted">Free agent</span>'}</div></div>
       </div>
-      <div class="pc-tab" data-pt="log"${cardTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every career game</div><div class="pc-log"></div></div></div>
-      ${p.espn && !DATA.archive ? `<div class="pc-tab" data-pt="news"${cardTab === 'news' ? '' : ' hidden'}><div class="pc-box pc-newsbox"><div class="pc-k">Recent news</div><div class="pc-news"></div></div></div>` : ''}
-      <div class="pc-links">${g ? `<a href="${gameHref(g)}">${st && st.state === 'in' ? '<span class="live-dot"></span>' : ''}Gamecast: ${esc(g.away.team)} @ ${esc(g.home.team)} &rsaquo;</a>` : ''}
-        ${g ? `<a href="${tileHref(g)}" data-goto="${esc(g.id)}">Matchup tile &rsaquo;</a>` : ''}</div>`;
-    const nb = body.querySelector('.pc-news'); if (nb) loadNews(p.espn, nb);
-    const lb = body.querySelector('.pc-log'); if (lb) loadLog(pid, lb, p);
+      <div class="seg pc-tabs" role="tablist">${[['ov', 'Week'], ['log', 'Game log'], ...(news ? [['news', 'News']] : [])]
+        .map(([k, l]) => `<button type="button" role="tab" data-pt="${k}" class="${cardTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${pickerHtml()}${week}</div>
+      <div class="pc-tab" data-pt="log"${cardTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every career game</div><div class="pc-log">${
+        !LOGS[pid] ? '<p class="pc-sub">Loading game log&hellip;</p>' : !L ? '<p class="pc-sub">Game log unavailable.</p>'
+          : L.seasons.length || (L.up || []).length ? logHtml(L, p || row) : '<p class="pc-sub">No NFL games yet.</p>'}</div></div></div>
+      ${news ? `<div class="pc-tab" data-pt="news"${cardTab === 'news' ? '' : ' hidden'}><div class="pc-box pc-newsbox"><div class="pc-k">Recent news</div><div class="pc-news"></div></div></div>` : ''}`;
+    const nb = body.querySelector('.pc-news'); if (nb) loadNews(espn, nb);
+    wireLogRows(body.querySelector('.pc-log'));
     body.querySelectorAll('.pc-tabs [data-pt]').forEach(b => b.onclick = () => {
       cardTab = b.dataset.pt;
       body.querySelectorAll('.pc-tabs [data-pt]').forEach(x => x.classList.toggle('on', x === b));
       body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.pt !== cardTab; });
     });
+    wirePicker(body);
     wireGoto(body);
   };
-  // Matchup links in cards jump to that game's tile on the Matchups tab (on the game page: the week page's tile).
-  const tileHref = g => CFG.page === 'game' ? `${(DATA.__rel || 'index.json').replace(/\.json$/, '.html')}#g-${g.id}` : `#g-${g.id}`;
+  // Matchup links in cards jump to that game's tile: in place for this page's week, else on that week's page.
+  const tileHref = (g, d = DATA) => CFG.page !== 'game' && d === DATA ? `#g-${g.id}`
+    : `${siteRoot()}${(d.__rel || 'index.json').replace(/\.json$/, '.html')}#g-${g.id}`;
   const goToTile = gid => {
     const tab = document.querySelector('nav.tabs button[data-tab="games"]'); if (tab) tab.click();
     const card = document.getElementById('g-' + gid);
     if (card) setTimeout(() => {
       card.scrollIntoView({ behavior: 'smooth', block: 'start' });
       card.classList.add('flash'); setTimeout(() => card.classList.remove('flash'), 1600);
+      // Arriving from another page: logos still loading above shift the layout, so re-align once they're in.
+      if (document.readyState !== 'complete') addEventListener('load', () => card.scrollIntoView({ block: 'start' }), { once: true });
     }, 60);
   };
   const wireGoto = body => body.querySelectorAll('[data-goto]').forEach(a => a.onclick = ev => {
-    if (CFG.page === 'game') return;  // a real link to the week page's tile
+    if (!(a.getAttribute('href') || '').startsWith('#')) return;  // a real link to another week page's tile
     ev.preventDefault(); closePlayer(); goToTile(a.dataset.goto);
   });
   // ------------------------------------------------------------------------------------------------- team card
-  // Same overlay and look as the player card. Overview from this week's data (Power, matchup, top players);
+  // Same overlay and look as the player card. Week tab from the picked week's data (Power, matchup, players);
   // season stats and the career game log from data/teams/<TEAM>.json (tools/player_logs.py).
   let cardTeam = null, teamTab = 'ov', teamOpp = '';
   const TLOGS = {};
@@ -482,13 +567,13 @@
         if (r.bye) return `<tr class="lg-bye"><td>${r.w}</td><td colspan="15">Bye</td></tr>`;
         if (r.u) {
           const u = r.u;
-          return `<tr class="lg-up"><td>${u.w}</td>${oppCell(u.o, u.h, u.opr)}<td class="muted">upcoming</td><td class="num">${u.ln != null ? sgn(-u.ln).replace('+0.0', 'PK') : '–'}</td>
+          return `<tr class="lg-up"${tileAttrs(u)}><td>${u.w}</td>${oppCell(u.o, u.h, u.opr)}<td class="muted">upcoming</td><td class="num">${u.ln != null ? sgn(-u.ln).replace('+0.0', 'PK') : '–'}</td>
             <td class="num">${pct(u.vc, u.mc)}</td><td class="num">–</td><td class="num">–</td><td colspan="8"></td><td><a class="tm-gc" href="${gcHref(u.gid, u.f)}" title="Gamecast">&rsaquo;</a></td></tr>`;
         }
         const g = r.g, s = g.s || [], os = g.os || [];
         const res = `<span class="tm-res ${g.r === 'W' ? 'w' : g.r === 'L' ? 'l' : ''}">${g.r}</span> ${g.ps}-${g.pa}${g.ot ? ' <small>OT</small>' : ''}`;
         const line = g.ln != null ? `${g.ln > 0 ? '-' : g.ln < 0 ? '+' : ''}${g.ln === 0 ? 'PK' : Math.abs(g.ln).toFixed(1)}${g.ats ? ` <small class="ats-${g.ats}">${g.ats === 'W' ? 'cov' : g.ats === 'L' ? 'no' : 'push'}</small>` : ''}` : '–';
-        return `<tr><td>${g.w}</td>${oppCell(g.o, g.h, g.opr)}<td class="tm-rc">${res}</td><td class="num">${line}</td><td class="num">${pct(g.vc, g.mc)}</td>
+        return `<tr${tileAttrs(g)}><td>${g.w}</td>${oppCell(g.o, g.h, g.opr)}<td class="tm-rc">${res}</td><td class="num">${line}</td><td class="num">${pct(g.vc, g.mc)}</td>
           <td class="num">${g.pr ? `<span class="lg-rk ${g.pr <= 8 ? 'rk-good' : g.pr <= 20 ? 'rk-mid' : 'rk-bad'}">${g.pr}</span>` : '–'}</td><td class="num muted">${g.elo || ''}</td>
           <td class="num">${f0(s[0])}</td><td class="num">${f0(s[1])}</td><td class="num">${f0(s[2])}</td><td class="num">${s[3] != null ? s[3].toFixed(1) : ''}</td><td class="num">${s[4] ?? ''}</td>
           <td class="num">${f0(os[0])}</td><td class="num">${os[3] != null ? os[3].toFixed(1) : ''}</td><td class="num">${os[4] ?? ''}</td>
@@ -498,7 +583,7 @@
       return `<tbody><tr class="lg-season"><td colspan="16"><b>${S.s}</b> ${esc(sumBits)}</td></tr>${head}${trs}</tbody>`;
     }).join('');
     const legend = `<div class="lg-leg"><span>Opponent color = their power rank that week (2021 on):</span><span class="mr-hard">top 8</span><span class="mr-tough">9-16</span><span class="mr-ok">17-24</span><span class="mr-easy">25-32</span>
-      <span>· Odds = pregame win chance, Vegas / our model · Line = Vegas spread for ${esc(abbr)} (cov = covered) · › = gamecast</span></div>`;
+      <span>· Odds = pregame win chance, Vegas / our model · Line = Vegas spread for ${esc(abbr)} (cov = covered) · › = gamecast · Tap a game (2021 on) to open its matchup</span></div>`;
     return `<div class="tm-bar">${sel}</div>${h2h}${legend}<div class="lg-scroll"><table class="lg tm-lg">${body}</table></div>`;
   };
   const teamSeasonBox = (L) => {
@@ -512,62 +597,69 @@
   };
   const renderTeam = abbr => {
     const body = document.querySelector('#pcOv .pc-body');
-    const info = tInfo(abbr), pw = (DATA.power || []).find(x => x.team === abbr), g = teamGame(abbr);
+    const d = cardData(), L = TLOGS[abbr], info = tInfo(abbr);
+    cardNeeds();
+    // Header, season box and game log are current; the Week tab (matchup, Power, players) follows the picker.
+    const wk = d ? teamWeek(abbr, d) : { html: wkWait(d), players: '' };
+    body.innerHTML = `
+      <div class="pc-head" style="--tc:${esc(info.color || '#666')}">${tLogo(abbr, 34)}
+        <div class="pc-id"><h3 id="pcName">${esc(info.name || abbr)}</h3>
+          <div class="pc-meta"><b>${esc((L && (L.seasons.find(s => s.s === L.cur) || {}).rec) || '')}</b>${info.division ? ` <span class="muted">${esc(info.division)}</span>` : ''}</div></div></div>
+      <div class="seg pc-tabs" role="tablist">${[['ov', 'Week'], ['log', 'Game log'], ['pl', 'Players']].map(([k, l]) => `<button type="button" data-tt="${k}" class="${teamTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="pc-tab" data-tt="ov"${teamTab === 'ov' ? '' : ' hidden'}>${pickerHtml()}${wk.html}<div class="tm-season">${L ? teamSeasonBox(L) : ''}</div></div>
+      <div class="pc-tab" data-tt="log"${teamTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every game since 1999</div><div class="tm-log">${L ? teamLogHtml(L, abbr) : '<p class="pc-sub">Loading game log&hellip;</p>'}</div></div></div>
+      <div class="pc-tab" data-tt="pl"${teamTab === 'pl' ? '' : ' hidden'}>${pickerHtml()}${d ? `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
+        ${wk.players ? `<table class="bx tm-pl"><thead><tr><th>Player</th><th class="num">Proj</th><th>Tier</th><th class="num">FP/G</th></tr></thead><tbody>${wk.players}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>` : wkWait(d)}</div>`;
+    body.querySelectorAll('[data-tt]').forEach(b => b.onclick = () => {
+      teamTab = b.dataset.tt;
+      body.querySelectorAll('.pc-tabs [data-tt]').forEach(x => x.classList.toggle('on', x === b));
+      body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.tt !== teamTab; });
+    });
+    wireTeamLog(body, abbr);
+    wireLogRows(body.querySelector('.tm-log'));
+    wirePicker(body);
+    wireGoto(body);
+    if (!L) loadTeamLog(abbr);
+  };
+  // The team's Week tab for one week's data: result / live score, matchup and odds, Power box; plus its player rows.
+  const teamWeek = (abbr, d) => {
+    const pw = (d.power || []).find(x => x.team === abbr), g = teamGame(abbr, d);
     const opp = g && (g.away.team === abbr ? g.home : g.away), home = g && g.home.team === abbr;
-    const st = g && LIVE.byGame[g.id], L = TLOGS[abbr];
+    const st = d === DATA && g ? LIVE.byGame[g.id] : null;
     let now = '';
     if (st && st.state !== 'pre') {
       const me = st.home.team === abbr ? st.home : st.away, them = st.home.team === abbr ? st.away : st.home, live = st.state === 'in';
       now = `<div class="pc-now${live ? ' is-live' : ''}"><div class="pc-k">${live ? `<span class="live-dot"></span>Live · ${esc(st.short || '')}` : 'Final'}</div>
-        <div class="pc-big">${esc(abbr)} ${me.score} <small>–</small> ${them.score} ${esc(them.team)}</div><div class="pc-sub"><a href="${gameHref(g)}">${live ? 'Open live gamecast' : 'Game recap'} &rsaquo;</a></div></div>`;
+        <div class="pc-big">${esc(abbr)} ${me.score} <small>–</small> ${them.score} ${esc(them.team)}</div><div class="pc-sub"><a href="${gameHref(g, d)}">${live ? 'Open live gamecast' : 'Game recap'} &rsaquo;</a></div></div>`;
     } else if (g && g.final) {
       const ps = home ? g.final.home : g.final.away, pa = home ? g.final.away : g.final.home;
-      now = `<div class="pc-now"><div class="pc-k">Final</div><div class="pc-big">${esc(abbr)} ${ps} <small>–</small> ${pa} ${esc(opp.team)}</div><div class="pc-sub"><a href="${gameHref(g)}">Game recap &rsaquo;</a></div></div>`;
+      now = `<div class="pc-now"><div class="pc-k">Final</div><div class="pc-big">${esc(abbr)} ${ps} <small>–</small> ${pa} ${esc(opp.team)}</div><div class="pc-sub"><a href="${gameHref(g, d)}">Game recap &rsaquo;</a></div></div>`;
     }
     const fc = g && g.fc;
     const myPct = (fav, pct) => fav === abbr ? pct : 100 - pct;
-    const week = g ? `<div class="pc-box"><div class="pc-k">Week ${DATA.week}</div>
-        <div class="pc-mu"><a class="pc-tile" href="${tileHref(g)}" data-goto="${esc(g.id)}" title="Open the matchup tile">${tLogo(opp.team, 22)}<b>${home ? 'vs' : '@'} ${esc(opp.nick || opp.team)} &rsaquo;</b></a> <span class="muted">${esc(g.kickoff || '')}</span></div>
+    const week = g ? `<div class="pc-box"><div class="pc-k">${esc(wkLabel(d))}</div>
+        <div class="pc-mu"><a class="pc-tile" href="${tileHref(g, d)}" data-goto="${esc(g.id)}" title="Open the matchup tile">${tLogo(opp.team, 22)}<b>${home ? 'vs' : '@'} ${esc(opp.nick || opp.team)} &rsaquo;</b></a> <span class="muted">${esc(g.kickoff || '')}</span></div>
         ${fc ? `<div class="tm-odds"><div><div class="pc-k">${fc.src === 'Vegas' ? 'Vegas odds' : 'Our model (no line yet)'}</div><b>${fc.tossup ? 'Tossup' : `${myPct(fc.fav, fc.pct)}%`}</b>${fc.tossup ? ` <small class="muted">${esc(abbr)} ${myPct(fc.fav, fc.pct)}%</small>` : ''}</div>
           ${fc.src === 'Vegas' ? `<div><div class="pc-k">Our model</div><b>${fc.model_tossup ? 'Tossup' : `${myPct(fc.model_fav, fc.model_pct)}%`}</b></div>` : ''}
           ${g.vegas_line ? `<div><div class="pc-k">Line</div><b>${esc(g.vegas_line)}</b></div>` : ''}</div>` : ''}
-        <div class="pc-links" style="margin-top:8px"><a href="${gameHref(g)}">Gamecast &rsaquo;</a><a href="${tileHref(g)}" data-goto="${esc(g.id)}">Matchup tile &rsaquo;</a></div></div>`
-      : `<div class="pc-box"><div class="pc-k">Week ${DATA.week}</div><b>Bye</b></div>`;
+        <div class="pc-links" style="margin-top:8px"><a href="${gameHref(g, d)}">Gamecast &rsaquo;</a><a href="${tileHref(g, d)}" data-goto="${esc(g.id)}">Matchup tile &rsaquo;</a></div></div>`
+      : `<div class="pc-box"><div class="pc-k">${esc(wkLabel(d))}</div><b>Bye</b></div>`;
     const unit = (label, v, rk, pp, total) => `<div class="tm-u${total ? ' tm-tot' : ''}"><span class="tm-ul">${label}</span><span class="tm-uv">${sgn(v)}</span>${rkChip(rk)}
       <span class="tm-ub"><span style="${v >= 0 ? `left:50%;width:${Math.min(50, Math.abs(v) * 10)}%` : `right:50%;width:${Math.min(50, Math.abs(v) * 10)}%`}" class="${v >= 0 ? 'pos' : 'neg'}"></span></span>
       ${pp != null ? `<span class="tm-pp muted" title="EPA per 100 plays">${sgn(pp)}</span>` : '<span></span>'}</div>`;
     const power = pw ? `<div class="pc-box"><div class="pc-k">Power ranking</div>
-        <div class="tm-pw"><div><div class="pc-big">${ord(pw.rank)}</div><div class="pc-sub">rank range ${esc(pw.range)}${pw.move ? ` · ${pw.move > 0 ? '▲' : '▼'}${Math.abs(pw.move)} this week` : ''}</div></div>
+        <div class="tm-pw"><div><div class="pc-big">${ord(pw.rank)}</div><div class="pc-sub">rank range ${esc(pw.range)}${pw.move ? ` · ${pw.move > 0 ? '▲' : '▼'}${Math.abs(pw.move)} from the week before` : ''}</div></div>
           <div><div class="pc-big sm">${sgn(pw.net)} <small>pts/g vs avg</small></div></div></div>
         <div class="tm-units">${unit('Offense', pw.off, pw.off_rk, null, true)}${unit('Pass O', pw.pass_o, pw.pass_o_rk, pw.pass_o_pp)}${unit('Run O', pw.rush_o, pw.rush_o_rk, pw.rush_o_pp)}
           ${unit('Defense', pw.def, pw.def_rk, null, true)}${unit('Pass D', pw.pass_d, pw.pass_d_rk, pw.pass_d_pp)}${unit('Run D', pw.rush_d, pw.rush_d_rk, pw.rush_d_pp)}
           ${unit('Special teams', pw.st, pw.st_rk, null, true)}</div>
         <div class="pc-sub">Points per game vs an average team (opponent-adjusted). Schedule so far ${ord(pw.sos_past_rk)} hardest · rest of season ${ord(pw.sos_next_rk)} hardest.</div>
         ${rankTrend(pw.rank_hist) ? `<div class="pc-k" style="margin-top:10px">Power rank by week</div>${rankTrend(pw.rank_hist)}` : ''}</div>` : '';
-    const players = Object.entries(DATA.players).filter(([, p]) => p.team === abbr).sort((a, b) => b[1].proj - a[1].proj);
-    const plRows = players.map(([pid, p]) => { const s = scaled(p);
+    const players = Object.entries(d.players).filter(([, p]) => p.team === abbr).sort((a, b) => b[1].proj - a[1].proj);
+    const plRows = players.map(([pid, p]) => { const s = scaled(p, d);
       return `<tr><td><button type="button" class="bx-n" data-open-pid="${esc(pid)}">${esc(p.name)}</button> <span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>${p.status ? ` <span class="flag ${p.inactive >= 0.5 ? 'f-out' : 'f-q'}">${esc(p.status)}</span>` : ''}</td>
         <td class="num"><b>${f1(s.proj)}</b></td><td><span class="tier t-${esc(p.slot)}">${esc(p.tier)}</span></td><td class="num muted">${p.fpg != null ? f1(p.fpg) : ''}</td></tr>`; }).join('');
-    const tabs = [['ov', 'Overview'], ['log', 'Game log'], ['pl', 'Players']];
-    body.innerHTML = `
-      <div class="pc-head" style="--tc:${esc(info.color || '#666')}">${tLogo(abbr, 34)}
-        <div class="pc-id"><h3 id="pcName">${esc(info.name || abbr)}</h3>
-          <div class="pc-meta"><b>${esc((L && (L.seasons.find(s => s.s === L.cur) || {}).rec) || (pw ? pw.record : ''))}</b>${info.division ? ` <span class="muted">${esc(info.division)}</span>` : ''}${pw ? ` <span class="tier t-start">Power ${ord(pw.rank)}</span>` : ''}</div></div></div>
-      ${now}
-      <div class="seg pc-tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" data-tt="${k}" class="${teamTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-      <div class="pc-tab" data-tt="ov"${teamTab === 'ov' ? '' : ' hidden'}><div class="pc-grid tm-grid">${week}${power}</div><div class="tm-season">${L ? teamSeasonBox(L) : ''}</div></div>
-      <div class="pc-tab" data-tt="log"${teamTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every game since 1999</div><div class="tm-log">${L ? teamLogHtml(L, abbr) : '<p class="pc-sub">Loading game log&hellip;</p>'}</div></div></div>
-      <div class="pc-tab" data-tt="pl"${teamTab === 'pl' ? '' : ' hidden'}><div class="pc-box"><div class="pc-k">Fantasy players this week</div>
-        ${plRows ? `<table class="bx tm-pl"><thead><tr><th>Player</th><th class="num">Proj</th><th>Tier</th><th class="num">FP/G</th></tr></thead><tbody>${plRows}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed this week.</p>'}</div></div>`;
-    body.querySelectorAll('[data-tt]').forEach(b => b.onclick = () => {
-      teamTab = b.dataset.tt;
-      body.querySelectorAll('.pc-tabs [data-tt]').forEach(x => x.classList.toggle('on', x === b));
-      body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.tt !== teamTab; });
-    });
-    const sel = body.querySelector('[data-topp]');
-    if (sel) sel.onchange = () => { teamOpp = sel.value; body.querySelector('.tm-log').innerHTML = teamLogHtml(TLOGS[abbr], abbr); wireTeamLog(body, abbr); };
-    wireGoto(body);
-    if (!L) loadTeamLog(abbr);
+    return { html: `${now}<div class="pc-grid tm-grid">${week}${power}</div>`, players: plRows };
   };
   const wireTeamLog = (body, abbr) => {
     const sel = body.querySelector('[data-topp]');
@@ -583,6 +675,7 @@
     const ov = ensureOverlay();
     if (!location.hash.startsWith('#player/') && !location.hash.startsWith('#team/')) prevHash = location.hash;
     if (abbr !== cardTeam) { teamTab = 'ov'; teamOpp = ''; }
+    if (ov.hidden) cardWk = pageKey();  // a fresh card starts on the page's week; card-to-card keeps the picked one
     cardPid = null; cardTeam = abbr;
     renderTeam(abbr);
     ov.hidden = false;
@@ -596,6 +689,7 @@
     const ov = ensureOverlay();
     if (!location.hash.startsWith('#player/') && !location.hash.startsWith('#team/')) prevHash = location.hash;
     if (pid !== cardPid) cardTab = 'ov';
+    if (ov.hidden) cardWk = pageKey();
     cardPid = pid; cardTeam = null;
     renderCard(pid);
     ov.hidden = false;

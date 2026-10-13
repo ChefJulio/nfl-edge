@@ -6,15 +6,11 @@
 <title>NFL Edge · Week {{ week }}</title>
 <link rel="stylesheet" href="{{ root }}assets/gamecast.css?v={{ asset_v }}">
 <style>
-:root {
-  --bg: #f5f6f8; --panel: #ffffff; --panel2: #f9fafb; --ink: #14161a; --muted: #6a717c; --faint: #9aa1ab;
-  --line: #e6e8ec; --accent: #2f6fed; --good: #16803c; --bad: #c2372c; --warn: #9a6700;
-  --shadow: 0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.06);
-}
-@media (prefers-color-scheme: dark) {
-  :root { --bg: #0d0f13; --panel: #15181d; --panel2: #1a1e24; --ink: #e9ecf0; --muted: #98a0ab; --faint: #6b737e;
-          --line: #262b33; --accent: #6d9eff; --good: #45c26b; --bad: #f2786d; --warn: #e0b04a;
-          --shadow: 0 1px 2px rgba(0,0,0,.4); }
+/* Dark only, whatever the device setting (owner's call). */
+:root { color-scheme: dark;
+  --bg: #0d0f13; --panel: #15181d; --panel2: #1a1e24; --ink: #e9ecf0; --muted: #98a0ab; --faint: #6b737e;
+  --line: #262b33; --accent: #6d9eff; --good: #45c26b; --bad: #f2786d; --warn: #e0b04a;
+  --shadow: 0 1px 2px rgba(0,0,0,.4);
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -385,9 +381,7 @@ tr.teamrow .f-up { background: rgba(69,194,107,.18); color: #8fe6a9; }
 .seg button.pos-QB.on { background: color-mix(in srgb, var(--qb) 20%, var(--panel)); }
 .seg button.pos-RB.on { background: color-mix(in srgb, var(--rb) 20%, var(--panel)); }
 .seg button.pos-WR.on { background: color-mix(in srgb, var(--wr) 20%, var(--panel)); }
-.seg button.pos-TE.on { background: color-mix(in srgb, var(--te) 20%, var(--panel)); }
-@media (prefers-color-scheme: light) { :root { --qb: #d6336c; --rb: #0f9f6e; --wr: #2563eb; --te: #b7791f; } }
-/* power */
+.seg button.pos-TE.on { background: color-mix(in srgb, var(--te) 20%, var(--panel)); }/* power */
 table.power td { padding-top: 9px; padding-bottom: 9px; }
 table.power .rk { width: 46px; }
 .rkn { font-size: 15px; font-weight: 800; display: block; line-height: 1.1; }

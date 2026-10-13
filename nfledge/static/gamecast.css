@@ -2,16 +2,11 @@
    Week pages already define the base theme; .gc-page rules give game.html the same look on its own. */
 
 /* ---- base theme for game.html (week pages carry the same tokens) ---- */
-.gc-page {
-  --bg: #f5f6f8; --panel: #ffffff; --panel2: #f9fafb; --ink: #14161a; --muted: #6a717c; --faint: #9aa1ab;
-  --line: #e6e8ec; --accent: #2f6fed; --good: #16803c; --bad: #c2372c; --warn: #9a6700;
-  --shadow: 0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.06);
-  --qb: #d6336c; --rb: #0f9f6e; --wr: #2563eb; --te: #b7791f;
-}
-@media (prefers-color-scheme: dark) {
-  .gc-page { --bg: #0d0f13; --panel: #15181d; --panel2: #1a1e24; --ink: #e9ecf0; --muted: #98a0ab; --faint: #6b737e;
-             --line: #262b33; --accent: #6d9eff; --good: #45c26b; --bad: #f2786d; --warn: #e0b04a;
-             --shadow: 0 1px 2px rgba(0,0,0,.4); --qb: #ff6f91; --rb: #34d399; --wr: #60a5fa; --te: #fbbf24; }
+/* Dark only, whatever the device setting (owner's call). */
+.gc-page { color-scheme: dark;
+  --bg: #0d0f13; --panel: #15181d; --panel2: #1a1e24; --ink: #e9ecf0; --muted: #98a0ab; --faint: #6b737e;
+  --line: #262b33; --accent: #6d9eff; --good: #45c26b; --bad: #f2786d; --warn: #e0b04a;
+  --shadow: 0 1px 2px rgba(0,0,0,.4); --qb: #ff6f91; --rb: #34d399; --wr: #60a5fa; --te: #fbbf24;
 }
 .gc-page { margin: 0; background: var(--bg); color: var(--ink); -webkit-text-size-adjust: 100%;
   font: 14px/1.45 Inter, "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
@@ -108,8 +103,8 @@ html.pc-open { overflow: hidden; }
 .pc-wk .wb-l, .pc-wk .wb-v { font-size: 9px; fill: var(--muted); text-anchor: middle; } .pc-wk .wb-v { fill: var(--ink); font-weight: 700; }
 .pc-take { margin: 10px 2px; font-weight: 600; line-height: 1.4; }
 .pc-newsbox, .pc-logbox { margin-bottom: 10px; }
-@media (prefers-color-scheme: dark) { .pc .tier { background: rgba(255,255,255,.07); color: rgba(255,255,255,.7); }
-  .pc .tier.t-start { background: #dcf2e3; color: #10612a; } .pc .tier.t-flex { background: #fdefc6; color: #7a5200; } }
+.pc .tier { background: rgba(255,255,255,.07); color: rgba(255,255,255,.7); }
+.pc .tier.t-start { background: #dcf2e3; color: #10612a; } .pc .tier.t-flex { background: #fdefc6; color: #7a5200; }
 /* team card */
 .pc-tlink { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; }
@@ -139,9 +134,7 @@ svg.tm-trend { display: block; margin-top: 4px; } .tm-tr-mid { stroke: var(--lin
 .tm-filter select { -webkit-appearance: none; appearance: none; color-scheme: dark; font: inherit; font-size: 13px; font-weight: 600; color: var(--ink);
   background-color: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 5px 28px 5px 10px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2398a0ab'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 10px center; }
-@media (prefers-color-scheme: light) { .tm-filter select { color-scheme: light; } }
-.tm-h2h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 2px 0 6px; font-size: 13px; }
+  background-repeat: no-repeat; background-position: right 10px center; }.tm-h2h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 2px 0 6px; font-size: 13px; }
 .tm-opp button { font: inherit; font-weight: 800; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 .tm-res { display: inline-block; width: 18px; text-align: center; font-weight: 800; border-radius: 4px; margin-right: 3px; }
 .tm-res.w { background: rgba(69,194,107,.24); color: #92e8ab; } .tm-res.l { background: rgba(242,120,109,.18); color: #ffb3aa; }
@@ -150,6 +143,17 @@ svg.tm-trend { display: block; margin-top: 4px; } .tm-tr-mid { stroke: var(--lin
 .tm-gc { font-weight: 800; font-size: 16px; text-decoration: none; padding: 0 4px; }
 table.tm-pl td { white-space: normal; }
 .pc .pc-tabs { display: flex; margin: 0 0 10px; } .pc .pc-tabs button { flex: 1; font-size: 13.5px; padding: 7px 10px; }
+/* card week picker: which week feeds the Week tab */
+.pc-wkbar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 0 0 10px; }
+.pc-wkpick { -webkit-appearance: none; appearance: none; color-scheme: dark; font: inherit; font-size: 16px; font-weight: 700; color: var(--ink);
+  background-color: var(--panel2); border: 1px solid var(--line); border-radius: 9px; padding: 6px 30px 6px 11px; min-width: 0; flex: 0 1 auto;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2398a0ab'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 11px center; }.pc-wkstep { width: 36px; height: 36px; flex: none; border-radius: 9px; border: 1px solid var(--line); background: var(--panel2); color: var(--ink);
+  font-size: 20px; line-height: 1; cursor: pointer; }
+.pc-wkstep:disabled { opacity: .35; cursor: default; }
+.pc-wkback { font: inherit; font-size: 12.5px; color: var(--accent); background: none; border: 0; padding: 4px 2px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.pc-wkmeta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; margin: 0 0 10px; }
+.pc-wkmeta .pc-flags { margin-top: 0; }
 /* career game log */
 .lg-leg { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 11px; color: var(--muted); margin: 4px 0 8px; align-items: center; }
 .lg-leg .mr-easy, .lg-leg .mr-ok, .lg-leg .mr-tough, .lg-leg .mr-hard { font-weight: 800; }
@@ -174,10 +178,10 @@ table.lg tbody:first-child tr.lg-season td { padding-top: 4px; }
 .lg-over { color: #45c26b; } .lg-under { color: var(--muted); }
 tr.lg-up td { color: var(--muted); } tr.lg-up .lg-opp.mr-easy, tr.lg-up .lg-opp.mr-ok, tr.lg-up .lg-opp.mr-tough, tr.lg-up .lg-opp.mr-hard { opacity: .9; }
 tr.lg-bye td { color: var(--faint); font-weight: 700; letter-spacing: .06em; }
-@media (prefers-color-scheme: light) {
-  .gc-page .mr-easy, .pc .mr-easy { color: #16803c; } .pc .mr-ok { color: #4a9a5e; } .pc .mr-tough { color: #9a6700; } .pc .mr-hard { color: #c2372c; }
-  .pc .rk-good { color: #10612a; } .pc .rk-mid { color: #7a5200; } .pc .rk-bad { color: #9b2218; }
-}
+/* log rows with a week page open that game's matchup tile */
+table.lg tbody tr[data-gid] { cursor: pointer; }
+@media (hover: hover) { table.lg tbody tr[data-gid]:hover td { background: color-mix(in srgb, var(--accent) 12%, var(--panel2)); } }
+table.lg tbody tr[data-gid]:active td { background: color-mix(in srgb, var(--accent) 18%, var(--panel2)); }
 .nw { list-style: none; margin: 6px 0 0; padding: 0; }
 .nw-i { padding: 9px 0 9px 10px; border-top: 1px solid var(--line); border-left: 3px solid transparent; }
 .nw-i:first-child { border-top: 0; } .nw-i.fresh { border-left-color: var(--accent); }
@@ -263,9 +267,7 @@ svg.wp { display: block; width: 100%; height: 200px; border-radius: 8px; touch-a
 /* plays: tinted by the team with the ball; special teams neutral; non-plays as thin dividers; events as chips */
 /* lightened first so dark team colors (navy, black) still read on the dark page */
 .pl[style*="--pt"] { --ptl: color-mix(in srgb, var(--pt) 72%, #ffffff);
-  background: color-mix(in srgb, var(--ptl) 11%, transparent); box-shadow: inset 4px 0 0 var(--ptl); }
-@media (prefers-color-scheme: light) { .pl[style*="--pt"] { --ptl: var(--pt); background: color-mix(in srgb, var(--pt) 10%, transparent); } }
-.pl-score .pl-txt { font-weight: 700; } .pl-pen .pl-txt { color: var(--muted); }
+  background: color-mix(in srgb, var(--ptl) 11%, transparent); box-shadow: inset 4px 0 0 var(--ptl); }.pl-score .pl-txt { font-weight: 700; } .pl-pen .pl-txt { color: var(--muted); }
 .pl-st { background: color-mix(in srgb, var(--muted) 6%, transparent); }
 .pl-np { padding: 3px 4px; font-size: 11px; color: var(--faint); border-bottom: 1px dashed var(--line); }
 .pl-np .pl-when { font-size: 11px; color: var(--faint); } .pl-np .pl-txt { font-size: 11px; letter-spacing: .03em; text-transform: uppercase; }

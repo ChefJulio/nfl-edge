@@ -294,6 +294,15 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   special teams neutral, timeouts / end-of-period as thin dividers; event chips TD/FG/XP/INT/FUM/SACK/FLAG/1ST.
   First down = next real play of the drive starts at 1st (from 1st down only if full distance gained; never on goal
   to go). Drive results are phrased for the offense ("Intercepted by TB").
+  **Cards are week-independent (2026-10-13, owner's "option 3"):** header (current roster team from the log doc),
+  game log and news are always current; a week picker on the card's Week tab (any week in `weeks.json`, default =
+  the page's week, prev/next steps, kept when hopping card to card) lazily fetches that week's `<page>.json` and
+  drives projection / matchup / availability / season-to-date (player) or matchup, odds, Power box, Players (team).
+  Live overlays only apply when the picked week is the page's own. Players we didn't list that week still get a
+  card ("not on our board" + his actual line from the log when he played). Log docs carry `name` and `espn` (cards
+  open without a week row) and per game `gid` + `f` (week file). **Game-log rows (2021+) open that game's matchup**
+  (owner: rows are links, not a week picker): in place on the same week's page, else that week's page `#g-<gid>`.
+  **Dark only (2026-10-13):** owner's call; light-theme tokens and `prefers-color-scheme` rules removed.
 
 ## 8. Site / pipeline
 - `index.html` = current week: the week being played (any final game) until **Tuesday 06:00 ET** after its last

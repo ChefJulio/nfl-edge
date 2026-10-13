@@ -32,6 +32,7 @@ def week_files(site: Path) -> list[Path]:
 
 
 OUR_GAMES = {}  # game_id -> our pregame numbers for that game + the week file it lives in (filled by our_weeks)
+NAMES = {}  # gsis -> (display name, espn id) from our week files (filled by our_weeks): cards open without a week row
 
 
 def our_weeks(site: Path) -> tuple[dict, dict, set]:
@@ -47,6 +48,8 @@ def our_weeks(site: Path) -> tuple[dict, dict, set]:
                               "home": g["home"]["team"], "file": rel, "line": g.get("vegas_line")}
     for pid, p in d["players"].items():
       everyone.add(pid)
+      if p.get("name") and (pid not in NAMES or rel == "index.json"):
+        NAMES[pid] = (p["name"], p.get("espn") or (NAMES.get(pid) or (None, None))[1])
       m = re.match(r"(\d+)", str(p.get("dvp") or ""))
       rank = int(m.group(1)) if m else None
       per_player[(s, w, pid)] = {"pj": round(float(p["proj"]), 1), "pjl": p["sc"]["pj"], "mr": rank}
@@ -92,11 +95,12 @@ def main():
   allsched = cache.get("schedules", "since1999", lambda: nfl.load_schedules(list(range(FIRST_SEASON, data.current_season + 1))),
                        stale=cache.age_hours("schedules", "since1999") > 12)
   allsched = allsched[allsched.game_type == "REG"]
-  home_of = {}
+  home_of, gid_of = {}, {}
   for g in allsched.itertuples():
     h, a = D.RELOCATED.get(g.home_team, g.home_team), D.RELOCATED.get(g.away_team, g.away_team)
     home_of[(int(g.season), int(g.week), h)] = 1
     home_of[(int(g.season), int(g.week), a)] = 0
+    gid_of[(int(g.season), int(g.week), h)] = gid_of[(int(g.season), int(g.week), a)] = g.game_id
 
   # Upcoming weeks of this season (and byes) from the schedule.
   sched = data.schedules[(data.schedules.season == data.current_season) & (data.schedules.game_type == "REG")]
@@ -132,6 +136,7 @@ def main():
         if o.get("pj") is not None:
           game["pj"] = o["pj"]
           game["pjl"] = [round(float(v), 2) for v in o["pjl"]]
+        _link(game, gid_of.get((int(r.season), int(r.week), r.team)))
         seasons.setdefault(int(r.season), []).append(game)
     # This season's remaining schedule (with byes), our projection and matchup where a page exists.
     team = cur_team.get(pid)
@@ -155,14 +160,23 @@ def main():
         if o.get("pj") is not None:
           e["pj"] = o["pj"]
           e["pjl"] = [round(float(v), 2) for v in o["pjl"]]
+        _link(e, gid_of.get((data.current_season, wk, team)))
         upcoming.append(e)
-    doc = {"pid": pid, "pos": pos, "keys": SCORE_KEYS, "cur": data.current_season, "team": team,
+    name, espn = NAMES.get(pid, (None, None))
+    doc = {"pid": pid, "name": name, "espn": espn, "pos": pos, "keys": SCORE_KEYS, "cur": data.current_season, "team": team,
            "seasons": [{"s": s, "g": seasons[s]} for s in sorted(seasons, reverse=True)], "up": upcoming}
     (out_dir / f"{pid}.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
     n += 1
   size = sum(f.stat().st_size for f in out_dir.glob("*.json"))
   print(f"[logs] wrote {n} player game logs ({size / 1e6:.1f} MB) to {out_dir}", flush=True)
   team_logs(site, cfg, data, cache, nfl, allsched)
+
+
+def _link(e: dict, gid) -> None:
+  """Game id + the week file holding our tile for it (2021 on), so the card's log row can open that matchup."""
+  ours = OUR_GAMES.get(gid) if gid else None
+  if ours:
+    e["gid"], e["f"] = gid, ours["file"]
 
 
 def _team_stat_rows(cache, nfl, seasons: list, current: int) -> pd.DataFrame:
