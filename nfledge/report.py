@@ -69,6 +69,13 @@ def contrast(a: str, b: str) -> float:
   return (la + 0.05) / (lb + 0.05)
 
 
+# Owner's pick (2026-10-13): these teams' logo circles use the OTHER team color than the automatic pick, with
+# ESPN's dark-mode logo (light outlines). Checked on a preview sheet: without the dark logo the Rams vanish
+# (blue on blue) and the Giants / Jets nearly do; with it every one reads clearly.
+LOGO_FLIP = {"KC", "SF", "DET", "SEA", "NE", "BAL", "CIN", "LA", "GB", "CHI", "IND", "HOU", "NYG", "WAS", "DEN",
+             "DAL", "NYJ", "LV", "ARI", "TEN"}
+
+
 class TeamStyle:
   """Team colors for chips and full-row backgrounds, with text colors chosen for WCAG contrast: the team's
   secondary color when it reaches 4.5:1 on the primary, otherwise white or black (whichever contrasts more)."""
@@ -78,7 +85,10 @@ class TeamStyle:
     if teams is not None:
       for _, t in teams.iterrows():
         self.c[t.team_abbr] = (t.team_color or "#666666", t.team_color2 or "#999999")
-        self.logo[t.team_abbr] = t.get("team_logo_espn")
+        url = t.get("team_logo_espn")
+        if t.team_abbr in LOGO_FLIP and isinstance(url, str):
+          url = url.replace("/nfl/500/", "/nfl/500-dark/")  # dark-mode logo: light outlines keep it visible
+        self.logo[t.team_abbr] = url
         self.nick[t.team_abbr] = t.get("team_nick") or ""
 
   def colors(self, team: str) -> tuple[str, str, str]:
@@ -112,8 +122,13 @@ class TeamStyle:
     return f"--tc:{self.visible(bg)};--tc2:{self.visible(sec)};--tfg:#ffffff"
 
   def logo_bg(self, team: str) -> str:
-    """Team primary or secondary - whichever leaves more of the logo visible (measured from its pixels)."""
-    return self._logo_bgs().get(team, self.c.get(team, ("#666666", "#999999"))[1])
+    """Team primary or secondary - whichever leaves more of the logo visible (measured from its pixels) - except
+    the owner's flip list, which takes the other of the two colors (presentation choice)."""
+    picked = self._logo_bgs().get(team, self.c.get(team, ("#666666", "#999999"))[1])
+    if team in LOGO_FLIP and team in self.c:
+      a, b = self.c[team]
+      return a if picked.lower() == b.lower() else b
+    return picked
 
   def _logo_bgs(self) -> dict:
     if hasattr(self, "_bg_cache"):
