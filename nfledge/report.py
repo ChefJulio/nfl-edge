@@ -284,11 +284,25 @@ def scoring_settings(scoring, cfg: dict) -> str:
                                 "superflex": 0}}, separators=(",", ":"))
 
 
-def score_data(r, st) -> str:
+def week_actuals(eng, season: int, week: int) -> dict:
+  """Actual fantasy points + stat line for this week, for players whose game is final (blank until then)."""
+  s = eng.data.schedules
+  g = s[(s.season == season) & (s.week == week) & (s.game_type == "REG") & s.home_score.notna()]
+  final_teams = set(g.home_team) | set(g.away_team)
+  a = eng.actual[(eng.actual.season == season) & (eng.actual.week == week)]
+  team_col = "team" if "team" in a else "recent_team"
+  a = a[a[team_col].isin(final_teams)] if team_col in a else a
+  return {r.gsis_id: {"pts": float(r.actual), "c": [round(float(getattr(r, k, 0) or 0), 2) for k in SCORE_KEYS]}
+          for r in a.itertuples()}
+
+
+def score_data(r, st, act: dict | None = None) -> str:
   """Compact JSON for client-side re-scoring: projected stat line (pj), season totals (ss) and games (g), and
   per-week stat lines (wk). The page re-scores with the viewer's settings; see the scoring panel script."""
   pj = [round(float(getattr(r, k, 0.0) or 0.0), 3) for k in SCORE_KEYS]
   out = {"pj": pj}
+  if act:
+    out["ac"] = act["c"]
   if st:
     out["ss"] = [round(float(st.get(k, 0.0) or 0.0), 2) for k in SCORE_KEYS]
     out["g"] = int(st.get("games", 0) or 0)
@@ -381,7 +395,8 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
   p = p.copy()
   # Everyone with a real role, plus every team's QB1 (so all playing teams have a quarterback listed).
   qb1 = p[p.pos == "QB"].sort_values("db", ascending=False).groupby("team").head(1).index
-  p = p[(p.proj >= 0.5) | p.index.isin(qb1)].copy()
+  # Rows worth listing: 2+ projected points (deep reserves add page weight, not information), plus every team's QB1.
+  p = p[(p.proj >= 2.0) | p.index.isin(qb1)].copy()
   p["pos_rank"] = p.groupby("pos").proj.rank(ascending=False, method="first").astype(int)
   p["tier"], p["slot"] = roster_tiers(p, cfg["tiers"])
   # Matchup = the opponent's defense-vs-position rank (1st toughest .. 32nd easiest); grade and meter follow it,
@@ -392,6 +407,7 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
   p["takeaway"] = [takeaway(r) for _, r in p.iterrows()]
   stats = season_stats(eng, season, week)
   luck = player_luck(eng, p, season, week)
+  acts = week_actuals(eng, season, week)
   n_weeks = week - 1
   # Until Friday's expert rankings are out, show last week's rank (display only; never fed to the model).
   e = eng.data.ecr
@@ -423,16 +439,13 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
         "fpg": st["fpg"] if st else np.nan, "last3": st["last3"] if st else np.nan,
         "season": season_line(r, st), "usage": usage_line(r, st),
         "bars": week_bars(st["weeks"] if st else [], n_weeks),
-        "sc": score_data(r, st), "pos": r.pos,
+        "sc": score_data(r, st, acts.get(r.gsis_id)), "pos": r.pos,
+        "act": acts[r.gsis_id]["pts"] if r.gsis_id in acts else None,
         "sched": schedule_note(luck.loc[r.gsis_id] if r.gsis_id in luck.index else None),
       })
     out[pos] = {"rows": rows, "byes": bye_rows(eng, stats, ts, pos, season, week)}
-  # FLEX: RB / WR / TE in one list by projection; each keeps its positional tier (e.g. WR2) and rank there.
-  flex = sorted((dict(r, pos_rank=r["rank"]) for p_ in ("RB", "WR", "TE") for r in out[p_]["rows"]),
-                key=lambda r: -r["proj"])
-  for i, r in enumerate(flex, 1):
-    r["rank"] = i
-  out["FLEX"] = {"rows": flex, "byes": []}
+  # FLEX (RB / WR / TE in one list) is assembled in the browser from those three lists, so rows aren't sent twice.
+  out["FLEX"] = {"rows": [], "byes": []}
   return out
 
 
@@ -714,6 +727,18 @@ def battle_colors(ts: "TeamStyle", away: str, home: str) -> dict:
   return {away: ap, home: "#9aa3b2"}
 
 
+def final_result(games: pd.DataFrame, g, model_fav: str, vegas_fav: str | None) -> dict | None:
+  """Final score once the game is over, and whether the model's and Vegas's favorites won."""
+  row = games[games.game_id == g.game_id]
+  if row.empty or pd.isna(row.home_score.iloc[0]):
+    return None
+  hs, as_ = int(row.home_score.iloc[0]), int(row.away_score.iloc[0])
+  winner = g.home_team if hs > as_ else g.away_team if as_ > hs else None
+  return {"home": hs, "away": as_, "winner": winner,
+          "model_right": winner is not None and model_fav == winner,
+          "vegas_right": None if vegas_fav is None or winner is None else vegas_fav == winner}
+
+
 def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None = None,
              power: list | None = None) -> list:
   """Per game: the headline lines (model vs Vegas, in betting notation), edges where they disagree, and
@@ -843,7 +868,8 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
                                f"{a_t} power rank", f"{h_t} power rank",
                                f"Model margin: {m_fav} by {abs(g.model_margin):.1f} (both offense-vs-defense "
                                f"matchups plus special teams and home field)"),
-                "score": f"{g.away_team} {g.away_pts:.0f} - {g.home_team} {g.home_pts:.0f}"})
+                "score": f"{g.away_team} {g.away_pts:.0f} - {g.home_team} {g.home_pts:.0f}",
+                "final": final_result(games, g, m_fav, v_fav if pd.notna(vm) else None)})
   return out
 
 

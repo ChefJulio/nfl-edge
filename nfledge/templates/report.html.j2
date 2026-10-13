@@ -171,6 +171,12 @@ table.ranks td.stick, table.ranks th.stick { min-width: 190px; white-space: norm
 th.projh, td.projc { text-align: left; padding-left: 14px; }
 td.projc .proj { justify-content: flex-start; }
 th.ctr, td.ctr { text-align: center; }
+.g-final { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 16px 0; font-size: 12.5px; }
+.gf-score { font-weight: 800; color: var(--ink); }
+.gf-pick { font-size: 11.5px; font-weight: 700; padding: 1px 8px; border-radius: 999px; }
+.gf-pick.ok { background: color-mix(in srgb, var(--good) 18%, transparent); color: var(--good); }
+.gf-pick.miss { background: color-mix(in srgb, var(--bad) 18%, transparent); color: var(--bad); }
+td.actc { font-weight: 700; font-size: 14px; } td.actc.act-hi { color: #6fdc8c; } td.actc.act-lo { color: #ff8f84; }
 @media (max-width: 640px) {
   .hide-xs { display: none; }
   table.ranks td.stick, table.ranks th.stick { min-width: 150px; }
@@ -412,7 +418,8 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 <header class="top"><div class="wrap">
   <div class="brand"><h1>NFL <span>Edge</span></h1><div class="wk">{{ season }} &middot; Week {{ week }}</div></div>
   <div class="meta">
-    <span>Data through <b>week {{ week - 1 }}</b>{% if pending %} &middot; {{ pending }} game pending{% endif %}</span>
+    <span>Projections use games through <b>week {{ week - 1 }}</b></span>
+    {% if n_final %}<span>Week {{ week }}: <b>{{ n_final }} of {{ n_games }}</b> games final</span>{% endif %}
     <span>Scoring <b id="scoreName">{{ 'Half PPR' if scoring == 'half' else scoring|upper if scoring in ('ppr',) else scoring|capitalize }}</b></span>
     {% if not injury_report %}<span class="alert">Injury report not out yet &middot; using last week's statuses</span>{% else %}<span>Injury report <b>in</b></span>{% endif %}
     <span>Updated {{ generated }}</span>
@@ -482,6 +489,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <th class="num" data-first="asc"><abbr title="FantasyPros expert consensus rank at the player's position (Fridays); faded 'lw' = last week's">ECR</abbr></th>
         <th class="stick" data-first="asc">Player</th>
         <th class="projh"><abbr title="Projection; bar = floor to ceiling (10th-90th pct), thick = middle 50%">Projection</abbr></th>
+        {% if has_actuals %}<th class="num actc-h"><abbr title="What he actually scored (once his game is final). Green = above his likely range (75th pct), red = below it (25th pct)">Actual</abbr></th>{% endif %}
         <th data-first="desc"><abbr title="Opponent and its defense vs {{ pos }}s: 1st = toughest (red), 32nd = easiest (green). Opponent-adjusted, from the model.">Matchup</abbr></th>
         <th class="ctr"><abbr title="Chance he is inactive: injury (practice pattern + game status) or healthy scratch">Inactive</abbr></th>
         <th class="num"><abbr title="Season fantasy points per game">FP/G</abbr></th>
@@ -494,13 +502,14 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <tr class="main teamrow{% if r.boost >= 1 %} boosted{% endif %}{% if r.avail < 0.5 %} out{% endif %}" style="{{ r.row_style }}" data-name="{{ r.name|lower }}" data-pos="{{ r.pos }}" data-proj="{{ '%.3f'|format(r.proj) }}" data-p="{{ '%.2f %.2f %.2f %.2f'|format(r.p10, r.p25, r.p75, r.p90) }}" data-sc="{{ r.sc }}">
           <td class="num rk">{{ r.rank }}</td>
           <td data-v="{{ r.ecr|f0 }}" class="num ecr{{ ' stale' if r.ecr_stale }}"{% if r.ecr_stale %} title="Last week's expert rank; this week's is published Friday"{% endif %}>{{ r.ecr|f0 }}{% if r.ecr_stale %}<sup>lw</sup>{% endif %}</td>
-          <td class="stick" data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b>{% if pos == 'FLEX' %}{{ r.pos|posb|safe }}{% endif %}<span class="nm-full">{{ r.name }}</span><span class="nm-short">{{ r.name|short }}</span></b>
+          <td class="stick" data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b><span class="nm-full">{{ r.name }}</span><span class="nm-short">{{ r.name|short }}</span></b>
             {%- if r.status or r.boost >= 1 or r.low_sample %}<div class="badges">
               {%- if r.status %}<span class="flag {{ 'f-out' if r.avail < 0.5 else 'f-q' }}" title="Injury report; practice Wed/Thu/Fri: D = did not practice, L = limited, F = full">{{ r.status }}</span>{% endif %}
               {%- if r.boost >= 1 %}<span class="flag f-up" title="Raised by volume vacated by: {{ r.boost_from }}">+{{ r.boost|f1 }} inj</span>{% endif %}
               {%- if r.low_sample %}<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>{% endif %}
             </div>{% endif %}</div></div></td>
           <td class="projc" data-v="{{ r.proj }}" title="Floor {{ r.p10|f1 }} · middle {{ r.p25|f1 }}-{{ r.p75|f1 }} · ceiling {{ r.p90|f1 }}"><div class="proj"><b>{{ r.proj|f1 }}</b>{{ r.range|safe }}<span class="fc">{{ r.p10|f0 }}&ndash;{{ r.p90|f0 }}</span></div></td>
+          {% if has_actuals %}<td class="num actc{% if r.act is not none %}{{ ' act-hi' if r.act > r.p75 else ' act-lo' if r.act < r.p25 else '' }}{% endif %}" data-v="{{ r.act if r.act is not none else '' }}">{{ r.act|f1 if r.act is not none else '' }}</td>{% endif %}
           {% set lvl = {'A': 5, 'B': 4, 'C': 3, 'D': 2, 'F': 1}[r.grade] %}
           <td class="mu" data-v="{{ r.dvp_rank }}"><div class="mu-row">
             <span class="opp"><span class="vs">{{ r.home }}</span>{{ r.opp_logo|safe }}<b>{{ r.opp }}</b></span>
@@ -513,7 +522,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
           <td class="line hide-sm">{{ r.line|safe }}</td>
           <td class="take">{{ r.takeaway }}</td>
         </tr>
-        <tr class="detail" hidden><td colspan="10">
+        <tr class="detail" hidden><td colspan="{{ 11 if has_actuals else 10 }}">
           <div class="dgrid">
             <div><div class="dh">This week</div><div class="line">{{ r.line|safe }}</div>
               <div class="muted small" style="margin-top:6px">Floor {{ r.p10|f1 }} &middot; median {{ r.p50|f1 }} &middot; ceiling {{ r.p90|f1 }} &middot; confidence {{ r.conf }}</div></div>
@@ -549,6 +558,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <div class="g-team home" style="{{ g.home.row_style }}">{{ g.home.logo|safe }}<div><b>{{ g.home.nick }}</b><small>{{ g.home.qb or g.home.team }}</small></div></div>
       </div>
       <div class="g-sub"><span>{{ g.kickoff }}{% if g.neutral %} &middot; neutral site{% endif %}</span><span>Model score {{ g.score }}</span></div>
+      {% if g.final %}<div class="g-final"><span class="gf-score">Final: {{ g.away.team }} {{ g.final.away }} &ndash; {{ g.home.team }} {{ g.final.home }}</span>
+        <span class="gf-pick {{ 'ok' if g.final.model_right else 'miss' }}">Model pick {{ 'won' if g.final.model_right else 'lost' }}</span>
+        {% if g.final.vegas_right is not none %}<span class="gf-pick {{ 'ok' if g.final.vegas_right else 'miss' }}">Vegas pick {{ 'won' if g.final.vegas_right else 'lost' }}</span>{% endif %}</div>{% endif %}
       <div class="g-lines">
         <div class="lb model" style="--fc:{{ g.model_fav.color }}"><small>Model</small><div class="big">{{ g.model_fav.logo|safe }}<span>{{ g.model_by|safe }}</span></div><div class="tot">O/U <b>{{ g.model_total|f1 }}</b></div></div>
         <div class="lb"{% if g.vegas_fav %} style="--fc:{{ g.vegas_fav.color }}"{% endif %}><small>Vegas</small><div class="big">{% if g.vegas_fav %}{{ g.vegas_fav.logo|safe }}{% endif %}<span>{{ g.vegas_line }}</span></div><div class="tot">O/U <b>{{ g.vegas_total|f1 if g.vegas_total == g.vegas_total else 'n/a' }}</b></div></div>
@@ -636,6 +648,21 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 <footer><div class="wrap">nfl-edge &middot; nflverse, NFL.com practice reports, FantasyPros, Open-Meteo &middot; for entertainment, not betting advice</div></footer>
 <script type="application/json" id="scoreCfg">{{ score_cfg|safe }}</script>
 <script>
+// FLEX list: copies of the RB / WR / TE rows (with their detail rows), ordered by projection and marked with a
+// position badge. Built first so every later handler (sorting, details, pinned column, scoring) sees it.
+(() => {
+  const tb = document.querySelector('.posview[data-pos="FLEX"] tbody');
+  if (!tb) return;
+  const rows = ['RB', 'WR', 'TE'].flatMap(p => [...document.querySelectorAll(`.posview[data-pos="${p}"] tr.main`)]);
+  rows.sort((a, b) => parseFloat(b.dataset.proj) - parseFloat(a.dataset.proj)).forEach((tr, i) => {
+    const c = tr.cloneNode(true), d = tr.nextElementSibling;
+    c.querySelector('td.rk').textContent = i + 1;
+    const nm = c.querySelector('td.stick b');
+    if (nm) nm.insertAdjacentHTML('afterbegin', `<span class="posb posb-${tr.dataset.pos}">${tr.dataset.pos}</span>`);
+    tb.appendChild(c);
+    if (d && d.classList.contains('detail')) tb.appendChild(d.cloneNode(true));
+  });
+})();
 document.querySelectorAll('nav.tabs button').forEach(b => b.onclick = () => {
   document.querySelectorAll('nav.tabs button').forEach(x => x.classList.toggle('on', x === b));
   document.querySelectorAll('main section').forEach(s => s.classList.toggle('on', s.id === 'tab-' + b.dataset.tab));
@@ -812,6 +839,12 @@ const applyScoring = () => {
       const proj = base > 0.3 ? parseFloat(tr.dataset.proj) * ratio : now;
       tr._proj = proj;
       tr._q = tr.dataset.p.split(' ').map(v => parseFloat(v) * ratio);
+      const ac = tr.querySelector('td.actc');
+      if (ac && sc.ac) {
+        const a = pts(sc.ac, w, pos);
+        ac.textContent = f1(a); ac.dataset.v = a.toFixed(2);
+        ac.classList.toggle('act-hi', a > tr._q[2]); ac.classList.toggle('act-lo', a < tr._q[1]);
+      }
       if (sc.g) {
         const fpg = pts(sc.ss, w, pos) / sc.g;
         const last = [...sc.wk].sort((a, b) => a[0] - b[0]).slice(-3).map(r => pts(r.slice(1), w, pos));

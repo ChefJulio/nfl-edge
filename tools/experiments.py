@@ -105,6 +105,11 @@ VARIANTS = {
   # game-script (spread-aware) shares ---
   **{f"wind_t{t}_s{int(s * 100)}": variant(player_model__wind_threshold_mph=t, player_model__wind_penalty_per_mph=s)
      for t in (10, 15, 20) for s in (0.01, 0.02, 0.03) if (t, s) != (15, 0.02)},
+  # round 4: extend the wind grid past its edge (round 2 best at threshold 10, slope 3%)
+  **{f"wind_t{t}_s{int(s * 100)}_c{int(c * 100)}": variant(player_model__wind_threshold_mph=t,
+                                                          player_model__wind_penalty_per_mph=s,
+                                                          player_model__wind_penalty_cap=c)
+     for t in (0, 5, 10) for s in (0.02, 0.03, 0.04) for c in (0.25, 0.40)},
   "hl_te5": variant(player_model__share_half_life_weeks={"default": 3.0, "TE": 5.0}),
   "hl_te5_wr5": variant(player_model__share_half_life_weeks={"default": 3.0, "TE": 5.0, "WR": 5.0}),
   "hl_qb5_te5": variant(player_model__share_half_life_weeks={"default": 3.0, "TE": 5.0, "QB": 5.0}),

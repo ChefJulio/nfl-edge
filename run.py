@@ -91,9 +91,31 @@ def cached_backtest(data, cfg, scoring) -> tuple[pd.DataFrame | None, list[int]]
   return res, seasons
 
 
+ROLLOVER_HOUR_ET = 6  # the page moves on to the next week at 06:00 Eastern on the Tuesday after a week's last game
+
+
+def display_week(data, now: pd.Timestamp | None = None) -> int:
+  """The week the page shows: the week being played (any game final) until Tuesday 06:00 ET after its last game
+  (so a Monday night game is still 'this week'), then the next week. Before the season: week 1."""
+  s = data.schedules
+  reg = s[(s.season == data.current_season) & (s.game_type == "REG")]
+  w = int(data.latest_week)
+  if w < 1:
+    return 1
+  games = reg[reg.week == w]
+  if games.home_score.isna().any():
+    return w
+  kick = pd.to_datetime(games.gameday.astype(str) + " " + games.gametime.fillna("13:00").astype(str))
+  last = kick.max().normalize()
+  days = (1 - last.weekday()) % 7 or 7  # the next Tuesday after the last game day
+  roll = (last + pd.Timedelta(days=days, hours=ROLLOVER_HOUR_ET)).tz_localize("America/New_York")
+  now = now or pd.Timestamp.now(tz="America/New_York")
+  return w if now < roll else min(w + 1, int(reg.week.max()))
+
+
 def main():
   ap = argparse.ArgumentParser(description=__doc__)
-  ap.add_argument("--week", type=int, help="target week (default: first week with no games played yet)")
+  ap.add_argument("--week", type=int, help="week to show (default: the week being played, until Tuesday 06:00 ET)")
   ap.add_argument("--no-backtest", action="store_true", help="skip the backtest section")
   ap.add_argument("--open", action="store_true", help="open the report in a browser when done")
   ap.add_argument("--out", help="output HTML path (default: config [report] output)")
@@ -102,9 +124,7 @@ def main():
   t0 = time.time()
   cfg, scoring = load_config(), load_scoring()
   data = load_all(cfg, force_week=args.week)
-  season, week = data.current_season, data.latest_week + 1
-  if args.week:
-    week = args.week
+  season, week = data.current_season, (args.week or display_week(data))
   print(f"[run] projecting {season} week {week}", flush=True)
 
   eng, proj = cached_model(data, cfg, scoring, season, week)
@@ -115,10 +135,14 @@ def main():
     ev = bt.evaluate(res, POSITIONS, ecr_only=True)
 
   power = rp.team_tables(eng, season, week, cfg, proj)
+  wk = data.schedules[(data.schedules.season == season) & (data.schedules.week == week)
+                      & (data.schedules.game_type == "REG")]
+  n_final, n_games = int(wk.home_score.notna().sum()), len(wk)
   inj = data.injuries
   injury_report = bool(((inj.season == season) & (inj.week == week)).any())
   ctx = {
     "season": season, "week": week, "pending": data.pending_games, "scoring": scoring.name,
+    "n_final": n_final, "n_games": n_games, "has_actuals": n_final > 0,
     "generated": time.strftime("%Y-%m-%d %H:%M"), "injury_report": injury_report,
     "players": rp.player_rankings(eng, proj, season, week, cfg), "games": rp.matchups(eng, season, week, cfg, proj, power),
     "power": power, "power_vol": rp.league_volume(eng, season, week, eng.tm.fit(season, week)),
