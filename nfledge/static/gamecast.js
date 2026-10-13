@@ -634,6 +634,17 @@
       const st = LIVE.byGame[art.dataset.gid], box = art.querySelector('.gc-live');
       if (!box) return;
       const g = DATA.games.find(x => x.id === art.dataset.gid);
+      // Header scoreboard: live / just-finished scores in the same slots the build fills for finals.
+      if (st && st.state !== 'pre' && !(st.state === 'post' && g && g.final)) {
+        const sides = { away: art.querySelector('.g-team.away'), home: art.querySelector('.g-team.home') };
+        ['away', 'home'].forEach(k => {
+          const sc = sides[k] && sides[k].querySelector('.g-sc');
+          if (sc) { sc.textContent = st[k].score; sc.hidden = false; }
+          if (sides[k]) sides[k].classList.toggle('lost', st.state === 'post' && st[k].score < st[k === 'away' ? 'home' : 'away'].score);
+        });
+        const at = art.querySelector('.g-at');
+        if (at) at.innerHTML = st.state === 'in' ? `<span class="live-dot"></span><small>${esc(st.short || '')}</small>` : '<span class="g-fin">FINAL</span>';
+      }
       // Pregame: nothing. Final: the tile already shows our final line, unless the game ended after this build.
       if (!st || st.state === 'pre' || (st.state === 'post' && g && g.final)) { box.hidden = true; return; }
       const sum = LIVE.sums[st.id];
@@ -642,12 +653,8 @@
       const sp = sit ? spot(sit, st) : null;
       const lastText = (sit && sit.lastPlay && sit.lastPlay.text) || '';
       const href = g ? gameHref(g) : '#';
-      const T = s => `${logo(s.logo, '#111', 18, s.team)}<b>${esc(s.team)}</b><span class="gl-sc">${s.score}</span>`;
       box.innerHTML = `
-        <div class="gl-row"><span class="gl-t">${T(st.away)}${sp && sp.offense.team === st.away.team ? '<i class="gl-pos" title="Has the ball"></i>' : ''}</span>
-          <span class="gl-clock">${live ? '<span class="live-dot"></span>' : ''}${esc(live ? (st.short || '') : (st.detail || 'Final'))}</span>
-          <span class="gl-t r">${sp && sp.offense.team === st.home.team ? '<i class="gl-pos" title="Has the ball"></i>' : ''}${T(st.home)}</span></div>
-        ${sp ? `<div class="gl-sit"><b>${esc(sp.offense.team)} ball</b>${sp.text ? ` · ${esc(sp.text)}` : ''}${sp.red ? ' · <span class="gl-red">red zone</span>' : ''}</div>${fieldSvg(sp, st)}` : ''}
+        ${sp ?`<div class="gl-sit"><b>${esc(sp.offense.team)} ball</b>${sp.text ? ` · ${esc(sp.text)}` : ''}${sp.red ? ' · <span class="gl-red">red zone</span>' : ''}</div>${fieldSvg(sp, st)}` : ''}
         ${lastText ? `<div class="gl-last">${linkNames(esc(lastText), [st.away.team, st.home.team])}</div>` : ''}
         <a class="gl-open" href="${href}">${live ? 'Open live gamecast' : 'Game recap'} &rsaquo;</a>`;
       box.hidden = false;

@@ -247,6 +247,20 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 .game { min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
 .g-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
 .tm-open, .pl-row, .nm-link { cursor: pointer; }
+article.game { scroll-margin-top: calc(var(--navh, 48px) + 10px); }  /* jump-to-tile lands below the sticky tabs */
+.g-head { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important; }
+.g-team { min-width: 0; overflow: hidden; }
+.g-id { min-width: 0; flex: 1 1 auto; } .g-id b, .g-id small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.g-sc, .g-team .logo { flex: none; }
+.g-sc { margin-left: auto; font-size: 32px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+.g-team.home .g-sc { margin-left: 0; margin-right: auto; }
+.g-team.lost .g-sc, .g-team.lost .g-id, .g-team.lost .logo { opacity: .5; }
+.g-fin { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; color: var(--muted); }
+.g-at small { display: block; font-size: 10.5px; font-weight: 700; text-align: center; white-space: nowrap; }
+.g-ab { display: none; }
+@media (max-width: 520px) { .g-head .g-sc { font-size: 28px; } .g-head .g-team { gap: 8px; padding: 10px 10px; min-height: 56px; }
+  .g-head .g-team .logo { width: 30px; height: 30px; } .g-head .g-team .logo img { width: 22px; height: 22px; }
+  .g-head .g-team b { font-size: 16px; } .g-head .g-at { padding: 0 6px; } .g-nick { display: none; } .g-ab { display: inline; } }
 .nm-link { font: inherit; color: inherit; background: none; border: 0; padding: 0; text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; }
 td.mu .opp.tm-open:hover b, .bye .nm-link:hover { color: var(--accent); }
@@ -578,13 +592,16 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   {% for g in games %}
     <article class="game" id="g-{{ g.id }}" data-gid="{{ g.id }}" data-away="{{ g.away.team }}" data-home="{{ g.home.team }}">
       <div class="g-head">
-        <div class="g-team away tm-open" style="{{ g.away.row_style }}" data-tm="{{ g.away.team }}">{{ g.away.logo|safe }}<div><b>{{ g.away.nick }}</b>{% if g.away.qb_pid %}<small class="nm-link" data-open-pid="{{ g.away.qb_pid }}">{{ g.away.qb }}</small>{% else %}<small>{{ g.away.qb or g.away.team }}</small>{% endif %}</div></div>
-        <div class="g-at">{{ 'vs' if g.neutral else '@' }}</div>
-        <div class="g-team home tm-open" style="{{ g.home.row_style }}" data-tm="{{ g.home.team }}">{{ g.home.logo|safe }}<div><b>{{ g.home.nick }}</b>{% if g.home.qb_pid %}<small class="nm-link" data-open-pid="{{ g.home.qb_pid }}">{{ g.home.qb }}</small>{% else %}<small>{{ g.home.qb or g.home.team }}</small>{% endif %}</div></div>
+        {# Header doubles as the scoreboard: scores on each side of the divider, the loser dimmed, FINAL in the middle
+           (live games fill the same slots from ESPN). #}
+        {% set fa, fh = (g.final.away, g.final.home) if g.final else (none, none) %}
+        <div class="g-team away tm-open{{ ' lost' if g.final and fa < fh }}" style="{{ g.away.row_style }}" data-tm="{{ g.away.team }}">{{ g.away.logo|safe }}<div class="g-id"><b><span class="g-nick">{{ g.away.nick }}</span><span class="g-ab">{{ g.away.team }}</span></b></div><span class="g-sc"{% if not g.final %} hidden{% endif %}>{{ fa if g.final else '' }}</span></div>
+        <div class="g-at">{% if g.final %}<span class="g-fin">FINAL</span>{% else %}{{ 'vs' if g.neutral else '@' }}{% endif %}</div>
+        <div class="g-team home tm-open{{ ' lost' if g.final and fh < fa }}" style="{{ g.home.row_style }}" data-tm="{{ g.home.team }}">{{ g.home.logo|safe }}<div class="g-id"><b><span class="g-nick">{{ g.home.nick }}</span><span class="g-ab">{{ g.home.team }}</span></b></div><span class="g-sc"{% if not g.final %} hidden{% endif %}>{{ fh if g.final else '' }}</span></div>
       </div>
       <div class="g-sub"><span>{{ g.kickoff }}{% if g.neutral %} &middot; neutral site{% endif %}</span><a class="gc-link" href="{{ root }}game.html?d={{ data_rel }}&amp;g={{ g.id }}">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
-      {% if g.final %}<div class="g-final"><span class="gf-score">Final: {{ g.away.team }} {{ g.final.away }} &ndash; {{ g.home.team }} {{ g.final.home }}</span>
+      {% if g.final %}<div class="g-final">
         {% if not g.final.winner %}<span class="gf-pick toss">Tie</span>
         {% elif g.fc.tossup %}<span class="gf-pick toss">Tossup &middot; {{ g.final.winner }} won</span>
         {% elif g.final.fav_won %}<span class="gf-pick ok">Favorite won</span>
