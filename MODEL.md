@@ -5,95 +5,147 @@ documented_code_hash: 8a1785813eb1b3db
 
 NFL Edge projects weekly fantasy points for QBs, RBs, WRs and TEs and rates every team, using only free data. Every number on this site comes from the pipeline below. Values shown in **bold blue** are filled in live from the current build, so they always match what produced this week's report.
 
-**Pipeline, start to finish:** load and cache data, then fit opponent-adjusted team ratings. From those, predict each game's volume and score, project each player's share of that volume and his efficiency, and adjust for availability and injuries. Finally, blend with the expert consensus where that has been shown to help, and attach calibrated ranges. Everything learned from history is trained only on the **{{ L.train_seasons }}** seasons *before* the one being projected or tested (a fixed window, so every backtest season is trained exactly like the live site).
+**Pipeline, start to finish:** load and cache data, then fit opponent-adjusted team ratings. From those, predict each game's volume and score, project each player's share of that volume and his efficiency, and adjust for availability and injuries. Finally, blend with the expert consensus where that has been shown to help, and attach calibrated ranges. Learned components train only on seasons *before* the one being projected or tested, mostly the **{{ L.train_seasons }}** seasons before it. The exceptions use longer history:
+
+- the points formula: up to 6 earlier seasons;
+- the practice-availability model: every season since 2018;
+- the injury-return model: every loaded season, including this season's finished absences;
+- the Vegas win-chance curve and Elo: every earlier game.
+
+Team ratings use this season's completed games plus a fading share of last season's. A few settings are fixed values chosen by testing on 2021-2026 history: the win-chance blend's weights, the tossup line, and tuned knobs such as half-lives and the wind penalty.
 
 ## 1. Data and refresh
 
 | Source | Used for |
 |---|---|
 | nflverse play-by-play (via `nflreadpy`) | Every play's expected points added (EPA), win probability, players involved, field position, air yards |
-| nflverse schedules | Results, Vegas spread and total, roof, kickoff time |
-| nflverse rosters, snap counts, injury reports, depth charts, draft picks | Who is on the team, who played, roles, statuses, draft capital |
+| nflverse schedules | Results (also for Elo), Vegas spread and total, roof, kickoff time |
+| nflverse rosters, snap counts, injury reports, depth charts, draft picks, participation, weekly player stats | Who is on the team, who played, roles, statuses, draft capital, routes, actual points, QB career history |
 | NFL.com injury API | Day-by-day Wed/Thu/Fri practice participation |
 | FantasyPros expert consensus (via nflverse) | Weekly positional ranks, published Fridays |
-| PFR advanced defensive stats | Tested for defender values (not used, see section 8) |
-| Open-Meteo | Wind forecast at kickoff for outdoor stadiums |
+| PFR advanced defensive stats | Tested for defender values; still downloaded but not used (see section 8) |
+| Open-Meteo | Wind forecast for outdoor and open-roof stadiums, averaged over the 4 hours from kickoff (current week only) |
 
-Seasons loaded: **{{ L.seasons }}**. Completed seasons are downloaded once and cached. The current season is refetched only when a new game goes final, and injury reports, rosters and depth charts are refreshed every few hours. The site rebuilds on every code push and once a day. The trained model is cached and only retrains when data, configuration or model code changes.
+Seasons loaded: **{{ L.seasons }}**.
+- **Refresh.** Completed seasons are downloaded once and cached. The current season's play-by-play is refetched when a new game goes final. Schedules (scores, lines) are refetched every run. Injury reports, practice data, rosters, depth charts and expert ranks are refreshed when they are more than 6 hours old.
+- **Rebuilds.** The site rebuilds on every code push and once a day.
+- **Model cache.** The trained model is reused only while every input is unchanged: final games, injury and practice reports, expert ranks, rosters, configuration and model code. In season that usually means a retrain every day. The wind forecast is fetched at retrain time.
 
 ## 2. Team ratings
 
 Each play's EPA (how much the play changed the expected score) is modeled as
 
-> EPA = league average + offense strength + defense strength + home edge
+> EPA = league average + offense strength + defense strength + home edge (+ the quarterback's own effect, for passing)
 
-fit separately for **passing** (dropbacks, including sacks and scrambles), **rushing** (designed runs) and **special teams** (punts, kickoffs, field goals, extra points). Kneels, spikes and two-point tries are removed, and so is garbage time: passing and rushing plays count only when the offense's win probability is between **{{ L.wp_min }}** and **{{ L.wp_max }}**.
+fit separately for **passing** (dropbacks, including sacks and scrambles), **rushing** (designed runs) and **special teams** (punts, kickoffs, field goals, extra points). Only regular-season plays are used. Kneels, spikes and two-point tries are removed. Garbage time is also removed: passing and rushing plays count only when the offense's win probability is between **{{ L.wp_min }}** and **{{ L.wp_max }}**. Special teams has no garbage-time filter.
 
-- **Opponent adjustment.** Solving for all teams at once (ridge regression) means a defense that faced weak offenses gets less credit than its raw numbers suggest. Ridge regression shrinks each team toward average by an amount (alpha) chosen by **time-split cross-validation**: fit on weeks 1 through N, predict week N+1, repeat, and never shuffle. Current alphas: pass **{{ L.alpha_pass }}**, rush **{{ L.alpha_rush }}**, special teams **{{ L.alpha_st }}**.
-- **Recency.** Plays from this season are weighted with a half-life of **{{ L.hl_team }}** weeks. Last season's plays start at weight **{{ L.prior_weight }}** and fade to zero by week **{{ L.prior_decay }}**.
-- **Quarterbacks.** Passing offense = the team (line, receivers, scheme) + its quarterback + a penalty for inexperienced quarterbacks (fewer than **{{ L.qb_cut }}** career dropbacks). The team and QB shrinkage amounts are tuned jointly. QB shrinkage alpha **{{ L.alpha_qb }}**, inexperienced-QB effect **{{ L.qb_inexp }}** points per 100 dropbacks. Highest current QB effects: {{ L.top_qbs }}.
-- **Home field.** One league-wide edge per unit, learned from recent seasons (currently pass **{{ L.home_pass }}**, rush **{{ L.home_rush }}** points per 100 plays). Neutral-site games get none.
-- **Certainty.** Ratings are refit on **{{ L.bootstrap }}** resamples of games (a cluster bootstrap). The Power tab turns that spread into a rank range: the middle 80% of simulated rankings.
+- **Opponent adjustment.** Solving for all teams at once (ridge regression) means a defense that faced weak offenses gets less credit than its raw numbers suggest. Ridge regression shrinks each team, and the home edge, toward average by an amount (alpha) chosen by **time-split cross-validation** on the training seasons: for each week from week 4 on, fit on everything before it, predict each team's EPA per play that week, and never shuffle. Current alphas: pass **{{ L.alpha_pass }}**, rush **{{ L.alpha_rush }}**, special teams **{{ L.alpha_st }}**.
+- **Recency.** Plays from this season are weighted with a half-life of **{{ L.hl_team }}** weeks. Last season's plays all carry one flat weight: full weight for week-1 projections (they are all there is), then **{{ L.prior_weight }}** x (**{{ L.prior_decay }}** - week) / ({{ L.prior_decay }} - 1), which is about 0.26 at week 2 and zero by week **{{ L.prior_decay }}**. Older seasons are not used.
+- **Quarterbacks.** Passing offense = the team (line, receivers, scheme) + its quarterback + a league-wide effect for inexperienced quarterbacks (fewer than **{{ L.qb_cut }}** career dropbacks, counting pass attempts back to 2006). Its size and sign are learned, not assumed. The team and QB shrinkage amounts are tuned jointly; the QB grid includes "no QB effects at all", so cross-validation could reject them. QB shrinkage alpha **{{ L.alpha_qb }}**, inexperienced-QB effect **{{ L.qb_inexp }}** points per 100 dropbacks. Highest QB effects among quarterbacks with any loaded history (not only current starters): {{ L.top_qbs }}.
+- **Home field.** One league-wide edge per unit (passing, rushing and special teams), fit inside the same weighted regression as the ratings. Currently pass **{{ L.home_pass }}**, rush **{{ L.home_rush }}** points per 100 plays. Neutral-site games get none. A division-game home term was tested and is off.
+- **Certainty.** Ratings are refit on **{{ L.bootstrap }}** resamples of games (a cluster bootstrap) to measure each passing and running unit's uncertainty. The Power tab simulates each team's net rating from those spreads and shows the middle 80% of simulated ranks. Special-teams and QB uncertainty are not included.
 
-Ratings are estimated per play. On the Power tab they are shown as **points per game versus an average team** (per-play rating x a league-average number of those plays), so the units add up; per-play values appear on hover. Higher is better for both offense and defense, because the defense number is flipped so "good" always reads positive.
+Ratings are estimated per play. On the Power tab they are shown as **points per game versus an average team on a neutral field**: per-play rating x a league-average number of those plays x the points formula's points-per-EPA weight (section 3). That way the units add up. Values per 100 plays appear on hover. Higher is better for both offense and defense, because the defense number is flipped so "good" always reads positive.
 
 **Field position is already accounted for.** EPA judges every play against what was expected from that exact down, distance and field position. A defense handed a short field by its offense's turnover starts the drive already "owing" the high expected points of that spot, and is charged only for what happens beyond that; the turnover itself counts against the offense that committed it. Raw points-allowed would wrongly blame the defense.
 
 ## 3. Game lines
 
-- **Volume.** Each team's expected plays and pass rate come from regressions learned on past games: its own pace, the opponent's pace allowed, and (for player projections only) the Vegas total and spread. Pass rate uses the team's neutral-situation pass rate over expected (PROE) and the game script implied by the spread.
-- **Points.** Expected offensive EPA per game (dropbacks × pass EPA + rushes × rush EPA, against this opponent), plus the special-teams edge, converts to points through a calibration learned on history: {{ L.points_model }}.
-- **The model publishes win chances only.** Point spreads on the site are always the market's. The model's margin (team ratings and the projected starting quarterbacks only, never Vegas) is used internally to size the battle bars. The Matchups battle bars explain the matchup in EPA per 100 plays: each offense's rating minus the opposing defense's (the total weights passing and running by projected dropbacks and runs), special teams per 100 special-teams plays, and the home-field boost per play. Pace is listed as projected plays. Bar length is the edge's impact on the game through the points formula above (edge x projected plays x fitted points per EPA), on one scale for every row: a full bar is the 95th percentile of offense-vs-defense impact across every pairing of that week's ratings. So equal numbers can draw different bars, and each special-teams play counts more than a scrimmage play because of field position.
-- **Vegas win chances.** The spread becomes a win probability through P(win) = 1 / (1 + e^(-k x spread)), with k fit every run on all earlier games' closing spreads.
-- **Our model's win chance** = 1 / (1 + e^(-x)), x = **{{ L.wm_home }}** for the home team (0 at a neutral site) + **{{ L.wm_rank_gap }}** per Power-rank place of advantage + **{{ L.wm_elo_per_100 }}** per 100 points of Elo advantage. **Elo** is a rating from final scores only: every team starts at 1505 and moves after each game by K = **{{ L.wm_elo_k }}** x (result - expected), where the expected result counts **{{ L.wm_elo_hfa }}** Elo points of home field and bigger wins move it more (margin of victory: {{ L.wm_elo_margin }}); each offseason ratings are pulled **{{ L.wm_elo_revert }}** of the way back to 1505. Everything is fit by `tools/elo_eval.py` (Elo settings by log loss on earlier seasons, stable across test years). Walk-forward on 2022-26 (Brier, lower = better): this blend 0.2228, Power rank + home 0.2292, the model's margin alone 0.2353, Vegas 0.2111, always the home team 0.249. Elo adds what the play-by-play ratings miss: actual results and memory across seasons. Rank beats the rating gap it comes from (0.2291 vs 0.2316), because the size of extreme rating gaps is unreliable. Nothing tested has added anything to the market's own chance (`tools/darts.py`: 28 signals incl. QB tiers, rest, travel, weather, referees), so the Matchups headline is the market's chance whenever a line exists, and the model's only before lines post.
-- **Tossups.** A game is a tossup when the favorite's chance is under **{{ L.tossup }}%**. That is the largest cut-off below which the market's favorites won at a rate a coin flip explains (54% +/- 6%, 90% interval). It falls at a spread under 3 points; 3-point favorites won about 61%. The tab's track record shows, for every confidence level, how often the favorite actually won, using chances fit only on earlier seasons.
+### Volume and points
+
+**Volume.** Each team's expected plays come from a regression on its recent plays per game and the plays its opponent allows. Pass rate comes from three things:
+
+- the team's recent pass rate;
+- its neutral-situation pass rate over expected (PROE: win probability 20-80%, quarters 1-3);
+- game script: the Vegas spread when lines are posted, otherwise the model's own projected margin.
+
+Player projections also use the Vegas total and spread when every game that week has a line. Matchups always uses the model-only version.
+
+**Points.** Expected offensive EPA per game (dropbacks × pass EPA + rushes × rush EPA, against this opponent, including home field and the starting QB), plus the special-teams edge, converts to points through a calibration learned on the 6 seasons before: {{ L.points_model }}. It uses a longer window than other components because two seasons pin down the special-teams weight poorly.
+
+**The model publishes win chances only.** Point spreads on the site are always the market's. The model's own margin (team ratings, projected starting QBs and pace; never Vegas) is never shown. It only sets game script for the projected pass rate, and the build checks that the battle-bar impacts add up to it.
+
+### Battle bars (Matchups)
+
+These break the matchup down in EPA per 100 plays:
+
+- each offense's rating minus the opposing defense's, with the total weighting passing and running by that offense's projected dropbacks and runs;
+- special teams per 100 special-teams plays;
+- the home-field edge per scrimmage play.
+
+Pace is listed as projected plays and pass rate. Bar length is the edge's impact on the game through the points formula, on one scale for every row:
+
+- offense rows: edge x projected plays x points per EPA;
+- special teams: edge x league-average special-teams plays x twice the fitted special-teams weight.
+
+A full bar is the 95th percentile of offense-vs-defense impact across every pairing of that week's ratings. So equal numbers can draw different bars, and each special-teams play counts more than a scrimmage play because of field position.
+
+### Win chances
+
+- **Vegas win chances.** The spread becomes a win probability through P(win) = 1 / (1 + e^(-k x spread)), with k fit every run on every earlier finished game with a line (playoffs included, ties excluded).
+- **Our model's win chance** = 1 / (1 + e^(-x)), where x = **{{ L.wm_home }}** for the home team (0 at a neutral site) + **{{ L.wm_rank_gap }}** per Power-rank place of advantage + **{{ L.wm_elo_per_100 }}** per 100 points of Elo advantage.
+- **Elo** is a rating from final scores only, playoffs included. Every team starts at 1505 in the first loaded season. After each game it moves by K = **{{ L.wm_elo_k }}** x (result - expected) x a margin multiplier, ln(|margin| + 1) x 2.2 / (winner's Elo edge x 0.001 + 2.2), so bigger wins move it more but a favorite's expected wins move it less. The expected result counts **{{ L.wm_elo_hfa }}** Elo points of home field (none at neutral sites). Each offseason, ratings are pulled **{{ L.wm_elo_revert }}** of the way back to 1505.
+- **How the blend was chosen.** The live Elo settings and the three weights are fit once by `tools/elo_eval.py` on every season through 2026 and stored in configuration. The backtest refits them each test year on earlier seasons only. Elo's settings were stable across those years. Walk-forward on 2022-26 games with a line (Brier, lower = better): this blend 0.2228, Power rank + home 0.2292, the model's margin alone 0.2353, Vegas 0.2111, always the home team 0.249. Elo adds what the play-by-play ratings miss: actual results and memory across seasons. On a larger sample (`tools/rank_predictor.py`), the rank also beat the rating gap it comes from (0.2291 vs 0.2316), because the size of extreme rating gaps is unreliable. Nothing tested has added anything to the market's own chance (`tools/darts.py`: 28 pre-game signals including QB tiers, rest, travel, cold weather and referees). So the Matchups headline is the market's chance whenever a line exists, and the model's only before lines post.
+- **Tossups.** A game is a tossup when the favorite's chance, rounded, is under **{{ L.tossup }}%**. That is the largest cut-off below which the market's favorites won at a rate a coin flip explains (54% +/- 6%, 90% interval, on 2022-26). It falls at a spread under 3 points; 3-point favorites won about 61%. The tab's track record shows, for every confidence level, how often the favorite actually won, using chances fit only on earlier seasons.
 
 ## 4. Player projections
 
 **Projection = projected volume × efficiency per opportunity × matchup**, computed stat by stat (passing yards, TDs and interceptions; rushing yards and TDs; catches, receiving yards and TDs; fumbles) and then scored with the scoring file (default half-PPR).
 
-**Volume.** Usage shares are recency-weighted (half-life **{{ L.hl_share }}** weeks) over games the player actually played: dropbacks for QBs, share of designed carries, and targets per team dropback. A learned calibration pulls each share toward the player's longer-run average, because recent spikes partly regress. The team's projected dropbacks and rushes then turn shares into opportunities.
+**Volume.** Usage shares are taken over games the player actually played: dropbacks for QBs, share of designed carries, and targets per team dropback.
+
+- **Recency.** This season's games are weighted with a half-life of **{{ L.hl_share }}** weeks. Last season's games carry the same flat, fading weight as in the team ratings.
+- **Regression to the mean.** A learned calibration pulls each share toward the player's longer-run average, because recent spikes partly regress.
+- **Team totals.** Each team's projected carries and targets are then pulled toward the totals a real game holds: carries 70% of the way, targets 30%.
+- **Quarterbacks.** The depth-chart starter gets at least 96% of dropbacks. QB rushes = designed carries + scramble rate x dropbacks.
+
+The team's projected dropbacks and rushes then turn shares into opportunities.
 
 **Efficiency.** For each stat per opportunity (yards per target, catch rate, TD rate and so on):
 
-1. *Empirical-Bayes shrinkage.* The player's rate is pulled toward the average for his position and draft-round tier. How hard depends on how noisy that stat is, estimated from data as a "prior strength" k in pseudo-opportunities. Examples: WR catch rate k ≈ **{{ L.k_wr_catch }}**, WR yards per target k ≈ **{{ L.k_wr_ypt }}**, RB yards per carry k ≈ **{{ L.k_rb_ypc }}**. A small k means the stat is mostly real skill; a large k means it is mostly noise.
+1. *Empirical-Bayes shrinkage.* The player's rate, over this season and the two before (weighted 1 / 0.6 / 0.3), is pulled toward the average for his position and draft tier (round 1, rounds 2-3, rounds 4-7, undrafted; a tier with too little data falls back to the position average). How hard depends on how noisy that stat is, estimated from data as a "prior strength" k in pseudo-opportunities. Examples: WR catch rate k ≈ **{{ L.k_wr_catch }}**, WR yards per target k ≈ **{{ L.k_wr_ypt }}**, RB yards per carry k ≈ **{{ L.k_rb_ypc }}**. A small k means the stat is mostly real skill; a large k means it is mostly noise.
 2. *Expected touchdowns.* Instead of raw TDs, each touch and target carries the historical TD rate for its field position (and end-zone targets). The player's TD rate blends toward his actual TDs as his sample grows (weight n / (n + **{{ L.td_k }}**)).
-3. *Learned efficiency regressions* combine the shrunk rate, the player's opponent-adjusted EPA, this opponent's defensive rating (the matchup), his own team's offensive rating including its quarterback (the supporting cast), home field, and the Vegas implied team total. **{{ L.n_eff_models }}** regressions are fit, one per stat and position group, on as-of features from earlier seasons.
+3. *Learned efficiency regressions* combine the shrunk rate; the player's opponent-adjusted EPA; this opponent's defensive rating (the matchup); his own unit's offensive rating, i.e. the supporting cast (pass offense with the projected starting QB for passing and receiving stats, run offense for rushing); home field; and the Vegas implied team total (the model's own projected points when no line exists). **{{ L.n_eff_models }}** regressions are fit, one per stat and position group, on as-of features from earlier seasons.
 
-**Weather.** Wind above **{{ L.wind_thr }}** mph cuts passing efficiency by **{{ L.wind_pen }}** per mph, capped at **{{ L.wind_cap }}**. Domes and closed roofs are always calm.
+**Weather.** Wind above **{{ L.wind_thr }}** mph cuts passing efficiency (pass yards and TDs, catches, receiving yards and TDs) by **{{ L.wind_pen }}** per mph, capped at **{{ L.wind_cap }}**. Domes, closed roofs and neutral sites count as calm. The live week uses the forecast; backtests and archived weeks use the measured game-day wind.
 
-**Expert blend.** Once the FantasyPros consensus is published (Fridays), RB/WR/TE projections blend it in with learned weights. QBs stay model-only because the model alone beats the experts there. Only rankings published before the player's kickoff are used. Current blends: {{ L.blend }}.
+**Expert blend.** Once the FantasyPros consensus is published (Fridays), RB/WR/TE projections blend it in with learned weights. QBs stay model-only because blending made QB projections worse. Only rankings scraped before game day are used, so players in Thursday games get no Friday rank. Current blends (plus a small fitted intercept, shown in section 10.5): {{ L.blend }}.
 
 **Ranges and touchdown odds.** The floor, middle and ceiling are the 10th / 25th / 75th / 90th percentiles of what actually happened after past projections of the same size at the position. (Extra widening for thin data or injury-driven roles was tested and removed: it made calibration worse.) Backtest coverage: **{{ L.coverage }}** of actual scores landed between floor and ceiling (target 80%). Touchdown odds (exactly 1, 2, 3+) treat the expected-TD rate as a Poisson count, which matched real frequencies closely in testing.
 
 ## 5. Availability and injuries
 
-- **Chance to play.** Gradient-boosted trees on the Wed/Thu/Fri practice sequence (did not practice / limited / full) and game status, trained on 2018+ seasons. Example: Questionable players who went did-not-practice three days played about 26% of the time, versus about 87% for limited, limited, full. Before Wednesday's report, last week's status carries forward using learned week-to-week rates.
+- **Chance to play.** Gradient-boosted trees on the Wed/Thu/Fri practice sequence (did not practice / limited / full) and game status, trained on every season from 2018 through the last training season. Example: for a Questionable player who did not practice all three days, the model gives roughly a 30% chance to play, versus roughly 85% for limited, limited, full (current values in section 10.6). Before Wednesday's report, last week's status carries forward using learned week-to-week rates.
 - **Healthy scratches.** For players not on the report, a second model uses how often the player has been active this season, whether he played last week, snap share, depth-chart rank, rookie status, and how many teammates at his position ahead of him are out.
-- **Scenarios, not discounts.** NFL availability is yes or no, so every projection is "if active", with Inactive% shown separately. Players below 50% are assumed out and their volume moves to teammates. Teammates of Questionable players show a contingent "+X if he sits".
-- **Redistribution.** Where vacated targets and carries actually went in past absences, learned by position pair, depth-chart rank and current share, and corrected so a player who has already missed several games is not double-counted (currently applied at **{{ L.redist_scale }}** strength). When a starting QB sits, the backup inherits his dropbacks and the whole passing offense uses the backup's quarterback rating.
+- **Scenarios, not discounts.** NFL availability is yes or no, so every projection is "if active", with Inactive% shown separately.
+- **Who sits.** Players below 50% are assumed out, as are contributors no longer on the roster (injured reserve, cut, traded). Their volume moves to teammates when they are a real contributor: an RB/WR/TE with an 8%+ projected target share or 15%+ carry share who has played this season, or the starting QB.
+- **"+X if he sits".** Teammates of a significant contributor with a 50-90% chance to play show this contingent bump when the gain is at least 1 point.
+- **Redistribution.** Vacated targets and carries go where they actually went in past absences, learned by position pair, depth-chart rank and current share. It is corrected so a player who has already missed several games is not double-counted, and currently applied at **{{ L.redist_scale }}** strength. When a starting QB sits, the backup inherits his dropbacks (and scrambles at his own rate), and the whole passing offense uses the backup's quarterback rating.
 
 ## 6. What the report numbers mean
 
 | Number | Definition |
 |---|---|
-| Matchup rank | The opponent's defense vs the position, 1st (toughest) to 32nd (easiest): the position's fantasy starters projected against every defense, ranked by points allowed. Opponent-adjusted, so not skewed by which offenses a defense has faced. The meter (1-5 bars) and grade follow the rank |
-| Matchup bars (Matchups) | The model margin split exactly along the points formula: each offense-vs-defense battle (per-play edge x projected plays x the fitted points per EPA), special teams (net special-teams EPA x its fitted weight), and home field plus play volume / pass-run mix. Overall = the sum, to the decimal |
-| Matchup points (hover) | Projection against this defense minus projection against an average defense |
-| Lookahead weeks (picker) | Later weeks of the season projected from today's data against that week's real opponents. Availability comes from the return-timing model: for a player out injured, the chance he plays his team's next game is learned from every injury absence since 2018 (games already missed, roster designation such as injured reserve or PUP, injury-report status, the injury, position, week), then chained game by game, with players who return staying active at the measured rate. Walk-forward 2021-25 it beats a designation x games-missed table (Brier 0.132 vs 0.137). Under 50% he sits and his volume is redistributed; injured-reserve players expected back are added to the roster. Injury reports list body parts, not diagnoses, so severity is only inferred from the designation and time missed; ESPN's diagnosis and return estimates are being archived daily to test as an input. Everyone else is assumed healthy; weather is neutral |
-| Archived weeks (picker) | Every week since 2021 exactly as the model would have shown it before that week, trained only on earlier data, with actual points and final scores |
-| Scoring & league panel (Rankings) | The model projects stat lines, so any scoring re-scores them exactly in your browser; projections that blend in expert ranks, and the floor/ceiling ranges, are scaled by the ratio of new to built points for that stat line (an approximation). Tiers, starter/flex colors, FP/G and weekly bars follow your settings. FLEX lists RB/WR/TE together |
+| Matchup rank | The opponent's defense vs the position, 1st (toughest) to 32nd (easiest): the position's fantasy starters (top 12 QB / 24 RB / 36 WR / 12 TE) projected against every defense at a neutral site, ranked by points allowed. Opponent-adjusted, so not skewed by which offenses a defense has faced. The meter (1-5 bars) and grade follow the rank |
+| Battle bars (Matchups) | Tug-of-war bars in EPA per 100 plays, with the number on the side that wins the battle ("even" under 0.5). Each offense vs the other defense: offense rating (including its projected starting QB) minus the defense's, the total weighting passing and running by that offense's projected dropbacks and runs (tap for Pass/Run). Special teams: the two units' net rating per 100 special-teams plays. Home field: the home edge per scrimmage play. Bar length = the edge's impact on the game through the points formula, on one scale (section 3). Pace appears as projected plays and pass rate. No points and no overall margin are shown; rank chips come from the Power tab |
+| Win chances (Matchups) | Headline: the market's chance from the Vegas spread, or ours before lines post; under {{ L.tossup }}% it is a tossup. "Our model": Power-rank gap + Elo + home field (section 3). Track record: how often the market's favorites won at each confidence level, each season scored with a curve fit only on earlier seasons |
+| Matchup points (hover) | Projection in this game minus the same projection against an average defense at a neutral site (model only, before the expert blend, so it includes the home/away effect and is not re-scored by the scoring panel) |
+| Lookahead weeks (picker) | Later weeks of the season projected from today's data against that week's real opponents. Availability comes from the return-timing model: for a player out injured, the chance he plays his team's next game is learned from every injury absence in the loaded seasons, including this season's resolved ones (games already missed, roster designation such as injured reserve or PUP, injury-report status, the injury, position, week), then chained game by game, with players who return staying active at the measured rate. Walk-forward 2021-25 it beats a designation x games-missed table (Brier 0.132 vs 0.137). Under 50% he sits and his volume is redistributed; injured-reserve players expected back are added to the roster. Injury reports list body parts, not diagnoses, so severity is only inferred from the designation and time missed; ESPN's diagnosis and return estimates are being archived daily to test as an input. Everyone else is assumed healthy (no healthy-scratch model), weather is neutral, and there is no expert blend. Vegas lines are used once posted. Ratings and usage are weighted for the target week, so last season's plays fade by the target week, not today's |
+| Archived weeks (picker) | Every week since 2021, projected only from data before that week, with player and team models trained on earlier seasons, shown alongside actual points and final scores. Exceptions: pages keep the model version they were built with; seasons before expert ranks were archived have none; wind is the measured game-day wind; and the "Our model" win chance and tossup line use constants fit on history through 2026, so on older pages they are partly in-sample |
+| Scoring & league panel (Rankings) | The model projects stat lines, so any scoring re-scores them in your browser: every projection and the floor/ceiling range is scaled by the ratio of new to built points for its stat line. That is exact for model-only projections and an approximation where expert ranks are blended in. Tiers, starter/flex colors, FP/G and weekly bars follow your settings; schedule-adjusted FP/G, matchup points and takeaways do not. Options include superflex. FLEX lists the top 150 RB/WR/TE together |
 | Tier | League-size buckets for a {{ L.tier_teams }}-team league: QB1 = QB ranks 1-{{ L.tier_teams }}, QB2 = the next {{ L.tier_teams }}, and so on for every position. Pill color is the roster slot the player fills with {{ L.tier_roster }}: green = starter, amber = flex range (best remaining RB/WR/TE), plain = bench |
-| Power values | The model's own predicted margin vs an average team on a neutral field, by unit: each unit's per-play rating x league-average plays of that type x the game model's fitted points formula (offense and defense x points per EPA; special teams x twice its fitted weight, since a special-teams edge adds to your score and takes from the opponent's). Pass offense includes the starting QB. Offense = Pass O + Run O, Defense = Pass D + Run D, Net = Offense + Defense + ST, so Power and the Matchups bars always agree. League-average volume means a defense is judged on per-play quality, not on how many plays its own offense left it facing |
-| Rank range (Power) | 10th-90th percentile rank when every team's net rating is resampled within its bootstrap uncertainty |
-| Schedule played / left (Power) | Points per game the opponents took away (played) or would take away (left), unit by unit: the team's actual dropbacks against each opponent's pass defense and runs against its run defense, plus the offenses its defense faced (incl. their QBs). Re-scored weekly with current ratings; 1st = hardest |
-| Rank movement (Power) | Change in net-rating rank since ratings as of last week |
-| Schedule-adjusted FP/G (Rankings, tap a player) | Each past game rescaled by how easy that defense is for this player's profile; a gap of 1+ FP/G from the raw average is called out as a soft or tough schedule |
+| Power values | The model's own predicted margin vs an average team on a neutral field, by unit: each unit's per-play rating x league-average plays of that type x the game model's fitted points formula (offense and defense x points per EPA; special teams x twice its fitted weight, since a special-teams edge adds to your score and takes from the opponent's). Pass offense includes the projected starting QB. Offense = Pass O + Run O, Defense = Pass D + Run D, Net = Offense + Defense + ST. This is a team-strength rating against an average opponent, not a game spread. Power and the Matchups battle bars share the same per-play ratings, ranks and points formula. League-average volume (this season's average dropbacks and runs per team-game) means a defense is judged on per-play quality, not on how many plays its own offense left it facing |
+| Rank range (Power) | 10th-90th percentile rank over 4,000 simulations, each team's net rating drawn from its bootstrap uncertainty (passing and running units) |
+| Schedule played / left (Power) | Points per game the opponents took away (played) or would take away (left), unit by unit. Played: the team's actual non-garbage-time dropbacks against each opponent's pass defense and runs against its run defense, plus the offenses its defense faced (incl. the actual passers). Left: the remaining regular-season games, this week included, at average volumes. Re-scored weekly with current ratings; 1st = hardest |
+| Rank movement (Power) | Change in net-rating rank vs ratings as of last week with last week's starting QBs, so a QB change can move a team on its own; none in weeks 1-2 |
+| Schedule-adjusted FP/G (Rankings, tap a player) | Each past game rescaled by how easy that defense is for this player's profile, using today's defense ratings (needs 3+ games); a gap of 1+ FP/G from the raw average is called out as a soft or tough schedule |
 | Role changes | Latest game vs the previous three, snap share +{{ L.snap_jump }} or opportunity share +{{ L.opp_jump }} |
 
 ## 7. Validation
 
-Every validation number on this site is **walk-forward**: projections for a week use only data available before it, and every learned component is trained only on earlier seasons. Changes are decided on one season and confirmed on the next. Current results on fantasy-relevant players who played:
+Every validation number on this site is **walk-forward**: projections for a week use only data available before it, and learned components are trained only on earlier seasons. Changes are adopted only if a 5-season walk-forward test (2021-2025, 95% confidence intervals over season-weeks) shows a gain that excludes zero.
+
+The table re-tests last season and this one, weeks 3 and later. It covers players who played, had 2+ earlier games that season and a pre-kickoff expert rank, and rank as fantasy-relevant (top 24 QB / 48 RB / 60 WR / 24 TE). Rank correlation is the weekly Spearman correlation, averaged.
 
 {{ L.bt_table }}
 
@@ -102,11 +154,19 @@ Every validation number on this site is **walk-forward**: projections for a week
 **Full audit (2026-10-12).** Every setting that had been hand-set, plus everything earlier decided on only one or two seasons, was re-tested walk-forward on 2021-2025 (12,480 fantasy-relevant player-weeks; 95% confidence intervals over season-weeks):
 
 - *Changed:* usage-share half-life 5 -> 3 weeks (better, interval excludes zero); range-widening multipliers removed (calibration 78.3% / 49.5% -> 80.0% / 50.2% vs targets 80 / 50); small-rate priors (scramble rate, fumbles, aDOT, targets per route) now estimated from data.
-- *Confirmed (alternatives worse):* Vegas implied total (+0.036 without), expert blend for RB/WR/TE (+0.013 without), a fixed-shape wind penalty (no wind or a fitted wind term both hurt TEs), half-strength injury redistribution, the 0.96 starting-QB share.
-- *Insensitive (alternatives within noise, current kept):* training window (2 / 3 / 4 seasons), prior-season weight and fade, efficiency season weights, garbage-time window, QB-experience cutoff and penalty, touchdown blend strength, availability-model size, redistribution trigger, team-rating half-life, QB effects on fantasy points, expert blend for QBs.
+- *Confirmed (alternatives worse):* Vegas implied total (+0.036 without), expert blend for RB/WR/TE (+0.013 without) but not for QBs (blending hurt), a fixed-shape wind penalty (no wind or a fitted wind term both hurt TEs), half-strength injury redistribution, the 0.96 starting-QB share.
+- *Insensitive for fantasy projections (alternatives within noise, current kept):* training window (2 / 3 / 4 seasons), prior-season weight and fade, efficiency season weights, garbage-time window, QB-experience cutoff and penalty, touchdown blend strength, availability-model size, redistribution trigger, team-rating half-life. (Prior-season carryover does matter for game outcomes; see below.)
 - *Usage shares:* each team's projected carries and targets are now pulled toward the totals a real game holds (carries 70% of the way, targets 30%; strengths chosen by backtest). Shares are predicted player by player, so team totals used to swing more than reality, over-projecting players on crowded backfields. Overall error -0.017, RB -0.043, RB ranking accuracy .507 -> .525.
 - *Follow-up rounds:* wind penalty grid-tuned to 10 mph / 3% per mph / 25% cap (better than the old 15 mph / 2%). No difference: position-specific share half-lives, game-script (spread-aware) shares, finer draft-pick tiers. Rejected: a final linear calibration of projections (worse on average error).
 - *Game model:* the points formula's special-teams weight drifted 0.9-3.3 when fit on two seasons; it now trains on six (weight about 2; margin error 10.71 -> 10.68, never worse in any season, winners 59% -> 61%). Fixed special-teams weights from 0 to 2.5 were all within noise of the fit.
+
+**Game outcomes (2026-10-12),** walk-forward on 2022-26:
+
+- **Win chances.** The market's win chances beat the model's, and no blend with the model helped. Against the spread, the model's lean covered 51.7% (break-even 52.4%), and bigger model-vs-Vegas disagreements did worse. Margin corrections (flat recalibration, team "mistake memory") did not help.
+- **Power rank.** It beat the rating gap it comes from and was adopted.
+- **28 pre-game signals.** Only Elo helped, and it shipped as part of our win chance. The rest did nothing: QB tiers, record, point differential, close-game luck, turnovers, streaks, rest, byes, travel, prime time, division games, cold weather, surface, new coaches, referees.
+- **Referees.** No referee or referee-team effect on spread or total results persists from one set of games to the next.
+- **Prior-season carryover in team ratings.** A quick three-season check found more of last season helps weeks 2-8 but hurts later weeks. Not adopted; parked for a fuller test.
 
 Ideas that sounded right but did not improve out-of-sample accuracy are switched off, not shipped:
 
@@ -118,11 +178,11 @@ Ideas that sounded right but did not improve out-of-sample accuracy are switched
 
 ## 9. Keeping this page current
 
-This page is generated from `MODEL.md` in the repository, and the bold values are filled in live at every build. The document carries a fingerprint of the model code and configuration. If either changes without the document being reviewed:
+This page is generated from `MODEL.md` in the repository, and the bold values are filled in live at every build. The document carries a fingerprint of the projection and rating code and the model settings in the configuration. Presentation code (the report builder, this page's generator, the page template) and the report and tier settings, including the win-chance constants, are not covered, so changes there rely on review. If covered code or settings change without the document being reviewed:
 
 - **On commit:** the git pre-commit hook stops the commit.
 - **On build:** GitHub flags a warning.
-- **On the page:** this tab shows an "out of date" notice.
+- **On the page:** this tab shows an "out of date" notice (current-week page).
 
 After updating the text, run `python tools/model_doc.py --stamp` to record the new fingerprint.
 

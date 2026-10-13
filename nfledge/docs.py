@@ -195,9 +195,11 @@ def formulas(eng, season: int, week: int) -> str:
         f"{eng.tm.alpha_qb:g} |" if u == "pass" else
         f"| {u} | {r.intercept[u]:+.4f} | {100 * r.home[u]:+.2f} | {eng.tm.alphas[u]:g} | - |")
   add(f"Inexperienced-QB effect I = **{100 * r.qb_inexp:+.2f}** per 100 dropbacks (fewer than "
-      f"{r.inexp_cut:g} career dropbacks). Power-tab values are points per game vs an average opponent: each unit's per-play rating x league-average "
-      f"plays of that type (pass O includes the starting QB's Q + I), so Offense = Pass O + Run O, Defense = Pass D + "
-      f"Run D (signs flipped so positive is good), Net = Offense + Defense + ST.")
+      f"{r.inexp_cut:g} career dropbacks). Power-tab values are points per game vs an average opponent on a neutral "
+      f"field: each unit's per-play rating x league-average plays of that type x the points formula's weight (b "
+      f"points per EPA for offense and defense, 2c for special teams; section 10.2). Pass O includes the starting "
+      f"QB's Q + I. Offense = Pass O + Run O, Defense = Pass D + Run D (signs flipped so positive is good), "
+      f"Net = Offense + Defense + ST.")
   if r.qb is not None and r.qb_prior is not None:
     q = r.qb[r.qb.index.isin(r.qb_prior.index[r.qb_prior >= r.inexp_cut])].sort_values(ascending=False)
     add("Quarterback effects Q (per 100 dropbacks, experienced QBs):")
@@ -285,8 +287,8 @@ def formulas(eng, season: int, week: int) -> str:
       b = eng.blend[pos]
       blend = f"{b.coef[0]:+.2f} + {b.coef[1]:.2f} x model + {b.coef[2]:.2f} x expert points"
     add(f"| {pos} | {m.coef[0]:.2f} {m.coef[1]:+.2f} x ln(rank) | {blend} |")
-  add("Spread of outcomes, widened x(1 + 0.6/(1 + games played)) relative to an established player, x1.2 for low "
-      "data and x1.25 for injury-boosted roles:")
+  add("Spread of outcomes (sets only the High / Medium / Low confidence label; range widening for thin data or "
+      "injury-boosted roles was tested and is off because it hurt calibration):")
   add("`sd^2 = a + b x projection`")
   add("Ranges are the 10th / 25th-75th / 90th percentiles of real outcomes after past projections of that size:")
   add("| Position | a | b | Projection 5 | Projection 10 | Projection 15 | Projection 20 |")
