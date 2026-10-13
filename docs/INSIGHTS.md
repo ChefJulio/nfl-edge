@@ -162,9 +162,11 @@ threads. Numbers are walk-forward backtest results (train on earlier seasons, te
   folded into Power + the Rankings detail row.)
 - Tiers: league-size buckets (QB1 = QB 1-10 in a 10-team league), pill color = roster slot (starter / flex range /
   bench) for 1QB 2RB 2WR 1TE 1FLEX; `[tiers]` in config.
-- Sticky header row + pinned name column: each wide table is its own scroll viewport (`.scroll`, max-height =
-  screen minus the tabs, scrolls both ways), so plain `position: sticky` does both with no script. (An earlier
-  clone-the-header-and-sync script was fragile on iPhone and is gone.) Owner prefers no dependencies.
+- Tables are full length; only the page scrolls (owner rejected tables scrolling inside their own box). A table that
+  fits its width gets `.fits` (desktop) and its real header sticks natively; a wider one (phone) scrolls sideways,
+  which traps sticky, so a header copy rides in a sticky strip under the tabs synced to the sideways scroll. The
+  pinned name column is native sticky. Tab bar is opaque (WebKit needs -webkit-backdrop-filter; translucent bars
+  let rows ghost through). Owner prefers no dependencies.
 - Compact pinned column: once a table scrolls sideways the name cell shows logo + last name at 11px; scrollLeft
   is compensated so content doesn't jump; expands back only at the far left (hysteresis).
 - Phone (<=640px): Rankings folds projection + matchup into the pinned player cell and hides those columns;

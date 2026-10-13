@@ -479,7 +479,14 @@ class GameModel:
     t["dropbacks_hat"] = self.plays_model.predict(t) * self.pass_rate.predict(t.assign(spread_team=0.0))
     t["rushes_hat"] = self.plays_model.predict(t) - t.dropbacks_hat
     t["off_epa_game"] = t.dropbacks_hat * t.epa_pass + t.rushes_hat * t.epa_rush
-    self.points = Linear.fit(t, "points", ["off_epa_game", "st_net"], name="points")
+    # Points per unit of special-teams EPA edge: "fitted" (least squares, the default) or a fixed number, so the
+    # game-level backtest (tools/game_eval.py) can test the fitted weight against alternatives.
+    st_w = self.cfg["team_model"].get("points_st_weight", "fitted")
+    if st_w == "fitted":
+      self.points = Linear.fit(t, "points", ["off_epa_game", "st_net"], name="points")
+    else:
+      m = Linear.fit(t.assign(points=t.points - float(st_w) * t.st_net), "points", ["off_epa_game"], name="points")
+      self.points = Linear(["off_epa_game", "st_net"], np.append(m.coef, float(st_w)), "points")
     return self
 
   def predict(self, games: pd.DataFrame, r: Ratings, vf: pd.DataFrame, use_vegas: bool,
