@@ -42,6 +42,8 @@ def plays(pbp: pd.DataFrame) -> pd.DataFrame:
   p["poss"] = new.cumsum()
   # defensive snaps already played by this defense in this game (all scrimmage plays, before the filter below)
   p["def_snaps"] = p.groupby(["game_id", "defteam"]).cumcount()
+  p["drive_pos"] = p.groupby("poss").cumcount() + 1  # play number within the series (before the WP filter)
+  p["drive_len"] = p.groupby("poss").poss.transform("size")
   ps = p.groupby("poss").agg(game_id=("game_id", "first"), off=("posteam", "first"), dfn=("defteam", "first"),
                              half=("half", "first"), n=("epa", "size"),
                              t0=("game_seconds_remaining", "first"), t1=("game_seconds_remaining", "last"),
@@ -147,6 +149,45 @@ if __name__ == "__main__":
         f"sd {qshare.std():.0%}, range {qshare.min():.0%}-{qshare.max():.0%}; at {100 * q_eff:+.2f} EPA/100 that moves "
         f"a defense's rating by about {100 * q_eff * qshare.std():.2f} EPA/100 per sd "
         f"(worst offense vs average: {100 * q_eff * (qshare.max() - qshare.mean()):.2f})")
+
+  # Within a long drive. Drives get long only by succeeding and end on a failure or a score, so the naive
+  # start-vs-end comparison mostly measures that. Instead: drives that reached at least N plays, only their first N
+  # plays (every one of them was followed by another play of the same drive, so none is drive-ending), compared
+  # within the same drive (offense quality that day cancels); two-minute drills excluded.
+  print("\n4. WITHIN A LONG DRIVE: EPA allowed by play number, same drive, drive-ending plays excluded")
+  for n, bands in ((8, [(1, 4), (5, 8)]), (12, [(1, 4), (5, 8), (9, 12)])):
+    sub = p[(p.drive_len > n) & (p.drive_pos <= n) & (p.two_min == 0)].copy()
+    sub["w"] = sub.epa - sub.groupby("poss").epa.transform("mean")
+    sub["late"] = (sub.drive_pos > n / 2).astype(float)
+    sub["red_zone"] = (sub.yardline_100 <= 20).astype(float)
+    sub["goal"] = sub.goal_to_go.fillna(0).astype(float)
+    sub["opp_terr"] = (sub.yardline_100 <= 50).astype(float)
+    rr = ols_ci(sub, "epa", ["late", "is_pass"], "poss", n_boot=300)
+    rc = ols_ci(sub, "epa", ["late", "is_pass", "red_zone", "goal", "opp_terr"], "poss", n_boot=300)
+    shape = "  ".join(f"plays {a}-{b} {100 * sub[sub.drive_pos.between(a, b)].w.mean():+.1f}" for a, b in bands)
+    print(f"   drives longer than {n} plays ({sub.poss.nunique():,} drives): {shape}")
+    print(f"      later half vs first half of the window: {100 * rr.at['late', 'coef']:+.2f} "
+          f"[{100 * rr.at['late', 'lo']:+.2f}, {100 * rr.at['late', 'hi']:+.2f}] EPA/100;  with field-zone controls "
+          f"(red zone, goal to go, opponent territory): {100 * rc.at['late', 'coef']:+.2f} "
+          f"[{100 * rc.at['late', 'lo']:+.2f}, {100 * rc.at['late', 'hi']:+.2f}]")
+    if n == 12:
+      for a, b in bands:
+        z = sub[sub.drive_pos.between(a, b)]
+        print(f"      plays {a}-{b}: {z.red_zone.mean():.0%} in the red zone, {z.opp_terr.mean():.0%} in opponent territory")
+  print("   (inside one drive, play number and field position move together, so the controlled number above is not "
+        "identifiable; the comparison below holds field position fixed instead)")
+  # Same field zone, different drive length: e.g. a red-zone snap that is the drive's 11th play vs one that is its
+  # 3rd (after a big gain). Within defense-game, two-minute drills excluded, all plays incl. drive-ending ones.
+  q = p[p.two_min == 0].copy()
+  q["pos5"] = (q.drive_pos - 1) / 5
+  for label, lo, hi in (("own half (51-99 yds out)", 51, 99), ("opponent 21-50", 21, 50), ("red zone (1-20)", 1, 20)):
+    z = q[q.yardline_100.between(lo, hi)]
+    rr = ols_ci(z, "epa", ["pos5", "is_pass", "margin", "q4"], "dg", n_boot=200)
+    shape = "  ".join(f"play {a}-{b} {100 * v:+.1f}" for (a, b), v in (
+      ((1, 3), None), ((4, 7), None), ((8, 99), None)) for v in [
+        (z[z.drive_pos.between(a, b)].epa - z.groupby('dg').epa.transform('mean')[z.drive_pos.between(a, b)]).mean()])
+    print(f"   {label:26s} per +5 plays into the drive: {100 * rr.at['pos5', 'coef']:+.2f} "
+          f"[{100 * rr.at['pos5', 'lo']:+.2f}, {100 * rr.at['pos5', 'hi']:+.2f}] EPA/100   ({shape})")
 
   # What it could mean for ratings: team-seasons differ in snap load; the wear slope x that difference.
   load = p.groupby(["season", "defteam"]).agg(snaps_pg=("dg", lambda x: x.value_counts().mean()))

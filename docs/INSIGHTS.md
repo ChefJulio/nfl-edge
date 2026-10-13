@@ -286,6 +286,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   demeaning, so treat magnitudes with care; "game flow / momentum" can't be separated from rest here.) Rating
   impact is small: team quick-possession share sd 6% -> ~0.2 EPA/100 on a defense rating (worst offense vs average
   ~0.6) vs a 3.9-4.5 spread between defenses. Not modeled; matters only when a bad offense suddenly improves.
+  Within a long drive: no fatigue signal. Same-drive comparison (drive-ending plays excluded) is not monotonic
+  (13+ play drives: plays 1-4 -2.5, 5-8 +4.8, 9-12 -2.4 EPA/100) and field position moves in lockstep with play
+  number (plays 9-12: 95% in opponent territory), so it can't be isolated in-drive. Holding the field zone fixed
+  across drives, later plays are BETTER for the defense (-3.7 to -7.1 EPA/100 per +5 plays), likely because a drive
+  that is still deep on play 8 is a stalling offense. Every design: no evidence defenses tire late in drives.
 - **PARKED (owner, 2026-10-12): prior-season carryover in team ratings.** `tools/carryover_eval.py --quick` (3
   seasons 2022/23/25, 765 games, fixed shipped win formula; current = prior_weight 0.3 fading to 0 by week 8,
   half-life 3). These knobs were "insensitive" on fantasy MAE but never tested on games. Findings: more carryover
