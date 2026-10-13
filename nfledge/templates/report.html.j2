@@ -94,20 +94,21 @@ abbr { text-decoration: none; border-bottom: 1px dotted var(--faint); cursor: he
    Meaningful colors (grades, risk, tiers, badges) sit on light pills so they read on any team color. */
 table.tiles { border-collapse: separate; border-spacing: 0 3px; margin-top: -3px; }
 table.tiles thead th { border-bottom: 0; }
-tr.teamrow { position: relative; }
-tr.teamrow > td { background: #171a20; color: #fff; border: 0; }
-tr.teamrow > td:first-child { border-radius: 6px 0 0 6px; }
-tr.teamrow > td:last-child { border-radius: 0 6px 6px 0; }
-/* Team trim: 2px primary-color border around the row, with a full-height secondary-color stripe just inside it on
-   the left and right edges (clipped to the rounded inner corners, so it reads as piping).
-   One pseudo-element only: a ::before on a table row would be laid out as an extra cell and shift the columns. */
-tr.teamrow::after { content: ""; position: absolute; inset: 0; border-radius: 6px; pointer-events: none; z-index: 4;
-  border: 2px solid var(--tc);
-  background: linear-gradient(var(--tc2), var(--tc2)) left top / 3px 100% no-repeat padding-box,
-              linear-gradient(var(--tc2), var(--tc2)) right top / 3px 100% no-repeat padding-box; }
+/* Team trim, drawn on the cells (inset shadows) rather than a tr::after overlay: iOS WebKit (every iPhone browser)
+   does not reliably position table rows, so a row overlay detached and floated around as a stray colored line.
+   Every cell: 2px primary-color top and bottom. First / last cell: 2px primary side + a 3px secondary-color stripe
+   just inside it. --extra carries per-cell additions (boost marker, pinned-column shadow). */
+tr.teamrow > td { background: #171a20; color: #fff; border: 0;
+  --top: inset 0 2px 0 var(--tc), inset 0 -2px 0 var(--tc); --side: 0 0 #0000; --extra: 0 0 #0000;
+  box-shadow: var(--top), var(--side), var(--extra); }
+tr.teamrow > td:first-child { border-radius: 6px 0 0 6px; --side: inset 2px 0 0 var(--tc), inset 5px 0 0 var(--tc2); }
+tr.teamrow > td:last-child { border-radius: 0 6px 6px 0; --side: inset -2px 0 0 var(--tc), inset -5px 0 0 var(--tc2); }
+@media (max-width: 760px) {  /* Power's last column (trend) is hidden here: close the row on the one before it */
+  table.power tr.teamrow > td:nth-last-child(2) { border-radius: 0 6px 6px 0; --side: inset -2px 0 0 var(--tc), inset -5px 0 0 var(--tc2); }
+}
 tr.teamrow:hover > td { background: #1e222a; }
 tr.teamrow .quiet, tr.teamrow .sub, tr.teamrow .st small, tr.teamrow .fc, tr.teamrow .vs { color: color-mix(in srgb, var(--tfg) 75%, transparent); }
-tr.teamrow.boosted > td:first-child { box-shadow: inset 3px 0 0 #ffd84d; }
+tr.teamrow.boosted > td:first-child { --extra: inset 8px 0 0 #ffd84d; }
 tr.teamrow.out > td { color: rgba(255,255,255,.55); }
 .logo { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px rgba(255,255,255,.18); }
 .logo img { width: 18px; height: 18px; object-fit: contain; }
@@ -136,7 +137,7 @@ thead th.stick { z-index: 3; }
 .scroll.compact .nm-full { display: none; } .scroll.compact .nm-short { display: inline; white-space: nowrap; }
 .scroll.compact td.stick .badges, .scroll.compact td.stick .sub { display: none !important; }
 .scroll.compact td.stick, .scroll.compact th.stick { min-width: 0 !important; width: auto !important; max-width: 104px;
-  padding-left: 5px; padding-right: 5px; box-shadow: 8px 0 10px -8px rgba(0,0,0,.85); }
+  padding-left: 5px; padding-right: 5px; --extra: 8px 0 10px -8px rgba(0,0,0,.85); }
 .scroll.compact td.stick .who { gap: 5px; }
 .scroll.compact td.stick .who b, .scroll.compact th.stick { font-size: 11px; }
 .scroll.compact td.stick .logo { width: 16px; height: 16px; box-shadow: none; } .scroll.compact td.stick .logo img { width: 12px; height: 12px; }
@@ -369,7 +370,7 @@ table.power .sub { display: block; margin-top: 2px; font-size: 11px; }
 .doc table { display: block; overflow-x: auto; width: fit-content; max-width: 100%; }
 .doc td, .doc th { padding: 6px 12px; font-variant-numeric: tabular-nums; }
 .doc tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--panel2) 60%, transparent); }
-.stale { margin: 0 0 14px; padding: 10px 14px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--warn) 50%, var(--line)); color: var(--warn); background: color-mix(in srgb, var(--warn) 8%, var(--panel)); font-size: 13px; font-weight: 600; }
+div.stale { margin: 0 0 14px; padding: 10px 14px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--warn) 50%, var(--line)); color: var(--warn); background: color-mix(in srgb, var(--warn) 8%, var(--panel)); font-size: 13px; font-weight: 600; }
 footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 </style>
 </head>

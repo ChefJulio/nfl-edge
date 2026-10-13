@@ -117,9 +117,13 @@ threads. Numbers are walk-forward backtest results (train on earlier seasons, te
 - **Bash tool cwd resets** each call; always `cd /c/Dev/BosDev/nfl-edge && ...`.
 - **pandas 3:** `Series.map` with a datetime Series as mapper can fail (use merge); `fillna` needs a Series not an
   ndarray; string dtype is Arrow-backed.
-- **CSS on table rows:** a `tr::before` pseudo-element is laid out as an extra table cell and shifts every column;
-  draw row decorations with a single `tr::after` (position absolute; `tr { position: relative }`). Sticky cells
-  paint over the overlay unless the overlay has a higher z-index.
+- **CSS on table rows:** never decorate rows with pseudo-elements. `tr::before` becomes an extra cell; `tr::after`
+  with `tr { position: relative }` works in Chrome but NOT on iPhone (every iOS browser is WebKit, which doesn't
+  reliably position rows): the overlay detached and floated as a stray colored line. Row trim is now inset
+  box-shadows on the cells (`--top` / `--side` / `--extra` variables). Owner tests on Brave/iPhone = WebKit;
+  headless Chrome can't reproduce WebKit bugs.
+- **Class-name collisions:** the Model banner's `.stale` styled `td.ecr.stale` cells for weeks unnoticed; scope
+  generic class names to their element (`div.stale`).
 - **Opacity on `<td>` dims its background** (dark blocks in colored rows); fade text with `color-mix` instead.
 - **Tab deep links:** section ids are `tab-<name>` so `#power` doesn't trigger the browser's native anchor jump.
 - **Markdown tables in generated docs need blank lines around them** (`docs._blocks`); verify by screenshot, not
