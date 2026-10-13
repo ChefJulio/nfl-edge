@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+from . import elo
 from .config import ROOT
 from .team_model import UNITS, game_lines, team_volume_features
 
@@ -813,8 +814,9 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
   """Per game: the win chances (the market's when a line exists, the model's as a second opinion; close games are
   tossups), and where each side's offense has the advantage over the other's defense."""
   r = eng.game_ratings(season, week)
-  tossup, k_model = cfg["report"]["tossup_below"], cfg["report"]["model_win_k"]
+  tossup, wm = cfg["report"]["tossup_below"], cfg["report"]["win_model"]
   k_vegas = vegas_win_k(eng.data.schedules, season, week)
+  elo_now = elo.ratings_before(eng.data.schedules, season, week, wm)
   vf = team_volume_features(eng.team_ledger, season, week, eng.cfg)
   games = eng.games(season, week)
   starters = {}
@@ -860,7 +862,15 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
     away, home = side(g.away_team), side(g.home_team)
     vm, vt = g.spread_line, g.total_line
     v_fav = g.home_team if (pd.notna(vm) and vm >= 0) else g.away_team
-    fc = forecast(g, float(logistic(k_model * g.model_margin)), k_vegas, tossup, names, ts)
+    # Our model's win chance: power-rank gap + Elo + home field (fit by tools/elo_eval.py; beat the model margin
+    # alone walk-forward). The margin itself is never published.
+    rk_a, rk_h = rank_of(g.away_team, "rank"), rank_of(g.home_team, "rank")
+    e_a, e_h = elo_now.get(g.away_team, elo.MEAN), elo_now.get(g.home_team, elo.MEAN)
+    x = (wm["home"] * (g.location != "Neutral") + wm["elo_per_100"] * (e_h - e_a) / 100
+         + (wm["rank_gap"] * (rk_a - rk_h) if rk_a and rk_h else 0.0))
+    fc = forecast(g, float(logistic(x)), k_vegas, tossup, names, ts)
+    fc["model_why"] = (f"Our model: power rank {g.away_team} {rk_a} vs {g.home_team} {rk_h}, Elo {e_a:.0f} vs "
+                       f"{e_h:.0f}{'' if g.location == 'Neutral' else ', plus home field'}")
     # Who wins each battle. Every bar is a tug of war, away team on the left and home team on the right. The
     # model margin = both offense-vs-defense matchups + special teams + home field + play volume (never shown).
     vol_of = tp[tp.game_id == g.game_id].set_index("team")

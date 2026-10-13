@@ -98,12 +98,23 @@ flex_positions = ["RB", "WR", "TE"]
 
 [report]
 output = "report/nfl_edge_week{week}.html"
-# Win probability = 1 / (1 + exp(-k x margin)). Vegas k is fit every run on past games' closing spreads; the
-# model's k (fit on its walk-forward margins, which need the full backtest) and the tossup line both come from
-# tools/win_prob.py: walk-forward on 2022-26, favorites the market gave under 59% won 54% +/- 6% (a coin flip
-# explains it), while 3-point favorites won ~61%.
-model_win_k = 0.141
+# Vegas win probability = 1 / (1 + exp(-k x spread)), k fit every run on past games' closing spreads. The tossup
+# line comes from tools/win_prob.py: walk-forward on 2022-26, favorites the market gave under 59% won 54% +/- 6%
+# (a coin flip explains it), while 3-point favorites won ~61%.
 tossup_below = 0.59
+
+[report.win_model]
+# Our model's win chance = logistic(home x [not neutral] + rank_gap x (away power rank - home power rank)
+#   + elo_per_100 x (home Elo - away Elo) / 100). Fit by tools/elo_eval.py: walk-forward Brier 0.2228 vs 0.2353 for
+# the model margin alone and 0.2292 for rank gap + home (both CIs exclude 0); Vegas 0.2111. Elo settings (K, home
+# field, offseason pull toward the mean, margin of victory) chosen by log loss, stable across test seasons.
+elo_k = 20
+elo_hfa = 25
+elo_revert = 0.50
+elo_margin = true
+home = 0.1865
+rank_gap = 0.0168
+elo_per_100 = 0.4449
 
 [experiments]
 # Optional model inputs. Defaults reflect the walk-forward backtest (decided on 2025, confirmed on 2026):
