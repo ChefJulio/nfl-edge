@@ -3,7 +3,8 @@
 Weekly opponent-adjusted NFL analytics (fantasy QB/RB/WR/TE projections + team ratings) built in Python, rendered
 to one static HTML page, deployed to GitHub Pages: https://chefjulio.github.io/nfl-edge/ (repo ChefJulio/nfl-edge).
 
-**Read `docs/INSIGHTS.md` before changing the model or the page.** It records every data quirk, every backtest
+**Read `docs/INSIGHTS.md` before changing the model or the page** (section 9 = current open threads and pending
+owner decisions). It records every data quirk, every backtest
 result (including ideas that were tested and rejected, with numbers), and the owner's preferences. Do not re-try
 a rejected idea without new data or a new angle, and do not "fix" a deliberate choice listed there.
 
@@ -23,6 +24,8 @@ a rejected idea without new data or a new angle, and do not "fix" a deliberate c
 .venv\Scripts\python tools/returns_eval.py 2021-2025              # injury return-timing model walk-forward
 .venv\Scripts\python tools/build_archive.py --out=site --missing-only   # archived week pages
 .venv\Scripts\python tools/screenshot.py players [--device=desktop]    # visual QA (WebKit iPhone by default)
+.venv\Scripts\python tools/vegas_compare.py                       # model vs Vegas: picks, blends, ATS by edge
+.venv\Scripts\python tools/residual_fix.py                        # walk-forward game-margin handicap tests
 ```
 Python 3.12 venv in `.venv`. Set `PYTHONIOENCODING=utf-8` when printing polars/pandas frames on Windows.
 CI: `.github/workflows/deploy.yml` builds on every push to main and daily (14:00 UTC), caching `cache/`.

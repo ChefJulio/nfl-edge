@@ -1,227 +1,236 @@
 # nfl-edge: accumulated insights
 
-Everything learned building this project (Oct 2026, through week 6 of the 2026 season). Organized as: owner
-preferences, data quirks, model findings with numbers, rejected ideas, engineering gotchas, UI decisions, open
-threads. Numbers are walk-forward backtest results (train on earlier seasons, test 2025 and 2026) unless noted.
+Everything learned building this project (Oct 2026, written during week 5-6 of the 2026 season). Sections: owner
+preferences, data quirks, model findings with numbers, model vs Vegas, rejected ideas, engineering gotchas, UI
+decisions, site / pipeline, open threads. Numbers are walk-forward backtests (every learned piece trained only on
+seasons before the one tested) on 2021-2025 unless noted; "MAE" = fantasy-point mean absolute error on relevant
+player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 95% CIs from a season-week bootstrap.
 
 ## 1. Owner preferences (Hunter, GitHub ChefJulio)
-- **Data-driven or nothing.** Every model change must beat the current model out of sample. If it doesn't, it
-  stays off (switchable in config) and gets documented as rejected. Report losses plainly.
-- **Free data only.** No paid sources (player props, PFF, etc.).
-- **Full transparency.** Formulas and fitted weights are public (Model tab section 10 is generated from the model).
-- **NFL availability is binary.** A Questionable player either plays his normal role or sits; never discount a
-  projection by play probability. Show "if active" projection + separate Inactive%; teammates get contingent
-  "+X if he sits". Players under 50% are treated as out and their volume redistributed.
-- **Default scoring: half PPR.**
-- **Presentation: elegance and readability first.** Minimal, sleek, dark. Important values easy to find. All
-  reasonable columns sortable. He reviews screenshots closely and dislikes clutter, light pills on dark rows,
-  inconsistent signals, and anything that looks "mashed together".
-- Works by pointing at a topic and asking the agent to do the thinking; propose a plan, then execute.
+- **Data-driven, no assumptions.** Every number in the model is either fitted from data or chosen by walk-forward
+  backtest; hand-set values are not acceptable unless tested. A change ships only if it beats the current model out
+  of sample (CI excludes 0); otherwise it stays off (switchable) and is documented. Report losses plainly. When the
+  data can't distinguish options, prefer the data-estimated one over a hand-picked one.
+- **Free data only; avoid dependencies** (no paid sources, no CSS/JS frameworks; dev-only tools are OK).
+- **Full transparency:** formulas and fitted weights are public (Model tab section 10 is generated).
+- **NFL availability is binary:** a Questionable player plays his normal role or sits; never discount a
+  projection by play probability. Show "if active" projection + separate Inactive%; P < 0.5 = sits, volume
+  redistributed; teammates get contingent "+X if he sits".
+- **Defaults:** half PPR, 10-team league, 1QB 2RB 2WR 1TE 1FLEX (all adjustable on the page).
+- **Presentation:** elegance and readability first; minimal, sleek, dark; important values easy to find; all
+  reasonable columns sortable. Reviews screenshots closely; dislikes clutter, light pills on dark rows, misaligned
+  columns, inconsistent signals, anything "mashed together", tables that scroll inside their own box.
+- **Tests on Brave on iPhone (= WebKit).** Verify mobile with `tools/screenshot.py` (WebKit), never only Chrome.
+- Works by pointing at a topic ("do the thinking"); expects a plan for big features, then execution; impatient with
+  slow runs (keep backtests fast, report ETAs, explain long waits).
 
 ## 2. Data quirks (nflverse / nflreadpy and others)
 - **Scrambles are `pass=1, rush=0`** in nflverse pbp. Any rushing filter must include `qb_scramble==1` or QB
   rushing collapses (this bug once cut projected QB rush yards from ~17 to ~4).
 - **Roster status `INA` = that week's game-day inactive list** (the outcome). Use `ACT` + `INA` as "53-man roster"
   for membership; using only `ACT` leaks the answer into availability models and drops last week's inactives.
+  `status_description_abbr`: A01 active, I01 inactive, R01 reserve/injured (IR), R48 IR designated to return,
+  R04 PUP, other R* reserve codes, P* practice squad (DEV).
 - **Rosters are per team-week; teams on bye or still to play (MNF) lack the latest week.** Use each team's own
-  latest roster week. Using the league-wide max week once dropped entire teams (KC, CAR) from projections.
-- **Franchise codes changed over time** (OAK->LV 2020, SD->LAC 2017, STL->LA 2016; LAR vs LA by source).
-  `Data.__post_init__` maps every team column to current codes; game_id strings keep the originals.
-- **Pending games:** the target week is the first week with no final games. A pending Monday game in the prior
-  week must not be treated as played (it once made Allen/Stafford look like scratch risks). Count only games with
-  a final score as history.
-- **Snap counts are keyed by PFR id**; map to gsis via rosters `pfr_id` (about 19% of rows unmapped, mostly
-  non-skill). Availability models train only on "observable" players (those with a mapping).
+  latest roster week. A player traded while a team was on bye can sit on two teams' latest rosters (keep his most
+  recent); depth charts can list a player twice (join on gsis_id + team, keep the best slot).
+- **Franchise codes changed** (OAK->LV 2020, SD->LAC 2017, STL->LA 2016; LAR vs LA by source).
+  `Data.__post_init__` maps every team column (incl. `opponent`, `draft_club`) to current codes; game_id strings keep
+  the originals.
+- **"Played" for a player-week:** snap counts post 1-2 days after games, weekly player stats (from pbp) sooner; use
+  the union (`returns.played_set`).
+- **Snap counts are keyed by PFR id**; mapped to gsis via rosters `pfr_id` (about 19% unmapped, mostly non-skill).
 - **Depth charts changed schema in 2025**: <=2024 weekly (`club_code`, `depth_team`, `formation`); 2025+ daily
-  snapshots (`dt`, `pos_abb`, `pos_rank`). `data.depth_for_week` normalizes both. Injured players drop off the
-  depth chart, so "players ahead of him" uses snap share, not depth rank.
-- **Participation (routes) only through 2025**; not published for the current season, so route-based features are
-  unusable live.
-- **Team codes:** `LA` (Rams) in pbp vs `LAR` in some sources; normalize to `LA`.
-- **Schedules `spread_line` > 0 = home favored.** Wind is null for domes/closed roofs (treat as 0); upcoming
-  games have no wind, so `data.forecast_wind` uses Open-Meteo at kickoff (neutral sites skipped).
-- **Injury reports (nflverse): one row per player-week with only the final practice status.** Daily Wed/Thu/Fri
-  participation comes from NFL.com's API (`api.nfl.com/football/v2/injuries`, token via the public web client key
-  in `data.py`), seasons 2016+, ~12 requests per season. Unofficial (may break / ToS gray area); toggle
-  `nfl_api_practice`. Each run also archives the live injury report to `cache/injury_snapshots/`.
-- **FantasyPros ECR** (via nflverse `load_ff_rankings`): weekly positional ranks scraped Fridays, i.e. after
-  Thursday games. Only use a rank if scraped before that player's kickoff. `fantasypros_id` in the ID map is a
-  float (cast to int string). PPR pages only.
-- **PFR advanced defensive stats** (`load_pfr_advstats(stat_type="def")`) exist 2018+ weekly, joinable to snaps
-  by pfr id. Tested for defender values; did not help (section 4).
-- **QB career history:** `load_player_stats` 2006+ gives pre-window career attempts so veterans are not flagged
-  as inexperienced at the start of the loaded window.
-- `nflreadpy.load_teams()` has team colors and ESPN logo URLs (`team_logo_espn`).
+  snapshots (`dt`, `pos_abb`, `pos_rank`). `data.depth_for_week` normalizes both.
+- **Participation (routes) only through 2025**; route features unusable live.
+- **Schedules `spread_line` > 0 = home favored.** Wind null for domes/closed roofs (= 0); upcoming games use
+  Open-Meteo at kickoff (`data.forecast_wind`), historical games the realized wind.
+- **Injury reports (nflverse):** one row per player-week, final practice status, body part only ("Knee", never "torn
+  ACL"). Daily Wed/Thu/Fri participation: NFL.com API (`api.nfl.com/football/v2/injuries`, public web client key),
+  2016+, unofficial; toggle `nfl_api_practice`. Live report archived to `cache/injury_snapshots/`.
+- **ESPN injury feed** (`site.api.espn.com/apis/site/v2/sports/football/nfl/injuries`, public, unofficial): ~800
+  players with status, diagnosis detail ("Surgery", "Bruise"), side, and an estimated `returnDate` (after the
+  season = effectively season-ending). **Current season only, no history** (core API per-athlete/season endpoints
+  return nothing for past seasons). Archived daily by CI (`tools/espn_snapshot.py` -> `data/espn_injuries/` on the
+  archive branch). ESPN ids map to gsis via `nflreadpy.load_ff_playerids()` (`espn_id`).
+- **FantasyPros ECR** (nflverse `load_ff_rankings`): positional ranks scraped Fridays; only use a rank scraped before
+  that player's kickoff. `fantasypros_id` is a float. Not available for older seasons in archived pages.
+- **PFR advanced defense** 2018+ weekly (tested for defender values; didn't help).
+- **QB career history** from `load_player_stats` 2006+ so veterans aren't flagged inexperienced.
+- `nflreadpy.load_teams()` has colors and ESPN logo URLs.
 
 ## 3. Model findings that shipped (with evidence)
-- **Team ratings:** ridge on play EPA per unit (pass/rush/ST), WP 10-90% filter, recency half-life 3 weeks,
-  prior season 0.3 decaying to 0 by week 8, alpha by time-split CV.
-- **QB-aware pass offense:** offense = team + QB effect + inexperienced-QB indicator (<150 career dropbacks).
-  Team and QB penalties must be tuned **jointly** (team alpha fixed first left Lamar vs Huntley at ~0.6 pts/game).
-  Pass CV loss 3017.2 -> 2974.5; game-margin MAE 2025 10.75 -> 10.40 (Vegas 10.08); fantasy neutral on normal
-  weeks; matters on backup-QB weeks. Inexperienced-QB effect about -13 pts per 100 dropbacks.
-- **Vegas implied team total as an efficiency input:** biggest single gain (QB rank corr 0.20 -> 0.38 on 2026).
-- **Half-lives:** usage shares 5 weeks, team ratings 3 weeks (small, consistent gains).
-- **ECR blend:** helps RB/WR (and TE on 2025), hurts QB; blend RB/WR/TE only. Model alone beats experts at QB.
-- **Empirical-Bayes shrinkage** by position x draft tier, prior strength k estimated by method of moments; TD
-  shrinkage estimated on expected TDs (role), not noisy actual TDs.
-- **Ranges:** empirical quantiles of outcomes by projection size; 77-82% of actuals inside 10th-90th (target 80%),
-  50-54% inside 25th-75th. **TD odds:** Poisson on expected TDs is well calibrated (1 TD 20.7% vs 20.2% actual).
-- **Availability:** gradient-boosted P(play) on Wed/Thu/Fri practice sequence + game status, trained 2018+:
-  Brier 0.1026 vs 0.1081 for status x final-practice table. Questionable DDD ~26-29%, LLF ~85-87%.
-  Healthy-scratch GB model: Brier 0.0532 vs 0.0678 (own active rate) vs 0.1211 (base rate).
-- **Redistribution** of vacated volume: near neutral overall (helps RB, slightly hurts WR) -> applied at 0.5.
-  Required fixes: count only players who appeared for the team THIS season (offseason departures were being
-  redistributed), scale by (1 - share of recent games already missed) to avoid double counting, and subtract
-  per-position baseline drift (players who suit up beat projected share slightly) before fitting weights.
-- **Field position:** EPA already handles short fields and turnovers (defense charged only beyond expected points;
-  turnover charged to the offense). Do not switch to points allowed.
-- **Power tab units:** points per game vs average at league-average volume so units add up; using league-average
-  (not actual) volume keeps defenses from being punished for facing more plays behind a bad offense.
-- **Strength of schedule:** unit-aware (team's actual dropbacks vs each opponent's pass D, runs vs run D, plus
-  offenses faced), re-scored weekly with current ratings. (A separate Schedule luck tab duplicated Power's
-  "Schedule played" and was removed; player schedule-adjusted FP/G lives in the Rankings detail row.)
-- **Matchup ranks:** opponent-adjusted defense-vs-position: position starters projected against all 32 defenses.
-  Grade/meter/takeaway all derive from this rank (an earlier separate grade contradicted it).
+- **Team ratings:** ridge on play EPA per unit (pass/rush/ST), WP 10-90% filter, recency half-life 3 weeks, prior
+  season 0.3 decaying to 0 by week 8, alpha by time-split CV. QB-aware pass offense: team + QB effect +
+  inexperienced-QB indicator (<150 career dropbacks); team and QB penalties tuned jointly (pass CV 3017 -> 2974).
+- **Training window fixed** at 2 seasons (`train_seasons`); it used to be "every loaded season" (a different and
+  far slower model when more history was loaded).
+- **Points formula** (`GameModel`): points = a + b x offensive EPA (volume x expected EPA/play) + c x net ST EPA,
+  OLS, trained on **6 prior seasons** (`points_seasons`; with 2 the ST weight drifted 0.9 -> 3.3, with 6 it is
+  ~2.1-2.3; margin MAE 10.71 -> 10.68, never worse per season, winners 59.2 -> 61.4%). Fixed ST weights 0-2.5 all
+  within noise of the fit. Fitted home effect on ST plays is slightly negative.
+- **Vegas implied team total as an efficiency input:** largest single factor (+0.036 MAE without it).
+- **ECR blend** for RB/WR/TE only (+0.013 without); hurts QB, where the model alone beats experts.
+- **Usage shares:** half-life **3** weeks (beat 5, -0.004; 8 worse). **Team-share normalization**
+  (`Engine._normalize_shares`): shares are predicted player by player, so projected team totals swung 1.5x as much
+  as real ones (sd .110 vs .076; over-subscribed teams over-projected). Each team's totals among players expected
+  to play are pulled toward the training-measured typical total: carries 0.7, targets 0.3 -> **-0.017 MAE, RB
+  -0.043, RB rank corr .507 -> .525** (carries drive it; targets alone no difference; full strength over-corrects).
+- **Empirical-Bayes shrinkage** by position x draft tier, k by method of moments; TD shrinkage on expected TDs.
+  Small-rate priors (scramble rate, fumbles/touch, aDOT, targets/route) fitted by method of moments (was hand-set).
+- **Wind penalty grid-tuned:** 10 mph threshold, 3% per mph, 25% cap (-0.011 vs the old 15 mph / 2%); a fitted
+  wind term and no wind both hurt TEs.
+- **Ranges:** empirical quantiles by projection size, no extra widening (hand-set widening multipliers made
+  calibration worse: 78.3/49.5% -> 80.0/50.2% inside 10-90 / 25-75 without them). TD odds: Poisson, calibrated.
+- **Availability:** GB P(play) on Wed/Thu/Fri practice sequence + status (Brier .1026 vs .1081 table); healthy-scratch
+  GB model (Brier .0532 vs .0678). Redistribution of vacated volume at 0.5 strength.
+- **Return-timing model** (`nfledge/returns.py`, `tools/returns_eval.py`): for players out injured, P(plays team's
+  next game) from games missed, designation (IR / IR-return / PUP / other reserve / active), report status, body
+  part, position, week; GB classifier; chained k games ahead with a measured stay-active rate after return (an
+  assumed 100% over-predicted 3-4 games out). Walk-forward Brier .132 vs .137 (designation x missed table) vs .178
+  (rate); wins 4/5 seasons (2021 worse: trained on 2018-20 incl. COVID-reserve season). Isotonic calibration on
+  leave-one-season-out predictions made it worse (.136), rejected. Mid-range probabilities run a bit pessimistic.
+  Feeds lookahead weeks (`lookahead_availability`): < 50% sits; IR players expected back are added to the roster.
+- **Power = the game model's margin vs an average team** (units x fitted points-formula weights; ST x 2c because a
+  special-teams edge adds to one score and subtracts from the other) so Power and the Matchups bars agree exactly;
+  it used to be face-value EPA (an untested display assumption).
+- **Error breakdown** (`tools/error_breakdown.py`): share of squared error removed by fixing each layer alone: team
+  volume ~0-10%, player share 10/30/34/38% (QB/RB/WR/TE), efficiency 21-31%, TDs 28-50%.
+- **Versus experts** (relevant players with a pre-game ECR, 4,522 rows): MAE model 5.07 / model alone 5.12 / ECR
+  5.11 / season average 5.40; better at QB (6.05 vs 6.18) and RB, tied WR/TE; strongest on injury-boosted roles
+  (5.51 vs 5.72) and weeks 7+; weakest on low-data rookies/backups (4.09 vs experts 4.00).
+- **Projection bias at the extremes:** 20+ point projections ~1 pt high, 8-12 ~0.3 low; a least-squares
+  recalibration hurt MAE (skewed outcomes), so it is NOT corrected.
 
-- **Training window is fixed** (`[data] train_seasons = 2`): learned components train on the 2 seasons before
-  the target. It used to be "every loaded season", so loading 2018+ for a long backtest trained a different
-  (and far slower: alpha tuning re-solves the ridge per week per grid point) model than the site runs.
-- **Points formula weights:** points = a + 0.80 x offensive EPA (volume x expected EPA/play) + 2.5 x net
-  special-teams EPA (2026 fit; both weights are OLS on ~1,100 training team-games, never hand-set). The ST weight
-  is large: SEA's 1st-ranked ST is worth ~5 pts vs DEN. Open data questions (do not override it by judgment):
-  is it stable across seasons' fits, and does the free fit beat alternatives on out-of-sample margins? One
-  testable explanation: ST ratings are heavily ridge-shrunk (alpha 300), and a regression on a shrunk predictor
-  scales it back up, so the weight may simply undo the shrinkage.
+## 4. Model vs Vegas (game outcomes) -- key strategic finding
+(Reproduce with `tools/vegas_compare.py` and `tools/residual_fix.py`.)
+- Model-only (no Vegas inputs) margin MAE ~10.4-10.7 vs Vegas closing line ~9.5-9.8; winners 61% vs 67%.
+- When they pick different winners: Vegas right **59%** (367 games 2021-25), 67% in 2026 wk 1-5 (12 games).
+- Blending any weight of the model's margin into Vegas makes margin MAE worse (best = Vegas alone, w=0).
+- **Against the spread** (break-even 52.4%), model lean covers 51.7% overall; by disagreement size 50.2 / 52.1 /
+  55.1 / 50.7 / **48.1%** (0-1.5 / 1.5-3 / 3-5 / 5-8 / 8+ pts). The 3-5 bin is noise (+/-5.5 pts at n=316, best of 5
+  bins). Bigger disagreements are WORSE: they signal information the model lacks. Totals: no edge (42-51%).
+- **Residual corrections tested** (tools/residual_fix.py, test 2022-26): flat recalibration actual ~ a + b x model
+  finds b = 1.6-2.1 (model margins too timid) and a = 2-4 (home under-rated) but applying it raises MAE (10.40 vs
+  10.37); team "mistake memory" (recent per-team misses) -0.03 MAE, no ATS change. No learnable systematic error:
+  the gap is missing information, not bias. Don't retry handicaps without new information.
+- Implication: the game model's value is structure (battles, Power), not beating lines; fantasy projections already
+  use Vegas implied totals. Paths still open: diagnose biggest misses for information gaps; market-implied ratings
+  (fit team ratings to posted spreads/totals) for lookahead weeks without lines; Matchups reframe (see section 9).
 
-- **Full audit 2026-10-12 (39 settings x 2021-25, 12,480 player-weeks, week-clustered CIs; tools/experiments.py
-  with --history=8):** changed: share half-life 5 -> 3 (-0.004; RB -0.012), range-widening multipliers removed
-  (coverage 78.3/49.5% -> 80.0/50.2%), small-rate priors fitted. Confirmed: implied total (+0.036 without), ECR
-  blend RB/WR/TE (+0.013 without), fixed wind penalty (no-wind TE +0.008, fitted wind TE +0.012: it learned a
-  positive TE effect), redistribution 0.5, starter share 0.96. Insensitive (within noise): train window 2/3/4,
-  prior weight/decay, eff season weights, WP window, QB-inexperience cutoff/penalty, TD k, GB size, redistribution
-  trigger, team half-life, QB effects (fantasy), ECR for QB. Bias: actuals exceed projections by +0.25 to +0.49
-  for relevant RB/WR/TE (unexplained; partly selection of "relevant" rows?).
-- **Usage-share normalization (item 3, 2026-10-12):** projected team totals of target shares vary 1.5x as much as
-  actual (sd .110 vs .076); players on over-subscribed teams over-projected (team sum > 1.0: -1.4 pp share).
-  `Engine._normalize_shares` pulls each team's totals (players expected to play) toward the training-measured typical
-  total. Grid: carries 0.7 + targets 0.3 best (-0.017 MAE, RB -0.043, RB rank .507 -> .525); carries drive it,
-  targets alone no difference; full strength over-corrects. Returning-from-injury teammates: real but small
-  (-0.9 pp when a 25%+ target earner returns, ~2% of rows) and largely absorbed by normalization.
-- **Model vs Vegas on games:** when they pick different winners (367 games 2021-25) Vegas is right 59%; blending
-  any weight of the model's margin into Vegas makes margin MAE worse (9.764 at w=0). The game model adds nothing
-  over closing lines; its value is structure (battles), and fantasy already uses Vegas implied totals.
-- **Rounds 2-4 (2021-25):** wind grid -> 10 mph / 3% / 25% cap adopted (-0.011). No difference: per-position
-  share half-life, spread-aware shares (game script already in recent usage), finer draft-pick tiers. Rejected:
-  final linear calibration (+0.013, CI excludes 0): projections ARE too extreme at the ends (20+ pt projections
-  ~1 pt high) but least-squares correction of the mean hurts MAE on skewed fantasy outcomes.
-- **Error breakdown (tools/error_breakdown.py, 2021-25):** share of squared error removed by fixing each layer
-  alone: team volume ~0-10%, player share 10/30/34/38% (QB/RB/WR/TE), efficiency 21-31%, TDs 28-50%. Share is the
-  largest fixable layer for RB/WR/TE; TDs/efficiency are mostly game-level noise.
-- **Game model (tools/game_eval.py):** points formula trained on 6 prior seasons (`points_seasons`): with 2 the
-  ST weight drifted 0.9 -> 3.3; with 6 it is ~2 (margin MAE 10.71 -> 10.68, never worse per season, winners
-  59.2 -> 61.4%). Fixed ST weights 0-2.5 all within noise. Model-only margin MAE ~10.7 vs Vegas 9.8. Fitted home
-  effect on special-teams plays is slightly negative (home ST worse), so 'Home & pace' can favor the visitor.
-- **Power = the game model's margin vs an average team** (units x fitted points-formula weights; ST x 2c) so it
-  agrees with the Matchups bars exactly; it used to be face-value EPA (an untested display assumption).
-
-## 4. Tested and rejected (do not retry without new data/angle)
+## 5. Tested and rejected (do not retry without new data/angle)
 | Idea | Result |
 |---|---|
-| Team-specific home field | No persistence: corr -0.02 over 567 team-seasons (2005-25). Seattle +5.7 (2005-12) vs -0.3 (2019-25) |
+| Team-specific home field | No persistence: corr -0.02 over 567 team-seasons (2005-25) |
 | Travel distance / time zones in HFA | No effect |
-| Division-game HFA term | Real in results (-0.8 pts, p=0.03) but worsened play-level CV (4698 vs 4676); off |
-| Shared stadium (LA, NY) adjustment | Only 7 games ever; no evidence either way; treated as normal home games |
-| Air-yards share / aDOT | No consistent gain |
-| Snap share as a volume input | ~no gain (also owner spec: snap trend is an alert, not an input) |
-| TD blend strength (k 50 / 400) | No effect |
-| Stat-weighted defender values (PFR) | Overfit, unstable signs, worse OOS |
-| Defensive absences (all groups), O-line absences | No reliable pre-game signal |
-| Cornerback absences | Looked real only when counting in-game snap losses; with pre-game-knowable absences the sign flips |
-| Pace (seconds/play) and drive sustainability in volume model | Plays MAE no better (6.88 -> 6.87-6.92 on 2025; 6.75 -> 6.78-6.80 on 2026) |
+| Division-game HFA term | Real in results but worsened play-level CV; off |
+| Shared stadium (LA, NY) adjustment | 7 games ever; no evidence |
+| Air-yards share / aDOT | +0.004 (worse) |
+| Snap share as a volume input | No gain (owner: snap trend is an alert) |
+| TD blend strength k 50 / 400 | No effect |
+| Stat-weighted defender values (PFR) | Overfit, worse OOS |
+| Defensive / O-line / cornerback absences | No reliable pre-game signal |
+| Pace / drive sustainability in volume model | No gain in plays MAE |
+| Fitted wind term (instead of fixed penalty) | TE +0.012 (learned a positive TE effect) |
+| Per-position share half-life | No difference |
+| Spread-aware (game-script) shares | No difference (recent usage already carries it) |
+| Finer draft-pick tiers for priors | No difference |
+| Final linear calibration of projections | +0.013 (worse) |
+| Starter QB share measured (0.97) vs 0.96 | +0.001 (worse) |
+| Range-widening multipliers | Worse calibration |
+| Isotonic calibration of return model | Brier .132 -> .136 |
+| Game-margin handicaps (flat recalibration, team mistake memory) | No ATS gain |
+| Insensitive (kept): train window 2/3/4, prior weight/decay, eff season weights, WP window, QB-inexp cutoff/penalty, GB sizes, redistribution trigger, team half-life | within noise |
 | Gradient border / white logo circles / light pills on dark rows | Owner rejected visually |
 
-## 5. Engineering gotchas
-- **Windows shell + heredocs mangle backslashes** (`\n`, `\r`). For any file content with escapes (JS regex,
-  Python string escapes), use the Write/Edit tools or a patch script written with Write, not inline heredocs.
-  A literal newline once broke the whole page script (all tabs dead); `run.py` now node-checks the script.
-- **Bash tool cwd resets** each call; always `cd /c/Dev/BosDev/nfl-edge && ...`.
-- **pandas 3:** `Series.map` with a datetime Series as mapper can fail (use merge); `fillna` needs a Series not an
-  ndarray; string dtype is Arrow-backed.
-- **CSS on table rows:** never decorate rows with pseudo-elements. `tr::before` becomes an extra cell; `tr::after`
-  with `tr { position: relative }` works in Chrome but NOT on iPhone (every iOS browser is WebKit, which doesn't
-  reliably position rows): the overlay detached and floated as a stray colored line. Row trim is now inset
-  box-shadows on the cells (`--top` / `--side` / `--extra` variables). Owner tests on Brave/iPhone = WebKit;
-  headless Chrome can't reproduce WebKit bugs.
-- **Class-name collisions:** the Model banner's `.stale` styled `td.ecr.stale` cells for weeks unnoticed; scope
-  generic class names to their element (`div.stale`).
-- **Opacity on `<td>` dims its background** (dark blocks in colored rows); fade text with `color-mix` instead.
-- **Tab deep links:** section ids are `tab-<name>` so `#power` doesn't trigger the browser's native anchor jump.
-- **Markdown tables in generated docs need blank lines around them** (`docs._blocks`); verify by screenshot, not
-  by stripping HTML (a text dump hid that tables weren't rendering).
-- **Visual QA:** headless Chrome:
-  `chrome.exe --headless=new --disable-gpu --hide-scrollbars --force-dark-mode --blink-settings=preferredColorScheme=0 --window-size=1440,900 --force-device-scale-factor=1.5 --virtual-time-budget=4000 --screenshot=<png> file:///.../report/nfl_edge_week6.html#<tab>`
-  then Read the PNG. Headless Chrome will not lay out narrower than ~500px and renders a scrolled window badly:
-  for phone width or scrolled states, load the page in a 375px (or 1440px) iframe inside a wrapper HTML and
-  scroll from an injected script.
-- **Caches:** `cache/model_<key>.pkl` (engine + projections; raw data detached to keep it ~36 MB) and
-  `cache/backtest_<key>.parquet`; keys hash config (minus display-only `[tiers]`/`[report]`, see
-  `docs.model_config`), scoring, data state and model code. Delete them to force a
-  retrain. `cache/logo_bg.json` stores per-team logo circle color choices.
-- **Sorting convention:** sortable cells carry `data-v` (raw value); headers take `data-first="asc"` for rank-like
-  columns and `class="nosort"` for unsortable ones.
-- **MODEL.md fingerprint** covers `nfledge/*.py` except `report.py`/`docs.py`, plus `config.toml`, with CRLF
-  normalized (Windows and the Linux CI agree).
+## 6. Engineering gotchas
+- **Windows shell + heredocs:** backslash escapes get mangled, and a Python patch string containing `\n` writes a
+  real newline (broke a JS/print once). Use Write/Edit for code with escapes. `run.py` node-checks the page script.
+- **Stop commands:** never combine `Stop-Process` with another command that might be permission-blocked (a blocked
+  `Remove-Item` silently cancelled the whole command once, leaving a duplicate batch running and eating RAM).
+- **Bash tool cwd resets** each call; `cd /c/Dev/BosDev/nfl-edge && ...`.
+- **Multiprocessing on Windows** (spawn) can't start workers from a script piped on stdin: write a `.py` file.
+- **Speed (keep):** ridge normal equations solved with Cholesky (`sla.cho_solve`; `np.linalg.solve` was 85 ms vs
+  0.5 ms per pass-unit solve, 170x); normal equations built once per CV fold and reused across the alpha grid;
+  player features via one factorize + `np.bincount` (2x vs groupby) and memoized per (season, week, ratings);
+  vectorized QB-starter pick. Training 120s -> ~40s; backtest season 110s -> ~90s.
+- **Parallel workers:** set OMP/OPENBLAS/MKL threads = cores / jobs before importing numpy (experiments.py does);
+  each worker with 2018+ data holds ~1.4-1.5 GB; 9 workers saturate this 8-core/16-thread machine (~94% CPU).
+- **Experiment cache keys** include model code: editing `nfledge/*.py` while a batch runs makes later jobs recompute
+  (and results computed by already-running workers get labeled with the new hash; harmless only if outputs are
+  identical). Defaults-preserving refactors were verified identical (max diff ~1e-14) before relying on that.
+- **pandas 3:** Arrow-backed strings (empty week-1 frames come back as str dtype: cast to float); `Series.map` with
+  datetimes can fail (merge instead).
+- **CSS on table rows:** never decorate rows with pseudo-elements (`tr::after` detaches in iOS WebKit and floated as
+  a stray colored line). Row trim = inset box-shadows on cells (`--top`/`--side`/`--extra`).
+- **Sticky + overflow:** an `overflow-x:auto` wrapper traps `position: sticky`; see UI section for the solution.
+- **iOS:** native `<select>` ignores dark styling unless `appearance: none`; `backdrop-filter` needs the `-webkit-`
+  prefix (or just use an opaque background); `[hidden]` is overridden by any `display:` rule (add `x[hidden]{display:none}`).
+- **Class-name collisions:** scope generic names (`div.stale` vs `td.ecr.stale`).
+- **Visual QA:** `python tools/screenshot.py TAB [--device=desktop] [--pos=WR] [--page-y=N] [--table-x=N]`
+  (Playwright WebKit iPhone 13 by default; dev-only install: `pip install playwright` + `playwright install webkit
+  chromium`). For behavior tests, drive Playwright directly (click, select_option, check console errors). File://
+  pages can't fetch `weeks.json` (CORS); harmless.
+- **Caches:** `cache/model_<key>.pkl` (engine + projections; feature memo excluded from pickle),
+  `cache/backtest_<key>.parquet`, `cache/experiments/<variant>_<season>_<key>.parquet`; keys hash config minus
+  display-only sections (`docs.model_config`), scoring, data state, model code.
+- **MODEL.md fingerprint** covers `nfledge/*.py` except `report.py`/`docs.py` plus config (minus display sections);
+  any model-code edit needs `tools/model_doc.py --stamp` (the pre-commit hook blocks otherwise).
 
-## 6. UI decisions (current state)
-- Team rows are dark tiles (#171a20), white text, 2px border in the team primary, a full-height 3px secondary
-  stripe just inside the left and right edges (owner found centered notches "silly"), 6px radius, 3px gaps. Very dark team colors are lightened just enough to show (`TeamStyle.visible`).
-- Logo circles: team primary or secondary, chosen per team by measuring which hides less of the logo's pixels.
-- Position badges: QB rose, RB green, WR blue, TE amber, everywhere a position appears.
-- Rankings: Matchup = opponent logo + 5-bar meter + DvP rank colored red (1st, toughest) to green (32nd);
-  projection range bar; TD donuts; Inactive%; ECR shows last week's rank faded with "lw" until Friday.
-- Matchups: model vs Vegas lines in betting notation first; plain-English edge pills ("Model likes X by 1.1 more
-  than Vegas"); "Who wins each battle" tug-of-war bars in the two teams' colors (offense fills from the left,
-  defense from the right, winner + points this game on the right). Centered +/- bars were too hard to read.
-  `battle_colors` swaps to a secondary when both primaries look alike.
-  Current card: away team always left, home right; Overall (model margin) on top, then the two
-  offense-vs-defense matchups (tap for Pass/Run), then Special teams and Home & pace. Bars are the margin split
-  exactly along the points formula (sum = margin to the decimal; the report warns if not), with Power ranks.
-  Model box reads "SEA by 4.1 points" (owner's wording); Vegas keeps betting notation.
-- Power: points per game, 7 ranked units, rank range (10th-90th pct simulated rank), schedule played/left.
-- Tabs: Rankings, Matchups, Power, Role changes, Model. (Track record folded into Model section 7; Schedule luck
-  folded into Power + the Rankings detail row.)
-- Tiers: league-size buckets (QB1 = QB 1-10 in a 10-team league), pill color = roster slot (starter / flex range /
-  bench) for 1QB 2RB 2WR 1TE 1FLEX; `[tiers]` in config.
-- Tables are full length; only the page scrolls (owner rejected tables scrolling inside their own box). A table that
-  fits its width gets `.fits` (desktop) and its real header sticks natively; a wider one (phone) scrolls sideways,
-  which traps sticky, so a header copy rides in a sticky strip under the tabs synced to the sideways scroll. The
-  pinned name column is native sticky. Tab bar is opaque (WebKit needs -webkit-backdrop-filter; translucent bars
-  let rows ghost through). Owner prefers no dependencies.
-- Compact pinned column: once a table scrolls sideways the name cell shows logo + last name at 11px; scrollLeft
-  is compensated so content doesn't jump; expands back only at the far left (hysteresis).
-- Phone (<=640px): Rankings folds projection + matchup into the pinned player cell and hides those columns;
-  name/team columns are pinned (`.stick`) on every wide table; grids use `minmax(0, 1fr)` so content can't widen
-  the page.
+## 7. UI decisions (current state)
+- Dark team tiles (#171a20), white text, 2px primary border + full-height 3px secondary stripe inside left/right
+  edges, drawn on cells. Logo circles in team primary or secondary (chosen by logo pixels). Position badges: QB rose,
+  RB green, WR blue, TE amber.
+- **Header:** season / week picker (dark custom selects), "Back to the current week" on other weeks; pills: games
+  used, "Week N: x of y games final", scoring, injury report, updated. Tab bar opaque.
+- **Rankings:** QB/RB/WR/TE/FLEX (FLEX built in the browser from RB/WR/TE rows, top 150: a 14-team league starts
+  84 flex-eligible). Columns: #, ECR (positional; "lw" until Friday), Player (pinned), Projection (number + range
+  bar + floor-ceiling; header aligned with the number), Actual (once games are final; green above 75th pct,
+  red below 25th), Matchup (fixed slots: @/vs, logo, code, 5-bar meter, DvP rank), Inactive (centered), FP/G, Tier,
+  Expected line (TD donuts), Takeaway. Rows listed at >= 2 projected points + every team's QB1.
+- **Scoring & league panel:** presets (Half PPR, PPR, Standard, 6-pt pass TD, TE premium), per-stat values
+  (yards as "yards per point"), teams / roster slots / flex / superflex; re-scores projections (exact from stat
+  lines; blended projections and ranges scaled by the ratio), Actual, FP/G, weekly bars, ranks and tiers in the
+  browser; saved in localStorage.
+- **Tables:** full length, only the page scrolls. If a table fits its width (`.fits`) the real header sticks
+  natively; wider tables (phone) scroll sideways with a header copy in a sticky strip under the tabs. Pinned name
+  column; compact mode when scrolled sideways (logo + last name, 11px, ~100px), scrollLeft compensated, hysteresis.
+- **Matchups:** away left / home right; Model box "SEA by 4.1 points" with favorite logo + color stripe; Vegas in
+  betting notation; plain-English edge pills; Overall bar on top, then the two offense-vs-defense matchups (tap for
+  Pass/Run), Special teams, Home & pace; bars = margin split exactly along the points formula (ST home effect
+  reported under Home), Power ranks per unit; final score + whether model / Vegas pick won.
+- **Power:** model margin vs average team by unit (7 ranks), rank range, schedule played/left, trend.
+- Tabs: Rankings, Matchups, Power, Role changes, Model.
 
-## 7. Open threads / ideas not yet done
-- **Play-caller / coordinator effects** (owner suggestion: Flores, Reid): test whether a coach's effect follows him
-  across teams beyond roster; on hold at owner's request.
-- **IDP fantasy scoring** (tackles/sacks/INTs) was asked about but the owner never answered whether they play IDP.
-- **Next Gen Stats** (separation, RYOE, CPOE) and **FTN charting** (screens, box counts) are free and untested.
-- **Daily practice archive:** `cache/injury_snapshots/` accumulates our own Wed/Thu/Fri history going forward.
-- Light mode has had little visual review (phone layouts reviewed 2026-10-12).
-- The 2026 test season is small (weeks 3-5 at time of writing); re-run experiments as it grows.
-- **Return-timing model (nfledge/returns.py, tools/returns_eval.py):** P(plays next game | out injured) from games
-  missed, designation (R01 IR / R48 IR-return / R04 PUP / other RES / active), report status, body part, position,
-  week; chained for k games ahead with a measured stay-active rate after return. Walk-forward Brier 0.132 vs 0.137
-  (designation x missed table) vs 0.178 (rate); wins 4/5 seasons. Isotonic calibration made it worse (rejected).
-  No severity data: injury reports say "Knee", not "torn ACL". ESPN's public feed has diagnosis detail + an
-  estimated return date (after season end = effectively season-ending) but NO history, so CI archives it daily to
-  site/data/espn_injuries/ (archive branch) to test as an input once enough injuries resolve (owner: use it only
-  as a data-driven feature, never as truth). Not yet wired into lookahead weeks.
-- **Queued:** wire the return model into lookahead weeks; ESPN feature test once data accrues; (designation, weeks missed, injury type, position -> P(active) k weeks
-  out; feeds lookahead weeks); rookie / low-data priors from free data (college production, preseason usage);
-  expected fantasy points per opportunity; NGS / FTN inputs.
-- **Speed:** experiment batches recompute identical stages per variant (e.g. team ratings); stage caching and
-  per-worker data windows (5 seasons instead of 9) would cut batch time further.
+## 8. Site / pipeline
+- `index.html` = current week: the week being played (any final game) until **Tuesday 06:00 ET** after its last
+  game (`run.display_week`), then the next week. Daily CI at 14:00 UTC publishes the rollover.
+- `<season>/week-NN.html`: archived weeks 2021 -> last week (built once by `tools/build_archive.py`, walk-forward,
+  ~10 s/page, 1.9-3.2 MB; stored on the **`archive` branch**, which CI checks out into `site/`, appends missing
+  weeks to, and pushes) and **lookahead** weeks (rest of the current season, rebuilt every run with
+  `run.py --lookahead`, never committed; return-model availability, healthy otherwise, neutral weather, Vegas
+  lines when posted). `weeks.json` (rewritten every build) feeds every page's picker so old pages list new weeks.
+- **Archive pages reflect the model at the time they were built.** After model changes (e.g. share normalization,
+  2026-10-12), regenerate: `tools/build_archive.py 2021-2026 --out=<dir> --jobs=6` (~8 min, needs ~10 GB RAM),
+  then replace the files in a checkout of the `archive` branch and push.
+- CI: `.github/workflows/deploy.yml` (contents: write for the archive commit; ~4-5 min per run).
+
+## 9. Open threads / next steps (as of 2026-10-12)
+- **In progress (owner said "do it"):** diagnose the model's biggest game misses (|model - Vegas| >= 5 where Vegas
+  was closer): tag QB situation (backup/rookie/change), weeks 1-3, usage-weighted key absences + OL/secondary
+  absences, rating staleness (recent form vs rating), rest/travel/division/late season, weather, ST/HFA share of
+  the margin; compare tag rates in Vegas-closer misses vs overall, per season; hand-review the 20 worst; fix only
+  what's clear and test walk-forward on margin MAE and ATS. If nothing stands out, the gap is market information.
+- **Awaiting owner decision:** Matchups reframe (Vegas line as headline, model as the explanation; drop or
+  de-emphasize edge pills with the honest record "Vegas right 59% when they disagree"; show running model vs Vegas
+  pick record).
+- **Proposed:** market-implied team ratings (fit to posted spreads/totals) for lookahead weeks and a Power "market
+  view"; test vs actual margins and future closing lines.
+- **Rebuild the archive** after the share-normalization change (and after any future model change).
+- **ESPN return estimates:** test as return-model features (est. weeks to return, surgery/tear/fracture) once
+  enough 2026 injuries resolve (~midseason); owner wants them only as data-driven inputs, never as truth.
+- **Accuracy levers:** rookies / low-data priors (college production, preseason usage); expected fantasy points per
+  opportunity; NGS / FTN inputs.
+- Play-caller effects (on hold); IDP question unanswered; light mode unreviewed.
+- Speed: experiment batches recompute identical stages per variant (stage caching; per-worker 5-season data windows
+  would halve memory and allow more workers).
