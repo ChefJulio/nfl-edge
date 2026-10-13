@@ -138,7 +138,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   [-0.0110, -0.0024], 5/5 seasons; Elo alone 0.2239 beats rank and model. Referee x team bias (vs spread) HURTS
   (+0.0043, noise); referee home rate, QB top/bottom 5, record, point diff, Pythagorean, close-game luck,
   turnovers, streaks, rest, bye, Thursday, prime time, division, travel/tz, west-early, dome-in-cold, surface,
-  new coach: nothing. Nothing adds to Vegas. Next: fit Elo constants walk-forward; check if its gain is early
+  new coach: nothing. Nothing adds to Vegas. **Referees vs the market** (tools/referees.py, 2,447 games 2017-26,
+  33 refs, shuffle tests within season): home ATS by ref 1.42x chance spread (p=0.09) but no persistence (first-half
+  vs second-half r = -0.05); totals vary LESS than chance (0.43x, p=0.99: the total line likely already prices
+  the crew); ref x team ATS exactly chance (0.95x, r = 0.00). Extremes like Vinovich 40% home covers (144 games)
+  don't carry forward. No referee effect to use. Next: fit Elo constants walk-forward; check if its gain is early
   season (cross-season carry-over our ratings lack).
 - **Tossup line**: favorites the market gave under 59% won 54.3% +/- 6.4% (90%; 15% of games), indistinguishable
   from a coin flip; 3-point favorites (~60%) won ~61%. The tool prints the largest cut-off a coin flip explains
