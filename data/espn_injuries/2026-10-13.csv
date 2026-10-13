@@ -99,10 +99,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3917232,Tyler Bass,Buffalo Bills,Active,2026-10-05T02:01Z,,,,,,Bass went 2-for-2 on field-goal attempts and made both of his PATs during Sunday's 29-26 loss to the Patriots.
 4635008,Keon Coleman,Buffalo Bills,Active,2026-10-04T23:53Z,,,,,,Coleman secured six of seven targets for 116 yards and a touchdown in the Bills' 29-26 loss to the Patriots on Sunday.
 4427348,Te'Cory Couch,Buffalo Bills,Questionable,2026-10-04T18:51Z,Hamstring,Not Specified,Not Specified,2026-10-12,QUESTIONABLE,Couch suffered a hamstring injury Sunday versus New England and is doubtful to return.
+4695883,Jalen Coker,Carolina Panthers,Questionable,2026-10-13T18:21Z,Quadriceps,Strain,Not Specified,2026-10-18,QUESTIONABLE,"Coker (quadriceps) was spotted participating in the Panthers' unofficial practice session Tuesday, Alex Zietlow of The Charlotte Observer reports."
 4687513,Cam Jackson,Carolina Panthers,Injured Reserve,2026-10-13T15:33Z,Knee,Not Specified,Not Specified,2026-11-15,IR,ir
 2973051,Taylor Moton,Carolina Panthers,Out,2026-10-12T18:43Z,Illness,Not Specified,Not Specified,2026-10-18,NFI-R,"Head coach Dave Canales said Monday that the Panthers plan to open Moton's (illness) 21-day practice window during Week 6 prep, Steve Reed of the Associated Press reports."
 4058925,Tershawn Wharton,Carolina Panthers,Out,2026-10-12T18:21Z,Neck,Surgery,Not Specified,2026-10-18,PUP-R,"Head coach Dave Canales said Monday that the Panthers plan to open Wharton's (neck0 21-day practice window this week, Steve Reed of the Associated Press reports."
-4695883,Jalen Coker,Carolina Panthers,Questionable,2026-10-12T17:35Z,Quadriceps,Strain,Not Specified,2026-10-18,QUESTIONABLE,"Head coach Dave Canales said Monday that Coker is ""on track"" to return from a one-game absence against the Eagles on Sunday, Joe Person of The Athletic reports."
 4243256,Devin Lloyd,Carolina Panthers,Active,2026-10-07T02:41Z,,,,,,Lloyd recorded nine total tackles (five solo) during Sunday night's 32-26 win against Detroit.
 4244607,Akayleb Evans,Carolina Panthers,Active,2026-10-07T02:31Z,,,,,,Evans recorded 11 total tackles (nine solo) and a pass defensed during Sunday night's 32-26 win over the Lions.
 4362647,Damien Lewis,Carolina Panthers,Questionable,2026-10-06T18:21Z,Elbow,Strain,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
 4430034,Xavier Legette,Carolina Panthers,Injured Reserve,2026-10-03T20:15Z,Knee,Not Specified,Not Specified,2026-11-08,IR,"The Panthers placed Legette (knee) on injured reserve Saturday, Darin Gantt of the team's official site reports."
 4429166,Princely Umanmielen,Carolina Panthers,Active,2026-10-01T19:37Z,,,,,,
-4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-13T18:01Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
+4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-13T18:33Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
 4431611,Caleb Williams,Chicago Bears,Questionable,2026-10-13T17:10Z,Hamstring,Strain,Right,2026-10-18,QUESTIONABLE,questionable
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-13T17:10Z,Toe,Sprain,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4911952,Keyshaun Elliott,Chicago Bears,Questionable,2026-10-13T17:10Z,Quadriceps,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -374,7 +374,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3045207,Jourdan Lewis,Jacksonville Jaguars,Active,2026-10-09T20:09Z,,,,,,
 4685415,Travis Hunter,Jacksonville Jaguars,Active,2026-10-07T02:13Z,,,,,,Hunter logged four tackles (three solo) and two pass defenses during the Jaguars' 22-17 win over the Bengals on Sunday.
 3050073,Foyesade Oluokun,Jacksonville Jaguars,Active,2026-10-07T01:59Z,,,,,,"Oluokun logged seven tackles (six solo), one interception and one forced fumble during the Jaguars' 22-17 win over the Bengals on Sunday."
-4362921,Tyquan Thornton,Kansas City Chiefs,Injured Reserve,2026-10-12T17:16Z,Ankle,Surgery,Left,2027-01-17,IR,"The Chiefs placed Thornton (ankle) on injured reserve Monday, Jeremy Fowler of ESPN.com reports."
+4362921,Tyquan Thornton,Kansas City Chiefs,Injured Reserve,2026-10-13T18:29Z,Ankle,Surgery,Left,2027-01-17,IR,The Chiefs placed Thornton (ankle) on injured reserve Tuesday.
 4362759,Nick Bolton,Kansas City Chiefs,Active,2026-10-07T01:36Z,,,,,,Bolton posted nine tackles (four solo) during the Chiefs' 30-27 win over the Raiders on Sunday.
 4880124,Mansoor Delane,Kansas City Chiefs,Active,2026-10-07T01:23Z,,,,,,Delane tallied 10 tackles (seven solo) and one pass defense during the Chiefs' 30-27 win over the Raiders on Sunday.
 4569659,Josh Simmons,Kansas City Chiefs,Questionable,2026-10-06T18:21Z,Back,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -528,7 +528,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3916923,Carlton Davis III,New England Patriots,Questionable,2026-10-13T17:10Z,Neck,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4686772,Christian Gonzalez,New England Patriots,Questionable,2026-10-13T17:10Z,Shoulder,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4688779,Channing Canada,New England Patriots,Questionable,2026-10-13T17:10Z,Hamstring,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
-4685298,Will Campbell,New England Patriots,Doubtful,2026-10-13T16:15Z,Knee,Sprain,Right,2026-10-18,DOUBTFUL,doubtful
+4685298,Will Campbell,New England Patriots,Doubtful,2026-10-13T16:15Z,Knee - MCL,Sprain,Right,2026-10-18,DOUBTFUL,doubtful
 4431431,Corey Kiner,New England Patriots,Active,2026-10-13T16:03Z,,,,,,"Kiner is expected to move into the No. 2 spot on the depth chart behind lead back Rhamondre Stevenson in Sunday's game against the Jets with TreVeyon Henderson (ankle) expected to be sidelined for multiple weeks, Mike Reiss of ESPN.com reports."
 4432710,TreVeyon Henderson,New England Patriots,Doubtful,2026-10-13T14:26Z,Ankle,Not Specified,Right,2026-10-18,DOUBTFUL,"Henderson is expected to miss multiple weeks after he was diagnosed with a right high-ankle sprain following an MRI on Monday, Adam Schefter of ESPN reports."
 4431465,Behren Morton,New England Patriots,Active,2026-10-12T19:27Z,,,,,,
@@ -574,8 +574,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4879276,Bryce Lance,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Lance turned five targets into a seven-yard catch during the Saints' 45-24 loss to the Falcons on Monday.
 4702559,Oscar Delp,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Delp was not targeted during Monday's 45-24 loss versus the Falcons.
 4599739,Kendre Miller,New Orleans Saints,Active,2026-10-07T00:08Z,,,,,,Miller rushed six time for nine yards and caught two of three targets while losing a fumble in Monday night's 45-24 loss to Atlanta.
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-13T18:26Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4240706,Jason Pinnock,New York Giants,Questionable,2026-10-13T17:10Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,questionable
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-13T17:10Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4921249,Colton Hood,New York Giants,Questionable,2026-10-12T23:52Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,"Hood (concussion) is considered day-to-day ahead of the Giants' matchup with the Saints in Week 6, Pat Leonard of the New York Daily News reports."
 4430261,Tyler Nubin,New York Giants,Questionable,2026-10-12T23:10Z,Neck,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Nubin (neck) is considered day-to-day ahead of the team's Week 6 matchup with the Saints, Pat Leonard of the New York Daily News reports."
 4691043,Nikko Reed,New York Giants,Active,2026-10-12T19:30Z,,,,,,
