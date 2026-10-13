@@ -218,7 +218,8 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   column; compact mode when scrolled sideways (logo + last name, 11px, ~100px), scrollLeft compensated, hysteresis.
 - **Matchups:** "win chances, not picks" (owner: "we're not a betting site, we're promoting good prediction
   practice"). Track-record table on top. Per game: win-chance box (favorite logo + "Cowboys 80% to win" or
-  "Tossup / too close to call", source tag Market or Model, bar split in team colors with the tossup zone hatched,
+  "Tossup / too close to call", source label above it "Vegas odds" or "Our model, no Vegas line yet" (owner was
+  confused by two different % on one card when the tag was small, right-aligned "Market"), bar split in team colors with the tossup zone hatched,
   Vegas line + O/U and "Our model: DAL 76%" underneath); away left / home right. **Owner rule: the model never
   publicly shows a point spread, score or total, only win %** (spreads are the market's). Battles in EPA per 100
   plays: the two offense-vs-defense totals (play-weighted; tap for Pass/Run), Special teams (per 100 ST plays),

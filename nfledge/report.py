@@ -793,7 +793,7 @@ def forecast(g, p_model: float, k_vegas: float, tossup: float, names: dict, ts: 
   return {"src": "Vegas" if pd.notna(vm) else "Model", "fav": fav, "nick": names.get(fav, fav),
           "logo": ts.logo_img(fav, 24), "pct": pct, "tossup": pct < round(tossup * 100),
           "p_away": round((1 - p) * 100), "p_home": round(p * 100),
-          "model_fav": m_fav, "model_pct": m_pct, "model_tossup": m_pct < round(tossup * 100)}
+          "model_fav": m_fav, "model_nick": names.get(m_fav, m_fav), "model_pct": m_pct, "model_tossup": m_pct < round(tossup * 100)}
 
 
 def final_result(games: pd.DataFrame, g, fc: dict) -> dict | None:
