@@ -288,16 +288,17 @@ details.grp > summary .bt-lbl { color: var(--ink); font-weight: 600; }
 .best { font-weight: 800; color: var(--accent); }
 .bt-group { text-align: center !important; border-bottom: 0 !important; }
 /* matchup cell: opponent, 5-segment grade meter, points vs an average defense */
+/* Fixed slots so the meter and rank line up down the column whatever the team code (WAS vs SF) or rank width. */
 .mu-row { display: flex; align-items: center; gap: 10px; }
-.opp { display: inline-flex; align-items: center; gap: 6px; min-width: 72px; }
+.opp { display: inline-flex; align-items: center; gap: 6px; flex: none; }
 .opp .vs { font-size: 11px; width: 16px; color: rgba(255,255,255,.55); }
 .opp .logo { width: 20px; height: 20px; } .opp .logo img { width: 15px; height: 15px; }
-.opp b { font-weight: 700; font-size: 12.5px; letter-spacing: .02em; }
+.opp b { font-weight: 700; font-size: 12.5px; letter-spacing: .02em; display: inline-block; width: 34px; }
 .meter { display: inline-flex; gap: 2px; align-items: flex-end; cursor: help; }
 .meter i { width: 4px; height: 12px; border-radius: 1.5px; background: rgba(255,255,255,.13); }
 .meter.m5 i.on, .meter.m4 i.on { background: #54d17a; } .meter.m3 i.on { background: rgba(255,255,255,.62); }
 .meter.m2 i.on, .meter.m1 i.on { background: #ff8378; }
-.dvp { font-size: 12.5px; font-weight: 700; min-width: 34px; cursor: help; }
+.dvp { font-size: 12.5px; font-weight: 700; width: 36px; flex: none; cursor: help; }
 /* translucent chips on dark tiles (light pills glare on dark rows) */
 tr.teamrow .pill { background: rgba(255,255,255,.08); color: rgba(255,255,255,.82); }
 tr.teamrow .pill-good { background: rgba(69,194,107,.17); color: #8fe6a9; }
