@@ -74,7 +74,7 @@ details.howto div { margin-top: 8px; color: var(--muted); font-size: 12.5px; max
    in every engine including iOS WebKit. Scrolling chains to the page at the box's edges. */
 .scroll { max-height: calc(100vh - var(--navh, 45px) - 12px); max-height: calc(100dvh - var(--navh, 45px) - 12px); }
 .game .scroll { max-height: none; }
-thead th { box-shadow: 0 1px 0 var(--line); }
+thead th { box-shadow: 0 -4px 0 var(--panel), 0 1px 0 var(--line); }  /* covers the 3px tile spacing above the header (WebKit) */
 table { border-collapse: collapse; width: 100%; font-size: 13px; }
 th, td { padding: 8px 10px; text-align: left; white-space: nowrap; vertical-align: middle; }
 thead th.can-sort { cursor: pointer; } thead th.can-sort:hover { color: var(--ink); }
