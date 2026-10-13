@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NFL Edge · Week 2</title>
-<link rel="stylesheet" href="../assets/gamecast.css">
+<link rel="stylesheet" href="../assets/gamecast.css?v=dde99ea632">
 <style>
 :root {
   --bg: #f5f6f8; --panel: #ffffff; --panel2: #f9fafb; --ink: #14161a; --muted: #6a717c; --faint: #9aa1ab;
@@ -246,6 +246,7 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 @media (min-width: 980px) { .games { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 .game { min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
 .g-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.tm-open { cursor: pointer; }
 .g-team { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--tc); color: var(--tfg); min-height: 62px; }
 .g-team.home { flex-direction: row-reverse; text-align: right; }
 .g-team .logo { width: 34px; height: 34px; } .g-team .logo img { width: 26px; height: 26px; }
@@ -437,7 +438,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     <span id="livePill" class="live-pill" hidden></span>
     <span>Scoring <b id="scoreName">Half PPR</b></span>
     
-    <span>Updated 2026-10-13 02:03</span>
+    <span>Updated 2026-10-13 02:40</span>
   </div>
 </div></header>
 <nav class="tabs"><div class="wrap">
@@ -6784,9 +6785,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_02_MIN_PHI" data-gid="2023_02_MIN_PHI" data-away="MIN" data-home="PHI">
       <div class="g-head">
-        <div class="g-team away" style="--tc:#72519c;--tc2:#ffc62f;--tfg:#ffffff"><span class="logo" style="background:#4F2683"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/min.png" alt="MIN" width="28" height="28" loading="lazy"></span><div><b>Vikings</b><small>Kirk Cousins</small></div></div>
+        <div class="g-team away tm-open" style="--tc:#72519c;--tc2:#ffc62f;--tfg:#ffffff" data-tm="MIN"><span class="logo" style="background:#4F2683"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/min.png" alt="MIN" width="28" height="28" loading="lazy"></span><div><b>Vikings</b><small>Kirk Cousins</small></div></div>
         <div class="g-at">@</div>
-        <div class="g-team home" style="--tc:#337076;--tc2:#a5acaf;--tfg:#ffffff"><span class="logo" style="background:#004C54"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/phi.png" alt="PHI" width="28" height="28" loading="lazy"></span><div><b>Eagles</b><small>Jalen Hurts</small></div></div>
+        <div class="g-team home tm-open" style="--tc:#337076;--tc2:#a5acaf;--tfg:#ffffff" data-tm="PHI"><span class="logo" style="background:#004C54"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/phi.png" alt="PHI" width="28" height="28" loading="lazy"></span><div><b>Eagles</b><small>Jalen Hurts</small></div></div>
       </div>
       <div class="g-sub"><span>Thu Sep 14 · 8:15 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-02.json&amp;g=2023_02_MIN_PHI">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -6898,9 +6899,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_02_GB_ATL" data-gid="2023_02_GB_ATL" data-away="GB" data-home="ATL">
       <div class="g-head">
-        <div class="g-team away" style="--tc:#4d5f5a;--tc2:#ffb612;--tfg:#ffffff"><span class="logo" style="background:#FFB612"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/gb.png" alt="GB" width="28" height="28" loading="lazy"></span><div><b>Packers</b><small>Jordan Love</small></div></div>
+        <div class="g-team away tm-open" style="--tc:#4d5f5a;--tc2:#ffb612;--tfg:#ffffff" data-tm="GB"><span class="logo" style="background:#FFB612"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/gb.png" alt="GB" width="28" height="28" loading="lazy"></span><div><b>Packers</b><small>Jordan Love</small></div></div>
         <div class="g-at">@</div>
-        <div class="g-team home" style="--tc:#a71930;--tc2:#595959;--tfg:#ffffff"><span class="logo" style="background:#A71930"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/atl.png" alt="ATL" width="28" height="28" loading="lazy"></span><div><b>Falcons</b><small>Desmond Ridder</small></div></div>
+        <div class="g-team home tm-open" style="--tc:#a71930;--tc2:#595959;--tfg:#ffffff" data-tm="ATL"><span class="logo" style="background:#A71930"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/atl.png" alt="ATL" width="28" height="28" loading="lazy"></span><div><b>Falcons</b><small>Desmond Ridder</small></div></div>
       </div>
       <div class="g-sub"><span>Sun Sep 17 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-02.json&amp;g=2023_02_GB_ATL">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -7012,9 +7013,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_02_LV_BUF" data-gid="2023_02_LV_BUF" data-away="LV" data-home="BUF">
       <div class="g-head">
-        <div class="g-team away" style="--tc:#595959;--tc2:#a5acaf;--tfg:#ffffff"><span class="logo" style="background:#A5ACAF"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lv.png" alt="LV" width="28" height="28" loading="lazy"></span><div><b>Raiders</b><small>Jimmy Garoppolo</small></div></div>
+        <div class="g-team away tm-open" style="--tc:#595959;--tc2:#a5acaf;--tfg:#ffffff" data-tm="LV"><span class="logo" style="background:#A5ACAF"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lv.png" alt="LV" width="28" height="28" loading="lazy"></span><div><b>Raiders</b><small>Jimmy Garoppolo</small></div></div>
         <div class="g-at">@</div>
-        <div class="g-team home" style="--tc:#335ca4;--tc2:#c60c30;--tfg:#ffffff"><span class="logo" style="background:#C60C30"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/buf.png" alt="BUF" width="28" height="28" loading="lazy"></span><div><b>Bills</b><small>Josh Allen</small></div></div>
+        <div class="g-team home tm-open" style="--tc:#335ca4;--tc2:#c60c30;--tfg:#ffffff" data-tm="BUF"><span class="logo" style="background:#C60C30"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/buf.png" alt="BUF" width="28" height="28" loading="lazy"></span><div><b>Bills</b><small>Josh Allen</small></div></div>
       </div>
       <div class="g-sub"><span>Sun Sep 17 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-02.json&amp;g=2023_02_LV_BUF">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -7126,9 +7127,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_02_BAL_CIN" data-gid="2023_02_BAL_CIN" data-away="BAL" data-home="CIN">
       <div class="g-head">
-        <div class="g-team away" style="--tc:#50458f;--tc2:#9e7c0c;--tfg:#ffffff"><span class="logo" style="background:#9E7C0C"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/bal.png" alt="BAL" width="28" height="28" loading="lazy"></span><div><b>Ravens</b><small>Lamar Jackson</small></div></div>
+        <div class="g-team away tm-open" style="--tc:#50458f;--tc2:#9e7c0c;--tfg:#ffffff" data-tm="BAL"><span class="logo" style="background:#9E7C0C"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/bal.png" alt="BAL" width="28" height="28" loading="lazy"></span><div><b>Ravens</b><small>Lamar Jackson</small></div></div>
         <div class="g-at">@</div>
-        <div class="g-team home" style="--tc:#fb4f14;--tc2:#595959;--tfg:#ffffff"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/cin.png" alt="CIN" width="28" height="28" loading="lazy"></span><div><b>Bengals</b><small>Joe Burrow</small></div></div>
+        <div class="g-team home tm-open" style="--tc:#fb4f14;--tc2:#595959;--tfg:#ffffff" data-tm="CIN"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/cin.png" alt="CIN" width="28" height="28" loading="lazy"></span><div><b>Bengals</b><small>Joe Burrow</small></div></div>
       </div>
       <div class="g-sub"><span>Sun Sep 17 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-02.json&amp;g=2023_02_BAL_CIN">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -7239,9 +7240,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_02_SEA_DET" data-gid="2023_02_SEA_DET" data-away="SEA" data-home="DET">
       <div class="g-head">
-        <div class="g-team away" style="--tc:#334e69;--tc2:#69be28;--tfg:#ffffff"><span class="logo" style="background:#69be28"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/sea.png" alt="SEA" width="28" height="28" loading="lazy"></span><div><b>Seahawks</b><small>Geno Smith</small></div></div>
+        <div class="g-team away tm-open" style="--tc:#334e69;--tc2:#69be28;--tfg:#ffffff" data-tm="SEA"><span class="logo" style="background:#69be28"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/sea.png" alt="SEA" width="28" height="28" loading="lazy"></span><div><b>Seahawks</b><small>Geno Smith</small></div></div>
         <div class="g-at">@</div>
-        <div class="g-team home" style="--tc:#0076b6;--tc2:#b0b7bc;--tfg:#ffffff"><span class="logo" style="background:#B0B7BC"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/det.png" alt="DET" width="28" height="28" loading="lazy"></span><div><b>Lions</b><small>Jared Goff</small></div></div>
+        <div class="g-team home tm-open" style="--tc:#0076b6;--tc2:#b0b7bc;--tfg:#ffffff" data-tm="DET"><span class="logo" style="background:#B0B7BC"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/det.png" alt="DET" width="28" height="28" loading="lazy"></span><div><b>Lions</b><small>Jared Goff</small></div></div>
       </div>
       <div class="g-sub"><span>Sun Sep 17 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-02.json&amp;g=2023_02_SEA_DET">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -7352,9 +7353,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_02_IND_HOU" data-gid="2023_02_IND_HOU" data-away="IND" data-home="HOU">
       <div class="g-head">
-        <div class="g-team away" style="--tc:#33567f;--tc2:#a5acaf;--tfg:#ffffff"><span class="logo" style="background:#a5acaf"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/ind.png" alt="IND" width="28" height="28" loading="lazy"></span><div><b>Colts</b><small>Anthony Richardson</small></div></div>
+        <div class="g-team away tm-open" style="--tc:#33567f;--tc2:#a5acaf;--tfg:#ffffff" data-tm="IND"><span class="logo" style="background:#a5acaf"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/ind.png" alt="IND" width="28" height="28" loading="lazy"></span><div><b>Colts</b><small>Anthony Richardson</small></div></div>
         <div class="g-at">@</div>
-        <div class="g-team home" style="--tc:#5b6e78;--tc2:#a71930;--tfg:#ffffff"><span class="logo" style="background:#A71930"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/hou.png" alt="HOU" width="28" height="28" loading="lazy"></span><div><b>Texans</b><small>C.J. Stroud</small></div></div>
+        <div class="g-team home tm-open" style="--tc:#5b6e78;--tc2:#a71930;--tfg:#ffffff" data-tm="HOU"><span class="logo" style="background:#A71930"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/hou.png" alt="HOU" width="28" height="28" loading="lazy"></span><div><b>Texans</b><small>C.J. Stroud</small></div></div>
       </div>
       <div class="g-sub"><span>Sun Sep 17 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-02.json&amp;g=2023_02_IND_HOU">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -7467,9 +7468,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_02_KC_JAX" data-gid="2023_02_KC_JAX" data-away="KC" data-home="JAX">
       <div class="g-head">
-        <div class="g-team away" style="--tc:#e31837;--tc2:#ffb612;--tfg:#ffffff"><span class="logo" style="background:#FFB612"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/kc.png" alt="KC" width="28" height="28" loading="lazy"></span><div><b>Chiefs</b><small>Patrick Mahomes</small></div></div>
+        <div class="g-team away tm-open" style="--tc:#e31837;--tc2:#ffb612;--tfg:#ffffff" data-tm="KC"><span class="logo" style="background:#FFB612"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/kc.png" alt="KC" width="28" height="28" loading="lazy"></span><div><b>Chiefs</b><small>Patrick Mahomes</small></div></div>
         <div class="g-at">@</div>
-        <div class="g-team home" style="--tc:#006778;--tc2:#595959;--tfg:#ffffff"><span class="logo" style="background:#006778"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/jax.png" alt="JAX" width="28" height="28" loading="lazy"></span><div><b>Jaguars</b><small>Trevor Lawrence</small></div></div>
+        <div class="g-team home tm-open" style="--tc:#006778;--tc2:#595959;--tfg:#ffffff" data-tm="JAX"><span class="logo" style="background:#006778"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/jax.png" alt="JAX" width="28" height="28" loading="lazy"></span><div><b>Jaguars</b><small>Trevor Lawrence</small></div></div>
       </div>
       <div class="g-sub"><span>Sun Sep 17 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-02.json&amp;g=2023_02_KC_JAX">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -7581,9 +7582,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_02_CHI_TB" data-gid="2023_02_CHI_TB" data-away="CHI" data-home="TB">
       <div class="g-head">
-        <div class="g-team away" style="--tc:#606875;--tc2:#e64100;--tfg:#ffffff"><span class="logo" style="background:#E64100"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="CHI" width="28" height="28" loading="lazy"></span><div><b>Bears</b><small>Justin Fields</small></div></div>
+        <div class="g-team away tm-open" style="--tc:#606875;--tc2:#e64100;--tfg:#ffffff" data-tm="CHI"><span class="logo" style="background:#E64100"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="CHI" width="28" height="28" loading="lazy"></span><div><b>Bears</b><small>Justin Fields</small></div></div>
         <div class="g-at">@</div>
-        <div class="g-team home" style="--tc:#a71930;--tc2:#5b5955;--tfg:#ffffff"><span class="logo" style="background:#322F2B"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/tb.png" alt="TB" width="28" height="28" loading="lazy"></span><div><b>Buccaneers</b><small>Baker Mayfield</small></div></div>
+        <div class="g-team home tm-open" style="--tc:#a71930;--tc2:#5b5955;--tfg:#ffffff" data-tm="TB"><span class="logo" style="background:#322F2B"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/tb.png" alt="TB" width="28" height="28" loading="lazy"></span><div><b>Buccaneers</b><small>Baker Mayfield</small></div></div>
       </div>
       <div class="g-sub"><span>Sun Sep 17 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-02.json&amp;g=2023_02_CHI_TB">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -7695,9 +7696,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_02_LAC_TEN" data-gid="2023_02_LAC_TEN" data-away="LAC" data-home="TEN">
       <div class="g-head">
-        <div class="g-team away" style="--tc:#007bc7;--tc2:#ffc20e;--tfg:#ffffff"><span class="logo" style="background:#007BC7"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lac.png" alt="LAC" width="28" height="28" loading="lazy"></span><div><b>Chargers</b><small>Justin Herbert</small></div></div>
+        <div class="g-team away tm-open" style="--tc:#007bc7;--tc2:#ffc20e;--tfg:#ffffff" data-tm="LAC"><span class="logo" style="background:#007BC7"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lac.png" alt="LAC" width="28" height="28" loading="lazy"></span><div><b>Chargers</b><small>Justin Herbert</small></div></div>
         <div class="g-at">@</div>
-        <div class="g-team home" style="--tc:#4495d2;--tc2:#d50a0a;--tfg:#ffffff"><span class="logo" style="background:#D50A0A"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/ten.png" alt="TEN" width="28" height="28" loading="lazy"></span><div><b>Titans</b><small>Ryan Tannehill</small></div></div>
+        <div class="g-team home tm-open" style="--tc:#4495d2;--tc2:#d50a0a;--tfg:#ffffff" data-tm="TEN"><span class="logo" style="background:#D50A0A"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/ten.png" alt="TEN" width="28" height="28" loading="lazy"></span><div><b>Titans</b><small>Ryan Tannehill</small></div></div>
       </div>
       <div class="g-sub"><span>Sun Sep 17 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-02.json&amp;g=2023_02_LAC_TEN">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -7808,9 +7809,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_02_NYG_ARI" data-gid="2023_02_NYG_ARI" data-away="NYG" data-home="ARI">
       <div class="g-head">
-        <div class="g-team away" style="--tc:#3c4e84;--tc2:#a71930;--tfg:#ffffff"><span class="logo" style="background:#A71930"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png" alt="NYG" width="28" height="28" loading="lazy"></span><div><b>Giants</b><small>Daniel Jones</small></div></div>
+        <div class="g-team away tm-open" style="--tc:#3c4e84;--tc2:#a71930;--tfg:#ffffff" data-tm="NYG"><span class="logo" style="background:#A71930"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png" alt="NYG" width="28" height="28" loading="lazy"></span><div><b>Giants</b><small>Daniel Jones</small></div></div>
         <div class="g-at">@</div>
-        <div class="g-team home" style="--tc:#97233f;--tc2:#595959;--tfg:#ffffff"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/ari.png" alt="ARI" width="28" height="28" loading="lazy"></span><div><b>Cardinals</b><small>Joshua Dobbs</small></div></div>
+        <div class="g-team home tm-open" style="--tc:#97233f;--tc2:#595959;--tfg:#ffffff" data-tm="ARI"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/ari.png" alt="ARI" width="28" height="28" loading="lazy"></span><div><b>Cardinals</b><small>Joshua Dobbs</small></div></div>
       </div>
       <div class="g-sub"><span>Sun Sep 17 · 4:05 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-02.json&amp;g=2023_02_NYG_ARI">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -7922,9 +7923,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_02_SF_LA" data-gid="2023_02_SF_LA" data-away="SF" data-home="LA">
       <div class="g-head">
-        <div class="g-team away" style="--tc:#aa0000;--tc2:#b3995d;--tfg:#ffffff"><span class="logo" style="background:#B3995D"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/sf.png" alt="SF" width="28" height="28" loading="lazy"></span><div><b>49ers</b><small>Brock Purdy</small></div></div>
+        <div class="g-team away tm-open" style="--tc:#aa0000;--tc2:#b3995d;--tfg:#ffffff" data-tm="SF"><span class="logo" style="background:#B3995D"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/sf.png" alt="SF" width="28" height="28" loading="lazy"></span><div><b>49ers</b><small>Brock Purdy</small></div></div>
         <div class="g-at">@</div>
-        <div class="g-team home" style="--tc:#335da9;--tc2:#ffd100;--tfg:#ffffff"><span class="logo" style="background:#FFD100"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lar.png" alt="LA" width="28" height="28" loading="lazy"></span><div><b>Rams</b><small>Matthew Stafford</small></div></div>
+        <div class="g-team home tm-open" style="--tc:#335da9;--tc2:#ffd100;--tfg:#ffffff" data-tm="LA"><span class="logo" style="background:#FFD100"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lar.png" alt="LA" width="28" height="28" loading="lazy"></span><div><b>Rams</b><small>Matthew Stafford</small></div></div>
       </div>
       <div class="g-sub"><span>Sun Sep 17 · 4:05 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-02.json&amp;g=2023_02_SF_LA">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -8036,9 +8037,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_02_NYJ_DAL" data-gid="2023_02_NYJ_DAL" data-away="NYJ" data-home="DAL">
       <div class="g-head">
-        <div class="g-team away" style="--tc:#336557;--tc2:#595959;--tfg:#ffffff"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/nyj.png" alt="NYJ" width="28" height="28" loading="lazy"></span><div><b>Jets</b><small>Zach Wilson</small></div></div>
+        <div class="g-team away tm-open" style="--tc:#336557;--tc2:#595959;--tfg:#ffffff" data-tm="NYJ"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/nyj.png" alt="NYJ" width="28" height="28" loading="lazy"></span><div><b>Jets</b><small>Zach Wilson</small></div></div>
         <div class="g-at">@</div>
-        <div class="g-team home" style="--tc:#334e69;--tc2:#b0b7bc;--tfg:#ffffff"><span class="logo" style="background:#B0B7BC"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/dal.png" alt="DAL" width="28" height="28" loading="lazy"></span><div><b>Cowboys</b><small>Dak Prescott</small></div></div>
+        <div class="g-team home tm-open" style="--tc:#334e69;--tc2:#b0b7bc;--tfg:#ffffff" data-tm="DAL"><span class="logo" style="background:#B0B7BC"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/dal.png" alt="DAL" width="28" height="28" loading="lazy"></span><div><b>Cowboys</b><small>Dak Prescott</small></div></div>
       </div>
       <div class="g-sub"><span>Sun Sep 17 · 4:25 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-02.json&amp;g=2023_02_NYJ_DAL">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -8150,9 +8151,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_02_WAS_DEN" data-gid="2023_02_WAS_DEN" data-away="WAS" data-home="DEN">
       <div class="g-head">
-        <div class="g-team away" style="--tc:#7b4343;--tc2:#ffb612;--tfg:#ffffff"><span class="logo" style="background:#FFB612"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/wsh.png" alt="WAS" width="28" height="28" loading="lazy"></span><div><b>Commanders</b><small>Sam Howell</small></div></div>
+        <div class="g-team away tm-open" style="--tc:#7b4343;--tc2:#ffb612;--tfg:#ffffff" data-tm="WAS"><span class="logo" style="background:#FFB612"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/wsh.png" alt="WAS" width="28" height="28" loading="lazy"></span><div><b>Commanders</b><small>Sam Howell</small></div></div>
         <div class="g-at">@</div>
-        <div class="g-team home" style="--tc:#334e69;--tc2:#fb4f14;--tfg:#ffffff"><span class="logo" style="background:#FB4F14"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/den.png" alt="DEN" width="28" height="28" loading="lazy"></span><div><b>Broncos</b><small>Russell Wilson</small></div></div>
+        <div class="g-team home tm-open" style="--tc:#334e69;--tc2:#fb4f14;--tfg:#ffffff" data-tm="DEN"><span class="logo" style="background:#FB4F14"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/den.png" alt="DEN" width="28" height="28" loading="lazy"></span><div><b>Broncos</b><small>Russell Wilson</small></div></div>
       </div>
       <div class="g-sub"><span>Sun Sep 17 · 4:25 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-02.json&amp;g=2023_02_WAS_DEN">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -8263,9 +8264,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_02_MIA_NE" data-gid="2023_02_MIA_NE" data-away="MIA" data-home="NE">
       <div class="g-head">
-        <div class="g-team away" style="--tc:#008e97;--tc2:#f58220;--tfg:#ffffff"><span class="logo" style="background:#008E97"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/mia.png" alt="MIA" width="28" height="28" loading="lazy"></span><div><b>Dolphins</b><small>Tua Tagovailoa</small></div></div>
+        <div class="g-team away tm-open" style="--tc:#008e97;--tc2:#f58220;--tfg:#ffffff" data-tm="MIA"><span class="logo" style="background:#008E97"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/mia.png" alt="MIA" width="28" height="28" loading="lazy"></span><div><b>Dolphins</b><small>Tua Tagovailoa</small></div></div>
         <div class="g-at">@</div>
-        <div class="g-team home" style="--tc:#334e69;--tc2:#c60c30;--tfg:#ffffff"><span class="logo" style="background:#C60C30"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/ne.png" alt="NE" width="28" height="28" loading="lazy"></span><div><b>Patriots</b><small>Mac Jones</small></div></div>
+        <div class="g-team home tm-open" style="--tc:#334e69;--tc2:#c60c30;--tfg:#ffffff" data-tm="NE"><span class="logo" style="background:#C60C30"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/ne.png" alt="NE" width="28" height="28" loading="lazy"></span><div><b>Patriots</b><small>Mac Jones</small></div></div>
       </div>
       <div class="g-sub"><span>Sun Sep 17 · 8:20 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-02.json&amp;g=2023_02_MIA_NE">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -8378,9 +8379,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_02_NO_CAR" data-gid="2023_02_NO_CAR" data-away="NO" data-home="CAR">
       <div class="g-head">
-        <div class="g-team away" style="--tc:#d3bc8d;--tc2:#595959;--tfg:#ffffff"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/no.png" alt="NO" width="28" height="28" loading="lazy"></span><div><b>Saints</b><small>Derek Carr</small></div></div>
+        <div class="g-team away tm-open" style="--tc:#d3bc8d;--tc2:#595959;--tfg:#ffffff" data-tm="NO"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/no.png" alt="NO" width="28" height="28" loading="lazy"></span><div><b>Saints</b><small>Derek Carr</small></div></div>
         <div class="g-at">@</div>
-        <div class="g-team home" style="--tc:#0085ca;--tc2:#595959;--tfg:#ffffff"><span class="logo" style="background:#0085CA"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/car.png" alt="CAR" width="28" height="28" loading="lazy"></span><div><b>Panthers</b><small>Bryce Young</small></div></div>
+        <div class="g-team home tm-open" style="--tc:#0085ca;--tc2:#595959;--tfg:#ffffff" data-tm="CAR"><span class="logo" style="background:#0085CA"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/car.png" alt="CAR" width="28" height="28" loading="lazy"></span><div><b>Panthers</b><small>Bryce Young</small></div></div>
       </div>
       <div class="g-sub"><span>Mon Sep 18 · 7:15 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-02.json&amp;g=2023_02_NO_CAR">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -8492,9 +8493,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   
     <article class="game" id="g-2023_02_CLE_PIT" data-gid="2023_02_CLE_PIT" data-away="CLE" data-home="PIT">
       <div class="g-head">
-        <div class="g-team away" style="--tc:#ff3c00;--tc2:#5a4a33;--tfg:#ffffff"><span class="logo" style="background:#311D00"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/cle.png" alt="CLE" width="28" height="28" loading="lazy"></span><div><b>Browns</b><small>Deshaun Watson</small></div></div>
+        <div class="g-team away tm-open" style="--tc:#ff3c00;--tc2:#5a4a33;--tfg:#ffffff" data-tm="CLE"><span class="logo" style="background:#311D00"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/cle.png" alt="CLE" width="28" height="28" loading="lazy"></span><div><b>Browns</b><small>Deshaun Watson</small></div></div>
         <div class="g-at">@</div>
-        <div class="g-team home" style="--tc:#595959;--tc2:#ffb612;--tfg:#ffffff"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/pit.png" alt="PIT" width="28" height="28" loading="lazy"></span><div><b>Steelers</b><small>Kenny Pickett</small></div></div>
+        <div class="g-team home tm-open" style="--tc:#595959;--tc2:#ffb612;--tfg:#ffffff" data-tm="PIT"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/pit.png" alt="PIT" width="28" height="28" loading="lazy"></span><div><b>Steelers</b><small>Kenny Pickett</small></div></div>
       </div>
       <div class="g-sub"><span>Mon Sep 18 · 8:15 PM ET</span><a class="gc-link" href="../game.html?d=2023/week-02.json&amp;g=2023_02_CLE_PIT">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -8616,7 +8617,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     <thead><tr><th class="num" data-first="asc">#</th><th class="stick" data-first="asc">Team</th><th class="num">Net</th><th>Offense</th><th>Defense</th><th class="minor">Pass O</th><th class="minor">Run O</th><th class="minor">Pass D</th><th class="minor">Run D</th><th class="minor">ST</th><th>Schedule played</th><th>Schedule left</th><th class="hide-sm nosort">Trend</th></tr></thead>
     <tbody>
     
-      <tr class="teamrow" style="--tc:#aa0000;--tc2:#b3995d;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#aa0000;--tc2:#b3995d;--tfg:#ffffff" data-tm="SF" title="Open the 49ers team card">
         <td class="num rk" data-v="1"><span class="rkn">1</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="49ers"><div class="who"><span class="logo" style="background:#B3995D"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/sf.png" alt="SF" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">49ers</span><span class="nm-short">SF</span></b><span class="sub">SF &middot; 1-0</span></div></div></td>
         <td class="num" data-v="6.244671177713235"><div class="netc"><b>+6.2</b><span class="sub" title="80% of simulations rank this team between 1 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 1</span></div></td>
@@ -8638,7 +8639,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#335ca4;--tc2:#c60c30;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#335ca4;--tc2:#c60c30;--tfg:#ffffff" data-tm="BUF" title="Open the Bills team card">
         <td class="num rk" data-v="2"><span class="rkn">2</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Bills"><div class="who"><span class="logo" style="background:#C60C30"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/buf.png" alt="BUF" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Bills</span><span class="nm-short">BUF</span></b><span class="sub">BUF &middot; 0-1</span></div></div></td>
         <td class="num" data-v="3.321263459473586"><div class="netc"><b>+3.3</b><span class="sub" title="80% of simulations rank this team between 2 and 6 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 2-6</span></div></td>
@@ -8660,7 +8661,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#e31837;--tc2:#ffb612;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#e31837;--tc2:#ffb612;--tfg:#ffffff" data-tm="KC" title="Open the Chiefs team card">
         <td class="num rk" data-v="3"><span class="rkn">3</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Chiefs"><div class="who"><span class="logo" style="background:#FFB612"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/kc.png" alt="KC" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Chiefs</span><span class="nm-short">KC</span></b><span class="sub">KC &middot; 0-1</span></div></div></td>
         <td class="num" data-v="2.970012429322961"><div class="netc"><b>+3.0</b><span class="sub" title="80% of simulations rank this team between 2 and 7 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 2-7</span></div></td>
@@ -8682,7 +8683,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#337076;--tc2:#a5acaf;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#337076;--tc2:#a5acaf;--tfg:#ffffff" data-tm="PHI" title="Open the Eagles team card">
         <td class="num rk" data-v="4"><span class="rkn">4</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Eagles"><div class="who"><span class="logo" style="background:#004C54"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/phi.png" alt="PHI" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Eagles</span><span class="nm-short">PHI</span></b><span class="sub">PHI &middot; 1-0</span></div></div></td>
         <td class="num" data-v="2.9567943779921992"><div class="netc"><b>+3.0</b><span class="sub" title="80% of simulations rank this team between 2 and 8 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 2-8</span></div></td>
@@ -8704,7 +8705,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#0076b6;--tc2:#b0b7bc;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#0076b6;--tc2:#b0b7bc;--tfg:#ffffff" data-tm="DET" title="Open the Lions team card">
         <td class="num rk" data-v="5"><span class="rkn">5</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Lions"><div class="who"><span class="logo" style="background:#B0B7BC"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/det.png" alt="DET" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Lions</span><span class="nm-short">DET</span></b><span class="sub">DET &middot; 1-0</span></div></div></td>
         <td class="num" data-v="2.317175918487574"><div class="netc"><b>+2.3</b><span class="sub" title="80% of simulations rank this team between 3 and 10 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 3-10</span></div></td>
@@ -8726,7 +8727,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#008e97;--tc2:#f58220;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#008e97;--tc2:#f58220;--tfg:#ffffff" data-tm="MIA" title="Open the Dolphins team card">
         <td class="num rk" data-v="6"><span class="rkn">6</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Dolphins"><div class="who"><span class="logo" style="background:#008E97"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/mia.png" alt="MIA" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Dolphins</span><span class="nm-short">MIA</span></b><span class="sub">MIA &middot; 1-0</span></div></div></td>
         <td class="num" data-v="2.163276042620573"><div class="netc"><b>+2.2</b><span class="sub" title="80% of simulations rank this team between 3 and 11 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 3-11</span></div></td>
@@ -8748,7 +8749,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#334e69;--tc2:#b0b7bc;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#334e69;--tc2:#b0b7bc;--tfg:#ffffff" data-tm="DAL" title="Open the Cowboys team card">
         <td class="num rk" data-v="7"><span class="rkn">7</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Cowboys"><div class="who"><span class="logo" style="background:#B0B7BC"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/dal.png" alt="DAL" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Cowboys</span><span class="nm-short">DAL</span></b><span class="sub">DAL &middot; 1-0</span></div></div></td>
         <td class="num" data-v="1.98719861840554"><div class="netc"><b>+2.0</b><span class="sub" title="80% of simulations rank this team between 3 and 12 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 3-12</span></div></td>
@@ -8770,7 +8771,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#50458f;--tc2:#9e7c0c;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#50458f;--tc2:#9e7c0c;--tfg:#ffffff" data-tm="BAL" title="Open the Ravens team card">
         <td class="num rk" data-v="8"><span class="rkn">8</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Ravens"><div class="who"><span class="logo" style="background:#9E7C0C"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/bal.png" alt="BAL" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Ravens</span><span class="nm-short">BAL</span></b><span class="sub">BAL &middot; 1-0</span></div></div></td>
         <td class="num" data-v="1.5226980597792399"><div class="netc"><b>+1.5</b><span class="sub" title="80% of simulations rank this team between 6 and 12 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 6-12</span></div></td>
@@ -8792,7 +8793,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#fb4f14;--tc2:#595959;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#fb4f14;--tc2:#595959;--tfg:#ffffff" data-tm="CIN" title="Open the Bengals team card">
         <td class="num rk" data-v="9"><span class="rkn">9</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Bengals"><div class="who"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/cin.png" alt="CIN" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Bengals</span><span class="nm-short">CIN</span></b><span class="sub">CIN &middot; 0-1</span></div></div></td>
         <td class="num" data-v="1.4822842067278148"><div class="netc"><b>+1.5</b><span class="sub" title="80% of simulations rank this team between 5 and 14 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 5-14</span></div></td>
@@ -8814,7 +8815,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#595959;--tc2:#a5acaf;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#595959;--tc2:#a5acaf;--tfg:#ffffff" data-tm="LV" title="Open the Raiders team card">
         <td class="num rk" data-v="10"><span class="rkn">10</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Raiders"><div class="who"><span class="logo" style="background:#A5ACAF"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lv.png" alt="LV" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Raiders</span><span class="nm-short">LV</span></b><span class="sub">LV &middot; 1-0</span></div></div></td>
         <td class="num" data-v="1.4666051183392437"><div class="netc"><b>+1.5</b><span class="sub" title="80% of simulations rank this team between 5 and 14 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 5-14</span></div></td>
@@ -8836,7 +8837,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#4495d2;--tc2:#d50a0a;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#4495d2;--tc2:#d50a0a;--tfg:#ffffff" data-tm="TEN" title="Open the Titans team card">
         <td class="num rk" data-v="11"><span class="rkn">11</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Titans"><div class="who"><span class="logo" style="background:#D50A0A"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/ten.png" alt="TEN" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Titans</span><span class="nm-short">TEN</span></b><span class="sub">TEN &middot; 0-1</span></div></div></td>
         <td class="num" data-v="1.0437377938818286"><div class="netc"><b>+1.0</b><span class="sub" title="80% of simulations rank this team between 6 and 16 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 6-16</span></div></td>
@@ -8858,7 +8859,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#006778;--tc2:#595959;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#006778;--tc2:#595959;--tfg:#ffffff" data-tm="JAX" title="Open the Jaguars team card">
         <td class="num rk" data-v="12"><span class="rkn">12</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Jaguars"><div class="who"><span class="logo" style="background:#006778"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/jax.png" alt="JAX" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Jaguars</span><span class="nm-short">JAX</span></b><span class="sub">JAX &middot; 1-0</span></div></div></td>
         <td class="num" data-v="0.678687496869276"><div class="netc"><b>+0.7</b><span class="sub" title="80% of simulations rank this team between 7 and 17 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 7-17</span></div></td>
@@ -8880,7 +8881,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#d3bc8d;--tc2:#595959;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#d3bc8d;--tc2:#595959;--tfg:#ffffff" data-tm="NO" title="Open the Saints team card">
         <td class="num rk" data-v="13"><span class="rkn">13</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Saints"><div class="who"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/no.png" alt="NO" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Saints</span><span class="nm-short">NO</span></b><span class="sub">NO &middot; 1-0</span></div></div></td>
         <td class="num" data-v="0.17093045286028696"><div class="netc"><b>+0.2</b><span class="sub" title="80% of simulations rank this team between 9 and 19 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 9-19</span></div></td>
@@ -8902,7 +8903,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#ff3c00;--tc2:#5a4a33;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#ff3c00;--tc2:#5a4a33;--tfg:#ffffff" data-tm="CLE" title="Open the Browns team card">
         <td class="num rk" data-v="14"><span class="rkn">14</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Browns"><div class="who"><span class="logo" style="background:#311D00"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/cle.png" alt="CLE" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Browns</span><span class="nm-short">CLE</span></b><span class="sub">CLE &middot; 1-0</span></div></div></td>
         <td class="num" data-v="0.08352010641558238"><div class="netc"><b>+0.1</b><span class="sub" title="80% of simulations rank this team between 10 and 20 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 10-20</span></div></td>
@@ -8924,7 +8925,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#335da9;--tc2:#ffd100;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#335da9;--tc2:#ffd100;--tfg:#ffffff" data-tm="LA" title="Open the Rams team card">
         <td class="num rk" data-v="15"><span class="rkn">15</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Rams"><div class="who"><span class="logo" style="background:#FFD100"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lar.png" alt="LA" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Rams</span><span class="nm-short">LA</span></b><span class="sub">LA &middot; 1-0</span></div></div></td>
         <td class="num" data-v="-0.0690724132214463"><div class="netc"><b>-0.1</b><span class="sub" title="80% of simulations rank this team between 11 and 20 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 11-20</span></div></td>
@@ -8946,7 +8947,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#007bc7;--tc2:#ffc20e;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#007bc7;--tc2:#ffc20e;--tfg:#ffffff" data-tm="LAC" title="Open the Chargers team card">
         <td class="num rk" data-v="16"><span class="rkn">16</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Chargers"><div class="who"><span class="logo" style="background:#007BC7"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lac.png" alt="LAC" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Chargers</span><span class="nm-short">LAC</span></b><span class="sub">LAC &middot; 0-1</span></div></div></td>
         <td class="num" data-v="-0.10598372655574297"><div class="netc"><b>-0.1</b><span class="sub" title="80% of simulations rank this team between 10 and 22 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 10-22</span></div></td>
@@ -8968,7 +8969,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#334e69;--tc2:#69be28;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#334e69;--tc2:#69be28;--tfg:#ffffff" data-tm="SEA" title="Open the Seahawks team card">
         <td class="num rk" data-v="17"><span class="rkn">17</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Seahawks"><div class="who"><span class="logo" style="background:#69be28"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/sea.png" alt="SEA" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Seahawks</span><span class="nm-short">SEA</span></b><span class="sub">SEA &middot; 0-1</span></div></div></td>
         <td class="num" data-v="-0.6669609912249106"><div class="netc"><b>-0.7</b><span class="sub" title="80% of simulations rank this team between 12 and 23 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 12-23</span></div></td>
@@ -8990,7 +8991,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#a71930;--tc2:#595959;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#a71930;--tc2:#595959;--tfg:#ffffff" data-tm="ATL" title="Open the Falcons team card">
         <td class="num rk" data-v="18"><span class="rkn">18</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Falcons"><div class="who"><span class="logo" style="background:#A71930"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/atl.png" alt="ATL" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Falcons</span><span class="nm-short">ATL</span></b><span class="sub">ATL &middot; 1-0</span></div></div></td>
         <td class="num" data-v="-0.7541133116778824"><div class="netc"><b>-0.8</b><span class="sub" title="80% of simulations rank this team between 14 and 22 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 14-22</span></div></td>
@@ -9012,7 +9013,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#72519c;--tc2:#ffc62f;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#72519c;--tc2:#ffc62f;--tfg:#ffffff" data-tm="MIN" title="Open the Vikings team card">
         <td class="num rk" data-v="19"><span class="rkn">19</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Vikings"><div class="who"><span class="logo" style="background:#4F2683"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/min.png" alt="MIN" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Vikings</span><span class="nm-short">MIN</span></b><span class="sub">MIN &middot; 0-1</span></div></div></td>
         <td class="num" data-v="-0.955346884065327"><div class="netc"><b>-1.0</b><span class="sub" title="80% of simulations rank this team between 15 and 23 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 15-23</span></div></td>
@@ -9034,7 +9035,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#334e69;--tc2:#c60c30;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#334e69;--tc2:#c60c30;--tfg:#ffffff" data-tm="NE" title="Open the Patriots team card">
         <td class="num rk" data-v="20"><span class="rkn">20</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Patriots"><div class="who"><span class="logo" style="background:#C60C30"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/ne.png" alt="NE" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Patriots</span><span class="nm-short">NE</span></b><span class="sub">NE &middot; 0-1</span></div></div></td>
         <td class="num" data-v="-1.024000301136569"><div class="netc"><b>-1.0</b><span class="sub" title="80% of simulations rank this team between 15 and 23 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 15-23</span></div></td>
@@ -9056,7 +9057,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#336557;--tc2:#595959;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#336557;--tc2:#595959;--tfg:#ffffff" data-tm="NYJ" title="Open the Jets team card">
         <td class="num rk" data-v="21"><span class="rkn">21</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Jets"><div class="who"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/nyj.png" alt="NYJ" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Jets</span><span class="nm-short">NYJ</span></b><span class="sub">NYJ &middot; 1-0</span></div></div></td>
         <td class="num" data-v="-1.0479822740653626"><div class="netc"><b>-1.0</b><span class="sub" title="80% of simulations rank this team between 15 and 23 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 15-23</span></div></td>
@@ -9078,7 +9079,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#3c4e84;--tc2:#a71930;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#3c4e84;--tc2:#a71930;--tfg:#ffffff" data-tm="NYG" title="Open the Giants team card">
         <td class="num rk" data-v="22"><span class="rkn">22</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Giants"><div class="who"><span class="logo" style="background:#A71930"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png" alt="NYG" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Giants</span><span class="nm-short">NYG</span></b><span class="sub">NYG &middot; 0-1</span></div></div></td>
         <td class="num" data-v="-1.7316857641150103"><div class="netc"><b>-1.7</b><span class="sub" title="80% of simulations rank this team between 17 and 25 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 17-25</span></div></td>
@@ -9100,7 +9101,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#595959;--tc2:#ffb612;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#595959;--tc2:#ffb612;--tfg:#ffffff" data-tm="PIT" title="Open the Steelers team card">
         <td class="num rk" data-v="23"><span class="rkn">23</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Steelers"><div class="who"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/pit.png" alt="PIT" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Steelers</span><span class="nm-short">PIT</span></b><span class="sub">PIT &middot; 0-1</span></div></div></td>
         <td class="num" data-v="-1.8128870502962247"><div class="netc"><b>-1.8</b><span class="sub" title="80% of simulations rank this team between 17 and 26 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 17-26</span></div></td>
@@ -9122,7 +9123,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#a71930;--tc2:#5b5955;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#a71930;--tc2:#5b5955;--tfg:#ffffff" data-tm="TB" title="Open the Buccaneers team card">
         <td class="num rk" data-v="24"><span class="rkn">24</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Buccaneers"><div class="who"><span class="logo" style="background:#322F2B"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/tb.png" alt="TB" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Buccaneers</span><span class="nm-short">TB</span></b><span class="sub">TB &middot; 1-0</span></div></div></td>
         <td class="num" data-v="-1.9724525900152816"><div class="netc"><b>-2.0</b><span class="sub" title="80% of simulations rank this team between 19 and 26 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 19-26</span></div></td>
@@ -9144,7 +9145,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#334e69;--tc2:#fb4f14;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#334e69;--tc2:#fb4f14;--tfg:#ffffff" data-tm="DEN" title="Open the Broncos team card">
         <td class="num rk" data-v="25"><span class="rkn">25</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Broncos"><div class="who"><span class="logo" style="background:#FB4F14"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/den.png" alt="DEN" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Broncos</span><span class="nm-short">DEN</span></b><span class="sub">DEN &middot; 0-1</span></div></div></td>
         <td class="num" data-v="-2.0903963748691767"><div class="netc"><b>-2.1</b><span class="sub" title="80% of simulations rank this team between 19 and 26 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 19-26</span></div></td>
@@ -9166,7 +9167,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#4d5f5a;--tc2:#ffb612;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#4d5f5a;--tc2:#ffb612;--tfg:#ffffff" data-tm="GB" title="Open the Packers team card">
         <td class="num rk" data-v="26"><span class="rkn">26</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Packers"><div class="who"><span class="logo" style="background:#FFB612"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/gb.png" alt="GB" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Packers</span><span class="nm-short">GB</span></b><span class="sub">GB &middot; 1-0</span></div></div></td>
         <td class="num" data-v="-3.065181612683236"><div class="netc"><b>-3.1</b><span class="sub" title="80% of simulations rank this team between 23 and 27 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 23-27</span></div></td>
@@ -9188,7 +9189,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#606875;--tc2:#e64100;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#606875;--tc2:#e64100;--tfg:#ffffff" data-tm="CHI" title="Open the Bears team card">
         <td class="num rk" data-v="27"><span class="rkn">27</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Bears"><div class="who"><span class="logo" style="background:#E64100"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="CHI" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Bears</span><span class="nm-short">CHI</span></b><span class="sub">CHI &middot; 0-1</span></div></div></td>
         <td class="num" data-v="-3.719240704003914"><div class="netc"><b>-3.7</b><span class="sub" title="80% of simulations rank this team between 25 and 28 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 25-28</span></div></td>
@@ -9210,7 +9211,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#7b4343;--tc2:#ffb612;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#7b4343;--tc2:#ffb612;--tfg:#ffffff" data-tm="WAS" title="Open the Commanders team card">
         <td class="num rk" data-v="28"><span class="rkn">28</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Commanders"><div class="who"><span class="logo" style="background:#FFB612"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/wsh.png" alt="WAS" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Commanders</span><span class="nm-short">WAS</span></b><span class="sub">WAS &middot; 1-0</span></div></div></td>
         <td class="num" data-v="-5.330126684836598"><div class="netc"><b>-5.3</b><span class="sub" title="80% of simulations rank this team between 28 and 30 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 28-30</span></div></td>
@@ -9232,7 +9233,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#0085ca;--tc2:#595959;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#0085ca;--tc2:#595959;--tfg:#ffffff" data-tm="CAR" title="Open the Panthers team card">
         <td class="num rk" data-v="29"><span class="rkn">29</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Panthers"><div class="who"><span class="logo" style="background:#0085CA"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/car.png" alt="CAR" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Panthers</span><span class="nm-short">CAR</span></b><span class="sub">CAR &middot; 0-1</span></div></div></td>
         <td class="num" data-v="-5.449557477135449"><div class="netc"><b>-5.4</b><span class="sub" title="80% of simulations rank this team between 28 and 31 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 28-31</span></div></td>
@@ -9254,7 +9255,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#33567f;--tc2:#a5acaf;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#33567f;--tc2:#a5acaf;--tfg:#ffffff" data-tm="IND" title="Open the Colts team card">
         <td class="num rk" data-v="30"><span class="rkn">30</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Colts"><div class="who"><span class="logo" style="background:#a5acaf"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/ind.png" alt="IND" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Colts</span><span class="nm-short">IND</span></b><span class="sub">IND &middot; 0-1</span></div></div></td>
         <td class="num" data-v="-6.16025308014672"><div class="netc"><b>-6.2</b><span class="sub" title="80% of simulations rank this team between 28 and 32 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 28-32</span></div></td>
@@ -9276,7 +9277,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#97233f;--tc2:#595959;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#97233f;--tc2:#595959;--tfg:#ffffff" data-tm="ARI" title="Open the Cardinals team card">
         <td class="num rk" data-v="31"><span class="rkn">31</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Cardinals"><div class="who"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/ari.png" alt="ARI" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Cardinals</span><span class="nm-short">ARI</span></b><span class="sub">ARI &middot; 0-1</span></div></div></td>
         <td class="num" data-v="-6.436097589963531"><div class="netc"><b>-6.4</b><span class="sub" title="80% of simulations rank this team between 29 and 32 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 29-32</span></div></td>
@@ -9298,7 +9299,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <td class="hide-sm"></td>
       </tr>
     
-      <tr class="teamrow" style="--tc:#5b6e78;--tc2:#a71930;--tfg:#ffffff">
+      <tr class="teamrow tm-open" style="--tc:#5b6e78;--tc2:#a71930;--tfg:#ffffff" data-tm="HOU" title="Open the Texans team card">
         <td class="num rk" data-v="32"><span class="rkn">32</span><span class="mv">&ndash;</span></td>
         <td class="stick" data-v="Texans"><div class="who"><span class="logo" style="background:#A71930"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/hou.png" alt="HOU" width="26" height="26" loading="lazy"></span><div><b><span class="nm-full">Texans</span><span class="nm-short">HOU</span></b><span class="sub">HOU &middot; 0-1</span></div></div></td>
         <td class="num" data-v="-7.393314189131607"><div class="netc"><b>-7.4</b><span class="sub" title="80% of simulations rank this team between 30 and 32 (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range 30-32</span></div></td>
@@ -9530,7 +9531,9 @@ document.querySelectorAll('table.sortable').forEach(tbl => {
 // A player row opens his card (assets/gamecast.js; loads after this script, so look it up at click time).
 document.addEventListener('click', e => {
   const tr = e.target.closest('tr.main[data-pid]');
-  if (tr && window.NFLE) window.NFLE.openPlayer(tr.dataset.pid);
+  if (tr && window.NFLE) { window.NFLE.openPlayer(tr.dataset.pid); return; }
+  const tm = e.target.closest('.tm-open[data-tm]');  // Power rows and Matchups tile headers open the team card
+  if (tm && window.NFLE) window.NFLE.openTeam(tm.dataset.tm);
 });
 // Table headers (see .fits / .fhead in the CSS).
 const nav = document.querySelector('nav.tabs');
@@ -9763,6 +9766,6 @@ window.nfleApplyScoring = () => applyScoring();
 })();
 </script>
 <script>window.NFLE_CFG = {"archive": true, "current": false, "data": "2023/week-02.json", "lookahead": 0, "root": "../", "season": 2023, "week": 2};</script>
-<script src="../assets/gamecast.js" defer></script>
+<script src="../assets/gamecast.js?v=dde99ea632" defer></script>
 </body>
 </html>
