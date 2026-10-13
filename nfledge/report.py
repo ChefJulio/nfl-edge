@@ -434,6 +434,15 @@ def espn_ids(rosters: pd.DataFrame | None, season: int) -> dict:
   return {g: str(e).split(".")[0] for g, e in zip(r.gsis_id, r.espn_id)}
 
 
+def headshots(rosters: pd.DataFrame | None, season: int) -> dict:
+  """gsis_id -> official NFL headshot URL from each player's latest roster row (nflverse rosters)."""
+  if rosters is None or "headshot_url" not in rosters:
+    return {}
+  r = rosters[(rosters.season <= season) & rosters.headshot_url.notna() & rosters.gsis_id.notna()]
+  r = r.sort_values(["season", "week"]).drop_duplicates("gsis_id", keep="last")
+  return dict(zip(r.gsis_id, r.headshot_url.astype(str)))
+
+
 def team_info(teams: pd.DataFrame | None) -> dict:
   """Every team's name, logo and colors (visible on the dark tile) for the team card, byes included."""
   ts = TeamStyle(teams)
@@ -533,6 +542,7 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
               if e is not None else pd.Series(dtype=float))
   prev_ecr = prev_ecr[~prev_ecr.index.duplicated()]
   espn = espn_ids(eng.data.rosters, season)
+  photos = headshots(eng.data.rosters, season)
   out = {}
   for pos in ("QB", "RB", "WR", "TE"):
     g = p[p.pos == pos].sort_values("proj", ascending=False)
@@ -541,7 +551,9 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
     for _, r in g.iterrows():
       st = stats.loc[r.gsis_id].to_dict() if r.gsis_id in stats.index else None
       rows.append({
-        "row_style": ts.row_style(r.team), "logo": ts.logo_img(r.team),
+        "row_style": ts.row_style(r.team), "logo": ts.logo_img(r.team), "logo_xs": ts.logo_img(r.team, 11),
+        "photo": photos.get(r.gsis_id) or (f"https://a.espncdn.com/i/headshots/nfl/players/full/{espn[r.gsis_id]}.png"
+                                           if r.gsis_id in espn else ""),
         "rank": int(r.pos_rank), "ecr": r.ecr if pd.notna(r.ecr) else prev_ecr.get(r.gsis_id, np.nan),
         "ecr_stale": pd.isna(r.ecr) and r.gsis_id in prev_ecr.index, "name": r.full_name, "team_chip": ts.chip(r.team),
         "opp_chip": ts.chip(r.opp), "opp": r.opp, "opp_logo": ts.logo_img(r.opp, 18),
@@ -1181,6 +1193,15 @@ def backtest_summary(ev: pd.DataFrame | None) -> list:
 # Render
 # ----------------------------------------------------------------------------------------------------------------
 
+def name_parts(name: str) -> tuple[str, str, str]:
+  """'Josh Allen' -> ('J', 'osh', 'Allen'); 'A.J. Brown' -> ('A', '.J.', 'Brown'). The pinned name column shows all
+  three, and the middle part folds away as the table scrolls sideways ('J. Allen'). One-word names: (name, '', '')."""
+  first, _, last = str(name).partition(" ")
+  if not last:
+    return str(name), "", ""
+  return first[:1], first[1:], last
+
+
 def short_name(name: str) -> str:
   """'Josh Allen' -> 'Allen', 'Amon-Ra St. Brown' -> 'St. Brown' (the compact pinned column; the team logo beside
   it tells same-name players apart)."""
@@ -1202,6 +1223,7 @@ def render(ctx: dict, out_path: Path) -> Path:
   env.filters["posb"] = pos_badge
   env.filters["pct"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.0%}"
   env.filters["short"] = short_name
+  env.filters["nameparts"] = name_parts
   # Site root relative to this page ("" for index.html, "../" for <season>/week-NN.html): shared assets, the game
   # page and this week's data file are addressed from there.
   root = ctx["nav"]["current_href"][:-len("index.html")]

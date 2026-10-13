@@ -158,18 +158,33 @@ tr.teamrow.out > td { color: rgba(255,255,255,.55); }
 /* Name columns stay pinned while a wide table scrolls sideways (phones). */
 td.stick, th.stick { position: sticky; left: 0; z-index: 1; }
 thead th.stick { z-index: 3; }
-/* Compact pinned column: once a table scrolls sideways, the pinned name cell shrinks to logo + short name
-   ("J. Allen", team code) and a shadow marks its edge; it expands again at the far left. */
+/* The pinned column never changes size (resizing made the table jump). Once a table is scrolled sideways a
+   shadow marks its edge; in the rankings, the rest of each first name folds away pixel for pixel with the scroll
+   ("Josh Allen" -> "J. Allen") while the initial and last name stay put (gamecast.js sets --sx; each .fn-rest
+   carries its own width as --w). */
 .nm-short { display: none; }
-.scroll.compact .nm-full { display: none; } .scroll.compact .nm-short { display: inline; white-space: nowrap; }
-.scroll.compact td.stick .badges, .scroll.compact td.stick .sub { display: none !important; }
-.scroll.compact td.stick, .scroll.compact th.stick { min-width: 0 !important; width: auto !important; max-width: 104px;
-  padding-left: 5px; padding-right: 5px; --extra: 8px 0 10px -8px rgba(0,0,0,.85); }
-.scroll.compact td.stick .who { gap: 5px; }
-.scroll.compact td.stick .who b, .scroll.compact th.stick { font-size: 11px; }
-.scroll.compact td.stick .logo { width: 16px; height: 16px; box-shadow: none; } .scroll.compact td.stick .logo img { width: 12px; height: 12px; }
-.scroll.compact td.stick .nm-short { overflow: hidden; text-overflow: ellipsis; display: block; max-width: 76px; }
-table.ranks td.stick, table.ranks th.stick { min-width: 190px; white-space: normal; }
+.scroll.scrolled td.stick, .scroll.scrolled th.stick { --extra: 8px 0 10px -8px rgba(0,0,0,.85); }
+table.ranks td.stick, table.ranks th.stick { width: 200px; min-width: 200px; max-width: 200px; white-space: normal; }
+table.ranks .nmw { min-width: 0; flex: 1; }
+table.ranks .nm { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fn-rest { display: inline-block; vertical-align: bottom; overflow: hidden; white-space: nowrap;
+  max-width: clamp(0px, calc(var(--w, 9em) - var(--sx, 0px)), var(--w, 9em)); }
+/* mid-fold, letters dissolve at the edge instead of being sliced in half */
+.scrolled .fn-rest { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 10px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 10px), transparent); }
+.fn-dot { display: inline-block; vertical-align: bottom; overflow: hidden;
+  max-width: clamp(0px, calc(var(--sx, 0px) - var(--w, 9em) + 0.3em), 0.3em); }
+/* player photo with a small team-logo badge (the badge alone if there's no photo) */
+.pic { position: relative; flex: none; width: 32px; height: 32px; border-radius: 50%; overflow: hidden;
+  background: rgba(255,255,255,.08); box-shadow: 0 0 0 1px rgba(255,255,255,.18); }
+.pic img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+.pic .pic-tm { position: absolute; right: -2px; bottom: -2px; }
+.pic .pic-tm .logo { width: 15px; height: 15px; box-shadow: 0 0 0 1.5px var(--panel); }
+.pic .pic-tm .logo img { width: 11px; height: 11px; }
+.pic.nopic img, .pic .nopic-mark { display: none; }
+.pic.nopic .pic-tm, .pic:has(.nopic-mark) .pic-tm { inset: 0; display: grid; place-items: center; }
+.pic.nopic .pic-tm .logo, .pic:has(.nopic-mark) .pic-tm .logo { width: 28px; height: 28px; box-shadow: none; }
+.pic.nopic .pic-tm .logo img, .pic:has(.nopic-mark) .pic-tm .logo img { width: 20px; height: 20px; }
 /* Projection sits next to the name; its header lines up with the number, not the far edge of the bar. */
 th.projh, td.projc { text-align: left; padding-left: 14px; }
 td.projc .proj { justify-content: flex-start; }
@@ -182,7 +197,9 @@ th.ctr, td.ctr { text-align: center; }
 td.actc { font-weight: 700; font-size: 14px; } td.actc.act-hi { color: #6fdc8c; } td.actc.act-lo { color: #ff8f84; }
 @media (max-width: 640px) {
   .hide-xs { display: none; }
-  table.ranks td.stick, table.ranks th.stick { min-width: 150px; }
+  table.ranks td.stick, table.ranks th.stick { width: 156px; min-width: 156px; max-width: 156px; padding-left: 6px; padding-right: 6px; }
+  table.ranks td.stick .who { gap: 7px; }
+  table.ranks .nm { font-size: 12.5px; }
   td.projc .rng { display: none; }  /* phone: number + floor-ceiling text; the bar comes back on wider screens */
   td.mu .meter { display: none; }
   th, td { padding: 8px 7px; }
@@ -441,7 +458,8 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <tr class="main teamrow{% if r.boost >= 1 %} boosted{% endif %}{% if r.avail < 0.5 %} out{% endif %}" style="{{ r.row_style }}" data-pid="{{ r.pid }}" data-espn="{{ r.espn }}" data-team="{{ r.team }}" data-name="{{ r.name|lower }}" data-pos="{{ r.pos }}" data-proj="{{ '%.3f'|format(r.proj) }}" data-p="{{ '%.2f %.2f %.2f %.2f'|format(r.p10, r.p25, r.p75, r.p90) }}" data-sc="{{ r.sc }}">
           <td class="num rk">{{ r.rank }}</td>
           <td data-v="{{ r.ecr|f0 }}" class="num ecr{{ ' stale' if r.ecr_stale }}"{% if r.ecr_stale %} title="Last week's expert rank; this week's is published Friday"{% endif %}>{{ r.ecr|f0 }}{% if r.ecr_stale %}<sup>lw</sup>{% endif %}</td>
-          <td class="stick" data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b><span class="nm-full">{{ r.name }}</span><span class="nm-short">{{ r.name|short }}</span></b>
+          {% set ini, rest, last = r.name|nameparts %}
+          <td class="stick" data-v="{{ r.name }}"><div class="who"><span class="pic">{% if r.photo %}<img src="{{ r.photo }}" alt="" width="32" height="32" loading="lazy" onerror="this.parentNode.classList.add('nopic')">{% else %}<i class="nopic-mark"></i>{% endif %}<span class="pic-tm">{{ r.logo_xs|safe }}</span></span><div class="nmw"><b class="nm"><span class="fn">{{ ini }}</span>{% if rest %}<span class="fn-rest">{{ rest }}</span><span class="fn-dot">.</span>{% endif %}{% if last %} {{ last }}{% endif %}</b>
             {%- if r.status or r.boost >= 1 or r.low_sample %}<div class="badges">
               {%- if r.status %}<span class="flag {{ 'f-out' if r.avail < 0.5 else 'f-q' }}" title="Injury report; practice Wed/Thu/Fri: D = did not practice, L = limited, F = full">{{ r.status }}</span>{% endif %}
               {%- if r.boost >= 1 %}<span class="flag f-up" title="Raised by volume vacated by: {{ r.boost_from }}">+{{ r.boost|f1 }} inj</span>{% endif %}
@@ -698,21 +716,23 @@ relayout();
 window.addEventListener('scroll', placeHeads, { passive: true });
 window.addEventListener('resize', relayout);
 document.addEventListener('click', e => { if (e.target.closest('nav.tabs, .posbar, tr.main, thead')) setTimeout(relayout, 0); });
-// Compact pinned column (see .scroll.compact in the CSS). Collapsing narrows the first columns, which would
-// slide the content being read; scrollLeft is moved by the same amount so it stays put. Expanding only at the
-// far left (hysteresis) keeps that adjustment from toggling it straight back.
+// Pinned column: fixed size, never resized (that made the table jump). Scrolling sideways adds an edge shadow and
+// folds the rest of each first name away pixel for pixel with the scroll (--sx; each .fn-rest gets its own width
+// as --w, measured the first time its table scrolls, when it is visible). One style write per animation frame.
 document.querySelectorAll('.scroll').forEach(sc => {
-  const cell = sc.querySelector('td.stick');
-  if (!cell) return;
+  if (!sc.querySelector('td.stick')) return;
+  let measured = false, frame = 0;
   sc.addEventListener('scroll', () => {
-    const on = sc.classList.contains('compact');
-    const want = on ? sc.scrollLeft > 0 : sc.scrollLeft > 4;
-    if (want === on) return;
-    const before = cell.getBoundingClientRect().width;
-    sc.classList.toggle('compact', want);
-    const delta = before - cell.getBoundingClientRect().width;
-    if (want && delta > 0) sc.scrollLeft = Math.max(1, sc.scrollLeft - delta);
-    relayout();
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      if (!measured) {
+        sc.querySelectorAll('.fn-rest').forEach(s => s.style.setProperty('--w', `${s.scrollWidth}px`));
+        measured = true;
+      }
+      sc.style.setProperty('--sx', `${Math.min(sc.scrollLeft, 120)}px`);
+      sc.classList.toggle('scrolled', sc.scrollLeft > 2);
+    });
   }, { passive: true });
 });
 const ps = document.getElementById('psearch');
