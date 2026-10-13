@@ -278,6 +278,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   ~8 MB): every REG game since 1999 (stats cached per season), snap % from 2012 (pfr -> gsis via load_players),
   home/away from the 1999+ schedule, weekly position rank (site scoring), and OUR pregame matchup rank +
   projection read from the published week JSONs (2021+, incl. lookahead weeks) - not hindsight.
+  **Team card** (2026-10-13): same overlay/tabs (Overview / Game log / Players), `#team/<ABBR>`; opens from Power
+  rows, Matchups tile headers (`.tm-open[data-tm]`), player-card team names, gamecast scoreboard. Week JSON now
+  carries `power` (incl. `rank_hist`, this week pinned to the headline rank) and `teams` (names/logos/colors).
+  `tools/player_logs.py` also writes `data/teams/<T>.json` (~3 MB): every REG game since 1999 (schedule + Elo +
+  nflverse team stats), 2021+ our pregame chances and both power ranks, season averages with league ranks,
+  remaining schedule. **nflverse team-stats EPA does NOT reconcile with pbp** (avg gap 6 EPA/game over 2026;
+  one game matched exactly): team log shows yards/play instead. EPA from our own pbp would need 1999-2018 pbp.
 
 ## 8. Site / pipeline
 - `index.html` = current week: the week being played (any final game) until **Tuesday 06:00 ET** after its last

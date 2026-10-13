@@ -303,8 +303,8 @@
   const closePlayer = () => {
     const ov = document.getElementById('pcOv'); if (ov) ov.hidden = true;
     document.documentElement.classList.remove('pc-open');
-    cardPid = null;
-    if (location.hash.startsWith('#player/')) { try { history.replaceState(null, '', location.pathname + location.search + prevHash); } catch (e) { /* ignore */ } }
+    cardPid = null; cardTeam = null;
+    if (location.hash.startsWith('#player/') || location.hash.startsWith('#team/')) { try { history.replaceState(null, '', location.pathname + location.search + prevHash); } catch (e) { /* ignore */ } }
   };
   const rangeSvg = (q, proj) => {
     const top = Math.max(10, q[4] * 1.1), W = 260, x = v => 4 + (W - 8) * Math.min(Math.max(v, 0), top) / top;
@@ -385,7 +385,7 @@
       <div class="pc-head" style="--tc:${esc(g ? g.colors[p.team] : '#666')}">
         ${me ? logo(me.logo_url, me.logo_bg, 34, p.team) : ''}
         <div class="pc-id"><h3 id="pcName">${esc(p.name)}</h3>
-          <div class="pc-meta"><span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span> ${esc(p.team)} ${opp ? `<span class="muted">${esc(p.home)} ${esc(opp.team)}</span>` : ''}
+          <div class="pc-meta"><span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span> <button type="button" class="tm-open pc-tlink" data-tm="${esc(p.team)}">${esc(p.team)}</button> ${opp ? `<span class="muted">${esc(p.home)} <button type="button" class="tm-open pc-tlink" data-tm="${esc(opp.team)}">${esc(opp.team)}</button></span>` : ''}
             <span class="tier t-${esc(p.slot)}">${esc(p.tier)}</span> <span class="muted">${esc(p.pos)}${p.rank} this week</span></div>
           ${flags ? `<div class="pc-flags">${flags}</div>` : ''}</div>
       </div>
@@ -426,12 +426,170 @@
       const card = document.getElementById('g-' + a.dataset.goto); if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   };
+  // ------------------------------------------------------------------------------------------------- team card
+  // Same overlay and look as the player card. Overview from this week's data (Power, matchup, top players);
+  // season stats and the career game log from data/teams/<TEAM>.json (tools/player_logs.py).
+  let cardTeam = null, teamTab = 'ov', teamOpp = '';
+  const TLOGS = {};
+  const rkChip = (r, title = '') => r ? `<span class="rk-b ${r <= 8 ? 'rk1' : r <= 16 ? 'rk2' : r <= 24 ? 'rk3' : 'rk4'}"${title ? ` title="${esc(title)}"` : ''}>${ord(r)}</span>` : '';
+  const sgn = v => v == null || isNaN(v) ? '' : `${v >= 0 ? '+' : ''}${(+v).toFixed(1)}`;
+  const tInfo = t => (DATA && DATA.teams && DATA.teams[t]) || {};
+  const tLogo = (t, size = 20) => { const i = tInfo(t); return logo(i.logo, i.logo_bg, size, t); };
+  const gcHref = (gid, f) => `${siteRoot()}game.html?g=${encodeURIComponent(gid)}${f ? `&d=${encodeURIComponent(f)}` : ''}`;
+  const rankTrend = hist => {
+    const wk = Object.keys(hist || {}).map(Number).sort((a, b) => a - b);
+    if (wk.length < 2) return '';
+    const W = 300, H = 80, X = w => 14 + (W - 28) * (w - wk[0]) / Math.max(1, wk[wk.length - 1] - wk[0]), Y = r => 8 + (H - 26) * (r - 1) / 31;
+    const pts_ = wk.map(w => `${X(w).toFixed(1)},${Y(hist[w]).toFixed(1)}`).join(' ');
+    return `<svg class="tm-trend" viewBox="0 0 ${W} ${H}" width="100%" height="${H}" aria-label="Power rank by week">
+      <line x1="14" x2="${W - 14}" y1="${Y(16.5)}" y2="${Y(16.5)}" class="tm-tr-mid"/><polyline points="${pts_}" class="tm-tr-line"/>
+      ${wk.map(w => `<circle cx="${X(w)}" cy="${Y(hist[w])}" r="3.2" class="tm-tr-pt"><title>Week ${w}: ${ord(hist[w])}</title></circle>
+        <text x="${X(w)}" y="${Y(hist[w]) - 6}" class="tm-tr-v">${hist[w]}</text><text x="${X(w)}" y="${H - 2}" class="tm-tr-w">${w}</text>`).join('')}</svg>`;
+  };
+  const teamLogHtml = (L, abbr) => {
+    const opps = [...new Set(L.seasons.flatMap(s => s.g.map(g => g.o)))].sort();
+    const sel = `<label class="tm-filter">Opponent <select data-topp><option value="">All teams</option>${opps.map(o => `<option value="${esc(o)}"${o === teamOpp ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select></label>`;
+    let h2h = '';
+    if (teamOpp) {
+      const gs = L.seasons.flatMap(s => s.g).filter(g => g.o === teamOpp);
+      const w = gs.filter(g => g.r === 'W').length, l = gs.filter(g => g.r === 'L').length, t = gs.filter(g => g.r === 'T').length;
+      h2h = `<div class="tm-h2h">${tLogo(teamOpp, 18)} <b>${esc(abbr)} vs ${esc(teamOpp)} since 1999: ${w}-${l}${t ? `-${t}` : ''}</b> <span class="muted">(${gs.length} games)</span></div>`;
+    }
+    const oppCell = (o, h, opr) => `<td class="lg-opp tm-opp ${opr ? (opr <= 8 ? 'mr-hard' : opr <= 16 ? 'mr-tough' : opr <= 24 ? 'mr-ok' : 'mr-easy') : ''}"><button type="button" class="tm-open" data-tm="${esc(o)}"${opr ? ` title="Their power rank that week: ${ord(opr)}"` : ''}>${h === 0 ? '@' : h === 2 ? 'vs ' : ''}${esc(o)}</button></td>`;
+    const pct = (v, m) => v == null && m == null ? '–' : `${v != null ? `${v}%` : '–'}<small> / ${m != null ? `${m}%` : '–'}</small>`;
+    const head = `<tr class="lg-gh"><th colspan="7"></th><th colspan="5" class="lg-grp">Offense</th><th colspan="3" class="lg-grp">Allowed</th><th></th></tr>
+      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th>Result</th><th class="num">Line</th><th class="num" title="Pregame win chance: Vegas / our model (2021 on)">Odds</th><th class="num" title="Our power rank that week">Pwr</th><th class="num" title="Elo going in">Elo</th>
+      <th class="num">Yds</th><th class="num">Pass</th><th class="num">Rush</th><th class="num" title="Yards per play">YPP</th><th class="num" title="Turnovers">TO</th>
+      <th class="num">Yds</th><th class="num">YPP</th><th class="num" title="Takeaways">TA</th><th></th></tr>`;
+    const body = L.seasons.map(S => {
+      let rows = S.g.map(g => ({ w: g.w, g }));
+      if (S.s === L.cur && !teamOpp) { (L.up || []).forEach(u => rows.push({ w: u.w, u })); (L.byes || []).forEach(b => rows.push({ w: b, bye: 1 })); }
+      if (teamOpp) rows = rows.filter(r => r.g && r.g.o === teamOpp);
+      if (!rows.length) return '';
+      rows.sort((a, b) => a.w - b.w);
+      const rk = S.rk || {}, av = S.avg || {};
+      const trs = rows.map(r => {
+        if (r.bye) return `<tr class="lg-bye"><td>${r.w}</td><td colspan="15">Bye</td></tr>`;
+        if (r.u) {
+          const u = r.u;
+          return `<tr class="lg-up"><td>${u.w}</td>${oppCell(u.o, u.h, u.opr)}<td class="muted">upcoming</td><td class="num">${u.ln != null ? sgn(-u.ln).replace('+0.0', 'PK') : '–'}</td>
+            <td class="num">${pct(u.vc, u.mc)}</td><td class="num">–</td><td class="num">–</td><td colspan="8"></td><td><a class="tm-gc" href="${gcHref(u.gid, u.f)}" title="Gamecast">&rsaquo;</a></td></tr>`;
+        }
+        const g = r.g, s = g.s || [], os = g.os || [];
+        const res = `<span class="tm-res ${g.r === 'W' ? 'w' : g.r === 'L' ? 'l' : ''}">${g.r}</span> ${g.ps}-${g.pa}${g.ot ? ' <small>OT</small>' : ''}`;
+        const line = g.ln != null ? `${g.ln > 0 ? '-' : g.ln < 0 ? '+' : ''}${g.ln === 0 ? 'PK' : Math.abs(g.ln).toFixed(1)}${g.ats ? ` <small class="ats-${g.ats}">${g.ats === 'W' ? 'cov' : g.ats === 'L' ? 'no' : 'push'}</small>` : ''}` : '–';
+        return `<tr><td>${g.w}</td>${oppCell(g.o, g.h, g.opr)}<td class="tm-rc">${res}</td><td class="num">${line}</td><td class="num">${pct(g.vc, g.mc)}</td>
+          <td class="num">${g.pr ? `<span class="lg-rk ${g.pr <= 8 ? 'rk-good' : g.pr <= 20 ? 'rk-mid' : 'rk-bad'}">${g.pr}</span>` : '–'}</td><td class="num muted">${g.elo || ''}</td>
+          <td class="num">${f0(s[0])}</td><td class="num">${f0(s[1])}</td><td class="num">${f0(s[2])}</td><td class="num">${s[3] != null ? s[3].toFixed(1) : ''}</td><td class="num">${s[4] ?? ''}</td>
+          <td class="num">${f0(os[0])}</td><td class="num">${os[3] != null ? os[3].toFixed(1) : ''}</td><td class="num">${os[4] ?? ''}</td>
+          <td><a class="tm-gc" href="${gcHref(g.gid, g.f)}" title="Gamecast">&rsaquo;</a></td></tr>`;
+      }).join('');
+      const sumBits = [S.rec, av.pf != null ? `${f1(av.pf)} PF/G${rk.pf ? ` (${ord(rk.pf)})` : ''}` : '', av.pa != null ? `${f1(av.pa)} PA/G${rk.pa ? ` (${ord(rk.pa)})` : ''}` : ''].filter(Boolean).join(' · ');
+      return `<tbody><tr class="lg-season"><td colspan="16"><b>${S.s}</b> ${esc(sumBits)}</td></tr>${head}${trs}</tbody>`;
+    }).join('');
+    const legend = `<div class="lg-leg"><span>Opponent color = their power rank that week (2021 on):</span><span class="mr-hard">top 8</span><span class="mr-tough">9-16</span><span class="mr-ok">17-24</span><span class="mr-easy">25-32</span>
+      <span>· Odds = pregame win chance, Vegas / our model · Line = Vegas spread for ${esc(abbr)} (cov = covered) · › = gamecast</span></div>`;
+    return `<div class="tm-bar">${sel}</div>${h2h}${legend}<div class="lg-scroll"><table class="lg tm-lg">${body}</table></div>`;
+  };
+  const teamSeasonBox = (L) => {
+    const S = L && L.seasons.find(s => s.s === L.cur);
+    if (!S) return '';
+    const a = S.avg || {}, r = S.rk || {};
+    const cell = (k, label, v) => `<div class="tm-st"><div class="pc-k">${label}</div><div class="tm-stv">${v}</div>${rkChip(r[k], `League rank this season (1st = best)`)}</div>`;
+    return `<div class="pc-box"><div class="pc-k">${S.s} season · ${esc(S.rec)} · per game</div><div class="tm-stats">
+      ${cell('pf', 'Points for', f1(a.pf))}${cell('pa', 'Points against', f1(a.pa))}${cell('yd', 'Yards', f0(a.yd))}${cell('oyd', 'Yards allowed', f0(a.oyd))}
+      ${cell('ep', 'Yards / play', a.ep != null ? a.ep.toFixed(2) : '')}${cell('oep', 'Allowed / play', a.oep != null ? a.oep.toFixed(2) : '')}${cell('tom', 'Turnover margin', sgn(a.tom))}</div></div>`;
+  };
+  const renderTeam = abbr => {
+    const body = document.querySelector('#pcOv .pc-body');
+    const info = tInfo(abbr), pw = (DATA.power || []).find(x => x.team === abbr), g = teamGame(abbr);
+    const opp = g && (g.away.team === abbr ? g.home : g.away), home = g && g.home.team === abbr;
+    const st = g && LIVE.byGame[g.id], L = TLOGS[abbr];
+    let now = '';
+    if (st && st.state !== 'pre') {
+      const me = st.home.team === abbr ? st.home : st.away, them = st.home.team === abbr ? st.away : st.home, live = st.state === 'in';
+      now = `<div class="pc-now${live ? ' is-live' : ''}"><div class="pc-k">${live ? `<span class="live-dot"></span>Live · ${esc(st.short || '')}` : 'Final'}</div>
+        <div class="pc-big">${esc(abbr)} ${me.score} <small>–</small> ${them.score} ${esc(them.team)}</div><div class="pc-sub"><a href="${gameHref(g)}">${live ? 'Open live gamecast' : 'Game recap'} &rsaquo;</a></div></div>`;
+    } else if (g && g.final) {
+      const ps = home ? g.final.home : g.final.away, pa = home ? g.final.away : g.final.home;
+      now = `<div class="pc-now"><div class="pc-k">Final</div><div class="pc-big">${esc(abbr)} ${ps} <small>–</small> ${pa} ${esc(opp.team)}</div><div class="pc-sub"><a href="${gameHref(g)}">Game recap &rsaquo;</a></div></div>`;
+    }
+    const fc = g && g.fc;
+    const myPct = (fav, pct) => fav === abbr ? pct : 100 - pct;
+    const week = g ? `<div class="pc-box"><div class="pc-k">Week ${DATA.week}</div>
+        <div class="pc-mu">${tLogo(opp.team, 22)}<b>${home ? 'vs' : '@'} ${esc(opp.nick || opp.team)}</b> <span class="muted">${esc(g.kickoff || '')}</span></div>
+        ${fc ? `<div class="tm-odds"><div><div class="pc-k">${fc.src === 'Vegas' ? 'Vegas odds' : 'Our model (no line yet)'}</div><b>${fc.tossup ? 'Tossup' : `${myPct(fc.fav, fc.pct)}%`}</b>${fc.tossup ? ` <small class="muted">${esc(abbr)} ${myPct(fc.fav, fc.pct)}%</small>` : ''}</div>
+          ${fc.src === 'Vegas' ? `<div><div class="pc-k">Our model</div><b>${fc.model_tossup ? 'Tossup' : `${myPct(fc.model_fav, fc.model_pct)}%`}</b></div>` : ''}
+          ${g.vegas_line ? `<div><div class="pc-k">Line</div><b>${esc(g.vegas_line)}</b></div>` : ''}</div>` : ''}
+        <div class="pc-links" style="margin-top:8px"><a href="${gameHref(g)}">Gamecast &rsaquo;</a>${CFG.page !== 'game' ? `<a href="#games" data-goto="${esc(g.id)}">Matchup card &rsaquo;</a>` : ''}</div></div>`
+      : `<div class="pc-box"><div class="pc-k">Week ${DATA.week}</div><b>Bye</b></div>`;
+    const unit = (label, v, rk, pp) => `<div class="tm-u"><span class="tm-ul">${label}</span><span class="tm-uv">${sgn(v)}</span>${rkChip(rk)}
+      <span class="tm-ub"><span style="${v >= 0 ? `left:50%;width:${Math.min(50, Math.abs(v) * 10)}%` : `right:50%;width:${Math.min(50, Math.abs(v) * 10)}%`}" class="${v >= 0 ? 'pos' : 'neg'}"></span></span>
+      ${pp != null ? `<span class="tm-pp muted" title="EPA per 100 plays">${sgn(pp)}</span>` : '<span></span>'}</div>`;
+    const power = pw ? `<div class="pc-box"><div class="pc-k">Power ranking</div>
+        <div class="tm-pw"><div><div class="pc-big">${ord(pw.rank)}</div><div class="pc-sub">rank range ${esc(pw.range)}${pw.move ? ` · ${pw.move > 0 ? '▲' : '▼'}${Math.abs(pw.move)} this week` : ''}</div></div>
+          <div><div class="pc-big sm">${sgn(pw.net)} <small>pts/g vs avg</small></div><div class="pc-sub">Offense ${sgn(pw.off)} (${ord(pw.off_rk)}) · Defense ${sgn(pw.def)} (${ord(pw.def_rk)})</div></div></div>
+        <div class="tm-units">${unit('Pass O', pw.pass_o, pw.pass_o_rk, pw.pass_o_pp)}${unit('Run O', pw.rush_o, pw.rush_o_rk, pw.rush_o_pp)}
+          ${unit('Pass D', pw.pass_d, pw.pass_d_rk, pw.pass_d_pp)}${unit('Run D', pw.rush_d, pw.rush_d_rk, pw.rush_d_pp)}${unit('Special teams', pw.st, pw.st_rk, null)}</div>
+        <div class="pc-sub">Points per game vs an average team (opponent-adjusted). Schedule so far ${ord(pw.sos_past_rk)} hardest · rest of season ${ord(pw.sos_next_rk)} hardest.</div>
+        ${rankTrend(pw.rank_hist) ? `<div class="pc-k" style="margin-top:10px">Power rank by week</div>${rankTrend(pw.rank_hist)}` : ''}</div>` : '';
+    const players = Object.entries(DATA.players).filter(([, p]) => p.team === abbr).sort((a, b) => b[1].proj - a[1].proj);
+    const plRows = players.map(([pid, p]) => { const s = scaled(p);
+      return `<tr><td><button type="button" class="bx-n" data-open-pid="${esc(pid)}">${esc(p.name)}</button> <span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>${p.status ? ` <span class="flag ${p.inactive >= 0.5 ? 'f-out' : 'f-q'}">${esc(p.status)}</span>` : ''}</td>
+        <td class="num"><b>${f1(s.proj)}</b></td><td><span class="tier t-${esc(p.slot)}">${esc(p.tier)}</span></td><td class="num muted">${p.fpg != null ? f1(p.fpg) : ''}</td></tr>`; }).join('');
+    const tabs = [['ov', 'Overview'], ['log', 'Game log'], ['pl', 'Players']];
+    body.innerHTML = `
+      <div class="pc-head" style="--tc:${esc(info.color || '#666')}">${tLogo(abbr, 34)}
+        <div class="pc-id"><h3 id="pcName">${esc(info.name || abbr)}</h3>
+          <div class="pc-meta"><b>${esc((L && (L.seasons.find(s => s.s === L.cur) || {}).rec) || (pw ? pw.record : ''))}</b>${info.division ? ` <span class="muted">${esc(info.division)}</span>` : ''}${pw ? ` <span class="tier t-start">Power ${ord(pw.rank)}</span>` : ''}</div></div></div>
+      ${now}
+      <div class="seg pc-tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" data-tt="${k}" class="${teamTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="pc-tab" data-tt="ov"${teamTab === 'ov' ? '' : ' hidden'}><div class="pc-grid tm-grid">${week}${power}</div><div class="tm-season">${L ? teamSeasonBox(L) : ''}</div></div>
+      <div class="pc-tab" data-tt="log"${teamTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every game since 1999</div><div class="tm-log">${L ? teamLogHtml(L, abbr) : '<p class="pc-sub">Loading game log&hellip;</p>'}</div></div></div>
+      <div class="pc-tab" data-tt="pl"${teamTab === 'pl' ? '' : ' hidden'}><div class="pc-box"><div class="pc-k">Fantasy players this week</div>
+        ${plRows ? `<table class="bx tm-pl"><thead><tr><th>Player</th><th class="num">Proj</th><th>Tier</th><th class="num">FP/G</th></tr></thead><tbody>${plRows}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed this week.</p>'}</div></div>`;
+    body.querySelectorAll('[data-tt]').forEach(b => b.onclick = () => {
+      teamTab = b.dataset.tt;
+      body.querySelectorAll('.pc-tabs [data-tt]').forEach(x => x.classList.toggle('on', x === b));
+      body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.tt !== teamTab; });
+    });
+    const sel = body.querySelector('[data-topp]');
+    if (sel) sel.onchange = () => { teamOpp = sel.value; body.querySelector('.tm-log').innerHTML = teamLogHtml(TLOGS[abbr], abbr); wireTeamLog(body, abbr); };
+    body.querySelectorAll('[data-goto]').forEach(a => a.onclick = ev => {
+      ev.preventDefault(); closePlayer();
+      const tab = document.querySelector('nav.tabs button[data-tab="games"]'); if (tab) tab.click();
+      const card = document.getElementById('g-' + a.dataset.goto); if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    if (!L) loadTeamLog(abbr);
+  };
+  const wireTeamLog = (body, abbr) => {
+    const sel = body.querySelector('[data-topp]');
+    if (sel) sel.onchange = () => { teamOpp = sel.value; body.querySelector('.tm-log').innerHTML = teamLogHtml(TLOGS[abbr], abbr); wireTeamLog(body, abbr); };
+  };
+  const loadTeamLog = async abbr => {
+    try { TLOGS[abbr] = await getJSON(`${siteRoot()}data/teams/${encodeURIComponent(abbr)}.json`); }
+    catch (e) { const b = document.querySelector('#pcOv .tm-log'); if (b) b.innerHTML = '<p class="pc-sub">Game log unavailable.</p>'; return; }
+    if (cardTeam === abbr) renderTeam(abbr);
+  };
+  const openTeam = abbr => {
+    if (!DATA) return;
+    const ov = ensureOverlay();
+    if (!location.hash.startsWith('#player/') && !location.hash.startsWith('#team/')) prevHash = location.hash;
+    if (abbr !== cardTeam) { teamTab = 'ov'; teamOpp = ''; }
+    cardPid = null; cardTeam = abbr;
+    renderTeam(abbr);
+    ov.hidden = false;
+    document.documentElement.classList.add('pc-open');
+    try { history.replaceState(null, '', location.pathname + location.search + '#team/' + abbr); } catch (e) { /* ignore */ }
+    ov.querySelector('.pc').scrollTop = 0; ov.scrollTop = 0;
+  };
+
   const openPlayer = pid => {
     if (!DATA) return;
     const ov = ensureOverlay();
-    if (!location.hash.startsWith('#player/')) prevHash = location.hash;
+    if (!location.hash.startsWith('#player/') && !location.hash.startsWith('#team/')) prevHash = location.hash;
     if (pid !== cardPid) cardTab = 'ov';
-    cardPid = pid;
+    cardPid = pid; cardTeam = null;
     renderCard(pid);
     ov.hidden = false;
     document.documentElement.classList.add('pc-open');
@@ -512,7 +670,7 @@
       } catch (e) { /* keep last good */ }
     }));
     paintRows(); paintTiles(); paintPill();
-    if (cardPid) renderCard(cardPid);
+    if (cardPid) renderCard(cardPid); else if (cardTeam) renderTeam(cardTeam);
     const sts = Object.values(LIVE.byGame);
     const soon = sts.some(s => s.state === 'pre' && new Date(s.date).getTime() - now < 30 * 60000);
     const live = sts.some(s => s.state === 'in');
@@ -667,7 +825,7 @@
     const sp = sit ? spot(sit, info) : null;
     const wpNow = (() => { const s = upto != null ? ser.filter(x => x.t <= upto) : ser; return s.length ? s[s.length - 1].home : null; })();
     const fc = g && g.fc;
-    const side = (s, isHome) => `<div class="sb-t${isHome ? ' home' : ''}" style="--tc:${esc(s.color)}">${logo(s.logo, '#111', 40, s.team)}
+    const side = (s, isHome) => `<div class="sb-t tm-open${isHome ? ' home' : ''}" data-tm="${esc(s.team)}" style="--tc:${esc(s.color)}">${logo(s.logo, '#111', 40, s.team)}
       <div><div class="sb-n">${esc((g && (isHome ? g.home.nick : g.away.nick)) || s.team)}</div><div class="sb-r">${esc(s.record || '')}</div></div>
       <div class="sb-s">${isHome ? hs : as}</div>${sp && sp.offense.team === s.team ? '<i class="sb-ball" title="Has the ball"></i>' : ''}</div>`;
     root.innerHTML = `
@@ -806,9 +964,17 @@
   const initWeek = async () => {
     try { DATA = await getJSON(CFG.root + CFG.data, 12000, false); DATA.__rel = CFG.data; } catch (e) { DATA = null; return; }
     if (location.hash.startsWith('#player/')) openPlayer(location.hash.slice(8));
-    document.addEventListener('nfle-scoring', () => { paintRows(); if (cardPid) renderCard(cardPid); });
+    else if (location.hash.startsWith('#team/')) openTeam(location.hash.slice(6));
+    document.addEventListener('nfle-scoring', () => { paintRows(); if (cardPid) renderCard(cardPid); else if (cardTeam) renderTeam(cardTeam); });
     if (CFG.current || SIM) startLive();
   };
-  window.NFLE = { openPlayer, closePlayer };
+  // Links inside cards and on the game page: player names open player cards, team names open team cards. (On week
+  // pages the page's own handler opens teams from Power rows and Matchups tiles; it covers the card's buttons too.)
+  document.addEventListener('click', e => {
+    const p = e.target.closest('[data-open-pid]');
+    if (p) { openPlayer(p.dataset.openPid); return; }
+    if (CFG.page === 'game') { const t = e.target.closest('.tm-open[data-tm]'); if (t) openTeam(t.dataset.tm); }
+  });
+  window.NFLE = { openPlayer, closePlayer, openTeam };
   if (CFG.page === 'game') initGame(); else initWeek();
 })();

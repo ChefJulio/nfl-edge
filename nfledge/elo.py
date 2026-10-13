@@ -7,9 +7,11 @@ import pandas as pd
 MEAN = 1505.0
 
 
-def run(g: pd.DataFrame, k: float, hfa: float, revert: float, margin: bool) -> tuple[np.ndarray, dict, int | None]:
+def run(g: pd.DataFrame, k: float, hfa: float, revert: float, margin: bool, pre: list | None = None
+        ) -> tuple[np.ndarray, dict, int | None]:
   """Walk the finished games in g (sorted by date). Returns each game's pre-game home-minus-away rating difference,
-  the ratings after the last game, and the season of the last game."""
+  the ratings after the last game, and the season of the last game. If `pre` is a list, each game's pre-game
+  (home, away) ratings are appended to it."""
   r, season, out = {}, None, np.empty(len(g))
   for i, (s, h, a, hs, as_, neutral) in enumerate(zip(g.season, g.home_team, g.away_team, g.home_score,
                                                       g.away_score, g.location == "Neutral")):
@@ -18,6 +20,8 @@ def run(g: pd.DataFrame, k: float, hfa: float, revert: float, margin: bool) -> t
       season = s
     rh, ra = r.get(h, MEAN), r.get(a, MEAN)
     out[i] = rh - ra
+    if pre is not None:
+      pre.append((rh, ra))
     edge = rh - ra + (0 if neutral else hfa)
     p = 1 / (1 + 10 ** (-edge / 400))
     m = hs - as_

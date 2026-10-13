@@ -31,12 +31,20 @@ def week_files(site: Path) -> list[Path]:
   return [p for p in [site / "index.json", *sorted(site.glob("[0-9][0-9][0-9][0-9]/week-[0-9][0-9].json"))] if p.exists()]
 
 
+OUR_GAMES = {}  # game_id -> our pregame numbers for that game + the week file it lives in (filled by our_weeks)
+
+
 def our_weeks(site: Path) -> tuple[dict, dict, set]:
   """(season, week, gsis) -> our projection + matchup rank; (season, week, opp, pos) -> matchup rank; all gsis."""
   per_player, per_opp, everyone = {}, {}, set()
   for f in week_files(site):
     d = json.loads(f.read_text(encoding="utf-8"))
     s, w = int(d["season"]), int(d["week"])
+    rel = f.relative_to(site).as_posix()
+    for g in d.get("games", []):
+      if g["id"] not in OUR_GAMES or rel != "index.json":  # archived / lookahead file wins over a stale copy
+        OUR_GAMES[g["id"]] = {"fc": g.get("fc") or {}, "pr": g.get("power_rk"), "away": g["away"]["team"],
+                              "home": g["home"]["team"], "file": rel, "line": g.get("vegas_line")}
     for pid, p in d["players"].items():
       everyone.add(pid)
       m = re.match(r"(\d+)", str(p.get("dvp") or ""))
@@ -154,6 +162,150 @@ def main():
     n += 1
   size = sum(f.stat().st_size for f in out_dir.glob("*.json"))
   print(f"[logs] wrote {n} player game logs ({size / 1e6:.1f} MB) to {out_dir}", flush=True)
+  team_logs(site, cfg, data, cache, nfl, allsched)
+
+
+def _team_stat_rows(cache, nfl, seasons: list, current: int) -> pd.DataFrame:
+  frames = []
+  for s in seasons:
+    t = cache.get("teamstats", s, lambda: nfl.load_team_stats([s], summary_level="week"),
+                  stale=(s == current and cache.age_hours("teamstats", s) > 6))
+    if t is not None and len(t):
+      frames.append(t[t.season_type == "REG"])
+  t = pd.concat(frames, ignore_index=True)
+  for c in ("team", "opponent_team"):
+    t[c] = t[c].replace(D.RELOCATED)
+  num = lambda c: pd.to_numeric(t[c], errors="coerce").fillna(0) if c in t else 0
+  plays = num("attempts") + num("sacks_suffered") + num("carries")
+  out = pd.DataFrame({
+    "game_id": t.game_id, "team": t.team,
+    "py": num("passing_yards") + num("sack_yards_lost").where(num("sack_yards_lost") <= 0, -num("sack_yards_lost")),
+    "ry": num("rushing_yards"), "plays": plays,
+    "to": num("passing_interceptions") + num("sack_fumbles_lost") + num("rushing_fumbles_lost") + num("receiving_fumbles_lost"),
+    "fd": num("passing_first_downs") + num("rushing_first_downs"), "sk": num("sacks_suffered"),
+    "pen": num("penalty_yards")})
+  out["yd"] = out.py + out.ry
+  # Yards per play, not EPA: nflverse's team passing EPA leaves sacks out while the play count includes them,
+  # which inflates every team's EPA per play (rankings would survive, the shown number would not).
+  out["ep"] = out.yd / out.plays.where(out.plays > 0, np.nan)
+  return out.set_index(["game_id", "team"])
+
+
+def team_logs(site: Path, cfg: dict, data, cache, nfl, allsched: pd.DataFrame):
+  """<site>/data/teams/<TEAM>.json: every regular-season game since 1999 with score, Vegas line and result
+  against it, both teams' Elo going in, per-game stats for and against (yards, yards per play, turnovers...), and
+  from 2021 on our pregame win chances and both teams' power ranks that week; season summaries with league ranks;
+  and this season's remaining schedule."""
+  from nfledge import elo
+  wm = cfg["report"]["win_model"]
+  cur = data.current_season
+  g = elo.finished(allsched.assign(home_team=allsched.home_team.replace(D.RELOCATED),
+                                   away_team=allsched.away_team.replace(D.RELOCATED)))
+  pre = []
+  elo.run(g, wm["elo_k"], wm["elo_hfa"], wm["elo_revert"], wm["elo_margin"], pre=pre)
+  g = g.assign(elo_h=[round(x[0]) for x in pre], elo_a=[round(x[1]) for x in pre])
+  g = g[g.game_type == "REG"]
+  ts = _team_stat_rows(cache, nfl, sorted(g.season.unique()), cur)
+  rows = []
+  for x in g.itertuples():
+    for team, opp, home, ps, pa, el, oel in ((x.home_team, x.away_team, 1, x.home_score, x.away_score, x.elo_h, x.elo_a),
+                                             (x.away_team, x.home_team, 0, x.away_score, x.home_score, x.elo_a, x.elo_h)):
+      line = (x.spread_line if home else -x.spread_line) if pd.notna(x.spread_line) else None  # + = favored by
+      rows.append({"season": int(x.season), "week": int(x.week), "gid": x.game_id, "team": team, "opp": opp,
+                   "h": 2 if x.location == "Neutral" else home, "ps": int(ps), "pa": int(pa), "line": line,
+                   "tot": float(x.total_line) if pd.notna(x.total_line) else None, "elo": int(el), "oelo": int(oel),
+                   "ot": bool(x.overtime == 1)})
+  T = pd.DataFrame(rows)
+  T["r"] = np.where(T.ps > T.pa, "W", np.where(T.ps < T.pa, "L", "T"))
+  def stat(gid, team, k):
+    try:
+      v = ts.at[(gid, team), k]
+      return None if pd.isna(v) else float(v)
+    except KeyError:
+      return None
+  for k in ("yd", "py", "ry", "ep", "to", "fd", "sk"):
+    T[k] = [stat(a, b, k) for a, b in zip(T.gid, T.team)]
+    T["o_" + k] = [stat(a, b, k) for a, b in zip(T.gid, T.opp)]
+  # season summaries + league ranks (per-game averages; 1 = best)
+  agg = T.groupby(["season", "team"]).agg(gp=("ps", "size"), w=("r", lambda s: (s == "W").sum()), l=("r", lambda s: (s == "L").sum()),
+                                          t=("r", lambda s: (s == "T").sum()), pf=("ps", "mean"), pa=("pa", "mean"),
+                                          yd=("yd", "mean"), oyd=("o_yd", "mean"), ep=("ep", "mean"), oep=("o_ep", "mean"),
+                                          to=("to", "mean"), oto=("o_to", "mean"))
+  agg["tom"] = agg.oto - agg.to
+  better_high = {"pf": True, "pa": False, "yd": True, "oyd": False, "ep": True, "oep": False, "tom": True}
+  for k, hi in better_high.items():
+    agg[k + "_rk"] = agg.groupby("season")[k].rank(ascending=not hi, method="min")
+  # this season's remaining games
+  sched = data.schedules[(data.schedules.season == cur) & (data.schedules.game_type == "REG")]
+  out_dir = site / "data" / "teams"
+  out_dir.mkdir(parents=True, exist_ok=True)
+  r1 = lambda v, n=1: None if v is None or pd.isna(v) else round(float(v), n)
+  for team in sorted(T.team.unique()):
+    if team not in set(sched.home_team) | set(sched.away_team):
+      continue  # defunct codes
+    me = T[T.team == team].sort_values(["season", "week"])
+    seasons = []
+    for s, gs in me.groupby("season"):
+      a = agg.loc[(s, team)]
+      games = []
+      for x in gs.itertuples():
+        e = {"w": x.week, "gid": x.gid, "o": x.opp, "h": x.h, "ps": x.ps, "pa": x.pa, "r": x.r, "elo": x.elo, "oelo": x.oelo}
+        if x.ot:
+          e["ot"] = 1
+        if x.line is not None and not pd.isna(x.line):
+          e["ln"] = r1(x.line)
+          m = x.ps - x.pa - x.line
+          e["ats"] = "W" if m > 0 else "L" if m < 0 else "P"
+        if x.tot is not None and not pd.isna(x.tot):
+          e["tot"] = r1(x.tot)
+        e["s"] = [r1(x.yd, 0), r1(x.py, 0), r1(x.ry, 0), r1(x.ep), r1(x.to, 0), r1(x.fd, 0)]
+        e["os"] = [r1(x.o_yd, 0), r1(x.o_py, 0), r1(x.o_ry, 0), r1(x.o_ep), r1(x.o_to, 0)]
+        ours = OUR_GAMES.get(x.gid)
+        if ours:
+          fc, home = ours["fc"], ours["home"] == team
+          if fc.get("src") == "Vegas" and fc.get("p_home") is not None:
+            e["vc"] = fc["p_home"] if home else fc["p_away"]
+          if fc.get("model_pct") is not None:
+            e["mc"] = fc["model_pct"] if fc.get("model_fav") == team else 100 - fc["model_pct"]
+          if ours["pr"]:
+            mine, theirs = (ours["pr"][1], ours["pr"][0]) if home else (ours["pr"][0], ours["pr"][1])
+            if mine:
+              e["pr"] = int(mine)
+            if theirs:
+              e["opr"] = int(theirs)
+          e["f"] = ours["file"]
+        games.append(e)
+      seasons.append({"s": int(s), "rec": f"{int(a.w)}-{int(a.l)}" + (f"-{int(a.t)}" if a.t else ""),
+                      "avg": {k: r1(a[k], 1 if k not in ("ep", "oep") else 2) for k in ("pf", "pa", "yd", "oyd", "ep", "oep", "tom")},
+                      "rk": {k: int(a[k + "_rk"]) for k in better_high if pd.notna(a[k + "_rk"])}, "g": games})
+    played = {e["w"] for x in seasons if x["s"] == cur for e in x["g"]}
+    up = []
+    for x in sched.itertuples():
+      if team not in (x.home_team, x.away_team) or x.week in played or pd.notna(x.home_score):
+        continue
+      home = x.home_team == team
+      e = {"w": int(x.week), "gid": x.game_id, "o": x.away_team if home else x.home_team,
+           "h": 2 if x.location == "Neutral" else int(home)}
+      if pd.notna(x.spread_line):
+        e["ln"] = r1(x.spread_line if home else -x.spread_line)
+      ours = OUR_GAMES.get(x.game_id)
+      if ours:
+        fc = ours["fc"]
+        if fc.get("src") == "Vegas" and fc.get("p_home") is not None:
+          e["vc"] = fc["p_home"] if home else fc["p_away"]
+        if fc.get("model_pct") is not None:
+          e["mc"] = fc["model_pct"] if fc.get("model_fav") == team else 100 - fc["model_pct"]
+        if ours["pr"]:
+          e["opr"] = int(ours["pr"][0] if home else ours["pr"][1])
+        e["f"] = ours["file"]
+      up.append(e)
+    byes = sorted(set(range(1, int(sched.week.max()) + 1))
+                  - set(int(w) for w in sched[(sched.home_team == team) | (sched.away_team == team)].week))
+    doc = {"team": team, "cur": cur, "byes": byes, "seasons": sorted(seasons, key=lambda x: -x["s"]), "up": up,
+           "stat_keys": ["yd", "py", "ry", "ypp", "to", "fd"]}
+    (out_dir / f"{team}.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
+  size = sum(f.stat().st_size for f in out_dir.glob("*.json"))
+  print(f"[logs] wrote {len(list(out_dir.glob('*.json')))} team game logs ({size / 1e6:.1f} MB) to {out_dir}", flush=True)
 
 
 if __name__ == "__main__":

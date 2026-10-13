@@ -408,6 +408,22 @@ def espn_ids(rosters: pd.DataFrame | None, season: int) -> dict:
   return {g: str(e).split(".")[0] for g, e in zip(r.gsis_id, r.espn_id)}
 
 
+def team_info(teams: pd.DataFrame | None) -> dict:
+  """Every team's name, logo and colors (visible on the dark tile) for the team card, byes included."""
+  ts = TeamStyle(teams)
+  out = {}
+  if teams is None:
+    return out
+  for t in teams.itertuples():
+    if t.team_abbr not in ts.c:
+      continue
+    bg, sec = ts.c[t.team_abbr]
+    out[t.team_abbr] = {"name": getattr(t, "team_name", t.team_abbr), "nick": ts.nick.get(t.team_abbr, ""),
+                        "logo": ts.logo.get(t.team_abbr) or "", "logo_bg": ts.logo_bg(t.team_abbr),
+                        "color": ts.visible(bg), "color2": ts.visible(sec), "division": getattr(t, "team_division", "") or ""}
+  return out
+
+
 # ESPN team codes that differ from nflverse's (everything else matches).
 ESPN_TEAM = {"LA": "LAR", "WAS": "WSH"}
 
@@ -435,7 +451,13 @@ def week_data(ctx: dict) -> str:
     games.append({k: g[k] for k in ("id", "away", "home", "kickoff", "neutral", "fc", "vegas_line", "vegas_total",
                                     "battles", "extras", "plays", "power_rk", "final", "bt_style", "colors",
                                     "gameday", "gametime")})
+  pkeys = ("team", "nick", "record", "rank", "move", "range", "net", "off", "def", "st", "pass_o", "rush_o", "pass_d",
+           "rush_d", "net_rk", "off_rk", "def_rk", "st_rk", "pass_o_rk", "rush_o_rk", "pass_d_rk", "rush_d_rk",
+           "pass_o_pp", "rush_o_pp", "pass_d_pp", "rush_d_pp", "sos_past", "sos_past_rk", "sos_next", "sos_next_rk",
+           "rank_hist")
+  power = [{k: r.get(k) for k in pkeys} for r in ctx.get("power") or []]
   out = {"season": ctx["season"], "week": ctx["week"], "generated": ctx["generated"], "archive": ctx["archive"],
+         "power": power, "teams": ctx.get("teams", {}),
          "lookahead": ctx["lookahead"], "tossup_pct": ctx["tossup_pct"], "espn_team": ESPN_TEAM,
          "score": json.loads(ctx["score_cfg"]), "players": players, "games": games}
   return json.dumps(out, separators=(",", ":"), default=lambda o: float(o) if isinstance(o, (np.floating, np.integer))
@@ -680,6 +702,7 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
     rw = eng.tm.fit(season, w)
     history[w] = unit_points(rw, league_volume(eng, season, w, rw), starters_asof(eng, season, w), fw).net
   hist = pd.DataFrame(history)
+  hist_rk = hist.rank(ascending=False, method="min")  # power rank by week, this season (team card trend)
   ts = TeamStyle(eng.data.teams)
   # Rank range: resample each unit within its bootstrap uncertainty (in points per game), rank the nets.
   qb = pd.Series({t: rb.qb_term(starters.get(t)) for t in rb.teams})
@@ -716,6 +739,9 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
       "sos_past_o": float(sp.get("off_past", np.nan)), "sos_past_d": float(sp.get("def_past", np.nan)),
       "sos_next_o": float(sp.get("off_next", np.nan)), "sos_next_d": float(sp.get("def_next", np.nan)),
       "spark": sparkline(hist.loc[team].tolist(), width=84, height=22) if team in hist.index else "",
+      # this week's point is the headline rank (bootstrap fit + projected starters), so trend and header agree
+      "rank_hist": {**({int(w): int(v) for w, v in hist_rk.loc[team].items() if pd.notna(v)} if team in hist_rk.index else {}),
+                    int(week): int(ranks["net"][team])},
     })
   return sorted(rows, key=lambda x: x["rank"])
 

@@ -246,6 +246,7 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 @media (min-width: 980px) { .games { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 .game { min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
 .g-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.tm-open { cursor: pointer; }
 .g-team { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--tc); color: var(--tfg); min-height: 62px; }
 .g-team.home { flex-direction: row-reverse; text-align: right; }
 .g-team .logo { width: 34px; height: 34px; } .g-team .logo img { width: 26px; height: 26px; }
@@ -574,9 +575,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   {% for g in games %}
     <article class="game" id="g-{{ g.id }}" data-gid="{{ g.id }}" data-away="{{ g.away.team }}" data-home="{{ g.home.team }}">
       <div class="g-head">
-        <div class="g-team away" style="{{ g.away.row_style }}">{{ g.away.logo|safe }}<div><b>{{ g.away.nick }}</b><small>{{ g.away.qb or g.away.team }}</small></div></div>
+        <div class="g-team away tm-open" style="{{ g.away.row_style }}" data-tm="{{ g.away.team }}">{{ g.away.logo|safe }}<div><b>{{ g.away.nick }}</b><small>{{ g.away.qb or g.away.team }}</small></div></div>
         <div class="g-at">{{ 'vs' if g.neutral else '@' }}</div>
-        <div class="g-team home" style="{{ g.home.row_style }}">{{ g.home.logo|safe }}<div><b>{{ g.home.nick }}</b><small>{{ g.home.qb or g.home.team }}</small></div></div>
+        <div class="g-team home tm-open" style="{{ g.home.row_style }}" data-tm="{{ g.home.team }}">{{ g.home.logo|safe }}<div><b>{{ g.home.nick }}</b><small>{{ g.home.qb or g.home.team }}</small></div></div>
       </div>
       <div class="g-sub"><span>{{ g.kickoff }}{% if g.neutral %} &middot; neutral site{% endif %}</span><a class="gc-link" href="{{ root }}game.html?d={{ data_rel }}&amp;g={{ g.id }}">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -638,7 +639,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     <thead><tr><th class="num" data-first="asc">#</th><th class="stick" data-first="asc">Team</th><th class="num">Net</th><th>Offense</th><th>Defense</th><th class="minor">Pass O</th><th class="minor">Run O</th><th class="minor">Pass D</th><th class="minor">Run D</th><th class="minor">ST</th><th>Schedule played</th><th>Schedule left</th><th class="hide-sm nosort">Trend</th></tr></thead>
     <tbody>
     {% for r in power %}
-      <tr class="teamrow" style="{{ r.row_style }}">
+      <tr class="teamrow tm-open" style="{{ r.row_style }}" data-tm="{{ r.team }}" title="Open the {{ r.nick }} team card">
         <td class="num rk" data-v="{{ r.rank }}"><span class="rkn">{{ r.rank }}</span>{% if r.move > 0 %}<span class="mv up">&#9650;{{ r.move }}</span>{% elif r.move < 0 %}<span class="mv dn">&#9660;{{ -r.move }}</span>{% else %}<span class="mv">&ndash;</span>{% endif %}</td>
         <td class="stick" data-v="{{ r.nick }}"><div class="who">{{ r.logo|safe }}<div><b><span class="nm-full">{{ r.nick }}</span><span class="nm-short">{{ r.team }}</span></b><span class="sub">{{ r.team }} &middot; {{ r.record }}</span></div></div></td>
         <td class="num" data-v="{{ r.net }}"><div class="netc"><b>{{ r.net|sgn }}</b><span class="sub" title="80% of simulations rank this team between {{ r.range.replace('-', ' and ') }} (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range {{ r.range }}</span></div></td>
@@ -775,7 +776,9 @@ document.querySelectorAll('table.sortable').forEach(tbl => {
 // A player row opens his card (assets/gamecast.js; loads after this script, so look it up at click time).
 document.addEventListener('click', e => {
   const tr = e.target.closest('tr.main[data-pid]');
-  if (tr && window.NFLE) window.NFLE.openPlayer(tr.dataset.pid);
+  if (tr && window.NFLE) { window.NFLE.openPlayer(tr.dataset.pid); return; }
+  const tm = e.target.closest('.tm-open[data-tm]');  // Power rows and Matchups tile headers open the team card
+  if (tm && window.NFLE) window.NFLE.openTeam(tm.dataset.tm);
 });
 // Table headers (see .fits / .fhead in the CSS).
 const nav = document.querySelector('nav.tabs');
