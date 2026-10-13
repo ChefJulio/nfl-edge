@@ -237,56 +237,33 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 .valbar { display: inline-flex; align-items: center; gap: 8px; justify-content: flex-end; }
 .valbar b { min-width: 42px; text-align: right; }
 
-/* matchups */
-.games { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
-@media (min-width: 980px) { .games { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
-.game { min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
-.g-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+/* matchups: compact tiles, one per row on phones, as many as fit on wider screens; each opens the gamecast */
+.games { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
 .tm-open, .pl-row, .nm-link { cursor: pointer; }
-article.game { scroll-margin-top: calc(var(--navh, 48px) + 10px); }  /* jump-to-tile lands below the sticky tabs */
-.g-head { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important; }
-.g-team { min-width: 0; overflow: hidden; }
-.g-id { min-width: 0; flex: 1 1 auto; } .g-id b, .g-id small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.g-sc, .g-team .logo { flex: none; }
-.g-sc { margin-left: auto; font-size: 32px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
-.g-team.home .g-sc { margin-left: 0; margin-right: auto; }
-.g-team.lost .g-sc, .g-team.lost .g-id, .g-team.lost .logo { opacity: .5; }
-.g-fin { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; color: var(--muted); }
-.g-at small { display: block; font-size: 10.5px; font-weight: 700; text-align: center; white-space: nowrap; }
-.g-ab { display: none; }
-@media (max-width: 520px) { .g-head .g-sc { font-size: 28px; } .g-head .g-team { gap: 8px; padding: 10px 10px; min-height: 56px; }
-  .g-head .g-team .logo { width: 30px; height: 30px; } .g-head .g-team .logo img { width: 22px; height: 22px; }
-  .g-head .g-team b { font-size: 16px; } .g-head .g-at { padding: 0 6px; } .g-nick { display: none; } .g-ab { display: inline; } }
+.mt { display: grid; gap: 0; min-width: 0; text-decoration: none; color: var(--ink); background: var(--panel); border: 1px solid var(--line);
+  border-radius: 12px; box-shadow: var(--shadow); padding: 6px 12px 10px; transition: border-color .15s; }
+.mt:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+.mt-tm { display: flex; align-items: center; gap: 10px; padding: 5px 0; min-width: 0; border-left: 3px solid var(--tc); padding-left: 8px; margin-left: -12px; }
+.mt-tm .logo { width: 30px; height: 30px; flex: none; } .mt-tm .logo img { width: 22px; height: 22px; }
+.mt-nm { min-width: 0; flex: 1; display: flex; flex-direction: column; line-height: 1.2; }
+.mt-nm b { font-size: 15px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mt-nm small { font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mt-sc { flex: none; font-size: 24px; font-weight: 800; letter-spacing: -.02em; min-width: 30px; text-align: right; }
+.mt-tm.lost { opacity: .5; } .mt-tm.has-ball .mt-nm b::after { content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 6px; border-radius: 50%; background: #c47a2c; vertical-align: 2px; }
+.mt-st { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); margin-top: 4px; padding-top: 7px; }
+.mt-st .mt-line { margin-left: auto; color: var(--ink); font-size: 12.5px; }
+.mt-fin { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.mt-live { color: var(--ink); font-weight: 700; } .mt-sit { width: 100%; } .mt-red { color: #ff8f84; font-weight: 700; }
+.mt-odds { margin-top: 7px; }
+.mt-bar { position: relative; display: flex; height: 5px; border-radius: 3px; overflow: hidden; }
+.mt-pct { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--muted); margin-top: 5px; }
+.mt-pct b { color: var(--ink); } .mt-odds.toss .mt-pct span:first-child b { color: var(--muted); }
+.wp-a { background: var(--ac); } .wp-h { flex: 1; background: var(--hc); }
+.wp-zone { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, rgba(255,255,255,.22) 0 2px, transparent 2px 5px); border-left: 1px solid rgba(255,255,255,.45); border-right: 1px solid rgba(255,255,255,.45); }
 .nm-link { font: inherit; color: inherit; background: none; border: 0; padding: 0; text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; }
 td.mu .opp.tm-open:hover b, .bye .nm-link:hover { color: var(--accent); }
-.g-team { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--tc); color: var(--tfg); min-height: 62px; }
-.g-team.home { flex-direction: row-reverse; text-align: right; }
-.g-team .logo { width: 34px; height: 34px; } .g-team .logo img { width: 26px; height: 26px; }
-.g-team b { font-size: 15px; font-weight: 700; display: block; line-height: 1.15; }
-.g-team small { font-size: 11.5px; opacity: .8; }
-.g-at { padding: 0 10px; font-size: 12px; font-weight: 700; color: var(--muted); background: var(--panel); align-self: stretch; display: grid; place-items: center; }
-.g-sub { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 8px; }
-.g-sub > span { white-space: nowrap; }
-.g-sub {font-size: 11.5px; color: var(--muted); padding: 8px 16px 0; }
-/* Win chance: one headline (favorite and chance, or Tossup), a bar split at the away team's chance in the two
-   teams' colors with the tossup zone shaded in the middle, then the Vegas line and our model's second opinion. */
-.wp { margin: 12px 16px 4px; padding: 11px 13px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel2); }
-.wp-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.wp-head .logo { width: 26px; height: 26px; } .wp-head .logo img { width: 19px; height: 19px; }
-.wp-call { font-size: 20px; font-weight: 800; letter-spacing: -.01em; line-height: 1.15; white-space: nowrap; }
-.wp-why { font-size: 13px; font-weight: 600; color: var(--muted); }
-.wp-src { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
-.wp.toss .wp-call { color: var(--muted); }
-.wp-bar { position: relative; display: flex; height: 10px; margin-top: 9px; border-radius: 5px; overflow: hidden; }
-.wp-a { background: var(--ac); } .wp-h { flex: 1; background: var(--hc); }
-.wp-zone { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, rgba(255,255,255,.22) 0 2px, transparent 2px 5px); border-left: 1px solid rgba(255,255,255,.45); border-right: 1px solid rgba(255,255,255,.45); }
-.wp-ends { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-top: 4px; }
-.wp-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; font-size: 12px; color: var(--muted); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); }
-.wp-meta b { color: var(--ink); font-weight: 700; }
-@media (max-width: 520px) { .wp-call { font-size: 17px; } .wp-head .logo { width: 22px; height: 22px; } .wp-head .logo img { width: 16px; height: 16px; } }
 .gf-pick.toss { background: color-mix(in srgb, var(--muted) 18%, transparent); color: var(--ink); }
-.track { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px 10px; margin-bottom: 16px; }
 table.trk { width: 100%; max-width: 640px; border-collapse: collapse; margin-top: 6px; font-size: 13px; }
 table.trk th { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; }
 table.trk th, table.trk td { padding: 6px 6px; border-bottom: 1px solid var(--line); }
@@ -296,50 +273,6 @@ table.trk td small { color: var(--muted); font-size: 11px; }
 @media (max-width: 520px) { table.trk { font-size: 12.5px; } table.trk th { font-size: 9.5px; letter-spacing: .04em; }
   table.trk th, table.trk td { padding: 6px 4px; } table.trk td small { display: block; font-size: 10px; } }
 .trk-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
-/* battles: tug of war in the two teams' colors; offense fills from the left, defense from the right */
-.battles { padding: 8px 16px 14px; display: grid; gap: 10px; }
-.bt-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; }
-/* Away team always on the left, home on the right; each group's labels sit over their own team's side. */
-.battle { display: grid; gap: 5px; }
-/* columns: label | away rank | away edge | bar | home edge | home rank */
-.bt-teams, .bt-grp, .bt-row { display: grid; grid-template-columns: 92px 38px 40px 1fr 40px 38px; align-items: center; gap: 6px; }
-.bt-unit { text-transform: none; letter-spacing: 0; font-weight: 600; }
-.bt-teams .bt-rk .rk-b { min-width: 0; }
-.bt-plays { border-top: 1px solid var(--line); padding-top: 8px; font-size: 12px; color: var(--muted); }
-.bt-plays b { color: var(--ink); }
-.bt-teams > span, .bt-grp > span:not(.bt-chev) { grid-column: 2 / -1; grid-row: 1; display: inline-flex; align-items: center; gap: 6px; }
-.bt-rk { display: flex; justify-content: center; } .bt-rk .rk-b { min-width: 34px; }
-.bt-teams > span:last-child, .bt-grp > span:last-child { justify-self: end; }
-.bt-teams { font-size: 13px; } .bt-teams b { font-weight: 800; }
-.bt-teams .logo { width: 20px; height: 20px; } .bt-teams .logo img { width: 15px; height: 15px; }
-.bt-grp { font-size: 11.5px; font-weight: 600; color: var(--muted); }
-.bt-lbl { font-size: 12px; color: var(--muted); white-space: nowrap; }
-.bt-v { font-size: 12.5px; font-weight: 800; text-align: right; white-space: nowrap; } .bt-v.r { text-align: left; }
-.bt-v i { font-style: normal; font-weight: 500; color: var(--faint); font-size: 11px; }
-.tug { position: relative; height: 10px; }
-.tug::before { content: ""; position: absolute; inset: 0; border-radius: 5px; background: var(--hc); }
-.tug-o { position: absolute; inset: 0 auto 0 0; border-radius: 5px 0 0 5px; background: var(--ac); }
-.tug-mid { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--ink); box-shadow: 0 0 0 1.5px var(--panel); }
-/* Offense-vs-defense groups: the subtotal is always visible; tap to show its passing and running rows. */
-details.grp { border-top: 1px solid var(--line); padding-top: 8px; }
-.battle.extras { border-top: 1px solid var(--line); padding-top: 8px; }
-.battle.extras .tug { height: 8px; }
-details.grp > summary { list-style: none; cursor: pointer; display: grid; gap: 5px; }
-details.grp > summary::-webkit-details-marker { display: none; }
-.bt-grp > .bt-chev { grid-column: 1; grid-row: 1; justify-self: start; font-size: 10.5px; font-weight: 600; color: var(--faint); white-space: nowrap; }
-.bt-chev::before { content: "+ Pass/Run"; } details.grp[open] .bt-chev::before { content: "2 Pass/Run"; }
-details.grp > summary:hover .bt-chev { color: var(--accent); }
-details.grp > summary .bt-lbl { color: var(--ink); font-weight: 600; }
-.bt-units { display: grid; gap: 5px; margin-top: 6px; }
-.bt-units .bt-lbl { padding-left: 10px; }
-.bt-units .tug { height: 8px; }
-@media (max-width: 520px) { .bt-teams, .bt-grp, .bt-row { grid-template-columns: 64px 32px 34px 1fr 34px 32px; gap: 4px; } .bt-lbl { white-space: normal; line-height: 1.15; }
-  .bt-rk .rk-b { min-width: 30px; } .bt-grp { font-size: 11px; } .bt-v { font-size: 11.5px; }
-  .bt-chev::before { content: "+ P/R"; } details.grp[open] .bt-chev::before { content: "2 P/R"; } }
-.game > details { border-top: 1px solid var(--line); }
-.game > details > summary { cursor: pointer; padding: 9px 16px; font-size: 12px; color: var(--muted); font-weight: 600; list-style: none; }
-.game > details > summary::after { content: " +"; } .game > details[open] > summary::after { content: " -"; }
-.game > details table { font-size: 12px; } .game > details td, .game > details th { padding: 6px 12px; }
 
 /* misc */
 .arrow { display: inline-flex; align-items: center; gap: 6px; }
@@ -431,15 +364,6 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 </style>
 </head>
 <body>
-{% macro rkchip(r, what) %}<span class="bt-rk">{% if r %}<span class="rk-b sm {{ r|rkc }}" title="{{ what }}: {{ r|ord }} of 32">{{ r|ord }}</span>{% endif %}</span>{% endmacro %}
-{% macro tugrow(x, label=none) %}<div class="bt-row" title="{{ x.title }}">
-  <span class="bt-lbl">{{ label or x.label }}</span>
-  {{ rkchip(x.away_rk, x.away_what) }}
-  <span class="bt-v">{% if x.side == 'away' %}+{{ '%.1f'|format(x.pts) }}{% elif x.side == 'even' %}<i>even</i>{% endif %}</span>
-  <span class="tug"><span class="tug-o" style="width:{{ '%.1f'|format(x.split) }}%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">{% if x.side == 'home' %}+{{ '%.1f'|format(x.pts) }}{% elif x.side == 'even' %}<i>even</i>{% endif %}</span>
-  {{ rkchip(x.home_rk, x.home_what) }}
-</div>{% endmacro %}
 <header class="top"><div class="wrap">
   <div class="brand"><h1>NFL <span>Edge</span></h1>
     <div class="wk-pick" title="Pick a season and week">
@@ -569,76 +493,34 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 </section>
 
 <section id="tab-games">
-  <div class="sec-head"><div><h2>Matchups</h2><p>Win chances, not picks. When neither side is a clear favorite we call it a tossup.</p></div></div>
-  <details class="howto"><summary>How to read</summary><div>
-    <b>Win chance</b> is the market's: the Vegas spread turned into a probability using how often teams with that spread have actually won. In backtests the market has been a more accurate forecaster than our model, and mixing the model in never helped, so we show the better number. Before lines are posted (lookahead weeks) the model's chance is used. <b>Our model</b> is shown underneath as an independent second opinion with no Vegas input: the two teams' Power ranks (play-by-play efficiency, opponent-adjusted, with the current quarterback) plus their Elo ratings (built from final scores, with memory across seasons) and home field. Hover it for the inputs. In backtests this mix beat each piece alone, though the market is still more accurate.
-    <b>Tossup</b> means the favorite's chance is under {{ tossup_pct }}% (roughly a spread under 3 points). Historically, favorites in that range won about as often as a coin flip would, so naming one would be false precision. The shaded middle of each bar marks that zone.
-    A 70% favorite should still lose 3 times in 10. That is an upset the forecast expected, not a mistake; the track record above shows whether chances at each level came true as often as they claimed.
-    <b>Who wins each battle</b> breaks the matchup down unit by unit (our play-by-play ratings, the same ones behind the Power ranks). Every bar is a tug of war in the two teams' colors, away team always on the left and home team on the right. Whoever pushes past the middle line wins it, and the number on the winner's side is the edge in <b>EPA per 100 plays</b> (expected points added: how much better each play goes than an average one from the same down, distance and field position). Each offense against the other defense: its offense rating minus the defense's, with the total weighting passing and running by that offense's projected dropbacks and runs. Tap a matchup to split it. Special teams compares the two units per 100 special-teams plays, and home field is the per-play boost the home team gets. Pace has no per-play form, so it is listed as projected plays. Rank chips are league ranks from the Power tab (green top 8, red bottom 8); the chips by the team names are overall power ranks. Hover a row for both teams' ratings. Bar length is how much each edge matters this game, on one scale for every row. The model never publishes a point spread, which is left to the market.
-  </div></details>
-  {% if track %}<div class="track">
-    <div class="bt-title">How often favorites win &middot; market chances, {{ track.since }}&ndash;{{ track.season }}</div>
-    <table class="trk"><thead><tr><th>Favorite's chance</th><th class="num">Games</th><th class="num">Expected</th><th class="num">Won</th><th class="num">{{ track.season }}</th></tr></thead>
-    <tbody>{% for r in track.rows %}<tr{% if r.tossup %} class="toss"{% endif %}><td>{{ r.label }}</td><td class="num">{{ r.n }}</td><td class="num">{{ '%.0f'|format(r.expected) }}%</td><td class="num"><b>{{ '%.0f'|format(r.actual) }}%</b></td><td class="num">{% if r.n_now %}{{ '%.0f'|format(r.actual_now) }}% <small>of {{ r.n_now }}</small>{% else %}&ndash;{% endif %}</td></tr>{% endfor %}</tbody></table>
-    <p class="trk-note">A well-calibrated forecast's favorites win about as often as their chance says. Each season is scored with chances fit only on the seasons before it.</p>
-  </div>{% endif %}
+  <div class="sec-head"><div><h2>Matchups</h2></div></div>
   <div class="games">
   {% for g in games %}
-    <article class="game" id="g-{{ g.id }}" data-gid="{{ g.id }}" data-away="{{ g.away.team }}" data-home="{{ g.home.team }}">
-      <div class="g-head">
-        {# Header doubles as the scoreboard: scores on each side of the divider, the loser dimmed, FINAL in the middle
-           (live games fill the same slots from ESPN). #}
-        {% set fa, fh = (g.final.away, g.final.home) if g.final else (none, none) %}
-        <div class="g-team away tm-open{{ ' lost' if g.final and fa < fh }}" style="{{ g.away.row_style }}" data-tm="{{ g.away.team }}">{{ g.away.logo|safe }}<div class="g-id"><b><span class="g-nick">{{ g.away.nick }}</span><span class="g-ab">{{ g.away.team }}</span></b></div><span class="g-sc"{% if not g.final %} hidden{% endif %}>{{ fa if g.final else '' }}</span></div>
-        <div class="g-at">{% if g.final %}<span class="g-fin">FINAL</span>{% else %}{{ 'vs' if g.neutral else '@' }}{% endif %}</div>
-        <div class="g-team home tm-open{{ ' lost' if g.final and fh < fa }}" style="{{ g.home.row_style }}" data-tm="{{ g.home.team }}">{{ g.home.logo|safe }}<div class="g-id"><b><span class="g-nick">{{ g.home.nick }}</span><span class="g-ab">{{ g.home.team }}</span></b></div><span class="g-sc"{% if not g.final %} hidden{% endif %}>{{ fh if g.final else '' }}</span></div>
+    {# Compact tile; the whole tile opens the game's gamecast (Pregame / Live / Postgame). Live games are painted
+       over by gamecast.js (scores, clock, field position) and lose the pregame odds row. #}
+    {% set fa, fh = (g.final.away, g.final.home) if g.final else (none, none) %}
+    {% set f = g.fc %}
+    <a class="mt{{ ' is-final' if g.final }}" id="g-{{ g.id }}" data-gid="{{ g.id }}" href="{{ root }}game.html?d={{ data_rel }}&amp;g={{ g.id }}" style="{{ g.bt_style }}">
+      {% for s, sc, os in [(g.away, fa, fh), (g.home, fh, fa)] %}
+      <div class="mt-tm {{ 'away' if loop.first else 'home' }}{{ ' lost' if g.final and sc < os }}" style="--tc:{{ g.colors[s.team] }}">
+        {{ s.logo|safe }}<span class="mt-nm"><b>{{ s.nick }}</b><small>{{ s.record }}{% if s.rank %} &middot; Power {{ s.rank|ord }}{% endif %}</small></span>
+        <span class="mt-sc">{{ sc if g.final else '' }}</span>
       </div>
-      <div class="g-sub"><span>{{ g.kickoff }}{% if g.neutral %} &middot; neutral site{% endif %}</span><a class="gc-link" href="{{ root }}game.html?d={{ data_rel }}&amp;g={{ g.id }}">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      {% if g.final %}<div class="g-final">
-        {% if not g.final.winner %}<span class="gf-pick toss">Tie</span>
-        {% elif g.fc.tossup %}<span class="gf-pick toss">Tossup &middot; {{ g.final.winner }} won</span>
-        {% elif g.final.fav_won %}<span class="gf-pick ok">Favorite won</span>
-        {% else %}<span class="gf-pick miss">Upset &middot; a {{ 100 - g.fc.pct }}% chance</span>{% endif %}</div>{% endif %}
-      {% set f = g.fc %}
-      <div class="wp{{ ' toss' if f.tossup }}" style="{{ g.bt_style }}">
-        <div class="wp-src">{{ 'Vegas odds' if f.src == 'Vegas' else 'Our model &middot; no Vegas line yet'|safe }}</div>
-        <div class="wp-head">
-          {% if f.tossup %}<span class="wp-call">Tossup</span><span class="wp-why">too close to call</span>
-          {% else %}{{ f.logo|safe }}<span class="wp-call">{{ f.nick }} {{ f.pct }}%</span><span class="wp-why">to win</span>{% endif %}
-        </div>
-        <div class="wp-bar" role="img" aria-label="{{ g.away.team }} {{ f.p_away }}%, {{ g.home.team }} {{ f.p_home }}%">
-          <span class="wp-a" style="width:{{ f.p_away }}%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:{{ 100 - tossup_pct }}%;width:{{ 2 * tossup_pct - 100 }}%"></i>
-        </div>
-        <div class="wp-ends"><span>{{ g.away.team }} {{ f.p_away }}%</span><span>{{ f.p_home }}% {{ g.home.team }}</span></div>
-        {% if g.vegas_line %}<div class="wp-meta">
-          <span>Vegas {{ g.vegas_line }}{% if g.vegas_total %} &middot; O/U {{ g.vegas_total|f1 }}{% endif %}</span>
-          <span title="{{ f.model_why }}">Our model: <b>{% if f.model_tossup %}tossup{% else %}{{ f.model_nick }} {{ f.model_pct }}%{% endif %}</b>{% if f.model_tossup %} ({{ f.model_nick }} {{ f.model_pct }}%){% endif %}</span>
-        </div>{% else %}<div class="wp-meta"><span>{{ f.model_why }}</span></div>{% endif %}
+      {% endfor %}
+      <div class="mt-st">
+        {% if g.final %}<span class="mt-fin">Final</span>
+          {% if not g.final.winner %}<span class="gf-pick toss">Tie</span>
+          {% elif f.tossup %}<span class="gf-pick toss">Tossup &middot; {{ g.final.winner }} won</span>
+          {% elif g.final.fav_won %}<span class="gf-pick ok">Favorite won &middot; {{ f.pct }}%</span>
+          {% else %}<span class="gf-pick miss">Upset &middot; a {{ 100 - f.pct }}% chance</span>{% endif %}
+        {% else %}<span class="mt-when">{{ g.kickoff }}{% if g.neutral %} &middot; neutral{% endif %}</span>{% if g.vegas_line %}<b class="mt-line">{{ g.vegas_line }}</b>{% endif %}{% endif %}
       </div>
-      <div class="battles" style="{{ g.bt_style }}">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span>{{ g.away.logo_sm|safe }}<b>{{ g.away.team }}</b>{{ rkchip(g.power_rk[0], g.away.team ~ ' power rank') }}</span><span>{{ rkchip(g.power_rk[1], g.home.team ~ ' power rank') }}<b>{{ g.home.team }}</b>{{ g.home.logo_sm|safe }}</span></div>
-        {% for b in g.battles %}
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>{{ b.head.left }}</span><span>{{ b.head.right }}</span></div>
-            {{ tugrow(b.head, 'Total') }}
-          </summary>
-          <div class="bt-units">{% for x in b.rows %}{{ tugrow(x) }}{% endfor %}</div>
-        </details>
-        {% endfor %}
-        <div class="battle extras">{% for x in g.extras %}{{ tugrow(x) }}{% endfor %}</div>
-        <div class="bt-plays">Projected plays: {% for p in g.plays %}{{ p.team }} <b>{{ '%.0f'|format(p.n) }}</b> ({{ '%.0f'|format(p.pass * 100) }}% pass){{ ' &middot; '|safe if not loop.last }}{% endfor %}</div>
-      </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody>{% for s in [g.away, g.home] %}<tr class="teamrow" style="{{ s.row_style }}"><td><b>{{ s.team }}</b></td><td class="num">{{ s.off_pass|sgn }}</td><td class="num">{{ s.off_rush|sgn }}</td><td class="num">{{ s.def_pass|sgn }}</td><td class="num">{{ s.def_rush|sgn }}</td><td class="num">{{ s.st|sgn }}</td></tr>{% endfor %}</tbody>
-        </table></div>
-      </details>
-    </article>
+      {% if not g.final %}<div class="mt-odds{{ ' toss' if f.tossup }}">
+        <div class="mt-bar" role="img" aria-label="{{ g.away.team }} {{ f.p_away }}%, {{ g.home.team }} {{ f.p_home }}%"><span class="wp-a" style="width:{{ f.p_away }}%"></span><span class="wp-h"></span><i class="wp-zone" style="left:{{ 100 - tossup_pct }}%;width:{{ 2 * tossup_pct - 100 }}%"></i></div>
+        <div class="mt-pct"><span>{% if f.src == 'Vegas' %}Vegas {% if f.tossup %}<b>tossup</b>{% else %}<b>{{ f.fav }} {{ f.pct }}%</b>{% endif %}{% else %}No line yet{% endif %}</span>
+          <span title="{{ f.model_why }}">Ours {% if f.model_tossup %}<b>tossup</b>{% else %}<b>{{ f.model_fav }} {{ f.model_pct }}%</b>{% endif %}</span></div>
+      </div>{% endif %}
+    </a>
   {% endfor %}
   </div>
 </section>
@@ -689,8 +571,13 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   <div class="sec-head"><div><h2>The model</h2><p>How every number on this site is calculated. Blue values are filled in live from this build.</p></div></div>
   {% if model_doc.stale %}<div class="stale">This description may be out of date: the model code or configuration changed after it was last reviewed.</div>{% endif %}
   <div class="doc-layout">
-    <nav class="toc">{% for h in model_doc.toc %}<a href="#{{ h.id }}">{{ h.title }}</a>{% endfor %}</nav>
-    <article class="card card-pad doc">{{ model_doc.html|safe }}</article>
+    <nav class="toc">{% for h in model_doc.toc %}<a href="#{{ h.id }}">{{ h.title }}</a>{% endfor %}{% if track %}<a href="#track-record">How often favorites win</a>{% endif %}</nav>
+    <article class="card card-pad doc">{{ model_doc.html|safe }}
+      {% if track %}<h2 id="track-record">How often favorites win</h2>
+      <p>Market chances, {{ track.since }}&ndash;{{ track.season }}. A well-calibrated forecast's favorites win about as often as their chance says; each season is scored with chances fit only on the seasons before it.</p>
+      <table class="trk"><thead><tr><th>Favorite's chance</th><th class="num">Games</th><th class="num">Expected</th><th class="num">Won</th><th class="num">{{ track.season }}</th></tr></thead>
+      <tbody>{% for r in track.rows %}<tr{% if r.tossup %} class="toss"{% endif %}><td>{{ r.label }}</td><td class="num">{{ r.n }}</td><td class="num">{{ '%.0f'|format(r.expected) }}%</td><td class="num"><b>{{ '%.0f'|format(r.actual) }}%</b></td><td class="num">{% if r.n_now %}{{ '%.0f'|format(r.actual_now) }}% <small>of {{ r.n_now }}</small>{% else %}&ndash;{% endif %}</td></tr>{% endfor %}</tbody></table>{% endif %}
+    </article>
   </div>
 </section>
 </div></main>

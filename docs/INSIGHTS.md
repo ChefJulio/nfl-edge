@@ -288,8 +288,8 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   **Linking (2026-10-13):** one click rule in gamecast.js, innermost wins: `[data-open-pid]` / `tr.main[data-pid]` ->
   player card, `.tm-open[data-tm]` -> team card (Rankings opponent, byes, Role changes, Matchups QB names and team
   headers, card team names, game-log opponents, gamecast drive / box / scoreboard teams). ESPN play text "D.Prescott"
-  is linked via first-initial + last-name (ties broken by the game's two teams). Card matchups jump to the tile
-  (`#g-<game_id>` deep link, flash outline). **Gamecast game log:** newest first by default; sort Newest / Oldest /
+  is linked via first-initial + last-name (ties broken by the game's two teams). Card matchups open the gamecast
+  (they jumped to the Matchups tile until the redesign below). **Gamecast game log:** newest first by default; sort Newest / Oldest /
   Biggest swings (top 40 by |ESPN WP change|); plays tinted by the team with the ball (lightened for dark colors),
   special teams neutral, timeouts / end-of-period as thin dividers; event chips TD/FG/XP/INT/FUM/SACK/FLAG/1ST.
   First down = next real play of the drive starts at 1st (from 1st down only if full distance gained; never on goal
@@ -301,8 +301,22 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Live overlays only apply when the picked week is the page's own. Players we didn't list that week still get a
   card ("not on our board" + his actual line from the log when he played). Log docs carry `name` and `espn` (cards
   open without a week row) and per game `gid` + `f` (week file). **Game-log rows (2021+) open that game's matchup**
-  (owner: rows are links, not a week picker): in place on the same week's page, else that week's page `#g-<gid>`.
+  (owner: rows are links, not a week picker): now that game's gamecast, `game.html?d=<f>&g=<gid>`.
   **Dark only (2026-10-13):** owner's call; light-theme tokens and `prefers-color-scheme` rules removed.
+  **Matchups -> gamecast redesign (2026-10-13, owner):** the Matchups tab is now a dense selector: one compact tile
+  per game (`a.mt`, the whole tile links to `game.html?d=&g=`; 1 per row on phones, auto-fill on desktop). Tile
+  states: pre = kickoff, Vegas spread, Vegas + our win % with a thin split bar; live = painted by `paintTiles`
+  (score, clock, possession dot, down and distance; odds row hidden); final = score + verdict pill. Tile how-to and
+  the "How often favorites win" table were removed from Matchups (owner: self-explanatory or in the Model tab); the
+  table now sits at the end of the Model tab (`#track-record`). The full old tile (odds, battle bars, projected
+  plays, team ratings) moved into the gamecast **Pregame** tab, rendered client-side from the week JSON (one
+  renderer, `preTab`), plus every fantasy player in the game. Gamecast tabs Pregame / Live / Postgame open on the
+  one matching ESPN's state (`GP.tab`, sticky once chosen); Postgame = result + verdict, full ESPN WP chart, top 6
+  WP swings (`gameLog(..., {sort:'impact', limit:6})`), fantasy actual vs projection, team stats, replay (which
+  switches to Live). If ESPN is down the page still renders from our file (`infoFromG`). Every matchup link (cards,
+  log rows) now goes to the gamecast; tile jumping (`goToTile`, `#g-` scroll) is gone and old `#g-<id>` links
+  redirect to the gamecast. Tile sides gained `record` and `rank`. Fixed in passing: the open "Pass/Run" label had a
+  stray U+0091 control char where a minus sign belonged.
 
 ## 8. Site / pipeline
 - `index.html` = current week: the week being played (any final game) until **Tuesday 06:00 ET** after its last

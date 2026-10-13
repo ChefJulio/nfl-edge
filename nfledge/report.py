@@ -955,6 +955,7 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
       return {"team": t, "nick": names.get(t, t), "row_style": ts.row_style(t), "logo": ts.logo_img(t, 28),
               "logo_sm": ts.logo_img(t, 16), "logo_url": ts.logo.get(t) or "", "logo_bg": ts.logo_bg(t),
               "qb": qb_name.get(starters.get(t), ""), "qb_pid": starters.get(t) or "",
+              "record": (rk.get(t) or {}).get("record") or "", "rank": rank_of(t, "rank"),
               "off_pass": per100(r.off.at[t, "pass"] + r.qb_term(starters.get(t))),
               "off_rush": per100(r.off.at[t, "rush"]), "def_pass": per100(-r.dfn.at[t, "pass"]),
               "def_rush": per100(-r.dfn.at[t, "rush"]), "st": per100(r.off.at[t, "st"] - r.dfn.at[t, "st"])}

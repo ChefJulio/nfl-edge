@@ -278,15 +278,15 @@
       <span>· Rank = his ${esc(pos)} finish that week (green = starter in your league size) · Proj = our projection then (green = beat it) · Tap a game (2021 on) to open its matchup</span></div>`;
     return `${legend}<div class="lg-scroll"><table class="lg">${body}</table></div>`;
   };
-  // Log rows we have a week page for (2021 on) open that game's matchup tile: in place when it's this page's week,
-  // else on that week's page. g.gid / g.f (week file) come from tools/player_logs.py.
-  const tileAttrs = g => g.gid && g.f ? ` data-gid="${esc(g.gid)}" data-f="${esc(g.f)}" title="Open the matchup"` : '';
+  // A game's gamecast, with the week file that holds our numbers for it (its Pregame tab reads them).
+  const gcUrl = (gid, f) => `${siteRoot()}game.html?d=${encodeURIComponent(f)}&g=${encodeURIComponent(gid)}`;
+  // Log rows we have a week page for (2021 on) open that game's gamecast. g.gid / g.f (week file) come from
+  // tools/player_logs.py.
+  const tileAttrs = g => g.gid && g.f ? ` data-gid="${esc(g.gid)}" data-f="${esc(g.f)}" title="Open the gamecast"` : '';
   const wireLogRows = box => box && box.addEventListener('click', e => {
     if (e.target.closest('button, a, select, input')) return;
     const tr = e.target.closest('tr[data-gid]'); if (!tr) return;
-    const gid = tr.dataset.gid, f = tr.dataset.f;
-    if (CFG.page !== 'game' && DATA && f === DATA.__rel) { closePlayer(); goToTile(gid); }
-    else location.href = `${siteRoot()}${f.replace(/\.json$/, '.html')}#g-${gid}`;
+    location.href = gcUrl(tr.dataset.gid, tr.dataset.f);
   });
   const LOGP = {};  // pid -> in-flight fetch, so a re-render while loading doesn't refetch
   const ensureLog = pid => LOGS[pid] ? Promise.resolve(LOGS[pid]) : (LOGP[pid] || (LOGP[pid] =
@@ -446,7 +446,7 @@
           ${rangeSvg(s.q, s.proj)}<div class="pc-sub">Floor ${f1(s.q[0])} · middle ${f1(s.q[1])}–${f1(s.q[3])} · ceiling ${f1(s.q[4])} · confidence ${esc(p.conf)}</div></div>
         <div class="pc-box"><div class="pc-k">Expected line</div><div class="line">${expectedLine(pid, p, d)}</div>${vol ? `<div class="pc-sub">${esc(vol)}</div>` : ''}</div>
         <div class="pc-box"><div class="pc-k">Matchup</div>
-          <div class="pc-mu">${g ? `<a class="pc-tile" href="${tileHref(g, d)}" data-goto="${esc(g.id)}" title="Open the matchup tile">` : ''}${opp ? logo(opp.logo_url, opp.logo_bg, 20, opp.team) : ''}<b>${esc(p.home)} ${esc(p.opp)} &rsaquo;</b>${g ? '</a>' : ''}
+          <div class="pc-mu">${g ? `<a class="pc-tile" href="${gameHref(g, d)}" title="Open the gamecast">` : ''}${opp ? logo(opp.logo_url, opp.logo_bg, 20, opp.team) : ''}<b>${esc(p.home)} ${esc(p.opp)} &rsaquo;</b>${g ? '</a>' : ''}
             <span style="color:${esc(p.dvp_color)}">${esc(p.dvp)} vs ${esc(p.pos)}s</span> <span class="muted">grade ${esc(p.grade)}</span></div>
           <div class="pc-sub">This defense ${p.mpts >= 0 ? 'adds' : 'takes away'} ${f1(Math.abs(p.mpts))} pts vs an average one.</div></div>
         <div class="pc-box"><div class="pc-k">Availability</div><div class="pc-big sm">${p.inactive < 0.005 ? '<1' : Math.round(p.inactive * 100)}% <small>inactive</small></div>
@@ -456,8 +456,7 @@
         <div class="pc-sub">${fpg != null ? `${f1(fpg)} FP/G` : ''}${l3 != null ? ` · last 3: ${f1(l3)}` : ''}${p.sched ? ` · ${esc(p.sched)}` : ''}</div>
         ${nweek >= 1 ? `<div class="pc-k" style="margin-top:10px">Points by week</div>${weekBars(p, d)}` : ''}</div>
       <p class="pc-take">${esc(p.takeaway)}</p>
-      ${g ? `<div class="pc-links"><a href="${gameHref(g, d)}">${st && st.state === 'in' ? '<span class="live-dot"></span>' : ''}Gamecast: ${esc(g.away.team)} @ ${esc(g.home.team)} &rsaquo;</a>
-        <a href="${tileHref(g, d)}" data-goto="${esc(g.id)}">Matchup tile &rsaquo;</a></div>` : ''}`;
+      ${g ? `<div class="pc-links"><a href="${gameHref(g, d)}">${st && st.state === 'in' ? '<span class="live-dot"></span>' : ''}Gamecast: ${esc(g.away.team)} @ ${esc(g.home.team)} &rsaquo;</a></div>` : ''}`;
     return html;
   };
   // A player we didn't list that week: say so, and show what he did from the career log when he played.
@@ -465,7 +464,7 @@
     const S = L && (L.seasons || []).find(x => +x.s === +d.season), g = S && S.g.find(x => x.w === +d.week);
     const pos = L && L.pos;
     const played = g ? `<div class="pc-now"><div class="pc-k">Final</div><div class="pc-big">${f1(pts(g.c, weights(), pos))} <small>pts</small></div>
-      <div class="pc-sub">${g.h === 0 ? '@' : 'vs'} ${esc(g.o)} · ${ord(g.rk)} among ${esc(pos)}s${g.gid && g.f ? ` · <a href="${siteRoot()}${esc(g.f.replace(/\.json$/, '.html'))}#g-${esc(g.gid)}" data-goto="${esc(g.gid)}">Matchup tile &rsaquo;</a>` : ''}</div></div>` : '';
+      <div class="pc-sub">${g.h === 0 ? '@' : 'vs'} ${esc(g.o)} · ${ord(g.rk)} among ${esc(pos)}s${g.gid && g.f ? ` · <a href="${esc(gcUrl(g.gid, g.f))}">Gamecast &rsaquo;</a>` : ''}</div></div>` : '';
     return `${played}<div class="pc-box"><p class="pc-sub">Not on our ${esc(wkLabel(d).toLowerCase())} board: a bye, ruled out, not on a roster yet, or projected too low to list.</p></div>`;
   };
   const renderCard = pid => {
@@ -502,25 +501,7 @@
       body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.pt !== cardTab; });
     });
     wirePicker(body);
-    wireGoto(body);
   };
-  // Matchup links in cards jump to that game's tile: in place for this page's week, else on that week's page.
-  const tileHref = (g, d = DATA) => CFG.page !== 'game' && d === DATA ? `#g-${g.id}`
-    : `${siteRoot()}${(d.__rel || 'index.json').replace(/\.json$/, '.html')}#g-${g.id}`;
-  const goToTile = gid => {
-    const tab = document.querySelector('nav.tabs button[data-tab="games"]'); if (tab) tab.click();
-    const card = document.getElementById('g-' + gid);
-    if (card) setTimeout(() => {
-      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      card.classList.add('flash'); setTimeout(() => card.classList.remove('flash'), 1600);
-      // Arriving from another page: logos still loading above shift the layout, so re-align once they're in.
-      if (document.readyState !== 'complete') addEventListener('load', () => card.scrollIntoView({ block: 'start' }), { once: true });
-    }, 60);
-  };
-  const wireGoto = body => body.querySelectorAll('[data-goto]').forEach(a => a.onclick = ev => {
-    if (!(a.getAttribute('href') || '').startsWith('#')) return;  // a real link to another week page's tile
-    ev.preventDefault(); closePlayer(); goToTile(a.dataset.goto);
-  });
   // ------------------------------------------------------------------------------------------------- team card
   // Same overlay and look as the player card. Week tab from the picked week's data (Power, matchup, players);
   // season stats and the career game log from data/teams/<TEAM>.json (tools/player_logs.py).
@@ -618,7 +599,6 @@
     wireTeamLog(body, abbr);
     wireLogRows(body.querySelector('.tm-log'));
     wirePicker(body);
-    wireGoto(body);
     if (!L) loadTeamLog(abbr);
   };
   // The team's Week tab for one week's data: result / live score, matchup and odds, Power box; plus its player rows.
@@ -638,11 +618,11 @@
     const fc = g && g.fc;
     const myPct = (fav, pct) => fav === abbr ? pct : 100 - pct;
     const week = g ? `<div class="pc-box"><div class="pc-k">${esc(wkLabel(d))}</div>
-        <div class="pc-mu"><a class="pc-tile" href="${tileHref(g, d)}" data-goto="${esc(g.id)}" title="Open the matchup tile">${tLogo(opp.team, 22)}<b>${home ? 'vs' : '@'} ${esc(opp.nick || opp.team)} &rsaquo;</b></a> <span class="muted">${esc(g.kickoff || '')}</span></div>
+        <div class="pc-mu"><a class="pc-tile" href="${gameHref(g, d)}" title="Open the gamecast">${tLogo(opp.team, 22)}<b>${home ? 'vs' : '@'} ${esc(opp.nick || opp.team)} &rsaquo;</b></a> <span class="muted">${esc(g.kickoff || '')}</span></div>
         ${fc ? `<div class="tm-odds"><div><div class="pc-k">${fc.src === 'Vegas' ? 'Vegas odds' : 'Our model (no line yet)'}</div><b>${fc.tossup ? 'Tossup' : `${myPct(fc.fav, fc.pct)}%`}</b>${fc.tossup ? ` <small class="muted">${esc(abbr)} ${myPct(fc.fav, fc.pct)}%</small>` : ''}</div>
           ${fc.src === 'Vegas' ? `<div><div class="pc-k">Our model</div><b>${fc.model_tossup ? 'Tossup' : `${myPct(fc.model_fav, fc.model_pct)}%`}</b></div>` : ''}
           ${g.vegas_line ? `<div><div class="pc-k">Line</div><b>${esc(g.vegas_line)}</b></div>` : ''}</div>` : ''}
-        <div class="pc-links" style="margin-top:8px"><a href="${gameHref(g, d)}">Gamecast &rsaquo;</a><a href="${tileHref(g, d)}" data-goto="${esc(g.id)}">Matchup tile &rsaquo;</a></div></div>`
+        <div class="pc-links" style="margin-top:8px"><a href="${gameHref(g, d)}">Gamecast &rsaquo;</a></div></div>`
       : `<div class="pc-box"><div class="pc-k">${esc(wkLabel(d))}</div><b>Bye</b></div>`;
     const unit = (label, v, rk, pp, total) => `<div class="tm-u${total ? ' tm-tot' : ''}"><span class="tm-ul">${label}</span><span class="tm-uv">${sgn(v)}</span>${rkChip(rk)}
       <span class="tm-ub"><span style="${v >= 0 ? `left:50%;width:${Math.min(50, Math.abs(v) * 10)}%` : `right:50%;width:${Math.min(50, Math.abs(v) * 10)}%`}" class="${v >= 0 ? 'pos' : 'neg'}"></span></span>
@@ -723,35 +703,32 @@
       });
     });
   };
+  // How the pregame forecast fared, as the build's final tiles say it (fav_won from our own final scores).
+  const verdict = (fc, winner) => !winner ? '<span class="gf-pick toss">Tie</span>'
+    : fc.tossup ? `<span class="gf-pick toss">Tossup · ${esc(winner)} won</span>`
+      : fc.fav === winner ? `<span class="gf-pick ok">Favorite won · ${fc.pct}%</span>`
+        : `<span class="gf-pick miss">Upset · a ${100 - fc.pct}% chance</span>`;
+  // Matchups tiles: live (and just-finished) games painted from ESPN over the build's pregame tile. Finals the
+  // build already knows stay as built.
   const paintTiles = () => {
-    document.querySelectorAll('article.game[data-gid]').forEach(art => {
-      const st = LIVE.byGame[art.dataset.gid], box = art.querySelector('.gc-live');
-      if (!box) return;
-      const g = DATA.games.find(x => x.id === art.dataset.gid);
-      // Header scoreboard: live / just-finished scores in the same slots the build fills for finals.
-      if (st && st.state !== 'pre' && !(st.state === 'post' && g && g.final)) {
-        const sides = { away: art.querySelector('.g-team.away'), home: art.querySelector('.g-team.home') };
-        ['away', 'home'].forEach(k => {
-          const sc = sides[k] && sides[k].querySelector('.g-sc');
-          if (sc) { sc.textContent = st[k].score; sc.hidden = false; }
-          if (sides[k]) sides[k].classList.toggle('lost', st.state === 'post' && st[k].score < st[k === 'away' ? 'home' : 'away'].score);
-        });
-        const at = art.querySelector('.g-at');
-        if (at) at.innerHTML = st.state === 'in' ? `<span class="live-dot"></span><small>${esc(st.short || '')}</small>` : '<span class="g-fin">FINAL</span>';
-      }
-      // Pregame: nothing. Final: the tile already shows our final line, unless the game ended after this build.
-      if (!st || st.state === 'pre' || (st.state === 'post' && g && g.final)) { box.hidden = true; return; }
-      const sum = LIVE.sums[st.id];
-      const live = st.state === 'in';
-      const sit = live ? (st.sit || (sum && sitFromPlays(sum))) : null;
+    document.querySelectorAll('a.mt[data-gid]').forEach(tile => {
+      const st = LIVE.byGame[tile.dataset.gid];
+      if (!st || st.state === 'pre' || tile.classList.contains('is-final')) return;
+      const live = st.state === 'in', g = DATA.games.find(x => x.id === tile.dataset.gid);
+      const sit = live ? (st.sit || (LIVE.sums[st.id] && sitFromPlays(LIVE.sums[st.id]))) : null;
       const sp = sit ? spot(sit, st) : null;
-      const lastText = (sit && sit.lastPlay && sit.lastPlay.text) || '';
-      const href = g ? gameHref(g) : '#';
-      box.innerHTML = `
-        ${sp ?`<div class="gl-sit"><b>${esc(sp.offense.team)} ball</b>${sp.text ? ` · ${esc(sp.text)}` : ''}${sp.red ? ' · <span class="gl-red">red zone</span>' : ''}</div>${fieldSvg(sp, st)}` : ''}
-        ${lastText ? `<div class="gl-last">${linkNames(esc(lastText), [st.away.team, st.home.team])}</div>` : ''}
-        <a class="gl-open" href="${href}">${live ? 'Open live gamecast' : 'Game recap'} &rsaquo;</a>`;
-      box.hidden = false;
+      const rows = tile.querySelectorAll('.mt-tm');
+      ['away', 'home'].forEach((k, i) => {
+        const row = rows[i]; if (!row) return;
+        row.querySelector('.mt-sc').textContent = st[k].score;
+        row.classList.toggle('lost', !live && st[k].score < st[k === 'away' ? 'home' : 'away'].score);
+        row.classList.toggle('has-ball', !!(sp && sp.offense.team === st[k].team));
+      });
+      const odds = tile.querySelector('.mt-odds'); if (odds) odds.hidden = true;  // pregame odds, not live ones
+      const winner = st.away.score > st.home.score ? st.away.team : st.home.score > st.away.score ? st.home.team : null;
+      tile.querySelector('.mt-st').innerHTML = live
+        ? `<span class="mt-live"><span class="live-dot"></span>${esc(st.short || '')}</span>${sp && sp.text ? `<span>${esc(sp.offense.team)} ball · ${esc(sp.text)}</span>` : ''}${sp && sp.red ? '<span class="mt-red">red zone</span>' : ''}`
+        : `<span class="mt-fin">${esc(st.detail || 'Final')}</span>${g && g.fc ? verdict(g.fc, winner) : ''}`;
     });
   };
   const paintPill = () => {
@@ -794,7 +771,7 @@
   };
 
   // ------------------------------------------------------------------------------------------------- game page
-  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null };
+  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null, tab: null };
   const parseGid = gid => { const m = String(gid || '').match(/^(\d{4})_(\d{2})_([A-Z]{2,3})_([A-Z]{2,3})$/); return m ? { season: +m[1], week: +m[2], away: m[3], home: m[4] } : null; };
   const wpSeries = (sum) => {
     const plays = allPlays(sum).flatMap(d => d.plays || []);
@@ -827,13 +804,14 @@
       <circle cx="${X(lastPt.t)}" cy="${Y(lastPt.home)}" r="4" class="wp-now"/>
       <line class="wp-hair" x1="0" x2="0" y1="${pad}" y2="${H - pad}" style="display:none"/></svg>`;
   };
-  const tugRow = (x, label) => {
-    const side = x.side, v = `+${(x.pts || 0).toFixed(1)}`;
-    const chip = r => r ? `<span class="rk-b ${r <= 8 ? 'rk1' : r <= 16 ? 'rk2' : r <= 24 ? 'rk3' : 'rk4'}">${ord(r)}</span>` : '<span></span>';
-    return `<div class="gt-row" title="${esc(x.title)}"><span class="gt-l">${esc(label || x.label)}</span>${chip(x.away_rk)}
-      <span class="gt-v">${side === 'away' ? v : side === 'even' ? '<i>even</i>' : ''}</span>
-      <span class="tug"><span class="tug-o" style="width:${x.split.toFixed(1)}%"></span><span class="tug-mid"></span></span>
-      <span class="gt-v r">${side === 'home' ? v : side === 'even' ? '<i>even</i>' : ''}</span>${chip(x.home_rk)}</div>`;
+  // One battle bar (report.tug): away team on the left, home on the right, the edge on the winner's side.
+  const btChip = (r, what) => `<span class="bt-rk">${r ? `<span class="rk-b sm ${r <= 8 ? 'rk1' : r <= 16 ? 'rk2' : r <= 24 ? 'rk3' : 'rk4'}" title="${esc(what)}: ${ord(r)} of 32">${ord(r)}</span>` : ''}</span>`;
+  const btRow = (x, label) => {
+    const v = `+${(+x.pts || 0).toFixed(1)}`;
+    return `<div class="bt-row" title="${esc(x.title)}"><span class="bt-lbl">${esc(label || x.label)}</span>${btChip(x.away_rk, x.away_what)}
+      <span class="bt-v">${x.side === 'away' ? v : x.side === 'even' ? '<i>even</i>' : ''}</span>
+      <span class="tug"><span class="tug-o" style="width:${(+x.split).toFixed(1)}%"></span><span class="tug-mid"></span></span>
+      <span class="bt-v r">${x.side === 'home' ? v : x.side === 'even' ? '<i>even</i>' : ''}</span>${btChip(x.home_rk, x.home_what)}</div>`;
   };
   const teamStats = (sum, info) => {
     const T = (sum.boxscore && sum.boxscore.teams) || [];
@@ -918,13 +896,15 @@
       return c.length === 1 ? `<button type="button" class="nm-link" data-open-pid="${esc(c[0].pid)}">${all}</button>` : all;
     });
   };
-  const gameLog = (sum, info, ser, upto) => {
+  // opts overrides the Live tab's controls (the Postgame tab asks for just the top few swings).
+  const gameLog = (sum, info, ser, upto, opts) => {
+    const o = Object.assign({ sort: GP.sort, filter: GP.filter, q: GP.q, view: GP.view, limit: 40, note: true }, opts);
     const drives = allPlays(sum);
     const wpAfter = {}; ser.forEach((s, i) => { wpAfter[s.play.id] = { now: s.home, prev: i ? ser[i - 1].home : s.home }; });
     const teamOf = id => String(id) === String(info.home.id) ? info.home : String(id) === String(info.away.id) ? info.away : null;
-    const q = GP.q.trim().toLowerCase();
-    const keep = p => (upto == null || elapsed(p) <= upto) && (GP.filter === 'all' || (GP.filter === 'score' && p.scoringPlay)
-      || (GP.filter === 'to' && p.isTurnover) || (GP.filter === 'pen' && p.isPenalty)) && (!q || String(p.text).toLowerCase().includes(q));
+    const q = o.q.trim().toLowerCase();
+    const keep = p => (upto == null || elapsed(p) <= upto) && (o.filter === 'all' || (o.filter === 'score' && p.scoringPlay)
+      || (o.filter === 'to' && p.isTurnover) || (o.filter === 'pen' && p.isPenalty)) && (!q || String(p.text).toLowerCase().includes(q));
     // First downs: ESPN doesn't flag them; a down-and-distance play earned one if the drive's next real play starts
     // at 1st down (a touchdown is its own highlight).
     const ttype = p => String((p.type && p.type.text) || '');
@@ -975,15 +955,15 @@
         <div class="pl-what">${dd || chipHtml ? `<div class="pl-dd">${chipHtml}${esc(dd)}</div>` : ''}<div class="pl-txt">${linkNames(esc(p.text), teams)}</div></div>
         <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${esc(info.away.team)} ${p.awayScore}–${p.homeScore} ${esc(info.home.team)}</b>` : ''}${swing}</div></li>`;
     };
-    const order = GP.sort !== 'old';  // newest first unless asked otherwise
+    const order = o.sort !== 'old';  // newest first unless asked otherwise
     const swingOf = p => { const w = wpAfter[p.id]; return w ? Math.abs(w.now - w.prev) : 0; };
     let html = '';
-    if (GP.sort === 'impact') {
+    if (o.sort === 'impact') {
       // Biggest swings in ESPN's live win probability, one flat list (impact order doesn't fit inside drives).
-      const pl = drives.flatMap(d => d.plays || []).filter(keep).filter(p => wpAfter[p.id]).sort((a, b) => swingOf(b) - swingOf(a)).slice(0, 40);
-      html = pl.length ? `<p class="gcs-note">The ${pl.length} plays that moved ESPN's win probability the most.</p><ol class="pls">${pl.map(playRow).join('')}</ol>`
+      const pl = drives.flatMap(d => d.plays || []).filter(keep).filter(p => wpAfter[p.id]).sort((a, b) => swingOf(b) - swingOf(a)).slice(0, o.limit);
+      html = pl.length ? `${o.note ? `<p class="gcs-note">The ${pl.length} plays that moved ESPN's win probability the most.</p>` : ''}<ol class="pls">${pl.map(playRow).join('')}</ol>`
         : '<p class="muted">No win-probability data for these plays yet.</p>';
-    } else if (GP.view === 'every') {
+    } else if (o.view === 'every') {
       let pl = drives.flatMap(d => d.plays || []).filter(keep);
       if (order) pl = pl.reverse();
       html = pl.length ? `<ol class="pls">${pl.map(playRow).join('')}</ol>` : '<p class="muted">No plays match.</p>';
@@ -1000,11 +980,86 @@
     }
     return html;
   };
+  // ---- Pregame tab: everything the Matchups tile used to carry, from the week file (made before kickoff).
+  const preTab = (g) => {
+    if (!g) return '<section class="gcs"><p class="muted">NFL Edge has no pregame numbers for this game (no week page for it).</p></section>';
+    const f = g.fc, tp = (DATA && DATA.tossup_pct) || 59, a = g.away, h = g.home;
+    const lg = (s, n = 18) => logo(s.logo_url, s.logo_bg, n, s.team);
+    const odds = `<section class="gcs"><h3>Win chances <span class="src us">NFL Edge, before kickoff</span></h3>
+      <p class="gcs-note">${esc(g.kickoff || '')}${g.neutral ? ' · neutral site' : ''}</p>
+      <div class="wp${f.tossup ? ' toss' : ''}" style="${esc(g.bt_style)}">
+        <div class="wp-src">${f.src === 'Vegas' ? 'Vegas odds' : 'Our model · no Vegas line yet'}</div>
+        <div class="wp-head">${f.tossup ? '<span class="wp-call">Tossup</span><span class="wp-why">too close to call</span>'
+          : `${lg(f.fav === a.team ? a : h, 20)}<span class="wp-call">${esc(f.nick)} ${f.pct}%</span><span class="wp-why">to win</span>`}</div>
+        <div class="wp-bar" role="img" aria-label="${esc(a.team)} ${f.p_away}%, ${esc(h.team)} ${f.p_home}%"><span class="wp-a" style="width:${f.p_away}%"></span><span class="wp-h"></span>
+          <i class="wp-zone" style="left:${100 - tp}%;width:${2 * tp - 100}%"></i></div>
+        <div class="wp-ends"><span>${esc(a.team)} ${f.p_away}%</span><span>${f.p_home}% ${esc(h.team)}</span></div>
+        ${g.vegas_line ? `<div class="wp-meta"><span>Vegas ${esc(g.vegas_line)}${g.vegas_total ? ` · O/U ${f1(g.vegas_total)}` : ''}</span>
+          <span title="${esc(f.model_why)}">Our model: <b>${f.model_tossup ? 'tossup' : `${esc(f.model_nick)} ${f.model_pct}%`}</b>${f.model_tossup ? ` (${esc(f.model_nick)} ${f.model_pct}%)` : ''}</span></div>`
+          : `<div class="wp-meta"><span>${esc(f.model_why)}</span></div>`}
+      </div></section>`;
+    const battles = `<section class="gcs"><div class="battles" style="${esc(g.bt_style)}">
+      <h3>Who wins each battle <span class="bt-unit">EPA per 100 plays</span></h3>
+      <div class="bt-teams"><span>${lg(a, 15)}<b>${esc(a.team)}</b>${btChip(g.power_rk[0], `${a.team} power rank`)}</span><span>${btChip(g.power_rk[1], `${h.team} power rank`)}<b>${esc(h.team)}</b>${lg(h, 15)}</span></div>
+      ${g.battles.map(b => `<details class="battle grp"><summary><div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>${esc(b.head.left)}</span><span>${esc(b.head.right)}</span></div>${btRow(b.head, 'Total')}</summary>
+        <div class="bt-units">${b.rows.map(x => btRow(x)).join('')}</div></details>`).join('')}
+      <div class="battle extras">${g.extras.map(x => btRow(x)).join('')}</div>
+      <div class="bt-plays">Projected plays: ${g.plays.map(p => `${esc(p.team)} <b>${f0(p.n)}</b> (${f0(p.pass * 100)}% pass)`).join(' · ')}</div></div></section>`;
+    const ratings = `<section class="gcs"><h3>Team ratings <span class="bt-unit">EPA per 100 plays vs average</span></h3><table class="bx gc-rt"><thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
+      <tbody>${[a, h].map(s => `<tr><td><span class="tm-open bx-th-in" data-tm="${esc(s.team)}">${lg(s, 14)}<b>${esc(s.team)}</b></span></td><td class="num">${sgn(s.off_pass)}</td><td class="num">${sgn(s.off_rush)}</td><td class="num">${sgn(s.def_pass)}</td><td class="num">${sgn(s.def_rush)}</td><td class="num">${sgn(s.st)}</td></tr>`).join('')}</tbody></table></section>`;
+    const players = Object.entries((DATA && DATA.players) || {}).filter(([, p]) => p.team === a.team || p.team === h.team).sort((x, y) => y[1].proj - x[1].proj);
+    const plTable = s => {
+      const rows = players.filter(([, p]) => p.team === s.team).map(([pid, p]) => { const sc = scaled(p);
+        return `<tr><td class="bx-who"><button type="button" class="bx-n" data-open-pid="${esc(pid)}">${esc(p.name)}</button> <span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>${p.status ? ` <span class="flag ${p.inactive >= 0.5 ? 'f-out' : 'f-q'}">${esc(p.status)}</span>` : ''}</td>
+          <td class="num"><b>${f1(sc.proj)}</b></td><td class="num muted">${f0(sc.q[0])}–${f0(sc.q[4])}</td><td class="num" style="color:${esc(p.dvp_color)}" title="Their defense vs ${esc(p.pos)}s (1st = toughest)">${esc(p.dvp)}</td></tr>`; }).join('');
+      return `<div class="bx-team" style="--tc:${esc(g.colors[s.team])}"><div class="bx-th tm-open" data-tm="${esc(s.team)}">${lg(s, 20)}<b>${esc(s.team)}</b></div>
+        ${rows ? `<table class="bx"><thead><tr><th>Player</th><th class="num">Proj</th><th class="num">Range</th><th class="num">Matchup</th></tr></thead><tbody>${rows}</tbody></table>` : '<p class="muted">No fantasy-relevant players listed.</p>'}</div>`;
+    };
+    return `<div class="gc-grid"><div class="gc-col">${odds}${battles}${ratings}</div>
+      <div class="gc-col"><section class="gcs"><h3>Fantasy projections <span class="bt-unit">your scoring</span></h3>${plTable(a)}${plTable(h)}</section></div></div>`;
+  };
+  // ---- Postgame tab: the recap once it's final.
+  const postTab = (sum, info, g, ser) => {
+    if (info.state !== 'post') return `<section class="gcs"><p class="muted">${info.state === 'pre' ? 'The recap appears once the game is over.' : 'The game is still going; the recap appears at the final whistle. Follow it on the Live tab.'}</p></section>`;
+    const a = info.away, h = info.home, winner = a.score > h.score ? a.team : h.score > a.score ? h.team : null;
+    const f = g && g.fc;
+    const call = f ? `<div class="pg-call">${verdict(f, winner)}
+      <span class="muted">${f.src === 'Vegas' ? `Vegas gave ${f.tossup ? `a tossup (${esc(f.nick)} ${f.pct}%)` : `${esc(f.nick)} ${f.pct}%`}` : 'No Vegas line'} · our model gave ${esc(f.model_nick)} ${f.model_pct}%${f.model_tossup ? ' (tossup)' : ''}</span></div>` : '';
+    const result = `<section class="gcs"><h3>Result</h3><div class="pg-res">
+      <span class="tm-open${winner === a.team ? ' won' : ''}" data-tm="${esc(a.team)}">${logo(a.logo, '#111', 26, a.team)}<b>${esc(a.team)}</b> ${a.score}</span><span class="muted">${esc(info.detail || 'Final')}</span>
+      <span class="tm-open${winner === h.team ? ' won' : ''}" data-tm="${esc(h.team)}">${h.score} <b>${esc(h.team)}</b>${logo(h.logo, '#111', 26, h.team)}</span></div>${call}
+      ${GP.canReplay ? '<div class="rp"><button type="button" data-rp="on">Replay this game play by play</button></div>' : ''}</section>`;
+    // Fantasy: what every player we projected actually scored, under the viewer's scoring.
+    const lines = sum ? boxLines(sum) : {}, map = byEspn(), w = weights();
+    const fan = Object.values(lines).map(o => { const pid = map[o.id], p = pid && DATA && DATA.players[pid]; return p ? { o, pid, p, v: pts(o.line, w, p.pos), s: scaled(p) } : null; })
+      .filter(Boolean).sort((x, y) => y.v - x.v);
+    const fanHtml = fan.length ? `<table class="bx"><thead><tr><th>Player</th><th class="num">Pts</th><th class="num">Proj</th><th class="num">+/-</th></tr></thead><tbody>${fan.map(x => { const d = x.v - x.s.proj;
+      return `<tr><td class="bx-who"><button type="button" class="bx-n" data-open-pid="${esc(x.pid)}">${esc(x.p.name)}</button> <span class="posb posb-${esc(x.p.pos)}">${esc(x.p.pos)}</span> <span class="muted">${esc(x.p.team)}</span><div class="bx-line">${esc(statLineText(x.o))}</div></td>
+        <td class="num"><b>${f1(x.v)}</b></td><td class="num muted">${f1(x.s.proj)}</td><td class="num ${d >= 0 ? 'good' : 'bad'}">${d >= 0 ? '+' : ''}${f1(d)}</td></tr>`; }).join('')}</tbody></table>`
+      : '<p class="muted">No projected players in the box score.</p>';
+    return `<div class="gc-grid"><div class="gc-col">${result}
+        <section class="gcs"><h3>Win probability <span class="src">ESPN</span></h3><p class="gcs-note">ESPN's in-game model over the whole game, not NFL Edge's forecast.</p>
+          <div class="wp-wrap">${sum ? wpChart(ser, info, null) : ''}<div class="wp-tip" hidden></div></div></section>
+        <section class="gcs"><h3>Turning points</h3><p class="gcs-note">The plays that moved ESPN's win probability the most.</p>
+          ${sum ? gameLog(sum, info, ser, null, { sort: 'impact', filter: 'all', q: '', limit: 6, note: false }) : ''}</section></div>
+      <div class="gc-col"><section class="gcs"><h3>Fantasy vs our projection <span class="bt-unit">your scoring</span></h3>${fanHtml}</section>
+        <section class="gcs"><h3>Team stats</h3>${sum ? teamStats(sum, info) || '<p class="muted">Not available.</p>' : ''}</section></div></div>`;
+  };
+  // ESPN unreachable: still show the game from our own week file (Pregame works; final score if we have it).
+  const infoFromG = g => {
+    const side = (s, k) => ({ team: s.team, id: null, score: g.final ? g.final[k] : 0, logo: s.logo_url, color: g.colors[s.team], record: s.record || '' });
+    const st = g.final ? 'post' : 'pre';
+    return { id: null, state: st, realState: st, detail: g.final ? 'Final' : g.kickoff, short: '', period: 0, clock: '',
+             away: side(g.away, 'away'), home: side(g.home, 'home'), sit: null, date: null, offline: true };
+  };
+  const GTABS = [['pre', 'Pregame'], ['live', 'Live'], ['post', 'Postgame']];
   const renderGame = () => {
     const root = document.getElementById('gc'), { sum, info, g } = GP;
     const rp = GP.replay;
     const ser = sum ? wpSeries(sum) : [];
     const upto = rp ? rp.t : null;
+    // Opens on the tab that fits the game's state; the viewer's pick sticks after that.
+    const tab = GP.tab || (rp ? 'live' : info.state === 'pre' ? 'pre' : info.state === 'in' ? 'live' : 'post');
     // header numbers: live/final from ESPN, or the replay position
     let hs = info.home.score, as = info.away.score, status = info.state === 'in' ? `${periodName(info.period)} ${info.clock}` : (info.detail || '');
     let sit = info.state === 'in' ? (info.sit || (sum && sitFromPlays(sum))) : null;
@@ -1015,24 +1070,27 @@
     }
     const sp = sit ? spot(sit, info) : null;
     const wpNow = (() => { const s = upto != null ? ser.filter(x => x.t <= upto) : ser; return s.length ? s[s.length - 1].home : null; })();
-    const fc = g && g.fc;
+    if (info.state === 'pre' && !rp) {  // no 0-0 before kickoff, and a short kickoff time (ESPN's long one crowds phones)
+      hs = ''; as = '';
+      if (info.date) status = new Date(info.date).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+    }
     const side = (s, isHome) => `<div class="sb-t tm-open${isHome ? ' home' : ''}" data-tm="${esc(s.team)}" style="--tc:${esc(s.color)}">${logo(s.logo, '#111', 40, s.team)}
       <div class="sb-id"><div class="sb-n"><span class="sb-full">${esc((g && (isHome ? g.home.nick : g.away.nick)) || s.team)}</span><span class="sb-ab">${esc(s.team)}</span></div><div class="sb-r">${esc(s.record || '')}</div></div>
       <div class="sb-s">${isHome ? hs : as}</div>${sp && sp.offense.team === s.team ? '<i class="sb-ball" title="Has the ball"></i>' : ''}</div>`;
-    root.innerHTML = `
-      <section class="sb">${side(info.away, false)}<div class="sb-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<b>${esc(status)}</b>
-        ${info.state === 'pre' ? `<div class="muted">${esc(new Date(info.date).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }))}</div>` : ''}</div>${side(info.home, true)}</section>
-      ${sp ? `<section class="sit"><div class="sit-dd"><b>${esc(sp.offense.team)} ball</b>${sp.text ? ` · ${esc(sp.text)}` : ''}${sp.red ? ' · <span class="gl-red">red zone</span>' : ''}</div>
+    const live = () => info.state === 'pre'
+      ? `<section class="gcs"><p class="muted">Kicks off ${esc(g ? g.kickoff : info.date ? new Date(info.date).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }) : 'soon')}. The live view (field position, ESPN's win probability, every play, box score) starts at kickoff.</p></section>`
+      : info.offline ? '<section class="gcs"><p class="muted">Live data from ESPN is unavailable right now. Try again in a minute.</p></section>'
+      : `${sp ? `<section class="sit"><div class="sit-dd"><b>${esc(sp.offense.team)} ball</b>${sp.text ? ` · ${esc(sp.text)}` : ''}${sp.red ? ' · <span class="gl-red">red zone</span>' : ''}</div>
         ${fieldSvg(sp, info)}${sit.lastPlay && sit.lastPlay.text ? `<div class="sit-last"><span class="muted">Last play:</span> ${linkNames(esc(sit.lastPlay.text), [info.away.team, info.home.team])}</div>` : ''}</section>` : ''}
       ${GP.canReplay ? `<section class="rp">${rp ? `<button type="button" data-rp="first">&laquo;</button><button type="button" data-rp="prev">&lsaquo;</button>
         <button type="button" data-rp="play">${rp.timer ? 'Pause' : 'Play'}</button><button type="button" data-rp="next">&rsaquo;</button><button type="button" data-rp="last">&raquo;</button>
         <input type="range" min="0" max="${rp.plays.length - 1}" value="${rp.i}" aria-label="Replay position"><span class="muted">Play ${rp.i + 1} of ${rp.plays.length}</span>
         <button type="button" data-rp="off">Exit replay</button>` : '<button type="button" data-rp="on">Replay this game play by play</button>'}</section>` : ''}
-      <nav class="gc-jump"><a href="#gcWp">Win %</a><a href="#gcLog">Plays</a><a href="#gcBox">Box score</a><a href="#gcTeam">Team stats</a>${g ? '<a href="#gcPre">Pregame</a>' : ''}</nav>
+      <nav class="gc-jump"><a href="#gcWp">Win %</a><a href="#gcLog">Plays</a><a href="#gcBox">Box score</a><a href="#gcTeam">Team stats</a></nav>
       <div class="gc-grid">
         <div class="gc-col">
           <section class="gcs" id="gcWp"><h3>Live win probability <span class="src">ESPN</span></h3>
-            <p class="gcs-note">ESPN's in-game model, updated every play. Not NFL Edge's forecast: our pregame chances are in the Pregame box.</p>
+            <p class="gcs-note">ESPN's in-game model, updated every play. Not NFL Edge's forecast: our pregame chances are on the Pregame tab.</p>
             ${wpNow != null ? `<div class="wp-now-t"><span style="color:${esc(info.away.color)}">${esc(info.away.team)} ${pc(1 - wpNow)}</span><span style="color:${esc(info.home.color)}">${esc(info.home.team)} ${pc(wpNow)}</span></div>` : ''}
             <div class="wp-wrap">${sum ? wpChart(ser, info, upto) : ''}<div class="wp-tip" hidden></div></div>
             <div class="wp-leg"><span><i class="wp-m wp-score"></i>score</span><span><i class="wp-m wp-to"></i>turnover</span><span class="muted">Above the line: ${esc(info.home.team)} favored · below: ${esc(info.away.team)}</span></div></section>
@@ -1047,20 +1105,17 @@
           <section class="gcs" id="gcBox"><h3>Box score</h3>${rp ? '<p class="gcs-note">Box score shows the final totals during a replay.</p>' : ''}
             ${sum && sum.boxscore && sum.boxscore.players ? boxScore(sum, info) : '<p class="muted">The box score fills in once the game starts.</p>'}</section>
           <section class="gcs" id="gcTeam"><h3>Team stats</h3>${sum ? teamStats(sum, info) || '<p class="muted">Not available yet.</p>' : ''}</section>
-          ${g ? `<section class="gcs" id="gcPre"><h3>Pregame <span class="src us">NFL Edge, before kickoff</span></h3>
-            <div class="pre-odds"><div><div class="pc-k">Vegas odds</div><b>${fc && fc.src === 'Vegas' ? (fc.tossup ? 'Tossup' : `${esc(fc.nick)} ${fc.pct}%`) : '—'}</b>
-              <div class="muted">${esc(g.vegas_line || 'No line')}${g.vegas_total ? ` · O/U ${f1(g.vegas_total)}` : ''}</div></div>
-              <div><div class="pc-k">Our model</div><b>${fc ? (fc.model_tossup ? 'Tossup' : `${esc(fc.model_nick)} ${fc.model_pct}%`) : '—'}</b><div class="muted">${esc(fc ? fc.model_why || '' : '')}</div></div></div>
-            <div class="pc-k" style="margin-top:12px">Who wins each battle · EPA per 100 plays</div>
-            <div class="gt-teams"><b>${esc(info.away.team)}</b><b>${esc(info.home.team)}</b></div>
-            <div class="gt" style="--ac:${esc(g.colors[g.away.team])};--hc:${esc(g.colors[g.home.team])}">
-              ${g.battles.map(b => tugRow(b.head, `${b.head.left} vs ${b.head.right}`)).join('')}${g.extras.map(x => tugRow(x)).join('')}</div></section>` : ''}
         </div>
       </div>`;
+    root.innerHTML = `
+      <section class="sb">${side(info.away, false)}<div class="sb-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<b>${esc(status)}</b></div>${side(info.home, true)}</section>
+      <div class="seg gc-tabs" role="tablist">${GTABS.map(([k, l]) => `<button type="button" role="tab" data-gtab="${k}" class="${tab === k ? 'on' : ''}">${k === 'live' && info.state === 'in' ? '<span class="live-dot"></span>' : ''}${l}</button>`).join('')}</div>
+      ${tab === 'pre' ? preTab(g) : tab === 'live' ? live() : postTab(sum, info, g, ser)}`;
     wireGame();
   };
   const wireGame = () => {
     const root = document.getElementById('gc');
+    root.querySelectorAll('[data-gtab]').forEach(b => b.onclick = () => { GP.tab = b.dataset.gtab; renderGame(); });
     root.querySelectorAll('[data-view]').forEach(b => b.onclick = () => { GP.view = b.dataset.view; renderGame(); });
     root.querySelectorAll('[data-filter]').forEach(b => b.onclick = () => { GP.filter = b.dataset.filter; renderGame(); });
     root.querySelectorAll('[data-sort]').forEach(b => b.onclick = () => { GP.sort = b.dataset.sort; renderGame(); });
@@ -1101,7 +1156,7 @@
     if (cmd === 'on') {
       const plays = allPlays(GP.sum).flatMap(d => d.plays || []);
       GP.replay = { plays, i: 0, play: plays[0], t: elapsed(plays[0]), timer: null };
-      GP.sort = 'new'; renderGame(); return;
+      GP.sort = 'new'; GP.tab = 'live'; renderGame(); scrollTo(0, 0); return;
     }
     const rp = GP.replay; if (!rp) return;
     if (cmd === 'off') { clearInterval(rp.timer); GP.replay = null; renderGame(); return; }
@@ -1130,7 +1185,9 @@
       GP.canReplay = GP.info.realState === 'post' && GP.sum && allPlays(GP.sum).length > 0;
       if (!GP.replay) renderGame();
     } catch (e) {
-      if (!GP.info) document.getElementById('gc').innerHTML = `<p class="gc-loading">Live data unavailable right now (${esc(e.message)}). Try again in a minute.</p>`;
+      // ESPN down: the game still shows from our own week file (Pregame, plus the final score if we have it).
+      if (!GP.info && GP.g) { GP.info = infoFromG(GP.g); renderGame(); }
+      else if (!GP.info) document.getElementById('gc').innerHTML = `<p class="gc-loading">Live data unavailable right now (${esc(e.message)}). Try again in a minute.</p>`;
     }
     if (GP.info && GP.info.realState === 'in' && !document.hidden) GP.timer = setTimeout(pollGame, 15000);
   };
@@ -1158,7 +1215,10 @@
     try { DATA = await getJSON(CFG.root + CFG.data, 12000, false); DATA.__rel = CFG.data; } catch (e) { DATA = null; return; }
     if (location.hash.startsWith('#player/')) openPlayer(location.hash.slice(8));
     else if (location.hash.startsWith('#team/')) openTeam(location.hash.slice(6));
-    else if (location.hash.startsWith('#g-')) goToTile(location.hash.slice(3));  // deep link to a matchup tile
+    else if (location.hash.startsWith('#g-')) {  // old links to a matchup tile now open that game's gamecast
+      const g = DATA.games.find(x => x.id === location.hash.slice(3));
+      if (g) { location.replace(gameHref(g)); return; }
+    }
     document.addEventListener('nfle-scoring', () => { paintRows(); if (cardPid) renderCard(cardPid); else if (cardTeam) renderTeam(cardTeam); });
     if (CFG.current || SIM) startLive();
   };
