@@ -311,8 +311,15 @@ class InjuryModel:
     rg = rg.merge(snap, on=["week", "gsis_id"], how="left")
     rg["snap"] = rg.snap.astype(float)
     rg = rg.sort_values(["gsis_id", "week"])
-    # Only games with a final score count as history (a pending Monday game is not an inactive week).
-    done = rg.final.fillna(False).astype(bool) & (rg.week <= self.data.completed_weeks(season))
+    # Only games with a final score count as history (a pending Monday game is not an inactive week), and only
+    # once that game's participation data exists: nflverse publishes play-by-play and snap counts a day or so
+    # after the final score, and until then every player of both teams would look inactive (2026-10-13: the
+    # Monday BUF-LA game made Josh Allen and Matthew Stafford 21% / 40% healthy-scratch risks).
+    seen = set(zip(L[L.season == season].week, L[L.season == season].team))
+    sn_ = d.snaps[(d.snaps.season == season)] if "team" in d.snaps else d.snaps.iloc[0:0]
+    seen |= set(zip(sn_.week, sn_.team.replace({"LAR": "LA"}))) if len(sn_) else set()
+    observed = pd.Series([(w, t) in seen for w, t in zip(rg.week, rg.team)], index=rg.index)
+    done = rg.final.fillna(False).astype(bool) & (rg.week <= self.data.completed_weeks(season)) & observed
     # History excludes injury-report weeks (those absences are injuries, not scratches) and unplayed weeks.
     hist = (done & ~rg.on_report).astype(int)
     act = (rg.active & (hist == 1)).astype(int)
