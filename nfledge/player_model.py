@@ -53,7 +53,17 @@ def EFF_FEATURES(comp: str, opp: str, unit: str, exp: dict | None = None) -> lis
   # share (a "vulture") should score more TDs per carry than his history of all carries alone says.
   if exp.get("gl_share") and comp == "rush_td":
     cols.append("i10_tilt")
+  # EXPERIMENT (owner): goal-line role x how often the team gets there. gl_frac = the expected share of HIS carries
+  # that come inside the 10 = (team's expected inside-10 fraction of rushes, from its implied points and run
+  # offense) x (his inside-10 share relative to his carry share). TDs = carries x rate, so this term's weight is
+  # the extra TDs per expected goal-line carry: a goal-line back only gains where his team reaches the goal line.
+  if exp.get("gl_struct") and comp == "rush_td":
+    cols.append("gl_frac")
   return cols
+
+
+GL_RATIO_K = 10.0  # pseudo team goal-line carries pulling a player's goal-line ratio toward 1
+GL_TEAM_DEFAULT = 0.08  # league-typical share of a team's designed rushes inside the 10 (fallback)
 
 
 RB_DEFAULT_CONC = 0.65  # league-typical lead-back share of RB carries, for teams with no history in the window
@@ -419,6 +429,13 @@ class PlayerModel:
                            ("ay_share", "air_yd", "team_ay"), ("i10_share", "carries_i10", "team_rush_i10")):
       f[name] = wsum(num, "w_use") / wsum(den, "w_use").replace(0, np.nan)
       f[name + "_long"] = wsum(num, "w_eff") / wsum(den, "w_eff").replace(0, np.nan)
+    # Goal-line role (experiments.gl_struct): his share of the team's inside-10 carries relative to his overall carry
+    # share, shrunk toward 1 (no special role) with GL_RATIO_K pseudo team goal-line carries, so a couple of
+    # goal-line totes don't make a "vulture". Capped to keep a tiny overall share from exploding the ratio.
+    gl_n = wsum("team_rush_i10", "w_use")
+    cs = f["carry_share"].fillna(0.0)
+    sh = (wsum("carries_i10", "w_use") + GL_RATIO_K * cs) / (gl_n + GL_RATIO_K)
+    f["gl_ratio"] = (sh / cs.where(cs > 0)).clip(0, 4).fillna(1.0)
     # Team committee tendency (experiments.rbbc): in each team-game, the lead back's share of the RBs' designed
     # carries, averaged over the team's recent games (usage weights). ~1 = bellcow team, ~0.5 = even committee.
     rb = L[(L.pos == "RB") & (L.carries > 0)]
@@ -523,6 +540,12 @@ class PlayerModel:
         if len(d) > 50:
           self.share_models[(share, gp)] = Linear.fit(d, f"y_{share}", SHARE_FEATURES(share, self.exp), weight=den,
                                                       name=f"{share}/{gp}")
+    # Team goal-line volume (used by experiments.gl_struct): share of a team's designed rushes that come inside the
+    # 10, from its implied points and run-offense rating, one row per team-game of the training seasons.
+    tg = t.drop_duplicates(["game_id", "team"])
+    tg = tg[tg.team_rush > 0].assign(y_gl=lambda d: d.team_rush_i10 / d.team_rush)
+    self.gl_team_model = Linear.fit(tg, "y_gl", ["implied_pts", "off_rush"], weight="team_rush", name="team_gl_frac")
+    self.add_gl_frac(t)
     self.eff_models = {}
     for opp, (_, unit, comps) in OPP_TYPES.items():
       d0 = t[t[opp] > 0].copy()
@@ -536,6 +559,19 @@ class PlayerModel:
             d, f"y_{c}", EFF_FEATURES(c, opp, unit, self.exp), weight=opp,
             name=f"{c}/{opp}/{gp}")
     return self
+
+  def add_gl_frac(self, d: pd.DataFrame) -> pd.DataFrame:
+    """gl_frac (in place): expected share of the player's carries inside the 10 = team's expected inside-10
+    fraction x his goal-line ratio. Missing inputs fall back to league-typical values."""
+    mod = getattr(self, "gl_team_model", None)
+    team = pd.Series(GL_TEAM_DEFAULT, index=d.index)
+    if mod is not None and {"implied_pts", "off_rush"} <= set(d.columns):
+      team = pd.Series(mod.predict(d.assign(implied_pts=d.implied_pts.fillna(d.implied_pts.mean()),
+                                            off_rush=d.off_rush.fillna(0.0))), index=d.index)
+    team = team.fillna(GL_TEAM_DEFAULT).clip(0.0, 0.5)
+    ratio = d.gl_ratio.fillna(1.0) if "gl_ratio" in d else 1.0
+    d["gl_frac"] = (team * ratio).clip(0.0, 1.0)
+    return d
 
   # -- projection ------------------------------------------------------------------------------------------------
   def project(self, f: pd.DataFrame, cands: pd.DataFrame, team_preds: pd.DataFrame, ratings,
@@ -575,6 +611,7 @@ class PlayerModel:
     p["carries"] = p.carry_share_hat * p.team_rush
     p["rush"] = p.carries + p.db * p.scr_rate.fillna(0.04) * (p.pos == "QB")
     p["tgt"] = p.tgt_share_hat * p.team_db
+    self.add_gl_frac(p)
     return self.stats_from_volume(p, wind)
 
   def share_hats(self, p: pd.DataFrame) -> pd.DataFrame:
@@ -615,6 +652,8 @@ class PlayerModel:
     p["wind_penalty"] = windpen
     if "i10_tilt" not in p:
       p["i10_tilt"] = 0.0
+    if "gl_frac" not in p:
+      self.add_gl_frac(p)
     q = p.assign(def_pass=0.0, def_rush=0.0, home=0) if neutral else p
     for k in STAT_KEYS:
       p[k] = 0.0

@@ -320,6 +320,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
     10+ pts below (n=933) gl over-corrects (.262 / .272 / .256). Net wash; owner agreed to stop if flat. RB range
     calibration by committee tercile all on target (10-90: .784/.813/.789; 25-75: .475/.518/.489). Display-only
     bellcow index on team cards: skipped (owner's call pending; the Players tab shows the split already).
+  - **ADOPTED: `experiments.gl_struct`** (owner: "who cares if you're a goal-line back whose team is never on the
+    goal line"). Diagnostic first: goal-line-heavy RBs on high-implied teams under-predicted 8.7 pts (n~240),
+    exactly right on low-implied teams; the flat tilt over-shot bad teams. Structural term in the rush-TD rate:
+    gl_frac = team inside-10 rush fraction (Linear on implied_pts + off_rush, per team-game; ~+0.004 per implied
+    point) x gl_ratio (player i10 share shrunk with GL_RATIO_K=10 toward carry share, / carry share, cap 4).
+    Pre-set gate met: RB P(1+ rush TD) Brier -0.000214 [-0.000434, -0.000004], 4/5 seasons better (2022 +0.00006),
+    Poisson log-lik -0.7339 -> -0.7333, RB MAE -0.0004 [-0.0018,+0.0009]. Fitted RB weight +0.053 (QB -0.010).
+    Gap closed only partly (high-scoring vultures 8.8 -> 7.6 pts): room for a stronger form later.
   **Model tab everywhere (2026-10-13):** archived / lookahead pages used to show a one-line "archived week"
   placeholder. Now the current build writes the tab once to `<site>/model.html` (`templates/model_tab.html.j2`,
   also embedded in index.html) and other weeks fetch it on first view (gamecast.js `loadModelTab`), so every page

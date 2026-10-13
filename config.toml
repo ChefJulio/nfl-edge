@@ -128,6 +128,12 @@ air_yards = false       # air-yards share (volume) + aDOT (receiving yards)
 # threshold / slope / cap now grid-tuned (see [player_model]).
 wind_mode = "fixed"
 snap_input = false      # snap share as a volume input (spec: flag only, so off unless you opt in)
+# Goal-line role scaled by how often the team reaches the goal line (owner's idea, 2026-10-13): rush-TD rate gets
+# gl_frac = team's expected inside-10 share of rushes (implied points + run offense) x the player's inside-10 share
+# relative to his carry share. Walk-forward 2021-25, RB P(1+ rush TD) Brier -0.00021 [-0.00043, -0.000004],
+# better in 4 of 5 seasons; RB points MAE not worse. A flat goal-line term (gl_share) and team committee tendency
+# (rbbc) did not help and stay off.
+gl_struct = true
 # Blend with FantasyPros expert consensus (free, scraped Fridays; only pre-kickoff ranks are used). Backtest:
 # helps RB/WR (and TE in 2025); hurts QB, where the model alone beats the experts.
 ecr_blend_positions = ["RB", "WR", "TE"]
