@@ -4,28 +4,34 @@ on:
   push:
     branches: [main]
   schedule:
-    # Daily refresh: injury reports (Wed-Fri), expert rankings (Fri) and scores change without a push.
+    # Daily refresh at 10:00 ET: injury reports (Wed-Fri), expert rankings (Fri) and scores change without a push.
+    # The page rolls over to the next week at 06:00 ET Tuesday, so Tuesday's run publishes the new week.
     - cron: "0 14 * * *"
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write   # commits newly finished weeks to the archive branch
   pages: write
   id-token: write
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false   # never interrupt a run mid-way through committing archive pages
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      # Past weeks: one page per season/week, built once and kept on the 'archive' branch (main stays small).
+      - uses: actions/checkout@v4
+        with:
+          ref: archive
+          path: site
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -39,7 +45,21 @@ jobs:
           restore-keys: nfl-cache-
       - name: Check the Model tab is current
         run: python tools/model_doc.py --check || echo "::warning::MODEL.md is out of date - the Model tab may not describe the latest model changes"
-      - run: python run.py --out site/index.html
+      # A week that just finished (after Tuesday's rollover) gets its archived page; existing pages are untouched.
+      - name: Archive newly finished weeks
+        run: python tools/build_archive.py --out=site --missing-only
+      - name: Commit new archive pages
+        working-directory: site
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Archive weeks ($(date -u +%Y-%m-%d))"
+            git push origin HEAD:archive
+          fi
+      # Current week (index.html) and the rest of the season (lookahead pages, rebuilt every run, never committed).
+      - run: python run.py --out site/index.html --lookahead
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:
