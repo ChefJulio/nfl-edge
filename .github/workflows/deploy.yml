@@ -64,6 +64,9 @@ jobs:
           fi
       # Current week (index.html) and the rest of the season (lookahead pages, rebuilt every run, never committed).
       - run: python run.py --out site/index.html --lookahead
+      # Career game logs for the player card (one JSON per player; reads the week data files built above).
+      - name: Player game logs
+        run: python tools/player_logs.py --site=site
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:

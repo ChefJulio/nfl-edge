@@ -273,6 +273,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   blurbs from ESPN's fantasy feed `site.web.api.espn.com/apis/fantasy/v2/games/ffl/news/players?days=60&playerId=<espn>`
   (CORS-open, one player per request; no bulk / multi-id form), fetched in the browser on card open, cached 5 min,
   never stored. Push notifications would need a server or a CI job + a push service (e.g. ntfy.sh): not built.
+  **Career game log** on cards (owner asked for Sleeper's log with every season expanded): `tools/player_logs.py`
+  (CI step after run.py) writes `site/data/players/<gsis>.json` for everyone on any week page (~1,000 players,
+  ~8 MB): every REG game since 1999 (stats cached per season), snap % from 2012 (pfr -> gsis via load_players),
+  home/away from the 1999+ schedule, weekly position rank (site scoring), and OUR pregame matchup rank +
+  projection read from the published week JSONs (2021+, incl. lookahead weeks) - not hindsight.
 
 ## 8. Site / pipeline
 - `index.html` = current week: the week being played (any final game) until **Tuesday 06:00 ET** after its last
@@ -312,6 +317,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   number (plays 9-12: 95% in opponent territory), so it can't be isolated in-drive. Holding the field zone fixed
   across drives, later plays are BETTER for the defense (-3.7 to -7.1 EPA/100 per +5 plays), likely because a drive
   that is still deep on play 8 is a stalling offense. Every design: no evidence defenses tire late in drives.
+- **PARKED (owner, 2026-10-13): news push notifications.** Owner doesn't want them now. If revived: a GitHub Actions
+  cron (~30 min) reads a watchlist file, polls ESPN's per-player news feed (see section 7, player news) and sends
+  new items via ntfy.sh (free push service + iPhone app); a static site can't push on its own.
 - **PARKED (owner, 2026-10-12): prior-season carryover in team ratings.** `tools/carryover_eval.py --quick` (3
   seasons 2022/23/25, 765 games, fixed shipped win formula; current = prior_weight 0.3 fading to 0 by week 8,
   half-life 3). These knobs were "insensitive" on fantasy MAE but never tested on games. Findings: more carryover

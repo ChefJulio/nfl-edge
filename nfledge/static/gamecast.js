@@ -223,6 +223,70 @@
     const s = b.previousElementSibling; s.classList.toggle('clip'); b.textContent = s.classList.contains('clip') ? 'More' : 'Less';
   });
 
+  // ------------------------------------------------------------------------------------------- career game log
+  // data/players/<gsis>.json (tools/player_logs.py): every regular-season game, newest season first, all expanded.
+  // Opponent colored by OUR pregame matchup rank that week (2021 on); rank = his position finish that week.
+  const LOGS = {};
+  const siteRoot = () => CFG.page === 'game' ? '' : (CFG.root || '');
+  const league = () => {
+    try { const s = JSON.parse(localStorage.getItem('nfledge-scoring') || 'null'); if (s && s.lg) return s.lg; } catch (e) { /* default */ }
+    return { teams: 10, QB: 1, RB: 2, WR: 2, TE: 1 };
+  };
+  const mrClass = r => !r ? '' : r <= 8 ? 'mr-hard' : r <= 16 ? 'mr-tough' : r <= 24 ? 'mr-ok' : 'mr-easy';
+  const logCols = (pos, rushy) => {
+    const c = (g, i) => g.c[i], x = (g, i) => g.x[i];
+    const ypc = g => x(g, 2) ? (c(g, 3) / x(g, 2)).toFixed(1) : '';
+    if (pos === 'QB') return [['Passing', [['C/A', g => `${x(g, 0)}/${x(g, 1)}`], ['Yd', g => f0(c(g, 0))], ['TD', g => c(g, 1)], ['Int', g => c(g, 2)]]],
+                              ['Rushing', [['Att', g => x(g, 2)], ['Yd', g => f0(c(g, 3))], ['TD', g => c(g, 4)]]]];
+    const rec = ['Receiving', [['Tgt', g => x(g, 3)], ['Rec', g => c(g, 5)], ['Yd', g => f0(c(g, 6))], ['TD', g => c(g, 7)]]];
+    const rush = ['Rushing', [['Att', g => x(g, 2)], ['Yd', g => f0(c(g, 3))], ['YPC', ypc], ['TD', g => c(g, 4)]]];
+    return pos === 'RB' ? [rush, rec] : rushy ? [rec, ['Rushing', [['Att', g => x(g, 2)], ['Yd', g => f0(c(g, 3))], ['TD', g => c(g, 4)]]]] : [rec];
+  };
+  const logHtml = (L, p) => {
+    const w = weights(), built = (DATA && DATA.score && DATA.score.built) || HALF, pos = L.pos || (p && p.pos);
+    const all = L.seasons.flatMap(s => s.g);
+    const rushy = pos !== 'QB' && pos !== 'RB' && all.reduce((t, g) => t + g.x[2], 0) >= 8;
+    const groups = logCols(pos, rushy), stat = groups.flatMap(gr => gr[1]);
+    const lg = league(), need = (lg.teams || 10) * Math.max(1, lg[pos] || 1);
+    const rkClass = r => r <= need ? 'rk-good' : r <= 2 * need ? 'rk-mid' : 'rk-bad';
+    const projOf = g => g.pjl ? g.pj * (pts(g.pjl, w, pos) / Math.max(0.1, pts(g.pjl, built, pos))) : null;
+    const opp = g => `<td class="lg-opp ${mrClass(g.mr)}"${g.mr ? ` title="Our pregame matchup rank: ${ord(g.mr)} of 32 vs ${esc(pos)}s (1st = toughest)"` : ''}>${g.h === 0 ? '@' : ''}${esc(g.o)}</td>`;
+    const head = `<tr class="lg-gh"><th colspan="6"></th>${groups.map(([n, cols]) => `<th colspan="${cols.length}" class="lg-grp">${n}</th>`).join('')}</tr>
+      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num">Proj</th><th class="num">Rank</th><th class="num">Snap</th>${stat.map(([n]) => `<th class="num">${n}</th>`).join('')}</tr>`;
+    const blank = `<td class="num">–</td>`.repeat(stat.length);
+    const body = L.seasons.map(S => {
+      const isCur = S.s === L.cur, rows = S.g.map(g => ({ w: g.w, g }));
+      if (isCur) (L.up || []).forEach(u => rows.push({ w: u.w, u }));
+      rows.sort((a, b) => a.w - b.w);
+      const fps = S.g.map(g => pts(g.c, w, pos)), fpg = fps.length ? fps.reduce((a, b) => a + b, 0) / fps.length : 0;
+      const team = S.g.length ? S.g[S.g.length - 1].t : '';
+      const trs = rows.map(r => {
+        if (r.u && r.u.bye) return `<tr class="lg-bye"><td>${r.w}</td><td colspan="${5 + stat.length}">Bye</td></tr>`;
+        if (r.u) {
+          const pj = projOf(r.u);
+          return `<tr class="lg-up"><td>${r.w}</td>${opp(r.u)}<td class="num">–</td><td class="num">${pj != null ? f1(pj) : '–'}</td><td class="num">–</td><td class="num">–</td>${blank}</tr>`;
+        }
+        const g = r.g, v = pts(g.c, w, pos), pj = projOf(g);
+        return `<tr><td>${g.w}</td>${opp(g)}<td class="num lg-fp">${f1(v)}</td>
+          <td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td>
+          <td class="num"><span class="lg-rk ${rkClass(g.rk)}">${g.rk}</span></td><td class="num">${g.sn != null ? g.sn : '–'}</td>
+          ${stat.map(([, fn]) => `<td class="num">${fn(g)}</td>`).join('')}</tr>`;
+      }).join('');
+      return `<tbody><tr class="lg-season"><td colspan="${6 + stat.length}"><b>${S.s}</b> ${esc(team)} · ${S.g.length} game${S.g.length === 1 ? '' : 's'}${S.g.length ? ` · ${f1(fpg)} FP/G` : ''}</td></tr>${head}${trs}</tbody>`;
+    }).join('');
+    const legend = `<div class="lg-leg"><span>Opponent color = our pregame matchup rank (2021 on):</span><span class="mr-easy">easy</span><span class="mr-ok">fair</span><span class="mr-tough">tough</span><span class="mr-hard">hardest</span>
+      <span>· Rank = his ${esc(pos)} finish that week (green = starter in your league size) · Proj = our projection then (green = beat it)</span></div>`;
+    return `${legend}<div class="lg-scroll"><table class="lg">${body}</table></div>`;
+  };
+  const loadLog = async (pid, box, p) => {
+    if (!LOGS[pid]) {
+      box.innerHTML = '<p class="pc-sub">Loading game log&hellip;</p>';
+      try { LOGS[pid] = await getJSON(`${siteRoot()}data/players/${encodeURIComponent(pid)}.json`); }
+      catch (e) { if (box.isConnected) box.innerHTML = '<p class="pc-sub">Game log unavailable.</p>'; return; }
+    }
+    if (box.isConnected) box.innerHTML = LOGS[pid].seasons.length || (LOGS[pid].up || []).length ? logHtml(LOGS[pid], p) : '<p class="pc-sub">No NFL games yet.</p>';
+  };
+
   // ----------------------------------------------------------------------------------------------- player card
   let cardPid = null;
   const ensureOverlay = () => {
@@ -342,9 +406,11 @@
         ${nweek >= 1 ? `<div class="pc-k" style="margin-top:10px">Points by week</div>${weekBars(p)}` : ''}</div>
       <p class="pc-take">${esc(p.takeaway)}</p>
       ${p.espn && !DATA.archive ? '<div class="pc-box pc-newsbox"><div class="pc-k">Recent news</div><div class="pc-news"></div></div>' : ''}
+      <div class="pc-box pc-logbox"><div class="pc-k">Game log · every career game</div><div class="pc-log"></div></div>
       <div class="pc-links">${g ? `<a href="${gameHref(g)}">${st && st.state === 'in' ? '<span class="live-dot"></span>' : ''}Gamecast: ${esc(g.away.team)} @ ${esc(g.home.team)} &rsaquo;</a>` : ''}
         ${CFG.page !== 'game' && g ? `<a href="#games" data-goto="${esc(g.id)}">Matchup card &rsaquo;</a>` : ''}</div>`;
     const nb = body.querySelector('.pc-news'); if (nb) loadNews(p.espn, nb);
+    const lb = body.querySelector('.pc-log'); if (lb) loadLog(pid, lb, p);
     body.querySelectorAll('[data-goto]').forEach(a => a.onclick = ev => {
       ev.preventDefault(); closePlayer();
       const tab = document.querySelector('nav.tabs button[data-tab="games"]'); if (tab) tab.click();

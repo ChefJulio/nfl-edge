@@ -100,7 +100,35 @@ html.pc-open { overflow: hidden; }
 .pc-wk .wb { fill: var(--accent); } .pc-wk .wb-miss { stroke: var(--faint); stroke-width: 2; }
 .pc-wk .wb-l, .pc-wk .wb-v { font-size: 9px; fill: var(--muted); text-anchor: middle; } .pc-wk .wb-v { fill: var(--ink); font-weight: 700; }
 .pc-take { margin: 10px 2px; font-weight: 600; line-height: 1.4; }
-.pc-newsbox { margin-bottom: 10px; }
+.pc-newsbox, .pc-logbox { margin-bottom: 10px; }
+/* career game log */
+.lg-leg { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 11px; color: var(--muted); margin: 4px 0 8px; align-items: center; }
+.lg-leg .mr-easy, .lg-leg .mr-ok, .lg-leg .mr-tough, .lg-leg .mr-hard { font-weight: 800; }
+.lg-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -12px; padding: 0 12px; }
+table.lg { border-collapse: separate; border-spacing: 0 3px; font-size: 12.5px; min-width: 100%; }
+table.lg th, table.lg td { padding: 4px 7px; white-space: nowrap; }
+table.lg th { font-size: 10.5px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; text-align: left; }
+table.lg .num { text-align: right; }
+table.lg tr > :nth-child(1), table.lg tr > :nth-child(2) { position: sticky; z-index: 1; background: var(--panel2); }
+table.lg tr > :nth-child(1) { left: 0; min-width: 30px; } table.lg tr > :nth-child(2) { left: 30px; min-width: 52px; }
+table.lg tr.lg-season td, table.lg tr.lg-gh th { position: static; }
+table.lg tbody tr:not(.lg-season):not(.lg-gh):not(.lg-ch) td { background: color-mix(in srgb, var(--ink) 4%, var(--panel2)); }
+table.lg tbody tr:not(.lg-season):not(.lg-gh):not(.lg-ch) td:first-child { border-radius: 6px 0 0 6px; }
+table.lg tr.lg-season td { padding: 14px 2px 2px; font-size: 13px; color: var(--muted); background: none; }
+table.lg tr.lg-season td b { color: var(--ink); font-size: 15px; margin-right: 6px; }
+table.lg tbody:first-child tr.lg-season td { padding-top: 4px; }
+.lg-grp { text-align: center !important; border-bottom: 2px solid var(--line); }
+.lg-opp { font-weight: 800; } .lg-fp { font-weight: 800; }
+.mr-easy { color: #45c26b; } .mr-ok { color: #9fd9a8; } .mr-tough { color: #e0b04a; } .mr-hard { color: #f2786d; }
+.lg-rk { display: inline-block; min-width: 30px; text-align: center; border-radius: 5px; padding: 0 5px; font-weight: 700; }
+.rk-good { background: rgba(69,194,107,.24); color: #92e8ab; } .rk-mid { background: rgba(224,176,74,.18); color: #f1d391; } .rk-bad { background: rgba(242,120,109,.18); color: #ffb3aa; }
+.lg-over { color: #45c26b; } .lg-under { color: var(--muted); }
+tr.lg-up td { color: var(--muted); } tr.lg-up .lg-opp.mr-easy, tr.lg-up .lg-opp.mr-ok, tr.lg-up .lg-opp.mr-tough, tr.lg-up .lg-opp.mr-hard { opacity: .9; }
+tr.lg-bye td { color: var(--faint); font-weight: 700; letter-spacing: .06em; }
+@media (prefers-color-scheme: light) {
+  .gc-page .mr-easy, .pc .mr-easy { color: #16803c; } .pc .mr-ok { color: #4a9a5e; } .pc .mr-tough { color: #9a6700; } .pc .mr-hard { color: #c2372c; }
+  .pc .rk-good { color: #10612a; } .pc .rk-mid { color: #7a5200; } .pc .rk-bad { color: #9b2218; }
+}
 .nw { list-style: none; margin: 6px 0 0; padding: 0; }
 .nw-i { padding: 9px 0 9px 10px; border-top: 1px solid var(--line); border-left: 3px solid transparent; }
 .nw-i:first-child { border-top: 0; } .nw-i.fresh { border-left-color: var(--accent); }
