@@ -313,8 +313,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
     rush-TD rate model) -0.002 [-0.005,+0.001]; both -0.003 [-0.006,+0.000]. WR "better" -0.001 = noise-level.
     Concentration persists r=0.36 season to season (inside-10: 0.19); same head coach 0.36 vs new 0.29, CI on the
     difference [-0.20,+0.34]. 2025 range: SEA 0.54 (most committee) to IND 0.88 (most bellcow). Ledger gained
-    carries_i10 / team_rush_i10 (unused unless gl_share is on). Possible follow-ups if wanted: RB TD-only error,
-    committee teams' range calibration, a display-only bellcow index on team cards.
+    carries_i10 / team_rush_i10 (unused unless gl_share is on).
+  - Follow-ups (`tools/rb_followups.py`, metrics fixed before looking): gl_share on P(1+ rush TD) for RBs, Brier
+    0.1896 -> 0.1893, diff -0.0003 [-0.0007,+0.0001] = no difference. Subgroups: goal-line share 10+ pts above
+    carry share (n=1002) baseline under-predicts (actual .349, base .308, gl .325; Brier -0.0016 [-0.0027,-0.0005]);
+    10+ pts below (n=933) gl over-corrects (.262 / .272 / .256). Net wash; owner agreed to stop if flat. RB range
+    calibration by committee tercile all on target (10-90: .784/.813/.789; 25-75: .475/.518/.489). Display-only
+    bellcow index on team cards: skipped (owner's call pending; the Players tab shows the split already).
   **Model tab everywhere (2026-10-13):** archived / lookahead pages used to show a one-line "archived week"
   placeholder. Now the current build writes the tab once to `<site>/model.html` (`templates/model_tab.html.j2`,
   also embedded in index.html) and other weeks fetch it on first view (gamecast.js `loadModelTab`), so every page
