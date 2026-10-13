@@ -856,12 +856,19 @@
       const off = st ? null : teamOf(p.start && p.start.team && p.start.team.id);
       const chips = [];
       if (p.scoringPlay) chips.push(/field goal/i.test(t + txt) ? ['FG', 'c-sc'] : /extra point/i.test(t + txt) ? ['XP', 'c-sc'] : /safety/i.test(t + txt) ? ['SAFETY', 'c-sc'] : ['TD', 'c-sc']);
-      else if (st) chips.push([/kickoff|kicks/i.test(t + txt) ? 'KO' : /punt/i.test(t + txt) ? 'PUNT' : /field goal/i.test(t + txt) ? 'FG' : 'ST', 'c-st']);
-      if (p.isTurnover) chips.push([/intercept/i.test(t + txt) ? 'INT' : /fumble/i.test(t + txt) ? 'FUM' : 'TO', 'c-to']);
+      else if (st) chips.push([/kickoff|kicks/i.test(t + txt) ? 'KICKOFF' : /punt/i.test(t + txt) ? 'PUNT' : /field goal/i.test(t + txt) ? 'FG' : 'ST', 'c-st']);
+      // ESPN doesn't flag lost fumbles on kickoffs / punts as turnovers: the kicking team recovering is one.
+      const kicker = st && (txt.match(/(?:kicks|punts)\b.*?\bfrom ([A-Z]{2,3}) \d/) || [])[1];
+      const recBy = (txt.match(/RECOVERED by ([A-Z]{2,3})-/) || [])[1];
+      const stLost = st && /FUMBLES/.test(txt) && kicker && recBy && ourCode(recBy) === ourCode(kicker);
+      if (p.isTurnover || stLost) chips.push([/intercept/i.test(t + txt) ? 'INT' : /fumble/i.test(t + txt) ? 'FUM' : 'TO', 'c-to']);
       if (/sack/i.test(t)) chips.push(['SACK', 'c-sk']);
       if (p.isPenalty) chips.push(['FLAG', 'c-pen']);
       if (fd) chips.push(['1ST', 'c-1st']);
-      const chipHtml = chips.map(([c, k]) => `<span class="pc-chip ${k}">${c}</span>`).join('');
+      const CHIP_TIP = { TD: 'Touchdown', FG: 'Field goal', XP: 'Extra point', SAFETY: 'Safety', KICKOFF: 'Kickoff (special teams)',
+                         PUNT: 'Punt (special teams)', ST: 'Special teams play', INT: 'Interception (turnover)', FUM: 'Fumble lost (turnover)',
+                         TO: 'Turnover', SACK: 'Sack', FLAG: 'Penalty on the play', '1ST': 'Gained a first down' };
+      const chipHtml = chips.map(([c, k]) => `<span class="pc-chip ${k}" title="${CHIP_TIP[c] || ''}">${c}</span>`).join('');
       const cls = `${p.scoringPlay ? ' pl-score' : ''}${p.isPenalty && !p.scoringPlay ? ' pl-pen' : ''}${st ? ' pl-st' : ''}`;
       return `<li class="pl${cls}"${off ? ` style="--pt:${esc(off.color)}"` : ''}><div class="pl-when">${when}</div>
         <div class="pl-what">${dd || chipHtml ? `<div class="pl-dd">${chipHtml}${esc(dd)}</div>` : ''}<div class="pl-txt">${linkNames(esc(p.text), teams)}</div></div>
