@@ -124,7 +124,7 @@ def main():
     "power": power, "power_vol": rp.league_volume(eng, season, week, eng.tm.fit(season, week)),
     "roles": rp.role_changes(eng, season, week, cfg), "backtest": rp.backtest_summary(ev),
     "bt_seasons": " and ".join(map(str, bt_seasons)) or "n/a", "bt_takeaway": backtest_takeaway(ev),
-    "tier_cfg": cfg["tiers"], "margin_disagree": cfg["report"]["margin_disagree"],
+    "score_cfg": rp.scoring_settings(scoring, cfg), "tier_cfg": cfg["tiers"], "margin_disagree": cfg["report"]["margin_disagree"],
     "total_disagree": cfg["report"]["total_disagree"],
     "model_doc": docs.render(docs.live_values(eng, cfg, season, week, res, ev)),
   }

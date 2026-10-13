@@ -55,6 +55,10 @@ def EFF_FEATURES(comp: str, opp: str, unit: str, exp: dict | None = None) -> lis
 def SHARE_FEATURES(share: str, exp: dict | None = None) -> list[str]:
   exp = exp or {}
   cols = [share, f"{share}_long"]
+  # Game script: the team's Vegas spread, and spread x the player's own share so lead roles and change-of-pace
+  # roles can respond differently (favorites run the lead back more; trailing teams throw to receiving backs).
+  if exp.get("spread_shares"):
+    cols += ["spread_team", f"{share}_x_spread"]
   if exp.get("air_yards") and share == "tgt_share":
     cols += ["ay_share", "ay_share_long"]
   if exp.get("snap_input"):
@@ -237,7 +241,21 @@ class PlayerModel:
       dr = dr.dropna(subset=["gsis_id"]).drop_duplicates("gsis_id").set_index("gsis_id")
       info["draft_round"] = dr["round"].reindex(info.index)
       info["draft_pick"] = dr["pick"].reindex(info.index)
-    info["tier"] = info.get("draft_round", pd.Series(np.nan, index=info.index)).map(draft_tier)
+    picks = self.pcfg.get("draft_tier_picks")  # e.g. [16, 32, 64, 100]: tiers by overall pick, else by round
+    if picks and "draft_pick" in info:
+      edges = sorted(int(x) for x in picks)
+      def by_pick(pk):
+        if pd.isna(pk):
+          return "UDFA"
+        lo = 0
+        for e in edges:
+          if pk <= e:
+            return f"P{lo + 1}-{e}"
+          lo = e
+        return f"P{lo + 1}+"
+      info["tier"] = info.draft_pick.map(by_pick)
+    else:
+      info["tier"] = info.get("draft_round", pd.Series(np.nan, index=info.index)).map(draft_tier)
     return info
 
   # -- setup -----------------------------------------------------------------------------------------------------
@@ -344,7 +362,17 @@ class PlayerModel:
     L = L[(L.season < season) | (L.week < week)]
     L = L[(L.season >= season - 2) & ~L.excluded]
     # Usage weights: recency within season + decaying prior season (as team model, but share half-life).
-    w_use = asof_weights(L.season, L.week, season, week, self.cfg, self.pcfg["share_half_life_weeks"])
+    # Share half-life: one number, or per position ({QB = .., RB = .., ...}; missing positions use "default").
+    hl = self.pcfg["share_half_life_weeks"]
+    if isinstance(hl, dict):
+      pos = L.pos.fillna("WR").to_numpy()
+      w_use = np.zeros(len(L))
+      for h in set(hl.values()) | {hl.get("default", 3.0)}:
+        m = np.array([hl.get(x, hl.get("default", 3.0)) == h for x in pos])
+        if m.any():
+          w_use[m] = asof_weights(L.season, L.week, season, week, self.cfg, h)[m]
+    else:
+      w_use = asof_weights(L.season, L.week, season, week, self.cfg, hl)
     # Efficiency weights: flat by season age.
     w_eff = np.select([L.season == season, L.season == season - 1, L.season == season - 2],
                       list(self.pcfg.get("eff_season_weights", EFF_SEASON_WEIGHTS)), 0.0)
@@ -439,6 +467,9 @@ class PlayerModel:
         j["off_pass"] = j.team.map(r.off["pass"]) + np.array([r.qb_term(q) for q in j.qb])
         j["off_rush"] = j.team.map(r.off["rush"])
         j["implied_pts"] = j.total_line / 2 + j.spread_team / 2
+        for sh in ("db_share", "carry_share", "tgt_share"):
+          j[f"{sh}_x_spread"] = j[sh].fillna(0) * j.spread_team.fillna(0)
+        j["spread_team"] = j.spread_team.fillna(0)
         j["wind"] = j.wind.fillna(0.0).where(~j.indoor.fillna(False).astype(bool), 0.0)
         j["wind_sq"] = j.wind ** 2
         rows.append(j)
@@ -489,6 +520,7 @@ class PlayerModel:
     p["off_rush"] = p.team.map(ratings.off["rush"])
     implied = tp.total_line / 2 + tp.spread_team / 2
     p["implied_pts"] = p.team.map(implied.fillna(tp.points_hat))
+    p["spread_team"] = p.team.map(tp.spread_team).fillna(0.0)
     p["snap_pct"] = p.snap_pct.fillna(0.0) if "snap_pct" in p else 0.0
     p["adot"] = p.adot.fillna(7.0) if "adot" in p else 7.0
     p["wind"] = p.game_id.map(wind).fillna(0.0) if wind is not None else 0.0
@@ -514,6 +546,12 @@ class PlayerModel:
     for c in [c for c in p.columns if c.endswith(("_share", "_share_long"))] + ["snap_pct"]:
       if c in p:
         p[c] = p[c].fillna(0.0)
+    # Game-script inputs (used only when experiments.spread_shares is on); no spread known = neutral script.
+    if "spread_team" not in p:
+      p["spread_team"] = 0.0
+    for sh in ("db_share", "carry_share", "tgt_share"):
+      if sh in p:
+        p[f"{sh}_x_spread"] = p[sh] * p.spread_team.fillna(0.0)
     for share, gps in (("db_share", ["QB"]), ("carry_share", ["QB", "RB", "WR", "TE"]),
                        ("tgt_share", ["RB", "WR", "TE"])):
       p[f"{share}_hat"] = 0.0

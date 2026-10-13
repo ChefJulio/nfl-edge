@@ -71,7 +71,8 @@ def _report(s) -> str:
 class InjuryModel:
   def __init__(self, data, pm, cfg):
     self.data, self.pm, self.cfg = data, pm, cfg
-    self.hl = cfg["player_model"]["share_half_life_weeks"]
+    hl = cfg["player_model"]["share_half_life_weeks"]
+    self.hl = float(hl.get("default", 3.0)) if isinstance(hl, dict) else hl  # per-position setting: team-level default
     self.scale = float(cfg.get("injuries", {}).get("redistribution_scale", 1.0))
 
   def _gb_params(self) -> dict:

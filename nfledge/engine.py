@@ -69,7 +69,7 @@ class Engine:
   def _fit_blend_and_uncertainty(self, seasons):
     """From projections on the train seasons: (1) expert-consensus blend per position, (2) residual SD model
     per position (sd^2 = a + b * projection)."""
-    self.ecr_map, self.blend, self.sd_model = {}, {}, {}
+    self.ecr_map, self.blend, self.sd_model, self.calib = {}, {}, {}, {}
     rows = []
     for s in seasons:
       for w in range(2, self.data.completed_weeks(s) + 1):
@@ -77,6 +77,14 @@ class Engine:
         rows.append(self.attach_actuals(p, s, w))
     d = pd.concat(rows)
     d = d[d.played]
+    # Optional final calibration per position (experiments.player_calibration = "linear"): actual ~ a + b x
+    # projection on the training seasons. Backtest showed projections slightly too extreme at both ends (20+ point
+    # projections ~1 pt high, 8-12 ~0.3 low); a fitted slope below 1 pulls them in. Applied before the expert blend.
+    if self.cfg.get("experiments", {}).get("player_calibration", "none") == "linear":
+      for pos, g in d.groupby("pos"):
+        if len(g) >= 200:
+          self.calib[pos] = Linear.fit(g, "actual", ["proj"], name=f"calib/{pos}")
+      d = self._calibrate(d)
     has = d.ecr.notna()
     blend_pos = set(self.cfg.get("experiments", {}).get("ecr_blend_positions", ["RB", "WR", "TE"]))
     for pos, g in d[has].groupby("pos"):
@@ -125,8 +133,16 @@ class Engine:
     p.loc[late, "ecr"] = np.nan
     return p.drop(columns=["scrape_date", "gameday"]).assign(ecr_pts=np.nan)
 
-  def apply_blend(self, p: pd.DataFrame) -> pd.DataFrame:
+  def _calibrate(self, p: pd.DataFrame) -> pd.DataFrame:
     p = p.copy()
+    for pos, m in getattr(self, "calib", {}).items():
+      sel = p.pos == pos
+      if sel.any():
+        p.loc[sel, "proj"] = np.clip(m.predict(p[sel]), 0, None)
+    return p
+
+  def apply_blend(self, p: pd.DataFrame) -> pd.DataFrame:
+    p = self._calibrate(p)
     p["proj_model"] = p.proj
     for pos, m in self.ecr_map.items():
       sel = (p.pos == pos) & p.ecr.notna()
@@ -188,7 +204,7 @@ class Engine:
     p["matchup_pct"] = p.proj / p.proj_neutral.clip(lower=0.5) - 1
     p["matchup_pts"] = p.proj - p.proj_neutral
     p = self.attach_ecr(p, season, week)
-    if blend and self.ecr_map:
+    if blend and (self.ecr_map or getattr(self, "calib", {})):
       p = self.apply_blend(p)
     else:
       p["proj_model"] = p.proj

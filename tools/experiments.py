@@ -101,6 +101,19 @@ VARIANTS = {
   "gb_large": variant(injuries__gb_iterations=300, injuries__gb_max_depth=5),
   "ranges_plain": variant(uncertainty__games_factor=0.0, uncertainty__low_sample_widen=1.0,
                           uncertainty__injury_boost_widen=1.0),
+  # --- round 2: wind penalty grid (threshold mph x slope per mph; cap 25%), per-position share half-life,
+  # game-script (spread-aware) shares ---
+  **{f"wind_t{t}_s{int(s * 100)}": variant(player_model__wind_threshold_mph=t, player_model__wind_penalty_per_mph=s)
+     for t in (10, 15, 20) for s in (0.01, 0.02, 0.03) if (t, s) != (15, 0.02)},
+  "hl_te5": variant(player_model__share_half_life_weeks={"default": 3.0, "TE": 5.0}),
+  "hl_te5_wr5": variant(player_model__share_half_life_weeks={"default": 3.0, "TE": 5.0, "WR": 5.0}),
+  "hl_qb5_te5": variant(player_model__share_half_life_weeks={"default": 3.0, "TE": 5.0, "QB": 5.0}),
+  "spread_shares": variant(experiments__spread_shares=True),
+  # rookie / backup priors: draft tiers by overall pick instead of round
+  "draft_picks_fine": variant(player_model__draft_tier_picks=[10, 32, 64, 100, 160]),
+  "draft_picks_mid": variant(player_model__draft_tier_picks=[32, 100]),
+  # final per-position linear calibration of projections (too extreme at both ends)
+  "calib_linear": variant(experiments__player_calibration="linear"),
   # 2026-10-12 audit outcome, tested together for interactions before adopting
   "adopted": variant(player_model__share_half_life_weeks=3.0, uncertainty__games_factor=0.0,
                      uncertainty__low_sample_widen=1.0, uncertainty__injury_boost_widen=1.0,

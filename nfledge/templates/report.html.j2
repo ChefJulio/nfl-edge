@@ -66,6 +66,25 @@ details.howto div { margin-top: 8px; color: var(--muted); font-size: 12.5px; max
 .seg button.on { background: var(--panel); color: var(--ink); box-shadow: var(--shadow); }
 #psearch { flex: 1; min-width: 150px; max-width: 280px; padding: 7px 11px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel2); color: var(--ink); font: inherit; font-size: 13px; }
 #psearch:focus { outline: 2px solid color-mix(in srgb, var(--accent) 40%, transparent); border-color: var(--accent); }
+/* scoring & league panel */
+.sbtn { margin-left: auto; background: var(--panel2); border: 1px solid var(--line); color: var(--ink); font: inherit; font-size: 13px; font-weight: 600; padding: 7px 12px; border-radius: 8px; cursor: pointer; }
+.sbtn:hover, .sbtn[aria-expanded="true"] { border-color: var(--accent); }
+.sbtn span { color: var(--muted); font-weight: 500; }
+.spanel[hidden] { display: none; }
+.spanel { padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--panel2); display: grid; gap: 12px; }
+.sp-h { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; margin-bottom: 6px; }
+.sp-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; } .sp-row .sp-h { margin: 0; }
+.sp-presets { display: flex; gap: 6px; flex-wrap: wrap; }
+.sp-presets button { background: var(--panel); border: 1px solid var(--line); color: var(--ink); font: inherit; font-size: 12.5px; font-weight: 600; padding: 5px 11px; border-radius: 999px; cursor: pointer; }
+.sp-presets button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 320px)); gap: 16px 48px; }
+.sp-col label { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13px; color: var(--ink); padding: 3px 0; }
+.sp-col input { width: 72px; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); font: inherit; font-size: 13px; text-align: right; }
+.sp-col input:focus { outline: 2px solid color-mix(in srgb, var(--accent) 40%, transparent); border-color: var(--accent); }
+.sp-reset { margin-top: 8px; background: none; border: 1px solid var(--line); color: var(--muted); font: inherit; font-size: 12.5px; padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+.sp-reset:hover { color: var(--ink); border-color: var(--faint); }
+.sp-note { margin: 0; font-size: 12px; color: var(--muted); }
+@media (max-width: 640px) { .sbtn { margin-left: 0; width: 100%; } }
 
 /* tables */
 .scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -394,7 +413,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   <div class="brand"><h1>NFL <span>Edge</span></h1><div class="wk">{{ season }} &middot; Week {{ week }}</div></div>
   <div class="meta">
     <span>Data through <b>week {{ week - 1 }}</b>{% if pending %} &middot; {{ pending }} game pending{% endif %}</span>
-    <span>Scoring <b>{{ 'Half PPR' if scoring == 'half' else scoring|upper if scoring in ('ppr',) else scoring|capitalize }}</b></span>
+    <span>Scoring <b id="scoreName">{{ 'Half PPR' if scoring == 'half' else scoring|upper if scoring in ('ppr',) else scoring|capitalize }}</b></span>
     {% if not injury_report %}<span class="alert">Injury report not out yet &middot; using last week's statuses</span>{% else %}<span>Injury report <b>in</b></span>{% endif %}
     <span>Updated {{ generated }}</span>
   </div>
@@ -409,7 +428,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 <main><div class="wrap">
 
 <section id="tab-players" class="on">
-  <div class="sec-head"><div><h2>Weekly rankings</h2><p>Half-PPR projections if active, with realistic ranges. Tap a player for season stats.</p></div></div>
+  <div class="sec-head"><div><h2>Weekly rankings</h2><p><span id="scoreSub">Half-PPR</span> projections if active, with realistic ranges. Tap a player for season stats.</p></div></div>
   <details class="howto"><summary>How to read</summary><div>
     <b>Projection</b> assumes the player is active (NFL availability is yes/no, so injured players show an Inactive% instead of a discount).
     The <b>range bar</b> comes from how past projections of this size actually turned out: thin line = floor to ceiling (10th to 90th percentile), thick bar = the likely middle half, tick = projection.
@@ -419,8 +438,40 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   </div></details>
   <div class="card">
     <div class="toolbar">
-      <div class="seg posbar">{% for pos in ["QB","RB","WR","TE"] %}<button data-pos="{{ pos }}" class="pos-{{ pos }}{{ ' on' if loop.first }}">{{ pos }}</button>{% endfor %}</div>
+      <div class="seg posbar">{% for pos in ["QB","RB","WR","TE","FLEX"] %}<button data-pos="{{ pos }}" class="pos-{{ pos }}{{ ' on' if loop.first }}">{{ pos }}</button>{% endfor %}</div>
       <input type="search" id="psearch" placeholder="Find a player" aria-label="Find a player">
+      <button type="button" class="sbtn" id="scoreBtn" aria-expanded="false" aria-controls="scorePanel">Scoring &amp; league <span id="scoreSum"></span></button>
+
+    </div>
+    <div class="spanel" id="scorePanel" hidden>
+      <div class="sp-row"><span class="sp-h">Preset</span><div class="sp-presets" id="spPresets"></div></div>
+      <div class="sp-grid">
+        <div class="sp-col">
+          <div class="sp-h">Points per stat</div>
+          <label>Passing yards per point <input type="number" step="1" min="1" data-k="pass_yd" data-inv="1"></label>
+          <label>Passing TD <input type="number" step="0.5" data-k="pass_td"></label>
+          <label>Interception <input type="number" step="0.5" data-k="interception"></label>
+          <label>Rushing yards per point <input type="number" step="1" min="1" data-k="rush_yd" data-inv="1"></label>
+          <label>Rushing TD <input type="number" step="0.5" data-k="rush_td"></label>
+          <label>Reception <input type="number" step="0.25" data-k="reception"></label>
+          <label>Receiving yards per point <input type="number" step="1" min="1" data-k="rec_yd" data-inv="1"></label>
+          <label>Receiving TD <input type="number" step="0.5" data-k="rec_td"></label>
+          <label>Fumble lost <input type="number" step="0.5" data-k="fumble_lost"></label>
+          <label>TE reception bonus <input type="number" step="0.25" data-k="te_bonus"></label>
+        </div>
+        <div class="sp-col">
+          <div class="sp-h">League (sets the tiers)</div>
+          <label>Teams <input type="number" step="1" min="4" max="32" data-l="teams"></label>
+          <label>QB <input type="number" step="1" min="0" max="3" data-l="QB"></label>
+          <label>RB <input type="number" step="1" min="0" max="4" data-l="RB"></label>
+          <label>WR <input type="number" step="1" min="0" max="5" data-l="WR"></label>
+          <label>TE <input type="number" step="1" min="0" max="3" data-l="TE"></label>
+          <label>Flex (RB/WR/TE) <input type="number" step="1" min="0" max="4" data-l="flex"></label>
+          <label>Superflex (any) <input type="number" step="1" min="0" max="2" data-l="superflex"></label>
+          <button type="button" class="sp-reset" id="spReset">Reset to Half PPR, 10 teams</button>
+        </div>
+      </div>
+      <p class="sp-note">Projections are stat lines, so any scoring re-scores them exactly. Blended-in expert ranks and the floor/ceiling ranges are scaled by the same ratio (an approximation). Saved on this device.</p>
     </div>
     {% for pos, block in players.items() %}
     <div class="posview" data-pos="{{ pos }}" {% if not loop.first %}hidden{% endif %}>
@@ -428,7 +479,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     <table class="sortable ranks tiles">
       <thead><tr>
         <th class="num" data-first="asc">#</th>
-        <th class="num" data-first="asc"><abbr title="FantasyPros expert consensus rank (Fridays); faded 'lw' = last week's">ECR</abbr></th>
+        <th class="num" data-first="asc"><abbr title="FantasyPros expert consensus rank at the player's position (Fridays); faded 'lw' = last week's">ECR</abbr></th>
         <th class="stick" data-first="asc">Player</th>
         <th class="projh"><abbr title="Projection; bar = floor to ceiling (10th-90th pct), thick = middle 50%">Projection</abbr></th>
         <th data-first="desc"><abbr title="Opponent and its defense vs {{ pos }}s: 1st = toughest (red), 32nd = easiest (green). Opponent-adjusted, from the model.">Matchup</abbr></th>
@@ -440,10 +491,10 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
       </tr></thead>
       <tbody>
       {% for r in block.rows %}
-        <tr class="main teamrow{% if r.boost >= 1 %} boosted{% endif %}{% if r.avail < 0.5 %} out{% endif %}" style="{{ r.row_style }}" data-name="{{ r.name|lower }}">
+        <tr class="main teamrow{% if r.boost >= 1 %} boosted{% endif %}{% if r.avail < 0.5 %} out{% endif %}" style="{{ r.row_style }}" data-name="{{ r.name|lower }}" data-pos="{{ r.pos }}" data-proj="{{ '%.3f'|format(r.proj) }}" data-p="{{ '%.2f %.2f %.2f %.2f'|format(r.p10, r.p25, r.p75, r.p90) }}" data-sc="{{ r.sc }}">
           <td class="num rk">{{ r.rank }}</td>
           <td data-v="{{ r.ecr|f0 }}" class="num ecr{{ ' stale' if r.ecr_stale }}"{% if r.ecr_stale %} title="Last week's expert rank; this week's is published Friday"{% endif %}>{{ r.ecr|f0 }}{% if r.ecr_stale %}<sup>lw</sup>{% endif %}</td>
-          <td class="stick" data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b><span class="nm-full">{{ r.name }}</span><span class="nm-short">{{ r.name|short }}</span></b>
+          <td class="stick" data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b>{% if pos == 'FLEX' %}{{ r.pos|posb|safe }}{% endif %}<span class="nm-full">{{ r.name }}</span><span class="nm-short">{{ r.name|short }}</span></b>
             {%- if r.status or r.boost >= 1 or r.low_sample %}<div class="badges">
               {%- if r.status %}<span class="flag {{ 'f-out' if r.avail < 0.5 else 'f-q' }}" title="Injury report; practice Wed/Thu/Fri: D = did not practice, L = limited, F = full">{{ r.status }}</span>{% endif %}
               {%- if r.boost >= 1 %}<span class="flag f-up" title="Raised by volume vacated by: {{ r.boost_from }}">+{{ r.boost|f1 }} inj</span>{% endif %}
@@ -457,7 +508,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
             <span class="dvp" style="color:{{ r.dvp_color }}" title="{{ r.opp }} defense vs {{ pos }}s: {{ r.dvp }} of 32 (1st = toughest, 32nd = easiest). This week: {{ r.mpts|sgn }} pts vs an average defense.">{{ r.dvp }}</span>
           </div></td>
           <td class="ctr" data-v="{{ r.inactive }}" title="{{ r.inactive_why }}"><span class="{{ 'pill pill-bad' if r.inactive >= 0.5 else 'pill pill-warn' if r.inactive >= 0.15 else 'pill pill-soft' if r.inactive >= 0.05 else 'quiet' }}">{{ '<1%' if r.inactive < 0.005 else r.inactive|pct }}</span></td>
-          <td class="num">{{ r.fpg|f1 }}</td>
+          <td class="num fpgc">{{ r.fpg|f1 }}</td>
           <td data-v="{{ r.rank }}"><span class="tier t-{{ r.slot }}" title="{{ {'start': 'Starter in a ' ~ tier_cfg.teams ~ '-team league', 'flex': 'Flex range in a ' ~ tier_cfg.teams ~ '-team league', 'bench': 'Bench depth in a ' ~ tier_cfg.teams ~ '-team league'}[r.slot] }}">{{ r.tier }}</span></td>
           <td class="line hide-sm">{{ r.line|safe }}</td>
           <td class="take">{{ r.takeaway }}</td>
@@ -467,16 +518,16 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
             <div><div class="dh">This week</div><div class="line">{{ r.line|safe }}</div>
               <div class="muted small" style="margin-top:6px">Floor {{ r.p10|f1 }} &middot; median {{ r.p50|f1 }} &middot; ceiling {{ r.p90|f1 }} &middot; confidence {{ r.conf }}</div></div>
             <div><div class="dh">Season</div><div class="line">{{ r.season|safe }}</div><div class="line" style="margin-top:4px">{{ r.usage|safe }}</div>
-              <div class="muted small" style="margin-top:6px">{{ r.fpg|f1 }} FP/G &middot; last 3: {{ r.last3|f1 }}</div>
+              <div class="muted small fpgline" style="margin-top:6px">{{ r.fpg|f1 }} FP/G &middot; last 3: {{ r.last3|f1 }}</div>
               {% if r.sched %}<div class="muted small" title="Each past game rescaled by how easy that defense was for his profile">{{ r.sched }}</div>{% endif %}</div>
-            <div><div class="dh">Points by week</div>{{ r.bars|safe }}</div>
+            <div class="wkbars"><div class="dh">Points by week</div>{{ r.bars|safe }}</div>
           </div>
         </td></tr>
       {% endfor %}
       </tbody>
     </table>
     </div>
-    {% if block.byes %}<div class="byes"><span>On bye</span>{% for b in block.byes %}<span class="bye">{{ b.logo|safe }}{{ b.name }} <span class="muted">{{ b.fpg|f1 }} FP/G</span></span>{% endfor %}</div>{% endif %}
+    {% if block.byes %}<div class="byes"><span>On bye</span>{% for b in block.byes %}<span class="bye" data-pos="{{ b.pos }}" data-sc="{{ b.sc }}">{{ b.logo|safe }}{{ b.name }} <span class="muted"><span class="byefpg">{{ b.fpg|f1 }}</span> FP/G</span></span>{% endfor %}</div>{% endif %}
     </div>
     {% endfor %}
   </div>
@@ -583,6 +634,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 </section>
 </div></main>
 <footer><div class="wrap">nfl-edge &middot; nflverse, NFL.com practice reports, FantasyPros, Open-Meteo &middot; for entertainment, not betting advice</div></footer>
+<script type="application/json" id="scoreCfg">{{ score_cfg|safe }}</script>
 <script>
 document.querySelectorAll('nav.tabs button').forEach(b => b.onclick = () => {
   document.querySelectorAll('nav.tabs button').forEach(x => x.classList.toggle('on', x === b));
@@ -710,6 +762,150 @@ if (ps) ps.oninput = () => {
   });
   relayout();
 };
+
+// Scoring & league panel. The model projects stat lines, so any scoring re-scores a player exactly from his
+// projected stats (data-sc: pj = projected stats, ss = season totals, g = games, wk = per-week stats, all in
+// SC.keys order). The shipped projection (which may blend in expert ranks) and its floor/ceiling are scaled by
+// new / built points of that stat line. Tiers follow the league: tier N = positional ranks N x teams; pill color =
+// starter / flex (RB/WR/TE, then superflex) / bench. Settings live in this browser only.
+const SC = JSON.parse(document.getElementById('scoreCfg').textContent);
+const NWEEK = {{ week - 1 }};
+const LS_KEY = 'nfledge-scoring';
+const defaults = () => ({ preset: 'Half PPR', w: { ...SC.presets['Half PPR'] },
+                          lg: { teams: SC.league.teams, ...SC.league.starters, flex: SC.league.flex, superflex: 0 } });
+let state = defaults();
+try { const s = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (s && s.w && s.lg) state = s; } catch (e) {}
+const pts = (c, w, pos) => c.reduce((t, v, i) => t + v * (w[SC.keys[i]] || 0), 0) + (pos === 'TE' ? c[5] * (w.te_bonus || 0) : 0);
+const f1 = v => (Math.round(v * 10) / 10).toFixed(1);
+const rangeSvg = (q, proj, axis) => {
+  const W = 100, H = 16, m = H / 2, x = v => 2 + (W - 4) * Math.min(Math.max(v, 0), axis) / axis;
+  return `<svg class="rng" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">` +
+    `<line x1="${x(q[0]).toFixed(1)}" y1="${m}" x2="${x(q[3]).toFixed(1)}" y2="${m}" class="rng-w"/>` +
+    `<rect x="${x(q[1]).toFixed(1)}" y="${m - 4}" width="${Math.max(x(q[2]) - x(q[1]), 1.5).toFixed(1)}" height="8" rx="2" class="rng-b"/>` +
+    `<line x1="${x(proj).toFixed(1)}" y1="1" x2="${x(proj).toFixed(1)}" y2="${H - 1}" class="rng-p"/></svg>`;
+};
+const weekSvg = (wk, w, pos) => {
+  if (NWEEK < 1) return '';
+  const W = 150, H = 34, byW = Object.fromEntries(wk.map(r => [r[0], pts(r.slice(1), w, pos)]));
+  const top = Math.max(10, ...Object.values(byW)), bw = W / NWEEK;
+  let out = '';
+  for (let k = 1; k <= NWEEK; k++) {
+    const v = byW[k], x0 = (k - 1) * bw + 1;
+    out += v === undefined
+      ? `<line x1="${(x0 + 2).toFixed(1)}" y1="${H - 9}" x2="${(x0 + bw - 4).toFixed(1)}" y2="${H - 9}" class="wb-miss"><title>Wk ${k}: did not play</title></line>`
+      : `<rect x="${x0.toFixed(1)}" y="${(H - 8 - Math.max(1, (H - 10) * Math.max(v, 0) / top)).toFixed(1)}" width="${(bw - 3).toFixed(1)}" height="${Math.max(1, (H - 10) * Math.max(v, 0) / top).toFixed(1)}" rx="1.5" class="wb"><title>Wk ${k}: ${f1(v)} pts</title></rect>`;
+    out += `<text x="${(x0 + (bw - 3) / 2).toFixed(1)}" y="${H - 0.5}" class="wb-l">${k}</text>`;
+  }
+  return `<svg class="wbars" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${out}</svg>`;
+};
+const applyScoring = () => {
+  const { w, lg } = state;
+  const views = [...document.querySelectorAll('.posview')];
+  views.forEach(view => {
+    const tb = view.querySelector('table.ranks tbody');
+    if (!tb) return;
+    const mains = [...tb.rows].filter(r => r.classList.contains('main'));
+    mains.forEach(tr => {
+      const sc = tr._sc || (tr._sc = JSON.parse(tr.dataset.sc)), pos = tr.dataset.pos;
+      const base = pts(sc.pj, SC.built, pos), now = pts(sc.pj, w, pos);
+      const ratio = base > 0.3 ? now / base : 1;
+      const proj = base > 0.3 ? parseFloat(tr.dataset.proj) * ratio : now;
+      tr._proj = proj;
+      tr._q = tr.dataset.p.split(' ').map(v => parseFloat(v) * ratio);
+      if (sc.g) {
+        const fpg = pts(sc.ss, w, pos) / sc.g;
+        const last = [...sc.wk].sort((a, b) => a[0] - b[0]).slice(-3).map(r => pts(r.slice(1), w, pos));
+        tr.querySelector('.fpgc').textContent = f1(fpg);
+        const d = tr.nextElementSibling;
+        if (d && d.classList.contains('detail')) {
+          const fl = d.querySelector('.fpgline'); if (fl) fl.textContent = `${f1(fpg)} FP/G · last 3: ${f1(last.reduce((a, b) => a + b, 0) / (last.length || 1))}`;
+          const wb = d.querySelector('.wkbars'); if (wb) wb.innerHTML = '<div class="dh">Points by week</div>' + weekSvg(sc.wk, w, pos);
+        }
+      }
+    });
+    const axis = Math.max(10, ...mains.map(r => r._q[3]).sort((a, b) => a - b).slice(0, Math.ceil(mains.length * 0.95)).slice(-1));
+    mains.sort((a, b) => b._proj - a._proj).forEach((tr, i) => {
+      tr.querySelector('td.rk').textContent = i + 1;
+      tr._rank = i + 1;
+      const c = tr.querySelector('td.projc'), q = tr._q;
+      c.dataset.v = tr._proj.toFixed(3);
+      c.title = `Floor ${f1(q[0])} · middle ${f1(q[1])}-${f1(q[2])} · ceiling ${f1(q[3])}`;
+      c.querySelector('.proj').innerHTML = `<b>${f1(tr._proj)}</b>${rangeSvg(q, tr._proj, axis)}<span class="fc">${Math.round(q[0])}–${Math.round(q[3])}</span>`;
+      const d = tr.nextElementSibling && tr.nextElementSibling.classList.contains('detail') ? tr.nextElementSibling : null;
+      tb.appendChild(tr); if (d) tb.appendChild(d);
+    });
+    view.querySelectorAll('thead th').forEach(h => { delete h.dataset.dir; h.classList.remove('sorted-asc', 'sorted-desc'); });
+  });
+  // Tiers and roster slots, from the position lists (FLEX rows mirror their position-list player).
+  const posRows = p => [...document.querySelectorAll(`.posview[data-pos="${p}"] tr.main`)];
+  const slot = {}, posRank = {};
+  const key = tr => tr.dataset.pos + '|' + tr.dataset.name;
+  ['QB', 'RB', 'WR', 'TE'].forEach(p => posRows(p).forEach(tr => { posRank[key(tr)] = tr._rank; slot[key(tr)] = tr._rank <= lg.teams * (lg[p] || 0) ? 'start' : 'bench'; }));
+  const fill = (positions, n) => {
+    positions.flatMap(posRows).filter(tr => slot[key(tr)] === 'bench').sort((a, b) => b._proj - a._proj).slice(0, n)
+      .forEach(tr => { slot[key(tr)] = 'flex'; });
+  };
+  fill(['RB', 'WR', 'TE'], lg.teams * (lg.flex || 0));
+  fill(['QB', 'RB', 'WR', 'TE'], lg.teams * (lg.superflex || 0));
+  const names = { start: 'Starter', flex: 'Flex range', bench: 'Bench depth' };
+  document.querySelectorAll('table.ranks tr.main').forEach(tr => {
+    const k = key(tr), r = posRank[k] || tr._rank, s = slot[k] || 'bench', t = tr.querySelector('.tier');
+    if (!t) return;
+    t.textContent = `${tr.dataset.pos}${Math.floor((r - 1) / lg.teams) + 1}`;
+    t.className = `tier t-${s}`;
+    t.title = `${names[s]} in a ${lg.teams}-team league`;
+    t.parentElement.dataset.v = r;
+  });
+  document.querySelectorAll('.bye').forEach(b => {
+    const sc = JSON.parse(b.dataset.sc); const el = b.querySelector('.byefpg');
+    if (el && sc.g) el.textContent = f1(pts(sc.ss, w, b.dataset.pos) / sc.g);
+  });
+  const name = state.preset || 'Custom';
+  document.getElementById('scoreName').textContent = name;
+  document.getElementById('scoreSub').textContent = name === 'Custom' ? 'Custom-scoring' : name;
+  document.getElementById('scoreSum').textContent = `· ${name}, ${lg.teams} teams`;
+  relayout();
+};
+// Panel wiring
+(() => {
+  const btn = document.getElementById('scoreBtn'), panel = document.getElementById('scorePanel');
+  const presetBox = document.getElementById('spPresets');
+  const sameW = (a, b) => Object.keys(b).every(k => Math.abs((a[k] || 0) - (b[k] || 0)) < 1e-9);
+  const sync = () => {
+    panel.querySelectorAll('input[data-k]').forEach(i => {
+      const v = state.w[i.dataset.k];
+      i.value = i.dataset.inv ? (v ? Math.round(1 / v) : '') : v;
+    });
+    panel.querySelectorAll('input[data-l]').forEach(i => { i.value = state.lg[i.dataset.l] ?? 0; });
+    presetBox.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.textContent === state.preset));
+  };
+  const save = () => { try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {} };
+  const changed = () => {
+    state.preset = Object.keys(SC.presets).find(n => sameW(state.w, SC.presets[n])) || 'Custom';
+    sync(); applyScoring(); save();
+  };
+  Object.keys(SC.presets).forEach(n => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = n;
+    b.onclick = () => { state.w = { ...SC.presets[n] }; changed(); };
+    presetBox.appendChild(b);
+  });
+  panel.querySelectorAll('input[data-k]').forEach(i => i.onchange = () => {
+    const v = parseFloat(i.value); if (isNaN(v)) return;
+    state.w[i.dataset.k] = i.dataset.inv ? (v > 0 ? 1 / v : 0) : v; changed();
+  });
+  panel.querySelectorAll('input[data-l]').forEach(i => i.onchange = () => {
+    const v = parseInt(i.value, 10); if (isNaN(v) || v < 0) return;
+    state.lg[i.dataset.l] = i.dataset.l === 'teams' ? Math.max(4, v) : v; changed();
+  });
+  document.getElementById('spReset').onclick = () => { state = defaults(); changed(); };
+  btn.onclick = () => { panel.hidden = !panel.hidden; btn.setAttribute('aria-expanded', String(!panel.hidden)); };
+  sync();
+  const d = defaults();
+  const isDefault = sameW(state.w, SC.built) && JSON.stringify(state.lg) === JSON.stringify(d.lg);
+  if (!isDefault) applyScoring(); else {
+    document.getElementById('scoreSum').textContent = `· ${state.preset}, ${state.lg.teams} teams`;
+  }
+})();
 </script>
 </body>
 </html>

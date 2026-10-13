@@ -250,9 +250,12 @@ def season_stats(eng, season: int, week: int) -> pd.DataFrame:
     "last3": a.sort_values("week").groupby("gsis_id").tail(3).groupby("gsis_id").actual.mean(),
   })
   for c in ("pass_yd", "pass_td", "interception", "rush_yd", "rush_td", "reception", "rec_yd", "rec_td",
-            "attempts", "completions", "carries", "targets"):
+            "fumble_lost", "attempts", "completions", "carries", "targets"):
     out[c] = g[c].sum()
   out["weeks"] = g.apply(lambda x: list(zip(x.week.astype(int), x.actual.astype(float))), include_groups=False)
+  # Per-week stat lines so the page can re-score past weeks under the viewer's scoring settings.
+  out["week_comps"] = g.apply(lambda x: [[int(w)] + [round(float(v), 2) for v in row]
+                                         for w, row in zip(x.week, x[SCORE_KEYS].to_numpy())], include_groups=False)
   L = eng.pm.ledger
   L = L[(L.season == season) & (L.week < week)]
   lg = L.groupby("gsis_id")
@@ -260,6 +263,37 @@ def season_stats(eng, season: int, week: int) -> pd.DataFrame:
   out["tgt_share"] = lg.tgt.sum() / lg.team_db.sum()
   out["carry_share"] = lg.carries.sum() / lg.team_rush.sum()
   return out
+
+
+# Stat order shared with the page's scoring panel (rows carry their stat lines in this order).
+SCORE_KEYS = ["pass_yd", "pass_td", "interception", "rush_yd", "rush_td", "reception", "rec_yd", "rec_td",
+              "fumble_lost"]
+
+
+def scoring_settings(scoring, cfg: dict) -> str:
+  """Presets + league defaults for the page's scoring panel (JSON). The site is built with `scoring` (default
+  half PPR, scoring.toml); the panel re-scores the projected and past stat lines in the browser."""
+  half = {"pass_yd": 0.04, "pass_td": 4, "interception": -2, "rush_yd": 0.1, "rush_td": 6, "reception": 0.5,
+          "rec_yd": 0.1, "rec_td": 6, "fumble_lost": -2, "te_bonus": 0.0}
+  presets = {"Half PPR": half, "PPR": {**half, "reception": 1.0}, "Standard": {**half, "reception": 0.0},
+             "6-pt pass TD": {**half, "pass_td": 6}, "TE premium": {**half, "te_bonus": 0.5}}
+  built = {**{k: float(v) for k, v in scoring.weights.items()}, "te_bonus": float(scoring.te_reception_bonus)}
+  t = cfg["tiers"]
+  return json.dumps({"keys": SCORE_KEYS, "presets": presets, "built": built,
+                     "league": {"teams": int(t["teams"]), "starters": t["starters"], "flex": int(t["flex"]),
+                                "superflex": 0}}, separators=(",", ":"))
+
+
+def score_data(r, st) -> str:
+  """Compact JSON for client-side re-scoring: projected stat line (pj), season totals (ss) and games (g), and
+  per-week stat lines (wk). The page re-scores with the viewer's settings; see the scoring panel script."""
+  pj = [round(float(getattr(r, k, 0.0) or 0.0), 3) for k in SCORE_KEYS]
+  out = {"pj": pj}
+  if st:
+    out["ss"] = [round(float(st.get(k, 0.0) or 0.0), 2) for k in SCORE_KEYS]
+    out["g"] = int(st.get("games", 0) or 0)
+    out["wk"] = st.get("week_comps") or []
+  return json.dumps(out, separators=(",", ":"))
 
 
 def expected_line(r) -> str:
@@ -389,9 +423,16 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
         "fpg": st["fpg"] if st else np.nan, "last3": st["last3"] if st else np.nan,
         "season": season_line(r, st), "usage": usage_line(r, st),
         "bars": week_bars(st["weeks"] if st else [], n_weeks),
+        "sc": score_data(r, st), "pos": r.pos,
         "sched": schedule_note(luck.loc[r.gsis_id] if r.gsis_id in luck.index else None),
       })
     out[pos] = {"rows": rows, "byes": bye_rows(eng, stats, ts, pos, season, week)}
+  # FLEX: RB / WR / TE in one list by projection; each keeps its positional tier (e.g. WR2) and rank there.
+  flex = sorted((dict(r, pos_rank=r["rank"]) for p_ in ("RB", "WR", "TE") for r in out[p_]["rows"]),
+                key=lambda r: -r["proj"])
+  for i, r in enumerate(flex, 1):
+    r["rank"] = i
+  out["FLEX"] = {"rows": flex, "byes": []}
   return out
 
 
@@ -410,7 +451,9 @@ def bye_rows(eng, stats, ts, pos, season, week) -> list:
   if pos != "QB":
     r = r[r.fpg >= 6]
   return [{"name": x.full_name, "team_chip": ts.chip(x.team), "fpg": x.fpg, "games": int(x.games),
-           "logo": ts.logo_img(x.team, 16)}
+           "logo": ts.logo_img(x.team, 16), "pos": pos,
+           "sc": json.dumps({"ss": [round(float(getattr(x, k, 0) or 0), 2) for k in SCORE_KEYS],
+                             "g": int(x.games)}, separators=(",", ":"))}
           for x in r.itertuples()]
 
 

@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 7a65bca40c4109fd
+documented_code_hash: 01590e5ba15b8212
 ---
 # How the model works
 
@@ -77,6 +77,7 @@ Ratings are estimated per play. On the Power tab they are shown as **points per 
 | Matchup rank | The opponent's defense vs the position, 1st (toughest) to 32nd (easiest): the position's fantasy starters projected against every defense, ranked by points allowed. Opponent-adjusted, so not skewed by which offenses a defense has faced. The meter (1-5 bars) and grade follow the rank |
 | Matchup bars (Matchups) | The model margin split exactly along the points formula: each offense-vs-defense battle (per-play edge x projected plays x the fitted points per EPA), special teams (net special-teams EPA x its fitted weight), and home field plus play volume / pass-run mix. Overall = the sum, to the decimal |
 | Matchup points (hover) | Projection against this defense minus projection against an average defense |
+| Scoring & league panel (Rankings) | The model projects stat lines, so any scoring re-scores them exactly in your browser; projections that blend in expert ranks, and the floor/ceiling ranges, are scaled by the ratio of new to built points for that stat line (an approximation). Tiers, starter/flex colors, FP/G and weekly bars follow your settings. FLEX lists RB/WR/TE together |
 | Tier | League-size buckets for a {{ L.tier_teams }}-team league: QB1 = QB ranks 1-{{ L.tier_teams }}, QB2 = the next {{ L.tier_teams }}, and so on for every position. Pill color is the roster slot the player fills with {{ L.tier_roster }}: green = starter, amber = flex range (best remaining RB/WR/TE), plain = bench |
 | Power values | The model's own predicted margin vs an average team on a neutral field, by unit: each unit's per-play rating x league-average plays of that type x the game model's fitted points formula (offense and defense x points per EPA; special teams x twice its fitted weight, since a special-teams edge adds to your score and takes from the opponent's). Pass offense includes the starting QB. Offense = Pass O + Run O, Defense = Pass D + Run D, Net = Offense + Defense + ST, so Power and the Matchups bars always agree. League-average volume means a defense is judged on per-play quality, not on how many plays its own offense left it facing |
 | Rank range (Power) | 10th-90th percentile rank when every team's net rating is resampled within its bootstrap uncertainty |
