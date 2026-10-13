@@ -222,6 +222,11 @@ class PlayerModel:
     self.team_ledger = team_ledger
     self.info = self._player_info()
 
+  def __getstate__(self):
+    state = dict(self.__dict__)
+    state.pop("_feat_cache", None)  # a per-run memo (~100 MB); never pickled into the model cache
+    return state
+
   # -- static player info ----------------------------------------------------------------------------------------
   def _player_info(self) -> pd.DataFrame:
     r = self.data.rosters.dropna(subset=["gsis_id"]).sort_values(["season", "week"])
@@ -239,6 +244,7 @@ class PlayerModel:
   def prepare(self, train_seasons: list[int]):
     """Fit xTD + build the player-game ledger. xTD is fit on train seasons only (no test leakage)."""
     pbp = self.data.pbp
+    self._feat_cache = {}
     self.xtd = XTD().fit(pbp[pbp.season.isin(train_seasons)])
     self.ledger = build_ledger(pbp, self.xtd, self.team_ledger, self.data.snaps, self.data.routes,
                                self.data.exclusions)
@@ -252,6 +258,7 @@ class PlayerModel:
     """Empirical-Bayes priors per (opportunity type, position group, draft tier) and prior strength k per
     component estimated by method of moments (k = within-player variance / between-player variance)."""
     L = self.ledger[self.ledger.season.isin(seasons) & ~self.ledger.excluded]
+    self._feat_cache = {}  # features depend on the priors
     mu, mu_pos, k = {}, {}, {}
     for opp, (_, unit, comps) in OPP_TYPES.items():
       d = L[L[opp] > 0].copy()
@@ -320,6 +327,19 @@ class PlayerModel:
 
   # -- as-of features --------------------------------------------------------------------------------------------
   def features(self, season: int, week: int, ratings) -> pd.DataFrame:
+    """As-of player features. Training asks for the same (season, week) several times (meta-model rows, injury
+    absorption, blend/range projections), always with the team model's cached ratings for that week, so those
+    calls are memoized; any other ratings object is computed fresh."""
+    cache = self.__dict__.setdefault("_feat_cache", {})
+    key = (season, week, id(ratings))
+    hit = cache.get(key)
+    if hit is not None and hit[0] is ratings:
+      return hit[1].copy()
+    f = self._features(season, week, ratings)
+    cache[key] = (ratings, f)
+    return f.copy()
+
+  def _features(self, season: int, week: int, ratings) -> pd.DataFrame:
     L = self.ledger
     L = L[(L.season < season) | (L.week < week)]
     L = L[(L.season >= season - 2) & ~L.excluded]
@@ -329,11 +349,15 @@ class PlayerModel:
     w_eff = np.select([L.season == season, L.season == season - 1, L.season == season - 2],
                       list(self.pcfg.get("eff_season_weights", EFF_SEASON_WEIGHTS)), 0.0)
     L = L.assign(w_use=w_use, w_eff=w_eff)
-    g = L.groupby("gsis_id")
-    f = pd.DataFrame(index=pd.Index(L.gsis_id.unique(), name="gsis_id"))
+    # Players are factorized once and every weighted sum is one bincount (this runs ~40 sums per week, every week
+    # of every backtest; a pandas groupby per sum re-factorized the ids each time and dominated training time).
+    codes, ids = pd.factorize(L.gsis_id)
+    ids = pd.Index(ids, name="gsis_id")
+    f = pd.DataFrame(index=ids)
 
     def wsum(col, wcol):
-      return (L[col] * L[wcol]).groupby(L.gsis_id).sum()
+      v = np.nan_to_num(L[col].to_numpy(float) * L[wcol].to_numpy(float))  # NaN counts as 0, as groupby.sum did
+      return pd.Series(np.bincount(codes, weights=v, minlength=len(ids)), index=ids)
 
     # Usage shares (games played only; exclusions removed).
     for name, num, den in (("db_share", "db", "team_db"), ("carry_share", "carries", "team_rush"),
@@ -341,9 +365,7 @@ class PlayerModel:
                            ("ay_share", "air_yd", "team_ay")):
       f[name] = wsum(num, "w_use") / wsum(den, "w_use").replace(0, np.nan)
       f[name + "_long"] = wsum(num, "w_eff") / wsum(den, "w_eff").replace(0, np.nan)
-    cur = L[L.season == season]
-    f["games"] = cur.groupby("gsis_id").size()
-    f["games"] = f.games.fillna(0)
+    f["games"] = np.bincount(codes, weights=(L.season == season).to_numpy(float), minlength=len(ids))
     last = L.sort_values(["season", "week"]).groupby("gsis_id").tail(1).set_index("gsis_id")
     f["last_team"] = last.team
     f["last_season"] = last.season
@@ -356,7 +378,10 @@ class PlayerModel:
       f[f"n_{opp}"] = n
       grp = pos_group(opp, f.pos.fillna("WR"))
       L_adj = L[f"{opp}_epa"] - L[opp] * L.opp.map(ratings.dfn[unit]).fillna(0)
-      adj_sum = (L_adj * L.w_eff).groupby(L.gsis_id).sum()
+      adj_sum = pd.Series(np.bincount(codes, weights=np.nan_to_num((L_adj * L.w_eff).to_numpy(float)),
+                                      minlength=len(ids)), index=ids)
+      # Prior means / strengths depend only on (position group, draft tier): look each pair up once.
+      pair = pd.Series(list(zip(grp, f.tier)), index=f.index)
       lam = n / (n + self.pcfg["td_blend_k"])
       for c in comps + [f"{opp}_adj"]:
         if c in TD_COMPONENTS:
@@ -366,8 +391,8 @@ class PlayerModel:
           obs = adj_sum
         else:
           obs = wsum(c, "w_eff")
-        mu = np.array([self._mu(opp, gp, t, c) for gp, t in zip(grp, f.tier)])
-        kk = np.array([self.prior.k.get((opp, gp, c), 100.0) for gp in grp])
+        mu = pair.map({pt: self._mu(opp, pt[0], pt[1], c) for pt in set(pair)}).to_numpy(float)
+        kk = grp.map({gp: self.prior.k.get((opp, gp, c), 100.0) for gp in set(grp)}).to_numpy(float)
         f[f"{c}_per_{opp}"] = (obs.reindex(f.index).fillna(0) + kk * mu) / (n.reindex(f.index).fillna(0) + kk)
     # Scramble rate per dropback and fumbles per touch (shrunk toward position means).
     # Prior (mean, strength) for each: fitted by method of moments on the training seasons when
@@ -382,9 +407,11 @@ class PlayerModel:
     f["fum_rate"] = (wsum("fumble_lost", "w_eff") + k * m) / (touches + k)
     m, k = mp["adot"]
     f["adot"] = (wsum("air_yd", "w_eff") + k * m) / (wsum("tgt", "w_eff") + k)
-    has_pct = L.offense_pct.notna()
-    f["snap_pct"] = ((L.offense_pct.fillna(0) * L.w_use).groupby(L.gsis_id).sum()
-                     / (L.w_use * has_pct).groupby(L.gsis_id).sum().replace(0, np.nan))
+    has_pct = L.offense_pct.notna().to_numpy(float)
+    snap_num = np.bincount(codes, weights=np.nan_to_num(L.offense_pct.to_numpy(float)) * L.w_use.to_numpy(float),
+                           minlength=len(ids))
+    snap_den = np.bincount(codes, weights=L.w_use.to_numpy(float) * has_pct, minlength=len(ids))
+    f["snap_pct"] = pd.Series(snap_num, index=ids) / pd.Series(snap_den, index=ids).replace(0, np.nan)
     tprr_den = wsum("dropbacks_on_field", "w_eff")
     m, k = mp["tprr"]
     f["tprr"] = (wsum("tgt", "w_eff") + k * m) / (tprr_den.replace(0, np.nan) + k)
@@ -548,13 +575,19 @@ class PlayerModel:
     "fitted")."""
     starter_share = getattr(self, "starter_db_share", 0.96)
     qb = p[p.pos == "QB"]
-    for team, g in qb.groupby("team"):
-      if "depth_rank" in g and g.depth_rank.notna().any():
-        starter = g.sort_values(["depth_rank", "db_share_hat"], ascending=[True, False]).index[0]
-      else:
-        starter = g.db_share_hat.idxmax()
-      p.loc[g.index, "db_share_hat"] = np.where(g.index == starter, max(starter_share, g.db_share_hat.max()), 0.0)
-      p.loc[g.index[g.index != starter], "carry_share_hat"] = 0.0
+    if qb.empty:
+      return
+    # Vectorized: per team, lowest depth rank first (teams with no depth chart: all tied), then highest share.
+    rank = qb.depth_rank if "depth_rank" in qb else pd.Series(np.nan, index=qb.index)
+    team_has_rank = rank.notna().groupby(qb.team).transform("any")
+    key = np.where(team_has_rank, rank.fillna(np.inf), 0.0)
+    order = pd.DataFrame({"team": qb.team, "key": key, "neg": -qb.db_share_hat, "pos": np.arange(len(qb))},
+                         index=qb.index).sort_values(["team", "key", "neg", "pos"], kind="stable")
+    starters = order.groupby("team", sort=False).head(1).index
+    is_starter = qb.index.isin(starters)
+    top = np.maximum(starter_share, qb.db_share_hat.groupby(qb.team).transform("max").to_numpy())
+    p.loc[qb.index, "db_share_hat"] = np.where(is_starter, top, 0.0)
+    p.loc[qb.index[~is_starter], "carry_share_hat"] = 0.0
 
 
 def actual_points(stats: pd.DataFrame, scoring) -> pd.DataFrame:
