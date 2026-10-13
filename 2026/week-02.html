@@ -4,17 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NFL Edge · Week 2</title>
-<link rel="stylesheet" href="../assets/gamecast.css?v=cfef62420f">
+<link rel="stylesheet" href="../assets/gamecast.css?v=3ced9f32d4">
 <style>
-:root {
-  --bg: #f5f6f8; --panel: #ffffff; --panel2: #f9fafb; --ink: #14161a; --muted: #6a717c; --faint: #9aa1ab;
-  --line: #e6e8ec; --accent: #2f6fed; --good: #16803c; --bad: #c2372c; --warn: #9a6700;
-  --shadow: 0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.06);
-}
-@media (prefers-color-scheme: dark) {
-  :root { --bg: #0d0f13; --panel: #15181d; --panel2: #1a1e24; --ink: #e9ecf0; --muted: #98a0ab; --faint: #6b737e;
-          --line: #262b33; --accent: #6d9eff; --good: #45c26b; --bad: #f2786d; --warn: #e0b04a;
-          --shadow: 0 1px 2px rgba(0,0,0,.4); }
+/* Dark only, whatever the device setting (owner's call). */
+:root { color-scheme: dark;
+  --bg: #0d0f13; --panel: #15181d; --panel2: #1a1e24; --ink: #e9ecf0; --muted: #98a0ab; --faint: #6b737e;
+  --line: #262b33; --accent: #6d9eff; --good: #45c26b; --bad: #f2786d; --warn: #e0b04a;
+  --shadow: 0 1px 2px rgba(0,0,0,.4);
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -241,56 +237,12 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 .valbar { display: inline-flex; align-items: center; gap: 8px; justify-content: flex-end; }
 .valbar b { min-width: 42px; text-align: right; }
 
-/* matchups */
-.games { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
-@media (min-width: 980px) { .games { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
-.game { min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
-.g-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+/* Matchups tiles are styled in assets/gamecast.css (shared, so style tweaks reach archived pages without a rebuild). */
 .tm-open, .pl-row, .nm-link { cursor: pointer; }
-article.game { scroll-margin-top: calc(var(--navh, 48px) + 10px); }  /* jump-to-tile lands below the sticky tabs */
-.g-head { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important; }
-.g-team { min-width: 0; overflow: hidden; }
-.g-id { min-width: 0; flex: 1 1 auto; } .g-id b, .g-id small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.g-sc, .g-team .logo { flex: none; }
-.g-sc { margin-left: auto; font-size: 32px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
-.g-team.home .g-sc { margin-left: 0; margin-right: auto; }
-.g-team.lost .g-sc, .g-team.lost .g-id, .g-team.lost .logo { opacity: .5; }
-.g-fin { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; color: var(--muted); }
-.g-at small { display: block; font-size: 10.5px; font-weight: 700; text-align: center; white-space: nowrap; }
-.g-ab { display: none; }
-@media (max-width: 520px) { .g-head .g-sc { font-size: 28px; } .g-head .g-team { gap: 8px; padding: 10px 10px; min-height: 56px; }
-  .g-head .g-team .logo { width: 30px; height: 30px; } .g-head .g-team .logo img { width: 22px; height: 22px; }
-  .g-head .g-team b { font-size: 16px; } .g-head .g-at { padding: 0 6px; } .g-nick { display: none; } .g-ab { display: inline; } }
 .nm-link { font: inherit; color: inherit; background: none; border: 0; padding: 0; text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; }
 td.mu .opp.tm-open:hover b, .bye .nm-link:hover { color: var(--accent); }
-.g-team { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--tc); color: var(--tfg); min-height: 62px; }
-.g-team.home { flex-direction: row-reverse; text-align: right; }
-.g-team .logo { width: 34px; height: 34px; } .g-team .logo img { width: 26px; height: 26px; }
-.g-team b { font-size: 15px; font-weight: 700; display: block; line-height: 1.15; }
-.g-team small { font-size: 11.5px; opacity: .8; }
-.g-at { padding: 0 10px; font-size: 12px; font-weight: 700; color: var(--muted); background: var(--panel); align-self: stretch; display: grid; place-items: center; }
-.g-sub { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 8px; }
-.g-sub > span { white-space: nowrap; }
-.g-sub {font-size: 11.5px; color: var(--muted); padding: 8px 16px 0; }
-/* Win chance: one headline (favorite and chance, or Tossup), a bar split at the away team's chance in the two
-   teams' colors with the tossup zone shaded in the middle, then the Vegas line and our model's second opinion. */
-.wp { margin: 12px 16px 4px; padding: 11px 13px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel2); }
-.wp-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.wp-head .logo { width: 26px; height: 26px; } .wp-head .logo img { width: 19px; height: 19px; }
-.wp-call { font-size: 20px; font-weight: 800; letter-spacing: -.01em; line-height: 1.15; white-space: nowrap; }
-.wp-why { font-size: 13px; font-weight: 600; color: var(--muted); }
-.wp-src { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
-.wp.toss .wp-call { color: var(--muted); }
-.wp-bar { position: relative; display: flex; height: 10px; margin-top: 9px; border-radius: 5px; overflow: hidden; }
-.wp-a { background: var(--ac); } .wp-h { flex: 1; background: var(--hc); }
-.wp-zone { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, rgba(255,255,255,.22) 0 2px, transparent 2px 5px); border-left: 1px solid rgba(255,255,255,.45); border-right: 1px solid rgba(255,255,255,.45); }
-.wp-ends { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-top: 4px; }
-.wp-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; font-size: 12px; color: var(--muted); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); }
-.wp-meta b { color: var(--ink); font-weight: 700; }
-@media (max-width: 520px) { .wp-call { font-size: 17px; } .wp-head .logo { width: 22px; height: 22px; } .wp-head .logo img { width: 16px; height: 16px; } }
 .gf-pick.toss { background: color-mix(in srgb, var(--muted) 18%, transparent); color: var(--ink); }
-.track { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px 10px; margin-bottom: 16px; }
 table.trk { width: 100%; max-width: 640px; border-collapse: collapse; margin-top: 6px; font-size: 13px; }
 table.trk th { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; }
 table.trk th, table.trk td { padding: 6px 6px; border-bottom: 1px solid var(--line); }
@@ -300,50 +252,6 @@ table.trk td small { color: var(--muted); font-size: 11px; }
 @media (max-width: 520px) { table.trk { font-size: 12.5px; } table.trk th { font-size: 9.5px; letter-spacing: .04em; }
   table.trk th, table.trk td { padding: 6px 4px; } table.trk td small { display: block; font-size: 10px; } }
 .trk-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
-/* battles: tug of war in the two teams' colors; offense fills from the left, defense from the right */
-.battles { padding: 8px 16px 14px; display: grid; gap: 10px; }
-.bt-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; }
-/* Away team always on the left, home on the right; each group's labels sit over their own team's side. */
-.battle { display: grid; gap: 5px; }
-/* columns: label | away rank | away edge | bar | home edge | home rank */
-.bt-teams, .bt-grp, .bt-row { display: grid; grid-template-columns: 92px 38px 40px 1fr 40px 38px; align-items: center; gap: 6px; }
-.bt-unit { text-transform: none; letter-spacing: 0; font-weight: 600; }
-.bt-teams .bt-rk .rk-b { min-width: 0; }
-.bt-plays { border-top: 1px solid var(--line); padding-top: 8px; font-size: 12px; color: var(--muted); }
-.bt-plays b { color: var(--ink); }
-.bt-teams > span, .bt-grp > span:not(.bt-chev) { grid-column: 2 / -1; grid-row: 1; display: inline-flex; align-items: center; gap: 6px; }
-.bt-rk { display: flex; justify-content: center; } .bt-rk .rk-b { min-width: 34px; }
-.bt-teams > span:last-child, .bt-grp > span:last-child { justify-self: end; }
-.bt-teams { font-size: 13px; } .bt-teams b { font-weight: 800; }
-.bt-teams .logo { width: 20px; height: 20px; } .bt-teams .logo img { width: 15px; height: 15px; }
-.bt-grp { font-size: 11.5px; font-weight: 600; color: var(--muted); }
-.bt-lbl { font-size: 12px; color: var(--muted); white-space: nowrap; }
-.bt-v { font-size: 12.5px; font-weight: 800; text-align: right; white-space: nowrap; } .bt-v.r { text-align: left; }
-.bt-v i { font-style: normal; font-weight: 500; color: var(--faint); font-size: 11px; }
-.tug { position: relative; height: 10px; }
-.tug::before { content: ""; position: absolute; inset: 0; border-radius: 5px; background: var(--hc); }
-.tug-o { position: absolute; inset: 0 auto 0 0; border-radius: 5px 0 0 5px; background: var(--ac); }
-.tug-mid { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--ink); box-shadow: 0 0 0 1.5px var(--panel); }
-/* Offense-vs-defense groups: the subtotal is always visible; tap to show its passing and running rows. */
-details.grp { border-top: 1px solid var(--line); padding-top: 8px; }
-.battle.extras { border-top: 1px solid var(--line); padding-top: 8px; }
-.battle.extras .tug { height: 8px; }
-details.grp > summary { list-style: none; cursor: pointer; display: grid; gap: 5px; }
-details.grp > summary::-webkit-details-marker { display: none; }
-.bt-grp > .bt-chev { grid-column: 1; grid-row: 1; justify-self: start; font-size: 10.5px; font-weight: 600; color: var(--faint); white-space: nowrap; }
-.bt-chev::before { content: "+ Pass/Run"; } details.grp[open] .bt-chev::before { content: "2 Pass/Run"; }
-details.grp > summary:hover .bt-chev { color: var(--accent); }
-details.grp > summary .bt-lbl { color: var(--ink); font-weight: 600; }
-.bt-units { display: grid; gap: 5px; margin-top: 6px; }
-.bt-units .bt-lbl { padding-left: 10px; }
-.bt-units .tug { height: 8px; }
-@media (max-width: 520px) { .bt-teams, .bt-grp, .bt-row { grid-template-columns: 64px 32px 34px 1fr 34px 32px; gap: 4px; } .bt-lbl { white-space: normal; line-height: 1.15; }
-  .bt-rk .rk-b { min-width: 30px; } .bt-grp { font-size: 11px; } .bt-v { font-size: 11.5px; }
-  .bt-chev::before { content: "+ P/R"; } details.grp[open] .bt-chev::before { content: "2 P/R"; } }
-.game > details { border-top: 1px solid var(--line); }
-.game > details > summary { cursor: pointer; padding: 9px 16px; font-size: 12px; color: var(--muted); font-weight: 600; list-style: none; }
-.game > details > summary::after { content: " +"; } .game > details[open] > summary::after { content: " -"; }
-.game > details table { font-size: 12px; } .game > details td, .game > details th { padding: 6px 12px; }
 
 /* misc */
 .arrow { display: inline-flex; align-items: center; gap: 6px; }
@@ -385,9 +293,7 @@ tr.teamrow .f-up { background: rgba(69,194,107,.18); color: #8fe6a9; }
 .seg button.pos-QB.on { background: color-mix(in srgb, var(--qb) 20%, var(--panel)); }
 .seg button.pos-RB.on { background: color-mix(in srgb, var(--rb) 20%, var(--panel)); }
 .seg button.pos-WR.on { background: color-mix(in srgb, var(--wr) 20%, var(--panel)); }
-.seg button.pos-TE.on { background: color-mix(in srgb, var(--te) 20%, var(--panel)); }
-@media (prefers-color-scheme: light) { :root { --qb: #d6336c; --rb: #0f9f6e; --wr: #2563eb; --te: #b7791f; } }
-/* power */
+.seg button.pos-TE.on { background: color-mix(in srgb, var(--te) 20%, var(--panel)); }/* power */
 table.power td { padding-top: 9px; padding-bottom: 9px; }
 table.power .rk { width: 46px; }
 .rkn { font-size: 15px; font-weight: 800; display: block; line-height: 1.1; }
@@ -437,8 +343,6 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 </style>
 </head>
 <body>
-
-
 <header class="top"><div class="wrap">
   <div class="brand"><h1>NFL <span>Edge</span></h1>
     <div class="wk-pick" title="Pick a season and week">
@@ -455,7 +359,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     <span id="livePill" class="live-pill" hidden></span>
     <span>Scoring <b id="scoreName">Half PPR</b></span>
     
-    <span>Updated 2026-10-13 03:27</span>
+    <span>Updated 2026-10-13 04:24</span>
   </div>
 </div></header>
 <nav class="tabs"><div class="wrap">
@@ -6566,1871 +6470,499 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 </section>
 
 <section id="tab-games">
-  <div class="sec-head"><div><h2>Matchups</h2><p>Win chances, not picks. When neither side is a clear favorite we call it a tossup.</p></div></div>
-  <details class="howto"><summary>How to read</summary><div>
-    <b>Win chance</b> is the market's: the Vegas spread turned into a probability using how often teams with that spread have actually won. In backtests the market has been a more accurate forecaster than our model, and mixing the model in never helped, so we show the better number. Before lines are posted (lookahead weeks) the model's chance is used. <b>Our model</b> is shown underneath as an independent second opinion with no Vegas input: the two teams' Power ranks (play-by-play efficiency, opponent-adjusted, with the current quarterback) plus their Elo ratings (built from final scores, with memory across seasons) and home field. Hover it for the inputs. In backtests this mix beat each piece alone, though the market is still more accurate.
-    <b>Tossup</b> means the favorite's chance is under 59% (roughly a spread under 3 points). Historically, favorites in that range won about as often as a coin flip would, so naming one would be false precision. The shaded middle of each bar marks that zone.
-    A 70% favorite should still lose 3 times in 10. That is an upset the forecast expected, not a mistake; the track record above shows whether chances at each level came true as often as they claimed.
-    <b>Who wins each battle</b> breaks the matchup down unit by unit (our play-by-play ratings, the same ones behind the Power ranks). Every bar is a tug of war in the two teams' colors, away team always on the left and home team on the right. Whoever pushes past the middle line wins it, and the number on the winner's side is the edge in <b>EPA per 100 plays</b> (expected points added: how much better each play goes than an average one from the same down, distance and field position). Each offense against the other defense: its offense rating minus the defense's, with the total weighting passing and running by that offense's projected dropbacks and runs. Tap a matchup to split it. Special teams compares the two units per 100 special-teams plays, and home field is the per-play boost the home team gets. Pace has no per-play form, so it is listed as projected plays. Rank chips are league ranks from the Power tab (green top 8, red bottom 8); the chips by the team names are overall power ranks. Hover a row for both teams' ratings. Bar length is how much each edge matters this game, on one scale for every row. The model never publishes a point spread, which is left to the market.
-  </div></details>
-  <div class="track">
-    <div class="bt-title">How often favorites win &middot; market chances, 2019&ndash;2026</div>
-    <table class="trk"><thead><tr><th>Favorite's chance</th><th class="num">Games</th><th class="num">Expected</th><th class="num">Won</th><th class="num">2026</th></tr></thead>
-    <tbody><tr class="toss"><td>Tossup (under 59%)</td><td class="num">306</td><td class="num">55%</td><td class="num"><b>53%</b></td><td class="num">67% <small>of 3</small></td></tr><tr><td>59-64%</td><td class="num">705</td><td class="num">61%</td><td class="num"><b>58%</b></td><td class="num">75% <small>of 8</small></td></tr><tr><td>65-74%</td><td class="num">590</td><td class="num">70%</td><td class="num"><b>72%</b></td><td class="num">100% <small>of 3</small></td></tr><tr><td>75% or more</td><td class="num">369</td><td class="num">82%</td><td class="num"><b>84%</b></td><td class="num">50% <small>of 2</small></td></tr></tbody></table>
-    <p class="trk-note">A well-calibrated forecast's favorites win about as often as their chance says. Each season is scored with chances fit only on the seasons before it.</p>
-  </div>
+  <div class="sec-head"><div><h2>Matchups</h2></div></div>
   <div class="games">
   
-    <article class="game" id="g-2026_02_DET_BUF" data-gid="2026_02_DET_BUF" data-away="DET" data-home="BUF">
-      <div class="g-head">
+    
+    
+    
+    <a class="mt is-final" id="g-2026_02_DET_BUF" data-gid="2026_02_DET_BUF" href="../game.html?d=2026/week-02.json&amp;g=2026_02_DET_BUF" style="--ac:#0076b6;--hc:#c60c30">
+      <div class="mt-main">
         
         
-        <div class="g-team away tm-open lost" style="--tc:#0076b6;--tc2:#b0b7bc;--tfg:#ffffff" data-tm="DET"><span class="logo" style="background:#0076B6"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/det.png" alt="DET" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Lions</span><span class="g-ab">DET</span></b></div><span class="g-sc">31</span></div>
-        <div class="g-at"><span class="g-fin">FINAL</span></div>
-        <div class="g-team home tm-open" style="--tc:#335ca4;--tc2:#c60c30;--tfg:#ffffff" data-tm="BUF"><span class="logo" style="background:#C60C30"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/buf.png" alt="BUF" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Bills</span><span class="g-ab">BUF</span></b></div><span class="g-sc">41</span></div>
+        <img class="mt-lg away" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/det.png" alt="" loading="lazy">
+        <div class="mt-side away lost">
+          <span class="mt-num">31</span>
+          <span class="mt-nm"><b>Lions</b> <small>1-0</small></span>
+        </div>
+        <span class="mt-at">@</span>
+        
+        
+        <img class="mt-lg home" src="https://a.espncdn.com/i/teamlogos/nfl/500/buf.png" alt="" loading="lazy">
+        <div class="mt-side home">
+          <span class="mt-num">41</span>
+          <span class="mt-nm"><b>Bills</b> <small>1-0</small></span>
+        </div>
+        
+        
       </div>
-      <div class="g-sub"><span>Thu Sep 17 · 8:15 PM ET</span><a class="gc-link" href="../game.html?d=2026/week-02.json&amp;g=2026_02_DET_BUF">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      <div class="g-final">
-        <span class="gf-pick ok">Favorite won</span>
-        </div>
-      
-      <div class="wp" style="--ac:#0076b6;--hc:#c60c30">
-        <div class="wp-src">Vegas odds</div>
-        <div class="wp-head">
-          <span class="logo" style="background:#C60C30"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/buf.png" alt="BUF" width="24" height="24" loading="lazy"></span><span class="wp-call">Bills 69%</span><span class="wp-why">to win</span>
-        </div>
-        <div class="wp-bar" role="img" aria-label="DET 31%, BUF 69%">
-          <span class="wp-a" style="width:31%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:41%;width:18%"></i>
-        </div>
-        <div class="wp-ends"><span>DET 31%</span><span>69% BUF</span></div>
-        <div class="wp-meta">
-          <span>Vegas BUF -5.5 &middot; O/U 54.5</span>
-          <span title="Our model: power rank DET 6 vs BUF 13, Elo 1540 vs 1593, plus home field">Our model: <b>tossup</b> (Bills 58%)</span>
-        </div>
+      <div class="mt-st">
+        <span class="mt-fin">Final</span>
+          <span class="gf-pick ok">Favorite won &middot; 69%</span>
+          
+        
       </div>
-      <div class="battles" style="--ac:#0076b6;--hc:#c60c30">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span><span class="logo" style="background:#0076B6"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/det.png" alt="DET" width="16" height="16" loading="lazy"></span><b>DET</b><span class="bt-rk"><span class="rk-b sm rk1" title="DET power rank: 6th of 32">6th</span></span></span><span><span class="bt-rk"><span class="rk-b sm rk2" title="BUF power rank: 13th of 32">13th</span></span><b>BUF</b><span class="logo" style="background:#C60C30"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/buf.png" alt="BUF" width="16" height="16" loading="lazy"></span></span></div>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>DET offense</span><span>BUF defense</span></div>
-            <div class="bt-row" title="DET offense vs BUF defense: +4.0 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="DET offense: 12th of 32">12th</span></span>
-  <span class="bt-v">+4.0</span>
-  <span class="tug"><span class="tug-o" style="width:76.1%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="BUF defense: 25th of 32">25th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="DET passing offense +2.7 vs BUF passing defense +2.5 EPA per 100 plays (vs league average): a +0.2 edge for the offense on about 36 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="DET Pass O: 15th of 32">15th</span></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:50.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="BUF Pass D: 10th of 32">10th</span></span>
-</div><div class="bt-row" title="DET running offense +1.1 vs BUF running defense -7.9 EPA per 100 plays (vs league average): a +9.0 edge for the offense on about 27 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="DET Run O: 12th of 32">12th</span></span>
-  <span class="bt-v">+9.0</span>
-  <span class="tug"><span class="tug-o" style="width:75.3%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="BUF Run D: 32nd of 32">32nd</span></span>
-</div></div>
-        </details>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>DET defense</span><span>BUF offense</span></div>
-            <div class="bt-row" title="BUF offense vs DET defense: +4.7 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="DET defense: 12th of 32">12th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:19.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+4.7</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="BUF offense: 2nd of 32">2nd</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="BUF passing offense +7.7 vs DET passing defense +3.1 EPA per 100 plays (vs league average): a +4.6 edge for the offense on about 36 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="DET Pass D: 8th of 32">8th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:32.6%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+4.6</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="BUF Pass O: 3rd of 32">3rd</span></span>
-</div><div class="bt-row" title="BUF running offense +3.5 vs DET running defense -1.3 EPA per 100 plays (vs league average): a +4.8 edge for the offense on about 25 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="DET Run D: 20th of 32">20th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:37.2%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+4.8</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="BUF Run O: 7th of 32">7th</span></span>
-</div></div>
-        </details>
-        
-        <div class="battle extras"><div class="bt-row" title="Special teams DET +2.0 vs BUF -1.2 EPA per 100 special-teams plays (about 12 per team per game)">
-  <span class="bt-lbl">Special teams</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="DET special teams: 4th of 32">4th</span></span>
-  <span class="bt-v">+3.2</span>
-  <span class="tug"><span class="tug-o" style="width:77.7%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="BUF special teams: 26th of 32">26th</span></span>
-</div><div class="bt-row" title="Home field: +0.3 EPA per 100 plays for DET, averaged over both teams&#39; plays (fitted from every game in the training window)">
-  <span class="bt-lbl">Home field</span>
-  <span class="bt-rk"></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"></span>
-</div></div>
-        <div class="bt-plays">Projected plays: DET <b>62</b> (57% pass) &middot; BUF <b>61</b> (59% pass)</div>
-      </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody><tr class="teamrow" style="--tc:#0076b6;--tc2:#b0b7bc;--tfg:#ffffff"><td><b>DET</b></td><td class="num">+2.7</td><td class="num">+1.1</td><td class="num">+3.1</td><td class="num">-1.3</td><td class="num">+2.0</td></tr><tr class="teamrow" style="--tc:#335ca4;--tc2:#c60c30;--tfg:#ffffff"><td><b>BUF</b></td><td class="num">+7.7</td><td class="num">+3.5</td><td class="num">+2.5</td><td class="num">-7.9</td><td class="num">-1.2</td></tr></tbody>
-        </table></div>
-      </details>
-    </article>
+    </a>
   
-    <article class="game" id="g-2026_02_CAR_ATL" data-gid="2026_02_CAR_ATL" data-away="CAR" data-home="ATL">
-      <div class="g-head">
+    
+    
+    
+    <a class="mt is-final" id="g-2026_02_CAR_ATL" data-gid="2026_02_CAR_ATL" href="../game.html?d=2026/week-02.json&amp;g=2026_02_CAR_ATL" style="--ac:#0085ca;--hc:#a71930">
+      <div class="mt-main">
         
         
-        <div class="g-team away tm-open" style="--tc:#0085ca;--tc2:#595959;--tfg:#ffffff" data-tm="CAR"><span class="logo" style="background:#0085CA"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/car.png" alt="CAR" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Panthers</span><span class="g-ab">CAR</span></b></div><span class="g-sc">34</span></div>
-        <div class="g-at"><span class="g-fin">FINAL</span></div>
-        <div class="g-team home tm-open lost" style="--tc:#a71930;--tc2:#595959;--tfg:#ffffff" data-tm="ATL"><span class="logo" style="background:#A71930"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/atl.png" alt="ATL" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Falcons</span><span class="g-ab">ATL</span></b></div><span class="g-sc">3</span></div>
+        <img class="mt-lg away" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/car.png" alt="" loading="lazy">
+        <div class="mt-side away">
+          <span class="mt-num">34</span>
+          <span class="mt-nm"><b>Panthers</b> <small>0-1</small></span>
+        </div>
+        <span class="mt-at">@</span>
+        
+        
+        <img class="mt-lg home" src="https://a.espncdn.com/i/teamlogos/nfl/500/atl.png" alt="" loading="lazy">
+        <div class="mt-side home lost">
+          <span class="mt-num">3</span>
+          <span class="mt-nm"><b>Falcons</b> <small>0-1</small></span>
+        </div>
+        
+        
       </div>
-      <div class="g-sub"><span>Sun Sep 20 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2026/week-02.json&amp;g=2026_02_CAR_ATL">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      <div class="g-final">
-        <span class="gf-pick ok">Favorite won</span>
-        </div>
-      
-      <div class="wp" style="--ac:#0085ca;--hc:#a71930">
-        <div class="wp-src">Vegas odds</div>
-        <div class="wp-head">
-          <span class="logo" style="background:#0085CA"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/car.png" alt="CAR" width="24" height="24" loading="lazy"></span><span class="wp-call">Panthers 59%</span><span class="wp-why">to win</span>
-        </div>
-        <div class="wp-bar" role="img" aria-label="CAR 59%, ATL 41%">
-          <span class="wp-a" style="width:59%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:41%;width:18%"></i>
-        </div>
-        <div class="wp-ends"><span>CAR 59%</span><span>41% ATL</span></div>
-        <div class="wp-meta">
-          <span>Vegas CAR -2.5 &middot; O/U 43.5</span>
-          <span title="Our model: power rank CAR 30 vs ATL 28, Elo 1433 vs 1470, plus home field">Our model: <b>Falcons 60%</b></span>
-        </div>
+      <div class="mt-st">
+        <span class="mt-fin">Final</span>
+          <span class="gf-pick ok">Favorite won &middot; 59%</span>
+          
+        
       </div>
-      <div class="battles" style="--ac:#0085ca;--hc:#a71930">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span><span class="logo" style="background:#0085CA"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/car.png" alt="CAR" width="16" height="16" loading="lazy"></span><b>CAR</b><span class="bt-rk"><span class="rk-b sm rk4" title="CAR power rank: 30th of 32">30th</span></span></span><span><span class="bt-rk"><span class="rk-b sm rk4" title="ATL power rank: 28th of 32">28th</span></span><b>ATL</b><span class="logo" style="background:#A71930"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/atl.png" alt="ATL" width="16" height="16" loading="lazy"></span></span></div>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>CAR offense</span><span>ATL defense</span></div>
-            <div class="bt-row" title="CAR offense vs ATL defense: -4.3 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="CAR offense: 22nd of 32">22nd</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:22.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+4.3</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="ATL defense: 6th of 32">6th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="CAR passing offense -2.1 vs ATL passing defense +4.1 EPA per 100 plays (vs league average): a -6.1 edge for the offense on about 37 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="CAR Pass O: 22nd of 32">22nd</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:26.1%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+6.1</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="ATL Pass D: 6th of 32">6th</span></span>
-</div><div class="bt-row" title="CAR running offense -0.5 vs ATL running defense +1.1 EPA per 100 plays (vs league average): a -1.6 edge for the offense on about 24 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="CAR Run O: 19th of 32">19th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:45.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+1.6</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="ATL Run D: 15th of 32">15th</span></span>
-</div></div>
-        </details>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>CAR defense</span><span>ATL offense</span></div>
-            <div class="bt-row" title="ATL offense vs CAR defense: -2.3 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="CAR defense: 27th of 32">27th</span></span>
-  <span class="bt-v">+2.3</span>
-  <span class="tug"><span class="tug-o" style="width:65.1%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="ATL offense: 30th of 32">30th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="ATL passing offense -9.0 vs CAR passing defense -3.2 EPA per 100 plays (vs league average): a -5.9 edge for the offense on about 35 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="CAR Pass D: 25th of 32">25th</span></span>
-  <span class="bt-v">+5.9</span>
-  <span class="tug"><span class="tug-o" style="width:71.5%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="ATL Pass O: 31st of 32">31st</span></span>
-</div><div class="bt-row" title="ATL running offense -0.3 vs CAR running defense -2.5 EPA per 100 plays (vs league average): a +2.3 edge for the offense on about 27 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="CAR Run D: 23rd of 32">23rd</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:43.6%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+2.3</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="ATL Run O: 18th of 32">18th</span></span>
-</div></div>
-        </details>
-        
-        <div class="battle extras"><div class="bt-row" title="Special teams CAR -1.8 vs ATL -2.2 EPA per 100 special-teams plays (about 12 per team per game)">
-  <span class="bt-lbl">Special teams</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="CAR special teams: 30th of 32">30th</span></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.2%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="ATL special teams: 31st of 32">31st</span></span>
-</div><div class="bt-row" title="Home field: +0.3 EPA per 100 plays for CAR, averaged over both teams&#39; plays (fitted from every game in the training window)">
-  <span class="bt-lbl">Home field</span>
-  <span class="bt-rk"></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"></span>
-</div></div>
-        <div class="bt-plays">Projected plays: CAR <b>61</b> (60% pass) &middot; ATL <b>61</b> (56% pass)</div>
-      </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody><tr class="teamrow" style="--tc:#0085ca;--tc2:#595959;--tfg:#ffffff"><td><b>CAR</b></td><td class="num">-2.1</td><td class="num">-0.5</td><td class="num">-3.2</td><td class="num">-2.5</td><td class="num">-1.8</td></tr><tr class="teamrow" style="--tc:#a71930;--tc2:#595959;--tfg:#ffffff"><td><b>ATL</b></td><td class="num">-9.0</td><td class="num">-0.3</td><td class="num">+4.1</td><td class="num">+1.1</td><td class="num">-2.2</td></tr></tbody>
-        </table></div>
-      </details>
-    </article>
+    </a>
   
-    <article class="game" id="g-2026_02_NO_BAL" data-gid="2026_02_NO_BAL" data-away="NO" data-home="BAL">
-      <div class="g-head">
+    
+    
+    
+    <a class="mt is-final" id="g-2026_02_NO_BAL" data-gid="2026_02_NO_BAL" href="../game.html?d=2026/week-02.json&amp;g=2026_02_NO_BAL" style="--ac:#d3bc8d;--hc:#50458f">
+      <div class="mt-main">
         
         
-        <div class="g-team away tm-open" style="--tc:#d3bc8d;--tc2:#595959;--tfg:#ffffff" data-tm="NO"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/no.png" alt="NO" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Saints</span><span class="g-ab">NO</span></b></div><span class="g-sc">24</span></div>
-        <div class="g-at"><span class="g-fin">FINAL</span></div>
-        <div class="g-team home tm-open lost" style="--tc:#50458f;--tc2:#9e7c0c;--tfg:#ffffff" data-tm="BAL"><span class="logo" style="background:#241773"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/bal.png" alt="BAL" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Ravens</span><span class="g-ab">BAL</span></b></div><span class="g-sc">17</span></div>
-      </div>
-      <div class="g-sub"><span>Sun Sep 20 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2026/week-02.json&amp;g=2026_02_NO_BAL">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      <div class="g-final">
-        <span class="gf-pick miss">Upset &middot; a 23% chance</span></div>
-      
-      <div class="wp" style="--ac:#d3bc8d;--hc:#50458f">
-        <div class="wp-src">Vegas odds</div>
-        <div class="wp-head">
-          <span class="logo" style="background:#241773"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/bal.png" alt="BAL" width="24" height="24" loading="lazy"></span><span class="wp-call">Ravens 77%</span><span class="wp-why">to win</span>
+        <img class="mt-lg away" src="https://a.espncdn.com/i/teamlogos/nfl/500/no.png" alt="" loading="lazy">
+        <div class="mt-side away">
+          <span class="mt-num">24</span>
+          <span class="mt-nm"><b>Saints</b> <small>0-1</small></span>
         </div>
-        <div class="wp-bar" role="img" aria-label="NO 23%, BAL 77%">
-          <span class="wp-a" style="width:23%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:41%;width:18%"></i>
+        <span class="mt-at">@</span>
+        
+        
+        <img class="mt-lg home" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/bal.png" alt="" loading="lazy">
+        <div class="mt-side home lost">
+          <span class="mt-num">17</span>
+          <span class="mt-nm"><b>Ravens</b> <small>1-0</small></span>
         </div>
-        <div class="wp-ends"><span>NO 23%</span><span>77% BAL</span></div>
-        <div class="wp-meta">
-          <span>Vegas BAL -8.5 &middot; O/U 45.5</span>
-          <span title="Our model: power rank NO 26 vs BAL 2, Elo 1460 vs 1556, plus home field">Our model: <b>Ravens 73%</b></span>
-        </div>
+        
+        
       </div>
-      <div class="battles" style="--ac:#d3bc8d;--hc:#50458f">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/no.png" alt="NO" width="16" height="16" loading="lazy"></span><b>NO</b><span class="bt-rk"><span class="rk-b sm rk4" title="NO power rank: 26th of 32">26th</span></span></span><span><span class="bt-rk"><span class="rk-b sm rk1" title="BAL power rank: 2nd of 32">2nd</span></span><b>BAL</b><span class="logo" style="background:#241773"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/bal.png" alt="BAL" width="16" height="16" loading="lazy"></span></span></div>
+      <div class="mt-st">
+        <span class="mt-fin">Final</span>
+          <span class="gf-pick miss">Upset &middot; a 23% chance</span>
         
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>NO offense</span><span>BAL defense</span></div>
-            <div class="bt-row" title="NO offense vs BAL defense: -5.4 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="NO offense: 27th of 32">27th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:14.5%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+5.4</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="BAL defense: 11th of 32">11th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="NO passing offense -3.4 vs BAL passing defense +0.6 EPA per 100 plays (vs league average): a -4.0 edge for the offense on about 39 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="NO Pass O: 24th of 32">24th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:33.7%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+4.0</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="BAL Pass D: 19th of 32">19th</span></span>
-</div><div class="bt-row" title="NO running offense -4.7 vs BAL running defense +2.9 EPA per 100 plays (vs league average): a -7.6 edge for the offense on about 24 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="NO Run O: 29th of 32">29th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:30.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+7.6</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="BAL Run D: 6th of 32">6th</span></span>
-</div></div>
-        </details>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>NO defense</span><span>BAL offense</span></div>
-            <div class="bt-row" title="BAL offense vs NO defense: +2.1 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="NO defense: 8th of 32">8th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:36.4%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+2.1</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="BAL offense: 7th of 32">7th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="BAL passing offense +5.7 vs NO passing defense +1.2 EPA per 100 plays (vs league average): a +4.5 edge for the offense on about 33 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="NO Pass D: 14th of 32">14th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:34.3%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+4.5</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="BAL Pass O: 9th of 32">9th</span></span>
-</div><div class="bt-row" title="BAL running offense +2.6 vs NO running defense +3.3 EPA per 100 plays (vs league average): a -0.7 edge for the offense on about 28 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="NO Run D: 5th of 32">5th</span></span>
-  <span class="bt-v">+0.7</span>
-  <span class="tug"><span class="tug-o" style="width:52.1%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="BAL Run O: 9th of 32">9th</span></span>
-</div></div>
-        </details>
-        
-        <div class="battle extras"><div class="bt-row" title="Special teams NO -1.8 vs BAL +0.8 EPA per 100 special-teams plays (about 12 per team per game)">
-  <span class="bt-lbl">Special teams</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="NO special teams: 29th of 32">29th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:27.6%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+2.6</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="BAL special teams: 8th of 32">8th</span></span>
-</div><div class="bt-row" title="Home field: +0.3 EPA per 100 plays for NO, averaged over both teams&#39; plays (fitted from every game in the training window)">
-  <span class="bt-lbl">Home field</span>
-  <span class="bt-rk"></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"></span>
-</div></div>
-        <div class="bt-plays">Projected plays: NO <b>63</b> (62% pass) &middot; BAL <b>60</b> (54% pass)</div>
       </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody><tr class="teamrow" style="--tc:#d3bc8d;--tc2:#595959;--tfg:#ffffff"><td><b>NO</b></td><td class="num">-3.4</td><td class="num">-4.7</td><td class="num">+1.2</td><td class="num">+3.3</td><td class="num">-1.8</td></tr><tr class="teamrow" style="--tc:#50458f;--tc2:#9e7c0c;--tfg:#ffffff"><td><b>BAL</b></td><td class="num">+5.7</td><td class="num">+2.6</td><td class="num">+0.6</td><td class="num">+2.9</td><td class="num">+0.8</td></tr></tbody>
-        </table></div>
-      </details>
-    </article>
+    </a>
   
-    <article class="game" id="g-2026_02_MIN_CHI" data-gid="2026_02_MIN_CHI" data-away="MIN" data-home="CHI">
-      <div class="g-head">
+    
+    
+    
+    <a class="mt is-final" id="g-2026_02_MIN_CHI" data-gid="2026_02_MIN_CHI" href="../game.html?d=2026/week-02.json&amp;g=2026_02_MIN_CHI" style="--ac:#72519c;--hc:#e64100">
+      <div class="mt-main">
         
         
-        <div class="g-team away tm-open" style="--tc:#72519c;--tc2:#ffc62f;--tfg:#ffffff" data-tm="MIN"><span class="logo" style="background:#4F2683"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/min.png" alt="MIN" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Vikings</span><span class="g-ab">MIN</span></b></div><span class="g-sc">9</span></div>
-        <div class="g-at"><span class="g-fin">FINAL</span></div>
-        <div class="g-team home tm-open lost" style="--tc:#606875;--tc2:#e64100;--tfg:#ffffff" data-tm="CHI"><span class="logo" style="background:#0B162A"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/chi.png" alt="CHI" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Bears</span><span class="g-ab">CHI</span></b></div><span class="g-sc">3</span></div>
-      </div>
-      <div class="g-sub"><span>Sun Sep 20 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2026/week-02.json&amp;g=2026_02_MIN_CHI">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      <div class="g-final">
-        <span class="gf-pick miss">Upset &middot; a 34% chance</span></div>
-      
-      <div class="wp" style="--ac:#72519c;--hc:#e64100">
-        <div class="wp-src">Vegas odds</div>
-        <div class="wp-head">
-          <span class="logo" style="background:#0B162A"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/chi.png" alt="CHI" width="24" height="24" loading="lazy"></span><span class="wp-call">Bears 66%</span><span class="wp-why">to win</span>
+        <img class="mt-lg away" src="https://a.espncdn.com/i/teamlogos/nfl/500/min.png" alt="" loading="lazy">
+        <div class="mt-side away">
+          <span class="mt-num">9</span>
+          <span class="mt-nm"><b>Vikings</b> <small>1-0</small></span>
         </div>
-        <div class="wp-bar" role="img" aria-label="MIN 34%, CHI 66%">
-          <span class="wp-a" style="width:34%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:41%;width:18%"></i>
+        <span class="mt-at">@</span>
+        
+        
+        <img class="mt-lg home" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/chi.png" alt="" loading="lazy">
+        <div class="mt-side home lost">
+          <span class="mt-num">3</span>
+          <span class="mt-nm"><b>Bears</b> <small>1-0</small></span>
         </div>
-        <div class="wp-ends"><span>MIN 34%</span><span>66% CHI</span></div>
-        <div class="wp-meta">
-          <span>Vegas CHI -4.5 &middot; O/U 46.5</span>
-          <span title="Our model: power rank MIN 17 vs CHI 4, Elo 1563 vs 1555, plus home field">Our model: <b>Bears 59%</b></span>
-        </div>
+        
+        
       </div>
-      <div class="battles" style="--ac:#72519c;--hc:#e64100">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span><span class="logo" style="background:#4F2683"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/min.png" alt="MIN" width="16" height="16" loading="lazy"></span><b>MIN</b><span class="bt-rk"><span class="rk-b sm rk3" title="MIN power rank: 17th of 32">17th</span></span></span><span><span class="bt-rk"><span class="rk-b sm rk1" title="CHI power rank: 4th of 32">4th</span></span><b>CHI</b><span class="logo" style="background:#0B162A"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/chi.png" alt="CHI" width="16" height="16" loading="lazy"></span></span></div>
+      <div class="mt-st">
+        <span class="mt-fin">Final</span>
+          <span class="gf-pick miss">Upset &middot; a 34% chance</span>
         
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>MIN offense</span><span>CHI defense</span></div>
-            <div class="bt-row" title="MIN offense vs CHI defense: -1.4 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="MIN offense: 26th of 32">26th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:40.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+1.4</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="CHI defense: 23rd of 32">23rd</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="MIN passing offense -3.9 vs CHI passing defense -1.4 EPA per 100 plays (vs league average): a -2.4 edge for the offense on about 36 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="MIN Pass O: 25th of 32">25th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:40.7%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+2.4</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="CHI Pass D: 21st of 32">21st</span></span>
-</div><div class="bt-row" title="MIN running offense -1.9 vs CHI running defense -1.9 EPA per 100 plays (vs league average): a +0.1 edge for the offense on about 24 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="MIN Run O: 22nd of 32">22nd</span></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:50.2%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="CHI Run D: 22nd of 32">22nd</span></span>
-</div></div>
-        </details>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>MIN defense</span><span>CHI offense</span></div>
-            <div class="bt-row" title="CHI offense vs MIN defense: +1.8 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="MIN defense: 3rd of 32">3rd</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:38.2%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+1.8</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="CHI offense: 1st of 32">1st</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="CHI passing offense +7.6 vs MIN passing defense +4.2 EPA per 100 plays (vs league average): a +3.4 edge for the offense on about 36 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="MIN Pass D: 4th of 32">4th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:37.1%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+3.4</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="CHI Pass O: 4th of 32">4th</span></span>
-</div><div class="bt-row" title="CHI running offense +4.3 vs MIN running defense +4.6 EPA per 100 plays (vs league average): a -0.4 edge for the offense on about 26 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="MIN Run D: 3rd of 32">3rd</span></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:51.1%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="CHI Run O: 5th of 32">5th</span></span>
-</div></div>
-        </details>
-        
-        <div class="battle extras"><div class="bt-row" title="Special teams MIN -0.9 vs CHI +1.5 EPA per 100 special-teams plays (about 12 per team per game)">
-  <span class="bt-lbl">Special teams</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="MIN special teams: 22nd of 32">22nd</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:29.2%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+2.4</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="CHI special teams: 6th of 32">6th</span></span>
-</div><div class="bt-row" title="Home field: +0.3 EPA per 100 plays for MIN, averaged over both teams&#39; plays (fitted from every game in the training window)">
-  <span class="bt-lbl">Home field</span>
-  <span class="bt-rk"></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"></span>
-</div></div>
-        <div class="bt-plays">Projected plays: MIN <b>60</b> (60% pass) &middot; CHI <b>62</b> (58% pass)</div>
       </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody><tr class="teamrow" style="--tc:#72519c;--tc2:#ffc62f;--tfg:#ffffff"><td><b>MIN</b></td><td class="num">-3.9</td><td class="num">-1.9</td><td class="num">+4.2</td><td class="num">+4.6</td><td class="num">-0.9</td></tr><tr class="teamrow" style="--tc:#606875;--tc2:#e64100;--tfg:#ffffff"><td><b>CHI</b></td><td class="num">+7.6</td><td class="num">+4.3</td><td class="num">-1.4</td><td class="num">-1.9</td><td class="num">+1.5</td></tr></tbody>
-        </table></div>
-      </details>
-    </article>
+    </a>
   
-    <article class="game" id="g-2026_02_CIN_HOU" data-gid="2026_02_CIN_HOU" data-away="CIN" data-home="HOU">
-      <div class="g-head">
+    
+    
+    
+    <a class="mt is-final" id="g-2026_02_CIN_HOU" data-gid="2026_02_CIN_HOU" href="../game.html?d=2026/week-02.json&amp;g=2026_02_CIN_HOU" style="--ac:#fb4f14;--hc:#5b6e78">
+      <div class="mt-main">
         
         
-        <div class="g-team away tm-open" style="--tc:#fb4f14;--tc2:#595959;--tfg:#ffffff" data-tm="CIN"><span class="logo" style="background:#FB4F14"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/cin.png" alt="CIN" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Bengals</span><span class="g-ab">CIN</span></b></div><span class="g-sc">20</span></div>
-        <div class="g-at"><span class="g-fin">FINAL</span></div>
-        <div class="g-team home tm-open lost" style="--tc:#5b6e78;--tc2:#a71930;--tfg:#ffffff" data-tm="HOU"><span class="logo" style="background:#03202F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/hou.png" alt="HOU" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Texans</span><span class="g-ab">HOU</span></b></div><span class="g-sc">6</span></div>
-      </div>
-      <div class="g-sub"><span>Sun Sep 20 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2026/week-02.json&amp;g=2026_02_CIN_HOU">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      <div class="g-final">
-        <span class="gf-pick miss">Upset &middot; a 39% chance</span></div>
-      
-      <div class="wp" style="--ac:#fb4f14;--hc:#5b6e78">
-        <div class="wp-src">Vegas odds</div>
-        <div class="wp-head">
-          <span class="logo" style="background:#03202F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/hou.png" alt="HOU" width="24" height="24" loading="lazy"></span><span class="wp-call">Texans 61%</span><span class="wp-why">to win</span>
+        <img class="mt-lg away" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/cin.png" alt="" loading="lazy">
+        <div class="mt-side away">
+          <span class="mt-num">20</span>
+          <span class="mt-nm"><b>Bengals</b> <small>1-0</small></span>
         </div>
-        <div class="wp-bar" role="img" aria-label="CIN 39%, HOU 61%">
-          <span class="wp-a" style="width:39%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:41%;width:18%"></i>
+        <span class="mt-at">@</span>
+        
+        
+        <img class="mt-lg home" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/hou.png" alt="" loading="lazy">
+        <div class="mt-side home lost">
+          <span class="mt-num">6</span>
+          <span class="mt-nm"><b>Texans</b> <small>0-1</small></span>
         </div>
-        <div class="wp-ends"><span>CIN 39%</span><span>61% HOU</span></div>
-        <div class="wp-meta">
-          <span>Vegas HOU -3.0 &middot; O/U 45.5</span>
-          <span title="Our model: power rank CIN 19 vs HOU 11, Elo 1503 vs 1559, plus home field">Our model: <b>Texans 64%</b></span>
-        </div>
+        
+        
       </div>
-      <div class="battles" style="--ac:#fb4f14;--hc:#5b6e78">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span><span class="logo" style="background:#FB4F14"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/cin.png" alt="CIN" width="16" height="16" loading="lazy"></span><b>CIN</b><span class="bt-rk"><span class="rk-b sm rk3" title="CIN power rank: 19th of 32">19th</span></span></span><span><span class="bt-rk"><span class="rk-b sm rk2" title="HOU power rank: 11th of 32">11th</span></span><b>HOU</b><span class="logo" style="background:#03202F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/hou.png" alt="HOU" width="16" height="16" loading="lazy"></span></span></div>
+      <div class="mt-st">
+        <span class="mt-fin">Final</span>
+          <span class="gf-pick miss">Upset &middot; a 39% chance</span>
         
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>CIN offense</span><span>HOU defense</span></div>
-            <div class="bt-row" title="CIN offense vs HOU defense: -2.3 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="CIN offense: 15th of 32">15th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:35.1%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+2.3</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="HOU defense: 5th of 32">5th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="CIN passing offense -1.1 vs HOU passing defense +1.1 EPA per 100 plays (vs league average): a -2.2 edge for the offense on about 39 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="CIN Pass O: 20th of 32">20th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:41.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+2.2</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="HOU Pass D: 15th of 32">15th</span></span>
-</div><div class="bt-row" title="CIN running offense +4.3 vs HOU running defense +6.8 EPA per 100 plays (vs league average): a -2.4 edge for the offense on about 23 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="CIN Run O: 3rd of 32">3rd</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:44.1%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+2.4</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="HOU Run D: 2nd of 32">2nd</span></span>
-</div></div>
-        </details>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>CIN defense</span><span>HOU offense</span></div>
-            <div class="bt-row" title="HOU offense vs CIN defense: +0.5 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="CIN defense: 24th of 32">24th</span></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:46.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="HOU offense: 21st of 32">21st</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="HOU passing offense +0.7 vs CIN passing defense +0.9 EPA per 100 plays (vs league average): a -0.2 edge for the offense on about 37 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="CIN Pass D: 18th of 32">18th</span></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:50.7%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="HOU Pass O: 17th of 32">17th</span></span>
-</div><div class="bt-row" title="HOU running offense -4.0 vs CIN running defense -5.4 EPA per 100 plays (vs league average): a +1.4 edge for the offense on about 25 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="CIN Run D: 29th of 32">29th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:46.2%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+1.4</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="HOU Run O: 27th of 32">27th</span></span>
-</div></div>
-        </details>
-        
-        <div class="battle extras"><div class="bt-row" title="Special teams CIN -0.1 vs HOU +0.8 EPA per 100 special-teams plays (about 12 per team per game)">
-  <span class="bt-lbl">Special teams</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="CIN special teams: 13th of 32">13th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:42.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+0.9</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="HOU special teams: 7th of 32">7th</span></span>
-</div><div class="bt-row" title="Home field: +0.3 EPA per 100 plays for CIN, averaged over both teams&#39; plays (fitted from every game in the training window)">
-  <span class="bt-lbl">Home field</span>
-  <span class="bt-rk"></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.7%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"></span>
-</div></div>
-        <div class="bt-plays">Projected plays: CIN <b>61</b> (63% pass) &middot; HOU <b>62</b> (59% pass)</div>
       </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody><tr class="teamrow" style="--tc:#fb4f14;--tc2:#595959;--tfg:#ffffff"><td><b>CIN</b></td><td class="num">-1.1</td><td class="num">+4.3</td><td class="num">+0.9</td><td class="num">-5.4</td><td class="num">-0.1</td></tr><tr class="teamrow" style="--tc:#5b6e78;--tc2:#a71930;--tfg:#ffffff"><td><b>HOU</b></td><td class="num">+0.7</td><td class="num">-4.0</td><td class="num">+1.1</td><td class="num">+6.8</td><td class="num">+0.8</td></tr></tbody>
-        </table></div>
-      </details>
-    </article>
+    </a>
   
-    <article class="game" id="g-2026_02_PIT_NE" data-gid="2026_02_PIT_NE" data-away="PIT" data-home="NE">
-      <div class="g-head">
+    
+    
+    
+    <a class="mt is-final" id="g-2026_02_PIT_NE" data-gid="2026_02_PIT_NE" href="../game.html?d=2026/week-02.json&amp;g=2026_02_PIT_NE" style="--ac:#595959;--hc:#c60c30">
+      <div class="mt-main">
         
         
-        <div class="g-team away tm-open lost" style="--tc:#595959;--tc2:#ffb612;--tfg:#ffffff" data-tm="PIT"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/pit.png" alt="PIT" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Steelers</span><span class="g-ab">PIT</span></b></div><span class="g-sc">3</span></div>
-        <div class="g-at"><span class="g-fin">FINAL</span></div>
-        <div class="g-team home tm-open" style="--tc:#334e69;--tc2:#c60c30;--tfg:#ffffff" data-tm="NE"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ne.png" alt="NE" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Patriots</span><span class="g-ab">NE</span></b></div><span class="g-sc">20</span></div>
+        <img class="mt-lg away" src="https://a.espncdn.com/i/teamlogos/nfl/500/pit.png" alt="" loading="lazy">
+        <div class="mt-side away lost">
+          <span class="mt-num">3</span>
+          <span class="mt-nm"><b>Steelers</b> <small>1-0</small></span>
+        </div>
+        <span class="mt-at">@</span>
+        
+        
+        <img class="mt-lg home" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ne.png" alt="" loading="lazy">
+        <div class="mt-side home">
+          <span class="mt-num">20</span>
+          <span class="mt-nm"><b>Patriots</b> <small>0-1</small></span>
+        </div>
+        
+        
       </div>
-      <div class="g-sub"><span>Sun Sep 20 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2026/week-02.json&amp;g=2026_02_PIT_NE">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      <div class="g-final">
-        <span class="gf-pick ok">Favorite won</span>
-        </div>
-      
-      <div class="wp" style="--ac:#595959;--hc:#c60c30">
-        <div class="wp-src">Vegas odds</div>
-        <div class="wp-head">
-          <span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ne.png" alt="NE" width="24" height="24" loading="lazy"></span><span class="wp-call">Patriots 66%</span><span class="wp-why">to win</span>
-        </div>
-        <div class="wp-bar" role="img" aria-label="PIT 34%, NE 66%">
-          <span class="wp-a" style="width:34%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:41%;width:18%"></i>
-        </div>
-        <div class="wp-ends"><span>PIT 34%</span><span>66% NE</span></div>
-        <div class="wp-meta">
-          <span>Vegas NE -4.5 &middot; O/U 41.5</span>
-          <span title="Our model: power rank PIT 15 vs NE 8, Elo 1528 vs 1572, plus home field">Our model: <b>Patriots 62%</b></span>
-        </div>
+      <div class="mt-st">
+        <span class="mt-fin">Final</span>
+          <span class="gf-pick ok">Favorite won &middot; 66%</span>
+          
+        
       </div>
-      <div class="battles" style="--ac:#595959;--hc:#c60c30">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/pit.png" alt="PIT" width="16" height="16" loading="lazy"></span><b>PIT</b><span class="bt-rk"><span class="rk-b sm rk2" title="PIT power rank: 15th of 32">15th</span></span></span><span><span class="bt-rk"><span class="rk-b sm rk1" title="NE power rank: 8th of 32">8th</span></span><b>NE</b><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ne.png" alt="NE" width="16" height="16" loading="lazy"></span></span></div>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>PIT offense</span><span>NE defense</span></div>
-            <div class="bt-row" title="PIT offense vs NE defense: -2.3 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="PIT offense: 23rd of 32">23rd</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:35.4%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+2.3</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="NE defense: 17th of 32">17th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="PIT passing offense -4.5 vs NE passing defense -0.6 EPA per 100 plays (vs league average): a -3.9 edge for the offense on about 37 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="PIT Pass O: 27th of 32">27th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:34.6%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+3.9</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="NE Pass D: 20th of 32">20th</span></span>
-</div><div class="bt-row" title="PIT running offense +1.9 vs NE running defense +1.5 EPA per 100 plays (vs league average): a +0.3 edge for the offense on about 23 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="PIT Run O: 11th of 32">11th</span></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:50.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="NE Run D: 12th of 32">12th</span></span>
-</div></div>
-        </details>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>PIT defense</span><span>NE offense</span></div>
-            <div class="bt-row" title="NE offense vs PIT defense: +1.8 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="PIT defense: 7th of 32">7th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:38.1%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+1.8</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="NE offense: 9th of 32">9th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="NE passing offense +10.9 vs PIT passing defense +4.2 EPA per 100 plays (vs league average): a +6.6 edge for the offense on about 37 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="PIT Pass D: 3rd of 32">3rd</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:24.2%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+6.6</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="NE Pass O: 2nd of 32">2nd</span></span>
-</div><div class="bt-row" title="NE running offense -5.3 vs PIT running defense -0.0 EPA per 100 plays (vs league average): a -5.3 edge for the offense on about 25 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="PIT Run D: 17th of 32">17th</span></span>
-  <span class="bt-v">+5.3</span>
-  <span class="tug"><span class="tug-o" style="width:63.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="NE Run O: 31st of 32">31st</span></span>
-</div></div>
-        </details>
-        
-        <div class="battle extras"><div class="bt-row" title="Special teams PIT -0.1 vs NE +0.7 EPA per 100 special-teams plays (about 12 per team per game)">
-  <span class="bt-lbl">Special teams</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="PIT special teams: 14th of 32">14th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:43.1%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+0.8</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="NE special teams: 9th of 32">9th</span></span>
-</div><div class="bt-row" title="Home field: +0.3 EPA per 100 plays for PIT, averaged over both teams&#39; plays (fitted from every game in the training window)">
-  <span class="bt-lbl">Home field</span>
-  <span class="bt-rk"></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.7%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"></span>
-</div></div>
-        <div class="bt-plays">Projected plays: PIT <b>61</b> (62% pass) &middot; NE <b>62</b> (60% pass)</div>
-      </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody><tr class="teamrow" style="--tc:#595959;--tc2:#ffb612;--tfg:#ffffff"><td><b>PIT</b></td><td class="num">-4.5</td><td class="num">+1.9</td><td class="num">+4.2</td><td class="num">-0.0</td><td class="num">-0.1</td></tr><tr class="teamrow" style="--tc:#334e69;--tc2:#c60c30;--tfg:#ffffff"><td><b>NE</b></td><td class="num">+10.9</td><td class="num">-5.3</td><td class="num">-0.6</td><td class="num">+1.5</td><td class="num">+0.7</td></tr></tbody>
-        </table></div>
-      </details>
-    </article>
+    </a>
   
-    <article class="game" id="g-2026_02_GB_NYJ" data-gid="2026_02_GB_NYJ" data-away="GB" data-home="NYJ">
-      <div class="g-head">
+    
+    
+    
+    <a class="mt is-final" id="g-2026_02_GB_NYJ" data-gid="2026_02_GB_NYJ" href="../game.html?d=2026/week-02.json&amp;g=2026_02_GB_NYJ" style="--ac:#ffb612;--hc:#336557">
+      <div class="mt-main">
         
         
-        <div class="g-team away tm-open" style="--tc:#4d5f5a;--tc2:#ffb612;--tfg:#ffffff" data-tm="GB"><span class="logo" style="background:#203731"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/gb.png" alt="GB" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Packers</span><span class="g-ab">GB</span></b></div><span class="g-sc">20</span></div>
-        <div class="g-at"><span class="g-fin">FINAL</span></div>
-        <div class="g-team home tm-open lost" style="--tc:#336557;--tc2:#595959;--tfg:#ffffff" data-tm="NYJ"><span class="logo" style="background:#003F2D"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/nyj.png" alt="NYJ" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Jets</span><span class="g-ab">NYJ</span></b></div><span class="g-sc">17</span></div>
+        <img class="mt-lg away" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/gb.png" alt="" loading="lazy">
+        <div class="mt-side away">
+          <span class="mt-num">20</span>
+          <span class="mt-nm"><b>Packers</b> <small>0-1</small></span>
+        </div>
+        <span class="mt-at">@</span>
+        
+        
+        <img class="mt-lg home" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/nyj.png" alt="" loading="lazy">
+        <div class="mt-side home lost">
+          <span class="mt-num">17</span>
+          <span class="mt-nm"><b>Jets</b> <small>1-0</small></span>
+        </div>
+        
+        
       </div>
-      <div class="g-sub"><span>Sun Sep 20 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2026/week-02.json&amp;g=2026_02_GB_NYJ">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      <div class="g-final">
-        <span class="gf-pick ok">Favorite won</span>
-        </div>
-      
-      <div class="wp" style="--ac:#ffb612;--hc:#336557">
-        <div class="wp-src">Vegas odds</div>
-        <div class="wp-head">
-          <span class="logo" style="background:#203731"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/gb.png" alt="GB" width="24" height="24" loading="lazy"></span><span class="wp-call">Packers 62%</span><span class="wp-why">to win</span>
-        </div>
-        <div class="wp-bar" role="img" aria-label="GB 62%, NYJ 38%">
-          <span class="wp-a" style="width:62%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:41%;width:18%"></i>
-        </div>
-        <div class="wp-ends"><span>GB 62%</span><span>38% NYJ</span></div>
-        <div class="wp-meta">
-          <span>Vegas GB -3.5 &middot; O/U 44.5</span>
-          <span title="Our model: power rank GB 12 vs NYJ 22, Elo 1492 vs 1434, plus home field">Our model: <b>tossup</b> (Packers 56%)</span>
-        </div>
+      <div class="mt-st">
+        <span class="mt-fin">Final</span>
+          <span class="gf-pick ok">Favorite won &middot; 62%</span>
+          
+        
       </div>
-      <div class="battles" style="--ac:#ffb612;--hc:#336557">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span><span class="logo" style="background:#203731"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/gb.png" alt="GB" width="16" height="16" loading="lazy"></span><b>GB</b><span class="bt-rk"><span class="rk-b sm rk2" title="GB power rank: 12th of 32">12th</span></span></span><span><span class="bt-rk"><span class="rk-b sm rk3" title="NYJ power rank: 22nd of 32">22nd</span></span><b>NYJ</b><span class="logo" style="background:#003F2D"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/nyj.png" alt="NYJ" width="16" height="16" loading="lazy"></span></span></div>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>GB offense</span><span>NYJ defense</span></div>
-            <div class="bt-row" title="GB offense vs NYJ defense: +8.1 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="GB offense: 5th of 32">5th</span></span>
-  <span class="bt-v">+8.1</span>
-  <span class="tug"><span class="tug-o" style="width:95.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="NYJ defense: 28th of 32">28th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="GB passing offense +12.0 vs NYJ passing defense -4.2 EPA per 100 plays (vs league average): a +16.2 edge for the offense on about 35 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="GB Pass O: 1st of 32">1st</span></span>
-  <span class="bt-v">+16.2</span>
-  <span class="tug"><span class="tug-o" style="width:95.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="NYJ Pass D: 29th of 32">29th</span></span>
-</div><div class="bt-row" title="GB running offense -5.0 vs NYJ running defense -1.9 EPA per 100 plays (vs league average): a -3.1 edge for the offense on about 26 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="GB Run O: 30th of 32">30th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:41.7%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+3.1</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="NYJ Run D: 21st of 32">21st</span></span>
-</div></div>
-        </details>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>GB defense</span><span>NYJ offense</span></div>
-            <div class="bt-row" title="NYJ offense vs GB defense: -4.0 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="GB defense: 18th of 32">18th</span></span>
-  <span class="bt-v">+4.0</span>
-  <span class="tug"><span class="tug-o" style="width:75.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="NYJ offense: 29th of 32">29th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="NYJ passing offense -6.5 vs GB passing defense -1.6 EPA per 100 plays (vs league average): a -4.9 edge for the offense on about 34 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="GB Pass D: 22nd of 32">22nd</span></span>
-  <span class="bt-v">+4.9</span>
-  <span class="tug"><span class="tug-o" style="width:67.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="NYJ Pass O: 29th of 32">29th</span></span>
-</div><div class="bt-row" title="NYJ running offense -2.4 vs GB running defense +0.4 EPA per 100 plays (vs league average): a -2.8 edge for the offense on about 27 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="GB Run D: 16th of 32">16th</span></span>
-  <span class="bt-v">+2.8</span>
-  <span class="tug"><span class="tug-o" style="width:58.1%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="NYJ Run O: 25th of 32">25th</span></span>
-</div></div>
-        </details>
-        
-        <div class="battle extras"><div class="bt-row" title="Special teams GB -1.0 vs NYJ +4.9 EPA per 100 special-teams plays (about 12 per team per game)">
-  <span class="bt-lbl">Special teams</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="GB special teams: 23rd of 32">23rd</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:5.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+5.9</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="NYJ special teams: 1st of 32">1st</span></span>
-</div><div class="bt-row" title="Home field: +0.3 EPA per 100 plays for GB, averaged over both teams&#39; plays (fitted from every game in the training window)">
-  <span class="bt-lbl">Home field</span>
-  <span class="bt-rk"></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"></span>
-</div></div>
-        <div class="bt-plays">Projected plays: GB <b>61</b> (58% pass) &middot; NYJ <b>61</b> (56% pass)</div>
-      </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody><tr class="teamrow" style="--tc:#4d5f5a;--tc2:#ffb612;--tfg:#ffffff"><td><b>GB</b></td><td class="num">+12.0</td><td class="num">-5.0</td><td class="num">-1.6</td><td class="num">+0.4</td><td class="num">-1.0</td></tr><tr class="teamrow" style="--tc:#336557;--tc2:#595959;--tfg:#ffffff"><td><b>NYJ</b></td><td class="num">-6.5</td><td class="num">-2.4</td><td class="num">-4.2</td><td class="num">-1.9</td><td class="num">+4.9</td></tr></tbody>
-        </table></div>
-      </details>
-    </article>
+    </a>
   
-    <article class="game" id="g-2026_02_CLE_TB" data-gid="2026_02_CLE_TB" data-away="CLE" data-home="TB">
-      <div class="g-head">
+    
+    
+    
+    <a class="mt is-final" id="g-2026_02_CLE_TB" data-gid="2026_02_CLE_TB" href="../game.html?d=2026/week-02.json&amp;g=2026_02_CLE_TB" style="--ac:#ff3c00;--hc:#5b5955">
+      <div class="mt-main">
         
         
-        <div class="g-team away tm-open" style="--tc:#ff3c00;--tc2:#5a4a33;--tfg:#ffffff" data-tm="CLE"><span class="logo" style="background:#311D00"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/cle.png" alt="CLE" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Browns</span><span class="g-ab">CLE</span></b></div><span class="g-sc">23</span></div>
-        <div class="g-at"><span class="g-fin">FINAL</span></div>
-        <div class="g-team home tm-open lost" style="--tc:#a71930;--tc2:#5b5955;--tfg:#ffffff" data-tm="TB"><span class="logo" style="background:#322F2B"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/tb.png" alt="TB" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Buccaneers</span><span class="g-ab">TB</span></b></div><span class="g-sc">19</span></div>
-      </div>
-      <div class="g-sub"><span>Sun Sep 20 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2026/week-02.json&amp;g=2026_02_CLE_TB">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      <div class="g-final">
-        <span class="gf-pick miss">Upset &middot; a 23% chance</span></div>
-      
-      <div class="wp" style="--ac:#ff3c00;--hc:#5b5955">
-        <div class="wp-src">Vegas odds</div>
-        <div class="wp-head">
-          <span class="logo" style="background:#322F2B"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/tb.png" alt="TB" width="24" height="24" loading="lazy"></span><span class="wp-call">Buccaneers 77%</span><span class="wp-why">to win</span>
+        <img class="mt-lg away" src="https://a.espncdn.com/i/teamlogos/nfl/500/cle.png" alt="" loading="lazy">
+        <div class="mt-side away">
+          <span class="mt-num">23</span>
+          <span class="mt-nm"><b>Browns</b> <small>0-1</small></span>
         </div>
-        <div class="wp-bar" role="img" aria-label="CLE 23%, TB 77%">
-          <span class="wp-a" style="width:23%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:41%;width:18%"></i>
+        <span class="mt-at">@</span>
+        
+        
+        <img class="mt-lg home" src="https://a.espncdn.com/i/teamlogos/nfl/500/tb.png" alt="" loading="lazy">
+        <div class="mt-side home lost">
+          <span class="mt-num">19</span>
+          <span class="mt-nm"><b>Buccaneers</b> <small>0-1</small></span>
         </div>
-        <div class="wp-ends"><span>CLE 23%</span><span>77% TB</span></div>
-        <div class="wp-meta">
-          <span>Vegas TB -8.5 &middot; O/U 41.5</span>
-          <span title="Our model: power rank CLE 31 vs TB 29, Elo 1431 vs 1467, plus home field">Our model: <b>Buccaneers 59%</b></span>
-        </div>
+        
+        
       </div>
-      <div class="battles" style="--ac:#ff3c00;--hc:#5b5955">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span><span class="logo" style="background:#311D00"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/cle.png" alt="CLE" width="16" height="16" loading="lazy"></span><b>CLE</b><span class="bt-rk"><span class="rk-b sm rk4" title="CLE power rank: 31st of 32">31st</span></span></span><span><span class="bt-rk"><span class="rk-b sm rk4" title="TB power rank: 29th of 32">29th</span></span><b>TB</b><span class="logo" style="background:#322F2B"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/tb.png" alt="TB" width="16" height="16" loading="lazy"></span></span></div>
+      <div class="mt-st">
+        <span class="mt-fin">Final</span>
+          <span class="gf-pick miss">Upset &middot; a 23% chance</span>
         
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>CLE offense</span><span>TB defense</span></div>
-            <div class="bt-row" title="CLE offense vs TB defense: -6.6 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="CLE offense: 32nd of 32">32nd</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:7.3%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+6.6</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="TB defense: 22nd of 32">22nd</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="CLE passing offense -10.5 vs TB passing defense -3.9 EPA per 100 plays (vs league average): a -6.6 edge for the offense on about 36 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="CLE Pass O: 32nd of 32">32nd</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:24.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+6.6</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="TB Pass D: 27th of 32">27th</span></span>
-</div><div class="bt-row" title="CLE running offense -4.0 vs TB running defense +2.7 EPA per 100 plays (vs league average): a -6.7 edge for the offense on about 25 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="CLE Run O: 28th of 32">28th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:32.4%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+6.7</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="TB Run D: 7th of 32">7th</span></span>
-</div></div>
-        </details>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>CLE defense</span><span>TB offense</span></div>
-            <div class="bt-row" title="TB offense vs CLE defense: -3.7 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="CLE defense: 14th of 32">14th</span></span>
-  <span class="bt-v">+3.7</span>
-  <span class="tug"><span class="tug-o" style="width:73.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="TB offense: 25th of 32">25th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="TB passing offense -6.4 vs CLE passing defense +3.3 EPA per 100 plays (vs league average): a -9.7 edge for the offense on about 37 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="CLE Pass D: 7th of 32">7th</span></span>
-  <span class="bt-v">+9.7</span>
-  <span class="tug"><span class="tug-o" style="width:87.5%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="TB Pass O: 28th of 32">28th</span></span>
-</div><div class="bt-row" title="TB running offense +2.2 vs CLE running defense -3.1 EPA per 100 plays (vs league average): a +5.2 edge for the offense on about 25 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="CLE Run D: 25th of 32">25th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:36.3%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+5.2</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="TB Run O: 10th of 32">10th</span></span>
-</div></div>
-        </details>
-        
-        <div class="battle extras"><div class="bt-row" title="Special teams CLE -1.0 vs TB -1.3 EPA per 100 special-teams plays (about 12 per team per game)">
-  <span class="bt-lbl">Special teams</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="CLE special teams: 24th of 32">24th</span></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:52.3%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="TB special teams: 27th of 32">27th</span></span>
-</div><div class="bt-row" title="Home field: +0.3 EPA per 100 plays for CLE, averaged over both teams&#39; plays (fitted from every game in the training window)">
-  <span class="bt-lbl">Home field</span>
-  <span class="bt-rk"></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"></span>
-</div></div>
-        <div class="bt-plays">Projected plays: CLE <b>61</b> (59% pass) &middot; TB <b>61</b> (60% pass)</div>
       </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody><tr class="teamrow" style="--tc:#ff3c00;--tc2:#5a4a33;--tfg:#ffffff"><td><b>CLE</b></td><td class="num">-10.5</td><td class="num">-4.0</td><td class="num">+3.3</td><td class="num">-3.1</td><td class="num">-1.0</td></tr><tr class="teamrow" style="--tc:#a71930;--tc2:#5b5955;--tfg:#ffffff"><td><b>TB</b></td><td class="num">-6.4</td><td class="num">+2.2</td><td class="num">-3.9</td><td class="num">+2.7</td><td class="num">-1.3</td></tr></tbody>
-        </table></div>
-      </details>
-    </article>
+    </a>
   
-    <article class="game" id="g-2026_02_PHI_TEN" data-gid="2026_02_PHI_TEN" data-away="PHI" data-home="TEN">
-      <div class="g-head">
+    
+    
+    
+    <a class="mt is-final" id="g-2026_02_PHI_TEN" data-gid="2026_02_PHI_TEN" href="../game.html?d=2026/week-02.json&amp;g=2026_02_PHI_TEN" style="--ac:#337076;--hc:#d50a0a">
+      <div class="mt-main">
         
         
-        <div class="g-team away tm-open" style="--tc:#337076;--tc2:#a5acaf;--tfg:#ffffff" data-tm="PHI"><span class="logo" style="background:#004C54"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/phi.png" alt="PHI" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Eagles</span><span class="g-ab">PHI</span></b></div><span class="g-sc">24</span></div>
-        <div class="g-at"><span class="g-fin">FINAL</span></div>
-        <div class="g-team home tm-open lost" style="--tc:#4495d2;--tc2:#d50a0a;--tfg:#ffffff" data-tm="TEN"><span class="logo" style="background:#4495D2"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ten.png" alt="TEN" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Titans</span><span class="g-ab">TEN</span></b></div><span class="g-sc">20</span></div>
+        <img class="mt-lg away" src="https://a.espncdn.com/i/teamlogos/nfl/500/phi.png" alt="" loading="lazy">
+        <div class="mt-side away">
+          <span class="mt-num">24</span>
+          <span class="mt-nm"><b>Eagles</b> <small>1-0</small></span>
+        </div>
+        <span class="mt-at">@</span>
+        
+        
+        <img class="mt-lg home" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ten.png" alt="" loading="lazy">
+        <div class="mt-side home lost">
+          <span class="mt-num">20</span>
+          <span class="mt-nm"><b>Titans</b> <small>0-1</small></span>
+        </div>
+        
+        
       </div>
-      <div class="g-sub"><span>Sun Sep 20 · 1:00 PM ET</span><a class="gc-link" href="../game.html?d=2026/week-02.json&amp;g=2026_02_PHI_TEN">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      <div class="g-final">
-        <span class="gf-pick ok">Favorite won</span>
-        </div>
-      
-      <div class="wp" style="--ac:#337076;--hc:#d50a0a">
-        <div class="wp-src">Vegas odds</div>
-        <div class="wp-head">
-          <span class="logo" style="background:#004C54"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/phi.png" alt="PHI" width="24" height="24" loading="lazy"></span><span class="wp-call">Eagles 73%</span><span class="wp-why">to win</span>
-        </div>
-        <div class="wp-bar" role="img" aria-label="PHI 73%, TEN 27%">
-          <span class="wp-a" style="width:73%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:41%;width:18%"></i>
-        </div>
-        <div class="wp-ends"><span>PHI 73%</span><span>27% TEN</span></div>
-        <div class="wp-meta">
-          <span>Vegas PHI -7.0 &middot; O/U 39.5</span>
-          <span title="Our model: power rank PHI 10 vs TEN 32, Elo 1545 vs 1379, plus home field">Our model: <b>Eagles 72%</b></span>
-        </div>
+      <div class="mt-st">
+        <span class="mt-fin">Final</span>
+          <span class="gf-pick ok">Favorite won &middot; 73%</span>
+          
+        
       </div>
-      <div class="battles" style="--ac:#337076;--hc:#d50a0a">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span><span class="logo" style="background:#004C54"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/phi.png" alt="PHI" width="16" height="16" loading="lazy"></span><b>PHI</b><span class="bt-rk"><span class="rk-b sm rk2" title="PHI power rank: 10th of 32">10th</span></span></span><span><span class="bt-rk"><span class="rk-b sm rk4" title="TEN power rank: 32nd of 32">32nd</span></span><b>TEN</b><span class="logo" style="background:#4495D2"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ten.png" alt="TEN" width="16" height="16" loading="lazy"></span></span></div>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>PHI offense</span><span>TEN defense</span></div>
-            <div class="bt-row" title="PHI offense vs TEN defense: +5.3 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="PHI offense: 19th of 32">19th</span></span>
-  <span class="bt-v">+5.3</span>
-  <span class="tug"><span class="tug-o" style="width:83.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="TEN defense: 31st of 32">31st</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="PHI passing offense +0.9 vs TEN passing defense -6.2 EPA per 100 plays (vs league average): a +7.1 edge for the offense on about 35 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="PHI Pass O: 16th of 32">16th</span></span>
-  <span class="bt-v">+7.1</span>
-  <span class="tug"><span class="tug-o" style="width:75.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="TEN Pass D: 31st of 32">31st</span></span>
-</div><div class="bt-row" title="PHI running offense -0.6 vs TEN running defense -3.5 EPA per 100 plays (vs league average): a +2.9 edge for the offense on about 26 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="PHI Run O: 20th of 32">20th</span></span>
-  <span class="bt-v">+2.9</span>
-  <span class="tug"><span class="tug-o" style="width:58.1%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="TEN Run D: 27th of 32">27th</span></span>
-</div></div>
-        </details>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>PHI defense</span><span>TEN offense</span></div>
-            <div class="bt-row" title="TEN offense vs PHI defense: -11.6 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="PHI defense: 2nd of 32">2nd</span></span>
-  <span class="bt-v">+11.6</span>
-  <span class="tug"><span class="tug-o" style="width:95.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="TEN offense: 31st of 32">31st</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="TEN passing offense -7.3 vs PHI passing defense +5.6 EPA per 100 plays (vs league average): a -12.9 edge for the offense on about 38 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="PHI Pass D: 1st of 32">1st</span></span>
-  <span class="bt-v">+12.9</span>
-  <span class="tug"><span class="tug-o" style="width:95.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="TEN Pass O: 30th of 32">30th</span></span>
-</div><div class="bt-row" title="TEN running offense -5.3 vs PHI running defense +4.0 EPA per 100 plays (vs league average): a -9.3 edge for the offense on about 22 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="PHI Run D: 4th of 32">4th</span></span>
-  <span class="bt-v">+9.3</span>
-  <span class="tug"><span class="tug-o" style="width:71.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="TEN Run O: 32nd of 32">32nd</span></span>
-</div></div>
-        </details>
-        
-        <div class="battle extras"><div class="bt-row" title="Special teams PHI -0.6 vs TEN -1.4 EPA per 100 special-teams plays (about 12 per team per game)">
-  <span class="bt-lbl">Special teams</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="PHI special teams: 19th of 32">19th</span></span>
-  <span class="bt-v">+0.8</span>
-  <span class="tug"><span class="tug-o" style="width:56.5%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="TEN special teams: 28th of 32">28th</span></span>
-</div><div class="bt-row" title="Home field: +0.3 EPA per 100 plays for PHI, averaged over both teams&#39; plays (fitted from every game in the training window)">
-  <span class="bt-lbl">Home field</span>
-  <span class="bt-rk"></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.7%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"></span>
-</div></div>
-        <div class="bt-plays">Projected plays: PHI <b>61</b> (57% pass) &middot; TEN <b>61</b> (63% pass)</div>
-      </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody><tr class="teamrow" style="--tc:#337076;--tc2:#a5acaf;--tfg:#ffffff"><td><b>PHI</b></td><td class="num">+0.9</td><td class="num">-0.6</td><td class="num">+5.6</td><td class="num">+4.0</td><td class="num">-0.6</td></tr><tr class="teamrow" style="--tc:#4495d2;--tc2:#d50a0a;--tfg:#ffffff"><td><b>TEN</b></td><td class="num">-7.3</td><td class="num">-5.3</td><td class="num">-6.2</td><td class="num">-3.5</td><td class="num">-1.4</td></tr></tbody>
-        </table></div>
-      </details>
-    </article>
+    </a>
   
-    <article class="game" id="g-2026_02_JAX_DEN" data-gid="2026_02_JAX_DEN" data-away="JAX" data-home="DEN">
-      <div class="g-head">
+    
+    
+    
+    <a class="mt is-final" id="g-2026_02_JAX_DEN" data-gid="2026_02_JAX_DEN" href="../game.html?d=2026/week-02.json&amp;g=2026_02_JAX_DEN" style="--ac:#006778;--hc:#fb4f14">
+      <div class="mt-main">
         
         
-        <div class="g-team away tm-open lost" style="--tc:#006778;--tc2:#595959;--tfg:#ffffff" data-tm="JAX"><span class="logo" style="background:#006778"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/jax.png" alt="JAX" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Jaguars</span><span class="g-ab">JAX</span></b></div><span class="g-sc">13</span></div>
-        <div class="g-at"><span class="g-fin">FINAL</span></div>
-        <div class="g-team home tm-open" style="--tc:#334e69;--tc2:#fb4f14;--tfg:#ffffff" data-tm="DEN"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/den.png" alt="DEN" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Broncos</span><span class="g-ab">DEN</span></b></div><span class="g-sc">20</span></div>
+        <img class="mt-lg away" src="https://a.espncdn.com/i/teamlogos/nfl/500/jax.png" alt="" loading="lazy">
+        <div class="mt-side away lost">
+          <span class="mt-num">13</span>
+          <span class="mt-nm"><b>Jaguars</b> <small>1-0</small></span>
+        </div>
+        <span class="mt-at">@</span>
+        
+        
+        <img class="mt-lg home" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/den.png" alt="" loading="lazy">
+        <div class="mt-side home">
+          <span class="mt-num">20</span>
+          <span class="mt-nm"><b>Broncos</b> <small>0-1</small></span>
+        </div>
+        
+        
       </div>
-      <div class="g-sub"><span>Sun Sep 20 · 4:05 PM ET</span><a class="gc-link" href="../game.html?d=2026/week-02.json&amp;g=2026_02_JAX_DEN">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      <div class="g-final">
-        <span class="gf-pick ok">Favorite won</span>
-        </div>
-      
-      <div class="wp" style="--ac:#006778;--hc:#fb4f14">
-        <div class="wp-src">Vegas odds</div>
-        <div class="wp-head">
-          <span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/den.png" alt="DEN" width="24" height="24" loading="lazy"></span><span class="wp-call">Broncos 59%</span><span class="wp-why">to win</span>
-        </div>
-        <div class="wp-bar" role="img" aria-label="JAX 41%, DEN 59%">
-          <span class="wp-a" style="width:41%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:41%;width:18%"></i>
-        </div>
-        <div class="wp-ends"><span>JAX 41%</span><span>59% DEN</span></div>
-        <div class="wp-meta">
-          <span>Vegas DEN -2.5 &middot; O/U 45.5</span>
-          <span title="Our model: power rank JAX 3 vs DEN 16, Elo 1580 vs 1546, plus home field">Our model: <b>tossup</b> (Jaguars 55%)</span>
-        </div>
+      <div class="mt-st">
+        <span class="mt-fin">Final</span>
+          <span class="gf-pick ok">Favorite won &middot; 59%</span>
+          
+        
       </div>
-      <div class="battles" style="--ac:#006778;--hc:#fb4f14">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span><span class="logo" style="background:#006778"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/jax.png" alt="JAX" width="16" height="16" loading="lazy"></span><b>JAX</b><span class="bt-rk"><span class="rk-b sm rk1" title="JAX power rank: 3rd of 32">3rd</span></span></span><span><span class="bt-rk"><span class="rk-b sm rk2" title="DEN power rank: 16th of 32">16th</span></span><b>DEN</b><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/den.png" alt="DEN" width="16" height="16" loading="lazy"></span></span></div>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>JAX offense</span><span>DEN defense</span></div>
-            <div class="bt-row" title="JAX offense vs DEN defense: +3.2 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="JAX offense: 11th of 32">11th</span></span>
-  <span class="bt-v">+3.2</span>
-  <span class="tug"><span class="tug-o" style="width:70.6%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="DEN defense: 15th of 32">15th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="JAX passing offense +3.6 vs DEN passing defense +2.7 EPA per 100 plays (vs league average): a +0.9 edge for the offense on about 36 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="JAX Pass O: 11th of 32">11th</span></span>
-  <span class="bt-v">+0.9</span>
-  <span class="tug"><span class="tug-o" style="width:53.6%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="DEN Pass D: 9th of 32">9th</span></span>
-</div><div class="bt-row" title="JAX running offense +3.5 vs DEN running defense -2.8 EPA per 100 plays (vs league average): a +6.3 edge for the offense on about 25 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="JAX Run O: 8th of 32">8th</span></span>
-  <span class="bt-v">+6.3</span>
-  <span class="tug"><span class="tug-o" style="width:66.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="DEN Run D: 24th of 32">24th</span></span>
-</div></div>
-        </details>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>JAX defense</span><span>DEN offense</span></div>
-            <div class="bt-row" title="DEN offense vs JAX defense: -3.7 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="JAX defense: 4th of 32">4th</span></span>
-  <span class="bt-v">+3.7</span>
-  <span class="tug"><span class="tug-o" style="width:74.2%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="DEN offense: 20th of 32">20th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="DEN passing offense -0.2 vs JAX passing defense +4.4 EPA per 100 plays (vs league average): a -4.7 edge for the offense on about 38 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="JAX Pass D: 2nd of 32">2nd</span></span>
-  <span class="bt-v">+4.7</span>
-  <span class="tug"><span class="tug-o" style="width:68.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="DEN Pass O: 19th of 32">19th</span></span>
-</div><div class="bt-row" title="DEN running offense +0.2 vs JAX running defense +2.4 EPA per 100 plays (vs league average): a -2.2 edge for the offense on about 23 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="JAX Run D: 9th of 32">9th</span></span>
-  <span class="bt-v">+2.2</span>
-  <span class="tug"><span class="tug-o" style="width:55.3%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="DEN Run O: 15th of 32">15th</span></span>
-</div></div>
-        </details>
-        
-        <div class="battle extras"><div class="bt-row" title="Special teams JAX -0.4 vs DEN -0.2 EPA per 100 special-teams plays (about 12 per team per game)">
-  <span class="bt-lbl">Special teams</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="JAX special teams: 17th of 32">17th</span></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:48.4%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="DEN special teams: 15th of 32">15th</span></span>
-</div><div class="bt-row" title="Home field: +0.3 EPA per 100 plays for JAX, averaged over both teams&#39; plays (fitted from every game in the training window)">
-  <span class="bt-lbl">Home field</span>
-  <span class="bt-rk"></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.7%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"></span>
-</div></div>
-        <div class="bt-plays">Projected plays: JAX <b>61</b> (59% pass) &middot; DEN <b>61</b> (62% pass)</div>
-      </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody><tr class="teamrow" style="--tc:#006778;--tc2:#595959;--tfg:#ffffff"><td><b>JAX</b></td><td class="num">+3.6</td><td class="num">+3.5</td><td class="num">+4.4</td><td class="num">+2.4</td><td class="num">-0.4</td></tr><tr class="teamrow" style="--tc:#334e69;--tc2:#fb4f14;--tfg:#ffffff"><td><b>DEN</b></td><td class="num">-0.2</td><td class="num">+0.2</td><td class="num">+2.7</td><td class="num">-2.8</td><td class="num">-0.2</td></tr></tbody>
-        </table></div>
-      </details>
-    </article>
+    </a>
   
-    <article class="game" id="g-2026_02_LV_LAC" data-gid="2026_02_LV_LAC" data-away="LV" data-home="LAC">
-      <div class="g-head">
+    
+    
+    
+    <a class="mt is-final" id="g-2026_02_LV_LAC" data-gid="2026_02_LV_LAC" href="../game.html?d=2026/week-02.json&amp;g=2026_02_LV_LAC" style="--ac:#595959;--hc:#007bc7">
+      <div class="mt-main">
         
         
-        <div class="g-team away tm-open" style="--tc:#595959;--tc2:#a5acaf;--tfg:#ffffff" data-tm="LV"><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/lv.png" alt="LV" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Raiders</span><span class="g-ab">LV</span></b></div><span class="g-sc">26</span></div>
-        <div class="g-at"><span class="g-fin">FINAL</span></div>
-        <div class="g-team home tm-open lost" style="--tc:#007bc7;--tc2:#ffc20e;--tfg:#ffffff" data-tm="LAC"><span class="logo" style="background:#007BC7"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lac.png" alt="LAC" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Chargers</span><span class="g-ab">LAC</span></b></div><span class="g-sc">14</span></div>
-      </div>
-      <div class="g-sub"><span>Sun Sep 20 · 4:05 PM ET</span><a class="gc-link" href="../game.html?d=2026/week-02.json&amp;g=2026_02_LV_LAC">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      <div class="g-final">
-        <span class="gf-pick miss">Upset &middot; a 28% chance</span></div>
-      
-      <div class="wp" style="--ac:#595959;--hc:#007bc7">
-        <div class="wp-src">Vegas odds</div>
-        <div class="wp-head">
-          <span class="logo" style="background:#007BC7"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lac.png" alt="LAC" width="24" height="24" loading="lazy"></span><span class="wp-call">Chargers 72%</span><span class="wp-why">to win</span>
+        <img class="mt-lg away" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/lv.png" alt="" loading="lazy">
+        <div class="mt-side away">
+          <span class="mt-num">26</span>
+          <span class="mt-nm"><b>Raiders</b> <small>1-0</small></span>
         </div>
-        <div class="wp-bar" role="img" aria-label="LV 28%, LAC 72%">
-          <span class="wp-a" style="width:28%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:41%;width:18%"></i>
+        <span class="mt-at">@</span>
+        
+        
+        <img class="mt-lg home" src="https://a.espncdn.com/i/teamlogos/nfl/500/lac.png" alt="" loading="lazy">
+        <div class="mt-side home lost">
+          <span class="mt-num">14</span>
+          <span class="mt-nm"><b>Chargers</b> <small>0-1</small></span>
         </div>
-        <div class="wp-ends"><span>LV 28%</span><span>72% LAC</span></div>
-        <div class="wp-meta">
-          <span>Vegas LAC -6.5 &middot; O/U 43.5</span>
-          <span title="Our model: power rank LV 24 vs LAC 27, Elo 1430 vs 1486, plus home field">Our model: <b>Chargers 60%</b></span>
-        </div>
+        
+        
       </div>
-      <div class="battles" style="--ac:#595959;--hc:#007bc7">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span><span class="logo" style="background:#000000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/lv.png" alt="LV" width="16" height="16" loading="lazy"></span><b>LV</b><span class="bt-rk"><span class="rk-b sm rk3" title="LV power rank: 24th of 32">24th</span></span></span><span><span class="bt-rk"><span class="rk-b sm rk4" title="LAC power rank: 27th of 32">27th</span></span><b>LAC</b><span class="logo" style="background:#007BC7"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/lac.png" alt="LAC" width="16" height="16" loading="lazy"></span></span></div>
+      <div class="mt-st">
+        <span class="mt-fin">Final</span>
+          <span class="gf-pick miss">Upset &middot; a 28% chance</span>
         
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>LV offense</span><span>LAC defense</span></div>
-            <div class="bt-row" title="LV offense vs LAC defense: -4.9 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="LV offense: 28th of 32">28th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:18.4%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+4.9</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="LAC defense: 13th of 32">13th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="LV passing offense -4.4 vs LAC passing defense +1.4 EPA per 100 plays (vs league average): a -5.8 edge for the offense on about 36 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="LV Pass O: 26th of 32">26th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:27.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+5.8</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="LAC Pass D: 11th of 32">11th</span></span>
-</div><div class="bt-row" title="LV running offense -4.0 vs LAC running defense -0.2 EPA per 100 plays (vs league average): a -3.7 edge for the offense on about 24 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="LV Run O: 26th of 32">26th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:40.5%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+3.7</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="LAC Run D: 18th of 32">18th</span></span>
-</div></div>
-        </details>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>LV defense</span><span>LAC offense</span></div>
-            <div class="bt-row" title="LAC offense vs LV defense: -4.5 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="LV defense: 9th of 32">9th</span></span>
-  <span class="bt-v">+4.5</span>
-  <span class="tug"><span class="tug-o" style="width:79.1%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="LAC offense: 24th of 32">24th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="LAC passing offense -3.4 vs LV passing defense +1.1 EPA per 100 plays (vs league average): a -4.5 edge for the offense on about 38 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="LV Pass D: 16th of 32">16th</span></span>
-  <span class="bt-v">+4.5</span>
-  <span class="tug"><span class="tug-o" style="width:68.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="LAC Pass O: 23rd of 32">23rd</span></span>
-</div><div class="bt-row" title="LAC running offense -2.1 vs LV running defense +2.3 EPA per 100 plays (vs league average): a -4.4 edge for the offense on about 24 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="LV Run D: 10th of 32">10th</span></span>
-  <span class="bt-v">+4.4</span>
-  <span class="tug"><span class="tug-o" style="width:61.1%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="LAC Run O: 23rd of 32">23rd</span></span>
-</div></div>
-        </details>
-        
-        <div class="battle extras"><div class="bt-row" title="Special teams LV -0.7 vs LAC -2.3 EPA per 100 special-teams plays (about 12 per team per game)">
-  <span class="bt-lbl">Special teams</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="LV special teams: 20th of 32">20th</span></span>
-  <span class="bt-v">+1.6</span>
-  <span class="tug"><span class="tug-o" style="width:63.7%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="LAC special teams: 32nd of 32">32nd</span></span>
-</div><div class="bt-row" title="Home field: +0.3 EPA per 100 plays for LV, averaged over both teams&#39; plays (fitted from every game in the training window)">
-  <span class="bt-lbl">Home field</span>
-  <span class="bt-rk"></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.7%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"></span>
-</div></div>
-        <div class="bt-plays">Projected plays: LV <b>61</b> (60% pass) &middot; LAC <b>62</b> (61% pass)</div>
       </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody><tr class="teamrow" style="--tc:#595959;--tc2:#a5acaf;--tfg:#ffffff"><td><b>LV</b></td><td class="num">-4.4</td><td class="num">-4.0</td><td class="num">+1.1</td><td class="num">+2.3</td><td class="num">-0.7</td></tr><tr class="teamrow" style="--tc:#007bc7;--tc2:#ffc20e;--tfg:#ffffff"><td><b>LAC</b></td><td class="num">-3.4</td><td class="num">-2.1</td><td class="num">+1.4</td><td class="num">-0.2</td><td class="num">-2.3</td></tr></tbody>
-        </table></div>
-      </details>
-    </article>
+    </a>
   
-    <article class="game" id="g-2026_02_SEA_ARI" data-gid="2026_02_SEA_ARI" data-away="SEA" data-home="ARI">
-      <div class="g-head">
+    
+    
+    
+    <a class="mt is-final" id="g-2026_02_SEA_ARI" data-gid="2026_02_SEA_ARI" href="../game.html?d=2026/week-02.json&amp;g=2026_02_SEA_ARI" style="--ac:#334e69;--hc:#97233f">
+      <div class="mt-main">
         
         
-        <div class="g-team away tm-open" style="--tc:#334e69;--tc2:#69be28;--tfg:#ffffff" data-tm="SEA"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/sea.png" alt="SEA" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Seahawks</span><span class="g-ab">SEA</span></b></div><span class="g-sc">31</span></div>
-        <div class="g-at"><span class="g-fin">FINAL</span></div>
-        <div class="g-team home tm-open lost" style="--tc:#97233f;--tc2:#595959;--tfg:#ffffff" data-tm="ARI"><span class="logo" style="background:#97233F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ari.png" alt="ARI" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Cardinals</span><span class="g-ab">ARI</span></b></div><span class="g-sc">7</span></div>
+        <img class="mt-lg away" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/sea.png" alt="" loading="lazy">
+        <div class="mt-side away">
+          <span class="mt-num">31</span>
+          <span class="mt-nm"><b>Seahawks</b> <small>1-0</small></span>
+        </div>
+        <span class="mt-at">@</span>
+        
+        
+        <img class="mt-lg home" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ari.png" alt="" loading="lazy">
+        <div class="mt-side home lost">
+          <span class="mt-num">7</span>
+          <span class="mt-nm"><b>Cardinals</b> <small>1-0</small></span>
+        </div>
+        
+        
       </div>
-      <div class="g-sub"><span>Sun Sep 20 · 4:25 PM ET</span><a class="gc-link" href="../game.html?d=2026/week-02.json&amp;g=2026_02_SEA_ARI">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      <div class="g-final">
-        <span class="gf-pick ok">Favorite won</span>
-        </div>
-      
-      <div class="wp" style="--ac:#334e69;--hc:#97233f">
-        <div class="wp-src">Vegas odds</div>
-        <div class="wp-head">
-          <span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/sea.png" alt="SEA" width="24" height="24" loading="lazy"></span><span class="wp-call">Seahawks 62%</span><span class="wp-why">to win</span>
-        </div>
-        <div class="wp-bar" role="img" aria-label="SEA 62%, ARI 38%">
-          <span class="wp-a" style="width:62%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:41%;width:18%"></i>
-        </div>
-        <div class="wp-ends"><span>SEA 62%</span><span>38% ARI</span></div>
-        <div class="wp-meta">
-          <span>Vegas SEA -3.5 &middot; O/U 40.5</span>
-          <span title="Our model: power rank SEA 1 vs ARI 23, Elo 1644 vs 1462, plus home field">Our model: <b>Seahawks 73%</b></span>
-        </div>
+      <div class="mt-st">
+        <span class="mt-fin">Final</span>
+          <span class="gf-pick ok">Favorite won &middot; 62%</span>
+          
+        
       </div>
-      <div class="battles" style="--ac:#334e69;--hc:#97233f">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/sea.png" alt="SEA" width="16" height="16" loading="lazy"></span><b>SEA</b><span class="bt-rk"><span class="rk-b sm rk1" title="SEA power rank: 1st of 32">1st</span></span></span><span><span class="bt-rk"><span class="rk-b sm rk3" title="ARI power rank: 23rd of 32">23rd</span></span><b>ARI</b><span class="logo" style="background:#97233F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ari.png" alt="ARI" width="16" height="16" loading="lazy"></span></span></div>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>SEA offense</span><span>ARI defense</span></div>
-            <div class="bt-row" title="SEA offense vs ARI defense: +2.2 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="SEA offense: 13th of 32">13th</span></span>
-  <span class="bt-v">+2.2</span>
-  <span class="tug"><span class="tug-o" style="width:64.3%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="ARI defense: 19th of 32">19th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="SEA passing offense +3.9 vs ARI passing defense -2.1 EPA per 100 plays (vs league average): a +6.0 edge for the offense on about 33 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="SEA Pass O: 10th of 32">10th</span></span>
-  <span class="bt-v">+6.0</span>
-  <span class="tug"><span class="tug-o" style="width:70.7%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="ARI Pass D: 23rd of 32">23rd</span></span>
-</div><div class="bt-row" title="SEA running offense -1.0 vs ARI running defense +1.2 EPA per 100 plays (vs league average): a -2.1 edge for the offense on about 28 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="SEA Run O: 21st of 32">21st</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:43.7%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+2.1</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="ARI Run D: 13th of 32">13th</span></span>
-</div></div>
-        </details>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>SEA defense</span><span>ARI offense</span></div>
-            <div class="bt-row" title="ARI offense vs SEA defense: -5.7 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="SEA defense: 1st of 32">1st</span></span>
-  <span class="bt-v">+5.7</span>
-  <span class="tug"><span class="tug-o" style="width:87.2%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="ARI offense: 16th of 32">16th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="ARI passing offense +3.1 vs SEA passing defense +4.1 EPA per 100 plays (vs league average): a -1.0 edge for the offense on about 40 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="SEA Pass D: 5th of 32">5th</span></span>
-  <span class="bt-v">+1.0</span>
-  <span class="tug"><span class="tug-o" style="width:54.4%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="ARI Pass O: 13th of 32">13th</span></span>
-</div><div class="bt-row" title="ARI running offense -2.1 vs SEA running defense +11.9 EPA per 100 plays (vs league average): a -14.0 edge for the offense on about 22 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="SEA Run D: 1st of 32">1st</span></span>
-  <span class="bt-v">+14.0</span>
-  <span class="tug"><span class="tug-o" style="width:82.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="ARI Run O: 24th of 32">24th</span></span>
-</div></div>
-        </details>
-        
-        <div class="battle extras"><div class="bt-row" title="Special teams SEA +4.2 vs ARI -1.2 EPA per 100 special-teams plays (about 12 per team per game)">
-  <span class="bt-lbl">Special teams</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="SEA special teams: 2nd of 32">2nd</span></span>
-  <span class="bt-v">+5.4</span>
-  <span class="tug"><span class="tug-o" style="width:95.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="ARI special teams: 25th of 32">25th</span></span>
-</div><div class="bt-row" title="Home field: +0.3 EPA per 100 plays for SEA, averaged over both teams&#39; plays (fitted from every game in the training window)">
-  <span class="bt-lbl">Home field</span>
-  <span class="bt-rk"></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"></span>
-</div></div>
-        <div class="bt-plays">Projected plays: SEA <b>60</b> (54% pass) &middot; ARI <b>62</b> (64% pass)</div>
-      </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody><tr class="teamrow" style="--tc:#334e69;--tc2:#69be28;--tfg:#ffffff"><td><b>SEA</b></td><td class="num">+3.9</td><td class="num">-1.0</td><td class="num">+4.1</td><td class="num">+11.9</td><td class="num">+4.2</td></tr><tr class="teamrow" style="--tc:#97233f;--tc2:#595959;--tfg:#ffffff"><td><b>ARI</b></td><td class="num">+3.1</td><td class="num">-2.1</td><td class="num">-2.1</td><td class="num">+1.2</td><td class="num">-1.2</td></tr></tbody>
-        </table></div>
-      </details>
-    </article>
+    </a>
   
-    <article class="game" id="g-2026_02_WAS_DAL" data-gid="2026_02_WAS_DAL" data-away="WAS" data-home="DAL">
-      <div class="g-head">
+    
+    
+    
+    <a class="mt is-final" id="g-2026_02_WAS_DAL" data-gid="2026_02_WAS_DAL" href="../game.html?d=2026/week-02.json&amp;g=2026_02_WAS_DAL" style="--ac:#7b4343;--hc:#b0b7bc">
+      <div class="mt-main">
         
         
-        <div class="g-team away tm-open lost" style="--tc:#7b4343;--tc2:#ffb612;--tfg:#ffffff" data-tm="WAS"><span class="logo" style="background:#5A1414"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/wsh.png" alt="WAS" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Commanders</span><span class="g-ab">WAS</span></b></div><span class="g-sc">20</span></div>
-        <div class="g-at"><span class="g-fin">FINAL</span></div>
-        <div class="g-team home tm-open" style="--tc:#334e69;--tc2:#b0b7bc;--tfg:#ffffff" data-tm="DAL"><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/dal.png" alt="DAL" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Cowboys</span><span class="g-ab">DAL</span></b></div><span class="g-sc">37</span></div>
+        <img class="mt-lg away" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/wsh.png" alt="" loading="lazy">
+        <div class="mt-side away lost">
+          <span class="mt-num">20</span>
+          <span class="mt-nm"><b>Commanders</b> <small>0-1</small></span>
+        </div>
+        <span class="mt-at">@</span>
+        
+        
+        <img class="mt-lg home" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/dal.png" alt="" loading="lazy">
+        <div class="mt-side home">
+          <span class="mt-num">37</span>
+          <span class="mt-nm"><b>Cowboys</b> <small>0-1</small></span>
+        </div>
+        
+        
       </div>
-      <div class="g-sub"><span>Sun Sep 20 · 4:25 PM ET</span><a class="gc-link" href="../game.html?d=2026/week-02.json&amp;g=2026_02_WAS_DAL">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      <div class="g-final">
-        <span class="gf-pick ok">Favorite won</span>
-        </div>
-      
-      <div class="wp" style="--ac:#7b4343;--hc:#b0b7bc">
-        <div class="wp-src">Vegas odds</div>
-        <div class="wp-head">
-          <span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/dal.png" alt="DAL" width="24" height="24" loading="lazy"></span><span class="wp-call">Cowboys 62%</span><span class="wp-why">to win</span>
-        </div>
-        <div class="wp-bar" role="img" aria-label="WAS 38%, DAL 62%">
-          <span class="wp-a" style="width:38%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:41%;width:18%"></i>
-        </div>
-        <div class="wp-ends"><span>WAS 38%</span><span>62% DAL</span></div>
-        <div class="wp-meta">
-          <span>Vegas DAL -3.5 &middot; O/U 51.5</span>
-          <span title="Our model: power rank WAS 18 vs DAL 25, Elo 1462 vs 1449, plus home field">Our model: <b>tossup</b> (Cowboys 50%)</span>
-        </div>
+      <div class="mt-st">
+        <span class="mt-fin">Final</span>
+          <span class="gf-pick ok">Favorite won &middot; 62%</span>
+          
+        
       </div>
-      <div class="battles" style="--ac:#7b4343;--hc:#b0b7bc">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span><span class="logo" style="background:#5A1414"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/wsh.png" alt="WAS" width="16" height="16" loading="lazy"></span><b>WAS</b><span class="bt-rk"><span class="rk-b sm rk3" title="WAS power rank: 18th of 32">18th</span></span></span><span><span class="bt-rk"><span class="rk-b sm rk4" title="DAL power rank: 25th of 32">25th</span></span><b>DAL</b><span class="logo" style="background:#002244"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/dal.png" alt="DAL" width="16" height="16" loading="lazy"></span></span></div>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>WAS offense</span><span>DAL defense</span></div>
-            <div class="bt-row" title="WAS offense vs DAL defense: +9.0 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="WAS offense: 17th of 32">17th</span></span>
-  <span class="bt-v">+9.0</span>
-  <span class="tug"><span class="tug-o" style="width:95.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="DAL defense: 32nd of 32">32nd</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="WAS passing offense +0.4 vs DAL passing defense -9.8 EPA per 100 plays (vs league average): a +10.2 edge for the offense on about 36 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="WAS Pass O: 18th of 32">18th</span></span>
-  <span class="bt-v">+10.2</span>
-  <span class="tug"><span class="tug-o" style="width:88.2%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="DAL Pass D: 32nd of 32">32nd</span></span>
-</div><div class="bt-row" title="WAS running offense +1.0 vs DAL running defense -6.2 EPA per 100 plays (vs league average): a +7.3 edge for the offense on about 25 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="WAS Run O: 13th of 32">13th</span></span>
-  <span class="bt-v">+7.3</span>
-  <span class="tug"><span class="tug-o" style="width:69.5%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="DAL Run D: 31st of 32">31st</span></span>
-</div></div>
-        </details>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>WAS defense</span><span>DAL offense</span></div>
-            <div class="bt-row" title="DAL offense vs WAS defense: +8.9 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="WAS defense: 30th of 32">30th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:5.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+8.9</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="DAL offense: 6th of 32">6th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="DAL passing offense +7.3 vs WAS passing defense -4.8 EPA per 100 plays (vs league average): a +12.1 edge for the offense on about 37 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="WAS Pass D: 30th of 32">30th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:5.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+12.1</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="DAL Pass O: 5th of 32">5th</span></span>
-</div><div class="bt-row" title="DAL running offense +0.8 vs WAS running defense -3.2 EPA per 100 plays (vs league average): a +4.0 edge for the offense on about 24 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="WAS Run D: 26th of 32">26th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:39.6%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+4.0</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="DAL Run O: 14th of 32">14th</span></span>
-</div></div>
-        </details>
-        
-        <div class="battle extras"><div class="bt-row" title="Special teams WAS +2.6 vs DAL -0.1 EPA per 100 special-teams plays (about 12 per team per game)">
-  <span class="bt-lbl">Special teams</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="WAS special teams: 3rd of 32">3rd</span></span>
-  <span class="bt-v">+2.7</span>
-  <span class="tug"><span class="tug-o" style="width:73.3%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="DAL special teams: 12th of 32">12th</span></span>
-</div><div class="bt-row" title="Home field: +0.3 EPA per 100 plays for WAS, averaged over both teams&#39; plays (fitted from every game in the training window)">
-  <span class="bt-lbl">Home field</span>
-  <span class="bt-rk"></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"></span>
-</div></div>
-        <div class="bt-plays">Projected plays: WAS <b>61</b> (58% pass) &middot; DAL <b>62</b> (61% pass)</div>
-      </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody><tr class="teamrow" style="--tc:#7b4343;--tc2:#ffb612;--tfg:#ffffff"><td><b>WAS</b></td><td class="num">+0.4</td><td class="num">+1.0</td><td class="num">-4.8</td><td class="num">-3.2</td><td class="num">+2.6</td></tr><tr class="teamrow" style="--tc:#334e69;--tc2:#b0b7bc;--tfg:#ffffff"><td><b>DAL</b></td><td class="num">+7.3</td><td class="num">+0.8</td><td class="num">-9.8</td><td class="num">-6.2</td><td class="num">-0.1</td></tr></tbody>
-        </table></div>
-      </details>
-    </article>
+    </a>
   
-    <article class="game" id="g-2026_02_MIA_SF" data-gid="2026_02_MIA_SF" data-away="MIA" data-home="SF">
-      <div class="g-head">
+    
+    
+    
+    <a class="mt is-final" id="g-2026_02_MIA_SF" data-gid="2026_02_MIA_SF" href="../game.html?d=2026/week-02.json&amp;g=2026_02_MIA_SF" style="--ac:#008e97;--hc:#aa0000">
+      <div class="mt-main">
         
         
-        <div class="g-team away tm-open lost" style="--tc:#008e97;--tc2:#f58220;--tfg:#ffffff" data-tm="MIA"><span class="logo" style="background:#008E97"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/mia.png" alt="MIA" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Dolphins</span><span class="g-ab">MIA</span></b></div><span class="g-sc">13</span></div>
-        <div class="g-at"><span class="g-fin">FINAL</span></div>
-        <div class="g-team home tm-open" style="--tc:#aa0000;--tc2:#b3995d;--tfg:#ffffff" data-tm="SF"><span class="logo" style="background:#AA0000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/sf.png" alt="SF" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">49ers</span><span class="g-ab">SF</span></b></div><span class="g-sc">35</span></div>
+        <img class="mt-lg away" src="https://a.espncdn.com/i/teamlogos/nfl/500/mia.png" alt="" loading="lazy">
+        <div class="mt-side away lost">
+          <span class="mt-num">13</span>
+          <span class="mt-nm"><b>Dolphins</b> <small>0-1</small></span>
+        </div>
+        <span class="mt-at">@</span>
+        
+        
+        <img class="mt-lg home" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/sf.png" alt="" loading="lazy">
+        <div class="mt-side home">
+          <span class="mt-num">35</span>
+          <span class="mt-nm"><b>49ers</b> <small>1-0</small></span>
+        </div>
+        
+        
       </div>
-      <div class="g-sub"><span>Sun Sep 20 · 4:25 PM ET</span><a class="gc-link" href="../game.html?d=2026/week-02.json&amp;g=2026_02_MIA_SF">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      <div class="g-final">
-        <span class="gf-pick ok">Favorite won</span>
-        </div>
-      
-      <div class="wp" style="--ac:#008e97;--hc:#aa0000">
-        <div class="wp-src">Vegas odds</div>
-        <div class="wp-head">
-          <span class="logo" style="background:#AA0000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/sf.png" alt="SF" width="24" height="24" loading="lazy"></span><span class="wp-call">49ers 86%</span><span class="wp-why">to win</span>
-        </div>
-        <div class="wp-bar" role="img" aria-label="MIA 14%, SF 86%">
-          <span class="wp-a" style="width:14%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:41%;width:18%"></i>
-        </div>
-        <div class="wp-ends"><span>MIA 14%</span><span>86% SF</span></div>
-        <div class="wp-meta">
-          <span>Vegas SF -12.5 &middot; O/U 44.5</span>
-          <span title="Our model: power rank MIA 21 vs SF 5, Elo 1440 vs 1579, plus home field">Our model: <b>49ers 75%</b></span>
-        </div>
+      <div class="mt-st">
+        <span class="mt-fin">Final</span>
+          <span class="gf-pick ok">Favorite won &middot; 86%</span>
+          
+        
       </div>
-      <div class="battles" style="--ac:#008e97;--hc:#aa0000">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span><span class="logo" style="background:#008E97"><img src="https://a.espncdn.com/i/teamlogos/nfl/500/mia.png" alt="MIA" width="16" height="16" loading="lazy"></span><b>MIA</b><span class="bt-rk"><span class="rk-b sm rk3" title="MIA power rank: 21st of 32">21st</span></span></span><span><span class="bt-rk"><span class="rk-b sm rk1" title="SF power rank: 5th of 32">5th</span></span><b>SF</b><span class="logo" style="background:#AA0000"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/sf.png" alt="SF" width="16" height="16" loading="lazy"></span></span></div>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>MIA offense</span><span>SF defense</span></div>
-            <div class="bt-row" title="MIA offense vs SF defense: +2.6 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="MIA offense: 14th of 32">14th</span></span>
-  <span class="bt-v">+2.6</span>
-  <span class="tug"><span class="tug-o" style="width:66.7%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="SF defense: 20th of 32">20th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="MIA passing offense +2.8 vs SF passing defense -2.3 EPA per 100 plays (vs league average): a +5.2 edge for the offense on about 36 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="MIA Pass O: 14th of 32">14th</span></span>
-  <span class="bt-v">+5.2</span>
-  <span class="tug"><span class="tug-o" style="width:69.5%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="SF Pass D: 24th of 32">24th</span></span>
-</div><div class="bt-row" title="MIA running offense +0.1 vs SF running defense +1.1 EPA per 100 plays (vs league average): a -1.1 edge for the offense on about 24 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="MIA Run O: 16th of 32">16th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:47.2%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+1.1</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="SF Run D: 14th of 32">14th</span></span>
-</div></div>
-        </details>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>MIA defense</span><span>SF offense</span></div>
-            <div class="bt-row" title="SF offense vs MIA defense: +9.1 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="MIA defense: 29th of 32">29th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:5.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+9.1</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="SF offense: 4th of 32">4th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="SF passing offense +6.0 vs MIA passing defense -4.0 EPA per 100 plays (vs league average): a +10.0 edge for the offense on about 37 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="MIA Pass D: 28th of 32">28th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:11.3%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+10.0</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="SF Pass O: 8th of 32">8th</span></span>
-</div><div class="bt-row" title="SF running offense +4.4 vs MIA running defense -3.6 EPA per 100 plays (vs league average): a +7.9 edge for the offense on about 25 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="MIA Run D: 28th of 32">28th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:28.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+7.9</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="SF Run O: 2nd of 32">2nd</span></span>
-</div></div>
-        </details>
-        
-        <div class="battle extras"><div class="bt-row" title="Special teams MIA +0.5 vs SF +1.5 EPA per 100 special-teams plays (about 12 per team per game)">
-  <span class="bt-lbl">Special teams</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="MIA special teams: 10th of 32">10th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:41.1%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+1.0</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="SF special teams: 5th of 32">5th</span></span>
-</div><div class="bt-row" title="Home field: +0.3 EPA per 100 plays for MIA, averaged over both teams&#39; plays (fitted from every game in the training window)">
-  <span class="bt-lbl">Home field</span>
-  <span class="bt-rk"></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"></span>
-</div></div>
-        <div class="bt-plays">Projected plays: MIA <b>60</b> (59% pass) &middot; SF <b>62</b> (59% pass)</div>
-      </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody><tr class="teamrow" style="--tc:#008e97;--tc2:#f58220;--tfg:#ffffff"><td><b>MIA</b></td><td class="num">+2.8</td><td class="num">+0.1</td><td class="num">-4.0</td><td class="num">-3.6</td><td class="num">+0.5</td></tr><tr class="teamrow" style="--tc:#aa0000;--tc2:#b3995d;--tfg:#ffffff"><td><b>SF</b></td><td class="num">+6.0</td><td class="num">+4.4</td><td class="num">-2.3</td><td class="num">+1.1</td><td class="num">+1.5</td></tr></tbody>
-        </table></div>
-      </details>
-    </article>
+    </a>
   
-    <article class="game" id="g-2026_02_IND_KC" data-gid="2026_02_IND_KC" data-away="IND" data-home="KC">
-      <div class="g-head">
+    
+    
+    
+    <a class="mt is-final" id="g-2026_02_IND_KC" data-gid="2026_02_IND_KC" href="../game.html?d=2026/week-02.json&amp;g=2026_02_IND_KC" style="--ac:#33567f;--hc:#e31837">
+      <div class="mt-main">
         
         
-        <div class="g-team away tm-open lost" style="--tc:#33567f;--tc2:#a5acaf;--tfg:#ffffff" data-tm="IND"><span class="logo" style="background:#002C5F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ind.png" alt="IND" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Colts</span><span class="g-ab">IND</span></b></div><span class="g-sc">30</span></div>
-        <div class="g-at"><span class="g-fin">FINAL</span></div>
-        <div class="g-team home tm-open" style="--tc:#e31837;--tc2:#ffb612;--tfg:#ffffff" data-tm="KC"><span class="logo" style="background:#E31837"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/kc.png" alt="KC" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Chiefs</span><span class="g-ab">KC</span></b></div><span class="g-sc">33</span></div>
+        <img class="mt-lg away" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ind.png" alt="" loading="lazy">
+        <div class="mt-side away lost">
+          <span class="mt-num">30</span>
+          <span class="mt-nm"><b>Colts</b> <small>0-1</small></span>
+        </div>
+        <span class="mt-at">@</span>
+        
+        
+        <img class="mt-lg home" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/kc.png" alt="" loading="lazy">
+        <div class="mt-side home">
+          <span class="mt-num">33</span>
+          <span class="mt-nm"><b>Chiefs</b> <small>1-0</small></span>
+        </div>
+        
+        
       </div>
-      <div class="g-sub"><span>Sun Sep 20 · 8:20 PM ET</span><a class="gc-link" href="../game.html?d=2026/week-02.json&amp;g=2026_02_IND_KC">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      <div class="g-final">
-        <span class="gf-pick ok">Favorite won</span>
-        </div>
-      
-      <div class="wp" style="--ac:#33567f;--hc:#e31837">
-        <div class="wp-src">Vegas odds</div>
-        <div class="wp-head">
-          <span class="logo" style="background:#E31837"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/kc.png" alt="KC" width="24" height="24" loading="lazy"></span><span class="wp-call">Chiefs 70%</span><span class="wp-why">to win</span>
-        </div>
-        <div class="wp-bar" role="img" aria-label="IND 30%, KC 70%">
-          <span class="wp-a" style="width:30%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:41%;width:18%"></i>
-        </div>
-        <div class="wp-ends"><span>IND 30%</span><span>70% KC</span></div>
-        <div class="wp-meta">
-          <span>Vegas KC -6.0 &middot; O/U 46.5</span>
-          <span title="Our model: power rank IND 20 vs KC 9, Elo 1456 vs 1528, plus home field">Our model: <b>Chiefs 67%</b></span>
-        </div>
+      <div class="mt-st">
+        <span class="mt-fin">Final</span>
+          <span class="gf-pick ok">Favorite won &middot; 70%</span>
+          
+        
       </div>
-      <div class="battles" style="--ac:#33567f;--hc:#e31837">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span><span class="logo" style="background:#002C5F"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/ind.png" alt="IND" width="16" height="16" loading="lazy"></span><b>IND</b><span class="bt-rk"><span class="rk-b sm rk3" title="IND power rank: 20th of 32">20th</span></span></span><span><span class="bt-rk"><span class="rk-b sm rk2" title="KC power rank: 9th of 32">9th</span></span><b>KC</b><span class="logo" style="background:#E31837"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/kc.png" alt="KC" width="16" height="16" loading="lazy"></span></span></div>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>IND offense</span><span>KC defense</span></div>
-            <div class="bt-row" title="IND offense vs KC defense: -1.3 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="IND offense: 18th of 32">18th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:41.6%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+1.3</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="KC defense: 10th of 32">10th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="IND passing offense -1.9 vs KC passing defense +1.2 EPA per 100 plays (vs league average): a -3.1 edge for the offense on about 38 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="IND Pass O: 21st of 32">21st</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:37.6%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+3.1</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="KC Pass D: 12th of 32">12th</span></span>
-</div><div class="bt-row" title="IND running offense +3.8 vs KC running defense +2.1 EPA per 100 plays (vs league average): a +1.6 edge for the offense on about 23 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="IND Run O: 6th of 32">6th</span></span>
-  <span class="bt-v">+1.6</span>
-  <span class="tug"><span class="tug-o" style="width:54.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="KC Run D: 11th of 32">11th</span></span>
-</div></div>
-        </details>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>IND defense</span><span>KC offense</span></div>
-            <div class="bt-row" title="KC offense vs IND defense: +5.4 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="IND defense: 21st of 32">21st</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:15.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+5.4</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="KC offense: 8th of 32">8th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="KC passing offense +3.2 vs IND passing defense -3.6 EPA per 100 plays (vs league average): a +6.8 edge for the offense on about 38 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="IND Pass D: 26th of 32">26th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:22.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+6.8</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="KC Pass O: 12th of 32">12th</span></span>
-</div><div class="bt-row" title="KC running offense +5.6 vs IND running defense +2.5 EPA per 100 plays (vs league average): a +3.1 edge for the offense on about 24 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="IND Run D: 8th of 32">8th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:42.2%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+3.1</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="KC Run O: 1st of 32">1st</span></span>
-</div></div>
-        </details>
-        
-        <div class="battle extras"><div class="bt-row" title="Special teams IND -0.3 vs KC -0.8 EPA per 100 special-teams plays (about 12 per team per game)">
-  <span class="bt-lbl">Special teams</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="IND special teams: 16th of 32">16th</span></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:54.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="KC special teams: 21st of 32">21st</span></span>
-</div><div class="bt-row" title="Home field: +0.3 EPA per 100 plays for IND, averaged over both teams&#39; plays (fitted from every game in the training window)">
-  <span class="bt-lbl">Home field</span>
-  <span class="bt-rk"></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.6%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"></span>
-</div></div>
-        <div class="bt-plays">Projected plays: IND <b>61</b> (62% pass) &middot; KC <b>62</b> (61% pass)</div>
-      </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody><tr class="teamrow" style="--tc:#33567f;--tc2:#a5acaf;--tfg:#ffffff"><td><b>IND</b></td><td class="num">-1.9</td><td class="num">+3.8</td><td class="num">-3.6</td><td class="num">+2.5</td><td class="num">-0.3</td></tr><tr class="teamrow" style="--tc:#e31837;--tc2:#ffb612;--tfg:#ffffff"><td><b>KC</b></td><td class="num">+3.2</td><td class="num">+5.6</td><td class="num">+1.2</td><td class="num">+2.1</td><td class="num">-0.8</td></tr></tbody>
-        </table></div>
-      </details>
-    </article>
+    </a>
   
-    <article class="game" id="g-2026_02_NYG_LA" data-gid="2026_02_NYG_LA" data-away="NYG" data-home="LA">
-      <div class="g-head">
+    
+    
+    
+    <a class="mt is-final" id="g-2026_02_NYG_LA" data-gid="2026_02_NYG_LA" href="../game.html?d=2026/week-02.json&amp;g=2026_02_NYG_LA" style="--ac:#3c4e84;--hc:#ffd100">
+      <div class="mt-main">
         
         
-        <div class="g-team away tm-open lost" style="--tc:#3c4e84;--tc2:#a71930;--tfg:#ffffff" data-tm="NYG"><span class="logo" style="background:#0B2265"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/nyg.png" alt="NYG" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Giants</span><span class="g-ab">NYG</span></b></div><span class="g-sc">6</span></div>
-        <div class="g-at"><span class="g-fin">FINAL</span></div>
-        <div class="g-team home tm-open" style="--tc:#335da9;--tc2:#ffd100;--tfg:#ffffff" data-tm="LA"><span class="logo" style="background:#003594"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/lar.png" alt="LA" width="28" height="28" loading="lazy"></span><div class="g-id"><b><span class="g-nick">Rams</span><span class="g-ab">LA</span></b></div><span class="g-sc">28</span></div>
+        <img class="mt-lg away" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/nyg.png" alt="" loading="lazy">
+        <div class="mt-side away lost">
+          <span class="mt-num">6</span>
+          <span class="mt-nm"><b>Giants</b> <small>1-0</small></span>
+        </div>
+        <span class="mt-at">@</span>
+        
+        
+        <img class="mt-lg home" src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/lar.png" alt="" loading="lazy">
+        <div class="mt-side home">
+          <span class="mt-num">28</span>
+          <span class="mt-nm"><b>Rams</b> <small>0-1</small></span>
+        </div>
+        
+        
       </div>
-      <div class="g-sub"><span>Mon Sep 21 · 8:15 PM ET</span><a class="gc-link" href="../game.html?d=2026/week-02.json&amp;g=2026_02_NYG_LA">Gamecast &rsaquo;</a></div>
-      <div class="gc-live" hidden></div>
-      <div class="g-final">
-        <span class="gf-pick ok">Favorite won</span>
-        </div>
-      
-      <div class="wp" style="--ac:#3c4e84;--hc:#ffd100">
-        <div class="wp-src">Vegas odds</div>
-        <div class="wp-head">
-          <span class="logo" style="background:#003594"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/lar.png" alt="LA" width="24" height="24" loading="lazy"></span><span class="wp-call">Rams 72%</span><span class="wp-why">to win</span>
-        </div>
-        <div class="wp-bar" role="img" aria-label="NYG 28%, LA 72%">
-          <span class="wp-a" style="width:28%"></span><span class="wp-h"></span>
-          <i class="wp-zone" style="left:41%;width:18%"></i>
-        </div>
-        <div class="wp-ends"><span>NYG 28%</span><span>72% LA</span></div>
-        <div class="wp-meta">
-          <span>Vegas LA -6.5 &middot; O/U 47.5</span>
-          <span title="Our model: power rank NYG 14 vs LA 7, Elo 1474 vs 1547, plus home field">Our model: <b>Rams 65%</b></span>
-        </div>
+      <div class="mt-st">
+        <span class="mt-fin">Final</span>
+          <span class="gf-pick ok">Favorite won &middot; 72%</span>
+          
+        
       </div>
-      <div class="battles" style="--ac:#3c4e84;--hc:#ffd100">
-        <div class="bt-title">Who wins each battle <span class="bt-unit">&middot; EPA per 100 plays</span></div>
-        <div class="bt-teams"><span><span class="logo" style="background:#0B2265"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/nyg.png" alt="NYG" width="16" height="16" loading="lazy"></span><b>NYG</b><span class="bt-rk"><span class="rk-b sm rk2" title="NYG power rank: 14th of 32">14th</span></span></span><span><span class="bt-rk"><span class="rk-b sm rk1" title="LA power rank: 7th of 32">7th</span></span><b>LA</b><span class="logo" style="background:#003594"><img src="https://a.espncdn.com/i/teamlogos/nfl/500-dark/lar.png" alt="LA" width="16" height="16" loading="lazy"></span></span></div>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>NYG offense</span><span>LA defense</span></div>
-            <div class="bt-row" title="NYG offense vs LA defense: +3.7 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="NYG offense: 10th of 32">10th</span></span>
-  <span class="bt-v">+3.7</span>
-  <span class="tug"><span class="tug-o" style="width:74.4%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="LA defense: 16th of 32">16th</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="NYG passing offense +7.1 vs LA passing defense +1.2 EPA per 100 plays (vs league average): a +5.9 edge for the offense on about 36 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="NYG Pass O: 6th of 32">6th</span></span>
-  <span class="bt-v">+5.9</span>
-  <span class="tug"><span class="tug-o" style="width:72.5%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="LA Pass D: 13th of 32">13th</span></span>
-</div><div class="bt-row" title="NYG running offense -0.2 vs LA running defense -0.9 EPA per 100 plays (vs league average): a +0.7 edge for the offense on about 26 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="NYG Run O: 17th of 32">17th</span></span>
-  <span class="bt-v">+0.7</span>
-  <span class="tug"><span class="tug-o" style="width:51.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="LA Run D: 19th of 32">19th</span></span>
-</div></div>
-        </details>
-        
-        <details class="battle grp">
-          <summary>
-            <div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>NYG defense</span><span>LA offense</span></div>
-            <div class="bt-row" title="LA offense vs NYG defense: +7.6 EPA per 100 plays for the offense, the passing and running edges weighted by its projected dropbacks and runs">
-  <span class="bt-lbl">Total</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="NYG defense: 26th of 32">26th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:5.0%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+7.6</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="LA offense: 3rd of 32">3rd</span></span>
-</div>
-          </summary>
-          <div class="bt-units"><div class="bt-row" title="LA passing offense +6.8 vs NYG passing defense +1.0 EPA per 100 plays (vs league average): a +5.7 edge for the offense on about 37 projected dropbacks">
-  <span class="bt-lbl">Passing</span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="NYG Pass D: 17th of 32">17th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:27.7%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+5.7</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="LA Pass O: 7th of 32">7th</span></span>
-</div><div class="bt-row" title="LA running offense +4.3 vs NYG running defense -6.2 EPA per 100 plays (vs league average): a +10.5 edge for the offense on about 25 projected runs">
-  <span class="bt-lbl">Running</span>
-  <span class="bt-rk"><span class="rk-b sm rk4" title="NYG Run D: 30th of 32">30th</span></span>
-  <span class="bt-v"></span>
-  <span class="tug"><span class="tug-o" style="width:22.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r">+10.5</span>
-  <span class="bt-rk"><span class="rk-b sm rk1" title="LA Run O: 4th of 32">4th</span></span>
-</div></div>
-        </details>
-        
-        <div class="battle extras"><div class="bt-row" title="Special teams NYG +0.2 vs LA -0.4 EPA per 100 special-teams plays (about 12 per team per game)">
-  <span class="bt-lbl">Special teams</span>
-  <span class="bt-rk"><span class="rk-b sm rk2" title="NYG special teams: 11th of 32">11th</span></span>
-  <span class="bt-v">+0.6</span>
-  <span class="tug"><span class="tug-o" style="width:54.9%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"></span>
-  <span class="bt-rk"><span class="rk-b sm rk3" title="LA special teams: 18th of 32">18th</span></span>
-</div><div class="bt-row" title="Home field: +0.3 EPA per 100 plays for NYG, averaged over both teams&#39; plays (fitted from every game in the training window)">
-  <span class="bt-lbl">Home field</span>
-  <span class="bt-rk"></span>
-  <span class="bt-v"><i>even</i></span>
-  <span class="tug"><span class="tug-o" style="width:53.8%"></span><span class="tug-mid"></span></span>
-  <span class="bt-v r"><i>even</i></span>
-  <span class="bt-rk"></span>
-</div></div>
-        <div class="bt-plays">Projected plays: NYG <b>62</b> (58% pass) &middot; LA <b>61</b> (60% pass)</div>
-      </div>
-      <details><summary>Team ratings</summary>
-        <div class="scroll"><table>
-          <thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
-          <tbody><tr class="teamrow" style="--tc:#3c4e84;--tc2:#a71930;--tfg:#ffffff"><td><b>NYG</b></td><td class="num">+7.1</td><td class="num">-0.2</td><td class="num">+1.0</td><td class="num">-6.2</td><td class="num">+0.2</td></tr><tr class="teamrow" style="--tc:#335da9;--tc2:#ffd100;--tfg:#ffffff"><td><b>LA</b></td><td class="num">+6.8</td><td class="num">+4.3</td><td class="num">+1.2</td><td class="num">-0.9</td><td class="num">-0.4</td></tr></tbody>
-        </table></div>
-      </details>
-    </article>
+    </a>
   
   </div>
 </section>
@@ -9258,8 +7790,13 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   <div class="sec-head"><div><h2>The model</h2><p>How every number on this site is calculated. Blue values are filled in live from this build.</p></div></div>
   
   <div class="doc-layout">
-    <nav class="toc"></nav>
-    <article class="card card-pad doc"><p>This is an archived week. The model description, formulas and track record are on the current week's Model tab.</p></article>
+    <nav class="toc"><a href="#track-record">How often favorites win</a></nav>
+    <article class="card card-pad doc"><p>This is an archived week. The model description, formulas and track record are on the current week's Model tab.</p>
+      <h2 id="track-record">How often favorites win</h2>
+      <p>Market chances, 2019&ndash;2026. A well-calibrated forecast's favorites win about as often as their chance says; each season is scored with chances fit only on the seasons before it.</p>
+      <table class="trk"><thead><tr><th>Favorite's chance</th><th class="num">Games</th><th class="num">Expected</th><th class="num">Won</th><th class="num">2026</th></tr></thead>
+      <tbody><tr class="toss"><td>Tossup (under 59%)</td><td class="num">306</td><td class="num">55%</td><td class="num"><b>53%</b></td><td class="num">67% <small>of 3</small></td></tr><tr><td>59-64%</td><td class="num">705</td><td class="num">61%</td><td class="num"><b>58%</b></td><td class="num">75% <small>of 8</small></td></tr><tr><td>65-74%</td><td class="num">590</td><td class="num">70%</td><td class="num"><b>72%</b></td><td class="num">100% <small>of 3</small></td></tr><tr><td>75% or more</td><td class="num">369</td><td class="num">82%</td><td class="num"><b>84%</b></td><td class="num">50% <small>of 2</small></td></tr></tbody></table>
+    </article>
   </div>
 </section>
 </div></main>
@@ -9589,6 +8126,6 @@ window.nfleApplyScoring = () => applyScoring();
 })();
 </script>
 <script>window.NFLE_CFG = {"archive": true, "current": false, "data": "2026/week-02.json", "lookahead": 0, "root": "../", "season": 2026, "week": 2};</script>
-<script src="../assets/gamecast.js?v=cfef62420f" defer></script>
+<script src="../assets/gamecast.js?v=3ced9f32d4" defer></script>
 </body>
 </html>
