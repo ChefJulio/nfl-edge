@@ -302,7 +302,8 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   MAE check (tools/experiments.py) before shipping. Beneficiaries: Power ranks, battle bars, fantasy matchups.
 - **Proposed:** market-implied team ratings (fit to posted spreads/totals) for lookahead weeks and a Power "market
   view"; test vs actual margins and future closing lines.
-- **Rebuild the archive** after the share-normalization change (and after any future model change).
+- **Archive rebuilt 2026-10-13** (2021 - 2026 wk 4, 94 pages, current model + Matchups win chances / tossups / Elo;
+  archive commit b3b7183). Rebuild again after any future model or Matchups change.
 - **ESPN return estimates:** test as return-model features (est. weeks to return, surgery/tear/fracture) once
   enough 2026 injuries resolve (~midseason); owner wants them only as data-driven inputs, never as truth.
 - **Accuracy levers:** rookies / low-data priors (college production, preseason usage); expected fantasy points per
