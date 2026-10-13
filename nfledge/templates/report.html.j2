@@ -237,40 +237,8 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 .valbar { display: inline-flex; align-items: center; gap: 8px; justify-content: flex-end; }
 .valbar b { min-width: 42px; text-align: right; }
 
-/* matchups: compact tiles, one per row on phones, as many as fit on wider screens; each opens the gamecast */
-.games { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); gap: 12px; }
+/* Matchups tiles are styled in assets/gamecast.css (shared, so style tweaks reach archived pages without a rebuild). */
 .tm-open, .pl-row, .nm-link { cursor: pointer; }
-/* --ac / --hc = the two teams' colors (picked to be distinct), blending into each other across the middle */
-.mt { display: grid; min-width: 0; overflow: hidden; text-decoration: none; color: var(--ink); border: 1px solid var(--line); border-radius: 14px;
-  box-shadow: var(--shadow); transition: border-color .15s;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--ac) 46%, var(--panel)) 0%, color-mix(in srgb, var(--ac) 20%, var(--panel)) 42%,
-                                     color-mix(in srgb, var(--hc) 20%, var(--panel)) 58%, color-mix(in srgb, var(--hc) 46%, var(--panel)) 100%); }
-.mt:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
-.mt-main { position: relative; display: grid; grid-template-columns: 62px minmax(0, 1fr) auto minmax(0, 1fr) 62px; grid-template-areas: ". sa at sh .";
-  align-items: center; gap: 0 8px; padding: 14px 10px 10px; min-height: 84px; }
-/* big logos on the outside, spilling past the tile's edges (clipped) and fading softly toward the middle */
-.mt-lg { position: absolute; top: 50%; width: 112px; height: 112px; margin-top: -56px; object-fit: contain; pointer-events: none; }
-.mt-lg.away { left: -26px; -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%);
-  mask-image: linear-gradient(90deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%); }
-.mt-lg.home { right: -26px; -webkit-mask-image: linear-gradient(270deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%);
-  mask-image: linear-gradient(270deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%); }
-.mt-side { position: relative; display: flex; flex-direction: column; min-width: 0; line-height: 1.1; text-shadow: 0 1px 3px rgba(0,0,0,.5); }
-.mt-at { position: relative; }
-.mt-side.away { grid-area: sa; align-items: flex-start; } .mt-side.home { grid-area: sh; align-items: flex-end; text-align: right; }
-.mt-num { font-size: 34px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
-.mt-num small { font-size: 16px; font-weight: 700; margin-left: 1px; opacity: .75; }
-.mt-nm { margin-top: 4px; font-size: 12.5px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.mt-nm b { font-weight: 700; } .mt-nm small { font-size: 11.5px; color: var(--muted); }
-.mt-at { grid-area: at; font-size: 15px; font-weight: 800; color: var(--muted); }
-.mt-side.dog .mt-num, .mt.toss .mt-num { opacity: .6; }
-.mt-side.lost { opacity: .45; } .mt-lg:has(+ .mt-side.lost) { opacity: .35; }
-.mt-side.has-ball .mt-nm b::after { content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 6px; border-radius: 50%; background: #c47a2c; vertical-align: 1px; }
-.mt-st { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 10px; font-size: 12px; color: var(--muted);
-  padding: 7px 12px 9px; background: color-mix(in srgb, var(--panel) 72%, transparent); border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
-.mt-st b { color: var(--ink); }
-.mt-fin { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
-.mt-live { color: var(--ink); font-weight: 700; } .mt-red { color: #ff8f84; font-weight: 700; }
-@media (max-width: 400px) { .mt-main { grid-template-columns: 50px minmax(0, 1fr) auto minmax(0, 1fr) 50px; } .mt-lg { width: 96px; height: 96px; margin-top: -48px; } .mt-num { font-size: 30px; } }
 .nm-link { font: inherit; color: inherit; background: none; border: 0; padding: 0; text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; }
 td.mu .opp.tm-open:hover b, .bye .nm-link:hover { color: var(--accent); }
