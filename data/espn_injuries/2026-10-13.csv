@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3915189,Roquan Smith,Baltimore Ravens,Active,2026-10-07T01:04Z,,,,,,Smith recorded six total tackles (one solo) during Sunday's 24-18 win over the Titans.
 4430831,Trenton Simpson,Baltimore Ravens,Active,2026-10-07T00:59Z,,,,,,Simpson recorded nine total tackles (two solo) and an interception during Sunday's 24-18 win over Tennessee.
 4696882,Devontez Walker,Baltimore Ravens,Active,2026-10-06T04:00Z,,,,,,Walker caught one of his two targets for 19 yards during Baltimore's win over the Titans on Sunday.
-4030899,Spencer Brown,Buffalo Bills,Questionable,2026-10-13T02:54Z,Back,,,2026-10-18,QUESTIONABLE,Brown (back) has been ruled out for the remainder of Monday night's game versus the Rams.
+4030899,Spencer Brown,Buffalo Bills,Questionable,2026-10-13T02:54Z,Back,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Brown (back) has been ruled out for the remainder of Monday night's game versus the Rams.
 4432715,Landon Jackson,Buffalo Bills,Out,2026-10-12T22:56Z,Knee,Not Specified,Not Specified,2026-10-18,INACTIVE,Jackson (knee) is inactive against the Rams on Monday.
 4401823,Dee Alford,Buffalo Bills,Out,2026-10-12T22:55Z,Ankle,Not Specified,Not Specified,2026-10-18,INACTIVE,Alford (ankle) is inactive for Monday's game against the Rams.
 4242433,Joshua Palmer,Buffalo Bills,Out,2026-10-12T22:51Z,Shoulder,Not Specified,Not Specified,2026-10-18,INACTIVE,inactive
@@ -504,7 +504,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5091793,Charles Demmings,Minnesota Vikings,Out,2026-10-12T19:22Z,Hamstring,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,out
 4696782,Elijah Williams,Minnesota Vikings,Active,2026-10-12T19:22Z,,,,,,
 4429205,Jordan Addison,Minnesota Vikings,Out,2026-10-12T19:22Z,Hamstring,Soreness,Not Specified,2026-10-25,QUESTIONABLE,out
-16733,Odell Beckham Jr.,Minnesota Vikings,Active,2026-10-12T19:22Z,,,,,,
 4710865,Jakobe Thomas,Minnesota Vikings,Active,2026-10-12T19:22Z,,,,,,
 4573398,Max Brosmer,Minnesota Vikings,Active,2026-10-12T19:22Z,,,,,,
 4567104,Will Reichard,Minnesota Vikings,Active,2026-10-12T15:13Z,,,,,,Reichard made all three of his field-goal attempts and both extra-point tries during the Vikings' 23-13 win over the Saints on Sunday.
@@ -515,7 +514,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362010,Michael Jurgens,Minnesota Vikings,Active,2026-10-11T16:56Z,,,,,,"Jurgens (elbow) is active for Sunday's game against the Saints, Craig Peters of the Vikings' official site reports."
 3123954,Brian O'Neill,Minnesota Vikings,Active,2026-10-11T16:54Z,,,,,,"O'Neill (knee) is active for Sunday's game against the Saints, Craig Peters of the Vikings' official site reports."
 4433959,Ben Yurosek,Minnesota Vikings,Active,2026-10-11T16:20Z,,,,,,"Yurosek (ankle) is listed as active for Sunday's game against the Saints, Craig Peters of the Vikings' official site reports."
-4360637,Jeshaun Jones,Minnesota Vikings,Active,2026-10-11T01:42Z,,,,,,"The Vikings elevated Jones from the practice squad to the active roster Saturday, Craig Peters of the team's official site reports."
 4799994,Brett Thorson,Minnesota Vikings,Active,2026-10-09T01:10Z,,,,,,Thorson (hamstring) was a full participant in practice Wednesday and Thursday.
 3728281,Blake Cashman,Minnesota Vikings,Active,2026-10-07T01:04Z,,,,,,Cashman recorded eight tackles (three solo) and a fumble recovery during Sunday's 15-10 win versus the Dolphins.
 4431553,Donovan Jackson,Minnesota Vikings,Injured Reserve,2026-10-07T00:34Z,Knee - Meniscus,Surgery,Not Specified,2027-01-17,IR,Jackson (knee) was placed on injured reserve by the Vikings on Tuesday.
@@ -524,6 +522,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4044540,Isaiah Rodgers,Minnesota Vikings,Active,2026-09-30T04:28Z,,,,,,Rodgers logged six tackles (two solo) and an interception in Sunday's 23-16 victory over Tampa Bay.
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-09-30T04:04Z,,,,,,"Wilson finished Sunday's 23-16 victory over Tampa Bay with 10 tackles, including 1.5 sacks, and one defensed pass."
 3921690,Josh Oliver,Minnesota Vikings,Injured Reserve,2026-09-30T00:26Z,Biceps,Surgery,Not Specified,2027-01-17,IR,"The Vikings placed Oliver (biceps) on injured reserve Tuesday, Craig Peters of the team's official site reports."
+16772,Kyle Van Noy,Minnesota Vikings,Active,2026-09-30T00:20Z,,,,,,"The Vikings signed Van Noy from the practice squad to the active roster Tuesday, Craig Peters of the team's official site reports."
+4695609,Zemaiah Vaughn,Minnesota Vikings,Active,2026-09-28T18:52Z,,,,,,
 4606666,Karon Prunty,New England Patriots,Out,2026-10-12T19:27Z,Hamstring,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,out
 3916923,Carlton Davis III,New England Patriots,Out,2026-10-12T19:27Z,Neck,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,out
 4686772,Christian Gonzalez,New England Patriots,Out,2026-10-12T19:27Z,Shoulder,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,out
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3918310,Carl Granderson,New Orleans Saints,Active,2026-10-09T22:40Z,,,,,,"Granderson (ankle) does not carry an injury designation ahead of Sunday's game against the Vikings, Emily Leiker of The Minnesota Star Tribune reports."
 4879276,Bryce Lance,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Lance turned five targets into a seven-yard catch during the Saints' 45-24 loss to the Falcons on Monday.
 4702559,Oscar Delp,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Delp was not targeted during Monday's 45-24 loss versus the Falcons.
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-13T03:00Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-13T03:53Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4921249,Colton Hood,New York Giants,Questionable,2026-10-12T23:52Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,"Hood (concussion) is considered day-to-day ahead of the Giants' matchup with the Saints in Week 6, Pat Leonard of the New York Daily News reports."
 4430261,Tyler Nubin,New York Giants,Questionable,2026-10-12T23:10Z,Neck,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Nubin (neck) is considered day-to-day ahead of the team's Week 6 matchup with the Saints, Pat Leonard of the New York Daily News reports."
 4240706,Jason Pinnock,New York Giants,Out,2026-10-12T19:30Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,out
@@ -590,7 +590,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4595348,Malik Nabers,New York Giants,Active,2026-10-11T21:52Z,,,,,,Nabers caught 11 of 20 targets for 121 yards and a touchdown in Sunday's 27-27 tie against the Commanders.
 4433970,J.J. McCarthy,New York Giants,Active,2026-10-11T16:07Z,,,,,,"McCarthy is serving as the Giants No. 2 quarterback for Sunday's game against the Commanders, Jordan Raanan of ESPN.com reports."
 4036132,Chauncey Golston,New York Giants,Injured Reserve,2026-10-11T01:28Z,Neck,Not Specified,Not Specified,2026-11-12,IR,"The Giants placed Golston (neck) on injured reserve Saturday, Dan Salomone of the Giants' official site reports."
-4570296,Dalen Cambre,New York Giants,Active,2026-10-11T01:26Z,,,,,,"The Giants have elevated Cambre from the practice squad ahead of Sunday's game against the Commanders, Dan Salomone of the Giants' official site reports."
 4259566,Andrew Thomas,New York Giants,Active,2026-10-10T02:38Z,,,,,,Thomas (groin) does not have any injury designation ahead of Sunday's game against the Commanders.
 2531358,Chris Manhertz,New York Giants,Active,2026-10-09T21:40Z,,,,,,
 3123075,Braxton Berrios,New York Giants,Injured Reserve,2026-10-07T23:25Z,Foot,Surgery,Not Specified,2027-02-15,IR,"The Giants placed Berrios (foot) on their injured reserve list Wednesday, Dan Salomone of the Giants' official site reports."
@@ -599,6 +598,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4950400,Arvell Reese,New York Giants,Active,2026-10-07T01:28Z,,,,,,Reese logged nine tackles (nine solo) during the Giants' win over the Cardinals on Sunday.
 4428328,Deonte Banks,New York Giants,Active,2026-10-07T01:13Z,,,,,,Banks logged four tackles (one solo) and a pick-six during the Giants' win over the Cardinals on Sunday.
 4429148,Theo Johnson,New York Giants,Active,2026-10-06T02:38Z,,,,,,Johnson caught his lone target for an 11-yard touchdown in Sunday's 36-24 win over the Cardinals.
+4241457,Najee Harris,New York Giants,Active,2026-10-06T02:20Z,,,,,,Harris logged nine carries for 30 yards and lost a fumble in the Giants' 36-24 win over the Cardinals on Sunday.
 4695404,Isaiah Davis,New York Jets,Active,2026-10-13T00:50Z,,,,,,Davis rushed twice for eight yards while catching one of two targets for nine yards during Sunday's 17-12 win over the Browns.
 4243375,Dylan Parham,New York Jets,Out,2026-10-12T19:32Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,out
 4700136,Kiko Mauigoa,New York Jets,Out,2026-10-12T19:32Z,Quadriceps,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,out
