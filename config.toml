@@ -98,9 +98,12 @@ flex_positions = ["RB", "WR", "TE"]
 
 [report]
 output = "report/nfl_edge_week{week}.html"
-# Highlight model vs Vegas disagreements larger than these (points).
-margin_disagree = 3.0
-total_disagree = 4.0
+# Win probability = 1 / (1 + exp(-k x margin)). Vegas k is fit every run on past games' closing spreads; the
+# model's k (fit on its walk-forward margins, which need the full backtest) and the tossup line both come from
+# tools/win_prob.py: walk-forward on 2022-26, favorites the market gave under 59% won 54% +/- 6% (a coin flip
+# explains it), while 3-point favorites won ~61%.
+model_win_k = 0.141
+tossup_below = 0.59
 
 [experiments]
 # Optional model inputs. Defaults reflect the walk-forward backtest (decided on 2025, confirmed on 2026):

@@ -730,23 +730,92 @@ def battle_colors(ts: "TeamStyle", away: str, home: str) -> dict:
   return {away: ap, home: "#9aa3b2"}
 
 
-def final_result(games: pd.DataFrame, g, model_fav: str, vegas_fav: str | None) -> dict | None:
-  """Final score once the game is over, and whether the model's and Vegas's favorites won."""
+def logistic(x):
+  return 1 / (1 + np.exp(-x))
+
+
+def fit_win_k(margin: np.ndarray, won: np.ndarray) -> float:
+  """Maximum-likelihood k in P(home wins) = logistic(k x margin) (no intercept: a margin of 0 is 50%)."""
+  ks = np.linspace(0.02, 0.4, 381)
+  p = logistic(np.outer(ks, margin)).clip(1e-9, 1 - 1e-9)
+  return float(ks[int(np.argmax((won * np.log(p) + (1 - won) * np.log(1 - p)).sum(axis=1)))])
+
+
+def _decided(schedules: pd.DataFrame, season: int, week: int) -> pd.DataFrame:
+  """Games finished before this week that had a closing line and a winner."""
+  s = schedules[schedules.home_score.notna() & schedules.spread_line.notna()
+                & (schedules.home_score != schedules.away_score)]
+  return s[(s.season < season) | ((s.season == season) & (s.week < week))]
+
+
+def vegas_win_k(schedules: pd.DataFrame, season: int, week: int) -> float:
+  s = _decided(schedules, season, week)
+  return fit_win_k(s.spread_line.to_numpy(float), (s.home_score > s.away_score).to_numpy(float))
+
+
+def track_record(schedules: pd.DataFrame, season: int, week: int, tossup: float) -> dict:
+  """How often the market's favorites won, by how confident it was. Each season's chances use a k fit only on
+  the seasons before it (the first loaded season only trains), so every row is an honest out-of-sample record."""
+  s = _decided(schedules, season, week)
+  yrs = sorted(s.season.unique())
+  parts = []
+  for yr in yrs[1:]:
+    tr, te = s[s.season < yr], s[s.season == yr]
+    p = logistic(fit_win_k(tr.spread_line.to_numpy(float), (tr.home_score > tr.away_score).to_numpy(float))
+                 * te.spread_line.to_numpy(float))
+    home_won = (te.home_score > te.away_score).to_numpy()
+    parts.append(pd.DataFrame({"season": yr, "fav": np.maximum(p, 1 - p), "won": np.where(p >= .5, home_won, ~home_won)}))
+  if not parts:
+    return {}
+  t = pd.concat(parts)
+  t["pct"] = (t.fav * 100).round()
+  cut = round(tossup * 100)
+  rows = []
+  for lo, hi, label in ((50, cut, f"Tossup (under {cut}%)"), (cut, 65, f"{cut}-64%"), (65, 75, "65-74%"),
+                        (75, 101, "75% or more")):
+    b = t[(t.pct >= lo) & (t.pct < hi)]
+    now = b[b.season == season]
+    rows.append({"label": label, "tossup": lo == 50, "n": len(b), "expected": b.fav.mean() * 100,
+                 "actual": b.won.mean() * 100, "n_now": len(now),
+                 "actual_now": now.won.mean() * 100 if len(now) else None})
+  return {"since": int(yrs[1]), "rows": rows, "n": len(t), "season": season}
+
+
+def forecast(g, p_model: float, k_vegas: float, tossup: float, names: dict, ts: "TeamStyle") -> dict:
+  """The game's win chances: the market's when a Vegas line exists (it has been the more accurate forecast, and
+  blending the model in never helped), else the model's. Under the tossup line we name no favorite."""
+  vm = g.spread_line
+  p = float(logistic(k_vegas * vm)) if pd.notna(vm) else p_model  # P(home wins)
+  fav = g.home_team if p >= .5 else g.away_team
+  pct = round(max(p, 1 - p) * 100)
+  m_fav = g.home_team if p_model >= .5 else g.away_team
+  m_pct = round(max(p_model, 1 - p_model) * 100)
+  return {"src": "Vegas" if pd.notna(vm) else "Model", "fav": fav, "nick": names.get(fav, fav),
+          "logo": ts.logo_img(fav, 24), "pct": pct, "tossup": pct < round(tossup * 100),
+          "p_away": round((1 - p) * 100), "p_home": round(p * 100),
+          "model_fav": m_fav, "model_pct": m_pct, "model_tossup": m_pct < round(tossup * 100),
+          "model_by": abs(g.model_margin)}
+
+
+def final_result(games: pd.DataFrame, g, fc: dict) -> dict | None:
+  """Final score once the game is over, and how the forecast fared: a favorite winning or an upset (a 65%
+  favorite should lose about 1 time in 3), or, for a tossup, simply who won."""
   row = games[games.game_id == g.game_id]
   if row.empty or pd.isna(row.home_score.iloc[0]):
     return None
   hs, as_ = int(row.home_score.iloc[0]), int(row.away_score.iloc[0])
   winner = g.home_team if hs > as_ else g.away_team if as_ > hs else None
   return {"home": hs, "away": as_, "winner": winner,
-          "model_right": winner is not None and model_fav == winner,
-          "vegas_right": None if vegas_fav is None or winner is None else vegas_fav == winner}
+          "fav_won": None if fc["tossup"] or winner is None else fc["fav"] == winner}
 
 
 def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None = None,
              power: list | None = None) -> list:
-  """Per game: the headline lines (model vs Vegas, in betting notation), edges where they disagree, and
-  where each side's offense has the advantage over the other's defense."""
+  """Per game: the win chances (the market's when a line exists, the model's as a second opinion; close games are
+  tossups), and where each side's offense has the advantage over the other's defense."""
   r = eng.game_ratings(season, week)
+  tossup, k_model = cfg["report"]["tossup_below"], cfg["report"]["model_win_k"]
+  k_vegas = vegas_win_k(eng.data.schedules, season, week)
   vf = team_volume_features(eng.team_ledger, season, week, eng.cfg)
   games = eng.games(season, week)
   starters = {}
@@ -777,18 +846,9 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
               "def_rush": per100(-r.dfn.at[t, "rush"]), "st": per100(r.off.at[t, "st"] - r.dfn.at[t, "st"])}
     away, home = side(g.away_team), side(g.home_team)
     vm, vt = g.spread_line, g.total_line
-    dm = g.model_margin - vm if pd.notna(vm) else np.nan
-    dt = g.model_total - vt if pd.notna(vt) else np.nan
     m_fav = g.home_team if g.model_margin >= 0 else g.away_team
     v_fav = g.home_team if (pd.notna(vm) and vm >= 0) else g.away_team
-    edges = []
-    if pd.notna(dm) and abs(dm) >= 1.0:
-      edges.append({"label": f"Model likes {g.home_team if dm > 0 else g.away_team} by {abs(dm):.1f} more than Vegas",
-                    "strong": abs(dm) >= cfg["report"]["margin_disagree"]})
-    if pd.notna(dt) and abs(dt) >= 1.5:
-      edges.append({"label": f"Model expects {abs(dt):.1f} {'more' if dt > 0 else 'fewer'} points "
-                             f"({'Over' if dt > 0 else 'Under'})",
-                    "strong": abs(dt) >= cfg["report"]["total_disagree"]})
+    fc = forecast(g, float(logistic(k_model * g.model_margin)), k_vegas, tossup, names, ts)
     # Who wins each battle, in points THIS game: per-play edge x that offense's projected plays of that type, so a
     # run edge (fewer plays) is not read as equal to a pass edge of the same per-play size. Every bar is a tug of
     # war with the away team on the left and the home team on the right. Hierarchy: Overall (the model margin) =
@@ -857,22 +917,17 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
       print(f"[report] warning: {g.game_id} matchup bars sum to {-check:+.2f}, model margin {g.model_margin:+.2f}",
             flush=True)
     out.append({"away": away, "home": home, "kickoff": kickoff_text(g.gameday, g.gametime),
-                "neutral": g.location == "Neutral", "model_line": spread_text(m_fav, g.model_margin),
-                "model_total": g.model_total, "vegas_line": spread_text(v_fav, vm) if pd.notna(vm) else "n/a",
-                "vegas_total": vt, "edges": edges, "battles": battles, "extras": [st_row, other_row],
+                "neutral": g.location == "Neutral", "fc": fc,
+                "vegas_line": spread_text(v_fav, vm) if pd.notna(vm) else None,
+                "vegas_total": vt if pd.notna(vt) else None, "battles": battles, "extras": [st_row, other_row],
                 "bt_style": f"--ac:{col[g.away_team]};--hc:{col[g.home_team]}",
-                "model_by": (f"{m_fav} by {abs(g.model_margin):.1f} <small>points</small>"
-                             if abs(g.model_margin) >= 0.05 else "Even"),
-                # The favorite's logo and color on each line box, so the pick reads at a glance.
-                "model_fav": {"logo": ts.logo_img(m_fav, 22), "color": col[m_fav]},
-                "vegas_fav": ({"logo": ts.logo_img(v_fav, 22), "color": col[v_fav]} if pd.notna(vm) else None),
                 # The whole game: the model margin, which adds special teams and home field to the battles below.
                 "overall": tug("Overall", -g.model_margin, 12.0, rank_of(a_t, "rank"), rank_of(h_t, "rank"),
                                f"{a_t} power rank", f"{h_t} power rank",
                                f"Model margin: {m_fav} by {abs(g.model_margin):.1f} (both offense-vs-defense "
                                f"matchups plus special teams and home field)"),
                 "score": f"{g.away_team} {g.away_pts:.0f} - {g.home_team} {g.home_pts:.0f}",
-                "final": final_result(games, g, m_fav, v_fav if pd.notna(vm) else None)})
+                "final": final_result(games, g, fc)})
   return out
 
 

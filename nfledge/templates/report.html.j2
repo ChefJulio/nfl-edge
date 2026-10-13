@@ -254,26 +254,33 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 .g-sub { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 8px; }
 .g-sub > span { white-space: nowrap; }
 .g-sub {font-size: 11.5px; color: var(--muted); padding: 8px 16px 0; }
-.g-lines { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 16px 6px; }
-/* Line boxes: the favorite's logo beside the line and a stripe of its color down the left edge. */
-.lb { border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px 9px 15px; background: var(--panel2); box-shadow: inset 4px 0 0 var(--fc, transparent); }
-.lb .big { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.lb .big > span { white-space: nowrap; }
-.lb .big .logo { width: 26px; height: 26px; } .lb .big .logo img { width: 19px; height: 19px; }
-@media (max-width: 520px) { .lb .big { font-size: 17px; flex-wrap: nowrap; gap: 6px; } .lb .big small { display: none !important; }
-  .lb .big .logo { width: 22px; height: 22px; } .lb .big .logo img { width: 16px; height: 16px; } .lb { padding: 8px 10px 8px 13px; } }
-.lb small { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
-.lb .big { font-size: 21px; font-weight: 800; letter-spacing: -.01em; line-height: 1.15; }
-.lb .big small, .lb.model .big small { display: inline; font-size: 13px; font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--muted); margin: 0; }
-.lb .tot { font-size: 13px; color: var(--muted); font-weight: 600; margin-top: 1px; }
-.lb .tot b { color: var(--ink); }
-.lb.model { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: color-mix(in srgb, var(--accent) 7%, var(--panel)); }
-.lb.model small { color: var(--accent); }
-.edges { display: flex; gap: 6px; flex-wrap: wrap; padding: 4px 16px 4px; min-height: 26px; align-items: center; }
-.edge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink); }
-.edge b { font-weight: 800; }
-.edge.strong { background: var(--accent); border-color: var(--accent); color: #fff; }
-.edge.none { color: var(--muted); border-style: dashed; }
+/* Win chance: one headline (favorite and chance, or Tossup), a bar split at the away team's chance in the two
+   teams' colors with the tossup zone shaded in the middle, then the Vegas line and our model's second opinion. */
+.wp { margin: 12px 16px 4px; padding: 11px 13px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel2); }
+.wp-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.wp-head .logo { width: 26px; height: 26px; } .wp-head .logo img { width: 19px; height: 19px; }
+.wp-call { font-size: 20px; font-weight: 800; letter-spacing: -.01em; line-height: 1.15; white-space: nowrap; }
+.wp-why { font-size: 13px; font-weight: 600; color: var(--muted); }
+.wp-src { margin-left: auto; font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; }
+.wp.toss .wp-call { color: var(--muted); }
+.wp-bar { position: relative; display: flex; height: 10px; margin-top: 9px; border-radius: 5px; overflow: hidden; }
+.wp-a { background: var(--ac); } .wp-h { flex: 1; background: var(--hc); }
+.wp-zone { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, rgba(255,255,255,.22) 0 2px, transparent 2px 5px); border-left: 1px solid rgba(255,255,255,.45); border-right: 1px solid rgba(255,255,255,.45); }
+.wp-ends { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-top: 4px; }
+.wp-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; font-size: 12px; color: var(--muted); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); }
+.wp-meta b { color: var(--ink); font-weight: 700; }
+@media (max-width: 520px) { .wp-call { font-size: 17px; } .wp-head .logo { width: 22px; height: 22px; } .wp-head .logo img { width: 16px; height: 16px; } }
+.gf-pick.toss { background: color-mix(in srgb, var(--muted) 18%, transparent); color: var(--ink); }
+.track { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px 10px; margin-bottom: 16px; }
+table.trk { width: 100%; max-width: 640px; border-collapse: collapse; margin-top: 6px; font-size: 13px; }
+table.trk th { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; }
+table.trk th, table.trk td { padding: 6px 6px; border-bottom: 1px solid var(--line); }
+table.trk th:first-child, table.trk td:first-child { padding-left: 0; }
+table.trk tr.toss td { color: var(--muted); }
+table.trk td small { color: var(--muted); font-size: 11px; }
+@media (max-width: 520px) { table.trk { font-size: 12.5px; } table.trk th { font-size: 9.5px; letter-spacing: .04em; }
+  table.trk th, table.trk td { padding: 6px 4px; } table.trk td small { display: block; font-size: 10px; } }
+.trk-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
 /* battles: tug of war in the two teams' colors; offense fills from the left, defense from the right */
 .battles { padding: 8px 16px 14px; display: grid; gap: 10px; }
 .bt-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; }
@@ -557,12 +564,19 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 </section>
 
 <section id="tab-games">
-  <div class="sec-head"><div><h2>Matchups</h2><p>Model lines next to Vegas. Highlighted edges are where they disagree most.</p></div></div>
+  <div class="sec-head"><div><h2>Matchups</h2><p>Win chances, not picks. When neither side is a clear favorite we call it a tossup.</p></div></div>
   <details class="howto"><summary>How to read</summary><div>
-    Model lines come only from opponent-adjusted team ratings (no Vegas inputs), so a disagreement is a genuine second opinion. Spreads use betting notation (favorite minus points).
-    Edges appear when the model differs from Vegas by 1+ point on the spread or 1.5+ on the total, and are highlighted at {{ margin_disagree }}+ / {{ total_disagree }}+.
+    <b>Win chance</b> is the market's: the Vegas spread turned into a probability using how often teams with that spread have actually won. In backtests the market has been a more accurate forecaster than our model, and mixing the model in never helped, so we show the better number. Before lines are posted (lookahead weeks) the model's chance is used. <b>Our model</b> is shown underneath as an independent second opinion built only from team ratings and the projected quarterbacks.
+    <b>Tossup</b> means the favorite's chance is under {{ tossup_pct }}% (roughly a spread under 3 points). Historically, favorites in that range won about as often as a coin flip would, so naming one would be false precision. The shaded middle of each bar marks that zone.
+    A 70% favorite should still lose 3 times in 10. That is an upset the forecast expected, not a mistake; the track record above shows whether chances at each level came true as often as they claimed.
     <b>Who wins each battle</b>: every bar is a tug of war in the two teams' colors, away team always on the left and home team on the right. Whoever pushes past the middle line wins, and the number on the winner's side is how many points that edge is worth <b>this game</b> compared with an average matchup. <b>Overall</b> (top) is the model's margin. Below it, each offense against the other defense: its total is roughly how far above or below average that offense should score. Tap a matchup to split it into passing and running (the per-play edge times that offense's projected dropbacks or runs, so a run edge is never read as equal to a pass edge of the same per-play size). Everything adds up exactly: Overall = both offense-vs-defense matchups + special teams + home field and pace (projected play volume and pass/run mix). The split follows the model's own points formula, so every bar is on the same scale as the model line. Rank chips are each unit's league rank from the Power tab (green top 8, red bottom 8). Hover a row for the per-play numbers.
   </div></details>
+  {% if track %}<div class="track">
+    <div class="bt-title">How often favorites win &middot; market chances, {{ track.since }}&ndash;{{ track.season }}</div>
+    <table class="trk"><thead><tr><th>Favorite's chance</th><th class="num">Games</th><th class="num">Expected</th><th class="num">Won</th><th class="num">{{ track.season }}</th></tr></thead>
+    <tbody>{% for r in track.rows %}<tr{% if r.tossup %} class="toss"{% endif %}><td>{{ r.label }}</td><td class="num">{{ r.n }}</td><td class="num">{{ '%.0f'|format(r.expected) }}%</td><td class="num"><b>{{ '%.0f'|format(r.actual) }}%</b></td><td class="num">{% if r.n_now %}{{ '%.0f'|format(r.actual_now) }}% <small>of {{ r.n_now }}</small>{% else %}&ndash;{% endif %}</td></tr>{% endfor %}</tbody></table>
+    <p class="trk-note">A well-calibrated forecast's favorites win about as often as their chance says. Each season is scored with chances fit only on the seasons before it.</p>
+  </div>{% endif %}
   <div class="games">
   {% for g in games %}
     <article class="game">
@@ -573,14 +587,26 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
       </div>
       <div class="g-sub"><span>{{ g.kickoff }}{% if g.neutral %} &middot; neutral site{% endif %}</span><span>Model score {{ g.score }}</span></div>
       {% if g.final %}<div class="g-final"><span class="gf-score">Final: {{ g.away.team }} {{ g.final.away }} &ndash; {{ g.home.team }} {{ g.final.home }}</span>
-        <span class="gf-pick {{ 'ok' if g.final.model_right else 'miss' }}">Model pick {{ 'won' if g.final.model_right else 'lost' }}</span>
-        {% if g.final.vegas_right is not none %}<span class="gf-pick {{ 'ok' if g.final.vegas_right else 'miss' }}">Vegas pick {{ 'won' if g.final.vegas_right else 'lost' }}</span>{% endif %}</div>{% endif %}
-      <div class="g-lines">
-        <div class="lb model" style="--fc:{{ g.model_fav.color }}"><small>Model</small><div class="big">{{ g.model_fav.logo|safe }}<span>{{ g.model_by|safe }}</span></div><div class="tot">O/U <b>{{ g.model_total|f1 }}</b></div></div>
-        <div class="lb"{% if g.vegas_fav %} style="--fc:{{ g.vegas_fav.color }}"{% endif %}><small>Vegas</small><div class="big">{% if g.vegas_fav %}{{ g.vegas_fav.logo|safe }}{% endif %}<span>{{ g.vegas_line }}</span></div><div class="tot">O/U <b>{{ g.vegas_total|f1 if g.vegas_total == g.vegas_total else 'n/a' }}</b></div></div>
-      </div>
-      <div class="edges">
-        {% for e in g.edges %}<span class="edge{{ ' strong' if e.strong }}">{{ e.label }}</span>{% else %}<span class="edge none">{{ "No Vegas line yet" if g.vegas_line == "n/a" else "Model agrees with Vegas" }}</span>{% endfor %}
+        {% if not g.final.winner %}<span class="gf-pick toss">Tie</span>
+        {% elif g.fc.tossup %}<span class="gf-pick toss">Tossup &middot; {{ g.final.winner }} won</span>
+        {% elif g.final.fav_won %}<span class="gf-pick ok">Favorite won</span>
+        {% else %}<span class="gf-pick miss">Upset &middot; a {{ 100 - g.fc.pct }}% chance</span>{% endif %}</div>{% endif %}
+      {% set f = g.fc %}
+      <div class="wp{{ ' toss' if f.tossup }}" style="{{ g.bt_style }}">
+        <div class="wp-head">
+          {% if f.tossup %}<span class="wp-call">Tossup</span><span class="wp-why">too close to call</span>
+          {% else %}{{ f.logo|safe }}<span class="wp-call">{{ f.nick }} {{ f.pct }}%</span><span class="wp-why">to win</span>{% endif %}
+          <span class="wp-src">{{ 'Market' if f.src == 'Vegas' else 'Model &middot; no line yet'|safe }}</span>
+        </div>
+        <div class="wp-bar" role="img" aria-label="{{ g.away.team }} {{ f.p_away }}%, {{ g.home.team }} {{ f.p_home }}%">
+          <span class="wp-a" style="width:{{ f.p_away }}%"></span><span class="wp-h"></span>
+          <i class="wp-zone" style="left:{{ 100 - tossup_pct }}%;width:{{ 2 * tossup_pct - 100 }}%"></i>
+        </div>
+        <div class="wp-ends"><span>{{ g.away.team }} {{ f.p_away }}%</span><span>{{ f.p_home }}% {{ g.home.team }}</span></div>
+        {% if g.vegas_line %}<div class="wp-meta">
+          <span>Vegas {{ g.vegas_line }}{% if g.vegas_total %} &middot; O/U {{ g.vegas_total|f1 }}{% endif %}</span>
+          <span>Our model: <b>{% if f.model_tossup %}tossup{% else %}{{ f.model_fav }} {{ f.model_pct }}%{% endif %}</b>{% if f.model_tossup %} ({{ f.model_fav }} {{ f.model_pct }}%){% endif %}</span>
+        </div>{% endif %}
       </div>
       <div class="battles" style="{{ g.bt_style }}">
         <div class="bt-title">Who wins each battle</div>

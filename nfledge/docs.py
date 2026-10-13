@@ -91,7 +91,7 @@ def live_values(eng, cfg: dict, season: int, week: int, bt_res: pd.DataFrame | N
     "home_pass": _p100(r.home["pass"]), "home_rush": _p100(r.home["rush"]),
     "bootstrap": f"{tmc['bootstrap_samples']}",
     "points_model": f"points ≈ {pts[0]:.1f} + {pts[1]:.2f} × offensive EPA per game + {pts[2]:.2f} × special-teams edge",
-    "margin_disagree": f"{cfg['report']['margin_disagree']:g}", "total_disagree": f"{cfg['report']['total_disagree']:g}",
+    "model_win_k": f"{cfg['report']['model_win_k']:.3f}", "tossup": f"{round(cfg['report']['tossup_below'] * 100)}",
     "k_wr_catch": f"{k.get(('tgt', 'WR', 'reception'), float('nan')):.0f}",
     "k_wr_ypt": f"{k.get(('tgt', 'WR', 'rec_yd'), float('nan')):.0f}",
     "k_rb_ypc": f"{k.get(('rush', 'RB', 'rush_yd'), float('nan')):.0f}",

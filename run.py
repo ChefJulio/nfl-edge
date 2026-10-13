@@ -157,7 +157,8 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
     "roles": rp.role_changes(eng, season, week, cfg), "backtest": rp.backtest_summary(ev),
     "bt_seasons": " and ".join(map(str, bt_seasons)) or "n/a", "bt_takeaway": backtest_takeaway(ev),
     "score_cfg": rp.scoring_settings(scoring, cfg), "tier_cfg": cfg["tiers"],
-    "margin_disagree": cfg["report"]["margin_disagree"], "total_disagree": cfg["report"]["total_disagree"],
+    "track": rp.track_record(data.schedules, season, week, cfg["report"]["tossup_below"]),
+    "tossup_pct": round(cfg["report"]["tossup_below"] * 100),
     "model_doc": (ARCHIVE_DOC if (archive or lookahead)
                   else docs.render(docs.live_values(eng, cfg, season, week, res, ev))),
   }

@@ -43,7 +43,9 @@ Ratings are estimated per play. On the Power tab they are shown as **points per 
 
 - **Volume.** Each team's expected plays and pass rate come from regressions learned on past games: its own pace, the opponent's pace allowed, and (for player projections only) the Vegas total and spread. Pass rate uses the team's neutral-situation pass rate over expected (PROE) and the game script implied by the spread.
 - **Points.** Expected offensive EPA per game (dropbacks × pass EPA + rushes × rush EPA, against this opponent), plus the special-teams edge, converts to points through a calibration learned on history: {{ L.points_model }}.
-- **Model lines** (Matchups tab) use team ratings and the projected starting quarterbacks only, never Vegas, so a disagreement with Vegas is a real second opinion. Edges appear at 1+ point on the spread or 1.5+ on the total, and are highlighted at **{{ L.margin_disagree }}+** and **{{ L.total_disagree }}+**.
+- **Model lines** (Matchups tab) use team ratings and the projected starting quarterbacks only, never Vegas, so they are an independent second opinion.
+- **Win chances.** A margin becomes a win probability through P(win) = 1 / (1 + e^(-k x margin)). For Vegas, k is fit every run on all earlier games' closing spreads. For the model, k = **{{ L.model_win_k }}**, fit on its walk-forward margins (`tools/win_prob.py`). Walk-forward on 2022-26, the market's chances scored better than the model's (Brier 0.211 vs 0.235; always picking the home team scores 0.249). The best blend put 0-15% weight on the model and did not beat the market alone. So the Matchups headline is the market's chance whenever a line exists, and the model's only before lines post.
+- **Tossups.** A game is a tossup when the favorite's chance is under **{{ L.tossup }}%**. That is the largest cut-off below which the market's favorites won at a rate a coin flip explains (54% +/- 6%, 90% interval). It falls at a spread under 3 points; 3-point favorites won about 61%. The tab's track record shows, for every confidence level, how often the favorite actually won, using chances fit only on earlier seasons.
 
 ## 4. Player projections
 

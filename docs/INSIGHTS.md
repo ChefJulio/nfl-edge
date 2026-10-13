@@ -123,9 +123,21 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   clinched/eliminated from standings and test); weather, rest, division, inexperienced QB, weeks 1-3, rating lag:
   noise. Worst misses: model ~even where Vegas had 13-20 pt favorites (ratings over-shrunk for margins; test
   margin-tuned shrinkage). The absence tags (Out/Doubtful snap share) came out empty: a join bug to fix first.
+- **Win probabilities** (tools/win_prob.py, walk-forward, 1,082 games 2022-26, P = logistic(k x margin), k fit on
+  prior seasons): Vegas Brier 0.2113 / log loss 0.610 / 67.3% right; model 0.2353 / 0.664 / 61.6%; always-home
+  0.2486. k: model 0.125-0.141, Vegas 0.118-0.148. Vegas well calibrated in every band. The model is under-confident
+  under 65% (52.5% predicted -> 56% won) and over-confident at 70%+ (73% -> 67%, n=91): the same over-shrinkage as
+  the miss diagnosis. Blend (logistic in w x model + (1-w) x Vegas, w and k fit walk-forward): w = 0-0.15, Brier
+  0.2115, no gain over Vegas alone.
+- **Tossup line**: favorites the market gave under 59% won 54.3% +/- 6.4% (90%; 15% of games), indistinguishable
+  from a coin flip; 3-point favorites (~60%) won ~61%. The tool prints the largest cut-off a coin flip explains
+  (0.59) and the model's all-games k (0.141); both live in config.toml [report].
 - Implication: the game model's value is structure (battles, Power), not beating lines; fantasy projections already
-  use Vegas implied totals. Paths still open: diagnose biggest misses for information gaps; market-implied ratings
-  (fit team ratings to posted spreads/totals) for lookahead weeks without lines; Matchups reframe (see section 9).
+  use Vegas implied totals. **Shipped 2026-10-12, owner's "good prediction practice" pivot:** Matchups shows win
+  chances, not picks. Headline = market chance when a line exists (model only before lines post), "Tossup" under
+  59%, model chance as second opinion, edge pills removed, finals read "Favorite won" / "Upset, a 20% chance" /
+  "Tossup, X won", and a track-record table (market favorites by confidence band, expected vs won, all seasons and
+  this one). Still open: market-implied ratings for lookahead weeks without lines.
 
 ## 5. Tested and rejected (do not retry without new data/angle)
 | Idea | Result |
@@ -204,10 +216,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 - **Tables:** full length, only the page scrolls. If a table fits its width (`.fits`) the real header sticks
   natively; wider tables (phone) scroll sideways with a header copy in a sticky strip under the tabs. Pinned name
   column; compact mode when scrolled sideways (logo + last name, 11px, ~100px), scrollLeft compensated, hysteresis.
-- **Matchups:** away left / home right; Model box "SEA by 4.1 points" with favorite logo + color stripe; Vegas in
-  betting notation; plain-English edge pills; Overall bar on top, then the two offense-vs-defense matchups (tap for
-  Pass/Run), Special teams, Home & pace; bars = margin split exactly along the points formula (ST home effect
-  reported under Home), Power ranks per unit; final score + whether model / Vegas pick won.
+- **Matchups:** "win chances, not picks" (owner: "we're not a betting site, we're promoting good prediction
+  practice"). Track-record table on top. Per game: win-chance box (favorite logo + "Cowboys 80% to win" or
+  "Tossup / too close to call", source tag Market or Model, bar split in team colors with the tossup zone hatched,
+  Vegas line + O/U and "Our model: DAL 76%" underneath); away left / home right; Overall bar on top, then the two
+  offense-vs-defense matchups (tap for Pass/Run), Special teams, Home & pace; bars = model margin split exactly
+  along the points formula (ST home effect reported under Home), Power ranks per unit; final score + Favorite won /
+  Upset (with its chance) / Tossup outcome.
 - **Power:** model margin vs average team by unit (7 ranks), rank range, schedule played/left, trend.
 - Tabs: Rankings, Matchups, Power, Role changes, Model.
 
@@ -232,9 +247,8 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   absences, rating staleness (recent form vs rating), rest/travel/division/late season, weather, ST/HFA share of
   the margin; compare tag rates in Vegas-closer misses vs overall, per season; hand-review the 20 worst; fix only
   what's clear and test walk-forward on margin MAE and ATS. If nothing stands out, the gap is market information.
-- **Awaiting owner decision:** Matchups reframe (Vegas line as headline, model as the explanation; drop or
-  de-emphasize edge pills with the honest record "Vegas right 59% when they disagree"; show running model vs Vegas
-  pick record).
+- **Done 2026-10-12:** Matchups tossup / win-chance reframe (section 4). Possible follow-up: a live model track
+  record (needs walk-forward model margins for past weeks, e.g. cached from the archive build).
 - **Proposed:** market-implied team ratings (fit to posted spreads/totals) for lookahead weeks and a Power "market
   view"; test vs actual margins and future closing lines.
 - **Rebuild the archive** after the share-normalization change (and after any future model change).
