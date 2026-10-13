@@ -46,7 +46,9 @@ Git hooks: `git config core.hooksPath .githooks` (pre-commit blocks commits when
 3. **Model vs presentation.** Model code = everything in `nfledge/` except `report.py` and `docs.py`. Changing
    model code or `config.toml` invalidates caches (full retrain ~3-6 min) and makes MODEL.md stale: update the
    doc, run `--stamp`. Presentation-only changes reuse the cached model (~10-30 s builds).
-4. **Verify the page visually** before claiming a UI change works (headless Chrome screenshots; see INSIGHTS).
+4. **Verify the page visually** before claiming a UI change works: `python tools/screenshot.py TAB` renders in
+   WebKit with an iPhone profile (the owner tests on Brave/iPhone, which is WebKit; headless Chrome misses WebKit
+   bugs), `--device=desktop` for Chromium. Options for position tab and page/table scrolling are in the script.
    `run.py` fails the build if the page script has a JS syntax error (needs `node` on PATH).
 5. **Commits:** plain ASCII messages, no emojis. Push to main deploys.
 6. **Code style:** 2-space indent Python, ~120 char lines, match surrounding idiom.

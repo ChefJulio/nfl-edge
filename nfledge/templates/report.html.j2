@@ -69,14 +69,12 @@ details.howto div { margin-top: 8px; color: var(--muted); font-size: 12.5px; max
 
 /* tables */
 .scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-/* Floating table header: a .scroll wrapper scrolls sideways, which traps position: sticky inside it, so a copy of
-   the header rides in a zero-height sticky strip just under the tabs (shown once the real one scrolls away) and
-   follows the table's horizontal scroll. Clicks pass through to the real header (sorting). */
-.fhead { position: sticky; top: var(--navh, 45px); height: 0; z-index: 6; visibility: hidden; }
-.fhead.show { visibility: visible; }
-.fhead-in { overflow: hidden; background: var(--panel); border-bottom: 1px solid var(--line); box-shadow: 0 6px 12px -8px rgba(0,0,0,.5); }
-.fhead table { width: auto; table-layout: fixed; margin: 0 !important; border-spacing: 0 !important; }
-.fhead th { overflow: hidden; text-overflow: ellipsis; }
+/* Table viewports: a wide table scrolls inside its own box, at most the screen height below the tabs, in both
+   directions. That makes plain position: sticky pin the header row (top) and the name column (left) with no script,
+   in every engine including iOS WebKit. Scrolling chains to the page at the box's edges. */
+.scroll { max-height: calc(100vh - var(--navh, 45px) - 12px); max-height: calc(100dvh - var(--navh, 45px) - 12px); }
+.game .scroll { max-height: none; }
+thead th { box-shadow: 0 1px 0 var(--line); }
 table { border-collapse: collapse; width: 100%; font-size: 13px; }
 th, td { padding: 8px 10px; text-align: left; white-space: nowrap; vertical-align: middle; }
 thead th.can-sort { cursor: pointer; } thead th.can-sort:hover { color: var(--ink); }
@@ -629,47 +627,11 @@ document.querySelectorAll('tr.main').forEach(r => r.onclick = () => {
   const d = r.nextElementSibling; if (!d || !d.classList.contains('detail')) return;
   d.hidden = !d.hidden; r.classList.toggle('open', !d.hidden);
 });
-// Floating headers (see .fhead in the CSS).
+// Tab-bar height sizes the table viewports (see .scroll in the CSS).
 const nav = document.querySelector('nav.tabs');
 const setNav = () => document.documentElement.style.setProperty('--navh', nav.offsetHeight + 'px');
 setNav();
-const heads = [];
-document.querySelectorAll('.scroll > table').forEach(tbl => {
-  if (!tbl.tHead || tbl.closest('.game')) return;
-  const sc = tbl.parentElement;
-  const strip = document.createElement('div'); strip.className = 'fhead'; strip.setAttribute('aria-hidden', 'true');
-  const inner = document.createElement('div'); inner.className = 'fhead-in';
-  const copy = document.createElement('table'); copy.className = tbl.className.replace('sortable', '');
-  inner.appendChild(copy); strip.appendChild(inner); sc.parentElement.insertBefore(strip, sc);
-  const build = () => {
-    copy.replaceChildren(tbl.tHead.cloneNode(true));
-    const src = [...tbl.tHead.rows[0].cells], dst = [...copy.tHead.rows[0].cells];
-    let total = 0;
-    dst.forEach((c, i) => {
-      const w = src[i].getBoundingClientRect().width; total += w;
-      c.style.width = c.style.minWidth = c.style.maxWidth = w + 'px';
-      c.onclick = () => { src[i].click(); build(); };
-    });
-    copy.style.width = total + 'px';
-    inner.style.width = sc.clientWidth + 'px';
-    inner.scrollLeft = sc.scrollLeft;
-  };
-  sc.addEventListener('scroll', () => { inner.scrollLeft = sc.scrollLeft; }, { passive: true });
-  heads.push({ tbl, strip, build, built: false });
-});
-const placeHeads = () => {
-  const navh = nav.getBoundingClientRect().bottom;
-  heads.forEach(h => {
-    const r = h.tbl.getBoundingClientRect(), th = h.tbl.tHead.getBoundingClientRect();
-    const show = r.width > 0 && th.top < navh && r.bottom - th.height > navh + 40;
-    if (show && !h.built) { h.build(); h.built = true; }
-    h.strip.classList.toggle('show', show);
-  });
-};
-const rebuild = () => { setNav(); heads.forEach(h => h.built = false); placeHeads(); };
-window.addEventListener('scroll', placeHeads, { passive: true });
-window.addEventListener('resize', rebuild);
-document.addEventListener('click', e => { if (e.target.closest('nav.tabs, .posbar, tr.main, thead')) setTimeout(rebuild, 0); });
+window.addEventListener('resize', setNav);
 // Compact pinned column (see .scroll.compact in the CSS). Collapsing narrows the first columns, which would
 // slide the content being read; scrollLeft is moved by the same amount so it stays put. Expanding only at the
 // far left (hysteresis) keeps that adjustment from toggling it straight back.
@@ -684,7 +646,6 @@ document.querySelectorAll('.scroll').forEach(sc => {
     sc.classList.toggle('compact', want);
     const delta = before - cell.getBoundingClientRect().width;
     if (want && delta > 0) sc.scrollLeft = Math.max(1, sc.scrollLeft - delta);
-    rebuild();
   }, { passive: true });
 });
 const ps = document.getElementById('psearch');
@@ -694,7 +655,6 @@ if (ps) ps.oninput = () => {
     const show = !q || r.dataset.name.includes(q); r.hidden = !show;
     const d = r.nextElementSibling; if (d && d.classList.contains('detail') && !show) d.hidden = true;
   });
-  rebuild();
 };
 </script>
 </body>
