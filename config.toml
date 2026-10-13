@@ -3,7 +3,8 @@
 [data]
 # Seasons of history loaded in addition to the current one. Meta-models (volume, efficiency,
 # injury redistribution) are trained only on seasons strictly before the one being projected.
-history_seasons = 3
+# 7 so the points formula can train on 6 prior seasons (each needs its prior season for features).
+history_seasons = 7
 # Learned components train on this many seasons immediately before the season being projected (or tested). Fixed
 # rather than "everything loaded", so a long backtest (more history loaded) trains each season exactly the way
 # the live site does, and training cost doesn't grow with the history window.
@@ -39,7 +40,15 @@ division_hfa = false
 qb_effects = true
 qb_inexp_dropbacks = 150
 qb_alpha_grid = [30, 100, 300, 1000, 1e9]
-# Ridge penalty on the inexperienced-QB indicator (one league-level effect, lightly penalized). [backtest pending]
+# Points formula (points = a + b x offensive EPA + c x special-teams EPA edge) trains on this many prior seasons;
+# ratings and volume models keep the 2-season window. Game-level walk-forward 2021-25 (tools/game_eval.py): with
+# 2 seasons the fitted special-teams weight drifted 0.9 -> 3.3; with 6 it settles near 2 (1.2, 1.9, 2.1, 2.1),
+# margin MAE 10.71 -> 10.68 (CI -0.09 to +0.01), never worse in any season, winners 59.2% -> 61.4%.
+# Fixed special-teams weights 0-2.5 were all within noise of the fit (points_st_weight = "fitted" kept).
+points_seasons = 6
+points_st_weight = "fitted"
+# Ridge penalty on the inexperienced-QB indicator (one league-level effect, lightly penalized). Audit: 10 within
+# noise; the 150-dropback cutoff vs 100 / 300 also within noise.
 qb_inexp_alpha = 1.0
 # Pass defense adjusted for starting cornerbacks likely out. Tested and rejected: counting only pre-game-knowable
 # absences, no defensive (or O-line) personnel effect held up out of sample (details in personnel.py).
@@ -51,8 +60,9 @@ volume_features = "base"
 seed = 7
 
 [player_model]
-# Recency half-life for usage shares (weeks).
-share_half_life_weeks = 5.0
+# Recency half-life for usage shares (weeks). 5-season audit (2021-25): 3 beats 5 (-0.004 pts MAE, CI excludes 0;
+# RB -0.012), 8 is worse (+0.004).
+share_half_life_weeks = 3.0
 # Expected-TD blend: weight on actual TDs = n / (n + td_blend_k), n = opportunities.
 td_blend_k = 150
 # Passing penalty above this wind speed (mph), per mph, capped.
@@ -60,13 +70,15 @@ wind_threshold_mph = 15
 wind_penalty_per_mph = 0.02
 wind_penalty_cap = 0.25
 # Role-change alert: snap-share jump (percentage points) vs prior 3-week average.
-# Efficiency look-back: weight of this season, last season and two seasons back. [backtest pending]
+# Efficiency look-back: weight of this season, last season and two seasons back. Audit: flat and steep
+# alternatives within noise (insensitive).
 eff_season_weights = [1.0, 0.6, 0.3]
 # Small-rate priors (scramble rate, fumbles per touch, aDOT, targets per route): "fixed" defaults or "fitted"
-# (method of moments on the training seasons). [backtest pending]
-minor_priors = "fixed"
+# (method of moments on the training seasons). Audit: fitted -0.001 (within noise) -> fitted, no hand-set values.
+minor_priors = "fitted"
 # Starting QB's minimum share of team dropbacks: "fixed" (starter_db_share) or "fitted" (measured: the top QB's
-# share in each training team-game, injury exits included). [backtest pending]
+# share in each training team-game, injury exits included). Audit: measured (0.97) slightly worse (+0.001,
+# CI excludes 0) -> 0.96 kept, now a tested value.
 starter_share = "fixed"
 starter_db_share = 0.96
 role_change_snap_jump = 0.15
@@ -94,7 +106,9 @@ total_disagree = 4.0
 implied_total = true    # Vegas implied team total as an efficiency input
 air_yards = false       # air-yards share (volume) + aDOT (receiving yards)
 # Wind: "fixed" = the hand-set penalty in [player_model] (wind_threshold_mph etc.); "linear" / "quadratic" = wind
-# (mph; domes 0) as a fitted input to every passing-efficiency regression, so the data sets its size. [pending]
+# (mph; domes 0) as a fitted input to every passing-efficiency regression. Audit: fixed beats both no-wind (TE
+# +0.008, CI excludes 0) and fitted (TE +0.012: thin data learned a positive TE effect) -> fixed kept; its
+# threshold / slope / cap are next to be tuned on a grid.
 wind_mode = "fixed"
 snap_input = false      # snap share as a volume input (spec: flag only, so off unless you opt in)
 # Blend with FantasyPros expert consensus (free, scraped Fridays; only pre-kickoff ranks are used). Backtest:
@@ -105,16 +119,18 @@ ecr_blend_positions = ["RB", "WR", "TE"]
 # Fraction of the learned vacated-volume redistribution applied. Backtest: helps RB, slightly hurts WR;
 # 0.5 keeps teammate projections near-unbiased in both 2025 and 2026.
 redistribution_scale = 0.5
-# Absences redistributed only for players at or above these projected shares. [backtest pending]
+# Absences redistributed only for players at or above these projected shares. Audit: lower / higher within noise.
 redistribute_min_share = { tgt_share = 0.08, carry_share = 0.15 }
-# Gradient-boosting settings for the practice-availability and healthy-scratch models. [backtest pending]
+# Gradient-boosting settings for the practice-availability and healthy-scratch models. Audit: smaller / larger
+# models within noise on points and availability Brier (0.0998-0.1006 vs 0.1003).
 gb_iterations = 200
 gb_learning_rate = 0.05
 gb_max_depth = 3
 
 [uncertainty]
 # Range widening relative to an established player: few games played (factor), low-data flag, and roles boosted
-# by a teammate's absence. Overall range calibration is measured; these multipliers are [backtest pending].
-games_factor = 0.6
-low_sample_widen = 1.2
-injury_boost_widen = 1.25
+# by a teammate's absence. Audit: the multipliers made calibration WORSE (78.3% / 49.5% inside 10-90 / 25-75 vs
+# 80.0% / 50.2% without; targets 80 / 50) -> off. The empirical ranges already reflect outcome spread.
+games_factor = 0.0
+low_sample_widen = 1.0
+injury_boost_widen = 1.0

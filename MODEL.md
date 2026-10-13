@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 92db034bfe49280a
+documented_code_hash: 7a65bca40c4109fd
 ---
 # How the model works
 
@@ -61,7 +61,7 @@ Ratings are estimated per play. On the Power tab they are shown as **points per 
 
 **Expert blend.** Once the FantasyPros consensus is published (Fridays), RB/WR/TE projections blend it in with learned weights. QBs stay model-only because the model alone beats the experts there. Only rankings published before the player's kickoff are used. Current blends: {{ L.blend }}.
 
-**Ranges and touchdown odds.** The floor, middle and ceiling are the 10th / 25th / 75th / 90th percentiles of what actually happened after past projections of the same size at the position, widened for players with little data or injury-driven roles. Backtest coverage: **{{ L.coverage }}** of actual scores landed between floor and ceiling (target 80%). Touchdown odds (exactly 1, 2, 3+) treat the expected-TD rate as a Poisson count, which matched real frequencies closely in testing.
+**Ranges and touchdown odds.** The floor, middle and ceiling are the 10th / 25th / 75th / 90th percentiles of what actually happened after past projections of the same size at the position. (Extra widening for thin data or injury-driven roles was tested and removed: it made calibration worse.) Backtest coverage: **{{ L.coverage }}** of actual scores landed between floor and ceiling (target 80%). Touchdown odds (exactly 1, 2, 3+) treat the expected-TD rate as a Poisson count, which matched real frequencies closely in testing.
 
 ## 5. Availability and injuries
 
@@ -78,7 +78,7 @@ Ratings are estimated per play. On the Power tab they are shown as **points per 
 | Matchup bars (Matchups) | The model margin split exactly along the points formula: each offense-vs-defense battle (per-play edge x projected plays x the fitted points per EPA), special teams (net special-teams EPA x its fitted weight), and home field plus play volume / pass-run mix. Overall = the sum, to the decimal |
 | Matchup points (hover) | Projection against this defense minus projection against an average defense |
 | Tier | League-size buckets for a {{ L.tier_teams }}-team league: QB1 = QB ranks 1-{{ L.tier_teams }}, QB2 = the next {{ L.tier_teams }}, and so on for every position. Pill color is the roster slot the player fills with {{ L.tier_roster }}: green = starter, amber = flex range (best remaining RB/WR/TE), plain = bench |
-| Power values | Points per game vs an average opponent: each unit's per-play rating x league-average plays of that type (pass offense includes the starting QB). Offense = Pass O + Run O, Defense = Pass D + Run D, Net = Offense + Defense + ST. League-average volume means a defense is judged on per-play quality, not on how many plays its own offense left it facing |
+| Power values | The model's own predicted margin vs an average team on a neutral field, by unit: each unit's per-play rating x league-average plays of that type x the game model's fitted points formula (offense and defense x points per EPA; special teams x twice its fitted weight, since a special-teams edge adds to your score and takes from the opponent's). Pass offense includes the starting QB. Offense = Pass O + Run O, Defense = Pass D + Run D, Net = Offense + Defense + ST, so Power and the Matchups bars always agree. League-average volume means a defense is judged on per-play quality, not on how many plays its own offense left it facing |
 | Rank range (Power) | 10th-90th percentile rank when every team's net rating is resampled within its bootstrap uncertainty |
 | Schedule played / left (Power) | Points per game the opponents took away (played) or would take away (left), unit by unit: the team's actual dropbacks against each opponent's pass defense and runs against its run defense, plus the offenses its defense faced (incl. their QBs). Re-scored weekly with current ratings; 1st = hardest |
 | Rank movement (Power) | Change in net-rating rank since ratings as of last week |
@@ -92,6 +92,13 @@ Every validation number on this site is **walk-forward**: projections for a week
 {{ L.bt_table }}
 
 ## 8. Tested and left out
+
+**Full audit (2026-10-12).** Every setting that had been hand-set, plus everything earlier decided on only one or two seasons, was re-tested walk-forward on 2021-2025 (12,480 fantasy-relevant player-weeks; 95% confidence intervals over season-weeks):
+
+- *Changed:* usage-share half-life 5 -> 3 weeks (better, interval excludes zero); range-widening multipliers removed (calibration 78.3% / 49.5% -> 80.0% / 50.2% vs targets 80 / 50); small-rate priors (scramble rate, fumbles, aDOT, targets per route) now estimated from data.
+- *Confirmed (alternatives worse):* Vegas implied total (+0.036 without), expert blend for RB/WR/TE (+0.013 without), the fixed wind penalty (no wind or a fitted wind term both hurt TEs), half-strength injury redistribution, the 0.96 starting-QB share.
+- *Insensitive (alternatives within noise, current kept):* training window (2 / 3 / 4 seasons), prior-season weight and fade, efficiency season weights, garbage-time window, QB-experience cutoff and penalty, touchdown blend strength, availability-model size, redistribution trigger, team-rating half-life, QB effects on fantasy points, expert blend for QBs.
+- *Game model:* the points formula's special-teams weight drifted 0.9-3.3 when fit on two seasons; it now trains on six (weight about 2; margin error 10.71 -> 10.68, never worse in any season, winners 59% -> 61%). Fixed special-teams weights from 0 to 2.5 were all within noise of the fit.
 
 Ideas that sounded right but did not improve out-of-sample accuracy are switched off, not shipped:
 

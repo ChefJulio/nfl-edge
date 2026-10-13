@@ -31,7 +31,9 @@ from nfledge.config import load_config  # noqa: E402
 from nfledge.team_model import GameModel, TeamModel, game_lines, team_game_ledger, team_volume_features  # noqa: E402
 
 pd.set_option("display.width", 200)
-VARIANTS = {"fitted": "fitted", "st_0": 0.0, "st_0.5": 0.5, "st_1": 1.0, "st_1.5": 1.5, "st_2.5": 2.5}
+# name -> (special-teams weight, seasons the points formula trains on; 2 = the training window)
+VARIANTS = {"fitted": ("fitted", 2), "st_0": (0.0, 2), "st_1": (1.0, 2), "st_1.5": (1.5, 2), "st_2.5": (2.5, 2),
+            "fitted_4yr": ("fitted", 4), "fitted_6yr": ("fitted", 6)}
 
 
 def season_games(base: dict, history: int, season: int) -> tuple[pd.DataFrame, dict]:
@@ -44,15 +46,18 @@ def season_games(base: dict, history: int, season: int) -> tuple[pd.DataFrame, d
   tm.tune_alphas([(s, w) for s in train for w in range(4, data.completed_weeks(s) + 1)])
   ledger = team_game_ledger(data.pbp, data.schedules)
   rows = GameModel(cfg).training_rows(tm, ledger, train)
+  prior = [s for s in data.seasons if s < season and s - 1 in data.seasons]
+  extra_rows = {s: GameModel(cfg).training_rows(tm, ledger, [s]) for s in prior if s not in train}
   sched = data.schedules
   sched = sched[(sched.season == season) & (sched.game_type == "REG") & sched.home_score.notna()]
   out, fitted_w = [], {}
-  for name, w in VARIANTS.items():
+  for name, (w, n_pts) in VARIANTS.items():
     c = copy.deepcopy(cfg)
     c["team_model"]["points_st_weight"] = w
-    gm = GameModel(c).fit(rows)
-    if name == "fitted":
-      fitted_w = dict(zip(gm.points.cols, gm.points.coef[1:]))
+    extra = [extra_rows[s] for s in prior[-n_pts:] if s in extra_rows]
+    gm = GameModel(c).fit(rows, pd.concat(extra + [rows]) if extra else None)
+    if w == "fitted":
+      fitted_w.update({f"{k}@{n_pts}yr": v for k, v in zip(gm.points.cols, gm.points.coef[1:])})
     for wk in sorted(sched.week.unique()):
       if wk < 2:
         continue

@@ -469,16 +469,25 @@ def starters_asof(eng, season: int, week: int) -> dict:
   return past.dropna(subset=["qb"]).groupby("team").qb.last().to_dict()
 
 
-def unit_points(r, vol: dict, starters: dict) -> pd.DataFrame:
-  """Points per game vs an average opponent, per unit, at league-average volume (so units add up):
-  Pass O includes the starting QB's effect; defense signs flipped so positive is always good."""
+def formula_weights(eng) -> dict:
+  """The game model's fitted points formula, as unit multipliers on EPA per game: offense and defense count
+  b points per EPA; a special-teams EPA edge counts 2c on the margin (c adds to your score, c comes off the
+  opponent's). Power uses these so its Net is the model's own margin vs an average team, matching Matchups."""
+  pc = dict(zip(eng.gm.points.cols, eng.gm.points.coef[1:]))
+  return {"play": float(pc["off_epa_game"]), "st": 2.0 * float(pc["st_net"])}
+
+
+def unit_points(r, vol: dict, starters: dict, w: dict) -> pd.DataFrame:
+  """Model margin per game vs an average opponent on a neutral field, per unit, at league-average volume (so
+  units add up): EPA per game x the game model's points-formula weights (formula_weights). Pass O includes the
+  starting QB's effect; defense signs flipped so positive is always good."""
   qb = pd.Series({t: r.qb_term(starters.get(t)) for t in r.teams})
   u = pd.DataFrame(index=r.teams)
-  u["pass_o"] = (r.off["pass"] + qb) * vol["pass"]
-  u["rush_o"] = r.off["rush"] * vol["rush"]
-  u["pass_d"] = -r.dfn["pass"] * vol["pass"]
-  u["rush_d"] = -r.dfn["rush"] * vol["rush"]
-  u["st"] = (r.off["st"] - r.dfn["st"]) * vol["st"]
+  u["pass_o"] = (r.off["pass"] + qb) * vol["pass"] * w["play"]
+  u["rush_o"] = r.off["rush"] * vol["rush"] * w["play"]
+  u["pass_d"] = -r.dfn["pass"] * vol["pass"] * w["play"]
+  u["rush_d"] = -r.dfn["rush"] * vol["rush"] * w["play"]
+  u["st"] = (r.off["st"] - r.dfn["st"]) * vol["st"] * w["st"]
   u["off"] = u.pass_o + u.rush_o
   u["def"] = u.pass_d + u.rush_d
   u["net"] = u["off"] + u["def"] + u["st"]
@@ -546,17 +555,18 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
   if proj is not None:  # this week's projected starters (injury-aware) override
     qbs = proj[(proj.pos == "QB") & ~proj.sits].sort_values("db").groupby("team").tail(1)
     starters.update(dict(zip(qbs.team, qbs.gsis_id)))
-  u = unit_points(rb, vol, starters)
+  fw = formula_weights(eng)
+  u = unit_points(rb, vol, starters, fw)
   history = {}
   for w in range(2, week + 1):
     rw = eng.tm.fit(season, w)
-    history[w] = unit_points(rw, league_volume(eng, season, w, rw), starters_asof(eng, season, w)).net
+    history[w] = unit_points(rw, league_volume(eng, season, w, rw), starters_asof(eng, season, w), fw).net
   hist = pd.DataFrame(history)
   ts = TeamStyle(eng.data.teams)
   # Rank range: resample each unit within its bootstrap uncertainty (in points per game), rank the nets.
   qb = pd.Series({t: rb.qb_term(starters.get(t)) for t in rb.teams})
-  se_net = np.sqrt((vol["pass"] ** 2) * (rb.se_off["pass"] ** 2 + rb.se_def["pass"] ** 2)
-                   + (vol["rush"] ** 2) * (rb.se_off["rush"] ** 2 + rb.se_def["rush"] ** 2))
+  se_net = fw["play"] * np.sqrt((vol["pass"] ** 2) * (rb.se_off["pass"] ** 2 + rb.se_def["pass"] ** 2)
+                                + (vol["rush"] ** 2) * (rb.se_off["rush"] ** 2 + rb.se_def["rush"] ** 2))
   rng = np.random.default_rng(cfg["team_model"]["seed"])
   sims = rng.normal(u.net.to_numpy(), se_net.reindex(u.index).to_numpy(), size=(4000, len(u)))
   sim_rank = (-sims).argsort(axis=1).argsort(axis=1) + 1
@@ -566,6 +576,9 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
   rk = lambda s: s.rank(ascending=False, method="min").astype(int)
   ranks = {c: rk(u[c]) for c in u.columns}
   sos = schedule_faced(eng, season, week, rb, starters)
+  for c in ("off_past", "def_past", "off_next", "def_next", "past", "next"):  # same points scale as the units
+    if c in sos:
+      sos[c] = sos[c] * fw["play"]
   sos_rk = {c: rk(sos[c].dropna()) for c in ("past", "next")}
   rec = records(eng, season, week)
   rows = []
@@ -754,6 +767,13 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
                               for u, col_ in (("pass", "dropbacks_hat"), ("rush", "rushes_hat")))
     volume = float(base_pts(va) - base_pts(vh))
     hfa = float(home_pts(va) - home_pts(vh))
+    # The formula's special-teams edge includes home field on special-teams plays: report that part under home
+    # field, so the Special teams bar equals the two teams' Power special-teams difference.
+    n_st = float(r.plays_pg.get("st", 11.0))
+    st_pure = 2 * c_st * n_st * (float(r.off.at[a_t, "st"] - r.dfn.at[a_t, "st"])
+                                 - float(r.off.at[h_t, "st"] - r.dfn.at[h_t, "st"]))
+    hfa += st - st_pure
+    st = st_pure
     st_row = tug("Special teams", st, 8.0, rank_of(a_t, "st_rk"), rank_of(h_t, "st_rk"),
                  f"{a_t} special teams", f"{h_t} special teams",
                  f"Special-teams EPA edge x {c_st:.2f} points per EPA (fitted: field position from returns and "

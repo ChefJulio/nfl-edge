@@ -94,6 +94,24 @@ threads. Numbers are walk-forward backtest results (train on earlier seasons, te
   testable explanation: ST ratings are heavily ridge-shrunk (alpha 300), and a regression on a shrunk predictor
   scales it back up, so the weight may simply undo the shrinkage.
 
+- **Full audit 2026-10-12 (39 settings x 2021-25, 12,480 player-weeks, week-clustered CIs; tools/experiments.py
+  with --history=8):** changed: share half-life 5 -> 3 (-0.004; RB -0.012), range-widening multipliers removed
+  (coverage 78.3/49.5% -> 80.0/50.2%), small-rate priors fitted. Confirmed: implied total (+0.036 without), ECR
+  blend RB/WR/TE (+0.013 without), fixed wind penalty (no-wind TE +0.008, fitted wind TE +0.012: it learned a
+  positive TE effect), redistribution 0.5, starter share 0.96. Insensitive (within noise): train window 2/3/4,
+  prior weight/decay, eff season weights, WP window, QB-inexperience cutoff/penalty, TD k, GB size, redistribution
+  trigger, team half-life, QB effects (fantasy), ECR for QB. Bias: actuals exceed projections by +0.25 to +0.49
+  for relevant RB/WR/TE (unexplained; partly selection of "relevant" rows?).
+- **Error breakdown (tools/error_breakdown.py, 2021-25):** share of squared error removed by fixing each layer
+  alone: team volume ~0-10%, player share 10/30/34/38% (QB/RB/WR/TE), efficiency 21-31%, TDs 28-50%. Share is the
+  largest fixable layer for RB/WR/TE; TDs/efficiency are mostly game-level noise.
+- **Game model (tools/game_eval.py):** points formula trained on 6 prior seasons (`points_seasons`): with 2 the
+  ST weight drifted 0.9 -> 3.3; with 6 it is ~2 (margin MAE 10.71 -> 10.68, never worse per season, winners
+  59.2 -> 61.4%). Fixed ST weights 0-2.5 all within noise. Model-only margin MAE ~10.7 vs Vegas 9.8. Fitted home
+  effect on special-teams plays is slightly negative (home ST worse), so 'Home & pace' can favor the visitor.
+- **Power = the game model's margin vs an average team** (units x fitted points-formula weights; ST x 2c) so it
+  agrees with the Matchups bars exactly; it used to be face-value EPA (an untested display assumption).
+
 ## 4. Tested and rejected (do not retry without new data/angle)
 | Idea | Result |
 |---|---|
@@ -181,3 +199,9 @@ threads. Numbers are walk-forward backtest results (train on earlier seasons, te
 - **Daily practice archive:** `cache/injury_snapshots/` accumulates our own Wed/Thu/Fri history going forward.
 - Light mode has had little visual review (phone layouts reviewed 2026-10-12).
 - The 2026 test season is small (weeks 3-5 at time of writing); re-run experiments as it grows.
+- **Queued (owner: everything data-driven, no assumptions):** tune the fixed wind penalty on a grid (threshold
+  10/15/20 mph, slope 1-3%/mph, cap) instead of the hand-picked 15 / 2% / 25%; position-specific share half-life
+  (RB wants 3, TE may prefer 5); then the accuracy ideas ranked by the error breakdown: expected fantasy points
+  per opportunity, spread-aware RB shares, NGS / FTN inputs.
+- **Speed:** experiment batches recompute identical stages per variant (e.g. team ratings); stage caching and
+  per-worker data windows (5 seasons instead of 9) would cut batch time further.

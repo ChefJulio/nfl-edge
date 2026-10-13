@@ -101,6 +101,10 @@ VARIANTS = {
   "gb_large": variant(injuries__gb_iterations=300, injuries__gb_max_depth=5),
   "ranges_plain": variant(uncertainty__games_factor=0.0, uncertainty__low_sample_widen=1.0,
                           uncertainty__injury_boost_widen=1.0),
+  # 2026-10-12 audit outcome, tested together for interactions before adopting
+  "adopted": variant(player_model__share_half_life_weeks=3.0, uncertainty__games_factor=0.0,
+                     uncertainty__low_sample_widen=1.0, uncertainty__injury_boost_widen=1.0,
+                     experiments__wind_mode="linear", player_model__minor_priors="fitted"),
 }
 
 

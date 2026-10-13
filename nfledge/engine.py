@@ -46,7 +46,14 @@ class Engine:
     self.pm.prepare(seasons)
     self.pm.fit_priors(seasons)
     self.gm = GameModel(self.cfg)
-    self.gm.fit(self.gm.training_rows(self.tm, self.team_ledger, seasons))
+    rows = self.gm.training_rows(self.tm, self.team_ledger, seasons)
+    # Points formula: optionally a longer window of prior seasons (team_model.points_seasons) than the 2-season
+    # training window; volume models keep the training window.
+    n_pts = int(self.cfg["team_model"].get("points_seasons", len(seasons)))
+    longer = [s for s in self.data.seasons if s < test_season and s - 1 in self.data.seasons][-n_pts:]
+    extra = [s for s in longer if s not in seasons]
+    pts_rows = pd.concat([self.gm.training_rows(self.tm, self.team_ledger, extra), rows]) if extra else None
+    self.gm.fit(rows, pts_rows)
     train = self.pm.training_rows(seasons, self.positions)
     self.pm.fit_meta(train)
     self.injury_model = inj.InjuryModel(self.data, self.pm, self.cfg).fit(seasons) if use_injuries else None

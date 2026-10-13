@@ -466,7 +466,9 @@ class GameModel:
     g["st_net"] = n_st * (g.epa_st - g.opp_epa_st)
     return g
 
-  def fit(self, train: pd.DataFrame):
+  def fit(self, train: pd.DataFrame, points_rows: pd.DataFrame | None = None):
+    """Volume models fit on `train`; the points formula fits on `points_rows` when given (a longer window of
+    seasons: two seasons pin down the special-teams weight poorly; it drifted 0.9-3.3 between windows)."""
     vf_mode = self.cfg["team_model"].get("volume_features", "base")
     more = {"base": [], "pace": ["sec_pp", "opp_sec_pp"],
             "extended": ["sec_pp", "opp_sec_pp", "epa_pass", "epa_rush", "opp_epa_pass", "opp_epa_rush"]}[vf_mode]
@@ -475,7 +477,7 @@ class GameModel:
     self.plays_model = Linear.fit(train, "plays", ["pace", "opp_pace_allowed"] + more, name="plays (model)")
     self.pass_rate = Linear.fit(train, "pass_rate", ["proe_team", "pass_rate_team", "spread_team"],
                                 weight="plays", name="pass rate")
-    t = train.copy()
+    t = (points_rows if points_rows is not None else train).copy()
     t["dropbacks_hat"] = self.plays_model.predict(t) * self.pass_rate.predict(t.assign(spread_team=0.0))
     t["rushes_hat"] = self.plays_model.predict(t) - t.dropbacks_hat
     t["off_epa_game"] = t.dropbacks_hat * t.epa_pass + t.rushes_hat * t.epa_rush
