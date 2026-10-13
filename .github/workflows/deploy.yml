@@ -5,8 +5,11 @@ on:
     branches: [main]
   schedule:
     # Daily refresh at 10:00 ET: injury reports (Wed-Fri), expert rankings (Fri) and scores change without a push.
-    # The page rolls over to the next week at 06:00 ET Tuesday, so Tuesday's run publishes the new week.
+    # The page rolls over to the next week at 06:00 ET Tuesday. GitHub's schedules are best-effort (often late,
+    # sometimes skipped: the 10:00 run never fired on 2026-10-13), so Tuesday gets its own early run as well:
+    # 11:30 UTC = 07:30 EDT / 06:30 EST, after the rollover in both.
     - cron: "0 14 * * *"
+    - cron: "30 11 * * 2"
   workflow_dispatch:
 
 permissions:
