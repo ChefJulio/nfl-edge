@@ -704,12 +704,12 @@ UNIT_NAME = {"pass": "Pass", "rush": "Run"}
 
 
 def tug(label: str, away_edge: float, scale: float, away_rk, home_rk, away_what: str, home_what: str,
-        title: str) -> dict:
-  """One tug-of-war bar: away team on the left, home on the right. away_edge = points this game in the away
-  team's favor; the split moves past the middle toward the loser (clipped at 90% of the bar at +/-scale), and the
-  margin is shown on the winner's side ('even' under half a point)."""
+        title: str, impact: float | None = None) -> dict:
+  """One tug-of-war bar: away team on the left, home on the right. away_edge = the number shown, in the away
+  team's favor, on the winner's side ('even' under 0.5). The split moves past the middle toward the loser by
+  impact / scale (impact defaults to away_edge), clipped at 90% of the bar."""
   return {"label": label, "edge": away_edge, "pts": abs(away_edge),
-          "split": 50 + 50 * max(-0.9, min(0.9, away_edge / scale)),
+          "split": 50 + 50 * max(-0.9, min(0.9, (away_edge if impact is None else impact) / scale)),
           "side": "even" if abs(away_edge) < 0.5 else "away" if away_edge > 0 else "home",
           "away_rk": away_rk, "home_rk": home_rk, "away_what": away_what, "home_what": home_what, "title": title}
 
@@ -834,6 +834,20 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
   def rank_of(team, key):
     return int(rk[team][key]) if team in rk else None
 
+  # The points formula: points = a + b x (dropbacks x E[pass EPA] + rushes x E[rush EPA]) + c x special-teams net,
+  # E[EPA] = league average + offense + defense (+ QB) + home field. It sets each battle bar's length (below).
+  pc = dict(zip(eng.gm.points.cols, eng.gm.points.coef[1:]))
+  b, c_st = float(pc["off_epa_game"]), float(pc["st_net"])
+  # One bar scale for every row of every game: a full bar (90%) is the 95th percentile of offense-vs-defense impact
+  # over every possible pairing of this week's ratings at league-average play counts.
+  pp = r.plays_pg
+  o_imp = {t: pp.get("pass", 34.0) * (r.off.at[t, "pass"] + r.qb_term(starters.get(t)))
+           + pp.get("rush", 25.0) * r.off.at[t, "rush"] for t in r.off.index}
+  d_imp = {t: pp.get("pass", 34.0) * r.dfn.at[t, "pass"] + pp.get("rush", 25.0) * r.dfn.at[t, "rush"]
+           for t in r.dfn.index}
+  pair = [abs(b * (o_imp[o] + d_imp[d])) for o in o_imp for d in d_imp if o != d]
+  bar_scale = float(np.percentile(pair, 95)) / 0.9 if pair else 8.0  # tug() clips at 0.9 x scale
+
   out = []
   for _, g in gl.iterrows():
     def side(t):
@@ -847,21 +861,15 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
     vm, vt = g.spread_line, g.total_line
     v_fav = g.home_team if (pd.notna(vm) and vm >= 0) else g.away_team
     fc = forecast(g, float(logistic(k_model * g.model_margin)), k_vegas, tossup, names, ts)
-    # Who wins each battle, in points THIS game: per-play edge x that offense's projected plays of that type, so a
-    # run edge (fewer plays) is not read as equal to a pass edge of the same per-play size. Every bar is a tug of
-    # war with the away team on the left and the home team on the right. Hierarchy: Overall (the model margin) =
-    # the two offense-vs-defense subtotals + special teams + home field; each subtotal = its passing + running.
+    # Who wins each battle. Every bar is a tug of war, away team on the left and home team on the right. The
+    # model margin = both offense-vs-defense matchups + special teams + home field + play volume (never shown).
     vol_of = tp[tp.game_id == g.game_id].set_index("team")
     col = battle_colors(ts, g.away_team, g.home_team)
     a_t, h_t = g.away_team, g.home_team
-    # The bars split the model margin EXACTLY along the points formula
-    #   points = a + b x (dropbacks x E[pass EPA] + rushes x E[rush EPA]) + c x special-teams net,
-    #   E[EPA] = league average + offense + defense (+ QB) + home field,
-    # so Overall = both offense-vs-defense matchups + special teams + home field + play volume.
-    pc = dict(zip(eng.gm.points.cols, eng.gm.points.coef[1:]))
-    b, c_st = float(pc["off_epa_game"]), float(pc["st_net"])
-    # Bars show EPA per 100 plays (efficiency edges, never the model's points: the model publishes only win
-    # chances). The points each edge is worth are still computed so the parts can be checked against the margin.
+    # Numbers are EPA per 100 plays (efficiency edges, never the model's points: the model publishes only win
+    # chances). Bar LENGTH is the edge's impact on this game through the fitted points formula (per-play edge x
+    # projected plays x points per EPA), on one scale for every row, so a special-teams edge over ~11 plays reads
+    # smaller than an offense edge of the same size over ~60. The impacts also check the parts against the margin.
     battles, off_pts = [], 0.0
     for o, d in ((away, home), (home, away)):
       a_role, h_role = ("off", "def") if o is away else ("def", "off")
@@ -870,22 +878,25 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
       for unit, label, vcol in (("pass", "Passing", "dropbacks_hat"), ("rush", "Running", "rushes_hat")):
         edge100 = o[f"off_{unit}"] - d[f"def_{unit}"]
         plays = float(vol_of.at[o["team"], vcol])
-        pts_sum += b * edge100 / 100 * plays
+        pts = b * edge100 / 100 * plays
+        pts_sum += pts
         plays_sum += plays
-        rows.append(tug(label, sign * edge100, 15.0,
+        rows.append(tug(label, sign * edge100, bar_scale,
                         rank_of(a_t, unit_rk[(unit, a_role)]), rank_of(h_t, unit_rk[(unit, h_role)]),
                         f"{a_t} {UNIT_NAME[unit]} {a_role[0].upper()}", f"{h_t} {UNIT_NAME[unit]} {h_role[0].upper()}",
                         f"{o['team']} {label.lower()} offense {o[f'off_{unit}']:+.1f} vs {d['team']} {label.lower()} "
                         f"defense {d[f'def_{unit}']:+.1f} EPA per 100 plays (vs league average): a {edge100:+.1f} "
-                        f"edge for the offense on about {plays:.0f} projected {'dropbacks' if unit == 'pass' else 'runs'}"))
+                        f"edge for the offense on about {plays:.0f} projected {'dropbacks' if unit == 'pass' else 'runs'}",
+                        impact=sign * pts))
       off_pts += sign * pts_sum
       total100 = pts_sum / (b * plays_sum) * 100  # the pass and run edges weighted by projected plays
-      head = tug(f"{o['team']} offense", sign * total100, 12.0, rank_of(a_t, f"{a_role}_rk"),
+      head = tug(f"{o['team']} offense", sign * total100, bar_scale, rank_of(a_t, f"{a_role}_rk"),
                  rank_of(h_t, f"{h_role}_rk"),
                  f"{a_t} {'offense' if a_role == 'off' else 'defense'}",
                  f"{h_t} {'offense' if h_role == 'off' else 'defense'}",
                  f"{o['team']} offense vs {d['team']} defense: {total100:+.1f} EPA per 100 plays for the offense, "
-                 f"the passing and running edges weighted by its projected dropbacks and runs")
+                 f"the passing and running edges weighted by its projected dropbacks and runs",
+                 impact=sign * pts_sum)
       head["left"] = f"{a_t} {'offense' if a_role == 'off' else 'defense'}"
       head["right"] = f"{h_t} {'offense' if h_role == 'off' else 'defense'}"
       battles.append({"head": head, "rows": rows})
@@ -905,14 +916,17 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
     # Special teams per 100 special-teams plays = the Power tab's ST difference; its weight in the points formula
     # (field position from returns and coverage) is documented on the Model tab, not printed per game.
     st100 = away["st"] - home["st"]
-    st_row = tug("Special teams", st100, 12.0, rank_of(a_t, "st_rk"), rank_of(h_t, "st_rk"),
+    n_st = float(r.plays_pg.get("st", 11.0))
+    st_row = tug("Special teams", st100, bar_scale, rank_of(a_t, "st_rk"), rank_of(h_t, "st_rk"),
                  f"{a_t} special teams", f"{h_t} special teams",
-                 f"Special teams {a_t} {away['st']:+.1f} vs {h_t} {home['st']:+.1f} EPA per 100 special-teams plays")
+                 f"Special teams {a_t} {away['st']:+.1f} vs {h_t} {home['st']:+.1f} EPA per 100 special-teams plays "
+                 f"(about {n_st:.0f} per team per game)", impact=2 * c_st * n_st * st100 / 100)
     home100 = hfa_scrim / (b * scrim_plays) * 100 if scrim_plays else 0.0  # per-play home edge across both offenses
-    home_row = tug("Home field", home100, 12.0, None, None, "", "",
+    home_row = tug("Home field", home100, bar_scale, None, None, "", "",
                    "Neutral site: no home field" if g.location == "Neutral" else
                    f"Home field: {abs(home100):+.1f} EPA per 100 plays for {h_t if home100 < 0 else a_t}, "
-                   f"averaged over both teams' plays (fitted from every game in the training window)")
+                   f"averaged over both teams' plays (fitted from every game in the training window)",
+                   impact=hfa_scrim)
     # Pace has no per-play (EPA) form, so it is shown as projected plays and pass rate instead of a bar.
     plays = [{"team": t, "n": float(v.dropbacks_hat + v.rushes_hat),
               "pass": float(v.dropbacks_hat / (v.dropbacks_hat + v.rushes_hat))} for t, v in ((a_t, va), (h_t, vh))]

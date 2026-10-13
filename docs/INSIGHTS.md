@@ -223,9 +223,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   publicly shows a point spread, score or total, only win %** (spreads are the market's). Battles in EPA per 100
   plays: the two offense-vs-defense totals (play-weighted; tap for Pass/Run), Special teams (per 100 ST plays),
   Home field (per play); power-rank chips by the team names; pace as "Projected plays: TB 61 (62% pass)". No
-  Overall bar. The points split still runs internally as a check against the margin. Caveat: bars are no longer
-  on one game-impact scale (an ST edge covers ~11 plays, an offense edge ~60). Final score + Favorite won / Upset
-  (with its chance) / Tossup outcome.
+  Overall bar. Bar LENGTH = the edge's impact on the game through the fitted points formula (never printed), one
+  scale for all rows: full bar (90%) = 95th percentile of offense-vs-defense impact over all pairings that week.
+  Finding (2026 wk 5 fit): b = 0.68 pts per offensive EPA, c = 2.34 per special-teams EPA, so +1 EPA/100 is worth
+  0.41 pts over ~60 scrimmage plays but 0.53 over ~11 ST plays: per unit of edge, ST weighs MORE (field position).
+  ST bars are usually shorter only because teams differ less on ST (sd 1.9 EPA/100 vs 3-4.5 for pass/run units).
+  Final score + Favorite won / Upset (with its chance) / Tossup outcome.
 - **Power:** model margin vs average team by unit (7 ranks), rank range, schedule played/left, trend.
 - Tabs: Rankings, Matchups, Power, Role changes, Model.
 
