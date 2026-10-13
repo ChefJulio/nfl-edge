@@ -203,7 +203,15 @@ threads. Numbers are walk-forward backtest results (train on earlier seasons, te
 - **Daily practice archive:** `cache/injury_snapshots/` accumulates our own Wed/Thu/Fri history going forward.
 - Light mode has had little visual review (phone layouts reviewed 2026-10-12).
 - The 2026 test season is small (weeks 3-5 at time of writing); re-run experiments as it grows.
-- **Queued:** injury return-timing model (designation, weeks missed, injury type, position -> P(active) k weeks
+- **Return-timing model (nfledge/returns.py, tools/returns_eval.py):** P(plays next game | out injured) from games
+  missed, designation (R01 IR / R48 IR-return / R04 PUP / other RES / active), report status, body part, position,
+  week; chained for k games ahead with a measured stay-active rate after return. Walk-forward Brier 0.132 vs 0.137
+  (designation x missed table) vs 0.178 (rate); wins 4/5 seasons. Isotonic calibration made it worse (rejected).
+  No severity data: injury reports say "Knee", not "torn ACL". ESPN's public feed has diagnosis detail + an
+  estimated return date (after season end = effectively season-ending) but NO history, so CI archives it daily to
+  site/data/espn_injuries/ (archive branch) to test as an input once enough injuries resolve (owner: use it only
+  as a data-driven feature, never as truth). Not yet wired into lookahead weeks.
+- **Queued:** wire the return model into lookahead weeks; ESPN feature test once data accrues; (designation, weeks missed, injury type, position -> P(active) k weeks
   out; feeds lookahead weeks); rookie / low-data priors from free data (college production, preseason usage);
   expected fantasy points per opportunity; NGS / FTN inputs.
 - **Speed:** experiment batches recompute identical stages per variant (e.g. team ratings); stage caching and

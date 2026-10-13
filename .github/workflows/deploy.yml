@@ -48,6 +48,10 @@ jobs:
       # A week that just finished (after Tuesday's rollover) gets its archived page; existing pages are untouched.
       - name: Archive newly finished weeks
         run: python tools/build_archive.py --out=site --missing-only
+      # ESPN's injury feed (diagnosis, estimated return date) has no history, so it is archived daily until there is
+      # enough to TEST it as a return-model input (tools/espn_snapshot.py). Failures never fail the build.
+      - name: Snapshot ESPN injury feed
+        run: python tools/espn_snapshot.py --out=site/data/espn_injuries || true
       - name: Commit new archive pages
         working-directory: site
         run: |
