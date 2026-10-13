@@ -188,6 +188,41 @@
     return last ? Object.assign({}, last.end || {}, { lastPlay: { text: last.text } }) : null;
   };
 
+  // ------------------------------------------------------------------------------------------------ player news
+  // RotoWire's player blurbs (what happened + why it matters), as ESPN's fantasy app shows them. One request per
+  // player, made when his card opens; cached for 5 minutes. Read live from ESPN, never stored by us.
+  const NEWS = {};
+  const ago = iso => {
+    const s = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (s < 3600) return `${Math.max(1, Math.round(s / 60))}m ago`;
+    if (s < 86400) return `${Math.round(s / 3600)}h ago`;
+    if (s < 7 * 86400) return `${Math.round(s / 86400)}d ago`;
+    return new Date(iso).toLocaleDateString([], { month: 'short', day: 'numeric' });
+  };
+  const newsHtml = items => !items.length ? '<p class="pc-sub">No news in the last 60 days.</p>'
+    : `<ol class="nw">${items.slice(0, 6).map(a => {
+        const story = String(a.story || a.description || '').replace(/<[^>]+>/g, '').trim();
+        const long = story.length > 260;
+        return `<li class="nw-i${Date.now() - new Date(a.published).getTime() < 86400000 ? ' fresh' : ''}">
+          <div class="nw-t">${esc(ago(a.published))}${a.type ? ` · ${esc(a.type === 'Rotowire' ? 'RotoWire' : a.type)}` : ''}</div>
+          <div class="nw-h">${esc(a.headline || '')}</div>
+          ${story ? `<div class="nw-s${long ? ' clip' : ''}">${esc(story)}</div>${long ? '<button type="button" class="nw-more">More</button>' : ''}` : ''}</li>`;
+      }).join('')}</ol><div class="nw-src">Player news by RotoWire, via ESPN's public feed.</div>`;
+  const loadNews = async (espn, box) => {
+    const hit = NEWS[espn];
+    if (hit && Date.now() - hit.t < 300000) { box.innerHTML = newsHtml(hit.items); wireNews(box); return; }
+    box.innerHTML = '<p class="pc-sub">Loading news&hellip;</p>';
+    try {
+      const d = await getJSON(`https://site.web.api.espn.com/apis/fantasy/v2/games/ffl/news/players?days=60&playerId=${encodeURIComponent(espn)}`);
+      const items = (d.feed || []).filter(a => a.headline).sort((a, b) => new Date(b.published) - new Date(a.published));
+      NEWS[espn] = { t: Date.now(), items };
+      if (box.isConnected) { box.innerHTML = newsHtml(items); wireNews(box); }
+    } catch (e) { if (box.isConnected) box.innerHTML = '<p class="pc-sub">News unavailable right now.</p>'; }
+  };
+  const wireNews = box => box.querySelectorAll('.nw-more').forEach(b => b.onclick = () => {
+    const s = b.previousElementSibling; s.classList.toggle('clip'); b.textContent = s.classList.contains('clip') ? 'More' : 'Less';
+  });
+
   // ----------------------------------------------------------------------------------------------- player card
   let cardPid = null;
   const ensureOverlay = () => {
@@ -306,8 +341,10 @@
         <div class="pc-sub">${fpg != null ? `${f1(fpg)} FP/G` : ''}${l3 != null ? ` · last 3: ${f1(l3)}` : ''}${p.sched ? ` · ${esc(p.sched)}` : ''}</div>
         ${nweek >= 1 ? `<div class="pc-k" style="margin-top:10px">Points by week</div>${weekBars(p)}` : ''}</div>
       <p class="pc-take">${esc(p.takeaway)}</p>
+      ${p.espn && !DATA.archive ? '<div class="pc-box pc-newsbox"><div class="pc-k">Recent news</div><div class="pc-news"></div></div>' : ''}
       <div class="pc-links">${g ? `<a href="${gameHref(g)}">${st && st.state === 'in' ? '<span class="live-dot"></span>' : ''}Gamecast: ${esc(g.away.team)} @ ${esc(g.home.team)} &rsaquo;</a>` : ''}
         ${CFG.page !== 'game' && g ? `<a href="#games" data-goto="${esc(g.id)}">Matchup card &rsaquo;</a>` : ''}</div>`;
+    const nb = body.querySelector('.pc-news'); if (nb) loadNews(p.espn, nb);
     body.querySelectorAll('[data-goto]').forEach(a => a.onclick = ev => {
       ev.preventDefault(); closePlayer();
       const tab = document.querySelector('nav.tabs button[data-tab="games"]'); if (tab) tab.click();

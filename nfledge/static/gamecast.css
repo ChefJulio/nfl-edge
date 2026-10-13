@@ -100,6 +100,16 @@ html.pc-open { overflow: hidden; }
 .pc-wk .wb { fill: var(--accent); } .pc-wk .wb-miss { stroke: var(--faint); stroke-width: 2; }
 .pc-wk .wb-l, .pc-wk .wb-v { font-size: 9px; fill: var(--muted); text-anchor: middle; } .pc-wk .wb-v { fill: var(--ink); font-weight: 700; }
 .pc-take { margin: 10px 2px; font-weight: 600; line-height: 1.4; }
+.pc-newsbox { margin-bottom: 10px; }
+.nw { list-style: none; margin: 6px 0 0; padding: 0; }
+.nw-i { padding: 9px 0 9px 10px; border-top: 1px solid var(--line); border-left: 3px solid transparent; }
+.nw-i:first-child { border-top: 0; } .nw-i.fresh { border-left-color: var(--accent); }
+.nw-t { font-size: 11px; color: var(--muted); font-weight: 600; }
+.nw-h { font-weight: 700; line-height: 1.38; margin-top: 2px; }
+.nw-s { font-size: 13px; color: var(--muted); line-height: 1.45; margin-top: 4px; }
+.nw-s.clip { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.nw-more { font: inherit; font-size: 12px; font-weight: 700; color: var(--accent); background: none; border: 0; padding: 2px 0; cursor: pointer; }
+.nw-src { font-size: 11px; color: var(--faint); margin-top: 6px; }
 .pc-links { display: flex; gap: 16px; flex-wrap: wrap; font-weight: 700; font-size: 13.5px; }
 .pc-links a { text-decoration: none; } .pc-none { padding: 20px 0; color: var(--muted); }
 

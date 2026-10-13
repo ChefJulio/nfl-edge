@@ -269,7 +269,10 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   has ESPN live win % (labeled ESPN, separate from pregame), game log (drive / every play, filters, WP swing per
   play), box score with fantasy pts vs our projections incl. targets, team stats, pregame box, replay mode for
   finished games. Test switches: `?sim=1` (week page: finished games treated as live), `&replay=1` (game page).
-  Owner tests real live on Thursday night games.
+  Owner tests real live on Thursday night games. **Player news** on cards (current / lookahead weeks): RotoWire
+  blurbs from ESPN's fantasy feed `site.web.api.espn.com/apis/fantasy/v2/games/ffl/news/players?days=60&playerId=<espn>`
+  (CORS-open, one player per request; no bulk / multi-id form), fetched in the browser on card open, cached 5 min,
+  never stored. Push notifications would need a server or a CI job + a push service (e.g. ntfy.sh): not built.
 
 ## 8. Site / pipeline
 - `index.html` = current week: the week being played (any final game) until **Tuesday 06:00 ET** after its last
