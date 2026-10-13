@@ -16,9 +16,20 @@ a rejected idea without new data or a new angle, and do not "fix" a deliberate c
 .venv\Scripts\python run.py --week 7        # project a specific week using only data before it
 .venv\Scripts\python tools/experiments.py baseline,<variant> 2025   # walk-forward A/B of config variants
 .venv\Scripts\python tools/model_doc.py --check | --stamp           # MODEL.md staleness check / re-stamp
+.venv\Scripts\python run.py --lookahead --out site/index.html      # + the rest of the season's weeks
+.venv\Scripts\python tools/experiments.py A,B 2021-2025 --history=8 --jobs=6   # 5-season A/B with CIs (cached)
+.venv\Scripts\python tools/game_eval.py 2021-2025                 # game-model (margin/total) walk-forward
+.venv\Scripts\python tools/error_breakdown.py "cache/experiments/baseline_20*.parquet"  # where error comes from
+.venv\Scripts\python tools/returns_eval.py 2021-2025              # injury return-timing model walk-forward
+.venv\Scripts\python tools/build_archive.py --out=site --missing-only   # archived week pages
+.venv\Scripts\python tools/screenshot.py players [--device=desktop]    # visual QA (WebKit iPhone by default)
 ```
 Python 3.12 venv in `.venv`. Set `PYTHONIOENCODING=utf-8` when printing polars/pandas frames on Windows.
 CI: `.github/workflows/deploy.yml` builds on every push to main and daily (14:00 UTC), caching `cache/`.
+Site layout: `index.html` = current week (stays on the week being played until Tue 06:00 ET); `<season>/week-NN.html`
+= archived weeks (built once, stored on the `archive` branch, which CI checks out into `site/` and appends to) and
+lookahead weeks (rebuilt every run, not committed); `weeks.json` feeds the pickers; `data/espn_injuries/` is the
+daily ESPN injury archive (evidence for a future return-model test, not used yet).
 Git hooks: `git config core.hooksPath .githooks` (pre-commit blocks commits when MODEL.md is stale).
 
 ## Layout
@@ -32,6 +43,7 @@ Git hooks: `git config core.hooksPath .githooks` (pre-commit blocks commits when
 | `nfledge/injuries.py` | Availability (practice-sequence GB model, healthy-scratch GB model), redistribution, QB handoff |
 | `nfledge/engine.py` | Train/project/blend: ECR blend, quantile ranges, uncertainty, candidates (rosters) |
 | `nfledge/personnel.py` | Defensive personnel adjustment: tested, OFF (kept switchable) |
+| `nfledge/returns.py` | Injury return-timing model (feeds lookahead weeks) |
 | `nfledge/backtest.py` | Walk-forward evaluation vs raw stats, Vegas-scaled, ECR |
 | `nfledge/report.py` | Builds every page section (presentation only) |
 | `nfledge/docs.py` | Model tab: renders MODEL.md, live values, generated formulas section, code fingerprint |
