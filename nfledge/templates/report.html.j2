@@ -30,7 +30,8 @@ header.top { padding: 22px 0 14px; }
 .brand h1 span { color: var(--accent); }
 .brand .wk { font-size: 15px; color: var(--muted); font-weight: 500; }
 .wk-pick { display: inline-flex; gap: 6px; align-items: center; }
-.wk-pick select { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; font: inherit; font-size: 14px; font-weight: 600; padding: 4px 8px; cursor: pointer; }
+.wk-pick select { -webkit-appearance: none; appearance: none; color-scheme: dark; background-color: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; font: inherit; font-size: 14px; font-weight: 600; padding: 5px 28px 5px 10px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2398a0ab'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
 .wk-pick select:hover, .wk-pick select:focus { border-color: var(--accent); outline: none; }
 .wk-back { font-size: 13px; font-weight: 600; }
 .archived { margin: 10px 0 0; font-size: 12.5px; color: var(--muted); }
@@ -429,11 +430,12 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     {% if not nav.is_current %}<a class="wk-back" href="{{ nav.current_href }}">Back to the current week</a>{% endif %}
   </div>
   {% if archive %}<p class="archived">Archived week: projections exactly as the model would have made them before week {{ week }}, using only data available then, with what actually happened alongside.</p>{% endif %}
+  {% if lookahead %}<p class="archived">Lookahead, {{ lookahead }} week{{ 's' if lookahead > 1 else '' }} out: projected from every game played so far against this week's real opponents. No injury report exists yet, so everyone on the active roster is assumed healthy (injured reserve stays out) and weather is neutral; Vegas lines are used once posted. Expect less accuracy the further out you look.</p>{% endif %}
   <div class="meta">
-    <span>Projections use games through <b>week {{ week - 1 }}</b></span>
+    <span>Projections use games through <b>week {{ data_week }}</b>{% if lookahead %} (all played so far){% endif %}</span>
     {% if n_final %}<span>Week {{ week }}: <b>{{ n_final }} of {{ n_games }}</b> games final</span>{% endif %}
     <span>Scoring <b id="scoreName">{{ 'Half PPR' if scoring == 'half' else scoring|upper if scoring in ('ppr',) else scoring|capitalize }}</b></span>
-    {% if not injury_report %}<span class="alert">Injury report not out yet &middot; using last week's statuses</span>{% else %}<span>Injury report <b>in</b></span>{% endif %}
+    {% if lookahead or archive %}{% elif not injury_report %}<span class="alert">Injury report not out yet &middot; using last week's statuses</span>{% else %}<span>Injury report <b>in</b></span>{% endif %}
     <span>Updated {{ generated }}</span>
   </div>
 </div></header>
@@ -578,7 +580,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <div class="lb"{% if g.vegas_fav %} style="--fc:{{ g.vegas_fav.color }}"{% endif %}><small>Vegas</small><div class="big">{% if g.vegas_fav %}{{ g.vegas_fav.logo|safe }}{% endif %}<span>{{ g.vegas_line }}</span></div><div class="tot">O/U <b>{{ g.vegas_total|f1 if g.vegas_total == g.vegas_total else 'n/a' }}</b></div></div>
       </div>
       <div class="edges">
-        {% for e in g.edges %}<span class="edge{{ ' strong' if e.strong }}">{{ e.label }}</span>{% else %}<span class="edge none">Model agrees with Vegas</span>{% endfor %}
+        {% for e in g.edges %}<span class="edge{{ ' strong' if e.strong }}">{{ e.label }}</span>{% else %}<span class="edge none">{{ "No Vegas line yet" if g.vegas_line == "n/a" else "Model agrees with Vegas" }}</span>{% endfor %}
       </div>
       <div class="battles" style="{{ g.bt_style }}">
         <div class="bt-title">Who wins each battle</div>

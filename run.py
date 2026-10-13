@@ -125,7 +125,7 @@ def week_nav(data, season: int, week: int, current_week: int, prefix: str) -> di
   cur = data.current_season
   seasons = {}
   for yr in range(FIRST_ARCHIVE_SEASON, cur + 1):
-    last = current_week if yr == cur else int(reg[reg.season == yr].week.max())
+    last = int(reg[reg.season == yr].week.max())  # current season too: later weeks are lookahead pages
     seasons[str(yr)] = {str(w): (f"{prefix}index.html" if (yr == cur and w == current_week)
                                  else f"{prefix}{yr}/week-{w:02d}.html") for w in range(1, last + 1)}
   return {"seasons": seasons, "season": str(season), "week": str(week),
@@ -137,7 +137,7 @@ ARCHIVE_DOC = {"html": "<p>This is an archived week. The model description, form
 
 
 def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict, res=None, ev=None,
-               bt_seasons=(), archive: bool = False) -> dict:
+               bt_seasons=(), archive: bool = False, lookahead: int = 0) -> dict:
   """Everything the page template needs for one season / week (shared by run.py and tools/build_archive.py)."""
   power = rp.team_tables(eng, season, week, cfg, proj)
   wk = data.schedules[(data.schedules.season == season) & (data.schedules.week == week)
@@ -148,6 +148,7 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
   return {
     "season": season, "week": week, "pending": data.pending_games, "scoring": scoring.name,
     "n_final": n_final, "n_games": n_games, "has_actuals": n_final > 0, "nav": nav, "archive": archive,
+    "lookahead": lookahead, "data_week": int(data.latest_week) if lookahead else week - 1,
     "generated": time.strftime("%Y-%m-%d %H:%M"), "injury_report": injury_report,
     "players": rp.player_rankings(eng, proj, season, week, cfg),
     "games": rp.matchups(eng, season, week, cfg, proj, power),
@@ -156,8 +157,24 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
     "bt_seasons": " and ".join(map(str, bt_seasons)) or "n/a", "bt_takeaway": backtest_takeaway(ev),
     "score_cfg": rp.scoring_settings(scoring, cfg), "tier_cfg": cfg["tiers"],
     "margin_disagree": cfg["report"]["margin_disagree"], "total_disagree": cfg["report"]["total_disagree"],
-    "model_doc": ARCHIVE_DOC if archive else docs.render(docs.live_values(eng, cfg, season, week, res, ev)),
+    "model_doc": (ARCHIVE_DOC if (archive or lookahead)
+                  else docs.render(docs.live_values(eng, cfg, season, week, res, ev))),
   }
+
+
+def build_lookahead(eng, data, cfg, scoring, season: int, week: int, site: Path):
+  """Every later week of the season, projected from today's data: real opponents, current ratings and depth
+  charts, Vegas lines once posted (else the model's own). Injuries: nothing is known that far out, so everyone on
+  the active roster is assumed healthy (IR stays off the roster); no weather. Rebuilt every run, never archived."""
+  s = data.schedules
+  last = int(s[(s.season == season) & (s.game_type == "REG")].week.max())
+  t0 = time.time()
+  for w in range(week + 1, last + 1):
+    proj = eng.project_week(season, w, use_injuries=False, quiet=True)
+    ctx = build_page(eng, data, cfg, scoring, season, w, proj,
+                     nav=week_nav(data, season, w, week, prefix="../"), lookahead=w - week)
+    check_script(rp.render(ctx, site / str(season) / f"week-{w:02d}.html"))
+  print(f"[run] lookahead weeks {week + 1}-{last} in {time.time() - t0:.0f}s", flush=True)
 
 
 def main():
@@ -166,6 +183,8 @@ def main():
   ap.add_argument("--no-backtest", action="store_true", help="skip the backtest section")
   ap.add_argument("--open", action="store_true", help="open the report in a browser when done")
   ap.add_argument("--out", help="output HTML path (default: config [report] output)")
+  ap.add_argument("--lookahead", action="store_true",
+                  help="also build the rest of the season's weeks next to --out (<season>/week-NN.html)")
   args = ap.parse_args()
 
   t0 = time.time()
@@ -188,6 +207,8 @@ def main():
     print("[run] warning: MODEL.md is out of date (model code/config changed); see tools/model_doc.py", flush=True)
   out = rp.render(ctx, Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week))
   check_script(out)
+  if args.lookahead:
+    build_lookahead(eng, data, cfg, scoring, season, week, out.parent)
   print(f"[run] wrote {out} in {time.time() - t0:.0f}s")
   if args.open:
     webbrowser.open(out.as_uri())
