@@ -24,6 +24,8 @@ a rejected idea without new data or a new angle, and do not "fix" a deliberate c
 .venv\Scripts\python tools/returns_eval.py 2021-2025              # injury return-timing model walk-forward
 .venv\Scripts\python tools/build_archive.py --out=site --missing-only   # archived week pages
 .venv\Scripts\python tools/screenshot.py players [--device=desktop] [--html=PATH] [--el=CSS]  # visual QA (WebKit iPhone)
+#   pages that fetch JSON (player card, gamecast): serve the build folder with `python -m http.server 8765`, then
+#   --url=http://127.0.0.1:8765/game.html?d=index.json&g=<game_id> [--wait=4000] [--click=CSS]; ?sim=1 fakes live
 .venv\Scripts\python tools/win_prob.py                            # Vegas win-prob calibration; prints tossup_below
 .venv\Scripts\python tools/darts.py                               # 28 pre-game signals vs rank / Vegas (cached base)
 .venv\Scripts\python tools/elo_eval.py                            # fits Elo + our win-chance blend; prints [report.win_model]
@@ -56,6 +58,8 @@ Git hooks: `git config core.hooksPath .githooks` (pre-commit blocks commits when
 | `nfledge/report.py` | Builds every page section (presentation only) |
 | `nfledge/docs.py` | Model tab: renders MODEL.md, live values, generated formulas section, code fingerprint |
 | `nfledge/templates/report.html.j2` | The whole page: CSS, tabs, tables, sorting JS |
+| `nfledge/static/gamecast.{js,css}`, `templates/game.html.j2` | Player card, live scores (ESPN), gamecast page; copied to the site root (`assets/`, `game.html`) on every render; each week page also writes `<page>.json` |
+| `nfledge/elo.py` | Elo from final scores (part of our win chance) |
 | `exclusions.csv` | Manual injury-shortened games to drop from usage/efficiency |
 | `scratch/` | Throwaway experiment scripts (gitignored) |
 

@@ -185,6 +185,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 | Gradient border / white logo circles / light pills on dark rows | Owner rejected visually |
 
 ## 6. Engineering gotchas
+- **ESPN feed from the browser:** use `site.web.api.espn.com` for BOTH scoreboard and summary; `site.api.espn.com`'s
+  scoreboard drops the CORS header for Chromium (Chrome / desktop Brave) though curl and WebKit get it. Never pass
+  a fetch `cache` option: Chromium then adds Cache-Control/Pragma request headers, forcing a CORS preflight ESPN
+  doesn't answer. ESPN team codes differ only for LA (LAR) and WAS (WSH). Play clocks have no numeric value: parse
+  `clock.displayValue` "mm:ss". nflverse rosters carry `espn_id` (gsis -> ESPN athlete id; 18/18 matched on a game).
+- **Testing pages that fetch JSON:** file:// blocks fetch; serve the build (`python -m http.server` in the output
+  folder) and use `tools/screenshot.py --url=... --wait=... --click=...`. Check desktop in Chromium too, not only
+  WebKit (the CORS issue above only showed in Chromium).
 - **Windows shell + heredocs:** backslash escapes get mangled, and a Python patch string containing `\n` writes a
   real newline (broke a JS/print once). Use Write/Edit for code with escapes. `run.py` node-checks the page script.
 - **Stop commands:** never combine `Stop-Process` with another command that might be permission-blocked (a blocked
@@ -252,6 +260,16 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Final score + Favorite won / Upset (with its chance) / Tossup outcome.
 - **Power:** model margin vs average team by unit (7 ranks), rank range, schedule played/left, trend.
 - Tabs: Rankings, Matchups, Power, Role changes, Model.
+- **Player card / live / gamecast (2026-10-13):** shared `nfledge/static/gamecast.{js,css}` copied to the site root
+  `assets/` and `game.html` (rendered from game.html.j2) by `report.write_site_assets` on every render, so archived
+  pages get fixes without a rebuild. Each week page also writes `<page>.json` (report.week_data: players with
+  ESPN ids, stat lines, ranges, pregame chances, battle bars; ~410 KB raw, ~60 KB gzipped). Rankings rows open a
+  player card (replaced the old detail row; `#player/<gsis>` deep-links). Matchups tiles get a "Gamecast" link and
+  a live strip while in progress (no ESPN win % on tiles, owner rule); gamecast page `game.html?d=<json>&g=<game_id>`
+  has ESPN live win % (labeled ESPN, separate from pregame), game log (drive / every play, filters, WP swing per
+  play), box score with fantasy pts vs our projections incl. targets, team stats, pregame box, replay mode for
+  finished games. Test switches: `?sim=1` (week page: finished games treated as live), `&replay=1` (game page).
+  Owner tests real live on Thursday night games.
 
 ## 8. Site / pipeline
 - `index.html` = current week: the week being played (any final game) until **Tuesday 06:00 ET** after its last

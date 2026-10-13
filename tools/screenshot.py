@@ -10,6 +10,10 @@ Usage: python tools/screenshot.py TAB [options]
   --table-y=N      scroll the visible table down N px (sticky-header checks)
   --out=PATH       output PNG (default scratch/shot_<tab>_<device>.png)
   --html=PATH      page to open (default: the newest report/nfl_edge_week*.html)
+  --url=URL        open a URL instead (pages that fetch JSON need http://, e.g. python -m http.server)
+  --wait=MS        extra wait after load (live data, ESPN fetches)
+  --click=CSS      click the first matching element before the shot (player card, buttons)
+  --full=1         full-page screenshot
 
 Owner tests on Brave/iPhone. Every iOS browser is WebKit, and headless Chrome cannot reproduce WebKit layout bugs
 (it missed a stray-line bug from row overlays), so check mobile layouts here with --device=iphone.
@@ -40,8 +44,13 @@ def main():
       browser = pw.chromium.launch()
       ctx = browser.new_context(viewport={"width": 1440, "height": 900}, color_scheme="dark")
     page = ctx.new_page()
-    page.goto(page_html.as_uri() + f"#{tab}")
+    page.goto(opt["url"] if "url" in opt else page_html.as_uri() + f"#{tab}")
     page.wait_for_load_state("networkidle")
+    if "wait" in opt:
+      page.wait_for_timeout(int(opt["wait"]))
+    if "click" in opt:  # e.g. open a player card: --click="tr.main[data-pos=WR]"
+      page.locator(opt["click"]).first.click()
+      page.wait_for_timeout(600)
     if "pos" in opt:
       page.click(f".posbar button[data-pos={opt['pos']}]")
     if "el" in opt:  # scroll the first matching element to the top of the screen
@@ -54,7 +63,7 @@ def main():
           .find(s => s.offsetWidth > 0); sc[prop] = v; sc.dispatchEvent(new Event('scroll')); }""",
                       [prop, int(opt[axis])])
     page.wait_for_timeout(400)
-    page.screenshot(path=str(out))
+    page.screenshot(path=str(out), full_page=opt.get("full") == "1")
     browser.close()
   print(out)
 

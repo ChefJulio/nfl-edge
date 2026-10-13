@@ -394,6 +394,54 @@ def ordinal(n: int) -> str:
   return f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
 
 
+def _num(r, col: str, nd: int = 2) -> float | None:
+  v = getattr(r, col, None)
+  return None if v is None or pd.isna(v) else round(float(v), nd)
+
+
+def espn_ids(rosters: pd.DataFrame | None, season: int) -> dict:
+  """gsis_id -> ESPN athlete id (nflverse rosters carry both), so live ESPN box scores map onto our players."""
+  if rosters is None or "espn_id" not in rosters:
+    return {}
+  r = rosters[(rosters.season <= season) & rosters.espn_id.notna() & rosters.gsis_id.notna()]
+  r = r.sort_values("season").drop_duplicates("gsis_id", keep="last")
+  return {g: str(e).split(".")[0] for g, e in zip(r.gsis_id, r.espn_id)}
+
+
+# ESPN team codes that differ from nflverse's (everything else matches).
+ESPN_TEAM = {"LA": "LAR", "WAS": "WSH"}
+
+
+def week_data(ctx: dict) -> str:
+  """The week's numbers as JSON, written next to the page (<page>.json). The game page and the player card read
+  it: projections and stat lines, pregame chances and battle bars, team colors and logos."""
+  players = {}
+  for pos, block in ctx["players"].items():
+    for r in block["rows"]:
+      players[r["pid"]] = {
+        "name": r["name"], "pos": r["pos"], "team": r["team"], "opp": r["opp"], "home": r["home"], "espn": r["espn"],
+        "proj": round(float(r["proj"]), 2), "q": [round(float(r[k]), 2) for k in ("p10", "p25", "p50", "p75", "p90")],
+        "rank": r["rank"],
+        "tier": r["tier"], "slot": r["slot"], "ecr": None if pd.isna(r["ecr"]) else r["ecr"],
+        "status": r["status"] or "", "inactive": r["inactive"], "inactive_why": r["inactive_why"],
+        "boost": r["boost"], "boost_from": r["boost_from"], "low_sample": r["low_sample"], "conf": r["conf"],
+        "dvp": r["dvp"], "dvp_color": r["dvp_color"], "grade": r["grade"], "mpts": r["mpts"],
+        "takeaway": r["takeaway"], "fpg": None if pd.isna(r["fpg"]) else r["fpg"],
+        "last3": None if pd.isna(r["last3"]) else r["last3"], "act": r["act"], "sc": json.loads(r["sc"]),
+        "ext": r["ext"], "sched": r["sched"] or "",
+        "proj_line": {k: v for k, v in r["proj_line"].items() if v}}
+  games = []
+  for g in ctx["games"]:
+    games.append({k: g[k] for k in ("id", "away", "home", "kickoff", "neutral", "fc", "vegas_line", "vegas_total",
+                                    "battles", "extras", "plays", "power_rk", "final", "bt_style", "colors",
+                                    "gameday", "gametime")})
+  out = {"season": ctx["season"], "week": ctx["week"], "generated": ctx["generated"], "archive": ctx["archive"],
+         "lookahead": ctx["lookahead"], "tossup_pct": ctx["tossup_pct"], "espn_team": ESPN_TEAM,
+         "score": json.loads(ctx["score_cfg"]), "players": players, "games": games}
+  return json.dumps(out, separators=(",", ":"), default=lambda o: float(o) if isinstance(o, (np.floating, np.integer))
+                    else bool(o) if isinstance(o, np.bool_) else None)
+
+
 def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> dict:
   ts = TeamStyle(eng.data.teams)
   p = p.copy()
@@ -418,6 +466,7 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
   prev_ecr = (e[(e.season == season) & (e.week == week - 1)].set_index("gsis_id").ecr
               if e is not None else pd.Series(dtype=float))
   prev_ecr = prev_ecr[~prev_ecr.index.duplicated()]
+  espn = espn_ids(eng.data.rosters, season)
   out = {}
   for pos in ("QB", "RB", "WR", "TE"):
     g = p[p.pos == pos].sort_values("proj", ascending=False)
@@ -446,6 +495,15 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
         "sc": score_data(r, st, acts.get(r.gsis_id)), "pos": r.pos,
         "act": acts[r.gsis_id]["pts"] if r.gsis_id in acts else None,
         "sched": schedule_note(luck.loc[r.gsis_id] if r.gsis_id in luck.index else None),
+        # identity for the player card, live stats (ESPN box scores) and the game page
+        "pid": r.gsis_id, "espn": espn.get(r.gsis_id, ""), "team": r.team,
+        "ext": ({k: (None if pd.isna(st.get(k)) else round(float(st.get(k)), 3))
+                 for k in ("games", "targets", "carries", "attempts", "completions", "snap", "tgt_share", "carry_share")}
+                if st else {}),
+        "proj_line": {"tgt": _num(r, "tgt"), "car": _num(r, "carries"), "att": _num(r, "attempts"),
+                      "rec": _num(r, "reception"), "pass_yd": _num(r, "pass_yd"), "rush_yd": _num(r, "rush_yd"),
+                      "rec_yd": _num(r, "rec_yd"), "pass_td": _num(r, "pass_td"), "rush_td": _num(r, "rush_td"),
+                      "rec_td": _num(r, "rec_td"), "int": _num(r, "interception")},
       })
     out[pos] = {"rows": rows, "byes": bye_rows(eng, stats, ts, pos, season, week)}
   # FLEX (RB / WR / TE in one list) is assembled in the browser from those three lists, so rows aren't sent twice.
@@ -854,7 +912,7 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
   for _, g in gl.iterrows():
     def side(t):
       return {"team": t, "nick": names.get(t, t), "row_style": ts.row_style(t), "logo": ts.logo_img(t, 28),
-              "logo_sm": ts.logo_img(t, 16),
+              "logo_sm": ts.logo_img(t, 16), "logo_url": ts.logo.get(t) or "", "logo_bg": ts.logo_bg(t),
               "qb": qb_name.get(starters.get(t), ""),
               "off_pass": per100(r.off.at[t, "pass"] + r.qb_term(starters.get(t))),
               "off_rush": per100(r.off.at[t, "rush"]), "def_pass": per100(-r.dfn.at[t, "pass"]),
@@ -944,7 +1002,9 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
     if abs(check + g.model_margin) > 0.05:  # the bars must sum to the model line; flag it if the formula changes
       print(f"[report] warning: {g.game_id} matchup bars sum to {-check:+.2f}, model margin {g.model_margin:+.2f}",
             flush=True)
-    out.append({"away": away, "home": home, "kickoff": kickoff_text(g.gameday, g.gametime),
+    out.append({"id": g.game_id, "gameday": str(g.gameday), "gametime": str(g.gametime),
+                "colors": {g.away_team: col[g.away_team], g.home_team: col[g.home_team]},
+                "away": away, "home": home, "kickoff": kickoff_text(g.gameday, g.gametime),
                 "neutral": g.location == "Neutral", "fc": fc,
                 "vegas_line": spread_text(v_fav, vm) if pd.notna(vm) else None,
                 "vegas_total": vt if pd.notna(vt) else None, "battles": battles, "extras": [st_row, home_row],
@@ -1068,7 +1128,28 @@ def render(ctx: dict, out_path: Path) -> Path:
   env.filters["posb"] = pos_badge
   env.filters["pct"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.0%}"
   env.filters["short"] = short_name
-  html_out = env.get_template("report.html.j2").render(**ctx)
+  # Site root relative to this page ("" for index.html, "../" for <season>/week-NN.html): shared assets, the game
+  # page and this week's data file are addressed from there.
+  root = ctx["nav"]["current_href"][:-len("index.html")]
   out_path.parent.mkdir(parents=True, exist_ok=True)
+  root_dir = (out_path.parent / root).resolve()
+  data_rel = out_path.resolve().relative_to(root_dir).with_suffix(".json").as_posix()
+  html_out = env.get_template("report.html.j2").render(**ctx, root=root, data_rel=data_rel)
   out_path.write_text(html_out, encoding="utf-8")
+  out_path.with_suffix(".json").write_text(week_data(ctx), encoding="utf-8")
+  write_site_assets(root_dir, env)
   return out_path
+
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+
+
+def write_site_assets(root_dir: Path, env) -> None:
+  """Shared files at the site root: the game page and the live / player-card / gamecast script and styles. Every
+  week page (current, lookahead and archived) links to these, so improvements reach old pages without rebuilding
+  them."""
+  (root_dir / "assets").mkdir(parents=True, exist_ok=True)
+  for f in STATIC_DIR.iterdir():
+    if f.is_file():
+      (root_dir / "assets" / f.name).write_bytes(f.read_bytes())
+  (root_dir / "game.html").write_text(env.get_template("game.html.j2").render(), encoding="utf-8")
