@@ -278,6 +278,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   record (needs walk-forward model margins for past weeks, e.g. cached from the archive build).
 - **Done 2026-10-12:** "Our model" win % = power rank + fitted Elo + home (section 4). Owner ruled out QB-adjusted
   Elo (Elo should stay results-only; QB info enters via the rank).
+- **Defensive fatigue (tools/fatigue.py, 2026-10-13, 219k plays 2018-26, within defense-game):** cumulative snap
+  load does NOT wear defenses down (-0.04 EPA/100 per +10 snaps [-0.49, +0.43]; pass/rush split both ~0). Short
+  rest DOES matter: the series right after the defense's own offense had a quick (<=3 play) possession allows +3.7
+  EPA/100 [+1.9, +5.1], robust to excluding turnovers and controlling for series start; each extra minute of own
+  possession -1.2. (Previous-series length shows the opposite sign, -4.0 per +10 plays: an artifact of within-game
+  demeaning, so treat magnitudes with care; "game flow / momentum" can't be separated from rest here.) Rating
+  impact is small: team quick-possession share sd 6% -> ~0.2 EPA/100 on a defense rating (worst offense vs average
+  ~0.6) vs a 3.9-4.5 spread between defenses. Not modeled; matters only when a bad offense suddenly improves.
 - **PARKED (owner, 2026-10-12): prior-season carryover in team ratings.** `tools/carryover_eval.py --quick` (3
   seasons 2022/23/25, 765 games, fixed shipped win formula; current = prior_weight 0.3 fading to 0 by week 8,
   half-life 3). These knobs were "insensitive" on fantasy MAE but never tested on games. Findings: more carryover
