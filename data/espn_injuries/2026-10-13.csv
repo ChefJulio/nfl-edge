@@ -25,7 +25,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429782,Josh Fryar,Arizona Cardinals,Active,2026-10-05T18:27Z,,,,,,
 4869132,Reggie Virgil,Arizona Cardinals,Active,2026-10-05T18:27Z,,,,,,
 4241474,Brian Robinson Jr.,Atlanta Falcons,Active,2026-10-13T01:14Z,,,,,,Robinson handled seven carries for 16 yards and did not catch his only target during Sunday's 30-23 overtime loss versus the Ravens. He also returned two kickoffs for 61 return yards.
-4360423,Michael Penix Jr.,Atlanta Falcons,Questionable,2026-10-12T19:17Z,Ribs,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"The Falcons have optimism that Penix's rib injury isn't overly serious and that he'll be available to play Sunday against the Bears, Jonathan Jones and Josh Kendall of The Athletic report."
 3043168,Za'Darius Smith,Atlanta Falcons,Out,2026-10-12T18:56Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,out
 5344782,Jack Strand,Atlanta Falcons,Active,2026-10-12T18:56Z,,,,,,
 4683194,Ethan Onianwa,Atlanta Falcons,Active,2026-10-12T18:56Z,,,,,,
@@ -33,6 +32,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4567099,Christian Harris,Atlanta Falcons,Active,2026-10-12T18:56Z,,,,,,
 4575860,Robert Longerbeam,Atlanta Falcons,Active,2026-10-12T18:56Z,,,,,,
 10621,Nick Folk,Atlanta Falcons,Active,2026-10-12T17:24Z,,,,,,"Folk converted all five of his kicks (three field goals, two extra points) during Sunday's 30-23 overtime loss to the Ravens."
+4360423,Michael Penix Jr.,Atlanta Falcons,Questionable,2026-10-12T13:22Z,Ribs,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Penix is scheduled to undergo an MRI on Monday after exiting Sunday's 30-23 overtime loss to the Ravens due to a rib injury, Adam Schefter of ESPN reports."
 4360248,Kyle Pitts Sr.,Atlanta Falcons,Active,2026-10-12T04:52Z,,,,,,Pitts caught five of six targets for 42 yards and a touchdown in Sunday's 30-23 overtime loss to the Ravens.
 4241479,Tua Tagovailoa,Atlanta Falcons,Active,2026-10-12T04:50Z,,,,,,Tagovailoa completed two of three passes for 34 yards and an interception in relief of Michael Penix (ribs) in Sunday's 30-23 overtime loss to the Ravens.
 4426502,Drake London,Atlanta Falcons,Active,2026-10-12T04:20Z,,,,,,London caught seven of 11 targets for 118 yards in Sunday's 30-23 overtime loss to the Ravens.
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
 4430034,Xavier Legette,Carolina Panthers,Injured Reserve,2026-10-03T20:15Z,Knee,Not Specified,Not Specified,2026-11-08,IR,"The Panthers placed Legette (knee) on injured reserve Saturday, Darin Gantt of the team's official site reports."
 4429166,Princely Umanmielen,Carolina Panthers,Active,2026-10-01T19:37Z,,,,,,
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-13T05:01Z,Undisclosed,,,2026-10-18,IR,ir
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-13T06:00Z,Undisclosed,,,2026-10-18,IR,ir
 15168,Case Keenum,Chicago Bears,Active,2026-10-12T21:54Z,,,,,,"Keenum completed 11 of 18 passes for 108 yards, zero touchdowns and one interception while adding a four-yard carry during the Bears' 31-7 loss to the Packers on Sunday. He also lost a fumble."
 4434153,Tyson Bagent,Chicago Bears,Active,2026-10-12T20:20Z,,,,,,"Head coach Ben Johnson said Monday that a decision hasn't been made regarding whether Bagent, Case Keenum or Caleb Williams (hamstring) will take reps with the first-team offense during the Bears' first Week 6 practice Wednesday, Sean Hammond of the Chicago Tribune reports."
 4608686,Kyle Monangai,Chicago Bears,Out,2026-10-12T18:58Z,Toe,Sprain,Not Specified,2026-10-18,QUESTIONABLE,out
