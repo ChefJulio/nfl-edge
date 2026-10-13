@@ -78,6 +78,13 @@ html.pc-open { overflow: hidden; }
 .pc-ov[hidden] { display: none; }
 .pc { position: relative; width: min(720px, 100%); background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0,0,0,.45); padding: 18px 18px 16px; }
+/* Tables inside cards: the week page's table rules (no wrapping, sticky shadowed headers) must not apply, and the
+   card itself never scrolls sideways (wide game logs scroll inside their own .lg-scroll box). */
+.pc-ov { overflow-x: hidden; }
+.pc { min-width: 0; overflow-x: hidden; }
+.pc thead th { position: static; box-shadow: none; background: none; }
+.pc table.bx th, .pc table.bx td { white-space: normal; padding: 6px 5px; }
+.pc table.bx .flag, .pc table.bx .posb, .pc table.bx .tier { white-space: nowrap; }
 .pc-x { position: absolute; top: 8px; right: 10px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--panel2); color: var(--ink);
   font-size: 22px; line-height: 1; cursor: pointer; }
 .pc-head { display: flex; gap: 12px; align-items: center; padding: 4px 40px 12px 0; border-bottom: 3px solid var(--tc); margin-bottom: 12px; }
