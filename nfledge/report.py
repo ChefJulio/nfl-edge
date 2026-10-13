@@ -878,9 +878,10 @@ def backtest_summary(ev: pd.DataFrame | None) -> list:
 # ----------------------------------------------------------------------------------------------------------------
 
 def short_name(name: str) -> str:
-  """'Josh Allen' -> 'J. Allen', 'Amon-Ra St. Brown' -> 'A. St. Brown' (the compact pinned column)."""
+  """'Josh Allen' -> 'Allen', 'Amon-Ra St. Brown' -> 'St. Brown' (the compact pinned column; the team logo beside
+  it tells same-name players apart)."""
   parts = str(name).split(" ", 1)
-  return f"{parts[0][0]}. {parts[1]}" if len(parts) == 2 and parts[0] else str(name)
+  return parts[1] if len(parts) == 2 and parts[1] else str(name)
 
 
 def render(ctx: dict, out_path: Path) -> Path:

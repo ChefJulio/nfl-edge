@@ -134,19 +134,25 @@ thead th.stick { z-index: 3; }
    ("J. Allen", team code) and a shadow marks its edge; it expands again at the far left. */
 .nm-short { display: none; }
 .scroll.compact .nm-full { display: none; } .scroll.compact .nm-short { display: inline; white-space: nowrap; }
-.scroll.compact td.stick .badges, .scroll.compact td.stick .sub, .scroll.compact .m-proj small { display: none !important; }
-.scroll.compact td.stick, .scroll.compact th.stick { min-width: 0 !important; width: auto !important; box-shadow: 8px 0 10px -8px rgba(0,0,0,.85); }
+.scroll.compact td.stick .badges, .scroll.compact td.stick .sub { display: none !important; }
+.scroll.compact td.stick, .scroll.compact th.stick { min-width: 0 !important; width: auto !important; max-width: 104px;
+  padding-left: 5px; padding-right: 5px; box-shadow: 8px 0 10px -8px rgba(0,0,0,.85); }
+.scroll.compact td.stick .who { gap: 5px; }
+.scroll.compact td.stick .who b, .scroll.compact th.stick { font-size: 11px; }
+.scroll.compact td.stick .logo { width: 16px; height: 16px; box-shadow: none; } .scroll.compact td.stick .logo img { width: 12px; height: 12px; }
+.scroll.compact td.stick .nm-short { overflow: hidden; text-overflow: ellipsis; display: block; max-width: 76px; }
 table.ranks td.stick, table.ranks th.stick { min-width: 190px; white-space: normal; }
-.m-only { display: none; }
+/* Projection sits next to the name; its header lines up with the number, not the far edge of the bar. */
+th.projh, td.projc { text-align: left; padding-left: 14px; }
+td.projc .proj { justify-content: flex-start; }
+th.ctr, td.ctr { text-align: center; }
 @media (max-width: 640px) {
   .hide-xs { display: none; }
-  .m-only { display: flex; }
-  table.ranks td.stick { min-width: 0; width: 100%; }
-  table.ranks td.stick .who { width: 100%; }
-  .m-proj { margin-left: auto; flex-direction: column; align-items: flex-end; padding-left: 10px; line-height: 1.15; }
-  .m-proj b { font-size: 16px; font-weight: 800; }
-  .m-proj small { font-size: 10.5px; color: rgba(255,255,255,.7); white-space: nowrap; font-weight: 600; }
+  table.ranks td.stick, table.ranks th.stick { min-width: 150px; }
+  td.projc .rng { display: none; }  /* phone: number + floor-ceiling text; the bar comes back on wider screens */
+  td.mu .meter { display: none; }
   th, td { padding: 8px 7px; }
+  th.projh, td.projc { padding-left: 10px; }
   td.take { min-width: 240px; max-width: 300px; }
 }
 .badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
@@ -417,9 +423,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <th class="num" data-first="asc">#</th>
         <th class="num" data-first="asc"><abbr title="FantasyPros expert consensus rank (Fridays); faded 'lw' = last week's">ECR</abbr></th>
         <th class="stick" data-first="asc">Player</th>
-        <th class="hide-xs" data-first="desc"><abbr title="Opponent and its defense vs {{ pos }}s: 1st = toughest (red), 32nd = easiest (green). Opponent-adjusted, from the model.">Matchup</abbr></th>
-        <th class="num"><abbr title="Chance he is inactive: injury (practice pattern + game status) or healthy scratch">Inactive</abbr></th>
-        <th class="num hide-xs"><abbr title="Projection; bar = floor to ceiling (10th-90th pct), thick = middle 50%">Projection</abbr></th>
+        <th class="projh"><abbr title="Projection; bar = floor to ceiling (10th-90th pct), thick = middle 50%">Projection</abbr></th>
+        <th data-first="desc"><abbr title="Opponent and its defense vs {{ pos }}s: 1st = toughest (red), 32nd = easiest (green). Opponent-adjusted, from the model.">Matchup</abbr></th>
+        <th class="ctr"><abbr title="Chance he is inactive: injury (practice pattern + game status) or healthy scratch">Inactive</abbr></th>
         <th class="num"><abbr title="Season fantasy points per game">FP/G</abbr></th>
         <th data-first="asc">Tier</th>
         <th class="hide-sm nosort"><abbr title="Projected stat line; donut = touchdown odds">Expected line</abbr></th>
@@ -435,16 +441,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
               {%- if r.status %}<span class="flag {{ 'f-out' if r.avail < 0.5 else 'f-q' }}" title="Injury report; practice Wed/Thu/Fri: D = did not practice, L = limited, F = full">{{ r.status }}</span>{% endif %}
               {%- if r.boost >= 1 %}<span class="flag f-up" title="Raised by volume vacated by: {{ r.boost_from }}">+{{ r.boost|f1 }} inj</span>{% endif %}
               {%- if r.low_sample %}<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>{% endif %}
-            </div>{% endif %}</div>
-            <span class="m-only m-proj"><b>{{ r.proj|f1 }}</b><small>{{ r.home }} {{ r.opp }} <span style="color:{{ r.dvp_color }}">{{ r.dvp }}</span></small></span></div></td>
+            </div>{% endif %}</div></div></td>
+          <td class="projc" data-v="{{ r.proj }}" title="Floor {{ r.p10|f1 }} · middle {{ r.p25|f1 }}-{{ r.p75|f1 }} · ceiling {{ r.p90|f1 }}"><div class="proj"><b>{{ r.proj|f1 }}</b>{{ r.range|safe }}<span class="fc">{{ r.p10|f0 }}&ndash;{{ r.p90|f0 }}</span></div></td>
           {% set lvl = {'A': 5, 'B': 4, 'C': 3, 'D': 2, 'F': 1}[r.grade] %}
-          <td class="mu hide-xs" data-v="{{ r.dvp_rank }}"><div class="mu-row">
+          <td class="mu" data-v="{{ r.dvp_rank }}"><div class="mu-row">
             <span class="opp"><span class="vs">{{ r.home }}</span>{{ r.opp_logo|safe }}<b>{{ r.opp }}</b></span>
             <span class="meter m{{ lvl }}" title="Matchup {{ r.grade }}: {{ r.opp }} is {{ r.dvp }} of 32 vs {{ pos }}s">{% for i in range(5) %}<i class="{{ 'on' if i < lvl }}"></i>{% endfor %}</span>
             <span class="dvp" style="color:{{ r.dvp_color }}" title="{{ r.opp }} defense vs {{ pos }}s: {{ r.dvp }} of 32 (1st = toughest, 32nd = easiest). This week: {{ r.mpts|sgn }} pts vs an average defense.">{{ r.dvp }}</span>
           </div></td>
-          <td class="num" data-v="{{ r.inactive }}" title="{{ r.inactive_why }}"><span class="{{ 'pill pill-bad' if r.inactive >= 0.5 else 'pill pill-warn' if r.inactive >= 0.15 else 'pill pill-soft' if r.inactive >= 0.05 else 'quiet' }}">{{ '<1%' if r.inactive < 0.005 else r.inactive|pct }}</span></td>
-          <td class="num hide-xs" data-v="{{ r.proj }}" title="Floor {{ r.p10|f1 }} · middle {{ r.p25|f1 }}-{{ r.p75|f1 }} · ceiling {{ r.p90|f1 }}"><div class="proj"><b>{{ r.proj|f1 }}</b>{{ r.range|safe }}<span class="fc">{{ r.p10|f0 }}&ndash;{{ r.p90|f0 }}</span></div></td>
+          <td class="ctr" data-v="{{ r.inactive }}" title="{{ r.inactive_why }}"><span class="{{ 'pill pill-bad' if r.inactive >= 0.5 else 'pill pill-warn' if r.inactive >= 0.15 else 'pill pill-soft' if r.inactive >= 0.05 else 'quiet' }}">{{ '<1%' if r.inactive < 0.005 else r.inactive|pct }}</span></td>
           <td class="num">{{ r.fpg|f1 }}</td>
           <td data-v="{{ r.rank }}"><span class="tier t-{{ r.slot }}" title="{{ {'start': 'Starter in a ' ~ tier_cfg.teams ~ '-team league', 'flex': 'Flex range in a ' ~ tier_cfg.teams ~ '-team league', 'bench': 'Bench depth in a ' ~ tier_cfg.teams ~ '-team league'}[r.slot] }}">{{ r.tier }}</span></td>
           <td class="line hide-sm">{{ r.line|safe }}</td>
