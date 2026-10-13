@@ -112,6 +112,8 @@ def main():
   cur_team = (data.rosters[data.rosters.season == data.current_season].sort_values("week")
               .drop_duplicates("gsis_id", keep="last").set_index("gsis_id").team)
 
+  bios = bio_map(data.rosters)
+  scr = qb_scrambles(data.pbp)
   out_dir = site / "data" / "players"
   out_dir.mkdir(parents=True, exist_ok=True)
   sts = st[st.player_id.isin(everyone)].sort_values(["season", "week"])
@@ -164,7 +166,10 @@ def main():
         upcoming.append(e)
     name, espn = NAMES.get(pid, (None, None))
     doc = {"pid": pid, "name": name, "espn": espn, "pos": pos, "keys": SCORE_KEYS, "cur": data.current_season, "team": team,
-           "seasons": [{"s": s, "g": seasons[s]} for s in sorted(seasons, reverse=True)], "up": upcoming}
+           "seasons": [{"s": s, "g": seasons[s]} for s in sorted(seasons, reverse=True)], "up": upcoming,
+           "bio": bios.get(pid, {})}
+    if pos == "QB" and pid in scr:
+      doc["scr"] = scr[pid]  # {season: [scrambles, dropbacks]}
     (out_dir / f"{pid}.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
     n += 1
   size = sum(f.stat().st_size for f in out_dir.glob("*.json"))
@@ -173,10 +178,45 @@ def main():
 
 
 def _link(e: dict, gid) -> None:
-  """Game id + the week file holding our tile for it (2021 on), so the card's log row can open that matchup."""
-  ours = OUR_GAMES.get(gid) if gid else None
+  """Game id (every game: the log row opens its gamecast) + the week file holding our numbers for it (2021 on:
+  the gamecast's Pregame tab and player cards need it)."""
+  if not gid:
+    return
+  e["gid"] = gid
+  ours = OUR_GAMES.get(gid)
   if ours:
-    e["gid"], e["f"] = gid, ours["file"]
+    e["f"] = ours["file"]
+
+
+def bio_map(rosters: pd.DataFrame) -> dict:
+  """gsis -> card bio from each player's latest roster row: jersey number, birth date, height (in), weight (lb),
+  accrued seasons as of that roster season, college, official headshot URL."""
+  r = rosters.dropna(subset=["gsis_id"]).sort_values(["season", "week"]).drop_duplicates("gsis_id", keep="last")
+  num = lambda v: None if pd.isna(v) else int(v)
+  out = {}
+  for x in r.itertuples():
+    b = {"num": num(getattr(x, "jersey_number", None)), "ht": num(getattr(x, "height", None)),
+         "wt": num(getattr(x, "weight", None)), "exp": num(getattr(x, "years_exp", None)), "exp_s": int(x.season)}
+    bd = getattr(x, "birth_date", None)
+    if bd is not None and not pd.isna(bd):
+      b["born"] = str(bd)[:10]
+    for k, col in (("college", "college"), ("photo", "headshot_url")):
+      v = getattr(x, col, None)
+      if isinstance(v, str) and v:
+        b[k] = v
+    out[x.gsis_id] = {k: v for k, v in b.items() if v is not None}
+  return out
+
+
+def qb_scrambles(pbp: pd.DataFrame) -> dict:
+  """gsis -> {season: [scrambles, dropbacks]} from play-by-play (loaded seasons)."""
+  db = pbp[pbp.is_dropback.astype(bool)] if "is_dropback" in pbp else pbp[pbp.qb_dropback == 1]
+  db = db.assign(gsis_id=db.passer_player_id.fillna(db.rusher_player_id)).dropna(subset=["gsis_id"])
+  g = db.groupby(["gsis_id", "season"]).agg(scr=("qb_scramble", "sum"), n=("qb_scramble", "size"))
+  out = {}
+  for (gid, s), x in g.iterrows():
+    out.setdefault(gid, {})[str(int(s))] = [int(x.scr), int(x.n)]
+  return out
 
 
 def _team_stat_rows(cache, nfl, seasons: list, current: int) -> pd.DataFrame:
