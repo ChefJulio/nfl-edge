@@ -244,6 +244,9 @@ def td_donut(lam: float, label: str = "TD") -> str:
 def season_stats(eng, season: int, week: int) -> pd.DataFrame:
   """Season-to-date per player: games, FP/G, last-3 FP/G, totals, usage shares, weekly points."""
   a = eng.actual[(eng.actual.season == season) & (eng.actual.week < week)]
+  if a.empty:  # week 1: nothing played yet this season
+    return pd.DataFrame(columns=["games", "fpg", "fp_total", "last3", "weeks", "week_comps", "snap", "tgt_share",
+                                 "carry_share"] + SCORE_KEYS)
   g = a.groupby("gsis_id")
   out = pd.DataFrame({
     "games": g.size(), "fpg": g.actual.mean(), "fp_total": g.actual.sum(),
@@ -564,7 +567,7 @@ def schedule_faced(eng, season: int, week: int, r, starters: dict) -> pd.DataFra
   games = cur.groupby("team").size()
   off_faced = -(P.defteam.map(r.dfn["pass"]).groupby(P.posteam).sum()
                 + R.defteam.map(r.dfn["rush"]).groupby(R.posteam).sum())
-  qbt = P.qb.map(lambda q: r.qb_term(q))
+  qbt = P.qb.map(lambda q: r.qb_term(q)).astype(float)  # float even when no games are played yet (week 1)
   def_faced = ((P.posteam.map(r.off["pass"]) + qbt).groupby(P.defteam).sum()
                + R.posteam.map(r.off["rush"]).groupby(R.defteam).sum())
   out = pd.DataFrame({"off_past": off_faced / games, "def_past": def_faced / games})

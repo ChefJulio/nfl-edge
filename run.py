@@ -113,6 +113,53 @@ def display_week(data, now: pd.Timestamp | None = None) -> int:
   return w if now < roll else min(w + 1, int(reg.week.max()))
 
 
+FIRST_ARCHIVE_SEASON = 2021
+
+
+def week_nav(data, season: int, week: int, current_week: int, prefix: str) -> dict:
+  """Season / week picker: every regular-season week from FIRST_ARCHIVE_SEASON on, up to the current week.
+  The current week lives at index.html; every other week at <season>/week-<NN>.html. `prefix` is the path from
+  this page back to the site root ("" for index.html, "../" for an archived week)."""
+  s = data.schedules
+  reg = s[s.game_type == "REG"]
+  cur = data.current_season
+  seasons = {}
+  for yr in range(FIRST_ARCHIVE_SEASON, cur + 1):
+    last = current_week if yr == cur else int(reg[reg.season == yr].week.max())
+    seasons[str(yr)] = {str(w): (f"{prefix}index.html" if (yr == cur and w == current_week)
+                                 else f"{prefix}{yr}/week-{w:02d}.html") for w in range(1, last + 1)}
+  return {"seasons": seasons, "season": str(season), "week": str(week),
+          "is_current": season == cur and week == current_week, "current_href": f"{prefix}index.html"}
+
+
+ARCHIVE_DOC = {"html": "<p>This is an archived week. The model description, formulas and track record are on the "
+                       "current week's Model tab.</p>", "toc": [], "stale": False}
+
+
+def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict, res=None, ev=None,
+               bt_seasons=(), archive: bool = False) -> dict:
+  """Everything the page template needs for one season / week (shared by run.py and tools/build_archive.py)."""
+  power = rp.team_tables(eng, season, week, cfg, proj)
+  wk = data.schedules[(data.schedules.season == season) & (data.schedules.week == week)
+                      & (data.schedules.game_type == "REG")]
+  n_final, n_games = int(wk.home_score.notna().sum()), len(wk)
+  inj = data.injuries
+  injury_report = bool(((inj.season == season) & (inj.week == week)).any())
+  return {
+    "season": season, "week": week, "pending": data.pending_games, "scoring": scoring.name,
+    "n_final": n_final, "n_games": n_games, "has_actuals": n_final > 0, "nav": nav, "archive": archive,
+    "generated": time.strftime("%Y-%m-%d %H:%M"), "injury_report": injury_report,
+    "players": rp.player_rankings(eng, proj, season, week, cfg),
+    "games": rp.matchups(eng, season, week, cfg, proj, power),
+    "power": power, "power_vol": rp.league_volume(eng, season, week, eng.tm.fit(season, week)),
+    "roles": rp.role_changes(eng, season, week, cfg), "backtest": rp.backtest_summary(ev),
+    "bt_seasons": " and ".join(map(str, bt_seasons)) or "n/a", "bt_takeaway": backtest_takeaway(ev),
+    "score_cfg": rp.scoring_settings(scoring, cfg), "tier_cfg": cfg["tiers"],
+    "margin_disagree": cfg["report"]["margin_disagree"], "total_disagree": cfg["report"]["total_disagree"],
+    "model_doc": ARCHIVE_DOC if archive else docs.render(docs.live_values(eng, cfg, season, week, res, ev)),
+  }
+
+
 def main():
   ap = argparse.ArgumentParser(description=__doc__)
   ap.add_argument("--week", type=int, help="week to show (default: the week being played, until Tuesday 06:00 ET)")
@@ -134,24 +181,9 @@ def main():
     res, bt_seasons = cached_backtest(data, cfg, scoring)
     ev = bt.evaluate(res, POSITIONS, ecr_only=True)
 
-  power = rp.team_tables(eng, season, week, cfg, proj)
-  wk = data.schedules[(data.schedules.season == season) & (data.schedules.week == week)
-                      & (data.schedules.game_type == "REG")]
-  n_final, n_games = int(wk.home_score.notna().sum()), len(wk)
-  inj = data.injuries
-  injury_report = bool(((inj.season == season) & (inj.week == week)).any())
-  ctx = {
-    "season": season, "week": week, "pending": data.pending_games, "scoring": scoring.name,
-    "n_final": n_final, "n_games": n_games, "has_actuals": n_final > 0,
-    "generated": time.strftime("%Y-%m-%d %H:%M"), "injury_report": injury_report,
-    "players": rp.player_rankings(eng, proj, season, week, cfg), "games": rp.matchups(eng, season, week, cfg, proj, power),
-    "power": power, "power_vol": rp.league_volume(eng, season, week, eng.tm.fit(season, week)),
-    "roles": rp.role_changes(eng, season, week, cfg), "backtest": rp.backtest_summary(ev),
-    "bt_seasons": " and ".join(map(str, bt_seasons)) or "n/a", "bt_takeaway": backtest_takeaway(ev),
-    "score_cfg": rp.scoring_settings(scoring, cfg), "tier_cfg": cfg["tiers"], "margin_disagree": cfg["report"]["margin_disagree"],
-    "total_disagree": cfg["report"]["total_disagree"],
-    "model_doc": docs.render(docs.live_values(eng, cfg, season, week, res, ev)),
-  }
+  ctx = build_page(eng, data, cfg, scoring, season, week, proj,
+                   nav=week_nav(data, season, week, display_week(data) if not args.week else week, prefix=""),
+                   res=res, ev=ev, bt_seasons=bt_seasons)
   if ctx["model_doc"]["stale"]:
     print("[run] warning: MODEL.md is out of date (model code/config changed); see tools/model_doc.py", flush=True)
   out = rp.render(ctx, Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week))

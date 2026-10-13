@@ -102,6 +102,10 @@ threads. Numbers are walk-forward backtest results (train on earlier seasons, te
   prior weight/decay, eff season weights, WP window, QB-inexperience cutoff/penalty, TD k, GB size, redistribution
   trigger, team half-life, QB effects (fantasy), ECR for QB. Bias: actuals exceed projections by +0.25 to +0.49
   for relevant RB/WR/TE (unexplained; partly selection of "relevant" rows?).
+- **Rounds 2-4 (2021-25):** wind grid -> 10 mph / 3% / 25% cap adopted (-0.011). No difference: per-position
+  share half-life, spread-aware shares (game script already in recent usage), finer draft-pick tiers. Rejected:
+  final linear calibration (+0.013, CI excludes 0): projections ARE too extreme at the ends (20+ pt projections
+  ~1 pt high) but least-squares correction of the mean hurts MAE on skewed fantasy outcomes.
 - **Error breakdown (tools/error_breakdown.py, 2021-25):** share of squared error removed by fixing each layer
   alone: team volume ~0-10%, player share 10/30/34/38% (QB/RB/WR/TE), efficiency 21-31%, TDs 28-50%. Share is the
   largest fixable layer for RB/WR/TE; TDs/efficiency are mostly game-level noise.
@@ -199,9 +203,8 @@ threads. Numbers are walk-forward backtest results (train on earlier seasons, te
 - **Daily practice archive:** `cache/injury_snapshots/` accumulates our own Wed/Thu/Fri history going forward.
 - Light mode has had little visual review (phone layouts reviewed 2026-10-12).
 - The 2026 test season is small (weeks 3-5 at time of writing); re-run experiments as it grows.
-- **Queued (owner: everything data-driven, no assumptions):** tune the fixed wind penalty on a grid (threshold
-  10/15/20 mph, slope 1-3%/mph, cap) instead of the hand-picked 15 / 2% / 25%; position-specific share half-life
-  (RB wants 3, TE may prefer 5); then the accuracy ideas ranked by the error breakdown: expected fantasy points
-  per opportunity, spread-aware RB shares, NGS / FTN inputs.
+- **Queued:** injury return-timing model (designation, weeks missed, injury type, position -> P(active) k weeks
+  out; feeds lookahead weeks); rookie / low-data priors from free data (college production, preseason usage);
+  expected fantasy points per opportunity; NGS / FTN inputs.
 - **Speed:** experiment batches recompute identical stages per variant (e.g. team ratings); stage caching and
   per-worker data windows (5 seasons instead of 9) would cut batch time further.

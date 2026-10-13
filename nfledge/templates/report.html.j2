@@ -29,6 +29,11 @@ header.top { padding: 22px 0 14px; }
 .brand h1 { font-size: 22px; font-weight: 800; letter-spacing: -.02em; margin: 0; }
 .brand h1 span { color: var(--accent); }
 .brand .wk { font-size: 15px; color: var(--muted); font-weight: 500; }
+.wk-pick { display: inline-flex; gap: 6px; align-items: center; }
+.wk-pick select { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; font: inherit; font-size: 14px; font-weight: 600; padding: 4px 8px; cursor: pointer; }
+.wk-pick select:hover, .wk-pick select:focus { border-color: var(--accent); outline: none; }
+.wk-back { font-size: 13px; font-weight: 600; }
+.archived { margin: 10px 0 0; font-size: 12.5px; color: var(--muted); }
 .meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 .meta span { font-size: 12px; color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; }
 .meta span b { color: var(--ink); font-weight: 600; }
@@ -416,7 +421,14 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   {{ rkchip(x.home_rk, x.home_what) }}
 </div>{% endmacro %}
 <header class="top"><div class="wrap">
-  <div class="brand"><h1>NFL <span>Edge</span></h1><div class="wk">{{ season }} &middot; Week {{ week }}</div></div>
+  <div class="brand"><h1>NFL <span>Edge</span></h1>
+    <div class="wk-pick" title="Pick a season and week">
+      <select id="pickSeason" aria-label="Season"></select>
+      <select id="pickWeek" aria-label="Week"></select>
+    </div>
+    {% if not nav.is_current %}<a class="wk-back" href="{{ nav.current_href }}">Back to the current week</a>{% endif %}
+  </div>
+  {% if archive %}<p class="archived">Archived week: projections exactly as the model would have made them before week {{ week }}, using only data available then, with what actually happened alongside.</p>{% endif %}
   <div class="meta">
     <span>Projections use games through <b>week {{ week - 1 }}</b></span>
     {% if n_final %}<span>Week {{ week }}: <b>{{ n_final }} of {{ n_games }}</b> games final</span>{% endif %}
@@ -647,14 +659,16 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 </div></main>
 <footer><div class="wrap">nfl-edge &middot; nflverse, NFL.com practice reports, FantasyPros, Open-Meteo &middot; for entertainment, not betting advice</div></footer>
 <script type="application/json" id="scoreCfg">{{ score_cfg|safe }}</script>
+<script type="application/json" id="navCfg">{{ nav|tojson }}</script>
 <script>
 // FLEX list: copies of the RB / WR / TE rows (with their detail rows), ordered by projection and marked with a
 // position badge. Built first so every later handler (sorting, details, pinned column, scoring) sees it.
 (() => {
   const tb = document.querySelector('.posview[data-pos="FLEX"] tbody');
   if (!tb) return;
+  const FLEX_DEPTH = 150;  // a 14-team 2RB/2WR/1TE/1FLEX league starts 84 flex-eligible players; 150 adds waiver depth
   const rows = ['RB', 'WR', 'TE'].flatMap(p => [...document.querySelectorAll(`.posview[data-pos="${p}"] tr.main`)]);
-  rows.sort((a, b) => parseFloat(b.dataset.proj) - parseFloat(a.dataset.proj)).forEach((tr, i) => {
+  rows.sort((a, b) => parseFloat(b.dataset.proj) - parseFloat(a.dataset.proj)).slice(0, FLEX_DEPTH).forEach((tr, i) => {
     const c = tr.cloneNode(true), d = tr.nextElementSibling;
     c.querySelector('td.rk').textContent = i + 1;
     const nm = c.querySelector('td.stick b');
@@ -662,6 +676,32 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     tb.appendChild(c);
     if (d && d.classList.contains('detail')) tb.appendChild(d.cloneNode(true));
   });
+})();
+// Season / week picker: every week links to its own page (the current week is index.html); the tab and hash
+// carry over so you stay on the same view.
+(() => {
+  const NAV = JSON.parse(document.getElementById('navCfg').textContent);
+  const ss = document.getElementById('pickSeason'), ws = document.getElementById('pickWeek');
+  const fillWeeks = yr => {
+    ws.replaceChildren(...Object.keys(NAV.seasons[yr]).map(w => new Option(`Week ${w}`, w)));
+  };
+  const fill = () => {
+    ss.replaceChildren(...Object.keys(NAV.seasons).reverse().map(y => new Option(y, y)));
+    ss.value = NAV.season; fillWeeks(NAV.season); ws.value = NAV.week;
+  };
+  fill();
+  // Pages built earlier carry the week list of their day; the site's weeks.json (rewritten every build) has the
+  // latest one, so older pages still list newer weeks.
+  const prefix = NAV.current_href.replace(/index\.html$/, '');
+  fetch(prefix + 'weeks.json').then(r => r.ok ? r.json() : null).then(j => {
+    if (!j) return;
+    NAV.seasons = Object.fromEntries(Object.entries(j).map(([y, ws_]) =>
+      [y, Object.fromEntries(Object.entries(ws_).map(([w, href]) => [w, prefix + href]))]));
+    fill();
+  }).catch(() => {});
+  const go = (yr, w) => { location.href = NAV.seasons[yr][w] + location.hash; };
+  ss.onchange = () => { const weeks = Object.keys(NAV.seasons[ss.value]); go(ss.value, weeks.includes(NAV.week) ? NAV.week : weeks[weeks.length - 1]); };
+  ws.onchange = () => go(ss.value, ws.value);
 })();
 document.querySelectorAll('nav.tabs button').forEach(b => b.onclick = () => {
   document.querySelectorAll('nav.tabs button').forEach(x => x.classList.toggle('on', x === b));

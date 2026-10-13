@@ -65,9 +65,11 @@ seed = 7
 share_half_life_weeks = 3.0
 # Expected-TD blend: weight on actual TDs = n / (n + td_blend_k), n = opportunities.
 td_blend_k = 150
-# Passing penalty above this wind speed (mph), per mph, capped.
-wind_threshold_mph = 15
-wind_penalty_per_mph = 0.02
+# Passing penalty above this wind speed (mph), per mph, capped. Grid-tuned walk-forward 2021-25 (thresholds 0-20,
+# slopes 1-4%/mph, caps 25/40%): 10 mph is the sweet spot (slopes 2-4% all -0.010 to -0.012 MAE vs the old
+# 15 / 2%, CI excludes 0); 0-5 mph thresholds unstable, steep + early is worse. Middle of the plateau adopted.
+wind_threshold_mph = 10
+wind_penalty_per_mph = 0.03
 wind_penalty_cap = 0.25
 # Role-change alert: snap-share jump (percentage points) vs prior 3-week average.
 # Efficiency look-back: weight of this season, last season and two seasons back. Audit: flat and steep
@@ -108,7 +110,7 @@ air_yards = false       # air-yards share (volume) + aDOT (receiving yards)
 # Wind: "fixed" = the hand-set penalty in [player_model] (wind_threshold_mph etc.); "linear" / "quadratic" = wind
 # (mph; domes 0) as a fitted input to every passing-efficiency regression. Audit: fixed beats both no-wind (TE
 # +0.008, CI excludes 0) and fitted (TE +0.012: thin data learned a positive TE effect) -> fixed kept; its
-# threshold / slope / cap are next to be tuned on a grid.
+# threshold / slope / cap now grid-tuned (see [player_model]).
 wind_mode = "fixed"
 snap_input = false      # snap share as a volume input (spec: flag only, so off unless you opt in)
 # Blend with FantasyPros expert consensus (free, scraped Fridays; only pre-kickoff ranks are used). Backtest:
