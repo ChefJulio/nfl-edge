@@ -285,6 +285,15 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   nflverse team stats), 2021+ our pregame chances and both power ranks, season averages with league ranks,
   remaining schedule. **nflverse team-stats EPA does NOT reconcile with pbp** (avg gap 6 EPA/game over 2026;
   one game matched exactly): team log shows yards/play instead. EPA from our own pbp would need 1999-2018 pbp.
+  **Linking (2026-10-13):** one click rule in gamecast.js, innermost wins: `[data-open-pid]` / `tr.main[data-pid]` ->
+  player card, `.tm-open[data-tm]` -> team card (Rankings opponent, byes, Role changes, Matchups QB names and team
+  headers, card team names, game-log opponents, gamecast drive / box / scoreboard teams). ESPN play text "D.Prescott"
+  is linked via first-initial + last-name (ties broken by the game's two teams). Card matchups jump to the tile
+  (`#g-<game_id>` deep link, flash outline). **Gamecast game log:** newest first by default; sort Newest / Oldest /
+  Biggest swings (top 40 by |ESPN WP change|); plays tinted by the team with the ball (lightened for dark colors),
+  special teams neutral, timeouts / end-of-period as thin dividers; event chips TD/FG/XP/INT/FUM/SACK/FLAG/1ST.
+  First down = next real play of the drive starts at 1st (from 1st down only if full distance gained; never on goal
+  to go). Drive results are phrased for the offense ("Intercepted by TB").
 
 ## 8. Site / pipeline
 - `index.html` = current week: the week being played (any final game) until **Tuesday 06:00 ET** after its last

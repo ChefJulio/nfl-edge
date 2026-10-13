@@ -255,8 +255,27 @@ svg.wp { display: block; width: 100%; height: 200px; border-radius: 8px; touch-a
 .pl-dd { font-size: 11.5px; color: var(--muted); font-weight: 600; } .pl-txt { line-height: 1.38; }
 .pl-side { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
 .pl-wp { font-size: 11px; color: var(--muted); white-space: nowrap; } .pl-sc { font-size: 12px; white-space: nowrap; }
-.pl-score { background: color-mix(in srgb, #ffd43b 9%, transparent); } .pl-score .pl-txt { font-weight: 700; }
-.pl-to { background: color-mix(in srgb, #ff4d4f 9%, transparent); } .pl-pen .pl-txt { color: var(--muted); }
+/* plays: tinted by the team with the ball; special teams neutral; non-plays as thin dividers; events as chips */
+/* lightened first so dark team colors (navy, black) still read on the dark page */
+.pl[style*="--pt"] { --ptl: color-mix(in srgb, var(--pt) 72%, #ffffff);
+  background: color-mix(in srgb, var(--ptl) 11%, transparent); box-shadow: inset 4px 0 0 var(--ptl); }
+@media (prefers-color-scheme: light) { .pl[style*="--pt"] { --ptl: var(--pt); background: color-mix(in srgb, var(--pt) 10%, transparent); } }
+.pl-score .pl-txt { font-weight: 700; } .pl-pen .pl-txt { color: var(--muted); }
+.pl-st { background: color-mix(in srgb, var(--muted) 6%, transparent); }
+.pl-np { padding: 3px 4px; font-size: 11px; color: var(--faint); border-bottom: 1px dashed var(--line); }
+.pl-np .pl-when { font-size: 11px; color: var(--faint); } .pl-np .pl-txt { font-size: 11px; letter-spacing: .03em; text-transform: uppercase; }
+.pc-chip { display: inline-block; font-size: 9.5px; font-weight: 800; letter-spacing: .05em; border-radius: 4px; padding: 0 5px;
+  margin-right: 5px; line-height: 15px; vertical-align: 1px; }
+.c-sc { background: #ffd43b; color: #3a2c00; } .c-to { background: #ff6b6b; color: #3a0b0b; } .c-1st { background: #45c26b; color: #0d2a17; }
+.c-sk { background: #e0b04a; color: #3a2a00; } .c-pen { background: #98a0ab; color: #15181d; } .c-st { background: #3a414c; color: #e9ecf0; }
+.dr-res.bad { color: #ff8f84; } .dr-tm { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+/* clickable player / team names (week pages define .nm-link too) */
+.nm-link { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; }
+.nm-link:hover { color: var(--accent); } .tm-open { cursor: pointer; }
+.pc-tile { display: inline-flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; }
+.pc-tile:hover b { color: var(--accent); }
+article.game.flash { box-shadow: 0 0 0 3px var(--accent), var(--shadow); transition: box-shadow .3s; }
 @media (max-width: 560px) { .pl { grid-template-columns: 52px minmax(0, 1fr); } .pl-side { grid-column: 2; align-items: flex-start; flex-direction: row; gap: 10px; } }
 /* box score */
 .bx-team { margin-bottom: 14px; } .bx-th { display: flex; align-items: center; gap: 8px; font-size: 15px; padding-bottom: 6px; border-bottom: 3px solid var(--tc); margin-bottom: 6px; }

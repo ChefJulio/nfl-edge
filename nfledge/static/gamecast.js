@@ -250,7 +250,7 @@
     const lg = league(), need = (lg.teams || 10) * Math.max(1, lg[pos] || 1);
     const rkClass = r => r <= need ? 'rk-good' : r <= 2 * need ? 'rk-mid' : 'rk-bad';
     const projOf = g => g.pjl ? g.pj * (pts(g.pjl, w, pos) / Math.max(0.1, pts(g.pjl, built, pos))) : null;
-    const opp = g => `<td class="lg-opp ${mrClass(g.mr)}"${g.mr ? ` title="Our pregame matchup rank: ${ord(g.mr)} of 32 vs ${esc(pos)}s (1st = toughest)"` : ''}>${g.h === 0 ? '@' : ''}${esc(g.o)}</td>`;
+    const opp = g => `<td class="lg-opp tm-opp ${mrClass(g.mr)}"${g.mr ? ` title="Our pregame matchup rank: ${ord(g.mr)} of 32 vs ${esc(pos)}s (1st = toughest)"` : ''}><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>`;
     const head = `<tr class="lg-gh"><th colspan="6"></th>${groups.map(([n, cols]) => `<th colspan="${cols.length}" class="lg-grp">${n}</th>`).join('')}</tr>
       <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num">Proj</th><th class="num">Rank</th><th class="num">Snap</th>${stat.map(([n]) => `<th class="num">${n}</th>`).join('')}</tr>`;
     const blank = `<td class="num">–</td>`.repeat(stat.length);
@@ -398,7 +398,7 @@
           ${rangeSvg(s.q, s.proj)}<div class="pc-sub">Floor ${f1(s.q[0])} · middle ${f1(s.q[1])}–${f1(s.q[3])} · ceiling ${f1(s.q[4])} · confidence ${esc(p.conf)}</div></div>
         <div class="pc-box"><div class="pc-k">Expected line</div><div class="line">${expectedLine(pid, p)}</div>${vol ? `<div class="pc-sub">${esc(vol)}</div>` : ''}</div>
         <div class="pc-box"><div class="pc-k">Matchup</div>
-          <div class="pc-mu">${opp ? logo(opp.logo_url, opp.logo_bg, 20, opp.team) : ''}<b>${esc(p.home)} ${esc(p.opp)}</b>
+          <div class="pc-mu">${g ? `<a class="pc-tile" href="${tileHref(g)}" data-goto="${esc(g.id)}" title="Open the matchup tile">` : ''}${opp ? logo(opp.logo_url, opp.logo_bg, 20, opp.team) : ''}<b>${esc(p.home)} ${esc(p.opp)} &rsaquo;</b>${g ? '</a>' : ''}
             <span style="color:${esc(p.dvp_color)}">${esc(p.dvp)} vs ${esc(p.pos)}s</span> <span class="muted">grade ${esc(p.grade)}</span></div>
           <div class="pc-sub">This defense ${p.mpts >= 0 ? 'adds' : 'takes away'} ${f1(Math.abs(p.mpts))} pts vs an average one.</div></div>
         <div class="pc-box"><div class="pc-k">Availability</div><div class="pc-big sm">${p.inactive < 0.005 ? '<1' : Math.round(p.inactive * 100)}% <small>inactive</small></div>
@@ -412,7 +412,7 @@
       <div class="pc-tab" data-pt="log"${cardTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every career game</div><div class="pc-log"></div></div></div>
       ${p.espn && !DATA.archive ? `<div class="pc-tab" data-pt="news"${cardTab === 'news' ? '' : ' hidden'}><div class="pc-box pc-newsbox"><div class="pc-k">Recent news</div><div class="pc-news"></div></div></div>` : ''}
       <div class="pc-links">${g ? `<a href="${gameHref(g)}">${st && st.state === 'in' ? '<span class="live-dot"></span>' : ''}Gamecast: ${esc(g.away.team)} @ ${esc(g.home.team)} &rsaquo;</a>` : ''}
-        ${CFG.page !== 'game' && g ? `<a href="#games" data-goto="${esc(g.id)}">Matchup card &rsaquo;</a>` : ''}</div>`;
+        ${g ? `<a href="${tileHref(g)}" data-goto="${esc(g.id)}">Matchup tile &rsaquo;</a>` : ''}</div>`;
     const nb = body.querySelector('.pc-news'); if (nb) loadNews(p.espn, nb);
     const lb = body.querySelector('.pc-log'); if (lb) loadLog(pid, lb, p);
     body.querySelectorAll('.pc-tabs [data-pt]').forEach(b => b.onclick = () => {
@@ -420,12 +420,22 @@
       body.querySelectorAll('.pc-tabs [data-pt]').forEach(x => x.classList.toggle('on', x === b));
       body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.pt !== cardTab; });
     });
-    body.querySelectorAll('[data-goto]').forEach(a => a.onclick = ev => {
-      ev.preventDefault(); closePlayer();
-      const tab = document.querySelector('nav.tabs button[data-tab="games"]'); if (tab) tab.click();
-      const card = document.getElementById('g-' + a.dataset.goto); if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    wireGoto(body);
   };
+  // Matchup links in cards jump to that game's tile on the Matchups tab (on the game page: the week page's tile).
+  const tileHref = g => CFG.page === 'game' ? `${(DATA.__rel || 'index.json').replace(/\.json$/, '.html')}#g-${g.id}` : `#g-${g.id}`;
+  const goToTile = gid => {
+    const tab = document.querySelector('nav.tabs button[data-tab="games"]'); if (tab) tab.click();
+    const card = document.getElementById('g-' + gid);
+    if (card) setTimeout(() => {
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      card.classList.add('flash'); setTimeout(() => card.classList.remove('flash'), 1600);
+    }, 60);
+  };
+  const wireGoto = body => body.querySelectorAll('[data-goto]').forEach(a => a.onclick = ev => {
+    if (CFG.page === 'game') return;  // a real link to the week page's tile
+    ev.preventDefault(); closePlayer(); goToTile(a.dataset.goto);
+  });
   // ------------------------------------------------------------------------------------------------- team card
   // Same overlay and look as the player card. Overview from this week's data (Power, matchup, top players);
   // season stats and the career game log from data/teams/<TEAM>.json (tools/player_logs.py).
@@ -517,11 +527,11 @@
     const fc = g && g.fc;
     const myPct = (fav, pct) => fav === abbr ? pct : 100 - pct;
     const week = g ? `<div class="pc-box"><div class="pc-k">Week ${DATA.week}</div>
-        <div class="pc-mu">${tLogo(opp.team, 22)}<b>${home ? 'vs' : '@'} ${esc(opp.nick || opp.team)}</b> <span class="muted">${esc(g.kickoff || '')}</span></div>
+        <div class="pc-mu"><a class="pc-tile" href="${tileHref(g)}" data-goto="${esc(g.id)}" title="Open the matchup tile">${tLogo(opp.team, 22)}<b>${home ? 'vs' : '@'} ${esc(opp.nick || opp.team)} &rsaquo;</b></a> <span class="muted">${esc(g.kickoff || '')}</span></div>
         ${fc ? `<div class="tm-odds"><div><div class="pc-k">${fc.src === 'Vegas' ? 'Vegas odds' : 'Our model (no line yet)'}</div><b>${fc.tossup ? 'Tossup' : `${myPct(fc.fav, fc.pct)}%`}</b>${fc.tossup ? ` <small class="muted">${esc(abbr)} ${myPct(fc.fav, fc.pct)}%</small>` : ''}</div>
           ${fc.src === 'Vegas' ? `<div><div class="pc-k">Our model</div><b>${fc.model_tossup ? 'Tossup' : `${myPct(fc.model_fav, fc.model_pct)}%`}</b></div>` : ''}
           ${g.vegas_line ? `<div><div class="pc-k">Line</div><b>${esc(g.vegas_line)}</b></div>` : ''}</div>` : ''}
-        <div class="pc-links" style="margin-top:8px"><a href="${gameHref(g)}">Gamecast &rsaquo;</a>${CFG.page !== 'game' ? `<a href="#games" data-goto="${esc(g.id)}">Matchup card &rsaquo;</a>` : ''}</div></div>`
+        <div class="pc-links" style="margin-top:8px"><a href="${gameHref(g)}">Gamecast &rsaquo;</a><a href="${tileHref(g)}" data-goto="${esc(g.id)}">Matchup tile &rsaquo;</a></div></div>`
       : `<div class="pc-box"><div class="pc-k">Week ${DATA.week}</div><b>Bye</b></div>`;
     const unit = (label, v, rk, pp, total) => `<div class="tm-u${total ? ' tm-tot' : ''}"><span class="tm-ul">${label}</span><span class="tm-uv">${sgn(v)}</span>${rkChip(rk)}
       <span class="tm-ub"><span style="${v >= 0 ? `left:50%;width:${Math.min(50, Math.abs(v) * 10)}%` : `right:50%;width:${Math.min(50, Math.abs(v) * 10)}%`}" class="${v >= 0 ? 'pos' : 'neg'}"></span></span>
@@ -556,11 +566,7 @@
     });
     const sel = body.querySelector('[data-topp]');
     if (sel) sel.onchange = () => { teamOpp = sel.value; body.querySelector('.tm-log').innerHTML = teamLogHtml(TLOGS[abbr], abbr); wireTeamLog(body, abbr); };
-    body.querySelectorAll('[data-goto]').forEach(a => a.onclick = ev => {
-      ev.preventDefault(); closePlayer();
-      const tab = document.querySelector('nav.tabs button[data-tab="games"]'); if (tab) tab.click();
-      const card = document.getElementById('g-' + a.dataset.goto); if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    wireGoto(body);
     if (!L) loadTeamLog(abbr);
   };
   const wireTeamLog = (body, abbr) => {
@@ -642,7 +648,7 @@
           <span class="gl-clock">${live ? '<span class="live-dot"></span>' : ''}${esc(live ? (st.short || '') : (st.detail || 'Final'))}</span>
           <span class="gl-t r">${sp && sp.offense.team === st.home.team ? '<i class="gl-pos" title="Has the ball"></i>' : ''}${T(st.home)}</span></div>
         ${sp ? `<div class="gl-sit"><b>${esc(sp.offense.team)} ball</b>${sp.text ? ` · ${esc(sp.text)}` : ''}${sp.red ? ' · <span class="gl-red">red zone</span>' : ''}</div>${fieldSvg(sp, st)}` : ''}
-        ${lastText ? `<div class="gl-last">${esc(lastText)}</div>` : ''}
+        ${lastText ? `<div class="gl-last">${linkNames(esc(lastText), [st.away.team, st.home.team])}</div>` : ''}
         <a class="gl-open" href="${href}">${live ? 'Open live gamecast' : 'Game recap'} &rsaquo;</a>`;
       box.hidden = false;
     });
@@ -687,7 +693,7 @@
   };
 
   // ------------------------------------------------------------------------------------------------- game page
-  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', newest: null, replay: null };
+  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null };
   const parseGid = gid => { const m = String(gid || '').match(/^(\d{4})_(\d{2})_([A-Z]{2,3})_([A-Z]{2,3})$/); return m ? { season: +m[1], week: +m[2], away: m[3], home: m[4] } : null; };
   const wpSeries = (sum) => {
     const plays = allPlays(sum).flatMap(d => d.plays || []);
@@ -769,12 +775,47 @@
       const rec = mine.filter(o => o.tgt || o.line[5]).sort((x, y) => y.tgt - x.tgt || y.line[6] - x.line[6]).map(o => { const p = proj(o), pl = p && p.proj_line;
         return `<tr><td>${nameCell(o)}</td><td class="num"><b>${o.tgt}</b>${pl && pl.tgt ? ` <small class="muted">/ ${f1(pl.tgt)}</small>` : ''}</td><td class="num">${o.line[5]}</td><td class="num">${f0(o.line[6])}${pl && pl.rec_yd ? ` <small class="muted">/ ${f0(pl.rec_yd)}</small>` : ''}</td><td class="num">${o.line[7]}</td></tr>`; }).join('');
       const tbl = (title, head, body) => body ? `<div class="bx-t"><div class="bx-h">${title}</div><table class="bx"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>` : '';
-      return `<div class="bx-team" style="--tc:${esc(side.color)}"><div class="bx-th">${logo(side.logo, '#111', 20, side.team)}<b>${esc(side.team)}</b></div>
+      return `<div class="bx-team" style="--tc:${esc(side.color)}"><div class="bx-th tm-open" data-tm="${esc(side.team)}">${logo(side.logo, '#111', 20, side.team)}<b>${esc(side.team)}</b></div>
         ${tbl('Fantasy points <small>(your scoring) vs our projection</small>', '<th>Player</th><th class="num">Pts</th><th class="num">Proj</th><th class="num">+/-</th>', fanRows)}
         ${tbl('Passing <small>yards / projected</small>', '<th>Player</th><th class="num">C/Att</th><th class="num">Yds</th><th class="num">TD</th><th class="num">Int</th>', pass)}
         ${tbl('Rushing <small>/ projected</small>', '<th>Player</th><th class="num">Car</th><th class="num">Yds</th><th class="num">TD</th>', rush)}
         ${tbl('Receiving <small>targets / projected</small>', '<th>Player</th><th class="num">Tgt</th><th class="num">Rec</th><th class="num">Yds</th><th class="num">TD</th>', rec)}</div>`;
     }).join('');
+  };
+  // Drive results from the OFFENSE's side: ESPN's "Interception" on a DAL drive means DAL threw it.
+  const driveResult = (d, tm, info, current) => {
+    const r = String(d.displayResult || d.result || '');
+    const opp = tm && tm.team === info.home.team ? info.away.team : info.home.team;
+    if (!r) return { text: current ? 'In progress' : '', cls: '' };
+    if (/intercept/i.test(r)) return { text: `Intercepted by ${opp}`, cls: 'bad' };
+    if (/fumble/i.test(r)) return { text: `Fumble lost to ${opp}`, cls: 'bad' };
+    if (/downs/i.test(r)) return { text: 'Turnover on downs', cls: 'bad' };
+    if (/blocked/i.test(r)) return { text: `${r.replace(/^blocked\s*/i, '')} blocked by ${opp}`.trim(), cls: 'bad' };
+    if (/safety/i.test(r)) return { text: `Safety (2 points to ${opp})`, cls: 'bad' };
+    if (/missed/i.test(r)) return { text: r, cls: 'bad' };
+    return { text: r, cls: d.isScore ? 'good' : '' };
+  };
+  // ESPN play text names players "D.Prescott" / "A.St. Brown": link the ones we have cards for (on either team in
+  // this game; ambiguous initials are left as plain text).
+  let ABBR = null;
+  const abbrMap = () => {
+    if (ABBR) return ABBR;
+    ABBR = {};
+    if (DATA) Object.entries(DATA.players).forEach(([pid, p]) => {
+      const parts = String(p.name).split(' ');
+      if (parts.length < 2) return;
+      const key = `${parts[0][0]}.${parts.slice(1).join(' ')}`;
+      (ABBR[key] = ABBR[key] || []).push({ pid, team: p.team });
+    });
+    return ABBR;
+  };
+  const linkNames = (html, teams) => {
+    if (!DATA) return html;
+    const m = abbrMap();
+    return html.replace(/\b([A-Z])\.((?:St\. )?[A-Z][A-Za-z'\-]+(?: (?:Jr\.|Sr\.|II|III|IV))?)/g, (all, i, rest) => {
+      const c = (m[`${i}.${rest}`] || []).filter(x => !teams || teams.includes(x.team));
+      return c.length === 1 ? `<button type="button" class="nm-link" data-open-pid="${esc(c[0].pid)}">${all}</button>` : all;
+    });
   };
   const gameLog = (sum, info, ser, upto) => {
     const drives = allPlays(sum);
@@ -783,18 +824,58 @@
     const q = GP.q.trim().toLowerCase();
     const keep = p => (upto == null || elapsed(p) <= upto) && (GP.filter === 'all' || (GP.filter === 'score' && p.scoringPlay)
       || (GP.filter === 'to' && p.isTurnover) || (GP.filter === 'pen' && p.isPenalty)) && (!q || String(p.text).toLowerCase().includes(q));
+    // First downs: ESPN doesn't flag them; a down-and-distance play earned one if the drive's next real play starts
+    // at 1st down (a touchdown is its own highlight).
+    const ttype = p => String((p.type && p.type.text) || '');
+    const isNonPlay = p => /timeout|end period|end of|two-minute|end game|official|end quarter/i.test(ttype(p))
+      || /^(END (GAME|QUARTER|OF)|Timeout|Two-Minute)/i.test(String(p.text || ''));
+    const isST = p => /kickoff|punt|field goal|extra point|two-point|onside|blocked/i.test(ttype(p)) && !/return \(offense\)/i.test(ttype(p))
+      || /\bkicks\b|\bpunts\b|extra point|field goal/i.test(String(p.text || ''));
+    const firstDown = new Set();
+    drives.forEach(d => {
+      const real = (d.plays || []).filter(p => p.start && p.start.down && !isNonPlay(p) && !isST(p));
+      real.forEach((p, i) => {
+        const nx = real[i + 1];
+        if (!nx || nx.start.down !== 1 || p.scoringPlay || p.isTurnover) return;
+        if (/goal/i.test(p.start.downDistanceText || p.start.shortDownDistanceText || '')) return;  // goal to go: only a TD
+        // from 1st down a new set needs the full distance gained (else it's e.g. a replayed down after a no-play)
+        if (p.start.down === 1 && !(p.statYardage >= (p.start.distance || 10))) return;
+        firstDown.add(p.id);
+      });
+    });
+    const teams = [info.away.team, info.home.team];
     const playRow = (p) => {
       const wp = wpAfter[p.id], d = wp ? wp.now - wp.prev : 0;
       const swing = Math.abs(d) >= 0.01 ? `<span class="pl-wp" title="Change in ESPN's live win probability on this play">${esc(d > 0 ? info.home.team : info.away.team)} +${Math.round(Math.abs(d) * 100)}%</span>` : '';
+      const when = `${p.period ? periodName(p.period.number) : ''} ${esc(p.clock ? p.clock.displayValue : '')}`;
+      // Not plays (timeouts, two-minute warning, end of quarter / game): thin muted divider rows.
+      if (isNonPlay(p)) return `<li class="pl pl-np"><div class="pl-when">${when}</div><div class="pl-what"><div class="pl-txt">${esc(p.text)}</div></div><div></div></li>`;
       const dd = (p.start && (p.start.downDistanceText || p.start.shortDownDistanceText)) || '';
-      const cls = p.scoringPlay ? ' pl-score' : p.isTurnover ? ' pl-to' : p.isPenalty ? ' pl-pen' : '';
-      return `<li class="pl${cls}"><div class="pl-when">${p.period ? periodName(p.period.number) : ''} ${esc(p.clock ? p.clock.displayValue : '')}</div>
-        <div class="pl-what">${dd ? `<div class="pl-dd">${esc(dd)}</div>` : ''}<div class="pl-txt">${esc(p.text)}</div></div>
+      const fd = firstDown.has(p.id), st = isST(p), t = ttype(p), txt = String(p.text || '');
+      // Tint = the team with the ball; special-teams plays stay neutral. Event types are chips, not row colors.
+      const off = st ? null : teamOf(p.start && p.start.team && p.start.team.id);
+      const chips = [];
+      if (p.scoringPlay) chips.push(/field goal/i.test(t + txt) ? ['FG', 'c-sc'] : /extra point/i.test(t + txt) ? ['XP', 'c-sc'] : /safety/i.test(t + txt) ? ['SAFETY', 'c-sc'] : ['TD', 'c-sc']);
+      else if (st) chips.push([/kickoff|kicks/i.test(t + txt) ? 'KO' : /punt/i.test(t + txt) ? 'PUNT' : /field goal/i.test(t + txt) ? 'FG' : 'ST', 'c-st']);
+      if (p.isTurnover) chips.push([/intercept/i.test(t + txt) ? 'INT' : /fumble/i.test(t + txt) ? 'FUM' : 'TO', 'c-to']);
+      if (/sack/i.test(t)) chips.push(['SACK', 'c-sk']);
+      if (p.isPenalty) chips.push(['FLAG', 'c-pen']);
+      if (fd) chips.push(['1ST', 'c-1st']);
+      const chipHtml = chips.map(([c, k]) => `<span class="pc-chip ${k}">${c}</span>`).join('');
+      const cls = `${p.scoringPlay ? ' pl-score' : ''}${p.isPenalty && !p.scoringPlay ? ' pl-pen' : ''}${st ? ' pl-st' : ''}`;
+      return `<li class="pl${cls}"${off ? ` style="--pt:${esc(off.color)}"` : ''}><div class="pl-when">${when}</div>
+        <div class="pl-what">${dd || chipHtml ? `<div class="pl-dd">${chipHtml}${esc(dd)}</div>` : ''}<div class="pl-txt">${linkNames(esc(p.text), teams)}</div></div>
         <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${esc(info.away.team)} ${p.awayScore}–${p.homeScore} ${esc(info.home.team)}</b>` : ''}${swing}</div></li>`;
     };
-    let order = GP.newest == null ? (GP.info && GP.info.state === 'in') : GP.newest;
+    const order = GP.sort !== 'old';  // newest first unless asked otherwise
+    const swingOf = p => { const w = wpAfter[p.id]; return w ? Math.abs(w.now - w.prev) : 0; };
     let html = '';
-    if (GP.view === 'every') {
+    if (GP.sort === 'impact') {
+      // Biggest swings in ESPN's live win probability, one flat list (impact order doesn't fit inside drives).
+      const pl = drives.flatMap(d => d.plays || []).filter(keep).filter(p => wpAfter[p.id]).sort((a, b) => swingOf(b) - swingOf(a)).slice(0, 40);
+      html = pl.length ? `<p class="gcs-note">The ${pl.length} plays that moved ESPN's win probability the most.</p><ol class="pls">${pl.map(playRow).join('')}</ol>`
+        : '<p class="muted">No win-probability data for these plays yet.</p>';
+    } else if (GP.view === 'every') {
       let pl = drives.flatMap(d => d.plays || []).filter(keep);
       if (order) pl = pl.reverse();
       html = pl.length ? `<ol class="pls">${pl.map(playRow).join('')}</ol>` : '<p class="muted">No plays match.</p>';
@@ -803,8 +884,9 @@
       if (order) ds = ds.reverse().map(x => ({ d: x.d, plays: [...x.plays].reverse() }));
       html = ds.map(({ d, plays }) => {
         const tm = teamOf(d.team && d.team.id) || {};
-        return `<div class="dr"><div class="dr-h" style="--tc:${esc(tm.color || '#666')}">${tm.logo ? logo(tm.logo, '#111', 16, tm.team) : ''}<b>${esc(tm.team || '')}</b>
-          <span class="dr-res${d.isScore ? ' good' : ''}">${esc(d.displayResult || d.result || (d === sum.drives.current ? 'In progress' : ''))}</span>
+        const res = driveResult(d, tm, info, d === sum.drives.current);
+        return `<div class="dr"><div class="dr-h" style="--tc:${esc(tm.color || '#666')}"><span class="tm-open dr-tm" data-tm="${esc(tm.team || '')}">${tm.logo ? logo(tm.logo, '#111', 16, tm.team) : ''}<b>${esc(tm.team || '')} drive</b></span>
+          <span class="dr-res ${res.cls}">${esc(res.text)}</span>
           <span class="muted">${esc(d.description || '')}</span></div><ol class="pls">${plays.map(playRow).join('')}</ol></div>`;
       }).join('') || '<p class="muted">No plays match.</p>';
     }
@@ -833,7 +915,7 @@
       <section class="sb">${side(info.away, false)}<div class="sb-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<b>${esc(status)}</b>
         ${info.state === 'pre' ? `<div class="muted">${esc(new Date(info.date).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }))}</div>` : ''}</div>${side(info.home, true)}</section>
       ${sp ? `<section class="sit"><div class="sit-dd"><b>${esc(sp.offense.team)} ball</b>${sp.text ? ` · ${esc(sp.text)}` : ''}${sp.red ? ' · <span class="gl-red">red zone</span>' : ''}</div>
-        ${fieldSvg(sp, info)}${sit.lastPlay && sit.lastPlay.text ? `<div class="sit-last"><span class="muted">Last play:</span> ${esc(sit.lastPlay.text)}</div>` : ''}</section>` : ''}
+        ${fieldSvg(sp, info)}${sit.lastPlay && sit.lastPlay.text ? `<div class="sit-last"><span class="muted">Last play:</span> ${linkNames(esc(sit.lastPlay.text), [info.away.team, info.home.team])}</div>` : ''}</section>` : ''}
       ${GP.canReplay ? `<section class="rp">${rp ? `<button type="button" data-rp="first">&laquo;</button><button type="button" data-rp="prev">&lsaquo;</button>
         <button type="button" data-rp="play">${rp.timer ? 'Pause' : 'Play'}</button><button type="button" data-rp="next">&rsaquo;</button><button type="button" data-rp="last">&raquo;</button>
         <input type="range" min="0" max="${rp.plays.length - 1}" value="${rp.i}" aria-label="Replay position"><span class="muted">Play ${rp.i + 1} of ${rp.plays.length}</span>
@@ -850,7 +932,7 @@
             <div class="lg-bar"><div class="seg">${[['drive', 'By drive'], ['every', 'Every play']].map(([k, l]) => `<button type="button" data-view="${k}" class="${GP.view === k ? 'on' : ''}">${l}</button>`).join('')}</div>
               <div class="seg">${[['all', 'All'], ['score', 'Scoring'], ['to', 'Turnovers'], ['pen', 'Penalties']].map(([k, l]) => `<button type="button" data-filter="${k}" class="${GP.filter === k ? 'on' : ''}">${l}</button>`).join('')}</div>
               <input type="search" id="lgQ" placeholder="Player or text" value="${esc(GP.q)}" aria-label="Filter plays">
-              <button type="button" class="lg-ord" data-order="1">${(GP.newest == null ? info.state === 'in' : GP.newest) ? 'Newest first' : 'Oldest first'}</button></div>
+              <div class="seg">${[['new', 'Newest'], ['old', 'Oldest'], ['impact', 'Biggest swings']].map(([k, l]) => `<button type="button" data-sort="${k}" class="${GP.sort === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>
             <div id="lgBody">${sum ? gameLog(sum, info, ser, upto) : '<p class="muted">Plays appear once the game starts.</p>'}</div></section>
         </div>
         <div class="gc-col">
@@ -873,8 +955,7 @@
     const root = document.getElementById('gc');
     root.querySelectorAll('[data-view]').forEach(b => b.onclick = () => { GP.view = b.dataset.view; renderGame(); });
     root.querySelectorAll('[data-filter]').forEach(b => b.onclick = () => { GP.filter = b.dataset.filter; renderGame(); });
-    const ord_ = root.querySelector('[data-order]');
-    if (ord_) ord_.onclick = () => { GP.newest = !(GP.newest == null ? GP.info.state === 'in' : GP.newest); renderGame(); };
+    root.querySelectorAll('[data-sort]').forEach(b => b.onclick = () => { GP.sort = b.dataset.sort; renderGame(); });
     const lq = root.querySelector('#lgQ');
     if (lq) lq.oninput = () => { GP.q = lq.value; document.getElementById('lgBody').innerHTML = gameLog(GP.sum, GP.info, wpSeries(GP.sum), GP.replay ? GP.replay.t : null); };
     root.querySelectorAll('.bx-n[data-pid]').forEach(b => b.onclick = () => openPlayer(b.dataset.pid));
@@ -912,10 +993,10 @@
     if (cmd === 'on') {
       const plays = allPlays(GP.sum).flatMap(d => d.plays || []);
       GP.replay = { plays, i: 0, play: plays[0], t: elapsed(plays[0]), timer: null };
-      GP.newest = true; renderGame(); return;
+      GP.sort = 'new'; renderGame(); return;
     }
     const rp = GP.replay; if (!rp) return;
-    if (cmd === 'off') { clearInterval(rp.timer); GP.replay = null; GP.newest = null; renderGame(); return; }
+    if (cmd === 'off') { clearInterval(rp.timer); GP.replay = null; renderGame(); return; }
     if (cmd === 'first') replayTo(0);
     if (cmd === 'last') replayTo(rp.plays.length - 1);
     if (cmd === 'prev') replayTo(rp.i - 1);
@@ -935,6 +1016,9 @@
       // Our Matchups colors are already chosen to be distinct from each other (ESPN's can be near-identical).
       if (GP.g && GP.g.colors) { GP.info.away.color = GP.g.colors[GP.away] || GP.info.away.color; GP.info.home.color = GP.g.colors[GP.home] || GP.info.home.color; }
       if (GP.info.realState !== 'pre') GP.sum = await getJSON(ESPN.sum + ev.id);
+      // Player cards opened from this page show the live / final line too.
+      if (GP.sum) Object.assign(LIVE.lines, boxLines(GP.sum));
+      if (GP.g) LIVE.byGame[GP.g.id] = GP.info;
       GP.canReplay = GP.info.realState === 'post' && GP.sum && allPlays(GP.sum).length > 0;
       if (!GP.replay) renderGame();
     } catch (e) {
@@ -966,15 +1050,19 @@
     try { DATA = await getJSON(CFG.root + CFG.data, 12000, false); DATA.__rel = CFG.data; } catch (e) { DATA = null; return; }
     if (location.hash.startsWith('#player/')) openPlayer(location.hash.slice(8));
     else if (location.hash.startsWith('#team/')) openTeam(location.hash.slice(6));
+    else if (location.hash.startsWith('#g-')) goToTile(location.hash.slice(3));  // deep link to a matchup tile
     document.addEventListener('nfle-scoring', () => { paintRows(); if (cardPid) renderCard(cardPid); else if (cardTeam) renderTeam(cardTeam); });
     if (CFG.current || SIM) startLive();
   };
-  // Links inside cards and on the game page: player names open player cards, team names open team cards. (On week
-  // pages the page's own handler opens teams from Power rows and Matchups tiles; it covers the card's buttons too.)
+  // One click rule for the whole site: the innermost clickable thing wins - a player name or player row opens his
+  // card, a team name / logo / tile header opens the team card (so a team inside a player row opens the team).
   document.addEventListener('click', e => {
-    const p = e.target.closest('[data-open-pid]');
-    if (p) { openPlayer(p.dataset.openPid); return; }
-    if (CFG.page === 'game') { const t = e.target.closest('.tm-open[data-tm]'); if (t) openTeam(t.dataset.tm); }
+    if (e.target.closest('a[href], input, select, .pc-tabs, .seg')) return;
+    for (let n = e.target; n && n !== document; n = n.parentElement) {
+      if (n.dataset && n.dataset.openPid) { openPlayer(n.dataset.openPid); return; }
+      if (n.classList && n.classList.contains('tm-open') && n.dataset.tm) { openTeam(n.dataset.tm); return; }
+      if (n.matches && n.matches('tr.main[data-pid]')) { openPlayer(n.dataset.pid); return; }
+    }
   });
   window.NFLE = { openPlayer, closePlayer, openTeam };
   if (CFG.page === 'game') initGame(); else initWeek();

@@ -246,7 +246,10 @@ tr.teamrow .dbar-fill.pos { background: #45c26b; } tr.teamrow .dbar-fill.neg { b
 @media (min-width: 980px) { .games { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 .game { min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; }
 .g-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
-.tm-open { cursor: pointer; }
+.tm-open, .pl-row, .nm-link { cursor: pointer; }
+.nm-link { font: inherit; color: inherit; background: none; border: 0; padding: 0; text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; }
+td.mu .opp.tm-open:hover b, .bye .nm-link:hover { color: var(--accent); }
 .g-team { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--tc); color: var(--tfg); min-height: 62px; }
 .g-team.home { flex-direction: row-reverse; text-align: right; }
 .g-team .logo { width: 34px; height: 34px; } .g-team .logo img { width: 26px; height: 26px; }
@@ -537,7 +540,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
           {% if show_act %}<td class="num actc{% if r.act is not none %}{{ ' act-hi' if r.act > r.p75 else ' act-lo' if r.act < r.p25 else '' }}{% endif %}" data-v="{{ r.act if r.act is not none else '' }}">{{ r.act|f1 if r.act is not none else '' }}</td>{% endif %}
           {% set lvl = {'A': 5, 'B': 4, 'C': 3, 'D': 2, 'F': 1}[r.grade] %}
           <td class="mu" data-v="{{ r.dvp_rank }}"><div class="mu-row">
-            <span class="opp"><span class="vs">{{ r.home }}</span>{{ r.opp_logo|safe }}<b>{{ r.opp }}</b></span>
+            <span class="opp tm-open" data-tm="{{ r.opp }}" title="Open the {{ r.opp }} team card"><span class="vs">{{ r.home }}</span>{{ r.opp_logo|safe }}<b>{{ r.opp }}</b></span>
             <span class="meter m{{ lvl }}" title="Matchup {{ r.grade }}: {{ r.opp }} is {{ r.dvp }} of 32 vs {{ pos }}s">{% for i in range(5) %}<i class="{{ 'on' if i < lvl }}"></i>{% endfor %}</span>
             <span class="dvp" style="color:{{ r.dvp_color }}" title="{{ r.opp }} defense vs {{ pos }}s: {{ r.dvp }} of 32 (1st = toughest, 32nd = easiest). This week: {{ r.mpts|sgn }} pts vs an average defense.">{{ r.dvp }}</span>
           </div></td>
@@ -551,7 +554,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
       </tbody>
     </table>
     </div>
-    {% if block.byes %}<div class="byes"><span>On bye</span>{% for b in block.byes %}<span class="bye" data-pos="{{ b.pos }}" data-sc="{{ b.sc }}">{{ b.logo|safe }}{{ b.name }} <span class="muted"><span class="byefpg">{{ b.fpg|f1 }}</span> FP/G</span></span>{% endfor %}</div>{% endif %}
+    {% if block.byes %}<div class="byes"><span>On bye</span>{% for b in block.byes %}<span class="bye" data-pos="{{ b.pos }}" data-sc="{{ b.sc }}"><span class="tm-open" data-tm="{{ b.team }}">{{ b.logo|safe }}</span><button type="button" class="nm-link" data-open-pid="{{ b.pid }}">{{ b.name }}</button> <span class="muted"><span class="byefpg">{{ b.fpg|f1 }}</span> FP/G</span></span>{% endfor %}</div>{% endif %}
     </div>
     {% endfor %}
   </div>
@@ -575,9 +578,9 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   {% for g in games %}
     <article class="game" id="g-{{ g.id }}" data-gid="{{ g.id }}" data-away="{{ g.away.team }}" data-home="{{ g.home.team }}">
       <div class="g-head">
-        <div class="g-team away tm-open" style="{{ g.away.row_style }}" data-tm="{{ g.away.team }}">{{ g.away.logo|safe }}<div><b>{{ g.away.nick }}</b><small>{{ g.away.qb or g.away.team }}</small></div></div>
+        <div class="g-team away tm-open" style="{{ g.away.row_style }}" data-tm="{{ g.away.team }}">{{ g.away.logo|safe }}<div><b>{{ g.away.nick }}</b>{% if g.away.qb_pid %}<small class="nm-link" data-open-pid="{{ g.away.qb_pid }}">{{ g.away.qb }}</small>{% else %}<small>{{ g.away.qb or g.away.team }}</small>{% endif %}</div></div>
         <div class="g-at">{{ 'vs' if g.neutral else '@' }}</div>
-        <div class="g-team home tm-open" style="{{ g.home.row_style }}" data-tm="{{ g.home.team }}">{{ g.home.logo|safe }}<div><b>{{ g.home.nick }}</b><small>{{ g.home.qb or g.home.team }}</small></div></div>
+        <div class="g-team home tm-open" style="{{ g.home.row_style }}" data-tm="{{ g.home.team }}">{{ g.home.logo|safe }}<div><b>{{ g.home.nick }}</b>{% if g.home.qb_pid %}<small class="nm-link" data-open-pid="{{ g.home.qb_pid }}">{{ g.home.qb }}</small>{% else %}<small>{{ g.home.qb or g.home.team }}</small>{% endif %}</div></div>
       </div>
       <div class="g-sub"><span>{{ g.kickoff }}{% if g.neutral %} &middot; neutral site{% endif %}</span><a class="gc-link" href="{{ root }}game.html?d={{ data_rel }}&amp;g={{ g.id }}">Gamecast &rsaquo;</a></div>
       <div class="gc-live" hidden></div>
@@ -664,7 +667,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   </div></details>
   <div class="card"><div class="scroll"><table class="sortable tiles">
     <thead><tr><th class="stick" data-first="asc">Player</th><th><abbr title="Sorts by the size of the jump">Snap share</abbr></th><th><abbr title="Sorts by the size of the jump">Opportunity share</abbr></th><th class="num">Touches</th><th class="nosort">Takeaway</th></tr></thead>
-    <tbody>{% for r in roles %}<tr class="teamrow" style="{{ r.row_style }}"><td class="stick" data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b><span class="nm-full">{{ r.name }}</span><span class="nm-short">{{ r.name|short }}</span></b><span class="sub">{{ r.pos|posb|safe }} {{ r.team }}{% if r.week != week - 1 %} &middot; wk {{ r.week }}{% endif %}</span></div></div></td>
+    <tbody>{% for r in roles %}<tr class="teamrow pl-row" style="{{ r.row_style }}" data-open-pid="{{ r.pid }}"><td class="stick" data-v="{{ r.name }}"><div class="who">{{ r.logo|safe }}<div><b><span class="nm-full">{{ r.name }}</span><span class="nm-short">{{ r.name|short }}</span></b><span class="sub">{{ r.pos|posb|safe }} <span class="tm-open" data-tm="{{ r.team }}">{{ r.team }}</span>{% if r.week != week - 1 %} &middot; wk {{ r.week }}{% endif %}</span></div></div></td>
       <td data-v="{{ (r.snap_now or 0) - (r.snap_prev or 0) }}"><span class="arrow"><span class="from">{{ r.snap_prev|pct }}</span><i>&rarr;</i><b>{{ r.snap_now|pct }}</b></span></td>
       <td data-v="{{ (r.opp_now or 0) - (r.opp_prev or 0) }}"><span class="arrow"><span class="from">{{ r.opp_prev|pct }}</span><i>&rarr;</i><b>{{ r.opp_now|pct }}</b></span></td>
       <td class="num">{{ r.touches }}</td><td class="take">{{ r.takeaway }}</td></tr>{% endfor %}</tbody>
@@ -773,13 +776,8 @@ document.querySelectorAll('table.sortable').forEach(tbl => {
     };
   });
 });
-// A player row opens his card (assets/gamecast.js; loads after this script, so look it up at click time).
-document.addEventListener('click', e => {
-  const tr = e.target.closest('tr.main[data-pid]');
-  if (tr && window.NFLE) { window.NFLE.openPlayer(tr.dataset.pid); return; }
-  const tm = e.target.closest('.tm-open[data-tm]');  // Power rows and Matchups tile headers open the team card
-  if (tm && window.NFLE) window.NFLE.openTeam(tm.dataset.tm);
-});
+// Player rows, player names and team names open their cards: one click rule in assets/gamecast.js (innermost
+// clickable element wins, so a team name inside a player row opens the team).
 // Table headers (see .fits / .fhead in the CSS).
 const nav = document.querySelector('nav.tabs');
 const setNav = () => document.documentElement.style.setProperty('--navh', nav.offsetHeight + 'px');

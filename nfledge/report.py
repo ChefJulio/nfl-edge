@@ -562,7 +562,7 @@ def bye_rows(eng, stats, ts, pos, season, week) -> list:
   r = r.groupby("team").head(1 if pos == "QB" else 2 if pos in ("RB", "TE") else 3)
   if pos != "QB":
     r = r[r.fpg >= 6]
-  return [{"name": x.full_name, "team_chip": ts.chip(x.team), "fpg": x.fpg, "games": int(x.games),
+  return [{"name": x.full_name, "pid": x.gsis_id, "team": x.team, "team_chip": ts.chip(x.team), "fpg": x.fpg, "games": int(x.games),
            "logo": ts.logo_img(x.team, 16), "pos": pos,
            "sc": json.dumps({"ss": [round(float(getattr(x, k, 0) or 0), 2) for k in SCORE_KEYS],
                              "g": int(x.games)}, separators=(",", ":"))}
@@ -954,7 +954,7 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
     def side(t):
       return {"team": t, "nick": names.get(t, t), "row_style": ts.row_style(t), "logo": ts.logo_img(t, 28),
               "logo_sm": ts.logo_img(t, 16), "logo_url": ts.logo.get(t) or "", "logo_bg": ts.logo_bg(t),
-              "qb": qb_name.get(starters.get(t), ""),
+              "qb": qb_name.get(starters.get(t), ""), "qb_pid": starters.get(t) or "",
               "off_pass": per100(r.off.at[t, "pass"] + r.qb_term(starters.get(t))),
               "off_rush": per100(r.off.at[t, "rush"]), "def_pass": per100(-r.dfn.at[t, "pass"]),
               "def_rush": per100(-r.dfn.at[t, "rush"]), "st": per100(r.off.at[t, "st"] - r.dfn.at[t, "st"])}
@@ -1114,7 +1114,7 @@ def role_changes(eng, season: int, week: int, cfg: dict) -> list:
     do = (last.opp_share or 0) - (prev_opp if pd.notna(prev_opp) else 0)
     if (pd.notna(ds) and ds >= thr_s) or (pd.notna(do) and do >= thr_o):
       name = eng.pm.info.full_name.get(gid, gid)
-      out.append({"name": name, "pos": last.pos, "team": last.team, "week": int(last.week),
+      out.append({"name": name, "pid": gid, "pos": last.pos, "team": last.team, "week": int(last.week),
                   "row_style": ts.row_style(last.team), "logo": ts.logo_img(last.team),
                   "snap_now": last.offense_pct, "snap_prev": prev_snap, "opp_now": last.opp_share,
                   "opp_prev": prev_opp, "touches": int(last.carries + last.tgt), "score": (ds or 0) + 2 * (do or 0),
