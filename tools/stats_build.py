@@ -1,6 +1,8 @@
 """Season stats for Teams > Stats and Players > Stats (data only; rendered by teamstats.js / playerstats.js).
 
-Writes <site>/data/stats/teams_<season>.json, players_<season>.json and index.json, regular season only.
+Writes <site>/data/stats/teams_<season>.json, players_<season>.json and index.json (regular season), plus
+teams_<season>_post.json / players_<season>_post.json for every season with playoff games (index "post"; the tabs'
+Regular season / Playoffs toggle; owner 2026-10-14: playoff stats matter, kept apart).
 
 Usage: python tools/stats_build.py [--site=site] [--seasons=1999-2026]   (CI runs it after run.py)
 
@@ -43,9 +45,14 @@ def _mmss(s) -> float:
     return np.nan
 
 
-def team_stats(pbp: pd.DataFrame, sched: pd.DataFrame, season: int) -> pd.DataFrame:
+def is_type(col: pd.Series, st: str) -> pd.Series:
+  """season_type / game_type column is regular season ("REG") or playoffs (POST, or WC / DIV / CON / SB)."""
+  return col == "REG" if st == "REG" else col != "REG"
+
+
+def team_stats(pbp: pd.DataFrame, sched: pd.DataFrame, season: int, st: str = "REG") -> pd.DataFrame:
   """One row per team: offense columns o_* and defense (allowed) columns d_*."""
-  p = pbp[(pbp.season_type == "REG")].copy()
+  p = pbp[is_type(pbp.season_type, st)].copy()
   for c in ("posteam", "defteam", "penalty_team"):
     p[c] = p[c].replace(RELOCATED)
   sc = p[p.play_type.isin(["pass", "run"])]
@@ -82,7 +89,7 @@ def team_stats(pbp: pd.DataFrame, sched: pd.DataFrame, season: int) -> pd.DataFr
   off["pen_yds"] = pen.groupby("penalty_team").penalty_yards.sum().reindex(off.index).fillna(0)
   t = off.join(dfn, how="outer")
   # Points and record from the schedule (final scores)
-  s = sched[(sched.season == season) & (sched.game_type == "REG") & sched.home_score.notna()]
+  s = sched[(sched.season == season) & is_type(sched.game_type, st) & sched.home_score.notna()]
   h, a = s.home_team.replace(RELOCATED), s.away_team.replace(RELOCATED)
   g = pd.concat([pd.DataFrame({"team": h, "pf": s.home_score, "pa": s.away_score}),
                  pd.DataFrame({"team": a, "pf": s.away_score, "pa": s.home_score})])
@@ -95,9 +102,9 @@ def team_stats(pbp: pd.DataFrame, sched: pd.DataFrame, season: int) -> pd.DataFr
   return t.reset_index().rename(columns={"index": "team", "posteam": "team"})
 
 
-def player_extras(pbp: pd.DataFrame) -> pd.DataFrame:
+def player_extras(pbp: pd.DataFrame, st: str = "REG") -> pd.DataFrame:
   """Per player-season usage only pbp has: inside-10 carries, red-zone targets."""
-  p = pbp[pbp.season_type == "REG"]
+  p = pbp[is_type(pbp.season_type, st)]
   i10 = p[(p.rush_attempt == 1) & (p.yardline_100 <= 10) & p.rusher_player_id.notna()].groupby("rusher_player_id").size()
   rz = p[(p.pass_attempt == 1) & (p.sack != 1) & (p.yardline_100 <= 20) & p.receiver_player_id.notna()].groupby("receiver_player_id").size()
   return pd.DataFrame({"car_i10": i10, "tgt_rz": rz}).fillna(0)
@@ -114,8 +121,8 @@ PSUM = ["completions", "attempts", "passing_yards", "passing_tds", "passing_inte
 
 
 def player_stats(ps: pd.DataFrame, snaps: pd.DataFrame | None, pfr2gsis: pd.Series, extras: pd.DataFrame,
-                 team_totals: pd.DataFrame) -> pd.DataFrame:
-  w = ps[ps.season_type == "REG"].copy()
+                 team_totals: pd.DataFrame, st: str = "REG") -> pd.DataFrame:
+  w = ps[is_type(ps.season_type, st)].copy()
   w["team"] = w.team.replace(RELOCATED)
   cols = [c for c in PSUM if c in w.columns]
   for c in cols:
@@ -126,7 +133,7 @@ def player_stats(ps: pd.DataFrame, snaps: pd.DataFrame | None, pfr2gsis: pd.Seri
                                    fg_long=("fg_long", "max") if "fg_long" in w else ("week", "size"))
   agg = agg.join(extras, how="left")
   if snaps is not None and len(snaps):
-    sn = snaps[snaps.game_type == "REG"].assign(gsis=lambda d: d.pfr_player_id.map(pfr2gsis))
+    sn = snaps[is_type(snaps.game_type, st)].assign(gsis=lambda d: d.pfr_player_id.map(pfr2gsis))
     sn["key"] = sn.gsis.fillna("pfr:" + sn.pfr_player_id.astype(str))
     sa = sn.groupby("key").agg(snaps_o=("offense_snaps", "sum"), snap_pct=("offense_pct", "mean"), snaps_d=("defense_snaps", "sum"),
                                snap_pct_d=("defense_pct", "mean"), snap_pct_st=("st_pct", "mean"),
@@ -170,11 +177,15 @@ def main():
   out.mkdir(parents=True, exist_ok=True)
   meta_key = "seasonstats_final"
   n_final_cur = int(sched[(sched.season == current) & (sched.game_type == "REG")].home_score.notna().sum())
-  done = 0
+  done, post_seasons = 0, []
   for s in seasons:
     tf, pf_ = cache.path("seasonstats_teams", s), cache.path("seasonstats_players", s)
     redo = not tf.exists() or not pf_.exists() or (s == current and cache.meta.get(meta_key) != n_final_cur)
-    if redo:
+    po_done = int((is_type(sched[sched.season == s].game_type, "POST") & sched[sched.season == s].home_score.notna()).sum())
+    tfp, pfp = cache.path("seasonstats_teams_post", s), cache.path("seasonstats_players_post", s)
+    redo_po = po_done > 0 and (not tfp.exists() or not pfp.exists() or cache.meta.get(f"{meta_key}_post_{s}") != po_done)
+    pbp = ps = sn = None
+    if redo or redo_po:
       pbp = nfl.load_pbp([s]).select([c for c in PBP_COLS]).to_pandas()
       for c in ("pass_attempt", "complete_pass", "sack", "interception", "fumble_lost", "rush_attempt", "pass_touchdown",
                 "rush_touchdown", "first_down_rush", "first_down_pass", "first_down_penalty", "third_down_converted",
@@ -182,22 +193,37 @@ def main():
         pbp[c] = pd.to_numeric(pbp[c], errors="coerce").fillna(0)
       for c in ("yards_gained", "passing_yards", "rushing_yards", "epa", "penalty_yards"):
         pbp[c] = pd.to_numeric(pbp[c], errors="coerce").fillna(0)
-      ts = team_stats(pbp, sched, s)
-      reg = pbp[pbp.season_type == "REG"].assign(posteam=lambda d: d.posteam.replace(RELOCATED))
-      tt = pd.DataFrame({"tgt": reg[(reg.pass_attempt == 1) & (reg.sack != 1) & reg.receiver_player_id.notna()].groupby("posteam").size(),
-                         "car": reg[(reg.rush_attempt == 1) & (reg.qb_kneel != 1)].groupby("posteam").size()})
       ps = nfl.load_player_stats([s]).to_pandas()
       sn = cache.get("snaps", s, lambda: nfl.load_snap_counts([s]), stale=(s == current)) if s >= 2012 else None
-      pl = player_stats(ps, sn, pfr2gsis, player_extras(pbp), tt)
+
+    def build(st):
+      ts_ = team_stats(pbp, sched, s, st)
+      x = pbp[is_type(pbp.season_type, st)].assign(posteam=lambda d: d.posteam.replace(RELOCATED))
+      tt = pd.DataFrame({"tgt": x[(x.pass_attempt == 1) & (x.sack != 1) & x.receiver_player_id.notna()].groupby("posteam").size(),
+                         "car": x[(x.rush_attempt == 1) & (x.qb_kneel != 1)].groupby("posteam").size()})
+      return ts_, player_stats(ps, sn, pfr2gsis, player_extras(pbp, st), tt, st)
+
+    if redo:
+      ts, pl = build("REG")
       ts.to_parquet(tf, index=False); pl.to_parquet(pf_, index=False)
       if s == current:
         cache.meta[meta_key] = n_final_cur
       done += 1
+    if redo_po:
+      tsp, plp = build("POST")
+      tsp.to_parquet(tfp, index=False); plp.to_parquet(pfp, index=False)
+      cache.meta[f"{meta_key}_post_{s}"] = po_done
+      cache.save_meta()  # a long first run (every season's pbp) can stop midway: keep what's done
     ts, pl = pd.read_parquet(tf), pd.read_parquet(pf_)
     write_team(out / f"teams_{s}.json", ts, s, teams)
     write_players(out / f"players_{s}.json", pl, s, current, bios)
+    if po_done and tfp.exists() and pfp.exists():
+      write_team(out / f"teams_{s}_post.json", pd.read_parquet(tfp), s, teams)
+      write_players(out / f"players_{s}_post.json", pd.read_parquet(pfp), s, current, bios)
+      post_seasons.append(s)
   cache.save_meta()
-  (out / "index.json").write_text(json.dumps({"v": V, "seasons": seasons, "current": current, "keys": SCORE_KEYS}), encoding="utf-8")
+  (out / "index.json").write_text(json.dumps({"v": V, "seasons": seasons, "current": current, "keys": SCORE_KEYS,
+                                               "post": post_seasons}), encoding="utf-8")
   print(f"[stats] {len(seasons)} seasons ({done} recomputed) -> {out}", flush=True)
 
 

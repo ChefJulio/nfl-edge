@@ -100,6 +100,7 @@
       sec.innerHTML = `<div class="sec-head"><div><h2>Player stats</h2><p class="ps-sub">Loading&hellip;</p></div></div>
         <div class="dt-card"><div class="dt-tools">
           <select class="dt-select ps-season" aria-label="Season"></select>
+          <div class="seg ps-type"><button type="button" data-t="reg">Regular season</button><button type="button" data-t="post">Playoffs</button></div>
           <select class="dt-select ps-pos" aria-label="Position">${['All', ...Object.keys(GROUPS)].map(g => `<option value="${g}">${g === 'All' ? 'All positions' : g}</option>`).join('')}</select>
           <div class="seg ps-per"><button type="button" data-v="tot">Totals</button><button type="button" data-v="pg">Per game</button></div>
           <input class="ps-q" type="search" placeholder="Find a player" aria-label="Find a player">
@@ -159,17 +160,26 @@
         const s = e.target.closest('.ps-pick'); if (!s) return;
         custom[+s.dataset.slot] = s.value; store('nfledge-ps-custom', JSON.stringify(custom)); draw(false);
       });
-      const load = s => NFLE.load(`data/stats/players_${s}.json`).then(d => {
+      // Regular season / Playoffs (owner 2026-10-14): separate files, never mixed (players_<season>_post.json)
+      let stype = 'reg', IX = null;
+      const typeBtns = () => sec.querySelectorAll('.ps-type button').forEach(b => {
+        const has = b.dataset.t === 'reg' || (IX && (IX.post || []).includes(+selS.value));
+        b.disabled = !has; b.title = has ? '' : 'No playoff games that season'; b.classList.toggle('on', b.dataset.t === stype);
+      });
+      const load = s => { if (stype === 'post' && !(IX && (IX.post || []).includes(s))) stype = 'reg'; typeBtns();
+        return NFLE.load(`data/stats/players_${s}${stype === 'post' ? '_post' : ''}.json`).then(d => {
         all = d.rows.map(v => { const r = Object.fromEntries(d.cols.map((c, i) => [c, v[i]])); r._g = groupOf(r.pos); return r; });
         score();
-        sub.textContent = `${s} regular season: ${all.length.toLocaleString()} players`;
+        sub.textContent = `${s} ${stype === 'post' ? 'playoffs' : 'regular season'}: ${all.length.toLocaleString()} players`;
         draw(true);
-      }).catch(() => { sub.textContent = 'No player stats for that season.'; });
+      }).catch(() => { sub.textContent = 'No player stats for that season.'; }); };
+      sec.querySelector('.ps-type').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (b && !b.disabled) { stype = b.dataset.t; load(+selS.value); } });
       selP.onchange = () => { pos = selP.value; store('nfledge-ps-pos', pos); draw(true); };
       sec.querySelector('.ps-per').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) { per = b.dataset.v === 'pg'; store('nfledge-ps-per', per ? 'pg' : 'tot'); draw(false); } });
       q.oninput = () => table && table.update(rows());
       document.addEventListener('nfle-scoring', () => { if (all.length) { score(); draw(false); } });
       NFLE.load('data/stats/index.json').then(ix => {
+        IX = ix;
         const want = pageSeason() && ix.seasons.includes(pageSeason()) ? pageSeason() : ix.current;
         selS.innerHTML = [...ix.seasons].reverse().map(s => `<option value="${s}"${s === want ? ' selected' : ''}>${s}</option>`).join('');
         selS.onchange = () => load(+selS.value);

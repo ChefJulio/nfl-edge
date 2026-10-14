@@ -12,3 +12,5 @@ th.ps-custom { white-space: nowrap; }
 .ps-sort { font: inherit; font-size: 12px; font-weight: 800; color: var(--muted); background: var(--panel2); border: 1px solid var(--line);
   border-radius: 6px; padding: 1px 6px; margin-left: 4px; cursor: pointer; vertical-align: middle; line-height: 1.3; }
 th.sorted-asc .ps-sort, th.sorted-desc .ps-sort { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); }
+
+.seg button:disabled { opacity: .4; cursor: default; }

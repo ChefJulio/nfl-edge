@@ -49,6 +49,7 @@
       sec.innerHTML = `<div class="sec-head"><div><h2>Team stats</h2><p class="ts-sub">Loading&hellip;</p></div></div>
         <div class="dt-card"><div class="dt-tools">
           <select class="dt-select ts-season" aria-label="Season"></select>
+          <div class="seg ts-type"><button type="button" data-t="reg">Regular season</button><button type="button" data-t="post">Playoffs</button></div>
           <div class="seg ts-side"><button type="button" data-v="o">Offense</button><button type="button" data-v="d">Defense</button></div>
           <div class="seg ts-per"><button type="button" data-v="tot">Totals</button><button type="button" data-v="pg">Per game</button></div>
         </div><div class="ts-tbl"></div></div>
@@ -63,16 +64,25 @@
           rowClass: () => 'tm-open', rowAttrs: r => `data-tm="${esc(r.team)}"` });
         else { table.setColumns(cols); table.update(rows); }
       };
-      const load = s => NFLE.load(`data/stats/teams_${s}.json`).then(d => {
+      // Regular season / Playoffs: separate files, never mixed (teams_<season>_post.json)
+      let stype = 'reg', IX = null;
+      const typeBtns = () => sec.querySelectorAll('.ts-type button').forEach(b => {
+        const has = b.dataset.t === 'reg' || (IX && (IX.post || []).includes(+sel.value));
+        b.disabled = !has; b.title = has ? '' : 'No playoff games that season'; b.classList.toggle('on', b.dataset.t === stype);
+      });
+      const load = s => { if (stype === 'post' && !(IX && (IX.post || []).includes(s))) stype = 'reg'; typeBtns();
+        return NFLE.load(`data/stats/teams_${s}${stype === 'post' ? '_post' : ''}.json`).then(d => {
         season = s;
         rows = Object.entries(d.teams).map(([team, vals]) => Object.assign({ team }, d.info[team] || { nick: team }, Object.fromEntries(d.cols.map((c, i) => [c, vals[i]]))));
-        sub.textContent = `${s} regular season${rows.length && rows[0].g ? `, ${Math.max(...rows.map(r => r.g))} games` : ''}`;
+        sub.textContent = stype === 'post' ? `${s} playoffs: ${rows.length} teams` : `${s} regular season${rows.length && rows[0].g ? `, ${Math.max(...rows.map(r => r.g))} games` : ''}`;
         draw();
-      }).catch(() => { sub.textContent = 'No team stats for that season.'; });
+      }).catch(() => { sub.textContent = 'No team stats for that season.'; }); };
+      sec.querySelector('.ts-type').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (b && !b.disabled) { stype = b.dataset.t; load(+sel.value); } });
       // switching sides re-sorts by points, best first (most scored / fewest allowed)
       sec.querySelector('.ts-side').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) { side = b.dataset.v; store('nfledge-ts-side', side); draw(); table.setSort({ key: 'pts', dir: side === 'd' ? 'asc' : 'desc' }); } });
       sec.querySelector('.ts-per').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) { per = b.dataset.v === 'pg'; store('nfledge-ts-per', per ? 'pg' : 'tot'); draw(); } });
       NFLE.load('data/stats/index.json').then(ix => {
+        IX = ix;
         const want = pageSeason() && ix.seasons.includes(pageSeason()) ? pageSeason() : ix.current;
         sel.innerHTML = [...ix.seasons].reverse().map(s => `<option value="${s}"${s === want ? ' selected' : ''}>${s}</option>`).join('');
         sel.onchange = () => load(+sel.value);
