@@ -54,6 +54,10 @@ def EFF_FEATURES(comp: str, opp: str, unit: str, exp: dict | None = None, group:
     cols.append("implied_pts")
   if exp.get("air_yards") and comp == "rec_yd":
     cols.append("adot")
+  # EXPERIMENT (owner, 2026-10-14): age. Walk-forward error drifts with age (WR -0.10 pts per year [-0.16, -0.04],
+  # RB -0.08): the multi-season rate history lags improving young players and declining older ones.
+  if exp.get("age_input"):
+    cols.append("age_c")
   # EXPERIMENT: goal-line role. A back whose share of the team's inside-10 carries runs above his overall carry
   # share (a "vulture") should score more TDs per carry than his history of all carries alone says.
   if exp.get("gl_share") and comp == "rush_td":
@@ -64,6 +68,9 @@ def EFF_FEATURES(comp: str, opp: str, unit: str, exp: dict | None = None, group:
   # the extra TDs per expected goal-line carry: a goal-line back only gains where his team reaches the goal line.
   if exp.get("gl_struct") and comp == "rush_td":
     cols.append("gl_frac")
+  # EXPERIMENT (2026-10-14): receivers' red-zone role x how often the team gets there (gl_struct's receiver analog).
+  if exp.get("rz_struct") and comp == "rec_td":
+    cols.append("rz_frac")
   # EXPERIMENT (owner): QB rushing TDs by run type. A pocket QB's runs are mostly scrambles from midfield, so his
   # team scoring a lot shouldn't raise his rushing-TD rate the way it raises a goal-line runner's. QBs only: the
   # expected scramble share of his runs, and team scoring x his designed-run share (data sets both weights).
@@ -74,9 +81,42 @@ def EFF_FEATURES(comp: str, opp: str, unit: str, exp: dict | None = None, group:
 
 GL_RATIO_K = 10.0  # pseudo team goal-line carries pulling a player's goal-line ratio toward 1
 GL_TEAM_DEFAULT = 0.08  # league-typical share of a team's designed rushes inside the 10 (fallback)
+RZ_TEAM_DEFAULT = 0.136  # league-typical share of a team's targets inside the 20 (fallback; measured 2018-25)
 
 
 RB_DEFAULT_CONC = 0.65  # league-typical lead-back share of RB carries, for teams with no history in the window
+
+
+def coach_aggression(pbp: pd.DataFrame, schedules: pd.DataFrame) -> dict:
+  """EXPERIMENT (experiments.coach_aggr): (game_id, team) -> the head coach's go-for-it tendency LAST season, as
+  his shrunk go rate minus that season's league rate, on 4th-and-4-or-less from the opponent's 40 in (win chance
+  5-95%, not the final 5 minutes). Persists year to year (corr .36, 2017-25). Shrinkage strength k by method of
+  moments over coach-seasons before the season being projected (walk-forward). New coaches: 0 (league rate)."""
+  f = pbp[(pbp.down == 4) & pbp.play_type.isin(["run", "pass", "punt", "field_goal"]) & (pbp.qb_kneel != 1)
+          & pbp.wp.between(0.05, 0.95) & ~((pbp.qtr >= 4) & (pbp.game_seconds_remaining <= 300))
+          & (pbp.ydstogo <= 4) & (pbp.yardline_100 <= 60)]
+  sch = schedules[schedules.game_type == "REG"]
+  coach_of = {}
+  for g in sch.itertuples():
+    coach_of[(g.game_id, g.home_team)], coach_of[(g.game_id, g.away_team)] = g.home_coach, g.away_coach
+  f = f.assign(go=f.play_type.isin(["run", "pass"]).astype(int),
+               coach=[coach_of.get((gi, t)) for gi, t in zip(f.game_id, f.posteam)])
+  cs = f.dropna(subset=["coach"]).groupby(["coach", "season"]).agg(n=("go", "size"), go=("go", "sum")).reset_index()
+  cs["L"] = cs.season.map(f.groupby("season").go.mean())
+  out = {}
+  for s in sorted(sch.season.unique()):
+    past = cs[cs.season < s]
+    if len(past) < 30:
+      continue
+    noise = (past.L * (1 - past.L) / past.n).mean()
+    between = max((past.go / past.n - past.L).var() - noise, 1e-6)
+    k = float((past.L * (1 - past.L)).mean() / between - 1)
+    prev = cs[cs.season == s - 1]
+    a = ((prev.go + k * prev.L) / (prev.n + k) - prev.L).set_axis(prev.coach)
+    for g in sch[sch.season == s].itertuples():
+      out[(g.game_id, g.home_team)] = float(a.get(g.home_coach, 0.0))
+      out[(g.game_id, g.away_team)] = float(a.get(g.away_coach, 0.0))
+  return out
 
 
 def add_qb_rush_inputs(d: pd.DataFrame, scrambles: pd.Series, designed: pd.Series) -> pd.DataFrame:
@@ -113,6 +153,8 @@ def SHARE_FEATURES(share: str, exp: dict | None = None) -> list[str]:
     cols += ["ay_share", "ay_share_long"]
   if exp.get("snap_input"):
     cols.append("snap_pct")
+  if exp.get("age_input"):  # see EFF_FEATURES
+    cols.append("age_c")
   # EXPERIMENT: committee vs bellcow teams. The team's lead-back concentration, and concentration x the player's
   # own share (on a committee team a big recent share should regress more; on a bellcow team it should stick).
   if exp.get("rbbc") and share == "carry_share":
@@ -217,9 +259,9 @@ def build_ledger(pbp: pd.DataFrame, xtd: XTD, team_ledger: pd.DataFrame, snaps: 
   tg = XTD._targets(live)
   tg = tg.assign(gsis_id=tg.receiver_player_id, tgt=1, tgt_epa=tg.epa.fillna(0), reception=tg.complete_pass,
                  rec_yd=tg.receiving_yards.fillna(0), rec_td=tg.pass_touchdown, rec_xtd=xtd.tgt_xtd(tg),
-                 air_yd=tg.air_yards.fillna(0))
+                 air_yd=tg.air_yards.fillna(0), tgt_i20=(tg.yardline_100 <= 20).astype(int))
   c = tg.groupby(base + ["gsis_id"])[["tgt", "tgt_epa", "reception", "rec_yd", "rec_td", "rec_xtd",
-                                      "air_yd"]].sum()
+                                      "air_yd", "tgt_i20"]].sum()
 
   fm = live[(live.fumble_lost == 1) & live.fumbled_1_player_id.notna()]
   f = fm.assign(gsis_id=fm.fumbled_1_player_id, fumble_lost=1).groupby(base + ["gsis_id"])[["fumble_lost"]].sum()
@@ -249,6 +291,8 @@ def build_ledger(pbp: pd.DataFrame, xtd: XTD, team_ledger: pd.DataFrame, snaps: 
   led = led.merge(tl, on=["game_id", "team"], how="left")
   led["team_ay"] = led.groupby(["game_id", "team"]).air_yd.transform("sum")
   led["team_rush_i10"] = led.groupby(["game_id", "team"]).carries_i10.transform("sum")  # designed runs inside the 10
+  led["team_tgt"] = led.groupby(["game_id", "team"]).tgt.transform("sum")
+  led["team_tgt_i20"] = led.groupby(["game_id", "team"]).tgt_i20.transform("sum")  # targets inside the 20
   if routes is not None and len(routes):
     led = led.merge(routes[["season", "week", "gsis_id", "dropbacks_on_field"]], on=["season", "week", "gsis_id"],
                     how="left")
@@ -291,6 +335,9 @@ class PlayerModel:
   def _player_info(self) -> pd.DataFrame:
     r = self.data.rosters.dropna(subset=["gsis_id"]).sort_values(["season", "week"])
     info = r.drop_duplicates("gsis_id", keep="last").set_index("gsis_id")[["full_name", "position", "team"]]
+    if "birth_date" in r:
+      info["birth"] = pd.to_datetime(r.dropna(subset=["birth_date"]).drop_duplicates("gsis_id", keep="last")
+                                     .set_index("gsis_id").birth_date.reindex(info.index), errors="coerce")
     info["position"] = info.position.replace({"FB": "RB", "HB": "RB"})
     dr = self.data.draft
     if dr is not None:
@@ -326,7 +373,12 @@ class PlayerModel:
     self.ledger["pos"] = pos
     self.ledger["tier"] = self.info.tier.reindex(self.ledger.gsis_id).fillna("UDFA").to_numpy()
     self.ledger = self.ledger[self.ledger.pos.isin(["QB", "RB", "WR", "TE"])].reset_index(drop=True)
+    self.coach_a = coach_aggression(pbp, self.data.schedules) if self.exp.get("coach_aggr") else {}
     return self
+
+  def gl_team_cols(self) -> list[str]:
+    """Inputs of the team goal-line model (the team's expected share of rushes inside the 10)."""
+    return ["implied_pts", "off_rush"] + (["coach_a"] if self.exp.get("coach_aggr") else [])
 
   def fit_priors(self, seasons: list[int]):
     """Empirical-Bayes priors per (opportunity type, position group, draft tier) and prior strength k per
@@ -456,6 +508,11 @@ class PlayerModel:
     cs = f["carry_share"].fillna(0.0)
     sh = (wsum("carries_i10", "w_use") + GL_RATIO_K * cs) / (gl_n + GL_RATIO_K)
     f["gl_ratio"] = (sh / cs.where(cs > 0)).clip(0, 4).fillna(1.0)
+    # EXPERIMENT (experiments.rz_struct): red-zone target role, the receiver analog of gl_ratio: his share of the
+    # team's targets inside the 20 relative to his share of all team targets, shrunk the same way.
+    ts = (wsum("tgt", "w_use") / wsum("team_tgt", "w_use").replace(0, np.nan)).fillna(0.0)
+    rz = (wsum("tgt_i20", "w_use") + GL_RATIO_K * ts) / (wsum("team_tgt_i20", "w_use") + GL_RATIO_K)
+    f["rz_ratio"] = (rz / ts.where(ts > 0)).clip(0, 4).fillna(1.0)
     # Team committee tendency (experiments.rbbc): in each team-game, the lead back's share of the RBs' designed
     # carries, averaged over the team's recent games (usage weights). ~1 = bellcow team, ~0.5 = even committee.
     rb = L[(L.pos == "RB") & (L.carries > 0)]
@@ -514,6 +571,12 @@ class PlayerModel:
     tprr_den = wsum("dropbacks_on_field", "w_eff")
     m, k = mp["tprr"]
     f["tprr"] = (wsum("tgt", "w_eff") + k * m) / (tprr_den.replace(0, np.nan) + k)
+    # EXPERIMENT (experiments.age_input): age at this week, centered at 27 (unknown birth date: 0 = typical). The
+    # efficiency and usage history lags a player who is still improving or already declining.
+    when = pd.Timestamp(f"{season}-09-07") + pd.Timedelta(days=7 * (week - 1))
+    birth = self.info.birth.reindex(f.index) if "birth" in self.info else pd.Series(pd.NaT, index=f.index)
+    f["age_c"] = ((when - birth).dt.days / 365.25 - 27.0).fillna(0.0)
+    f.attrs["when"] = when
     return f
 
   def _mu(self, opp, grp, tier, comp):
@@ -553,6 +616,8 @@ class PlayerModel:
   def fit_meta(self, train: pd.DataFrame):
     """Share calibration + per-component efficiency regressions, fit on as-of features vs realized games."""
     t = train.copy()
+    if self.exp.get("coach_aggr"):  # the game's head coach's go-for-it tendency last season (coach_aggression)
+      t["coach_a"] = [getattr(self, "coach_a", {}).get(k, 0.0) for k in zip(t.game_id, t.team)]
     self.share_models = {}
     for share, num, den, groups in (("db_share", "db", "team_db", ["QB"]),
                                     ("carry_share", "carries", "team_rush", ["QB", "RB", "WR", "TE"]),
@@ -567,8 +632,11 @@ class PlayerModel:
     # 10, from its implied points and run-offense rating, one row per team-game of the training seasons.
     tg = t.drop_duplicates(["game_id", "team"])
     tg = tg[tg.team_rush > 0].assign(y_gl=lambda d: d.team_rush_i10 / d.team_rush)
-    self.gl_team_model = Linear.fit(tg, "y_gl", ["implied_pts", "off_rush"], weight="team_rush", name="team_gl_frac")
+    self.gl_team_model = Linear.fit(tg, "y_gl", self.gl_team_cols(), weight="team_rush", name="team_gl_frac")
     self.add_gl_frac(t)
+    tz = tg[tg.team_tgt > 0].assign(y_rz=lambda d: d.team_tgt_i20 / d.team_tgt)
+    self.rz_team_model = Linear.fit(tz, "y_rz", ["implied_pts", "off_pass"], weight="team_tgt", name="team_rz_frac")
+    self.add_rz_frac(t)
     self.eff_models = {}
     for opp, (_, unit, comps) in OPP_TYPES.items():
       d0 = t[t[opp] > 0].copy()
@@ -590,14 +658,30 @@ class PlayerModel:
           self.eff_models[(opp, gp, c)] = mod
     return self
 
+  def add_rz_frac(self, d: pd.DataFrame) -> pd.DataFrame:
+    """rz_frac (in place): expected share of the player's targets inside the 20 = team's expected red-zone share of
+    targets (implied points + pass offense) x his red-zone ratio. Missing inputs: league-typical values."""
+    mod = getattr(self, "rz_team_model", None)
+    team = pd.Series(RZ_TEAM_DEFAULT, index=d.index)
+    if mod is not None and {"implied_pts", "off_pass"} <= set(d.columns):
+      team = pd.Series(mod.predict(d.assign(implied_pts=d.implied_pts.fillna(d.implied_pts.mean()),
+                                            off_pass=d.off_pass.fillna(0.0))), index=d.index)
+    team = team.fillna(RZ_TEAM_DEFAULT).clip(0.0, 0.6)
+    ratio = d.rz_ratio.fillna(1.0) if "rz_ratio" in d else 1.0
+    d["rz_frac"] = (team * ratio).clip(0.0, 1.0)
+    return d
+
   def add_gl_frac(self, d: pd.DataFrame) -> pd.DataFrame:
     """gl_frac (in place): expected share of the player's carries inside the 10 = team's expected inside-10
     fraction x his goal-line ratio. Missing inputs fall back to league-typical values."""
     mod = getattr(self, "gl_team_model", None)
     team = pd.Series(GL_TEAM_DEFAULT, index=d.index)
     if mod is not None and {"implied_pts", "off_rush"} <= set(d.columns):
+      coach = (d.coach_a.fillna(0.0) if "coach_a" in d
+               else pd.Series([getattr(self, "coach_a", {}).get(k, 0.0) for k in zip(d.game_id, d.team)], index=d.index)
+               if "game_id" in d else 0.0)
       team = pd.Series(mod.predict(d.assign(implied_pts=d.implied_pts.fillna(d.implied_pts.mean()),
-                                            off_rush=d.off_rush.fillna(0.0))), index=d.index)
+                                            off_rush=d.off_rush.fillna(0.0), coach_a=coach)), index=d.index)
     team = team.fillna(GL_TEAM_DEFAULT).clip(0.0, 0.5)
     ratio = d.gl_ratio.fillna(1.0) if "gl_ratio" in d else 1.0
     d["gl_frac"] = (team * ratio).clip(0.0, 1.0)
@@ -629,6 +713,12 @@ class PlayerModel:
                                         index=p.index))
     self._fill_rate_priors(p)
     add_rb_inputs(p, f.attrs.get("team_conc"))
+    # Age for every candidate, including players with no history yet (not in f): mostly rookies, so not "typical".
+    if "when" in f.attrs and "birth" in self.info:
+      birth = pd.Series(self.info.birth.reindex(p.gsis_id).to_numpy(), index=p.index)
+      p["age_c"] = ((f.attrs["when"] - birth).dt.days / 365.25 - 27.0).fillna(0.0)
+    else:
+      p["age_c"] = p.age_c.fillna(0.0) if "age_c" in p else 0.0
 
     self.share_hats(p)
     self._qb_starters(p)
@@ -642,6 +732,7 @@ class PlayerModel:
     p["rush"] = p.carries + p.db * p.scr_rate.fillna(0.04) * (p.pos == "QB")
     p["tgt"] = p.tgt_share_hat * p.team_db
     self.add_gl_frac(p)
+    self.add_rz_frac(p)
     add_qb_rush_inputs(p, p.db * p.scr_rate.fillna(0.04), p.carries)
     return self.stats_from_volume(p, wind)
 
@@ -656,6 +747,8 @@ class PlayerModel:
     for sh in ("db_share", "carry_share", "tgt_share"):
       if sh in p:
         p[f"{sh}_x_spread"] = p[sh] * p.spread_team.fillna(0.0)
+    if "age_c" not in p:  # rows built outside features() (injury absorption): typical age
+      p["age_c"] = 0.0
     if "team_conc" not in p:  # callers that build rows themselves (injury absorption): league-typical team
       p["team_conc"] = RB_DEFAULT_CONC
     p["carry_share_x_conc"] = p.carry_share.fillna(0.0) * p.team_conc.fillna(RB_DEFAULT_CONC)
@@ -683,8 +776,12 @@ class PlayerModel:
     p["wind_penalty"] = windpen
     if "i10_tilt" not in p:
       p["i10_tilt"] = 0.0
+    if "age_c" not in p:
+      p["age_c"] = 0.0
     if "gl_frac" not in p:
       self.add_gl_frac(p)
+    if "rz_frac" not in p:
+      self.add_rz_frac(p)
     if "scr_frac" not in p:
       add_qb_rush_inputs(p, p.db.fillna(0) * p.scr_rate.fillna(0.04) if "db" in p else 0.0 * p.index.to_series(),
                          p.carries.fillna(0) if "carries" in p else 0.0 * p.index.to_series())

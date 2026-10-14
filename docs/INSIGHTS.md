@@ -206,6 +206,15 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 | Range-widening multipliers | Worse calibration |
 | Isotonic calibration of return model | Brier .132 -> .136 |
 | Game-margin handicaps (flat recalibration, team mistake memory) | No ATS gain |
+| Coach 4th-down aggressiveness -> goal-line volume (`experiments.coach_aggr`, 2026-10-14) | Trait persists (coach go-rate on 4th-and-<=4 from the 40 in, shrunk vs league season rate: corr .36 [.27, .46] year to year) and shows in raw data (+0.30 inside-10 rushes/game per +10pp [+0.12, +0.50]; offensive TDs +0.08 [-0.03, +0.18], ns). As a team goal-line-model input (prior season): MAE identical all 6 seasons, TD Brier no difference. Real but too small (1 sd coach ~ +0.03 TDs/game) |
+| QB-specific target shares (2026-10-14) | After a QB change, no position / depth tilt (RB -0.4, TE -0.6, WR -0.3 pts of share; short vs deep aDOT the same). A receiver's share WITH the incoming passer (shrunk, this + last season) predicts WORSE than his recent overall share at every k (k=10 +0.7 [+0.5, +0.9] pts of share error, k=200 +0.1 ns): pair history is stale. The surprise-QB-change error isn't target redistribution |
+| Red-zone target role x team red-zone volume (`experiments.rz_struct`, gl_struct for WR/TE) | MAE no difference anywhere; P(1+ rec TD) Brier WR -0.00003, TE -0.0001 [-0.0003, +0.00005]: no difference. xTD already prices target location |
+| Passing-down back x expected trailing (role-specific, after spread-aware shares was rejected) | tilt (3rd/4th-down vs early-down share of team RB targets) x expected deficit: +0.06 pts of team target share at 1 sd each, CI ~[-0.2, +0.2]: nothing |
+| RB workload carryover / age x workload | Heavy last game (vs his norm) x short rest: no effect on next share (+0.03 [-0.02, +0.08] per touch per day) or yards per touch. Extra touches last game -> MORE share next game (+0.7 pts per touch): recency, already weighted. Age x cumulative season touches -> yards per touch: +0.015 [-0.016, +0.043] per yr per 100 touches: nothing |
+| Garbage-time share of recent points -> next-week error | +0.002 [-0.06, +0.07] pts per +10 pts of share (all), no position significant: nothing |
+| Folklore: revenge games, primetime | Revenge (vs a former team) -0.04 [-0.76, +0.64]; primetime -0.19 [-0.53, +0.16]; a player's primetime gap doesn't persist (corr +.04 [-.06, +.15]) |
+| Division familiarity (2006-25 results, 2021-25 backtest) | First-meeting loser vs spread in the rematch -0.11 [-0.93, +0.70]; rematch margins +0.8 larger [0.0, +1.6] but not vs the spread; players in 1st / 2nd division meetings vs projection ns. Division games went under the total by 1.5-1.8 pts more than others 2006-19, but -0.09 [-1.41, +1.20] since 2020: the market corrected |
+| Age as a model input (`experiments.age_input`, owner, 2026-10-14) | Descriptive: walk-forward error drifts with age, WR -0.10 pts/yr [-0.16, -0.04], RB -0.08 [-0.15, -0.004] (young RBs 21-23 +0.8 [+0.1, +1.5] above projection), QB/TE none; raw output by age is flat (survivors). One linear age term in all share + efficiency regressions: MAE ALL -0.000 [-0.004, +0.003], RB -0.004 [-0.008, +0.001], QB +0.010 [-0.001, +0.022], seasons mixed; QB pass-TD Brier -0.0004 better, others ns. Gate (overall MAE better) not met |
 | Insensitive (kept): train window 2/3/4, prior weight/decay, eff season weights, WP window, QB-inexp cutoff/penalty, GB sizes, redistribution trigger, team half-life | within noise |
 | Gradient border / white logo circles / light pills on dark rows | Owner rejected visually |
 
@@ -432,6 +441,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 - CI: `.github/workflows/deploy.yml` (contents: write for the archive commit; ~4-5 min per run).
 
 ## 9. Open threads / next steps (as of 2026-10-12)
+- **From the 2026-10-14 research batch (section 5 has the numbers):** (1) Age restricted to RB / WR (where the
+  drift is), set up as its own pre-registered test; the all-position term added QB noise. (2) "Not extended entering
+  the last rookie-deal year" (rounds 2-7, year 4, no new contract signed by then; knowable pre-season): actual minus
+  projection -0.60 [-1.21, -0.03] vs others, placebo year 3 +0.20. Near the CI edge after many tests, so suspect;
+  a plausible mechanism (the team passed on him). The naive "contract year = last season paid" version (-1.36) uses
+  hindsight (cut players stop being paid) and must not be used. Re-test once 2026 adds data. (3) Coach aggressiveness
+  is real but tiny; revisit only if a direct TD-rate input (not via goal-line volume) is wanted.
 - **Done 2026-10-12 (results in section 4):** diagnose the model's biggest game misses. Next, in order: starter
   accuracy of projected QBs + use the site's starter logic in game_eval; fix absence tags; late-season playoff-status
   features; margin-tuned shrinkage. Original plan: (|model - Vegas| >= 5 where Vegas
