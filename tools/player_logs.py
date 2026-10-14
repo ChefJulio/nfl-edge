@@ -21,7 +21,7 @@ import pandas as pd  # noqa: E402
 
 from nfledge import data as D  # noqa: E402
 from nfledge.config import load_config, load_scoring  # noqa: E402
-from nfledge.report import SCORE_KEYS  # noqa: E402
+from nfledge.report import SCORE_KEYS, headshot_url  # noqa: E402
 
 FIRST_SEASON = 1999
 POS = ("QB", "RB", "WR", "TE")
@@ -203,7 +203,7 @@ def bio_map(rosters: pd.DataFrame) -> dict:
     for k, col in (("college", "college"), ("photo", "headshot_url")):
       v = getattr(x, col, None)
       if isinstance(v, str) and v:
-        b[k] = v
+        b[k] = headshot_url(v) if k == "photo" else v
     out[x.gsis_id] = {k: v for k, v in b.items() if v is not None}
   return out
 

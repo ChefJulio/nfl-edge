@@ -469,7 +469,11 @@
   };
   // Header extras from the career log doc (tools/player_logs.py): photo, jersey number, bio, recent snap share and,
   // for QBs, how often he scrambles. All current, like the rest of the header.
-  const photoUrl = (L, espn) => (L && L.bio && L.bio.photo) || (espn ? `https://a.espncdn.com/i/headshots/nfl/players/full/${encodeURIComponent(espn)}.png` : '');
+  // NFL headshots come as ~4 MB originals; the image server's face crop is sharp at card size and ~13 KB
+  // (player logs already store the cropped URL; this also covers older log files).
+  const faceCrop = u => u.replace('/upload/f_auto,q_auto/', '/upload/c_thumb,g_face,z_0.75,w_160,h_160,f_auto,q_auto/');
+  const photoUrl = (L, espn) => (L && L.bio && L.bio.photo ? faceCrop(L.bio.photo) : '')
+    || (espn ? `https://a.espncdn.com/i/headshots/nfl/players/full/${encodeURIComponent(espn)}.png` : '');
   const bioLine = L => {
     const b = (L && L.bio) || {}, bits = [];
     if (b.born) {

@@ -41,11 +41,19 @@ header.top { padding: 16px 0 12px; }
 .wk-now { font-size: 13px; font-weight: 700; text-decoration: none; padding: 5px 11px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--accent) 50%, var(--line)); white-space: nowrap; }
 .wk-now:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
 .archived { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); }
-/* status: one quiet line, dot-separated */
-.meta { display: flex; flex-wrap: wrap; align-items: center; margin-top: 8px; font-size: 12px; color: var(--muted); row-gap: 2px; }
-.meta > span + span::before { content: "\00b7"; margin: 0 7px; color: var(--faint); }
-.meta span b { color: var(--ink); font-weight: 600; }
-.meta span.alert { color: var(--warn); font-weight: 600; }
+#livePill { font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); white-space: nowrap; }
+/* page details: an (i) on the header row; hover (or tap) opens them */
+.hinfo-w { position: relative; display: inline-flex; }
+.hinfo { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--muted);
+  font: italic 700 13px/1 Georgia, serif; cursor: pointer; display: grid; place-items: center; padding: 0; }
+.hinfo:hover, .hinfo-w.open .hinfo { color: var(--ink); border-color: var(--accent); }
+.hinfo.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 55%, var(--line)); }
+.hpop { display: none; position: absolute; z-index: 30; top: calc(100% + 8px); right: -8px; width: max-content; max-width: min(320px, 86vw);
+  flex-direction: column; gap: 5px; padding: 10px 12px; border-radius: 10px; background: var(--panel2); border: 1px solid var(--line);
+  box-shadow: 0 10px 30px rgba(0,0,0,.5); font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+.hpop b { color: var(--ink); font-weight: 600; } .hpop .alert { color: var(--warn); font-weight: 600; }
+@media (hover: hover) { .hinfo-w:hover .hpop { display: flex; } }
+.hinfo-w.open .hpop { display: flex; }
 nav.tabs { position: sticky; top: 0; z-index: 10; background: var(--bg); border-bottom: 1px solid var(--line); }
 nav.tabs .wrap { display: flex; gap: 22px; overflow-x: auto; scrollbar-width: none; }
 nav.tabs button { flex: none; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font: inherit; font-weight: 600; font-size: 13.5px; padding: 12px 0 10px; cursor: pointer; }
@@ -54,8 +62,8 @@ nav.tabs button.on { color: var(--ink); border-bottom-color: var(--accent); }
 @media (max-width: 640px) {
   nav.tabs .wrap { gap: 16px; } nav.tabs button { font-size: 13px; }
   header.top { padding: 14px 0 10px; }
-  .meta { font-size: 11.5px; }
-  .hdr { gap: 8px 10px; } .brand h1 { font-size: 20px; }
+  .hdr { gap: 8px 8px; } .brand h1 { font-size: 20px; }
+  .wk-step { width: 30px; } .wk-nav select { padding: 6px 22px 6px 9px; background-position: right 8px center; }
   .wk-tag.now { display: none; }  /* phones: the current week is the default; only past / upcoming get a tag */
 }
 main { padding: 20px 0 48px; }
@@ -186,17 +194,34 @@ table.ranks .nm { display: block; white-space: nowrap; overflow: hidden; text-ov
   mask-image: linear-gradient(90deg, #000 calc(100% - 10px), transparent); }
 .fn-dot { display: inline-block; vertical-align: bottom; overflow: hidden;
   max-width: clamp(0px, calc(var(--sx, 0px) - var(--w, 9em) + 0.3em), 0.3em); }
-/* player photo with a small team-logo badge (the badge alone if there's no photo) */
-.pic { position: relative; flex: none; width: 32px; height: 32px; border-radius: 50%; overflow: hidden;
-  background: rgba(255,255,255,.08); box-shadow: 0 0 0 1px rgba(255,255,255,.18); }
-.pic img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
-.pic .pic-tm { position: absolute; right: -2px; bottom: -2px; }
-.pic .pic-tm .logo { width: 15px; height: 15px; box-shadow: 0 0 0 1.5px var(--panel); }
-.pic .pic-tm .logo img { width: 11px; height: 11px; }
-.pic.nopic img, .pic .nopic-mark { display: none; }
-.pic.nopic .pic-tm, .pic:has(.nopic-mark) .pic-tm { inset: 0; display: grid; place-items: center; }
-.pic.nopic .pic-tm .logo, .pic:has(.nopic-mark) .pic-tm .logo { width: 28px; height: 28px; box-shadow: none; }
-.pic.nopic .pic-tm .logo img, .pic:has(.nopic-mark) .pic-tm .logo img { width: 20px; height: 20px; }
+/* player photo (face crop) with the team logo resting on top of it, spilling over the bottom-right edge; with no
+   photo the logo fills the circle instead */
+.pic { position: relative; flex: none; width: 34px; height: 34px; margin-right: 3px; }
+.pic-img { display: block; width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
+  background: rgba(255,255,255,.08); box-shadow: 0 0 0 1px rgba(255,255,255,.16); }
+.pic-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pic .pic-tm { position: absolute; right: -6px; bottom: -4px; z-index: 1; }
+.pic .pic-tm .logo { width: 17px; height: 17px; box-shadow: 0 0 0 2px var(--panel), 0 1px 3px rgba(0,0,0,.5); }
+.pic .pic-tm .logo img { width: 12px; height: 12px; }
+.pic.nopic .pic-img img { display: none; }
+.pic.nopic .pic-tm { inset: 0; display: grid; place-items: center; }
+.pic.nopic .pic-tm .logo { width: 34px; height: 34px; box-shadow: none; } .pic.nopic .pic-tm .logo img { width: 24px; height: 24px; }
+/* rank with the expert consensus rank beside it, "1 (1lw)" */
+td.rk { white-space: nowrap; } td.rk .rkn { display: inline; font-weight: 700; }
+td.rk .ecr { margin-left: 3px; font-size: 11px; font-weight: 500; color: color-mix(in srgb, var(--tfg, var(--ink)) 62%, transparent); }
+td.rk .ecr.stale { font-style: italic; } td.rk .ecr sup { font-size: 8px; font-style: normal; }
+td.projc .pv { font-size: 15px; font-weight: 700; }
+/* compact matchup: "@" against the logo, the rank right after the team code */
+td.mu { white-space: nowrap; }
+td.mu .opp { gap: 3px; } td.mu .opp .vs { width: auto; margin-right: 2px; } td.mu .opp b { width: auto; }
+td.mu .dvp { width: auto; margin-left: 6px; }
+/* last 5 games: bars = points, green beat / red missed our projection, tick = the projection */
+td.l5 { width: 104px; min-width: 104px; padding-top: 4px; padding-bottom: 4px; }
+.l5s { display: block; overflow: visible; }
+.l5s .b-hit { fill: #45c26b; } .l5s .b-miss { fill: #f2786d; } .l5s .b-none { fill: color-mix(in srgb, var(--tfg, #fff) 35%, transparent); }
+.l5s .pj { stroke: #fff; stroke-width: 2; stroke-linecap: round; }
+.l5s .wl { font-size: 8px; fill: color-mix(in srgb, var(--tfg, #fff) 55%, transparent); text-anchor: middle; }
+.l5-none { font-size: 11px; color: color-mix(in srgb, var(--tfg, var(--ink)) 50%, transparent); }
 /* Projection sits next to the name; its header lines up with the number, not the far edge of the bar. */
 th.projh, td.projc { text-align: left; padding-left: 14px; }
 td.projc .proj { justify-content: flex-start; }
@@ -221,7 +246,7 @@ td.actc { font-weight: 700; font-size: 14px; } td.actc.act-hi { color: #6fdc8c; 
   td.take.tags { width: 200px; min-width: 200px; max-width: 200px; }
 }
 .badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
-td.rk { font-weight: 700; width: 32px; }
+td.rk { font-weight: 700; width: 1%; }
 td.ecr { color: color-mix(in srgb, var(--tfg, var(--ink)) 82%, transparent); }
 td.ecr.stale { font-style: italic; color: color-mix(in srgb, var(--tfg, var(--ink)) 58%, transparent); } td.ecr sup { font-size: 8px; margin-left: 1px; font-style: normal; }
 td.mu { white-space: nowrap; } td.mu .vs { font-size: 11px; margin-right: 5px; }
@@ -397,18 +422,20 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     </div>
     {% if archive %}<span class="wk-tag past">Past week</span>{% elif lookahead %}<span class="wk-tag ahead">Upcoming</span>{% else %}<span class="wk-tag now">This week</span>{% endif %}
     {% if not nav.is_current %}<a class="wk-now" href="{{ nav.current_href }}">Current week &rsaquo;</a>{% endif %}
+    <span id="livePill" class="live-pill" hidden></span>
+    {# Page details live in a tooltip (hover, or tap on phones); the button turns amber while the injury report is pending. #}
+    {% set pending = not (lookahead or archive) and not injury_report %}
+    <span class="hinfo-w"><button type="button" class="hinfo{{ ' warn' if pending }}" aria-label="Page details" aria-expanded="false">i</button>
+      <span class="hpop" role="tooltip">
+        <span>Data through <b>week {{ data_week }}</b>{% if lookahead %} (all games played so far){% endif %}</span>
+        {% if n_final %}<span><b>{{ n_final }} of {{ n_games }}</b> games final</span>{% endif %}
+        <span>Scoring <b id="scoreName">{{ 'Half PPR' if scoring == 'half' else scoring|upper if scoring in ('ppr',) else scoring|capitalize }}</b></span>
+        {% if pending %}<span class="alert">Injury report pending: last week's statuses (and early ESPN injury news) are used</span>{% elif not (lookahead or archive) %}<span>Injury report <b>in</b></span>{% endif %}
+        <span>Updated {{ generated }}</span>
+      </span></span>
   </div>
   {% if archive %}<p class="archived">Projected before kickoff with only the data available then; actual results alongside.</p>{% endif %}
   {% if lookahead %}<p class="archived" title="Everyone on the active roster is assumed healthy (injured reserve stays out) and weather is neutral; Vegas lines are used once posted.">{{ lookahead }} week{{ 's' if lookahead > 1 else '' }} out: projected from games so far, no injury report or weather yet. Less certain the further out.</p>{% endif %}
-  {# One quiet line of status instead of a row of pills; the injury caveat stays amber. #}
-  <div class="meta">
-    <span>Data through <b>week {{ data_week }}</b></span>
-    {% if n_final %}<span><b>{{ n_final }}/{{ n_games }}</b> final</span>{% endif %}
-    <span id="livePill" class="live-pill" hidden></span>
-    <span><b id="scoreName">{{ 'Half PPR' if scoring == 'half' else scoring|upper if scoring in ('ppr',) else scoring|capitalize }}</b></span>
-    {% if lookahead or archive %}{% elif not injury_report %}<span class="alert" title="This week's injury report isn't out yet: last week's statuses (and early ESPN injury news) are used">Injury report pending</span>{% else %}<span>Injury report in</span>{% endif %}
-    <span>Updated {{ generated }}</span>
-  </div>
 </div></header>
 <nav class="tabs"><div class="wrap">
   <button data-tab="players" class="on">Rankings</button>
@@ -424,11 +451,11 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 <section id="tab-players" class="on">
   <div class="sec-head"><div><h2>Weekly rankings</h2><p><span id="scoreSub">Half-PPR</span> projections if active, with realistic ranges. Tap a player for his full card.</p></div></div>
   <details class="howto"><summary>How to read</summary><div>
-    <b>Projection</b> assumes the player is active (NFL availability is yes/no, so injured players show an Inactive% instead of a discount).
-    The <b>range bar</b> comes from how past projections of this size actually turned out: thin line = floor to ceiling (10th to 90th percentile), thick bar = the likely middle half, tick = projection.
-    <b>Matchup</b>: grade A-F ranks this week's matchups at the position; the pill is fantasy points this defense adds or removes vs an average one.
-    <b>TD donut</b>: ring segments = chance of 0 / 1 / 2 / 3+ touchdowns (darker = more), center = chance of at least one.
-    <b>ECR</b> is the FantasyPros expert consensus rank (faded "lw" = last week's, until Friday). A yellow edge marks a projection boosted by a teammate's absence.
+    <b>Projection</b> assumes the player is active (NFL availability is yes/no, so injured players show an Inactive% instead of a discount). Tap a player for his range of outcomes.
+    <b>#</b> is our rank; the number in parentheses is the FantasyPros expert consensus rank ("lw" = last week's, until Friday).
+    <b>Last 5</b>: his last five games this season; green = beat our projection for that game, red = missed it, the white tick is the projection.
+    <b>Matchup</b>: the opponent's defense vs the position, 1st = toughest to 32nd = easiest.
+    <b>TD ring</b>: chance of at least one touchdown (hover for 1 / 2 / 3+). A yellow edge marks a projection boosted by a teammate's absence.
   </div></details>
   <div class="card">
     <div class="toolbar">
@@ -472,14 +499,14 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     <div class="scroll">
     <table class="sortable ranks tiles">
       <thead><tr>
-        <th class="num" data-first="asc">#</th>
-        <th class="num" data-first="asc"><abbr title="FantasyPros expert consensus rank at the player's position (Fridays); faded 'lw' = last week's">ECR</abbr></th>
+        <th class="num rkh" data-first="asc"><abbr title="Our rank at the position; in parentheses the FantasyPros expert consensus rank (published Fridays; 'lw' = last week's until then)">#</abbr></th>
         <th class="stick" data-first="asc">Player</th>
-        <th class="projh"><abbr title="Projection; bar = floor to ceiling (10th-90th pct), thick = middle 50%">Projection</abbr></th>
+        <th class="num projh"><abbr title="Projected fantasy points under your scoring (tap a player for the full range of outcomes)">Proj</abbr></th>
         {% if show_act %}<th class="num actc-h"><abbr title="What he scored: live during his game (pulsing dot), final once it ends. Green = above his likely range (75th pct), red = below it (25th pct), colored only when final">Actual</abbr></th>{% endif %}
+        <th class="num"><abbr title="Season fantasy points per game">FP/G</abbr></th>
+        <th class="nosort l5h"><abbr title="His last 5 games this season: bar = points scored, green = beat our projection for that game, red = missed it; the tick is our projection">Last 5</abbr></th>
         <th data-first="desc"><abbr title="Opponent and its defense vs {{ pos }}s: 1st = toughest (red), 32nd = easiest (green). Opponent-adjusted, from the model.">Matchup</abbr></th>
         <th class="ctr"><abbr title="Chance he is inactive: injury (practice pattern + game status) or healthy scratch">Inactive</abbr></th>
-        <th class="num"><abbr title="Season fantasy points per game">FP/G</abbr></th>
         <th data-first="asc">Tier</th>
         <th class="hide-sm nosort"><abbr title="Projected stat line; donut = touchdown odds">Expected line</abbr></th>
         <th class="nosort">Takeaway</th>
@@ -487,25 +514,20 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
       <tbody>
       {% for r in block.rows %}
         <tr class="main teamrow{% if r.boost >= 1 %} boosted{% endif %}{% if r.avail < 0.5 %} out{% endif %}" style="{{ r.row_style }}" data-pid="{{ r.pid }}" data-espn="{{ r.espn }}" data-team="{{ r.team }}" data-name="{{ r.name|lower }}" data-pos="{{ r.pos }}" data-proj="{{ '%.3f'|format(r.proj) }}" data-p="{{ '%.2f %.2f %.2f %.2f'|format(r.p10, r.p25, r.p75, r.p90) }}" data-sc="{{ r.sc }}">
-          <td class="num rk">{{ r.rank }}</td>
-          <td data-v="{{ r.ecr|f0 }}" class="num ecr{{ ' stale' if r.ecr_stale }}"{% if r.ecr_stale %} title="Last week's expert rank; this week's is published Friday"{% endif %}>{{ r.ecr|f0 }}{% if r.ecr_stale %}<sup>lw</sup>{% endif %}</td>
+          <td class="num rk" data-v="{{ r.rank }}"><b class="rkn">{{ r.rank }}</b>{% if r.ecr == r.ecr and r.ecr is not none %}<span class="ecr{{ ' stale' if r.ecr_stale }}" title="{{ 'Last week' if r.ecr_stale else 'Expert consensus' }} rank (FantasyPros)">({{ r.ecr|f0 }}{% if r.ecr_stale %}<sup>lw</sup>{% endif %})</span>{% endif %}</td>
           {% set ini, rest, last = r.name|nameparts %}
-          <td class="stick" data-v="{{ r.name }}"><div class="who"><span class="pic">{% if r.photo %}<img src="{{ r.photo }}" alt="" width="32" height="32" loading="lazy" onerror="this.parentNode.classList.add('nopic')">{% else %}<i class="nopic-mark"></i>{% endif %}<span class="pic-tm">{{ r.logo_xs|safe }}</span></span><div class="nmw"><b class="nm"><span class="fn">{{ ini }}</span>{% if rest %}<span class="fn-rest">{{ rest }}</span><span class="fn-dot">.</span>{% endif %}{% if last %} {{ last }}{% endif %}</b>
+          <td class="stick" data-v="{{ r.name }}"><div class="who"><span class="pic{{ '' if r.photo else ' nopic' }}"><span class="pic-img">{% if r.photo %}<img src="{{ r.photo }}" alt="" width="34" height="34" loading="lazy" onerror="this.closest('.pic').classList.add('nopic')">{% endif %}</span><span class="pic-tm">{{ r.logo_xs|safe }}</span></span><div class="nmw"><b class="nm"><span class="fn">{{ ini }}</span>{% if rest %}<span class="fn-rest">{{ rest }}</span><span class="fn-dot">.</span>{% endif %}{% if last %} {{ last }}{% endif %}</b>
             {%- if r.status or r.boost >= 1 or r.low_sample %}<div class="badges">
               {%- if r.status %}<span class="flag {{ 'f-out' if r.avail < 0.5 else 'f-q' }}" title="Injury report; practice Wed/Thu/Fri: D = did not practice, L = limited, F = full">{{ r.status }}</span>{% endif %}
               {%- if r.boost >= 1 %}<span class="flag f-up" title="Raised by volume vacated by: {{ r.boost_from }}">+{{ r.boost|f1 }} inj</span>{% endif %}
               {%- if r.low_sample %}<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>{% endif %}
             </div>{% endif %}</div></div></td>
-          <td class="projc" data-v="{{ r.proj }}" title="Floor {{ r.p10|f1 }} · middle {{ r.p25|f1 }}-{{ r.p75|f1 }} · ceiling {{ r.p90|f1 }}"><div class="proj"><b>{{ r.proj|f1 }}</b>{{ r.range|safe }}<span class="fc">{{ r.p10|f0 }}&ndash;{{ r.p90|f0 }}</span></div></td>
+          <td class="num projc" data-v="{{ r.proj }}" title="Floor {{ r.p10|f1 }} · middle {{ r.p25|f1 }}-{{ r.p75|f1 }} · ceiling {{ r.p90|f1 }}"><b class="pv">{{ r.proj|f1 }}</b></td>
           {% if show_act %}<td class="num actc{% if r.act is not none %}{{ ' act-hi' if r.act > r.p75 else ' act-lo' if r.act < r.p25 else '' }}{% endif %}" data-v="{{ r.act if r.act is not none else '' }}">{{ r.act|f1 if r.act is not none else '' }}</td>{% endif %}
-          {% set lvl = {'A': 5, 'B': 4, 'C': 3, 'D': 2, 'F': 1}[r.grade] %}
-          <td class="mu" data-v="{{ r.dvp_rank }}"><div class="mu-row">
-            <span class="opp tm-open" data-tm="{{ r.opp }}" title="Open the {{ r.opp }} team card"><span class="vs">{{ r.home }}</span>{{ r.opp_logo|safe }}<b>{{ r.opp }}</b></span>
-            <span class="meter m{{ lvl }}" title="Matchup {{ r.grade }}: {{ r.opp }} is {{ r.dvp }} of 32 vs {{ pos }}s">{% for i in range(5) %}<i class="{{ 'on' if i < lvl }}"></i>{% endfor %}</span>
-            <span class="dvp" style="color:{{ r.dvp_color }}" title="{{ r.opp }} defense vs {{ pos }}s: {{ r.dvp }} of 32 (1st = toughest, 32nd = easiest). This week: {{ r.mpts|sgn }} pts vs an average defense.">{{ r.dvp }}</span>
-          </div></td>
-          <td class="ctr" data-v="{{ r.inactive }}" title="{{ r.inactive_why }}"><span class="{{ 'pill pill-bad' if r.inactive >= 0.5 else 'pill pill-warn' if r.inactive >= 0.15 else 'pill pill-soft' if r.inactive >= 0.05 else 'quiet' }}">{{ '<1%' if r.inactive < 0.005 else r.inactive|pct }}</span></td>
           <td class="num fpgc">{{ r.fpg|f1 }}</td>
+          <td class="l5" data-pjw="{{ r.pjw }}"></td>
+          <td class="mu" data-v="{{ r.dvp_rank }}" title="{{ r.opp }} defense vs {{ pos }}s: {{ r.dvp }} of 32 (1st = toughest, 32nd = easiest). This week: {{ r.mpts|sgn }} pts vs an average defense."><span class="opp tm-open" data-tm="{{ r.opp }}"><span class="vs">{{ r.home }}</span>{{ r.opp_logo|safe }}<b>{{ r.opp }}</b></span><span class="dvp" style="color:{{ r.dvp_color }}">{{ r.dvp }}</span></td>
+          <td class="ctr" data-v="{{ r.inactive }}" title="{{ r.inactive_why }}"><span class="{{ 'pill pill-bad' if r.inactive >= 0.5 else 'pill pill-warn' if r.inactive >= 0.15 else 'pill pill-soft' if r.inactive >= 0.05 else 'quiet' }}">{{ '<1%' if r.inactive < 0.005 else r.inactive|pct }}</span></td>
           <td data-v="{{ r.rank }}"><span class="tier t-{{ r.slot }}" title="{{ {'start': 'Starter in a ' ~ tier_cfg.teams ~ '-team league', 'flex': 'Flex range in a ' ~ tier_cfg.teams ~ '-team league', 'bench': 'Bench depth in a ' ~ tier_cfg.teams ~ '-team league'}[r.slot] }}">{{ r.tier }}</span></td>
           <td class="line hide-sm">{{ r.line|safe }}</td>
           <td class="take tags" title="{{ r.takeaway }}"><div class="tg">{% for t in r.tags %}<span class="tgx tg-{{ t.k }}" title="{{ t.d }}">{{ t.t }}</span>{% endfor %}</div></td>
@@ -616,7 +638,8 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   const rows = ['RB', 'WR', 'TE'].flatMap(p => [...document.querySelectorAll(`.posview[data-pos="${p}"] tr.main`)]);
   rows.sort((a, b) => parseFloat(b.dataset.proj) - parseFloat(a.dataset.proj)).slice(0, FLEX_DEPTH).forEach((tr, i) => {
     const c = tr.cloneNode(true), d = tr.nextElementSibling;
-    c.querySelector('td.rk').textContent = i + 1;
+    c.querySelector('td.rk .rkn').textContent = i + 1;
+    c.querySelector('td.rk').dataset.v = i + 1;
     const nm = c.querySelector('td.stick b');
     if (nm) nm.insertAdjacentHTML('afterbegin', `<span class="posb posb-${tr.dataset.pos}">${tr.dataset.pos}</span>`);
     tb.appendChild(c);
@@ -631,11 +654,12 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   // them in order, crossing seasons.
   const ws = document.getElementById('pickWeek'), prev = document.getElementById('wkPrev'), next = document.getElementById('wkNext');
   const key = (y, w) => `${y}-${w}`;
+  const narrow = matchMedia('(max-width: 420px)').matches;  // phones: "2026 · Wk 6" keeps the header on one row
   const fill = () => {
     const years = Object.keys(NAV.seasons).sort((a, b) => b - a);
     ws.replaceChildren(...years.map(y => {
       const g = document.createElement('optgroup'); g.label = y;
-      Object.keys(NAV.seasons[y]).sort((a, b) => a - b).forEach(w => g.appendChild(new Option(`${y} · Week ${w}`, key(y, w))));
+      Object.keys(NAV.seasons[y]).sort((a, b) => a - b).forEach(w => g.appendChild(new Option(`${y} · ${narrow ? 'Wk' : 'Week'} ${w}`, key(y, w))));
       return g;
     }));
     ws.value = key(NAV.season, NAV.week);
@@ -661,6 +685,13 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     fill();
   }).catch(() => {});
   ws.onchange = () => { const [y, w] = ws.value.split('-'); location.href = NAV.seasons[y][w] + location.hash; };
+  // Page-details tooltip: hover on desktop (CSS); tap toggles it on phones, tapping anywhere else closes it.
+  const hw = document.querySelector('.hinfo-w');
+  if (hw) {
+    const hb = hw.querySelector('.hinfo');
+    hb.addEventListener('click', e => { e.stopPropagation(); const on = hw.classList.toggle('open'); hb.setAttribute('aria-expanded', on); });
+    document.addEventListener('click', e => { if (!hw.contains(e.target)) { hw.classList.remove('open'); hb.setAttribute('aria-expanded', 'false'); } });
+  }
 })();
 document.querySelectorAll('nav.tabs button').forEach(b => b.onclick = () => {
   document.querySelectorAll('nav.tabs button').forEach(x => x.classList.toggle('on', x === b));
@@ -803,13 +834,6 @@ let state = defaults();
 try { const s = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (s && s.w && s.lg) state = s; } catch (e) {}
 const pts = (c, w, pos) => c.reduce((t, v, i) => t + v * (w[SC.keys[i]] || 0), 0) + (pos === 'TE' ? c[5] * (w.te_bonus || 0) : 0);
 const f1 = v => (Math.round(v * 10) / 10).toFixed(1);
-const rangeSvg = (q, proj, axis) => {
-  const W = 100, H = 16, m = H / 2, x = v => 2 + (W - 4) * Math.min(Math.max(v, 0), axis) / axis;
-  return `<svg class="rng" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">` +
-    `<line x1="${x(q[0]).toFixed(1)}" y1="${m}" x2="${x(q[3]).toFixed(1)}" y2="${m}" class="rng-w"/>` +
-    `<rect x="${x(q[1]).toFixed(1)}" y="${m - 4}" width="${Math.max(x(q[2]) - x(q[1]), 1.5).toFixed(1)}" height="8" rx="2" class="rng-b"/>` +
-    `<line x1="${x(proj).toFixed(1)}" y1="1" x2="${x(proj).toFixed(1)}" y2="${H - 1}" class="rng-p"/></svg>`;
-};
 const weekSvg = (wk, w, pos) => {
   if (NWEEK < 1) return '';
   const W = 150, H = 34, byW = Object.fromEntries(wk.map(r => [r[0], pts(r.slice(1), w, pos)]));
@@ -824,8 +848,32 @@ const weekSvg = (wk, w, pos) => {
   }
   return `<svg class="wbars" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${out}</svg>`;
 };
+// Last 5 column: his last five games this season under the viewer's scoring. Bar = points; green = beat our
+// projection for that game, red = missed it, grey = no projection on file; the white tick is the projection
+// (published before that game, site scoring, scaled like this week's projection). Weeks label the bars.
+const drawLast5 = w => {
+  document.querySelectorAll('table.ranks tr.main').forEach(tr => {
+    const cell = tr.querySelector('td.l5'); if (!cell) return;
+    const sc = tr._sc || (tr._sc = JSON.parse(tr.dataset.sc)), pos = tr.dataset.pos;
+    const pjw = cell._pjw || (cell._pjw = JSON.parse(cell.dataset.pjw || '{}'));
+    const base = pts(sc.pj, SC.built, pos), ratio = base > 0.3 ? pts(sc.pj, w, pos) / base : 1;
+    const games = [...(sc.wk || [])].sort((a, b) => a[0] - b[0]).slice(-5)
+      .map(r => ({ wk: r[0], v: pts(r.slice(1), w, pos), pj: pjw[r[0]] != null ? pjw[r[0]] * ratio : null }));
+    if (!games.length) { cell.innerHTML = '<span class="l5-none">no games</span>'; return; }
+    const W = 96, H = 34, top = Math.max(10, ...games.map(g => Math.max(g.v, g.pj || 0))) * 1.08, slot = W / 5, bw = slot - 5;
+    const y = v => (H - 9) - (H - 11) * Math.max(v, 0) / top;
+    cell.innerHTML = `<svg class="l5s" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${games.map((g, i) => {
+      const x = i * slot + 2, cls = g.pj == null ? 'b-none' : g.v >= g.pj ? 'b-hit' : 'b-miss', yt = y(g.v);
+      return `<rect x="${x.toFixed(1)}" y="${yt.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1.5, H - 9 - yt).toFixed(1)}" rx="2" class="${cls}">`
+        + `<title>Week ${g.wk}: ${f1(g.v)} pts${g.pj != null ? ` · projected ${f1(g.pj)}` : ''}</title></rect>`
+        + (g.pj != null ? `<line x1="${(x - 1).toFixed(1)}" x2="${(x + bw + 1).toFixed(1)}" y1="${y(g.pj).toFixed(1)}" y2="${y(g.pj).toFixed(1)}" class="pj"/>` : '')
+        + `<text x="${(x + bw / 2).toFixed(1)}" y="${H - 0.5}" class="wl">${g.wk}</text>`;
+    }).join('')}</svg>`;
+  });
+};
 const applyScoring = () => {
   const { w, lg } = state;
+  drawLast5(w);
   const views = [...document.querySelectorAll('.posview')];
   views.forEach(view => {
     const tb = view.querySelector('table.ranks tbody');
@@ -856,14 +904,14 @@ const applyScoring = () => {
         }
       }
     });
-    const axis = Math.max(10, ...mains.map(r => r._q[3]).sort((a, b) => a - b).slice(0, Math.ceil(mains.length * 0.95)).slice(-1));
     mains.sort((a, b) => b._proj - a._proj).forEach((tr, i) => {
-      tr.querySelector('td.rk').textContent = i + 1;
+      tr.querySelector('td.rk .rkn').textContent = i + 1;
+      tr.querySelector('td.rk').dataset.v = i + 1;
       tr._rank = i + 1;
       const c = tr.querySelector('td.projc'), q = tr._q;
       c.dataset.v = tr._proj.toFixed(3);
       c.title = `Floor ${f1(q[0])} · middle ${f1(q[1])}-${f1(q[2])} · ceiling ${f1(q[3])}`;
-      c.querySelector('.proj').innerHTML = `<b>${f1(tr._proj)}</b>${rangeSvg(q, tr._proj, axis)}<span class="fc">${Math.round(q[0])}–${Math.round(q[3])}</span>`;
+      c.querySelector('.pv').textContent = f1(tr._proj);
       const d = tr.nextElementSibling && tr.nextElementSibling.classList.contains('detail') ? tr.nextElementSibling : null;
       tb.appendChild(tr); if (d) tb.appendChild(d);
     });
@@ -940,6 +988,7 @@ window.nfleApplyScoring = () => applyScoring();
   const isDefault = sameW(state.w, SC.built) && JSON.stringify(state.lg) === JSON.stringify(d.lg);
   if (!isDefault) applyScoring(); else {
     document.getElementById('scoreSum').textContent = `· ${state.preset}, ${state.lg.teams} teams`;
+    drawLast5(state.w);
   }
 })();
 </script>

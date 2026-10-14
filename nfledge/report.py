@@ -451,13 +451,23 @@ def espn_ids(rosters: pd.DataFrame | None, season: int) -> dict:
   return {g: str(e).split(".")[0] for g, e in zip(r.gsis_id, r.espn_id)}
 
 
+HEADSHOT_CROP = "c_thumb,g_face,z_0.75,w_160,h_160,f_auto,q_auto"
+
+
+def headshot_url(url: str) -> str:
+  """The NFL image server's face-centered 160x160 crop of a headshot: sharp at small sizes on retina screens, and
+  ~13 KB instead of the ~4 MB original the roster link points at."""
+  url = str(url or "")
+  return url.replace("/upload/f_auto,q_auto/", f"/upload/{HEADSHOT_CROP}/") if "/upload/" in url else url
+
+
 def headshots(rosters: pd.DataFrame | None, season: int) -> dict:
-  """gsis_id -> official NFL headshot URL from each player's latest roster row (nflverse rosters)."""
+  """gsis_id -> official NFL headshot URL (face crop) from each player's latest roster row (nflverse rosters)."""
   if rosters is None or "headshot_url" not in rosters:
     return {}
   r = rosters[(rosters.season <= season) & rosters.headshot_url.notna() & rosters.gsis_id.notna()]
   r = r.sort_values(["season", "week"]).drop_duplicates("gsis_id", keep="last")
-  return dict(zip(r.gsis_id, r.headshot_url.astype(str)))
+  return {g: headshot_url(u) for g, u in zip(r.gsis_id, r.headshot_url.astype(str))}
 
 
 def team_info(teams: pd.DataFrame | None) -> dict:
@@ -1266,6 +1276,24 @@ def short_name(name: str) -> str:
   return parts[1] if len(parts) == 2 and parts[1] else str(name)
 
 
+def past_projections(root_dir: Path, season: int, week: int, n: int = 8) -> dict:
+  """gsis -> {week: projection} from this season's published week files before `week` (the projection each player
+  carried into that game, site scoring). Weeks without a file (not built yet) are simply missing."""
+  out: dict = {}
+  for w in range(max(1, week - n), week):
+    f = root_dir / str(season) / f"week-{w:02d}.json"
+    if not f.exists():
+      continue
+    try:
+      players = json.loads(f.read_text(encoding="utf-8")).get("players", {})
+    except (OSError, ValueError):
+      continue
+    for pid, p in players.items():
+      if p.get("proj") is not None:
+        out.setdefault(pid, {})[str(w)] = round(float(p["proj"]), 1)
+  return out
+
+
 def render(ctx: dict, out_path: Path) -> Path:
   env = Environment(loader=FileSystemLoader(TEMPLATE_DIR), autoescape=select_autoescape(["html", "j2"]))
   env.filters["f0"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.0f}"
@@ -1287,6 +1315,11 @@ def render(ctx: dict, out_path: Path) -> Path:
   out_path.parent.mkdir(parents=True, exist_ok=True)
   root_dir = (out_path.parent / root).resolve()
   data_rel = out_path.resolve().relative_to(root_dir).with_suffix(".json").as_posix()
+  # The Last 5 column compares recent games with OUR projection for each (as published before kickoff).
+  past = past_projections(root_dir, ctx["season"], ctx["week"])
+  for block in ctx["players"].values():
+    for r in block["rows"]:
+      r["pjw"] = json.dumps(past.get(r["pid"], {}), separators=(",", ":"))
   html_out = env.get_template("report.html.j2").render(**ctx, root=root, data_rel=data_rel, asset_v=asset_version())
   out_path.write_text(html_out, encoding="utf-8")
   out_path.with_suffix(".json").write_text(week_data(ctx), encoding="utf-8")
