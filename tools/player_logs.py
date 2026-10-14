@@ -112,8 +112,9 @@ def main():
   cur_team = (data.rosters[data.rosters.season == data.current_season].sort_values("week")
               .drop_duplicates("gsis_id", keep="last").set_index("gsis_id").team)
 
-  contracts = cache.get("contracts", "all", lambda: nfl.load_contracts().select(CONTRACT_COLS),
-                        stale=cache.age_hours("contracts", "all") > 24)
+  cpath = cache.path("contracts", "all")
+  old = cpath.exists() and "last_year" not in pd.read_parquet(cpath).columns  # cached before last_year existed
+  contracts = cache.get("contracts", "all", lambda: load_contracts(nfl), stale=old or cache.age_hours("contracts", "all") > 24)
   cache.save_meta()  # fetch times for players / contracts, so the next run honors their refresh intervals
   bios = bio_map(data.rosters, data.draft, contracts)
   scr = qb_scrambles(data.pbp)
@@ -195,6 +196,22 @@ CONTRACT_COLS = ["gsis_id", "is_active", "year_signed", "years", "value", "apy",
                  "draft_year", "draft_overall"]
 
 
+def load_contracts(nfl) -> pd.DataFrame:
+  """OverTheCap contracts (nflverse) plus last_year: the final season he is actually paid, from the per-season
+  history. Void years (added to spread bonus money; placeholder salaries like 85 or 99, but no cash) don't count:
+  Allen's deal lists seasons to 2033 and pays through 2030; McCaffrey's through 2027 (lists 2030)."""
+  c = nfl.load_contracts()
+  def last_paid(h):
+    yrs = [int(s["year"]) for s in (h or []) if str(s.get("year") or "").isdigit() and (s.get("cash_paid") or 0) > 0]
+    return max(yrs) if yrs else None
+  out = c.select(CONTRACT_COLS).to_pandas()
+  paid = pd.Series([last_paid(h) for h in c["season_history"].to_list()], index=out.index, dtype="float")
+  # A deal whose seasons have no cash posted yet (fresh minimum / practice-squad signings): its own length.
+  own = out.year_signed + out.years.fillna(1) - 1
+  out["last_year"] = paid.where(paid >= out.year_signed, own)
+  return out
+
+
 def draft_map(draft: pd.DataFrame | None, contracts: pd.DataFrame | None) -> dict:
   """gsis -> {"y": year, "r": round, "p": pick within the round, "o": overall} or {"u": 1} (undrafted). nflverse's
   draft table first; OverTheCap's draft year + overall pick (contracts) for players it lacks; undrafted = an
@@ -219,15 +236,16 @@ def draft_map(draft: pd.DataFrame | None, contracts: pd.DataFrame | None) -> dic
 
 def contract_map(contracts: pd.DataFrame | None) -> dict:
   """gsis -> current contract (OverTheCap via nflverse): $M per year, total, years, guaranteed, share of the cap,
-  year signed. No end year: for an extension OverTheCap's years are the ADDED years (McCaffrey's 2024 2-year
-  extension runs through 2027, not 2025), so signed + years would mislead."""
+  year signed, and the season he'd reach free agency if not extended (the season after the last one he is paid;
+  not signed + years: for an extension OverTheCap's years are only the ADDED years)."""
   if contracts is None or not len(contracts):
     return {}
   c = contracts[contracts.is_active.fillna(False).astype(bool)].dropna(subset=["gsis_id", "apy"])
   c = c.sort_values("year_signed").drop_duplicates("gsis_id", keep="last")
   r2 = lambda v: None if pd.isna(v) else round(float(v), 2)
   return {x.gsis_id: {k: v for k, v in {"apy": r2(x.apy), "val": r2(x.value), "gtd": r2(x.guaranteed), "cap": None if pd.isna(x.apy_cap_pct) else round(float(x.apy_cap_pct), 4),
-                                        "from": int(x.year_signed), "yrs": None if pd.isna(x.years) else int(x.years)}.items()
+                                        "from": int(x.year_signed), "yrs": None if pd.isna(x.years) else int(x.years),
+                                        "fa": None if pd.isna(getattr(x, "last_year", np.nan)) else int(x.last_year) + 1}.items()
                       if v is not None}
           for x in c.itertuples()}
 

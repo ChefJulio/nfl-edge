@@ -293,9 +293,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   small label, rows are CSS subgrids so columns line up and short rows leave blanks; optional left label column).
   Profile box under the header: Age (to a tenth), Height, Weight, NFL yrs, Draft "R1:7 '18" (pick within round from
   nflverse draft table; OverTheCap fallback; UDFA), College (first listed = final school), then Contract (per year,
-  total, years, guaranteed, % of cap, signed) from nflverse `load_contracts` (OverTheCap; active deal; cached 24h
-  in tools/player_logs.py). No contract END year: OverTheCap "years" on an extension = added years only (CMC 2024
-  2y ext runs through 2027). Week tab: Projection (big number + one rank pill "QB #1" colored by roster tier,
+  total, guaranteed, % of cap, signed, free agent) from nflverse `load_contracts` (OverTheCap; active deal; cached
+  24h in tools/player_logs.py). OverTheCap "years" on an extension = added years only (CMC 2024 2y ext runs
+  through 2027), so the free-agent year comes from `season_history`: the season after the last one with cash paid
+  (void years carry placeholder salaries 85 / 99 but $0 cash: Allen lists 2033, paid through 2030 -> FA 2031);
+  deals with no cash posted yet (2026 rookies, minimum signings) use signed + years - 1. Week tab: Projection (big number + one rank pill "QB #1" colored by roster tier,
   replacing the tier badge + "QB1 in week 6" line; "% inactive" chip, reason at >= 5%; Floor / Middle / Ceiling /
   Confidence row) + Expected line (grid; TDs as chance of 1+); full-width Matchup tile with kickoff, click anywhere
   -> gamecast, team code -> team card; Season box (Scoring, Passing/Rushing/Receiving, Usage incl. QB scramble %

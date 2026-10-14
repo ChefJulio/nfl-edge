@@ -562,9 +562,13 @@
       : cell(`R${dr.r}:${dr.p}`, `Draft '${String(dr.y).slice(2)}`, `${dr.y} draft: round ${dr.r}, pick ${dr.p} (${ord(dr.o)} overall)`));
     // Transfers list every school, final one first ("Wyoming; Reedley CC"): show that one, all of them on hover.
     if (b.college) bio.push(cell(esc(b.college.split(';')[0].trim()), 'College', b.college));
-    const k = b.deal, deal = k ? [cell(money(k.apy), 'Per year'), k.val != null ? cell(money(k.val), 'Total') : '', k.yrs ? cell(esc(k.yrs), 'Years', 'Years in the deal as signed (an extension counts only the added years)') : '',
+    // Free agent = the season after the last one he's paid (void years excluded); older log files lack it and show
+    // the deal's length instead.
+    const k = b.deal, deal = k ? [cell(money(k.apy), 'Per year'), k.val != null ? cell(money(k.val), 'Total', k.yrs ? `${k.yrs}-year deal as signed (an extension counts only its added years)` : '') : '',
       k.gtd != null ? cell(money(k.gtd), 'Guaranteed') : '', k.cap != null ? cell(`${(k.cap * 100).toFixed(1)}%`, 'Of cap', 'Per-year value as a share of the salary cap when signed') : '',
-      cell(esc(k.from), 'Signed')] : [];
+      cell(esc(k.from), 'Signed'),
+      k.fa ? cell(esc(k.fa), 'Free agent', `Hits free agency in ${k.fa} if not extended (paid through ${k.fa - 1}; void years excluded)`)
+        : k.yrs ? cell(esc(k.yrs), 'Years') : ''] : [];
     if (!bio.length && !deal.length) return '';
     return `<div class="pc-box pc-profile">${sg([sgRow(null, bio), deal.length ? `<div class="sg-h">Contract</div>${sgRow(null, deal)}` : ''], 6, { labels: false, cls: 'sg-prof' })}</div>`;
   };
