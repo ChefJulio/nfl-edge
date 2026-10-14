@@ -24,6 +24,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4239944,Hunter Long,Arizona Cardinals,Injured Reserve,2026-10-06T23:22Z,Knee,Not Specified,Not Specified,2026-11-08,IR,The Cardinals placed Long (knee) on injured reserve Tuesday.
 4426844,Elijah Higgins,Arizona Cardinals,Active,2026-10-06T03:47Z,,,,,,Higgins caught both of his targets for 19 yards and a touchdown in Sunday's loss to the Giants.
 4429782,Josh Fryar,Arizona Cardinals,Active,2026-10-05T18:27Z,,,,,,
+4361409,Jahan Dotson,Atlanta Falcons,Active,2026-10-14T01:55Z,,,,,,Dotson caught two of four passes for 54 yards during the Falcons' 30-23 overtime loss to the Ravens on Sunday.
 3043168,Za'Darius Smith,Atlanta Falcons,Questionable,2026-10-13T17:10Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4241474,Brian Robinson Jr.,Atlanta Falcons,Active,2026-10-13T01:14Z,,,,,,Robinson handled seven carries for 16 yards and did not catch his only target during Sunday's 30-23 overtime loss versus the Ravens. He also returned two kickoffs for 61 return yards.
 5344782,Jack Strand,Atlanta Falcons,Active,2026-10-12T18:56Z,,,,,,
@@ -48,7 +49,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685502,Harold Perkins Jr.,Atlanta Falcons,Active,2026-10-08T00:56Z,,,,,,Perkins recorded 10 tackles (seven solo) including 0.5 sacks and a pass defensed during Monday's 45-24 win at New Orleans.
 3043275,Austin Hooper,Atlanta Falcons,Active,2026-10-07T00:10Z,,,,,,Hooper caught his only target for nine yards during Monday's 45-24 win at New Orleans.
 4870612,Zachariah Branch,Atlanta Falcons,Active,2026-10-07T00:02Z,,,,,,Branch caught both of his targets for 10 yards while also adding 65 kickoff-return yards and 25 yards as a punt returner during Monday night's 45-24 win over the Saints.
-3917914,Olamide Zaccheaus,Atlanta Falcons,Active,2026-10-07T00:01Z,,,,,,Zaccheaus failed to haul in his lone target during the Falcons' 45-24 win over the Saints on Monday.
 4360939,Rashod Bateman,Baltimore Ravens,Active,2026-10-13T23:43Z,,,,,,Bateman caught five of six passes for 62 yards during the Ravens' 30-23 overtime win over the Falcons on Sunday.
 4243220,Andrew Vorhees,Baltimore Ravens,Questionable,2026-10-13T17:10Z,Foot,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 3052743,Trey Hendrickson,Baltimore Ravens,Questionable,2026-10-13T17:10Z,Finger,Surgery,Right,2026-10-18,QUESTIONABLE,questionable
