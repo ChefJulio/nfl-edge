@@ -65,6 +65,8 @@ Git hooks: `git config core.hooksPath .githooks` (pre-commit blocks commits when
 | `nfledge/static/shell.{js,css}` | App shell: 4 parents (Players, Teams, Games, Model) + sub-tab chips, bottom tab bar on phones, hash routing (#players/rankings; old #games etc. mapped), `NFLE.load` (cached JSON), placeholder sections for tabs not built yet |
 | `nfledge/static/table.{js,css}` | `NFLE.Table`: the shared table component for client-rendered tabs (sort, pinned column, sticky header, header strip on phones) |
 | `tools/dev.py` | Dev server: built site + live `nfledge/static/` assets |
+| `nfledge/standings.py` | Standings + NFL tiebreaking procedures (division, wild card, seeds); presentation-side (not in the model fingerprint) |
+| `tools/standings_build.py`, `nfledge/static/standings.{js,css}` | Teams > Standings: `data/standings/<season>.json` (2002 on, CI step) rendered in the browser; area modules load on first open (shell.js AREAS) |
 | `nfledge/elo.py` | Elo from final scores (part of our win chance) |
 | `exclusions.csv` | Manual injury-shortened games to drop from usage/efficiency |
 | `scratch/` | Throwaway experiment scripts (gitignored) |

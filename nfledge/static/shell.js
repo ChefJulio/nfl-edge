@@ -28,6 +28,27 @@
     { key: 'games', label: 'Games', subs: [['matchups', 'Matchups', 'tab-games']] },
     { key: 'model', label: 'Model', subs: [['model', 'Model', 'tab-model']] },
   ];
+  // Client-rendered tabs: section id -> area module (assets/<area>.js + .css), loaded the first time the tab opens.
+  // A module registers NFLE.areas[<area>] = { mount(section) } and renders into its section.
+  const AREAS = { 'tab-teams-standings': 'standings' };
+  const ver = (document.currentScript && new URL(document.currentScript.src).search) || '';
+  const loaded = {};
+  const NFLE = window.NFLE = window.NFLE || {};
+  NFLE.areas = NFLE.areas || {};
+  const mountArea = id => {
+    const area = AREAS[id], sec = document.getElementById(id);
+    if (!area || !sec || sec.dataset.mounted) return;
+    sec.dataset.mounted = '1';
+    const go = () => { try { NFLE.areas[area].mount(sec); } catch (e) { sec.insertAdjacentHTML('beforeend', `<p class="muted">Couldn't load this tab (${String(e.message || e)}).</p>`); } };
+    if (loaded[area]) { loaded[area].then(go); return; }
+    const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = new URL(`assets/${area}.css${ver}`, NFLE.root).href;
+    document.head.appendChild(css);
+    loaded[area] = new Promise((ok, bad) => {
+      const js = document.createElement('script'); js.src = new URL(`assets/${area}.js${ver}`, NFLE.root).href;
+      js.onload = ok; js.onerror = () => bad(new Error(`assets/${area}.js`)); document.head.appendChild(js);
+    });
+    loaded[area].then(go, e => sec.insertAdjacentHTML('beforeend', `<p class="muted">Couldn't load this tab (${e.message}).</p>`));
+  };
   const OLD = { players: 'players/rankings', roles: 'players/roles', power: 'teams/power', games: 'games', model: 'model',
                playoffs: 'teams/playoffs', draft: 'teams/draft', transactions: 'players/moves' };
   const CARD = /^(player|team)\/|^g-/;  // card / old tile deep links: gamecast.js owns these
@@ -96,6 +117,7 @@
     const route = r.p.subs.length < 2 ? r.p.key : `${r.p.key}/${r.s[0]}`;
     try { localStorage.setItem('nfledge-tab', route); } catch (e) { /* private mode */ }
     if (push && location.hash.slice(1) !== route) { try { history.replaceState(null, '', '#' + route); } catch (e) { /* file:// */ } }
+    mountArea(id);
     document.dispatchEvent(new CustomEvent('nfle-route', { detail: { parent: r.p.key, sub: r.s[0], section: id } }));
   };
   const onNav = e => {

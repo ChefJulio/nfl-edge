@@ -23,7 +23,7 @@ from nfledge.engine import POSITIONS, Engine
 
 def model_code() -> str:
   """Source of everything that affects model outputs (report.py and templates only change presentation)."""
-  return "".join(p.read_text() for p in sorted((ROOT / "nfledge").glob("*.py")) if p.name not in ("report.py", "docs.py"))
+  return "".join(p.read_text() for p in sorted((ROOT / "nfledge").glob("*.py")) if p.name not in ("report.py", "docs.py", "standings.py"))
 
 
 def frame_hash(df) -> int:

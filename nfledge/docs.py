@@ -20,7 +20,7 @@ from jinja2 import Environment, StrictUndefined
 from .config import ROOT
 
 DOC = ROOT / "MODEL.md"
-PRESENTATION = {"report.py", "docs.py"}  # changes here never change model outputs
+PRESENTATION = {"report.py", "docs.py", "standings.py"}  # changes here never change model outputs (standings: site data)
 PRESENTATION_CFG = {"tiers", "report"}  # config sections only the page reads
 
 

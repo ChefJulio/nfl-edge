@@ -76,6 +76,9 @@ jobs:
       # Career game logs for the player card (one JSON per player; reads the week data files built above).
       - name: Player game logs
         run: python tools/player_logs.py --site=site
+      # Teams > Standings data (every season since 2002; ~10 s), rendered in the browser by assets/standings.js.
+      - name: Standings
+        run: python tools/standings_build.py --site=site
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:

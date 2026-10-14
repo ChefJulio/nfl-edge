@@ -1,0 +1,20 @@
+/* Teams > Standings (standings.js) */
+#tab-teams-standings .dt-tools select { -webkit-appearance: none; appearance: none; color-scheme: dark; font: inherit; font-size: 14px; font-weight: 700;
+  color: var(--ink); background: var(--panel2); border: 1px solid var(--line); border-radius: 9px; padding: 7px 28px 7px 11px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: right 13px center, right 8px center; background-size: 5px 5px; background-repeat: no-repeat; }
+.st-body { padding: 4px 0 8px; }
+.st-h { margin: 14px 14px 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+.st-tbl table.dt td.stick { min-width: 150px; }
+.st-logo { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; flex: none;
+  background: color-mix(in srgb, var(--tc) 30%, #1b1f26); box-shadow: 0 0 0 1px rgba(255,255,255,.14); }
+.st-logo img { width: 20px; height: 20px; object-fit: contain; }
+.st-seed { display: inline-block; margin-left: 6px; font-size: 10.5px; font-weight: 800; line-height: 16px; padding: 0 5px; border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 25%, transparent); color: var(--ink); vertical-align: 1px; }
+.st-why { color: var(--muted); cursor: help; }
+.st-pos { color: #54d17a; } .st-neg { color: #ff8378; }
+.st-l5 { display: inline-flex; gap: 2px; } .st-l5 i { font-style: normal; font-size: 10px; font-weight: 800; width: 15px; text-align: center; border-radius: 3px; line-height: 16px; }
+.st-l5 .w { background: rgba(69,194,107,.2); color: #8fe0a8; } .st-l5 .l { background: rgba(242,120,109,.18); color: #f59a91; } .st-l5 .t { background: rgba(255,255,255,.1); color: var(--muted); }
+table.dt tr.st-cut td { border-bottom: 2px solid color-mix(in srgb, var(--accent) 60%, transparent); }
+.st-note { font-size: 12px; margin: 10px 2px 0; line-height: 1.45; }
+.st-pad { padding: 14px; }
