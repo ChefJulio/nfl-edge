@@ -562,6 +562,9 @@ def team_info(teams: pd.DataFrame | None) -> dict:
 
 # ESPN team codes that differ from nflverse's (everything else matches).
 ESPN_TEAM = {"LA": "LAR", "WAS": "WSH"}
+# Weekly rosters before ~2016 use legacy club codes (BLT, CLV, HST, ARZ, SL) besides the relocated ones: -> today's
+# codes (player pages, transactions linking). Kept here, not in data.py (model code), since only pages use it.
+ROSTER_TEAM = {"BLT": "BAL", "CLV": "CLE", "HST": "HOU", "ARZ": "ARI", "SL": "LA", "STL": "LA", "OAK": "LV", "SD": "LAC", "LAR": "LA"}
 
 
 def week_data(ctx: dict) -> str:

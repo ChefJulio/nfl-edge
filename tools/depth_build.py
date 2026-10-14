@@ -21,7 +21,7 @@ import pandas as pd  # noqa: E402
 from nfledge import data as D  # noqa: E402
 from nfledge.config import load_config  # noqa: E402
 
-V = 2
+V = 3  # 3: every player has a page (links), 2026-10-14
 FIRST = 2001
 FRANCHISE = {"OAK": "LV", "SD": "LAC", "STL": "LA", "LAR": "LA"}  # relocated clubs -> today's code (team pages)
 KIND = {"Offense": "off", "Defense": "def", "Special Teams": "st"}

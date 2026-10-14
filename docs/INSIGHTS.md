@@ -533,7 +533,17 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   module whose field is missing from an older week file leaves the section alone. `tools/screenshot.py` opens the
   dev server (pages need http:// to fetch their JSON).
 
-## 9. Open threads / next steps (as of 2026-10-12)
+- **Every player has a page (2026-10-14):** ~16k player files (~90 MB) from nflverse weekly stats (all positions,
+  1999 on), weekly rosters (2002 on) and PFR snap counts (2012 on). Roster files before ~2016 use legacy club codes
+  BLT / CLV / HST / ARZ / SL (`report.ROSTER_TEAM`). Snap counts carry PFR ids: map them through nflverse's player
+  table, not the loaded rosters' `pfr_id` (rosters miss ~30% of snap rows: linemen, defenders, ~8% of skill players
+  in 2020-24). Targets are missing in nflverse stats for some seasons (e.g. 2003-08: 0 targets). Ourlads' depth
+  charts are more accurate per the owner, but their terms forbid scraping and republishing (checked 2026-10-14).
+
+## 9. Open threads / next steps
+- **Model snap data gap (2026-10-14):** `data.load_all` maps snaps pfr -> gsis through the loaded rosters, which
+  lose ~8% of skill-player snap rows in 2020-24 (0.5% in 2026). Fixing it (player-table map) changes model inputs:
+  run the 5-season A/B before adopting. (as of 2026-10-12)
 - **From the 2026-10-14 research batch (section 5 has the numbers):** (2) "Not extended entering
   the last rookie-deal year" (rounds 2-7, year 4, no new contract signed by then; knowable pre-season): actual minus
   projection -0.60 [-1.21, -0.03] vs others, placebo year 3 +0.20. Near the CI edge after many tests, so suspect;

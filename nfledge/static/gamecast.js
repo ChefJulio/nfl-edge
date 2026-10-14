@@ -596,6 +596,99 @@
       + (log ? `<div class="pc-box pc-mini"><div class="pc-k">${cur ? 'This season' : 'Last 5 games'}</div><div class="pc-log">${log}</div>
         <button type="button" class="pc-more" data-goto="log">Show more</button></div>` : '');
   };
+  // ------------------------------------------------------------------------------------- non-fantasy player pages
+  // Defense, line, specialists (and skill players without fantasy stats): the career log doc carries a kind and
+  // its stat keys (tools/player_logs.py other_logs); no projections, points or ranks.
+  const KIND_COLS = {
+    def: { tk: ['Tk', 'Solo tackles'], ast: ['Ast', 'Assisted tackles'], tfl: ['TFL', 'Tackles for loss'], sk: ['Sk', 'Sacks'], qbh: ['QBH', 'QB hits'],
+           int: ['Int', 'Interceptions'], pd: ['PD', 'Passes defended'], ff: ['FF', 'Forced fumbles'], fr: ['FR', 'Fumble recoveries'], td: ['TD', 'Defensive TDs'] },
+    k: { fgm: ['FGM', 'Field goals made'], fga: ['FGA', 'Field goals attempted'], lng: ['Lng', 'Longest field goal'], xpm: ['XPM', 'Extra points made'], xpa: ['XPA', 'Extra points attempted'] },
+    p: { pu: ['Punts', 'Punts'], yd: ['Yds', 'Punt yards'], net: ['Net', 'Net punt yards'], i20: ['In20', 'Inside the 20'], lng: ['Lng', 'Longest punt'] },
+    off: { car: ['Car', 'Carries'], ryd: ['Rush yd', 'Rushing yards'], rec: ['Rec', 'Receptions'], yd: ['Rec yd', 'Receiving yards'], td: ['TD', 'Receiving TDs'] },
+  };
+  const RET_COLS = { kr: ['KR', 'Kick returns'], kry: ['KR yd', 'Kick return yards'], pr: ['PR', 'Punt returns'], pry: ['PR yd', 'Punt return yards'] };
+  const KIND_NAME = { def: 'Defense', k: 'Kicking', p: 'Punting', ol: 'Offensive line', ls: 'Long snapper', off: 'Offense' };
+  const kindTotals = (L, games) => {
+    const t = {}, keys = L.keys || [], rk = L.ret_keys || [];
+    games.forEach(g => {
+      keys.forEach((k, i) => { const v = (g.d || [])[i] || 0; t[k] = k === 'lng' ? Math.max(t[k] || 0, v) : (t[k] || 0) + v; });
+      rk.forEach((k, i) => { t['r_' + k] = (t['r_' + k] || 0) + ((g.r || [])[i] || 0); });
+    });
+    const sn = games.map(g => g.sn).filter(v => v != null);
+    t.g = games.length; t.sn = sn.length ? sn.reduce((a, b) => a + b, 0) / sn.length : null;
+    return t;
+  };
+  const nfmt = v => v == null ? '–' : Number.isInteger(v) ? String(v) : v.toFixed(1);
+  // the stat grid for a stretch of games: games + snap share, his kind's totals (with rates), returns when he had any
+  const kindGrid = (L, t) => {
+    const cols = KIND_COLS[L.kind] || {};
+    const main = [cell(f0(t.g), 'Games'), t.sn != null ? cell(`${Math.round(t.sn)}%`, 'Snaps', `Average share of ${L.kind === 'def' ? 'defensive' : L.kind === 'ol' || L.kind === 'off' ? 'offensive' : 'special-teams'} snaps (2012 on)`) : ''];
+    const stats = (L.keys || []).map(k => cols[k] ? cell(nfmt(t[k] || 0), cols[k][0], cols[k][1]) : '');
+    if (L.kind === 'k' && t.fga) stats.splice(2, 0, cell(`${Math.round(100 * t.fgm / t.fga)}%`, 'FG%'));
+    if (L.kind === 'p' && t.pu) stats.splice(2, 0, cell(f1(t.yd / t.pu), 'Avg'), cell(f1(t.net / t.pu), 'Net avg'));
+    const ret = t.r_kr || t.r_pr ? [t.r_kr ? cell(f0(t.r_kr), 'KR') : '', t.r_kr ? cell(f1(t.r_kry / t.r_kr), 'KR avg') : '',
+      t.r_pr ? cell(f0(t.r_pr), 'PR') : '', t.r_pr ? cell(f1(t.r_pry / t.r_pr), 'PR avg') : ''] : [];
+    return sg([sgRow(null, main), stats.length ? sgRow(KIND_NAME[L.kind], stats) : '', ret.length ? sgRow('Returns', ret) : ''], 5, { labels: true, cls: 'sg-season' });
+  };
+  // game log table for a kind: Wk, Opp, Snap, his stats, returns (only when he had any in those games)
+  const kindLog = (L, seasons, opts = {}) => {
+    const cols = KIND_COLS[L.kind] || {}, keys = (L.keys || []).filter(k => cols[k]);
+    const hasRet = seasons.some(S => S.g.some(g => g.r));
+    const rk = hasRet ? (L.ret_keys || []) : [];
+    const head = `<tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Snap</th>${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}${rk.map(k => `<th class="num" title="${esc(RET_COLS[k][1])}">${RET_COLS[k][0]}</th>`).join('')}</tr>`;
+    const n = 3 + keys.length + rk.length;
+    const body = seasons.map(S => {
+      const t = kindTotals(L, S.g), team = S.g.length ? S.g[S.g.length - 1].t : '';
+      const trs = [...S.g].sort((a, b) => a.w - b.w).map(g => `<tr${tileAttrs(g)}><td>${g.w}</td><td class="lg-opp tm-opp"><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>
+        <td class="num">${g.sn != null ? g.sn : '–'}</td>${keys.map(k => `<td class="num">${nfmt((g.d || [])[(L.keys || []).indexOf(k)])}</td>`).join('')}${rk.map((k, i) => `<td class="num">${g.r ? nfmt(g.r[i]) : '–'}</td>`).join('')}</tr>`).join('');
+      const sum = opts.compact ? '' : ` · ${t.g} game${t.g === 1 ? '' : 's'}${keys.length ? ` · ${keys.slice(0, 4).map(k => `${nfmt(t[k] || 0)} ${cols[k][0]}`).join(', ')}` : ''}`;
+      return `<tbody><tr class="lg-season"><td colspan="${n}"><b>${S.s}</b> ${esc(team)}${sum}</td></tr>${head}${trs}</tbody>`;
+    }).join('');
+    return `<div class="lg-scroll"><table class="lg">${body}</table></div>`;
+  };
+  // career by season: every season he was on an active roster (2002 on) or played, with team, games and totals
+  const kindCareer = L => {
+    const cols = KIND_COLS[L.kind] || {}, keys = (L.keys || []).filter(k => cols[k]).slice(0, 6);
+    const ros = L.ros || {}, bySeason = Object.fromEntries(L.seasons.map(S => [S.s, S]));
+    const years = [...new Set([...Object.keys(ros).map(Number), ...L.seasons.map(S => S.s)])].sort((a, b) => b - a);
+    if (!years.length) return '';
+    const rows = years.map(y => {
+      const S = bySeason[y], t = S ? kindTotals(L, S.g) : null, r = ros[y];
+      const team = r ? r[0] : S && S.g.length ? S.g[S.g.length - 1].t : '';
+      return `<tr><td><b>${y}</b></td><td class="tm-opp">${team ? team.split('/').map(x => `<button type="button" class="tm-open" data-tm="${esc(x)}">${esc(x)}</button>`).join('/') : ''}</td>
+        <td class="num">${t ? t.g : '–'}</td><td class="num">${r ? r[1] : '–'}</td><td class="num">${t && t.sn != null ? `${Math.round(t.sn)}%` : '–'}</td>
+        ${keys.map(k => `<td class="num">${t ? nfmt(t[k] || 0) : '–'}</td>`).join('')}</tr>`;
+    }).join('');
+    return `<div class="lg-scroll"><table class="lg lg-career"><thead><tr class="lg-ch"><th>Season</th><th>Team</th><th class="num" title="Games with a stat or a snap">G</th>
+      <th class="num" title="Weeks on the active roster">Wks</th><th class="num">Snap</th>${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  };
+  const kindOverview = (L, espn) => {
+    const last = L.seasons.find(S => S.g.length);
+    const season = last ? `<div class="pc-box"><div class="pc-k">${last.s === L.cur ? `${last.s} season so far` : `${last.s} season (his latest)`}</div>${kindGrid(L, kindTotals(L, last.g))}</div>` : '';
+    const career = L.seasons.flatMap(S => S.g);
+    const car = career.length ? `<div class="pc-box"><div class="pc-k">Career (regular season${career.some(g => g.sn != null) ? '; snaps from 2012' : ''})</div>${kindGrid(L, kindTotals(L, career))}</div>` : '';
+    const recent = last ? `<div class="pc-box pc-mini"><div class="pc-k">${last.s === L.cur ? 'This season' : `${last.s} games`}</div><div class="pc-log">${kindLog(L, [last], { compact: true })}</div>
+      <button type="button" class="pc-more" data-goto="log">Show more</button></div>` : '';
+    const news = espn ? `<div class="pc-box pc-mini"><div class="pc-k">Latest news</div><div class="pc-news" data-n="3"></div><button type="button" class="pc-more" data-goto="news">Show more</button></div>` : '';
+    const hist = kindCareer(L);
+    return `${season}${!career.length ? '<div class="pc-box"><p class="pc-sub">No regular-season games with a recorded stat or snap yet.</p></div>' : ''}${recent}${news}${car}${hist ? `<div class="pc-box"><div class="pc-k">By season</div>${hist}</div>` : ''}`;
+  };
+  // Career by season for a fantasy-position player (retired / not on a roster this season): games, points per game
+  // under the viewer's scoring, and his position's main totals. c / x = the log's stat line (scoring keys) / volume.
+  const offCareer = L => {
+    const pos = L.pos, w = weights();
+    const cols = pos === 'QB' ? [['Pass yd', g => g.c[0]], ['Pass TD', g => g.c[1]], ['Int', g => g.c[2]], ['Rush yd', g => g.c[3]], ['Rush TD', g => g.c[4]]]
+      : pos === 'RB' ? [['Car', g => g.x[2]], ['Rush yd', g => g.c[3]], ['Rush TD', g => g.c[4]], ['Rec', g => g.c[5]], ['Rec yd', g => g.c[6]], ['Rec TD', g => g.c[7]]]
+        : [['Tgt', g => g.x[3]], ['Rec', g => g.c[5]], ['Rec yd', g => g.c[6]], ['Rec TD', g => g.c[7]], ['Rush yd', g => g.c[3]]];
+    const sum = (gs, fn) => gs.reduce((t, g) => t + (fn(g) || 0), 0);
+    const row = (label, gs, team) => `<tr><td><b>${label}</b></td><td class="tm-opp">${team ? `<button type="button" class="tm-open" data-tm="${esc(team)}">${esc(team)}</button>` : ''}</td>
+      <td class="num">${gs.length}</td><td class="num">${gs.length ? f1(sum(gs, g => pts(g.c, w, pos)) / gs.length) : '–'}</td>${cols.map(([, fn]) => `<td class="num">${f0(sum(gs, fn))}</td>`).join('')}</tr>`;
+    const seasons = L.seasons.filter(S => S.g.length);
+    if (!seasons.length) return '';
+    const all = seasons.flatMap(S => S.g);
+    return `<div class="lg-scroll"><table class="lg lg-career"><thead><tr class="lg-ch"><th>Season</th><th>Team</th><th class="num">G</th><th class="num" title="Fantasy points per game, your scoring">FP/G</th>${cols.map(([n]) => `<th class="num">${n}</th>`).join('')}</tr></thead>
+      <tbody>${seasons.map(S => row(S.s, S.g, S.g[S.g.length - 1].t)).join('')}${row('Career', all, '')}</tbody></table></div>`;
+  };
   const renderCard = pid => {
     const body = document.querySelector('#pcOv .pc-body');
     const d = cardData(), L = LOGS[pid] && !LOGS[pid].missing ? LOGS[pid] : null;
@@ -609,22 +702,29 @@
     const info = tInfo(team), news = !!espn;
     const photo = photoUrl(L, espn), num = L && L.bio ? L.bio.num : null;
     if (cardTab === 'news' && !news) cardTab = 'ov';
-    const week = (d === undefined || d === null ? wkWait(d) : p ? playerWeek(pid, p, d, L) : playerOff(L, d))
-      + weekExtras(pid, L, p || row, espn);
+    const isKind = !!(L && L.kind);  // a non-fantasy page (defense, line, specialists): no week projections
+    // retired / off every roster this season and not on the picked week's board: a career overview, no week picker
+    const lastPlayed = L ? (L.seasons.find(S => S.g.length) || {}).s : null;
+    const retired = !isKind && !!L && !L.team && !p && !(DATA && DATA.players[pid]) && lastPlayed && lastPlayed < L.cur;
+    const overview = isKind || retired;
+    const week = isKind ? kindOverview(L, espn)
+      : retired ? weekExtras(pid, L, row, espn) + (offCareer(L) ? `<div class="pc-box"><div class="pc-k">By season (regular season)</div>${offCareer(L)}</div>` : '')
+      : (d === undefined || d === null ? wkWait(d) : p ? playerWeek(pid, p, d, L) : playerOff(L, d)) + weekExtras(pid, L, p || row, espn);
     body.innerHTML = `
       <div class="pc-head" style="--tc:${esc(info.color || '#666')}">
         ${photo ? `<div class="pc-pic"><img src="${esc(photo)}" alt="" width="72" height="72" loading="lazy" onerror="this.parentNode.classList.add('nopic')">${team ? `<span class="pc-pic-tm">${tLogo(team, 16)}</span>` : ''}</div>`
           : team ? tLogo(team, 34) : ''}
         <div class="pc-id"><h3 id="pcName">${num != null ? `<span class="pc-num">#${esc(num)}</span>` : ''}${esc(name)}</h3>
-          <div class="pc-meta">${pos ? `<span class="posb posb-${esc(pos)}">${esc(pos)}</span>` : ''} ${team ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(team)}">${esc(info.name || team)}</button>` : '<span class="muted">Free agent</span>'}</div>
+          <div class="pc-meta">${pos ? `<span class="posb posb-${esc(pos)}">${esc(pos)}</span>` : ''} ${team ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(team)}">${esc(info.name || team)}</button>` : L && lastPlayed && lastPlayed < L.cur ? `<span class="muted">Last played ${esc(lastPlayed)}</span>` : '<span class="muted">Free agent</span>'}</div>
 </div>
       </div>
       ${profileBox(L)}
-      <div class="seg pc-tabs" role="tablist">${[['ov', 'Week'], ['log', 'Game log'], ...(news ? [['news', 'News']] : [])]
+      <div class="seg pc-tabs" role="tablist">${[['ov', overview ? 'Overview' : 'Week'], ['log', 'Game log'], ...(news ? [['news', 'News']] : [])]
         .map(([k, l]) => `<button type="button" role="tab" data-pt="${k}" class="${cardTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-      <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${pickerHtml()}${week}</div>
+      <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${overview ? '' : pickerHtml()}${week}</div>
       <div class="pc-tab" data-pt="log"${cardTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every career game</div><div class="pc-log">${
         !LOGS[pid] ? '<p class="pc-sub">Loading game log&hellip;</p>' : !L ? '<p class="pc-sub">Game log unavailable.</p>'
+          : isKind ? (L.seasons.length ? kindLog(L, L.seasons) : '<p class="pc-sub">No regular-season games with a recorded stat or snap.</p>')
           : L.seasons.length || (L.up || []).length ? logHtml(L, p || row) : '<p class="pc-sub">No NFL games yet.</p>'}</div></div></div>
       ${news ? `<div class="pc-tab" data-pt="news"${cardTab === 'news' ? '' : ' hidden'}><div class="pc-box pc-newsbox"><div class="pc-k">Recent news</div><div class="pc-news"></div></div></div>` : ''}`;
     body.querySelectorAll('.pc-news').forEach(nb => loadNews(espn, nb, +nb.dataset.n || 6));

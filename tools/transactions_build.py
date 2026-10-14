@@ -22,6 +22,7 @@ sys.path.insert(0, str(ROOT))
 
 from nfledge import data as D  # noqa: E402
 from nfledge.config import load_config  # noqa: E402
+from nfledge.report import ROSTER_TEAM  # noqa: E402
 
 V = 1
 URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/transactions?season={s}&limit=100&page={p}"
@@ -147,7 +148,7 @@ class Linker:
       if ros is None or not len(ros):
         continue
       for x in ros.dropna(subset=["gsis_id"]).drop_duplicates(["gsis_id", "team"]).itertuples():
-        self.by_nt.setdefault((norm(x.full_name), ESPN_TEAM.get(x.team, x.team)), x.gsis_id)
+        self.by_nt.setdefault((norm(x.full_name), ROSTER_TEAM.get(x.team, ESPN_TEAM.get(x.team, x.team))), x.gsis_id)
     act = players[(players.rookie_season.fillna(0) <= season + 1) & (players.last_season.fillna(9999) >= season - 1)]
     for x in act.dropna(subset=["gsis_id"]).itertuples():
       fam = FAM.get(str(x.position), {str(x.position_group)})

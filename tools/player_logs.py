@@ -21,7 +21,7 @@ import pandas as pd  # noqa: E402
 
 from nfledge import data as D  # noqa: E402
 from nfledge.config import load_config, load_scoring  # noqa: E402
-from nfledge.report import SCORE_KEYS, headshot_url  # noqa: E402
+from nfledge.report import ROSTER_TEAM, SCORE_KEYS, _json_safe, headshot_url  # noqa: E402
 
 FIRST_SEASON = 1999
 POS = ("QB", "RB", "WR", "TE")
@@ -90,7 +90,11 @@ def main():
   pfr = players.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
   sn_old = [cache.get("snaps", s, lambda: nfl.load_snap_counts([s]), stale=False) for s in range(2012, first_loaded)]
   sn_old = [x[x.game_type == "REG"].assign(gsis_id=lambda x: x.pfr_player_id.map(pfr)) for x in sn_old if x is not None and len(x)]
-  sn = pd.concat(sn_old + [data.snaps], ignore_index=True).dropna(subset=["gsis_id"])
+  # every season through the player table's pfr -> gsis map (the loaded seasons' roster-based map misses ~30% of
+  # rows, mostly linemen and defenders, and ~8% of skill players in 2020-24)
+  sn = pd.concat(sn_old + [data.snaps], ignore_index=True)
+  sn["gsis_id"] = sn.pfr_player_id.map(pfr).fillna(sn.gsis_id)
+  sn = sn.dropna(subset=["gsis_id"])
   snap = sn.groupby(["season", "week", "gsis_id"]).offense_pct.max()
   ours, opp_rank, everyone = our_weeks(site)
   # Home / away for every past game (the stats feed doesn't say): full schedule history.
@@ -118,10 +122,18 @@ def main():
   old = cpath.exists() and "last_year" not in pd.read_parquet(cpath).columns  # cached before last_year existed
   contracts = cache.get("contracts", "all", lambda: load_contracts(nfl), stale=old or cache.age_hours("contracts", "all") > 24)
   cache.save_meta()  # fetch times for players / contracts, so the next run honors their refresh intervals
-  bios = bio_map(data.rosters, data.draft, contracts)
+  # Every roster since 2002 (bios, career teams for every player's page; loaded seasons come with the data)
+  ros_cols = ["season", "week", "team", "gsis_id", "full_name", "position", "status", "jersey_number", "birth_date", "height",
+              "weight", "college", "headshot_url", "years_exp", "espn_id"]
+  all_ros = pd.concat([x[[c for c in ros_cols if c in x]] for x in
+                       [cache.get("rosters", s, lambda: nfl.load_rosters_weekly([s]), stale=False) for s in range(2002, first_loaded)]
+                       + [data.rosters] if x is not None and len(x)], ignore_index=True)
+  bios = bio_map(all_ros, data.draft, contracts)
   scr = qb_scrambles(data.pbp)
   out_dir = site / "data" / "players"
   out_dir.mkdir(parents=True, exist_ok=True)
+  everyone |= set(st.player_id.dropna())  # every QB / RB / WR / TE since 1999, not only those on our week pages
+  pinfo = players.dropna(subset=["gsis_id"]).drop_duplicates("gsis_id").set_index("gsis_id")
   sts = st[st.player_id.isin(everyone)].sort_values(["season", "week"])
   by_player = {pid: g for pid, g in sts.groupby("player_id")}
   n = 0
@@ -179,6 +191,8 @@ def main():
         _link(e, gid_of.get((data.current_season, wk, team)))
         upcoming.append(e)
     name, espn = NAMES.get(pid, (None, None))
+    if name is None and pid in pinfo.index:  # not on any week page of ours: nflverse's player table
+      name, espn = pinfo.at[pid, "display_name"], espn_str(pinfo.at[pid, "espn_id"])
     doc = {"pid": pid, "name": name, "espn": espn, "pos": pos, "keys": SCORE_KEYS, "cur": data.current_season, "team": team,
            "seasons": [{"s": s, "g": seasons[s]} for s in sorted(seasons, reverse=True)], "up": upcoming,
            "bio": bios.get(pid, {})}
@@ -188,7 +202,140 @@ def main():
     n += 1
   size = sum(f.stat().st_size for f in out_dir.glob("*.json"))
   print(f"[logs] wrote {n} player game logs ({size / 1e6:.1f} MB) to {out_dir}", flush=True)
+  other_logs(site, cache, nfl, data.current_season, allsched, pinfo, all_ros, sn, bios, written=set(everyone))
   team_logs(site, cfg, data, cache, nfl, allsched)
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Every other player (defense, line, specialists): a page without the fantasy parts. kind = which stat set the page
+# shows; the page reads the stat names from the doc ("keys"), so the stat choice lives in one place (here).
+KIND_OF = {**{p: "off" for p in "QB RB WR TE FB HB".split()},
+           **{p: "def" for p in "DE DT NT DL LB ILB OLB MLB CB S SS FS SAF DB".split()},
+           **{p: "ol" for p in "T OT G OG C OL".split()}, "K": "k", "PK": "k", "P": "p", "LS": "ls"}
+KIND_STATS = {
+  "def": [("tk", "def_tackles_solo"), ("ast", "def_tackle_assists"), ("tfl", "def_tackles_for_loss"), ("sk", "def_sacks"),
+          ("qbh", "def_qb_hits"), ("int", "def_interceptions"), ("pd", "def_pass_defended"), ("ff", "def_fumbles_forced"),
+          ("fr", "fumble_recovery_opp"), ("td", "def_tds")],
+  "k": [("fgm", "fg_made"), ("fga", "fg_att"), ("lng", "fg_long"), ("xpm", "pat_made"), ("xpa", "pat_att")],
+  "p": [("pu", "pt_att"), ("yd", "pt_yards"), ("net", "pt_net_yards"), ("i20", "pt_inside_20"), ("lng", "pt_long")],
+  "ol": [], "ls": [],
+  # fullbacks and skill players without fantasy-relevant stats (blocking backs, depth WRs): the offense basics
+  "off": [("car", "carries"), ("ryd", "rushing_yards"), ("rec", "receptions"), ("yd", "receiving_yards"), ("td", "receiving_tds")],
+}
+RET = [("kr", "kickoff_returns"), ("kry", "kickoff_return_yards"), ("pr", "punt_returns"), ("pry", "punt_return_yards")]
+SNAP_UNIT = {"def": "defense_pct", "ol": "offense_pct", "off": "offense_pct", "k": "st_pct", "p": "st_pct", "ls": "st_pct"}
+FULL_COLS = ["player_id", "player_display_name", "position", "season", "week", "season_type", "team", "opponent_team"] + \
+  sorted({c for v in KIND_STATS.values() for _, c in v} | {c for _, c in RET})
+
+
+def espn_str(e):
+  if e is None or (isinstance(e, float) and pd.isna(e)):
+    return None
+  e = str(e).replace(".0", "")
+  return e if e.isdigit() else None
+
+
+def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: pd.DataFrame, ros: pd.DataFrame,
+               snaps: pd.DataFrame, bios: dict, written: set):
+  """<site>/data/players/<gsis>.json for everyone the fantasy pass didn't write: every player in nflverse's weekly
+  stats (1999 on), on a weekly roster (2002 on) or in the snap counts (2012 on). Per game: his kind's stat line
+  ("d", in "keys" order), returns ("r") when he had any, his unit's snap share ("sn"). Plus "ros": per season, his
+  team(s) and weeks on the active roster (the career table for players without stats, e.g. linemen before 2012)."""
+  frames = []
+  for s in range(FIRST_SEASON, cur + 1):
+    x = cache.get("stats_full", s, lambda: nfl.load_player_stats([s]).select(FULL_COLS).to_pandas(),
+                  stale=s == cur and cache.age_hours("stats_full", s) > 6)
+    if x is not None and len(x):
+      frames.append(x[x.season_type == "REG"])
+  cache.save_meta()
+  st = pd.concat(frames, ignore_index=True)
+  st = st[~st.player_id.isin(written)].copy()
+  for c in FULL_COLS[8:]:
+    st[c] = pd.to_numeric(st[c], errors="coerce").fillna(0)
+  for c in ("team", "opponent_team"):
+    st[c] = st[c].replace(D.RELOCATED)
+  home_of, gid_of, opp_of = {}, {}, {}
+  for g in allsched.itertuples():
+    h, a = D.RELOCATED.get(g.home_team, g.home_team), D.RELOCATED.get(g.away_team, g.away_team)
+    for t, o, hm in ((h, a, 2 if g.location == "Neutral" else 1), (a, h, 0)):
+      home_of[(int(g.season), int(g.week), t)] = hm
+      gid_of[(int(g.season), int(g.week), t)] = g.game_id
+      opp_of[(int(g.season), int(g.week), t)] = o
+  ros = ros.dropna(subset=["gsis_id"]).copy()
+  ros["team"] = ros.team.replace(ROSTER_TEAM)
+  sn = snaps[snaps.gsis_id.notna()].copy()
+  sn["team"] = sn.team.replace(D.RELOCATED)
+  # position: latest roster row, else latest stat row, else nflverse's player table
+  pos_of = dict(zip(st.sort_values(["season", "week"]).player_id, st.sort_values(["season", "week"]).position))
+  rs_sorted = ros.sort_values(["season", "week"])
+  pos_of.update(dict(zip(rs_sorted.gsis_id, rs_sorted.position)))
+  ids = (set(st.player_id) | set(ros.gsis_id) | set(sn.gsis_id)) - written
+  stat_by = {k: g for k, g in st.groupby("player_id")}
+  snap_by = {k: g for k, g in sn.groupby("gsis_id")}
+  ros_by = {k: g for k, g in ros[ros.status == "ACT"].groupby("gsis_id")}
+  last_ros = rs_sorted.drop_duplicates("gsis_id", keep="last").set_index("gsis_id")
+  name_of = dict(zip(st.player_id, st.player_display_name))
+  name_of.update(dict(zip(last_ros.index, last_ros.full_name)))
+  out_dir = site / "data" / "players"
+  n = 0
+  r1 = lambda v: int(v) if float(v).is_integer() else round(float(v), 1)  # noqa: E731
+  for pid in ids:
+    pos = pos_of.get(pid)
+    if not isinstance(pos, str) and pid in pinfo.index:
+      pos = pinfo.at[pid, "position"]
+    kind = KIND_OF.get(str(pos), "def" if isinstance(pos, str) else "ol")
+    keys = KIND_STATS[kind]
+    games = {}
+    g = stat_by.get(pid)
+    if g is not None:
+      for r in g.itertuples():
+        key = (int(r.season), int(r.week))
+        e = {"w": key[1], "t": r.team, "o": r.opponent_team, "h": home_of.get((key[0], key[1], r.team), 1)}
+        if keys:
+          e["d"] = [r1(getattr(r, c)) for _, c in keys]
+        ret = [r1(getattr(r, c)) for _, c in RET]
+        if any(ret):
+          e["r"] = ret
+        games[key] = e
+    sg = snap_by.get(pid)
+    unit = SNAP_UNIT[kind]
+    if sg is not None:
+      for r in sg.itertuples():
+        key = (int(r.season), int(r.week))
+        e = games.get(key)
+        if e is None:
+          if not ((r.offense_snaps or 0) + (r.defense_snaps or 0) + (r.st_snaps or 0)):
+            continue
+          e = games[key] = {"w": key[1], "t": r.team, "o": opp_of.get((key[0], key[1], r.team), r.opponent),
+                            "h": home_of.get((key[0], key[1], r.team), 1)}
+          if keys:
+            e["d"] = [0] * len(keys)
+        pct = getattr(r, unit)
+        if pd.notna(pct):
+          e["sn"] = int(round(100 * float(pct)))
+    seasons = {}
+    for (s, w), e in sorted(games.items()):
+      gid = gid_of.get((s, w, e["t"]))
+      if gid:
+        e["gid"] = gid
+      seasons.setdefault(s, []).append(e)
+    rs = {}
+    rg = ros_by.get(pid)
+    if rg is not None:
+      for s, x in rg.groupby("season"):
+        rs[str(int(s))] = ["/".join(dict.fromkeys(x.sort_values("week").team)), int(x.week.nunique())]
+    lr = last_ros.loc[pid] if pid in last_ros.index else None
+    team = lr.team if lr is not None and int(lr.season) == cur and lr.status not in ("CUT", "RET") else None
+    espn = espn_str(lr.get("espn_id")) if lr is not None else None
+    if espn is None and pid in pinfo.index:
+      espn = espn_str(pinfo.at[pid, "espn_id"])
+    name = name_of.get(pid) or (pinfo.at[pid, "display_name"] if pid in pinfo.index else pid)
+    doc = {"pid": pid, "name": name, "espn": espn, "pos": pos if isinstance(pos, str) else None, "kind": kind,
+           "keys": [k for k, _ in keys], "ret_keys": [k for k, _ in RET], "cur": cur, "team": team,
+           "seasons": [{"s": s, "g": seasons[s]} for s in sorted(seasons, reverse=True)], "ros": rs, "bio": bios.get(pid, {})}
+    (out_dir / f"{pid}.json").write_text(json.dumps(_json_safe(doc), separators=(",", ":"), allow_nan=False), encoding="utf-8")
+    n += 1
+  print(f"[logs] wrote {n} other player pages (defense, line, specialists, players without fantasy stats)", flush=True)
 
 
 def _link(e: dict, gid) -> None:
