@@ -340,17 +340,34 @@ def score_data(r, st, act: dict | None = None) -> str:
   return json.dumps(out, separators=(",", ":"))
 
 
+def td_mini(lam: float, label: str = "TD") -> str:
+  """Compact touchdown odds for the Rankings table: a small ring filled to the anytime chance, the percentage and
+  the label on one line; the full 0 / 1 / 2 / 3+ breakdown in the tooltip (Poisson, as td_donut)."""
+  lam = max(float(lam), 0.0)
+  p0 = math.exp(-lam)
+  p1, p2 = lam * p0, lam ** 2 / 2 * p0
+  any_ = 1 - p0
+  r, circ = 6.0, 2 * math.pi * 6.0
+  tip = (f"{label}: anytime {any_:.0%} | exactly 1: {p1:.0%} | 2: {p2:.0%} | 3+: {max(1 - p0 - p1 - p2, 0):.0%} "
+         f"(avg {lam:.2f})")
+  return (f'<span class="tdm" title="{tip}"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">'
+          f'<circle cx="8" cy="8" r="{r}" class="tdm-bg"/><circle cx="8" cy="8" r="{r}" class="tdm-fg" '
+          f'stroke-dasharray="{any_ * circ:.2f} {circ:.2f}" transform="rotate(-90 8 8)"/></svg>'
+          f'<b>{any_:.0%}</b><small>{label}</small></span>')
+
+
 def expected_line(r) -> str:
+  """Two fixed lines: yards / volume, then touchdown odds (every row the same height and width)."""
   if r.pos == "QB":
     stats = stat(r.pass_yd, "pass yd") + stat(r.interception, "INT", 1) + stat(r.rush_yd, "rush yd")
-    tds = td_donut(r.pass_td, "pass TD") + (td_donut(r.rush_td, "rush TD") if r.rush_td >= 0.15 else "")
+    tds = td_mini(r.pass_td, "pass TD") + (td_mini(r.rush_td, "rush TD") if r.rush_td >= 0.15 else "")
   elif r.pos == "RB":
     stats = (stat(r.carries, "car") + stat(r.rush_yd, "rush yd") + stat(r.reception, "rec", 1)
              + stat(r.rec_yd, "rec yd"))
-    tds = td_donut(r.rush_td + r.rec_td)
+    tds = td_mini(r.rush_td + r.rec_td)
   else:
     stats = stat(r.tgt, "tgt", 1) + stat(r.reception, "rec", 1) + stat(r.rec_yd, "yd")
-    tds = td_donut(r.rec_td + r.rush_td)
+    tds = td_mini(r.rec_td + r.rush_td)
   return f'<div class="xl"><div class="xl-st">{stats}</div><div class="xl-td">{tds}</div></div>'
 
 
@@ -532,6 +549,7 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
   p["dvp_rank"] = [int(dvp[pos][o]) if pos in dvp and o in dvp[pos] else 16 for pos, o in zip(p.pos, p.opp)]
   p["grade"] = pd.cut(p.dvp_rank, [0, 6, 12, 19, 26, 32], labels=["F", "D", "C", "B", "A"]).astype(str)
   p["takeaway"] = [takeaway(r) for _, r in p.iterrows()]
+  p["tags"] = [takeaway_tags(r) for _, r in p.iterrows()]
   stats = season_stats(eng, season, week)
   luck = player_luck(eng, p, season, week)
   acts = week_actuals(eng, season, week)
@@ -563,7 +581,7 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
         "home": "vs" if r.home >= 0 else "@", "proj": r.proj,
         "p10": r.p10, "p25": r.p25, "p50": r.p50, "p75": r.p75, "p90": r.p90,
         "range": range_svg(r.p10, r.p25, r.p75, r.p90, r.proj, axis),
-        "grade": r.grade, "mpts": r.matchup_pts, "tier": r.tier, "slot": r.slot, "takeaway": r.takeaway, "conf": r.confidence,
+        "grade": r.grade, "mpts": r.matchup_pts, "tier": r.tier, "slot": r.slot, "takeaway": r.takeaway, "tags": r.tags, "conf": r.confidence,
         "status": r.status, "avail": r.avail, "inactive": 1 - r.avail,
         "inactive_why": inactive_why(r), "boost": r.injury_boost, "boost_from": r.boost_from or "",
         "low_sample": bool(r.low_sample), "line": expected_line(r),
@@ -649,6 +667,45 @@ def takeaway(r) -> str:
     if r.confidence == "Low":
       bits.append("boom/bust")
   return "; ".join(bits)
+
+
+def takeaway_tags(r) -> list[dict]:
+  """The takeaway as short colored tags for the Rankings table (t = label, k = good / warn / bad / info, d = the
+  full detail for the tooltip). Same facts and order as takeaway(); the player card keeps the sentence."""
+  last = lambda names: ", ".join(n.split(" ", 1)[-1] for n in str(names).split(", ") if n)
+  tags = []
+  if r.avail < 0.5:
+    return [{"t": "Likely out", "k": "bad", "d": f"Likely inactive ({r.status or 'healthy scratch risk'})"}]
+  if r.avail < 0.9:
+    tags.append({"t": f"{1 - r.avail:.0%} inactive", "k": "warn",
+                 "d": f"{1 - r.avail:.0%} chance inactive ({r.status or 'healthy scratch risk'})"})
+  if r.injury_boost >= 1.0:
+    tags.append({"t": f"+{r.injury_boost:.1f} from injuries", "k": "good",
+                 "d": f"+{r.injury_boost:.1f} pts from volume vacated by {r.boost_from}"})
+  if r.if_sits_gain >= 1.0:
+    tags.append({"t": f"+{r.if_sits_gain:.1f} if {last(r.if_sits_name)} sits", "k": "good",
+                 "d": f"+{r.if_sits_gain:.1f} more if {r.if_sits_name} sits"})
+  if r.grade == "A":
+    tags.append({"t": "Soft matchup", "k": "good", "d": f"{r.opp} {ordinal(r.dvp_rank)} of 32 vs {r.pos}s (32nd = easiest)"})
+  elif r.grade == "F":
+    tags.append({"t": "Tough matchup", "k": "bad", "d": f"{r.opp} {ordinal(r.dvp_rank)} of 32 vs {r.pos}s (1st = toughest)"})
+  if r.wind_penalty >= 0.05:
+    tags.append({"t": f"Wind -{r.wind_penalty:.0%} passing", "k": "warn", "d": f"Forecast wind trims passing by {r.wind_penalty:.0%}"})
+  if r.low_sample:
+    tags.append({"t": "Thin data", "k": "info", "d": "Few career opportunities: efficiency leans on the position x draft-round prior"})
+  if not tags:
+    if r.pos == "QB":
+      tags.append({"t": f"{r.db:.0f} dropbacks" + (f" · {r.rush:.1f} rushes" if r.rush >= 4 else ""), "k": "info",
+                   "d": f"Projected {r.db:.0f} dropbacks" + (f" and {r.rush:.1f} rushes (a rushing floor)" if r.rush >= 4 else "")})
+    elif r.pos == "RB":
+      tags.append({"t": f"{r.carries:.0f} car · {r.tgt:.1f} tgt", "k": "info",
+                   "d": f"Projected workload: {r.carries:.0f} carries and {r.tgt:.1f} targets"})
+    else:
+      tags.append({"t": f"{r.tgt:.1f} tgt · {r.tgt_share_hat:.0%} share", "k": "info",
+                   "d": f"Projected {r.tgt:.1f} targets ({r.tgt_share_hat:.0%} of team dropbacks)"})
+    if r.confidence == "Low":
+      tags.append({"t": "Boom/bust", "k": "info", "d": "Wide range of outcomes (low confidence)"})
+  return tags
 
 
 def league_volume(eng, season: int, week: int, r) -> dict:
