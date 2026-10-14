@@ -611,6 +611,22 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   -/+ 1 steppers and a slider capped at the largest sample; distance filter / group-by by exact yards to 15+.
   Special teams added (<season>_st.json, kicking team's side; kickoffs: nflverse posteam = RECEIVING team, so
   team / score / wp / EPA flipped in the builder). 2025 kickoff touchbacks 21% vs 64% in 2024 (new rules).
+- **RESULT (Edge grade v2): FAILED, v1 stays.** Team-changers (n=486, targets 2021-2025): next-season value/g rank
+  corr. v1 .131, v2 .145, diff +0.014 [-0.082, +0.115]; fantasy pts/g -0.013 [-0.120, +0.085]. All players
+  (reported only): value/g -0.027 [-0.063, +0.015]; fantasy pts/g +0.043 [+0.006, +0.079] (a lead, not a pass:
+  post-hoc; needs a fresh holdout = the 2026 season). Face check, 2023 RBs (percentile among regulars): Bijan v1 16
+  -> v2 76, but Gibbs 66 -> 32 and Saquon 2 -> 7: no version is clearly more sensible. Lesson: next-season value
+  for movers is barely predictable (~.13) from ANY public stat set; the noise floor swamps the ability-vs-context
+  distinction. `tools/grade_build.py --eval2` reproduces (cache/grade_eval_v2.parquet).
+- **PRE-REGISTERED 2026-10-14 (before building): Edge grade v2 = ability, not situation.** Owner: keep v1 live
+  meanwhile. v2 inputs are context-neutral only (NO raw EPA / value): NGS rush yards over expected per carry,
+  separation, NGS YAC over expected; pbp CPOE, catch rate over expected, YACOE; PFR yards after contact, broken
+  tackles, drops; role shares (carry / target / air-yards / snap share); explosive-run rate; QB sack and INT
+  rates, depth; age, draft capital. Weights learned per position by walk-forward ridge to next-season value/g.
+  GATE: among players who CHANGED TEAMS between seasons (main team by games, >= 6 games before and >= 4 after),
+  pooled 2021-2025 targets, v2's rank correlation with next-season value/g minus v1's (shrunk 3-season value/g)
+  must have a 95% bootstrap CI above 0. Reported, not gating: all players, and next-season fantasy points/g.
+  Pass -> v2 replaces v1 on cards. Fail -> v1 stays, result recorded.
 - **Edge grade v1 flaw (owner: "Bijan 2023 = 19 seems super wrong"):** value = EPA over replacement charges a
   receiver for his QB's incompletions / INTs (Bijan 2023 rec EPA -12.9 on 86 Ridder-era targets) and can't separate
   a back from his line (Bijan ~ Allgeier per carry; Saquon 2023 near bottom). It measures value produced in that

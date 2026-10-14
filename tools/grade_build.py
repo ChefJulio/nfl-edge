@@ -49,6 +49,20 @@ RATES = {
          ("drop", "drops", "tgt"), ("snap", "snap_pct", "games")],
 }
 RATES["TE"] = RATES["WR"]
+# v2 (ability, not situation; INSIGHTS pre-registration): context-neutral inputs only, no raw EPA / value. NGS rush yards
+# over expected (tracking: blockers, box, defenders' positions) and separation; catch / YAC / completions over
+# expected; PFR contact and broken tackles; role shares (coaches' own read of ability); QB sack / INT rates and depth.
+RATES_V2 = {
+  "QB": [("cpoe", "cpo", "cpo_n"), ("sack_rate", "sacks", "qb_db"), ("int_rate", "ints", "att"), ("adot", "ay", "att"),
+         ("db_pg", "qb_db", "games"), ("rush_yd_pg", "ru_yd", "games")],
+  "RB": [("ryoe", "ngs_ryoe", "ngs_ra"), ("yaco", "pfr_yaco", "pfr_car"), ("btk", "btk", "touch"), ("x10", "ru_x10", "ru_n"),
+         ("yacoe", "yco", "yco_n"), ("croe", "cro", "cro_n"), ("car_pg", "ru_n", "games"), ("tgt_pg", "tgt", "games"),
+         ("snap", "snap_pct", "games")],
+  "WR": [("sep", "ngs_sep", "ngs_tg"), ("ngs_yacoe", "ngs_yaco", "ngs_rc"), ("yacoe", "yco", "yco_n"), ("croe", "cro", "cro_n"),
+         ("tgt_share", "tgt", "team_tgt"), ("ay_share", "ay_t", "team_ay"), ("adot", "ay_t", "tgt"), ("drop", "drops", "tgt"),
+         ("btk", "btk", "touch"), ("snap", "snap_pct", "games")],
+}
+RATES_V2["TE"] = RATES_V2["WR"]
 LABEL = {"epa_db": "EPA / dropback", "succ_db": "Success rate", "cpoe": "CPOE", "sack_rate": "Sack rate (lower is better)",
          "int_rate": "INT rate (lower is better)", "adot": "Depth of target", "db_pg": "Dropbacks / game",
          "rush_epa_pg": "Rushing EPA / game", "rush_epa": "EPA / rush", "rush_succ": "Rush success rate", "ypc": "Yards / carry",
@@ -56,10 +70,11 @@ LABEL = {"epa_db": "EPA / dropback", "succ_db": "Success rate", "cpoe": "CPOE", 
          "tgt_pg": "Targets / game", "rec_epa": "EPA / target", "yacoe": "YAC over expected", "snap": "Snap share",
          "rec_succ": "Target success rate", "croe": "Catch rate over expected", "tgt_share": "Target share",
          "ay_share": "Air-yards share", "drop": "Drop rate (lower is better)", "age": "Age", "draft": "Draft capital",
-         "value": "EPA over replacement / game"}
+         "value": "EPA over replacement / game", "ryoe": "Rush yards over expected", "sep": "Separation",
+         "ngs_yacoe": "YAC over expected (tracking)", "rush_yd_pg": "Rushing yards / game"}
 
 
-def season_table(data, pfr: pd.DataFrame, scoring) -> pd.DataFrame:
+def season_table(data, pfr: pd.DataFrame, scoring, ngs: pd.DataFrame | None = None) -> pd.DataFrame:
   """One row per (gsis_id, season): summed opportunities and outcomes, regular season."""
   p = data.pbp[data.pbp.season_type == "REG"]
   p = p[(p.two_point_attempt == 0) & p.posteam.notna()]
@@ -95,6 +110,8 @@ def season_table(data, pfr: pd.DataFrame, scoring) -> pd.DataFrame:
   rows.append(sn.groupby(["gsis_id", "season", "week"]).agg(games=("week", "nunique"), snap_pct=("offense_pct", "sum")))
   if pfr is not None and len(pfr):
     rows.append(pfr.groupby(["gsis_id", "season", "week"])[["pfr_car", "pfr_yaco", "btk", "drops"]].sum())
+  if ngs is not None and len(ngs):
+    rows.append(ngs.groupby(["gsis_id", "season", "week"])[["ngs_ryoe", "ngs_ra", "ngs_sep", "ngs_tg", "ngs_yaco", "ngs_rc"]].sum())
   t = pd.concat(rows, axis=1).fillna(0.0)
   t = t[t.games > 0]  # player-games (snaps > 0); per-game rows feed the shrinkage estimates (fit_priors)
   t["touch"] = t.ru_n + t.rec
@@ -136,9 +153,9 @@ def window(t: pd.DataFrame, season: int) -> pd.DataFrame:
   return out
 
 
-def features(win: pd.DataFrame, pos: str, priors: dict, info: pd.DataFrame) -> pd.DataFrame:
+def features(win: pd.DataFrame, pos: str, priors: dict, info: pd.DataFrame, rates=None) -> pd.DataFrame:
   f = pd.DataFrame(index=win.index)
-  for name, num, den in RATES[pos]:
+  for name, num, den in (rates or RATES)[pos]:
     m, k = priors[(pos, name)]
     f[name] = (win[num] + k * m) / (win[den] + k)
   m, k = priors[(pos, "value")]
@@ -150,14 +167,16 @@ def features(win: pd.DataFrame, pos: str, priors: dict, info: pd.DataFrame) -> p
   return f
 
 
-def fit_priors(tg: pd.DataFrame, pos_of: pd.Series, seasons) -> dict:
+def fit_priors(tg: pd.DataFrame, pos_of: pd.Series, seasons, rates=None) -> dict:
   """Shrinkage (mean, k) per (position, rate) from player-GAME rows in `seasons` (method of moments: game-to-game
   noise within player-seasons vs spread between players)."""
   out = {}
   tt = tg[tg.season.isin(seasons)].assign(pos=lambda d: d.gsis_id.map(pos_of))
   for pos in POS:
     d = tt[tt.pos == pos]
-    for name, num, den in RATES[pos]:
+    for name, num, den in (rates or RATES)[pos]:
+      if num not in d or den not in d:
+        continue
       est = mom_prior(d, num, den) if len(d) else None
       if est is None:
         tot = d[den].sum()
@@ -203,7 +222,7 @@ class Ridge:
     return self.b0 + self.contrib(X).sum(axis=1).to_numpy()
 
 
-def pairs(t, pos_of, info, priors, seasons):
+def pairs(t, pos_of, info, priors, seasons, rates=None, team_of=None):
   """Training rows: features at season s, target = value per game in s+1 (>= MIN_NEXT_GAMES games)."""
   out = []
   nxt = t.set_index(["gsis_id", "season"])
@@ -213,14 +232,15 @@ def pairs(t, pos_of, info, priors, seasons):
       w = win[win.index.map(pos_of) == pos]
       if not len(w):
         continue
-      f = features(w, pos, priors, info)
+      f = features(w, pos, priors, info, rates)
       key = pd.MultiIndex.from_arrays([f.index, np.full(len(f), s + 1)])
       g1 = nxt.games.reindex(key).to_numpy()
       f = f.assign(pos=pos, s=s, games_now=w.games_now.to_numpy(),
                    y=nxt.value.reindex(key).to_numpy() / g1, g1=g1,
                    fp_next=nxt.fp.reindex(key).to_numpy() / g1,
                    fp_now=t[t.season == s].set_index("gsis_id").fp.reindex(f.index).to_numpy() / w.games_now.to_numpy(),
-                   v_now=t[t.season == s].set_index("gsis_id").value.reindex(f.index).to_numpy() / w.games_now.to_numpy())
+                   v_now=t[t.season == s].set_index("gsis_id").value.reindex(f.index).to_numpy() / w.games_now.to_numpy(),
+                   tm_now=[(team_of or {}).get((g, s)) for g in f.index], tm_next=[(team_of or {}).get((g, s + 1)) for g in f.index])
       out.append(f)
   return pd.concat(out)
 
@@ -249,6 +269,24 @@ def load(cfg):
       q = q[q.game_type == "REG"]
       fr.append(pd.DataFrame({"pfr": q.pfr_player_id, "season": q.season, "week": q.week, "pfr_car": 0.0, "pfr_yaco": 0.0,
                               "btk": q.receiving_broken_tackles.fillna(0), "drops": q.receiving_drop.fillna(0)}))
+  ng = []
+  for s in range(2016, cur + 1):
+    for st, name in (("rushing", "ngsrush"), ("receiving", "ngsrec")):
+      f = cache.get(name, s, lambda: nfl.load_nextgen_stats(seasons=[s], stat_type=st),
+                    stale=s == cur and cache.age_hours(name, s) > 12)
+      if f is None or not len(f):
+        continue
+      f = f[(f.week > 0) & (f.season_type == "REG")]
+      if st == "rushing":
+        ok = f.rush_yards_over_expected.notna()
+        ng.append(pd.DataFrame({"gsis_id": f.player_gsis_id, "season": f.season, "week": f.week,
+                                "ngs_ryoe": f.rush_yards_over_expected.fillna(0), "ngs_ra": f.rush_attempts.where(ok, 0)}))
+      else:
+        ng.append(pd.DataFrame({"gsis_id": f.player_gsis_id, "season": f.season, "week": f.week,
+                                "ngs_sep": (f.avg_separation * f.targets).fillna(0), "ngs_tg": f.targets.where(f.avg_separation.notna(), 0),
+                                "ngs_yaco": (f.avg_yac_above_expectation * f.receptions).fillna(0),
+                                "ngs_rc": f.receptions.where(f.avg_yac_above_expectation.notna(), 0)}))
+  ngs = pd.concat(ng, ignore_index=True).fillna(0.0) if ng else None
   pfr = pd.concat(fr, ignore_index=True)
   pfr["gsis_id"] = pfr.pfr.map(ppid)
   pfr = pfr.dropna(subset=["gsis_id"])
@@ -258,7 +296,11 @@ def load(cfg):
                        "name": pl.get("display_name")})
   ro = data.rosters.dropna(subset=["gsis_id"]).sort_values(["season", "week"])
   pos_of = ro.drop_duplicates("gsis_id", keep="last").set_index("gsis_id").position.replace({"FB": "RB", "HB": "RB"})
-  return data, pfr, info, pos_of, cur
+  sn = data.snaps.dropna(subset=["gsis_id"])
+  sn = sn[sn.offense_snaps > 0]
+  main = sn.groupby(["gsis_id", "season"]).team.agg(lambda x: x.value_counts().index[0])
+  team_of = {k: D.RELOCATED.get(v, v) for k, v in main.items()}
+  return data, pfr, info, pos_of, cur, ngs, team_of
 
 
 def evaluate(tg, pos_of, info, cur):
@@ -275,6 +317,47 @@ def evaluate(tg, pos_of, info, cur):
       m = Ridge().fit(a[cols], a.y.to_numpy(), np.minimum(a.g1, 17).to_numpy(float), a.s.to_numpy())
       res.append(b.assign(grade=m.predict(b[cols]), T=T))
   return pd.concat(res)
+
+
+def evaluate_v2(tg, pos_of, info, cur, team_of):
+  """Walk-forward v2 (RATES_V2 ridge) vs v1 (shrunk value / game, the live grade) on the same rows."""
+  res = []
+  t = seasons_of(tg)
+  both = {p: RATES[p] + [x for x in RATES_V2[p] if x[0] not in {n for n, _, _ in RATES[p]}] for p in POS}
+  for T in range(2021, cur):
+    pri = fit_priors(tg, pos_of, range(FIRST, T), both)
+    tr = pairs(t, pos_of, info, pri, range(FIRST + 1, T - 1), RATES_V2, team_of)
+    te = pairs(t, pos_of, info, pri, [T - 1], RATES_V2, team_of)
+    for pos in POS:
+      a = tr[(tr.pos == pos) & (tr.g1 >= MIN_NEXT_GAMES)]
+      b = te[(te.pos == pos) & (te.g1 >= MIN_NEXT_GAMES) & (te.games_now >= 6)]
+      cols = [n for n, _, _ in RATES_V2[pos]] + ["age", "draft"]
+      m = Ridge().fit(a[cols], a.y.to_numpy(), np.minimum(a.g1, 17).to_numpy(float), a.s.to_numpy())
+      res.append(b.assign(v2=m.predict(b[cols]), v1=b.value, T=T, alpha=m.alpha))
+  return pd.concat(res)
+
+
+def report_v2(r, label):
+  rng = np.random.default_rng(11)
+  groups = {k: g for k, g in r.groupby(["T", "pos"]) if len(g) >= 5}
+  def mean_corr(col, tgt, gs):
+    return float(np.mean([spearmanr(g[col], g[tgt])[0] for g in gs.values()]))
+  print(f"\n{label}: n={len(r)}  (rank corr., mean over season x position)")
+  for tgt, name in (("y", "next-season value/g"), ("fp_next", "next-season fantasy pts/g")):
+    c1, c2 = mean_corr("v1", tgt, groups), mean_corr("v2", tgt, groups)
+    boots = []
+    for _ in range(1000):
+      d = []
+      for g in groups.values():
+        x = g.iloc[rng.integers(0, len(g), len(g))]
+        d.append(spearmanr(x.v2, x[tgt])[0] - spearmanr(x.v1, x[tgt])[0])
+      boots.append(np.nanmean(d))
+    lo, hi = np.percentile(boots, [2.5, 97.5])
+    print(f"  {name:28s} v1 {c1:.3f}  v2 {c2:.3f}  v2 - v1 {c2 - c1:+.3f} [{lo:+.3f}, {hi:+.3f}]")
+  for pos in POS:
+    gp = {k: g for k, g in groups.items() if k[1] == pos}
+    if gp:
+      print(f"    {pos}: n={sum(len(g) for g in gp.values())}  value/g v1 {mean_corr('v1', 'y', gp):.3f} v2 {mean_corr('v2', 'y', gp):.3f}")
 
 
 def report(r):
@@ -356,8 +439,15 @@ def build(tg, pos_of, info, cur, out: Path):
 def main():
   opt = dict(a[2:].split("=", 1) if "=" in a else (a[2:], "1") for a in sys.argv[1:] if a.startswith("--"))
   cfg = load_config()
-  data, pfr, info, pos_of, cur = load(cfg)
-  tg = add_value(season_table(data, pfr, load_scoring()), pos_of)
+  data, pfr, info, pos_of, cur, ngs, team_of = load(cfg)
+  tg = add_value(season_table(data, pfr, load_scoring(), ngs), pos_of)
+  if "eval2" in opt:
+    r = evaluate_v2(tg, pos_of, info, cur, team_of)
+    r.to_parquet(ROOT / "cache" / "grade_eval_v2.parquet")
+    mv = r[r.tm_now.notna() & r.tm_next.notna() & (r.tm_now != r.tm_next)]
+    report_v2(mv, "GATE: players who changed teams")
+    report_v2(r, "All players (reported, not gating)")
+    return
   if "eval" in opt:
     r = evaluate(tg, pos_of, info, cur)
     r.to_parquet(ROOT / "cache" / "grade_eval.parquet")
