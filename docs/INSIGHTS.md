@@ -289,6 +289,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   ~8 MB): every REG game since 1999 (stats cached per season), snap % from 2012 (pfr -> gsis via load_players),
   home/away from the 1999+ schedule, weekly position rank (site scoring), and OUR pregame matchup rank +
   projection read from the published week JSONs (2021+, incl. lookahead weeks) - not hindsight.
+  **Player card layout (2026-10-13 redesign, owner spec):** header strip = value-over-label "blips" (age to a
+  tenth, height, weight, NFL yrs, first-listed college; QB scramble rates) + snap % bars over the last 5 season
+  weeks (BYE / dash markers, rankings Last 5 look). Week tab: Projection (availability = colored "% inactive" chip,
+  reason shown at >= 5%) + Expected line; full-width Matchup tile, click anywhere -> gamecast, team code -> team
+  card; season box = labeled chip rows (Scoring, Passing/Rushing/Receiving, Usage) + small points bars; then 3
+  latest news + last 5 games (same table as Game log) with "Show more" into those tabs. Removed: Availability
+  box, takeaway line, bottom gamecast link. Class gotcha: `.pc-chip` is the gamecast play chip, card blips are
+  `.pc-blip`.
   **Team card** (2026-10-13): same overlay/tabs (Overview / Game log / Players), `#team/<ABBR>`; opens from Power
   rows, Matchups tile headers (`.tm-open[data-tm]`), player-card team names, gamecast scoreboard. Week JSON now
   carries `power` (incl. `rank_hist`, this week pinned to the headline rank) and `teams` (names/logos/colors).
