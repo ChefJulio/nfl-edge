@@ -108,7 +108,7 @@
 (() => {
   // Four parents (owner, 2026-10-14): Players (incl. transactions = player news) and Teams (incl. playoffs, draft).
   const NAV = [
-    { key: 'players', label: 'Players', subs: [['rankings', 'Rankings', 'tab-players'], ['stats', 'Stats'], ['roles', 'Roles', 'tab-roles'], ['injuries', 'Injuries'], ['moves', 'Moves']] },
+    { key: 'players', label: 'Players', subs: [['rankings', 'Rankings', 'tab-players'], ['stats', 'Stats'], ['roles', 'Roles', 'tab-roles'], ['injuries', 'Injuries'], ['moves', 'Moves'], ['trends', 'Trends']] },
     { key: 'teams', label: 'Teams', subs: [['power', 'Power', 'tab-power'], ['standings', 'Standings'], ['playoffs', 'Playoffs'], ['stats', 'Stats'], ['draft', 'Draft']] },
     { key: 'games', label: 'Games', subs: [['matchups', 'Matchups', 'tab-games']] },
     { key: 'model', label: 'Model', subs: [['model', 'Model', 'tab-model']] },
@@ -118,7 +118,8 @@
   const AREAS = { 'tab-teams-standings': 'standings', 'tab-teams-stats': 'teamstats', 'tab-players-stats': 'playerstats',
                   'tab-players-injuries': 'injuries', 'tab-players': 'rankings', 'tab-teams-draft': 'draft',
                   'tab-teams-playoffs': 'playoffs', 'tab-players-moves': 'moves', 'tab-power': 'power',
-                  'tab-games': 'matchups', 'tab-roles': 'roles', 'tab-model': 'model' };
+                  'tab-games': 'matchups', 'tab-roles': 'roles', 'tab-model': 'model',
+                  'tab-players-trends': 'trends' };
   const ver = (document.currentScript && new URL(document.currentScript.src).search) || '';
   const loaded = {};
   const NFLE = window.NFLE = window.NFLE || {};

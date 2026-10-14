@@ -581,8 +581,17 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   the browser: per-season compact play files (run + pass plays, ~33.5k/season, ~25 columns ~0.35-0.5 MB gzipped;
   1999-2026). The cached pbp (cache/pbp_*.parquet) is a prepared subset missing success, first_down, shotgun,
   no_huddle, yards_after_catch, pass/run location and gap: the build must load full nflverse pbp per season.
-- **Still to do from the playoffs request:** Player Stats tab needs a Regular / Playoffs toggle (stats_build.py
-  filters season_type == REG everywhere); Team Stats likewise.
+- **Trends status (2026-10-14, WIP, committed locally, NOT pushed):** built tools/trends_build.py (data/plays/
+  <season>.json + index.json; columns documented in its docstring; finished seasons cached cache/plays_site/v1;
+  tested 2022-2026 into scratch/site), nfledge/static/trends.js + trends.css (sentence chips, filters, group by,
+  league baseline, min slider, season trend SVG, ?t= share link, examples, localStorage), shell.js NAV
+  ['trends','Trends'] under Players + AREAS 'tab-players-trends'. REMAINING before push: (1) build 1999-2021 play
+  files (`python tools/trends_build.py --site=scratch/site`); (2) add CI step "Trends" (`python
+  tools/trends_build.py --site=site`) to .github/workflows/deploy.yml; (3) confirm trends.css is linked the way
+  other area CSS is (check how shell.js loads per-area css); (4) iPhone WebKit screenshot test, incl. ?t= links
+  surviving the hash router and player-row clicks (data-open-pid); (5) clean the no-op forEach in the min-slider
+  input handler (it should just re-grey rows, not re-run the whole count); (6) CLAUDE.md file map entry.
+- Player Stats / Team Stats Regular / Playoffs toggle: DONE (c5e9abd).
 - **ESPN early-week buckets (2026-10-14, nfledge/espn_calib.py), MEASURED:** Wayback Machine captures of
   espn.com/nfl/injuries (near-daily 2022-24; the page embeds status + est. return date per player; tools/espn_wayback.py
   caches them) -> 23,695 Mon/Tue listings vs game-day inactives (tools/espn_return_eval.py -> committed priors
