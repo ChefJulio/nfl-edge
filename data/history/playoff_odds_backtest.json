@@ -1,0 +1,96 @@
+{
+ "seasons": "2021-2025",
+ "sims": 1000,
+ "drift": 0.9,
+ "rows": 2880,
+ "brier": {
+  "playoffs": {
+   "model": 0.1382,
+   "base_rate": 0.2461
+  },
+  "div": {
+   "model": 0.1183,
+   "base_rate": 0.1875
+  },
+  "bye": {
+   "model": 0.0384,
+   "base_rate": 0.0586
+  },
+  "title": {
+   "model": 0.0284,
+   "base_rate": 0.0303
+  }
+ },
+ "calibration": [
+  {
+   "bin": "0-5%",
+   "n": 503,
+   "predicted": 0.9,
+   "actual": 0.8
+  },
+  {
+   "bin": "5-15%",
+   "n": 267,
+   "predicted": 9.6,
+   "actual": 9.4
+  },
+  {
+   "bin": "15-30%",
+   "n": 400,
+   "predicted": 22.5,
+   "actual": 24.8
+  },
+  {
+   "bin": "30-50%",
+   "n": 502,
+   "predicted": 39.7,
+   "actual": 40.2
+  },
+  {
+   "bin": "50-70%",
+   "n": 468,
+   "predicted": 59.6,
+   "actual": 59.6
+  },
+  {
+   "bin": "70-85%",
+   "n": 248,
+   "predicted": 77.1,
+   "actual": 75.0
+  },
+  {
+   "bin": "85-95%",
+   "n": 185,
+   "predicted": 90.0,
+   "actual": 88.1
+  },
+  {
+   "bin": "95-100%",
+   "n": 307,
+   "predicted": 99.0,
+   "actual": 98.4
+  }
+ ],
+ "by_week": [
+  {
+   "weeks": "1-4",
+   "brier": 0.2062,
+   "base_rate": 0.2461
+  },
+  {
+   "weeks": "5-9",
+   "brier": 0.1536,
+   "base_rate": 0.2461
+  },
+  {
+   "weeks": "10-14",
+   "brier": 0.1257,
+   "base_rate": 0.2461
+  },
+  {
+   "weeks": "15-18",
+   "brier": 0.0667,
+   "base_rate": 0.2461
+  }
+ ]
+}

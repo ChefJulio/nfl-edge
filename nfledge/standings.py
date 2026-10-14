@@ -58,6 +58,17 @@ class League:
   conf: dict  # team -> 'AFC' / 'NFC'
   div: dict  # team -> 'AFC East' ...
   _rec: dict = field(default_factory=dict)
+  by: dict = field(default_factory=dict)  # team -> [(opp, res, pf, pa)]: every lookup below reads these lists
+
+  def __post_init__(self):
+    if not self.by:
+      for t, o, r, pf, pa in zip(self.games.team, self.games.opp, self.games.res, self.games.pf, self.games.pa):
+        self.by.setdefault(t, []).append((o, float(r), float(pf), float(pa)))
+
+  @classmethod
+  def from_results(cls, by: dict, conf: dict, div: dict):
+    """Fast constructor for simulations: by = team -> [(opp, res, pf, pa)] (no DataFrame)."""
+    return cls(pd.DataFrame(columns=["team", "opp", "res", "pf", "pa", "week"]), conf, div, by=by)
 
   @classmethod
   def from_schedule(cls, sched: pd.DataFrame, teams: pd.DataFrame, season: int, through_week: int | None = None):
@@ -79,11 +90,10 @@ class League:
 
   def rec(self, team: str, opps=None) -> Rec:
     r = Rec()
-    g = self.games[self.games.team == team]
-    if opps is not None:
-      g = g[g.opp.isin(opps)]
-    for x in g.res:
-      r.add(x)
+    opps = None if opps is None else set(opps)
+    for o, res, _, _ in self.by.get(team, ()):
+      if opps is None or o in opps:
+        r.add(res)
     return r
 
   def overall(self, team):
@@ -98,14 +108,14 @@ class League:
     return [x for x, c in self.conf.items() if c == self.conf[team] and x != team]
 
   def opps(self, team) -> list[str]:
-    return list(self.games[self.games.team == team].opp)
+    return [o for o, _, _, _ in self.by.get(team, ())]
 
   def common_opps(self, clubs) -> set:
     sets = [set(self.opps(c)) for c in clubs]
     return set.intersection(*sets) - set(clubs) if sets else set()
 
   def sov(self, team) -> float:  # combined record of the opponents it beat (each win counts once)
-    beat = list(self.games[(self.games.team == team) & (self.games.res == 1)].opp)
+    beat = [o for o, res, _, _ in self.by.get(team, ()) if res == 1]
     return self._combined(beat)
 
   def sos(self, team) -> float:
@@ -120,15 +130,14 @@ class League:
     return w / g if g else 0.0
 
   def net(self, team, opps=None) -> float:
-    g = self.games[self.games.team == team]
-    if opps is not None:
-      g = g[g.opp.isin(opps)]
-    return float((g.pf - g.pa).sum())
+    opps = None if opps is None else set(opps)
+    return float(sum(pf - pa for o, _, pf, pa in self.by.get(team, ()) if opps is None or o in opps))
 
   def pts_rank(self, team, pool) -> float:
     """Combined ranking in points scored and points allowed among `pool` (lower = better)."""
-    agg = self.games[self.games.team.isin(pool)].groupby("team")[["pf", "pa"]].sum().reindex(pool).fillna(0)
-    return float(agg.pf.rank(ascending=False, method="min")[team] + agg.pa.rank(ascending=True, method="min")[team])
+    pf = {t: sum(x[2] for x in self.by.get(t, ())) for t in pool}
+    pa = {t: sum(x[3] for x in self.by.get(t, ())) for t in pool}
+    return float(1 + sum(v > pf[team] for v in pf.values()) + 1 + sum(v < pa[team] for v in pa.values()))
 
   # -- tiebreakers -----------------------------------------------------------------------------------------------
   def _split(self, clubs, key, higher=True):
@@ -160,17 +169,20 @@ class League:
 
     def h2h(c):  # applies only as a sweep: beat each of the others (+1) or lost to each (-1), else 0
       others = [x for x in clubs if x != c]
-      g = self.games[(self.games.team == c) & self.games.opp.isin(others)]
-      if set(g.opp) != set(others):
+      res = {}
+      for o, r, _, _ in self.by.get(c, ()):
+        if o in others:
+          res.setdefault(o, []).append(r)
+      if set(res) != set(others):
         return 0.0
-      if (g.groupby("opp").res.min() == 1).all():
+      if all(min(v) == 1 for v in res.values()):
         return 1.0
-      if (g.groupby("opp").res.max() == 0).all():
+      if all(max(v) == 0 for v in res.values()):
         return -1.0
       return 0.0
     steps = [("head-to-head (sweep)", h2h) if len(clubs) > 2 else ("head-to-head", lambda c: self.rec(c, [x for x in clubs if x != c]).pct),
              ("conference record", lambda c: self.rec(c, self.conf_teams(c)).pct)]
-    if all(len(self.games[(self.games.team == c) & self.games.opp.isin(common)]) >= 4 for c in clubs):
+    if all(sum(o in common for o in self.opps(c)) >= 4 for c in clubs):
       steps.append(("common games", lambda c: self.rec(c, common).pct))
     steps += [("strength of victory", self.sov), ("strength of schedule", self.sos),
               ("conference points rank", lambda c: -self.pts_rank(c, conf_pool)),

@@ -36,3 +36,17 @@
 }
 .po-view[hidden] { display: none; }
 .po-row { font-size: 12.5px; }
+/* odds view */
+.od-seeding { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 640px) { .od-seeding { grid-template-columns: 1fr; } }
+.od-conf { display: flex; flex-direction: column; gap: 4px; }
+.od-seed { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 9px; background: var(--panel2); border: 1px solid var(--line); cursor: pointer; font-size: 13px; }
+.od-seed:hover { border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); }
+.od-sn { width: 16px; text-align: center; color: var(--muted); }
+.od-nm { font-weight: 700; flex: 1; } .od-rec { color: var(--muted); font-size: 12px; } .od-sp { font-weight: 800; min-width: 40px; text-align: right; }
+.od-note { margin: 8px 0 12px; }
+.od-tools { padding: 0 0 8px; border-bottom: 0; }
+.od-p { display: inline-block; min-width: 44px; padding: 1px 6px; border-radius: 6px; font-weight: 700;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 35%, transparent) calc(var(--v) * 1%), transparent 0); }
+.od-track { margin-top: 14px; } .od-tt { width: auto; margin: 6px 0 12px; font-size: 12.5px; }
+.od-tt th, .od-tt td { padding: 4px 12px 4px 0; }
