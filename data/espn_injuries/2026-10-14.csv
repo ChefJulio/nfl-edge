@@ -74,6 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3915189,Roquan Smith,Baltimore Ravens,Active,2026-10-07T01:04Z,,,,,,Smith recorded six total tackles (one solo) during Sunday's 24-18 win over the Titans.
 4430831,Trenton Simpson,Baltimore Ravens,Active,2026-10-07T00:59Z,,,,,,Simpson recorded nine total tackles (two solo) and an interception during Sunday's 24-18 win over Tennessee.
 4696882,Devontez Walker,Baltimore Ravens,Active,2026-10-06T04:00Z,,,,,,Walker caught one of his two targets for 19 yards during Baltimore's win over the Titans on Sunday.
+4429501,Ray Davis,Buffalo Bills,Active,2026-10-14T02:57Z,,,,,,Davis caught his lone target for 31 yards while adding two carries for two yards and three kickoff returns for 114 yards during the Bills' 37-34 overtime win over the Rams on Monday.
 3915487,Mike Danna,Buffalo Bills,Active,2026-10-14T02:21Z,,,,,,Danna re-signed with the Bills on Tuesday.
 3915411,Ty Johnson,Buffalo Bills,Active,2026-10-14T00:28Z,,,,,,Johnson caught all four of his targets for 72 yards during the Bills' 37-34 overtime win over the Rams on Monday.
 4635008,Keon Coleman,Buffalo Bills,Active,2026-10-13T23:25Z,,,,,,Coleman caught a seven-yard touchdown pass (on two targets) during the Bills' 37-34 overtime win over the Rams on Monday.
@@ -95,7 +96,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4684527,T.J. Sanders,Buffalo Bills,Active,2026-10-09T00:32Z,,,,,,Sanders (appendix) practiced in full Thursday.
 4362506,Greg Rousseau,Buffalo Bills,Active,2026-10-08T01:09Z,,,,,,Rousseau logged four tackles (two solo) and two passes defensed in the Bills' 29-26 loss to the Patriots on Sunday.
 3930086,Dawson Knox,Buffalo Bills,Active,2026-10-06T02:41Z,,,,,,Knox caught both of his targets for 13 yards in the Bills' 29-26 loss to the Patriots on Sunday.
-4429501,Ray Davis,Buffalo Bills,Active,2026-10-06T00:06Z,,,,,,"Davis logged a four-yard carry, a three-yard reception and returned one kickoff for 29 yards during the Bills' 29-26 loss to the Patriots in Week 4."
 5076951,Jalon Kilgore,Buffalo Bills,Active,2026-10-05T18:30Z,,,,,,
 3917232,Tyler Bass,Buffalo Bills,Active,2026-10-05T02:01Z,,,,,,Bass went 2-for-2 on field-goal attempts and made both of his PATs during Sunday's 29-26 loss to the Patriots.
 4427348,Te'Cory Couch,Buffalo Bills,Questionable,2026-10-04T18:51Z,Hamstring,Not Specified,Not Specified,2026-10-12,QUESTIONABLE,Couch suffered a hamstring injury Sunday versus New England and is doubtful to return.
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
 4430034,Xavier Legette,Carolina Panthers,Injured Reserve,2026-10-03T20:15Z,Knee,Not Specified,Not Specified,2026-11-08,IR,"The Panthers placed Legette (knee) on injured reserve Saturday, Darin Gantt of the team's official site reports."
 4429166,Princely Umanmielen,Carolina Panthers,Active,2026-10-01T19:37Z,,,,,,
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-14T02:01Z,Undisclosed,,,2026-10-18,IR,ir
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-14T04:00Z,Undisclosed,,,2026-10-18,IR,ir
 4432804,Shemar Turner,Chicago Bears,Active,2026-10-14T01:37Z,,,,,,The Bears activated Turner (knee) from their reserve/PUP list Tuesday.
 2973405,Kalif Raymond,Chicago Bears,Active,2026-10-13T23:34Z,,,,,,Raymond caught three of four passes for six yards and logged one carry for minus-two yards during the Bears' 31-7 loss to the Packers on Sunday. He also returned one punt for nine yards.
 3134690,Montez Sweat,Chicago Bears,Suspension,2026-10-13T20:16Z,Suspension,Not Specified,Not Specified,2026-11-02,RESERVE-SUS,"The NFL announced Tuesday that Sweat has been suspended two games without pay for violating the league's performance-enhancing substances policy, Brad Biggs of the Chicago Tribune reports."
@@ -149,6 +149,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426358,Darnell Wright,Chicago Bears,Active,2026-10-09T19:09Z,,,,,,
 2577773,Joe Thuney,Chicago Bears,Active,2026-10-09T19:09Z,,,,,,
 3930040,Jonah Jackson,Chicago Bears,Active,2026-10-09T19:08Z,,,,,,
+4384852,Dohnte Meyers,Cincinnati Bengals,Active,2026-10-14T02:47Z,,,,,,Meyers brought in both of his targets for 12 yards during the Bengals' 31-24 win over the Dolphins on Sunday.
 5092508,Colbie Young,Cincinnati Bengals,Questionable,2026-10-13T17:10Z,Knee,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4401811,Kyle Dugger,Cincinnati Bengals,Questionable,2026-10-13T17:10Z,Quadriceps,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 3050481,Tanner Hudson,Cincinnati Bengals,Out,2026-10-13T15:52Z,Pectoral,Strain,Not Specified,2027-02-15,OUT,"Hudson's agent revealed Tuesday that the tight end sustained a torn pectoral in Sunday's 31-24 win over the Dolphins and is expected to miss the rest of the season, Charlie Clifford of WLWT News 5 Cincinnati reports."
@@ -172,7 +173,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4567098,Jordan Battle,Cincinnati Bengals,Active,2026-10-08T20:41Z,,,,,,
 4427729,Demetrius Knight Jr.,Cincinnati Bengals,Active,2026-10-07T02:23Z,,,,,,Knight finished Sunday's 22-17 loss to the Jaguars with six tackles (three solo).
 4690070,Mitchell Tinsley,Cincinnati Bengals,Active,2026-10-06T02:52Z,,,,,,Tinsley caught three of his seven targets for 49 yards in the Bengals' 22-17 loss to the Jaguars on Sunday.
-4384852,Dohnte Meyers,Cincinnati Bengals,Active,2026-10-04T22:25Z,,,,,,"Meyers brought in seven of nine targets for 82 yards, returned six kickoffs for 161 yards and ran back two punts for nine yards in the Bengals' 22-17 loss to the Jaguars on Sunday."
 4572036,DJ Turner II,Cincinnati Bengals,Active,2026-10-02T20:17Z,,,,,,
 4569682,Audric Estime,Cleveland Browns,Active,2026-10-13T21:45Z,,,,,,The Browns signed Estime to the 53-man roster Tuesday.
 4601080,Raheim Sanders,Cleveland Browns,Injured Reserve,2026-10-13T21:00Z,Hip,Not Specified,Not Specified,2026-11-15,IR,The Browns placed Sanders (hip) on injured reserve Tuesday.
@@ -574,8 +574,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3918310,Carl Granderson,New Orleans Saints,Active,2026-10-09T22:40Z,,,,,,"Granderson (ankle) does not carry an injury designation ahead of Sunday's game against the Vikings, Emily Leiker of The Minnesota Star Tribune reports."
 4879276,Bryce Lance,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Lance turned five targets into a seven-yard catch during the Saints' 45-24 loss to the Falcons on Monday.
 4702559,Oscar Delp,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Delp was not targeted during Monday's 45-24 loss versus the Falcons.
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-14T04:00Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4040615,Malik Harrison,New York Giants,Active,2026-10-14T02:13Z,,,,,,"Harrison was signed to the Giants' active roster Tuesday, Dan Salomone of the team's official site reports."
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-14T02:01Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4682648,Malachi Fields,New York Giants,Active,2026-10-14T01:38Z,,,,,,Fields hauled in both of his targets for 20 yards during the Giants' 27-27 tie with the Commanders on Sunday.
 4431321,Dru Phillips,New York Giants,Active,2026-10-13T23:07Z,,,,,,Phillips had five total tackles (five solo) and 2.0 sacks in Sunday's 27-27 tie with the Commanders.
 4240706,Jason Pinnock,New York Giants,Questionable,2026-10-13T17:10Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -749,6 +749,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3894856,Anthony Nelson,Tampa Bay Buccaneers,Active,2026-10-07T18:57Z,,,,,,
 4428522,Tykee Smith,Tampa Bay Buccaneers,Active,2026-10-07T00:56Z,,,,,,Smith recorded six tackles (four solo) and a forced fumble during the Buccaneers' 17-14 loss to the Packers on Sunday.
 4240401,Ifeatu Melifonwu,Tampa Bay Buccaneers,Active,2026-10-06T00:27Z,,,,,,"Head coach Todd Bowles said Melifonwu is likely to start at safety Thursday night against Dallas, Jenna Laine of ESPN.com reports."
+4883647,Elic Ayomanor,Tennessee Titans,Active,2026-10-14T02:41Z,,,,,,Ayomanor caught one of two passes for 17 yards during the Titans' 26-3 loss to the Texans on Sunday. He also added a tackle on special teams.
 4360978,David Martin-Robinson,Tennessee Titans,Questionable,2026-10-13T17:10Z,Hamstring,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4036134,Amani Hooker,Tennessee Titans,Questionable,2026-10-13T17:10Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,questionable
 3925357,Calvin Ridley,Tennessee Titans,Active,2026-10-13T01:31Z,,,,,,Ridley caught two of three targets for 33 yards during Sunday's 26-3 loss to the Texans.
@@ -771,7 +772,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035369,Jeffery Simmons,Tennessee Titans,Active,2026-10-09T19:41Z,,,,,,
 4570469,Marcus Harris,Tennessee Titans,Active,2026-10-09T19:41Z,,,,,,
 4870805,Anthony Hill Jr.,Tennessee Titans,Active,2026-10-07T01:15Z,,,,,,Hill tallied eight tackles (three solo) during the Titans' 24-18 loss to the Ravens on Sunday.
-4883647,Elic Ayomanor,Tennessee Titans,Active,2026-10-06T02:32Z,,,,,,Ayomanor caught his lone target for 22 yards in Sunday's loss to the Ravens.
 4879480,Drew Moss,Tennessee Titans,Active,2026-10-05T19:07Z,,,,,,
 4039160,Kylen Granson,Tennessee Titans,Active,2026-10-05T19:07Z,,,,,,
 4567156,Treylon Burks,Washington Commanders,Active,2026-10-14T00:44Z,,,,,,Burks caught two passes on five targets for 16 yards during Sunday's 27-27 tie with the Giants.
