@@ -1400,6 +1400,6 @@
     const sec = document.getElementById('tab-model');
     if (sec && sec.classList.contains('on')) loadModelTab();
   }
-  window.NFLE = Object.assign(window.NFLE || {}, { openPlayer, closePlayer, openTeam });  // shared with shell.js / table.js
+  window.NFLE = Object.assign(window.NFLE || {}, { openPlayer, closePlayer, openTeam, weights });  // shared with shell.js, table.js, area modules
   if (CFG.page === 'game') initGame(); else initWeek();
 })();

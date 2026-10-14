@@ -37,7 +37,7 @@
       sec.classList.remove('soon');
       sec.innerHTML = `<div class="sec-head"><div><h2>Standings</h2><p class="st-sub">Loading&hellip;</p></div></div>
         <div class="dt-card"><div class="dt-tools">
-          <select class="st-season" aria-label="Season"></select>
+          <select class="dt-select st-season" aria-label="Season"></select>
           <div class="seg st-view"><button type="button" data-v="div">Divisions</button><button type="button" data-v="conf">Playoff picture</button></div>
         </div><div class="st-body"></div></div>
         <p class="st-note muted">Ties count as half a win. Tiebreakers follow the NFL's procedure (head-to-head, division record, common games, conference record, strength of victory and schedule, points rankings, net points); the deciding step is shown under the team. Net touchdowns and the coin toss (the last two steps, almost never reached) are not modeled.</p>`;

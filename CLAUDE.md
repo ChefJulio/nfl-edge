@@ -67,6 +67,7 @@ Git hooks: `git config core.hooksPath .githooks` (pre-commit blocks commits when
 | `tools/dev.py` | Dev server: built site + live `nfledge/static/` assets |
 | `nfledge/standings.py` | Standings + NFL tiebreaking procedures (division, wild card, seeds); presentation-side (not in the model fingerprint) |
 | `tools/standings_build.py`, `nfledge/static/standings.{js,css}` | Teams > Standings: `data/standings/<season>.json` (2002 on, CI step) rendered in the browser; area modules load on first open (shell.js AREAS) |
+| `tools/stats_build.py`, `nfledge/static/{teamstats,playerstats}.{js,css}` | Teams > Stats + Players > Stats: `data/stats/{teams,players}_<season>.json` (1999 on, CI step; aggregates cached in `cache/seasonstats_*`) |
 | `nfledge/elo.py` | Elo from final scores (part of our win chance) |
 | `exclusions.csv` | Manual injury-shortened games to drop from usage/efficiency |
 | `scratch/` | Throwaway experiment scripts (gitignored) |

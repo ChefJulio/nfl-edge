@@ -1,0 +1,168 @@
+// Players > Stats: raw regular-season stats for every player with a snap or a stat line that season
+// (data/stats/players_<season>.json, tools/stats_build.py). Position groups get their own default columns; the last
+// three columns are pickers over EVERY attribute we hold (saved in this browser). Fantasy points follow the site's
+// scoring settings (NFLE.weights from gamecast.js). Rows open the player card.
+(() => {
+  const NFLE = window.NFLE, esc = NFLE.esc;
+  const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } return v; };
+  const pageSeason = () => { const m = location.pathname.match(/(\d{4})\/week-\d+\.html$/); return m ? +m[1] : null; };
+  const HALF = { pass_yd: 0.04, pass_td: 4, interception: -2, rush_yd: 0.1, rush_td: 6, reception: 0.5, rec_yd: 0.1, rec_td: 6, fumble_lost: -2, te_bonus: 0 };
+  const GROUPS = {
+    QB: ['QB'], RB: ['RB', 'FB', 'HB'], WR: ['WR'], TE: ['TE'], OL: ['T', 'G', 'C', 'OT', 'OG', 'OL', 'LS'],
+    DL: ['DE', 'DT', 'NT', 'DL'], LB: ['LB', 'ILB', 'OLB', 'MLB'], DB: ['CB', 'S', 'FS', 'SS', 'DB', 'SAF'], K: ['K', 'PK'], P: ['P'],
+  };
+  const groupOf = pos => Object.keys(GROUPS).find(g => GROUPS[g].includes(pos)) || 'Other';
+  const div = (a, b) => b ? a / b : null;
+  const fmt = {
+    i: v => v == null ? '' : Math.round(v).toLocaleString(), d1: v => v == null ? '' : v.toFixed(1), d2: v => v == null ? '' : v.toFixed(2),
+    pct: v => v == null ? '' : `${(100 * v).toFixed(1)}%`, s: v => v == null ? '' : esc(v), epa: v => v == null ? '' : (v > 0 ? '+' : '') + v.toFixed(2),
+    money: v => v == null ? '' : v >= 1 ? `$${v.toFixed(1)}M` : `$${Math.round(v * 1000)}K`,
+  };
+  // Every attribute we hold: [key, label, group, value(r, per), format, title, first-sort]. Counting stats (count: true)
+  // divide by games in per-game mode.
+  const A = [];
+  const add = (key, label, group, fn, f = 'i', title = '', first = 'desc', count = false) => A.push({ key, label, group, fn, f, title, first, count });
+  const raw = (key, label, group, f = 'i', title = '') => add(key, label, group, r => r[key], f, title, 'desc', true);
+  // bio, draft, contract
+  add('age', 'Age', 'Bio', r => r.age, 'd1', 'Age at the season opener', 'asc');
+  add('ht', 'Height', 'Bio', r => r.ht, 'i', 'Inches'); add('wt', 'Weight', 'Bio', r => r.wt, 'i', 'Pounds');
+  add('college', 'College', 'Bio', r => r.college, 's', '', 'asc'); add('exp', 'NFL yrs', 'Bio', r => r.exp, 'i', 'Seasons of experience that year');
+  add('draft_y', 'Draft yr', 'Draft', r => r.draft_y, 'i', '', 'asc'); add('draft_r', 'Round', 'Draft', r => r.draft_r, 'i', '', 'asc');
+  add('draft_o', 'Overall pick', 'Draft', r => r.draft_o, 'i', '', 'asc');
+  add('draft', 'Draft', 'Draft', r => r.udfa ? 'UDFA' : r.draft_r ? `R${r.draft_r}:${r.draft_p}` : null, 's', 'Round:pick within the round', 'asc');
+  add('apy', 'APY', 'Contract', r => r.apy, 'money', 'Average per year of the current deal (current season only)');
+  add('deal_val', 'Deal total', 'Contract', r => r.deal_val, 'money'); add('deal_gtd', 'Guaranteed', 'Contract', r => r.deal_gtd, 'money');
+  add('fa', 'Free agent', 'Contract', r => r.fa, 'i', 'Season he reaches free agency if not extended', 'asc');
+  // usage
+  add('games', 'G', 'Usage', r => r.games, 'i', 'Games played');
+  raw('snaps_o', 'Off snaps', 'Usage'); add('snap_pct', 'Snap %', 'Usage', r => r.snap_pct || null, 'pct', 'Average share of offensive snaps');
+  raw('snaps_d', 'Def snaps', 'Usage'); add('snap_pct_d', 'Def snap %', 'Usage', r => r.snap_pct_d || null, 'pct');
+  raw('snaps_st', 'ST snaps', 'Usage');
+  raw('targets', 'Tgt', 'Usage'); add('tgt_share', 'Tgt %', 'Usage', r => r.tgt_share || null, 'pct', 'Share of team targets');
+  raw('carries', 'Car', 'Usage'); add('car_share', 'Car %', 'Usage', r => r.car_share || null, 'pct', 'Share of team carries');
+  raw('car_i10', 'Car in 10', 'Usage', 'i', 'Carries inside the opponent 10'); raw('tgt_rz', 'RZ tgt', 'Usage', 'i', 'Targets inside the opponent 20');
+  // passing
+  add('cmp_att', 'Cmp/Att', 'Passing', r => r.attempts ? `${r.completions}/${r.attempts}` : null, 's', '', 'desc');
+  raw('completions', 'Cmp', 'Passing'); raw('attempts', 'Att', 'Passing'); raw('passing_yards', 'Pass yds', 'Passing');
+  raw('passing_tds', 'Pass TD', 'Passing'); raw('passing_interceptions', 'INT', 'Passing'); raw('sacks_suffered', 'Sacked', 'Passing');
+  raw('passing_air_yards', 'Air yds', 'Passing'); raw('passing_first_downs', 'Pass 1D', 'Passing');
+  // rushing / receiving
+  raw('rushing_yards', 'Rush yds', 'Rushing'); raw('rushing_tds', 'Rush TD', 'Rushing'); raw('rushing_first_downs', 'Rush 1D', 'Rushing');
+  raw('receptions', 'Rec', 'Receiving'); raw('receiving_yards', 'Rec yds', 'Receiving'); raw('receiving_tds', 'Rec TD', 'Receiving');
+  raw('receiving_air_yards', 'Rec air yds', 'Receiving'); raw('receiving_yards_after_catch', 'YAC', 'Receiving'); raw('receiving_first_downs', 'Rec 1D', 'Receiving');
+  raw('fumbles_lost_total', 'Fum lost', 'Rushing');
+  // efficiency
+  add('ypa', 'Y/A', 'Efficiency', r => div(r.passing_yards, r.attempts), 'd1', 'Passing yards per attempt');
+  add('cmp_pct', 'Cmp%', 'Efficiency', r => div(r.completions, r.attempts), 'pct');
+  add('ypc', 'YPC', 'Efficiency', r => div(r.rushing_yards, r.carries), 'd1', 'Rushing yards per carry');
+  add('ypt', 'Y/Tgt', 'Efficiency', r => div(r.receiving_yards, r.targets), 'd1', 'Receiving yards per target');
+  add('catch', 'Catch %', 'Efficiency', r => div(r.receptions, r.targets), 'pct');
+  add('adot', 'aDOT', 'Efficiency', r => div(r.receiving_air_yards, r.targets), 'd1', 'Average depth of target');
+  add('pass_epa', 'EPA/db', 'Efficiency', r => div(r.passing_epa, r.attempts + r.sacks_suffered), 'epa', 'Passing EPA per dropback');
+  add('rush_epa', 'EPA/car', 'Efficiency', r => div(r.rushing_epa, r.carries), 'epa', 'Rushing EPA per carry');
+  add('rec_epa', 'EPA/tgt', 'Efficiency', r => div(r.receiving_epa, r.targets), 'epa', 'Receiving EPA per target');
+  // defense / kicking / punting / returns
+  add('tackles', 'Tackles', 'Defense', r => (r.def_tackles_solo || 0) + (r.def_tackle_assists || 0) || null, 'i', 'Solo + assisted', 'desc', true);
+  raw('def_tackles_for_loss', 'TFL', 'Defense'); raw('def_sacks', 'Sacks', 'Defense', 'd1'); raw('def_qb_hits', 'QB hits', 'Defense');
+  raw('def_interceptions', 'Def INT', 'Defense'); raw('def_pass_defended', 'PD', 'Defense', 'i', 'Passes defended');
+  raw('def_fumbles_forced', 'FF', 'Defense', 'i', 'Fumbles forced'); raw('def_tds', 'Def TD', 'Defense');
+  add('fg', 'FG', 'Kicking', r => r.fg_att ? `${r.fg_made}/${r.fg_att}` : null, 's'); raw('fg_made', 'FGM', 'Kicking');
+  add('fg_pct', 'FG%', 'Kicking', r => div(r.fg_made, r.fg_att), 'pct'); add('fg_long', 'Long', 'Kicking', r => r.fg_att ? r.fg_long : null, 'i');
+  add('pat', 'XP', 'Kicking', r => r.pat_att ? `${r.pat_made}/${r.pat_att}` : null, 's');
+  raw('pt_att', 'Punts', 'Punting'); add('pt_avg', 'Avg', 'Punting', r => div(r.pt_yards, r.pt_att), 'd1', 'Yards per punt');
+  raw('kickoff_return_yards', 'KR yds', 'Returns'); raw('punt_return_yards', 'PR yds', 'Returns');
+  // fantasy (site scoring)
+  add('fp', 'FPts', 'Fantasy', r => r._fp, 'd1', 'Fantasy points in your scoring', 'desc', true);
+  add('fpg', 'FP/G', 'Fantasy', r => div(r._fp, r.games), 'd1', 'Fantasy points per game');
+  add('fp_rank', 'Pos rank', 'Fantasy', r => r._rank, 'i', 'Fantasy-points finish at his position', 'asc');
+  const BY = Object.fromEntries(A.map(a => [a.key, a]));
+  const DEFAULTS = {
+    All: ['games', 'snaps_o', 'passing_yards', 'rushing_yards', 'receiving_yards', 'fp', 'fpg'],
+    QB: ['games', 'cmp_att', 'passing_yards', 'passing_tds', 'passing_interceptions', 'ypa', 'sacks_suffered', 'rushing_yards', 'rushing_tds', 'fp', 'fpg'],
+    RB: ['games', 'carries', 'rushing_yards', 'ypc', 'rushing_tds', 'car_share', 'targets', 'receptions', 'receiving_yards', 'receiving_tds', 'fp', 'fpg'],
+    WR: ['games', 'targets', 'receptions', 'receiving_yards', 'ypt', 'receiving_tds', 'tgt_share', 'adot', 'fp', 'fpg'],
+    TE: ['games', 'targets', 'receptions', 'receiving_yards', 'ypt', 'receiving_tds', 'tgt_share', 'snap_pct', 'fp', 'fpg'],
+    OL: ['games', 'snaps_o', 'snap_pct', 'snaps_st'],
+    DL: ['games', 'tackles', 'def_tackles_for_loss', 'def_sacks', 'def_qb_hits', 'def_fumbles_forced', 'snaps_d', 'snap_pct_d'],
+    LB: ['games', 'tackles', 'def_tackles_for_loss', 'def_sacks', 'def_interceptions', 'def_pass_defended', 'snaps_d', 'snap_pct_d'],
+    DB: ['games', 'tackles', 'def_interceptions', 'def_pass_defended', 'def_fumbles_forced', 'def_tds', 'snaps_d', 'snap_pct_d'],
+    K: ['games', 'fg', 'fg_pct', 'fg_long', 'pat'], P: ['games', 'pt_att', 'pt_avg'],
+  };
+  const SORT0 = { QB: 'fp', RB: 'fp', WR: 'fp', TE: 'fp', All: 'fp', OL: 'snaps_o', DL: 'def_sacks', LB: 'tackles', DB: 'tackles', K: 'fg_made', P: 'pt_att' };
+  const CUSTOM = 3;
+  const pickHtml = (slot, key) => `<select class="ps-pick" data-slot="${slot}" aria-label="Custom column ${slot + 1}"><option value="">+ column</option>${
+    [...new Set(A.map(a => a.group))].map(g => `<optgroup label="${esc(g)}">${A.filter(a => a.group === g).map(a => `<option value="${a.key}"${a.key === key ? ' selected' : ''}>${esc(a.label)}</option>`).join('')}</optgroup>`).join('')}</select>`;
+
+  NFLE.areas.playerstats = {
+    mount(sec) {
+      sec.classList.remove('soon');
+      sec.innerHTML = `<div class="sec-head"><div><h2>Player stats</h2><p class="ps-sub">Loading&hellip;</p></div></div>
+        <div class="dt-card"><div class="dt-tools">
+          <select class="dt-select ps-season" aria-label="Season"></select>
+          <select class="dt-select ps-pos" aria-label="Position">${['All', ...Object.keys(GROUPS)].map(g => `<option value="${g}">${g === 'All' ? 'All positions' : g}</option>`).join('')}</select>
+          <div class="seg ps-per"><button type="button" data-v="tot">Totals</button><button type="button" data-v="pg">Per game</button></div>
+          <input class="ps-q" type="search" placeholder="Find a player" aria-label="Find a player">
+        </div><div class="ps-tbl"></div></div>
+        <p class="st-note muted">Regular season, raw (not adjusted for opponents). Fantasy points use your scoring settings (Rankings &rsaquo; Scoring &amp; league). The last three columns are yours: pick any stat, bio, draft or contract detail.</p>`;
+      const sub = sec.querySelector('.ps-sub'), selS = sec.querySelector('.ps-season'), selP = sec.querySelector('.ps-pos'), q = sec.querySelector('.ps-q');
+      let all = [], pos = store('nfledge-ps-pos') || 'QB', per = store('nfledge-ps-per') === 'pg', table = null;
+      let custom = (() => { try { return JSON.parse(store('nfledge-ps-custom') || 'null') || ['age', 'draft', 'apy']; } catch (e) { return ['age', 'draft', 'apy']; } })();
+      if (!DEFAULTS[pos]) pos = 'QB';
+      selP.value = pos;
+      const col = (a, slot) => ({
+        key: slot == null ? a.key : `c${slot}_${a ? a.key : ''}`, label: a ? a.label : '', title: a ? a.title : '', num: !a || a.f !== 's',
+        first: a ? a.first : 'desc', headHtml: slot == null ? null : pickHtml(slot, a && a.key), cls: slot == null ? '' : 'ps-custom',
+        value: r => { if (!a) return null; const v = a.fn(r); return per && a.count && typeof v === 'number' ? div(v, r.games) : v; },
+        html: r => { if (!a) return ''; const v = a.fn(r); return fmt[per && a.count && a.f === 'i' ? 'd1' : a.f](per && a.count && typeof v === 'number' ? div(v, r.games) : v); },
+      });
+      const columns = () => [
+        { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name,
+          html: r => `<div class="who"><div><b>${esc(r.name)}</b><span class="sub"><span class="posb posb-${esc(groupOf(r.pos))}">${esc(r.pos || '')}</span> ${r.team ? `<span class="tm-open" data-tm="${esc(r.team)}">${esc(r.team)}</span>` : ''}</span></div></div>` },
+        ...DEFAULTS[pos].map(k => col(BY[k])),
+        ...custom.map((k, i) => col(BY[k] || null, i)),
+      ];
+      const score = () => {
+        const w = (NFLE.weights && NFLE.weights()) || HALF;
+        all.forEach(r => {
+          r._fp = (r.passing_yards || 0) * (w.pass_yd || 0) + (r.passing_tds || 0) * (w.pass_td || 0) + (r.passing_interceptions || 0) * (w.interception || 0)
+            + (r.rushing_yards || 0) * (w.rush_yd || 0) + (r.rushing_tds || 0) * (w.rush_td || 0) + (r.receptions || 0) * (w.reception || 0)
+            + (r.receiving_yards || 0) * (w.rec_yd || 0) + (r.receiving_tds || 0) * (w.rec_td || 0) + (r.fumbles_lost_total || 0) * (w.fumble_lost || 0)
+            + (r.pos === 'TE' ? (r.receptions || 0) * (w.te_bonus || 0) : 0);
+        });
+        const byG = {};
+        all.forEach(r => (byG[r._g] = byG[r._g] || []).push(r));
+        Object.values(byG).forEach(g => g.sort((a, b) => b._fp - a._fp).forEach((r, i) => { r._rank = r._fp > 0 ? i + 1 : null; }));
+      };
+      const rows = () => {
+        const t = q.value.trim().toLowerCase();
+        return all.filter(r => (pos === 'All' || r._g === pos) && (!t || (r.name || '').toLowerCase().includes(t) || (r.team || '').toLowerCase() === t));
+      };
+      const draw = (resort) => {
+        sec.querySelectorAll('.ps-per button').forEach(b => b.classList.toggle('on', (b.dataset.v === 'pg') === per));
+        const cols = columns();
+        if (!table) table = NFLE.Table(sec.querySelector('.ps-tbl'), { columns: cols, rows: rows(), sort: { key: SORT0[pos], dir: 'desc' },
+          rowAttrs: r => /^\d\d-\d{7}$/.test(r.pid) ? `data-open-pid="${esc(r.pid)}"` : '' });
+        else { table.setColumns(cols); table.update(rows()); if (resort) table.setSort({ key: SORT0[pos], dir: 'desc' }); }
+        sec.querySelectorAll('.ps-pick').forEach(s => s.onchange = () => {
+          custom[+s.dataset.slot] = s.value; store('nfledge-ps-custom', JSON.stringify(custom)); draw(false);
+        });
+      };
+      const load = s => NFLE.load(`data/stats/players_${s}.json`).then(d => {
+        all = d.rows.map(v => { const r = Object.fromEntries(d.cols.map((c, i) => [c, v[i]])); r._g = groupOf(r.pos); return r; });
+        score();
+        sub.textContent = `${s} regular season: ${all.length.toLocaleString()} players`;
+        draw(true);
+      }).catch(() => { sub.textContent = 'No player stats for that season.'; });
+      selP.onchange = () => { pos = selP.value; store('nfledge-ps-pos', pos); draw(true); };
+      sec.querySelector('.ps-per').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) { per = b.dataset.v === 'pg'; store('nfledge-ps-per', per ? 'pg' : 'tot'); draw(false); } });
+      q.oninput = () => table && table.update(rows());
+      document.addEventListener('nfle-scoring', () => { if (all.length) { score(); draw(false); } });
+      NFLE.load('data/stats/index.json').then(ix => {
+        const want = pageSeason() && ix.seasons.includes(pageSeason()) ? pageSeason() : ix.current;
+        selS.innerHTML = [...ix.seasons].reverse().map(s => `<option value="${s}"${s === want ? ' selected' : ''}>${s}</option>`).join('');
+        selS.onchange = () => load(+selS.value);
+        load(want);
+      }).catch(() => { sub.textContent = 'Player stats are not available on this page.'; });
+    },
+  };
+})();

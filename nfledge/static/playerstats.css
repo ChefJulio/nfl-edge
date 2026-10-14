@@ -1,0 +1,9 @@
+/* Players > Stats (playerstats.js); shared table styles in table.css */
+#tab-players-stats .ps-q { flex: 1; min-width: 150px; max-width: 260px; padding: 7px 11px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--panel2); color: var(--ink); font: inherit; font-size: 13px; }
+#tab-players-stats .seg { flex: none; }
+.ps-pick { -webkit-appearance: none; appearance: none; color-scheme: dark; max-width: 110px; font: inherit; font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .04em; color: var(--accent); background: transparent; border: 1px dashed color-mix(in srgb, var(--accent) 50%, var(--line));
+  border-radius: 6px; padding: 2px 6px; cursor: pointer; text-align: right; }
+table.dt th.ps-custom, table.dt td.ps-custom { background: color-mix(in srgb, var(--accent) 4%, var(--panel)); }
+#tab-players-stats .who .sub .posb { margin-right: 3px; }

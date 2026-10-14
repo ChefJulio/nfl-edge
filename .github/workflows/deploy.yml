@@ -79,6 +79,10 @@ jobs:
       # Teams > Standings data (every season since 2002; ~10 s), rendered in the browser by assets/standings.js.
       - name: Standings
         run: python tools/standings_build.py --site=site
+      # Teams > Stats + Players > Stats data (1999 on). Finished seasons are aggregated once and kept in the cache;
+      # the current season is redone when a game goes final.
+      - name: Season stats
+        run: python tools/stats_build.py --site=site
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:

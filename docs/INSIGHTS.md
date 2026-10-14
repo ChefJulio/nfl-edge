@@ -439,6 +439,25 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   2026-10-12), regenerate: `tools/build_archive.py 2021-2026 --out=<dir> --jobs=6` (~8 min, needs ~10 GB RAM),
   then replace the files in a checkout of the `archive` branch and push.
 - CI: `.github/workflows/deploy.yml` (contents: write for the archive commit; ~4-5 min per run).
+- **Client-rendering migration (started 2026-10-14; owner's plan, phases 0-6):** Python writes DATA only (JSON);
+  the browser renders. Done: app shell (`assets/shell.js`: 4 parents Players / Teams / Games / Model + sub-tab
+  chips, hash routes `#players/stats`, old `#games` etc. mapped; phones: bottom tab bar with the chips above it,
+  top nav hidden, owner's choice; `NAV_MODE = 'top'` keeps the old top strip in code), `NFLE.load` (cached JSON),
+  `NFLE.Table` (`assets/table.js`: the one table component; fixed column widths when every column has `w`, so
+  stacked tables align), area modules (`assets/<area>.js/.css` loaded on a tab's first open; shell.js `AREAS`), dev
+  loop `tools/dev.py` (assets served live from `nfledge/static/`). New tabs: Teams > Standings
+  (`data/standings/<season>.json`, `tools/standings_build.py`, 2002 on), Teams > Stats + Players > Stats
+  (`data/stats/{teams,players}_<season>.json`, `tools/stats_build.py`, 1999 on; finished seasons aggregated once
+  into `cache/seasonstats_*`; current season redone when a game goes final). Rankings / Power / Matchups / Roles /
+  Model are still Jinja-rendered (phases 2 and 6). `window.NFLE` is shared: modules MERGE into it (gamecast.js used
+  to overwrite it, which wiped the shell's loader). Next (owner, 2026-10-14): player / team PAGES as routes
+  (`#player/<id>`, `#team/<abbr>`) instead of overlay cards, with breadcrumbs and a working back button, before
+  the Rankings migration.
+- **Tiebreakers** (`nfledge/standings.py`, presentation-side: excluded from the model fingerprint and cache key):
+  division, wild card, seeds; seeds match ESPN's official seeding 2014-2025 exactly (24/24 conference seedings).
+  ESPN's own standings feed before 2014 is incomplete / wrong (missing or partial seeds), so older seasons were
+  spot-checked against known history instead (2006 NFC, 2007 AFC, 2009 AFC correct). Stopgaps: net touchdowns and
+  the coin toss (fixed alphabetical) are not modeled; mid-season strength of schedule uses games played so far.
 
 ## 9. Open threads / next steps (as of 2026-10-12)
 - **From the 2026-10-14 research batch (section 5 has the numbers):** (2) "Not extended entering

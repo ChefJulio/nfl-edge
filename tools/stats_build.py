@@ -1,0 +1,245 @@
+"""Season stats for Teams > Stats and Players > Stats (data only; rendered by teamstats.js / playerstats.js).
+
+Writes <site>/data/stats/teams_<season>.json, players_<season>.json and index.json, regular season only.
+
+Usage: python tools/stats_build.py [--site=site] [--seasons=1999-2026]   (CI runs it after run.py)
+
+Team stats are computed from our own play-by-play (nflverse team-level EPA doesn't reconcile with pbp, INSIGHTS
+section 7), offense and defense. Player stats are season totals of nflverse's weekly player stats, plus snaps
+(2012 on), inside-10 carries and red-zone targets (from the same pbp), and bio / draft / contract (the player-card
+helpers in tools/player_logs.py). Finished seasons are aggregated once and cached (cache/seasonstats_*.parquet);
+the current season is redone when its count of final games changes.
+"""
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tools"))
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+
+from nfledge import data as D  # noqa: E402
+from nfledge.config import load_config  # noqa: E402
+from nfledge.report import SCORE_KEYS  # noqa: E402
+from nfledge.standings import RELOCATED  # noqa: E402
+
+V = 1
+FIRST = 1999
+PBP_COLS = ["game_id", "season", "week", "season_type", "posteam", "defteam", "play_type", "yards_gained", "pass_attempt",
+            "complete_pass", "sack", "passing_yards", "rushing_yards", "rush_attempt", "pass_touchdown", "rush_touchdown",
+            "interception", "fumble_lost", "first_down_rush", "first_down_pass", "first_down_penalty", "third_down_converted",
+            "third_down_failed", "fourth_down_converted", "fourth_down_failed", "penalty", "penalty_team", "penalty_yards",
+            "fixed_drive", "fixed_drive_result", "drive_inside20", "drive_time_of_possession", "epa", "success", "qb_kneel",
+            "yardline_100", "rusher_player_id", "receiver_player_id", "td_team"]
+
+
+def _mmss(s) -> float:
+  try:
+    m, x = str(s).split(":")
+    return int(m) * 60 + int(x)
+  except ValueError:
+    return np.nan
+
+
+def team_stats(pbp: pd.DataFrame, sched: pd.DataFrame, season: int) -> pd.DataFrame:
+  """One row per team: offense columns o_* and defense (allowed) columns d_*."""
+  p = pbp[(pbp.season_type == "REG")].copy()
+  for c in ("posteam", "defteam", "penalty_team"):
+    p[c] = p[c].replace(RELOCATED)
+  sc = p[p.play_type.isin(["pass", "run"])]
+  def side(g):
+    att = g.pass_attempt.sum() - g.sack.sum()
+    sacks = g.sack.sum()
+    sack_yds = -g.loc[g.sack == 1, "yards_gained"].sum()
+    gross = g.passing_yards.sum()
+    rush_att = g.rush_attempt.sum()
+    third_c, third_f = g.third_down_converted.sum(), g.third_down_failed.sum()
+    fourth_c, fourth_f = g.fourth_down_converted.sum(), g.fourth_down_failed.sum()
+    return pd.Series({
+      "plays": len(g), "yds": g.yards_gained.sum(), "att": att, "cmp": g.complete_pass.sum(), "pass_yds": gross - sack_yds,
+      "pass_td": g.pass_touchdown.sum(), "int": g.interception.sum(), "sacks": sacks, "sack_yds": sack_yds,
+      "rush_att": rush_att, "rush_yds": g.rushing_yards.sum(), "rush_td": g.rush_touchdown.sum(),
+      "fum_lost": g.fumble_lost.sum(), "first_downs": g.first_down_rush.sum() + g.first_down_pass.sum() + g.first_down_penalty.sum(),
+      "third_c": third_c, "third_att": third_c + third_f, "fourth_c": fourth_c, "fourth_att": fourth_c + fourth_f,
+      "epa": g.epa.sum(), "success": g.success.sum()})
+  off = sc.groupby("posteam").apply(side, include_groups=False).add_prefix("o_")
+  dfn = sc.groupby("defteam").apply(side, include_groups=False).add_prefix("d_")
+  # Drives: red-zone trips and touchdowns, time of possession (one row per drive)
+  dr = p.dropna(subset=["fixed_drive"]).drop_duplicates(["game_id", "posteam", "fixed_drive"])
+  dr = dr.assign(rz=dr.drive_inside20.fillna(0).astype(int), td=(dr.fixed_drive_result == "Touchdown").astype(int),
+                 top=dr.drive_time_of_possession.map(_mmss))
+  for who, key in (("o", "posteam"), ("d", "defteam")):
+    g = dr.groupby(key)
+    rz = g.rz.sum(); rz_td = dr[dr.rz == 1].groupby(key).td.sum()
+    off_or_d = off if who == "o" else dfn
+    off_or_d[f"{who}_rz"] = rz.reindex(off_or_d.index).fillna(0)
+    off_or_d[f"{who}_rz_td"] = rz_td.reindex(off_or_d.index).fillna(0)
+  off["o_top"] = dr.groupby("posteam").top.sum().reindex(off.index)
+  pen = p[p.penalty == 1].drop_duplicates(["game_id", "fixed_drive", "penalty_team", "penalty_yards", "play_type"])
+  off["pen"] = pen.groupby("penalty_team").size().reindex(off.index).fillna(0)
+  off["pen_yds"] = pen.groupby("penalty_team").penalty_yards.sum().reindex(off.index).fillna(0)
+  t = off.join(dfn, how="outer")
+  # Points and record from the schedule (final scores)
+  s = sched[(sched.season == season) & (sched.game_type == "REG") & sched.home_score.notna()]
+  h, a = s.home_team.replace(RELOCATED), s.away_team.replace(RELOCATED)
+  g = pd.concat([pd.DataFrame({"team": h, "pf": s.home_score, "pa": s.away_score}),
+                 pd.DataFrame({"team": a, "pf": s.away_score, "pa": s.home_score})])
+  agg = g.groupby("team").agg(g=("pf", "size"), pf=("pf", "sum"), pa=("pa", "sum"),
+                              w=("pf", lambda x: 0), )
+  res = g.assign(w=(g.pf > g.pa).astype(int), l=(g.pf < g.pa).astype(int), t=(g.pf == g.pa).astype(int)).groupby("team")[["w", "l", "t"]].sum()
+  t = t.join(agg[["g", "pf", "pa"]]).join(res)
+  t["takeaways"] = t.d_int + t.d_fum_lost
+  t["turnovers"] = t.o_int + t.o_fum_lost
+  return t.reset_index().rename(columns={"index": "team", "posteam": "team"})
+
+
+def player_extras(pbp: pd.DataFrame) -> pd.DataFrame:
+  """Per player-season usage only pbp has: inside-10 carries, red-zone targets."""
+  p = pbp[pbp.season_type == "REG"]
+  i10 = p[(p.rush_attempt == 1) & (p.yardline_100 <= 10) & p.rusher_player_id.notna()].groupby("rusher_player_id").size()
+  rz = p[(p.pass_attempt == 1) & (p.sack != 1) & (p.yardline_100 <= 20) & p.receiver_player_id.notna()].groupby("receiver_player_id").size()
+  return pd.DataFrame({"car_i10": i10, "tgt_rz": rz}).fillna(0)
+
+
+PSUM = ["completions", "attempts", "passing_yards", "passing_tds", "passing_interceptions", "sacks_suffered", "sack_yards_lost",
+        "passing_air_yards", "passing_first_downs", "passing_epa", "passing_2pt_conversions", "carries", "rushing_yards", "rushing_tds",
+        "rushing_first_downs", "rushing_epa", "rushing_2pt_conversions", "receptions", "targets", "receiving_yards", "receiving_tds",
+        "receiving_air_yards", "receiving_yards_after_catch", "receiving_first_downs", "receiving_epa", "receiving_2pt_conversions",
+        "fumbles_lost_total", "sack_fumbles_lost", "rushing_fumbles_lost", "receiving_fumbles_lost",
+        "def_tackles_solo", "def_tackle_assists", "def_tackles_for_loss", "def_sacks", "def_qb_hits", "def_interceptions",
+        "def_pass_defended", "def_fumbles_forced", "def_tds", "fg_made", "fg_att", "pat_made", "pat_att", "pt_att", "pt_yards",
+        "punt_returns", "punt_return_yards", "kickoff_returns", "kickoff_return_yards", "special_teams_tds"]
+
+
+def player_stats(ps: pd.DataFrame, snaps: pd.DataFrame | None, pfr2gsis: pd.Series, extras: pd.DataFrame,
+                 team_totals: pd.DataFrame) -> pd.DataFrame:
+  w = ps[ps.season_type == "REG"].copy()
+  w["team"] = w.team.replace(RELOCATED)
+  cols = [c for c in PSUM if c in w.columns]
+  for c in cols:
+    w[c] = pd.to_numeric(w[c], errors="coerce").fillna(0)
+  w = w.sort_values("week")
+  agg = w.groupby("player_id").agg(**{c: (c, "sum") for c in cols}, games=("week", "nunique"),
+                                   name=("player_display_name", "last"), pos=("position", "last"), team=("team", "last"),
+                                   fg_long=("fg_long", "max") if "fg_long" in w else ("week", "size"))
+  agg = agg.join(extras, how="left")
+  if snaps is not None and len(snaps):
+    sn = snaps[snaps.game_type == "REG"].assign(gsis=lambda d: d.pfr_player_id.map(pfr2gsis))
+    sn["key"] = sn.gsis.fillna("pfr:" + sn.pfr_player_id.astype(str))
+    sa = sn.groupby("key").agg(snaps_o=("offense_snaps", "sum"), snap_pct=("offense_pct", "mean"), snaps_d=("defense_snaps", "sum"),
+                               snap_pct_d=("defense_pct", "mean"), snap_pct_st=("st_pct", "mean"),
+                               snaps_st=("st_snaps", "sum"), snap_games=("week", "nunique"), sn_name=("player", "last"),
+                               sn_pos=("position", "last"), sn_team=("team", "last"))
+    sa = sa[(sa.snaps_o + sa.snaps_d + sa.snaps_st) > 0]
+    agg = agg.join(sa, how="outer")
+    agg["name"] = agg.name.fillna(agg.sn_name); agg["pos"] = agg.pos.fillna(agg.sn_pos)
+    agg["team"] = agg.team.fillna(agg.sn_team.replace(RELOCATED))
+    agg["games"] = agg.games.fillna(0).combine(agg.snap_games.fillna(0), max)
+    agg = agg.drop(columns=["sn_name", "sn_pos", "sn_team", "snap_games"])
+  agg = agg.fillna({c: 0 for c in cols + ["car_i10", "tgt_rz"]})
+  # Shares of the team's season totals (targets of all passes, designed carries of all runs)
+  agg["tgt_share"] = agg.targets / agg.team.map(team_totals.tgt).replace(0, np.nan)
+  agg["car_share"] = agg.carries / agg.team.map(team_totals.car).replace(0, np.nan)
+  agg.index.name = "pid"
+  return agg.reset_index()
+
+
+def main():
+  opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
+  site = Path(opt.get("site", "site"))
+  cfg = load_config()
+  import nflreadpy as nfl
+  import player_logs as PL
+  cache = D.Cache(ROOT / cfg["data"]["cache_dir"])
+  current = int(nfl.get_current_season())
+  sched = cache.get("schedules", "since1999", lambda: nfl.load_schedules(list(range(FIRST, current + 1))),
+                    stale=cache.age_hours("schedules", "since1999") > 6)
+  a, _, b = opt.get("seasons", f"{FIRST}-{current}").partition("-")
+  seasons = [s for s in range(int(a), int(b or a) + 1) if (sched.season == s).any()]
+  players = cache.get("players", "all", lambda: nfl.load_players(), stale=cache.age_hours("players", "all") > 24 * 7)
+  pfr2gsis = players.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
+  rosters = pd.concat([x for x in (cache.get("rosters", s, lambda: nfl.load_rosters_weekly([s]), stale=False)
+                                   for s in range(max(FIRST, current - 9), current + 1)) if x is not None], ignore_index=True)
+  teams = cache.get("teams", "all", lambda: nfl.load_teams(), stale=False)
+  draft = cache.get("draft", "all", lambda: nfl.load_draft_picks(), stale=cache.age_hours("draft", "all") > 24 * 30)
+  contracts = cache.get("contracts", "all", lambda: PL.load_contracts(nfl), stale=cache.age_hours("contracts", "all") > 24)
+  bios = PL.bio_map(rosters, draft, contracts)
+  out = site / "data" / "stats"
+  out.mkdir(parents=True, exist_ok=True)
+  meta_key = "seasonstats_final"
+  n_final_cur = int(sched[(sched.season == current) & (sched.game_type == "REG")].home_score.notna().sum())
+  done = 0
+  for s in seasons:
+    tf, pf_ = cache.path("seasonstats_teams", s), cache.path("seasonstats_players", s)
+    redo = not tf.exists() or not pf_.exists() or (s == current and cache.meta.get(meta_key) != n_final_cur)
+    if redo:
+      pbp = nfl.load_pbp([s]).select([c for c in PBP_COLS]).to_pandas()
+      for c in ("pass_attempt", "complete_pass", "sack", "interception", "fumble_lost", "rush_attempt", "pass_touchdown",
+                "rush_touchdown", "first_down_rush", "first_down_pass", "first_down_penalty", "third_down_converted",
+                "third_down_failed", "fourth_down_converted", "fourth_down_failed", "penalty", "success"):
+        pbp[c] = pd.to_numeric(pbp[c], errors="coerce").fillna(0)
+      for c in ("yards_gained", "passing_yards", "rushing_yards", "epa", "penalty_yards"):
+        pbp[c] = pd.to_numeric(pbp[c], errors="coerce").fillna(0)
+      ts = team_stats(pbp, sched, s)
+      reg = pbp[pbp.season_type == "REG"].assign(posteam=lambda d: d.posteam.replace(RELOCATED))
+      tt = pd.DataFrame({"tgt": reg[(reg.pass_attempt == 1) & (reg.sack != 1) & reg.receiver_player_id.notna()].groupby("posteam").size(),
+                         "car": reg[(reg.rush_attempt == 1) & (reg.qb_kneel != 1)].groupby("posteam").size()})
+      ps = nfl.load_player_stats([s]).to_pandas()
+      sn = cache.get("snaps", s, lambda: nfl.load_snap_counts([s]), stale=(s == current)) if s >= 2012 else None
+      pl = player_stats(ps, sn, pfr2gsis, player_extras(pbp), tt)
+      ts.to_parquet(tf, index=False); pl.to_parquet(pf_, index=False)
+      if s == current:
+        cache.meta[meta_key] = n_final_cur
+      done += 1
+    ts, pl = pd.read_parquet(tf), pd.read_parquet(pf_)
+    write_team(out / f"teams_{s}.json", ts, s, teams)
+    write_players(out / f"players_{s}.json", pl, s, current, bios)
+  cache.save_meta()
+  (out / "index.json").write_text(json.dumps({"v": V, "seasons": seasons, "current": current, "keys": SCORE_KEYS}), encoding="utf-8")
+  print(f"[stats] {len(seasons)} seasons ({done} recomputed) -> {out}", flush=True)
+
+
+def _clean(v):
+  if v is None or (isinstance(v, float) and not np.isfinite(v)):
+    return None
+  if isinstance(v, (np.integer,)):
+    return int(v)
+  if isinstance(v, (float, np.floating)):
+    return round(float(v), 4) if abs(v - round(v)) > 1e-9 else int(round(v))
+  return v
+
+
+def write_team(path: Path, ts: pd.DataFrame, season: int, teams: pd.DataFrame):
+  cols = [c for c in ts.columns if c != "team"]
+  t = teams.assign(team_abbr=teams.team_abbr.replace(RELOCATED)).drop_duplicates("team_abbr").set_index("team_abbr")
+  info = {a: {"nick": t.at[a, "team_nick"], "name": t.at[a, "team_name"], "logo": t.at[a, "team_logo_espn"], "color": t.at[a, "team_color"]}
+          for a in ts.team if a in t.index}
+  doc = {"v": V, "season": season, "cols": cols, "info": info,
+         "teams": {r.team: [_clean(getattr(r, c)) for c in cols] for r in ts.itertuples()}}
+  path.write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
+
+
+def write_players(path: Path, pl: pd.DataFrame, season: int, current: int, bios: dict):
+  num = [c for c in pl.columns if c not in ("pid", "name", "pos", "team")]
+  rows = []
+  for r in pl.itertuples(index=False):
+    b = bios.get(r.pid, {})
+    d, k = b.get("draft") or {}, b.get("deal") or {}
+    born = b.get("born")
+    age = round((pd.Timestamp(f"{season}-09-07") - pd.Timestamp(born)).days / 365.25, 1) if born else None
+    rows.append([r.pid, r.name, r.pos, r.team] + [_clean(getattr(r, c)) for c in num] + [
+      age, b.get("ht"), b.get("wt"), (b.get("college") or "").split(";")[0].strip() or None,
+      (b.get("exp") - (b.get("exp_s", season) - season)) if b.get("exp") is not None else None,
+      d.get("y"), d.get("r"), d.get("p"), d.get("o"), 1 if d.get("u") else 0,
+      k.get("apy") if season == current else None, k.get("val") if season == current else None,
+      k.get("gtd") if season == current else None, k.get("fa") if season == current else None])
+  cols = ["pid", "name", "pos", "team"] + num + ["age", "ht", "wt", "college", "exp", "draft_y", "draft_r", "draft_p",
+                                                 "draft_o", "udfa", "apy", "deal_val", "deal_gtd", "fa"]
+  doc = {"v": V, "season": season, "cols": cols, "rows": rows, "keys": SCORE_KEYS}
+  path.write_text(json.dumps(doc, separators=(",", ":"), default=_clean), encoding="utf-8")
+
+
+if __name__ == "__main__":
+  main()
