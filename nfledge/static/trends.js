@@ -200,8 +200,8 @@
     read: ['read', vk('rd'), ['rd'], 'k'], pa: ['play action', code('px', ['No play action', 'Play action']), ['px'], 'v'],
     mo: ['motion', code('mo', ['No motion', 'Motion']), ['mo'], 'v'], press: ['pressure', code('pz', ['Clean', 'Pressured']), ['pz'], 'v'],
     depth: ['pass depth', (P, j) => P.ay[j] <= -99 ? null : P.ay[j] < 0 ? 0 : P.ay[j] < 10 ? 1 : P.ay[j] < 20 ? 2 : 3, ['ay'], 'k'],
-    loc: ['pass location', code('pl', [null, 'Left', 'Middle', 'Right']), ['pl'], 'v'], dir: ['run direction', code('rl', [null, 'Left', 'Middle', 'Right']), ['rl'], 'v'],
-    gap: ['run gap', (P, j) => P.rl[j] === 2 ? 'Middle' : [null, 'End', 'Tackle', 'Guard'][P.gp[j]] || null, ['gp'], 'v'],
+    loc: ['pass location', code('pl', [null, 'Left', 'Middle', 'Right']), ['pl'], 'v'], dir: ['run direction', (P, j) => P.rl[j] || null, ['rl'], 'k'],
+    gap: ['run gap', (P, j) => P.rl[j] === 2 ? 4 : P.gp[j] || null, ['gp'], 'k'],  // outside -> inside: end, tackle, guard, middle
     kdist: ['kick distance', (P, j) => P.kd[j] >= 0 ? Math.min(6, Math.floor(P.kd[j] / 10)) : null, [], 'k'],
     roof: ['roof', (P, j, G) => G[P.g[j]][4] ? 'Indoors' : 'Outdoors', [], 'v'], surf: ['surface', (P, j, G) => [null, 'Grass', 'Turf'][G[P.g[j]][5] + 1] || null, [], 'v'],
   };
@@ -210,7 +210,7 @@
     qtr: k => k === 5 ? 'OT' : `Q${k}`, down: k => `${k}${['', 'st', 'nd', 'rd', 'th'][k]} down`, dist: k => k >= 15 ? '15+ to go' : `${k} to go`,
     zone: k => k < 5 ? `Own ${k * 10}-${k * 10 + 9}` : `Opp ${100 - k * 10}-${91 - k * 10}`.replace('Opp 0-', 'Opp 1-'),
     score: k => ['Down 17+', 'Down 9-16', 'Down 1-8', 'Tied', 'Up 1-8', 'Up 9-16', 'Up 17+'][k + 3], box: k => `${k} in the box`,
-    rushers: k => `${k} rushers`, kdist: k => k >= 6 ? '60+ yds' : k < 2 ? 'under 20 yds' : `${k * 10}-${k * 10 + 9} yds`, dbs: k => `${k} DBs`, pers: k => `${k} personnel`, depth: k => ['Behind the line', 'Short (0-9)', 'Intermediate (10-19)', 'Deep (20+)'][k],
+    rushers: k => `${k} rushers`, dir: k => [null, 'Left', 'Middle', 'Right'][k], gap: k => [null, 'End', 'Tackle', 'Guard', 'Middle'][k], kdist: k => k >= 6 ? '60+ yds' : k < 2 ? 'under 20 yds' : `${k * 10}-${k * 10 + 9} yds`, dbs: k => `${k} DBs`, pers: k => `${k} personnel`, depth: k => ['Behind the line', 'Short (0-9)', 'Intermediate (10-19)', 'Deep (20+)'][k],
   };
   const EXAMPLES = [
     ['4th-quarter rushing, one-score games', { fam: 'rush', met: 'ypc', who: 'L', by: 'player', f: { qtr: '4', score: 'one' } }],
@@ -221,6 +221,9 @@
     ['Pass rate over expected', { fam: 'team', met: 'proe', who: 'L', by: 'team', f: { wp: 'ng' } }],
     ['Cold-weather passing by season', { fam: 'pass', met: 'ypa', who: 'L', by: 'season', f: { wx: 'c32' } }],
     ['Field goals from 50+', { fam: 'fg', met: 'pct', who: 'L', by: 'player', f: { fgd: '50' } }],
+    ['Where runs work: direction x gap', { fam: 'rush', met: 'ypc', who: 'L', by: 'dir', by2: 'gap', f: {} }],
+    ['Success by down and distance', { fam: 'team', met: 'sr', who: 'L', by: 'down', by2: 'dist', f: {} }],
+    ['Each team by quarter', { fam: 'team', met: 'epa', who: 'L', by: 'team', by2: 'qtr', f: {} }],
     ['Best kick returners', { fam: 'kr', met: 'avg', who: 'L', by: 'player', f: {} }],
   ];
   const fmt = (v, d) => v == null || !isFinite(v) ? '–' : d ? v.toFixed(d) : Math.round(v).toLocaleString();
@@ -236,13 +239,20 @@
     return FAM[fam].st ? (ST_FILTERS.has(k) || (F.stOnly && only)) : !F.stOnly && only;
   };
   const byAllowed = (k, fam) => FAM[fam].st ? ST_BY.has(k) : k !== 'kdist';
+  // Two-way grids (owner 2026-10-14): a second grouping makes the answer a shaded rows x columns grid. Groupings with
+  // dozens of values (players, teams, coaches) work as rows only; columns must fit a phone (capped, scrolls past that).
+  const GRID_ROW_ONLY = new Set(['player', 'team', 'opp', 'coach']);
+  const GRID_MAX_ROWS = 40, GRID_MAX_COLS = 24;
+  // metrics where a lower number is the good one (the grid shades those the other way)
+  const LOWER = new Set(['skr', 'int', 'stuff', 'fl', 'drop', 'iw', 'ta', 'pz', 'qh', 'rya', 'bk', 'miss']);
+  const numKey = x => (x !== '' && x != null && !isNaN(x) ? +x : x);
 
   NFLE.areas.trends = {
     mount(sec) {
       sec.classList.remove('soon');
       let IX = null, Q = null, busy = 0, paint = null, maxN = 0;
       const base = {}, extra = {}, merged = {};
-      const defaults = () => ({ fam: 'rush', met: 'ypc', who: 'L', wn: '', by: 'player', st: 'reg', from: null, to: null, f: {}, min: null });
+      const defaults = () => ({ fam: 'rush', met: 'ypc', who: 'L', wn: '', by: 'player', by2: '', st: 'reg', from: null, to: null, f: {}, min: null });
       const fromUrl = () => { try { const t = new URLSearchParams(location.search).get('t'); return t ? JSON.parse(decodeURIComponent(escape(atob(t)))) : null; } catch (e) { return null; } };
       const saved = () => { try { return JSON.parse(localStorage.getItem(LS) || 'null'); } catch (e) { return null; } };
       sec.innerHTML = `<div class="sec-head"><div><h2>Trends</h2><p>Ask the play-by-play anything: every run and pass since 1999, with charting (personnel, coverage, routes, pressure, play action...) where it exists. Tap any word to change it.</p></div></div>
@@ -259,6 +269,7 @@
         const [, m] = famMetric(), s = new Set(m[3] || []);
         Object.keys(Q.f).forEach(k => (FILTERS[k].need || []).forEach(c => s.add(c)));
         (BY[Q.by][2] || []).forEach(c => s.add(c));
+        if (Q.by2 && BY[Q.by2]) (BY[Q.by2][2] || []).forEach(c => s.add(c));
         return [...s];
       };
       const tracked = () => new Set(IX.tracked || Object.keys(CNAME));
@@ -277,6 +288,7 @@
         const yrs = IX.seasons.map(s => [s, s]);
         const span = `${sel('tr-from', yrs, Q.from, 'From season')}<span class="tr-w">to</span>${sel('tr-to', yrs, Q.to, 'To season')}`;
         const st = sel('tr-st', [['reg', 'regular season'], ['post', 'playoffs'], ['both', 'regular season + playoffs']], Q.st, 'Season type');
+        const by2 = sel(`tr-by2${Q.by2 ? '' : ' tr-off'}`, [['', 'nothing else'], ...Object.entries(BY).filter(([k]) => k !== Q.by && !GRID_ROW_ONLY.has(k) && byAllowed(k, Q.fam)).map(([k, b]) => [k, b[0]])], Q.by2 || '', 'Then by (grid)');
         const by = sel('tr-by', Object.entries(BY).filter(([k]) => byAllowed(k, Q.fam) && !(k === 'player' && (Q.fam === 'team' || /^P:/.test(Q.who)))).map(([k, b]) => [k, b[0]]), Q.by, 'Group by');
         const chips = Object.entries(Q.f).map(([k, v]) => `<span class="tr-fchip">${sel('tr-f', FILTERS[k].opts.map(o => [o[0], o[1]]), v, FILTERS[k].label, ` data-f="${k}"`)}<button type="button" class="tr-x" data-x="${k}" aria-label="Remove">&times;</button></span>`).join('');
         const groups = {};
@@ -284,7 +296,7 @@
         const add = `<select class="tr-chip tr-add" aria-label="Add a filter"><option value="">+ filter</option>${Object.entries(groups).map(([g, fs]) => `<optgroup label="${esc(g)}">${fs.map(([k, l]) => opt(k, l)).join('')}</optgroup>`).join('')}</select>`;
         qbox.innerHTML = `<div class="tr-line">${sel('tr-fam', Object.entries(FAM).map(([k, f]) => [k, f.label]), Q.fam, 'Stat family')} ${metSel} <span class="tr-w">for</span> ${who}</div>
           <div class="tr-line">${chips} ${add}</div>
-          <div class="tr-line">${span} <span class="tr-w">&middot;</span> ${st} <span class="tr-w">&middot; by</span> ${by}</div>
+          <div class="tr-line">${span} <span class="tr-w">&middot;</span> ${st} <span class="tr-w">&middot; by</span> ${by} <span class="tr-w">and</span> ${by2}</div>
           <div class="tr-line tr-tools"><div class="tr-min"><span class="tr-w">min</span><button type="button" class="tr-step" data-step="-1" aria-label="One fewer">&minus;</button><input type="range" min="0" max="${Math.max(maxN, Q.min ?? fam.min, fam.min * 2)}" step="1" value="${Q.min ?? fam.min}" aria-label="Minimum sample"><button type="button" class="tr-step" data-step="1" aria-label="One more">+</button> <b>${Q.min ?? fam.min}</b> <span class="tr-w">${esc(fam.unit)}</span></div>
             <button type="button" class="tr-share">Copy link</button></div>`;
         const f = qbox.querySelector('.tr-find'); if (f) { fillFind(); f.focus(); }
@@ -346,7 +358,7 @@
           const [fam, m] = famMetric();
           const tests = Object.entries(Q.f).map(([k, v]) => (FILTERS[k].opts.find(o => o[0] === v) || [])[2]).filter(Boolean);
           const [wk, ...rest] = Q.who === 'L' ? ['L'] : Q.who.split(':'), wv = rest.join(':');
-          const by = BY[Q.by], groups = new Map(), league = blank(), names = {}, teamOf = {};
+          const by = BY[Q.by], by2 = Q.by2 && BY[Q.by2] ? BY[Q.by2] : null, groups = new Map(), league = blank(), names = {}, teamOf = {};
           let plays = 0;
           list.forEach(({ D, P, V, PL, n }) => {
             const G = D.games, T = D.teams;
@@ -371,8 +383,11 @@
               let key;
               if (Q.by === 'player') { key = PL[act][0]; teamOf[key] = T[P.o[j]]; } else key = by[1](P, j, G, D, V);
               if (key == null) continue;
+              let k2 = null;
+              if (by2) { k2 = by2[1](P, j, G, D, V); if (k2 == null) continue; }
               plays++;
-              let a = groups.get(key); if (!a) { a = blank(); groups.set(key, a); }
+              const gk = by2 ? `${key}||${k2}` : key;
+              let a = groups.get(gk); if (!a) { a = blank(); a._k = [key, k2]; groups.set(gk, a); }
               common(a, P, j); fam.add(a, P, j);
             }
           });
@@ -384,6 +399,56 @@
           const slider = qbox.querySelector('.tr-min input');
           if (slider) slider.max = Math.max(maxN, Q.min ?? fam.min, fam.min * 2);
           const whoTxt = wk === 'L' ? '' : ` &middot; this query: ${fmt(plays)} ${esc(fam.unit)}`;
+          if (by2) {
+            sec.querySelector('.tr-base').innerHTML = `League, same situation: <b>${fmt(lg, m[2])}</b> ${esc(m[0])} on ${fmt(league.n)} ${esc(fam.unit)}${whoTxt}`;
+            sec.querySelector('.tr-trend').innerHTML = '';
+            const lab2 = BYLABEL[Q.by2], tb = sec.querySelector('.tr-tbl');
+            const rowLab = k => Q.by === 'player' ? names[k] || k : lab ? lab(numKey(k)) : String(k);
+            const colLab = k => lab2 ? lab2(numKey(k)) : String(k);
+            const cells = [...groups.values()].map(a => ({ r: a._k[0], c: a._k[1], a, n: den(a), v: m[1](a) }));
+            const order = (keys, how, tot) => how === 'v' ? keys.sort((x, y) => tot.get(y) - tot.get(x))
+              : keys.sort((x, y) => { const p = numKey(x), q = numKey(y), d = typeof p === 'number' && typeof q === 'number' ? p - q : String(p).localeCompare(String(q)); return how === 'kd' ? -d : d; });
+            const totR = new Map(), totC = new Map(), allR = new Map();
+            // each row's overall accumulator (the "All" column, and the order of player / team rows: best first)
+            const merge = (t, a) => { Object.keys(a).forEach(k => { if (k !== '_k') t[k] = k === 'lg' ? Math.max(t[k] || 0, a[k]) : (t[k] || 0) + a[k]; }); return t; };
+            cells.forEach(x => { totR.set(x.r, (totR.get(x.r) || 0) + x.n); totC.set(x.c, (totC.get(x.c) || 0) + x.n);
+              allR.set(x.r, merge(allR.get(x.r) || blank(), x.a)); });
+            const rowV = r => { const a = allR.get(r); const v = m[1](a); return den(a) >= (Q.min ?? fam.min) && isFinite(v) ? v : null; };
+            const byMetric = keys => keys.sort((x, y) => { const p = rowV(x), q = rowV(y); if (p == null || q == null) return (p == null) - (q == null) || totR.get(y) - totR.get(x); return LOWER.has(Q.met) ? p - q : q - p; });
+            const rowsK = by[3] === 'v' ? byMetric([...totR.keys()]) : order([...totR.keys()], by[3], totR), colsK = order([...totC.keys()], by2[3], totC);
+            // too many: keep the biggest samples, then restore the grouping's own order
+            const keep = (keys, tot, cap, how) => keys.length <= cap ? keys : order([...keys].sort((x, y) => tot.get(y) - tot.get(x)).slice(0, cap), how, tot);
+            const R = rowsK.length <= GRID_MAX_ROWS ? rowsK : by[3] === 'v' ? byMetric([...rowsK].sort((x, y) => totR.get(y) - totR.get(x)).slice(0, GRID_MAX_ROWS)) : keep(rowsK, totR, GRID_MAX_ROWS, by[3]);
+            const C = keep(colsK, totC, GRID_MAX_COLS, by2[3]);
+            const at = new Map(cells.map(x => [`${x.r}||${x.c}`, x]));
+            const lowGood = LOWER.has(Q.met), count = m[2] === 0;
+            const draw = () => {
+              const min = Q.min ?? fam.min, shown = cells.filter(x => x.n >= min && isFinite(x.v));
+              const spread = count ? Math.max(1, ...shown.map(x => x.v)) : Math.max(1e-9, ...shown.map(x => Math.abs(x.v - lg)));
+              const shade = x => {
+                if (count) return `background: color-mix(in srgb, var(--accent) ${Math.round(8 + 52 * x.v / spread)}%, var(--panel2))`;
+                const d = x.v - lg, good = lowGood ? d < 0 : d > 0, w = Math.round(8 + 52 * Math.min(1, Math.abs(d) / spread));
+                return `background: color-mix(in srgb, ${good ? '#4fbf6f' : '#d9655b'} ${w}%, var(--panel2))`;
+              };
+              const hidden = cells.filter(x => x.n < min).length;
+              const head = `<tr><th class="tr-gc0">${esc(by[0])} <span class="muted">/</span> ${esc(by2[0])}</th>${C.map(c => `<th>${esc(colLab(c))}</th>`).join('')}<th class="tr-gall">All</th></tr>`;
+              const allCell = r => { const a = allR.get(r), n = den(a), v = m[1](a);
+                return n >= min && isFinite(v) ? `<td class="tr-gall" style="${shade({ v, n })}"><b>${fmt(v, m[2])}</b><i>${fmt(n)}</i></td>` : '<td class="tr-ge tr-gall">&middot;</td>'; };
+              const body = R.map(r => `<tr><th class="tr-gc0"${Q.by === 'player' && /^\d\d-\d{7}$/.test(r) ? ` data-open-pid="${esc(r)}"` : ''}>${esc(rowLab(r))}${Q.by === 'player' && teamOf[r] ? ` <span class="sub">${esc(teamOf[r])}</span>` : ''}</th>${C.map(c => {
+                const x = at.get(`${r}||${c}`);
+                if (!x || x.n < min || !isFinite(x.v)) return `<td class="tr-ge" title="${x ? `${fmt(x.n)} ${esc(unit.toLowerCase())}: under the minimum` : 'none'}">&middot;</td>`;
+                return `<td style="${shade(x)}" title="${esc(rowLab(r))} / ${esc(colLab(c))}: ${fmt(x.v, m[2])} ${esc(m[0])} on ${fmt(x.n)} ${esc(unit.toLowerCase())}"><b>${fmt(x.v, m[2])}</b><i>${fmt(x.n)}</i></td>`;
+              }).join('')}${allCell(r)}</tr>`).join('');
+              const capped = (R.length < rowsK.length ? ` Showing the ${R.length} ${esc(by[0])} rows with the most ${esc(fam.unit)}.` : '') + (C.length < colsK.length ? ` Showing ${C.length} of ${colsK.length} columns.` : '');
+              tb.innerHTML = `<p class="tr-gnote muted">${count ? 'Darker = more.' : `Green = better than the league (${fmt(lg, m[2])}), red = worse${lowGood ? ' (lower is better here)' : ''}.`} Small number = ${esc(unit.toLowerCase())}.${hidden ? ` ${hidden} cell${hidden === 1 ? '' : 's'} under ${min} hidden (&middot;).` : ''}${capped}</p>
+                <div class="tr-gwrap"><table class="tr-grid"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+            };
+            maxN = cells.reduce((mx, x) => Math.max(mx, x.n), 0);
+            const slider = qbox.querySelector('.tr-min input');
+            if (slider) slider.max = Math.max(maxN, Q.min ?? fam.min, fam.min * 2);
+            paint = draw; draw();
+            return;
+          }
           sec.querySelector('.tr-base').innerHTML = `League, same situation: <b>${fmt(lg, m[2])}</b> ${esc(m[0])} on ${fmt(league.n)} ${esc(fam.unit)}${whoTxt}`;
           const trend = sec.querySelector('.tr-trend');
           if (Q.by === 'season' && rows.length > 1) {
@@ -438,6 +503,7 @@
           if (Q.fam === 'team' && /^P:/.test(Q.who)) { Q.who = 'L'; Q.wn = ''; }
           Object.keys(Q.f).forEach(k => { if (!allowed(k, Q.fam)) delete Q.f[k]; });
           if (!byAllowed(Q.by, Q.fam)) Q.by = Q.fam === 'team' ? 'team' : 'player';
+          if (Q.by2 && !byAllowed(Q.by2, Q.fam)) Q.by2 = '';
           maxN = 0;
         } else if (t.matches('.tr-met')) Q.met = t.value;
         else if (t.matches('.tr-who')) { Q.who = t.value; if (!/^[PC]:/.test(Q.who)) Q.wn = ''; if (/^P:/.test(Q.who) && Q.by === 'player') Q.by = 'season'; }
@@ -447,7 +513,8 @@
         } else if (t.matches('.tr-from')) { Q.from = +t.value; if (Q.to < Q.from) Q.to = Q.from; }
         else if (t.matches('.tr-to')) { Q.to = +t.value; if (Q.from > Q.to) Q.from = Q.to; }
         else if (t.matches('.tr-st')) Q.st = t.value;
-        else if (t.matches('.tr-by')) Q.by = t.value;
+        else if (t.matches('.tr-by')) { Q.by = t.value; if (Q.by2 === Q.by) Q.by2 = ''; }
+        else if (t.matches('.tr-by2')) Q.by2 = t.value;
         else if (t.matches('.tr-f')) Q.f[t.dataset.f] = t.value;
         else if (t.matches('.tr-add') && t.value) Q.f[t.value] = FILTERS[t.value].opts[0][0];
         else return;

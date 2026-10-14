@@ -28,3 +28,19 @@ table.dt td.tr-main b { color: var(--ink); }
 .tr-covnote { margin: 0 2px 8px; padding: 7px 10px; font-size: 12.5px; color: var(--muted); border-left: 3px solid #e0b34a; background: color-mix(in srgb, #e0b34a 8%, transparent); border-radius: 0 6px 6px 0; }
 .tr-find { min-width: 12em; cursor: text; font-weight: 600; }
 .tr-find::placeholder { color: var(--muted); }
+
+/* two-way grid: shaded cells (value + sample), sticky row labels, scrolls sideways inside its own box */
+.tr-chip.tr-off { background: var(--panel2); border-color: var(--line); color: var(--muted); font-weight: 600; }
+.tr-gnote { margin: 4px 2px 8px; font-size: 12.5px; }
+.tr-gwrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--line); border-radius: 10px; }
+table.tr-grid { border-collapse: separate; border-spacing: 2px; font-variant-numeric: tabular-nums; }
+table.tr-grid th { font-size: 11.5px; font-weight: 700; color: var(--muted); padding: 6px 6px; white-space: nowrap; text-align: center; }
+table.tr-grid th.tr-gc0 { position: sticky; left: 0; z-index: 1; background: var(--panel); text-align: left; color: var(--ink); font-size: 12.5px; max-width: 11em; overflow: hidden; text-overflow: ellipsis; }
+table.tr-grid thead th.tr-gc0 { color: var(--muted); font-size: 11px; }
+table.tr-grid th[data-open-pid] { cursor: pointer; }
+table.tr-grid th .sub { color: var(--muted); font-weight: 600; font-size: 10.5px; }
+table.tr-grid td { min-width: 52px; padding: 5px 4px; border-radius: 6px; text-align: center; background: var(--panel2); line-height: 1.15; }
+table.tr-grid td b { display: block; font-size: 13px; color: var(--ink); }
+table.tr-grid td i { display: block; font-style: normal; font-size: 10px; color: var(--muted); }
+table.tr-grid td.tr-ge { color: var(--muted); background: none; }
+table.tr-grid .tr-gall { border-left: 2px solid var(--line); } table.tr-grid th.tr-gall { color: var(--ink); }

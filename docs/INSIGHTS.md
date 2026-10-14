@@ -640,6 +640,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Allgeier 2023; Saquon 2022 / 2024 / 2025 not bottom-quartile; workhorse stars top half) and (b) guardrail: RB
   rank corr. of season-only grade with next-season fantasy pts/g (both seasons qualified, 2019-2025) not
   significantly below the current grade's.
+- **Trends two-way grids (owner pick from the ideas list, 2026-10-14):** "by X and Y" -> shaded grid (green / red
+  vs the league, flipped for lower-is-better metrics; counts shade by size), sample under each value, cells under the
+  minimum hidden, an All column, player / team / coach rows only (columns must fit a phone; caps 40 x 24), player /
+  team rows sorted by their overall metric. Remaining ideas (ranked): type-a-question parser, distribution strip,
+  +/- ranges + sample-adjusted sort, tap-through to plays, compare mode, lines for any ordered grouping, Rank column,
+  web worker, share-as-image.
 - **Penalties (owner 2026-10-14, "you pick where"):** team page Week tab box (per game + league rank, drawn, top
   calls, most-flagged players), player page box (season by type + career by season), Teams > Stats columns.
   nflverse pbp keeps one (the main) penalty per play; ~3,500 / season, 92% with a player. Bug fixed: stats_build
