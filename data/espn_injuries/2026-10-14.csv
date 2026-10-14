@@ -24,7 +24,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241482,Jedrick Wills Jr.,Arizona Cardinals,Active,2026-10-07T00:36Z,,,,,,The Cardinals signed Wills off the Bills' practice squad to their active roster Tuesday.
 4428991,Paris Johnson Jr.,Arizona Cardinals,Injured Reserve,2026-10-07T00:29Z,Biceps,Surgery,Left,2027-02-15,IR,The Cardinals placed Johnson (biceps) on injured reserve Tuesday.
 4239944,Hunter Long,Arizona Cardinals,Injured Reserve,2026-10-06T23:22Z,Knee,Not Specified,Not Specified,2026-11-08,IR,The Cardinals placed Long (knee) on injured reserve Tuesday.
-4360423,Michael Penix Jr.,Atlanta Falcons,Questionable,2026-10-14T16:21Z,Ribs,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Falcons head coach Kevin Stefanski said that Penix (ribs) will practice Wednesday but will be limited in some fashion, Marc Raimondi of ESPN.com reports."
+4360423,Michael Penix Jr.,Atlanta Falcons,Active,2026-10-14T21:20Z,,,,,,
 4361409,Jahan Dotson,Atlanta Falcons,Active,2026-10-14T01:55Z,,,,,,Dotson caught two of four passes for 54 yards during the Falcons' 30-23 overtime loss to the Ravens on Sunday.
 3043168,Za'Darius Smith,Atlanta Falcons,Questionable,2026-10-13T17:10Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4241474,Brian Robinson Jr.,Atlanta Falcons,Active,2026-10-13T01:14Z,,,,,,Robinson handled seven carries for 16 yards and did not catch his only target during Sunday's 30-23 overtime loss versus the Ravens. He also returned two kickoffs for 61 return yards.
@@ -212,7 +212,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426485,Jonathan Mingo,Dallas Cowboys,Active,2026-10-10T17:35Z,,,,,,Mingo caught two of four passes for 20 yards during the Cowboys' 24-16 loss to the Buccaneers on Thursday.
 3676833,KaVontae Turpin,Dallas Cowboys,Active,2026-10-10T17:31Z,,,,,,"Turpin caught two of four passes for 22 yards during the Cowboys' 24-16 loss to the Buccaneers on Thursday. He also returned one punt for 10 yards and added 127 yards on five kickoff returns, fumbling on one of them."
 4609048,Tyler Guyton,Dallas Cowboys,Questionable,2026-10-10T02:11Z,Back,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Head coach Brian Schottenheimer said Friday that X-rays on Guyton's back came back negative, Joe Hoyt of The Dallas Morning News reports."
-4241389,CeeDee Lamb,Dallas Cowboys,Questionable,2026-10-09T12:44Z,Quadriceps,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Lamb is believed to be dealing with a ""quad bruise"" that is ""not considered to be serious,"" Ian Rapoport of NFL Network reports."
+4241389,CeeDee Lamb,Dallas Cowboys,Questionable,2026-10-09T12:44Z,,,,,,"Lamb is believed to be dealing with a ""quad bruise"" that is ""not considered to be serious,"" Ian Rapoport of NFL Network reports."
 4242355,Jake Ferguson,Dallas Cowboys,Active,2026-10-09T04:55Z,,,,,,Ferguson brought in three of six targets for 19 yards in the Cowboys' 24-16 loss to the Buccaneers on Thursday night.
 5083754,Ryan Flournoy,Dallas Cowboys,Active,2026-10-09T04:49Z,,,,,,Flournoy brought in three of four targets for 90 yards in the Cowboys' 24-16 loss to the Buccaneers on Thursday night.
 3953687,Brandon Aubrey,Dallas Cowboys,Active,2026-10-09T04:09Z,,,,,,Aubrey made his only field-goal attempt and his lone extra-point try in a Week 5 loss to Tampa Bay on Thursday.
@@ -574,7 +574,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3918310,Carl Granderson,New Orleans Saints,Active,2026-10-09T22:40Z,,,,,,"Granderson (ankle) does not carry an injury designation ahead of Sunday's game against the Vikings, Emily Leiker of The Minnesota Star Tribune reports."
 4879276,Bryce Lance,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Lance turned five targets into a seven-yard catch during the Saints' 45-24 loss to the Falcons on Monday.
 4702559,Oscar Delp,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Delp was not targeted during Monday's 45-24 loss versus the Falcons.
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-14T21:00Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-14T21:20Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+3123075,Braxton Berrios,New York Giants,Injured Reserve,2026-10-14T21:17Z,Foot,Surgery,Not Specified,2027-02-15,IR,"Berrios (foot) underwent successful surgery Friday to repair a Lisfranc injury, Jordan Raanan of ESPN.com reports."
 4361266,Greg Newsome II,New York Giants,Questionable,2026-10-14T20:55Z,Groin,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4259566,Andrew Thomas,New York Giants,Questionable,2026-10-14T20:52Z,Groin,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4725996,Abdul Carter,New York Giants,Questionable,2026-10-14T20:52Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -598,7 +599,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4595348,Malik Nabers,New York Giants,Active,2026-10-11T21:52Z,,,,,,Nabers caught 11 of 20 targets for 121 yards and a touchdown in Sunday's 27-27 tie against the Commanders.
 4433970,J.J. McCarthy,New York Giants,Active,2026-10-11T16:07Z,,,,,,"McCarthy is serving as the Giants No. 2 quarterback for Sunday's game against the Commanders, Jordan Raanan of ESPN.com reports."
 4036132,Chauncey Golston,New York Giants,Injured Reserve,2026-10-11T01:28Z,Neck,Not Specified,Not Specified,2026-11-12,IR,"The Giants placed Golston (neck) on injured reserve Saturday, Dan Salomone of the Giants' official site reports."
-2531358,Chris Manhertz,New York Giants,Active,2026-10-09T21:40Z,,,,,,
 4723820,Omar Cooper Jr.,New York Jets,Injured Reserve,2026-10-14T20:26Z,Ankle,Sprain,Not Specified,2026-10-18,IR-R,Cooper (ankle) was a limited participant in Wednesday's practice.
 5083315,Kenyon Sadiq,New York Jets,Questionable,2026-10-14T20:23Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,Sadiq (concussion) was a limited practice participant Wednesday.
 4426686,Dane Belton,New York Jets,Questionable,2026-10-14T20:18Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
