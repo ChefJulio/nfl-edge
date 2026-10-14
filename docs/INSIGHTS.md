@@ -214,7 +214,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 | Garbage-time share of recent points -> next-week error | +0.002 [-0.06, +0.07] pts per +10 pts of share (all), no position significant: nothing |
 | Folklore: revenge games, primetime | Revenge (vs a former team) -0.04 [-0.76, +0.64]; primetime -0.19 [-0.53, +0.16]; a player's primetime gap doesn't persist (corr +.04 [-.06, +.15]) |
 | Division familiarity (2006-25 results, 2021-25 backtest) | First-meeting loser vs spread in the rematch -0.11 [-0.93, +0.70]; rematch margins +0.8 larger [0.0, +1.6] but not vs the spread; players in 1st / 2nd division meetings vs projection ns. Division games went under the total by 1.5-1.8 pts more than others 2006-19, but -0.09 [-1.41, +1.20] since 2020: the market corrected |
-| Age as a model input (`experiments.age_input`, owner, 2026-10-14) | Descriptive: walk-forward error drifts with age, WR -0.10 pts/yr [-0.16, -0.04], RB -0.08 [-0.15, -0.004] (young RBs 21-23 +0.8 [+0.1, +1.5] above projection), QB/TE none; raw output by age is flat (survivors). One linear age term in all share + efficiency regressions: MAE ALL -0.000 [-0.004, +0.003], RB -0.004 [-0.008, +0.001], QB +0.010 [-0.001, +0.022], seasons mixed; QB pass-TD Brier -0.0004 better, others ns. Gate (overall MAE better) not met |
+| Age as a model input (`experiments.age_input`, owner, 2026-10-14) | Descriptive: walk-forward error drifts with age, WR -0.10 pts/yr [-0.16, -0.04], RB -0.08 [-0.15, -0.004] (young RBs 21-23 +0.8 [+0.1, +1.5] above projection), QB/TE none; raw output by age is flat (survivors). One linear age term in all share + efficiency regressions: MAE ALL -0.000 [-0.004, +0.003], RB -0.004 [-0.008, +0.001], QB +0.010 [-0.001, +0.022], seasons mixed; QB pass-TD Brier -0.0004 better, others ns. Gate (overall MAE better) not met. Owner: stars age well (Brady, Adams), make it position-specific -> RB/WR only (`age_input = ["RB", "WR"]`), linear and quadratic (`age_shape`): RB -0.004 [-0.009, +0.001] / -0.002, WR -0.002 / -0.002 (both ns), TE +0.001 worse, 2026 worse in both. Rejected: the drift is real in the residuals but a fitted age term doesn't recover it out of sample |
 | Insensitive (kept): train window 2/3/4, prior weight/decay, eff season weights, WP window, QB-inexp cutoff/penalty, GB sizes, redistribution trigger, team half-life | within noise |
 | Gradient border / white logo circles / light pills on dark rows | Owner rejected visually |
 
@@ -441,8 +441,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 - CI: `.github/workflows/deploy.yml` (contents: write for the archive commit; ~4-5 min per run).
 
 ## 9. Open threads / next steps (as of 2026-10-12)
-- **From the 2026-10-14 research batch (section 5 has the numbers):** (1) Age restricted to RB / WR (where the
-  drift is), set up as its own pre-registered test; the all-position term added QB noise. (2) "Not extended entering
+- **From the 2026-10-14 research batch (section 5 has the numbers):** (2) "Not extended entering
   the last rookie-deal year" (rounds 2-7, year 4, no new contract signed by then; knowable pre-season): actual minus
   projection -0.60 [-1.21, -0.03] vs others, placebo year 3 +0.20. Near the CI edge after many tests, so suspect;
   a plausible mechanism (the team passed on him). The naive "contract year = last season paid" version (-1.36) uses

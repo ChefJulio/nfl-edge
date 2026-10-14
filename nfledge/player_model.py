@@ -56,8 +56,7 @@ def EFF_FEATURES(comp: str, opp: str, unit: str, exp: dict | None = None, group:
     cols.append("adot")
   # EXPERIMENT (owner, 2026-10-14): age. Walk-forward error drifts with age (WR -0.10 pts per year [-0.16, -0.04],
   # RB -0.08): the multi-season rate history lags improving young players and declining older ones.
-  if exp.get("age_input"):
-    cols.append("age_c")
+  cols += age_cols(exp, group)
   # EXPERIMENT: goal-line role. A back whose share of the team's inside-10 carries runs above his overall carry
   # share (a "vulture") should score more TDs per carry than his history of all carries alone says.
   if exp.get("gl_share") and comp == "rush_td":
@@ -142,7 +141,17 @@ def add_rb_inputs(d: pd.DataFrame, conc: dict | None) -> pd.DataFrame:
   return d
 
 
-def SHARE_FEATURES(share: str, exp: dict | None = None) -> list[str]:
+def age_cols(exp: dict, group: str | None) -> list[str]:
+  """EXPERIMENT (experiments.age_input): True = every position group, or a list of groups (e.g. ["RB", "WR"]: the
+  walk-forward error drifts with age there, not at QB / TE); experiments.age_shape "linear" (default) or
+  "quadratic" (decline that steepens with age)."""
+  on = exp.get("age_input")
+  if not on or (isinstance(on, (list, tuple)) and group not in on):
+    return []
+  return ["age_c", "age_sq"] if exp.get("age_shape") == "quadratic" else ["age_c"]
+
+
+def SHARE_FEATURES(share: str, exp: dict | None = None, group: str | None = None) -> list[str]:
   exp = exp or {}
   cols = [share, f"{share}_long"]
   # Game script: the team's Vegas spread, and spread x the player's own share so lead roles and change-of-pace
@@ -153,8 +162,7 @@ def SHARE_FEATURES(share: str, exp: dict | None = None) -> list[str]:
     cols += ["ay_share", "ay_share_long"]
   if exp.get("snap_input"):
     cols.append("snap_pct")
-  if exp.get("age_input"):  # see EFF_FEATURES
-    cols.append("age_c")
+  cols += age_cols(exp, group)  # see EFF_FEATURES
   # EXPERIMENT: committee vs bellcow teams. The team's lead-back concentration, and concentration x the player's
   # own share (on a committee team a big recent share should regress more; on a bellcow team it should stick).
   if exp.get("rbbc") and share == "carry_share":
@@ -576,6 +584,7 @@ class PlayerModel:
     when = pd.Timestamp(f"{season}-09-07") + pd.Timedelta(days=7 * (week - 1))
     birth = self.info.birth.reindex(f.index) if "birth" in self.info else pd.Series(pd.NaT, index=f.index)
     f["age_c"] = ((when - birth).dt.days / 365.25 - 27.0).fillna(0.0)
+    f["age_sq"] = f.age_c ** 2
     f.attrs["when"] = when
     return f
 
@@ -626,7 +635,7 @@ class PlayerModel:
       for gp in groups:
         d = t[(t.pos == gp) & t[share].notna()]
         if len(d) > 50:
-          self.share_models[(share, gp)] = Linear.fit(d, f"y_{share}", SHARE_FEATURES(share, self.exp), weight=den,
+          self.share_models[(share, gp)] = Linear.fit(d, f"y_{share}", SHARE_FEATURES(share, self.exp, gp), weight=den,
                                                       name=f"{share}/{gp}")
     # Team goal-line volume (used by experiments.gl_struct): share of a team's designed rushes that come inside the
     # 10, from its implied points and run-offense rating, one row per team-game of the training seasons.
@@ -719,6 +728,7 @@ class PlayerModel:
       p["age_c"] = ((f.attrs["when"] - birth).dt.days / 365.25 - 27.0).fillna(0.0)
     else:
       p["age_c"] = p.age_c.fillna(0.0) if "age_c" in p else 0.0
+    p["age_sq"] = p.age_c ** 2
 
     self.share_hats(p)
     self._qb_starters(p)
@@ -749,6 +759,8 @@ class PlayerModel:
         p[f"{sh}_x_spread"] = p[sh] * p.spread_team.fillna(0.0)
     if "age_c" not in p:  # rows built outside features() (injury absorption): typical age
       p["age_c"] = 0.0
+    if "age_sq" not in p:
+      p["age_sq"] = p.age_c ** 2
     if "team_conc" not in p:  # callers that build rows themselves (injury absorption): league-typical team
       p["team_conc"] = RB_DEFAULT_CONC
     p["carry_share_x_conc"] = p.carry_share.fillna(0.0) * p.team_conc.fillna(RB_DEFAULT_CONC)
@@ -778,6 +790,8 @@ class PlayerModel:
       p["i10_tilt"] = 0.0
     if "age_c" not in p:
       p["age_c"] = 0.0
+    if "age_sq" not in p:
+      p["age_sq"] = p.age_c ** 2
     if "gl_frac" not in p:
       self.add_gl_frac(p)
     if "rz_frac" not in p:

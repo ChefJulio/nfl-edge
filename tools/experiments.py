@@ -67,6 +67,8 @@ VARIANTS = {
   "coach_aggr": variant(experiments__coach_aggr=True),
   "rz_struct": variant(experiments__rz_struct=True),
   "age_input": variant(experiments__age_input=True),
+  "age_rbwr": variant(experiments__age_input=["RB", "WR"]),
+  "age_rbwr_quad": variant(experiments__age_input=["RB", "WR"], experiments__age_shape="quadratic"),
   "air_yards": variant(experiments__air_yards=True),
   "snap_input": variant(experiments__snap_input=True),
   "share_hl_3": variant(player_model__share_half_life_weeks=3.0),
