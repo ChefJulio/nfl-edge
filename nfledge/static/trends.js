@@ -31,6 +31,7 @@
              pr: ['Pass rate %', a => 100 * a.db / a.n, 1], fd: ['1st down %', a => 100 * a.fd / a.n, 1], plays: ['Plays', a => a.n, 0], td: ['TDs', a => a.td, 0] } },
   };
   const FIRST = { rush: 'ypc', pass: 'epa', rec: 'ypt', team: 'epa' };
+  const COUNT = { att: 1, tgt: 1, plays: 1 };  // metrics equal to the sample column: not repeated as extras
   // ---- situation filters: each a list of [value, label, test]
   const FILTERS = {
     qtr: ['Quarter', [['1', '1st quarter', (P, j) => P.q[j] === 1], ['2', '2nd quarter', (P, j) => P.q[j] === 2], ['3', '3rd quarter', (P, j) => P.q[j] === 3],
@@ -62,7 +63,7 @@
   NFLE.areas.trends = {
     mount(sec) {
       sec.classList.remove('soon');
-      let IX = null, Q = null, table = null, busy = 0;
+      let IX = null, Q = null, table = null, busy = 0, paint = null;
       const files = {};
       const defaults = () => ({ fam: 'rush', met: 'ypc', who: 'L', by: 'player', st: 'reg', from: null, to: null, f: {}, min: null });
       const fromUrl = () => { try { const t = new URLSearchParams(location.search).get('t'); return t ? JSON.parse(decodeURIComponent(escape(atob(t)))) : null; } catch (e) { return null; } };
@@ -166,15 +167,16 @@
             { key: 'v', label: m[0], num: true, cls: 'tr-main', value: r => isFinite(r.v) ? r.v : null, html: r => `<b>${fmt(r.v, m[2])}</b>` },
             { key: 'dv', label: 'vs league', num: true, value: r => isFinite(r.v) ? r.v - lg : null,
               html: r => { const d = r.v - lg; return isFinite(d) ? `<span class="${d > 0 ? 'tr-up' : d < 0 ? 'tr-dn' : ''}">${d > 0 ? '+' : ''}${fmt(d, m[2] || 0)}</span>` : '–'; } },
-            ...Object.entries(fam.met).filter(([k]) => k !== Q.met).slice(0, 4).map(([k, mm]) => ({ key: `m_${k}`, label: mm[0], num: true,
+            ...Object.entries(fam.met).filter(([k]) => k !== Q.met && !COUNT[k]).slice(0, 4).map(([k, mm]) => ({ key: `m_${k}`, label: mm[0], num: true,
               value: r => { const v = mm[1](r.a); return isFinite(v) ? v : null; }, html: r => fmt(mm[1](r.a), mm[2]) })),
           ];
           const tb = sec.querySelector('.tr-tbl');
-          if (!rows.length) { tb.innerHTML = '<p class="muted">No plays match.</p>'; table = null; return; }
+          if (!rows.length) { tb.innerHTML = '<p class="muted">No plays match.</p>'; table = null; paint = null; return; }
           const sortKey = Q.by === 'season' || Q.by === 'qtr' || Q.by === 'down' ? 'label' : 'v';
           const opt = { columns: cols, rows, sort: { key: sortKey, dir: sortKey === 'label' ? (Q.by === 'season' ? 'desc' : 'asc') : 'desc' },
             rowClass: r => r.n < min ? 'tr-low' : '', rowAttrs: r => Q.by === 'player' && /^\d\d-\d{7}$/.test(r.key) ? `data-open-pid="${esc(r.key)}"` : '' };
-          tb.innerHTML = ''; table = NFLE.Table(tb, opt);
+          paint = () => { opt.rowClass = r => r.n < (Q.min ?? fam.min) ? 'tr-low' : ''; tb.innerHTML = ''; table = NFLE.Table(tb, opt); };
+          paint();
         }).catch(e => { sec.querySelector('.tr-base').textContent = `Couldn't load plays (${e.message}).`; });
       };
       const update = (re = true) => { save(); render(); if (re) run(); };
@@ -197,7 +199,7 @@
       qbox.addEventListener('input', e => {
         if (!e.target.matches('.tr-min input')) return;
         Q.min = +e.target.value; e.target.nextElementSibling.textContent = Q.min; save();
-        if (table) { const min = Q.min; sec.querySelectorAll('.tr-tbl tbody tr').forEach(() => {}); run(); }
+        if (paint) paint();  // re-grey only: the counts don't depend on the minimum
       });
       qbox.addEventListener('click', e => {
         const x = e.target.closest('[data-x]');
@@ -223,6 +225,8 @@
       }).then(() => {
         const last = IX.seasons[IX.seasons.length - 1];
         Q = Object.assign(defaults(), saved() || {}, fromUrl() || {});
+        // a shared link seeds the query once; drop ?t= so later edits (saved locally) survive a reload
+        if (location.search.includes('t=')) history.replaceState(null, '', location.pathname + location.hash);
         if (!Q.to || !IX.seasons.includes(Q.to)) Q.to = last;
         if (!Q.from || !IX.seasons.includes(Q.from)) Q.from = Math.max(IX.seasons[0], Q.to - 2);
         if (!FAM[Q.fam]) Q.fam = 'rush';

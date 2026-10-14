@@ -4,7 +4,7 @@
 .tr-w { color: var(--muted); font-size: 14px; }
 .tr-chip { -webkit-appearance: none; appearance: none; color-scheme: dark; font: inherit; font-size: 15px; font-weight: 700; color: var(--ink);
   background: color-mix(in srgb, var(--accent) 14%, var(--panel2)); border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--line));
-  border-radius: 999px; padding: 4px 12px; max-width: 100%; cursor: pointer; }
+  border-radius: 999px; padding: 4px 12px; max-width: 100%; cursor: pointer; field-sizing: content; }
 .tr-chip.tr-add { background: var(--panel2); border-style: dashed; border-color: var(--line); color: var(--muted); font-weight: 600; }
 .tr-fchip { display: inline-flex; align-items: center; gap: 0; }
 .tr-fchip .tr-chip { border-radius: 999px 0 0 999px; padding-right: 8px; }
