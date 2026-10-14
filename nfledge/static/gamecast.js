@@ -333,6 +333,7 @@
   };
   let prevHash = '';
   const closePlayer = () => {
+    if (pageMode() && (location.hash.startsWith('#player/') || location.hash.startsWith('#team/'))) { history.back(); return; }
     const ov = document.getElementById('pcOv'); if (ov) ov.hidden = true;
     document.documentElement.classList.remove('pc-open');
     cardPid = null; cardTeam = null;
@@ -794,31 +795,43 @@
     catch (e) { const b = document.querySelector('#pcOv .tm-log'); if (b) b.innerHTML = '<p class="pc-sub">Game log unavailable.</p>'; return; }
     if (cardTeam === abbr) renderTeam(abbr);
   };
+  // Page mode (week pages with the app shell): players and teams are PAGES at #player/<id> / #team/<abbr>. Opening
+  // one sets the hash (a real history entry, so Back works); the shell routes it and calls NFLE.showPlayer / showTeam.
+  const pageMode = () => !!(window.NFLE && window.NFLE.pageMode);
   const openTeam = abbr => {
+    if (pageMode()) { if (location.hash !== `#team/${abbr}`) location.hash = `team/${abbr}`; else showTeam(abbr); return; }
+    showTeam(abbr);
+  };
+  const showTeam = abbr => {
     if (!DATA) return;
     const ov = ensureOverlay();
     if (!location.hash.startsWith('#player/') && !location.hash.startsWith('#team/')) prevHash = location.hash;
     if (abbr !== cardTeam) { teamTab = 'ov'; teamOpp = ''; }
-    if (ov.hidden) cardWk = pageKey();  // a fresh card starts on the page's week; card-to-card keeps the picked one
+    // a fresh card starts on the page's week; card-to-card keeps the picked one (page mode: the shell flags fresh)
+    if (ov.hidden || !cardWk || (window.NFLE && NFLE.freshPage)) cardWk = pageKey();
     cardPid = null; cardTeam = abbr;
     renderTeam(abbr);
     ov.hidden = false;
     document.documentElement.classList.add('pc-open');
-    try { history.replaceState(null, '', location.pathname + location.search + '#team/' + abbr); } catch (e) { /* ignore */ }
+    if (!pageMode()) { try { history.replaceState(null, '', location.pathname + location.search + '#team/' + abbr); } catch (e) { /* ignore */ } }
     ov.querySelector('.pc').scrollTop = 0; ov.scrollTop = 0;
   };
 
   const openPlayer = pid => {
+    if (pageMode()) { if (location.hash !== `#player/${pid}`) location.hash = `player/${pid}`; else showPlayer(pid); return; }
+    showPlayer(pid);
+  };
+  const showPlayer = pid => {
     if (!DATA) return;
     const ov = ensureOverlay();
     if (!location.hash.startsWith('#player/') && !location.hash.startsWith('#team/')) prevHash = location.hash;
     if (pid !== cardPid) cardTab = 'ov';
-    if (ov.hidden) cardWk = pageKey();
+    if (ov.hidden || !cardWk || (window.NFLE && NFLE.freshPage)) cardWk = pageKey();
     cardPid = pid; cardTeam = null;
     renderCard(pid);
     ov.hidden = false;
     document.documentElement.classList.add('pc-open');
-    try { history.replaceState(null, '', location.pathname + location.search + '#player/' + pid); } catch (e) { /* ignore */ }
+    if (!pageMode()) { try { history.replaceState(null, '', location.pathname + location.search + '#player/' + pid); } catch (e) { /* ignore */ } }
     ov.querySelector('.pc').scrollTop = 0;
   };
 
@@ -1400,6 +1413,6 @@
     const sec = document.getElementById('tab-model');
     if (sec && sec.classList.contains('on')) loadModelTab();
   }
-  window.NFLE = Object.assign(window.NFLE || {}, { openPlayer, closePlayer, openTeam, weights });  // shared with shell.js, table.js, area modules
+  window.NFLE = Object.assign(window.NFLE || {}, { openPlayer, closePlayer, openTeam, showPlayer, showTeam, weights });  // shared with shell.js, table.js, area modules
   if (CFG.page === 'game') initGame(); else initWeek();
 })();

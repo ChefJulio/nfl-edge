@@ -51,12 +51,18 @@
   };
   const OLD = { players: 'players/rankings', roles: 'players/roles', power: 'teams/power', games: 'games', model: 'model',
                playoffs: 'teams/playoffs', draft: 'teams/draft', transactions: 'players/moves' };
-  const CARD = /^(player|team)\/|^g-/;  // card / old tile deep links: gamecast.js owns these
+  const CARD = /^g-/;  // old matchup-tile links: gamecast.js turns them into gamecast links
+  const PAGE = /^(player|team)\/(.+)$/;  // player / team pages (rendered by gamecast.js into #pcOv in the page section)
   const nav = document.querySelector('nav.tabs');
   const main = document.querySelector('main .wrap');
   if (!nav || !main) return;
   const parent = k => NAV.find(p => p.key === k) || NAV[0];
   const sectionId = (p, s) => s[2] || `tab-${p.key}-${s[0]}`;
+  // The player / team page: a section holding the card renderer's container (#pcOv, found by gamecast.js) under a
+  // breadcrumb trail back to where you came from.
+  main.insertAdjacentHTML('beforeend', `<section id="tab-page"><nav class="crumbs" aria-label="Breadcrumb"></nav>
+    <div class="pc-ov pc-page" id="pcOv"><div class="pc"><div class="pc-body"></div></div></div></section>`);
+  NFLE.pageMode = true;
   // Placeholder sections for tabs not built yet (one per sub-tab), so routing is uniform.
   NAV.forEach(p => p.subs.forEach(s => {
     if (!document.getElementById(sectionId(p, s))) {
@@ -111,7 +117,38 @@
     const s = p.subs.find(x => x[0] === sk) || p.subs[0];
     return { p, s };
   };
+  let lastRoute = null;  // the list route a page was opened from (breadcrumb), with its scroll position
+  const scrolls = {};
+  let onPage = false;
+  const showPage = (kind, id) => {
+    const from = lastRoute || { p: NAV[0], s: NAV[0].subs[0] };
+    main.querySelectorAll(':scope > section').forEach(x => x.classList.toggle('on', x.id === 'tab-page'));
+    nav.querySelectorAll('[data-par]').forEach(b => b.classList.toggle('on', b.dataset.par === from.p.key));
+    if (bot) bot.querySelectorAll('.bb-row [data-par]').forEach(b => b.classList.toggle('on', b.dataset.par === from.p.key));
+    subBar.hidden = true; subBar.innerHTML = '';
+    if (NFLE.placeBar) NFLE.placeBar();
+    const crumbs = document.querySelector('#tab-page .crumbs');
+    const fromHash = from.p.subs.length < 2 ? from.p.key : `${from.p.key}/${from.s[0]}`;
+    crumbs.innerHTML = `<button type="button" class="cr-back" aria-label="Back">&lsaquo;</button>
+      <a href="#${fromHash}">${from.p.label}</a>${from.p.subs.length > 1 ? `<span>&rsaquo;</span><a href="#${fromHash}">${from.s[1]}</a>` : ''}
+      <span>&rsaquo;</span><b class="cr-here">${kind === 'team' ? id : '&hellip;'}</b>`;
+    crumbs.querySelector('.cr-back').onclick = () => { if (history.length > 1 && lastRoute) history.back(); else location.hash = fromHash; };
+    window.scrollTo({ top: 0 });
+    const fresh = !onPage;  // opened from a list (not page-to-page): the card starts on this page's week
+    const render = () => {
+      const fn = kind === 'player' ? NFLE.showPlayer : NFLE.showTeam;
+      NFLE.freshPage = fresh;
+      if (fn) fn(decodeURIComponent(id));
+      NFLE.freshPage = false;
+      // the name for the last crumb, once the card has rendered it
+      setTimeout(() => { const h = document.getElementById('pcName'); const here = crumbs.querySelector('.cr-here'); if (h && here) here.textContent = h.textContent.replace(/^#\d+\s*/, ''); }, 60);
+    };
+    render();
+    onPage = true;
+    document.dispatchEvent(new CustomEvent('nfle-route', { detail: { parent: from.p.key, sub: 'page', section: 'tab-page' } }));
+  };
   const show = (r, push) => {
+    if (lastRoute && lastRoute !== r) scrolls[sectionId(lastRoute.p, lastRoute.s)] = window.scrollY;
     nav.querySelectorAll('[data-par]').forEach(b => b.classList.toggle('on', b.dataset.par === r.p.key));
     if (bot) {
       bot.querySelectorAll('.bb-row [data-par]').forEach(b => b.classList.toggle('on', b.dataset.par === r.p.key));
@@ -127,7 +164,9 @@
     try { localStorage.setItem('nfledge-tab', route); } catch (e) { /* private mode */ }
     if (push && location.hash.slice(1) !== route) { try { history.replaceState(null, '', '#' + route); } catch (e) { /* file:// */ } }
     if (NFLE.placeBar) NFLE.placeBar();  // the chip row comes and goes with the parent: re-measure the bar
+    lastRoute = r; onPage = false;
     mountArea(id);
+    if (scrolls[id] != null) requestAnimationFrame(() => window.scrollTo({ top: scrolls[id] }));  // back from a page
     document.dispatchEvent(new CustomEvent('nfle-route', { detail: { parent: r.p.key, sub: r.s[0], section: id } }));
   };
   const onNav = e => {
@@ -150,8 +189,16 @@
     bot.addEventListener('click', onNav);
     document.addEventListener('click', e => { const sh = bot.querySelector('.bb-sheet'); if (sh && !bot.contains(e.target)) sh.hidden = true; });
   }
-  window.addEventListener('hashchange', () => { const r = parse(location.hash); if (r) show(r, false); });
+  const route = (h, push) => {
+    const m = (h || '').replace(/^#/, '').match(PAGE);
+    if (m) { if (lastRoute) scrolls[sectionId(lastRoute.p, lastRoute.s)] = window.scrollY; showPage(m[1], m[2]); return true; }
+    const r = parse(h); if (r) { show(r, push); return true; }
+    return false;
+  };
+  window.addEventListener('hashchange', () => route(location.hash, false));
   let saved = null; try { saved = localStorage.getItem('nfledge-tab'); } catch (e) { /* ignore */ }
-  show(parse(location.hash) || parse(saved) || parse('players'), !CARD.test(location.hash.slice(1)));
+  // A page link opened directly: its breadcrumb points at the tab you last used.
+  if (PAGE.test(location.hash.slice(1))) { lastRoute = parse(saved) || parse('players'); route(location.hash, false); }
+  else show(parse(location.hash) || parse(saved) || parse('players'), !CARD.test(location.hash.slice(1)));
   window.NFLE_SHELL = { go: h => { const r = parse(h); if (r) show(r, true); } };
 })();
