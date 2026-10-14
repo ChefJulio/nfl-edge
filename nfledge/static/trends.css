@@ -20,7 +20,8 @@
 .tr-svg { width: 100%; max-width: 520px; height: auto; margin: 0 0 8px; }
 .tr-lg { stroke: var(--muted); stroke-dasharray: 4 4; stroke-width: 1; } .tr-pl { fill: none; stroke: var(--accent); stroke-width: 2; }
 .tr-pt { fill: var(--accent); } .tr-yr { fill: var(--muted); font-size: 9px; text-anchor: middle; }
-table.dt tr.tr-low td { opacity: .45; }
+/* dim the text, not the cell: a translucent sticky cell lets the scrolled columns show through */
+table.dt tr.tr-low td, table.dt tr.tr-low td b, table.dt tr.tr-low td .sub, table.dt tr.tr-low td span { color: color-mix(in srgb, var(--muted) 70%, transparent); }
 table.dt td.tr-main b { color: var(--ink); }
 .tr-up { color: #6fdc8c; font-weight: 700; } .tr-dn { color: #ff8f84; font-weight: 700; }
 @media (max-width: 640px) { .tr-line { font-size: 15px; } .tr-chip { font-size: 14px; padding: 4px 10px; } }

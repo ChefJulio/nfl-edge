@@ -594,6 +594,16 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   - nflverse xpass runs high (2024 league pass_oe -1.7%): read PROE against the league column.
   - Coverage is measured, not hand-listed: index.json `cov`; trends.js drops uncovered seasons and says so.
   - Not built: QB sneak (is_qb_sneak), penalties, defenders' names from participation, drives.
+- **PRE-REGISTERED 2026-10-14 (before any run): charting stats in projections.** Variants croe (catches over
+  expected per target -> reception rate), yacoe (YAC over expected per catch -> receiving yards), cpoe (completions
+  over expected per attempt -> QB passing yards), oe_all (all three). From nflverse cp / xyac (2006 on, live
+  weekly). Team PROE is already an input (team_model pass_rate: proe_team), so not re-tested. FTN / participation
+  features excluded: participation is never available live, FTN only from 2022 (too few walk-forward seasons).
+  Walk-forward 2021-2026 vs baseline, tools/experiments.py, 95% bootstrap over season-weeks. GATE: adopt a
+  variant if its all-position MAE CI upper bound < 0 and no position's CI lower bound > 0; or, if the all-position
+  CI spans 0, adopt it only for the positions it targets (croe / yacoe: RB-WR-TE, cpoe: QB) when that position's
+  CI upper bound < 0, it is better in at least 4 of 6 seasons, and no other position is significantly worse.
+  Otherwise off. If more than one passes, oe_all decides (adopt the combination only if it beats each single).
 - **Owner questions 2026-10-14 (answered, not yet approved):** (1) A/B charting stats in projections, volume-first:
   team PROE, YACOE / catchable rate, opponent pressure (contested catch is unstable, low priority); FTN only from
   2022 = 3-4 backtest seasons. (2) "NFL Edge grade" (Madden-like overall): don't cite Madden (EA proprietary,

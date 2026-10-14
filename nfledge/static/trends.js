@@ -319,6 +319,8 @@
           const den = m[4] ? m[4][1] : (a => a.n), unit = m[4] ? m[4][0] : fam.unit[0].toUpperCase() + fam.unit.slice(1);
           const rows = [...groups.entries()].map(([k, a]) => ({ key: k, a, n: den(a), v: m[1](a),
             label: Q.by === 'player' ? names[k] || k : lab ? lab(k) : String(k), team: Q.by === 'player' ? teamOf[k] : '' }));
+          // the table keeps input order among rows it can't rank (under the minimum): pre-sort them by the metric
+          rows.sort((x, y) => (isFinite(y.v) ? y.v : -Infinity) - (isFinite(x.v) ? x.v : -Infinity));
           const whoTxt = wk === 'L' ? '' : ` &middot; this query: ${fmt(plays)} ${esc(fam.unit)}`;
           sec.querySelector('.tr-base').innerHTML = `League, same situation: <b>${fmt(lg, m[2])}</b> ${esc(m[0])} on ${fmt(league.n)} ${esc(fam.unit)}${whoTxt}`;
           const trend = sec.querySelector('.tr-trend');
@@ -339,8 +341,12 @@
                 : isTeam ? `<span class="tm-open" data-tm="${esc(r.key)}"><b>${esc(r.label)}</b></span>` : `<b>${esc(r.label)}</b>` },
             { key: 'n', label: unit, num: true, value: r => r.n, html: r => fmt(r.n) },
             { key: 'v', label: m[0], num: true, cls: 'tr-main', value: r => isFinite(r.v) && r.n >= (Q.min ?? fam.min) ? r.v : null, html: r => `<b>${fmt(r.v, m[2])}</b>` },
-            { key: 'dv', label: 'vs league', num: true, value: r => isFinite(r.v) && r.n >= (Q.min ?? fam.min) ? r.v - lg : null,
-              html: r => { const d = r.v - lg; return isFinite(d) ? `<span class="${d > 0 ? 'tr-up' : d < 0 ? 'tr-dn' : ''}">${d > 0 ? '+' : ''}${fmt(d, m[2] || 0)}</span>` : '–'; } },
+            // rates compare with the league rate; counts (0 decimals: yards, catches, TDs...) as a share of the league total
+            m[2] === 0
+              ? { key: 'dv', label: 'Share of league', num: true, value: r => lg > 0 && r.n >= (Q.min ?? fam.min) ? r.v / lg : null,
+                  html: r => lg > 0 ? `${(100 * r.v / lg).toFixed(1)}%` : '–' }
+              : { key: 'dv', label: 'vs league', num: true, value: r => isFinite(r.v) && r.n >= (Q.min ?? fam.min) ? r.v - lg : null,
+                  html: r => { const d = r.v - lg; return isFinite(d) ? `<span class="${d > 0 ? 'tr-up' : d < 0 ? 'tr-dn' : ''}">${d > 0 ? '+' : ''}${fmt(d, m[2])}</span>` : '–'; } },
             ...extras.map(([k, mm]) => ({ key: `m_${k}`, label: mm[0], num: true,
               value: r => { const v = mm[1](r.a); return isFinite(v) ? v : null; }, html: r => fmt(mm[1](r.a), mm[2]) })),
           ];

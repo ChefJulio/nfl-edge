@@ -12,6 +12,7 @@ Caching policy:
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 import urllib.request
@@ -38,6 +39,9 @@ PBP_COLS = [
   "fumbled_1_player_id", "special_teams_play", "play_type", "two_point_attempt", "pass_oe", "xpass", "roof",
   "wind", "weather", "score_differential", "posteam_score", "defteam_score", "total_home_score",
   "total_away_score",
+  # nflverse model outputs for the charting experiments (experiments.croe / yacoe / cpoe): completion probability
+  # (cp), CPOE, YAC and expected YAC (2006 on, live every week).
+  "cp", "cpoe", "yards_after_catch", "xyac_mean_yardage",
 ]
 
 STAT_COLS = [
@@ -97,9 +101,21 @@ class Cache:
       return None
     if not isinstance(df, pd.DataFrame):
       df = df.to_pandas()
-    df.to_parquet(p, index=False)
+    # Atomic: write a temp file, then rename over the old one. Parallel processes (experiments workers, tools) read
+    # these files; a reader that caught a half-written parquet crashed an A/B run (2026-10-14).
+    tmp = p.with_suffix(f".{os.getpid()}.tmp")
+    df.to_parquet(tmp, index=False)
+    os.replace(tmp, p)
     self.meta.setdefault("fetched", {})[f"{name}_{season}"] = time.time()
     return df
+
+  def lacks(self, name: str, season, cols) -> bool:
+    """True if the cached file exists but is missing any of cols (schema only; no data read)."""
+    p = self.path(name, season)
+    if not p.exists():
+      return False
+    import pyarrow.parquet as pq
+    return not set(cols) <= set(pq.read_schema(p).names)
 
   def age_hours(self, name: str, season) -> float:
     ts = self.meta.get("fetched", {}).get(f"{name}_{season}")
@@ -220,7 +236,9 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
     is_cur = s == current
     pbp_stale = is_cur and new_weeks
     live_stale = is_cur and cache.age_hours("injuries", s) > LIVE_TTL_HOURS
-    frames["pbp"].append(cache.get("pbp", s, lambda: nfl.load_pbp([s]).select(PBP_COLS), stale=pbp_stale))
+    # A cached season missing a column PBP_COLS now asks for is refetched (adding a column never yields silent NaN).
+    frames["pbp"].append(cache.get("pbp", s, lambda: nfl.load_pbp([s]).select(PBP_COLS),
+                                   stale=pbp_stale or cache.lacks("pbp", s, PBP_COLS)))
     frames["stats"].append(cache.get("stats", s, lambda: nfl.load_player_stats([s]).select(STAT_COLS),
                                      stale=pbp_stale))
     frames["snaps"].append(cache.get("snaps", s, lambda: nfl.load_snap_counts([s]), stale=pbp_stale))

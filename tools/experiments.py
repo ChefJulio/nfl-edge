@@ -75,7 +75,12 @@ VARIANTS = {
   "share_hl_8": variant(player_model__share_half_life_weeks=8.0),
   "team_hl_2": variant(team_model__half_life_weeks=2.0),
   "team_hl_5": variant(team_model__half_life_weeks=5.0),
-  "snap_map_rosters": variant(experiments__snap_map="rosters"),  # the old snap id map (A/B for the 2026-10-14 fix)
+  "snap_map_rosters": variant(experiments__snap_map="rosters"),
+  # charting stats (owner, 2026-10-14): over-expected skill from nflverse's cp / xyac models
+  "croe": variant(experiments__croe=True),
+  "yacoe": variant(experiments__yacoe=True),
+  "cpoe": variant(experiments__cpoe=True),
+  "oe_all": variant(experiments__croe=True, experiments__yacoe=True, experiments__cpoe=True),  # the old snap id map (A/B for the 2026-10-14 fix)
   "td_k_50": variant(player_model__td_blend_k=50),
   "td_k_400": variant(player_model__td_blend_k=400),
   "no_qb_effects": variant(team_model__qb_effects=False),

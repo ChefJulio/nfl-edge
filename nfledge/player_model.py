@@ -54,6 +54,15 @@ def EFF_FEATURES(comp: str, opp: str, unit: str, exp: dict | None = None, group:
     cols.append("implied_pts")
   if exp.get("air_yards") and comp == "rec_yd":
     cols.append("adot")
+  # EXPERIMENTS (owner, 2026-10-14: "charting stats in projections"): skill beyond the shrunk raw rates, from
+  # nflverse's completion-probability and expected-YAC models. croe = catches over expected per target (receptions);
+  # yacoe = YAC over expected per catch (receiving yards); cpoe = completions over expected per attempt (QB yards).
+  if exp.get("croe") and comp == "reception":
+    cols.append("croe")
+  if exp.get("yacoe") and comp == "rec_yd":
+    cols.append("yacoe")
+  if exp.get("cpoe") and comp == "pass_yd":
+    cols.append("cpoe")
   # EXPERIMENT (owner, 2026-10-14): age. Walk-forward error drifts with age (WR -0.10 pts per year [-0.16, -0.04],
   # RB -0.08): the multi-season rate history lags improving young players and declining older ones.
   cols += age_cols(exp, group)
@@ -253,7 +262,11 @@ def build_ledger(pbp: pd.DataFrame, xtd: XTD, team_ledger: pd.DataFrame, snaps: 
   db.loc[tgt_mask, "pass_xtd"] = xtd.tgt_xtd(db[tgt_mask])
   db = db.assign(db=1, db_epa=db.epa.fillna(0), pass_yd=db.passing_yards.fillna(0) * (db.qb_scramble == 0),
                  pass_td=db.pass_touchdown * (db.qb_scramble == 0), interception=db.interception)
-  a = db.groupby(base + ["gsis_id"])[["db", "db_epa", "pass_yd", "pass_td", "interception", "pass_xtd"]].sum()
+  cp = db.cp if "cp" in db else pd.Series(np.nan, index=db.index)
+  db["cpo_n"] = ((db.pass_attempt == 1) & (db.sack == 0) & cp.notna()).astype(int)  # attempts with a completion prob.
+  db["cpo"] = (db.complete_pass - cp).where(db.cpo_n == 1, 0.0)
+  a = db.groupby(base + ["gsis_id"])[["db", "db_epa", "pass_yd", "pass_td", "interception", "pass_xtd",
+                                      "cpo", "cpo_n"]].sum()
 
   # nflverse flags scrambles as pass plays (pass=1, rush=0), so include them explicitly.
   ru = live[((live.rush == 1) | (live.qb_scramble == 1)) & (live.qb_kneel == 0) & live.rusher_player_id.notna()].copy()
@@ -268,8 +281,17 @@ def build_ledger(pbp: pd.DataFrame, xtd: XTD, team_ledger: pd.DataFrame, snaps: 
   tg = tg.assign(gsis_id=tg.receiver_player_id, tgt=1, tgt_epa=tg.epa.fillna(0), reception=tg.complete_pass,
                  rec_yd=tg.receiving_yards.fillna(0), rec_td=tg.pass_touchdown, rec_xtd=xtd.tgt_xtd(tg),
                  air_yd=tg.air_yards.fillna(0), tgt_i20=(tg.yardline_100 <= 20).astype(int))
+  tcp = tg.cp if "cp" in tg else pd.Series(np.nan, index=tg.index)
+  tg["cro_n"] = tcp.notna().astype(int)
+  tg["cro"] = (tg.complete_pass - tcp).where(tg.cro_n == 1, 0.0)
+  if "xyac_mean_yardage" in tg and "yards_after_catch" in tg:
+    ok = (tg.complete_pass == 1) & tg.xyac_mean_yardage.notna() & tg.yards_after_catch.notna()
+    tg["yco_n"] = ok.astype(int)
+    tg["yco"] = (tg.yards_after_catch - tg.xyac_mean_yardage).where(ok, 0.0)
+  else:
+    tg["yco_n"], tg["yco"] = 0, 0.0
   c = tg.groupby(base + ["gsis_id"])[["tgt", "tgt_epa", "reception", "rec_yd", "rec_td", "rec_xtd",
-                                      "air_yd", "tgt_i20"]].sum()
+                                      "air_yd", "tgt_i20", "cro", "cro_n", "yco", "yco_n"]].sum()
 
   fm = live[(live.fumble_lost == 1) & live.fumbled_1_player_id.notna()]
   f = fm.assign(gsis_id=fm.fumbled_1_player_id, fumble_lost=1).groupby(base + ["gsis_id"])[["fumble_lost"]].sum()
@@ -428,7 +450,8 @@ class PlayerModel:
 
   # Fixed defaults (mean, strength in pseudo-opportunities) for the small rates; minor_priors = "fitted" replaces
   # them with method-of-moments estimates from the training seasons.
-  MINOR_DEFAULTS = {"scr_rate": (0.04, 40.0), "fum_rate": (0.005, 150.0), "adot": (7.0, 30.0), "tprr": (0.17, 60.0)}
+  MINOR_DEFAULTS = {"scr_rate": (0.04, 40.0), "fum_rate": (0.005, 150.0), "adot": (7.0, 30.0), "tprr": (0.17, 60.0),
+                    "croe": (0.0, 200.0), "yacoe": (0.0, 100.0), "cpoe": (0.0, 300.0)}
 
   def _fit_minor_priors(self, L: pd.DataFrame):
     self.minor_prior = dict(self.MINOR_DEFAULTS)
@@ -443,7 +466,10 @@ class PlayerModel:
     specs = {"scr_rate": (L[L.pos == "QB"], "scrambles", "db"),
              "fum_rate": (L.assign(touch=touches), "fumble_lost", "touch"),
              "adot": (L[L.pos.isin(["WR", "TE", "RB"])], "air_yd", "tgt"),
-             "tprr": (L[L.dropbacks_on_field > 0], "tgt", "dropbacks_on_field")}
+             "tprr": (L[L.dropbacks_on_field > 0], "tgt", "dropbacks_on_field"),
+             "croe": (L[L.pos.isin(["WR", "TE", "RB"])], "cro", "cro_n"),
+             "yacoe": (L[L.pos.isin(["WR", "TE", "RB"])], "yco", "yco_n"),
+             "cpoe": (L[L.pos == "QB"], "cpo", "cpo_n")}
     for name, (g, num, den) in specs.items():
       est = mom_prior(g, num, den)
       if est is not None:
@@ -579,6 +605,10 @@ class PlayerModel:
     tprr_den = wsum("dropbacks_on_field", "w_eff")
     m, k = mp["tprr"]
     f["tprr"] = (wsum("tgt", "w_eff") + k * m) / (tprr_den.replace(0, np.nan) + k)
+    # Over-expected rates (experiments croe / yacoe / cpoe), shrunk toward the league like the other minor rates.
+    for name, num, den in (("croe", "cro", "cro_n"), ("yacoe", "yco", "yco_n"), ("cpoe", "cpo", "cpo_n")):
+      m, k = mp.get(name, self.MINOR_DEFAULTS[name])
+      f[name] = (wsum(num, "w_eff") + k * m) / (wsum(den, "w_eff") + k)
     # EXPERIMENT (experiments.age_input): age at this week, centered at 27 (unknown birth date: 0 = typical). The
     # efficiency and usage history lags a player who is still improving or already declining.
     when = pd.Timestamp(f"{season}-09-07") + pd.Timedelta(days=7 * (week - 1))
@@ -788,6 +818,8 @@ class PlayerModel:
     p["wind_penalty"] = windpen
     if "i10_tilt" not in p:
       p["i10_tilt"] = 0.0
+    for c in ("croe", "yacoe", "cpoe"):  # rows built outside features() (injury absorption): league average
+      p[c] = p[c].fillna(0.0) if c in p else 0.0
     if "age_c" not in p:
       p["age_c"] = 0.0
     if "age_sq" not in p:
@@ -829,7 +861,7 @@ class PlayerModel:
         mu = np.array([self._mu(opp, gp, t, c) for gp, t in zip(grp, p.tier)])
         p[col] = p[col].fillna(pd.Series(mu, index=p.index)) if col in p else mu
     for c, v in (("scr_rate", 0.04), ("fum_rate", 0.005), ("n_db", 0), ("n_rush", 0), ("n_tgt", 0),
-                 ("games", 0)):
+                 ("games", 0), ("croe", 0.0), ("yacoe", 0.0), ("cpoe", 0.0)):
       p[c] = p[c].fillna(v) if c in p else v
 
   def _qb_starters(self, p: pd.DataFrame):

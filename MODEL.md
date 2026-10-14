@@ -1,5 +1,5 @@
 ---
-documented_code_hash: d3aaa1d955e00951
+documented_code_hash: 97f5c6946335595c
 ---
 # How the model works
 
@@ -46,7 +46,7 @@ Team ratings use this season's completed games plus a fading share of last seaso
 
 | Source | Used for |
 |---|---|
-| nflverse play-by-play (via `nflreadpy`) | Every play's expected points added (EPA), win probability, players involved, field position, air yards |
+| nflverse play-by-play (via `nflreadpy`) | Every play's expected points added (EPA), win probability, players involved, field position, air yards; completion probability and expected yards after catch (for the over-expected tests in section 8) |
 | nflverse schedules | Results (also for Elo), Vegas spread and total, roof, kickoff time |
 | nflverse rosters, snap counts, injury reports, depth charts, draft picks, participation, weekly player stats | Who is on the team, who played, roles, statuses, draft capital, routes, actual points, QB career history. Snap counts are matched to players through nflverse's player table as well as the rosters (the rosters alone missed about 8% of skill players' games in 2020-24; fixing it lowered projection error slightly, walk-forward 2021-25) |
 | NFL.com injury API | Day-by-day Wed/Thu/Fri practice participation |
@@ -55,7 +55,7 @@ Team ratings use this season's completed games plus a fading share of last seaso
 | Open-Meteo | Wind forecast for outdoor and open-roof stadiums, averaged over the 4 hours from kickoff (current week only) |
 
 Seasons loaded: **{{ L.seasons }}**.
-- **Refresh.** Completed seasons are downloaded once and cached. The current season's play-by-play is refetched when a new game goes final. Schedules (scores, lines) are refetched every run. Injury reports, practice data, rosters, depth charts and expert ranks are refreshed when they are more than 6 hours old.
+- **Refresh.** Completed seasons are downloaded once and cached (and downloaded again if the model starts reading a column the cached copy lacks). The current season's play-by-play is refetched when a new game goes final. Schedules (scores, lines) are refetched every run. Injury reports, practice data, rosters, depth charts and expert ranks are refreshed when they are more than 6 hours old.
 - **Rebuilds.** The site rebuilds on every code push and once a day.
 - **Model cache.** The trained model is reused only while every input is unchanged: final games, injury and practice reports, expert ranks, rosters, configuration and model code. In season that usually means a retrain every day. The wind forecast is fetched at retrain time.
 
@@ -217,6 +217,8 @@ The table re-tests last season and this one, weeks 3 and later. It covers player
 - **Goal-line role x team goal-line volume: adopted** (section 4, step 4). The miss above came from teams that reach the goal line a lot: goal-line backs on the highest-scoring third of teams scored a rushing TD 47% of the time against 38% predicted, while on the lowest-scoring third the prediction was already right. Scaling the role by the team's expected goal-line carries, tested with criteria set in advance: chance of 1+ rushing TD Brier 0.1896 -> 0.1894, difference -0.00021 (-0.00043 to -0.000004), better in 4 of 5 seasons, touchdown counts also better predicted, fantasy-point error not worse (-0.0004, -0.0018 to +0.0009). A small but real gain; most of the high-scoring-team gap (8.8 -> 7.6 points) remains.
 - **Quarterbacks who vulture goal-line runs.** Backs whose QB takes many inside-10 runs are not over-projected, because a back's goal-line share is measured against all of his team's goal-line runs, QB sneaks included. The real miss is the other kind of QB: pocket passers on high-scoring teams got too much rushing-touchdown credit (about 9% actual vs 13% predicted). Splitting QB runs into scrambles and designed runs, with team scoring boosting designed runs only, narrowed that gap but not enough to register: chance of 1+ rushing TD Brier -0.0002 (-0.0006 to +0.0002), QB points error +0.001 (-0.003 to +0.006). Left off.
 - **Ranges for committee backs.** Range calibration was checked for RBs by team committee tendency: every group is on target within its interval (10-90 range: committee 78.4%, middle 81.3%, bellcow 78.9% vs 80%; 25-75 range 47.5% / 51.8% / 48.9% vs 50%). No change needed.
+
+**Charting stats (owner, 2026-10-14), being tested, switched off until then.** Skill beyond a player's raw rates, from nflverse's completion-probability and expected-YAC models: catches over expected per target (feeding receptions), yards after catch over expected (receiving yards), completions over expected (quarterback passing yards). Each is shrunk toward the league like the other small rates. Criteria were set before running; the result goes here either way. Team pass rate over expected is already in the volume model. Participation charting (personnel, coverage, pressure) is not published for the current season, and FTN charting starts in 2022, too few seasons to test.
 
 Ideas that sounded right but did not improve out-of-sample accuracy are switched off, not shipped:
 
