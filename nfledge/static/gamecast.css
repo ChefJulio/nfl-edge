@@ -471,3 +471,6 @@ table.gc-rt { width: 100%; font-size: 13px; } .bx-th-in { display: inline-flex; 
 .dc-tag.dt-d { background: rgba(240,150,80,.16); border-color: rgba(240,150,80,.32); color: #f4b37f; }
 .dc-tag.dt-q { background: rgba(224,176,74,.14); border-color: rgba(224,176,74,.3); color: #f3d38c; }
 .dc-p a.dc-ext { text-decoration: none; } .dc-p a.dc-ext:hover { text-decoration: underline; text-underline-offset: 3px; }
+.dc-pct { margin-left: 4px; font-size: 11px; color: var(--faint); font-variant-numeric: tabular-nums; }
+.dc-p.first .dc-pct { color: var(--muted); }
+.seg.dc-mode { margin: 0 0 10px; }

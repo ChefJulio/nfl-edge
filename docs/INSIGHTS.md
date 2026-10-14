@@ -144,6 +144,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 - **Projection bias at the extremes:** 20+ point projections ~1 pt high, 8-12 ~0.3 low; a least-squares
   recalibration hurt MAE (skewed outcomes), so it is NOT corrected.
 
+- **Depth charts by playing time (2026-10-14, adopted):** starters = each position's snap leaders over the team's
+  last 3 games (missed game = 0; players off the roster / ruled Out / on a reserve list left out). Scored 2025-26
+  (weeks 2+, ~5.7k team-game position groups) against who led the position in snaps that game: 87.7% vs 76.4% for
+  ESPN's listed chart (last game only 84.6%, + injury filter 87.5%); wins at every position (QB 91-93 vs 88, RB 83
+  vs 70, TE 79 vs 68, DL 82 vs 69). Week 1: ESPN's preseason chart wins (82.5% vs 70.5% from last season's final 3
+  games), so a team's first game keeps the listed chart; from week 2 usage wins (90% vs 80%).
+  `tools/depth_accuracy.py`, `tools/depth_week1.py`.
+
 ## 4. Model vs Vegas (game outcomes) -- key strategic finding
 (Reproduce with `tools/vegas_compare.py` and `tools/residual_fix.py`.)
 - Model-only (no Vegas inputs) margin MAE ~10.4-10.7 vs Vegas closing line ~9.5-9.8; winners 61% vs 67%.

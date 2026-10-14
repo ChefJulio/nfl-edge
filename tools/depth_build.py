@@ -20,8 +20,9 @@ import pandas as pd  # noqa: E402
 
 from nfledge import data as D  # noqa: E402
 from nfledge.config import load_config  # noqa: E402
+from nfledge.report import ROSTER_TEAM  # noqa: E402
 
-V = 3  # 3: every player has a page (links), 2026-10-14
+V = 4  # 4: + depth by playing time ("u"); 3: every player has a page (links)
 FIRST = 2001
 FRANCHISE = {"OAK": "LV", "SD": "LAC", "STL": "LA", "LAR": "LA"}  # relocated clubs -> today's code (team pages)
 KIND = {"Offense": "off", "Defense": "def", "Special Teams": "st"}
@@ -78,6 +79,78 @@ def weekly_espn(raw: pd.DataFrame, sched: pd.DataFrame, season: int) -> tuple[pd
   d = d.rename(columns={"player_name": "name", "pos_abb": "abb", "pos_rank": "rank", "pos_slot": "slot", "pos_name": "label"})
   return d[["team", "week", "kind", "abb", "label", "name", "gsis_id", "rank", "order", "slot"]], groups
 
+# ---------------------------------------------------------------------------------------------------------------
+# Depth by playing time (the tab's default from a team's 2nd game on). Tested 2025-26 (scratch/depth_accuracy.py,
+# depth_week1.py): a chart's starters = the game's top snap-getters at the position 88% of the time this way vs 76%
+# for ESPN's listed chart; in week 1 ESPN's preseason chart wins (83% vs 71% from last season's usage), so week 1
+# keeps the listed chart.
+GROUP = {"QB": "QB", "RB": "RB", "FB": "RB", "HB": "RB", "WR": "WR", "TE": "TE", **{p: "OL" for p in "T OT G OG C OL".split()},
+         **{p: "DL" for p in "DE DT NT DL".split()}, **{p: "LB" for p in "LB ILB OLB MLB".split()}, "CB": "CB",
+         **{p: "S" for p in "S SS FS SAF DB".split()}}
+GROUPS = ["QB", "RB", "WR", "TE", "OL", "DL", "LB", "CB", "S"]
+DEFAULT_N = {"QB": 1, "RB": 1, "WR": 3, "TE": 1, "OL": 5, "DL": 4, "LB": 3, "CB": 2, "S": 2}  # only if a week has no listed chart
+WINDOW = 3  # games
+
+
+def usage_weeks(season: int, sn: pd.DataFrame, ros, out: set, reserve: set, listed: pd.DataFrame, pos_of: dict) -> dict:
+  """(team, week) -> [[group, n starters, [[gsis, name, avg snap %], ...]], ...] for every listed week where the team
+  has already played this season. Window = the team's last WINDOW games before the week; a player's share averages
+  over those games (a missed game counts 0). Left out: players not on the team's roster that week (latest roster
+  week for weeks not out yet), ruled Out on that week's report, or on a reserve list."""
+  out_map = {}
+  if sn is None or sn.empty:
+    return out_map
+  ros_by = {}
+  if ros is not None and len(ros):
+    r = ros[ros.status == "ACT"]
+    for (team, wk), g in r.groupby(["team", "week"]):
+      ros_by[(team, int(wk))] = set(g.gsis_id)
+  starters_n = {}
+  for (team, wk), g in listed.groupby(["team", "week"]):
+    first = g.sort_values("rank").drop_duplicates(["kind", "slot", "abb"])
+    first = first[first.kind != "st"]
+    if "slot" in first and (first.slot == 0).all():  # older charts: every depth-1 player counts
+      first = g[(g["rank"] == 1) & (g.kind != "st")]
+    cnt = pd.Series([GROUP.get(pos_of.get(x)) for x in first.gsis_id]).value_counts()
+    starters_n[(team, int(wk))] = {k: int(v) for k, v in cnt.items() if k}
+  for team, ts in sn.groupby("team"):
+    played = sorted(ts.week.unique())
+    for wk in sorted(listed[listed.team == team].week.unique()):
+      prior = [w for w in played if w < wk][-WINDOW:]
+      if not prior:
+        continue  # the team's first game: the listed chart is better (week-1 test above)
+      win = ts[ts.week.isin(prior)]
+      rweeks = [w for (t, w) in ros_by if t == team and w <= wk]
+      on = ros_by.get((team, max(rweeks))) if rweeks else None
+      ok = lambda g: (on is None or g in on) and (g, int(wk)) not in out and (g, int(wk)) not in reserve  # noqa: E731
+      win = win[win.gsis_id.map(ok)]
+      n = starters_n.get((team, int(wk)), {})
+      rows = []
+      for grp in GROUPS:
+        gw = win[win.grp == grp]
+        if gw.empty:
+          continue
+        share = (gw.groupby("gsis_id").pct.sum() / len(prior)).sort_values(ascending=False)
+        share = share[share >= 0.01].head(6)
+        names = gw.drop_duplicates("gsis_id").set_index("gsis_id").player
+        rows.append([grp, n.get(grp) or DEFAULT_N[grp], [[g, names.get(g, g), int(round(100 * v))] for g, v in share.items()]])
+      out_map[(team, int(wk))] = rows
+  return out_map
+
+
+def season_snaps(cache, nfl, season: int, pfr: pd.Series, live: bool) -> pd.DataFrame | None:
+  if season < 2012:
+    return None
+  sn = cache.get("snaps", season, lambda: nfl.load_snap_counts([season]), stale=live and cache.age_hours("snaps", season) > 6)
+  if sn is None or sn.empty:
+    return None
+  sn = sn.copy()
+  sn["gsis_id"] = sn.pfr_player_id.map(pfr)
+  sn["team"] = sn.team.replace(FRANCHISE)
+  sn["grp"] = sn.position.map(GROUP)
+  sn["pct"] = sn[["offense_pct", "defense_pct"]].max(axis=1).fillna(0)
+  return sn.dropna(subset=["gsis_id", "grp"])
+
 
 def main():
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
@@ -92,6 +165,15 @@ def main():
   players = cache.get("players", "all", lambda: nfl.load_players(), stale=cache.age_hours("players", "all") > 24 * 7)
   espn_of = {g: str(e) for g, e in zip(players.gsis_id, players.espn_id) if isinstance(g, str) and pd.notna(e) and str(e)}
   pages = {f.stem for f in (site / "data" / "players").glob("*.json")}
+  pfr = players.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
+  pos_of = players.dropna(subset=["gsis_id"]).drop_duplicates("gsis_id").set_index("gsis_id").position.to_dict()
+  # the live week: ESPN's injury list (daily) rules players out before the official report
+  live_out = set()
+  espn_inj = site / "data" / "espn_injuries" / "latest.json"
+  if espn_inj.exists():
+    gsis_of = {str(e).replace(".0", ""): g for g, e in zip(players.gsis_id, players.espn_id) if isinstance(g, str) and pd.notna(e)}
+    live_out = {gsis_of.get(str(r["espn_id"])) for r in json.loads(espn_inj.read_text(encoding="utf-8"))["rows"]
+                if r.get("status") in ("Out", "Injured Reserve", "Suspension")} - {None}
   out_root = site / "data" / "depth"
   for season in range(int(a), int(b or a) + 1):
     live = season == current
@@ -109,7 +191,7 @@ def main():
       continue
     d["team"] = d.team.replace(FRANCHISE)
     # that week's official tags: reserve lists from the weekly roster, game status from the injury report
-    tags = {}
+    tags, ros = {}, None
     if season >= 2002:
       ros = cache.get("rosters", season, lambda: nfl.load_rosters_weekly([season]),
                       stale=live and cache.age_hours("rosters", season) > 24)
@@ -123,6 +205,15 @@ def main():
         i = inj[inj.report_status.isin(GAME_TAG)]
         for g, w, st in zip(i.gsis_id, i.week, i.report_status):
           tags.setdefault((g, int(w)), GAME_TAG[st])  # a reserve list outranks a game status
+    # depth by playing time (2012 on: snap counts)
+    sn = season_snaps(cache, nfl, season, pfr, live)
+    out_set = {k for k, v in tags.items() if v == "O"}
+    reserve = {k for k, v in tags.items() if v in ("IR", "PUP", "NFI", "SUSP", "HOLD")}
+    if live and live_out:
+      last_wk = int(d.week.max())
+      out_set |= {(g, last_wk) for g in live_out}
+    rs = ros.assign(team=ros.team.replace({**FRANCHISE, **ROSTER_TEAM})) if ros is not None and len(ros) else None
+    usage = usage_weeks(season, sn, rs, out_set, reserve, d, pos_of) if sn is not None else {}
     (out_root / str(season)).mkdir(parents=True, exist_ok=True)
     for team, t in d.groupby("team"):
       plist, pidx = [], {}
@@ -145,6 +236,9 @@ def main():
             rows.append([str(s.abb.iloc[0]), str(s.label.iloc[0]),
                          [[pi(n, g), int(rk), tags.get((g, int(wk)))] for n, g, rk in zip(s.name, s.gsis_id, s["rank"])]])
           wkd[kind] = rows
+        u = usage.get((team, int(wk)))
+        if u:  # [[group, n starters, [[player index, avg snap %, tag], ...]], ...]
+          wkd["u"] = [[grp, n, [[pi(name, g), pct, tags.get((g, int(wk)))] for g, name, pct in pl]] for grp, n, pl in u]
         gr = groups.get((team, int(wk)), {})
         wkd["f"], wkd["d"] = gr.get("off", ""), gr.get("def", "")
         weeks[str(int(wk))] = wkd
