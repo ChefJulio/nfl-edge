@@ -640,6 +640,10 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Allgeier 2023; Saquon 2022 / 2024 / 2025 not bottom-quartile; workhorse stars top half) and (b) guardrail: RB
   rank corr. of season-only grade with next-season fantasy pts/g (both seasons qualified, 2019-2025) not
   significantly below the current grade's.
+- **Spot starters get an asterisked OVR (owner 2026-10-14, Tyler Huntley):** unqualified players with >= 2 games
+  at >= 50% of offensive snaps that season, graded on those games only, percentile vs the qualified pool (not joining
+  it), [9] = 1, dashed badge "OVR 79*". Owner: no fringe sneaking in; kept strict (Huntley 2026: 48% in week 4 relief,
+  100% week 5 = one game, ungraded until his next start). ~60-130 such players a season.
 - **Trends two-way grids (owner pick from the ideas list, 2026-10-14):** "by X and Y" -> shaded grid (green / red
   vs the league, flipped for lower-is-better metrics; counts shade by size), sample under each value, cells under the
   minimum hidden, an All column, player / team / coach rows only (columns must fit a phone; caps 40 x 24), player /

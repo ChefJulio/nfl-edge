@@ -466,6 +466,19 @@ def report(r):
 
 
 LOWER_BETTER = {"sack_rate", "int_rate", "drop"}
+# Unqualified players with a real role (owner 2026-10-14: spot starters like Tyler Huntley, but no garbage-time
+# fringe): at least SUB_GAMES games that season with SUB_SNAP of the offensive snaps or more. Graded on those games only,
+# against the qualified pool (not joining it), shown with an asterisk.
+SUB_GAMES, SUB_SNAP = 2, 0.5
+
+
+def pct_vs(ref: pd.Series, x: pd.Series) -> pd.Series:
+  """0-99 percentile of each x within the reference distribution (x not part of it; ties count half)."""
+  r = np.sort(ref.dropna().to_numpy())
+  if not len(r):
+    return pd.Series(50, index=x.index)
+  lo, hi = np.searchsorted(r, x.to_numpy(), "left"), np.searchsorted(r, x.to_numpy(), "right")
+  return pd.Series(np.clip(np.round(100 * (lo + hi) / 2 / len(r)), 0, 99).astype(int), index=x.index)
 
 
 def pct(v: pd.Series, w: pd.Series | None = None) -> pd.Series:
@@ -531,6 +544,7 @@ def build(tg, pos_of, info, cur, out: Path, sched: pd.DataFrame, team_of: dict, 
   out.mkdir(parents=True, exist_ok=True)
   tg = tg.assign(opps=tg.qb_db + tg.ru_n + tg.tgt)
   t = rb_value(seasons_of(tg), pos_of, ryoe, rush_ctx or {})
+  t_sub = seasons_of(tg[tg.snap_pct >= SUB_SNAP])  # only the games where he played half the snaps or more
   pri = fit_priors(tg, pos_of, range(FIRST, cur + 1))
   tgames = team_games(sched)
   # who qualified, per season (the NFL's minimums per team game)
@@ -578,6 +592,22 @@ def build(tg, pos_of, info, cur, out: Path, sched: pd.DataFrame, team_of: dict, 
       for gid in ids:
         players[gid] = [int(g[gid]), pos, int(w.games_now[gid]), int(round(w.games[gid])), round(float(cur_v[gid]), 1),
                         [int(ps[n][gid]) for n in names], int(sg[gid]), round(float(raw[gid]), 1), int(o.games[gid])]
+      # unqualified with a real role: graded on their half-the-snaps games, against the qualified pool ([9] = 1)
+      sub = t_sub[(t_sub.season == s) & (t_sub.games >= SUB_GAMES)].set_index("gsis_id")
+      uq = [x for x in sub.index if pos_of.get(x) == pos and x not in players]
+      if uq:
+        wsub = window(t_sub, s)
+        uq = [x for x in uq if x in wsub.index]
+        u, uo = wsub.loc[uq], sub.loc[uq]
+        fu = features(u, pos, pri, info)
+        ucur = (u.fp + k * m) / (u.games + k)
+        usea = (uo.fp + k * m) / (uo.games + k)
+        ug, usg = pct_vs(cur_v, ucur), pct_vs(sea_v, usea)
+        ups = {n: (99 - pct_vs(f[n], fu[n])) if n in LOWER_BETTER else pct_vs(f[n], fu[n]) for n in names}
+        for gid in uq:
+          players[gid] = [int(ug[gid]), pos, int(u.games_now[gid]), int(round(u.games[gid])), round(float(ucur[gid]), 1),
+                          [int(ups[n][gid]) for n in names], int(usg[gid]), round(float(uo.fp[gid] / uo.games[gid]), 1),
+                          int(uo.games[gid]), 1]
     (out / f"{s}.json").write_text(json.dumps({"season": s, "stats": stats, "qualified": qual_n, "players": players},
                                               separators=(",", ":")), encoding="utf-8")
     seasons.append(s)
