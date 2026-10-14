@@ -474,3 +474,7 @@ table.gc-rt { width: 100%; font-size: 13px; } .bx-th-in { display: inline-flex; 
 .dc-pct { margin-left: 4px; font-size: 11px; color: var(--faint); font-variant-numeric: tabular-nums; }
 .dc-p.first .dc-pct { color: var(--muted); }
 .seg.dc-mode { margin: 0 0 10px; }
+/* season header rows: the label stays pinned at the left edge while the log scrolls sideways */
+table.lg tr.lg-season .lg-pin { position: sticky; left: 0; display: inline-block; padding-right: 8px; background: inherit; }
+/* cover the 12px gutter left of the pinned columns, so scrolled-under cells do not peek out on the left */
+table.lg tr > :nth-child(1), table.lg tr.lg-season .lg-pin { box-shadow: -12px 0 0 var(--panel2); }
