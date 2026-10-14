@@ -618,7 +618,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   - EPA(incomplete) at that air-yard depth, per season] + on catches (yac_epa - xyac_epa); rushing unchanged
   (fumbles are his). GUARDRAIL: ships if, walk-forward 2021-2025 all players, its rank corr. with next-season
   fantasy pts/g is not significantly below v1's (95% CI of v1.1 - v1 not entirely below 0). Face check reported.
-- **RESULT: RB via NGS RYOE + catchable-ball attribution -> LIVE.** Face check passed: Bijan 2023 43 > Allgeier 39
+- **FINAL (owner 2026-10-14: "it should correlate with output, not advanced-metric skill"): OVR = output.**
+  Fantasy pts/g (site scoring) among qualified players, shrunk by measured k toward the qualified average. Next-
+  season fantasy pts/g rank corr. (season-only grade, 2019-2024 -> next): QB .42 -> .58, RB .31 -> .63, WR .31 ->
+  .68, TE .17 -> .60 vs the per-play EPA version. Face: Bijan 2023 84 (12.8 ppg) vs Allgeier 60; Saquon 2022-25
+  95/90/99/87; G. Wilson 77-93; leaders read right. Lesson: three rounds of "skill" metrics (EPA, learned ridge,
+  NGS) each produced cases the owner rightly called absurd; output is what people judge players by, and it is
+  also the most stable. The EPA / RYOE / catchable work below now powers only the stat bars.
+- **RESULT: RB via NGS RYOE + catchable-ball attribution -> superseded by output.** Face check passed: Bijan 2023 43 > Allgeier 39
   (was 24 / 32); Saquon 2022-25 58 / 76 / 97 / 34 (was 18 / 9 / 94 / 9); leaders read right (2023 RB CMC, Conner,
   Hall, Cook; WR Aiyuk, Deebo, Metcalf; TE Kittle, LaPorta, Andrews; 2025 RB Bijan, Cook, Henry, Achane, Gibbs).
   Guardrails (next-season fantasy pts/g, season-only grade): RB +0.021 [-0.092, +0.129], WR -0.033 [-0.087,

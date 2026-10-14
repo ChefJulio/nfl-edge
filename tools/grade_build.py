@@ -532,43 +532,52 @@ def build(tg, pos_of, info, cur, out: Path, sched: pd.DataFrame, team_of: dict, 
   tg = tg.assign(opps=tg.qb_db + tg.ru_n + tg.tgt)
   t = rb_value(seasons_of(tg), pos_of, ryoe, rush_ctx or {})
   pri = fit_priors(tg, pos_of, range(FIRST, cur + 1))
-  vpri = {}
-  for pos in POS:
-    d = tg[(tg.gsis_id.map(pos_of) == pos) & (tg.opps > 0)]
-    vpri[pos] = mom_prior(d, "value", "opps") or (float(d.value.sum() / max(d.opps.sum(), 1)), 50.0)
   tgames = team_games(sched)
+  # who qualified, per season (the NFL's minimums per team game)
+  qual = set()
+  for s in range(FIRST, cur + 1):
+    one = t[t.season == s].set_index("gsis_id")
+    tgm = pd.Series([tgames.get((team_of.get((g, s)), s), np.nan) for g in one.index], index=one.index)
+    pos_s = one.index.map(pos_of)
+    for pos in POS:
+      ok = np.zeros(len(one), bool)
+      for col, rate in QUALIFY[pos]:
+        ok |= (one[col] >= rate * tgm).fillna(False).to_numpy()
+      qual |= {(g, s) for g in one.index[(pos_s == pos) & ok]}
+  # THE RATING = OUTPUT (owner 2026-10-14: "correlate with output, not advanced-metric skill"): fantasy points per game
+  # in the site's scoring (yards, TDs, catches, turnovers), shrunk toward the QUALIFIED players' average at the
+  # position by k pseudo-games measured from game-to-game noise (method of moments on qualified player-games).
+  qg = tg[[(g, s) in qual for g, s in zip(tg.gsis_id, tg.season)]]
+  fpri = {}
+  for pos in POS:
+    d = qg[qg.gsis_id.map(pos_of) == pos]
+    fpri[pos] = mom_prior(d, "fp", "games") or (float(d.fp.sum() / max(d.games.sum(), 1)), 3.0)
   seasons = []
   for s in range(FIRST, cur + 1):
     one = t[t.season == s].set_index("gsis_id")
     if not len(one):
       continue
-    tgm = pd.Series([tgames.get((team_of.get((g, s)), s), np.nan) for g in one.index], index=one.index)
     pos_s = one.index.map(pos_of)
     win = window(t, s)
     players, stats, qual_n = {}, {}, {}
     for pos in POS:
-      rule = QUALIFY[pos]
-      ok = np.zeros(len(one), bool)
-      for col, rate in rule:
-        ok |= (one[col] >= rate * tgm).fillna(False).to_numpy()
-      ids = one.index[(pos_s == pos) & ok]
-      ids = [g for g in ids if g in win.index]
+      ids = [g for g in one.index[pos_s == pos] if (g, s) in qual and g in win.index]
       if len(ids) < 5:
         continue
       qual_n[pos] = len(ids)
       w, o = win.loc[ids], one.loc[ids]
       f = features(w, pos, pri, info)
-      m, k = vpri[pos]
-      cur_v = (w.value + k * m) / (w.opps + k)
-      sea_v = (o.value + k * m) / (o.opps + k)
-      raw = o.value / o.opps
+      m, k = fpri[pos]
+      cur_v = (w.fp + k * m) / (w.games + k)  # current form: this season + the two before (SEASON_W)
+      sea_v = (o.fp + k * m) / (o.games + k)  # that season only
+      raw = o.fp / o.games
       names = [n for n, _, _ in RATES[pos]]
       stats[pos] = [LABEL[n] for n in names]
       g, sg = pct(cur_v), pct(sea_v)
       ps = {n: (99 - pct(f[n])) if n in LOWER_BETTER else pct(f[n]) for n in names}
       for gid in ids:
-        players[gid] = [int(g[gid]), pos, int(w.games_now[gid]), int(round(w.games[gid])), round(float(cur_v[gid]), 3),
-                        [int(ps[n][gid]) for n in names], int(sg[gid]), round(float(raw[gid]), 3), int(o.opps[gid])]
+        players[gid] = [int(g[gid]), pos, int(w.games_now[gid]), int(round(w.games[gid])), round(float(cur_v[gid]), 1),
+                        [int(ps[n][gid]) for n in names], int(sg[gid]), round(float(raw[gid]), 1), int(o.games[gid])]
     (out / f"{s}.json").write_text(json.dumps({"season": s, "stats": stats, "qualified": qual_n, "players": players},
                                               separators=(",", ":")), encoding="utf-8")
     seasons.append(s)
