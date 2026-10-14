@@ -74,7 +74,7 @@ LABEL = {"epa_db": "EPA / dropback", "succ_db": "Success rate", "cpoe": "CPOE", 
          "ngs_yacoe": "YAC over expected (tracking)", "rush_yd_pg": "Rushing yards / game"}
 
 
-def season_table(data, pfr: pd.DataFrame, scoring, ngs: pd.DataFrame | None = None) -> pd.DataFrame:
+def season_table(data, pfr: pd.DataFrame, scoring, ngs: pd.DataFrame | None = None, ftn: pd.DataFrame | None = None) -> pd.DataFrame:
   """One row per (gsis_id, season): summed opportunities and outcomes, regular season."""
   p = data.pbp[data.pbp.season_type == "REG"]
   p = p[(p.two_point_attempt == 0) & p.posteam.notna()]
@@ -90,8 +90,10 @@ def season_table(data, pfr: pd.DataFrame, scoring, ngs: pd.DataFrame | None = No
               .groupby(["gsis_id", "season", "week"])[["qb_db", "qb_epa", "qb_succ", "sacks", "ints", "att", "ay", "cpo", "cpo_n"]].sum())
   ru = p[p.is_designed_rush & p.rusher_player_id.notna()]
   ry = ru.rushing_yards.fillna(0)
+  rfl = ((ru.fumble_lost == 1) & (ru.fumbled_1_player_id == ru.rusher_player_id)).astype(int)
   rows.append(ru.assign(gsis_id=ru.rusher_player_id, ru_n=1, ru_epa=ep, ru_succ=(ep > 0).astype(int), ru_yd=ry,
-                        ru_x10=(ry >= 10).astype(int)).groupby(["gsis_id", "season", "week"])[["ru_n", "ru_epa", "ru_succ", "ru_yd", "ru_x10"]].sum())
+                        ru_x10=(ry >= 10).astype(int), ru_fl=rfl)
+              .groupby(["gsis_id", "season", "week"])[["ru_n", "ru_epa", "ru_succ", "ru_yd", "ru_x10", "ru_fl"]].sum())
   tg = p[(p.pass_attempt == 1) & (p.sack == 0) & p.receiver_player_id.notna()].copy()
   te = tg.epa.fillna(0.0)
   tg["team_tgt_g"] = tg.groupby(["game_id", "posteam"]).game_id.transform("size")
@@ -105,6 +107,17 @@ def season_table(data, pfr: pd.DataFrame, scoring, ngs: pd.DataFrame | None = No
   worth = (ce.get(1) - ce.get(0)).fillna(0.0)
   delta = pd.Series(list(zip(tg.season, tg.aybin)), index=tg.index).map(worth.to_dict()).fillna(0.0)
   catch = ((tg.complete_pass - tg.cp) * delta).where(tg.cp.notna(), 0.0)
+  # Where FTN charted the ball as catchable or not (2022 on), that decides instead: a catch is measured against how
+  # often THAT kind of ball (catchable or not, at that depth) is caught, so an off-target throw isn't on the receiver.
+  # The completion probability alone knows depth and route, not ball placement (Bijan 2023 still paid for Ridder).
+  if ftn is not None and len(ftn):
+    idx = tg.index  # a left merge keeps row order but renumbers: restore so every Series above still lines up
+    tg = tg.merge(ftn, on=["game_id", "play_id"], how="left")
+    tg.index = idx
+    known = tg.catchable.notna()
+    rate = tg[known].groupby(["season", "aybin", "catchable"]).complete_pass.mean()
+    pc = pd.Series(list(zip(tg.season, tg.aybin, tg.catchable)), index=tg.index).map(rate.to_dict())
+    catch = catch.where(~known | pc.isna(), (tg.complete_pass - pc) * delta)
   yac = (tg.yac_epa - tg.xyac_epa).where((tg.complete_pass == 1) & tg.yac_epa.notna() & tg.xyac_epa.notna(), 0.0) \
     if "yac_epa" in tg and "xyac_epa" in tg else 0.0
   tg["rec_att_p"] = (catch + yac).fillna(0.0)
@@ -302,6 +315,15 @@ def load(cfg):
                                 "ngs_yaco": (f.avg_yac_above_expectation * f.receptions).fillna(0),
                                 "ngs_rc": f.receptions.where(f.avg_yac_above_expectation.notna(), 0)}))
   ngs = pd.concat(ng, ignore_index=True).fillna(0.0) if ng else None
+  # season-level rush yards over expected (NGS week 0 = the season; its own qualifying minimum, close to ours)
+  ys = []
+  for s in range(2018, cur + 1):
+    f = cache.get("ngsrush", s, lambda: None, stale=False)
+    if f is not None and len(f):
+      f = f[(f.week == 0) & f.rush_yards_over_expected.notna()]
+      ys.append(pd.DataFrame({"gsis_id": f.player_gsis_id, "season": f.season, "ryoe_s": f.rush_yards_over_expected,
+                              "ryoe_att": f.rush_attempts}))
+  ryoe = pd.concat(ys, ignore_index=True).groupby(["gsis_id", "season"]).sum() if ys else None
   pfr = pd.concat(fr, ignore_index=True)
   pfr["gsis_id"] = pfr.pfr.map(ppid)
   pfr = pfr.dropna(subset=["gsis_id"])
@@ -315,6 +337,23 @@ def load(cfg):
   sn = sn[sn.offense_snaps > 0]
   main = sn.groupby(["gsis_id", "season"]).team.agg(lambda x: x.value_counts().index[0])
   team_of = {k: D.RELOCATED.get(v, v) for k, v in main.items()}
+  # league rushing context per season: EPA per rushing yard (slope over designed runs) and a lost fumble's EPA
+  pb = data.pbp[(data.pbp.season_type == "REG") & data.pbp.is_designed_rush & data.pbp.epa.notna()]
+  rush_ctx = {}
+  for s, g in pb.groupby("season"):
+    yd = g.rushing_yards.fillna(0)
+    slope = float(np.cov(yd, g.epa)[0, 1] / max(yd.var(), 1e-9))
+    fl = g[g.fumble_lost == 1]
+    rush_ctx[int(s)] = (slope, float(fl.epa.mean()) if len(fl) else -4.0, float(len(fl) / len(g)))
+  data.ryoe, data.rush_ctx = ryoe, rush_ctx
+  # FTN charting (2022 on): was each target catchable
+  fl = []
+  for s in range(2022, cur + 1):
+    f = cache.get("ftn", s, lambda: nfl.load_ftn_charting([s]), stale=s == cur and cache.age_hours("ftn", s) > 12)
+    if f is not None and len(f):
+      fl.append(pd.DataFrame({"game_id": f.nflverse_game_id, "play_id": pd.to_numeric(f.nflverse_play_id, errors="coerce"),
+                              "catchable": f.is_catchable_ball.astype(float)}))
+  data.ftn = pd.concat(fl, ignore_index=True).dropna(subset=["play_id"]).drop_duplicates(["game_id", "play_id"]) if fl else None
   return data, pfr, info, pos_of, cur, ngs, team_of
 
 
@@ -458,7 +497,31 @@ def team_games(sched: pd.DataFrame) -> dict:
   return out
 
 
-def build(tg, pos_of, info, cur, out: Path, sched: pd.DataFrame, team_of: dict):
+def rb_value(t: pd.DataFrame, pos_of: pd.Series, ryoe, rush_ctx: dict) -> pd.DataFrame:
+  """RB rows of the season table re-valued (owner 2026-10-14: EPA per carry graded Saquon 2022 an 18 and backup
+  Allgeier above Bijan; rushing EPA is mostly the line and play-calling). Rushing = NGS rush yards over expected
+  (tracking: blockers, box, defenders) x the league's EPA per rushing yard that season, plus lost fumbles vs the
+  league rate x a lost fumble's EPA; receiving = the receiver's part of each target vs the RB average. Seasons
+  without an NGS row (under its minimum) keep rushing EPA vs the RB average."""
+  t = t.copy()
+  rb = (t.gsis_id.map(pos_of) == "RB").to_numpy()
+  if ryoe is None or not rb.any():
+    return t
+  key = pd.MultiIndex.from_frame(t[["gsis_id", "season"]])
+  ry = ryoe.ryoe_s.reindex(key).to_numpy()
+  ctx = pd.DataFrame([rush_ctx.get(int(s), (0.065, -4.0, 0.006)) for s in t.season], columns=["epy", "fcost", "frate"])
+  rbt = t[rb]
+  avg_rush = (rbt.groupby("season").ru_epa.sum() / rbt.groupby("season").ru_n.sum()).reindex(t.season).to_numpy()
+  avg_rec = (rbt.groupby("season").rec_att2.sum() / rbt.groupby("season").tgt.sum().replace(0, np.nan)).reindex(t.season).fillna(0).to_numpy()
+  fum = (t.ru_fl.to_numpy() - t.ru_n.to_numpy() * ctx.frate.to_numpy()) * ctx.fcost.to_numpy()
+  # no NGS row: rushing EPA vs the RB average (it already contains his fumbles); NGS row: RYOE value + fumble cost
+  rush = np.where(np.isnan(ry), t.ru_epa.to_numpy() - t.ru_n.to_numpy() * avg_rush, ry * ctx.epy.to_numpy() + fum)
+  rec = t.rec_att2.to_numpy() - t.tgt.to_numpy() * avg_rec
+  t.loc[rb, "value"] = (rush + rec)[rb]
+  return t
+
+
+def build(tg, pos_of, info, cur, out: Path, sched: pd.DataFrame, team_of: dict, ryoe=None, rush_ctx=None):
   """data/grades/<season>.json for 2018..current + index.json. Grades are PER OPPORTUNITY (dropbacks + designed
   carries + targets; owner 2026-10-14: per-opportunity is fair, totals aren't) and only for players who met the NFL's
   qualifying minimum that season (QUALIFY), as percentiles among the qualified at the position:
@@ -467,7 +530,7 @@ def build(tg, pos_of, info, cur, out: Path, sched: pd.DataFrame, team_of: dict):
   Both shrunk toward the position average by k pseudo-opportunities, measured (method of moments)."""
   out.mkdir(parents=True, exist_ok=True)
   tg = tg.assign(opps=tg.qb_db + tg.ru_n + tg.tgt)
-  t = seasons_of(tg)
+  t = rb_value(seasons_of(tg), pos_of, ryoe, rush_ctx or {})
   pri = fit_priors(tg, pos_of, range(FIRST, cur + 1))
   vpri = {}
   for pos in POS:
@@ -517,7 +580,7 @@ def main():
   opt = dict(a[2:].split("=", 1) if "=" in a else (a[2:], "1") for a in sys.argv[1:] if a.startswith("--"))
   cfg = load_config()
   data, pfr, info, pos_of, cur, ngs, team_of = load(cfg)
-  st = season_table(data, pfr, load_scoring(), ngs)
+  st = season_table(data, pfr, load_scoring(), ngs, getattr(data, "ftn", None))
   # the live grade credits receivers with their part of a target only (v1.2; INSIGHTS): the throw is the QB's
   tg = add_value(st, pos_of, "rec_att2")
   if "eval11" in opt:
@@ -537,7 +600,8 @@ def main():
     r.to_parquet(ROOT / "cache" / "grade_eval.parquet")
     print(report(r))
     return
-  build(tg, pos_of, info, cur, Path(opt.get("site", "site")) / "data" / "grades", data.schedules, team_of)
+  build(tg, pos_of, info, cur, Path(opt.get("site", "site")) / "data" / "grades", data.schedules, team_of,
+        getattr(data, "ryoe", None), getattr(data, "rush_ctx", None))
 
 
 if __name__ == "__main__":

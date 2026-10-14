@@ -618,6 +618,21 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   - EPA(incomplete) at that air-yard depth, per season] + on catches (yac_epa - xyac_epa); rushing unchanged
   (fumbles are his). GUARDRAIL: ships if, walk-forward 2021-2025 all players, its rank corr. with next-season
   fantasy pts/g is not significantly below v1's (95% CI of v1.1 - v1 not entirely below 0). Face check reported.
+- **RESULT: RB via NGS RYOE + catchable-ball attribution -> LIVE.** Face check passed: Bijan 2023 43 > Allgeier 39
+  (was 24 / 32); Saquon 2022-25 58 / 76 / 97 / 34 (was 18 / 9 / 94 / 9); leaders read right (2023 RB CMC, Conner,
+  Hall, Cook; WR Aiyuk, Deebo, Metcalf; TE Kittle, LaPorta, Andrews; 2025 RB Bijan, Cook, Henry, Achane, Gibbs).
+  Guardrails (next-season fantasy pts/g, season-only grade): RB +0.021 [-0.092, +0.129], WR -0.033 [-0.087,
+  +0.026], TE -0.036 [-0.115, +0.056], QB +0.000. Catchable fix: FTN is_catchable_ball (2022+) decides a target's
+  catch expectation instead of cp (cp sees depth / route, not ball placement). Known leftover: per-play grades can
+  bury volume receivers on awful offenses (Garrett Wilson 2023 2nd pct among qualified WRs).
+- **OVR scale (owner): 50-99** = 50 + pct x 49/99 among the qualified (the lowest qualified player is a 50, not a
+  0); sentence and stat bars keep the plain percentile.
+- **PRE-REGISTERED (owner: "fix the ratings, get it to a point it makes sense"): RB rushing via NGS RYOE.** RB
+  value = RYOE x league EPA per rushing yard (that season) + lost-fumble cost vs the league rate, + receiving
+  (receiver's part, vs the RB average); per play among qualified. Ships if (a) RB face check passes (Bijan 2023 >
+  Allgeier 2023; Saquon 2022 / 2024 / 2025 not bottom-quartile; workhorse stars top half) and (b) guardrail: RB
+  rank corr. of season-only grade with next-season fantasy pts/g (both seasons qualified, 2019-2025) not
+  significantly below the current grade's.
 - **UI prefs (owner 2026-10-14):** player / team page header (photo, name, position, grade, team) is sticky
   (top: var(--navh), set by shell.js from the top bar's height; the page container needs overflow: clip, never
   hidden/auto, or sticky breaks). The grade badge reads "OVR", not "EDGE" (EDGE is a position).
