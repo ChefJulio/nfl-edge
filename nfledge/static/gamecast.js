@@ -291,23 +291,28 @@
     const body = seasons.map(S => {
       const isCur = S.s === L.cur, rows = S.g.map(g => ({ w: g.w, g }));
       if (isCur) up.forEach(u => rows.push({ w: u.w, u }));
-      rows.sort((a, b) => a.w - b.w);
+      rows.sort((a, b) => b.w - a.w);  // newest first: scrolling down goes back in time (owner, 2026-10-14)
       const fps = S.g.map(g => pts(g.c, w, pos)), fpg = fps.length ? fps.reduce((a, b) => a + b, 0) / fps.length : 0;
       const team = S.g.length ? S.g[S.g.length - 1].t : '';
+      const played = (g, label) => { const v = pts(g.c, w, pos), pj = projOf(g);
+        return `<tr${tileAttrs(g)}><td>${esc(label)}</td>${opp(g)}<td class="num lg-fp">${f1(v)}</td>
+          <td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td>
+          <td class="num"><span class="lg-rk ${rkClass(g.rk)}">${g.rk}</span></td><td class="num">${g.sn != null ? g.sn : '–'}</td>
+          ${stat.map(([, fn]) => `<td class="num">${fn(g)}</td>`).join('')}</tr>`; };
       const trs = rows.map(r => {
         if (r.u && r.u.bye) return `<tr class="lg-bye"><td>${r.w}</td><td colspan="${5 + stat.length}">Bye</td></tr>`;
         if (r.u) {
           const pj = projOf(r.u);
           return `<tr class="lg-up"${tileAttrs(r.u)}><td>${r.w}</td>${opp(r.u)}<td class="num">–</td><td class="num">${pj != null ? f1(pj) : '–'}</td><td class="num">–</td><td class="num">–</td>${blank}</tr>`;
         }
-        const g = r.g, v = pts(g.c, w, pos), pj = projOf(g);
-        return `<tr${tileAttrs(g)}><td>${g.w}</td>${opp(g)}<td class="num lg-fp">${f1(v)}</td>
-          <td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td>
-          <td class="num"><span class="lg-rk ${rkClass(g.rk)}">${g.rk}</span></td><td class="num">${g.sn != null ? g.sn : '–'}</td>
-          ${stat.map(([, fn]) => `<td class="num">${fn(g)}</td>`).join('')}</tr>`;
+        return played(r.g, r.g.w);
       }).join('');
       const sum = opts.last ? '' : ` · ${S.g.length} game${S.g.length === 1 ? '' : 's'}${S.g.length ? ` · ${f1(fpg)} FP/G` : ''}`;
-      return `<tbody><tr class="lg-season"><td colspan="${6 + stat.length}"><span class="lg-pin"><b>${S.s}</b> ${esc(team)}${sum}</span></td></tr>${head}${trs}</tbody>`;
+      // playoffs first (as Sleeper does), their own block: not in the regular-season totals, finishes or FP/G
+      const pg = opts.last || opts.season ? [] : (S.pg || []);
+      const sub = (label, gs) => `<tr class="lg-sub"><td colspan="${6 + stat.length}"><span class="lg-pin">${label}${gs ? ` · ${gs.length} game${gs.length === 1 ? '' : 's'} · ${f1(gs.reduce((t, g) => t + pts(g.c, w, pos), 0) / gs.length)} FP/G` : ''}</span></td></tr>`;
+      const po = pg.length ? `${sub('Playoffs', pg)}${head}${[...pg].reverse().map(g => played(g, g.po)).join('')}${S.g.length || rows.length ? sub('Regular season') : ''}` : '';
+      return `<tbody><tr class="lg-season"><td colspan="${6 + stat.length}"><span class="lg-pin"><b>${S.s}</b> ${esc(team)}${sum}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
     }).join('');
     if (opts.last || opts.season) return `<div class="lg-scroll"><table class="lg">${body}</table></div>`;
     const legend = `<div class="lg-leg"><span>Opponent color = our pregame matchup (2021 on): green helped, red hurt, deeper = bigger</span>
@@ -642,16 +647,22 @@
   // game log table for a kind: Wk, Opp, Snap, his stats, returns (only when he had any in those games)
   const kindLog = (L, seasons, opts = {}) => {
     const cols = KIND_COLS[L.kind] || {}, keys = (L.keys || []).filter(k => cols[k]);
-    const hasRet = seasons.some(S => S.g.some(g => g.r));
+    const hasRet = seasons.some(S => S.g.some(g => g.r) || (S.pg || []).some(g => g.r));
     const rk = hasRet ? (L.ret_keys || []) : [];
     const head = `<tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Snap</th>${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}${rk.map(k => `<th class="num" title="${esc(RET_COLS[k][1])}">${RET_COLS[k][0]}</th>`).join('')}</tr>`;
     const n = 3 + keys.length + rk.length;
     const body = seasons.map(S => {
       const t = kindTotals(L, S.g), team = S.g.length ? S.g[S.g.length - 1].t : '';
-      const trs = [...S.g].sort((a, b) => a.w - b.w).map(g => `<tr${tileAttrs(g)}><td>${g.w}</td><td class="lg-opp tm-opp"><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>
-        <td class="num">${g.sn != null ? g.sn : '–'}</td>${keys.map(k => `<td class="num">${nfmt((g.d || [])[(L.keys || []).indexOf(k)])}</td>`).join('')}${rk.map((k, i) => `<td class="num">${g.r ? nfmt(g.r[i]) : '–'}</td>`).join('')}</tr>`).join('');
+      const row = (g, label) => `<tr${tileAttrs(g)}><td>${esc(label)}</td><td class="lg-opp tm-opp"><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>
+        <td class="num">${g.sn != null ? g.sn : '–'}</td>${keys.map(k => `<td class="num">${nfmt((g.d || [])[(L.keys || []).indexOf(k)])}</td>`).join('')}${rk.map((k, i) => `<td class="num">${g.r ? nfmt(g.r[i]) : '–'}</td>`).join('')}</tr>`;
+      const trs = [...S.g].sort((a, b) => b.w - a.w).map(g => row(g, g.w)).join('');  // newest first
       const sum = opts.compact ? '' : ` · ${t.g} game${t.g === 1 ? '' : 's'}${keys.length ? ` · ${keys.slice(0, 4).map(k => `${nfmt(t[k] || 0)} ${cols[k][0]}`).join(', ')}` : ''}`;
-      return `<tbody><tr class="lg-season"><td colspan="${n}"><span class="lg-pin"><b>${S.s}</b> ${esc(team)}${sum}</span></td></tr>${head}${trs}</tbody>`;
+      // playoffs first, their own block (not in the season totals above)
+      const pg = opts.compact ? [] : (S.pg || []);
+      const sub = (label, extra = '') => `<tr class="lg-sub"><td colspan="${n}"><span class="lg-pin">${label}${extra}</span></td></tr>`;
+      const pt = pg.length ? kindTotals(L, pg) : null;
+      const po = pg.length ? `${sub('Playoffs', ` · ${pg.length} game${pg.length === 1 ? '' : 's'}${keys.length ? ` · ${keys.slice(0, 4).map(k => `${nfmt(pt[k] || 0)} ${cols[k][0]}`).join(', ')}` : ''}`)}${head}${[...pg].reverse().map(g => row(g, g.po)).join('')}${S.g.length ? sub('Regular season') : ''}` : '';
+      return `<tbody><tr class="lg-season"><td colspan="${n}"><span class="lg-pin"><b>${S.s}</b> ${esc(team || (pg[0] && pg[0].t) || '')}${sum}</span></td></tr>${po}${S.g.length ? head + trs : ''}</tbody>`;
     }).join('');
     return `<div class="lg-scroll"><table class="lg">${body}</table></div>`;
   };
@@ -922,9 +933,20 @@
       let rows = S.g.map(g => ({ w: g.w, g }));
       if (S.s === L.cur && !teamOpp) { (L.up || []).forEach(u => rows.push({ w: u.w, u })); (L.byes || []).forEach(b => rows.push({ w: b, bye: 1 })); }
       if (teamOpp) rows = rows.filter(r => r.g && r.g.o === teamOpp);
-      if (!rows.length) return '';
-      rows.sort((a, b) => a.w - b.w);
+      const pg = (S.pg || []).filter(g => !teamOpp || g.o === teamOpp);
+      if (!rows.length && !pg.length) return '';
+      rows.sort((a, b) => b.w - a.w);  // newest first
       const rk = S.rk || {}, av = S.avg || {};
+      const played = (g, label) => {
+        const s = g.s || [], os = g.os || [];
+        const res = `<span class="tm-res ${g.r === 'W' ? 'w' : g.r === 'L' ? 'l' : ''}">${g.r}</span> ${g.ps}-${g.pa}${g.ot ? ' <small>OT</small>' : ''}`;
+        const line = g.ln != null ? `${g.ln > 0 ? '-' : g.ln < 0 ? '+' : ''}${g.ln === 0 ? 'PK' : Math.abs(g.ln).toFixed(1)}${g.ats ? ` <small class="ats-${g.ats}">${g.ats === 'W' ? 'cov' : g.ats === 'L' ? 'no' : 'push'}</small>` : ''}` : '–';
+        return `<tr${tileAttrs(g)}><td>${esc(label)}</td>${oppCell(g.o, g.h, g.opr)}<td class="tm-rc">${res}</td><td class="num">${line}</td><td class="num">${pct(g.vc, g.mc)}</td>
+          <td class="num">${g.pr ? `<span class="lg-rk ${g.pr <= 8 ? 'rk-good' : g.pr <= 20 ? 'rk-mid' : 'rk-bad'}">${g.pr}</span>` : '–'}</td><td class="num muted">${g.elo || ''}</td>
+          <td class="num">${f0(s[0])}</td><td class="num">${f0(s[1])}</td><td class="num">${f0(s[2])}</td><td class="num">${s[3] != null ? s[3].toFixed(1) : ''}</td><td class="num">${s[4] ?? ''}</td>
+          <td class="num">${f0(os[0])}</td><td class="num">${os[3] != null ? os[3].toFixed(1) : ''}</td><td class="num">${os[4] ?? ''}</td>
+          <td><a class="tm-gc" href="${gcHref(g.gid, g.f)}" title="Gamecast">&rsaquo;</a></td></tr>`;
+      };
       const trs = rows.map(r => {
         if (r.bye) return `<tr class="lg-bye"><td>${r.w}</td><td colspan="15">Bye</td></tr>`;
         if (r.u) {
@@ -932,17 +954,13 @@
           return `<tr class="lg-up"${tileAttrs(u)}><td>${u.w}</td>${oppCell(u.o, u.h, u.opr)}<td class="muted">upcoming</td><td class="num">${u.ln != null ? sgn(-u.ln).replace('+0.0', 'PK') : '–'}</td>
             <td class="num">${pct(u.vc, u.mc)}</td><td class="num">–</td><td class="num">–</td><td colspan="8"></td><td><a class="tm-gc" href="${gcHref(u.gid, u.f)}" title="Gamecast">&rsaquo;</a></td></tr>`;
         }
-        const g = r.g, s = g.s || [], os = g.os || [];
-        const res = `<span class="tm-res ${g.r === 'W' ? 'w' : g.r === 'L' ? 'l' : ''}">${g.r}</span> ${g.ps}-${g.pa}${g.ot ? ' <small>OT</small>' : ''}`;
-        const line = g.ln != null ? `${g.ln > 0 ? '-' : g.ln < 0 ? '+' : ''}${g.ln === 0 ? 'PK' : Math.abs(g.ln).toFixed(1)}${g.ats ? ` <small class="ats-${g.ats}">${g.ats === 'W' ? 'cov' : g.ats === 'L' ? 'no' : 'push'}</small>` : ''}` : '–';
-        return `<tr${tileAttrs(g)}><td>${g.w}</td>${oppCell(g.o, g.h, g.opr)}<td class="tm-rc">${res}</td><td class="num">${line}</td><td class="num">${pct(g.vc, g.mc)}</td>
-          <td class="num">${g.pr ? `<span class="lg-rk ${g.pr <= 8 ? 'rk-good' : g.pr <= 20 ? 'rk-mid' : 'rk-bad'}">${g.pr}</span>` : '–'}</td><td class="num muted">${g.elo || ''}</td>
-          <td class="num">${f0(s[0])}</td><td class="num">${f0(s[1])}</td><td class="num">${f0(s[2])}</td><td class="num">${s[3] != null ? s[3].toFixed(1) : ''}</td><td class="num">${s[4] ?? ''}</td>
-          <td class="num">${f0(os[0])}</td><td class="num">${os[3] != null ? os[3].toFixed(1) : ''}</td><td class="num">${os[4] ?? ''}</td>
-          <td><a class="tm-gc" href="${gcHref(g.gid, g.f)}" title="Gamecast">&rsaquo;</a></td></tr>`;
+        return played(r.g, r.g.w);
       }).join('');
+      const sub = label => `<tr class="lg-sub"><td colspan="16"><span class="lg-pin">${label}</span></td></tr>`;
+      const pw = pg.filter(g => g.r === 'W').length;
+      const po = pg.length ? `${sub(`Playoffs · ${pw}-${pg.length - pw}`)}${head}${[...pg].reverse().map(g => played(g, g.po)).join('')}${rows.length ? sub('Regular season') : ''}` : '';
       const sumBits = [S.rec, av.pf != null ? `${f1(av.pf)} PF/G${rk.pf ? ` (${ord(rk.pf)})` : ''}` : '', av.pa != null ? `${f1(av.pa)} PA/G${rk.pa ? ` (${ord(rk.pa)})` : ''}` : ''].filter(Boolean).join(' · ');
-      return `<tbody><tr class="lg-season"><td colspan="16"><span class="lg-pin"><b>${S.s}</b> ${esc(sumBits)}</span></td></tr>${head}${trs}</tbody>`;
+      return `<tbody><tr class="lg-season"><td colspan="16"><span class="lg-pin"><b>${S.s}</b> ${esc(sumBits)}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
     }).join('');
     const legend = `<div class="lg-leg"><span>Opponent color = their power rank that week (2021 on):</span><span class="mr-hard">top 8</span><span class="mr-tough">9-16</span><span class="mr-ok">17-24</span><span class="mr-easy">25-32</span>
       <span>· Odds = pregame win chance, Vegas / our model · Line = Vegas spread for ${esc(abbr)} (cov = covered) · Tap a game to open its gamecast</span></div>`;

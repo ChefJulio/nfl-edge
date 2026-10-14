@@ -73,18 +73,28 @@ def main():
   old = [o[o.season_type == "REG"].assign(team=lambda x: x.team.replace(D.RELOCATED),
                                           opponent_team=lambda x: x.opponent_team.replace(D.RELOCATED))
          for o in old if o is not None and len(o)]
-  st = pd.concat(old + [data.stats], ignore_index=True)
-  st = st[st.position.isin(POS)].copy()
-  for c in D.STAT_COLS[8:]:
-    st[c] = pd.to_numeric(st[c], errors="coerce").fillna(0)
-  st["fumble_lost"] = st.sack_fumbles_lost + st.rushing_fumbles_lost + st.receiving_fumbles_lost
   ren = {"passing_yards": "pass_yd", "passing_tds": "pass_td", "passing_interceptions": "interception",
          "rushing_yards": "rush_yd", "rushing_tds": "rush_td", "receptions": "reception", "receiving_yards": "rec_yd",
          "receiving_tds": "rec_td"}
-  st = st.rename(columns=ren)
   w = {k: float(v) for k, v in scoring.weights.items()}
-  st["fp"] = sum(st[k] * w.get(k, 0.0) for k in SCORE_KEYS) + np.where(st.position == "TE", st.reception * float(scoring.te_reception_bonus), 0)
-  st["prk"] = st.groupby(["season", "week", "position"]).fp.rank(ascending=False, method="min").astype(int)
+
+  def prep(x: pd.DataFrame) -> pd.DataFrame:
+    """Fantasy positions, numeric stat line, site-scoring points and the week's position finish."""
+    x = x[x.position.isin(POS)].copy()
+    for c in D.STAT_COLS[8:]:
+      x[c] = pd.to_numeric(x[c], errors="coerce").fillna(0)
+    x["fumble_lost"] = x.sack_fumbles_lost + x.rushing_fumbles_lost + x.receiving_fumbles_lost
+    x = x.rename(columns=ren)
+    x["fp"] = sum(x[k] * w.get(k, 0.0) for k in SCORE_KEYS) + np.where(x.position == "TE", x.reception * float(scoring.te_reception_bonus), 0)
+    x["prk"] = x.groupby(["season", "week", "position"]).fp.rank(ascending=False, method="min").astype(int)
+    return x
+
+  st = prep(pd.concat(old + [data.stats], ignore_index=True))
+  # Playoff games (owner, 2026-10-14: taken seriously, kept apart from the regular season): every season's POST rows
+  post = [cache.get("stats", s, lambda: nfl.load_player_stats([s]).select(D.STAT_COLS), stale=False)
+          for s in range(FIRST_SEASON, data.current_season + 1)]
+  post = pd.concat([x[x.season_type == "POST"] for x in post if x is not None and len(x)], ignore_index=True)
+  post = prep(post.assign(team=post.team.replace(D.RELOCATED), opponent_team=post.opponent_team.replace(D.RELOCATED)))
   # Snap share: loaded seasons already carry gsis ids; older ones map pfr -> gsis through nflverse's player table.
   players = cache.get("players", "all", lambda: nfl.load_players(), stale=cache.age_hours("players", "all") > 24 * 7)
   pfr = players.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
@@ -96,11 +106,22 @@ def main():
   sn["gsis_id"] = sn.pfr_player_id.map(pfr).fillna(sn.gsis_id)
   sn = sn.dropna(subset=["gsis_id"])
   snap = sn.groupby(["season", "week", "gsis_id"]).offense_pct.max()
+  sn_post = [cache.get("snaps", s, lambda: nfl.load_snap_counts([s]), stale=False) for s in range(2012, data.current_season + 1)]
+  sn_post = pd.concat([x[x.game_type != "REG"] for x in sn_post if x is not None and len(x)], ignore_index=True)
+  sn_post["gsis_id"] = sn_post.pfr_player_id.map(pfr)
+  snap_post = sn_post.dropna(subset=["gsis_id"]).groupby(["season", "week", "gsis_id"]).offense_pct.max()
   ours, opp_rank, everyone = our_weeks(site)
   # Home / away for every past game (the stats feed doesn't say): full schedule history.
   allsched = cache.get("schedules", "since1999", lambda: nfl.load_schedules(list(range(FIRST_SEASON, data.current_season + 1))),
                        stale=cache.age_hours("schedules", "since1999") > 12)
+  postsched = allsched[allsched.game_type.isin(["WC", "DIV", "CON", "SB"])]
   allsched = allsched[allsched.game_type == "REG"]
+  round_of = {}
+  for g in postsched.itertuples():
+    h, a = D.RELOCATED.get(g.home_team, g.home_team), D.RELOCATED.get(g.away_team, g.away_team)
+    neutral = g.location == "Neutral"  # Super Bowls: neither side is "@"
+    for t, hm in ((h, 2 if neutral else 1), (a, 2 if neutral else 0)):
+      round_of[(int(g.season), int(g.week), t)] = (g.game_type, hm, g.game_id)
   home_of, gid_of = {}, {}
   for g in allsched.itertuples():
     h, a = D.RELOCATED.get(g.home_team, g.home_team), D.RELOCATED.get(g.away_team, g.away_team)
@@ -137,6 +158,7 @@ def main():
   pinfo = players.dropna(subset=["gsis_id"]).drop_duplicates("gsis_id").set_index("gsis_id")
   sts = st[st.player_id.isin(everyone)].sort_values(["season", "week"])
   by_player = {pid: g for pid, g in sts.groupby("player_id")}
+  post_by = {pid: g for pid, g in post[post.player_id.isin(everyone)].sort_values(["season", "week"]).groupby("player_id")}
   n = 0
   for pid in everyone:
     g = by_player.get(pid)
@@ -163,6 +185,20 @@ def main():
           game["pjl"] = [round(float(v), 2) for v in o["pjl"]]
         _link(game, gid_of.get((int(r.season), int(r.week), r.team)))
         seasons.setdefault(int(r.season), []).append(game)
+    playoffs = {}
+    pg = post_by.get(pid)
+    if pg is not None:
+      for r in pg.itertuples():
+        rnd = round_of.get((int(r.season), int(r.week), r.team))
+        if rnd is None:
+          continue
+        game = {"w": int(r.week), "po": rnd[0], "o": r.opponent_team, "t": r.team, "h": rnd[1], "gid": rnd[2],
+                "c": [round(float(getattr(r, k)), 1) for k in SCORE_KEYS],
+                "x": [int(r.completions), int(r.attempts), int(r.carries), int(r.targets)], "rk": int(r.prk)}
+        sp = snap_post.get((int(r.season), int(r.week), pid))
+        if sp is not None and not pd.isna(sp):
+          game["sn"] = int(round(100 * float(sp)))
+        playoffs.setdefault(int(r.season), []).append(game)
     # This season's remaining schedule (with byes), our projection and matchup where a page exists.
     team = cur_team.get(pid)
     upcoming = []
@@ -195,7 +231,8 @@ def main():
     if name is None and pid in pinfo.index:  # not on any week page of ours: nflverse's player table
       name, espn = pinfo.at[pid, "display_name"], espn_str(pinfo.at[pid, "espn_id"])
     doc = {"pid": pid, "name": name, "espn": espn, "pos": pos, "keys": SCORE_KEYS, "cur": data.current_season, "team": team,
-           "seasons": [{"s": s, "g": seasons[s]} for s in sorted(seasons, reverse=True)], "up": upcoming,
+           "seasons": [{"s": s, "g": seasons.get(s, []), **({"pg": playoffs[s]} if s in playoffs else {})}
+                       for s in sorted(set(seasons) | set(playoffs), reverse=True)], "up": upcoming,
            "bio": bios.get(pid, {})}
     if pid in injuries:
       doc["inj"] = injuries[pid]["eps"]
@@ -206,8 +243,9 @@ def main():
     n += 1
   size = sum(f.stat().st_size for f in out_dir.glob("*.json"))
   print(f"[logs] wrote {n} player game logs ({size / 1e6:.1f} MB) to {out_dir}", flush=True)
-  other_logs(site, cache, nfl, data.current_season, allsched, pinfo, all_ros, sn, bios, written=set(everyone), injuries=injuries)
-  team_logs(site, cfg, data, cache, nfl, allsched)
+  other_logs(site, cache, nfl, data.current_season, allsched, pinfo, all_ros, sn, bios, written=set(everyone), injuries=injuries,
+             post_snaps=sn_post, round_of=round_of)
+  team_logs(site, cfg, data, cache, nfl, allsched, postsched)
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -240,17 +278,19 @@ def espn_str(e):
 
 
 def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: pd.DataFrame, ros: pd.DataFrame,
-               snaps: pd.DataFrame, bios: dict, written: set, injuries: dict | None = None):
+               snaps: pd.DataFrame, bios: dict, written: set, injuries: dict | None = None,
+               post_snaps: pd.DataFrame | None = None, round_of: dict | None = None):
   """<site>/data/players/<gsis>.json for everyone the fantasy pass didn't write: every player in nflverse's weekly
   stats (1999 on), on a weekly roster (2002 on) or in the snap counts (2012 on). Per game: his kind's stat line
   ("d", in "keys" order), returns ("r") when he had any, his unit's snap share ("sn"). Plus "ros": per season, his
-  team(s) and weeks on the active roster (the career table for players without stats, e.g. linemen before 2012)."""
+  team(s) and weeks on the active roster (the career table for players without stats, e.g. linemen before 2012).
+  Playoff games ("pg" per season, round in "po"), kept apart from the regular season like the fantasy pass."""
   frames = []
   for s in range(FIRST_SEASON, cur + 1):
     x = cache.get("stats_full", s, lambda: nfl.load_player_stats([s]).select(FULL_COLS).to_pandas(),
                   stale=s == cur and cache.age_hours("stats_full", s) > 6)
     if x is not None and len(x):
-      frames.append(x[x.season_type == "REG"])
+      frames.append(x[x.season_type.isin(["REG", "POST"])])
   cache.save_meta()
   st = pd.concat(frames, ignore_index=True)
   st = st[~st.player_id.isin(written)].copy()
@@ -258,6 +298,11 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
     st[c] = pd.to_numeric(st[c], errors="coerce").fillna(0)
   for c in ("team", "opponent_team"):
     st[c] = st[c].replace(D.RELOCATED)
+  pst, st = st[st.season_type == "POST"], st[st.season_type == "REG"]
+  round_of = round_of or {}
+  pst_by = {k: g for k, g in pst.groupby("player_id")}
+  ps = post_snaps[post_snaps.gsis_id.notna()].assign(team=lambda x: x.team.replace(D.RELOCATED)) if post_snaps is not None else None
+  psnap_by = {k: g for k, g in ps.groupby("gsis_id")} if ps is not None else {}
   home_of, gid_of, opp_of = {}, {}, {}
   for g in allsched.itertuples():
     h, a = D.RELOCATED.get(g.home_team, g.home_team), D.RELOCATED.get(g.away_team, g.away_team)
@@ -323,6 +368,36 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
       if gid:
         e["gid"] = gid
       seasons.setdefault(s, []).append(e)
+    playoffs = {}  # (season, week) -> game, same shape + the round
+    for r in (pst_by[pid].itertuples() if pid in pst_by else []):
+      rnd = round_of.get((int(r.season), int(r.week), r.team))
+      if rnd is None:
+        continue
+      e = {"w": int(r.week), "po": rnd[0], "t": r.team, "o": r.opponent_team, "h": rnd[1], "gid": rnd[2]}
+      if keys:
+        e["d"] = [r1(getattr(r, c)) for _, c in keys]
+      ret = [r1(getattr(r, c)) for _, c in RET]
+      if any(ret):
+        e["r"] = ret
+      playoffs[(int(r.season), int(r.week))] = e
+    for r in (psnap_by[pid].itertuples() if pid in psnap_by else []):
+      key = (int(r.season), int(r.week))
+      rnd = round_of.get((key[0], key[1], r.team))
+      if rnd is None:
+        continue
+      e = playoffs.get(key)
+      if e is None:
+        if not ((r.offense_snaps or 0) + (r.defense_snaps or 0) + (r.st_snaps or 0)):
+          continue
+        e = playoffs[key] = {"w": key[1], "po": rnd[0], "t": r.team, "o": r.opponent, "h": rnd[1], "gid": rnd[2]}
+        if keys:
+          e["d"] = [0] * len(keys)
+      pct = getattr(r, unit)
+      if pd.notna(pct):
+        e["sn"] = int(round(100 * float(pct)))
+    pg = {}
+    for (s, w), e in sorted(playoffs.items()):
+      pg.setdefault(s, []).append(e)
     rs = {}
     rg = ros_by.get(pid)
     if rg is not None:
@@ -336,7 +411,8 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
     name = name_of.get(pid) or (pinfo.at[pid, "display_name"] if pid in pinfo.index else pid)
     doc = {"pid": pid, "name": name, "espn": espn, "pos": pos if isinstance(pos, str) else None, "kind": kind,
            "keys": [k for k, _ in keys], "ret_keys": [k for k, _ in RET], "cur": cur, "team": team,
-           "seasons": [{"s": s, "g": seasons[s]} for s in sorted(seasons, reverse=True)], "ros": rs, "bio": bios.get(pid, {})}
+           "seasons": [{"s": s, "g": seasons.get(s, []), **({"pg": pg[s]} if s in pg else {})}
+                       for s in sorted(set(seasons) | set(pg), reverse=True)], "ros": rs, "bio": bios.get(pid, {})}
     if injuries and pid in injuries:
       doc["inj"] = injuries[pid]["eps"]
       doc["dur"] = injuries[pid].get("dur")
@@ -551,7 +627,7 @@ def _team_stat_rows(cache, nfl, seasons: list, current: int) -> pd.DataFrame:
     t = cache.get("teamstats", s, lambda: nfl.load_team_stats([s], summary_level="week"),
                   stale=(s == current and cache.age_hours("teamstats", s) > 6))
     if t is not None and len(t):
-      frames.append(t[t.season_type == "REG"])
+      frames.append(t[t.season_type.isin(["REG", "POST"])])
   t = pd.concat(frames, ignore_index=True)
   for c in ("team", "opponent_team"):
     t[c] = t[c].replace(D.RELOCATED)
@@ -571,7 +647,7 @@ def _team_stat_rows(cache, nfl, seasons: list, current: int) -> pd.DataFrame:
   return out.set_index(["game_id", "team"])
 
 
-def team_logs(site: Path, cfg: dict, data, cache, nfl, allsched: pd.DataFrame):
+def team_logs(site: Path, cfg: dict, data, cache, nfl, allsched: pd.DataFrame, postsched: pd.DataFrame | None = None):
   """<site>/data/teams/<TEAM>.json: every regular-season game since 1999 with score, Vegas line and result
   against it, both teams' Elo going in, per-game stats for and against (yards, yards per play, turnovers...), and
   from 2021 on our pregame win chances and both teams' power ranks that week; season summaries with league ranks;
@@ -620,6 +696,32 @@ def team_logs(site: Path, cfg: dict, data, cache, nfl, allsched: pd.DataFrame):
   out_dir = site / "data" / "teams"
   out_dir.mkdir(parents=True, exist_ok=True)
   r1 = lambda v, n=1: None if v is None or pd.isna(v) else round(float(v), n)
+  # playoff games per (team, season), kept apart from the regular season (round in "po")
+  po = {}
+  for x in (postsched.itertuples() if postsched is not None else []):
+    if pd.isna(x.home_score):
+      continue
+    h, a = D.RELOCATED.get(x.home_team, x.home_team), D.RELOCATED.get(x.away_team, x.away_team)
+    nt = x.location == "Neutral"
+    for team, opp, home, ps_, pa_ in ((h, a, 2 if nt else 1, x.home_score, x.away_score), (a, h, 2 if nt else 0, x.away_score, x.home_score)):
+      e = {"w": int(x.week), "po": x.game_type, "gid": x.game_id, "o": opp, "h": home, "ps": int(ps_), "pa": int(pa_),
+           "r": "W" if ps_ > pa_ else "L" if ps_ < pa_ else "T"}
+      if x.overtime == 1:
+        e["ot"] = 1
+      if pd.notna(x.spread_line):
+        line = x.spread_line if team == h else -x.spread_line
+        e["ln"] = r1(line)
+        m = ps_ - pa_ - line
+        e["ats"] = "W" if m > 0 else "L" if m < 0 else "P"
+      def stat(t, k):
+        try:
+          v = ts.at[(x.game_id, t), k]
+          return None if pd.isna(v) else float(v)
+        except KeyError:
+          return None
+      e["s"] = [r1(stat(team, "yd"), 0), r1(stat(team, "py"), 0), r1(stat(team, "ry"), 0), r1(stat(team, "ep")), r1(stat(team, "to"), 0), r1(stat(team, "fd"), 0)]
+      e["os"] = [r1(stat(opp, "yd"), 0), r1(stat(opp, "py"), 0), r1(stat(opp, "ry"), 0), r1(stat(opp, "ep")), r1(stat(opp, "to"), 0)]
+      po.setdefault((team, int(x.season)), []).append(e)
   for team in sorted(T.team.unique()):
     if team not in set(sched.home_team) | set(sched.away_team):
       continue  # defunct codes
@@ -657,7 +759,8 @@ def team_logs(site: Path, cfg: dict, data, cache, nfl, allsched: pd.DataFrame):
         games.append(e)
       seasons.append({"s": int(s), "rec": f"{int(a.w)}-{int(a.l)}" + (f"-{int(a.t)}" if a.t else ""),
                       "avg": {k: r1(a[k], 1 if k not in ("ep", "oep") else 2) for k in ("pf", "pa", "yd", "oyd", "ep", "oep", "tom")},
-                      "rk": {k: int(a[k + "_rk"]) for k in better_high if pd.notna(a[k + "_rk"])}, "g": games})
+                      "rk": {k: int(a[k + "_rk"]) for k in better_high if pd.notna(a[k + "_rk"])}, "g": games,
+                      **({"pg": sorted(po[(team, int(s))], key=lambda e: e["w"])} if (team, int(s)) in po else {})})
     played = {e["w"] for x in seasons if x["s"] == cur for e in x["g"]}
     up = []
     for x in sched.itertuples():

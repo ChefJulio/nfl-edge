@@ -550,7 +550,28 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Owner's decision (2026-10-14): no Ourlads at all, not even a link-out ("they don't want anyone but their users
   using their stuff"). Do not propose it again.
 
+- **Owner UI rules (2026-10-14):** game logs are fully reverse-chronological (newest season first; inside a season
+  playoff rounds SB/CON/DIV/WC on top, then week 18 -> 1; upcoming weeks above played ones): "scrolling down goes
+  back in time". Injury badges are compact codes everywhere (Q / D / O / IR / SSPD / PUP / NFI; full status on
+  hover; gamecast.js injTag, exported as NFLE.injTag). Playoffs are taken seriously but kept apart: player, non-
+  fantasy and team logs carry per-season "pg" (round in "po"; tools/player_logs.py round_of / postsched) shown as a
+  "Playoffs" block above "Regular season", never mixed into regular-season totals, ranks or FP/G. Super Bowls are
+  neutral (h = 2 for both sides: no "@"). Player Stats custom columns: one delegated change listener (the table
+  redraws its header on sort) + a sort button per custom column (tapping the picker on phones can't sort).
+
 ## 9. Open threads / next steps (as of 2026-10-12)
+- **NEXT (owner-approved 2026-10-14): Players > Trends, a play-level query builder.** "Rushing YPC for Ravens
+  players in the 4th quarter, 2022-24" -> leaderboard. Design agreed: the query is a sentence of tappable chips
+  (stat family + metric / who: team, player, league, or against a team / filters: quarter, down & distance, field
+  zone, score margin, time left, home/away, opponent, shotgun, run direction, pass depth / group by: player, team,
+  season, opponent, quarter, down); results = leaderboard with the league baseline, a min-sample slider (low-n rows
+  greyed, not hidden), a trend line when grouped by season, the query in the URL (shareable), rows open player
+  pages, starter example queries. Season type toggle Regular / Playoffs / Both (owner: include playoffs). All in
+  the browser: per-season compact play files (run + pass plays, ~33.5k/season, ~25 columns ~0.35-0.5 MB gzipped;
+  1999-2026). The cached pbp (cache/pbp_*.parquet) is a prepared subset missing success, first_down, shotgun,
+  no_huddle, yards_after_catch, pass/run location and gap: the build must load full nflverse pbp per season.
+- **Still to do from the playoffs request:** Player Stats tab needs a Regular / Playoffs toggle (stats_build.py
+  filters season_type == REG everywhere); Team Stats likewise.
 - **ESPN early-week buckets (2026-10-14, nfledge/espn_calib.py), MEASURED:** Wayback Machine captures of
   espn.com/nfl/injuries (near-daily 2022-24; the page embeds status + est. return date per player; tools/espn_wayback.py
   caches them) -> 23,695 Mon/Tue listings vs game-day inactives (tools/espn_return_eval.py -> committed priors
