@@ -599,13 +599,14 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361266,Greg Newsome II,New York Giants,Active,2026-10-07T01:44Z,,,,,,Newsome registered seven tackles (four solo) and an interception during the Giants' win Sunday versus the Cardinals.
 3929950,Tremaine Edmunds,New York Giants,Active,2026-10-07T01:34Z,,,,,,Edmunds totaled nine tackles (eight solo) during the Giants' win over the Cardinals on Sunday.
 4950400,Arvell Reese,New York Giants,Active,2026-10-07T01:28Z,,,,,,Reese logged nine tackles (nine solo) during the Giants' win over the Cardinals on Sunday.
+4723820,Omar Cooper Jr.,New York Jets,Injured Reserve,2026-10-14T20:26Z,Ankle,Sprain,Not Specified,2026-10-18,IR-R,Cooper (ankle) was a limited participant in Wednesday's practice.
+5083315,Kenyon Sadiq,New York Jets,Questionable,2026-10-14T20:23Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,Sadiq (concussion) was a limited practice participant Wednesday.
+4426686,Dane Belton,New York Jets,Questionable,2026-10-14T20:18Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+4700136,Kiko Mauigoa,New York Jets,Active,2026-10-14T20:17Z,,,,,,
 4243375,Dylan Parham,New York Jets,Doubtful,2026-10-14T17:19Z,Knee,Not Specified,Not Specified,2026-10-18,DOUBTFUL,doubtful
 4362094,Joseph Ossai,New York Jets,Doubtful,2026-10-14T17:18Z,Ankle,Not Specified,Not Specified,2026-10-18,DOUBTFUL,doubtful
-5083315,Kenyon Sadiq,New York Jets,Questionable,2026-10-14T17:12Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,"Jets head coach Aaron Glenn said that Sadiq remains in concussion protocol and won't practice Wednesday, Zack Rosenblatt of The Athletic reports."
-4723820,Omar Cooper Jr.,New York Jets,Injured Reserve,2026-10-14T16:53Z,Ankle,Sprain,Not Specified,2026-10-18,IR-R,"The Jets designated Cooper (ankle) for return from injured reserve Wednesday, Antwan V. Staley of the New York Daily News reports."
 4427366,Breece Hall,New York Jets,Doubtful,2026-10-14T16:49Z,Quadriceps,Not Specified,Right,2026-10-18,DOUBTFUL,"Jets head coach Aaron Glenn said that Hall (quadriceps) won't practice Wednesday and remains week-to-week, Al Iannazzone of Newsday reports."
 4597500,Adonai Mitchell,New York Jets,Doubtful,2026-10-14T16:40Z,Finger,Surgery,Not Specified,2026-10-18,DOUBTFUL,"Jets head coach Aaron Glenn said Wednesday that Mitchell (finger) underwent a small procedure on his hand and remains week-to-week, Zack Rosenblatt of The Athletic reports."
-4700136,Kiko Mauigoa,New York Jets,Questionable,2026-10-13T17:10Z,,,,,,questionable
 4695404,Isaiah Davis,New York Jets,Active,2026-10-13T00:50Z,,,,,,Davis rushed twice for eight yards while catching one of two targets for nine yards during Sunday's 17-12 win over the Browns.
 4574142,Nate Lynn,New York Jets,Active,2026-10-12T19:32Z,,,,,,
 4570470,Nahshon Wright,New York Jets,Active,2026-10-12T19:32Z,,,,,,
@@ -621,7 +622,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426817,Jarvis Brownlee Jr.,New York Jets,Active,2026-10-10T00:39Z,,,,,,"Brownlee (concussion) does not have an injury designation ahead of Sunday's game against the Browns, Daniel Oyefusi of ESPN.com reports."
 4808766,Mason Taylor,New York Jets,Active,2026-10-09T21:44Z,,,,,,"Taylor (thumb) does not carry an injury designation into Sunday's game against the Browns, Daniel Oyefusi of ESPN.com reports."
 4361331,Jamien Sherwood,New York Jets,Active,2026-10-08T04:15Z,,,,,,Sherwood finished with 13 total tackles (five solo) and one forced fumble in Sunday's 23-12 loss to Chicago.
-4426686,Dane Belton,New York Jets,Active,2026-10-08T03:57Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Belton finished with 14 total tackles (six solo) in Sunday's 23-12 loss to the Bears.
 14958,Demario Davis,New York Jets,Active,2026-10-08T03:46Z,,,,,,Davis ended with 10 total tackles (five solo) and 1.0 sacks in Sunday's 23-12 loss to Chicago.
 4429005,Braiden McGregor,New York Jets,Injured Reserve,2026-10-07T21:44Z,Pectoral,Surgery,Not Specified,2027-02-15,IR,"McGregor (pectoral) was placed on the Jets' injured reserve list Wednesday, Eric Allen of the team's official site reports."
 4241478,DeVonta Smith,Philadelphia Eagles,Questionable,2026-10-14T18:54Z,Hamstring,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Smith (hamstring) was working on the JUGS machine during Wednesday's practice, Olivia Reiner of The Philadelphia Inquirer reports."
@@ -762,7 +762,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5081785,Jackie Marshall,Tennessee Titans,Active,2026-10-12T19:45Z,,,,,,
 4685555,Nicholas Singleton,Tennessee Titans,Active,2026-10-12T19:45Z,,,,,,
 3124084,Joey Slye,Tennessee Titans,Active,2026-10-12T14:17Z,,,,,,Slye made his lone field-goal attempt during the Titans' 26-3 loss to the Texans on Sunday.
-4428557,Tyjae Spears,Tennessee Titans,Active,2026-10-12T04:14Z,,,,,,Spears rushed twice for no gain and lost a fumble while catching all nine of his targets for 28 yards during Sunday's 26-3 loss to the Texans.
+4428557,Tyjae Spears,Tennessee Titans,Active,2026-10-12T04:14Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Spears rushed twice for no gain and lost a fumble while catching all nine of his targets for 28 yards during Sunday's 26-3 loss to the Texans.
 4569587,Wan'Dale Robinson,Tennessee Titans,Active,2026-10-11T23:33Z,,,,,,Robinson caught six of seven targets for 53 yards in Sunday's 26-3 loss to the Texans.
 4871023,Carnell Tate,Tennessee Titans,Active,2026-10-11T23:28Z,,,,,,Tate caught one of five targets for six yards in Sunday's 26-3 loss to the Texans.
 4688380,Cam Ward,Tennessee Titans,Active,2026-10-11T23:20Z,,,,,,Ward completed 23 of 36 passes for 170 yards and an interception in Sunday's 26-3 loss to the Texans. He added two yards on his lone carry.
