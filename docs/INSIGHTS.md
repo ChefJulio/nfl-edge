@@ -618,6 +618,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   - EPA(incomplete) at that air-yard depth, per season] + on catches (yac_epa - xyac_epa); rushing unchanged
   (fumbles are his). GUARDRAIL: ships if, walk-forward 2021-2025 all players, its rank corr. with next-season
   fantasy pts/g is not significantly below v1's (95% CI of v1.1 - v1 not entirely below 0). Face check reported.
+- **Grade = per play among qualified players (owner 2026-10-14):** "grading should be per-opportunity; cut off
+  non-relevant backs". Value over replacement per play (dropbacks + carries + targets); qualified = NFL stat-title
+  minimums per team game (14 att QB, 6.25 carries or 1.875 catches RB, 1.875 catches WR/TE): ~190-210 players a
+  season. QB/WR/TE read sensibly; RBs still odd (Saquon 2022 18, 2025 9; Jeanty 2025 1) because rushing EPA per
+  carry is mostly the line / scheme. Proposed next: NGS rush yards over expected per carry for the RB run component.
 - **Grade display fixes (owner: "Allgeier 87 vs Bijan, really?"):** (1) the by-season table showed the 3-season
   window grade, so Allgeier's "2023" was mostly his 2022 -> each season now that season only ([6], [7]); the header
   stays current form (window). (2) percentiles weighted by games played (shrunk 1-3 game backups piled at the mean

@@ -66,7 +66,7 @@ RATES_V2["TE"] = RATES_V2["WR"]
 LABEL = {"epa_db": "EPA / dropback", "succ_db": "Success rate", "cpoe": "CPOE", "sack_rate": "Sack rate (lower is better)",
          "int_rate": "INT rate (lower is better)", "adot": "Depth of target", "db_pg": "Dropbacks / game",
          "rush_epa_pg": "Rushing EPA / game", "rush_epa": "EPA / rush", "rush_succ": "Rush success rate", "ypc": "Yards / carry",
-         "x10": "10+ yard runs", "yaco": "Yards after contact", "btk": "Broken tackles / touch", "car_pg": "Carries / game",
+         "x10": "10+ yard run rate", "yaco": "Yards after contact per carry", "btk": "Broken tackles per touch", "car_pg": "Carries / game",
          "tgt_pg": "Targets / game", "rec_epa": "EPA / target", "yacoe": "YAC over expected", "snap": "Snap share",
          "rec_succ": "Target success rate", "croe": "Catch rate over expected", "tgt_share": "Target share",
          "ay_share": "Air-yards share", "drop": "Drop rate (lower is better)", "age": "Age", "draft": "Draft capital",
@@ -442,41 +442,74 @@ def pct(v: pd.Series, w: pd.Series | None = None) -> pd.Series:
   return (100 * cw / tot).reindex(v.index).clip(0, 99).round().astype(int)
 
 
-def build(tg, pos_of, info, cur, out: Path):
-  """data/grades/<season>.json for 2018..current + index.json. Two grades per player-season, both percentiles among
-  everyone at his position who played that season:
-    [0] current form: that season and the two before (SEASON_W), the header grade when the season is the current one;
-    [6] that season only (the by-season history: a season's grade must not borrow earlier seasons; owner 2026-10-14,
-        Allgeier's "2023" was mostly his 2022). Both shrunk toward the position average by the measured k."""
+# Who gets a grade (owner 2026-10-14: compare only players with real involvement): the NFL's own qualifying minimums
+# for its stat titles, per team game so they work mid-season. RBs qualify on carries or catches.
+QUALIFY = {"QB": [("att", 14.0)], "RB": [("ru_n", 6.25), ("rec", 1.875)], "WR": [("rec", 1.875)], "TE": [("rec", 1.875)]}
+
+
+def team_games(sched: pd.DataFrame) -> dict:
+  """(team, season) -> regular-season games played (final scores)."""
+  g = sched[(sched.game_type == "REG") & sched.home_score.notna()]
+  out = {}
+  for r in g.itertuples():
+    for tm in (r.home_team, r.away_team):
+      k = (D.RELOCATED.get(tm, tm), int(r.season))
+      out[k] = out.get(k, 0) + 1
+  return out
+
+
+def build(tg, pos_of, info, cur, out: Path, sched: pd.DataFrame, team_of: dict):
+  """data/grades/<season>.json for 2018..current + index.json. Grades are PER OPPORTUNITY (dropbacks + designed
+  carries + targets; owner 2026-10-14: per-opportunity is fair, totals aren't) and only for players who met the NFL's
+  qualifying minimum that season (QUALIFY), as percentiles among the qualified at the position:
+    [0] current form: value per opportunity over that season and the two before (SEASON_W);
+    [6] that season only (the by-season history: a season's grade never borrows earlier seasons).
+  Both shrunk toward the position average by k pseudo-opportunities, measured (method of moments)."""
   out.mkdir(parents=True, exist_ok=True)
+  tg = tg.assign(opps=tg.qb_db + tg.ru_n + tg.tgt)
   t = seasons_of(tg)
   pri = fit_priors(tg, pos_of, range(FIRST, cur + 1))
+  vpri = {}
+  for pos in POS:
+    d = tg[(tg.gsis_id.map(pos_of) == pos) & (tg.opps > 0)]
+    vpri[pos] = mom_prior(d, "value", "opps") or (float(d.value.sum() / max(d.opps.sum(), 1)), 50.0)
+  tgames = team_games(sched)
   seasons = []
   for s in range(FIRST, cur + 1):
-    win = window(t, s)
-    if not len(win):
+    one = t[t.season == s].set_index("gsis_id")
+    if not len(one):
       continue
-    players, stats = {}, {}
+    tgm = pd.Series([tgames.get((team_of.get((g, s)), s), np.nan) for g in one.index], index=one.index)
+    pos_s = one.index.map(pos_of)
+    win = window(t, s)
+    players, stats, qual_n = {}, {}, {}
     for pos in POS:
-      w = win[win.index.map(pos_of) == pos]
-      if len(w) < 10:
+      rule = QUALIFY[pos]
+      ok = np.zeros(len(one), bool)
+      for col, rate in rule:
+        ok |= (one[col] >= rate * tgm).fillna(False).to_numpy()
+      ids = one.index[(pos_s == pos) & ok]
+      ids = [g for g in ids if g in win.index]
+      if len(ids) < 5:
         continue
+      qual_n[pos] = len(ids)
+      w, o = win.loc[ids], one.loc[ids]
       f = features(w, pos, pri, info)
+      m, k = vpri[pos]
+      cur_v = (w.value + k * m) / (w.opps + k)
+      sea_v = (o.value + k * m) / (o.opps + k)
+      raw = o.value / o.opps
       names = [n for n, _, _ in RATES[pos]]
       stats[pos] = [LABEL[n] for n in names]
-      g = pct(f.value, w.games)
+      g, sg = pct(cur_v), pct(sea_v)
       ps = {n: (99 - pct(f[n])) if n in LOWER_BETTER else pct(f[n]) for n in names}
-      one = t[(t.season == s) & t.gsis_id.isin(f.index)].set_index("gsis_id").reindex(f.index)
-      m, k = pri[(pos, "value")]
-      sv = (one.value.fillna(0) + k * m) / (one.games.fillna(0) + k)
-      sg, raw = pct(sv, one.games), one.value / one.games
-      for gid in f.index:
-        players[gid] = [int(g[gid]), pos, int(w.games_now[gid]), int(round(w.games[gid] / 1)), round(float(f.value[gid]), 2),
-                        [int(ps[n][gid]) for n in names], int(sg[gid]), round(float(raw[gid]), 2) if pd.notna(raw[gid]) else None]
-    (out / f"{s}.json").write_text(json.dumps({"season": s, "stats": stats, "players": players}, separators=(",", ":")),
-                                   encoding="utf-8")
+      for gid in ids:
+        players[gid] = [int(g[gid]), pos, int(w.games_now[gid]), int(round(w.games[gid])), round(float(cur_v[gid]), 3),
+                        [int(ps[n][gid]) for n in names], int(sg[gid]), round(float(raw[gid]), 3), int(o.opps[gid])]
+    (out / f"{s}.json").write_text(json.dumps({"season": s, "stats": stats, "qualified": qual_n, "players": players},
+                                              separators=(",", ":")), encoding="utf-8")
     seasons.append(s)
-    print(f"[grades] {s}: {len(players)} players", flush=True)
+    print(f"[grades] {s}: {len(players)} qualified players {qual_n}", flush=True)
   (out / "index.json").write_text(json.dumps({"seasons": seasons, "current": cur}), encoding="utf-8")
 
 
@@ -504,7 +537,7 @@ def main():
     r.to_parquet(ROOT / "cache" / "grade_eval.parquet")
     print(report(r))
     return
-  build(tg, pos_of, info, cur, Path(opt.get("site", "site")) / "data" / "grades")
+  build(tg, pos_of, info, cur, Path(opt.get("site", "site")) / "data" / "grades", data.schedules, team_of)
 
 
 if __name__ == "__main__":
