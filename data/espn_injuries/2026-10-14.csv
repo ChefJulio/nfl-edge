@@ -24,6 +24,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241482,Jedrick Wills Jr.,Arizona Cardinals,Active,2026-10-07T00:36Z,,,,,,The Cardinals signed Wills off the Bills' practice squad to their active roster Tuesday.
 4428991,Paris Johnson Jr.,Arizona Cardinals,Injured Reserve,2026-10-07T00:29Z,Biceps,Surgery,Left,2027-02-15,IR,The Cardinals placed Johnson (biceps) on injured reserve Tuesday.
 4239944,Hunter Long,Arizona Cardinals,Injured Reserve,2026-10-06T23:22Z,Knee,Not Specified,Not Specified,2026-11-08,IR,The Cardinals placed Long (knee) on injured reserve Tuesday.
+4240596,C.J. Henderson,Atlanta Falcons,Questionable,2026-10-14T21:35Z,Groin,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Henderson (groin) did not practice Wednesday, Marc Raimondi of ESPN.com reports."
 4360423,Michael Penix Jr.,Atlanta Falcons,Active,2026-10-14T21:29Z,,,,,,"Penix (ribs) was a full practice participant Wednesday, Tori McElhaney of the Falcons' official site reports."
 4361409,Jahan Dotson,Atlanta Falcons,Active,2026-10-14T01:55Z,,,,,,Dotson caught two of four passes for 54 yards during the Falcons' 30-23 overtime loss to the Ravens on Sunday.
 3043168,Za'Darius Smith,Atlanta Falcons,Questionable,2026-10-13T17:10Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -38,7 +39,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241479,Tua Tagovailoa,Atlanta Falcons,Active,2026-10-12T04:50Z,,,,,,Tagovailoa completed two of three passes for 34 yards and an interception in relief of Michael Penix (ribs) in Sunday's 30-23 overtime loss to the Ravens.
 4426502,Drake London,Atlanta Falcons,Active,2026-10-12T04:20Z,,,,,,London caught seven of 11 targets for 118 yards in Sunday's 30-23 overtime loss to the Ravens.
 4430807,Bijan Robinson,Atlanta Falcons,Active,2026-10-12T04:12Z,,,,,,Robinson rushed 17 times for 86 yards while catching four of seven targets for 32 yards in Sunday's 30-23 overtime loss to the Ravens.
-4240596,C.J. Henderson,Atlanta Falcons,Questionable,2026-10-12T03:38Z,Groin,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Henderson (groin) is questionable to return to Sunday night's contest against the Ravens, Josh Kendall of The Athletic reports."
 16713,Jake Matthews,Atlanta Falcons,Active,2026-10-11T23:22Z,,,,,,"Matthews (groin) is active for Sunday night's game against the Ravens, Tori McElhaney of the Falcons' official site reports."
 4037626,Divine Deablo,Atlanta Falcons,Active,2026-10-11T23:19Z,,,,,,"Deablo (hamstring) is active for Sunday night's game against the Ravens, Tori McElhaney of the Falcons' official site reports."
 2972515,Cooper Rush,Atlanta Falcons,Active,2026-10-11T23:16Z,,,,,,"Rush (coach's decision) is inactive for Sunday's game against the Ravens but will serve as the emergency quarterback, Tori McElhaney of the Falcons' official site reports."
@@ -124,9 +124,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428993,Haynes King,Carolina Panthers,Active,2026-10-04T23:08Z,,,,,,King (coach's decision) is inactive but will operate as the Panthers' emergency third quarterback Sunday night versus Detroit.
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
 4430034,Xavier Legette,Carolina Panthers,Injured Reserve,2026-10-03T20:15Z,Knee,Not Specified,Not Specified,2026-11-08,IR,"The Panthers placed Legette (knee) on injured reserve Saturday, Darin Gantt of the team's official site reports."
-4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-14T21:45Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
+4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-14T21:52Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
+4242659,Dayo Odeyingbo,Chicago Bears,Out,2026-10-14T21:49Z,Quadriceps,Not Specified,Not Specified,2026-10-22,OUT,"Odeyingbo (quadriceps) is expected to miss time, Adam Hoge of AllCHGO.com reports."
 3121544,T.J. Edwards,Chicago Bears,Doubtful,2026-10-14T17:23Z,Hamstring,Not Specified,Not Specified,2026-10-18,DOUBTFUL,doubtful
-4242659,Dayo Odeyingbo,Chicago Bears,Out,2026-10-14T17:21Z,Quadriceps,Not Specified,Not Specified,2026-10-22,OUT,out
 4431611,Caleb Williams,Chicago Bears,Questionable,2026-10-14T16:30Z,Hamstring,Strain,Right,2026-10-18,QUESTIONABLE,"Bears head coach Ben Johnson said that Williams (hamstring) will be listed as a full practice participant on Wednesday's estimated injury report, Sean Hammond of the Chicago Tribune reports."
 4432804,Shemar Turner,Chicago Bears,Active,2026-10-14T01:37Z,,,,,,The Bears activated Turner (knee) from their reserve/PUP list Tuesday.
 2973405,Kalif Raymond,Chicago Bears,Active,2026-10-13T23:34Z,,,,,,Raymond caught three of four passes for six yards and logged one carry for minus-2 yards during the Bears' 31-7 loss to the Packers on Sunday. He also returned one punt for nine yards.
@@ -174,12 +174,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4427729,Demetrius Knight Jr.,Cincinnati Bengals,Active,2026-10-07T02:23Z,,,,,,Knight finished Sunday's 22-17 loss to the Jaguars with six tackles (three solo).
 4690070,Mitchell Tinsley,Cincinnati Bengals,Active,2026-10-06T02:52Z,,,,,,Tinsley caught three of his seven targets for 49 yards in the Bengals' 22-17 loss to the Jaguars on Sunday.
 4572036,DJ Turner II,Cincinnati Bengals,Active,2026-10-02T20:17Z,,,,,,
+4870653,KC Concepcion,Cleveland Browns,Questionable,2026-10-14T21:48Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,Concepcion (concussion) was a limited participant in Wednesday's practice.
 3040471,Maliek Collins,Cleveland Browns,Questionable,2026-10-14T21:45Z,Foot,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 3115336,Derek Barnett,Cleveland Browns,Questionable,2026-10-14T21:45Z,Ankle,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4832800,Denzel Boston,Cleveland Browns,Questionable,2026-10-14T21:43Z,Foot,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Boston was listed as a limited participant in Wednesday's practice due to a foot injury, Chris Easterling of the Akron Beacon Journal reports."
 4685702,Quinshon Judkins,Cleveland Browns,Questionable,2026-10-14T21:30Z,Foot,Not Specified,Right,2026-10-18,QUESTIONABLE,"Judkins (foot) didn't participate in Wednesday's practice, Chris Easterling of the Akron Beacon Journal reports."
 5081397,Dylan Sampson,Cleveland Browns,Injured Reserve,2026-10-14T16:15Z,Knee,Not Specified,Left,2026-10-18,IR-R,"The Browns designated Sampson (knee) for return from injured reserve Wednesday, Mary Kay Cabot of The Cleveland Plain Dealer reports."
-4870653,KC Concepcion,Cleveland Browns,Questionable,2026-10-14T16:02Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,"Concepcion is progressing well in his recovery from a concussion and is set to practice Wednesday, Mary Kay Cabot of The Cleveland Plain Dealer reports."
 4569682,Audric Estime,Cleveland Browns,Active,2026-10-13T21:45Z,,,,,,The Browns signed Estime to the 53-man roster Tuesday.
 4601080,Raheim Sanders,Cleveland Browns,Injured Reserve,2026-10-13T21:00Z,Hip,Not Specified,Not Specified,2026-11-15,IR,The Browns placed Sanders (hip) on injured reserve Tuesday.
 4241424,Tylan Wallace,Cleveland Browns,Questionable,2026-10-13T17:10Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3918310,Carl Granderson,New Orleans Saints,Active,2026-10-09T22:40Z,,,,,,"Granderson (ankle) does not carry an injury designation ahead of Sunday's game against the Vikings, Emily Leiker of The Minnesota Star Tribune reports."
 4879276,Bryce Lance,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Lance turned five targets into a seven-yard catch during the Saints' 45-24 loss to the Falcons on Monday.
 4702559,Oscar Delp,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Delp was not targeted during Monday's 45-24 loss versus the Falcons.
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-14T21:32Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-14T21:45Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 3123075,Braxton Berrios,New York Giants,Injured Reserve,2026-10-14T21:17Z,Foot,Surgery,Not Specified,2027-02-15,IR,"Berrios (foot) underwent successful surgery Friday to repair a Lisfranc injury, Jordan Raanan of ESPN.com reports."
 4361266,Greg Newsome II,New York Giants,Questionable,2026-10-14T20:55Z,Groin,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4259566,Andrew Thomas,New York Giants,Questionable,2026-10-14T20:52Z,Groin,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
