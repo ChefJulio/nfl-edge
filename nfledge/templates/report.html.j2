@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NFL Edge · Week {{ week }}</title>
 <link rel="stylesheet" href="{{ root }}assets/gamecast.css?v={{ asset_v }}">
+<link rel="stylesheet" href="{{ root }}assets/shell.css?v={{ asset_v }}">
 <style>
 /* Dark only, whatever the device setting (owner's call). */
 :root { color-scheme: dark;
@@ -54,13 +55,8 @@ header.top { padding: 16px 0 12px; }
 .hpop b { color: var(--ink); font-weight: 600; } .hpop .alert { color: var(--warn); font-weight: 600; }
 @media (hover: hover) { .hinfo-w:hover .hpop { display: flex; } }
 .hinfo-w.open .hpop { display: flex; }
-nav.tabs { position: sticky; top: 0; z-index: 10; background: var(--bg); border-bottom: 1px solid var(--line); }
-nav.tabs .wrap { display: flex; gap: 22px; overflow-x: auto; scrollbar-width: none; }
-nav.tabs button { flex: none; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font: inherit; font-weight: 600; font-size: 13.5px; padding: 12px 0 10px; cursor: pointer; }
-nav.tabs button:hover { color: var(--ink); }
-nav.tabs button.on { color: var(--ink); border-bottom-color: var(--accent); }
+/* nav (parent tabs + sub-tab chips): assets/shell.css + shell.js */
 @media (max-width: 640px) {
-  nav.tabs .wrap { gap: 16px; } nav.tabs button { font-size: 13px; }
   header.top { padding: 14px 0 10px; }
   .hdr { gap: 8px 8px; } .brand h1 { font-size: 20px; }
   .wk-step { width: 30px; } .wk-nav select { padding: 6px 22px 6px 9px; background-position: right 8px center; }
@@ -451,13 +447,8 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
   {% if archive %}<p class="archived">Projected before kickoff with only the data available then; actual results alongside.</p>{% endif %}
   {% if lookahead %}<p class="archived" title="Everyone on the active roster is assumed healthy (injured reserve stays out) and weather is neutral; Vegas lines are used once posted.">{{ lookahead }} week{{ 's' if lookahead > 1 else '' }} out: projected from games so far, no injury report or weather yet. Less certain the further out.</p>{% endif %}
 </div></header>
-<nav class="tabs"><div class="wrap">
-  <button data-tab="players" class="on">Rankings</button>
-  <button data-tab="games">Matchups</button>
-  <button data-tab="power">Power</button>
-  <button data-tab="roles">Role changes</button>
-  <button data-tab="model">Model</button>
-</div></nav>
+{# Parent tabs + sub-tab chips and hash routing are built by assets/shell.js (shared with archived weeks). #}
+<nav class="tabs"></nav>
 <main><div class="wrap">
 
 {# The Actual column also shows on the current week before any game is final: live stats fill it in. #}
@@ -726,21 +717,10 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     document.addEventListener('click', e => { if (!hw.contains(e.target)) { hw.classList.remove('open'); hb.setAttribute('aria-expanded', 'false'); } });
   }
 })();
-document.querySelectorAll('nav.tabs button').forEach(b => b.onclick = () => {
-  document.querySelectorAll('nav.tabs button').forEach(x => x.classList.toggle('on', x === b));
-  document.querySelectorAll('main section').forEach(s => s.classList.toggle('on', s.id === 'tab-' + b.dataset.tab));
-  try { localStorage.setItem('nfledge-tab', b.dataset.tab); } catch (e) {}
-  try { history.replaceState(null, '', '#' + b.dataset.tab); } catch (e) {}
-});
 document.querySelectorAll('.posbar button').forEach(b => b.onclick = () => {
   document.querySelectorAll('.posbar button').forEach(x => x.classList.toggle('on', x === b));
   document.querySelectorAll('.posview').forEach(v => v.hidden = v.dataset.pos !== b.dataset.pos);
 });
-try {
-  const t = location.hash.slice(1) || localStorage.getItem('nfledge-tab');
-  const b = t && document.querySelector(`nav.tabs button[data-tab="${t}"]`);
-  if (b) b.click();
-} catch (e) {}
 // Sorting: cells carry their real value in data-v (ranks, percentages, tiers); blanks always sort last; the first
 // click uses the header's natural direction (data-first), the next click flips it; detail rows follow their row.
 document.querySelectorAll('table.sortable').forEach(tbl => {
@@ -1051,6 +1031,7 @@ window.nfleApplyScoring = () => applyScoring();
 })();
 </script>
 <script>window.NFLE_CFG = {{ {"root": root, "data": data_rel, "season": season, "week": week, "current": nav.is_current and not lookahead and not archive, "archive": archive, "lookahead": lookahead}|tojson }};</script>
+<script src="{{ root }}assets/shell.js?v={{ asset_v }}" defer></script>
 <script src="{{ root }}assets/gamecast.js?v={{ asset_v }}" defer></script>
 </body>
 </html>

@@ -1396,8 +1396,7 @@
       .catch(() => { box.dataset.loaded = ''; box.innerHTML = `<p class="muted">Couldn't load the model description right now. <a href="${esc(siteRoot())}index.html#model">Open it on the current week</a>.</p>`; });
   };
   if (CFG.page !== 'game') {
-    const mt = document.querySelector('nav.tabs button[data-tab="model"]');
-    if (mt) mt.addEventListener('click', loadModelTab);
+    document.addEventListener('nfle-route', e => { if (e.detail.section === 'tab-model') loadModelTab(); });  // shell.js
     const sec = document.getElementById('tab-model');
     if (sec && sec.classList.contains('on')) loadModelTab();
   }
