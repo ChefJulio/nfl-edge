@@ -267,7 +267,11 @@ td.line { width: 230px; min-width: 230px; max-width: 230px; }
 .tdm-bg { fill: none; stroke: var(--tfg, var(--muted)); stroke-width: 3; opacity: .2; }
 .tdm-fg { fill: none; stroke: var(--tfg, var(--accent)); stroke-width: 3; stroke-linecap: round; }
 /* Takeaway: short colored tags, at most two lines, fixed width (the full sentence is in the tooltip). */
-td.take.tags { width: 220px; min-width: 220px; max-width: 220px; }
+td.take.tags { min-width: 220px; }
+/* Number / short columns hug their content (width: 1%), so on wide screens the spare width goes to Takeaway
+   instead of opening gaps around Actual and Matchup. */
+table.ranks td.rk, table.ranks td.projc, table.ranks td.actc, table.ranks td.fpgc, table.ranks td.tierc,
+table.ranks td.mu, table.ranks td.ctr, table.ranks td.l5 { width: 1%; white-space: nowrap; }
 .tg { display: flex; flex-wrap: wrap; gap: 4px; max-height: 46px; overflow: hidden; }
 .tgx { display: inline-block; white-space: nowrap; font-size: 11.5px; font-weight: 700; line-height: 20px; padding: 0 8px;
   border-radius: 999px; background: rgba(255,255,255,.08); color: rgba(255,255,255,.82); cursor: help; }
@@ -504,10 +508,10 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <th class="num projh"><abbr title="Projected fantasy points under your scoring (tap a player for the full range of outcomes)">Proj</abbr></th>
         {% if show_act %}<th class="num actc-h"><abbr title="What he scored: live during his game (pulsing dot), final once it ends. Green = above his likely range (75th pct), red = below it (25th pct), colored only when final">Actual</abbr></th>{% endif %}
         <th class="num"><abbr title="Season fantasy points per game">FP/G</abbr></th>
+        <th data-first="asc">Tier</th>
         <th class="nosort l5h"><abbr title="His last 5 games this season: bar = points scored, green = beat our projection for that game, red = missed it; the tick is our projection">Last 5</abbr></th>
         <th data-first="desc"><abbr title="Opponent and its defense vs {{ pos }}s: 1st = toughest (red), 32nd = easiest (green). Opponent-adjusted, from the model.">Matchup</abbr></th>
         <th class="ctr"><abbr title="Chance he is inactive: injury (practice pattern + game status) or healthy scratch">Inactive</abbr></th>
-        <th data-first="asc">Tier</th>
         <th class="hide-sm nosort"><abbr title="Projected stat line; donut = touchdown odds">Expected line</abbr></th>
         <th class="nosort">Takeaway</th>
       </tr></thead>
@@ -525,10 +529,10 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
           <td class="num projc" data-v="{{ r.proj }}" title="Floor {{ r.p10|f1 }} · middle {{ r.p25|f1 }}-{{ r.p75|f1 }} · ceiling {{ r.p90|f1 }}"><b class="pv">{{ r.proj|f1 }}</b></td>
           {% if show_act %}<td class="num actc{% if r.act is not none %}{{ ' act-hi' if r.act > r.p75 else ' act-lo' if r.act < r.p25 else '' }}{% endif %}" data-v="{{ r.act if r.act is not none else '' }}">{{ r.act|f1 if r.act is not none else '' }}</td>{% endif %}
           <td class="num fpgc">{{ r.fpg|f1 }}</td>
+          <td class="tierc" data-v="{{ r.rank }}"><span class="tier t-{{ r.slot }}" title="{{ {'start': 'Starter in a ' ~ tier_cfg.teams ~ '-team league', 'flex': 'Flex range in a ' ~ tier_cfg.teams ~ '-team league', 'bench': 'Bench depth in a ' ~ tier_cfg.teams ~ '-team league'}[r.slot] }}">{{ r.tier }}</span></td>
           <td class="l5" data-pjw="{{ r.pjw }}"></td>
-          <td class="mu" data-v="{{ r.dvp_rank }}" title="{{ r.opp }} defense vs {{ pos }}s: {{ r.dvp }} of 32 (1st = toughest, 32nd = easiest). This week: {{ r.mpts|sgn }} pts vs an average defense."><span class="opp tm-open" data-tm="{{ r.opp }}"><span class="vs">{{ r.home }}</span>{{ r.opp_logo|safe }}<b>{{ r.opp }}</b></span><span class="dvp" style="color:{{ r.dvp_color }}">{{ r.dvp }}</span></td>
+          <td class="mu" data-v="{{ r.dvp_rank }}" title="{{ r.opp }} defense vs {{ pos }}s: {{ r.dvp }} of 32 (1st = toughest, 32nd = easiest). This week: {{ r.mpts|sgn }} pts vs an average defense."><span class="opp tm-open" data-tm="{{ r.opp }}"><span class="vs">{{ r.home }}</span>{{ r.opp_logo|safe }}<b style="color:{{ r.dvp_color }}">{{ r.opp }}</b></span><span class="dvp" style="color:{{ r.dvp_color }}">{{ r.dvp }}</span></td>
           <td class="ctr" data-v="{{ r.inactive }}" title="{{ r.inactive_why }}"><span class="{{ 'pill pill-bad' if r.inactive >= 0.5 else 'pill pill-warn' if r.inactive >= 0.15 else 'pill pill-soft' if r.inactive >= 0.05 else 'quiet' }}">{{ '<1%' if r.inactive < 0.005 else r.inactive|pct }}</span></td>
-          <td data-v="{{ r.rank }}"><span class="tier t-{{ r.slot }}" title="{{ {'start': 'Starter in a ' ~ tier_cfg.teams ~ '-team league', 'flex': 'Flex range in a ' ~ tier_cfg.teams ~ '-team league', 'bench': 'Bench depth in a ' ~ tier_cfg.teams ~ '-team league'}[r.slot] }}">{{ r.tier }}</span></td>
           <td class="line hide-sm">{{ r.line|safe }}</td>
           <td class="take tags" title="{{ r.takeaway }}"><div class="tg">{% for t in r.tags %}<span class="tgx tg-{{ t.k }}" title="{{ t.d }}">{{ t.t }}</span>{% endfor %}</div></td>
         </tr>
@@ -555,7 +559,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
       <div class="mt-main">
         {% for s, sc, os, pct in [(g.away, fa, fh, f.p_away), (g.home, fh, fa, f.p_home)] %}
         {% set side = 'away' if loop.first else 'home' %}
-        {% if s.logo_url %}<img class="mt-lg {{ side }}" src="{{ s.logo_url }}" alt="" loading="lazy">{% endif %}
+        {% if s.logo_url %}<img class="mt-lg {{ side }}" src="{{ s.logo_url|logosrc(112) }}" alt="" loading="lazy">{% endif %}
         <div class="mt-side {{ side }}{{ ' lost' if g.final and sc < os }}{{ ' dog' if not g.final and not f.tossup and pct < 50 }}">
           <span class="mt-num">{% if g.final %}{{ sc }}{% else %}{{ pct }}<small>%</small>{% endif %}</span>
           <span class="mt-nm"><b>{{ s.nick }}</b> <small>{{ s.record }}</small></span>

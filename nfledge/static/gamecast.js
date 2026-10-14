@@ -66,8 +66,12 @@
   };
   const teamGame = (team, d = DATA) => d && d.games.find(g => g.away.team === team || g.home.team === team);
   const sideOf = (g, team) => g && (g.away.team === team ? g.away : g.home.team === team ? g.home : null);
+  // ESPN's 500 px logos come out ragged when the browser shrinks them; its resizer downsamples them properly
+  // (3x the display size, so retina screens stay sharp). Same rule as report.logo_src.
+  const logoSrc = (url, size) => /a\.espncdn\.com\/i\/teamlogos\//.test(url)
+    ? `https://a.espncdn.com/combiner/i?img=${url.split('a.espncdn.com')[1]}&w=${Math.max(24, size * 3)}&h=${Math.max(24, size * 3)}` : url;
   const logo = (url, bg, size = 22, alt = '') => url
-    ? `<span class="nl" style="background:${esc(bg || '#333')};width:${size + 6}px;height:${size + 6}px"><img src="${esc(url)}" alt="${esc(alt)}" width="${size}" height="${size}" loading="lazy"></span>` : '';
+    ? `<span class="nl" style="background:${esc(bg || '#333')};width:${size + 6}px;height:${size + 6}px"><img src="${esc(logoSrc(url, size))}" alt="${esc(alt)}" width="${size}" height="${size}" loading="lazy"></span>` : '';
 
   // ------------------------------------------------------------------------------------------------------- ESPN
   const weekEvents = async (season, week) => {

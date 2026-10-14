@@ -162,8 +162,17 @@ class TeamStyle:
     url = self.logo.get(team)
     if not url:
       return ""
-    return (f'<span class="logo" style="background:{self.logo_bg(team)}"><img src="{html.escape(url)}" alt="{html.escape(team)}" '
-            f'width="{size}" height="{size}" loading="lazy"></span>')
+    return (f'<span class="logo" style="background:{self.logo_bg(team)}"><img src="{html.escape(logo_src(url, size))}" '
+            f'alt="{html.escape(team)}" width="{size}" height="{size}" loading="lazy"></span>')
+
+
+def logo_src(url: str, size: int) -> str:
+  """ESPN team logos are 500 px PNGs; shrunk to 11-28 px by the browser they come out ragged. ESPN's resizer
+  downsamples them properly server side: request 3x the display size (sharp on retina screens, ~3 KB each)."""
+  if "a.espncdn.com/i/teamlogos/" not in str(url):
+    return url
+  px = max(24, int(size) * 3)
+  return f"https://a.espncdn.com/combiner/i?img={url.split('a.espncdn.com', 1)[1]}&w={px}&h={px}"
 
 
 def pick_logo_bg(url: str, primary: str, secondary: str) -> str:
@@ -1309,6 +1318,7 @@ def render(ctx: dict, out_path: Path) -> Path:
   env.filters["pct"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.0%}"
   env.filters["short"] = short_name
   env.filters["nameparts"] = name_parts
+  env.filters["logosrc"] = logo_src
   # Site root relative to this page ("" for index.html, "../" for <season>/week-NN.html): shared assets, the game
   # page and this week's data file are addressed from there.
   root = ctx["nav"]["current_href"][:-len("index.html")]
