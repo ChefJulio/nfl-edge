@@ -575,9 +575,11 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
   n_weeks = week - 1
   # Until Friday's expert rankings are out, show last week's rank (display only; never fed to the model).
   e = eng.data.ecr
-  prev_ecr = (e[(e.season == season) & (e.week == week - 1)].set_index("gsis_id").ecr
-              if e is not None else pd.Series(dtype=float))
-  prev_ecr = prev_ecr[~prev_ecr.index.duplicated()]
+  prev = (e[(e.season == season) & (e.week == week - 1)].drop_duplicates("gsis_id").set_index("gsis_id")
+          if e is not None else pd.DataFrame(columns=["ecr", "ecr_flex"]))
+  prev_ecr, prev_flex = prev.ecr, prev.get("ecr_flex", pd.Series(dtype=float)).dropna()
+  if "ecr_flex" not in p:
+    p["ecr_flex"] = np.nan
   espn = espn_ids(eng.data.rosters, season)
   photos = headshots(eng.data.rosters, season)
   byes, pend = team_byes(eng.data.schedules, season, week, set(eng.data.pbp.game_id.unique()))
@@ -593,7 +595,9 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
         "photo": photos.get(r.gsis_id) or (f"https://a.espncdn.com/i/headshots/nfl/players/full/{espn[r.gsis_id]}.png"
                                            if r.gsis_id in espn else ""),
         "rank": int(r.pos_rank), "ecr": r.ecr if pd.notna(r.ecr) else prev_ecr.get(r.gsis_id, np.nan),
-        "ecr_stale": pd.isna(r.ecr) and r.gsis_id in prev_ecr.index, "name": r.full_name, "team_chip": ts.chip(r.team),
+        "ecr_stale": pd.isna(r.ecr) and r.gsis_id in prev_ecr.index,
+        "ecr_flex": r.ecr_flex if pd.notna(r.ecr_flex) else prev_flex.get(r.gsis_id, np.nan),
+        "ecr_flex_stale": pd.isna(r.ecr_flex) and r.gsis_id in prev_flex.index, "name": r.full_name, "team_chip": ts.chip(r.team),
         "opp_chip": ts.chip(r.opp), "opp": r.opp, "opp_logo": ts.logo_img(r.opp, 18),
         "dvp": ordinal(int(dvp[r.pos][r.opp])) if r.pos in dvp and r.opp in dvp[r.pos] else "",
         "dvp_rank": int(r.dvp_rank),

@@ -20,6 +20,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pyarrow.parquet as pq
 
 from .config import ROOT
 
@@ -244,7 +245,10 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
     ah = [cache.get("availhist", s, lambda: availability_history(nfl, s), stale=False) for s in range(first, current)]
     ah = [a for a in ah if a is not None and len(a)]
     avail_hist = pd.concat(ah, ignore_index=True) if ah else None
-  ecr = cache.get("ecr", "all", lambda: load_ecr(nfl, sched), stale=cache.age_hours("ecr", "all") > LIVE_TTL_HOURS)
+  ecr_path = cache.path("ecr", "all")
+  ecr_old = ecr_path.exists() and "ecr_flex" not in pq.read_schema(ecr_path).names  # cached before ecr_flex existed
+  ecr = cache.get("ecr", "all", lambda: load_ecr(nfl, sched),
+                  stale=ecr_old or cache.age_hours("ecr", "all") > LIVE_TTL_HOURS)
   teams = cache.get("teams", "all", lambda: nfl.load_teams(), stale=cache.age_hours("teams", "all") > 24 * 90)
   first = seasons[0]
   qbc = cache.get("qbcareer", first, lambda: qb_career_before(nfl, first), stale=False)
@@ -362,12 +366,18 @@ def fetch_practice_days(season: int) -> pd.DataFrame:
 
 def load_ecr(nfl, sched: pd.DataFrame) -> pd.DataFrame:
   """FantasyPros weekly positional ECR (scraped Fridays), mapped to gsis ids and to the week it was for.
-  The per-player leakage guard (scraped before that player's kickoff) is applied in Engine.attach_ecr."""
-  r = _to_pd(nfl.load_ff_rankings(type="all"))
-  r = r[(r.ecr_type == "wp") & r.pos.isin(POSITIONS)][["id", "pos", "team", "ecr", "sd", "scrape_date"]].copy()
+  The per-player leakage guard (scraped before that player's kickoff) is applied in Engine.attach_ecr.
+  ecr_flex is the expert flex rank (display only, never a model input): nflverse doesn't carry FantasyPros' flex
+  page, so it is their weekly superflex (OP) consensus with the QBs taken out, RB / WR / TE re-ranked 1..n."""
+  all_r = _to_pd(nfl.load_ff_rankings(type="all"))
+  r = all_r[(all_r.ecr_type == "wp") & all_r.pos.isin(POSITIONS)][["id", "pos", "team", "ecr", "sd", "scrape_date"]].copy()
+  op = all_r[(all_r.ecr_type == "wsf") & all_r.pos.isin(["RB", "WR", "TE"])][["id", "ecr", "scrape_date"]].copy()
+  op["ecr_flex"] = op.groupby("scrape_date").ecr.rank(method="first")
+  op = op.assign(id=op.id.astype(str)).drop_duplicates(["scrape_date", "id"])[["id", "scrape_date", "ecr_flex"]]
   ids = _to_pd(nfl.load_ff_playerids())[["fantasypros_id", "gsis_id"]].dropna()
   ids["fantasypros_id"] = ids.fantasypros_id.astype("int64").astype(str)
   r["id"] = r.id.astype(str)
+  r = r.merge(op, on=["id", "scrape_date"], how="left")
   r = r.merge(ids, left_on="id", right_on="fantasypros_id")
   r["scrape_date"] = pd.to_datetime(r.scrape_date)
   g = sched[sched.game_type == "REG"][["season", "week", "gameday", "home_team", "away_team"]].copy()
@@ -382,7 +392,7 @@ def load_ecr(nfl, sched: pd.DataFrame) -> pd.DataFrame:
     out.append(grp.assign(season=season, week=week))
   e = pd.concat(out, ignore_index=True)
   e = e.sort_values("scrape_date").drop_duplicates(["season", "week", "gsis_id"], keep="last")
-  return e[["season", "week", "gsis_id", "pos", "ecr", "sd", "scrape_date"]]
+  return e[["season", "week", "gsis_id", "pos", "ecr", "ecr_flex", "sd", "scrape_date"]]
 
 
 def qb_career_before(nfl, first_season: int, start: int = 2006) -> pd.DataFrame:

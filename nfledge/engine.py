@@ -164,15 +164,17 @@ class Engine:
 
   def attach_ecr(self, p: pd.DataFrame, season: int, week: int) -> pd.DataFrame:
     """Expert consensus rank for the week, only if scraped before the player's kickoff (no leakage)."""
-    p = p.drop(columns=["ecr", "ecr_pts"], errors="ignore")
+    p = p.drop(columns=["ecr", "ecr_flex", "ecr_pts"], errors="ignore")
     e = self.data.ecr
     if e is None:
-      return p.assign(ecr=np.nan, ecr_pts=np.nan)
-    e = e[(e.season == season) & (e.week == week)][["gsis_id", "ecr", "scrape_date"]]
+      return p.assign(ecr=np.nan, ecr_flex=np.nan, ecr_pts=np.nan)
+    if "ecr_flex" not in e:  # cached before the flex rank existed
+      e = e.assign(ecr_flex=np.nan)
+    e = e[(e.season == season) & (e.week == week)][["gsis_id", "ecr", "ecr_flex", "scrape_date"]]
     kick = self.games(season, week)[["game_id", "gameday"]]
     p = p.merge(e, on="gsis_id", how="left").merge(kick, on="game_id", how="left")
     late = pd.to_datetime(p.scrape_date) >= pd.to_datetime(p.gameday)
-    p.loc[late, "ecr"] = np.nan
+    p.loc[late, ["ecr", "ecr_flex"]] = np.nan
     return p.drop(columns=["scrape_date", "gameday"]).assign(ecr_pts=np.nan)
 
   def _calibrate(self, p: pd.DataFrame) -> pd.DataFrame:

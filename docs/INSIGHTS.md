@@ -55,6 +55,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   archive branch). ESPN ids map to gsis via `nflreadpy.load_ff_playerids()` (`espn_id`).
 - **FantasyPros ECR** (nflverse `load_ff_rankings`): positional ranks scraped Fridays; only use a rank scraped before
   that player's kickoff. `fantasypros_id` is a float. Not available for older seasons in archived pages.
+  nflverse has no FantasyPros flex page: `ecr_flex` (display only, FLEX view's rank + vs ECR) = the weekly superflex
+  list (`ecr_type == "wsf"`, weekly-op) minus QBs, re-ranked. Before 2026-10-13 the FLEX view showed positional ECR.
+- **Flex position mix check (2026-10-13, 2025-26 backtest, 18 weeks):** our top-12 flex averages 63% RB vs the
+  experts' 55% (top-24: 55 vs 50; top-60: 44 vs 41). Not a bias against WRs: in our top 60, WRs score below
+  projection (-1.32 [-1.94, -0.71]) more than RBs (-0.40 [-1.11, 0.31]); top-12 WRs -2.56 vs RBs -0.17. If
+  anything the WRs are over-ranked (wider error = more winner's curse at the top). Not yet a formal test.
 - **PFR advanced defense** 2018+ weekly (tested for defender values; didn't help).
 - **QB career history** from `load_player_stats` 2006+ so veterans aren't flagged inexperienced.
 - `nflreadpy.load_teams()` has colors and ESPN logo URLs.
