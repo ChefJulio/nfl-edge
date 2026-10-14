@@ -534,3 +534,4 @@ td .eg-chip { margin-left: 0; }
 .pen-pl { display: flex; flex-wrap: wrap; gap: 6px; }
 .pen-p { font: inherit; font-size: 12.5px; color: var(--ink); background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 4px 9px; cursor: pointer; }
 td.pen-top { color: var(--muted); font-size: 12.5px; }
+.pen-pos { display: inline-block; min-width: 2.4em; margin-right: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: .03em; color: var(--muted); background: var(--panel); border-radius: 5px; padding: 1px 5px; text-align: center; }

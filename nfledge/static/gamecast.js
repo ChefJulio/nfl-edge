@@ -765,7 +765,8 @@
     const rank = (f, asc) => 1 + all.filter(([, x]) => asc ? f(x) < f(T) : f(x) > f(T)).length;
     const tone = r => r <= 8 ? 'good' : r >= 25 ? 'bad' : '';
     const cellR = (v, lab, r, tip) => `<div class="pen-c"><div class="pen-v">${v}</div><div class="pen-k">${lab}</div><span class="pen-r ${tone(r)}" title="${esc(tip)}">${ord(r)}</span></div>`;
-    const pl = T.players.map(([g, n, y]) => `<button type="button" class="pen-p" data-open-pid="${esc(g)}"><b>${esc(D.names[g] || g)}</b> <span class="muted">${n} &middot; ${y} yd</span></button>`).join('');
+    const pl = T.players.map(([g, n, y]) => { const ps = (D.pos || {})[g];
+      return `<button type="button" class="pen-p" data-open-pid="${esc(g)}">${ps ? `<span class="pen-pos">${esc(ps)}</span>` : ''}<b>${esc(D.names[g] || g)}</b> <span class="muted">${n} &middot; ${y} yd</span></button>`; }).join('');
     return `<div class="pc-box"><div class="pc-k">Penalties · ${D.season} · ${T.g} games</div>
       <div class="pen-grid">${cellR((per(T)).toFixed(1), 'Flags / game', rank(per, true), 'League rank, fewest flags = 1st')}
         ${cellR(Math.round(yper(T)), 'Yards / game', rank(yper, true), 'League rank, fewest yards = 1st')}
