@@ -4,7 +4,8 @@ current files.
 
 Usage: python tools/dev.py [--site=scratch/site] [--port=8765]
   then open http://127.0.0.1:8765/index.html (build the folder once with
-  `python run.py --out scratch/site/index.html`; re-run only for template / Python / model changes).
+  `python run.py --out scratch/site/index.html`; re-run only for Python / model changes: pages and JS / CSS are
+  static, and the tabs render in the browser from the week JSON).
 """
 import http.server
 import sys

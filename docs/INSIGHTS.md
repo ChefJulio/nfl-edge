@@ -325,7 +325,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 - **Power:** model margin vs average team by unit (7 ranks), rank range, schedule played/left, trend.
 - Tabs: Rankings, Matchups, Power, Role changes, Model.
 - **Player card / live / gamecast (2026-10-13):** shared `nfledge/static/gamecast.{js,css}` copied to the site root
-  `assets/` and `game.html` (rendered from game.html.j2) by `report.write_site_assets` on every render, so archived
+  `assets/` and `game.html` (from `nfledge/pages/game.html`) by `report.write_site_assets` on every render, so archived
   pages get fixes without a rebuild. Each week page also writes `<page>.json` (report.week_data: players with
   ESPN ids, stat lines, ranges, pregame chances, battle bars; ~410 KB raw, ~60 KB gzipped). Rankings rows open a
   player card (replaced the old detail row; `#player/<gsis>` deep-links). Matchups tiles get a "Gamecast" link and
@@ -426,8 +426,8 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
     exist: compare ESPN early-week statuses with who played; refit rates or drop the bridge. Not used for lookahead
     weeks (ESPN return_date untested there).
   **Model tab everywhere (2026-10-13):** archived / lookahead pages used to show a one-line "archived week"
-  placeholder. Now the current build writes the tab once to `<site>/model.html` (`templates/model_tab.html.j2`,
-  also embedded in index.html) and other weeks fetch it on first view (gamecast.js `loadModelTab`), so every page
+  placeholder. Now the current build writes the tab once (since Phase 6: `<site>/data/model.json`, drawn by
+  `assets/model.js`; before: `model.html` from a Jinja template) and every week fetches it on first view, so every page
   shows the same, current description. MODEL.md opens with "The short version": a plain-language summary for
   non-technical, casual fans (owner's request); the technical detail follows unchanged.
   **Strict JSON (2026-10-13):** week files are written through `_json_safe` (NaN / inf -> null, `allow_nan=False`).
@@ -474,7 +474,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   (`data/standings/<season>.json`, `tools/standings_build.py`, 2002 on), Teams > Stats + Players > Stats
   (`data/stats/{teams,players}_<season>.json`, `tools/stats_build.py`, 1999 on; finished seasons aggregated once
   into `cache/seasonstats_*`; current season redone when a game goes final). Rankings / Power / Matchups / Roles /
-  Model are still Jinja-rendered (phases 2 and 6). `window.NFLE` is shared: modules MERGE into it (gamecast.js used
+  Model were still Jinja-rendered then (all client-rendered since Phase 6, below). `window.NFLE` is shared: modules MERGE into it (gamecast.js used
   to overwrite it, which wiped the shell's loader). Next (owner, 2026-10-14): player / team PAGES as routes
   (`#player/<id>`, `#team/<abbr>`) instead of overlay cards, with breadcrumbs and a working back button, before
   the Rankings migration.
@@ -507,6 +507,19 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Filters toggle, and fold the note under the name (the Details column is hidden), so the table fits without
   side-scrolling. Draws 250 rows at a time (a season is ~2-5k); any non-default sort draws the whole filtered season
   (`NFLE.Table` got `onSort` + `getSort` for this).
+- **Phase 6 done (2026-10-14): Jinja retired; every week page is a static shell + its JSON.** `nfledge/pages/week.html`
+  (plain HTML, `%TOKENS%` filled by `report.page_html`: title, root, asset version, a one-line `NFLE_CFG`) is the
+  same ~2.5 KB for every week (was ~270 KB); `<page>.json` (`"v": 3`) adds `roles`, `power_vol`, `head` (data
+  week, games final, injury report in, scoring) and per-team `net_hist` (Power trend line) to v2. Power, Matchups,
+  Roles and Model render in the browser (`assets/{power,matchups,roles,model}.js`); the header (week picker from
+  `weeks.json`, which the current week's build now writes too; past / upcoming tags; details popover) is in
+  shell.js. Shared helpers: `NFLE.week()` (the week data, once loaded), `NFLE.fmt` (sgn / ord / rank-badge class /
+  team logo / row trim). The template's CSS is `assets/site.css`. MODEL.md's `{{ L.name }}` values are filled by a
+  strict regex (a name the build doesn't provide fails the build) and the HTML goes to `data/model.json`.
+  `run.check_script` now `node --check`s every `static/*.js` once per run. Old URLs keep working: same page paths,
+  same hashes (`#games`, `#power`... map onto routes). The archive was rebuilt in the new shape (95 pages); a
+  module whose field is missing from an older week file leaves the section alone. `tools/screenshot.py` opens the
+  dev server (pages need http:// to fetch their JSON).
 
 ## 9. Open threads / next steps (as of 2026-10-12)
 - **From the 2026-10-14 research batch (section 5 has the numbers):** (2) "Not extended entering

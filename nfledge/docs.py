@@ -15,7 +15,6 @@ import re
 import markdown
 import numpy as np
 import pandas as pd
-from jinja2 import Environment, StrictUndefined
 
 from .config import ROOT
 
@@ -126,11 +125,16 @@ RAW = {"bt_table", "formulas"}  # generated markdown blocks, inserted as-is
 
 
 def render(live: dict) -> dict:
-  """MODEL.md -> HTML with live values (StrictUndefined: a missing value fails the build, never shows blank)."""
+  """MODEL.md -> HTML with its {{ L.name }} placeholders filled with live values."""
   _, body = _split()
-  env = Environment(undefined=StrictUndefined, autoescape=False)
-  filled = env.from_string(body).render(L={k: f"<span class=\"live\">{v}</span>" if k not in RAW else v
-                                          for k, v in live.items()})
+  L = {k: f"<span class=\"live\">{v}</span>" if k not in RAW else v for k, v in live.items()}
+
+  def fill(m):  # strict: a value MODEL.md names but the build doesn't provide fails the build, never shows blank
+    if m.group(1) not in L:
+      raise KeyError(f"MODEL.md uses {{{{ L.{m.group(1)} }}}}, which docs.live_values does not provide")
+    return str(L[m.group(1)])
+
+  filled = re.sub(r"\{\{\s*L\.(\w+)\s*\}\}", fill, body)
   html = markdown.markdown(filled, extensions=["tables", "sane_lists"])
   toc, n = [], 0
 

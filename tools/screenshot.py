@@ -1,7 +1,7 @@
 """Screenshot the built report for visual QA, in the iPhone engine (WebKit) or desktop Chromium.
 
 Usage: python tools/screenshot.py TAB [options]
-  TAB              players | games | power | roles | model
+  TAB              a route: players | players/stats | teams/power | games | model | player/<gsis> ...
   --device=D       iphone (WebKit, iPhone 13 profile; default) | desktop (Chromium, 1440 wide)
   --pos=P          Rankings position tab: QB | RB | WR | TE
   --page-y=N       scroll the page down N px first
@@ -9,8 +9,8 @@ Usage: python tools/screenshot.py TAB [options]
   --table-x=N      scroll the visible table sideways N px (pinned-column / compact checks)
   --table-y=N      scroll the visible table down N px (sticky-header checks)
   --out=PATH       output PNG (default scratch/shot_<tab>_<device>.png)
-  --html=PATH      page to open (default: the newest report/nfl_edge_week*.html)
-  --url=URL        open a URL instead (pages that fetch JSON need http://, e.g. python -m http.server)
+  --url=URL        page to open (default: the dev server, http://127.0.0.1:8765/index.html#TAB; start it with
+                   `python tools/dev.py`). Pages fetch their week JSON, so they need http://, not file://.
   --wait=MS        extra wait after load (live data, ESPN fetches)
   --click=CSS      click the first matching element before the shot (player card, buttons)
   --full=1         full-page screenshot
@@ -32,9 +32,7 @@ def main():
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
   tab = args[0] if args else "players"
   device = opt.get("device", "iphone")
-  page_html = (Path(opt["html"]).resolve() if "html" in opt
-               else max((ROOT / "report").glob("nfl_edge_week*.html"), key=lambda p: p.stat().st_mtime))
-  out = Path(opt.get("out", ROOT / "scratch" / f"shot_{tab}_{device}.png"))
+  out = Path(opt.get("out", ROOT / "scratch" / f"shot_{tab.replace('/', '_')}_{device}.png"))
   out.parent.mkdir(exist_ok=True)
   with sync_playwright() as pw:
     if device == "iphone":
@@ -44,15 +42,17 @@ def main():
       browser = pw.chromium.launch()
       ctx = browser.new_context(viewport={"width": 1440, "height": 900}, color_scheme="dark")
     page = ctx.new_page()
-    page.goto(opt["url"] if "url" in opt else page_html.as_uri() + f"#{tab}")
+    page.goto(opt.get("url", f"http://127.0.0.1:8765/index.html#{tab}"))
     page.wait_for_load_state("networkidle")
+    if "#" in page.url:  # a week page: wait for the tab to render from its JSON
+      page.wait_for_selector("section.on .scroll tbody tr, section.on a.mt, section.on .doc h2, section.on .pc", timeout=15000)
     if "wait" in opt:
       page.wait_for_timeout(int(opt["wait"]))
     if "click" in opt:  # e.g. open a player card: --click="tr.main[data-pos=WR]"
       page.locator(opt["click"]).first.click()
       page.wait_for_timeout(600)
     if "pos" in opt:
-      page.click(f".posbar button[data-pos={opt['pos']}]")
+      page.click(f"section.on .seg button[data-pos={opt['pos']}], .posbar button[data-pos={opt['pos']}]")
     if "el" in opt:  # scroll the first matching element to the top of the screen
       page.locator(opt["el"]).first.evaluate("e => window.scrollTo(0, e.getBoundingClientRect().top + scrollY - 70)")
     if "page-y" in opt:

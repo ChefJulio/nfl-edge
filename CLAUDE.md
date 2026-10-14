@@ -23,12 +23,12 @@ a rejected idea without new data or a new angle, and do not "fix" a deliberate c
 .venv\Scripts\python tools/error_breakdown.py "cache/experiments/baseline_20*.parquet"  # where error comes from
 .venv\Scripts\python tools/returns_eval.py 2021-2025              # injury return-timing model walk-forward
 .venv\Scripts\python tools/build_archive.py --out=site --missing-only   # archived week pages
-.venv\Scripts\python tools/screenshot.py players [--device=desktop] [--html=PATH] [--el=CSS]  # visual QA (WebKit iPhone)
+.venv\Scripts\python tools/screenshot.py teams/power [--device=desktop] [--url=URL] [--el=CSS]  # visual QA (WebKit iPhone)
 .venv\Scripts\python tools/dev.py --site=scratch/site [--port=8765]   # DEV LOOP: serves a built folder with assets/
 #   read live from nfledge/static/ (no cache): JS/CSS edits show on browser refresh, no re-render. Build the folder
-#   once with `run.py --out scratch/site/index.html`; re-run only for template / Python / model changes.
-#   pages that fetch JSON (player card, gamecast): serve the build folder (tools/dev.py above), then
-#   --url=http://127.0.0.1:8765/game.html?d=index.json&g=<game_id> [--wait=4000] [--click=CSS]; ?sim=1 fakes live
+#   once with `run.py --out scratch/site/index.html`; re-run only for Python / model changes (pages are static
+#   shells; every tab renders in the browser from the week JSON). screenshot.py opens the dev server by default;
+#   other pages: --url=http://127.0.0.1:8765/game.html?d=index.json&g=<game_id> [--wait=4000] [--click=CSS]; ?sim=1 fakes live
 .venv\Scripts\python tools/win_prob.py                            # Vegas win-prob calibration; prints tossup_below
 .venv\Scripts\python tools/darts.py                               # 28 pre-game signals vs rank / Vegas (cached base)
 .venv\Scripts\python tools/elo_eval.py                            # fits Elo + our win-chance blend; prints [report.win_model]
@@ -58,11 +58,12 @@ Git hooks: `git config core.hooksPath .githooks` (pre-commit blocks commits when
 | `nfledge/personnel.py` | Defensive personnel adjustment: tested, OFF (kept switchable) |
 | `nfledge/returns.py` | Injury return-timing model (feeds lookahead weeks) |
 | `nfledge/backtest.py` | Walk-forward evaluation vs raw stats, Vegas-scaled, ECR |
-| `nfledge/report.py` | Builds every page section (presentation only) |
-| `nfledge/docs.py` | Model tab: renders MODEL.md, live values, generated formulas section, code fingerprint |
-| `nfledge/templates/report.html.j2` | The whole page: CSS, tabs, tables, sorting JS |
-| `nfledge/static/gamecast.{js,css}`, `templates/game.html.j2` | Player card, live scores (ESPN), gamecast page; copied to the site root (`assets/`, `game.html`) on every render; each week page also writes `<page>.json` |
-| `nfledge/static/shell.{js,css}` | App shell: 4 parents (Players, Teams, Games, Model) + sub-tab chips, bottom tab bar on phones, hash routing (#players/rankings; old #games etc. mapped), `NFLE.load` (cached JSON), placeholder sections for tabs not built yet |
+| `nfledge/report.py` | Builds each week's numbers (presentation only): `week_data` = the week JSON every tab renders from (`"v": 3`), `render` = page shell + JSON + site files |
+| `nfledge/docs.py` | Model tab text: MODEL.md with live values (`{{ L.name }}`, strict regex fill) -> HTML in `data/model.json`; generated formulas section; code fingerprint |
+| `nfledge/pages/{week,game}.html` | Page shells (plain HTML, `%TOKENS%` filled by `report.page_html`; no Jinja): every week page is the same shell + its `<page>.json` |
+| `nfledge/static/site.css` | Site-wide styles (tokens, header, tables, rankings, badges, model doc) |
+| `nfledge/static/gamecast.{js,css}` | Player / team pages, live scores (ESPN), gamecast page, loads the week JSON (`NFLE.weekData`); every `static/` file is copied to the site's `assets/` on every render |
+| `nfledge/static/shell.{js,css}` | App shell: 4 parents (Players, Teams, Games, Model) + sub-tab chips, bottom tab bar on phones, hash routing (#players/rankings; old #games etc. mapped), `NFLE.load` (cached JSON), `NFLE.week()` (the week data), `NFLE.fmt` (shared cell helpers), the week page header (picker from `weeks.json`, details popover), area loader (`AREAS`) |
 | `nfledge/static/table.{js,css}` | `NFLE.Table`: the shared table component for client-rendered tabs (sort, pinned column, sticky header, header strip on phones) |
 | `tools/dev.py` | Dev server: built site + live `nfledge/static/` assets |
 | `nfledge/standings.py` | Standings + NFL tiebreaking procedures (division, wild card, seeds); presentation-side (not in the model fingerprint) |
@@ -72,7 +73,7 @@ Git hooks: `git config core.hooksPath .githooks` (pre-commit blocks commits when
 | `tools/playoffs_build.py`, `nfledge/static/playoffs.{js,css}`, `data/history/` | Teams > Playoffs: brackets 1920 on (`data/playoffs/<season>.json`; 538 file + Wikipedia seeds kept in `data/history/`) |
 | `tools/playoff_odds.py` | Teams > Playoffs odds: `data/playoffs/odds.json` (Monte Carlo + tiebreakers; CI step). `--backtest` rewrites the COMMITTED track record `data/history/playoff_odds_backtest.json` (needs the archive worktree); `--fit-drift` = the pre-registered drift fit |
 | `tools/transactions_build.py`, `nfledge/static/moves.{js,css}` | Players > Moves: ESPN transactions parsed into moves, `data/transactions/<season>.json` (2002 on; CI step, raw pages cached) |
-| `nfledge/static/rankings.js`, `injuries.js` | Players > Rankings (from the week JSON) and Players > Injuries (ESPN list + our inactive %) |
+| `nfledge/static/{rankings,injuries,roles,power,matchups,model}.js` | Week tabs from the week JSON: Rankings, Injuries (ESPN list + our inactive %), Roles, Power, Matchups (tiles; live paint via `NFLE.paintTiles`), Model (`data/model.json`) |
 | `nfledge/elo.py` | Elo from final scores (part of our win chance) |
 | `exclusions.csv` | Manual injury-shortened games to drop from usage/efficiency |
 | `scratch/` | Throwaway experiment scripts (gitignored) |

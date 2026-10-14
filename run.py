@@ -22,7 +22,7 @@ from nfledge.engine import POSITIONS, Engine
 
 
 def model_code() -> str:
-  """Source of everything that affects model outputs (report.py and templates only change presentation)."""
+  """Source of everything that affects model outputs (report.py, docs.py and standings.py only change presentation)."""
   return "".join(p.read_text() for p in sorted((ROOT / "nfledge").glob("*.py")) if p.name not in ("report.py", "docs.py", "standings.py"))
 
 
@@ -140,7 +140,8 @@ def week_nav(data, season: int, week: int, current_week: int, prefix: str) -> di
 
 def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict, res=None, ev=None,
                bt_seasons=(), archive: bool = False, lookahead: int = 0) -> dict:
-  """Everything the page template needs for one season / week (shared by run.py and tools/build_archive.py)."""
+  """Everything one season / week page needs (shared by run.py and tools/build_archive.py); report.render turns
+  it into the page's JSON."""
   power = rp.team_tables(eng, season, week, cfg, proj)
   wk = data.schedules[(data.schedules.season == season) & (data.schedules.week == week)
                       & (data.schedules.game_type == "REG")]
@@ -160,8 +161,8 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
     "score_cfg": rp.scoring_settings(scoring, cfg), "tier_cfg": cfg["tiers"],
     "track": rp.track_record(data.schedules, season, week, cfg["report"]["tossup_below"]),
     "tossup_pct": round(cfg["report"]["tossup_below"] * 100),
-    # Only the current week renders the Model tab; it is also written to the site root (model.html), which archived
-    # and lookahead pages load, so every page shows the same, current description.
+    # Only the current week renders the Model tab text; it is written to data/model.json at the site root, which
+    # every page (archived and lookahead too) loads, so every page shows the same, current description.
     "model_doc": (None if (archive or lookahead)
                   else docs.render(docs.live_values(eng, cfg, season, week, res, ev))),
   }
@@ -232,22 +233,23 @@ def main():
     webbrowser.open(out.as_uri())
 
 
+_scripts_ok = False
+
+
 def check_script(path: Path):
-  """Fail loudly if the page's JavaScript does not parse (a syntax error silently kills every button)."""
-  import re
+  """Fail loudly if a site script does not parse (a syntax error silently kills every tab): node --check on every
+  assets/*.js the page loads (the page itself is a static shell with one inline line of config). Once per run."""
   import shutil
   import subprocess
-  import tempfile
+  global _scripts_ok
   node = shutil.which("node")
-  if not node:
+  if _scripts_ok or not node:
     return
-  js = "\n".join(re.findall(r"<script>(.*?)</script>", path.read_text(encoding="utf-8"), re.S))
-  with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False, encoding="utf-8") as f:
-    f.write(js)
-  res = subprocess.run([node, "--check", f.name], capture_output=True, text=True)
-  Path(f.name).unlink(missing_ok=True)
-  if res.returncode != 0:
-    sys.exit(f"[run] report JavaScript has a syntax error:\n{res.stderr}")
+  _scripts_ok = True
+  for js in sorted((ROOT / "nfledge" / "static").glob("*.js")):
+    res = subprocess.run([node, "--check", str(js)], capture_output=True, text=True)
+    if res.returncode != 0:
+      sys.exit(f"[run] {js.name} has a syntax error:\n{res.stderr}")
 
 
 def backtest_takeaway(ev) -> str:

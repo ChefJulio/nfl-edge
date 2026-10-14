@@ -1399,20 +1399,8 @@
       if (n.matches && n.matches('tr.main[data-pid]')) { openPlayer(n.dataset.pid); return; }
     }
   });
-  // Archived and lookahead weeks: the Model tab is the current week's (model.html at the site root, written by its
-  // build), loaded the first time the tab is shown so every page describes the same, current model.
-  const loadModelTab = () => {
-    const box = document.querySelector('.model-remote');
-    if (!box || box.dataset.loaded) return;
-    box.dataset.loaded = '1';
-    fetch(box.dataset.src).then(r => r.ok ? r.text() : Promise.reject(new Error(r.status))).then(h => { box.innerHTML = h; })
-      .catch(() => { box.dataset.loaded = ''; box.innerHTML = `<p class="muted">Couldn't load the model description right now. <a href="${esc(siteRoot())}index.html#model">Open it on the current week</a>.</p>`; });
-  };
-  if (CFG.page !== 'game') {
-    document.addEventListener('nfle-route', e => { if (e.detail.section === 'tab-model') loadModelTab(); });  // shell.js
-    const sec = document.getElementById('tab-model');
-    if (sec && sec.classList.contains('on')) loadModelTab();
-  }
-  window.NFLE = Object.assign(window.NFLE || {}, { openPlayer, closePlayer, openTeam, showPlayer, showTeam, weights, weekData: () => DATA });  // shared with shell.js, table.js, area modules
+  // paintTiles / gameHref: the Matchups tab (assets/matchups.js) draws the tiles, then paints live games at once
+  window.NFLE = Object.assign(window.NFLE || {}, { openPlayer, closePlayer, openTeam, showPlayer, showTeam, weights,
+    weekData: () => DATA, paintTiles: () => { if (DATA) paintTiles(); }, gameHref });  // shared with shell.js, table.js, area modules
   if (CFG.page === 'game') initGame(); else initWeek();
 })();

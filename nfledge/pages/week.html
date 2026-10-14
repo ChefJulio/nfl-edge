@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>%TITLE%</title>
+<!-- Every week page (current, lookahead, archived) is this same shell: report.render fills the %TOKENS%; the week's
+     numbers are in the JSON next to it and every tab renders in the browser (assets/*.js). -->
+<link rel="stylesheet" href="%ROOT%assets/site.css?v=%V%">
+<link rel="stylesheet" href="%ROOT%assets/gamecast.css?v=%V%">
+<link rel="stylesheet" href="%ROOT%assets/shell.css?v=%V%">
+<link rel="stylesheet" href="%ROOT%assets/table.css?v=%V%">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="hdr">
+    <a class="brand" href="%ROOT%index.html#players" title="Current week's rankings"><h1>NFL <span>Edge</span></h1></a>
+    <div class="wk-nav">
+      <a class="wk-step" id="wkPrev" aria-label="Previous week" role="button">&lsaquo;</a>
+      <select id="pickWeek" aria-label="Season and week"></select>
+      <a class="wk-step" id="wkNext" aria-label="Next week" role="button">&rsaquo;</a>
+    </div>
+    <span class="wk-tag" id="wkTag" hidden></span>
+    <a class="wk-now" id="wkNow" href="%ROOT%index.html" hidden>Current week &rsaquo;</a>
+    <span id="livePill" class="live-pill" hidden></span>
+    <span class="hinfo-w" hidden><button type="button" class="hinfo" aria-label="Page details" aria-expanded="false">i</button>
+      <span class="hpop" role="tooltip"></span></span>
+  </div>
+  <p class="archived" id="wkNote" hidden></p>
+</div></header>
+<nav class="tabs"></nav>
+<main><div class="wrap">
+<section id="tab-players" class="on"><div class="sec-head"><div><h2>Weekly rankings</h2><p class="muted">Loading&hellip;</p></div></div></section>
+<section id="tab-games"></section>
+<section id="tab-power"></section>
+<section id="tab-roles"></section>
+<section id="tab-model"></section>
+</div></main>
+<footer><div class="wrap">nfl-edge &middot; nflverse, NFL.com practice reports, FantasyPros, ESPN, Open-Meteo &middot; for entertainment, not betting advice</div></footer>
+<script>window.NFLE_CFG = %CFG%;</script>
+<script src="%ROOT%assets/shell.js?v=%V%" defer></script>
+<script src="%ROOT%assets/table.js?v=%V%" defer></script>
+<script src="%ROOT%assets/gamecast.js?v=%V%" defer></script>
+</body>
+</html>

@@ -1,8 +1,8 @@
 // NFL Edge app shell: navigation (parent tabs + sub-tab chips) and hash routing.
 // Routes: #players/rankings, #teams/power, #games ... Old one-level hashes (#players, #games, #power, #roles,
 // #model) map onto the new routes; #player/<id>, #team/<abbr> and #g-<game> stay with gamecast.js (cards).
-// Server-rendered tabs keep their <section id="tab-..."> until their migration phase; tabs that don't exist yet get
-// a placeholder section. Loaded on every week page (current, lookahead, archived) from assets/, so nav changes
+// Every tab renders in the browser (Phase 6, 2026-10-14): the page is a static shell (nfledge/pages/week.html) plus
+// the week's JSON; sections not in the shell get a placeholder section here. Loaded on every week page (current, lookahead, archived) from assets/, so nav changes
 // reach archived weeks without a rebuild.
 // NFLE.load(path): lazy JSON loader with an in-memory cache, paths relative to the site root (the folder holding
 // assets/), so it works from index.html and from archived <season>/week-NN.html pages alike.
@@ -19,6 +19,91 @@
     }
     return cache.get(path);
   };
+  // The page's week data (loaded by gamecast.js): resolves once it is in, or null after 15 s (missing / failed).
+  NFLE.week = () => new Promise(ok => {
+    const t0 = Date.now();
+    const f = () => { const d = NFLE.weekData && NFLE.weekData(); if (d || Date.now() - t0 > 15000) ok(d || null); else setTimeout(f, 100); };
+    f();
+  });
+  // Shared cell helpers for the client-rendered tabs (same markup the old server template drew).
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  NFLE.esc = NFLE.esc || esc;
+  const f1 = v => v == null || isNaN(v) ? '' : (Math.round(v * 10) / 10).toFixed(1);
+  const logoSrc = (url, size) => !url ? '' : !/a\.espncdn\.com\/i\/teamlogos\//.test(url) ? url
+    : `https://a.espncdn.com/combiner/i?img=${encodeURIComponent(new URL(url).pathname)}&w=${Math.max(24, size * 3)}&h=${Math.max(24, size * 3)}`;
+  NFLE.fmt = {
+    f1, logoSrc,
+    sgn: v => v == null || isNaN(v) ? '' : Math.abs(v) < 0.05 ? '0.0' : `${v > 0 ? '+' : ''}${f1(v)}`,
+    pct: v => v == null || isNaN(v) ? '' : `${Math.round(v * 100)}%`,
+    ord: n => !n ? '' : `${n}${n % 100 >= 10 && n % 100 <= 20 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th')}`,
+    rkc: n => n <= 8 ? 'rk1' : n <= 16 ? 'rk2' : n <= 24 ? 'rk3' : 'rk4',  // league-rank badge color (top 8 green ... bottom 8 red)
+    posb: p => ['QB', 'RB', 'WR', 'TE', 'K', 'DST'].includes(p) ? `<span class="posb posb-${esc(p)}">${esc(p)}</span>` : esc(p),
+    short: n => { const i = String(n).indexOf(' '); return i < 0 ? String(n) : String(n).slice(i + 1); },  // 'Josh Allen' -> 'Allen'
+    // team logo on its picked background, and a row's team trim (--tc / --tc2), from the week data's teams map
+    logo: (teams, t, size = 18) => { const i = (teams || {})[t] || {}; return i.logo ? `<span class="logo" style="background:${esc(i.logo_bg || '#333')}"><img src="${esc(logoSrc(i.logo, size))}" alt="${esc(t)}" width="${size}" height="${size}" loading="lazy"></span>` : ''; },
+    rowStyle: (teams, t) => { const i = (teams || {})[t] || {}; return `--tc:${i.color || '#666'};--tc2:${i.color2 || '#999'};--tfg:#ffffff`; },
+  };
+})();
+// Week page header: the season / week picker (every week links to its own page; weeks.json at the site root lists
+// them, rewritten every build, so old pages list new weeks), where this page sits in time, and the page details.
+(() => {
+  const NFLE = window.NFLE, esc = NFLE.esc, CFG = window.NFLE_CFG || {};
+  const ws = document.getElementById('pickWeek');
+  if (!ws || CFG.page !== 'week') return;
+  const prev = document.getElementById('wkPrev'), next = document.getElementById('wkNext');
+  const here = `${CFG.season}-${CFG.week}`;
+  const narrow = matchMedia('(max-width: 420px)').matches;  // phones: "2026 · Wk 6" keeps the header on one row
+  let seasons = { [CFG.season]: { [CFG.week]: location.pathname } };
+  const href = p => new URL(p, NFLE.root).href;
+  const fill = () => {
+    const years = Object.keys(seasons).sort((a, b) => b - a);
+    ws.replaceChildren(...years.map(y => {
+      const g = document.createElement('optgroup'); g.label = y;
+      Object.keys(seasons[y]).sort((a, b) => a - b).forEach(w => g.appendChild(new Option(`${y} · ${narrow ? 'Wk' : 'Week'} ${w}`, `${y}-${w}`)));
+      return g;
+    }));
+    ws.value = here;
+    const order = Object.keys(seasons).sort((a, b) => a - b).flatMap(y => Object.keys(seasons[y]).sort((a, b) => a - b).map(w => [y, w]));
+    const i = order.findIndex(([y, w]) => `${y}-${w}` === here);
+    [[prev, i > 0 ? order[i - 1] : null], [next, i >= 0 ? order[i + 1] : null]].forEach(([a, t]) => {
+      a.classList.toggle('off', !t);
+      if (t) { a.dataset.to = href(seasons[t[0]][t[1]]); a.href = a.dataset.to + location.hash; a.title = `${t[0]} week ${t[1]}`; }
+      else a.removeAttribute('href');
+    });
+  };
+  fill();
+  NFLE.load('weeks.json').then(j => { seasons = j; fill(); }).catch(() => {});
+  // the tab (hash) carries over, so you stay on the same view
+  [prev, next].forEach(a => a.addEventListener('click', () => { if (a.dataset.to) a.href = a.dataset.to + location.hash; }));
+  ws.onchange = () => { const [y, w] = ws.value.split('-'); location.href = href(seasons[y][w]) + location.hash; };
+  const tag = document.getElementById('wkTag');
+  const [cls, txt] = CFG.archive ? ['past', 'Past week'] : CFG.lookahead ? ['ahead', 'Upcoming'] : ['now', 'This week'];
+  tag.className = `wk-tag ${cls}`; tag.textContent = txt; tag.hidden = false;
+  document.getElementById('wkNow').hidden = !!CFG.current;
+  const note = document.getElementById('wkNote');
+  if (CFG.archive) { note.textContent = 'Projected before kickoff with only the data available then; actual results alongside.'; note.hidden = false; }
+  else if (CFG.lookahead) {
+    note.textContent = `${CFG.lookahead} week${CFG.lookahead > 1 ? 's' : ''} out: projected from games so far, no injury report or weather yet. Less certain the further out.`;
+    note.title = 'Everyone on the active roster is assumed healthy (injured reserve stays out) and weather is neutral; Vegas lines are used once posted.';
+    note.hidden = false;
+  }
+  // Page details: a tooltip on the (i) (hover on desktop, tap on phones); amber while the injury report is pending.
+  const hw = document.querySelector('.hinfo-w'), hb = hw.querySelector('.hinfo');
+  NFLE.week().then(D => {
+    if (!D || !D.head) return;
+    const h = D.head, live = !(CFG.archive || CFG.lookahead), pending = live && !h.injury_report;
+    const sc = h.scoring === 'half' ? 'Half PPR' : h.scoring === 'ppr' ? 'PPR' : String(h.scoring || '').replace(/^./, c => c.toUpperCase());
+    hw.querySelector('.hpop').innerHTML = [
+      `<span>Data through <b>week ${esc(h.data_week)}</b>${CFG.lookahead ? ' (all games played so far)' : ''}</span>`,
+      h.n_final ? `<span><b>${h.n_final} of ${h.n_games}</b> games final</span>` : '',
+      `<span>Scoring <b id="scoreName">${esc(sc)}</b></span>`,
+      pending ? '<span class="alert">Injury report pending: last week\'s statuses (and early ESPN injury news) are used</span>' : live ? '<span>Injury report <b>in</b></span>' : '',
+      `<span>Updated ${esc(D.generated || '')}</span>`].join('');
+    hb.classList.toggle('warn', pending);
+    hw.hidden = false;
+  });
+  hb.addEventListener('click', e => { e.stopPropagation(); const on = hw.classList.toggle('open'); hb.setAttribute('aria-expanded', on); });
+  document.addEventListener('click', e => { if (!hw.contains(e.target)) { hw.classList.remove('open'); hb.setAttribute('aria-expanded', 'false'); } });
 })();
 (() => {
   // Four parents (owner, 2026-10-14): Players (incl. transactions = player news) and Teams (incl. playoffs, draft).
@@ -32,7 +117,8 @@
   // A module registers NFLE.areas[<area>] = { mount(section) } and renders into its section.
   const AREAS = { 'tab-teams-standings': 'standings', 'tab-teams-stats': 'teamstats', 'tab-players-stats': 'playerstats',
                   'tab-players-injuries': 'injuries', 'tab-players': 'rankings', 'tab-teams-draft': 'draft',
-                  'tab-teams-playoffs': 'playoffs', 'tab-players-moves': 'moves' };
+                  'tab-teams-playoffs': 'playoffs', 'tab-players-moves': 'moves', 'tab-power': 'power',
+                  'tab-games': 'matchups', 'tab-roles': 'roles', 'tab-model': 'model' };
   const ver = (document.currentScript && new URL(document.currentScript.src).search) || '';
   const loaded = {};
   const NFLE = window.NFLE = window.NFLE || {};

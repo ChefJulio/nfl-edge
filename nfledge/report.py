@@ -10,13 +10,12 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from . import elo
 from .config import ROOT
 from .team_model import UNITS, game_lines, team_volume_features
 
-TEMPLATE_DIR = Path(__file__).parent / "templates"
+PAGES_DIR = Path(__file__).parent / "pages"  # page shells (plain HTML with %TOKENS%, filled by render)
 LEAGUE_PASS_SHARE = 0.58  # weight of pass vs rush when combining unit ratings into one number
 
 
@@ -27,21 +26,6 @@ LEAGUE_PASS_SHARE = 0.58  # weight of pass vs rush when combining unit ratings i
 def per100(x):
   """EPA/play -> points per 100 plays (the unit shown everywhere)."""
   return 100.0 * x
-
-
-def sparkline(values, width=90, height=22) -> str:
-  v = [x for x in values if pd.notna(x)]
-  if len(v) < 2:
-    return ""
-  lo, hi = min(v), max(v)
-  span = (hi - lo) or 1.0
-  pts = " ".join(f"{i * width / (len(v) - 1):.1f},{height - 2 - (x - lo) / span * (height - 4):.1f}"
-                 for i, x in enumerate(v))
-  last = v[-1]
-  cy = height - 2 - (last - lo) / span * (height - 4)
-  return (f'<svg class="spark" viewBox="0 0 {width} {height}" width="{width}" height="{height}" aria-hidden="true">'
-          f'<polyline points="{pts}" fill="none" stroke="currentColor" stroke-width="1.5"/>'
-          f'<circle cx="{width:.1f}" cy="{cy:.1f}" r="2.2" fill="currentColor"/></svg>')
 
 
 def roster_tiers(p: pd.DataFrame, tiers: dict) -> tuple[list, list]:
@@ -240,9 +224,6 @@ def week_bars(weeks: list, n_weeks: int, width=150, height=34) -> str:
 POSITIONS_ALL = ("QB", "RB", "WR", "TE")
 
 
-def pos_badge(pos: str) -> str:
-  """Position badge, one color per position across the site."""
-  return f'<span class="posb posb-{pos}">{pos}</span>' if pos in POSITIONS_ALL else str(pos)
 
 
 def stat(v, unit, digits=0) -> str:
@@ -528,8 +509,6 @@ def matchup_marks(eng, p: pd.DataFrame, season: int, week: int) -> tuple[pd.Seri
   return mu, hi, pd.Series([color(m, sh) for m, sh in zip(mu, shift)], index=p.index)
 
 
-def ordinal(n: int) -> str:
-  return f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
 
 
 def _num(r, col: str, nd: int = 2) -> float | None:
@@ -621,12 +600,20 @@ def week_data(ctx: dict) -> str:
   pkeys = ("team", "nick", "record", "rank", "move", "range", "net", "off", "def", "st", "pass_o", "rush_o", "pass_d",
            "rush_d", "net_rk", "off_rk", "def_rk", "st_rk", "pass_o_rk", "rush_o_rk", "pass_d_rk", "rush_d_rk",
            "pass_o_pp", "rush_o_pp", "pass_d_pp", "rush_d_pp", "sos_past", "sos_past_rk", "sos_next", "sos_next_rk",
-           "rank_hist")
+           "sos_past_o", "sos_past_d", "sos_next_o", "sos_next_d", "rank_hist", "net_hist")
   power = [{k: r.get(k) for k in pkeys} for r in ctx.get("power") or []]
   out = {"season": ctx["season"], "week": ctx["week"], "generated": ctx["generated"], "archive": ctx["archive"],
          "power": power, "teams": ctx.get("teams", {}),
          "lookahead": ctx["lookahead"], "tossup_pct": ctx["tossup_pct"], "espn_team": ESPN_TEAM,
-         "score": json.loads(ctx["score_cfg"]), "players": players, "games": games, "rk": rk, "v": 2}
+         "score": json.loads(ctx["score_cfg"]), "players": players, "games": games, "rk": rk,
+         # v3 (Phase 6): everything the page used to render on the server - Roles, the Power column scale, the header
+         "roles": [{k: r.get(k) for k in ("pid", "name", "pos", "team", "week", "snap_now", "snap_prev", "opp_now",
+                                          "opp_prev", "touches", "takeaway")} for r in ctx.get("roles") or []],
+         "power_vol": ctx.get("power_vol"),
+         "head": {"data_week": ctx["data_week"], "n_final": ctx["n_final"], "n_games": ctx["n_games"],
+                  "injury_report": bool(ctx["injury_report"]), "scoring": ctx["scoring"],
+                  "has_actuals": bool(ctx.get("has_actuals"))},
+         "v": 3}
   # Browsers reject NaN / Infinity in JSON (Python writes them happily), and one bad value makes the whole file
   # unreadable: e.g. sos_past is NaN in week 1 and sos_next on archived weeks. Non-finite numbers become null.
   return json.dumps(_json_safe(out), separators=(",", ":"), allow_nan=False)
@@ -997,7 +984,7 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
     move = int(prev_rank[team] - ranks["net"][team]) if prev_rank is not None and team in prev_rank else 0
     sp = sos.loc[team] if team in sos.index else pd.Series(dtype=float)
     rows.append({
-      "team": team, "nick": ts.nick.get(team, ""), "logo": ts.logo_img(team, 26), "row_style": ts.row_style(team),
+      "team": team, "nick": ts.nick.get(team, ""),
       "record": rec.get(team, ""), "rank": int(ranks["net"][team]), "move": move,
       "range": f"{lo[team]}-{hi[team]}" if lo[team] != hi[team] else f"{lo[team]}",
       **{c: float(u.at[team, c]) for c in u.columns},
@@ -1008,7 +995,7 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
       "sos_next": float(sp.get("next", np.nan)), "sos_next_rk": int(sos_rk["next"].get(team, 0)),
       "sos_past_o": float(sp.get("off_past", np.nan)), "sos_past_d": float(sp.get("def_past", np.nan)),
       "sos_next_o": float(sp.get("off_next", np.nan)), "sos_next_d": float(sp.get("def_next", np.nan)),
-      "spark": sparkline(hist.loc[team].tolist(), width=84, height=22) if team in hist.index else "",
+      "net_hist": [round(float(x), 2) for x in hist.loc[team].tolist() if pd.notna(x)] if team in hist.index else [],
       # this week's point is the headline rank (bootstrap fit + projected starters), so trend and header agree
       "rank_hist": {**({int(w): int(v) for w, v in hist_rk.loc[team].items() if pd.notna(v)} if team in hist_rk.index else {}),
                     int(week): int(ranks["net"][team])},
@@ -1016,10 +1003,6 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
   return sorted(rows, key=lambda x: x["rank"])
 
 
-def net_rating(r) -> pd.Series:
-  off = LEAGUE_PASS_SHARE * r.off["pass"] + (1 - LEAGUE_PASS_SHARE) * r.off["rush"]
-  dfn = LEAGUE_PASS_SHARE * r.dfn["pass"] + (1 - LEAGUE_PASS_SHARE) * r.dfn["rush"]
-  return off - dfn + (r.off["st"] - r.dfn["st"]) * 0.18  # ST plays are ~18% as frequent as scrimmage plays
 
 
 def spread_text(fav: str, margin: float) -> str:
@@ -1044,15 +1027,6 @@ def kickoff_text(gameday, gametime) -> str:
       return str(gameday)
 
 
-def diverging_bar(v: float, scale: float, width: int = 120) -> str:
-  """Centered bar: right/green for positive, left/red for negative, clipped at +/-scale."""
-  if v is None or pd.isna(v) or not scale:
-    return ""
-  frac = max(-1.0, min(1.0, v / scale)) * 0.5
-  left = 50 if frac >= 0 else 50 + frac * 100
-  cls = "pos" if v >= 0 else "neg"
-  return (f'<span class="dbar" style="width:{width}px"><span class="dbar-mid"></span>'
-          f'<span class="dbar-fill {cls}" style="left:{left:.1f}%;width:{abs(frac) * 100:.1f}%"></span></span>')
 
 
 UNIT_NAME = {"pass": "Pass", "rush": "Run"}
@@ -1358,7 +1332,6 @@ def role_changes(eng, season: int, week: int, cfg: dict) -> list:
   last_team_week = L.groupby("team").week.max()
   out = []
   thr_s, thr_o = cfg["player_model"]["role_change_snap_jump"], cfg["player_model"]["role_change_opp_jump"]
-  ts = TeamStyle(eng.data.teams)
   for gid, g in L.sort_values("week").groupby("gsis_id"):
     last = g.iloc[-1]
     if last.week != last_team_week.get(last.team):
@@ -1371,7 +1344,6 @@ def role_changes(eng, season: int, week: int, cfg: dict) -> list:
     if (pd.notna(ds) and ds >= thr_s) or (pd.notna(do) and do >= thr_o):
       name = eng.pm.info.full_name.get(gid, gid)
       out.append({"name": name, "pid": gid, "pos": last.pos, "team": last.team, "week": int(last.week),
-                  "row_style": ts.row_style(last.team), "logo": ts.logo_img(last.team),
                   "snap_now": last.offense_pct, "snap_prev": prev_snap, "opp_now": last.opp_share,
                   "opp_prev": prev_opp, "touches": int(last.carries + last.tgt), "score": (ds or 0) + 2 * (do or 0),
                   "takeaway": role_takeaway(last.offense_pct or 0, last.opp_share or 0, int(last.carries + last.tgt))})
@@ -1404,20 +1376,8 @@ def backtest_summary(ev: pd.DataFrame | None) -> list:
 # Render
 # ----------------------------------------------------------------------------------------------------------------
 
-def name_parts(name: str) -> tuple[str, str, str]:
-  """'Josh Allen' -> ('J', 'osh', 'Allen'); 'A.J. Brown' -> ('A', '.J.', 'Brown'). The pinned name column shows all
-  three, and the middle part folds away as the table scrolls sideways ('J. Allen'). One-word names: (name, '', '')."""
-  first, _, last = str(name).partition(" ")
-  if not last:
-    return str(name), "", ""
-  return first[:1], first[1:], last
 
 
-def short_name(name: str) -> str:
-  """'Josh Allen' -> 'Allen', 'Amon-Ra St. Brown' -> 'St. Brown' (the compact pinned column; the team logo beside
-  it tells same-name players apart)."""
-  parts = str(name).split(" ", 1)
-  return parts[1] if len(parts) == 2 and parts[1] else str(name)
 
 
 def past_projections(root_dir: Path, season: int, week: int, n: int = 8) -> dict:
@@ -1438,25 +1398,21 @@ def past_projections(root_dir: Path, season: int, week: int, n: int = 8) -> dict
   return out
 
 
+def page_html(name: str, **tokens) -> str:
+  """A page shell from nfledge/pages/ with its %TOKENS% filled (plain replacement: the pages hold no logic)."""
+  out = (PAGES_DIR / name).read_text(encoding="utf-8")
+  for k, v in tokens.items():
+    out = out.replace(f"%{k}%", str(v))
+  return out
+
+
 def render(ctx: dict, out_path: Path) -> Path:
-  env = Environment(loader=FileSystemLoader(TEMPLATE_DIR), autoescape=select_autoescape(["html", "j2"]))
-  env.filters["f0"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.0f}"
-  env.filters["f1"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.1f}"
-  env.filters["f2"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.2f}"
-  env.filters["f3"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.3f}"
-  env.filters["sgn"] = lambda x: "" if x is None or pd.isna(x) else "0.0" if abs(x) < 0.05 else f"{x:+.1f}"
-  env.filters["dbar"] = lambda v, scale=10.0, width=120: diverging_bar(v, scale, width)
-  env.filters["abs"] = lambda v: abs(v) if v is not None and not pd.isna(v) else 0
-  env.filters["ord"] = lambda n: "" if not n else f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
-  env.filters["rkc"] = lambda n: "rk1" if n <= 8 else "rk2" if n <= 16 else "rk3" if n <= 24 else "rk4"
-  env.filters["posb"] = pos_badge
-  env.filters["pct"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.0%}"
-  env.filters["short"] = short_name
-  env.filters["nameparts"] = name_parts
-  env.filters["logosrc"] = logo_src
+  """Write one week: the page shell (<page>.html, the same for every week) and its numbers (<page>.json), plus the
+  shared site files (assets/, game.html; the current week also writes data/model.json and weeks.json)."""
   # Site root relative to this page ("" for index.html, "../" for <season>/week-NN.html): shared assets, the game
   # page and this week's data file are addressed from there.
-  root = ctx["nav"]["current_href"][:-len("index.html")]
+  nav = ctx["nav"]
+  root = nav["current_href"][:-len("index.html")]
   out_path.parent.mkdir(parents=True, exist_ok=True)
   root_dir = (out_path.parent / root).resolve()
   data_rel = out_path.resolve().relative_to(root_dir).with_suffix(".json").as_posix()
@@ -1465,12 +1421,19 @@ def render(ctx: dict, out_path: Path) -> Path:
   for block in ctx["players"].values():
     for r in block["rows"]:
       r["pjw"] = json.dumps(past.get(r["pid"], {}), separators=(",", ":"))
-  html_out = env.get_template("report.html.j2").render(**ctx, root=root, data_rel=data_rel, asset_v=asset_version())
-  out_path.write_text(html_out, encoding="utf-8")
+  cfg = {"page": "week", "root": root, "data": data_rel, "season": ctx["season"], "week": ctx["week"],
+         "current": bool(nav["is_current"] and not ctx["lookahead"] and not ctx["archive"]),
+         "archive": bool(ctx["archive"]), "lookahead": int(ctx["lookahead"] or 0)}
+  out_path.write_text(page_html("week.html", TITLE=f"NFL Edge · {ctx['season']} Week {ctx['week']}", ROOT=root,
+                                V=asset_version(), CFG=json.dumps(cfg, separators=(",", ":"))), encoding="utf-8")
   out_path.with_suffix(".json").write_text(week_data(ctx), encoding="utf-8")
-  write_site_assets(root_dir, env)
-  if ctx.get("model_doc"):  # the current week: its Model tab is the one every other week's page loads
-    (root_dir / "model.html").write_text(env.get_template("model_tab.html.j2").render(**ctx), encoding="utf-8")
+  write_site_assets(root_dir)
+  if ctx.get("model_doc"):  # the current week: its Model tab text is the one every week's page shows
+    (root_dir / "data").mkdir(exist_ok=True)
+    (root_dir / "data" / "model.json").write_text(json.dumps(_json_safe({**ctx["model_doc"], "track": ctx.get("track")}),
+                                                             separators=(",", ":")), encoding="utf-8")
+  if nav["is_current"] and not root:  # the picker's week list (root-relative paths)
+    (root_dir / "weeks.json").write_text(json.dumps(nav["seasons"], separators=(",", ":")), encoding="utf-8")
   return out_path
 
 
@@ -1488,7 +1451,7 @@ def asset_version() -> str:
   return h.hexdigest()[:10]
 
 
-def write_site_assets(root_dir: Path, env) -> None:
+def write_site_assets(root_dir: Path) -> None:
   """Shared files at the site root: the game page and the live / player-card / gamecast script and styles. Every
   week page (current, lookahead and archived) links to these, so improvements reach old pages without rebuilding
   them."""
@@ -1496,4 +1459,4 @@ def write_site_assets(root_dir: Path, env) -> None:
   for f in STATIC_DIR.iterdir():
     if f.is_file():
       (root_dir / "assets" / f.name).write_bytes(f.read_bytes())
-  (root_dir / "game.html").write_text(env.get_template("game.html.j2").render(asset_v=asset_version()), encoding="utf-8")
+  (root_dir / "game.html").write_text(page_html("game.html", V=asset_version()), encoding="utf-8")

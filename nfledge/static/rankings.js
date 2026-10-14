@@ -12,21 +12,17 @@
   const f1 = v => v == null || isNaN(v) ? '' : (Math.round(v * 10) / 10).toFixed(1);
   const sgn = v => v == null ? '' : Math.abs(v) < 0.05 ? '0.0' : `${v > 0 ? '+' : ''}${f1(v)}`;
   const nameParts = n => { const i = String(n).indexOf(' '); return i < 0 ? [n, '', ''] : [n[0], n.slice(1, i), n.slice(i + 1)]; };
-  const logoSrc = (url, size) => !url ? '' : !/a\.espncdn\.com\/i\/teamlogos\//.test(url) ? url
-    : `https://a.espncdn.com/combiner/i?img=${encodeURIComponent(new URL(url).pathname)}&w=${size * 3}&h=${size * 3}`;
 
   NFLE.areas.rankings = {
     mount(sec) {
-      const week = () => new Promise(ok => { const t0 = Date.now(); const f = () => { const d = NFLE.weekData && NFLE.weekData(); if (d || Date.now() - t0 > 15000) ok(d || null); else setTimeout(f, 100); }; f(); });
-      week().then(D => { if (D && D.rk) build(sec, D); });
+      NFLE.week().then(D => { if (D && D.rk) build(sec, D); });
     },
   };
 
   function build(sec, D) {
     const SC = D.score, RK = D.rk, TEAMS = D.teams || {};
     const nweek = (D.week || 1) - 1;
-    const logo = (t, size) => { const i = TEAMS[t] || {}; return i.logo ? `<span class="logo" style="background:${esc(i.logo_bg || '#333')}"><img src="${esc(logoSrc(i.logo, size))}" alt="${esc(t)}" width="${size}" height="${size}" loading="lazy"></span>` : ''; };
-    const rowStyle = t => { const i = TEAMS[t] || {}; return `--tc:${i.color || '#666'};--tc2:${i.color2 || '#999'};--tfg:#ffffff`; };
+    const logo = (t, size) => NFLE.fmt.logo(TEAMS, t, size), rowStyle = t => NFLE.fmt.rowStyle(TEAMS, t);
     const defaults = () => ({ preset: 'Half PPR', w: { ...SC.presets['Half PPR'] }, lg: { teams: SC.league.teams, ...SC.league.starters, flex: SC.league.flex, superflex: 0 } });
     let state = defaults();
     try { const s = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (s && s.w && s.lg) state = s; } catch (e) { /* default */ }

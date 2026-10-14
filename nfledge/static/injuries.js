@@ -36,9 +36,8 @@
           rowAttrs: r => r.pid ? `data-open-pid="${esc(r.pid)}"` : '' });
         else table.update(rows());
       };
-      // the page's week data (our availability) loads on its own: wait for it, up to 10 s
-      const week = () => new Promise(ok => { const t0 = Date.now(); const f = () => { const d = NFLE.weekData && NFLE.weekData(); if (d || Date.now() - t0 > 10000) ok(d || null); else setTimeout(f, 150); }; f(); });
-      Promise.all([NFLE.load('data/espn_injuries/latest.json'), week()]).then(([d, wk]) => {
+      // the page's week data (our availability) loads on its own (NFLE.week waits for it)
+      Promise.all([NFLE.load('data/espn_injuries/latest.json'), NFLE.week()]).then(([d, wk]) => {
         const byEspn = {}, nameToAbbr = {};
         if (wk) {
           Object.entries(wk.players || {}).forEach(([pid, p]) => { if (p.espn) byEspn[String(p.espn)] = [pid, p]; });
