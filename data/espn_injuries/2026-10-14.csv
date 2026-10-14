@@ -74,6 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3915189,Roquan Smith,Baltimore Ravens,Active,2026-10-07T01:04Z,,,,,,Smith recorded six total tackles (one solo) during Sunday's 24-18 win over the Titans.
 4430831,Trenton Simpson,Baltimore Ravens,Active,2026-10-07T00:59Z,,,,,,Simpson recorded nine total tackles (two solo) and an interception during Sunday's 24-18 win over Tennessee.
 4696882,Devontez Walker,Baltimore Ravens,Active,2026-10-06T04:00Z,,,,,,Walker caught one of his two targets for 19 yards during Baltimore's win over the Titans on Sunday.
+3915487,Mike Danna,Buffalo Bills,Active,2026-10-14T02:21Z,,,,,,Danna re-signed with the Bills on Tuesday.
 3915411,Ty Johnson,Buffalo Bills,Active,2026-10-14T00:28Z,,,,,,Johnson caught all four of his targets for 72 yards during the Bills' 37-34 overtime win over the Rams on Monday.
 4635008,Keon Coleman,Buffalo Bills,Active,2026-10-13T23:25Z,,,,,,Coleman caught a seven-yard touchdown pass (on two targets) during the Bills' 37-34 overtime win over the Rams on Monday.
 3915416,DJ Moore,Buffalo Bills,Questionable,2026-10-13T17:10Z,Shoulder - AC Joint,Sprain,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -98,7 +99,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5076951,Jalon Kilgore,Buffalo Bills,Active,2026-10-05T18:30Z,,,,,,
 3917232,Tyler Bass,Buffalo Bills,Active,2026-10-05T02:01Z,,,,,,Bass went 2-for-2 on field-goal attempts and made both of his PATs during Sunday's 29-26 loss to the Patriots.
 4427348,Te'Cory Couch,Buffalo Bills,Questionable,2026-10-04T18:51Z,Hamstring,Not Specified,Not Specified,2026-10-12,QUESTIONABLE,Couch suffered a hamstring injury Sunday versus New England and is doubtful to return.
-4044133,Sam Franklin Jr.,Buffalo Bills,Active,2026-10-04T07:56Z,,,,,,
 2973051,Taylor Moton,Carolina Panthers,Out,2026-10-14T01:24Z,Illness,Not Specified,Not Specified,2026-10-18,NFI-R,"The Panthers activated Moton (illness) off the reserve/non-football illness list Tuesday, Darin Gantt of the team's official site reports."
 4687513,Cam Jackson,Carolina Panthers,Injured Reserve,2026-10-14T01:16Z,Shoulder,Surgery,Not Specified,2027-02-15,IR,"The Panthers placed Jackson (shoulder) on injured reserve Tuesday, Darin Gantt of the team's official site reports."
 4058925,Tershawn Wharton,Carolina Panthers,Out,2026-10-13T21:01Z,Neck,Surgery,Not Specified,2026-10-18,PUP-R,The Panthers designated Wharton (neck) to return from reserve/PUP list Tuesday.
@@ -249,6 +249,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3929914,Adam Prentice,Denver Broncos,Active,2026-10-03T23:03Z,,,,,,"The Broncos signed Prentice from their practice squad to their 53-man roster Saturday, Aric DiLalla of the team's official site reports."
 4039059,Brandon Jones,Denver Broncos,Active,2026-10-01T01:34Z,,,,,,Jones posted 12 tackles (10 solo) and one pass defense during the Broncos' 30-26 win over the Rams on Sunday.
 4686472,Marvin Mims Jr.,Denver Broncos,Active,2026-09-30T22:44Z,,,,,,Mims (foot) was a full participant in Wednesday's practice.
+5123663,Isaac TeSlaa,Detroit Lions,Active,2026-10-14T02:28Z,,,,,,TeSlaa failed to haul in either of his two targets during the Lions' 45-21 win over the Cardinals on Sunday.
 3910229,Rock Ya-Sin,Detroit Lions,Questionable,2026-10-13T17:10Z,Hamstring,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4611506,Ben Bartch,Detroit Lions,Questionable,2026-10-13T17:10Z,Foot,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4035434,Devin White,Detroit Lions,Doubtful,2026-10-12T23:37Z,Forearm,Surgery,Not Specified,2026-10-25,DOUBTFUL,"Head coach Dan Campbell confirmed Monday that White (forearm) will need surgery but is expected to return ""at some point"" later this season, Richard Silva of The Detroit News reports."
@@ -273,7 +274,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3139387,D.J. Reed,Detroit Lions,Active,2026-10-04T23:18Z,,,,,,Reed (ribs) is active for Sunday night's matchup with the Panthers.
 4260409,Derrick Barnes,Detroit Lions,Active,2026-09-30T03:46Z,,,,,,Barnes registered eight tackles (five solo) and a defensed pass Sunday in a 31-24 victory against the Jets.
 3045463,Chuck Clark,Detroit Lions,Active,2026-09-30T03:37Z,,,,,,"Clark finished Sunday's 31-24 win over the Jets with seven tackles, including 1.0 sacks, and a forced fumble."
-5123663,Isaac TeSlaa,Detroit Lions,Active,2026-09-30T01:25Z,,,,,,TeSlaa caught all three of his targets for 66 yards in the Lions' 31-24 win over the Jets on Sunday.
 4428037,Jacob Monk,Green Bay Packers,Questionable,2026-10-13T17:10Z,Quadriceps,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4242390,Aaron Banks,Green Bay Packers,Questionable,2026-10-13T17:10Z,Toe,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4887255,Anthony Campbell,Green Bay Packers,Questionable,2026-10-13T17:10Z,Ankle,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -449,8 +449,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242283,Rashawn Slater,Los Angeles Chargers,Injured Reserve,2026-10-10T02:51Z,Ankle,Sprain,Not Specified,2026-11-16,IR,The Chargers placed Slater (ankle) on injured reserve Friday.
 2979860,Dalvin Tomlinson,Los Angeles Chargers,Active,2026-10-10T00:41Z,,,,,,Tomlinson (hamstring) doesn't have an injury designation for Sunday's game against the Broncos.
 4690171,Deane Leonard,Los Angeles Chargers,Active,2026-10-09T21:19Z,,,,,,
+4036135,Alaric Jackson,Los Angeles Rams,Suspension,2026-10-14T02:29Z,Suspension,,,2026-11-01,RESERVE-SUS,"Jackson has been suspended two games as a result of his involvement in a postgame altercation following Monday night's 37-34 overtime loss to the Bills, Mike Garafolo of NFL Network reports."
 3122132,Myles Garrett,Los Angeles Rams,Injured Reserve,2026-10-14T01:14Z,Knee,Surgery,Left,2026-10-25,IR,"Head coach Sean McVay told reporters Tuesday that Garrett (knee) will not return to practice this week and will not play against the Cardinals on Sunday, Cameron DaSilva of USA Today reports."
-4036135,Alaric Jackson,Los Angeles Rams,Suspension,2026-10-13T23:05Z,Suspension,,,2026-11-01,RESERVE-SUS,suspension
 4259619,Blake Grupe,Los Angeles Rams,Active,2026-10-13T18:02Z,,,,,,"The Rams signed Grupe off the Jets' practice squad Tuesday, Mike Garafolo of NFL Network reports."
 4240123,Larrell Murchison,Los Angeles Rams,Active,2026-10-13T17:06Z,,,,,,
 3912189,Bill Murray,Los Angeles Rams,Active,2026-10-13T17:06Z,,,,,,
@@ -699,6 +699,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685523,Ephesians Prysock,San Francisco 49ers,Active,2026-10-05T19:03Z,,,,,,
 4685397,Jordan James,San Francisco 49ers,Active,2026-10-04T19:22Z,,,,,,James (coach's decision) is inactive against Denver on Sunday.
 4243493,Keion White,San Francisco 49ers,Active,2026-10-04T19:00Z,,,,,,
+2977187,Cooper Kupp,Seattle Seahawks,Active,2026-10-14T02:20Z,,,,,,Kupp caught two of three passes for 15 yards during Sunday's 32-29 loss to the 49ers.
 3924327,Drew Lock,Seattle Seahawks,Questionable,2026-10-14T00:20Z,Forearm,Not Specified,Right,2026-10-15,QUESTIONABLE,"The Seahawks listed Lock (forearm) as a limited practice participant on Tuesday's estimated report, Curtis Crabtree of Fox 13 Seattle reports."
 4426385,Zach Charbonnet,Seattle Seahawks,Out,2026-10-14T00:15Z,Knee - ACL,Surgery,Left,2026-10-25,PUP-R,"Charbonnet (knee) was estimated as a limited practice participant Tuesday, Curtis Crabtree of Fox 13 Seattle reports."
 4592823,Beau Stephens,Seattle Seahawks,Active,2026-10-14T00:01Z,,,,,,
@@ -723,7 +724,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686540,Tyrice Knight,Seattle Seahawks,Active,2026-10-08T23:10Z,,,,,,
 4247808,Ty Okada,Seattle Seahawks,Active,2026-10-07T23:59Z,,,,,,"Okada (hamstring) was a full participant in Wednesday's practice, John Boyle of the Seahawks' official site reports."
 4869523,Nick Emmanwori,Seattle Seahawks,Active,2026-10-07T01:25Z,,,,,,"Emmanwori registered nine total tackles (eight solo), including 1.0 sacks, and added a pass defensed during Sunday's 30-23 win over the Chargers."
-4362851,Ernest Jones IV,Seattle Seahawks,Active,2026-10-07T01:16Z,,,,,,"Jones recorded 12 total tackles (six solo), including 1.0 sacks, and added an interception during Sunday's 30-23 win over the Chargers."
 4034790,Antoine Winfield Jr.,Tampa Bay Buccaneers,Doubtful,2026-10-13T17:10Z,Ribs,Fracture,Not Specified,2026-10-18,DOUBTFUL,doubtful
 4816107,Benjamin Morrison,Tampa Bay Buccaneers,Questionable,2026-10-13T17:10Z,Quadriceps,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4429511,SirVocea Dennis,Tampa Bay Buccaneers,Questionable,2026-10-13T17:10Z,Ankle,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
