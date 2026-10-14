@@ -50,7 +50,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3043275,Austin Hooper,Atlanta Falcons,Active,2026-10-07T00:10Z,,,,,,Hooper caught his only target for nine yards during Monday's 45-24 win at New Orleans.
 4870612,Zachariah Branch,Atlanta Falcons,Active,2026-10-07T00:02Z,,,,,,Branch caught both of his targets for 10 yards while also adding 65 kickoff-return yards and 25 yards as a punt returner during Monday night's 45-24 win over the Saints.
 3916387,Lamar Jackson,Baltimore Ravens,Questionable,2026-10-14T13:40Z,Ankle,Sprain,Left,2026-10-18,QUESTIONABLE,"Jackson (ankle) ""has a realistic chance"" to return to action Sunday against the Browns, Adam Schefter of ESPN reports."
-4870847,Ja'Kobi Lane,Baltimore Ravens,Injured Reserve,2026-10-14T13:18Z,Wrist,Surgery,Left,2026-10-18,IR,"Lane (wrist) ""is expected to return to practice"" and per head coach Jesse Minter ""has a shot"" to play Sunday against the Browns, Mike Garafolo of NFL Network reports."
+4870847,Ja'Kobi Lane,Baltimore Ravens,Injured Reserve,2026-10-14T13:18Z,Wrist,Surgery,Left,2026-10-18,IR,"Lane (wrist) ""is expected to return to practice,"" and per head coach Jesse Minter ""has a shot"" to play Sunday against the Browns, Mike Garafolo of NFL Network reports."
 4038441,Justice Hill,Baltimore Ravens,Active,2026-10-14T02:01Z,,,,,,Hill turned four carries into 73 yards and caught two of four targets for five yards during the Ravens' 30-23 overtime win over the Falcons on Sunday.
 4360939,Rashod Bateman,Baltimore Ravens,Active,2026-10-13T23:43Z,,,,,,Bateman caught five of six passes for 62 yards during the Ravens' 30-23 overtime win over the Falcons on Sunday.
 4243220,Andrew Vorhees,Baltimore Ravens,Questionable,2026-10-13T17:10Z,Foot,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -141,7 +141,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431299,Rome Odunze,Chicago Bears,Active,2026-10-11T22:34Z,,,,,,Odunze brought in three of nine targets for 40 yards in the Bears' 31-7 loss to the Packers on Sunday. He also lost a fumble.
 4685278,Luther Burden III,Chicago Bears,Active,2026-10-11T22:25Z,,,,,,Burden secured four of six targets for 47 yards and rushed four times for two yards in the Bears' 31-7 loss to the Packers on Sunday.
 4259545,D'Andre Swift,Chicago Bears,Active,2026-10-11T21:50Z,,,,,,Swift rushed nine times for 43 yards and a touchdown and brought in four of five targets for 30 yards in the Bears' 31-7 loss to the Packers on Sunday.
-4242659,Dayo Odeyingbo,Chicago Bears,Questionable,2026-10-11T20:03Z,Quadriceps,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Odeyingbo (quadriceps) is doubtful to return to Sunday's game against the Packers.
+4242659,Dayo Odeyingbo,Chicago Bears,Questionable,2026-10-11T20:03Z,Quadriceps,Not Specified,Not Specified,2026-10-22,OUT,Odeyingbo (quadriceps) is doubtful to return to Sunday's game against the Packers.
 4426374,Tyrique Stevenson Sr.,Chicago Bears,Questionable,2026-10-11T19:00Z,Hamstring,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Stevenson (hamstring) is doubtful to return to Sunday's game against the Packers.
 3121544,T.J. Edwards,Chicago Bears,Questionable,2026-10-11T18:44Z,Hamstring,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Edwards (hamstring) has been ruled out for the remainder of Sunday's game against the Packers.
 4430822,Noah Sewell,Chicago Bears,Active,2026-10-11T16:35Z,,,,,,Sewell (Achilles) is active for Sunday's game against the Packers.
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3918310,Carl Granderson,New Orleans Saints,Active,2026-10-09T22:40Z,,,,,,"Granderson (ankle) does not carry an injury designation ahead of Sunday's game against the Vikings, Emily Leiker of The Minnesota Star Tribune reports."
 4879276,Bryce Lance,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Lance turned five targets into a seven-yard catch during the Saints' 45-24 loss to the Falcons on Monday.
 4702559,Oscar Delp,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Delp was not targeted during Monday's 45-24 loss versus the Falcons.
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-14T17:00Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-14T17:19Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4040615,Malik Harrison,New York Giants,Active,2026-10-14T02:13Z,,,,,,"Harrison was signed to the Giants' active roster Tuesday, Dan Salomone of the team's official site reports."
 4682648,Malachi Fields,New York Giants,Active,2026-10-14T01:38Z,,,,,,Fields hauled in both of his targets for 20 yards during the Giants' 27-27 tie with the Commanders on Sunday.
 4431321,Dru Phillips,New York Giants,Active,2026-10-13T23:07Z,,,,,,Phillips had five total tackles (five solo) and 2.0 sacks in Sunday's 27-27 tie with the Commanders.
