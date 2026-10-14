@@ -72,11 +72,28 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   pages (a `| AFC 1 = Team` block; the API rate-limits bursts, so the fetch pauses and backs off); 1999 on from our
   tiebreaker code. Before 1975 no seeds (home field rotated by division). 1920-32: no playoffs, recognized champion
   shown. Era names (Houston Oilers, Phoenix Cardinals...) get text badges, modern names logos.
+- **ESPN transactions feed (2026-10-14):** `site.api.espn.com/apis/site/v2/sports/football/nfl/transactions?season=Y
+  &limit=100&page=P`, free, no key; ~1,100-2,800 entries a season back to 2002 (2001: ~500, thin). Free text, one
+  entry per team per day, often several moves ("Signed LB X. Waived CB Y."). Format changed around 2009: before,
+  positions are spelled out ("linebacker", "tackles A and B") and moves are chained with "; "; after, abbreviations
+  ("WRs A and B", "LB's A and B") and ". "; roster dumps continue a move in a verb-less sentence ("Signed rookies.
+  QB A, WR B"), which inherits the previous move's type. Team codes LAR / WSH (map to LA / WAS). The feed 404s any
+  page holding a bad record: the fetcher re-requests that range in pages of 10, then 1, and skips only what 404s.
+  2003 404s for nearly everything after ~record 600 (584 skipped: 2003 is a partial season, 632 entries). Player
+  linking: name + team on that season's (then last season's) roster, else a unique name among players active that
+  season, else position family breaks namesake ties. Coverage: moves typed 93-99% per season; players linked
+  68-78% in 2002-06 (thinner rosters), 82-95% after; the rest are mostly camp / practice-squad players nflverse
+  never lists.
 
 ## 3. Model findings that shipped (with evidence)
 - **Team ratings:** ridge on play EPA per unit (pass/rush/ST), WP 10-90% filter, recency half-life 3 weeks, prior
   season 0.3 decaying to 0 by week 8, alpha by time-split CV. QB-aware pass offense: team + QB effect +
   inexperienced-QB indicator (<150 career dropbacks); team and QB penalties tuned jointly (pass CV 3017 -> 2974).
+- **Playoff-odds drift = 0.9 (2026-10-14):** without it the odds were overconfident (2021-25 walk-forward: given
+  5-15% -> 20.9% made it; 85-95% -> 79.1%). Pre-registered gate: best make-playoffs Brier on 2021-23 over
+  {0, .3, .6, .9, 1.2, 1.5} (500 sims/week), adopt only if it also beats no drift on 2024-25. Picked 0.9 (2021-23
+  0.1455 vs 0.1480); held-out 2024-25 0.1273 vs 0.1344, 85-95% band 89.0% actual vs 76.0%. Full 2021-25 rerun at
+  1,000 sims: 0.1382 (was 0.1427), every calibration band within 2.3 points.
 - **Training window fixed** at 2 seasons (`train_seasons`); it used to be "every loaded season" (a different and
   far slower model when more history was loaded).
 - **Points formula** (`GameModel`): points = a + b x offensive EPA (volume x expected EPA/play) + c x net ST EPA,
@@ -476,6 +493,20 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   ESPN's own standings feed before 2014 is incomplete / wrong (missing or partial seeds), so older seasons were
   spot-checked against known history instead (2006 NFC, 2007 AFC, 2009 AFC correct). Stopgaps: net touchdowns and
   the coin toss (fixed alphabetical) are not modeled; mid-season strength of schedule uses games played so far.
+  The League keeps per-team result lists (not a DataFrame) so one seeding takes ~1.4 ms (the odds sim seeds 10,000).
+- **Playoff odds (Phase 4b, 2026-10-14):** `tools/playoff_odds.py` -> `data/playoffs/odds.json` (CI, 10,000 sims,
+  ~1 min); Teams > Playoffs opens on Odds for the current season (most likely seeding + odds table + track record).
+  Method and numbers in MODEL.md ("Playoff odds"). The track record needs the archive worktree (week JSON power
+  ranks as of each week), which CI doesn't check out, so it is COMMITTED: `data/history/playoff_odds_backtest.json`;
+  rerun `--backtest` and commit after any change to the method. Drift (`[report] playoff_drift`) was pre-registered
+  and adopted on held-out data (section 3).
+- **Players > Moves (Phase 5, 2026-10-14):** `tools/transactions_build.py` -> `data/transactions/<season>.json`
+  (rows: date, team, type, pos, name, pid, text; one row per player per move, newest first) + `index.json` (seasons,
+  team logos). Raw feed pages cached per season in `cache/`; only the current season is refetched. View: season /
+  team / move type / position / date range / search; phones keep season + search up top with the rest behind a
+  Filters toggle, and fold the note under the name (the Details column is hidden), so the table fits without
+  side-scrolling. Draws 250 rows at a time (a season is ~2-5k); any non-default sort draws the whole filtered season
+  (`NFLE.Table` got `onSort` + `getSort` for this).
 
 ## 9. Open threads / next steps (as of 2026-10-12)
 - **From the 2026-10-14 research batch (section 5 has the numbers):** (2) "Not extended entering

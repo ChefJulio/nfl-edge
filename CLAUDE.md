@@ -70,6 +70,8 @@ Git hooks: `git config core.hooksPath .githooks` (pre-commit blocks commits when
 | `tools/stats_build.py`, `nfledge/static/{teamstats,playerstats}.{js,css}` | Teams > Stats + Players > Stats: `data/stats/{teams,players}_<season>.json` (1999 on, CI step; aggregates cached in `cache/seasonstats_*`) |
 | `tools/draft_build.py`, `nfledge/static/draft.{js,css}` | Teams > Draft: `data/draft/<year>.json` (1980 on, PFR via nflverse; CI step) |
 | `tools/playoffs_build.py`, `nfledge/static/playoffs.{js,css}`, `data/history/` | Teams > Playoffs: brackets 1920 on (`data/playoffs/<season>.json`; 538 file + Wikipedia seeds kept in `data/history/`) |
+| `tools/playoff_odds.py` | Teams > Playoffs odds: `data/playoffs/odds.json` (Monte Carlo + tiebreakers; CI step). `--backtest` rewrites the COMMITTED track record `data/history/playoff_odds_backtest.json` (needs the archive worktree); `--fit-drift` = the pre-registered drift fit |
+| `tools/transactions_build.py`, `nfledge/static/moves.{js,css}` | Players > Moves: ESPN transactions parsed into moves, `data/transactions/<season>.json` (2002 on; CI step, raw pages cached) |
 | `nfledge/static/rankings.js`, `injuries.js` | Players > Rankings (from the week JSON) and Players > Injuries (ESPN list + our inactive %) |
 | `nfledge/elo.py` | Elo from final scores (part of our win chance) |
 | `exclusions.csv` | Manual injury-shortened games to drop from usage/efficiency |

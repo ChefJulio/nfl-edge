@@ -7,7 +7,8 @@
 //   const t = NFLE.Table(mountEl, {
 //     columns: [{ key, label, headHtml? (header HTML instead of the label), title?, num?, stick?, first? ('asc' | 'desc'), sort? (false = not sortable), cls?, w? (px),
 //                 value?: row => sortable value, html?: row => cell HTML (escape it yourself) }],
-//     rows, sort: { key, dir }, rowAttrs?: row => 'data-open-pid="..."', rowClass?: row => 'teamrow', cls?: 'tiles'
+//     rows, sort: { key, dir }, rowAttrs?: row => 'data-open-pid="..."', rowClass?: row => 'teamrow', cls?: 'tiles',
+//     onSort?: sort => {} (after a header click)
 //   });
 //   t.update(rows); t.setColumns(columns); t.setSort({ key, dir });
 (() => {
@@ -71,6 +72,7 @@
       const c = cols.find(x => x.key === th.dataset.key);
       sort = { key: c.key, dir: sort && sort.key === c.key ? (sort.dir === 'asc' ? 'desc' : 'asc') : (c.first || (c.num ? 'desc' : 'asc')) };
       head(); body(); layout();
+      if (opt.onSort) opt.onSort(sort);
     });
     // Header copy for tables that scroll sideways (phones): a zero-height sticky strip under the nav.
     const buildCopy = () => {
@@ -114,6 +116,7 @@
       update(r) { rows = r || []; body(); layout(); },
       setColumns(c) { cols = c; if (sort && !cols.some(x => x.key === sort.key)) sort = null; head(); body(); layout(); },
       setSort(x) { sort = x; head(); body(); layout(); },
+      getSort: () => sort,
       layout, place,
     };
     head(); body();

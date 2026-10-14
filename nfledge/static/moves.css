@@ -1,0 +1,35 @@
+/* Players > Moves (moves.js) */
+.mv-tools { flex-wrap: wrap; }
+.mv-dl { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.mv-dl input, .mv-q { background: var(--panel2); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; font: inherit; font-size: 13px; color-scheme: dark; }
+.mv-q { flex: 1; min-width: 160px; }
+.mv-date { font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+.mv-tm { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+.mv-chip { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 999px; white-space: nowrap; background: rgba(255,255,255,.08); color: var(--muted); }
+.mv-chip.mv-add { background: rgba(80,200,140,.16); color: #7fdcaa; }
+.mv-chip.mv-cut { background: rgba(242,120,109,.16); color: #f59a91; }
+.mv-chip.mv-inj { background: rgba(224,176,74,.16); color: #f3d38c; }
+.mv-chip.mv-trade { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--ink); }
+.mv-chip.mv-ps { background: rgba(140,160,255,.14); color: #b4c0ff; }
+.mv-link { text-decoration: underline; text-decoration-color: rgba(255,255,255,.25); text-underline-offset: 3px; }
+table.dt td.mv-text { white-space: normal; font-size: 12px; color: var(--muted); line-height: 1.35; min-width: 280px; max-width: 520px; }
+tr[data-open-pid] { cursor: pointer; }
+.mv-more-wrap { display: flex; justify-content: center; padding: 10px 0 4px; }
+.mv-more { background: var(--panel2); color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 7px 16px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.mv-more[hidden] { display: none; }
+.mv-ftog { display: none; }
+.mv-note { display: none; }
+td.mv-who { min-width: 150px; }
+/* phones: season + search + Filters toggle; the note folds under the name and the Details column goes */
+@media (max-width: 640px) {
+  .mv-ftog { display: inline-block; background: var(--panel2); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font: inherit; font-size: 13px; font-weight: 700; }
+  .mv-tools.closed .mv-team, .mv-tools.closed .mv-group, .mv-tools.closed .mv-pos, .mv-tools.closed .mv-dl { display: none; }
+  .mv-q { min-width: 0; }
+  .mv-dl { flex: 1 1 40%; } .mv-dl input { flex: 1; min-width: 0; }
+  table.dt th.mv-text, table.dt td.mv-text { display: none; }
+  .mv-note { display: block; font-size: 11.5px; color: var(--muted); line-height: 1.3; margin-top: 3px; white-space: normal; }
+  td.mv-who { min-width: 0; white-space: normal; }
+  .mv-tm .st-logo + span { display: none; }
+  .mv-chip { white-space: normal; display: inline-block; line-height: 1.25; text-align: center; }
+  .mv-date { font-size: 12px; }
+}

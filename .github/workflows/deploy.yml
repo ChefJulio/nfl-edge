@@ -89,6 +89,13 @@ jobs:
       # Teams > Playoffs history (every postseason since 1920; 1933-98 from data/history/, seeds 1975-98 cached there).
       - name: Playoffs
         run: python tools/playoffs_build.py --site=site
+      # Teams > Playoffs odds: 10,000 simulated seasons as of the week the site shows (~1 min); track record from
+      # data/history/playoff_odds_backtest.json.
+      - name: Playoff odds
+        run: python tools/playoff_odds.py --site=site
+      # Players > Moves: ESPN's transactions log, 2002 on (past seasons fetched once into the cache, this season daily).
+      - name: Moves
+        run: python tools/transactions_build.py --site=site
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:

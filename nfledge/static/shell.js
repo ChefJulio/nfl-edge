@@ -32,7 +32,7 @@
   // A module registers NFLE.areas[<area>] = { mount(section) } and renders into its section.
   const AREAS = { 'tab-teams-standings': 'standings', 'tab-teams-stats': 'teamstats', 'tab-players-stats': 'playerstats',
                   'tab-players-injuries': 'injuries', 'tab-players': 'rankings', 'tab-teams-draft': 'draft',
-                  'tab-teams-playoffs': 'playoffs' };
+                  'tab-teams-playoffs': 'playoffs', 'tab-players-moves': 'moves' };
   const ver = (document.currentScript && new URL(document.currentScript.src).search) || '';
   const loaded = {};
   const NFLE = window.NFLE = window.NFLE || {};
