@@ -28,6 +28,15 @@
   // Plain GETs only: a cache-mode option makes Chromium add Cache-Control / Pragma request headers, which turns the
   // request into a CORS preflight that ESPN's feed does not answer (WebKit is fine either way). ESPN's own
   // max-age is 1-9 s, so the browser cache never holds live data for long.
+  // Injury status as a compact tag: Q / D / O / IR / SSPD / PUP / NFI, the full status (incl. practice days, ESPN or
+  // last-week notes) on hover. One look everywhere a status shows (rankings, cards, team pages, gamecast).
+  const injCode = st => {
+    const t = String(st || '').trim();
+    return /^(ir\b|injured reserve)/i.test(t) ? 'IR' : /^(susp|sspd)/i.test(t) ? 'SSPD' : /^(pup|physically)/i.test(t) ? 'PUP'
+      : /^(nfi|non-football)/i.test(t) ? 'NFI' : /^out/i.test(t) ? 'O' : /^doubt/i.test(t) ? 'D' : /^question/i.test(t) ? 'Q' : t.split(/\s/)[0].toUpperCase();
+  };
+  const injTag = st => { if (!st) return ''; const c = injCode(st);
+    return `<span class="dc-tag dt-${c === 'Q' ? 'q' : c === 'D' ? 'd' : 'out'}" title="${esc(st)}">${esc(c)}</span>`; };
   const getJSON = async (url, ms = 12000) => {
     const c = new AbortController(), t = setTimeout(() => c.abort(), ms);
     try {
@@ -521,7 +530,7 @@
     // One rank pill (our rank at his position), colored by roster tier: starter / flex range / bench.
     const slotTxt = { start: 'starter', flex: 'flex range', bench: 'bench depth' }[p.slot] || '';
     const rankPill = `<span class="pc-rk t-${esc(p.slot)}" title="Our #${p.rank} ${esc(p.pos)} for ${esc(wkLabel(d).toLowerCase())} · ${esc(p.tier)} tier${slotTxt ? ` (${slotTxt})` : ''}">${esc(p.pos)} #${p.rank}</span>`;
-    const flags = [p.status ? `<span class="flag ${ia >= 0.5 ? 'f-out' : 'f-q'}">${esc(p.status)}</span>` : '',
+    const flags = [injTag(p.status),
                    p.boost >= 1 ? `<span class="flag f-up" title="Raised by volume vacated by ${esc(p.boost_from)}">+${f1(p.boost)} from injuries</span>` : '',
                    p.low_sample ? '<span class="flag" title="Few games to learn from: a wider range">low data</span>' : ''].join('');
     const exp = expectedCells(p);
@@ -1012,7 +1021,7 @@
         ${rankTrend(pw.rank_hist) ? `<div class="pc-k" style="margin-top:10px">Power rank by week</div>${rankTrend(pw.rank_hist)}` : ''}</div>` : '';
     const players = Object.entries(d.players).filter(([, p]) => p.team === abbr).sort((a, b) => b[1].proj - a[1].proj);
     const plRows = players.map(([pid, p]) => { const s = scaled(p, d);
-      return `<tr><td><button type="button" class="bx-n" data-open-pid="${esc(pid)}">${esc(p.name)}</button> <span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>${p.status ? ` <span class="flag ${p.inactive >= 0.5 ? 'f-out' : 'f-q'}">${esc(p.status)}</span>` : ''}</td>
+      return `<tr><td><button type="button" class="bx-n" data-open-pid="${esc(pid)}">${esc(p.name)}</button> <span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>${injTag(p.status)}</td>
         <td class="num"><b>${f1(s.proj)}</b></td><td><span class="tier t-${esc(p.slot)}">${esc(p.tier)}</span></td><td class="num muted">${p.fpg != null ? f1(p.fpg) : ''}</td></tr>`; }).join('');
     return { html: `${now}<div class="pc-grid tm-grid">${week}${power}</div>`, players: plRows };
   };
@@ -1447,7 +1456,7 @@
     const players = Object.entries((DATA && DATA.players) || {}).filter(([, p]) => p.team === a.team || p.team === h.team).sort((x, y) => y[1].proj - x[1].proj);
     const plTable = s => {
       const rows = players.filter(([, p]) => p.team === s.team).map(([pid, p]) => { const sc = scaled(p);
-        return `<tr><td class="bx-who"><button type="button" class="bx-n" data-open-pid="${esc(pid)}">${esc(p.name)}</button> <span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>${p.status ? ` <span class="flag ${p.inactive >= 0.5 ? 'f-out' : 'f-q'}">${esc(p.status)}</span>` : ''}</td>
+        return `<tr><td class="bx-who"><button type="button" class="bx-n" data-open-pid="${esc(pid)}">${esc(p.name)}</button> <span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>${injTag(p.status)}</td>
           <td class="num"><b>${f1(sc.proj)}</b></td><td class="num muted">${f0(sc.q[0])}–${f0(sc.q[4])}</td><td class="num">${muHtml(p, s === a ? h.team : a.team)}</td></tr>`; }).join('');
       return `<div class="bx-team" style="--tc:${esc(g.colors[s.team])}"><div class="bx-th tm-open" data-tm="${esc(s.team)}">${lg(s, 20)}<b>${esc(s.team)}</b></div>
         ${rows ? `<table class="bx"><thead><tr><th>Player</th><th class="num">Proj</th><th class="num">Range</th><th class="num">Matchup</th></tr></thead><tbody>${rows}</tbody></table>` : '<p class="muted">No fantasy-relevant players listed.</p>'}</div>`;
@@ -1677,6 +1686,6 @@
   });
   // paintTiles / gameHref: the Matchups tab (assets/matchups.js) draws the tiles, then paints live games at once
   window.NFLE = Object.assign(window.NFLE || {}, { openPlayer, closePlayer, openTeam, showPlayer, showTeam, weights,
-    weekData: () => DATA, paintTiles: () => { if (DATA) paintTiles(); }, gameHref });  // shared with shell.js, table.js, area modules
+    weekData: () => DATA, injTag, paintTiles: () => { if (DATA) paintTiles(); }, gameHref });  // shared with shell.js, table.js, area modules
   if (CFG.page === 'game') initGame(); else initWeek();
 })();

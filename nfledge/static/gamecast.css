@@ -491,3 +491,4 @@ table.lg tr > :nth-child(1), table.lg tr.lg-season .lg-pin { box-shadow: -12px 0
 .ij-part { font-size: 12.5px; padding: 3px 9px; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid var(--line); color: var(--muted); }
 .ij-part b { color: var(--ink); font-weight: 700; }
 table.ij-tbl tr.ij-played td { color: var(--muted); }
+.badges .dc-tag { margin-left: 0; }
