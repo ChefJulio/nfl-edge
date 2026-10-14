@@ -618,6 +618,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   - EPA(incomplete) at that air-yard depth, per season] + on catches (yac_epa - xyac_epa); rushing unchanged
   (fumbles are his). GUARDRAIL: ships if, walk-forward 2021-2025 all players, its rank corr. with next-season
   fantasy pts/g is not significantly below v1's (95% CI of v1.1 - v1 not entirely below 0). Face check reported.
+- **UI prefs (owner 2026-10-14):** player / team page header (photo, name, position, grade, team) is sticky
+  (top: var(--navh), set by shell.js from the top bar's height; the page container needs overflow: clip, never
+  hidden/auto, or sticky breaks). The grade badge reads "OVR", not "EDGE" (EDGE is a position).
 - **Grade = per play among qualified players (owner 2026-10-14):** "grading should be per-opportunity; cut off
   non-relevant backs". Value over replacement per play (dropbacks + carries + targets); qualified = NFL stat-title
   minimums per team game (14 att QB, 6.25 carries or 1.875 catches RB, 1.875 catches WR/TE): ~190-210 players a

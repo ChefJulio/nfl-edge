@@ -162,6 +162,11 @@
   nav.innerHTML = `<div class="wrap nav-par" role="tablist">${NAV.map(p => `<button type="button" role="tab" data-par="${p.key}">${p.short
       ? `<span class="lbl-long">${p.label}</span><span class="lbl-short">${p.short}</span>` : p.label}</button>`).join('')}</div>
     <div class="wrap nav-sub" hidden></div>`;
+  // --navh: the sticky top bar's height (0 where it's hidden), so things that stick below it (the player / team page
+  // header) know where to stop.
+  const setNavH = () => document.documentElement.style.setProperty('--navh', `${getComputedStyle(nav).display === 'none' ? 0 : nav.offsetHeight}px`);
+  if (window.ResizeObserver) new ResizeObserver(setNavH).observe(nav);
+  window.addEventListener('resize', setNavH);
   // Phones: a bottom tab bar (owner's choice, 2026-10-14). Five slots: the four busiest parents + More (a sheet with
   // the rest); the sub-tab chips stay in the top bar. The top strip (parent tabs in the top bar, short labels) is
   // kept for a possible future setting: set NAV_MODE = 'top'. Desktop always uses the top strip.

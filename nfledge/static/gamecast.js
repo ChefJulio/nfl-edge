@@ -758,7 +758,7 @@
   const grSeason = s => GR.s[s] || (GR.s[s] = NFLE.load(`data/grades/${s}.json`).catch(() => null));
   const GRADED = { QB: 1, RB: 1, WR: 1, TE: 1 };
   const grTone = g => g >= 80 ? 'good' : g <= 30 ? 'bad' : '';
-  const grChip = (pid, cur) => { const r = cur && cur.players[pid]; return r ? `<span class="eg-chip ${grTone(r[0])}" title="NFL Edge grade ${cur.season}: production percentile among ${esc(r[1])}s">EDGE <b>${r[0]}</b></span>` : ''; };
+  const grChip = (pid, cur) => { const r = cur && cur.players[pid]; return r ? `<span class="eg-chip ${grTone(r[0])}" title="NFL Edge overall (${cur.season}): per-play value percentile among qualified ${esc(r[1])}s">OVR <b>${r[0]}</b></span>` : ''; };
   const gradeTab = (pid, docs) => {
     const rows = docs.filter(d => d && d.players[pid]).sort((a, b) => b.season - a.season);
     if (!rows.length) return '<div class="pc-box"><p class="pc-sub">No grade: grades cover quarterbacks, running backs, receivers and tight ends since 2018 who met the NFL\'s qualifying minimum in a season (per team game: 14 pass attempts, 6.25 carries, or 1.875 catches).</p></div>';
