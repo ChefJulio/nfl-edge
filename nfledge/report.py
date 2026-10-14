@@ -593,7 +593,7 @@ def week_data(ctx: dict) -> str:
     for r in block["rows"]:
       players[r["pid"]] = {
         "name": r["name"], "pos": r["pos"], "team": r["team"], "opp": r["opp"], "home": r["home"], "espn": r["espn"],
-        "proj": round(float(r["proj"]), 2), "q": [round(float(r[k]), 2) for k in ("p10", "p25", "p50", "p75", "p90")],
+        "proj": round(float(r["proj"]), 3), "q": [round(float(r[k]), 3) for k in ("p10", "p25", "p50", "p75", "p90")],
         "rank": r["rank"],
         "tier": r["tier"], "slot": r["slot"], "ecr": None if pd.isna(r["ecr"]) else r["ecr"],
         "status": r["status"] or "", "inactive": r["inactive"], "inactive_why": r["inactive_why"],
@@ -602,12 +602,22 @@ def week_data(ctx: dict) -> str:
         "takeaway": r["takeaway"], "fpg": None if pd.isna(r["fpg"]) else r["fpg"],
         "last3": None if pd.isna(r["last3"]) else r["last3"], "act": r["act"], "sc": json.loads(r["sc"]),
         "ext": r["ext"], "sched": r["sched"] or "",
-        "proj_line": {k: v for k, v in r["proj_line"].items() if v}}
+        "proj_line": {k: v for k, v in r["proj_line"].items() if v},
+        # Rankings table (rendered in the browser, assets/rankings.js): the cells the server template used to draw
+        "photo": r["photo"], "vol": r["vol"], "td": r["td"], "imp": r["imp"], "byes": r["byes"], "pend": r["pend"],
+        "pjw": json.loads(r.get("pjw") or "{}"), "ecr_stale": bool(r["ecr_stale"]),
+        "ecr_flex": None if pd.isna(r["ecr_flex"]) else r["ecr_flex"], "ecr_flex_stale": bool(r["ecr_flex_stale"])}
   games = []
   for g in ctx["games"]:
     games.append({k: g[k] for k in ("id", "away", "home", "kickoff", "neutral", "fc", "vegas_line", "vegas_total",
                                     "battles", "extras", "plays", "power_rk", "final", "bt_style", "colors",
                                     "gameday", "gametime")})
+  # Rankings: players on bye per position (with their season line, for FP/G under the viewer's scoring) and
+  # whether the Actual column shows (any final game, or the current week before kickoff: live stats fill it in).
+  rk = {"v": 2, "show_act": bool(ctx.get("has_actuals") or (ctx["nav"]["is_current"] and not ctx["lookahead"] and not ctx["archive"])),
+        "tier_teams": int(ctx["tier_cfg"]["teams"]) if ctx.get("tier_cfg") else 10,
+        "byes": {pos: [{k: (json.loads(b[k]) if k == "sc" else b[k]) for k in ("pid", "name", "team", "fpg", "games", "sc")}
+                       for b in block.get("byes", [])] for pos, block in ctx["players"].items()}}
   pkeys = ("team", "nick", "record", "rank", "move", "range", "net", "off", "def", "st", "pass_o", "rush_o", "pass_d",
            "rush_d", "net_rk", "off_rk", "def_rk", "st_rk", "pass_o_rk", "rush_o_rk", "pass_d_rk", "rush_d_rk",
            "pass_o_pp", "rush_o_pp", "pass_d_pp", "rush_d_pp", "sos_past", "sos_past_rk", "sos_next", "sos_next_rk",
@@ -616,7 +626,7 @@ def week_data(ctx: dict) -> str:
   out = {"season": ctx["season"], "week": ctx["week"], "generated": ctx["generated"], "archive": ctx["archive"],
          "power": power, "teams": ctx.get("teams", {}),
          "lookahead": ctx["lookahead"], "tossup_pct": ctx["tossup_pct"], "espn_team": ESPN_TEAM,
-         "score": json.loads(ctx["score_cfg"]), "players": players, "games": games}
+         "score": json.loads(ctx["score_cfg"]), "players": players, "games": games, "rk": rk, "v": 2}
   # Browsers reject NaN / Infinity in JSON (Python writes them happily), and one bad value makes the whole file
   # unreadable: e.g. sos_past is NaN in week 1 and sos_next on archived weeks. Non-finite numbers become null.
   return json.dumps(_json_safe(out), separators=(",", ":"), allow_nan=False)

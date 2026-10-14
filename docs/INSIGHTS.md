@@ -453,6 +453,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   to overwrite it, which wiped the shell's loader). Next (owner, 2026-10-14): player / team PAGES as routes
   (`#player/<id>`, `#team/<abbr>`) instead of overlay cards, with breadcrumbs and a working back button, before
   the Rankings migration.
+- **Phase 2 done (2026-10-14): Players > Rankings renders in the browser** (`assets/rankings.js`) from the week JSON
+  (`players` + `rk`: byes, show_act, tier teams; per player photo / vol / td / imp / byes / pend / pjw / ECR flags;
+  JSON shape `"v": 2`). Rows are data: the scoring panel recomputes projection, range, rank, tier, slot, vs ECR and
+  redraws through `NFLE.Table` (same cell markup and classes as the old template, so the template CSS still styles
+  it). Old vs new compared side by side (desktop + iPhone, QB + FLEX): identical except rounding (JSON now keeps 3
+  decimals). Week JSONs without `rk` (archived pages until rebuilt) keep their server-rendered table.
 - **Players > Injuries** (2026-10-14): ESPN's injury list (`data/espn_injuries/latest.json`, written by the daily
   snapshot step) joined to our inactive % from the week data. Building it exposed a bridge bug: ESPN "Injured
   Reserve" was mapped to Out and scored with Out's carry-forward rate (67% inactive: a third of players listed Out

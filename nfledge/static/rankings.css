@@ -1,0 +1,7 @@
+/* Players > Rankings (rankings.js). The table styles still live in templates/report.html.j2 until the week pages
+   become a thin shell (phase 6); table.dt defaults are overridden for the tile rows here. */
+table.dt.tiles { border-collapse: separate; border-spacing: 0 3px; margin-top: -3px; }
+table.dt.tiles tbody td { border-bottom: 0; }
+table.dt.tiles thead th { border-bottom: 0; }
+table.dt.tiles tr.teamrow > td.stick { background: #171a20; }
+table.dt.tiles tr.teamrow:hover > td { background: #1e222a; }
