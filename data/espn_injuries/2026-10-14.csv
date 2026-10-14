@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428993,Haynes King,Carolina Panthers,Active,2026-10-04T23:08Z,,,,,,King (coach's decision) is inactive but will operate as the Panthers' emergency third quarterback Sunday night versus Detroit.
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
 4430034,Xavier Legette,Carolina Panthers,Injured Reserve,2026-10-03T20:15Z,Knee,Not Specified,Not Specified,2026-11-08,IR,"The Panthers placed Legette (knee) on injured reserve Saturday, Darin Gantt of the team's official site reports."
-4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-14T20:19Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
+4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-14T20:45Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
 3121544,T.J. Edwards,Chicago Bears,Doubtful,2026-10-14T17:23Z,Hamstring,Not Specified,Not Specified,2026-10-18,DOUBTFUL,doubtful
 4242659,Dayo Odeyingbo,Chicago Bears,Out,2026-10-14T17:21Z,Quadriceps,Not Specified,Not Specified,2026-10-22,OUT,out
 4431611,Caleb Williams,Chicago Bears,Questionable,2026-10-14T16:30Z,Hamstring,Strain,Right,2026-10-18,QUESTIONABLE,"Bears head coach Ben Johnson said that Williams (hamstring) will be listed as a full practice participant on Wednesday's estimated injury report, Sean Hammond of the Chicago Tribune reports."
@@ -549,6 +549,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4372030,Christian Barmore,New England Patriots,Active,2026-10-11T16:07Z,,,,,,Barmore (shoulder) is active Week 5 against the Raiders.
 4245273,Christian Elliss,New England Patriots,Active,2026-10-11T16:06Z,,,,,,Elliss (chest) is active Week 5 against the Raiders.
 4428930,Craig Woodson,New England Patriots,Active,2026-10-11T15:58Z,,,,,,Woodson (shoulder) is active Week 5 against the Raiders.
+4361370,Chris Olave,New Orleans Saints,Questionable,2026-10-14T20:33Z,Illness,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Olave didn't practice Wednesday due to an illness, Nick Underhill of NewOrleans.Football reports."
 4599739,Kendre Miller,New Orleans Saints,Active,2026-10-14T01:29Z,,,,,,Miller turned 10 carries into 30 yards and a touchdown during the Saints' 23-13 loss to the Vikings on Sunday.
 4036131,Noah Fant,New Orleans Saints,Active,2026-10-13T23:55Z,,,,,,Fant brought in his lone target for seven yards during the Saints' 23-13 loss to the Vikings on Sunday.
 4433938,Jeremiah Wright,New Orleans Saints,Questionable,2026-10-13T17:10Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -564,7 +565,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4569559,Devaughn Vele,New Orleans Saints,Active,2026-10-12T00:08Z,,,,,,Vele secured four of six targets for 26 yards in the Saints' 23-13 loss to the Vikings on Sunday.
 3054850,Alvin Kamara,New Orleans Saints,Active,2026-10-11T22:17Z,,,,,,Kamara rushed three times for 12 yards and brought in both targets for minus-6 yards in the Saints' 23-13 loss to the Vikings on Sunday.
 4360689,Tyler Shough,New Orleans Saints,Active,2026-10-11T21:41Z,,,,,,Shough completed 16 of 25 passes for 96 yards with no touchdowns and two interceptions in the Saints' 23-13 loss to the Vikings on Sunday.
-4361370,Chris Olave,New Orleans Saints,Active,2026-10-11T20:33Z,,,,,,Olave secured four of six targets for 46 yards in the Saints' 23-13 loss to the Vikings on Sunday.
 4432768,Lorenzo Styles Jr.,New Orleans Saints,Active,2026-10-11T17:00Z,,,,,,Styles (calf) is listed as active for Sunday's game against the Vikings.
 4566088,Jaylan Ford,New Orleans Saints,Active,2026-10-11T16:59Z,,,,,,Ford (ankle) is active for Sunday's game against the Vikings.
 4685479,Christen Miller,New Orleans Saints,Active,2026-10-11T16:44Z,,,,,,Miller is active for Sunday's game against the Vikings.
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3918310,Carl Granderson,New Orleans Saints,Active,2026-10-09T22:40Z,,,,,,"Granderson (ankle) does not carry an injury designation ahead of Sunday's game against the Vikings, Emily Leiker of The Minnesota Star Tribune reports."
 4879276,Bryce Lance,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Lance turned five targets into a seven-yard catch during the Saints' 45-24 loss to the Falcons on Monday.
 4702559,Oscar Delp,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Delp was not targeted during Monday's 45-24 loss versus the Falcons.
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-14T20:19Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-14T20:33Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4040615,Malik Harrison,New York Giants,Active,2026-10-14T02:13Z,,,,,,"Harrison was signed to the Giants' active roster Tuesday, Dan Salomone of the team's official site reports."
 4682648,Malachi Fields,New York Giants,Active,2026-10-14T01:38Z,,,,,,Fields hauled in both of his targets for 20 yards during the Giants' 27-27 tie with the Commanders on Sunday.
 4431321,Dru Phillips,New York Giants,Active,2026-10-13T23:07Z,,,,,,Phillips had five total tackles (five solo) and 2.0 sacks in Sunday's 27-27 tie with the Commanders.
@@ -724,7 +724,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686540,Tyrice Knight,Seattle Seahawks,Active,2026-10-08T23:10Z,,,,,,
 4247808,Ty Okada,Seattle Seahawks,Active,2026-10-07T23:59Z,,,,,,"Okada (hamstring) was a full participant in Wednesday's practice, John Boyle of the Seahawks' official site reports."
 4869523,Nick Emmanwori,Seattle Seahawks,Active,2026-10-07T01:25Z,,,,,,"Emmanwori registered nine total tackles (eight solo), including 1.0 sacks, and added a pass defensed during Sunday's 30-23 win over the Chargers."
-3052587,Baker Mayfield,Tampa Bay Buccaneers,Doubtful,2026-10-14T15:56Z,Thumb,Dislocated,Right,2026-10-18,DOUBTFUL,"Mayfield (thumb) wasn't spotted on the field for Wednesday's practice, Greg Auman of Fox Sports reports."
+4430871,Sean Tucker,Tampa Bay Buccaneers,Questionable,2026-10-14T20:36Z,Quadriceps,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+3052587,Baker Mayfield,Tampa Bay Buccaneers,Doubtful,2026-10-14T20:25Z,Thumb,Dislocated,Right,2026-10-18,DOUBTFUL,Mayfield (right thumb) officially didn't practice Wednesday.
 4034790,Antoine Winfield Jr.,Tampa Bay Buccaneers,Doubtful,2026-10-13T17:10Z,Ribs,Fracture,Not Specified,2026-10-18,DOUBTFUL,doubtful
 4816107,Benjamin Morrison,Tampa Bay Buccaneers,Questionable,2026-10-13T17:10Z,Quadriceps,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4429511,SirVocea Dennis,Tampa Bay Buccaneers,Questionable,2026-10-13T17:10Z,Ankle,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -737,7 +738,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3043107,Alex Anzalone,Tampa Bay Buccaneers,Active,2026-10-12T00:02Z,,,,,,Anzalone recorded five total tackles (one solo) and an interception during Thursday night's 24-16 win over Dallas.
 5220680,Ted Hurst III,Tampa Bay Buccaneers,Active,2026-10-10T17:27Z,,,,,,Hurst did not record a target during the Buccaneers' 24-16 win over the Cowboys on Thursday.
 4608810,Tez Johnson,Tampa Bay Buccaneers,Active,2026-10-10T04:43Z,,,,,,Johnson caught his lone target for 64 yards during Thursday's 24-16 win over the Cowboys.
-4430871,Sean Tucker,Tampa Bay Buccaneers,Active,2026-10-10T04:30Z,,,,,,Tucker turned five carries into 18 yards during the Buccaneers' 24-16 win over the Cowboys on Thursday.
 4243331,Cade Otton,Tampa Bay Buccaneers,Active,2026-10-09T23:53Z,,,,,,Otton caught three of four targets for 25 yards in a 24-16 win over Dallas on Thursday.
 4596472,Jalon Daniels,Tampa Bay Buccaneers,Active,2026-10-09T15:23Z,,,,,,"Buccaneers coach Todd Bowles said Friday that he plans on starting Daniels in Week 6 against Pittsburgh, Scott Smith of the team's official site reports."
 4371733,Kenny Gainwell,Tampa Bay Buccaneers,Active,2026-10-09T04:59Z,,,,,,Gainwell rushed four times for 18 yards and brought in three of four targets for 10 yards in the Buccaneers' 24-16 win over the Cowboys on Thursday night.
@@ -749,8 +749,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3894856,Anthony Nelson,Tampa Bay Buccaneers,Active,2026-10-07T18:57Z,,,,,,
 4428522,Tykee Smith,Tampa Bay Buccaneers,Active,2026-10-07T00:56Z,,,,,,Smith recorded six tackles (four solo) and a forced fumble during the Buccaneers' 17-14 loss to the Packers on Sunday.
 4240401,Ifeatu Melifonwu,Tampa Bay Buccaneers,Active,2026-10-06T00:27Z,,,,,,"Head coach Todd Bowles said Melifonwu is likely to start at safety Thursday night against Dallas, Jenna Laine of ESPN.com reports."
+3916148,Tony Pollard,Tennessee Titans,Active,2026-10-14T20:36Z,,,,,,
+4570469,Marcus Harris,Tennessee Titans,Questionable,2026-10-14T20:33Z,Ankle,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+4429607,Cor'Dale Flott,Tennessee Titans,Active,2026-10-14T20:32Z,,,,,,
+4428557,Tyjae Spears,Tennessee Titans,Questionable,2026-10-14T20:28Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Spears was a limited participant in Wednesday's practice due to a knee injury.
 4685617,Kevin Winston Jr.,Tennessee Titans,Doubtful,2026-10-14T17:11Z,Quadriceps,Not Specified,Not Specified,2026-10-18,DOUBTFUL,doubtful
-3916148,Tony Pollard,Tennessee Titans,Questionable,2026-10-14T17:06Z,Foot,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Titans head coach Robert Saleh said that Pollard (foot) won't practice Wednesday, Turron Davenport of ESPN.com reports."
 4883647,Elic Ayomanor,Tennessee Titans,Active,2026-10-14T02:41Z,,,,,,Ayomanor caught one of two passes for 17 yards during the Titans' 26-3 loss to the Texans on Sunday. He also added a tackle on special teams.
 4360978,David Martin-Robinson,Tennessee Titans,Questionable,2026-10-13T17:10Z,Hamstring,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4036134,Amani Hooker,Tennessee Titans,Questionable,2026-10-13T17:10Z,Concussion,Concussion,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -762,15 +765,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5081785,Jackie Marshall,Tennessee Titans,Active,2026-10-12T19:45Z,,,,,,
 4685555,Nicholas Singleton,Tennessee Titans,Active,2026-10-12T19:45Z,,,,,,
 3124084,Joey Slye,Tennessee Titans,Active,2026-10-12T14:17Z,,,,,,Slye made his lone field-goal attempt during the Titans' 26-3 loss to the Texans on Sunday.
-4428557,Tyjae Spears,Tennessee Titans,Active,2026-10-12T04:14Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Spears rushed twice for no gain and lost a fumble while catching all nine of his targets for 28 yards during Sunday's 26-3 loss to the Texans.
 4569587,Wan'Dale Robinson,Tennessee Titans,Active,2026-10-11T23:33Z,,,,,,Robinson caught six of seven targets for 53 yards in Sunday's 26-3 loss to the Texans.
 4871023,Carnell Tate,Tennessee Titans,Active,2026-10-11T23:28Z,,,,,,Tate caught one of five targets for six yards in Sunday's 26-3 loss to the Texans.
 4688380,Cam Ward,Tennessee Titans,Active,2026-10-11T23:20Z,,,,,,Ward completed 23 of 36 passes for 170 yards and an interception in Sunday's 26-3 loss to the Texans. He added two yards on his lone carry.
-4429607,Cor'Dale Flott,Tennessee Titans,Questionable,2026-10-11T19:25Z,Chest,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Flott (chest) has been ruled out for the remainder of Sunday's game against the Texans.
 4917635,Joshua Williams,Tennessee Titans,Injured Reserve,2026-10-10T23:21Z,Pectoral,Not Specified,Not Specified,2026-10-18,IR-R,"Williams (pectoral) has been downgraded to out for Sunday's game against the Texans, Jim Wyatt of the Titans' official site reports."
 3120464,John Franklin-Myers,Tennessee Titans,Active,2026-10-09T19:41Z,,,,,,
 4035369,Jeffery Simmons,Tennessee Titans,Active,2026-10-09T19:41Z,,,,,,
-4570469,Marcus Harris,Tennessee Titans,Active,2026-10-09T19:41Z,,,,,,
 4870805,Anthony Hill Jr.,Tennessee Titans,Active,2026-10-07T01:15Z,,,,,,Hill tallied eight tackles (three solo) during the Titans' 24-18 loss to the Ravens on Sunday.
 4879480,Drew Moss,Tennessee Titans,Active,2026-10-05T19:07Z,,,,,,
 4039160,Kylen Granson,Tennessee Titans,Active,2026-10-05T19:07Z,,,,,,
