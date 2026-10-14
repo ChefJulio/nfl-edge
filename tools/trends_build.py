@@ -15,6 +15,7 @@ columnar and compact: teams, games, players and coaches are indexed lists, play 
                 charting (2022 on, CC-BY-SA: motion, play action, screen, RPO, blitzers, pocket, drops, catchable,
                 contested, interception-worthy, throwaways, read). Box / rushers / alignment fall back to FTN when
                 participation is missing (the current season). Missing: -1 for numbers and flags, 0 for vocab codes.
+<season>_st.json special teams (kickoffs, punts, field goals, extra points), kicking team's side; build_st.
 index.json      seasons + cov: {season: [columns with values on >= 90% of the plays they apply to]}. Trends.js only
                 uses a column in covered seasons and says which seasons it dropped, so a charting gap is never a zero.
 Vocabularies changed in 2023 (participation provider): formations and routes are mapped onto one set (FORM, ROUTE);
@@ -34,7 +35,7 @@ import pandas as pd  # noqa: E402
 from nfledge import data as D  # noqa: E402
 from nfledge.config import load_config  # noqa: E402
 
-V = 4
+V = 5
 FIRST = 1999
 COVERED = 0.9
 COLS = ["game_id", "play_id", "season", "week", "season_type", "posteam", "defteam", "home_team", "play_type", "qtr", "down",
@@ -44,7 +45,13 @@ COLS = ["game_id", "play_id", "season", "week", "season_type", "posteam", "defte
         "rusher_player_name", "passer_player_id", "passer_player_name", "receiver_player_id", "receiver_player_name",
         "qb_kneel", "qb_spike", "two_point_attempt", "fumble_lost", "wp", "wpa", "cpoe", "xpass", "qb_hit",
         "tackled_for_loss", "xyac_mean_yardage", "roof", "surface", "temp", "wind", "div_game", "spread_line", "total_line",
-        "home_coach", "away_coach", "away_team"]
+        "home_coach", "away_coach", "away_team",
+        # special teams (<season>_st.json)
+        "kicker_player_id", "kicker_player_name", "punter_player_id", "punter_player_name", "kickoff_returner_player_id",
+        "kickoff_returner_player_name", "punt_returner_player_id", "punt_returner_player_name", "kick_distance",
+        "return_yards", "touchback", "punt_inside_twenty", "punt_fair_catch", "punt_blocked", "field_goal_result",
+        "extra_point_result", "return_touchdown"]
+ST_TYPES = {"kickoff": 0, "punt": 1, "field_goal": 2, "extra_point": 3}
 LOC = {"left": 1, "middle": 2, "right": 3}
 GAP = {"end": 1, "tackle": 2, "guard": 3}
 FORM = {"SHOTGUN": "Shotgun", "EMPTY": "Shotgun", "S": "Shotgun", "UNDER CENTER": "Under center", "SINGLEBACK": "Under center",
@@ -138,6 +145,54 @@ def build(pbp: pd.DataFrame, season: int, full: dict) -> dict:
             ci.get(r.home_coach, -1), ci.get(r.away_coach, -1)] for r in g.itertuples(index=False)]
   return {"v": V, "season": season, "teams": teams, "coaches": coaches, "games": games, "players": plist, "n": len(p),
           "cols": cols}, p[["game_id", "play_id"]].reset_index(drop=True)
+
+
+def build_st(pbp: pd.DataFrame, doc: dict, full: dict) -> dict:
+  """Special-teams plays (kickoffs, punts, field goals, extra points), every column from the KICKING team's side:
+  nflverse makes the receiving team the offense on kickoffs (posteam, EPA, score, win probability), so those are
+  flipped. k / r = kicking / receiving team; kp = kicker or punter, rp = returner (player idx, -1 none); mk = made
+  (FG / XP good); rt = returned (a returner and no touchback / fair catch); e = EPA x100 for the kicking team."""
+  p = pbp[pbp.play_type.isin(list(ST_TYPES)) & pbp.posteam.notna() & pbp.defteam.notna() & pbp.game_id.isin(
+    [g[0] for g in doc["games"]])].copy()
+  for c in ("posteam", "defteam"):
+    p[c] = p[c].replace(D.RELOCATED)
+  ti = {t: i for i, t in enumerate(doc["teams"])}
+  gi = {g[0]: i for i, g in enumerate(doc["games"])}
+  ko = (p.play_type == "kickoff").to_numpy()
+  kick = np.where(ko, p.defteam, p.posteam)
+  recv = np.where(ko, p.posteam, p.defteam)
+  num = lambda c, d=0: pd.to_numeric(p[c], errors="coerce").fillna(d)  # noqa: E731
+  flip = np.where(ko, -1, 1)
+  wp = pd.to_numeric(p.wp, errors="coerce")
+  wpk = np.where(wp.isna(), -1, np.round(np.where(ko, 1 - wp, wp) * 100)).astype(int)
+  ids = {}
+  kid = p.kicker_player_id.fillna(p.punter_player_id)
+  knm = p.kicker_player_name.fillna(p.punter_player_name)
+  rid = p.kickoff_returner_player_id.fillna(p.punt_returner_player_id)
+  rnm = p.kickoff_returner_player_name.fillna(p.punt_returner_player_name)
+  for gid, n in list(zip(kid, knm)) + list(zip(rid, rnm)):
+    if isinstance(gid, str) and gid not in ids:
+      ids[gid] = full.get(gid) or (n if isinstance(n, str) else gid)
+  plist = list(ids.items())
+  pi = {g: i for i, (g, _) in enumerate(plist)}
+  tb, fc = num("touchback").astype(int), num("punt_fair_catch").astype(int)
+  ret = (rid.notna() & (tb == 0) & (fc == 0)).astype(int)
+  res = np.where(p.play_type == "field_goal", (p.field_goal_result == "made").astype(int),
+                 np.where(p.play_type == "extra_point", (p.extra_point_result == "good").astype(int), 0))
+  cols = {
+    "g": [gi[x] for x in p.game_id], "k": [ti.get(t, -1) for t in kick], "r": [ti.get(t, -1) for t in recv],
+    "t": [ST_TYPES[x] for x in p.play_type], "q": num("qtr").astype(int).tolist(),
+    "hs": (num("half_seconds_remaining", 1800) // 10).astype(int).tolist(),
+    "sd": (num("score_differential").astype(int) * flip).tolist(), "wp": wpk.tolist(),
+    "yl": num("yardline_100", 50).astype(int).tolist(), "kd": num("kick_distance", -1).astype(int).tolist(),
+    "ry": num("return_yards").astype(int).tolist(), "rt": ret.tolist(), "tb": tb.tolist(), "fc": fc.tolist(),
+    "i20": num("punt_inside_twenty").astype(int).tolist(), "bk": num("punt_blocked").astype(int).tolist(),
+    "mk": res.astype(int).tolist(), "td": num("return_touchdown").astype(int).tolist(),
+    "fl": num("fumble_lost").astype(int).tolist(), "e": (num("epa") * 100 * flip).round().astype(int).tolist(),
+    "kp": [pi.get(x, -1) if isinstance(x, str) else -1 for x in kid],
+    "rp": [pi.get(x, -1) if isinstance(x, str) else -1 for x in rid],
+  }
+  return {"v": V, "season": doc["season"], "players": plist, "n": len(p), "cols": cols}
 
 
 def charting(keys: pd.DataFrame, part: pd.DataFrame | None, ftn: pd.DataFrame | None) -> dict:
@@ -249,9 +304,9 @@ def main():
   ixf = out / "index.json"
   cov = json.loads(ixf.read_text(encoding="utf-8")).get("cov", {}) if ixf.exists() else {}
   for s in range(int(a), int(b or a) + 1):
-    names = (f"{s}.json", f"{s}_x.json", f"{s}_cov.json")
+    names = (f"{s}.json", f"{s}_x.json", f"{s}_cov.json", f"{s}_st.json")
     if s < current and all((kept / nm).exists() for nm in names):  # finished seasons never change
-      for nm in names[:2]:
+      for nm in (names[0], names[1], names[3]):
         shutil.copyfile(kept / nm, out / nm)
       cov[str(s)] = json.loads((kept / names[2]).read_text(encoding="utf-8"))
       continue
@@ -274,14 +329,16 @@ def main():
     x.update({"v": V, "season": s, "n": doc["n"]})
     cv = coverage(doc, x)
     cov[str(s)] = cv
-    for nm, d in ((names[0], doc), (names[1], x), (names[2], cv)):
+    st = build_st(pbp, doc, full)
+    for nm, d in ((names[0], doc), (names[1], x), (names[2], cv), (names[3], st)):
       (out / nm).write_text(json.dumps(d, separators=(",", ":"), allow_nan=False), encoding="utf-8")
     if s < current:
       for nm in names:
         shutil.copyfile(out / nm, kept / nm)
     (out / names[2]).unlink()
     print(f"[plays] {s}: {doc['n']} plays, {len(doc['players'])} players, {len(x['cols'])} charting cols, "
-          f"{(out / names[0]).stat().st_size / 1e6:.1f} + {(out / names[1]).stat().st_size / 1e6:.1f} MB", flush=True)
+          f"{(out / names[0]).stat().st_size / 1e6:.1f} + {(out / names[1]).stat().st_size / 1e6:.1f} MB, "
+          f"{st['n']} special-teams plays", flush=True)
   seasons = sorted(int(p.stem) for p in out.glob("[0-9][0-9][0-9][0-9].json"))
   ixf.write_text(json.dumps({"v": V, "seasons": seasons, "current": current, "tracked": sorted(APPLIES),
                              "cov": {str(s): cov.get(str(s), []) for s in seasons}}, separators=(",", ":")), encoding="utf-8")

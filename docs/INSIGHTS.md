@@ -594,6 +594,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   - nflverse xpass runs high (2024 league pass_oe -1.7%): read PROE against the league column.
   - Coverage is measured, not hand-listed: index.json `cov`; trends.js drops uncovered seasons and says so.
   - Not built: QB sneak (is_qb_sneak), penalties, defenders' names from participation, drives.
+- **RESULT (charting A/B): all four variants null** (croe / yacoe / cpoe / oe_all: |d MAE| <= 0.001 at every
+  position, every CI spans 0, no season pattern). Left off. Run crashed once on a half-written cache parquet (fixed:
+  atomic Cache writes).
 - **PRE-REGISTERED 2026-10-14 (before any run): charting stats in projections.** Variants croe (catches over
   expected per target -> reception rate), yacoe (YAC over expected per catch -> receiving yards), cpoe (completions
   over expected per attempt -> QB passing yards), oe_all (all three). From nflverse cp / xyac (2006 on, live
@@ -604,6 +607,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   CI spans 0, adopt it only for the positions it targets (croe / yacoe: RB-WR-TE, cpoe: QB) when that position's
   CI upper bound < 0, it is better in at least 4 of 6 seasons, and no other position is significantly worse.
   Otherwise off. If more than one passes, oe_all decides (adopt the combination only if it beats each single).
+- **Trends owner prefs (2026-10-14):** rows under the minimum are HIDDEN (count shown), not greyed; minimum has
+  -/+ 1 steppers and a slider capped at the largest sample; distance filter / group-by by exact yards to 15+.
+  Special teams added (<season>_st.json, kicking team's side; kickoffs: nflverse posteam = RECEIVING team, so
+  team / score / wp / EPA flipped in the builder). 2025 kickoff touchbacks 21% vs 64% in 2024 (new rules).
+- **Edge grade v1 flaw (owner: "Bijan 2023 = 19 seems super wrong"):** value = EPA over replacement charges a
+  receiver for his QB's incompletions / INTs (Bijan 2023 rec EPA -12.9 on 86 Ridder-era targets) and can't separate
+  a back from his line (Bijan ~ Allgeier per carry; Saquon 2023 near bottom). It measures value produced in that
+  offense, not ability.
 - **NFL Edge grade (owner 2026-10-14: "something we're confident and proud of").** Pre-registered gate: a learned
   grade (ridge per position on shrunk per-play stats incl. YACOE, CROE, CPOE, PFR yards after contact / broken
   tackles / drops, age, draft) must beat last season's value/g AND last season's FP/g at ranking next-season value,

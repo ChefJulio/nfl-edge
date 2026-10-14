@@ -11,7 +11,9 @@
 .tr-x { font: inherit; font-size: 15px; line-height: 1; color: var(--muted); background: color-mix(in srgb, var(--accent) 14%, var(--panel2));
   border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--line)); border-left: 0; border-radius: 0 999px 999px 0; padding: 5px 10px 5px 6px; cursor: pointer; }
 .tr-tools { justify-content: space-between; margin-top: 10px; font-size: 13px; }
-.tr-min { display: inline-flex; align-items: center; gap: 6px; } .tr-min input { width: 130px; accent-color: var(--accent); }
+.tr-min { display: inline-flex; align-items: center; gap: 6px; } .tr-min input { width: 120px; accent-color: var(--accent); }
+.tr-step { font: inherit; font-size: 17px; font-weight: 700; line-height: 1; width: 30px; height: 30px; color: var(--ink); background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+.tr-hid { margin: 8px 2px 0; font-size: 12.5px; }
 .tr-share { font: inherit; font-size: 13px; font-weight: 700; color: var(--ink); background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 5px 10px; cursor: pointer; }
 .tr-ex { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12.5px; }
 .tr-exb { font: inherit; font-size: 12.5px; color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; cursor: pointer; }
@@ -20,8 +22,6 @@
 .tr-svg { width: 100%; max-width: 520px; height: auto; margin: 0 0 8px; }
 .tr-lg { stroke: var(--muted); stroke-dasharray: 4 4; stroke-width: 1; } .tr-pl { fill: none; stroke: var(--accent); stroke-width: 2; }
 .tr-pt { fill: var(--accent); } .tr-yr { fill: var(--muted); font-size: 9px; text-anchor: middle; }
-/* dim the text, not the cell: a translucent sticky cell lets the scrolled columns show through */
-table.dt tr.tr-low td, table.dt tr.tr-low td b, table.dt tr.tr-low td .sub, table.dt tr.tr-low td span { color: color-mix(in srgb, var(--muted) 70%, transparent); }
 table.dt td.tr-main b { color: var(--ink); }
 .tr-up { color: #6fdc8c; font-weight: 700; } .tr-dn { color: #ff8f84; font-weight: 700; }
 @media (max-width: 640px) { .tr-line { font-size: 15px; } .tr-chip { font-size: 14px; padding: 4px 10px; } }
