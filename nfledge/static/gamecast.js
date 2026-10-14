@@ -689,6 +689,48 @@
     return `<div class="lg-scroll"><table class="lg lg-career"><thead><tr class="lg-ch"><th>Season</th><th>Team</th><th class="num">G</th><th class="num" title="Fantasy points per game, your scoring">FP/G</th>${cols.map(([n]) => `<th class="num">${n}</th>`).join('')}</tr></thead>
       <tbody>${seasons.map(S => row(S.s, S.g, S.g[S.g.length - 1].t)).join('')}${row('Career', all, '')}</tbody></table></div>`;
   };
+  // ---------------------------------------------------------------------------------------- injuries tab
+  // His injury history (tools/player_logs.py injury_history, 2009 on): episodes from the official injury reports and
+  // weekly rosters, games missed per episode, and a durability score (share of his team's games he was available
+  // for, shrunk toward the position average for short careers, as a percentile among his position).
+  const GRP_LABEL = { QB: 'QBs', RB: 'RBs', WR: 'WRs', TE: 'TEs', OL: 'offensive linemen', DL: 'defensive linemen', LB: 'linebackers', DB: 'defensive backs', K: 'kickers', P: 'punters', LS: 'long snappers' };
+  const loadInj = () => {
+    if (DINJ !== null || loadInj.busy) return;
+    loadInj.busy = 1;
+    getJSON(`${siteRoot()}data/espn_injuries/latest.json`).then(x => { DINJ = {}; x.rows.forEach(r => { DINJ[String(r.espn_id)] = r; }); rerenderCard(); }).catch(() => {});
+  };
+  const injuryTab = (L, espn) => {
+    const eps = L.inj || [], d = L.dur;
+    loadInj();
+    const now = espn && DINJ && DINJ[espn];
+    const cur = now && now.status !== 'Active' ? `<div class="pc-box"><div class="pc-k">Right now · ESPN</div>
+      <div class="ij-now"><span class="dc-tag dt-${now.status === 'Questionable' ? 'q' : now.status === 'Doubtful' ? 'd' : 'out'}">${esc(now.status)}</span>
+        <b>${esc([now.type, now.detail && now.detail !== 'Not Specified' ? now.detail : '', now.side && now.side !== 'Not Specified' ? now.side : ''].filter(Boolean).join(' · '))}</b>
+        ${now.return_date ? `<span class="muted">est. return ${esc(new Date(now.return_date + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }))}</span>` : ''}</div>
+      ${now.comment ? `<p class="pc-sub">${esc(now.comment)}</p>` : ''}</div>` : '';
+    let dur = '';
+    if (d && d.games) {
+      const pct = d.pct != null ? Math.round(d.pct * 100) : null, tone = pct == null ? '' : pct >= 67 ? 'good' : pct <= 33 ? 'bad' : '';
+      dur = `<div class="pc-box"><div class="pc-k">Durability · since 2009</div>
+        <div class="ij-dur"><div class="pc-big ${tone}">${pct != null ? `${ord(pct)}` : '–'} <small>percentile</small></div>
+          <div class="pc-sub">${pct != null ? `More durable than ${pct}% of ${esc(GRP_LABEL[d.grp] || d.grp)} with a season or more of games` : ''}${d.small ? ' (few games yet: pulled toward the position average)' : ''}.</div></div>
+        ${sg([sgRow(null, [cell(`${Math.round(d.avail * 100)}%`, 'Available', 'Share of his team\'s games he was not out injured'), cell(f0(d.games), 'Team games'), cell(f0(d.missed), 'Missed', 'Games missed injured'), cell(f0(eps.length), 'Injuries', 'Injury episodes listed')])], 4, { labels: false, cls: 'sg-tight' })}
+        <p class="pc-sub">Counts his team's games while he was on the roster; games missed inside an injury episode count against him (healthy scratches and suspensions don't). Ranked after pulling short careers toward the position average by one season of games.</p></div>`;
+    }
+    if (!eps.length) return cur + dur + '<div class="pc-box"><p class="pc-sub">No injuries on the official reports since 2009.</p></div>';
+    // recurring body parts: by games missed, then by how often listed
+    const parts = {};
+    eps.forEach(e => { const k = e.part || 'Undisclosed'; parts[k] = parts[k] || { n: 0, m: 0 }; parts[k].n++; parts[k].m += e.missed || 0; });
+    const top = Object.entries(parts).sort((a, b) => b[1].m - a[1].m || b[1].n - a[1].n).slice(0, 5);
+    const rec = `<div class="pc-box"><div class="pc-k">Most often</div><div class="ij-parts">${top.map(([k, v]) => `<span class="ij-part"><b>${esc(k)}</b> ${v.n}x${v.m ? ` · ${v.m} missed` : ''}</span>`).join('')}</div></div>`;
+    const wk = e => e.w0 === e.w1 ? `Wk ${e.w0}` : `Wk ${e.w0}-${e.w1}`;
+    const rows = eps.map(e => `<tr${e.missed ? '' : ' class="ij-played"'}><td><b>${e.s}</b></td><td>${wk(e)}</td><td>${esc(e.part || 'Undisclosed')}</td>
+      <td class="num">${e.missed ? `<b>${e.missed}</b>` : '0'}</td><td class="num">${e.played || 0}</td>
+      <td>${e.list ? `<span class="dc-tag dt-out">${esc(e.list)}</span>` : e.worst ? `<span class="dc-tag dt-${e.worst === 'Questionable' ? 'q' : e.worst === 'Doubtful' ? 'd' : 'out'}">${esc(e.worst === 'Questionable' ? 'Q' : e.worst === 'Doubtful' ? 'D' : 'Out')}</span>` : ''}</td></tr>`).join('');
+    return `${cur}${dur}${rec}<div class="pc-box pc-logbox"><div class="pc-k">Every injury listed</div>
+      <div class="lg-scroll"><table class="lg ij-tbl"><thead><tr class="lg-ch"><th>Season</th><th>Weeks</th><th>Injury</th><th class="num" title="Games missed">Missed</th><th class="num" title="Games played while listed">Played</th><th title="Worst game status or reserve list">Status</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="pc-sub">From the official injury reports and weekly rosters (2009 on). An episode runs while he is on the report or a reserve list; a bye doesn't end it, a game played without a listing does. IR players drop off the weekly report, so a later IR stint can show as undisclosed.</p></div>`;
+  };
   const renderCard = pid => {
     const body = document.querySelector('#pcOv .pc-body');
     const d = cardData(), L = LOGS[pid] && !LOGS[pid].missing ? LOGS[pid] : null;
@@ -719,13 +761,14 @@
 </div>
       </div>
       ${profileBox(L)}
-      <div class="seg pc-tabs" role="tablist">${[['ov', overview ? 'Overview' : 'Week'], ['log', 'Game log'], ...(news ? [['news', 'News']] : [])]
+      <div class="seg pc-tabs" role="tablist">${[['ov', overview ? 'Overview' : 'Week'], ['log', 'Game log'], ...(L && (L.inj || L.dur) ? [['inj', 'Injuries']] : []), ...(news ? [['news', 'News']] : [])]
         .map(([k, l]) => `<button type="button" role="tab" data-pt="${k}" class="${cardTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${overview ? '' : pickerHtml()}${week}</div>
       <div class="pc-tab" data-pt="log"${cardTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every career game</div><div class="pc-log">${
         !LOGS[pid] ? '<p class="pc-sub">Loading game log&hellip;</p>' : !L ? '<p class="pc-sub">Game log unavailable.</p>'
           : isKind ? (L.seasons.length ? kindLog(L, L.seasons) : '<p class="pc-sub">No regular-season games with a recorded stat or snap.</p>')
           : L.seasons.length || (L.up || []).length ? logHtml(L, p || row) : '<p class="pc-sub">No NFL games yet.</p>'}</div></div></div>
+      ${L && (L.inj || L.dur) ? `<div class="pc-tab" data-pt="inj"${cardTab === 'inj' ? '' : ' hidden'}>${injuryTab(L, espn)}</div>` : ''}
       ${news ? `<div class="pc-tab" data-pt="news"${cardTab === 'news' ? '' : ' hidden'}><div class="pc-box pc-newsbox"><div class="pc-k">Recent news</div><div class="pc-news"></div></div></div>` : ''}`;
     body.querySelectorAll('.pc-news').forEach(nb => loadNews(espn, nb, +nb.dataset.n || 6));
     body.querySelectorAll('.pc-log').forEach(wireLogRows);

@@ -124,11 +124,12 @@ def main():
   cache.save_meta()  # fetch times for players / contracts, so the next run honors their refresh intervals
   # Every roster since 2002 (bios, career teams for every player's page; loaded seasons come with the data)
   ros_cols = ["season", "week", "team", "gsis_id", "full_name", "position", "status", "jersey_number", "birth_date", "height",
-              "weight", "college", "headshot_url", "years_exp", "espn_id"]
+              "weight", "college", "headshot_url", "years_exp", "espn_id", "status_description_abbr"]
   all_ros = pd.concat([x[[c for c in ros_cols if c in x]] for x in
                        [cache.get("rosters", s, lambda: nfl.load_rosters_weekly([s]), stale=False) for s in range(2002, first_loaded)]
                        + [data.rosters] if x is not None and len(x)], ignore_index=True)
   bios = bio_map(all_ros, data.draft, contracts)
+  injuries = injury_history(cache, nfl, data.current_season, all_ros, allsched)
   scr = qb_scrambles(data.pbp)
   out_dir = site / "data" / "players"
   out_dir.mkdir(parents=True, exist_ok=True)
@@ -196,13 +197,16 @@ def main():
     doc = {"pid": pid, "name": name, "espn": espn, "pos": pos, "keys": SCORE_KEYS, "cur": data.current_season, "team": team,
            "seasons": [{"s": s, "g": seasons[s]} for s in sorted(seasons, reverse=True)], "up": upcoming,
            "bio": bios.get(pid, {})}
+    if pid in injuries:
+      doc["inj"] = injuries[pid]["eps"]
+      doc["dur"] = injuries[pid].get("dur")
     if pos == "QB" and pid in scr:
       doc["scr"] = scr[pid]  # {season: [scrambles, dropbacks]}
     (out_dir / f"{pid}.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
     n += 1
   size = sum(f.stat().st_size for f in out_dir.glob("*.json"))
   print(f"[logs] wrote {n} player game logs ({size / 1e6:.1f} MB) to {out_dir}", flush=True)
-  other_logs(site, cache, nfl, data.current_season, allsched, pinfo, all_ros, sn, bios, written=set(everyone))
+  other_logs(site, cache, nfl, data.current_season, allsched, pinfo, all_ros, sn, bios, written=set(everyone), injuries=injuries)
   team_logs(site, cfg, data, cache, nfl, allsched)
 
 
@@ -236,7 +240,7 @@ def espn_str(e):
 
 
 def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: pd.DataFrame, ros: pd.DataFrame,
-               snaps: pd.DataFrame, bios: dict, written: set):
+               snaps: pd.DataFrame, bios: dict, written: set, injuries: dict | None = None):
   """<site>/data/players/<gsis>.json for everyone the fantasy pass didn't write: every player in nflverse's weekly
   stats (1999 on), on a weekly roster (2002 on) or in the snap counts (2012 on). Per game: his kind's stat line
   ("d", in "keys" order), returns ("r") when he had any, his unit's snap share ("sn"). Plus "ros": per season, his
@@ -333,9 +337,107 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
     doc = {"pid": pid, "name": name, "espn": espn, "pos": pos if isinstance(pos, str) else None, "kind": kind,
            "keys": [k for k, _ in keys], "ret_keys": [k for k, _ in RET], "cur": cur, "team": team,
            "seasons": [{"s": s, "g": seasons[s]} for s in sorted(seasons, reverse=True)], "ros": rs, "bio": bios.get(pid, {})}
+    if injuries and pid in injuries:
+      doc["inj"] = injuries[pid]["eps"]
+      doc["dur"] = injuries[pid].get("dur")
     (out_dir / f"{pid}.json").write_text(json.dumps(_json_safe(doc), separators=(",", ":"), allow_nan=False), encoding="utf-8")
     n += 1
   print(f"[logs] wrote {n} other player pages (defense, line, specialists, players without fantasy stats)", flush=True)
+
+
+# ---------------------------------------------------------------------------------------------------------------
+# Injury history for the player page's Injuries tab: episodes built from every official injury report (2009 on:
+# body part, game status) and the weekly rosters (2002 on: active / inactive / reserve lists), team game weeks only.
+RESERVE = {"R01": "IR", "R48": "IR", "R04": "PUP", "R05": "NFI"}
+NOT_INJURY = re.compile(r"not injury|rest|personal|resting|coach", re.I)
+SEVERITY = {"Questionable": 1, "Doubtful": 2, "Out": 3}
+
+
+def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFrame) -> dict:
+  """gsis -> [episode], newest first. An episode = consecutive team games where he was on the injury report or a
+  reserve list for an injury (a bye doesn't break it; a game played with no listing ends it). Per episode: season,
+  first / last week, body part (the one listed most), games missed (not active), games played while listed, the
+  reserve list if any, the worst game status."""
+  inj = []
+  for s in range(2009, cur + 1):
+    x = cache.get("injuries", s, lambda: nfl.load_injuries([s]), stale=s == cur and cache.age_hours("injuries", s) > 6)
+    if x is not None and len(x):
+      inj.append(x[x.game_type == "REG"][["season", "week", "gsis_id", "report_primary_injury", "practice_primary_injury", "report_status"]])
+  inj = pd.concat(inj, ignore_index=True).dropna(subset=["gsis_id"])
+  inj["part"] = inj.report_primary_injury.fillna(inj.practice_primary_injury).astype("string").str.strip().str.capitalize()  # "right Finger" -> "Right finger"
+  inj = inj[inj.part.notna() & ~inj.part.astype(str).str.contains(NOT_INJURY)]
+  listed = {(g, int(s), int(w)): (str(p), str(st) if isinstance(st, str) else "") for g, s, w, p, st in
+            zip(inj.gsis_id, inj.season, inj.week, inj.part, inj.report_status)}
+  games = set()
+  for x in allsched.itertuples():
+    for t in (x.home_team, x.away_team):
+      games.add((int(x.season), int(x.week), ROSTER_TEAM.get(t, t)))
+  r = ros.dropna(subset=["gsis_id"])[["gsis_id", "season", "week", "team", "status", "status_description_abbr"]].copy()
+  r["team"] = r.team.replace(ROSTER_TEAM)
+  r = r[[(int(a), int(b), c) in games for a, b, c in zip(r.season, r.week, r.team)]]
+  r = r[r.status.isin(["ACT", "INA", "RES"]) & (r.season >= 2009)]  # on the team for that game; 2009 on (official
+  # reports; earlier weekly rosters are too sparse to count games: Brady's 2008 has one row)
+  pos_of = ros.dropna(subset=["gsis_id"]).sort_values(["season", "week"]).drop_duplicates("gsis_id", keep="last").set_index("gsis_id").position
+  r = r.sort_values(["gsis_id", "season", "week"]).drop_duplicates(["gsis_id", "season", "week"], keep="last")
+  out = {}
+  for gid, g in r.groupby("gsis_id", sort=False):
+    eps, cur_ep = [], None
+
+    def close():
+      nonlocal cur_ep
+      if cur_ep:
+        parts = pd.Series(cur_ep.pop("parts"))
+        cur_ep["part"] = parts.mode().iloc[0] if len(parts) else ("Undisclosed" if cur_ep.get("list") else "")
+        if cur_ep["missed"] or cur_ep["played"]:
+          eps.append(cur_ep)
+      cur_ep = None
+
+    last_season = None
+    for s, w, st, code in zip(g.season, g.week, g.status, g.status_description_abbr):
+      s, w = int(s), int(w)
+      if s != last_season:
+        close()
+        last_season = s
+      lst = listed.get((gid, s, w))
+      res = RESERVE.get(code) if st == "RES" else None
+      active = st == "ACT"
+      if lst or res or (cur_ep and not active and st in ("INA", "RES")):
+        if cur_ep is None:
+          cur_ep = {"s": s, "w0": w, "w1": w, "missed": 0, "played": 0, "parts": [], "worst": ""}
+        cur_ep["w1"] = w
+        if lst:
+          cur_ep["parts"].append(lst[0])
+          if SEVERITY.get(lst[1], 0) > SEVERITY.get(cur_ep["worst"], 0):
+            cur_ep["worst"] = lst[1]
+        if res:
+          cur_ep["list"] = res
+        if active:
+          cur_ep["played"] += 1
+        elif st in ("INA", "RES"):
+          cur_ep["missed"] += 1
+      elif cur_ep and active:
+        close()
+    close()
+    out[gid] = {"eps": [{k: v for k, v in e.items() if v not in ("", None)} for e in reversed(eps)],
+                "games": len(g), "missed": sum(e["missed"] for e in eps)}
+  # Durability: share of his team's games he was available for (games missed inside injury episodes count against
+  # him; healthy scratches and suspensions don't), shrunk toward his position's average by one season of games
+  # (17), then his percentile among everyone at the position with a season or more of games.
+  grp = {**{p: "OL" for p in "T OT G OG C OL".split()}, **{p: "DL" for p in "DE DT NT DL".split()},
+         **{p: "LB" for p in "LB ILB OLB MLB".split()}, **{p: "DB" for p in "CB S SS FS SAF DB".split()},
+         "FB": "RB", "PK": "K"}
+  df = pd.DataFrame([(g, v["games"], v["missed"]) for g, v in out.items()], columns=["gsis_id", "games", "missed"])
+  df["grp"] = [grp.get(str(pos_of.get(g)), str(pos_of.get(g))) for g in df.gsis_id]
+  prior = df[df.games >= 17].groupby("grp").apply(lambda x: 1 - x.missed.sum() / x.games.sum()).to_dict()
+  df["avail"] = 1 - df.missed / df.games.where(df.games > 0, 1)
+  df["shrunk"] = [(a * n + prior.get(gp, 0.95) * 17) / (n + 17) for a, n, gp in zip(df.avail, df.games, df.grp)]
+  peers = {gp: np.sort(x[x.games >= 17].shrunk.to_numpy()) for gp, x in df.groupby("grp")}
+  for x in df.itertuples():
+    pr = peers.get(x.grp)
+    pct = float(np.searchsorted(pr, x.shrunk, side="right") / len(pr)) if pr is not None and len(pr) else None
+    out[x.gsis_id]["dur"] = {"games": int(x.games), "missed": int(x.missed), "avail": round(float(x.avail), 3),
+                             "pct": None if pct is None else round(pct, 3), "grp": x.grp, "small": bool(x.games < 17)}
+  return out
 
 
 def _link(e: dict, gid) -> None:
