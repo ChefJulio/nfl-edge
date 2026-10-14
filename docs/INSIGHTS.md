@@ -611,6 +611,20 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   -/+ 1 steppers and a slider capped at the largest sample; distance filter / group-by by exact yards to 15+.
   Special teams added (<season>_st.json, kicking team's side; kickoffs: nflverse posteam = RECEIVING team, so
   team / score / wp / EPA flipped in the builder). 2025 kickoff touchbacks 21% vs 64% in 2024 (new rules).
+- **Bijan 2023 = 19 diagnosed (owner: "dig deeper"):** 25 incompletions -27.7 EPA and 3 INTs -13.4 on passes TO
+  him (Ridder / Heinicke), 3 lost fumbles -13.9, catches +28.2, rushing ex-fumbles -0.061/carry (league -0.046;
+  boom-bust, 35% success). Target EPA bills receivers for their QB's throws (Gibbs 2023 -23 the same way).
+  PRE-REGISTERED fix v1.1 (definition, decided on logic): receiving value = (catch - cp) x [league EPA(complete)
+  - EPA(incomplete) at that air-yard depth, per season] + on catches (yac_epa - xyac_epa); rushing unchanged
+  (fumbles are his). GUARDRAIL: ships if, walk-forward 2021-2025 all players, its rank corr. with next-season
+  fantasy pts/g is not significantly below v1's (95% CI of v1.1 - v1 not entirely below 0). Face check reported.
+- **RESULT v1.2: PASSED guardrail -> LIVE** (fantasy pts/g -0.013 [-0.028, +0.005]; QB .625 = , RB .389 -> .333,
+  WR .546 -> .511, TE .161 -> .203). Bijan 2023 19 -> 42 (rest = 3 lost fumbles -13.9 and 35% rush success; Allgeier
+  87 because his window includes a good 2022). Open owner question: EPA grade vs fantasy-style volume credit.
+- **RESULT v1.1: FAILED guardrail** (next-season fantasy pts/g -0.026 [-0.045, -0.007]; WR .546 -> .468): removing
+  the throw also removed credit for EARNING targets (an average target worth 0). PRE-REGISTERED v1.2 (owner: "an RB
+  penalized for a pass play?"), same guardrail, second look at these seasons: + league EPA of a target at that
+  air-yard depth (that season), i.e. credit for earning the target independent of this QB's accuracy.
 - **RESULT (Edge grade v2): FAILED, v1 stays.** Team-changers (n=486, targets 2021-2025): next-season value/g rank
   corr. v1 .131, v2 .145, diff +0.014 [-0.082, +0.115]; fantasy pts/g -0.013 [-0.120, +0.085]. All players
   (reported only): value/g -0.027 [-0.063, +0.015]; fantasy pts/g +0.043 [+0.006, +0.079] (a lead, not a pass:

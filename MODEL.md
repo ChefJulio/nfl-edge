@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 97f5c6946335595c
+documented_code_hash: 2d63c0812664e1a7
 ---
 # How the model works
 
@@ -46,7 +46,7 @@ Team ratings use this season's completed games plus a fading share of last seaso
 
 | Source | Used for |
 |---|---|
-| nflverse play-by-play (via `nflreadpy`) | Every play's expected points added (EPA), win probability, players involved, field position, air yards; completion probability and expected yards after catch (for the over-expected tests in section 8) |
+| nflverse play-by-play (via `nflreadpy`) | Every play's expected points added (EPA), win probability, players involved, field position, air yards; completion probability and expected yards after catch (for the over-expected tests in section 8, and the player-page grade) |
 | nflverse schedules | Results (also for Elo), Vegas spread and total, roof, kickoff time |
 | nflverse rosters, snap counts, injury reports, depth charts, draft picks, participation, weekly player stats | Who is on the team, who played, roles, statuses, draft capital, routes, actual points, QB career history. Snap counts are matched to players through nflverse's player table as well as the rosters (the rosters alone missed about 8% of skill players' games in 2020-24; fixing it lowered projection error slightly, walk-forward 2021-25) |
 | NFL.com injury API | Day-by-day Wed/Thu/Fri practice participation |

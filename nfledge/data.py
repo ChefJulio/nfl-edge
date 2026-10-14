@@ -42,6 +42,8 @@ PBP_COLS = [
   # nflverse model outputs for the charting experiments (experiments.croe / yacoe / cpoe): completion probability
   # (cp), CPOE, YAC and expected YAC (2006 on, live every week).
   "cp", "cpoe", "yards_after_catch", "xyac_mean_yardage",
+  # YAC EPA and its expectation: the receiver's share of a target's value (tools/grade_build.py, Edge grade)
+  "yac_epa", "xyac_epa",
 ]
 
 STAT_COLS = [

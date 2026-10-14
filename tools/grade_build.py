@@ -97,13 +97,28 @@ def season_table(data, pfr: pd.DataFrame, scoring, ngs: pd.DataFrame | None = No
   tg["team_tgt_g"] = tg.groupby(["game_id", "posteam"]).game_id.transform("size")
   tg["team_ay_g"] = tg.groupby(["game_id", "posteam"]).air_yards.transform(lambda s: s.fillna(0).clip(lower=0).sum())
   ok = (tg.complete_pass == 1) & tg.xyac_mean_yardage.notna() & tg.yards_after_catch.notna()
+  # The receiver's part of a target (v1.1): catching more than the throw's completion probability says, valued at what
+  # a catch is worth at that depth that season, plus YAC EPA over expected on catches. Incompletions and interceptions
+  # cost him only as far as a typical receiver would have caught the ball: the throw is the quarterback's.
+  tg["aybin"] = (tg.air_yards.fillna(0).clip(-10, 45) // 5).astype(int)
+  ce = tg.groupby(["season", "aybin", "complete_pass"]).epa.mean().unstack()
+  worth = (ce.get(1) - ce.get(0)).fillna(0.0)
+  delta = pd.Series(list(zip(tg.season, tg.aybin)), index=tg.index).map(worth.to_dict()).fillna(0.0)
+  catch = ((tg.complete_pass - tg.cp) * delta).where(tg.cp.notna(), 0.0)
+  yac = (tg.yac_epa - tg.xyac_epa).where((tg.complete_pass == 1) & tg.yac_epa.notna() & tg.xyac_epa.notna(), 0.0) \
+    if "yac_epa" in tg and "xyac_epa" in tg else 0.0
+  tg["rec_att_p"] = (catch + yac).fillna(0.0)
+  # v1.2: plus what a target at that depth is worth on average (league, that season): credit for EARNING the target,
+  # independent of this quarterback's accuracy (v1.1 without it lost target-earning and failed its guardrail).
+  depth_worth = tg.groupby(["season", "aybin"]).epa.mean()
+  tg["rec_att2_p"] = tg.rec_att_p + pd.Series(list(zip(tg.season, tg.aybin)), index=tg.index).map(depth_worth.to_dict()).fillna(0.0)
   rec = tg.assign(gsis_id=tg.receiver_player_id, tgt=1, rec_epa=te, rec_succ=(te > 0).astype(int), rec=tg.complete_pass,
                   ay_t=tg.air_yards.fillna(0).clip(lower=0), cro_n=tg.cp.notna().astype(int),
                   cro=(tg.complete_pass - tg.cp).where(tg.cp.notna(), 0.0), yco_n=ok.astype(int),
-                  yco=(tg.yards_after_catch - tg.xyac_mean_yardage).where(ok, 0.0))
+                  yco=(tg.yards_after_catch - tg.xyac_mean_yardage).where(ok, 0.0), rec_att=tg.rec_att_p, rec_att2=tg.rec_att2_p)
   # team targets / air yards over the games he was targeted in (traded players: each team's games)
   g = rec.groupby(["gsis_id", "season", "week"]).agg(team_tgt=("team_tgt_g", "first"), team_ay=("team_ay_g", "first"))
-  rows.append(rec.groupby(["gsis_id", "season", "week"])[["tgt", "rec_epa", "rec_succ", "rec", "ay_t", "cro", "cro_n", "yco", "yco_n"]].sum())
+  rows.append(rec.groupby(["gsis_id", "season", "week"])[["tgt", "rec_epa", "rec_succ", "rec", "ay_t", "cro", "cro_n", "yco", "yco_n", "rec_att", "rec_att2"]].sum())
   rows.append(g)
   sn = data.snaps.dropna(subset=["gsis_id"])
   sn = sn[sn.offense_snaps > 0]
@@ -120,18 +135,18 @@ def season_table(data, pfr: pd.DataFrame, scoring, ngs: pd.DataFrame | None = No
   return t.reset_index()
 
 
-def add_value(tg: pd.DataFrame, pos_of: pd.Series) -> pd.DataFrame:
+def add_value(tg: pd.DataFrame, pos_of: pd.Series, rec_col: str = "rec_epa") -> pd.DataFrame:
   """value = EPA over replacement: each opportunity's EPA minus what that position's backups produce per
   opportunity that season (replacement = player-games under half the offensive snaps; measured, not set).
   Raw EPA per game punished volume (most runs lose EPA), so a workhorse back read worse than his backup."""
   tg = tg.copy()
   tg["pos"] = tg.gsis_id.map(pos_of)
   bk = tg[tg.snap_pct < 0.5]
-  for epa, n, key in (("qb_epa", "qb_db", "rq"), ("ru_epa", "ru_n", "rr"), ("rec_epa", "tgt", "rt")):
+  for epa, n, key in (("qb_epa", "qb_db", "rq"), ("ru_epa", "ru_n", "rr"), (rec_col, "tgt", "rt")):
     r = bk.groupby(["season", "pos"])[[epa, n]].sum()
     rate = (r[epa] / r[n].replace(0, np.nan)).fillna(0.0)
     tg[key] = pd.Series(list(zip(tg.season, tg.pos))).map(rate.to_dict()).fillna(0.0).to_numpy()
-  tg["value"] = (tg.qb_epa - tg.qb_db * tg.rq) + (tg.ru_epa - tg.ru_n * tg.rr) + (tg.rec_epa - tg.tgt * tg.rt)
+  tg["value"] = (tg.qb_epa - tg.qb_db * tg.rq) + (tg.ru_epa - tg.ru_n * tg.rr) + (tg[rec_col] - tg.tgt * tg.rt)
   return tg.drop(columns=["pos", "rq", "rr", "rt"])
 
 
@@ -360,6 +375,20 @@ def report_v2(r, label):
       print(f"    {pos}: n={sum(len(g) for g in gp.values())}  value/g v1 {mean_corr('v1', 'y', gp):.3f} v2 {mean_corr('v2', 'y', gp):.3f}")
 
 
+def evaluate_v11(tg, pos_of, info, cur, opt_col="rec_att2"):
+  out = []
+  for col, tag in (("rec_epa", "v1"), (opt_col, "v11")):
+    tv = add_value(tg, pos_of, col)
+    t = seasons_of(tv)
+    for T in range(2021, cur):
+      pri = fit_priors(tv, pos_of, range(FIRST, T))
+      te = pairs(t, pos_of, info, pri, [T - 1])
+      te = te[(te.g1 >= MIN_NEXT_GAMES) & (te.games_now >= 6)]
+      out.append(te[["pos", "value", "fp_next"]].assign(T=T, tag=tag).reset_index(names="gsis_id"))
+  r = pd.concat(out).pivot_table(index=["gsis_id", "T", "pos", "fp_next"], columns="tag", values="value").reset_index()
+  return r.rename(columns={"v1": "v1", "v11": "v2"}).assign(y=r.fp_next)
+
+
 def report(r):
   rng = np.random.default_rng(7)
   print(f"{'pos':4s} {'n':>5s}  rank corr. with next-season EPA/game:  grade   last EPA/g   last FP/g    "
@@ -440,7 +469,14 @@ def main():
   opt = dict(a[2:].split("=", 1) if "=" in a else (a[2:], "1") for a in sys.argv[1:] if a.startswith("--"))
   cfg = load_config()
   data, pfr, info, pos_of, cur, ngs, team_of = load(cfg)
-  tg = add_value(season_table(data, pfr, load_scoring(), ngs), pos_of)
+  st = season_table(data, pfr, load_scoring(), ngs)
+  # the live grade credits receivers with their part of a target only (v1.2; INSIGHTS): the throw is the QB's
+  tg = add_value(st, pos_of, "rec_att2")
+  if "eval11" in opt:
+    r = evaluate_v11(st, pos_of, info, cur)
+    print("\nv1.1 guardrail (v2 column = v1.1): rank corr. with next-season fantasy pts/g")
+    report_v2(r, "All players")
+    return
   if "eval2" in opt:
     r = evaluate_v2(tg, pos_of, info, cur, team_of)
     r.to_parquet(ROOT / "cache" / "grade_eval_v2.parquet")
