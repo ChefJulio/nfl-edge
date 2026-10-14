@@ -751,6 +751,40 @@
       <div class="lg-scroll"><table class="lg ij-tbl"><thead><tr class="lg-ch"><th>Season</th><th>Weeks</th><th>Injury</th><th class="num" title="Games missed">Missed</th><th class="num" title="Games played while listed">Played</th><th title="Worst game status or reserve list">Status</th></tr></thead><tbody>${rows}</tbody></table></div>
       <p class="pc-sub">From the official injury reports and weekly rosters (2009 on); games missed and played come from snap counts, so they start in 2013 ('–' before). An episode runs while he is on the report or a reserve list; a bye doesn't end it, a game played without a listing does. IR players drop off the weekly report, so a later IR stint can show as undisclosed.</p></div>`;
   };
+  // ---- Penalties (data/penalties/<season>.json, tools/penalties_build.py): regular season; one flagged play = one
+  // penalty (nflverse records each play's main penalty); yards are 0 when declined or offset.
+  const PEN = { ix: null, s: {} };
+  const penIndex = () => PEN.ix || (PEN.ix = NFLE.load('data/penalties/index.json').catch(() => null));
+  const penSeason = s => PEN.s[s] || (PEN.s[s] = NFLE.load(`data/penalties/${s}.json`).catch(() => null));
+  const penTypes = types => types.length ? `<div class="pen-types">${types.slice(0, 6).map(([t, n, y]) => `<span class="pen-t"><b>${n}</b> ${esc(t)}<i>${y} yd</i></span>`).join('')}</div>` : '';
+  // team: the latest season with games; per game and league rank (1 = fewest flags), drawn, top calls, top players
+  const teamPenBox = (abbr, D) => {
+    const T = D && D.teams[abbr];
+    if (!T || !T.g) return '';
+    const all = Object.entries(D.teams).filter(([, x]) => x.g), per = x => x.n / x.g, yper = x => x.y / x.g, dper = x => x.dn / x.g;
+    const rank = (f, asc) => 1 + all.filter(([, x]) => asc ? f(x) < f(T) : f(x) > f(T)).length;
+    const tone = r => r <= 8 ? 'good' : r >= 25 ? 'bad' : '';
+    const cellR = (v, lab, r, tip) => `<div class="pen-c"><div class="pen-v">${v}</div><div class="pen-k">${lab}</div><span class="pen-r ${tone(r)}" title="${esc(tip)}">${ord(r)}</span></div>`;
+    const pl = T.players.map(([g, n, y]) => `<button type="button" class="pen-p" data-open-pid="${esc(g)}"><b>${esc(D.names[g] || g)}</b> <span class="muted">${n} &middot; ${y} yd</span></button>`).join('');
+    return `<div class="pc-box"><div class="pc-k">Penalties · ${D.season} · ${T.g} games</div>
+      <div class="pen-grid">${cellR((per(T)).toFixed(1), 'Flags / game', rank(per, true), 'League rank, fewest flags = 1st')}
+        ${cellR(Math.round(yper(T)), 'Yards / game', rank(yper, true), 'League rank, fewest yards = 1st')}
+        ${cellR((dper(T)).toFixed(1), 'Drawn / game', rank(dper, false), "Opponents' flags; most drawn = 1st")}</div>
+      ${penTypes(T.types)}${pl ? `<div class="pc-k pen-sub">Most flagged</div><div class="pen-pl">${pl}</div>` : ''}
+      <p class="pc-sub">Regular season. Counts each play's main penalty, declined ones included (0 yards).</p></div>`;
+  };
+  // player: every season he drew a flag (seasons from his career log), newest first
+  const playerPenBox = (pid, docs) => {
+    const rows = docs.filter(d => d && d.players[pid]).sort((a, b) => b.season - a.season);
+    if (!rows.length) return '';
+    const D = rows[0], r = D.players[pid];
+    const tot = rows.reduce((a, d) => [a[0] + d.players[pid][1], a[1] + d.players[pid][2]], [0, 0]);
+    const hist = rows.map(d => { const x = d.players[pid]; return `<tr><td><b>${d.season}</b></td><td>${esc(x[0])}</td><td class="num">${x[1]}</td><td class="num">${x[2]}</td><td class="pen-top">${esc((x[3][0] || [''])[0])}</td></tr>`; }).join('');
+    return `<div class="pc-box"><div class="pc-k">Penalties · ${D.season}: ${r[1]} for ${r[2]} yards</div>${penTypes(r[3])}
+      ${rows.length > 1 ? `<div class="pc-k pen-sub">Career: ${tot[0]} for ${tot[1]} yards</div>
+      <div class="lg-scroll"><table class="lg"><thead><tr class="lg-ch"><th>Season</th><th>Team</th><th class="num">Flags</th><th class="num">Yds</th><th>Most often</th></tr></thead><tbody>${hist}</tbody></table></div>` : ''}
+      <p class="pc-sub">Regular season, accepted and declined. Only seasons with a flag are listed.</p></div>`;
+  };
   // ---- NFL Edge grade (data/grades/<season>.json, tools/grade_build.py): percentile of EPA over replacement per game
   // over his last three seasons (weighted to the latest, shrunk by sample size) among his position's players that season.
   const GR = { ix: null, s: {} };
@@ -816,7 +850,7 @@
       <div class="seg pc-tabs" role="tablist">${[['ov', overview ? 'Overview' : 'Week'], ['log', 'Game log'], ...(graded ? [['gr', 'Grade']] : []), ...(L && (L.inj || L.dur) ? [['inj', 'Injuries']] : []), ...(news ? [['news', 'News']] : [])]
         .map(([k, l]) => `<button type="button" role="tab" data-pt="${k}" class="${cardTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       ${graded ? `<div class="pc-tab" data-pt="gr"${cardTab === 'gr' ? '' : ' hidden'}><div class="pc-grade"><p class="pc-sub">Loading grade&hellip;</p></div></div>` : ''}
-      <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${overview ? '' : pickerHtml()}${week}</div>
+      <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${overview ? '' : pickerHtml()}${week}<div class="pc-pen"></div></div>
       <div class="pc-tab" data-pt="log"${cardTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every career game</div><div class="pc-log">${
         !LOGS[pid] ? '<p class="pc-sub">Loading game log&hellip;</p>' : !L ? '<p class="pc-sub">Game log unavailable.</p>'
           : isKind ? (L.seasons.length ? kindLog(L, L.seasons) : '<p class="pc-sub">No regular-season games with a recorded stat or snap.</p>')
@@ -824,6 +858,10 @@
       ${L && (L.inj || L.dur) ? `<div class="pc-tab" data-pt="inj"${cardTab === 'inj' ? '' : ' hidden'}>${injuryTab(L, espn)}</div>` : ''}
       ${news ? `<div class="pc-tab" data-pt="news"${cardTab === 'news' ? '' : ' hidden'}><div class="pc-box pc-newsbox"><div class="pc-k">Recent news</div><div class="pc-news"></div></div></div>` : ''}`;
     body.querySelectorAll('.pc-news').forEach(nb => loadNews(espn, nb, +nb.dataset.n || 6));
+    if (L) body.querySelectorAll('.pc-pen').forEach(pb => penIndex().then(ix => {
+      const ss = ix ? [...new Set(L.seasons.map(S => S.s))].filter(x => ix.seasons.includes(x)) : [];
+      return Promise.all(ss.map(penSeason));
+    }).then(docs => { if (cardPid === pid) pb.innerHTML = playerPenBox(pid, docs); }));
     body.querySelectorAll('.pc-grade').forEach(gb => grIndex().then(ix => ix ? Promise.all(ix.seasons.map(grSeason)) : [])
       .then(docs => { if (cardPid === pid) gb.innerHTML = gradeTab(pid, docs); }));
     body.querySelectorAll('.pc-log').forEach(wireLogRows);
@@ -1055,7 +1093,7 @@
         <div class="pc-id"><h3 id="pcName">${esc(info.name || abbr)}</h3>
           <div class="pc-meta"><b>${esc((L && (L.seasons.find(s => s.s === L.cur) || {}).rec) || '')}</b>${info.division ? ` <span class="muted">${esc(info.division)}</span>` : ''}</div></div></div>
       <div class="seg pc-tabs" role="tablist">${[['ov', 'Week'], ['log', 'Game log'], ['pl', 'Players'], ['dc', 'Depth'], ['po', 'Playoffs']].map(([k, l]) => `<button type="button" data-tt="${k}" class="${teamTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-      <div class="pc-tab" data-tt="ov"${teamTab === 'ov' ? '' : ' hidden'}>${pickerHtml()}${wk.html}<div class="tm-season">${L ? teamSeasonBox(L) : ''}</div></div>
+      <div class="pc-tab" data-tt="ov"${teamTab === 'ov' ? '' : ' hidden'}>${pickerHtml()}${wk.html}<div class="tm-season">${L ? teamSeasonBox(L) : ''}</div><div class="tm-pen"></div></div>
       <div class="pc-tab" data-tt="log"${teamTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every game since 1999</div><div class="tm-log">${L ? teamLogHtml(L, abbr) : '<p class="pc-sub">Loading game log&hellip;</p>'}</div></div></div>
       <div class="pc-tab" data-tt="pl"${teamTab === 'pl' ? '' : ' hidden'}>${pickerHtml()}${d ? `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
         ${wk.players ? `<table class="bx tm-pl"><thead><tr><th>Player</th><th class="num">Proj</th><th>Tier</th><th class="num">FP/G</th></tr></thead><tbody>${wk.players}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>` : wkWait(d)}</div>
@@ -1070,6 +1108,10 @@
     });
     wireTeamLog(body, abbr);
     wireDepth(body, abbr);
+    // penalties: the current season once it has games, else the last one
+    const tp = body.querySelector('.tm-pen');
+    if (tp) penIndex().then(ix => ix && penSeason(ix.current).then(D => D && D.teams[abbr] && D.teams[abbr].g >= 1 ? D : penSeason(ix.current - 1)))
+      .then(D => { if (cardTeam === abbr && D) tp.innerHTML = teamPenBox(abbr, D); });
     body.addEventListener('click', e => {  // playoff game rows open their gamecast
       const g = e.target.closest('.tpo-g[data-gid]'); if (!g || e.target.closest('button, a')) return;
       location.href = gcUrl(g.dataset.gid, '');

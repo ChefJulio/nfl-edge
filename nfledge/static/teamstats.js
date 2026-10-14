@@ -37,7 +37,9 @@
       num('fourth', '4th %', r => div(r[k('fourth_c')], r[k('fourth_att')]), pct, lowGood, '4th-down conversion rate (attempts only)'),
       num('rz', 'RZ TD%', r => div(r[k('rz_td')], r[k('rz')]), pct, lowGood, 'Touchdowns per drive that reached the red zone (inside the 20)'),
       ...(side === 'o' ? [num('top', 'TOP', r => div(r.o_top, r.g), mmss, 'desc', 'Time of possession per game'),
-                          num('pen', 'Penalties', r => per ? div(r.pen, r.g) : r.pen, per ? f1 : f0, 'asc', 'Accepted penalties against (all phases)')] : []),
+                          num('pen', 'Penalties', r => per ? div(r.pen, r.g) : r.pen, per ? f1 : f0, 'asc', 'Flags against, all phases (declined included)'),
+                          num('penyd', 'Pen yds', r => per ? div(r.pen_yds, r.g) : r.pen_yds, per ? f1 : f0, 'asc', 'Penalty yards against'),
+                          num('pendr', 'Drawn', r => r.pen_drawn == null ? null : per ? div(r.pen_drawn, r.g) : r.pen_drawn, per ? f1 : f0, 'desc', "Opponents' flags (penalties drawn)")] : []),
       num('epa', 'EPA/play', r => div(r[k('epa')], r[k('plays')]), v => v == null ? '' : (v > 0 ? '+' : '') + v.toFixed(3), lowGood, 'Expected points added per play'),
       num('succ', 'Success', r => div(r[k('success')], r[k('plays')]), pct, lowGood, 'Share of plays with positive EPA'),
     ];

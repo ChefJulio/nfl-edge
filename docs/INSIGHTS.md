@@ -640,6 +640,10 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Allgeier 2023; Saquon 2022 / 2024 / 2025 not bottom-quartile; workhorse stars top half) and (b) guardrail: RB
   rank corr. of season-only grade with next-season fantasy pts/g (both seasons qualified, 2019-2025) not
   significantly below the current grade's.
+- **Penalties (owner 2026-10-14, "you pick where"):** team page Week tab box (per game + league rank, drawn, top
+  calls, most-flagged players), player page box (season by type + career by season), Teams > Stats columns.
+  nflverse pbp keeps one (the main) penalty per play; ~3,500 / season, 92% with a player. Bug fixed: stats_build
+  deduped flags on drive + team + yards + play type, merging repeat false starts on a drive (now per play_id).
 - **UI prefs (owner 2026-10-14):** player / team page header (photo, name, position, grade, team) is sticky
   (top: var(--navh), set by shell.js from the top bar's height; the page container needs overflow: clip, never
   hidden/auto, or sticky breaks). The grade badge reads "OVR", not "EDGE" (EDGE is a position).

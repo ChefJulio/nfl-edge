@@ -29,7 +29,7 @@ from nfledge.standings import RELOCATED  # noqa: E402
 
 V = 1
 FIRST = 1999
-PBP_COLS = ["game_id", "season", "week", "season_type", "posteam", "defteam", "play_type", "yards_gained", "pass_attempt",
+PBP_COLS = ["game_id", "play_id", "season", "week", "season_type", "posteam", "defteam", "play_type", "yards_gained", "pass_attempt",
             "complete_pass", "sack", "passing_yards", "rushing_yards", "rush_attempt", "pass_touchdown", "rush_touchdown",
             "interception", "fumble_lost", "first_down_rush", "first_down_pass", "first_down_penalty", "third_down_converted",
             "third_down_failed", "fourth_down_converted", "fourth_down_failed", "penalty", "penalty_team", "penalty_yards",
@@ -84,9 +84,12 @@ def team_stats(pbp: pd.DataFrame, sched: pd.DataFrame, season: int, st: str = "R
     off_or_d[f"{who}_rz"] = rz.reindex(off_or_d.index).fillna(0)
     off_or_d[f"{who}_rz_td"] = rz_td.reindex(off_or_d.index).fillna(0)
   off["o_top"] = dr.groupby("posteam").top.sum().reindex(off.index)
-  pen = p[p.penalty == 1].drop_duplicates(["game_id", "fixed_drive", "penalty_team", "penalty_yards", "play_type"])
+  # one flagged play = one penalty (the old key, drive + team + yards + play type, merged two false starts on a drive)
+  pen = p[(p.penalty == 1) & p.penalty_team.notna()].drop_duplicates(["game_id", "play_id"])
   off["pen"] = pen.groupby("penalty_team").size().reindex(off.index).fillna(0)
   off["pen_yds"] = pen.groupby("penalty_team").penalty_yards.sum().reindex(off.index).fillna(0)
+  drew = pen.posteam.where(pen.penalty_team != pen.posteam, pen.defteam)  # the team the flag went against's opponent
+  off["pen_drawn"] = pen.groupby(drew).size().reindex(off.index).fillna(0)
   t = off.join(dfn, how="outer")
   # Points and record from the schedule (final scores)
   s = sched[(sched.season == season) & is_type(sched.game_type, st) & sched.home_score.notna()]
@@ -179,10 +182,10 @@ def main():
   n_final_cur = int(sched[(sched.season == current) & (sched.game_type == "REG")].home_score.notna().sum())
   done, post_seasons = 0, []
   for s in seasons:
-    tf, pf_ = cache.path("seasonstats_teams", s), cache.path("seasonstats_players", s)
+    tf, pf_ = cache.path("seasonstats_teams_v2", s), cache.path("seasonstats_players", s)  # v2: penalty count fix
     redo = not tf.exists() or not pf_.exists() or (s == current and cache.meta.get(meta_key) != n_final_cur)
     po_done = int((is_type(sched[sched.season == s].game_type, "POST") & sched[sched.season == s].home_score.notna()).sum())
-    tfp, pfp = cache.path("seasonstats_teams_post", s), cache.path("seasonstats_players_post", s)
+    tfp, pfp = cache.path("seasonstats_teams_post_v2", s), cache.path("seasonstats_players_post", s)
     redo_po = po_done > 0 and (not tfp.exists() or not pfp.exists() or cache.meta.get(f"{meta_key}_post_{s}") != po_done)
     pbp = ps = sn = None
     if redo or redo_po:

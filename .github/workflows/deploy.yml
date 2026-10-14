@@ -105,6 +105,9 @@ jobs:
       # Player pages: NFL Edge grade (production percentile, 2018 on; tools/grade_build.py).
       - name: Edge grades
         run: python tools/grade_build.py --site=site
+      # Team / player pages and Teams > Stats: penalties per season since 1999 (tools/penalties_build.py).
+      - name: Penalties
+        run: python tools/penalties_build.py --site=site
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:
