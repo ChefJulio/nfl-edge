@@ -765,7 +765,7 @@
     const D = rows[0], r = D.players[pid], pos = r[1], labels = D.stats[pos] || [];
     const posName = { QB: 'quarterbacks', RB: 'running backs', WR: 'wide receivers', TE: 'tight ends' }[pos] || pos;
     const sign = v => v == null ? '–' : `${v > 0 ? '+' : ''}${v.toFixed(3)}`, nq = (D.qualified || {})[pos];
-    const bars = labels.map((l, i) => { const v = r[5][i]; return `<div class="eg-row"><span class="eg-l">${esc(l)}</span><span class="eg-bar"><i class="${grTone(v)}" style="width:${Math.max(2, v)}%"></i></span><b class="eg-v">${v}</b></div>`; }).join('');
+    const bars = labels.map((l, i) => { const v = r[5][i]; return `<div class="eg-row"><span class="eg-l">${esc(l)}</span><b class="eg-v">${v}</b><span class="eg-bar"><i class="${grTone(v)}" style="width:${Math.max(2, v)}%"></i></span></div>`; }).join('');
     // by season: that season's play only ([6], [7]); older files without it fall back to the window grade
     const hist = rows.map(d => { const x = d.players[pid], g = x[6] ?? x[0];
       return `<tr><td><b>${d.season}</b></td><td class="num"><span class="eg-chip ${grTone(g)}"><b>${g}</b></span></td><td class="num">${x[8] ?? '–'}</td><td class="num">${sign(x[7])}</td></tr>`; }).join('');
