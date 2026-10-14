@@ -25,6 +25,9 @@ def _log(msg):
 
 class Engine:
   def __init__(self, data: Data, cfg: dict, scoring, positions=POSITIONS):
+    if cfg.get("experiments", {}).get("snap_map") == "rosters" and "gsis_id_roster" in data.snaps:
+      import dataclasses  # A/B only: the pre-2026-10-14 roster-only snap id map
+      data = dataclasses.replace(data, snaps=data.snaps.assign(gsis_id=data.snaps.gsis_id_roster))
     self.data, self.cfg, self.scoring, self.positions = data, cfg, scoring, list(positions)
     self.tm = TeamModel(data.pbp, cfg, data.qb_career)
     self.team_ledger = team_game_ledger(data.pbp, data.schedules)

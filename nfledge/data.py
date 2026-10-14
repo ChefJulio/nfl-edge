@@ -270,7 +270,13 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
   snaps = snaps[snaps.game_type == "REG"].copy()
   rosters = cat("rosters")
   pid = rosters.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
-  snaps["gsis_id"] = snaps.pfr_player_id.map(pid)
+  # Snap counts carry PFR ids. The loaded rosters' pfr_id misses ~8% of skill-player rows in 2020-24 (~30% of all
+  # rows); nflverse's player table maps ~99.8%. Roster map first, the player table for the rest (2026-10-14).
+  # gsis_id_roster keeps the old roster-only map for the A/B (tools/experiments.py snap_map_rosters).
+  snaps["gsis_id_roster"] = snaps.pfr_player_id.map(pid)
+  players = cache.get("players", "all", lambda: nfl.load_players(), stale=cache.age_hours("players", "all") > 24 * 7)
+  ppid = players.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
+  snaps["gsis_id"] = snaps.gsis_id_roster.fillna(snaps.pfr_player_id.map(ppid))
   routes = frames["routes"]
   routes = pd.concat([r for r in routes if r is not None], ignore_index=True) if any(
     r is not None for r in routes) else None

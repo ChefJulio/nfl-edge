@@ -1,5 +1,5 @@
 ---
-documented_code_hash: cbf1b81e9210d718
+documented_code_hash: d3aaa1d955e00951
 ---
 # How the model works
 
@@ -48,7 +48,7 @@ Team ratings use this season's completed games plus a fading share of last seaso
 |---|---|
 | nflverse play-by-play (via `nflreadpy`) | Every play's expected points added (EPA), win probability, players involved, field position, air yards |
 | nflverse schedules | Results (also for Elo), Vegas spread and total, roof, kickoff time |
-| nflverse rosters, snap counts, injury reports, depth charts, draft picks, participation, weekly player stats | Who is on the team, who played, roles, statuses, draft capital, routes, actual points, QB career history |
+| nflverse rosters, snap counts, injury reports, depth charts, draft picks, participation, weekly player stats | Who is on the team, who played, roles, statuses, draft capital, routes, actual points, QB career history. Snap counts are matched to players through nflverse's player table as well as the rosters (the rosters alone missed about 8% of skill players' games in 2020-24; fixing it lowered projection error slightly, walk-forward 2021-25) |
 | NFL.com injury API | Day-by-day Wed/Thu/Fri practice participation |
 | FantasyPros expert consensus (via nflverse) | Weekly positional ranks, published Fridays |
 | PFR advanced defensive stats | Tested for defender values; still downloaded but not used (see section 8) |

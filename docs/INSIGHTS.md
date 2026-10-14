@@ -547,6 +547,8 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   table, not the loaded rosters' `pfr_id` (rosters miss ~30% of snap rows: linemen, defenders, ~8% of skill players
   in 2020-24). Targets are missing in nflverse stats for some seasons (e.g. 2003-08: 0 targets). Ourlads' depth
   charts are more accurate per the owner, but their terms forbid scraping and republishing (checked 2026-10-14).
+  Owner's decision (2026-10-14): no Ourlads at all, not even a link-out ("they don't want anyone but their users
+  using their stuff"). Do not propose it again.
 
 ## 9. Open threads / next steps (as of 2026-10-12)
 - **ESPN early-week buckets (2026-10-14, nfledge/espn_calib.py), MEASURED:** Wayback Machine captures of
@@ -557,11 +559,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Return dates are mostly placeholders (= next game day) and run optimistic: first game back a median 14 days
   after the estimate (IR +38), earlier than estimated 1%. Priors capped at 50 cases so 2026 outcomes still count.
   Owner's audit cases now: Deebo 98% inactive, Henderson / Montgomery 96%. The pre-registered 4-week check is
-  superseded by the backfill (measured directly). Next if needed: the Questionable bucket (needs the 'news since
-  last game' filter, which the Wayback data lacks).
-- **Model snap data gap (2026-10-14):** `data.load_all` maps snaps pfr -> gsis through the loaded rosters, which
-  lose ~8% of skill-player snap rows in 2020-24 (0.5% in 2026). Fixing it (player-table map) changes model inputs:
-  run the 5-season A/B before adopting.
+  superseded by the backfill (measured directly). Questionable bucket DEFERRED (2026-10-14, owner left it to me): the
+  Wayback data has no ESPN update time, so the bridge's 'news since his last game' filter can't be applied and its
+  48% mixes fresh news with stale tags. Revisit once the daily snapshots (which keep `updated`) hold ~4 weeks of
+  outcomes: measure Q-with-fresh-news early-week play rate, adopt as a bucket if it differs from no listing.
+- **Model snap data gap FIXED (2026-10-14, adopted):** `data.load_all` mapped snaps pfr -> gsis through the loaded
+  rosters only (lost ~8% of skill-player snap rows 2020-24). Now roster map + nflverse player table fallback.
+  A/B 2021-25 (snap_map_rosters vs baseline): MAE -0.003 overall, 90% CI [-0.005, -0.001], better or tied every
+  season and position (WR -0.001 CI excludes 0).
 - **From the 2026-10-14 research batch (section 5 has the numbers):** (2) "Not extended entering
   the last rookie-deal year" (rounds 2-7, year 4, no new contract signed by then; knowable pre-season): actual minus
   projection -0.60 [-1.21, -0.03] vs others, placebo year 3 +0.20. Near the CI edge after many tests, so suspect;
