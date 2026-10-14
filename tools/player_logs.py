@@ -27,6 +27,8 @@ FIRST_SEASON = 1999
 POS = ("QB", "RB", "WR", "TE")
 
 
+GSIS_RE = re.compile(r"^\d{2}-\d{7}$")
+
 def week_files(site: Path) -> list[Path]:
   return [p for p in [site / "index.json", *sorted(site.glob("[0-9][0-9][0-9][0-9]/week-[0-9][0-9].json"))] if p.exists()]
 
@@ -322,7 +324,8 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
   pos_of = dict(zip(st.sort_values(["season", "week"]).player_id, st.sort_values(["season", "week"]).position))
   rs_sorted = ros.sort_values(["season", "week"])
   pos_of.update(dict(zip(rs_sorted.gsis_id, rs_sorted.position)))
-  ids = (set(st.player_id) | set(ros.gsis_id) | set(sn.gsis_id)) - written
+  # real player ids only (00-0012345): one source carries a placeholder "0" that became data/players/0.json
+  ids = {g for g in (set(st.player_id) | set(ros.gsis_id) | set(sn.gsis_id)) - written if isinstance(g, str) and GSIS_RE.match(g)}
   stat_by = {k: g for k, g in st.groupby("player_id")}
   snap_by = {k: g for k, g in sn.groupby("gsis_id")}
   ros_by = {k: g for k, g in ros[ros.status == "ACT"].groupby("gsis_id")}
