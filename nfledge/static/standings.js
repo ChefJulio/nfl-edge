@@ -18,17 +18,17 @@
       <span class="sub">${esc(r.team)}${why ? ` &middot; <span class="st-why" title="Ahead of the clubs it's tied with on: ${esc(WHY[why] || why)}">${why === 'division tiebreak' ? '' : 'won tiebreak: '}${esc(WHY[why] || why)}</span>` : ''}</span></div></div>`;
   };
   const columns = (ties, view) => [
-    ...(view === 'conf' ? [{ key: 'conf_rank', label: '#', num: true, first: 'asc' }] : []),
-    { key: 'nick', label: 'Team', stick: true, first: 'asc', html: r => teamCell(r, view), value: r => view === 'conf' ? r.conf_rank : r.div_rank },
-    { key: 'w', label: 'W', num: true }, { key: 'l', label: 'L', num: true, first: 'asc' },
-    ...(ties ? [{ key: 't', label: 'T', num: true }] : []),
-    { key: 'pct', label: 'Pct', num: true, html: r => pct(r.pct) },
-    { key: 'pf', label: 'PF', num: true }, { key: 'pa', label: 'PA', num: true, first: 'asc' },
-    { key: 'diff', label: 'Diff', num: true, html: r => `<span class="${r.diff > 0 ? 'st-pos' : r.diff < 0 ? 'st-neg' : ''}">${sgn(r.diff)}</span>` },
-    { key: 'div_rec', label: 'Div', value: r => recPct(r.div_rec) }, { key: 'conf_rec', label: 'Conf', value: r => recPct(r.conf_rec) },
-    { key: 'home', label: 'Home', value: r => recPct(r.home) }, { key: 'away', label: 'Away', value: r => recPct(r.away) },
-    { key: 'streak', label: 'Strk', value: r => (r.streak[0] === 'W' ? 1 : -1) * (+r.streak.slice(1) || 0) },
-    { key: 'last5', label: 'Last 5', sort: false, html: r => `<span class="st-l5">${[...r.last5].map(x => `<i class="${x === 'W' ? 'w' : x === 'L' ? 'l' : 't'}">${x}</i>`).join('')}</span>` },
+    ...(view === 'conf' ? [{ w: 44, key: 'conf_rank', label: '#', num: true, first: 'asc' }] : []),
+    { w: 230, key: 'nick', label: 'Team', stick: true, first: 'asc', html: r => teamCell(r, view), value: r => view === 'conf' ? r.conf_rank : r.div_rank },
+    { w: 46, key: 'w', label: 'W', num: true }, { w: 46, key: 'l', label: 'L', num: true, first: 'asc' },
+    ...(ties ? [{ w: 42, key: 't', label: 'T', num: true }] : []),
+    { w: 64, key: 'pct', label: 'Pct', num: true, html: r => pct(r.pct) },
+    { w: 58, key: 'pf', label: 'PF', num: true }, { w: 58, key: 'pa', label: 'PA', num: true, first: 'asc' },
+    { w: 64, key: 'diff', label: 'Diff', num: true, html: r => `<span class="${r.diff > 0 ? 'st-pos' : r.diff < 0 ? 'st-neg' : ''}">${sgn(r.diff)}</span>` },
+    { w: 64, key: 'div_rec', label: 'Div', cls: 'ctr', value: r => recPct(r.div_rec) }, { w: 68, key: 'conf_rec', label: 'Conf', cls: 'ctr', value: r => recPct(r.conf_rec) },
+    { w: 64, key: 'home', label: 'Home', cls: 'ctr', value: r => recPct(r.home) }, { w: 64, key: 'away', label: 'Away', cls: 'ctr', value: r => recPct(r.away) },
+    { w: 58, key: 'streak', label: 'Strk', cls: 'ctr', value: r => (r.streak[0] === 'W' ? 1 : -1) * (+r.streak.slice(1) || 0) },
+    { w: 116, key: 'last5', label: 'Last 5', sort: false, html: r => `<span class="st-l5">${[...r.last5].map(x => `<i class="${x === 'W' ? 'w' : x === 'L' ? 'l' : 't'}">${x}</i>`).join('')}</span>` },
   ];
   const recPct = s => { const [w, l, t = 0] = String(s || '').split('-').map(Number); const g = w + l + t; return g ? (w + t / 2) / g : null; };
 

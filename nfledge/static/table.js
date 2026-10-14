@@ -5,7 +5,7 @@
 // Data in, HTML out: sorting reorders the row data and redraws the body.
 //
 //   const t = NFLE.Table(mountEl, {
-//     columns: [{ key, label, title?, num?, stick?, first? ('asc' | 'desc'), sort? (false = not sortable), cls?,
+//     columns: [{ key, label, title?, num?, stick?, first? ('asc' | 'desc'), sort? (false = not sortable), cls?, w? (px),
 //                 value?: row => sortable value, html?: row => cell HTML (escape it yourself) }],
 //     rows, sort: { key, dir }, rowAttrs?: row => 'data-open-pid="..."', rowClass?: row => 'teamrow', cls?: 'tiles'
 //   });
@@ -28,7 +28,19 @@
       const v = c.value ? c.value(r) : r[c.key];
       return v === undefined || v === null || v === '' || (typeof v === 'number' && isNaN(v)) ? null : typeof v === 'string' ? v.toLowerCase() : v;
     };
+    // Fixed column widths (every column has w): tables built from the same columns line up exactly (several tables
+    // stacked, e.g. Standings), and the layout doesn't shift with the content.
+    const sizes = () => {
+      const fixed = cols.every(c => c.w);
+      tbl.classList.toggle('dt-fixed', fixed);
+      tbl.querySelector('colgroup')?.remove();
+      if (fixed) {
+        tbl.insertAdjacentHTML('afterbegin', `<colgroup>${cols.map(c => `<col style="width:${c.w}px">`).join('')}</colgroup>`);
+        tbl.style.minWidth = `${cols.reduce((t, c) => t + c.w, 0)}px`;
+      } else tbl.style.minWidth = '';
+    };
     const head = () => {
+      sizes();
       tbl.tHead.innerHTML = `<tr>${cols.map(c => {
         const cls = [c.num ? 'num' : '', c.stick ? 'stick' : '', c.sort === false ? 'nosort' : 'can-sort', c.cls || '',
                      sort && sort.key === c.key ? `sorted-${sort.dir}` : ''].filter(Boolean).join(' ');

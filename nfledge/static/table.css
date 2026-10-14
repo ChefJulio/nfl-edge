@@ -27,3 +27,5 @@ table.dt tbody tr:hover td { background: color-mix(in srgb, var(--accent) 5%, va
 /* panel the table sits in (same as the Rankings card) */
 .dt-card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
 .dt-card .dt-tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+table.dt.dt-fixed { table-layout: fixed; } table.dt.dt-fixed td, table.dt.dt-fixed th { overflow: hidden; text-overflow: ellipsis; }
+table.dt td.ctr, table.dt th.ctr { text-align: center; }
