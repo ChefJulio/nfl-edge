@@ -91,7 +91,8 @@
   const SORT0 = { QB: 'fp', RB: 'fp', WR: 'fp', TE: 'fp', All: 'fp', OL: 'snaps_o', DL: 'def_sacks', LB: 'tackles', DB: 'tackles', K: 'fg_made', P: 'pt_att' };
   const CUSTOM = 3;
   const pickHtml = (slot, key) => `<select class="ps-pick" data-slot="${slot}" aria-label="Custom column ${slot + 1}"><option value="">+ column</option>${
-    [...new Set(A.map(a => a.group))].map(g => `<optgroup label="${esc(g)}">${A.filter(a => a.group === g).map(a => `<option value="${a.key}"${a.key === key ? ' selected' : ''}>${esc(a.label)}</option>`).join('')}</optgroup>`).join('')}</select>`;
+    [...new Set(A.map(a => a.group))].map(g => `<optgroup label="${esc(g)}">${A.filter(a => a.group === g).map(a => `<option value="${a.key}"${a.key === key ? ' selected' : ''}>${esc(a.label)}</option>`).join('')}</optgroup>`).join('')}</select>${
+    key ? `<button type="button" class="ps-sort" data-slot="${slot}" aria-label="Sort by this column" title="Sort by this column">&#8597;</button>` : ''}`;
 
   NFLE.areas.playerstats = {
     mount(sec) {
@@ -143,10 +144,21 @@
         if (!table) table = NFLE.Table(sec.querySelector('.ps-tbl'), { columns: cols, rows: rows(), sort: { key: SORT0[pos], dir: 'desc' },
           rowAttrs: r => /^\d\d-\d{7}$/.test(r.pid) ? `data-open-pid="${esc(r.pid)}"` : '' });
         else { table.setColumns(cols); table.update(rows()); if (resort) table.setSort({ key: SORT0[pos], dir: 'desc' }); }
-        sec.querySelectorAll('.ps-pick').forEach(s => s.onchange = () => {
-          custom[+s.dataset.slot] = s.value; store('nfledge-ps-custom', JSON.stringify(custom)); draw(false);
-        });
       };
+      // Custom-column sort buttons: the table ignores clicks on header controls, so they sort it themselves
+      // (first tap = the stat's natural direction, the next flips it).
+      sec.addEventListener('click', e => {
+        const b = e.target.closest('.ps-sort'); if (!b || !table) return;
+        const a = BY[custom[+b.dataset.slot]]; if (!a) return;
+        const key = `c${b.dataset.slot}_${a.key}`, cur = table.getSort();
+        table.setSort({ key, dir: cur && cur.key === key ? (cur.dir === 'asc' ? 'desc' : 'asc') : (a.first || 'desc') });
+      });
+      // One listener for every column picker: the table redraws its header on each sort and clones it for the phone
+      // header strip, so handlers set on the pickers themselves were lost after the first sort.
+      sec.addEventListener('change', e => {
+        const s = e.target.closest('.ps-pick'); if (!s) return;
+        custom[+s.dataset.slot] = s.value; store('nfledge-ps-custom', JSON.stringify(custom)); draw(false);
+      });
       const load = s => NFLE.load(`data/stats/players_${s}.json`).then(d => {
         all = d.rows.map(v => { const r = Object.fromEntries(d.cols.map((c, i) => [c, v[i]])); r._g = groupOf(r.pos); return r; });
         score();
