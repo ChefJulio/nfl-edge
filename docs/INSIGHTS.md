@@ -164,7 +164,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   59%, model chance as second opinion, edge pills removed, finals read "Favorite won" / "Upset, a 20% chance" /
   "Tossup, X won", and a track-record table (market favorites by confidence band, expected vs won, all seasons and
   this one). Still open: market-implied ratings for lookahead weeks without lines.
-- **Opponent defense terms in the efficiency models (2026-10-14; PENDING owner decision):** with the Vegas
+- **Opponent defense terms in the efficiency models (2026-10-14; ADOPTED "drop", owner delegated the call):** with the Vegas
   implied total and schedule-adjusted player rates in, `def_pass` / `def_rush` fit ~0 and several are
   wrong-signed (QB pass_td, QB rush_td, WR rec_yd). Gate set before running: adopt "drop" if MAE not worse (CI
   includes 0 or favors it) and no P(1+ TD) Brier worse. Walk-forward 2021-2026 (`experiments.def_terms`):
@@ -172,7 +172,17 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   6 seasons; TD Brier (QB pass/rush, RB rush/rec, WR/TE rec) all no difference. sign-constrained (refit without
   the term when wrong-signed) = no difference anywhere. Dropping the implied total instead = worse at every
   position (ALL +0.029 [+0.020, +0.038], QB +0.105): Vegas carries the opponent information, the defense terms
-  fit noise. Passes the gate; ships only on the owner's go-ahead (then MODEL.md stamp + archive rebuild).
+  fit noise. Passed the gate; config `def_terms = "drop"`, archive rebuilt.
+- **Matchup display (2026-10-14):** the old 1st-32nd "defense vs position" rank measured only the defense
+  ratings' effect beyond Vegas (max ~0.5 pts) and stretched it over a 32-step color scale; its order was mostly
+  noise. Now `report.matchup_effect` = projection minus projection vs a league-average opponent: Vegas implied
+  total minus the MARKET's defense term (`report.market_lines`: implied = mu + off + def + home x h, least squares
+  over the season's lines, as-of weights incl. this week's lines; SEA -3.9 .. DAL +2.9 pts, home 0.77), team
+  volume via the game model's Vegas formulas on the neutral lines, defense ratings 0. Our own game model's
+  opponent effect was much milder than the market's (Stafford vs ARI +0.5 vs +1.4), and "season-average implied"
+  counts QB changes / form as matchup. Week 6: |matchup| median QB 0.6, RB 0.6, TE 0.3, WR 0.2 pts. Color is
+  continuous (owner): white at 0.0, faint tint (0.22) up to full at the week's 90th pct of percentile-point shift
+  across fantasy starters (pooled); Soft/Tough tags = top quarter.
 
 ## 5. Tested and rejected (do not retry without new data/angle)
 | Idea | Result |
