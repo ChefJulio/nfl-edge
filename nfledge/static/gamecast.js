@@ -1328,6 +1328,52 @@
     }
     return html;
   };
+  // Pregame depth charts: both teams' charts for the game's week (data/depth/<season>/<TEAM>.json; playing time when the
+  // team has played this season, else the listed chart), starters plus the next man up at each position.
+  const preDepth = g => {
+    const season = +g.id.slice(0, 4), week = +g.id.slice(5, 7), teams = [g.away.team, g.home.team];
+    teams.forEach(t => {
+      const k = dKey(season, t);
+      if (DFILES[k] === undefined) {
+        DFILES[k] = null;
+        getJSON(`${siteRoot()}data/depth/${season}/${encodeURIComponent(t)}.json`)
+          .then(x => { DFILES[k] = x; renderGame(); }).catch(() => { DFILES[k] = false; renderGame(); });
+      }
+    });
+    if (DINJ === null && !preDepth.inj) {  // the current week's tags come from ESPN's live list (daily)
+      preDepth.inj = 1;
+      getJSON(`${siteRoot()}data/espn_injuries/latest.json`).then(x => { DINJ = {}; x.rows.forEach(r => { DINJ[String(r.espn_id)] = r; }); renderGame(); }).catch(() => {});
+    }
+    const team = t => {
+      const f = DFILES[dKey(season, t)];
+      if (!f) return `<div class="pd-team"><p class="muted">${f === false ? `No depth chart for ${esc(t)}.` : 'Loading depth chart&hellip;'}</p></div>`;
+      const wks = Object.keys(f.weeks).map(Number).sort((a, b) => a - b), wk = wks.filter(x => x <= week).pop() || wks[0];
+      const W = f.weeks[wk], live = wk === wks[wks.length - 1] && !(g.final);  // the latest chart of a game not played yet
+      const chip = ([pi, pct, ftag], bold) => {
+        const [name, pid, espn] = f.players[pi];
+        const li = live && DINJ && espn ? DINJ[espn] : null, tag = live && DINJ ? (li ? ESPN_TAG[li.status] : null) : ftag;
+        const nm = pid ? `<button type="button" class="bx-n dc-n" data-open-pid="${esc(pid)}">${esc(name)}</button>` : `<span class="dc-n">${esc(name)}</span>`;
+        return `<span class="dc-p${bold ? ' first' : ''}">${nm}${pct != null ? `<span class="dc-pct">${pct}%</span>` : ''}${tag ? `<span class="dc-tag dt-${tag === 'Q' ? 'q' : tag === 'D' ? 'd' : 'out'}" title="${esc(TAG_NAME[tag] || tag)}">${esc(tag)}</span>` : ''}</span>`;
+      };
+      let rows;
+      if (W.u) {  // playing time: [group, n starters, [[player, snap %, tag], ...]]
+        rows = W.u.map(([grp, n, pl]) => [grp, pl.slice(0, n + 1).map((x, i) => chip(x, i < n))]);
+      } else {  // listed chart: [abb, name, [[player, rank, tag], ...]]; first in each slot + the next one
+        rows = [...(W.off || []), ...(W.def || [])].map(([abb, , pl]) => [abb, pl.slice(0, 2).map(([pi, , tag], i) => chip([pi, null, tag], i === 0))]);
+      }
+      const half = W.u ? ['QB', 'RB', 'WR', 'TE', 'OL'] : null;
+      const block = rs => rs.map(([k, chips]) => `<div class="dc-row"><span class="dc-pos">${esc(k)}</span><span class="dc-pl">${chips.join('')}</span></div>`).join('');
+      const off = half ? rows.filter(r => half.includes(r[0])) : rows.slice(0, (W.off || []).length);
+      const def = half ? rows.filter(r => !half.includes(r[0])) : rows.slice((W.off || []).length);
+      const src = W.u ? 'playing time, last 3 games' : (season >= 2025 ? "ESPN's listed chart" : 'listed chart');
+      const pageHref = DATA && DATA.__rel ? `${siteRoot()}${DATA.__rel.replace(/\.json$/, '.html')}#team/${encodeURIComponent(t)}` : '';
+      return `<div class="pd-team"><div class="bx-th tm-open" data-tm="${esc(t)}" style="--tc:${esc(g.colors[t])}">${logo(t === g.away.team ? g.away.logo_url : g.home.logo_url, t === g.away.team ? g.away.logo_bg : g.home.logo_bg, 20, t)}<b>${esc(t)}</b><span class="muted pd-src">${esc(src)}</span></div>
+        <div class="pd-k">Offense</div>${block(off)}<div class="pd-k">Defense</div>${block(def)}
+        ${pageHref ? `<a class="pd-more" href="${esc(pageHref)}">Full depth chart &rsaquo;</a>` : ''}</div>`;
+    };
+    return `<section class="gcs"><h3>Depth charts <span class="bt-unit">starters in bold</span></h3>${teams.map(team).join('')}
+      <p class="gcs-note">From a team's second game on: each position's snap leaders over its last 3 games (share of snaps), leaving out players ruled out or on a reserve list; before that, the team's listed chart. Tags: that week's injury report or reserve list.</p></section>`;
+  };
   // ---- Pregame tab: everything the Matchups tile used to carry, from the week file (made before kickoff).
   const preTab = (g) => {
     if (!g) return '<section class="gcs"><p class="muted">NFL Edge has no pregame numbers for this game (no week page for it).</p></section>';
@@ -1364,7 +1410,7 @@
         ${rows ? `<table class="bx"><thead><tr><th>Player</th><th class="num">Proj</th><th class="num">Range</th><th class="num">Matchup</th></tr></thead><tbody>${rows}</tbody></table>` : '<p class="muted">No fantasy-relevant players listed.</p>'}</div>`;
     };
     return `<div class="gc-grid"><div class="gc-col">${odds}${battles}${ratings}</div>
-      <div class="gc-col"><section class="gcs"><h3>Fantasy projections <span class="bt-unit">your scoring</span></h3>${plTable(a)}${plTable(h)}</section></div></div>`;
+      <div class="gc-col"><section class="gcs"><h3>Fantasy projections <span class="bt-unit">your scoring</span></h3>${plTable(a)}${plTable(h)}</section>${preDepth(g)}</div></div>`;
   };
   // ---- Postgame tab: the recap once it's final.
   const postTab = (sum, info, g, ser) => {

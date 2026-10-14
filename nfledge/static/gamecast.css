@@ -478,3 +478,9 @@ table.gc-rt { width: 100%; font-size: 13px; } .bx-th-in { display: inline-flex; 
 table.lg tr.lg-season .lg-pin { position: sticky; left: 0; display: inline-block; padding-right: 8px; background: inherit; }
 /* cover the 12px gutter left of the pinned columns, so scrolled-under cells do not peek out on the left */
 table.lg tr > :nth-child(1), table.lg tr.lg-season .lg-pin { box-shadow: -12px 0 0 var(--panel2); }
+/* gamecast Pregame: depth charts */
+.pd-team { margin: 0 0 14px; } .pd-team .bx-th { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.pd-src { font-size: 11.5px; font-weight: 500; margin-left: auto; }
+.pd-k { font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 8px 0 2px; }
+.pd-k + .dc-row { border-top: 0; }
+.pd-more { display: inline-block; margin-top: 6px; font-size: 12.5px; }
