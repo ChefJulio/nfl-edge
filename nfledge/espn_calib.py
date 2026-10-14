@@ -10,9 +10,12 @@ ESPN's feed. Each bridged player falls in one bucket:
 Each bucket's P(active) is learned from outcomes: every early-week snapshot in the daily ESPN archive
 (tools/espn_snapshot.py; ESPN keeps no history, so it starts 2026-10-13) is matched to whether the player then
 played, from the weekly roster's game-day status (INA / reserve = inactive; a week counts once its game-day
-inactives are published). Rate = (prior x PRIOR_WEIGHT + actives) / (PRIOR_WEIGHT + cases), prior = the model's
-carry-forward rate for the designation (Out / Doubtful), so with no outcomes nothing changes and every new week of
-outcomes moves the rate toward what actually happened.
+inactives are published). Rate = (prior x PRIOR_WEIGHT + actives) / (PRIOR_WEIGHT + cases). Priors, all measured:
+  "Out+ret"   how often a player the team lists Out on the final official report plays (2021-25: 0.1% of 5,350):
+              a return date after the game says the same thing early (owner, 2026-10-14: the generic early-week Out
+              rate treated the return date as if it carried no information)
+  "Out", "Doubtful"   the designation's carry-forward rate (how often a player with it last week plays next week)
+so each new week of outcomes moves a rate toward what actually happened.
 Pre-registered check (2026-10-14): after 4 weeks of outcomes, if "Out+ret" isn't clearly less likely to play than
 "Out" (its 90% interval below Out's rate), merge it back into "Out".
 """
@@ -83,13 +86,26 @@ def cases(hist_dir: Path, data, season: int) -> pd.DataFrame:
   return c[["gsis_id", "week", "bucket", "inactive"]]
 
 
+def official_out_rate(data) -> float:
+  """P(plays | final official report says Out), from the loaded seasons: injury report x game-day roster status."""
+  inj = data.injuries[(data.injuries.report_status == "Out") & (data.injuries.game_type == "REG")]
+  # only weeks whose game-day inactives are published (some 2019 weeks lack them: their Out players read as active)
+  done = set(zip(data.rosters[data.rosters.status == "INA"].season, data.rosters[data.rosters.status == "INA"].week))
+  inj = inj[[(a, b) in done for a, b in zip(inj.season, inj.week)]]
+  st = data.rosters.drop_duplicates(["season", "gsis_id", "week"], keep="last").set_index(["season", "gsis_id", "week"]).status
+  s = [st.get((a, b, c)) for a, b, c in zip(inj.season, inj.gsis_id, inj.week)]
+  s = [v for v in s if v is not None]
+  return sum(v == "ACT" for v in s) / len(s) if s else 0.0
+
+
 def learned_rates(hist_dir: Path, data, season: int, p_next: dict) -> dict:
   """bucket -> {"p": P(active), "n": outcomes seen, "inactive": of them inactive, "prior": prior P(active)}."""
   c = cases(hist_dir, data, season)
   c = c[c.inactive.notna()]
   out = {"IR": {"p": 0.0, "n": int((c.bucket == "IR").sum()), "inactive": int(c[c.bucket == "IR"].inactive.sum()), "prior": 0.0}}
-  for b, rep in (("Out", "Out"), ("Out+ret", "Out"), ("Doubtful", "Doubtful")):
-    prior = float(p_next.get(rep, 0.5))
+  priors = {"Out": float(p_next.get("Out", 0.5)), "Out+ret": official_out_rate(data), "Doubtful": float(p_next.get("Doubtful", 0.5))}
+  for b in ("Out", "Out+ret", "Doubtful"):
+    prior = priors[b]
     x = c[c.bucket == b]
     act = float((1 - x.inactive).sum())
     out[b] = {"p": (prior * PRIOR_WEIGHT + act) / (PRIOR_WEIGHT + len(x)), "n": int(len(x)),
