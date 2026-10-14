@@ -238,6 +238,7 @@ table.tm-pl td { white-space: normal; }
 .pc-wkbar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 0 0 10px; }
 .pc-wkpick { -webkit-appearance: none; appearance: none; color-scheme: dark; font: inherit; font-size: 16px; font-weight: 700; color: var(--ink);
   background-color: var(--panel2); border: 1px solid var(--line); border-radius: 9px; padding: 6px 30px 6px 11px; min-width: 0; flex: 0 1 auto;
+  max-width: calc(100% - 84px); text-overflow: ellipsis;  /* both arrows stay on its row (2 x 36 px + gaps) */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2398a0ab'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right 11px center; }.pc-wkstep { width: 36px; height: 36px; flex: none; border-radius: 9px; border: 1px solid var(--line); background: var(--panel2); color: var(--ink);
   font-size: 20px; line-height: 1; cursor: pointer; }
@@ -456,3 +457,13 @@ table.gc-rt { width: 100%; font-size: 13px; } .bx-th-in { display: inline-flex; 
 /* matchup points (player card, gamecast players table): colored by the week file (green helps, red hurts) */
 .muv { font-weight: 800; font-variant-numeric: tabular-nums; cursor: help; }
 .pc-muv { font-size: 15px; } .pc-muv small { color: var(--muted); font-weight: 600; font-size: 12px; }
+/* team page: Depth tab (one row per position: starter first, backups after, wrapping) */
+.dc-row { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px; padding: 6px 0; border-top: 1px solid var(--line); align-items: baseline; }
+.pc-k + .dc-row { border-top: 0; }
+.dc-pos { font-size: 11.5px; font-weight: 800; color: var(--muted); letter-spacing: .03em; }
+.dc-pl { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: 13.5px; }
+.dc-p { color: var(--muted); white-space: nowrap; } .dc-p .dc-n { font-weight: 500; color: var(--muted); }
+.dc-p.first .dc-n { font-weight: 700; color: var(--ink); }
+.dc-p .flag { font-size: 10px; line-height: 15px; padding: 0 5px; border-radius: 4px; }
+.pc .dc-p .f-q { background: #fdefc6; color: #7a5200; } .pc .dc-p .f-out { background: #fde1dd; color: #9b2218; }
+.dc-p a.dc-ext { text-decoration: none; } .dc-p a.dc-ext:hover { text-decoration: underline; text-underline-offset: 3px; }

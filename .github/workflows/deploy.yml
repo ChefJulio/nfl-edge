@@ -96,6 +96,9 @@ jobs:
       # Players > Moves: ESPN's transactions log, 2002 on (past seasons fetched once into the cache, this season daily).
       - name: Moves
         run: python tools/transactions_build.py --site=site
+      # Team page > Depth: every team's latest depth chart (ESPN's, via nflverse; after Player game logs, which it links to).
+      - name: Depth charts
+        run: python tools/depth_build.py --site=site
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:

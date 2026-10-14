@@ -652,6 +652,38 @@
   // season stats and the career game log from data/teams/<TEAM>.json (tools/player_logs.py).
   let cardTeam = null, teamTab = 'ov', teamOpp = '';
   const TLOGS = {};
+  // Depth tab: every team's latest depth chart (data/depth/latest.json, tools/depth_build.py; ESPN's charts via
+  // nflverse, daily) with ESPN's injury list (data/espn_injuries/latest.json) flagging who is hurt. Loaded on first use.
+  let DEPTH, DINJ = {};
+  const INJ_TAG = { 'Out': ['Out', 'f-out'], 'Injured Reserve': ['IR', 'f-out'], 'Doubtful': ['D', 'f-out'], 'Questionable': ['Q', 'f-q'],
+                    'Suspension': ['Susp', 'f-out'], 'Physically Unable to Perform': ['PUP', 'f-out'] };
+  const loadDepth = () => {
+    if (DEPTH !== undefined) return;
+    DEPTH = null;
+    Promise.all([getJSON(`${siteRoot()}data/depth/latest.json`), getJSON(`${siteRoot()}data/espn_injuries/latest.json`).catch(() => null)])
+      .then(([d, inj]) => {
+        DEPTH = d;
+        (inj ? inj.rows : []).forEach(r => { DINJ[String(r.espn_id)] = r; });
+        if (cardTeam) renderTeam(cardTeam);
+      }).catch(e => { console.warn('depth', e); DEPTH = false; if (cardTeam) renderTeam(cardTeam); });
+  };
+  const depthHtml = abbr => {
+    if (!DEPTH) return `<div class="pc-box"><p class="pc-sub">${DEPTH === false ? 'Depth chart unavailable right now.' : 'Loading depth chart&hellip;'}</p></div>`;
+    const t = DEPTH.teams[abbr];
+    if (!t) return '<div class="pc-box"><p class="pc-sub">No depth chart for this team.</p></div>';
+    const who = ([name, pid, espn], i) => {
+      const inj = espn && DINJ[espn], tag = inj && INJ_TAG[inj.status];
+      // our player page when he has one (offensive skill players), else his ESPN page
+      const nm = pid ? `<button type="button" class="bx-n dc-n" data-open-pid="${esc(pid)}">${esc(name)}</button>`
+        : espn ? `<a class="dc-n dc-ext" href="https://www.espn.com/nfl/player/_/id/${esc(espn)}" target="_blank" rel="noopener" title="ESPN player page">${esc(name)}</a>` : `<span class="dc-n">${esc(name)}</span>`;
+      return `<span class="dc-p${i ? '' : ' first'}">${nm}${tag ? ` <span class="flag ${tag[1]}" title="${esc(inj.status)}${inj.type ? ` (${esc(inj.type)})` : ''}">${tag[0]}</span>` : ''}</span>`;
+    };
+    const box = (title, rows) => rows && rows.length ? `<div class="pc-box"><div class="pc-k">${esc(title)}</div>
+      ${rows.map(([abb, name, pl]) => `<div class="dc-row"><span class="dc-pos" title="${esc(name)}">${esc(abb)}</span><span class="dc-pl">${pl.map(who).join('')}</span></div>`).join('')}</div>` : '';
+    const day = new Date(DEPTH.asof).toLocaleDateString([], { month: 'short', day: 'numeric' });
+    return `${box(`Offense · ${t.formation}`, t.off)}${box(`Defense · ${String(t.front).replace(/ D$/, '')}`, t.def)}${box('Special teams', t.st)}
+      <p class="pc-sub">ESPN's depth chart as of ${esc(day)} (starter first, then backups in order); injury tags from ESPN's injury report. Teams' own weekly charts are often listed as "unofficial" and can lag reality.</p>`;
+  };
   const rkChip = (r, title = '') => r ? `<span class="rk-b ${r <= 8 ? 'rk1' : r <= 16 ? 'rk2' : r <= 24 ? 'rk3' : 'rk4'}"${title ? ` title="${esc(title)}"` : ''}>${ord(r)}</span>` : '';
   const sgn = v => v == null || isNaN(v) ? '' : `${v >= 0 ? '+' : ''}${(+v).toFixed(1)}`;
   const tInfo = t => (DATA && DATA.teams && DATA.teams[t]) || {};
@@ -731,13 +763,16 @@
       <div class="pc-head" style="--tc:${esc(info.color || '#666')}">${tLogo(abbr, 34)}
         <div class="pc-id"><h3 id="pcName">${esc(info.name || abbr)}</h3>
           <div class="pc-meta"><b>${esc((L && (L.seasons.find(s => s.s === L.cur) || {}).rec) || '')}</b>${info.division ? ` <span class="muted">${esc(info.division)}</span>` : ''}</div></div></div>
-      <div class="seg pc-tabs" role="tablist">${[['ov', 'Week'], ['log', 'Game log'], ['pl', 'Players']].map(([k, l]) => `<button type="button" data-tt="${k}" class="${teamTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="seg pc-tabs" role="tablist">${[['ov', 'Week'], ['log', 'Game log'], ['pl', 'Players'], ['dc', 'Depth']].map(([k, l]) => `<button type="button" data-tt="${k}" class="${teamTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       <div class="pc-tab" data-tt="ov"${teamTab === 'ov' ? '' : ' hidden'}>${pickerHtml()}${wk.html}<div class="tm-season">${L ? teamSeasonBox(L) : ''}</div></div>
       <div class="pc-tab" data-tt="log"${teamTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every game since 1999</div><div class="tm-log">${L ? teamLogHtml(L, abbr) : '<p class="pc-sub">Loading game log&hellip;</p>'}</div></div></div>
       <div class="pc-tab" data-tt="pl"${teamTab === 'pl' ? '' : ' hidden'}>${pickerHtml()}${d ? `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
-        ${wk.players ? `<table class="bx tm-pl"><thead><tr><th>Player</th><th class="num">Proj</th><th>Tier</th><th class="num">FP/G</th></tr></thead><tbody>${wk.players}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>` : wkWait(d)}</div>`;
+        ${wk.players ? `<table class="bx tm-pl"><thead><tr><th>Player</th><th class="num">Proj</th><th>Tier</th><th class="num">FP/G</th></tr></thead><tbody>${wk.players}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>` : wkWait(d)}</div>
+      <div class="pc-tab" data-tt="dc"${teamTab === 'dc' ? '' : ' hidden'}>${teamTab === 'dc' ? depthHtml(abbr) : ''}</div>`;
+    if (teamTab === 'dc') loadDepth();
     body.querySelectorAll('[data-tt]').forEach(b => b.onclick = () => {
       teamTab = b.dataset.tt;
+      if (teamTab === 'dc') { loadDepth(); body.querySelector('.pc-tab[data-tt="dc"]').innerHTML = depthHtml(abbr); }
       body.querySelectorAll('.pc-tabs [data-tt]').forEach(x => x.classList.toggle('on', x === b));
       body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.tt !== teamTab; });
     });

@@ -72,6 +72,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   pages (a `| AFC 1 = Team` block; the API rate-limits bursts, so the fetch pauses and backs off); 1999 on from our
   tiebreaker code. Before 1975 no seeds (home field rotated by division). 1920-32: no playoffs, recognized champion
   shown. Era names (Houston Oilers, Phoenix Cardinals...) get text badges, modern names logos.
+- **Depth charts (2026-10-14):** nflverse `load_depth_charts` from 2025 on = DAILY snapshots of ESPN's charts
+  (`dt` column; every slot of offense in the team's base set, e.g. "3WR 1TE", base defense "Base 3-4 D" / "Base 4-3 D",
+  and special teams; `pos_slot` + `pos_rank` = depth order; 3 separate WR slots). Some slots list no one (NaN name:
+  drop before writing JSON). Teams' own "unofficial" depth charts exist only as PDFs in weekly game notes. Only
+  offensive skill players have player pages (career logs); the Depth tab links everyone else to ESPN.
 - **ESPN transactions feed (2026-10-14):** `site.api.espn.com/apis/site/v2/sports/football/nfl/transactions?season=Y
   &limit=100&page=P`, free, no key; ~1,100-2,800 entries a season back to 2002 (2001: ~500, thin). Free text, one
   entry per team per day, often several moves ("Signed LB X. Waived CB Y."). Format changed around 2009: before,
