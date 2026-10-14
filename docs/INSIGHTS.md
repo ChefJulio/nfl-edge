@@ -453,6 +453,10 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   to overwrite it, which wiped the shell's loader). Next (owner, 2026-10-14): player / team PAGES as routes
   (`#player/<id>`, `#team/<abbr>`) instead of overlay cards, with breadcrumbs and a working back button, before
   the Rankings migration.
+- **Players > Injuries** (2026-10-14): ESPN's injury list (`data/espn_injuries/latest.json`, written by the daily
+  snapshot step) joined to our inactive % from the week data. Building it exposed a bridge bug: ESPN "Injured
+  Reserve" was mapped to Out and scored with Out's carry-forward rate (67% inactive: a third of players listed Out
+  play the next week). IR is a roster rule (4-game minimum), so the bridge now maps it to "IR" = inactive.
 - **Tiebreakers** (`nfledge/standings.py`, presentation-side: excluded from the model fingerprint and cache key):
   division, wild card, seeds; seeds match ESPN's official seeding 2014-2025 exactly (24/24 conference seedings).
   ESPN's own standings feed before 2014 is incomplete / wrong (missing or partial seeds), so older seasons were

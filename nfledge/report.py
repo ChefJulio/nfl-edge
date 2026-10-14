@@ -491,7 +491,7 @@ def matchup_effect(eng, p: pd.DataFrame, season: int, week: int) -> pd.Series:
   db_scale = ((q.team_db - ddb) / q.team_db.where(q.team_db > 0)).fillna(1.0).clip(0, 3)
   rush_scale = ((q.team_rush - drush) / q.team_rush.where(q.team_rush > 0)).fillna(1.0).clip(0, 3)
   wind = q.set_index("game_id").wind[lambda s: ~s.index.duplicated()] if "wind" in q else None
-  base = q.drop(columns=["gl_frac", "scr_frac", "implied_x_designed"], errors="ignore")
+  base = q.drop(columns=["gl_frac", "rz_frac", "scr_frac", "implied_x_designed"], errors="ignore")
   neutral = base.assign(implied_pts=base.implied_pts - dpts, def_pass=0.0, def_rush=0.0,
                         team_db=base.team_db - ddb, team_rush=base.team_rush - drush,
                         db=base.db * db_scale, tgt=base.tgt * db_scale, carries=base.carries * rush_scale)

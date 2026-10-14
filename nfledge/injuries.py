@@ -410,7 +410,7 @@ class InjuryModel:
         # STOPGAP (unvalidated, see espn.py): this week's report isn't out, but ESPN has injury news from after his
         # last game. Scored like that designation carried forward from last week.
         rep = self.espn_bridge[row.gsis_id]
-        p.at[i, "avail"] = float(self.p_next.get(rep, 1.0))
+        p.at[i, "avail"] = 0.0 if rep == "IR" else float(self.p_next.get(rep, 1.0))  # IR: out at least 4 games
         p.at[i, "status"] = f"{rep} (ESPN)"
       elif row.gsis_id in prev_map.index:
         rep = _report(prev_map.at[row.gsis_id, "report_status"])

@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 39ad8307cdcdbd5d
+documented_code_hash: 924ac1f49904a84e
 ---
 # How the model works
 
@@ -145,7 +145,7 @@ The team's projected dropbacks and rushes then turn shares into opportunities.
 ## 5. Availability and injuries
 
 - **Chance to play.** Gradient-boosted trees on the Wed/Thu/Fri practice sequence (did not practice / limited / full) and game status, trained on every season from 2018 through the last training season. Example: for a Questionable player who did not practice all three days, the model gives roughly a 30% chance to play, versus roughly 85% for limited, limited, full (current values in section 10.6). Before Wednesday's report, last week's status carries forward using learned week-to-week rates.
-- **Early-week injury news (stopgap, not yet validated).** A player hurt in Sunday's game is on no report until Wednesday, so he would look healthy for three days. For the current week only, while his team's report is not out, an ESPN status of Out, injured reserve or Doubtful posted after his team's last game is scored like that designation carried forward (labeled "(ESPN)" on the site). ESPN's Questionable is ignored: it stays on many players who played through something. ESPN's feed has no history, so it is being saved daily; once enough weeks exist, its early-week calls will be checked against who actually played and the rates refit or the bridge removed.
+- **Early-week injury news (stopgap, not yet validated).** A player hurt in Sunday's game is on no report until Wednesday, so he would look healthy for three days. For the current week only, while his team's report is not out, an ESPN status of Out or Doubtful posted after his team's last game is scored like that designation carried forward (labeled "(ESPN)" on the site). Injured reserve is a roster rule, not a designation: a player placed on IR misses at least four games, so he counts as inactive. ESPN's Questionable is ignored: it stays on many players who played through something. ESPN's feed has no history, so it is being saved daily; once enough weeks exist, its early-week calls will be checked against who actually played and the rates refit or the bridge removed.
 - **Healthy scratches.** For players not on the report, a second model uses how often the player has been active this season, whether he played last week, snap share, depth-chart rank, rookie status, and how many teammates at his position ahead of him are out.
 - **Scenarios, not discounts.** NFL availability is yes or no, so every projection is "if active", with Inactive% shown separately.
 - **Who sits.** Players below 50% are assumed out, as are contributors no longer on the roster (injured reserve, cut, traded). Their volume moves to teammates when they are a real contributor: an RB/WR/TE with an 8%+ projected target share or 15%+ carry share who has played this season, or the starting QB.

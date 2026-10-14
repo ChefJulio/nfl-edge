@@ -22,7 +22,9 @@ URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries"
 # keeps "Questionable" / "Day-To-Day" on many players who played through something on Sunday (first live run:
 # 28 such entries, CeeDee Lamb and Saquon Barkley among them), a far weaker signal than an official Questionable,
 # so those wait for the official report.
-STATUS_MAP = {"Out": "Out", "Injured Reserve": "Out", "Doubtful": "Doubtful"}
+# Injured reserve is a roster rule, not a designation: a player placed on IR misses at least four games, so it maps
+# to "IR" = certainly inactive this week (not to Out's carry-forward rate, under which a third of players return).
+STATUS_MAP = {"Out": "Out", "Injured Reserve": "IR", "Doubtful": "Doubtful"}
 
 
 def fetch_injuries(timeout: int = 30) -> pd.DataFrame:

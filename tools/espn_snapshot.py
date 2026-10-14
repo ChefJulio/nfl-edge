@@ -5,10 +5,12 @@ ESPN only serves the current season (no history), so the archive has to be built
 used by the model until a walk-forward test shows it helps; the snapshot is evidence, not a source of truth.
 
 Usage: python tools/espn_snapshot.py [--out=site/data/espn_injuries]
-Writes <out>/<YYYY-MM-DD>.csv (one row per listed player; an existing file for today is overwritten).
+Writes <out>/<YYYY-MM-DD>.csv (one row per listed player; an existing file for today is overwritten) and
+<out>/latest.json (the same rows, for the Players > Injuries tab).
 Unofficial public endpoint (like the NFL.com practice feed): may change without notice; failures are non-fatal.
 """
 import datetime as dt
+import json
 import sys
 from pathlib import Path
 
@@ -27,7 +29,10 @@ def main():
   out.mkdir(parents=True, exist_ok=True)
   path = out / f"{dt.datetime.now(dt.timezone.utc):%Y-%m-%d}.csv"
   df.to_csv(path, index=False)
-  print(f"[espn] {len(df)} injury entries -> {path}")
+  latest = {"v": 1, "fetched": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
+            "rows": json.loads(df.to_json(orient="records"))}
+  (out / "latest.json").write_text(json.dumps(latest, separators=(",", ":")), encoding="utf-8")
+  print(f"[espn] {len(df)} injury entries -> {path} (+ latest.json)")
 
 
 if __name__ == "__main__":

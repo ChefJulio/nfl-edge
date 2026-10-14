@@ -1413,6 +1413,6 @@
     const sec = document.getElementById('tab-model');
     if (sec && sec.classList.contains('on')) loadModelTab();
   }
-  window.NFLE = Object.assign(window.NFLE || {}, { openPlayer, closePlayer, openTeam, showPlayer, showTeam, weights });  // shared with shell.js, table.js, area modules
+  window.NFLE = Object.assign(window.NFLE || {}, { openPlayer, closePlayer, openTeam, showPlayer, showTeam, weights, weekData: () => DATA });  // shared with shell.js, table.js, area modules
   if (CFG.page === 'game') initGame(); else initWeek();
 })();
