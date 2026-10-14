@@ -112,7 +112,10 @@ def main():
   cur_team = (data.rosters[data.rosters.season == data.current_season].sort_values("week")
               .drop_duplicates("gsis_id", keep="last").set_index("gsis_id").team)
 
-  bios = bio_map(data.rosters)
+  contracts = cache.get("contracts", "all", lambda: nfl.load_contracts().select(CONTRACT_COLS),
+                        stale=cache.age_hours("contracts", "all") > 24)
+  cache.save_meta()  # fetch times for players / contracts, so the next run honors their refresh intervals
+  bios = bio_map(data.rosters, data.draft, contracts)
   scr = qb_scrambles(data.pbp)
   out_dir = site / "data" / "players"
   out_dir.mkdir(parents=True, exist_ok=True)
@@ -188,11 +191,53 @@ def _link(e: dict, gid) -> None:
     e["f"] = ours["file"]
 
 
-def bio_map(rosters: pd.DataFrame) -> dict:
+CONTRACT_COLS = ["gsis_id", "is_active", "year_signed", "years", "value", "apy", "guaranteed", "apy_cap_pct",
+                 "draft_year", "draft_overall"]
+
+
+def draft_map(draft: pd.DataFrame | None, contracts: pd.DataFrame | None) -> dict:
+  """gsis -> {"y": year, "r": round, "p": pick within the round, "o": overall} or {"u": 1} (undrafted). nflverse's
+  draft table first; OverTheCap's draft year + overall pick (contracts) for players it lacks; undrafted = an
+  OverTheCap player with no draft year."""
+  if draft is None or not len(draft):
+    return {}
+  d = draft.dropna(subset=["round", "pick"]).copy()
+  d["in_rd"] = d.pick - d.groupby(["season", "round"]).pick.transform("min") + 1
+  rec = lambda x: {"y": int(x.season), "r": int(x["round"]), "p": int(x.in_rd), "o": int(x.pick)}
+  out = {g: rec(x) for g, x in d.dropna(subset=["gsis_id"]).drop_duplicates("gsis_id").set_index("gsis_id").iterrows()}
+  if contracts is not None:
+    by_slot = {(int(x.season), int(x.pick)): rec(x) for _, x in d.iterrows()}
+    for g, x in contracts.dropna(subset=["gsis_id"]).drop_duplicates("gsis_id").set_index("gsis_id").iterrows():
+      if g in out:
+        continue
+      if pd.isna(x.draft_year):
+        out[g] = {"u": 1}
+      elif pd.notna(x.draft_overall) and (int(x.draft_year), int(x.draft_overall)) in by_slot:
+        out[g] = by_slot[(int(x.draft_year), int(x.draft_overall))]
+  return out
+
+
+def contract_map(contracts: pd.DataFrame | None) -> dict:
+  """gsis -> current contract (OverTheCap via nflverse): $M per year, total, years, guaranteed, share of the cap,
+  year signed. No end year: for an extension OverTheCap's years are the ADDED years (McCaffrey's 2024 2-year
+  extension runs through 2027, not 2025), so signed + years would mislead."""
+  if contracts is None or not len(contracts):
+    return {}
+  c = contracts[contracts.is_active.fillna(False).astype(bool)].dropna(subset=["gsis_id", "apy"])
+  c = c.sort_values("year_signed").drop_duplicates("gsis_id", keep="last")
+  r2 = lambda v: None if pd.isna(v) else round(float(v), 2)
+  return {x.gsis_id: {k: v for k, v in {"apy": r2(x.apy), "val": r2(x.value), "gtd": r2(x.guaranteed), "cap": None if pd.isna(x.apy_cap_pct) else round(float(x.apy_cap_pct), 4),
+                                        "from": int(x.year_signed), "yrs": None if pd.isna(x.years) else int(x.years)}.items()
+                      if v is not None}
+          for x in c.itertuples()}
+
+
+def bio_map(rosters: pd.DataFrame, draft: pd.DataFrame | None = None, contracts: pd.DataFrame | None = None) -> dict:
   """gsis -> card bio from each player's latest roster row: jersey number, birth date, height (in), weight (lb),
-  accrued seasons as of that roster season, college, official headshot URL."""
+  accrued seasons as of that roster season, college, official headshot URL; plus draft slot and current contract."""
   r = rosters.dropna(subset=["gsis_id"]).sort_values(["season", "week"]).drop_duplicates("gsis_id", keep="last")
   num = lambda v: None if pd.isna(v) else int(v)
+  drafts, deals = draft_map(draft, contracts), contract_map(contracts)
   out = {}
   for x in r.itertuples():
     b = {"num": num(getattr(x, "jersey_number", None)), "ht": num(getattr(x, "height", None)),
@@ -204,6 +249,10 @@ def bio_map(rosters: pd.DataFrame) -> dict:
       v = getattr(x, col, None)
       if isinstance(v, str) and v:
         b[k] = headshot_url(v) if k == "photo" else v
+    if x.gsis_id in drafts:
+      b["draft"] = drafts[x.gsis_id]
+    if x.gsis_id in deals:
+      b["deal"] = deals[x.gsis_id]
     out[x.gsis_id] = {k: v for k, v in b.items() if v is not None}
   return out
 

@@ -337,76 +337,99 @@
       <text x="${x(q[0])}" y="25" class="pc-rt">${f0(q[0])}</text><text x="${x(q[4])}" y="25" class="pc-rt" text-anchor="end">${f0(q[4])}</text></svg>`;
   };
   // Small bars over season-week slots, the rankings' Last 5 look: value above each bar, the week below, BYE for a
-  // team bye and a dash for a game he missed. slots: [{w, v (null = no bar), bye, title}]. Scales down to fit.
+  // team bye and a dash for a game he missed. slots: [{w, v (null = no bar), bye, pj (projection tick), title}];
+  // with a projection the bar is green when he beat it, red when he missed. Scales down to fit.
   const miniBars = (slots, { fmt = f0, top = 0, slotW = 30, H = 48, cls = '' } = {}) => {
     if (!slots.length) return '';
-    const W = slots.length * slotW, bw = slotW - 8, mx = Math.max(top, 1, ...slots.map(s => s.v || 0));
+    const W = slots.length * slotW, bw = slotW - 8, mx = Math.max(top, 1, ...slots.map(s => Math.max(s.v || 0, s.v != null ? s.pj || 0 : 0)));
     const y = v => (H - 12) - (H - 25) * Math.max(v, 0) / mx;
     return `<svg class="mb ${cls}" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img">${slots.map((s, i) => {
       const x = i * slotW + 4, mid = (x + bw / 2).toFixed(1);
+      const tone = s.pj == null ? '' : s.v >= s.pj ? ' mb-hit' : ' mb-miss';
       const body = s.v == null
         ? (s.bye ? `<text x="${mid}" y="${H - 15}" class="mb-bye">BYE</text>`
           : `<line x1="${x + 4}" x2="${x + bw - 4}" y1="${H - 13}" y2="${H - 13}" class="mb-dnp"/>`)
-        : `<rect x="${x}" y="${y(s.v).toFixed(1)}" width="${bw}" height="${Math.max(1.5, H - 12 - y(s.v)).toFixed(1)}" rx="2" class="mb-b"/>`
-          + `<text x="${mid}" y="${(y(s.v) - 3).toFixed(1)}" class="mb-v">${fmt(s.v)}</text>`;
+        : `<rect x="${x}" y="${y(s.v).toFixed(1)}" width="${bw}" height="${Math.max(1.5, H - 12 - y(s.v)).toFixed(1)}" rx="2" class="mb-b${tone}"/>`
+          + (s.pj != null ? `<line x1="${x - 1}" x2="${x + bw + 1}" y1="${y(s.pj).toFixed(1)}" y2="${y(s.pj).toFixed(1)}" class="mb-pj"/>` : '')
+          + `<text x="${mid}" y="${(Math.min(y(s.v), s.pj != null ? y(s.pj) : 99) - 3).toFixed(1)}" class="mb-v">${fmt(s.v)}</text>`;
       return `<g>${s.title ? `<title>${esc(s.title)}</title>` : ''}${body}<text x="${mid}" y="${H - 1.5}" class="mb-w">${s.w}</text></g>`;
     }).join('')}</svg>`;
   };
-  // Value-over-label chip (v is HTML: callers escape).
-  const chip = (v, k, title = '') => `<span class="pc-blip"${title ? ` title="${esc(title)}"` : ''}><b>${v}</b><small>${esc(k)}</small></span>`;
+  // Stat grid, the card's one building block: each cell is a value over a small label (v is HTML: callers escape).
+  // Rows share the grid's columns (--n), so values line up down a box; an optional label column runs down the left.
+  const cell = (v, k, title = '') => `<div class="sg-c"${title ? ` title="${esc(title)}"` : ''}><b>${v}</b><small>${esc(k)}</small></div>`;
+  const sgRow = (label, cells) => {
+    const c = cells.filter(Boolean);
+    return c.length ? `<div class="sg-r">${label != null ? `<div class="sg-k">${esc(label)}</div>` : ''}${c.join('')}</div>` : '';
+  };
+  const sgChart = (label, svg) => svg ? `<div class="sg-r"><div class="sg-k">${esc(label)}</div><div class="sg-chart">${svg}</div></div>` : '';
+  const sg = (rows, n, { labels = true, cls = '' } = {}) => {
+    const r = rows.filter(Boolean);
+    return r.length ? `<div class="sg${labels ? '' : ' sg-nolab'}${cls ? ` ${cls}` : ''}" style="--n:${n}">${r.join('')}</div>` : '';
+  };
   // Team byes of his current season (from the career log), for the week charts.
   const logByes = L => new Set(((L && L.up) || []).filter(u => u.bye).map(u => u.w));
-  // Snap share over the last five season weeks of his latest season: through the last finished week this season
-  // (the week before his team's next game), else the last five weeks of the most recent season he played.
-  const snapBars = L => {
-    if (!L || !L.seasons || !L.seasons.length) return '';
-    const cur = L.seasons.find(S => S.s === L.cur), S = cur && cur.g.length ? cur : L.seasons[0];
-    const byes = S === cur ? logByes(L) : new Set(), games = Object.fromEntries(S.g.map(g => [g.w, g]));
-    const next = S === cur ? Math.min(99, ...(L.up || []).filter(u => !u.bye).map(u => u.w)) : 99;
-    const end = next < 99 ? next - 1 : Math.max(...S.g.map(g => g.w), ...[...byes].filter(b => b < next));
-    const slots = [];
-    for (let k = Math.max(1, end - 4); k <= end; k++) {
-      const g = games[k];
-      slots.push(g ? { w: k, v: g.sn != null ? g.sn : null, title: `Week ${k}: ${g.sn != null ? `${g.sn}% of snaps` : 'played (no snap count)'} ${g.h === 0 ? '@' : 'vs'} ${g.o}` }
-        : byes.has(k) ? { w: k, v: null, bye: 1, title: `Week ${k}: bye` } : { w: k, v: null, title: `Week ${k}: did not play` });
-    }
-    return slots.length ? `<div class="pc-snaps"><span class="pc-k2">Snap %${S !== cur ? ` · ${S.s}` : ''}</span>${miniBars(slots, { top: 100, slotW: 34, H: 58, cls: 'mb-snap' })}</div>` : '';
+  // Our projection for a logged game, rescaled to the viewer's scoring (null before 2021 / no page).
+  const logProj = (g, pos) => {
+    if (!g.pjl) return null;
+    const built = (DATA && DATA.score && DATA.score.built) || HALF;
+    return g.pj * (pts(g.pjl, weights(), pos) / Math.max(0.1, pts(g.pjl, built, pos)));
   };
-  // Expected line: the week page's own row graphic (TD donuts) when the card shows this page's week, else text.
-  const expectedLine = (pid, p, d) => {
-    const td = d === DATA && document.querySelector(`tr.main[data-pid="${CSS.escape(pid)}"] td.line`);
-    if (td) return td.innerHTML;
-    const l = p.proj_line || {}, tdp = x => x ? `${Math.round((1 - Math.exp(-x)) * 100)}%` : '';
-    const s = (v, u, d = 0) => v ? `<span class="st"><b>${d ? f1(v) : f0(v)}</b><small>${u}</small></span>` : '';
-    const tds = (l.pass_td ? `${s(l.pass_td, 'pass TD', 1)}` : '') + (l.rush_td >= 0.1 ? `<span class="st"><b>${tdp(l.rush_td)}</b><small>rush TD</small></span>` : '')
-      + (l.rec_td >= 0.1 ? `<span class="st"><b>${tdp(l.rec_td)}</b><small>rec TD</small></span>` : '');
-    return p.pos === 'QB' ? s(l.pass_yd, 'pass yd') + s(l.int, 'INT', 1) + s(l.rush_yd, 'rush yd') + tds
-      : p.pos === 'RB' ? s(l.car, 'car', 1) + s(l.rush_yd, 'rush yd') + s(l.rec, 'rec', 1) + s(l.rec_yd, 'rec yd') + tds
-        : s(l.tgt, 'tgt', 1) + s(l.rec, 'rec', 1) + s(l.rec_yd, 'yd') + tds;
+  // Expected line as grid cells: volume first, then yards, then touchdowns (TDs as the chance he scores one).
+  const expectedCells = p => {
+    const l = p.proj_line || {}, c = [];
+    const n1 = (v, k) => v ? cell(f1(v), k) : '', n0 = (v, k) => v ? cell(f0(v), k) : '';
+    const tdp = (v, k) => v >= 0.05 ? cell(`${Math.round((1 - Math.exp(-v)) * 100)}%`, k, 'Chance he scores at least one') : '';
+    if (p.pos === 'QB') c.push(n1(l.att, 'Pass att'), n0(l.pass_yd, 'Pass yds'), n1(l.pass_td, 'Pass TD'), n1(l.int, 'INT'), n1(l.car, 'Carries'), n0(l.rush_yd, 'Rush yds'), tdp(l.rush_td, 'Rush TD'));
+    else if (p.pos === 'RB') c.push(n1(l.car, 'Carries'), n0(l.rush_yd, 'Rush yds'), n1(l.tgt, 'Targets'), n1(l.rec, 'Catches'), n0(l.rec_yd, 'Rec yds'), tdp(l.rush_td, 'Rush TD'), tdp(l.rec_td, 'Rec TD'));
+    else c.push(n1(l.tgt, 'Targets'), n1(l.rec, 'Catches'), n0(l.rec_yd, 'Rec yds'), tdp(l.rec_td, 'Rec TD'), l.rush_yd >= 3 ? n0(l.rush_yd, 'Rush yds') : '');
+    return c.filter(Boolean);
   };
-  // Season to date as labeled chip rows (Scoring, Passing / Rushing / Receiving in his position's order, Usage),
-  // then points by week. sc.ss = season stat line in scoring-key order, ext = volume and shares.
+  // Season to date as one stat grid: Scoring, then Passing / Rushing / Receiving in his position's order, Usage
+  // (QBs: scramble rate this season and career), then points and snap share by week on shared week columns.
+  // sc.ss = season stat line in scoring-key order, ext = volume and shares; snaps and our past projections come
+  // from the career log.
+  const SNAP_FLAT = 95;  // every recent game at or above this share: the snap chart says nothing (most QBs) - hidden
   const seasonHtml = (p, d, L) => {
     const ss = p.sc.ss, e = p.ext || {}, K = KEYS(), v = k => ss ? ss[K.indexOf(k)] || 0 : 0, w = weights();
     if (!ss || !e.games) return '<p class="pc-sub">No games this season yet.</p>';
-    const c = (x, k, t) => chip(esc(x), k, t);
-    const row = (k, chips) => chips.filter(Boolean).length ? `<div class="pc-srow"><span class="pc-sk">${k}</span><div class="pc-chips">${chips.join('')}</div></div>` : '';
+    const pct = x => `${Math.round(x * 100)}%`;
     const wk = [...(p.sc.wk || [])].sort((a, b) => a[0] - b[0]), byW = Object.fromEntries(wk.map(r => [r[0], pts(r.slice(1), w, p.pos)]));
     const last = wk.slice(-3).map(r => byW[r[0]]), fpg = p.sc.g ? pts(ss, w, p.pos) / p.sc.g : null;
-    const pass = p.pos === 'QB' ? row('Passing', [c(`${f0(e.completions)}/${f0(e.attempts)}`, 'Cmp/Att'), c(f0(v('pass_yd')), 'Yds'), c(f0(v('pass_td')), 'TD'), c(f0(v('interception')), 'INT')]) : '';
-    const rush = e.carries || v('rush_yd') ? row('Rushing', [e.carries ? c(f0(e.carries), 'Att') : '', c(f0(v('rush_yd')), 'Yds'),
-      e.carries ? c(f1(v('rush_yd') / e.carries), 'YPC') : '', c(f0(v('rush_td')), 'TD')]) : '';
-    const rec = e.targets ? row('Receiving', [c(f0(e.targets), 'Tgt'), c(f0(v('reception')), 'Rec'), c(f0(v('rec_yd')), 'Yds'), c(f0(v('rec_td')), 'TD')]) : '';
-    const use = row('Usage', [e.snap != null ? c(`${Math.round(e.snap * 100)}%`, 'Snaps') : '', p.pos !== 'QB' && e.tgt_share ? c(`${Math.round(e.tgt_share * 100)}%`, 'Tgt share') : '',
-      e.carry_share ? c(`${Math.round(e.carry_share * 100)}%`, 'Carry share') : '']);
-    const scoring = row('Scoring', [c(f0(e.games), 'Games'), fpg != null ? c(f1(fpg), 'FP/G') : '',
-      last.length ? c(f1(last.reduce((a, b) => a + b, 0) / last.length), `Last ${last.length}`) : '']);
-    const nweek = (d.week || 1) - 1, byes = L && +d.season === +L.cur ? logByes(L) : new Set(), slots = [];
-    for (let k = 1; k <= nweek; k++) slots.push(byW[k] != null ? { w: k, v: byW[k], title: `Week ${k}: ${f1(byW[k])} pts` }
-      : byes.has(k) ? { w: k, v: null, bye: 1, title: `Week ${k}: bye` } : { w: k, v: null, title: `Week ${k}: did not play` });
+    const scoring = sgRow('Scoring', [cell(f0(e.games), 'Games'), fpg != null ? cell(f1(fpg), 'FP/G') : '',
+      last.length ? cell(f1(last.reduce((a, b) => a + b, 0) / last.length), `Last ${last.length}`) : '']);
+    const pass = p.pos === 'QB' ? sgRow('Passing', [cell(`${f0(e.completions)}/${f0(e.attempts)}`, 'Cmp/Att'), cell(f0(v('pass_yd')), 'Yds'),
+      cell(f0(v('pass_td')), 'TD'), cell(f0(v('interception')), 'INT')]) : '';
+    const rush = e.carries || v('rush_yd') ? sgRow('Rushing', [e.carries ? cell(f0(e.carries), 'Att') : '', cell(f0(v('rush_yd')), 'Yds'),
+      e.carries ? cell(f1(v('rush_yd') / e.carries), 'YPC') : '', cell(f0(v('rush_td')), 'TD')]) : '';
+    const rec = e.targets ? sgRow('Receiving', [cell(f0(e.targets), 'Tgt'), cell(f0(v('reception')), 'Rec'), cell(f0(v('rec_yd')), 'Yds'), cell(f0(v('rec_td')), 'TD')]) : '';
+    const scr = p.pos === 'QB' && L && L.scr ? (() => {
+      const tot = Object.values(L.scr).reduce((a, [s, n]) => [a[0] + s, a[1] + n], [0, 0]), cur = L.scr[String(d.season)];
+      const r = ([s, n]) => `${(100 * s / n).toFixed(1)}%`, t = 'Scrambles per dropback (designed runs not included)';
+      return [cur && cur[1] ? cell(r(cur), 'Scramble %', `${t}, ${d.season}`) : '',
+              tot[1] ? cell(r(tot), 'Career scr %', `${t}, since ${Math.min(...Object.keys(L.scr).map(Number))}`) : ''];
+    })() : [];
+    const use = sgRow('Usage', [e.snap != null ? cell(pct(e.snap), 'Snap %', 'Share of offensive snaps') : '', p.pos !== 'QB' && e.tgt_share ? cell(pct(e.tgt_share), 'Tgt %', 'Share of team targets') : '',
+      e.carry_share ? cell(pct(e.carry_share), 'Carry %', 'Share of team carries') : '', ...scr]);
+    // Week charts: the last 8 season weeks before this one, the same columns for points and snaps.
+    const nweek = (d.week || 1) - 1, byes = L && +d.season === +L.cur ? logByes(L) : new Set();
+    const S = L && L.seasons.find(x => +x.s === +d.season), lg = S ? Object.fromEntries(S.g.map(g => [g.w, g])) : {};
+    const weeks = []; for (let k = Math.max(1, nweek - 7); k <= nweek; k++) weeks.push(k);
+    const gap = k => byes.has(k) ? { w: k, v: null, bye: 1, title: `Week ${k}: bye` } : { w: k, v: null, title: `Week ${k}: did not play` };
+    const ptsSlots = weeks.map(k => {
+      if (byW[k] == null) return gap(k);
+      const pj = lg[k] ? logProj(lg[k], p.pos) : null;
+      return { w: k, v: byW[k], pj, title: `Week ${k}: ${f1(byW[k])} pts${pj != null ? ` · we projected ${f1(pj)}` : ''}` };
+    });
+    const snapSlots = weeks.map(k => lg[k] ? { w: k, v: lg[k].sn != null ? lg[k].sn : null, title: `Week ${k}: ${lg[k].sn != null ? `${lg[k].sn}% of snaps` : 'played (no snap count)'}` } : gap(k));
+    const sv = snapSlots.filter(x => x.v != null).map(x => x.v);
+    const snapsFlat = !sv.length || sv.every(x => x >= SNAP_FLAT);
+    const opt = { slotW: 32, H: 52 };
     const order = p.pos === 'RB' || p.pos === 'QB' ? [pass, rush, rec] : [rec, rush];
-    return `${scoring}${order.join('')}${use}${p.sched ? `<div class="pc-sub">${esc(p.sched)}</div>` : ''}
-      ${slots.length ? `<div class="pc-srow pc-wkrow"><span class="pc-sk">Points</span>${miniBars(slots, { slotW: 32, H: 54, cls: 'mb-pts' })}</div>` : ''}`;
+    return sg([scoring, ...order, use,
+               weeks.length ? sgChart('Points', miniBars(ptsSlots, { ...opt, cls: 'mb-pts' })) : '',
+               weeks.length && !snapsFlat ? sgChart('Snap %', miniBars(snapSlots, { ...opt, top: 100, cls: 'mb-snap' })) : ''], 4, { cls: 'sg-season' })
+      + (p.sched ? `<div class="pc-sub">${esc(p.sched)}</div>` : '');
   };
   // ------------------------------------------------------------------------------------------ card week picker
   // Cards belong to the player / team, not the page: header, game log and news are always current; a week picker
@@ -474,28 +497,30 @@
       now = `<div class="pc-now${isLive ? ' is-live' : ''}"><div class="pc-k">${tag}</div><div class="pc-big">${f1(v)} <small>pts</small></div>
         <div class="pc-sub">${ln ? `${esc(statLineText(ln, p.pos))}${isLive ? '' : ' · '}` : ''}${isLive ? '' : (v > s.q[3] ? '<b class="good">above his likely range</b>' : v < s.q[1] ? '<b class="bad">below his likely range</b>' : 'within his likely range')}</div></div>`;
     }
-    const pl = p.proj_line || {};
-    const vol = [pl.att ? `${f1(pl.att)} pass att` : '', pl.car ? `${f1(pl.car)} carries` : '', pl.tgt ? `${f1(pl.tgt)} targets` : '', pl.rec ? `${f1(pl.rec)} catches` : ''].filter(Boolean).join(' · ');
     // Availability rides on the projection: a chip always, the reason spelled out once there's real risk.
     const ia = p.inactive || 0, av = ia >= 0.5 ? 'av-out' : ia >= 0.05 ? 'av-q' : 'av-ok';
     const avChip = `<span class="pc-av ${av}" title="${esc(p.inactive_why || '')}">${ia < 0.005 ? '&lt;1' : Math.round(ia * 100)}% inactive</span>`;
     const isLive = st && st.state === 'in';
-    const flags = [p.status ? `<span class="flag ${p.inactive >= 0.5 ? 'f-out' : 'f-q'}">${esc(p.status)}</span>` : '',
+    // One rank pill (our rank at his position), colored by roster tier: starter / flex range / bench.
+    const slotTxt = { start: 'starter', flex: 'flex range', bench: 'bench depth' }[p.slot] || '';
+    const rankPill = `<span class="pc-rk t-${esc(p.slot)}" title="Our #${p.rank} ${esc(p.pos)} for ${esc(wkLabel(d).toLowerCase())} · ${esc(p.tier)} tier${slotTxt ? ` (${slotTxt})` : ''}">${esc(p.pos)} #${p.rank}</span>`;
+    const flags = [p.status ? `<span class="flag ${ia >= 0.5 ? 'f-out' : 'f-q'}">${esc(p.status)}</span>` : '',
                    p.boost >= 1 ? `<span class="flag f-up" title="Raised by volume vacated by ${esc(p.boost_from)}">+${f1(p.boost)} from injuries</span>` : '',
-                   p.low_sample ? '<span class="flag">low data</span>' : ''].join('');
+                   p.low_sample ? '<span class="flag" title="Few games to learn from: a wider range">low data</span>' : ''].join('');
+    const exp = expectedCells(p);
     const html = `
-      <div class="pc-wkmeta"><span class="tier t-${esc(p.slot)}">${esc(p.tier)}</span> <span class="muted">${esc(p.pos)}${p.rank} in ${esc(wkLabel(d).toLowerCase())}</span>
-        ${opp ? `<span class="muted">· <button type="button" class="tm-open pc-tlink" data-tm="${esc(p.team)}">${esc(p.team)}</button> ${esc(p.home)} <button type="button" class="tm-open pc-tlink" data-tm="${esc(opp.team)}">${esc(opp.team)}</button></span>` : ''}
-        ${flags ? `<span class="pc-flags">${flags}</span>` : ''}</div>
       ${now}
       <div class="pc-grid">
-        <div class="pc-box"><div class="pc-kr"><span class="pc-k">Projection${ia >= 0.05 ? ' (if active)' : ''}</span>${avChip}</div><div class="pc-big">${f1(s.proj)} <small>pts</small></div>
-          ${rangeSvg(s.q, s.proj)}<div class="pc-sub">Floor ${f1(s.q[0])} · middle ${f1(s.q[1])}–${f1(s.q[3])} · ceiling ${f1(s.q[4])} · confidence ${esc(p.conf)}</div>
+        <div class="pc-box pc-proj"><div class="pc-kr"><span class="pc-k">Projection${ia >= 0.05 ? ' (if active)' : ''}</span>${avChip}</div>
+          <div class="pc-bigrow"><div class="pc-big">${f1(s.proj)} <small>pts</small></div>${rankPill}${flags ? `<span class="pc-flags">${flags}</span>` : ''}</div>
+          ${rangeSvg(s.q, s.proj)}
+          ${sg([sgRow(null, [cell(f1(s.q[0]), 'Floor'), cell(`${f0(s.q[1])}–${f0(s.q[3])}`, 'Middle', `Middle half of outcomes: ${f1(s.q[1])} to ${f1(s.q[3])}`),
+                cell(f1(s.q[4]), 'Ceiling'), cell(esc(p.conf), 'Confidence')])], 4, { labels: false, cls: 'sg-tight' })}
           ${ia >= 0.05 ? `<div class="pc-sub pc-why ${av}">${esc(p.inactive_why)}</div>` : ''}</div>
-        <div class="pc-box"><div class="pc-k">Expected line</div><div class="line">${expectedLine(pid, p, d)}</div>${vol ? `<div class="pc-sub">${esc(vol)}</div>` : ''}</div>
+        <div class="pc-box"><div class="pc-k">Expected line</div>${exp.length ? sg([sgRow(null, exp)], 4, { labels: false, cls: 'sg-tight sg-wrap' }) : '<p class="pc-sub">No line projected.</p>'}</div>
       </div>
       <div class="pc-box pc-mutile"${g ? ` data-href="${esc(gameHref(g, d))}" role="link" tabindex="0" title="Open the gamecast"` : ''}>
-        <div class="pc-kr"><span class="pc-k">Matchup</span>${g ? `<span class="pc-go">${isLive ? '<span class="live-dot"></span>Live · ' : ''}Gamecast &rsaquo;</span>` : ''}</div>
+        <div class="pc-kr"><span class="pc-k">Matchup${g && g.kickoff && !isLive && !g.final ? ` · ${esc(g.kickoff)}` : ''}</span>${g ? `<span class="pc-go">${isLive ? '<span class="live-dot"></span>Live · ' : ''}Gamecast &rsaquo;</span>` : ''}</div>
         <div class="pc-mu">${opp ? logo(opp.logo_url, opp.logo_bg, 22, opp.team) : ''}<b>${esc(p.home)} ${opp ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(opp.team)}">${esc(opp.team)}</button>` : esc(p.opp)}</b>
           <span style="color:${esc(p.dvp_color)}">${esc(p.dvp)} vs ${esc(p.pos)}s</span> <span class="muted">grade ${esc(p.grade)}</span></div>
         <div class="pc-sub">This defense ${p.mpts >= 0 ? 'adds' : 'takes away'} ${f1(Math.abs(p.mpts))} pts vs an average one.</div></div>
@@ -517,28 +542,26 @@
   const faceCrop = u => u.replace('/upload/f_auto,q_auto/', '/upload/c_thumb,g_face,z_0.75,w_160,h_160,f_auto,q_auto/');
   const photoUrl = (L, espn) => (L && L.bio && L.bio.photo ? faceCrop(L.bio.photo) : '')
     || (espn ? `https://a.espncdn.com/i/headshots/nfl/players/full/${encodeURIComponent(espn)}.png` : '');
-  // Header strip: bio chips (age to a tenth, height, weight, years in the league, college), QB scramble rates, and
-  // snap share over the last five weeks as bars. All current, like the rest of the header.
-  const headStrip = (L, pos, color) => {
-    if (!L) return '';
-    const b = L.bio || {}, chips = [];
-    if (b.born) chips.push(chip(((Date.now() - new Date(b.born + 'T12:00:00')) / 31557600000).toFixed(1), 'Age', `Born ${b.born}`));
-    if (b.ht) chips.push(chip(esc(`${Math.floor(b.ht / 12)}'${b.ht % 12}"`), 'Height'));
-    if (b.wt) chips.push(chip(`${esc(b.wt)}<i>lb</i>`, 'Weight'));
-    if (b.exp != null) {
-      const cur = b.exp_s === L.cur;
-      chips.push(b.exp === 0 && cur ? chip('Rookie', 'NFL yrs') : chip(esc(b.exp), 'NFL yrs', cur ? '' : `As of ${b.exp_s}`));
-    }
+  // Profile box under the header (current, like the header): bio, draft slot, and the current contract
+  // (OverTheCap via nflverse; $M). Desktop: one row of six; phones: rows of three (CSS --n).
+  const money = m => m >= 100 ? `$${f0(m)}M` : m >= 1 ? `$${f1(m)}M` : `$${f0(m * 1000)}K`;
+  const profileBox = L => {
+    if (!L || !L.bio) return '';
+    const b = L.bio, bio = [];
+    if (b.born) bio.push(cell(((Date.now() - new Date(b.born + 'T12:00:00')) / 31557600000).toFixed(1), 'Age', `Born ${b.born}`));
+    if (b.ht) bio.push(cell(esc(`${Math.floor(b.ht / 12)}'${b.ht % 12}"`), 'Height'));
+    if (b.wt) bio.push(cell(`${esc(b.wt)}<i>lb</i>`, 'Weight'));
+    if (b.exp != null) bio.push(b.exp === 0 && b.exp_s === L.cur ? cell('Rookie', 'NFL yrs') : cell(esc(b.exp), 'NFL yrs', b.exp_s === L.cur ? '' : `As of ${b.exp_s}`));
+    const dr = b.draft;
+    if (dr) bio.push(dr.u ? cell('UDFA', 'Draft', 'Undrafted free agent')
+      : cell(`R${dr.r}:${dr.p}`, `Draft '${String(dr.y).slice(2)}`, `${dr.y} draft: round ${dr.r}, pick ${dr.p} (${ord(dr.o)} overall)`));
     // Transfers list every school, final one first ("Wyoming; Reedley CC"): show that one, all of them on hover.
-    if (b.college) chips.push(chip(`<span class="pc-clip">${esc(b.college.split(';')[0].trim())}</span>`, 'College', b.college));
-    if (pos === 'QB' && L.scr) {
-      const tot = Object.values(L.scr).reduce((a, [s, n]) => [a[0] + s, a[1] + n], [0, 0]), cur = L.scr[String(L.cur)];
-      const pct = ([s, n]) => `${(100 * s / n).toFixed(1)}%`, t = 'Scrambles per dropback (designed runs not included)';
-      if (cur && cur[1]) chips.push(chip(pct(cur), `Scramble ${L.cur}`, t));
-      if (tot[1]) chips.push(chip(pct(tot), `Since ${Math.min(...Object.keys(L.scr).map(Number))}`, t));
-    }
-    const snaps = snapBars(L);
-    return chips.length || snaps ? `<div class="pc-strip"${color ? ` style="--tc:${esc(color)}"` : ''}>${chips.length ? `<div class="pc-chips">${chips.join('')}</div>` : ''}${snaps}</div>` : '';
+    if (b.college) bio.push(cell(esc(b.college.split(';')[0].trim()), 'College', b.college));
+    const k = b.deal, deal = k ? [cell(money(k.apy), 'Per year'), k.val != null ? cell(money(k.val), 'Total') : '', k.yrs ? cell(esc(k.yrs), 'Years', 'Years in the deal as signed (an extension counts only the added years)') : '',
+      k.gtd != null ? cell(money(k.gtd), 'Guaranteed') : '', k.cap != null ? cell(`${(k.cap * 100).toFixed(1)}%`, 'Of cap', 'Per-year value as a share of the salary cap when signed') : '',
+      cell(esc(k.from), 'Signed')] : [];
+    if (!bio.length && !deal.length) return '';
+    return `<div class="pc-box pc-profile">${sg([sgRow(null, bio), deal.length ? `<div class="sg-h">Contract</div>${sgRow(null, deal)}` : ''], 6, { labels: false, cls: 'sg-prof' })}</div>`;
   };
   // Week tab, below the weekly section: his three latest news items and five latest games, each with a way into
   // the full tab. Both are current, whatever week the picker shows.
@@ -572,7 +595,7 @@
           <div class="pc-meta">${pos ? `<span class="posb posb-${esc(pos)}">${esc(pos)}</span>` : ''} ${team ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(team)}">${esc(info.name || team)}</button>` : '<span class="muted">Free agent</span>'}</div>
 </div>
       </div>
-      ${headStrip(L, pos, info.color)}
+      ${profileBox(L)}
       <div class="seg pc-tabs" role="tablist">${[['ov', 'Week'], ['log', 'Game log'], ...(news ? [['news', 'News']] : [])]
         .map(([k, l]) => `<button type="button" role="tab" data-pt="${k}" class="${cardTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${pickerHtml()}${week}</div>

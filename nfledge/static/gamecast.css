@@ -117,19 +117,42 @@ html.pc-open { overflow: hidden; }
 .pc-pic-tm .nl { width: 26px !important; height: 26px !important; box-shadow: 0 0 0 2px var(--panel), 0 1px 4px rgba(0,0,0,.5); }
 .pc-pic.nopic .pc-pic-tm { inset: 0; display: grid; place-items: center; }
 .pc-num { color: var(--muted); font-weight: 700; margin-right: 8px; }
-/* header strip: bio chips (value over label) beside a last-5-weeks snap chart */
-.pc-strip { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 18px; margin: -2px 0 12px; }
-.pc-chips { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
-.pc-blip { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-width: 46px; padding: 5px 9px 4px;
-  border-radius: 9px; background: var(--panel2); border: 1px solid var(--line); line-height: 1.1; }
-.pc-blip b { font-size: 14px; font-weight: 800; white-space: nowrap; letter-spacing: -.01em; }
-.pc-blip b i { font-style: normal; font-size: 10.5px; font-weight: 600; color: var(--muted); margin-left: 1px; }
-.pc-blip small { margin-top: 2px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); white-space: nowrap; }
-.pc-clip { display: inline-block; max-width: 110px; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom; }
-.pc-snaps { display: flex; flex-direction: column; gap: 1px; flex: none; }
-/* small week bars (snaps, points): the rankings' Last 5 look */
+/* stat grid: the card's one building block. Value over a small label in every cell; rows share the grid's columns
+   (--n) so values line up down a box; optional label column on the left; hairlines between rows. */
+.sg { display: grid; grid-template-columns: var(--lw, 70px) repeat(var(--n), minmax(0, 1fr)); margin-top: 4px; }
+.sg.sg-nolab { grid-template-columns: repeat(var(--n), minmax(0, 1fr)); }
+.sg-r { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }  /* short rows leave blanks, never reflow */
+.sg-r > * { padding: 7px 2px; min-width: 0; }
+.sg-r + .sg-r { border-top: 1px solid color-mix(in srgb, var(--line) 75%, transparent); }
+.sg-k { grid-column: 1; }
+.sg-k { display: flex; align-items: center; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.sg-c { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; line-height: 1.15; }
+.sg-c b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 800; letter-spacing: -.01em; }
+.sg-c b i { font-style: normal; font-size: 11px; font-weight: 600; color: var(--muted); margin-left: 1px; }
+.sg-c small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px;
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.sg-c[title] { cursor: help; }
+.sg-chart { grid-column: 2 / -1; padding: 6px 0 2px !important; }
+.sg-h { grid-column: 1 / -1; padding: 8px 0 0; border-top: 1px solid color-mix(in srgb, var(--line) 75%, transparent); margin-top: 2px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.sg-tight .sg-c b { font-size: 14px; } .sg-tight .sg-r > * { padding: 5px 1px; }
+.pc-profile { margin: -2px 0 12px; padding-top: 4px; padding-bottom: 4px; }
+@media (max-width: 560px) {
+  .sg { --lw: 56px; } .sg-k { font-size: 9px; letter-spacing: .04em; }
+  .sg-prof { --n: 3 !important; } .sg-c b { font-size: 14px; } .sg-c small { font-size: 9px; letter-spacing: .03em; }
+}
+/* projection: big number + our rank pill (colored by roster tier) */
+.pc-bigrow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; }
+.pc-bigrow .pc-flags { margin-top: 0; }
+.pc-rk { font-size: 12px; font-weight: 800; padding: 3px 9px; border-radius: 999px; white-space: nowrap; cursor: help;
+  background: rgba(255,255,255,.07); color: rgba(255,255,255,.75); }
+.pc-rk.t-start { background: rgba(69,194,107,.16); color: #8fe0a8; } .pc-rk.t-flex { background: rgba(224,176,74,.16); color: #f3d38c; }
+/* small week bars (points, snaps): the rankings' Last 5 look - green beat our projection, red missed it */
 .mb { display: block; max-width: 100%; height: auto; overflow: visible; }
-.mb .mb-b { fill: color-mix(in srgb, var(--accent) 80%, transparent); } .mb.mb-snap .mb-b { fill: color-mix(in srgb, var(--tc, var(--accent)) 75%, #fff 10%); }
+.mb .mb-b { fill: color-mix(in srgb, var(--accent) 70%, transparent); }
+.mb .mb-b.mb-hit { fill: #45c26b; } .mb .mb-b.mb-miss { fill: #f2786d; }
+.mb.mb-snap .mb-b { fill: color-mix(in srgb, var(--muted) 70%, transparent); }
+.mb .mb-pj { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
 .mb .mb-v { font-size: 9px; font-weight: 700; fill: var(--ink); text-anchor: middle; }
 .mb .mb-w { font-size: 8.5px; fill: var(--muted); text-anchor: middle; }
 .mb .mb-bye { font-size: 7.5px; font-weight: 700; letter-spacing: .04em; fill: var(--muted); text-anchor: middle; }
@@ -147,13 +170,7 @@ html.pc-open { overflow: hidden; }
 .pc-mutile[data-href]:hover, .pc-mutile[data-href]:focus-visible { outline: none; border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
   background: color-mix(in srgb, var(--accent) 6%, var(--panel2)); }
 .pc-go { font-size: 12px; font-weight: 700; color: var(--accent); white-space: nowrap; }
-/* season box: one labeled row of chips per stat group */
 .pc-season { margin-bottom: 10px; }
-.pc-srow { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
-.pc-sk { flex: none; width: 66px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-.pc-season .pc-blip { min-width: 42px; padding: 4px 8px 3px; } .pc-season .pc-blip b { font-size: 13px; }
-@media (max-width: 560px) { .pc-srow { gap: 8px; } .pc-sk { width: 54px; font-size: 9px; letter-spacing: .04em; }
-  .pc-season .pc-blip { min-width: 38px; padding: 4px 6px 3px; } }
 /* Week tab previews: latest news and last 5 games, each with a way into its full tab */
 .pc-mini { margin-bottom: 10px; }
 .pc-mini .nw { margin-top: 6px; }
