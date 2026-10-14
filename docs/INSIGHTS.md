@@ -549,14 +549,16 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   charts are more accurate per the owner, but their terms forbid scraping and republishing (checked 2026-10-14).
 
 ## 9. Open threads / next steps (as of 2026-10-12)
-- **ESPN early-week buckets (2026-10-14, nfledge/espn_calib.py):** Out + ESPN return date after this week's game /
-  Out / Doubtful / IR, each P(active) learned from archived snapshots' outcomes (weekly roster INA = inactive; a
-  week counts once its INA list is published), prior = the designation's carry-forward rate x 5 pseudo-cases.
-  Motivated by the owner's Tuesday audit (Deebo, Mayfield, R. Wilson at 67% with return dates weeks out; Henderson,
-  Montgomery "multiple weeks / week-to-week" at 52% Doubtful, though Henderson's ESPN return date said this Sunday).
-  PRE-REGISTERED: after 4 weeks of outcomes, merge Out+ret back into Out unless its 90% interval is below Out's
-  rate. If text-only cases keep slipping through, next step = Claude as a fixed-label classifier of the news blurbs,
-  labels calibrated the same way (owner prefers not to automate Claude unless needed).
+- **ESPN early-week buckets (2026-10-14, nfledge/espn_calib.py), MEASURED:** Wayback Machine captures of
+  espn.com/nfl/injuries (near-daily 2022-24; the page embeds status + est. return date per player; tools/espn_wayback.py
+  caches them) -> 23,695 Mon/Tue listings vs game-day inactives (tools/espn_return_eval.py -> committed priors
+  data/history/espn_early_week.json). Played that week: Out + return 7+ days past the game 1.8% (n=652); Out 33.5%;
+  ESPN Doubtful 4.2% (n=95; the model's official-Doubtful carry rate was 48%); Questionable 48% (not bridged).
+  Return dates are mostly placeholders (= next game day) and run optimistic: first game back a median 14 days
+  after the estimate (IR +38), earlier than estimated 1%. Priors capped at 50 cases so 2026 outcomes still count.
+  Owner's audit cases now: Deebo 98% inactive, Henderson / Montgomery 96%. The pre-registered 4-week check is
+  superseded by the backfill (measured directly). Next if needed: the Questionable bucket (needs the 'news since
+  last game' filter, which the Wayback data lacks).
 - **Model snap data gap (2026-10-14):** `data.load_all` maps snaps pfr -> gsis through the loaded rosters, which
   lose ~8% of skill-player snap rows in 2020-24 (0.5% in 2026). Fixing it (player-table map) changes model inputs:
   run the 5-season A/B before adopting.

@@ -1,0 +1,16 @@
+{
+ "Doubtful": {
+  "n": 95,
+  "played": 4
+ },
+ "Out": {
+  "n": 8382,
+  "played": 2812
+ },
+ "Out+ret": {
+  "n": 652,
+  "played": 12
+ },
+ "ret_days": 7,
+ "source": "Wayback captures of espn.com/nfl/injuries, Mon/Tue 2022-2025 (tools/espn_return_eval.py)"
+}

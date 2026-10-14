@@ -21,9 +21,18 @@ Pre-registered check (2026-10-14): after 4 weeks of outcomes, if "Out+ret" isn't
 """
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pandas as pd
+
+HIST = Path(__file__).resolve().parent.parent / "data" / "history" / "espn_early_week.json"
+try:  # measured on 2022-25 (Wayback captures; tools/espn_return_eval.py): per bucket, early-week listings + played
+  PRIORS = json.loads(HIST.read_text(encoding="utf-8"))
+except (OSError, ValueError):
+  PRIORS = {}
+RET_DAYS = int(PRIORS.get("ret_days", 7))  # a return date this many days past the game; closer = ESPN's placeholder
+PRIOR_CAP = 50  # past seasons count as at most this many cases, so this season's outcomes can still move a rate
 
 PRIOR_WEIGHT = 5.0  # the prior counts as this many past cases (small: outcomes take over within a couple of weeks)
 STATUS = {"Out": "Out", "Doubtful": "Doubtful", "Injured Reserve": "IR"}
@@ -33,7 +42,7 @@ EARLY_DAYS = 3  # a snapshot counts as early-week when taken at least this many 
 def bucket(status: str, return_date, game_day) -> str | None:
   rep = STATUS.get(str(status))
   if rep == "Out" and isinstance(return_date, str) and return_date and game_day is not None:
-    if pd.Timestamp(return_date[:10]) > pd.Timestamp(game_day):
+    if (pd.Timestamp(return_date[:10]) - pd.Timestamp(game_day)).days >= RET_DAYS:
       return "Out+ret"
   return rep
 
@@ -103,11 +112,12 @@ def learned_rates(hist_dir: Path, data, season: int, p_next: dict) -> dict:
   c = cases(hist_dir, data, season)
   c = c[c.inactive.notna()]
   out = {"IR": {"p": 0.0, "n": int((c.bucket == "IR").sum()), "inactive": int(c[c.bucket == "IR"].inactive.sum()), "prior": 0.0}}
-  priors = {"Out": float(p_next.get("Out", 0.5)), "Out+ret": official_out_rate(data), "Doubtful": float(p_next.get("Doubtful", 0.5))}
+  fallback = {"Out": float(p_next.get("Out", 0.5)), "Out+ret": official_out_rate(data), "Doubtful": float(p_next.get("Doubtful", 0.5))}
   for b in ("Out", "Out+ret", "Doubtful"):
-    prior = priors[b]
+    h = PRIORS.get(b)
+    prior, weight = ((h["played"] / h["n"], min(h["n"], PRIOR_CAP)) if h and h.get("n") else (fallback[b], PRIOR_WEIGHT))
     x = c[c.bucket == b]
     act = float((1 - x.inactive).sum())
-    out[b] = {"p": (prior * PRIOR_WEIGHT + act) / (PRIOR_WEIGHT + len(x)), "n": int(len(x)),
+    out[b] = {"p": (prior * weight + act) / (weight + len(x)), "n": int(len(x)),
               "inactive": int(x.inactive.sum()), "prior": prior}
   return out

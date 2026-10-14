@@ -110,3 +110,16 @@ if len(o2):
     x = early_by[early_by.gap.between(lo_, hi_)]
     if len(x):
       print(f"    {name:20s} n={len(x):4d}  back for this week's game {(x.back <= x.game).mean():6.1%}")
+
+# The bridge's priors (nfledge/espn_calib.py reads them): early-week play rates per bucket, with "Out+ret" = an
+# estimated return at least RET_DAYS after this week's game (closer dates are mostly ESPN's next-game placeholder and
+# play like a plain Out: 1-6 days after -> 28% played; 7+ days -> 1.7%).
+import json  # noqa: E402
+RET_DAYS = 7
+r["b2"] = ["Out+ret" if st == "Out" and rt is not None and (rt - gd).days >= RET_DAYS else st
+           for st, rt, gd in zip(r.status, r.ret, r.game)]
+pri = {b: {"n": int(len(x)), "played": int(x.played.sum())} for b, x in r.groupby("b2") if b in ("Out", "Out+ret", "Doubtful")}
+pri["ret_days"] = RET_DAYS
+pri["source"] = f"Wayback captures of espn.com/nfl/injuries, Mon/Tue {r.season.min()}-{r.season.max()} (tools/espn_return_eval.py)"
+(ROOT / "data" / "history" / "espn_early_week.json").write_text(json.dumps(pri, indent=1), encoding="utf-8")
+print("\npriors written:", {k: v for k, v in pri.items() if isinstance(v, dict)})
