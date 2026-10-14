@@ -99,11 +99,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5076951,Jalon Kilgore,Buffalo Bills,Active,2026-10-05T18:30Z,,,,,,
 3917232,Tyler Bass,Buffalo Bills,Active,2026-10-05T02:01Z,,,,,,Bass went 2-for-2 on field-goal attempts and made both of his PATs during Sunday's 29-26 loss to the Patriots.
 4427348,Te'Cory Couch,Buffalo Bills,Questionable,2026-10-04T18:51Z,Hamstring,Not Specified,Not Specified,2026-10-12,QUESTIONABLE,Couch suffered a hamstring injury Sunday versus New England and is doubtful to return.
+4695883,Jalen Coker,Carolina Panthers,Active,2026-10-14T20:04Z,,,,,,
 2973051,Taylor Moton,Carolina Panthers,Out,2026-10-14T01:24Z,Illness,Not Specified,Not Specified,2026-10-18,NFI-R,"The Panthers activated Moton (illness) off the reserve/non-football illness list Tuesday, Darin Gantt of the team's official site reports."
 4687513,Cam Jackson,Carolina Panthers,Injured Reserve,2026-10-14T01:16Z,Shoulder,Surgery,Not Specified,2027-02-15,IR,"The Panthers placed Jackson (shoulder) on injured reserve Tuesday, Darin Gantt of the team's official site reports."
 4058925,Tershawn Wharton,Carolina Panthers,Out,2026-10-13T21:01Z,Neck,Surgery,Not Specified,2026-10-18,PUP-R,The Panthers designated Wharton (neck) to return from reserve/PUP list Tuesday.
 4685350,Trevor Etienne,Carolina Panthers,Injured Reserve,2026-10-13T20:53Z,Ankle,Sprain,Not Specified,2026-10-18,IR-R,The Panthers announced Tuesday that Etienne (ankle) is designated to return from injured reserve.
-4695883,Jalen Coker,Carolina Panthers,Questionable,2026-10-13T18:21Z,Quadriceps,Strain,Not Specified,2026-10-18,QUESTIONABLE,"Coker (quadriceps) was spotted participating in the Panthers' unofficial practice session Tuesday, Alex Zietlow of The Charlotte Observer reports."
 4243256,Devin Lloyd,Carolina Panthers,Active,2026-10-07T02:41Z,,,,,,Lloyd recorded nine total tackles (five solo) during Sunday night's 32-26 win against Detroit.
 4244607,Akayleb Evans,Carolina Panthers,Active,2026-10-07T02:31Z,,,,,,Evans recorded 11 total tackles (nine solo) and a pass defensed during Sunday night's 32-26 win over the Lions.
 4362647,Damien Lewis,Carolina Panthers,Questionable,2026-10-06T18:21Z,Elbow,Strain,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -116,7 +116,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431588,Ja'Tavion Sanders,Carolina Panthers,Active,2026-10-05T18:31Z,,,,,,
 4683506,Albert Reese IV,Carolina Panthers,Active,2026-10-05T18:31Z,,,,,,
 4568263,Ryan Fitzgerald,Carolina Panthers,Active,2026-10-05T16:08Z,,,,,,Fitzgerald connected on both of his field-goal tries and two of his four point-after attempts in Sunday's 32-26 win over the Lions.
-2576925,Darren Waller,Carolina Panthers,Active,2026-10-05T04:25Z,,,,,,Waller caught three of six targets for 36 yards in Sunday's 32-26 win over the Lions.
+2576925,Darren Waller,Carolina Panthers,Active,2026-10-05T04:25Z,Toe,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Waller caught three of six targets for 36 yards in Sunday's 32-26 win over the Lions.
 4685720,Bryce Young,Carolina Panthers,Active,2026-10-05T04:20Z,,,,,,Young completed 29 of 41 passes for 329 yards and two touchdowns while rushing three times for three yards in Sunday's 32-26 win over the Lions.
 4241416,Chuba Hubbard,Carolina Panthers,Active,2026-10-05T04:15Z,,,,,,Hubbard rushed 20 times for 122 yards and two touchdowns while catching one of two targets for seven yards in Sunday's 32-26 win over the Lions.
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-05T04:04Z,,,,,,McMillan caught 14 of 16 targets for 192 yards and two touchdowns in Sunday's 32-26 win over the Lions.
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
 4430034,Xavier Legette,Carolina Panthers,Injured Reserve,2026-10-03T20:15Z,Knee,Not Specified,Not Specified,2026-11-08,IR,"The Panthers placed Legette (knee) on injured reserve Saturday, Darin Gantt of the team's official site reports."
 4429166,Princely Umanmielen,Carolina Panthers,Active,2026-10-01T19:37Z,,,,,,
-4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-14T20:00Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
+4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-14T20:07Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
 3121544,T.J. Edwards,Chicago Bears,Doubtful,2026-10-14T17:23Z,Hamstring,Not Specified,Not Specified,2026-10-18,DOUBTFUL,doubtful
 4242659,Dayo Odeyingbo,Chicago Bears,Out,2026-10-14T17:21Z,Quadriceps,Not Specified,Not Specified,2026-10-22,OUT,out
 4431611,Caleb Williams,Chicago Bears,Questionable,2026-10-14T16:30Z,Hamstring,Strain,Right,2026-10-18,QUESTIONABLE,"Bears head coach Ben Johnson said that Williams (hamstring) will be listed as a full practice participant on Wednesday's estimated injury report, Sean Hammond of the Chicago Tribune reports."
@@ -299,7 +299,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5076652,Brandon Cisse,Green Bay Packers,Active,2026-10-07T23:41Z,,,,,,Cisse (neck) was a full participant in Wednesday's practice.
 4428863,Evan Williams,Green Bay Packers,Active,2026-10-07T01:08Z,,,,,,"Williams finished Sunday's 17-14 win over the Buccaneers with seven tackles (three solo), including 1.0 sacks, and two pass defenses (including one interception)."
 4430438,Edgerrin Cooper,Green Bay Packers,Injured Reserve,2026-10-06T23:22Z,Achilles,Surgery,Left,2027-02-15,IR,Cooper (Achilles) was placed on injured reserve by the Packers on Tuesday.
-4432708,Marvin Harrison Jr.,Houston Texans,Active,2026-10-14T19:40Z,,,,,,"Texans head coach DeMeco Ryans confirmed Wednesday that Harrison will make his team debut Sunday versus the Jaguars, Jonathan M. Alexander of the Houston Chronicle reports."
+4432708,Marvin Harrison Jr.,Houston Texans,Active,2026-10-14T19:40Z,,,,,,"Texans head coach DeMeco Ryans confirmed Wednesday that Harrison will make his team debut Sunday versus the Jaguars in London, Jonathan M. Alexander of the Houston Chronicle reports."
 4035538,David Montgomery,Houston Texans,Doubtful,2026-10-14T18:04Z,Groin,Not Specified,Not Specified,2026-10-18,DOUBTFUL,"Montgomery (groin) isn't practicing Wednesday, Aaron Wilson of KPRC 2 Houston reports."
 3121595,Braden Smith,Houston Texans,Active,2026-10-14T14:51Z,,,,,,
 4241223,Jalen Pitre,Houston Texans,Doubtful,2026-10-14T00:45Z,Shoulder - AC Joint,Sprain,Left,2026-10-18,DOUBTFUL,"Pitre will not need surgery and will not need to be placed on injured reserve as a result of the shoulder injury he suffered during Sunday's game at Tennessee, Aaron Wilson of KPRC 2 Houston reports."
