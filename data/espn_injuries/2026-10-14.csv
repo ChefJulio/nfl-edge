@@ -49,6 +49,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685502,Harold Perkins Jr.,Atlanta Falcons,Active,2026-10-08T00:56Z,,,,,,Perkins recorded 10 tackles (seven solo) including 0.5 sacks and a pass defensed during Monday's 45-24 win at New Orleans.
 3043275,Austin Hooper,Atlanta Falcons,Active,2026-10-07T00:10Z,,,,,,Hooper caught his only target for nine yards during Monday's 45-24 win at New Orleans.
 4870612,Zachariah Branch,Atlanta Falcons,Active,2026-10-07T00:02Z,,,,,,Branch caught both of his targets for 10 yards while also adding 65 kickoff-return yards and 25 yards as a punt returner during Monday night's 45-24 win over the Saints.
+4038441,Justice Hill,Baltimore Ravens,Active,2026-10-14T02:01Z,,,,,,Hill turned four carries into 73 yards and caught two of four targets for five yards during the Ravens' 30-23 overtime win over the Falcons on Sunday.
 4360939,Rashod Bateman,Baltimore Ravens,Active,2026-10-13T23:43Z,,,,,,Bateman caught five of six passes for 62 yards during the Ravens' 30-23 overtime win over the Falcons on Sunday.
 4243220,Andrew Vorhees,Baltimore Ravens,Questionable,2026-10-13T17:10Z,Foot,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 3052743,Trey Hendrickson,Baltimore Ravens,Questionable,2026-10-13T17:10Z,Finger,Surgery,Right,2026-10-18,QUESTIONABLE,questionable
@@ -73,7 +74,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3915189,Roquan Smith,Baltimore Ravens,Active,2026-10-07T01:04Z,,,,,,Smith recorded six total tackles (one solo) during Sunday's 24-18 win over the Titans.
 4430831,Trenton Simpson,Baltimore Ravens,Active,2026-10-07T00:59Z,,,,,,Simpson recorded nine total tackles (two solo) and an interception during Sunday's 24-18 win over Tennessee.
 4696882,Devontez Walker,Baltimore Ravens,Active,2026-10-06T04:00Z,,,,,,Walker caught one of his two targets for 19 yards during Baltimore's win over the Titans on Sunday.
-4038441,Justice Hill,Baltimore Ravens,Active,2026-10-06T02:27Z,,,,,,Hill rushed one time for three yards in Sunday's 24-18 win over the Titans. He added two catches for 22 yards on three targets.
 3915411,Ty Johnson,Buffalo Bills,Active,2026-10-14T00:28Z,,,,,,Johnson caught all four of his targets for 72 yards during the Bills' 37-34 overtime win over the Rams on Monday.
 4635008,Keon Coleman,Buffalo Bills,Active,2026-10-13T23:25Z,,,,,,Coleman caught a seven-yard touchdown pass (on two targets) during the Bills' 37-34 overtime win over the Rams on Monday.
 3915416,DJ Moore,Buffalo Bills,Questionable,2026-10-13T17:10Z,Shoulder - AC Joint,Sprain,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -574,6 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3918310,Carl Granderson,New Orleans Saints,Active,2026-10-09T22:40Z,,,,,,"Granderson (ankle) does not carry an injury designation ahead of Sunday's game against the Vikings, Emily Leiker of The Minnesota Star Tribune reports."
 4879276,Bryce Lance,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Lance turned five targets into a seven-yard catch during the Saints' 45-24 loss to the Falcons on Monday.
 4702559,Oscar Delp,New Orleans Saints,Active,2026-10-07T00:19Z,,,,,,Delp was not targeted during Monday's 45-24 loss versus the Falcons.
+4040615,Malik Harrison,New York Giants,Active,2026-10-14T02:13Z,,,,,,"Harrison was signed to the Giants' active roster Tuesday, Dan Salomone of the team's official site reports."
 3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-14T02:01Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4682648,Malachi Fields,New York Giants,Active,2026-10-14T01:38Z,,,,,,Fields hauled in both of his targets for 20 yards during the Giants' 27-27 tie with the Commanders on Sunday.
 4431321,Dru Phillips,New York Giants,Active,2026-10-13T23:07Z,,,,,,Phillips had five total tackles (five solo) and 2.0 sacks in Sunday's 27-27 tie with the Commanders.
@@ -598,7 +599,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361266,Greg Newsome II,New York Giants,Active,2026-10-07T01:44Z,,,,,,Newsome registered seven tackles (four solo) and an interception during the Giants' win Sunday versus the Cardinals.
 3929950,Tremaine Edmunds,New York Giants,Active,2026-10-07T01:34Z,,,,,,Edmunds totaled nine tackles (eight solo) during the Giants' win over the Cardinals on Sunday.
 4950400,Arvell Reese,New York Giants,Active,2026-10-07T01:28Z,,,,,,Reese logged nine tackles (nine solo) during the Giants' win over the Cardinals on Sunday.
-4428328,Deonte Banks,New York Giants,Active,2026-10-07T01:13Z,,,,,,Banks logged four tackles (one solo) and a pick-six during the Giants' win over the Cardinals on Sunday.
 4243375,Dylan Parham,New York Jets,Questionable,2026-10-13T17:10Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4700136,Kiko Mauigoa,New York Jets,Questionable,2026-10-13T17:10Z,Quadriceps,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4597500,Adonai Mitchell,New York Jets,Questionable,2026-10-13T17:10Z,Finger,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -649,6 +649,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3915106,Fred Johnson,Philadelphia Eagles,Active,2026-10-10T02:31Z,,,,,,Johnson (knee) does not have any injury designation ahead of Sunday's game against the Jaguars.
 4685287,Jihaad Campbell,Philadelphia Eagles,Active,2026-10-10T01:06Z,,,,,,Campbell (knee) does not have an injury designation against the Jaguars on Sunday.
 3917657,Zack Baun,Philadelphia Eagles,Active,2026-10-10T00:59Z,,,,,,Baun (concussion) does not have an injury designation for Sunday's game against the Jaguars.
+4430802,Darnell Washington,Pittsburgh Steelers,Active,2026-10-14T02:11Z,,,,,,Washington caught two of three targets for 12 yards during the Steelers' 34-22 win over the Colts on Sunday.
 3873935,Jamel Dean,Pittsburgh Steelers,Questionable,2026-10-13T17:10Z,Ankle,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4038815,Rico Dowdle,Pittsburgh Steelers,Questionable,2026-10-13T17:10Z,Toe,Dislocated,Right,2026-10-18,QUESTIONABLE,questionable
 4035656,Ben Skowronek,Pittsburgh Steelers,Out,2026-10-12T22:08Z,Calf,Not Specified,Not Specified,2026-10-25,OUT,"Head coach Mike McCarthy said Monday that Skowronek (calf) will not play against the Buccaneers this Sunday, Alan Saunders of SteelersNow.com reports."
@@ -673,7 +674,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4682980,Derrick Harmon,Pittsburgh Steelers,Injured Reserve,2026-10-05T21:23Z,Foot,Not Specified,Not Specified,2026-11-15,IR,"The Steelers placed Harmon (foot) on injured reserve Monday, Teresa Varley of the team's official site reports."
 4431533,Gabriel Rubio,Pittsburgh Steelers,Active,2026-10-05T19:01Z,,,,,,
 4570044,Jaquan Brisker,Pittsburgh Steelers,Active,2026-10-03T01:53Z,,,,,,Brisker made seven tackles (four solo) in Thursday night's 27-24 loss to the Browns.
-4242207,Patrick Queen,Pittsburgh Steelers,Active,2026-10-03T01:51Z,,,,,,Queen made five tackles (three solo) in Thursday night's 27-24 loss to the Browns.
 3916903,Dre Greenlaw,San Francisco 49ers,Suspension,2026-10-14T01:22Z,Suspension,Not Specified,Not Specified,2026-10-25,RESERVE-SUS,"Greenlaw's appeal of a one-game suspension was denied by the NFL on Tuesday, Adam Schefter of ESPN reports."
 4693337,Marques Sigle,San Francisco 49ers,Doubtful,2026-10-13T17:10Z,Ankle,Not Specified,Not Specified,2026-10-19,DOUBTFUL,doubtful
 16002,Kyle Juszczyk,San Francisco 49ers,Questionable,2026-10-13T17:10Z,Knee,Sprain,Right,2026-10-19,QUESTIONABLE,questionable
