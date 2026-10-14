@@ -249,11 +249,16 @@
     const rush = ['Rushing', [['Att', g => x(g, 2)], ['Yd', g => f0(c(g, 3))], ['YPC', ypc], ['TD', g => c(g, 4)]]];
     return pos === 'RB' ? [rush, rec] : rushy ? [rec, ['Rushing', [['Att', g => x(g, 2)], ['Yd', g => f0(c(g, 3))], ['TD', g => c(g, 4)]]]] : [rec];
   };
-  // opts.last = N: just his N most recent games (the Week tab's preview), no upcoming weeks, legend or season totals.
+  // Week tab preview, no legend and no upcoming weeks: opts.season = this season's games so far with its byes;
+  // opts.last = N = his N most recent games (the fallback before his first game this season, no season totals).
   const logHtml = (L, p, opts = {}) => {
     const w = weights(), built = (DATA && DATA.score && DATA.score.built) || HALF, pos = L.pos || (p && p.pos);
     let seasons = L.seasons, up = L.up || [];
-    if (opts.last) {
+    if (opts.season) {
+      seasons = L.seasons.filter(S => S.s === L.cur && S.g.length);
+      const end = Math.max(0, ...(seasons[0] ? seasons[0].g.map(g => g.w) : []));
+      up = up.filter(u => u.bye && u.w < end);
+    } else if (opts.last) {
       const keep = new Set(L.seasons.flatMap(S => S.g.map(g => [S.s, g])).sort((a, b) => b[0] - a[0] || b[1].w - a[1].w)
         .slice(0, opts.last).map(r => r[1]));
       seasons = L.seasons.map(S => ({ ...S, g: S.g.filter(g => keep.has(g)) })).filter(S => S.g.length);
@@ -290,7 +295,7 @@
       const sum = opts.last ? '' : ` · ${S.g.length} game${S.g.length === 1 ? '' : 's'}${S.g.length ? ` · ${f1(fpg)} FP/G` : ''}`;
       return `<tbody><tr class="lg-season"><td colspan="${6 + stat.length}"><b>${S.s}</b> ${esc(team)}${sum}</td></tr>${head}${trs}</tbody>`;
     }).join('');
-    if (opts.last) return `<div class="lg-scroll"><table class="lg">${body}</table></div>`;
+    if (opts.last || opts.season) return `<div class="lg-scroll"><table class="lg">${body}</table></div>`;
     const legend = `<div class="lg-leg"><span>Opponent color = our pregame matchup rank (2021 on):</span><span class="mr-easy">easy</span><span class="mr-ok">fair</span><span class="mr-tough">tough</span><span class="mr-hard">hardest</span>
       <span>· Rank = his ${esc(pos)} finish that week (green = starter in your league size) · Proj = our projection then (green = beat it) · Tap a game to open its gamecast</span></div>`;
     return `${legend}<div class="lg-scroll"><table class="lg">${body}</table></div>`;
@@ -563,13 +568,15 @@
     if (!bio.length && !deal.length) return '';
     return `<div class="pc-box pc-profile">${sg([sgRow(null, bio), deal.length ? `<div class="sg-h">Contract</div>${sgRow(null, deal)}` : ''], 6, { labels: false, cls: 'sg-prof' })}</div>`;
   };
-  // Week tab, below the weekly section: his three latest news items and five latest games, each with a way into
-  // the full tab. Both are current, whatever week the picker shows.
+  // Week tab, below the weekly section: his three latest news items and this season's games (his last five before
+  // his first game of the season), each with a way into the full tab. Both are current, whatever week is picked.
   const weekExtras = (pid, L, row, espn) => {
-    const log = !LOGS[pid] ? '<p class="pc-sub">Loading games&hellip;</p>' : L && L.seasons.length ? logHtml(L, row, { last: 5 }) : '';
+    const cur = L && L.seasons.some(S => S.s === L.cur && S.g.length);
+    const log = !LOGS[pid] ? '<p class="pc-sub">Loading games&hellip;</p>'
+      : L && L.seasons.length ? logHtml(L, row, cur ? { season: true } : { last: 5 }) : '';
     return (espn ? `<div class="pc-box pc-mini"><div class="pc-k">Latest news</div><div class="pc-news" data-n="3"></div>
         <button type="button" class="pc-more" data-goto="news">Show more</button></div>` : '')
-      + (log ? `<div class="pc-box pc-mini"><div class="pc-k">Last 5 games</div><div class="pc-log">${log}</div>
+      + (log ? `<div class="pc-box pc-mini"><div class="pc-k">${cur ? 'This season' : 'Last 5 games'}</div><div class="pc-log">${log}</div>
         <button type="button" class="pc-more" data-goto="log">Show more</button></div>` : '');
   };
   const renderCard = pid => {
