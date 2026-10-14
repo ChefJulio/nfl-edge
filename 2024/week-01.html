@@ -444,7 +444,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <span><b>16 of 16</b> games final</span>
         <span>Scoring <b id="scoreName">Half PPR</b></span>
         
-        <span>Updated 2026-10-13 21:41</span>
+        <span>Updated 2026-10-13 23:37</span>
       </span></span>
   </div>
   <p class="archived">Projected before kickoff with only the data available then; actual results alongside.</p>
@@ -7453,6 +7453,15 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     const c = tr.cloneNode(true), d = tr.nextElementSibling;
     c.querySelector('td.rk .rkn').textContent = i + 1;
     c.querySelector('td.rk').dataset.v = i + 1;
+    // The experts' flex rank replaces the positional one (rank cell and vs ECR); none known = left blank.
+    const f = tr.dataset.ecrf, lw = !!tr.dataset.ecrfLw, ec = c.querySelector('td.rk .ecr'), vc = c.querySelector('td.vsc');
+    if (ec) ec.remove();
+    if (f) c.querySelector('td.rk').insertAdjacentHTML('beforeend', `<span class="ecr${lw ? ' stale' : ''}" title="${lw ? 'Last week' : 'Expert consensus'} flex rank (FantasyPros superflex list without QBs)">(${f}${lw ? '<sup>lw</sup>' : ''})</span>`);
+    if (vc) {
+      vc.classList.toggle('stale', lw);
+      if (f) { const v = Math.round(f - (i + 1)); vc.dataset.ecr = f; vc.dataset.v = v; vc.innerHTML = `<span class="vs-n ${v >= 3 ? 'pos' : v <= -3 ? 'neg' : ''}">${v > 0 ? '+' : ''}${v}</span>`; }
+      else { vc.dataset.ecr = ''; vc.dataset.v = ''; vc.innerHTML = ''; }
+    }
     const nm = c.querySelector('td.stick b');
     if (nm) nm.insertAdjacentHTML('afterbegin', `<span class="posb posb-${tr.dataset.pos}">${tr.dataset.pos}</span>`);
     tb.appendChild(c);
