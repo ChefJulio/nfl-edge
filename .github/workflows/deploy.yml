@@ -83,6 +83,9 @@ jobs:
       # the current season is redone when a game goes final.
       - name: Season stats
         run: python tools/stats_build.py --site=site
+      # Teams > Draft data (every pick since 1980 with career outcomes; ~2 s).
+      - name: Draft
+        run: python tools/draft_build.py --site=site
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:
