@@ -79,7 +79,8 @@
       strip.classList.toggle('show', show);
     };
     const layout = () => {
-      document.documentElement.style.setProperty('--navh', `${(document.querySelector('nav.tabs') || {}).offsetHeight || 45}px`);
+      const nv = document.querySelector('nav.tabs');
+      document.documentElement.style.setProperty('--navh', `${nv ? nv.offsetHeight : 0}px`);  // 0 when phones hide the top bar
       sc.classList.remove('fits');
       sc.classList.toggle('fits', tbl.offsetWidth > 0 && tbl.scrollWidth <= sc.clientWidth + 1);
       built = false; measured = false; place();

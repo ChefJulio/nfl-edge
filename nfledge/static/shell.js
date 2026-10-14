@@ -91,6 +91,15 @@
       ${extra.length ? `<button type="button" data-more>${svg('more')}<span>More</span></button>` : ''}</nav>
       ${extra.length ? `<div class="bb-sheet" hidden>${extra.map(p => `<button type="button" data-par="${p.key}">${p.label}</button>`).join('')}</div>` : ''}`;
     document.body.appendChild(bot);
+    // Phones: the sub-tab chips ride in the bottom bar too (all navigation in thumb reach; owner, 2026-10-14) and the
+    // top bar is hidden. Wider screens keep everything in the top bar. --bbh = the bar's height, for page padding.
+    const phone = matchMedia('(max-width: 640px)');
+    const place = () => {
+      if (phone.matches) bot.insertBefore(subBar, bot.firstChild); else nav.appendChild(subBar);
+      document.documentElement.style.setProperty('--bbh', `${phone.matches ? bot.offsetHeight : 0}px`);
+    };
+    phone.addEventListener('change', place);
+    NFLE.placeBar = place;
   }
   const subBar = nav.querySelector('.nav-sub');
   const parse = h => {
@@ -117,6 +126,7 @@
     const route = r.p.subs.length < 2 ? r.p.key : `${r.p.key}/${r.s[0]}`;
     try { localStorage.setItem('nfledge-tab', route); } catch (e) { /* private mode */ }
     if (push && location.hash.slice(1) !== route) { try { history.replaceState(null, '', '#' + route); } catch (e) { /* file:// */ } }
+    if (NFLE.placeBar) NFLE.placeBar();  // the chip row comes and goes with the parent: re-measure the bar
     mountArea(id);
     document.dispatchEvent(new CustomEvent('nfle-route', { detail: { parent: r.p.key, sub: r.s[0], section: id } }));
   };

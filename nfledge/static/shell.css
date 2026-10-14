@@ -6,26 +6,26 @@ nav.tabs .nav-par button { flex: none; background: none; border: 0; border-botto
   font: inherit; font-weight: 650; font-size: 14px; padding: 12px 0 10px; cursor: pointer; }
 nav.tabs .nav-par button:hover { color: var(--ink); }
 nav.tabs .nav-par button.on { color: var(--ink); border-bottom-color: var(--accent); }
-nav.tabs .nav-sub { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-top: 8px; padding-bottom: 9px; border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
-nav.tabs .nav-sub[hidden] { display: none; }
-nav.tabs .nav-sub::-webkit-scrollbar { display: none; }
-nav.tabs .chip { flex: none; font: inherit; font-size: 12.5px; font-weight: 650; color: var(--muted); background: var(--panel2);
+.nav-sub { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-top: 8px; padding-bottom: 9px; border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
+.nav-sub[hidden] { display: none; }
+.nav-sub::-webkit-scrollbar { display: none; }
+.nav-sub .chip { flex: none; font: inherit; font-size: 12.5px; font-weight: 650; color: var(--muted); background: var(--panel2);
   border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
-nav.tabs .chip:hover { color: var(--ink); }
-nav.tabs .chip.on { color: var(--ink); background: color-mix(in srgb, var(--accent) 22%, var(--panel2)); border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+.nav-sub .chip:hover { color: var(--ink); }
+.nav-sub .chip.on { color: var(--ink); background: color-mix(in srgb, var(--accent) 22%, var(--panel2)); border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
 nav.tabs .lbl-short { display: none; }
 @media (max-width: 640px) {
   nav.tabs .nav-par { gap: 11px; } nav.tabs .nav-par button { font-size: 13px; }
 }
 @media (max-width: 480px) { nav.tabs .lbl-long { display: none; } nav.tabs .lbl-short { display: inline; }
-  nav.tabs .nav-sub { gap: 5px; } nav.tabs .chip { padding: 5px 10px; font-size: 12.5px; } }
+  .nav-sub { gap: 5px; } .nav-sub .chip { padding: 5px 10px; font-size: 12.5px; } }
 section.soon .sec-head p { color: var(--muted); }
 /* Optional bottom tab bar (phones, ?nav=bottom): fixed, above the home indicator; the top bar keeps the sub-tab chips */
 .botbar { display: none; }
 @media (max-width: 640px) {
-  html.nav-bottom nav.tabs .nav-par { display: none; }
-  html.nav-bottom nav.tabs .nav-sub { border-top: 0; }
-  html.nav-bottom body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+  html.nav-bottom nav.tabs { display: none; }
+  html.nav-bottom body { padding-bottom: var(--bbh, 64px); }
+  .botbar .nav-sub { border-top: 0; padding: 8px 16px 2px; }
   html.nav-bottom .botbar { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
     background: color-mix(in srgb, var(--bg) 92%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
     border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
