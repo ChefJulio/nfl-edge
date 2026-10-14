@@ -220,6 +220,8 @@ td.l5 { width: 104px; min-width: 104px; padding-top: 4px; padding-bottom: 4px; }
 .l5s { display: block; overflow: visible; }
 .l5s .b-hit { fill: #45c26b; } .l5s .b-miss { fill: #f2786d; } .l5s .b-none { fill: color-mix(in srgb, var(--tfg, #fff) 35%, transparent); }
 .l5s .pj { stroke: #fff; stroke-width: 2; stroke-linecap: round; }
+.l5s .dnp { stroke: color-mix(in srgb, var(--tfg, #fff) 35%, transparent); stroke-width: 2; stroke-linecap: round; }
+.l5s .bye { font-size: 7px; font-weight: 700; letter-spacing: .04em; text-anchor: middle; fill: color-mix(in srgb, var(--tfg, #fff) 45%, transparent); }
 .l5s .wl { font-size: 8px; fill: color-mix(in srgb, var(--tfg, #fff) 55%, transparent); text-anchor: middle; }
 .l5-none { font-size: 11px; color: color-mix(in srgb, var(--tfg, var(--ink)) 50%, transparent); }
 /* Projection sits next to the name; its header lines up with the number, not the far edge of the bar. */
@@ -271,7 +273,14 @@ td.take.tags { min-width: 220px; }
 /* Number / short columns hug their content (width: 1%), so on wide screens the spare width goes to Takeaway
    instead of opening gaps around Actual and Matchup. */
 table.ranks td.rk, table.ranks td.projc, table.ranks td.actc, table.ranks td.fpgc, table.ranks td.tierc,
-table.ranks td.mu, table.ranks td.ctr, table.ranks td.l5 { width: 1%; white-space: nowrap; }
+table.ranks td.mu, table.ranks td.ctr, table.ranks td.l5, table.ranks td.rngc, table.ranks td.volc,
+table.ranks td.impc, table.ranks td.tdc, table.ranks td.vsc { width: 1%; white-space: nowrap; }
+td.rngc { font-size: 12.5px; color: color-mix(in srgb, var(--tfg, var(--ink)) 72%, transparent); }
+td.volc { font-size: 12.5px; }
+.va { font-style: normal; font-size: 9px; margin-left: 5px; vertical-align: 1px; } .va-up { color: #6fdc8c; } .va-down { color: #ff8f84; }
+td.impc, td.tdc { font-weight: 600; }
+td.vsc .vs-n { font-weight: 700; } td.vsc .vs-n.pos { color: #6fdc8c; } td.vsc .vs-n.neg { color: #ff8f84; }
+td.vsc.stale .vs-n { opacity: .6; }
 .tg { display: flex; flex-wrap: wrap; gap: 4px; max-height: 46px; overflow: hidden; }
 .tgx { display: inline-block; white-space: nowrap; font-size: 11.5px; font-weight: 700; line-height: 20px; padding: 0 8px;
   border-radius: 999px; background: rgba(255,255,255,.08); color: rgba(255,255,255,.82); cursor: help; }
@@ -458,8 +467,11 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     <b>Projection</b> assumes the player is active (NFL availability is yes/no, so injured players show an Inactive% instead of a discount). Tap a player for his range of outcomes.
     <b>#</b> is our rank; the number in parentheses is the FantasyPros expert consensus rank ("lw" = last week's, until Friday).
     <b>Last 5</b>: his last five games this season; green = beat our projection for that game, red = missed it, the white tick is the projection.
+    <b>Range</b>: floor to ceiling; 8 times in 10 his score lands inside it.
     <b>Matchup</b>: the opponent's defense vs the position, 1st = toughest to 32nd = easiest.
-    <b>TD ring</b>: chance of at least one touchdown (hover for 1 / 2 / 3+). A yellow edge marks a projection boosted by a teammate's absence.
+    <b>Volume</b>: projected dropbacks / carries / targets; an arrow means his recent usage share has moved up or down from his longer-run share.
+    <b>Team pts</b>: points his team is expected to score (Vegas implied total). <b>TD</b>: chance of at least one touchdown (QBs: projected passing TDs).
+    <b>vs ECR</b>: how many spots higher (+) or lower (-) we rank him than the expert consensus. Hover a player's name for our one-line take. A yellow edge marks a projection boosted by a teammate's absence.
   </div></details>
   <div class="card">
     <div class="toolbar">
@@ -506,35 +518,42 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <th class="num rkh" data-first="asc"><abbr title="Our rank at the position; in parentheses the FantasyPros expert consensus rank (published Fridays; 'lw' = last week's until then)">#</abbr></th>
         <th class="stick" data-first="asc">Player</th>
         <th class="num projh"><abbr title="Projected fantasy points under your scoring (tap a player for the full range of outcomes)">Proj</abbr></th>
+        <th class="num rngh"><abbr title="Floor to ceiling: 8 times in 10 his score lands in this range (10th to 90th percentile of how past projections like this turned out)">Range</abbr></th>
         {% if show_act %}<th class="num actc-h"><abbr title="What he scored: live during his game (pulsing dot), final once it ends. Green = above his likely range (75th pct), red = below it (25th pct), colored only when final">Actual</abbr></th>{% endif %}
         <th class="num"><abbr title="Season fantasy points per game">FP/G</abbr></th>
         <th data-first="asc">Tier</th>
         <th class="nosort l5h"><abbr title="His last 5 games this season: bar = points scored, green = beat our projection for that game, red = missed it; the tick is our projection">Last 5</abbr></th>
         <th data-first="desc"><abbr title="Opponent and its defense vs {{ pos }}s: 1st = toughest (red), 32nd = easiest (green). Opponent-adjusted, from the model.">Matchup</abbr></th>
         <th class="ctr"><abbr title="Chance he is inactive: injury (practice pattern + game status) or healthy scratch">Inactive</abbr></th>
-        <th class="hide-sm nosort"><abbr title="Projected stat line; donut = touchdown odds">Expected line</abbr></th>
-        <th class="nosort">Takeaway</th>
+        <th data-first="desc"><abbr title="Projected volume; arrow = his recent usage share has moved up or down from his longer-run share (a role change)">Volume</abbr></th>
+        <th class="num" data-first="desc"><abbr title="Points his team is expected to score this game (Vegas implied total; our model's before lines post): more points, more scoring chances">Team pts</abbr></th>
+        <th class="num" data-first="desc"><abbr title="{{ 'Projected passing touchdowns (hover for his rushing TD chance)' if pos == 'QB' else 'Chance he scores at least one touchdown' }}">{{ 'Pass TD' if pos == 'QB' else 'TD' }}</abbr></th>
+        <th class="num" data-first="desc"><abbr title="Where we rank him vs the FantasyPros expert consensus: +6 = six spots higher than the experts (we like him more), -4 = lower">vs ECR</abbr></th>
       </tr></thead>
       <tbody>
       {% for r in block.rows %}
         <tr class="main teamrow{% if r.boost >= 1 %} boosted{% endif %}{% if r.avail < 0.5 %} out{% endif %}" style="{{ r.row_style }}" data-pid="{{ r.pid }}" data-espn="{{ r.espn }}" data-team="{{ r.team }}" data-name="{{ r.name|lower }}" data-pos="{{ r.pos }}" data-proj="{{ '%.3f'|format(r.proj) }}" data-p="{{ '%.2f %.2f %.2f %.2f'|format(r.p10, r.p25, r.p75, r.p90) }}" data-sc="{{ r.sc }}">
           <td class="num rk" data-v="{{ r.rank }}"><b class="rkn">{{ r.rank }}</b>{% if r.ecr == r.ecr and r.ecr is not none %}<span class="ecr{{ ' stale' if r.ecr_stale }}" title="{{ 'Last week' if r.ecr_stale else 'Expert consensus' }} rank (FantasyPros)">({{ r.ecr|f0 }}{% if r.ecr_stale %}<sup>lw</sup>{% endif %})</span>{% endif %}</td>
           {% set ini, rest, last = r.name|nameparts %}
-          <td class="stick" data-v="{{ r.name }}"><div class="who"><span class="pic{{ '' if r.photo else ' nopic' }}"><span class="pic-img">{% if r.photo %}<img src="{{ r.photo }}" alt="" width="34" height="34" loading="lazy" onerror="this.closest('.pic').classList.add('nopic')">{% endif %}</span><span class="pic-tm">{{ r.logo_xs|safe }}</span></span><div class="nmw"><b class="nm"><span class="fn">{{ ini }}</span>{% if rest %}<span class="fn-rest">{{ rest }}</span><span class="fn-dot">.</span>{% endif %}{% if last %} {{ last }}{% endif %}</b>
+          <td class="stick" data-v="{{ r.name }}" title="{{ r.takeaway }}"><div class="who"><span class="pic{{ '' if r.photo else ' nopic' }}"><span class="pic-img">{% if r.photo %}<img src="{{ r.photo }}" alt="" width="34" height="34" loading="lazy" onerror="this.closest('.pic').classList.add('nopic')">{% endif %}</span><span class="pic-tm">{{ r.logo_xs|safe }}</span></span><div class="nmw"><b class="nm"><span class="fn">{{ ini }}</span>{% if rest %}<span class="fn-rest">{{ rest }}</span><span class="fn-dot">.</span>{% endif %}{% if last %} {{ last }}{% endif %}</b>
             {%- if r.status or r.boost >= 1 or r.low_sample %}<div class="badges">
               {%- if r.status %}<span class="flag {{ 'f-out' if r.avail < 0.5 else 'f-q' }}" title="Injury report; practice Wed/Thu/Fri: D = did not practice, L = limited, F = full">{{ r.status }}</span>{% endif %}
               {%- if r.boost >= 1 %}<span class="flag f-up" title="Raised by volume vacated by: {{ r.boost_from }}">+{{ r.boost|f1 }} inj</span>{% endif %}
               {%- if r.low_sample %}<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>{% endif %}
             </div>{% endif %}</div></div></td>
           <td class="num projc" data-v="{{ r.proj }}" title="Floor {{ r.p10|f1 }} · middle {{ r.p25|f1 }}-{{ r.p75|f1 }} · ceiling {{ r.p90|f1 }}"><b class="pv">{{ r.proj|f1 }}</b></td>
+          <td class="num rngc" data-v="{{ r.p90 - r.p10 }}" title="Floor {{ r.p10|f1 }} · middle {{ r.p25|f1 }}-{{ r.p75|f1 }} · ceiling {{ r.p90|f1 }}">{{ r.p10|f0 }}&ndash;{{ r.p90|f0 }}</td>
           {% if show_act %}<td class="num actc{% if r.act is not none %}{{ ' act-hi' if r.act > r.p75 else ' act-lo' if r.act < r.p25 else '' }}{% endif %}" data-v="{{ r.act if r.act is not none else '' }}">{{ r.act|f1 if r.act is not none else '' }}</td>{% endif %}
           <td class="num fpgc">{{ r.fpg|f1 }}</td>
           <td class="tierc" data-v="{{ r.rank }}"><span class="tier t-{{ r.slot }}" title="{{ {'start': 'Starter in a ' ~ tier_cfg.teams ~ '-team league', 'flex': 'Flex range in a ' ~ tier_cfg.teams ~ '-team league', 'bench': 'Bench depth in a ' ~ tier_cfg.teams ~ '-team league'}[r.slot] }}">{{ r.tier }}</span></td>
-          <td class="l5" data-pjw="{{ r.pjw }}"></td>
+          <td class="l5" data-pjw="{{ r.pjw }}" data-byes="{{ r.byes|join(',') }}" data-pend="{{ r.pend|join(',') }}"></td>
           <td class="mu" data-v="{{ r.dvp_rank }}" title="{{ r.opp }} defense vs {{ pos }}s: {{ r.dvp }} of 32 (1st = toughest, 32nd = easiest). This week: {{ r.mpts|sgn }} pts vs an average defense."><span class="opp tm-open" data-tm="{{ r.opp }}"><span class="vs">{{ r.home }}</span>{{ r.opp_logo|safe }}<b style="color:{{ r.dvp_color }}">{{ r.opp }}</b></span><span class="dvp" style="color:{{ r.dvp_color }}">{{ r.dvp }}</span></td>
           <td class="ctr" data-v="{{ r.inactive }}" title="{{ r.inactive_why }}"><span class="{{ 'pill pill-bad' if r.inactive >= 0.5 else 'pill pill-warn' if r.inactive >= 0.15 else 'pill pill-soft' if r.inactive >= 0.05 else 'quiet' }}">{{ '<1%' if r.inactive < 0.005 else r.inactive|pct }}</span></td>
-          <td class="line hide-sm">{{ r.line|safe }}</td>
-          <td class="take tags" title="{{ r.takeaway }}"><div class="tg">{% for t in r.tags %}<span class="tgx tg-{{ t.k }}" title="{{ t.d }}">{{ t.t }}</span>{% endfor %}</div></td>
+          <td class="volc" data-v="{{ r.vol.v }}" title="{{ r.vol.d }}">{{ r.vol.t }}{% if r.vol.a == 'up' %}<i class="va va-up">&#9650;</i>{% elif r.vol.a == 'down' %}<i class="va va-down">&#9660;</i>{% endif %}</td>
+          <td class="num impc" data-v="{{ r.imp if r.imp is not none else '' }}">{{ r.imp|f1 if r.imp is not none else '' }}</td>
+          <td class="num tdc" data-v="{{ r.td.v }}" title="{{ r.td.d }}">{{ r.td.t }}</td>
+          {% set vs = (r.ecr - r.rank)|round|int if (r.ecr == r.ecr and r.ecr is not none) else none %}
+          <td class="num vsc{{ ' stale' if r.ecr_stale }}" data-v="{{ vs if vs is not none else '' }}" data-ecr="{{ r.ecr if (r.ecr == r.ecr and r.ecr is not none) else '' }}">{% if vs is not none %}<span class="vs-n {{ 'pos' if vs >= 3 else 'neg' if vs <= -3 else '' }}">{{ '+' if vs > 0 }}{{ vs }}</span>{% endif %}</td>
         </tr>
       {% endfor %}
       </tbody>
@@ -855,23 +874,40 @@ const weekSvg = (wk, w, pos) => {
 // Last 5 column: his last five games this season under the viewer's scoring. Bar = points; green = beat our
 // projection for that game, red = missed it, grey = no projection on file; the white tick is the projection
 // (published before that game, site scoring, scaled like this week's projection). Weeks label the bars.
+// The slots are the five season weeks before this one (fewer early in the season), labeled by week: a missed game
+// leaves a dash, a team bye says BYE, so gaps read as gaps.
+const L5_WEEK = {{ week }};
 const drawLast5 = w => {
+  const weeks = [];
+  for (let k = Math.max(1, L5_WEEK - 5); k < L5_WEEK; k++) weeks.push(k);
   document.querySelectorAll('table.ranks tr.main').forEach(tr => {
     const cell = tr.querySelector('td.l5'); if (!cell) return;
+    if (!weeks.length) { cell.innerHTML = '<span class="l5-none">week 1</span>'; return; }
     const sc = tr._sc || (tr._sc = JSON.parse(tr.dataset.sc)), pos = tr.dataset.pos;
     const pjw = cell._pjw || (cell._pjw = JSON.parse(cell.dataset.pjw || '{}'));
+    const byes = new Set((cell.dataset.byes || '').split(',').filter(Boolean).map(Number));
+    const pend = new Set((cell.dataset.pend || '').split(',').filter(Boolean).map(Number));
     const base = pts(sc.pj, SC.built, pos), ratio = base > 0.3 ? pts(sc.pj, w, pos) / base : 1;
-    const games = [...(sc.wk || [])].sort((a, b) => a[0] - b[0]).slice(-5)
-      .map(r => ({ wk: r[0], v: pts(r.slice(1), w, pos), pj: pjw[r[0]] != null ? pjw[r[0]] * ratio : null }));
-    if (!games.length) { cell.innerHTML = '<span class="l5-none">no games</span>'; return; }
-    const W = 96, H = 34, top = Math.max(10, ...games.map(g => Math.max(g.v, g.pj || 0))) * 1.08, slot = W / 5, bw = slot - 5;
+    const played = Object.fromEntries((sc.wk || []).map(r => [r[0], pts(r.slice(1), w, pos)]));
+    const games = weeks.map(k => ({ wk: k, v: played[k], pj: pjw[k] != null ? pjw[k] * ratio : null }));
+    const W = 96, H = 34, slot = W / 5, bw = slot - 5;
+    const top = Math.max(10, ...games.map(g => Math.max(g.v ?? 0, g.v != null ? g.pj || 0 : 0))) * 1.08;
     const y = v => (H - 9) - (H - 11) * Math.max(v, 0) / top;
     cell.innerHTML = `<svg class="l5s" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${games.map((g, i) => {
-      const x = i * slot + 2, cls = g.pj == null ? 'b-none' : g.v >= g.pj ? 'b-hit' : 'b-miss', yt = y(g.v);
-      return `<rect x="${x.toFixed(1)}" y="${yt.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1.5, H - 9 - yt).toFixed(1)}" rx="2" class="${cls}">`
-        + `<title>Week ${g.wk}: ${f1(g.v)} pts${g.pj != null ? ` · projected ${f1(g.pj)}` : ''}</title></rect>`
-        + (g.pj != null ? `<line x1="${(x - 1).toFixed(1)}" x2="${(x + bw + 1).toFixed(1)}" y1="${y(g.pj).toFixed(1)}" y2="${y(g.pj).toFixed(1)}" class="pj"/>` : '')
-        + `<text x="${(x + bw / 2).toFixed(1)}" y="${H - 0.5}" class="wl">${g.wk}</text>`;
+      const x = i * slot + 2, mid = x + bw / 2;
+      let body;
+      if (g.v == null) {
+        body = byes.has(g.wk)
+          ? `<text x="${mid.toFixed(1)}" y="${H - 13}" class="bye">BYE</text>`
+          : pend.has(g.wk) ? `<text x="${mid.toFixed(1)}" y="${H - 13}" class="bye">...<title>Week ${g.wk}: stats not published yet</title></text>`
+          : `<line x1="${(x + 3).toFixed(1)}" x2="${(x + bw - 3).toFixed(1)}" y1="${H - 11}" y2="${H - 11}" class="dnp"><title>Week ${g.wk}: did not play</title></line>`;
+      } else {
+        const cls = g.pj == null ? 'b-none' : g.v >= g.pj ? 'b-hit' : 'b-miss', yt = y(g.v);
+        body = `<rect x="${x.toFixed(1)}" y="${yt.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1.5, H - 9 - yt).toFixed(1)}" rx="2" class="${cls}">`
+          + `<title>Week ${g.wk}: ${f1(g.v)} pts${g.pj != null ? ` · projected ${f1(g.pj)}` : ''}</title></rect>`
+          + (g.pj != null ? `<line x1="${(x - 1).toFixed(1)}" x2="${(x + bw + 1).toFixed(1)}" y1="${y(g.pj).toFixed(1)}" y2="${y(g.pj).toFixed(1)}" class="pj"/>` : '');
+      }
+      return body + `<text x="${mid.toFixed(1)}" y="${H - 0.5}" class="wl">${g.wk}</text>`;
     }).join('')}</svg>`;
   });
 };
@@ -916,6 +952,14 @@ const applyScoring = () => {
       c.dataset.v = tr._proj.toFixed(3);
       c.title = `Floor ${f1(q[0])} · middle ${f1(q[1])}-${f1(q[2])} · ceiling ${f1(q[3])}`;
       c.querySelector('.pv').textContent = f1(tr._proj);
+      const rc = tr.querySelector('td.rngc');  // range scales with the projection
+      if (rc) { rc.textContent = `${Math.round(q[0])}–${Math.round(q[3])}`; rc.dataset.v = (q[3] - q[0]).toFixed(2); rc.title = c.title; }
+      const vc = tr.querySelector('td.vsc');  // our rank moved, so the gap to the experts moves too
+      if (vc && vc.dataset.ecr) {
+        const v = Math.round(parseFloat(vc.dataset.ecr) - (i + 1));
+        vc.dataset.v = v;
+        vc.innerHTML = `<span class="vs-n ${v >= 3 ? 'pos' : v <= -3 ? 'neg' : ''}">${v > 0 ? '+' : ''}${v}</span>`;
+      }
       const d = tr.nextElementSibling && tr.nextElementSibling.classList.contains('detail') ? tr.nextElementSibling : null;
       tb.appendChild(tr); if (d) tb.appendChild(d);
     });

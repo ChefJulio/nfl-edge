@@ -580,6 +580,7 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
   prev_ecr = prev_ecr[~prev_ecr.index.duplicated()]
   espn = espn_ids(eng.data.rosters, season)
   photos = headshots(eng.data.rosters, season)
+  byes, pend = team_byes(eng.data.schedules, season, week, set(eng.data.pbp.game_id.unique()))
   out = {}
   for pos in ("QB", "RB", "WR", "TE"):
     g = p[p.pos == pos].sort_values("proj", ascending=False)
@@ -601,6 +602,8 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
         "p10": r.p10, "p25": r.p25, "p50": r.p50, "p75": r.p75, "p90": r.p90,
         "range": range_svg(r.p10, r.p25, r.p75, r.p90, r.proj, axis),
         "grade": r.grade, "mpts": r.matchup_pts, "tier": r.tier, "slot": r.slot, "takeaway": r.takeaway, "tags": r.tags, "conf": r.confidence,
+        "vol": volume_cell(r), "td": td_cell(r), "byes": byes.get(r.team, []), "pend": pend.get(r.team, []),
+        "imp": float(r.implied_pts) if pd.notna(getattr(r, "implied_pts", np.nan)) else None,
         "status": r.status, "avail": r.avail, "inactive": 1 - r.avail,
         "inactive_why": inactive_why(r), "boost": r.injury_boost, "boost_from": r.boost_from or "",
         "low_sample": bool(r.low_sample), "line": expected_line(r),
@@ -725,6 +728,47 @@ def takeaway_tags(r) -> list[dict]:
     if r.confidence == "Low":
       tags.append({"t": "Boom/bust", "k": "info", "d": "Wide range of outcomes (low confidence)"})
   return tags
+
+
+def team_byes(schedules: pd.DataFrame, season: int, week: int, have_games: set | None = None) -> tuple[dict, dict]:
+  """(team -> [bye weeks before `week`], team -> [weeks whose game's stats aren't published yet]) for the Last 5
+  column's empty slots: a bye says BYE, a game still waiting on nflverse's stats isn't shown as a missed game."""
+  s = schedules[(schedules.season == season) & (schedules.game_type == "REG") & (schedules.week < week)]
+  played, pending = {}, {}
+  for g in s.itertuples():
+    for t in (g.home_team, g.away_team):
+      played.setdefault(t, set()).add(int(g.week))
+      if have_games is not None and g.game_id not in have_games:
+        pending.setdefault(t, []).append(int(g.week))
+  return {t: [w for w in range(1, week) if w not in wks] for t, wks in played.items()}, pending
+
+
+def volume_cell(r) -> dict:
+  """Projected volume for the Rankings table, with an arrow when his recent usage share has moved away from his
+  longer-run share (at least 15% relative and 3 points absolute: a real role change, not noise)."""
+  if r.pos == "QB":
+    txt = f"{r.db:.0f} db" + (f" · {r.rush:.1f} ru" if r.rush >= 2 else "")
+    return {"t": txt, "a": "", "v": float(r.db + r.rush), "d": f"Projected {r.db:.0f} dropbacks and {r.rush:.1f} rushes"}
+  share, name = ("carry_share", "carry share") if r.pos == "RB" else ("tgt_share", "target share")
+  txt = f"{r.carries:.0f} car · {r.tgt:.1f} tgt" if r.pos == "RB" else f"{r.tgt:.1f} tgt"
+  rec, lng = float(getattr(r, share, 0) or 0), float(getattr(r, share + "_long", 0) or 0)
+  arrow = ""
+  if lng >= 0.02 and abs(rec - lng) >= 0.03:
+    arrow = "up" if rec >= lng * 1.15 else "down" if rec <= lng * 0.85 else ""
+  return {"t": txt, "a": arrow, "v": float(r.carries + r.tgt),
+          "d": f"Projected {txt.replace('car', 'carries').replace('tgt', 'targets')}. "
+                                        f"Recent {name} {rec:.0%} vs longer-run {lng:.0%}"}
+
+
+def td_cell(r) -> dict:
+  """Touchdowns for the Rankings table: QBs = projected passing TDs (rushing TD chance in the tooltip); everyone
+  else = chance of at least one TD (Poisson on the expected-TD rate, as the TD rings)."""
+  if r.pos == "QB":
+    p = 1 - math.exp(-max(float(r.rush_td), 0.0))
+    return {"t": f"{r.pass_td:.1f}", "v": float(r.pass_td), "d": f"{r.pass_td:.2f} projected passing TDs · {p:.0%} chance of a rushing TD"}
+  lam = max(float(r.rush_td) + float(r.rec_td), 0.0)
+  p = 1 - math.exp(-lam)
+  return {"t": f"{p:.0%}", "v": p, "d": f"Chance of at least one TD: {p:.0%} ({lam:.2f} expected)"}
 
 
 def league_volume(eng, season: int, week: int, r) -> dict:
