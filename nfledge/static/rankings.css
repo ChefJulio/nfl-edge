@@ -5,3 +5,12 @@ table.dt.tiles tbody td { border-bottom: 0; }
 table.dt.tiles thead th { border-bottom: 0; }
 table.dt.tiles tr.teamrow > td.stick { background: #171a20; }
 table.dt.tiles tr.teamrow:hover > td { background: #1e222a; }
+/* Scrolled sideways: keep the team trim on the pinned cell (its edge shadow joins the trim instead of replacing it;
+   table.css's generic .scrolled shadow would drop the trim) */
+.dt-wrap .scroll.scrolled table.tiles tr.teamrow > td.stick { --extra: 8px 0 10px -8px rgba(0,0,0,.85); box-shadow: var(--top), var(--side), var(--extra); }
+/* First-name fold: snaps to the initial once the table is scrolled at all ("Josh Allen" -> "J. Allen"), with a short
+   animation, instead of following the scroll pixel by pixel (mid-fold names looked sliced in iOS Safari) */
+.dt-wrap table.tiles .fn-rest { max-width: var(--w, 9em); transition: max-width .18s ease; -webkit-mask-image: none; mask-image: none; }
+.dt-wrap .scroll.scrolled table.tiles .fn-rest { max-width: 0; }
+.dt-wrap table.tiles .fn-dot { max-width: 0; transition: max-width .18s ease; }
+.dt-wrap .scroll.scrolled table.tiles .fn-dot { max-width: .3em; }
