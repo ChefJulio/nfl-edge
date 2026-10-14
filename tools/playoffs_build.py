@@ -190,6 +190,91 @@ def game(season, date, t1, t2, s1, s2, neutral, seeds, gid=None, conf_of=None) -
   return g
 
 
+# ---------------------------------------------------------------------------------------------------------------
+# Per-franchise playoff history for the team page's Playoffs tab: data/playoffs/teams.json (site codes).
+ROUND = {"Wild Card": "WC", "First round": "WC", "Divisional": "DIV", "Second round": "DIV", "AFC Championship": "CONF",
+         "NFC Championship": "CONF", "Conference Championship": "CONF", "Super Bowl": "SB", "NFL Championship": "LCH",
+         "AFL Championship": "LCH", "AAFC Championship": "LCH"}
+FINISH = {"title": 7, "SB": 6, "LCH": 5, "CONF": 4, "DIV": 3, "WC": 2, "OTHER": 1}  # how far a season went (best finish)
+
+
+def team_summaries(out: Path, seasons: list[int]) -> dict:
+  """site code -> playoff history: every postseason (round, opponent, score), records overall and by round, titles
+  (Super Bowl; NFL championships before it; AFL 1960-69; AAFC 1946-49 kept apart: not NFL records), best finish,
+  appearances, the playoff rate since the 1970 merger, last appearance, drought, longest streak."""
+  site_of = lambda c: TO_SITE.get(c, c)  # noqa: E731
+  name_to_code = {}
+  for c, eras in ERAS.items():
+    for a, b, n in eras:
+      name_to_code.setdefault(n, []).append((a, b, c))
+  T = {}
+
+  def team(code):
+    return T.setdefault(code, {"seasons": {}, "titles": []})
+
+  last_done = max(seasons)
+  for s in seasons:
+    doc = json.loads((out / f"{s}.json").read_text(encoding="utf-8"))
+    if doc.get("champion"):  # 1920-32: no playoffs, the standings champion
+      for a, b, c in name_to_code.get(doc["champion"], []):
+        if a <= s <= b:
+          team(site_of(c))["titles"].append({"s": s, "kind": "NFL"})
+    rounds = [(r["label"], g) for grp in doc.get("groups", []) for r in grp["rounds"] for g in r["games"]]
+    if doc.get("final"):
+      rounds += [(doc["final"]["label"], g) for g in doc["final"]["games"]]
+    for label, g in rounds:
+      rd = "SB" if label.startswith("Super Bowl") else ROUND.get(label, "OTHER")
+      for me, op, ps, pa, home in ((g["home"], g["away"], g["hs"], g["as"], 2 if g.get("neutral") else 1),
+                                   (g["away"], g["home"], g["as"], g["hs"], 2 if g.get("neutral") else 0)):
+        code = me.get("site") or site_of(me["code"])
+        t = team(code)
+        S = t["seasons"].setdefault(s, {"s": s, "name": me["name"], "games": [], "aafc": g.get("league") == "AAFC"})
+        if me.get("seed"):
+          S["seed"] = me["seed"]
+        r = "W" if ps > pa else "L" if ps < pa else "T"
+        S["games"].append({"rd": rd, "label": label, "o": op.get("site") or site_of(op["code"]), "on": op["name"], "h": home,
+                           "ps": int(ps), "pa": int(pa), "r": r, **({"gid": g["gid"]} if g.get("gid") else {})})
+        title_game = rd == "SB" or (rd == "LCH" and (label != "NFL Championship" or s < 1966))
+        if r == "W" and title_game:
+          kind = "SB" if rd == "SB" else "AAFC" if label.startswith("AAFC") else "AFL" if label.startswith("AFL") else "NFL"
+          t["titles"].append({"s": s, "kind": kind})
+  out_doc = {}
+  for code, t in T.items():
+    seas = [x for x in sorted(t["seasons"].values(), key=lambda x: -x["s"])]
+    nfl_seas = [x for x in seas if not x["aafc"]]
+    games = [g for x in nfl_seas for g in x["games"]]
+    by = {}
+    for g in games:
+      b = by.setdefault(g["rd"], {"w": 0, "l": 0})
+      b["w" if g["r"] == "W" else "l"] += 1
+    for x in seas:  # each season's finish: champion, or the round he went out in
+      won_title = any(ti["s"] == x["s"] for ti in t["titles"])
+      lastg = max(x["games"], key=lambda g: FINISH.get(g["rd"], 1))
+      x["fin"] = "title" if won_title else lastg["rd"]
+      x["fin_label"] = ("Won " + lastg["label"]) if won_title else ("Lost " + (x["games"][-1]["label"]))
+    apps = sorted(x["s"] for x in nfl_seas)
+    streak = best = 0
+    for i, s in enumerate(apps):
+      streak = streak + 1 if i and s == apps[i - 1] + 1 else 1
+      best = max(best, streak)
+    eras = ERAS.get({v: k for k, v in TO_SITE.items()}.get(code, code), [])
+    first = eras[0][0] if eras else None
+    since = max(1970, first or 1970)
+    existed = [s for s in range(since, last_done + 1) if not (code == "CLE" and 1996 <= s <= 1998)] if first else []
+    ranked = sorted(nfl_seas, key=lambda x: (-FINISH.get(x["fin"], 0), -x["s"]))
+    out_doc[code] = {
+      "apps": len(apps), "w": sum(g["r"] == "W" for g in games), "l": sum(g["r"] == "L" for g in games),
+      "rounds": by, "titles": sorted(t["titles"], key=lambda x: -x["s"]),
+      "sb": {"apps": sum(1 for g in games if g["rd"] == "SB"), "w": by.get("SB", {}).get("w", 0)},
+      "best": ranked[0]["fin_label"] if ranked else None, "best_s": [x["s"] for x in ranked if x["fin"] == ranked[0]["fin"]] if ranked else [],
+      "last": apps[-1] if apps else None, "drought": (last_done - apps[-1]) if apps else None, "streak": best,
+      "rate": {"since": since, "apps": sum(1 for s in apps if s >= since), "seasons": len(existed)} if existed else None,
+      "first": first, "seasons": seas,
+    }
+  (out / "teams.json").write_text(json.dumps(out_doc, separators=(",", ":")), encoding="utf-8")
+  return out_doc
+
+
 def main():
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
   site = Path(opt.get("site", "site"))
@@ -224,6 +309,7 @@ def main():
     doc = season_doc(s, rows, {k: v for k, v in (seeds if s >= 1975 else {}).items()})
     (out / f"{s}.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
   (out / "index.json").write_text(json.dumps({"v": V, "seasons": seasons, "current": current}), encoding="utf-8")
+  team_summaries(out, seasons)
   print(f"[playoffs] {len(seasons)} seasons -> {out}", flush=True)
 
 

@@ -559,6 +559,17 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   neutral (h = 2 for both sides: no "@"). Player Stats custom columns: one delegated change listener (the table
   redraws its header on sort) + a sort button per custom column (tapping the picker on phones can't sort).
 
+- **Weekly rosters mark game-day inactives (INA) only from 2019 (2026-10-14).** Before that, ACT = on the roster:
+  injured players who sat read as active (Allen's 4 missed games in 2018). "Played a game" = any snaps (PFR snap
+  counts, which start in 2013: nflverse has NO 2012 snap data despite docs). Injury tab missed / played counts and
+  durability count from 2013; 2009-12 episodes are listed with '-'. Episodes continue only while listed or on a
+  reserve list (else backups who rarely play would 'miss' every game). Anything using INA as an outcome must stay
+  in 2019+ weeks that have INA rows (espn_calib, espn_return_eval do).
+- **Team page Playoffs tab (2026-10-14):** tools/playoffs_build.py team_summaries -> data/playoffs/teams.json. Titles =
+  Super Bowls + NFL championship games won before the Super Bowl (1933-65) + 1920-32 standings champions + AFL
+  titles; AAFC titles listed separately (not NFL records). Playoff rate since the 1970 merger (or founding).
+  Green Bay checks out: 13 titles, 37-28.
+
 ## 9. Open threads / next steps (as of 2026-10-12)
 - **NEXT (owner-approved 2026-10-14): Players > Trends, a play-level query builder.** "Rushing YPC for Ravens
   players in the 4th quarter, 2022-24" -> leaderboard. Design agreed: the query is a sentence of tappable chips

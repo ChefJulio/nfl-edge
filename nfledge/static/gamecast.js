@@ -636,7 +636,7 @@
   // the stat grid for a stretch of games: games + snap share, his kind's totals (with rates), returns when he had any
   const kindGrid = (L, t) => {
     const cols = KIND_COLS[L.kind] || {};
-    const main = [cell(f0(t.g), 'Games'), t.sn != null ? cell(`${Math.round(t.sn)}%`, 'Snaps', `Average share of ${L.kind === 'def' ? 'defensive' : L.kind === 'ol' || L.kind === 'off' ? 'offensive' : 'special-teams'} snaps (2012 on)`) : ''];
+    const main = [cell(f0(t.g), 'Games'), t.sn != null ? cell(`${Math.round(t.sn)}%`, 'Snaps', `Average share of ${L.kind === 'def' ? 'defensive' : L.kind === 'ol' || L.kind === 'off' ? 'offensive' : 'special-teams'} snaps (2013 on)`) : ''];
     const stats = (L.keys || []).map(k => cols[k] ? cell(nfmt(t[k] || 0), cols[k][0], cols[k][1]) : '');
     if (L.kind === 'k' && t.fga) stats.splice(2, 0, cell(`${Math.round(100 * t.fgm / t.fga)}%`, 'FG%'));
     if (L.kind === 'p' && t.pu) stats.splice(2, 0, cell(f1(t.yd / t.pu), 'Avg'), cell(f1(t.net / t.pu), 'Net avg'));
@@ -686,7 +686,7 @@
     const last = L.seasons.find(S => S.g.length);
     const season = last ? `<div class="pc-box"><div class="pc-k">${last.s === L.cur ? `${last.s} season so far` : `${last.s} season (his latest)`}</div>${kindGrid(L, kindTotals(L, last.g))}</div>` : '';
     const career = L.seasons.flatMap(S => S.g);
-    const car = career.length ? `<div class="pc-box"><div class="pc-k">Career (regular season${career.some(g => g.sn != null) ? '; snaps from 2012' : ''})</div>${kindGrid(L, kindTotals(L, career))}</div>` : '';
+    const car = career.length ? `<div class="pc-box"><div class="pc-k">Career (regular season${career.some(g => g.sn != null) ? '; snaps from 2013' : ''})</div>${kindGrid(L, kindTotals(L, career))}</div>` : '';
     const recent = last ? `<div class="pc-box pc-mini"><div class="pc-k">${last.s === L.cur ? 'This season' : `${last.s} games`}</div><div class="pc-log">${kindLog(L, [last], { compact: true })}</div>
       <button type="button" class="pc-more" data-goto="log">Show more</button></div>` : '';
     const news = espn ? `<div class="pc-box pc-mini"><div class="pc-k">Latest news</div><div class="pc-news" data-n="3"></div><button type="button" class="pc-more" data-goto="news">Show more</button></div>` : '';
@@ -731,11 +731,11 @@
     let dur = '';
     if (d && d.games) {
       const pct = d.pct != null ? Math.round(d.pct * 100) : null, tone = pct == null ? '' : pct >= 67 ? 'good' : pct <= 33 ? 'bad' : '';
-      dur = `<div class="pc-box"><div class="pc-k">Durability · since 2009</div>
+      dur = `<div class="pc-box"><div class="pc-k">Durability · since 2013</div>
         <div class="ij-dur"><div class="pc-big ${tone}">${pct != null ? `${ord(pct)}` : '–'} <small>percentile</small></div>
           <div class="pc-sub">${pct != null ? `More durable than ${pct}% of ${esc(GRP_LABEL[d.grp] || d.grp)} with a season or more of games` : ''}${d.small ? ' (few games yet: pulled toward the position average)' : ''}.</div></div>
         ${sg([sgRow(null, [cell(`${Math.round(d.avail * 100)}%`, 'Available', 'Share of his team\'s games he was not out injured'), cell(f0(d.games), 'Team games'), cell(f0(d.missed), 'Missed', 'Games missed injured'), cell(f0(eps.length), 'Injuries', 'Injury episodes listed')])], 4, { labels: false, cls: 'sg-tight' })}
-        <p class="pc-sub">Counts his team's games while he was on the roster; games missed inside an injury episode count against him (healthy scratches and suspensions don't). Ranked after pulling short careers toward the position average by one season of games.</p></div>`;
+        <p class="pc-sub">Counts his team's games while he was on the roster, from 2013 (snap counts tell who played); games missed inside an injury episode count against him (healthy scratches and suspensions don't). Ranked after pulling short careers toward the position average by one season of games.</p></div>`;
     }
     if (!eps.length) return cur + dur + '<div class="pc-box"><p class="pc-sub">No injuries on the official reports since 2009.</p></div>';
     // recurring body parts: by games missed, then by how often listed
@@ -745,11 +745,11 @@
     const rec = `<div class="pc-box"><div class="pc-k">Most often</div><div class="ij-parts">${top.map(([k, v]) => `<span class="ij-part"><b>${esc(k)}</b> ${v.n}x${v.m ? ` · ${v.m} missed` : ''}</span>`).join('')}</div></div>`;
     const wk = e => e.w0 === e.w1 ? `Wk ${e.w0}` : `Wk ${e.w0}-${e.w1}`;
     const rows = eps.map(e => `<tr${e.missed ? '' : ' class="ij-played"'}><td><b>${e.s}</b></td><td>${wk(e)}</td><td>${esc(e.part || 'Undisclosed')}</td>
-      <td class="num">${e.missed ? `<b>${e.missed}</b>` : '0'}</td><td class="num">${e.played || 0}</td>
+      <td class="num">${e.missed == null ? '–' : e.missed ? `<b>${e.missed}</b>` : '0'}</td><td class="num">${e.played == null ? '–' : e.played || 0}</td>
       <td>${e.list ? `<span class="dc-tag dt-out">${esc(e.list)}</span>` : e.worst ? `<span class="dc-tag dt-${e.worst === 'Questionable' ? 'q' : e.worst === 'Doubtful' ? 'd' : 'out'}">${esc(e.worst === 'Questionable' ? 'Q' : e.worst === 'Doubtful' ? 'D' : 'Out')}</span>` : ''}</td></tr>`).join('');
     return `${cur}${dur}${rec}<div class="pc-box pc-logbox"><div class="pc-k">Every injury listed</div>
       <div class="lg-scroll"><table class="lg ij-tbl"><thead><tr class="lg-ch"><th>Season</th><th>Weeks</th><th>Injury</th><th class="num" title="Games missed">Missed</th><th class="num" title="Games played while listed">Played</th><th title="Worst game status or reserve list">Status</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <p class="pc-sub">From the official injury reports and weekly rosters (2009 on). An episode runs while he is on the report or a reserve list; a bye doesn't end it, a game played without a listing does. IR players drop off the weekly report, so a later IR stint can show as undisclosed.</p></div>`;
+      <p class="pc-sub">From the official injury reports and weekly rosters (2009 on); games missed and played come from snap counts, so they start in 2013 ('–' before). An episode runs while he is on the report or a reserve list; a bye doesn't end it, a game played without a listing does. IR players drop off the weekly report, so a later IR stint can show as undisclosed.</p></div>`;
   };
   const renderCard = pid => {
     const body = document.querySelector('#pcOv .pc-body');
@@ -975,6 +975,40 @@
       ${cell('pf', 'Points for', f1(a.pf))}${cell('pa', 'Points against', f1(a.pa))}${cell('yd', 'Yards', f0(a.yd))}${cell('oyd', 'Yards allowed', f0(a.oyd))}
       ${cell('ep', 'Yards / play', a.ep != null ? a.ep.toFixed(2) : '')}${cell('oep', 'Allowed / play', a.oep != null ? a.oep.toFixed(2) : '')}${cell('tom', 'Turnover margin', sgn(a.tom))}</div></div>`;
   };
+  // Team page: Playoffs tab (data/playoffs/teams.json, tools/playoffs_build.py team_summaries): every postseason since
+  // 1933 (champions before), records overall and by round, titles, best finish, the playoff rate since the merger.
+  let TPO;
+  const RD_NAME = { WC: 'Wild Card', DIV: 'Divisional', CONF: 'Conference', SB: 'Super Bowl', LCH: 'League championship', OTHER: 'Other (tiebreakers)' };
+  const TITLE_NAME = { SB: 'Super Bowl', NFL: 'NFL championship', AFL: 'AFL championship', AAFC: 'AAFC championship' };
+  const teamPlayoffs = abbr => {
+    if (TPO === undefined) {
+      TPO = null;
+      getJSON(`${siteRoot()}data/playoffs/teams.json`).then(x => { TPO = x; if (cardTeam) renderTeam(cardTeam); }).catch(() => { TPO = false; if (cardTeam) renderTeam(cardTeam); });
+    }
+    if (!TPO) return `<div class="pc-box"><p class="pc-sub">${TPO === false ? 'Playoff history unavailable right now.' : 'Loading playoff history&hellip;'}</p></div>`;
+    const t = TPO[abbr];
+    if (!t) return '<div class="pc-box"><p class="pc-sub">No playoff games yet.</p></div>';
+    const pct = (w, l) => w + l ? `${Math.round(100 * w / (w + l))}%` : '–';
+    const nfl = t.titles.filter(x => x.kind !== 'AAFC'), aafc = t.titles.filter(x => x.kind === 'AAFC');
+    const r = t.rate;
+    const top = sg([sgRow(null, [cell(f0(nfl.length), 'Titles', 'Super Bowls, NFL championships before them, AFL championships'), cell(`${t.sb.w}-${t.sb.apps - t.sb.w}`, 'Super Bowls', 'Super Bowl record'),
+        cell(`${t.w}-${t.l}`, 'Record', `Playoff games won-lost (${pct(t.w, t.l)})`), cell(f0(t.apps), 'Appearances', 'Postseasons with a playoff game (NFL / AFL)')]),
+      sgRow(null, [r ? cell(`${Math.round(100 * r.apps / Math.max(1, r.seasons))}%`, `Since ${r.since}`, `In the playoffs ${r.apps} of ${r.seasons} seasons since ${r.since === 1970 ? 'the 1970 merger' : `${r.since} (first season)`}`) : '',
+        cell(t.last ? esc(t.last) : '–', 'Last trip'), cell(t.drought != null ? f0(t.drought) : '–', 'Drought', 'Seasons since the last playoff appearance'), cell(f0(t.streak), 'Best streak', 'Most consecutive playoff seasons')])], 4, { labels: false, cls: 'sg-tight' });
+    const titles = nfl.length || aafc.length ? `<div class="po-titles">${nfl.map(x => `<span class="ij-part"><b>${x.s}</b> ${esc(TITLE_NAME[x.kind])}</span>`).join('')}${aafc.map(x => `<span class="ij-part muted" title="AAFC titles are not NFL records"><b>${x.s}</b> AAFC (not NFL)</span>`).join('')}</div>` : '';
+    const best = t.best ? `<p class="pc-sub">Best finish: <b>${esc(t.best)}</b> (${t.best_s.slice(0, 8).join(', ')}${t.best_s.length > 8 ? '&hellip;' : ''})</p>` : '';
+    const order = ['SB', 'CONF', 'DIV', 'WC', 'LCH', 'OTHER'].filter(k => t.rounds[k]);
+    const rounds = `<table class="bx tpo-rd"><thead><tr><th>Round</th><th class="num">W-L</th><th class="num">Win %</th></tr></thead><tbody>${order.map(k => `<tr><td>${esc(RD_NAME[k])}</td><td class="num">${t.rounds[k].w}-${t.rounds[k].l}</td><td class="num">${pct(t.rounds[k].w, t.rounds[k].l)}</td></tr>`).join('')}</tbody></table>`;
+    const RD_SHORT = { WC: 'WC', DIV: 'DIV', CONF: 'CON', SB: 'SB', LCH: 'CH', OTHER: 'TB' };
+    const seasons = t.seasons.map(S => `<div class="tpo-s${S.fin === 'title' ? ' champ' : ''}"><div class="tpo-h"><b>${S.s}</b>${S.seed ? ` <span class="muted">#${S.seed} seed</span>` : ''}${S.name && S.name !== (tInfo(abbr).name || '') ? ` <span class="muted">${esc(S.name)}</span>` : ''}
+        <span class="tpo-fin${S.fin === 'title' ? ' good' : ''}">${esc(S.fin_label)}${S.aafc ? ' (AAFC)' : ''}</span></div>
+        ${[...S.games].reverse().map(g => `<div class="tpo-g"${g.gid ? ` data-gid="${esc(g.gid)}" role="link" title="Open the gamecast"` : ''}><span class="tpo-rd" title="${esc(g.label)}">${esc(RD_SHORT[g.rd] || g.rd)}</span>
+          <span class="tm-res ${g.r === 'W' ? 'w' : 'l'}">${g.r}</span> <b>${g.ps}-${g.pa}</b> <span>${g.h === 0 ? '@' : g.h === 2 ? 'vs' : 'vs'} <button type="button" class="tm-open" data-tm="${esc(g.o)}">${esc(g.on)}</button></span></div>`).join('')}</div>`).join('');
+    return `<div class="pc-box"><div class="pc-k">Postseason history</div>${top}${titles}${best}</div>
+      <div class="pc-box"><div class="pc-k">By round</div>${rounds}</div>
+      <div class="pc-box"><div class="pc-k">Every postseason · newest first</div>${seasons}
+        <p class="pc-sub">Every playoff game since 1933 (1920-32 champions from the standings). AFL games count; AAFC games and titles (1946-49) are shown but are not NFL records.</p></div>`;
+  };
   const renderTeam = abbr => {
     const body = document.querySelector('#pcOv .pc-body');
     const d = cardData(), L = TLOGS[abbr], info = tInfo(abbr);
@@ -985,20 +1019,26 @@
       <div class="pc-head" style="--tc:${esc(info.color || '#666')}">${tLogo(abbr, 34)}
         <div class="pc-id"><h3 id="pcName">${esc(info.name || abbr)}</h3>
           <div class="pc-meta"><b>${esc((L && (L.seasons.find(s => s.s === L.cur) || {}).rec) || '')}</b>${info.division ? ` <span class="muted">${esc(info.division)}</span>` : ''}</div></div></div>
-      <div class="seg pc-tabs" role="tablist">${[['ov', 'Week'], ['log', 'Game log'], ['pl', 'Players'], ['dc', 'Depth']].map(([k, l]) => `<button type="button" data-tt="${k}" class="${teamTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="seg pc-tabs" role="tablist">${[['ov', 'Week'], ['log', 'Game log'], ['pl', 'Players'], ['dc', 'Depth'], ['po', 'Playoffs']].map(([k, l]) => `<button type="button" data-tt="${k}" class="${teamTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       <div class="pc-tab" data-tt="ov"${teamTab === 'ov' ? '' : ' hidden'}>${pickerHtml()}${wk.html}<div class="tm-season">${L ? teamSeasonBox(L) : ''}</div></div>
       <div class="pc-tab" data-tt="log"${teamTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every game since 1999</div><div class="tm-log">${L ? teamLogHtml(L, abbr) : '<p class="pc-sub">Loading game log&hellip;</p>'}</div></div></div>
       <div class="pc-tab" data-tt="pl"${teamTab === 'pl' ? '' : ' hidden'}>${pickerHtml()}${d ? `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
         ${wk.players ? `<table class="bx tm-pl"><thead><tr><th>Player</th><th class="num">Proj</th><th>Tier</th><th class="num">FP/G</th></tr></thead><tbody>${wk.players}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>` : wkWait(d)}</div>
-      <div class="pc-tab" data-tt="dc"${teamTab === 'dc' ? '' : ' hidden'}>${teamTab === 'dc' ? depthHtml(abbr) : ''}</div>`;
+      <div class="pc-tab" data-tt="dc"${teamTab === 'dc' ? '' : ' hidden'}>${teamTab === 'dc' ? depthHtml(abbr) : ''}</div>
+      <div class="pc-tab" data-tt="po"${teamTab === 'po' ? '' : ' hidden'}>${teamTab === 'po' ? teamPlayoffs(abbr) : ''}</div>`;
     body.querySelectorAll('[data-tt]').forEach(b => b.onclick = () => {
       teamTab = b.dataset.tt;
       if (teamTab === 'dc') { body.querySelector('.pc-tab[data-tt="dc"]').innerHTML = depthHtml(abbr); wireDepth(body, abbr); }
+      if (teamTab === 'po') body.querySelector('.pc-tab[data-tt="po"]').innerHTML = teamPlayoffs(abbr);
       body.querySelectorAll('.pc-tabs [data-tt]').forEach(x => x.classList.toggle('on', x === b));
       body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.tt !== teamTab; });
     });
     wireTeamLog(body, abbr);
     wireDepth(body, abbr);
+    body.addEventListener('click', e => {  // playoff game rows open their gamecast
+      const g = e.target.closest('.tpo-g[data-gid]'); if (!g || e.target.closest('button, a')) return;
+      location.href = gcUrl(g.dataset.gid, '');
+    });
     wireLogRows(body.querySelector('.tm-log'));
     wirePicker(body);
     if (!L) loadTeamLog(abbr);

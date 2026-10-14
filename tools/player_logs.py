@@ -150,7 +150,11 @@ def main():
                        [cache.get("rosters", s, lambda: nfl.load_rosters_weekly([s]), stale=False) for s in range(2002, first_loaded)]
                        + [data.rosters] if x is not None and len(x)], ignore_index=True)
   bios = bio_map(all_ros, data.draft, contracts)
-  injuries = injury_history(cache, nfl, data.current_season, all_ros, allsched)
+  # who actually played each game: any snaps (PFR, 2012 on). Weekly rosters only mark game-day inactives from 2019,
+  # so before that "ACT" just means on the roster (Allen's 4 missed games in 2018 read as played).
+  tot = sn[["offense_snaps", "defense_snaps", "st_snaps"]].fillna(0).sum(axis=1)
+  played = set(zip(sn.gsis_id[tot > 0], sn.season[tot > 0].astype(int), sn.week[tot > 0].astype(int)))
+  injuries = injury_history(cache, nfl, data.current_season, all_ros, allsched, played)
   scr = qb_scrambles(data.pbp)
   out_dir = site / "data" / "players"
   out_dir.mkdir(parents=True, exist_ok=True)
@@ -429,7 +433,10 @@ NOT_INJURY = re.compile(r"not injury|rest|personal|resting|coach", re.I)
 SEVERITY = {"Questionable": 1, "Doubtful": 2, "Out": 3}
 
 
-def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFrame) -> dict:
+SNAPS_FROM = 2013  # games missed / played are counted from snap counts (nflverse has none for 2012)
+
+
+def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFrame, played: set) -> dict:
   """gsis -> [episode], newest first. An episode = consecutive team games where he was on the injury report or a
   reserve list for an injury (a bye doesn't break it; a game played with no listing ends it). Per episode: season,
   first / last week, body part (the one listed most), games missed (not active), games played while listed, the
@@ -464,8 +471,9 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
       if cur_ep:
         parts = pd.Series(cur_ep.pop("parts"))
         cur_ep["part"] = parts.mode().iloc[0] if len(parts) else ("Undisclosed" if cur_ep.get("list") else "")
-        if cur_ep["missed"] or cur_ep["played"]:
-          eps.append(cur_ep)
+        if not cur_ep.pop("counted"):
+          cur_ep["missed"] = cur_ep["played"] = None  # before 2012: no snap counts to tell
+        eps.append(cur_ep)
       cur_ep = None
 
     last_season = None
@@ -476,10 +484,12 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
         last_season = s
       lst = listed.get((gid, s, w))
       res = RESERVE.get(code) if st == "RES" else None
-      active = st == "ACT"
-      if lst or res or (cur_ep and not active and st in ("INA", "RES")):
+      counted = s >= SNAPS_FROM  # before snap counts nobody can tell who sat: listed, not counted
+      active = (gid, s, w) in played if counted else st == "ACT"
+      if lst or res:  # a week off the report and off reserve lists ends the episode (backups who rarely play
+        # would otherwise "miss" every later game)
         if cur_ep is None:
-          cur_ep = {"s": s, "w0": w, "w1": w, "missed": 0, "played": 0, "parts": [], "worst": ""}
+          cur_ep = {"s": s, "w0": w, "w1": w, "missed": 0, "played": 0, "parts": [], "worst": "", "counted": counted}
         cur_ep["w1"] = w
         if lst:
           cur_ep["parts"].append(lst[0])
@@ -489,13 +499,13 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
           cur_ep["list"] = res
         if active:
           cur_ep["played"] += 1
-        elif st in ("INA", "RES"):
+        else:
           cur_ep["missed"] += 1
-      elif cur_ep and active:
+      elif cur_ep:
         close()
     close()
     out[gid] = {"eps": [{k: v for k, v in e.items() if v not in ("", None)} for e in reversed(eps)],
-                "games": len(g), "missed": sum(e["missed"] for e in eps)}
+                "games": int((g.season >= SNAPS_FROM).sum()), "missed": sum(e["missed"] or 0 for e in eps)}
   # Durability: share of his team's games he was available for (games missed inside injury episodes count against
   # him; healthy scratches and suspensions don't), shrunk toward his position's average by one season of games
   # (17), then his percentile among everyone at the position with a season or more of games.

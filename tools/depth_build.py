@@ -205,7 +205,7 @@ def main():
         i = inj[inj.report_status.isin(GAME_TAG)]
         for g, w, st in zip(i.gsis_id, i.week, i.report_status):
           tags.setdefault((g, int(w)), GAME_TAG[st])  # a reserve list outranks a game status
-    # depth by playing time (2012 on: snap counts)
+    # depth by playing time (2013 on: snap counts; nflverse has none for 2012)
     sn = season_snaps(cache, nfl, season, pfr, live)
     out_set = {k for k, v in tags.items() if v == "O"}
     reserve = {k for k, v in tags.items() if v in ("IR", "PUP", "NFI", "SUSP", "HOLD")}
