@@ -1,205 +1,391 @@
-// Players > Trends: a play-level query builder over every run and pass play since 1999 (data/plays/<season>.json,
-// tools/trends_build.py). The query reads as a sentence of tappable chips ("Rushing YPC for Ravens players, 4th
-// quarter, 2022-2024, by player"); the answer is a leaderboard against the league in the same situation, with a
-// minimum sample (small samples greyed, not hidden), a trend line when grouped by season, and a shareable link
-// (?t=... in the URL). Everything is counted in the browser from the season files, loaded only when a query needs them.
+// Players > Trends: a play-level query builder over every run and pass play since 1999 (data/plays/<season>.json +
+// <season>_x.json charting, tools/trends_build.py). The query reads as a sentence of tappable chips ("Rushing YPC for
+// BAL players, 4th quarter, 2022-2024, by player"); the answer is a leaderboard against the league in the same
+// situation, with a minimum sample (small samples greyed, not hidden), a trend line when grouped by season, and a
+// shareable link (?t=..., read once then dropped). Everything is counted in the browser from the season files.
+// Coverage: every filter / metric / grouping names the columns it needs; index.json lists, per season, the columns
+// charted on >= 90% of the plays they apply to, and a query only counts seasons that have all it needs (and says
+// which it left out), so a charting gap never reads as a zero.
 (() => {
   const NFLE = window.NFLE, esc = NFLE.esc;
   const LS = 'nfledge-trends';
-  // ---- stat families: which plays count, whose they are, what is summed, and the metrics built from the sums
+  // columns that live in <season>_x.json (participation + FTN charting): loaded only when a query needs one
+  const XCOLS = new Set(['fm', 'op', 'db', 'bx', 'pr', 'tt', 'pz', 'mz', 'cv', 'rt', 'mo', 'px', 'sc', 'rp', 'tr', 'oo', 'iw', 'ta', 'cb', 'ct', 'dr', 'cr', 'bl', 'bf', 'rd']);
+  const CNAME = { ay: 'air yards', yc: 'YAC', pl: 'pass location', rl: 'run direction', gp: 'run gap', cp: 'completion probability', xp: 'expected pass rate',
+    xy: 'expected YAC', wp: 'win probability', wa: 'WPA', fm: 'QB alignment', op: 'personnel', db: 'defensive personnel', bx: 'box count', pr: 'pass rushers',
+    tt: 'time to throw', pz: 'pressure', mz: 'man / zone', cv: 'coverage shell', rt: 'routes', mo: 'motion', px: 'play action', sc: 'screens', rp: 'RPOs',
+    tr: 'trick plays', oo: 'pocket', iw: 'INT-worthy throws', ta: 'throwaways', cb: 'catchable balls', ct: 'contested balls', dr: 'drops',
+    cr: 'created receptions', bl: 'blitzers', bf: 'backfield', rd: 'reads' };
+  const FLAGS = ['tl', 'qh', 'pz', 'iw', 'ta', 'oo', 'px', 'mo', 'dr', 'cb', 'ct', 'cr', 'sg', 'nh', 'sc', 'rp'];
+  // ---- metrics: [label, value from the sums, decimals, columns needed]
+  const rate = c => a => 100 * a[c + 'n'] / a[c + 'd'];
   const FAM = {
     rush: { label: 'Rushing', unit: 'rushes', min: 20, play: (P, j) => P.ty[j] !== 1, actor: (P, j) => P.ru[j],
-      add: (a, P, j) => { a.n++; a.y += P.y[j]; a.td += P.td[j]; a.e += P.e[j]; a.s += P.s[j]; a.fd += P.fd[j]; a.x += P.y[j] >= 10; a.fl += P.fl[j]; },
+      add: (a, P, j) => { a.y += P.y[j]; a.td += P.td[j]; a.fd += P.fd[j]; a.x += P.y[j] >= 10; a.fl += P.fl[j]; },
       met: { ypc: ['YPC', a => a.y / a.n, 2], yds: ['Yards', a => a.y, 0], att: ['Rushes', a => a.n, 0], td: ['TDs', a => a.td, 0],
              epa: ['EPA / rush', a => a.e / 100 / a.n, 3], sr: ['Success %', a => 100 * a.s / a.n, 1], fd: ['1st down %', a => 100 * a.fd / a.n, 1],
-             x: ['10+ yd %', a => 100 * a.x / a.n, 1] } },
+             x: ['10+ yd %', a => 100 * a.x / a.n, 1], stuff: ['Stuffed %', rate('tl'), 1], fl: ['Fumbles lost', a => a.fl, 0],
+             wpa: ['WPA', a => a.wa / 1000, 2, ['wa']] } },
     pass: { label: 'Passing', unit: 'dropbacks', min: 50, play: (P, j) => P.ty[j] === 1, actor: (P, j) => P.pp[j],
-      add: (a, P, j) => { a.n++; const sk = P.sk[j]; a.att += P.pa[j] && !sk; a.c += P.c[j]; a.y += sk ? 0 : P.y[j]; a.td += P.td[j] && P.c[j];
-        a.int += P.in[j]; a.sk += sk; a.e += P.e[j]; a.s += P.s[j]; if (P.pa[j] && !sk && P.ay[j] > -99) { a.ay += P.ay[j]; a.ayn++; } },
+      add: (a, P, j) => { const sk = P.sk[j], att = P.pa[j] && !sk; a.att += att; a.c += P.c[j]; a.y += sk ? 0 : P.y[j]; a.td += P.td[j] && P.c[j];
+        a.int += P.in[j]; a.sk += sk; if (att && P.ay[j] > -99) { a.ay += P.ay[j]; a.ayn++; } if (att && P.cp[j] > -999) { a.cp += P.cp[j]; a.cpn++; }
+        if (P.tt && P.tt[j] >= 0) { a.tt += P.tt[j]; a.ttn++; } },
       met: { ypa: ['Yds / att', a => a.y / a.att, 2], cmp: ['Comp %', a => 100 * a.c / a.att, 1], yds: ['Yards', a => a.y, 0], td: ['TDs', a => a.td, 0],
              int: ['INTs', a => a.int, 0], epa: ['EPA / dropback', a => a.e / 100 / a.n, 3], sr: ['Success %', a => 100 * a.s / a.n, 1],
-             skr: ['Sack %', a => 100 * a.sk / a.n, 1], adot: ['Air yds / att', a => a.ay / a.ayn, 1], att: ['Attempts', a => a.att, 0] } },
+             skr: ['Sack %', a => 100 * a.sk / a.n, 1], att: ['Attempts', a => a.att, 0], adot: ['Air yds / att', a => a.ay / a.ayn, 1, ['ay']],
+             cpoe: ['CPOE', a => a.cp / 10 / a.cpn, 1, ['cp']], pz: ['Pressure %', rate('pz'), 1, ['pz']], tt: ['Time to throw', a => a.tt / 10 / a.ttn, 2, ['tt']],
+             qh: ['QB hit %', rate('qh'), 1], iw: ['INT-worthy %', rate('iw'), 1, ['iw']], ta: ['Throwaway %', rate('ta'), 1, ['ta']],
+             oo: ['Out of pocket %', rate('oo'), 1, ['oo']], px: ['Play action %', rate('px'), 1, ['px']], wpa: ['WPA', a => a.wa / 1000, 2, ['wa']] } },
     rec: { label: 'Receiving', unit: 'targets', min: 15, play: (P, j) => P.ty[j] === 1 && P.re[j] >= 0, actor: (P, j) => P.re[j],
-      add: (a, P, j) => { a.n++; a.c += P.c[j]; a.y += P.c[j] ? P.y[j] : 0; a.td += P.td[j] && P.c[j]; a.e += P.e[j]; a.s += P.s[j];
-        if (P.c[j] && P.yc[j] > -99) { a.yac += P.yc[j]; a.ycn++; } if (P.ay[j] > -99) { a.ay += P.ay[j]; a.ayn++; } },
+      add: (a, P, j) => { const c = P.c[j]; a.c += c; a.y += c ? P.y[j] : 0; a.td += P.td[j] && c;
+        if (c && P.yc[j] > -99) { a.yac += P.yc[j]; a.ycn++; if (P.xy[j] > -999) { a.yo += P.yc[j] - P.xy[j] / 10; a.yon++; } }
+        if (P.ay[j] > -99) { a.ay += P.ay[j]; a.ayn++; } if (P.cp[j] > -999) { a.cp += P.cp[j]; a.cpn++; }
+        if (P.ct && P.ct[j] === 1) { a.ctt++; a.ctc += c; } },
       met: { ypt: ['Yds / target', a => a.y / a.n, 2], yds: ['Yards', a => a.y, 0], rec: ['Catches', a => a.c, 0], tgt: ['Targets', a => a.n, 0],
-             cr: ['Catch %', a => 100 * a.c / a.n, 1], td: ['TDs', a => a.td, 0], yac: ['YAC / catch', a => a.yac / a.ycn, 1],
-             adot: ['aDOT', a => a.ay / a.ayn, 1], epa: ['EPA / target', a => a.e / 100 / a.n, 3], sr: ['Success %', a => 100 * a.s / a.n, 1] } },
+             cr: ['Catch %', a => 100 * a.c / a.n, 1], td: ['TDs', a => a.td, 0], yac: ['YAC / catch', a => a.yac / a.ycn, 1, ['yc']],
+             adot: ['aDOT', a => a.ay / a.ayn, 1, ['ay']], epa: ['EPA / target', a => a.e / 100 / a.n, 3], sr: ['Success %', a => 100 * a.s / a.n, 1],
+             croe: ['Catch % over exp.', a => a.cp / 10 / a.cpn, 1, ['cp']], yacoe: ['YAC over exp.', a => a.yo / a.yon, 2, ['xy']],
+             drop: ['Drop %', rate('dr'), 1, ['dr']], cb: ['Catchable %', rate('cb'), 1, ['cb']], ctr: ['Contested %', rate('ct'), 1, ['ct']],
+             ctc: ['Contested catch %', a => 100 * a.ctc / a.ctt, 1, ['ct'], ['Contested targets', a => a.ctt]], crt: ['Created catch %', rate('cr'), 1, ['cr']],
+             wpa: ['WPA', a => a.wa / 1000, 2, ['wa']] } },
     team: { label: 'Team offense', unit: 'plays', min: 50, play: () => true, actor: (P, j) => P.o[j], teamActor: true,
-      add: (a, P, j) => { a.n++; a.y += P.y[j]; a.e += P.e[j]; a.s += P.s[j]; a.db += P.ty[j] === 1; a.td += P.td[j]; a.fd += P.fd[j]; },
+      add: (a, P, j) => { const db = P.ty[j] !== 0; a.y += P.y[j]; a.db += db; a.td += P.td[j]; a.fd += P.fd[j];
+        if (P.xp[j] >= 0) { a.xo += db - P.xp[j] / 100; a.xon++; } },
       met: { epa: ['EPA / play', a => a.e / 100 / a.n, 3], ypp: ['Yds / play', a => a.y / a.n, 2], sr: ['Success %', a => 100 * a.s / a.n, 1],
-             pr: ['Pass rate %', a => 100 * a.db / a.n, 1], fd: ['1st down %', a => 100 * a.fd / a.n, 1], plays: ['Plays', a => a.n, 0], td: ['TDs', a => a.td, 0] } },
+             pr: ['Dropback %', a => 100 * a.db / a.n, 1], proe: ['Pass rate over exp.', a => 100 * a.xo / a.xon, 1, ['xp']],
+             fd: ['1st down %', a => 100 * a.fd / a.n, 1], plays: ['Plays', a => a.n, 0], td: ['TDs', a => a.td, 0], sg: ['Shotgun %', rate('sg'), 1],
+             nh: ['No-huddle %', rate('nh'), 1], px: ['Play action %', rate('px'), 1, ['px']], mo: ['Motion %', rate('mo'), 1, ['mo']],
+             wpa: ['WPA', a => a.wa / 1000, 2, ['wa']] } },
   };
   const FIRST = { rush: 'ypc', pass: 'epa', rec: 'ypt', team: 'epa' };
   const COUNT = { att: 1, tgt: 1, plays: 1 };  // metrics equal to the sample column: not repeated as extras
-  // ---- situation filters: each a list of [value, label, test]
-  const FILTERS = {
-    qtr: ['Quarter', [['1', '1st quarter', (P, j) => P.q[j] === 1], ['2', '2nd quarter', (P, j) => P.q[j] === 2], ['3', '3rd quarter', (P, j) => P.q[j] === 3],
-      ['4', '4th quarter', (P, j) => P.q[j] === 4], ['ot', 'overtime', (P, j) => P.q[j] >= 5], ['h2', '2nd half + OT', (P, j) => P.q[j] >= 3]]],
-    down: ['Down', [['1', '1st down', (P, j) => P.dn[j] === 1], ['2', '2nd down', (P, j) => P.dn[j] === 2], ['3', '3rd down', (P, j) => P.dn[j] === 3],
-      ['4', '4th down', (P, j) => P.dn[j] === 4], ['34', '3rd or 4th down', (P, j) => P.dn[j] >= 3]]],
-    dist: ['Distance', [['s', 'short (1-3 to go)', (P, j) => P.tg[j] <= 3], ['m', 'medium (4-7 to go)', (P, j) => P.tg[j] >= 4 && P.tg[j] <= 7], ['l', 'long (8+ to go)', (P, j) => P.tg[j] >= 8]]],
-    zone: ['Field zone', [['rz', 'red zone', (P, j) => P.yl[j] <= 20], ['gl', 'inside the 10', (P, j) => P.yl[j] <= 10], ['opp', "opponent's half", (P, j) => P.yl[j] <= 50], ['own', 'own half', (P, j) => P.yl[j] > 50]]],
-    score: ['Score', [['l9', 'leading by 9+', (P, j) => P.sd[j] >= 9], ['l', 'leading by 1-8', (P, j) => P.sd[j] >= 1 && P.sd[j] <= 8], ['t', 'tied', (P, j) => P.sd[j] === 0],
-      ['b', 'trailing by 1-8', (P, j) => P.sd[j] <= -1 && P.sd[j] >= -8], ['b9', 'trailing by 9+', (P, j) => P.sd[j] <= -9], ['one', 'one-score game', (P, j) => Math.abs(P.sd[j]) <= 8]]],
-    time: ['Clock', [['2m', 'last 2 minutes of a half', (P, j) => P.hs[j] <= 12], ['5m', 'last 5 minutes of a half', (P, j) => P.hs[j] <= 30]]],
-    site: ['Home / away', [['h', 'at home', (P, j, G) => G[P.g[j]][3] === P.o[j]], ['a', 'on the road', (P, j, G) => G[P.g[j]][3] !== P.o[j]]]],
-    form: ['Formation', [['sg', 'shotgun', (P, j) => P.sg[j] === 1], ['uc', 'under center', (P, j) => P.sg[j] === 0], ['nh', 'no huddle', (P, j) => P.nh[j] === 1]]],
-    dir: ['Run direction', [['l', 'runs left', (P, j) => P.rl[j] === 1], ['m', 'runs up the middle', (P, j) => P.rl[j] === 2], ['r', 'runs right', (P, j) => P.rl[j] === 3]]],
-    depth: ['Pass depth', [['b', 'behind the line', (P, j) => P.ay[j] > -99 && P.ay[j] < 0], ['s', 'short (under 10 air yds)', (P, j) => P.ay[j] > -99 && P.ay[j] < 10],
-      ['i', 'intermediate (10-19)', (P, j) => P.ay[j] >= 10 && P.ay[j] < 20], ['d', 'deep (20+)', (P, j) => P.ay[j] >= 20]]],
+  const blank = () => { const a = { n: 0, y: 0, td: 0, e: 0, s: 0, fd: 0, x: 0, fl: 0, att: 0, c: 0, int: 0, sk: 0, ay: 0, ayn: 0, yac: 0, ycn: 0, db: 0,
+    cp: 0, cpn: 0, tt: 0, ttn: 0, yo: 0, yon: 0, xo: 0, xon: 0, ctt: 0, ctc: 0, wa: 0 }; FLAGS.forEach(c => { a[c + 'n'] = 0; a[c + 'd'] = 0; }); return a; };
+  const common = (a, P, j) => {
+    a.n++; a.e += P.e[j]; a.s += P.s[j]; a.wa += P.wa[j];
+    for (let k = 0; k < FLAGS.length; k++) { const col = P[FLAGS[k]]; if (col) { const v = col[j]; if (v >= 0) { a[FLAGS[k] + 'd']++; a[FLAGS[k] + 'n'] += v === 1; } } }
   };
-  const BY = { player: 'player', team: 'team', season: 'season', opp: 'opponent', qtr: 'quarter', down: 'down' };
+
+  // ---- filters: { label, group, need, only (families), opts: [value, label, test(P, j, G, V)] }; V = the season's vocabularies
+  const vt = (c, label) => (P, j, G, V) => !!V[c] && V[c][P[c][j] - 1] === label;
+  const eq = (c, v) => (P, j) => P[c][j] === v;
+  const gm = (P, j, G) => G[P.g[j]];
+  const offFav = (P, j, G) => { const g = gm(P, j, G); return g[9] === -999 ? null : (g[3] === P.o[j] ? g[9] : -g[9]); };
+  const PASSY = ['pass', 'rec', 'team'], RUNNY = ['rush', 'team'];
+  const FILTERS = {
+    qtr: { label: 'Quarter', group: 'Situation', opts: [['1', '1st quarter', eq('q', 1)], ['2', '2nd quarter', eq('q', 2)], ['3', '3rd quarter', eq('q', 3)],
+      ['4', '4th quarter', eq('q', 4)], ['ot', 'overtime', (P, j) => P.q[j] >= 5], ['h2', '2nd half + OT', (P, j) => P.q[j] >= 3]] },
+    down: { label: 'Down', group: 'Situation', opts: [['1', '1st down', eq('dn', 1)], ['2', '2nd down', eq('dn', 2)], ['3', '3rd down', eq('dn', 3)],
+      ['4', '4th down', eq('dn', 4)], ['34', '3rd or 4th down', (P, j) => P.dn[j] >= 3]] },
+    dist: { label: 'Distance', group: 'Situation', opts: [['s', 'short (1-3 to go)', (P, j) => P.tg[j] <= 3], ['m', 'medium (4-7 to go)', (P, j) => P.tg[j] >= 4 && P.tg[j] <= 7],
+      ['l', 'long (8+ to go)', (P, j) => P.tg[j] >= 8]] },
+    zone: { label: 'Field zone', group: 'Situation', opts: [['rz', 'red zone', (P, j) => P.yl[j] <= 20], ['gl', 'inside the 10', (P, j) => P.yl[j] <= 10],
+      ['gtg', 'goal to go', (P, j) => P.yl[j] <= P.tg[j]], ['opp', "opponent's half", (P, j) => P.yl[j] <= 50], ['own', 'own half', (P, j) => P.yl[j] > 50],
+      ['deep', 'backed up (own 10)', (P, j) => P.yl[j] >= 90]] },
+    score: { label: 'Score', group: 'Situation', opts: [['l9', 'leading by 9+', (P, j) => P.sd[j] >= 9], ['l', 'leading by 1-8', (P, j) => P.sd[j] >= 1 && P.sd[j] <= 8],
+      ['t', 'tied', eq('sd', 0)], ['b', 'trailing by 1-8', (P, j) => P.sd[j] <= -1 && P.sd[j] >= -8], ['b9', 'trailing by 9+', (P, j) => P.sd[j] <= -9],
+      ['one', 'one-score game', (P, j) => Math.abs(P.sd[j]) <= 8]] },
+    time: { label: 'Clock', group: 'Situation', opts: [['2m', 'last 2 minutes of a half', (P, j) => P.hs[j] <= 12], ['5m', 'last 5 minutes of a half', (P, j) => P.hs[j] <= 30]] },
+    wp: { label: 'Win probability', group: 'Situation', need: ['wp'], opts: [['ng', 'no garbage time (10-90%)', (P, j) => P.wp[j] >= 10 && P.wp[j] <= 90],
+      ['close', 'competitive (25-75%)', (P, j) => P.wp[j] >= 25 && P.wp[j] <= 75], ['ahead', 'game in hand (90%+)', (P, j) => P.wp[j] > 90],
+      ['behind', 'long shot (under 10%)', (P, j) => P.wp[j] >= 0 && P.wp[j] < 10]] },
+    site: { label: 'Home / away', group: 'Game', opts: [['h', 'at home', (P, j, G) => gm(P, j, G)[3] === P.o[j]], ['a', 'on the road', (P, j, G) => gm(P, j, G)[3] !== P.o[j]]] },
+    week: { label: 'Weeks', group: 'Game', opts: [['e', 'weeks 1-4', (P, j, G) => gm(P, j, G)[1] <= 4 && !gm(P, j, G)[2]],
+      ['m', 'weeks 5-9', (P, j, G) => { const w = gm(P, j, G)[1]; return w >= 5 && w <= 9 && !gm(P, j, G)[2]; }],
+      ['l', 'weeks 10-14', (P, j, G) => { const w = gm(P, j, G)[1]; return w >= 10 && w <= 14 && !gm(P, j, G)[2]; }],
+      ['d', 'week 15 on', (P, j, G) => gm(P, j, G)[1] >= 15 && !gm(P, j, G)[2]]] },
+    roof: { label: 'Roof', group: 'Game', opts: [['in', 'indoors', (P, j, G) => gm(P, j, G)[4] === 1], ['out', 'outdoors', (P, j, G) => gm(P, j, G)[4] === 0]] },
+    surf: { label: 'Surface', group: 'Game', opts: [['g', 'on grass', (P, j, G) => gm(P, j, G)[5] === 0], ['t', 'on turf', (P, j, G) => gm(P, j, G)[5] === 1]] },
+    wx: { label: 'Weather', group: 'Game', opts: [['c40', 'cold (40 F or below)', (P, j, G) => { const g = gm(P, j, G); return !g[4] && g[6] > -999 && g[6] <= 40; }],
+      ['c32', 'freezing (32 F or below)', (P, j, G) => { const g = gm(P, j, G); return !g[4] && g[6] > -999 && g[6] <= 32; }],
+      ['w15', 'windy (15+ mph)', (P, j, G) => { const g = gm(P, j, G); return !g[4] && g[7] >= 15; }],
+      ['hot', 'hot (80 F or above)', (P, j, G) => { const g = gm(P, j, G); return !g[4] && g[6] >= 80; }]] },
+    div: { label: 'Division', group: 'Game', opts: [['d', 'division games', (P, j, G) => gm(P, j, G)[8] === 1], ['n', 'non-division games', (P, j, G) => gm(P, j, G)[8] === 0]] },
+    line: { label: 'Point spread', group: 'Game', opts: [['f7', 'favored by 7+', (P, j, G) => offFav(P, j, G) >= 70], ['f', 'favored', (P, j, G) => offFav(P, j, G) > 0],
+      ['u', 'underdog', (P, j, G) => { const f = offFav(P, j, G); return f != null && f < 0; }], ['u7', 'underdog by 7+', (P, j, G) => { const f = offFav(P, j, G); return f != null && f <= -70; }]] },
+    total: { label: 'Over / under', group: 'Game', opts: [['hi', 'total 48+', (P, j, G) => gm(P, j, G)[10] >= 480],
+      ['lo', 'total 40 or less', (P, j, G) => { const t = gm(P, j, G)[10]; return t > 0 && t <= 400; }]] },
+    form: { label: 'Shotgun / huddle', group: 'Offense', opts: [['sg', 'shotgun', eq('sg', 1)], ['uc', 'not shotgun', eq('sg', 0)], ['nh', 'no huddle', eq('nh', 1)]] },
+    align: { label: 'QB alignment', group: 'Offense', need: ['fm'], opts: ['Shotgun', 'Under center', 'Pistol', 'Wildcat'].map(l => [l, l.toLowerCase(), vt('fm', l)]) },
+    pers: { label: 'Personnel', group: 'Offense', need: ['op'], opts: [...['10', '11', '12', '13', '20', '21', '22'].map(c => [c, `${c} personnel`, vt('op', c)]),
+      ['e', 'no running back', (P, j, G, V) => !!V.op && (V.op[P.op[j] - 1] || 'x')[0] === '0']] },
+    bf: { label: 'Backfield', group: 'Offense', need: ['bf'], opts: [['0', 'empty backfield', eq('bf', 0)], ['1', 'one back', eq('bf', 1)], ['2', 'two+ backs', (P, j) => P.bf[j] >= 2]] },
+    mo: { label: 'Motion', group: 'Offense', need: ['mo'], opts: [['y', 'motion at the snap', eq('mo', 1)], ['n', 'no motion', eq('mo', 0)]] },
+    pa: { label: 'Play action', group: 'Offense', need: ['px'], only: PASSY, opts: [['y', 'play action', eq('px', 1)], ['n', 'no play action', eq('px', 0)]] },
+    rpo: { label: 'RPO', group: 'Offense', need: ['rp'], opts: [['y', 'RPOs', eq('rp', 1)], ['n', 'not an RPO', eq('rp', 0)]] },
+    scr: { label: 'Screen', group: 'Offense', need: ['sc'], only: PASSY, opts: [['y', 'screens', eq('sc', 1)], ['n', 'no screens', eq('sc', 0)]] },
+    trick: { label: 'Trick play', group: 'Offense', need: ['tr'], opts: [['y', 'trick plays', eq('tr', 1)], ['n', 'no trick plays', eq('tr', 0)]] },
+    dir: { label: 'Run direction', group: 'Run', only: RUNNY, opts: [['l', 'runs left', eq('rl', 1)], ['m', 'runs up the middle', eq('rl', 2)], ['r', 'runs right', eq('rl', 3)],
+      ['o', 'runs outside (left or right)', (P, j) => P.rl[j] === 1 || P.rl[j] === 3]] },
+    rtype: { label: 'Run type', group: 'Run', only: ['rush'], opts: [['d', 'designed runs', eq('ty', 0)], ['s', 'QB scrambles', eq('ty', 2)]] },
+    gap: { label: 'Run gap', group: 'Run', need: ['gp'], only: RUNNY, opts: [['end', 'around end', eq('gp', 1)], ['tackle', 'off tackle', eq('gp', 2)], ['guard', 'off guard', eq('gp', 3)]] },
+    depth: { label: 'Pass depth', group: 'Pass', need: ['ay'], only: PASSY, opts: [['b', 'behind the line', (P, j) => P.ay[j] > -99 && P.ay[j] < 0],
+      ['s', 'short (under 10 air yds)', (P, j) => P.ay[j] > -99 && P.ay[j] < 10], ['i', 'intermediate (10-19)', (P, j) => P.ay[j] >= 10 && P.ay[j] < 20],
+      ['d', 'deep (20+)', (P, j) => P.ay[j] >= 20]] },
+    loc: { label: 'Pass location', group: 'Pass', need: ['pl'], only: PASSY, opts: [['l', 'throws left', eq('pl', 1)], ['m', 'throws over the middle', eq('pl', 2)],
+      ['r', 'throws right', eq('pl', 3)], ['o', 'throws outside (left or right)', (P, j) => P.pl[j] === 1 || P.pl[j] === 3]] },
+    route: { label: 'Route', group: 'Pass', need: ['rt'], only: PASSY, opts: ['Go', 'Post', 'Corner', 'Slant', 'In / dig', 'Hitch / curl', 'Cross / drag',
+      'Out / flat / swing', 'Angle', 'Wheel', 'Screen'].map(l => [l, `${l.toLowerCase()} routes`, vt('rt', l)]) },
+    press: { label: 'Pressure', group: 'Pass', need: ['pz'], only: PASSY, opts: [['y', 'under pressure', eq('pz', 1)], ['n', 'clean pocket', eq('pz', 0)]] },
+    ttt: { label: 'Time to throw', group: 'Pass', need: ['tt'], only: PASSY, opts: [['q', 'quick (under 2.5 s)', (P, j) => P.tt[j] >= 0 && P.tt[j] < 25],
+      ['m', '2.5-3.4 s', (P, j) => P.tt[j] >= 25 && P.tt[j] < 35], ['l', 'held it (3.5 s+)', (P, j) => P.tt[j] >= 35]] },
+    pocket: { label: 'Pocket', group: 'Pass', need: ['oo'], only: PASSY, opts: [['in', 'in the pocket', eq('oo', 0)], ['out', 'out of the pocket', eq('oo', 1)]] },
+    read: { label: 'Read', group: 'Pass', need: ['rd'], only: PASSY, opts: ['1st read', '2nd read', '3rd+ read', 'Checkdown', 'Designed', 'Scramble drill']
+      .map(l => [l, l.toLowerCase() + (l.endsWith('read') ? ' throws' : ''), vt('rd', l)]) },
+    hit: { label: 'QB hit', group: 'Pass', only: PASSY, opts: [['y', 'QB hit', eq('qh', 1)], ['n', 'QB not hit', eq('qh', 0)]] },
+    catchable: { label: 'Catchable', group: 'Pass', need: ['cb'], only: PASSY, opts: [['y', 'catchable balls', eq('cb', 1)], ['n', 'uncatchable balls', eq('cb', 0)]] },
+    contested: { label: 'Contested', group: 'Pass', need: ['ct'], only: PASSY, opts: [['y', 'contested balls', eq('ct', 1)], ['n', 'uncontested balls', eq('ct', 0)]] },
+    box: { label: 'Box', group: 'Defense', need: ['bx'], opts: [['l', '6 or fewer in the box', (P, j) => P.bx[j] >= 1 && P.bx[j] <= 6], ['7', '7 in the box', eq('bx', 7)],
+      ['s', '8+ in the box', (P, j) => P.bx[j] >= 8]] },
+    rushers: { label: 'Pass rushers', group: 'Defense', need: ['pr'], only: PASSY, opts: [['3', '3 or fewer rushers', (P, j) => P.pr[j] >= 1 && P.pr[j] <= 3],
+      ['4', '4 rushers', eq('pr', 4)], ['5', '5+ rushers', (P, j) => P.pr[j] >= 5]] },
+    blitz: { label: 'Blitz', group: 'Defense', need: ['bl'], only: PASSY, opts: [['y', 'blitzed', (P, j) => P.bl[j] >= 1], ['n', 'not blitzed', eq('bl', 0)]] },
+    dbs: { label: 'Defensive personnel', group: 'Defense', need: ['db'], opts: [['4', 'base (4 DBs or fewer)', (P, j) => P.db[j] >= 0 && P.db[j] <= 4],
+      ['5', 'nickel (5 DBs)', eq('db', 5)], ['6', 'dime (6+ DBs)', (P, j) => P.db[j] >= 6]] },
+    mz: { label: 'Man / zone', group: 'Defense', need: ['mz'], only: PASSY, opts: [['m', 'vs man coverage', eq('mz', 1)], ['z', 'vs zone coverage', eq('mz', 2)]] },
+    cov: { label: 'Coverage', group: 'Defense', need: ['cv'], only: PASSY, opts: ['Cover 0', 'Cover 1', 'Cover 2', '2-man', 'Cover 3', 'Cover 4', 'Cover 6', 'Cover 9', 'Combo']
+      .map(l => [l, `vs ${l}`, vt('cv', l)]) },
+  };
+  // ---- group by: [label, key(P, j, G, D, V), need, sort ('v' metric, 'k' key asc, 'kd' key desc)]
+  const vk = c => (P, j, G, D, V) => (V[c] && V[c][P[c][j] - 1]) || null;
+  const code = (c, names) => (P, j) => names[P[c][j]] || null;
+  const offCoach = (P, j, G, D) => { const g = G[P.g[j]], i = g[3] === P.o[j] ? g[11] : g[12]; return i >= 0 ? D.coaches[i] : null; };
+  const BY = {
+    player: ['player', null, [], 'v'], team: ['team', (P, j, G, D) => D.teams[P.o[j]], [], 'v'], opp: ['opponent', (P, j, G, D) => D.teams[P.d[j]], [], 'v'],
+    coach: ['head coach', offCoach, [], 'v'], season: ['season', (P, j, G, D) => D.season, [], 'kd'],
+    week: ['week', (P, j, G) => { const g = G[P.g[j]]; return g[2] ? 100 + g[1] : g[1]; }, [], 'k'],
+    qtr: ['quarter', (P, j) => P.q[j] >= 5 ? 5 : P.q[j], [], 'k'], down: ['down', (P, j) => P.dn[j] || null, [], 'k'],
+    dist: ['yards to go', (P, j) => Math.min(P.tg[j], 11), [], 'k'], zone: ['field position', (P, j) => Math.floor((100 - P.yl[j]) / 10), [], 'k'],
+    score: ['score margin', (P, j) => Math.max(-3, Math.min(3, Math.sign(P.sd[j]) * Math.ceil(Math.abs(P.sd[j]) / 8))), [], 'k'],
+    align: ['QB alignment', vk('fm'), ['fm'], 'v'], pers: ['personnel', vk('op'), ['op'], 'k'], box: ['box count', (P, j) => P.bx[j] >= 1 ? P.bx[j] : null, ['bx'], 'k'],
+    rushers: ['pass rushers', (P, j) => P.pr[j] >= 1 ? P.pr[j] : null, ['pr'], 'k'], dbs: ['defensive backs', (P, j) => P.db[j] >= 0 ? P.db[j] : null, ['db'], 'k'],
+    mz: ['man / zone', code('mz', ['', 'Man', 'Zone']), ['mz'], 'v'], cov: ['coverage', vk('cv'), ['cv'], 'k'], route: ['route', vk('rt'), ['rt'], 'v'],
+    read: ['read', vk('rd'), ['rd'], 'k'], pa: ['play action', code('px', ['No play action', 'Play action']), ['px'], 'v'],
+    mo: ['motion', code('mo', ['No motion', 'Motion']), ['mo'], 'v'], press: ['pressure', code('pz', ['Clean', 'Pressured']), ['pz'], 'v'],
+    depth: ['pass depth', (P, j) => P.ay[j] <= -99 ? null : P.ay[j] < 0 ? 0 : P.ay[j] < 10 ? 1 : P.ay[j] < 20 ? 2 : 3, ['ay'], 'k'],
+    loc: ['pass location', code('pl', [null, 'Left', 'Middle', 'Right']), ['pl'], 'v'], dir: ['run direction', code('rl', [null, 'Left', 'Middle', 'Right']), ['rl'], 'v'],
+    gap: ['run gap', (P, j) => P.rl[j] === 2 ? 'Middle' : [null, 'End', 'Tackle', 'Guard'][P.gp[j]] || null, ['gp'], 'v'],
+    roof: ['roof', (P, j, G) => G[P.g[j]][4] ? 'Indoors' : 'Outdoors', [], 'v'], surf: ['surface', (P, j, G) => [null, 'Grass', 'Turf'][G[P.g[j]][5] + 1] || null, [], 'v'],
+  };
+  const BYLABEL = {
+    week: k => k > 100 ? ['', 'Wild Card', 'Divisional', 'Conference', 'Super Bowl'][Math.min(4, k - 118)] || `Playoffs wk ${k - 100}` : `Week ${k}`,
+    qtr: k => k === 5 ? 'OT' : `Q${k}`, down: k => `${k}${['', 'st', 'nd', 'rd', 'th'][k]} down`, dist: k => k >= 11 ? '11+ to go' : `${k} to go`,
+    zone: k => k < 5 ? `Own ${k * 10}-${k * 10 + 9}` : `Opp ${100 - k * 10}-${91 - k * 10}`.replace('Opp 0-', 'Opp 1-'),
+    score: k => ['Down 17+', 'Down 9-16', 'Down 1-8', 'Tied', 'Up 1-8', 'Up 9-16', 'Up 17+'][k + 3], box: k => `${k} in the box`,
+    rushers: k => `${k} rushers`, dbs: k => `${k} DBs`, pers: k => `${k} personnel`, depth: k => ['Behind the line', 'Short (0-9)', 'Intermediate (10-19)', 'Deep (20+)'][k],
+  };
   const EXAMPLES = [
     ['4th-quarter rushing, one-score games', { fam: 'rush', met: 'ypc', who: 'L', by: 'player', f: { qtr: '4', score: 'one' } }],
-    ['3rd-and-long passing', { fam: 'pass', met: 'epa', who: 'L', by: 'player', f: { down: '3', dist: 'l' } }],
+    ['Passing vs the blitz', { fam: 'pass', met: 'epa', who: 'L', by: 'player', f: { blitz: 'y' } }],
     ['Red-zone targets', { fam: 'rec', met: 'tgt', who: 'L', by: 'player', f: { zone: 'rz' } }],
-    ['Deep passing by team', { fam: 'pass', met: 'ypa', who: 'L', by: 'team', f: { depth: 'd' } }],
-    ['Runs when leading by 9+', { fam: 'rush', met: 'sr', who: 'L', by: 'team', f: { score: 'l9' } }],
+    ['Which coverage hurts most?', { fam: 'pass', met: 'epa', who: 'L', by: 'cov', f: {} }],
+    ['Runs vs a stacked box', { fam: 'rush', met: 'ypc', who: 'L', by: 'player', f: { box: 's' } }],
+    ['Pass rate over expected', { fam: 'team', met: 'proe', who: 'L', by: 'team', f: { wp: 'ng' } }],
+    ['Cold-weather passing by season', { fam: 'pass', met: 'ypa', who: 'L', by: 'season', f: { wx: 'c32' } }],
   ];
   const fmt = (v, d) => v == null || !isFinite(v) ? '–' : d ? v.toFixed(d) : Math.round(v).toLocaleString();
-  const sel = (cls, opts, val, label) => `<select class="tr-chip ${cls}" aria-label="${esc(label)}">${opts.map(([v, l]) => `<option value="${esc(v)}"${String(v) === String(val) ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
+  const opt = (v, l, cur) => `<option value="${esc(v)}"${String(v) === String(cur) ? ' selected' : ''}>${esc(l)}</option>`;
+  const sel = (cls, opts, val, label, extra = '') => `<select class="tr-chip ${cls}" aria-label="${esc(label)}"${extra}>${opts.map(([v, l]) => opt(v, l, val)).join('')}</select>`;
+  const ranges = ys => { const out = []; ys.forEach(y => { const r = out[out.length - 1]; if (r && r[1] === y - 1) r[1] = y; else out.push([y, y]); });
+    return out.map(([a, b]) => a === b ? `${a}` : `${a}-${b}`).join(', '); };
+  const allowed = (k, fam) => !FILTERS[k].only || FILTERS[k].only.includes(fam);
 
   NFLE.areas.trends = {
     mount(sec) {
       sec.classList.remove('soon');
-      let IX = null, Q = null, table = null, busy = 0, paint = null;
-      const files = {};
-      const defaults = () => ({ fam: 'rush', met: 'ypc', who: 'L', by: 'player', st: 'reg', from: null, to: null, f: {}, min: null });
+      let IX = null, Q = null, busy = 0, paint = null;
+      const base = {}, extra = {}, merged = {};
+      const defaults = () => ({ fam: 'rush', met: 'ypc', who: 'L', wn: '', by: 'player', st: 'reg', from: null, to: null, f: {}, min: null });
       const fromUrl = () => { try { const t = new URLSearchParams(location.search).get('t'); return t ? JSON.parse(decodeURIComponent(escape(atob(t)))) : null; } catch (e) { return null; } };
       const saved = () => { try { return JSON.parse(localStorage.getItem(LS) || 'null'); } catch (e) { return null; } };
-      sec.innerHTML = `<div class="sec-head"><div><h2>Trends</h2><p>Ask the play-by-play anything: every run and pass since 1999. Tap any word to change it.</p></div></div>
+      sec.innerHTML = `<div class="sec-head"><div><h2>Trends</h2><p>Ask the play-by-play anything: every run and pass since 1999, with charting (personnel, coverage, routes, pressure, play action...) where it exists. Tap any word to change it.</p></div></div>
         <div class="dt-card tr-card"><div class="tr-q"></div><div class="tr-ex"></div></div>
-        <div class="tr-base muted"></div><div class="tr-trend"></div><div class="tr-tbl"></div>
-        <p class="st-note muted">nflverse play-by-play. Rushing counts designed runs and QB scrambles; passing counts dropbacks (sacks included; yards per attempt and completion % use pass attempts). EPA = expected points added. Rows under the minimum sample are greyed: small samples make loud, fake trends.</p>`;
+        <div class="tr-base muted"></div><div class="tr-cov"></div><div class="tr-trend"></div><div class="tr-tbl"></div>
+        <datalist id="tr-dl"></datalist>
+        <p class="st-note muted">nflverse play-by-play (1999 on); NGS participation charting (2016-2025: formation, personnel, box, rushers, pressure, time to throw, routes, coverage) and FTN charting (2022 on, CC-BY-SA: motion, play action, RPOs, screens, blitzes, pocket, reads, drops, catchable / contested balls). A query only counts seasons where everything it uses was charted, and says which it left out. Rushing counts designed runs and QB scrambles; passing counts dropbacks (sacks included; yards per attempt and completion % use pass attempts). EPA = expected points added; CPOE = completion % over expected; pass rate over expected uses nflverse's xpass model, whose league average is not exactly zero, so read it against the league column. Rows under the minimum sample are greyed: small samples make loud, fake trends. Route names were re-charted in 2023, so outs, flats and swings are one group.</p>`;
       const qbox = sec.querySelector('.tr-q');
       sec.querySelector('.tr-ex').innerHTML = `<span class="muted">Try:</span> ${EXAMPLES.map((e, i) => `<button type="button" class="tr-exb" data-ex="${i}">${esc(e[0])}</button>`).join('')}`;
 
+      // ---- what a query needs, and which seasons have it
+      const famMetric = () => { const fam = FAM[Q.fam]; return [fam, fam.met[Q.met] || Object.values(fam.met)[0]]; };
+      const needs = () => {
+        const [, m] = famMetric(), s = new Set(m[3] || []);
+        Object.keys(Q.f).forEach(k => (FILTERS[k].need || []).forEach(c => s.add(c)));
+        (BY[Q.by][2] || []).forEach(c => s.add(c));
+        return [...s];
+      };
+      const tracked = () => new Set(IX.tracked || Object.keys(CNAME));
+      const covers = (s, cols) => { const have = IX.cov[s] || [], tr = tracked(); return cols.every(c => !tr.has(c) || have.includes(c)); };
+      const spanSeasons = () => IX.seasons.filter(s => s >= Q.from && s <= Q.to);
+
       // ---- the sentence
-      const teamsOf = () => (IX && IX.teams) || [];
       const render = () => {
-        const fam = FAM[Q.fam], seasons = IX.seasons;
-        const whoOpts = [['L', 'the whole league'], ...teamsOf().map(t => [`T:${t}`, `${t} ${Q.fam === 'team' ? 'offense' : 'players'}`]), ...teamsOf().map(t => [`V:${t}`, `against ${t}`])];
-        const famSel = sel('tr-fam', Object.entries(FAM).map(([k, f]) => [k, f.label]), Q.fam, 'Stat family');
+        const fam = FAM[Q.fam], teams = IX.teams;
+        const whoOpts = [['L', 'the whole league'], ...teams.map(t => [`T:${t}`, `${t} ${Q.fam === 'team' ? 'offense' : 'players'}`]), ...teams.map(t => [`V:${t}`, `against ${t}`])];
+        if (/^[PC]:/.test(Q.who)) whoOpts.unshift([Q.who, Q.who[0] === 'C' ? `${Q.wn}'s offense` : Q.wn]);
+        whoOpts.push(['S', Q.fam === 'team' ? 'find a head coach...' : 'find a player or coach...']);
         const metSel = sel('tr-met', Object.entries(fam.met).map(([k, m]) => [k, m[0]]), Q.met, 'Metric');
-        const who = sel('tr-who', whoOpts, Q.who, 'Who');
-        const yrs = seasons.map(s => [s, s]);
+        const who = Q.who === 'S' ? `<input class="tr-chip tr-find" list="tr-dl" placeholder="type a name" aria-label="Find a player or coach" autocomplete="off">`
+          : sel('tr-who', whoOpts, Q.who, 'Who');
+        const yrs = IX.seasons.map(s => [s, s]);
         const span = `${sel('tr-from', yrs, Q.from, 'From season')}<span class="tr-w">to</span>${sel('tr-to', yrs, Q.to, 'To season')}`;
         const st = sel('tr-st', [['reg', 'regular season'], ['post', 'playoffs'], ['both', 'regular season + playoffs']], Q.st, 'Season type');
-        const by = sel('tr-by', Object.entries(BY).filter(([k]) => !(Q.fam === 'team' && k === 'player')).map(([k, l]) => [k, l]), Q.by, 'Group by');
-        const chips = Object.entries(Q.f).map(([k, v]) => {
-          const [name, opts] = FILTERS[k];
-          return `<span class="tr-fchip">${sel(`tr-f`, opts.map(o => [o[0], o[1]]), v, name).replace('class="tr-chip tr-f"', `class="tr-chip tr-f" data-f="${k}"`)}<button type="button" class="tr-x" data-x="${k}" aria-label="Remove">&times;</button></span>`;
-        }).join('');
-        const free = Object.entries(FILTERS).filter(([k]) => !(k in Q.f) && !(k === 'dir' && Q.fam !== 'rush' && Q.fam !== 'team') && !(k === 'depth' && Q.fam === 'rush'));
-        const add = free.length ? `<select class="tr-chip tr-add" aria-label="Add a filter"><option value="">+ filter</option>${free.map(([k, [n]]) => `<option value="${k}">${esc(n)}</option>`).join('')}</select>` : '';
-        qbox.innerHTML = `<div class="tr-line">${famSel} ${metSel} <span class="tr-w">for</span> ${who}</div>
+        const by = sel('tr-by', Object.entries(BY).filter(([k]) => !(k === 'player' && (Q.fam === 'team' || /^P:/.test(Q.who)))).map(([k, b]) => [k, b[0]]), Q.by, 'Group by');
+        const chips = Object.entries(Q.f).map(([k, v]) => `<span class="tr-fchip">${sel('tr-f', FILTERS[k].opts.map(o => [o[0], o[1]]), v, FILTERS[k].label, ` data-f="${k}"`)}<button type="button" class="tr-x" data-x="${k}" aria-label="Remove">&times;</button></span>`).join('');
+        const groups = {};
+        Object.entries(FILTERS).filter(([k]) => !(k in Q.f) && allowed(k, Q.fam)).forEach(([k, f]) => { (groups[f.group] = groups[f.group] || []).push([k, f.label]); });
+        const add = `<select class="tr-chip tr-add" aria-label="Add a filter"><option value="">+ filter</option>${Object.entries(groups).map(([g, fs]) => `<optgroup label="${esc(g)}">${fs.map(([k, l]) => opt(k, l)).join('')}</optgroup>`).join('')}</select>`;
+        qbox.innerHTML = `<div class="tr-line">${sel('tr-fam', Object.entries(FAM).map(([k, f]) => [k, f.label]), Q.fam, 'Stat family')} ${metSel} <span class="tr-w">for</span> ${who}</div>
           <div class="tr-line">${chips} ${add}</div>
           <div class="tr-line">${span} <span class="tr-w">&middot;</span> ${st} <span class="tr-w">&middot; by</span> ${by}</div>
           <div class="tr-line tr-tools"><label class="tr-min"><span class="tr-w">min</span> <input type="range" min="0" max="${fam.min * 10}" step="${Math.max(1, Math.round(fam.min / 4))}" value="${Q.min ?? fam.min}"> <b>${Q.min ?? fam.min}</b> <span class="tr-w">${esc(fam.unit)}</span></label>
             <button type="button" class="tr-share">Copy link</button></div>`;
+        const f = qbox.querySelector('.tr-find'); if (f) { fillFind(); f.focus(); }
       };
       const save = () => { try { localStorage.setItem(LS, JSON.stringify(Q)); } catch (e) { /* private mode */ } };
 
-      // ---- the query
-      const load = () => {
-        const want = IX.seasons.filter(s => s >= Q.from && s <= Q.to);
-        return Promise.all(want.map(s => files[s] || (files[s] = NFLE.load(`data/plays/${s}.json`)))).then(docs => docs);
+      // ---- loading: base file per season; charting file only when the query needs a charting column
+      const loadSeason = (s, wantX) => {
+        const b = base[s] || (base[s] = NFLE.load(`data/plays/${s}.json`));
+        const x = wantX ? (extra[s] || (extra[s] = NFLE.load(`data/plays/${s}_x.json`).catch(() => ({ cols: {}, vocab: {} })))) : Promise.resolve(null);
+        return Promise.all([b, x]).then(([D, X]) => {
+          const key = `${s}${X ? 'x' : ''}`;
+          if (!merged[key]) merged[key] = { D, P: X ? Object.assign({}, D.cols, X.cols) : D.cols, V: X ? X.vocab || {} : {} };
+          return merged[key];
+        });
       };
+      // player / coach search: names from the seasons in range (players carry their last season in range)
+      const fillFind = () => {
+        Promise.all(spanSeasons().map(s => loadSeason(s, false))).then(list => {
+          const last = {}, coaches = new Set();
+          list.forEach(({ D }) => { D.players.forEach(([g, n]) => { last[g] = [n, D.season]; }); (D.coaches || []).forEach(c => coaches.add(c)); });
+          const opts = [];
+          if (Q.fam !== 'team') Object.entries(last).forEach(([g, [n, s]]) => opts.push([`${n} (${s})`, `P:${g}`, n]));
+          [...coaches].forEach(c => opts.push([`${c} (head coach)`, `C:${c}`, c]));
+          opts.sort((a, b) => a[0].localeCompare(b[0]));
+          findMap = new Map(opts.map(o => [o[0], o]));
+          sec.querySelector('#tr-dl').innerHTML = opts.map(o => `<option value="${esc(o[0])}"></option>`).join('');
+        });
+      };
+      let findMap = new Map();
+
       const run = () => {
-        const me = ++busy;
+        const me = ++busy, all = spanSeasons(), need = needs();
+        const seasons = all.filter(s => covers(s, need)), dropped = all.filter(s => !seasons.includes(s));
+        const wantX = need.some(c => XCOLS.has(c));
+        const covEl = sec.querySelector('.tr-cov');
+        const limiting = need.filter(c => dropped.some(s => !covers(s, [c]))).map(c => CNAME[c] || c);
+        const chartedIn = need.length ? IX.seasons.filter(s => covers(s, need)) : [];
+        covEl.innerHTML = dropped.length ? `<p class="tr-covnote">${esc(limiting.join(', ') || 'Charting')} ${limiting.length > 1 ? 'are' : 'is'} not charted for ${esc(ranges(dropped))}, so ${dropped.length > 1 ? 'those seasons are' : 'that season is'} left out${chartedIn.length ? ` (charted: ${esc(ranges(chartedIn))})` : ''}.</p>` : '';
+        if (Q.who === 'S') return;
+        if (!seasons.length) { sec.querySelector('.tr-base').textContent = ''; sec.querySelector('.tr-trend').innerHTML = ''; sec.querySelector('.tr-tbl').innerHTML = ''; paint = null; return; }
         sec.querySelector('.tr-base').textContent = 'Counting plays…';
-        load().then(docs => {
+        Promise.all(seasons.map(s => loadSeason(s, wantX))).then(list => {
           if (me !== busy) return;
-          const fam = FAM[Q.fam], m = fam.met[Q.met] || Object.values(fam.met)[0];
-          const tests = Object.entries(Q.f).map(([k, v]) => (FILTERS[k][1].find(o => o[0] === v) || [])[2]).filter(Boolean);
-          const [wk, wv] = Q.who === 'L' ? ['L', null] : Q.who.split(':');
-          const groups = new Map(), league = {}, names = {}, teamOfPlayer = {};
-          const blank = () => ({ n: 0, y: 0, td: 0, e: 0, s: 0, fd: 0, x: 0, fl: 0, att: 0, c: 0, int: 0, sk: 0, ay: 0, ayn: 0, yac: 0, ycn: 0, db: 0 });
-          Object.assign(league, blank());
+          const [fam, m] = famMetric();
+          const tests = Object.entries(Q.f).map(([k, v]) => (FILTERS[k].opts.find(o => o[0] === v) || [])[2]).filter(Boolean);
+          const [wk, ...rest] = Q.who === 'L' ? ['L'] : Q.who.split(':'), wv = rest.join(':');
+          const by = BY[Q.by], groups = new Map(), league = blank(), names = {}, teamOf = {};
           let plays = 0;
-          docs.forEach(D => {
-            const P = D.cols, G = D.games, T = D.teams, n = D.n;
-            const wt = wv != null ? T.indexOf(wv) : -2;
+          list.forEach(({ D, P, V }) => {
+            const G = D.games, T = D.teams, n = D.n;
+            const wt = wk === 'T' || wk === 'V' ? T.indexOf(wv) : -2;
+            const wp = wk === 'P' ? D.players.findIndex(p => p[0] === wv) : -2;
+            if (wk === 'P' && wp < 0) return;
             D.players.forEach(([gid, nm]) => { names[gid] = nm; });
             for (let j = 0; j < n; j++) {
               const post = G[P.g[j]][2];
               if ((Q.st === 'reg' && post) || (Q.st === 'post' && !post)) continue;
               if (!fam.play(P, j)) continue;
               let ok = true;
-              for (let k = 0; k < tests.length; k++) if (!tests[k](P, j, G)) { ok = false; break; }
+              for (let k = 0; k < tests.length; k++) if (!tests[k](P, j, G, V)) { ok = false; break; }
               if (!ok) continue;
               const act = fam.actor(P, j);
               if (act < 0 && !fam.teamActor) continue;
-              fam.add(league, P, j);
+              common(league, P, j); fam.add(league, P, j);
               if (wk === 'T' && P.o[j] !== wt) continue;
               if (wk === 'V' && P.d[j] !== wt) continue;
+              if (wk === 'P' && act !== wp) continue;
+              if (wk === 'C' && offCoach(P, j, G, D) !== wv) continue;
+              let key;
+              if (Q.by === 'player') { key = D.players[act][0]; teamOf[key] = T[P.o[j]]; } else key = by[1](P, j, G, D, V);
+              if (key == null) continue;
               plays++;
-              let key, label;
-              if (Q.by === 'player') { const gid = D.players[act][0]; key = gid; teamOfPlayer[gid] = T[P.o[j]]; }
-              else if (Q.by === 'team') key = T[P.o[j]];
-              else if (Q.by === 'opp') key = T[P.d[j]];
-              else if (Q.by === 'season') key = D.season;
-              else if (Q.by === 'qtr') key = P.q[j] >= 5 ? 'OT' : `Q${P.q[j]}`;
-              else key = `${P.dn[j]}${['', 'st', 'nd', 'rd', 'th'][P.dn[j]] || ''} down`;
               let a = groups.get(key); if (!a) { a = blank(); groups.set(key, a); }
-              fam.add(a, P, j);
+              common(a, P, j); fam.add(a, P, j);
             }
           });
-          const lg = m[1](league), min = Q.min ?? fam.min;
-          const rows = [...groups.entries()].map(([k, a]) => ({ key: k, a, n: a.n, v: m[1](a),
-            label: Q.by === 'player' ? names[k] || k : String(k), team: Q.by === 'player' ? teamOfPlayer[k] : '' }));
-          sec.querySelector('.tr-base').innerHTML = `League, same situation: <b>${fmt(lg, m[2])}</b> ${esc(m[0])} on ${fmt(league.n)} ${esc(fam.unit)}${wk !== 'L' ? ` &middot; this query: ${fmt(plays)} ${esc(fam.unit)}` : ''}`;
-          // season trend line
+          const lg = m[1](league), lab = BYLABEL[Q.by];
+          const den = m[4] ? m[4][1] : (a => a.n), unit = m[4] ? m[4][0] : fam.unit[0].toUpperCase() + fam.unit.slice(1);
+          const rows = [...groups.entries()].map(([k, a]) => ({ key: k, a, n: den(a), v: m[1](a),
+            label: Q.by === 'player' ? names[k] || k : lab ? lab(k) : String(k), team: Q.by === 'player' ? teamOf[k] : '' }));
+          const whoTxt = wk === 'L' ? '' : ` &middot; this query: ${fmt(plays)} ${esc(fam.unit)}`;
+          sec.querySelector('.tr-base').innerHTML = `League, same situation: <b>${fmt(lg, m[2])}</b> ${esc(m[0])} on ${fmt(league.n)} ${esc(fam.unit)}${whoTxt}`;
           const trend = sec.querySelector('.tr-trend');
           if (Q.by === 'season' && rows.length > 1) {
             const r = rows.filter(x => isFinite(x.v)).sort((x, y) => x.key - y.key), vs = r.map(x => x.v), lo = Math.min(...vs, lg), hi = Math.max(...vs, lg), W = 320, H = 90;
             const X = i => 14 + i * (W - 28) / Math.max(1, r.length - 1), Y = v => H - 16 - (v - lo) / ((hi - lo) || 1) * (H - 30);
-            trend.innerHTML = `<svg class="tr-svg" viewBox="0 0 ${W} ${H}" role="img"><line x1="10" x2="${W - 10}" y1="${Y(lg)}" y2="${Y(lg)}" class="tr-lg"/>
+            trend.innerHTML = `<svg class="tr-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(m[0])} by season"><line x1="10" x2="${W - 10}" y1="${Y(lg)}" y2="${Y(lg)}" class="tr-lg"/>
               <polyline points="${r.map((x, i) => `${X(i)},${Y(x.v)}`).join(' ')}" class="tr-pl"/>${r.map((x, i) => `<circle cx="${X(i)}" cy="${Y(x.v)}" r="3" class="tr-pt"><title>${x.key}: ${fmt(x.v, m[2])}</title></circle>
               <text x="${X(i)}" y="${H - 2}" class="tr-yr">${String(x.key).slice(2)}</text>`).join('')}</svg>`;
           } else trend.innerHTML = '';
+          // extra columns: other metrics of the family whose data every counted season has
+          const extras = Object.entries(fam.met).filter(([k, mm]) => k !== Q.met && !COUNT[k] && seasons.every(s => covers(s, mm[3] || []))
+            && (mm[3] || []).every(c => !XCOLS.has(c) || wantX)).slice(0, 5);
+          const isTeam = Q.by === 'team' || Q.by === 'opp';
           const cols = [
-            { key: 'label', label: BY[Q.by][0].toUpperCase() + BY[Q.by].slice(1), stick: true, first: 'asc', value: r => r.label,
+            { key: 'label', label: by[0][0].toUpperCase() + by[0].slice(1), stick: true, first: 'asc', value: r => by[3] === 'v' ? r.label : r.key,
               html: r => Q.by === 'player' ? `<div class="who"><div><b>${esc(r.label)}</b><span class="sub">${esc(r.team || '')}</span></div></div>`
-                : (Q.by === 'team' || Q.by === 'opp') ? `<span class="tm-open" data-tm="${esc(r.key)}"><b>${esc(r.label)}</b></span>` : `<b>${esc(r.label)}</b>` },
-            { key: 'n', label: fam.unit[0].toUpperCase() + fam.unit.slice(1), num: true, value: r => r.n, html: r => fmt(r.n) },
-            { key: 'v', label: m[0], num: true, cls: 'tr-main', value: r => isFinite(r.v) ? r.v : null, html: r => `<b>${fmt(r.v, m[2])}</b>` },
-            { key: 'dv', label: 'vs league', num: true, value: r => isFinite(r.v) ? r.v - lg : null,
+                : isTeam ? `<span class="tm-open" data-tm="${esc(r.key)}"><b>${esc(r.label)}</b></span>` : `<b>${esc(r.label)}</b>` },
+            { key: 'n', label: unit, num: true, value: r => r.n, html: r => fmt(r.n) },
+            { key: 'v', label: m[0], num: true, cls: 'tr-main', value: r => isFinite(r.v) && r.n >= (Q.min ?? fam.min) ? r.v : null, html: r => `<b>${fmt(r.v, m[2])}</b>` },
+            { key: 'dv', label: 'vs league', num: true, value: r => isFinite(r.v) && r.n >= (Q.min ?? fam.min) ? r.v - lg : null,
               html: r => { const d = r.v - lg; return isFinite(d) ? `<span class="${d > 0 ? 'tr-up' : d < 0 ? 'tr-dn' : ''}">${d > 0 ? '+' : ''}${fmt(d, m[2] || 0)}</span>` : '–'; } },
-            ...Object.entries(fam.met).filter(([k]) => k !== Q.met && !COUNT[k]).slice(0, 4).map(([k, mm]) => ({ key: `m_${k}`, label: mm[0], num: true,
+            ...extras.map(([k, mm]) => ({ key: `m_${k}`, label: mm[0], num: true,
               value: r => { const v = mm[1](r.a); return isFinite(v) ? v : null; }, html: r => fmt(mm[1](r.a), mm[2]) })),
           ];
           const tb = sec.querySelector('.tr-tbl');
-          if (!rows.length) { tb.innerHTML = '<p class="muted">No plays match.</p>'; table = null; paint = null; return; }
-          const sortKey = Q.by === 'season' || Q.by === 'qtr' || Q.by === 'down' ? 'label' : 'v';
-          const opt = { columns: cols, rows, sort: { key: sortKey, dir: sortKey === 'label' ? (Q.by === 'season' ? 'desc' : 'asc') : 'desc' },
-            rowClass: r => r.n < min ? 'tr-low' : '', rowAttrs: r => Q.by === 'player' && /^\d\d-\d{7}$/.test(r.key) ? `data-open-pid="${esc(r.key)}"` : '' };
-          paint = () => { opt.rowClass = r => r.n < (Q.min ?? fam.min) ? 'tr-low' : ''; tb.innerHTML = ''; table = NFLE.Table(tb, opt); };
+          if (!rows.length) { tb.innerHTML = '<p class="muted">No plays match.</p>'; paint = null; return; }
+          const sort = by[3] === 'v' ? { key: 'v', dir: 'desc' } : { key: 'label', dir: by[3] === 'kd' ? 'desc' : 'asc' };
+          const o = { columns: cols, rows, sort,
+            rowAttrs: r => Q.by === 'player' && /^\d\d-\d{7}$/.test(r.key) ? `data-open-pid="${esc(r.key)}"` : '' };
+          paint = () => { o.rowClass = r => r.n < (Q.min ?? fam.min) ? 'tr-low' : ''; tb.innerHTML = ''; NFLE.Table(tb, o); };
           paint();
         }).catch(e => { sec.querySelector('.tr-base').textContent = `Couldn't load plays (${e.message}).`; });
       };
-      const update = (re = true) => { save(); render(); if (re) run(); };
+      const update = () => { save(); render(); run(); };
 
       // ---- events (delegated: the sentence redraws on every change)
       qbox.addEventListener('change', e => {
         const t = e.target;
-        if (t.matches('.tr-fam')) { Q.fam = t.value; Q.met = FIRST[Q.fam]; Q.min = null; if (Q.fam === 'team' && Q.by === 'player') Q.by = 'team'; }
-        else if (t.matches('.tr-met')) Q.met = t.value;
-        else if (t.matches('.tr-who')) Q.who = t.value;
-        else if (t.matches('.tr-from')) { Q.from = +t.value; if (Q.to < Q.from) Q.to = Q.from; }
+        if (t.matches('.tr-fam')) {
+          Q.fam = t.value; Q.met = FIRST[Q.fam]; Q.min = null;
+          if (Q.fam === 'team' && Q.by === 'player') Q.by = 'team';
+          if (Q.fam === 'team' && /^P:/.test(Q.who)) { Q.who = 'L'; Q.wn = ''; }
+          Object.keys(Q.f).forEach(k => { if (!allowed(k, Q.fam)) delete Q.f[k]; });
+        } else if (t.matches('.tr-met')) Q.met = t.value;
+        else if (t.matches('.tr-who')) { Q.who = t.value; if (!/^[PC]:/.test(Q.who)) Q.wn = ''; if (/^P:/.test(Q.who) && Q.by === 'player') Q.by = 'season'; }
+        else if (t.matches('.tr-find')) {
+          const hit = findMap.get(t.value); if (!hit) return;
+          Q.who = hit[1]; Q.wn = hit[2]; if (/^P:/.test(Q.who) && Q.by === 'player') Q.by = 'season';
+        } else if (t.matches('.tr-from')) { Q.from = +t.value; if (Q.to < Q.from) Q.to = Q.from; }
         else if (t.matches('.tr-to')) { Q.to = +t.value; if (Q.from > Q.to) Q.from = Q.to; }
         else if (t.matches('.tr-st')) Q.st = t.value;
         else if (t.matches('.tr-by')) Q.by = t.value;
         else if (t.matches('.tr-f')) Q.f[t.dataset.f] = t.value;
-        else if (t.matches('.tr-add') && t.value) Q.f[t.value] = FILTERS[t.value][1][0][0];
+        else if (t.matches('.tr-add') && t.value) Q.f[t.value] = FILTERS[t.value].opts[0][0];
         else return;
         update();
       });
       qbox.addEventListener('input', e => {
+        if (e.target.matches('.tr-find')) { if (findMap.has(e.target.value)) e.target.dispatchEvent(new Event('change', { bubbles: true })); return; }
         if (!e.target.matches('.tr-min input')) return;
         Q.min = +e.target.value; e.target.nextElementSibling.textContent = Q.min; save();
         if (paint) paint();  // re-grey only: the counts don't depend on the minimum
+      });
+      qbox.addEventListener('focusout', e => {
+        // leaving the search box without picking a name goes back to the previous choice
+        if (e.target.matches('.tr-find') && Q.who === 'S') setTimeout(() => { if (Q.who === 'S' && !qbox.contains(document.activeElement)) { Q.who = 'L'; update(); } }, 200);
       });
       qbox.addEventListener('click', e => {
         const x = e.target.closest('[data-x]');
@@ -215,8 +401,7 @@
       });
       sec.querySelector('.tr-ex').addEventListener('click', e => {
         const b = e.target.closest('[data-ex]'); if (!b) return;
-        const ex = EXAMPLES[+b.dataset.ex][1];
-        Q = Object.assign(defaults(), { from: Q.from, to: Q.to }, JSON.parse(JSON.stringify(ex)));
+        Q = Object.assign(defaults(), { from: Q.from, to: Q.to }, JSON.parse(JSON.stringify(EXAMPLES[+b.dataset.ex][1])));
         update();
       });
       NFLE.load('data/plays/index.json').then(ix => {
@@ -231,6 +416,9 @@
         if (!Q.from || !IX.seasons.includes(Q.from)) Q.from = Math.max(IX.seasons[0], Q.to - 2);
         if (!FAM[Q.fam]) Q.fam = 'rush';
         if (!FAM[Q.fam].met[Q.met]) Q.met = FIRST[Q.fam];
+        if (!BY[Q.by]) Q.by = 'player';
+        if (Q.who === 'S') Q.who = 'L';
+        Object.keys(Q.f).forEach(k => { if (!FILTERS[k] || !allowed(k, Q.fam)) delete Q.f[k]; });
         update();
       }).catch(() => { sec.querySelector('.tr-base').textContent = 'Play data is not available on this page.'; });
     },

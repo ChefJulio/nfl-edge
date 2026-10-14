@@ -581,11 +581,25 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   the browser: per-season compact play files (run + pass plays, ~33.5k/season, ~25 columns ~0.35-0.5 MB gzipped;
   1999-2026). The cached pbp (cache/pbp_*.parquet) is a prepared subset missing success, first_down, shotgun,
   no_huddle, yards_after_catch, pass/run location and gap: the build must load full nflverse pbp per season.
-- **Trends: SHIPPED 2026-10-14.** Play files 1999-2026 (~2.5 MB raw / ~0.4 MB gzipped per season), CI step
-  "Trends". Tested on WebKit iPhone: share link, filters, by-season trend line, min slider (re-greys without
-  recounting), player rows open player pages. Ideas not built: run gap filter (column gp exists), pass location
-  (pl), a player picker for "who" (today: league / team / against a team), Players sub-tab bar now overflows
-  (6 tabs; it scrolls).
+- **Trends: SHIPPED 2026-10-14; charting added same day ("add everything we have data for").** Data quirks found:
+  - **nflverse files QB scrambles under play_type "run"** (qb_scramble = 1). Classify by qb_scramble first, or
+    dropback / pass-rate counts lose ~3% of plays (league PROE read -5.5 instead of ~-2).
+  - **Air yards and pass location start 2006** (0% before); YAC likewise. xpass / cpoe / xyac from 2006.
+  - **Participation (NGS) 2016-2025, never the current season**; coverage shell / man-zone from 2018. **The
+    vocabulary changed in 2023**: formations (SINGLEBACK / I_FORM / EMPTY -> UNDER CENTER / SHOTGUN / PISTOL) and
+    routes (OUT / FLAT -> QUICK OUT / DEEP OUT / SWING, HITCH -> HITCH/CURL...). Mapped to one set; the out / flat /
+    swing family merged because its boundaries moved. Coverage counts shift too (COMBO 1233 in 2023 vs 77 in 2025).
+  - **FTN charting 2022 on incl. the current season** (CC-BY-SA, credit in the page note). Box / rushers / QB
+    alignment fall back to FTN where participation is missing (current season): a source switch at 2026.
+  - nflverse xpass runs high (2024 league pass_oe -1.7%): read PROE against the league column.
+  - Coverage is measured, not hand-listed: index.json `cov`; trends.js drops uncovered seasons and says so.
+  - Not built: QB sneak (is_qb_sneak), penalties, defenders' names from participation, drives.
+- **Owner questions 2026-10-14 (answered, not yet approved):** (1) A/B charting stats in projections, volume-first:
+  team PROE, YACOE / catchable rate, opponent pressure (contested catch is unstable, low priority); FTN only from
+  2022 = 3-4 backtest seasons. (2) "NFL Edge grade" (Madden-like overall): don't cite Madden (EA proprietary,
+  hand-set); build a per-position composite with weights learned from next-season predictiveness, shrunk by
+  sample, shown as percentile / 40-99 with the stats behind it; gate = beats last-season fantasy points alone at
+  predicting next season.
 - Player Stats / Team Stats Regular / Playoffs toggle: DONE (c5e9abd).
 - **ESPN early-week buckets (2026-10-14, nfledge/espn_calib.py), MEASURED:** Wayback Machine captures of
   espn.com/nfl/injuries (near-daily 2022-24; the page embeds status + est. return date per player; tools/espn_wayback.py
