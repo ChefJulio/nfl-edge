@@ -223,6 +223,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 - **Caches:** `cache/model_<key>.pkl` (engine + projections; feature memo excluded from pickle),
   `cache/backtest_<key>.parquet`, `cache/experiments/<variant>_<season>_<key>.parquet`; keys hash config minus
   display-only sections (`docs.model_config`), scoring, data state, model code.
+- **Late nflverse data (Monday games):** the schedule marks a game final hours before nflverse publishes its
+  plays/stats/snaps (BUF@LA MNF 2026 wk5 was still missing Tuesday night). The final-count refetch trigger fires
+  once, too early, so `data.missing_finals` also forces an hourly refetch while any final game is absent from the
+  cached pbp/snaps/stats. Archive pages had the same flaw (built once, Tuesday morning): `site/archive.json` records
+  each page's coverage `[pbp games, stat teams, snap games]`, and `--missing-only` rebuilds a page whose count rose.
 - **MODEL.md fingerprint** covers `nfledge/*.py` except `report.py`/`docs.py` plus config (minus display sections);
   any model-code edit needs `tools/model_doc.py --stamp` (the pre-commit hook blocks otherwise).
 

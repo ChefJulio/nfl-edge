@@ -48,7 +48,8 @@ jobs:
           restore-keys: nfl-cache-
       - name: Check the Model tab is current
         run: python tools/model_doc.py --check || echo "::warning::MODEL.md is out of date - the Model tab may not describe the latest model changes"
-      # A week that just finished (after Tuesday's rollover) gets its archived page; existing pages are untouched.
+      # A week that just finished (after Tuesday's rollover) gets its archived page; existing pages are untouched
+      # unless their week has gained data since they were built (a Monday game nflverse published late).
       - name: Archive newly finished weeks
         run: python tools/build_archive.py --out=site --missing-only
       # ESPN's injury feed (diagnosis, estimated return date) has no history, so it is archived daily until there is

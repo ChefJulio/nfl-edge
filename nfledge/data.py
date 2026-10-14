@@ -24,6 +24,7 @@ import pandas as pd
 from .config import ROOT
 
 LIVE_TTL_HOURS = 6
+LAG_RETRY_HOURS = 1  # how often to retry while a final game is still missing from nflverse's published data
 POSITIONS = ("QB", "RB", "WR", "TE")
 
 PBP_COLS = [
@@ -159,6 +160,29 @@ def _to_pd(df):
   return df if isinstance(df, pd.DataFrame) else df.to_pandas()
 
 
+def missing_finals(cache: Cache, season: int, reg: pd.DataFrame) -> set[str]:
+  """Final regular-season games absent from the cached play-by-play, snaps, or player stats (a game counts as
+  present in stats once both teams have rows for that week)."""
+  final = reg[reg.home_score.notna()]
+  want = set(final.game_id)
+  missing = set()
+  for name in ("pbp", "snaps"):
+    p = cache.path(name, season)
+    have = set(pd.read_parquet(p, columns=["game_id"]).game_id) if p.exists() else set()
+    missing |= want - have
+  p = cache.path("stats", season)
+  if p.exists():
+    st = pd.read_parquet(p, columns=["week", "team"])
+    have = set(zip(st.week, st.team.replace(RELOCATED)))
+    for g in final.itertuples():
+      if (g.week, RELOCATED.get(g.home_team, g.home_team)) not in have or \
+         (g.week, RELOCATED.get(g.away_team, g.away_team)) not in have:
+        missing.add(g.game_id)
+  else:
+    missing |= want
+  return missing
+
+
 def load_all(cfg: dict, force_week: int | None = None) -> Data:
   import nflreadpy as nfl
 
@@ -182,6 +206,12 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
   new_weeks = n_final != cached_final
   if new_weeks:
     _log(f"new final games for {current}: cached {cached_final}, schedule shows {n_final}")
+  elif cache.age_hours("pbp", current) >= LAG_RETRY_HOURS and (lagging := missing_finals(cache, current, reg)):
+    # The schedule marks a game final hours before nflverse publishes its plays/stats/snaps (a Monday night
+    # game typically lands Tuesday afternoon). The final-count trigger above has already fired by then, so
+    # keep retrying until every final game is covered.
+    _log(f"{len(lagging)} final game(s) not yet in cached data ({', '.join(sorted(lagging)[:4])}); refetching")
+    new_weeks = True
 
   frames = {k: [] for k in ("pbp", "stats", "snaps", "rosters", "injuries", "routes", "pfr_def")}
   depth = {}
