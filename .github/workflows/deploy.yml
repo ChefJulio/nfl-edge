@@ -102,6 +102,9 @@ jobs:
       # Players > Trends: compact play-by-play per season since 1999 (finished seasons cached), queried in the browser.
       - name: Trends
         run: python tools/trends_build.py --site=site
+      # Player pages: NFL Edge grade (production percentile, 2018 on; tools/grade_build.py).
+      - name: Edge grades
+        run: python tools/grade_build.py --site=site
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:

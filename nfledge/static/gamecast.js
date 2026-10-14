@@ -751,6 +751,28 @@
       <div class="lg-scroll"><table class="lg ij-tbl"><thead><tr class="lg-ch"><th>Season</th><th>Weeks</th><th>Injury</th><th class="num" title="Games missed">Missed</th><th class="num" title="Games played while listed">Played</th><th title="Worst game status or reserve list">Status</th></tr></thead><tbody>${rows}</tbody></table></div>
       <p class="pc-sub">From the official injury reports and weekly rosters (2009 on); games missed and played come from snap counts, so they start in 2013 ('–' before). An episode runs while he is on the report or a reserve list; a bye doesn't end it, a game played without a listing does. IR players drop off the weekly report, so a later IR stint can show as undisclosed.</p></div>`;
   };
+  // ---- NFL Edge grade (data/grades/<season>.json, tools/grade_build.py): percentile of EPA over replacement per game
+  // over his last three seasons (weighted to the latest, shrunk by sample size) among his position's players that season.
+  const GR = { ix: null, s: {} };
+  const grIndex = () => GR.ix || (GR.ix = NFLE.load('data/grades/index.json').catch(() => null));
+  const grSeason = s => GR.s[s] || (GR.s[s] = NFLE.load(`data/grades/${s}.json`).catch(() => null));
+  const GRADED = { QB: 1, RB: 1, WR: 1, TE: 1 };
+  const grTone = g => g >= 80 ? 'good' : g <= 30 ? 'bad' : '';
+  const grChip = (pid, cur) => { const r = cur && cur.players[pid]; return r ? `<span class="eg-chip ${grTone(r[0])}" title="NFL Edge grade ${cur.season}: production percentile among ${esc(r[1])}s">EDGE <b>${r[0]}</b></span>` : ''; };
+  const gradeTab = (pid, docs) => {
+    const rows = docs.filter(d => d && d.players[pid]).sort((a, b) => b.season - a.season);
+    if (!rows.length) return '<div class="pc-box"><p class="pc-sub">No grade yet: grades cover quarterbacks, running backs, receivers and tight ends who played a game since 2018.</p></div>';
+    const D = rows[0], r = D.players[pid], pos = r[1], labels = D.stats[pos] || [];
+    const posName = { QB: 'quarterbacks', RB: 'running backs', WR: 'wide receivers', TE: 'tight ends' }[pos] || pos;
+    const bars = labels.map((l, i) => { const v = r[5][i]; return `<div class="eg-row"><span class="eg-l">${esc(l)}</span><span class="eg-bar"><i class="${grTone(v)}" style="width:${Math.max(2, v)}%"></i></span><b class="eg-v">${v}</b></div>`; }).join('');
+    const hist = rows.map(d => { const x = d.players[pid]; return `<tr><td><b>${d.season}</b></td><td class="num"><span class="eg-chip ${grTone(x[0])}"><b>${x[0]}</b></span></td><td class="num">${x[2]}</td><td class="num">${x[4] > 0 ? '+' : ''}${x[4].toFixed(2)}</td></tr>`; }).join('');
+    return `<div class="pc-box"><div class="pc-k">NFL Edge grade · ${D.season}</div>
+        <div class="ij-dur"><div class="pc-big ${grTone(r[0])}">${r[0]} <small>/ 99</small></div>
+          <div class="pc-sub">Produced more value per game than ${r[0]}% of the ${posName} who played in ${D.season}: <b>${r[4] > 0 ? '+' : ''}${r[4].toFixed(2)}</b> expected points over a replacement-level backup per game${r[3] < 8 ? ' (a small sample so far, so it leans on the position average)' : ''}.</div></div></div>
+      <div class="pc-box"><div class="pc-k">The stats behind it · percentile among ${posName}</div><div class="eg-bars">${bars}</div></div>
+      <div class="pc-box pc-logbox"><div class="pc-k">By season</div><div class="lg-scroll"><table class="lg"><thead><tr class="lg-ch"><th>Season</th><th class="num">Grade</th><th class="num" title="Games that season">G</th><th class="num" title="Expected points over replacement per game">Value / g</th></tr></thead><tbody>${hist}</tbody></table></div>
+        <p class="pc-sub">How it works: every play he passed, ran or was targeted on is scored in expected points, minus what his position's backups produce on the same kind of play (backups = players in games where they played under half the snaps). That is averaged per game over his last three seasons, weighted to the latest (1 / 0.6 / 0.3), and pulled toward the position average by an amount measured from game-to-game noise, so a few big games can't make a 99. The grade is his percentile at his position. It describes production, not a forecast: a model that learned weights for the stats above didn't predict the next season measurably better than this number (tested 2021-2025). Stats: nflverse play-by-play, PFR advanced stats (yards after contact, broken tackles, drops; 2018 on).</p></div>`;
+  };
   const renderCard = pid => {
     const body = document.querySelector('#pcOv .pc-body');
     const d = cardData(), L = LOGS[pid] && !LOGS[pid].missing ? LOGS[pid] : null;
@@ -764,6 +786,10 @@
     const info = tInfo(team), news = !!espn;
     const photo = photoUrl(L, espn), num = L && L.bio ? L.bio.num : null;
     if (cardTab === 'news' && !news) cardTab = 'ov';
+    const graded = !!GRADED[pos];
+    if (cardTab === 'gr' && !graded) cardTab = 'ov';
+    // the current season's grades drive the header chip; the Grade tab loads every season on first open
+    if (graded && GR.cur === undefined) { GR.cur = null; grIndex().then(ix => ix && grSeason(ix.current)).then(d => { GR.cur = d || null; if (cardPid === pid) renderCard(pid); }); }
     const isKind = !!(L && L.kind);  // a non-fantasy page (defense, line, specialists): no week projections
     // retired / off every roster this season and not on the picked week's board: a career overview, no week picker
     const lastPlayed = L ? (L.seasons.find(S => S.g.length) || {}).s : null;
@@ -777,12 +803,13 @@
         ${photo ? `<div class="pc-pic"><img src="${esc(photo)}" alt="" width="72" height="72" loading="lazy" onerror="this.parentNode.classList.add('nopic')">${team ? `<span class="pc-pic-tm">${tLogo(team, 16)}</span>` : ''}</div>`
           : team ? tLogo(team, 34) : ''}
         <div class="pc-id"><h3 id="pcName">${num != null ? `<span class="pc-num">#${esc(num)}</span>` : ''}${esc(name)}</h3>
-          <div class="pc-meta">${pos ? `<span class="posb posb-${esc(pos)}">${esc(pos)}</span>` : ''} ${team ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(team)}">${esc(info.name || team)}</button>` : L && lastPlayed && lastPlayed < L.cur ? `<span class="muted">Last played ${esc(lastPlayed)}</span>` : '<span class="muted">Free agent</span>'}</div>
+          <div class="pc-meta">${pos ? `<span class="posb posb-${esc(pos)}">${esc(pos)}</span>` : ''}${graded ? grChip(pid, GR.cur) : ''} ${team ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(team)}">${esc(info.name || team)}</button>` : L && lastPlayed && lastPlayed < L.cur ? `<span class="muted">Last played ${esc(lastPlayed)}</span>` : '<span class="muted">Free agent</span>'}</div>
 </div>
       </div>
       ${profileBox(L)}
-      <div class="seg pc-tabs" role="tablist">${[['ov', overview ? 'Overview' : 'Week'], ['log', 'Game log'], ...(L && (L.inj || L.dur) ? [['inj', 'Injuries']] : []), ...(news ? [['news', 'News']] : [])]
+      <div class="seg pc-tabs" role="tablist">${[['ov', overview ? 'Overview' : 'Week'], ['log', 'Game log'], ...(graded ? [['gr', 'Grade']] : []), ...(L && (L.inj || L.dur) ? [['inj', 'Injuries']] : []), ...(news ? [['news', 'News']] : [])]
         .map(([k, l]) => `<button type="button" role="tab" data-pt="${k}" class="${cardTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      ${graded ? `<div class="pc-tab" data-pt="gr"${cardTab === 'gr' ? '' : ' hidden'}><div class="pc-grade"><p class="pc-sub">Loading grade&hellip;</p></div></div>` : ''}
       <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${overview ? '' : pickerHtml()}${week}</div>
       <div class="pc-tab" data-pt="log"${cardTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every career game</div><div class="pc-log">${
         !LOGS[pid] ? '<p class="pc-sub">Loading game log&hellip;</p>' : !L ? '<p class="pc-sub">Game log unavailable.</p>'
@@ -791,6 +818,8 @@
       ${L && (L.inj || L.dur) ? `<div class="pc-tab" data-pt="inj"${cardTab === 'inj' ? '' : ' hidden'}>${injuryTab(L, espn)}</div>` : ''}
       ${news ? `<div class="pc-tab" data-pt="news"${cardTab === 'news' ? '' : ' hidden'}><div class="pc-box pc-newsbox"><div class="pc-k">Recent news</div><div class="pc-news"></div></div></div>` : ''}`;
     body.querySelectorAll('.pc-news').forEach(nb => loadNews(espn, nb, +nb.dataset.n || 6));
+    body.querySelectorAll('.pc-grade').forEach(gb => grIndex().then(ix => ix ? Promise.all(ix.seasons.map(grSeason)) : [])
+      .then(docs => { if (cardPid === pid) gb.innerHTML = gradeTab(pid, docs); }));
     body.querySelectorAll('.pc-log').forEach(wireLogRows);
     const showTab = k => {
       cardTab = k;

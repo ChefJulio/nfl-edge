@@ -1,0 +1,370 @@
+"""NFL Edge grade: one number per offensive player (QB / RB / WR / TE) for player pages, data/grades.json.
+
+Usage: python tools/grade_build.py [--site=site]      build the grades (CI, daily)
+       python tools/grade_build.py --eval              walk-forward validation (the gate; prints the table)
+
+What the grade means: the player's expected football value per game NEXT season, where value = EPA over
+replacement per game (passing incl. scrambles, designed rushing, receiving; replacement = what that position's
+backups produce per opportunity, add_value). It is learned, not hand-weighted: per
+position, a ridge regression maps this player's recent per-play stats (each shrunk toward the position average by
+its own sample size, method-of-moments strength) to what players with those stats produced the following season.
+Shown as a percentile (0-99) among that position's regulars, with each stat's contribution.
+
+Gate (pre-registered in docs/INSIGHTS.md): walk-forward 2021-2025, the grade's rank correlation with next-season
+value must beat (a) last season's value per game and (b) last season's fantasy points per game, with the pooled
+bootstrap CI of the difference excluding 0. If it fails, nothing is published.
+"""
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+from scipy.stats import spearmanr  # noqa: E402
+
+from nfledge import data as D  # noqa: E402
+from nfledge.config import load_config, load_scoring  # noqa: E402
+from nfledge.player_model import actual_points, mom_prior  # noqa: E402
+
+FIRST = 2018  # PFR advanced stats (yards after contact, broken tackles, drops) start here
+SEASON_W = (1.0, 0.6, 0.3)  # the feature window: this season, last, two back (as the projection model's efficiency)
+MIN_NEXT_GAMES = 4  # a target season counts only with this many games played
+POS = ("QB", "RB", "WR", "TE")
+ALPHAS = (0.3, 1.0, 3.0, 10.0, 30.0, 100.0)
+
+# (feature, numerator, denominator) rates shrunk toward the position mean; per-game volumes use games as den
+RATES = {
+  "QB": [("epa_db", "qb_epa", "qb_db"), ("succ_db", "qb_succ", "qb_db"), ("cpoe", "cpo", "cpo_n"),
+         ("sack_rate", "sacks", "qb_db"), ("int_rate", "ints", "att"), ("adot", "ay", "att"),
+         ("db_pg", "qb_db", "games"), ("rush_epa_pg", "ru_epa", "games")],
+  "RB": [("rush_epa", "ru_epa", "ru_n"), ("rush_succ", "ru_succ", "ru_n"), ("ypc", "ru_yd", "ru_n"),
+         ("x10", "ru_x10", "ru_n"), ("yaco", "pfr_yaco", "pfr_car"), ("btk", "btk", "touch"),
+         ("car_pg", "ru_n", "games"), ("tgt_pg", "tgt", "games"), ("rec_epa", "rec_epa", "tgt"),
+         ("yacoe", "yco", "yco_n"), ("snap", "snap_pct", "games")],
+  "WR": [("rec_epa", "rec_epa", "tgt"), ("rec_succ", "rec_succ", "tgt"), ("croe", "cro", "cro_n"),
+         ("yacoe", "yco", "yco_n"), ("adot", "ay_t", "tgt"), ("tgt_share", "tgt", "team_tgt"),
+         ("ay_share", "ay_t", "team_ay"), ("tgt_pg", "tgt", "games"), ("btk", "btk", "touch"),
+         ("drop", "drops", "tgt"), ("snap", "snap_pct", "games")],
+}
+RATES["TE"] = RATES["WR"]
+LABEL = {"epa_db": "EPA / dropback", "succ_db": "Success rate", "cpoe": "CPOE", "sack_rate": "Sack rate (lower is better)",
+         "int_rate": "INT rate (lower is better)", "adot": "Depth of target", "db_pg": "Dropbacks / game",
+         "rush_epa_pg": "Rushing EPA / game", "rush_epa": "EPA / rush", "rush_succ": "Rush success rate", "ypc": "Yards / carry",
+         "x10": "10+ yard runs", "yaco": "Yards after contact", "btk": "Broken tackles / touch", "car_pg": "Carries / game",
+         "tgt_pg": "Targets / game", "rec_epa": "EPA / target", "yacoe": "YAC over expected", "snap": "Snap share",
+         "rec_succ": "Target success rate", "croe": "Catch rate over expected", "tgt_share": "Target share",
+         "ay_share": "Air-yards share", "drop": "Drop rate (lower is better)", "age": "Age", "draft": "Draft capital",
+         "value": "EPA over replacement / game"}
+
+
+def season_table(data, pfr: pd.DataFrame, scoring) -> pd.DataFrame:
+  """One row per (gsis_id, season): summed opportunities and outcomes, regular season."""
+  p = data.pbp[data.pbp.season_type == "REG"]
+  p = p[(p.two_point_attempt == 0) & p.posteam.notna()]
+  ep = p.epa.fillna(0.0)
+  rows = []
+  # QB: dropbacks credited to the passer (scrambles to the scrambler), as the projection ledger does
+  db = p[p.is_dropback].assign(gsis_id=lambda d: d.passer_player_id.fillna(d.rusher_player_id))
+  att = (db.pass_attempt == 1) & (db.sack == 0)
+  cpn = att & db.cp.notna()
+  rows.append(db.assign(qb_db=1, qb_epa=ep, qb_succ=(ep > 0).astype(int), sacks=db.sack, ints=db.interception,
+                        att=att.astype(int), ay=db.air_yards.fillna(0).where(att, 0), cpo_n=cpn.astype(int),
+                        cpo=(db.complete_pass - db.cp).where(cpn, 0.0))
+              .groupby(["gsis_id", "season", "week"])[["qb_db", "qb_epa", "qb_succ", "sacks", "ints", "att", "ay", "cpo", "cpo_n"]].sum())
+  ru = p[p.is_designed_rush & p.rusher_player_id.notna()]
+  ry = ru.rushing_yards.fillna(0)
+  rows.append(ru.assign(gsis_id=ru.rusher_player_id, ru_n=1, ru_epa=ep, ru_succ=(ep > 0).astype(int), ru_yd=ry,
+                        ru_x10=(ry >= 10).astype(int)).groupby(["gsis_id", "season", "week"])[["ru_n", "ru_epa", "ru_succ", "ru_yd", "ru_x10"]].sum())
+  tg = p[(p.pass_attempt == 1) & (p.sack == 0) & p.receiver_player_id.notna()].copy()
+  te = tg.epa.fillna(0.0)
+  tg["team_tgt_g"] = tg.groupby(["game_id", "posteam"]).game_id.transform("size")
+  tg["team_ay_g"] = tg.groupby(["game_id", "posteam"]).air_yards.transform(lambda s: s.fillna(0).clip(lower=0).sum())
+  ok = (tg.complete_pass == 1) & tg.xyac_mean_yardage.notna() & tg.yards_after_catch.notna()
+  rec = tg.assign(gsis_id=tg.receiver_player_id, tgt=1, rec_epa=te, rec_succ=(te > 0).astype(int), rec=tg.complete_pass,
+                  ay_t=tg.air_yards.fillna(0).clip(lower=0), cro_n=tg.cp.notna().astype(int),
+                  cro=(tg.complete_pass - tg.cp).where(tg.cp.notna(), 0.0), yco_n=ok.astype(int),
+                  yco=(tg.yards_after_catch - tg.xyac_mean_yardage).where(ok, 0.0))
+  # team targets / air yards over the games he was targeted in (traded players: each team's games)
+  g = rec.groupby(["gsis_id", "season", "week"]).agg(team_tgt=("team_tgt_g", "first"), team_ay=("team_ay_g", "first"))
+  rows.append(rec.groupby(["gsis_id", "season", "week"])[["tgt", "rec_epa", "rec_succ", "rec", "ay_t", "cro", "cro_n", "yco", "yco_n"]].sum())
+  rows.append(g)
+  sn = data.snaps.dropna(subset=["gsis_id"])
+  sn = sn[sn.offense_snaps > 0]
+  rows.append(sn.groupby(["gsis_id", "season", "week"]).agg(games=("week", "nunique"), snap_pct=("offense_pct", "sum")))
+  if pfr is not None and len(pfr):
+    rows.append(pfr.groupby(["gsis_id", "season", "week"])[["pfr_car", "pfr_yaco", "btk", "drops"]].sum())
+  t = pd.concat(rows, axis=1).fillna(0.0)
+  t = t[t.games > 0]  # player-games (snaps > 0); per-game rows feed the shrinkage estimates (fit_priors)
+  t["touch"] = t.ru_n + t.rec
+  pts = actual_points(data.stats, scoring)
+  t["fp"] = pts.groupby(["gsis_id", "season", "week"]).actual.sum().reindex(t.index).fillna(0.0)
+  return t.reset_index()
+
+
+def add_value(tg: pd.DataFrame, pos_of: pd.Series) -> pd.DataFrame:
+  """value = EPA over replacement: each opportunity's EPA minus what that position's backups produce per
+  opportunity that season (replacement = player-games under half the offensive snaps; measured, not set).
+  Raw EPA per game punished volume (most runs lose EPA), so a workhorse back read worse than his backup."""
+  tg = tg.copy()
+  tg["pos"] = tg.gsis_id.map(pos_of)
+  bk = tg[tg.snap_pct < 0.5]
+  for epa, n, key in (("qb_epa", "qb_db", "rq"), ("ru_epa", "ru_n", "rr"), ("rec_epa", "tgt", "rt")):
+    r = bk.groupby(["season", "pos"])[[epa, n]].sum()
+    rate = (r[epa] / r[n].replace(0, np.nan)).fillna(0.0)
+    tg[key] = pd.Series(list(zip(tg.season, tg.pos))).map(rate.to_dict()).fillna(0.0).to_numpy()
+  tg["value"] = (tg.qb_epa - tg.qb_db * tg.rq) + (tg.ru_epa - tg.ru_n * tg.rr) + (tg.rec_epa - tg.tgt * tg.rt)
+  return tg.drop(columns=["pos", "rq", "rr", "rt"])
+
+
+def seasons_of(tg: pd.DataFrame) -> pd.DataFrame:
+  """Player-game rows -> player-season sums."""
+  return tg.drop(columns="week").groupby(["gsis_id", "season"]).sum().reset_index()
+
+
+def window(t: pd.DataFrame, season: int) -> pd.DataFrame:
+  """Weighted sums over season, season-1, season-2 (SEASON_W), for players who played in `season`."""
+  cur = set(t[t.season == season].gsis_id)
+  w = t[t.gsis_id.isin(cur) & t.season.between(season - 2, season)].copy()
+  wt = w.season.map({season - i: x for i, x in enumerate(SEASON_W)})
+  num = [c for c in w.columns if c not in ("gsis_id", "season")]
+  w[num] = w[num].mul(wt, axis=0)
+  out = w.groupby("gsis_id")[num].sum()
+  out["games_now"] = t[t.season == season].set_index("gsis_id").games.reindex(out.index)
+  out["season"] = season
+  return out
+
+
+def features(win: pd.DataFrame, pos: str, priors: dict, info: pd.DataFrame) -> pd.DataFrame:
+  f = pd.DataFrame(index=win.index)
+  for name, num, den in RATES[pos]:
+    m, k = priors[(pos, name)]
+    f[name] = (win[num] + k * m) / (win[den] + k)
+  m, k = priors[(pos, "value")]
+  f["value"] = (win.value + k * m) / (win.games + k)  # EPA over replacement / game, shrunk (k from game-to-game noise)
+  age = (pd.Timestamp(f"{int(win.season.iloc[0])}-12-01") - info.birth.reindex(f.index)).dt.days / 365.25
+  f["age"] = age.fillna(age.median() if age.notna().any() else 26.0)
+  pick = info.draft_pick.reindex(f.index)
+  f["draft"] = -np.log(pick.fillna(300.0).clip(1, 300))  # higher = earlier pick; undrafted = pick 300
+  return f
+
+
+def fit_priors(tg: pd.DataFrame, pos_of: pd.Series, seasons) -> dict:
+  """Shrinkage (mean, k) per (position, rate) from player-GAME rows in `seasons` (method of moments: game-to-game
+  noise within player-seasons vs spread between players)."""
+  out = {}
+  tt = tg[tg.season.isin(seasons)].assign(pos=lambda d: d.gsis_id.map(pos_of))
+  for pos in POS:
+    d = tt[tt.pos == pos]
+    for name, num, den in RATES[pos]:
+      est = mom_prior(d, num, den) if len(d) else None
+      if est is None:
+        tot = d[den].sum()
+        est = (float(d[num].sum() / tot) if tot else 0.0, 20.0)
+      out[(pos, name)] = est
+    out[(pos, "value")] = mom_prior(d, "value", "games") or (float(d.value.sum() / max(d.games.sum(), 1)), 5.0)
+  return out
+
+
+class Ridge:
+  """Standardized weighted ridge; alpha by leave-one-season-out CV over ALPHAS."""
+
+  def fit(self, X: pd.DataFrame, y: np.ndarray, w: np.ndarray, groups: np.ndarray):
+    self.cols = list(X.columns)
+    self.mu, self.sd = X.mean(), X.std().replace(0, 1.0)
+    Z = ((X - self.mu) / self.sd).to_numpy(float)
+
+    def solve(Z, y, w, a):
+      ym = np.average(y, weights=w)
+      W = w[:, None]
+      beta = np.linalg.solve(Z.T @ (W * Z) + a * np.eye(Z.shape[1]), Z.T @ (w * (y - ym)))
+      return ym, beta
+    best = None
+    for a in ALPHAS:
+      err = 0.0
+      for gq in np.unique(groups):
+        tr, te = groups != gq, groups == gq
+        if tr.sum() < 30 or te.sum() < 5:
+          continue
+        b0, b = solve(Z[tr], y[tr], w[tr], a)
+        err += float(np.sum(w[te] * (y[te] - b0 - Z[te] @ b) ** 2))
+      if best is None or err < best[0]:
+        best = (err, a)
+    self.alpha = best[1]
+    self.b0, self.beta = solve(Z, y, w, self.alpha)
+    return self
+
+  def contrib(self, X: pd.DataFrame) -> pd.DataFrame:
+    """Each feature's contribution (in target units) relative to the training average."""
+    return ((X[self.cols] - self.mu) / self.sd) * self.beta
+
+  def predict(self, X: pd.DataFrame) -> np.ndarray:
+    return self.b0 + self.contrib(X).sum(axis=1).to_numpy()
+
+
+def pairs(t, pos_of, info, priors, seasons):
+  """Training rows: features at season s, target = value per game in s+1 (>= MIN_NEXT_GAMES games)."""
+  out = []
+  nxt = t.set_index(["gsis_id", "season"])
+  for s in seasons:
+    win = window(t, s)
+    for pos in POS:
+      w = win[win.index.map(pos_of) == pos]
+      if not len(w):
+        continue
+      f = features(w, pos, priors, info)
+      key = pd.MultiIndex.from_arrays([f.index, np.full(len(f), s + 1)])
+      g1 = nxt.games.reindex(key).to_numpy()
+      f = f.assign(pos=pos, s=s, games_now=w.games_now.to_numpy(),
+                   y=nxt.value.reindex(key).to_numpy() / g1, g1=g1,
+                   fp_next=nxt.fp.reindex(key).to_numpy() / g1,
+                   fp_now=t[t.season == s].set_index("gsis_id").fp.reindex(f.index).to_numpy() / w.games_now.to_numpy(),
+                   v_now=t[t.season == s].set_index("gsis_id").value.reindex(f.index).to_numpy() / w.games_now.to_numpy())
+      out.append(f)
+  return pd.concat(out)
+
+
+def load(cfg):
+  import nflreadpy as nfl
+  c = json.loads(json.dumps(cfg))
+  cur = int(nfl.get_current_season())
+  c["data"]["history_seasons"] = cur - FIRST
+  data = D.load_all(c)
+  cache = D.Cache(ROOT / cfg["data"]["cache_dir"])
+  players = cache.get("players", "all", lambda: nfl.load_players(), stale=False)
+  ppid = players.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
+  fr = []
+  for s in range(FIRST, cur + 1):
+    st = lambda: nfl.load_pfr_advstats([s], stat_type="rush", summary_level="week")  # noqa: E731
+    r = cache.get("pfrrush", s, st, stale=s == cur and cache.age_hours("pfrrush", s) > 12)
+    st2 = lambda: nfl.load_pfr_advstats([s], stat_type="rec", summary_level="week")  # noqa: E731
+    q = cache.get("pfrrec", s, st2, stale=s == cur and cache.age_hours("pfrrec", s) > 12)
+    if r is not None and len(r):
+      r = r[r.game_type == "REG"]
+      fr.append(pd.DataFrame({"pfr": r.pfr_player_id, "season": r.season, "week": r.week, "pfr_car": r.carries.fillna(0),
+                              "pfr_yaco": r.rushing_yards_after_contact.fillna(0),
+                              "btk": r.rushing_broken_tackles.fillna(0), "drops": 0.0}))
+    if q is not None and len(q):
+      q = q[q.game_type == "REG"]
+      fr.append(pd.DataFrame({"pfr": q.pfr_player_id, "season": q.season, "week": q.week, "pfr_car": 0.0, "pfr_yaco": 0.0,
+                              "btk": q.receiving_broken_tackles.fillna(0), "drops": q.receiving_drop.fillna(0)}))
+  pfr = pd.concat(fr, ignore_index=True)
+  pfr["gsis_id"] = pfr.pfr.map(ppid)
+  pfr = pfr.dropna(subset=["gsis_id"])
+  pl = players.dropna(subset=["gsis_id"]).drop_duplicates("gsis_id").set_index("gsis_id")
+  info = pd.DataFrame({"birth": pd.to_datetime(pl.get("birth_date"), errors="coerce"),
+                       "draft_pick": pd.to_numeric(pl.get("draft_pick"), errors="coerce"),
+                       "name": pl.get("display_name")})
+  ro = data.rosters.dropna(subset=["gsis_id"]).sort_values(["season", "week"])
+  pos_of = ro.drop_duplicates("gsis_id", keep="last").set_index("gsis_id").position.replace({"FB": "RB", "HB": "RB"})
+  return data, pfr, info, pos_of, cur
+
+
+def evaluate(tg, pos_of, info, cur):
+  """Walk-forward: for target season T, priors + model use only seasons before T."""
+  res = []
+  t = seasons_of(tg)
+  for T in range(2021, cur):
+    pri = fit_priors(tg, pos_of, range(FIRST, T))
+    tr = pairs(t, pos_of, info, pri, range(FIRST + 1, T - 1))
+    te = pairs(t, pos_of, info, pri, [T - 1])
+    for pos in POS:
+      a, b = tr[(tr.pos == pos) & (tr.g1 >= MIN_NEXT_GAMES)], te[(te.pos == pos) & (te.g1 >= MIN_NEXT_GAMES) & (te.games_now >= 6)]
+      cols = [n for n, _, _ in RATES[pos]] + ["value", "age", "draft"]
+      m = Ridge().fit(a[cols], a.y.to_numpy(), np.minimum(a.g1, 17).to_numpy(float), a.s.to_numpy())
+      res.append(b.assign(grade=m.predict(b[cols]), T=T))
+  return pd.concat(res)
+
+
+def report(r):
+  rng = np.random.default_rng(7)
+  print(f"{'pos':4s} {'n':>5s}  rank corr. with next-season EPA/game:  grade   last EPA/g   last FP/g    "
+        f"grade - last EPA/g [95% CI]   grade - last FP/g [95% CI]   | vs next FP/g: grade  last FP/g")
+  out = {}
+  for pos in list(POS) + ["ALL"]:
+    d = r if pos == "ALL" else r[r.pos == pos]
+    def stat(x):
+      by = [spearmanr(g.grade, g.y)[0] - spearmanr(g[x], g.y)[0] for _, g in x_groups(d)]
+      return by
+    def corr(d, col, tgt="y"):
+      vals = [spearmanr(g[col], g[tgt])[0] for _, g in x_groups(d)]
+      return float(np.mean(vals))
+    def x_groups(d):
+      return d.groupby(["T", "pos"])
+    cg, cv, cf = corr(d, "grade"), corr(d, "v_now"), corr(d, "fp_now")
+    boots = []
+    keys = list(x_groups(d).groups)
+    groups = {k: g for k, g in x_groups(d)}
+    for _ in range(400):
+      dv, df = [], []
+      for k in keys:
+        g = groups[k]
+        s = g.iloc[rng.integers(0, len(g), len(g))]
+        dv.append(spearmanr(s.grade, s.y)[0] - spearmanr(s.v_now, s.y)[0])
+        df.append(spearmanr(s.grade, s.y)[0] - spearmanr(s.fp_now, s.y)[0])
+      boots.append((np.mean(dv), np.mean(df)))
+    b = np.array(boots)
+    lo1, hi1 = np.percentile(b[:, 0], [2.5, 97.5])
+    lo2, hi2 = np.percentile(b[:, 1], [2.5, 97.5])
+    gf, ff = corr(d, "grade", "fp_next"), corr(d, "fp_now", "fp_next")
+    print(f"{pos:4s} {len(d):5d}  {'':38s}{cg:.3f}   {cv:.3f}        {cf:.3f}        {cg - cv:+.3f} [{lo1:+.3f}, {hi1:+.3f}]"
+          f"       {cg - cf:+.3f} [{lo2:+.3f}, {hi2:+.3f}]     |              {gf:.3f}  {ff:.3f}")
+    out[pos] = (lo1 > 0 and lo2 > 0)
+  return out
+
+
+LOWER_BETTER = {"sack_rate", "int_rate", "drop"}
+
+
+def pct(v: pd.Series) -> pd.Series:
+  """0-99 percentile within the group (ties share a rank)."""
+  return (100 * (v.rank(method="average") - 0.5) / len(v)).clip(0, 99).round().astype(int)
+
+
+def build(tg, pos_of, info, cur, out: Path):
+  """data/grades/<season>.json for 2018..current + index.json. A season's grade uses that season and the two before
+  (SEASON_W) and ranks a player among everyone at his position who played that season."""
+  out.mkdir(parents=True, exist_ok=True)
+  t = seasons_of(tg)
+  pri = fit_priors(tg, pos_of, range(FIRST, cur + 1))
+  seasons = []
+  for s in range(FIRST, cur + 1):
+    win = window(t, s)
+    if not len(win):
+      continue
+    players, stats = {}, {}
+    for pos in POS:
+      w = win[win.index.map(pos_of) == pos]
+      if len(w) < 10:
+        continue
+      f = features(w, pos, pri, info)
+      names = [n for n, _, _ in RATES[pos]]
+      stats[pos] = [LABEL[n] for n in names]
+      g = pct(f.value)
+      ps = {n: (99 - pct(f[n])) if n in LOWER_BETTER else pct(f[n]) for n in names}
+      for gid in f.index:
+        players[gid] = [int(g[gid]), pos, int(w.games_now[gid]), int(round(w.games[gid] / 1)), round(float(f.value[gid]), 2),
+                        [int(ps[n][gid]) for n in names]]
+    (out / f"{s}.json").write_text(json.dumps({"season": s, "stats": stats, "players": players}, separators=(",", ":")),
+                                   encoding="utf-8")
+    seasons.append(s)
+    print(f"[grades] {s}: {len(players)} players", flush=True)
+  (out / "index.json").write_text(json.dumps({"seasons": seasons, "current": cur}), encoding="utf-8")
+
+
+def main():
+  opt = dict(a[2:].split("=", 1) if "=" in a else (a[2:], "1") for a in sys.argv[1:] if a.startswith("--"))
+  cfg = load_config()
+  data, pfr, info, pos_of, cur = load(cfg)
+  tg = add_value(season_table(data, pfr, load_scoring()), pos_of)
+  if "eval" in opt:
+    r = evaluate(tg, pos_of, info, cur)
+    r.to_parquet(ROOT / "cache" / "grade_eval.parquet")
+    print(report(r))
+    return
+  build(tg, pos_of, info, cur, Path(opt.get("site", "site")) / "data" / "grades")
+
+
+if __name__ == "__main__":
+  main()

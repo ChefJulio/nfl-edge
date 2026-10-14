@@ -604,6 +604,18 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   CI spans 0, adopt it only for the positions it targets (croe / yacoe: RB-WR-TE, cpoe: QB) when that position's
   CI upper bound < 0, it is better in at least 4 of 6 seasons, and no other position is significantly worse.
   Otherwise off. If more than one passes, oe_all decides (adopt the combination only if it beats each single).
+- **NFL Edge grade (owner 2026-10-14: "something we're confident and proud of").** Pre-registered gate: a learned
+  grade (ridge per position on shrunk per-play stats incl. YACOE, CROE, CPOE, PFR yards after contact / broken
+  tackles / drops, age, draft) must beat last season's value/g AND last season's FP/g at ranking next-season value,
+  walk-forward 2021-2025, CI excluding 0. Result: v1 (target = raw EPA/g) was mis-specified (most runs lose EPA, so
+  RB volume read as bad: last FP/g correlated -0.17 with it); v2 target = EPA over replacement/g (one definitional
+  change, then frozen): grade beat both baselines at every position on point estimate but no CI excluded 0
+  (ALL +0.030 [-0.002, +0.066] vs last value; QB .627 / RB .194 / WR .304 / TE .178 rank corr.). FAILED -> owner
+  chose the simple, honest version: "production grade" = shrunk EPA over replacement/g percentile (it is the
+  baseline that the learned model could not beat). Known limit: RB EPA is line/scheme-heavy (Bijan 2023 = 19).
+  Percentile population = everyone at the position who played that season (backups shrink to the mean, so a
+  below-average starter can rank under them). Ideas for a v3 (fresh holdout needed, 2026 season-end): longer
+  history (2006+ without PFR), fantasy-relevant target, rookies' draft prior.
 - **Owner questions 2026-10-14 (answered, not yet approved):** (1) A/B charting stats in projections, volume-first:
   team PROE, YACOE / catchable rate, opponent pressure (contested catch is unstable, low priority); FTN only from
   2022 = 3-4 backtest seasons. (2) "NFL Edge grade" (Madden-like overall): don't cite Madden (EA proprietary,

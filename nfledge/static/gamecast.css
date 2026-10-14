@@ -505,3 +505,17 @@ table.tpo-rd { width: 100%; }
 .tpo-g { display: flex; align-items: center; gap: 6px; font-size: 13px; padding: 2px 0; }
 .tpo-g[data-gid] { cursor: pointer; } .tpo-g button.tm-open { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 .tpo-rd { display: inline-block; min-width: 30px; font-size: 10.5px; font-weight: 800; color: var(--muted); letter-spacing: .04em; }
+
+/* NFL Edge grade: header chip + Grade tab bars */
+.eg-chip { display: inline-flex; align-items: baseline; gap: 4px; margin-left: 6px; padding: 1px 7px; border-radius: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; color: var(--muted); background: var(--panel2); border: 1px solid var(--line); vertical-align: middle; }
+.eg-chip b { font-size: 13px; color: var(--ink); letter-spacing: 0; }
+.eg-chip.good { border-color: color-mix(in srgb, #6fdc8c 55%, var(--line)); } .eg-chip.good b { color: #6fdc8c; }
+.eg-chip.bad { border-color: color-mix(in srgb, #ff8f84 50%, var(--line)); } .eg-chip.bad b { color: #ff8f84; }
+td .eg-chip { margin-left: 0; }
+.eg-bars { display: grid; gap: 7px; margin-top: 6px; }
+.eg-row { display: grid; grid-template-columns: minmax(0, 11em) 1fr 2.2em; align-items: center; gap: 10px; font-size: 13px; }
+.eg-l { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eg-bar { height: 8px; border-radius: 4px; background: var(--panel2); overflow: hidden; }
+.eg-bar i { display: block; height: 100%; border-radius: 4px; background: color-mix(in srgb, var(--accent) 75%, var(--panel2)); }
+.eg-bar i.good { background: #4fbf6f; } .eg-bar i.bad { background: #d9655b; }
+.eg-v { text-align: right; font-variant-numeric: tabular-nums; }
