@@ -16,13 +16,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+import numpy as np
 import pandas as pd  # noqa: E402
 
 from nfledge import data as D  # noqa: E402
 from nfledge.config import load_config  # noqa: E402
 from nfledge.report import ROSTER_TEAM  # noqa: E402
 
-V = 6  # 6: recency-weighted window, games missed hurt skipped; 5: INA counts as on the team, injured starters kept (flag); 4: + depth by playing time ("u"); 3: pages
+V = 7  # 7: each player's last 3 healthy games (skips games missed or left hurt); 6: recency-weighted window, games missed hurt skipped; 5: INA counts as on the team, injured starters kept (flag); 4: + depth by playing time ("u"); 3: pages
 FIRST = 2001
 FRANCHISE = {"OAK": "LV", "SD": "LAC", "STL": "LA", "LAR": "LA"}  # relocated clubs -> today's code (team pages)
 KIND = {"Offense": "off", "Defense": "def", "Special Teams": "st"}
@@ -95,13 +96,38 @@ WINDOW = 3  # games
 # 27,780 team-game cells): per-starter accuracy 81.7% (plain 3-game average) -> 83.6%, +2.0 pts [+1.8, +2.1], better
 # at every position group; starters back from an injury absence 73.6% -> 82.0%.
 RECENCY = (0.5, 0.3, 0.2)
+# Owner design (2026-10-14, Justin Jefferson): each player's last 3 HEALTHY games that season, reaching back as far as
+# needed: a game he missed hurt (0 snaps, listed / reserve that week) or LEFT hurt (under half his max share of his
+# previous 3 played games, and listed / reserve the next team week) doesn't count. Tested in tools/depth_window_eval.py.
+LEFT_HURT = 0.5
+
+
+def injury_games(A: pd.DataFrame, hurt_set: set) -> pd.DataFrame:
+  """players x weeks: True where the game was injury-affected (missed hurt, or left hurt)."""
+  weeks = list(A.columns)
+  V = A.to_numpy()
+  bad = np.zeros(V.shape, dtype=bool)
+  for r, g in enumerate(A.index):
+    seen = []
+    for j, w in enumerate(weeks):
+      v = V[r, j]
+      if v == 0:
+        bad[r, j] = (g, int(w)) in hurt_set
+        continue
+      ref = max(seen[-3:]) if seen else None
+      nxt = weeks[j + 1] if j + 1 < len(weeks) else None
+      if ref and v < LEFT_HURT * ref and nxt is not None and (g, int(nxt)) in hurt_set:
+        bad[r, j] = True
+      else:
+        seen.append(v)
+  return pd.DataFrame(bad, index=A.index, columns=weeks)
 
 
 def usage_weeks(season: int, sn: pd.DataFrame, ros, out: set, reserve: set, listed: pd.DataFrame, pos_of: dict,
                 hurt_set: set | None = None) -> dict:
   """(team, week) -> [[group, n starters, [[gsis, name, avg snap %], ...]], ...] for every listed week where the team
-  has already played this season. Window = the team's last WINDOW games before the week; a player's share averages
-  over those games (a missed game counts 0). Left out: players not on the team's roster that week (latest roster
+  has already played this season. A player's share = his last 3 healthy games that season (injury_games), newest
+  weighted most (RECENCY); a game missed for any other reason counts 0. Left out: players not on the team's roster that week (latest roster
   week for weeks not out yet), ruled Out on that week's report, or on a reserve list. An Out / reserve player who
   would have been a starter by playing time is kept at the end of his group, flagged (an injured starter shouldn't
   vanish: owner 2026-10-14, Jordan Addison). Roster = ACT or INA: inactive for a game is still on the team (the
@@ -124,11 +150,13 @@ def usage_weeks(season: int, sn: pd.DataFrame, ros, out: set, reserve: set, list
     starters_n[(team, int(wk))] = {k: int(v) for k, v in cnt.items() if k}
   for team, ts in sn.groupby("team"):
     played = sorted(ts.week.unique())
+    A = ts.pivot_table(index="gsis_id", columns="week", values="pct", aggfunc="max").reindex(columns=played).fillna(0.0)
+    bad = injury_games(A, hurt_set or set())
     for wk in sorted(listed[listed.team == team].week.unique()):
       prior = [w for w in played if w < wk][-WINDOW:]
       if not prior:
         continue  # the team's first game: the listed chart is better (week-1 test above)
-      win = ts[ts.week.isin(prior)]
+      win = ts[ts.week < wk]  # candidates: anyone who played for the team this season (healthy games reach back)
       rweeks = [w for (t, w) in ros_by if t == team and w <= wk]
       on = ros_by.get((team, max(rweeks))) if rweeks else None
       on_team = lambda g: on is None or g in on  # noqa: E731
@@ -141,15 +169,15 @@ def usage_weeks(season: int, sn: pd.DataFrame, ros, out: set, reserve: set, list
         if gw.empty:
           continue
         k = n.get(grp) or DEFAULT_N[grp]
-        # recency-weighted share; a game he missed hurt (0 snaps, listed / reserve that week) drops out of his average
-        pw = gw.pivot_table(index="gsis_id", columns="week", values="pct", aggfunc="max").reindex(columns=prior).fillna(0.0)
-        newest = list(reversed(prior))
-        wts = pd.DataFrame({w: RECENCY[i] if i < len(RECENCY) else 0.0 for i, w in enumerate(newest)}, index=pw.index)[prior]
-        if hurt_set:
-          miss = pd.DataFrame({w: [(g, int(w)) in hurt_set for g in pw.index] for w in prior}, index=pw.index)
-          wts = wts.where(~(miss & (pw == 0)), 0.0)
-        tot = wts.sum(axis=1)
-        every = ((pw * wts).sum(axis=1) / tot.where(tot > 0)).fillna(0.0).sort_values(ascending=False)
+        # his last 3 healthy games, newest first, weighted RECENCY
+        before = [w for w in played if w < wk][::-1]
+        def healthy(g):
+          vals = [A.at[g, w] for w in before if not bad.at[g, w]][:len(RECENCY)]
+          if not vals:
+            return 0.0
+          wt = np.array(RECENCY[:len(vals)])
+          return float(np.dot(vals, wt) / wt.sum())
+        every = pd.Series({g: healthy(g) for g in gw.gsis_id.unique()}).sort_values(ascending=False)
         is_hurt = every.index.map(hurt).to_numpy().astype(bool)
         share = every[~is_hurt]
         share = share[share >= 0.01].head(6)

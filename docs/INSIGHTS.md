@@ -640,6 +640,16 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Allgeier 2023; Saquon 2022 / 2024 / 2025 not bottom-quartile; workhorse stars top half) and (b) guardrail: RB
   rank corr. of season-only grade with next-season fantasy pts/g (both seasons qualified, 2019-2025) not
   significantly below the current grade's.
+- **RESULT healthy3: SHIPPED (depth_build V7).** vs "both": +0.0003 [-0.0006, +0.0012] overall (no worse), starters
+  back from injury 82.0 -> 83.1% (base 73.6). MIN wk 6: Addison 95, Jefferson 93 (was 34 / 67), Jennings 79.
+- **Better in-game injury signal (owner idea):** pbp `desc` notes "TEAM-##-F.Last was injured during the play" (~3 /
+  game since ~2010, ~1 / game 2003): team + jersey -> gsis via that week's roster. Candidate uses: depth "left hurt"
+  flag (replace the snap heuristic, re-test), injury-history episodes (game + quarter he got hurt), availability model.
+- **PRE-REGISTERED (owner design, 2026-10-14): "healthy3".** Each player's last 3 HEALTHY games that season (newest
+  first, weights .5/.3/.2), skipping games he missed hurt (0 snaps + listed / reserve that week) and games he LEFT
+  hurt (snap share under half his max of his previous 3 played games, and listed / reserve / absent-and-listed the
+  next team week), reaching back as far as needed. Owner-specified rule -> ships unless it tests significantly worse
+  than "both" (95% CI of healthy3 - both entirely below 0); result reported either way.
 - **RESULT (depth window): "both" ADOPTED** (depth_build V6, RECENCY .5/.3/.2 + games missed hurt skipped). 27,780
   cells 2019-2026, per starter: base 81.7%, skip_inj 83.1, recency 82.5, last1 82.7, both 83.6 (+2.0 [+1.8, +2.1]),
   better at every group; starters back from injury 73.6 -> 82.0. MIN wk 6: Addison 97, Jennings 79, Jefferson 67

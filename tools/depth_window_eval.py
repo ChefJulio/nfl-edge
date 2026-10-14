@@ -8,6 +8,9 @@ Variants of depth_build's "share of snaps over the team's last 3 games, a missed
   recency    weights .5 / .3 / .2, newest game first
   both       skip_inj + recency
   last1      the last game only
+  healthy3   (owner design) each player's last 3 HEALTHY games that season, newest first .5 / .3 / .2: skips games
+             missed hurt and games LEFT hurt (under half his max share of his previous 3 played games, and on the
+             report / a reserve list the next team week), reaching back as far as needed
 Score per team-game and group: share of the predicted top-N (fixed N per group, depth_build.DEFAULT_N) that were
 among the game's top-N snap-getters in the group. Players ruled Out / on a reserve list for the target week are
 excluded for every variant (as the site does). 2019-2026 regular season, weeks 4+.
@@ -25,7 +28,7 @@ from depth_build import DEFAULT_N, GROUP, GROUPS  # noqa: E402
 from nfledge import data as D  # noqa: E402
 
 SEASONS = range(2019, 2027)
-VARIANTS = ["base", "skip_inj", "recency", "both", "last1"]
+VARIANTS = ["base", "skip_inj", "recency", "both", "last1", "healthy3"]
 RW = np.array([0.5, 0.3, 0.2])
 
 
@@ -57,6 +60,23 @@ def main():
       weeks = sorted(ts.week.unique())
       pct = ts.pivot_table(index="gsis_id", columns="week", values="pct", aggfunc="max").fillna(0.0)
       grp_of = ts.drop_duplicates("gsis_id").set_index("gsis_id").grp
+      # injury-affected games per player over the whole season: missed hurt, or left hurt (see healthy3)
+      A = pct[weeks].to_numpy()
+      gids = pct.index.to_numpy()
+      bad = np.zeros_like(A, dtype=bool)
+      for r_, g in enumerate(gids):
+        played = []
+        for j, w in enumerate(weeks):
+          v = A[r_, j]
+          if v == 0:
+            bad[r_, j] = (g, w) in hurt
+          else:
+            ref = max(played[-3:]) if played else None
+            nxt = weeks[j + 1] if j + 1 < len(weeks) else None
+            if ref and v < 0.5 * ref and nxt is not None and (g, nxt) in hurt:
+              bad[r_, j] = True
+            else:
+              played.append(v)
       for i, wk in enumerate(weeks):
         if i < 3 or wk < 4:
           continue
@@ -77,7 +97,15 @@ def main():
             w = np.where(missed_hurt, 0.0, w)
           tot = w.sum(axis=1)
           return np.where(tot > 0, (P * w).sum(axis=1) / np.where(tot > 0, tot, 1), 0.0)
-        sc = {v: pd.Series(score(v), index=ids) for v in VARIANTS}
+        def healthy3():
+          out_ = np.zeros(len(ids))
+          for r_ in range(len(ids)):
+            vals = [A[r_, j] for j in range(i - 1, -1, -1) if not bad[r_, j]][:3]
+            if vals:
+              w = RW[:len(vals)]
+              out_[r_] = float(np.dot(vals, w) / w.sum())
+          return out_
+        sc = {v: pd.Series(healthy3() if v == "healthy3" else score(v), index=ids) for v in VARIANTS}
         for grp in GROUPS:
           n = DEFAULT_N[grp]
           truth_pool = game[game.grp == grp]
@@ -102,14 +130,14 @@ def main():
   tg = r.assign(key=r.season.astype(str) + r.team + r.week.astype(str))
   keys = tg.key.unique()
   by = {k: g for k, g in tg.groupby("key")}
-  for v in VARIANTS[1:]:
-    d0 = wavg(r, v) - wavg(r, "base")
+  for v, ref in [(x, "base") for x in VARIANTS[1:]] + [("healthy3", "both")]:
+    d0 = wavg(r, v) - wavg(r, ref)
     boots = []
     for _ in range(400):
       smp = pd.concat([by[k] for k in rng.choice(keys, len(keys))])
-      boots.append(wavg(smp, v) - wavg(smp, "base"))
+      boots.append(wavg(smp, v) - wavg(smp, ref))
     lo, hi = np.percentile(boots, [2.5, 97.5])
-    print(f"  {v:9s} - base {d0:+.4f} [{lo:+.4f}, {hi:+.4f}]")
+    print(f"  {v:9s} - {ref:4s} {d0:+.4f} [{lo:+.4f}, {hi:+.4f}]")
   sub = r[r.ret]
   print(f"\ncells with a starter returning from a hurt absence ({len(sub):,}):", "  ".join(f"{v} {wavg(sub, v):.3f}" for v in VARIANTS))
   print(r.groupby("grp")[VARIANTS].mean().round(3).to_string())
