@@ -9,17 +9,21 @@
     ? `<span class="st-logo" style="--tc:${esc(r.color || '#555')}"><img src="${esc(r.logo)}" alt="" width="${size}" height="${size}" loading="lazy"></span>` : '';
   const pct = v => v == null ? '' : v.toFixed(3).replace(/^0/, '');
   const sgn = v => v > 0 ? `+${v}` : `${v}`;
+  // the deciding tiebreak step: full name (tooltip) and a short tag, so the pinned team column stays narrow on phones
   const WHY = { 'head-to-head (sweep)': 'head-to-head sweep', 'division tiebreak': 'ahead of division rival' };
+  const TB = { 'head-to-head': 'H2H', 'head-to-head (sweep)': 'H2H sweep', 'division record': 'div rec', 'common games': 'common',
+               'conference record': 'conf rec', 'strength of victory': 'SOV', 'strength of schedule': 'SOS',
+               'conference points rank': 'conf pts', 'league points rank': 'NFL pts', 'net points': 'net pts', 'division tiebreak': 'div TB' };
 
   const teamCell = (r, view) => {
     const why = view === 'conf' ? r.conf_why : r.div_why;
     const seed = r.seed ? `<span class="st-seed${r.seed <= (r.conf_rank && r.seed) ? '' : ''}" title="${r.seed <= 4 ? 'Division leader' : 'Wild card'}: seed ${r.seed}">${r.seed}</span>` : '';
     return `<div class="who">${logo(r)}<div><b>${esc(r.nick)}</b>${seed}
-      <span class="sub">${esc(r.team)}${why ? ` &middot; <span class="st-why" title="Ahead of the clubs it's tied with on: ${esc(WHY[why] || why)}">${why === 'division tiebreak' ? '' : 'won tiebreak: '}${esc(WHY[why] || why)}</span>` : ''}</span></div></div>`;
+      <span class="sub">${esc(r.team)}${why ? ` &middot; <span class="st-why" title="Ahead of the clubs it's tied with on: ${esc(WHY[why] || why)}">${why === 'division tiebreak' ? '' : 'TB: '}${esc(TB[why] || why)}</span>` : ''}</span></div></div>`;
   };
   const columns = (ties, view) => [
     ...(view === 'conf' ? [{ w: 44, key: 'conf_rank', label: '#', num: true, first: 'asc' }] : []),
-    { w: 230, key: 'nick', label: 'Team', stick: true, first: 'asc', html: r => teamCell(r, view), value: r => view === 'conf' ? r.conf_rank : r.div_rank },
+    { w: 176, key: 'nick', label: 'Team', stick: true, first: 'asc', html: r => teamCell(r, view), value: r => view === 'conf' ? r.conf_rank : r.div_rank },
     { w: 46, key: 'w', label: 'W', num: true }, { w: 46, key: 'l', label: 'L', num: true, first: 'asc' },
     ...(ties ? [{ w: 42, key: 't', label: 'T', num: true }] : []),
     { w: 64, key: 'pct', label: 'Pct', num: true, html: r => pct(r.pct) },
@@ -40,7 +44,7 @@
           <select class="dt-select st-season" aria-label="Season"></select>
           <div class="seg st-view"><button type="button" data-v="div">Divisions</button><button type="button" data-v="conf">Playoff picture</button></div>
         </div><div class="st-body"></div></div>
-        <p class="st-note muted">Ties count as half a win. Tiebreakers follow the NFL's procedure (head-to-head, division record, common games, conference record, strength of victory and schedule, points rankings, net points); the deciding step is shown under the team. Net touchdowns and the coin toss (the last two steps, almost never reached) are not modeled.</p>`;
+        <p class="st-note muted">Ties count as half a win. Tiebreakers follow the NFL's procedure (head-to-head, division record, common games, conference record, strength of victory and schedule, points rankings, net points); the deciding step is shown under the team (TB = won a tiebreak on: H2H = head-to-head, div / conf rec = division / conference record, common = common games, SOV / SOS = strength of victory / schedule, pts = points rankings; div TB = ahead of a division rival on the division tiebreak). Net touchdowns and the coin toss (the last two steps, almost never reached) are not modeled.</p>`;
       const sel = sec.querySelector('.st-season'), body = sec.querySelector('.st-body'), sub = sec.querySelector('.st-sub');
       let view = store(VIEW_KEY) === 'conf' ? 'conf' : 'div', doc = null;
       const draw = () => {

@@ -213,6 +213,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 | Idea | Result |
 |---|---|
 | Team-specific home field | No persistence: corr -0.02 over 567 team-seasons (2005-25) |
+| Recency by games played instead of calendar weeks (a bye doesn't age a team's / player's games; 2026-10-14) | Null: team ratings, usage shares and both together all within +-0.001 MAE at every position, 2021-25 walk-forward, CIs straddle 0. Week-6 2026 check: Mahomes 17.54 -> 17.57; largest mover +0.38 (K. Walker). Kept calendar weeks |
 | Travel distance / time zones in HFA | No effect |
 | Division-game HFA term | Real in results but worsened play-level CV; off |
 | Shared stadium (LA, NY) adjustment | 7 games ever; no evidence |
