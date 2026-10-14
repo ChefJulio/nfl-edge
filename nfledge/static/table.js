@@ -1,0 +1,112 @@
+// NFLE.Table: the one table component for client-rendered tabs. Same behavior as the Rankings table (INSIGHTS
+// section 7): drawn full length (only the page scrolls), pinned name column, sticky header (a copy rides under the
+// nav once the real one scrolls away when the table has to scroll sideways on phones), sortable headers (first click
+// = the column's natural direction, blanks always last), edge shadow + first-name fold while scrolled sideways.
+// Data in, HTML out: sorting reorders the row data and redraws the body.
+//
+//   const t = NFLE.Table(mountEl, {
+//     columns: [{ key, label, title?, num?, stick?, first? ('asc' | 'desc'), sort? (false = not sortable), cls?,
+//                 value?: row => sortable value, html?: row => cell HTML (escape it yourself) }],
+//     rows, sort: { key, dir }, rowAttrs?: row => 'data-open-pid="..."', rowClass?: row => 'teamrow', cls?: 'tiles'
+//   });
+//   t.update(rows); t.setColumns(columns);
+(() => {
+  const NFLE = window.NFLE = window.NFLE || {};
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  NFLE.esc = NFLE.esc || esc;
+  const all = new Set();
+  const navH = () => { const n = document.querySelector('nav.tabs'); return n ? n.getBoundingClientRect().bottom : 0; };
+
+  NFLE.Table = (mount, opt) => {
+    let cols = opt.columns, rows = opt.rows || [], sort = opt.sort || null;
+    mount.classList.add('dt-wrap');
+    mount.innerHTML = `<div class="fhead" aria-hidden="true"><div class="fhead-in"><table class="dt ${esc(opt.cls || '')}"></table></div></div>
+      <div class="scroll"><table class="dt ${esc(opt.cls || '')}"><thead></thead><tbody></tbody></table></div>`;
+    const strip = mount.querySelector('.fhead'), inner = strip.firstElementChild, copy = inner.firstElementChild;
+    const sc = mount.querySelector('.scroll'), tbl = sc.firstElementChild;
+    const val = (c, r) => {
+      const v = c.value ? c.value(r) : r[c.key];
+      return v === undefined || v === null || v === '' || (typeof v === 'number' && isNaN(v)) ? null : typeof v === 'string' ? v.toLowerCase() : v;
+    };
+    const head = () => {
+      tbl.tHead.innerHTML = `<tr>${cols.map(c => {
+        const cls = [c.num ? 'num' : '', c.stick ? 'stick' : '', c.sort === false ? 'nosort' : 'can-sort', c.cls || '',
+                     sort && sort.key === c.key ? `sorted-${sort.dir}` : ''].filter(Boolean).join(' ');
+        const lab = c.title ? `<abbr title="${esc(c.title)}">${esc(c.label)}</abbr>` : esc(c.label);
+        return `<th class="${cls}" data-key="${esc(c.key)}">${lab}</th>`;
+      }).join('')}</tr>`;
+    };
+    const body = () => {
+      let rs = rows;
+      if (sort) {
+        const c = cols.find(x => x.key === sort.key);
+        if (c) {
+          const m = sort.dir === 'asc' ? 1 : -1;
+          rs = rows.map((r, i) => [val(c, r), i, r]).sort((a, b) => {
+            if (a[0] === null || b[0] === null) return a[0] === b[0] ? a[1] - b[1] : a[0] === null ? 1 : -1;
+            return (a[0] > b[0] ? 1 : a[0] < b[0] ? -1 : a[1] - b[1]) * (a[0] === b[0] ? 1 : m);
+          }).map(x => x[2]);
+        }
+      }
+      tbl.tBodies[0].innerHTML = rs.map(r => `<tr${opt.rowClass ? ` class="${esc(opt.rowClass(r))}"` : ''}${opt.rowAttrs ? ' ' + opt.rowAttrs(r) : ''}>${cols.map(c => {
+        const cls = [c.num ? 'num' : '', c.stick ? 'stick' : '', c.cls || ''].filter(Boolean).join(' ');
+        return `<td${cls ? ` class="${cls}"` : ''}>${c.html ? c.html(r) : esc(r[c.key] ?? '')}</td>`;
+      }).join('')}</tr>`).join('');
+    };
+    tbl.tHead.addEventListener('click', e => {
+      const th = e.target.closest('th'); if (!th || th.classList.contains('nosort')) return;
+      const c = cols.find(x => x.key === th.dataset.key);
+      sort = { key: c.key, dir: sort && sort.key === c.key ? (sort.dir === 'asc' ? 'desc' : 'asc') : (c.first || (c.num ? 'desc' : 'asc')) };
+      head(); body(); layout();
+    });
+    // Header copy for tables that scroll sideways (phones): a zero-height sticky strip under the nav.
+    const buildCopy = () => {
+      copy.innerHTML = tbl.tHead.outerHTML;
+      const src = [...tbl.tHead.rows[0].cells], dst = [...copy.tHead.rows[0].cells];
+      let total = 0;
+      dst.forEach((c, i) => {
+        const w = src[i].getBoundingClientRect().width; total += w;
+        c.style.width = c.style.minWidth = c.style.maxWidth = w + 'px';
+        c.onclick = () => src[i].click();
+      });
+      copy.style.width = total + 'px'; inner.style.width = sc.clientWidth + 'px'; inner.scrollLeft = sc.scrollLeft;
+    };
+    let built = false;
+    const place = () => {
+      const top = navH(), r = tbl.getBoundingClientRect(), th = tbl.tHead.getBoundingClientRect();
+      const show = !sc.classList.contains('fits') && r.width > 0 && th.top < top && r.bottom - th.height > top + 40;
+      if (show && !built) { buildCopy(); built = true; }
+      strip.classList.toggle('show', show);
+    };
+    const layout = () => {
+      document.documentElement.style.setProperty('--navh', `${(document.querySelector('nav.tabs') || {}).offsetHeight || 45}px`);
+      sc.classList.remove('fits');
+      sc.classList.toggle('fits', tbl.offsetWidth > 0 && tbl.scrollWidth <= sc.clientWidth + 1);
+      built = false; measured = false; place();
+    };
+    // Sideways scroll: header copy follows, pinned-column edge shadow, first names fold (--sx; .fn-rest --w).
+    let measured = false, frame = 0;
+    sc.addEventListener('scroll', () => {
+      inner.scrollLeft = sc.scrollLeft;
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        if (!measured) { sc.querySelectorAll('.fn-rest').forEach(s => s.style.setProperty('--w', `${s.scrollWidth}px`)); measured = true; }
+        sc.style.setProperty('--sx', `${Math.min(sc.scrollLeft, 120)}px`);
+        sc.classList.toggle('scrolled', sc.scrollLeft > 2);
+      });
+    }, { passive: true });
+    const api = {
+      update(r) { rows = r || []; body(); layout(); },
+      setColumns(c) { cols = c; if (sort && !cols.some(x => x.key === sort.key)) sort = null; head(); body(); layout(); },
+      layout, place,
+    };
+    head(); body();
+    all.add(api);
+    requestAnimationFrame(layout);
+    return api;
+  };
+  window.addEventListener('scroll', () => all.forEach(t => t.place()), { passive: true });
+  window.addEventListener('resize', () => all.forEach(t => t.layout()));
+  document.addEventListener('nfle-route', () => requestAnimationFrame(() => all.forEach(t => t.layout())));
+})();

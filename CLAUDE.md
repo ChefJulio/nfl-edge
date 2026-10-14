@@ -62,7 +62,8 @@ Git hooks: `git config core.hooksPath .githooks` (pre-commit blocks commits when
 | `nfledge/docs.py` | Model tab: renders MODEL.md, live values, generated formulas section, code fingerprint |
 | `nfledge/templates/report.html.j2` | The whole page: CSS, tabs, tables, sorting JS |
 | `nfledge/static/gamecast.{js,css}`, `templates/game.html.j2` | Player card, live scores (ESPN), gamecast page; copied to the site root (`assets/`, `game.html`) on every render; each week page also writes `<page>.json` |
-| `nfledge/static/shell.{js,css}` | App shell: parent tabs + sub-tab chips, hash routing (#players/rankings, old #games etc. mapped), placeholder sections for tabs not built yet |
+| `nfledge/static/shell.{js,css}` | App shell: 4 parents (Players, Teams, Games, Model) + sub-tab chips, bottom tab bar on phones, hash routing (#players/rankings; old #games etc. mapped), `NFLE.load` (cached JSON), placeholder sections for tabs not built yet |
+| `nfledge/static/table.{js,css}` | `NFLE.Table`: the shared table component for client-rendered tabs (sort, pinned column, sticky header, header strip on phones) |
 | `tools/dev.py` | Dev server: built site + live `nfledge/static/` assets |
 | `nfledge/elo.py` | Elo from final scores (part of our win chance) |
 | `exclusions.csv` | Manual injury-shortened games to drop from usage/efficiency |

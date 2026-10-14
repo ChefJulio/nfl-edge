@@ -4,17 +4,32 @@
 // Server-rendered tabs keep their <section id="tab-..."> until their migration phase; tabs that don't exist yet get
 // a placeholder section. Loaded on every week page (current, lookahead, archived) from assets/, so nav changes
 // reach archived weeks without a rebuild.
+// NFLE.load(path): lazy JSON loader with an in-memory cache, paths relative to the site root (the folder holding
+// assets/), so it works from index.html and from archived <season>/week-NN.html pages alike.
 (() => {
+  const NFLE = window.NFLE = window.NFLE || {};
+  const root = new URL('..', document.currentScript ? document.currentScript.src : location.href);
+  const cache = new Map();
+  NFLE.root = root.href;
+  NFLE.load = path => {
+    if (!cache.has(path)) {
+      cache.set(path, fetch(new URL(path, root), { cache: 'no-cache' })
+        .then(r => r.ok ? r.json() : Promise.reject(new Error(`${r.status} ${path}`)))
+        .catch(e => { cache.delete(path); throw e; }));
+    }
+    return cache.get(path);
+  };
+})();
+(() => {
+  // Four parents (owner, 2026-10-14): Players (incl. transactions = player news) and Teams (incl. playoffs, draft).
   const NAV = [
-    { key: 'players', label: 'Players', subs: [['rankings', 'Rankings', 'tab-players'], ['stats', 'Stats'], ['roles', 'Role changes', 'tab-roles'], ['injuries', 'Injuries']] },
-    { key: 'teams', label: 'Teams', subs: [['power', 'Power', 'tab-power'], ['stats', 'Stats'], ['standings', 'Standings']] },
+    { key: 'players', label: 'Players', subs: [['rankings', 'Rankings', 'tab-players'], ['stats', 'Stats'], ['roles', 'Roles', 'tab-roles'], ['injuries', 'Injuries'], ['moves', 'Moves']] },
+    { key: 'teams', label: 'Teams', subs: [['power', 'Power', 'tab-power'], ['standings', 'Standings'], ['playoffs', 'Playoffs'], ['stats', 'Stats'], ['draft', 'Draft']] },
     { key: 'games', label: 'Games', subs: [['matchups', 'Matchups', 'tab-games']] },
-    { key: 'playoffs', label: 'Playoffs', subs: [['playoffs', 'Playoffs']] },
-    { key: 'draft', label: 'Draft', subs: [['draft', 'Draft']] },
-    { key: 'transactions', label: 'Transactions', short: 'Moves', subs: [['transactions', 'Transactions']] },
     { key: 'model', label: 'Model', subs: [['model', 'Model', 'tab-model']] },
   ];
-  const OLD = { players: 'players/rankings', roles: 'players/roles', power: 'teams/power', games: 'games', model: 'model' };
+  const OLD = { players: 'players/rankings', roles: 'players/roles', power: 'teams/power', games: 'games', model: 'model',
+               playoffs: 'teams/playoffs', draft: 'teams/draft', transactions: 'players/moves' };
   const CARD = /^(player|team)\/|^g-/;  // card / old tile deep links: gamecast.js owns these
   const nav = document.querySelector('nav.tabs');
   const main = document.querySelector('main .wrap');
@@ -31,28 +46,29 @@
   nav.innerHTML = `<div class="wrap nav-par" role="tablist">${NAV.map(p => `<button type="button" role="tab" data-par="${p.key}">${p.short
       ? `<span class="lbl-long">${p.label}</span><span class="lbl-short">${p.short}</span>` : p.label}</button>`).join('')}</div>
     <div class="wrap nav-sub" hidden></div>`;
-  // Optional bottom tab bar on phones (owner trying it out): ?nav=bottom turns it on, ?nav=top off; remembered.
-  // Five slots: the four busiest parents + More (a sheet with the rest). Sub-tab chips stay in the top bar.
+  // Phones: a bottom tab bar (owner's choice, 2026-10-14). Five slots: the four busiest parents + More (a sheet with
+  // the rest); the sub-tab chips stay in the top bar. The top strip (parent tabs in the top bar, short labels) is
+  // kept for a possible future setting: set NAV_MODE = 'top'. Desktop always uses the top strip.
+  const NAV_MODE = 'bottom';
   const ICON = {
     players: '<circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.6 7-5.6s6.2 2 7 5.6"/>',
     teams: '<path d="M12 3l7 3v5c0 4.4-3 8-7 10-4-2-7-5.6-7-10V6z"/>',
     games: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
-    playoffs: '<path d="M8 4h8v5a4 4 0 01-8 0zM8 6H5a3 3 0 003 4M16 6h3a3 3 0 01-3 4M12 13v4M8.5 20h7"/>',
+    model: '<path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-6"/>',
     more: '<circle cx="5.5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18.5" cy="12" r="1.4"/>',
   };
   const svg = k => `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">${ICON[k]}</svg>`;
-  const qp = new URLSearchParams(location.search).get('nav');
-  try { if (qp === 'bottom' || qp === 'top') localStorage.setItem('nfledge-nav', qp); } catch (e) { /* ignore */ }
-  let navMode = qp || ''; try { navMode = navMode || localStorage.getItem('nfledge-nav') || 'top'; } catch (e) { navMode = 'top'; }
-  const BOTTOM = ['players', 'teams', 'games', 'playoffs'];
+  const navMode = NAV_MODE;
+  const BOTTOM = NAV.map(p => p.key);  // all four parents fit: no More sheet
   let bot = null;
   if (navMode === 'bottom') {
     document.documentElement.classList.add('nav-bottom');
     bot = document.createElement('div');
     bot.className = 'botbar';
+    const extra = NAV.filter(p => !BOTTOM.includes(p.key));  // parents beyond the bar go in a More sheet (none today)
     bot.innerHTML = `<nav class="bb-row">${BOTTOM.map(k => `<button type="button" data-par="${k}">${svg(k)}<span>${parent(k).label}</span></button>`).join('')}
-      <button type="button" data-more>${svg('more')}<span>More</span></button></nav>
-      <div class="bb-sheet" hidden>${NAV.filter(p => !BOTTOM.includes(p.key)).map(p => `<button type="button" data-par="${p.key}">${p.label}</button>`).join('')}</div>`;
+      ${extra.length ? `<button type="button" data-more>${svg('more')}<span>More</span></button>` : ''}</nav>
+      ${extra.length ? `<div class="bb-sheet" hidden>${extra.map(p => `<button type="button" data-par="${p.key}">${p.label}</button>`).join('')}</div>` : ''}`;
     document.body.appendChild(bot);
   }
   const subBar = nav.querySelector('.nav-sub');
@@ -69,9 +85,9 @@
     nav.querySelectorAll('[data-par]').forEach(b => b.classList.toggle('on', b.dataset.par === r.p.key));
     if (bot) {
       bot.querySelectorAll('.bb-row [data-par]').forEach(b => b.classList.toggle('on', b.dataset.par === r.p.key));
-      bot.querySelector('[data-more]').classList.toggle('on', !BOTTOM.includes(r.p.key));
-      bot.querySelectorAll('.bb-sheet [data-par]').forEach(b => b.classList.toggle('on', b.dataset.par === r.p.key));
-      bot.querySelector('.bb-sheet').hidden = true;
+      const more = bot.querySelector('[data-more]'), sheet = bot.querySelector('.bb-sheet');
+      if (more) more.classList.toggle('on', !BOTTOM.includes(r.p.key));
+      if (sheet) { sheet.querySelectorAll('[data-par]').forEach(b => b.classList.toggle('on', b.dataset.par === r.p.key)); sheet.hidden = true; }
     }
     subBar.hidden = r.p.subs.length < 2;
     subBar.innerHTML = r.p.subs.length < 2 ? '' : r.p.subs.map(s => `<button type="button" class="chip${s === r.s ? ' on' : ''}" data-sub="${s[0]}">${s[1]}</button>`).join('');
@@ -84,7 +100,7 @@
   };
   const onNav = e => {
     const pb = e.target.closest('[data-par]'), sb = e.target.closest('[data-sub]');
-    if (e.target.closest('[data-more]')) { const sh = bot.querySelector('.bb-sheet'); sh.hidden = !sh.hidden; return; }
+    if (bot && e.target.closest('[data-more]')) { const sh = bot.querySelector('.bb-sheet'); sh.hidden = !sh.hidden; return; }
     if (pb) {  // a parent tab reopens the sub-tab you last used there
       const p = parent(pb.dataset.par);
       let last = null; try { last = localStorage.getItem(`nfledge-sub-${p.key}`); } catch (e) { /* ignore */ }
@@ -100,7 +116,7 @@
   nav.addEventListener('click', onNav);
   if (bot) {
     bot.addEventListener('click', onNav);
-    document.addEventListener('click', e => { if (!bot.contains(e.target)) bot.querySelector('.bb-sheet').hidden = true; });
+    document.addEventListener('click', e => { const sh = bot.querySelector('.bb-sheet'); if (sh && !bot.contains(e.target)) sh.hidden = true; });
   }
   window.addEventListener('hashchange', () => { const r = parse(location.hash); if (r) show(r, false); });
   let saved = null; try { saved = localStorage.getItem('nfledge-tab'); } catch (e) { /* ignore */ }

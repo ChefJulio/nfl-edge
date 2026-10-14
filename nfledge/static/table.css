@@ -1,0 +1,29 @@
+/* NFLE.Table (table.js): the shared table look, same rules as the Rankings table (templates/report.html.j2), so
+   client-rendered tabs need no template CSS. Scoped to table.dt. */
+.dt-wrap .scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.dt-wrap .scroll.fits { overflow: visible; }
+.dt-wrap .scroll.fits table.dt thead th { top: var(--navh, 45px); }
+.dt-wrap .fhead { position: sticky; top: var(--navh, 45px); height: 0; z-index: 6; visibility: hidden; }
+.dt-wrap .fhead.show { visibility: visible; }
+.dt-wrap .fhead-in { overflow: hidden; background: var(--panel); border-bottom: 1px solid var(--line); box-shadow: 0 6px 12px -8px rgba(0,0,0,.5); }
+.dt-wrap .fhead table { width: auto; table-layout: fixed; margin: 0 !important; border-spacing: 0 !important; }
+.dt-wrap .fhead th { overflow: hidden; text-overflow: ellipsis; position: static; }
+.dt-wrap .fhead th.stick { position: sticky; left: 0; }
+table.dt { border-collapse: collapse; width: 100%; font-size: 13px; }
+table.dt th, table.dt td { padding: 8px 10px; text-align: left; white-space: nowrap; vertical-align: middle; }
+table.dt thead th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted);
+  background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; user-select: none;
+  box-shadow: 0 -4px 0 var(--panel), 0 1px 0 var(--line); }
+table.dt thead th.can-sort { cursor: pointer; } table.dt thead th.can-sort:hover { color: var(--ink); }
+table.dt thead th.sorted-asc::after { content: " \25B2"; font-size: 8px; color: var(--accent); }
+table.dt thead th.sorted-desc::after { content: " \25BC"; font-size: 8px; color: var(--accent); }
+table.dt tbody td { border-bottom: 1px solid var(--line); }
+table.dt td.num, table.dt th.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.dt td.stick, table.dt th.stick { position: sticky; left: 0; z-index: 1; background: var(--panel); }
+table.dt thead th.stick { z-index: 3; }
+.dt-wrap .scroll.scrolled td.stick, .dt-wrap .scroll.scrolled th.stick { box-shadow: 8px 0 10px -8px rgba(0,0,0,.85); }
+table.dt tbody tr[data-open-pid], table.dt tbody tr[data-tm] { cursor: pointer; }
+table.dt tbody tr:hover td { background: color-mix(in srgb, var(--accent) 5%, var(--panel)); }
+/* panel the table sits in (same as the Rankings card) */
+.dt-card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+.dt-card .dt-tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 12px 14px; border-bottom: 1px solid var(--line); }
