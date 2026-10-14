@@ -618,6 +618,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   - EPA(incomplete) at that air-yard depth, per season] + on catches (yac_epa - xyac_epa); rushing unchanged
   (fumbles are his). GUARDRAIL: ships if, walk-forward 2021-2025 all players, its rank corr. with next-season
   fantasy pts/g is not significantly below v1's (95% CI of v1.1 - v1 not entirely below 0). Face check reported.
+- **Grade display fixes (owner: "Allgeier 87 vs Bijan, really?"):** (1) the by-season table showed the 3-season
+  window grade, so Allgeier's "2023" was mostly his 2022 -> each season now that season only ([6], [7]); the header
+  stays current form (window). (2) percentiles weighted by games played (shrunk 1-3 game backups piled at the mean
+  and any above-average player leapt past them). Still: Saquon 2022 15 / 2023 5 / 2025 4, Allgeier 2024 87 as a
+  backup. EPA per play can't see RB workload and swings with line / scheme / fumbles (RB next-season rank corr.
+  ~.19 vs ~.81 for fantasy pts/g). Rookies need no special case: no penalty, just no earlier seasons in the window.
+  Owner decision pending: what the grade should reward.
 - **RESULT v1.2: PASSED guardrail -> LIVE** (fantasy pts/g -0.013 [-0.028, +0.005]; QB .625 = , RB .389 -> .333,
   WR .546 -> .511, TE .161 -> .203). Bijan 2023 19 -> 42 (rest = 3 lost fumbles -13.9 and 35% rush success; Allgeier
   87 because his window includes a good 2022). Open owner question: EPA grade vs fantasy-style volume credit.

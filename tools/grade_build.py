@@ -429,14 +429,25 @@ def report(r):
 LOWER_BETTER = {"sack_rate", "int_rate", "drop"}
 
 
-def pct(v: pd.Series) -> pd.Series:
-  """0-99 percentile within the group (ties share a rank)."""
-  return (100 * (v.rank(method="average") - 0.5) / len(v)).clip(0, 99).round().astype(int)
+def pct(v: pd.Series, w: pd.Series | None = None) -> pd.Series:
+  """0-99 percentile within the group, weighted by games played when w is given: the share of the position's games
+  played by players below him. Unweighted, the many shrunk 1-3 game backups pile up at the position average and any
+  above-average player leaps past them (Allgeier 2024 graded 91 as a backup)."""
+  if w is None:
+    return (100 * (v.rank(method="average") - 0.5) / len(v)).clip(0, 99).round().astype(int)
+  w = w.reindex(v.index).fillna(0).clip(lower=0)
+  order = v.sort_values(kind="stable").index
+  cw = w[order].cumsum() - w[order] / 2
+  tot = w.sum() or 1.0
+  return (100 * cw / tot).reindex(v.index).clip(0, 99).round().astype(int)
 
 
 def build(tg, pos_of, info, cur, out: Path):
-  """data/grades/<season>.json for 2018..current + index.json. A season's grade uses that season and the two before
-  (SEASON_W) and ranks a player among everyone at his position who played that season."""
+  """data/grades/<season>.json for 2018..current + index.json. Two grades per player-season, both percentiles among
+  everyone at his position who played that season:
+    [0] current form: that season and the two before (SEASON_W), the header grade when the season is the current one;
+    [6] that season only (the by-season history: a season's grade must not borrow earlier seasons; owner 2026-10-14,
+        Allgeier's "2023" was mostly his 2022). Both shrunk toward the position average by the measured k."""
   out.mkdir(parents=True, exist_ok=True)
   t = seasons_of(tg)
   pri = fit_priors(tg, pos_of, range(FIRST, cur + 1))
@@ -453,11 +464,15 @@ def build(tg, pos_of, info, cur, out: Path):
       f = features(w, pos, pri, info)
       names = [n for n, _, _ in RATES[pos]]
       stats[pos] = [LABEL[n] for n in names]
-      g = pct(f.value)
+      g = pct(f.value, w.games)
       ps = {n: (99 - pct(f[n])) if n in LOWER_BETTER else pct(f[n]) for n in names}
+      one = t[(t.season == s) & t.gsis_id.isin(f.index)].set_index("gsis_id").reindex(f.index)
+      m, k = pri[(pos, "value")]
+      sv = (one.value.fillna(0) + k * m) / (one.games.fillna(0) + k)
+      sg, raw = pct(sv, one.games), one.value / one.games
       for gid in f.index:
         players[gid] = [int(g[gid]), pos, int(w.games_now[gid]), int(round(w.games[gid] / 1)), round(float(f.value[gid]), 2),
-                        [int(ps[n][gid]) for n in names]]
+                        [int(ps[n][gid]) for n in names], int(sg[gid]), round(float(raw[gid]), 2) if pd.notna(raw[gid]) else None]
     (out / f"{s}.json").write_text(json.dumps({"season": s, "stats": stats, "players": players}, separators=(",", ":")),
                                    encoding="utf-8")
     seasons.append(s)
