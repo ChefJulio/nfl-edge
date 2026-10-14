@@ -374,7 +374,8 @@ class InjuryModel:
     return pd.Series(self.scratch_model.predict_proba(t[self.SCRATCH_COLS])[:, 1], index=t.gsis_id.to_numpy())
 
   # -- application -----------------------------------------------------------------------------------------------
-  espn_bridge: dict | None = None  # gsis_id -> official designation borrowed from ESPN (live week only; see espn.py)
+  espn_bridge: dict | None = None  # gsis_id -> ESPN bucket (live week only; see espn.py / espn_calib.py)
+  espn_rates: dict | None = None  # bucket -> learned P(active) (espn_calib.learned_rates); None = carry-forward rates
 
   def availability(self, p: pd.DataFrame, season: int, week: int) -> pd.DataFrame:
     inj = self.data.injuries
@@ -407,11 +408,14 @@ class InjuryModel:
           p.at[i, "avail"] = self.prob(rep, prac)
           p.at[i, "status"] = rep if rep != "None" else ""
       elif self.espn_bridge and row.gsis_id in self.espn_bridge:
-        # STOPGAP (unvalidated, see espn.py): this week's report isn't out, but ESPN has injury news from after his
-        # last game. Scored like that designation carried forward from last week.
-        rep = self.espn_bridge[row.gsis_id]
-        p.at[i, "avail"] = 0.0 if rep == "IR" else float(self.p_next.get(rep, 1.0))  # IR: out at least 4 games
-        p.at[i, "status"] = f"{rep} (ESPN)"
+        # This week's report isn't out, but ESPN has injury news from after his last game: its bucket's P(active),
+        # learned from how earlier early-week ESPN statuses turned out (espn_calib.py); before any outcomes, the
+        # designation's carry-forward rate. IR: out at least 4 games.
+        b = self.espn_bridge[row.gsis_id]
+        rate = (self.espn_rates or {}).get(b)
+        base = "Out" if b == "Out+ret" else b
+        p.at[i, "avail"] = 0.0 if b == "IR" else float(rate["p"] if rate else self.p_next.get(base, 1.0))
+        p.at[i, "status"] = "Out (ESPN; return date after this game)" if b == "Out+ret" else f"{b} (ESPN)"
       elif row.gsis_id in prev_map.index:
         rep = _report(prev_map.at[row.gsis_id, "report_status"])
         if rep != "None":
@@ -421,10 +425,11 @@ class InjuryModel:
 
   @staticmethod
   def build_espn_bridge(data, season: int, week: int, feed: pd.DataFrame) -> dict:
-    """STOPGAP early-week bridge (see espn.py): gsis_id -> official designation for players with an ESPN injury
-    status updated on or after their team's last completed game day, for teams whose report for `week` is not out.
-    Empty when there is no feed, or once every report for the week is published."""
+    """Early-week bridge (see espn.py): gsis_id -> ESPN bucket (espn_calib.bucket: Out / Out+ret / Doubtful / IR)
+    for players with an ESPN injury status updated on or after their team's last completed game day, for teams
+    whose report for `week` is not out. Empty when there is no feed, or once every report for the week is out."""
     from .espn import STATUS_MAP
+    from .espn_calib import bucket
     if feed is None or feed.empty:
       return {}
     inj = data.injuries
@@ -436,6 +441,8 @@ class InjuryModel:
                        & (data.schedules.week < week) & data.schedules.home_score.notna()]
     last_day = pd.concat([s[["home_team", "gameday"]].set_axis(["team", "day"], axis=1),
                           s[["away_team", "gameday"]].set_axis(["team", "day"], axis=1)]).groupby("team").day.max()
+    w = data.schedules[(data.schedules.season == season) & (data.schedules.week == week)]
+    game_day = {**dict(zip(w.home_team, w.gameday)), **dict(zip(w.away_team, w.gameday))}
     out = {}
     for x in feed.itertuples():
       rep = STATUS_MAP.get(str(x.status))
@@ -448,7 +455,7 @@ class InjuryModel:
       upd = pd.to_datetime(x.updated, utc=True, errors="coerce")
       if pd.isna(upd) or upd.tz_convert("America/New_York").date() < pd.Timestamp(last_day[team]).date():
         continue  # news from before his last game: last week's report already covers it
-      out[gsis] = rep
+      out[gsis] = bucket(x.status, getattr(x, "return_date", None), game_day.get(team)) or rep
     return out
 
   def report_avail(self, season: int, week: int) -> pd.Series:

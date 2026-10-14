@@ -3,11 +3,10 @@
 Two uses:
 - tools/espn_snapshot.py archives it daily, to TEST its diagnoses / return dates as model inputs later.
 - The live build's early-week bridge (injuries.InjuryModel.espn_bridge): between Sunday's games and the official
-  Wednesday report, a player hurt in his last game has no report entry, so the model would call him healthy.
-  STOPGAP (2026-10-13, owner-approved, NOT yet validated): for players whose team's report for the week is not out,
-  an ESPN status updated after the team's last game is mapped to the official designation it corresponds to and
-  scored with the model's learned carry-forward rates. To validate once enough daily snapshots exist: compare
-  ESPN early-week statuses with who actually played, and replace the mapping with fitted rates if they differ.
+  Wednesday report, a player hurt in his last game has no report entry, so the model would call him healthy. For
+  players whose team's report for the week is not out, an ESPN status updated after the team's last game puts him
+  in a bucket (espn_calib.py: Out with a return date after the game / Out / Doubtful / IR) whose P(active) is
+  learned from the archived snapshots' outcomes, starting from the official designation's carry-forward rate.
 """
 from __future__ import annotations
 
