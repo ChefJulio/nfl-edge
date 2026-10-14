@@ -164,6 +164,15 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   59%, model chance as second opinion, edge pills removed, finals read "Favorite won" / "Upset, a 20% chance" /
   "Tossup, X won", and a track-record table (market favorites by confidence band, expected vs won, all seasons and
   this one). Still open: market-implied ratings for lookahead weeks without lines.
+- **Opponent defense terms in the efficiency models (2026-10-14; PENDING owner decision):** with the Vegas
+  implied total and schedule-adjusted player rates in, `def_pass` / `def_rush` fit ~0 and several are
+  wrong-signed (QB pass_td, QB rush_td, WR rec_yd). Gate set before running: adopt "drop" if MAE not worse (CI
+  includes 0 or favors it) and no P(1+ TD) Brier worse. Walk-forward 2021-2026 (`experiments.def_terms`):
+  drop = MAE -0.002 [-0.004, -0.000] overall, QB -0.008 [-0.016, -0.000], RB/WR/TE no difference, better in all
+  6 seasons; TD Brier (QB pass/rush, RB rush/rec, WR/TE rec) all no difference. sign-constrained (refit without
+  the term when wrong-signed) = no difference anywhere. Dropping the implied total instead = worse at every
+  position (ALL +0.029 [+0.020, +0.038], QB +0.105): Vegas carries the opponent information, the defense terms
+  fit noise. Passes the gate; ships only on the owner's go-ahead (then MODEL.md stamp + archive rebuild).
 
 ## 5. Tested and rejected (do not retry without new data/angle)
 | Idea | Result |

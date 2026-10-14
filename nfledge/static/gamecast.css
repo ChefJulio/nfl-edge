@@ -263,6 +263,7 @@ table.lg tr.lg-season td b { color: var(--ink); font-size: 15px; margin-right: 6
 table.lg tbody:first-child tr.lg-season td { padding-top: 4px; }
 .lg-grp { text-align: center !important; border-bottom: 2px solid var(--line); }
 .lg-opp { font-weight: 800; } .lg-fp { font-weight: 800; }
+.lg-opp[style*="--mc"] { color: var(--mc); }  /* our pregame matchup color (week files from 2026-10-14 on) */
 .mr-easy { color: #45c26b; } .mr-ok { color: #9fd9a8; } .mr-tough { color: #e0b04a; } .mr-hard { color: #f2786d; }
 .lg-rk { display: inline-block; min-width: 30px; text-align: center; border-radius: 5px; padding: 0 5px; font-weight: 700; }
 .rk-good { background: rgba(69,194,107,.24); color: #92e8ab; } .rk-mid { background: rgba(224,176,74,.18); color: #f1d391; } .rk-bad { background: rgba(242,120,109,.18); color: #ffb3aa; }
@@ -451,3 +452,7 @@ table.gc-rt { width: 100%; font-size: 13px; } .bx-th-in { display: inline-flex; 
 .pg-res > .tm-open { display: inline-flex; align-items: center; gap: 8px; opacity: .55; } .pg-res > .tm-open.won { opacity: 1; }
 .pg-res .muted { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .pg-call { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 10px; font-size: 12.5px; }
+
+/* matchup points (player card, gamecast players table): colored by the week file (green helps, red hurts) */
+.muv { font-weight: 800; font-variant-numeric: tabular-nums; cursor: help; }
+.pc-muv { font-size: 15px; } .pc-muv small { color: var(--muted); font-weight: 600; font-size: 12px; }

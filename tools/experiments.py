@@ -62,6 +62,8 @@ VARIANTS = {
   "baseline": variant(),
   # --- previously decided on 1-2 seasons; re-checked on 5 ---
   "no_implied_total": variant(experiments__implied_total=False),
+  "def_drop": variant(experiments__def_terms="drop"),
+  "def_sign": variant(experiments__def_terms="sign"),
   "air_yards": variant(experiments__air_yards=True),
   "snap_input": variant(experiments__snap_input=True),
   "share_hl_3": variant(player_model__share_half_life_weeks=3.0),

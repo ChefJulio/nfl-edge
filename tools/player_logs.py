@@ -53,6 +53,8 @@ def our_weeks(site: Path) -> tuple[dict, dict, set]:
       m = re.match(r"(\d+)", str(p.get("dvp") or ""))
       rank = int(m.group(1)) if m else None
       per_player[(s, w, pid)] = {"pj": round(float(p["proj"]), 1), "pjl": p["sc"]["pj"], "mr": rank}
+      if p.get("mu") is not None:  # week files from 2026-10-14 on: matchup points + emphasis instead of a rank
+        per_player[(s, w, pid)].update(mu=round(float(p["mu"]), 1), mh=int(p.get("mu_hi") or 0), mc=p.get("mu_c"))
       if rank and p.get("opp"):
         per_opp[(s, w, p["opp"], p["pos"])] = rank
   return per_player, per_opp, everyone
@@ -137,7 +139,11 @@ def main():
                 "x": [int(r.completions), int(r.attempts), int(r.carries), int(r.targets)], "rk": int(r.prk)}
         if sp is not None and not pd.isna(sp):
           game["sn"] = int(round(100 * float(sp)))
-        if mr:
+        if o.get("mu") is not None:
+          game["mu"], game["mh"] = o["mu"], o["mh"]
+          if o.get("mc"):
+            game["mc"] = o["mc"]
+        elif mr:
           game["mr"] = int(mr)
         if o.get("pj") is not None:
           game["pj"] = o["pj"]
@@ -161,7 +167,11 @@ def main():
         o = ours.get((data.current_season, wk, pid), {})
         e = {"w": wk, "o": tg[0], "h": tg[1]}
         mr = o.get("mr") or (opp_rank.get((data.current_season, wk, tg[0], pos)) if pos else None)
-        if mr:
+        if o.get("mu") is not None:
+          e["mu"], e["mh"] = o["mu"], o["mh"]
+          if o.get("mc"):
+            e["mc"] = o["mc"]
+        elif mr:
           e["mr"] = int(mr)
         if o.get("pj") is not None:
           e["pj"] = o["pj"]

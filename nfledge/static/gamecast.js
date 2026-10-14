@@ -270,7 +270,12 @@
     const lg = league(), need = (lg.teams || 10) * Math.max(1, lg[pos] || 1);
     const rkClass = r => r <= need ? 'rk-good' : r <= 2 * need ? 'rk-mid' : 'rk-bad';
     const projOf = g => g.pjl ? g.pj * (pts(g.pjl, w, pos) / Math.max(0.1, pts(g.pjl, built, pos))) : null;
-    const opp = g => `<td class="lg-opp tm-opp ${mrClass(g.mr)}"${g.mr ? ` title="Our pregame matchup rank: ${ord(g.mr)} of 32 vs ${esc(pos)}s (1st = toughest)"` : ''}><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>`;
+    // Opponent color: our pregame matchup, green / red when it was one of that week's bigger ones (mu, mh); week
+    // files from before 2026-10-14 carry the old 1st-32nd rank (mr) instead.
+    const oppTone = g => g.mu != null ? '' : mrClass(g.mr);
+    const oppTip = g => g.mu != null ? `Our pregame matchup: ${muSigned(g.mu)} pts vs an average opponent`
+      : g.mr ? `Our pregame matchup rank: ${ord(g.mr)} of 32 vs ${esc(pos)}s (1st = toughest)` : '';
+    const opp = g => `<td class="lg-opp tm-opp ${oppTone(g)}"${g.mc ? ` style="--mc:${esc(g.mc)}"` : ''}${oppTip(g) ? ` title="${oppTip(g)}"` : ''}><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>`;
     const head = `<tr class="lg-gh"><th colspan="6"></th>${groups.map(([n, cols]) => `<th colspan="${cols.length}" class="lg-grp">${n}</th>`).join('')}</tr>
       <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num">Proj</th><th class="num">Rank</th><th class="num">Snap</th>${stat.map(([n]) => `<th class="num">${n}</th>`).join('')}</tr>`;
     const blank = `<td class="num">–</td>`.repeat(stat.length);
@@ -296,7 +301,7 @@
       return `<tbody><tr class="lg-season"><td colspan="${6 + stat.length}"><b>${S.s}</b> ${esc(team)}${sum}</td></tr>${head}${trs}</tbody>`;
     }).join('');
     if (opts.last || opts.season) return `<div class="lg-scroll"><table class="lg">${body}</table></div>`;
-    const legend = `<div class="lg-leg"><span>Opponent color = our pregame matchup rank (2021 on):</span><span class="mr-easy">easy</span><span class="mr-ok">fair</span><span class="mr-tough">tough</span><span class="mr-hard">hardest</span>
+    const legend = `<div class="lg-leg"><span>Opponent color = our pregame matchup (2021 on): green helped, red hurt, deeper = bigger</span>
       <span>· Rank = his ${esc(pos)} finish that week (green = starter in your league size) · Proj = our projection then (green = beat it) · Tap a game to open its gamecast</span></div>`;
     return `${legend}<div class="lg-scroll"><table class="lg">${body}</table></div>`;
   };
@@ -488,6 +493,12 @@
   const wkWait = d => d === undefined ? '<div class="pc-box"><p class="pc-sub">Loading that week&hellip;</p></div>'
     : '<div class="pc-box"><p class="pc-sub">We have no page for that week.</p></div>';
 
+  // Matchup: points facing this opponent adds (+) or takes away (-) vs an average opponent, in its week-scaled
+  // color (mu_c: green helps, red hurts, deeper = bigger). Week files from before 2026-10-14 carry the old rank.
+  const muSigned = v => Math.abs(v) < 0.05 ? '0.0' : `${v > 0 ? '+' : ''}${f1(v)}`;
+  const muHtml = (p, opp) => p.mu != null
+    ? `<span class="muv" style="color:${esc(p.mu_c || '')}" title="Facing ${esc(opp || p.opp)} instead of an average opponent: ${muSigned(p.mu)} pts">${muSigned(p.mu)}</span>`
+    : p.dvp ? `<span style="color:${esc(p.dvp_color || '')}" title="Old-style matchup rank: their defense vs ${esc(p.pos)}s (1st = toughest)">${esc(p.dvp)}</span>` : '';
   const gameHref = (g, d = DATA) => `${siteRoot()}game.html?d=${encodeURIComponent(d.__rel || CFG.data)}&g=${encodeURIComponent(g.id)}`;
   // The player's weekly section for the selected week (projection, matchup, availability, season to date).
   const playerWeek = (pid, p, d, L) => {
@@ -527,8 +538,9 @@
       <div class="pc-box pc-mutile"${g ? ` data-href="${esc(gameHref(g, d))}" role="link" tabindex="0" title="Open the gamecast"` : ''}>
         <div class="pc-kr"><span class="pc-k">Matchup${g && g.kickoff && !isLive && !g.final ? ` · ${esc(g.kickoff)}` : ''}</span>${g ? `<span class="pc-go">${isLive ? '<span class="live-dot"></span>Live · ' : ''}Gamecast &rsaquo;</span>` : ''}</div>
         <div class="pc-mu">${opp ? logo(opp.logo_url, opp.logo_bg, 22, opp.team) : ''}<b>${esc(p.home)} ${opp ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(opp.team)}">${esc(opp.team)}</button>` : esc(p.opp)}</b>
-          <span style="color:${esc(p.dvp_color)}">${esc(p.dvp)} vs ${esc(p.pos)}s</span> <span class="muted">grade ${esc(p.grade)}</span></div>
-        <div class="pc-sub">This defense ${p.mpts >= 0 ? 'adds' : 'takes away'} ${f1(Math.abs(p.mpts))} pts vs an average one.</div></div>
+          ${p.mu != null ? `<span class="pc-muv">${muHtml(p, opp && opp.team)} <small>pts</small></span>` : muHtml(p)}</div>
+        <div class="pc-sub">${p.mu != null ? `Facing ${esc(p.opp)} instead of an average opponent ${Math.abs(p.mu) < 0.05 ? 'changes nothing' : `${p.mu > 0 ? 'adds' : 'takes away'} ${f1(Math.abs(p.mu))} pts`}: its Vegas total, the play volume and the defense ratings together.`
+            : `This defense ${p.mpts >= 0 ? 'adds' : 'takes away'} ${f1(Math.abs(p.mpts || 0))} pts vs an average one.`}</div></div>
       <div class="pc-box pc-season"><div class="pc-k">${esc(d.season)} season before week ${esc(d.week)}</div>${seasonHtml(p, d, L)}</div>`;
     return html;
   };
@@ -1147,7 +1159,7 @@
     const plTable = s => {
       const rows = players.filter(([, p]) => p.team === s.team).map(([pid, p]) => { const sc = scaled(p);
         return `<tr><td class="bx-who"><button type="button" class="bx-n" data-open-pid="${esc(pid)}">${esc(p.name)}</button> <span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>${p.status ? ` <span class="flag ${p.inactive >= 0.5 ? 'f-out' : 'f-q'}">${esc(p.status)}</span>` : ''}</td>
-          <td class="num"><b>${f1(sc.proj)}</b></td><td class="num muted">${f0(sc.q[0])}–${f0(sc.q[4])}</td><td class="num" style="color:${esc(p.dvp_color)}" title="Their defense vs ${esc(p.pos)}s (1st = toughest)">${esc(p.dvp)}</td></tr>`; }).join('');
+          <td class="num"><b>${f1(sc.proj)}</b></td><td class="num muted">${f0(sc.q[0])}–${f0(sc.q[4])}</td><td class="num">${muHtml(p, s === a ? h.team : a.team)}</td></tr>`; }).join('');
       return `<div class="bx-team" style="--tc:${esc(g.colors[s.team])}"><div class="bx-th tm-open" data-tm="${esc(s.team)}">${lg(s, 20)}<b>${esc(s.team)}</b></div>
         ${rows ? `<table class="bx"><thead><tr><th>Player</th><th class="num">Proj</th><th class="num">Range</th><th class="num">Matchup</th></tr></thead><tbody>${rows}</tbody></table>` : '<p class="muted">No fantasy-relevant players listed.</p>'}</div>`;
     };

@@ -214,7 +214,8 @@ td.projc .pv { font-size: 15px; font-weight: 700; }
 /* compact matchup: "@" against the logo, the rank right after the team code */
 td.mu { white-space: nowrap; }
 td.mu .opp { gap: 3px; } td.mu .opp .vs { width: auto; margin-right: 2px; } td.mu .opp b { width: auto; }
-td.mu .dvp { width: auto; margin-left: 6px; }
+/* matchup: points the opponent adds / takes away; green / red, deeper for bigger matchups (report.matchup_marks) */
+td.mu .muv { margin-left: 7px; font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums; cursor: help; }
 /* last 5 games: bars = points, green beat / red missed our projection, tick = the projection */
 td.l5 { width: 104px; min-width: 104px; padding-top: 4px; padding-bottom: 4px; }
 .l5s { display: block; overflow: visible; }
@@ -468,7 +469,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
     <b>#</b> is our rank; the number in parentheses is the FantasyPros expert consensus rank ("lw" = last week's, until Friday).
     <b>Last 5</b>: his last five games this season; green = beat our projection for that game, red = missed it, the white tick is the projection.
     <b>Range</b>: floor to ceiling; 8 times in 10 his score lands inside it.
-    <b>Matchup</b>: the opponent's defense vs the position, 1st = toughest to 32nd = easiest.
+    <b>Matchup</b>: points the opponent adds to (+) or takes from (-) the projection, vs an average opponent: its Vegas total, the team's play volume and the defense ratings together. Green helps, red hurts; the deeper the color, the bigger the matchup.
     <b>Volume</b>: projected dropbacks / carries / targets; an arrow means his recent usage share has moved up or down from his longer-run share.
     <b>Team pts</b>: points his team is expected to score (Vegas implied total). <b>TD</b>: chance of at least one touchdown (QBs: projected passing TDs).
     <b>vs ECR</b>: how many spots higher (+) or lower (-) we rank him than the expert consensus. Hover a player's name for our one-line take. A yellow edge marks a projection boosted by a teammate's absence.
@@ -523,7 +524,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
         <th class="num"><abbr title="Season fantasy points per game">FP/G</abbr></th>
         <th data-first="asc">Tier</th>
         <th class="nosort l5h"><abbr title="His last 5 games this season: bar = points scored, green = beat our projection for that game, red = missed it; the tick is our projection">Last 5</abbr></th>
-        <th data-first="desc"><abbr title="Opponent and its defense vs {{ pos }}s: 1st = toughest (red), 32nd = easiest (green). Opponent-adjusted, from the model.">Matchup</abbr></th>
+        <th data-first="desc"><abbr title="Opponent, and the points facing them adds (+) or takes away (-) vs an average opponent: Vegas total, play volume and defense ratings together. Green helps, red hurts; deeper = bigger.">Matchup</abbr></th>
         <th class="ctr"><abbr title="Chance he is inactive: injury (practice pattern + game status) or healthy scratch">Inactive</abbr></th>
         <th data-first="desc"><abbr title="Projected volume; arrow = his recent usage share has moved up or down from his longer-run share (a role change)">Volume</abbr></th>
         <th class="num" data-first="desc"><abbr title="Points his team is expected to score this game (Vegas implied total; our model's before lines post): more points, more scoring chances">Team pts</abbr></th>
@@ -547,7 +548,7 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
           <td class="num fpgc">{{ r.fpg|f1 }}</td>
           <td class="tierc" data-v="{{ r.rank }}"><span class="tier t-{{ r.slot }}" title="{{ {'start': 'Starter in a ' ~ tier_cfg.teams ~ '-team league', 'flex': 'Flex range in a ' ~ tier_cfg.teams ~ '-team league', 'bench': 'Bench depth in a ' ~ tier_cfg.teams ~ '-team league'}[r.slot] }}">{{ r.tier }}</span></td>
           <td class="l5" data-pjw="{{ r.pjw }}" data-byes="{{ r.byes|join(',') }}" data-pend="{{ r.pend|join(',') }}"></td>
-          <td class="mu" data-v="{{ r.dvp_rank }}" title="{{ r.opp }} defense vs {{ pos }}s: {{ r.dvp }} of 32 (1st = toughest, 32nd = easiest). This week: {{ r.mpts|sgn }} pts vs an average defense."><span class="opp tm-open" data-tm="{{ r.opp }}"><span class="vs">{{ r.home }}</span>{{ r.opp_logo|safe }}<b style="color:{{ r.dvp_color }}">{{ r.opp }}</b></span><span class="dvp" style="color:{{ r.dvp_color }}">{{ r.dvp }}</span></td>
+          <td class="mu" data-v="{{ '%.2f'|format(r.mu) }}"><span class="opp tm-open" data-tm="{{ r.opp }}"><span class="vs">{{ r.home }}</span>{{ r.opp_logo|safe }}<b>{{ r.opp }}</b></span><span class="muv" style="color:{{ r.mu_c }}" title="Facing {{ r.opp }} instead of an average opponent: {{ r.mu|sgn }} pts">{{ r.mu|sgn }}</span></td>
           <td class="ctr" data-v="{{ r.inactive }}" title="{{ r.inactive_why }}"><span class="{{ 'pill pill-bad' if r.inactive >= 0.5 else 'pill pill-warn' if r.inactive >= 0.15 else 'pill pill-soft' if r.inactive >= 0.05 else 'quiet' }}">{{ '<1%' if r.inactive < 0.005 else r.inactive|pct }}</span></td>
           <td class="volc" data-v="{{ r.vol.v }}" title="{{ r.vol.d }}">{{ r.vol.t }}{% if r.vol.a == 'up' %}<i class="va va-up">&#9650;</i>{% elif r.vol.a == 'down' %}<i class="va va-down">&#9660;</i>{% endif %}</td>
           <td class="num impc" data-v="{{ r.imp if r.imp is not none else '' }}">{{ r.imp|f1 if r.imp is not none else '' }}</td>

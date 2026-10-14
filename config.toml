@@ -134,6 +134,12 @@ snap_input = false      # snap share as a volume input (spec: flag only, so off 
 # better in 4 of 5 seasons; RB points MAE not worse. A flat goal-line term (gl_share) and team committee tendency
 # (rbbc) did not help and stay off.
 gl_struct = true
+# Opponent defense ratings in the efficiency regressions: "fitted" (old default), "drop", or "sign" (dropped when
+# wrong-signed). With the Vegas implied total and schedule-adjusted player rates in, they fit ~0 and several came
+# out wrong-signed. Walk-forward 2021-2026: drop = MAE -0.002 [-0.004, -0.000] (QB -0.008 [-0.016, -0.000], other
+# positions no difference, better all 6 seasons), every P(1+ TD) Brier no difference; "sign" no difference. The
+# opponent reaches projections through the Vegas total and team volume instead.
+def_terms = "drop"
 # Blend with FantasyPros expert consensus (free, scraped Fridays; only pre-kickoff ranks are used). Backtest:
 # helps RB/WR (and TE in 2025); hurts QB, where the model alone beats the experts.
 ecr_blend_positions = ["RB", "WR", "TE"]

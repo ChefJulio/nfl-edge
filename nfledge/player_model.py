@@ -39,6 +39,11 @@ def EFF_FEATURES(comp: str, opp: str, unit: str, exp: dict | None = None, group:
   Optional (config [experiments]): Vegas implied team total; average depth of target for receiving yards."""
   exp = exp or {}
   cols = [f"{comp}_per_{opp}", f"{opp}_adj_per_{opp}", f"def_{unit}", f"off_{unit}", "home"]
+  # Opponent defense terms (config experiments.def_terms; "drop" adopted 2026-10-14): with Vegas and schedule-adjusted
+  # player rates in the model they fit near zero and several came out wrong-signed; leaving them out tested slightly
+  # better. "sign" (drop only when wrong-signed) is handled in the fit.
+  if exp.get("def_terms") == "drop":
+    cols.remove(f"def_{unit}")
   # Wind as a fitted input to passing efficiency (instead of the fixed penalty): the data sets its size.
   wind_mode = exp.get("wind_mode", "fixed")
   if unit == "pass" and wind_mode in ("linear", "quadratic"):
@@ -573,9 +578,16 @@ class PlayerModel:
           continue
         for c in comps:
           d = d.assign(**{f"y_{c}": d[c] / d[opp]})
-          self.eff_models[(opp, gp, c)] = Linear.fit(
-            d, f"y_{c}", EFF_FEATURES(c, opp, unit, self.exp, gp), weight=opp,
-            name=f"{c}/{opp}/{gp}")
+          cols = EFF_FEATURES(c, opp, unit, self.exp, gp)
+          mod = Linear.fit(d, f"y_{c}", cols, weight=opp, name=f"{c}/{opp}/{gp}")
+          # EXPERIMENT def_terms = "sign": a worse defense (more EPA allowed) can only mean more production (fewer
+          # interceptions). A wrong-signed fit means the constrained optimum is the term at zero = refit without it.
+          dcol = f"def_{unit}"
+          if self.exp.get("def_terms") == "sign" and dcol in cols:
+            b = mod.coef[1 + cols.index(dcol)]
+            if (b > 0) if c == "interception" else (b < 0):
+              mod = Linear.fit(d, f"y_{c}", [x for x in cols if x != dcol], weight=opp, name=f"{c}/{opp}/{gp}")
+          self.eff_models[(opp, gp, c)] = mod
     return self
 
   def add_gl_frac(self, d: pd.DataFrame) -> pd.DataFrame:

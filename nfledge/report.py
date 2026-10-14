@@ -1,6 +1,7 @@
 """Build the weekly report context and render a single static, mobile-friendly HTML file."""
 from __future__ import annotations
 
+import copy
 import html
 import json
 import math
@@ -412,34 +413,119 @@ def usage_line(r, st) -> str:
 
 
 STARTERS = {"QB": 12, "RB": 24, "WR": 36, "TE": 12}
+def market_lines(schedules: pd.DataFrame, season: int, week: int, cfg: dict) -> dict:
+  """The betting market's view of every offense and defense: each team's Vegas implied total split as
+  implied = mu + offense[team] + defense[opponent] + home x h  (h = +1 home, -1 away, 0 neutral site),
+  least squares over the season's lines through this week, earlier weeks and last season weighted down on the
+  team ratings' own schedule (team_model.asof_weights). defense[o] > 0 = the market expects teams to score more
+  than usual against o. Schedule-adjusted: a defense isn't credited for the offenses it happened to draw."""
+  from .team_model import asof_weights
+  g = schedules[(schedules.game_type == "REG") & schedules.total_line.notna() & schedules.spread_line.notna()]
+  w = asof_weights(g.season, g.week, season, week + 1, cfg)  # + 1: this week's own lines count, fully
+  g, w = g[w > 0], w[w > 0]
+  teams = sorted(set(g.home_team) | set(g.away_team))
+  ix = {t: i for i, t in enumerate(teams)}
+  n, rows = len(teams), []
+  h = np.where(g.get("location", pd.Series("", index=g.index)).eq("Neutral"), 0, 1)
+  for side, (t, o, hh, y) in enumerate(((g.home_team, g.away_team, h, g.total_line / 2 + g.spread_line / 2),
+                                        (g.away_team, g.home_team, -h, g.total_line / 2 - g.spread_line / 2))):
+    rows.append(pd.DataFrame({"t": t.map(ix).to_numpy(), "o": o.map(ix).to_numpy(), "h": hh, "y": y.to_numpy(), "w": w}))
+  d = pd.concat(rows, ignore_index=True)
+  X = np.zeros((len(d), 2 + 2 * n))
+  X[:, 0], X[:, 1] = 1.0, d.h
+  X[np.arange(len(d)), 2 + d.t.to_numpy()] = 1.0
+  X[np.arange(len(d)), 2 + n + d.o.to_numpy()] = 1.0
+  # A whisper of ridge on the team terms only, so the one-hot blocks are identifiable (they each sum to the
+  # intercept); then centered, so 0 = a league-average offense / defense.
+  sw = np.sqrt(d.w.to_numpy())
+  pen = np.zeros(2 + 2 * n); pen[2:] = 1e-6 * d.w.sum()
+  beta = np.linalg.solve((X * sw[:, None]).T @ (X * sw[:, None]) + np.diag(pen), (X * sw[:, None]).T @ (d.y.to_numpy() * sw))
+  off, dfn = pd.Series(beta[2:2 + n], index=teams), pd.Series(beta[2 + n:], index=teams)
+  return {"mu": beta[0] + off.mean() + dfn.mean(), "home": beta[1], "off": off - off.mean(), "def": dfn - dfn.mean()}
 
 
-def defense_vs_position(eng, p: pd.DataFrame, season: int, week: int) -> dict:
-  """Opponent-adjusted 'defense vs position' ranks: each position's fantasy starters projected against every
-  defense (that defense's ratings in place of this week's opponent, home field neutral); defenses ranked by
-  points allowed. 1st = toughest, 32nd = most generous. Unlike raw fantasy-points-allowed ranks, this is not
-  skewed by which offenses a defense happened to face."""
+def matchup_effect(eng, p: pd.DataFrame, season: int, week: int) -> pd.Series:
+  """Each player's matchup in fantasy points: our model projection as built minus the same projection against a
+  league-average opponent; his role, his team, home field and weather unchanged. Positive = the opponent helps.
+
+  The opponent reaches a projection three ways, all taken out here:
+    - Vegas implied team total (the biggest channel): minus the market's view of this defense
+      (market_lines: defense[opp]). Our own defense ratings are milder than the market's, and the projection
+      runs on the Vegas total, so the market is the one to ask.
+    - Team volume (dropbacks, rushes): the game model's Vegas volume formulas re-run with the lines this team
+      would get against an average opponent (total and spread from market_lines), the difference applied.
+    - Defense ratings in the efficiency models: league average (0).
+  Index = p's index."""
+  games = eng.games(season, week)
+  if games.empty or "implied_pts" not in p:
+    return pd.Series(0.0, index=p.index)
+  m = market_lines(eng.data.schedules, season, week, eng.cfg)
+  off, dfn, H, mu = m["off"], m["def"], m["home"], m["mu"]
+  from .team_model import matchup_frame, team_volume_features
   r = eng.game_ratings(season, week)
-  out = {}
-  for pos, n in STARTERS.items():
-    base = p[(p.pos == pos) & (p.avail >= 0.5)].sort_values("proj", ascending=False).head(n)
-    if base.empty:
-      continue
-    allowed = {}
-    for d in r.teams:
-      x = base.assign(def_pass=r.dfn.at[d, "pass"], def_rush=r.dfn.at[d, "rush"], home=0)
-      allowed[d] = float(eng.pm.stats_from_volume(x).proj.mean())
-    s = pd.Series(allowed)
-    out[pos] = s.rank(ascending=True, method="min").astype(int)  # fewest points allowed = 1st (toughest)
-  return out
+  vf = team_volume_features(eng.team_ledger, season, week, eng.cfg)
+  hh = np.where(games.get("location", pd.Series("", index=games.index)).eq("Neutral"), 0, 1)
+  # Volume: the game model's Vegas-mode formulas (plays, pass rate) on the market's lines, as scheduled vs against
+  # an average opponent (whose pace is the league's too). The formulas are linear, so only the change matters.
+  frame = eng.gm._features(matchup_frame(games), r, vf).set_index("team")
+  vols = {}
+  for opp_avg in (False, True):
+    lines = []
+    for team, opp, side in ((games.home_team, games.away_team, 1), (games.away_team, games.home_team, -1)):
+      ours = mu + team.map(off).fillna(0.0) + (0.0 if opp_avg else opp.map(dfn).fillna(0.0)) + H * side * hh
+      theirs = mu + (0.0 if opp_avg else opp.map(off).fillna(0.0)) + team.map(dfn).fillna(0.0) - H * side * hh
+      lines.append(pd.DataFrame({"total_line": (ours + theirs).to_numpy(), "spread_team": (ours - theirs).to_numpy()},
+                                index=team.to_numpy()))
+    ln = pd.concat(lines)
+    f = frame.copy()
+    f["total_line"], f["spread_team"] = ln.total_line, ln.spread_team
+    if opp_avg:
+      f["opp_pace_allowed"], f["opp_sec_pp"] = vf.pace_allowed.mean(), vf.sec_pp.mean()
+    plays = eng.gm.plays_vegas.predict(f)
+    db = plays * eng.gm.pass_rate.predict(f)
+    vols[opp_avg] = pd.DataFrame({"db": db, "rush": plays - db}, index=f.index)
+  dv = vols[False] - vols[True]
+  q = p.copy()
+  dpts = q.opp.map(dfn).fillna(0.0)
+  ddb, drush = q.team.map(dv.db).fillna(0.0), q.team.map(dv.rush).fillna(0.0)
+  db_scale = ((q.team_db - ddb) / q.team_db.where(q.team_db > 0)).fillna(1.0).clip(0, 3)
+  rush_scale = ((q.team_rush - drush) / q.team_rush.where(q.team_rush > 0)).fillna(1.0).clip(0, 3)
+  wind = q.set_index("game_id").wind[lambda s: ~s.index.duplicated()] if "wind" in q else None
+  base = q.drop(columns=["gl_frac", "scr_frac", "implied_x_designed"], errors="ignore")
+  neutral = base.assign(implied_pts=base.implied_pts - dpts, def_pass=0.0, def_rush=0.0,
+                        team_db=base.team_db - ddb, team_rush=base.team_rush - drush,
+                        db=base.db * db_scale, tgt=base.tgt * db_scale, carries=base.carries * rush_scale)
+  neutral["rush"] = neutral.carries + (base.rush - base.carries) * db_scale  # QB scrambles follow dropbacks
+  as_built = eng.pm.stats_from_volume(base, wind).proj
+  return (as_built - eng.pm.stats_from_volume(neutral, wind).proj).rename("matchup_pts")
 
 
-def rank_color(rank: int, n: int = 32) -> str:
-  """1st (toughest) red -> mid neutral -> 32nd (easiest) green."""
-  t = (rank - 1) / max(n - 1, 1)
-  red, mid, green = (255, 131, 120), (214, 218, 224), (84, 209, 122)
-  a, b, u = (red, mid, t / 0.5) if t < 0.5 else (mid, green, (t - 0.5) / 0.5)
-  return "#" + "".join(f"{round(x + (y - x) * u):02x}" for x, y in zip(a, b))
+MU_NEUTRAL, MU_GOOD, MU_BAD = (232, 234, 238), (84, 209, 122), (255, 131, 120)
+MU_MIN_TINT = 0.22  # the faintest tint any nonzero matchup gets, so its direction always reads
+
+
+def matchup_marks(eng, p: pd.DataFrame, season: int, week: int) -> tuple[pd.Series, pd.Series, pd.Series]:
+  """(matchup points, tag -1 / 0 / +1, text color) per row.
+  Size is measured as how far the matchup moves the player's median within his OWN outcome range (percentile
+  points; sd from his 10-90 range), against the week's fantasy-relevant players (STARTERS per position, pooled, so
+  a position whose matchups barely matter, like WR, stays pale):
+    - color: white at 0.0, otherwise green (helps) / red (hurts), from a faint tint up to full color at the 90th
+      percentile of the week's sizes;
+    - tag ("Soft / Tough matchup" in tags and takeaway): the top quarter of the week's sizes."""
+  mu = matchup_effect(eng, p, season, week).reindex(p.index).fillna(0.0)
+  sd = ((p.p90 - p.p10) / 2.563).clip(lower=0.5)
+  shift = (mu / sd).map(lambda z: 50.0 * math.erf(z / math.sqrt(2)))  # percentile points his median moves
+  pool = pd.concat([p[(p.pos == pos) & (p.avail >= 0.5)].proj.nlargest(n) for pos, n in STARTERS.items()]).index
+  size = shift.loc[pool].abs() if len(pool) else pd.Series([1.0])
+  tag_at, full_at = max(float(size.quantile(0.75)), 1e-9), max(float(size.quantile(0.90)), 1e-9)
+  hi = np.sign(mu).where(shift.abs() >= tag_at, 0).astype(int)
+  def color(m, sh):
+    if abs(m) < 0.05:  # shows as 0.0
+      return "#%02x%02x%02x" % MU_NEUTRAL
+    t = MU_MIN_TINT + (1 - MU_MIN_TINT) * min(1.0, abs(sh) / full_at)
+    end = MU_GOOD if m > 0 else MU_BAD
+    return "#" + "".join(f"{round(a + (b - a) * t):02x}" for a, b in zip(MU_NEUTRAL, end))
+  return mu, hi, pd.Series([color(m, sh) for m, sh in zip(mu, shift)], index=p.index)
 
 
 def ordinal(n: int) -> str:
@@ -512,7 +598,7 @@ def week_data(ctx: dict) -> str:
         "tier": r["tier"], "slot": r["slot"], "ecr": None if pd.isna(r["ecr"]) else r["ecr"],
         "status": r["status"] or "", "inactive": r["inactive"], "inactive_why": r["inactive_why"],
         "boost": r["boost"], "boost_from": r["boost_from"], "low_sample": r["low_sample"], "conf": r["conf"],
-        "dvp": r["dvp"], "dvp_color": r["dvp_color"], "grade": r["grade"], "mpts": r["mpts"],
+        "mu": r["mu"], "mu_hi": r["mu_hi"], "mu_c": r["mu_c"],
         "takeaway": r["takeaway"], "fpg": None if pd.isna(r["fpg"]) else r["fpg"],
         "last3": None if pd.isna(r["last3"]) else r["last3"], "act": r["act"], "sc": json.loads(r["sc"]),
         "ext": r["ext"], "sched": r["sched"] or "",
@@ -562,11 +648,7 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
   p = p[(p.proj >= 2.0) | p.index.isin(qb1)].copy()
   p["pos_rank"] = p.groupby("pos").proj.rank(ascending=False, method="first").astype(int)
   p["tier"], p["slot"] = roster_tiers(p, cfg["tiers"])
-  # Matchup = the opponent's defense-vs-position rank (1st toughest .. 32nd easiest); grade and meter follow it,
-  # so the meter, the rank and the takeaway always tell the same story.
-  dvp = defense_vs_position(eng, p, season, week)
-  p["dvp_rank"] = [int(dvp[pos][o]) if pos in dvp and o in dvp[pos] else 16 for pos, o in zip(p.pos, p.opp)]
-  p["grade"] = pd.cut(p.dvp_rank, [0, 6, 12, 19, 26, 32], labels=["F", "D", "C", "B", "A"]).astype(str)
+  p["mu"], p["mu_hi"], p["mu_c"] = matchup_marks(eng, p, season, week)
   p["takeaway"] = [takeaway(r) for _, r in p.iterrows()]
   p["tags"] = [takeaway_tags(r) for _, r in p.iterrows()]
   stats = season_stats(eng, season, week)
@@ -599,13 +681,11 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
         "ecr_flex": r.ecr_flex if pd.notna(r.ecr_flex) else prev_flex.get(r.gsis_id, np.nan),
         "ecr_flex_stale": pd.isna(r.ecr_flex) and r.gsis_id in prev_flex.index, "name": r.full_name, "team_chip": ts.chip(r.team),
         "opp_chip": ts.chip(r.opp), "opp": r.opp, "opp_logo": ts.logo_img(r.opp, 18),
-        "dvp": ordinal(int(dvp[r.pos][r.opp])) if r.pos in dvp and r.opp in dvp[r.pos] else "",
-        "dvp_rank": int(r.dvp_rank),
-        "dvp_color": rank_color(int(dvp[r.pos][r.opp])) if r.pos in dvp and r.opp in dvp[r.pos] else "",
+        "mu": round(float(r.mu), 2), "mu_hi": int(r.mu_hi), "mu_c": r.mu_c,
         "home": "vs" if r.home >= 0 else "@", "proj": r.proj,
         "p10": r.p10, "p25": r.p25, "p50": r.p50, "p75": r.p75, "p90": r.p90,
         "range": range_svg(r.p10, r.p25, r.p75, r.p90, r.proj, axis),
-        "grade": r.grade, "mpts": r.matchup_pts, "tier": r.tier, "slot": r.slot, "takeaway": r.takeaway, "tags": r.tags, "conf": r.confidence,
+        "tier": r.tier, "slot": r.slot, "takeaway": r.takeaway, "tags": r.tags, "conf": r.confidence,
         "vol": volume_cell(r), "td": td_cell(r), "byes": byes.get(r.team, []), "pend": pend.get(r.team, []),
         "imp": float(r.implied_pts) if pd.notna(getattr(r, "implied_pts", np.nan)) else None,
         "status": r.status, "avail": r.avail, "inactive": 1 - r.avail,
@@ -675,10 +755,8 @@ def takeaway(r) -> str:
     bits.append(f"+{r.injury_boost:.1f} pts from vacated volume ({r.boost_from})")
   if r.if_sits_gain >= 1.0:
     bits.append(f"+{r.if_sits_gain:.1f} more if {r.if_sits_name} sits")
-  if r.grade == "A":
-    bits.append(f"soft matchup ({r.opp} {ordinal(r.dvp_rank)} vs {r.pos}s)")
-  elif r.grade == "F":
-    bits.append(f"tough matchup ({r.opp} {ordinal(r.dvp_rank)} vs {r.pos}s)")
+  if r.mu_hi:
+    bits.append(f"{'soft' if r.mu > 0 else 'tough'} matchup ({r.mu:+.1f} pts vs {r.opp})")
   if r.wind_penalty >= 0.05:
     bits.append(f"wind trims passing {r.wind_penalty:.0%}")
   if r.low_sample:
@@ -711,10 +789,9 @@ def takeaway_tags(r) -> list[dict]:
   if r.if_sits_gain >= 1.0:
     tags.append({"t": f"+{r.if_sits_gain:.1f} if {last(r.if_sits_name)} sits", "k": "good",
                  "d": f"+{r.if_sits_gain:.1f} more if {r.if_sits_name} sits"})
-  if r.grade == "A":
-    tags.append({"t": "Soft matchup", "k": "good", "d": f"{r.opp} {ordinal(r.dvp_rank)} of 32 vs {r.pos}s (32nd = easiest)"})
-  elif r.grade == "F":
-    tags.append({"t": "Tough matchup", "k": "bad", "d": f"{r.opp} {ordinal(r.dvp_rank)} of 32 vs {r.pos}s (1st = toughest)"})
+  if r.mu_hi:
+    tags.append({"t": f"{'Soft' if r.mu > 0 else 'Tough'} matchup", "k": "good" if r.mu > 0 else "bad",
+                 "d": f"{r.mu:+.1f} pts from facing {r.opp} instead of an average opponent"})
   if r.wind_penalty >= 0.05:
     tags.append({"t": f"Wind -{r.wind_penalty:.0%} passing", "k": "warn", "d": f"Forecast wind trims passing by {r.wind_penalty:.0%}"})
   if r.low_sample:
@@ -1357,7 +1434,7 @@ def render(ctx: dict, out_path: Path) -> Path:
   env.filters["f1"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.1f}"
   env.filters["f2"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.2f}"
   env.filters["f3"] = lambda x: "" if x is None or pd.isna(x) else f"{x:.3f}"
-  env.filters["sgn"] = lambda x: "" if x is None or pd.isna(x) else f"{x:+.1f}"
+  env.filters["sgn"] = lambda x: "" if x is None or pd.isna(x) else "0.0" if abs(x) < 0.05 else f"{x:+.1f}"
   env.filters["dbar"] = lambda v, scale=10.0, width=120: diverging_bar(v, scale, width)
   env.filters["abs"] = lambda v: abs(v) if v is not None and not pd.isna(v) else 0
   env.filters["ord"] = lambda n: "" if not n else f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
