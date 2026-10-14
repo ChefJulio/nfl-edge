@@ -1,0 +1,1082 @@
+{
+"1975": {
+"PIT": {
+"conf": "AFC",
+"seed": 1
+},
+"OAK": {
+"conf": "AFC",
+"seed": 2
+},
+"IND": {
+"conf": "AFC",
+"seed": 3
+},
+"CIN": {
+"conf": "AFC",
+"seed": 4
+},
+"MIN": {
+"conf": "NFC",
+"seed": 1
+},
+"LAR": {
+"conf": "NFC",
+"seed": 2
+},
+"ARI": {
+"conf": "NFC",
+"seed": 3
+},
+"DAL": {
+"conf": "NFC",
+"seed": 4
+}
+},
+"1976": {
+"OAK": {
+"conf": "AFC",
+"seed": 1
+},
+"IND": {
+"conf": "AFC",
+"seed": 2
+},
+"PIT": {
+"conf": "AFC",
+"seed": 3
+},
+"NE": {
+"conf": "AFC",
+"seed": 4
+},
+"MIN": {
+"conf": "NFC",
+"seed": 1
+},
+"DAL": {
+"conf": "NFC",
+"seed": 2
+},
+"LAR": {
+"conf": "NFC",
+"seed": 3
+},
+"WSH": {
+"conf": "NFC",
+"seed": 4
+}
+},
+"1977": {
+"DEN": {
+"conf": "AFC",
+"seed": 1
+},
+"IND": {
+"conf": "AFC",
+"seed": 2
+},
+"PIT": {
+"conf": "AFC",
+"seed": 3
+},
+"OAK": {
+"conf": "AFC",
+"seed": 4
+},
+"DAL": {
+"conf": "NFC",
+"seed": 1
+},
+"LAR": {
+"conf": "NFC",
+"seed": 2
+},
+"MIN": {
+"conf": "NFC",
+"seed": 3
+},
+"CHI": {
+"conf": "NFC",
+"seed": 4
+}
+},
+"1978": {
+"PIT": {
+"conf": "AFC",
+"seed": 1
+},
+"NE": {
+"conf": "AFC",
+"seed": 2
+},
+"DEN": {
+"conf": "AFC",
+"seed": 3
+},
+"MIA": {
+"conf": "AFC",
+"seed": 4
+},
+"TEN": {
+"conf": "AFC",
+"seed": 5
+},
+"LAR": {
+"conf": "NFC",
+"seed": 1
+},
+"DAL": {
+"conf": "NFC",
+"seed": 2
+},
+"MIN": {
+"conf": "NFC",
+"seed": 3
+},
+"ATL": {
+"conf": "NFC",
+"seed": 4
+},
+"PHI": {
+"conf": "NFC",
+"seed": 5
+}
+},
+"1979": {
+"LAC": {
+"conf": "AFC",
+"seed": 1
+},
+"PIT": {
+"conf": "AFC",
+"seed": 2
+},
+"MIA": {
+"conf": "AFC",
+"seed": 3
+},
+"TEN": {
+"conf": "AFC",
+"seed": 4
+},
+"DEN": {
+"conf": "AFC",
+"seed": 5
+},
+"DAL": {
+"conf": "NFC",
+"seed": 1
+},
+"TB": {
+"conf": "NFC",
+"seed": 2
+},
+"LAR": {
+"conf": "NFC",
+"seed": 3
+},
+"PHI": {
+"conf": "NFC",
+"seed": 4
+},
+"CHI": {
+"conf": "NFC",
+"seed": 5
+}
+},
+"1980": {
+"LAC": {
+"conf": "AFC",
+"seed": 1
+},
+"CLE": {
+"conf": "AFC",
+"seed": 2
+},
+"BUF": {
+"conf": "AFC",
+"seed": 3
+},
+"OAK": {
+"conf": "AFC",
+"seed": 4
+},
+"TEN": {
+"conf": "AFC",
+"seed": 5
+},
+"ATL": {
+"conf": "NFC",
+"seed": 1
+},
+"PHI": {
+"conf": "NFC",
+"seed": 2
+},
+"MIN": {
+"conf": "NFC",
+"seed": 3
+},
+"DAL": {
+"conf": "NFC",
+"seed": 4
+},
+"LAR": {
+"conf": "NFC",
+"seed": 5
+}
+},
+"1981": {
+"CIN": {
+"conf": "AFC",
+"seed": 1
+},
+"MIA": {
+"conf": "AFC",
+"seed": 2
+},
+"LAC": {
+"conf": "AFC",
+"seed": 3
+},
+"NYJ": {
+"conf": "AFC",
+"seed": 4
+},
+"BUF": {
+"conf": "AFC",
+"seed": 5
+},
+"SF": {
+"conf": "NFC",
+"seed": 1
+},
+"DAL": {
+"conf": "NFC",
+"seed": 2
+},
+"TB": {
+"conf": "NFC",
+"seed": 3
+},
+"PHI": {
+"conf": "NFC",
+"seed": 4
+},
+"NYG": {
+"conf": "NFC",
+"seed": 5
+}
+},
+"1982": {
+"OAK": {
+"conf": "AFC",
+"seed": 1
+},
+"MIA": {
+"conf": "AFC",
+"seed": 2
+},
+"CIN": {
+"conf": "AFC",
+"seed": 3
+},
+"PIT": {
+"conf": "AFC",
+"seed": 4
+},
+"LAC": {
+"conf": "AFC",
+"seed": 5
+},
+"NYJ": {
+"conf": "AFC",
+"seed": 6
+},
+"NE": {
+"conf": "AFC",
+"seed": 7
+},
+"CLE": {
+"conf": "AFC",
+"seed": 8
+},
+"WSH": {
+"conf": "NFC",
+"seed": 1
+},
+"DAL": {
+"conf": "NFC",
+"seed": 2
+},
+"GB": {
+"conf": "NFC",
+"seed": 3
+},
+"MIN": {
+"conf": "NFC",
+"seed": 4
+},
+"ATL": {
+"conf": "NFC",
+"seed": 5
+},
+"ARI": {
+"conf": "NFC",
+"seed": 6
+},
+"TB": {
+"conf": "NFC",
+"seed": 7
+},
+"DET": {
+"conf": "NFC",
+"seed": 8
+}
+},
+"1983": {
+"OAK": {
+"conf": "AFC",
+"seed": 1
+},
+"MIA": {
+"conf": "AFC",
+"seed": 2
+},
+"PIT": {
+"conf": "AFC",
+"seed": 3
+},
+"SEA": {
+"conf": "AFC",
+"seed": 4
+},
+"DEN": {
+"conf": "AFC",
+"seed": 5
+},
+"WSH": {
+"conf": "NFC",
+"seed": 1
+},
+"SF": {
+"conf": "NFC",
+"seed": 2
+},
+"DET": {
+"conf": "NFC",
+"seed": 3
+},
+"DAL": {
+"conf": "NFC",
+"seed": 4
+},
+"LAR": {
+"conf": "NFC",
+"seed": 5
+}
+},
+"1984": {
+"MIA": {
+"conf": "AFC",
+"seed": 1
+},
+"DEN": {
+"conf": "AFC",
+"seed": 2
+},
+"PIT": {
+"conf": "AFC",
+"seed": 3
+},
+"SEA": {
+"conf": "AFC",
+"seed": 4
+},
+"OAK": {
+"conf": "AFC",
+"seed": 5
+},
+"SF": {
+"conf": "NFC",
+"seed": 1
+},
+"WSH": {
+"conf": "NFC",
+"seed": 2
+},
+"CHI": {
+"conf": "NFC",
+"seed": 3
+},
+"LAR": {
+"conf": "NFC",
+"seed": 4
+},
+"NYG": {
+"conf": "NFC",
+"seed": 5
+}
+},
+"1985": {
+"OAK": {
+"conf": "AFC",
+"seed": 1
+},
+"MIA": {
+"conf": "AFC",
+"seed": 2
+},
+"CLE": {
+"conf": "AFC",
+"seed": 3
+},
+"NYJ": {
+"conf": "AFC",
+"seed": 4
+},
+"NE": {
+"conf": "AFC",
+"seed": 5
+},
+"CHI": {
+"conf": "NFC",
+"seed": 1
+},
+"LAR": {
+"conf": "NFC",
+"seed": 2
+},
+"DAL": {
+"conf": "NFC",
+"seed": 3
+},
+"NYG": {
+"conf": "NFC",
+"seed": 4
+},
+"SF": {
+"conf": "NFC",
+"seed": 5
+}
+},
+"1986": {
+"CLE": {
+"conf": "AFC",
+"seed": 1
+},
+"DEN": {
+"conf": "AFC",
+"seed": 2
+},
+"NE": {
+"conf": "AFC",
+"seed": 3
+},
+"NYJ": {
+"conf": "AFC",
+"seed": 4
+},
+"KC": {
+"conf": "AFC",
+"seed": 5
+},
+"NYG": {
+"conf": "NFC",
+"seed": 1
+},
+"CHI": {
+"conf": "NFC",
+"seed": 2
+},
+"SF": {
+"conf": "NFC",
+"seed": 3
+},
+"WSH": {
+"conf": "NFC",
+"seed": 4
+},
+"LAR": {
+"conf": "NFC",
+"seed": 5
+}
+},
+"1987": {
+"DEN": {
+"conf": "AFC",
+"seed": 1
+},
+"CLE": {
+"conf": "AFC",
+"seed": 2
+},
+"IND": {
+"conf": "AFC",
+"seed": 3
+},
+"TEN": {
+"conf": "AFC",
+"seed": 4
+},
+"SEA": {
+"conf": "AFC",
+"seed": 5
+},
+"SF": {
+"conf": "NFC",
+"seed": 1
+},
+"CHI": {
+"conf": "NFC",
+"seed": 2
+},
+"WSH": {
+"conf": "NFC",
+"seed": 3
+},
+"NO": {
+"conf": "NFC",
+"seed": 4
+},
+"MIN": {
+"conf": "NFC",
+"seed": 5
+}
+},
+"1988": {
+"CIN": {
+"conf": "AFC",
+"seed": 1
+},
+"BUF": {
+"conf": "AFC",
+"seed": 2
+},
+"SEA": {
+"conf": "AFC",
+"seed": 3
+},
+"CLE": {
+"conf": "AFC",
+"seed": 4
+},
+"TEN": {
+"conf": "AFC",
+"seed": 5
+},
+"CHI": {
+"conf": "NFC",
+"seed": 1
+},
+"SF": {
+"conf": "NFC",
+"seed": 2
+},
+"PHI": {
+"conf": "NFC",
+"seed": 3
+},
+"MIN": {
+"conf": "NFC",
+"seed": 4
+},
+"LAR": {
+"conf": "NFC",
+"seed": 5
+}
+},
+"1989": {
+"DEN": {
+"conf": "AFC",
+"seed": 1
+},
+"CLE": {
+"conf": "AFC",
+"seed": 2
+},
+"BUF": {
+"conf": "AFC",
+"seed": 3
+},
+"TEN": {
+"conf": "AFC",
+"seed": 4
+},
+"PIT": {
+"conf": "AFC",
+"seed": 5
+},
+"SF": {
+"conf": "NFC",
+"seed": 1
+},
+"NYG": {
+"conf": "NFC",
+"seed": 2
+},
+"MIN": {
+"conf": "NFC",
+"seed": 3
+},
+"PHI": {
+"conf": "NFC",
+"seed": 4
+},
+"LAR": {
+"conf": "NFC",
+"seed": 5
+}
+},
+"1990": {
+"BUF": {
+"conf": "AFC",
+"seed": 1
+},
+"OAK": {
+"conf": "AFC",
+"seed": 2
+},
+"CIN": {
+"conf": "AFC",
+"seed": 3
+},
+"MIA": {
+"conf": "AFC",
+"seed": 4
+},
+"KC": {
+"conf": "AFC",
+"seed": 5
+},
+"TEN": {
+"conf": "AFC",
+"seed": 6
+},
+"SF": {
+"conf": "NFC",
+"seed": 1
+},
+"NYG": {
+"conf": "NFC",
+"seed": 2
+},
+"CHI": {
+"conf": "NFC",
+"seed": 3
+},
+"PHI": {
+"conf": "NFC",
+"seed": 4
+},
+"WSH": {
+"conf": "NFC",
+"seed": 5
+},
+"NO": {
+"conf": "NFC",
+"seed": 6
+}
+},
+"1991": {
+"BUF": {
+"conf": "AFC",
+"seed": 1
+},
+"DEN": {
+"conf": "AFC",
+"seed": 2
+},
+"TEN": {
+"conf": "AFC",
+"seed": 3
+},
+"KC": {
+"conf": "AFC",
+"seed": 4
+},
+"OAK": {
+"conf": "AFC",
+"seed": 5
+},
+"NYJ": {
+"conf": "AFC",
+"seed": 6
+},
+"WSH": {
+"conf": "NFC",
+"seed": 1
+},
+"DET": {
+"conf": "NFC",
+"seed": 2
+},
+"NO": {
+"conf": "NFC",
+"seed": 3
+},
+"CHI": {
+"conf": "NFC",
+"seed": 4
+},
+"DAL": {
+"conf": "NFC",
+"seed": 5
+},
+"ATL": {
+"conf": "NFC",
+"seed": 6
+}
+},
+"1992": {
+"PIT": {
+"conf": "AFC",
+"seed": 1
+},
+"MIA": {
+"conf": "AFC",
+"seed": 2
+},
+"LAC": {
+"conf": "AFC",
+"seed": 3
+},
+"BUF": {
+"conf": "AFC",
+"seed": 4
+},
+"TEN": {
+"conf": "AFC",
+"seed": 5
+},
+"KC": {
+"conf": "AFC",
+"seed": 6
+},
+"SF": {
+"conf": "NFC",
+"seed": 1
+},
+"DAL": {
+"conf": "NFC",
+"seed": 2
+},
+"MIN": {
+"conf": "NFC",
+"seed": 3
+},
+"NO": {
+"conf": "NFC",
+"seed": 4
+},
+"PHI": {
+"conf": "NFC",
+"seed": 5
+},
+"WSH": {
+"conf": "NFC",
+"seed": 6
+}
+},
+"1993": {
+"BUF": {
+"conf": "AFC",
+"seed": 1
+},
+"TEN": {
+"conf": "AFC",
+"seed": 2
+},
+"KC": {
+"conf": "AFC",
+"seed": 3
+},
+"OAK": {
+"conf": "AFC",
+"seed": 4
+},
+"DEN": {
+"conf": "AFC",
+"seed": 5
+},
+"PIT": {
+"conf": "AFC",
+"seed": 6
+},
+"DAL": {
+"conf": "NFC",
+"seed": 1
+},
+"SF": {
+"conf": "NFC",
+"seed": 2
+},
+"DET": {
+"conf": "NFC",
+"seed": 3
+},
+"NYG": {
+"conf": "NFC",
+"seed": 4
+},
+"MIN": {
+"conf": "NFC",
+"seed": 5
+},
+"GB": {
+"conf": "NFC",
+"seed": 6
+}
+},
+"1994": {
+"PIT": {
+"conf": "AFC",
+"seed": 1
+},
+"LAC": {
+"conf": "AFC",
+"seed": 2
+},
+"MIA": {
+"conf": "AFC",
+"seed": 3
+},
+"CLE": {
+"conf": "AFC",
+"seed": 4
+},
+"NE": {
+"conf": "AFC",
+"seed": 5
+},
+"KC": {
+"conf": "AFC",
+"seed": 6
+},
+"SF": {
+"conf": "NFC",
+"seed": 1
+},
+"DAL": {
+"conf": "NFC",
+"seed": 2
+},
+"MIN": {
+"conf": "NFC",
+"seed": 3
+},
+"GB": {
+"conf": "NFC",
+"seed": 4
+},
+"DET": {
+"conf": "NFC",
+"seed": 5
+},
+"CHI": {
+"conf": "NFC",
+"seed": 6
+}
+},
+"1995": {
+"KC": {
+"conf": "AFC",
+"seed": 1
+},
+"PIT": {
+"conf": "AFC",
+"seed": 2
+},
+"BUF": {
+"conf": "AFC",
+"seed": 3
+},
+"LAC": {
+"conf": "AFC",
+"seed": 4
+},
+"IND": {
+"conf": "AFC",
+"seed": 5
+},
+"MIA": {
+"conf": "AFC",
+"seed": 6
+},
+"DAL": {
+"conf": "NFC",
+"seed": 1
+},
+"SF": {
+"conf": "NFC",
+"seed": 2
+},
+"GB": {
+"conf": "NFC",
+"seed": 3
+},
+"PHI": {
+"conf": "NFC",
+"seed": 4
+},
+"DET": {
+"conf": "NFC",
+"seed": 5
+},
+"ATL": {
+"conf": "NFC",
+"seed": 6
+}
+},
+"1996": {
+"DEN": {
+"conf": "AFC",
+"seed": 1
+},
+"NE": {
+"conf": "AFC",
+"seed": 2
+},
+"PIT": {
+"conf": "AFC",
+"seed": 3
+},
+"BUF": {
+"conf": "AFC",
+"seed": 4
+},
+"JAX": {
+"conf": "AFC",
+"seed": 5
+},
+"IND": {
+"conf": "AFC",
+"seed": 6
+},
+"GB": {
+"conf": "NFC",
+"seed": 1
+},
+"CAR": {
+"conf": "NFC",
+"seed": 2
+},
+"DAL": {
+"conf": "NFC",
+"seed": 3
+},
+"SF": {
+"conf": "NFC",
+"seed": 4
+},
+"PHI": {
+"conf": "NFC",
+"seed": 5
+},
+"MIN": {
+"conf": "NFC",
+"seed": 6
+}
+},
+"1997": {
+"KC": {
+"conf": "AFC",
+"seed": 1
+},
+"PIT": {
+"conf": "AFC",
+"seed": 2
+},
+"NE": {
+"conf": "AFC",
+"seed": 3
+},
+"DEN": {
+"conf": "AFC",
+"seed": 4
+},
+"JAX": {
+"conf": "AFC",
+"seed": 5
+},
+"MIA": {
+"conf": "AFC",
+"seed": 6
+},
+"SF": {
+"conf": "NFC",
+"seed": 1
+},
+"GB": {
+"conf": "NFC",
+"seed": 2
+},
+"NYG": {
+"conf": "NFC",
+"seed": 3
+},
+"TB": {
+"conf": "NFC",
+"seed": 4
+},
+"DET": {
+"conf": "NFC",
+"seed": 5
+},
+"MIN": {
+"conf": "NFC",
+"seed": 6
+}
+},
+"1998": {
+"DEN": {
+"conf": "AFC",
+"seed": 1
+},
+"NYJ": {
+"conf": "AFC",
+"seed": 2
+},
+"JAX": {
+"conf": "AFC",
+"seed": 3
+},
+"MIA": {
+"conf": "AFC",
+"seed": 4
+},
+"BUF": {
+"conf": "AFC",
+"seed": 5
+},
+"NE": {
+"conf": "AFC",
+"seed": 6
+},
+"MIN": {
+"conf": "NFC",
+"seed": 1
+},
+"ATL": {
+"conf": "NFC",
+"seed": 2
+},
+"DAL": {
+"conf": "NFC",
+"seed": 3
+},
+"SF": {
+"conf": "NFC",
+"seed": 4
+},
+"GB": {
+"conf": "NFC",
+"seed": 5
+},
+"ARI": {
+"conf": "NFC",
+"seed": 6
+}
+}
+}

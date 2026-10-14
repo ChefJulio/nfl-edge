@@ -86,6 +86,9 @@ jobs:
       # Teams > Draft data (every pick since 1980 with career outcomes; ~2 s).
       - name: Draft
         run: python tools/draft_build.py --site=site
+      # Teams > Playoffs history (every postseason since 1920; 1933-98 from data/history/, seeds 1975-98 cached there).
+      - name: Playoffs
+        run: python tools/playoffs_build.py --site=site
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:

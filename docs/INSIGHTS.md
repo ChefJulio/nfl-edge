@@ -65,6 +65,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 - **QB career history** from `load_player_stats` 2006+ so veterans aren't flagged inexperienced.
 - `nflreadpy.load_teams()` has colors and ESPN logo URLs.
 
+- **Playoff history sources (2026-10-14):** FiveThirtyEight `nfl_games.csv` (MIT) covers 1920-2020 with a 0/1 playoff
+  flag only (no rounds, no seeds), today's franchise codes (Raiders = OAK, Rams = LAR, WSH) and AFL + AAFC games mixed
+  in (AAFC codes BBA / BCL / NAA; CLE and SF were AAFC 1946-49). The 1932 Bears-Portsmouth game counts as regular
+  season (538 agrees). Rounds = date clusters per side; seeds 1975-1998 from Wikipedia's per-season "NFL playoffs"
+  pages (a `| AFC 1 = Team` block; the API rate-limits bursts, so the fetch pauses and backs off); 1999 on from our
+  tiebreaker code. Before 1975 no seeds (home field rotated by division). 1920-32: no playoffs, recognized champion
+  shown. Era names (Houston Oilers, Phoenix Cardinals...) get text badges, modern names logos.
+
 ## 3. Model findings that shipped (with evidence)
 - **Team ratings:** ridge on play EPA per unit (pass/rush/ST), WP 10-90% filter, recency half-life 3 weeks, prior
   season 0.3 decaying to 0 by week 8, alpha by time-split CV. QB-aware pass offense: team + QB effect +

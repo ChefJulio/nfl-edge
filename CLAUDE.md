@@ -69,6 +69,7 @@ Git hooks: `git config core.hooksPath .githooks` (pre-commit blocks commits when
 | `tools/standings_build.py`, `nfledge/static/standings.{js,css}` | Teams > Standings: `data/standings/<season>.json` (2002 on, CI step) rendered in the browser; area modules load on first open (shell.js AREAS) |
 | `tools/stats_build.py`, `nfledge/static/{teamstats,playerstats}.{js,css}` | Teams > Stats + Players > Stats: `data/stats/{teams,players}_<season>.json` (1999 on, CI step; aggregates cached in `cache/seasonstats_*`) |
 | `tools/draft_build.py`, `nfledge/static/draft.{js,css}` | Teams > Draft: `data/draft/<year>.json` (1980 on, PFR via nflverse; CI step) |
+| `tools/playoffs_build.py`, `nfledge/static/playoffs.{js,css}`, `data/history/` | Teams > Playoffs: brackets 1920 on (`data/playoffs/<season>.json`; 538 file + Wikipedia seeds kept in `data/history/`) |
 | `nfledge/static/rankings.js`, `injuries.js` | Players > Rankings (from the week JSON) and Players > Injuries (ESPN list + our inactive %) |
 | `nfledge/elo.py` | Elo from final scores (part of our win chance) |
 | `exclusions.csv` | Manual injury-shortened games to drop from usage/efficiency |

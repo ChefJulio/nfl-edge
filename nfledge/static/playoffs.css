@@ -1,0 +1,38 @@
+/* Teams > Playoffs (playoffs.js) */
+.po-body { padding: 12px 14px 16px; overflow-x: auto; }
+.po-bracket { display: flex; gap: 14px; align-items: stretch; min-width: min-content; margin-bottom: 18px; }
+.po-side { display: flex; flex-direction: column; gap: 8px; }
+.po-st { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+.po-side.mirror .po-st { text-align: right; }
+.po-note { text-transform: none; letter-spacing: 0; font-weight: 600; color: #e0b04a; }
+.po-rounds { display: flex; gap: 12px; flex: 1; }
+.po-round { display: flex; flex-direction: column; width: 172px; flex: none; }
+.po-rl { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; white-space: nowrap; }
+.po-games { display: flex; flex-direction: column; justify-content: space-around; gap: 10px; flex: 1; }
+.po-final { align-self: center; }
+.po-final .po-game { border-color: color-mix(in srgb, #e0b04a 60%, var(--line)); box-shadow: 0 0 0 1px color-mix(in srgb, #e0b04a 30%, transparent); }
+.po-game { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 6px 8px 5px; }
+.po-game.po-link { cursor: pointer; } .po-game.po-link:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+.po-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; color: var(--muted); font-size: 13px; }
+.po-row.win { color: var(--ink); font-weight: 700; }
+.po-row .po-nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.po-row .po-nm.tm-open { cursor: pointer; } .po-row .po-nm.tm-open:hover { text-decoration: underline; }
+.po-sc { font-variant-numeric: tabular-nums; min-width: 22px; text-align: right; }
+.po-logo { width: 20px; height: 20px; object-fit: contain; flex: none; }
+.po-txt { width: 20px; height: 20px; flex: none; display: inline-grid; place-items: center; font-size: 8.5px; font-weight: 800; border-radius: 4px;
+  background: rgba(255,255,255,.1); color: var(--muted); letter-spacing: -.02em; }
+.po-seed { font-size: 10px; font-weight: 800; color: var(--muted); min-width: 10px; }
+.po-meta { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+.po-none { padding: 14px 4px; } .po-champ { font-size: 16px; }
+/* phones: each side stacks its rounds; the final comes last */
+@media (max-width: 760px) {
+  .po-bracket { flex-direction: column; min-width: 0; }
+  .po-rounds { flex-direction: column; }
+  .po-side.mirror .po-rounds { flex-direction: column-reverse; }
+  .po-side.mirror .po-st { text-align: left; }
+  .po-round { width: auto; }
+  .po-final { order: 3; align-self: stretch; }
+  .po-side.mirror { order: 2; }
+}
+.po-view[hidden] { display: none; }
+.po-row { font-size: 12.5px; }
