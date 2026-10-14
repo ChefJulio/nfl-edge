@@ -640,6 +640,16 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Allgeier 2023; Saquon 2022 / 2024 / 2025 not bottom-quartile; workhorse stars top half) and (b) guardrail: RB
   rank corr. of season-only grade with next-season fantasy pts/g (both seasons qualified, 2019-2025) not
   significantly below the current grade's.
+- **RESULT (depth window): "both" ADOPTED** (depth_build V6, RECENCY .5/.3/.2 + games missed hurt skipped). 27,780
+  cells 2019-2026, per starter: base 81.7%, skip_inj 83.1, recency 82.5, last1 82.7, both 83.6 (+2.0 [+1.8, +2.1]),
+  better at every group; starters back from injury 73.6 -> 82.0. MIN wk 6: Addison 97, Jennings 79, Jefferson 67
+  (was WR4 at 34), Felton 62. tools/depth_window_eval.py reproduces.
+- **PRE-REGISTERED (owner: "test it"): depth-by-playing-time window.** Variants vs the live "last 3 team games,
+  missed = 0": skip_inj (a game he missed while on that week's injury report or a reserve list leaves his average
+  instead of counting 0), recency (weights .5 / .3 / .2 newest first), both, last1 (last game only). Score: share of
+  predicted starters (fixed N per group) among the game's top-N snap-getters in the group; 2019-2026 regular season,
+  weeks 4+, players ruled Out / reserve that week excluded for every variant. GATE: a variant replaces the live one if
+  its accuracy minus the live one's has a 95% bootstrap CI (over team-games) above 0; among passers, the best.
 - **Depth chart fixes (owner 2026-10-14, Jordan Addison):** (1) BUG: the playing-time chart's "on the team" check used
   ACT-only weekly rosters, so one inactive game (INA) erased a starter (Addison 83-98% snaps, vanished after missing
   week 5); now ACT or INA. (2) Out / reserve players who would have started by playing time stay at the end of the

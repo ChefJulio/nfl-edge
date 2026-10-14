@@ -22,7 +22,7 @@ from nfledge import data as D  # noqa: E402
 from nfledge.config import load_config  # noqa: E402
 from nfledge.report import ROSTER_TEAM  # noqa: E402
 
-V = 5  # 5: INA counts as on the team, injured starters kept (flag); 4: + depth by playing time ("u"); 3: pages
+V = 6  # 6: recency-weighted window, games missed hurt skipped; 5: INA counts as on the team, injured starters kept (flag); 4: + depth by playing time ("u"); 3: pages
 FIRST = 2001
 FRANCHISE = {"OAK": "LV", "SD": "LAC", "STL": "LA", "LAR": "LA"}  # relocated clubs -> today's code (team pages)
 KIND = {"Offense": "off", "Defense": "def", "Special Teams": "st"}
@@ -90,9 +90,15 @@ GROUP = {"QB": "QB", "RB": "RB", "FB": "RB", "HB": "RB", "WR": "WR", "TE": "TE",
 GROUPS = ["QB", "RB", "WR", "TE", "OL", "DL", "LB", "CB", "S"]
 DEFAULT_N = {"QB": 1, "RB": 1, "WR": 3, "TE": 1, "OL": 5, "DL": 4, "LB": 3, "CB": 2, "S": 2}  # only if a week has no listed chart
 WINDOW = 3  # games
+# Window weights, newest game first, and games a player missed while hurt (on that week's injury report or a reserve
+# list, 0 snaps) leave his average instead of counting 0. Pre-registered test (tools/depth_window_eval.py, 2019-2026,
+# 27,780 team-game cells): per-starter accuracy 81.7% (plain 3-game average) -> 83.6%, +2.0 pts [+1.8, +2.1], better
+# at every position group; starters back from an injury absence 73.6% -> 82.0%.
+RECENCY = (0.5, 0.3, 0.2)
 
 
-def usage_weeks(season: int, sn: pd.DataFrame, ros, out: set, reserve: set, listed: pd.DataFrame, pos_of: dict) -> dict:
+def usage_weeks(season: int, sn: pd.DataFrame, ros, out: set, reserve: set, listed: pd.DataFrame, pos_of: dict,
+                hurt_set: set | None = None) -> dict:
   """(team, week) -> [[group, n starters, [[gsis, name, avg snap %], ...]], ...] for every listed week where the team
   has already played this season. Window = the team's last WINDOW games before the week; a player's share averages
   over those games (a missed game counts 0). Left out: players not on the team's roster that week (latest roster
@@ -135,7 +141,15 @@ def usage_weeks(season: int, sn: pd.DataFrame, ros, out: set, reserve: set, list
         if gw.empty:
           continue
         k = n.get(grp) or DEFAULT_N[grp]
-        every = (gw.groupby("gsis_id").pct.sum() / len(prior)).sort_values(ascending=False)
+        # recency-weighted share; a game he missed hurt (0 snaps, listed / reserve that week) drops out of his average
+        pw = gw.pivot_table(index="gsis_id", columns="week", values="pct", aggfunc="max").reindex(columns=prior).fillna(0.0)
+        newest = list(reversed(prior))
+        wts = pd.DataFrame({w: RECENCY[i] if i < len(RECENCY) else 0.0 for i, w in enumerate(newest)}, index=pw.index)[prior]
+        if hurt_set:
+          miss = pd.DataFrame({w: [(g, int(w)) in hurt_set for g in pw.index] for w in prior}, index=pw.index)
+          wts = wts.where(~(miss & (pw == 0)), 0.0)
+        tot = wts.sum(axis=1)
+        every = ((pw * wts).sum(axis=1) / tot.where(tot > 0)).fillna(0.0).sort_values(ascending=False)
         is_hurt = every.index.map(hurt).to_numpy().astype(bool)
         share = every[~is_hurt]
         share = share[share >= 0.01].head(6)
@@ -224,7 +238,7 @@ def main():
       last_wk = int(d.week.max())
       out_set |= {(g, last_wk) for g in live_out}
     rs = ros.assign(team=ros.team.replace({**FRANCHISE, **ROSTER_TEAM})) if ros is not None and len(ros) else None
-    usage = usage_weeks(season, sn, rs, out_set, reserve, d, pos_of) if sn is not None else {}
+    usage = usage_weeks(season, sn, rs, out_set, reserve, d, pos_of, set(tags)) if sn is not None else {}
     (out_root / str(season)).mkdir(parents=True, exist_ok=True)
     for team, t in d.groupby("team"):
       plist, pidx = [], {}
