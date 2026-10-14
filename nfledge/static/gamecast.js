@@ -937,7 +937,7 @@
     const W = f.weeks[sel.w];
     const liveWk = sel.s === DIDX.current && sel.w === weeks[weeks.length - 1];  // the current chart: ESPN's live injury list
     const weekSel = `<select class="pc-wkpick dc-week" aria-label="Week">${weeks.map(w => `<option value="${w}"${w === sel.w ? ' selected' : ''}>${wkName(sel.s, w, post)}</option>`).join('')}</select>`;
-    const who = ([pi, rank, tag], i, pct = null, starter = null) => {
+    const who = ([pi, rank, tag], i, pct = null, starter = null, hurt = false) => {
       const [name, pid, espn] = f.players[pi];
       const live = liveWk && espn && DINJ && DINJ[espn];
       const t = liveWk && DINJ ? (live ? ESPN_TAG[live.status] : null) : tag;
@@ -946,23 +946,24 @@
       const nm = pid ? `<button type="button" class="bx-n dc-n" data-open-pid="${esc(pid)}">${esc(name)}</button>`
         : espn ? `<a class="dc-n dc-ext" href="https://www.espn.com/nfl/player/_/id/${esc(espn)}" target="_blank" rel="noopener" title="ESPN player page">${esc(name)}</a>` : `<span class="dc-n">${esc(name)}</span>`;
       const bold = starter != null ? starter : i === 0 || rank === 1;
-      return `<span class="dc-p${bold ? ' first' : ''}">${nm}${pct != null ? `<span class="dc-pct" title="Average share of snaps, last ${esc(f.window || 3)} games">${pct}%</span>` : ''}${t ? `<span class="dc-tag dt-${TAG_TONE[t] || 'out'}" title="${esc(title)}">${esc(t)}</span>` : ''}</span>`;
+      return `<span class="dc-p${bold && !hurt ? ' first' : ''}${hurt ? ' dc-hurt' : ''}"${hurt ? ' title="Starter by playing time, out this week"' : ''}>${nm}${pct != null ? `<span class="dc-pct" title="Average share of snaps, last ${esc(f.window || 3)} games">${pct}%</span>` : ''}${t ? `<span class="dc-tag dt-${TAG_TONE[t] || 'out'}" title="${esc(title)}">${esc(t)}</span>` : ''}</span>`;
     };
     const box = (title, rows) => rows && rows.length ? `<div class="pc-box"><div class="pc-k">${esc(title)}</div>
-      ${rows.map(([abb, name, pl]) => `<div class="dc-row"><span class="dc-pos" title="${esc(name)}">${esc(abb)}</span><span class="dc-pl">${pl.map(who).join('')}</span></div>`).join('')}</div>` : '';
+      ${rows.map(([abb, name, pl]) => `<div class="dc-row"><span class="dc-pos" title="${esc(name)}">${esc(abb)}</span><span class="dc-pl">${pl.map((x, i) => who(x, i)).join('')}</span></div>`).join('')}</div>` : '';
     // by playing time: snap leaders over the team's last 3 games (from its 2nd game on), starters in bold
     const mode = W.u ? dMode : 'list';
     const ubox = (title, grps) => {
       const rows = (W.u || []).filter(r => grps.includes(r[0]));
       return rows.length ? `<div class="pc-box"><div class="pc-k">${esc(title)}</div>
-        ${rows.map(([g, n, pl]) => `<div class="dc-row"><span class="dc-pos" title="${esc(GRP_NAME[g] || g)}">${esc(g)}</span><span class="dc-pl">${pl.map(([pi, pct, tag], i) => who([pi, 0, tag], i, pct, i < n)).join('')}</span></div>`).join('')}</div>` : '';
+        ${rows.map(([g, n, pl]) => { const up = pl.filter(x => !x[3]), hurt = pl.filter(x => x[3]);
+          return `<div class="dc-row"><span class="dc-pos" title="${esc(GRP_NAME[g] || g)}">${esc(g)}</span><span class="dc-pl">${up.map(([pi, pct, tag], i) => who([pi, 0, tag], i, pct, i < n)).join('')}${hurt.map(([pi, pct, tag], i) => who([pi, 0, tag], i, pct, false, true)).join('')}</span></div>`; }).join('')}</div>` : '';
     };
     const seg = W.u ? `<div class="seg dc-mode" role="tablist"><button type="button" data-dm="use" class="${mode === 'use' ? 'on' : ''}">Playing time</button><button type="button" data-dm="list" class="${mode === 'list' ? 'on' : ''}">Listed chart</button></div>` : '';
     const tags = liveWk ? "ESPN's injury list, updated daily" : "that week's injury report (O / D / Q) or reserve list (IR, PUP, NFI, SUSP, HOLD = did not report)";
     const listedName = sel.s >= 2025 ? "ESPN's depth chart" : "The team's depth chart";
     const body = mode === 'use'
       ? `${ubox('Offense', ['QB', 'RB', 'WR', 'TE', 'OL'])}${ubox('Defense', ['DL', 'LB', 'CB', 'S'])}${box('Special teams (listed chart)', W.st)}
-        <p class="pc-sub">Who actually plays: each position's snap leaders over the team's last 3 games (share of snaps; a missed game counts as 0), leaving out players no longer on the team, ruled out that week or on a reserve list. Starters in bold, as many as the listed chart has. Tested on 2025-26: these starters were the game's top snap-getters 88% of the time, ESPN's listed starters 76%. Tags: ${tags}.</p>`
+        <p class="pc-sub">Who actually plays: each position's snap leaders over the team's last 3 games (share of snaps; a missed game counts as 0), leaving out players no longer on the team; a starter ruled out that week or on a reserve list is shown faded at the end of his group with his tag. Starters in bold, as many as the listed chart has. Tested on 2025-26: these starters were the game's top snap-getters 88% of the time, ESPN's listed starters 76%. Tags: ${tags}.</p>`
       : `${box(`Offense${W.f ? ` · ${W.f}` : ''}`, W.off)}${box(`Defense${W.d ? ` · ${String(W.d).replace(/ D$/, '')}` : ''}`, W.def)}${box('Special teams', W.st)}
         <p class="pc-sub">${listedName} for that week (starters in bold, backups in order)${W.u ? '' : sel.s >= 2012 ? ". A team's first game shows the listed chart: before it has played, the preseason chart beats last season's playing time (83% vs 71% of starters right in 2025-26)" : ''}. Tags: ${tags}. Team depth charts are labeled "unofficial" and can lag reality.</p>`;
     return `<div class="pc-wkbar">${seasonSel}${weekSel}</div>${seg}${body}`;

@@ -640,6 +640,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Allgeier 2023; Saquon 2022 / 2024 / 2025 not bottom-quartile; workhorse stars top half) and (b) guardrail: RB
   rank corr. of season-only grade with next-season fantasy pts/g (both seasons qualified, 2019-2025) not
   significantly below the current grade's.
+- **Depth chart fixes (owner 2026-10-14, Jordan Addison):** (1) BUG: the playing-time chart's "on the team" check used
+  ACT-only weekly rosters, so one inactive game (INA) erased a starter (Addison 83-98% snaps, vanished after missing
+  week 5); now ACT or INA. (2) Out / reserve players who would have started by playing time stay at the end of the
+  group, faded and struck through, with their tag (depth_build V5, flag [3]). (3) BUG: listed-chart rows called
+  pl.map(who), passing the row array in as the snap % ("58,1,%" in special teams and the Listed chart view).
 - **Spot starters get an asterisked OVR (owner 2026-10-14, Tyler Huntley):** unqualified players with >= 2 games
   at >= 50% of offensive snaps that season, graded on those games only, percentile vs the qualified pool (not joining
   it), [9] = 1, dashed badge "OVR 79*". Owner: no fringe sneaking in; kept strict (Huntley 2026: 48% in week 4 relief,

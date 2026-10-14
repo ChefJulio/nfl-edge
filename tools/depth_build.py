@@ -22,7 +22,7 @@ from nfledge import data as D  # noqa: E402
 from nfledge.config import load_config  # noqa: E402
 from nfledge.report import ROSTER_TEAM  # noqa: E402
 
-V = 4  # 4: + depth by playing time ("u"); 3: every player has a page (links)
+V = 5  # 5: INA counts as on the team, injured starters kept (flag); 4: + depth by playing time ("u"); 3: pages
 FIRST = 2001
 FRANCHISE = {"OAK": "LV", "SD": "LAC", "STL": "LA", "LAR": "LA"}  # relocated clubs -> today's code (team pages)
 KIND = {"Offense": "off", "Defense": "def", "Special Teams": "st"}
@@ -96,13 +96,16 @@ def usage_weeks(season: int, sn: pd.DataFrame, ros, out: set, reserve: set, list
   """(team, week) -> [[group, n starters, [[gsis, name, avg snap %], ...]], ...] for every listed week where the team
   has already played this season. Window = the team's last WINDOW games before the week; a player's share averages
   over those games (a missed game counts 0). Left out: players not on the team's roster that week (latest roster
-  week for weeks not out yet), ruled Out on that week's report, or on a reserve list."""
+  week for weeks not out yet), ruled Out on that week's report, or on a reserve list. An Out / reserve player who
+  would have been a starter by playing time is kept at the end of his group, flagged (an injured starter shouldn't
+  vanish: owner 2026-10-14, Jordan Addison). Roster = ACT or INA: inactive for a game is still on the team (the
+  ACT-only check dropped Addison after one missed game)."""
   out_map = {}
   if sn is None or sn.empty:
     return out_map
   ros_by = {}
   if ros is not None and len(ros):
-    r = ros[ros.status == "ACT"]
+    r = ros[ros.status.isin(["ACT", "INA"])]
     for (team, wk), g in r.groupby(["team", "week"]):
       ros_by[(team, int(wk))] = set(g.gsis_id)
   starters_n = {}
@@ -122,18 +125,26 @@ def usage_weeks(season: int, sn: pd.DataFrame, ros, out: set, reserve: set, list
       win = ts[ts.week.isin(prior)]
       rweeks = [w for (t, w) in ros_by if t == team and w <= wk]
       on = ros_by.get((team, max(rweeks))) if rweeks else None
-      ok = lambda g: (on is None or g in on) and (g, int(wk)) not in out and (g, int(wk)) not in reserve  # noqa: E731
-      win = win[win.gsis_id.map(ok)]
+      on_team = lambda g: on is None or g in on  # noqa: E731
+      hurt = lambda g: (g, int(wk)) in out or (g, int(wk)) in reserve  # noqa: E731
+      win = win[win.gsis_id.map(on_team)]
       n = starters_n.get((team, int(wk)), {})
       rows = []
       for grp in GROUPS:
         gw = win[win.grp == grp]
         if gw.empty:
           continue
-        share = (gw.groupby("gsis_id").pct.sum() / len(prior)).sort_values(ascending=False)
+        k = n.get(grp) or DEFAULT_N[grp]
+        every = (gw.groupby("gsis_id").pct.sum() / len(prior)).sort_values(ascending=False)
+        is_hurt = every.index.map(hurt).to_numpy().astype(bool)
+        share = every[~is_hurt]
         share = share[share >= 0.01].head(6)
+        # injured starters: would have been among the group's k starters by playing time
+        cut = every.iloc[min(k, len(every)) - 1] if len(every) else 1.0
+        inj = every[is_hurt & (every >= cut).to_numpy() & (every >= 0.01).to_numpy()]
         names = gw.drop_duplicates("gsis_id").set_index("gsis_id").player
-        rows.append([grp, n.get(grp) or DEFAULT_N[grp], [[g, names.get(g, g), int(round(100 * v))] for g, v in share.items()]])
+        rows.append([grp, k, [[g, names.get(g, g), int(round(100 * v)), 0] for g, v in share.items()]
+                     + [[g, names.get(g, g), int(round(100 * v)), 1] for g, v in inj.items()]])
       out_map[(team, int(wk))] = rows
   return out_map
 
@@ -237,8 +248,8 @@ def main():
                          [[pi(n, g), int(rk), tags.get((g, int(wk)))] for n, g, rk in zip(s.name, s.gsis_id, s["rank"])]])
           wkd[kind] = rows
         u = usage.get((team, int(wk)))
-        if u:  # [[group, n starters, [[player index, avg snap %, tag], ...]], ...]
-          wkd["u"] = [[grp, n, [[pi(name, g), pct, tags.get((g, int(wk)))] for g, name, pct in pl]] for grp, n, pl in u]
+        if u:  # [[group, n starters, [[player index, avg snap %, tag, injured starter 0/1], ...]], ...]
+          wkd["u"] = [[grp, n, [[pi(name, g), pct, tags.get((g, int(wk))), x] for g, name, pct, x in pl]] for grp, n, pl in u]
         gr = groups.get((team, int(wk)), {})
         wkd["f"], wkd["d"] = gr.get("off", ""), gr.get("def", "")
         weeks[str(int(wk))] = wkd

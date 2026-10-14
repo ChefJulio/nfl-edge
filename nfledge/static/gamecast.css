@@ -536,3 +536,4 @@ td .eg-chip { margin-left: 0; }
 td.pen-top { color: var(--muted); font-size: 12.5px; }
 .pen-pos { display: inline-block; min-width: 2.4em; margin-right: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: .03em; color: var(--muted); background: var(--panel); border-radius: 5px; padding: 1px 5px; text-align: center; }
 .eg-chip.eg-uq { border-style: dashed; } .eg-chip.eg-uq b { color: var(--muted); }
+.dc-p.dc-hurt { opacity: .55; } .dc-p.dc-hurt .dc-n { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 70%, transparent); }
