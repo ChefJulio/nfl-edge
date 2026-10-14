@@ -117,9 +117,66 @@ html.pc-open { overflow: hidden; }
 .pc-pic-tm .nl { width: 26px !important; height: 26px !important; box-shadow: 0 0 0 2px var(--panel), 0 1px 4px rgba(0,0,0,.5); }
 .pc-pic.nopic .pc-pic-tm { inset: 0; display: grid; place-items: center; }
 .pc-num { color: var(--muted); font-weight: 700; margin-right: 8px; }
-.pc-bio { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
-.pc-use { display: grid; gap: 3px; font-size: 12.5px; margin: -4px 0 12px; }
-.pc-use b { font-weight: 800; } .pc-use small { color: var(--muted); font-size: 11px; }
+/* stat grid: the card's one building block. Value over a small label in every cell; rows share the grid's columns
+   (--n) so values line up down a box; optional label column on the left; hairlines between rows. */
+.sg { display: grid; grid-template-columns: var(--lw, 70px) repeat(var(--n), minmax(0, 1fr)); margin-top: 4px; }
+.sg.sg-nolab { grid-template-columns: repeat(var(--n), minmax(0, 1fr)); }
+.sg-r { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }  /* short rows leave blanks, never reflow */
+.sg-r > * { padding: 7px 2px; min-width: 0; }
+.sg-r + .sg-r { border-top: 1px solid color-mix(in srgb, var(--line) 75%, transparent); }
+.sg-k { grid-column: 1; }
+.sg-k { display: flex; align-items: center; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.sg-c { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; line-height: 1.15; }
+.sg-c b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 800; letter-spacing: -.01em; }
+.sg-c b i { font-style: normal; font-size: 11px; font-weight: 600; color: var(--muted); margin-left: 1px; }
+.sg-c small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px;
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.sg-c[title] { cursor: help; }
+.sg-chart { grid-column: 2 / -1; padding: 6px 0 2px !important; }
+.sg-h { grid-column: 1 / -1; padding: 8px 0 0; border-top: 1px solid color-mix(in srgb, var(--line) 75%, transparent); margin-top: 2px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.sg-tight .sg-c b { font-size: 14px; } .sg-tight .sg-r > * { padding: 5px 1px; }
+.pc-profile { margin: -2px 0 12px; padding-top: 4px; padding-bottom: 4px; }
+@media (max-width: 560px) {
+  .sg { --lw: 56px; } .sg-k { font-size: 9px; letter-spacing: .04em; }
+  .sg-prof { --n: 3 !important; } .sg-c b { font-size: 14px; } .sg-c small { font-size: 9px; letter-spacing: .03em; }
+}
+/* projection: big number + our rank pill (colored by roster tier) */
+.pc-bigrow { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; }
+.pc-bigrow .pc-flags { margin-top: 0; }
+.pc-rk { font-size: 12px; font-weight: 800; padding: 3px 9px; border-radius: 999px; white-space: nowrap; cursor: help;
+  background: rgba(255,255,255,.07); color: rgba(255,255,255,.75); }
+.pc-rk.t-start { background: rgba(69,194,107,.16); color: #8fe0a8; } .pc-rk.t-flex { background: rgba(224,176,74,.16); color: #f3d38c; }
+/* small week bars (points, snaps): the rankings' Last 5 look - green beat our projection, red missed it */
+.mb { display: block; max-width: 100%; height: auto; overflow: visible; }
+.mb .mb-b { fill: color-mix(in srgb, var(--accent) 70%, transparent); }
+.mb .mb-b.mb-hit { fill: #45c26b; } .mb .mb-b.mb-miss { fill: #f2786d; }
+.mb.mb-snap .mb-b { fill: color-mix(in srgb, var(--muted) 70%, transparent); }
+.mb .mb-pj { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+.mb .mb-v { font-size: 9px; font-weight: 700; fill: var(--ink); text-anchor: middle; }
+.mb .mb-w { font-size: 8.5px; fill: var(--muted); text-anchor: middle; }
+.mb .mb-bye { font-size: 7.5px; font-weight: 700; letter-spacing: .04em; fill: var(--muted); text-anchor: middle; }
+.mb .mb-dnp { stroke: var(--faint); stroke-width: 2; stroke-linecap: round; }
+/* box header row: label left, chip / link right */
+.pc-kr { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 20px; }
+.pc-av { flex: none; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; cursor: help; }
+.pc-av.av-ok { background: rgba(69,194,107,.14); color: #7fd99a; }
+.pc-av.av-q { background: rgba(224,176,74,.16); color: #f3d38c; }
+.pc-av.av-out { background: rgba(242,120,109,.16); color: #f59a91; }
+.pc-why.av-q { color: #f3d38c; } .pc-why.av-out { color: #f59a91; }
+/* the matchup tile opens the gamecast from anywhere (its team code opens the team card) */
+.pc-mutile { display: block; margin-bottom: 10px; }
+.pc-mutile[data-href] { cursor: pointer; transition: border-color .15s, background-color .15s; }
+.pc-mutile[data-href]:hover, .pc-mutile[data-href]:focus-visible { outline: none; border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
+  background: color-mix(in srgb, var(--accent) 6%, var(--panel2)); }
+.pc-go { font-size: 12px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.pc-season { margin-bottom: 10px; }
+/* Week tab previews: latest news and last 5 games, each with a way into its full tab */
+.pc-mini { margin-bottom: 10px; }
+.pc-mini .nw { margin-top: 6px; }
+.pc-more { display: block; width: 100%; margin-top: 8px; padding: 8px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel);
+  color: var(--accent); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.pc-more:hover { border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); }
 .pc-k2 { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; margin-right: 4px; }
 .pc-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; margin-top: 3px; }
 .pc-flags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; }
@@ -136,9 +193,6 @@ html.pc-open { overflow: hidden; }
 .pc-mu { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
 .pc-rng { display: block; margin-top: 4px; } .pc-rng .rng-w { stroke: var(--muted); stroke-width: 2; opacity: .6; }
 .pc-rng .rng-b { fill: var(--accent); opacity: .45; } .pc-rng .rng-p { stroke: var(--ink); stroke-width: 2.5; } .pc-rt { font-size: 9px; fill: var(--muted); }
-.pc-wk .wb { fill: var(--accent); } .pc-wk .wb-miss { stroke: var(--faint); stroke-width: 2; }
-.pc-wk .wb-l, .pc-wk .wb-v { font-size: 9px; fill: var(--muted); text-anchor: middle; } .pc-wk .wb-v { fill: var(--ink); font-weight: 700; }
-.pc-take { margin: 10px 2px; font-weight: 600; line-height: 1.4; }
 .pc-newsbox, .pc-logbox { margin-bottom: 10px; }
 .pc .tier { background: rgba(255,255,255,.07); color: rgba(255,255,255,.7); }
 .pc .tier.t-start { background: #dcf2e3; color: #10612a; } .pc .tier.t-flex { background: #fdefc6; color: #7a5200; }
@@ -209,6 +263,7 @@ table.lg tr.lg-season td b { color: var(--ink); font-size: 15px; margin-right: 6
 table.lg tbody:first-child tr.lg-season td { padding-top: 4px; }
 .lg-grp { text-align: center !important; border-bottom: 2px solid var(--line); }
 .lg-opp { font-weight: 800; } .lg-fp { font-weight: 800; }
+.lg-opp[style*="--mc"] { color: var(--mc); }  /* our pregame matchup color (week files from 2026-10-14 on) */
 .mr-easy { color: #45c26b; } .mr-ok { color: #9fd9a8; } .mr-tough { color: #e0b04a; } .mr-hard { color: #f2786d; }
 .lg-rk { display: inline-block; min-width: 30px; text-align: center; border-radius: 5px; padding: 0 5px; font-weight: 700; }
 .rk-good { background: rgba(69,194,107,.24); color: #92e8ab; } .rk-mid { background: rgba(224,176,74,.18); color: #f1d391; } .rk-bad { background: rgba(242,120,109,.18); color: #ffb3aa; }
@@ -397,3 +452,7 @@ table.gc-rt { width: 100%; font-size: 13px; } .bx-th-in { display: inline-flex; 
 .pg-res > .tm-open { display: inline-flex; align-items: center; gap: 8px; opacity: .55; } .pg-res > .tm-open.won { opacity: 1; }
 .pg-res .muted { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .pg-call { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 10px; font-size: 12.5px; }
+
+/* matchup points (player card, gamecast players table): colored by the week file (green helps, red hurts) */
+.muv { font-weight: 800; font-variant-numeric: tabular-nums; cursor: help; }
+.pc-muv { font-size: 15px; } .pc-muv small { color: var(--muted); font-weight: 600; font-size: 12px; }
