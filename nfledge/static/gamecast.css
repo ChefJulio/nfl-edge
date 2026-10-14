@@ -464,6 +464,10 @@ table.gc-rt { width: 100%; font-size: 13px; } .bx-th-in { display: inline-flex; 
 .dc-pl { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: 13.5px; }
 .dc-p { color: var(--muted); white-space: nowrap; } .dc-p .dc-n { font-weight: 500; color: var(--muted); }
 .dc-p.first .dc-n { font-weight: 700; color: var(--ink); }
-.dc-p .flag { font-size: 10px; line-height: 15px; padding: 0 5px; border-radius: 4px; }
-.pc .dc-p .f-q { background: #fdefc6; color: #7a5200; } .pc .dc-p .f-out { background: #fde1dd; color: #9b2218; }
+/* injury tag after a name: tinted chip (as on Players > Injuries), red = out / reserve lists, orange = D, amber = Q */
+.dc-tag { display: inline-block; margin-left: 5px; padding: 0 5px; border-radius: 5px; font-size: 9.5px; font-weight: 800;
+  letter-spacing: .03em; line-height: 16px; vertical-align: 1px; border: 1px solid transparent; cursor: help; }
+.dc-tag.dt-out { background: rgba(242,120,109,.16); border-color: rgba(242,120,109,.32); color: #f59a91; }
+.dc-tag.dt-d { background: rgba(240,150,80,.16); border-color: rgba(240,150,80,.32); color: #f4b37f; }
+.dc-tag.dt-q { background: rgba(224,176,74,.14); border-color: rgba(224,176,74,.3); color: #f3d38c; }
 .dc-p a.dc-ext { text-decoration: none; } .dc-p a.dc-ext:hover { text-decoration: underline; text-underline-offset: 3px; }

@@ -652,37 +652,71 @@
   // season stats and the career game log from data/teams/<TEAM>.json (tools/player_logs.py).
   let cardTeam = null, teamTab = 'ov', teamOpp = '';
   const TLOGS = {};
-  // Depth tab: every team's latest depth chart (data/depth/latest.json, tools/depth_build.py; ESPN's charts via
-  // nflverse, daily) with ESPN's injury list (data/espn_injuries/latest.json) flagging who is hurt. Loaded on first use.
-  let DEPTH, DINJ = {};
-  const INJ_TAG = { 'Out': ['Out', 'f-out'], 'Injured Reserve': ['IR', 'f-out'], 'Doubtful': ['D', 'f-out'], 'Questionable': ['Q', 'f-q'],
-                    'Suspension': ['Susp', 'f-out'], 'Physically Unable to Perform': ['PUP', 'f-out'] };
-  const loadDepth = () => {
-    if (DEPTH !== undefined) return;
-    DEPTH = null;
-    Promise.all([getJSON(`${siteRoot()}data/depth/latest.json`), getJSON(`${siteRoot()}data/espn_injuries/latest.json`).catch(() => null)])
-      .then(([d, inj]) => {
-        DEPTH = d;
-        (inj ? inj.rows : []).forEach(r => { DINJ[String(r.espn_id)] = r; });
-        if (cardTeam) renderTeam(cardTeam);
-      }).catch(e => { console.warn('depth', e); DEPTH = false; if (cardTeam) renderTeam(cardTeam); });
+  // Depth tab: a team's depth chart for any week since 2001 (data/depth/<season>/<TEAM>.json, tools/depth_build.py;
+  // nflverse: team charts through 2024, ESPN's daily charts after), its own season / week pickers starting on the
+  // page's week. Each player's tag is that week's official one (injury report O / D / Q, or a reserve list: IR, PUP,
+  // NFI, SUSP, HOLD); the latest week of the current season shows ESPN's live injury list instead (it moves daily).
+  let DIDX, DINJ = null;
+  const DFILES = {}, dSel = {};  // dSel[team] = { s, w }
+  const TAG_TONE = { Q: 'q', D: 'd' };  // everything else (O, IR, PUP, NFI, SUSP, HOLD) = out
+  const ESPN_TAG = { 'Out': 'O', 'Injured Reserve': 'IR', 'Doubtful': 'D', 'Questionable': 'Q', 'Suspension': 'SUSP',
+                     'Physically Unable to Perform': 'PUP' };
+  const TAG_NAME = { O: 'Out', D: 'Doubtful', Q: 'Questionable', IR: 'Injured reserve', PUP: 'Physically unable to perform list',
+                     NFI: 'Non-football injury list', SUSP: 'Suspended', HOLD: 'Did not report' };
+  const dKey = (s, t) => `${s}/${t}`;
+  const loadDepth = (s, abbr) => {
+    const again = () => { if (cardTeam === abbr && teamTab === 'dc') renderTeam(abbr); };
+    if (DIDX === undefined) {
+      DIDX = null;
+      getJSON(`${siteRoot()}data/depth/index.json`).then(x => { DIDX = x; again(); }).catch(() => { DIDX = false; again(); });
+      getJSON(`${siteRoot()}data/espn_injuries/latest.json`).then(x => { DINJ = {}; x.rows.forEach(r => { DINJ[String(r.espn_id)] = r; }); again(); }).catch(() => {});
+    }
+    const k = dKey(s, abbr);
+    if (s && DFILES[k] === undefined) {
+      DFILES[k] = null;
+      getJSON(`${siteRoot()}data/depth/${s}/${encodeURIComponent(abbr)}.json`).then(x => { DFILES[k] = x; again(); }).catch(() => { DFILES[k] = false; again(); });
+    }
   };
+  const regWeeks = s => s >= 2021 ? 18 : 17;
+  const wkName = (s, w, post) => w <= regWeeks(s) ? `Week ${w}` : (['Wild card', 'Divisional', 'Conference', 'Super Bowl'][post.indexOf(w)] || `Week ${w}`);
   const depthHtml = abbr => {
-    if (!DEPTH) return `<div class="pc-box"><p class="pc-sub">${DEPTH === false ? 'Depth chart unavailable right now.' : 'Loading depth chart&hellip;'}</p></div>`;
-    const t = DEPTH.teams[abbr];
-    if (!t) return '<div class="pc-box"><p class="pc-sub">No depth chart for this team.</p></div>';
-    const who = ([name, pid, espn], i) => {
-      const inj = espn && DINJ[espn], tag = inj && INJ_TAG[inj.status];
+    if (DIDX === undefined || DIDX === null) { loadDepth(null, abbr); return '<div class="pc-box"><p class="pc-sub">Loading depth chart&hellip;</p></div>'; }
+    if (!DIDX) return '<div class="pc-box"><p class="pc-sub">Depth charts unavailable right now.</p></div>';
+    if (!dSel[abbr]) {  // start on the page's week (or the latest season we have)
+      const [cs, cw] = String(cardWk || '').split('-').map(Number);
+      dSel[abbr] = DIDX.seasons.includes(cs) ? { s: cs, w: cw } : { s: DIDX.seasons[DIDX.seasons.length - 1], w: null };
+    }
+    const sel = dSel[abbr], f = DFILES[dKey(sel.s, abbr)];
+    if (f === undefined) loadDepth(sel.s, abbr);
+    const seasonSel = `<select class="pc-wkpick dc-season" aria-label="Season">${[...DIDX.seasons].reverse().map(y => `<option value="${y}"${y === sel.s ? ' selected' : ''}>${y}</option>`).join('')}</select>`;
+    if (!f) return `<div class="pc-wkbar">${seasonSel}</div><div class="pc-box"><p class="pc-sub">${f === false ? `No depth chart for ${esc(abbr)} in ${sel.s}.` : 'Loading depth chart&hellip;'}</p></div>`;
+    const weeks = Object.keys(f.weeks).map(Number).sort((a, b) => a - b), post = weeks.filter(w => w > regWeeks(sel.s));
+    if (!weeks.includes(sel.w)) sel.w = weeks.filter(w => w <= (sel.w || 99)).pop() || weeks[weeks.length - 1];
+    const W = f.weeks[sel.w];
+    const liveWk = sel.s === DIDX.current && sel.w === weeks[weeks.length - 1];  // the current chart: ESPN's live injury list
+    const weekSel = `<select class="pc-wkpick dc-week" aria-label="Week">${weeks.map(w => `<option value="${w}"${w === sel.w ? ' selected' : ''}>${wkName(sel.s, w, post)}</option>`).join('')}</select>`;
+    const who = ([pi, rank, tag], i) => {
+      const [name, pid, espn] = f.players[pi];
+      const live = liveWk && espn && DINJ && DINJ[espn];
+      const t = liveWk && DINJ ? (live ? ESPN_TAG[live.status] : null) : tag;
+      const title = live ? `${live.status}${live.type ? ` (${live.type})` : ''}` : TAG_NAME[t] || t;
       // our player page when he has one (offensive skill players), else his ESPN page
       const nm = pid ? `<button type="button" class="bx-n dc-n" data-open-pid="${esc(pid)}">${esc(name)}</button>`
         : espn ? `<a class="dc-n dc-ext" href="https://www.espn.com/nfl/player/_/id/${esc(espn)}" target="_blank" rel="noopener" title="ESPN player page">${esc(name)}</a>` : `<span class="dc-n">${esc(name)}</span>`;
-      return `<span class="dc-p${i ? '' : ' first'}">${nm}${tag ? ` <span class="flag ${tag[1]}" title="${esc(inj.status)}${inj.type ? ` (${esc(inj.type)})` : ''}">${tag[0]}</span>` : ''}</span>`;
+      return `<span class="dc-p${i === 0 || rank === 1 ? ' first' : ''}">${nm}${t ? `<span class="dc-tag dt-${TAG_TONE[t] || 'out'}" title="${esc(title)}">${esc(t)}</span>` : ''}</span>`;
     };
     const box = (title, rows) => rows && rows.length ? `<div class="pc-box"><div class="pc-k">${esc(title)}</div>
       ${rows.map(([abb, name, pl]) => `<div class="dc-row"><span class="dc-pos" title="${esc(name)}">${esc(abb)}</span><span class="dc-pl">${pl.map(who).join('')}</span></div>`).join('')}</div>` : '';
-    const day = new Date(DEPTH.asof).toLocaleDateString([], { month: 'short', day: 'numeric' });
-    return `${box(`Offense · ${t.formation}`, t.off)}${box(`Defense · ${String(t.front).replace(/ D$/, '')}`, t.def)}${box('Special teams', t.st)}
-      <p class="pc-sub">ESPN's depth chart as of ${esc(day)} (starter first, then backups in order); injury tags from ESPN's injury report. Teams' own weekly charts are often listed as "unofficial" and can lag reality.</p>`;
+    return `<div class="pc-wkbar">${seasonSel}${weekSel}</div>
+      ${box(`Offense${W.f ? ` · ${W.f}` : ''}`, W.off)}${box(`Defense${W.d ? ` · ${String(W.d).replace(/ D$/, '')}` : ''}`, W.def)}${box('Special teams', W.st)}
+      <p class="pc-sub">${sel.s >= 2025 ? "ESPN's depth chart" : "The team's depth chart"} for that week (starters in bold, backups in order). Tags: ${liveWk ? "ESPN's injury list, updated daily" : "that week's injury report (O / D / Q) or reserve list (IR, PUP, NFI, SUSP, HOLD = did not report)"}. Team depth charts are labeled "unofficial" and can lag reality.</p>`;
+  };
+  const wireDepth = (body, abbr) => {
+    const box = body.querySelector('.pc-tab[data-tt="dc"]'); if (!box) return;
+    const ss = box.querySelector('.dc-season'), ws = box.querySelector('.dc-week');
+    const redraw = () => { box.innerHTML = depthHtml(abbr); wireDepth(body, abbr); };
+    if (ss) ss.onchange = () => { dSel[abbr] = { s: +ss.value, w: dSel[abbr].w }; redraw(); };
+    if (ws) ws.onchange = () => { dSel[abbr].w = +ws.value; redraw(); };
   };
   const rkChip = (r, title = '') => r ? `<span class="rk-b ${r <= 8 ? 'rk1' : r <= 16 ? 'rk2' : r <= 24 ? 'rk3' : 'rk4'}"${title ? ` title="${esc(title)}"` : ''}>${ord(r)}</span>` : '';
   const sgn = v => v == null || isNaN(v) ? '' : `${v >= 0 ? '+' : ''}${(+v).toFixed(1)}`;
@@ -769,14 +803,14 @@
       <div class="pc-tab" data-tt="pl"${teamTab === 'pl' ? '' : ' hidden'}>${pickerHtml()}${d ? `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
         ${wk.players ? `<table class="bx tm-pl"><thead><tr><th>Player</th><th class="num">Proj</th><th>Tier</th><th class="num">FP/G</th></tr></thead><tbody>${wk.players}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>` : wkWait(d)}</div>
       <div class="pc-tab" data-tt="dc"${teamTab === 'dc' ? '' : ' hidden'}>${teamTab === 'dc' ? depthHtml(abbr) : ''}</div>`;
-    if (teamTab === 'dc') loadDepth();
     body.querySelectorAll('[data-tt]').forEach(b => b.onclick = () => {
       teamTab = b.dataset.tt;
-      if (teamTab === 'dc') { loadDepth(); body.querySelector('.pc-tab[data-tt="dc"]').innerHTML = depthHtml(abbr); }
+      if (teamTab === 'dc') { body.querySelector('.pc-tab[data-tt="dc"]').innerHTML = depthHtml(abbr); wireDepth(body, abbr); }
       body.querySelectorAll('.pc-tabs [data-tt]').forEach(x => x.classList.toggle('on', x === b));
       body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.tt !== teamTab; });
     });
     wireTeamLog(body, abbr);
+    wireDepth(body, abbr);
     wireLogRows(body.querySelector('.tm-log'));
     wirePicker(body);
     if (!L) loadTeamLog(abbr);

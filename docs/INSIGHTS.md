@@ -77,6 +77,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   and special teams; `pos_slot` + `pos_rank` = depth order; 3 separate WR slots). Some slots list no one (NaN name:
   drop before writing JSON). Teams' own "unofficial" depth charts exist only as PDFs in weekly game notes. Only
   offensive skill players have player pages (career logs); the Depth tab links everyone else to ESPN.
+  Through 2024: weekly team charts (`formation` Offense / Defense / Special Teams, `depth_position` labels are messy:
+  whitespace, team-specific names like JACK / LEO / NKL; several WRs share depth 1). Weeks 19+ (18+ before 2021) are
+  playoffs. Official tags per week: injury report game status (2009 on) and weekly roster `status_description_abbr`
+  codes, identified from known players: R01 / R48 = IR (R48 = designated to return), R04 = PUP, R05 = NFI, R40 =
+  suspended (Kamara, Perryman 2023), R03 = did not report (C. Jones 2023 holdout), R06 = left squad; P0x = practice
+  squad, I02 = emergency third QB. Full history ~21 MB; cold build ~7 min, warm ~30 s.
 - **ESPN transactions feed (2026-10-14):** `site.api.espn.com/apis/site/v2/sports/football/nfl/transactions?season=Y
   &limit=100&page=P`, free, no key; ~1,100-2,800 entries a season back to 2002 (2001: ~500, thin). Free text, one
   entry per team per day, often several moves ("Signed LB X. Waived CB Y."). Format changed around 2009: before,
