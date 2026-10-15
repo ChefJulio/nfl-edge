@@ -234,8 +234,9 @@
   const ACT = new RegExp(`^${NM} (?:pass|scrambles|sacked|left|right|up the middle|middle|kneels)\\b`);
   const playHead = (pl, names, ctx = {}) => {
     // the official text leads with formation and eligibility notes: "(Shotgun) C.Lomu reported in as eligible. D.Maye ..."
-    const lead_ = new RegExp(`^(?:(?:\\([^)]*\\)|${NM} reported in as eligible\\.)\\s*)+`);
-    const full = String(pl.text || '').replace(lead_, '');  // shown under the card
+    // also "Direct snap to C.Heyward." (a wildcat snap note) and ESPN's stray leading space (" R.Stevenson up the middle")
+    const lead_ = new RegExp(`^(?:(?:\\([^)]*\\)|${NM} reported in as eligible\\.|Direct snap to ${NM}\\.)\\s*)+`);
+    const full = String(pl.text || '').trim().replace(lead_, '');  // shown under the card
     // what's parsed: after a replay reversal only the ruling that stands ("...the play was REVERSED.D.Maye pass
     // incomplete..."), and without the 2-point try that follows a touchdown
     let raw = full;

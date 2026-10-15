@@ -20,6 +20,34 @@
                       43: 'rec_td', 72: 'fumble_lost' };
   const ESPN_SLOT = { 0: 'QB', 2: 'RB', 4: 'WR', 6: 'TE', 23: 'FLEX', 7: 'SUPER_FLEX', 16: 'DEF', 17: 'K' };
   const ESPN_POS = { 1: 'QB', 2: 'RB', 3: 'WR', 4: 'TE', 5: 'K', 16: 'DEF' };
+  // Kickers (data/kdst.json, nfledge/kickers.py): expected made / missed per distance band + PATs, scored here with the
+  // league's own kicking settings. Band order: 0_19, 20_29, 30_39, 40_49, 50_59, 60_ (made, then missed), xpm, xpmiss.
+  const KB = ['0_19', '20_29', '30_39', '40_49', '50_59', '60_'];
+  const KMID = { '0_19': 18, '20_29': 25, '30_39': 35, '40_49': 45, '50_59': 54, '60_': 61 };  // typical distance, for per-yard scoring
+  const sleeperK = sc => {
+    const g = k => +(sc[k] || 0), w = {};
+    const band = { '0_19': '0_19', '20_29': '20_29', '30_39': '30_39', '40_49': '40_49' };
+    KB.forEach(b => {
+      const big = b === '50_59' ? (sc.fgm_50_59 != null ? g('fgm_50_59') : g('fgm_50p')) : b === '60_' ? (sc.fgm_60p != null ? g('fgm_60p') : g('fgm_50p')) : g(`fgm_${band[b]}`);
+      const bigMiss = b === '50_59' || b === '60_' ? g('fgmiss_50p') : g(`fgmiss_${band[b]}`);
+      w[`fgm_${b}`] = g('fgm') + big + g('fgm_yds') * KMID[b] + g('fgm_yds_over_30') * Math.max(0, KMID[b] - 30);
+      w[`fgmiss_${b}`] = g('fgmiss') + bigMiss;
+    });
+    w.xpm = g('xpm'); w.xpmiss = g('xpmiss');
+    return w;
+  };
+  // ESPN stat ids: 80 made <40, 77 made 40-49, 74 made 50+, 198 made 50-59, 201 made 60+, 85 missed FG, 86 PAT made, 88 PAT missed
+  const espnK = items => {
+    const pt = id => { const it = items.find(x => x.statId === id); return it ? (it.pointsOverrides && it.pointsOverrides['17'] != null ? it.pointsOverrides['17'] : it.points) : 0; };
+    const w = {};
+    KB.forEach(b => {
+      const made = ['0_19', '20_29', '30_39'].includes(b) ? pt(80) : b === '40_49' ? pt(77)
+        : b === '50_59' ? (items.some(x => x.statId === 198) ? pt(198) : pt(74)) : (items.some(x => x.statId === 201) ? pt(201) : pt(74));
+      w[`fgm_${b}`] = made; w[`fgmiss_${b}`] = pt(85);
+    });
+    w.xpm = pt(86); w.xpmiss = pt(88);
+    return w;
+  };
   const ELIG = { QB: ['QB'], RB: ['RB'], WR: ['WR'], TE: ['TE'], FLEX: ['RB', 'WR', 'TE'], WRRB_FLEX: ['RB', 'WR'], REC_FLEX: ['WR', 'TE'],
                  SUPER_FLEX: ['QB', 'RB', 'WR', 'TE'], DEF: ['DEF'], K: ['K'] };
 
@@ -42,8 +70,9 @@
       const scoring = {};
       Object.entries(SLEEPER_SCORE).forEach(([k, ours]) => { scoring[ours] = +((lg.scoring_settings || {})[k] || 0); });
       const byRoster = Object.fromEntries((mu || []).map(m => [m.roster_id, m]));
+      const kw = sleeperK(lg.scoring_settings || {});
       return {
-        platform: 'sleeper', id, name: lg.name, season: lg.season, week,
+        platform: 'sleeper', id, name: lg.name, season: lg.season, week, kw,
         slots: (lg.roster_positions || []).filter(s => !['BN', 'IR', 'TAXI'].includes(s)),
         scoring,
         teams: (rosters || []).map(r => { const st = r.settings || {};
@@ -76,6 +105,7 @@
         scoring[k] = it.points;
         if (k === 'reception' && it.pointsOverrides && it.pointsOverrides['6'] != null) scoring.te_bonus = it.pointsOverrides['6'] - it.points;  // TE premium
       });
+      const kw = espnK((st.scoringSettings || {}).scoringItems || []);
       const names = {};
       const teams = (d.teams || []).map(t => {
         const entries = ((t.roster || {}).entries || []);
@@ -90,7 +120,7 @@
       });
       const games = (d.schedule || []).filter(g => g.matchupPeriodId === week || (g.home && g.home.pointsByScoringPeriod && g.home.pointsByScoringPeriod[week] != null));
       return {
-        platform: 'espn', id, name: st.name, season, week, slots, scoring, teams, espnNames: names,
+        platform: 'espn', id, name: st.name, season, week, slots, scoring, kw, teams, espnNames: names,
         matchup(teamId) {
           const g = games.find(x => String((x.home || {}).teamId) === teamId || String((x.away || {}).teamId) === teamId);
           if (!g) return null;
@@ -103,9 +133,15 @@
     },
   };
 
-  NFLE.areas.league = { mount(sec) { Promise.all([NFLE.week(), NFLE.load('data/fantasy_ids.json')]).then(([D, IDS]) => build(sec, D, IDS)); } };
+  NFLE.areas.league = { mount(sec) {
+    Promise.all([NFLE.week(), NFLE.load('data/fantasy_ids.json'), NFLE.load('data/kdst.json').catch(() => null)]).then(([D, IDS, KD]) => build(sec, D, IDS, KD));
+  } };
 
-  function build(sec, D, IDS) {
+  function build(sec, D, IDS, KD) {
+    const KBY = {};  // kicker gsis -> { team, name, w: [[week, implied, line]] }
+    if (KD && KD.k) Object.entries(KD.k).forEach(([team, o]) => { KBY[o.pid] = Object.assign({ team }, o); });
+    const kScore = line => (KD ? KD.k_keys : []).reduce((t, key, i) => t + (line[i] || 0) * ((L.kw || {})[key] || 0), 0);
+    const kWeek = (g, wk) => { const o = KBY[g]; const e = o && o.w.find(z => z[0] === wk); return e ? kScore(e[2]) : null; };
     const TEAMS = D.teams || {}, KEYS = D.score.keys;
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem(LS) || 'null'); } catch (e) { /* none */ }
@@ -126,6 +162,11 @@
     };
     const fromPid = (g, x) => {
       const p = D.players[g], nm = IDS.names[g];
+      if (!p && KBY[g]) {  // a kicker: our kicking projection under this league's kicking settings
+        const o = KBY[g], proj = kWeek(g, KD.from);
+        return { ext: x, pid: g, name: o.name, pos: 'K', team: o.team, proj, pa: proj == null ? 0 : 1, exp: proj, sd: 4.3, inactive: 0,
+                 why: proj == null ? 'on bye' : '' };
+      }
       if (!p) return { ext: x, pid: g, name: nm ? nm[0] : g, pos: nm ? nm[1] : '', team: nm ? nm[2] : '', proj: null, exp: null, why: 'no projection this week (bye, out, or not on our board)' };
       const proj = pts(p.sc.pj, L.scoring, p.pos), pa = 1 - (p.inactive || 0);
       // sd from his range (10th-90th percentile spans 2.56 sd), rescaled to this league's scoring
@@ -195,7 +236,7 @@
         <h3 class="lg-h">Best lineup <span class="muted">${f1(total(best))} expected</span></h3>
         ${table(best.map(r => row(r.slot, r.p)).join(''))}
         <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') || '<tr><td colspan="4" class="muted">No projected bench players.</td></tr>')}
-        <p class="muted lg-note">Expected points = our projection under your league's scoring x his chance to play. Team defenses and kickers aren't projected (kept as you set them). Scoring bonuses (100-yard games, 2-point tries) aren't modeled.</p>`;
+        <p class="muted lg-note">Expected points = our projection under your league's scoring x his chance to play. Team defenses aren't projected yet (kept as you set them); kickers are, under your league's kicking settings. Scoring bonuses (100-yard games, 2-point tries) aren't modeled.</p>`;
     };
 
     const matchupView = () => {
@@ -230,7 +271,12 @@
         return `<h3 class="lg-h">${pos}</h3>${table(list.map(p => row(pos, p, `<td class="num">${p.ros != null ? Math.round(p.ros) : ''}</td>`)).join('') || '<tr><td colspan="5" class="muted">None projected.</td></tr>',
           '<th></th><th>Player</th><th class="num">This wk</th><th class="num">Out%</th><th class="num">ROS</th>')}`;
       }).join('');
-      return `<p class="muted lg-note">Unrostered in your league, best rest-of-season first (expected points through week 17 under your scoring).</p>${byPos}`;
+      const kFree = Object.entries(KBY).filter(([g]) => !rostered.has(g)).map(([g, o]) => {
+        const r = fromPid(g, g); r.ros = o.w.reduce((t, e) => t + kScore(e[2]), 0); return r; })
+        .sort((a, b) => b.ros - a.ros).slice(0, 6);
+      const kHtml = L.slots.includes('K') ? `<h3 class="lg-h">K</h3>${table(kFree.map(p => row('K', p, `<td class="num">${Math.round(p.ros)}</td>`)).join(''),
+        '<th></th><th>Player</th><th class="num">This wk</th><th class="num">Out%</th><th class="num">ROS</th>')}` : '';
+      return `${kHtml ? '' : ''}<p class="muted lg-note">Unrostered in your league, best rest-of-season first (expected points through week 17 under your scoring).</p>${byPos}${kHtml}`;
     };
 
     // ---- league rankings: every team's best lineup this week and for each remaining week through 17 (ros.json:
@@ -246,6 +292,7 @@
         weeks.forEach(k => {
           const cand = t.ext.map(x => {
             const g = gsisOf(x), r = g && ROS.players[g];
+            if (!r && g && KBY[g]) { const v = kWeek(g, k); return v == null || (k === KD.from && false) ? null : { ext: x, pos: 'K', exp: v }; }
             if (!r) return null;
             const e = r.w.find(z => z[0] === k);
             if (!e || (k === ROS.from && r.k && now >= Date.parse(r.k))) return null;
@@ -265,7 +312,7 @@
           <td class="num">${f1(r.wk)} <span class="muted">(${wkRank.indexOf(r.t.id) + 1})</span></td>
           <td class="num">${rc.w ?? ''}-${rc.l ?? ''}${rc.t ? `-${rc.t}` : ''}</td><td class="num muted">${rc.pf ? Math.round(rc.pf) : ''}</td></tr>`;
       }).join('');
-      return `<p class="muted lg-note">Ranked by rest-of-season strength: each team's best lineup by our projections for every remaining week through ${ROS.through}, summed (byes, injuries and players coming back included). This week's number in parentheses is its rank. Team defenses and kickers aren't projected.</p>
+      return `<p class="muted lg-note">Ranked by rest-of-season strength: each team's best lineup by our projections for every remaining week through ${ROS.through}, summed (byes, injuries and players coming back included). This week's number in parentheses is its rank. Team defenses aren't projected yet; kickers are.</p>
         <div class="lg-scroll"><table class="bx lg-tbl lg-rank"><thead><tr><th class="num">#</th><th>Team</th><th class="num">ROS</th><th class="num">vs avg</th><th class="num">This wk</th><th class="num">Record</th><th class="num">PF</th></tr></thead><tbody>${body}</tbody></table></div>`;
     };
 

@@ -593,6 +593,8 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   who kicked. Baseline: the kicker's season-to-date average (standard scoring: FG 3 / 4 at 40-49 / 5 at 50+, PAT 1,
   miss -1). Gate: MAE lower with a 95% CI over season-weeks excluding 0 and better in >= 3 of 5 seasons. Fail: ship
   the baseline (season-to-date average, rescaled per league from his made / missed line) and say so.
+  **Result: PASS, SHIPPED** (`tools/kicker_eval.py`): 2,298 kicker-games, MAE 3.706 vs 3.998 (-0.293 [-0.389,
+  -0.204]), 5/5 seasons; mean 7.86 vs actual 7.84 (baseline 8.06); correlation with actual 0.158 vs 0.043.
 - **PRE-REGISTERED 2026-10-15 (owner: "anything worth trying taking OUT?"): removal tests.** Components never
   ablated on fantasy accuracy: QB effects in the team pass model (`no_qb_effects`), vacated-volume redistribution
   (`redistribution_0`), prior-season carryover in team ratings (`prior_weight_0`), the 10-90% win-probability play

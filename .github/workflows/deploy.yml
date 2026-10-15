@@ -87,6 +87,9 @@ jobs:
       # Players > Rankings > Rest of season: this week + the lookahead weeks summed per player through week 17.
       - name: Rest of season
         run: python tools/ros_build.py --site=site
+      # League tab: kicker (and team-defense) projections, this week through 17 (reads the week pages above).
+      - name: Kickers and defenses
+        run: python tools/kdst_build.py --site=site
       # Career game logs for the player card (one JSON per player; reads the week data files built above).
       - name: Player game logs
         run: python tools/player_logs.py --site=site
