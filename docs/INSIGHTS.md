@@ -572,6 +572,16 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Green Bay checks out: 13 titles, 37-28.
 
 ## 9. Open threads / next steps (as of 2026-10-12)
+- **PRE-REGISTERED 2026-10-15 (owner: "anything worth trying taking OUT?"): removal tests.** Components never
+  ablated on fantasy accuracy: QB effects in the team pass model (`no_qb_effects`), vacated-volume redistribution
+  (`redistribution_0`), prior-season carryover in team ratings (`prior_weight_0`), the 10-90% win-probability play
+  filter (`wp_none`). `tools/experiments.py baseline,<variant> 2021-2025`, relevant rows, 95% CI over season-weeks.
+  Rule: REMOVE if overall MAE is not worse (CI upper bound < +0.003) AND no position is significantly worse (its
+  CI above 0); KEEP otherwise. A removal that is significantly better is removed regardless of the 0.003 margin.
+  (Prior-season carryover also helps team-game prediction early in the season (section 9 carryover note), so it is
+  only removed if Matchups / Power are checked too.) Rejected experiment switches still in model code (elite, rbbc,
+  gl_share, gl_struct, coach_aggr, rz_struct, age_input, spread_shares, qb_rush_split) are dead code: delete,
+  verified by an identical baseline backtest before / after.
 - **Return games, fact check (owner 2026-10-15: "players returning from injury have huge fantasy games all the
   time").** Skill players averaging 8+ half-PPR before the absence, 2019-25 (n 473): pre-injury 12.5, return game
   10.8, next 3 games 11.0; booms (>= 1.5x his average) 14.2% of return games vs 18.5% of his other games, busts
