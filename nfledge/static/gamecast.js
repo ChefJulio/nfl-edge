@@ -208,7 +208,7 @@
     punt: /punts (\d+) yards/, kick: /kicks (\d+) yards/, fg: /(\d+) yard field goal is (GOOD|No Good|BLOCKED)/i,
     ret: new RegExp(`\\. (${NM}) (?:to|pushed|ran|for|MUFFS)`), pen: /PENALTY on ([A-Z]{2,4})-[^,]*, ([^,]+), (\d+) yards/,
   };
-  const fullNames = sum => {
+  const fullNames = (sum, ids = null) => {  // ids (optional): filled with the same keys -> ESPN athlete id
     const m = {};
     // the official text writes "D.Prescott", or "Ja.Chase" to tell apart a teammate with the same initial
     ((sum && sum.boxscore && sum.boxscore.players) || []).forEach(tp => (tp.statistics || []).forEach(c => (c.athletes || []).forEach(a => {
@@ -216,18 +216,58 @@
       const keys = [String(A.shortName || '').replace(/\s+/g, ''), fn && ln ? `${fn[0]}.${ln}` : '', fn.length > 1 && ln ? `${fn.slice(0, 2)}.${ln}` : ''];
       const bare = ln.replace(/(Jr|Sr|II|III|IV|V)\.?$/, '');  // "Godwin Jr." is "C.Godwin" in the text
       if (fn && bare !== ln) keys.push(`${fn[0]}.${bare}`, fn.length > 1 ? `${fn.slice(0, 2)}.${bare}` : '');
-      keys.forEach(k => { if (k && !m[k]) m[k] = A.displayName; });
+      keys.forEach(k => { if (k && !m[k]) { m[k] = A.displayName; if (ids) ids[k] = String(A.id); } });
     })));
     return m;
   };
-  const playHead = (pl, names) => {
-    const raw = String(pl.text || '').replace(/^(\([^)]*\)\s*)+/, '');
+  // ctx: { off, other } our team codes for the offense at the snap and its opponent (who lost a fumble)
+  const ACT = new RegExp(`^${NM} (?:pass|scrambles|sacked|left|right|up the middle|middle|kneels)\\b`);
+  const playHead = (pl, names, ctx = {}) => {
+    // the official text leads with formation and eligibility notes: "(Shotgun) C.Lomu reported in as eligible. D.Maye ..."
+    const lead_ = new RegExp(`^(?:(?:\\([^)]*\\)|${NM} reported in as eligible\\.)\\s*)+`);
+    const full = String(pl.text || '').replace(lead_, '');  // shown under the card
+    // what's parsed: after a replay reversal only the ruling that stands ("...the play was REVERSED.D.Maye pass
+    // incomplete..."), and without the 2-point try that follows a touchdown
+    let raw = full;
+    if (/REVERSED\./.test(raw)) raw = raw.slice(raw.lastIndexOf('REVERSED.') + 9).trim().replace(lead_, '');
+    raw = raw.replace(/\s*TWO-POINT CONVERSION ATTEMPT\..*$/, '');
     const nm = x => x ? (names[x.replace(/\s+/g, '')] || x) : '';
     const g = (k, i = 1) => { const m = raw.match(RX[k]); return m ? m[i] : null; };
     const t = (pl.type && pl.type.text) || '', y = pl.statYardage || 0;
     const td = /touchdown/i.test(t) || /TOUCHDOWN/.test(raw);
     const yds = n => n === 0 ? 'no gain' : n < 0 ? `loss of ${-n}` : `${n} yard${n === 1 ? '' : 's'}`;
+    // a scrimmage action read from the text alone (ESPN's play type names the fumble, not what led to it)
+    const action = txt => {
+      if (!ACT.test(txt)) return null;
+      const ty = /pass incomplete/.test(txt) ? 'Pass Incompletion' : /INTERCEPTED/.test(txt) ? 'Interception'
+        : /sacked/.test(txt) ? 'Sack' : / pass /.test(txt) ? 'Pass Reception' : 'Rush';
+      const sy = /no gain/.test(txt) ? 0 : +((txt.match(/for (-?\d+) yards?/) || [])[1] || 0);
+      return playHead({ text: txt, type: { text: ty }, statYardage: sy, isTurnover: ty === 'Interception', inner: true }, names, ctx);
+    };
     let h, cls = '';
+    // fumbles (owner 2026-10-15: "Fumble" alone misleads): say what the play was and who ended up with the ball. Kept
+    // by the offense and the play went on ("FUMBLES, and recovers ... D.Maye pass ... to H.Henry for 20 yards") -> that
+    // play, recovered; otherwise the action before the fumble, then lost to / recovered by the team that got it.
+    const fi = raw.search(/FUMBLES/);
+    if (fi >= 0 && !pl.inner) {
+      const recs = [...raw.matchAll(/(?:RECOVERED|recovered) by ([A-Z]{2,4})-/g)], rec = recs.length ? ourCode(recs[recs.length - 1][1]) : '';
+      const ret = /kickoff|punt/i.test(t), loser = ret ? ctx.other : ctx.off;  // on a kick the returner's team fumbles
+      const lost = rec ? (loser ? rec !== loser : !!pl.isTurnover) : false;
+      if (!lost) {
+        const rest = raw.slice(fi).match(new RegExp(`\\. (${NM} (?:pass|scrambles|sacked|left|right|up the middle|middle)\\b.*)$`));
+        const r = rest && action(rest[1]);
+        if (r) return { h: `${r.h}${rec && rec !== loser ? `, fumble recovered by ${rec}` : ' (fumble recovered)'}`, cls: r.cls, raw: full, eff: raw };
+      }
+      // the action that led to the LAST fumble (a play can fumble twice: botched snap, recovered, then strip-sacked)
+      const lf = raw.lastIndexOf('FUMBLES'), who = (raw.match(new RegExp(`^(${NM}) `)) || [])[1];
+      const segs = raw.slice(0, lf).split(/\. (?=[A-Z][a-z]?\.)/).map(x => x.trim()).filter(Boolean);
+      const head = ret ? raw.slice(0, fi).trim() : segs.reverse().find(x => ACT.test(x));
+      const base = ret ? playHead(Object.assign({}, pl, { text: head, inner: true }), names, ctx).h : head ? action(head).h : '';
+      const tdD = lost && /TOUCHDOWN/.test(raw.slice(lf));
+      h = base ? `${base}, ${lost ? `fumble lost to ${rec}` : 'fumble recovered'}`
+        : `${who ? nm(who) : 'Ball'} fumbles, ${lost ? `lost to ${rec}` : 'offense recovers'}`;
+      return { h: `${h}${tdD ? `, ${rec} TD` : ''}`.replace(/\s{2,}/g, ' '), cls: lost ? 'bad' : '', raw: full, eff: raw, lost };
+    }
     if (/interception/i.test(t)) { h = `${nm(g('lead'))} intercepted${g('picked') ? ` by ${nm(g('picked'))}` : ''}`; cls = 'bad'; }
     else if (/sack/i.test(t)) { h = `${nm(g('lead'))} sacked, ${yds(y)}`; cls = 'bad'; }
     else if (/pass reception|passing touchdown/i.test(t)) h = `${nm(g('lead'))} ${g('to') ? `to ${nm(g('to'))}` : 'pass'}, ${yds(y)}`;
@@ -237,11 +277,75 @@
     else if (/kickoff/i.test(t)) h = /Touchback/i.test(raw) ? 'Kickoff, touchback' : `Kickoff: ${nm(g('ret'))} returns it ${pl.statYardage || 0} yards`;
     else if (/field goal/i.test(t)) { const r = g('fg', 2); h = `${g('fg') || ''}-yard field goal, ${/good/i.test(r || t) && !/no good/i.test(r || '') ? 'good' : r && /block/i.test(r) ? 'blocked' : 'no good'}`; cls = /good/i.test(t) ? 'good' : 'bad'; }
     else if (/penalty/i.test(t)) { const m = raw.match(RX.pen); h = m ? `Penalty, ${m[1]}: ${m[2]}, ${m[3]} yards` : 'Penalty'; cls = 'flag'; }
-    else if (/fumble/i.test(t)) { h = `Fumble${/RECOVERED by ([A-Z]{2,4})/.test(raw) ? `, recovered by ${raw.match(/RECOVERED by ([A-Z]{2,4})/)[1]}` : ''}`; cls = 'bad'; }
     else h = t || raw.split('. ')[0];
     if (td) { h += ' · Touchdown'; cls = 'td'; }
     if (pl.isTurnover && cls !== 'bad') cls = 'bad';
-    return { h: h.replace(/\s+,/g, ',').replace(/\s{2,}/g, ' ').trim(), cls, raw };
+    return { h: h.replace(/\s+,/g, ',').replace(/\s{2,}/g, ' ').trim(), cls, raw: full, eff: raw };
+  };
+  // ---- what one play put in the box score (owner 2026-10-15): yards, catches, touchdowns, picks and lost fumbles
+  // per player, read from the official text (ESPN's play feed names no players). Every scrimmage action in the text
+  // counts ("FUMBLES, and recovers ... D.Maye pass ... to H.Henry for 20 yards" credits the pass). Sacks, kicks,
+  // 2-point tries and plays wiped out by a penalty credit nothing.
+  const playStats = (raw, lost) => {
+    if (/No Play|NULLIFIED/i.test(raw)) return [];
+    const out = {}, who = k => out[k] || (out[k] = { key: k, s: {} });
+    const add = (k, stat, v) => { const o = who(k); o.s[stat] = (o.s[stat] || 0) + v; };
+    let carrier = null;
+    raw.split(/\. (?=[A-Z][a-z]?\.)/).map(x => x.trim()).filter(x => ACT.test(x) && !/sacked|kneels|TWO-POINT/i.test(x)).forEach(seg => {
+      const lead = seg.match(new RegExp(`^(${NM}) `))[1];
+      const yd = /no gain/.test(seg) ? 0 : +((seg.match(/for (-?\d+) yards?/) || [])[1] || 0);
+      const td = /TOUCHDOWN/.test(seg.split(/INTERCEPTED|FUMBLES/)[0]);
+      if (/ pass /.test(seg)) {
+        if (/INTERCEPTED/.test(seg)) { add(lead, 'interception', 1); carrier = null; return; }
+        if (/pass incomplete/.test(seg)) { add(lead, 'pass_att', 0); carrier = null; return; }
+        const to = seg.match(RX.to);
+        add(lead, 'pass_yd', yd); if (td) add(lead, 'pass_td', 1);
+        if (to) { add(to[1], 'reception', 1); add(to[1], 'rec_yd', yd); if (td) add(to[1], 'rec_td', 1); }
+        carrier = to ? to[1] : lead;
+      } else { add(lead, 'rush_yd', yd); if (td) add(lead, 'rush_td', 1); carrier = lead; }
+    });
+    if (lost && carrier) add(carrier, 'fumble_lost', 1);
+    return Object.values(out);
+  };
+  const statText = s => {
+    const sg = v => `${v < 0 ? '&minus;' : '+'}${Math.abs(v)}`, bits = [];
+    if (s.pass_att != null && s.pass_yd == null && !s.interception) bits.push('incomplete');
+    if (s.pass_yd != null) bits.push(`${sg(s.pass_yd)} pass yds`);
+    if (s.pass_td) bits.push('pass TD');
+    if (s.interception) bits.push('INT');
+    if (s.rush_yd != null) bits.push(`${sg(s.rush_yd)} rush yds`);
+    if (s.rush_td) bits.push('rush TD');
+    if (s.reception) bits.push(`catch, ${sg(s.rec_yd || 0)} yds`);
+    if (s.rec_td) bits.push('rec TD');
+    if (s.fumble_lost) bits.push('fumble lost');
+    return bits.join(' · ');
+  };
+  const WPI = new WeakMap();  // sum -> { playId: [win% before, win% after] } (home team's chance)
+  const wpAround = (sum, pl) => {
+    if (!WPI.has(sum)) {
+      const m = {}, ser = wpSeries(sum);
+      ser.forEach((x, i) => { m[String(x.play.id)] = [i ? ser[i - 1].home : x.home, x.home]; });
+      WPI.set(sum, m);
+    }
+    return WPI.get(sum)[String(pl.id)] || null;
+  };
+  const playImpact = (pl, hd, info, sum, ids, names, off) => {
+    const map = byEspn(), w = weights(), K = KEYS();
+    const rows = playStats(hd.eff, hd.lost).map(o => {
+      const id = ids[o.key.replace(/\s+/g, '')], pid = id && map[id], pp = pid && DATA && DATA.players[pid];
+      const line = K.map(k => o.s[k] || 0), fp = pts(line, w, pp ? pp.pos : '');
+      return `<div class="pi-row"${pid ? ` data-open-pid="${esc(pid)}"` : ''}>${id ? `<img class="pi-hs" src="${esc(NFLE.ui ? NFLE.ui.headshot(id) : '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : '<span class="pi-hs"></span>'}
+        <span class="pi-nm">${esc(names[o.key.replace(/\s+/g, '')] || o.key)}</span><span class="pi-st">${statText(o.s)}</span>
+        <b class="pi-fp ${fp > 0.05 ? 'up' : fp < -0.05 ? 'dn' : ''}">${fp > 0.05 ? '+' : fp < -0.05 ? '&minus;' : ''}${f1(Math.abs(fp))}</b></div>`;
+    }).slice(0, 2).join('');
+    const wp = wpAround(sum, pl);
+    let wpHtml = '';
+    if (wp && off) {
+      const home = off === info.home.team, b0 = Math.round(100 * (home ? wp[0] : 1 - wp[0])), b1 = Math.round(100 * (home ? wp[1] : 1 - wp[1])), d = b1 - b0;
+      wpHtml = `<div class="pi-wp"><span>${esc(off)} win chance</span> <b>${b0}%</b> <span class="rp-ar">&rarr;</span> <b>${b1}%</b>
+        <span class="pi-d ${d > 0 ? 'up' : d < 0 ? 'dn' : ''}">${d > 0 ? '+' : d < 0 ? '&minus;' : '±'}${Math.abs(d)}</span></div>`;
+    }
+    return `<div class="pi">${rows}${wpHtml}</div>`;
   };
   const playFieldSvg = (a, b, info) => {
     const X = v => 10 + v;
@@ -263,7 +367,8 @@
       <rect x="0" y="0" width="10" height="20" style="fill:${esc(info.away.color)}"/><rect x="110" y="0" width="10" height="20" style="fill:${esc(info.home.color)}"/>${lines}${mark}</svg>`;
   };
   const replayCard = (pl, info, sum) => {
-    const a = spot(pl.start, info), b = spot(pl.end, info), hd = playHead(pl, fullNames(sum));
+    const a = spot(pl.start, info), b = spot(pl.end, info), ids = {}, names = fullNames(sum, ids);
+    const hd = playHead(pl, names, a ?{ off: a.offense.team, other: a.offense.team === info.away.team ? info.home.team : info.away.team } : {});
     // timeouts, quarter ends, the two-minute warning: an event, not a play (no down line, nothing next)
     const event = /timeout|end period|end of|two-minute/i.test((pl.type && pl.type.text) || '');
     const off = a && !event ? a.offense.team : '';
@@ -281,12 +386,13 @@
     const dc = t => /^1st/.test(t) ? 'd1' : /^3rd/.test(t) ? 'd3' : /^4th/.test(t) ? 'd4' : '';
     const net = a && b && !event && !changed && !kick && !/punt|field goal|extra point|kickoff/i.test((pl.type && pl.type.text) || '') ? Math.round((b.x - a.x) * a.dir) : null;
     const chip = net == null ? '' : `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)} yd${Math.abs(net) === 1 ? '' : 's'}</span>`;
-    const afterHtml = !after ? '' : changed ? `${pill(b.offense.team)} <span class="rp-d chg">${esc(pl.end.downDistanceText)}</span>`
+    const afterHtml = !after ? '' : changed ? `${pill(b.offense.team)} <span class="rp-d chg">${esc(pl.end.shortDownDistanceText || pl.end.downDistanceText)}</span>`
       : `<span class="rp-d ${dc(after)}${/^1st/.test(after) && !/^1st/.test(before) ? ' new' : ''}">${esc(after)}</span>`;
     return `<section class="sit rp-card"><div class="rp-dd">${offSide ? `${pill(off)} <b>ball</b>` : ''}${where ? `${off ? ' · ' : ''}${esc(where)}` : ''}</div>
-      <div class="rp-what ${hd.cls}">${esc(hd.h)}</div>${playFieldSvg(event ? b : a, event ? null : b, info)}
-      ${!event && (before || after) ? `<div class="rp-next"><span class="rp-d ${dc(before)}">${esc(before)}</span>${after ? ` <span class="rp-ar">&rarr;</span> ${afterHtml}` : ''}${chip}</div>` : ''}
-      <div class="rp-raw">${esc(hd.raw)}</div></section>`;
+      <div class="rp-what ${hd.cls}${hd.h.length > 44 ? ' long' : ''}">${esc(hd.h)}</div>${playFieldSvg(event ? b : a, event ? null : b, info)}
+      <div class="rp-next">${!event && (before || after) ? `<span class="rp-d ${dc(before)}">${esc(before)}</span>${after ? ` <span class="rp-ar">&rarr;</span> ${afterHtml}` : ''}${chip}` : ''}</div>
+      ${event ? '<div class="pi"></div>' : playImpact(pl, hd, info, sum, ids, names, off)}
+      <div class="rp-raw" title="Tap for the full play">${esc(hd.raw)}</div></section>`;
   };
   const sitFromPlays = (sum) => {  // after the last play (finished games, replay, or no live situation yet)
     const pl = allPlays(sum).flatMap(d => d.plays || []);
@@ -1756,7 +1862,7 @@
       ${GP.canReplay ? `<section class="rp">${rp ? `<button type="button" data-rp="first">&laquo;</button><button type="button" data-rp="prev">&lsaquo;</button>
         <button type="button" data-rp="play">${rp.timer ? 'Pause' : 'Play'}</button><button type="button" data-rp="next">&rsaquo;</button><button type="button" data-rp="last">&raquo;</button>
         <span class="seg rp-speed">${[['slow', 'Slow'], ['normal', 'Normal'], ['fast', 'Fast']].map(([k, l]) => `<button type="button" data-rps="${k}" class="${(GP.rpSpeed || 'normal') === k ? 'on' : ''}">${l}</button>`).join('')}</span>
-        <input type="range" min="0" max="${rp.plays.length - 1}" value="${rp.i}" aria-label="Replay position"><span class="muted">Play ${rp.i + 1} of ${rp.plays.length}</span>
+        <input type="range" min="0" max="${rp.plays.length - 1}" value="${rp.i}" aria-label="Replay position"><span class="muted rp-pos">Play ${rp.i + 1} of ${rp.plays.length}</span>
         <button type="button" data-rp="off">Exit replay</button>` : '<button type="button" data-rp="on">Replay this game play by play</button>'}</section>` : ''}
       <nav class="gc-jump"><a href="#gcWp">Win %</a><a href="#gcLog">Plays</a><a href="#gcBox">Box score</a><a href="#gcTeam">Team stats</a></nav>
       <div class="gc-grid">
@@ -1828,6 +1934,7 @@
     });
     // replay controls
     root.querySelectorAll('[data-rp]').forEach(b => b.onclick = () => replayCmd(b.dataset.rp));
+    root.querySelectorAll('.rp-card .rp-raw').forEach(e => e.onclick = () => e.classList.toggle('open'));  // clamped to 3 lines
     root.querySelectorAll('[data-rps]').forEach(b => b.onclick = () => {
       GP.rpSpeed = b.dataset.rps;
       if (GP.replay && GP.replay.timer) startReplayTimer(GP.replay);

@@ -582,3 +582,28 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .rp-card .rp-yd { margin-left: auto; font-size: 13px; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
 .rp-card .rp-yd.gain { color: #6fdc8c; background: rgba(111,220,140,.14); } .rp-card .rp-yd.loss { color: #ff8f84; background: rgba(255,143,132,.14); }
 .rp-card .rp-yd.zero { color: var(--muted); background: rgba(255,255,255,.07); }
+/* replay card: every slot has a fixed height so stepping through plays never moves the controls below it
+   (owner 2026-10-15); long play text is clamped to 3 lines, tap to read it all */
+.rp-card .rp-dd { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; height: 22px; line-height: 22px; }
+.rp-card .rp-what { height: 2.5em; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.rp-card .rp-next { flex-wrap: nowrap; white-space: nowrap; height: 24px; overflow: hidden; }
+.rp-card .rp-d.new::after { content: '1ST DOWN'; }
+.rp-card .rp-raw { height: 4.05em; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; cursor: pointer; }
+.rp-card .rp-raw.open { height: auto; display: block; }
+.rp button[data-rp=play] { min-width: 4.6em; }
+.rp .rp-pos { min-width: 8.5em; font-variant-numeric: tabular-nums; }
+.rp-card .rp-what.long { font-size: 17px; }
+/* what the play did: up to two players (stat line + fantasy points) and the offense's win chance; fixed height */
+.rp-card .pi { height: 92px; margin-top: 8px; padding: 6px 0 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+.pi-row { display: flex; align-items: center; gap: 8px; height: 28px; font-size: 13px; cursor: pointer; min-width: 0; }
+.pi-hs { width: 28px; height: 28px; border-radius: 50%; background: #23272f; object-fit: cover; flex: none; }
+.pi-nm { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; max-width: 40%; }
+.pi-st { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; min-width: 0; }
+.pi-fp { margin-left: auto; font-size: 13.5px; padding: 2px 8px; border-radius: 999px; color: var(--muted); background: rgba(255,255,255,.07); flex: none; font-variant-numeric: tabular-nums; }
+.pi-fp::after { content: ' FP'; font-size: 10px; font-weight: 700; opacity: .8; }
+.pi-fp.up { color: #6fdc8c; background: rgba(111,220,140,.14); } .pi-fp.dn { color: #ff8f84; background: rgba(255,143,132,.14); }
+.pi-wp { margin-top: auto; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 5px; height: 22px; }
+.pi-wp b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.pi-d { margin-left: auto; font-weight: 800; font-size: 13px; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,.07); }
+.pi-d.up { color: #6fdc8c; background: rgba(111,220,140,.14); } .pi-d.dn { color: #ff8f84; background: rgba(255,143,132,.14); }
+.rp-card .rp-what { height: 50px; } .rp-card .rp-what.long { line-height: 25px; }
