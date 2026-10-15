@@ -671,6 +671,17 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   on this week's report but not in a state / neither; (iii) the Hurts group (on the report, this-week P < 0.5,
   not in a state) within 5 points. Pass -> ship as the lookahead availability for all players (IR-return
   additions to the roster unchanged); ROS totals then carry attrition for everyone.
+  **v1 result (`tools/ros_avail_eval.py`): PASS, NOT SHIPPED.** Brier 0.2395 -> 0.1526 [-0.095, -0.080], 4/4;
+  by k within 1.2 points; groups within 2.3; Hurts group 59.4 vs 60.1 actual (old 100). But a subgroup check
+  (seen before this v2) by position x role (offensive snap share last 3: <0.3 / 0.3-0.7 / >0.7) x k-bucket: starter
+  RBs under-predicted 3.3 / 5.9 / 6.8 points (k 2-4 / 5-8 / 9-12), mid RBs and mid / starter TEs 3-5 under,
+  starter QBs 4.7 over at 9-12 (actual 72%): rankings compare starters across positions, so that skews them. Also
+  a bug: players on a bye at W have no roster row that week and were left out (Gibbs: 100% everywhere).
+- **PRE-REGISTERED 2026-10-15: unified lookahead availability v2.** Same design, with: roster row = his latest at or
+  before W (bye weeks); added feature season-long offensive snap share before W (separates established starters
+  from 3-game blips); trees max_depth 5, 400 iterations (more room for position x role x k interactions; chosen
+  before the run). Gate: v1's (i)-(iii), plus (iv) every position x role x k-bucket cell with n >= 300 within 5
+  points of actual.
 - **PRE-REGISTERED 2026-10-15: partial-week practice models.** For k = 1 and 2 published practice days, a model
   trained on report weeks truncated to their first k days (3-day weeks; same features with no game status, same
   GB settings), used while a team's final report (any game status on it) is not out. Walk-forward 2021-25 (train on
