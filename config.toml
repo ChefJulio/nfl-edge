@@ -159,6 +159,10 @@ share_normalize_tgt = 0.3
 # Walk-forward 2021-25 (pre-registered, owner 2026-10-15): newcomers + teammates MAE -0.009 [-0.011, -0.007],
 # overall -0.002 [-0.004, 0.000], no position worse (WR -0.006).
 newcomer_scale = 0.5
+# Journeymen (team changes over the past 5 seasons + this one) come in under their projections: whole stat line x
+# 0.94 / 0.91 / 0.89 for 1 / 2 / 3+ changes (data/history/journeyman.json). Fit 2021-23, tested 2024-25: MAE -0.108
+# for those players, -0.039 overall, RB / WR / TE better, QB no difference (owner idea, pre-registered 2026-10-15).
+journeyman = true
 
 [injuries]
 # Fraction of the learned vacated-volume redistribution applied. Backtest: helps RB, slightly hurts WR;

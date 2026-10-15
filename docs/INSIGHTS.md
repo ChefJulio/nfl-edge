@@ -618,6 +618,15 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   whole projected stat lines. Test on 2024-25 (untouched by the fit). Gate: (i) rows with
   k >= 1: MAE lower, 95% CI over season-weeks excluding 0; (ii) all rows: MAE not worse (CI upper < +0.003); (iii) no
   position significantly worse. Pass -> refit the multipliers on 2021-25 and ship.
+  **Result: PASS, SHIPPED** (`tools/journeyman_eval.py`, current-model backtest): fit 2021-23 multipliers 1 / 0.94 /
+  0.906 / 0.881; 2024-25 k >= 1 rows (4,096) MAE 3.714 -> 3.605 (-0.108 [-0.125, -0.090]); all rows (11,335)
+  -0.039 [-0.045, -0.033]; RB -0.041, WR -0.052, TE -0.023 (all CI < 0), QB -0.011 [-0.059, +0.040]. Bias by k
+  before -0.50 / -0.75 / -0.76 / -0.84, after -0.50 / -0.36 / -0.27 / -0.20. Shipped refit on 2021-25: 1 / 0.944 /
+  0.912 / 0.892 (`data/history/journeyman.json`, config experiments.journeyman). Caveat: backtests of 2021-25 now
+  include an in-sample adjustment.
+- **QB rushing on a leg injury (owner, Caleb's hamstring 2026-10-15): too few cases.** Mobile QBs (proj 15+ rush
+  yds) who played while listed with a leg injury: 14 games in 2021-25, rushed 18.1 vs 20.7 projected (-2.5 +- 10.5);
+  healthy mobile QBs +1.0 +- 1.5. No adjustment; revisit only if the sample grows.
 - **PRE-REGISTERED 2026-10-15 (owner: "if judkins sits, his replacement's projection would skyrocket, right?"):
   conserve vacated volume.** Wk 6: Judkins (68% of CLE carries, 60% to sit) is benched in the default scenario but
   only ~2.4 of his 11.5 points move to teammates (Estime +1.8, McLaughlin +0.6): the learned redistribution at 0.5

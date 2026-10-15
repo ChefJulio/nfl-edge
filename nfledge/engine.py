@@ -203,6 +203,47 @@ class Engine:
     s = self.data.schedules
     return s[(s.season == season) & (s.week == week) & (s.game_type == "REG")].copy()
 
+  def _journeyman(self, p: pd.DataFrame, season: int, week: int) -> pd.DataFrame:
+    """Players who change teams often come in under their projections (owner idea; pre-registered 2026-10-15,
+    tools/journeyman_eval.py): k = team changes over his past 5 seasons + this one (weekly rosters), capped at 3,
+    scales his whole projected stat line by a measured multiplier (data/history/journeyman.json: 1 / 0.94 / 0.91 /
+    0.89). Fit on 2021-23, tested on 2024-25: MAE -0.108 for k >= 1, -0.039 overall; shipped multipliers refit on
+    2021-25 (so backtests of those seasons are partly in-sample). His first game with a team is left to the
+    newcomer discount."""
+    import json
+    from pathlib import Path
+    from .player_model import STAT_KEYS
+    if not hasattr(self, "_jm"):
+      f = Path(__file__).resolve().parent.parent / "data" / "history" / "journeyman.json"
+      self._jm = {int(k): float(v) for k, v in json.loads(f.read_text(encoding="utf-8"))["mult"].items()} if f.exists() else {}
+      self._jm_seq = {}
+      r = self.data.rosters[(self.data.rosters.status == "ACT") & self.data.rosters.gsis_id.notna()].sort_values(["season", "week"])
+      for (g, s_), x in r.groupby(["gsis_id", "season"]):
+        self._jm_seq[(g, int(s_))] = list(zip(x.week.astype(int), team_name_fix(x.team)))
+    if not self._jm:
+      return p
+    p = p.copy()
+    first = getattr(self, "_first_game", {})
+    now = season * 100 + week
+    mult = []
+    for g, team in zip(p.gsis_id, p.team.astype(str)):
+      fg = first.get((g, team))
+      if first and (fg is None or fg >= now):  # first game with this team: the newcomer discount's job
+        mult.append(1.0)
+        continue
+      teams = []
+      for y in range(season - 5, season + 1):
+        teams += [t for wk, t in self._jm_seq.get((g, y), []) if y < season or wk <= week]
+      teams = [t for i, t in enumerate(teams) if i == 0 or t != teams[i - 1]]
+      mult.append(self._jm.get(min(3, max(0, len(teams) - 1)), 1.0))
+    m = np.array(mult)
+    for k in STAT_KEYS + ["proj"]:
+      if k in p:
+        p[k] = p[k] * m
+    if "proj_model" in p:
+      p["proj_model"] = p.proj_model * m
+    return p
+
   def _newcomers(self, p: pd.DataFrame, scale: float, wind, season: int, week: int) -> pd.DataFrame:
     """EXPERIMENT (experiments.newcomer_scale; pre-registered 2026-10-15): a RB / WR / TE in his first game for a team
     (no snap for it before this week, any season) gets `scale` x his projected targets and carries (mid-season movers'
@@ -305,6 +346,8 @@ class Engine:
       p = self.apply_blend(p)
     else:
       p["proj_model"] = p.proj
+    if self.cfg.get("experiments", {}).get("journeyman", False):
+      p = self._journeyman(p, season, week)
     p["low_sample"] = (p.n_db.fillna(0) + p.n_rush.fillna(0) + p.n_tgt.fillna(0)) < 40
     p = self._uncertainty(p)
     p["season"], p["week"] = season, week
