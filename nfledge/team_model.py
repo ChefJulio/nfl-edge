@@ -42,10 +42,12 @@ def prior_dropbacks(qbexp: pd.DataFrame, season: int, week: int) -> pd.Series:
 def unit_plays(pbp: pd.DataFrame, cfg: dict, qbexp: pd.DataFrame | None = None) -> dict[str, pd.DataFrame]:
   tm = cfg["team_model"]
   live = pbp.epa.notna() & pbp.posteam.notna() & pbp.defteam.notna()
-  not_garbage = pbp.wp.between(tm["wp_min"], tm["wp_max"])
+  # Every play counts, blowouts included: the old garbage-time filter (offense win probability 10-90%) was removed
+  # 2026-10-15 (owner's removal tests, INSIGHTS sec. 9): game margin MAE 10.638 -> 10.548 [-0.158, -0.019], better in
+  # 4 of 5 seasons, winners 59.2 -> 61.0%; fantasy MAE no difference.
   sel = {
-    "pass": live & pbp.is_dropback & not_garbage,
-    "rush": live & pbp.is_designed_rush & not_garbage,
+    "pass": live & pbp.is_dropback,
+    "rush": live & pbp.is_designed_rush,
     "st": live & pbp.is_st,
   }
   cols = ["season", "week", "game_id", "posteam", "defteam", "home", "div", "epa"]

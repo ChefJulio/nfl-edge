@@ -1,6 +1,8 @@
 """Walk-forward test of the GAME model (team ratings -> predicted score), scored on real game results.
 
-Usage: python tools/game_eval.py [SEASONS] [--history=N] [--jobs=N]   (default 2021-2025, history 8)
+Usage: python tools/game_eval.py [SEASONS] [--history=N] [--jobs=N] [--only=fitted] [--set=sec.key=val;...] [--save=path]
+  --set     config overrides (removal tests, 2026-10-15: e.g. --set="team_model.qb_effects=false")
+  --only    restrict the points-formula variants; --save writes every game prediction (parquet) for paired comparisons
 
 For each test season: tune the team-rating penalties and build the points-formula training rows on the two
 seasons before it (exactly as the site trains), then predict every regular-season game week by week from data
@@ -34,10 +36,31 @@ pd.set_option("display.width", 200)
 # name -> (special-teams weight, seasons the points formula trains on; 2 = the training window)
 VARIANTS = {"fitted": ("fitted", 2), "st_0": (0.0, 2), "st_1": (1.0, 2), "st_1.5": (1.5, 2), "st_2.5": (2.5, 2),
             "fitted_4yr": ("fitted", 4), "fitted_6yr": ("fitted", 6)}
+# --only / --set travel by environment so parallel worker processes (which re-import this module) see them too
+_opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
+for _k in ("only", "set"):
+  if _k in _opt:
+    os.environ[f"GAME_EVAL_{_k.upper()}"] = _opt[_k]
+if os.environ.get("GAME_EVAL_ONLY"):
+  VARIANTS = {k: v for k, v in VARIANTS.items() if k in os.environ["GAME_EVAL_ONLY"].split(",")}
+
+
+def overrides(cfg: dict) -> dict:
+  for part in filter(None, os.environ.get("GAME_EVAL_SET", "").split(";")):
+    key, _, val = part.partition("=")
+    sec, k = key.split(".")
+    v = {"true": True, "false": False}.get(val.lower(), val)
+    if isinstance(v, str):
+      try:
+        v = float(v)
+      except ValueError:
+        pass
+    cfg.setdefault(sec, {})[k] = v
+  return cfg
 
 
 def season_games(base: dict, history: int, season: int) -> tuple[pd.DataFrame, dict]:
-  cfg = copy.deepcopy(base)
+  cfg = overrides(copy.deepcopy(base))
   cfg["data"]["history_seasons"] = history
   data = D.load_all(cfg)
   t0 = time.time()
@@ -106,6 +129,8 @@ def main():
   d["err_t"] = (d.model_total - d.actual_total).abs()
   d["win"] = np.sign(d.model_margin) == np.sign(d.actual_margin)
   d["wk"] = d.season.astype(str) + "-" + d.week.astype(str)
+  if opt.get("save"):
+    d.to_parquet(opt["save"], index=False)
   ref = d[d.variant == "fitted"].set_index("game_id")
   vegas = (d[d.variant == "fitted"].spread_line - d[d.variant == "fitted"].actual_margin).abs().mean()
   rows = []

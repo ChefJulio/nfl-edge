@@ -81,7 +81,6 @@ def live_values(eng, cfg: dict, season: int, week: int, bt_res: pd.DataFrame | N
       cov = f"{100 * d.actual.between(d.p10, d.p90).mean():.0f}%"
   return {
     "seasons": f"{min(eng.data.seasons)}-{max(eng.data.seasons)}",
-    "wp_min": f"{tmc['wp_min']:.0%}", "wp_max": f"{tmc['wp_max']:.0%}",
     "alpha_pass": f"{eng.tm.alphas['pass']:g}", "alpha_rush": f"{eng.tm.alphas['rush']:g}",
     "alpha_st": f"{eng.tm.alphas['st']:g}", "alpha_qb": f"{eng.tm.alpha_qb:g}",
     "hl_team": f"{tmc['half_life_weeks']:g}", "hl_share": f"{pmc['share_half_life_weeks']:g}",

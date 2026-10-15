@@ -591,6 +591,15 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   spread_shares, rbbc, elite_*, player_calibration linear, snap_map rosters, def_terms fitted / sign, wind_mode
   linear / quadratic (gl_struct is ADOPTED and stays). Delete, verified by identical baseline projections before /
   after; results stay recorded here.
+  **Results (fantasy: `tools/experiments.py` 2021-25, 12,480 rows; games: `tools/game_eval.py --set` 2021-25, 1,279
+  games):** WIN-PROBABILITY FILTER REMOVED: fantasy ALL -0.001 [-0.002, +0.001], no position worse; game margin MAE
+  10.638 -> 10.548 (-0.090 [-0.158, -0.019]), better 4/5 seasons, winners 59.2 -> 61.0%: blowout plays carry signal.
+  QB EFFECTS KEPT: fantasy ALL +0.000 [-0.001, +0.002] (TE -0.003 better) but games +0.011 [-0.075, +0.096] with the
+  last two seasons worse (+0.058, +0.115) and total MAE +0.046. PRIOR-SEASON CARRYOVER KEPT: fantasy ALL +0.000
+  [-0.006, +0.008] fails the 0.003 bound (2024 +0.012). REDISTRIBUTION: overall no difference (+0.000 [-0.001,
+  +0.001]), but on the 5.7% of rows it changes (1,825) MAE is worse with it, +0.031 [+0.019, +0.042], while it
+  removes the bias (teammates of a sitting player: -0.15 without, +0.01 with): the same mean-vs-MAE trade-off as the
+  rejected linear calibration. Owner's call (pending).
 - **Return games, fact check (owner 2026-10-15: "players returning from injury have huge fantasy games all the
   time").** Skill players averaging 8+ half-PPR before the absence, 2019-25 (n 473): pre-injury 12.5, return game
   10.8, next 3 games 11.0; booms (>= 1.5x his average) 14.2% of return games vs 18.5% of his other games, busts

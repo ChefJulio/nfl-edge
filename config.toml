@@ -24,9 +24,7 @@ prior_weight = 0.3
 prior_decay_week = 8
 # Exponential recency weighting within the current season (weeks).
 half_life_weeks = 3.0
-# Win-probability window for garbage-time filtering.
-wp_min = 0.10
-wp_max = 0.90
+# (No garbage-time filter: every play counts; removed 2026-10-15, better game predictions.)
 # Ridge alpha grid searched with time-split CV (train weeks 1..N, predict N+1).
 alpha_grid = [1, 3, 10, 30, 100, 300, 1000, 3000]
 bootstrap_samples = 200
