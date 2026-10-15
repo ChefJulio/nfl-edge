@@ -653,6 +653,24 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   (iii fails by 1.1 points: k=6 76.2 vs 68.7, the same long-horizon optimism as (A) and the diagnostic). Hurts
   therefore still shows 100% from wk 7. The unified lookahead availability (OPEN above) would fix the plateau and
   is the way to cover him; retest B' inside it.
+- **PRE-REGISTERED 2026-10-15 (owner: "if it's data backed i support it"): unified lookahead availability.** One
+  classifier, P(skill player plays his team's k-th game from decision week W) for EVERY fantasy-relevant player,
+  replacing "return chain for players out, 1.0 for everyone else". Population: QB/RB/WR/TE with >= 1 offensive
+  snap this season before W, on the team's roster at W (any status); W = 2..16; label = played (any snap) his
+  team's k-th game from W (k = 1 is W itself). Features (all as known before W's games): k; position; offensive
+  snap share over his last 3 team games; share of his team's last 4 games played; games played this season;
+  this week's P(plays) (practice model on the final report when on it, else none) and on-report flag; roster
+  designation (active / IR / IR-return / PUP / other reserve); return-model state (missed games) and its chained
+  P(active) at k with step 1 = this week's estimate (production's current lookahead); week W. Gradient-boosted
+  trees, same settings as the practice model. Walk-forward: decision seasons 2020-25, test 2022-25, each trained
+  on decision seasons before it (practice and return models inside the features are walk-forward too).
+  Baseline: production now (return chain with this-week step 1 for players in a return state, 1.0 for the rest).
+  Evaluated on k = 2..12 with the k-th game in week <= 17. Gate: (i) pooled Brier lower, 95% bootstrap CI
+  (2,000 player-season resamples) excluding 0, lower in >= 3 of 4 seasons; (ii) calibration: mean predicted within
+  3 points of actual for each k in 2..12, and within 3 points for each group pooled over k: in a return state /
+  on this week's report but not in a state / neither; (iii) the Hurts group (on the report, this-week P < 0.5,
+  not in a state) within 5 points. Pass -> ship as the lookahead availability for all players (IR-return
+  additions to the roster unchanged); ROS totals then carry attrition for everyone.
 - **PRE-REGISTERED 2026-10-15: partial-week practice models.** For k = 1 and 2 published practice days, a model
   trained on report weeks truncated to their first k days (3-day weeks; same features with no game status, same
   GB settings), used while a team's final report (any game status on it) is not out. Walk-forward 2021-25 (train on
