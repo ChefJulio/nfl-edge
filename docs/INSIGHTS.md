@@ -693,6 +693,16 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   decision seasons used to train start in 2022 (2020-21 excluded: COVID reserve list; finding above came from the
   v2 test data, so this is not blind). Test seasons 2023, 2024, 2025 (each trained on 2022 .. season-1). Gate:
   v2's (i)-(iv) with (i) needing >= 2 of 3 seasons. Live model then trains on 2022 onward.
+  **v3 result: FAIL, not shipped; STOPPED here** (three versions; a fourth would be gate shopping). Brier 0.2407 ->
+  0.1546 [-0.096, -0.077], 3/3; by k within 1.3; Hurts group 57.3 vs 60.4 (ok); but (ii) the out-injured group
+  46.7 vs 50.8 (-4.1 > 3) and (iv) mid RBs 5-8 / 9-12 -4.9 / -5.5 fail. Starter RBs now fine (-1.6 / -2.2), QB
+  starters within 2.8, WR low 9-12 -4.3. Every version beat production by ~0.09 Brier yet none met the per-group
+  bounds. Code kept as research: `tools/ros_avail_model.py`, `tools/ros_avail_eval.py` (rows cached per season).
+  **Next angle if resumed (needs its own pre-registration):** fewer, fatter cells (the per-cell bound is near the
+  clustered season-to-season noise: ~50 RB starters a season repeat across weeks and k), or a bound with a
+  player-cluster CI instead of a fixed 3/5 points; or model the out-injured group by the return chain + a fitted
+  plateau and use the classifier only for healthy players. ROS meanwhile: injured-only lookahead (+ (A)), healthy
+  players at 1.0 (overstates everyone's ROS by ~15-25% evenly; ranks mostly unaffected except vs injured players).
 - **PRE-REGISTERED 2026-10-15: partial-week practice models.** For k = 1 and 2 published practice days, a model
   trained on report weeks truncated to their first k days (3-day weeks; same features with no game status, same
   GB settings), used while a team's final report (any game status on it) is not out. Walk-forward 2021-25 (train on

@@ -128,7 +128,8 @@ for season in TEST:
     for k in range(2, H + 1):
       lab = m.active_after(season, x.gsis_id, x.team, int(x.week), k - 1)
       if lab is not None:
-        B.append({"season": season, "ep": f"B{season}-{i}", "k": k, "y": float(lab), "base": 1.0, "var": later[i, k - 2]})
+        B.append({"season": season, "ep": f"B{season}-{i}", "k": k, "y": float(lab), "base": 1.0, "var": later[i, k - 2],
+                  "p1": float(p1[i]), "pos": x.position})
 
 A, B = pd.DataFrame(A), pd.DataFrame(B)
 A.to_parquet(ROOT / "cache" / "lookahead_chain_A.parquet", index=False)
