@@ -580,6 +580,18 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Green Bay checks out: 13 titles, 37-28.
 
 ## 9. Open threads / next steps (as of 2026-10-12)
+- **PRE-REGISTERED 2026-10-15 (owner: "still annoyed McLaughlin is projected 2.6 even if Judkins sits"): newcomer
+  discount.** Wk 6 CLE: Estime signed this week (off MIN's practice squad) and gets ~12 carries from his old role;
+  McLaughlin (the incumbent) ~3. Descriptive (2021-25 backtest, RB/WR/TE mid-season movers, 126 players): first game
+  with the new team projected 2.78 vs actual 1.09 (bias -1.70 vs -0.51 for everyone else); games 2-3 normal (-0.59,
+  -0.57). Variant `newcomer_05` (experiments.newcomer_scale = 0.5, a round value set before the run): in a
+  RB/WR/TE's first game for a new team (last_team != team), his projected targets and carries x 0.5, the removed
+  volume given to same-position teammates who are projected to play (applied after availability, so a sitting
+  starter doesn't absorb it), in proportion to their own; projections recomputed (refined before the run: wk 6 the
+  first draft handed Estime's cut to a sitting Judkins). ESPN's and our usage depth charts both list McLaughlin RB2.
+  Gate: (i) on those
+  newcomers' rows + their same-team same-position teammates that week, MAE lower with a 95% CI over season-weeks
+  excluding 0; (ii) overall MAE not worse (CI upper < +0.003); (iii) no position significantly worse.
 - **PRE-REGISTERED 2026-10-15 (owner: "if judkins sits, his replacement's projection would skyrocket, right?"):
   conserve vacated volume.** Wk 6: Judkins (68% of CLE carries, 60% to sit) is benched in the default scenario but
   only ~2.4 of his 11.5 points move to teammates (Estime +1.8, McLaughlin +0.6): the learned redistribution at 0.5
