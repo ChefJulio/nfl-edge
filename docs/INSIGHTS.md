@@ -579,6 +579,15 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Green Bay checks out: 13 titles, 37-28.
 
 ## 9. Open threads / next steps (as of 2026-10-12)
+- **PRE-REGISTERED 2026-10-15 (owner: "if judkins sits, his replacement's projection would skyrocket, right?"):
+  conserve vacated volume.** Wk 6: Judkins (68% of CLE carries, 60% to sit) is benched in the default scenario but
+  only ~2.4 of his 11.5 points move to teammates (Estime +1.8, McLaughlin +0.6): the learned redistribution at 0.5
+  strength hands out a fraction of the vacated share and the rest vanishes. Variant `redist_conserve`
+  (injuries.redistribute_conserve): keep the learned allocation (who gets it) but rescale each team's additions so
+  they sum to the vacated share (sits x share x (1 - absent fraction)), per share type. Walk-forward 2021-25
+  (`tools/experiments.py baseline,redist_conserve`). Gate: (i) on rows whose projection changes by > 0.05 pts, MAE
+  lower with a 95% CI over season-weeks excluding 0; (ii) overall MAE not worse (CI upper < +0.003); (iii) no
+  position significantly worse overall. Bias on affected rows reported.
 - **Redistribution: KEPT (2026-10-15, owner delegated the call).** By boost size (2021-25 backtest, all players):
   1,444 rows with a < 0.5 pt boost (MAE with 3.94 / without 3.90) and 99 at 0.5-1.5 (4.95 / 4.82) are noise; the
   12 rows with 1.5+ pts (a backup taking a starter's role: actual 9.4, projected 7.7 with / 5.7 without; bias -2.1
