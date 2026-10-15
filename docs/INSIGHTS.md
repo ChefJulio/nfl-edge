@@ -311,6 +311,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   any model-code edit needs `tools/model_doc.py --stamp` (the pre-commit hook blocks otherwise).
 
 ## 7. UI decisions (current state)
+- **Rankings > Rest of season (owner 2026-10-15).** A Weekly | Rest of season switch on the Rankings tab (remembered per device). Owner's picks: through week 17 (fantasy seasons end there), this week counts until kickoff. Expected points = sum of each remaining week's projected stat line x P(play), re-scored exactly under the viewer's scoring. Columns: ROS pts, Pts/G (per game played), Games (expected), Sched (sum of matchup effects), a bar per week (B bye, dash = projected to sit), ROS tier, season FP/G. **Not yet:** a ROS range (needs measuring: weekly ranges don't add, a player's weeks are correlated); a ROS accuracy backtest; the lookahead weeks ignore ESPN return dates and the midweek ESPN rulings (Hurts: 0% this week, 100% from wk 7 though ESPN's return date is 10/26, after the wk 7 game). Lookahead chains a current injury forward from this week's chance (Lamar: 40% to play wk 6, 38% wk 7, 80% by wk 17) -- worth checking against outcomes.
 - Dark team tiles (#171a20), white text, 2px primary border + full-height 3px secondary stripe inside left/right
   edges, drawn on cells. Logo circles in team primary or secondary (chosen by logo pixels). Position badges: QB rose,
   RB green, WR blue, TE amber.

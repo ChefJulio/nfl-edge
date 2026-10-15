@@ -84,6 +84,9 @@ jobs:
           fi
       # Current week (index.html) and the rest of the season (lookahead pages, rebuilt every run, never committed).
       - run: python run.py --out site/index.html --lookahead
+      # Players > Rankings > Rest of season: this week + the lookahead weeks summed per player through week 17.
+      - name: Rest of season
+        run: python tools/ros_build.py --site=site
       # Career game logs for the player card (one JSON per player; reads the week data files built above).
       - name: Player game logs
         run: python tools/player_logs.py --site=site
