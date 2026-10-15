@@ -562,3 +562,4 @@ table.pst-tbl tr.pst-tot td:first-child { padding-left: 10px; }
 .fd-ar.loss { stroke: #f2786d; } .fd-ar.loss.head { fill: #f2786d; }
 .fd-ar.kick { stroke: #e9eef5; stroke-dasharray: 2 1.4; } .fd-ar.kick.head { fill: #e9eef5; }
 .rp .rp-speed { display: inline-flex; margin-left: 4px; }
+.rp-card .rp-ar { color: var(--muted); margin: 0 4px; }

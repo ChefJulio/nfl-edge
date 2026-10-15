@@ -265,12 +265,15 @@
     // timeouts, quarter ends, the two-minute warning: an event, not a play (no down line, nothing next)
     const event = /timeout|end period|end of|two-minute/i.test((pl.type && pl.type.text) || '');
     const off = a && !event ? a.offense.team : '';
-    const before = event ? '' : pl.start && pl.start.downDistanceText && pl.start.down ? pl.start.downDistanceText : /kickoff/i.test((pl.type && pl.type.text) || '') ? 'Kickoff' : '';
+    // top: who has it and where; bottom: the down before -> the down after (owner: "2nd & 10 -> 3rd & 2")
+    const kick = /kickoff/i.test((pl.type && pl.type.text) || '');
+    const where = event || kick || !pl.start ? '' : String(pl.start.possessionText || '').replace(/^50$/, 'midfield');
+    const before = event ? '' : pl.start && pl.start.down ? (pl.start.shortDownDistanceText || pl.start.downDistanceText || '') : kick ? 'Kickoff' : '';
     const changed = a && b && a.offense.team !== b.offense.team;
     const after = !pl.end || !pl.end.downDistanceText ? '' : changed ? `${b.offense.team} ball, ${pl.end.downDistanceText}` : pl.end.shortDownDistanceText || pl.end.downDistanceText;
-    return `<section class="sit rp-card"><div class="rp-dd">${off ? `<b>${esc(off)} ball</b>` : ''}${before ? `${off ? ' · ' : ''}${esc(before)}` : ''}</div>
+    return `<section class="sit rp-card"><div class="rp-dd">${off ? `<b>${esc(off)} ball</b>` : ''}${where ? `${off ? ' · ' : ''}${esc(where)}` : ''}</div>
       <div class="rp-what ${hd.cls}">${esc(hd.h)}</div>${playFieldSvg(event ? b : a, event ? null : b, info)}
-      ${after && !event ? `<div class="rp-next">&rarr; ${esc(after)}</div>` : ''}
+      ${!event && (before || after) ? `<div class="rp-next">${esc(before)}${after ? ` <span class="rp-ar">&rarr;</span> ${esc(after)}` : ''}</div>` : ''}
       <div class="rp-raw">${esc(hd.raw)}</div></section>`;
   };
   const sitFromPlays = (sum) => {  // after the last play (finished games, replay, or no live situation yet)
