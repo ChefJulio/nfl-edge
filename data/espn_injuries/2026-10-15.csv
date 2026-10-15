@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-05T04:04Z,,,,,,McMillan caught 14 of 16 targets for 192 yards and two touchdowns in Sunday's 32-26 win over the Lions.
 4428993,Haynes King,Carolina Panthers,Active,2026-10-04T23:08Z,,,,,,King (coach's decision) is inactive but will operate as the Panthers' emergency third quarterback Sunday night versus Detroit.
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-15T22:09Z,Undisclosed,,,2026-10-18,IR,ir
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-15T22:22Z,Undisclosed,,,2026-10-18,IR,ir
 4431611,Caleb Williams,Chicago Bears,Questionable,2026-10-15T20:06Z,Hamstring,Strain,Right,2026-10-18,QUESTIONABLE,"Williams (hamstring) said Thursday that he doesn't know if he'll play this weekend against Atlanta because he still has medical protocols to complete, Sean Hammond of the Chicago Tribune reports."
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-15T19:38Z,Toe,Sprain,Not Specified,2026-10-18,QUESTIONABLE,Monangai (toe) was listed as a non-participant on Thursday's injury report.
 4361093,Kyler Gordon,Chicago Bears,Out,2026-10-15T00:36Z,Calf,Not Specified,Not Specified,2026-10-18,PUP-R,Gordon (calf) was estimated as a full participant on the Bears' official injury report Wednesday.
@@ -424,10 +424,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4875295,Jackson Powers-Johnson,Las Vegas Raiders,Active,2026-10-09T00:37Z,,,,,,Powers-Johnson (groin) was a full participant in practice Thursday.
 4379416,Quay Walker,Las Vegas Raiders,Active,2026-10-07T01:50Z,,,,,,"Walker registered six tackles (four solo), including 1.0 sacks, during the Raiders' 30-27 loss to the Chiefs on Sunday."
 4685978,Darrell Luter Jr.,Las Vegas Raiders,Active,2026-10-05T18:47Z,,,,,,
+4429025,Quentin Johnston,Los Angeles Chargers,Questionable,2026-10-15T22:19Z,Chest,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Johnston (chest) was a limited participant in Thursday's practice.
+4612826,Ladd McConkey,Los Angeles Chargers,Questionable,2026-10-15T22:17Z,Foot,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,McConkey (foot) was listed as a limited participant in Thursday's practice.
 3917668,Alec Ingold,Los Angeles Chargers,Injured Reserve,2026-10-15T20:06Z,Shoulder,Not Specified,Not Specified,2026-11-22,IR,The Chargers placed Ingold on injured reserve Thursday due to a shoulder injury.
 2579621,Denzel Perryman,Los Angeles Chargers,Injured Reserve,2026-10-15T01:08Z,Undisclosed,Not Specified,Not Specified,2026-11-01,IR,"Chargers head coach Jim Harbaugh said Wednesday that Perryman (undisclosed) won't be reinstated from injured reserve ahead of Sunday's game against the Chiefs, Alex Insdorf of BoltBeat.com reports."
 4685553,Brenen Thompson,Los Angeles Chargers,Questionable,2026-10-15T00:05Z,Quadriceps,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Thompson (quadriceps) was a limited participant in Wednesday's practice.
-3051738,Marquez Valdes-Scantling,Los Angeles Chargers,Questionable,2026-10-14T23:59Z,Ribs,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Valdes-Scantling (ribs) was a limited participant in Wednesday's practice.
+3051738,Marquez Valdes-Scantling,Los Angeles Chargers,Active,2026-10-14T23:59Z,,,,,,Valdes-Scantling (ribs) was a limited participant in Wednesday's practice.
 4360745,Kendall Williamson,Los Angeles Chargers,Questionable,2026-10-14T22:39Z,Ankle,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 2979860,Dalvin Tomlinson,Los Angeles Chargers,Questionable,2026-10-14T22:39Z,Hamstring,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4243328,Elijah Molden,Los Angeles Chargers,Questionable,2026-10-14T22:38Z,Hamstring,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -435,8 +437,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4567138,Justin Eboigbe,Los Angeles Chargers,Questionable,2026-10-14T22:38Z,Shoulder,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4241597,Daiyan Henley,Los Angeles Chargers,Questionable,2026-10-14T22:38Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4686612,Tre' Harris,Los Angeles Chargers,Doubtful,2026-10-14T22:33Z,Hamstring,Not Specified,Not Specified,2026-10-18,DOUBTFUL,Harris (hamstring) was listed as a non-participant on Wednesday's injury report.
-4429025,Quentin Johnston,Los Angeles Chargers,Questionable,2026-10-14T22:31Z,Chest,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Johnston (chest) was listed as a limited participant on Wednesday's injury report.
-4612826,Ladd McConkey,Los Angeles Chargers,Questionable,2026-10-14T22:25Z,Foot,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,McConkey (foot) was listed as a limited participant on Wednesday's injury report.
 3886812,Jake Browning,Los Angeles Chargers,Active,2026-10-13T23:13Z,,,,,,"The Chargers signed Browning to the practice squad Tuesday, Noah Furtado of The Athletic reports."
 4430870,KeAndre Lambert-Smith,Los Angeles Chargers,Injured Reserve,2026-10-13T22:20Z,Hamstring,Not Specified,Not Specified,2026-10-18,IR-R,The Chargers designated Lambert-Smith (hamstring) for return from injured reserve Tuesday.
 4838693,Rodney Shelley,Los Angeles Chargers,Questionable,2026-10-13T17:10Z,Hamstring,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035661,Julian Blackmon,New Orleans Saints,Active,2026-10-11T16:37Z,,,,,,Blackmon (shoulder) is active for Sunday's game against the Vikings.
 4698597,Barion Brown,New Orleans Saints,Active,2026-10-11T16:22Z,,,,,,Brown (thigh) is active for Sunday's game against the Vikings.
 3115383,Davon Godchaux,New Orleans Saints,Active,2026-10-10T16:20Z,,,,,,Godchaux (groin) does not have an injury designation for Sunday's game against the Vikings.
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-15T22:12Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-15T22:22Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4040615,Malik Harrison,New York Giants,Questionable,2026-10-15T21:18Z,Groin,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4433970,J.J. McCarthy,New York Giants,Active,2026-10-15T14:28Z,,,,,,"Giants head coach John Harbaugh said Wednesday he plans to keep using McCarthy in a change-of-pace role behind starting quarterback Jameis Winston in an effort to take advantage of McCarthy's scrambling ability, Jordan Raanan of ESPN.com reports."
 4430261,Tyler Nubin,New York Giants,Questionable,2026-10-14T23:34Z,Neck,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Nubin (neck) did not practice Wednesday, Dan Salomone of the Giants' official site reports."
@@ -774,10 +774,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4870805,Anthony Hill Jr.,Tennessee Titans,Active,2026-10-07T01:15Z,,,,,,Hill tallied eight tackles (three solo) during the Titans' 24-18 loss to the Ravens on Sunday.
 4879480,Drew Moss,Tennessee Titans,Active,2026-10-05T19:07Z,,,,,,
 4039160,Kylen Granson,Tennessee Titans,Active,2026-10-05T19:07Z,,,,,,
-4575131,Jacory Croskey-Merritt,Washington Commanders,Questionable,2026-10-15T22:06Z,Groin,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
+4567156,Treylon Burks,Washington Commanders,Questionable,2026-10-15T22:22Z,Shoulder,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
+3068267,Austin Ekeler,Washington Commanders,Questionable,2026-10-15T22:21Z,Chest,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
+3121422,Terry McLaurin,Washington Commanders,Questionable,2026-10-15T22:18Z,Hamstring,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,McLaurin (hamstring) practiced in a limited capacity Thursday.
+4575131,Jacory Croskey-Merritt,Washington Commanders,Questionable,2026-10-15T22:10Z,Groin,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,Croskey-Merritt was held out of Thursday's practice due to a groin injury.
 2976212,Stefon Diggs,Washington Commanders,Questionable,2026-10-15T16:49Z,Hamstring,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,"Diggs (hamstring) won't practice Thursday, Zach Selby of the Commanders' official site reports."
 4426403,Nick Cross,Washington Commanders,Active,2026-10-15T16:37Z,,,,,,
-4567156,Treylon Burks,Washington Commanders,Active,2026-10-14T00:44Z,,,,,,Burks caught two passes on five targets for 16 yards during Sunday's 27-27 tie with the Giants.
 5081432,Antonio Williams,Washington Commanders,Active,2026-10-14T00:36Z,,,,,,Williams hauled in all three of his targets for 31 yards and added a two-yard punt return during the Commanders' 27-27 tie with the Giants on Sunday.
 3929865,Charles Omenihu,Washington Commanders,Questionable,2026-10-13T17:10Z,Groin,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
 4572460,Tyler Owens,Washington Commanders,Questionable,2026-10-13T17:10Z,Hamstring,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
@@ -788,7 +790,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4605488,Tanoa Togiai,Washington Commanders,Active,2026-10-12T19:48Z,,,,,,
 5081335,Drew Stevens,Washington Commanders,Active,2026-10-12T16:04Z,,,,,,Stevens made both of his field-goal attempts and went 1-for-2 on extra-point tries during the Commanders' 27-27 tie with the Giants on Sunday.
 4697815,Rachaad White,Washington Commanders,Active,2026-10-12T01:19Z,,,,,,White (shoulder) rushed seven times for 18 yards while catching his only target for two yards in Sunday's 27-27 tie against the Giants.
-3121422,Terry McLaurin,Washington Commanders,Active,2026-10-11T23:57Z,Hamstring,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,McLaurin (hamstring) caught all four of his targets for 62 yards and also caught a two-point conversion in Sunday's 27-27 tie against the Giants.
 4426348,Jayden Daniels,Washington Commanders,Active,2026-10-11T22:14Z,,,,,,"Daniels (elbow) completed 17 of 25 passes for 199 yards, no touchdowns and no interceptions while rushing nine times for 103 yards and two touchdowns in Sunday's 27-27 tie against the Giants. He also threw a successful two-point conversion."
 2980080,Deatrich Wise Jr.,Washington Commanders,Active,2026-10-11T03:39Z,,,,,,"The Commanders activated Wise (quadriceps) from the reserve/PUP list Saturday, and he no longer has an injury designation for Sunday's game against the Giants."
 4574689,Trey Amos,Washington Commanders,Injured Reserve,2026-10-11T01:02Z,Ankle,Sprain,Not Specified,2026-10-19,IR-R,Amos (ankle) has been downgraded to out for Sunday's game against the Giants.
@@ -798,4 +799,3 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3115922,Nick Allegretti,Washington Commanders,Active,2026-10-09T21:45Z,,,,,,
 5081807,Sonny Styles,Washington Commanders,Active,2026-10-09T00:01Z,,,,,,Styles (groin) was a full participant at practice Thursday.
 4690923,Ben Sinnott,Washington Commanders,Active,2026-10-08T20:54Z,,,,,,Sinnott (ribs) upgraded to full participation at Thursday's practice.
-3125248,Jeremy Reaves,Washington Commanders,Active,2026-10-07T23:39Z,,,,,,Reaves (finger) was listed as a full practice participant on Wednesday's injury report.
