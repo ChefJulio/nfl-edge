@@ -133,8 +133,12 @@
     },
   };
 
+  // Always the CURRENT week (index.json), whatever page the tab is opened from: a real league is live now, and an
+  // archived or lookahead page's week would project today's rosters with another week's numbers (owner 2026-10-15:
+  // opened from 2025 wk 18, Mahomes et al. showed "no projection").
   NFLE.areas.league = { mount(sec) {
-    Promise.all([NFLE.week(), NFLE.load('data/fantasy_ids.json'), NFLE.load('data/kdst.json').catch(() => null)]).then(([D, IDS, KD]) => build(sec, D, IDS, KD));
+    const cur = NFLE.week().then(D => (D && !D.archive && !D.lookahead) ? D : NFLE.load('index.json'));
+    Promise.all([cur, NFLE.load('data/fantasy_ids.json'), NFLE.load('data/kdst.json').catch(() => null)]).then(([D, IDS, KD]) => build(sec, D, IDS, KD));
   } };
 
   function build(sec, D, IDS, KD) {
