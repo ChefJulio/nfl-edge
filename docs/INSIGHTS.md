@@ -694,6 +694,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   calls, most-flagged players), player page box (season by type + career by season), Teams > Stats columns.
   nflverse pbp keeps one (the main) penalty per play; ~3,500 / season, 92% with a player. Bug fixed: stats_build
   deduped flags on drive + team + yards + play type, merging repeat false starts on a drive (now per play_id).
+- **Gamecast (owner 2026-10-14):** Postgame "Player stats" = ESPN's full box score (all categories, team toggle,
+  tile rows). game.html now loads shell.js + ui.css (shared tile CSS moved out of site.css: site.css hides
+  non-active sections and blanks the game page). Replay: 2.5 s / play default (Slow 4 / Fast 1.3), a card per play
+  (down & distance, a one-line headline from ESPN's play type + yardage with full names via the box score, the play
+  drawn on the field: line of scrimmage, first-down line, gain / loss / kick arrow, then "-> 2nd & 2"). Win %
+  tooltip clamps by its measured width.
 - **One look everywhere (owner 2026-10-14): use NFLE.ui (shell.js) for ANY new list or matchup.** Player rows =
   NFLE.ui.player (headshot + team badge, name, pos + team; team logo when no photo), team rows = NFLE.ui.team
   (logo, nickname, "KC · 4-0"); both as tiles: table cls 'tiles', row class 'teamrow', row attrs

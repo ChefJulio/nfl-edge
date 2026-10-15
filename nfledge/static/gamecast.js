@@ -195,6 +195,84 @@
       <rect x="0" y="0" width="10" height="20" style="fill:${esc(info.away.color)}"/><rect x="110" y="0" width="10" height="20" style="fill:${esc(info.home.color)}"/>
       ${lines}${ball}</svg>`;
   };
+  // ---- Replay card (owner 2026-10-14: readable at a glance): "1st & 10 at ATL 35" / "Aaron Jones 8-yard run" /
+  // "-> 2nd & 2", and the play drawn on the mini field (line of scrimmage, first-down line, an arrow from start to
+  // finish: green gain, red loss, neutral kick / change of possession). Headlines come from ESPN's play type, the
+  // yardage and the official text's names, made full names through the box score ("J.Williams" -> Javonte Williams).
+  const NM = "[A-Z][a-z]?\\.[A-Za-z'.\\- ]+?";
+  const RX = {
+    lead: new RegExp(`^(${NM})\\s+(?:left|right|up the middle|middle|scrambles|kneels|pass|sacked|punts|kicks|spiked|\\d+ yard field goal|extra point|FUMBLES|Aborted)`),
+    to: new RegExp(` to (${NM})(?= to | for |\\.| \\(|,|$)`),
+    picked: new RegExp(`INTERCEPTED by (${NM})(?= at| \\(|\\.|,| to)`),
+    punt: /punts (\d+) yards/, kick: /kicks (\d+) yards/, fg: /(\d+) yard field goal is (GOOD|No Good|BLOCKED)/i,
+    ret: new RegExp(`\\. (${NM}) (?:to|pushed|ran|for|MUFFS)`), pen: /PENALTY on ([A-Z]{2,4})-[^,]*, ([^,]+), (\d+) yards/,
+  };
+  const fullNames = sum => {
+    const m = {};
+    // the official text writes "D.Prescott", or "Ja.Chase" to tell apart a teammate with the same initial
+    ((sum && sum.boxscore && sum.boxscore.players) || []).forEach(tp => (tp.statistics || []).forEach(c => (c.athletes || []).forEach(a => {
+      const A = a.athlete, fn = String(A.firstName || ''), ln = String(A.lastName || '').replace(/\s+/g, '');
+      const keys = [String(A.shortName || '').replace(/\s+/g, ''), fn && ln ? `${fn[0]}.${ln}` : '', fn.length > 1 && ln ? `${fn.slice(0, 2)}.${ln}` : ''];
+      const bare = ln.replace(/(Jr|Sr|II|III|IV|V)\.?$/, '');  // "Godwin Jr." is "C.Godwin" in the text
+      if (fn && bare !== ln) keys.push(`${fn[0]}.${bare}`, fn.length > 1 ? `${fn.slice(0, 2)}.${bare}` : '');
+      keys.forEach(k => { if (k && !m[k]) m[k] = A.displayName; });
+    })));
+    return m;
+  };
+  const playHead = (pl, names) => {
+    const raw = String(pl.text || '').replace(/^(\([^)]*\)\s*)+/, '');
+    const nm = x => x ? (names[x.replace(/\s+/g, '')] || x) : '';
+    const g = (k, i = 1) => { const m = raw.match(RX[k]); return m ? m[i] : null; };
+    const t = (pl.type && pl.type.text) || '', y = pl.statYardage || 0;
+    const td = /touchdown/i.test(t) || /TOUCHDOWN/.test(raw);
+    const yds = n => n === 0 ? 'no gain' : n < 0 ? `loss of ${-n}` : `${n} yard${n === 1 ? '' : 's'}`;
+    let h, cls = '';
+    if (/interception/i.test(t)) { h = `${nm(g('lead'))} intercepted${g('picked') ? ` by ${nm(g('picked'))}` : ''}`; cls = 'bad'; }
+    else if (/sack/i.test(t)) { h = `${nm(g('lead'))} sacked, ${yds(y)}`; cls = 'bad'; }
+    else if (/pass reception|passing touchdown/i.test(t)) h = `${nm(g('lead'))} to ${nm(g('to'))}, ${yds(y)}`;
+    else if (/pass incompletion/i.test(t)) h = `${nm(g('lead'))} incomplete${g('to') ? ` to ${nm(g('to'))}` : ''}`;
+    else if (/^rush|rushing touchdown/i.test(t)) h = y > 0 ? `${nm(g('lead'))} ${y}-yard run` : `${nm(g('lead'))} run, ${yds(y)}`;
+    else if (/punt/i.test(t)) h = `${nm(g('lead'))} punts ${g('punt') || ''} yards${/Touchback/i.test(raw) ? ', touchback' : g('ret') ? `, ${nm(g('ret'))} returns ${pl.statYardage || 0}` : ''}`;
+    else if (/kickoff/i.test(t)) h = /Touchback/i.test(raw) ? 'Kickoff, touchback' : `Kickoff: ${nm(g('ret'))} returns it ${pl.statYardage || 0} yards`;
+    else if (/field goal/i.test(t)) { const r = g('fg', 2); h = `${g('fg') || ''}-yard field goal, ${/good/i.test(r || t) && !/no good/i.test(r || '') ? 'good' : r && /block/i.test(r) ? 'blocked' : 'no good'}`; cls = /good/i.test(t) ? 'good' : 'bad'; }
+    else if (/penalty/i.test(t)) { const m = raw.match(RX.pen); h = m ? `Penalty, ${m[1]}: ${m[2]}, ${m[3]} yards` : 'Penalty'; cls = 'flag'; }
+    else if (/fumble/i.test(t)) { h = `Fumble${/RECOVERED by ([A-Z]{2,4})/.test(raw) ? `, recovered by ${raw.match(/RECOVERED by ([A-Z]{2,4})/)[1]}` : ''}`; cls = 'bad'; }
+    else h = t || raw.split('. ')[0];
+    if (td) { h += ' · Touchdown'; cls = 'td'; }
+    if (pl.isTurnover && cls !== 'bad') cls = 'bad';
+    return { h: h.replace(/\s+,/g, ',').replace(/\s{2,}/g, ' ').trim(), cls, raw };
+  };
+  const playFieldSvg = (a, b, info) => {
+    const X = v => 10 + v;
+    let lines = '';
+    for (let v = 10; v < 100; v += 10) lines += `<line x1="${X(v)}" y1="1" x2="${X(v)}" y2="19" class="fd-l${v === 50 ? ' mid' : ''}"/>`;
+    let mark = '';
+    if (a && b) {
+      const same = a.offense.team === b.offense.team, d = b.x - a.x, gain = same && d * a.dir > 0, loss = same && d * a.dir < 0;
+      const cls = !same ? 'fd-ar kick' : gain ? 'fd-ar gain' : loss ? 'fd-ar loss' : '';
+      mark = `${a.down ? `<line x1="${X(a.toGo)}" y1="1" x2="${X(a.toGo)}" y2="19" class="fd-go"/>` : ''}<line x1="${X(a.x)}" y1="1" x2="${X(a.x)}" y2="19" class="fd-los"/>`;
+      if (cls && Math.abs(d) >= 0.5) {
+        const s0 = Math.sign(d);
+        mark += `<line x1="${X(a.x)}" y1="10" x2="${X(b.x) - s0 * 1.6}" y2="10" class="${cls}"/><path d="M${X(b.x)} 10 l${-s0 * 2.6} -2.6 v5.2 z" class="${cls} head"/>`;
+      }
+      mark += `<ellipse cx="${X(b.x)}" cy="10" rx="2.4" ry="1.6" class="fd-ball"/>`;
+    } else if (a) mark = `<ellipse cx="${X(a.x)}" cy="10" rx="2.4" ry="1.6" class="fd-ball"/>`;
+    return `<svg class="fd" viewBox="0 0 120 20" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="0" width="120" height="20" class="fd-turf"/>
+      <rect x="0" y="0" width="10" height="20" style="fill:${esc(info.away.color)}"/><rect x="110" y="0" width="10" height="20" style="fill:${esc(info.home.color)}"/>${lines}${mark}</svg>`;
+  };
+  const replayCard = (pl, info, sum) => {
+    const a = spot(pl.start, info), b = spot(pl.end, info), hd = playHead(pl, fullNames(sum));
+    // timeouts, quarter ends, the two-minute warning: an event, not a play (no down line, nothing next)
+    const event = /timeout|end period|end of|two-minute/i.test((pl.type && pl.type.text) || '');
+    const off = a && !event ? a.offense.team : '';
+    const before = event ? '' : pl.start && pl.start.downDistanceText && pl.start.down ? pl.start.downDistanceText : /kickoff/i.test((pl.type && pl.type.text) || '') ? 'Kickoff' : '';
+    const changed = a && b && a.offense.team !== b.offense.team;
+    const after = !pl.end || !pl.end.downDistanceText ? '' : changed ? `${b.offense.team} ball, ${pl.end.downDistanceText}` : pl.end.shortDownDistanceText || pl.end.downDistanceText;
+    return `<section class="sit rp-card"><div class="rp-dd">${off ? `<b>${esc(off)} ball</b>` : ''}${before ? `${off ? ' · ' : ''}${esc(before)}` : ''}</div>
+      <div class="rp-what ${hd.cls}">${esc(hd.h)}</div>${playFieldSvg(event ? b : a, event ? null : b, info)}
+      ${after && !event ? `<div class="rp-next">&rarr; ${esc(after)}</div>` : ''}
+      <div class="rp-raw">${esc(hd.raw)}</div></section>`;
+  };
   const sitFromPlays = (sum) => {  // after the last play (finished games, replay, or no live situation yet)
     const pl = allPlays(sum).flatMap(d => d.plays || []);
     const last = pl[pl.length - 1];
@@ -1690,10 +1768,11 @@
     const live = () => info.state === 'pre'
       ? `<section class="gcs"><p class="muted">Kicks off ${esc(g ? g.kickoff : info.date ? new Date(info.date).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }) : 'soon')}. The live view (field position, ESPN's win probability, every play, box score) starts at kickoff.</p></section>`
       : info.offline ? '<section class="gcs"><p class="muted">Live data from ESPN is unavailable right now. Try again in a minute.</p></section>'
-      : `${sp ? `<section class="sit"><div class="sit-dd"><b>${esc(sp.offense.team)} ball</b>${sp.text ? ` · ${esc(sp.text)}` : ''}${sp.red ? ' · <span class="gl-red">red zone</span>' : ''}</div>
+      : `${rp && rp.play ? replayCard(rp.play, info, sum) : sp ? `<section class="sit"><div class="sit-dd"><b>${esc(sp.offense.team)} ball</b>${sp.text ? ` · ${esc(sp.text)}` : ''}${sp.red ? ' · <span class="gl-red">red zone</span>' : ''}</div>
         ${fieldSvg(sp, info)}${sit.lastPlay && sit.lastPlay.text ? `<div class="sit-last"><span class="muted">Last play:</span> ${linkNames(esc(sit.lastPlay.text), [info.away.team, info.home.team])}</div>` : ''}</section>` : ''}
       ${GP.canReplay ? `<section class="rp">${rp ? `<button type="button" data-rp="first">&laquo;</button><button type="button" data-rp="prev">&lsaquo;</button>
         <button type="button" data-rp="play">${rp.timer ? 'Pause' : 'Play'}</button><button type="button" data-rp="next">&rsaquo;</button><button type="button" data-rp="last">&raquo;</button>
+        <span class="seg rp-speed">${[['slow', 'Slow'], ['normal', 'Normal'], ['fast', 'Fast']].map(([k, l]) => `<button type="button" data-rps="${k}" class="${(GP.rpSpeed || 'normal') === k ? 'on' : ''}">${l}</button>`).join('')}</span>
         <input type="range" min="0" max="${rp.plays.length - 1}" value="${rp.i}" aria-label="Replay position"><span class="muted">Play ${rp.i + 1} of ${rp.plays.length}</span>
         <button type="button" data-rp="off">Exit replay</button>` : '<button type="button" data-rp="on">Replay this game play by play</button>'}</section>` : ''}
       <nav class="gc-jump"><a href="#gcWp">Win %</a><a href="#gcLog">Plays</a><a href="#gcBox">Box score</a><a href="#gcTeam">Team stats</a></nav>
@@ -1767,6 +1846,11 @@
     });
     // replay controls
     root.querySelectorAll('[data-rp]').forEach(b => b.onclick = () => replayCmd(b.dataset.rp));
+    root.querySelectorAll('[data-rps]').forEach(b => b.onclick = () => {
+      GP.rpSpeed = b.dataset.rps;
+      if (GP.replay && GP.replay.timer) startReplayTimer(GP.replay);
+      root.querySelectorAll('[data-rps]').forEach(x => x.classList.toggle('on', x === b));
+    });
     const rng = root.querySelector('.rp input[type=range]');
     if (rng) rng.oninput = () => { replayTo(+rng.value); };
   };
@@ -1789,8 +1873,14 @@
     if (cmd === 'next') replayTo(rp.i + 1);
     if (cmd === 'play') {
       if (rp.timer) { clearInterval(rp.timer); rp.timer = null; renderGame(); }
-      else { rp.timer = setInterval(() => { if (rp.i >= rp.plays.length - 1) { clearInterval(rp.timer); rp.timer = null; } replayTo(rp.i + 1); }, 900); renderGame(); }
+      else { startReplayTimer(rp); renderGame(); }
     }
+  };
+  // seconds per play: long enough to read the card (owner: "plays by itself too fast")
+  const RP_MS = { slow: 4000, normal: 2500, fast: 1300 };
+  const startReplayTimer = rp => {
+    clearInterval(rp.timer);
+    rp.timer = setInterval(() => { if (rp.i >= rp.plays.length - 1) { clearInterval(rp.timer); rp.timer = null; } replayTo(rp.i + 1); }, RP_MS[GP.rpSpeed || 'normal']);
   };
   const pollGame = async () => {
     clearTimeout(GP.timer);
