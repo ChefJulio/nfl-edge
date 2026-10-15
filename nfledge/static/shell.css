@@ -45,6 +45,8 @@ section.soon .sec-head p { color: var(--muted); }
 /* player / team pages (#player/<id>, #team/<abbr>): the card renderer in page form, under breadcrumbs */
 html.pc-open { overflow: visible; }
 #tab-page .pc-page { position: static; inset: auto; background: none; padding: 0; display: block; z-index: auto; }
+/* one centered 820px column (breadcrumbs + card) on wide screens; it used to sit at the left of the wide container */
+#tab-page { max-width: 820px; margin-left: auto; margin-right: auto; }
 #tab-page .pc-page .pc { width: 100%; max-width: 820px; margin: 0; border-radius: 14px; box-shadow: none; }
 /* the name / photo / position header stays in view while the page scrolls (owner 2026-10-14). 'clip' (not 'hidden')
    on the card: a hidden overflow makes the card its own scroll box, and a sticky child would never stick. */
