@@ -137,6 +137,14 @@
       const badges = (r.status || r.boost >= 1 || r.low_sample) ? `<div class="badges">${NFLE.injTag(r.status)}${r.boost >= 1 ? `<span class="flag f-up" title="Raised by volume vacated by: ${esc(r.boost_from)}">+${f1(r.boost)} inj</span>` : ''}${r.low_sample ? '<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>' : ''}</div>` : '';
       return `<div class="who" title="${esc(r.takeaway || '')}"><span class="pic${r.photo ? '' : ' nopic'}"><span class="pic-img">${r.photo ? `<img src="${esc(r.photo)}" alt="" width="34" height="34" loading="lazy" onerror="this.closest('.pic').classList.add('nopic')">` : ''}</span><span class="pic-tm">${logo(r.team, 11)}</span></span><div class="nmw"><b class="nm">${flex ? `<span class="posb posb-${esc(r.pos)}">${esc(r.pos)}</span>` : ''}<span class="fn">${esc(ini)}</span>${rest ? `<span class="fn-rest">${esc(rest)}</span><span class="fn-dot">.</span>` : ''}${last ? ` ${esc(last)}` : ''}</b>${badges}</div></div>`;
     };
+    // Two worlds, not a blend (owner 2026-10-15: availability is binary): the projection shown is the likelier world for
+    // the uncertain teammate; this line is the other one ("6.5 if Judkins plays").
+    const lastName = n => String(n || '').split(' ').slice(1).join(' ') || n;
+    const condLine = r => {
+      if (!r.cond) return '';
+      const [nm, , pSit, plays, sits] = r.cond, other = pSit >= 0.5 ? plays : sits;
+      return `<span class="pv-cond" title="${esc(`${f1(sits * r._ratio)} if ${nm} sits (${Math.round(100 * pSit)}% likely), ${f1(plays * r._ratio)} if he plays`)}">${f1(other * r._ratio)} if ${esc(lastName(nm))} ${pSit >= 0.5 ? 'plays' : 'sits'}</span>`;
+    };
     const ecrOf = (r, flex) => flex ? r.ecr_flex : r.ecr;
     const staleOf = (r, flex) => flex ? r.ecr_flex_stale : r.ecr_stale;
     const rankOf = (r, flex) => flex ? r._frank : r._rank;
@@ -148,7 +156,7 @@
             return `<b class="rkn">${rankOf(r, flex)}</b>${e != null ? `<span class="ecr${st ? ' stale' : ''}" title="${st ? 'Last week' : 'Expert consensus'} ${flex ? 'flex ' : ''}rank (FantasyPros${flex ? ' superflex list without QBs' : ''})">(${f0(e)}${st ? '<sup>lw</sup>' : ''})</span>` : ''}`; } },
         { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name, html: r => nameCell(r, flex) },
         { key: 'proj', label: 'Proj', num: true, cls: 'projc', title: 'Projected fantasy points under your scoring (tap a player for the full range of outcomes)', value: r => r._proj,
-          html: r => `<b class="pv" title="${esc(range(r))}">${f1(r._proj)}</b>` },
+          html: r => `<b class="pv" title="${esc(range(r))}">${f1(r._proj)}</b>${condLine(r)}` },
         { key: 'range', label: 'Range', num: true, cls: 'rngc', title: 'Floor to ceiling: 8 times in 10 his score lands in this range (10th to 90th percentile of how past projections like this turned out)',
           value: r => r._q[4] - r._q[0], html: r => `<span title="${esc(range(r))}">${Math.round(r._q[0])}&ndash;${Math.round(r._q[4])}</span>` },
         ...(RK.show_act ? [{ key: 'act', label: 'Actual', num: true, cls: 'actc', title: 'What he scored: live during his game (pulsing dot), final once it ends. Green = above his likely range (75th pct), red = below it (25th pct), colored only when final',

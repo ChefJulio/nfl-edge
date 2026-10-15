@@ -579,7 +579,7 @@ def week_data(ctx: dict) -> str:
         "rank": r["rank"],
         "tier": r["tier"], "slot": r["slot"], "ecr": None if pd.isna(r["ecr"]) else r["ecr"],
         "status": r["status"] or "", "inactive": r["inactive"], "inactive_why": r["inactive_why"],
-        "boost": r["boost"], "boost_from": r["boost_from"], "low_sample": r["low_sample"], "conf": r["conf"],
+        "boost": r["boost"], "boost_from": r["boost_from"], "cond": r.get("cond"), "low_sample": r["low_sample"], "conf": r["conf"],
         "mu": r["mu"], "mu_hi": r["mu_hi"], "mu_c": r["mu_c"],
         "takeaway": r["takeaway"], "fpg": None if pd.isna(r["fpg"]) else r["fpg"],
         "last3": None if pd.isna(r["last3"]) else r["last3"], "act": r["act"], "sc": json.loads(r["sc"]),
@@ -690,6 +690,14 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
         "imp": float(r.implied_pts) if pd.notna(getattr(r, "implied_pts", np.nan)) else None,
         "status": r.status, "avail": r.avail, "inactive": 1 - r.avail,
         "inactive_why": inactive_why(r), "boost": r.injury_boost, "boost_from": r.boost_from or "",
+        # two worlds for a teammate of an uncertain player: [name, pid, P(he sits), proj if he plays, proj if he sits]
+        # anchored to his final projection (the default world, after team-share normalization); the other world = that
+        # plus / minus the swing measured between the two scenarios
+        "cond": (lambda d, default_sits: [r.cond_name, r.cond_pid, round(float(r.cond_p_sit), 3),
+                                          round(float(r.proj - d if default_sits else r.proj), 2),
+                                          round(float(r.proj if default_sits else r.proj + d), 2)])(
+                   float(r.cond_sits - r.cond_plays), float(r.cond_p_sit) >= 0.5)
+                 if isinstance(getattr(r, "cond_name", ""), str) and getattr(r, "cond_name", "") else None,
         "low_sample": bool(r.low_sample), "line": expected_line(r),
         "fpg": st["fpg"] if st else np.nan, "last3": st["last3"] if st else np.nan,
         "season": season_line(r, st), "usage": usage_line(r, st),

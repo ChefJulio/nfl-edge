@@ -75,6 +75,7 @@ class InjuryModel:
     hl = cfg["player_model"]["share_half_life_weeks"]
     self.hl = float(hl.get("default", 3.0)) if isinstance(hl, dict) else hl  # per-position setting: team-level default
     self.scale = float(cfg.get("injuries", {}).get("redistribution_scale", 1.0))
+    self.conserve = bool(cfg.get("injuries", {}).get("redistribute_conserve", False))
 
   def _gb_params(self) -> dict:
     g = self.cfg.get("injuries", {})
@@ -598,6 +599,29 @@ class InjuryModel:
       better = gain > p.if_sits_gain
       p.loc[better, "if_sits_gain"] = gain[better]
       p.loc[better, "if_sits_name"] = x.full_name if isinstance(x.full_name, str) else ""
+
+    # Two numbers instead of one (owner 2026-10-15: "it's binary, not a spectrum"): for every teammate of a genuinely
+    # uncertain player (15-85% to sit), his projection in both worlds, that player plays / sits; each player keeps
+    # the pairing that moves him most. The default scenario (his `proj`) is one of the two; nothing is averaged.
+    p["cond_name"], p["cond_pid"], p["cond_p_sit"], p["cond_plays"], p["cond_sits"] = "", "", np.nan, np.nan, np.nan
+    unsure = cont[(cont.p_play >= 0.15) & (cont.p_play <= 0.85) & cont.gsis_id.isin(set(p.gsis_id))]
+    impact = pd.Series(0.3, index=p.index)  # ignore pairings that move a player less than 0.3 points
+    for _, u in unsure.iterrows():
+      alt_p = p0.copy()
+      if u.p_play < 0.5:  # benched in the default scenario: the other world is him playing
+        alt_p.loc[alt_p.gsis_id == u.gsis_id, "sits"] = False
+        alt = self._redistribute(alt_p, sits[sits.gsis_id != u.gsis_id], wind)
+        plays, sat = alt.proj, p.proj
+      else:  # playing in the default scenario: the other world is him sitting
+        alt_p.loc[alt_p.gsis_id == u.gsis_id, "sits"] = True
+        alt = self._redistribute(alt_p, pd.concat([sits, u.to_frame().T]), wind)
+        plays, sat = p.proj, alt.proj
+      d = (sat - plays).where((p.team == u.team) & (p.gsis_id != u.gsis_id), 0.0)
+      hit = d.abs() > impact
+      if hit.any():
+        impact[hit] = d.abs()[hit]
+        p.loc[hit, "cond_name"], p.loc[hit, "cond_pid"], p.loc[hit, "cond_p_sit"] = u.full_name, u.gsis_id, 1 - float(u.p_play)
+        p.loc[hit, "cond_plays"], p.loc[hit, "cond_sits"] = plays[hit], sat[hit]
     self.last_absent = sits
     return p
 
@@ -615,6 +639,11 @@ class InjuryModel:
         if rv.empty:
           continue
         add = np.clip(self._design(rv, vac, share) @ self.coef[share], 0, None) * self.scale
+        if self.conserve:  # EXPERIMENT (injuries.redistribute_conserve): hand out all of the vacated share
+          need = vac.groupby("team").eff_vac.sum()
+          got = pd.Series(add, index=rv.index).groupby(rv.team).transform("sum")
+          k = rv.team.map(need).fillna(0).to_numpy() / np.where(got.to_numpy() > 0, got.to_numpy(), np.inf)
+          add = np.where(got.to_numpy() > 0, add * k, add)
         p.loc[rv.index, "tgt_add" if share == "tgt_share" else "carry_add"] = add
     p["tgt"] = p.tgt + p.tgt_add * p.team_db
     p["carries"] = p.carries + p.carry_add * p.team_rush

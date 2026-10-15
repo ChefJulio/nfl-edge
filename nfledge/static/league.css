@@ -18,3 +18,4 @@ table.lg-tbl td.num, table.lg-tbl th.num { white-space: nowrap; }
 table.lg-rank tr.lg-me td { background: rgba(122,162,255,.10); }
 .lg-you { font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 999px; background: rgba(122,162,255,.2); color: #a9c1ff; }
 table.lg-rank td.good { color: #6fdc8c; } table.lg-rank td.bad { color: #ff8f84; }
+.lg-cond { display: inline-block; margin-left: 6px; font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: rgba(122,162,255,.16); color: #a9c1ff; }
