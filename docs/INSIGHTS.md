@@ -572,6 +572,30 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Green Bay checks out: 13 titles, 37-28.
 
 ## 9. Open threads / next steps (as of 2026-10-12)
+- **Return games, fact check (owner 2026-10-15: "players returning from injury have huge fantasy games all the
+  time").** Skill players averaging 8+ half-PPR before the absence, 2019-25 (n 473): pre-injury 12.5, return game
+  10.8, next 3 games 11.0; booms (>= 1.5x his average) 14.2% of return games vs 18.5% of his other games, busts
+  (<= 0.5x) 32.1% vs 20.5%. Big return games are common in absolute terms (42 of 1,361 return games scored 25+,
+  94 scored 20+: Dalvin Cook 47.6, Derrick Henry 39.1, Bowers 37.3) but no more frequent than usual. Our weekly
+  projections already get them right: archived 2021-26, return games projected 9.10 vs actual 9.25 (residual
+  +0.14 +- 0.59), same as other games (+0.07). No return-game adjustment.
+- **Return timing, diagnostic (2026-10-15):** P(back by his k-th game after the first missed one), skill players,
+  walk-forward 2022-25: active-roster injuries calibrated (k 1-4: 44 / 66 / 80 / 86% actual vs 44 / 64 / 76 / 84%),
+  inactive similar; IR wrong both ways: k 1-3 actual 0% (the 4-game IR minimum) vs predicted 1-10%, k 8 45.6% vs
+  30.2% (too pessimistic once eligible).
+- **PRE-REGISTERED 2026-10-15 (owner: "pinpointing returns from IR and injuries in general is very important"):
+  return-timing v2.** Return model (next-game hazard, chained) with three additions: (1) IR rule: games spent on
+  IR so far (`ir_games`) as a feature, and the hazard set to 0 while an IR player is below the season's minimum
+  (2022+: 4 games; 2020-21: 3; earlier: 8); (2) practice window: on his team's practice report for the next game
+  (window opened / designated to return) + his practice score that week, the flag carried forward once opened;
+  (3) ESPN's estimated return: weeks from the next game to ESPN's return date at the latest Wayback capture between
+  his last missed game and the next one (2022-25 captures; NaN otherwise), plus ESPN status, carried forward one
+  week per game. Walk-forward test seasons 2023-25 (train 2019 .. season-1; all positions train, skill positions
+  scored). Decision points: every return-model state; label P(back by his k-th next game), k = 1..8; both
+  baseline and variant use production's step 1 (this week's practice estimate where on the report) and stay = 1.
+  Gate: (i) Brier lower, 95% bootstrap CI by episode excluding 0, >= 2 of 3 seasons; (ii) each designation with
+  n >= 150 rows x k-bucket (1-2 / 3-4 / 5-8) within 5 points of actual; (iii) IR rows that the rule makes
+  impossible predicted <= 1%. Ablation (each addition alone) reported, not gated.
 - **SHIPPED 2026-10-15 (owner design, data check): a returned player counts like a healthy one in the lookahead.**
   Owner: once back for even one game, the odds he's past the injury are very high; re-aggravation is small. Data
   (2022-25 skill players, role-matched by offensive snap share): starters back from an injury absence play their
