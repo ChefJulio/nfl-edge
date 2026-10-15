@@ -1,3 +1,6 @@
+/* Shared tile styles live in ui.css. Archived week pages were rendered before that split and only link site.css,
+   so it pulls ui.css in too (a page that also links it just reuses the cached file). */
+@import url("ui.css");
 /* Site-wide styles (were inline in the old report template): tokens, header, section chrome, tables, rankings,
    badges, model doc. Area modules add their own assets/<area>.css. */
 /* Dark only, whatever the device setting (owner's call). */
@@ -401,3 +404,4 @@ footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
 .ros-note { font-size: 12px; margin: 8px 2px 0; }
 table.ros td.l5 { width: auto; min-width: 112px; }
 .rk-h-week[hidden], .rk-h-ros[hidden], .ros-note[hidden] { display: none !important; }
+.rk-mode[hidden] { display: none !important; }

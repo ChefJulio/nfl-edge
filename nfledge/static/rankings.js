@@ -34,6 +34,8 @@
     let pos = 'QB', tables = {}, q = '', mode = 'week', ROS = null, rosAll = [];
     const rosTables = {};
     try { if (localStorage.getItem('nfledge-rk-mode') === 'ros') mode = 'ros'; } catch (e) { /* default */ }
+    const rosOk = !D.archive;  // a past week's page: 'rest of season from now' means nothing there, weekly only
+    if (!rosOk) mode = 'week';
 
     // -- markup -----------------------------------------------------------------------------------------------
     sec.innerHTML = `<div class="seg rk-mode" role="tablist"><button type="button" data-mode="week">Weekly</button><button type="button" data-mode="ros">Rest of season</button></div>
@@ -260,7 +262,7 @@
     });
     const setMode = m => {
       mode = m;
-      try { localStorage.setItem('nfledge-rk-mode', m); } catch (e) { /* private mode */ }
+      if (rosOk) { try { localStorage.setItem('nfledge-rk-mode', m); } catch (e) { /* private mode */ } }
       sec.querySelectorAll('.rk-mode button').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
       sec.querySelectorAll('.rk-h-week').forEach(e => { e.hidden = m !== 'week'; });
       sec.querySelectorAll('.rk-h-ros').forEach(e => { e.hidden = m !== 'ros'; });
@@ -271,6 +273,7 @@
       if (m === 'ros') loadRos().then(() => rosDraw()).catch(() => { const n = sec.querySelector('.ros-note'); n.hidden = false; n.textContent = 'Rest-of-season projections are not available right now.'; });
       else if (tables[pos]) tables[pos].layout();
     };
+    if (!rosOk) sec.querySelector('.rk-mode').hidden = true;
     sec.querySelector('.rk-mode').addEventListener('click', e => { const b = e.target.closest('[data-mode]'); if (b && b.dataset.mode !== mode) setMode(b.dataset.mode); });
 
     const draw = (resort = true) => {
