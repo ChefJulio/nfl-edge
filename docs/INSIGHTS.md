@@ -605,6 +605,23 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   **Remaining (not tested, not shipped):** ESPN Doubtful midweek; players ESPN rules Out who are NOT on the
   practice report (v1's sample was mostly long-term IR); a live-data recheck of the rates once the daily ESPN
   archive (with update times) covers ~8 weeks of midweek rulings.
+  **Explored 2026-10-15 (owner: "explore the opens"; descriptive, Wayback Wed-Fri 2022-24):** (a) ESPN Out NOT on
+  the report: 85% are on reserve lists that week (RES 521 / Out, 350 / Out+ret), 24 + 8 on the active roster:
+  not worth a rule, CLOSED. (b) ESPN Questionable not on the report: mostly stale labels on backups (ACT 1,422 /
+  INA 744), the healthy-scratch model's job: CLOSED. (c) ESPN Doubtful on the report: n 68, played 2.9% vs 42.5%
+  practice-model baseline; too few for a gate and the baseline is biased (d): RETEST after (d). (d) FOUND: the
+  practice model is overconfident midweek for EVERY report player, not just ESPN-listed ones. On all 3-day report
+  weeks 2022-24 (n 9,240 per state), mean predicted vs actual play: 1 day published 86% vs 65%; 2 days 76% vs 65%;
+  full week with game status 83% vs 82% (calibrated). Cause: trained on complete weeks only, where "no game
+  status" means cleared; midweek, no status yet reads the same. Lamar (wk 6, Wed DNP) 81% to play is this.
+- **PRE-REGISTERED 2026-10-15: partial-week practice models.** For k = 1 and 2 published practice days, a model
+  trained on report weeks truncated to their first k days (3-day weeks; same features with no game status, same
+  GB settings), used while a team's final report (any game status on it) is not out. Walk-forward 2021-25 (train on
+  seasons before the test season, availhist 2018-25), all 3-day report weeks, both states pooled. Baseline: the
+  current full-week model on the same truncated rows (= production today). Gate: Brier lower, 95% bootstrap CI of
+  the difference (2,000 player-week resamples) excluding 0, lower in >= 4 of 5 seasons, AND mean predicted within
+  3 points of actual for each k. Pass -> ship in `availability()` / `report_avail()`; midweek ESPN rulings keep
+  precedence; then retest (c) against the new baseline.
 - **NEXT (owner-approved 2026-10-14): Players > Trends, a play-level query builder.** "Rushing YPC for Ravens
   players in the 4th quarter, 2022-24" -> leaderboard. Design agreed: the query is a sentence of tappable chips
   (stat family + metric / who: team, player, league, or against a team / filters: quarter, down & distance, field

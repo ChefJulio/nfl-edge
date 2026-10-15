@@ -51,118 +51,125 @@ def practice_model(test_season: int):
   return HistGradientBoostingClassifier(**GB, random_state=0).fit(X, d.played), list(X.columns)
 
 
-frames = []
-for season in SEASONS:
-  rows = []
-  model, cols = practice_model(season)
-  ros = c.get("rosters", season, None, stale=False)
-  done = set(ros.week)
-  st = ros.drop_duplicates(["gsis_id", "week"], keep="last").set_index(["gsis_id", "week"]).status
-  days = AH[AH.season == season].drop_duplicates(["gsis_id", "week"], keep="last").set_index(["gsis_id", "week"])
-  s = sched[(sched.season == season) & (sched.game_type == "REG")]
-  g = pd.concat([s[["week", "gameday", "home_team"]].set_axis(["week", "day", "team"], axis=1),
-                 s[["week", "gameday", "away_team"]].set_axis(["week", "day", "team"], axis=1)])
-  g["day"] = pd.to_datetime(g.day)
-  by_team = {t: x.sort_values("day") for t, x in g.groupby("team")}
-  for x in H[H.season == season].itertuples():
-    gsis, team = gsis_of.get(str(x.espn_id)), abbr_of.get(x.team)
-    if gsis is None or team not in by_team:
+def midweek_rows(buckets=("Out", "Out+ret", "IR")) -> pd.DataFrame:
+  """One row per player-week: the latest qualifying Wed-Fri capture listing him in one of `buckets` (espn_calib
+  buckets, or ESPN's own status word for unmapped ones such as "Questionable"), with the practice-model baseline."""
+  frames = []
+  for season in SEASONS:
+    rows = []
+    model, cols = practice_model(season)
+    ros = c.get("rosters", season, None, stale=False)
+    done = set(ros.week)
+    st = ros.drop_duplicates(["gsis_id", "week"], keep="last").set_index(["gsis_id", "week"]).status
+    days = AH[AH.season == season].drop_duplicates(["gsis_id", "week"], keep="last").set_index(["gsis_id", "week"])
+    s = sched[(sched.season == season) & (sched.game_type == "REG")]
+    g = pd.concat([s[["week", "gameday", "home_team"]].set_axis(["week", "day", "team"], axis=1),
+                   s[["week", "gameday", "away_team"]].set_axis(["week", "day", "team"], axis=1)])
+    g["day"] = pd.to_datetime(g.day)
+    by_team = {t: x.sort_values("day") for t, x in g.groupby("team")}
+    for x in H[H.season == season].itertuples():
+      gsis, team = gsis_of.get(str(x.espn_id)), abbr_of.get(x.team)
+      if gsis is None or team not in by_team:
+        continue
+      ts = pd.Timestamp(x.ts[:14]).tz_localize("UTC")
+      tg = by_team[team]
+      nxt = tg[tg.day >= pd.Timestamp(x.captured)]
+      if nxt.empty:
+        continue
+      wk, gday = int(nxt.week.iloc[0]), nxt.day.iloc[0]
+      if gday.dayofweek != 6 or wk not in done:  # Sunday games only (Wed/Thu/Fri practice)
+        continue
+      ret = pd.Timestamp(x.ret).strftime("%Y-%m-%d") if x.ret is not None and pd.notna(x.ret) else None
+      b = bucket(x.status, ret, gday.strftime("%Y-%m-%d")) or str(x.status)  # unmapped: ESPN's own word
+      if b not in buckets:
+        continue
+      # practice days published by the capture: day i (0 = Wed) from 22:00 UTC that day
+      k = sum(ts >= (gday - pd.Timedelta(days=4 - i)).tz_localize("UTC") + pd.Timedelta(hours=22) for i in range(3))
+      if not 1 <= k <= 2:
+        continue
+      on = (gsis, wk) in days.index
+      dv = days.loc[(gsis, wk)].days if on else ""
+      dv = dv if isinstance(dv, str) else ""
+      # the strings carry no dates: a short one ("D", "LF") is a player added later in the week, so it covers the
+      # LAST days; keep only the days published by the capture ("?" = unknown status, practice_features drops it)
+      seen = dv[:max(0, k - (3 - len(dv)))]
+      rows.append({"season": season, "week": wk, "gsis_id": gsis, "ts": ts, "bucket": b, "k": k, "on_report": on,
+                   "days": seen,
+                   "position": days.loc[(gsis, wk)].position if on else x.pos,
+                   "played": float(st.get((gsis, wk)) == "ACT"), "name": x.name})
+    df = pd.DataFrame(rows)
+    if df.empty:
       continue
-    ts = pd.Timestamp(x.ts[:14]).tz_localize("UTC")
-    tg = by_team[team]
-    nxt = tg[tg.day >= pd.Timestamp(x.captured)]
-    if nxt.empty:
-      continue
-    wk, gday = int(nxt.week.iloc[0]), nxt.day.iloc[0]
-    if gday.dayofweek != 6 or wk not in done:  # Sunday games only (Wed/Thu/Fri practice)
-      continue
-    ret = pd.Timestamp(x.ret).strftime("%Y-%m-%d") if x.ret is not None and pd.notna(x.ret) else None
-    b = bucket(x.status, ret, gday.strftime("%Y-%m-%d"))
-    if b not in ("Out", "Out+ret", "IR"):
-      continue
-    # practice days published by the capture: day i (0 = Wed) from 22:00 UTC that day
-    k = sum(ts >= (gday - pd.Timedelta(days=4 - i)).tz_localize("UTC") + pd.Timedelta(hours=22) for i in range(3))
-    if not 1 <= k <= 2:
-      continue
-    on = (gsis, wk) in days.index
-    dv = days.loc[(gsis, wk)].days if on else ""
-    dv = dv if isinstance(dv, str) else ""
-    # the strings carry no dates: a short one ("D", "LF") is a player added later in the week, so it covers the
-    # LAST days; keep only the days published by the capture ("?" = unknown status, practice_features drops it)
-    seen = dv[:max(0, k - (3 - len(dv)))]
-    rows.append({"season": season, "week": wk, "gsis_id": gsis, "ts": ts, "bucket": b, "k": k, "on_report": on,
-                 "days": seen,
-                 "position": days.loc[(gsis, wk)].position if on else x.pos,
-                 "played": float(st.get((gsis, wk)) == "ACT"), "name": x.name})
-  df = pd.DataFrame(rows)
-  if df.empty:
-    continue
-  df["base"] = NOT_ON_REPORT
-  on = df.on_report
-  if on.any():
-    X = df[on].assign(game_status="None")
-    df.loc[on, "base"] = model.predict_proba(practice_features(X)[cols])[:, 1]
-  frames.append(df)
-
-R = pd.concat(frames, ignore_index=True).sort_values("ts").drop_duplicates(["season", "week", "gsis_id"], keep="last")
-print(f"[midweek] {len(R)} player-weeks ({R.on_report.mean():.0%} on the report), by season:",
-      R.groupby("season").size().to_dict(), "by bucket:", R.bucket.value_counts().to_dict(), flush=True)
-print("[midweek] play rate by bucket x season:\n", R.pivot_table(index="bucket", columns="season", values="played",
-                                                                aggfunc=["mean", "size"]).round(3).to_string())
+    df["base"] = NOT_ON_REPORT
+    on = df.on_report
+    if on.any():
+      X = df[on].assign(game_status="None")
+      df.loc[on, "base"] = model.predict_proba(practice_features(X)[cols])[:, 1]
+    frames.append(df)
+  R = pd.concat(frames, ignore_index=True).sort_values("ts").drop_duplicates(["season", "week", "gsis_id"], keep="last")
+  return R
 
 
-def loso_rate(b, season):
-  if b == "IR":
-    return 0.0
-  o = R[(R.bucket == b) & (R.season != season)]
-  return float(o.played.mean()) if len(o) else float(R[R.season != season].played.mean())
+if __name__ == "__main__":
+  R = midweek_rows()
+  print(f"[midweek] {len(R)} player-weeks ({R.on_report.mean():.0%} on the report), by season:",
+        R.groupby("season").size().to_dict(), "by bucket:", R.bucket.value_counts().to_dict(), flush=True)
+  print("[midweek] play rate by bucket x season:\n", R.pivot_table(index="bucket", columns="season", values="played",
+                                                                  aggfunc=["mean", "size"]).round(3).to_string())
 
 
-R["rule"] = [loso_rate(b, s) for b, s in zip(R.bucket, R.season)]
-R["se_base"], R["se_rule"] = (R.base - R.played) ** 2, (R.rule - R.played) ** 2
-d = (R.se_rule - R.se_base).to_numpy()
-rng = np.random.default_rng(0)
-boot = np.array([d[rng.integers(0, len(d), len(d))].mean() for _ in range(2000)])
-lo, hi = np.percentile(boot, [2.5, 97.5])
-per = R.groupby("season")[["se_base", "se_rule"]].mean()
-print("[midweek] Brier by season:\n", per.round(4).to_string())
-print(f"[midweek] pooled Brier base {R.se_base.mean():.4f} rule {R.se_rule.mean():.4f}  diff {d.mean():+.4f} "
-      f"[{lo:+.4f}, {hi:+.4f}]  seasons better {(per.se_rule < per.se_base).sum()}/{len(per)}", flush=True)
-ok = len(R) >= 100 and hi < 0 and (per.se_rule < per.se_base).sum() >= 2
-print("[midweek] GATE:", "PASS" if ok else ("INCONCLUSIVE (n < 100)" if len(R) < 100 else "FAIL"))
-print("[midweek] on report vs not:\n", R.groupby("on_report")[["played", "base", "rule", "se_base", "se_rule"]].mean()
-      .round(3).to_string())
-print("[midweek] baseline misses (played <= 0, base >= .5), sample:\n",
-      R[(R.played == 0) & (R.base >= .5)][["season", "week", "name", "bucket", "days", "base", "rule"]].head(12).to_string())
-R.to_parquet(ROOT / "cache" / "espn_midweek_eval.parquet", index=False)
-
-# ---- v2 (pre-registered after v1, see INSIGHTS): on-report rows only, rule = on-report LOSO bucket rate
-import json  # noqa: E402
-
-O = R[R.on_report].copy()
+  def loso_rate(b, season):
+    if b == "IR":
+      return 0.0
+    o = R[(R.bucket == b) & (R.season != season)]
+    return float(o.played.mean()) if len(o) else float(R[R.season != season].played.mean())
 
 
-def loso_on(b, season):
-  o = O[(O.bucket == b) & (O.season != season)]
-  return float(o.played.mean()) if len(o) else float(O[O.season != season].played.mean())
+  R["rule"] = [loso_rate(b, s) for b, s in zip(R.bucket, R.season)]
+  R["se_base"], R["se_rule"] = (R.base - R.played) ** 2, (R.rule - R.played) ** 2
+  d = (R.se_rule - R.se_base).to_numpy()
+  rng = np.random.default_rng(0)
+  boot = np.array([d[rng.integers(0, len(d), len(d))].mean() for _ in range(2000)])
+  lo, hi = np.percentile(boot, [2.5, 97.5])
+  per = R.groupby("season")[["se_base", "se_rule"]].mean()
+  print("[midweek] Brier by season:\n", per.round(4).to_string())
+  print(f"[midweek] pooled Brier base {R.se_base.mean():.4f} rule {R.se_rule.mean():.4f}  diff {d.mean():+.4f} "
+        f"[{lo:+.4f}, {hi:+.4f}]  seasons better {(per.se_rule < per.se_base).sum()}/{len(per)}", flush=True)
+  ok = len(R) >= 100 and hi < 0 and (per.se_rule < per.se_base).sum() >= 2
+  print("[midweek] GATE:", "PASS" if ok else ("INCONCLUSIVE (n < 100)" if len(R) < 100 else "FAIL"))
+  print("[midweek] on report vs not:\n", R.groupby("on_report")[["played", "base", "rule", "se_base", "se_rule"]].mean()
+        .round(3).to_string())
+  print("[midweek] baseline misses (played <= 0, base >= .5), sample:\n",
+        R[(R.played == 0) & (R.base >= .5)][["season", "week", "name", "bucket", "days", "base", "rule"]].head(12).to_string())
+  R.to_parquet(ROOT / "cache" / "espn_midweek_eval.parquet", index=False)
+
+  # ---- v2 (pre-registered after v1, see INSIGHTS): on-report rows only, rule = on-report LOSO bucket rate
+  import json  # noqa: E402
+
+  O = R[R.on_report].copy()
 
 
-O["rule2"] = [loso_on(b, s) for b, s in zip(O.bucket, O.season)]
-O["sb"], O["sr"] = (O.base - O.played) ** 2, (O.rule2 - O.played) ** 2
-d2 = (O.sr - O.sb).to_numpy()
-boot2 = np.array([d2[rng.integers(0, len(d2), len(d2))].mean() for _ in range(2000)])
-lo2, hi2 = np.percentile(boot2, [2.5, 97.5])
-per2 = O.groupby("season")[["sb", "sr"]].mean()
-cal = O.groupby("bucket").agg(n=("played", "size"), actual=("played", "mean"), rule=("rule2", "mean"), base=("base", "mean"))
-cal["off_pts"] = 100 * (cal.rule - cal.actual)
-print(f"[midweek v2] on-report n {len(O)}  Brier base {O.sb.mean():.4f} rule {O.sr.mean():.4f}  diff {d2.mean():+.4f} "
-      f"[{lo2:+.4f}, {hi2:+.4f}]  seasons better {(per2.sr < per2.sb).sum()}/{len(per2)}")
-print(cal.round(3).to_string())
-ok2 = len(O) >= 100 and hi2 < 0 and (per2.sr < per2.sb).sum() >= 2 and (cal.off_pts.abs() <= 10).all()
-print("[midweek v2] GATE:", "PASS" if ok2 else "FAIL")
-if ok2:  # the shipped rates (nfledge/espn_calib.py MIDWEEK): every on-report row, all seasons
-  rates = {b: {"p": round(float(x.played.mean()), 4), "n": int(len(x))} for b, x in O.groupby("bucket")}
-  out = ROOT / "data" / "history" / "espn_midweek.json"
-  out.write_text(json.dumps({"source": "tools/espn_midweek_eval.py (Wayback Wed-Fri captures 2022-24, players on the "
-                                       "practice report, Sunday games)", "rates": rates}, indent=1), encoding="utf-8")
-  print(f"[midweek v2] wrote {out.name}: {rates}")
+  def loso_on(b, season):
+    o = O[(O.bucket == b) & (O.season != season)]
+    return float(o.played.mean()) if len(o) else float(O[O.season != season].played.mean())
+
+
+  O["rule2"] = [loso_on(b, s) for b, s in zip(O.bucket, O.season)]
+  O["sb"], O["sr"] = (O.base - O.played) ** 2, (O.rule2 - O.played) ** 2
+  d2 = (O.sr - O.sb).to_numpy()
+  boot2 = np.array([d2[rng.integers(0, len(d2), len(d2))].mean() for _ in range(2000)])
+  lo2, hi2 = np.percentile(boot2, [2.5, 97.5])
+  per2 = O.groupby("season")[["sb", "sr"]].mean()
+  cal = O.groupby("bucket").agg(n=("played", "size"), actual=("played", "mean"), rule=("rule2", "mean"), base=("base", "mean"))
+  cal["off_pts"] = 100 * (cal.rule - cal.actual)
+  print(f"[midweek v2] on-report n {len(O)}  Brier base {O.sb.mean():.4f} rule {O.sr.mean():.4f}  diff {d2.mean():+.4f} "
+        f"[{lo2:+.4f}, {hi2:+.4f}]  seasons better {(per2.sr < per2.sb).sum()}/{len(per2)}")
+  print(cal.round(3).to_string())
+  ok2 = len(O) >= 100 and hi2 < 0 and (per2.sr < per2.sb).sum() >= 2 and (cal.off_pts.abs() <= 10).all()
+  print("[midweek v2] GATE:", "PASS" if ok2 else "FAIL")
+  if ok2:  # the shipped rates (nfledge/espn_calib.py MIDWEEK): every on-report row, all seasons
+    rates = {b: {"p": round(float(x.played.mean()), 4), "n": int(len(x))} for b, x in O.groupby("bucket")}
+    out = ROOT / "data" / "history" / "espn_midweek.json"
+    out.write_text(json.dumps({"source": "tools/espn_midweek_eval.py (Wayback Wed-Fri captures 2022-24, players on the "
+                                         "practice report, Sunday games)", "rates": rates}, indent=1), encoding="utf-8")
+    print(f"[midweek v2] wrote {out.name}: {rates}")
