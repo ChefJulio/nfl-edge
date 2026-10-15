@@ -37,10 +37,11 @@ def played_set(data) -> set:
   return played
 
 
-def lookahead_availability(data, current_week: int, weeks: list[int]) -> tuple[dict, dict, dict]:
+def lookahead_availability(data, current_week: int, weeks: list[int], now_report: dict | None = None) -> tuple[dict, dict, dict]:
   """For each lookahead week: {gsis_id: P(active)} and {gsis_id: status text} for players out injured now, plus
   the injured-reserve players expected back that week (to add to the roster). Fit on every injury episode whose
-  outcome is known (walk-forward: nothing from the future)."""
+  outcome is known (walk-forward: nothing from the future). now_report: {gsis_id: P(plays this week)} for players
+  on this week's practice report (InjuryModel.availability): the chain starts from it instead of the hazard."""
   season = data.current_season
   m = ReturnModel(data, played_set(data))
   st = m.states(sorted(data.seasons))
@@ -57,7 +58,10 @@ def lookahead_availability(data, current_week: int, weeks: list[int]) -> tuple[d
   if cur.empty:
     return {w: {} for w in weeks}, {w: {} for w in weeks}, {w: pd.DataFrame() for w in weeks}
   horizon = 18
-  pa = m.p_active(cur, horizon)
+  now_report = now_report or {}
+  first = np.array([float(now_report[g]) if (g in now_report and int(nw) == current_week) else np.nan
+                    for g, nw in zip(cur.gsis_id, cur.next_week)])
+  pa = m.p_active(cur, horizon, first=first)
   s = data.schedules
   reg = s[(s.season == season) & (s.game_type == "REG")]
   team_weeks = {t: sorted(set(reg[reg.home_team == t].week) | set(reg[reg.away_team == t].week))
@@ -193,14 +197,19 @@ class ReturnModel:
   def hazard(self, d: pd.DataFrame) -> np.ndarray:
     return self.model.predict_proba(d[FEATURES])[:, 1]
 
-  def p_active(self, state: pd.DataFrame, horizon: int) -> np.ndarray:
+  def p_active(self, state: pd.DataFrame, horizon: int, first: np.ndarray | None = None) -> np.ndarray:
     """P(active in each of the next `horizon` games), shape (len(state), horizon), for players out now. Each step
-    adds one missed game; the designation stays until he returns (IR / PUP players stay designated)."""
+    adds one missed game; the designation stays until he returns (IR / PUP players stay designated).
+    first: per-row P(plays) for the first game where this week's report knows better (NaN = the hazard). Owner-
+    approved test 2026-10-15 (tools/lookahead_chain_eval.py, A): walk-forward 2022-25 Brier over his next 2-6 games
+    0.228 -> 0.194, 4/4 seasons."""
     s = state.copy()
     out = np.zeros((len(s), horizon))
     still_out = np.ones(len(s))
     for h in range(horizon):
       p = self.hazard(s)
+      if h == 0 and first is not None:
+        p = np.where(np.isnan(first), p, first)
       back_now = still_out * p
       # back this game, or back earlier and still active (measured stay-active rate)
       out[:, h] = (1 - still_out) * getattr(self, "stay_active", 1.0) + back_now

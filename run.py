@@ -186,7 +186,7 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
   }
 
 
-def build_lookahead(eng, data, cfg, scoring, season: int, week: int, site: Path):
+def build_lookahead(eng, data, cfg, scoring, season: int, week: int, site: Path, now_report: dict | None = None):
   """Every later week of the season, projected from today's data: real opponents, current ratings and depth
   charts, Vegas lines once posted (else the model's own). Injuries: nothing is known that far out, so everyone on
   the active roster is assumed healthy (IR stays off the roster); no weather. Rebuilt every run, never archived."""
@@ -196,7 +196,8 @@ def build_lookahead(eng, data, cfg, scoring, season: int, week: int, site: Path)
   weeks = list(range(week + 1, last + 1))
   # Players out injured now: P(active) each later week from the return-timing model; under 50% he sits and his
   # volume is redistributed (same binary rule as the current week); injured-reserve players expected back return.
-  avail, status, extra = returns.lookahead_availability(data, week, weeks)
+  # now_report: this week's chance to play for players on its practice report (the chain starts from it)
+  avail, status, extra = returns.lookahead_availability(data, week, weeks, now_report)
   for w in weeks:
     proj = eng.project_week(season, w, use_injuries=True, quiet=True, avail_override=avail.get(w, {}),
                             status_override=status.get(w, {}), extra_cands=extra.get(w))
@@ -253,7 +254,8 @@ def main():
   out = rp.render(ctx, Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week))
   check_script(out)
   if args.lookahead:
-    build_lookahead(eng, data, cfg, scoring, season, week, out.parent)
+    rep = proj[proj.on_report] if "on_report" in proj else proj.iloc[0:0]
+    build_lookahead(eng, data, cfg, scoring, season, week, out.parent, dict(zip(rep.gsis_id, rep.avail)))
   print(f"[run] wrote {out} in {time.time() - t0:.0f}s")
   if args.open:
     webbrowser.open(out.as_uri())

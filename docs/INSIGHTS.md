@@ -648,6 +648,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   >= 3 of 4 seasons; AND (ii) fairness: the group's actual play rate over k = 2..6 is at least 10 points below that
   of skill players not on the report who played the previous game (so the discount is the injury, not ordinary
   attrition); AND (iii) the variant's mean prediction within 5 points of actual over k = 2..6.
+  **Result: FAIL, not shipped.** 831 episodes: Brier 0.460 -> 0.226 [-0.256, -0.211], 4/4 (i passes); group plays
+  54.0% vs 85.8% for not-on-report skill players, a 31.7-point gap (ii passes); but predicted 60.1% vs actual 54.0%
+  (iii fails by 1.1 points: k=6 76.2 vs 68.7, the same long-horizon optimism as (A) and the diagnostic). Hurts
+  therefore still shows 100% from wk 7. The unified lookahead availability (OPEN above) would fix the plateau and
+  is the way to cover him; retest B' inside it.
 - **PRE-REGISTERED 2026-10-15: partial-week practice models.** For k = 1 and 2 published practice days, a model
   trained on report weeks truncated to their first k days (3-day weeks; same features with no game status, same
   GB settings), used while a team's final report (any game status on it) is not out. Walk-forward 2021-25 (train on

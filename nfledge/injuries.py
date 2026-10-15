@@ -423,7 +423,7 @@ class InjuryModel:
     prev = inj[inj.week == week - 1]
     published = set(cur.team)
     p = p.copy()
-    p["avail"], p["status"], p["partial_week"] = 1.0, "", False
+    p["avail"], p["status"], p["partial_week"], p["on_report"] = 1.0, "", False, False
     cur_map = cur.set_index("gsis_id")
     prev_map = prev.drop_duplicates("gsis_id").set_index("gsis_id")
     pr = self.data.practice
@@ -439,6 +439,7 @@ class InjuryModel:
         x = days.loc[[row.gsis_id]]
         p.at[i, "avail"] = float(self.practice_prob(x, final=row.team in final)[0])
         p.at[i, "partial_week"] = row.team not in final  # report.inactive_why: "practice so far"
+        p.at[i, "on_report"] = True  # returns.lookahead_availability starts its chain from this week's chance
         gs = x.game_status.iloc[0]
         label = gs.title() if gs != "None" else ""
         ruled = self.midweek_ruling(row.gsis_id, gs)
