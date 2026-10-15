@@ -611,6 +611,18 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   week + ESPN weeks-to-return / status at decision time + this week's practice-model P(plays) when on the report.
   Baseline: production (chain, step 1 = this week's estimate, stay 1). Same gate as v2. If it fails, stop and
   record; production keeps the chain.
+  **v3 result (`tools/return_v3_eval.py`): FAIL, not shipped; stopped as committed.** Brier 0.1189 -> 0.1138
+  (-0.005 [-0.010, -0.000]), 2/3 seasons. IR pinpointing fixed: IR k 1-2 / 3-4 / 5-8 actual 6.4 / 21.1 / 40.9% vs
+  v3 7.7 / 21.7 / 39.5 (production 9.7 / 19.1 / 27.9); rule-impossible IR rows 0.0% (actual 0.4%); active-roster
+  within 2.6. Fails (ii) on the small groups: game-day inactive (I01) -9.4 / -16.7 / -11.5, IR designated to
+  return -10.3 / -12.8 / -4.0, other reserve 5-8 -7.1.
+- **PRE-REGISTERED 2026-10-15, to be judged on FRESH 2026 outcomes only: hybrid return timing.** v3's direct model
+  for players on IR (designation ir, plus the IR minimum rule), production's chain for every other designation.
+  Chosen after seeing v3's per-designation results on 2023-25, so those seasons can't judge it; it is evaluated
+  on 2026 return-model states from week 7 on whose outcomes resolve this season (decision points before any
+  2026 outcome was looked at). Not live until then. Gate: IR rows' Brier lower than production's with a 95%
+  bootstrap CI by episode excluding 0, and IR calibration by k-bucket within 5 points; non-IR rows unchanged by
+  construction. Earliest look: after week 14 (enough IR returns to resolve).
 - **SHIPPED 2026-10-15 (owner design, data check): a returned player counts like a healthy one in the lookahead.**
   Owner: once back for even one game, the odds he's past the injury are very high; re-aggravation is small. Data
   (2022-25 skill players, role-matched by offensive snap share): starters back from an injury absence play their
