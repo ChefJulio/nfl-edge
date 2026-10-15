@@ -134,23 +134,11 @@ table.tiles thead th { border-bottom: 0; }
    does not reliably position table rows, so a row overlay detached and floated around as a stray colored line.
    Every cell: 2px primary-color top and bottom. First / last cell: 2px primary side + a 3px secondary-color stripe
    just inside it. --extra carries per-cell additions (boost marker, pinned-column shadow). */
-tr.teamrow > td { background: #171a20; color: #fff; border: 0;
-  --top: inset 0 2px 0 var(--tc), inset 0 -2px 0 var(--tc); --side: 0 0 #0000; --extra: 0 0 #0000;
-  box-shadow: var(--top), var(--side), var(--extra); }
-tr.teamrow > td:first-child { border-radius: 6px 0 0 6px; --side: inset 2px 0 0 var(--tc), inset 5px 0 0 var(--tc2); }
-tr.teamrow > td:last-child { border-radius: 0 6px 6px 0; --side: inset -2px 0 0 var(--tc), inset -5px 0 0 var(--tc2); }
 @media (max-width: 760px) {  /* Power's last column (trend) is hidden here: close the row on the one before it */
   table.power tr.teamrow > td:nth-last-child(2) { border-radius: 0 6px 6px 0; --side: inset -2px 0 0 var(--tc), inset -5px 0 0 var(--tc2); }
 }
-tr.teamrow:hover > td { background: #1e222a; }
-tr.teamrow .quiet, tr.teamrow .sub, tr.teamrow .st small, tr.teamrow .fc, tr.teamrow .vs { color: color-mix(in srgb, var(--tfg) 75%, transparent); }
 tr.teamrow.boosted > td:first-child { --extra: inset 8px 0 0 #ffd84d; }
 tr.teamrow.out > td { color: rgba(255,255,255,.55); }
-.logo { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px rgba(255,255,255,.18); }
-.logo img { width: 18px; height: 18px; object-fit: contain; }
-.who { display: flex; align-items: center; gap: 9px; }
-.who b { font-weight: 600; }
-.who .sub { font-size: 11px; display: block; line-height: 1.2; font-weight: 500; }
 .chip { display: inline-block; min-width: 40px; text-align: center; font-size: 11px; font-weight: 700; letter-spacing: .03em; padding: 2px 6px; border-radius: 5px; border-left: 3px solid; box-shadow: 0 0 0 1px rgba(255,255,255,.5); }
 .pill { display: inline-block; padding: 0 7px; border-radius: 999px; font-weight: 700; font-size: 11.5px; line-height: 19px; background: #eef0f3; color: #2a2f37; white-space: nowrap; }
 .pill-good { background: #dcf2e3; color: #10612a; } .pill-bad { background: #fde1dd; color: #9b2218; }
@@ -185,16 +173,6 @@ table.ranks .nm { display: block; white-space: nowrap; overflow: hidden; text-ov
   max-width: clamp(0px, calc(var(--sx, 0px) - var(--w, 9em) + 0.3em), 0.3em); }
 /* player photo (face crop) with the team logo resting on top of it, spilling over the bottom-right edge; with no
    photo the logo fills the circle instead */
-.pic { position: relative; flex: none; width: 34px; height: 34px; margin-right: 3px; }
-.pic-img { display: block; width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
-  background: rgba(255,255,255,.08); box-shadow: 0 0 0 1px rgba(255,255,255,.16); }
-.pic-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.pic .pic-tm { position: absolute; right: -6px; bottom: -4px; z-index: 1; }
-.pic .pic-tm .logo { width: 17px; height: 17px; box-shadow: 0 0 0 2px var(--panel), 0 1px 3px rgba(0,0,0,.5); }
-.pic .pic-tm .logo img { width: 12px; height: 12px; }
-.pic.nopic .pic-img img { display: none; }
-.pic.nopic .pic-tm { inset: 0; display: grid; place-items: center; }
-.pic.nopic .pic-tm .logo { width: 34px; height: 34px; box-shadow: none; } .pic.nopic .pic-tm .logo img { width: 24px; height: 24px; }
 /* rank with the expert consensus rank beside it, "1 (1lw)" */
 td.rk { white-space: nowrap; } td.rk .rkn { display: inline; font-weight: 700; }
 td.rk .ecr { margin-left: 3px; font-size: 11px; font-weight: 500; color: color-mix(in srgb, var(--tfg, var(--ink)) 62%, transparent); }

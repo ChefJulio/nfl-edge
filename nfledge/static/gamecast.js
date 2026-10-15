@@ -1589,6 +1589,40 @@
     return `<div class="gc-grid"><div class="gc-col">${odds}${battles}${ratings}</div>
       <div class="gc-col"><section class="gcs"><h3>Fantasy projections <span class="bt-unit">your scoring</span></h3>${plTable(a)}${plTable(h)}</section>${preDepth(g)}</div></div>`;
   };
+  // ---- Postgame player stats (owner 2026-10-14): ESPN's full box score, every category it keeps (passing through
+  // punting, defense included), one team at a time, each player in the site's tile row; tapping opens our player page
+  // when we have one (ESPN id -> gsis via data/espn_ids.json).
+  const PST_NAME = { passing: 'Passing', rushing: 'Rushing', receiving: 'Receiving', fumbles: 'Fumbles', defensive: 'Defense',
+                     interceptions: 'Interceptions', kickReturns: 'Kick returns', puntReturns: 'Punt returns', kicking: 'Kicking', punting: 'Punting' };
+  let GSIS_OF = null;  // ESPN id -> gsis, built once from NFLE.ui.ids
+  const playerStats = (sum, info) => {
+    const P = sum && sum.boxscore && sum.boxscore.players;
+    if (!P || !P.length) return '';
+    const U = NFLE.ui, teams = (DATA && DATA.teams) || {};
+    if (!GSIS_OF && U && U.ids && Object.keys(U.ids).length) { GSIS_OF = {}; Object.entries(U.ids).forEach(([g, e]) => { GSIS_OF[e] = g; }); }
+    const sides = [info.away, info.home];
+    const pick = sides.some(x => x.team === GP.pst) ? GP.pst : info.away.team;
+    const block = side => {
+      const tp = P.find(x => ourCode(x.team.abbreviation) === side.team);
+      if (!tp) return '';
+      const style = teams[side.team] ? NFLE.fmt.rowStyle(teams, side.team) : `--tc:${side.color || '#666'};--tc2:${side.color || '#999'};--tfg:#ffffff`;
+      const cats = (tp.statistics || []).filter(c => (c.athletes || []).length).map(c => {
+        const rows = c.athletes.map(a => {
+          const id = String(a.athlete.id), pid = GSIS_OF && GSIS_OF[id];
+          const cell = U ? U.player({ name: a.athlete.displayName, team: side.team, espn: id, sub: a.athlete.jersey ? `#${a.athlete.jersey}` : side.team }, teams)
+            : `<b>${esc(a.athlete.displayName)}</b>`;
+          return `<tr class="teamrow" style="${style}"${pid ? ` data-open-pid="${esc(pid)}"` : ''}><td class="pst-who">${cell}</td>${(a.stats || []).map(v => `<td class="num">${esc(v)}</td>`).join('')}</tr>`;
+        }).join('');
+        const tot = (c.totals || []).length ? `<tr class="pst-tot"><td>Team</td>${c.totals.map(v => `<td class="num">${esc(v)}</td>`).join('')}</tr>` : '';
+        const head = (c.labels || []).map((l, i) => `<th class="num" title="${esc((c.descriptions || [])[i] || '')}">${esc(l)}</th>`).join('');
+        return `<div class="pst-cat"><div class="bx-h">${esc(PST_NAME[c.name] || c.text || c.name)}</div>
+          <div class="lg-scroll"><table class="bx tiles pst-tbl"><thead><tr><th>Player</th>${head}</tr></thead><tbody>${rows}${tot}</tbody></table></div></div>`;
+      }).join('');
+      return `<div class="pst-team" data-pst="${esc(side.team)}"${side.team === pick ? '' : ' hidden'}>${cats || '<p class="muted">No player stats.</p>'}</div>`;
+    };
+    const seg = `<div class="seg pst-seg" role="tablist">${sides.map(x => `<button type="button" data-pst="${esc(x.team)}" class="${x.team === pick ? 'on' : ''}">${logo(x.logo, '#111', 18, x.team)} ${esc(x.team)}</button>`).join('')}</div>`;
+    return `<section class="gcs" id="gcPst"><h3>Player stats <span class="src">ESPN</span></h3>${seg}${sides.map(block).join('')}</section>`;
+  };
   // ---- Postgame tab: the recap once it's final.
   const postTab = (sum, info, g, ser) => {
     if (info.state !== 'post') return `<section class="gcs"><p class="muted">${info.state === 'pre' ? 'The recap appears once the game is over.' : 'The game is still going; the recap appears at the final whistle. Follow it on the Live tab.'}</p></section>`;
@@ -1618,7 +1652,8 @@
           ${gameLog(sum, info, ser, null, { sort: 'impact', filter: 'all', q: '', limit: 6, note: false })}</section>` : ''}</div>
       <div class="gc-col">${DATA ? `<section class="gcs"><h3>Fantasy vs our projection <span class="bt-unit">your scoring</span></h3>${fanHtml}</section>`
         : `<section class="gcs"><h3>Box score</h3>${sum && sum.boxscore && sum.boxscore.players ? boxScore(sum, info) : '<p class="muted">Not available.</p>'}</section>`}
-        <section class="gcs"><h3>Team stats</h3>${sum ? teamStats(sum, info) || '<p class="muted">Not available.</p>' : ''}</section></div></div>`;
+        <section class="gcs"><h3>Team stats</h3>${sum ? teamStats(sum, info) || '<p class="muted">Not available.</p>' : ''}</section></div></div>
+      ${playerStats(sum, info)}`;
   };
   // ESPN unreachable: still show the game from our own week file (Pregame works; final score if we have it).
   const infoFromG = g => {
@@ -1713,12 +1748,23 @@
         const vx = 6 + (640 - 12) * best.t / T;
         hair.setAttribute('x1', vx); hair.setAttribute('x2', vx); hair.style.display = '';
         tip.innerHTML = `<b>${best.play.period ? periodName(best.play.period.number) : ''} ${esc(best.play.clock ? best.play.clock.displayValue : '')}</b> · ${esc(GP.info.home.team)} ${pc(best.home)} / ${esc(GP.info.away.team)} ${pc(1 - best.home)}<br>${esc(best.play.text)}`;
-        tip.hidden = false; tip.style.left = `${Math.min(Math.max(x * 100, 18), 82)}%`;
+        // keep the whole tooltip inside the chart: centered on the finger, clamped by its measured width (a % clamp
+        // let the wide play text run off the screen edge near the ends)
+        tip.hidden = false;
+        const W = tip.parentElement.getBoundingClientRect().width, tw = tip.offsetWidth;
+        tip.style.transform = 'none';
+        tip.style.left = `${Math.max(0, Math.min(W - tw, x * W - tw / 2))}px`;
       };
       svg.addEventListener('mousemove', move); svg.addEventListener('touchstart', move, { passive: true });
       svg.addEventListener('touchmove', move, { passive: true });
       svg.addEventListener('mouseleave', () => { tip.hidden = true; hair.style.display = 'none'; });
     }
+    // postgame player stats: one team at a time
+    root.querySelectorAll('.pst-seg [data-pst]').forEach(b => b.onclick = () => {
+      GP.pst = b.dataset.pst;
+      root.querySelectorAll('.pst-team').forEach(t => { t.hidden = t.dataset.pst !== GP.pst; });
+      root.querySelectorAll('.pst-seg [data-pst]').forEach(x => x.classList.toggle('on', x === b));
+    });
     // replay controls
     root.querySelectorAll('[data-rp]').forEach(b => b.onclick = () => replayCmd(b.dataset.rp));
     const rng = root.querySelector('.rp input[type=range]');

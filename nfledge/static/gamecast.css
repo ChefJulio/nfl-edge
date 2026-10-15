@@ -542,3 +542,10 @@ td.pen-top { color: var(--muted); font-size: 12.5px; }
 .pc-mt { margin: 0 0 12px; } .pc-mt .mt { margin: 0; } .pc-mtk { margin: 2px 2px 6px; }
 /* team page Players tab: tile rows with the same 3px gap as the list tabs */
 table.bx.tiles { border-collapse: separate; border-spacing: 0 3px; } table.bx.tiles td { border-bottom: 0; }
+
+/* Postgame player stats */
+.pst-seg { margin: 4px 0 10px; } .pst-seg button { display: inline-flex; align-items: center; gap: 6px; }
+.pst-cat { margin: 0 0 14px; }
+table.pst-tbl td.pst-who { min-width: 11em; } table.pst-tbl td.num, table.pst-tbl th.num { white-space: nowrap; }
+table.pst-tbl tr.pst-tot td { font-weight: 800; color: var(--muted); border-top: 1px solid var(--line); padding-top: 6px; }
+table.pst-tbl tr.pst-tot td:first-child { padding-left: 10px; }
