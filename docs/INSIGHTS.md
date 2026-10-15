@@ -634,6 +634,20 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Gate (each): pooled Brier over k = 2..6 lower, 95% bootstrap CI of the difference (2,000 resamples of
   player-episodes) excluding 0, lower in >= 3 of 4 seasons. The long-horizon plateau (1) is a separate problem,
   not fixed here.
+  **Results (`tools/lookahead_chain_eval.py`):** (A) PASS: 3,514 episodes, Brier 0.2277 -> 0.1940, diff -0.034
+  [-0.039, -0.029], 4/4 seasons; k=2 actual 67.4% / old 54.8% / new 62.4%; k=6 73.4 / 77.7 / 81.4 (the plateau
+  overshoot remains). SHIP. (B) PASS on paper: 10,891 episodes, Brier 0.215 -> 0.150, 4/4; but NOT SHIPPED: skill
+  players NOT on any report also play only 91% of their next game falling to 81% at k=6 (on-report: 88% -> 80%),
+  so B's discount is mostly ordinary attrition that the lookahead applies to nobody else (everyone healthy = 1.0):
+  shipping it would rank every player on a report below his true standing relative to the rest.
+  **OPEN (the real fix):** a lookahead availability for EVERYONE: P(plays his k-th next game) from role / snap
+  share, position, current report and the return model, so healthy players also carry attrition and injured ones
+  are compared fairly. ROS totals are then all lower, but ranks are fair.
+- **PRE-REGISTERED 2026-10-15: B' (likely to miss this week).** B restricted to skill players (QB/RB/WR/TE) whose
+  practice-model P(plays game G) < 0.5. Gate: (i) pooled Brier over k = 2..6 lower than P = 1.0, CI excluding 0,
+  >= 3 of 4 seasons; AND (ii) fairness: the group's actual play rate over k = 2..6 is at least 10 points below that
+  of skill players not on the report who played the previous game (so the discount is the injury, not ordinary
+  attrition); AND (iii) the variant's mean prediction within 5 points of actual over k = 2..6.
 - **PRE-REGISTERED 2026-10-15: partial-week practice models.** For k = 1 and 2 published practice days, a model
   trained on report weeks truncated to their first k days (3-day weeks; same features with no game status, same
   GB settings), used while a team's final report (any game status on it) is not out. Walk-forward 2021-25 (train on
