@@ -139,11 +139,39 @@ class InjuryModel:
     X = practice_features(d)
     self.practice_cols = list(X.columns)
     self.practice_model = HistGradientBoostingClassifier(**self._gb_params(), random_state=0).fit(X, d.played)
+    # Midweek (owner-approved test 2026-10-15, INSIGHTS sec. 9; tools/partial_week_eval.py): the full-week model
+    # reads "no game status yet" as "cleared" (1 day published: 86% predicted vs 65% played). One model per k = 1, 2
+    # published days, trained on 3-day report weeks cut to their first k days, every outcome: walk-forward 2021-25
+    # Brier 0.203 -> 0.160 (5/5 seasons), calibrated within 1.2 points. Used until the team's final report is out.
+    self.partial_models = {}
+    full3 = ah[(ah.season < max(seasons) + 1) & (ah.days.fillna("").str.len() == 3)]
+    for k in (1, 2):
+      t = full3.assign(days=full3.days.str[:k], game_status="None")
+      self.partial_models[k] = HistGradientBoostingClassifier(**self._gb_params(), random_state=0).fit(
+        practice_features(t)[self.practice_cols], t.played)
 
-  def practice_prob(self, rows: pd.DataFrame) -> np.ndarray:
+  def practice_prob(self, rows: pd.DataFrame, final: bool = True) -> np.ndarray:
+    """P(plays) from the practice sequence. final=False (his team's final report isn't out): 1-2 published days
+    use the partial-week model for that many days."""
     X = practice_features(rows)[self.practice_cols]
     p = self.practice_model.predict_proba(X)[:, 1]
+    if not final and getattr(self, "partial_models", None):
+      n = rows.days.fillna("").str.replace("?", "", regex=False).str.len().to_numpy()
+      for k, m in self.partial_models.items():
+        if (n == k).any():
+          p = np.where(n == k, m.predict_proba(X)[:, 1], p)
     return np.where(rows.game_status.to_numpy() == "OUT", 0.0, p)
+
+  def final_report_teams(self, days: pd.DataFrame, season: int, week: int) -> set:
+    """Teams whose final report for the week is out: someone on it has a game status, or it has 3 practice days.
+    days: this week's practice rows indexed by gsis_id."""
+    r = self.data.rosters
+    r = r[(r.season == season) & (r.week <= week)].sort_values("week").drop_duplicates("gsis_id", keep="last")
+    team = days.index.map(dict(zip(r.gsis_id, r.team)))
+    has_gs = days.game_status.fillna("None").astype(str).isin(["None", "nan", ""]).__invert__()
+    long = days.days.fillna("").str.len() >= 3
+    t = pd.DataFrame({"team": team, "fin": (has_gs | long).to_numpy()}).dropna(subset=["team"])
+    return set(t[t.fin].team)
 
   def prob(self, rep: str, prac: str) -> float:
     if rep == "Out":
@@ -401,13 +429,14 @@ class InjuryModel:
     use_days = self.practice_model is not None and pr is not None
     if use_days:
       days = pr[(pr.season == season) & (pr.week == week)].drop_duplicates("gsis_id", keep="last").set_index("gsis_id")
+      final = self.final_report_teams(days, season, week)
     scratch = self.scratch_prob(season, week)
     p["scratch_avail"] = p.gsis_id.map(scratch).fillna(1.0)
     for i, row in p.iterrows():
       p.at[i, "avail"] = p.at[i, "scratch_avail"]  # healthy-scratch risk unless the injury report says more
       if row.team in published and use_days and row.gsis_id in days.index:
         x = days.loc[[row.gsis_id]]
-        p.at[i, "avail"] = float(self.practice_prob(x)[0])
+        p.at[i, "avail"] = float(self.practice_prob(x, final=row.team in final)[0])
         gs = x.game_status.iloc[0]
         label = gs.title() if gs != "None" else ""
         ruled = self.midweek_ruling(row.gsis_id, gs)
@@ -488,11 +517,12 @@ class InjuryModel:
       pr = self.data.practice
       days = (pr[(pr.season == season) & (pr.week == week)].drop_duplicates("gsis_id", keep="last")
               .set_index("gsis_id") if pr is not None else None)
+      final = self.final_report_teams(days, season, week) if days is not None else set()
       for _, x in cur.iterrows():
         if self.practice_model is not None and days is not None and x.gsis_id in days.index:
           d = days.loc[[x.gsis_id]]
           ruled = self.midweek_ruling(x.gsis_id, d.game_status.iloc[0])
-          out[x.gsis_id] = ruled[0] if ruled else float(self.practice_prob(d)[0])
+          out[x.gsis_id] = ruled[0] if ruled else float(self.practice_prob(d, final=x.team in final)[0])
         else:
           out[x.gsis_id] = self.prob(_report(x.report_status), _practice(x.practice_status))
     else:
