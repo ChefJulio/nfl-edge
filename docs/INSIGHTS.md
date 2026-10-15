@@ -608,6 +608,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   14-17 +1 / 18-27 0 / 28-34 -1 / 35-45 -3 / 46+ -5). Gate: MAE lower, 95% CI over season-weeks excluding 0,
   >= 3 of 5 seasons. Fail: ship the season average (rescaled per league from its stat line) and say so. The owner's
   Sleeper scoring (per point / per yard allowed + extras) reported alongside, not gated.
+  **Result: PASS, SHIPPED** (`tools/dst_eval.py`): 2,398 defense-games, ESPN standard MAE 4.002 vs 4.339 (-0.337
+  [-0.417, -0.258]), 5/5; mean 6.19 vs actual 6.16; corr 0.253 vs 0.075. Owner's Sleeper scoring 4.519 vs 4.939, 5/5.
+  League tab lists every nonzero league setting we don't project (2-pt conversions, 3-and-outs, 4th-down stops, ...).
 - **PRE-REGISTERED 2026-10-15 (owner: "anything worth trying taking OUT?"): removal tests.** Components never
   ablated on fantasy accuracy: QB effects in the team pass model (`no_qb_effects`), vacated-volume redistribution
   (`redistribution_0`), prior-season carryover in team ratings (`prior_weight_0`), the 10-90% win-probability play

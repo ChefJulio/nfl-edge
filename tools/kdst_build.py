@@ -1,10 +1,13 @@
-"""League tab: kicker (and later team-defense) projections, data/kdst.json, this week through week 17.
+"""League tab: kicker and team-defense (D/ST) projections, data/kdst.json, this week through week 17.
 
 Usage: python tools/kdst_build.py --site=site   (CI step after run.py --lookahead and ros_build.py)
 Kickers (nfledge/kickers.py; owner-approved gate 2026-10-15: MAE 3.71 vs 4.00 for his season average, 5/5
 seasons): each team's kicker = the last one who kicked for it this season; his expected kicking stat line each
 week from the team's implied points in that week's page (Vegas when posted, else our game model: the same number
 the player projections use). The page re-scores the lines with the league's own kicking settings.
+D/ST (nfledge/defenses.py; gate 2026-10-15: MAE 4.00 vs 4.34 for its season average on ESPN standard scoring, 5/5
+seasons): each defense's expected stat line + points / yards allowed distributions vs that week's opponent, the
+opponent's implied points from the same page; rates from games before the current week.
 """
 import json
 import sys
@@ -15,6 +18,7 @@ sys.path.insert(0, str(ROOT))
 import pandas as pd  # noqa: E402
 
 from nfledge import data as D  # noqa: E402
+from nfledge import defenses as DF  # noqa: E402
 from nfledge.kickers import LINE, KickerModel, implied_points, load_kicks  # noqa: E402
 
 THROUGH = 17
@@ -54,10 +58,24 @@ def main():
       line = m.line(pid, team, imp)
       o = out_k.setdefault(team, {"pid": pid, "name": name, "w": []})
       o["w"].append([w, round(imp, 1), [round(line[x], 3) for x in LINE]])
-  out = {"season": season, "from": week, "through": THROUGH, "built": cur.get("generated"), "k_keys": LINE, "k": out_k}
+  # D/ST
+  g = DF.load_games(c, [season - 2, season - 1, season], sched)
+  dm = DF.DefenseModel().fit(g[(g.season < season) | (g.week < week)], implied_points(sched))
+  out_d = {}
+  for w, d in sorted(pages.items()):
+    imp = team_implied(d)
+    for gm in d.get("games", []):
+      a, h = gm["away"]["team"], gm["home"]["team"]
+      for team, opp, home in ((a, h, 0), (h, a, 1)):
+        if opp not in imp:
+          continue
+        line = dm.line(team, opp, imp[opp], (season, week))
+        out_d.setdefault(team, {"w": []})["w"].append([w, opp, home, [round(line[x], 3) for x in DF.LINE]])
+  out = {"season": season, "from": week, "through": THROUGH, "built": cur.get("generated"), "k_keys": LINE, "k": out_k,
+         "d_keys": DF.LINE, "dst": out_d}
   (site / "data").mkdir(parents=True, exist_ok=True)
   (site / "data" / "kdst.json").write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
-  print(f"[kdst] kickers {len(out_k)} teams, weeks {week}-{THROUGH}", flush=True)
+  print(f"[kdst] kickers {len(out_k)} teams, defenses {len(out_d)}, weeks {week}-{THROUGH}", flush=True)
 
 
 if __name__ == "__main__":

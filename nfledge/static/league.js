@@ -48,6 +48,60 @@
     w.xpm = pt(86); w.xpmiss = pt(88);
     return w;
   };
+  // D/ST (data/kdst.json, nfledge/defenses.py): expected stats + points / yards allowed as normal(mu, sd); a league's
+  // tiers come from those distributions (integer outcomes, below 0 counted as 0), per-point / per-yard from the means.
+  const DSTAT = ['sack', 'int', 'fum_rec', 'ff', 'def_td', 'st_td', 'safe', 'blk', 'pass_def', 'tkl_loss', 'forced_punts', 'def_2pt'];
+  const erf = x => { const t = 1 / (1 + 0.3275911 * Math.abs(x)), y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x); return x >= 0 ? y : -y; };
+  const Phi = z => 0.5 * (1 + erf(z / Math.SQRT2));
+  const pBetween = (mu, sd, lo, hi) => (hi === Infinity ? 1 : Phi((hi + 0.5 - mu) / sd)) - (lo <= 0 ? 0 : Phi((lo - 0.5 - mu) / sd));
+  const dstScore = (ln, w) => {
+    let t = DSTAT.reduce((a, k) => a + (ln[k] || 0) * (w[k] || 0), 0);
+    (w.pa_tiers || []).forEach(([lo, hi, pts]) => { t += pts * pBetween(ln.pa_mu, ln.pa_sd, lo, hi); });
+    (w.ya_tiers || []).forEach(([lo, hi, pts]) => { t += pts * pBetween(ln.ya_mu, ln.ya_sd, lo, hi); });
+    return t + (w.pts_allow || 0) * ln.pa_mu + (w.yds_allow || 0) * ln.ya_mu;
+  };
+  const sleeperD = sc => {
+    const g = k => +(sc[k] || 0);
+    const pa = [[0, 0, 'pts_allow_0'], [1, 6, 'pts_allow_1_6'], [7, 13, 'pts_allow_7_13'], [14, 20, 'pts_allow_14_20'], [21, 27, 'pts_allow_21_27'],
+                [28, 34, 'pts_allow_28_34'], [35, Infinity, 'pts_allow_35p']];
+    const ya = [[0, 99, 'yds_allow_0_100'], [100, 199, 'yds_allow_100_199'], [200, 299, 'yds_allow_200_299'], [300, 349, 'yds_allow_300_349'],
+                [350, 399, 'yds_allow_350_399'], [400, 449, 'yds_allow_400_449'], [450, 499, 'yds_allow_450_499'], [500, 549, 'yds_allow_500_549'],
+                [550, Infinity, 'yds_allow_550p']];
+    return { sack: g('sack'), int: g('int'), fum_rec: g('fum_rec'), ff: g('ff'), def_td: g('def_td'), st_td: g('def_st_td') || g('st_td'),
+             safe: g('safe'), blk: g('blk_kick'), pass_def: g('def_pass_def'), tkl_loss: g('tkl_loss'), forced_punts: g('def_forced_punts'),
+             def_2pt: g('def_2pt'), pts_allow: g('pts_allow'), yds_allow: g('yds_allow'),
+             pa_tiers: pa.filter(t => g(t[2])).map(([lo, hi, k]) => [lo, hi, g(k)]), ya_tiers: ya.filter(t => g(t[2])).map(([lo, hi, k]) => [lo, hi, g(k)]) };
+  };
+  // ESPN D/ST stat ids (values usually set as overrides for the D/ST slot, '16'): 99 sack, 95 INT, 96 fumble recovered,
+  // 106 forced fumble, 97 blocked kick, 98 safety, 113 pass defended, 103 / 104 INT / fumble return TD, 101 / 102 / 93
+  // kick / punt / blocked-kick return TD, 206 2-pt return, 120 per point allowed, 127 per yard allowed, tiers 89-92 / 121-125, 128-136
+  const espnD = items => {
+    const pt = id => { const it = items.find(x => x.statId === id); return it ? (it.pointsOverrides && it.pointsOverrides['16'] != null ? it.pointsOverrides['16'] : it.points) : 0; };
+    const avg = ids => ids.reduce((a, i) => a + pt(i), 0) / ids.length;
+    const pa = [[0, 0, 89], [1, 6, 90], [7, 13, 91], [14, 17, 92], [18, 21, 121], [22, 27, 122], [28, 34, 123], [35, 45, 124], [46, Infinity, 125]];
+    const ya = [[0, 99, 128], [100, 199, 129], [200, 299, 130], [300, 349, 131], [350, 399, 132], [400, 449, 133], [450, 499, 134], [500, 549, 135], [550, Infinity, 136]];
+    return { sack: pt(99), int: pt(95), fum_rec: pt(96), ff: pt(106), def_td: avg([103, 104]), st_td: avg([101, 102, 93]), safe: pt(98), blk: pt(97),
+             pass_def: pt(113), tkl_loss: 0, forced_punts: 0, def_2pt: pt(206), pts_allow: pt(120), yds_allow: pt(127),
+             pa_tiers: pa.filter(t => pt(t[2])).map(([lo, hi, i]) => [lo, hi, pt(i)]), ya_tiers: ya.filter(t => pt(t[2])).map(([lo, hi, i]) => [lo, hi, pt(i)]) };
+  };
+  // ESPN D/ST player ids are -16000 - ESPN team id
+  const ESPN_TEAM = { 1: 'ATL', 2: 'BUF', 3: 'CHI', 4: 'CIN', 5: 'CLE', 6: 'DAL', 7: 'DEN', 8: 'DET', 9: 'GB', 10: 'TEN', 11: 'IND', 12: 'KC', 13: 'LV',
+                      14: 'LA', 15: 'MIA', 16: 'MIN', 17: 'NE', 18: 'NO', 19: 'NYG', 20: 'NYJ', 21: 'PHI', 22: 'ARI', 23: 'PIT', 24: 'LAC', 25: 'SF',
+                      26: 'SEA', 27: 'TB', 28: 'WAS', 29: 'CAR', 30: 'JAX', 33: 'BAL', 34: 'HOU' };
+  const dstTeam = x => { const n = +x; if (n <= -16001 && n >= -16034) return ESPN_TEAM[-16000 - n] || null;
+    if (/^[A-Z]{2,3}$/.test(x)) return ({ LAR: 'LA', WSH: 'WAS', JAC: 'JAX' })[x] || x; return null; };
+  const SLEEPER_USED = new Set([...Object.keys(SLEEPER_SCORE), 'fgm', 'fgmiss', 'fgm_yds', 'fgm_yds_over_30', 'xpm', 'xpmiss',
+    'fgm_0_19', 'fgm_20_29', 'fgm_30_39', 'fgm_40_49', 'fgm_50p', 'fgm_50_59', 'fgm_60p', 'fgmiss_0_19', 'fgmiss_20_29', 'fgmiss_30_39',
+    'fgmiss_40_49', 'fgmiss_50p', 'sack', 'int', 'fum_rec', 'ff', 'def_td', 'def_st_td', 'st_td', 'safe', 'blk_kick', 'def_pass_def', 'tkl_loss',
+    'def_forced_punts', 'def_2pt', 'pts_allow', 'yds_allow', 'pts_allow_0', 'pts_allow_1_6', 'pts_allow_7_13', 'pts_allow_14_20',
+    'pts_allow_21_27', 'pts_allow_28_34', 'pts_allow_35p', 'yds_allow_0_100', 'yds_allow_100_199', 'yds_allow_200_299', 'yds_allow_300_349',
+    'yds_allow_350_399', 'yds_allow_400_449', 'yds_allow_450_499', 'yds_allow_500_549', 'yds_allow_550p']);
+  const ESPN_USED = new Set([3, 4, 20, 24, 25, 53, 42, 43, 72, 74, 77, 80, 85, 86, 88, 198, 201, 99, 95, 96, 106, 97, 98, 113, 103, 104, 101, 102, 93,
+    206, 120, 127, 89, 90, 91, 92, 121, 122, 123, 124, 125, 128, 129, 130, 131, 132, 133, 134, 135, 136]);
+  const NICE = { pass_2pt: '2-pt pass', rush_2pt: '2-pt rush', rec_2pt: '2-pt catch', def_3_and_out: '3-and-outs', def_4_and_stop: '4th-down stops',
+                 fum: 'fumbles', fum_rec_td: 'fumble-return TDs (player)', st_ff: 'special-teams forced fumbles', st_fum_rec: 'special-teams fumble recoveries',
+                 def_st_ff: 'D/ST special-teams forced fumbles', def_st_fum_rec: 'D/ST special-teams fumble recoveries', bonus_rec_te: 'TE catch bonus',
+                 19: '2-pt pass', 26: '2-pt rush', 44: '2-pt catch', 63: 'fumble-recovery TDs (player)', 209: 'fumble recoveries (player)' };
   const ELIG = { QB: ['QB'], RB: ['RB'], WR: ['WR'], TE: ['TE'], FLEX: ['RB', 'WR', 'TE'], WRRB_FLEX: ['RB', 'WR'], REC_FLEX: ['WR', 'TE'],
                  SUPER_FLEX: ['QB', 'RB', 'WR', 'TE'], DEF: ['DEF'], K: ['K'] };
 
@@ -70,9 +124,10 @@
       const scoring = {};
       Object.entries(SLEEPER_SCORE).forEach(([k, ours]) => { scoring[ours] = +((lg.scoring_settings || {})[k] || 0); });
       const byRoster = Object.fromEntries((mu || []).map(m => [m.roster_id, m]));
-      const kw = sleeperK(lg.scoring_settings || {});
+      const kw = sleeperK(lg.scoring_settings || {}), dw = sleeperD(lg.scoring_settings || {});
+      const unmodeled = Object.entries(lg.scoring_settings || {}).filter(([k, v]) => +v && !SLEEPER_USED.has(k)).map(([k]) => NICE[k] || k.replace(/_/g, ' '));
       return {
-        platform: 'sleeper', id, name: lg.name, season: lg.season, week, kw,
+        platform: 'sleeper', id, name: lg.name, season: lg.season, week, kw, dw, unmodeled,
         slots: (lg.roster_positions || []).filter(s => !['BN', 'IR', 'TAXI'].includes(s)),
         scoring,
         teams: (rosters || []).map(r => { const st = r.settings || {};
@@ -105,7 +160,10 @@
         scoring[k] = it.points;
         if (k === 'reception' && it.pointsOverrides && it.pointsOverrides['6'] != null) scoring.te_bonus = it.pointsOverrides['6'] - it.points;  // TE premium
       });
-      const kw = espnK((st.scoringSettings || {}).scoringItems || []);
+      const items = (st.scoringSettings || {}).scoringItems || [];
+      const kw = espnK(items), dw = espnD(items);
+      const unmodeled = items.filter(it => !ESPN_USED.has(it.statId) && (it.points || Object.values(it.pointsOverrides || {}).some(Boolean)))
+        .map(it => NICE[it.statId] || `ESPN stat ${it.statId}`);
       const names = {};
       const teams = (d.teams || []).map(t => {
         const entries = ((t.roster || {}).entries || []);
@@ -120,7 +178,7 @@
       });
       const games = (d.schedule || []).filter(g => g.matchupPeriodId === week || (g.home && g.home.pointsByScoringPeriod && g.home.pointsByScoringPeriod[week] != null));
       return {
-        platform: 'espn', id, name: st.name, season, week, slots, scoring, kw, teams, espnNames: names,
+        platform: 'espn', id, name: st.name, season, week, slots, scoring, kw, dw, unmodeled, teams, espnNames: names,
         matchup(teamId) {
           const g = games.find(x => String((x.home || {}).teamId) === teamId || String((x.away || {}).teamId) === teamId);
           if (!g) return null;
@@ -145,6 +203,8 @@
     const KBY = {};  // kicker gsis -> { team, name, w: [[week, implied, line]] }
     if (KD && KD.k) Object.entries(KD.k).forEach(([team, o]) => { KBY[o.pid] = Object.assign({ team }, o); });
     const kScore = line => (KD ? KD.k_keys : []).reduce((t, key, i) => t + (line[i] || 0) * ((L.kw || {})[key] || 0), 0);
+    const dWeek = (team, wk) => { const o = KD && KD.dst && KD.dst[team]; const e = o && o.w.find(z => z[0] === wk);
+      return e ? { pts: dstScore(Object.fromEntries(KD.d_keys.map((k, i) => [k, e[3][i]])), L.dw || {}), opp: e[1], home: e[2] } : null; };
     const kWeek = (g, wk) => { const o = KBY[g]; const e = o && o.w.find(z => z[0] === wk); return e ? kScore(e[2]) : null; };
     const TEAMS = D.teams || {}, KEYS = D.score.keys;
     let saved = null;
@@ -159,7 +219,13 @@
     const player = x => {
       const g = gsisOf(x);
       if (g) return fromPid(g, x);
-      // a team defense, kicker or unmapped id
+      // a team defense (projected), or an unmapped id
+      const dt = dstTeam(x);
+      if (dt) {
+        const v = KD ? dWeek(dt, KD.from) : null;
+        return { ext: x, name: `${(TEAMS[dt] || {}).nick || dt} D/ST`, pos: 'DEF', team: dt, proj: v ? v.pts : null, pa: v ? 1 : 0, exp: v ? v.pts : null,
+                 sd: 5.5, inactive: 0, opp: v ? v.opp : '', home: v ? (v.home ? 'vs' : '@') : '', why: v ? '' : 'on bye' };
+      }
       const e = L.espnNames && L.espnNames[x], dst = /^[A-Z]{2,3}$/.test(x);
       return { ext: x, name: e ? e.name : (dst ? `${(TEAMS[x] || {}).nick || x} D/ST` : `Player ${x}`), pos: e ? e.pos : (dst ? 'DEF' : ''),
                team: dst ? x : '', proj: null, exp: null };
@@ -189,7 +255,7 @@
     // ---- best lineup: fixed slots first (scarcest eligibility), then flex / superflex, by expected points -----------
     const optimize = (players, slots, current = []) => {
       const pool = players.filter(p => p.exp != null).sort((a, b) => b.exp - a.exp), used = new Set(), out = [];
-      const keep = current.filter(p => p && p.exp == null && ['DEF', 'K'].includes(p.pos));  // not projected: as you set them
+      const keep = current.filter(p => p && p.exp == null && ['DEF', 'K'].includes(p.pos));  // on bye / not projected: as you set them
       const order = [...slots].sort((a, b) => (ELIG[a] || []).length - (ELIG[b] || []).length);
       order.forEach(s => {
         const el = ELIG[s] || [], pick = pool.find(p => !used.has(p.ext) && el.includes(p.pos))
@@ -240,7 +306,7 @@
         <h3 class="lg-h">Best lineup <span class="muted">${f1(total(best))} expected</span></h3>
         ${table(best.map(r => row(r.slot, r.p)).join(''))}
         <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') || '<tr><td colspan="4" class="muted">No projected bench players.</td></tr>')}
-        <p class="muted lg-note">Expected points = our projection under your league's scoring x his chance to play. Team defenses aren't projected yet (kept as you set them); kickers are, under your league's kicking settings. Scoring bonuses (100-yard games, 2-point tries) aren't modeled.</p>`;
+        <p class="muted lg-note">Expected points = our projection under your league's scoring x his chance to play. Kickers and team defenses are projected under your league's own kicking and D/ST settings (3-and-outs and 4th-down stops aren't modeled). Scoring bonuses (100-yard games, 2-point tries) aren't modeled.</p>`;
     };
 
     const matchupView = () => {
@@ -278,9 +344,15 @@
       const kFree = Object.entries(KBY).filter(([g]) => !rostered.has(g)).map(([g, o]) => {
         const r = fromPid(g, g); r.ros = o.w.reduce((t, e) => t + kScore(e[2]), 0); return r; })
         .sort((a, b) => b.ros - a.ros).slice(0, 6);
+      const rosteredD = new Set(L.teams.flatMap(t => t.ext.map(dstTeam).filter(Boolean)));
+      const dFree = KD && KD.dst ? Object.keys(KD.dst).filter(t => !rosteredD.has(t)).map(t => {
+        const r = player(L.platform === 'espn' ? String(-16000 - +(Object.entries(ESPN_TEAM).find(([, c]) => c === t) || [0])[0]) : t);
+        r.ros = KD.dst[t].w.reduce((a, e) => a + (dWeek(t, e[0]) || { pts: 0 }).pts, 0); return r; }).sort((a, b) => b.ros - a.ros).slice(0, 6) : [];
+      const dHtml = L.slots.includes('DEF') ? `<h3 class="lg-h">D/ST</h3>${table(dFree.map(p => row('DEF', p, `<td class="num">${Math.round(p.ros)}</td>`)).join(''),
+        '<th></th><th>Team</th><th class="num">This wk</th><th class="num">Out%</th><th class="num">ROS</th>')}` : '';
       const kHtml = L.slots.includes('K') ? `<h3 class="lg-h">K</h3>${table(kFree.map(p => row('K', p, `<td class="num">${Math.round(p.ros)}</td>`)).join(''),
         '<th></th><th>Player</th><th class="num">This wk</th><th class="num">Out%</th><th class="num">ROS</th>')}` : '';
-      return `${kHtml ? '' : ''}<p class="muted lg-note">Unrostered in your league, best rest-of-season first (expected points through week 17 under your scoring).</p>${byPos}${kHtml}`;
+      return `${kHtml ? '' : ''}<p class="muted lg-note">Unrostered in your league, best rest-of-season first (expected points through week 17 under your scoring).</p>${byPos}${kHtml}${dHtml}`;
     };
 
     // ---- league rankings: every team's best lineup this week and for each remaining week through 17 (ros.json:
@@ -296,6 +368,8 @@
         weeks.forEach(k => {
           const cand = t.ext.map(x => {
             const g = gsisOf(x), r = g && ROS.players[g];
+            const dt = !g && dstTeam(x);
+            if (dt) { const v = dWeek(dt, k); return v ? { ext: x, pos: 'DEF', exp: v.pts } : null; }
             if (!r && g && KBY[g]) { const v = kWeek(g, k); return v == null || (k === KD.from && false) ? null : { ext: x, pos: 'K', exp: v }; }
             if (!r) return null;
             const e = r.w.find(z => z[0] === k);
@@ -316,7 +390,7 @@
           <td class="num">${f1(r.wk)} <span class="muted">(${wkRank.indexOf(r.t.id) + 1})</span></td>
           <td class="num">${rc.w ?? ''}-${rc.l ?? ''}${rc.t ? `-${rc.t}` : ''}</td><td class="num muted">${rc.pf ? Math.round(rc.pf) : ''}</td></tr>`;
       }).join('');
-      return `<p class="muted lg-note">Ranked by rest-of-season strength: each team's best lineup by our projections for every remaining week through ${ROS.through}, summed (byes, injuries and players coming back included). This week's number in parentheses is its rank. Team defenses aren't projected yet; kickers are.</p>
+      return `<p class="muted lg-note">Ranked by rest-of-season strength: each team's best lineup by our projections for every remaining week through ${ROS.through}, summed (byes, injuries and players coming back included). This week's number in parentheses is its rank. Kickers and team defenses included.</p>
         <div class="lg-scroll"><table class="bx lg-tbl lg-rank"><thead><tr><th class="num">#</th><th>Team</th><th class="num">ROS</th><th class="num">vs avg</th><th class="num">This wk</th><th class="num">Record</th><th class="num">PF</th></tr></thead><tbody>${body}</tbody></table></div>`;
     };
 
@@ -328,7 +402,7 @@
     };
 
     const header = () => {
-      sec.innerHTML = `<div class="sec-head"><div><h2>${esc(L.name)}</h2><p>${L.platform === 'sleeper' ? 'Sleeper' : 'ESPN'} · week ${esc(String(L.week))} · ${L.teams.length} teams · our projections under your league's scoring.</p></div></div>
+      sec.innerHTML = `<div class="sec-head"><div><h2>${esc(L.name)}</h2><p>${L.platform === 'sleeper' ? 'Sleeper' : 'ESPN'} · week ${esc(String(L.week))} · ${L.teams.length} teams · our projections under your league's scoring.</p>${(L.unmodeled || []).length ? `<p class="muted lg-note">Your league also scores ${esc([...new Set(L.unmodeled)].join(', '))}: not in our projections yet.</p>` : ''}</div></div>
         <div class="lg-top"><label>Your team <select class="lg-team">${L.teams.map(t => `<option value="${esc(t.id)}"${mine && t.id === mine.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
           <button type="button" class="sbtn lg-change">Change league</button></div>
         <div class="seg lg-seg">${[['lineup', 'Lineup'], ['matchup', 'Matchup'], ['teams', 'Teams'], ['waivers', 'Waivers']].map(([k, l]) => `<button type="button" data-v="${k}" class="${view === k ? 'on' : ''}">${l}</button>`).join('')}</div>
