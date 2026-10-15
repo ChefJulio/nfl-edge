@@ -1101,7 +1101,7 @@
       <div class="pc-tab" data-tt="ov"${teamTab === 'ov' ? '' : ' hidden'}>${pickerHtml()}${wk.html}<div class="tm-season">${L ? teamSeasonBox(L) : ''}</div><div class="tm-pen"></div></div>
       <div class="pc-tab" data-tt="log"${teamTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every game since 1999</div><div class="tm-log">${L ? teamLogHtml(L, abbr) : '<p class="pc-sub">Loading game log&hellip;</p>'}</div></div></div>
       <div class="pc-tab" data-tt="pl"${teamTab === 'pl' ? '' : ' hidden'}>${pickerHtml()}${d ? `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
-        ${wk.players ? `<table class="bx tm-pl"><thead><tr><th>Player</th><th class="num">Proj</th><th>Tier</th><th class="num">FP/G</th></tr></thead><tbody>${wk.players}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>` : wkWait(d)}</div>
+        ${wk.players ? `<table class="bx tm-pl tiles"><thead><tr><th>Player</th><th class="num">Proj</th><th>Tier</th><th class="num">FP/G</th></tr></thead><tbody>${wk.players}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>` : wkWait(d)}</div>
       <div class="pc-tab" data-tt="dc"${teamTab === 'dc' ? '' : ' hidden'}>${teamTab === 'dc' ? depthHtml(abbr) : ''}</div>
       <div class="pc-tab" data-tt="po"${teamTab === 'po' ? '' : ' hidden'}>${teamTab === 'po' ? teamPlayoffs(abbr) : ''}</div>`;
     body.querySelectorAll('[data-tt]').forEach(b => b.onclick = () => {
@@ -1146,7 +1146,7 @@
         ${rankTrend(pw.rank_hist) ? `<div class="pc-k" style="margin-top:10px">Power rank by week</div>${rankTrend(pw.rank_hist)}` : ''}</div>` : '';
     const players = Object.entries(d.players).filter(([, p]) => p.team === abbr).sort((a, b) => b[1].proj - a[1].proj);
     const plRows = players.map(([pid, p]) => { const s = scaled(p, d);
-      return `<tr><td><button type="button" class="bx-n" data-open-pid="${esc(pid)}">${esc(p.name)}</button> <span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>${injTag(p.status)}</td>
+      return `<tr class="teamrow" style="${NFLE.fmt.rowStyle(d.teams, p.team)}" data-open-pid="${esc(pid)}"><td>${NFLE.ui.player({ name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, badges: injTag(p.status) }, d.teams)}</td>
         <td class="num"><b>${f1(s.proj)}</b></td><td><span class="tier t-${esc(p.slot)}">${esc(p.tier)}</span></td><td class="num muted">${p.fpg != null ? f1(p.fpg) : ''}</td></tr>`; }).join('');
     return { html: `${week}<div class="pc-grid tm-grid">${power}</div>`, players: plRows };
   };

@@ -18,10 +18,11 @@
     { key: 'pick', label: 'Pick', num: true, first: 'asc', html: r => `<b>${r.pick}</b><span class="sub">R${r.round}:${r.in_rd}</span>` },
     { key: 'fr', label: 'Team', first: 'asc', value: r => r.team, html: r => {
         const t = teams[r.fr] || {};
-        return `<span class="tm-open dr-tm" data-tm="${esc(r.fr)}">${t.logo ? `<span class="st-logo" style="--tc:${esc(t.color || '#555')}"><img src="${esc(t.logo)}" alt="" width="20" height="20" loading="lazy"></span>` : ''}<span>${esc(r.team)}</span></span>`;
+        return `<span class="tm-open dr-tm" data-tm="${esc(r.fr)}">${NFLE.fmt.logo(teams, r.fr, 20)}<span>${esc(r.fr || r.team)}</span></span>`;
       } },
     { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.pfr_player_name,
-      html: r => `<div class="who"><div><b>${esc(r.pfr_player_name)}</b>${r.hof ? ' <span class="dr-hof" title="Pro Football Hall of Fame">HOF</span>' : ''}<span class="sub">${esc(r.position || '')} &middot; ${esc(r.college || '')}</span></div></div>` },
+      html: r => NFLE.ui.player({ name: r.pfr_player_name, team: r.fr, pid: r.gsis_id, sub: `${r.position || ''} · ${r.college || ''}`,
+        badges: r.hof ? ' <span class="dr-hof" title="Pro Football Hall of Fame">HOF</span>' : '' }, teams) },
     { key: 'age', label: 'Age', num: true, first: 'asc' },
     { key: 'yrs', label: 'Yrs', num: true, title: 'Seasons from his draft year to his last season', value: r => r.to ? r.to - r.season + 1 : null, html: r => r.to ? r.to - r.season + 1 : '' },
     { key: 'games', label: 'G', num: true, title: 'Career games' },
@@ -53,7 +54,7 @@
       };
       const draw = () => {
         if (!table) table = NFLE.Table(sec.querySelector('.dr-tbl'), { columns: columns(teams), rows: filtered(), sort: { key: 'pick', dir: 'asc' },
-          rowAttrs: r => r.gsis_id ? `data-open-pid="${esc(r.gsis_id)}"` : '' });
+          cls: 'tiles', rowClass: () => 'teamrow', rowAttrs: r => `${NFLE.ui.tileStyle(teams, r.fr)}${r.gsis_id ? ` data-open-pid="${esc(r.gsis_id)}"` : ''}` });
         else { table.setColumns(columns(teams)); table.update(filtered()); }
       };
       const fill = (sel, vals) => {
@@ -62,7 +63,7 @@
         sel.value = vals.some(v => String(v[0]) === cur) ? cur : '';
       };
       const load = y => NFLE.load(`data/draft/${y}.json`).then(d => {
-        teams = d.teams || {};
+        teams = Object.assign({}, d.teams || {}, WT);  // the week map has both trim colors
         rows = d.rows.map(v => Object.assign({ season: y }, Object.fromEntries(d.cols.map((c, i) => [c, v[i]]))));
         fill(selT, [...new Set(rows.map(r => r.fr))].sort().map(a => [a, (teams[a] && teams[a].nick) || a]));
         fill(selP, [...new Set(rows.map(r => r.category).filter(Boolean))].sort().map(c => [c, c]));
@@ -72,7 +73,9 @@
       }).catch(() => { sub.textContent = 'No draft data for that year.'; });
       [selT, selP, selR].forEach(s => { s.onchange = () => table && table.update(filtered()); });
       qi.oninput = () => table && table.update(filtered());
-      NFLE.load('data/draft/index.json').then(ix => {
+      let WT = {};
+      Promise.all([NFLE.load('data/draft/index.json'), NFLE.week(), NFLE.ui.ready]).then(([ix, wk]) => {
+        WT = (wk && wk.teams) || {};
         const ps = pageSeason(), want = ps && ix.years.includes(ps) ? ps : ix.years[ix.years.length - 1];
         selY.innerHTML = [...ix.years].reverse().map(y => `<option value="${y}"${y === want ? ' selected' : ''}>${y}</option>`).join('');
         selY.onchange = () => load(+selY.value);

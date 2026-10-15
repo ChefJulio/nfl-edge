@@ -50,3 +50,6 @@
   background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 35%, transparent) calc(var(--v) * 1%), transparent 0); }
 .od-track { margin-top: 14px; } .od-tt { width: auto; margin: 6px 0 12px; font-size: 12.5px; }
 .od-tt th, .od-tt td { padding: 4px 12px 4px 0; }
+
+/* seed tiles carry the team trim like every team row (site.css tr.teamrow) */
+.od-seed { box-shadow: inset 3px 0 0 var(--tc, transparent), inset 6px 0 0 var(--tc2, transparent); padding-left: 12px; }

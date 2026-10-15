@@ -170,6 +170,10 @@ def main():
   seasons = [s for s in range(int(a), int(b or a) + 1) if (sched.season == s).any()]
   players = cache.get("players", "all", lambda: nfl.load_players(), stale=cache.age_hours("players", "all") > 24 * 7)
   espn_of = {g: str(e).replace(".0", "") for g, e in zip(players.gsis_id, players.espn_id) if isinstance(g, str) and pd.notna(e) and str(e)}
+  # site-wide headshot map (NFLE.ui.player): players active since 2010 (~11k, ~90 KB gzipped, loaded once)
+  recent = set(players[pd.to_numeric(players.last_season, errors="coerce") >= 2010].gsis_id)
+  (site / "data").mkdir(parents=True, exist_ok=True)
+  (site / "data" / "espn_ids.json").write_text(json.dumps({g: e for g, e in espn_of.items() if g in recent}, separators=(",", ":")), encoding="utf-8")
   pfr2gsis = players.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
   rosters = pd.concat([x for x in (cache.get("rosters", s, lambda: nfl.load_rosters_weekly([s]), stale=False)
                                    for s in range(max(FIRST, current - 9), current + 1)) if x is not None], ignore_index=True)

@@ -540,3 +540,5 @@ td.pen-top { color: var(--muted); font-size: 12.5px; }
 .ij-ig { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
 /* the Games tab's matchup tile on player / team pages */
 .pc-mt { margin: 0 0 12px; } .pc-mt .mt { margin: 0; } .pc-mtk { margin: 2px 2px 6px; }
+/* team page Players tab: tile rows with the same 3px gap as the list tabs */
+table.bx.tiles { border-collapse: separate; border-spacing: 0 3px; } table.bx.tiles td { border-bottom: 0; }

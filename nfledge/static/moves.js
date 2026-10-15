@@ -31,7 +31,7 @@
       html: r => `<span class="mv-chip mv-${GROUP[r.type] || 'misc'}">${esc(LABEL[r.type] || r.type)}</span>` },
     // phones fold the note under the name (the Details column is hidden there; the table fits without side-scroll)
     { key: 'name', label: 'Player', first: 'asc', value: r => r.name || '~', cls: 'mv-who',
-      html: r => `${r.name ? `<div class="who"><div><b class="${r.pid ? 'mv-link' : ''}">${esc(r.name)}</b><span class="sub"><span class="posb posb-${esc(r.pos)}">${esc(r.pos)}</span></span></div></div>` : ''}<span class="mv-note">${esc(r.text)}</span>` },
+      html: r => `${r.name ? NFLE.ui.player({ name: r.name, pos: r.pos, team: r.team, pid: r.pid }, teams) : ''}<span class="mv-note">${esc(r.text)}</span>` },
     { key: 'text', label: 'Details', sort: false, cls: 'mv-text', html: r => esc(r.text) },
   ];
   NFLE.areas.moves = {
@@ -64,7 +64,7 @@
         // the data is newest first: draw it in pages; any other sort needs the whole filtered season in the table
         const page = cur && !(cur.key === 'date' && cur.dir === 'desc') ? all : all.slice(0, shown);
         if (!table) table = NFLE.Table($('.mv-tbl'), { columns: columns(teams), rows: page, sort: { key: 'date', dir: 'desc' },
-          rowAttrs: r => r.pid ? `data-open-pid="${esc(r.pid)}"` : '', onSort: () => draw(false) });
+          cls: 'tiles', rowClass: () => 'teamrow', rowAttrs: r => `${NFLE.ui.tileStyle(teams, r.team)}${r.pid ? ` data-open-pid="${esc(r.pid)}"` : ''}`, onSort: () => draw(false) });
         else table.update(page);
         more.hidden = page.length >= all.length;
         more.textContent = `Show more (${(all.length - page.length).toLocaleString()} left)`;
@@ -92,8 +92,8 @@
       const nset = () => { const n = [selT, selG, selP, from, to].filter(x => x.value).length; ftog.textContent = n ? `Filters (${n})` : 'Filters'; };
       [selT, selG, selP, from, to].forEach(x => x.addEventListener('change', nset));
       more.onclick = () => { shown += STEP * 4; draw(false); };
-      NFLE.load('data/transactions/index.json').then(ix => {
-        teams = ix.teams || {};
+      Promise.all([NFLE.load('data/transactions/index.json'), NFLE.week(), NFLE.ui.ready]).then(([ix, wk]) => {
+        teams = Object.assign({}, ix.teams || {}, (wk && wk.teams) || {});  // the week map has both trim colors
         const ps = pageSeason(), want = ps && ix.seasons.includes(ps) ? ps : ix.seasons[ix.seasons.length - 1];
         selS.innerHTML = [...ix.seasons].reverse().map(y => `<option value="${y}"${y === want ? ' selected' : ''}>${y}</option>`).join('');
         selS.onchange = () => load(+selS.value);

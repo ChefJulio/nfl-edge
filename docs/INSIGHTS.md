@@ -702,6 +702,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   (stats JSON gained 'espn' for headshots), Team Stats, Standings, Trends (player / team groupings; no headshots:
   play files carry gsis only), player page (tile + "Matchup effect" box), team page Week tab (tile replaces the
   score / matchup / odds boxes).
+  Second pass (owner: "look again"): Roles (faces), Injuries, Moves, Draft (also showed PFR codes KAN / NOR: now
+  current codes), Playoffs (odds table + seed tiles with team trim), team page Players tab. Headshots for any list
+  with a player id: data/espn_ids.json (gsis -> ESPN id, players active since 2010, stats_build), NFLE.ui.ready.
 - **UI prefs (owner 2026-10-14):** player / team page header (photo, name, position, grade, team) is sticky
   (top: var(--navh), set by shell.js from the top bar's height; the page container needs overflow: clip, never
   hidden/auto, or sticky breaks). The grade badge reads "OVR", not "EDGE" (EDGE is a position).

@@ -49,10 +49,12 @@
   const F = NFLE.fmt;
   NFLE.ui = {
     headshot: espn => espn ? `https://a.espncdn.com/i/headshots/nfl/players/full/${encodeURIComponent(espn)}.png` : '',
+    ids: {},  // gsis -> ESPN id (data/espn_ids.json, tools/stats_build.py): a headshot for any list with a player id
+    ready: null,
     tileStyle: (teams, t) => `style="${F.rowStyle(teams, t)}"`,
-    // p: { name, team, pos, grp (badge color group), photo | espn, sub (default: team), badges (html) }
+    // p: { name, team, pos, grp (badge color group), photo | espn | pid, sub (default: team), badges (html) }
     player: (p, teams) => {
-      const photo = p.photo || NFLE.ui.headshot(p.espn);
+      const photo = p.photo || NFLE.ui.headshot(p.espn || (p.pid && NFLE.ui.ids[p.pid]));
       const pic = photo
         ? `<span class="pic"><span class="pic-img"><img src="${esc(photo)}" alt="" width="34" height="34" loading="lazy" onerror="this.closest('.pic').classList.add('nopic')"></span><span class="pic-tm">${F.logo(teams, p.team, 11)}</span></span>`
         : F.logo(teams, p.team, 26);
@@ -88,6 +90,8 @@
         <div class="mt-main">${main}</div><div class="mt-st">${st}</div></a>`;
     },
   };
+  // lists wait for this (with NFLE.week()) before drawing, so their rows come up with faces
+  NFLE.ui.ready = NFLE.load('data/espn_ids.json').then(m => { NFLE.ui.ids = m || {}; }).catch(() => {});
 })();
 // Week page header: the season / week picker (every week links to its own page; weeks.json at the site root lists
 // them, rewritten every build, so old pages list new weeks), where this page sits in time, and the page details.

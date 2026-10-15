@@ -3,6 +3,7 @@
 // Bracket layout per era: AFC rounds | Super Bowl | NFC rounds (mirrored) from 1970; two leagues side by side before;
 // a single title game (plus labeled division tiebreakers) earlier; 1920-32 had no playoffs (champion by standings).
 (() => {
+  let TEAMS = {};  // the week data's teams map (tile colors, logos)
   const NFLE = window.NFLE, esc = NFLE.esc;
   const logoUrl = code => `https://a.espncdn.com/combiner/i?img=${encodeURIComponent(`/i/teamlogos/nfl/500/${code.toLowerCase()}.png`)}&w=60&h=60`;
   const ESPN_CODE = { LA: 'lar', WAS: 'wsh', LV: 'lv' };
@@ -79,12 +80,13 @@
   NFLE.areas.playoffOdds = {
     render(body, sub) {
       body.innerHTML = '<p class="muted">Loading&hellip;</p>';
-      NFLE.load('data/playoffs/odds.json').then(d => {
+      Promise.all([NFLE.load('data/playoffs/odds.json'), NFLE.week()]).then(([d, wk]) => {
+        TEAMS = (wk && wk.teams) || {};
         sub.textContent = `${d.season} playoff odds as of week ${d.as_of_week} · ${d.sims.toLocaleString()} simulated seasons`;
         const by = Object.fromEntries(d.teams.map(r => [r.team, r]));
         const seeding = ['AFC', 'NFC'].map(c => `<div class="od-conf"><div class="po-st">${c}</div>${(d.seeding[c] || []).map(s => {
           const r = by[s.team] || {};
-          return `<div class="od-seed tm-open" data-tm="${esc(s.team)}"><b class="od-sn">${s.seed}</b>${logo(r)}<span class="od-nm">${esc(r.nick || s.team)}</span><span class="od-rec">${r.w}-${r.l}${r.t ? `-${r.t}` : ''}</span><span class="od-sp">${pct(s.p)}</span></div>`;
+          return `<div class="od-seed tm-open" data-tm="${esc(s.team)}" style="${NFLE.fmt.rowStyle(TEAMS, s.team)}"><b class="od-sn">${s.seed}</b>${logo(r)}<span class="od-nm">${esc(r.nick || s.team)}</span><span class="od-rec">${r.w}-${r.l}${r.t ? `-${r.t}` : ''}</span><span class="od-sp">${pct(s.p)}</span></div>`;
         }).join('')}</div>`).join('');
         const t = d.track;
         const track = t ? `<details class="howto od-track"><summary>Track record: how these odds did, 2021-2025</summary><div>
@@ -101,7 +103,7 @@
           <div class="dt-tools od-tools"><div class="seg od-cf"><button type="button" data-c="">All</button><button type="button" data-c="AFC">AFC</button><button type="button" data-c="NFC">NFC</button></div></div>
           <div class="od-tbl"></div>${track}`;
         const cols = [
-          { key: 'team', label: 'Team', stick: true, first: 'asc', value: r => r.nick, html: r => `<div class="who">${logo(r)}<div><b>${esc(r.nick)}</b><span class="sub">${esc(r.div)}</span></div></div>` },
+          { key: 'team', label: 'Team', stick: true, first: 'asc', value: r => r.nick, html: r => NFLE.ui.team(r.team, TEAMS, esc(r.div)) },
           { key: 'rec', label: 'Record', value: r => r.w + 0.5 * r.t, html: r => `${r.w}-${r.l}${r.t ? `-${r.t}` : ''}` },
           { key: 'exp_w', label: 'Proj W', num: true, title: 'Average wins at season end across the simulations', html: r => r.exp_w.toFixed(1) },
           ...[['p_playoffs', 'Playoffs'], ['p_div', 'Division', 'Win the division'], ['p_bye', 'Bye', 'The 1 seed: a first-round bye'],
@@ -111,7 +113,7 @@
         ];
         const rows = () => d.teams.filter(r => !conf || r.conf === conf);
         const table = NFLE.Table(body.querySelector('.od-tbl'), { columns: cols, rows: rows(), sort: { key: 'p_playoffs', dir: 'desc' },
-          rowClass: () => 'tm-open', rowAttrs: r => `data-tm="${esc(r.team)}"` });
+          cls: 'tiles', rowClass: () => 'teamrow tm-open', rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.team)} data-tm="${esc(r.team)}"` });
         const seg = body.querySelector('.od-cf');
         const mark = () => seg.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.c === conf));
         seg.addEventListener('click', e => { const b = e.target.closest('[data-c]'); if (b) { conf = b.dataset.c; mark(); table.update(rows()); } });

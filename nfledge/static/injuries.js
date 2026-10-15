@@ -2,6 +2,7 @@
 // tools/espn_snapshot.py) next to our own chance he's inactive this week (the page's week data). Rows we project
 // open the player page. Fantasy-relevant players (on our board) by default; "All" shows ESPN's whole list.
 (() => {
+  let TEAMS = {};  // the week data's teams map (tile colors, logos)
   const NFLE = window.NFLE, esc = NFLE.esc;
   const ORDER = { 'Out': 1, 'Injured Reserve': 2, 'Doubtful': 3, 'Questionable': 4, 'Day-To-Day': 5, 'Suspension': 6 };
   const tone = s => /Out|Reserve|Suspension/.test(s) ? 'bad' : /Doubtful/.test(s) ? 'warn' : /Questionable|Day/.test(s) ? 'q' : '';
@@ -20,7 +21,7 @@
       let scope = 'fan', all = [], table = null;
       const cols = [
         { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name,
-          html: r => `<div class="who"><div><b>${esc(r.name)}</b><span class="sub">${r.pos ? `<span class="posb posb-${esc(r.pos)}">${esc(r.pos)}</span> ` : ''}<span class="tm-open" data-tm="${esc(r.abbr)}">${esc(r.abbr || r.team)}</span></span></div></div>` },
+          html: r => NFLE.ui.player({ name: r.name, pos: r.pos, team: r.abbr, espn: r.espn_id, sub: r.abbr || r.team }, TEAMS) },
         { key: 'status', label: 'Status', first: 'asc', value: r => ORDER[r.status] || 9, html: r => `<span class="in-st in-${tone(r.status)}">${esc(r.status)}</span>` },
         { key: 'inactive', label: 'Inactive', num: true, title: 'Our chance he does not play this week', value: r => r.inactive,
           html: r => r.inactive == null ? '<span class="muted">&ndash;</span>' : `<span class="in-pct" style="--p:${Math.round(100 * r.inactive)}">${r.inactive < 0.005 ? '&lt;1' : Math.round(100 * r.inactive)}%</span>` },
@@ -33,11 +34,12 @@
       const draw = () => {
         sec.querySelectorAll('.in-scope button').forEach(b => b.classList.toggle('on', b.dataset.v === scope));
         if (!table) table = NFLE.Table(sec.querySelector('.in-tbl'), { columns: cols, rows: rows(), sort: { key: 'inactive', dir: 'desc' },
-          rowAttrs: r => r.pid ? `data-open-pid="${esc(r.pid)}"` : '' });
+          cls: 'tiles', rowClass: () => 'teamrow', rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.abbr)}${r.pid ? ` data-open-pid="${esc(r.pid)}"` : ''}` });
         else table.update(rows());
       };
       // the page's week data (our availability) loads on its own (NFLE.week waits for it)
       Promise.all([NFLE.load('data/espn_injuries/latest.json'), NFLE.week()]).then(([d, wk]) => {
+        TEAMS = (wk && wk.teams) || {};
         const byEspn = {}, nameToAbbr = {};
         if (wk) {
           Object.entries(wk.players || {}).forEach(([pid, p]) => { if (p.espn) byEspn[String(p.espn)] = [pid, p]; });
