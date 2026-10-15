@@ -25,10 +25,10 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from depth_build import DEFAULT_N, GROUP, GROUPS  # noqa: E402
-from nfledge import data as D  # noqa: E402
+from nfledge import data as D, ingame  # noqa: E402
 
 SEASONS = range(2019, 2027)
-VARIANTS = ["base", "skip_inj", "recency", "both", "last1", "healthy3"]
+VARIANTS = ["base", "skip_inj", "recency", "both", "last1", "healthy3", "h3_note50", "h3_note80"]
 RW = np.array([0.5, 0.3, 0.2])
 
 
@@ -56,6 +56,8 @@ def main():
     res = ros[ros.status.isin(["RES", "INA"]) & ros.status_description_abbr.astype(str).str.match(r"^R")]
     reserve = set(zip(res.gsis_id, res.week))
     hurt = listed | reserve
+    nt = ingame.load(c, nfl, season, ros)
+    noted = set(zip(nt.gsis_id, nt.week)) if nt is not None and len(nt) else set()
     for team, ts in sn.groupby("team"):
       weeks = sorted(ts.week.unique())
       pct = ts.pivot_table(index="gsis_id", columns="week", values="pct", aggfunc="max").fillna(0.0)
@@ -64,18 +66,22 @@ def main():
       A = pct[weeks].to_numpy()
       gids = pct.index.to_numpy()
       bad = np.zeros_like(A, dtype=bool)
+      bad50, bad80 = np.zeros_like(bad), np.zeros_like(bad)  # + injury-note games under 50% / 80% of his usual share
       for r_, g in enumerate(gids):
         played = []
         for j, w in enumerate(weeks):
           v = A[r_, j]
           if v == 0:
-            bad[r_, j] = (g, w) in hurt
+            bad[r_, j] = bad50[r_, j] = bad80[r_, j] = (g, w) in hurt
           else:
             ref = max(played[-3:]) if played else None
             nxt = weeks[j + 1] if j + 1 < len(weeks) else None
-            if ref and v < 0.5 * ref and nxt is not None and (g, nxt) in hurt:
-              bad[r_, j] = True
-            else:
+            heur = bool(ref and v < 0.5 * ref and nxt is not None and (g, nxt) in hurt)
+            note = (g, w) in noted
+            bad[r_, j] = heur
+            bad50[r_, j] = heur or bool(note and ref and v < 0.5 * ref)
+            bad80[r_, j] = heur or bool(note and ref and v < 0.8 * ref)
+            if not heur:
               played.append(v)
       for i, wk in enumerate(weeks):
         if i < 3 or wk < 4:
@@ -97,15 +103,16 @@ def main():
             w = np.where(missed_hurt, 0.0, w)
           tot = w.sum(axis=1)
           return np.where(tot > 0, (P * w).sum(axis=1) / np.where(tot > 0, tot, 1), 0.0)
-        def healthy3():
+        def healthy3(B):
           out_ = np.zeros(len(ids))
           for r_ in range(len(ids)):
-            vals = [A[r_, j] for j in range(i - 1, -1, -1) if not bad[r_, j]][:3]
+            vals = [A[r_, j] for j in range(i - 1, -1, -1) if not B[r_, j]][:3]
             if vals:
               w = RW[:len(vals)]
               out_[r_] = float(np.dot(vals, w) / w.sum())
           return out_
-        sc = {v: pd.Series(healthy3() if v == "healthy3" else score(v), index=ids) for v in VARIANTS}
+        HB = {"healthy3": bad, "h3_note50": bad50, "h3_note80": bad80}
+        sc = {v: pd.Series(healthy3(HB[v]) if v in HB else score(v), index=ids) for v in VARIANTS}
         for grp in GROUPS:
           n = DEFAULT_N[grp]
           truth_pool = game[game.grp == grp]
@@ -130,7 +137,7 @@ def main():
   tg = r.assign(key=r.season.astype(str) + r.team + r.week.astype(str))
   keys = tg.key.unique()
   by = {k: g for k, g in tg.groupby("key")}
-  for v, ref in [(x, "base") for x in VARIANTS[1:]] + [("healthy3", "both")]:
+  for v, ref in [(x, "base") for x in VARIANTS[1:]] + [("healthy3", "both"), ("h3_note50", "healthy3"), ("h3_note80", "healthy3")]:
     d0 = wavg(r, v) - wavg(r, ref)
     boots = []
     for _ in range(400):

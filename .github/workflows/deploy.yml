@@ -56,6 +56,10 @@ jobs:
       # enough to TEST it as a return-model input (tools/espn_snapshot.py). Failures never fail the build.
       - name: Snapshot ESPN injury feed
         run: python tools/espn_snapshot.py --out=site/data/espn_injuries || true
+      # ESPN news blurbs for listed players (once a day; no history on ESPN, so archived going forward) and the
+      # in-game injuries parsed from them ("left Sunday's game", "did not return"): depth charts + Injuries tab.
+      - name: Archive ESPN injury news
+        run: python tools/espn_news.py --out=site/data/espn_news || true
       - name: Commit new archive pages
         working-directory: site
         run: |

@@ -156,7 +156,8 @@ def main():
   # so before that "ACT" just means on the roster (Allen's 4 missed games in 2018 read as played).
   tot = sn[["offense_snaps", "defense_snaps", "st_snaps"]].fillna(0).sum(axis=1)
   played = set(zip(sn.gsis_id[tot > 0], sn.season[tot > 0].astype(int), sn.week[tot > 0].astype(int)))
-  injuries = injury_history(cache, nfl, data.current_season, all_ros, allsched, played)
+  injuries = injury_history(cache, nfl, data.current_season, all_ros, allsched, played,
+                            ingame_events(cache, nfl, data.current_season, all_ros, site))
   scr = qb_scrambles(data.pbp)
   out_dir = site / "data" / "players"
   out_dir.mkdir(parents=True, exist_ok=True)
@@ -439,7 +440,39 @@ SEVERITY = {"Questionable": 1, "Doubtful": 2, "Out": 3}
 SNAPS_FROM = 2013  # games missed / played are counted from snap counts (nflverse has none for 2012)
 
 
-def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFrame, played: set) -> dict:
+def ingame_events(cache, nfl, cur: int, ros: pd.DataFrame, site: Path) -> dict:
+  """(gsis, season) -> [(week, quarter or None, source)]: in-game injuries from the play-by-play notes ("was injured
+  during the play", 2009 on; nfledge/ingame.py) and, this season, ESPN news blurbs ("left Sunday's game", "did not
+  return"; tools/espn_news.py). Notes miss injuries without a stoppage; blurbs only exist for this season."""
+  from nfledge import ingame
+  out = {}
+  for s in range(2009, cur + 1):
+    rs = cache.get("rosters", s, lambda: nfl.load_rosters_weekly([s]), stale=False)  # full columns (jersey, names)
+    if rs is None or not len(rs):
+      continue
+    n = ingame.load(cache, nfl, s, rs, stale=s == cur and cache.age_hours("ingame", s) > 6)
+    if n is None or not len(n):
+      continue
+    n = n[(n.season_type == "REG") & n.gsis_id.notna()]
+    for g, w, q in zip(n.gsis_id, n.week, n.qtr):
+      out.setdefault((g, int(s)), []).append((int(w), int(q) if pd.notna(q) and q <= 4 else None, "pbp"))
+  news = site / "data" / "espn_news" / "ingame.json"
+  if news.exists():
+    try:
+      doc = json.loads(news.read_text(encoding="utf-8"))
+      pl = cache.get("players", "all", lambda: nfl.load_players(), stale=False)
+      gs = {str(e).replace(".0", ""): g for g, e in zip(pl.gsis_id, pl.espn_id) if isinstance(g, str) and pd.notna(e)}
+      for e in doc.get("events", []):
+        g = gs.get(str(e.get("espn")))
+        if g and e.get("week"):
+          out.setdefault((g, int(doc["season"])), []).append((int(e["week"]), e.get("q"), "news"))
+    except Exception:
+      pass
+  return out
+
+
+def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFrame, played: set,
+                   ig: dict | None = None) -> dict:
   """gsis -> [episode], newest first. An episode = consecutive team games where he was on the injury report or a
   reserve list for an injury (a bye doesn't break it; a game played with no listing ends it). Per episode: season,
   first / last week, body part (the one listed most), games missed (not active), games played while listed, the
@@ -507,6 +540,14 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
       elif cur_ep:
         close()
     close()
+    # the game it started in: an in-game injury in the episode's first week or the week before it (hurt Sunday,
+    # listed from the next report); the earliest such game, pbp note or news blurb
+    for e in eps:
+      evs = sorted((x for x in (ig or {}).get((gid, e["s"]), []) if e["w0"] - 1 <= x[0] <= e["w0"]), key=lambda x: x[0])
+      if evs:
+        wk = evs[0][0]
+        qs = [x[1] for x in evs if x[0] == wk and x[1]]
+        e["ig"] = [wk, qs[0] if qs else None]
     out[gid] = {"eps": [{k: v for k, v in e.items() if v not in ("", None)} for e in reversed(eps)],
                 "games": int((g.season >= SNAPS_FROM).sum()), "missed": sum(e["missed"] or 0 for e in eps)}
   # Durability: share of his team's games he was available for (games missed inside injury episodes count against

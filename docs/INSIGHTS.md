@@ -640,6 +640,21 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Allgeier 2023; Saquon 2022 / 2024 / 2025 not bottom-quartile; workhorse stars top half) and (b) guardrail: RB
   rank corr. of season-only grade with next-season fantasy pts/g (both seasons qualified, 2019-2025) not
   significantly below the current grade's.
+- **RESULT: pbp injury notes do NOT help the depth window** (h3_note50 -0.0001 [-0.0002, -0.0000], h3_note80 -0.0001
+  [-0.0005, +0.0002] vs healthy3): the snap-pattern rule already catches the injuries that cost playing time. Not
+  used for depth. News blurbs (tools/espn_news.py, owner idea): per-player ESPN endpoint only (no league feed), current
+  season only -> archived daily for players on ESPN's injury list (~800 requests, 0.25 s apart, once a day); parsed
+  with patterns (left / exited ... game, did not return, questionable to return, ruled out for the rest, forced out,
+  injured his X during, quarter mentions); event = the last game HIS team kicked off before the blurb ("last Sunday's
+  win" posted Sunday morning = the week before), explicit "Week N" only in the injury phrase's sentence. ~280 events
+  wk 1-5 2026. Untestable on past seasons -> kept out of depth until the archive can test it. BOTH sources now mark
+  the Injuries tab: an episode's in-game origin ("hurt in the week 3 game, Q2") = a note / blurb in its first week or
+  the week before.
+- **PRE-REGISTERED: play-by-play injury notes in the depth window.** nfledge/ingame.py (notes link 100% via team +
+  jersey). Variants on top of healthy3: h3_note50 / h3_note80 = a game ALSO counts as left hurt when he has an injury
+  note in it and played under 50% / 80% of his max share of his previous 3 played games (no next-week listing
+  needed). GATE: adopt the better one if its accuracy minus healthy3 has a 95% CI above 0. Finding first: notes are
+  incomplete (Jefferson 2026 wk 3 has none: noted only when play stops for a player down).
 - **RESULT healthy3: SHIPPED (depth_build V7).** vs "both": +0.0003 [-0.0006, +0.0012] overall (no worse), starters
   back from injury 82.0 -> 83.1% (base 73.6). MIN wk 6: Addison 95, Jefferson 93 (was 34 / 67), Jennings 79.
 - **Better in-game injury signal (owner idea):** pbp `desc` notes "TEAM-##-F.Last was injured during the play" (~3 /

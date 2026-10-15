@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 2d63c0812664e1a7
+documented_code_hash: 49a6d0f90c9fa7a4
 ---
 # How the model works
 
@@ -52,6 +52,7 @@ Team ratings use this season's completed games plus a fading share of last seaso
 | NFL.com injury API | Day-by-day Wed/Thu/Fri practice participation |
 | FantasyPros expert consensus (via nflverse) | Weekly positional ranks, published Fridays |
 | PFR advanced defensive stats | Tested for defender values; still downloaded but not used (see section 8) |
+| Play-by-play injury notes and ESPN news blurbs | In-game injuries ("was injured during the play", "left Sunday's game") for the player Injuries tab. Not a projection input; tested as a depth-chart signal and it added nothing beyond snap patterns |
 | Open-Meteo | Wind forecast for outdoor and open-roof stadiums, averaged over the 4 hours from kickoff (current week only) |
 
 Seasons loaded: **{{ L.seasons }}**.
