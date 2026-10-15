@@ -607,3 +607,10 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .pi-d { margin-left: auto; font-weight: 800; font-size: 13px; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,.07); }
 .pi-d.up { color: #6fdc8c; background: rgba(111,220,140,.14); } .pi-d.dn { color: #ff8f84; background: rgba(255,143,132,.14); }
 .rp-card .rp-what { height: 50px; } .rp-card .rp-what.long { line-height: 25px; }
+/* practice days next to the status tag: one letter per day */
+.pr-days { display: inline-flex; gap: 2px; margin-left: 4px; vertical-align: 1px; }
+.pr-days i { font-style: normal; font-size: 9px; font-weight: 800; padding: 0 4px; height: 15px; line-height: 15px; text-align: center; border-radius: 4px; letter-spacing: .02em; }
+.pr-days .pr-F { color: #7fe0a0; background: rgba(111,220,140,.14); }
+.pr-days .pr-L { color: #f3d38c; background: rgba(224,176,74,.16); }
+.pr-days .pr-D { color: #f59a91; background: rgba(242,120,109,.16); }
+.badges .pr-days:first-child { margin-left: 0; }

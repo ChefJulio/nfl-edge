@@ -35,8 +35,18 @@
     return /^(ir\b|injured reserve)/i.test(t) ? 'IR' : /^(susp|sspd)/i.test(t) ? 'SSPD' : /^(pup|physically)/i.test(t) ? 'PUP'
       : /^(nfi|non-football)/i.test(t) ? 'NFI' : /^out/i.test(t) ? 'O' : /^doubt/i.test(t) ? 'D' : /^question/i.test(t) ? 'Q' : t.split(/\s/)[0].toUpperCase();
   };
-  const injTag = st => { if (!st) return ''; const c = injCode(st);
-    return `<span class="dc-tag dt-${c === 'Q' ? 'q' : c === 'D' ? 'd' : 'out'}" title="${esc(st)}">${esc(c)}</span>`; };
+  // status = "<game designation> (<practice days>)", e.g. "Questionable (DLF)" or just " (D)" midweek: the designation
+  // is a colored tag, each practice day its own chip in the NFL's report terms (FP green, LP amber, DNP red), so a
+  // Wednesday DNP never reads as "Doubtful"
+  const PRAC = { D: 'Did not practice', L: 'Limited', F: 'Full' }, PRAB = { D: 'DNP', L: 'LP', F: 'FP' }, DAYS = ['Wed', 'Thu', 'Fri'];
+  const injTag = st => {
+    if (!st) return '';
+    const m = String(st).match(/^(.*?)\s*\(([DLF]+)\)\s*$/), des = (m ? m[1] : String(st)).trim(), pr = m ? m[2] : '';
+    const c = des ? injCode(des) : '';
+    const tag = c ? `<span class="dc-tag dt-${c === 'Q' ? 'q' : c === 'D' ? 'd' : 'out'}" title="${esc(des)}">${esc(c)}</span>` : '';
+    const days = pr ? `<span class="pr-days" title="Practice: ${esc([...pr].map((x, i) => `${DAYS[i] || ''} ${PRAC[x]}`).join(', '))}">${[...pr].map(x => `<i class="pr-${x}">${PRAB[x]}</i>`).join('')}</span>` : '';
+    return tag + days;
+  };
   const getJSON = async (url, ms = 12000) => {
     const c = new AbortController(), t = setTimeout(() => c.abort(), ms);
     try {
