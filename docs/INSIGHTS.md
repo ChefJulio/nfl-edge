@@ -596,6 +596,21 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Gate: (i) Brier lower, 95% bootstrap CI by episode excluding 0, >= 2 of 3 seasons; (ii) each designation with
   n >= 150 rows x k-bucket (1-2 / 3-4 / 5-8) within 5 points of actual; (iii) IR rows that the rule makes
   impossible predicted <= 1%. Ablation (each addition alone) reported, not gated.
+  **v2 result (`tools/return_v2_eval.py`): FAIL, not shipped.** Brier 0.1189 -> 0.1333 (+0.014 [+0.009, +0.020]),
+  0/3 seasons; later horizons too pessimistic (active k 5-8 -6.8, inactive -14, IR k 5-8 17.6% vs 40.9% actual).
+  Ablation: IR rule alone +0.0017 [-0.000, +0.003] (but rule-impossible IR rows 0.1% vs base 5.2%, actual 0.4%);
+  practice window alone +0.0054; ESPN return alone +0.012. Cause: the chain rolls today-only information forward
+  (this week's practice score becomes NaN = "not practicing" in later steps; ESPN's estimate is counted down as
+  if exact), so errors compound. Baseline's own IR weakness: k 5-8 27.9% vs 40.9% actual. 2025 Wayback coverage
+  of ESPN's injury page is thin (21 captures, 4 parsed), so ESPN is effectively tested on 2023-24.
+- **PRE-REGISTERED 2026-10-15: return timing v3 (direct horizons; last attempt).** Same information, no chain:
+  one classifier, P(back by his k-th next game | state at decision time, k), k = 1..8, trained on every state x k
+  with a known outcome (walk-forward, train 2019 .. season-1). Features: the return model's (missed, designation,
+  report, injury, position, week) + k + IR games so far and games short of the minimum (hazard-free: k beyond the
+  shortfall is learnable; and the prediction is forced to 0 when k <= shortfall) + practice window / score this
+  week + ESPN weeks-to-return / status at decision time + this week's practice-model P(plays) when on the report.
+  Baseline: production (chain, step 1 = this week's estimate, stay 1). Same gate as v2. If it fails, stop and
+  record; production keeps the chain.
 - **SHIPPED 2026-10-15 (owner design, data check): a returned player counts like a healthy one in the lookahead.**
   Owner: once back for even one game, the odds he's past the injury are very high; re-aggravation is small. Data
   (2022-25 skill players, role-matched by offensive snap share): starters back from an injury absence play their
