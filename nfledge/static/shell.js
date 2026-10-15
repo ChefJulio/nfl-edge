@@ -43,6 +43,51 @@
     logo: (teams, t, size = 18) => { const i = (teams || {})[t] || {}; return i.logo ? `<span class="logo" style="background:${esc(i.logo_bg || '#333')}"><img src="${esc(logoSrc(i.logo, size))}" alt="${esc(t)}" width="${size}" height="${size}" loading="lazy"></span>` : ''; },
     rowStyle: (teams, t) => { const i = (teams || {})[t] || {}; return `--tc:${i.color || '#666'};--tc2:${i.color2 || '#999'};--tfg:#ffffff`; },
   };
+  // One look everywhere (owner 2026-10-14): every list of players or teams is a row of team-colored tiles (table cls
+  // 'tiles', row class 'teamrow', row style from tileStyle) with the same name cell, and every matchup is the Games
+  // tab's tile. Teams map = the week data's (NFLE.week() -> D.teams: logo, logo_bg, color, color2, nick).
+  const F = NFLE.fmt;
+  NFLE.ui = {
+    headshot: espn => espn ? `https://a.espncdn.com/i/headshots/nfl/players/full/${encodeURIComponent(espn)}.png` : '',
+    tileStyle: (teams, t) => `style="${F.rowStyle(teams, t)}"`,
+    // p: { name, team, pos, grp (badge color group), photo | espn, sub (default: team), badges (html) }
+    player: (p, teams) => {
+      const photo = p.photo || NFLE.ui.headshot(p.espn);
+      const pic = photo
+        ? `<span class="pic"><span class="pic-img"><img src="${esc(photo)}" alt="" width="34" height="34" loading="lazy" onerror="this.closest('.pic').classList.add('nopic')"></span><span class="pic-tm">${F.logo(teams, p.team, 11)}</span></span>`
+        : F.logo(teams, p.team, 26);
+      const pos = p.pos ? `<span class="posb posb-${esc(p.grp || p.pos)}">${esc(p.pos)}</span> ` : '';
+      return `<div class="who">${pic}<div class="nmw"><b class="nm">${esc(p.name)}</b><span class="sub">${pos}${esc(p.sub ?? p.team ?? '')}</span>${p.badges || ''}</div></div>`;
+    },
+    // a team: logo, nickname, sub line (default "KC")
+    team: (t, teams, sub, extra = '') => {
+      const i = (teams || {})[t] || {};
+      return `<div class="who">${F.logo(teams, t, 26)}<div><b>${esc(i.nick || t)}</b>${extra}<span class="sub">${sub == null ? esc(t) : sub}</span></div></div>`;
+    },
+    // the Games tab's matchup tile: logos outside, team colors blending, win chance (score once it starts); live
+    // games are repainted by gamecast.js (NFLE.paintTiles finds tiles by data-gid wherever they are)
+    matchTile: (g, href) => {
+      const f = g.fc || {}, fin = g.final;
+      const sides = [[g.away, fin && fin.away, fin && fin.home, f.p_away], [g.home, fin && fin.home, fin && fin.away, f.p_home]];
+      const verdict = !fin ? '' : !fin.winner ? '<span class="gf-pick toss">Tie</span>'
+        : f.tossup ? `<span class="gf-pick toss">Tossup &middot; ${esc(fin.winner)} won</span>`
+          : fin.fav_won ? `<span class="gf-pick ok">Favorite won &middot; ${f.pct}%</span>`
+            : `<span class="gf-pick miss">Upset &middot; a ${100 - f.pct}% chance</span>`;
+      const main = sides.map(([s, sc, os, pct], i) => {
+        const side = i ? 'home' : 'away';
+        const cls = `${fin && sc < os ? ' lost' : ''}${!fin && !f.tossup && pct < 50 ? ' dog' : ''}`;
+        return `${s.logo_url ? `<img class="mt-lg ${side}" src="${esc(F.logoSrc(s.logo_url, 112))}" alt="" loading="lazy">` : ''}
+          <div class="mt-side ${side}${cls}"><span class="mt-num">${fin ? esc(sc) : `${esc(pct)}<small>%</small>`}</span>
+            <span class="mt-nm"><b>${esc(s.nick)}</b> <small>${esc(s.record)}</small></span></div>
+          ${i ? '' : `<span class="mt-at">${g.neutral ? 'vs' : '@'}${f.tossup && !fin ? '<small>Tossup</small>' : ''}</span>`}`;
+      }).join('');
+      const st = fin ? `<span class="mt-fin">Final</span>${verdict}`
+        : `<span>${esc(g.kickoff)}${g.neutral ? ' &middot; neutral' : ''}</span>
+           <span class="mt-odds">${g.vegas_line ? `<b>${esc(g.vegas_line)}</b>` : 'no line yet'} &middot; <span title="${esc(f.model_why || '')}">ours ${f.model_tossup ? 'tossup' : `${esc(f.model_fav)} ${esc(f.model_pct)}%`}</span></span>`;
+      return `<a class="mt ${fin ? 'is-final' : 'is-pre'}${f.tossup && !fin ? ' toss' : ''}" data-gid="${esc(g.id)}" href="${esc(href || (NFLE.gameHref ? NFLE.gameHref(g) : '#'))}" style="${esc(g.bt_style || '')}">
+        <div class="mt-main">${main}</div><div class="mt-st">${st}</div></a>`;
+    },
+  };
 })();
 // Week page header: the season / week picker (every week links to its own page; weeks.json at the site root lists
 // them, rewritten every build, so old pages list new weeks), where this page sits in time, and the page details.

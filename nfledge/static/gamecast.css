@@ -538,3 +538,5 @@ td.pen-top { color: var(--muted); font-size: 12.5px; }
 .eg-chip.eg-uq { border-style: dashed; } .eg-chip.eg-uq b { color: var(--muted); }
 .dc-p.dc-hurt { opacity: .55; } .dc-p.dc-hurt .dc-n { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 70%, transparent); }
 .ij-ig { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+/* the Games tab's matchup tile on player / team pages */
+.pc-mt { margin: 0 0 12px; } .pc-mt .mt { margin: 0; } .pc-mtk { margin: 2px 2px 6px; }

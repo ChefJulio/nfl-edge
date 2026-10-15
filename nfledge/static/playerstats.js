@@ -96,6 +96,9 @@
 
   NFLE.areas.playerstats = {
     mount(sec) {
+      // team colors / logos for the tile rows (the week data's map); redraw once it is in
+      let TEAMS = {};
+      NFLE.week().then(D => { if (D && D.teams) { TEAMS = D.teams; if (table) { table = null; sec.querySelector('.ps-tbl').innerHTML = ''; draw(); } } });
       sec.classList.remove('soon');
       sec.innerHTML = `<div class="sec-head"><div><h2>Player stats</h2><p class="ps-sub">Loading&hellip;</p></div></div>
         <div class="dt-card"><div class="dt-tools">
@@ -119,7 +122,7 @@
       });
       const columns = () => [
         { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name,
-          html: r => `<div class="who"><div><b>${esc(r.name)}</b><span class="sub"><span class="posb posb-${esc(groupOf(r.pos))}">${esc(r.pos || '')}</span> ${r.team ? `<span class="tm-open" data-tm="${esc(r.team)}">${esc(r.team)}</span>` : ''}</span></div></div>` },
+          html: r => NFLE.ui.player({ name: r.name, pos: r.pos, grp: groupOf(r.pos), team: r.team, espn: r.espn }, TEAMS) },
         ...DEFAULTS[pos].map(k => col(BY[k])),
         ...custom.map((k, i) => col(BY[k] || null, i)),
       ];
@@ -142,8 +145,8 @@
       const draw = (resort) => {
         sec.querySelectorAll('.ps-per button').forEach(b => b.classList.toggle('on', (b.dataset.v === 'pg') === per));
         const cols = columns();
-        if (!table) table = NFLE.Table(sec.querySelector('.ps-tbl'), { columns: cols, rows: rows(), sort: { key: SORT0[pos], dir: 'desc' },
-          rowAttrs: r => /^\d\d-\d{7}$/.test(r.pid) ? `data-open-pid="${esc(r.pid)}"` : '' });
+        if (!table) table = NFLE.Table(sec.querySelector('.ps-tbl'), { columns: cols, rows: rows(), sort: { key: SORT0[pos], dir: 'desc' }, cls: 'tiles',
+          rowClass: () => 'teamrow', rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.team)}${/^\d\d-\d{7}$/.test(r.pid) ? ` data-open-pid="${esc(r.pid)}"` : ''}` });
         else { table.setColumns(cols); table.update(rows()); if (resort) table.setSort({ key: SORT0[pos], dir: 'desc' }); }
       };
       // Custom-column sort buttons: the table ignores clicks on header controls, so they sort it themselves

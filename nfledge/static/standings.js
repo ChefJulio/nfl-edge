@@ -1,6 +1,7 @@
 // Teams > Standings: data/standings/<season>.json (tools/standings_build.py; tiebreakers in nfledge/standings.py).
 // Two views: Divisions (eight tables) and Playoff picture (each conference in seed order). Rows open the team card.
 (() => {
+  let TEAMS = {};  // the week data's teams map (tile colors, logos), filled at mount
   const NFLE = window.NFLE, esc = NFLE.esc;
   const VIEW_KEY = 'nfledge-standings-view';
   const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } return v; };
@@ -18,8 +19,7 @@
   const teamCell = (r, view) => {
     const why = view === 'conf' ? r.conf_why : r.div_why;
     const seed = r.seed ? `<span class="st-seed${r.seed <= (r.conf_rank && r.seed) ? '' : ''}" title="${r.seed <= 4 ? 'Division leader' : 'Wild card'}: seed ${r.seed}">${r.seed}</span>` : '';
-    return `<div class="who">${logo(r)}<div><b>${esc(r.nick)}</b>${seed}
-      <span class="sub">${esc(r.team)}${why ? ` &middot; <span class="st-why" title="Ahead of the clubs it's tied with on: ${esc(WHY[why] || why)}">${why === 'division tiebreak' ? '' : 'TB: '}${esc(TB[why] || why)}</span>` : ''}</span></div></div>`;
+    return NFLE.ui.team(r.team, TEAMS, `${esc(r.team)}${why ? ` &middot; <span class="st-why" title="Ahead of the clubs it's tied with on: ${esc(WHY[why] || why)}">${why === 'division tiebreak' ? '' : 'TB: '}${esc(TB[why] || why)}</span>` : ''}`, seed);
   };
   const columns = (ties, view) => [
     ...(view === 'conf' ? [{ w: 44, key: 'conf_rank', label: '#', num: true, first: 'asc' }] : []),
@@ -39,6 +39,7 @@
   NFLE.areas.standings = {
     mount(sec) {
       sec.classList.remove('soon');
+      NFLE.week().then(D => { if (D && D.teams) { TEAMS = D.teams; draw(); } });
       sec.innerHTML = `<div class="sec-head"><div><h2>Standings</h2><p class="st-sub">Loading&hellip;</p></div></div>
         <div class="dt-card"><div class="dt-tools">
           <select class="dt-select st-season" aria-label="Season"></select>
@@ -59,14 +60,14 @@
             body.insertAdjacentHTML('beforeend', `<h3 class="st-h">${conf}</h3><div class="st-tbl"></div>`);
             const rows = [...teams].sort((a, b) => a.conf_rank - b.conf_rank);
             NFLE.Table(body.lastElementChild, { columns: columns(ties, 'conf'), rows, sort: { key: 'conf_rank', dir: 'asc' },
-              rowClass: r => `tm-open${r.conf_rank === doc.playoff_teams ? ' st-cut' : ''}`, rowAttrs: r => `data-tm="${esc(r.team)}"` });
+              cls: 'tiles', rowClass: r => `teamrow tm-open${r.conf_rank === doc.playoff_teams ? ' st-cut' : ''}`, rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.team)} data-tm="${esc(r.team)}"` });
           } else {
             const divs = [...new Set(teams.map(r => r.div))].sort();
             for (const d of divs) {
               body.insertAdjacentHTML('beforeend', `<h3 class="st-h">${esc(d)}</h3><div class="st-tbl"></div>`);
               const rows = teams.filter(r => r.div === d).sort((a, b) => a.div_rank - b.div_rank);
               NFLE.Table(body.lastElementChild, { columns: columns(ties, 'div'), rows, sort: { key: 'nick', dir: 'asc' },
-                rowClass: () => 'tm-open', rowAttrs: r => `data-tm="${esc(r.team)}"` });
+                cls: 'tiles', rowClass: () => 'teamrow tm-open', rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.team)} data-tm="${esc(r.team)}"` });
             }
           }
         }

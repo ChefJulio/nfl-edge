@@ -550,8 +550,8 @@
           ${ia >= 0.05 ? `<div class="pc-sub pc-why ${av}">${esc(p.inactive_why)}</div>` : ''}</div>
         <div class="pc-box"><div class="pc-k">Expected line</div>${exp.length ? sg([sgRow(null, exp)], 4, { labels: false, cls: 'sg-tight sg-wrap' }) : '<p class="pc-sub">No line projected.</p>'}</div>
       </div>
-      <div class="pc-box pc-mutile"${g ? ` data-href="${esc(gameHref(g, d))}" role="link" tabindex="0" title="Open the gamecast"` : ''}>
-        <div class="pc-kr"><span class="pc-k">Matchup${g && g.kickoff && !isLive && !g.final ? ` · ${esc(g.kickoff)}` : ''}</span>${g ? `<span class="pc-go">${isLive ? '<span class="live-dot"></span>Live · ' : ''}Gamecast &rsaquo;</span>` : ''}</div>
+      ${g ? `<div class="pc-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>` : ''}
+      <div class="pc-box"><div class="pc-k">Matchup effect</div>
         <div class="pc-mu">${opp ? logo(opp.logo_url, opp.logo_bg, 22, opp.team) : ''}<b>${esc(p.home)} ${opp ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(opp.team)}">${esc(opp.team)}</button>` : esc(p.opp)}</b>
           ${p.mu != null ? `<span class="pc-muv">${muHtml(p, opp && opp.team)} <small>pts</small></span>` : muHtml(p)}</div>
         <div class="pc-sub">${p.mu != null ? `Facing ${esc(p.opp)} instead of an average opponent ${Math.abs(p.mu) < 0.05 ? 'changes nothing' : `${p.mu > 0 ? 'adds' : 'takes away'} ${f1(Math.abs(p.mu))} pts`}: its Vegas total, the play volume and the defense ratings together.`
@@ -885,6 +885,7 @@
       t.onkeydown = e => { if (e.key === 'Enter' && e.target === t) location.href = t.dataset.href; };
     });
     wirePicker(body);
+    NFLE.paintTiles();
   };
   // ------------------------------------------------------------------------------------------------- team card
   // Same overlay and look as the player card. Week tab from the picked week's data (Power, matchup, players);
@@ -1122,30 +1123,15 @@
     });
     wireLogRows(body.querySelector('.tm-log'));
     wirePicker(body);
+    NFLE.paintTiles();
     if (!L) loadTeamLog(abbr);
   };
   // The team's Week tab for one week's data: result / live score, matchup and odds, Power box; plus its player rows.
   const teamWeek = (abbr, d) => {
     const pw = (d.power || []).find(x => x.team === abbr), g = teamGame(abbr, d);
     const opp = g && (g.away.team === abbr ? g.home : g.away), home = g && g.home.team === abbr;
-    const st = d === DATA && g ? LIVE.byGame[g.id] : null;
-    let now = '';
-    if (st && st.state !== 'pre') {
-      const me = st.home.team === abbr ? st.home : st.away, them = st.home.team === abbr ? st.away : st.home, live = st.state === 'in';
-      now = `<div class="pc-now${live ? ' is-live' : ''}"><div class="pc-k">${live ? `<span class="live-dot"></span>Live · ${esc(st.short || '')}` : 'Final'}</div>
-        <div class="pc-big">${esc(abbr)} ${me.score} <small>–</small> ${them.score} ${esc(them.team)}</div><div class="pc-sub"><a href="${gameHref(g, d)}">${live ? 'Open live gamecast' : 'Game recap'} &rsaquo;</a></div></div>`;
-    } else if (g && g.final) {
-      const ps = home ? g.final.home : g.final.away, pa = home ? g.final.away : g.final.home;
-      now = `<div class="pc-now"><div class="pc-k">Final</div><div class="pc-big">${esc(abbr)} ${ps} <small>–</small> ${pa} ${esc(opp.team)}</div><div class="pc-sub"><a href="${gameHref(g, d)}">Game recap &rsaquo;</a></div></div>`;
-    }
-    const fc = g && g.fc;
-    const myPct = (fav, pct) => fav === abbr ? pct : 100 - pct;
-    const week = g ? `<div class="pc-box"><div class="pc-k">${esc(wkLabel(d))}</div>
-        <div class="pc-mu"><a class="pc-tile" href="${gameHref(g, d)}" title="Open the gamecast">${tLogo(opp.team, 22)}<b>${home ? 'vs' : '@'} ${esc(opp.nick || opp.team)} &rsaquo;</b></a> <span class="muted">${esc(g.kickoff || '')}</span></div>
-        ${fc ? `<div class="tm-odds"><div><div class="pc-k">${fc.src === 'Vegas' ? 'Vegas odds' : 'Our model (no line yet)'}</div><b>${fc.tossup ? 'Tossup' : `${myPct(fc.fav, fc.pct)}%`}</b>${fc.tossup ? ` <small class="muted">${esc(abbr)} ${myPct(fc.fav, fc.pct)}%</small>` : ''}</div>
-          ${fc.src === 'Vegas' ? `<div><div class="pc-k">Our model</div><b>${fc.model_tossup ? 'Tossup' : `${myPct(fc.model_fav, fc.model_pct)}%`}</b></div>` : ''}
-          ${g.vegas_line ? `<div><div class="pc-k">Line</div><b>${esc(g.vegas_line)}</b></div>` : ''}</div>` : ''}
-        <div class="pc-links" style="margin-top:8px"><a href="${gameHref(g, d)}">Gamecast &rsaquo;</a></div></div>`
+    // the Games tab's tile (win chances, line, ours; the score once it starts, repainted live)
+    const week = g ? `<div class="pc-k pc-mtk">${esc(wkLabel(d))}</div><div class="pc-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>`
       : `<div class="pc-box"><div class="pc-k">${esc(wkLabel(d))}</div><b>Bye</b></div>`;
     const unit = (label, v, rk, pp, total) => `<div class="tm-u${total ? ' tm-tot' : ''}"><span class="tm-ul">${label}</span><span class="tm-uv">${sgn(v)}</span>${rkChip(rk)}
       <span class="tm-ub"><span style="${v >= 0 ? `left:50%;width:${Math.min(50, Math.abs(v) * 10)}%` : `right:50%;width:${Math.min(50, Math.abs(v) * 10)}%`}" class="${v >= 0 ? 'pos' : 'neg'}"></span></span>
@@ -1162,7 +1148,7 @@
     const plRows = players.map(([pid, p]) => { const s = scaled(p, d);
       return `<tr><td><button type="button" class="bx-n" data-open-pid="${esc(pid)}">${esc(p.name)}</button> <span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>${injTag(p.status)}</td>
         <td class="num"><b>${f1(s.proj)}</b></td><td><span class="tier t-${esc(p.slot)}">${esc(p.tier)}</span></td><td class="num muted">${p.fpg != null ? f1(p.fpg) : ''}</td></tr>`; }).join('');
-    return { html: `${now}<div class="pc-grid tm-grid">${week}${power}</div>`, players: plRows };
+    return { html: `${week}<div class="pc-grid tm-grid">${power}</div>`, players: plRows };
   };
   const wireTeamLog = (body, abbr) => {
     const sel = body.querySelector('[data-topp]');

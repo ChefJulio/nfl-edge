@@ -247,8 +247,10 @@
   const LOWER = new Set(['skr', 'int', 'stuff', 'fl', 'drop', 'iw', 'ta', 'pz', 'qh', 'rya', 'bk', 'miss']);
   const numKey = x => (x !== '' && x != null && !isNaN(x) ? +x : x);
 
+  let TEAMS = {};  // the week data's teams map (tile colors, logos)
   NFLE.areas.trends = {
     mount(sec) {
+      NFLE.week().then(D => { if (D && D.teams) { TEAMS = D.teams; if (paint) paint(); } });
       sec.classList.remove('soon');
       let IX = null, Q = null, busy = 0, paint = null, maxN = 0;
       const base = {}, extra = {}, merged = {};
@@ -464,8 +466,8 @@
           const isTeam = Q.by === 'team' || Q.by === 'opp';
           const cols = [
             { key: 'label', label: by[0][0].toUpperCase() + by[0].slice(1), stick: true, first: 'asc', value: r => by[3] === 'v' ? r.label : r.key,
-              html: r => Q.by === 'player' ? `<div class="who"><div><b>${esc(r.label)}</b><span class="sub">${esc(r.team || '')}</span></div></div>`
-                : isTeam ? `<span class="tm-open" data-tm="${esc(r.key)}"><b>${esc(r.label)}</b></span>` : `<b>${esc(r.label)}</b>` },
+              html: r => Q.by === 'player' ? NFLE.ui.player({ name: r.label, team: r.team }, TEAMS)
+                : isTeam ? NFLE.ui.team(r.key, TEAMS) : `<b>${esc(r.label)}</b>` },
             { key: 'n', label: unit, num: true, value: r => r.n, html: r => fmt(r.n) },
             { key: 'v', label: m[0], num: true, cls: 'tr-main', value: r => isFinite(r.v) ? r.v : null, html: r => `<b>${fmt(r.v, m[2])}</b>` },
             // rates compare with the league rate; counts (0 decimals: yards, catches, TDs...) as a share of the league total
@@ -480,8 +482,11 @@
           const tb = sec.querySelector('.tr-tbl');
           if (!rows.length) { tb.innerHTML = '<p class="muted">No plays match.</p>'; paint = null; return; }
           const sort = by[3] === 'v' ? { key: 'v', dir: 'desc' } : { key: 'label', dir: by[3] === 'kd' ? 'desc' : 'asc' };
-          const o = { columns: cols, rows, sort,
-            rowAttrs: r => Q.by === 'player' && /^\d\d-\d{7}$/.test(r.key) ? `data-open-pid="${esc(r.key)}"` : '' };
+          // player / team rows are team-colored tiles like every other list (NFLE.ui); other groupings stay plain
+          const tiled = Q.by === 'player' || isTeam, tm = r => Q.by === 'player' ? r.team : r.key;
+          const o = { columns: cols, rows, sort, cls: tiled ? 'tiles' : '',
+            rowClass: () => tiled ? `teamrow${isTeam ? ' tm-open' : ''}` : '',
+            rowAttrs: r => `${tiled ? NFLE.ui.tileStyle(TEAMS, tm(r)) : ''}${Q.by === 'player' && /^\d\d-\d{7}$/.test(r.key) ? ` data-open-pid="${esc(r.key)}"` : ''}${isTeam ? ` data-tm="${esc(r.key)}"` : ''}` };
           paint = () => {
             const min = Q.min ?? fam.min, keep = rows.filter(r => r.n >= min), hid = rows.length - keep.length;
             tb.innerHTML = '';

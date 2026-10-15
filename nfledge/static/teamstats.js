@@ -1,6 +1,7 @@
 // Teams > Stats: raw regular-season team stats from our own play-by-play (data/stats/teams_<season>.json, built by
 // tools/stats_build.py). Offense or defense (what a defense allowed), totals or per game; rows open the team card.
 (() => {
+  let TEAMS = {};  // the week data's teams map (tile colors, logos), filled at mount
   const NFLE = window.NFLE, esc = NFLE.esc;
   const store = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } return v; };
   const pageSeason = () => { const m = location.pathname.match(/(\d{4})\/week-\d+\.html$/); return m ? +m[1] : null; };
@@ -17,7 +18,7 @@
     const lowGood = side === 'd' ? 'asc' : 'desc', highGood = side === 'd' ? 'desc' : 'asc';  // natural sort per side
     return [
       { key: 'team', label: 'Team', stick: true, first: 'asc', w: 170, value: r => r.nick,
-        html: r => `<div class="who"><span class="st-logo" style="--tc:${esc(r.color || '#555')}"><img src="${esc(r.logo || '')}" alt="" width="20" height="20" loading="lazy"></span><div><b>${esc(r.nick)}</b><span class="sub">${esc(r.team)} &middot; ${r.w}-${r.l}${r.t ? `-${r.t}` : ''}</span></div></div>` },
+        html: r => NFLE.ui.team(r.team, TEAMS, `${esc(r.team)} &middot; ${r.w}-${r.l}${r.t ? `-${r.t}` : ''}`) },
       num('pts', side === 'o' ? 'Pts' : 'Pts allowed', r => per ? div(side === 'o' ? r.pf : r.pa, r.g) : (side === 'o' ? r.pf : r.pa), per ? f1 : f0, lowGood),
       num('yds', 'Yds', r => cnt(r, 'yds'), per ? f1 : f0, lowGood),
       num('ypp', 'Y/P', r => div(r[k('yds')], r[k('plays')]), f1, lowGood, 'Yards per play'),
@@ -47,6 +48,7 @@
 
   NFLE.areas.teamstats = {
     mount(sec) {
+      NFLE.week().then(D => { if (D && D.teams) { TEAMS = D.teams; if (table) { table = null; sec.querySelector('.ts-tbl').innerHTML = ''; draw(); } } });
       sec.classList.remove('soon');
       sec.innerHTML = `<div class="sec-head"><div><h2>Team stats</h2><p class="ts-sub">Loading&hellip;</p></div></div>
         <div class="dt-card"><div class="dt-tools">
@@ -63,7 +65,7 @@
         sec.querySelectorAll('.ts-per button').forEach(b => b.classList.toggle('on', (b.dataset.v === 'pg') === per));
         const cols = columns(side, per);
         if (!table) table = NFLE.Table(sec.querySelector('.ts-tbl'), { columns: cols, rows, sort: { key: 'pts', dir: side === 'd' ? 'asc' : 'desc' },
-          rowClass: () => 'tm-open', rowAttrs: r => `data-tm="${esc(r.team)}"` });
+          cls: 'tiles', rowClass: () => 'teamrow tm-open', rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.team)} data-tm="${esc(r.team)}"` });
         else { table.setColumns(cols); table.update(rows); }
       };
       // Regular season / Playoffs: separate files, never mixed (teams_<season>_post.json)

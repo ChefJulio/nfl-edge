@@ -694,6 +694,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   calls, most-flagged players), player page box (season by type + career by season), Teams > Stats columns.
   nflverse pbp keeps one (the main) penalty per play; ~3,500 / season, 92% with a player. Bug fixed: stats_build
   deduped flags on drive + team + yards + play type, merging repeat false starts on a drive (now per play_id).
+- **One look everywhere (owner 2026-10-14): use NFLE.ui (shell.js) for ANY new list or matchup.** Player rows =
+  NFLE.ui.player (headshot + team badge, name, pos + team; team logo when no photo), team rows = NFLE.ui.team
+  (logo, nickname, "KC · 4-0"); both as tiles: table cls 'tiles', row class 'teamrow', row attrs
+  NFLE.ui.tileStyle(TEAMS, team) with TEAMS = NFLE.week() -> D.teams. Matchups = NFLE.ui.matchTile(g, href) (the
+  Games tab tile; NFLE.paintTiles() repaints live ones anywhere). Applied: Rankings, Power (already), Player Stats
+  (stats JSON gained 'espn' for headshots), Team Stats, Standings, Trends (player / team groupings; no headshots:
+  play files carry gsis only), player page (tile + "Matchup effect" box), team page Week tab (tile replaces the
+  score / matchup / odds boxes).
 - **UI prefs (owner 2026-10-14):** player / team page header (photo, name, position, grade, team) is sticky
   (top: var(--navh), set by shell.js from the top bar's height; the page container needs overflow: clip, never
   hidden/auto, or sticky breaks). The grade badge reads "OVR", not "EDGE" (EDGE is a position).

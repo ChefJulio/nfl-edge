@@ -169,6 +169,7 @@ def main():
   a, _, b = opt.get("seasons", f"{FIRST}-{current}").partition("-")
   seasons = [s for s in range(int(a), int(b or a) + 1) if (sched.season == s).any()]
   players = cache.get("players", "all", lambda: nfl.load_players(), stale=cache.age_hours("players", "all") > 24 * 7)
+  espn_of = {g: str(e).replace(".0", "") for g, e in zip(players.gsis_id, players.espn_id) if isinstance(g, str) and pd.notna(e) and str(e)}
   pfr2gsis = players.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
   rosters = pd.concat([x for x in (cache.get("rosters", s, lambda: nfl.load_rosters_weekly([s]), stale=False)
                                    for s in range(max(FIRST, current - 9), current + 1)) if x is not None], ignore_index=True)
@@ -219,10 +220,10 @@ def main():
       cache.save_meta()  # a long first run (every season's pbp) can stop midway: keep what's done
     ts, pl = pd.read_parquet(tf), pd.read_parquet(pf_)
     write_team(out / f"teams_{s}.json", ts, s, teams)
-    write_players(out / f"players_{s}.json", pl, s, current, bios)
+    write_players(out / f"players_{s}.json", pl, s, current, bios, espn_of)
     if po_done and tfp.exists() and pfp.exists():
       write_team(out / f"teams_{s}_post.json", pd.read_parquet(tfp), s, teams)
-      write_players(out / f"players_{s}_post.json", pd.read_parquet(pfp), s, current, bios)
+      write_players(out / f"players_{s}_post.json", pd.read_parquet(pfp), s, current, bios, espn_of)
       post_seasons.append(s)
   cache.save_meta()
   (out / "index.json").write_text(json.dumps({"v": V, "seasons": seasons, "current": current, "keys": SCORE_KEYS,
@@ -250,7 +251,7 @@ def write_team(path: Path, ts: pd.DataFrame, season: int, teams: pd.DataFrame):
   path.write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
 
 
-def write_players(path: Path, pl: pd.DataFrame, season: int, current: int, bios: dict):
+def write_players(path: Path, pl: pd.DataFrame, season: int, current: int, bios: dict, espn: dict | None = None):
   num = [c for c in pl.columns if c not in ("pid", "name", "pos", "team")]
   rows = []
   for r in pl.itertuples(index=False):
@@ -263,9 +264,10 @@ def write_players(path: Path, pl: pd.DataFrame, season: int, current: int, bios:
       (b.get("exp") - (b.get("exp_s", season) - season)) if b.get("exp") is not None else None,
       d.get("y"), d.get("r"), d.get("p"), d.get("o"), 1 if d.get("u") else 0,
       k.get("apy") if season == current else None, k.get("val") if season == current else None,
-      k.get("gtd") if season == current else None, k.get("fa") if season == current else None])
+      k.get("gtd") if season == current else None, k.get("fa") if season == current else None,
+      (espn or {}).get(r.pid)])  # ESPN id: the headshot on the tile rows (NFLE.ui.player)
   cols = ["pid", "name", "pos", "team"] + num + ["age", "ht", "wt", "college", "exp", "draft_y", "draft_r", "draft_p",
-                                                 "draft_o", "udfa", "apy", "deal_val", "deal_gtd", "fa"]
+                                                 "draft_o", "udfa", "apy", "deal_val", "deal_gtd", "fa", "espn"]
   doc = {"v": V, "season": season, "cols": cols, "rows": rows, "keys": SCORE_KEYS}
   path.write_text(json.dumps(doc, separators=(",", ":"), default=_clean), encoding="utf-8")
 
