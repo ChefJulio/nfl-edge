@@ -735,6 +735,12 @@ def bye_rows(eng, stats, ts, pos, season, week) -> list:
 
 
 def inactive_why(r) -> str:
+  if r.status and r.status.startswith("Questionable (ESPN)"):  # display only (InjuryModel.espn_questionable)
+    days = r.status[len("Questionable (ESPN)"):].strip(" ()")
+    words = {"D": "DNP", "L": "limited", "F": "full"}
+    prac = ", ".join(words.get(c, c) for c in days if c in words)
+    return ("ESPN lists him Questionable (not the official tag yet). "
+            + (f"The chance comes from practice so far: {prac}" if prac else "No practice report yet; ESPN's Questionable alone doesn't change the chance"))
   if r.status and r.status.endswith("(ESPN)"):
     return ("ESPN injury news since his last game (this week's official report isn't out yet): "
             + r.status.replace(" (ESPN)", ""))

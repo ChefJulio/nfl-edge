@@ -405,6 +405,7 @@ class InjuryModel:
   espn_bridge: dict | None = None  # gsis_id -> ESPN bucket (live week only; see espn.py / espn_calib.py)
   espn_rates: dict | None = None  # bucket -> learned P(active) (espn_calib.learned_rates); None = carry-forward rates
   espn_midweek: dict | None = None  # gsis_id -> ESPN bucket ruled after his team's report started (build_espn_bridge)
+  espn_questionable: dict | None = None  # gsis_id -> "Questionable": fresh ESPN Q, display only (availability)
 
   def midweek_ruling(self, gsis_id: str, game_status) -> tuple[float, str] | None:
     """A fresh ESPN Out / IR for a player on this week's practice report, before his final game status: its measured
@@ -465,15 +466,24 @@ class InjuryModel:
         if rep != "None":
           p.at[i, "avail"] = float(self.p_next.get(rep, 1.0))
           p.at[i, "status"] = f"{rep} last wk"
+    # ESPN's Questionable, shown but not used (owner 2026-10-15: rows showed ESPN's O / D but never its Q): only where
+    # there's no designation yet ("" or practice days only) or just last week's; the chance to play is unchanged
+    for i, row in p.iterrows():
+      st = p.at[i, "status"]
+      if row.gsis_id in (self.espn_questionable or {}) and (st == "" or st.startswith(" (") or st.endswith("last wk")):
+        p.at[i, "status"] = "Questionable (ESPN)" + (st if st.startswith(" (") else "")
     return p
 
   @staticmethod
-  def build_espn_bridge(data, season: int, week: int, feed: pd.DataFrame, midweek: bool = False) -> dict:
+  def build_espn_bridge(data, season: int, week: int, feed: pd.DataFrame, midweek: bool = False,
+                        questionable: bool = False) -> dict:
     """Early-week bridge (see espn.py): gsis_id -> ESPN bucket (espn_calib.bucket: Out / Out+ret / Doubtful / IR)
     for players with an ESPN injury status updated on or after their team's last completed game day, for teams
     whose report for `week` is not out. Empty when there is no feed, or once every report for the week is out.
     midweek=True: the same, for teams whose report IS out, Out / Out+ret / IR only (espn_calib.MIDWEEK): a ruling
-    made after practice started, applied to players on the report until their final game status (availability)."""
+    made after practice started, applied to players on the report until their final game status (availability).
+    questionable=True: ESPN Questionable, any team, same freshness filter: DISPLAY only (espn_questionable), since
+    it adds nothing to the practice days (INSIGHTS sec. 9: played 63%, practice model 58%)."""
     from .espn import STATUS_MAP
     from .espn_calib import MIDWEEK_BUCKETS, bucket
     if feed is None or feed.empty:
@@ -491,16 +501,19 @@ class InjuryModel:
     game_day = {**dict(zip(w.home_team, w.gameday)), **dict(zip(w.away_team, w.gameday))}
     out = {}
     for x in feed.itertuples():
-      rep = STATUS_MAP.get(str(x.status))
+      rep = ("Questionable" if str(x.status) == "Questionable" else None) if questionable else STATUS_MAP.get(str(x.status))
       hit = by_espn.get(str(x.espn_id))
       if rep is None or hit is None:
         continue
       gsis, team = hit
-      if (team in published) != midweek or team not in last_day.index:
+      if (not questionable and (team in published) != midweek) or team not in last_day.index:
         continue
       upd = pd.to_datetime(x.updated, utc=True, errors="coerce")
       if pd.isna(upd) or upd.tz_convert("America/New_York").date() < pd.Timestamp(last_day[team]).date():
         continue  # news from before his last game: last week's report already covers it
+      if questionable:
+        out[gsis] = rep
+        continue
       b = bucket(x.status, getattr(x, "return_date", None), game_day.get(team)) or rep
       if midweek and b not in MIDWEEK_BUCKETS:
         continue

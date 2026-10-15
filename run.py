@@ -52,7 +52,7 @@ def attach_data(eng, data):
 
 
 def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict | None = None, espn_hist: Path | None = None,
-                 espn_midweek: dict | None = None):
+                 espn_midweek: dict | None = None, espn_questionable: dict | None = None):
   """Trained engine + this week's projections, cached on disk. Presentation-only changes (report.py, the
   template) reuse it, so a re-render takes seconds instead of minutes. espn_bridge (live week only): early-week
   ESPN injury statuses (InjuryModel.build_espn_bridge); part of the cache key, so new ESPN news re-projects.
@@ -65,6 +65,8 @@ def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict |
                 if espn_bridge else "")
   if espn_midweek:
     bridge_key += "_m" + hashlib.sha1(json.dumps(sorted(espn_midweek.items())).encode()).hexdigest()[:8]
+  if espn_questionable:  # display only, but it's in the cached projections' status column
+    bridge_key += "_q" + hashlib.sha1(json.dumps(sorted(espn_questionable)).encode()).hexdigest()[:8]
   path = cache_dir / f"model_{state_key(data, cfg, scoring, season, week)}{bridge_key}.pkl"
   if path.exists():
     with open(path, "rb") as f:
@@ -75,6 +77,8 @@ def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict |
   eng = Engine(data, cfg, scoring, POSITIONS).train(season)
   if espn_midweek and eng.injury_model is not None:
     eng.injury_model.espn_midweek = espn_midweek
+  if espn_questionable and eng.injury_model is not None:
+    eng.injury_model.espn_questionable = espn_questionable
   if espn_bridge and eng.injury_model is not None:
     from nfledge.espn_calib import learned_rates
     eng.injury_model.espn_bridge = espn_bridge
@@ -219,7 +223,7 @@ def main():
   print(f"[run] projecting {season} week {week}", flush=True)
 
   # Early-week bridge (nfledge/espn.py, espn_calib.py): the live week only, never --week rebuilds or backtests.
-  bridge, midweek = {}, {}
+  bridge, midweek, quest = {}, {}, {}
   if not args.week:
     from nfledge.espn import fetch_injuries
     from nfledge.injuries import InjuryModel
@@ -228,11 +232,13 @@ def main():
     if bridge:
       print(f"[run] ESPN early-week injury news for {len(bridge)} players (official report not out)", flush=True)
     midweek = InjuryModel.build_espn_bridge(data, season, week, feed, midweek=True)
+    quest = InjuryModel.build_espn_bridge(data, season, week, feed, questionable=True)  # display only
     if midweek:
       print(f"[run] ESPN midweek Out / Doubtful / IR rulings for {len(midweek)} players (report out, no final status yet)", flush=True)
   out_path = Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week)
   eng, proj = cached_model(data, cfg, scoring, season, week, espn_bridge=bridge,
-                           espn_hist=out_path.parent / "data" / "espn_injuries", espn_midweek=midweek)
+                           espn_hist=out_path.parent / "data" / "espn_injuries", espn_midweek=midweek,
+                           espn_questionable=quest)
 
   ev, bt_seasons, res = None, [], None
   if not args.no_backtest:
