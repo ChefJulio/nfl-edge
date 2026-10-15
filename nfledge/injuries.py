@@ -422,7 +422,7 @@ class InjuryModel:
     prev = inj[inj.week == week - 1]
     published = set(cur.team)
     p = p.copy()
-    p["avail"], p["status"] = 1.0, ""
+    p["avail"], p["status"], p["partial_week"] = 1.0, "", False
     cur_map = cur.set_index("gsis_id")
     prev_map = prev.drop_duplicates("gsis_id").set_index("gsis_id")
     pr = self.data.practice
@@ -437,6 +437,7 @@ class InjuryModel:
       if row.team in published and use_days and row.gsis_id in days.index:
         x = days.loc[[row.gsis_id]]
         p.at[i, "avail"] = float(self.practice_prob(x, final=row.team in final)[0])
+        p.at[i, "partial_week"] = row.team not in final  # report.inactive_why: "practice so far"
         gs = x.game_status.iloc[0]
         label = gs.title() if gs != "None" else ""
         ruled = self.midweek_ruling(row.gsis_id, gs)
