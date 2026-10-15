@@ -623,6 +623,15 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   2026 outcome was looked at). Not live until then. Gate: IR rows' Brier lower than production's with a 95%
   bootstrap CI by episode excluding 0, and IR calibration by k-bucket within 5 points; non-IR rows unchanged by
   construction. Earliest look: after week 14 (enough IR returns to resolve).
+- **PRE-REGISTERED 2026-10-15 (owner: "after week 14 doesn't help us today"): the same hybrid on untouched
+  seasons 2021 and 2022.** No v1-v3 test or selection used 2021-22 outcomes (v2/v3 tested 2023-25). Walk-forward:
+  2021 trained on 2019-20, 2022 on 2019-21 (COVID-era training, and 2021 has no ESPN data: the hybrid's IR model
+  runs without it). Gate on IR rows (skill players, k = 1..8): (i) Brier lower than production's chain (step 1 =
+  practice estimate, stay 1), 95% bootstrap CI by episode excluding 0, better in both seasons; (ii) IR calibration
+  by k-bucket within 5 points. Pass -> ship the hybrid now; the fresh-2026 check above still runs as confirmation.
+- **IR minimum as a hard rule (owner design: an NFL rule, not a model).** Production's chain with the hazard set
+  to 0 while an IR player is short of the minimum (no new features). Ships unless significantly worse: Brier on
+  IR rows 2023-25 not worse with a 95% CI excluding a 0.005 loss.
 - **SHIPPED 2026-10-15 (owner design, data check): a returned player counts like a healthy one in the lookahead.**
   Owner: once back for even one game, the odds he's past the injury are very high; re-aggravation is small. Data
   (2022-25 skill players, role-matched by offensive snap share): starters back from an injury absence play their
