@@ -595,6 +595,19 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   the baseline (season-to-date average, rescaled per league from his made / missed line) and say so.
   **Result: PASS, SHIPPED** (`tools/kicker_eval.py`): 2,298 kicker-games, MAE 3.706 vs 3.998 (-0.293 [-0.389,
   -0.204]), 5/5 seasons; mean 7.86 vs actual 7.84 (baseline 8.06); correlation with actual 0.158 vs 0.043.
+- **PRE-REGISTERED 2026-10-15: team-defense (D/ST) projections.** Source: nflverse weekly team stats + schedules.
+  Expected per game: sacks, INTs, opponent fumbles recovered, forced fumbles, defensive TDs, special-teams TDs,
+  safeties, blocked kicks, passes defended, tackles for loss, forced punts (opponent punts), defensive 2-pt returns =
+  league rate x (defense's rate / league) x (opponent offense's rate allowed / league), each rate the last 16 games
+  shrunk toward the league (common stats 8 games of league weight, rare ones 30); points allowed ~ normal around the
+  opponent's implied points (sd fit on the window); yards allowed ~ normal around a fit on the opponent's implied
+  points and the defense's shrunk yards-allowed rate. Any league's tiers / per-point / per-yard scoring computed from
+  those. Not projected: 3-and-outs, 4th-down stops. Walk-forward 2021-25 weeks 3+ (rates from games before the week,
+  fits on the two prior seasons + season so far). Baseline: the D/ST's season-to-date average. Scored on ESPN's
+  standard D/ST scoring (sack 1, INT 2, FR 2, TD 6, safety 2, block 2, points-allowed tiers 0 +5 / 1-6 +4 / 7-13 +3 /
+  14-17 +1 / 18-27 0 / 28-34 -1 / 35-45 -3 / 46+ -5). Gate: MAE lower, 95% CI over season-weeks excluding 0,
+  >= 3 of 5 seasons. Fail: ship the season average (rescaled per league from its stat line) and say so. The owner's
+  Sleeper scoring (per point / per yard allowed + extras) reported alongside, not gated.
 - **PRE-REGISTERED 2026-10-15 (owner: "anything worth trying taking OUT?"): removal tests.** Components never
   ablated on fantasy accuracy: QB effects in the team pass model (`no_qb_effects`), vacated-volume redistribution
   (`redistribution_0`), prior-season carryover in team ratings (`prior_weight_0`), the 10-90% win-probability play
