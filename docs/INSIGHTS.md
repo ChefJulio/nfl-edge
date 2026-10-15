@@ -615,6 +615,25 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   weeks 2022-24 (n 9,240 per state), mean predicted vs actual play: 1 day published 86% vs 65%; 2 days 76% vs 65%;
   full week with game status 83% vs 82% (calibrated). Cause: trained on complete weeks only, where "no game
   status" means cleared; midweek, no status yet reads the same. Lamar (wk 6, Wed DNP) 81% to play is this.
+- **Lookahead availability beyond the next game (diagnostic 2026-10-15, `tools/return_horizon_eval.py`, walk-
+  forward 2022-25).** The return-timing model was validated on the next game only; ROS uses it to week 17. (1) By
+  horizon it drifts: active-roster injured players actual vs predicted k=2 65.5% / 58.1%, k=4 71.7 / 74.8, k=6
+  71.2 / 81.4 (actual plateaus ~71%: some never return to the lineup; the constant stay-active rate doesn't
+  capture it); IR players k=6 30.2 / 20.1 (too pessimistic). (2) The chain ignores this week's practice report.
+  Replacing step 1 with the practice model's P(plays) (variant written into the script BEFORE the run; no gate set)
+  on states with a practice row (n 18,542 rows): Brier k=1 .247 -> .101, k=2 .246 -> .180, k=4 .219 -> .192,
+  k=6 .228 -> .211. Not yet a gate: see the pre-registration below.
+- **PRE-REGISTERED 2026-10-15: lookahead starts from this week's estimate.** Two changes, each gated separately,
+  walk-forward 2022-25 (return model and practice model fit on seasons before the test season), label = played
+  his team's k-th game, k = 2..6 pooled (k = 1 is the current week, already served by the weekly model):
+  (A) players already out (a return-model state) whose next game has a practice row: step 1 of the chain = the
+  practice model's P(plays) for that game instead of the hazard; later steps chain the hazard as now.
+  (B) newly injured: on the report for game G after playing the previous game (no state), which production now
+  treats as healthy from G+1 on (P = 1.0). Variant: P(G) = practice model, then if he misses G a state is built
+  (missed 1, designation active, his report status and injury) and the hazard chains from there.
+  Gate (each): pooled Brier over k = 2..6 lower, 95% bootstrap CI of the difference (2,000 resamples of
+  player-episodes) excluding 0, lower in >= 3 of 4 seasons. The long-horizon plateau (1) is a separate problem,
+  not fixed here.
 - **PRE-REGISTERED 2026-10-15: partial-week practice models.** For k = 1 and 2 published practice days, a model
   trained on report weeks truncated to their first k days (3-day weeks; same features with no game status, same
   GB settings), used while a team's final report (any game status on it) is not out. Walk-forward 2021-25 (train on
