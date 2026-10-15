@@ -622,6 +622,16 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   the difference (2,000 player-week resamples) excluding 0, lower in >= 4 of 5 seasons, AND mean predicted within
   3 points of actual for each k. Pass -> ship in `availability()` / `report_avail()`; midweek ESPN rulings keep
   precedence; then retest (c) against the new baseline.
+  **Result: PASS, SHIPPED 2026-10-15** (`tools/partial_week_eval.py`). Brier 0.203 -> 0.160, diff -0.044
+  [-0.046, -0.042], 5/5 seasons; mean predicted vs actual: 1 day 66.2% vs 65.0% (old 86.4%), 2 days 65.7% vs
+  65.0% (old 75.2%). Per sequence (actual / old / new): D 39.7 / 80.9 / 40.8; L 79.8 / 90.5 / 79.2; F 86.6 /
+  89.4 / 91.4; DD 16.1 / 29.6 / 15.7; LL 77.1 / 91.8 / 77.0. Small overshoot on all-full starts (FF 87.6 actual,
+  92.7 new). Live wk 6: Lamar (Wed DNP) 19% -> 60% inactive. "Final report out" = anyone on the team's report has
+  a game status, or the team has 3 practice days (backtests always see final weeks: unchanged).
+  **(c) retest:** ESPN Doubtful on the report, n 67: played 3.0%, new baseline 22.3% (old 41.8%): a real gap
+  left, but n < 100: OPEN, revisit when the live ESPN archive (daily from 2026-10-13, with update times) adds
+  ~35 midweek Doubtfuls (pool with Wayback). ESPN Questionable on the report, n 4,690: played 63.2%, new baseline
+  58.3% (old 75.4%): ESPN's Questionable adds nothing the practice days don't: CLOSED, no rule.
 - **NEXT (owner-approved 2026-10-14): Players > Trends, a play-level query builder.** "Rushing YPC for Ravens
   players in the 4th quarter, 2022-24" -> leaderboard. Design agreed: the query is a sentence of tappable chips
   (stat family + metric / who: team, player, league, or against a team / filters: quarter, down & distance, field
