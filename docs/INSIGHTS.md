@@ -682,6 +682,17 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   from 3-game blips); trees max_depth 5, 400 iterations (more room for position x role x k interactions; chosen
   before the run). Gate: v1's (i)-(iii), plus (iv) every position x role x k-bucket cell with n >= 300 within 5
   points of actual.
+  **v2 result: FAIL, not shipped.** (i)-(iii) pass (Brier 0.2440 -> 0.1543 [-0.098, -0.082], 4/4; by k within 1.3;
+  groups within 2.2; Hurts group 59.3 vs 60.1); (iv) fails: starter RBs -3.7 / -7.0 / -7.8, mid RBs -3.1 / -5.3 /
+  -4.8, starter QBs 9-12 +4.1. Diagnosis (after the run): in-sample the model is calibrated (RB starters k >= 5:
+  83.2 vs 84.3), but RB starters' later-game play rate is 74.9% (2020) and 74.4% (2021) vs 89.0 / 86.7 / 78.4 / 87.7
+  in 2022-25: the COVID-19 reserve list (2020-21) pulled healthy starters for a week or two, and every test season
+  trained on those years. Note the cells are clustered (the same ~50 RB starters a season repeat across weeks and
+  k), so a 5-point cell bound is near the season-to-season noise (2024 alone: 78%).
+- **PRE-REGISTERED 2026-10-15: unified lookahead availability v3 (post-COVID training).** v2 unchanged except the
+  decision seasons used to train start in 2022 (2020-21 excluded: COVID reserve list; finding above came from the
+  v2 test data, so this is not blind). Test seasons 2023, 2024, 2025 (each trained on 2022 .. season-1). Gate:
+  v2's (i)-(iv) with (i) needing >= 2 of 3 seasons. Live model then trains on 2022 onward.
 - **PRE-REGISTERED 2026-10-15: partial-week practice models.** For k = 1 and 2 published practice days, a model
   trained on report weeks truncated to their first k days (3-day weeks; same features with no game status, same
   GB settings), used while a team's final report (any game status on it) is not out. Walk-forward 2021-25 (train on
