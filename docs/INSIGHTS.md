@@ -585,6 +585,16 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   out from the other seasons' rows. Gate: pooled Brier lower with a 95% bootstrap CI (2,000 player-week resamples)
   on the difference excluding 0, AND lower in at least 2 of the 3 seasons. Fewer than 100 player-weeks:
   inconclusive, not shipped. Result goes here (and section 3 or 5) either way.
+  **v1 result (`tools/espn_midweek_eval.py`): formal PASS, judged INVALID, not shipped.** 9,552 player-weeks,
+  Brier 0.863 -> 0.028, 3/3 seasons. But 95% of rows are players NOT on the practice report (mostly long-term IR,
+  play rate 2%) scored at the 0.95 placeholder, which production never assigns them (IR players aren't projected):
+  the pass is that straw man. On-report rows (n = 478, the Hurts case) played 23.8% of the time; baseline mean
+  0.737, rule mean 0.022, Brier 0.419 -> 0.235. Wayback captures have no "updated" time, so a midweek ESPN "Out"
+  can be last week's stale label, which production's freshness filter (update after the last game) would drop.
+  **v2, pre-registered after seeing only those on-report aggregates (not a blind gate; stated so):** on-report
+  rows only; buckets Out / Out+ret / IR (IR on a practice report = designated to return); rule = leave-one-season-
+  out play rate of ON-REPORT rows in the same bucket; same gate (Brier CI excludes 0, >= 2 of 3 seasons,
+  n >= 100), plus a calibration check: the rule's predicted rate within 10 points of the actual rate per bucket.
 - **NEXT (owner-approved 2026-10-14): Players > Trends, a play-level query builder.** "Rushing YPC for Ravens
   players in the 4th quarter, 2022-24" -> leaderboard. Design agreed: the query is a sentence of tappable chips
   (stat family + metric / who: team, player, league, or against a team / filters: quarter, down & distance, field

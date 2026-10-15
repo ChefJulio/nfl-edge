@@ -1,7 +1,9 @@
 """Backfill ESPN's injury table (status + estimated return date) from the Wayback Machine, to measure how good its
 return dates are and calibrate the early-week bridge on past seasons (nfledge/espn_calib.py).
 
-Usage: python tools/espn_wayback.py [--seasons=2022-2025]
+Usage: python tools/espn_wayback.py [--seasons=2022-2025] [--days=0,1] [--out=cache/espn_injury_history.parquet]
+--days: weekdays to fetch (0 = Mon). The midweek ruling test (INSIGHTS sec. 9, 2026-10-15) uses
+--days=2,3,4 --out=cache/espn_injury_midweek.parquet, so the Mon/Tue calibration file stays as it is.
 ESPN's public injuries page (espn.com/nfl/injuries) was captured almost daily 2022-24 (and on ~130 days of 2025).
 Each capture's embedded page data lists every injured player: ESPN id, position, status, estimated return date.
 This fetches the Monday and Tuesday captures of each regular season (the early-week window the bridge covers),
@@ -66,12 +68,14 @@ def parse(html: str, ts: str) -> list[dict]:
 def main():
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
   a, _, b = opt.get("seasons", "2022-2025").partition("-")
+  dows = tuple(int(x) for x in opt.get("days", "0,1").split(","))
+  out_file = ROOT / opt.get("out", "cache/espn_injury_history.parquet")
   OUT.mkdir(parents=True, exist_ok=True)
   rows = []
   for season in range(int(a), int(b or a) + 1):
     caps = json.loads(get(CDX.format(a=f"{season}0901", b=f"{season + 1}0110")))[1:]
-    picks = [c[0] for c in caps if dt.datetime.strptime(c[0][:8], "%Y%m%d").weekday() in (0, 1)]  # Mon, Tue
-    print(f"[wayback] {season}: {len(caps)} daily captures, {len(picks)} on Mon/Tue", flush=True)
+    picks = [c[0] for c in caps if dt.datetime.strptime(c[0][:8], "%Y%m%d").weekday() in dows]
+    print(f"[wayback] {season}: {len(caps)} daily captures, {len(picks)} on weekdays {dows}", flush=True)
     for ts in picks:
       f = OUT / f"espn_injuries_{ts}.html.gz"
       if not f.exists():
@@ -83,7 +87,7 @@ def main():
         time.sleep(1.5)
       rows += [dict(r, season=season) for r in parse(gzip.decompress(f.read_bytes()).decode("utf-8", "ignore"), ts)]
   df = pd.DataFrame(rows)
-  df.to_parquet(ROOT / "cache" / "espn_injury_history.parquet", index=False)
+  df.to_parquet(out_file, index=False)
   print(f"[wayback] {len(df)} rows, {df.ts.nunique()} captures, {df.ret.notna().mean():.0%} with a return date", flush=True)
 
 
