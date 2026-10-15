@@ -571,6 +571,20 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Green Bay checks out: 13 titles, 37-28.
 
 ## 9. Open threads / next steps (as of 2026-10-12)
+- **PRE-REGISTERED 2026-10-15 (owner-approved): midweek ESPN "Out" rulings during practice week.** Trigger: Hurts
+  (PHI, wk 6) ruled out Thursday, ESPN Out with a return date after the game, yet 12% inactive because once a
+  team's report is out `availability()` uses the practice model only (Wed FP) and the ESPN bridge skips that team.
+  Data: Wayback captures of espn.com/nfl/injuries on Wed/Thu/Fri, 2022-24 (fetched into a separate file,
+  `cache/espn_injury_midweek.parquet`, so the Mon/Tue calibration input is untouched). Sample: Sunday games only;
+  players ESPN lists Out / IR at a capture made after at least one of his team's practice days was published
+  (a day counts as published from 22:00 UTC that day) and before the final (Friday) report; one row per
+  player-week = the latest such capture; outcome = active that week (weekly roster status ACT). Baseline = what
+  production does: the practice model (walk-forward, trained on seasons before the test season) on the practice
+  days published at the capture, no game status; players not on the report get 0.95. Rule: replace that with the
+  ESPN bucket's play rate (Out with return date after the game / Out / IR = 0), rates estimated leave-one-season-
+  out from the other seasons' rows. Gate: pooled Brier lower with a 95% bootstrap CI (2,000 player-week resamples)
+  on the difference excluding 0, AND lower in at least 2 of the 3 seasons. Fewer than 100 player-weeks:
+  inconclusive, not shipped. Result goes here (and section 3 or 5) either way.
 - **NEXT (owner-approved 2026-10-14): Players > Trends, a play-level query builder.** "Rushing YPC for Ravens
   players in the 4th quarter, 2022-24" -> leaderboard. Design agreed: the query is a sentence of tappable chips
   (stat family + metric / who: team, player, league, or against a team / filters: quarter, down & distance, field
