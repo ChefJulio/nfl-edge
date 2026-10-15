@@ -579,9 +579,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Rule: REMOVE if overall MAE is not worse (CI upper bound < +0.003) AND no position is significantly worse (its
   CI above 0); KEEP otherwise. A removal that is significantly better is removed regardless of the 0.003 margin.
   (Prior-season carryover also helps team-game prediction early in the season (section 9 carryover note), so it is
-  only removed if Matchups / Power are checked too.) Rejected experiment switches still in model code (elite, rbbc,
-  gl_share, gl_struct, coach_aggr, rz_struct, age_input, spread_shares, qb_rush_split) are dead code: delete,
-  verified by an identical baseline backtest before / after.
+  only removed if Matchups / Power are checked too.) Rejected experiment switches still in model code are dead code:
+  air_yards, snap_input, croe / yacoe / cpoe, gl_share, rz_struct, qb_rush_split, coach_aggr, age_input,
+  spread_shares, rbbc, elite_*, player_calibration linear, snap_map rosters, def_terms fitted / sign, wind_mode
+  linear / quadratic (gl_struct is ADOPTED and stays). Delete, verified by identical baseline projections before /
+  after; results stay recorded here.
 - **Return games, fact check (owner 2026-10-15: "players returning from injury have huge fantasy games all the
   time").** Skill players averaging 8+ half-PPR before the absence, 2019-25 (n 473): pre-injury 12.5, return game
   10.8, next 3 games 11.0; booms (>= 1.5x his average) 14.2% of return games vs 18.5% of his other games, busts
