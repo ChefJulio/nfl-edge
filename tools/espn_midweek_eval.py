@@ -135,3 +135,34 @@ print("[midweek] on report vs not:\n", R.groupby("on_report")[["played", "base",
 print("[midweek] baseline misses (played <= 0, base >= .5), sample:\n",
       R[(R.played == 0) & (R.base >= .5)][["season", "week", "name", "bucket", "days", "base", "rule"]].head(12).to_string())
 R.to_parquet(ROOT / "cache" / "espn_midweek_eval.parquet", index=False)
+
+# ---- v2 (pre-registered after v1, see INSIGHTS): on-report rows only, rule = on-report LOSO bucket rate
+import json  # noqa: E402
+
+O = R[R.on_report].copy()
+
+
+def loso_on(b, season):
+  o = O[(O.bucket == b) & (O.season != season)]
+  return float(o.played.mean()) if len(o) else float(O[O.season != season].played.mean())
+
+
+O["rule2"] = [loso_on(b, s) for b, s in zip(O.bucket, O.season)]
+O["sb"], O["sr"] = (O.base - O.played) ** 2, (O.rule2 - O.played) ** 2
+d2 = (O.sr - O.sb).to_numpy()
+boot2 = np.array([d2[rng.integers(0, len(d2), len(d2))].mean() for _ in range(2000)])
+lo2, hi2 = np.percentile(boot2, [2.5, 97.5])
+per2 = O.groupby("season")[["sb", "sr"]].mean()
+cal = O.groupby("bucket").agg(n=("played", "size"), actual=("played", "mean"), rule=("rule2", "mean"), base=("base", "mean"))
+cal["off_pts"] = 100 * (cal.rule - cal.actual)
+print(f"[midweek v2] on-report n {len(O)}  Brier base {O.sb.mean():.4f} rule {O.sr.mean():.4f}  diff {d2.mean():+.4f} "
+      f"[{lo2:+.4f}, {hi2:+.4f}]  seasons better {(per2.sr < per2.sb).sum()}/{len(per2)}")
+print(cal.round(3).to_string())
+ok2 = len(O) >= 100 and hi2 < 0 and (per2.sr < per2.sb).sum() >= 2 and (cal.off_pts.abs() <= 10).all()
+print("[midweek v2] GATE:", "PASS" if ok2 else "FAIL")
+if ok2:  # the shipped rates (nfledge/espn_calib.py MIDWEEK): every on-report row, all seasons
+  rates = {b: {"p": round(float(x.played.mean()), 4), "n": int(len(x))} for b, x in O.groupby("bucket")}
+  out = ROOT / "data" / "history" / "espn_midweek.json"
+  out.write_text(json.dumps({"source": "tools/espn_midweek_eval.py (Wayback Wed-Fri captures 2022-24, players on the "
+                                       "practice report, Sunday games)", "rates": rates}, indent=1), encoding="utf-8")
+  print(f"[midweek v2] wrote {out.name}: {rates}")

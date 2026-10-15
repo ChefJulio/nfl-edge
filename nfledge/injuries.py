@@ -376,6 +376,16 @@ class InjuryModel:
   # -- application -----------------------------------------------------------------------------------------------
   espn_bridge: dict | None = None  # gsis_id -> ESPN bucket (live week only; see espn.py / espn_calib.py)
   espn_rates: dict | None = None  # bucket -> learned P(active) (espn_calib.learned_rates); None = carry-forward rates
+  espn_midweek: dict | None = None  # gsis_id -> ESPN bucket ruled after his team's report started (build_espn_bridge)
+
+  def midweek_ruling(self, gsis_id: str, game_status) -> tuple[float, str] | None:
+    """A fresh ESPN Out / IR for a player on this week's practice report, before his final game status: its measured
+    play rate (espn_calib.MIDWEEK) and label, or None. The final report's status (Friday) takes over again."""
+    from .espn_calib import MIDWEEK
+    b = (self.espn_midweek or {}).get(gsis_id)
+    if b is None or b not in MIDWEEK or str(game_status) not in ("None", "", "nan"):
+      return None
+    return float(MIDWEEK[b]["p"]), "IR (ESPN)" if b == "IR" else "Out (ESPN)"
 
   def availability(self, p: pd.DataFrame, season: int, week: int) -> pd.DataFrame:
     inj = self.data.injuries
@@ -399,7 +409,11 @@ class InjuryModel:
         x = days.loc[[row.gsis_id]]
         p.at[i, "avail"] = float(self.practice_prob(x)[0])
         gs = x.game_status.iloc[0]
-        p.at[i, "status"] = (gs.title() if gs != "None" else "") + (f" ({x.days.iloc[0]})" if x.days.iloc[0] else "")
+        label = gs.title() if gs != "None" else ""
+        ruled = self.midweek_ruling(row.gsis_id, gs)
+        if ruled:
+          p.at[i, "avail"], label = ruled
+        p.at[i, "status"] = label + (f" ({x.days.iloc[0]})" if x.days.iloc[0] else "")
         continue
       if row.team in published:
         if row.gsis_id in cur_map.index:
@@ -424,12 +438,14 @@ class InjuryModel:
     return p
 
   @staticmethod
-  def build_espn_bridge(data, season: int, week: int, feed: pd.DataFrame) -> dict:
+  def build_espn_bridge(data, season: int, week: int, feed: pd.DataFrame, midweek: bool = False) -> dict:
     """Early-week bridge (see espn.py): gsis_id -> ESPN bucket (espn_calib.bucket: Out / Out+ret / Doubtful / IR)
     for players with an ESPN injury status updated on or after their team's last completed game day, for teams
-    whose report for `week` is not out. Empty when there is no feed, or once every report for the week is out."""
+    whose report for `week` is not out. Empty when there is no feed, or once every report for the week is out.
+    midweek=True: the same, for teams whose report IS out, Out / Out+ret / IR only (espn_calib.MIDWEEK): a ruling
+    made after practice started, applied to players on the report until their final game status (availability)."""
     from .espn import STATUS_MAP
-    from .espn_calib import bucket
+    from .espn_calib import MIDWEEK_BUCKETS, bucket
     if feed is None or feed.empty:
       return {}
     inj = data.injuries
@@ -450,12 +466,15 @@ class InjuryModel:
       if rep is None or hit is None:
         continue
       gsis, team = hit
-      if team in published or team not in last_day.index:
+      if (team in published) != midweek or team not in last_day.index:
         continue
       upd = pd.to_datetime(x.updated, utc=True, errors="coerce")
       if pd.isna(upd) or upd.tz_convert("America/New_York").date() < pd.Timestamp(last_day[team]).date():
         continue  # news from before his last game: last week's report already covers it
-      out[gsis] = bucket(x.status, getattr(x, "return_date", None), game_day.get(team)) or rep
+      b = bucket(x.status, getattr(x, "return_date", None), game_day.get(team)) or rep
+      if midweek and b not in MIDWEEK_BUCKETS:
+        continue
+      out[gsis] = b
     return out
 
   def report_avail(self, season: int, week: int) -> pd.Series:
@@ -471,7 +490,9 @@ class InjuryModel:
               .set_index("gsis_id") if pr is not None else None)
       for _, x in cur.iterrows():
         if self.practice_model is not None and days is not None and x.gsis_id in days.index:
-          out[x.gsis_id] = float(self.practice_prob(days.loc[[x.gsis_id]])[0])
+          d = days.loc[[x.gsis_id]]
+          ruled = self.midweek_ruling(x.gsis_id, d.game_status.iloc[0])
+          out[x.gsis_id] = ruled[0] if ruled else float(self.practice_prob(d)[0])
         else:
           out[x.gsis_id] = self.prob(_report(x.report_status), _practice(x.practice_status))
     else:

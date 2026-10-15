@@ -31,6 +31,14 @@ try:  # measured on 2022-25 (Wayback captures; tools/espn_return_eval.py): per b
   PRIORS = json.loads(HIST.read_text(encoding="utf-8"))
 except (OSError, ValueError):
   PRIORS = {}
+try:  # midweek rulings (owner-approved test 2026-10-15, INSIGHTS sec. 9): a player on his team's practice report whom
+  # ESPN lists Out / IR after the report started, before the final game status. Measured play rates per bucket
+  # (tools/espn_midweek_eval.py, 2022-24): they replace the practice model, which reads a Wed full practice as ~90%
+  # to play even after the team rules him out Thursday (Hurts, 2026 wk 6). Brier 0.419 -> 0.164 on 488 player-weeks.
+  MIDWEEK = json.loads((HIST.parent / "espn_midweek.json").read_text(encoding="utf-8"))["rates"]
+except (OSError, ValueError, KeyError):
+  MIDWEEK = {}
+MIDWEEK_BUCKETS = ("Out", "Out+ret", "IR")
 RET_DAYS = int(PRIORS.get("ret_days", 7))  # a return date this many days past the game; closer = ESPN's placeholder
 PRIOR_CAP = 50  # past seasons count as at most this many cases, so this season's outcomes can still move a rate
 

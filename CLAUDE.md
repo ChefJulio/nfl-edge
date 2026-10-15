@@ -38,7 +38,11 @@ a rejected idea without new data or a new angle, and do not "fix" a deliberate c
 .venv\Scripts\python tools/residual_fix.py                        # walk-forward game-margin handicap tests
 ```
 Python 3.12 venv in `.venv`. Set `PYTHONIOENCODING=utf-8` when printing polars/pandas frames on Windows.
-CI: `.github/workflows/deploy.yml` builds on every push to main and daily (14:00 UTC), caching `cache/`.
+CI: `.github/workflows/deploy.yml` builds on every push to main and daily (14:00 UTC), plus Wed-Fri 22:15 UTC
+(after practice reports), Sat 21:00 and Sun 16:45 (after 1 PM inactives), caching `cache/`.
+Injury availability, live week: before a team's report, ESPN early-week buckets (`espn_calib`); once it's out, the
+practice model, except a fresh ESPN Out / IR ruling before the final status (`InjuryModel.midweek_ruling`, rates
+in `data/history/espn_midweek.json` from `tools/espn_midweek_eval.py`; INSIGHTS sec. 9).
 Site layout: `index.html` = current week (stays on the week being played until Tue 06:00 ET); `<season>/week-NN.html`
 = archived weeks (built once, stored on the `archive` branch, which CI checks out into `site/` and appends to) and
 lookahead weeks (rebuilt every run, not committed); `weeks.json` feeds the pickers; `data/espn_injuries/` is the

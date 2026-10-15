@@ -595,6 +595,16 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   rows only; buckets Out / Out+ret / IR (IR on a practice report = designated to return); rule = leave-one-season-
   out play rate of ON-REPORT rows in the same bucket; same gate (Brier CI excludes 0, >= 2 of 3 seasons,
   n >= 100), plus a calibration check: the rule's predicted rate within 10 points of the actual rate per bucket.
+  **v2 result: PASS, SHIPPED 2026-10-15.** n = 488; Brier 0.419 -> 0.164, diff -0.254 [-0.297, -0.209], 3/3
+  seasons (2022 0.318 -> 0.069, 2023 0.428 -> 0.194, 2024 0.479 -> 0.191). Calibration (actual / rule / old
+  baseline): Out+ret 0% / 0% / 42% (n 43); Out 9.6% / 12.6% / 59% (n 187); IR on report 38% / 36% / 90% (n 258).
+  Starkest: practice "DD" + ESPN Out played 0.7% (n 136) vs 32% from the practice model. Shipped as
+  `InjuryModel.midweek_ruling` with pooled rates (`data/history/espn_midweek.json`), production keeping the
+  feed's freshness filter (ESPN update on/after the team's last game) that the Wayback test couldn't apply; the
+  final game status takes over. Live check: Hurts (Out+ret, Wed FP) goes 12% -> 100% inactive.
+  **Remaining (not tested, not shipped):** ESPN Doubtful midweek; players ESPN rules Out who are NOT on the
+  practice report (v1's sample was mostly long-term IR); a live-data recheck of the rates once the daily ESPN
+  archive (with update times) covers ~8 weeks of midweek rulings.
 - **NEXT (owner-approved 2026-10-14): Players > Trends, a play-level query builder.** "Rushing YPC for Ravens
   players in the 4th quarter, 2022-24" -> leaderboard. Design agreed: the query is a sentence of tappable chips
   (stat family + metric / who: team, player, league, or against a team / filters: quarter, down & distance, field

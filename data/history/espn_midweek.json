@@ -1,0 +1,17 @@
+{
+ "source": "tools/espn_midweek_eval.py (Wayback Wed-Fri captures 2022-24, players on the practice report, Sunday games)",
+ "rates": {
+  "IR": {
+   "p": 0.3798,
+   "n": 258
+  },
+  "Out": {
+   "p": 0.0963,
+   "n": 187
+  },
+  "Out+ret": {
+   "p": 0.0,
+   "n": 43
+  }
+ }
+}
