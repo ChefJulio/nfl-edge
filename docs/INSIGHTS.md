@@ -611,6 +611,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   -0.88, 2 -> -1.24, 3+ -> -1.35 (+-0.4); same monotonic pattern for 2 / 3 / 4-year windows. Journeymen are
   over-projected. Overlaps the newcomer effect (first games are inside); NEXT: pre-register a switch-count input or
   shrink, excluding first games with a team, after the newcomer gate.
+- **PRE-REGISTERED 2026-10-15 (owner: "do it"): journeyman adjustment.** k = team changes over the player's past 5
+  seasons + this one (weekly rosters, ACT), capped at 3; rows that are his first game with a team excluded (the
+  newcomer discount covers those). Multiplier per k = [sum actual / sum projected for k] / [same for k = 0], fit on
+  the 2021-23 backtest (current model; all QB / RB / WR / TE rows with a projection >= 1 and an actual), applied to
+  whole projected stat lines. Test on 2024-25 (untouched by the fit). Gate: (i) rows with
+  k >= 1: MAE lower, 95% CI over season-weeks excluding 0; (ii) all rows: MAE not worse (CI upper < +0.003); (iii) no
+  position significantly worse. Pass -> refit the multipliers on 2021-25 and ship.
 - **PRE-REGISTERED 2026-10-15 (owner: "if judkins sits, his replacement's projection would skyrocket, right?"):
   conserve vacated volume.** Wk 6: Judkins (68% of CLE carries, 60% to sit) is benched in the default scenario but
   only ~2.4 of his 11.5 points move to teammates (Estime +1.8, McLaughlin +0.6): the learned redistribution at 0.5
