@@ -202,8 +202,9 @@
   const NM = "[A-Z][a-z]?\\.[A-Za-z'.\\- ]+?";
   const RX = {
     lead: new RegExp(`^(${NM})\\s+(?:left|right|up the middle|middle|scrambles|kneels|pass|sacked|punts|kicks|spiked|\\d+ yard field goal|extra point|FUMBLES|Aborted)`),
-    to: new RegExp(` to (${NM})(?= to | for |\\.| \\(|,|$)`),
-    picked: new RegExp(`INTERCEPTED by (${NM})(?= at| \\(|\\.|,| to)`),
+    // a name ends at punctuation or a lowercase word ("to D.Moore ran ob at NE 49", "to J.Williams to DAL 38")
+    to: new RegExp(` to (${NM})(?= [a-z]| \\(|\\.|,|$)`),
+    picked: new RegExp(`INTERCEPTED by (${NM})(?= [a-z]| \\(|\\.|,)`),
     punt: /punts (\d+) yards/, kick: /kicks (\d+) yards/, fg: /(\d+) yard field goal is (GOOD|No Good|BLOCKED)/i,
     ret: new RegExp(`\\. (${NM}) (?:to|pushed|ran|for|MUFFS)`), pen: /PENALTY on ([A-Z]{2,4})-[^,]*, ([^,]+), (\d+) yards/,
   };
@@ -229,7 +230,7 @@
     let h, cls = '';
     if (/interception/i.test(t)) { h = `${nm(g('lead'))} intercepted${g('picked') ? ` by ${nm(g('picked'))}` : ''}`; cls = 'bad'; }
     else if (/sack/i.test(t)) { h = `${nm(g('lead'))} sacked, ${yds(y)}`; cls = 'bad'; }
-    else if (/pass reception|passing touchdown/i.test(t)) h = `${nm(g('lead'))} to ${nm(g('to'))}, ${yds(y)}`;
+    else if (/pass reception|passing touchdown/i.test(t)) h = `${nm(g('lead'))} ${g('to') ? `to ${nm(g('to'))}` : 'pass'}, ${yds(y)}`;
     else if (/pass incompletion/i.test(t)) h = `${nm(g('lead'))} incomplete${g('to') ? ` to ${nm(g('to'))}` : ''}`;
     else if (/^rush|rushing touchdown/i.test(t)) h = y > 0 ? `${nm(g('lead'))} ${y}-yard run` : `${nm(g('lead'))} run, ${yds(y)}`;
     else if (/punt/i.test(t)) h = `${nm(g('lead'))} punts ${g('punt') || ''} yards${/Touchback/i.test(raw) ? ', touchback' : g('ret') ? `, ${nm(g('ret'))} returns ${pl.statYardage || 0}` : ''}`;
@@ -253,10 +254,11 @@
       mark = `${a.down ? `<line x1="${X(a.toGo)}" y1="1" x2="${X(a.toGo)}" y2="19" class="fd-go"/>` : ''}<line x1="${X(a.x)}" y1="1" x2="${X(a.x)}" y2="19" class="fd-los"/>`;
       if (cls && Math.abs(d) >= 0.5) {
         const s0 = Math.sign(d);
-        mark += `<line x1="${X(a.x)}" y1="10" x2="${X(b.x) - s0 * 1.6}" y2="10" class="${cls}"/><path d="M${X(b.x)} 10 l${-s0 * 2.6} -2.6 v5.2 z" class="${cls} head"/>`;
+        const x2 = X(b.x) - s0 * 1.6, tip = `M${X(b.x)} 10 l${-s0 * 2.6} -2.6 v5.2 z`;
+        mark += `<line x1="${X(a.x)}" y1="10" x2="${x2}" y2="10" class="fd-halo"/><path d="${tip}" class="fd-halo"/>`
+          + `<line x1="${X(a.x)}" y1="10" x2="${x2}" y2="10" class="${cls}"/><path d="${tip}" class="${cls} head"/>`;
       }
-      mark += `<ellipse cx="${X(b.x)}" cy="10" rx="2.4" ry="1.6" class="fd-ball"/>`;
-    } else if (a) mark = `<ellipse cx="${X(a.x)}" cy="10" rx="2.4" ry="1.6" class="fd-ball"/>`;
+    } else if (a) mark = `<line x1="${X(a.x)}" y1="1" x2="${X(a.x)}" y2="19" class="fd-los"/>`;  // an event: just where the ball sits
     return `<svg class="fd" viewBox="0 0 120 20" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="0" width="120" height="20" class="fd-turf"/>
       <rect x="0" y="0" width="10" height="20" style="fill:${esc(info.away.color)}"/><rect x="110" y="0" width="10" height="20" style="fill:${esc(info.home.color)}"/>${lines}${mark}</svg>`;
   };
@@ -271,9 +273,19 @@
     const before = event ? '' : pl.start && pl.start.down ? (pl.start.shortDownDistanceText || pl.start.downDistanceText || '') : kick ? 'Kickoff' : '';
     const changed = a && b && a.offense.team !== b.offense.team;
     const after = !pl.end || !pl.end.downDistanceText ? '' : changed ? `${b.offense.team} ball, ${pl.end.downDistanceText}` : pl.end.shortDownDistanceText || pl.end.downDistanceText;
-    return `<section class="sit rp-card"><div class="rp-dd">${off ? `<b>${esc(off)} ball</b>` : ''}${where ? `${off ? ' · ' : ''}${esc(where)}` : ''}</div>
+    // color code (owner 2026-10-15): the offense in its team color, the yards gained green / lost red, and the downs
+    // by urgency (a fresh 1st down green, 3rd amber, 4th red)
+    const offSide = off ? (info.away.team === off ? info.away : info.home) : null;
+    const pill = t => { const sd = info.away.team === t ? info.away : info.home.team === t ? info.home : null;
+      return `<span class="rp-tm" style="--tc:${esc((sd && sd.color) || '#555')}">${esc(t)}</span>`; };
+    const dc = t => /^1st/.test(t) ? 'd1' : /^3rd/.test(t) ? 'd3' : /^4th/.test(t) ? 'd4' : '';
+    const net = a && b && !event && !changed && !kick && !/punt|field goal|extra point|kickoff/i.test((pl.type && pl.type.text) || '') ? Math.round((b.x - a.x) * a.dir) : null;
+    const chip = net == null ? '' : `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)} yd${Math.abs(net) === 1 ? '' : 's'}</span>`;
+    const afterHtml = !after ? '' : changed ? `${pill(b.offense.team)} <span class="rp-d chg">${esc(pl.end.downDistanceText)}</span>`
+      : `<span class="rp-d ${dc(after)}${/^1st/.test(after) && !/^1st/.test(before) ? ' new' : ''}">${esc(after)}</span>`;
+    return `<section class="sit rp-card"><div class="rp-dd">${offSide ? `${pill(off)} <b>ball</b>` : ''}${where ? `${off ? ' · ' : ''}${esc(where)}` : ''}</div>
       <div class="rp-what ${hd.cls}">${esc(hd.h)}</div>${playFieldSvg(event ? b : a, event ? null : b, info)}
-      ${!event && (before || after) ? `<div class="rp-next">${esc(before)}${after ? ` <span class="rp-ar">&rarr;</span> ${esc(after)}` : ''}</div>` : ''}
+      ${!event && (before || after) ? `<div class="rp-next"><span class="rp-d ${dc(before)}">${esc(before)}</span>${after ? ` <span class="rp-ar">&rarr;</span> ${afterHtml}` : ''}${chip}</div>` : ''}
       <div class="rp-raw">${esc(hd.raw)}</div></section>`;
   };
   const sitFromPlays = (sum) => {  // after the last play (finished games, replay, or no live situation yet)

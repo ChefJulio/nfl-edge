@@ -571,3 +571,14 @@ table.pst-tbl .pst-fp { border-left: 1px solid rgba(255,255,255,.12); } table.ps
 table.pst-tbl td.pst-who, table.pst-tbl thead tr:last-child th:first-child { position: sticky; left: 0; z-index: 2; background: #171a20; }
 table.pst-tbl thead tr:last-child th:first-child { background: var(--panel); }
 table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.pst-who .nm { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* replay card color coding: team pill, yards chip, downs by urgency; arrow halo instead of a ball */
+.fd-halo { stroke: rgba(0,0,0,.55); stroke-width: 3; fill: rgba(0,0,0,.55); }
+.fd-ar.gain { stroke: #7dffa0; } .fd-ar.gain.head { fill: #7dffa0; }
+.rp-card .rp-tm { display: inline-block; padding: 1px 7px; border-radius: 6px; background: var(--tc); color: #fff; font-weight: 800; font-size: 13px;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); text-shadow: 0 1px 1px rgba(0,0,0,.4); }
+.rp-card .rp-next { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 4px; }
+.rp-card .rp-d.d1 { color: #6fdc8c; } .rp-card .rp-d.d3 { color: #ffc94d; } .rp-card .rp-d.d4 { color: #ff8f84; } .rp-card .rp-d.chg { color: #8fbfff; }
+.rp-card .rp-d.new::after { content: 'FIRST DOWN'; margin-left: 6px; font-size: 10px; letter-spacing: .06em; padding: 2px 5px; border-radius: 4px; background: rgba(111,220,140,.16); vertical-align: 2px; }
+.rp-card .rp-yd { margin-left: auto; font-size: 13px; font-weight: 800; padding: 2px 8px; border-radius: 999px; }
+.rp-card .rp-yd.gain { color: #6fdc8c; background: rgba(111,220,140,.14); } .rp-card .rp-yd.loss { color: #ff8f84; background: rgba(255,143,132,.14); }
+.rp-card .rp-yd.zero { color: var(--muted); background: rgba(255,255,255,.07); }
