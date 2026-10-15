@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428993,Haynes King,Carolina Panthers,Active,2026-10-04T23:08Z,,,,,,King (coach's decision) is inactive but will operate as the Panthers' emergency third quarterback Sunday night versus Detroit.
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
 4430034,Xavier Legette,Carolina Panthers,Injured Reserve,2026-10-03T20:15Z,Knee,Not Specified,Not Specified,2026-11-08,IR,"The Panthers placed Legette (knee) on injured reserve Saturday, Darin Gantt of the team's official site reports."
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-15T17:02Z,Undisclosed,,,2026-10-18,IR,ir
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-15T18:10Z,Undisclosed,,,2026-10-18,IR,ir
 4361093,Kyler Gordon,Chicago Bears,Out,2026-10-15T00:36Z,Calf,Not Specified,Not Specified,2026-10-18,PUP-R,Gordon (calf) was estimated as a full participant on the Bears' official injury report Wednesday.
 4426374,Tyrique Stevenson Sr.,Chicago Bears,Questionable,2026-10-15T00:27Z,Hip,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Stevenson (hip) was estimated as a limited participant on the Bears' official injury report Wednesday.
 3121544,T.J. Edwards,Chicago Bears,Doubtful,2026-10-15T00:21Z,Hamstring,Not Specified,Not Specified,2026-10-18,DOUBTFUL,Edwards (hamstring) was estimated as a non-participant in Wednesday's walk-through practice.
@@ -524,6 +524,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-09-30T04:04Z,,,,,,"Wilson finished Sunday's 23-16 victory over Tampa Bay with 10 tackles, including 1.5 sacks, and one defensed pass."
 3921690,Josh Oliver,Minnesota Vikings,Injured Reserve,2026-09-30T00:26Z,Biceps,Surgery,Not Specified,2027-01-17,IR,"The Vikings placed Oliver (biceps) on injured reserve Tuesday, Craig Peters of the team's official site reports."
 16772,Kyle Van Noy,Minnesota Vikings,Active,2026-09-30T00:20Z,,,,,,"The Vikings signed Van Noy from the practice squad to the active roster Tuesday, Craig Peters of the team's official site reports."
+4432710,TreVeyon Henderson,New England Patriots,Questionable,2026-10-15T18:04Z,Ankle,Sprain,Right,2026-10-18,QUESTIONABLE,"Henderson (ankle) is in pads ahead of Thursday's practice, Doug Kyed of the Boston Herald reports."
 4047646,A.J. Brown,New England Patriots,Injured Reserve,2026-10-15T17:43Z,Ankle,Sprain,Right,2026-10-18,IR-R,"Brown (ankle) said Thursday that it's ""up in the air"" whether he'll be available for Sunday's game against the Jets, and that the decision will ultimately be made by head coach Mike Vrabel, Evan Lazar of the Patriots' official site reports."
 4565293,Marcus Bryant,New England Patriots,Injured Reserve,2026-10-15T00:55Z,Ankle,Not Specified,Not Specified,2026-10-18,IR-R,The Patriots opened the 21-day practice window Wednesday for Bryant (ankle) to return from injured reserve.
 4368113,Charles Woods,New England Patriots,Questionable,2026-10-14T23:50Z,Shoulder,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Woods (shoulder) was a limited participant in Wednesday's practice.
@@ -535,7 +536,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4245273,Christian Elliss,New England Patriots,Questionable,2026-10-14T21:16Z,Chest,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4685298,Will Campbell,New England Patriots,Questionable,2026-10-14T21:15Z,Knee - MCL,Sprain,Right,2026-10-18,QUESTIONABLE,questionable
 2574056,Kevin Byard,New England Patriots,Questionable,2026-10-14T21:14Z,Chest,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
-4432710,TreVeyon Henderson,New England Patriots,Questionable,2026-10-14T21:07Z,Ankle,Sprain,Right,2026-10-18,QUESTIONABLE,The Patriots listed Henderson (ankle) as a limited participant in Wednesday's practice.
 4831959,Eli Raridon,New England Patriots,Active,2026-10-14T01:46Z,,,,,,Raridon caught all five of his targets for 57 yards during the Patriots' 45-17 win over the Raiders on Sunday.
 4569173,Rhamondre Stevenson,New England Patriots,Active,2026-10-13T23:07Z,,,,,,"Stevenson is expected to take on a heavier workload for the next few weeks while TreVeyon Henderson recovers from a high-ankle sprain that he sustained in Sunday's 45-17 win over the Raiders, per ESPN."
 4606666,Karon Prunty,New England Patriots,Questionable,2026-10-13T17:10Z,Hamstring,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035661,Julian Blackmon,New Orleans Saints,Active,2026-10-11T16:37Z,,,,,,Blackmon (shoulder) is active for Sunday's game against the Vikings.
 4698597,Barion Brown,New Orleans Saints,Active,2026-10-11T16:22Z,,,,,,Brown (thigh) is active for Sunday's game against the Vikings.
 3115383,Davon Godchaux,New Orleans Saints,Active,2026-10-10T16:20Z,,,,,,Godchaux (groin) does not have an injury designation for Sunday's game against the Vikings.
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-15T17:02Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-15T18:01Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4433970,J.J. McCarthy,New York Giants,Active,2026-10-15T14:28Z,,,,,,"Giants head coach John Harbaugh said Wednesday he plans to keep using McCarthy in a change-of-pace role behind starting quarterback Jameis Winston in an effort to take advantage of McCarthy's scrambling ability, Jordan Raanan of ESPN.com reports."
 4430261,Tyler Nubin,New York Giants,Questionable,2026-10-14T23:34Z,Neck,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Nubin (neck) did not practice Wednesday, Dan Salomone of the Giants' official site reports."
 4725996,Abdul Carter,New York Giants,Questionable,2026-10-14T23:31Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Carter (calf) was listed as a DNP on Wednesday's injury report, Dan Salomone of the Giants' official site reports."
