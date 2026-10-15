@@ -579,6 +579,20 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Green Bay checks out: 13 titles, 37-28.
 
 ## 9. Open threads / next steps (as of 2026-10-12)
+- **Redistribution: KEPT (2026-10-15, owner delegated the call).** By boost size (2021-25 backtest, all players):
+  1,444 rows with a < 0.5 pt boost (MAE with 3.94 / without 3.90) and 99 at 0.5-1.5 (4.95 / 4.82) are noise; the
+  12 rows with 1.5+ pts (a backup taking a starter's role: actual 9.4, projected 7.7 with / 5.7 without; bias -2.1
+  vs -4.0) are what fantasy cares about and it helps there, still under-projecting. OPEN, pre-register when there's
+  a way to get more than 12 cases: redistribute only meaningful vacated volume, possibly at full strength.
+- **PRE-REGISTERED 2026-10-15 (owner: "wire up defense and kickers", "make sure the relevant scoring settings are
+  applied"): kicker projections.** Source: nflverse player stats (fg made / missed by distance band 0-19 / 20-29 /
+  30-39 / 40-49 / 50-59 / 60+, PAT made / missed). Model: the team's expected FG and PAT attempts from its Vegas
+  implied total (league-wide fit on the training seasons), the team's distance-band mix and the kicker's make rate
+  per band, each shrunk toward the league (empirical Bayes), giving an expected kicking stat line that any league's
+  scoring re-scores. Walk-forward 2021-25 (fit on the two prior seasons + the season so far), weeks 3+, every kicker
+  who kicked. Baseline: the kicker's season-to-date average (standard scoring: FG 3 / 4 at 40-49 / 5 at 50+, PAT 1,
+  miss -1). Gate: MAE lower with a 95% CI over season-weeks excluding 0 and better in >= 3 of 5 seasons. Fail: ship
+  the baseline (season-to-date average, rescaled per league from his made / missed line) and say so.
 - **PRE-REGISTERED 2026-10-15 (owner: "anything worth trying taking OUT?"): removal tests.** Components never
   ablated on fantasy accuracy: QB effects in the team pass model (`no_qb_effects`), vacated-volume redistribution
   (`redistribution_0`), prior-season carryover in team ratings (`prior_weight_0`), the 10-90% win-probability play
