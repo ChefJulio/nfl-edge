@@ -592,6 +592,18 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Gate: (i) on those
   newcomers' rows + their same-team same-position teammates that week, MAE lower with a 95% CI over season-weeks
   excluding 0; (ii) overall MAE not worse (CI upper < +0.003); (iii) no position significantly worse.
+  **v1 run DISCARDED (implementation bug):** keyed on the features' `last_team`, which isn't the team of his last
+  game: it flagged 13,190 rows (offseason movers all season), ALL MAE +0.086. Re-run with the pre-registered
+  definition (no snap for this team before this week; players who have played somewhere), same gate.
+  Side analyses (owner): first games split by signed that week (113: projected 3.07, scored 1.29 = 42%) vs on the
+  roster a week+ earlier (33: 1.65 vs 0.39 = 24%): not a separate effect, both barely contribute. Estime's projection
+  (wk 6) = 30% carry share in games he played (2025 NO 46 carries / 5 g, 2024 DEN 76 / 13), carried over as if he
+  were settled in; McLaughlin's long-run 18.5% (DEN) is pulled to 7.5% by 3 small CLE games.
+- **Team-switch count vs projection error (owner idea, descriptive 2026-10-15; 2021-25 backtest, players projected
+  5+):** mean actual - projection by team changes over the prior 5 seasons + this one: 0 -> -0.55 (n 9,962), 1 ->
+  -0.88, 2 -> -1.24, 3+ -> -1.35 (+-0.4); same monotonic pattern for 2 / 3 / 4-year windows. Journeymen are
+  over-projected. Overlaps the newcomer effect (first games are inside); NEXT: pre-register a switch-count input or
+  shrink, excluding first games with a team, after the newcomer gate.
 - **PRE-REGISTERED 2026-10-15 (owner: "if judkins sits, his replacement's projection would skyrocket, right?"):
   conserve vacated volume.** Wk 6: Judkins (68% of CLE carries, 60% to sit) is benched in the default scenario but
   only ~2.4 of his 11.5 points move to teammates (Estime +1.8, McLaughlin +0.6): the learned redistribution at 0.5
