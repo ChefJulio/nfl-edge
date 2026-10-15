@@ -61,7 +61,7 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
   now_report = now_report or {}
   first = np.array([float(now_report[g]) if (g in now_report and int(nw) == current_week) else np.nan
                     for g, nw in zip(cur.gsis_id, cur.next_week)])
-  pa = m.p_active(cur, horizon, first=first)
+  pa = m.p_active(cur, horizon, first=first, stay=1.0)  # once back, like a healthy player (also 1.0 here)
   s = data.schedules
   reg = s[(s.season == season) & (s.game_type == "REG")]
   team_weeks = {t: sorted(set(reg[reg.home_team == t].week) | set(reg[reg.away_team == t].week))
@@ -197,12 +197,19 @@ class ReturnModel:
   def hazard(self, d: pd.DataFrame) -> np.ndarray:
     return self.model.predict_proba(d[FEATURES])[:, 1]
 
-  def p_active(self, state: pd.DataFrame, horizon: int, first: np.ndarray | None = None) -> np.ndarray:
+  def p_active(self, state: pd.DataFrame, horizon: int, first: np.ndarray | None = None,
+               stay: float | None = None) -> np.ndarray:
     """P(active in each of the next `horizon` games), shape (len(state), horizon), for players out now. Each step
     adds one missed game; the designation stays until he returns (IR / PUP players stay designated).
     first: per-row P(plays) for the first game where this week's report knows better (NaN = the hazard). Owner-
     approved test 2026-10-15 (tools/lookahead_chain_eval.py, A): walk-forward 2022-25 Brier over his next 2-6 games
-    0.228 -> 0.194, 4/4 seasons."""
+    0.228 -> 0.194, 4/4 seasons.
+    stay: P(active) in each game after he's back (default: the measured stay_active, 0.89). Lookahead passes 1.0:
+    owner 2026-10-15 ("once a player returns ... odds of being fully past that injury are very high"), and the
+    data agrees: skill starters back from injury play their next 1-5 games at 95.9 / 88.3 / 86.8 / 85.6 / 84.6% vs
+    95.2 / 89.6 / 88.2 / 86.7 / 84.9% for healthy starters in the same role (2022-25), i.e. like a healthy player,
+    whom the lookahead counts at 1.0; the 0.89 left every returned player 11 points below healthy ones there."""
+    stay = getattr(self, "stay_active", 1.0) if stay is None else stay
     s = state.copy()
     out = np.zeros((len(s), horizon))
     still_out = np.ones(len(s))
@@ -211,8 +218,8 @@ class ReturnModel:
       if h == 0 and first is not None:
         p = np.where(np.isnan(first), p, first)
       back_now = still_out * p
-      # back this game, or back earlier and still active (measured stay-active rate)
-      out[:, h] = (1 - still_out) * getattr(self, "stay_active", 1.0) + back_now
+      # back this game, or back earlier and still active
+      out[:, h] = (1 - still_out) * stay + back_now
       still_out = still_out * (1 - p)
       s["missed"] = s.missed + 1
       s["week"] = s.week + 1

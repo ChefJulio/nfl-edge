@@ -572,6 +572,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Green Bay checks out: 13 titles, 37-28.
 
 ## 9. Open threads / next steps (as of 2026-10-12)
+- **SHIPPED 2026-10-15 (owner design, data check): a returned player counts like a healthy one in the lookahead.**
+  Owner: once back for even one game, the odds he's past the injury are very high; re-aggravation is small. Data
+  (2022-25 skill players, role-matched by offensive snap share): starters back from an injury absence play their
+  next 1-6 games 95.9 / 88.3 / 86.8 / 85.6 / 84.6 / 74.0% vs healthy starters 95.2 / 89.6 / 88.2 / 86.7 / 84.9 /
+  82.2% (h 6: n 104, noisy); mid and low roles alike; longer absences no worse (starters back after 4+ missed:
+  89.7%). The return chain multiplied every post-return game by stay_active 0.892 while healthy players count
+  1.0 in the lookahead, an 11-point penalty on every returning player in ROS. `p_active(stay=1.0)` there.
 - **PRE-REGISTERED 2026-10-15 (owner-approved): midweek ESPN "Out" rulings during practice week.** Trigger: Hurts
   (PHI, wk 6) ruled out Thursday, ESPN Out with a return date after the game, yet 12% inactive because once a
   team's report is out `availability()` uses the practice model only (Wed FP) and the ESPN bridge skips that team.
