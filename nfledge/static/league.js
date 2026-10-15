@@ -46,8 +46,10 @@
         platform: 'sleeper', id, name: lg.name, season: lg.season, week,
         slots: (lg.roster_positions || []).filter(s => !['BN', 'IR', 'TAXI'].includes(s)),
         scoring,
-        teams: (rosters || []).map(r => ({ id: String(r.roster_id), owner: r.owner_id, name: uName[r.owner_id] || `Team ${r.roster_id}`,
-                                            ext: (r.players || []).map(String), starters: (r.starters || []).map(String) })),
+        teams: (rosters || []).map(r => { const st = r.settings || {};
+          return { id: String(r.roster_id), owner: r.owner_id, name: uName[r.owner_id] || `Team ${r.roster_id}`,
+                   ext: (r.players || []).map(String), starters: (r.starters || []).map(String),
+                   record: { w: st.wins || 0, l: st.losses || 0, t: st.ties || 0, pf: (st.fpts || 0) + (st.fpts_decimal || 0) / 100 } }; }),
         matchup(teamId) {
           const me = byRoster[teamId];
           if (!me) return null;
@@ -78,9 +80,13 @@
       const teams = (d.teams || []).map(t => {
         const entries = ((t.roster || {}).entries || []);
         entries.forEach(e => { const p = (e.playerPoolEntry || {}).player || {}; names[String(e.playerId)] = { name: p.fullName, pos: ESPN_POS[p.defaultPositionId] }; });
+        // starters in the league's slot order (ESPN lists a roster in no particular order)
+        const left = entries.filter(e => ![20, 21].includes(e.lineupSlotId));
+        const starters = slots.map(sl => { const i = left.findIndex(e => ESPN_SLOT[e.lineupSlotId] === sl); return i < 0 ? '' : String(left.splice(i, 1)[0].playerId); });
+        const ov = ((t.record || {}).overall) || {};
         return { id: String(t.id), owner: (t.owners || [])[0], name: t.name || `${t.location || ''} ${t.nickname || ''}`.trim(),
-                 ext: entries.map(e => String(e.playerId)),
-                 starters: entries.filter(e => ![20, 21].includes(e.lineupSlotId)).map(e => String(e.playerId)) };
+                 ext: entries.map(e => String(e.playerId)), starters,
+                 record: { w: ov.wins || 0, l: ov.losses || 0, t: ov.ties || 0, pf: ov.pointsFor || 0 } };
       });
       const games = (d.schedule || []).filter(g => g.matchupPeriodId === week || (g.home && g.home.pointsByScoringPeriod && g.home.pointsByScoringPeriod[week] != null));
       return {
@@ -89,7 +95,7 @@
           const g = games.find(x => String((x.home || {}).teamId) === teamId || String((x.away || {}).teamId) === teamId);
           if (!g) return null;
           const home = String(g.home.teamId), away = String((g.away || {}).teamId), opp = home === teamId ? away : home;
-          const pts = s => (s && ((s.pointsByScoringPeriod || {})[week] ?? s.totalPoints)) || 0;
+          const pts = s => (s && (s.totalPointsLive ?? (s.pointsByScoringPeriod || {})[week] ?? s.totalPoints)) || 0;
           return { opp, points: { [home]: pts(g.home), [away]: pts(g.away) }, starters: null };
         },
         defName: x => (names[x] || {}).name || x,
@@ -170,14 +176,17 @@
       const best = optimize(ps, L.slots, curStart), bestSet = new Set(best.filter(r => r.p).map(r => r.p.ext));
       const curRows = L.slots.map((s, i) => ({ slot: s, p: ps.find(p => p.ext === mine.starters[i]) || null }));
       const gain = total(best) - total(curRows);
-      const benchIn = best.filter(r => r.p && !cur.has(r.p.ext)).map(r => r.p), benchOut = curRows.filter(r => r.p && r.p.exp != null && !bestSet.has(r.p.ext)).map(r => r.p);
+      // replaced starters include ones with no projection (bye, IR, out): they score 0 where they sit
+      const benchIn = best.filter(r => r.p && !cur.has(r.p.ext)).map(r => r.p),
+        benchOut = curRows.filter(r => r.p && !['DEF', 'K'].includes(r.p.pos) && !bestSet.has(r.p.ext)).map(r => r.p);
       // An uncertain starter (15-85% to sit) isn't a bench call midweek: lineups can change until each game kicks off,
       // so he's a "wait for the final report" with what he's worth if he plays vs the best fill-in.
-      const unsure = benchOut.filter(p => p.inactive >= 0.15 && p.inactive <= 0.85);
+      const unsure = benchOut.filter(p => p.exp != null && p.inactive >= 0.15 && p.inactive <= 0.85);
       const sure = benchOut.filter(p => !unsure.includes(p));
       const fill = benchIn.slice().sort((a, b) => b.exp - a.exp);
+      const outName = p => `${esc(p.name)}${p.exp == null ? ` <span class="muted">(${esc(p.why ? 'not projected: bye, IR or out' : 'not projected')})</span>` : ''}`;
       const swaps = !benchIn.length ? '<div class="lg-swaps good">Your lineup is already the best one by our projections.</div>'
-        : `<div class="lg-swaps">${sure.length ? `<div><b>Start ${fill.slice(0, sure.length).map(p => esc(p.name)).join(', ')}</b> over ${sure.map(p => esc(p.name)).join(', ')}.</div>` : ''}
+        : `<div class="lg-swaps">${sure.length ? `<div><b>Start ${fill.slice(0, sure.length).map(p => esc(p.name)).join(', ')}</b> over ${sure.map(outName).join(', ')}.</div>` : ''}
           ${unsure.map(p => `<div><b>${esc(p.name)}: wait for news.</b> ${pct(p.inactive)} to sit (${esc(statusWords(p.status))}). If he plays he's worth ${f1(p.proj)}, more than the best fill-in${fill.length ? ` (${esc(fill[fill.length - 1].name)}, ${f1(fill[fill.length - 1].proj)})` : ''}; swap only if he's ruled out or still doubtful by his kickoff.</div>`).join('')}
           <div class="muted">By expected points the best lineup gains <b class="good">+${f1(gain)}</b>.</div></div>`;
       const unproj = curRows.filter(r => r.p && r.p.exp == null && r.slot !== 'DEF' && r.slot !== 'K').map(r => r.p);
@@ -224,10 +233,46 @@
       return `<p class="muted lg-note">Unrostered in your league, best rest-of-season first (expected points through week 17 under your scoring).</p>${byPos}`;
     };
 
+    // ---- league rankings: every team's best lineup this week and for each remaining week through 17 (ros.json:
+    // each week's projected stat line x his chance to play, so byes, injuries and returns all count), summed
+    const teamsView = () => {
+      if (!ROS) return '<p class="muted">Loading rest-of-season projections…</p>';
+      const now = Date.now(), weeks = [];
+      for (let k = ROS.from; k <= ROS.through; k++) weeks.push(k);
+      const rows = L.teams.map(t => {
+        const ps = t.ext.map(player);
+        const wk = total(optimize(ps, L.slots));
+        let ros = 0;
+        weeks.forEach(k => {
+          const cand = t.ext.map(x => {
+            const g = gsisOf(x), r = g && ROS.players[g];
+            if (!r) return null;
+            const e = r.w.find(z => z[0] === k);
+            if (!e || (k === ROS.from && r.k && now >= Date.parse(r.k))) return null;
+            return { ext: x, pos: r.pos, exp: e[1] * pts(e[5], L.scoring, r.pos) };
+          }).filter(Boolean);
+          ros += total(optimize(cand, L.slots));
+        });
+        return { t, wk, ros };
+      });
+      rows.sort((a, b) => b.ros - a.ros);
+      const avg = rows.reduce((s_, r) => s_ + r.ros, 0) / rows.length;
+      const wkRank = rows.slice().sort((a, b) => b.wk - a.wk).map(r => r.t.id);
+      const body = rows.map((r, i) => {
+        const rc = r.t.record || {};
+        return `<tr class="${r.t.id === mine.id ? 'lg-me' : ''}"><td class="num"><b>${i + 1}</b></td><td><b>${esc(r.t.name)}</b>${r.t.id === mine.id ? ' <span class="lg-you">you</span>' : ''}</td>
+          <td class="num"><b>${Math.round(r.ros)}</b></td><td class="num ${r.ros >= avg ? 'good' : 'bad'}">${r.ros >= avg ? '+' : ''}${Math.round(r.ros - avg)}</td>
+          <td class="num">${f1(r.wk)} <span class="muted">(${wkRank.indexOf(r.t.id) + 1})</span></td>
+          <td class="num">${rc.w ?? ''}-${rc.l ?? ''}${rc.t ? `-${rc.t}` : ''}</td><td class="num muted">${rc.pf ? Math.round(rc.pf) : ''}</td></tr>`;
+      }).join('');
+      return `<p class="muted lg-note">Ranked by rest-of-season strength: each team's best lineup by our projections for every remaining week through ${ROS.through}, summed (byes, injuries and players coming back included). This week's number in parentheses is its rank. Team defenses and kickers aren't projected.</p>
+        <div class="lg-scroll"><table class="bx lg-tbl lg-rank"><thead><tr><th class="num">#</th><th>Team</th><th class="num">ROS</th><th class="num">vs avg</th><th class="num">This wk</th><th class="num">Record</th><th class="num">PF</th></tr></thead><tbody>${body}</tbody></table></div>`;
+    };
+
     const draw = () => {
       if (!L) return connectView();
       const box = sec.querySelector('.lg-body');
-      box.innerHTML = view === 'lineup' ? lineupView() : view === 'matchup' ? matchupView() : waiversView();
+      box.innerHTML = view === 'lineup' ? lineupView() : view === 'matchup' ? matchupView() : view === 'teams' ? teamsView() : waiversView();
       if (NFLE.ui && NFLE.ui.ready) NFLE.ui.ready.then(() => {});
     };
 
@@ -235,13 +280,13 @@
       sec.innerHTML = `<div class="sec-head"><div><h2>${esc(L.name)}</h2><p>${L.platform === 'sleeper' ? 'Sleeper' : 'ESPN'} · week ${esc(String(L.week))} · ${L.teams.length} teams · our projections under your league's scoring.</p></div></div>
         <div class="lg-top"><label>Your team <select class="lg-team">${L.teams.map(t => `<option value="${esc(t.id)}"${mine && t.id === mine.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
           <button type="button" class="sbtn lg-change">Change league</button></div>
-        <div class="seg lg-seg">${[['lineup', 'Lineup'], ['matchup', 'Matchup'], ['waivers', 'Waivers']].map(([k, l]) => `<button type="button" data-v="${k}" class="${view === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+        <div class="seg lg-seg">${[['lineup', 'Lineup'], ['matchup', 'Matchup'], ['teams', 'Teams'], ['waivers', 'Waivers']].map(([k, l]) => `<button type="button" data-v="${k}" class="${view === k ? 'on' : ''}">${l}</button>`).join('')}</div>
         <div class="lg-body"></div>`;
       sec.querySelector('.lg-team').onchange = e => { mine = L.teams.find(t => t.id === e.target.value); saved.team = mine.id; save(); draw(); };
       sec.querySelector('.lg-change').onclick = () => { saved = null; save(); L = null; connectView(); };
       sec.querySelector('.lg-seg').onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; view = b.dataset.v;
         sec.querySelectorAll('.lg-seg button').forEach(x => x.classList.toggle('on', x === b));
-        if (view === 'waivers' && !ROS) NFLE.load('data/ros.json').then(j => { ROS = j; draw(); }, () => draw()); else draw(); };
+        if ((view === 'waivers' || view === 'teams') && !ROS) NFLE.load('data/ros.json').then(j => { ROS = j; draw(); }, () => draw()); else draw(); };
     };
 
     const open = async s => {

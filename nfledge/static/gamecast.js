@@ -286,7 +286,7 @@
     else if (/punt/i.test(t)) h = `${nm(g('lead'))} punts ${g('punt') || ''} yards${/Touchback/i.test(raw) ? ', touchback' : g('ret') ? `, ${nm(g('ret'))} returns ${pl.statYardage || 0}` : ''}`;
     else if (/kickoff/i.test(t)) h = /Touchback/i.test(raw) ? 'Kickoff, touchback' : `Kickoff: ${nm(g('ret'))} returns it ${pl.statYardage || 0} yards`;
     else if (/field goal/i.test(t)) { const r = g('fg', 2); h = `${g('fg') || ''}-yard field goal, ${/good/i.test(r || t) && !/no good/i.test(r || '') ? 'good' : r && /block/i.test(r) ? 'blocked' : 'no good'}`; cls = /good/i.test(t) ? 'good' : 'bad'; }
-    else if (/penalty/i.test(t)) { const m = raw.match(RX.pen); h = m ? `Penalty, ${m[1]}: ${m[2]}, ${m[3]} yards` : 'Penalty'; cls = 'flag'; }
+    else if (/penalty/i.test(t)) { const m = raw.match(RX.pen); h = m ? `Penalty, ${m[1]}: ${m[2]}, ${m[3]} yards` : 'Penalty'; cls = 'pen'; }  // not 'flag': site.css .flag is a white badge
     else h = t || raw.split('. ')[0];
     if (td) { h += ' · Touchdown'; cls = 'td'; }
     if (pl.isTurnover && cls !== 'bad') cls = 'bad';

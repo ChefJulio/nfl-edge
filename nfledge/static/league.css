@@ -15,3 +15,6 @@ table.lg-tbl td.num, table.lg-tbl th.num { white-space: nowrap; }
 .lg-bar { height: 8px; border-radius: 4px; background: rgba(255,143,132,.35); margin-top: 6px; overflow: hidden; } .lg-bar span { display: block; height: 100%; background: #6fdc8c; }
 .lg-vs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } @media (max-width: 760px) { .lg-vs { grid-template-columns: 1fr; } }
 .lg-tn { font-weight: 800; } .lg-big { font-size: 26px; font-weight: 800; }
+table.lg-rank tr.lg-me td { background: rgba(122,162,255,.10); }
+.lg-you { font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 999px; background: rgba(122,162,255,.2); color: #a9c1ff; }
+table.lg-rank td.good { color: #6fdc8c; } table.lg-rank td.bad { color: #ff8f84; }
