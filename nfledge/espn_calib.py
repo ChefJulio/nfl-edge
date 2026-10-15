@@ -38,7 +38,9 @@ try:  # midweek rulings (owner-approved test 2026-10-15, INSIGHTS sec. 9): a pla
   MIDWEEK = json.loads((HIST.parent / "espn_midweek.json").read_text(encoding="utf-8"))["rates"]
 except (OSError, ValueError, KeyError):
   MIDWEEK = {}
-MIDWEEK_BUCKETS = ("Out", "Out+ret", "IR")
+# Doubtful added 2026-10-15 by owner direction, not a gate (n 71 < 100): 2 of 71 played (official Friday Doubtful
+# 2021-25: 3.8% of 573), vs 22% from the partial-week practice model.
+MIDWEEK_BUCKETS = ("Out", "Out+ret", "IR", "Doubtful")
 RET_DAYS = int(PRIORS.get("ret_days", 7))  # a return date this many days past the game; closer = ESPN's placeholder
 PRIOR_CAP = 50  # past seasons count as at most this many cases, so this season's outcomes can still move a rate
 

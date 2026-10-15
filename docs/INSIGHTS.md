@@ -630,7 +630,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   a game status, or the team has 3 practice days (backtests always see final weeks: unchanged).
   **(c) retest:** ESPN Doubtful on the report, n 67: played 3.0%, new baseline 22.3% (old 41.8%): a real gap
   left, but n < 100: OPEN, revisit when the live ESPN archive (daily from 2026-10-13, with update times) adds
-  ~35 midweek Doubtfuls (pool with Wayback). ESPN Questionable on the report, n 4,690: played 63.2%, new baseline
+  ~35 midweek Doubtfuls (pool with Wayback). **SHIPPED anyway 2026-10-15 by owner direction (not gated):** "Doubtful players almost
+  never play"; every source agrees (official Friday Doubtful 2021-25 3.8% of 573, model 2.2%; ESPN early-week
+  4.2%; midweek 2 of 71). Rate 2.8% in `espn_midweek.json` (`gated: false`). Still recheck on live data. ESPN Questionable on the report, n 4,690: played 63.2%, new baseline
   58.3% (old 75.4%): ESPN's Questionable adds nothing the practice days don't: CLOSED, no rule.
 - **NEXT (owner-approved 2026-10-14): Players > Trends, a play-level query builder.** "Rushing YPC for Ravens
   players in the 4th quarter, 2022-24" -> leaderboard. Design agreed: the query is a sentence of tappable chips

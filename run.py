@@ -229,7 +229,7 @@ def main():
       print(f"[run] ESPN early-week injury news for {len(bridge)} players (official report not out)", flush=True)
     midweek = InjuryModel.build_espn_bridge(data, season, week, feed, midweek=True)
     if midweek:
-      print(f"[run] ESPN midweek Out / IR rulings for {len(midweek)} players (report out, no final status yet)", flush=True)
+      print(f"[run] ESPN midweek Out / Doubtful / IR rulings for {len(midweek)} players (report out, no final status yet)", flush=True)
   out_path = Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week)
   eng, proj = cached_model(data, cfg, scoring, season, week, espn_bridge=bridge,
                            espn_hist=out_path.parent / "data" / "espn_injuries", espn_midweek=midweek)

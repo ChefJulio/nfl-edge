@@ -743,7 +743,8 @@ def inactive_why(r) -> str:
     words = {"D": "DNP", "L": "limited", "F": "full"}
     prac = ", ".join(words.get(c, c) for c in days if c in words)
     what = ("On injured reserve but practicing: designated to return, not yet activated (ESPN)" if r.status.startswith("IR")
-            else "Ruled out after practice started (ESPN, since his last game)")
+            else "Listed Doubtful after practice started (ESPN, since his last game); Doubtful players almost never play"
+            if r.status.startswith("Doubtful") else "Ruled out after practice started (ESPN, since his last game)")
     return what + (f"; practice: {prac}" if prac else "")
   if r.status and r.status.startswith(" (") and getattr(r, "partial_week", False):  # midweek: partial-week model
     words = {"D": "DNP", "L": "limited", "F": "full"}

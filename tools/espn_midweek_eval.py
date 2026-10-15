@@ -169,6 +169,12 @@ if __name__ == "__main__":
   print("[midweek v2] GATE:", "PASS" if ok2 else "FAIL")
   if ok2:  # the shipped rates (nfledge/espn_calib.py MIDWEEK): every on-report row, all seasons
     rates = {b: {"p": round(float(x.played.mean()), 4), "n": int(len(x))} for b, x in O.groupby("bucket")}
+    # Doubtful: owner-directed 2026-10-15, NOT gated (n 68 < 100). Owner: Doubtful players almost never play; every
+    # source agrees (this midweek sample 2 of 68, ESPN early-week 4.2%, official Friday Doubtful 2021-25 3.8% of 573)
+    # while the partial-week practice model gave these players 22%. Same measured-rate treatment as the gated buckets.
+    Dq = midweek_rows(buckets=("Doubtful",))
+    Dq = Dq[Dq.on_report]
+    rates["Doubtful"] = {"p": round(float(Dq.played.mean()), 4), "n": int(len(Dq)), "gated": False}
     out = ROOT / "data" / "history" / "espn_midweek.json"
     out.write_text(json.dumps({"source": "tools/espn_midweek_eval.py (Wayback Wed-Fri captures 2022-24, players on the "
                                          "practice report, Sunday games)", "rates": rates}, indent=1), encoding="utf-8")

@@ -413,7 +413,7 @@ class InjuryModel:
     b = (self.espn_midweek or {}).get(gsis_id)
     if b is None or b not in MIDWEEK or str(game_status) not in ("None", "", "nan"):
       return None
-    return float(MIDWEEK[b]["p"]), "IR (ESPN)" if b == "IR" else "Out (ESPN)"
+    return float(MIDWEEK[b]["p"]), {"IR": "IR (ESPN)", "Doubtful": "Doubtful (ESPN)"}.get(b, "Out (ESPN)")
 
   def availability(self, p: pd.DataFrame, season: int, week: int) -> pd.DataFrame:
     inj = self.data.injuries

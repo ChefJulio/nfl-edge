@@ -614,3 +614,7 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .pr-days .pr-L { color: #f3d38c; background: rgba(224,176,74,.16); }
 .pr-days .pr-D { color: #f59a91; background: rgba(242,120,109,.16); }
 .badges .pr-days:first-child { margin-left: 0; }
+/* team Week tab: the Power box spans the card (was alone in a 2-column grid); wide screens split it in two */
+.tm-grid { grid-template-columns: 1fr; }
+@media (min-width: 760px) { .tm-pwbox { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+  .tm-pwr { padding-top: 22px; } }
