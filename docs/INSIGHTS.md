@@ -629,6 +629,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   runs without it). Gate on IR rows (skill players, k = 1..8): (i) Brier lower than production's chain (step 1 =
   practice estimate, stay 1), 95% bootstrap CI by episode excluding 0, better in both seasons; (ii) IR calibration
   by k-bucket within 5 points. Pass -> ship the hybrid now; the fresh-2026 check above still runs as confirmation.
+  **Result: PASS, SHIPPED 2026-10-15** (`tools/return_hybrid_eval.py`; re-run through the production code in
+  `tools/return_timing_check.py`, identical): IR rows 6,118 / 280 episodes, Brier 0.1727 -> 0.1578 [-0.028, -0.002],
+  2021 0.204 -> 0.179, 2022 0.140 -> 0.136; k 1-2 / 3-4 / 5-8 actual 7.6 / 24.0 / 41.6% vs hybrid 6.5 / 21.8 / 39.2
+  (chain 6.7 / 15.7 / 23.4). Live in `returns.lookahead_availability` for designation ir; also reserve-list players
+  now join lookahead rosters from P >= 0.05 (was 0.5, which left IR players at 0 ROS points).
+  **IR-minimum rule on the chain alone: FAIL** (2023-25 IR rows 0.1356 -> 0.1428, +0.0071 [+0.004, +0.011]): it
+  pushes returns later in a chain that was already late; the rule lives inside the hybrid instead.
 - **IR minimum as a hard rule (owner design: an NFL rule, not a model).** Production's chain with the hazard set
   to 0 while an IR player is short of the minimum (no new features). Ships unless significantly worse: Brier on
   IR rows 2023-25 not worse with a 95% CI excluding a 0.005 loss.

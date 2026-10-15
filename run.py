@@ -186,7 +186,8 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
   }
 
 
-def build_lookahead(eng, data, cfg, scoring, season: int, week: int, site: Path, now_report: dict | None = None):
+def build_lookahead(eng, data, cfg, scoring, season: int, week: int, site: Path, now_report: dict | None = None,
+                    espn_feed=None):
   """Every later week of the season, projected from today's data: real opponents, current ratings and depth
   charts, Vegas lines once posted (else the model's own). Injuries: nothing is known that far out, so everyone on
   the active roster is assumed healthy (IR stays off the roster); no weather. Rebuilt every run, never archived."""
@@ -197,7 +198,12 @@ def build_lookahead(eng, data, cfg, scoring, season: int, week: int, site: Path,
   # Players out injured now: P(active) each later week from the return-timing model; under 50% he sits and his
   # volume is redistributed (same binary rule as the current week); injured-reserve players expected back return.
   # now_report: this week's chance to play for players on its practice report (the chain starts from it)
-  avail, status, extra = returns.lookahead_availability(data, week, weeks, now_report)
+  # IR players: the direct return-timing model (return_timing.py), fed this week's practice and ESPN's live feed
+  g = cfg.get("injuries", {})
+  gb = {"max_iter": int(g.get("gb_iterations", 200)), "learning_rate": float(g.get("gb_learning_rate", 0.05)),
+        "max_depth": int(g.get("gb_max_depth", 3))}
+  avail, status, extra = returns.lookahead_availability(data, week, weeks, now_report, espn_feed=espn_feed,
+                                                        cache_dir=ROOT / cfg["data"]["cache_dir"], gb=gb)
   for w in weeks:
     proj = eng.project_week(season, w, use_injuries=True, quiet=True, avail_override=avail.get(w, {}),
                             status_override=status.get(w, {}), extra_cands=extra.get(w))
@@ -224,7 +230,7 @@ def main():
   print(f"[run] projecting {season} week {week}", flush=True)
 
   # Early-week bridge (nfledge/espn.py, espn_calib.py): the live week only, never --week rebuilds or backtests.
-  bridge, midweek, quest = {}, {}, {}
+  bridge, midweek, quest, feed = {}, {}, {}, None
   if not args.week:
     from nfledge.espn import fetch_injuries
     from nfledge.injuries import InjuryModel
@@ -255,7 +261,7 @@ def main():
   check_script(out)
   if args.lookahead:
     rep = proj[proj.on_report] if "on_report" in proj else proj.iloc[0:0]
-    build_lookahead(eng, data, cfg, scoring, season, week, out.parent, dict(zip(rep.gsis_id, rep.avail)))
+    build_lookahead(eng, data, cfg, scoring, season, week, out.parent, dict(zip(rep.gsis_id, rep.avail)), espn_feed=feed)
   print(f"[run] wrote {out} in {time.time() - t0:.0f}s")
   if args.open:
     webbrowser.open(out.as_uri())

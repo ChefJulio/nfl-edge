@@ -37,11 +37,15 @@ def played_set(data) -> set:
   return played
 
 
-def lookahead_availability(data, current_week: int, weeks: list[int], now_report: dict | None = None) -> tuple[dict, dict, dict]:
+def lookahead_availability(data, current_week: int, weeks: list[int], now_report: dict | None = None,
+                           espn_feed: pd.DataFrame | None = None, cache_dir=None, gb: dict | None = None) -> tuple[dict, dict, dict]:
   """For each lookahead week: {gsis_id: P(active)} and {gsis_id: status text} for players out injured now, plus
   the injured-reserve players expected back that week (to add to the roster). Fit on every injury episode whose
   outcome is known (walk-forward: nothing from the future). now_report: {gsis_id: P(plays this week)} for players
-  on this week's practice report (InjuryModel.availability): the chain starts from it instead of the hazard."""
+  on this week's practice report (InjuryModel.availability): the chain starts from it instead of the hazard.
+  Players on IR use return_timing.py's direct model instead of the chain (pre-registered hybrid, owner-approved
+  2026-10-15), fed this week's practice and ESPN's live status / return date (espn_feed); cache_dir and gb are
+  needed for it (without them every player stays on the chain)."""
   season = data.current_season
   m = ReturnModel(data, played_set(data))
   st = m.states(sorted(data.seasons))
@@ -62,6 +66,26 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
   first = np.array([float(now_report[g]) if (g in now_report and int(nw) == current_week) else np.nan
                     for g, nw in zip(cur.gsis_id, cur.next_week)])
   pa = m.p_active(cur, horizon, first=first, stay=1.0)  # once back, like a healthy player (also 1.0 here)
+  ir_rows = np.where(cur.desig.to_numpy() == "ir")[0]
+  if len(ir_rows) and cache_dir is not None and gb is not None:
+    from . import return_timing as RT
+    seasons = [s_ for s_ in range(RT.FIRST_SEASON, season) if s_ in set(data.seasons)]
+    rt = RT.fit(RT.training_rows(data, m, gb, seasons, cache_dir))
+    prac = pd.concat([data.avail_hist[["season", "week", "gsis_id", "days", "game_status"]],
+                      data.practice[data.practice.season == season][["season", "week", "gsis_id", "days", "game_status"]]
+                      if data.practice is not None else None], ignore_index=True)
+    esp = pd.read_parquet(RT.CAPTURES) if RT.CAPTURES.exists() else pd.DataFrame(columns=["captured", "espn_id", "status", "ret"])
+    if espn_feed is not None and len(espn_feed):  # live: as captured now
+      ret = pd.to_datetime(espn_feed.get("return_date"), errors="coerce", utc=True).dt.tz_convert(None)
+      live = pd.DataFrame({"captured": pd.Timestamp.now().normalize(), "espn_id": espn_feed.espn_id.astype(str),
+                           "status": espn_feed.status, "ret": ret})
+      esp = pd.concat([esp, live], ignore_index=True)
+    # features need his whole season of states (games on IR so far, window opened earlier), then his latest row
+    ids = set(cur.gsis_id.iloc[ir_rows])
+    full = RT.enrich(data, st[(st.season == season) & st.gsis_id.isin(ids)], prac, esp).set_index(["gsis_id", "week"])
+    sub = full.loc[list(zip(cur.gsis_id.iloc[ir_rows], cur.week.iloc[ir_rows]))].reset_index()
+    sub["p_now"] = first[ir_rows]
+    pa[ir_rows, :] = RT.predict(rt, sub, horizon)
   s = data.schedules
   reg = s[(s.season == season) & (s.game_type == "REG")]
   team_weeks = {t: sorted(set(reg[reg.home_team == t].week) | set(reg[reg.away_team == t].week))
@@ -82,7 +106,10 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
       p = float(pa[i, k - 1])
       a[x.gsis_id] = p
       t_[x.gsis_id] = f"{p:.0%} to play"
-      if x.gsis_id in info.index and info.at[x.gsis_id, "status"] == "RES" and p >= 0.5:
+      # a reserve-list player joins that week's roster with his chance to play, like an injured active player: under
+      # 50% he's projected to sit (teammates keep the volume) but his if-active line and chance still count toward
+      # rest-of-season totals (the >= 0.5 cut used before left IR players at 0 ROS points: Achane 2026 wk 6)
+      if x.gsis_id in info.index and info.at[x.gsis_id, "status"] == "RES" and p >= 0.05:
         pos = POS_GROUP.get(str(info.at[x.gsis_id, "position"]), "")
         if pos in ("QB", "RB", "WR", "TE"):
           rows.append({"gsis_id": x.gsis_id, "team": x.team, "pos": pos,
