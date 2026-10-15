@@ -160,6 +160,8 @@
     { key: 'players', label: 'Players', subs: [['rankings', 'Rankings', 'tab-players'], ['stats', 'Stats'], ['roles', 'Roles', 'tab-roles'], ['injuries', 'Injuries'], ['moves', 'Moves'], ['trends', 'Trends']] },
     { key: 'teams', label: 'Teams', subs: [['power', 'Power', 'tab-power'], ['standings', 'Standings'], ['playoffs', 'Playoffs'], ['stats', 'Stats'], ['draft', 'Draft']] },
     { key: 'games', label: 'Games', subs: [['matchups', 'Matchups', 'tab-games']] },
+    // your own fantasy league (Sleeper / public ESPN import; owner 2026-10-15)
+    { key: 'league', label: 'League', subs: [['league', 'My League', 'tab-league']] },
     { key: 'model', label: 'Model', subs: [['model', 'Model', 'tab-model']] },
   ];
   // Client-rendered tabs: section id -> area module (assets/<area>.js + .css), loaded the first time the tab opens.
@@ -168,7 +170,7 @@
                   'tab-players-injuries': 'injuries', 'tab-players': 'rankings', 'tab-teams-draft': 'draft',
                   'tab-teams-playoffs': 'playoffs', 'tab-players-moves': 'moves', 'tab-power': 'power',
                   'tab-games': 'matchups', 'tab-roles': 'roles', 'tab-model': 'model',
-                  'tab-players-trends': 'trends' };
+                  'tab-players-trends': 'trends', 'tab-league': 'league' };
   const ver = (document.currentScript && new URL(document.currentScript.src).search) || '';
   const loaded = {};
   const NFLE = window.NFLE = window.NFLE || {};
@@ -225,11 +227,12 @@
     teams: '<path d="M12 3l7 3v5c0 4.4-3 8-7 10-4-2-7-5.6-7-10V6z"/>',
     games: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
     model: '<path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-6"/>',
+    league: '<path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.5 3.5M17 6h2.5A2.5 2.5 0 0 1 17 9.5M12 13v4M8.5 20h7"/>',
     more: '<circle cx="5.5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18.5" cy="12" r="1.4"/>',
   };
   const svg = k => `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">${ICON[k]}</svg>`;
   const navMode = NAV_MODE;
-  const BOTTOM = NAV.map(p => p.key);  // all four parents fit: no More sheet
+  const BOTTOM = NAV.map(p => p.key);  // all five parents fit: no More sheet
   let bot = null;
   if (navMode === 'bottom') {
     document.documentElement.classList.add('nav-bottom');

@@ -1,0 +1,17 @@
+/* League tab (league.js): import your Sleeper / ESPN league */
+.lg-connect { padding: 16px; max-width: 560px; }
+.lg-form { display: flex; gap: 8px; margin: 8px 0; } .lg-in { flex: 1; min-width: 0; font: inherit; padding: 9px 12px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+.lg-pick { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0; }
+.lg-err { color: #ff8f84; } .lg-hint { margin: 10px 0 0; } .lg-note { font-size: 12px; margin: 8px 2px; }
+.lg-top { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 12px; }
+.lg-top select { font: inherit; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); margin-left: 6px; }
+.lg-seg { margin: 0 0 12px; }
+.lg-h { font-size: 15px; margin: 16px 0 6px; } .lg-h .muted { font-weight: 500; font-size: 13px; margin-left: 6px; }
+.lg-swaps { padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,.05); } .lg-swaps .good, .lg-swaps.good { color: #6fdc8c; }
+table.lg-tbl td.lg-slot { font-size: 11px; font-weight: 800; color: var(--muted); width: 3.5em; }
+table.lg-tbl td.num, table.lg-tbl th.num { white-space: nowrap; }
+.lg-wp { margin: 4px 0 14px; } .lg-wp b { font-size: 24px; }
+.lg-bar { height: 8px; border-radius: 4px; background: rgba(255,143,132,.35); margin-top: 6px; overflow: hidden; } .lg-bar span { display: block; height: 100%; background: #6fdc8c; }
+.lg-vs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } @media (max-width: 760px) { .lg-vs { grid-template-columns: 1fr; } }
+.lg-tn { font-weight: 800; } .lg-big { font-size: 26px; font-weight: 800; }

@@ -95,6 +95,9 @@ jobs:
         run: python tools/standings_build.py --site=site
       # Teams > Stats + Players > Stats data (1999 on). Finished seasons are aggregated once and kept in the cache;
       # the current season is redone when a game goes final.
+      # League tab: Sleeper / ESPN / Yahoo player ids -> ours (+ names), for imported fantasy rosters.
+      - name: Fantasy id map
+        run: python tools/fantasy_ids_build.py --site=site
       - name: Season stats
         run: python tools/stats_build.py --site=site
       # Teams > Draft data (every pick since 1980 with career outcomes; ~2 s).
