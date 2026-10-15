@@ -167,8 +167,8 @@ def pick_logo_bg(url: str, primary: str, secondary: str) -> str:
   import urllib.request
 
   from PIL import Image
-  with urllib.request.urlopen(url, timeout=15) as resp:
-    img = Image.open(io.BytesIO(resp.read())).convert("RGBA").resize((96, 96))
+  with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "nfl-edge-site/1.0"}), timeout=15) as resp:
+    img =Image.open(io.BytesIO(resp.read())).convert("RGBA").resize((96, 96))
   px = [p for p in img.getdata() if p[3] > 128]
   if not px:
     return secondary
@@ -738,6 +738,13 @@ def inactive_why(r) -> str:
   if r.status and r.status.endswith("(ESPN)"):
     return ("ESPN injury news since his last game (this week's official report isn't out yet): "
             + r.status.replace(" (ESPN)", ""))
+  if r.status and "(ESPN)" in r.status:  # midweek ruling (InjuryModel.midweek_ruling): "Out (ESPN) (DF)"
+    days = r.status.rsplit("(", 1)[1].rstrip(")") if r.status.endswith(")") else ""
+    words = {"D": "DNP", "L": "limited", "F": "full"}
+    prac = ", ".join(words.get(c, c) for c in days if c in words)
+    what = ("On injured reserve but practicing: designated to return, not yet activated (ESPN)" if r.status.startswith("IR")
+            else "Ruled out after practice started (ESPN, since his last game)")
+    return what + (f"; practice: {prac}" if prac else "")
   if r.status:
     return "Injury report + practice pattern: " + r.status
   if r.avail < 0.9:

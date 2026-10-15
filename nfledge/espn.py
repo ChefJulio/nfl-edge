@@ -29,7 +29,8 @@ STATUS_MAP = {"Out": "Out", "Injured Reserve": "IR", "Doubtful": "Doubtful"}
 def fetch_injuries(timeout: int = 30) -> pd.DataFrame:
   """One row per listed player (empty frame on any failure)."""
   try:
-    with urllib.request.urlopen(URL, timeout=timeout) as resp:
+    with urllib.request.urlopen(urllib.request.Request(URL, headers={"User-Agent": "nfl-edge-site/1.0"}),
+                                timeout=timeout) as resp:
       feed = json.load(resp)
   except Exception as e:
     print(f"[espn] injury feed unavailable: {e}", flush=True)

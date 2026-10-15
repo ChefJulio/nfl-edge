@@ -527,7 +527,7 @@ def forecast_wind(games: pd.DataFrame) -> pd.Series:
     url = (f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&hourly=wind_speed_10m"
            f"&wind_speed_unit=mph&timezone=America%2FNew_York&start_date={g.gameday}&end_date={g.gameday}")
     try:
-      with urllib.request.urlopen(url, timeout=10) as r:
+      with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "nfl-edge-site/1.0"}), timeout=10) as r:
         speeds = json.loads(r.read())["hourly"]["wind_speed_10m"]
       window = [s for s in speeds[hour:hour + 4] if s is not None]
       out[i] = float(np.mean(window)) if window else np.nan
