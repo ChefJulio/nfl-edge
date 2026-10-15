@@ -1434,39 +1434,6 @@
       }).join('');
     return `<div class="ts-head"><b>${esc(info.away.team)}</b><b>${esc(info.home.team)}</b></div>${rows}`;
   };
-  const boxScore = (sum, info) => {
-    const lines = boxLines(sum), map = byEspn(), w = weights();
-    const nameCell = o => {
-      const pid = map[o.id];
-      return pid ? `<button type="button" class="bx-n" data-pid="${esc(pid)}">${esc(o.short)}</button>` : `<span class="bx-n plain">${esc(o.short)}</span>`;
-    };
-    const fp = o => { const pid = map[o.id], p = pid && DATA.players[pid]; return pts(o.line, w, p ? p.pos : ''); };
-    return [info.away, info.home].map(side => {
-      const mine = Object.values(lines).filter(o => o.team === side.team);
-      const proj = o => { const pid = map[o.id], p = pid && DATA && DATA.players[pid]; return p ? p : null; };
-      const fan = mine.filter(o => proj(o) || fp(o) !== 0).sort((x, y) => fp(y) - fp(x));
-      const fanRows = fan.map(o => {
-        const p = proj(o), s = p ? scaled(p) : null, v = fp(o);
-        const d = s ? v - s.proj : null;
-        return `<tr><td class="bx-who">${nameCell(o)}${p ? ` <span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>` : ''}
-          <div class="bx-line">${esc(statLineText(o))}</div></td><td class="num"><b>${f1(v)}</b></td>
-          <td class="num muted">${s ? f1(s.proj) : ''}</td><td class="num ${d == null ? '' : d >= 0 ? 'good' : 'bad'}">${d == null ? '' : (d >= 0 ? '+' : '') + f1(d)}</td></tr>`;
-      }).join('');
-      const pass = mine.filter(o => o.att).map(o => { const p = proj(o), pl = p && p.proj_line;
-        return `<tr><td>${nameCell(o)}</td><td class="num">${o.comp}/${o.att}</td><td class="num">${f0(o.line[0])}${pl && pl.pass_yd ? ` <small class="muted">/ ${f0(pl.pass_yd)}</small>` : ''}</td><td class="num">${o.line[1]}</td><td class="num">${o.line[2]}</td></tr>`; }).join('');
-      const rush = mine.filter(o => o.car).sort((x, y) => y.line[3] - x.line[3]).map(o => { const p = proj(o), pl = p && p.proj_line;
-        return `<tr><td>${nameCell(o)}</td><td class="num">${o.car}${pl && pl.car ? ` <small class="muted">/ ${f1(pl.car)}</small>` : ''}</td><td class="num">${f0(o.line[3])}${pl && pl.rush_yd ? ` <small class="muted">/ ${f0(pl.rush_yd)}</small>` : ''}</td><td class="num">${o.line[4]}</td></tr>`; }).join('');
-      const rec = mine.filter(o => o.tgt || o.line[5]).sort((x, y) => y.tgt - x.tgt || y.line[6] - x.line[6]).map(o => { const p = proj(o), pl = p && p.proj_line;
-        return `<tr><td>${nameCell(o)}</td><td class="num"><b>${o.tgt}</b>${pl && pl.tgt ? ` <small class="muted">/ ${f1(pl.tgt)}</small>` : ''}</td><td class="num">${o.line[5]}</td><td class="num">${f0(o.line[6])}${pl && pl.rec_yd ? ` <small class="muted">/ ${f0(pl.rec_yd)}</small>` : ''}</td><td class="num">${o.line[7]}</td></tr>`; }).join('');
-      const tbl = (title, head, body) => body ? `<div class="bx-t"><div class="bx-h">${title}</div><table class="bx"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>` : '';
-      return `<div class="bx-team" style="--tc:${esc(side.color)}"><div class="bx-th tm-open" data-tm="${esc(side.team)}">${logo(side.logo, '#111', 20, side.team)}<b>${esc(side.team)}</b></div>
-        ${DATA ? tbl('Fantasy points <small>(your scoring) vs our projection</small>', '<th>Player</th><th class="num">Pts</th><th class="num">Proj</th><th class="num">+/-</th>', fanRows)
-          : tbl('Fantasy points <small>(your scoring)</small>', '<th>Player</th><th class="num">Pts</th><th></th><th></th>', fanRows)}
-        ${tbl('Passing <small>yards / projected</small>', '<th>Player</th><th class="num">C/Att</th><th class="num">Yds</th><th class="num">TD</th><th class="num">Int</th>', pass)}
-        ${tbl('Rushing <small>/ projected</small>', '<th>Player</th><th class="num">Car</th><th class="num">Yds</th><th class="num">TD</th>', rush)}
-        ${tbl('Receiving <small>targets / projected</small>', '<th>Player</th><th class="num">Tgt</th><th class="num">Rec</th><th class="num">Yds</th><th class="num">TD</th>', rec)}</div>`;
-    }).join('');
-  };
   // Drive results from the OFFENSE's side: ESPN's "Interception" on a DAL drive means DAL threw it.
   const driveResult = (d, tm, info, current) => {
     const r = String(d.displayResult || d.result || '');
@@ -1676,9 +1643,15 @@
   const PST_NAME = { passing: 'Passing', rushing: 'Rushing', receiving: 'Receiving', fumbles: 'Fumbles', defensive: 'Defense',
                      interceptions: 'Interceptions', kickReturns: 'Kick returns', puntReturns: 'Punt returns', kicking: 'Kicking', punting: 'Punting' };
   let GSIS_OF = null;  // ESPN id -> gsis, built once from NFLE.ui.ids
-  const playerStats = (sum, info) => {
+  const playerStats = (sum, info, opt = {}) => {
     const P = sum && sum.boxscore && sum.boxscore.players;
-    if (!P || !P.length) return '';
+    if (!P || !P.length) return opt.empty ? `<section class="gcs" id="${opt.id || 'gcPst'}"><h3>${esc(opt.title || 'Player stats')}</h3><p class="muted">${esc(opt.empty)}</p></section>` : '';
+    // owner 2026-10-14: no projection comparisons here, just what happened. Passing, rushing and receiving stay separate
+    // tables (a QB who runs shows in both); each of those rows ends with the player's whole-game fantasy points in the
+    // viewer's scoring, so the same total repeats across his tables.
+    const lines = boxLines(sum), map = byEspn(), w = weights();
+    const FP_CATS = ['passing', 'rushing', 'receiving'];
+    const fpOf = id => { const o = lines[id]; if (!o) return null; const pid = map[id], pp = pid && DATA && DATA.players[pid]; return pts(o.line, w, pp ? pp.pos : ''); };
     const U = NFLE.ui, teams = (DATA && DATA.teams) || {};
     if (!GSIS_OF && U && U.ids && Object.keys(U.ids).length) { GSIS_OF = {}; Object.entries(U.ids).forEach(([g, e]) => { GSIS_OF[e] = g; }); }
     const sides = [info.away, info.home];
@@ -1688,21 +1661,26 @@
       if (!tp) return '';
       const style = teams[side.team] ? NFLE.fmt.rowStyle(teams, side.team) : `--tc:${side.color || '#666'};--tc2:${side.color || '#999'};--tfg:#ffffff`;
       const cats = (tp.statistics || []).filter(c => (c.athletes || []).length).map(c => {
+        const withFp = FP_CATS.includes(c.name);
         const rows = c.athletes.map(a => {
           const id = String(a.athlete.id), pid = GSIS_OF && GSIS_OF[id];
-          const cell = U ? U.player({ name: a.athlete.displayName, team: side.team, espn: id, sub: a.athlete.jersey ? `#${a.athlete.jersey}` : side.team }, teams)
+          const dp = map[id] && DATA && DATA.players[map[id]];
+          const sub = a.athlete.jersey ? `#${a.athlete.jersey}` : '';
+          const cell = U ? U.player({ name: a.athlete.displayName, team: side.team, espn: id, pos: dp ? dp.pos : '', sub }, teams)
             : `<b>${esc(a.athlete.displayName)}</b>`;
-          return `<tr class="teamrow" style="${style}"${pid ? ` data-open-pid="${esc(pid)}"` : ''}><td class="pst-who">${cell}</td>${(a.stats || []).map(v => `<td class="num">${esc(v)}</td>`).join('')}</tr>`;
+          const fp = withFp ? fpOf(id) : null;
+          return `<tr class="teamrow" style="${style}"${pid ? ` data-open-pid="${esc(pid)}"` : ''}><td class="pst-who">${cell}</td>${(a.stats || []).map(v => `<td class="num">${esc(v)}</td>`).join('')}${withFp ? `<td class="num pst-fp"><b>${fp == null ? '' : f1(fp)}</b></td>` : ''}</tr>`;
         }).join('');
-        const tot = (c.totals || []).length ? `<tr class="pst-tot"><td>Team</td>${c.totals.map(v => `<td class="num">${esc(v)}</td>`).join('')}</tr>` : '';
-        const head = (c.labels || []).map((l, i) => `<th class="num" title="${esc((c.descriptions || [])[i] || '')}">${esc(l)}</th>`).join('');
+        const tot = (c.totals || []).length ? `<tr class="pst-tot"><td>Team</td>${c.totals.map(v => `<td class="num">${esc(v)}</td>`).join('')}${withFp ? '<td></td>' : ''}</tr>` : '';
+        const head = (c.labels || []).map((l, i) => `<th class="num" title="${esc((c.descriptions || [])[i] || '')}">${esc(l)}</th>`).join('')
+          + (withFp ? '<th class="num pst-fp" title="Fantasy points for the whole game, your scoring">FP</th>' : '');
         return `<div class="pst-cat"><div class="bx-h">${esc(PST_NAME[c.name] || c.text || c.name)}</div>
           <div class="lg-scroll"><table class="bx tiles pst-tbl"><thead><tr><th>Player</th>${head}</tr></thead><tbody>${rows}${tot}</tbody></table></div></div>`;
       }).join('');
       return `<div class="pst-team" data-pst="${esc(side.team)}"${side.team === pick ? '' : ' hidden'}>${cats || '<p class="muted">No player stats.</p>'}</div>`;
     };
     const seg = `<div class="seg pst-seg" role="tablist">${sides.map(x => `<button type="button" data-pst="${esc(x.team)}" class="${x.team === pick ? 'on' : ''}">${logo(x.logo, '#111', 18, x.team)} ${esc(x.team)}</button>`).join('')}</div>`;
-    return `<section class="gcs" id="gcPst"><h3>Player stats <span class="src">ESPN</span></h3>${seg}${sides.map(block).join('')}</section>`;
+    return `<section class="gcs" id="${opt.id || 'gcPst'}"><h3>${esc(opt.title || 'Player stats')} <span class="src">ESPN</span></h3>${opt.note ? `<p class="gcs-note">${esc(opt.note)}</p>` : ''}${seg}${sides.map(block).join('')}</section>`;
   };
   // ---- Postgame tab: the recap once it's final.
   const postTab = (sum, info, g, ser) => {
@@ -1715,14 +1693,6 @@
       <span class="tm-open${winner === a.team ? ' won' : ''}" data-tm="${esc(a.team)}">${logo(a.logo, '#111', 26, a.team)}<b>${esc(a.team)}</b> ${a.score}</span><span class="muted">${esc(info.detail || 'Final')}</span>
       <span class="tm-open${winner === h.team ? ' won' : ''}" data-tm="${esc(h.team)}">${h.score} <b>${esc(h.team)}</b>${logo(h.logo, '#111', 26, h.team)}</span></div>${call}
       ${GP.canReplay ? '<div class="rp"><button type="button" data-rp="on">Replay this game play by play</button></div>' : ''}</section>`;
-    // Fantasy: what every player we projected actually scored, under the viewer's scoring.
-    const lines = sum ? boxLines(sum) : {}, map = byEspn(), w = weights();
-    const fan = Object.values(lines).map(o => { const pid = map[o.id], p = pid && DATA && DATA.players[pid]; return p ? { o, pid, p, v: pts(o.line, w, p.pos), s: scaled(p) } : null; })
-      .filter(Boolean).sort((x, y) => y.v - x.v);
-    const fanHtml = fan.length ? `<table class="bx"><thead><tr><th>Player</th><th class="num">Pts</th><th class="num">Proj</th><th class="num">+/-</th></tr></thead><tbody>${fan.map(x => { const d = x.v - x.s.proj;
-      return `<tr><td class="bx-who"><button type="button" class="bx-n" data-open-pid="${esc(x.pid)}">${esc(x.p.name)}</button> <span class="posb posb-${esc(x.p.pos)}">${esc(x.p.pos)}</span> <span class="muted">${esc(x.p.team)}</span><div class="bx-line">${esc(statLineText(x.o))}</div></td>
-        <td class="num"><b>${f1(x.v)}</b></td><td class="num muted">${f1(x.s.proj)}</td><td class="num ${d >= 0 ? 'good' : 'bad'}">${d >= 0 ? '+' : ''}${f1(d)}</td></tr>`; }).join('')}</tbody></table>`
-      : '<p class="muted">No projected players in the box score.</p>';
     // Older games: ESPN has no win probability (and before ~2005 no plays), so those sections are left out, and
     // without our week file there are no projections: the box score takes that slot.
     const hasWp = ser.length >= 2;
@@ -1731,9 +1701,7 @@
           <div class="wp-wrap">${wpChart(ser, info, null)}<div class="wp-tip" hidden></div></div></section>
         <section class="gcs"><h3>Turning points</h3><p class="gcs-note">The plays that moved ESPN's win probability the most.</p>
           ${gameLog(sum, info, ser, null, { sort: 'impact', filter: 'all', q: '', limit: 6, note: false })}</section>` : ''}</div>
-      <div class="gc-col">${DATA ? `<section class="gcs"><h3>Fantasy vs our projection <span class="bt-unit">your scoring</span></h3>${fanHtml}</section>`
-        : `<section class="gcs"><h3>Box score</h3>${sum && sum.boxscore && sum.boxscore.players ? boxScore(sum, info) : '<p class="muted">Not available.</p>'}</section>`}
-        <section class="gcs"><h3>Team stats</h3>${sum ? teamStats(sum, info) || '<p class="muted">Not available.</p>' : ''}</section></div></div>
+      <div class="gc-col"><section class="gcs"><h3>Team stats</h3>${sum ? teamStats(sum, info) || '<p class="muted">Not available.</p>' : ''}</section></div></div>
       ${playerStats(sum, info)}`;
   };
   // ESPN unreachable: still show the game from our own week file (Pregame works; final score if we have it).
@@ -1796,8 +1764,7 @@
               : gameLog(sum, info, ser, upto)}</div></section>
         </div>
         <div class="gc-col">
-          <section class="gcs" id="gcBox"><h3>Box score</h3>${rp ? '<p class="gcs-note">Box score shows the final totals during a replay.</p>' : ''}
-            ${sum && sum.boxscore && sum.boxscore.players ? boxScore(sum, info) : '<p class="muted">The box score fills in once the game starts.</p>'}</section>
+          ${playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: rp ? 'Box score shows the final totals during a replay.' : '', empty: 'The box score fills in once the game starts.' })}
           <section class="gcs" id="gcTeam"><h3>Team stats</h3>${sum ? teamStats(sum, info) || '<p class="muted">Not available yet.</p>' : ''}</section>
         </div>
       </div>`;
