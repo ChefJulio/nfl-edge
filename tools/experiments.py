@@ -87,6 +87,7 @@ VARIANTS = {
   "redistribution_0": variant(injuries__redistribution_scale=0.0),
   "redistribution_1": variant(injuries__redistribution_scale=1.0),
   "redist_conserve": variant(injuries__redistribute_conserve=True),
+  "newcomer_05": variant(experiments__newcomer_scale=0.5),
   "ecr_blend_all": variant(experiments__ecr_blend_positions=["QB", "RB", "WR", "TE"]),
   "ecr_blend_none": variant(experiments__ecr_blend_positions=[]),
   # --- previously hand-set, never tested ---

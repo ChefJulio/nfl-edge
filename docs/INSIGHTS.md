@@ -595,6 +595,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   **v1 run DISCARDED (implementation bug):** keyed on the features' `last_team`, which isn't the team of his last
   game: it flagged 13,190 rows (offseason movers all season), ALL MAE +0.086. Re-run with the pre-registered
   definition (no snap for this team before this week; players who have played somewhere), same gate.
+  **Result: PASS, SHIPPED** (config experiments.newcomer_scale = 0.5): ALL -0.002 [-0.004, 0.000], 4/5 seasons
+  better, WR -0.006 [-0.011, -0.002], no position worse; newcomers + same-team same-position teammates MAE -0.009
+  [-0.011, -0.007] (727 first games, 100-190 a season); newcomer bias +0.50 -> +0.42. Live wk 6 check: only the 5
+  teams with a newcomer change (CLE, HOU, IND, SEA, TEN; 355 other players identical); CLE with Judkins out:
+  McLaughlin 2.6 -> 5.5, Estime 8.3 -> 4.1. OPEN: in the backtest ~9k rows on teams WITHOUT a newcomer also moved
+  (mean |0.02|, both directions) and limiting the recompute to newcomer teams didn't remove it (identical results),
+  while the live week shows none: an unexplained backtest-path difference worth tracing.
   Side analyses (owner): first games split by signed that week (113: projected 3.07, scored 1.29 = 42%) vs on the
   roster a week+ earlier (33: 1.65 vs 0.39 = 24%): not a separate effect, both barely contribute. Estime's projection
   (wk 6) = 30% carry share in games he played (2025 NO 46 carries / 5 g, 2024 DEN 76 / 13), carried over as if he

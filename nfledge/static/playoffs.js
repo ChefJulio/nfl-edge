@@ -90,7 +90,7 @@
         }).join('')}</div>`).join('');
         const t = d.track;
         const track = t ? `<details class="howto od-track"><summary>Track record: how these odds did, 2021-2025</summary><div>
-            <p>Odds re-run as of every week of every season (with that week's power ranks and the Vegas lines known then), then checked against what happened. Brier score: lower is better; "base rate" is the score from giving every team the league-wide average chance.</p>
+            <p>Odds re-run as of every week of every season (with that week's power ranks and the Vegas lines known then), then checked against what happened. Brier score: the average squared miss between the odds and what happened (0 would be perfect); "base rate" is the score from giving every team the league-wide average chance.</p>
             <table class="bx od-tt"><thead><tr><th></th><th class="num">Brier</th><th class="num">Base rate</th></tr></thead><tbody>
             ${[['playoffs', 'Make playoffs'], ['div', 'Win division'], ['bye', 'First-round bye'], ['title', 'Win Super Bowl']].map(([k, l]) => `<tr><td>${l}</td><td class="num">${t.brier[k].model.toFixed(3)}</td><td class="num">${t.brier[k].base_rate.toFixed(3)}</td></tr>`).join('')}
             </tbody></table>

@@ -203,6 +203,47 @@ class Engine:
     s = self.data.schedules
     return s[(s.season == season) & (s.week == week) & (s.game_type == "REG")].copy()
 
+  def _newcomers(self, p: pd.DataFrame, scale: float, wind, season: int, week: int) -> pd.DataFrame:
+    """EXPERIMENT (experiments.newcomer_scale; pre-registered 2026-10-15): a RB / WR / TE in his first game for a team
+    (no snap for it before this week, any season) gets `scale` x his projected targets and carries (mid-season movers'
+    first games came in at ~40% of projection, 2021-25); the removed volume goes to same-position teammates who are
+    projected to play, in proportion to their own. (v1 keyed on the features' last_team, which isn't 'team of his last
+    game': it flagged 13k rows, whole seasons of offseason movers; that run was discarded.)"""
+    p = p.copy()
+    if not hasattr(self, "_first_game"):
+      sn = self.data.snaps.dropna(subset=["gsis_id"])
+      sn = sn[(sn.offense_snaps.fillna(0) + sn.defense_snaps.fillna(0) + sn.st_snaps.fillna(0)) > 0]
+      sn = sn.assign(team=team_name_fix(sn.team), k=sn.season * 100 + sn.week)
+      self._first_game = sn.groupby(["gsis_id", "team"]).k.min().to_dict()
+    now = season * 100 + week
+    first = [self._first_game.get((g, t)) for g, t in zip(p.gsis_id, p.team.astype(str))]
+    new = pd.Series([f is None or f >= now for f in first], index=p.index) & p.pos.isin(["RB", "WR", "TE"])
+    new &= p.gsis_id.isin(set(g for g, _ in self._first_game))  # someone who has played somewhere (not a rookie debut)
+    if not new.any():
+      return p
+    for v in ("tgt", "carries"):
+      cut = (p[v] * (1 - scale)).where(new, 0.0)
+      p.loc[new, v] = p.loc[new, v] * scale
+      if v == "carries":
+        p.loc[new, "rush"] = p.loc[new, "rush"] - cut[new]
+      for (team, pos), c in cut[new].groupby([p.team[new], p.pos[new]]):
+        mates = p.index[(p.team == team) & (p.pos == pos) & ~new & ~p.get("sits", pd.Series(False, index=p.index)).astype(bool)]
+        base = p.loc[mates, v]
+        if len(mates) and base.sum() > 0:
+          add = c.sum() * base / base.sum()
+          p.loc[mates, v] = base + add
+          if v == "carries":
+            p.loc[mates, "rush"] = p.loc[mates, "rush"] + add
+    # recompute only the teams with a newcomer: a second stats_from_volume pass isn't exactly idempotent (rows on
+    # untouched teams moved ~0.02 pts), so everyone else keeps his row as it was
+    aff = p.team.isin(set(p.team[new]))
+    redo = self.pm.stats_from_volume(p[aff], wind)
+    p = p.copy()
+    for col in redo.columns:
+      if col in p.columns:
+        p.loc[aff, col] = redo[col].to_numpy()
+    return p
+
   def candidates(self, season: int, week: int) -> pd.DataFrame:
     r = self.data.rosters
     r = r[(r.season == season) & r.gsis_id.notna() & (r.week <= week)].copy()
@@ -252,6 +293,9 @@ class Engine:
     p["if_sits_gain"], p["if_sits_name"] = 0.0, ""
     if use_injuries and self.injury_model is not None:
       p = self.injury_model.apply(p, season, week, wind, avail_override, status_override)
+    nf = float(self.cfg.get("experiments", {}).get("newcomer_scale", 1.0))
+    if nf < 1.0:  # EXPERIMENT (experiments.newcomer_scale): first game for a new team, after who sits is settled
+      p = self._newcomers(p, nf, wind, season, week)
     p = self._normalize_shares(p, wind)
     p["proj_neutral"] = self.pm.stats_from_volume(p, wind, neutral=True).proj
     p["matchup_pct"] = p.proj / p.proj_neutral.clip(lower=0.5) - 1

@@ -63,13 +63,15 @@ RATES_V2 = {
          ("btk", "btk", "touch"), ("snap", "snap_pct", "games")],
 }
 RATES_V2["TE"] = RATES_V2["WR"]
-LABEL = {"epa_db": "EPA / dropback", "succ_db": "Success rate", "cpoe": "CPOE", "sack_rate": "Sack rate (lower is better)",
-         "int_rate": "INT rate (lower is better)", "adot": "Depth of target", "db_pg": "Dropbacks / game",
+# Lower-is-better rates are flipped into percentiles (99 = fewest); the card says once that high / green is good for
+# every bar (owner 2026-10-15), so the labels stay plain.
+LABEL = {"epa_db": "EPA / dropback", "succ_db": "Success rate", "cpoe": "CPOE", "sack_rate": "Sack rate",
+         "int_rate": "INT rate", "adot": "Depth of target", "db_pg": "Dropbacks / game",
          "rush_epa_pg": "Rushing EPA / game", "rush_epa": "EPA / rush", "rush_succ": "Rush success rate", "ypc": "Yards / carry",
          "x10": "10+ yard run rate", "yaco": "Yards after contact per carry", "btk": "Broken tackles per touch", "car_pg": "Carries / game",
          "tgt_pg": "Targets / game", "rec_epa": "EPA / target", "yacoe": "YAC over expected", "snap": "Snap share",
          "rec_succ": "Target success rate", "croe": "Catch rate over expected", "tgt_share": "Target share",
-         "ay_share": "Air-yards share", "drop": "Drop rate (lower is better)", "age": "Age", "draft": "Draft capital",
+         "ay_share": "Air-yards share", "drop": "Drop rate", "age": "Age", "draft": "Draft capital",
          "value": "EPA over replacement / game", "ryoe": "Rush yards over expected", "sep": "Separation",
          "ngs_yacoe": "YAC over expected (tracking)", "rush_yd_pg": "Rushing yards / game"}
 

@@ -154,6 +154,11 @@ ecr_blend_positions = ["RB", "WR", "TE"]
 # carry most of it (targets alone within noise); full strength over-corrects.
 share_normalize_carries = 0.7
 share_normalize_tgt = 0.3
+# A RB / WR / TE in his first game for a team (no snap for it before) gets half his projected targets and carries; the
+# rest goes to same-position teammates who play. Mid-season movers' first games came in at ~40% of projection.
+# Walk-forward 2021-25 (pre-registered, owner 2026-10-15): newcomers + teammates MAE -0.009 [-0.011, -0.007],
+# overall -0.002 [-0.004, 0.000], no position worse (WR -0.006).
+newcomer_scale = 0.5
 
 [injuries]
 # Fraction of the learned vacated-volume redistribution applied. Backtest: helps RB, slightly hurts WR;
