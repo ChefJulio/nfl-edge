@@ -588,6 +588,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   (`tools/experiments.py baseline,redist_conserve`). Gate: (i) on rows whose projection changes by > 0.05 pts, MAE
   lower with a 95% CI over season-weeks excluding 0; (ii) overall MAE not worse (CI upper < +0.003); (iii) no
   position significantly worse overall. Bias on affected rows reported.
+  **Result: FAIL, not shipped** (switch stays off). Overall ALL +0.001 [-0.001, +0.003], no position different;
+  affected rows (1,767) MAE 4.472 -> 4.508 (+0.035 [+0.020, +0.049]), bias -0.09 -> +0.06; the 32 rows boosted 1+
+  pts: MAE 4.97 -> 5.46, bias -0.98 -> +0.73. Full conservation overshoots: a sitting starter's work doesn't all
+  reach the teammates we project (call-ups, fullbacks, QB runs, and the offense itself shifts). The answer to the
+  owner's question: the backup's jump is real but smaller than one-for-one; the current 0.5 strength sits nearer the
+  truth (-1.0 under vs +0.7 over). Shipped instead: both worlds shown (backup's projection if the starter plays /
+  sits) and a game-time call in the League lineup.
 - **Redistribution: KEPT (2026-10-15, owner delegated the call).** By boost size (2021-25 backtest, all players):
   1,444 rows with a < 0.5 pt boost (MAE with 3.94 / without 3.90) and 99 at 0.5-1.5 (4.95 / 4.82) are noise; the
   12 rows with 1.5+ pts (a backup taking a starter's role: actual 9.4, projected 7.7 with / 5.7 without; bias -2.1
