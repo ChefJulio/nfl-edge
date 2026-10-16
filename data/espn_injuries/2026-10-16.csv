@@ -528,7 +528,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686772,Christian Gonzalez,New England Patriots,Active,2026-10-15T23:25Z,,,,,,Gonzalez (shoulder) was a full participant in Thursday's practice.
 4240042,Cory Durden,New England Patriots,Questionable,2026-10-15T20:39Z,Illness,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4432710,TreVeyon Henderson,New England Patriots,Questionable,2026-10-15T20:29Z,Ankle,Sprain,Right,2026-10-18,QUESTIONABLE,"Henderson (ankle) remained limited at Thursday's practice, Mark Daniels of MassLive reports."
-4047646,A.J. Brown,New England Patriots,Injured Reserve,2026-10-15T20:24Z,Ankle,Sprain,Right,2026-10-18,IR-R,"Brown (ankle) was a limited participant at Thursday's practice, Mark Daniels of MassLive reports."
+4047646,A.J. Brown,New England Patriots,Injured Reserve,2026-10-15T17:43Z,Ankle,Sprain,Right,2026-10-18,IR-R,"Brown (ankle) said Thursday that it's ""up in the air"" whether he'll be available for Sunday's game against the Jets, and that the decision ultimately will be made by head coach Mike Vrabel, Evan Lazar of the Patriots' official site reports."
 4565293,Marcus Bryant,New England Patriots,Injured Reserve,2026-10-15T00:55Z,Ankle,Not Specified,Not Specified,2026-10-18,IR-R,The Patriots opened the 21-day practice window Wednesday for Bryant (ankle) to return from injured reserve.
 4368113,Charles Woods,New England Patriots,Questionable,2026-10-14T23:50Z,Shoulder,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Woods (shoulder) was a limited participant in Wednesday's practice.
 3915525,Dre'Mont Jones,New England Patriots,Questionable,2026-10-14T23:45Z,Shoulder,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Jones (shoulder) was a limited participant in Wednesday's practice.
@@ -699,6 +699,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3040151,George Kittle,San Francisco 49ers,Active,2026-10-12T01:06Z,,,,,,Kittle (illness) caught five of six targets for 24 yards in Sunday's 32-29 win over the Seahawks.
 4361741,Brock Purdy,San Francisco 49ers,Active,2026-10-12T01:04Z,,,,,,"Purdy completed 19 of 29 passes for 189 yards, two touchdowns and one interception in Sunday's 32-29 win over the Seahawks. He also rushed five times for six yards and threw a successful two-point conversion."
 3117251,Christian McCaffrey,San Francisco 49ers,Active,2026-10-12T00:25Z,,,,,,McCaffrey rushed 11 times for 68 yards and a touchdown while catching all three of his targets for 15 yards in Sunday's 32-29 win over the Seahawks.
+4429835,George Holani,Seattle Seahawks,Active,2026-10-16T05:19Z,,,,,,Holani rushed five times for 20 yards and a touchdown in the Seahawks' 17-14 overtime loss to the Broncos on Thursday.
+4032473,Rashid Shaheed,Seattle Seahawks,Active,2026-10-16T05:13Z,,,,,,"Shaheed brought in five of eight targets for 66 yards, rushed once for two yards, returned three kickoffs for 77 yards and ran back three punts for 39 yards in the Seahawks' 17-14 overtime loss to the Broncos on Thursday. He also caught a two-point conversion pass and committed two fumbles, recoveri"
 3912547,Sam Darnold,Seattle Seahawks,Active,2026-10-16T04:17Z,,,,,,Darnold completed 27 of 51 passes for 278 yards with no touchdowns and two interceptions and rushed twice for 19 yards in the Seahawks' 17-14 overtime loss to the Broncos on Thursday. He also threw a two-point conversion pass.
 4678006,Elijah Arroyo,Seattle Seahawks,Questionable,2026-10-16T04:10Z,Shoulder,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4887558,Emanuel Wilson,Seattle Seahawks,Active,2026-10-16T04:08Z,,,,,,Wilson rushed 14 times for 52 yards and failed to bring in his only target in the Seahawks' 17-14 overtime loss to the Broncos on Thursday.
@@ -718,9 +720,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426385,Zach Charbonnet,Seattle Seahawks,Out,2026-10-14T22:14Z,Knee - ACL,Surgery,Left,2026-10-25,PUP-R,"Charbonnet (knee) has been ruled out for Thursday's game at Denver, Corbin K. Smith of EmeraldCitySpectrum.com reports."
 2977187,Cooper Kupp,Seattle Seahawks,Active,2026-10-14T02:20Z,,,,,,Kupp caught two of three passes for 15 yards during Sunday's 32-29 loss to the 49ers.
 4592823,Beau Stephens,Seattle Seahawks,Active,2026-10-14T00:01Z,,,,,,
-4429835,George Holani,Seattle Seahawks,Active,2026-10-13T02:04Z,,,,,,Holani rushed four times for seven yards and lost a fumble while reeling in all four of his targets for 24 yards during Sunday's 32-29 loss to the 49ers.
 4597703,Tory Horton,Seattle Seahawks,Active,2026-10-13T01:33Z,,,,,,Horton did not draw any targets during Sunday's 32-29 loss versus the 49ers.
-4032473,Rashid Shaheed,Seattle Seahawks,Active,2026-10-13T00:57Z,,,,,,Shaheed caught two of four targets for 23 yards while also adding 86 kickoff-return yards during Sunday's 32-29 loss to the 49ers.
 4576297,AJ Barner,Seattle Seahawks,Active,2026-10-13T00:53Z,,,,,,Barner caught three of five targets for 20 yards during Sunday's 32-29 loss versus the 49ers.
 4569547,Nick Kallerup,Seattle Seahawks,Active,2026-10-12T19:38Z,,,,,,
 2473037,Jason Myers,Seattle Seahawks,Active,2026-10-12T16:59Z,,,,,,"Myers made all seven of his kicks (five field goals, two extra points) during the Seahawks' 32-29 loss to the 49ers on Sunday."
