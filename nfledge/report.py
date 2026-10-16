@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 import html
 import json
+import re
 import math
 import os
 from pathlib import Path
@@ -531,8 +532,9 @@ HEADSHOT_CROP = "c_thumb,g_face,z_0.75,w_160,h_160,f_auto,q_auto"
 def headshot_url(url: str) -> str:
   """The NFL image server's face-centered 160x160 crop of a headshot: sharp at small sizes on retina screens, and
   ~13 KB instead of the ~4 MB original the roster link points at."""
-  url = str(url or "")
-  return url.replace("/upload/f_auto,q_auto/", f"/upload/{HEADSHOT_CROP}/") if "/upload/" in url else url
+  # some headshots live under /image/private/ (Deshaun Watson's full 141 KB original was loading on every page,
+  # Lighthouse 2026-10-16); the crop works there too
+  return re.sub(r"/(upload|private)/f_auto,q_auto/", rf"/\1/{HEADSHOT_CROP}/", str(url or ""))
 
 
 def headshots(rosters: pd.DataFrame | None, season: int) -> dict:

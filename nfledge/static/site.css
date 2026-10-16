@@ -385,7 +385,7 @@ table.power .sub { display: block; margin-top: 2px; font-size: 11px; }
 .doc td, .doc th { padding: 6px 12px; font-variant-numeric: tabular-nums; }
 .doc tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--panel2) 60%, transparent); }
 div.stale { margin: 0 0 14px; padding: 10px 14px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--warn) 50%, var(--line)); color: var(--warn); background: color-mix(in srgb, var(--warn) 8%, var(--panel)); font-size: 13px; font-weight: 600; }
-footer { color: var(--faint); font-size: 12px; padding: 0 0 36px; }
+footer { color: #7e8793; font-size: 12px; padding: 0 0 36px; }
 /* header pieces shell.js fills in (hidden until then) */
 .hinfo-w[hidden], .wk-tag[hidden], .wk-now[hidden], p.archived[hidden] { display: none; }
 /* Rankings > Rest of season: mode switch and the weekly strip */

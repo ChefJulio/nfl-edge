@@ -40,7 +40,7 @@
     if (!rosOk) mode = 'week';
 
     // -- markup -----------------------------------------------------------------------------------------------
-    sec.innerHTML = `<div class="seg rk-mode" role="tablist"><button type="button" data-mode="week">Weekly</button><button type="button" data-mode="ros">Rest of season</button></div>
+    sec.innerHTML = `<div class="seg rk-mode" role="tablist"><button type="button" role="tab" data-mode="week">Weekly</button><button type="button" role="tab" data-mode="ros">Rest of season</button></div>
       <div class="sec-head rk-h-week"><div><h2>Weekly rankings</h2><p><span id="scoreSub">Half-PPR</span> projections if active, with realistic ranges. Tap a player for his page.</p></div></div>
       <div class="sec-head rk-h-ros" hidden><div><h2>Rest-of-season rankings</h2><p><span class="rosSub">Half-PPR</span> points expected from now through week 17, each game weighted by his chance to play. Tap a player for his page.</p></div></div>
       <details class="howto rk-h-ros" hidden><summary>How to read</summary><div>

@@ -845,11 +845,11 @@
   // for QBs, how often he scrambles. All current, like the rest of the header.
   // NFL headshots come as ~4 MB originals; the image server's face crop is sharp at card size and ~13 KB
   // (player logs already store the cropped URL; this also covers older log files).
-  const faceCrop = u => u.replace('/upload/f_auto,q_auto/', '/upload/c_thumb,g_face,z_0.75,w_160,h_160,f_auto,q_auto/');
+  const faceCrop = u => u.replace(/\/(upload|private)\/f_auto,q_auto\//, '/$1/c_thumb,g_face,z_0.75,w_160,h_160,f_auto,q_auto/');
   // the full-size headshot for the tap-to-zoom view (owner 2026-10-15): NFL's original upload, else ESPN's full PNG
   const photoBig = (L, espn) => (L && L.bio && L.bio.photo ? L.bio.photo : '') || (espn ? `https://a.espncdn.com/i/headshots/nfl/players/full/${encodeURIComponent(espn)}.png` : '');
   // NFL image-service URLs carry their crop / size in the path: drop it for the original upload
-  const uncrop = u => String(u || '').replace(/\/upload\/[^/]*c_thumb[^/]*\//, '/upload/f_auto,q_auto,w_1000/');
+  const uncrop = u => String(u || '').replace(/\/(upload|private)\/[^/]*c_thumb[^/]*\//, '/$1/f_auto,q_auto,w_1000/');
   const photoUrl = (L, espn) => (L && L.bio && L.bio.photo ? faceCrop(L.bio.photo) : '')
     || (espn ? `https://a.espncdn.com/i/headshots/nfl/players/full/${encodeURIComponent(espn)}.png` : '');
   // Profile box under the header (current, like the header): bio, draft slot, and the current contract
@@ -1259,7 +1259,7 @@
         ${rows.map(([g, n, pl]) => { const up = pl.filter(x => !x[3]), hurt = pl.filter(x => x[3]);
           return `<div class="dc-row"><span class="dc-pos" title="${esc(GRP_NAME[g] || g)}">${esc(g)}</span><span class="dc-pl">${up.map(([pi, pct, tag], i) => who([pi, 0, tag], i, pct, i < n)).join('')}${hurt.map(([pi, pct, tag], i) => who([pi, 0, tag], i, pct, false, true)).join('')}</span></div>`; }).join('')}</div>` : '';
     };
-    const seg = W.u ? `<div class="seg dc-mode" role="tablist"><button type="button" data-dm="use" class="${mode === 'use' ? 'on' : ''}">Playing time</button><button type="button" data-dm="list" class="${mode === 'list' ? 'on' : ''}">Listed chart</button></div>` : '';
+    const seg = W.u ? `<div class="seg dc-mode" role="tablist"><button type="button" role="tab" data-dm="use" class="${mode === 'use' ? 'on' : ''}">Playing time</button><button type="button" role="tab" data-dm="list" class="${mode === 'list' ? 'on' : ''}">Listed chart</button></div>` : '';
     const tags = liveWk ? "ESPN's injury list, updated daily" : "that week's injury report (O / D / Q) or reserve list (IR, PUP, NFI, SUSP, HOLD = did not report)";
     const listedName = sel.s >= 2025 ? "ESPN's depth chart" : "The team's depth chart";
     const body = mode === 'use'
@@ -1515,7 +1515,7 @@
       <div class="pc-head" style="--tc:${esc(info.color || '#666')}"><span class="pc-logo-z" data-zoom="${esc(info.logo ? logoSrc(info.logo, 500) : '')}" role="button" tabindex="0" aria-label="Show a bigger logo">${tLogo(abbr, 34)}</span>
         <div class="pc-id"><h3 id="pcName">${esc(info.name || abbr)}</h3>
           <div class="pc-meta"><b>${esc((L && (L.seasons.find(s => s.s === L.cur) || {}).rec) || '')}</b>${info.division ? ` <span class="muted">${esc(info.division)}</span>` : ''}</div></div></div>
-      <div class="seg pc-tabs" role="tablist">${[['ov', 'Week'], ['log', 'Game log'], ['pl', 'Players'], ['dc', 'Depth'], ['po', 'Playoffs']].map(([k, l]) => `<button type="button" data-tt="${k}" class="${teamTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="seg pc-tabs" role="tablist">${[['ov', 'Week'], ['log', 'Game log'], ['pl', 'Players'], ['dc', 'Depth'], ['po', 'Playoffs']].map(([k, l]) => `<button type="button" role="tab" data-tt="${k}" class="${teamTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       <div class="pc-tab" data-tt="ov"${teamTab === 'ov' ? '' : ' hidden'}>${pickerHtml()}${wk.html}<div class="tm-season">${L ? teamSeasonBox(L) : ''}</div><div class="tm-pen"></div></div>
       <div class="pc-tab" data-tt="log"${teamTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every game since 1999</div><div class="tm-log">${L ? teamLogHtml(L, abbr) : '<p class="pc-sub">Loading game log&hellip;</p>'}</div></div></div>
       <div class="pc-tab" data-tt="pl"${teamTab === 'pl' ? '' : ' hidden'}>${pickerHtml()}${d ? `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
@@ -2029,7 +2029,7 @@
       }).join('');
       return `<div class="pst-team" data-pst="${esc(side.team)}"${side.team === pick ? '' : ' hidden'}>${cats || '<p class="muted">No player stats.</p>'}</div>`;
     };
-    const seg = `<div class="seg pst-seg" role="tablist">${sides.map(x => `<button type="button" data-pst="${esc(x.team)}" class="${x.team === pick ? 'on' : ''}">${logo(x.logo, '#111', 18, x.team)} ${esc(x.team)}</button>`).join('')}</div>`;
+    const seg = `<div class="seg pst-seg" role="tablist">${sides.map(x => `<button type="button" role="tab" data-pst="${esc(x.team)}" class="${x.team === pick ? 'on' : ''}">${logo(x.logo, '#111', 18, x.team)} ${esc(x.team)}</button>`).join('')}</div>`;
     return `<section class="gcs" id="${opt.id || 'gcPst'}"><h3>${esc(opt.title || 'Player stats')} <span class="src">ESPN</span></h3>${opt.note ? `<p class="gcs-note">${esc(opt.note)}</p>` : ''}${seg}${sides.map(block).join('')}</section>`;
   };
   // ---- Postgame tab: the recap once it's final.
