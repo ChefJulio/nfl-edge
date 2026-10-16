@@ -1849,3 +1849,15 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   (sacks / scrambles in the dropback denominator vs pass yards). Training on full games only would condition on the
   outcome (early exits have low yards per dropback), so it is NOT the fix. Next: compare in-sample (training rows)
   vs test bias by row type to locate (a)-(c).
+  **Located (same day): the fixed wind penalty drives most of it.** QB scored rows by penalty applied: none (1,612)
+  pass yds +7.5, ypd 6.51 actual vs 6.30 projected; 0-5% (72) +8.0; 5-10% (134) +16.0; 10-20% (104) +18.5; 20%+
+  (70) +31.7, ypd 5.92 vs 4.82 (real passing drops ~9% at ~20 mph, the projection 23%). Penalized rows miss more than
+  unpenalized in all 6 seasons. Undoing the penalty on penalized rows (all relevant positions, 2,495): MAE worse at
+  every position (ALL +0.155 [+0.092, +0.218]; WR +0.253, TE +0.169, RB +0.066, all CI > 0; QB +0.081 [-0.148,
+  +0.308]), so the penalty earns its place for MAE; bias: receivers right (WR -0.07 with it, -1.09 without), QBs
+  over-penalized (+0.66 with, -1.00 without; zero near 60% strength). The penalty was grid-tuned on all positions'
+  MAE (sec. 3), which receivers dominate. NOT tested: a QB-only strength would be picked after looking at 2021-26,
+  and the MAE effect on ~380 windy QB rows is far below what an interval that wide can show (thread 8 power). Also
+  standing: backtests feed the game's recorded wind (pbp, data.py game_wind) while live builds feed an Open-Meteo
+  forecast mean (data.forecast_wind) - the penalty was tuned on the former; the live-input archive (thread 1) is the
+  way to measure how the two compare. The +7.5 yds with no penalty stays open ((a)-(c) above).
