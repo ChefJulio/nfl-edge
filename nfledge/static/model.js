@@ -62,10 +62,42 @@
       NFLE.load('data/model.json').then(m => {
         // m.html is our own build's rendering of MODEL.md (trusted, same origin): inserted as HTML on purpose
         body.innerHTML = `${m.stale ? '<div class="stale">This description may be out of date: the model code or configuration changed after it was last reviewed.</div>' : ''}
-          <div class="doc-layout"><nav class="toc">${m.toc.map(h => `<a href="#${esc(h.id)}">${esc(h.title)}</a>`).join('')}${m.avail ? '<a href="#avail-record">How accurate is our inactive %?</a>' : ''}${m.track ? '<a href="#track-record">How often favorites win</a>' : ''}</nav>
-          <article class="card card-pad doc">${m.html}${avail(m.avail)}${track(m.track)}</article></div>`;
-        // table-of-contents links scroll within the page (the hash is the router's)
-        body.querySelector('.toc').addEventListener('click', e => {
+          <div class="seg md-areas" role="tablist"></div>
+          <div class="doc-layout"><nav class="toc"></nav><article class="card card-pad doc">${m.html}</article></div>`;
+        // One area at a time (owner 2026-10-16: explanations split by what we compute): each "## " section of MODEL.md
+        // is an area; its track record goes inside it; the desktop side list shows the open area's subsections.
+        const art = body.querySelector('article'), toc = body.querySelector('.toc'), bar = body.querySelector('.md-areas');
+        const areas = [];
+        let cur = null;
+        [...art.childNodes].forEach(n => {
+          if (n.nodeType === 1 && n.tagName === 'H2') {
+            cur = document.createElement('div');
+            cur.className = 'md-area';
+            cur.dataset.title = n.textContent.trim();
+            art.insertBefore(cur, n);
+            areas.push(cur);
+          }
+          if (cur) cur.appendChild(n); else if (n.nodeType === 1 && n.tagName === 'H1') n.remove();
+        });
+        const place = (re, html) => { if (html) (areas.find(a => re.test(a.dataset.title)) || areas[areas.length - 1]).insertAdjacentHTML('beforeend', html); };
+        place(/inactive|availability/i, avail(m.avail));
+        place(/^games|game lines/i, track(m.track));
+        let saved = null;
+        try { saved = sessionStorage.getItem('nfle-model-area'); } catch (e) { /* private mode */ }
+        const show = title => {
+          const a = areas.find(x => x.dataset.title === title) || areas[0];
+          if (!a) return;
+          areas.forEach(x => { x.hidden = x !== a; });
+          bar.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.t === a.dataset.title));
+          a.querySelectorAll('h3').forEach((h, i) => { if (!h.id) h.id = `ma-${areas.indexOf(a)}-${i}`; });
+          toc.innerHTML = [...a.querySelectorAll('h3')].map(h => `<a href="#${esc(h.id)}">${esc(h.textContent)}</a>`).join('');
+          try { sessionStorage.setItem('nfle-model-area', a.dataset.title); } catch (e) { /* private mode */ }
+        };
+        bar.innerHTML = areas.map(a => `<button type="button" role="tab" data-t="${esc(a.dataset.title)}">${esc(a.dataset.title.replace(/^\d+\.\s*/, ''))}</button>`).join('');
+        bar.addEventListener('click', e => { const b = e.target.closest('button[data-t]'); if (b) { show(b.dataset.t); window.scrollTo({ top: sec.offsetTop - 60 }); } });
+        show(saved);
+        // side-list links scroll within the page (the hash is the router's)
+        toc.addEventListener('click', e => {
           const a = e.target.closest('a[href^="#"]'); if (!a) return;
           e.preventDefault();
           const t = document.getElementById(a.getAttribute('href').slice(1)); if (t) t.scrollIntoView({ behavior: 'smooth' });

@@ -945,7 +945,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   - nflverse xpass runs high (2024 league pass_oe -1.7%): read PROE against the league column.
   - Coverage is measured, not hand-listed: index.json `cov`; trends.js drops uncovered seasons and says so.
   - Not built: QB sneak (is_qb_sneak), penalties, defenders' names from participation, drives.
-- **RESULT (charting A/B): all four variants null** (croe / yacoe / cpoe / oe_all: |d MAE| <= 0.001 at every
+- **RESULT {#charting-ab} (charting A/B): all four variants null** (croe / yacoe / cpoe / oe_all: |d MAE| <= 0.001 at every
   position, every CI spans 0, no season pattern). Left off. Run crashed once on a half-written cache parquet (fixed:
   atomic Cache writes).
 - **PRE-REGISTERED 2026-10-14 (before any run): charting stats in projections.** Variants croe (catches over
@@ -976,7 +976,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   95/90/99/87; G. Wilson 77-93; leaders read right. Lesson: three rounds of "skill" metrics (EPA, learned ridge,
   NGS) each produced cases the owner rightly called absurd; output is what people judge players by, and it is
   also the most stable. The EPA / RYOE / catchable work below now powers only the stat bars.
-- **RESULT: RB via NGS RYOE + catchable-ball attribution -> superseded by output.** Face check passed: Bijan 2023 43 > Allgeier 39
+- **RESULT {#rb-ryoe}: RB via NGS RYOE + catchable-ball attribution -> superseded by output.** Face check passed: Bijan 2023 43 > Allgeier 39
   (was 24 / 32); Saquon 2022-25 58 / 76 / 97 / 34 (was 18 / 9 / 94 / 9); leaders read right (2023 RB CMC, Conner,
   Hall, Cook; WR Aiyuk, Deebo, Metcalf; TE Kittle, LaPorta, Andrews; 2025 RB Bijan, Cook, Henry, Achane, Gibbs).
   Guardrails (next-season fantasy pts/g, season-only grade): RB +0.021 [-0.092, +0.129], WR -0.033 [-0.087,
@@ -991,7 +991,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Allgeier 2023; Saquon 2022 / 2024 / 2025 not bottom-quartile; workhorse stars top half) and (b) guardrail: RB
   rank corr. of season-only grade with next-season fantasy pts/g (both seasons qualified, 2019-2025) not
   significantly below the current grade's.
-- **RESULT: pbp injury notes do NOT help the depth window** (h3_note50 -0.0001 [-0.0002, -0.0000], h3_note80 -0.0001
+- **RESULT {#depth-pbp-notes}: pbp injury notes do NOT help the depth window** (h3_note50 -0.0001 [-0.0002, -0.0000], h3_note80 -0.0001
   [-0.0005, +0.0002] vs healthy3): the snap-pattern rule already catches the injuries that cost playing time. Not
   used for depth. News blurbs (tools/espn_news.py, owner idea): per-player ESPN endpoint only (no league feed), current
   season only -> archived daily for players on ESPN's injury list (~800 requests, 0.25 s apart, once a day); parsed
@@ -1006,7 +1006,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   note in it and played under 50% / 80% of his max share of his previous 3 played games (no next-week listing
   needed). GATE: adopt the better one if its accuracy minus healthy3 has a 95% CI above 0. Finding first: notes are
   incomplete (Jefferson 2026 wk 3 has none: noted only when play stops for a player down).
-- **RESULT healthy3: SHIPPED (depth_build V7).** vs "both": +0.0003 [-0.0006, +0.0012] overall (no worse), starters
+- **RESULT {#depth-healthy3} healthy3: SHIPPED (depth_build V7).** vs "both": +0.0003 [-0.0006, +0.0012] overall (no worse), starters
   back from injury 82.0 -> 83.1% (base 73.6). MIN wk 6: Addison 95, Jefferson 93 (was 34 / 67), Jennings 79.
 - **Better in-game injury signal (owner idea):** pbp `desc` notes "TEAM-##-F.Last was injured during the play" (~3 /
   game since ~2010, ~1 / game 2003): team + jersey -> gsis via that week's roster. Candidate uses: depth "left hurt"
@@ -1016,7 +1016,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   hurt (snap share under half his max of his previous 3 played games, and listed / reserve / absent-and-listed the
   next team week), reaching back as far as needed. Owner-specified rule -> ships unless it tests significantly worse
   than "both" (95% CI of healthy3 - both entirely below 0); result reported either way.
-- **RESULT (depth window): "both" ADOPTED** (depth_build V6, RECENCY .5/.3/.2 + games missed hurt skipped). 27,780
+- **RESULT {#depth-window} (depth window): "both" ADOPTED** (depth_build V6, RECENCY .5/.3/.2 + games missed hurt skipped). 27,780
   cells 2019-2026, per starter: base 81.7%, skip_inj 83.1, recency 82.5, last1 82.7, both 83.6 (+2.0 [+1.8, +2.1]),
   better at every group; starters back from injury 73.6 -> 82.0. MIN wk 6: Addison 97, Jennings 79, Jefferson 67
   (was WR4 at 34), Felton 62. tools/depth_window_eval.py reproduces.
@@ -1077,14 +1077,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   backup. EPA per play can't see RB workload and swings with line / scheme / fumbles (RB next-season rank corr.
   ~.19 vs ~.81 for fantasy pts/g). Rookies need no special case: no penalty, just no earlier seasons in the window.
   Owner decision pending: what the grade should reward.
-- **RESULT v1.2: PASSED guardrail -> LIVE** (fantasy pts/g -0.013 [-0.028, +0.005]; QB .625 = , RB .389 -> .333,
+- **RESULT {#edge-grade-v1-2} v1.2: PASSED guardrail -> LIVE** (fantasy pts/g -0.013 [-0.028, +0.005]; QB .625 = , RB .389 -> .333,
   WR .546 -> .511, TE .161 -> .203). Bijan 2023 19 -> 42 (rest = 3 lost fumbles -13.9 and 35% rush success; Allgeier
   87 because his window includes a good 2022). Open owner question: EPA grade vs fantasy-style volume credit.
-- **RESULT v1.1: FAILED guardrail** (next-season fantasy pts/g -0.026 [-0.045, -0.007]; WR .546 -> .468): removing
+- **RESULT {#edge-grade-v1-1} v1.1: FAILED guardrail** (next-season fantasy pts/g -0.026 [-0.045, -0.007]; WR .546 -> .468): removing
   the throw also removed credit for EARNING targets (an average target worth 0). PRE-REGISTERED v1.2 (owner: "an RB
   penalized for a pass play?"), same guardrail, second look at these seasons: + league EPA of a target at that
   air-yard depth (that season), i.e. credit for earning the target independent of this QB's accuracy.
-- **RESULT (Edge grade v2): FAILED, v1 stays.** Team-changers (n=486, targets 2021-2025): next-season value/g rank
+- **RESULT {#edge-grade-v2} (Edge grade v2): FAILED, v1 stays.** Team-changers (n=486, targets 2021-2025): next-season value/g rank
   corr. v1 .131, v2 .145, diff +0.014 [-0.082, +0.115]; fantasy pts/g -0.013 [-0.120, +0.085]. All players
   (reported only): value/g -0.027 [-0.063, +0.015]; fantasy pts/g +0.043 [+0.006, +0.079] (a lead, not a pass:
   post-hoc; needs a fresh holdout = the 2026 season). Face check, 2023 RBs (percentile among regulars): Bijan v1 16
@@ -1213,11 +1213,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Scoreboard, descriptive: MAE by position and season, ours vs theirs, CI on the difference. (2) Blend: final =
   (1 - w) ours + w Sleeper, w per position fit on 2021-23 (grid 0-1 by 0.05), tested 2024-26. GATE: all-position
   MAE CI upper < 0 on 2024-26 and no position's CI lower > 0. Live: Sleeper's API is free and open (CORS *).
-- **RESULT route_input (2026-10-15): FAIL.** Walk-forward 2021-25: ALL -0.002 [-0.007, +0.003]; TE -0.021 [-0.036,
+- **RESULT {#route-input} route_input (2026-10-15): FAIL.** Walk-forward 2021-25: ALL -0.002 [-0.007, +0.003]; TE -0.021 [-0.036,
   -0.007] (better), RB -0.002, WR +0.004, QB 0; seasons -0.006 / -0.006 / -0.001 / +0.005 / -0.004. The TE gain is a
   post-hoc subgroup; a TE-only version would need its own pre-registration AND a live route source (heatradar, PFF
   definition) -- not pursued now. Moved to section 5 terms: routes as a usage input, no overall gain.
-- **RESULT Sleeper head-to-head + blend (2026-10-15): gate passed, then INVALIDATED by leakage -> NOT shipped.**
+- **RESULT {#sleeper-blend} Sleeper head-to-head + blend (2026-10-15): gate passed, then INVALIDATED by leakage -> NOT shipped.**
   12,948 relevant rows 2021-26 wk 5, all matched. (1) Ours vs Sleeper MAE 5.176 vs 5.225, -0.049 [-0.092, -0.009]:
   QB -0.190 [-0.330, -0.049], WR -0.080 [-0.127, -0.032], TE -0.040 ns, RB +0.055 [+0.004, +0.105] (they're
   better). By season -0.31 / +0.01 / +0.05 / +0.06 / -0.07 / +0.06 (2026 wk 1-5): roughly a tie after 2021, and
@@ -1261,7 +1261,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   plays in later seasons counted as a newcomer (live has no future seasons: never affected). Harmless while debuts
   projected 0 (likely the OPEN "~9k rows, ~0.02" backtest side effect); with a debut prior it halved the rookie and
   handed the cut to his position mates. Now "played somewhere before this week".
-- **RESULT debut_prior v1 (weeks 1-2, after the bug fix): FAIL on part (i).** Debut rows +0.096 [-0.229, +0.411]
+- **RESULT {#debut-prior-v1} debut_prior v1 (weeks 1-2, after the bug fix): FAIL on part (i).** Debut rows +0.096 [-0.229, +0.411]
   (n 358); all rows -0.029 [-0.057, -0.002]; teammates -0.039 [-0.051, -0.028]; positions all ns. By depth slot,
   debut MAE old -> new: RB1 7.78 -> 4.85, RB2 4.26 -> 3.18, WR1 6.37 -> 5.00, TE1 4.61 -> 3.17, WR2 3.76 -> 3.64 (n
   10/25/17/7/63), but slot 3 / unlisted worse (RB3 1.93 -> 2.90, WR unl 1.19 -> 1.76): their median game is ~0 while
@@ -1276,7 +1276,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   rows +0.40 [-0.84, +1.63]). AMENDED 2026-10-15 before running: the deciding test moves to weeks 1-2 of 2016-2020
   (seasons no test has touched; weekly depth charts exist), same gate as v1 parts (i)-(ii), team-week CIs, v2 vs
   baseline. Pass -> ship d12; fail -> off until 2027 weeks 1-2.
-- **RESULT debut_prior v2 "d12": PASS -> SHIPPED (config experiments.debut_prior = "d12").** Fresh weeks 1-2
+- **RESULT {#debut-prior-v2} debut_prior v2 "d12": PASS -> SHIPPED (config experiments.debut_prior = "d12").** Fresh weeks 1-2
   2016-20 (history 13 seasons): debut rows (n 150) -1.023 [-1.699, -0.318]; all rows (3,932) -0.070 [-0.102, -0.038];
   RB -0.180 [-0.266, -0.101], TE -0.022, WR -0.037, QB -0.002 (ns); teammates -0.032 [-0.044, -0.021]; every
   season better (-0.071 / -0.057 / -0.039 / -0.101 / -0.082). Weeks 3+ 2021-25 relevant rows +0.000 [0.000,
@@ -1288,7 +1288,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   = [0.05, 0.95] and [0.02, 0.98] vs no filter, tools/game_eval.py 2021-25 --only=fitted, paired by game. GATE: adopt
   a window only if margin MAE beats no filter with the 95% CI over season-weeks excluding 0 (if both do, the better
   one); then confirm fantasy MAE not worse (tools/experiments.py, CI upper < +0.003).
-- **RESULT narrower blowout filters (2026-10-15): both FAIL, no filter stays.** Game margin MAE 2021-25 (1,279
+- **RESULT {#blowout-filters} narrower blowout filters (2026-10-15): both FAIL, no filter stays.** Game margin MAE 2021-25 (1,279
   games, paired): none 10.548 (winners 61.0%); 2-98% 10.573, +0.025 [-0.022, +0.076], worse every season (60.2%);
   5-95% 10.630, +0.082 [+0.023, +0.143], worse every season (59.0%); old 10-90% 10.638 (+0.090). Monotone: every
   slice of blowout plays removed costs accuracy. Switch kept off (team_model.wp_window absent). Context: the removal
@@ -1349,7 +1349,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   week-1 Brier of availability vs played, players not on the injury report, lower with the 95% CI over team-weeks
   excluding 0; (ii) weeks 1-2 fantasy MAE (played rows) not worse, CI upper < +0.003; (iii) weeks 3+ 2021-25
   fantasy MAE not worse (tools/experiments.py).
-- **RESULT practice_role (all positions): written gate PASS, but QB significantly worse -> not shipped as is.**
+- **RESULT {#practice-role-all} practice_role (all positions): written gate PASS, but QB significantly worse -> not shipped as is.**
   Walk-forward 2021-25, availability Brier on injury-report player-weeks 0.0987 -> 0.0950, -0.0037 [-0.0047, -0.0027],
   better every season; fantasy MAE -0.000 [-0.001, +0.001]. By position: RB -0.0048 [-0.0071, -0.0025], TE -0.0045
   [-0.0066, -0.0025], WR -0.0046 [-0.0062, -0.0032], QB +0.0033 [+0.0008, +0.0059]. Diagnosis correction: depth-1
@@ -1360,13 +1360,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   (`injuries.practice_role = ["RB","WR","TE"]`).** Precedent: the expert blend is position-limited the same way.
   QB rows get role -1 (no role information). GATE (2021-25 walk-forward): availability Brier overall CI upper < 0,
   QB CI lower <= 0 (not significantly worse), fantasy MAE CI upper < +0.003.
-- **RESULT practice_role RB/WR/TE only: PASS -> SHIPPED (config injuries.practice_role).** Availability Brier on
+- **RESULT {#practice-role-skill} practice_role RB/WR/TE only: PASS -> SHIPPED (config injuries.practice_role).** Availability Brier on
   injury-report player-weeks 2021-25 0.0987 -> 0.0931, -0.0056 [-0.0068, -0.0044]; QB -0.0099 [-0.0137, -0.0062], RB
   -0.0043, TE -0.0038, WR -0.0060 (all CIs exclude 0); every season. Fantasy MAE ALL -0.000 [-0.002, +0.001] (TE
   +0.001 [0.000, 0.002]). Correction to the earlier note: the "94% of healthy starting QBs play" figure was wrong:
   the depth chart still listed benched QBs as QB1 (Tyrod Taylor, Tannehill, Richardson...). See the job-security
   study below.
-- **RESULT scratch_carry: FAIL on part (iii).** Weeks 3+ 2021-25 fantasy MAE +0.003 [-0.000, +0.006], QB +0.020
+- **RESULT {#scratch-carry-v1} scratch_carry: FAIL on part (iii).** Weeks 3+ 2021-25 fantasy MAE +0.003 [-0.000, +0.006], QB +0.020
   [+0.003, +0.043] (training on week-1 rows changed the model for every week). Not shipped; a week-1-only version
   (seed only week-1 rows, train as before) would need its own test.
 - **Job-security study (owner 2026-10-15: "at what points do teams bench a healthy QB? same for other positions;
@@ -1405,7 +1405,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   sits)) x r, r = the measured rate a healthy QB2 plays when QB1 plays (fit on 2021-23 backtest rows). TEST on the
   cached baseline backtests 2024-25 (QB2 rows whose QB1 had avail < 0.95): Brier of the rule vs the current
   availability, lower with the 95% CI over team-weeks excluding 0 -> implement in the engine.
-- **RESULT scratch_carry v2 (week-1-only seeding): FAIL on part (ii).** Week-1 availability Brier, players not on
+- **RESULT {#scratch-carry-v2} scratch_carry v2 (week-1-only seeding): FAIL on part (ii).** Week-1 availability Brier, players not on
   the report, 0.1248 -> 0.1174 (-0.0074 [-0.0118, -0.0031]), but it overshoots (RB / WR / TE mean P(active) ~0.91
   vs 0.84-0.88 actual) and weeks 1-2 fantasy MAE +0.0012 [-0.0050, +0.0091]. Off. OPEN: week 1's healthy-scratch
   numbers are badly calibrated (QBs 0.33 vs 0.48 actual); a calibrated week-1 model (e.g. its own week-1 fit on
@@ -1414,13 +1414,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   registered above): 2024-25 QB2 rows whose QB1 had avail < .95, n 371: Brier 0.2283 -> 0.1957 (-0.0326 [-0.0562,
   -0.0093]); mean P(play) 0.425 / rule 0.465 / actual 0.439. Note: a healthy QB2 plays only 74.6% of the time when
   QB1 sits (a QB3 / stale chart), so the rule's "1.0 when QB1 sits" is generous; refining it is a later test.
-- **RESULT (A) job_security: PASS -> SHIPPED (config injuries.job_security = true).** Availability Brier, players not on
+- **RESULT {#job-security} (A) job_security: PASS -> SHIPPED (config injuries.job_security = true).** Availability Brier, players not on
   the report, 2021-25 walk-forward (n 30,567): 0.0765 -> 0.0763, -0.0002 [-0.00045, -0.00001] over season-weeks. By
   position: RB -0.0010 [-0.0013, -0.0006], WR -0.0002 [-0.0005, +0.0001], TE -0.0000, QB +0.0005 [-0.0003, +0.0013]
   (none significantly worse). Fantasy MAE -0.000 [-0.001, +0.001]. A small gain, mostly RBs; for QBs the features
   add nothing the depth chart and active history don't already carry (QB benchings of healthy incumbents are rare,
   1.4% of weeks). Owner-requested contract input included (cap share).
-- **RESULT (B) share_quality: FAIL.** Fantasy MAE +0.002 [0.000, +0.003] overall, worse; no position better. Off.
+- **RESULT {#share-quality} (B) share_quality: FAIL.** Fantasy MAE +0.002 [0.000, +0.003] overall, worse; no position better. Off.
 - **PRE-REGISTERED 2026-10-16 (before running): (C) `injuries.practice_rest` - veteran rest days in the practice
   model** (owner: Keenan Allen, 34, DNP Wednesday "Not injury related - resting player" with a groin listed second;
   the model reads only the D/L/F sequence, so a rest DNP looks like an injury DNP). Variant `practice_rest`: a flag
@@ -1488,7 +1488,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   excluding 0 and lower in at least 4 of 5 seasons; calibration: every predicted-probability decile within 4 points
   of what happened. Reported also: players who missed last game; Out-last-week players; in-game injuries. Live ESPN
   news (the early-week bridge) has too little history to be part of this test; it keeps overriding where it applies.
-- **RESULT (G) Tuesday model: PASS.** 2021-25, players on last week's final report (n 18,258): Brier 0.1378 ->
+- **RESULT {#tuesday-model} (G) Tuesday model: PASS.** 2021-25, players on last week's final report (n 18,258): Brier 0.1378 ->
   0.1243, diff -0.0135 [-0.0160, -0.0110]; better 5/5 seasons (2024 only barely: 0.1327 -> 0.1313); worst decile
   2.7 pts. Subgroups (Brier; predicted old / new vs actual): missed last game 0.262 -> 0.233 (53 / 46 vs 47%); in-game
   injury note 0.257 -> 0.185 (78 / 61 vs 57%); left early 0.224 -> 0.182 (80 / 68 vs 65%); Questionable last week
@@ -1498,12 +1498,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   healthy until news says otherwise (healthy-scratch model / ESPN bridge). Added population: players NOT on game k's
   report with an in-game injury note in game k or a snap share 20+ points under his usual. Baseline: what the site
   shows them (the healthy rate; carry-forward "None"). Same gate on that population, the model trained on both.
-- **RESULT (G2): PASS.** Hurt in last game while not on its report (in-game note, or snaps 20+ points under his
+- **RESULT {#tuesday-hurt-unlisted} (G2): PASS.** Hurt in last game while not on its report (in-game note, or snaps 20+ points under his
   usual; n 7,973, 2021-25): Brier 0.2032 (shown healthy: the 88% healthy rate) -> 0.1531, diff -0.0501 [-0.0553,
   -0.0448], better 5/5 seasons; predicted 74.6% vs played 75.0%. In-game note: predicted 64.5%, played 65.0%; left
   early only: 80.9% vs 81.3%. (G) with the model trained on both populations: 0.1378 -> 0.1237 [-0.0166, -0.0116],
   5/5, worst decile 2.2 pts. -> SHIP: the Tuesday model replaces the carry-forward before a team's first report.
-- **RESULT (C) practice_rest: FAIL; practice_rest_age: FAIL.** Availability Brier, players on the report 2021-25
+- **RESULT {#practice-rest} (C) practice_rest: FAIL; practice_rest_age: FAIL.** Availability Brier, players on the report 2021-25
   (n 7,598): rest flag 0.0931 -> 0.0930 (-0.0001 [-0.0005, +0.0004]); + age 0.0931 -> 0.0936 (+0.0005 [-0.0002,
   +0.0013]; RB MAE significantly worse). A vet's rest Wednesday is followed by full Thursday / Friday practice, which
   the model already reads as healthy: by the final report the label adds nothing. (The Tuesday model and (E) carry
@@ -1529,7 +1529,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   significantly worse; stages 1 and 2 lower with the CI excluding 0 or at worst CI upper < +0.002; stage 0 CI upper <
   +0.002 vs the Tuesday model; every stage's deciles within 4 points. Then, as a second step before shipping, fantasy
   MAE 2021-25 CI upper < +0.003 (tools/experiments.py). (F) and (H) are dropped in favor of this.
-- **RESULT (I) one model for every day: FAIL (as registered), with large gains.** 2021-25, Brier today -> one model:
+- **RESULT {#one-model-v1} (I) one model for every day: FAIL (as registered), with large gains.** 2021-25, Brier today -> one model:
   Wednesday 0.2166 -> 0.1334 (-0.083 [-0.088, -0.078], 5/5), Thursday 0.1488 -> 0.1026 (-0.046, 5/5), final report
   0.0948 -> 0.0846 (-0.010 [-0.012, -0.008], 5/5; every real position better or no different), Tuesday 0.1327 ->
   0.1345 (+0.0018 [+0.0012, +0.0025], worse than the dedicated Tuesday model). Missed his last game: Wednesday
@@ -1542,7 +1542,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   to the season-s model. (3) Missing positions filled from the rosters. GATE: (I)'s gate for stages 1-3 AND, because
   this attempt was designed after seeing results, the same direction on data nothing has touched: 2026 weeks so far
   (trained through 2025): stage 3 Brier lower than today's practice model and stages 1-2 not worse. Then fantasy MAE.
-- **RESULT (I2): availability gate PASS.** 2021-25, today's model -> one model (calibrated): Wednesday 0.2166 ->
+- **RESULT {#one-model-v2} (I2): availability gate PASS.** 2021-25, today's model -> one model (calibrated): Wednesday 0.2166 ->
   0.1350 (-0.082 [-0.086, -0.077], 5/5, worst decile 3.6 pts), Thursday 0.1488 -> 0.1039 (-0.045, 5/5, 1.4 pts),
   final report 0.0948 -> 0.0844 (-0.0104 [-0.0124, -0.0084], 5/5, 3.2 pts); no position significantly worse (DB
   +0.003 [-0.007, +0.008]). Untouched 2026 weeks 1-6 (trained through 2025): Wednesday 0.2299 -> 0.1286, Thursday
@@ -1557,11 +1557,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   game plan), so his first game looks strong because the absence was always going to be long. The clean version
   measures the replacement BEFORE the injury (his earlier starts / grade going in); that is the one to test as an input
   to the return-timing and availability models, QB and RB only.
-- **RESULT (D) grade_prior (Edge grade as of the week, as a share-model input): FAIL.** Fantasy MAE 2021-25 +0.003
+- **RESULT {#edge-grade-prior} (D) grade_prior (Edge grade as of the week, as a share-model input): FAIL.** Fantasy MAE 2021-25 +0.003
   [+0.000, +0.007] (worse); QB -0.003 [-0.011, +0.004], RB +0.003, WR +0.006 [-0.000, +0.013], TE +0.003; worse in 3
   of 5 seasons. The grade is recent fantasy output, which the share and efficiency inputs already carry in finer form
   (opportunity shares + per-opportunity rates, recency-weighted); adding the blended number only adds noise. Off.
-- **RESULT (I2) step 2, fantasy MAE: by the letter FAIL (CI upper +0.004 vs < +0.003), not significantly worse.**
+- **RESULT {#one-model-mae} (I2) step 2, fantasy MAE: by the letter FAIL (CI upper +0.004 vs < +0.003), not significantly worse.**
   2021-25: ALL +0.001 [-0.004, +0.004]; QB -0.010 [-0.030, +0.005]; RB +0.004 [-0.002, +0.011]; WR +0.002 [+0.000,
   +0.004] (edge of significance); TE +0.001; seasons -0.003 / +0.003 / +0.003 / -0.005 / +0.006. Availability Brier
   on report rows in the same runs 0.0935 -> 0.0903. -> SHIPPED under the owner-design rule (the one model is the
@@ -1576,7 +1576,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   model as shipped (I2), same rows, same calibration step. GATE: final report Brier lower with the 95% CI over
   season-weeks excluding 0, no position significantly worse; Wednesday / Thursday CI upper < +0.002; deciles within
   4 points; same direction on the untouched 2026 weeks. Also reported: spread of team_q across teams.
-- **RESULT (J) team habits: FAIL.** team_q varies (team-seasons 2021-25: 10th-90th percentile 59-80%, range 41-87%)
+- **RESULT {#team-habits} (J) team habits: FAIL.** team_q varies (team-seasons 2021-25: 10th-90th percentile 59-80%, range 41-87%)
   but adds nothing the one model doesn't already see: final report 0.0844 -> 0.0841 (-0.0003 [-0.0010, +0.0004]);
   Questionable only 0.1793 -> 0.1779; QB significantly worse (+0.0074 [+0.0034, +0.0113]); Wednesday +0.0003,
   Thursday +0.0004; 2026 Wednesday worse. The habit shows up in each player's own practice days and status, which the
@@ -1594,7 +1594,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   shipped, same rows, same calibration; tools/k_eval.py. GATE as (J): final report Brier lower with the 95% CI excluding
   0, no position significantly worse; Wednesday / Thursday CI upper < +0.002; deciles within 4 points; same direction
   on 2026 so far. Each input also reported alone (descriptive, not gated).
-- **RESULT (K): FAIL.** Combined (calendar + own Questionable record + clean depth): final report 0.0844 -> 0.0840
+- **RESULT {#blind-spots-k} (K): FAIL.** Combined (calendar + own Questionable record + clean depth): final report 0.0844 -> 0.0840
   (-0.0004 [-0.0012, +0.0004]); Wednesday -0.0003, Thursday -0.0002; 2026 Wednesday +0.0006. Alone (descriptive):
   calendar final -0.0007 [-0.0014, -0.0001] (the only signal; 2026's weeks 1-6 can't show a late-season effect),
   own record -0.0001 [-0.0007, +0.0005], clean depth +0.0002 [-0.0004, +0.0007]. The blind-spot pockets were partly
@@ -1611,12 +1611,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   lower with the 95% CI over season-weeks excluding 0, no position significantly worse; weeks 1-14 not worse (CI
   upper < +0.0005); deciles within 4 points. (2026's weeks so far can't test a late-season effect; it is reported
   for weeks 1-14 only.)
-- **RESULT (L1) stakes in the one model: FAIL (narrowly).** Weeks 15-18 final report 0.0962 -> 0.0942 (-0.0020
+- **RESULT {#stakes-injured} (L1) stakes in the one model: FAIL (narrowly).** Weeks 15-18 final report 0.0962 -> 0.0942 (-0.0020
   [-0.0047, +0.0003]; better 4/5 seasons; QB -0.0097 [-0.0178, -0.0016]); weeks 15-18 Wednesday -0.0041 [-0.0081,
   -0.0005], Thursday -0.0026 [-0.0058, +0.0005]; weeks 1-14 about zero but not tight enough for the "not worse" bar
   (Wednesday +0.0005 [-0.0005, +0.0016]); 2026 weeks 1-6 +0.0014 to +0.0026. Odds help late and add noise early, when
   every team is alive. Off.
-- **RESULT (L2) stakes in the healthy-scratch model: FAIL (no change).** Non-report players weeks 15-18 (n 8,081):
+- **RESULT {#stakes-healthy} (L2) stakes in the healthy-scratch model: FAIL (no change).** Non-report players weeks 15-18 (n 8,081):
   0.0839 -> 0.0839 (-0.00001 [-0.00042, +0.00037]); weeks 1-14 -0.00007; week 18 predicted active 84.3% with and
   without, played 82.1%. The final-week flag already in the healthy-scratch inputs (job security's last_week) carries
   most of the week-18 rest; what's left is ~2 points. Fantasy MAE -0.002 [-0.005, +0.001]. Off. Late-season stakes:

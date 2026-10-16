@@ -443,3 +443,7 @@ svg.av-cal .av-ax { fill: var(--muted); font-size: 10px; }
 svg.av-cal .av-axl { fill: var(--muted); font-size: 10.5px; }
 table.av-spots tr.av-when td { padding-top: 12px; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 0; }
 table.av-spots td.av-off { color: var(--warn); font-weight: 700; }
+/* Model tab areas (model.js): one at a time, chips scroll sideways on phones */
+.md-areas { display: flex; overflow-x: auto; margin: 0 0 12px; max-width: 100%; scrollbar-width: none; }
+.md-areas button { flex: none; white-space: nowrap; }
+.md-area > h2:first-child { margin-top: 0; }

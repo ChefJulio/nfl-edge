@@ -103,6 +103,9 @@ Git hooks: `git config core.hooksPath .githooks` (pre-commit blocks commits when
 3. **Model vs presentation.** Model code = everything in `nfledge/` except `report.py` and `docs.py`. Changing
    model code or `config.toml` invalidates caches (full retrain ~3-6 min) and makes MODEL.md stale: update the
    doc, run `--stamp`. Presentation-only changes reuse the cached model (~10-30 s builds).
+   The same pre-commit hook also blocks a commit when the lab notebook and the Model tab disagree: every
+   `- **RESULT {#id} ...` in docs/INSIGHTS.md needs one line in its area's "What we tried" list in MODEL.md carrying
+   `<!-- tried:id -->` (plain words: Shipped / Rejected - the question - the key result (YYYY-MM)).
 4. **Verify the page visually** before claiming a UI change works: `python tools/screenshot.py TAB` renders in
    WebKit with an iPhone profile (the owner tests on Brave/iPhone, which is WebKit; headless Chrome misses WebKit
    bugs), `--device=desktop` for Chromium. Options for position tab and page/table scrolling are in the script.
