@@ -1,5 +1,5 @@
 ---
-documented_code_hash: dbd3f136fb2f6b15
+documented_code_hash: b311077c9bffc8ed
 ---
 # How the model works
 
@@ -165,7 +165,7 @@ The team's projected dropbacks and rushes then turn shares into opportunities.
 - **Scenarios, not discounts.** NFL availability is yes or no, so every projection is "if active", with Inactive% shown separately.
 - **Who sits.** Players below 50% are assumed out, as are contributors no longer on the roster (injured reserve, cut, traded). Their volume moves to teammates when they are a real contributor: an RB/WR/TE with an 8%+ projected target share or 15%+ carry share who has played this season, or the starting QB.
 - **"+X if he sits".** Teammates of a significant contributor with a 50-90% chance to play show this contingent bump when the gain is at least 1 point.
-- **Redistribution.** Vacated targets and carries go where they actually went in past absences, learned by position pair, depth-chart rank and current share. It is corrected so a player who has already missed several games is not double-counted, and currently applied at **{{ L.redist_scale }}** strength. When a starting QB sits, the backup inherits his dropbacks (and scrambles at his own rate), and the whole passing offense uses the backup's quarterback rating.
+- **Redistribution.** Vacated targets and carries go where they actually went in past absences, learned by position pair, depth-chart rank and current share. It is corrected so a player who has already missed several games is not double-counted, and currently applied at **{{ L.redist_scale }}** strength. When a starting QB sits, the backup inherits his dropbacks (and scrambles at his own rate), and the whole passing offense uses the backup's quarterback rating. The "+X from injuries" tag on a player is the part of his final projection that comes from teammates' absences: measured when injuries are applied, then scaled with every later adjustment so it never exceeds the projection.
 
 ## 6. What the report numbers mean
 

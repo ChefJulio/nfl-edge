@@ -372,6 +372,7 @@ class Engine:
     p["if_sits_gain"], p["if_sits_name"] = 0.0, ""
     if use_injuries and self.injury_model is not None:
       p = self.injury_model.apply(p, season, week, wind, avail_override, status_override)
+    p["proj_at_inj"] = p.proj  # the injury boost is measured here; later steps rescale it (below)
     nf = float(self.cfg.get("experiments", {}).get("newcomer_scale", 1.0))
     if nf < 1.0:  # EXPERIMENT (experiments.newcomer_scale): first game for a new team, after who sits is settled
       p = self._newcomers(p, nf, wind, season, week)
@@ -389,6 +390,12 @@ class Engine:
     sw = self.cfg.get("experiments", {}).get("sleeper_blend") or {}
     if sw and blend and avail_override is None:  # tested on the week being played only, not lookahead weeks
       p = self._sleeper_blend(p, season, week, sw)
+    # The boost is measured when injuries are applied, but later steps (team-share normalization, the expert blend,
+    # journeyman) move the projection: scale it with them so the "+X from injuries" tag is part of the final number
+    # and never exceeds it (owner 2026-10-15: Huntley showed +12.7 inj on an 11.6 projection).
+    at = p.proj_at_inj.where(p.proj_at_inj > 0)
+    p["injury_boost"] = (p.injury_boost * (p.proj / at)).fillna(0.0).clip(lower=0.0, upper=p.proj.clip(lower=0.0))
+    p = p.drop(columns=["proj_at_inj"])
     p["low_sample"] = (p.n_db.fillna(0) + p.n_rush.fillna(0) + p.n_tgt.fillna(0)) < 40
     p = self._uncertainty(p)
     p["season"], p["week"] = season, week
