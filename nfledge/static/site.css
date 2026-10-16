@@ -419,3 +419,6 @@ dl.ht dd { margin: 0; color: var(--muted); }
 /* Power: chipped values inside the unit / net cells keep their own sizes */
 table .netc b.sc { display: inline-block; padding: 2px 6px; }
 table .mc .mv2.sc { min-width: 38px; }
+/* iOS zooms the page into any text field under 16px when it's tapped (owner 2026-10-16: the league form came up
+   zoomed and cut off): 16px on phones */
+@media (max-width: 640px) { input[type="text"], input[type="search"], input:not([type]), textarea { font-size: 16px; } }

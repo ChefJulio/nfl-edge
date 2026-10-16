@@ -1,6 +1,6 @@
 /* League tab (league.js): import your Sleeper / ESPN league */
 .lg-connect { padding: 16px; max-width: 560px; }
-.lg-form { display: flex; gap: 8px; margin: 8px 0; } .lg-in { flex: 1; min-width: 0; font: inherit; padding: 9px 12px; border-radius: 10px;
+.lg-form { display: flex; gap: 8px; margin: 8px 0; } .lg-form .sbtn { flex: none; width: auto; margin: 0; }  /* phones: .sbtn is full width */ .lg-in { flex: 1; min-width: 0; font: inherit; padding: 9px 12px; border-radius: 10px;
   border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
 .lg-pick { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0; }
 .lg-err { color: #ff8f84; } .lg-hint { margin: 10px 0 0; } .lg-note { font-size: 12px; margin: 8px 2px; }

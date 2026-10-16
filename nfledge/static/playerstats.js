@@ -14,7 +14,7 @@
   const groupOf = pos => Object.keys(GROUPS).find(g => GROUPS[g].includes(pos)) || 'Other';
   const div = (a, b) => b ? a / b : null;
   const fmt = {
-    i: v => v == null ? '' : Math.round(v).toLocaleString(), d1: v => v == null ? '' : v.toFixed(1), d2: v => v == null ? '' : v.toFixed(2),
+    i: v => v == null ? '' : Math.round(v).toLocaleString(), y: v => v == null ? '' : String(Math.round(v)),  // y: years, no comma d1: v => v == null ? '' : v.toFixed(1), d2: v => v == null ? '' : v.toFixed(2),
     pct: v => v == null ? '' : `${(100 * v).toFixed(1)}%`, s: v => v == null ? '' : esc(v), epa: v => v == null ? '' : (v > 0 ? '+' : '') + v.toFixed(2),
     money: v => v == null ? '' : v >= 1 ? `$${v.toFixed(1)}M` : `$${Math.round(v * 1000)}K`,
   };
@@ -27,7 +27,7 @@
   add('age', 'Age', 'Bio', r => r.age, 'd1', 'Age at the season opener', 'asc');
   add('ht', 'Height', 'Bio', r => r.ht, 'i', 'Inches'); add('wt', 'Weight', 'Bio', r => r.wt, 'i', 'Pounds');
   add('college', 'College', 'Bio', r => r.college, 's', '', 'asc'); add('exp', 'NFL yrs', 'Bio', r => r.exp, 'i', 'Seasons of experience that year');
-  add('draft_y', 'Draft yr', 'Draft', r => r.draft_y, 'i', '', 'asc'); add('draft_r', 'Round', 'Draft', r => r.draft_r, 'i', '', 'asc');
+  add('draft_y', 'Draft yr', 'Draft', r => r.draft_y, 'y', '', 'asc'); add('draft_r', 'Round', 'Draft', r => r.draft_r, 'i', '', 'asc');
   add('draft_o', 'Overall pick', 'Draft', r => r.draft_o, 'i', '', 'asc');
   add('draft', 'Draft', 'Draft', r => r.udfa ? 'UDFA' : r.draft_r ? `R${r.draft_r}:${r.draft_p}` : null, 's', 'Round:pick within the round', 'asc');
   add('apy', 'APY', 'Contract', r => r.apy, 'money', 'Average per year of the current deal (current season only)');
