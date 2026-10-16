@@ -323,10 +323,15 @@ def formulas(eng, season: int, week: int) -> str:
       seqs = ["DDD", "DDL", "DLL", "LLL", "DLF", "LLF", "LFF", "FFF"]
       rows = pd.DataFrame([{"days": s, "game_status": gs, "position": "WR"} for gs in ("QUESTIONABLE", "DOUBTFUL")
                            for s in seqs])
-      pr_ = im.practice_model.predict_proba(practice_features(rows)[im.practice_cols])[:, 1]
+      x_ = practice_features(rows)
+      if "role" in im.practice_cols:  # injuries.practice_role: the table is for a starter (90% of snaps)
+        x_["role"] = 0.9
+      pr_ = im.practice_model.predict_proba(x_[im.practice_cols])[:, 1]
       add("The practice model is gradient-boosted trees (no single formula; features: count of DNP / limited / full "
           "days, first and last day, trend, all-DNP flag, game status, skill position). Its outputs for a skill "
-          "player (D = did not practice, L = limited, F = full, Wed/Thu/Fri):")
+          "player"
+          + (" who plays 90% of snaps" if "role" in im.practice_cols else "")
+          + " (D = did not practice, L = limited, F = full, Wed/Thu/Fri):")
       add("| Status | " + " | ".join(seqs) + " |")
       add("|---|" + "---|" * len(seqs))
       for i, gs in enumerate(("Questionable", "Doubtful")):
