@@ -480,33 +480,57 @@
     const rush = ['Rushing', [['Att', g => x(g, 2), 11], ['Yd', g => f0(c(g, 3)), 3], ['YPC', ypc], ['TD', g => c(g, 4), 4]]];
     return pos === 'RB' ? [rush, rec] : rushy ? [rec, ['Rushing', [['Att', g => x(g, 2), 11], ['Yd', g => f0(c(g, 3)), 3], ['TD', g => c(g, 4), 4]]]] : [rec];
   };
-  // A season's totals row rides just under the player header while that block's games scroll past, and leaves with
-  // the block's last game (owner 2026-10-16). Plain position: sticky can't do it: the log scrolls sideways, which
-  // traps sticky inside .lg-scroll (site.css .fhead note). The row's own cells are translated instead, so its columns
-  // and sideways scroll stay aligned; it never rises above its own spot. A block ends at the next sub-header
-  // (playoffs -> regular season) or the season's end.
-  const floatTotals = () => {
-    const rows = [...document.querySelectorAll('tr.lg-tot')].filter(tr => tr.offsetParent);
-    if (!rows.length) return;
-    const head = document.querySelector('#tab-page .pc-page .pc-head') || document.querySelector('nav.tabs');
-    const top = head ? head.getBoundingClientRect().bottom : 0;
-    rows.forEach(tr => {
-      let end = tr.parentElement.getBoundingClientRect().bottom;
-      for (let n = tr.nextElementSibling; n; n = n.nextElementSibling) {
-        if (n.classList.contains('lg-sub')) { end = n.getBoundingClientRect().top; break; }
-      }
-      const r = tr.getBoundingClientRect();  // the row box itself never moves: its top is the natural spot
-      const dy = Math.round(Math.max(0, Math.min(top - r.top, end - r.height - r.top)));
-      if (dy === (+tr.dataset.dy || 0)) return;
-      tr.dataset.dy = dy;
-      tr.classList.toggle('lg-float', dy > 0);
-      for (const td of tr.cells) td.style.transform = dy ? `translateY(${dy}px)` : '';
-    });
+  // Game logs: each section's column heads (Wk / Opp / Pts ..., with the Passing / Rushing group row) stay under the
+  // page header while that section's games scroll past, and leave with its last game (owner 2026-10-16). The log scrolls
+  // sideways, which traps position: sticky inside .lg-scroll, and moving rows from scroll events lagged on iOS. So: for
+  // each section an invisible box over it, OUTSIDE the scroller, holding a native position: sticky copy of its heads
+  // (the browser does the sticking: no lag, and the box's end is where it lets go). Script only lays the boxes out
+  // when the table's size changes and keeps the copy's sideways scroll in step with the table's.
+  const stickTop = () => {
+    const h = document.querySelector('#tab-page .pc-page .pc-head'), nav = document.querySelector('nav.tabs');
+    return h ? (parseFloat(getComputedStyle(h).top) || 0) + h.offsetHeight : nav ? nav.offsetHeight : 0;
   };
-  let floatQueued = false;
-  const queueFloat = () => { if (!floatQueued) { floatQueued = true; requestAnimationFrame(() => { floatQueued = false; floatTotals(); }); } };
-  addEventListener('scroll', queueFloat, { passive: true, capture: true });
-  addEventListener('resize', queueFloat, { passive: true });
+  const layHeads = tbl => {
+    const sc = tbl.closest('.lg-scroll'), box = sc && sc.parentElement;
+    if (!box) return;
+    box.querySelectorAll(':scope > .lg-fh').forEach(x => x.remove());
+    if (!tbl.offsetParent) return;
+    if (getComputedStyle(box).position === 'static') box.style.position = 'relative';
+    const b0 = box.getBoundingClientRect().top, s0 = sc.getBoundingClientRect(), top = stickTop();
+    const cs = getComputedStyle(sc);
+    tbl.querySelectorAll('tbody tr.lg-ch').forEach(ch => {
+      const gh = ch.previousElementSibling && ch.previousElementSibling.classList.contains('lg-gh') ? ch.previousElementSibling : null;
+      let end = ch.parentElement.getBoundingClientRect().bottom;
+      for (let n = ch.nextElementSibling; n; n = n.nextElementSibling) {
+        if (n.classList.contains('lg-sub') || n.classList.contains('lg-season')) { end = n.getBoundingClientRect().top; break; }
+      }
+      const r0 = (gh || ch).getBoundingClientRect().top;
+      const widths = [...ch.cells].map(c => c.getBoundingClientRect().width);
+      const lay = document.createElement('div');
+      lay.className = 'lg-fh';
+      lay.setAttribute('aria-hidden', 'true');
+      lay.style.cssText = `top:${r0 - b0}px;height:${Math.max(0, end - r0)}px;left:${s0.left - box.getBoundingClientRect().left}px;width:${s0.width}px`;
+      lay.innerHTML = `<div class="lg-fh-in" style="top:${top}px"><div class="lg-fh-x" style="padding:0 ${cs.paddingRight} 0 ${cs.paddingLeft}">
+        <table class="${tbl.className}" style="width:${tbl.getBoundingClientRect().width}px"><colgroup>${widths.map(w => `<col style="width:${w}px">`).join('')}</colgroup>
+        <tbody>${gh ? gh.outerHTML : ''}${ch.outerHTML}</tbody></table></div></div>`;
+      box.appendChild(lay);
+      lay.querySelector('.lg-fh-x').scrollLeft = sc.scrollLeft;
+    });
+    if (!sc.dataset.fh) {  // the copies follow the table sideways
+      sc.dataset.fh = '1';
+      sc.addEventListener('scroll', () => box.querySelectorAll(':scope > .lg-fh .lg-fh-x').forEach(x => { x.scrollLeft = sc.scrollLeft; }), { passive: true });
+    }
+  };
+  const fhRO = typeof ResizeObserver === 'function' ? new ResizeObserver(es => es.forEach(e => layHeads(e.target))) : null;
+  const fhSeen = new WeakSet();
+  const watchLogs = root => (root.querySelectorAll ? root.querySelectorAll('.lg-scroll > table.lg') : []).forEach(tbl => {
+    if (fhSeen.has(tbl) || !tbl.querySelector('tbody tr.lg-ch')) return;
+    fhSeen.add(tbl);
+    if (fhRO) fhRO.observe(tbl); else layHeads(tbl);
+  });
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) watchLogs(n.parentElement || n); })))
+    .observe(document.documentElement, { childList: true, subtree: true });
+  addEventListener('resize', () => document.querySelectorAll('.lg-scroll > table.lg').forEach(tbl => fhSeen.has(tbl) && layHeads(tbl)), { passive: true });
   // Week tab preview, no legend and no upcoming weeks: opts.season = this season's games so far with its byes;
   // opts.last = N = his N most recent games (the fallback before his first game this season, no season totals).
   const logHtml = (L, p, opts = {}) => {

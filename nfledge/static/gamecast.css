@@ -719,6 +719,8 @@ table.lg tbody tr.lg-gap td { height: 7px; padding: 0; background: none !importa
    (owner 2026-10-16, totals row): cover it with the card color */
 table.lg tr > :nth-child(1)::before { content: ''; position: absolute; top: -3px; bottom: -3px; right: 100%; width: 12px; background: var(--panel2); pointer-events: none; }
 table.lg tr.lg-season td::before, table.lg tr.lg-gh th::before { content: none; }
-/* the floating totals row (gamecast.js floatTotals) paints over the game rows it passes; pinned cells above the rest */
-table.lg tr.lg-tot td { position: relative; z-index: 3; }
-table.lg tr.lg-tot > :nth-child(1), table.lg tr.lg-tot > :nth-child(2) { position: sticky; z-index: 4; }
+/* game-log column heads that stay in view (gamecast.js layHeads): a box over each section holds a sticky copy */
+.lg-fh { position: absolute; pointer-events: none; z-index: 5; }
+.lg-fh-in { position: sticky; background: var(--panel2); }
+.lg-fh-x { overflow: hidden; }
+.lg-fh table.lg { border-spacing: 0; table-layout: fixed; min-width: 0; }
