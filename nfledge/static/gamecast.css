@@ -682,9 +682,9 @@ table.pst-tbl td.pst-who .nm { white-space: normal; overflow: hidden; display: -
 
 /* Box score: every stat and column head in a small chip, columns packed tight (owner 2026-10-15) */
 table.pst-tbl th.num, table.pst-tbl td.num { padding: 3px 1px; text-align: center; }
-table.pst-tbl .sc { display: inline-block; min-width: 2.1em; padding: 3px 5px; border-radius: 6px; background: rgba(255,255,255,.08);
+table.pst-tbl .sc { display: inline-block; min-width: 2.1em; padding: 3px 5px; border-radius: 6px; background: transparent;
   font-variant-numeric: tabular-nums; font-size: var(--fs-sm); line-height: 1.25; text-align: center; color: var(--ink); }
-table.pst-tbl .sc.h { background: rgba(255,255,255,.05); color: var(--muted); font-size: var(--fs-xs); font-weight: 700; letter-spacing: .02em; padding: 2px 5px; }
+table.pst-tbl .sc.h { background: transparent; color: var(--muted); font-size: var(--fs-xs); font-weight: 700; letter-spacing: .02em; padding: 2px 5px; }
 table.pst-tbl .sc.fp { background: rgba(109,158,255,.2); color: #dce6ff; font-weight: 700; }
 table.pst-tbl tr.pst-tot .sc { background: transparent; color: var(--muted); font-weight: 700; }
 table.pst-tbl .pst-fp { border-left: 0 !important; padding-left: 4px !important; }

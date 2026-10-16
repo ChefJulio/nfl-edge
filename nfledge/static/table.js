@@ -46,7 +46,7 @@
       sizes();
       tbl.tHead.innerHTML = `<tr>${cols.map(c => {
         const cls = [c.num ? 'num' : '', c.stick ? 'stick' : '', c.sort === false ? 'nosort' : 'can-sort', c.cls || '',
-                     sort && sort.key === c.key ? `sorted-${sort.dir}` : ''].filter(Boolean).join(' ');
+                     sort && sort.key === c.key ? `sorted-${sort.dir} sorted` : ''].filter(Boolean).join(' ');
         const lab = c.headHtml ? c.headHtml : c.title ? `<abbr title="${esc(c.title)}">${esc(c.label)}</abbr>` : esc(c.label);
         return `<th class="${cls}" data-key="${esc(c.key)}">${lab}</th>`;
       }).join('')}</tr>`;
@@ -66,7 +66,8 @@
         }
       }
       const rowHtml = r => `<tr${opt.rowClass ? ` class="${esc(opt.rowClass(r))}"` : ''}${opt.rowAttrs ? ' ' + opt.rowAttrs(r) : ''}>${cols.map(c => {
-        const cls = [c.num ? 'num' : '', c.stick ? 'stick' : '', c.cls || ''].filter(Boolean).join(' ');
+        // the sorted column's numbers keep their chip (owner 2026-10-16: chips only on key / sorted columns)
+        const cls = [c.num ? 'num' : '', c.stick ? 'stick' : '', c.cls || '', sort && sort.key === c.key && !c.stick ? 'sorted' : ''].filter(Boolean).join(' ');
         return `<td${cls ? ` class="${cls}"` : ''}>${c.html ? c.html(r) : esc(r[c.key] ?? '')}</td>`;
       }).join('')}</tr>`;
       // The rows that fill the screen first, the rest in batches after it paints (owner 2026-10-16: "lazy load so the

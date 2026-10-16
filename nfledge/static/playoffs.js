@@ -105,7 +105,7 @@
         const cols = [
           { key: 'team', label: 'Team', stick: true, first: 'asc', value: r => r.nick, html: r => NFLE.ui.team(r.team, TEAMS, esc(r.div)) },
           { key: 'rec', label: 'Record', value: r => r.w + 0.5 * r.t, html: r => `${r.w}-${r.l}${r.t ? `-${r.t}` : ''}` },
-          { key: 'exp_w', label: 'Proj W', num: true, title: 'Average wins at season end across the simulations', html: r => r.exp_w.toFixed(1) },
+          { key: 'exp_w', label: 'Proj W', num: true, cls: 'key', title: 'Average wins at season end across the simulations', html: r => r.exp_w.toFixed(1) },
           ...[['p_playoffs', 'Playoffs'], ['p_div', 'Division', 'Win the division'], ['p_bye', 'Bye', 'The 1 seed: a first-round bye'],
               ['p_div_round', 'Div round', 'Reach the divisional round'], ['p_conf_game', 'Conf game', 'Reach the conference championship'],
               ['p_sb', 'Super Bowl', 'Reach the Super Bowl'], ['p_title', 'Win SB', 'Win the Super Bowl']]

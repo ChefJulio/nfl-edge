@@ -27,10 +27,14 @@ tr.teamrow .quiet, tr.teamrow .sub, tr.teamrow .st small, tr.teamrow .fc, tr.tea
 .pic.nopic .pic-tm { inset: 0; display: grid; place-items: center; }
 .pic.nopic .pic-tm .logo { width: 34px; height: 34px; box-shadow: none; } .pic.nopic .pic-tm .logo img { width: 24px; height: 24px; }
 
-/* Number chips in every data table (shell.js NFLE.chips; owner 2026-10-15) */
-table .sc { display: inline-block; min-width: 1.8em; padding: 2px 4px; border-radius: 5px; background: rgba(255,255,255,.07);
+/* Number chips (shell.js NFLE.chips; owner 2026-10-15). Since 2026-10-16 (owner: "try the one key value thing, or
+   multiple key values") every stat keeps its chip's spacing and alignment, but only a table's key columns (cls 'key')
+   and the column it is sorted by draw the chip; colored rank chips keep their tint everywhere. */
+table .sc { display: inline-block; min-width: 1.8em; padding: 2px 4px; border-radius: 5px; background: transparent;
   font-variant-numeric: tabular-nums; line-height: 1.25; text-align: center; }
-table th .sc.h { background: rgba(255,255,255,.045); color: inherit; font-weight: 700; }
+table th .sc.h { background: transparent; color: inherit; font-weight: 700; }
+table td.key .sc, table td.sorted .sc { background: rgba(255,255,255,.08); }
+table th.key .sc.h, table th.sorted .sc.h { background: rgba(255,255,255,.05); }
 table th.num, table td.num { padding-left: 2px; padding-right: 2px; }
 
 /* Alternating rows wherever rows aren't team-colored (owner 2026-10-15): a faint overlay on every other body row,

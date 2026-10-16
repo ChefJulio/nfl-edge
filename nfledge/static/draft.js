@@ -28,7 +28,7 @@
     { key: 'games', label: 'G', num: true, title: 'Career games' },
     { key: 'seasons_started', label: 'Starter', num: true, title: "Seasons as his team's primary starter" },
     { key: 'probowls', label: 'Pro Bowls', num: true }, { key: 'allpro', label: 'All-Pro', num: true, title: 'First-team All-Pro selections' },
-    { key: 'w_av', label: 'Career AV', num: true, title: 'Weighted career Approximate Value (Pro Football Reference): one number for a career at any position' },
+    { key: 'w_av', label: 'Career AV', num: true, cls: 'key', title: 'Weighted career Approximate Value (Pro Football Reference): one number for a career at any position' },
     { key: 'dr_av', label: 'AV for team', num: true, title: 'Approximate Value produced for the team that drafted him' },
     { key: 'career', label: 'Career', sort: false, cls: 'dr-career', html: r => esc(career(r)) },
   ];
