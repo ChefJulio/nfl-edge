@@ -1304,3 +1304,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   all of this week's games their way / against them, 500 seasons (paired). Placement: team page Playoffs tab (chart +
   guide, above the history), a one-line "Rooting interests" box on the Week tab (current week only), Matchups tile
   note for the top 3 games by 2p(1-p) x summed playoff swing. Odds run 49 s locally with rooting (multi-process).
+- **Depth by playing time: injured players with a role stay listed (owner 2026-10-15, Jordan Mason).** Two causes he
+  vanished: the roster check counted ACT / INA only, so every IR player (status RES) was dropped before the
+  injured-starter rule ran; and that rule kept only would-be starters (Mason was RB2, 45%). Now RES counts as on the
+  team, an Out / reserve player with a healthy-game share >= 15% is kept (tagged, end of group), and a week whose
+  roster isn't published yet (per team) keeps the latest roster's reserve tags. Finished seasons in cache/depth_site
+  keep the old rule until rebuilt.

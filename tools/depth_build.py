@@ -123,6 +123,9 @@ def injury_games(A: pd.DataFrame, hurt_set: set) -> pd.DataFrame:
   return pd.DataFrame(bad, index=A.index, columns=weeks)
 
 
+INJURED_ROLE = 0.15  # an injured player with at least this healthy-game snap share stays listed (tagged)
+
+
 def usage_weeks(season: int, sn: pd.DataFrame, ros, out: set, reserve: set, listed: pd.DataFrame, pos_of: dict,
                 hurt_set: set | None = None) -> dict:
   """(team, week) -> [[group, n starters, [[gsis, name, avg snap %], ...]], ...] for every listed week where the team
@@ -130,14 +133,16 @@ def usage_weeks(season: int, sn: pd.DataFrame, ros, out: set, reserve: set, list
   weighted most (RECENCY); a game missed for any other reason counts 0. Left out: players not on the team's roster that week (latest roster
   week for weeks not out yet), ruled Out on that week's report, or on a reserve list. An Out / reserve player who
   would have been a starter by playing time is kept at the end of his group, flagged (an injured starter shouldn't
-  vanish: owner 2026-10-14, Jordan Addison). Roster = ACT or INA: inactive for a game is still on the team (the
-  ACT-only check dropped Addison after one missed game)."""
+  vanish: owner 2026-10-14, Jordan Addison), and so is an Out / reserve player with a real role (a healthy-game share
+  of INJURED_ROLE or more: owner 2026-10-15, Jordan Mason, RB2 at 45% before IR). Roster = ACT, INA or RES: inactive
+  for a game or on a reserve list (IR, PUP...) is still on the team (the ACT-only check dropped Addison after one
+  missed game; ACT / INA dropped every IR player before the injured-player rule could see him)."""
   out_map = {}
   if sn is None or sn.empty:
     return out_map
   ros_by = {}
   if ros is not None and len(ros):
-    r = ros[ros.status.isin(["ACT", "INA"])]
+    r = ros[ros.status.isin(["ACT", "INA", "RES"])]
     for (team, wk), g in r.groupby(["team", "week"]):
       ros_by[(team, int(wk))] = set(g.gsis_id)
   starters_n = {}
@@ -160,7 +165,9 @@ def usage_weeks(season: int, sn: pd.DataFrame, ros, out: set, reserve: set, list
       rweeks = [w for (t, w) in ros_by if t == team and w <= wk]
       on = ros_by.get((team, max(rweeks))) if rweeks else None
       on_team = lambda g: on is None or g in on  # noqa: E731
-      hurt = lambda g: (g, int(wk)) in out or (g, int(wk)) in reserve  # noqa: E731
+      # a week whose roster isn't out yet keeps the latest roster's reserve lists (IR doesn't lapse by itself)
+      rwk = int(wk) if (team, int(wk)) in ros_by else (max(rweeks) if rweeks else int(wk))
+      hurt = lambda g: (g, int(wk)) in out or (g, int(wk)) in reserve or (g, rwk) in reserve  # noqa: E731
       win = win[win.gsis_id.map(on_team)]
       n = starters_n.get((team, int(wk)), {})
       rows = []
@@ -183,7 +190,7 @@ def usage_weeks(season: int, sn: pd.DataFrame, ros, out: set, reserve: set, list
         share = share[share >= 0.01].head(6)
         # injured starters: would have been among the group's k starters by playing time
         cut = every.iloc[min(k, len(every)) - 1] if len(every) else 1.0
-        inj = every[is_hurt & (every >= cut).to_numpy() & (every >= 0.01).to_numpy()]
+        inj = every[is_hurt & ((every >= cut) | (every >= INJURED_ROLE)).to_numpy() & (every >= 0.01).to_numpy()]
         names = gw.drop_duplicates("gsis_id").set_index("gsis_id").player
         rows.append([grp, k, [[g, names.get(g, g), int(round(100 * v)), 0] for g, v in share.items()]
                      + [[g, names.get(g, g), int(round(100 * v)), 1] for g, v in inj.items()]])
@@ -251,6 +258,14 @@ def main():
       if ros is not None and len(ros):
         r = ros[ros.status_description_abbr.isin(ROSTER_TAG)]
         tags.update({(g, int(w)): ROSTER_TAG[c] for g, w, c in zip(r.gsis_id, r.week, r.status_description_abbr) if isinstance(g, str)})
+        # weeks whose roster isn't published yet keep the latest roster's reserve lists (IR doesn't lapse by itself;
+        # Jordan Mason showed as a healthy RB2 in week 6 while the latest roster, week 5, had him on IR)
+        # per team: some teams' week-N rosters post before others'
+        last = ros.groupby("team").week.max()
+        for g, w, tm, c in zip(r.gsis_id, r.week, r.team, r.status_description_abbr):
+          if isinstance(g, str) and int(w) == int(last.get(tm, w)):
+            for nxt in range(int(w) + 1, int(d.week.max()) + 1):
+              tags.setdefault((g, nxt), ROSTER_TAG[c])
     if season >= 2009:
       inj = cache.get("injuries", season, lambda: nfl.load_injuries([season]),
                       stale=live and cache.age_hours("injuries", season) > 6)
