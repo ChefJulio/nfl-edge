@@ -224,6 +224,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426354,George Pickens,Dallas Cowboys,Active,2026-10-09T03:45Z,,,,,,Pickens secured nine of 13 targets for 130 yards and a touchdown in the Cowboys' 24-16 loss to the Buccaneers on Thursday night.
 4568652,Tyler Smith,Dallas Cowboys,Active,2026-10-08T23:09Z,,,,,,"Smith (thumb) is active for Thursday's game against the Buccaneers, Patrik Walker of the Cowboys' official site reports."
 4431006,Caelen Carson,Dallas Cowboys,Active,2026-10-05T18:38Z,,,,,,
+3128429,Courtland Sutton,Denver Broncos,Active,2026-10-16T05:04Z,,,,,,Sutton brought in two of three targets for 19 yards in the Broncos' 17-14 overtime win over the Seahawks on Thursday.
 4372016,Jaylen Waddle,Denver Broncos,Active,2026-10-16T04:58Z,,,,,,Waddle secured four of seven targets for 24 yards in the Broncos' 17-14 overtime win over the Seahawks on Thursday.
 4426338,Bo Nix,Denver Broncos,Active,2026-10-16T04:54Z,,,,,,Nix completed 17 of 27 passes for 107 yards with no touchdowns or interceptions and rushed four times for two yards in the Broncos' 17-14 overtime win over the Seahawks on Thursday. He also recovered a fumble.
 4568490,RJ Harvey,Denver Broncos,Active,2026-10-16T03:59Z,,,,,,Harvey rushed six times for 25 yards and a touchdown and brought in three of four targets for 31 yards in the Broncos' 17-14 overtime win over the Seahawks on Thursday.
@@ -240,7 +241,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3051876,Evan Engram,Denver Broncos,Active,2026-10-14T02:34Z,,,,,,Engram caught all four of his targets for 55 yards during the Broncos' 23-17 win over the Chargers on Sunday.
 4603189,Sai'vion Jones,Denver Broncos,Active,2026-10-13T22:21Z,,,,,,
 2985659,Wil Lutz,Denver Broncos,Active,2026-10-12T16:11Z,,,,,,Lutz went 3-for-4 on field-goal attempts and connected on both of his extra-point tries during the Broncos' 23-17 win over the Chargers on Sunday.
-3128429,Courtland Sutton,Denver Broncos,Active,2026-10-12T01:39Z,,,,,,Sutton posted two catches (on three targets) for 18 yards and one touchdown during Sunday's 23-17 victory at the Chargers.
 4039057,Lil'Jordan Humphrey,Denver Broncos,Active,2026-10-10T00:22Z,,,,,,The Broncos signed Humphrey off the practice squad to the active roster Friday.
 4600981,Pat Bryant,Denver Broncos,Injured Reserve,2026-10-09T21:47Z,Ankle,Sprain,Right,2026-11-08,IR,Bryant (ankle) was placed on the Broncos' injured reserve Friday.
 5216101,Dondrea Tillman,Denver Broncos,Active,2026-10-09T01:10Z,,,,,,"Tillman (hamstring) was a full participant in Thursday's practice, Aric DiLalla of the team's official site reports."
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035661,Julian Blackmon,New Orleans Saints,Active,2026-10-11T16:37Z,,,,,,Blackmon (shoulder) is active for Sunday's game against the Vikings.
 4698597,Barion Brown,New Orleans Saints,Active,2026-10-11T16:22Z,,,,,,Brown (thigh) is active for Sunday's game against the Vikings.
 3115383,Davon Godchaux,New Orleans Saints,Active,2026-10-10T16:20Z,,,,,,Godchaux (groin) does not have an injury designation for Sunday's game against the Vikings.
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-16T04:10Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-16T05:00Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4725996,Abdul Carter,New York Giants,Questionable,2026-10-16T00:14Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Carter (calf) did not practice Thursday, Dan Salomone of the Giants' official site reports."
 4040655,Darnell Mooney,New York Giants,Active,2026-10-16T00:01Z,,,,,,"Mooney (neck) was a full participant in Thursday's practice, Dan Salomone of the Giants' official site reports."
 4040615,Malik Harrison,New York Giants,Questionable,2026-10-15T21:18Z,Groin,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
