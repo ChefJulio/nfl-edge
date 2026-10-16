@@ -10,6 +10,7 @@
   const NFLE = window.NFLE, esc = NFLE.esc;
   const LS_KEY = 'nfledge-scoring';
   const POS = ['QB', 'RB', 'WR', 'TE', 'FLEX', 'K', 'DST'];
+  const OUT_LINE = 0.9;  // inactive chance at which a player projects 0 (owner 2026-10-16: under 10% to play)
   const KDP = ['K', 'DST'];  // kickers / team defenses: data/kdst.json, standard ESPN scoring (owner 2026-10-15)
   const POS_LABEL = { DST: 'D/ST' };
   const FLEX_DEPTH = 150;  // a 14-team 2RB/2WR/1TE/1FLEX league starts 84 flex-eligible players; 150 adds waiver depth
@@ -100,6 +101,11 @@
         const base = pts(r.sc.pj, SC.built, r.pos), now = pts(r.sc.pj, w, r.pos);
         const ratio = base > 0.3 ? now / base : 1;
         r._proj = base > 0.3 ? r.proj * ratio : now;
+        // Near-certain outs (owner 2026-10-16: under 10% to play) project 0 and sink below the active players; the
+        // line if he does play stays beside it. 10-50% keep their if-active line (owner's call).
+        r._ifact = r._proj;
+        r._likelyOut = r.inactive >= OUT_LINE;
+        if (r._likelyOut) r._proj = 0;
         r._q = r.q.map(v => v * ratio);  // p10, p25, p50, p75, p90
         r._ratio = ratio;
         r._fpg = r.sc.g ? pts(r.sc.ss, w, r.pos) / r.sc.g : r.fpg;
@@ -162,7 +168,9 @@
           value: r => rankOf(r, flex), html: r => `<b class="rkn">${rankOf(r, flex)}</b>` },
         { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name, html: r => nameCell(r, flex) },
         { key: 'proj', label: 'Proj', num: true, cls: 'projc', title: 'Projected fantasy points under your scoring (tap a player for the full range of outcomes)', value: r => r._proj,
-          html: r => `<b class="pv" title="${esc(range(r))}">${f1(r._proj)}</b>${condLine(r)}` },
+          html: r => r._likelyOut
+            ? `<b class="pv" title="Under 10% to play: projected 0">0.0</b><span class="ifact" title="${esc(range(r))}">if he plays ${f1(r._ifact)}</span>`
+            : `<b class="pv" title="${esc(range(r))}">${f1(r._proj)}</b>${condLine(r)}` },
         { key: 'range', label: 'Range', num: true, cls: 'rngc', title: 'Floor to ceiling: 8 times in 10 his score lands in this range (10th to 90th percentile of how past projections like this turned out)',
           value: r => r._q[4] - r._q[0], html: r => `<span title="${esc(range(r))}">${Math.round(r._q[0])}&ndash;${Math.round(r._q[4])}</span>` },
         ...(RK.show_act ? [{ key: 'act', label: 'Actual', num: true, cls: 'actc', title: 'What he scored: live during his game (pulsing dot), final once it ends. Green = above his likely range (75th pct), red = below it (25th pct), colored only when final',

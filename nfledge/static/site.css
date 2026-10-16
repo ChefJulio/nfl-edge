@@ -427,3 +427,5 @@ table .mc .mv2.sc { min-width: 38px; }
 /* iOS also zooms on a quick double tap anywhere that isn't a link or button (rows, tiles, cells); manipulation turns
    that off and keeps pinch zoom and scrolling */
 html { touch-action: manipulation; }
+/* near-certain outs (rankings.js OUT_LINE): projected 0, with the line if he does play */
+td.projc .ifact { display: block; font-size: 10.5px; color: var(--muted); white-space: nowrap; margin-top: 1px; }
