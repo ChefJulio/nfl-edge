@@ -51,7 +51,7 @@ def season_ranks(base: dict, season: int) -> pd.DataFrame:
     past = ledger[(ledger.season == season) & (ledger.week < wk) | (ledger.season < season)]
     starters = past.dropna(subset=["qb"]).sort_values(["season", "week"]).groupby("team").qb.last().to_dict()
     vol = r.plays_pg
-    net = pd.Series({t: b * ((r.off.at[t, "pass"] + r.qb_term(starters.get(t)) - r.dfn.at[t, "pass"]) * vol["pass"]
+    net = pd.Series({t: b * ((r.off.at[t, "pass"] + r.qb_term(starters.get(t), t) - r.dfn.at[t, "pass"]) * vol["pass"]
                              + (r.off.at[t, "rush"] - r.dfn.at[t, "rush"]) * vol["rush"])
                      + st_w * (r.off.at[t, "st"] - r.dfn.at[t, "st"]) * vol["st"] for t in r.teams})
     rank = net.rank(ascending=False, method="min")
@@ -60,7 +60,7 @@ def season_ranks(base: dict, season: int) -> pd.DataFrame:
     gl = gl.merge(games[["game_id", "home_score", "away_score", "location"]], on="game_id")
     gl["home_rank"], gl["away_rank"] = gl.home_team.map(rank), gl.away_team.map(rank)
     gl["home_net"], gl["away_net"] = gl.home_team.map(net), gl.away_team.map(net)
-    qbt = pd.Series({t: float(r.qb_term(starters.get(t))) for t in r.teams})  # each starter's own effect
+    qbt = pd.Series({t: float(r.qb_term(starters.get(t), t)) for t in r.teams})  # each starter's own effect
     qrank = qbt.rank(ascending=False, method="min")
     gl["home_qbt"], gl["away_qbt"] = gl.home_team.map(qbt), gl.away_team.map(qbt)
     gl["home_qb_rank"], gl["away_qb_rank"] = gl.home_team.map(qrank), gl.away_team.map(qrank)

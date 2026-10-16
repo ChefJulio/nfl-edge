@@ -101,6 +101,7 @@ VARIANTS = {
   "td_k_50": variant(player_model__td_blend_k=50),
   "td_k_400": variant(player_model__td_blend_k=400),
   "no_qb_effects": variant(team_model__qb_effects=False),
+  "qb_newteam": variant(team_model__qb_newteam_dropbacks=150),  # INSIGHTS (R)
   "redistribution_0": variant(injuries__redistribution_scale=0.0),
   "redistribution_1": variant(injuries__redistribution_scale=1.0),
   "redist_conserve": variant(injuries__redistribute_conserve=True),

@@ -1728,3 +1728,47 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   week_rank_gap 0.0313, week_elo_per_100 0.3242 (fit on N, every season 2021-26). The playoff odds keep the
   rest-of-season rank and the old weights (fit on A); refit on C = home 0.1841, rank_gap 0.0252, elo 0.3616 - a
   candidate for the odds backtest, not applied.
+- **Finding 2026-10-16 (corrected harness, game misses from the team's side, + = overrated, 2021-25): QB changes are
+  overrated, most of all QBs new to the team.** Same QB as last game (n 2,247) -0.38 [-0.93, +0.15]; changes: new
+  arrival, last started for another team (n 65) +6.07 [+2.39, +9.73] (Vegas +2.69); experienced backup (n 90) +2.15
+  [-0.56, +4.78] (Vegas +0.55); inexperienced (n 83) +1.95 [-0.99, +4.85] (Vegas +2.45); usual starter returns (n 73)
+  +1.48 [-1.76, +4.83] (Vegas +1.75). The QB effect is one number per QB from all his plays, so a veteran's level
+  carries over to a new team, new system and receivers at full value.
+- **PRE-REGISTERED 2026-10-16 (before building): (R) a new-to-the-team QB term.** A second league-level indicator in
+  the pass unit next to the inexperienced one, fit the same way (one coefficient, penalty qb_inexp_alpha): 1 on a pass
+  play when the QB had < 150 dropbacks for THIS team before that week (play-by-play window) and >= 150 career (so it
+  never overlaps the inexperienced term). At prediction time it applies to the projected starter by the same rule.
+  Config team_model.qb_newteam_dropbacks (absent = off). Tests: (1) tools/game_eval.py 2021-25 (corrected harness)
+  baseline vs --set team_model.qb_newteam_dropbacks=150; (2) tools/experiments.py baseline,qb_newteam 2021-2025.
+  GATE: (1) margin MAE on games where either starter carries the new flag: lower with the 95% CI over games excluding
+  0; all games not worse (CI upper < +0.02); (2) fantasy MAE, all relevant players, not worse (CI upper < +0.005).
+- **RESULT {#qb-newteam} (R) a new-to-the-team QB term: FAIL (right direction, within noise).** tools/qb_newteam_eval.py
+  on game_eval 2021-25: games with a flagged starter (n 281 of 1,279) margin MAE 10.704 -> 10.627 (-0.077 [-0.232,
+  +0.072]); all games 10.428 -> 10.405 (-0.023 [-0.061, +0.013]). Fantasy (tools/experiments.py baseline,qb_newteam
+  2021-25): ALL +0.001 [0.000, +0.001] (QB +0.003 [0.000, +0.005]; guard met, effect nil). The flag (< 150 dropbacks for the team) also catches offseason signings in their first
+  games, diluting the mid-season-arrival effect behind the finding (65 games); narrowing it to those now would be
+  chosen after seeing the data. Off (config absent); the code stays as an experiment.
+- **Finding 2026-10-16 (outside review of the testing approach, read-only checks on the caches; latest baseline
+  parquet per season, scored rows, weeks 3+). Work plan: threads 1-8 below, in order.**
+  - Kickoff rule: kickoff EPA to the receiving team ~0 in 2018-23 -> +0.255 (2024), +0.253 (2025), +0.231 (2026).
+    Team sd of kickoff EPA 0.05-0.09 before -> 0.103 (2025), 0.144 (2026 partial). Points-formula ST weight
+    (fit_points_st_net) by test season 2021-26: 0.98 / 1.34 / 2.24 / 2.38 / 2.31 / 2.24. With points_seasons = 6 the
+    2026 fit is 4/6 pre-rule. Nothing in the repo mentioned the rule.
+  - Scored set misses breakouts: 18.8% of weekly top finishes (top 12 QB / 24 RB / 36 WR / 12 TE, 2021-26) are outside
+    the scored rows: 200 have < 2 games, 1,110 played but sit outside the top-N (TE 252 / 996, WR 578 / 2,988). Mean
+    proj 4.48; where ECR exists (n 1,046) ours 4.63 vs ECR 4.97. The top-N is ranked by mean(proj, raw_fpg, vegas),
+    i.e. partly by our own projection.
+  - Residual correlation: QB-WR same team +0.32 / opposing +0.09; QB-TE +0.28 / +0.07; QB-RB +0.05; WR-WR, RB-RB,
+    WR-RB ~0. league.js sums player variances as independent for the matchup win chance.
+  - Season drift, mean actual - proj, 2021-26: all -0.18 / +0.04 / +0.40 / +0.67 / -0.02 / +0.33; QB -0.63 / +0.66 /
+    +1.07 / +1.46 / +0.37 / +1.06 (under-projected 5 of 6 seasons).
+  - Wind, training vs live: training uses pbp game wind (max over game, data.py); live uses an Open-Meteo forecast
+    (mean of 4 hourly values at 10 m). Different source AND definition. Penalty active on 19% of scored rows (mean
+    11%). Forecast wind isn't archived numerically.
+  - Lines, training vs live: backtests use nflverse lines as they stand after the game (effectively closing); live
+    Tue-Sat builds use that day's line. No archive of the lines used live.
+  - Threads: (1) archive what the live site used; (2) kickoff-rule regime; (3) information the stats can't see (change
+    events); (4) score where fantasy value is; (5) QB calibration; (6) correlation-aware League win chance (owner
+    asked before shipping a change to what the site shows); (7) rest-of-season accuracy; (8) testing hygiene. Rules:
+    descriptive check first, pre-register only on a signal persisting across seasons; prefer decide-2025 /
+    confirm-2026 over another pass on 2021-25; check the harness matches production; scan pockets are hypotheses.

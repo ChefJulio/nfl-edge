@@ -919,7 +919,7 @@ def unit_points(r, vol: dict, starters: dict, w: dict) -> pd.DataFrame:
   """Model margin per game vs an average opponent on a neutral field, per unit, at league-average volume (so
   units add up): EPA per game x the game model's points-formula weights (formula_weights). Pass O includes the
   starting QB's effect; defense signs flipped so positive is always good."""
-  qb = pd.Series({t: r.qb_term(starters.get(t)) for t in r.teams})
+  qb = pd.Series({t: r.qb_term(starters.get(t), t) for t in r.teams})
   u = pd.DataFrame(index=r.teams)
   u["pass_o"] = (r.off["pass"] + qb) * vol["pass"] * w["play"]
   u["rush_o"] = r.off["rush"] * vol["rush"] * w["play"]
@@ -946,7 +946,7 @@ def schedule_faced(eng, season: int, week: int, r, starters: dict, qb_eff: dict 
   games = cur.groupby("team").size()
   off_faced = -(P.defteam.map(r.dfn["pass"]).groupby(P.posteam).sum()
                 + R.defteam.map(r.dfn["rush"]).groupby(R.posteam).sum())
-  qbt = P.qb.map(lambda q: r.qb_term(q)).astype(float)  # float even when no games are played yet (week 1)
+  qbt = pd.Series([r.qb_term(q, t) for q, t in zip(P.qb, P.posteam)], index=P.index, dtype=float)  # float even when no games are played yet (week 1)
   def_faced = ((P.posteam.map(r.off["pass"]) + qbt).groupby(P.defteam).sum()
                + R.posteam.map(r.off["rush"]).groupby(R.defteam).sum())
   out = pd.DataFrame({"off_past": off_faced / games, "def_past": def_faced / games})
@@ -963,7 +963,7 @@ def schedule_faced(eng, season: int, week: int, r, starters: dict, qb_eff: dict 
       rows.append({"team": t,
                    "off_next": -(r.dfn.at[o, "pass"] * db_pg.get(t, np.nan) + r.dfn.at[o, "rush"] * ru_pg.get(t, np.nan)),
                    # future opponents: their expected QB (powerc, when given), else this week's starter
-                   "def_next": ((r.off.at[o, "pass"] + (qb_eff[o] if qb_eff and o in qb_eff else r.qb_term(starters.get(o))))
+                   "def_next": ((r.off.at[o, "pass"] + (qb_eff[o] if qb_eff and o in qb_eff else r.qb_term(starters.get(o), o)))
                                 * db_pg.get(o, np.nan)
                                 + r.off.at[o, "rush"] * ru_pg.get(o, np.nan))})
   if rows:
@@ -1006,7 +1006,7 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
     now = dict(zip(q_.gsis_id, q_.avail.astype(float)))
   usual, backup, pbar = powerc.inputs(eng, season, week, starters, now)
   u = powerc.blend(unit_points(rb, vol, usual, fw), unit_points(rb, vol, backup, fw), pbar)
-  qb_eff = {t: pbar.get(t, 1.0) * rb.qb_term(usual.get(t, starters.get(t))) + (1 - pbar.get(t, 1.0)) * rb.qb_term(backup.get(t))
+  qb_eff = {t: pbar.get(t, 1.0) * rb.qb_term(usual.get(t, starters.get(t)), t) + (1 - pbar.get(t, 1.0)) * rb.qb_term(backup.get(t), t)
             for t in rb.teams}
   history, qb_by_week = {}, {}
   for w in range(2, week + 1):
@@ -1242,7 +1242,7 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
   # One bar scale for every row of every game: a full bar (90%) is the 95th percentile of offense-vs-defense impact
   # over every possible pairing of this week's ratings at league-average play counts.
   pp = r.plays_pg
-  o_imp = {t: pp.get("pass", 34.0) * (r.off.at[t, "pass"] + r.qb_term(starters.get(t)))
+  o_imp = {t: pp.get("pass", 34.0) * (r.off.at[t, "pass"] + r.qb_term(starters.get(t), t))
            + pp.get("rush", 25.0) * r.off.at[t, "rush"] for t in r.off.index}
   d_imp = {t: pp.get("pass", 34.0) * r.dfn.at[t, "pass"] + pp.get("rush", 25.0) * r.dfn.at[t, "rush"]
            for t in r.dfn.index}
@@ -1256,7 +1256,7 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
               "logo_sm": ts.logo_img(t, 16), "logo_url": ts.logo.get(t) or "", "logo_bg": ts.logo_bg(t),
               "qb": qb_name.get(starters.get(t), ""), "qb_pid": starters.get(t) or "",
               "record": (rk.get(t) or {}).get("record") or "", "rank": rank_of(t, "rank"),
-              "off_pass": per100(r.off.at[t, "pass"] + r.qb_term(starters.get(t))),
+              "off_pass": per100(r.off.at[t, "pass"] + r.qb_term(starters.get(t), t)),
               "off_rush": per100(r.off.at[t, "rush"]), "def_pass": per100(-r.dfn.at[t, "pass"]),
               "def_rush": per100(-r.dfn.at[t, "rush"]), "st": per100(r.off.at[t, "st"] - r.dfn.at[t, "st"])}
     away, home = side(g.away_team), side(g.home_team)

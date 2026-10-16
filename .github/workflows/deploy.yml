@@ -123,12 +123,15 @@ jobs:
         run: python tools/playoff_odds.py --site=site
       # The odds-by-week chart needs each week's odds kept: commit only that file to the archive branch (the archive commit
       # above runs before the odds exist). Failures never fail the build.
-      - name: Keep playoff odds history
+      # Also what this build fed the model (data/live_inputs/, written by run.py: lines, wind, ECR scrape, projections),
+      # so backtest accuracy can be checked against what the live site actually used.
+      - name: Keep playoff odds and live input history
         working-directory: site
         run: |
-          git add data/playoffs/hist_*.json || exit 0
+          git add data/live_inputs/*.json || true
+          git add data/playoffs/hist_*.json || true
           if ! git diff --cached --quiet; then
-            git commit -m "Playoff odds history ($(date -u +%Y-%m-%d))"
+            git commit -m "Playoff odds and live inputs ($(date -u +%Y-%m-%d))"
             for i in 1 2 3; do
               git push origin HEAD:archive && break
               git pull --rebase -X theirs origin archive

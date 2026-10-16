@@ -39,7 +39,25 @@ def prior_dropbacks(qbexp: pd.DataFrame, season: int, week: int) -> pd.Series:
   return pd.Series((last.prior + last.n).to_numpy(), index=last.qb.to_numpy())
 
 
-def unit_plays(pbp: pd.DataFrame, cfg: dict, qbexp: pd.DataFrame | None = None) -> dict[str, pd.DataFrame]:
+def qb_team_experience(pbp: pd.DataFrame) -> pd.DataFrame:
+  """Dropbacks each QB had for each team BEFORE each (season, week) within the play-by-play window. Feeds the
+  new-to-the-team QB term (EXPERIMENT team_model.qb_newteam_dropbacks; INSIGHTS (R))."""
+  db = pbp[pbp.is_dropback].assign(qb=pbp.passer_player_id.fillna(pbp.rusher_player_id)).dropna(subset=["qb", "posteam"])
+  g = db.groupby(["qb", "posteam", "season", "week"]).size().rename("n").reset_index()
+  g = g.rename(columns={"posteam": "team"}).sort_values(["qb", "team", "season", "week"])
+  g["prior"] = g.groupby(["qb", "team"]).n.cumsum() - g.n
+  return g
+
+
+def prior_team_dropbacks(qbteam: pd.DataFrame, season: int, week: int) -> pd.Series:
+  """Dropbacks per (QB, team) entering (season, week)."""
+  before = qbteam[(qbteam.season < season) | ((qbteam.season == season) & (qbteam.week < week))]
+  last = before.groupby(["qb", "team"]).tail(1)
+  return pd.Series((last.prior + last.n).to_numpy(), index=pd.MultiIndex.from_arrays([last.qb, last.team]))
+
+
+def unit_plays(pbp: pd.DataFrame, cfg: dict, qbexp: pd.DataFrame | None = None,
+               qbteam: pd.DataFrame | None = None) -> dict[str, pd.DataFrame]:
   tm = cfg["team_model"]
   live = pbp.epa.notna() & pbp.posteam.notna() & pbp.defteam.notna()
   # Every play counts, blowouts included: the old garbage-time filter (offense win probability 10-90%) was removed
@@ -61,7 +79,13 @@ def unit_plays(pbp: pd.DataFrame, cfg: dict, qbexp: pd.DataFrame | None = None) 
     pri = qbexp.set_index(["qb", "season", "week"]).prior
     key = pd.MultiIndex.from_arrays([out["pass"].qb, out["pass"].season, out["pass"].week])
     cut = tm.get("qb_inexp_dropbacks", 150)
-    out["pass"]["qb_inexp"] = (pri.reindex(key).fillna(0).to_numpy() < cut).astype(float)
+    career = pri.reindex(key).fillna(0).to_numpy()
+    out["pass"]["qb_inexp"] = (career < cut).astype(float)
+    new_cut = tm.get("qb_newteam_dropbacks")
+    if new_cut and qbteam is not None:  # EXPERIMENT (INSIGHTS (R)): experienced QB, few dropbacks for this team
+      tp = qbteam.set_index(["qb", "team", "season", "week"]).prior
+      tkey = pd.MultiIndex.from_arrays([out["pass"].qb, out["pass"].posteam, out["pass"].season, out["pass"].week])
+      out["pass"]["qb_newteam"] = ((tp.reindex(tkey).fillna(0).to_numpy() < new_cut) & (career >= cut)).astype(float)
   return out
 
 
@@ -115,6 +139,7 @@ class Design:
     self.base_p = 2 * n + 3
     self.inexp_alpha = 1.0
     self.qbs = []
+    self.i_inexp = self.i_new = None
     if qbs and "qb" in plays:
       q = plays.qb.fillna("UNK")
       self.qbs = sorted(q.unique())
@@ -123,7 +148,13 @@ class Design:
       data = np.concatenate([data, np.ones(len(plays)), inexp])
       r = np.concatenate([r, rows, rows])
       c = np.concatenate([c, self.base_p + qi, np.full(len(plays), self.base_p + len(self.qbs))])
-    self.p = self.base_p + (len(self.qbs) + 1 if self.qbs else 0)
+      self.i_inexp = self.base_p + len(self.qbs)
+      if "qb_newteam" in plays:  # EXPERIMENT (INSIGHTS (R)): the new-to-the-team indicator, one more column
+        self.i_new = self.i_inexp + 1
+        data = np.concatenate([data, plays["qb_newteam"].to_numpy(dtype=float)])
+        r = np.concatenate([r, rows])
+        c = np.concatenate([c, np.full(len(plays), self.i_new)])
+    self.p = self.base_p + (len(self.qbs) + 1 + (self.i_new is not None) if self.qbs else 0)
     self.X = sp.csr_matrix((data, (r, c)), shape=(len(plays), self.p))
     self.y = plays.epa.to_numpy(dtype=float)
 
@@ -143,7 +174,9 @@ class Design:
     pen[0] = 0.0
     if self.qbs:
       pen[self.base_p:self.base_p + len(self.qbs)] = alpha_qb
-      pen[-1] = self.inexp_alpha  # inexperienced-QB indicator: lightly penalized league-level effect
+      pen[self.i_inexp] = self.inexp_alpha  # inexperienced-QB indicator: lightly penalized league-level effect
+      if self.i_new is not None:
+        pen[self.i_new] = self.inexp_alpha  # new-to-the-team indicator, same footing
     M = A + np.diag(pen) + 1e-9 * np.eye(self.p)
     # Ridge normal equations are symmetric positive-definite: Cholesky is the right solver and ~170x faster
     # than np.linalg.solve here (85 ms vs 0.5 ms for the pass unit; the general LU path thrashes OpenBLAS).
@@ -172,16 +205,23 @@ class Ratings:
   qb_inexp: float = 0.0  # extra effect for QBs with little career experience
   qb_prior: pd.Series | None = None  # career dropbacks entering this week
   inexp_cut: float = 150.0
+  qb_newteam: float = 0.0  # EXPERIMENT (INSIGHTS (R)): extra effect for an experienced QB new to the team
+  qb_team_prior: pd.Series | None = None  # dropbacks per (QB, team) entering this week
+  newteam_cut: float = 0.0
 
-  def qb_term(self, qb) -> float:
-    """Pass EPA/play contribution of a specific quarterback (0 when QB effects are off or QB unknown)."""
+  def qb_term(self, qb, team=None) -> float:
+    """Pass EPA/play contribution of a specific quarterback (0 when QB effects are off or QB unknown). `team` is
+    the team he plays for in that game; it is needed only for the new-to-the-team term (when that is on)."""
     if self.qb is None or qb is None or (isinstance(qb, float) and np.isnan(qb)):
       return 0.0
     prior = self.qb_prior.get(qb, 0.0) if self.qb_prior is not None else 0.0
-    return float(self.qb.get(qb, 0.0)) + self.qb_inexp * float(prior < self.inexp_cut)
+    out = float(self.qb.get(qb, 0.0)) + self.qb_inexp * float(prior < self.inexp_cut)
+    if self.qb_team_prior is not None and team is not None and prior >= self.inexp_cut:
+      out += self.qb_newteam * float(self.qb_team_prior.get((qb, team), 0.0) < self.newteam_cut)
+    return out
 
   def expected_epa(self, off_team: str, def_team: str, unit: str, home: int, div: int = 0, qb=None) -> float:
-    q = self.qb_term(qb) if unit == "pass" else 0.0
+    q = self.qb_term(qb, off_team) if unit == "pass" else 0.0
     return (self.intercept[unit] + self.off.at[off_team, unit] + self.dfn.at[def_team, unit] + q
             + (self.home[unit] + self.home_div.get(unit, 0.0) * div) * home)
 
@@ -198,7 +238,9 @@ class TeamModel:
     self.cfg = cfg
     self.use_qb = cfg["team_model"].get("qb_effects", True)
     self.qbexp = qb_experience(pbp, qb_career)
-    self.plays = unit_plays(pbp, cfg, self.qbexp)
+    self.new_cut = cfg["team_model"].get("qb_newteam_dropbacks")
+    self.qbteam = qb_team_experience(pbp) if self.new_cut else None
+    self.plays = unit_plays(pbp, cfg, self.qbexp, self.qbteam)
     self.teams = sorted(set(pbp.posteam.dropna()) | set(pbp.defteam.dropna()))
     div = cfg["team_model"].get("division_hfa", True)
     self.designs = {u: Design(p, self.teams, division=div, qbs=(u == "pass" and self.use_qb))
@@ -252,7 +294,7 @@ class TeamModel:
     alphas = alphas or self.alphas
     icpt, home, off, dfn, se_off, se_def, hdiv = {}, {}, {}, {}, {}, {}, {}
     raw_off, raw_def, plays_pg = {}, {}, {}
-    qb, qb_inexp = None, 0.0
+    qb, qb_inexp, qb_new = None, 0.0, 0.0
     for u in UNITS:
       w = self.weights(u, season, target_week)
       d = self.designs[u]
@@ -260,7 +302,8 @@ class TeamModel:
       icpt[u], off[u], dfn[u], home[u], hdiv[u] = _unpack(beta, self.teams)
       if d.qbs:
         qb = pd.Series(beta[d.base_p:d.base_p + len(d.qbs)], index=d.qbs)
-        qb_inexp = float(beta[-1])
+        qb_inexp = float(beta[d.i_inexp])
+        qb_new = float(beta[d.i_new]) if d.i_new is not None else 0.0
       p = self.plays[u]
       cur = (p.season == season) & (p.week < target_week)
       if cur.any():
@@ -275,7 +318,9 @@ class TeamModel:
                 pd.DataFrame(raw_off).reindex(self.teams) if raw_off else None,
                 pd.DataFrame(raw_def).reindex(self.teams) if raw_def else None, plays_pg, hdiv,
                 qb, qb_inexp, prior_dropbacks(self.qbexp, season, target_week),
-                float(self.cfg["team_model"].get("qb_inexp_dropbacks", 150)))
+                float(self.cfg["team_model"].get("qb_inexp_dropbacks", 150)), qb_new,
+                prior_team_dropbacks(self.qbteam, season, target_week) if self.qbteam is not None else None,
+                float(self.new_cut or 0.0))
     if alphas is self.alphas:
       self._cache[key] = r
     return r

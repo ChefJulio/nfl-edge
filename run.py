@@ -22,8 +22,8 @@ from nfledge.engine import POSITIONS, Engine
 
 
 def model_code() -> str:
-  """Source of everything that affects model outputs (report.py, docs.py, standings.py and machine.py only change presentation)."""
-  return "".join(p.read_text() for p in sorted((ROOT / "nfledge").glob("*.py")) if p.name not in ("report.py", "docs.py", "standings.py", "machine.py", "powerc.py"))
+  """Source of everything that affects model outputs (docs.PRESENTATION files only change presentation)."""
+  return "".join(p.read_text() for p in sorted((ROOT / "nfledge").glob("*.py")) if p.name not in docs.PRESENTATION)
 
 
 def frame_hash(df) -> int:
@@ -260,6 +260,10 @@ def main():
     print("[run] warning: MODEL.md is out of date (model code/config changed); see tools/model_doc.py", flush=True)
   out = rp.render(ctx, Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week))
   check_script(out)
+  if not args.week:  # what this live build fed the model (lines, wind, ECR scrape, projections), for live-vs-backtest checks
+    from nfledge import live_inputs
+    f = live_inputs.write(out.parent, data, eng.games(season, week), proj, season, week)
+    print(f"[run] live inputs archived -> {f.name}", flush=True)
   if args.lookahead:
     rep = proj[proj.on_report] if "on_report" in proj else proj.iloc[0:0]
     build_lookahead(eng, data, cfg, scoring, season, week, out.parent, dict(zip(rep.gsis_id, rep.avail)), espn_feed=feed)

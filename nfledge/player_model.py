@@ -735,7 +735,7 @@ class PlayerModel:
         j["def_pass"] = j.opp.map(r.dfn["pass"])
         j["def_rush"] = j.opp.map(r.dfn["rush"])
         # Supporting-cast passing offense includes the quarterback who actually started that game.
-        j["off_pass"] = j.team.map(r.off["pass"]) + np.array([r.qb_term(q) for q in j.qb])
+        j["off_pass"] = j.team.map(r.off["pass"]) + np.array([r.qb_term(q, t) for q, t in zip(j.qb, j.team)])
         j["off_rush"] = j.team.map(r.off["rush"])
         j["implied_pts"] = j.total_line / 2 + j.spread_team / 2
         for sh in ("db_share", "carry_share", "tgt_share"):
@@ -863,7 +863,7 @@ class PlayerModel:
     self._qb_starters(p)
     # Pass offense = team (ex-QB) + the projected starter's QB effect; the injury module swaps in the backup.
     p["off_pass_base"] = p.off_pass
-    p["qb_term"] = [ratings.qb_term(g) if pos == "QB" else np.nan for g, pos in zip(p.gsis_id, p.pos)]
+    p["qb_term"] = [ratings.qb_term(g, t) if pos == "QB" else np.nan for g, pos, t in zip(p.gsis_id, p.pos, p.team)]
     starter = p[p.pos == "QB"].sort_values("db_share_hat").groupby("team").tail(1).set_index("team").qb_term
     p["off_pass"] = p.off_pass_base + p.team.map(starter).fillna(0.0)
     p["db"] = p.db_share_hat * p.team_db
