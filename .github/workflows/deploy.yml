@@ -71,6 +71,10 @@ jobs:
       # can't be backtested from their API: save what they show before kickoff, every run (tools/sleeper_snapshot.py).
       - name: Snapshot Sleeper projections
         run: python tools/sleeper_snapshot.py --out=site/data/sleeper_proj || true
+      # FantasyPros weekly ECR is re-scraped twice a day but only Friday's is kept in nflverse's history: save each scrape
+      # for the early-week ECR forward test (tools/ecr_snapshot.py; INSIGHTS sec. 9).
+      - name: Snapshot expert rankings
+        run: python tools/ecr_snapshot.py --out=site/data/ecr_snapshots || true
       - name: Commit new archive pages
         working-directory: site
         run: |

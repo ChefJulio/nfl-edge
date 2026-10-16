@@ -1314,3 +1314,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   plain stat values in data tables in span.sc (headers span.sc.h) when 80%+ of a column qualifies; cells with their own
   markup (bars, badges, words like "cov") stay plain; `no-chips` on a table opts out. NFLE.Table adds 8 px per
   non-pinned column on fixed-width tables so chips don't clip. Box score (pst-tbl) keeps its tighter packed variant.
+- **PRE-REGISTERED 2026-10-15 (owner: "aren't expert rankings available before Friday?"): early-week ECR.** FantasyPros
+  weekly ECR exists all week (DynastyProcess re-scrapes twice daily), but nflverse's history keeps only Friday's, so
+  Tue-Thu projections run without the expert blend and early-week ranks can't be backtested. Every CI run now saves
+  the current scrape (tools/ecr_snapshot.py -> archive branch data/ecr_snapshots/). TEST once 4+ weeks of snapshots
+  exist (from 2026 wk 7): projections as they stood Tue / Wed / Thu (archived pages), re-blended with that day's
+  ECR using the CURRENT Friday-fit blend weights, vs as published (no ECR). Relevant RB / WR / TE rows. GATE:
+  MAE better with the 95% CI over team-weeks excluding 0 on the Tue-Thu rows, no position worse; then early-week
+  ECR goes live (the same pre-kickoff guard).
