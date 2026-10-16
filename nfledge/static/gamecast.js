@@ -1922,11 +1922,11 @@
           const cell = U ? U.player({ name: a.athlete.displayName, team: side.team, espn: id, pos: dp ? dp.pos : '', sub }, teams)
             : `<b>${esc(a.athlete.displayName)}</b>`;
           const fp = withFp ? fpOf(id) : null;
-          return `<tr class="teamrow" style="${style}"${pid ? ` data-open-pid="${esc(pid)}"` : ''}><td class="pst-who">${cell}</td>${(a.stats || []).map(v => `<td class="num">${esc(v)}</td>`).join('')}${withFp ? `<td class="num pst-fp"><b>${fp == null ? '' : f1(fp)}</b></td>` : ''}</tr>`;
+          return `<tr class="teamrow" style="${style}"${pid ? ` data-open-pid="${esc(pid)}"` : ''}><td class="pst-who">${cell}</td>${(a.stats || []).map(v => `<td class="num"><span class="sc">${esc(v)}</span></td>`).join('')}${withFp ? `<td class="num pst-fp">${fp == null ? '' : `<span class="sc fp">${f1(fp)}</span>`}</td>` : ''}</tr>`;
         }).join('');
-        const tot = (c.totals || []).length ? `<tr class="pst-tot"><td>Team</td>${c.totals.map(v => `<td class="num">${esc(v)}</td>`).join('')}${withFp ? '<td></td>' : ''}</tr>` : '';
-        const head = (c.labels || []).map((l, i) => `<th class="num" title="${esc((c.descriptions || [])[i] || '')}">${esc(l)}</th>`).join('')
-          + (withFp ? '<th class="num pst-fp" title="Fantasy points for the whole game, your scoring">FP</th>' : '');
+        const tot = (c.totals || []).length ? `<tr class="pst-tot"><td>Team</td>${c.totals.map(v => `<td class="num"><span class="sc">${esc(v)}</span></td>`).join('')}${withFp ? '<td></td>' : ''}</tr>` : '';
+        const head = (c.labels || []).map((l, i) => `<th class="num" title="${esc((c.descriptions || [])[i] || '')}"><span class="sc h">${esc(l)}</span></th>`).join('')
+          + (withFp ? '<th class="num pst-fp" title="Fantasy points for the whole game, your scoring"><span class="sc h">FP</span></th>' : '');
         return `<div class="pst-cat"><div class="bx-h">${esc(PST_NAME[c.name] || c.text || c.name)}</div>
           <div class="lg-scroll"><table class="bx tiles pst-tbl"><thead><tr><th>Player</th>${head}</tr></thead><tbody>${rows}${tot}</tbody></table></div></div>`;
       }).join('');
