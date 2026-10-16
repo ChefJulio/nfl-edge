@@ -1605,6 +1605,9 @@
         side.classList.remove('dog');
         side.classList.toggle('lost', !live && st[k].score < st[k === 'away' ? 'home' : 'away'].score);
         side.classList.toggle('has-ball', !!(sp && sp.offense.team === st[k].team));
+        // once it's final, ESPN's record includes this game (the built page has the record from before kickoff)
+        const rec = side.querySelector('.mt-nm small');
+        if (rec && !live && st[k].record) rec.textContent = st[k].record;
       });
       const winner = st.away.score > st.home.score ? st.away.team : st.home.score > st.away.score ? st.home.team : null;
       tile.querySelector('.mt-st').innerHTML = live
