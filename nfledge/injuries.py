@@ -387,7 +387,8 @@ class InjuryModel:
     rg["hist_w"], rg["act_w"] = hist.to_numpy(), act.to_numpy()  # this week's own history counts (next season's seed)
     # EXPERIMENT (injuries.scratch_carry; pre-registered 2026-10-15): a player with no games yet this season starts
     # from last season's totals, so week 1 isn't "no history" for everyone (every starting QB got 70% active).
-    if self.cfg.get("injuries", {}).get("scratch_carry") and (season - 1) in self.data.seasons:
+    carry = self.cfg.get("injuries", {}).get("scratch_carry")
+    if carry and (season - 1) in self.data.seasons:
       tabs = self.__dict__.setdefault("_scratch_tables", {})  # previous seasons' tables, built once
       prev = tabs.get(season - 1)
       if prev is None:
@@ -399,6 +400,8 @@ class InjuryModel:
         "snap": pv_hist[pv_hist.act_w == 1].groupby("gsis_id").snap.mean(),
         "last": pv_hist.groupby("gsis_id").act_w.last()})
       seed = rg.n_prev == 0
+      if carry == "week1":  # v2: only each team's first game of the season; training unchanged
+        seed &= rg.week == rg.groupby("team").week.transform("min")
       m = rg.gsis_id.map(agg.n).fillna(0)
       use = seed & (m > 0)
       rg.loc[use, "n_prev"] = m[use]
@@ -425,7 +428,75 @@ class InjuryModel:
     for p_ in ("QB", "RB", "WR", "TE"):
       rg[f"is_{p_}"] = (rg.pos == p_).astype(int)
     rg["season"] = season
+    if self.cfg.get("injuries", {}).get("job_security"):
+      self._job_security(rg, season)
     return rg
+
+  JOB_COLS = ["incumbent", "perf_pct", "r1_behind", "win_pct", "cap_pct", "last_week"]
+
+  def _job_security(self, rg: pd.DataFrame, season: int):
+    """EXPERIMENT (injuries.job_security; pre-registered 2026-10-16, tools/job_security.py): in place, what makes a
+    healthy starter lose the job: incumbent (started his team's first game: QB 70%+ snaps, others led the position
+    group), season-to-date EPA per opportunity percentile at his position, a first-round rookie at his position on
+    the roster, team win % before the week, his contract's APY share of the cap, the team's last regular-season week."""
+    from .config import ROOT
+    d, L = self.data, self.pm.ledger
+    Ls = L[L.season == season]
+    # incumbent
+    first = Ls.groupby("team").week.transform("min") == Ls.week
+    f0 = Ls[first].assign(pos=Ls[first].gsis_id.map(self.pm.info.position).replace({"FB": "RB", "HB": "RB"}))
+    lead = f0.groupby(["team", "pos"]).offense_pct.transform("max")
+    inc = f0[((f0.pos == "QB") & (f0.offense_pct >= 0.7)) | ((f0.pos != "QB") & (f0.offense_pct >= 0.5) & (f0.offense_pct >= lead - 1e-9))]
+    rg["incumbent"] = rg.gsis_id.isin(set(inc.gsis_id)).astype(float)
+    # season-to-date EPA per opportunity, as of the week (games before it)
+    e = Ls.assign(epa=Ls.db_epa.fillna(0) + Ls.rush_epa.fillna(0) + Ls.tgt_epa.fillna(0),
+                  opp=Ls.db.fillna(0) + Ls.carries.fillna(0) + Ls.tgt.fillna(0)).groupby(["gsis_id", "week"])[["epa", "opp"]].sum()
+    e = e.reset_index().sort_values(["gsis_id", "week"])
+    e["ce"], e["co"] = e.groupby("gsis_id").epa.cumsum(), e.groupby("gsis_id").opp.cumsum()
+    look = {}
+    for g, x in e.groupby("gsis_id"):
+      look[g] = (x.week.to_numpy(), x.ce.to_numpy(), x.co.to_numpy())
+    perf = []
+    for g, w in zip(rg.gsis_id, rg.week):
+      z = look.get(g)
+      n = int(np.searchsorted(z[0], w)) if z is not None else 0  # games before this week
+      perf.append(z[1][n - 1] / max(z[2][n - 1], 1.0) if n and z[2][n - 1] >= 10 else np.nan)
+    rg["perf"] = perf
+    rg["perf_pct"] = rg.groupby(["week", "pos"]).perf.rank(pct=True).fillna(0.5)
+    rg.drop(columns=["perf"], inplace=True)
+    # a first-round rookie at his position on the roster that week (not him)
+    r = d.rosters[(d.rosters.season == season) & d.rosters.gsis_id.notna()]
+    r = r[(pd.to_numeric(r.years_exp, errors="coerce") == 0) & (pd.to_numeric(r.draft_number, errors="coerce") <= 32)]
+    r = r.assign(team=r.team.replace({"LAR": "LA"}), pos=r.position.replace({"FB": "RB", "HB": "RB"}))
+    rk = r.groupby(["week", "team", "pos"]).gsis_id.apply(set).to_dict()
+    last_r = int(r.week.max()) if len(r) else 0
+    rg["r1_behind"] = [float(bool(rk.get((min(w, last_r), t_, p_), set()) - {g})) for w, t_, p_, g in zip(rg.week, rg.team, rg.pos, rg.gsis_id)]
+    # team win % before the week
+    sch = d.schedules[(d.schedules.season == season) & (d.schedules.game_type == "REG") & d.schedules.home_score.notna()]
+    res = pd.concat([pd.DataFrame({"week": sch.week, "team": sch.home_team, "w": (sch.home_score > sch.away_score) + 0.5 * (sch.home_score == sch.away_score)}),
+                     pd.DataFrame({"week": sch.week, "team": sch.away_team, "w": (sch.away_score > sch.home_score) + 0.5 * (sch.home_score == sch.away_score)})])
+    res["team"] = res.team.replace({"LAR": "LA"})
+    wins = {(t_, w): float(x[x.week < w].w.mean()) if (x.week < w).any() else 0.5 for t_, x in res.groupby("team") for w in range(1, 23)}
+    rg["win_pct"] = [wins.get((t_, w), 0.5) for t_, w in zip(rg.team, rg.week)]
+    # contract: APY share of the cap for the deal in force this season (cached by tools/player_logs.py)
+    cp = getattr(self, "_contracts", None)
+    if cp is None:
+      try:
+        cp = pd.read_parquet(ROOT / self.cfg["data"]["cache_dir"] / "contracts_all.parquet")
+      except Exception:
+        cp = pd.DataFrame(columns=["gsis_id", "year_signed", "last_year", "apy_cap_pct"])
+      self._contracts = cp
+    c = cp.dropna(subset=["gsis_id", "year_signed"])
+    c = c[(c.year_signed <= season) & (c.last_year.fillna(c.year_signed) >= season)].sort_values("year_signed")
+    cap = c.drop_duplicates("gsis_id", keep="last").set_index("gsis_id").apy_cap_pct
+    rg["cap_pct"] = rg.gsis_id.map(cap).fillna(0.0).astype(float)
+    # last regular-season week (rest games)
+    last_wk = int(d.schedules[(d.schedules.season == season) & (d.schedules.game_type == "REG")].week.max())
+    rg["last_week"] = (rg.week == last_wk).astype(float)
+
+  @property
+  def scratch_cols(self):
+    return self.SCRATCH_COLS + (self.JOB_COLS if self.cfg.get("injuries", {}).get("job_security") else [])
 
   SCRATCH_COLS = ["n_prev", "act_rate", "played_last", "snap_avg", "rank", "ahead_out", "rookie", "is_QB", "is_RB",
                   "is_WR", "is_TE"]
@@ -436,11 +507,11 @@ class InjuryModel:
     rows = []
     for s in seasons:
       t = self.scratch_table(s)
-      first = 1 if self.cfg.get("injuries", {}).get("scratch_carry") else 2  # week 1 has real history only when carried
+      first = 1 if self.cfg.get("injuries", {}).get("scratch_carry") is True else 2  # v1 trained on week 1 too
       rows.append(t[t.final & (t.week <= self.data.completed_weeks(s)) & ~t.on_report & t.observable & (t.week >= first)])
     d = pd.concat(rows)
     self.scratch_model = HistGradientBoostingClassifier(**self._gb_params(), random_state=0).fit(
-      d[self.SCRATCH_COLS], d.active)
+      d[self.scratch_cols], d.active)
     self._scratch_cache = {}
 
   def scratch_prob(self, season: int, week: int) -> pd.Series:
@@ -448,7 +519,7 @@ class InjuryModel:
       self._scratch_cache[season] = self.scratch_table(season)
     t = self._scratch_cache[season]
     t = t[t.week == week]
-    return pd.Series(self.scratch_model.predict_proba(t[self.SCRATCH_COLS])[:, 1], index=t.gsis_id.to_numpy())
+    return pd.Series(self.scratch_model.predict_proba(t[self.scratch_cols])[:, 1], index=t.gsis_id.to_numpy())
 
   # -- application -----------------------------------------------------------------------------------------------
   espn_bridge: dict | None = None  # gsis_id -> ESPN bucket (live week only; see espn.py / espn_calib.py)

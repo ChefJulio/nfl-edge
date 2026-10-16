@@ -1369,3 +1369,39 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 - **RESULT scratch_carry: FAIL on part (iii).** Weeks 3+ 2021-25 fantasy MAE +0.003 [-0.000, +0.006], QB +0.020
   [+0.003, +0.043] (training on week-1 rows changed the model for every week). Not shipped; a week-1-only version
   (seed only week-1 rows, train as before) would need its own test.
+- **Job-security study (owner 2026-10-15: "at what points do teams bench a healthy QB? same for other positions;
+  contracts / sunk cost?"; tools/job_security.py, 2012-25, healthy = not on the injury report at all, benched = 0
+  snaps while a teammate at his position plays 50%+).** QBs: incumbent starters (started the team's first game)
+  benched 1.43% of weeks 1-17 vs 11.4% for interim starters; by season-to-date EPA/dropback percentile (incumbents):
+  bottom 10% 4.7%, 10-25% 3.2%, 25-50% 1.8%, top half ~0.6%; first-round rookie behind him 10.2% vs 1.2%; team
+  <30% wins 2.9% vs 50%+ ~0.6%; R1 1.1% vs later ~2%; paid 12%+ of the cap 0.8%. Sunk cost: bottom-25% performers
+  paid 7%+ of the cap 3.0% vs 3.9% cheaper (10 vs 18 events: direction as expected, not distinguishable from noise).
+  Top-half benchings were almost all final-week rests. RBs: zero-snap benchings 0.5% (they lose carries, not the
+  game). Usage: 2021-25 backtest, top-10% RBs (season FP/G) got 7% more carries than projected (17.05 vs 15.96),
+  bottom 25% 2% fewer; WR +3% / -5%.
+- **PRE-REGISTERED 2026-10-16 (before running): (A) `injuries.job_security` - healthy-scratch model features:**
+  incumbent (started his team's first game: QB 70%+ snaps, others led the position group), season-to-date EPA per
+  opportunity percentile at his position (as of the week), a first-round rookie at his position behind him, team
+  win % before the week, contract APY share of the cap that season, and the team's last regular-season week. GATE:
+  availability Brier on players NOT on the injury report (the scratch model's rows), 2021-25 walk-forward, lower
+  with the 95% CI over season-weeks excluding 0, no position significantly worse; fantasy MAE CI upper < +0.003.
+  **(B) `experiments.share_quality` - the player's EB-shrunk opponent-adjusted EPA per opportunity (rush for carry
+  share, target for target share) as a share-regression input.** GATE: fantasy MAE all-position CI upper < 0, no
+  position's CI lower > 0.
+- **PRE-REGISTERED 2026-10-16: scratch_carry v2 ("week1").** Seed last season's history only into each team's first
+  game of the season; the model's training is unchanged (weeks 2+ identical by construction). GATE (weeks 1-2
+  2021-26, tools/early_weeks_eval.py + tools/scratch_gate.py): week-1 availability Brier for players not on the
+  report lower, CI over team-weeks excluding 0; weeks 1-2 fantasy MAE CI upper < +0.003.
+- **scratch_carry v1, weeks 1-2 (for the record; v1 already failed part iii):** week-1 availability Brier, players not
+  on the report, 0.1248 -> 0.1078 (-0.0170 [-0.0211, -0.0130]); the current model's week 1 is badly calibrated (QBs
+  mean P(active) 0.332 vs 0.482 actually played; carry 0.535). Weeks 1-2 fantasy MAE -0.0017 [-0.0069, +0.0043]
+  (part ii FAIL, upper > +0.003). v2 (week-1-only seeding, training unchanged) is the follow-up.
+- **Watch list (owner 2026-10-16): Lamar Jackson / Tyler Huntley (BAL), Baker Mayfield / Jalon Daniels (TB);**
+  tools/watch_players.py prints them for this week + lookahead. Baseline (wk 6): Lamar 84.6% inactive but Huntley
+  46.6% inactive; Baker 97.2% but Daniels 41.2%: the healthy-scratch model scores a backup QB as a generic backup
+  unless the starter is officially Out / Doubtful (ahead_out), so his chance to play ignores the starter's.
+- **PRE-REGISTERED 2026-10-16 (before computing): backup QB plays when the starter sits.** For the team's QB2 (depth
+  2, not on the injury report) when the team's QB1 has a chance to sit: P(QB2 plays) = P(QB1 sits) + (1 - P(QB1
+  sits)) x r, r = the measured rate a healthy QB2 plays when QB1 plays (fit on 2021-23 backtest rows). TEST on the
+  cached baseline backtests 2024-25 (QB2 rows whose QB1 had avail < 0.95): Brier of the rule vs the current
+  availability, lower with the 95% CI over team-weeks excluding 0 -> implement in the engine.

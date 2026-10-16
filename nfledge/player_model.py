@@ -173,6 +173,10 @@ def SHARE_FEATURES(share: str, exp: dict | None = None, group: str | None = None
     cols.append("snap_pct")
   # EXPERIMENT (experiments.route_input): route participation (dropbacks on field / team dropbacks) for targets.
   # Participation is published only after each season, so this can be backtested but not run live from nflverse.
+  # EXPERIMENT (experiments.share_quality; pre-registered 2026-10-16): his quality (EB-shrunk opponent-adjusted EPA per
+  # opportunity) as a usage input: top-10% RBs got 7% more carries than projected (2021-25), bottom 25% 2% fewer.
+  if exp.get("share_quality") and share in ("carry_share", "tgt_share"):
+    cols.append("rush_adj_per_rush" if share == "carry_share" else "tgt_adj_per_tgt")
   if exp.get("route_input") and share == "tgt_share":
     cols += ["route_share", "route_share_long"]
   cols += age_cols(exp, group)  # see EFF_FEATURES

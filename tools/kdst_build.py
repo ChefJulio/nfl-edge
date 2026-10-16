@@ -49,6 +49,18 @@ def main():
   m = KickerModel().fit(k[(k.season < season) | (k.week < week)], implied_points(sched))
   cur_k = k[k.season == season].sort_values("week").groupby("team").tail(1)  # the team's latest kicker
   kick = {t: (r.player_id, r.player_display_name) for t, r in zip(cur_k.team, cur_k.itertuples())}
+  # ...unless the latest roster says otherwise (owner 2026-10-16: Mevis was cut, Grupe signed, and the Rams' kicker
+  # still showed as Mevis): the team's active kicker (ACT) on its latest roster week; two -> the one with more kicks
+  ro = c.get("rosters", season, None, stale=False)
+  if ro is not None and len(ro):
+    ro = ro[ro.position == "K"].assign(team=ro.team.replace({"LAR": "LA"}))
+    ro = ro[ro.week == ro.groupby("team").week.transform("max")]
+    act = ro[ro.status == "ACT"].dropna(subset=["gsis_id"])
+    n_k = k.groupby("player_id").size()
+    for team, g in act.groupby("team"):
+      best = max(g.itertuples(), key=lambda r: n_k.get(r.gsis_id, 0))
+      if team not in kick or kick[team][0] != best.gsis_id:
+        kick[team] = (best.gsis_id, best.full_name)
   out_k = {}
   for w, d in sorted(pages.items()):
     for team, imp in team_implied(d).items():
