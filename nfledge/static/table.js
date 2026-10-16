@@ -51,6 +51,8 @@
         return `<th class="${cls}" data-key="${esc(c.key)}">${lab}</th>`;
       }).join('')}</tr>`;
     };
+    let gen = 0;
+    const BATCH = 40;
     const body = () => {
       let rs = rows;
       if (sort) {
@@ -63,10 +65,24 @@
           }).map(x => x[2]);
         }
       }
-      tbl.tBodies[0].innerHTML = rs.map(r => `<tr${opt.rowClass ? ` class="${esc(opt.rowClass(r))}"` : ''}${opt.rowAttrs ? ' ' + opt.rowAttrs(r) : ''}>${cols.map(c => {
+      const rowHtml = r => `<tr${opt.rowClass ? ` class="${esc(opt.rowClass(r))}"` : ''}${opt.rowAttrs ? ' ' + opt.rowAttrs(r) : ''}>${cols.map(c => {
         const cls = [c.num ? 'num' : '', c.stick ? 'stick' : '', c.cls || ''].filter(Boolean).join(' ');
         return `<td${cls ? ` class="${cls}"` : ''}>${c.html ? c.html(r) : esc(r[c.key] ?? '')}</td>`;
-      }).join('')}</tr>`).join('');
+      }).join('')}</tr>`;
+      // The rows that fill the screen first, the rest in batches after it paints (owner 2026-10-16: "lazy load so the
+      // important stuff gets drawn more quickly"; the landing QB table drew 31 rows of ~70 elements for 5 in view).
+      // A newer draw (sort, filter, new data) cancels the batches of an older one.
+      const my = ++gen, tb = tbl.tBodies[0], first = Math.max(12, Math.ceil(innerHeight / 45));
+      tb.innerHTML = rs.slice(0, first).map(rowHtml).join('');
+      if (rs.length <= first) return;
+      let i = first;
+      const more = () => {
+        if (my !== gen) return;
+        tb.insertAdjacentHTML('beforeend', rs.slice(i, i + BATCH).map(rowHtml).join(''));
+        i += BATCH;
+        if (i < rs.length) setTimeout(more, 0); else layout();
+      };
+      requestAnimationFrame(() => setTimeout(more, 0));  // after the first paint
     };
     tbl.tHead.addEventListener('click', e => {
       if (e.target.closest('select, input, button')) return;  // controls inside a header (custom-column pickers)
