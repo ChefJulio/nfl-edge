@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-05T04:04Z,,,,,,McMillan caught 14 of 16 targets for 192 yards and two touchdowns in Sunday's 32-26 win over the Lions.
 4428993,Haynes King,Carolina Panthers,Active,2026-10-04T23:08Z,,,,,,King (coach's decision) is inactive but will operate as the Panthers' emergency third quarterback Sunday night versus Detroit.
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-16T22:18Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,ir
+4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-16T22:34Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
 4242659,Dayo Odeyingbo,Chicago Bears,Out,2026-10-16T19:13Z,Quadriceps,Not Specified,Not Specified,2026-10-22,OUT,out
 3121544,T.J. Edwards,Chicago Bears,Out,2026-10-16T19:13Z,Hamstring,Not Specified,Not Specified,2026-10-22,OUT,out
 4911952,Keyshaun Elliott,Chicago Bears,Out,2026-10-16T19:13Z,Quadriceps,Not Specified,Not Specified,2026-10-22,OUT,out
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035661,Julian Blackmon,New Orleans Saints,Active,2026-10-11T16:37Z,,,,,,Blackmon (shoulder) is active for Sunday's game against the Vikings.
 4698597,Barion Brown,New Orleans Saints,Active,2026-10-11T16:22Z,,,,,,Brown (thigh) is active for Sunday's game against the Vikings.
 3115383,Davon Godchaux,New Orleans Saints,Active,2026-10-10T16:20Z,,,,,,Godchaux (groin) does not have an injury designation for Sunday's game against the Vikings.
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-16T22:18Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-16T22:34Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4430261,Tyler Nubin,New York Giants,Out,2026-10-16T21:16Z,Neck,Not Specified,Not Specified,2026-10-25,OUT,out
 4921249,Colton Hood,New York Giants,Out,2026-10-16T21:16Z,Concussion,Concussion,Not Specified,2026-10-25,OUT,out
 4040615,Malik Harrison,New York Giants,Active,2026-10-16T21:16Z,,,,,,
@@ -674,17 +674,18 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3932886,Sean Murphy-Bunting,Pittsburgh Steelers,Active,2026-10-06T00:19Z,,,,,,"The Steelers signed Murphy-Bunting off the Buccaneers' practice squad Monday, Teresa Varley of the Steelers' official site reports."
 4682980,Derrick Harmon,Pittsburgh Steelers,Injured Reserve,2026-10-05T21:23Z,Foot,Not Specified,Not Specified,2026-11-15,IR,"The Steelers placed Harmon (foot) on injured reserve Monday, Teresa Varley of the team's official site reports."
 4431533,Gabriel Rubio,Pittsburgh Steelers,Active,2026-10-05T19:01Z,,,,,,
-16737,Mike Evans,San Francisco 49ers,Questionable,2026-10-16T20:29Z,Ribs,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,"Evans (ribs/Achilles) was working on the side during the open portion of Friday's practice, Nick Wagoner of ESPN.com reports."
+16002,Kyle Juszczyk,San Francisco 49ers,Active,2026-10-16T22:34Z,,,,,,
+4432244,Romello Height,San Francisco 49ers,Questionable,2026-10-16T22:33Z,Illness,,,2026-10-19,QUESTIONABLE,questionable
+4565779,Carver Willis,San Francisco 49ers,Active,2026-10-16T22:33Z,,,,,,
+16737,Mike Evans,San Francisco 49ers,Questionable,2026-10-16T22:32Z,Ribs,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,"Evans (ribs/Achilles) was a non-participant at Friday's practice, Harrison Rich of the San Francisco Chronicle reports."
 4693337,Marques Sigle,San Francisco 49ers,Doubtful,2026-10-16T04:32Z,Ankle,Not Specified,Not Specified,2026-10-19,DOUBTFUL,"Sigle (ankle) didn't take part in Thursday's practice, Matt Barrows of The Athletic reports."
 4040605,Nick Bosa,San Francisco 49ers,Questionable,2026-10-16T04:26Z,Calf,Strain,Not Specified,2026-10-19,QUESTIONABLE,"Bosa (knee/calf) was a non-participant at Thursday's practice, Matt Barrows of The Athletic reports."
 4685623,Mykel Williams,San Francisco 49ers,Questionable,2026-10-15T23:28Z,Knee,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
-4565779,Carver Willis,San Francisco 49ers,Questionable,2026-10-15T23:28Z,Toe,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
 4565200,Upton Stout,San Francisco 49ers,Questionable,2026-10-15T23:27Z,Shoulder,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
 3916075,Colton McKivitz,San Francisco 49ers,Questionable,2026-10-15T23:27Z,Illness,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
 3057524,Siran Neal,San Francisco 49ers,Questionable,2026-10-15T23:27Z,Neck,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
 4685369,Gracen Halton,San Francisco 49ers,Questionable,2026-10-15T23:26Z,Quadriceps,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
 3895856,Christian Kirk,San Francisco 49ers,Injured Reserve,2026-10-15T22:46Z,Calf,Not Specified,Not Specified,2026-10-19,IR-R,"Kirk (calf) was limited in his return to practice Thursday, Matt Barrows of The Athletic reports."
-16002,Kyle Juszczyk,San Francisco 49ers,Questionable,2026-10-15T20:04Z,,,,,,"Juszczyk (knee) will be limited at Thursday's practice, head coach Kyle Shanahan told reporters Thursday, Cam Inman of Bay Area News Group reports."
 3126486,Deebo Samuel Sr.,San Francisco 49ers,Out,2026-10-15T19:54Z,Hamstring,Not Specified,Right,2026-11-08,OUT,"Head coach Kyle Shanahan said Thursday that the 49ers will ""hold off"" on placing Samuel (hamstring) on IR due to the team's bye in Week 8, Vic Tafur of the Athletic reports."
 3043116,Demarcus Robinson,San Francisco 49ers,Injured Reserve,2026-10-15T19:50Z,Ankle,Sprain,Right,2026-11-08,IR,"Head coach Kyle Shanahan said Thursday that Robinson (ankle) has an ""outside chance"" to return from injured reserve for the 49ers' Week 7 game versus the Falcons but is more likely to be activated following the team's Week 8 bye, David Lombardi of SFStandard.com reports."
 3916903,Dre Greenlaw,San Francisco 49ers,Suspension,2026-10-14T01:22Z,Suspension,Not Specified,Not Specified,2026-10-25,RESERVE-SUS,"Greenlaw's appeal of a one-game suspension was denied by the NFL on Tuesday, Adam Schefter of ESPN reports."
@@ -698,7 +699,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4427325,Renardo Green,San Francisco 49ers,Active,2026-10-12T16:36Z,,,,,,Green logged one solo tackle and three pass defenses (including two interceptions) during the 49ers' 32-29 win over the Seahawks on Sunday.
 3040151,George Kittle,San Francisco 49ers,Active,2026-10-12T01:06Z,,,,,,Kittle (illness) caught five of six targets for 24 yards in Sunday's 32-29 win over the Seahawks.
 4361741,Brock Purdy,San Francisco 49ers,Active,2026-10-12T01:04Z,,,,,,"Purdy completed 19 of 29 passes for 189 yards, two touchdowns and one interception in Sunday's 32-29 win over the Seahawks. He also rushed five times for six yards and threw a successful two-point conversion."
-3117251,Christian McCaffrey,San Francisco 49ers,Active,2026-10-12T00:25Z,,,,,,McCaffrey rushed 11 times for 68 yards and a touchdown while catching all three of his targets for 15 yards in Sunday's 32-29 win over the Seahawks.
 4685512,Jadarian Price,Seattle Seahawks,Injured Reserve,2026-10-16T17:27Z,Chest,Not Specified,Not Specified,2026-11-02,IR,"Head coach Mike Macdonald said Friday that Price ""should be looking at a sooner rather than later return after"" the Seahawks' next game in Week 7, Brady Henderson of ESPN.com reports."
 4429835,George Holani,Seattle Seahawks,Active,2026-10-16T05:19Z,,,,,,Holani rushed five times for 20 yards and a touchdown in the Seahawks' 17-14 overtime loss to the Broncos on Thursday.
 4032473,Rashid Shaheed,Seattle Seahawks,Active,2026-10-16T05:13Z,,,,,,"Shaheed brought in five of eight targets for 66 yards, rushed once for two yards, returned three kickoffs for 77 yards and ran back three punts for 39 yards in the Seahawks' 17-14 overtime loss to the Broncos on Thursday. He also caught a two-point conversion pass and committed two fumbles, recoveri"
