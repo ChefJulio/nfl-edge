@@ -1628,7 +1628,7 @@
   };
 
   // ------------------------------------------------------------------------------------------------- game page
-  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null, tab: null };
+  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null, tab: null, pane: 'box' };
   const parseGid = gid => { const m = String(gid || '').match(/^(\d{4})_(\d{2})_([A-Z]{2,3})_([A-Z]{2,3})$/); return m ? { season: +m[1], week: +m[2], away: m[3], home: m[4] } : null; };
   const wpSeries = (sum) => {
     const plays = allPlays(sum).flatMap(d => d.plays || []);
@@ -1965,6 +1965,8 @@
              away: side(g.away, 'away'), home: side(g.home, 'home'), sit: null, date: null, offline: true };
   };
   const GTABS = [['pre', 'Pregame'], ['live', 'Live'], ['post', 'Postgame']];
+  // Live tab: one pane at a time, picked here (owner 2026-10-15: "if i pick stats i see stats"); box score first
+  const GPANES = [['box', 'Box score'], ['plays', 'Plays'], ['wp', 'Win %'], ['team', 'Team stats']];
   const renderGame = () => {
     const root = document.getElementById('gc'), { sum, info, g } = GP;
     const rp = GP.replay;
@@ -1999,28 +2001,22 @@
         <span class="seg rp-speed">${[['slow', 'Slow'], ['normal', 'Normal'], ['fast', 'Fast']].map(([k, l]) => `<button type="button" data-rps="${k}" class="${(GP.rpSpeed || 'normal') === k ? 'on' : ''}">${l}</button>`).join('')}</span>
         <input type="range" min="0" max="${rp.plays.length - 1}" value="${rp.i}" aria-label="Replay position"><span class="muted rp-pos">Play ${rp.i + 1} of ${rp.plays.length}</span>
         <button type="button" data-rp="off">Exit replay</button>` : '<button type="button" data-rp="on">Replay this game play by play</button>'}</section>` : ''}
-      <nav class="gc-jump"><a href="#gcWp">Win %</a><a href="#gcLog">Plays</a><a href="#gcBox">Box score</a><a href="#gcTeam">Team stats</a></nav>
-      <div class="gc-grid">
-        <div class="gc-col">
-          <section class="gcs" id="gcWp"><h3>Live win probability <span class="src">ESPN</span></h3>
+      <div class="seg gc-panes" role="tablist">${GPANES.map(([k, l]) => `<button type="button" role="tab" data-pane="${k}" class="${GP.pane === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      ${GP.pane === 'wp' ? `<section class="gcs" id="gcWp"><h3>Live win probability <span class="src">ESPN</span></h3>
             <p class="gcs-note">ESPN's in-game model, updated every play. Not NFL Edge's forecast: our pregame chances are on the Pregame tab.</p>
             ${wpNow != null ? `<div class="wp-now-t"><span style="color:${esc(info.away.color)}">${esc(info.away.team)} ${pc(1 - wpNow)}</span><span style="color:${esc(info.home.color)}">${esc(info.home.team)} ${pc(wpNow)}</span></div>` : ''}
             <div class="wp-wrap">${sum ? wpChart(ser, info, upto) : ''}<div class="wp-tip" hidden></div></div>
-            <div class="wp-leg"><span><i class="wp-m wp-score"></i>score</span><span><i class="wp-m wp-to"></i>turnover</span><span class="muted">Above the line: ${esc(info.home.team)} favored · below: ${esc(info.away.team)}</span></div></section>
-          <section class="gcs" id="gcLog"><h3>Game log</h3>
+            <div class="wp-leg"><span><i class="wp-m wp-score"></i>score</span><span><i class="wp-m wp-to"></i>turnover</span><span class="muted">Above the line: ${esc(info.home.team)} favored · below: ${esc(info.away.team)}</span></div></section>`
+      : GP.pane === 'plays' ? `<section class="gcs" id="gcLog"><h3>Game log</h3>
             <div class="lg-bar"><div class="seg">${[['drive', 'By drive'], ['every', 'Every play']].map(([k, l]) => `<button type="button" data-view="${k}" class="${GP.view === k ? 'on' : ''}">${l}</button>`).join('')}</div>
               <div class="seg">${[['all', 'All'], ['score', 'Scoring'], ['to', 'Turnovers'], ['pen', 'Penalties']].map(([k, l]) => `<button type="button" data-filter="${k}" class="${GP.filter === k ? 'on' : ''}">${l}</button>`).join('')}</div>
               <input type="search" id="lgQ" placeholder="Player or text" value="${esc(GP.q)}" aria-label="Filter plays">
               <div class="seg">${[['new', 'Newest'], ['old', 'Oldest'], ['impact', 'Biggest swings']].map(([k, l]) => `<button type="button" data-sort="${k}" class="${GP.sort === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>
             <div id="lgBody">${!sum ? '<p class="muted">Plays appear once the game starts.</p>'
               : !allPlays(sum).length && info.state === 'post' ? '<p class="muted">ESPN has no play-by-play for this game (games before about 2005 only have box scores).</p>'
-              : gameLog(sum, info, ser, upto)}</div></section>
-        </div>
-        <div class="gc-col">
-          ${playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: rp ? 'Box score shows the final totals during a replay.' : '', empty: 'The box score fills in once the game starts.' })}
-          <section class="gcs" id="gcTeam"><h3>Team stats</h3>${sum ? teamStats(sum, info) || '<p class="muted">Not available yet.</p>' : ''}</section>
-        </div>
-      </div>`;
+              : gameLog(sum, info, ser, upto)}</div></section>`
+      : GP.pane === 'team' ? `<section class="gcs" id="gcTeam"><h3>Team stats</h3>${sum ? teamStats(sum, info) || '<p class="muted">Not available yet.</p>' : ''}</section>`
+      : playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: rp ? 'Box score shows the final totals during a replay.' : '', empty: 'The box score fills in once the game starts.' })}`;
     root.innerHTML = `
       <section class="sb">${side(info.away, false)}<div class="sb-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<b>${esc(status)}</b></div>${side(info.home, true)}</section>
       <div class="seg gc-tabs" role="tablist">${GTABS.map(([k, l]) => `<button type="button" role="tab" data-gtab="${k}" class="${tab === k ? 'on' : ''}">${k === 'live' && info.state === 'in' ? '<span class="live-dot"></span>' : ''}${l}</button>`).join('')}</div>
@@ -2030,6 +2026,7 @@
   const wireGame = () => {
     const root = document.getElementById('gc');
     root.querySelectorAll('[data-gtab]').forEach(b => b.onclick = () => { GP.tab = b.dataset.gtab; renderGame(); });
+    root.querySelectorAll('[data-pane]').forEach(b => b.onclick = () => { GP.pane = b.dataset.pane; renderGame(); });
     root.querySelectorAll('[data-view]').forEach(b => b.onclick = () => { GP.view = b.dataset.view; renderGame(); });
     root.querySelectorAll('[data-filter]').forEach(b => b.onclick = () => { GP.filter = b.dataset.filter; renderGame(); });
     root.querySelectorAll('[data-sort]').forEach(b => b.onclick = () => { GP.sort = b.dataset.sort; renderGame(); });
