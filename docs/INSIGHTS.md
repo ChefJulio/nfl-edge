@@ -97,7 +97,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   never lists.
 
 ## 3. Model findings that shipped (with evidence)
-- **Team ratings:** ridge on play EPA per unit (pass/rush/ST), WP 10-90% filter, recency half-life 3 weeks, prior
+- **Team ratings:** ridge on play EPA per unit (pass/rush/ST), every play (no WP filter since 2026-10-15), recency half-life 3 weeks, prior
   season 0.3 decaying to 0 by week 8, alpha by time-split CV. QB-aware pass offense: team + QB effect +
   inexperienced-QB indicator (<150 career dropbacks); team and QB penalties tuned jointly (pass CV 3017 -> 2974).
 - **Playoff-odds drift = 0.9 (2026-10-14):** without it the odds were overconfident (2021-25 walk-forward: given
@@ -1283,3 +1283,15 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   +0.001]. In-sample 2021-26 weeks 1-2: debut -0.654 [-1.352, -0.000], all -0.040 [-0.064, -0.017]. Weeks 1-2 are
   still unmeasured by the standard backtest: tools/early_weeks_eval.py + tools/debut_gate.py cover them.
   OPEN (newcomer side effect) likely closed by the bug fix above; not re-measured.
+- **PRE-REGISTERED 2026-10-15 (owner: "did you test 95%+? 98?"): narrower blowout filters.** Only 10-90% (old) vs
+  none was tested on games; 5-95 only on fantasy MAE (2026-10-12 audit, insensitive). Variants team_model.wp_window
+  = [0.05, 0.95] and [0.02, 0.98] vs no filter, tools/game_eval.py 2021-25 --only=fitted, paired by game. GATE: adopt
+  a window only if margin MAE beats no filter with the 95% CI over season-weeks excluding 0 (if both do, the better
+  one); then confirm fantasy MAE not worse (tools/experiments.py, CI upper < +0.003).
+- **RESULT narrower blowout filters (2026-10-15): both FAIL, no filter stays.** Game margin MAE 2021-25 (1,279
+  games, paired): none 10.548 (winners 61.0%); 2-98% 10.573, +0.025 [-0.022, +0.076], worse every season (60.2%);
+  5-95% 10.630, +0.082 [+0.023, +0.143], worse every season (59.0%); old 10-90% 10.638 (+0.090). Monotone: every
+  slice of blowout plays removed costs accuracy. Switch kept off (team_model.wp_window absent). Context: the removal
+  moved week-6 2026 ranks a lot (SEA net 1 -> 6, MIN 2 -> 8; SEA offense 29 -> 24: 18% of its plays in blowout
+  states at +0.26 EPA/play vs -0.16 otherwise; MIN defense 2 -> 1). The Power tab's move arrows compare weeks, not
+  model versions, so a model change the same week looks like movement.

@@ -14,6 +14,7 @@ Differences vs 'fitted' get a 95% bootstrap CI over season-weeks. The fitted wei
 (is it stable?). Ratings and training rows don't depend on the weight, so they are computed once per season.
 """
 import copy
+import json
 import os
 import sys
 import time
@@ -49,12 +50,10 @@ def overrides(cfg: dict) -> dict:
   for part in filter(None, os.environ.get("GAME_EVAL_SET", "").split(";")):
     key, _, val = part.partition("=")
     sec, k = key.split(".")
-    v = {"true": True, "false": False}.get(val.lower(), val)
-    if isinstance(v, str):
-      try:
-        v = float(v)
-      except ValueError:
-        pass
+    try:  # JSON values: true / 0.5 / [0.05, 0.95]; anything else stays a string
+      v = json.loads(val)
+    except ValueError:
+      v = val
     cfg.setdefault(sec, {})[k] = v
   return cfg
 

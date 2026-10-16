@@ -45,9 +45,12 @@ def unit_plays(pbp: pd.DataFrame, cfg: dict, qbexp: pd.DataFrame | None = None) 
   # Every play counts, blowouts included: the old garbage-time filter (offense win probability 10-90%) was removed
   # 2026-10-15 (owner's removal tests, INSIGHTS sec. 9): game margin MAE 10.638 -> 10.548 [-0.158, -0.019], better in
   # 4 of 5 seasons, winners 59.2 -> 61.0%; fantasy MAE no difference.
+  # EXPERIMENT (team_model.wp_window = [lo, hi]; absent = every play): a narrower blowout filter than the old 10-90%.
+  win = tm.get("wp_window")
+  keep = pbp.wp.between(*win) if win else pd.Series(True, index=pbp.index)
   sel = {
-    "pass": live & pbp.is_dropback,
-    "rush": live & pbp.is_designed_rush,
+    "pass": live & pbp.is_dropback & keep,
+    "rush": live & pbp.is_designed_rush & keep,
     "st": live & pbp.is_st,
   }
   cols = ["season", "week", "game_id", "posteam", "defteam", "home", "div", "epa"]
