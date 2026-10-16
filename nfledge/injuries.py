@@ -685,6 +685,22 @@ class InjuryModel:
     cont = self.contributors(f, season, week)
     on_team = set(zip(p.gsis_id, p.team))
     cont["p_play"] = [1.0 if (g, t) in on_team else 0.0 for g, t in zip(cont.gsis_id, cont.team)]
+    # The backup QB plays when the starter sits (pre-registered 2026-10-16; owner watch list Huntley / Daniels): QB2 (depth
+    # 2, not on the injury report) = P(QB1 sits) + P(QB1 plays) x r, r = how often a healthy QB2 plays anyway (relief,
+    # blowouts; 0.232 measured 2021-23). Tested 2024-25 on QB2s whose starter had a chance to sit: Brier 0.2283 -> 0.1957
+    # (-0.0326 [-0.0562, -0.0093]). The healthy-scratch model scored him as a generic backup unless QB1 was Out / D.
+    r2 = self.cfg.get("injuries", {}).get("qb2_play_rate")
+    p["qb2_of"] = ""
+    if r2 is not None:
+      qb = p[p.pos == "QB"]
+      rk = pd.to_numeric(qb.get("depth_rank", pd.Series(np.nan, index=qb.index)), errors="coerce")
+      for team, g in qb.groupby("team"):
+        q1, q2 = g[rk[g.index] == 1], g[(rk[g.index] == 2) & (g.status.fillna("") == "")]
+        if len(q1) == 1 and len(q2):
+          a1 = float(q1.avail.iloc[0])
+          for i in q2.index:
+            p.at[i, "avail"] = (1 - a1) + a1 * float(r2)
+            p.at[i, "qb2_of"] = q1.full_name.iloc[0] if "full_name" in q1 else ""
     avail = p.set_index("gsis_id").avail
     has = cont.gsis_id.isin(avail.index) & (cont.p_play > 0)
     cont.loc[has, "p_play"] = cont.loc[has, "gsis_id"].map(avail)

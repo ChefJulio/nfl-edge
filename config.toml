@@ -182,6 +182,9 @@ sleeper_blend = {}
 # injury-report players 0.0987 -> 0.0931 (-0.0056 [-0.0068, -0.0044]), better at every position (QB -0.0099) and
 # every season; fantasy MAE unchanged. Role for all positions made starting QBs overconfident (QB worse).
 practice_role = ["RB", "WR", "TE"]
+# The backup QB (depth 2, not on the report) plays when the starter sits: P = P(QB1 sits) + P(QB1 plays) x this rate
+# (how often a healthy QB2 plays anyway, 2021-23). 2024-25: Brier 0.2283 -> 0.1957 on QB2s whose starter might sit.
+qb2_play_rate = 0.232
 # Fraction of the learned vacated-volume redistribution applied. Backtest: helps RB, slightly hurts WR;
 # 0.5 keeps teammate projections near-unbiased in both 2025 and 2026.
 redistribution_scale = 0.5

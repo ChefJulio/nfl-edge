@@ -107,7 +107,19 @@ class Cache:
     # these files; a reader that caught a half-written parquet crashed an A/B run (2026-10-14).
     tmp = p.with_suffix(f".{os.getpid()}.tmp")
     df.to_parquet(tmp, index=False)
-    os.replace(tmp, p)
+    # Windows refuses the rename while another process has the file open (two experiment workers refreshing the same
+    # file crashed a run, 2026-10-16): retry briefly, then keep the other process's copy (same data).
+    for i in range(10):
+      try:
+        os.replace(tmp, p)
+        break
+      except PermissionError:
+        time.sleep(0.2 * (i + 1))
+    else:
+      try:
+        os.remove(tmp)
+      except OSError:
+        pass
     self.meta.setdefault("fetched", {})[f"{name}_{season}"] = time.time()
     return df
 

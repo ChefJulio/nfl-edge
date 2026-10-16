@@ -1405,3 +1405,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   sits)) x r, r = the measured rate a healthy QB2 plays when QB1 plays (fit on 2021-23 backtest rows). TEST on the
   cached baseline backtests 2024-25 (QB2 rows whose QB1 had avail < 0.95): Brier of the rule vs the current
   availability, lower with the 95% CI over team-weeks excluding 0 -> implement in the engine.
+- **RESULT scratch_carry v2 (week-1-only seeding): FAIL on part (ii).** Week-1 availability Brier, players not on
+  the report, 0.1248 -> 0.1174 (-0.0074 [-0.0118, -0.0031]), but it overshoots (RB / WR / TE mean P(active) ~0.91
+  vs 0.84-0.88 actual) and weeks 1-2 fantasy MAE +0.0012 [-0.0050, +0.0091]. Off. OPEN: week 1's healthy-scratch
+  numbers are badly calibrated (QBs 0.33 vs 0.48 actual); a calibrated week-1 model (e.g. its own week-1 fit on
+  last season's state) is the next idea.
+- **SHIPPED 2026-10-16: backup QB plays when the starter sits (config injuries.qb2_play_rate = 0.232).** Gate (pre-
+  registered above): 2024-25 QB2 rows whose QB1 had avail < .95, n 371: Brier 0.2283 -> 0.1957 (-0.0326 [-0.0562,
+  -0.0093]); mean P(play) 0.425 / rule 0.465 / actual 0.439. Note: a healthy QB2 plays only 74.6% of the time when
+  QB1 sits (a QB3 / stale chart), so the rule's "1.0 when QB1 sits" is generous; refining it is a later test.

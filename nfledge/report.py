@@ -743,6 +743,8 @@ def bye_rows(eng, stats, ts, pos, season, week) -> list:
 
 
 def inactive_why(r) -> str:
+  if getattr(r, "qb2_of", ""):  # injuries.apply: the backup QB plays when the starter sits
+    return (f"Backup QB: he plays if {r.qb2_of} sits, plus relief snaps when {r.qb2_of} plays")
   if r.status and r.status.startswith("Questionable (ESPN)"):  # display only (InjuryModel.espn_questionable)
     days = r.status[len("Questionable (ESPN)"):].strip(" ()")
     words = {"D": "DNP", "L": "limited", "F": "full"}
