@@ -9,7 +9,7 @@
   --shadow: 0 1px 2px rgba(0,0,0,.4); --qb: #ff6f91; --rb: #34d399; --wr: #60a5fa; --te: #fbbf24;
 }
 .gc-page { margin: 0; background: var(--bg); color: var(--ink); -webkit-text-size-adjust: 100%;
-  font: 14px/1.45 Inter, "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+  font: 14px/1.45 var(--font);
   font-feature-settings: "tnum" 1; -webkit-font-smoothing: antialiased; }
 .gc-page *, .pc-ov * { box-sizing: border-box; }
 .gc-page a { color: var(--accent); }
