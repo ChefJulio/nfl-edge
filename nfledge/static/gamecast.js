@@ -1718,7 +1718,10 @@
     if (next && !SIM) LIVE.timer = setTimeout(pollWeek, next);
   };
   const startLive = () => {
-    pollWeek();
+    // after the first paint, not during it: the scoreboard + finished-game box scores (~75 KB) and the repaint they
+    // trigger were landing in the middle of the first render (Lighthouse 2026-10-16). Safari has no requestIdleCallback.
+    const idle = window.requestIdleCallback || (f => setTimeout(f, 600));
+    idle(() => pollWeek(), { timeout: 1500 });
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) clearTimeout(LIVE.timer); else pollWeek();
     });
@@ -2210,7 +2213,8 @@
       // Our Matchups colors are already chosen to be distinct from each other (ESPN's can be near-identical).
       if (GP.g && GP.g.colors) { GP.info.away.color = GP.g.colors[GP.away] || GP.info.away.color; GP.info.home.color = GP.g.colors[GP.home] || GP.info.home.color; }
       else distinctColors(GP.info);  // a link without the week file: ESPN's colors, made distinct here
-      if (GP.info.realState !== 'pre') GP.sum = await getJSON(ESPN.sum + ev.id);
+      // the box score links players to our pages through the id map (NFLE.ui.ready, fetched on first use)
+      if (GP.info.realState !== 'pre') [GP.sum] = await Promise.all([getJSON(ESPN.sum + ev.id), NFLE.ui && NFLE.ui.ready]);
       // Player cards opened from this page show the live / final line too.
       if (GP.sum) Object.assign(LIVE.lines, boxLines(GP.sum));
       if (GP.g) LIVE.byGame[GP.g.id] = GP.info;

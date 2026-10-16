@@ -187,7 +187,7 @@
     // applies to QB / RB / WR / TE only.
     let KD = null, KDA = { K: [], DST: [] };
     const KS = NFLE.kdst;
-    const loadKD = () => KD ? Promise.resolve(KD) : NFLE.load('data/kdst.json').then(j => {
+    const loadKD = () => KD ? Promise.resolve(KD) : Promise.all([NFLE.load('data/kdst.json'), NFLE.ui.ready]).then(([j]) => {
       if (!j) throw new Error('no kdst');
       KD = j;
       KDA.K = Object.entries(j.k || {}).map(([team, o]) => ({ pid: o.pid, name: o.name, team, pos: 'K',

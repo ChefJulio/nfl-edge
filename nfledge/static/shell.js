@@ -50,7 +50,6 @@
   NFLE.ui = {
     headshot: espn => espn ? `https://a.espncdn.com/i/headshots/nfl/players/full/${encodeURIComponent(espn)}.png` : '',
     ids: {},  // gsis -> ESPN id (data/espn_ids.json, tools/stats_build.py): a headshot for any list with a player id
-    ready: null,
     tileStyle: (teams, t) => `style="${F.rowStyle(teams, t)}"`,
     // p: { name, team, pos, grp (badge color group), photo | espn | pid, sub (default: team), badges (html) }
     player: (p, teams) => {
@@ -90,8 +89,11 @@
         <div class="mt-main">${main}</div><div class="mt-st">${st}</div></a>`;
     },
   };
-  // lists wait for this (with NFLE.week()) before drawing, so their rows come up with faces
-  NFLE.ui.ready = NFLE.load('data/espn_ids.json').then(m => { NFLE.ui.ids = m || {}; }).catch(() => {});
+  // lists that show players by id wait for this (with NFLE.week()) before drawing, so their rows come up with faces.
+  // Fetched on first use, not on every page load: 77 KB the landing Rankings page doesn't need (its players carry
+  // their ESPN ids), and it competed with index.json for the first paint (Lighthouse 2026-10-16).
+  let idsP = null;
+  Object.defineProperty(NFLE.ui, 'ready', { get: () => idsP || (idsP = NFLE.load('data/espn_ids.json').then(m => { NFLE.ui.ids = m || {}; }).catch(() => {})) });
 })();
 // Week page header: the season / week picker (every week links to its own page; weeks.json at the site root lists
 // them, rewritten every build, so old pages list new weeks), where this page sits in time, and the page details.
