@@ -24,12 +24,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5084939,Isaiah Adams,Arizona Cardinals,Injured Reserve,2026-10-11T03:58Z,Ankle,Not Specified,Not Specified,2026-11-08,IR,"The Cardinals placed Adams (ankle) on injured reserve Saturday, Darren Urban of the team's official site reports."
 4428633,Dadrion Taylor-Demerson,Arizona Cardinals,Active,2026-10-10T01:17Z,,,,,,"Taylor-Demerson (back) does not have an injury designation against the Lions on Sunday, Zach Gershman of the Cardinals' official site reports."
 3127287,Budda Baker,Arizona Cardinals,Active,2026-10-07T01:55Z,,,,,,Baker tallied five tackles (two solo) and an interception during Arizona's loss versus the Giants on Sunday.
+4360423,Michael Penix Jr.,Atlanta Falcons,Active,2026-10-16T17:40Z,,,,,,"Penix (ribs) doesn't have a designation for Sunday's game against the Bears, Tori McElhaney of the Falcons' official site reports."
 4595343,Kendal Daniels,Atlanta Falcons,Active,2026-10-16T17:36Z,,,,,,
 4361510,Cameron Thomas,Atlanta Falcons,Active,2026-10-16T17:36Z,,,,,,
 4240596,C.J. Henderson,Atlanta Falcons,Out,2026-10-16T17:35Z,Groin,Not Specified,Not Specified,2026-10-25,OUT,out
 3043168,Za'Darius Smith,Atlanta Falcons,Questionable,2026-10-15T23:17Z,Neck,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Smith (neck) was a limited participant at practice Thursday, Tori McElhaney of the Falcons' official site reports."
 4037626,Divine Deablo,Atlanta Falcons,Active,2026-10-15T23:12Z,,,,,,"Deablo (hamstring) was a full participant at practice Thursday, Tori McElhaney of the Falcons' official site reports."
-4360423,Michael Penix Jr.,Atlanta Falcons,Active,2026-10-15T19:51Z,,,,,,"Penix (ribs) practiced without limitations again Thursday, Daniel Flick of the Atlanta Journal-Constitution reports."
 4361409,Jahan Dotson,Atlanta Falcons,Active,2026-10-14T01:55Z,,,,,,Dotson caught two of four passes for 54 yards during the Falcons' 30-23 overtime loss to the Ravens on Sunday.
 4241474,Brian Robinson Jr.,Atlanta Falcons,Active,2026-10-13T01:14Z,,,,,,Robinson handled seven carries for 16 yards and did not catch his only target during Sunday's 30-23 overtime loss versus the Ravens. He also returned two kickoffs for 61 return yards.
 5344782,Jack Strand,Atlanta Falcons,Active,2026-10-12T18:56Z,,,,,,
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-05T04:04Z,,,,,,McMillan caught 14 of 16 targets for 192 yards and two touchdowns in Sunday's 32-26 win over the Lions.
 4428993,Haynes King,Carolina Panthers,Active,2026-10-04T23:08Z,,,,,,King (coach's decision) is inactive but will operate as the Panthers' emergency third quarterback Sunday night versus Detroit.
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-16T17:21Z,Undisclosed,,,2026-10-18,IR,ir
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-16T17:36Z,Undisclosed,,,2026-10-18,IR,ir
 4431611,Caleb Williams,Chicago Bears,Questionable,2026-10-15T20:06Z,Hamstring,Strain,Right,2026-10-18,QUESTIONABLE,"Williams (hamstring) said Thursday that he doesn't know if he'll play this weekend against Atlanta because he still has medical protocols to complete, Sean Hammond of the Chicago Tribune reports."
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-15T19:38Z,Toe,Sprain,Not Specified,2026-10-18,QUESTIONABLE,Monangai (toe) was listed as a non-participant on Thursday's injury report.
 4361093,Kyler Gordon,Chicago Bears,Out,2026-10-15T00:36Z,Calf,Not Specified,Not Specified,2026-10-18,PUP-R,Gordon (calf) was estimated as a full participant on the Bears' official injury report Wednesday.
@@ -524,8 +524,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-09-30T04:04Z,,,,,,"Wilson finished Sunday's 23-16 victory over Tampa Bay with 10 tackles, including 1.5 sacks, and one defensed pass."
 3921690,Josh Oliver,Minnesota Vikings,Injured Reserve,2026-09-30T00:26Z,Biceps,Surgery,Not Specified,2027-01-17,IR,"The Vikings placed Oliver (biceps) on injured reserve Tuesday, Craig Peters of the team's official site reports."
 16772,Kyle Van Noy,Minnesota Vikings,Active,2026-09-30T00:20Z,,,,,,"The Vikings signed Van Noy from the practice squad to the active roster Tuesday, Craig Peters of the team's official site reports."
-4432710,TreVeyon Henderson,New England Patriots,Questionable,2026-10-16T16:13Z,Ankle,Sprain,Right,2026-10-18,QUESTIONABLE,"Henderson (ankle) is practicing Friday, Mark Daniels of MassLive reports."
-4047646,A.J. Brown,New England Patriots,Injured Reserve,2026-10-16T16:10Z,Ankle,Sprain,Right,2026-10-18,IR-R,"Brown (ankle) practiced all three days this week, Mark Daniels of MassLive reports."
+4432710,TreVeyon Henderson,New England Patriots,Questionable,2026-10-16T16:13Z,Ankle,Sprain,Right,2026-10-18,QUESTIONABLE,"Henderson (ankle) is practicing Friday, Mark Daniels of MassLive.com reports."
+4047646,A.J. Brown,New England Patriots,Injured Reserve,2026-10-16T16:10Z,Ankle,Sprain,Right,2026-10-18,IR-R,"Brown (ankle) practiced all three days this week, Mark Daniels of MassLive.com reports."
 4685298,Will Campbell,New England Patriots,Questionable,2026-10-16T01:58Z,Knee - MCL,Sprain,Right,2026-10-18,QUESTIONABLE,Campbell (knee) was a limited participant at practice Thursday.
 4686772,Christian Gonzalez,New England Patriots,Active,2026-10-15T23:25Z,,,,,,Gonzalez (shoulder) was a full participant in Thursday's practice.
 4240042,Cory Durden,New England Patriots,Questionable,2026-10-15T20:39Z,Illness,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
