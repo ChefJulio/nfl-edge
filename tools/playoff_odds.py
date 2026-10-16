@@ -40,7 +40,7 @@ def model_p(home: str, away: str, neutral: bool, ranks: dict, elo_now: dict, wm:
 
 
 def simulate(sched, teams, season: int, week: int, ranks: dict, wm: dict, n: int, rng, lines_weeks=None, drift: float = 0.0,
-             keep: bool = False, played_before: int | None = None) -> dict:
+             keep: bool = False, played_before: int | None = None, ranks_by_week: dict | None = None) -> dict:
   """Monte Carlo of the rest of `season` from before `week`'s games. lines_weeks: weeks whose Vegas lines may be used
   (None = every line on file, the live case; the backtest passes {week}: lines known at that time).
   drift: team strength isn't fixed for the rest of the season. Each simulated season gives every team a strength
@@ -58,7 +58,9 @@ def simulate(sched, teams, season: int, week: int, ranks: dict, wm: dict, n: int
   p = []
   for g in left.itertuples():
     use_line = pd.notna(g.spread_line) and (lines_weeks is None or g.week in lines_weeks)
-    p.append(float(logistic(k * g.spread_line)) if use_line else model_p(g.home_team, g.away_team, g.location == "Neutral", ranks, elo_now, wm))
+    # ranks_by_week (INSIGHTS (N)): each game's own week's ranks (an injured starter's expected return); else `ranks`
+    rk_g = ranks_by_week.get(int(g.week), ranks) if ranks_by_week else ranks
+    p.append(float(logistic(k * g.spread_line)) if use_line else model_p(g.home_team, g.away_team, g.location == "Neutral", rk_g, elo_now, wm))
   p = np.array(p)
   homes, aways = list(left.home_team), list(left.away_team)
   n_weeks = int(reg.week.max())

@@ -1651,3 +1651,17 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Live: Power ranks by C (Net, units blended by the usual starter's mean chance over the remaining games, so units
   still add up), "This week" column = A; trend = C by week; schedule left rates opponents by their expected QB.
   Playoff odds still hold the current rank; test (3) pending.
+- **PRE-REGISTERED 2026-10-16 (before running): (N) playoff odds with week-by-week, injury-aware ratings.** Today the
+  simulation holds each team's current Power rank for every remaining game (an injured starter's backup "plays" the
+  whole season). Variant: each remaining game uses ranks for ITS week, from ratings = P(usual starter plays that week)
+  x net with him + (1 - P) x net with the backup (nfledge/powerc.py, chain fit on outcomes known before the week);
+  playoff games use the last regular week's ranks. Baseline: today's rule (constant rank from this week's lineup),
+  recomputed with the same code. Also reported: constant rest-of-season rank (C). tools/odds_c_eval.py, 2021-25, every
+  week, 1,000 simulated seasons per week, the same random draws for both. GATE: make-playoffs Brier lower with the 95%
+  CI over season-weeks excluding 0; division and bye Brier not worse (CI upper < +0.001).
+- **RESULT {#odds-weekly-c} (N) playoff odds with week-by-week, injury-aware ratings: FAIL (no effect).** 2021-25, every
+  week, 1,000 sims, same draws: make-playoffs Brier A 0.1372, weekly 0.1373 (+0.00007 [-0.00022, +0.00038]), C held
+  constant 0.1373 (+0.00005 [-0.00024, +0.00035]); division +0.00020 / +0.00016; bye -0.00002 / -0.00001; seasons
+  split 2-3. The win model uses the rank GAP (coarse) + Elo + this week's Vegas line, few teams are affected at once,
+  and the record already banked dominates season outcomes. Weekly variant off. The live odds read Power's rank, which
+  became C with (M): measured no different from the old rule, kept so the odds and the Power page use one rank.

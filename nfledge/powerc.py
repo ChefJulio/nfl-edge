@@ -42,10 +42,11 @@ def usual_starters(eng, season: int, week: int) -> dict:
   return out
 
 
-def inputs(eng, season: int, week: int, recent: dict, now: dict | None = None) -> tuple[dict, dict, dict]:
+def inputs(eng, season: int, week: int, recent: dict, now: dict | None = None, by_week: dict | None = None) -> tuple[dict, dict, dict]:
   """(usual, backup, pbar): team -> usual starter, backup, and the usual starter's mean chance to play over the
   team's remaining games from `week` on. recent: team -> this week's (or most recent) starter. now: gsis -> this
-  week's chance to play (replaces the chain's first step)."""
+  week's chance to play (replaces the chain's first step). by_week: if a dict is given, it is filled with team ->
+  {week: P(usual starter plays)} for every remaining game (the playoff odds use them game by game)."""
   from . import data as D
   d = eng.data
   usual = usual_starters(eng, season, week)
@@ -84,6 +85,8 @@ def inputs(eng, season: int, week: int, recent: dict, now: dict | None = None) -
     else:
       ps = [1.0] * len(rem)
     pbar[t] = float(np.mean(ps))
+    if by_week is not None:
+      by_week[t] = dict(zip(rem, ps))
   return usual, backup, pbar
 
 
