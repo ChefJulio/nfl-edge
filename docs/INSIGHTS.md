@@ -1414,3 +1414,10 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   registered above): 2024-25 QB2 rows whose QB1 had avail < .95, n 371: Brier 0.2283 -> 0.1957 (-0.0326 [-0.0562,
   -0.0093]); mean P(play) 0.425 / rule 0.465 / actual 0.439. Note: a healthy QB2 plays only 74.6% of the time when
   QB1 sits (a QB3 / stale chart), so the rule's "1.0 when QB1 sits" is generous; refining it is a later test.
+- **RESULT (A) job_security: PASS -> SHIPPED (config injuries.job_security = true).** Availability Brier, players not on
+  the report, 2021-25 walk-forward (n 30,567): 0.0765 -> 0.0763, -0.0002 [-0.00045, -0.00001] over season-weeks. By
+  position: RB -0.0010 [-0.0013, -0.0006], WR -0.0002 [-0.0005, +0.0001], TE -0.0000, QB +0.0005 [-0.0003, +0.0013]
+  (none significantly worse). Fantasy MAE -0.000 [-0.001, +0.001]. A small gain, mostly RBs; for QBs the features
+  add nothing the depth chart and active history don't already carry (QB benchings of healthy incumbents are rare,
+  1.4% of weeks). Owner-requested contract input included (cap share).
+- **RESULT (B) share_quality: FAIL.** Fantasy MAE +0.002 [0.000, +0.003] overall, worse; no position better. Off.

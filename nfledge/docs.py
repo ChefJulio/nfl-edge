@@ -344,13 +344,29 @@ def formulas(eng, season: int, week: int) -> str:
         {"label": "Same, starter ahead is out", "n_prev": 5, "act_rate": 0.4, "played_last": 0, "snap_avg": 0.1, "rank": 5, "ahead_out": 1, "rookie": 0},
         {"label": "Rookie RB3", "n_prev": 5, "act_rate": 0.6, "played_last": 1, "snap_avg": 0.15, "rank": 3, "ahead_out": 0, "rookie": 1},
       ])
+      # job-security inputs (injuries.job_security): starters are incumbents with an average season and contract
+      prof = prof.assign(incumbent=(prof["rank"] == 1).astype(int), perf_pct=0.5, r1_behind=0, win_pct=0.5,
+                         cap_pct=np.where(prof["rank"] == 1, 0.03, 0.005), last_week=0)
+      if "incumbent" in im.scratch_cols:
+        qb = {"n_prev": 5, "act_rate": 1.0, "played_last": 1, "snap_avg": 0.98, "rank": 1, "ahead_out": 0, "rookie": 0,
+              "incumbent": 1, "r1_behind": 0, "win_pct": 0.5, "cap_pct": 0.1, "last_week": 0}
+        prof = pd.concat([prof, pd.DataFrame([{**qb, "label": "Starting QB, playing well", "perf_pct": 0.75},
+                                              {**qb, "label": "Starting QB, bottom 10%, 1st-round rookie behind, team 1-5",
+                                               "perf_pct": 0.05, "r1_behind": 1, "win_pct": 0.17, "cap_pct": 0.02}])],
+                         ignore_index=True)
       for p_ in ("QB", "RB", "WR", "TE"):
         prof[f"is_{p_}"] = 0
       prof.loc[prof.label.str.contains("RB"), "is_RB"] = 1
-      prof.loc[~prof.label.str.contains("RB"), "is_WR"] = 1
-      ps = im.scratch_model.predict_proba(prof[im.SCRATCH_COLS])[:, 1]
+      prof.loc[prof.label.str.contains("QB"), "is_QB"] = 1
+      prof.loc[~prof.label.str.contains("RB|QB"), "is_WR"] = 1
+      cols = im.scratch_cols
+      for c_ in cols:
+        if c_ not in prof:
+          prof[c_] = 0
+      ps = im.scratch_model.predict_proba(prof[cols])[:, 1]
       add("Healthy-scratch model (gradient-boosted trees on active history, last game, snap share, depth rank, "
-          "teammates out ahead, rookie, position). Example outputs:")
+          "teammates out ahead, rookie, position" + ("; job security: incumbent, season EPA percentile, first-round "
+          "rookie behind, team win %, cap share, final week" if "incumbent" in im.scratch_cols else "") + "). Example outputs:")
       add("| Profile | Inactive% |")
       add("|---|---|")
       for lbl, p_ in zip(prof.label, ps):
