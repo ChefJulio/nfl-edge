@@ -1783,3 +1783,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   live build before his kickoff with the walk-forward page: MAE by position, distribution of projection differences,
   largest gaps with line / chance-to-play / ECR differences. PENDING CHECK: run it from Tuesday 2026-10-20 (week 6, the
   first archived live week) and after each week; record the gap once 3+ weeks exist.
+- **Thread 2 (2026-10-16): kickoff-rule regime - no signal, no test.** Descriptive, REG plays 2017-26 (2026 partial):
+  (a) split-half persistence (odd vs even weeks, 32 teams, SE ~0.18 per season) of team mean kickoff EPA: returns
+  2017-23 mean r +0.07 vs 2024-26 +0.01; coverage +0.25 vs +0.12. No rise after the rule. Team per-game kickoff EPA sd
+  0.25-0.45 before, 0.35 / 0.55 / 0.73 (2024 / 25 / 26 partial; fewer games inflate it). (b) Points-formula ST weight
+  fit on one season at a time: 2018-23 0.18 / 0.76 / 0.93 / 1.68 / 1.13 / 2.24, 2024-25 0.88 / 1.19 (+-0.5); the
+  rise in the 6-season-window weights (0.98 -> 2.24) happened before the rule. The ST term is a net edge (own minus
+  opponent's expected ST EPA, team_model GameModel._features), so a league-wide kickoff shift sits in the ST
+  intercept and cancels. Side finding: field goals have NEVER been in the ST unit (nflverse sets
+  special_teams_play = 0 on all 7,622 FG plays 2019-26, and data.py's is_st requires it), though MODEL.md said
+  they were (fixed). FG EPA split-half r for the kicking team +0.12 mean, positive 8 of 10 seasons; expected margin
+  effect ~0.1 pt, below what a decide-2025 / confirm-2026 test can detect: not tested (thread 8 power note).
