@@ -259,6 +259,47 @@ def compare(results: dict[str, pd.DataFrame], ref: str) -> pd.DataFrame:
   return pd.DataFrame(rows)
 
 
+def decision_pairs(ref_rows: pd.DataFrame, within: float = 6.0) -> pd.DataFrame:
+  """Start / sit decisions (INSIGHTS thread 4, 2026-10-16): every pair of the reference's relevant rows at the same
+  season / week / position whose consensus ranks are within `within`. Fixed once, so every variant decides the same
+  pairs. Columns: season, week, pos, i, j (keys into gsis ids), a_i - a_j."""
+  out = []
+  for (s, w, pos), g in ref_rows.sort_values("crank").groupby(["season", "week", "pos"]):
+    ids, cr, a = g.gsis_id.to_numpy(), g.crank.to_numpy(), g.actual.to_numpy()
+    for x in range(len(g)):
+      for y in range(x + 1, len(g)):
+        if cr[y] - cr[x] > within:
+          break
+        out.append((s, w, pos, ids[x], ids[y], a[x] - a[y]))
+  return pd.DataFrame(out, columns=["season", "week", "pos", "i", "j", "da"])
+
+
+def decision_table(results: dict[str, pd.DataFrame], ref: str) -> pd.DataFrame:
+  """Points gained per pair over a coin flip by starting the player a variant projects higher: sign(p_i - p_j) x
+  (a_i - a_j) / 2 (ties count 0). Next to MAE in every comparison; differences vs the reference with a 95% CI over
+  season-weeks."""
+  pairs = decision_pairs(relevant(results[ref]))
+  keys = ["season", "week", "gsis_id"]
+  gains = {}
+  for name, res in results.items():
+    p = res[keys + ["proj"]].drop_duplicates(keys).set_index(keys).proj
+    pi = p.reindex(pd.MultiIndex.from_arrays([pairs.season, pairs.week, pairs.i])).to_numpy()
+    pj = p.reindex(pd.MultiIndex.from_arrays([pairs.season, pairs.week, pairs.j])).to_numpy()
+    gains[name] = np.nan_to_num(np.sign(pi - pj)) * pairs.da.to_numpy() / 2
+  rows, wk = [], pairs.season.astype(str) + "-" + pairs.week.astype(str)
+  for name in results:
+    for pos in POS + ["ALL"]:
+      m = (pairs.pos == pos).to_numpy() if pos != "ALL" else np.ones(len(pairs), bool)
+      row = {"variant": name, "pos": pos, "pairs": int(m.sum()), "gain": gains[name][m].mean()}
+      if name != ref:
+        d = pd.Series(gains[name][m] - gains[ref][m])
+        lo, hi = week_bootstrap(d, wk[m].reset_index(drop=True))
+        row.update({"d_gain": d.mean(), "ci_lo": lo, "ci_hi": hi,
+                    "verdict": "better" if lo > 0 else "worse" if hi < 0 else "no difference"})
+      rows.append(row)
+  return pd.DataFrame(rows)
+
+
 _DATA = {}
 
 
@@ -303,6 +344,9 @@ def main():
     print(f"  {name:22s} 10-90: {cov80:.3f}  25-75: {cov50:.3f}  avail Brier: {brier:.4f} (n={len(rep)})")
   print(f"\nSeasons {seasons}; reference = {names[0]}; relevant rows of the reference; MAE in fantasy points.")
   print(out.to_string(index=False, float_format=lambda x: f"{x:.3f}"))
+  print("\nStart / sit decisions: pairs of the reference's relevant players within 6 consensus ranks (same week and "
+        "position); points gained per pair over a coin flip by starting the one projected higher (higher = better).")
+  print(decision_table(results, names[0]).to_string(index=False, float_format=lambda x: f"{x:.3f}"))
   for s in seasons:
     by = compare({k: v[v.season == s] for k, v in results.items()}, names[0])
     by = by[by.pos == "ALL"]
