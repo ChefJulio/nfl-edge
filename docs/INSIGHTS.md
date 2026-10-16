@@ -1310,3 +1310,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   team, an Out / reserve player with a healthy-game share >= 15% is kept (tagged, end of group), and a week whose
   roster isn't published yet (per team) keeps the latest roster's reserve tags. Finished seasons in cache/depth_site
   keep the old rule until rebuilt.
+- **Number chips site-wide (owner 2026-10-15, after the box score):** shell.js NFLE.chips + a MutationObserver wraps
+  plain stat values in data tables in span.sc (headers span.sc.h) when 80%+ of a column qualifies; cells with their own
+  markup (bars, badges, words like "cov") stay plain; `no-chips` on a table opts out. NFLE.Table adds 8 px per
+  non-pinned column on fixed-width tables so chips don't clip. Box score (pst-tbl) keeps its tighter packed variant.

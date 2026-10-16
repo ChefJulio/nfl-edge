@@ -36,8 +36,10 @@
       tbl.classList.toggle('dt-fixed', fixed);
       tbl.querySelector('colgroup')?.remove();
       if (fixed) {
-        tbl.insertAdjacentHTML('afterbegin', `<colgroup>${cols.map(c => `<col style="width:${c.w}px">`).join('')}</colgroup>`);
-        tbl.style.minWidth = `${cols.reduce((t, c) => t + c.w, 0)}px`;
+        // + room for the number chips (shell.js NFLE.chips) in every column but the pinned name
+        const wd = c => c.w + (c.stick ? 0 : 8);
+        tbl.insertAdjacentHTML('afterbegin', `<colgroup>${cols.map(c => `<col style="width:${wd(c)}px">`).join('')}</colgroup>`);
+        tbl.style.minWidth = `${cols.reduce((t, c) => t + wd(c), 0)}px`;
       } else tbl.style.minWidth = '';
     };
     const head = () => {

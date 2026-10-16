@@ -348,3 +348,85 @@
   else show(parse(location.hash) || parse(saved) || parse('players'), !CARD.test(location.hash.slice(1)));
   window.NFLE_SHELL = { go: h => { const r = parse(h); if (r) show(r, true); } };
 })();
+// Number chips in every data table (owner 2026-10-15, after the box score): a cell whose value is a stat (digits with
+// / - . , % : and the like, plain or inside one simple wrapper such as a colored span) gets it wrapped in a small chip
+// (span.sc); a column's header gets a chip (span.sc.h) when its cells have them, so heads and values match. Cells with
+// their own visuals (bars, badges, photos, links, several parts) are left alone, a column chips only when 80%+ of
+// its values qualify, and a table with class "no-chips" is skipped. One observer covers tables rendered later too
+// (sorting, paging, tab switches, live repaints).
+(() => {
+  const NFLE = window.NFLE = window.NFLE || {};
+  const OK = new Set(['B', 'STRONG', 'ABBR', 'SMALL', 'SPAN']);
+  const STAT = /^[\s\d.,%+\-\u2212\u2013\u2014/:()]+$/;
+  const plain = el => {
+    const kids = [...el.childNodes], elems = kids.filter(n => n.nodeType === 1);
+    if (!kids.length || elems.length > 1) return false;
+    if (elems.some(n => !OK.has(n.tagName) || n.children.length || n.classList.contains('sc'))) return false;
+    return kids.every(n => n.nodeType === 1 || n.nodeType === 3 && (elems.length === 0 || !n.textContent.trim()));
+  };
+  const wrapIn = (el, cls) => {
+    const sp = document.createElement('span');
+    sp.className = cls;
+    [...el.childNodes].forEach(n => sp.appendChild(n));
+    el.appendChild(sp);
+  };
+  // 1 = chip it, 0 = blank (doesn't count), -1 = not a plain stat
+  const kind = td => {
+    if (td.querySelector(':scope > .sc')) return 2;
+    const t = td.textContent.trim();
+    if (!t || /^[–—-]+$/.test(t)) return 0;
+    return !td.classList.contains('stick') && plain(td) && /\d/.test(t) && STAT.test(t) ? 1 : -1;
+  };
+  const table = tb => {
+    if (tb.classList.contains('no-chips')) return;
+    const by = new Map();  // column -> [[cell, kind]]
+    // columns by position (a cell spanning several columns, like a season header row, sits out)
+    const cols_of = r => { let c = 0; return [...r.cells].map(td => { const at = c; c += td.colSpan || 1; return [td, at]; }); };
+    [...tb.tBodies].forEach(b => [...b.rows].forEach(r => cols_of(r).forEach(([td, at]) => {
+      if ((td.colSpan || 1) > 1 || td.tagName === 'TH') return;  // header cells inside a body (per-season blocks) don't vote
+      if (!by.has(at)) by.set(at, []);
+      by.get(at).push([td, kind(td)]);
+    })));
+    const cols = new Set();
+    by.forEach((list, i) => {
+      // a column chips when at least 80% of its values are plain stats (playoff rows' "WC", a rank's "(4lw)" note stay plain)
+      const yes = list.filter(([, k]) => k > 0).length, no = list.filter(([, k]) => k < 0).length;
+      if (!yes || yes < 4 * no) return;
+      list.forEach(([td, k]) => { if (k === 1) wrapIn(td, 'sc'); });
+      cols.add(i);
+    });
+    // the sticky header copy (Table's .fhead) has no body: it follows its twin's columns
+    const twin = !tb.tBodies.length && tb.closest('.fhead') && tb.closest('.dt-wrap') ? tb.closest('.dt-wrap').querySelector('.scroll table') : null;
+    if (twin && twin.tBodies[0] && twin.tBodies[0].rows[0]) {
+      cols_of(twin.tBodies[0].rows[0]).forEach(([td, at]) => { if (td.querySelector(':scope > .sc')) cols.add(at); });
+    }
+    // headers wherever they sit (thead, or header rows inside each body block); group headers span columns: skipped
+    [...tb.rows].forEach(r => cols_of(r).forEach(([th, at]) => {
+      if (th.tagName === 'TH' && (th.colSpan || 1) === 1 && cols.has(at) && !th.querySelector(':scope > .sc') && plain(th) && th.textContent.trim()) wrapIn(th, 'sc h');
+    }));
+    if (!twin) {  // keep the copy in step
+      const cp = tb.closest('.dt-wrap') && tb.closest('.dt-wrap').querySelector('.fhead table');
+      if (cp && cp !== tb) table(cp);
+    }
+  };
+  NFLE.chips = root => {
+    if (!root || !root.querySelectorAll) return;
+    const t = root.closest ? root.closest('table') : null;
+    if (t) { table(t); return; }
+    root.querySelectorAll('table').forEach(table);
+  };
+  const pending = new Set();
+  let raf = 0;
+  const run = () => { raf = 0; const ns = [...pending]; pending.clear(); ns.forEach(n => { if (n.isConnected) NFLE.chips(n); }); };
+  const start = () => {
+    NFLE.chips(document.body);
+    new MutationObserver(ms => {
+      ms.forEach(m => m.addedNodes.forEach(n => {
+        if (n.nodeType === 1 && !(n.classList && n.classList.contains('sc'))) pending.add(n);
+        else if (n.nodeType === 3 && n.parentElement && !n.parentElement.classList.contains('sc')) pending.add(n.parentElement);
+      }));
+      if (pending.size && !raf) raf = requestAnimationFrame(run);
+    }).observe(document.body, { childList: true, subtree: true });
+  };
+  if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+})();
