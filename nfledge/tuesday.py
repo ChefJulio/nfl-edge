@@ -235,9 +235,36 @@ def week_rows(d, rep_rows: pd.DataFrame, hurt: set) -> pd.DataFrame:
   return pd.DataFrame(rows)
 
 
+def add_team_q(x: pd.DataFrame, hist: pd.DataFrame, k: float = 20.0) -> pd.DataFrame:
+  """EXPERIMENT (INSIGHTS (J)): team_q = share of the team's final-report Questionable players who played, over its
+  games strictly before (season, week): the two seasons before + this season so far, shrunk toward the league rate
+  with k pseudo-cases. hist: labelled stage-3 rows."""
+  h = hist[(hist.stage == 3) & (hist.gs_now == "Questionable")].dropna(subset=["y"])
+  league = float(h.y.mean()) if len(h) else 0.7
+  by = {}
+  for t, g in h.groupby("team"):
+    g = g.assign(key=g.season * 100 + g.week).sort_values("key")
+    by[t] = (g.key.to_numpy(), np.cumsum(g.y.to_numpy()), np.arange(1, len(g) + 1))
+  out = []
+  for t, s_, w in zip(x.team, x.season, x.week):
+    e = by.get(t)
+    if e is None:
+      out.append(league)
+      continue
+    keys, cy, cn = e
+    hi = np.searchsorted(keys, s_ * 100 + w, side="left")  # games before this week
+    lo = np.searchsorted(keys, (s_ - 2) * 100, side="left")  # from two seasons back
+    n = (cn[hi - 1] if hi else 0) - (cn[lo - 1] if lo else 0)
+    yy = (cy[hi - 1] if hi else 0) - (cy[lo - 1] if lo else 0)
+    out.append((yy + k * league) / (n + k))
+  return x.assign(team_q=out)
+
+
 def week_features(x: pd.DataFrame) -> pd.DataFrame:
   from .injuries import InjuryModel
   f = features(x)
+  if "team_q" in x.columns:  # (J)
+    f["team_q"] = x.team_q.astype(float).to_numpy()
   for c in ("on_now", "wn_D", "wn_L", "wn_F", "w_first", "w_last"):
     f[c] = x[c].astype(float).to_numpy()
   f["w_trend"] = f.w_last - f.w_first

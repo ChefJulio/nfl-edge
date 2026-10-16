@@ -1569,3 +1569,15 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   recorded. Projections barely move because availability changes the projection only when a player crosses 50%
   (who sits and whose volume is redistributed); the displayed inactive % is where it matters. Owner may hold it to
   the stricter bar: config injuries.week_model.
+- **PRE-REGISTERED 2026-10-16 (before running): (J) team habits in the one availability model** (owner: "test by
+  team"; Footballguys 2017-22: Philadelphia's Questionable players played 79%, Houston's 49%). Input `team_q`: the
+  share of this team's final-report Questionable players who played, over its games before this week (the two
+  seasons before + this season so far), shrunk toward the league rate with 20 pseudo-cases. Compared with the one
+  model as shipped (I2), same rows, same calibration step. GATE: final report Brier lower with the 95% CI over
+  season-weeks excluding 0, no position significantly worse; Wednesday / Thursday CI upper < +0.002; deciles within
+  4 points; same direction on the untouched 2026 weeks. Also reported: spread of team_q across teams.
+- **RESULT (J) team habits: FAIL.** team_q varies (team-seasons 2021-25: 10th-90th percentile 59-80%, range 41-87%)
+  but adds nothing the one model doesn't already see: final report 0.0844 -> 0.0841 (-0.0003 [-0.0010, +0.0004]);
+  Questionable only 0.1793 -> 0.1779; QB significantly worse (+0.0074 [+0.0034, +0.0113]); Wednesday +0.0003,
+  Thursday +0.0004; 2026 Wednesday worse. The habit shows up in each player's own practice days and status, which the
+  model reads player by player. Off (code kept: tuesday.add_team_q, tools/team_q_eval.py).
