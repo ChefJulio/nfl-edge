@@ -707,5 +707,11 @@ table.lg .sc.rk-good { background: rgba(69,194,107,.24); color: #b6f0c7; }
 table.lg .sc.rk-mid { background: rgba(224,176,74,.20); color: #f4dca4; }
 table.lg .sc.rk-bad { background: rgba(242,120,109,.20); color: #ffc2bb; }
 /* season totals row under the column heads */
-table.lg tbody tr.lg-tot td { font-weight: 700; color: var(--ink); background: color-mix(in srgb, var(--ink) 9%, var(--panel2)); }
-table.lg tr.lg-tot td:first-child { color: var(--muted); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+/* set apart from the games: accent tint and outline, then a gap before the first game */
+table.lg tbody tr.lg-tot td { font-weight: 700; color: var(--ink); background: color-mix(in srgb, var(--accent) 13%, var(--panel2));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--accent) 45%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+table.lg tbody tr.lg-tot td:first-child { color: var(--accent); font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  box-shadow: inset 1px 1px 0 color-mix(in srgb, var(--accent) 45%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+table.lg tbody tr.lg-tot td:last-child { border-radius: 0 6px 6px 0;
+  box-shadow: inset -1px 1px 0 color-mix(in srgb, var(--accent) 45%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+table.lg tbody tr.lg-gap td { height: 7px; padding: 0; background: none !important; box-shadow: none; }

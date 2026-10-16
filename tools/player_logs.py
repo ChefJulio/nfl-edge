@@ -97,11 +97,34 @@ def main():
     return x
 
   st = prep(pd.concat(old + [data.stats], ignore_index=True))
+  # Season totals' finish at the position (owner 2026-10-16: the game log's totals row colored like its games): each
+  # player's regular-season sums ranked among everyone at his position that season, fantasy points and every stat
+  tot = st.groupby(["season", "player_id"]).agg(position=("position", "last"), fp=("fp", "sum"),
+                                                **{k: (k, "sum") for k in RANKED}).reset_index()
+  tg = tot.groupby(["season", "position"])
+  tot["prk"] = tg.fp.rank(ascending=False, method="min")
+  for k in RANKED:
+    tot[f"{k}_wr"] = tg[k].rank(ascending=k in FEWER_BETTER, method="min")
+  season_rank = {(int(r.season), r.player_id): {"trk": int(r.prk), "tr": [int(getattr(r, f"{k}_wr")) for k in RANKED]}
+                 for r in tot.itertuples()}
   # Playoff games (owner, 2026-10-14: taken seriously, kept apart from the regular season): every season's POST rows
   post = [cache.get("stats", s, lambda: nfl.load_player_stats([s]).select(D.STAT_COLS), stale=False)
           for s in range(FIRST_SEASON, data.current_season + 1)]
   post = pd.concat([x[x.season_type == "POST"] for x in post if x is not None and len(x)], ignore_index=True)
   post = prep(post.assign(team=post.team.replace(D.RELOCATED), opponent_team=post.opponent_team.replace(D.RELOCATED)))
+  # A playoff week has 2-12 teams, so ranking among them makes every conference-title QB a top-4 "starter" (owner
+  # 2026-10-16). Instead: the rank it would have had in an average regular-season week that season, 1 + (that season's
+  # regular-season player-weeks at the position that beat it) / (weeks).
+  for (season, pos), g in post.groupby(["season", "position"]):
+    ref = st[(st.season == season) & (st.position == pos)]
+    if not len(ref):
+      continue
+    nw = ref.week.nunique()
+    for k, col in [("fp", "prk")] + [(k, f"{k}_wr") for k in RANKED]:
+      vals, v = np.sort(ref[k].to_numpy(float)), g[k].to_numpy(float)
+      better = (np.searchsorted(vals, v, "left") if k in FEWER_BETTER
+                else len(vals) - np.searchsorted(vals, v, "right"))
+      post.loc[g.index, col] = np.round(1 + better / nw).astype(int)
   # Snap share: loaded seasons already carry gsis ids; older ones map pfr -> gsis through nflverse's player table.
   players = cache.get("players", "all", lambda: nfl.load_players(), stale=cache.age_hours("players", "all") > 24 * 7)
   pfr = players.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
@@ -245,7 +268,8 @@ def main():
     if name is None and pid in pinfo.index:  # not on any week page of ours: nflverse's player table
       name, espn = pinfo.at[pid, "display_name"], espn_str(pinfo.at[pid, "espn_id"])
     doc = {"pid": pid, "name": name, "espn": espn, "pos": pos, "keys": SCORE_KEYS, "cur": data.current_season, "team": team,
-           "seasons": [{"s": s, "g": seasons.get(s, []), **({"pg": playoffs[s]} if s in playoffs else {})}
+           "seasons": [{"s": s, "g": seasons.get(s, []), **({"pg": playoffs[s]} if s in playoffs else {}),
+                        **season_rank.get((s, pid), {})}
                        for s in sorted(set(seasons) | set(playoffs), reverse=True)], "up": upcoming,
            "bio": bios.get(pid, {})}
     if pid in injuries:

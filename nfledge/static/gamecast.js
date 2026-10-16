@@ -525,19 +525,24 @@
           <td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td>
           <td class="num"><span class="lg-rk ${rkClass(g.rk)}">${g.rk}</span></td><td class="num">${g.sn != null ? (g.r ? `<span class="sc ${snapTone(g.sn)}">${g.sn}</span>` : g.sn) : '–'}</td>
           ${stat.map(([, fn, ri]) => { const v = fn(g);
-            // a zero ties most of the position (0 rush TD can "rank" top 10): uncolored, except Int / fumbles (fewer is better)
-            return `<td class="num">${ri != null && g.r ? (+v === 0 && ri !== 2 && ri !== 8 ? `<span class="sc">${v}</span>` : chip(v, g.r[ri])) : v}</td>`; }).join('')}</tr>`; };
+            // a zero ties most of the position (0 rush TD can "rank" top 10): red (owner 2026-10-16), except Int / fumbles
+            // (fewer is better)
+            return `<td class="num">${ri != null && g.r ? (+v === 0 && ri !== 2 && ri !== 8 ? `<span class="sc rk-bad">${v}</span>` : chip(v, g.r[ri])) : v}</td>`; }).join('')}</tr>`; };
       // season totals right under the column heads (owner 2026-10-16): the games summed into one stat line, so every
-      // column (C/A, YPC) reads it as it reads a game; Snap = average, Proj = total only when every game had one
-      const totRow = gs => {
+      // column (C/A, YPC) reads it as it reads a game; Snap = average, Proj = total only when every game had one.
+      // Colored by the season total's finish at his position (rk = S.trk / S.tr from tools/player_logs.py; not playoffs)
+      const totRow = (gs, rk) => {
         if (gs.length < 2 || opts.last) return '';
         const add = k => gs[0][k].map((_, i) => gs.reduce((t, g) => t + (+g[k][i] || 0), 0)), T = { c: add('c'), x: add('x') };
         const pjs = gs.map(projOf), sn = gs.filter(g => g.sn != null);
-        return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num lg-fp">${f1(pts(T.c, w, pos))}</td>
-          <td class="num muted">${pjs.every(v => v != null) ? f1(pjs.reduce((a, b) => a + b, 0)) : '–'}</td><td></td>
-          <td class="num">${sn.length ? Math.round(sn.reduce((t, g) => t + g.sn, 0) / sn.length) : '–'}</td>${stat.map(([, fn]) => `<td class="num">${fn(T)}</td>`).join('')}</tr>`;
+        const tc = (v, r) => rk && r != null ? chip(v, r) : v, avgSn = sn.length ? Math.round(sn.reduce((t, g) => t + g.sn, 0) / sn.length) : null;
+        return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num lg-fp">${tc(f1(pts(T.c, w, pos)), rk && rk.trk)}</td>
+          <td class="num muted">${pjs.every(v => v != null) ? f1(pjs.reduce((a, b) => a + b, 0)) : '–'}</td>
+          <td class="num">${rk && rk.trk ? `<span class="lg-rk ${rkClass(rk.trk)}" title="His ${esc(pos)} finish that season (fantasy points, site scoring)">${rk.trk}</span>` : ''}</td>
+          <td class="num">${avgSn == null ? '–' : rk ? `<span class="sc ${snapTone(avgSn)}">${avgSn}</span>` : avgSn}</td>${stat.map(([, fn, ri]) => `<td class="num">${tc(fn(T), rk && rk.tr && ri != null ? rk.tr[ri] : null)}</td>`).join('')}</tr>
+          <tr class="lg-gap"><td colspan="${6 + stat.length}"></td></tr>`;
       };
-      const trs = totRow(S.g) + rows.map(r => {
+      const trs = totRow(S.g, S.tr ? S : null) + rows.map(r => {
         if (r.u && r.u.bye) return `<tr class="lg-bye"><td>${r.w}</td><td colspan="${5 + stat.length}">Bye</td></tr>`;
         if (r.u) {
           const pj = projOf(r.u);
@@ -905,7 +910,8 @@
       const tot = gs => {
         if (gs.length < 2 || opts.compact) return '';
         const sum = (g2, i) => gs.reduce((a, g) => a + (+((g[g2] || [])[i]) || 0), 0), sn = gs.filter(g => g.sn != null);
-        return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num">${sn.length ? Math.round(sn.reduce((a, g) => a + g.sn, 0) / sn.length) : '–'}</td>${keys.map(k => `<td class="num">${nfmt(sum('d', (L.keys || []).indexOf(k)))}</td>`).join('')}${rk.map((k, i) => `<td class="num">${nfmt(sum('r', i))}</td>`).join('')}</tr>`;
+        return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num">${sn.length ? Math.round(sn.reduce((a, g) => a + g.sn, 0) / sn.length) : '–'}</td>${keys.map(k => `<td class="num">${nfmt(sum('d', (L.keys || []).indexOf(k)))}</td>`).join('')}${rk.map((k, i) => `<td class="num">${nfmt(sum('r', i))}</td>`).join('')}</tr>
+          <tr class="lg-gap"><td colspan="${n}"></td></tr>`;
       };
       const trs = tot(S.g) + [...S.g].sort((a, b) => b.w - a.w).map(g => row(g, g.w)).join('');  // newest first
       const sum = opts.compact ? '' : ` · ${t.g} game${t.g === 1 ? '' : 's'}${keys.length ? ` · ${keys.slice(0, 4).map(k => `${nfmt(t[k] || 0)} ${cols[k][0]}`).join(', ')}` : ''}`;
