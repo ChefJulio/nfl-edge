@@ -607,7 +607,8 @@ def week_data(ctx: dict) -> str:
   pkeys = ("team", "nick", "record", "rank", "move", "range", "net", "off", "def", "st", "pass_o", "rush_o", "pass_d",
            "rush_d", "net_rk", "off_rk", "def_rk", "st_rk", "pass_o_rk", "rush_o_rk", "pass_d_rk", "rush_d_rk",
            "pass_o_pp", "rush_o_pp", "pass_d_pp", "rush_d_pp", "sos_past", "sos_past_rk", "sos_next", "sos_next_rk",
-           "sos_past_o", "sos_past_d", "sos_next_o", "sos_next_d", "rank_hist", "net_hist", "qb_hist", "qb_note")
+           "sos_past_o", "sos_past_d", "sos_next_o", "sos_next_d", "rank_hist", "net_hist", "qb_hist", "qb_note",
+           "net_now", "rank_now", "qb_back")
   power = [{k: r.get(k) for k in pkeys} for r in ctx.get("power") or []]
   out = {"season": ctx["season"], "week": ctx["week"], "generated": ctx["generated"], "archive": ctx["archive"],
          "power": power, "teams": ctx.get("teams", {}),
@@ -931,7 +932,7 @@ def unit_points(r, vol: dict, starters: dict, w: dict) -> pd.DataFrame:
   return u
 
 
-def schedule_faced(eng, season: int, week: int, r, starters: dict) -> pd.DataFrame:
+def schedule_faced(eng, season: int, week: int, r, starters: dict, qb_eff: dict | None = None) -> pd.DataFrame:
   """Strength of schedule in points per game, unit by unit and weighted by the plays actually involved.
   Played: every offensive play is charged with the opposing unit it faced (dropbacks vs that pass defense,
   runs vs that run defense) and every defensive play with the opposing offense (incl. its passer); summed and
@@ -961,7 +962,9 @@ def schedule_faced(eng, season: int, week: int, r, starters: dict) -> pd.DataFra
         continue
       rows.append({"team": t,
                    "off_next": -(r.dfn.at[o, "pass"] * db_pg.get(t, np.nan) + r.dfn.at[o, "rush"] * ru_pg.get(t, np.nan)),
-                   "def_next": ((r.off.at[o, "pass"] + r.qb_term(starters.get(o))) * db_pg.get(o, np.nan)
+                   # future opponents: their expected QB (powerc, when given), else this week's starter
+                   "def_next": ((r.off.at[o, "pass"] + (qb_eff[o] if qb_eff and o in qb_eff else r.qb_term(starters.get(o))))
+                                * db_pg.get(o, np.nan)
                                 + r.off.at[o, "rush"] * ru_pg.get(o, np.nan))})
   if rows:
     out = out.join(pd.DataFrame(rows).groupby("team")[["off_next", "def_next"]].mean(), how="outer")
@@ -993,29 +996,36 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
     qbs = proj[(proj.pos == "QB") & ~proj.sits].sort_values("db").groupby("team").tail(1)
     starters.update(dict(zip(qbs.team, qbs.gsis_id)))
   fw = formula_weights(eng)
-  u = unit_points(rb, vol, starters, fw)
+  from . import powerc
+  u_now = unit_points(rb, vol, starters, fw)  # this week's lineup (the "This week" column; Matchups uses the same)
+  # THE RANK = rest-of-season strength, injury-aware (owner 2026-10-16; nfledge/powerc.py, INSIGHTS (M)): each team's
+  # usual starter weighted by his chance to be back over its remaining games, the backup for the rest
+  now = {}
+  if proj is not None and "avail" in proj:
+    q_ = proj[proj.pos == "QB"]
+    now = dict(zip(q_.gsis_id, q_.avail.astype(float)))
+  usual, backup, pbar = powerc.inputs(eng, season, week, starters, now)
+  u = powerc.blend(unit_points(rb, vol, usual, fw), unit_points(rb, vol, backup, fw), pbar)
+  qb_eff = {t: pbar.get(t, 1.0) * rb.qb_term(usual.get(t, starters.get(t))) + (1 - pbar.get(t, 1.0)) * rb.qb_term(backup.get(t))
+            for t in rb.teams}
   history, qb_by_week = {}, {}
   for w in range(2, week + 1):
     rw = eng.tm.fit(season, w)
     qb_by_week[w] = starters_asof(eng, season, w)
-    history[w] = unit_points(rw, league_volume(eng, season, w, rw), qb_by_week[w], fw).net
+    vw = league_volume(eng, season, w, rw)
+    us_w, bk_w, pb_w = powerc.inputs(eng, season, w, qb_by_week[w])
+    history[w] = powerc.blend(unit_points(rw, vw, us_w, fw), unit_points(rw, vw, bk_w, fw), pb_w).net
   # Each week's rating uses that week's starting QB (it's who plays), so a backup's start moves the line: flag those
   # weeks against the team's usual starter (the one who started most of them), so the trend doesn't read as the team
   # changing (owner 2026-10-16, after an outside review: Washington -0.66 -> -8.64 -> -1.21 as Daniels sat and returned)
-  qb_by_week[week + 1] = dict(starters)  # this week (projected starters)
-  usual = {}
-  for t in rb.teams:
-    seq = [qb_by_week[w].get(t) for w in sorted(qb_by_week) if qb_by_week[w].get(t)]
-    if seq:
-      cnt = pd.Series(seq).value_counts()
-      usual[t] = min(cnt[cnt == cnt.max()].index, key=seq.index)  # a tie goes to the incumbent (who started first)
+  # usual starter: powerc.usual_starters (most starts this season before this week; a tie goes to the incumbent)
   ro = eng.data.rosters.dropna(subset=["gsis_id"]).sort_values(["season", "week"]).drop_duplicates("gsis_id", keep="last")
   qb_name = dict(zip(ro.gsis_id, ro.full_name))
   hist = pd.DataFrame(history)
   hist_rk = hist.rank(ascending=False, method="min")  # power rank by week, this season (team card trend)
   ts = TeamStyle(eng.data.teams)
   # Rank range: resample each unit within its bootstrap uncertainty (in points per game), rank the nets.
-  qb = pd.Series({t: rb.qb_term(starters.get(t)) for t in rb.teams})
+  qb = pd.Series(qb_eff)
   se_net = fw["play"] * np.sqrt((vol["pass"] ** 2) * (rb.se_off["pass"] ** 2 + rb.se_def["pass"] ** 2)
                                 + (vol["rush"] ** 2) * (rb.se_off["rush"] ** 2 + rb.se_def["rush"] ** 2))
   rng = np.random.default_rng(cfg["team_model"]["seed"])
@@ -1026,7 +1036,8 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
   prev_rank = hist[week - 1].rank(ascending=False) if (week - 1) in hist else None
   rk = lambda s: s.rank(ascending=False, method="min").astype(int)
   ranks = {c: rk(u[c]) for c in u.columns}
-  sos = schedule_faced(eng, season, week, rb, starters)
+  rank_now = rk(u_now.net)
+  sos = schedule_faced(eng, season, week, rb, starters, qb_eff)
   for c in ("off_past", "def_past", "off_next", "def_next", "past", "next"):  # same points scale as the units
     if c in sos:
       sos[c] = sos[c] * fw["play"]
@@ -1040,6 +1051,8 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
       "team": team, "nick": ts.nick.get(team, ""),
       "record": rec.get(team, ""), "rank": int(ranks["net"][team]), "move": move,
       "range": f"{lo[team]}-{hi[team]}" if lo[team] != hi[team] else f"{lo[team]}",
+      "net_now": float(u_now.at[team, "net"]), "rank_now": int(rank_now[team]),
+      "qb_back": round(float(pbar.get(team, 1.0)), 3),  # usual starter's mean chance to play over the rest of the season
       **{c: float(u.at[team, c]) for c in u.columns},
       **{f"{c}_rk": int(ranks[c][team]) for c in u.columns},
       "pass_o_pp": per100(rb.off.at[team, "pass"] + qb[team]), "rush_o_pp": per100(rb.off.at[team, "rush"]),

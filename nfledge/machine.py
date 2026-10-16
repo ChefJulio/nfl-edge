@@ -98,6 +98,38 @@ def rankings_md(week: dict, base: str) -> str:
   return "\n".join(out)
 
 
+def power_md(week: dict, base: str) -> str:
+  rows = week.get("power") or []
+  sg = lambda v: "" if v is None else f"{v:+.1f}"  # noqa: E731
+  out = [f"# NFL Edge power rankings: {week['season']} week {week['week']}", "",
+         "Rank and Net = how good each team is from here on: opponent-adjusted points per game vs an average team over "
+         "its remaining games, an injured starting QB counted by his chance to be back each week. This week = the same "
+         "rating with this week's starter. Offense + Defense + ST = Net. Rank range = 10th-90th percentile rank over "
+         f"4,000 simulations. Method: {base}model.md (Games).", "",
+         "| Rank | Team | Record | Net | This week (rank) | Offense | Defense | ST | Rank range | QB note |", "|---|---|---|---|---|---|---|---|---|---|"]
+  for r in rows:
+    out.append(f"| {r['rank']} | {r['team']} {r.get('nick', '')} | {r.get('record', '')} | {sg(r.get('net'))} | "
+               f"{sg(r.get('net_now'))} ({r.get('rank_now', '')}) | {sg(r.get('off'))} | {sg(r.get('def'))} | {sg(r.get('st'))} | "
+               f"{r.get('range', '')} | {r.get('qb_note', '')} |")
+  return "\n".join(out) + "\n"
+
+
+def games_md(week: dict, base: str) -> str:
+  out = [f"# NFL Edge games: {week['season']} week {week['week']}", "",
+         "Market chance = from the Vegas spread when posted; our model = power rank gap + Elo + home field "
+         f"(method: {base}model.md, Games).", "",
+         "| Kickoff | Game | QBs | Vegas line | Total | Market favorite | Our model | Final |", "|---|---|---|---|---|---|---|---|"]
+  for g in week.get("games") or []:
+    a, h, f = g.get("away", {}), g.get("home", {}), g.get("fc", {}) or {}
+    fin = g.get("final") or {}
+    final = f"{a.get('team')} {fin.get('away')} - {h.get('team')} {fin.get('home')}" if fin.get("home") is not None else ""
+    mk = "tossup" if f.get("tossup") else f"{f.get('fav', '')} {f.get('pct', '')}%"
+    md = "tossup" if f.get("model_tossup") else f"{f.get('model_fav', '')} {f.get('model_pct', '')}%"
+    out.append(f"| {g.get('kickoff', '')} | {a.get('team')} ({a.get('record', '')}) {'vs' if g.get('neutral') else '@'} {h.get('team')} ({h.get('record', '')}) | "
+               f"{a.get('qb', '')} / {h.get('qb', '')} | {g.get('vegas_line') or ''} | {g.get('vegas_total') or ''} | {mk} | {md} | {final} |")
+  return "\n".join(out) + "\n"
+
+
 def llms_txt(base: str, season: int, week: int, generated: str) -> str:
   return f"""# NFL Edge
 
@@ -116,8 +148,10 @@ are the same content in plain text and JSON.
   games, playoffs, grades, kickers and defenses), what was tested and rejected, and accuracy track records
 - [How the model works (static HTML)]({base}model/): the same, as a web page without JavaScript
 - [This week's rankings (Markdown)]({base}rankings.md): projections per position with ranges and inactive chances
-- [Lab notebook (raw)](https://github.com/ChefJulio/nfl-edge/blob/main/docs/INSIGHTS.md): every test as it happened,
-  with its pre-registered pass bar and result
+- [Power rankings (Markdown)]({base}power.md): every team's rest-of-season and this-week rating, units, rank range
+- [This week's games (Markdown)]({base}games.md): kickoff, QBs, Vegas line and total, market and model chances, finals
+- [Lab notebook (Markdown)]({base}notebook.md): every test as it happened, with its pass bar written before the result
+  (also on GitHub: https://github.com/ChefJulio/nfl-edge/blob/main/docs/INSIGHTS.md)
 - [Source code](https://github.com/ChefJulio/nfl-edge)
 
 ## Data (JSON)
@@ -125,7 +159,8 @@ are the same content in plain text and JSON.
 - [{base}index.json]({base}index.json): this week: players (projection, stat line, range quantiles, inactive chance
   and why, matchup, status), games (lines, win chances, battle bars), teams, power ratings, roles
 - [{base}weeks.json]({base}weeks.json): every built week (season -> week -> page); each page's data is the same path
-  with .json (e.g. {season}/week-{week + 1:02d}.json for next week's projection)
+  with .json; the current week is also at {season}/week-{week:02d}.json (same file as index.json). The Markdown files
+  above are small enough for one fetch; index.json (~550 KB) is not, for some fetchers.
 - [{base}data/ros.json]({base}data/ros.json): rest of season, per player and week: expected stat line if active,
   chance to play, opponent
 - [{base}data/kdst.json]({base}data/kdst.json): kicker and team-defense expected stat lines this week through week 17
@@ -144,4 +179,13 @@ def write(root: Path, body_md: str, avail: dict | None, track: dict | None, week
   (root / "model").mkdir(exist_ok=True)
   (root / "model" / "index.html").write_text(model_page(md, base, generated), encoding="utf-8")
   (root / "rankings.md").write_text(rankings_md(week, base), encoding="utf-8")
+  (root / "power.md").write_text(power_md(week, base), encoding="utf-8")
+  (root / "games.md").write_text(games_md(week, base), encoding="utf-8")
+  nb = Path(__file__).resolve().parent.parent / "docs" / "INSIGHTS.md"  # the lab notebook (github.com blocks fetchers)
+  if nb.exists():
+    (root / "notebook.md").write_text(nb.read_text(encoding="utf-8"), encoding="utf-8")
+  # the current week's data at its archive path too, so {season}/week-NN.json always works
+  wk = root / str(week["season"]) / f"week-{int(week['week']):02d}.json"
+  wk.parent.mkdir(exist_ok=True)
+  wk.write_text(week_json, encoding="utf-8")
   (root / "llms.txt").write_text(llms_txt(base, int(week["season"]), int(week["week"]), generated), encoding="utf-8")

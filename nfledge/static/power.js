@@ -21,6 +21,8 @@
       html: r => `<div class="who">${F.logo(teams, r.team, 26)}<div><b><span class="nm-full">${esc(r.nick)}</span><span class="nm-short">${esc(r.team)}</span></b><span class="sub">${esc(r.team)} &middot; ${esc(r.record)}</span></div></div>` },
     { key: 'net', label: 'Net', num: true,
       html: r => `<div class="netc"><b class="sc">${F.sgn(r.net)}</b><span class="sub" title="80% of simulations rank this team between ${esc(String(r.range).replace('-', ' and '))} (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range ${esc(r.range)}</span></div>` },
+    { key: 'net_now', label: 'This week', num: true, title: "Net with this week's starting quarterback",
+      html: r => r.net_now == null ? '' : `<div class="mc"><span class="mv2 sc">${F.sgn(r.net_now)}</span><span class="rk-b sm ${F.rkc(r.rank_now)}">${F.ord(r.rank_now)}</span></div>` },
     { key: 'off', label: 'Offense', title: 'Pass O + Run O', html: r => `<span title="Pass O ${F.sgn(r.pass_o)} + Run O ${F.sgn(r.rush_o)}">${mc(r.off, r.off_rk)}</span>` },
     { key: 'def', label: 'Defense', title: 'Pass D + Run D', html: r => `<span title="Pass D ${F.sgn(r.pass_d)} + Run D ${F.sgn(r.rush_d)}">${mc(r.def, r.def_rk)}</span>` },
     ...[['pass_o', 'Pass O', 'per 100 dropbacks, incl. starting QB'], ['rush_o', 'Run O', 'per 100 designed runs'],
@@ -37,10 +39,12 @@
       NFLE.week().then(D => {
         if (!D || !D.power || !D.power.length || !('net_hist' in D.power[0])) return;  // older week file: keep the page's table
         const v = D.power_vol || {}, n = (x, d) => x ? Math.round(x) : d;
-        sec.innerHTML = `<div class="sec-head"><div><h2>Power rankings</h2><p>Opponent-adjusted points per game vs an average team. Everything adds up: Offense = Pass O + Run O, Defense = Pass D + Run D, Net = Offense + Defense + ST.</p></div></div>
+        sec.innerHTML = `<div class="sec-head"><div><h2>Power rankings</h2><p>How good each team is from here on: opponent-adjusted points per game vs an average team over its remaining games, with an injured starting quarterback counted by his chance to be back each week. "This week" is the same rating with this week's starter. Everything adds up: Offense = Pass O + Run O, Defense = Pass D + Run D, Net = Offense + Defense + ST.</p></div></div>
           <details class="howto"><summary>How to read</summary><div>
             <dl class="ht">
               <dt>Every number</dt><dd>Points per game vs an average opponent. Higher is better everywhere, defense included, and the columns add up.</dd>
+              <dt>Rank and Net</dt><dd>Rest of the season: a quarterback who is out counts by his chance to be back in each remaining game (his backup the rest), so a one-week absence barely moves a team and a season-ending one counts fully.</dd>
+              <dt>This week</dt><dd>The same rating with this week's starting quarterback, the one Matchups uses. A QB tag means someone other than the usual starter is expected to start.</dd>
               <dt>Units</dt><dd>Per-play rating × a typical game's plays (about ${n(v.pass, 34)} dropbacks, ${n(v.rush, 25)} runs, ${n(v.st, 11)} special-teams plays). Hover a unit for its per-play rating. Pass O includes the current starting QB.</dd>
               <dt>Rank range</dt><dd>Where the team could rank given the uncertainty (10th–90th percentile). Narrow = settled; wide = a few games could move it a lot.</dd>
               <dt>Badges</dt><dd>League ranks: green = top 8, red = bottom 8.</dd>

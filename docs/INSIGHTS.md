@@ -1630,3 +1630,24 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   games: +1.42 [-0.46, +3.28]. Candidate test (not run): a stronger or experience-scaled penalty in the pass unit, gated
   on game margin MAE. (The reviewer's other points: rank history now flags QB-driven weeks; retired team codes
   removed; a separate power.json declined - index.json is one shared load for every tab.)
+- **PRE-REGISTERED 2026-10-16 (before building): (M) Power rank = rest-of-season strength, injury-aware (owner chose
+  "C": how good a team is from here on; this week's lineup stays as a column).** C for a team at week w = the mean,
+  over its remaining regular-season games, of P(usual starting QB back that game) x net rating with him + (1 - P) x
+  net rating with his backup; P from the return-timing chain fit only on outcomes known before week w (healthy usual
+  starter: P = 1); usual starter = most starts this season before w (tie: the incumbent); backup = the most recent
+  starter if not the usual one, else depth-chart QB2. A = today's rank basis (net with the most recent starter).
+  tools/power_c.py, 2021-25, every week 2-18. GATE: (1) rank correlation (Spearman, 32 teams) with each team's actual
+  point differential per game over its remaining games, averaged over season-weeks: C - A > 0 with the 95% CI over
+  season-weeks excluding 0, on season-weeks where at least one usual starter is out (where C and A differ); overall
+  C not worse than A (CI lower > -0.005). Reported, not gated: the same vs record and point differential so far;
+  (2) playoff-game margins from C entering the playoffs (~65 games); (3) playoff odds with week-by-week C ratings,
+  scored like the existing odds backtest (a separate test before changing the odds).
+- **RESULT {#power-rank-c} (M) Power rank = rest-of-season strength: PASS -> SHIPPED.** tools/power_c.py (calls the
+  site's own nfledge/powerc.py), 2021-25, 85 season-weeks: mean Spearman with rest-of-season point differential per
+  game: C 0.445, A (this week's lineup) 0.436, point differential so far 0.424, win % so far 0.381. C - A on the 75
+  season-weeks with a usual starter out +0.0102 [+0.0016, +0.0193] (gate); all weeks +0.0083 [+0.0002, +0.0163];
+  better 4 of 5 seasons (2025 -0.005); C - PD so far +0.020 [+0.001, +0.040]. Teams without their usual starter then
+  went -3.25 per game vs A -2.12 / C -1.56: backups are overrated generally (see the inexperienced-QB finding).
+  Live: Power ranks by C (Net, units blended by the usual starter's mean chance over the remaining games, so units
+  still add up), "This week" column = A; trend = C by week; schedule left rates opponents by their expected QB.
+  Playoff odds still hold the current rank; test (3) pending.
