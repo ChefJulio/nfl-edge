@@ -137,7 +137,7 @@ class InjuryModel:
     d = ah[(ah.season < max(seasons) + 1) & (ah.game_status != "OUT")]
     if len(d) < 1000:
       return
-    X = practice_features(d)
+    X = self._with_role(practice_features(d), d)
     self.practice_cols = list(X.columns)
     self.practice_model = HistGradientBoostingClassifier(**self._gb_params(), random_state=0).fit(X, d.played)
     # Midweek (owner-approved test 2026-10-15, INSIGHTS sec. 9; tools/partial_week_eval.py): the full-week model
@@ -149,12 +149,37 @@ class InjuryModel:
     for k in (1, 2):
       t = full3.assign(days=full3.days.str[:k], game_status="None")
       self.partial_models[k] = HistGradientBoostingClassifier(**self._gb_params(), random_state=0).fit(
-        practice_features(t)[self.practice_cols], t.played)
+        self._with_role(practice_features(t), t)[self.practice_cols], t.played)
+
+  def _with_role(self, X: pd.DataFrame, rows: pd.DataFrame) -> pd.DataFrame:
+    """EXPERIMENT (injuries.practice_role; pre-registered 2026-10-15): add his recent role, the mean snap share
+    (offense or defense, whichever is larger) over his last 3 games before that week, any season; 0 if none. Without
+    it the practice models treat a starter listed with full practice like the backups on the report, who often
+    don't take a snap (Drake Maye 6.5-11% inactive while practicing fully)."""
+    pr = self.cfg.get("injuries", {}).get("practice_role")
+    if not pr:
+      return X
+    use_pos = set(pr) if isinstance(pr, (list, tuple)) else None  # a list: only those positions get the role
+    if not hasattr(self, "_role_idx"):
+      sn = self.data.snaps.dropna(subset=["gsis_id"])
+      v = np.maximum(sn.offense_pct.fillna(0).to_numpy(float), sn.defense_pct.fillna(0).to_numpy(float))
+      t = pd.DataFrame({"g": sn.gsis_id.to_numpy(), "k": (sn.season * 100 + sn.week).to_numpy(), "v": v})
+      t = t[t.v > 0].groupby(["g", "k"]).v.max().reset_index().sort_values(["g", "k"])
+      self._role_idx = {g: (x.k.to_numpy(), x.v.to_numpy()) for g, x in t.groupby("g")}
+    gid = rows.gsis_id if "gsis_id" in rows else pd.Series(rows.index, index=rows.index)
+    out = []
+    for g, s_, w in zip(gid, rows.season, rows.week):
+      e = self._role_idx.get(g)
+      n = int(np.searchsorted(e[0], int(s_) * 100 + int(w))) if e is not None else 0
+      out.append(float(e[1][max(0, n - 3):n].mean()) if n else 0.0)
+    if use_pos is not None and "position" in rows:
+      out = [v if ps in use_pos else -1.0 for v, ps in zip(out, rows.position)]
+    return X.assign(role=out)
 
   def practice_prob(self, rows: pd.DataFrame, final: bool = True) -> np.ndarray:
     """P(plays) from the practice sequence. final=False (his team's final report isn't out): 1-2 published days
     use the partial-week model for that many days."""
-    X = practice_features(rows)[self.practice_cols]
+    X = self._with_role(practice_features(rows), rows)[self.practice_cols]
     p = self.practice_model.predict_proba(X)[:, 1]
     if not final and getattr(self, "partial_models", None):
       n = rows.days.fillna("").str.replace("?", "", regex=False).str.len().to_numpy()
@@ -359,6 +384,28 @@ class InjuryModel:
     rg["played_last"] = lastplayed.fillna(-1)
     sn = rg.snap.where(rg.active & (hist == 1))
     rg["snap_avg"] = sn.groupby(rg.gsis_id).transform(lambda s: s.expanding().mean().shift(1)).fillna(0)
+    rg["hist_w"], rg["act_w"] = hist.to_numpy(), act.to_numpy()  # this week's own history counts (next season's seed)
+    # EXPERIMENT (injuries.scratch_carry; pre-registered 2026-10-15): a player with no games yet this season starts
+    # from last season's totals, so week 1 isn't "no history" for everyone (every starting QB got 70% active).
+    if self.cfg.get("injuries", {}).get("scratch_carry") and (season - 1) in self.data.seasons:
+      tabs = self.__dict__.setdefault("_scratch_tables", {})  # previous seasons' tables, built once
+      prev = tabs.get(season - 1)
+      if prev is None:
+        prev = tabs[season - 1] = self.scratch_table(season - 1)
+      pv = prev.sort_values("week")
+      pv_hist = pv[pv.hist_w == 1]
+      agg = pd.DataFrame({
+        "n": pv.groupby("gsis_id").hist_w.sum(), "a": pv.groupby("gsis_id").act_w.sum(),
+        "snap": pv_hist[pv_hist.act_w == 1].groupby("gsis_id").snap.mean(),
+        "last": pv_hist.groupby("gsis_id").act_w.last()})
+      seed = rg.n_prev == 0
+      m = rg.gsis_id.map(agg.n).fillna(0)
+      use = seed & (m > 0)
+      rg.loc[use, "n_prev"] = m[use]
+      rg.loc[use, "act_prev"] = rg.gsis_id.map(agg.a)[use]
+      rg.loc[use, "act_rate"] = (rg.act_prev[use] + 1) / (rg.n_prev[use] + 1.2)
+      rg.loc[use, "snap_avg"] = rg.gsis_id.map(agg.snap)[use].fillna(0)
+      rg.loc[use, "played_last"] = rg.gsis_id.map(agg["last"])[use].fillna(-1)
     # Depth chart rank + how many players ahead of him at his position are out this week.
     ranks = []
     for w in sorted(rg.week.unique()):
@@ -389,7 +436,8 @@ class InjuryModel:
     rows = []
     for s in seasons:
       t = self.scratch_table(s)
-      rows.append(t[t.final & (t.week <= self.data.completed_weeks(s)) & ~t.on_report & t.observable & (t.week >= 2)])
+      first = 1 if self.cfg.get("injuries", {}).get("scratch_carry") else 2  # week 1 has real history only when carried
+      rows.append(t[t.final & (t.week <= self.data.completed_weeks(s)) & ~t.on_report & t.observable & (t.week >= first)])
     d = pd.concat(rows)
     self.scratch_model = HistGradientBoostingClassifier(**self._gb_params(), random_state=0).fit(
       d[self.SCRATCH_COLS], d.active)

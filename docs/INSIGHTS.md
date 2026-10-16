@@ -1326,3 +1326,37 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   (the rules both models' gates used); weekly (proj, matchup, team pts / FG att / XP for kickers; opp pts / sacks /
   takeaways for defenses, tiers) and rest of season (this week's game drops once it kicks off). Scoring helpers moved
   to shell.js NFLE.kdst (League tab uses the same). The scoring panel still applies to QB / RB / WR / TE only.
+- **PRE-REGISTERED 2026-10-15 (owner: why is Drake Maye 6.5-11% inactive with full practices?): role in the
+  practice model (`injuries.practice_role`).** Diagnosis: the practice / partial-week GB models see only the practice
+  days, game status and a skill flag, and learn "played a snap"; backups who are active but never enter count as
+  not playing, so every player on the report inherits backup-level risk (history 2019-25: listed, final day Full, no
+  status: QBs 16.3% no snaps, but starting QBs (50%+ snaps last game) 4.0%, skill starters 1.2%; Maye got 6.5% FFF /
+  11% FF). Variant: add his recent role, the mean snap share (offense or defense) over his last 3 games before that
+  week (0 if none), to both the full-week and partial-week models. GATE (walk-forward 2021-25,
+  tools/experiments.py baseline,practice_role): availability Brier on injury-report player-weeks lower with the 95%
+  CI over season-weeks excluding 0; fantasy MAE not worse (CI upper < +0.003). Reported, not gating: calibration
+  for starters with full practice and no status. Separately OPEN: Maye week 1 2026 showed 46.9% healthy-scratch
+  risk as the starter (archived page); check the healthy-scratch model's week-1 inputs.
+- **Week-1 healthy-scratch bug (found 2026-10-15, Drake Maye wk 1 46.9%).** The healthy-scratch model's history
+  features (games, active rate, last game, snap share) count the current season only, and it trains on week 2+. In
+  week 1 every player has n_prev 0 / snap_avg 0, a profile that in training means "backup with no role": all 32
+  depth-1 QBs get P(active) 0.70 from the model trained through 2025 (Josh Allen too); the archived wk-1 page had Maye
+  at 0.53, a hair from the < 50% "sits" line that hands his volume to teammates.
+- **PRE-REGISTERED 2026-10-15: carry last season into the scratch history (`injuries.scratch_carry`).** A player with
+  no games yet this season starts from his previous season's totals (games, active games, mean snap share when
+  active, whether he played his last game); training then includes week 1. Rookies / no prior season: unchanged.
+  TEST (tools/early_weeks_eval.py, weeks 1-2 2021-26, baseline vs scratch_carry, all candidate rows): GATE (i)
+  week-1 Brier of availability vs played, players not on the injury report, lower with the 95% CI over team-weeks
+  excluding 0; (ii) weeks 1-2 fantasy MAE (played rows) not worse, CI upper < +0.003; (iii) weeks 3+ 2021-25
+  fantasy MAE not worse (tools/experiments.py).
+- **RESULT practice_role (all positions): written gate PASS, but QB significantly worse -> not shipped as is.**
+  Walk-forward 2021-25, availability Brier on injury-report player-weeks 0.0987 -> 0.0950, -0.0037 [-0.0047, -0.0027],
+  better every season; fantasy MAE -0.000 [-0.001, +0.001]. By position: RB -0.0048 [-0.0071, -0.0025], TE -0.0045
+  [-0.0066, -0.0025], WR -0.0046 [-0.0062, -0.0032], QB +0.0033 [+0.0008, +0.0059]. Diagnosis correction: depth-1
+  QBs listed with full practice and no status actually played only 94.1% (n 220): the old model's 93.8% was
+  right (Maye's 6.5% was fair for his spot); the role input made them 97.4% (overconfident). Skill starters with
+  full practice: old 93.8% / new 97.0% / actual 96.7% (the real fix).
+- **PRE-REGISTERED 2026-10-15 (amendment, before running): role input for RB / WR / TE only
+  (`injuries.practice_role = ["RB","WR","TE"]`).** Precedent: the expert blend is position-limited the same way.
+  QB rows get role -1 (no role information). GATE (2021-25 walk-forward): availability Brier overall CI upper < 0,
+  QB CI lower <= 0 (not significantly worse), fantasy MAE CI upper < +0.003.
