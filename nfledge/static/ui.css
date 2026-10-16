@@ -24,3 +24,16 @@ tr.teamrow .quiet, tr.teamrow .sub, tr.teamrow .st small, tr.teamrow .fc, tr.tea
 .pic.nopic .pic-img img { display: none; }
 .pic.nopic .pic-tm { inset: 0; display: grid; place-items: center; }
 .pic.nopic .pic-tm .logo { width: 34px; height: 34px; box-shadow: none; } .pic.nopic .pic-tm .logo img { width: 24px; height: 24px; }
+
+/* Number chips in every data table (shell.js NFLE.chips; owner 2026-10-15) */
+table .sc { display: inline-block; min-width: 1.8em; padding: 2px 4px; border-radius: 5px; background: rgba(255,255,255,.07);
+  font-variant-numeric: tabular-nums; line-height: 1.25; text-align: center; }
+table th .sc.h { background: rgba(255,255,255,.045); color: inherit; font-weight: 800; }
+table th.num, table td.num { padding-left: 2px; padding-right: 2px; }
+
+/* Alternating rows wherever rows aren't team-colored (owner 2026-10-15): a faint overlay on every other body row,
+   layered over each cell's own background so pinned columns stripe too. Team-colored rows (.teamrow / inline style),
+   header rows inside a body, and tables marked no-zebra are left alone. */
+table:not(.no-zebra) > tbody > tr:not(.teamrow):not([style]):nth-child(even) > td {
+  background-image: linear-gradient(rgba(255,255,255,.035), rgba(255,255,255,.035)); }
+.ts-row:nth-child(even) { background: rgba(255,255,255,.035); border-radius: 6px; }

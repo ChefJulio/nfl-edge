@@ -11,15 +11,15 @@
     const pts = v.map((x, i) => `${(i * w / (v.length - 1)).toFixed(1)},${y(x)}`).join(' ');
     return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="${w}" cy="${y(v[v.length - 1])}" r="2.2" fill="currentColor"/></svg>`;
   };
-  const mc = (v, rk, cls = 'mv2', sm = '') => `<div class="mc"><span class="${cls}">${F.sgn(v)}</span><span class="rk-b${sm} ${F.rkc(rk)}">${F.ord(rk)}</span></div>`;
-  const sched = (v, rk, o, d) => rk ? `<div class="mc" title="Opposing defenses ${F.sgn(o)} + opposing offenses ${F.sgn(d)} pts/game vs average"><span class="mv2">${F.sgn(v)}</span><span class="rk-b ${F.rkc(33 - rk)}" title="1st = hardest (red), 32nd = easiest (green)">${F.ord(rk)}</span></div><span class="sub">${rk <= 8 ? 'hard' : rk >= 25 ? 'easy' : 'average'}</span>` : '';
+  const mc = (v, rk, cls = 'mv2', sm = '') => `<div class="mc"><span class="${cls} sc">${F.sgn(v)}</span><span class="rk-b${sm} ${F.rkc(rk)}">${F.ord(rk)}</span></div>`;
+  const sched = (v, rk, o, d) => rk ? `<div class="mc" title="Opposing defenses ${F.sgn(o)} + opposing offenses ${F.sgn(d)} pts/game vs average"><span class="mv2 sc">${F.sgn(v)}</span><span class="rk-b ${F.rkc(33 - rk)}" title="1st = hardest (red), 32nd = easiest (green)">${F.ord(rk)}</span></div><span class="sub">${rk <= 8 ? 'hard' : rk >= 25 ? 'easy' : 'average'}</span>` : '';
   const columns = teams => [
     { key: 'rank', label: '#', num: true, first: 'asc', cls: 'rk',
       html: r => `<span class="rkn">${r.rank}</span>${r.move > 0 ? `<span class="mv up">&#9650;${r.move}</span>` : r.move < 0 ? `<span class="mv dn">&#9660;${-r.move}</span>` : '<span class="mv">&ndash;</span>'}` },
     { key: 'nick', label: 'Team', stick: true, first: 'asc',
       html: r => `<div class="who">${F.logo(teams, r.team, 26)}<div><b><span class="nm-full">${esc(r.nick)}</span><span class="nm-short">${esc(r.team)}</span></b><span class="sub">${esc(r.team)} &middot; ${esc(r.record)}</span></div></div>` },
     { key: 'net', label: 'Net', num: true,
-      html: r => `<div class="netc"><b>${F.sgn(r.net)}</b><span class="sub" title="80% of simulations rank this team between ${esc(String(r.range).replace('-', ' and '))} (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range ${esc(r.range)}</span></div>` },
+      html: r => `<div class="netc"><b class="sc">${F.sgn(r.net)}</b><span class="sub" title="80% of simulations rank this team between ${esc(String(r.range).replace('-', ' and '))} (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range ${esc(r.range)}</span></div>` },
     { key: 'off', label: 'Offense', title: 'Pass O + Run O', html: r => `<span title="Pass O ${F.sgn(r.pass_o)} + Run O ${F.sgn(r.rush_o)}">${mc(r.off, r.off_rk)}</span>` },
     { key: 'def', label: 'Defense', title: 'Pass D + Run D', html: r => `<span title="Pass D ${F.sgn(r.pass_d)} + Run D ${F.sgn(r.rush_d)}">${mc(r.def, r.def_rk)}</span>` },
     ...[['pass_o', 'Pass O', 'per 100 dropbacks, incl. starting QB'], ['rush_o', 'Run O', 'per 100 designed runs'],

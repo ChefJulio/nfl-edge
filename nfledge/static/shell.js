@@ -358,6 +358,7 @@
   const NFLE = window.NFLE = window.NFLE || {};
   const OK = new Set(['B', 'STRONG', 'ABBR', 'SMALL', 'SPAN']);
   const STAT = /^[\s\d.,%+\-\u2212\u2013\u2014/:()]+$/;
+  const STAT2 = /^(?:[WLT]\d+|R\d+:\d+|[+\-\u2212]?\$?[\d.,]+[MK]?)$/;  // streaks, draft slots, contracts
   const plain = el => {
     const kids = [...el.childNodes], elems = kids.filter(n => n.nodeType === 1);
     if (!kids.length || elems.length > 1) return false;
@@ -372,10 +373,10 @@
   };
   // 1 = chip it, 0 = blank (doesn't count), -1 = not a plain stat
   const kind = td => {
-    if (td.querySelector(':scope > .sc')) return 2;
+    if (td.querySelector('.sc')) return 2;  // already chipped (by the helper, or by a table that marks its own value)
     const t = td.textContent.trim();
     if (!t || /^[–—-]+$/.test(t)) return 0;
-    return !td.classList.contains('stick') && plain(td) && /\d/.test(t) && STAT.test(t) ? 1 : -1;
+    return !td.classList.contains('stick') && plain(td) && /\d/.test(t) && (STAT.test(t) || STAT2.test(t)) ? 1 : -1;
   };
   const table = tb => {
     if (tb.classList.contains('no-chips')) return;
