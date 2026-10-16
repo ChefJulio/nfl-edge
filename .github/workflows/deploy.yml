@@ -67,6 +67,10 @@ jobs:
       # in-game injuries parsed from them ("left Sunday's game", "did not return"): depth charts + Injuries tab.
       - name: Archive ESPN injury news
         run: python tools/espn_news.py --out=site/data/espn_news || true
+      # Sleeper's projections keep only the last saved value, edited after games (in-game injuries zeroed), so a blend
+      # can't be backtested from their API: save what they show before kickoff, every run (tools/sleeper_snapshot.py).
+      - name: Snapshot Sleeper projections
+        run: python tools/sleeper_snapshot.py --out=site/data/sleeper_proj || true
       - name: Commit new archive pages
         working-directory: site
         run: |

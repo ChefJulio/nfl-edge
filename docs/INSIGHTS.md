@@ -238,6 +238,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 | Shared stadium (LA, NY) adjustment | 7 games ever; no evidence |
 | Air-yards share / aDOT | +0.004 (worse) |
 | Snap share as a volume input | No gain (owner: snap trend is an alert) |
+| Route share (dropbacks on field) as a target-share input (`route_input`, 2026-10-15) | ALL -0.002 [-0.007, +0.003] 2021-25; TE -0.021 [-0.036, -0.007] post hoc; no free live source matching the history's definition (heatradar republishes PFF true routes) |
 | TD blend strength k 50 / 400 | No effect |
 | Stat-weighted defender values (PFR) | Overfit, worse OOS |
 | Defensive / O-line / cornerback absences | No reliable pre-game signal |
@@ -1191,3 +1192,49 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 - Play-caller effects (on hold); IDP question unanswered; light mode unreviewed.
 - Speed: experiment batches recompute identical stages per variant (stage caching; per-worker 5-season data windows
   would halve memory and allow more workers).
+- **Route data for the current season (checked 2026-10-15):** nflverse participation still ends at 2025 (2025 file
+  posted 2026-02-10; FTN supplies it after each season). Sleeper's 2026 weekly stats carry snaps, no routes. FTN
+  charting 2026 is per play (no per-player routes). Free live source found: heatradar.app/nfl/routes embeds JSON
+  per player-week (routes, route share, TPRR, YPRR, slot / wide / inline rate; weeks 1-5 on 10-15, >= 8 routes). Its
+  field names match PFF's premium export (republished; licensing unclear, could vanish), and it counts true routes
+  while our history counts dropbacks on field (pass-blocking TEs / RBs differ). Use only if routes help at all.
+- **PRE-REGISTERED 2026-10-15 (before any run): routes as a usage input (`route_input`).** route_share and
+  route_share_long (dropbacks on field / team dropbacks, same recency weights as tgt_share) added to the target-share
+  regression. Walk-forward 2021-2025 (the seasons with participation) vs baseline, tools/experiments.py, 95%
+  bootstrap over season-weeks. GATE: all-position MAE CI upper < 0 and no position's CI lower > 0. If it passes, a
+  second check before any live use: no season has both sources, so heatradar's 2026 route share vs snap share must
+  match 2025 participation's route share vs snap share by position (slope within 10%, corr within .05).
+- **PRE-REGISTERED 2026-10-15 (before any run): head-to-head vs Sleeper, then a blend.** Sleeper's projections API
+  (`api.sleeper.app/projections/nfl/{season}/{week}`, company = rotowire, back to 2019) gives each player-week's
+  stat line; scored in our half-PPR rules from the stats (Sleeper's own pts use INT -1 and bonuses). Rows: the
+  baseline backtest's relevant rows (played, >= 2 prior games, top-N), 2021-2026 wk 5, matched by sleeper id ->
+  gsis (data/fantasy_ids.json); unmatched / unprojected rows reported. Caveat: only the last saved Sleeper value
+  exists (updated_at often after the week's Sunday), so theirs may include game-day news ours lacks. (1)
+  Scoreboard, descriptive: MAE by position and season, ours vs theirs, CI on the difference. (2) Blend: final =
+  (1 - w) ours + w Sleeper, w per position fit on 2021-23 (grid 0-1 by 0.05), tested 2024-26. GATE: all-position
+  MAE CI upper < 0 on 2024-26 and no position's CI lower > 0. Live: Sleeper's API is free and open (CORS *).
+- **RESULT route_input (2026-10-15): FAIL.** Walk-forward 2021-25: ALL -0.002 [-0.007, +0.003]; TE -0.021 [-0.036,
+  -0.007] (better), RB -0.002, WR +0.004, QB 0; seasons -0.006 / -0.006 / -0.001 / +0.005 / -0.004. The TE gain is a
+  post-hoc subgroup; a TE-only version would need its own pre-registration AND a live route source (heatradar, PFF
+  definition) -- not pursued now. Moved to section 5 terms: routes as a usage input, no overall gain.
+- **RESULT Sleeper head-to-head + blend (2026-10-15): gate passed, then INVALIDATED by leakage -> NOT shipped.**
+  12,948 relevant rows 2021-26 wk 5, all matched. (1) Ours vs Sleeper MAE 5.176 vs 5.225, -0.049 [-0.092, -0.009]:
+  QB -0.190 [-0.330, -0.049], WR -0.080 [-0.127, -0.032], TE -0.040 ns, RB +0.055 [+0.004, +0.105] (they're
+  better). By season -0.31 / +0.01 / +0.05 / +0.06 / -0.07 / +0.06 (2026 wk 1-5): roughly a tie after 2021, and
+  Sleeper's numbers are leak-advantaged (below), so we're at least even. Rank corr ours / theirs QB .369/.348, RB
+  .533/.552, WR .420/.411, TE .373/.376. (2) Pre-registered blend, fit 2021-23 (QB .25, RB .70, WR .05, TE .15),
+  tested 2024-26: -0.020 [-0.039, -0.002], GATE PASS; through the engine -0.024 [-0.042, -0.004].
+  LEAKAGE (found while checking the live build): Sleeper's API keeps only the last saved projection, updated_at
+  after kickoff on ~100% of 2024-26 rows, and players hurt IN the game are re-saved at 0: 2026 wk 4 Chase (20% of
+  snaps, 4.2 pts), Barkley (7%), Mariota (16%), McConkey all show Sleeper 0 though they played. The earlier
+  "disagreement predicts our error equally before / after late saves" check (corr .107/.170 vs .167/.144) did not
+  catch it. Also a design error: our displayed projection is "if he plays" (availability separate), so a Sleeper 0
+  (their availability call) must not be blended in. Leak-free version (Sleeper 0 = no number, 93 rows): fit
+  2021-23 QB .05 / RB .75 / WR .05 / TE .15, test 2024-26 -0.011 [-0.029, +0.007] (WR -0.005 [-0.008, -0.002],
+  others ns; seasons -0.036 / +0.009 / +0.011): FAIL. Same weights as the original fit with zero-skip -0.014
+  [-0.032, +0.004]. Non-zero rows may carry partial post-game edits too, so even that is optimistic.
+  -> sleeper_blend = {} (off; engine code kept, zero-skip rule built in). FORWARD TEST (pre-registered now): every CI
+  run saves Sleeper's current-week projections (tools/sleeper_snapshot.py -> archive branch data/sleeper_proj/);
+  at season end (2026 wk 7-17) take, per player, the last snapshot before his kickoff; weights = the zero-skip
+  2021-26 fit (QB .15 / RB .60 / WR .20 / TE .25, fixed now); GATE: relevant rows, blend vs ours MAE CI upper < 0, no
+  position's CI lower > 0. The tool for that comparison is not written yet (sleeper_compare.py reads the API).

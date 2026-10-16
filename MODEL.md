@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 376db05d29289d5a
+documented_code_hash: bf825e4bf63b959f
 ---
 # How the model works
 
@@ -22,6 +22,7 @@ A player with only a few games is pulled toward what is typical for players like
 **Injuries.** Practice reports (did not practice / limited / full) and game status turn into a chance he plays. If he is likely out, his share goes to teammates the way it has gone in past absences. Projections are always "if he plays", with the chance he sits shown next to it.
 
 **Experts.** Once the weekly expert rankings come out, they are mixed in for running backs, receivers and tight ends, because testing showed the mix beats either alone. Quarterbacks stay ours alone, because the mix made them worse.
+
 
 **Ranges.** Instead of one number you also get a floor and a ceiling, based on how real scores have spread around past projections like this one. About 8 times in 10 the actual score lands between them.
 
@@ -51,6 +52,7 @@ Team ratings use this season's completed games plus a fading share of last seaso
 | nflverse rosters, snap counts, injury reports, depth charts, draft picks, participation, weekly player stats | Who is on the team, who played, roles, statuses, draft capital, routes, actual points, QB career history. Snap counts are matched to players through nflverse's player table as well as the rosters (the rosters alone missed about 8% of skill players' games in 2020-24; fixing it lowered projection error slightly, walk-forward 2021-25) |
 | NFL.com injury API | Day-by-day Wed/Thu/Fri practice participation |
 | FantasyPros expert consensus (via nflverse) | Weekly positional ranks, published Fridays |
+| Sleeper projections API (RotoWire's numbers) | Not used in projections. Saved before kickoff every run for a forward test of blending them in (their API's past weeks are edited after games, so they can't be backtested cleanly) |
 | PFR advanced defensive stats | Tested for defender values; still downloaded but not used (see section 8) |
 | Play-by-play injury notes and ESPN news blurbs | In-game injuries ("was injured during the play", "left Sunday's game") for the player Injuries tab. Not a projection input; tested as a depth-chart signal and it added nothing beyond snap patterns |
 | Open-Meteo | Wind forecast for outdoor and open-roof stadiums, averaged over the 4 hours from kickoff (current week only) |
@@ -207,6 +209,8 @@ The table re-tests last season and this one, weeks 3 and later. It covers player
 - *Insensitive for fantasy projections (alternatives within noise, current kept):* training window (2 / 3 / 4 seasons), prior-season weight and fade, efficiency season weights, QB-experience cutoff and penalty, touchdown blend strength, availability-model size, redistribution trigger, team-rating half-life. (Prior-season carryover does matter for game outcomes; see below.)
 - *Usage shares:* each team's projected carries and targets are now pulled toward the totals a real game holds (carries 70% of the way, targets 30%; strengths chosen by backtest). Shares are predicted player by player, so team totals used to swing more than reality, over-projecting players on crowded backfields. Overall error -0.017, RB -0.043, RB ranking accuracy .507 -> .525.
 - *Follow-up rounds:* wind penalty grid-tuned to 10 mph / 3% per mph / 25% cap (better than the old 15 mph / 2%). No difference: position-specific share half-lives, game-script (spread-aware) shares, finer draft-pick tiers. Rejected: a final linear calibration of projections (worse on average error).
+- *Routes run (2026-10-15):* a receiver's share of team dropbacks spent on the field, as an input to his target share. Walk-forward 2021-25, no overall difference (-0.002, interval -0.007 to +0.003; tight ends better, receivers slightly worse). Left out; the data also isn't published until after each season.
+- *Blending in Sleeper's projections (2026-10-15):* head to head we're slightly better overall than Sleeper (RotoWire's numbers): better at quarterback and receiver, worse at running back. Mixing theirs in looked like a small gain, but their past projections are edited after games (players hurt mid-game are set to zero), and without those edits the gain was not significant. Their projections are now saved before every kickoff so the mix can be re-tested cleanly at season end.
 - *Game model:* the points formula's special-teams weight drifted 0.9-3.3 when fit on two seasons; it now trains on six (weight about 2; margin error 10.71 -> 10.68, never worse in any season, winners 59% -> 61%). Fixed special-teams weights from 0 to 2.5 were all within noise of the fit.
 
 **Game outcomes (2026-10-12),** walk-forward on 2022-26:

@@ -9,6 +9,7 @@ import pandas as pd
 import copy
 
 from . import injuries as inj
+from .config import ROOT
 from .personnel import Personnel
 from .data import Data, depth_for_week, team_name_fix
 from .player_model import PlayerModel, actual_points
@@ -244,6 +245,33 @@ class Engine:
       p["proj_model"] = p.proj_model * m
     return p
 
+  def _sleeper_blend(self, p: pd.DataFrame, season: int, week: int, weights: dict) -> pd.DataFrame:
+    """EXPERIMENT (experiments.sleeper_blend, OFF): final = (1 - w) ours + w Sleeper's projection (RotoWire's, scored
+    in our rules), w per position. The backtest passed (2026-10-15, tools/sleeper_compare.py) but Sleeper's saved
+    projections are edited after games, and the leak-free version failed; forward test from pre-kickoff snapshots
+    (tools/sleeper_snapshot.py). The whole stat line (and both two-world numbers) is scaled by blended / ours, so
+    per-league rescoring stays consistent. Sleeper's 0 is their availability call, not a forecast: our projection is
+    "if he plays" (availability is shown separately), so those players keep ours, as do players Sleeper doesn't
+    project and players we project at 0."""
+    from . import sleeper as SL
+    from .player_model import STAT_KEYS
+    try:
+      live = week > self.data.completed_weeks(season)
+      sp = SL.week_points(season, week, ROOT / self.cfg["data"]["cache_dir"], self.scoring, self.data.rosters, live=live)
+    except Exception as e:  # Sleeper down: ours alone
+      _log(f"sleeper projections {season} wk {week}: unavailable ({type(e).__name__}); not blended")
+      return p
+    p = p.copy()
+    p["sleeper"] = p.gsis_id.map(sp)
+    w = p.pos.map(lambda x: float(weights.get(x, 0.0)))
+    ok = (p.sleeper > 0) & (p.proj > 0) & (w > 0)
+    new = (1 - w) * p.proj + w * p.sleeper
+    ratio = pd.Series(1.0, index=p.index).where(~ok, new / p.proj.where(ok))
+    for k in STAT_KEYS + ["proj"] + [c for c in ("cond_plays", "cond_sits") if c in p]:
+      if k in p:
+        p[k] = p[k] * ratio
+    return p
+
   def _newcomers(self, p: pd.DataFrame, scale: float, wind, season: int, week: int) -> pd.DataFrame:
     """EXPERIMENT (experiments.newcomer_scale; pre-registered 2026-10-15): a RB / WR / TE in his first game for a team
     (no snap for it before this week, any season) gets `scale` x his projected targets and carries (mid-season movers'
@@ -348,6 +376,9 @@ class Engine:
       p["proj_model"] = p.proj
     if self.cfg.get("experiments", {}).get("journeyman", False):
       p = self._journeyman(p, season, week)
+    sw = self.cfg.get("experiments", {}).get("sleeper_blend") or {}
+    if sw and blend and avail_override is None:  # tested on the week being played only, not lookahead weeks
+      p = self._sleeper_blend(p, season, week, sw)
     p["low_sample"] = (p.n_db.fillna(0) + p.n_rush.fillna(0) + p.n_tgt.fillna(0)) < 40
     p = self._uncertainty(p)
     p["season"], p["week"] = season, week

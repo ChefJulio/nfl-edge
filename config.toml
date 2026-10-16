@@ -163,6 +163,12 @@ newcomer_scale = 0.5
 # 0.94 / 0.91 / 0.89 for 1 / 2 / 3+ changes (data/history/journeyman.json). Fit 2021-23, tested 2024-25: MAE -0.108
 # for those players, -0.039 overall, RB / WR / TE better, QB no difference (owner idea, pre-registered 2026-10-15).
 journeyman = true
+# Second opinion: final = (1 - w) ours + w Sleeper's projection (RotoWire's, free API; nfledge/sleeper.py), per
+# position, week being played only. OFF: the pre-registered backtest passed (-0.020 [-0.039, -0.002]) but Sleeper's
+# saved projections are edited after games (players hurt in-game zeroed), and the leak-free version failed
+# (-0.011 [-0.029, +0.007]). Forward test from pre-kickoff snapshots (tools/sleeper_snapshot.py); INSIGHTS sec. 9.
+# To test: { QB = 0.15, RB = 0.6, WR = 0.2, TE = 0.25 } (zero-skip weights fit 2021-26, leak-affected).
+sleeper_blend = {}
 
 [injuries]
 # Fraction of the learned vacated-volume redistribution applied. Backtest: helps RB, slightly hurts WR;

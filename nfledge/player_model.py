@@ -171,6 +171,10 @@ def SHARE_FEATURES(share: str, exp: dict | None = None, group: str | None = None
     cols += ["ay_share", "ay_share_long"]
   if exp.get("snap_input"):
     cols.append("snap_pct")
+  # EXPERIMENT (experiments.route_input): route participation (dropbacks on field / team dropbacks) for targets.
+  # Participation is published only after each season, so this can be backtested but not run live from nflverse.
+  if exp.get("route_input") and share == "tgt_share":
+    cols += ["route_share", "route_share_long"]
   cols += age_cols(exp, group)  # see EFF_FEATURES
   # EXPERIMENT: committee vs bellcow teams. The team's lead-back concentration, and concentration x the player's
   # own share (on a committee team a big recent share should regress more; on a bellcow team it should stick).

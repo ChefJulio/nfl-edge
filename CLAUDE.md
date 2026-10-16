@@ -59,6 +59,7 @@ Git hooks: `git config core.hooksPath .githooks` (pre-commit blocks commits when
 | `nfledge/player_model.py` | Player ledger, xTD, EB priors, as-of features, share + efficiency regressions, projection |
 | `nfledge/injuries.py` | Availability (practice-sequence GB model, healthy-scratch GB model), redistribution, QB handoff |
 | `nfledge/engine.py` | Train/project/blend: ECR blend, quantile ranges, uncertainty, candidates (rosters) |
+| `nfledge/sleeper.py`, `tools/sleeper_compare.py`, `tools/sleeper_snapshot.py` | Sleeper's weekly projections (RotoWire's; free API). Blend switch `experiments.sleeper_blend` is OFF: the API's past weeks are edited after games (in-game injuries zeroed), so backtests leak (INSIGHTS sec. 9). `sleeper_snapshot.py` (CI) saves the live week before kickoff to the archive branch `data/sleeper_proj/` for the season-end forward test; `sleeper_compare.py` = the (leak-affected) API head-to-head |
 | `nfledge/personnel.py` | Defensive personnel adjustment: tested, OFF (kept switchable) |
 | `nfledge/returns.py` | Injury return-timing model (feeds lookahead weeks) |
 | `nfledge/backtest.py` | Walk-forward evaluation vs raw stats, Vegas-scaled, ECR |
