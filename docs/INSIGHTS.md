@@ -1832,3 +1832,20 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   qb_newteam variant was MAE +0.001 (worse) yet decisions +0.004 [+0.001, +0.008] (better): the two metrics can
   disagree. PROPOSAL to the owner: make the decision metric a gate criterion next to MAE (a change ships only if
   neither is significantly worse), first use the pending redistribution call. Not adopted until he says so.
+- **Thread 5 (2026-10-16): QB calibration, descriptive; cause not pinned down, no test yet.** Scored QB rows 2021-26
+  (1,992; latest baseline backtests): actual - proj mean +0.60, median +0.29 (so mostly real bias, partly skew). By
+  component, fantasy points per game: passing yards +0.13 / +0.48 / +0.55 / +0.46 / +0.23 / +0.65 (2021-26, positive
+  every season; raw +9.5 yds, median +7.7); passing TDs -0.18 / 0.00 / +0.43 / +0.81 / +0.30 / +0.40; INT, rushing
+  yards, fumbles ~0; rushing TDs -0.39 / -0.06 / +0.20 / -0.11 / -0.08 / +0.09 (raw -0.013 per game: the logged
+  over-prediction, tiny). Passing yards = volume -2.1 + efficiency +9.9: dropbacks are right (35.82 vs 35.84; the
+  starter's share is under-forecast 0.92 vs 0.96 but team dropbacks over, cancelling) while yards per dropback is
+  low every season, pooled 6.16 vs 6.44 (+0.15 / +0.27 / +0.39 / +0.37 / +0.29 / +0.02 for 2026 so far). Pocket QBs
+  carry it (+15.7 yds; mobile -3.9). By projected-efficiency quintile (all QBs with 15+ dropbacks, which conditions
+  on the outcome, so only the PATTERN is read): +0.70 / +0.24 / +0.20 / +0.27 / +0.08, i.e. largest for the QBs
+  projected worst, smallest for the best: not shrinkage toward a backup-heavy mean (that would hit the best most),
+  and not sample size (n_db < 300 +0.19 vs 300+ +0.32). Open hypotheses, to check before any test: (a) the weighted
+  linear rate fit trains on every QB row incl. relief / garbage appearances, whose level differs from starts; (b) the
+  defense / wind terms' mean effect on starters vs on the training mix; (c) a rate-feature definition mismatch
+  (sacks / scrambles in the dropback denominator vs pass yards). Training on full games only would condition on the
+  outcome (early exits have low yards per dropback), so it is NOT the fix. Next: compare in-sample (training rows)
+  vs test bias by row type to locate (a)-(c).
