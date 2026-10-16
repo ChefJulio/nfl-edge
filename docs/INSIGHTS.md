@@ -1709,3 +1709,22 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   comparisons were paired on the same harness and stand. New lead: an EXPERIENCED QB taking over (n 228) is overrated
   +3.06 [+1.22, +4.87] (Vegas +1.55) - veteran backups / new arrivals rated near their old (shrunk) career level.
   Also: tools/rank_predictor.py (win-chance blend scoring) has the same previous-starter rating; to fix and rescore.
+- **PRE-REGISTERED 2026-10-16 (before running): (Q) which rank feeds the Matchups win chance.** Found while fixing the
+  harness: the win chance is logistic(home + rank_gap x (away rank - home rank) + elo_per_100 x Elo diff / 100); its
+  coefficients were fit (tools/elo_eval.py) on ranks that rated each team's PREVIOUS starter, and since (M) the live
+  page feeds it Power's rest-of-season rank C, which (M) gated on the rest of the season, never on single games. For
+  one game, this week's lineup is the information that matters (the live page knows the projected starter). Variants,
+  ranks from the site's own code (tools/power_c.py, every season-week 2021-26): A = net with the previous starter (the
+  fitting basis), N = net with this game's actual starter (stand-in for the announced starter), C = live. For each,
+  the three coefficients refit walk-forward (seasons before the test season, 2021 on; Elo with the config settings),
+  scored by Brier on games 2022-26 with a Vegas line. GATE: Matchups switches to N (this week's lineup rank, with
+  coefficients refit on N over every season) unless C beats N with the 95% CI over season-weeks excluding 0. Reported:
+  the same on games where either team's usual starter is out (where the ranks differ), and A for reference.
+- **RESULT {#win-rank-this-week} (Q) which rank feeds the Matchups win chance: N -> SHIPPED.** tools/win_rank_eval.py,
+  1,084 games 2022-26 with a line: Brier A 0.2220, N 0.2203, C 0.2214 (Vegas 0.2114). C - N +0.0011 [-0.0007,
+  +0.0030] (C does not beat N: switch); N - A -0.0017 [-0.0033, -0.0001]. Games with a usual starter out (194): A
+  0.2176, N 0.2122, C 0.2159 (C - N +0.0037 [-0.0017, +0.0097]). N best or tied in every season (2022: C 0.2243 vs N
+  0.2244). Live: Matchups uses Power's rank_now (this week's projected starter) with new keys week_home 0.1838,
+  week_rank_gap 0.0313, week_elo_per_100 0.3242 (fit on N, every season 2021-26). The playoff odds keep the
+  rest-of-season rank and the old weights (fit on A); refit on C = home 0.1841, rank_gap 0.0252, elo 0.3616 - a
+  candidate for the odds backtest, not applied.

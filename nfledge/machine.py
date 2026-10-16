@@ -116,7 +116,7 @@ def power_md(week: dict, base: str) -> str:
 
 def games_md(week: dict, base: str) -> str:
   out = [f"# NFL Edge games: {week['season']} week {week['week']}", "",
-         "Market chance = from the Vegas spread when posted; our model = power rank gap + Elo + home field "
+         "Market chance = from the Vegas spread when posted; our model = this week's rank gap (each team with this week's QB) + Elo + home field "
          f"(method: {base}model.md, Games).", "",
          "| Kickoff | Game | QBs | Vegas line | Total | Market favorite | Our model | Final |", "|---|---|---|---|---|---|---|---|"]
   for g in week.get("games") or []:

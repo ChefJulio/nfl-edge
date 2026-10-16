@@ -1262,14 +1262,14 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
     away, home = side(g.away_team), side(g.home_team)
     vm, vt = g.spread_line, g.total_line
     v_fav = g.home_team if (pd.notna(vm) and vm >= 0) else g.away_team
-    # Our model's win chance: power-rank gap + Elo + home field (fit by tools/elo_eval.py; beat the model margin
-    # alone walk-forward). The margin itself is never published.
-    rk_a, rk_h = rank_of(g.away_team, "rank"), rank_of(g.home_team, "rank")
+    # Our model's win chance: rank gap + Elo + home field. The rank is this week's lineup (Power's "This week"
+    # column), not the rest-of-season Power rank: INSIGHTS (Q), tools/win_rank_eval.py. The margin is never published.
+    rk_a, rk_h = rank_of(g.away_team, "rank_now"), rank_of(g.home_team, "rank_now")
     e_a, e_h = elo_now.get(g.away_team, elo.MEAN), elo_now.get(g.home_team, elo.MEAN)
-    x = (wm["home"] * (g.location != "Neutral") + wm["elo_per_100"] * (e_h - e_a) / 100
-         + (wm["rank_gap"] * (rk_a - rk_h) if rk_a and rk_h else 0.0))
+    x = (wm["week_home"] * (g.location != "Neutral") + wm["week_elo_per_100"] * (e_h - e_a) / 100
+         + (wm["week_rank_gap"] * (rk_a - rk_h) if rk_a and rk_h else 0.0))
     fc = forecast(g, float(logistic(x)), k_vegas, tossup, names, ts)
-    fc["model_why"] = (f"Our model: power rank {g.away_team} {rk_a} vs {g.home_team} {rk_h}, Elo {e_a:.0f} vs "
+    fc["model_why"] = (f"Our model: this week's rank {g.away_team} {rk_a} vs {g.home_team} {rk_h}, Elo {e_a:.0f} vs "
                        f"{e_h:.0f}{'' if g.location == 'Neutral' else ', plus home field'}")
     # Who wins each battle. Every bar is a tug of war, away team on the left and home team on the right. The
     # model margin = both offense-vs-defense matchups + special teams + home field + play volume (never shown).

@@ -118,9 +118,17 @@ elo_k = 20
 elo_hfa = 25
 elo_revert = 0.50
 elo_margin = true
+# home / rank_gap / elo_per_100: the playoff odds (future games, Power's rest-of-season rank). Fit on ranks with the
+# previous starter; refitting them on that rank is a separate test (the odds have their own backtest).
 home = 0.1865
 rank_gap = 0.0168
 elo_per_100 = 0.4449
+# week_*: the Matchups win chance for THIS week's game, from the rank of this week's lineup (Power's "This week").
+# tools/win_rank_eval.py (INSIGHTS (Q)), walk-forward 2022-26: Brier 0.2203 vs 0.2214 with the rest-of-season rank
+# and 0.2220 with the previous starter (-0.0017 [-0.0033, -0.0001]); fit on every season 2021-26.
+week_home = 0.1838
+week_rank_gap = 0.0313
+week_elo_per_100 = 0.3242
 
 [experiments]
 # Optional model inputs. Defaults reflect the walk-forward backtest (decided on 2025, confirmed on 2026):
