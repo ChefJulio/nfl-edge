@@ -19,7 +19,7 @@ import pandas as pd
 from .config import ROOT
 
 DOC = ROOT / "MODEL.md"
-PRESENTATION = {"report.py", "docs.py", "standings.py"}  # changes here never change model outputs (standings: site data)
+PRESENTATION = {"report.py", "docs.py", "standings.py", "machine.py"}  # changes here never change model outputs (standings: site data)
 PRESENTATION_CFG = {"tiers", "report"}  # config sections only the page reads
 
 
@@ -134,6 +134,7 @@ def render(live: dict) -> dict:
     return str(L[m.group(1)])
 
   filled = re.sub(r"\{\{\s*L\.(\w+)\s*\}\}", fill, body)
+  plain = re.sub(r"\{\{\s*L\.(\w+)\s*\}\}", lambda m: str(live[m.group(1)]), body)  # nfledge/machine.py: model.md
   html = markdown.markdown(filled, extensions=["tables", "sane_lists"])
   toc, n = [], 0
 
@@ -147,7 +148,7 @@ def render(live: dict) -> dict:
   html = re.sub(r"<h2>(.*?)</h2>", anchor, html)
   # Position cells in tables get the site's position badges.
   html = re.sub(r"<td>(QB|RB|WR|TE)</td>", lambda m: f'<td><span class="posb posb-{m.group(1)}">{m.group(1)}</span></td>', html)
-  return {"html": html, "toc": toc, "stale": is_stale()}
+  return {"html": html, "toc": toc, "stale": is_stale(), "md": plain}
 
 
 # ----------------------------------------------------------------------------------------------------------------

@@ -97,6 +97,8 @@ flex_positions = ["RB", "WR", "TE"]
 
 [report]
 output = "report/nfl_edge_week{week}.html"
+# public address of the site (llms.txt and the other plain-text copies link with it; nfledge/machine.py)
+site_url = "https://chefjulio.github.io/nfl-edge/"
 # Playoff odds (tools/playoff_odds.py): each simulated season shifts every team's strength by N(0, drift x
 # sqrt(share of season left)) log-odds. Pre-registered fit (2026-10-14): best make-playoffs Brier on 2021-23 of
 # {0, .3, .6, .9, 1.2, 1.5} was 0.9; on held-out 2024-25 it scored 0.1273 vs 0.1344 with none, and fixed the

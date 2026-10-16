@@ -22,8 +22,8 @@ from nfledge.engine import POSITIONS, Engine
 
 
 def model_code() -> str:
-  """Source of everything that affects model outputs (report.py, docs.py and standings.py only change presentation)."""
-  return "".join(p.read_text() for p in sorted((ROOT / "nfledge").glob("*.py")) if p.name not in ("report.py", "docs.py", "standings.py"))
+  """Source of everything that affects model outputs (report.py, docs.py, standings.py and machine.py only change presentation)."""
+  return "".join(p.read_text() for p in sorted((ROOT / "nfledge").glob("*.py")) if p.name not in ("report.py", "docs.py", "standings.py", "machine.py"))
 
 
 def frame_hash(df) -> int:
@@ -181,6 +181,7 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
     "tossup_pct": round(cfg["report"]["tossup_below"] * 100),
     # Only the current week renders the Model tab text; it is written to data/model.json at the site root, which
     # every page (archived and lookahead too) loads, so every page shows the same, current description.
+    "site_url": cfg["report"].get("site_url"),
     "model_doc": (None if (archive or lookahead)
                   else docs.render(docs.live_values(eng, cfg, season, week, res, ev))),
   }

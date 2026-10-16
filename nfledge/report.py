@@ -1472,8 +1472,14 @@ def render(ctx: dict, out_path: Path) -> Path:
     # Model tab > "How accurate is our inactive %?" (tools/avail_track.py; committed, rerun after availability changes)
     av = Path(__file__).resolve().parent.parent / "data" / "history" / "availability_track.json"
     avail = json.loads(av.read_text(encoding="utf-8")) if av.exists() else None
-    (root_dir / "data" / "model.json").write_text(json.dumps(_json_safe({**ctx["model_doc"], "track": ctx.get("track"), "avail": avail}),
+    doc = {k: v for k, v in ctx["model_doc"].items() if k != "md"}
+    (root_dir / "data" / "model.json").write_text(json.dumps(_json_safe({**doc, "track": ctx.get("track"), "avail": avail}),
                                                              separators=(",", ":")), encoding="utf-8")
+    if not root and ctx["model_doc"].get("md"):  # scrapeable copies: llms.txt, model.md, model/, rankings.md (nfledge/machine.py)
+      from . import machine
+      base = str(ctx.get("site_url") or "https://chefjulio.github.io/nfl-edge/")
+      machine.write(root_dir, ctx["model_doc"]["md"], avail, ctx.get("track"), out_path.with_suffix(".json").read_text(encoding="utf-8"),
+                    base, str(ctx["generated"]))
   if nav["is_current"] and not root:  # the picker's week list (root-relative paths)
     (root_dir / "weeks.json").write_text(json.dumps(nav["seasons"], separators=(",", ":")), encoding="utf-8")
     # the current build's stamp: a page left open (phones keep tabs alive for days) asks for this tiny file when you
