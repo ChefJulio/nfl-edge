@@ -251,6 +251,7 @@ A full bar is the 95th percentile of offense-vs-defense impact across every pair
 
 ### What we tried
 
+- **Rejected** - When a team's starting quarterback is a game-time decision, should its win chance blend him and his backup by his chance to play, instead of picking whoever is likelier? - No difference: win-chance error 0.2221 either way on 204 such games, 2021-25; most of these quarterbacks are 70-90% and play (2026-10). <!-- tried:qb-blend-winchance -->
 - **Shipped** - Should the Power rank mean how good a team is from here on, counting an injured quarterback by his chance to be back, instead of who starts this week? - Yes: it predicted rest-of-season point differential better than this week's lineup (rank correlation 0.445 vs 0.436; with a starter out +0.010, interval +0.002 to +0.019), better in 4 of 5 seasons (2026-10). <!-- tried:power-rank-c -->
 - **Rejected** - Should blowout plays be left out of the team ratings (tested at 2-98%, 5-95% and 10-90% win probability)? - No: every filter made game predictions worse (average margin miss 10.55 points with every play vs 10.57 to 10.64 with a filter), so every play counts (2026-10). <!-- tried:blowout-filters -->
 - *Game model:* the points formula's special-teams weight drifted 0.9-3.3 when fit on two seasons; it now trains on six (weight about 2; margin error 10.71 -> 10.68, never worse in any season, winners 59% -> 61%). Fixed special-teams weights from 0 to 2.5 were all within noise of the fit.

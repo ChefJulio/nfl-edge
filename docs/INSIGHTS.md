@@ -1665,3 +1665,17 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   split 2-3. The win model uses the rank GAP (coarse) + Elo + this week's Vegas line, few teams are affected at once,
   and the record already banked dominates season outcomes. Weekly variant off. The live odds read Power's rank, which
   became C with (M): measured no different from the old rule, kept so the odds and the Power page use one rank.
+- **PRE-REGISTERED 2026-10-16 (before running): (O) blend an uncertain QB into win chances** (owner: "is the split right
+  at 50%?"). The 50% rule (P < 0.5 sits) stays for player projections: with two outcomes, the single scenario that
+  minimizes expected absolute error is the likelier one, which flips at exactly 50%. A win chance is a probability, so
+  for games where a team's usual starting QB is on the final report with P(plays) 5-95% (the one availability model,
+  walk-forward), compare: binary = rate the team with the starter if P >= 0.5 else the backup; blend = P x win chance
+  with the starter + (1 - P) x with the backup. Win chance from the game model's margin (normal, spread from the other
+  seasons' misses). tools/qb_blend_eval.py, 2021-25, the game model as in tools/game_eval.py. GATE: win-chance Brier on
+  those games lower with the 95% CI over games excluding 0. If it passes: Matchups' model chance and Power's "This
+  week" use the blend.
+- **RESULT {#qb-blend-winchance} (O) blend an uncertain QB into win chances: FAIL (no effect).** 204 games 2021-25 with
+  a usual starter on the final report at 5-95%: win-chance Brier binary 0.2221, blend 0.2221 (-0.0000 [-0.0026,
+  +0.0025]); seasons split 3-2. Most such QBs are Questionable at 70-90% and play, so the blend moves the chance a point
+  or two. Vegas on the same games 0.2011: the market prices the injury news we don't see (and backups are under-
+  penalized, see the inexperienced-QB finding). The 50% rule stays everywhere.
