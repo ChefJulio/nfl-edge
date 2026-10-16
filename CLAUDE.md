@@ -106,5 +106,8 @@ Git hooks: `git config core.hooksPath .githooks` (pre-commit blocks commits when
    WebKit with an iPhone profile (the owner tests on Brave/iPhone, which is WebKit; headless Chrome misses WebKit
    bugs), `--device=desktop` for Chromium. Options for position tab and page/table scrolling are in the script.
    `run.py` fails the build if the page script has a JS syntax error (needs `node` on PATH).
-5. **Commits:** plain ASCII messages, no emojis. Push to main deploys.
+5. **Commits:** plain ASCII messages, no emojis. Push to main deploys. **Before pushing a model / config change, run
+   a full local build** (`run.py --no-backtest --lookahead --out scratch/site/index.html`): experiments test the
+   model, not the page, and `docs.py` feeds hand-built example rows to the live models, so a new model input breaks
+   the deploy (2026-10-16: practice_role and job_security each did; two failed deploys before it was caught).
 6. **Code style:** 2-space indent Python, ~120 char lines, match surrounding idiom.
