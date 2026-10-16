@@ -1238,3 +1238,48 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   at season end (2026 wk 7-17) take, per player, the last snapshot before his kickoff; weights = the zero-skip
   2021-26 fit (QB .15 / RB .60 / WR .20 / TE .25, fixed now); GATE: relevant rows, blend vs ours MAE CI upper < 0, no
   position's CI lower > 0. The tool for that comparison is not written yet (sleeper_compare.py reads the API).
+- **Weeks 1-2 were never backtested (found 2026-10-15, tools/early_weeks_eval.py).** The standard backtest starts at
+  week 3. Weeks 1-2 2021-26 (4,847 played rows): veterans fine (QB/RB/TE/WR MAE vs experts 6.01/3.78/2.43/4.11 vs
+  6.86/3.74/2.36/4.05), rookies under-projected: bias RB +1.27, WR +1.64, TE +0.70; R1 WR +4.68 (proj 4.2, actual
+  8.8). Cause: a player with no usage history gets share_hat = 0 (player_model.share_hats: `p[share] <= 0 -> 0`),
+  so debuts project ~0 (2023 wk 1 Bijan Robinson 0.0 -> 17.3; Nacua, Addison, Flowers, Worthy, BTJ, Egbuka 0.0);
+  37 of 66 rookie 10+ point games in weeks 1-2 were projected under 5. Veterans' RB / TE bias -0.54 / -0.39 there is
+  likely the rookies' volume landing on them. The old "weakest on rookies (4.09 vs experts 4.00)" line is stale:
+  weeks 3+ 2021-26 we beat the experts in every rookie / games-played bucket.
+- **PRE-REGISTERED 2026-10-15 (before building): debut usage prior (`experiments.debut_prior`).** For an RB / WR /
+  TE with no history in the loaded data (not in the feature frame), target share and carry share = a per-position
+  regression fit on earlier rookies' first career games (rosters rookie_year = season, first ledger game): share ~
+  depth-chart slot that week (1 / 2 / 3+ / unlisted) + draft tier (R1 / R2-3 / R4-7 / UDFA), fit walk-forward on
+  every loaded season before the test season. Replaces the current 0; QBs unchanged (starter logic covers them);
+  team-share normalization then applies as usual. Tests: weeks 1-2 2021-26 (tools/early_weeks_eval.py) and the
+  standard weeks 3+ 2021-25 (tools/experiments.py, mid-season debuts). CI: 95% bootstrap over TEAM-weeks for weeks
+  1-2 (only 12 season-weeks), season-weeks for weeks 3+. GATE: (i) weeks 1-2 debut rows MAE lower, CI excluding 0;
+  (ii) weeks 1-2 all rows CI upper < +0.003 and no position's CI lower > 0; (iii) weeks 3+ all-position CI upper <
+  +0.003.
+- **BUG FIXED 2026-10-15: newcomer discount flagged debuting rookies in backtests.** `_newcomers` required "played
+  somewhere", checked against a first-game table spanning every LOADED season, so in backtests a rookie debut who
+  plays in later seasons counted as a newcomer (live has no future seasons: never affected). Harmless while debuts
+  projected 0 (likely the OPEN "~9k rows, ~0.02" backtest side effect); with a debut prior it halved the rookie and
+  handed the cut to his position mates. Now "played somewhere before this week".
+- **RESULT debut_prior v1 (weeks 1-2, after the bug fix): FAIL on part (i).** Debut rows +0.096 [-0.229, +0.411]
+  (n 358); all rows -0.029 [-0.057, -0.002]; teammates -0.039 [-0.051, -0.028]; positions all ns. By depth slot,
+  debut MAE old -> new: RB1 7.78 -> 4.85, RB2 4.26 -> 3.18, WR1 6.37 -> 5.00, TE1 4.61 -> 3.17, WR2 3.76 -> 3.64 (n
+  10/25/17/7/63), but slot 3 / unlisted worse (RB3 1.93 -> 2.90, WR unl 1.19 -> 1.76): their median game is ~0 while
+  the prior is a mean pulled up by rare big games. (Before the bug fix the halved prior gave debut rows -0.254 and
+  teammates +0.024: the bug did both.) Not shipped.
+- **PRE-REGISTERED 2026-10-15 (before seeing any weeks 3+ debut rows): debut_prior v2 ("d12").** Same prior, applied
+  only to debuts listed at depth slot 1 or 2 that week; slot 3+ / unlisted stay 0. Decided on FRESH rows: weeks 3+
+  2021-25 (mid-season debuts; tools/experiments.py debut_d12 vs baseline, both with the bug fix). GATE: debut rows
+  (no history) MAE lower, 95% CI over season-weeks excluding 0; all rows CI upper < +0.003; no position's CI lower >
+  0. Weeks 1-2 numbers for v2 are reported but are in-sample for the slot choice.
+- **debut_prior v2 on weeks 3+ 2021-25: NO POWER.** Only 5 slot-1/2 debut rows (relevant-row MAE unchanged; debut
+  rows +0.40 [-0.84, +1.63]). AMENDED 2026-10-15 before running: the deciding test moves to weeks 1-2 of 2016-2020
+  (seasons no test has touched; weekly depth charts exist), same gate as v1 parts (i)-(ii), team-week CIs, v2 vs
+  baseline. Pass -> ship d12; fail -> off until 2027 weeks 1-2.
+- **RESULT debut_prior v2 "d12": PASS -> SHIPPED (config experiments.debut_prior = "d12").** Fresh weeks 1-2
+  2016-20 (history 13 seasons): debut rows (n 150) -1.023 [-1.699, -0.318]; all rows (3,932) -0.070 [-0.102, -0.038];
+  RB -0.180 [-0.266, -0.101], TE -0.022, WR -0.037, QB -0.002 (ns); teammates -0.032 [-0.044, -0.021]; every
+  season better (-0.071 / -0.057 / -0.039 / -0.101 / -0.082). Weeks 3+ 2021-25 relevant rows +0.000 [0.000,
+  +0.001]. In-sample 2021-26 weeks 1-2: debut -0.654 [-1.352, -0.000], all -0.040 [-0.064, -0.017]. Weeks 1-2 are
+  still unmeasured by the standard backtest: tools/early_weeks_eval.py + tools/debut_gate.py cover them.
+  OPEN (newcomer side effect) likely closed by the bug fix above; not re-measured.

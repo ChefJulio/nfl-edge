@@ -414,6 +414,65 @@ class PlayerModel:
     """Inputs of the team goal-line model (the team's expected share of rushes inside the 10)."""
     return ["implied_pts", "off_rush"] + (["coach_a"] if self.exp.get("coach_aggr") else [])
 
+  DEBUT_POS = ("RB", "WR", "TE")
+
+  @staticmethod
+  def _debut_x(depth: pd.Series, tier: pd.Series) -> pd.DataFrame:
+    """Debut-prior inputs: depth-chart slot (1 / 2 / 3+; unlisted = all zero) and draft tier (UDFA = all zero)."""
+    d = pd.to_numeric(depth, errors="coerce")
+    t = tier.fillna("UDFA").astype(str)
+    return pd.DataFrame({"d1": (d == 1).astype(float), "d2": (d == 2).astype(float), "d3": (d >= 3).astype(float),
+                         "r1": (t == "R1").astype(float), "r23": (t == "R2-3").astype(float),
+                         "r47": (t == "R4-7").astype(float)}, index=depth.index)
+
+  def fit_debut(self, test_season: int):
+    """EXPERIMENT (experiments.debut_prior; pre-registered 2026-10-15): usage for a RB / WR / TE with no history.
+    Without it his share is 0, so rookies debut at ~0 (2023 wk 1 Bijan Robinson 0.0 -> 17.3). Fit on earlier
+    rookies' first career games (first ledger game in his rookie season, every loaded season before test_season):
+    target share and carry share per position ~ depth-chart slot that week + draft tier."""
+    from .data import depth_for_week
+    self.debut_models = {}
+    ry = self.data.rosters.dropna(subset=["gsis_id", "rookie_year"]).drop_duplicates("gsis_id").set_index("gsis_id").rookie_year
+    L = self.ledger[self.ledger.season < test_season]
+    L = L[L.pos.isin(self.DEBUT_POS) & ~L.excluded].sort_values(["season", "week"])
+    first = L.drop_duplicates("gsis_id")
+    first = first[first.season == first.gsis_id.map(ry)]
+    if len(first) < 50:
+      return
+    parts = []
+    for (s, w), g in first.groupby(["season", "week"]):
+      dc = depth_for_week(self.data, int(s), int(w))
+      dc = dc[["gsis_id", "rank"]].sort_values("rank").drop_duplicates("gsis_id")
+      parts.append(g.merge(dc, on="gsis_id", how="left"))
+    d = pd.concat(parts, ignore_index=True)
+    d = pd.concat([d, self._debut_x(d["rank"], d["tier"])], axis=1)
+    d["y_tgt_share"] = d.tgt / d.team_db.replace(0, np.nan)
+    d["y_carry_share"] = d.carries / d.team_rush.replace(0, np.nan)
+    cols = ["d1", "d2", "d3", "r1", "r23", "r47"]
+    for pos, g in d.groupby("pos"):
+      for share in ("tgt_share", "carry_share"):
+        if len(g) >= 30:
+          self.debut_models[(share, pos)] = Linear.fit(g, f"y_{share}", cols, name=f"debut/{share}/{pos}")
+
+  def apply_debut(self, p: pd.DataFrame, f: pd.DataFrame) -> None:
+    """In place: debut-prior shares for RB / WR / TE with no history (not in the feature frame f)."""
+    models = getattr(self, "debut_models", None)
+    if not models:
+      return
+    new = ~p.gsis_id.isin(f.index) & p.pos.isin(self.DEBUT_POS)
+    if self.exp.get("debut_prior") == "d12":  # v2: listed depth slots 1-2 only (deeper debuts' median game is ~0)
+      new &= pd.to_numeric(p.get("depth_rank", pd.Series(np.nan, index=p.index)), errors="coerce").le(2)
+    if not new.any():
+      return
+    x = self._debut_x(p.loc[new, "depth_rank"] if "depth_rank" in p else pd.Series(np.nan, index=p.index[new]),
+                      p.loc[new, "tier"])
+    for (share, pos), m in models.items():
+      sel = (p.loc[new, "pos"] == pos).to_numpy()
+      if sel.any():
+        idx = p.index[new][sel]
+        p.loc[idx, f"{share}_hat"] = np.clip(m.predict(x.loc[idx]), 0, 1)
+    p["debut"] = new
+
   def fit_priors(self, seasons: list[int]):
     """Empirical-Bayes priors per (opportunity type, position group, draft tier) and prior strength k per
     component estimated by method of moments (k = within-player variance / between-player variance)."""
@@ -765,6 +824,8 @@ class PlayerModel:
     p["age_sq"] = p.age_c ** 2
 
     self.share_hats(p)
+    if self.exp.get("debut_prior"):
+      self.apply_debut(p, f)
     self._qb_starters(p)
     # Pass offense = team (ex-QB) + the projected starter's QB effect; the injury module swaps in the backup.
     p["off_pass_base"] = p.off_pass

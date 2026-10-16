@@ -49,6 +49,8 @@ class Engine:
     self.tm.tune_alphas(folds)
     self.pm.prepare(seasons)
     self.pm.fit_priors(seasons)
+    if self.cfg.get("experiments", {}).get("debut_prior"):
+      self.pm.fit_debut(test_season)
     self.gm = GameModel(self.cfg)
     rows = self.gm.training_rows(self.tm, self.team_ledger, seasons)
     # Points formula: optionally a longer window of prior seasons (team_model.points_seasons) than the 2-season
@@ -287,7 +289,15 @@ class Engine:
     now = season * 100 + week
     first = [self._first_game.get((g, t)) for g, t in zip(p.gsis_id, p.team.astype(str))]
     new = pd.Series([f is None or f >= now for f in first], index=p.index) & p.pos.isin(["RB", "WR", "TE"])
-    new &= p.gsis_id.isin(set(g for g, _ in self._first_game))  # someone who has played somewhere (not a rookie debut)
+    # someone who played somewhere BEFORE this week (not a rookie debut). The first-game table spans every loaded
+    # season, so in backtests it includes later seasons: checking "played anywhere" alone flagged debuting rookies
+    # who play in later seasons (bug found 2026-10-15; harmless while debuts projected 0, not with debut priors).
+    if not hasattr(self, "_first_any"):
+      fa = {}
+      for (g, _), k in self._first_game.items():
+        fa[g] = min(k, fa.get(g, k))
+      self._first_any = fa
+    new &= pd.Series([self._first_any.get(g, now) < now for g in p.gsis_id], index=p.index)
     if not new.any():
       return p
     for v in ("tgt", "carries"):

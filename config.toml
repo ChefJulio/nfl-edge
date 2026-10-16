@@ -163,6 +163,12 @@ newcomer_scale = 0.5
 # 0.94 / 0.91 / 0.89 for 1 / 2 / 3+ changes (data/history/journeyman.json). Fit 2021-23, tested 2024-25: MAE -0.108
 # for those players, -0.039 overall, RB / WR / TE better, QB no difference (owner idea, pre-registered 2026-10-15).
 journeyman = true
+# Debut usage prior: a RB / WR / TE with no history (rookie debuts) listed at depth slot 1-2 gets target / carry
+# shares from earlier rookies' first games (depth slot + draft tier); before, any player without history projected
+# ~0 (2023 wk 1 Bijan Robinson 0.0 -> 17.3). Deeper debuts stay 0 (their median game is ~0; v1 applied to all slots
+# and failed). Fresh test weeks 1-2 2016-20: debut players -1.02 [-1.70, -0.32], all rows -0.070 [-0.102, -0.038],
+# better every season; weeks 3+ unchanged. Pre-registered 2026-10-15.
+debut_prior = "d12"
 # Second opinion: final = (1 - w) ours + w Sleeper's projection (RotoWire's, free API; nfledge/sleeper.py), per
 # position, week being played only. OFF: the pre-registered backtest passed (-0.020 [-0.039, -0.002]) but Sleeper's
 # saved projections are edited after games (players hurt in-game zeroed), and the leak-free version failed
