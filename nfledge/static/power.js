@@ -4,18 +4,19 @@
 (() => {
   const NFLE = window.NFLE, esc = NFLE.esc, F = NFLE.fmt;
   // the season's weekly net ratings as a small line (the dot = this week)
-  const spark = (v, w = 84, h = 22) => {
+  // weeks rated with a QB other than the usual starter (qb: 1s aligned with v) get a hollow ring
+  const spark = (v, w = 84, h = 22, qb = []) => {
     v = (v || []).filter(x => x != null);
     if (v.length < 2) return '';
     const lo = Math.min(...v), span = (Math.max(...v) - lo) || 1, y = x => (h - 2 - (x - lo) / span * (h - 4)).toFixed(1);
     const pts = v.map((x, i) => `${(i * w / (v.length - 1)).toFixed(1)},${y(x)}`).join(' ');
-    return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="${w}" cy="${y(v[v.length - 1])}" r="2.2" fill="currentColor"/></svg>`;
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="currentColor" stroke-width="1.5"/>${qb.map((f, i) => f ? `<circle class="spark-qb" cx="${(i * w / (v.length - 1)).toFixed(1)}" cy="${y(v[i])}" r="3"/>` : '').join('')}<circle cx="${w}" cy="${y(v[v.length - 1])}" r="2.2" fill="currentColor"/></svg>`;
   };
   const mc = (v, rk, cls = 'mv2', sm = '') => `<div class="mc"><span class="${cls} sc">${F.sgn(v)}</span><span class="rk-b${sm} ${F.rkc(rk)}">${F.ord(rk)}</span></div>`;
   const sched = (v, rk, o, d) => rk ? `<div class="mc" title="Opposing defenses ${F.sgn(o)} + opposing offenses ${F.sgn(d)} pts/game vs average"><span class="mv2 sc">${F.sgn(v)}</span><span class="rk-b ${F.rkc(33 - rk)}" title="1st = hardest (red), 32nd = easiest (green)">${F.ord(rk)}</span></div><span class="sub">${rk <= 8 ? 'hard' : rk >= 25 ? 'easy' : 'average'}</span>` : '';
   const columns = teams => [
     { key: 'rank', label: '#', num: true, first: 'asc', cls: 'rk',
-      html: r => `<span class="rkn">${r.rank}</span>${r.move > 0 ? `<span class="mv up">&#9650;${r.move}</span>` : r.move < 0 ? `<span class="mv dn">&#9660;${-r.move}</span>` : '<span class="mv">&ndash;</span>'}` },
+      html: r => `<span class="rkn">${r.rank}</span>${r.move > 0 ? `<span class="mv up">&#9650;${r.move}</span>` : r.move < 0 ? `<span class="mv dn">&#9660;${-r.move}</span>` : '<span class="mv">&ndash;</span>'}${r.qb_note ? `<span class="mv qbx" title="${esc(r.qb_note)}: this week's rating uses him">QB</span>` : ''}` },
     { key: 'nick', label: 'Team', stick: true, first: 'asc',
       html: r => `<div class="who">${F.logo(teams, r.team, 26)}<div><b><span class="nm-full">${esc(r.nick)}</span><span class="nm-short">${esc(r.team)}</span></b><span class="sub">${esc(r.team)} &middot; ${esc(r.record)}</span></div></div>` },
     { key: 'net', label: 'Net', num: true,
@@ -28,7 +29,8 @@
       html: r => `<span${r[`${k}_pp`] != null ? ` title="${F.sgn(r[`${k}_pp`])} ${nm}"` : ''}>${mc(r[k], r[`${k}_rk`], 'mv3', ' sm')}</span>` })),
     { key: 'sos_past', label: 'Schedule played', html: r => sched(r.sos_past, r.sos_past_rk, r.sos_past_o, r.sos_past_d) },
     { key: 'sos_next', label: 'Schedule left', html: r => sched(r.sos_next, r.sos_next_rk, r.sos_next_o, r.sos_next_d) },
-    { key: 'trend', label: 'Trend', sort: false, cls: 'hide-sm', html: r => spark(r.net_hist) },
+    { key: 'trend', label: 'Trend', sort: false, cls: 'hide-sm',
+      html: r => `<span${(r.qb_hist || []).some(Boolean) ? ' title="Hollow rings: weeks rated with a backup QB starting"' : ''}>${spark(r.net_hist, 84, 22, r.qb_hist || [])}</span>` },
   ];
   NFLE.areas.power = {
     mount(sec) {

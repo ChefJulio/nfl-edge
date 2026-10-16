@@ -552,8 +552,10 @@ def team_info(teams: pd.DataFrame | None) -> dict:
   out = {}
   if teams is None:
     return out
+  from .data import RELOCATED
   for t in teams.itertuples():
-    if t.team_abbr not in ts.c:
+    # nflverse's team table keeps old and alias codes (OAK, SD, STL, LAR); the data maps them to today's teams on load
+    if t.team_abbr not in ts.c or t.team_abbr in RELOCATED:
       continue
     bg, sec = ts.c[t.team_abbr]
     out[t.team_abbr] = {"name": getattr(t, "team_name", t.team_abbr), "nick": ts.nick.get(t.team_abbr, ""),
@@ -605,7 +607,7 @@ def week_data(ctx: dict) -> str:
   pkeys = ("team", "nick", "record", "rank", "move", "range", "net", "off", "def", "st", "pass_o", "rush_o", "pass_d",
            "rush_d", "net_rk", "off_rk", "def_rk", "st_rk", "pass_o_rk", "rush_o_rk", "pass_d_rk", "rush_d_rk",
            "pass_o_pp", "rush_o_pp", "pass_d_pp", "rush_d_pp", "sos_past", "sos_past_rk", "sos_next", "sos_next_rk",
-           "sos_past_o", "sos_past_d", "sos_next_o", "sos_next_d", "rank_hist", "net_hist")
+           "sos_past_o", "sos_past_d", "sos_next_o", "sos_next_d", "rank_hist", "net_hist", "qb_hist", "qb_note")
   power = [{k: r.get(k) for k in pkeys} for r in ctx.get("power") or []]
   out = {"season": ctx["season"], "week": ctx["week"], "generated": ctx["generated"], "archive": ctx["archive"],
          "power": power, "teams": ctx.get("teams", {}),
@@ -992,10 +994,23 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
     starters.update(dict(zip(qbs.team, qbs.gsis_id)))
   fw = formula_weights(eng)
   u = unit_points(rb, vol, starters, fw)
-  history = {}
+  history, qb_by_week = {}, {}
   for w in range(2, week + 1):
     rw = eng.tm.fit(season, w)
-    history[w] = unit_points(rw, league_volume(eng, season, w, rw), starters_asof(eng, season, w), fw).net
+    qb_by_week[w] = starters_asof(eng, season, w)
+    history[w] = unit_points(rw, league_volume(eng, season, w, rw), qb_by_week[w], fw).net
+  # Each week's rating uses that week's starting QB (it's who plays), so a backup's start moves the line: flag those
+  # weeks against the team's usual starter (the one who started most of them), so the trend doesn't read as the team
+  # changing (owner 2026-10-16, after an outside review: Washington -0.66 -> -8.64 -> -1.21 as Daniels sat and returned)
+  qb_by_week[week + 1] = dict(starters)  # this week (projected starters)
+  usual = {}
+  for t in rb.teams:
+    seq = [qb_by_week[w].get(t) for w in sorted(qb_by_week) if qb_by_week[w].get(t)]
+    if seq:
+      cnt = pd.Series(seq).value_counts()
+      usual[t] = min(cnt[cnt == cnt.max()].index, key=seq.index)  # a tie goes to the incumbent (who started first)
+  ro = eng.data.rosters.dropna(subset=["gsis_id"]).sort_values(["season", "week"]).drop_duplicates("gsis_id", keep="last")
+  qb_name = dict(zip(ro.gsis_id, ro.full_name))
   hist = pd.DataFrame(history)
   hist_rk = hist.rank(ascending=False, method="min")  # power rank by week, this season (team card trend)
   ts = TeamStyle(eng.data.teams)
@@ -1034,6 +1049,11 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
       "sos_past_o": float(sp.get("off_past", np.nan)), "sos_past_d": float(sp.get("def_past", np.nan)),
       "sos_next_o": float(sp.get("off_next", np.nan)), "sos_next_d": float(sp.get("def_next", np.nan)),
       "net_hist": [round(float(x), 2) for x in hist.loc[team].tolist() if pd.notna(x)] if team in hist.index else [],
+      # 1 where that week's rating used a QB other than his usual starter (aligned with net_hist)
+      "qb_hist": [int(bool(usual.get(team)) and qb_by_week[w].get(team) != usual.get(team))
+                  for w, x in hist.loc[team].items() if pd.notna(x)] if team in hist.index else [],
+      "qb_note": (f"{qb_name.get(starters.get(team), 'Another QB')} expected to start, not {qb_name.get(usual[team], 'the usual starter')}"
+                  if usual.get(team) and starters.get(team) and starters.get(team) != usual[team] else ""),
       # this week's point is the headline rank (bootstrap fit + projected starters), so trend and header agree
       "rank_hist": {**({int(w): int(v) for w, v in hist_rk.loc[team].items() if pd.notna(v)} if team in hist_rk.index else {}),
                     int(week): int(ranks["net"][team])},

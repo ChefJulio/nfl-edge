@@ -1621,3 +1621,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   without, played 82.1%. The final-week flag already in the healthy-scratch inputs (job security's last_week) carries
   most of the week-18 rest; what's left is ~2 points. Fantasy MAE -0.002 [-0.005, +0.001]. Off. Late-season stakes:
   closed for now (L1 near-miss on injured players, L2 nothing on healthy ones).
+- **Finding 2026-10-16 (outside review by the Claude app, from the scrapeable site: "the inexperienced-QB penalty is
+  very large (-21.5 per 100 dropbacks) and barely shrunk; check it"): it is, if anything, too SMALL.** Walk-forward
+  game predictions 2021-25 (tools/game_eval.py --only=fitted), per team-game, starter = most dropbacks, inexperienced =
+  < 150 career dropbacks entering the game (the model's own rule). Model margin miss from that team's side (positive
+  = predicted better than they did): inexperienced starter (n 204) +2.41 pts [+0.51, +4.34], better in 4 of 5 seasons
+  (2021 +3.7, 2022 -1.1, 2023 +2.5, 2024 +1.4, 2025 +5.3); experienced (n 2,354) -0.21 [-0.76, +0.32]. Vegas, same
+  games: +1.42 [-0.46, +3.28]. Candidate test (not run): a stronger or experience-scaled penalty in the pass unit, gated
+  on game margin MAE. (The reviewer's other points: rank history now flags QB-driven weeks; retired team codes
+  removed; a separate power.json declined - index.json is one shared load for every tab.)
