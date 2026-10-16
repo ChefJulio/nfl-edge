@@ -674,7 +674,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3932886,Sean Murphy-Bunting,Pittsburgh Steelers,Active,2026-10-06T00:19Z,,,,,,"The Steelers signed Murphy-Bunting off the Buccaneers' practice squad Monday, Teresa Varley of the Steelers' official site reports."
 4682980,Derrick Harmon,Pittsburgh Steelers,Injured Reserve,2026-10-05T21:23Z,Foot,Not Specified,Not Specified,2026-11-15,IR,"The Steelers placed Harmon (foot) on injured reserve Monday, Teresa Varley of the team's official site reports."
 4431533,Gabriel Rubio,Pittsburgh Steelers,Active,2026-10-05T19:01Z,,,,,,
-16002,Kyle Juszczyk,San Francisco 49ers,Active,2026-10-16T22:34Z,,,,,,
+16002,Kyle Juszczyk,San Francisco 49ers,Active,2026-10-16T23:21Z,,,,,,"Juszczyk (knee) was a full participant in Friday's practice, Harrison Rich of the San Francisco Chronicle reports."
+3895856,Christian Kirk,San Francisco 49ers,Injured Reserve,2026-10-16T23:17Z,Calf,Not Specified,Not Specified,2026-10-19,IR-R,"Kirk (calf) remained limited in Friday's practice, Harrison Rich of the San Francisco Chronicle reports."
 4432244,Romello Height,San Francisco 49ers,Questionable,2026-10-16T22:33Z,Illness,,,2026-10-19,QUESTIONABLE,questionable
 4565779,Carver Willis,San Francisco 49ers,Active,2026-10-16T22:33Z,,,,,,
 16737,Mike Evans,San Francisco 49ers,Questionable,2026-10-16T22:32Z,Ribs,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,"Evans (ribs/Achilles) was a non-participant at Friday's practice, Harrison Rich of the San Francisco Chronicle reports."
@@ -685,7 +686,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3916075,Colton McKivitz,San Francisco 49ers,Questionable,2026-10-15T23:27Z,Illness,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
 3057524,Siran Neal,San Francisco 49ers,Questionable,2026-10-15T23:27Z,Neck,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
 4685369,Gracen Halton,San Francisco 49ers,Questionable,2026-10-15T23:26Z,Quadriceps,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
-3895856,Christian Kirk,San Francisco 49ers,Injured Reserve,2026-10-15T22:46Z,Calf,Not Specified,Not Specified,2026-10-19,IR-R,"Kirk (calf) was limited in his return to practice Thursday, Matt Barrows of The Athletic reports."
 3126486,Deebo Samuel Sr.,San Francisco 49ers,Out,2026-10-15T19:54Z,Hamstring,Not Specified,Right,2026-11-08,OUT,"Head coach Kyle Shanahan said Thursday that the 49ers will ""hold off"" on placing Samuel (hamstring) on IR due to the team's bye in Week 8, Vic Tafur of the Athletic reports."
 3043116,Demarcus Robinson,San Francisco 49ers,Injured Reserve,2026-10-15T19:50Z,Ankle,Sprain,Right,2026-11-08,IR,"Head coach Kyle Shanahan said Thursday that Robinson (ankle) has an ""outside chance"" to return from injured reserve for the 49ers' Week 7 game versus the Falcons but is more likely to be activated following the team's Week 8 bye, David Lombardi of SFStandard.com reports."
 3916903,Dre Greenlaw,San Francisco 49ers,Suspension,2026-10-14T01:22Z,Suspension,Not Specified,Not Specified,2026-10-25,RESERVE-SUS,"Greenlaw's appeal of a one-game suspension was denied by the NFL on Tuesday, Adam Schefter of ESPN reports."
@@ -774,6 +774,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035369,Jeffery Simmons,Tennessee Titans,Active,2026-10-09T19:41Z,,,,,,
 4870805,Anthony Hill Jr.,Tennessee Titans,Active,2026-10-07T01:15Z,,,,,,Hill tallied eight tackles (three solo) during the Titans' 24-18 loss to the Ravens on Sunday.
 4879480,Drew Moss,Tennessee Titans,Active,2026-10-05T19:07Z,,,,,,
+4567156,Treylon Burks,Washington Commanders,Questionable,2026-10-16T23:15Z,Shoulder,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,Burks (shoulder) remained limited in Friday's practice.
 3068267,Austin Ekeler,Washington Commanders,Questionable,2026-10-16T23:13Z,Chest,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,Ekeler (chest) remained limited in Friday's practice.
 4697815,Rachaad White,Washington Commanders,Questionable,2026-10-16T22:26Z,Shoulder,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,White practiced in a limited capacity Friday due to a shoulder injury.
 2976212,Stefon Diggs,Washington Commanders,Questionable,2026-10-16T22:21Z,Hamstring,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,Diggs (hamstring) was limited at Friday's practice.
@@ -788,7 +789,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361357,Javontae Jean-Baptiste,Washington Commanders,Questionable,2026-10-15T23:16Z,Pectoral,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
 4426403,Nick Cross,Washington Commanders,Active,2026-10-15T22:47Z,,,,,,"Cross (illness) will be a full participant in practices ahead of Monday's game against the 49ers, Tashan Reed of The Washington Post reports."
 4568617,Jordan Magee,Washington Commanders,Injured Reserve,2026-10-15T22:38Z,Hamstring,Not Specified,Not Specified,2026-10-19,IR-R,Magee (hamstring) was designated to return from injured reserve Thursday.
-4567156,Treylon Burks,Washington Commanders,Questionable,2026-10-15T22:27Z,Shoulder,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,Burks was limited at Thursday's practice due to a shoulder injury.
 5081432,Antonio Williams,Washington Commanders,Active,2026-10-14T00:36Z,,,,,,Williams hauled in all three of his targets for 31 yards and added a two-yard punt return during the Commanders' 27-27 tie with the Giants on Sunday.
 3929865,Charles Omenihu,Washington Commanders,Questionable,2026-10-13T17:10Z,Groin,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
 4572460,Tyler Owens,Washington Commanders,Questionable,2026-10-13T17:10Z,Hamstring,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
