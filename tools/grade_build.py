@@ -617,6 +617,113 @@ def build(tg, pos_of, info, cur, out: Path, sched: pd.DataFrame, team_of: dict, 
   (out / "index.json").write_text(json.dumps({"seasons": seasons, "current": cur}), encoding="utf-8")
 
 
+
+# ---- Seasons before 2018 (owner 2026-10-15: "a more crude calculation to give grades to players before 2018") ----
+# The OVR is the same thing it is from 2018 on: fantasy points per game in the site's scoring, shrunk toward the
+# qualified players' average at the position (method of moments, these seasons' own player-games), as a percentile
+# among that season's qualified players (QUALIFY). Only the stat bars change: box-score rates from nflverse weekly
+# player stats instead of play-by-play / tracking / charting. Targets are missing in nflverse 2003-2008, so those
+# seasons' receiving bars use catches instead. Finished seasons never change: built once, kept in the cache.
+HIST_FIRST, HIST_V = 1999, 1
+HIST_RATES = {
+  "QB": [("ypa", "pass_yd", "att", "Yards / attempt"), ("cmp", "cmp", "att", "Completion %"),
+         ("ptd", "pass_td", "att", "TD rate"), ("int_rate", "ints", "att", "INT rate"),
+         ("sack_rate", "sacks", "db", "Sack rate"), ("att_pg", "att", "games", "Attempts / game"),
+         ("ryd_pg", "ru_yd", "games", "Rushing yards / game")],
+  "RB": [("ypc", "ru_yd", "ru_n", "Yards / carry"), ("rtd", "ru_td", "ru_n", "Rushing TD rate"),
+         ("car_pg", "ru_n", "games", "Carries / game"), ("rec_pg", "rec", "games", "Catches / game"),
+         ("ypr", "rec_yd", "rec", "Yards / catch")],
+  "WR": [("ypt", "rec_yd", "tgt", "Yards / target"), ("catch", "rec", "tgt", "Catch rate"),
+         ("ypr", "rec_yd", "rec", "Yards / catch"), ("tgt_pg", "tgt", "games", "Targets / game"),
+         ("ryd_pg", "rec_yd", "games", "Receiving yards / game"), ("rtd", "rec_td", "rec", "TD per catch")],
+}
+HIST_RATES["TE"] = HIST_RATES["WR"]
+HIST_NO_TGT = {"ypt", "catch", "tgt_pg"}  # dropped in seasons without targets (2003-2008)
+HIST_LOWER = {"int_rate", "sack_rate"}
+
+
+def build_historic(out: Path, cur_first: int, sched: pd.DataFrame, scoring, cache_dir: Path) -> list[int]:
+  """data/grades/<season>.json for HIST_FIRST..cur_first-1 (same record layout as build(); "basis": "box")."""
+  import shutil
+  import nflreadpy as nfl
+  kept = cache_dir / "grades_site" / f"hist_v{HIST_V}"
+  kept.mkdir(parents=True, exist_ok=True)
+  seasons = list(range(HIST_FIRST, cur_first))
+  todo = [x for x in seasons if not (kept / f"{x}.json").exists()]
+  if todo:
+    wk = nfl.load_player_stats(list(range(max(HIST_FIRST, min(todo) - 2), cur_first)), summary_level="week").to_pandas()
+    wk = wk[(wk.season_type == "REG") & wk.position.isin(["QB", "RB", "FB", "HB", "WR", "TE"])]
+    pts = actual_points(wk, scoring)
+    g = pd.DataFrame({"gsis_id": wk.player_id, "season": wk.season, "team": wk.team.map(lambda x: D.RELOCATED.get(x, x)),
+                      "pos": pts.position, "fp": pts.actual,
+                      "att": wk.attempts.fillna(0), "cmp": wk.completions.fillna(0), "pass_yd": wk.passing_yards.fillna(0),
+                      "pass_td": wk.passing_tds.fillna(0), "ints": wk.passing_interceptions.fillna(0),
+                      "sacks": wk.sacks_suffered.fillna(0), "ru_n": wk.carries.fillna(0), "ru_yd": wk.rushing_yards.fillna(0),
+                      "ru_td": wk.rushing_tds.fillna(0), "rec": wk.receptions.fillna(0), "tgt": wk.targets.fillna(0),
+                      "rec_yd": wk.receiving_yards.fillna(0), "rec_td": wk.receiving_tds.fillna(0), "games": 1.0})
+    g["db"] = g.att + g.sacks
+    mode1 = lambda x: (lambda m: m.iloc[0] if len(m) else None)(x.dropna().mode())  # noqa: E731  (most common, if any)
+    pos_of = g.groupby("gsis_id").pos.agg(mode1)  # one position per player (his usual one)
+    g["pos"] = g.gsis_id.map(pos_of)
+    num = ["fp", "att", "cmp", "pass_yd", "pass_td", "ints", "sacks", "db", "ru_n", "ru_yd", "ru_td", "rec", "tgt", "rec_yd",
+           "rec_td", "games"]
+    t = g.groupby(["gsis_id", "season"]).agg({**{c: "sum" for c in num}, "pos": "first",
+                                              "team": mode1}).reset_index()
+    tgames = team_games(sched)
+    qual = set()
+    for s_ in seasons:
+      one = t[t.season == s_]
+      tgm = pd.Series([tgames.get((tm, s_), np.nan) for tm in one.team], index=one.index)
+      for pos in POS:
+        ok = np.zeros(len(one), bool)
+        for col, rate in QUALIFY[pos]:
+          col = {"ru_n": "ru_n", "rec": "rec", "att": "att"}[col]
+          ok |= (one[col] >= rate * tgm).fillna(False).to_numpy()
+        qual |= {(a, s_) for a, ok_ in zip(one.gsis_id[one.pos == pos], ok[(one.pos == pos).to_numpy()]) if ok_}
+    # shrinkage prior on qualified player-games (every season here, so early seasons have a stable k)
+    qg = g[[(a, b) in qual for a, b in zip(g.gsis_id, g.season)]]
+    fpri = {pos: mom_prior(qg[qg.pos == pos], "fp", "games") or (float(qg[qg.pos == pos].fp.mean()), 3.0) for pos in POS}
+    for s_ in todo:
+      one = t[t.season == s_].set_index("gsis_id")
+      has_tgt = float(one.tgt.sum()) > 0
+      players, stats, qual_n = {}, {}, {}
+      for pos in POS:
+        ids = [x for x in one.index[one.pos == pos] if (x, s_) in qual]
+        if len(ids) < 5:
+          continue
+        qual_n[pos] = len(ids)
+        o = one.loc[ids]
+        # current form: this season and the two before, weighted SEASON_W (games and points alike)
+        wf, wg = pd.Series(0.0, index=ids), pd.Series(0.0, index=ids)
+        for lag, w in enumerate(SEASON_W):
+          prev = t[t.season == s_ - lag].set_index("gsis_id").reindex(ids)
+          wf, wg = wf + w * prev.fp.fillna(0), wg + w * prev.games.fillna(0)
+        m, k = fpri[pos]
+        cur_v, sea_v = (wf + k * m) / (wg + k), (o.fp + k * m) / (o.games + k)
+        rates = [r for r in HIST_RATES[pos] if has_tgt or r[0] not in HIST_NO_TGT]
+        stats[pos] = [r[3] for r in rates]
+        bars = {}
+        for key, nu, de, _ in rates:
+          v = o[nu] / o[de].replace(0, np.nan)
+          v = v.replace([np.inf, -np.inf], np.nan)
+          v = v.fillna(v.median()).fillna(0.0)
+          bars[key] = (99 - pct(v)) if key in HIST_LOWER else pct(v)
+        gp, sg = pct(cur_v), pct(sea_v)
+        for x in ids:
+          players[x] = [int(gp[x]), pos, int(o.games[x]), int(round(wg[x])), round(float(cur_v[x]), 1),
+                        [int(bars[r[0]][x]) for r in rates], int(sg[x]), round(float(o.fp[x] / o.games[x]), 1), int(o.games[x])]
+      doc = {"season": s_, "basis": "box", "stats": stats, "qualified": qual_n, "players": players}
+      (kept / f"{s_}.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
+      print(f"[grades] {s_} (box score): {len(players)} qualified players {qual_n}", flush=True)
+  out.mkdir(parents=True, exist_ok=True)
+  done = []
+  for s_ in seasons:
+    if (kept / f"{s_}.json").exists():
+      shutil.copyfile(kept / f"{s_}.json", out / f"{s_}.json")
+      done.append(s_)
+  return done
+
+
 def main():
   opt = dict(a[2:].split("=", 1) if "=" in a else (a[2:], "1") for a in sys.argv[1:] if a.startswith("--"))
   cfg = load_config()
@@ -641,8 +748,28 @@ def main():
     r.to_parquet(ROOT / "cache" / "grade_eval.parquet")
     print(report(r))
     return
-  build(tg, pos_of, info, cur, Path(opt.get("site", "site")) / "data" / "grades", data.schedules, team_of,
-        getattr(data, "ryoe", None), getattr(data, "rush_ctx", None))
+  out = Path(opt.get("site", "site")) / "data" / "grades"
+  build(tg, pos_of, info, cur, out, data.schedules, team_of, getattr(data, "ryoe", None), getattr(data, "rush_ctx", None))
+  # seasons before FIRST: box-score grades (same OVR), built once and cached; listed ahead of the rest in index.json
+  sched = D.Cache(ROOT / cfg["data"]["cache_dir"]).get("schedules", "since1999", None, stale=False)
+  old = build_historic(out, FIRST, sched if sched is not None else data.schedules, load_scoring(), ROOT / cfg["data"]["cache_dir"])
+  ix = json.loads((out / "index.json").read_text(encoding="utf-8"))
+  ix["seasons"] = sorted(set(old) | set(ix["seasons"]))
+  ix["box_before"] = FIRST
+  (out / "index.json").write_text(json.dumps(ix), encoding="utf-8")
+  # per-player history for the Grade tab (one small file instead of every season's: 28 files, ~700 KB):
+  # data/grades/players/<last 2 digits of gsis>.json = {gsis: [[season, basis, record, [bar labels], qualified n], ...]}
+  shards = {}
+  for sf in sorted(out.glob("[12][0-9][0-9][0-9].json")):
+    d = json.loads(sf.read_text(encoding="utf-8"))
+    for pid, rec in d["players"].items():
+      pos = rec[1]
+      shards.setdefault(pid[-2:], {}).setdefault(pid, []).append(
+        [d["season"], d.get("basis", "pbp"), rec, d["stats"].get(pos, []), (d.get("qualified") or {}).get(pos)])
+  (out / "players").mkdir(exist_ok=True)
+  for k, v in shards.items():
+    (out / "players" / f"{k}.json").write_text(json.dumps(v, separators=(",", ":")), encoding="utf-8")
+  print(f"[grades] player histories: {sum(len(v) for v in shards.values())} players in {len(shards)} shards", flush=True)
 
 
 if __name__ == "__main__":

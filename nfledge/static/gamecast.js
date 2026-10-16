@@ -1026,7 +1026,7 @@
   const grChip = (pid, cur) => { const r = cur && cur.players[pid]; return r ? `<span class="eg-chip ${r[9] ? 'eg-uq' : grTone(r[0])}" title="NFL Edge overall (${cur.season}), 50-99 among qualified ${esc(r[1])}s${r[9] ? `; under the qualifying minimum, graded on his ${r[8]} games with half the snaps or more` : ''}">OVR <b>${ovr(r[0])}${uqMark(r)}</b></span>` : ''; };
   const gradeTab = (pid, docs) => {
     const rows = docs.filter(d => d && d.players[pid]).sort((a, b) => b.season - a.season);
-    if (!rows.length) return '<div class="pc-box"><p class="pc-sub">No grade: grades cover quarterbacks, running backs, receivers and tight ends since 2018 who met the NFL\'s qualifying minimum in a season (per team game: 14 pass attempts, 6.25 carries, or 1.875 catches).</p></div>';
+    if (!rows.length) return '<div class="pc-box"><p class="pc-sub">No grade: grades cover quarterbacks, running backs, receivers and tight ends since 1999 who met the NFL\'s qualifying minimum in a season (per team game: 14 pass attempts, 6.25 carries, or 1.875 catches).</p></div>';
     const D = rows[0], r = D.players[pid], pos = r[1], labels = D.stats[pos] || [];
     const posName = { QB: 'quarterbacks', RB: 'running backs', WR: 'wide receivers', TE: 'tight ends' }[pos] || pos;
     const f1 = v => v == null ? '–' : v.toFixed(1), nq = (D.qualified || {})[pos];
@@ -1036,13 +1036,13 @@
     const bars = labels.map((l, i) => { const v = r[5][i]; l = FLIP[l] || l; return `<div class="eg-row"><span class="eg-l">${esc(l)}</span><b class="eg-v">${v}</b><span class="eg-bar"><i class="${grTone(v)}" style="width:${Math.max(2, v)}%"></i></span></div>`; }).join('');
     // by season: that season's play only ([6], [7]); older files without it fall back to the window grade
     const hist = rows.map(d => { const x = d.players[pid], g = x[6] ?? x[0];
-      return `<tr><td><b>${d.season}</b></td><td class="num"><span class="eg-chip ${x[9] ? 'eg-uq' : grTone(g)}"><b>${ovr(g)}${uqMark(x)}</b></span></td><td class="num">${x[8] ?? '–'}</td><td class="num">${f1(x[7])}</td></tr>`; }).join('');
+      return `<tr><td><b>${d.season}</b>${d.basis === 'box' ? ' <small class="muted" title="Box-score stats only before 2018: same OVR, simpler stats behind it">box</small>' : ''}</td><td class="num"><span class="eg-chip ${x[9] ? 'eg-uq' : grTone(g)}"><b>${ovr(g)}${uqMark(x)}</b></span></td><td class="num">${x[8] ?? '–'}</td><td class="num">${f1(x[7])}</td></tr>`; }).join('');
     return `<div class="pc-box"><div class="pc-k">NFL Edge grade · current form</div>
         <div class="ij-dur"><div class="pc-big ${r[9] ? '' : grTone(r[0])}">${ovr(r[0])}${uqMark(r)} <small>OVR</small></div>
           <div class="pc-sub">Over his last three seasons weighted to ${D.season}, he produced <b>${f1(r[4])}</b> fantasy points per game, more than ${r[0]}% of the ${nq ? `${nq} ` : ''}qualified ${posName}${r[9] ? ` (*under the qualifying minimum: graded on his ${r[8]} games with half the snaps or more, not counted in the rankings)` : ''}${r[3] < 8 ? ' (a small sample so far, so it leans on the position average)' : ''}.</div></div></div>
       <div class="pc-box"><div class="pc-k">The stats behind it · percentile among ${posName}</div><p class="pc-sub">Higher and greener is better for every stat. For rates where less is better (drops, sacks, interceptions) the percentile is flipped: 99 = fewest.</p><div class="eg-bars">${bars}</div></div>
       <div class="pc-box pc-logbox"><div class="pc-k">By season · that season only</div><div class="lg-scroll"><table class="lg"><thead><tr class="lg-ch"><th>Season</th><th class="num">OVR</th><th class="num" title="Games played">G</th><th class="num" title="Fantasy points per game (site scoring)">Pts / g</th></tr></thead><tbody>${hist}</tbody></table></div>
-        <p class="pc-sub">How it works: the overall measures output: fantasy points per game in this site's scoring (yards, touchdowns, catches, turnovers), pulled toward the position average by an amount measured from game-to-game swings, so a few big games can't make a 99. The rankings use players who met the NFL's qualifying minimum that season (per team game: 14 pass attempts, 6.25 carries, or 1.875 catches). A player under it who still played half the snaps or more in at least two games (a spot starter) gets an asterisked grade from those games, measured against the qualified players. Current form weights his last three seasons 1 / 0.6 / 0.3; each season in the table uses that season alone. OVR runs 50-99: his percentile among the qualified at his position, scaled so the lowest is a 50. The stats above show how he gets there (efficiency, role, and tracking measures as percentiles). Stats: nflverse play-by-play, Next Gen Stats, PFR advanced stats (2018 on).</p></div>`;
+        <p class="pc-sub">How it works: the overall measures output: fantasy points per game in this site's scoring (yards, touchdowns, catches, turnovers), pulled toward the position average by an amount measured from game-to-game swings, so a few big games can't make a 99. The rankings use players who met the NFL's qualifying minimum that season (per team game: 14 pass attempts, 6.25 carries, or 1.875 catches). A player under it who still played half the snaps or more in at least two games (a spot starter) gets an asterisked grade from those games, measured against the qualified players. Current form weights his last three seasons 1 / 0.6 / 0.3; each season in the table uses that season alone. OVR runs 50-99: his percentile among the qualified at his position, scaled so the lowest is a 50. The stats above show how he gets there (efficiency, role, and tracking measures as percentiles). Stats: nflverse play-by-play, Next Gen Stats, PFR advanced stats (2018 on). Seasons before 2018 (marked <i>box</i>) have the same OVR, but the stats behind it are box-score rates, and spot starters under the minimum aren't graded.</p></div>`;
   };
   const renderCard = pid => {
     const body = document.querySelector('#pcOv .pc-body');
@@ -1092,9 +1092,11 @@
     // his career from one small shard (data/penalties/players/<last 2 digits>.json) instead of every season's file
     if (L) body.querySelectorAll('.pc-pen').forEach(pb => NFLE.load(`data/penalties/players/${pid.slice(-2)}.json`).catch(() => null)
       .then(sh => { if (cardPid === pid) pb.innerHTML = playerPenBox(pid, ((sh || {})[pid] || []).map(([season, ...x]) => ({ season, players: { [pid]: x } }))); }));
-    // the Grade tab's every-season history loads when the tab is opened (9 files, ~230 KB), not with the page
+    // the Grade tab's history: his own small shard (data/grades/players/<last 2 digits>.json), loaded when the tab opens
     const loadGrades = () => body.querySelectorAll('.pc-grade').forEach(gb => { if (gb.dataset.loaded) return; gb.dataset.loaded = '1';
-      grIndex().then(ix => ix ? Promise.all(ix.seasons.map(grSeason)) : []).then(docs => { if (cardPid === pid) gb.innerHTML = gradeTab(pid, docs); }); });
+      NFLE.load(`data/grades/players/${pid.slice(-2)}.json`).catch(() => null).then(sh => {
+        const docs = ((sh || {})[pid] || []).map(([season, basis, rec, labels, nq]) => ({ season, basis, players: { [pid]: rec }, stats: { [rec[1]]: labels }, qualified: { [rec[1]]: nq } }));
+        if (cardPid === pid) gb.innerHTML = gradeTab(pid, docs); }); });
     if (cardTab === 'gr') loadGrades();
     body.querySelectorAll('.pc-log').forEach(wireLogRows);
     const showTab = k => {
