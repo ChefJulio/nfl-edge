@@ -235,7 +235,9 @@ svg.tm-trend { display: block; margin-top: 4px; } .tm-tr-mid { stroke: var(--lin
 .ats-W { color: #45c26b !important; } .ats-L { color: var(--muted); }
 .tm-gc { font-weight: 700; font-size: var(--fs-lg); text-decoration: none; padding: 0 4px; }
 table.tm-pl td { white-space: normal; }
-.pc .pc-tabs { display: flex; margin: 0 0 10px; } .pc .pc-tabs button { flex: 1; font-size: var(--fs-md); padding: 7px 10px; }
+.pc .pc-tabs { display: flex; margin: 0 0 10px; overflow-x: auto; scrollbar-width: none; } .pc .pc-tabs::-webkit-scrollbar { display: none; }
+.pc .pc-tabs button { flex: 1 0 auto; font-size: var(--fs-md); padding: 7px 10px; white-space: nowrap; }
+@media (max-width: 420px) { .pc .pc-tabs button { padding: 7px 8px; } }
 /* card week picker: which week feeds the Week tab */
 .pc-wkbar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 0 0 10px; }
 .pc-wkpick { -webkit-appearance: none; appearance: none; color-scheme: dark; font: inherit; font-size: var(--fs-lg); font-weight: 700; color: var(--ink);

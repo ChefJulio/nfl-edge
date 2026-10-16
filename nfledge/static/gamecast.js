@@ -2000,13 +2000,19 @@
     return `<section class="gcs"><h3>Depth charts <span class="bt-unit">starters in bold</span></h3>${teams.map(team).join('')}
       <p class="gcs-note">From a team's second game on: each position's snap leaders over its last 3 games (share of snaps), leaving out players ruled out or on a reserve list; before that, the team's listed chart. Tags: that week's injury report or reserve list.</p></section>`;
   };
+  // Kickoff in the visitor's own time zone everywhere on the gamecast (owner 2026-10-16: the header said CDT, the card
+  // ET): ESPN's exact time when it has loaded, else the week page's Eastern string.
+  const kickText = (g, long = true) => GP.info && GP.info.date
+    ? new Date(GP.info.date).toLocaleString([], long ? { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }
+      : { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' })
+    : (g && g.kickoff) || '';
   // ---- Pregame tab: everything the Matchups tile used to carry, from the week file (made before kickoff).
   const preTab = (g) => {
     if (!g) return '<section class="gcs"><p class="muted">NFL Edge has no pregame numbers for this game (no week page for it).</p></section>';
     const f = g.fc, tp = (DATA && DATA.tossup_pct) || 59, a = g.away, h = g.home;
     const lg = (s, n = 18) => logo(s.logo_url, s.logo_bg, n, s.team);
     const odds = `<section class="gcs"><h3>Win chances <span class="src us">NFL Edge, before kickoff</span></h3>
-      <p class="gcs-note">${esc(g.kickoff || '')}${g.neutral ? ' · neutral site' : ''}</p>
+      <p class="gcs-note">${esc(kickText(g))}${g.neutral ? ' · neutral site' : ''}</p>
       <div class="wp${f.tossup ? ' toss' : ''}" style="${esc(g.bt_style)}">
         <div class="wp-src">${f.src === 'Vegas' ? 'Vegas odds' : 'Our model · no Vegas line yet'}</div>
         <div class="wp-head">${f.tossup ? '<span class="wp-call">Tossup</span><span class="wp-why">too close to call</span>'
@@ -2140,7 +2146,7 @@
       <div class="sb-id"><div class="sb-n"><span class="sb-full">${esc((g && (isHome ? g.home.nick : g.away.nick)) || s.team)}</span><span class="sb-ab">${esc(s.team)}</span></div><div class="sb-r">${esc(s.record || '')}</div></div>
       <div class="sb-s">${isHome ? hs : as}</div>${sp && sp.offense.team === s.team ? '<i class="sb-ball" title="Has the ball"></i>' : ''}</div>`;
     const live = () => info.state === 'pre'
-      ? `<section class="gcs"><p class="muted">Kicks off ${esc(g ? g.kickoff : info.date ? new Date(info.date).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }) : 'soon')}. The live view (field position, ESPN's win probability, every play, box score) starts at kickoff.</p></section>`
+      ? `<section class="gcs"><p class="muted">Kicks off ${esc(kickText(g) || 'soon')}. The live view (field position, ESPN's win probability, every play, box score) starts at kickoff.</p></section>`
       : info.offline ? '<section class="gcs"><p class="muted">Live data from ESPN is unavailable right now. Try again in a minute.</p></section>'
       : `${rp && rp.play ? replayCard(rp.play, info, sum) : sp ? `<section class="sit"><div class="sit-dd"><b>${tmL(sp.offense.team)} ball</b>${sp.text ? ` · ${esc(sp.text)}` : ''}${sp.red ? ' · <span class="gl-red">red zone</span>' : ''}</div>
         ${fieldSvg(sp, info)}${sit.lastPlay && sit.lastPlay.text ? `<div class="sit-last"><span class="muted">Last play:</span> ${linkNames(esc(sit.lastPlay.text), [info.away.team, info.home.team])}</div>` : ''}</section>` : ''}

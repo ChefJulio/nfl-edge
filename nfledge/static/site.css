@@ -462,3 +462,5 @@ table.av-spots td.av-off { color: var(--warn); font-weight: 700; }
 .md-areas { display: flex; overflow-x: auto; margin: 0 0 12px; max-width: 100%; scrollbar-width: none; }
 .md-areas button { flex: none; white-space: nowrap; }
 .md-area > h2:first-child { margin-top: 0; }
+
+@media (max-width: 640px) { #psearch { max-width: none; } }  /* full width on phones, lined up with the scoring button */

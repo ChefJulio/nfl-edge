@@ -39,10 +39,10 @@
       NFLE.week().then(D => {
         if (!D || !D.power || !D.power.length || !('net_hist' in D.power[0])) return;  // older week file: keep the page's table
         const v = D.power_vol || {}, n = (x, d) => x ? Math.round(x) : d;
-        sec.innerHTML = `<div class="sec-head"><div><h2>Power rankings</h2><p>How good each team is from here on: opponent-adjusted points per game vs an average team over its remaining games, with an injured starting quarterback counted by his chance to be back each week. "This week" is the same rating with this week's starter. Everything adds up: Offense = Pass O + Run O, Defense = Pass D + Run D, Net = Offense + Defense + ST.</p></div></div>
+        sec.innerHTML = `<div class="sec-head"><div><h2>Power rankings</h2><p>How good each team is from here on, in points per game vs an average team.</p></div></div>
           <details class="howto"><summary>How to read</summary><div>
             <dl class="ht">
-              <dt>Every number</dt><dd>Points per game vs an average opponent. Higher is better everywhere, defense included, and the columns add up.</dd>
+              <dt>Every number</dt><dd>Opponent-adjusted points per game vs an average team. Higher is better everywhere, defense included, and the columns add up: Offense = Pass O + Run O, Defense = Pass D + Run D, Net = Offense + Defense + ST.</dd>
               <dt>Rank and Net</dt><dd>Rest of the season: a quarterback who is out counts by his chance to be back in each remaining game (his backup the rest), so a one-week absence barely moves a team and a season-ending one counts fully.</dd>
               <dt>This week</dt><dd>The same rating with this week's starting quarterback, the one Matchups uses. A QB tag means someone other than the usual starter is expected to start.</dd>
               <dt>Units</dt><dd>Per-play rating × a typical game's plays (about ${n(v.pass, 34)} dropbacks, ${n(v.rush, 25)} runs, ${n(v.st, 11)} special-teams plays). Hover a unit for its per-play rating. Pass O includes the current starting QB.</dd>

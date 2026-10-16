@@ -116,8 +116,12 @@
       document.documentElement.style.setProperty('--navh', `${nv ? nv.offsetHeight : 0}px`);  // 0 when phones hide the top bar
       sc.classList.remove('fits');
       sc.classList.toggle('fits', tbl.offsetWidth > 0 && tbl.scrollWidth <= sc.clientWidth + 1);
+      edge();
       built = false; measured = false; place();
     };
+    // More columns off the right edge: a soft fade on the wrapper says "scroll sideways" (owner 2026-10-16).
+    const edge = () => { const w = sc.closest('.dt-wrap') || sc.parentElement;
+      if (w) w.classList.toggle('more', sc.scrollLeft + sc.clientWidth < sc.scrollWidth - 4); };
     // Sideways scroll: header copy follows, pinned-column edge shadow, first names fold (--sx; .fn-rest --w).
     let measured = false, frame = 0;
     sc.addEventListener('scroll', () => {
@@ -128,6 +132,7 @@
         if (!measured) { sc.querySelectorAll('.fn-rest').forEach(s => s.style.setProperty('--w', `${s.scrollWidth}px`)); measured = true; }
         sc.style.setProperty('--sx', `${Math.min(sc.scrollLeft, 120)}px`);
         sc.classList.toggle('scrolled', sc.scrollLeft > 2);
+        edge();
       });
     }, { passive: true });
     const api = {

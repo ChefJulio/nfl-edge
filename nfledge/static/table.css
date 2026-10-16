@@ -1,6 +1,10 @@
 /* NFLE.Table (table.js): the shared table look, same rules as the Rankings table (templates/report.html.j2), so
    client-rendered tabs need no template CSS. Scoped to table.dt. */
 .dt-wrap .scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.dt-wrap { position: relative; }
+.dt-wrap::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; width: 28px; pointer-events: none; z-index: 3;
+  background: linear-gradient(to right, transparent, color-mix(in srgb, var(--bg) 85%, transparent)); opacity: 0; transition: opacity var(--dur) var(--ease); }
+.dt-wrap.more::after { opacity: 1; }
 .dt-wrap .scroll.fits { overflow: visible; }
 .dt-wrap .scroll.fits table.dt thead th { top: var(--navh, 45px); }
 .dt-wrap .fhead { position: sticky; top: var(--navh, 45px); height: 0; z-index: 6; visibility: hidden; }

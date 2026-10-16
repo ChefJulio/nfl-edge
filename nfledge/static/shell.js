@@ -306,7 +306,9 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const scrolls = {};
   let onPage = false;
   const showPage = (kind, id) => {
-    const from = lastRoute || { p: NAV[0], s: NAV[0].subs[0] };
+    // no list behind it (a direct link): a team page sits under Teams, a player page under Players
+    const home = NAV.find(x => x.key === (kind === 'team' ? 'teams' : 'players')) || NAV[0];
+    const from = lastRoute || { p: home, s: home.subs[0] };
     main.querySelectorAll(':scope > section').forEach(x => x.classList.toggle('on', x.id === 'tab-page'));
     nav.querySelectorAll('[data-par]').forEach(b => b.classList.toggle('on', b.dataset.par === from.p.key));
     if (bot) bot.querySelectorAll('.bb-row [data-par]').forEach(b => b.classList.toggle('on', b.dataset.par === from.p.key));
