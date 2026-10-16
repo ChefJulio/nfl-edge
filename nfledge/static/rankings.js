@@ -373,7 +373,11 @@
         if (view.hidden && tables[p] === undefined) return;  // built on first show
         if (KDP.includes(p)) { if (mode === 'week') kdDraw(p); return; }
         const rows = rowsFor(p);
-        if (!tables[p]) tables[p] = NFLE.Table(view.querySelector('.rk-tbl'), { columns: columns(p === 'FLEX'), rows, cls: 'sortable ranks tiles', sort: { key: 'proj', dir: 'desc' }, rowAttrs, rowClass });
+        if (!tables[p]) {
+          tables[p] = NFLE.Table(view.querySelector('.rk-tbl'), { columns: columns(p === 'FLEX'), rows, cls: 'sortable ranks tiles', sort: { key: 'proj', dir: 'desc' }, rowAttrs, rowClass });
+          // the landing animation (pages/week.html adds html.land-anim) plays on this first draw only, not on sorts
+          setTimeout(() => document.documentElement.classList.remove('land-anim'), 1200);
+        }
         else { tables[p].setColumns(columns(p === 'FLEX')); tables[p].update(rows); if (resort) tables[p].setSort({ key: 'proj', dir: 'desc' }); }
         view.querySelector('.byes-box').innerHTML = byesHtml(p);
       });

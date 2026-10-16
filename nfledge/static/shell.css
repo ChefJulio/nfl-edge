@@ -60,3 +60,35 @@ html.pc-open { overflow: visible; }
 .crumbs b { color: var(--ink); font-weight: 700; }
 .crumbs .cr-back { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel2); color: var(--ink);
   font: inherit; font-size: 18px; line-height: 1; cursor: pointer; display: grid; place-items: center; padding: 0 0 2px; }
+/* First-paint frame (pages/week.html): which one shows, and the shimmer rows standing in for the table */
+html:not(.land-rk) .fr-rk, html.land-rk .fr-gen { display: none !important; }
+.fr-ros-t, html.land-ros .fr-wk-t { display: none; } html.land-ros .fr-ros-t { display: block; }
+.fr-head { height: 35px; border-bottom: 1px solid var(--line); }
+.fr-rk .rk-mode .fr-wk, html.land-ros .fr-rk .rk-mode .fr-ros { background: var(--panel2); color: var(--ink); }
+html.land-ros .fr-rk .rk-mode .fr-wk { background: none; color: var(--muted); }
+html.land-rk .botbar .bb-row button.fr-on { color: var(--accent); }
+.fr-rows { padding: 4px 0 8px; }
+.fr-row, .fr-bar { border-radius: 10px; background: linear-gradient(90deg, var(--panel2) 0%, color-mix(in srgb, var(--ink) 7%, var(--panel2)) 50%, var(--panel2) 100%);
+  background-size: 200% 100%; animation: fr-shim 1.3s linear infinite; }
+.fr-row { height: 58px; margin: 6px 0; }
+.fr-gen { padding-top: 6px; } .fr-h { height: 26px; width: 55%; margin: 8px 0 10px; } .fr-p { height: 14px; width: 85%; margin-bottom: 16px; }
+@keyframes fr-shim { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .fr-row, .fr-bar { animation: none; } }
+/* Landing: the real rows rise into place as they replace the shimmer, staggered down the first screen (owner
+   2026-10-16); first draw only (html.land-anim, dropped by rankings.js), never on sorts or filters */
+@keyframes fr-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+html.land-anim #tab-players .scroll tbody tr { animation: fr-in .38s cubic-bezier(.2, .7, .3, 1) both; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(1) { animation-delay: 35ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(2) { animation-delay: 70ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(3) { animation-delay: 105ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(4) { animation-delay: 140ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(5) { animation-delay: 175ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(6) { animation-delay: 210ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(7) { animation-delay: 245ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(8) { animation-delay: 280ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(9) { animation-delay: 315ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(10) { animation-delay: 350ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(11) { animation-delay: 385ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(12) { animation-delay: 420ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(n+13) { animation-delay: 455ms; }
+@media (prefers-reduced-motion: reduce) { html.land-anim #tab-players .scroll tbody tr { animation: none; } }

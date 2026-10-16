@@ -238,13 +238,15 @@
   let bot = null;
   if (navMode === 'bottom') {
     document.documentElement.classList.add('nav-bottom');
-    bot = document.createElement('div');
+    // the page's first-paint copy (pages/week.html) when there is one; older archived pages have none
+    bot = document.querySelector('body > .botbar') || document.createElement('div');
     bot.className = 'botbar';
+    bot.removeAttribute('aria-hidden');
     const extra = NAV.filter(p => !BOTTOM.includes(p.key));  // parents beyond the bar go in a More sheet (none today)
     bot.innerHTML = `<nav class="bb-row">${BOTTOM.map(k => `<button type="button" data-par="${k}">${svg(k)}<span>${parent(k).label}</span></button>`).join('')}
       ${extra.length ? `<button type="button" data-more>${svg('more')}<span>More</span></button>` : ''}</nav>
       ${extra.length ? `<div class="bb-sheet" hidden>${extra.map(p => `<button type="button" data-par="${p.key}">${p.label}</button>`).join('')}</div>` : ''}`;
-    document.body.appendChild(bot);
+    if (!bot.isConnected) document.body.appendChild(bot);
     // Phones: the sub-tab chips ride in the bottom bar too (all navigation in thumb reach; owner, 2026-10-14) and the
     // top bar is hidden. Wider screens keep everything in the top bar. --bbh = the bar's height, for page padding.
     const phone = matchMedia('(max-width: 640px)');
