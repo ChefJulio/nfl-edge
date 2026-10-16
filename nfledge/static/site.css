@@ -422,4 +422,8 @@ table .mc .mv2.sc { min-width: 38px; }
 /* iOS zooms the page into any text field or dropdown under 16px when it's tapped, and never zooms back out, so the
    zoom follows you to the next page (owner 2026-10-16: league form cut off; pages "zoomed in a tiny bit" after going
    back): 16px on phones. !important: the dropdowns set their own 13-14px with more specific selectors. */
-@media (max-width: 640px) { input[type="text"], input[type="search"], input:not([type]), textarea, select { font-size: 16px !important; } }
+@media (max-width: 640px) { input[type="text"], input[type="search"], input[type="number"], input[type="date"], input:not([type]),
+  textarea, select { font-size: 16px !important; } }
+/* iOS also zooms on a quick double tap anywhere that isn't a link or button (rows, tiles, cells); manipulation turns
+   that off and keeps pinch zoom and scrolling */
+html { touch-action: manipulation; }
