@@ -173,6 +173,8 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   clinched/eliminated from standings and test); weather, rest, division, inexperienced QB, weeks 1-3, rating lag:
   noise. Worst misses: model ~even where Vegas had 13-20 pt favorites (ratings over-shrunk for margins; test
   margin-tuned shrinkage). The absence tags (Out/Doubtful snap share) came out empty: a join bug to fix first.
+  [2026-10-16: the surprise-QB share was measured on the harness that rated last week's starter
+  ({#game-eval-starter}); re-measured with tools/event_misses.py, thread 3 in sec. 9: QB change +0.47 [-0.13, +1.12].]
 - **Win probabilities** (tools/win_prob.py, walk-forward, 1,082 games 2022-26, P = logistic(k x margin), k fit on
   prior seasons): Vegas Brier 0.2113 / log loss 0.610 / 67.3% right; model 0.2353 / 0.664 / 61.6%; always-home
   0.2486. k: model 0.125-0.141, Vegas 0.118-0.148. Vegas well calibrated in every band. The model is under-confident
@@ -1794,3 +1796,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   special_teams_play = 0 on all 7,622 FG plays 2019-26, and data.py's is_st requires it), though MODEL.md said
   they were (fixed). FG EPA split-half r for the kicking team +0.12 mean, positive 8 of 10 seasons; expected margin
   effect ~0.1 pt, below what a decide-2025 / confirm-2026 test can detect: not tested (thread 8 power note).
+- **Thread 3 (2026-10-16): change events vs the excess miss over Vegas - no persistent signal, parked.**
+  tools/event_misses.py on the corrected game_eval predictions (1,279 games 2021-25 with a line; excess = |model miss|
+  - |Vegas miss|, mean +0.66), each event vs games without it, by lag in team games: QB change this game (n 288)
+  +0.47 [-0.13, +1.12], positive 4/5 seasons (the overrating (R) tried to fix); 1-2 games after +0.18 / +0.09.
+  Head-coach change (schedule coach differs from the previous game): 8 / 8 / 7 games, unreadable. New snap leader at
+  RB / WR / TE (seen after the game, so lag 1-3): +0.31 [-0.52, +1.07], -0.08, -0.99. Arrival (>= 50% snaps for a
+  team after playing elsewhere that season): -0.21 / -0.29 / +0.00. v1 used the top-2 WR set (fired in 82% of games),
+  replaced. Offensive coordinator / play-caller changes: no data source in nflverse; not checked. The old surprise-QB
+  "42% of excess" came from the starter-rating artifact. Nothing to pre-register.
