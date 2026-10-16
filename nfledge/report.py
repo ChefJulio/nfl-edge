@@ -583,7 +583,7 @@ def week_data(ctx: dict) -> str:
         "rank": r["rank"],
         "tier": r["tier"], "slot": r["slot"], "ecr": None if pd.isna(r["ecr"]) else r["ecr"],
         "status": r["status"] or "", "inactive": r["inactive"], "inactive_why": r["inactive_why"],
-        "boost": r["boost"], "boost_from": r["boost_from"], "cond": r.get("cond"), "low_sample": r["low_sample"], "conf": r["conf"],
+        "boost": r["boost"], "boost_from": r["boost_from"], "cond": r.get("cond"), "cond2": r.get("cond2"), "low_sample": r["low_sample"], "conf": r["conf"],
         "mu": r["mu"], "mu_hi": r["mu_hi"], "mu_c": r["mu_c"],
         "takeaway": r["takeaway"], "fpg": None if pd.isna(r["fpg"]) else r["fpg"],
         "last3": None if pd.isna(r["last3"]) else r["last3"], "act": r["act"], "sc": json.loads(r["sc"]),
@@ -701,11 +701,7 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
         # two worlds for a teammate of an uncertain player: [name, pid, P(he sits), proj if he plays, proj if he sits]
         # anchored to his final projection (the default world, after team-share normalization); the other world = that
         # plus / minus the swing measured between the two scenarios
-        "cond": (lambda d, default_sits: [r.cond_name, r.cond_pid, round(float(r.cond_p_sit), 3),
-                                          round(float(r.proj - d if default_sits else r.proj), 2),
-                                          round(float(r.proj if default_sits else r.proj + d), 2)])(
-                   float(r.cond_sits - r.cond_plays), float(r.cond_p_sit) >= 0.5)
-                 if isinstance(getattr(r, "cond_name", ""), str) and getattr(r, "cond_name", "") else None,
+        "cond": cond_pair(r, "cond"), "cond2": cond_pair(r, "cond2"),  # the second-biggest swing (owner 2026-10-16)
         "low_sample": bool(r.low_sample), "line": expected_line(r),
         "fpg": st["fpg"] if st else np.nan, "last3": st["last3"] if st else np.nan,
         "season": season_line(r, st), "usage": usage_line(r, st),
@@ -748,6 +744,19 @@ def bye_rows(eng, stats, ts, pos, season, week) -> list:
            "sc": json.dumps({"ss": [round(float(getattr(x, k, 0) or 0), 2) for k in SCORE_KEYS],
                              "g": int(x.games)}, separators=(",", ":"))}
           for x in r.itertuples()]
+
+
+def cond_pair(r, k: str = "cond") -> list | None:
+  """Two worlds for a teammate of an uncertain player: [name, pid, P(he sits), proj if he plays, proj if he sits],
+  anchored to the player's final projection (the default world, after team-share normalization); the other world =
+  that plus / minus the swing measured between the two scenarios. k: "cond" (biggest swing) or "cond2" (next)."""
+  name = getattr(r, f"{k}_name", "")
+  if not isinstance(name, str) or not name:
+    return None
+  p_sit = float(getattr(r, f"{k}_p_sit"))
+  d = float(getattr(r, f"{k}_sits") - getattr(r, f"{k}_plays"))
+  plays, sits = (r.proj - d, r.proj) if p_sit >= 0.5 else (r.proj, r.proj + d)
+  return [name, getattr(r, f"{k}_pid"), round(p_sit, 3), round(float(plays), 2), round(float(sits), 2)]
 
 
 def inactive_why(r) -> str:

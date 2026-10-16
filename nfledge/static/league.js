@@ -233,12 +233,14 @@
       // sd from his range (10th-90th percentile spans 2.56 sd), rescaled to this league's scoring
       const base = pts(p.sc.pj, D.score.built, p.pos), r = base > 0.3 ? proj / base : 1;
       const sd = ((p.q[4] - p.q[0]) * r) / 2.563;
-      // two worlds for a teammate of an uncertain player, in this league's scoring
-      const cond = p.cond ? { name: p.cond[0], pid: p.cond[1], pSit: p.cond[2], plays: p.cond[3] * r, sits: p.cond[4] * r } : null;
+      // two worlds for a teammate of an uncertain player, in this league's scoring: up to two such teammates, biggest
+      // swing first (owner 2026-10-16: Coleman's projection assumes DJ Moore sits, not just Palmer)
+      const conds = [p.cond, p.cond2].filter(Boolean).map(c => ({ name: c[0], pid: c[1], pSit: c[2], plays: c[3] * r, sits: c[4] * r }));
       return { ext: x, pid: g, name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, status: p.status, opp: p.opp, home: p.home,
-               proj, pa, exp: proj * pa, sd, inactive: p.inactive || 0, cond };
+               proj, pa, exp: proj * pa, sd, inactive: p.inactive || 0, conds };
     };
 
+    const last = n => String(n || '').split(' ').slice(-1)[0];  // "DJ Moore" -> "Moore"
     // "Questionable (ESPN) (DL)" -> "Questionable per ESPN; practice: DNP, limited"
     const statusWords = st => {
       const m = String(st || '').match(/^(.*?)\s*\(([DLF]+)\)\s*$/), des = (m ? m[1] : String(st || '')).trim().replace(/\s*\(ESPN\)/, ' per ESPN');
@@ -268,8 +270,8 @@
     // ---- views --------------------------------------------------------------------------------------------------
     const row = (slot, p, extra = '') => p ? `<tr class="teamrow" style="${NFLE.fmt.rowStyle(TEAMS, p.team)}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}>
         <td class="lg-slot">${esc(slot)}</td><td>${NFLE.ui.player({ name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, pid: p.pid,
-          sub: p.opp ? `${p.home} ${p.opp}` : (p.why || p.team || ''), badges: NFLE.injTag(p.status || '')
-            + (p.cond ? `<span class="lg-cond">${f1(p.cond.pSit >= 0.5 ? p.cond.plays : p.cond.sits)} if ${esc(p.cond.name.split(' ').slice(-1)[0])} ${p.cond.pSit >= 0.5 ? 'plays' : 'sits'}</span>` : '') }, TEAMS)}</td>
+          subHtml: p.opp ? `${esc(p.home)} ${NFLE.ui.tm(p.opp)}` : p.why ? esc(p.why) : NFLE.ui.tm(p.team), badges: NFLE.injTag(p.status || '')
+            + (p.conds || []).map(c => `<span class="lg-cond">${f1(c.pSit >= 0.5 ? c.plays : c.sits)} if ${esc(last(c.name))} ${c.pSit >= 0.5 ? 'plays' : 'sits'}</span>`).join('') }, TEAMS)}</td>
         <td class="num"><b>${p.proj != null ? f1(p.proj) : '—'}</b></td><td class="num muted">${p.proj != null ? (p.inactive >= 0.05 ? pct(p.inactive) : '') : ''}</td>${extra}</tr>`
       : `<tr><td class="lg-slot">${esc(slot)}</td><td colspan="3" class="muted">empty</td>${extra}</tr>`;
     const table = (body, head = '<th>Slot</th><th>Player</th><th class="num">Proj</th><th class="num">Out%</th>') =>
@@ -286,22 +288,44 @@
         benchOut = curRows.filter(r => r.p && !['DEF', 'K'].includes(r.p.pos) && !bestSet.has(r.p.ext)).map(r => r.p);
       // An uncertain starter (15-85% to sit) isn't a bench call midweek: lineups can change until each game kicks off,
       // so he's a "wait for the final report" with what he's worth if he plays vs the best fill-in.
-      const unsure = benchOut.filter(p => p.exp != null && p.inactive >= 0.15 && p.inactive <= 0.85);
+      // Only when he'd start if he plays: a player who projects below the weakest fill-in even when active is simply
+      // benched (Palmer 4.4 vs Coleman 7.6, 2026-10-16), not a game-time call.
+      const minFill = benchIn.length ? Math.min(...benchIn.map(q => q.proj ?? 0)) : 0;
+      const unsure = benchOut.filter(p => p.exp != null && p.inactive >= 0.15 && p.inactive <= 0.85 && p.proj > minFill);
       const sure = benchOut.filter(p => !unsure.includes(p));
       const fill = benchIn.slice().sort((a, b) => b.exp - a.exp);
-      const outName = p => `${esc(p.name)}${p.exp == null ? ` <span class="muted">(${esc(p.why ? 'not projected: bye, IR or out' : 'not projected')})</span>` : ''}`;
+      // Readable moves (owner 2026-10-16): who comes in, who goes out and why, then one card per game-time call with
+      // its two outcomes on their own lines.
+      const why = p => p.exp == null ? 'not projected (bye, IR or out)'
+        : p.inactive >= 0.15 ? `${pct(p.inactive)} to sit · ${f1(p.proj)} if he plays · ${esc(statusWords(p.status))}`
+        : `projects ${f1(p.exp)}`;
+      const ifLines = p => (p.conds || []).map(c => `${f1(c.pSit >= 0.5 ? c.plays : c.sits)} if ${esc(last(c.name))} ${c.pSit >= 0.5 ? 'plays' : 'sits'}`);
+      const nm = p => `<b>${esc(p.name)}</b>`;
+      const sureCard = sure.length ? `<div class="lg-mv">
+          <div class="lg-mv-row"><span class="lg-mv-k good">Start</span><div>${fill.slice(0, sure.length).map(p =>
+            `<div>${nm(p)} <span class="muted">${f1(p.exp)}${ifLines(p).length ? ` · ${ifLines(p).join(' · ')}` : ''}</span></div>`).join('')}</div></div>
+          <div class="lg-mv-row"><span class="lg-mv-k bad">Bench</span><div>${sure.map(p => `<div>${nm(p)} <span class="muted">${why(p)}</span></div>`).join('')}</div></div>
+        </div>` : '';
+      const gtCards = unsure.map(p => {
+        // his backup on YOUR roster (a teammate whose projection depends on him), in the "he sits" world
+        const cuffOf = q => (q.conds || []).find(c => c.pid === p.pid);
+        // only someone who comes off the bench for him (not a player already starting either way)
+        const cuff = ps.filter(q => cuffOf(q) && (!bestSet.has(q.ext) || benchIn.includes(q))).sort((a, b) => cuffOf(b).sits - cuffOf(a).sits)[0];
+        const other = fill.length ? fill[fill.length - 1] : null;
+        const cc = cuff && cuffOf(cuff);
+        const useCuff = cuff && (!other || cc.sits >= other.proj);  // the better of his backup (in that world) and the next man up
+        const out = useCuff ? `start ${nm(cuff)} <b>${f1(cc.sits)}</b> <span class="muted">(${f1(cc.plays)} if ${esc(last(p.name))} plays)</span>`
+          : other ? `start ${nm(other)} <b>${f1(other.proj)}</b>${cuff ? ` <span class="muted">(your ${esc(cuff.name)} only rises to ${f1(cc.sits)})</span>` : ''}` : 'pick up a fill-in';
+        return `<div class="lg-mv gt">
+            <div class="lg-mv-h">${nm(p)} <span class="lg-mv-tag">game-time call</span></div>
+            <div class="muted lg-mv-s">${pct(p.inactive)} to sit · ${esc(statusWords(p.status))}</div>
+            <div class="lg-mv-row"><span class="lg-mv-k good">Plays</span><div>start him <b>${f1(p.proj)}</b></div></div>
+            <div class="lg-mv-row"><span class="lg-mv-k bad">Out</span><div>${out}</div></div>
+          </div>`;
+      }).join('');
       const swaps = !benchIn.length ? '<div class="lg-swaps good">Your lineup is already the best one by our projections.</div>'
-        : `<div class="lg-swaps">${sure.length ? `<div><b>Start ${fill.slice(0, sure.length).map(p => esc(p.name)).join(', ')}</b> over ${sure.map(outName).join(', ')}.</div>` : ''}
-          ${unsure.map(p => {
-            // his backup on YOUR roster (a teammate whose projection depends on him), in the "he sits" world
-            const cuff = ps.filter(q => q.cond && q.cond.pid === p.pid).sort((a, b) => b.cond.sits - a.cond.sits)[0];
-            const other = fill.length ? fill[fill.length - 1] : null;
-            const useCuff = cuff && (!other || cuff.cond.sits >= other.proj);  // the better of his backup (in that world) and the next man up
-            const alt = useCuff ? `start ${esc(cuff.name)} (${f1(cuff.cond.sits)} with ${esc(p.name.split(' ').slice(-1)[0])} out, ${f1(cuff.cond.plays)} if he plays)`
-              : other ? `start ${esc(other.name)} (${f1(other.proj)})${cuff ? `; your ${esc(cuff.name)} only rises to ${f1(cuff.cond.sits)}` : ''}` : 'pick up a fill-in';
-            return `<div><b>${esc(p.name)}: game-time call.</b> ${pct(p.inactive)} to sit (${esc(statusWords(p.status))}). Inactives come out 90 minutes before kickoff: <b>if he plays, start him (${f1(p.proj)})</b>; if he's out, ${alt}.</div>`;
-          }).join('')}
-          <div class="muted">By expected points the best lineup gains <b class="good">+${f1(gain)}</b>.</div></div>`;
+        : `<div class="lg-swaps">${sureCard}${gtCards}
+          <div class="muted lg-mv-f">Best lineup: <b class="good">+${f1(gain)}</b> expected points.${unsure.length ? ' Inactives are posted 90 minutes before each kickoff.' : ''}</div></div>`;
       const unproj = curRows.filter(r => r.p && r.p.exp == null && r.slot !== 'DEF' && r.slot !== 'K').map(r => r.p);
       const bench = ps.filter(p => !bestSet.has(p.ext) && p.exp != null).sort((a, b) => b.exp - a.exp);
       return `${swaps}${unproj.length ? `<p class="muted lg-note">Starting with no projection: ${unproj.map(p => `${esc(p.name)} (${esc(p.why || 'not projected')})`).join(', ')}.</p>` : ''}

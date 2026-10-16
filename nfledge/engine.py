@@ -269,7 +269,7 @@ class Engine:
     ok = (p.sleeper > 0) & (p.proj > 0) & (w > 0)
     new = (1 - w) * p.proj + w * p.sleeper
     ratio = pd.Series(1.0, index=p.index).where(~ok, new / p.proj.where(ok))
-    for k in STAT_KEYS + ["proj"] + [c for c in ("cond_plays", "cond_sits") if c in p]:
+    for k in STAT_KEYS + ["proj"] + [c for c in ("cond_plays", "cond_sits", "cond2_plays", "cond2_sits") if c in p]:
       if k in p:
         p[k] = p[k] * ratio
     return p

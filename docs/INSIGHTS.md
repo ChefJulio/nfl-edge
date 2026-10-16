@@ -1805,3 +1805,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   team after playing elsewhere that season): -0.21 / -0.29 / +0.00. v1 used the top-2 WR set (fired in 82% of games),
   replaced. Offensive coordinator / play-caller changes: no data source in nflverse; not checked. The old surprise-QB
   "42% of excess" came from the starter-rating artifact. Nothing to pre-register.
+- **PRE-REGISTERED 2026-10-16 (owner: "non contact jerseys, something we can parse from news blurbs and account for
+  and subsequently test relating to active%"): non-contact jersey, FORWARD test.** Parse: tools/espn_news.py writes
+  data/espn_news/jersey.json (pattern: non- / no-contact jersey, red / yellow jersey; not "non-contact injury"), one
+  sighting per (player, his team's next game). ESPN serves the current season only, so there is no 2021-25 history:
+  2026 so far has 13 sightings, 5 in game weeks (Moore wks 3, 4, 6; Bateman 5, 6), and of the 12 finished
+  player-weeks 11 played (descriptive, outcome-blind to the model). Rows: sightings published within the 6 days
+  before the game, player on that week's final injury report. Trigger: 40 such rows with outcomes (2026 on). Check:
+  actual active rate minus our final P(play) on those rows, 95% CI over rows; if it excludes 0, pre-register a
+  jersey input to the availability model (stage-3 feature, walk-forward on the accumulated rows, Brier gate); if not,
+  record "no information beyond practice status". Until then nothing in the model changes.

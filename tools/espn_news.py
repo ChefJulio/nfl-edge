@@ -39,6 +39,10 @@ QTR = re.compile(r"\b(first|second|third|fourth|1st|2nd|3rd|4th) quarter\b|\b(ha
 QNUM = {"first": 1, "1st": 1, "second": 2, "2nd": 2, "third": 3, "3rd": 3, "fourth": 4, "4th": 4, "halftime": 2}
 WEEK = re.compile(r"\bWeek (\d{1,2})\b")
 TAG = re.compile(r"<[^>]+>")
+# Practice attire (owner 2026-10-16: "non contact jerseys, something we can parse ... and test relating to active%"):
+# "red non-contact jersey", "no-contact jersey", "yellow jersey". Not "non-contact injury" (an injury type).
+JERSEY = re.compile(r"\b(?:non|no)-?\s?contact (?:red |yellow )?jersey|\b(?:red|yellow) (?:non-?|no-)?contact jersey"
+                    r"|\b(?:red|yellow) jersey", re.I)
 
 
 def fetch(espn_id: str) -> list:
@@ -98,6 +102,27 @@ def events(blurbs: list, inj: dict, kicks_of: dict) -> list:
   return out
 
 
+def jerseys(blurbs: list, inj: dict, kicks_of: dict) -> list:
+  """Non-contact jersey sightings, one per (player, upcoming game): the team's first kickoff after the blurb was
+  published. Kept going forward for the pre-registered forward test (INSIGHTS sec. 9, non-contact jersey)."""
+  seen, out = set(), []
+  for b in sorted(blurbs, key=lambda x: x["published"]):
+    text = f"{b['headline']} {b['story']}"
+    m = JERSEY.search(text)
+    if not m:
+      continue
+    who = inj.get(b["espn"], {})
+    nxt = [w for w, ko in kicks_of.get(who.get("team"), []) if ko > b["published"]]
+    wk = min(nxt) if nxt else None
+    if wk is None or (b["espn"], wk) in seen:
+      continue
+    seen.add((b["espn"], wk))
+    lo = max(0, m.start() - 160)
+    out.append({"espn": b["espn"], "name": who.get("name"), "team": who.get("team"), "week": wk,
+                "published": b["published"], "text": text[lo:m.end() + 80]})
+  return out
+
+
 def main():
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
   out = Path(opt.get("out", "site/data/espn_news"))
@@ -144,6 +169,9 @@ def main():
   ev = events(list(allb.values()), inj, kicks_of)
   (out / "ingame.json").write_text(json.dumps({"season": season, "events": ev}, separators=(",", ":")), encoding="utf-8")
   print(f"[news] {len(ev)} in-game injury events this season", flush=True)
+  js = jerseys(list(allb.values()), inj, kicks_of)
+  (out / "jersey.json").write_text(json.dumps({"season": season, "sightings": js}, separators=(",", ":")), encoding="utf-8")
+  print(f"[news] {len(js)} non-contact jersey sightings this season", flush=True)
 
 
 if __name__ == "__main__":

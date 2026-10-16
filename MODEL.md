@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 7bd2ba21d60c6536
+documented_code_hash: d74d98214353dd2e
 ---
 # How the model works
 
@@ -72,7 +72,7 @@ The team's projected dropbacks and rushes then turn shares into opportunities.
 
 ### When a teammate sits
 
-- **Two worlds for a backup.** Playing is yes or no, so for a teammate of a genuinely uncertain player (15-85% to sit) the site shows two numbers instead of a blend: his projection if that player plays and if he sits (the likelier one is the main projection; the other is shown under it). The League tab turns that into a game-time call: if the starter is active, start him; if he's out, start his backup (at his 'starter out' number) or whoever is better.
+- **Two worlds for a backup.** Playing is yes or no, so for a teammate of an uncertain player (5-95% to sit) the site shows two numbers instead of a blend: his projection if that player plays and if he sits (the likelier one is the main projection; the other is shown under it, for up to two such teammates, biggest swing first). The Fantasy tab turns that into a game-time call: if the starter is active, start him; if he's out, start his backup (at his 'starter out' number) or whoever is better.
 - **Who sits.** Players below 50% are assumed out, as are contributors no longer on the roster (injured reserve, cut, traded). Their volume moves to teammates when they are a real contributor: an RB/WR/TE with an 8%+ projected target share or 15%+ carry share who has played this season, or the starting QB.
 - **"+X if he sits".** Teammates of a significant contributor with a 50-90% chance to play show this contingent bump when the gain is at least 1 point.
 - **Redistribution.** Vacated targets and carries go where they actually went in past absences, learned by position pair, depth-chart rank and current share. It is corrected so a player who has already missed several games is not double-counted, and currently applied at **{{ L.redist_scale }}** strength. When a starting QB sits, the backup inherits his dropbacks (and scrambles at his own rate), and the whole passing offense uses the backup's quarterback rating. The "+X from injuries" tag on a player is the part of his final projection that comes from teammates' absences: measured when injuries are applied, then scaled with every later adjustment so it never exceeds the projection.
@@ -296,7 +296,7 @@ For each of this week's unplayed games, the rooting guide asks how much the resu
 
 ## Grades, kickers and defenses
 
-This area covers the Edge grade on player cards and the kicker and team-defense projections on the League tab.
+This area covers the Edge grade on player cards and the kicker and team-defense projections on the Fantasy tab.
 
 ### Edge grade (player cards)
 
@@ -306,8 +306,8 @@ The grade measures output, not style: fantasy points per game in the site's scor
 
 | Number | Definition |
 |---|---|
-| Kickers (League tab) | An expected kicking stat line per game: the team's field-goal and extra-point attempts from its implied points (the same number the player projections use), its mix of kick distances and the kicker's make rate by distance, each blended toward the league average until there's enough of his own history; then scored with your league's kicking settings (distance bands, per-yard bonuses, misses). Walk-forward 2021-25 it beat the kicker's season-to-date average: average miss 3.71 vs 4.00 points, better every season |
-| Team defenses (League tab) | An expected stat line per game (sacks, interceptions, fumble recoveries, forced fumbles, defensive and return touchdowns, safeties, blocked kicks, passes defended, tackles for loss, forced punts, 2-point returns): the league rate times the defense's own rate times what the opponent's offense gives up, each blended toward the league until there's enough history (much more for rare plays like touchdowns). Points allowed are a spread around the opponent's implied points and yards allowed a spread from a fit on those, so any league's brackets, per-point or per-yard scoring is computed exactly. Walk-forward 2021-25 it beat the defense's season-to-date average: average miss 4.00 vs 4.34 on ESPN's standard scoring and 4.52 vs 4.94 on a per-point / per-yard league, better every season. 3-and-outs and 4th-down stops aren't modeled |
+| Kickers (Fantasy tab) | An expected kicking stat line per game: the team's field-goal and extra-point attempts from its implied points (the same number the player projections use), its mix of kick distances and the kicker's make rate by distance, each blended toward the league average until there's enough of his own history; then scored with your league's kicking settings (distance bands, per-yard bonuses, misses). Walk-forward 2021-25 it beat the kicker's season-to-date average: average miss 3.71 vs 4.00 points, better every season |
+| Team defenses (Fantasy tab) | An expected stat line per game (sacks, interceptions, fumble recoveries, forced fumbles, defensive and return touchdowns, safeties, blocked kicks, passes defended, tackles for loss, forced punts, 2-point returns): the league rate times the defense's own rate times what the opponent's offense gives up, each blended toward the league until there's enough history (much more for rare plays like touchdowns). Points allowed are a spread around the opponent's implied points and yards allowed a spread from a fit on those, so any league's brackets, per-point or per-yard scoring is computed exactly. Walk-forward 2021-25 it beat the defense's season-to-date average: average miss 4.00 vs 4.34 on ESPN's standard scoring and 4.52 vs 4.94 on a per-point / per-yard league, better every season. 3-and-outs and 4th-down stops aren't modeled |
 
 ### What we tried
 

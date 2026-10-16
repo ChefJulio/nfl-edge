@@ -433,10 +433,10 @@
                 return `background: color-mix(in srgb, ${good ? '#4fbf6f' : '#d9655b'} ${w}%, var(--panel2))`;
               };
               const hidden = cells.filter(x => x.n < min).length;
-              const head = `<tr><th class="tr-gc0">${esc(by[0])} <span class="muted">/</span> ${esc(by2[0])}</th>${C.map(c => `<th>${esc(colLab(c))}</th>`).join('')}<th class="tr-gall">All</th></tr>`;
+              const head = `<tr><th class="tr-gc0">${esc(by[0])} <span class="muted">/</span> ${esc(by2[0])}</th>${C.map(c => `<th>${['team', 'opp'].includes(Q.by2) ? NFLE.ui.tm(c, esc(colLab(c))) : esc(colLab(c))}</th>`).join('')}<th class="tr-gall">All</th></tr>`;
               const allCell = r => { const a = allR.get(r), n = den(a), v = m[1](a);
                 return n >= min && isFinite(v) ? `<td class="tr-gall" style="${shade({ v, n })}"><b>${fmt(v, m[2])}</b><i>${fmt(n)}</i></td>` : '<td class="tr-ge tr-gall">&middot;</td>'; };
-              const body = R.map(r => `<tr><th class="tr-gc0"${Q.by === 'player' && /^\d\d-\d{7}$/.test(r) ? ` data-open-pid="${esc(r)}"` : ''}>${esc(rowLab(r))}${Q.by === 'player' && teamOf[r] ? ` <span class="sub">${esc(teamOf[r])}</span>` : ''}</th>${C.map(c => {
+              const body = R.map(r => `<tr><th class="tr-gc0"${Q.by === 'player' && /^\d\d-\d{7}$/.test(r) ? ` data-open-pid="${esc(r)}"` : ''}>${['team', 'opp'].includes(Q.by) ? NFLE.ui.tm(r, esc(rowLab(r))) : esc(rowLab(r))}${Q.by === 'player' && teamOf[r] ? ` <span class="sub">${NFLE.ui.tm(teamOf[r])}</span>` : ''}</th>${C.map(c => {
                 const x = at.get(`${r}||${c}`);
                 if (!x || x.n < min || !isFinite(x.v)) return `<td class="tr-ge" title="${x ? `${fmt(x.n)} ${esc(unit.toLowerCase())}: under the minimum` : 'none'}">&middot;</td>`;
                 return `<td style="${shade(x)}" title="${esc(rowLab(r))} / ${esc(colLab(c))}: ${fmt(x.v, m[2])} ${esc(m[0])} on ${fmt(x.n)} ${esc(unit.toLowerCase())}"><b>${fmt(x.v, m[2])}</b><i>${fmt(x.n)}</i></td>`;

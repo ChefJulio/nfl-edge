@@ -61,6 +61,8 @@ td.actc .live-dot { width: 7px; height: 7px; margin-right: 5px; }
   align-items: center; gap: 0 8px; padding: 14px 10px 10px; min-height: 84px; }
 /* big logos on the outside, only just spilling past the tile's edges, fading softly toward the middle */
 .mt-lg { position: absolute; top: 50%; width: 112px; height: 112px; margin-top: -56px; object-fit: contain; pointer-events: none; }
+.mt-lg.tm-open { pointer-events: auto; }  /* its visible edge opens the team (the score / name sit above it) */
+.mt .tm-open:hover b, .mt-stake .tm-open:hover { text-decoration: underline; }
 .mt-lg.away { left: -10px; -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%);
   mask-image: linear-gradient(90deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%); }
 .mt-lg.home { right: -10px; -webkit-mask-image: linear-gradient(270deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%);

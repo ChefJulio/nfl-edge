@@ -957,9 +957,13 @@ class InjuryModel:
     # Two numbers instead of one (owner 2026-10-15: "it's binary, not a spectrum"): for every teammate of a genuinely
     # uncertain player (15-85% to sit), his projection in both worlds, that player plays / sits; each player keeps
     # the pairing that moves him most. The default scenario (his `proj`) is one of the two; nothing is averaged.
-    p["cond_name"], p["cond_pid"], p["cond_p_sit"], p["cond_plays"], p["cond_sits"] = "", "", np.nan, np.nan, np.nan
-    unsure = cont[(cont.p_play >= 0.15) & (cont.p_play <= 0.85) & cont.gsis_id.isin(set(p.gsis_id))]
-    impact = pd.Series(0.3, index=p.index)  # ignore pairings that move a player less than 0.3 points
+    # Up to two pairings per player, biggest swing first (owner 2026-10-16: Coleman showed only "if Palmer sits" while
+    # his projection already assumed DJ Moore, 6% to play, sits - the bigger story). Uncertain = 5-95% to play, so a
+    # likely-out teammate's "if he plays" world is shown too.
+    for k in ("cond", "cond2"):
+      p[f"{k}_name"], p[f"{k}_pid"], p[f"{k}_p_sit"], p[f"{k}_plays"], p[f"{k}_sits"] = "", "", np.nan, np.nan, np.nan
+    unsure = cont[(cont.p_play >= 0.05) & (cont.p_play <= 0.95) & cont.gsis_id.isin(set(p.gsis_id))]
+    cands = {}  # row -> [(|swing|, name, pid, p_sit, plays, sits)], swings under 0.3 points ignored
     for _, u in unsure.iterrows():
       alt_p = p0.copy()
       if u.p_play < 0.5:  # benched in the default scenario: the other world is him playing
@@ -971,11 +975,12 @@ class InjuryModel:
         alt = self._redistribute(alt_p, pd.concat([sits, u.to_frame().T]), wind)
         plays, sat = p.proj, alt.proj
       d = (sat - plays).where((p.team == u.team) & (p.gsis_id != u.gsis_id), 0.0)
-      hit = d.abs() > impact
-      if hit.any():
-        impact[hit] = d.abs()[hit]
-        p.loc[hit, "cond_name"], p.loc[hit, "cond_pid"], p.loc[hit, "cond_p_sit"] = u.full_name, u.gsis_id, 1 - float(u.p_play)
-        p.loc[hit, "cond_plays"], p.loc[hit, "cond_sits"] = plays[hit], sat[hit]
+      for i in d.index[d.abs() > 0.3]:
+        cands.setdefault(i, []).append((abs(float(d[i])), u.full_name, u.gsis_id, 1 - float(u.p_play),
+                                        float(plays[i]), float(sat[i])))
+    for i, cs in cands.items():
+      for k, c in zip(("cond", "cond2"), sorted(cs, key=lambda c: -c[0])):
+        p.loc[i, [f"{k}_name", f"{k}_pid", f"{k}_p_sit", f"{k}_plays", f"{k}_sits"]] = list(c[1:])
     self.last_absent = sits
     return p
 

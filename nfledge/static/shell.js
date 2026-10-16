@@ -53,14 +53,18 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     headshot: espn => espn ? `https://a.espncdn.com/i/headshots/nfl/players/full/${encodeURIComponent(espn)}.png` : '',
     ids: {},  // gsis -> ESPN id (data/espn_ids.json, tools/stats_build.py): a headshot for any list with a player id
     tileStyle: (teams, t) => `style="${F.rowStyle(teams, t)}"`,
-    // p: { name, team, pos, grp (badge color group), photo | espn | pid, sub (default: team), badges (html) }
+    // A team name or logo that opens the team page (owner 2026-10-16: every one on the site, except the small logo on
+    // a player's photo). html: what to show (default: the abbreviation).
+    tm: (t, html, cls = '') => t ? `<span class="tm-open${cls ? ` ${cls}` : ''}" data-tm="${esc(t)}">${html == null ? esc(t) : html}</span>` : (html || ''),
+    // p: { name, team, pos, grp (badge color group), photo | espn | pid, sub (default: team, linked) | subHtml, badges }
     player: (p, teams) => {
       const photo = p.photo || NFLE.ui.headshot(p.espn || (p.pid && NFLE.ui.ids[p.pid]));
       const pic = photo
         ? `<span class="pic"><span class="pic-img"><img src="${esc(photo)}" alt="" width="34" height="34" loading="lazy" onerror="this.closest('.pic').classList.add('nopic')"></span><span class="pic-tm">${F.logo(teams, p.team, 11)}</span></span>`
-        : F.logo(teams, p.team, 26);
+        : NFLE.ui.tm(p.team, F.logo(teams, p.team, 26));
       const pos = p.pos ? `<span class="posb posb-${esc(p.grp || p.pos)}">${esc(p.pos)}</span> ` : '';
-      return `<div class="who">${pic}<div class="nmw"><b class="nm">${esc(p.name)}</b><span class="sub">${pos}${esc(p.sub ?? p.team ?? '')}</span>${p.badges || ''}</div></div>`;
+      const sub = p.subHtml != null ? p.subHtml : p.sub != null ? esc(p.sub) : NFLE.ui.tm(p.team);
+      return `<div class="who">${pic}<div class="nmw"><b class="nm">${esc(p.name)}</b><span class="sub">${pos}${sub}</span>${p.badges || ''}</div></div>`;
     },
     // a team: logo, nickname, sub line (default "KC")
     team: (t, teams, sub, extra = '') => {
@@ -72,21 +76,23 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     matchTile: (g, href) => {
       const f = g.fc || {}, fin = g.final;
       const sides = [[g.away, fin && fin.away, fin && fin.home, f.p_away], [g.home, fin && fin.home, fin && fin.away, f.p_home]];
+      const T = NFLE.ui.tm;
       const verdict = !fin ? '' : !fin.winner ? '<span class="gf-pick toss">Tie</span>'
-        : f.tossup ? `<span class="gf-pick toss">Tossup &middot; ${esc(fin.winner)} won</span>`
+        : f.tossup ? `<span class="gf-pick toss">Tossup &middot; ${T(fin.winner)} won</span>`
           : fin.fav_won ? `<span class="gf-pick ok">Favorite won &middot; ${f.pct}%</span>`
             : `<span class="gf-pick miss">Upset &middot; a ${100 - f.pct}% chance</span>`;
       const main = sides.map(([s, sc, os, pct], i) => {
         const side = i ? 'home' : 'away';
         const cls = `${fin && sc < os ? ' lost' : ''}${!fin && !f.tossup && pct < 50 ? ' dog' : ''}`;
-        return `${s.logo_url ? `<img class="mt-lg ${side}" src="${esc(F.logoSrc(s.logo_url, 112))}" alt="" loading="lazy">` : ''}
+        // the logo's visible edge (outside the score / name, which sit above it) and the name open the team page
+        return `${s.logo_url ? `<img class="mt-lg ${side} tm-open" data-tm="${esc(s.team)}" src="${esc(F.logoSrc(s.logo_url, 112))}" alt="" loading="lazy">` : ''}
           <div class="mt-side ${side}${cls}"><span class="mt-num">${fin ? esc(sc) : `${esc(pct)}<small>%</small>`}</span>
-            <span class="mt-nm"><b>${esc(s.nick)}</b> <small>${esc(s.record)}</small></span></div>
+            <span class="mt-nm">${T(s.team, `<b>${esc(s.nick)}</b>`)} <small>${esc(s.record)}</small></span></div>
           ${i ? '' : `<span class="mt-at">${g.neutral ? 'vs' : '@'}${f.tossup && !fin ? '<small>Tossup</small>' : ''}</span>`}`;
       }).join('');
       const st = fin ? `<span class="mt-fin">Final</span>${verdict}`
         : `<span>${esc(g.kickoff)}${g.neutral ? ' &middot; neutral' : ''}</span>
-           <span class="mt-odds">${g.vegas_line ? `<b>${esc(g.vegas_line)}</b>` : 'no line yet'} &middot; <span title="${esc(f.model_why || '')}">ours ${f.model_tossup ? 'tossup' : `${esc(f.model_fav)} ${esc(f.model_pct)}%`}</span></span>`;
+           <span class="mt-odds">${g.vegas_line ? `<b>${esc(g.vegas_line)}</b>` : 'no line yet'} &middot; <span title="${esc(f.model_why || '')}">ours ${f.model_tossup ? 'tossup' : `${T(f.model_fav)} ${esc(f.model_pct)}%`}</span></span>`;
       return `<a class="mt ${fin ? 'is-final' : 'is-pre'}${f.tossup && !fin ? ' toss' : ''}" data-gid="${esc(g.id)}" href="${esc(href || (NFLE.gameHref ? NFLE.gameHref(g) : '#'))}" style="${esc(g.bt_style || '')}">
         <div class="mt-main">${main}</div><div class="mt-st">${st}</div></a>`;
     },
@@ -192,7 +198,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     { key: 'teams', label: 'Teams', subs: [['power', 'Power', 'tab-power'], ['standings', 'Standings'], ['playoffs', 'Playoffs'], ['stats', 'Stats'], ['draft', 'Draft']] },
     { key: 'games', label: 'Games', subs: [['matchups', 'Matchups', 'tab-games']] },
     // your own fantasy league (Sleeper / public ESPN import; owner 2026-10-15)
-    { key: 'league', label: 'League', subs: [['league', 'My League', 'tab-league']] },
+    { key: 'league', label: 'Fantasy', subs: [['league', 'My League', 'tab-league']] },  // tab named Fantasy (owner 2026-10-16)
     { key: 'model', label: 'Model', subs: [['model', 'Model', 'tab-model']] },
   ];
   // Client-rendered tabs: section id -> area module (assets/<area>.js + .css), loaded the first time the tab opens.
@@ -470,7 +476,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   document.addEventListener('click', e => { closeAll(e.target.closest && e.target.closest('details.howto')); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(null); });
 })();
-// Kicker and D/ST scoring from data/kdst.json lines (tools/kdst_build.py): shared by Rankings and the League tab.
+// Kicker and D/ST scoring from data/kdst.json lines (tools/kdst_build.py): shared by Rankings and the Fantasy tab.
 // STD = standard ESPN scoring, the rules both models were tested on (nfledge/kickers.py STANDARD, defenses.py ESPN_STD).
 (() => {
   const NFLE = window.NFLE = window.NFLE || {};

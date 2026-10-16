@@ -21,7 +21,7 @@
       let scope = 'fan', all = [], table = null;
       const cols = [
         { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name,
-          html: r => NFLE.ui.player({ name: r.name, pos: r.pos, team: r.abbr, espn: r.espn_id, sub: r.abbr || r.team }, TEAMS) },
+          html: r => NFLE.ui.player({ name: r.name, pos: r.pos, team: r.abbr, espn: r.espn_id, subHtml: r.abbr ? NFLE.ui.tm(r.abbr) : NFLE.esc(r.team || '') }, TEAMS) },
         { key: 'status', label: 'Status', first: 'asc', value: r => ORDER[r.status] || 9, html: r => `<span class="in-st in-${tone(r.status)}">${esc(r.status)}</span>` },
         { key: 'inactive', label: 'Inactive', num: true, title: 'Our chance he does not play this week', value: r => r.inactive,
           html: r => r.inactive == null ? '<span class="muted">&ndash;</span>' : `<span class="in-pct" style="--p:${Math.round(100 * r.inactive)}">${r.inactive < 0.005 ? '&lt;1' : Math.round(100 * r.inactive)}%</span>` },

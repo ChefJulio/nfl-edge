@@ -20,6 +20,8 @@
 
   // ---------------------------------------------------------------------------------------------------- helpers
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  // a team name / logo that opens its page (owner 2026-10-16: every one on the site, except the logo on a player photo)
+  const tmL = (t, html) => t ? `<span class="tm-open" data-tm="${esc(t)}">${html == null ? esc(t) : html}</span>` : (html || '');
   const f1 = v => (v == null || isNaN(v)) ? '' : (Math.round(v * 10) / 10).toFixed(1);
   const f0 = v => (v == null || isNaN(v)) ? '' : String(Math.round(v));
   const pc = v => `${Math.round(v * 100)}%`;
@@ -404,7 +406,7 @@
     // by urgency (a fresh 1st down green, 3rd amber, 4th red)
     const offSide = off ? (info.away.team === off ? info.away : info.home) : null;
     const pill = t => { const sd = info.away.team === t ? info.away : info.home.team === t ? info.home : null;
-      return `<span class="rp-tm" style="--tc:${esc((sd && sd.color) || '#555')}">${esc(t)}</span>`; };
+      return `<span class="rp-tm tm-open" data-tm="${esc(t)}" style="--tc:${esc((sd && sd.color) || '#555')}">${esc(t)}</span>`; };
     const dc = t => /^1st/.test(t) ? 'd1' : /^3rd/.test(t) ? 'd3' : /^4th/.test(t) ? 'd4' : '';
     const net = a && b && !event && !changed && !kick && !/punt|field goal|extra point|kickoff/i.test((pl.type && pl.type.text) || '') ? Math.round((b.x - a.x) * a.dir) : null;
     const chip = net == null ? '' : `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)} yd${Math.abs(net) === 1 ? '' : 's'}</span>`;
@@ -625,7 +627,7 @@
       const pg = opts.last || opts.season ? [] : (S.pg || []);
       const sub = (label, gs) => `<tr class="lg-sub"><td colspan="${6 + stat.length}"><span class="lg-pin">${label}${gs ? ` · ${gs.length} game${gs.length === 1 ? '' : 's'} · ${f1(gs.reduce((t, g) => t + pts(g.c, w, pos), 0) / gs.length)} FP/G` : ''}</span></td></tr>`;
       const po = pg.length ? `${sub('Playoffs', pg)}${head}${totRow(pg)}${[...pg].reverse().map(g => played(g, g.po)).join('')}${S.g.length || rows.length ? sub('Regular season') : ''}` : '';
-      return `<tbody><tr class="lg-season"><td colspan="${6 + stat.length}"><span class="lg-pin"><b>${S.s}</b> ${esc(team)}${sum}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
+      return `<tbody><tr class="lg-season"><td colspan="${6 + stat.length}"><span class="lg-pin"><b>${S.s}</b> ${tmL(team)}${sum}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
     }).join('');
     if (opts.last || opts.season) return `<div class="lg-scroll"><table class="lg">${body}</table></div>`;
     const legend = `<div class="lg-leg"><span>Opponent color = our pregame matchup (2021 on): green helped, red hurt, deeper = bigger</span>
@@ -869,9 +871,9 @@
       </div>
       ${g ? `<div class="pc-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>` : ''}
       <div class="pc-box"><div class="pc-k">Matchup effect</div>
-        <div class="pc-mu">${opp ? logo(opp.logo_url, opp.logo_bg, 22, opp.team) : ''}<b>${esc(p.home)} ${opp ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(opp.team)}">${esc(opp.team)}</button>` : esc(p.opp)}</b>
+        <div class="pc-mu">${opp ? tmL(opp.team, logo(opp.logo_url, opp.logo_bg, 22, opp.team)) : ''}<b>${esc(p.home)} ${opp ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(opp.team)}">${esc(opp.team)}</button>` : tmL(p.opp)}</b>
           ${p.mu != null ? `<span class="pc-muv">${muHtml(p, opp && opp.team)} <small>pts</small></span>` : muHtml(p)}</div>
-        <div class="pc-sub">${p.mu != null ? `Facing ${esc(p.opp)} instead of an average opponent ${Math.abs(p.mu) < 0.05 ? 'changes nothing' : `${p.mu > 0 ? 'adds' : 'takes away'} ${f1(Math.abs(p.mu))} pts`}: its Vegas total, the play volume and the defense ratings together.`
+        <div class="pc-sub">${p.mu != null ? `Facing ${tmL(p.opp)} instead of an average opponent ${Math.abs(p.mu) < 0.05 ? 'changes nothing' : `${p.mu > 0 ? 'adds' : 'takes away'} ${f1(Math.abs(p.mu))} pts`}: its Vegas total, the play volume and the defense ratings together.`
             : `This defense ${p.mpts >= 0 ? 'adds' : 'takes away'} ${f1(Math.abs(p.mpts || 0))} pts vs an average one.`}</div></div>
       <div class="pc-box pc-season"><div class="pc-k">${esc(d.season)} season before week ${esc(d.week)}</div>${seasonHtml(p, d, L)}</div>`;
     return html;
@@ -881,7 +883,7 @@
     const S = L && (L.seasons || []).find(x => +x.s === +d.season), g = S && S.g.find(x => x.w === +d.week);
     const pos = L && L.pos;
     const played = g ? `<div class="pc-now"><div class="pc-k">Final</div><div class="pc-big">${f1(pts(g.c, weights(), pos))} <small>pts</small></div>
-      <div class="pc-sub">${g.h === 0 ? '@' : 'vs'} ${esc(g.o)} · ${ord(g.rk)} among ${esc(pos)}s${g.gid ? ` · <a href="${esc(gcUrl(g.gid, g.f || ''))}">Gamecast &rsaquo;</a>` : ''}</div></div>` : '';
+      <div class="pc-sub">${g.h === 0 ? '@' : 'vs'} ${tmL(g.o)} · ${ord(g.rk)} among ${esc(pos)}s${g.gid ? ` · <a href="${esc(gcUrl(g.gid, g.f || ''))}">Gamecast &rsaquo;</a>` : ''}</div></div>` : '';
     return `${played}<div class="pc-box"><p class="pc-sub">Not on our ${esc(wkLabel(d).toLowerCase())} board: a bye, ruled out, not on a roster yet, or projected too low to list.</p></div>`;
   };
   // Header extras from the career log doc (tools/player_logs.py): photo, jersey number, bio, recent snap share and,
@@ -993,7 +995,7 @@
       const sub = (label, extra = '') => `<tr class="lg-sub"><td colspan="${n}"><span class="lg-pin">${label}${extra}</span></td></tr>`;
       const pt = pg.length ? kindTotals(L, pg) : null;
       const po = pg.length ? `${sub('Playoffs', ` · ${pg.length} game${pg.length === 1 ? '' : 's'}${keys.length ? ` · ${keys.slice(0, 4).map(k => `${nfmt(pt[k] || 0)} ${cols[k][0]}`).join(', ')}` : ''}`)}${head}${tot(pg)}${[...pg].reverse().map(g => row(g, g.po)).join('')}${S.g.length ? sub('Regular season') : ''}` : '';
-      return `<tbody><tr class="lg-season"><td colspan="${n}"><span class="lg-pin"><b>${S.s}</b> ${esc(team || (pg[0] && pg[0].t) || '')}${sum}</span></td></tr>${po}${S.g.length ? head + trs : ''}</tbody>`;
+      return `<tbody><tr class="lg-season"><td colspan="${n}"><span class="lg-pin"><b>${S.s}</b> ${tmL(team || (pg[0] && pg[0].t) || '')}${sum}</span></td></tr>${po}${S.g.length ? head + trs : ''}</tbody>`;
     }).join('');
     return `<div class="lg-scroll"><table class="lg">${body}</table></div>`;
   };
@@ -1185,7 +1187,7 @@
     body.innerHTML = `
       <div class="pc-head" style="--tc:${esc(info.color || '#666')}">
         ${photo ? `<div class="pc-pic" data-zoom="${esc(uncrop(photoBig(L, espn) || photo))}" role="button" tabindex="0" aria-label="Show a bigger photo"><img src="${esc(photo)}" alt="" width="72" height="72" loading="lazy" onerror="this.parentNode.classList.add('nopic')">${team ? `<span class="pc-pic-tm">${tLogo(team, 16)}</span>` : ''}</div>`
-          : team ? tLogo(team, 34) : ''}
+          : team ? tmL(team, tLogo(team, 34)) : ''}
         <div class="pc-id"><h3 id="pcName">${num != null ? `<span class="pc-num">#${esc(num)}</span>` : ''}${esc(name)}</h3>
           <div class="pc-meta">${pos ? `<span class="posb posb-${esc(pos)}">${esc(pos)}</span>` : ''}${graded ? grChip(pid, GR.cur) : ''} ${team ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(team)}">${esc(info.name || team)}</button>` : L && lastPlayed && lastPlayed < L.cur ? `<span class="muted">Last played ${esc(lastPlayed)}</span>` : '<span class="muted">Free agent</span>'}</div>
 </div>
@@ -1345,7 +1347,7 @@
     if (teamOpp) {
       const gs = L.seasons.flatMap(s => s.g).filter(g => g.o === teamOpp);
       const w = gs.filter(g => g.r === 'W').length, l = gs.filter(g => g.r === 'L').length, t = gs.filter(g => g.r === 'T').length;
-      h2h = `<div class="tm-h2h">${tLogo(teamOpp, 18)} <b>${esc(abbr)} vs ${esc(teamOpp)} since 1999: ${w}-${l}${t ? `-${t}` : ''}</b> <span class="muted">(${gs.length} games)</span></div>`;
+      h2h = `<div class="tm-h2h">${tmL(teamOpp, tLogo(teamOpp, 18))} <b>${esc(abbr)} vs ${tmL(teamOpp)} since 1999: ${w}-${l}${t ? `-${t}` : ''}</b> <span class="muted">(${gs.length} games)</span></div>`;
     }
     const oppCell = (o, h, opr) => `<td class="lg-opp tm-opp ${opr ? (opr <= 8 ? 'mr-hard' : opr <= 16 ? 'mr-tough' : opr <= 24 ? 'mr-ok' : 'mr-easy') : ''}"><button type="button" class="tm-open" data-tm="${esc(o)}"${opr ? ` title="Their power rank that week: ${ord(opr)}"` : ''}>${h === 0 ? '@' : h === 2 ? 'vs ' : ''}${esc(o)}</button></td>`;
     const pct = (v, m) => v == null && m == null ? '–' : `${v != null ? `${v}%` : '–'}<small> / ${m != null ? `${m}%` : '–'}</small>`;
@@ -1470,7 +1472,7 @@
     if (!x) return '';
     const sig = x.games.filter(r => !r.own && r.sig && r.v > 0).slice(0, 3);
     return `<div class="pc-box rt-line"><span class="pc-k">Rooting interests</span> ${sig.length
-      ? sig.map(r => `<b>${esc(rtTeam(O, r.root).nick || r.root)}</b> <small class="muted">${rtPts(r.v)}</small>`).join(' · ')
+      ? sig.map(r => `${tmL(r.root, `<b>${esc(rtTeam(O, r.root).nick || r.root)}</b>`)} <small class="muted">${rtPts(r.v)}</small>`).join(' · ')
       : '<span class="muted">no other game moves their odds much</span>'} <button type="button" class="rt-more" data-tt-go="po">Full guide</button></div>`;
   };
   // odds by week: lines going into each week, dashed to next week's best / worst case; schedule along the bottom
@@ -1497,7 +1499,7 @@
       if (!g) return `<text x="${x}" y="${y0}" class="oc-w">${w}</text><text x="${x}" y="${y0 + 22}" class="oc-bye">BYE</text>`;
       const res = g[3] == null ? `<text x="${x}" y="${y0 + 38}" class="oc-r">${g[2] ? 'vs' : '@'}</text>`
         : `<text x="${x}" y="${y0 + 38}" class="oc-r ${g[3] > g[4] ? 'w' : g[3] < g[4] ? 'l' : ''}">${g[3] > g[4] ? 'W' : g[3] < g[4] ? 'L' : 'T'}</text><text x="${x}" y="${y0 + 46}" class="oc-sc">${g[3]}-${g[4]}</text>`;
-      return `<g><title>Week ${w} · ${esc(g[5])} · ${g[2] ? 'vs' : '@'} ${esc(rtTeam(O, g[1]).nick || g[1])}${g[3] != null ? ` · ${g[3]}-${g[4]}` : ''}</title>
+      return `<g class="tm-open" data-tm="${esc(g[1])}"><title>Week ${w} · ${esc(g[5])} · ${g[2] ? 'vs' : '@'} ${esc(rtTeam(O, g[1]).nick || g[1])}${g[3] != null ? ` · ${g[3]}-${g[4]}` : ''}</title>
         <text x="${x}" y="${y0}" class="oc-w">${w}</text>${lg ? `<image href="${esc(lg)}" x="${x - 7}" y="${y0 + 5}" width="14" height="14"/>` : `<text x="${x}" y="${y0 + 16}" class="oc-r">${esc(g[1])}</text>`}${res}</g>`;
     }).join('');
     return `<svg class="oc" viewBox="0 0 ${W} ${Hh}" width="100%" role="img" aria-label="Playoff chances by week">${grid}${ser}${axis}</svg>
@@ -1513,12 +1515,12 @@
       const v = r.gain(k);
       return `<span class="rt-chip ${v > 0 ? 'good' : 'bad'}"${v < 0 ? ` title="Helps their chance to ${goal}, hurts their chance to ${RT_GOAL[k]}"` : ''}>${RT_SHORT[k]} ${rtPts(v)}</span>`;
     }).join('');
-    const detail = r => `<table class="bx rt-dt"><thead><tr><th></th><th class="num">If ${esc(nick(r.root))} win</th><th class="num">If ${esc(nick(r.vs))} win</th></tr></thead><tbody>
+    const detail = r => `<table class="bx rt-dt"><thead><tr><th></th><th class="num">If ${tmL(r.root, esc(nick(r.root)))} win</th><th class="num">If ${tmL(r.vs, esc(nick(r.vs)))} win</th></tr></thead><tbody>
       ${[0, 1, 2].map(k => `<tr${k === x.m ? ' class="rt-main"' : ''}><td>${RT_SHORT[k]}</td><td class="num">${rtPct(r.pw[k])}</td><td class="num">${rtPct(r.pl[k])}</td></tr>`).join('')}</tbody></table>`;
-    const row = r => `<details class="rt-g"><summary>${tLogo(r.root, 20)}<span class="rt-nm"><b>${esc(nick(r.root))}</b> over ${esc(nick(r.vs))}</span>
+    const row = r => `<details class="rt-g"><summary>${tmL(r.root, tLogo(r.root, 20))}<span class="rt-nm">${tmL(r.root, `<b>${esc(nick(r.root))}</b>`)} over ${tmL(r.vs, esc(nick(r.vs)))}</span>
         ${chips(r)}<span class="rt-v ${r.v > 0 ? 'good' : ''}">${rtPts(r.v)}</span></summary>${detail(r)}</details>`;
-    const say = sig.filter(r => r.v > 0).slice(0, 4).map(r => esc(nick(r.root)));
-    const ownHtml = own ? `<div class="rt-own"><div class="pc-k">Their game</div>${tLogo(own.vs, 20)}<span>${own.g.home === abbr ? 'vs' : '@'} <b>${esc(nick(own.vs))}</b></span>
+    const say = sig.filter(r => r.v > 0).slice(0, 4).map(r => tmL(r.root, esc(nick(r.root))));
+    const ownHtml = own ? `<div class="rt-own"><div class="pc-k">Their game</div>${tmL(own.vs, tLogo(own.vs, 20))}<span>${own.g.home === abbr ? 'vs' : '@'} ${tmL(own.vs, `<b>${esc(nick(own.vs))}</b>`)}</span>
         <span class="rt-wl"><span>Win <b>${rtPct(own.pw[x.m])}</b></span><span>Lose <b>${rtPct(own.pl[x.m])}</b></span></span></div>`
       : `<p class="pc-sub">Bye this week: how the rest of the league's games move their chances.</p>`;
     return `<div class="pc-box rt-box"><div class="pc-k">Rooting guide · week ${O.root.week}</div>
@@ -1700,7 +1702,7 @@
   };
   // How the pregame forecast fared, as the build's final tiles say it (fav_won from our own final scores).
   const verdict = (fc, winner) => !winner ? '<span class="gf-pick toss">Tie</span>'
-    : fc.tossup ? `<span class="gf-pick toss">Tossup · ${esc(winner)} won</span>`
+    : fc.tossup ? `<span class="gf-pick toss">Tossup · ${tmL(winner)} won</span>`
       : fc.fav === winner ? `<span class="gf-pick ok">Favorite won · ${fc.pct}%</span>`
         : `<span class="gf-pick miss">Upset · a ${100 - fc.pct}% chance</span>`;
   // Matchups tiles: live (and just-finished) games painted from ESPN over the build's pregame tile. Finals the
@@ -1727,7 +1729,7 @@
       });
       const winner = st.away.score > st.home.score ? st.away.team : st.home.score > st.away.score ? st.home.team : null;
       tile.querySelector('.mt-st').innerHTML = live
-        ? `<span class="mt-live"><span class="live-dot"></span>${esc(st.short || '')}</span>${sp && sp.text ? `<span>${esc(sp.offense.team)} ball · ${esc(sp.text)}</span>` : ''}${sp && sp.red ? '<span class="mt-red">red zone</span>' : ''}`
+        ? `<span class="mt-live"><span class="live-dot"></span>${esc(st.short || '')}</span>${sp && sp.text ? `<span>${tmL(sp.offense.team)} ball · ${esc(sp.text)}</span>` : ''}${sp && sp.red ? '<span class="mt-red">red zone</span>' : ''}`
         : `<span class="mt-fin">${esc(st.detail || 'Final')}</span>${g && g.fc ? verdict(g.fc, winner) : ''}`;
     });
   };
@@ -1831,7 +1833,7 @@
         return `<div class="ts-row"><span class="ts-v">${esc(a[k] ?? '')}</span><span class="ts-k">${esc(k)}</span><span class="ts-v r">${esc(h[k] ?? '')}</span>
           <span class="ts-bar"><span style="width:${(sa * 100).toFixed(1)}%;background:${esc(info.away.color)}"></span><span style="flex:1;background:${esc(info.home.color)}"></span></span></div>`;
       }).join('');
-    return `<div class="ts-head"><b>${esc(info.away.team)}</b><b>${esc(info.home.team)}</b></div>${rows}`;
+    return `<div class="ts-head">${tmL(info.away.team, `<b>${esc(info.away.team)}</b>`)}${tmL(info.home.team, `<b>${esc(info.home.team)}</b>`)}</div>${rows}`;
   };
   // Drive results from the OFFENSE's side: ESPN's "Interception" on a DAL drive means DAL threw it.
   const driveResult = (d, tm, info, current) => {
@@ -1899,7 +1901,7 @@
     const teams = [info.away.team, info.home.team];
     const playRow = (p) => {
       const wp = wpAfter[p.id], d = wp ? wp.now - wp.prev : 0;
-      const swing = Math.abs(d) >= 0.01 ? `<span class="pl-wp" title="Change in ESPN's live win probability on this play">${esc(d > 0 ? info.home.team : info.away.team)} +${Math.round(Math.abs(d) * 100)}%</span>` : '';
+      const swing = Math.abs(d) >= 0.01 ? `<span class="pl-wp" title="Change in ESPN's live win probability on this play">${tmL(d > 0 ? info.home.team : info.away.team)} +${Math.round(Math.abs(d) * 100)}%</span>` : '';
       const when = `${p.period ? periodName(p.period.number) : ''} ${esc(p.clock ? p.clock.displayValue : '')}`;
       // Not plays (timeouts, two-minute warning, end of quarter / game): thin muted divider rows.
       if (isNonPlay(p)) return `<li class="pl pl-np"><div class="pl-when">${when}</div><div class="pl-what"><div class="pl-txt">${esc(p.text)}</div></div><div></div></li>`;
@@ -1925,7 +1927,7 @@
       const cls = `${p.scoringPlay ? ' pl-score' : ''}${p.isPenalty && !p.scoringPlay ? ' pl-pen' : ''}${st ? ' pl-st' : ''}`;
       return `<li class="pl${cls}"${off ? ` style="--pt:${esc(off.color)}"` : ''}><div class="pl-when">${when}</div>
         <div class="pl-what">${dd || chipHtml ? `<div class="pl-dd">${chipHtml}${esc(dd)}</div>` : ''}<div class="pl-txt">${linkNames(esc(p.text), teams)}</div></div>
-        <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${esc(info.away.team)} ${p.awayScore}–${p.homeScore} ${esc(info.home.team)}</b>` : ''}${swing}</div></li>`;
+        <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${tmL(info.away.team)} ${p.awayScore}–${p.homeScore} ${tmL(info.home.team)}</b>` : ''}${swing}</div></li>`;
     };
     const order = o.sort !== 'old';  // newest first unless asked otherwise
     const swingOf = p => { const w = wpAfter[p.id]; return w ? Math.abs(w.now - w.prev) : 0; };
@@ -2008,21 +2010,21 @@
       <div class="wp${f.tossup ? ' toss' : ''}" style="${esc(g.bt_style)}">
         <div class="wp-src">${f.src === 'Vegas' ? 'Vegas odds' : 'Our model · no Vegas line yet'}</div>
         <div class="wp-head">${f.tossup ? '<span class="wp-call">Tossup</span><span class="wp-why">too close to call</span>'
-          : `${lg(f.fav === a.team ? a : h, 20)}<span class="wp-call">${esc(f.nick)} ${f.pct}%</span><span class="wp-why">to win</span>`}</div>
+          : `${tmL(f.fav, lg(f.fav === a.team ? a : h, 20))}<span class="wp-call">${tmL(f.fav, esc(f.nick))} ${f.pct}%</span><span class="wp-why">to win</span>`}</div>
         <div class="wp-bar" role="img" aria-label="${esc(a.team)} ${f.p_away}%, ${esc(h.team)} ${f.p_home}%"><span class="wp-a" style="width:${f.p_away}%"></span><span class="wp-h"></span>
           <i class="wp-zone" style="left:${100 - tp}%;width:${2 * tp - 100}%"></i></div>
-        <div class="wp-ends"><span>${esc(a.team)} ${f.p_away}%</span><span>${f.p_home}% ${esc(h.team)}</span></div>
+        <div class="wp-ends"><span>${tmL(a.team)} ${f.p_away}%</span><span>${f.p_home}% ${tmL(h.team)}</span></div>
         ${g.vegas_line ? `<div class="wp-meta"><span>Vegas ${esc(g.vegas_line)}${g.vegas_total ? ` · O/U ${f1(g.vegas_total)}` : ''}</span>
-          <span title="${esc(f.model_why)}">Our model: <b>${f.model_tossup ? 'tossup' : `${esc(f.model_nick)} ${f.model_pct}%`}</b>${f.model_tossup ? ` (${esc(f.model_nick)} ${f.model_pct}%)` : ''}</span></div>`
+          <span title="${esc(f.model_why)}">Our model: <b>${f.model_tossup ? 'tossup' : `${tmL(f.model_fav, esc(f.model_nick))} ${f.model_pct}%`}</b>${f.model_tossup ? ` (${tmL(f.model_fav, esc(f.model_nick))} ${f.model_pct}%)` : ''}</span></div>`
           : `<div class="wp-meta"><span>${esc(f.model_why)}</span></div>`}
       </div></section>`;
     const battles = `<section class="gcs"><div class="battles" style="${esc(g.bt_style)}">
       <h3>Who wins each battle <span class="bt-unit">EPA per 100 plays</span></h3>
-      <div class="bt-teams"><span>${lg(a, 15)}<b>${esc(a.team)}</b>${btChip(g.power_rk[0], `${a.team} power rank`)}</span><span>${btChip(g.power_rk[1], `${h.team} power rank`)}<b>${esc(h.team)}</b>${lg(h, 15)}</span></div>
+      <div class="bt-teams"><span>${tmL(a.team, `${lg(a, 15)}<b>${esc(a.team)}</b>`)}${btChip(g.power_rk[0], `${a.team} power rank`)}</span><span>${btChip(g.power_rk[1], `${h.team} power rank`)}${tmL(h.team, `<b>${esc(h.team)}</b>${lg(h, 15)}`)}</span></div>
       ${g.battles.map(b => `<details class="battle grp"><summary><div class="bt-grp"><span class="bt-chev" aria-hidden="true"></span><span>${esc(b.head.left)}</span><span>${esc(b.head.right)}</span></div>${btRow(b.head, 'Total')}</summary>
         <div class="bt-units">${b.rows.map(x => btRow(x)).join('')}</div></details>`).join('')}
       <div class="battle extras">${g.extras.map(x => btRow(x)).join('')}</div>
-      <div class="bt-plays">Projected plays: ${g.plays.map(p => `${esc(p.team)} <b>${f0(p.n)}</b> (${f0(p.pass * 100)}% pass)`).join(' · ')}</div></div></section>`;
+      <div class="bt-plays">Projected plays: ${g.plays.map(p => `${tmL(p.team)} <b>${f0(p.n)}</b> (${f0(p.pass * 100)}% pass)`).join(' · ')}</div></div></section>`;
     const ratings = `<section class="gcs"><h3>Team ratings <span class="bt-unit">EPA per 100 plays vs average</span></h3><table class="bx gc-rt"><thead><tr><th></th><th class="num">Pass O</th><th class="num">Run O</th><th class="num">Pass D</th><th class="num">Run D</th><th class="num">ST</th></tr></thead>
       <tbody>${[a, h].map(s => `<tr><td><span class="tm-open bx-th-in" data-tm="${esc(s.team)}">${lg(s, 14)}<b>${esc(s.team)}</b></span></td><td class="num">${sgn(s.off_pass)}</td><td class="num">${sgn(s.off_rush)}</td><td class="num">${sgn(s.def_pass)}</td><td class="num">${sgn(s.def_rush)}</td><td class="num">${sgn(s.st)}</td></tr>`).join('')}</tbody></table></section>`;
     const players = Object.entries((DATA && DATA.players) || {}).filter(([, p]) => p.team === a.team || p.team === h.team).sort((x, y) => y[1].proj - x[1].proj);
@@ -2087,7 +2089,7 @@
     const a = info.away, h = info.home, winner = a.score > h.score ? a.team : h.score > a.score ? h.team : null;
     const f = g && g.fc;
     const call = f ? `<div class="pg-call">${verdict(f, winner)}
-      <span class="muted">${f.src === 'Vegas' ? `Vegas gave ${f.tossup ? `a tossup (${esc(f.nick)} ${f.pct}%)` : `${esc(f.nick)} ${f.pct}%`}` : 'No Vegas line'} · our model gave ${esc(f.model_nick)} ${f.model_pct}%${f.model_tossup ? ' (tossup)' : ''}</span></div>` : '';
+      <span class="muted">${f.src === 'Vegas' ? `Vegas gave ${f.tossup ? `a tossup (${tmL(f.fav, esc(f.nick))} ${f.pct}%)` : `${tmL(f.fav, esc(f.nick))} ${f.pct}%`}` : 'No Vegas line'} · our model gave ${tmL(f.model_fav, esc(f.model_nick))} ${f.model_pct}%${f.model_tossup ? ' (tossup)' : ''}</span></div>` : '';
     const result = `<section class="gcs"><h3>Result</h3><div class="pg-res">
       <span class="tm-open${winner === a.team ? ' won' : ''}" data-tm="${esc(a.team)}">${logo(a.logo, '#111', 26, a.team)}<b>${esc(a.team)}</b> ${a.score}</span><span class="muted">${esc(info.detail || 'Final')}</span>
       <span class="tm-open${winner === h.team ? ' won' : ''}" data-tm="${esc(h.team)}">${h.score} <b>${esc(h.team)}</b>${logo(h.logo, '#111', 26, h.team)}</span></div>${call}
@@ -2140,7 +2142,7 @@
     const live = () => info.state === 'pre'
       ? `<section class="gcs"><p class="muted">Kicks off ${esc(g ? g.kickoff : info.date ? new Date(info.date).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }) : 'soon')}. The live view (field position, ESPN's win probability, every play, box score) starts at kickoff.</p></section>`
       : info.offline ? '<section class="gcs"><p class="muted">Live data from ESPN is unavailable right now. Try again in a minute.</p></section>'
-      : `${rp && rp.play ? replayCard(rp.play, info, sum) : sp ? `<section class="sit"><div class="sit-dd"><b>${esc(sp.offense.team)} ball</b>${sp.text ? ` · ${esc(sp.text)}` : ''}${sp.red ? ' · <span class="gl-red">red zone</span>' : ''}</div>
+      : `${rp && rp.play ? replayCard(rp.play, info, sum) : sp ? `<section class="sit"><div class="sit-dd"><b>${tmL(sp.offense.team)} ball</b>${sp.text ? ` · ${esc(sp.text)}` : ''}${sp.red ? ' · <span class="gl-red">red zone</span>' : ''}</div>
         ${fieldSvg(sp, info)}${sit.lastPlay && sit.lastPlay.text ? `<div class="sit-last"><span class="muted">Last play:</span> ${linkNames(esc(sit.lastPlay.text), [info.away.team, info.home.team])}</div>` : ''}</section>` : ''}
       ${GP.canReplay ? `<section class="rp">${rp ? `<button type="button" data-rp="first">&laquo;</button><button type="button" data-rp="prev">&lsaquo;</button>
         <button type="button" data-rp="play">${rp.timer ? 'Pause' : 'Play'}</button><button type="button" data-rp="next">&rsaquo;</button><button type="button" data-rp="last">&raquo;</button>
@@ -2150,9 +2152,9 @@
       <div class="seg gc-panes" role="tablist">${GPANES.map(([k, l]) => `<button type="button" role="tab" data-pane="${k}" class="${GP.pane === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       ${GP.pane === 'wp' ? `<section class="gcs" id="gcWp"><h3>Live win probability <span class="src">ESPN</span></h3>
             <p class="gcs-note">ESPN's in-game model, updated every play. Not NFL Edge's forecast: our pregame chances are on the Pregame tab.</p>
-            ${wpNow != null ? `<div class="wp-now-t"><span style="color:${esc(info.away.color)}">${esc(info.away.team)} ${pc(1 - wpNow)}</span><span style="color:${esc(info.home.color)}">${esc(info.home.team)} ${pc(wpNow)}</span></div>` : ''}
+            ${wpNow != null ? `<div class="wp-now-t"><span style="color:${esc(info.away.color)}">${tmL(info.away.team)} ${pc(1 - wpNow)}</span><span style="color:${esc(info.home.color)}">${tmL(info.home.team)} ${pc(wpNow)}</span></div>` : ''}
             <div class="wp-wrap">${sum ? wpChart(ser, info, upto) : ''}<div class="wp-tip" hidden></div></div>
-            <div class="wp-leg"><span><i class="wp-m wp-score"></i>score</span><span><i class="wp-m wp-to"></i>turnover</span><span class="muted">Above the line: ${esc(info.home.team)} favored · below: ${esc(info.away.team)}</span></div></section>`
+            <div class="wp-leg"><span><i class="wp-m wp-score"></i>score</span><span><i class="wp-m wp-to"></i>turnover</span><span class="muted">Above the line: ${tmL(info.home.team)} favored · below: ${tmL(info.away.team)}</span></div></section>`
       : GP.pane === 'plays' ? `<section class="gcs" id="gcLog"><h3>Game log</h3>
             <div class="lg-bar"><div class="seg">${[['drive', 'By drive'], ['every', 'Every play']].map(([k, l]) => `<button type="button" data-view="${k}" class="${GP.view === k ? 'on' : ''}">${l}</button>`).join('')}</div>
               <div class="seg">${[['all', 'All'], ['score', 'Scoring'], ['to', 'Turnovers'], ['pen', 'Penalties']].map(([k, l]) => `<button type="button" data-filter="${k}" class="${GP.filter === k ? 'on' : ''}">${l}</button>`).join('')}</div>
@@ -2307,6 +2309,15 @@
   // One click rule for the whole site: the innermost clickable thing wins - a player name or player row opens his
   // card, a team name / logo / tile header opens the team card (so a team inside a player row opens the team).
   document.addEventListener('click', e => {
+    // A team inside a link or a <summary> (Matchups tile, rooting guide) opens the team and cancels the outer action
+    // (owner 2026-10-16: every team name and logo opens its page); a player element closer to the tap still wins.
+    const tm = e.target.closest('.tm-open[data-tm]');
+    if (tm) {
+      const outer = e.target.closest('a[href], summary'), pid = e.target.closest('[data-open-pid]');
+      if (outer && outer.contains(tm) && !(pid && tm.contains(pid))) {
+        e.preventDefault(); openTeam(tm.dataset.tm); return;
+      }
+    }
     if (e.target.closest('a[href], input, select, .pc-tabs, .seg')) return;
     for (let n = e.target; n && n !== document; n = n.parentElement) {
       if (n.dataset && n.dataset.openPid) { openPlayer(n.dataset.openPid); return; }

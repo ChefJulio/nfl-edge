@@ -155,11 +155,11 @@
     // Two worlds, not a blend (owner 2026-10-15: availability is binary): the projection shown is the likelier world for
     // the uncertain teammate; this line is the other one ("6.5 if Judkins plays").
     const lastName = n => String(n || '').split(' ').slice(1).join(' ') || n;
-    const condLine = r => {
-      if (!r.cond) return '';
-      const [nm, , pSit, plays, sits] = r.cond, other = pSit >= 0.5 ? plays : sits;
+    // up to two uncertain teammates, biggest swing first (cond, cond2)
+    const condLine = r => [r.cond, r.cond2].filter(Boolean).map(c => {
+      const [nm, , pSit, plays, sits] = c, other = pSit >= 0.5 ? plays : sits;
       return `<span class="pv-cond" title="${esc(`${f1(sits * r._ratio)} if ${nm} sits (${Math.round(100 * pSit)}% likely), ${f1(plays * r._ratio)} if he plays`)}">${f1(other * r._ratio)} if ${esc(lastName(nm))} ${pSit >= 0.5 ? 'plays' : 'sits'}</span>`;
-    };
+    }).join('');
     const rankOf = (r, flex) => flex ? r._frank : r._rank;
     const columns = flex => {
       const range = r => `Floor ${f1(r._q[0])} · middle ${f1(r._q[1])}-${f1(r._q[3])} · ceiling ${f1(r._q[4])}`;

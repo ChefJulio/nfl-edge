@@ -8,7 +8,7 @@
   const logoUrl = code => `https://a.espncdn.com/combiner/i?img=${encodeURIComponent(`/i/teamlogos/nfl/500/${code.toLowerCase()}.png`)}&w=60&h=60`;
   const ESPN_CODE = { LA: 'lar', WAS: 'wsh', LV: 'lv' };
   const badge = t => t.modern
-    ? `<img class="po-logo" src="${esc(logoUrl(ESPN_CODE[t.site] || t.site))}" alt="" width="20" height="20" loading="lazy">`
+    ? `<img class="po-logo tm-open" data-tm="${esc(t.site)}" src="${esc(logoUrl(ESPN_CODE[t.site] || t.site))}" alt="" width="20" height="20" loading="lazy">`
     : `<span class="po-txt" title="${esc(t.name)}">${esc(t.name.split(' ').map(w => w[0]).join('').slice(0, 3))}</span>`;
   const gameCard = g => {
     const homeWin = g.hs > g.as, row = (t, s, win) => `<div class="po-row${win ? ' win' : ''}">${badge(t)}${t.seed ? `<span class="po-seed">${t.seed}</span>` : ''}<span class="po-nm${t.modern ? ' tm-open' : ''}"${t.modern ? ` data-tm="${esc(t.site)}"` : ''}>${esc(t.name)}</span><b class="po-sc">${s}</b></div>`;

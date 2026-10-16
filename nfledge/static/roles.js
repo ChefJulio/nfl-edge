@@ -22,7 +22,7 @@
           columns: [
             { key: 'name', label: 'Player', stick: true, first: 'asc',
               html: r => NFLE.ui.player({ name: r.name, pos: r.pos, team: r.team, pid: r.pid, photo: ((D.players || {})[r.pid] || {}).photo,
-                sub: `${r.team}${r.week !== last ? ` · wk ${r.week}` : ''}` }, teams) },
+                subHtml: `${NFLE.ui.tm(r.team)}${r.week !== last ? ` · wk ${r.week}` : ''}` }, teams) },
             { key: 'snap', label: 'Snap share', title: 'Sorts by the size of the jump', value: r => (r.snap_now || 0) - (r.snap_prev || 0), html: r => arrow(r.snap_prev, r.snap_now) },
             { key: 'opp', label: 'Opportunity share', title: 'Sorts by the size of the jump', value: r => (r.opp_now || 0) - (r.opp_prev || 0), html: r => arrow(r.opp_prev, r.opp_now) },
             { key: 'touches', label: 'Touches', num: true },
