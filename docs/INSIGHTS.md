@@ -1679,3 +1679,18 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   +0.0025]); seasons split 3-2. Most such QBs are Questionable at 70-90% and play, so the blend moves the chance a point
   or two. Vegas on the same games 0.2011: the market prices the injury news we don't see (and backups are under-
   penalized, see the inexperienced-QB finding). The 50% rule stays everywhere.
+- **PRE-REGISTERED 2026-10-16 (before looking): (P) missing pass catchers and backs in the team rating** (owner asked
+  whether "this week" counts non-QB injuries; it doesn't: only QBs, and CB / O-line adjustments were rejected). Inputs
+  per team-game, knowable before kickoff: the share of the team's targets (and separately carries) over its last 3
+  games held by WR / TE / RB players listed Out or Doubtful on the final report. Players already out for weeks are
+  already absent from those games, so only fresh absences count. Adjustment to the predicted margin: b_pass x (own
+  missing target share - opponent's) + b_rush x (same for carries), b fit by least squares on the game model's margin
+  misses in the seasons before (walk-forward, tools/game_eval.py --save predictions). tools/skill_absence_eval.py,
+  2022-25 (2021 has no earlier season of misses). GATE: margin MAE on games where either team misses >= 15% of its
+  target or carry share: lower with the 95% CI over games excluding 0; all games not worse (CI upper < +0.02).
+- **RESULT {#skill-absence-margin} (P) missing pass catchers and backs in the team rating: FAIL.** Walk-forward fits
+  point the right way and are stable: b_pass -5.2 to -9.7, b_rush -1.6 to -3.0 points per 100% of share (so a team
+  missing a 25%-target WR is about 2 points worse). But on the 311 of 1023 games 2022-25 with a team missing >= 15%,
+  margin MAE 10.953 -> 10.987 (+0.034 [-0.179, +0.250]); all games 10.294 -> 10.309 (+0.015 [-0.053, +0.084]). A
+  1-2 point nudge is small against ~10-point misses, and the game model already sees some of it (team volume features
+  over recent games). "This week" stays QB-only for injuries.
