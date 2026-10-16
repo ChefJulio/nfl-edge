@@ -1815,3 +1815,20 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   actual active rate minus our final P(play) on those rows, 95% CI over rows; if it excludes 0, pre-register a
   jersey input to the availability model (stage-3 feature, walk-forward on the accumulated rows, Brier gate); if not,
   record "no information beyond practice status". Until then nothing in the model changes.
+- **Thread 4 (2026-10-16): scoring where fantasy value is (tools/fantasy_value_eval.py, latest baseline backtests
+  2021-26).** (1) Extended set (played with >= 30% offensive snaps or projection >= 3, incl. < 2 earlier games; 22,799
+  player-weeks, 12,902 also in the scored rows; selecting on snaps uses the outcome, fine for a same-rows comparison):
+  model vs ECR MAE, rows with ECR (19,075): ALL +0.002 [-0.021, +0.025]; QB +0.281 [+0.148, +0.422] (worse; thread 5);
+  RB -0.063 [-0.100, -0.025]; WR -0.021 [-0.044, +0.003]; TE -0.025 [-0.039, -0.009]. Rows outside the scored set
+  (8,045 with ECR): 3.227 vs 3.180, bias (actual - proj) +0.28 vs ECR -0.03: we under-project fringe players a bit.
+  (2) Breakouts (first top-12 QB / 24 RB / 36 WR / 12 TE week of a season, week 4 on; 1,268): ECR ranks him higher
+  than we do 61-80% of the time that week and the next (ECR adopts faster), BUT the week after, on the 905 who played
+  with an ECR rank, MAE ours 4.367 vs ECR 4.356 (+0.010 [-0.083, +0.101]); bias +0.40 vs +0.30; QB +1.74 vs +1.08
+  (thread 5). Faster adoption isn't more accurate: no recency test warranted. (3) Decision metric, now printed by
+  tools/experiments.py next to MAE: pairs of the reference's relevant players within 6 consensus ranks (same week,
+  position), points gained per pair over a coin flip by starting the one projected higher, paired CI over season-weeks.
+  Baseline 2021-25: ALL +0.887 (68,160 pairs), QB +0.978, RB +0.997, WR +0.773, TE +0.872. vs ECR on shared pairs
+  (fantasy_value_eval): model +0.475 vs ECR +0.418 (model better 3 of 6 seasons). First use: the rejected
+  qb_newteam variant was MAE +0.001 (worse) yet decisions +0.004 [+0.001, +0.008] (better): the two metrics can
+  disagree. PROPOSAL to the owner: make the decision metric a gate criterion next to MAE (a change ships only if
+  neither is significantly worse), first use the pending redistribution call. Not adopted until he says so.
