@@ -1575,6 +1575,7 @@
       rowsFor(espn).forEach(tr => {
         const g = teamGame(tr.dataset.team), st = g && LIVE.byGame[g.id];
         if (!st) return;
+        if (!tr._sc && !tr.dataset.sc) return;  // client-rendered rows (Rankings) paint their own actuals
         const sc = tr._sc || (tr._sc = JSON.parse(tr.dataset.sc));
         const live = st.state === 'in';
         if (!live && sc.ac && !tr.dataset.live) return;  // our own final stats are already on the page

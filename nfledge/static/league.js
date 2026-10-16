@@ -50,16 +50,7 @@
   };
   // D/ST (data/kdst.json, nfledge/defenses.py): expected stats + points / yards allowed as normal(mu, sd); a league's
   // tiers come from those distributions (integer outcomes, below 0 counted as 0), per-point / per-yard from the means.
-  const DSTAT = ['sack', 'int', 'fum_rec', 'ff', 'def_td', 'st_td', 'safe', 'blk', 'pass_def', 'tkl_loss', 'forced_punts', 'def_2pt'];
-  const erf = x => { const t = 1 / (1 + 0.3275911 * Math.abs(x)), y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x); return x >= 0 ? y : -y; };
-  const Phi = z => 0.5 * (1 + erf(z / Math.SQRT2));
-  const pBetween = (mu, sd, lo, hi) => (hi === Infinity ? 1 : Phi((hi + 0.5 - mu) / sd)) - (lo <= 0 ? 0 : Phi((lo - 0.5 - mu) / sd));
-  const dstScore = (ln, w) => {
-    let t = DSTAT.reduce((a, k) => a + (ln[k] || 0) * (w[k] || 0), 0);
-    (w.pa_tiers || []).forEach(([lo, hi, pts]) => { t += pts * pBetween(ln.pa_mu, ln.pa_sd, lo, hi); });
-    (w.ya_tiers || []).forEach(([lo, hi, pts]) => { t += pts * pBetween(ln.ya_mu, ln.ya_sd, lo, hi); });
-    return t + (w.pts_allow || 0) * ln.pa_mu + (w.yds_allow || 0) * ln.ya_mu;
-  };
+  const { dstScore } = NFLE.kdst;  // shared with Rankings (shell.js)
   const sleeperD = sc => {
     const g = k => +(sc[k] || 0);
     const pa = [[0, 0, 'pts_allow_0'], [1, 6, 'pts_allow_1_6'], [7, 13, 'pts_allow_7_13'], [14, 20, 'pts_allow_14_20'], [21, 27, 'pts_allow_21_27'],

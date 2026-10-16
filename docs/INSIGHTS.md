@@ -1322,3 +1322,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   ECR using the CURRENT Friday-fit blend weights, vs as published (no ECR). Relevant RB / WR / TE rows. GATE:
   MAE better with the 95% CI over team-weeks excluding 0 on the Tue-Thu rows, no position worse; then early-week
   ECR goes live (the same pre-kickoff guard).
+- **Rankings: K and D/ST tabs (owner 2026-10-15).** From data/kdst.json (this week through 17), standard ESPN scoring
+  (the rules both models' gates used); weekly (proj, matchup, team pts / FG att / XP for kickers; opp pts / sacks /
+  takeaways for defenses, tiers) and rest of season (this week's game drops once it kicks off). Scoring helpers moved
+  to shell.js NFLE.kdst (League tab uses the same). The scoring panel still applies to QB / RB / WR / TE only.

@@ -437,3 +437,25 @@
   document.addEventListener('click', e => { closeAll(e.target.closest && e.target.closest('details.howto')); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(null); });
 })();
+// Kicker and D/ST scoring from data/kdst.json lines (tools/kdst_build.py): shared by Rankings and the League tab.
+// STD = standard ESPN scoring, the rules both models were tested on (nfledge/kickers.py STANDARD, defenses.py ESPN_STD).
+(() => {
+  const NFLE = window.NFLE = window.NFLE || {};
+  const DSTAT = ['sack', 'int', 'fum_rec', 'ff', 'def_td', 'st_td', 'safe', 'blk', 'pass_def', 'tkl_loss', 'forced_punts', 'def_2pt'];
+  const erf = x => { const t = 1 / (1 + 0.3275911 * Math.abs(x)), y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x); return x >= 0 ? y : -y; };
+  const Phi = z => 0.5 * (1 + erf(z / Math.SQRT2));
+  // P(lo <= X <= hi) for an integer outcome of normal(mu, sd); below 0 counts as 0
+  const pBetween = (mu, sd, lo, hi) => (hi === Infinity ? 1 : Phi((hi + 0.5 - mu) / sd)) - (lo <= 0 ? 0 : Phi((lo - 0.5 - mu) / sd));
+  const dstScore = (ln, w) => {
+    let t = DSTAT.reduce((a, k) => a + (ln[k] || 0) * (w[k] || 0), 0);
+    (w.pa_tiers || []).forEach(([lo, hi, pts]) => { t += pts * pBetween(ln.pa_mu, ln.pa_sd, lo, hi); });
+    (w.ya_tiers || []).forEach(([lo, hi, pts]) => { t += pts * pBetween(ln.ya_mu, ln.ya_sd, lo, hi); });
+    return t + (w.pts_allow || 0) * ln.pa_mu + (w.yds_allow || 0) * ln.ya_mu;
+  };
+  const kScore = (keys, line, w) => keys.reduce((t, k, i) => t + (line[i] || 0) * (w[k] || 0), 0);
+  const STD_K = { fgm_0_19: 3, fgm_20_29: 3, fgm_30_39: 3, fgm_40_49: 4, fgm_50_59: 5, fgm_60_: 5, fgmiss_0_19: -1, fgmiss_20_29: -1,
+                  fgmiss_30_39: -1, fgmiss_40_49: -1, fgmiss_50_59: -1, fgmiss_60_: -1, xpm: 1, xpmiss: -1 };
+  const STD_D = { sack: 1, int: 2, fum_rec: 2, def_td: 6, st_td: 6, safe: 2, blk: 2,
+                  pa_tiers: [[0, 0, 5], [1, 6, 4], [7, 13, 3], [14, 17, 1], [18, 27, 0], [28, 34, -1], [35, 45, -3], [46, Infinity, -5]] };
+  NFLE.kdst = { DSTAT, Phi, pBetween, dstScore, kScore, STD_K, STD_D };
+})();

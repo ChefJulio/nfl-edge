@@ -9,7 +9,9 @@
 (() => {
   const NFLE = window.NFLE, esc = NFLE.esc;
   const LS_KEY = 'nfledge-scoring';
-  const POS = ['QB', 'RB', 'WR', 'TE', 'FLEX'];
+  const POS = ['QB', 'RB', 'WR', 'TE', 'FLEX', 'K', 'DST'];
+  const KDP = ['K', 'DST'];  // kickers / team defenses: data/kdst.json, standard ESPN scoring (owner 2026-10-15)
+  const POS_LABEL = { DST: 'D/ST' };
   const FLEX_DEPTH = 150;  // a 14-team 2RB/2WR/1TE/1FLEX league starts 84 flex-eligible players; 150 adds waiver depth
   const f0 = v => v == null ? '' : String(Math.round(v));
   const f1 = v => v == null || isNaN(v) ? '' : (Math.round(v * 10) / 10).toFixed(1);
@@ -66,7 +68,7 @@
       </div></details>
       <div class="card">
         <div class="toolbar">
-          <div class="seg posbar">${POS.map(p => `<button type="button" data-pos="${p}" class="pos-${p}">${p}</button>`).join('')}</div>
+          <div class="seg posbar">${POS.map(p => `<button type="button" data-pos="${p}" class="pos-${p}">${POS_LABEL[p] || p}</button>`).join('')}</div>
           <input type="search" id="psearch" placeholder="Find a player" aria-label="Find a player">
           <button type="button" class="sbtn" id="scoreBtn" aria-expanded="false" aria-controls="scorePanel">Scoring &amp; league <span id="scoreSum"></span></button>
         </div>
@@ -180,6 +182,83 @@
       ];
       return cols;
     };
+    // -- kickers and team defenses --------------------------------------------------------------------------------
+    // Each team's kicker / D/ST line per week (this week through 17), scored with standard ESPN rules; the scoring panel
+    // applies to QB / RB / WR / TE only.
+    let KD = null, KDA = { K: [], DST: [] };
+    const KS = NFLE.kdst;
+    const loadKD = () => KD ? Promise.resolve(KD) : NFLE.load('data/kdst.json').then(j => {
+      if (!j) throw new Error('no kdst');
+      KD = j;
+      KDA.K = Object.entries(j.k || {}).map(([team, o]) => ({ pid: o.pid, name: o.name, team, pos: 'K',
+        photo: NFLE.ui.headshot(NFLE.ui.ids && NFLE.ui.ids[o.pid]),
+        by: Object.fromEntries(o.w.map(([wk, imp, line]) => [wk, { v: KS.kScore(j.k_keys, line, KS.STD_K), imp,
+          fga: line.slice(0, 12).reduce((a, b) => a + b, 0), xp: line[12] }])) }));
+      KDA.DST = Object.entries(j.dst || {}).map(([team, o]) => ({ pid: `DST-${team}`, name: (TEAMS[team] || {}).nick || team, team, pos: 'DST',
+        by: Object.fromEntries(o.w.map(([wk, opp, home, line]) => { const ln = Object.fromEntries(j.d_keys.map((k, i) => [k, line[i]]));
+          return [wk, { v: KS.dstScore(ln, KS.STD_D), opp, home: home ? 'vs' : '@', pa: ln.pa_mu, sack: ln.sack, take: ln.int + ln.fum_rec }]; })) }));
+      return j;
+    });
+    // kickoff (ms) of a team's game this week: gameday + gametime are Eastern (EDT from mid-March to early November)
+    const kickoff = t => { const g = (D.games || []).find(x => x.away.team === t || x.home.team === t);
+      if (!g || !g.gameday || !g.gametime) return null; const m = +g.gameday.slice(5, 7), d = +g.gameday.slice(8, 10);
+      const edt = (m > 3 && m < 11) || (m === 3 && d >= 9) || (m === 11 && d < 3); return Date.parse(`${g.gameday}T${g.gametime}:00${edt ? '-04:00' : '-05:00'}`); };
+    const oppOf = t => { const g = (D.games || []).find(x => x.away.team === t || x.home.team === t);
+      return g ? { opp: g.home.team === t ? g.away.team : g.home.team, home: g.home.team === t ? 'vs' : '@' } : null; };
+    const kdRows = p => {
+      const t = q.trim().toLowerCase(), wk = D.week;
+      let rows = KDA[p].map(r => {
+        const e = r.by[wk];
+        if (mode === 'ros') {  // this week's game drops out once it kicks off (as for players)
+          const ko = kickoff(r.team), started = ko != null && Date.now() >= ko;
+          const ws = Object.entries(r.by).filter(([w]) => +w >= (KD ? KD.from : wk) && !(started && +w === D.week));
+          const tot = ws.reduce((a, [, x]) => a + x.v, 0);
+          return Object.assign(r, { _v: tot, _games: ws.length, _ppg: ws.length ? tot / ws.length : 0 });
+        }
+        return e ? Object.assign(r, { _v: e.v, _e: e, _o: oppOf(r.team) }) : null;
+      }).filter(Boolean).sort((a, b) => b._v - a._v);
+      rows.forEach((r, i) => { r._rank = i + 1; r._tier = `${POS_LABEL[p] || p}${Math.floor(i / state.lg.teams) + 1}`; r._slot = i < state.lg.teams ? 'start' : 'bench'; });
+      return t ? rows.filter(r => r.name.toLowerCase().includes(t) || r.team.toLowerCase() === t) : rows;
+    };
+    const kdWho = r => r.pos === 'DST' ? NFLE.ui.team(r.team, TEAMS, esc(r.team))
+      : NFLE.ui.player({ name: r.name, team: r.team, photo: r.photo, sub: r.team }, TEAMS);
+    const kdOpp = (opp, home) => opp ? `<span class="opp tm-open" data-tm="${esc(opp)}"><span class="vs">${esc(home)}</span>${logo(opp, 18)}<b>${esc(opp)}</b></span>` : '';
+    const kdColumns = p => {
+      const head = [
+        { key: 'rank', label: '#', num: true, first: 'asc', cls: 'rk', value: r => r._rank, html: r => `<b class="rkn">${r._rank}</b>` },
+        { key: 'name', label: p === 'K' ? 'Kicker' : 'Defense', stick: true, first: 'asc', value: r => r.name, html: kdWho }];
+      if (mode === 'ros') return [...head,
+        { key: 'proj', label: 'ROS pts', num: true, cls: 'projc', title: 'Expected points from this week through week 17, standard ESPN scoring', value: r => r._v, html: r => `<b class="pv">${f0(r._v)}</b>` },
+        { key: 'ppg', label: 'Pts/G', num: true, value: r => r._ppg, html: r => f1(r._ppg) },
+        { key: 'games', label: 'Games', num: true, title: 'Games left through week 17 (byes excluded)', value: r => r._games, html: r => String(r._games) },
+        { key: 'tier', label: 'Tier', first: 'asc', cls: 'tierc', value: r => r._rank, html: r => `<span class="tier t-${r._slot}">${r._tier}</span>` }];
+      return [...head,
+        { key: 'proj', label: 'Proj', num: true, cls: 'projc', title: 'Projected points, standard ESPN scoring', value: r => r._v, html: r => `<b class="pv">${f1(r._v)}</b>` },
+        { key: 'mu', label: 'Matchup', first: 'asc', cls: 'mu', value: r => p === 'DST' ? r._e.opp : (r._o || {}).opp,
+          html: r => p === 'DST' ? kdOpp(r._e.opp, r._e.home) : (r._o ? kdOpp(r._o.opp, r._o.home) : '') },
+        ...(p === 'K' ? [
+          { key: 'imp', label: 'Team pts', num: true, title: "Points his team is expected to score (Vegas implied total; our model's before lines post)", value: r => r._e.imp, html: r => f1(r._e.imp) },
+          { key: 'fga', label: 'FG att', num: true, title: 'Expected field-goal attempts', value: r => r._e.fga, html: r => f1(r._e.fga) },
+          { key: 'xp', label: 'XP', num: true, title: 'Expected extra points made', value: r => r._e.xp, html: r => f1(r._e.xp) }]
+        : [
+          { key: 'pa', label: 'Opp pts', num: true, first: 'asc', title: 'Points the opponent is expected to score', value: r => r._e.pa, html: r => f1(r._e.pa) },
+          { key: 'sack', label: 'Sacks', num: true, title: 'Expected sacks', value: r => r._e.sack, html: r => f1(r._e.sack) },
+          { key: 'take', label: 'Takeaways', num: true, title: 'Expected interceptions + fumble recoveries', value: r => r._e.take, html: r => f1(r._e.take) }]),
+        { key: 'tier', label: 'Tier', first: 'asc', cls: 'tierc', value: r => r._rank, html: r => `<span class="tier t-${r._slot}" title="${r._slot === 'start' ? 'Starter' : 'Bench'} in a ${state.lg.teams}-team league">${r._tier}</span>` }];
+    };
+    const kdAttrs = r => r.pos === 'DST' ? `style="${rowStyle(r.team)}" data-tm="${esc(r.team)}" data-team="${esc(r.team)}"`
+      : `style="${rowStyle(r.team)}" data-pid="${esc(r.pid)}" data-open-pid="${esc(r.pid)}" data-team="${esc(r.team)}"`;
+    const kdNote = p => `<p class="muted kd-note">${p === 'K' ? 'Kickers' : 'Team defenses'}: standard ESPN scoring (${p === 'K' ? 'field goals 3 / 4 / 5 by distance, misses −1, extra points 1' : 'sacks 1, takeaways 2, touchdowns 6, points-allowed tiers'}); the scoring panel applies to QB / RB / WR / TE.${KD && D.week < KD.from ? ' Kicker and defense projections cover the current week through week 17.' : ''}</p>`;
+    const kdDraw = p => {
+      const view = sec.querySelector(`.posview[data-pos="${p}"]`);
+      if (!KD) { loadKD().then(() => kdDraw(p)).catch(() => { view.querySelector('.byes-box').innerHTML = '<p class="muted">Kicker and defense projections are not available right now.</p>'; }); return; }
+      const box = view.querySelector(mode === 'ros' ? '.ros-tbl' : '.rk-tbl'), store = mode === 'ros' ? rosTables : tables;
+      const opts = { columns: kdColumns(p), rows: kdRows(p), cls: `sortable ranks tiles${p === 'DST' ? '' : ''}`, sort: { key: 'proj', dir: 'desc' },
+                     rowAttrs: kdAttrs, rowClass: r => `main teamrow${r.pos === 'DST' ? ' tm-open' : ''}` };
+      if (!store[p]) store[p] = NFLE.Table(box, opts);
+      else { store[p].setColumns(opts.columns); store[p].update(opts.rows); }
+      view.querySelector('.byes-box').innerHTML = kdNote(p);
+    };
     const rowsFor = p => {
       const t = q.trim().toLowerCase();
       const base = p === 'FLEX' ? all.filter(r => ['RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._proj - a._proj).slice(0, FLEX_DEPTH) : all.filter(r => r.pos === p);
@@ -251,6 +330,7 @@
       return t ? base.filter(r => r.name.toLowerCase().includes(t)) : base;
     };
     const rosDraw = (resort = true) => {
+      if (KDP.includes(pos)) { kdDraw(pos); return; }
       if (!ROS) return;
       rosDerive();
       const box = sec.querySelector(`.posview[data-pos="${pos}"] .ros-tbl`);
@@ -291,6 +371,7 @@
       POS.forEach(p => {
         const view = sec.querySelector(`.posview[data-pos="${p}"]`);
         if (view.hidden && tables[p] === undefined) return;  // built on first show
+        if (KDP.includes(p)) { if (mode === 'week') kdDraw(p); return; }
         const rows = rowsFor(p);
         if (!tables[p]) tables[p] = NFLE.Table(view.querySelector('.rk-tbl'), { columns: columns(p === 'FLEX'), rows, cls: 'sortable ranks tiles', sort: { key: 'proj', dir: 'desc' }, rowAttrs, rowClass });
         else { tables[p].setColumns(columns(p === 'FLEX')); tables[p].update(rows); if (resort) tables[p].setSort({ key: 'proj', dir: 'desc' }); }
@@ -311,7 +392,7 @@
       if (mode === 'ros') rosDraw(!rosTables[p]);
     };
     sec.querySelector('.posbar').addEventListener('click', e => { const b = e.target.closest('[data-pos]'); if (b) showPos(b.dataset.pos); });
-    sec.querySelector('#psearch').oninput = e => { q = e.target.value; POS.forEach(p => tables[p] && tables[p].update(rowsFor(p))); if (mode === 'ros') rosDraw(false); };
+    sec.querySelector('#psearch').oninput = e => { q = e.target.value; POS.forEach(p => tables[p] && tables[p].update(KDP.includes(p) ? kdRows(p) : rowsFor(p))); if (mode === 'ros') rosDraw(false); };
     window.nfleWeights = () => state.w;
     window.nfleApplyScoring = () => draw();
 
