@@ -99,6 +99,17 @@
   };
   const evKey = ev => ev.competitions[0].competitors.map(t => ourCode(t.team.abbreviation)).sort().join('-');
   const gKey = (a, h) => [a, h].sort().join('-');
+  // ESPN's two primaries can be near-identical (SEA / DEN both navy): the home side switches to its alternate color, or
+  // either side lightens when both are too dark to read on the dark page (owner 2026-10-15, team stats bars)
+  const rgb = h => { const m = String(h || '').replace('#', '').match(/^([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i); return m ? m.slice(1).map(x => parseInt(x, 16)) : null; };
+  const cdist = (a, b) => { const x = rgb(a), y = rgb(b); return x && y ? Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]) : 999; };
+  const luma = h => { const c = rgb(h); return c ? 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2] : 128; };
+  const distinctColors = info => {
+    const a = info.away, h = info.home;
+    if (cdist(a.color, h.color) < 90 && h.alt && cdist(a.color, h.alt) >= 90) h.color = h.alt;
+    else if (cdist(a.color, h.color) < 90 && a.alt && cdist(a.alt, h.color) >= 90) a.color = a.alt;
+    [a, h].forEach(x => { if (luma(x.color) < 40 && x.alt && luma(x.alt) > luma(x.color) && cdist(x.alt, (x === a ? h : a).color) >= 90) x.color = x.alt; });
+  };
   const evInfo = ev => {
     const c = ev.competitions[0], st = c.status || ev.status, t = st.type;
     const side = {};
@@ -545,6 +556,10 @@
 
   // ----------------------------------------------------------------------------------------------- player card
   let cardPid = null, cardTab = 'ov';  // the open tab survives live refreshes; a new player starts on Week
+  // each team / player page remembers its last tab for the session, so Back from another page lands where you were
+  // (owner 2026-10-15); sessionStorage so a full page reload (a game page, the week picker) keeps it too
+  const TABS = (() => { try { return JSON.parse(sessionStorage.getItem('nfle-tabs') || '{}'); } catch (e) { return {}; } })();
+  const rememberTab = (k, v) => { TABS[k] = v; try { sessionStorage.setItem('nfle-tabs', JSON.stringify(TABS)); } catch (e) { /* private mode */ } };
   const ensureOverlay = () => {
     let ov = document.getElementById('pcOv');
     if (ov) return ov;
@@ -1074,15 +1089,18 @@
       ${L && (L.inj || L.dur) ? `<div class="pc-tab" data-pt="inj"${cardTab === 'inj' ? '' : ' hidden'}>${injuryTab(L, espn)}</div>` : ''}
       ${news ? `<div class="pc-tab" data-pt="news"${cardTab === 'news' ? '' : ' hidden'}><div class="pc-box pc-newsbox"><div class="pc-k">Recent news</div><div class="pc-news"></div></div></div>` : ''}`;
     body.querySelectorAll('.pc-news').forEach(nb => loadNews(espn, nb, +nb.dataset.n || 6));
-    if (L) body.querySelectorAll('.pc-pen').forEach(pb => penIndex().then(ix => {
-      const ss = ix ? [...new Set(L.seasons.map(S => S.s))].filter(x => ix.seasons.includes(x)) : [];
-      return Promise.all(ss.map(penSeason));
-    }).then(docs => { if (cardPid === pid) pb.innerHTML = playerPenBox(pid, docs); }));
-    body.querySelectorAll('.pc-grade').forEach(gb => grIndex().then(ix => ix ? Promise.all(ix.seasons.map(grSeason)) : [])
-      .then(docs => { if (cardPid === pid) gb.innerHTML = gradeTab(pid, docs); }));
+    // his career from one small shard (data/penalties/players/<last 2 digits>.json) instead of every season's file
+    if (L) body.querySelectorAll('.pc-pen').forEach(pb => NFLE.load(`data/penalties/players/${pid.slice(-2)}.json`).catch(() => null)
+      .then(sh => { if (cardPid === pid) pb.innerHTML = playerPenBox(pid, ((sh || {})[pid] || []).map(([season, ...x]) => ({ season, players: { [pid]: x } }))); }));
+    // the Grade tab's every-season history loads when the tab is opened (9 files, ~230 KB), not with the page
+    const loadGrades = () => body.querySelectorAll('.pc-grade').forEach(gb => { if (gb.dataset.loaded) return; gb.dataset.loaded = '1';
+      grIndex().then(ix => ix ? Promise.all(ix.seasons.map(grSeason)) : []).then(docs => { if (cardPid === pid) gb.innerHTML = gradeTab(pid, docs); }); });
+    if (cardTab === 'gr') loadGrades();
     body.querySelectorAll('.pc-log').forEach(wireLogRows);
     const showTab = k => {
       cardTab = k;
+      rememberTab(`p:${pid}`, k);
+      if (k === 'gr') loadGrades();
       body.querySelectorAll('.pc-tabs [data-pt]').forEach(x => x.classList.toggle('on', x.dataset.pt === k));
       body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.pt !== cardTab; });
     };
@@ -1437,6 +1455,7 @@
       <div class="pc-tab" data-tt="po"${teamTab === 'po' ? '' : ' hidden'}>${teamTab === 'po' ? rootingHtml(abbr) + teamPlayoffs(abbr) : ''}</div>`;
     body.querySelectorAll('[data-tt]').forEach(b => b.onclick = () => {
       teamTab = b.dataset.tt;
+      rememberTab(`t:${abbr}`, teamTab);
       if (teamTab === 'dc') { body.querySelector('.pc-tab[data-tt="dc"]').innerHTML = depthHtml(abbr); wireDepth(body, abbr); }
       if (teamTab === 'po') body.querySelector('.pc-tab[data-tt="po"]').innerHTML = rootingHtml(abbr) + teamPlayoffs(abbr);
       body.querySelectorAll('.pc-tabs [data-tt]').forEach(x => x.classList.toggle('on', x === b));
@@ -1488,23 +1507,26 @@
     const sel = body.querySelector('[data-topp]');
     if (sel) sel.onchange = () => { teamOpp = sel.value; body.querySelector('.tm-log').innerHTML = teamLogHtml(TLOGS[abbr], abbr); wireTeamLog(body, abbr); };
   };
-  const loadTeamLog = async abbr => {
+  // one fetch per team: renders while it's in flight used to start their own (4 copies of a 97 KB file)
+  const TLOGP = {};
+  const loadTeamLog = abbr => TLOGP[abbr] || (TLOGP[abbr] = (async () => {
     try { TLOGS[abbr] = await getJSON(`${siteRoot()}data/teams/${encodeURIComponent(abbr)}.json`); }
-    catch (e) { const b = document.querySelector('#pcOv .tm-log'); if (b) b.innerHTML = '<p class="pc-sub">Game log unavailable.</p>'; return; }
+    catch (e) { delete TLOGP[abbr]; const b = document.querySelector('#pcOv .tm-log'); if (b) b.innerHTML = '<p class="pc-sub">Game log unavailable.</p>'; return; }
     if (cardTeam === abbr) renderTeam(abbr);
-  };
+  })());
   // Page mode (week pages with the app shell): players and teams are PAGES at #player/<id> / #team/<abbr>. Opening
   // one sets the hash (a real history entry, so Back works); the shell routes it and calls NFLE.showPlayer / showTeam.
   const pageMode = () => !!(window.NFLE && window.NFLE.pageMode);
   const openTeam = abbr => {
     if (pageMode()) { if (location.hash !== `#team/${abbr}`) location.hash = `team/${abbr}`; else showTeam(abbr); return; }
+    if (DATA && DATA.__rel) { location.href = `${siteRoot()}${DATA.__rel.replace(/\.json$/, '.html')}#team/${encodeURIComponent(abbr)}`; return; }
     showTeam(abbr);
   };
   const showTeam = abbr => {
     if (!DATA) return;
     const ov = ensureOverlay();
     if (!location.hash.startsWith('#player/') && !location.hash.startsWith('#team/')) prevHash = location.hash;
-    if (abbr !== cardTeam) { teamTab = 'ov'; teamOpp = ''; }
+    if (abbr !== cardTeam) { teamTab = TABS[`t:${abbr}`] || 'ov'; teamOpp = ''; }
     // a fresh card starts on the page's week; card-to-card keeps the picked one (page mode: the shell flags fresh)
     if (ov.hidden || !cardWk || (window.NFLE && NFLE.freshPage)) cardWk = pageKey();
     cardPid = null; cardTeam = abbr;
@@ -1517,13 +1539,15 @@
 
   const openPlayer = pid => {
     if (pageMode()) { if (location.hash !== `#player/${pid}`) location.hash = `player/${pid}`; else showPlayer(pid); return; }
+    // the game page has no app shell: go to the player's page on this game's week page (Back returns to the game)
+    if (DATA && DATA.__rel) { location.href = `${siteRoot()}${DATA.__rel.replace(/\.json$/, '.html')}#player/${encodeURIComponent(pid)}`; return; }
     showPlayer(pid);
   };
   const showPlayer = pid => {
     if (!DATA) return;
     const ov = ensureOverlay();
     if (!location.hash.startsWith('#player/') && !location.hash.startsWith('#team/')) prevHash = location.hash;
-    if (pid !== cardPid) cardTab = 'ov';
+    if (pid !== cardPid) cardTab = TABS[`p:${pid}`] || 'ov';
     if (ov.hidden || !cardWk || (window.NFLE && NFLE.freshPage)) cardWk = pageKey();
     cardPid = pid; cardTeam = null;
     renderCard(pid);
@@ -2112,6 +2136,7 @@
       GP.info = evInfo(ev);
       // Our Matchups colors are already chosen to be distinct from each other (ESPN's can be near-identical).
       if (GP.g && GP.g.colors) { GP.info.away.color = GP.g.colors[GP.away] || GP.info.away.color; GP.info.home.color = GP.g.colors[GP.home] || GP.info.home.color; }
+      else distinctColors(GP.info);  // a link without the week file: ESPN's colors, made distinct here
       if (GP.info.realState !== 'pre') GP.sum = await getJSON(ESPN.sum + ev.id);
       // Player cards opened from this page show the live / final line too.
       if (GP.sum) Object.assign(LIVE.lines, boxLines(GP.sum));

@@ -6,6 +6,7 @@ records the main penalty of each play (penalty_team, penalty_player_id, penalty_
 declined or offset). ~3,600 a season; ~92% name a player (the rest are team calls: delay of game, too many men).
   teams:   {TEAM: {g, n, y, dn, dy, types: [[type, n, y]], players: [[gsis, n, y]]}}   dn / dy = drawn (opponents')
   players: {gsis: [team, n, y, [[type, n, y]]]}                  names: {gsis: name}   pos: {gsis: position that season}
+Also data/penalties/players/<shard>.json: each player's career, one small file per last-two-digit shard.
 """
 import json
 import shutil
@@ -97,6 +98,22 @@ def main():
     print(f"[penalties] {s}: {n} penalties, {len(doc['players'])} players", flush=True)
   seasons = sorted(int(p.stem) for p in out.glob("[0-9][0-9][0-9][0-9].json"))
   (out / "index.json").write_text(json.dumps({"seasons": seasons, "current": current}), encoding="utf-8")
+  # Per-player career files for player pages (owner 2026-10-15: a player page fetched every season's league-wide file,
+  # ~1.4 MB, to read one row): data/penalties/players/<last 2 digits of gsis>.json = {gsis: [[season, team, n, y,
+  # [[type, n, y]]], ...]} (newest first; seasons with a flag only), 100 shards of a few KB.
+  career = {}
+  for sf in sorted(out.glob("[0-9][0-9][0-9][0-9].json")):
+    d = json.loads(sf.read_text(encoding="utf-8"))
+    for pid, x in d.get("players", {}).items():
+      career.setdefault(pid, []).append([d["season"], *x])
+  shards = {}
+  for pid, rows in career.items():
+    shards.setdefault(pid[-2:], {})[pid] = sorted(rows, key=lambda r: -r[0])
+  pd_ = out / "players"
+  pd_.mkdir(exist_ok=True)
+  for k, v in shards.items():
+    (pd_ / f"{k}.json").write_text(json.dumps(v, separators=(",", ":")), encoding="utf-8")
+  print(f"[penalties] player careers: {len(career)} players in {len(shards)} shards", flush=True)
 
 
 if __name__ == "__main__":
