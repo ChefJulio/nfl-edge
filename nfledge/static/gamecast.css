@@ -690,3 +690,4 @@ table.pst-tbl td.pst-who { width: auto; max-width: 12em; }
 table.pst-tbl .sc { min-width: 1.8em; padding: 3px 3px; font-size: 12px; border-radius: 5px; }
 table.pst-tbl .sc.h { padding: 2px 3px; font-size: 10px; letter-spacing: 0; }
 table.pst-tbl th.num, table.pst-tbl td.num { padding: 3px 1px; }
+tr.gr-dnp td { color: var(--faint); font-style: italic; } tr.gr-dnp td.num { text-align: center; }

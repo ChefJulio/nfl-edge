@@ -1036,7 +1036,12 @@
     const FLIP = { 'Sack rate (lower is better)': 'Sack rate', 'INT rate (lower is better)': 'INT rate', 'Drop rate (lower is better)': 'Drop rate' };
     const bars = labels.map((l, i) => { const v = r[5][i]; l = FLIP[l] || l; return `<div class="eg-row"><span class="eg-l">${esc(l)}</span><b class="eg-v">${v}</b><span class="eg-bar"><i class="${grTone(v)}" style="width:${Math.max(2, v)}%"></i></span></div>`; }).join('');
     // by season: that season's play only ([6], [7]); older files without it fall back to the window grade
-    const hist = all.map(d => { const x = d.players[pid], g = x[6] ?? x[0];
+    // every season from his first to his last, none skipped (owner 2026-10-15: a missing year reads as consecutive)
+    const have = new Set(all.map(d => d.season)), years = [];
+    for (let y = all[0].season; y >= all[all.length - 1].season; y--) years.push(y);
+    const dnp = y => `<tr class="muted gr-dnp"><td><b>${y}</b></td><td class="num" colspan="3">Did not play</td></tr>`;
+    const hist = years.map(y => have.has(y) ? all.find(d => d.season === y) : y).map(d => { if (typeof d === 'number') return dnp(d);
+      const x = d.players[pid], g = x[6] ?? x[0];
       if (x[0] == null) return `<tr class="muted"><td><b>${d.season}</b></td><td class="num" title="Not graded: too few games with a real role (needs the qualifying minimum, or 2+ games with a starter's workload)">–</td><td class="num">${x[8] ?? '–'}</td><td class="num">${f1(x[7])}</td></tr>`;
       return `<tr><td><b>${d.season}</b>${d.basis === 'box' ? ' <small class="muted" title="Box-score stats only before 2018: same OVR, simpler stats behind it">box</small>' : ''}</td><td class="num"><span class="eg-chip ${x[9] ? 'eg-uq' : grTone(g)}"><b>${ovr(g)}${uqMark(x)}</b></span></td><td class="num">${x[8] ?? '–'}</td><td class="num">${f1(x[7])}</td></tr>`; }).join('');
     return `<div class="pc-box"><div class="pc-k">NFL Edge grade · current form</div>
