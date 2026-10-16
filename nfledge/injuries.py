@@ -200,6 +200,64 @@ class InjuryModel:
       return b  # "resting player" with a groin listed second: the groin is what could keep him out
     return a or b or "none"
 
+  def _tues_inputs(self):
+    """(final report rows, in-game injury notes), built once per model object (nfledge/tuesday.py)."""
+    if not hasattr(self, "_tues_in"):
+      from pathlib import Path
+      from . import data as D
+      from . import tuesday as T
+      cache = D.Cache(Path(__file__).resolve().parent.parent / self.cfg["data"]["cache_dir"])
+      self._tues_in = (T.report_rows(self.data), T.hurt_notes(self.data, cache))
+    return self._tues_in
+
+  def _tues_table(self):
+    """The Tuesday model's rows (nfledge/tuesday.py), built once per model object."""
+    if not hasattr(self, "_tues_rows"):
+      from . import tuesday as T
+      self._tues_rows = T.build_rows(self.data, *self._tues_inputs())
+    return self._tues_rows
+
+  def week_prob(self, items: list) -> np.ndarray:
+    """(INSIGHTS (I2), injuries.week_model) the one availability model for Wednesday on: items as
+    tuesday.week_now_rows. Trained on seasons before this one, calibrated per stage on the season before."""
+    from . import tuesday as T
+    if not hasattr(self, "_week_ctx"):
+      rep_rows, hurt = self._tues_inputs()
+      self._week_ctx = T._Ctx(self.data, rep_rows, hurt)
+      w = T.week_rows(self.data, rep_rows, hurt).dropna(subset=["y"])
+      self._week_all = w[~((w.stage == 3) & (w.gs_now == "Out"))]
+      self._week_models = {}
+    x = T.week_now_rows(self._week_ctx, items)
+    out = np.full(len(x), np.nan)
+    for s_ in sorted(set(x.season)):
+      if s_ not in self._week_models:
+        self._week_models[s_] = T.week_model(self._week_all, s_) if (self._week_all.season < s_).sum() > 5000 else None
+      m = self._week_models[s_]
+      k = (x.season == s_).to_numpy()
+      if m is not None:
+        out[k] = T.week_predict(m, x[k])
+    return out
+
+  def _with_tprior(self, X: pd.DataFrame, rows: pd.DataFrame) -> pd.DataFrame:
+    """EXPERIMENT (injuries.tuesday_prior; pre-registered 2026-10-16, INSIGHTS (H)): the Tuesday model's P(plays) for
+    that week as an input, so the practice models build on it instead of starting over. Strictly walk-forward: the
+    number for any row of season s comes from a Tuesday model trained on seasons before s."""
+    if not self.cfg.get("injuries", {}).get("tuesday_prior"):
+      return X
+    if not hasattr(self, "_tprior_idx"):
+      from . import tuesday as T
+      r = self._tues_table()
+      idx = {}
+      for s_ in sorted(set(r.season)):
+        tr, te = r[(r.season < s_) & r.y.notna()], r[r.season == s_]
+        if len(tr) < 1000 or not len(te):
+          continue
+        pv = T.fit(tr).predict_proba(T.features(te))[:, 1]
+        idx.update({(int(a), int(b), g): float(v) for a, b, g, v in zip(te.season, te.week, te.gsis_id, pv)})
+      self._tprior_idx = idx
+    gid = rows.gsis_id if "gsis_id" in rows else pd.Series(rows.index, index=rows.index)
+    return X.assign(tues_p=[self._tprior_idx.get((int(s_), int(w), g), np.nan) for g, s_, w in zip(gid, rows.season, rows.week)])
+
   def _with_prev(self, X: pd.DataFrame, rows: pd.DataFrame) -> pd.DataFrame:
     """EXPERIMENT (injuries.practice_prev; pre-registered 2026-10-16): did he miss his team's previous game (no snap
     in it), and how many in a row (cap 4). Limited Wed + Thu: played 89% after playing last week, 59% after missing
@@ -261,7 +319,7 @@ class InjuryModel:
     week's report / practice injury fields says the player was resting ("Not injury related - resting player"), so a
     rest DNP stops reading like an injury DNP (owner: Keenan Allen, 34). practice_rest = "age" also adds his age at the
     start of the season (rosters' birth date; NaN when unknown, which the trees handle)."""
-    X = self._with_prev(self._with_reason(X, rows), rows)
+    X = self._with_tprior(self._with_prev(self._with_reason(X, rows), rows), rows)
     mode = self.cfg.get("injuries", {}).get("practice_rest")
     if not mode:
       return X
@@ -645,13 +703,8 @@ class InjuryModel:
     """gsis -> (P(plays), status label, plain-English why) from the Tuesday model, for players whose team's game this
     week is next after one he was listed for or hurt in (nfledge/tuesday.py). Built once, trained on every row whose
     outcome is known before this week."""
-    from pathlib import Path
-    from . import data as D
     from . import tuesday as T
-    if not hasattr(self, "_tues_rows"):
-      cache = D.Cache(Path(__file__).resolve().parent.parent / self.cfg["data"]["cache_dir"])
-      self._tues_rows = T.build_rows(self.data, T.report_rows(self.data), T.hurt_notes(self.data, cache))
-    r = self._tues_rows
+    r = self._tues_table()
     if not len(r):
       return {}
     train = r[r.y.notna() & ((r.season < season) | ((r.season == season) & (r.week < week)))]
@@ -703,6 +756,13 @@ class InjuryModel:
       if row.team in published and use_days and row.gsis_id in days.index:
         x = days.loc[[row.gsis_id]]
         p.at[i, "avail"] = float(self.practice_prob(x, final=row.team in final)[0])
+        if self.cfg.get("injuries", {}).get("week_model") and x.game_status.iloc[0] != "OUT":
+          # (I2) the one model: the Tuesday picture + this week's practice so far (stage 1-2) or the final report (3)
+          dd = str(x.days.iloc[0] or "").replace("?", "")
+          st = 3 if row.team in final else max(1, min(2, len(dd)))
+          v = self.week_prob([(row.gsis_id, season, week, row.team, row.pos, dd, x.game_status.iloc[0], st)])[0]
+          if v == v:
+            p.at[i, "avail"] = float(v)
         p.at[i, "partial_week"] = row.team not in final  # report.inactive_why: "practice so far"
         p.at[i, "on_report"] = True  # returns.lookahead_availability starts its chain from this week's chance
         gs = x.game_status.iloc[0]

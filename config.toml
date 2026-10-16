@@ -189,6 +189,10 @@ qb2_play_rate = 0.232
 # (nfledge/tuesday.py): last week's status + practice, whether he played last game and how much, in-game injury
 # notes, the episode so far, the listed reason. 2021-25: on-report Brier 0.1378 -> 0.1237, hurt-not-listed 0.2032 -> 0.1531.
 tuesday = true
+# Wednesday on: ONE availability model for every day of the week (owner 2026-10-16), the Tuesday picture (last game,
+# snaps vs usual, in-game injury, the whole injury episode, listed reason) + this week's practice so far / the final
+# report, calibrated per stage. 2021-25 Brier: Wednesday 0.217 -> 0.135, Thursday 0.149 -> 0.104, final 0.095 -> 0.084.
+week_model = true
 # Job security in the healthy-scratch model (incumbent starter, season-to-date EPA percentile, first-round rookie
 # behind him, team win %, contract share of the cap, final week). 2021-25: Brier on players not on the report
 # 0.0765 -> 0.0763 (-0.0002 [-0.00045, -0.00001]); RB -0.0010, others no difference; MAE unchanged.

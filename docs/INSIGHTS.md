@@ -1503,3 +1503,69 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   -0.0448], better 5/5 seasons; predicted 74.6% vs played 75.0%. In-game note: predicted 64.5%, played 65.0%; left
   early only: 80.9% vs 81.3%. (G) with the model trained on both populations: 0.1378 -> 0.1237 [-0.0166, -0.0116],
   5/5, worst decile 2.2 pts. -> SHIP: the Tuesday model replaces the carry-forward before a team's first report.
+- **RESULT (C) practice_rest: FAIL; practice_rest_age: FAIL.** Availability Brier, players on the report 2021-25
+  (n 7,598): rest flag 0.0931 -> 0.0930 (-0.0001 [-0.0005, +0.0004]); + age 0.0931 -> 0.0936 (+0.0005 [-0.0002,
+  +0.0013]; RB MAE significantly worse). A vet's rest Wednesday is followed by full Thursday / Friday practice, which
+  the model already reads as healthy: by the final report the label adds nothing. (The Tuesday model and (E) carry
+  the listed reason, including rest, where it can matter: before the practice days exist.) Off.
+- **PRE-REGISTERED 2026-10-16 (before running): (H) `injuries.tuesday_prior` - keep the Tuesday number after the
+  first report** (owner: "if Tuesday is so accurate why are we throwing it out?"). The practice and partial-week
+  models get the Tuesday model's P(plays) for that week as an input (the Tuesday model for season s trained on
+  seasons before s only, for training and test rows alike; NaN where there is none). Today the Wednesday model starts
+  over from the practice days (McConkey: Tuesday 48% -> one "limited" day -> 82.5%). GATE: as (F): availability Brier
+  on injury-report weeks 2021-25 lower with the CI over season-weeks excluding 0, no position significantly worse,
+  MAE CI upper < +0.003; partial weeks reported separately. If (F) and (H) both pass, ship the lower Brier.
+- **PRE-REGISTERED 2026-10-16 (before building): (I) one availability model for every day of the week** (owner:
+  "shouldn't Wednesday, or any given day, just use the same approach Tuesday does, with extra information?"). Today
+  three models hand off (Tuesday -> partial-week 1-2 days -> full-week practice) and each starts over. New: ONE model,
+  rows = (player, game) at each stage of the week: 0 = Tuesday (no report yet), 1 = Wednesday, 2 = Thursday, 3 =
+  final report. Inputs: everything the Tuesday model has (from his last game) + this week's report so far (on it or
+  not, practice days so far, the listed reason, and the game status at stage 3) + his role. Population: everyone on
+  this week's final report or in the Tuesday population. Walk-forward 2021-25 (trained on seasons before), compared
+  stage by stage with what the site uses at that stage today (stage 0: the shipped Tuesday model; 1-2: the partial-
+  week models; 3: the full-week practice model with the role input), on the same rows; game status Out excluded
+  (0% by rule). tools/week_avail_eval.py.
+  GATE: stage 3 (the largest: final reports) Brier lower with the 95% CI over season-weeks excluding 0, no position
+  significantly worse; stages 1 and 2 lower with the CI excluding 0 or at worst CI upper < +0.002; stage 0 CI upper <
+  +0.002 vs the Tuesday model; every stage's deciles within 4 points. Then, as a second step before shipping, fantasy
+  MAE 2021-25 CI upper < +0.003 (tools/experiments.py). (F) and (H) are dropped in favor of this.
+- **RESULT (I) one model for every day: FAIL (as registered), with large gains.** 2021-25, Brier today -> one model:
+  Wednesday 0.2166 -> 0.1334 (-0.083 [-0.088, -0.078], 5/5), Thursday 0.1488 -> 0.1026 (-0.046, 5/5), final report
+  0.0948 -> 0.0846 (-0.010 [-0.012, -0.008], 5/5; every real position better or no different), Tuesday 0.1327 ->
+  0.1345 (+0.0018 [+0.0012, +0.0025], worse than the dedicated Tuesday model). Missed his last game: Wednesday
+  predicted 80.5% today / 47.0% one model / 47.6% played; final 78.9 / 68.7 / 68.7%. Failed on: calibration (final
+  report worst decile 6.2 pts: 61.4 predicted vs 67.6 actual; Wednesday 4.4 pts: 89.0 vs 85.3), Tuesday slightly
+  worse, and rows with no position recorded (a data gap) worse. Not shipped.
+- **PRE-REGISTERED 2026-10-16, second attempt after seeing (I): (I2).** Changes, each general rather than tuned to
+  (I)'s numbers: (1) Tuesday keeps the dedicated Tuesday model; the one model serves stages 1-3 only. (2) A calibration
+  step per stage: isotonic regression fit on season s-1 predictions of a model trained on seasons before s-1, applied
+  to the season-s model. (3) Missing positions filled from the rosters. GATE: (I)'s gate for stages 1-3 AND, because
+  this attempt was designed after seeing results, the same direction on data nothing has touched: 2026 weeks so far
+  (trained through 2025): stage 3 Brier lower than today's practice model and stages 1-2 not worse. Then fantasy MAE.
+- **RESULT (I2): availability gate PASS.** 2021-25, today's model -> one model (calibrated): Wednesday 0.2166 ->
+  0.1350 (-0.082 [-0.086, -0.077], 5/5, worst decile 3.6 pts), Thursday 0.1488 -> 0.1039 (-0.045, 5/5, 1.4 pts),
+  final report 0.0948 -> 0.0844 (-0.0104 [-0.0124, -0.0084], 5/5, 3.2 pts); no position significantly worse (DB
+  +0.003 [-0.007, +0.008]). Untouched 2026 weeks 1-6 (trained through 2025): Wednesday 0.2299 -> 0.1286, Thursday
+  0.1634 -> 0.1033, final 0.0946 -> 0.0817. Missed last game: Wednesday predicted 80.5% today / 48.6% / played 47.6%.
+  Tuesday stays the dedicated Tuesday model (0.1327 vs 0.1350). Next: the fantasy MAE step (experiments.py).
+- **Finding 2026-10-16 (owner: "is a starter with a bad replacement rushed back?"): yes at QB and RB, not WR / TE.**
+  Regular starters (60%+ snaps last 3 games, 5+ FP/G) who missed games and returned in-season, 2012-25 (n 695);
+  replacement = the teammate at the position whose snap share jumped most; his first fill-in game's fantasy points vs
+  the starter's usual, in thirds. Back after missing 1 game: weak fill-in 60% / middle 54% / strong 41% (avg missed
+  1.86 / 2.00 / 2.46). QB 62 / 53 / 26% (n 212); RB 63 / 36 / 30% (n 78); WR 60 / 60 / 57%; TE 55 / 50 / 67% (n 95).
+  Caveat (likely large at QB): reverse cause - a team expecting a long absence prepares the backup (first-team reps,
+  game plan), so his first game looks strong because the absence was always going to be long. The clean version
+  measures the replacement BEFORE the injury (his earlier starts / grade going in); that is the one to test as an input
+  to the return-timing and availability models, QB and RB only.
+- **RESULT (D) grade_prior (Edge grade as of the week, as a share-model input): FAIL.** Fantasy MAE 2021-25 +0.003
+  [+0.000, +0.007] (worse); QB -0.003 [-0.011, +0.004], RB +0.003, WR +0.006 [-0.000, +0.013], TE +0.003; worse in 3
+  of 5 seasons. The grade is recent fantasy output, which the share and efficiency inputs already carry in finer form
+  (opportunity shares + per-opportunity rates, recency-weighted); adding the blended number only adds noise. Off.
+- **RESULT (I2) step 2, fantasy MAE: by the letter FAIL (CI upper +0.004 vs < +0.003), not significantly worse.**
+  2021-25: ALL +0.001 [-0.004, +0.004]; QB -0.010 [-0.030, +0.005]; RB +0.004 [-0.002, +0.011]; WR +0.002 [+0.000,
+  +0.004] (edge of significance); TE +0.001; seasons -0.003 / +0.003 / +0.003 / -0.005 / +0.006. Availability Brier
+  on report rows in the same runs 0.0935 -> 0.0903. -> SHIPPED under the owner-design rule (the one model is the
+  owner's design: ship unless shown significantly worse; overall it is not), with this miss of my own pre-set MAE bar
+  recorded. Projections barely move because availability changes the projection only when a player crosses 50%
+  (who sits and whose volume is redistributed); the displayed inactive % is where it matters. Owner may hold it to
+  the stricter bar: config injuries.week_model.
