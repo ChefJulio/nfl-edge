@@ -37,8 +37,14 @@
         const v = D.power_vol || {}, n = (x, d) => x ? Math.round(x) : d;
         sec.innerHTML = `<div class="sec-head"><div><h2>Power rankings</h2><p>Opponent-adjusted points per game vs an average team. Everything adds up: Offense = Pass O + Run O, Defense = Pass D + Run D, Net = Offense + Defense + ST.</p></div></div>
           <details class="howto"><summary>How to read</summary><div>
-            Every number is <b>points per game against an average opponent</b>: each unit's per-play rating times a league-average number of those plays (about ${n(v.pass, 34)} dropbacks, ${n(v.rush, 25)} runs and ${n(v.st, 11)} special-teams plays), so the columns add up and a run edge is never read as equal to a pass edge. Hover any unit for its per-play rating. Pass O includes the team's current starting quarterback. Higher is better everywhere, including defense. <b>Rank range</b> is the 10th-90th percentile rank when ratings are resampled within their uncertainty (200 bootstrap resamples of games): a narrow range means the data has settled, a wide one means a few more games could move the team a lot.
-            Colored badges are league ranks (green = top 8, red = bottom 8). <b>Schedule</b>: points per game the opponents took away (played) or would take away (left), unit by unit: the team's actual dropbacks against each opponent's pass defense and runs against its run defense, plus the offenses its defense faced. Positive = tougher than average; 1st = hardest. Re-scored every week with current ratings. Arrows show the move since last week.
+            <dl class="ht">
+              <dt>Every number</dt><dd>Points per game vs an average opponent. Higher is better everywhere, defense included, and the columns add up.</dd>
+              <dt>Units</dt><dd>Per-play rating × a typical game's plays (about ${n(v.pass, 34)} dropbacks, ${n(v.rush, 25)} runs, ${n(v.st, 11)} special-teams plays). Hover a unit for its per-play rating. Pass O includes the current starting QB.</dd>
+              <dt>Rank range</dt><dd>Where the team could rank given the uncertainty (10th–90th percentile). Narrow = settled; wide = a few games could move it a lot.</dd>
+              <dt>Badges</dt><dd>League ranks: green = top 8, red = bottom 8.</dd>
+              <dt>Schedule</dt><dd>Points per game opponents took away (played) or will (left). Positive = tougher than average; 1st = hardest.</dd>
+              <dt>Arrows</dt><dd>Move since last week.</dd>
+            </dl>
           </div></details>
           <div class="pw-tbl"></div>`;
         const teams = D.teams || {};

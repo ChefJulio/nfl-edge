@@ -42,20 +42,27 @@
       <div class="sec-head rk-h-week"><div><h2>Weekly rankings</h2><p><span id="scoreSub">Half-PPR</span> projections if active, with realistic ranges. Tap a player for his page.</p></div></div>
       <div class="sec-head rk-h-ros" hidden><div><h2>Rest-of-season rankings</h2><p><span class="rosSub">Half-PPR</span> points expected from now through week 17, each game weighted by his chance to play. Tap a player for his page.</p></div></div>
       <details class="howto rk-h-ros" hidden><summary>How to read</summary><div>
-        <b>ROS pts</b>: the points we expect from him from now through week 17 (where most fantasy seasons end), under your scoring. Each remaining game is projected against its real opponent with today's ratings, roles and Vegas lines, then multiplied by his chance to play that week (injured players come back on the return-timing model). This week's game counts until it kicks off.
-        <b>Pts/G</b>: ROS points per game he's expected to play. <b>Games</b>: games he's expected to play (byes and expected absences don't count).
-        <b>Sched</b>: points his remaining opponents add (+) or take away (-) in total, vs average opponents. <b>Weeks</b>: each remaining week's expected points; B = bye, a dash = expected to sit, faded = under 50% to play.
-        Later weeks are less certain: they use today's roles and ratings, and injuries nobody knows about yet aren't in them.
+        <dl class="ht">
+          <dt>ROS pts</dt><dd>Points we expect from him from now through week 17, in your scoring. Each game is projected against its real opponent, then scaled by his chance to play.</dd>
+          <dt>Pts/G</dt><dd>Those points per game he's expected to play.</dd>
+          <dt>Games</dt><dd>Games he's expected to play (byes and expected absences don't count).</dd>
+          <dt>Sched</dt><dd>Points his remaining opponents add (+) or take away (−) in total.</dd>
+          <dt>Weeks</dt><dd>Each week's expected points. B = bye, dash = expected to sit, faded = under 50% to play.</dd>
+        </dl>
+        <p class="ht-note">Later weeks are less certain: they use today's roles and ratings. This week's game counts until kickoff.</p>
       </div></details>
       <details class="howto rk-h-week"><summary>How to read</summary><div>
-        <b>Projection</b> assumes the player is active (NFL availability is yes/no, so injured players show an Inactive% instead of a discount). Tap a player for his range of outcomes.
-        <b>#</b> is our rank; the number in parentheses is the FantasyPros expert consensus rank ("lw" = last week's, until Friday).
-        <b>Last 5</b>: his last five games this season; green = beat our projection for that game, red = missed it, the white tick is the projection.
-        <b>Range</b>: floor to ceiling; 8 times in 10 his score lands inside it.
-        <b>Matchup</b>: points the opponent adds to (+) or takes from (-) the projection, vs an average opponent: its Vegas total, the team's play volume and the defense ratings together. Green helps, red hurts; the deeper the color, the bigger the matchup.
-        <b>Volume</b>: projected dropbacks / carries / targets; an arrow means his recent usage share has moved up or down from his longer-run share.
-        <b>Team pts</b>: points his team is expected to score (Vegas implied total). <b>TD</b>: chance of at least one touchdown (QBs: projected passing TDs).
-        <b>vs ECR</b>: how many spots higher (+) or lower (-) we rank him than the expert consensus. Hover a player's name for our one-line take. A yellow edge marks a projection boosted by a teammate's absence.
+        <dl class="ht">
+          <dt>#</dt><dd>Our rank at the position.</dd>
+          <dt>Proj</dt><dd>Points if he plays. Injured players show an Inactive % instead of a discount, since playing is yes/no.</dd>
+          <dt>Range</dt><dd>Floor to ceiling: 8 times in 10 his score lands inside it.</dd>
+          <dt>Last 5</dt><dd>His last five games. Green beat our projection, red missed it; the white tick is the projection.</dd>
+          <dt>Matchup</dt><dd>Points this opponent adds (+) or takes away (−) vs an average one. Green helps, red hurts; deeper = bigger.</dd>
+          <dt>Volume</dt><dd>Projected dropbacks / carries / targets. An arrow means his recent role is growing or shrinking.</dd>
+          <dt>Team pts</dt><dd>Points his team is expected to score (Vegas implied total).</dd>
+          <dt>TD</dt><dd>Chance of at least one touchdown (QBs: projected passing TDs).</dd>
+        </dl>
+        <p class="ht-note">Tap a player for his page. A yellow edge = projection boosted by a teammate's absence.</p>
       </div></details>
       <div class="card">
         <div class="toolbar">
@@ -145,15 +152,12 @@
       const [nm, , pSit, plays, sits] = r.cond, other = pSit >= 0.5 ? plays : sits;
       return `<span class="pv-cond" title="${esc(`${f1(sits * r._ratio)} if ${nm} sits (${Math.round(100 * pSit)}% likely), ${f1(plays * r._ratio)} if he plays`)}">${f1(other * r._ratio)} if ${esc(lastName(nm))} ${pSit >= 0.5 ? 'plays' : 'sits'}</span>`;
     };
-    const ecrOf = (r, flex) => flex ? r.ecr_flex : r.ecr;
-    const staleOf = (r, flex) => flex ? r.ecr_flex_stale : r.ecr_stale;
     const rankOf = (r, flex) => flex ? r._frank : r._rank;
     const columns = flex => {
       const range = r => `Floor ${f1(r._q[0])} · middle ${f1(r._q[1])}-${f1(r._q[3])} · ceiling ${f1(r._q[4])}`;
       const cols = [
-        { key: 'rank', label: '#', num: true, first: 'asc', cls: 'rk', title: "Our rank at the position; in parentheses the FantasyPros expert consensus rank (published Fridays; 'lw' = last week's until then)",
-          value: r => rankOf(r, flex), html: r => { const e = ecrOf(r, flex), st = staleOf(r, flex);
-            return `<b class="rkn">${rankOf(r, flex)}</b>${e != null ? `<span class="ecr${st ? ' stale' : ''}" title="${st ? 'Last week' : 'Expert consensus'} ${flex ? 'flex ' : ''}rank (FantasyPros${flex ? ' superflex list without QBs' : ''})">(${f0(e)}${st ? '<sup>lw</sup>' : ''})</span>` : ''}`; } },
+        { key: 'rank', label: '#', num: true, first: 'asc', cls: 'rk', title: 'Our rank at the position (owner 2026-10-15: our ranks only, no expert consensus shown)',
+          value: r => rankOf(r, flex), html: r => `<b class="rkn">${rankOf(r, flex)}</b>` },
         { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name, html: r => nameCell(r, flex) },
         { key: 'proj', label: 'Proj', num: true, cls: 'projc', title: 'Projected fantasy points under your scoring (tap a player for the full range of outcomes)', value: r => r._proj,
           html: r => `<b class="pv" title="${esc(range(r))}">${f1(r._proj)}</b>${condLine(r)}` },
@@ -173,9 +177,6 @@
         { key: 'imp', label: 'Team pts', num: true, cls: 'impc', title: "Points his team is expected to score this game (Vegas implied total; our model's before lines post): more points, more scoring chances", value: r => r.imp, html: r => f1(r.imp) },
         { key: 'td', label: pos === 'QB' ? 'Pass TD' : 'TD', num: true, cls: 'tdc', title: pos === 'QB' ? 'Projected passing touchdowns (hover for his rushing TD chance)' : 'Chance he scores at least one touchdown',
           value: r => r.td && r.td.v, html: r => r.td ? `<span title="${esc(r.td.d)}">${esc(r.td.t)}</span>` : '' },
-        { key: 'vs', label: 'vs ECR', num: true, cls: 'vsc', title: 'Where we rank him vs the FantasyPros expert consensus: +6 = six spots higher than the experts (we like him more), -4 = lower',
-          value: r => { const e = ecrOf(r, flex); return e == null ? null : Math.round(e - rankOf(r, flex)); },
-          html: r => { const e = ecrOf(r, flex); if (e == null) return ''; const v = Math.round(e - rankOf(r, flex)); return `<span class="vs-n ${v >= 3 ? 'pos' : v <= -3 ? 'neg' : ''}${staleOf(r, flex) ? ' stale' : ''}">${v > 0 ? '+' : ''}${v}</span>`; } },
       ];
       return cols;
     };

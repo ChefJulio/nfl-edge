@@ -430,3 +430,9 @@
   };
   if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
 })();
+// How to read pop-outs close on a tap outside them or Esc (site.css details.howto)
+(() => {
+  const closeAll = keep => document.querySelectorAll('details.howto[open]:not(.od-track)').forEach(d => { if (d !== keep) d.open = false; });
+  document.addEventListener('click', e => { closeAll(e.target.closest && e.target.closest('details.howto')); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(null); });
+})();

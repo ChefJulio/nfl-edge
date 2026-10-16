@@ -10,7 +10,11 @@
         const teams = D.teams || {}, last = D.week - 1;
         sec.innerHTML = `<div class="sec-head"><div><h2>Role changes</h2><p>Snap and opportunity spikes in week ${last} compared with each player's previous three games.</p></div></div>
           <details class="howto"><summary>How to read</summary><div>
-            Compares each player's latest game with his previous three. Opportunity share = (carries + targets) / team plays. These are alerts, not model inputs: check the reason (injury ahead of him, demotion, game script) before chasing.
+            <dl class="ht">
+              <dt>Compares</dt><dd>His latest game with his previous three.</dd>
+              <dt>Opportunity share</dt><dd>(Carries + targets) / team plays.</dd>
+              <dt>Use it as</dt><dd>An alert, not a model input: check why (injury ahead of him, demotion, game script) before chasing.</dd>
+            </dl>
           </div></details>
           ${D.roles.length ? '<div class="ro-tbl"></div>' : '<p class="muted">No role changes yet this season.</p>'}`;
         if (!D.roles.length) return;
