@@ -137,7 +137,7 @@ class InjuryModel:
     d = ah[(ah.season < max(seasons) + 1) & (ah.game_status != "OUT")]
     if len(d) < 1000:
       return
-    X = self._with_role(practice_features(d), d)
+    X = self._with_rest(self._with_role(practice_features(d), d), d)
     self.practice_cols = list(X.columns)
     self.practice_model = HistGradientBoostingClassifier(**self._gb_params(), random_state=0).fit(X, d.played)
     # Midweek (owner-approved test 2026-10-15, INSIGHTS sec. 9; tools/partial_week_eval.py): the full-week model
@@ -149,7 +149,7 @@ class InjuryModel:
     for k in (1, 2):
       t = full3.assign(days=full3.days.str[:k], game_status="None")
       self.partial_models[k] = HistGradientBoostingClassifier(**self._gb_params(), random_state=0).fit(
-        self._with_role(practice_features(t), t)[self.practice_cols], t.played)
+        self._with_rest(self._with_role(practice_features(t), t), t)[self.practice_cols], t.played)
 
   def _with_role(self, X: pd.DataFrame, rows: pd.DataFrame) -> pd.DataFrame:
     """EXPERIMENT (injuries.practice_role; pre-registered 2026-10-15): add his recent role, the mean snap share
@@ -176,10 +176,115 @@ class InjuryModel:
       out = [v if ps in use_pos else -1.0 for v, ps in zip(out, rows.position)]
     return X.assign(role=out)
 
+  REASONS = ["hamstring", "neck", "concussion", "leg_soft", "ankle", "knee", "foot", "upper", "core", "illness",
+             "personal", "rest", "other"]
+
+  @staticmethod
+  def reason_of(primary: str, secondary: str) -> str:
+    """The week's listed reason as one category (INSIGHTS (E)): a real injury wins over a rest note listed with it."""
+    def cat(t: str):
+      t = t.lower()
+      if not t or t in ("nan", "none"):
+        return None
+      for key, words in (("hamstring", ["hamstring"]), ("neck", ["neck"]), ("concussion", ["concussion", "head"]),
+                         ("leg_soft", ["groin", "quad", "thigh", "calf", "achilles", "adductor"]), ("ankle", ["ankle"]),
+                         ("knee", ["knee", "acl", "mcl"]), ("foot", ["foot", "toe", "heel"]),
+                         ("upper", ["shoulder", "elbow", "hand", "wrist", "finger", "thumb", "arm", "pectoral", "bicep", "tricep"]),
+                         ("core", ["back", "hip", "rib", "chest", "abdom", "oblique", "pelvis"]), ("illness", ["illness"]),
+                         ("personal", ["personal"]), ("rest", ["rest", "not injury related"])):
+        if any(w in t for w in words):
+          return key
+      return "other"
+    a, b = cat(str(primary)), cat(str(secondary))
+    if a in ("rest", "personal") and b not in (None, "rest", "personal"):
+      return b  # "resting player" with a groin listed second: the groin is what could keep him out
+    return a or b or "none"
+
+  def _with_prev(self, X: pd.DataFrame, rows: pd.DataFrame) -> pd.DataFrame:
+    """EXPERIMENT (injuries.practice_prev; pre-registered 2026-10-16): did he miss his team's previous game (no snap
+    in it), and how many in a row (cap 4). Limited Wed + Thu: played 89% after playing last week, 59% after missing
+    it (owner: Ladd McConkey). His team that week: the injury report's, else his latest roster row. NaN where snap
+    counts don't cover the season (2018)."""
+    if not self.cfg.get("injuries", {}).get("practice_prev"):
+      return X
+    if not hasattr(self, "_prev_idx"):
+      sn = self.data.snaps.dropna(subset=["gsis_id"])
+      tot = sn[["offense_snaps", "defense_snaps", "st_snaps"]].fillna(0).sum(axis=1)
+      self._on_field = set(zip(sn.gsis_id[tot > 0], sn.season[tot > 0].astype(int), sn.week[tot > 0].astype(int)))
+      self._snap_seasons = set(sn.season.astype(int))
+      sch = self.data.schedules[self.data.schedules.game_type == "REG"]
+      tw = {}
+      for g in sch.itertuples():
+        for t in (g.home_team, g.away_team):
+          tw.setdefault((int(g.season), t), []).append(int(g.week))
+      self._team_weeks = {k: sorted(v) for k, v in tw.items()}
+      inj = self.data.injuries.dropna(subset=["gsis_id"])
+      self._team_of = {(int(s_), int(w), g): t for s_, w, g, t in zip(inj.season, inj.week, inj.gsis_id, inj.team)}
+      ro = self.data.rosters.dropna(subset=["gsis_id"]).sort_values(["season", "week"])
+      self._ros_team = ro.drop_duplicates("gsis_id", keep="last").set_index("gsis_id").team.to_dict()
+      self._prev_idx = True
+    gid = rows.gsis_id if "gsis_id" in rows else pd.Series(rows.index, index=rows.index)
+    teams = rows.team if "team" in rows else pd.Series([None] * len(rows), index=rows.index)
+    miss, streak = [], []
+    for g, s_, w, t in zip(gid, rows.season, rows.week, teams):
+      s_, w = int(s_), int(w)
+      t = t if isinstance(t, str) else self._team_of.get((s_, w, g)) or self._ros_team.get(g)
+      t = {"LAR": "LA"}.get(t, t)
+      prev = [k for k in self._team_weeks.get((s_, t), []) if k < w]
+      if s_ not in self._snap_seasons or not prev:
+        miss.append(np.nan); streak.append(np.nan)
+        continue
+      n = 0
+      for k in reversed(prev):
+        if (g, s_, k) in self._on_field:
+          break
+        n += 1
+      miss.append(float(n > 0)); streak.append(float(min(n, 4)))
+    return X.assign(missed_prev=miss, missed_run=streak)
+
+  def _with_reason(self, X: pd.DataFrame, rows: pd.DataFrame) -> pd.DataFrame:
+    """EXPERIMENT (injuries.practice_reason; pre-registered 2026-10-16): one flag per listed-reason category."""
+    if not self.cfg.get("injuries", {}).get("practice_reason"):
+      return X
+    if not hasattr(self, "_reason_idx"):
+      inj = self.data.injuries.dropna(subset=["gsis_id"]).drop_duplicates(["season", "week", "gsis_id"], keep="last")
+      pr = inj.practice_primary_injury.where(inj.practice_primary_injury.notna(), inj.report_primary_injury)
+      sc = inj.practice_secondary_injury.where(inj.practice_secondary_injury.notna(), inj.report_secondary_injury)
+      self._reason_idx = {(int(s_), int(w), g): self.reason_of(a, b)
+                          for s_, w, g, a, b in zip(inj.season, inj.week, inj.gsis_id, pr, sc)}
+    gid = rows.gsis_id if "gsis_id" in rows else pd.Series(rows.index, index=rows.index)
+    cats = [self._reason_idx.get((int(s_), int(w), g), "none") for g, s_, w in zip(gid, rows.season, rows.week)]
+    return X.assign(**{f"why_{c}": [float(x == c) for x in cats] for c in self.REASONS})
+
+  def _with_rest(self, X: pd.DataFrame, rows: pd.DataFrame) -> pd.DataFrame:
+    """EXPERIMENT (injuries.practice_rest; pre-registered 2026-10-16): veteran rest days. 'rest' = 1 when any of the
+    week's report / practice injury fields says the player was resting ("Not injury related - resting player"), so a
+    rest DNP stops reading like an injury DNP (owner: Keenan Allen, 34). practice_rest = "age" also adds his age at the
+    start of the season (rosters' birth date; NaN when unknown, which the trees handle)."""
+    X = self._with_prev(self._with_reason(X, rows), rows)
+    mode = self.cfg.get("injuries", {}).get("practice_rest")
+    if not mode:
+      return X
+    if not hasattr(self, "_rest_idx"):
+      inj = self.data.injuries.dropna(subset=["gsis_id"])
+      txt = inj[["report_primary_injury", "report_secondary_injury", "practice_primary_injury",
+                 "practice_secondary_injury"]].fillna("").astype(str).agg(" ".join, axis=1).str.lower()
+      r = inj[txt.str.contains("resting")]
+      self._rest_idx = set(zip(r.season.astype(int), r.week.astype(int), r.gsis_id))
+      ro = self.data.rosters.dropna(subset=["gsis_id", "birth_date"])
+      self._born = pd.to_datetime(ro.drop_duplicates("gsis_id", keep="last").set_index("gsis_id").birth_date, errors="coerce")
+    gid = rows.gsis_id if "gsis_id" in rows else pd.Series(rows.index, index=rows.index)
+    X = X.assign(rest=[float((int(s_), int(w), g) in self._rest_idx) for g, s_, w in zip(gid, rows.season, rows.week)])
+    if mode == "age":
+      b = gid.map(self._born)
+      start = pd.to_datetime(rows.season.astype(int).astype(str) + "-09-01")
+      X = X.assign(age=((start - pd.to_datetime(b.values)).dt.days / 365.25).to_numpy(float))
+    return X
+
   def practice_prob(self, rows: pd.DataFrame, final: bool = True) -> np.ndarray:
     """P(plays) from the practice sequence. final=False (his team's final report isn't out): 1-2 published days
     use the partial-week model for that many days."""
-    X = self._with_role(practice_features(rows), rows)[self.practice_cols]
+    X = self._with_rest(self._with_role(practice_features(rows), rows), rows)[self.practice_cols]
     p = self.practice_model.predict_proba(X)[:, 1]
     if not final and getattr(self, "partial_models", None):
       n = rows.days.fillna("").str.replace("?", "", regex=False).str.len().to_numpy()
@@ -536,6 +641,44 @@ class InjuryModel:
       return None
     return float(MIDWEEK[b]["p"]), {"IR": "IR (ESPN)", "Doubtful": "Doubtful (ESPN)"}.get(b, "Out (ESPN)")
 
+  def tuesday_probs(self, season: int, week: int) -> dict:
+    """gsis -> (P(plays), status label, plain-English why) from the Tuesday model, for players whose team's game this
+    week is next after one he was listed for or hurt in (nfledge/tuesday.py). Built once, trained on every row whose
+    outcome is known before this week."""
+    from pathlib import Path
+    from . import data as D
+    from . import tuesday as T
+    if not hasattr(self, "_tues_rows"):
+      cache = D.Cache(Path(__file__).resolve().parent.parent / self.cfg["data"]["cache_dir"])
+      self._tues_rows = T.build_rows(self.data, T.report_rows(self.data), T.hurt_notes(self.data, cache))
+    r = self._tues_rows
+    if not len(r):
+      return {}
+    train = r[r.y.notna() & ((r.season < season) | ((r.season == season) & (r.week < week)))]
+    now = r[(r.season == season) & (r.week == week) & r.y.isna()]
+    if len(train) < 1000 or not len(now):
+      return {}
+    pr_ = T.fit(train).predict_proba(T.features(now))[:, 1]
+    words = {"D": "DNP", "L": "limited", "F": "full"}
+    out = {}
+    for x, v in zip(now.itertuples(), pr_):
+      if x.pop == "A":
+        lab = f"{x.status} last wk" if x.status != "None" else "On report last wk"
+      else:
+        lab = "Hurt last game" if x.hurt_in_game else "Left last game early"
+      bits = []
+      if x.pop == "A":
+        bits.append(f"{x.status if x.status != 'None' else 'no game status'} last week"
+                    + (f" (practice {', '.join(words[c] for c in 'DLF' for _ in range(int(getattr(x, 'n_' + c))))})" if x.n_D + x.n_L + x.n_F else ""))
+      if x.played_last:
+        sh = f"played last game, {round(100 * x.last_pct)}% of snaps" + (f" vs his usual {round(100 * x.usual_pct)}%" if x.usual_pct == x.usual_pct else "")
+        bits.append(sh + (", injury noted during it" if x.hurt_in_game else ""))
+      else:
+        bits.append(f"missed his last {int(x.missed_run)} game{'s' if x.missed_run > 1 else ''}" if x.missed_run else "did not play last game")
+      out[x.gsis_id] = (float(v), lab, "Before this week's first injury report: " + "; ".join(bits)
+                        + ". How players in that spot played the next game (Tuesday model)")
+    return out
+
   def availability(self, p: pd.DataFrame, season: int, week: int) -> pd.DataFrame:
     inj = self.data.injuries
     inj = inj[(inj.season == season) & (inj.game_type == "REG")].dropna(subset=["gsis_id"])
@@ -544,6 +687,8 @@ class InjuryModel:
     published = set(cur.team)
     p = p.copy()
     p["avail"], p["status"], p["partial_week"], p["on_report"] = 1.0, "", False, False
+    p["tuesday"] = ""  # report.inactive_why: why the Tuesday model says what it says
+    tues = None
     cur_map = cur.set_index("gsis_id")
     prev_map = prev.drop_duplicates("gsis_id").set_index("gsis_id")
     pr = self.data.practice
@@ -582,6 +727,10 @@ class InjuryModel:
         base = "Out" if b == "Out+ret" else b
         p.at[i, "avail"] = 0.0 if b == "IR" else float(rate["p"] if rate else self.p_next.get(base, 1.0))
         p.at[i, "status"] = "Out (ESPN; return date after this game)" if b == "Out+ret" else f"{b} (ESPN)"
+      elif self.cfg.get("injuries", {}).get("tuesday") and row.gsis_id in (tues if tues is not None else (tues := self.tuesday_probs(season, week))):
+        # Before his team's first report: the Tuesday model (nfledge/tuesday.py; INSIGHTS (G) / (G2))
+        pr_, lab, why_ = tues[row.gsis_id]
+        p.at[i, "avail"], p.at[i, "status"], p.at[i, "tuesday"] = pr_, lab, why_
       elif row.gsis_id in prev_map.index:
         rep = _report(prev_map.at[row.gsis_id, "report_status"])
         if rep != "None":

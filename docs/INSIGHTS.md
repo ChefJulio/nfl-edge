@@ -1421,3 +1421,85 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   add nothing the depth chart and active history don't already carry (QB benchings of healthy incumbents are rare,
   1.4% of weeks). Owner-requested contract input included (cap share).
 - **RESULT (B) share_quality: FAIL.** Fantasy MAE +0.002 [0.000, +0.003] overall, worse; no position better. Off.
+- **PRE-REGISTERED 2026-10-16 (before running): (C) `injuries.practice_rest` - veteran rest days in the practice
+  model** (owner: Keenan Allen, 34, DNP Wednesday "Not injury related - resting player" with a groin listed second;
+  the model reads only the D/L/F sequence, so a rest DNP looks like an injury DNP). Variant `practice_rest`: a flag
+  for the week when any of his report / practice injury fields says resting; variant `practice_rest_age`: the flag +
+  his age at the start of the season. GATE (each variant vs baseline): availability Brier on injury-report player-
+  weeks, 2021-25 walk-forward (tools/experiments.py; final reports), lower with the 95% CI over season-weeks
+  excluding 0; no position significantly worse; fantasy MAE CI upper < +0.003. Also reported: mean P(play) vs actual
+  for rest-flagged weeks. The flag comes from the week's final record, so it is judged on final-report weeks only;
+  midweek it would be partly hindsight.
+- **PRE-REGISTERED 2026-10-16 (before running): (D) `experiments.grade_prior` - the Edge grade as a projection
+  input** (owner: "does factoring our Edge grade into projections help?"). The grade (tools/grade_build.py) predicts
+  next-season value per game from the player's recent seasons; built walk-forward for season s from seasons before
+  s only (no in-season information), as an input to the share regressions (carry share, target share, dropback
+  share). GATE: fantasy MAE 2021-25, all positions CI upper < 0; no position's CI lower > 0.
+- **AMENDMENT to (D), before running (2026-10-16):** the published Edge grade is not the advanced-stats ridge in
+  grade_build.py but "current form" = fantasy points per game over this season and the two before (weights 1 / .6 /
+  .3), shrunk toward the position mean. Testing the preseason-only version would test something the site doesn't
+  show, so `grade_prior` = that number AS OF THE WEEK (games before the week only; priors from completed seasons),
+  as an input to the carry, target and dropback share regressions. Gate unchanged.
+- **Finding 2026-10-16: the listed reason matters and the practice model ignores it.** Wednesday-DNP weeks, played
+  that week (2018-25, n >= 40 each): hamstring 46%, neck 50%, concussion 58%, groin 60%, ankle 67%, knee 69%, toe 80%,
+  back 81%, illness 81%, personal matter 82%, "Not Injury Related" 94%, resting player 98%. (C) only flags the word
+  "resting", so it misses the plain "Not Injury Related" label (679 such weeks) and "Rest".
+- **PRE-REGISTERED 2026-10-16 (before running): (E) `injuries.practice_reason`** - the practice model gets the
+  week's listed reason as a category (one flag each): hamstring, neck, concussion, groin / quad / thigh / calf
+  (soft-tissue leg), ankle, knee, foot / toe, shoulder / elbow / hand / wrist (upper body), back / hip / ribs, illness,
+  personal matter, rest (any "rest" or "Not Injury Related" without another reason), other. Same gate as (C):
+  availability Brier on injury-report weeks 2021-25 lower with the CI excluding 0, no position significantly worse,
+  MAE CI upper < +0.003; final-report weeks only (the reason is the week's final record). If both (C) and (E) pass,
+  ship (E) (it contains (C)).
+- **Collect now, test later:** ESPN's injury notes (archived daily since 2026-10-13: detail = strain / sprain / tear /
+  surgery, side, return date, reporter comment: "expected to play", "game-time decision", "trending toward", "rest
+  day"). Too little history to test; a season of archive will be.
+- **Finding 2026-10-16: body part x practice pattern** (Questionable, 3-day weeks, 2018-25; descriptive, (E) is the
+  test). Within the SAME practice pattern the listed reason moves the play rate 15-30 points: DDL hamstring 51% vs
+  ankle 77%; DLL concussion 54% vs foot 83%; DDD hamstring 20% vs illness 50%; LLL concussion 59% vs knee 73%.
+  Hamstring is the worst or near it in every pattern; concussion is bad whenever he didn't finish the week full.
+- **Finding 2026-10-16: same body part again does NOT mean more missed time.** Episodes 2020-25 (history from 2019):
+  missed 1+ games, first time 60% / same part earlier this season 57% / same part in an earlier season 55%; average
+  missed 1.05 / 1.01 / 1.06. By part (first / same season / earlier season): hamstring 71 / 64 / 68%, ankle 61 / 54 /
+  57%, knee 63 / 62 / 58%, concussion 73 / 78 / 72% (repeat n 41). Likely why: a part listed again is often a nagging
+  injury he plays through, while serious repeats go to IR and drop off the report. Not worth a model input.
+- **Finding 2026-10-16 (owner: Ladd McConkey, missed week 5, limited Wed + Thu, site said 17% out): the practice
+  models don't know he missed last week.** Limited Wed + Thu in 3-day weeks (2018-25): played 77.5% overall, 89.1% if
+  he played his team's previous game, 59.3% if he missed it (n 2,193); WRs 63%, foot 65%. Then by Friday (missed
+  last week): DNP 19%, limited 50%, full 86%. The partial-week model said 82.5% for McConkey.
+- **PRE-REGISTERED 2026-10-16 (before running): (F) `injuries.practice_prev`** - the practice and partial-week models
+  get "missed his team's previous game" (no snap in it) and how many games in a row he has missed (capped at 4). GATE:
+  availability Brier on injury-report weeks 2021-25 lower with the CI over season-weeks excluding 0, no position
+  significantly worse, MAE CI upper < +0.003; also reported separately for partial weeks (tools/partial_week_eval.py),
+  where the McConkey case lives.
+  Also on FINAL reports (Questionable, 3 practice days, 2019-25), played after playing / after missing the previous
+  game: DDD 36 / 9%, DDL 75 / 35%, LLL 78 / 60% (n 1,020 missed), LLF 94 / 83%, FFF 93 / 65% (n 319); all 75 / 61%.
+  The gap survives the game status, so (F) matters for the final model too, not only midweek.
+- **PRE-REGISTERED 2026-10-16 (before building): (G) Tuesday model** (owner: Tuesday = waiver claims + the day before
+  the first report; "get more accurate on Tuesdays"). Today, before a team's first report, the chance to play is last
+  week's final status carried forward (p_next: one number per status). New: P(plays this week) for everyone on last
+  week's final report (not on a reserve list), learned from what is known on Tuesday:
+  last week's game status and practice days (counts, last day), whether he played last game, his snap share there vs
+  his usual (left early), an in-game injury note (nfledge/ingame.py), games missed in a row, weeks on the report this
+  episode and his practice days since the injury first appeared (the whole episode, not just last week), the listed
+  reason (category), an extra rest week (bye) before this game, position, role, age. Gradient-boosted, walk-forward
+  (trained on seasons before the test season). tools/tuesday_eval.py.
+  GATE: 2021-25, Brier vs the current carry-forward on the same player-weeks, lower with the 95% CI over season-weeks
+  excluding 0 and lower in at least 4 of 5 seasons; calibration: every predicted-probability decile within 4 points
+  of what happened. Reported also: players who missed last game; Out-last-week players; in-game injuries. Live ESPN
+  news (the early-week bridge) has too little history to be part of this test; it keeps overriding where it applies.
+- **RESULT (G) Tuesday model: PASS.** 2021-25, players on last week's final report (n 18,258): Brier 0.1378 ->
+  0.1243, diff -0.0135 [-0.0160, -0.0110]; better 5/5 seasons (2024 only barely: 0.1327 -> 0.1313); worst decile
+  2.7 pts. Subgroups (Brier; predicted old / new vs actual): missed last game 0.262 -> 0.233 (53 / 46 vs 47%); in-game
+  injury note 0.257 -> 0.185 (78 / 61 vs 57%); left early 0.224 -> 0.182 (80 / 68 vs 65%); Questionable last week
+  0.157 -> 0.137; Out last week 0.234 -> 0.238 (slightly worse: the one place the old table is as good).
+- **AMENDMENT (G2), before running:** the test above only covers players already on last week's report. The core
+  Tuesday case is a player who got hurt Sunday while healthy (not on that report); today the site treats him as
+  healthy until news says otherwise (healthy-scratch model / ESPN bridge). Added population: players NOT on game k's
+  report with an in-game injury note in game k or a snap share 20+ points under his usual. Baseline: what the site
+  shows them (the healthy rate; carry-forward "None"). Same gate on that population, the model trained on both.
+- **RESULT (G2): PASS.** Hurt in last game while not on its report (in-game note, or snaps 20+ points under his
+  usual; n 7,973, 2021-25): Brier 0.2032 (shown healthy: the 88% healthy rate) -> 0.1531, diff -0.0501 [-0.0553,
+  -0.0448], better 5/5 seasons; predicted 74.6% vs played 75.0%. In-game note: predicted 64.5%, played 65.0%; left
+  early only: 80.9% vs 81.3%. (G) with the model trained on both populations: 0.1378 -> 0.1237 [-0.0166, -0.0116],
+  5/5, worst decile 2.2 pts. -> SHIP: the Tuesday model replaces the carry-forward before a team's first report.

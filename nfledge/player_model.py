@@ -179,6 +179,11 @@ def SHARE_FEATURES(share: str, exp: dict | None = None, group: str | None = None
     cols.append("rush_adj_per_rush" if share == "carry_share" else "tgt_adj_per_tgt")
   if exp.get("route_input") and share == "tgt_share":
     cols += ["route_share", "route_share_long"]
+  # EXPERIMENT (experiments.grade_prior; pre-registered 2026-10-16): the site's Edge grade as of the week (his fantasy
+  # points per game, this season + the two before weighted 1 / .6 / .3, shrunk toward the position: tools/grade_build.py
+  # build's "current form"), from games before the week only.
+  if exp.get("grade_prior") and share in ("carry_share", "tgt_share", "db_share"):
+    cols.append("grade_fpg")
   cols += age_cols(exp, group)  # see EFF_FEATURES
   # EXPERIMENT: committee vs bellcow teams. The team's lead-back concentration, and concentration x the player's
   # own share (on a committee team a big recent share should regress more; on a bellcow team it should stick).
@@ -553,6 +558,29 @@ class PlayerModel:
     return d
 
   # -- as-of features --------------------------------------------------------------------------------------------
+  def _grade_asof(self, season: int, week: int) -> pd.Series:
+    """EXPERIMENT (experiments.grade_prior): the Edge grade's number as of (season, week): fantasy points per game
+    over his games before the week, this season x1, last x.6, two back x.3 (grade_build SEASON_W), shrunk toward his
+    position's mean by k pseudo-games (method of moments on the seasons before; grade_build's fpri). NaN = no games."""
+    if not hasattr(self, "_fp_rows"):
+      a = actual_points(self.data.stats[self.data.stats.season_type == "REG"], self.scoring)
+      self._fp_rows = a[["gsis_id", "season", "week", "position", "actual"]].dropna(subset=["gsis_id"]).assign(games=1.0)
+      self._fp_prior = {}
+    r = self._fp_rows
+    r = r[((r.season < season) | (r.week < week)) & (r.season >= season - 2)]
+    wt = r.season.map({season: 1.0, season - 1: 0.6, season - 2: 0.3}).to_numpy(float)
+    num = (r.actual.to_numpy(float) * wt)
+    g = pd.DataFrame({"gsis_id": r.gsis_id.to_numpy(), "num": num, "den": wt}).groupby("gsis_id").sum()
+    pos = r.drop_duplicates("gsis_id", keep="last").set_index("gsis_id").position.reindex(g.index)
+    if season not in self._fp_prior:  # priors from completed seasons before this one
+      done = self._fp_rows[(self._fp_rows.season < season) & (self._fp_rows.season >= season - 3)]
+      self._fp_prior[season] = {ps: (mom_prior(d.rename(columns={"actual": "fp"}), "fp", "games")
+                                     or (float(d.actual.mean()), 3.0)) for ps, d in done.groupby("position")}
+    pri = self._fp_prior[season]
+    m = pos.map(lambda x: pri.get(x, (np.nan, 3.0))[0]).to_numpy(float)
+    k = pos.map(lambda x: pri.get(x, (np.nan, 3.0))[1]).to_numpy(float)
+    return pd.Series((g.num.to_numpy() + k * m) / (g.den.to_numpy() + k), index=g.index)
+
   def features(self, season: int, week: int, ratings) -> pd.DataFrame:
     """As-of player features. Training asks for the same (season, week) several times (meta-model rows, injury
     absorption, blend/range projections), always with the team model's cached ratings for that week, so those
@@ -669,6 +697,8 @@ class PlayerModel:
                            minlength=len(ids))
     snap_den = np.bincount(codes, weights=L.w_use.to_numpy(float) * has_pct, minlength=len(ids))
     f["snap_pct"] = pd.Series(snap_num, index=ids) / pd.Series(snap_den, index=ids).replace(0, np.nan)
+    if self.cfg.get("experiments", {}).get("grade_prior"):
+      f["grade_fpg"] = self._grade_asof(season, week).reindex(f.index)
     tprr_den = wsum("dropbacks_on_field", "w_eff")
     m, k = mp["tprr"]
     f["tprr"] = (wsum("tgt", "w_eff") + k * m) / (tprr_den.replace(0, np.nan) + k)

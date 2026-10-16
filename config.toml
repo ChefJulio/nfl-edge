@@ -185,6 +185,10 @@ practice_role = ["RB", "WR", "TE"]
 # The backup QB (depth 2, not on the report) plays when the starter sits: P = P(QB1 sits) + P(QB1 plays) x this rate
 # (how often a healthy QB2 plays anyway, 2021-23). 2024-25: Brier 0.2283 -> 0.1957 on QB2s whose starter might sit.
 qb2_play_rate = 0.232
+# Before a team's first injury report of the week (Tuesday: waiver claims), P(plays) from the Tuesday model
+# (nfledge/tuesday.py): last week's status + practice, whether he played last game and how much, in-game injury
+# notes, the episode so far, the listed reason. 2021-25: on-report Brier 0.1378 -> 0.1237, hurt-not-listed 0.2032 -> 0.1531.
+tuesday = true
 # Job security in the healthy-scratch model (incumbent starter, season-to-date EPA percentile, first-round rookie
 # behind him, team win %, contract share of the cap, final week). 2021-25: Brier on players not on the report
 # 0.0765 -> 0.0763 (-0.0002 [-0.00045, -0.00001]); RB -0.0010, others no difference; MAE unchanged.
