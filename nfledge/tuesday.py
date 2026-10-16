@@ -306,12 +306,22 @@ def add_k_feats(d, x: pd.DataFrame, hist: pd.DataFrame, rep_rows: pd.DataFrame, 
   return x
 
 
+def add_stakes(x: pd.DataFrame, odds: pd.DataFrame) -> pd.DataFrame:
+  """EXPERIMENT (INSIGHTS (L)): the team's playoff / division / bye odds as of the week (before its games;
+  tools/playoff_odds.py --weekly) + the week number. NaN where no odds exist (2019)."""
+  o = {(int(a_), int(b_), t): (p1, p2, p3) for a_, b_, t, p1, p2, p3 in zip(odds.season, odds.week, odds.team, odds.p_playoffs, odds.p_div, odds.p_bye)}
+  v = [o.get((int(s_), int(w), {"LAR": "LA"}.get(t, t)), (np.nan, np.nan, np.nan)) for s_, w, t in zip(x.season, x.week, x.team)]
+  # -1 = no odds (2019: an all-blank column breaks the trees' binning when a fold has only that season)
+  return x.assign(st_po=[a_[0] for a_ in v], st_div=[a_[1] for a_ in v], st_bye=[a_[2] for a_ in v],
+                  wk=x.week.astype(float)).fillna({"st_po": -1.0, "st_div": -1.0, "st_bye": -1.0})
+
+
 def week_features(x: pd.DataFrame) -> pd.DataFrame:
   from .injuries import InjuryModel
   f = features(x)
   if "team_q" in x.columns:  # (J)
     f["team_q"] = x.team_q.astype(float).to_numpy()
-  for c in ("wk", "final_week", "own_qn", "own_q", "depth_prev"):  # (K)
+  for c in ("wk", "final_week", "own_qn", "own_q", "depth_prev", "st_po", "st_div", "st_bye"):  # (K), (L)
     if c in x.columns:
       f[c] = x[c].astype(float).to_numpy()
   for c in ("on_now", "wn_D", "wn_L", "wn_F", "w_first", "w_last"):

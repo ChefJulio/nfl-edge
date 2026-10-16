@@ -593,6 +593,14 @@ class InjuryModel:
     rg["season"] = season
     if self.cfg.get("injuries", {}).get("job_security"):
       self._job_security(rg, season)
+    if self.cfg.get("injuries", {}).get("stakes_scratch"):
+      # EXPERIMENT (INSIGHTS (L2)): the team's playoff / division / bye odds as of the week + the week number, so
+      # rested healthy starters (a clinched seed in week 18) stop looking like any other week
+      from pathlib import Path
+      from .tuesday import add_stakes
+      f = Path(__file__).resolve().parent.parent / self.cfg["data"]["cache_dir"] / "playoff_odds_weekly.parquet"
+      odds = pd.read_parquet(f) if f.exists() else pd.DataFrame(columns=["season", "week", "team", "p_playoffs", "p_div", "p_bye"])
+      rg = add_stakes(rg, odds)
     return rg
 
   JOB_COLS = ["incumbent", "perf_pct", "r1_behind", "win_pct", "cap_pct", "last_week"]
@@ -659,7 +667,9 @@ class InjuryModel:
 
   @property
   def scratch_cols(self):
-    return self.SCRATCH_COLS + (self.JOB_COLS if self.cfg.get("injuries", {}).get("job_security") else [])
+    g = self.cfg.get("injuries", {})
+    return (self.SCRATCH_COLS + (self.JOB_COLS if g.get("job_security") else [])
+            + (["st_po", "st_div", "st_bye", "wk"] if g.get("stakes_scratch") else []))
 
   SCRATCH_COLS = ["n_prev", "act_rate", "played_last", "snap_avg", "rank", "ahead_out", "rookie", "is_QB", "is_RB",
                   "is_WR", "is_TE"]

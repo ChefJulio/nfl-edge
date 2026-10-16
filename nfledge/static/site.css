@@ -429,3 +429,17 @@ table .mc .mv2.sc { min-width: 38px; }
 html { touch-action: manipulation; }
 /* near-certain outs (rankings.js OUT_LINE): projected 0, with the line if he does play */
 td.projc .ifact { display: block; font-size: 10.5px; color: var(--muted); white-space: nowrap; margin-top: 1px; }
+/* Model tab: "How accurate is our inactive %?" (model.js avail) */
+table.av-vs tr.av-ours td { font-weight: 700; color: var(--ink); }
+table.av-vs td.av-barc { width: 34%; }
+.av-bar { display: block; height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--muted) 45%, transparent); }
+table.av-vs tr.av-ours .av-bar { background: var(--accent); }
+svg.av-cal { display: block; width: 100%; max-width: 420px; height: auto; margin: 6px 0 10px; }
+svg.av-cal .av-grid { stroke: var(--line); stroke-width: 1; }
+svg.av-cal .av-diag { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; }
+svg.av-cal .av-dot { fill: var(--accent); fill-opacity: .85; }
+svg.av-cal .av-now { fill: none; stroke: var(--warn); stroke-width: 2; }
+svg.av-cal .av-ax { fill: var(--muted); font-size: 10px; }
+svg.av-cal .av-axl { fill: var(--muted); font-size: 10.5px; }
+table.av-spots tr.av-when td { padding-top: 12px; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 0; }
+table.av-spots td.av-off { color: var(--warn); font-weight: 700; }

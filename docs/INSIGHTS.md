@@ -1601,3 +1601,23 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   selection (scanning many groups finds the biggest misses, which shrink back) and the same-game depth gap was the
   leak. Next for late season: the team's playoff situation (clinched / eliminated) from standings, which only weeks
   16-18 can confirm. Off (code kept: tuesday.add_k_feats, tools/k_eval.py).
+- **PRE-REGISTERED 2026-10-16 (before running): (L) late-season stakes from playoff odds** (owner: "do it", after (K)
+  found late-season rest is the real remaining gap). Inputs, as of the week before its games (tools/playoff_odds.py
+  simulations, the same method as the Playoffs tab; each week's finished games only): the team's chance to make the
+  playoffs, win the division and get the bye, plus the week number. Clinched = ~100%, eliminated = ~0%, a locked seed
+  = odds that can't move. (L1) in the one availability model (players on the report), tools/stakes_eval.py vs the one
+  model as shipped, same rows, same calibration. (L2) in the healthy-scratch model (players not on the report: rested
+  healthy starters), tools/experiments.py availability Brier on non-report rows. GATE for each: weeks 15-18 Brier
+  lower with the 95% CI over season-weeks excluding 0, no position significantly worse; weeks 1-14 not worse (CI
+  upper < +0.0005); deciles within 4 points. (2026's weeks so far can't test a late-season effect; it is reported
+  for weeks 1-14 only.)
+- **RESULT (L1) stakes in the one model: FAIL (narrowly).** Weeks 15-18 final report 0.0962 -> 0.0942 (-0.0020
+  [-0.0047, +0.0003]; better 4/5 seasons; QB -0.0097 [-0.0178, -0.0016]); weeks 15-18 Wednesday -0.0041 [-0.0081,
+  -0.0005], Thursday -0.0026 [-0.0058, +0.0005]; weeks 1-14 about zero but not tight enough for the "not worse" bar
+  (Wednesday +0.0005 [-0.0005, +0.0016]); 2026 weeks 1-6 +0.0014 to +0.0026. Odds help late and add noise early, when
+  every team is alive. Off.
+- **RESULT (L2) stakes in the healthy-scratch model: FAIL (no change).** Non-report players weeks 15-18 (n 8,081):
+  0.0839 -> 0.0839 (-0.00001 [-0.00042, +0.00037]); weeks 1-14 -0.00007; week 18 predicted active 84.3% with and
+  without, played 82.1%. The final-week flag already in the healthy-scratch inputs (job security's last_week) carries
+  most of the week-18 rest; what's left is ~2 points. Fantasy MAE -0.002 [-0.005, +0.001]. Off. Late-season stakes:
+  closed for now (L1 near-miss on injured players, L2 nothing on healthy ones).

@@ -1,0 +1,239 @@
+{
+ "seasons": "2021-2025",
+ "n": 27831,
+ "versus": [
+  {
+   "label": "\"Questionable = 50/50\" (the common rule of thumb)",
+   "brier": 0.1261
+  },
+  {
+   "label": "The official game status (each tag's real play rate)",
+   "brier": 0.1111
+  },
+  {
+   "label": "Game status + Friday's practice",
+   "brier": 0.1045
+  },
+  {
+   "label": "Ours",
+   "brier": 0.0862,
+   "ours": true
+  }
+ ],
+ "stages": [
+  {
+   "label": "Tuesday (before any report)",
+   "n": 9277,
+   "brier": 0.1356,
+   "wrong": 19.1,
+   "predicted": 75.8,
+   "played": 75.5
+  },
+  {
+   "label": "Wednesday",
+   "n": 6132,
+   "brier": 0.1358,
+   "wrong": 18.6,
+   "predicted": 65.4,
+   "played": 65.4
+  },
+  {
+   "label": "Thursday",
+   "n": 6132,
+   "brier": 0.1051,
+   "wrong": 15.0,
+   "predicted": 65.3,
+   "played": 65.4
+  },
+  {
+   "label": "Final report",
+   "n": 6290,
+   "brier": 0.0862,
+   "wrong": 11.5,
+   "predicted": 82.3,
+   "played": 82.2
+  }
+ ],
+ "calib": [
+  {
+   "band": "0-10%",
+   "n": 1450,
+   "predicted": 4.4,
+   "played": 5.6
+  },
+  {
+   "band": "10-30%",
+   "n": 2074,
+   "predicted": 20.4,
+   "played": 20.1
+  },
+  {
+   "band": "30-50%",
+   "n": 2456,
+   "predicted": 39.4,
+   "played": 38.8
+  },
+  {
+   "band": "50-70%",
+   "n": 3488,
+   "predicted": 62.1,
+   "played": 61.4
+  },
+  {
+   "band": "70-90%",
+   "n": 6937,
+   "predicted": 81.8,
+   "played": 82.0
+  },
+  {
+   "band": "90-100%",
+   "n": 11426,
+   "predicted": 95.6,
+   "played": 95.6
+  }
+ ],
+ "spots": [
+  {
+   "when": "Final report",
+   "label": "No game status",
+   "n": 4015,
+   "played": 93.0,
+   "predicted": 92.1
+  },
+  {
+   "when": "Final report",
+   "label": "Questionable, full practice Friday",
+   "n": 350,
+   "played": 86.0,
+   "predicted": 89.4
+  },
+  {
+   "when": "Final report",
+   "label": "Questionable, limited Friday",
+   "n": 1237,
+   "played": 69.2,
+   "predicted": 71.9
+  },
+  {
+   "when": "Final report",
+   "label": "Questionable, no practice Friday",
+   "n": 307,
+   "played": 46.6,
+   "predicted": 47.3
+  },
+  {
+   "when": "Final report",
+   "label": "Questionable, no practice all week",
+   "n": 111,
+   "played": 24.3,
+   "predicted": 33.6
+  },
+  {
+   "when": "Final report",
+   "label": "Questionable, missed his last game",
+   "n": 560,
+   "played": 59.5,
+   "predicted": 62.0
+  },
+  {
+   "when": "Final report",
+   "label": "Doubtful",
+   "n": 236,
+   "played": 3.4,
+   "predicted": 8.9
+  },
+  {
+   "when": "Wednesday",
+   "label": "Full practice",
+   "n": 1164,
+   "played": 91.2,
+   "predicted": 89.9
+  },
+  {
+   "when": "Wednesday",
+   "label": "Limited practice",
+   "n": 2394,
+   "played": 81.0,
+   "predicted": 78.3
+  },
+  {
+   "when": "Wednesday",
+   "label": "No practice",
+   "n": 2574,
+   "played": 39.2,
+   "predicted": 42.3
+  },
+  {
+   "when": "Wednesday",
+   "label": "No practice, missed his last game",
+   "n": 685,
+   "played": 10.1,
+   "predicted": 16.3
+  },
+  {
+   "when": "Tuesday",
+   "label": "Out last week",
+   "n": 1223,
+   "played": 37.2,
+   "predicted": 38.7
+  },
+  {
+   "when": "Tuesday",
+   "label": "Questionable last week, played",
+   "n": 1441,
+   "played": 84.4,
+   "predicted": 87.2
+  },
+  {
+   "when": "Tuesday",
+   "label": "Hurt in his last game, not on that report",
+   "n": 2131,
+   "played": 74.5,
+   "predicted": 74.2
+  }
+ ],
+ "now": {
+  "season": 2026,
+  "weeks": "1-6",
+  "n": 1367,
+  "calib": [
+   {
+    "band": "0-10%",
+    "n": 117,
+    "predicted": 4.4,
+    "played": 7.7
+   },
+   {
+    "band": "10-30%",
+    "n": 122,
+    "predicted": 20.4,
+    "played": 18.0
+   },
+   {
+    "band": "30-50%",
+    "n": 160,
+    "predicted": 39.2,
+    "played": 45.6
+   },
+   {
+    "band": "50-70%",
+    "n": 92,
+    "predicted": 63.4,
+    "played": 66.3
+   },
+   {
+    "band": "70-90%",
+    "n": 305,
+    "predicted": 82.6,
+    "played": 85.6
+   },
+   {
+    "band": "90-100%",
+    "n": 571,
+    "predicted": 95.6,
+    "played": 96.8
+   }
+  ],
+  "brier": 0.1024
+ }
+}

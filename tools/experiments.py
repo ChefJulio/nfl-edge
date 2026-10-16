@@ -86,6 +86,7 @@ VARIANTS = {
   "practice_prev": variant(injuries__practice_prev=True),
   "tuesday_prior": variant(injuries__tuesday_prior=True),
   "week_model": variant(injuries__week_model=True),
+  "stakes_scratch": variant(injuries__stakes_scratch=True),
   "no_sleeper": variant(experiments__sleeper_blend={}),
   "share_hl_3": variant(player_model__share_half_life_weeks=3.0),
   "share_hl_8": variant(player_model__share_half_life_weeks=8.0),

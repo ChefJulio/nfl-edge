@@ -345,6 +345,23 @@ def main():
     bt_path.write_text(json.dumps(res, indent=1), encoding="utf-8")
     print(json.dumps(res, indent=1))
     return
+  if "--weekly" in sys.argv:
+    # (INSIGHTS (L)) every team's odds as of every week (before that week's games), 2019 on, for the late-season stakes
+    # inputs of the availability models: cache/playoff_odds_weekly.parquet
+    archive = Path(opt.get("archive", ROOT.parent / "nfl-edge-archive"))
+    sims, drift = int(opt.get("sims", 1000)), float(cfg["report"].get("playoff_drift", 0.0))
+    rng, recs = np.random.default_rng(7), []
+    reg = sched[sched.game_type == "REG"]
+    for season in range(int(opt.get("first", 2019)), current + 1):
+      r_ = reg[reg.season == season]
+      last = int(r_.week.max()) if season < current else int(r_[r_.home_score.notna()].week.max()) + 1
+      for week in range(1, last + 1):
+        res = simulate(sched, teams, season, week, week_ranks(archive, season, week), wm, sims, rng, lines_weeks={week}, drift=drift)
+        recs += [{"season": season, "week": week, "team": r["team"], "p_playoffs": r["p_playoffs"], "p_div": r["p_div"],
+                  "p_bye": r["p_bye"]} for r in res["rows"]]
+      print(f"[odds weekly] {season} weeks 1-{last}", flush=True)
+    pd.DataFrame(recs).to_parquet(ROOT / cfg["data"]["cache_dir"] / "playoff_odds_weekly.parquet", index=False)
+    return
   if "--fit-drift" in sys.argv:
     # Pre-registered: pick the drift with the lowest make-playoffs Brier on 2021-2023; adopt only if it also beats
     # no drift on 2024-2025 (never used to pick it).

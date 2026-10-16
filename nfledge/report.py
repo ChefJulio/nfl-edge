@@ -1469,7 +1469,10 @@ def render(ctx: dict, out_path: Path) -> Path:
   write_site_assets(root_dir)
   if ctx.get("model_doc"):  # the current week: its Model tab text is the one every week's page shows
     (root_dir / "data").mkdir(exist_ok=True)
-    (root_dir / "data" / "model.json").write_text(json.dumps(_json_safe({**ctx["model_doc"], "track": ctx.get("track")}),
+    # Model tab > "How accurate is our inactive %?" (tools/avail_track.py; committed, rerun after availability changes)
+    av = Path(__file__).resolve().parent.parent / "data" / "history" / "availability_track.json"
+    avail = json.loads(av.read_text(encoding="utf-8")) if av.exists() else None
+    (root_dir / "data" / "model.json").write_text(json.dumps(_json_safe({**ctx["model_doc"], "track": ctx.get("track"), "avail": avail}),
                                                              separators=(",", ":")), encoding="utf-8")
   if nav["is_current"] and not root:  # the picker's week list (root-relative paths)
     (root_dir / "weeks.json").write_text(json.dumps(nav["seasons"], separators=(",", ":")), encoding="utf-8")
