@@ -13,6 +13,7 @@
   --row: #171a20; --row-hover: #1e222a;  /* table rows / tiles */
   --fs-2xs: 10px; --fs-xs: 11px; --fs-sm: 12px; --fs-md: 13px; --fs-base: 14px; --fs-lg: 16px; --fs-xl: 20px; --fs-2xl: 28px;
   --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-pill: 999px;
+  --chip-h: 18px; --chip-r: 5px; --tag-h: 20px;  /* two chip families: data chips and tag pills */
   --e1: 0 1px 2px rgba(0,0,0,.35); --e2: 0 4px 14px rgba(0,0,0,.35); --e3: 0 12px 32px rgba(0,0,0,.45);
   --ease: cubic-bezier(.2, .7, .2, 1); --dur-fast: 120ms; --dur: 200ms;
 }
@@ -46,7 +47,7 @@ header.top { padding: 16px 0 12px; }
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2398a0ab'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
 .wk-nav select:focus { background-color: var(--panel2); }
 .wk-nav select:focus:not(:focus-visible) { outline: none; }
-.wk-tag { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.wk-tag { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 0 8px; border-radius: var(--r-pill); white-space: nowrap; line-height: var(--tag-h); }
 .wk-tag.now { color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); }
 .wk-tag.past { color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, transparent); }
 .wk-tag.ahead { color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); }
@@ -158,15 +159,15 @@ table.tiles thead th { border-bottom: 0; }
 tr.teamrow.boosted > td:first-child { --extra: inset 8px 0 0 #ffd84d; }
 tr.teamrow.out > td { color: rgba(255,255,255,.55); }
 .chip { display: inline-block; min-width: 40px; text-align: center; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .03em; padding: 2px 6px; border-radius: 5px; border-left: 3px solid; box-shadow: 0 0 0 1px rgba(255,255,255,.5); }
-.pill { display: inline-block; padding: 0 7px; border-radius: 999px; font-weight: 700; font-size: var(--fs-xs); line-height: 19px; background: #eef0f3; color: #2a2f37; white-space: nowrap; }
-.pill-good { background: #dcf2e3; color: #10612a; } .pill-bad { background: #fde1dd; color: #9b2218; }
-.pill-warn { background: #fdefc6; color: #7a5200; } .pill-soft { background: #eef0f3; color: #3a3f47; }
+.pill { display: inline-block; padding: 0 8px; border-radius: var(--r-pill); font-weight: 700; font-size: var(--fs-xs); line-height: var(--tag-h); background: rgba(255,255,255,.08); color: rgba(255,255,255,.82); white-space: nowrap; }
+.pill-good { background: rgba(69,194,107,.17); color: #8fe6a9; } .pill-bad { background: rgba(242,120,109,.18); color: #ffaaa1; }
+.pill-warn { background: rgba(224,176,74,.17); color: #f3d38c; } .pill-soft { background: rgba(255,255,255,.07); color: rgba(255,255,255,.65); }
 .pill-strong { background: var(--accent); color: #fff; }
 .g { display: inline-block; width: 20px; text-align: center; border-radius: 5px; font-weight: 700; font-size: var(--fs-xs); line-height: 19px; background: #eef0f3; color: #2a2f37; }
 .g-A { background: #c9ecd4; color: #0c5222; } .g-B { background: #e3f4e8; color: #1e7a3a; } .g-D { background: #fdebe9; color: #a8352a; } .g-F { background: #f9d3ce; color: #8a1d14; }
-.tier { display: inline-block; font-size: var(--fs-xs); font-weight: 600; padding: 0 8px; border-radius: 999px; line-height: 20px; background: #eef0f3; color: #3a3f47; }
+.tier { display: inline-block; font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill); line-height: var(--tag-h); background: rgba(255,255,255,.07); color: rgba(255,255,255,.65); }
 .t-start { background: #dcf2e3; color: #10612a; } .t-flex { background: #fdefc6; color: #7a5200; }
-.flag { display: inline-block; font-size: var(--fs-xs); font-weight: 600; padding: 0 6px; border-radius: 4px; line-height: 17px; background: rgba(255,255,255,.92); color: #1d1f23; white-space: nowrap; }
+.flag { display: inline-block; font-size: var(--fs-xs); font-weight: 700; padding: 0 6px; border-radius: var(--chip-r); line-height: var(--chip-h); background: rgba(255,255,255,.1); color: rgba(255,255,255,.85); white-space: nowrap; }
 .f-q { background: #fdefc6; color: #7a5200; } .f-out { background: #fde1dd; color: #9b2218; } .f-up { background: #dcf2e3; color: #10612a; }
 
 /* rankings */
@@ -344,7 +345,7 @@ tr.teamrow .f-q { background: rgba(224,176,74,.18); color: #f3d38c; } tr.teamrow
 tr.teamrow .f-up { background: rgba(69,194,107,.18); color: #8fe6a9; }
 /* position badges: one color per position everywhere */
 :root { --qb: #ff6f91; --rb: #34d399; --wr: #60a5fa; --te: #fbbf24; }
-.posb { display: inline-block; font-size: var(--fs-2xs); font-weight: 700; letter-spacing: .04em; padding: 0 5px; border-radius: 4px; line-height: 16px; margin-right: 3px; vertical-align: 1px; }
+.posb { display: inline-block; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em; padding: 0 6px; border-radius: var(--chip-r); line-height: var(--chip-h); margin-right: 3px; vertical-align: 1px; }
 .posb-QB { background: color-mix(in srgb, var(--qb) 20%, transparent); color: var(--qb); }
 .posb-RB { background: color-mix(in srgb, var(--rb) 20%, transparent); color: var(--rb); }
 .posb-WR { background: color-mix(in srgb, var(--wr) 20%, transparent); color: var(--wr); }
@@ -363,7 +364,7 @@ table.power .rk { width: 46px; }
 .netc b { font-size: var(--fs-lg); font-weight: 700; display: block; line-height: 1.1; }
 .mc { display: flex; align-items: center; gap: 7px; }
 .mv2 { font-weight: 700; font-size: var(--fs-base); min-width: 38px; }
-.rk-b { display: inline-block; min-width: 34px; text-align: center; font-size: var(--fs-xs); font-weight: 700; border-radius: 4px; padding: 0 5px; line-height: 17px; }
+.rk-b { display: inline-block; min-width: 34px; text-align: center; font-size: var(--fs-xs); font-weight: 700; border-radius: var(--chip-r); padding: 0 6px; line-height: var(--chip-h); }
 .rk1 { background: rgba(69,194,107,.24); color: #92e8ab; } .rk2 { background: rgba(69,194,107,.11); color: #c4ecd0; }
 .rk3 { background: rgba(224,176,74,.14); color: #f1d391; } .rk4 { background: rgba(242,120,109,.2); color: #ffb3aa; }
 .rkn2 { background: rgba(255,255,255,.1); color: rgba(255,255,255,.85); }

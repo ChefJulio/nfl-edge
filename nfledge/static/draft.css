@@ -2,6 +2,6 @@
 #tab-teams-draft .dr-q { flex: 1; min-width: 150px; max-width: 260px; padding: 7px 11px; border-radius: 8px; border: 1px solid var(--line);
   background: var(--panel2); color: var(--ink); font: inherit; font-size: var(--fs-md); }
 .dr-tm { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; cursor: pointer; }
-.dr-hof { font-size: var(--fs-2xs); font-weight: 700; padding: 0 5px; border-radius: 4px; background: #e8c46a; color: #2a2108; vertical-align: 1px; }
+.dr-hof { font-size: var(--fs-xs); font-weight: 700; padding: 0 6px; border-radius: var(--chip-r); background: #e8c46a; color: #2a2108; vertical-align: 1px; line-height: var(--chip-h); }
 table.dt td.dr-career { font-size: var(--fs-sm); color: var(--muted); white-space: normal; min-width: 220px; max-width: 360px; }
 table.dt td .sub { display: block; font-size: var(--fs-xs); color: var(--muted); font-weight: 500; }

@@ -15,19 +15,19 @@
 .gc-page a { color: var(--accent); }
 .gc-page .muted, .pc .muted { color: var(--muted); }
 .gc-page .good, .pc .good { color: var(--good); } .gc-page .bad, .pc .bad { color: var(--bad); }
-.gc-page .posb { display: inline-block; font-size: var(--fs-2xs); font-weight: 700; letter-spacing: .04em; padding: 0 5px; border-radius: 4px; line-height: 16px; vertical-align: 1px; }
+.gc-page .posb { display: inline-block; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em; padding: 0 6px; border-radius: var(--chip-r); line-height: var(--chip-h); vertical-align: 1px; }
 .gc-page .posb-QB { background: color-mix(in srgb, var(--qb) 20%, transparent); color: var(--qb); }
 .gc-page .posb-RB { background: color-mix(in srgb, var(--rb) 20%, transparent); color: var(--rb); }
 .gc-page .posb-WR { background: color-mix(in srgb, var(--wr) 20%, transparent); color: var(--wr); }
 .gc-page .posb-TE { background: color-mix(in srgb, var(--te) 20%, transparent); color: var(--te); }
 .gc-page .tier { display: inline-block; font-size: var(--fs-xs); font-weight: 600; padding: 0 8px; border-radius: 999px; line-height: 20px; background: var(--panel2); color: var(--muted); }
 .gc-page .t-start { background: #dcf2e3; color: #10612a; } .gc-page .t-flex { background: #fdefc6; color: #7a5200; }
-.gc-page .flag { display: inline-block; font-size: var(--fs-xs); font-weight: 600; padding: 0 6px; border-radius: 4px; line-height: 17px; background: rgba(255,255,255,.92); color: #1d1f23; }
+.gc-page .flag { display: inline-block; font-size: var(--fs-xs); font-weight: 700; padding: 0 6px; border-radius: var(--chip-r); line-height: var(--chip-h); background: rgba(255,255,255,.1); color: rgba(255,255,255,.85); }
 .gc-page .f-q { background: #fdefc6; color: #7a5200; } .gc-page .f-out { background: #fde1dd; color: #9b2218; } .gc-page .f-up { background: #dcf2e3; color: #10612a; }
 .gc-page .seg { display: inline-flex; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 2px; }
 .gc-page .seg button { background: none; border: 0; color: var(--muted); font: inherit; font-weight: 600; font-size: var(--fs-sm); padding: 4px 11px; border-radius: 6px; cursor: pointer; }
 .gc-page .seg button.on { background: var(--panel); color: var(--ink); box-shadow: var(--shadow); }
-.gc-page .rk-b { display: inline-block; min-width: 34px; text-align: center; font-size: var(--fs-xs); font-weight: 700; border-radius: 4px; padding: 0 5px; line-height: 17px; }
+.gc-page .rk-b { display: inline-block; min-width: 34px; text-align: center; font-size: var(--fs-xs); font-weight: 700; border-radius: var(--chip-r); padding: 0 6px; line-height: var(--chip-h); }
 .gc-page .rk1 { background: rgba(69,194,107,.24); color: #92e8ab; } .gc-page .rk2 { background: rgba(69,194,107,.11); color: #c4ecd0; }
 .gc-page .rk3 { background: rgba(224,176,74,.14); color: #f1d391; } .gc-page .rk4 { background: rgba(242,120,109,.2); color: #ffb3aa; }
 /* expected-line pieces used inside the player card (week pages style these already) */
@@ -213,7 +213,7 @@ html.pc-open { overflow: hidden; }
 .tm-ub { position: relative; height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--muted) 16%, transparent); }
 .tm-ub::after { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--faint); }
 .tm-ub span { position: absolute; top: 0; bottom: 0; border-radius: 4px; } .tm-ub .pos { background: var(--good); } .tm-ub .neg { background: var(--bad); }
-.pc .rk-b { display: inline-block; min-width: 34px; text-align: center; font-size: var(--fs-xs); font-weight: 700; border-radius: 4px; padding: 0 5px; line-height: 17px; }
+.pc .rk-b { display: inline-block; min-width: 34px; text-align: center; font-size: var(--fs-xs); font-weight: 700; border-radius: var(--chip-r); padding: 0 6px; line-height: var(--chip-h); }
 .pc .rk1 { background: rgba(69,194,107,.24); color: #92e8ab; } .pc .rk2 { background: rgba(69,194,107,.11); color: #c4ecd0; }
 .pc .rk3 { background: rgba(224,176,74,.14); color: #f1d391; } .pc .rk4 { background: rgba(242,120,109,.2); color: #ffb3aa; }
 svg.tm-trend { display: block; margin-top: 4px; } .tm-tr-mid { stroke: var(--line); stroke-dasharray: 3 3; }
@@ -329,8 +329,8 @@ table.lg tbody tr[data-gid]:active td { background: color-mix(in srgb, var(--acc
 .gc-col { display: grid; gap: 16px; align-content: start; min-width: 0; }
 .gcs { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 14px 12px; box-shadow: var(--shadow); scroll-margin-top: 50px; min-width: 0; }
 .gcs h3 { margin: 0 0 8px; font-size: var(--fs-lg); display: flex; align-items: center; gap: 8px; }
-.gcs .src { font-size: var(--fs-2xs); text-transform: uppercase; letter-spacing: .07em; font-weight: 700; padding: 1px 7px; border-radius: 999px;
-  background: color-mix(in srgb, #ff4d4f 16%, transparent); color: #ff8f84; }
+.gcs .src { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .07em; font-weight: 700; padding: 0 8px; border-radius: var(--r-pill);
+  background: color-mix(in srgb, #ff4d4f 16%, transparent); color: #ff8f84; line-height: var(--tag-h); }
 .gcs .src.us { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
 .gcs-note { margin: -2px 0 8px; font-size: var(--fs-sm); color: var(--muted); }
 /* win probability */
@@ -368,8 +368,8 @@ svg.wp { display: block; width: 100%; height: 200px; border-radius: 8px; touch-a
 .pl-st { background: color-mix(in srgb, var(--muted) 6%, transparent); }
 .pl-np { padding: 3px 4px; font-size: var(--fs-xs); color: var(--faint); border-bottom: 1px dashed var(--line); }
 .pl-np .pl-when { font-size: var(--fs-xs); color: var(--faint); } .pl-np .pl-txt { font-size: var(--fs-xs); letter-spacing: .03em; text-transform: uppercase; }
-.pc-chip { display: inline-block; font-size: var(--fs-2xs); font-weight: 700; letter-spacing: .05em; border-radius: 4px; padding: 0 5px;
-  margin-right: 5px; line-height: 15px; vertical-align: 1px; }
+.pc-chip { display: inline-block; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .05em; border-radius: var(--chip-r); padding: 0 6px;
+  margin-right: 5px; line-height: var(--chip-h); vertical-align: 1px; }
 .c-sc { background: #ffd43b; color: #3a2c00; } .c-to { background: #ff6b6b; color: #3a0b0b; } .c-1st { background: #45c26b; color: #0d2a17; }
 .c-sk { background: #e0b04a; color: #3a2a00; } .c-pen { background: #98a0ab; color: #15181d; } .c-st { background: #3a414c; color: #e9ecf0; }
 .dr-res.bad { color: #ff8f84; } .dr-tm { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
@@ -469,8 +469,8 @@ table.gc-rt { width: 100%; font-size: var(--fs-md); } .bx-th-in { display: inlin
 .dc-p { color: var(--muted); white-space: nowrap; } .dc-p .dc-n { font-weight: 500; color: var(--muted); }
 .dc-p.first .dc-n { font-weight: 700; color: var(--ink); }
 /* injury tag after a name: tinted chip (as on Players > Injuries), red = out / reserve lists, orange = D, amber = Q */
-.dc-tag { display: inline-block; margin-left: 5px; padding: 0 5px; border-radius: 5px; font-size: var(--fs-2xs); font-weight: 700;
-  letter-spacing: .03em; line-height: 16px; vertical-align: 1px; border: 1px solid transparent; cursor: help; }
+.dc-tag { display: inline-block; margin-left: 5px; padding: 0 6px; border-radius: var(--chip-r); font-size: var(--fs-xs); font-weight: 700;
+  letter-spacing: .03em; line-height: var(--chip-h); vertical-align: 1px; border: 1px solid transparent; cursor: help; }
 .dc-tag.dt-out { background: rgba(242,120,109,.16); border-color: rgba(242,120,109,.32); color: #f59a91; }
 .dc-tag.dt-d { background: rgba(240,150,80,.16); border-color: rgba(240,150,80,.32); color: #f4b37f; }
 .dc-tag.dt-q { background: rgba(224,176,74,.14); border-color: rgba(224,176,74,.3); color: #f3d38c; }
@@ -511,7 +511,7 @@ table.tpo-rd { width: 100%; }
 .tpo-rd { display: inline-block; min-width: 30px; font-size: var(--fs-xs); font-weight: 700; color: var(--muted); letter-spacing: .04em; }
 
 /* NFL Edge grade: header chip + Grade tab bars */
-.eg-chip { display: inline-flex; align-items: baseline; gap: 4px; margin-left: 6px; padding: 1px 7px; border-radius: 6px; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em; color: var(--muted); background: var(--panel2); border: 1px solid var(--line); vertical-align: middle; }
+.eg-chip { display: inline-flex; align-items: baseline; gap: 4px; margin-left: 6px; padding: 0 6px; border-radius: var(--chip-r); font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em; color: var(--muted); background: var(--panel2); border: 1px solid var(--line); vertical-align: middle; line-height: var(--chip-h); }
 .eg-chip b { font-size: var(--fs-md); color: var(--ink); letter-spacing: 0; }
 .eg-chip.good { border-color: color-mix(in srgb, #6fdc8c 55%, var(--line)); } .eg-chip.good b { color: #6fdc8c; }
 .eg-chip.bad { border-color: color-mix(in srgb, #ff8f84 50%, var(--line)); } .eg-chip.bad b { color: #ff8f84; }
@@ -657,7 +657,7 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .rt-nm { flex: 1; min-width: 0; font-size: var(--fs-base); }
 .rt-v { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 42px; text-align: right; }
 .rt-v.good { color: var(--good); }
-.rt-chip { font-size: var(--fs-xs); font-weight: 700; padding: 1px 6px; border-radius: 999px; white-space: nowrap; }
+.rt-chip { font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill); white-space: nowrap; line-height: var(--tag-h); }
 .rt-chip.good { background: rgba(69,194,107,.14); color: var(--good); }
 .rt-chip.bad { background: rgba(242,120,109,.14); color: var(--bad); }
 .rt-dt { margin: 0 0 8px 28px; width: calc(100% - 28px); font-size: var(--fs-sm); }
@@ -730,5 +730,5 @@ table.lg tr.lg-season td::before, table.lg tr.lg-gh th::before { content: none; 
 .lg-fh table.lg { border-spacing: 0; table-layout: fixed; min-width: 0; }
 /* weeks he didn't play (gamecast.js missTag): dashes, with why in a small tag */
 table.lg tr.lg-miss td { color: var(--faint); }
-.lg-tag { display: inline-block; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .03em; padding: 1px 6px; border-radius: 6px;
-  color: var(--muted); background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.lg-tag { display: inline-block; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .03em; padding: 0 6px; border-radius: var(--chip-r);
+  color: var(--muted); background: color-mix(in srgb, var(--ink) 8%, transparent); line-height: var(--chip-h); }

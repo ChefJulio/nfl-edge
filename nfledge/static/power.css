@@ -1,4 +1,4 @@
 /* Teams > Power (power.js): table styles in site.css (table.power). */
 /* QB-change flags (report.team_tables qb_hist / qb_note) */
 svg.spark .spark-qb { fill: none; stroke: var(--warn); stroke-width: 1.5; }
-.mv.qbx { display: inline-block; margin-left: 4px; padding: 0 4px; border-radius: 4px; font-size: var(--fs-2xs); font-weight: 700; color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, transparent); }
+.mv.qbx { display: inline-block; margin-left: 4px; padding: 0 6px; border-radius: var(--chip-r); font-size: var(--fs-xs); font-weight: 700; color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, transparent); line-height: var(--chip-h); }

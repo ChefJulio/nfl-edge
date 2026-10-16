@@ -16,15 +16,15 @@ table.lg-tbl td.num, table.lg-tbl th.num { white-space: nowrap; }
 .lg-vs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } @media (max-width: 760px) { .lg-vs { grid-template-columns: 1fr; } }
 .lg-tn { font-weight: 800; } .lg-big { font-size: 26px; font-weight: 800; }
 table.lg-rank tr.lg-me td { background: rgba(122,162,255,.10); }
-.lg-you { font-size: var(--fs-2xs); font-weight: 700; padding: 1px 6px; border-radius: 999px; background: rgba(122,162,255,.2); color: #a9c1ff; }
+.lg-you { font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill); background: rgba(122,162,255,.2); color: #a9c1ff; line-height: var(--tag-h); }
 table.lg-rank td.good { color: #6fdc8c; } table.lg-rank td.bad { color: #ff8f84; }
-.lg-cond { display: inline-block; margin-left: 6px; font-size: var(--fs-xs); font-weight: 700; padding: 1px 6px; border-radius: 999px; background: rgba(122,162,255,.16); color: #a9c1ff; }
+.lg-cond { display: inline-block; margin-left: 6px; font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill); background: rgba(122,162,255,.16); color: #a9c1ff; line-height: var(--tag-h); }
 /* lineup moves as cards (owner 2026-10-16: "make it more readable") */
 .lg-swaps { display: grid; gap: 8px; } .lg-swaps:not(.good) { padding: 0; background: none; }
 .lg-mv { padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); display: grid; gap: 6px; }
 .lg-mv.gt { border-color: rgba(240,192,90,.35); }
 .lg-mv-h { font-size: var(--fs-base); }
-.lg-mv-tag { margin-left: 6px; font-size: var(--fs-xs); font-weight: 700; padding: 1px 7px; border-radius: 999px; background: rgba(240,192,90,.16); color: #f0c05a; vertical-align: 1px; }
+.lg-mv-tag { margin-left: 6px; font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill); background: rgba(240,192,90,.16); color: #f0c05a; vertical-align: 1px; line-height: var(--tag-h); }
 .lg-mv-s { font-size: var(--fs-sm); margin-top: -2px; }
 .lg-mv-row { display: grid; grid-template-columns: 52px 1fr; gap: 8px; align-items: baseline; line-height: 1.45; }
 .lg-mv-k { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }

@@ -2,7 +2,7 @@
 .st-body { padding: 4px 0 8px; }
 .st-h { margin: 14px 14px 6px; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
 .st-tbl table.dt td.stick { min-width: 150px; }
-.st-seed { display: inline-block; margin-left: 6px; font-size: var(--fs-xs); font-weight: 700; line-height: 16px; padding: 0 5px; border-radius: 999px;
+.st-seed { display: inline-block; margin-left: 6px; font-size: var(--fs-xs); font-weight: 700; line-height: var(--tag-h); padding: 0 8px; border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--accent) 25%, transparent); color: var(--ink); vertical-align: 1px; }
 .st-why { color: var(--muted); cursor: help; }
 .st-pos { color: #54d17a; } .st-neg { color: #ff8378; }
