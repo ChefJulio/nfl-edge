@@ -1360,3 +1360,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   (`injuries.practice_role = ["RB","WR","TE"]`).** Precedent: the expert blend is position-limited the same way.
   QB rows get role -1 (no role information). GATE (2021-25 walk-forward): availability Brier overall CI upper < 0,
   QB CI lower <= 0 (not significantly worse), fantasy MAE CI upper < +0.003.
+- **RESULT practice_role RB/WR/TE only: PASS -> SHIPPED (config injuries.practice_role).** Availability Brier on
+  injury-report player-weeks 2021-25 0.0987 -> 0.0931, -0.0056 [-0.0068, -0.0044]; QB -0.0099 [-0.0137, -0.0062], RB
+  -0.0043, TE -0.0038, WR -0.0060 (all CIs exclude 0); every season. Fantasy MAE ALL -0.000 [-0.002, +0.001] (TE
+  +0.001 [0.000, 0.002]). Correction to the earlier note: the "94% of healthy starting QBs play" figure was wrong:
+  the depth chart still listed benched QBs as QB1 (Tyrod Taylor, Tannehill, Richardson...). See the job-security
+  study below.
+- **RESULT scratch_carry: FAIL on part (iii).** Weeks 3+ 2021-25 fantasy MAE +0.003 [-0.000, +0.006], QB +0.020
+  [+0.003, +0.043] (training on week-1 rows changed the model for every week). Not shipped; a week-1-only version
+  (seed only week-1 rows, train as before) would need its own test.

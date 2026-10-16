@@ -177,6 +177,11 @@ debut_prior = "d12"
 sleeper_blend = {}
 
 [injuries]
+# Practice models get a player's recent role (mean snap share, last 3 games) for RB / WR / TE; QBs get none (owner
+# question 2026-10-15, Drake Maye 6.5-11% inactive at full practice). Walk-forward 2021-25: availability Brier on
+# injury-report players 0.0987 -> 0.0931 (-0.0056 [-0.0068, -0.0044]), better at every position (QB -0.0099) and
+# every season; fantasy MAE unchanged. Role for all positions made starting QBs overconfident (QB worse).
+practice_role = ["RB", "WR", "TE"]
 # Fraction of the learned vacated-volume redistribution applied. Backtest: helps RB, slightly hurts WR;
 # 0.5 keeps teammate projections near-unbiased in both 2025 and 2026.
 redistribution_scale = 0.5
