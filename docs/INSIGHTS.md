@@ -1622,7 +1622,8 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   most of the week-18 rest; what's left is ~2 points. Fantasy MAE -0.002 [-0.005, +0.001]. Off. Late-season stakes:
   closed for now (L1 near-miss on injured players, L2 nothing on healthy ones).
 - **Finding 2026-10-16 (outside review by the Claude app, from the scrapeable site: "the inexperienced-QB penalty is
-  very large (-21.5 per 100 dropbacks) and barely shrunk; check it"): it is, if anything, too SMALL.** Walk-forward
+  very large (-21.5 per 100 dropbacks) and barely shrunk; check it"): it is, if anything, too SMALL.** [WITHDRAWN
+  2026-10-16: a test-harness artifact, see {#game-eval-starter}.] Walk-forward
   game predictions 2021-25 (tools/game_eval.py --only=fitted), per team-game, starter = most dropbacks, inexperienced =
   < 150 career dropbacks entering the game (the model's own rule). Model margin miss from that team's side (positive
   = predicted better than they did): inexperienced starter (n 204) +2.41 pts [+0.51, +4.34], better in 4 of 5 seasons
@@ -1693,4 +1694,18 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   missing a 25%-target WR is about 2 points worse). But on the 311 of 1023 games 2022-25 with a team missing >= 15%,
   margin MAE 10.953 -> 10.987 (+0.034 [-0.179, +0.250]); all games 10.294 -> 10.309 (+0.015 [-0.053, +0.084]). A
   1-2 point nudge is small against ~10-point misses, and the game model already sees some of it (team volume features
-  over recent games). "This week" stays QB-only for injuries.
+  over recent games). "This week" stays QB-only for injuries. Rerun on the corrected harness (next entry): same
+  verdict, 311 games 10.731 -> 10.750 (+0.019 [-0.198, +0.239]); all 10.165 -> 10.171 (+0.006 [-0.061, +0.075]).
+- **RESULT {#game-eval-starter} test-harness fix: tools/game_eval.py rated each team's PREVIOUS starting QB, not this
+  game's; the inexperienced-QB "too small" finding above is withdrawn.** Checking that finding before testing a bigger
+  penalty: the harness rated last week's starter in 311 of 2,558 team-games 2021-25 (12%), so a backup's first start
+  was predicted with the injured veteran and the penalty never applied. The live site was never affected (it rates
+  this week's projected starter, report.matchups / team_tables). Split of the old predictions (miss from the team's
+  side, + = overrated): inexperienced starter, rated QB wrong (n 83) +5.96 [+3.08, +8.89]; rated QB right (n 124)
+  +0.46 [-1.99, +2.99]. Fix: rate the QB who started the game (most dropbacks) as a stand-in for the announced starter.
+  Walk-forward 2021-25, 1,279 games: margin MAE 10.547 -> 10.428, winners 61.2% -> 62.1% (Vegas 9.766). With the
+  right QB, inexperienced starters: first starts after a change (n 83) +1.95 [-0.90, +4.86] (Vegas +2.45), continuing
+  (n 124) +0.43 [-2.02, +2.92] (Vegas +1.07): no evidence the penalty is too small, so no test. Earlier game_eval
+  comparisons were paired on the same harness and stand. New lead: an EXPERIENCED QB taking over (n 228) is overrated
+  +3.06 [+1.22, +4.87] (Vegas +1.55) - veteran backups / new arrivals rated near their old (shrunk) career level.
+  Also: tools/rank_predictor.py (win-chance blend scoring) has the same previous-starter rating; to fix and rescore.
