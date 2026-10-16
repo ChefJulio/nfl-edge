@@ -227,7 +227,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4568490,RJ Harvey,Denver Broncos,Active,2026-10-16T03:59Z,,,,,,Harvey rushed six times for 25 yards and a touchdown and brought in three of four targets for 31 yards in the Broncos' 17-14 overtime win over the Seahawks on Thursday.
 4241985,J.K. Dobbins,Denver Broncos,Active,2026-10-16T03:54Z,,,,,,Dobbins rushed 17 times for 41 yards and a touchdown and brought in all three targets for five yards during the Broncos' 17-14 overtime win over the Seahawks on Thursday.
 4372016,Jaylen Waddle,Denver Broncos,Active,2026-10-16T02:20Z,,,,,,"Waddle suffered a shoulder injury in the third quarter of Thursday's game against the Seahawks but was able to return, Parker Gabriel of The Denver Post and Zac Stevens of TheDNVR.com report."
-4362748,Tyler Badie,Denver Broncos,Questionable,2026-10-16T01:30Z,Thumb,Not Specified,Not Specified,2026-10-15,QUESTIONABLE,"Badie (thumb) won't return to Thursday's game against Seattle, Zac Stevens of TheDNVR.com reports. He finished with one carry for six yards."
+4362748,Tyler Badie,Denver Broncos,Questionable,2026-10-16T01:30Z,Thumb,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"Badie (thumb) won't return to Thursday's game against Seattle, Zac Stevens of TheDNVR.com reports. He finished with one carry for six yards."
 4382401,Riley Moss,Denver Broncos,Active,2026-10-15T23:13Z,,,,,,"Moss (ribs) is available for Thursday's game against the Seahawks, Aric DiLalla of the team's official site reports."
 4241820,Sam Ehlinger,Denver Broncos,Out,2026-10-15T23:08Z,Coach's Decision,Not Specified,Not Specified,2026-10-25,INACTIVE,"Ehlinger (coach's decision) is inactive for Thursday's game against Seattle, though he is listed as the emergency quarterback, Aric DiLalla of the team's official site reports."
 4683535,Tyler Onyedim,Denver Broncos,Out,2026-10-15T22:49Z,Coach's Decision,Not Specified,Not Specified,2026-10-25,INACTIVE,inactive
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035661,Julian Blackmon,New Orleans Saints,Active,2026-10-11T16:37Z,,,,,,Blackmon (shoulder) is active for Sunday's game against the Vikings.
 4698597,Barion Brown,New Orleans Saints,Active,2026-10-11T16:22Z,,,,,,Brown (thigh) is active for Sunday's game against the Vikings.
 3115383,Davon Godchaux,New Orleans Saints,Active,2026-10-10T16:20Z,,,,,,Godchaux (groin) does not have an injury designation for Sunday's game against the Vikings.
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-16T03:00Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-16T04:10Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4725996,Abdul Carter,New York Giants,Questionable,2026-10-16T00:14Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Carter (calf) did not practice Thursday, Dan Salomone of the Giants' official site reports."
 4040655,Darnell Mooney,New York Giants,Active,2026-10-16T00:01Z,,,,,,"Mooney (neck) was a full participant in Thursday's practice, Dan Salomone of the Giants' official site reports."
 4040615,Malik Harrison,New York Giants,Questionable,2026-10-15T21:18Z,Groin,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -699,8 +699,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3040151,George Kittle,San Francisco 49ers,Active,2026-10-12T01:06Z,,,,,,Kittle (illness) caught five of six targets for 24 yards in Sunday's 32-29 win over the Seahawks.
 4361741,Brock Purdy,San Francisco 49ers,Active,2026-10-12T01:04Z,,,,,,"Purdy completed 19 of 29 passes for 189 yards, two touchdowns and one interception in Sunday's 32-29 win over the Seahawks. He also rushed five times for six yards and threw a successful two-point conversion."
 3117251,Christian McCaffrey,San Francisco 49ers,Active,2026-10-12T00:25Z,,,,,,McCaffrey rushed 11 times for 68 yards and a touchdown while catching all three of his targets for 15 yards in Sunday's 32-29 win over the Seahawks.
+4678006,Elijah Arroyo,Seattle Seahawks,Questionable,2026-10-16T04:10Z,Shoulder,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
+4887558,Emanuel Wilson,Seattle Seahawks,Active,2026-10-16T04:08Z,,,,,,Wilson rushed 14 times for 52 yards and failed to bring in his only target in the Seahawks' 17-14 overtime loss to the Broncos on Thursday.
 4430878,Jaxon Smith-Njigba,Seattle Seahawks,Active,2026-10-16T03:49Z,,,,,,Smith-Njigba brought in 12 of 16 targets for 134 yards in the Seahawks' 17-14 overtime loss to the Broncos on Thursday.
-4678006,Elijah Arroyo,Seattle Seahawks,Doubtful,2026-10-16T01:38Z,Shoulder,,,2026-10-15,DOUBTFUL,Arroyo (shoulder) is doubtful to return to Thursday's game against Denver.
 4035693,Velus Jones Jr.,Seattle Seahawks,Active,2026-10-16T00:46Z,,,,,,Jones was signed from the practice squad to the active roster ahead of Thursday's game against the Broncos.
 4432734,Jalen Milroe,Seattle Seahawks,Out,2026-10-15T23:03Z,Coach's Decision,Not Specified,Not Specified,2026-10-25,INACTIVE,"Milroe (coach's decision) is inactive for Thursday's game against Denver, though he will once again serve as the Seahawks' emergency quarterback."
 3929636,Irv Charles,Seattle Seahawks,Active,2026-10-15T22:57Z,,,,,,"Charles was elevated from the practice squad to the active roster ahead of Thursday's game against Denver, John Boyle of the team's official site reports."
@@ -723,7 +724,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4569547,Nick Kallerup,Seattle Seahawks,Active,2026-10-12T19:38Z,,,,,,
 2473037,Jason Myers,Seattle Seahawks,Active,2026-10-12T16:59Z,,,,,,"Myers made all seven of his kicks (five field goals, two extra points) during the Seahawks' 32-29 loss to the 49ers on Sunday."
 3912547,Sam Darnold,Seattle Seahawks,Active,2026-10-12T01:11Z,,,,,,"Darnold completed 18 of 29 passes for 195 yards, one touchdown and two interceptions in Sunday's 32-29 loss to the 49ers. He added one rushing attempt for five yards."
-4887558,Emanuel Wilson,Seattle Seahawks,Active,2026-10-12T01:05Z,,,,,,Wilson rushed 20 times for 61 yards and a touchdown in Sunday's 32-29 loss to the 49ers. He also caught both of his targets for 11 yards and lost a fumble.
 4430871,Sean Tucker,Tampa Bay Buccaneers,Questionable,2026-10-15T21:05Z,Quadriceps,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Tucker (quadriceps) was a limited participant at Thursday's practice.
 3052587,Baker Mayfield,Tampa Bay Buccaneers,Doubtful,2026-10-15T20:16Z,Thumb,Dislocated,Right,2026-10-18,DOUBTFUL,"Buccaneers offensive coordinator Zac Robinson said Thursday that Mayfield's right thumb is ""just not quite ready"" this week, Greg Auman of Fox Sports reports."
 4816107,Benjamin Morrison,Tampa Bay Buccaneers,Questionable,2026-10-14T23:30Z,Quadriceps,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Morrison (quadriceps) was a limited participant at the Buccaneers' practice Wednesday.
