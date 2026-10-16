@@ -1,7 +1,7 @@
 /* Players > Injuries (injuries.js) */
-.in-st { font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: rgba(255,255,255,.08); white-space: nowrap; }
+.in-st { font-size: var(--fs-xs); font-weight: 700; padding: 1px 7px; border-radius: 999px; background: rgba(255,255,255,.08); white-space: nowrap; }
 .in-st.in-bad { background: rgba(242,120,109,.18); color: #f59a91; } .in-st.in-warn { background: rgba(240,150,80,.18); color: #f4b37f; }
 .in-st.in-q { background: rgba(224,176,74,.16); color: #f3d38c; }
-.in-pct { font-weight: 800; color: color-mix(in srgb, #f59a91 calc(var(--p) * 1%), var(--ink)); }
-table.dt td.in-note { max-width: 420px; white-space: normal; font-size: 12px; color: var(--muted); line-height: 1.35; min-width: 260px; }
+.in-pct { font-weight: 700; color: color-mix(in srgb, #f59a91 calc(var(--p) * 1%), var(--ink)); }
+table.dt td.in-note { max-width: 420px; white-space: normal; font-size: var(--fs-sm); color: var(--muted); line-height: 1.35; min-width: 260px; }
 #tab-players-injuries .seg { flex: none; }

@@ -3,31 +3,31 @@
 .lg-form { display: flex; gap: 8px; margin: 8px 0; } .lg-form .sbtn { flex: none; width: auto; margin: 0; }  /* phones: .sbtn is full width */ .lg-in { flex: 1; min-width: 0; font: inherit; padding: 9px 12px; border-radius: 10px;
   border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
 .lg-pick { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0; }
-.lg-err { color: #ff8f84; } .lg-hint { margin: 10px 0 0; } .lg-note { font-size: 12px; margin: 8px 2px; }
+.lg-err { color: #ff8f84; } .lg-hint { margin: 10px 0 0; } .lg-note { font-size: var(--fs-sm); margin: 8px 2px; }
 .lg-top { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 12px; }
 .lg-top select { font: inherit; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); margin-left: 6px; }
 .lg-seg { margin: 0 0 12px; }
-.lg-h { font-size: 15px; margin: 16px 0 6px; } .lg-h .muted { font-weight: 500; font-size: 13px; margin-left: 6px; }
+.lg-h { font-size: var(--fs-lg); margin: 16px 0 6px; } .lg-h .muted { font-weight: 500; font-size: var(--fs-md); margin-left: 6px; }
 .lg-swaps { padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,.05); } .lg-swaps .good, .lg-swaps.good { color: #6fdc8c; }
-table.lg-tbl td.lg-slot { font-size: 11px; font-weight: 800; color: var(--muted); width: 3.5em; }
+table.lg-tbl td.lg-slot { font-size: var(--fs-xs); font-weight: 700; color: var(--muted); width: 3.5em; }
 table.lg-tbl td.num, table.lg-tbl th.num { white-space: nowrap; }
 .lg-wp { margin: 4px 0 14px; } .lg-wp b { font-size: 24px; }
 .lg-bar { height: 8px; border-radius: 4px; background: rgba(255,143,132,.35); margin-top: 6px; overflow: hidden; } .lg-bar span { display: block; height: 100%; background: #6fdc8c; }
 .lg-vs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } @media (max-width: 760px) { .lg-vs { grid-template-columns: 1fr; } }
 .lg-tn { font-weight: 800; } .lg-big { font-size: 26px; font-weight: 800; }
 table.lg-rank tr.lg-me td { background: rgba(122,162,255,.10); }
-.lg-you { font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 999px; background: rgba(122,162,255,.2); color: #a9c1ff; }
+.lg-you { font-size: var(--fs-2xs); font-weight: 700; padding: 1px 6px; border-radius: 999px; background: rgba(122,162,255,.2); color: #a9c1ff; }
 table.lg-rank td.good { color: #6fdc8c; } table.lg-rank td.bad { color: #ff8f84; }
-.lg-cond { display: inline-block; margin-left: 6px; font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: rgba(122,162,255,.16); color: #a9c1ff; }
+.lg-cond { display: inline-block; margin-left: 6px; font-size: var(--fs-xs); font-weight: 700; padding: 1px 6px; border-radius: 999px; background: rgba(122,162,255,.16); color: #a9c1ff; }
 /* lineup moves as cards (owner 2026-10-16: "make it more readable") */
 .lg-swaps { display: grid; gap: 8px; } .lg-swaps:not(.good) { padding: 0; background: none; }
 .lg-mv { padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); display: grid; gap: 6px; }
 .lg-mv.gt { border-color: rgba(240,192,90,.35); }
-.lg-mv-h { font-size: 14px; }
-.lg-mv-tag { margin-left: 6px; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: rgba(240,192,90,.16); color: #f0c05a; vertical-align: 1px; }
-.lg-mv-s { font-size: 12px; margin-top: -2px; }
+.lg-mv-h { font-size: var(--fs-base); }
+.lg-mv-tag { margin-left: 6px; font-size: var(--fs-xs); font-weight: 700; padding: 1px 7px; border-radius: 999px; background: rgba(240,192,90,.16); color: #f0c05a; vertical-align: 1px; }
+.lg-mv-s { font-size: var(--fs-sm); margin-top: -2px; }
 .lg-mv-row { display: grid; grid-template-columns: 52px 1fr; gap: 8px; align-items: baseline; line-height: 1.45; }
-.lg-mv-k { font-size: 10.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.lg-mv-k { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
 .lg-mv-k.good { color: #6fdc8c; } .lg-mv-k.bad { color: #ff8a80; }
-.lg-mv-f { font-size: 12px; padding: 0 2px; }
+.lg-mv-f { font-size: var(--fs-sm); padding: 0 2px; }
 .lg-tbl .lg-cond + .lg-cond { margin-left: 4px; }
