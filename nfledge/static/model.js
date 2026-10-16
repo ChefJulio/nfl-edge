@@ -57,7 +57,7 @@
   NFLE.areas.model = {
     mount(sec) {
       sec.innerHTML = `<div class="sec-head"><div><h2>The model</h2><p>How every number on this site is calculated. Blue values are filled in live from the latest build.</p></div></div>
-        <div class="md-body"><p class="muted">Loading the model description&hellip;</p></div>`;
+        <div class="md-body skel-zone"></div>`;
       const body = sec.querySelector('.md-body');
       NFLE.load('data/model.json').then(m => {
         // m.html is our own build's rendering of MODEL.md (trusted, same origin): inserted as HTML on purpose

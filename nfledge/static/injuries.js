@@ -15,7 +15,7 @@
           <select class="dt-select in-team" aria-label="Team"><option value="">All teams</option></select>
           <select class="dt-select in-status" aria-label="Status"><option value="">Any status</option></select>
           <div class="seg in-scope"><button type="button" data-v="fan">Fantasy</button><button type="button" data-v="all">All</button></div>
-        </div><div class="in-tbl"></div></div>
+        </div><div class="skel-zone in-tbl"></div></div>
         <p class="st-note muted">Status, injury, estimated return and notes from ESPN's injury feed (updated daily). Inactive % is ours: the chance he doesn't play this week, from the injury report, practice participation and his history (see the Model tab).</p>`;
       const sub = sec.querySelector('.in-sub'), selT = sec.querySelector('.in-team'), selS = sec.querySelector('.in-status');
       let scope = 'fan', all = [], table = null;

@@ -44,7 +44,7 @@
         <div class="dt-card"><div class="dt-tools">
           <select class="dt-select st-season" aria-label="Season"></select>
           <div class="seg st-view"><button type="button" data-v="div">Divisions</button><button type="button" data-v="conf">Playoff picture</button></div>
-        </div><div class="st-body"></div></div>
+        </div><div class="skel-zone st-body"></div></div>
         <p class="st-note muted">Ties count as half a win. Tiebreakers follow the NFL's procedure (head-to-head, division record, common games, conference record, strength of victory and schedule, points rankings, net points); the deciding step is shown under the team (TB = won a tiebreak on: H2H = head-to-head, div / conf rec = division / conference record, common = common games, SOV / SOS = strength of victory / schedule, pts = points rankings; div TB = ahead of a division rival on the division tiebreak). Net touchdowns and the coin toss (the last two steps, almost never reached) are not modeled.</p>`;
       const sel = sec.querySelector('.st-season'), body = sec.querySelector('.st-body'), sub = sec.querySelector('.st-sub');
       let view = store(VIEW_KEY) === 'conf' ? 'conf' : 'div', doc = null;

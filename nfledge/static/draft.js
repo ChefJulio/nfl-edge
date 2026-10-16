@@ -42,7 +42,7 @@
           <select class="dt-select dr-pos" aria-label="Position"><option value="">All positions</option></select>
           <select class="dt-select dr-round" aria-label="Round"><option value="">All rounds</option></select>
           <input class="dr-q" type="search" placeholder="Find a player or school" aria-label="Find a player or school">
-        </div><div class="dr-tbl"></div></div>
+        </div><div class="skel-zone dr-tbl"></div></div>
         <p class="st-note muted">Pro Football Reference via nflverse. Career numbers include this season so far; Approximate Value (AV) rates a season at any position on one scale.</p>`;
       const sub = sec.querySelector('.dr-sub'), selY = sec.querySelector('.dr-year'), selT = sec.querySelector('.dr-team'),
             selP = sec.querySelector('.dr-pos'), selR = sec.querySelector('.dr-round'), qi = sec.querySelector('.dr-q');

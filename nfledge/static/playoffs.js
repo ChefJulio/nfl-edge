@@ -35,7 +35,7 @@
       sec.innerHTML = `<div class="sec-head"><div><h2>Playoffs</h2><p class="po-sub">Loading&hellip;</p></div></div>
         <div class="dt-card"><div class="dt-tools"><select class="dt-select po-season" aria-label="Season"></select>
           <div class="seg po-view" hidden><button type="button" data-v="odds">Odds</button><button type="button" data-v="bracket">Bracket</button></div></div>
-        <div class="po-body"></div></div>
+        <div class="skel-zone po-body"></div></div>
         <p class="st-note muted">Seasons are listed by the year they started (Super Bowl I = 1966 season). 1933-1998 results: FiveThirtyEight (MIT license); seeds 1975-1998: Wikipedia; 1999 on: nflverse, seeds from our tiebreaker code.</p>`;
       const sel = sec.querySelector('.po-season'), body = sec.querySelector('.po-body'), sub = sec.querySelector('.po-sub'), viewSeg = sec.querySelector('.po-view');
       let idx = null, view = 'odds';

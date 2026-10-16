@@ -107,7 +107,7 @@
           <select class="dt-select ps-pos" aria-label="Position">${['All', ...Object.keys(GROUPS)].map(g => `<option value="${g}">${g === 'All' ? 'All positions' : g}</option>`).join('')}</select>
           <div class="seg ps-per"><button type="button" data-v="tot">Totals</button><button type="button" data-v="pg">Per game</button></div>
           <input class="ps-q" type="search" placeholder="Find a player" aria-label="Find a player">
-        </div><div class="ps-tbl"></div></div>
+        </div><div class="skel-zone ps-tbl"></div></div>
         <p class="st-note muted">Regular season, raw (not adjusted for opponents). Fantasy points use your scoring settings (Rankings &rsaquo; Scoring &amp; league). The last three columns are yours: pick any stat, bio, draft or contract detail.</p>`;
       const sub = sec.querySelector('.ps-sub'), selS = sec.querySelector('.ps-season'), selP = sec.querySelector('.ps-pos'), q = sec.querySelector('.ps-q');
       let all = [], pos = store('nfledge-ps-pos') || 'QB', per = store('nfledge-ps-per') === 'pg', table = null;

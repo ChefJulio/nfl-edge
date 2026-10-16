@@ -46,7 +46,7 @@
           <select class="dt-select mv-group" aria-label="Move type"><option value="">All moves</option>${GROUPS.map(g => `<option value="${g[0]}">${esc(g[1])}</option>`).join('')}</select>
           <select class="dt-select mv-pos" aria-label="Position"><option value="">All positions</option></select>
           <label class="mv-dl">From <input type="date" class="mv-from"></label><label class="mv-dl">To <input type="date" class="mv-to"></label>
-        </div><div class="mv-tbl"></div><div class="mv-more-wrap"><button type="button" class="mv-more" hidden></button></div></div>
+        </div><div class="skel-zone mv-tbl"></div><div class="mv-more-wrap"><button type="button" class="mv-more" hidden></button></div></div>
         <p class="st-note muted">From ESPN's transactions log (updated daily; thin before 2003). Each note is split into one row per player; tap a linked name for his page. The full note is kept in Details.</p>`;
       const $ = s => sec.querySelector(s);
       const sub = $('.mv-sub'), selS = $('.mv-season'), selT = $('.mv-team'), selG = $('.mv-group'), selP = $('.mv-pos'),

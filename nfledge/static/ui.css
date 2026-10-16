@@ -72,3 +72,12 @@ button:active:not(:disabled), a.mt:active, .chip:active, .sbtn:active, [data-ope
 .stale-pill b { color: var(--accent); }
 .stale-pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
 .stale-pill:active { transform: translateX(-50%) scale(.96); }
+
+/* Loading placeholders (owner 2026-10-16): an empty .skel-zone shows faint shimmering rows at about the height of what
+   loads into it, so the page doesn't jump when the data lands; anything rendered into it replaces them (:empty). */
+.skel-zone:empty { position: relative; overflow: hidden; min-height: 320px; border-radius: var(--r-md);
+  background: repeating-linear-gradient(to bottom, rgba(255,255,255,.045) 0 46px, transparent 46px 52px); }
+.skel-zone:empty::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent); animation: skel 1.3s ease-in-out infinite; }
+.skel-zone.sm:empty { min-height: 156px; }
+@keyframes skel { to { transform: translateX(100%); } }

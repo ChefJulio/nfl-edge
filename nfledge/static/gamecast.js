@@ -824,7 +824,7 @@
     body.querySelectorAll('[data-wkstep]').forEach(b => b.onclick = () => { const o = wkOrder(); go(o[o.indexOf(cardWk) + +b.dataset.wkstep]); });
     const back = body.querySelector('[data-wkback]'); if (back) back.onclick = () => go(pageKey());
   };
-  const wkWait = d => d === undefined ? '<div class="pc-box"><p class="pc-sub">Loading that week&hellip;</p></div>'
+  const wkWait = d => d === undefined ? '<div class="pc-box"><div class="skel-zone sm"></div></div>'
     : '<div class="pc-box"><p class="pc-sub">We have no page for that week.</p></div>';
 
   // Matchup: points facing this opponent adds (+) or takes away (-) vs an average opponent, in its week-scaled
@@ -926,7 +926,7 @@
   // his first game of the season), each with a way into the full tab. Both are current, whatever week is picked.
   const weekExtras = (pid, L, row, espn) => {
     const cur = L && L.seasons.some(S => S.s === L.cur && S.g.length);
-    const log = !LOGS[pid] ? '<p class="pc-sub">Loading games&hellip;</p>'
+    const log = !LOGS[pid] ? '<div class="skel-zone sm"></div>'
       : L && L.seasons.length ? logHtml(L, row, cur ? { season: true } : { last: 5 }) : '';
     return (espn ? `<div class="pc-box pc-mini"><div class="pc-k">Latest news</div><div class="pc-news" data-n="3"></div>
         <button type="button" class="pc-more" data-goto="news">Show more</button></div>` : '')
@@ -1200,7 +1200,7 @@
       ${graded ? `<div class="pc-tab" data-pt="gr"${cardTab === 'gr' ? '' : ' hidden'}><div class="pc-grade"><p class="pc-sub">Loading grade&hellip;</p></div></div>` : ''}
       <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${overview ? '' : pickerHtml()}${week}${overview ? '<div class="pc-pen"></div>' : ''}</div>
       <div class="pc-tab" data-pt="log"${cardTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every career game</div><div class="pc-log">${
-        !LOGS[pid] ? '<p class="pc-sub">Loading game log&hellip;</p>' : !L ? '<p class="pc-sub">Game log unavailable.</p>'
+        !LOGS[pid] ? '<div class="skel-zone"></div>' : !L ? '<p class="pc-sub">Game log unavailable.</p>'
           : isKind ? (L.seasons.length ? kindLog(L, L.seasons) : '<p class="pc-sub">No regular-season games with a recorded stat or snap.</p>')
           : L.seasons.length || (L.up || []).length ? logHtml(L, p || row) : '<p class="pc-sub">No NFL games yet.</p>'}</div></div></div>
       ${L && (L.inj || L.dur) ? `<div class="pc-tab" data-pt="inj"${cardTab === 'inj' ? '' : ' hidden'}>${injuryTab(L, espn)}</div>` : ''}
