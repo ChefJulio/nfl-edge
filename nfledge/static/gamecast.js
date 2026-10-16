@@ -797,6 +797,10 @@
   // NFL headshots come as ~4 MB originals; the image server's face crop is sharp at card size and ~13 KB
   // (player logs already store the cropped URL; this also covers older log files).
   const faceCrop = u => u.replace('/upload/f_auto,q_auto/', '/upload/c_thumb,g_face,z_0.75,w_160,h_160,f_auto,q_auto/');
+  // the full-size headshot for the tap-to-zoom view (owner 2026-10-15): NFL's original upload, else ESPN's full PNG
+  const photoBig = (L, espn) => (L && L.bio && L.bio.photo ? L.bio.photo : '') || (espn ? `https://a.espncdn.com/i/headshots/nfl/players/full/${encodeURIComponent(espn)}.png` : '');
+  // NFL image-service URLs carry their crop / size in the path: drop it for the original upload
+  const uncrop = u => String(u || '').replace(/\/upload\/[^/]*c_thumb[^/]*\//, '/upload/f_auto,q_auto,w_1000/');
   const photoUrl = (L, espn) => (L && L.bio && L.bio.photo ? faceCrop(L.bio.photo) : '')
     || (espn ? `https://a.espncdn.com/i/headshots/nfl/players/full/${encodeURIComponent(espn)}.png` : '');
   // Profile box under the header (current, like the header): bio, draft slot, and the current contract
@@ -1078,7 +1082,7 @@
       : (d === undefined || d === null ? wkWait(d) : p ? playerWeek(pid, p, d, L) : playerOff(L, d)) + weekExtras(pid, L, p || row, espn);
     body.innerHTML = `
       <div class="pc-head" style="--tc:${esc(info.color || '#666')}">
-        ${photo ? `<div class="pc-pic"><img src="${esc(photo)}" alt="" width="72" height="72" loading="lazy" onerror="this.parentNode.classList.add('nopic')">${team ? `<span class="pc-pic-tm">${tLogo(team, 16)}</span>` : ''}</div>`
+        ${photo ? `<div class="pc-pic" data-zoom="${esc(uncrop(photoBig(L, espn) || photo))}" role="button" tabindex="0" aria-label="Show a bigger photo"><img src="${esc(photo)}" alt="" width="72" height="72" loading="lazy" onerror="this.parentNode.classList.add('nopic')">${team ? `<span class="pc-pic-tm">${tLogo(team, 16)}</span>` : ''}</div>`
           : team ? tLogo(team, 34) : ''}
         <div class="pc-id"><h3 id="pcName">${num != null ? `<span class="pc-num">#${esc(num)}</span>` : ''}${esc(name)}</h3>
           <div class="pc-meta">${pos ? `<span class="posb posb-${esc(pos)}">${esc(pos)}</span>` : ''}${graded ? grChip(pid, GR.cur) : ''} ${team ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(team)}">${esc(info.name || team)}</button>` : L && lastPlayed && lastPlayed < L.cur ? `<span class="muted">Last played ${esc(lastPlayed)}</span>` : '<span class="muted">Free agent</span>'}</div>
@@ -1452,7 +1456,7 @@
     // Header, season box and game log are current; the Week tab (matchup, Power, players) follows the picker.
     const wk = d ? teamWeek(abbr, d) : { html: wkWait(d), players: '' };
     body.innerHTML = `
-      <div class="pc-head" style="--tc:${esc(info.color || '#666')}">${tLogo(abbr, 34)}
+      <div class="pc-head" style="--tc:${esc(info.color || '#666')}"><span class="pc-logo-z" data-zoom="${esc(info.logo ? logoSrc(info.logo, 500) : '')}" role="button" tabindex="0" aria-label="Show a bigger logo">${tLogo(abbr, 34)}</span>
         <div class="pc-id"><h3 id="pcName">${esc(info.name || abbr)}</h3>
           <div class="pc-meta"><b>${esc((L && (L.seasons.find(s => s.s === L.cur) || {}).rec) || '')}</b>${info.division ? ` <span class="muted">${esc(info.division)}</span>` : ''}</div></div></div>
       <div class="seg pc-tabs" role="tablist">${[['ov', 'Week'], ['log', 'Game log'], ['pl', 'Players'], ['dc', 'Depth'], ['po', 'Playoffs']].map(([k, l]) => `<button type="button" data-tt="${k}" class="${teamTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
@@ -2208,4 +2212,21 @@
   window.NFLE = Object.assign(window.NFLE || {}, { openPlayer, closePlayer, openTeam, showPlayer, showTeam, weights,
     weekData: () => DATA, injTag, paintTiles: () => { if (DATA) paintTiles(); }, gameHref });  // shared with shell.js, table.js, area modules
   if (CFG.page === 'game') initGame(); else initWeek();
+})();
+
+// Tap-to-zoom (owner 2026-10-15): any [data-zoom] element opens its full-size image over the page; tap or Esc closes.
+(() => {
+  const open = url => {
+    if (!url) return;
+    const ov = document.createElement('div');
+    ov.className = 'zoom-ov';
+    ov.innerHTML = `<img src="${url.replace(/"/g, '&quot;')}" alt="">`;
+    const close = () => { ov.remove(); document.removeEventListener('keydown', esc); };
+    const esc = e => { if (e.key === 'Escape') close(); };
+    ov.addEventListener('click', close);
+    document.addEventListener('keydown', esc);
+    document.body.appendChild(ov);
+  };
+  document.addEventListener('click', e => { const z = e.target.closest && e.target.closest('[data-zoom]'); if (z && z.dataset.zoom) { e.preventDefault(); e.stopPropagation(); open(z.dataset.zoom); } }, true);
+  document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.dataset && e.target.dataset.zoom) open(e.target.dataset.zoom); });
 })();
