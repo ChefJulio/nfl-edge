@@ -260,11 +260,60 @@ def add_team_q(x: pd.DataFrame, hist: pd.DataFrame, k: float = 20.0) -> pd.DataF
   return x.assign(team_q=out)
 
 
+def add_k_feats(d, x: pd.DataFrame, hist: pd.DataFrame, rep_rows: pd.DataFrame, which=("cal", "own", "depth")) -> pd.DataFrame:
+  """EXPERIMENT (INSIGHTS (K)): calendar (week, final_week), his own record when Questionable (own_qn, own_q: shrunk
+  with 3 pseudo-cases), and depth_prev (teammates at his position on the field 20%+ in the team's previous game and
+  not on this week's report). Everything from before the game."""
+  x = x.copy()
+  sch = d.schedules[d.schedules.game_type == "REG"]
+  tw = {}
+  for g in sch.itertuples():
+    for t in (g.home_team, g.away_team):
+      tw.setdefault((int(g.season), t), []).append(int(g.week))
+  if "cal" in which:
+    last = {k: max(v) for k, v in tw.items()}
+    x["wk"] = x.week.astype(float)
+    x["final_week"] = [float(w == last.get((s_, t), -1)) for s_, w, t in zip(x.season, x.week, x.team)]
+  if "own" in which:
+    q = hist[(hist.stage == 3) & (hist.gs_now == "Questionable")].dropna(subset=["y"])
+    league = float(q.y.mean()) if len(q) else 0.7
+    by = {g: (gg.season.to_numpy() * 100 + gg.week.to_numpy(), np.cumsum(gg.y.to_numpy()))
+          for g, gg in q.sort_values(["season", "week"]).groupby("gsis_id")}
+    n_, r_ = [], []
+    for g, s_, w in zip(x.gsis_id, x.season, x.week):
+      e = by.get(g)
+      i = int(np.searchsorted(e[0], s_ * 100 + w, side="left")) if e is not None else 0
+      yy = float(e[1][i - 1]) if i else 0.0
+      n_.append(float(min(i, 10)))
+      r_.append((yy + 3 * league) / (i + 3))
+    x["own_qn"], x["own_q"] = n_, r_
+  if "depth" in which:
+    sn = d.snaps.dropna(subset=["gsis_id"]).assign(season=lambda z: z.season.astype(int), week=lambda z: z.week.astype(int))
+    sn = sn.assign(pos=sn.position.replace({"FB": "RB", "HB": "RB"}), v=np.maximum(sn.offense_pct.fillna(0), sn.defense_pct.fillna(0)))
+    played = sn[sn.v >= 0.2].groupby(["team", "season", "week", "pos"]).gsis_id.apply(set).to_dict()
+    onrep = {}
+    for g, s_, w in zip(rep_rows.gsis_id, rep_rows.season, rep_rows.week):
+      onrep.setdefault((int(s_), int(w)), set()).add(g)
+    out = []
+    for g, s_, w, t, ps in zip(x.gsis_id, x.season, x.week, x.team, x.pos):
+      prev = [k for k in tw.get((s_, t), []) if k < w]
+      if not prev:
+        out.append(np.nan)
+        continue
+      mates = played.get((t, s_, prev[-1], ps), set()) - {g} - onrep.get((s_, w), set())
+      out.append(float(min(len(mates), 4)))
+    x["depth_prev"] = out
+  return x
+
+
 def week_features(x: pd.DataFrame) -> pd.DataFrame:
   from .injuries import InjuryModel
   f = features(x)
   if "team_q" in x.columns:  # (J)
     f["team_q"] = x.team_q.astype(float).to_numpy()
+  for c in ("wk", "final_week", "own_qn", "own_q", "depth_prev"):  # (K)
+    if c in x.columns:
+      f[c] = x[c].astype(float).to_numpy()
   for c in ("on_now", "wn_D", "wn_L", "wn_F", "w_first", "w_last"):
     f[c] = x[c].astype(float).to_numpy()
   f["w_trend"] = f.w_last - f.w_first

@@ -1581,3 +1581,23 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Questionable only 0.1793 -> 0.1779; QB significantly worse (+0.0074 [+0.0034, +0.0113]); Wednesday +0.0003,
   Thursday +0.0004; 2026 Wednesday worse. The habit shows up in each player's own practice days and status, which the
   model reads player by player. Off (code kept: tuesday.add_team_q, tools/team_q_eval.py).
+- **Finding 2026-10-16 (owner: "anything else that might be a blind spot?"): where the one model is off.** Walk-
+  forward 2021-25 final reports (predicted 83.5%, played 83.5% overall). Fine: bye next week (gap within 2.3 pts),
+  short week / extra rest (within 1.4). Off: week 18 predicted 82.1% vs played 75.2% (-6.9; week 16+ Questionable
+  -4.8); Questionable players who were Q 3+ times before and always played +4.8 (76.2 vs 81.0), who played < 60% of
+  those -6.2; 3+ healthy teammates at the position -7.5 BUT measured from the same game's snaps (leaks the outcome:
+  if he sits, backups play more), so not trusted as measured.
+- **PRE-REGISTERED 2026-10-16 (before running): (K) three inputs for the one model.** (1) Calendar: week number and a
+  final-week flag. (2) His own record when Questionable: times Q on a final report before this week and how often he
+  played, shrunk toward the league rate with 3 pseudo-cases. (3) Depth, measured cleanly: teammates at his position
+  who played 20%+ of snaps in the team's previous game and aren't on this week's report. Compared with the one model as
+  shipped, same rows, same calibration; tools/k_eval.py. GATE as (J): final report Brier lower with the 95% CI excluding
+  0, no position significantly worse; Wednesday / Thursday CI upper < +0.002; deciles within 4 points; same direction
+  on 2026 so far. Each input also reported alone (descriptive, not gated).
+- **RESULT (K): FAIL.** Combined (calendar + own Questionable record + clean depth): final report 0.0844 -> 0.0840
+  (-0.0004 [-0.0012, +0.0004]); Wednesday -0.0003, Thursday -0.0002; 2026 Wednesday +0.0006. Alone (descriptive):
+  calendar final -0.0007 [-0.0014, -0.0001] (the only signal; 2026's weeks 1-6 can't show a late-season effect),
+  own record -0.0001 [-0.0007, +0.0005], clean depth +0.0002 [-0.0004, +0.0007]. The blind-spot pockets were partly
+  selection (scanning many groups finds the biggest misses, which shrink back) and the same-game depth gap was the
+  leak. Next for late season: the team's playoff situation (clinched / eliminated) from standings, which only weeks
+  16-18 can confirm. Off (code kept: tuesday.add_k_feats, tools/k_eval.py).
