@@ -194,6 +194,8 @@ def main():
   sts = st[st.player_id.isin(everyone)].sort_values(["season", "week"])
   by_player = {pid: g for pid, g in sts.groupby("player_id")}
   post_by = {pid: g for pid, g in post[post.player_id.isin(everyone)].sort_values(["season", "week"]).groupby("player_id")}
+  sched_w, n_weeks = team_weeks(allsched)
+  ros_w = roster_weeks(all_ros[all_ros.gsis_id.isin(everyone)])
   n = 0
   for pid in everyone:
     g = by_player.get(pid)
@@ -269,7 +271,10 @@ def main():
       name, espn = pinfo.at[pid, "display_name"], espn_str(pinfo.at[pid, "espn_id"])
     doc = {"pid": pid, "name": name, "espn": espn, "pos": pos, "keys": SCORE_KEYS, "cur": data.current_season, "team": team,
            "seasons": [{"s": s, "g": seasons.get(s, []), **({"pg": playoffs[s]} if s in playoffs else {}),
-                        **season_rank.get((s, pid), {})}
+                        **season_rank.get((s, pid), {}),
+                        # the weeks he has no game in (this season's byes come with "up")
+                        "m": missed_weeks(s, seasons.get(s, []), ros_w.get(pid, {}), sched_w, n_weeks.get(s, 0), gid_of,
+                                          byes=s != data.current_season, snap_of=lambda w, s=s: snap.get((s, w, pid)))}
                        for s in sorted(set(seasons) | set(playoffs), reverse=True)], "up": upcoming,
            "bio": bios.get(pid, {})}
     if pid in injuries:
@@ -309,6 +314,87 @@ RANKED = ["pass_yd", "pass_td", "interception", "rush_yd", "rush_td", "reception
 FEWER_BETTER = {"interception", "fumble_lost"}
 FULL_COLS = ["player_id", "player_display_name", "position", "season", "week", "season_type", "team", "opponent_team"] + \
   sorted({c for v in KIND_STATS.values() for _, c in v} | {c for _, c in RET})
+
+
+# Every regular-season week in a player's game log (owner 2026-10-16: "weeks the player didn't play should still be
+# there"): the weeks he has no game get a row saying why, from his weekly roster status that week.
+def roster_tag(status, abbr) -> str:
+  if status == "INA":
+    return "INA"  # declared inactive on game day (rosters mark it from 2019; before that he reads DNP)
+  if status == "RES":
+    return "PUP" if abbr == "R04" else "IR" if abbr in ("R01", "R48") else "Res"
+  return {"DEV": "PS", "CUT": "Cut", "RET": "Ret"}.get(status, "DNP")
+
+
+def team_weeks(allsched: pd.DataFrame) -> tuple[dict, dict]:
+  """(season, week, team) -> (opponent, home 1/0, final) for every regular-season game, relocated team codes; and
+  season -> its last week with a finished game (all of a past season; this season so far: later weeks belong to the
+  upcoming schedule, and rosters don't exist for them yet)."""
+  games, n_weeks = {}, {}
+  for g in allsched.itertuples():
+    h, a = D.RELOCATED.get(g.home_team, g.home_team), D.RELOCATED.get(g.away_team, g.away_team)
+    s, w, fin = int(g.season), int(g.week), pd.notna(g.home_score)
+    games[(s, w, h)], games[(s, w, a)] = (a, 1, fin), (h, 0, fin)
+    if fin:
+      n_weeks[s] = max(n_weeks.get(s, 0), w)
+  return games, n_weeks
+
+
+def roster_weeks(ros: pd.DataFrame) -> dict:
+  """gsis_id -> {(season, week): (team, status, status code)} from the weekly rosters (2002 on)."""
+  r = ros.dropna(subset=["gsis_id"])[["gsis_id", "season", "week", "team", "status", "status_description_abbr"]]
+  r = r.assign(team=r.team.replace({"LAR": "LA"}).map(lambda t: D.RELOCATED.get(t, t)))
+  out = {}
+  for g, s_, w, t, st_, ab in zip(r.gsis_id, r.season.astype(int), r.week.astype(int), r.team, r.status, r.status_description_abbr):
+    out.setdefault(g, {})[(s_, w)] = (t, st_, ab)
+  return out
+
+
+def missed_weeks(season: int, games: list, ros_wk: dict, sched: dict, n_weeks: int, gid_of: dict,
+                 byes: bool = True, snap_of=None) -> list:
+  """Rows for the regular-season weeks of `season` he has no game in: {"w", "bye": 1} when his team was off, else
+  {"w", "o", "h", "t", "miss": tag} (tag from roster_tag; "FA" = on no roster that week). Weeks whose game isn't
+  final yet are left to the upcoming schedule. His team that week: the roster's, else (no roster that season, e.g.
+  before 2002) the team of his nearest game."""
+  played = {e["w"] for e in games}
+  has_ros = any(k[0] == season for k in ros_wk)
+  out = []
+  for w in range(1, n_weeks + 1):
+    if w in played:
+      continue
+    r = ros_wk.get((season, w))
+    if r:
+      team = r[0]
+    elif has_ros:
+      # no roster row: a team's bye week has none, so on the same team the weeks before and after = still his team;
+      # otherwise he wasn't signed yet, or had been released
+      before = [k for k in ros_wk if k[0] == season and k[1] < w]
+      after = [k for k in ros_wk if k[0] == season and k[1] > w]
+      t0 = ros_wk[max(before)][0] if before else None
+      if t0 is None or not after or ros_wk[min(after)][0] != t0 or ros_wk[max(before)][1] in ("CUT", "RET"):
+        out.append({"w": w, "miss": "FA"})
+        continue
+      team = t0
+    elif games:
+      team = min(games, key=lambda e: (abs(e["w"] - w), e["w"] > w))["t"]
+    else:
+      out.append({"w": w, "miss": "FA"})
+      continue
+    team = D.RELOCATED.get(team, team)
+    g = sched.get((season, w, team))
+    if g is None:
+      if byes:
+        out.append({"w": w, "bye": 1})
+      continue
+    if not g[2]:
+      continue  # not played yet
+    e = {"w": w, "o": g[0], "h": g[1], "t": team, "miss": roster_tag(r[1], r[2]) if r else "DNP"}
+    sp = snap_of(w) if snap_of else None
+    if sp is not None and not pd.isna(sp) and sp > 0:  # on the field without a stat (Allen's 1-snap week 18, 2024)
+      e["miss"], e["sn"] = "", int(round(100 * float(sp)))
+    _link(e, gid_of.get((season, w, team)))
+    out.append(e)
+  return out
 
 
 def espn_str(e):
@@ -364,6 +450,8 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
   stat_by = {k: g for k, g in st.groupby("player_id")}
   snap_by = {k: g for k, g in sn.groupby("gsis_id")}
   ros_by = {k: g for k, g in ros[ros.status == "ACT"].groupby("gsis_id")}
+  sched_w, n_weeks = team_weeks(allsched)
+  ros_w = roster_weeks(ros)
   last_ros = rs_sorted.drop_duplicates("gsis_id", keep="last").set_index("gsis_id")
   name_of = dict(zip(st.player_id, st.player_display_name))
   name_of.update(dict(zip(last_ros.index, last_ros.full_name)))
@@ -453,7 +541,8 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
     name = name_of.get(pid) or (pinfo.at[pid, "display_name"] if pid in pinfo.index else pid)
     doc = {"pid": pid, "name": name, "espn": espn, "pos": pos if isinstance(pos, str) else None, "kind": kind,
            "keys": [k for k, _ in keys], "ret_keys": [k for k, _ in RET], "cur": cur, "team": team,
-           "seasons": [{"s": s, "g": seasons.get(s, []), **({"pg": pg[s]} if s in pg else {})}
+           "seasons": [{"s": s, "g": seasons.get(s, []), **({"pg": pg[s]} if s in pg else {}),
+                        "m": missed_weeks(s, seasons.get(s, []), ros_w.get(pid, {}), sched_w, n_weeks.get(s, 0), gid_of)}
                        for s in sorted(set(seasons) | set(pg), reverse=True)], "ros": rs, "bio": bios.get(pid, {})}
     if injuries and pid in injuries:
       doc["inj"] = injuries[pid]["eps"]

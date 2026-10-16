@@ -724,3 +724,7 @@ table.lg tr.lg-season td::before, table.lg tr.lg-gh th::before { content: none; 
 .lg-fh-in { position: sticky; background: var(--panel2); }
 .lg-fh-x { overflow: hidden; }
 .lg-fh table.lg { border-spacing: 0; table-layout: fixed; min-width: 0; }
+/* weeks he didn't play (gamecast.js missTag): dashes, with why in a small tag */
+table.lg tr.lg-miss td { color: var(--faint); }
+.lg-tag { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: .03em; padding: 1px 6px; border-radius: 6px;
+  color: var(--muted); background: color-mix(in srgb, var(--ink) 8%, transparent); }

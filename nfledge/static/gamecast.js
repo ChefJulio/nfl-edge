@@ -499,12 +499,22 @@
     const b0 = box.getBoundingClientRect().top, s0 = sc.getBoundingClientRect(), top = stickTop();
     const cs = getComputedStyle(sc);
     tbl.querySelectorAll('tbody tr.lg-ch').forEach(ch => {
-      const gh = ch.previousElementSibling && ch.previousElementSibling.classList.contains('lg-gh') ? ch.previousElementSibling : null;
+      // the rows right above the heads ride along (owner 2026-10-16): group heads, the Playoffs / Regular season label
+      // and the season row ("2026 NO - 5 games - 17.0 FP/G") when it sits directly above
+      const lead = [];
+      for (let pv = ch.previousElementSibling; pv && ['lg-gh', 'lg-sub', 'lg-season'].some(c => pv.classList.contains(c)); pv = pv.previousElementSibling) {
+        lead.unshift(pv);
+        if (pv.classList.contains('lg-season')) break;
+      }
       let end = ch.parentElement.getBoundingClientRect().bottom;
       for (let n = ch.nextElementSibling; n; n = n.nextElementSibling) {
         if (n.classList.contains('lg-sub') || n.classList.contains('lg-season')) { end = n.getBoundingClientRect().top; break; }
       }
-      const r0 = (gh || ch).getBoundingClientRect().top;
+      const r0 = (lead[0] || ch).getBoundingClientRect().top;
+      // under "Regular season" (after a playoffs block) the copy names the season too
+      const seasonRow = ch.parentElement.querySelector('tr.lg-season'), yr = seasonRow && seasonRow.querySelector('b');
+      const leadHtml = lead.map(r => r.classList.contains('lg-sub') && !lead.some(x => x.classList.contains('lg-season')) && yr
+        ? r.outerHTML.replace('<span class="lg-pin">', `<span class="lg-pin">${esc(yr.textContent)} &middot; `) : r.outerHTML).join('');
       const widths = [...ch.cells].map(c => c.getBoundingClientRect().width);
       const lay = document.createElement('div');
       lay.className = 'lg-fh';
@@ -512,7 +522,7 @@
       lay.style.cssText = `top:${r0 - b0}px;height:${Math.max(0, end - r0)}px;left:${s0.left - box.getBoundingClientRect().left}px;width:${s0.width}px`;
       lay.innerHTML = `<div class="lg-fh-in" style="top:${top}px"><div class="lg-fh-x" style="padding:0 ${cs.paddingRight} 0 ${cs.paddingLeft}">
         <table class="${tbl.className}" style="width:${tbl.getBoundingClientRect().width}px"><colgroup>${widths.map(w => `<col style="width:${w}px">`).join('')}</colgroup>
-        <tbody>${gh ? gh.outerHTML : ''}${ch.outerHTML}</tbody></table></div></div>`;
+        <tbody>${leadHtml}${ch.outerHTML}</tbody></table></div></div>`;
       box.appendChild(lay);
       lay.querySelector('.lg-fh-x').scrollLeft = sc.scrollLeft;
     });
@@ -531,6 +541,12 @@
   new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) watchLogs(n.parentElement || n); })))
     .observe(document.documentElement, { childList: true, subtree: true });
   addEventListener('resize', () => document.querySelectorAll('.lg-scroll > table.lg').forEach(tbl => fhSeen.has(tbl) && layHeads(tbl)), { passive: true });
+  // A week without a game of his: why (roster status that week; tools/player_logs.py roster_tag). "Bye" sits in the
+  // pinned Opp column so it stays put when the log scrolls sideways.
+  const MISS_TIP = { DNP: 'Active, did not play', INA: 'Inactive on game day', IR: 'Injured reserve', PUP: 'PUP list', Res: 'Reserve list',
+                     PS: 'Practice squad', Cut: 'Released', Ret: 'Retired', FA: 'Not on a roster' };
+  const missTag = u => u.miss ? `<span class="lg-tag" title="${esc(MISS_TIP[u.miss] || u.miss)}">${esc(u.miss)}</span>` : '<span class="lg-tag" title="On the field, no stats">0</span>';
+  const byeRow = (w, rest) => `<tr class="lg-bye"><td>${w}</td><td>Bye</td><td colspan="${rest}"></td></tr>`;
   // Week tab preview, no legend and no upcoming weeks: opts.season = this season's games so far with its byes;
   // opts.last = N = his N most recent games (the fallback before his first game this season, no season totals).
   const logHtml = (L, p, opts = {}) => {
@@ -568,6 +584,8 @@
     const body = seasons.map(S => {
       const isCur = S.s === L.cur, rows = S.g.map(g => ({ w: g.w, g }));
       if (isCur) up.forEach(u => rows.push({ w: u.w, u }));
+      // weeks without a game of his (tools/player_logs.py missed_weeks): byes, and why he sat
+      if (!opts.last) (S.m || []).forEach(m => rows.push({ w: m.w, u: m }));
       rows.sort((a, b) => b.w - a.w);  // newest first: scrolling down goes back in time (owner, 2026-10-14)
       const fps = S.g.map(g => pts(g.c, w, pos)), fpg = fps.length ? fps.reduce((a, b) => a + b, 0) / fps.length : 0;
       const team = S.g.length ? S.g[S.g.length - 1].t : '';
@@ -594,7 +612,8 @@
           <tr class="lg-gap"><td colspan="${6 + stat.length}"></td></tr>`;
       };
       const trs = totRow(S.g, S.tr ? S : null) + rows.map(r => {
-        if (r.u && r.u.bye) return `<tr class="lg-bye"><td>${r.w}</td><td colspan="${5 + stat.length}">Bye</td></tr>`;
+        if (r.u && r.u.bye) return byeRow(r.w, 4 + stat.length);
+        if (r.u && r.u.miss != null) return `<tr class="lg-miss"${tileAttrs(r.u)}><td>${r.w}</td>${r.u.o ? opp(r.u) : '<td class="lg-opp">&ndash;</td>'}<td class="num">${missTag(r.u)}</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">${r.u.sn != null ? r.u.sn : '&ndash;'}</td>${blank}</tr>`;
         if (r.u) {
           const pj = projOf(r.u);
           return `<tr class="lg-up"${tileAttrs(r.u)}><td>${r.w}</td>${opp(r.u)}<td class="num">–</td><td class="num">${pj != null ? f1(pj) : '–'}</td><td class="num">–</td><td class="num">–</td>${blank}</tr>`;
@@ -964,7 +983,10 @@
         return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num">${sn.length ? Math.round(sn.reduce((a, g) => a + g.sn, 0) / sn.length) : '–'}</td>${keys.map(k => `<td class="num">${nfmt(sum('d', (L.keys || []).indexOf(k)))}</td>`).join('')}${rk.map((k, i) => `<td class="num">${nfmt(sum('r', i))}</td>`).join('')}</tr>
           <tr class="lg-gap"><td colspan="${n}"></td></tr>`;
       };
-      const trs = tot(S.g) + [...S.g].sort((a, b) => b.w - a.w).map(g => row(g, g.w)).join('');  // newest first
+      const miss = g => `<tr class="lg-miss"${tileAttrs(g)}><td>${g.w}</td>${g.o ? `<td class="lg-opp tm-opp"><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>` : '<td class="lg-opp">&ndash;</td>'}
+        <td class="num">${g.sn != null ? g.sn : missTag(g)}</td>${'<td class="num">&ndash;</td>'.repeat(n - 3)}</tr>`;
+      const trs = tot(S.g) + [...S.g, ...(opts.compact ? [] : (S.m || []))].sort((a, b) => b.w - a.w)  // newest first, every week
+        .map(g => g.bye ? byeRow(g.w, n - 2) : g.miss != null ? miss(g) : row(g, g.w)).join('');
       const sum = opts.compact ? '' : ` · ${t.g} game${t.g === 1 ? '' : 's'}${keys.length ? ` · ${keys.slice(0, 4).map(k => `${nfmt(t[k] || 0)} ${cols[k][0]}`).join(', ')}` : ''}`;
       // playoffs first, their own block (not in the season totals above)
       const pg = opts.compact ? [] : (S.pg || []);
