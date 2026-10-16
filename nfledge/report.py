@@ -1471,6 +1471,9 @@ def render(ctx: dict, out_path: Path) -> Path:
                                                              separators=(",", ":")), encoding="utf-8")
   if nav["is_current"] and not root:  # the picker's week list (root-relative paths)
     (root_dir / "weeks.json").write_text(json.dumps(nav["seasons"], separators=(",", ":")), encoding="utf-8")
+    # the current build's stamp: a page left open (phones keep tabs alive for days) asks for this tiny file when you
+    # come back to it and offers a refresh when the site has newer numbers (shell.js, stale check)
+    (root_dir / "build.json").write_text(json.dumps({"generated": ctx["generated"]}), encoding="utf-8")
   return out_path
 
 

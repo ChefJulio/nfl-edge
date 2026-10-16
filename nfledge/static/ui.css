@@ -37,3 +37,19 @@ table th.num, table td.num { padding-left: 2px; padding-right: 2px; }
 table:not(.no-zebra) > tbody > tr:not(.teamrow):not([style]):nth-child(even) > td {
   background-image: linear-gradient(rgba(255,255,255,.018), rgba(255,255,255,.018)); }
 .ts-row:nth-child(even) { background: rgba(255,255,255,.018); border-radius: 6px; }
+/* Pressed look the moment a finger lands, not on release (owner 2026-10-16: feel snappier); replaces iOS's grey tap box.
+   Rows brighten whatever their team color; buttons and tiles also give a little. shell.js enables :active on iOS. */
+html { -webkit-tap-highlight-color: transparent; }
+tr[data-open-pid]:active > td, tr[data-pid]:active > td, tr[data-gid]:active > td, tr[data-tm]:active > td, tr.tm-open:active > td { filter: brightness(1.35); }
+button, a.mt, .chip, .sbtn, .tm-open, [data-open-pid]:not(tr) { transition: transform .08s ease-out, filter .08s ease-out; }
+button:active:not(:disabled), a.mt:active, .chip:active, .sbtn:active, [data-open-pid]:not(tr):active { transform: scale(.96); filter: brightness(1.25); }
+.tm-open:not(tr):active { filter: brightness(1.4); }
+@media (prefers-reduced-motion: reduce) { button:active, a.mt:active, .chip:active, .sbtn:active { transform: none; } }
+/* "New numbers - Refresh" (shell.js stale check): floats above the bottom bar, one tap reloads */
+.stale-pill { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--bbh, 0px) + 14px); z-index: 50;
+  display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 999px; font: inherit; font-size: 13px;
+  color: var(--ink); background: var(--panel2); border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--line));
+  box-shadow: 0 8px 24px rgba(0,0,0,.45); cursor: pointer; }
+.stale-pill b { color: var(--accent); }
+.stale-pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.stale-pill:active { transform: translateX(-50%) scale(.96); }

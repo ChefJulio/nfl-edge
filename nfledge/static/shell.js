@@ -6,6 +6,8 @@
 // reach archived weeks without a rebuild.
 // NFLE.load(path): lazy JSON loader with an in-memory cache, paths relative to the site root (the folder holding
 // assets/), so it works from index.html and from archived <season>/week-NN.html pages alike.
+// iOS only applies :active (ui.css: the pressed look on rows, tiles and buttons) when the page listens for touches.
+document.addEventListener('touchstart', () => {}, { passive: true });
 (() => {
   const NFLE = window.NFLE = window.NFLE || {};
   const root = new URL('..', document.currentScript ? document.currentScript.src : location.href);
@@ -94,6 +96,33 @@
   // their ESPN ids), and it competed with index.json for the first paint (Lighthouse 2026-10-16).
   let idsP = null;
   Object.defineProperty(NFLE.ui, 'ready', { get: () => idsP || (idsP = NFLE.load('data/espn_ids.json').then(m => { NFLE.ui.ids = m || {}; }).catch(() => {})) });
+})();
+// A page left open keeps showing what it loaded, and phones keep tabs alive for days. When you come back to the
+// current week's page (and at most every 10 minutes), ask the site for its build stamp (build.json, report.render);
+// if it's newer than this page's numbers, offer a refresh. Never reloads on its own: you may be mid-read. Nothing is
+// cached across visits, so a reload always gets the new build.
+(() => {
+  const NFLE = window.NFLE, CFG = window.NFLE_CFG || {};
+  if (!CFG.current || !NFLE) return;
+  let last = Date.now(), shown = false;
+  const show = () => {
+    shown = true;
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'stale-pill'; b.innerHTML = '<i></i>New numbers &middot; <b>Refresh</b>';
+    b.onclick = () => location.reload();
+    document.body.appendChild(b);
+  };
+  const check = async (force = false) => {
+    if (shown || document.hidden || (!force && Date.now() - last < 10 * 60000)) return;
+    last = Date.now();
+    try {
+      const r = await fetch(new URL('build.json', NFLE.root), { cache: 'no-store' });
+      const b = r.ok ? await r.json() : null, D = NFLE.weekData && NFLE.weekData();
+      if (b && D && b.generated && D.generated && b.generated !== D.generated) show();
+    } catch (e) { /* offline: try again next time */ }
+  };
+  document.addEventListener('visibilitychange', () => check());
+  addEventListener('pageshow', e => { if (e.persisted) check(true); });  // restored from the back/forward cache
 })();
 // Week page header: the season / week picker (every week links to its own page; weeks.json at the site root lists
 // them, rewritten every build, so old pages list new weeks), where this page sits in time, and the page details.
