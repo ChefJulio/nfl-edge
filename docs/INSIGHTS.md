@@ -1295,3 +1295,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   moved week-6 2026 ranks a lot (SEA net 1 -> 6, MIN 2 -> 8; SEA offense 29 -> 24: 18% of its plays in blowout
   states at +0.26 EPA/play vs -0.16 otherwise; MIN defense 2 -> 1). The Power tab's move arrows compare weeks, not
   model versions, so a model change the same week looks like movement.
+- **SHIPPED 2026-10-15 (owner: rooting guides "restricted to the current week", "be elegant where we present it",
+  and the odds-by-week chart from a scorereport.net screenshot):** research (PFF 2021 method, scorereport, 538,
+  inpredictable, ESPN FPI) -> paired flip: per simulated season, re-run standings with only that game flipped, so a
+  swing is the game's own effect (splitting seasons by result is noise-dominated: SE ~sqrt(p(1-p)/N) per group).
+  2,000 seasons x 14 games, standard errors ~0.2-0.3 pts; a swing shows only if >= 0.5 pts and >= 2 SE. Goal ranked:
+  make playoffs, else division (team > 95% or < 3% to make it), else top seed; conflicts tagged. Best / worst case =
+  all of this week's games their way / against them, 500 seasons (paired). Placement: team page Playoffs tab (chart +
+  guide, above the history), a one-line "Rooting interests" box on the Week tab (current week only), Matchups tile
+  note for the top 3 games by 2p(1-p) x summed playoff swing. Odds run 49 s locally with rooting (multi-process).

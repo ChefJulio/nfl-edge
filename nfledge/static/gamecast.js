@@ -1300,6 +1300,124 @@
       <div class="pc-box"><div class="pc-k">Every postseason · newest first</div>${seasons}
         <p class="pc-sub">Every playoff game since 1933 (1920-32 champions from the standings). AFL games count; AAFC games and titles (1946-49) are shown but are not NFL records.</p></div>`;
   };
+  // Playoff odds by week + rooting guide (data/playoffs/odds.json, tools/playoff_odds.py; owner 2026-10-15). The guide
+  // covers the current week only: each unplayed game's effect on this team's chances, from the same simulated seasons
+  // with only that game flipped (PFF's paired method), so small swings aren't noise. Ranked by the chance that's still
+  // in play: making the playoffs, else the division, else the top seed.
+  let ODDS;
+  const oddsData = () => {
+    if (ODDS === undefined) {
+      ODDS = null;
+      NFLE.load('data/playoffs/odds.json').then(x => { ODDS = x || false; if (cardTeam) renderTeam(cardTeam); }).catch(() => { ODDS = false; });
+    }
+    return ODDS || null;
+  };
+  const RT_GOAL = ['make the playoffs', 'win the division', 'get the top seed'], RT_SHORT = ['Playoffs', 'Division', 'Top seed'];
+  const rtPct = v => v >= 0.9995 ? '>99.9%' : v > 0 && v < 0.0005 ? '<0.1%' : `${(v * 100).toFixed(1)}%`;
+  const rtPts = v => `${v >= 0 ? '+' : '−'}${Math.abs(v * 100).toFixed(1)}`;
+  const rtGoal = r => r.p_playoffs > 0.03 && r.p_playoffs < 0.95 ? 0 : r.p_div > 0.03 && r.p_div < 0.97 ? 1 : r.p_bye > 0.02 && r.p_bye < 0.98 ? 2 : 0;
+  const rtTeam = (O, t) => (O.teams || []).find(r => r.team === t) || {};
+  const rtRows = (O, abbr) => {
+    const R = O && O.root, T = R && R.teams && R.teams[abbr];
+    if (!T) return null;
+    const m = rtGoal(rtTeam(O, abbr));
+    const games = R.games.map((g, i) => {
+      const [sw, se, ph, pa] = T.g[i], own = g.home === abbr || g.away === abbr;
+      const home = own ? g.home === abbr : sw[m] >= 0;
+      const gain = k => home ? sw[k] : -sw[k];  // this team's change if the side it roots for wins
+      const real = k => Math.abs(sw[k]) >= 0.005 && Math.abs(sw[k]) >= 2 * se[k];
+      return { g, own, root: home ? g.home : g.away, vs: home ? g.away : g.home, v: gain(m), sig: real(m), gain, real,
+               pw: home ? ph : pa, pl: home ? pa : ph };
+    }).sort((a, b) => b.own - a.own || Math.abs(b.v) - Math.abs(a.v));
+    return { m, T, games };
+  };
+  // one line for the Week tab (current week only)
+  const rootLine = (abbr, d) => {
+    const O = oddsData(), x = O && +O.season === +d.season && O.root && +O.root.week === +d.week ? rtRows(O, abbr) : null;
+    if (!x) return '';
+    const sig = x.games.filter(r => !r.own && r.sig && r.v > 0).slice(0, 3);
+    return `<div class="pc-box rt-line"><span class="pc-k">Rooting interests</span> ${sig.length
+      ? sig.map(r => `<b>${esc(rtTeam(O, r.root).nick || r.root)}</b> <small class="muted">${rtPts(r.v)}</small>`).join(' · ')
+      : '<span class="muted">no other game moves their odds much</span>'} <button type="button" class="rt-more" data-tt-go="po">Full guide</button></div>`;
+  };
+  // odds by week: lines going into each week, dashed to next week's best / worst case; schedule along the bottom
+  const oddsChart = (abbr, O) => {
+    const H = O.hist || {}, weeks = Object.keys(H).map(Number).filter(w => H[w] && H[w][abbr]).sort((a, b) => a - b);
+    if (!weeks.length) return '';
+    const sch = (O.sched || {})[abbr] || [], byW = Object.fromEntries(sch.map(g => [g[0], g]));
+    const nW = Math.max(18, ...sch.map(g => g[0])), R = O.root, T = R && R.teams && R.teams[abbr];
+    const W = 360, L = 26, Rt = 34, top = 12, ch = 140, Hh = top + ch + 58;
+    const X = w => L + (W - L - Rt) * (w - 1) / (nW - 1), Y = v => top + ch * (1 - v);
+    const last = weeks[weeks.length - 1], nx = R && T && +R.week === last && last < nW ? last + 1 : null;
+    const grid = [0, 0.2, 0.4, 0.6, 0.8, 1].map(v => `<line x1="${L}" x2="${W - Rt}" y1="${Y(v)}" y2="${Y(v)}" class="oc-grid"/><text x="${L - 4}" y="${Y(v) + 3}" class="oc-y">${v * 100}%</text>`).join('');
+    const ser = [[0, 'po', 'Make playoffs'], [1, 'dv', 'Win division'], [2, 'ts', 'Top seed']].map(([k, c, label]) => {
+      const pts = weeks.map(w => [X(w), Y(H[w][abbr][k]), H[w][abbr][k], w]);
+      const [lx, ly] = pts[pts.length - 1];
+      const dash = nx ? [T.best[k], T.worst[k]].map((v, i) => `<line x1="${lx}" y1="${ly}" x2="${X(nx)}" y2="${Y(v)}" class="oc-l oc-${c} oc-dash"/>
+          <circle cx="${X(nx)}" cy="${Y(v)}" r="2.6" class="oc-p oc-${c} oc-open"><title>Week ${nx} if every week ${last} game goes ${i ? 'against them' : 'their way'}: ${rtPct(v)}</title></circle>
+          <text x="${X(nx) + 5}" y="${Y(v) + (i ? 8 : -2)}" class="oc-v oc-${c}">${(v * 100).toFixed(0)}</text>`).join('') : '';
+      return `<polyline points="${pts.map(q => `${q[0].toFixed(1)},${q[1].toFixed(1)}`).join(' ')}" class="oc-l oc-${c}"/>${dash}
+        ${pts.map(([x, y, v, w]) => `<circle cx="${x}" cy="${y}" r="2.8" class="oc-p oc-${c}"><title>${label}, going into week ${w}: ${rtPct(v)}</title></circle>`).join('')}`;
+    }).join('');
+    const axis = Array.from({ length: nW }, (_, i) => i + 1).map(w => {
+      const g = byW[w], x = X(w), y0 = top + ch + 12, lg = g && rtTeam(O, g[1]).logo;
+      if (!g) return `<text x="${x}" y="${y0}" class="oc-w">${w}</text><text x="${x}" y="${y0 + 22}" class="oc-bye">BYE</text>`;
+      const res = g[3] == null ? `<text x="${x}" y="${y0 + 38}" class="oc-r">${g[2] ? 'vs' : '@'}</text>`
+        : `<text x="${x}" y="${y0 + 38}" class="oc-r ${g[3] > g[4] ? 'w' : g[3] < g[4] ? 'l' : ''}">${g[3] > g[4] ? 'W' : g[3] < g[4] ? 'L' : 'T'}</text><text x="${x}" y="${y0 + 46}" class="oc-sc">${g[3]}-${g[4]}</text>`;
+      return `<g><title>Week ${w} · ${esc(g[5])} · ${g[2] ? 'vs' : '@'} ${esc(rtTeam(O, g[1]).nick || g[1])}${g[3] != null ? ` · ${g[3]}-${g[4]}` : ''}</title>
+        <text x="${x}" y="${y0}" class="oc-w">${w}</text>${lg ? `<image href="${esc(lg)}" x="${x - 7}" y="${y0 + 5}" width="14" height="14"/>` : `<text x="${x}" y="${y0 + 16}" class="oc-r">${esc(g[1])}</text>`}${res}</g>`;
+    }).join('');
+    return `<svg class="oc" viewBox="0 0 ${W} ${Hh}" width="100%" role="img" aria-label="Playoff chances by week">${grid}${ser}${axis}</svg>
+      <div class="oc-key"><span class="oc-k oc-po">Make playoffs</span><span class="oc-k oc-dv">Win division</span><span class="oc-k oc-ts">Top seed</span>${nx ? `<span class="muted">dashed: week ${nx} if every week ${last} game goes their way / against them</span>` : ''}</div>`;
+  };
+  const rootGuide = (abbr, O) => {
+    const x = rtRows(O, abbr);
+    if (!x) return '';
+    const nick = t => rtTeam(O, t).nick || t, goal = RT_GOAL[x.m];
+    const own = x.games.find(r => r.own), rest = x.games.filter(r => !r.own);
+    const sig = rest.filter(r => r.sig), quiet = rest.length - sig.length;
+    const chips = r => [0, 1, 2].filter(k => k !== x.m && r.real(k) && Math.abs(r.gain(k)) >= 0.01).map(k => {
+      const v = r.gain(k);
+      return `<span class="rt-chip ${v > 0 ? 'good' : 'bad'}"${v < 0 ? ` title="Helps their chance to ${goal}, hurts their chance to ${RT_GOAL[k]}"` : ''}>${RT_SHORT[k]} ${rtPts(v)}</span>`;
+    }).join('');
+    const detail = r => `<table class="bx rt-dt"><thead><tr><th></th><th class="num">If ${esc(nick(r.root))} win</th><th class="num">If ${esc(nick(r.vs))} win</th></tr></thead><tbody>
+      ${[0, 1, 2].map(k => `<tr${k === x.m ? ' class="rt-main"' : ''}><td>${RT_SHORT[k]}</td><td class="num">${rtPct(r.pw[k])}</td><td class="num">${rtPct(r.pl[k])}</td></tr>`).join('')}</tbody></table>`;
+    const row = r => `<details class="rt-g"><summary>${tLogo(r.root, 20)}<span class="rt-nm"><b>${esc(nick(r.root))}</b> over ${esc(nick(r.vs))}</span>
+        ${chips(r)}<span class="rt-v ${r.v > 0 ? 'good' : ''}">${rtPts(r.v)}</span></summary>${detail(r)}</details>`;
+    const say = sig.filter(r => r.v > 0).slice(0, 4).map(r => esc(nick(r.root)));
+    const ownHtml = own ? `<div class="rt-own"><div class="pc-k">Their game</div>${tLogo(own.vs, 20)}<span>${own.g.home === abbr ? 'vs' : '@'} <b>${esc(nick(own.vs))}</b></span>
+        <span class="rt-wl"><span>Win <b>${rtPct(own.pw[x.m])}</b></span><span>Lose <b>${rtPct(own.pl[x.m])}</b></span></span></div>`
+      : `<p class="pc-sub">Bye this week: how the rest of the league's games move their chances.</p>`;
+    return `<div class="pc-box rt-box"><div class="pc-k">Rooting guide · week ${O.root.week}</div>
+      <p class="rt-say">${say.length ? `Root for the <b>${say.length > 1 ? `${say.slice(0, -1).join(', ')}</b> and <b>${say[say.length - 1]}` : say[0]}</b>.` : 'No other game this week moves their odds much.'}</p>
+      ${ownHtml}
+      ${sig.length ? `<div class="rt-list"><div class="rt-hd"><span>Root for</span><span>Chance to ${goal}, pts</span></div>${sig.map(row).join('')}</div>` : ''}
+      ${quiet ? `<p class="pc-sub">${quiet} other game${quiet > 1 ? 's' : ''}: negligible (under half a point, or within simulation noise).</p>` : ''}
+      <p class="pc-sub">Each number is the change in their chance to ${goal} between the two results: the same ${O.root.n_flip.toLocaleString()} simulated seasons with only that game flipped. Tap a game for both outcomes. Green / red tags: the game also moves another chance by a point or more (red means the two pull opposite ways).</p></div>`;
+  };
+  const rootingHtml = abbr => {
+    const O = oddsData();
+    if (O === null && ODDS !== false) return '<div class="pc-box"><p class="pc-sub">Loading playoff odds&hellip;</p></div>';
+    if (!O || !O.teams || !rtTeam(O, abbr).team) return '';
+    const r = rtTeam(O, abbr), H = O.hist || {}, prev = H[O.as_of_week - 1] && H[O.as_of_week - 1][abbr];
+    const stat = (k, label, v) => `<div class="tm-st"><div class="pc-k">${label}</div><div class="tm-stv">${rtPct(v)}</div>${prev ? `<div class="pc-sub" title="Going into week ${O.as_of_week - 1}">was ${rtPct(prev[k])}</div>` : ''}</div>`;
+    return `<div class="pc-box oc-box"><div class="pc-k">${O.season} playoff chances · going into each week</div>
+        <div class="tm-stats oc-stats">${stat(0, 'Make playoffs', r.p_playoffs)}${stat(1, 'Win division', r.p_div)}${stat(2, 'Top seed', r.p_bye)}</div>
+        ${oddsChart(abbr, O)}<p class="pc-sub">${O.sims.toLocaleString()} simulated seasons with the real tiebreakers (Teams &rsaquo; Playoffs has the method and its track record).</p></div>
+      ${rootGuide(abbr, O)}`;
+  };
+  // Games > Matchups: the week's biggest games for the playoff race (playoff-odds swing summed over every team,
+  // weighted by how close the game is) get a one-line note on their tile.
+  NFLE.rootStakes = () => NFLE.load('data/playoffs/odds.json').then(O => {
+    const R = O && O.root;
+    if (!R || !R.games) return [];
+    return R.games.map((g, i) => {
+      const hit = Object.entries(R.teams).map(([t, T]) => [t, Math.abs(T.g[i][0][0]), T.g[i][1][0]]).filter(([, v, se]) => v >= 0.02 && v >= 2 * se)
+        .sort((a, b) => b[1] - a[1]);
+      const tot = hit.reduce((a, [, v]) => a + v, 0);
+      return { id: g.id, tot, lev: 2 * g.p_home * (1 - g.p_home) * tot, teams: hit.map(h => h[0]) };
+    }).filter(x => x.tot >= 0.05).sort((a, b) => b.lev - a.lev).slice(0, 3);
+  }).catch(() => []);
   const renderTeam = abbr => {
     const body = document.querySelector('#pcOv .pc-body');
     const d = cardData(), L = TLOGS[abbr], info = tInfo(abbr);
@@ -1316,14 +1434,15 @@
       <div class="pc-tab" data-tt="pl"${teamTab === 'pl' ? '' : ' hidden'}>${pickerHtml()}${d ? `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
         ${wk.players ? `<table class="bx tm-pl tiles"><thead><tr><th>Player</th><th class="num">Proj</th><th>Tier</th><th class="num">FP/G</th></tr></thead><tbody>${wk.players}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>` : wkWait(d)}</div>
       <div class="pc-tab" data-tt="dc"${teamTab === 'dc' ? '' : ' hidden'}>${teamTab === 'dc' ? depthHtml(abbr) : ''}</div>
-      <div class="pc-tab" data-tt="po"${teamTab === 'po' ? '' : ' hidden'}>${teamTab === 'po' ? teamPlayoffs(abbr) : ''}</div>`;
+      <div class="pc-tab" data-tt="po"${teamTab === 'po' ? '' : ' hidden'}>${teamTab === 'po' ? rootingHtml(abbr) + teamPlayoffs(abbr) : ''}</div>`;
     body.querySelectorAll('[data-tt]').forEach(b => b.onclick = () => {
       teamTab = b.dataset.tt;
       if (teamTab === 'dc') { body.querySelector('.pc-tab[data-tt="dc"]').innerHTML = depthHtml(abbr); wireDepth(body, abbr); }
-      if (teamTab === 'po') body.querySelector('.pc-tab[data-tt="po"]').innerHTML = teamPlayoffs(abbr);
+      if (teamTab === 'po') body.querySelector('.pc-tab[data-tt="po"]').innerHTML = rootingHtml(abbr) + teamPlayoffs(abbr);
       body.querySelectorAll('.pc-tabs [data-tt]').forEach(x => x.classList.toggle('on', x === b));
       body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.tt !== teamTab; });
     });
+    body.querySelectorAll('[data-tt-go]').forEach(b => b.onclick = () => { const t = body.querySelector(`.pc-tabs [data-tt="${b.dataset.ttGo}"]`); if (t) { t.click(); t.scrollIntoView({ block: 'nearest' }); } });
     wireTeamLog(body, abbr);
     wireDepth(body, abbr);
     // penalties: the current season once it has games, else the last one
@@ -1363,7 +1482,7 @@
     const plRows = players.map(([pid, p]) => { const s = scaled(p, d);
       return `<tr class="teamrow" style="${NFLE.fmt.rowStyle(d.teams, p.team)}" data-open-pid="${esc(pid)}"><td>${NFLE.ui.player({ name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, badges: injTag(p.status) }, d.teams)}</td>
         <td class="num"><b>${f1(s.proj)}</b></td><td><span class="tier t-${esc(p.slot)}">${esc(p.tier)}</span></td><td class="num muted">${p.fpg != null ? f1(p.fpg) : ''}</td></tr>`; }).join('');
-    return { html: `${week}<div class="pc-grid tm-grid">${power}</div>`, players: plRows };
+    return { html: `${week}${rootLine(abbr, d)}<div class="pc-grid tm-grid">${power}</div>`, players: plRows };
   };
   const wireTeamLog = (body, abbr) => {
     const sel = body.querySelector('[data-topp]');

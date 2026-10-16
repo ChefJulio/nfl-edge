@@ -13,6 +13,11 @@
         sec.innerHTML = `<div class="sec-head"><div><h2>Matchups</h2></div></div>
           ${D.games.length ? `<div class="games">${D.games.map(tile).join('')}</div>` : '<p class="muted">No games this week.</p>'}`;
         NFLE.paintTiles();
+        // the week's biggest games for the playoff race (rooting guide data, gamecast.js NFLE.rootStakes)
+        if (NFLE.rootStakes) NFLE.rootStakes().then(top => top.forEach((x, i) => {
+          const el = sec.querySelector(`.mt[data-gid="${CSS.escape(x.id)}"]`);
+          if (el && !el.querySelector('.mt-stake')) el.insertAdjacentHTML('beforeend', `<div class="mt-stake"><b>${i ? 'Big' : 'Biggest'} game for the playoff race</b> · ${x.teams.slice(0, 5).map(NFLE.esc).join(', ')}${x.teams.length > 5 ? '&hellip;' : ''}: ${Math.round(x.tot * 100)} pts of playoff odds riding on it</div>`);
+        }));
       });
     },
   };
