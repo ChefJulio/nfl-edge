@@ -28,7 +28,7 @@ html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 Inter, "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
        font-feature-settings: "tnum" 1, "cv11" 1; -webkit-font-smoothing: antialiased; }
 a { color: var(--accent); }
-.wrap { max-width: 1440px; margin: 0 auto; padding: 0 20px; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }  /* one centered column for every page (gamecast too) */
 @media (max-width: 640px) { .wrap { padding: 0 16px; } }
 
 /* header + nav */

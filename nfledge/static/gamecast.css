@@ -292,7 +292,7 @@ table.lg tbody tr[data-gid]:active td { background: color-mix(in srgb, var(--acc
 .pc-links a { text-decoration: none; } .pc-none { padding: 20px 0; color: var(--muted); }
 
 /* ---- game page ---- */
-.gc-wrap { max-width: 1240px; margin: 0 auto; padding: 0 20px; }
+.gc-wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }  /* same column as the week pages (.wrap) */
 @media (max-width: 640px) { .gc-wrap { padding: 0 12px; } }
 .gc-top { padding: 14px 0 6px; } .gc-top .gc-wrap { display: flex; align-items: baseline; gap: 18px; }
 .gc-brand { font-size: var(--fs-xl); font-weight: 800; letter-spacing: -.02em; color: var(--ink) !important; text-decoration: none; }
