@@ -1772,3 +1772,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
     asked before shipping a change to what the site shows); (7) rest-of-season accuracy; (8) testing hygiene. Rules:
     descriptive check first, pre-register only on a signal persisting across seasons; prefer decide-2025 /
     confirm-2026 over another pass on 2021-25; check the harness matches production; scan pockets are hypotheses.
+- **Thread 1 (2026-10-16): live-input archive SHIPPED; the live-vs-backtest gap can't be measured on past weeks.**
+  Every current-week build now writes data/live_inputs/<season>_<week>_<time>.json (nfledge/live_inputs.py; CI
+  commits it to the archive branch with the playoff-odds history): each game's spread / total as the schedule had
+  them, the wind fed to the model, the ECR scrape date used, and per player proj / proj_no_inj / avail / ecr /
+  wind_penalty / implied_pts / spread_team (~23 KB a build). ECR scrapes themselves were already archived
+  (tools/ecr_snapshot.py). No record of earlier live builds exists: archived week pages are walk-forward rebuilds made
+  after the week (final lines, recorded wind, final report, Friday ECR), the Pages artifact isn't kept, and the Wayback
+  Machine has no captures of the site. tools/live_vs_backtest.py (ready, smoke-tested) compares, per player, the last
+  live build before his kickoff with the walk-forward page: MAE by position, distribution of projection differences,
+  largest gaps with line / chance-to-play / ECR differences. PENDING CHECK: run it from Tuesday 2026-10-20 (week 6, the
+  first archived live week) and after each week; record the gap once 3+ weeks exist.
