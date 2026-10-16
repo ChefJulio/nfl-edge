@@ -480,6 +480,33 @@
     const rush = ['Rushing', [['Att', g => x(g, 2), 11], ['Yd', g => f0(c(g, 3)), 3], ['YPC', ypc], ['TD', g => c(g, 4), 4]]];
     return pos === 'RB' ? [rush, rec] : rushy ? [rec, ['Rushing', [['Att', g => x(g, 2), 11], ['Yd', g => f0(c(g, 3)), 3], ['TD', g => c(g, 4), 4]]]] : [rec];
   };
+  // A season's totals row rides just under the player header while that block's games scroll past, and leaves with
+  // the block's last game (owner 2026-10-16). Plain position: sticky can't do it: the log scrolls sideways, which
+  // traps sticky inside .lg-scroll (site.css .fhead note). The row's own cells are translated instead, so its columns
+  // and sideways scroll stay aligned; it never rises above its own spot. A block ends at the next sub-header
+  // (playoffs -> regular season) or the season's end.
+  const floatTotals = () => {
+    const rows = [...document.querySelectorAll('tr.lg-tot')].filter(tr => tr.offsetParent);
+    if (!rows.length) return;
+    const head = document.querySelector('#tab-page .pc-page .pc-head') || document.querySelector('nav.tabs');
+    const top = head ? head.getBoundingClientRect().bottom : 0;
+    rows.forEach(tr => {
+      let end = tr.parentElement.getBoundingClientRect().bottom;
+      for (let n = tr.nextElementSibling; n; n = n.nextElementSibling) {
+        if (n.classList.contains('lg-sub')) { end = n.getBoundingClientRect().top; break; }
+      }
+      const r = tr.getBoundingClientRect();  // the row box itself never moves: its top is the natural spot
+      const dy = Math.round(Math.max(0, Math.min(top - r.top, end - r.height - r.top)));
+      if (dy === (+tr.dataset.dy || 0)) return;
+      tr.dataset.dy = dy;
+      tr.classList.toggle('lg-float', dy > 0);
+      for (const td of tr.cells) td.style.transform = dy ? `translateY(${dy}px)` : '';
+    });
+  };
+  let floatQueued = false;
+  const queueFloat = () => { if (!floatQueued) { floatQueued = true; requestAnimationFrame(() => { floatQueued = false; floatTotals(); }); } };
+  addEventListener('scroll', queueFloat, { passive: true, capture: true });
+  addEventListener('resize', queueFloat, { passive: true });
   // Week tab preview, no legend and no upcoming weeks: opts.season = this season's games so far with its byes;
   // opts.last = N = his N most recent games (the fallback before his first game this season, no season totals).
   const logHtml = (L, p, opts = {}) => {

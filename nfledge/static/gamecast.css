@@ -715,3 +715,10 @@ table.lg tbody tr.lg-tot td:first-child { color: var(--accent); font-size: 11px;
 table.lg tbody tr.lg-tot td:last-child { border-radius: 0 6px 6px 0;
   box-shadow: inset -1px 1px 0 color-mix(in srgb, var(--accent) 45%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--accent) 45%, transparent); }
 table.lg tbody tr.lg-gap td { height: 7px; padding: 0; background: none !important; box-shadow: none; }
+/* the pinned columns stick inside .lg-scroll's 12px side padding, so scrolled cells showed through that strip
+   (owner 2026-10-16, totals row): cover it with the card color */
+table.lg tr > :nth-child(1)::before { content: ''; position: absolute; top: -3px; bottom: -3px; right: 100%; width: 12px; background: var(--panel2); pointer-events: none; }
+table.lg tr.lg-season td::before, table.lg tr.lg-gh th::before { content: none; }
+/* the floating totals row (gamecast.js floatTotals) paints over the game rows it passes; pinned cells above the rest */
+table.lg tr.lg-tot td { position: relative; z-index: 3; }
+table.lg tr.lg-tot > :nth-child(1), table.lg tr.lg-tot > :nth-child(2) { position: sticky; z-index: 4; }
