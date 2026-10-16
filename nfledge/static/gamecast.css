@@ -701,3 +701,11 @@ table.lg tr.lg-ch > th:nth-child(2), table.lg tbody tr:not(.lg-season):not(.lg-g
   -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); animation: zoomin .15s ease-out; }
 .zoom-ov img { max-width: min(92vw, 520px); max-height: 80vh; object-fit: contain; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
 @keyframes zoomin { from { opacity: 0; } to { opacity: 1; } }
+
+/* game-log values colored by their weekly finish at the position */
+table.lg .sc.rk-good { background: rgba(69,194,107,.24); color: #b6f0c7; }
+table.lg .sc.rk-mid { background: rgba(224,176,74,.20); color: #f4dca4; }
+table.lg .sc.rk-bad { background: rgba(242,120,109,.20); color: #ffc2bb; }
+/* season totals row under the column heads */
+table.lg tbody tr.lg-tot td { font-weight: 700; color: var(--ink); background: color-mix(in srgb, var(--ink) 9%, var(--panel2)); }
+table.lg tr.lg-tot td:first-child { color: var(--muted); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }

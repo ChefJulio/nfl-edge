@@ -470,14 +470,15 @@
     return { teams: 10, QB: 1, RB: 2, WR: 2, TE: 1 };
   };
   const mrClass = r => !r ? '' : r <= 8 ? 'mr-hard' : r <= 16 ? 'mr-tough' : r <= 24 ? 'mr-ok' : 'mr-easy';
+  // each column: [label, value, index into the game row's weekly position ranks g.r (tools/player_logs.py RANKED), or none]
   const logCols = (pos, rushy) => {
     const c = (g, i) => g.c[i], x = (g, i) => g.x[i];
     const ypc = g => x(g, 2) ? (c(g, 3) / x(g, 2)).toFixed(1) : '';
-    if (pos === 'QB') return [['Passing', [['C/A', g => `${x(g, 0)}/${x(g, 1)}`], ['Yd', g => f0(c(g, 0))], ['TD', g => c(g, 1)], ['Int', g => c(g, 2)]]],
-                              ['Rushing', [['Att', g => x(g, 2)], ['Yd', g => f0(c(g, 3))], ['TD', g => c(g, 4)]]]];
-    const rec = ['Receiving', [['Tgt', g => x(g, 3)], ['Rec', g => c(g, 5)], ['Yd', g => f0(c(g, 6))], ['TD', g => c(g, 7)]]];
-    const rush = ['Rushing', [['Att', g => x(g, 2)], ['Yd', g => f0(c(g, 3))], ['YPC', ypc], ['TD', g => c(g, 4)]]];
-    return pos === 'RB' ? [rush, rec] : rushy ? [rec, ['Rushing', [['Att', g => x(g, 2)], ['Yd', g => f0(c(g, 3))], ['TD', g => c(g, 4)]]]] : [rec];
+    if (pos === 'QB') return [['Passing', [['C/A', g => `${x(g, 0)}/${x(g, 1)}`, 9], ['Yd', g => f0(c(g, 0)), 0], ['TD', g => c(g, 1), 1], ['Int', g => c(g, 2), 2]]],
+                              ['Rushing', [['Att', g => x(g, 2), 11], ['Yd', g => f0(c(g, 3)), 3], ['TD', g => c(g, 4), 4]]]];
+    const rec = ['Receiving', [['Tgt', g => x(g, 3), 12], ['Rec', g => c(g, 5), 5], ['Yd', g => f0(c(g, 6)), 6], ['TD', g => c(g, 7), 7]]];
+    const rush = ['Rushing', [['Att', g => x(g, 2), 11], ['Yd', g => f0(c(g, 3)), 3], ['YPC', ypc], ['TD', g => c(g, 4), 4]]];
+    return pos === 'RB' ? [rush, rec] : rushy ? [rec, ['Rushing', [['Att', g => x(g, 2), 11], ['Yd', g => f0(c(g, 3)), 3], ['TD', g => c(g, 4), 4]]]] : [rec];
   };
   // Week tab preview, no legend and no upcoming weeks: opts.season = this season's games so far with its byes;
   // opts.last = N = his N most recent games (the fallback before his first game this season, no season totals).
@@ -499,6 +500,10 @@
     const groups = logCols(pos, rushy), stat = groups.flatMap(gr => gr[1]);
     const lg = league(), need = (lg.teams || 10) * Math.max(1, lg[pos] || 1);
     const rkClass = r => r <= need ? 'rk-good' : r <= 2 * need ? 'rk-mid' : 'rk-bad';
+    // a value's chip, colored by its finish at his position that week (owner 2026-10-16; Sleeper-style); older files
+    // without per-stat ranks get plain chips
+    const chip = (v, r) => r == null ? `${v}` : `<span class="sc ${rkClass(r)}">${v}</span>`;
+    const snapTone = s => s == null ? '' : s >= 70 ? 'rk-good' : s >= 40 ? 'rk-mid' : 'rk-bad';
     const projOf = g => g.pjl ? g.pj * (pts(g.pjl, w, pos) / Math.max(0.1, pts(g.pjl, built, pos))) : null;
     // Opponent color: our pregame matchup, green / red when it was one of that week's bigger ones (mu, mh); week
     // files from before 2026-10-14 carry the old 1st-32nd rank (mr) instead.
@@ -516,11 +521,23 @@
       const fps = S.g.map(g => pts(g.c, w, pos)), fpg = fps.length ? fps.reduce((a, b) => a + b, 0) / fps.length : 0;
       const team = S.g.length ? S.g[S.g.length - 1].t : '';
       const played = (g, label) => { const v = pts(g.c, w, pos), pj = projOf(g);
-        return `<tr${tileAttrs(g)}><td>${esc(label)}</td>${opp(g)}<td class="num lg-fp">${f1(v)}</td>
+        return `<tr${tileAttrs(g)}><td>${esc(label)}</td>${opp(g)}<td class="num lg-fp">${g.r ? chip(f1(v), g.rk) : f1(v)}</td>
           <td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td>
-          <td class="num"><span class="lg-rk ${rkClass(g.rk)}">${g.rk}</span></td><td class="num">${g.sn != null ? g.sn : '–'}</td>
-          ${stat.map(([, fn]) => `<td class="num">${fn(g)}</td>`).join('')}</tr>`; };
-      const trs = rows.map(r => {
+          <td class="num"><span class="lg-rk ${rkClass(g.rk)}">${g.rk}</span></td><td class="num">${g.sn != null ? (g.r ? `<span class="sc ${snapTone(g.sn)}">${g.sn}</span>` : g.sn) : '–'}</td>
+          ${stat.map(([, fn, ri]) => { const v = fn(g);
+            // a zero ties most of the position (0 rush TD can "rank" top 10): uncolored, except Int / fumbles (fewer is better)
+            return `<td class="num">${ri != null && g.r ? (+v === 0 && ri !== 2 && ri !== 8 ? `<span class="sc">${v}</span>` : chip(v, g.r[ri])) : v}</td>`; }).join('')}</tr>`; };
+      // season totals right under the column heads (owner 2026-10-16): the games summed into one stat line, so every
+      // column (C/A, YPC) reads it as it reads a game; Snap = average, Proj = total only when every game had one
+      const totRow = gs => {
+        if (gs.length < 2 || opts.last) return '';
+        const add = k => gs[0][k].map((_, i) => gs.reduce((t, g) => t + (+g[k][i] || 0), 0)), T = { c: add('c'), x: add('x') };
+        const pjs = gs.map(projOf), sn = gs.filter(g => g.sn != null);
+        return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num lg-fp">${f1(pts(T.c, w, pos))}</td>
+          <td class="num muted">${pjs.every(v => v != null) ? f1(pjs.reduce((a, b) => a + b, 0)) : '–'}</td><td></td>
+          <td class="num">${sn.length ? Math.round(sn.reduce((t, g) => t + g.sn, 0) / sn.length) : '–'}</td>${stat.map(([, fn]) => `<td class="num">${fn(T)}</td>`).join('')}</tr>`;
+      };
+      const trs = totRow(S.g) + rows.map(r => {
         if (r.u && r.u.bye) return `<tr class="lg-bye"><td>${r.w}</td><td colspan="${5 + stat.length}">Bye</td></tr>`;
         if (r.u) {
           const pj = projOf(r.u);
@@ -532,7 +549,7 @@
       // playoffs first (as Sleeper does), their own block: not in the regular-season totals, finishes or FP/G
       const pg = opts.last || opts.season ? [] : (S.pg || []);
       const sub = (label, gs) => `<tr class="lg-sub"><td colspan="${6 + stat.length}"><span class="lg-pin">${label}${gs ? ` · ${gs.length} game${gs.length === 1 ? '' : 's'} · ${f1(gs.reduce((t, g) => t + pts(g.c, w, pos), 0) / gs.length)} FP/G` : ''}</span></td></tr>`;
-      const po = pg.length ? `${sub('Playoffs', pg)}${head}${[...pg].reverse().map(g => played(g, g.po)).join('')}${S.g.length || rows.length ? sub('Regular season') : ''}` : '';
+      const po = pg.length ? `${sub('Playoffs', pg)}${head}${totRow(pg)}${[...pg].reverse().map(g => played(g, g.po)).join('')}${S.g.length || rows.length ? sub('Regular season') : ''}` : '';
       return `<tbody><tr class="lg-season"><td colspan="${6 + stat.length}"><span class="lg-pin"><b>${S.s}</b> ${esc(team)}${sum}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
     }).join('');
     if (opts.last || opts.season) return `<div class="lg-scroll"><table class="lg">${body}</table></div>`;
@@ -884,13 +901,19 @@
       const t = kindTotals(L, S.g), team = S.g.length ? S.g[S.g.length - 1].t : '';
       const row = (g, label) => `<tr${tileAttrs(g)}><td>${esc(label)}</td><td class="lg-opp tm-opp"><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>
         <td class="num">${g.sn != null ? g.sn : '–'}</td>${keys.map(k => `<td class="num">${nfmt((g.d || [])[(L.keys || []).indexOf(k)])}</td>`).join('')}${rk.map((k, i) => `<td class="num">${g.r ? nfmt(g.r[i]) : '–'}</td>`).join('')}</tr>`;
-      const trs = [...S.g].sort((a, b) => b.w - a.w).map(g => row(g, g.w)).join('');  // newest first
+      // season totals under the column heads (owner 2026-10-16), as in the fantasy log: sums, snap share averaged
+      const tot = gs => {
+        if (gs.length < 2 || opts.compact) return '';
+        const sum = (g2, i) => gs.reduce((a, g) => a + (+((g[g2] || [])[i]) || 0), 0), sn = gs.filter(g => g.sn != null);
+        return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num">${sn.length ? Math.round(sn.reduce((a, g) => a + g.sn, 0) / sn.length) : '–'}</td>${keys.map(k => `<td class="num">${nfmt(sum('d', (L.keys || []).indexOf(k)))}</td>`).join('')}${rk.map((k, i) => `<td class="num">${nfmt(sum('r', i))}</td>`).join('')}</tr>`;
+      };
+      const trs = tot(S.g) + [...S.g].sort((a, b) => b.w - a.w).map(g => row(g, g.w)).join('');  // newest first
       const sum = opts.compact ? '' : ` · ${t.g} game${t.g === 1 ? '' : 's'}${keys.length ? ` · ${keys.slice(0, 4).map(k => `${nfmt(t[k] || 0)} ${cols[k][0]}`).join(', ')}` : ''}`;
       // playoffs first, their own block (not in the season totals above)
       const pg = opts.compact ? [] : (S.pg || []);
       const sub = (label, extra = '') => `<tr class="lg-sub"><td colspan="${n}"><span class="lg-pin">${label}${extra}</span></td></tr>`;
       const pt = pg.length ? kindTotals(L, pg) : null;
-      const po = pg.length ? `${sub('Playoffs', ` · ${pg.length} game${pg.length === 1 ? '' : 's'}${keys.length ? ` · ${keys.slice(0, 4).map(k => `${nfmt(pt[k] || 0)} ${cols[k][0]}`).join(', ')}` : ''}`)}${head}${[...pg].reverse().map(g => row(g, g.po)).join('')}${S.g.length ? sub('Regular season') : ''}` : '';
+      const po = pg.length ? `${sub('Playoffs', ` · ${pg.length} game${pg.length === 1 ? '' : 's'}${keys.length ? ` · ${keys.slice(0, 4).map(k => `${nfmt(pt[k] || 0)} ${cols[k][0]}`).join(', ')}` : ''}`)}${head}${tot(pg)}${[...pg].reverse().map(g => row(g, g.po)).join('')}${S.g.length ? sub('Regular season') : ''}` : '';
       return `<tbody><tr class="lg-season"><td colspan="${n}"><span class="lg-pin"><b>${S.s}</b> ${esc(team || (pg[0] && pg[0].t) || '')}${sum}</span></td></tr>${po}${S.g.length ? head + trs : ''}</tbody>`;
     }).join('');
     return `<div class="lg-scroll"><table class="lg">${body}</table></div>`;

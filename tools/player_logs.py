@@ -89,6 +89,11 @@ def main():
     x = x.rename(columns=ren)
     x["fp"] = sum(x[k] * w.get(k, 0.0) for k in SCORE_KEYS) + np.where(x.position == "TE", x.reception * float(scoring.te_reception_bonus), 0)
     x["prk"] = x.groupby(["season", "week", "position"]).fp.rank(ascending=False, method="min").astype(int)
+    # every stat's finish at his position that week (owner 2026-10-16: color each game-log value by it, Sleeper-style);
+    # fewer is better for interceptions and fumbles
+    grp = x.groupby(["season", "week", "position"])
+    for k in RANKED:
+      x[f"{k}_wr"] = grp[k].rank(ascending=k in FEWER_BETTER, method="min").fillna(99).astype(int)
     return x
 
   st = prep(pd.concat(old + [data.stats], ignore_index=True))
@@ -178,7 +183,8 @@ def main():
         sp = snap.get((int(r.season), int(r.week), pid))
         game = {"w": int(r.week), "o": r.opponent_team, "t": r.team, "h": home_of.get((int(r.season), int(r.week), r.team), 1),
                 "c": [round(float(getattr(r, k)), 1) for k in SCORE_KEYS],
-                "x": [int(r.completions), int(r.attempts), int(r.carries), int(r.targets)], "rk": int(r.prk)}
+                "x": [int(r.completions), int(r.attempts), int(r.carries), int(r.targets)], "rk": int(r.prk),
+                "r": [int(getattr(r, f"{k}_wr")) for k in RANKED]}
         if sp is not None and not pd.isna(sp):
           game["sn"] = int(round(100 * float(sp)))
         if o.get("mu") is not None:
@@ -201,7 +207,8 @@ def main():
           continue
         game = {"w": int(r.week), "po": rnd[0], "o": r.opponent_team, "t": r.team, "h": rnd[1], "gid": rnd[2],
                 "c": [round(float(getattr(r, k)), 1) for k in SCORE_KEYS],
-                "x": [int(r.completions), int(r.attempts), int(r.carries), int(r.targets)], "rk": int(r.prk)}
+                "x": [int(r.completions), int(r.attempts), int(r.carries), int(r.targets)], "rk": int(r.prk),
+                "r": [int(getattr(r, f"{k}_wr")) for k in RANKED]}
         sp = snap_post.get((int(r.season), int(r.week), pid))
         if sp is not None and not pd.isna(sp):
           game["sn"] = int(round(100 * float(sp)))
@@ -273,6 +280,9 @@ KIND_STATS = {
 }
 RET = [("kr", "kickoff_returns"), ("kry", "kickoff_return_yards"), ("pr", "punt_returns"), ("pry", "punt_return_yards")]
 SNAP_UNIT = {"def": "defense_pct", "ol": "offense_pct", "off": "offense_pct", "k": "st_pct", "p": "st_pct", "ls": "st_pct"}
+RANKED = ["pass_yd", "pass_td", "interception", "rush_yd", "rush_td", "reception", "rec_yd", "rec_td", "fumble_lost",
+          "completions", "attempts", "carries", "targets"]  # = SCORE_KEYS + the game row's x stats, in that order
+FEWER_BETTER = {"interception", "fumble_lost"}
 FULL_COLS = ["player_id", "player_display_name", "position", "season", "week", "season_type", "team", "opponent_team"] + \
   sorted({c for v in KIND_STATS.values() for _, c in v} | {c for _, c in RET})
 
