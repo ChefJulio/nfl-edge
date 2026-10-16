@@ -624,7 +624,7 @@ def build(tg, pos_of, info, cur, out: Path, sched: pd.DataFrame, team_of: dict, 
 # among that season's qualified players (QUALIFY). Only the stat bars change: box-score rates from nflverse weekly
 # player stats instead of play-by-play / tracking / charting. Targets are missing in nflverse 2003-2008, so those
 # seasons' receiving bars use catches instead. Finished seasons never change: built once, kept in the cache.
-HIST_FIRST, HIST_V = 1999, 1
+HIST_FIRST, HIST_V = 1999, 2  # v2: spot starters (role games) graded too
 HIST_RATES = {
   "QB": [("ypa", "pass_yd", "att", "Yards / attempt"), ("cmp", "cmp", "att", "Completion %"),
          ("ptd", "pass_td", "att", "TD rate"), ("int_rate", "ints", "att", "INT rate"),
@@ -669,6 +669,12 @@ def build_historic(out: Path, cur_first: int, sched: pd.DataFrame, scoring, cach
            "rec_td", "games"]
     t = g.groupby(["gsis_id", "season"]).agg({**{c: "sum" for c in num}, "pos": "first",
                                               "team": mode1}).reset_index()
+    # games with a real role (owner 2026-10-15: "2017 just missing is jarring"): the 2018+ grades use half the snaps;
+    # this source has no snaps, so workload stands in: QB 10+ attempts, RB 8+ carries + catches/targets, WR / TE 3+
+    # targets or 2+ catches
+    role = np.select([g.pos == "QB", g.pos == "RB"], [g.att >= 10, (g.ru_n + np.maximum(g.tgt, g.rec)) >= 8],
+                     (g.tgt >= 3) | (g.rec >= 2))
+    tr = g[role].groupby(["gsis_id", "season"]).agg({**{c: "sum" for c in num}, "pos": "first"}).reset_index()
     tgames = team_games(sched)
     qual = set()
     for s_ in seasons:
@@ -712,6 +718,26 @@ def build_historic(out: Path, cur_first: int, sched: pd.DataFrame, scoring, cach
         for x in ids:
           players[x] = [int(gp[x]), pos, int(o.games[x]), int(round(wg[x])), round(float(cur_v[x]), 1),
                         [int(bars[r[0]][x]) for r in rates], int(sg[x]), round(float(o.fp[x] / o.games[x]), 1), int(o.games[x])]
+        # under the minimum with SUB_GAMES+ role games: graded on those games against the qualified pool ([9] = 1)
+        sub = tr[(tr.season == s_) & (tr.pos == pos) & (tr.games >= SUB_GAMES)].set_index("gsis_id")
+        uq = [x for x in sub.index if x not in players]
+        if uq:
+          u = sub.loc[uq]
+          uwf, uwg = pd.Series(0.0, index=uq), pd.Series(0.0, index=uq)
+          for lag, w in enumerate(SEASON_W):
+            prev = tr[tr.season == s_ - lag].set_index("gsis_id").reindex(uq)
+            uwf, uwg = uwf + w * prev.fp.fillna(0), uwg + w * prev.games.fillna(0)
+          ucur, usea = (uwf + k * m) / (uwg + k), (u.fp + k * m) / (u.games + k)
+          ug, usg = pct_vs(cur_v, ucur), pct_vs(sea_v, usea)
+          ub = {}
+          for key, nu, de, _ in rates:
+            ref = (o[nu] / o[de].replace(0, np.nan)).replace([np.inf, -np.inf], np.nan)
+            v = (u[nu] / u[de].replace(0, np.nan)).replace([np.inf, -np.inf], np.nan).fillna(ref.median()).fillna(0.0)
+            ref = ref.fillna(ref.median()).fillna(0.0)
+            ub[key] = (99 - pct_vs(ref, v)) if key in HIST_LOWER else pct_vs(ref, v)
+          for x in uq:
+            players[x] = [int(ug[x]), pos, int(u.games[x]), int(round(uwg[x])), round(float(ucur[x]), 1),
+                          [int(ub[r[0]][x]) for r in rates], int(usg[x]), round(float(u.fp[x] / u.games[x]), 1), int(u.games[x]), 1]
       doc = {"season": s_, "basis": "box", "stats": stats, "qualified": qual_n, "players": players}
       (kept / f"{s_}.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
       print(f"[grades] {s_} (box score): {len(players)} qualified players {qual_n}", flush=True)
@@ -766,6 +792,28 @@ def main():
       pos = rec[1]
       shards.setdefault(pid[-2:], {}).setdefault(pid, []).append(
         [d["season"], d.get("basis", "pbp"), rec, d["stats"].get(pos, []), (d.get("qualified") or {}).get(pos)])
+  # seasons he played but wasn't graded (too few games / role): listed so the history has no silent gaps (owner
+  # 2026-10-15). Weekly stats per season, finished seasons cached.
+  cache = D.Cache(ROOT / cfg["data"]["cache_dir"])
+  import nflreadpy as nfl
+  graded = {(pid, r[0]) for sh in shards.values() for pid, rows in sh.items() for r in rows}
+  for yr in range(HIST_FIRST, cur + 1):
+    wk = cache.get("pstats_week", yr, lambda: nfl.load_player_stats([yr], summary_level="week").to_pandas(),
+                   stale=yr == cur and cache.age_hours("pstats_week", yr) > 6)
+    if wk is None or not len(wk):
+      continue
+    wk = wk[(wk.season_type == "REG") & wk.position.isin(["QB", "RB", "FB", "HB", "WR", "TE"])]
+    pts = actual_points(wk, load_scoring())
+    agg = pd.DataFrame({"gsis_id": wk.player_id, "pos": pts.position, "fp": pts.actual}).groupby("gsis_id").agg(
+      fp=("fp", "sum"), games=("fp", "size"), pos=("pos", lambda x: x.mode().iloc[0] if len(x.mode()) else None))
+    for pid, r in agg.iterrows():
+      if not isinstance(pid, str) or (pid, yr) in graded or r.pos not in POS:
+        continue
+      shards.setdefault(pid[-2:], {}).setdefault(pid, []).append(
+        [yr, "none", [None, r.pos, int(r.games), None, None, [], None, round(float(r.fp / r.games), 1), int(r.games)], [], None])
+  for sh in shards.values():
+    for rows in sh.values():
+      rows.sort(key=lambda r: r[0])
   (out / "players").mkdir(exist_ok=True)
   for k, v in shards.items():
     (out / "players" / f"{k}.json").write_text(json.dumps(v, separators=(",", ":")), encoding="utf-8")
