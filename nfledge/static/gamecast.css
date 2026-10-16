@@ -570,7 +570,7 @@ table.pst-tbl tr.pst-tot td:first-child { padding-left: 10px; }
 table.pst-tbl .pst-fp { border-left: 1px solid rgba(255,255,255,.12); } table.pst-tbl td.pst-fp b { color: var(--ink); }
 .bx-h small { font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--muted); margin-left: 6px; }
 /* the name column stays put while the stat columns scroll under it (fantasy points are at the far end) */
-table.pst-tbl td.pst-who, table.pst-tbl thead tr:last-child th:first-child { position: sticky; left: 0; z-index: 2; background: #171a20; }
+table.pst-tbl td.pst-who, table.pst-tbl thead tr:last-child th:first-child { position: sticky; left: 0; z-index: 2; background: var(--row); }
 table.pst-tbl thead tr:last-child th:first-child { background: var(--panel); }
 table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.pst-who .nm { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* replay card color coding: team pill, yards chip, downs by urgency; arrow halo instead of a ball */

@@ -8,7 +8,21 @@
   --bg: #0d0f13; --panel: #15181d; --panel2: #1a1e24; --ink: #e9ecf0; --muted: #98a0ab; --faint: #6b737e;
   --line: #262b33; --accent: #6d9eff; --good: #45c26b; --bad: #f2786d; --warn: #e0b04a;
   --shadow: 0 1px 2px rgba(0,0,0,.4);
+  /* Design tokens (owner 2026-10-16: sleek, consistent). Use these instead of one-off values. */
+  --faint: #7d8590;  /* was #6b737e: 3.7:1 on panels, under AA for small text */
+  --row: #171a20; --row-hover: #1e222a;  /* table rows / tiles */
+  --fs-xs: 11px; --fs-sm: 12px; --fs-md: 13px; --fs-base: 14px; --fs-lg: 16px; --fs-xl: 20px; --fs-2xl: 28px;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-pill: 999px;
+  --e1: 0 1px 2px rgba(0,0,0,.35); --e2: 0 4px 14px rgba(0,0,0,.35); --e3: 0 12px 32px rgba(0,0,0,.45);
+  --ease: cubic-bezier(.2, .7, .2, 1); --dur-fast: 120ms; --dur: 200ms;
 }
+/* keyboard focus: one visible ring everywhere (mouse / touch focus stays clean) */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+/* interaction feedback on everything clickable */
+button, .chip, .sbtn, .seg button, a.mt, .tm-open, [data-open-pid] { transition: background-color var(--dur-fast) var(--ease),
+  border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease),
+  transform .08s ease-out, filter .08s ease-out; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 Inter, "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
@@ -30,7 +44,8 @@ header.top { padding: 16px 0 12px; }
 .wk-nav select { -webkit-appearance: none; appearance: none; color-scheme: dark; background: transparent; color: var(--ink); border: 0;
   border-left: 1px solid var(--line); border-right: 1px solid var(--line); font: inherit; font-size: 16px; font-weight: 700; padding: 6px 26px 6px 12px; cursor: pointer;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2398a0ab'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
-.wk-nav select:focus { outline: none; background-color: var(--panel2); }
+.wk-nav select:focus { background-color: var(--panel2); }
+.wk-nav select:focus:not(:focus-visible) { outline: none; }
 .wk-tag { font-size: 11.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
 .wk-tag.now { color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); }
 .wk-tag.past { color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, transparent); }
@@ -135,10 +150,10 @@ table.tiles { border-collapse: separate; border-spacing: 0 3px; margin-top: -3px
 table.tiles thead th { border-bottom: 0; }
 /* Team trim, drawn on the cells (inset shadows) rather than a tr::after overlay: iOS WebKit (every iPhone browser)
    does not reliably position table rows, so a row overlay detached and floated around as a stray colored line.
-   Every cell: 2px primary-color top and bottom. First / last cell: 2px primary side + a 3px secondary-color stripe
-   just inside it. --extra carries per-cell additions (boost marker, pinned-column shadow). */
+   First cell: the two-tone team stripe (ui.css). --extra carries per-cell additions (boost marker, pinned-column
+   shadow). */
 @media (max-width: 760px) {  /* Power's last column (trend) is hidden here: close the row on the one before it */
-  table.power tr.teamrow > td:nth-last-child(2) { border-radius: 0 6px 6px 0; --side: inset -2px 0 0 var(--tc), inset -5px 0 0 var(--tc2); }
+  table.power tr.teamrow > td:nth-last-child(2) { border-radius: 0 var(--r-sm) var(--r-sm) 0; }
 }
 tr.teamrow.boosted > td:first-child { --extra: inset 8px 0 0 #ffd84d; }
 tr.teamrow.out > td { color: rgba(255,255,255,.55); }

@@ -1,13 +1,15 @@
 /* Shared tile look (owner 2026-10-14: one look everywhere), loaded by every page (week.html, game.html):
    team-colored tile rows (tr.teamrow + --tc / --tc2 from NFLE.fmt.rowStyle), the team logo badge, the name cell
    (.who) and the player headshot with its team badge (.pic). Built by NFLE.ui in shell.js.
-   Every cell: 2px primary-color top and bottom; first / last cell: 2px primary side + a 3px secondary stripe. */
-tr.teamrow > td { background: #171a20; color: #fff; border: 0;
-  --top: inset 0 2px 0 var(--tc), inset 0 -2px 0 var(--tc); --side: 0 0 #0000; --extra: 0 0 #0000;
-  box-shadow: var(--top), var(--side), var(--extra); }
-tr.teamrow > td:first-child { border-radius: 6px 0 0 6px; --side: inset 2px 0 0 var(--tc), inset 5px 0 0 var(--tc2); }
-tr.teamrow > td:last-child { border-radius: 0 6px 6px 0; --side: inset -2px 0 0 var(--tc), inset -5px 0 0 var(--tc2); }
-tr.teamrow:hover > td { background: #1e222a; }
+   A small two-tone stripe on the left of each row, 3px primary + 2px secondary (owner 2026-10-16: the full primary
+   outline + side stripes were busy on desktop and seamed at the pinned column). --top / --side / --extra stay as
+   hooks other rules use. */
+tr.teamrow > td { background: var(--row); color: #fff; border: 0;
+  --top: 0 0 #0000; --side: 0 0 #0000; --extra: 0 0 #0000;
+  box-shadow: var(--top), var(--side), var(--extra); transition: background-color var(--dur-fast) var(--ease); }
+tr.teamrow > td:first-child { border-radius: var(--r-sm) 0 0 var(--r-sm); --side: inset 3px 0 0 var(--tc), inset 5px 0 0 var(--tc2); }
+tr.teamrow > td:last-child { border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+tr.teamrow:hover > td { background: var(--row-hover); }
 tr.teamrow .quiet, tr.teamrow .sub, tr.teamrow .st small, tr.teamrow .fc, tr.teamrow .vs { color: color-mix(in srgb, var(--tfg) 75%, transparent); }
 .logo { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px rgba(255,255,255,.18); }
 .logo img { width: 18px; height: 18px; object-fit: contain; }

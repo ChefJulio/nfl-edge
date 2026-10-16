@@ -3,8 +3,8 @@
 table.dt.tiles { border-collapse: separate; border-spacing: 0 3px; margin-top: -3px; }
 table.dt.tiles tbody td { border-bottom: 0; }
 table.dt.tiles thead th { border-bottom: 0; }
-table.dt.tiles tr.teamrow > td.stick { background: #171a20; }
-table.dt.tiles tr.teamrow:hover > td { background: #1e222a; }
+table.dt.tiles tr.teamrow > td.stick { background: var(--row); }
+table.dt.tiles tr.teamrow:hover > td { background: var(--row-hover); }
 /* Scrolled sideways: keep the team trim on the pinned cell (its edge shadow joins the trim instead of replacing it;
    table.css's generic .scrolled shadow would drop the trim) */
 .dt-wrap .scroll.scrolled table.tiles tr.teamrow > td.stick { --extra: 8px 0 10px -8px rgba(0,0,0,.85); box-shadow: var(--top), var(--side), var(--extra); }
