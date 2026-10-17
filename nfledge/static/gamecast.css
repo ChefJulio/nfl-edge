@@ -1040,7 +1040,7 @@ html.pc-open { overflow: hidden; }
 
 /* matchup tiles: the team's wordmark in place of the typed nickname (owner 2026-10-17), black-trimmed like All teams */
 .mt-nm { display: flex; align-items: center; gap: 6px; overflow: visible; }
-.mt-side.away .mt-nm { justify-content: flex-end; }
+.mt-side.away .mt-nm { flex-direction: row-reverse; justify-content: flex-start; }  /* away: record then name, mirroring home (owner 2026-10-17) */
 .mt-wm { display: block; height: 15px; width: auto; max-width: 112px; object-fit: contain;
   filter: drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000) drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
 .mt-nm b:has(.mt-wm) { display: inline-flex; align-items: center; }
