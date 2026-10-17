@@ -2250,3 +2250,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Not the pre-registered pick but seen: 4 on 2024-25 -0.052 [-0.099, -0.002], both seasons, 2026 so far -0.018; 2 is
   worse (+0.101 [+0.008, +0.203]). Adopting 4 now would be picking after seeing; instead a fresh pre-registered test
   at season end: 4 vs 3 on full 2026 (gate: lower margin MAE, CI excluding 0).
+- **PRE-REGISTERED 2026-10-17 (before running): (AG) season weights in player efficiency** (docs/handset_audit.md #6).
+  player_model.eff_season_weights = [1, .6, .3] (this / last / two seasons back; "flat and steep within noise", no
+  numbers). Grid last {.3, .6, 1} x two back {0, .3, .6} (today .6 / .3). tools/experiments.py 2021-2026 (variants
+  effw_*), tools/grid_eval.py: CHOOSE the lowest fantasy MAE (relevant rows) on 2021-23; DECIDE on 2024-25: lower than
+  today with a 95% season-week CI excluding 0 and lower in both seasons; guards: no position significantly worse,
+  start / sit not significantly worse (sec. 1 rule 7); CONFIRM 2026 so far, same direction. Today's the choice -> keep.

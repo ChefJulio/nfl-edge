@@ -114,6 +114,9 @@ VARIANTS = {
   # INSIGHTS (Z): the TD blend k (weight on actual TDs = n / (n + k)); 1e9 = expected TDs only
   **{f"td_k_{k}": variant(player_model__td_blend_k=k) for k in (25, 50, 100, 300, 600)},
   "td_k_xtd": variant(player_model__td_blend_k=1e9),
+  # (AG) season weights in player efficiency (INSIGHTS, pre-registered 2026-10-17): last x two back; today 0.6 / 0.3
+  **{f"effw_{int(a * 10)}_{int(b * 10)}": variant(player_model__eff_season_weights=[1.0, a, b])
+     for a in (0.3, 0.6, 1.0) for b in (0.0, 0.3, 0.6)},
   # INSIGHTS (AC): the redistribution trigger, smallest share handed out (today tgt .08, carry .15)
   **{f"minshare_{int(t * 100)}_{int(c * 100)}": variant(injuries__redistribute_min_share={"tgt_share": t, "carry_share": c})
      for t in (0.04, 0.06, 0.08, 0.12) for c in (0.08, 0.15, 0.25) if (t, c) != (0.08, 0.15)},
