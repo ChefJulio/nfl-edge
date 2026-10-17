@@ -15,9 +15,11 @@ table.dt.tiles tr.teamrow:hover > td { background: var(--row-hover); }
   #tab-players .scroll.scrolled table.ranks td.stick, #tab-players .scroll.scrolled table.ranks th.stick { width: 118px; min-width: 118px; max-width: 118px; }
 }
 
-/* rank on the photo's top-left corner, only while scrolled sideways (the # column is off screen then) */
-.pic .pic-rk { position: absolute; left: -7px; top: -6px; z-index: 2; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px;
-  display: none; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; line-height: 1;
-  background: var(--panel); color: var(--ink); box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--ink) 35%, transparent), 0 1px 3px rgba(0,0,0,.5);
-  font-variant-numeric: tabular-nums; }
-.dt-wrap .scroll.scrolled .pic .pic-rk { display: flex; }
+/* rank on the photo's top-left corner, only while scrolled sideways (the # column is off screen then); a twin of the
+   team-logo badge on the opposite corner: same size, same cut-out ring, mirrored (owner 2026-10-17: "a tiny bit off") */
+.pic .pic-rk { position: absolute; left: -5px; top: -4px; z-index: 2; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px;
+  display: none; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; line-height: 1; letter-spacing: -.02em;
+  background: #e9ecf0; color: #0d0f13; box-shadow: 0 0 0 2px var(--panel), 0 1px 3px rgba(0,0,0,.5); font-variant-numeric: tabular-nums; }
+.dt-wrap .scroll.scrolled .pic .pic-rk { display: flex; animation: rk-in .16s ease-out; }
+@keyframes rk-in { from { transform: scale(.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .dt-wrap .scroll.scrolled .pic .pic-rk { animation: none; } }
