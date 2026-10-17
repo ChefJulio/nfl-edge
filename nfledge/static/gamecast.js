@@ -2787,65 +2787,39 @@
     ov.querySelector('.sheet').style.setProperty('--sheeth', `${ov.querySelector('.sheet-h').offsetHeight}px`);
     if (matchMedia('(max-width: 699px)').matches) drag(ov, ov.querySelector('.sheet'));
   };
-  // Phones (owner 2026-10-16): the sheet follows the finger. It opens at up to SNAP of the screen; dragging up grows
-  // it to FULL; dragging down shrinks it back from full, or slides it away from its opening size (far or fast
-  // enough), else it springs back. Content scrolls as usual: a downward drag only moves the sheet once its content
-  // is at the top, and from the grab bar / title row always.
-  const SNAP = 0.62, FULL = 0.92;
+  // Phones (owner 2026-10-17: no half-open state): a sheet opens at full height (or its content's, if shorter) and
+  // scrolls natively; dragging down, from the grab bar / title row or once its content is at the top, slides it with the
+  // finger, and far or fast enough closes it, else it springs back.
+  const FULL = 0.92;
   const drag = (ov, sh) => {
-    const vh = () => innerHeight, cap = () => Math.min(sh.scrollHeight, FULL * vh());
-    let full = false;
-    const setH = (h, anim) => { sh.classList.toggle('sheet-anim', !!anim); sh.style.maxHeight = `${Math.round(h)}px`; };
-    setH(Math.min(sh.scrollHeight, SNAP * vh()));
-    let y0 = 0, t0 = 0, h0 = 0, s0 = 0, mode = null, lastY = 0, lastT = 0, v = 0, glide = 0;
-    // after a drag that ran into full height, the content keeps the finger's speed for a moment and slows (a native
-    // scroll can't take over mid-gesture once the drag has claimed it)
-    const coast = vel => { cancelAnimationFrame(glide); let sp = -vel * 16, prev = performance.now();
-      const step = t => { const dt = Math.min(32, t - prev); prev = t; sh.scrollTop += sp * dt / 16; sp *= Math.pow(0.95, dt / 16);
-        if (Math.abs(sp) > 0.5) glide = requestAnimationFrame(step); };
-      glide = requestAnimationFrame(step); };
+    sh.style.maxHeight = `${Math.round(FULL * innerHeight)}px`;
+    let y0 = 0, mode = null, lastY = 0, lastT = 0, v = 0;
     sh.addEventListener('touchstart', e => {
       if (e.touches.length !== 1) return;
-      cancelAnimationFrame(glide);
-      y0 = lastY = e.touches[0].clientY; t0 = lastT = e.timeStamp; h0 = sh.offsetHeight; s0 = sh.scrollTop; v = 0;
+      y0 = lastY = e.touches[0].clientY; lastT = e.timeStamp; v = 0;
       mode = e.target.closest('.sheet-h') ? 'drag' : null;  // body touches decide on the first move
     }, { passive: true });
     sh.addEventListener('touchmove', e => {
       const y = e.touches[0].clientY, dy = y - y0;
       if (e.timeStamp > lastT) { v = (y - lastY) / (e.timeStamp - lastT); lastY = y; lastT = e.timeStamp; }
-      if (mode === null && Math.abs(dy) > 4) {
-        mode = (dy > 0 && sh.scrollTop <= 0) || (dy < 0 && !full && sh.offsetHeight < cap() - 1) ? 'drag' : 'scroll';
-      }
+      if (mode === null && Math.abs(dy) > 4) mode = dy > 0 && sh.scrollTop <= 0 ? 'drag' : 'scroll';
       if (mode !== 'drag') return;
       e.preventDefault();
-      // up: grow; once at full height, the rest of the same swipe scrolls the content (owner 2026-10-17: it got
-      // "caught" at full and needed a second swipe)
-      if (dy < 0) { sh.style.transform = ''; const want = h0 - dy, c = cap(); setH(Math.min(c, want));
-        if (want > c) { full = true; sh.scrollTop = s0 + (want - c); } }
-      else { setH(h0); sh.style.transform = `translateY(${dy}px)`; }  // down: slide, the height kept
+      sh.classList.remove('sheet-anim');
+      sh.style.transform = `translateY(${Math.max(0, dy)}px)`;
     }, { passive: false });
     sh.addEventListener('touchend', () => {
       if (mode !== 'drag') { mode = null; return; }
       mode = null;
-      const dy = lastY - y0, snapH = Math.min(sh.scrollHeight, SNAP * vh());
+      const dy = lastY - y0;
       sh.classList.add('sheet-anim');
-      if (dy < 0) {  // grew: settle full (and let the content glide on if the swipe ran into full), or back
-        const ranIn = h0 - dy > cap();
-        full = full || ranIn || dy < -50 || v < -0.4;
-        setH(full ? cap() : h0, true);
-        if (ranIn && v < -0.2) coast(v);
-        return;
-      }
-      const far = dy > 0.3 * h0 || v > 0.6;
-      sh.style.transform = '';
-      if (full && far && h0 - dy > snapH * 0.6) { full = false; setH(snapH, true); return; }  // full -> opening size
-      if (far) {  // away
-        sh.style.transform = `translateY(${h0 + 40}px)`;
+      if (dy > 0.25 * sh.offsetHeight || v > 0.6) {  // away
+        sh.style.transform = `translateY(${sh.offsetHeight + 40}px)`;
         ov.classList.add('sheet-out');
         setTimeout(close, 200);
         return;
       }
-      setH(h0, true);  // not far enough: spring back
+      sh.style.transform = '';  // not far enough: spring back
     });
   };
   document.addEventListener('click', e => {
