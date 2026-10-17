@@ -185,6 +185,7 @@ def main():
   # so before that "ACT" just means on the roster (Allen's 4 missed games in 2018 read as played).
   tot = sn[["offense_snaps", "defense_snaps", "st_snaps"]].fillna(0).sum(axis=1)
   played = set(zip(sn.gsis_id[tot > 0], sn.season[tot > 0].astype(int), sn.week[tot > 0].astype(int)))
+  prac = practice_timeline(data.practice, allsched, sn, all_ros, data.current_season)
   injuries = injury_history(cache, nfl, data.current_season, all_ros, allsched, played,
                             ingame_events(cache, nfl, data.current_season, all_ros, site))
   scr = qb_scrambles(data.pbp)
@@ -281,6 +282,8 @@ def main():
     if pid in injuries:
       doc["inj"] = injuries[pid]["eps"]
       doc["dur"] = injuries[pid].get("dur")
+    if pid in prac:
+      doc["prac"] = prac[pid]
     if pos == "QB" and pid in scr:
       doc["scr"] = scr[pid]  # {season: [scrambles, dropbacks]}
     (out_dir / f"{pid}.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
@@ -288,7 +291,7 @@ def main():
   size = sum(f.stat().st_size for f in out_dir.glob("*.json"))
   print(f"[logs] wrote {n} player game logs ({size / 1e6:.1f} MB) to {out_dir}", flush=True)
   other_logs(site, cache, nfl, data.current_season, allsched, pinfo, all_ros, sn, bios, written=set(everyone), injuries=injuries,
-             post_snaps=sn_post, round_of=round_of)
+             post_snaps=sn_post, round_of=round_of, prac=prac)
   team_logs(site, cfg, data, cache, nfl, allsched, postsched)
 
 
@@ -319,6 +322,47 @@ FULL_COLS = ["player_id", "player_display_name", "position", "season", "week", "
 
 # Every regular-season week in a player's game log (owner 2026-10-16: "weeks the player didn't play should still be
 # there"): the weeks he has no game get a row saying why, from his weekly roster status that week.
+def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: pd.DataFrame, cur: int) -> dict:
+  """gsis -> this season's practice days and games in date order (owner 2026-10-17: "the date the report was out,
+  show the last 6, include games in that timeline, dates near each"). Events: ["p", date, D/L/F, game status on the
+  week's last day or ""], ["g", date, opponent, "vs"/"@", snap share or "out" or "" (upcoming)]. Players who were on a
+  practice report this season only; the card shows the latest few."""
+  if practice is None or "dates" not in practice:
+    return {}
+  pr = practice[(practice.season == cur) & practice.gsis_id.notna()]
+  if not len(pr):
+    return {}
+  sch = allsched[allsched.season == cur]
+  games = {}
+  for g in sch.itertuples():
+    for t, o, h in ((g.home_team, g.away_team, "vs"), (g.away_team, g.home_team, "@")):
+      games[(D.RELOCATED.get(t, t), int(g.week))] = (str(g.gameday)[:10], D.RELOCATED.get(o, o), h)
+  team_wk = {(r.gsis_id, int(r.week)): ROSTER_TEAM.get(r.team, r.team)
+             for r in ros[(ros.season == cur) & ros.gsis_id.notna()][["gsis_id", "week", "team"]].itertuples()}
+  snap = {(r.gsis_id, int(r.week)): r.offense_pct for r in sn[sn.season == cur][["gsis_id", "week", "offense_pct"]].itertuples()}
+  today = pd.Timestamp.now(tz="America/New_York").strftime("%Y-%m-%d")
+  out = {}
+  for gid, x in pr.groupby("gsis_id"):
+    ev = []
+    for r in x.sort_values("week").itertuples():
+      ds = [d for d in str(r.dates or "").split(",") if d]
+      gs = "" if r.game_status in (None, "None") else str(r.game_status).capitalize()
+      for i, (d, c) in enumerate(zip(ds, str(r.days))):
+        ev.append(["p", d, c, gs if i == len(ds) - 1 else ""])
+    weeks = sorted({int(w) for w in x.week})
+    for w in range(1, max(weeks) + 2):  # his games through the week after his latest report (the next one)
+      t = team_wk.get((gid, w)) or team_wk.get((gid, max(weeks)))
+      gm = t and games.get((t, w))
+      if not gm:
+        continue
+      s_ = snap.get((gid, w))
+      res = (int(round(100 * float(s_))) if s_ is not None and s_ == s_ else "out") if gm[0] <= today else ""
+      ev.append(["g", gm[0], gm[1], gm[2], res])
+    ev.sort(key=lambda e: (e[1], 0 if e[0] == "p" else 1))
+    out[gid] = ev
+  return out
+
+
 def roster_tag(status, abbr) -> str:
   if status == "INA":
     return "INA"  # declared inactive on game day (rosters mark it from 2019; before that he reads DNP)
@@ -420,7 +464,7 @@ def rows_by(df: pd.DataFrame | None, key: str) -> dict:
 
 def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: pd.DataFrame, ros: pd.DataFrame,
                snaps: pd.DataFrame, bios: dict, written: set, injuries: dict | None = None,
-               post_snaps: pd.DataFrame | None = None, round_of: dict | None = None):
+               post_snaps: pd.DataFrame | None = None, round_of: dict | None = None, prac: dict | None = None):
   """<site>/data/players/<gsis>.json for everyone the fantasy pass didn't write: every player in nflverse's weekly
   stats (1999 on), on a weekly roster (2002 on) or in the snap counts (2012 on). Per game: his kind's stat line
   ("d", in "keys" order), returns ("r") when he had any, his unit's snap share ("sn"). Plus "ros": per season, his
@@ -564,6 +608,8 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
     if injuries and pid in injuries:
       doc["inj"] = injuries[pid]["eps"]
       doc["dur"] = injuries[pid].get("dur")
+    if prac and pid in prac:
+      doc["prac"] = prac[pid]
     (out_dir / f"{pid}.json").write_text(json.dumps(_json_safe(doc), separators=(",", ":"), allow_nan=False), encoding="utf-8")
     n += 1
   print(f"[logs] wrote {n} other player pages (defense, line, specialists, players without fantasy stats)", flush=True)

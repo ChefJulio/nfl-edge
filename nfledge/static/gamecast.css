@@ -893,3 +893,14 @@ table.lg tr.lg-car td:first-child b { font-weight: 700; }
 /* stat groups divided (owner 2026-10-17): a hairline and a little room where rushing / receiving / passing start */
 table.lg td.lg-gs, table.lg th.lg-gs { box-shadow: inset 1px 0 0 color-mix(in srgb, var(--ink) 22%, transparent); padding-left: 6px !important; }
 .ij-line { margin: 4px 0; } .pc-tap .pc-big.good { color: #6fdc8c; }
+/* practice and games timeline in the Health sheet (owner 2026-10-17) */
+.pt-list { display: grid; gap: 2px; }
+.pt-row { display: grid; grid-template-columns: 7.5em 3.2em 1fr; align-items: center; gap: 8px; padding: 5px 0; border-top: 1px solid var(--line); font-size: var(--fs-md); }
+.pt-row:first-child { border-top: 0; }
+.pt-row.pt-g { background: color-mix(in srgb, var(--ink) 4%, transparent); border-radius: var(--r-sm); padding-left: 6px; padding-right: 6px; }
+.pt-d { color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; }
+.pt-gm { font-weight: 700; white-space: nowrap; }
+.pr-chip { display: inline-block; text-align: center; font-size: var(--fs-xs); font-weight: 700; border-radius: var(--r-sm); padding: 1px 4px; }
+.pr-chip.pr-D { background: rgba(255,143,132,.18); color: #ff8f84; } .pr-chip.pr-L { background: rgba(240,192,90,.18); color: #f0c05a; }
+.pr-chip.pr-F { background: rgba(111,220,140,.16); color: #6fdc8c; }
+.sheet .ij-now .pr-days { display: none; }  /* the dated practice timeline below says it */

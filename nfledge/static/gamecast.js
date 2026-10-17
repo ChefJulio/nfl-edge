@@ -912,7 +912,7 @@
     const bars = slots.length ? `<div class="pc-tapbars">${miniBars(slots, { slotW: 22, H: 40, cls: 'mb-pts mb-sm' })}</div>` : '';
     const body = fpg != null ? `<div class="pc-big">${f1(fpg)} <small>FP/G</small></div><div class="pc-tapsub">${f0(games)} games · last ${slots.length}</div>${bars}`
       : `<div class="pc-big">${f1(slots[slots.length - 1].v)} <small>pts</small></div><div class="pc-tapsub">last game · last ${slots.length}</div>${bars}`;
-    return fpg != null ? tapTile('Form', body, title, detail) : goTile('Form', body, 'log', 'g');
+    return fpg != null && detail ? tapTile('Form', body, title, detail) : goTile('Form', body, 'log', 'g');
   };
   // ---- Health (owner 2026-10-17: a tile instead of the Injuries tab, and a briefing that brings you up to speed) ----
   // ros.json for our return model's week (the first upcoming week he's more likely than not to play)
@@ -943,6 +943,21 @@
     const sub = !h.inj ? 'no injury listed' : [h.what, ret].filter(Boolean).join(' · ') || 'on the injury report';
     return tapTile('Health', `${big}<div class="pc-tapsub">${esc(sub)}</div>`, 'Health', injuryBrief(pid, p, L, espn, h));
   };
+  // Practice and games, dated (owner 2026-10-17: "the date the report was out, show the last 6, include games in that
+  // timeline"): his latest six practice days and games this season plus his next game (career log prac,
+  // tools/player_logs.py practice_timeline)
+  const PR_WORD = { D: 'Did not practice', L: 'Limited', F: 'Full' };
+  const practiceTl = L => {
+    const ev = (L && L.prac) || [];
+    if (!ev.length) return '';
+    const today = new Date().toISOString().slice(0, 10);
+    const past = ev.filter(e => e[1] <= today).slice(-6), next = ev.find(e => e[1] > today && e[0] === 'g');
+    const day = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+    const row = e => e[0] === 'p'
+      ? `<div class="pt-row"><span class="pt-d">${day(e[1])}</span><span class="pr-chip pr-${e[2]}">${e[2] === 'D' ? 'DNP' : e[2] + 'P'}</span><span>${PR_WORD[e[2]] || ''}${e[3] ? ` · <b>${esc(e[3])}</b>` : ''}</span></div>`
+      : `<div class="pt-row pt-g"><span class="pt-d">${day(e[1])}</span><span class="pt-gm">${esc(e[3])} ${tmL(e[2])}</span><span>${e[4] === '' ? '<b>next game</b>' : e[4] === 'out' ? '<b class="bad">did not play</b>' : `played · ${esc(e[4])}% of snaps`}</span></div>`;
+    return `<div class="pc-box"><div class="pc-k">Practice and games</div><div class="pt-list">${past.map(row).join('')}${next ? row(next) : ''}</div></div>`;
+  };
   // the briefing: this week, the timeline (since when, games missed, return estimates), the latest news, then history
   const injuryBrief = (pid, p, L, espn, h) => {
     const now = h.now, ep = h.ep;
@@ -958,7 +973,7 @@
     const timeline = h.inj && (tl.length || (now && now.comment)) ? `<div class="pc-box"><div class="pc-k">Timeline</div>${tl.map(t => `<div class="ij-line">${t}</div>`).join('')}
         ${now && now.comment ? `<p class="pc-sub">${esc(now.comment)}</p>` : ''}</div>` : '';
     const news = espn ? `<div class="pc-box"><div class="pc-k">Latest news</div><div class="pc-news" data-espn="${esc(espn)}" data-n="2"></div></div>` : '';
-    return thisWeek + timeline + news + (L && (L.inj || L.dur) ? injuryTab(L, espn, true) : '');
+    return thisWeek + practiceTl(L) + timeline + news + (L && (L.inj || L.dur) ? injuryTab(L, espn, true) : '');
   };
   // Grade tile (owner 2026-10-16: OVR moved here from the header, then the Grade tab folded into its sheet): his OVR;
   // the sheet holds the whole grade (gradeTab) from his history shard (GRH, loaded with the page)
@@ -1025,8 +1040,18 @@
     const pos = L && L.pos;
     const played = g ? `<div class="pc-now"><div class="pc-k">Final</div><div class="pc-big">${f1(pts(g.c, weights(), pos))} <small>pts</small></div>
       <div class="pc-sub">${g.h === 0 ? '@' : 'vs'} ${tmL(g.o)} · ${ord(g.rk)} among ${esc(pos)}s${g.gid ? ` · <a href="${esc(gcUrl(g.gid, g.f || ''))}">Gamecast &rsaquo;</a>` : ''}</div></div>` : '';
-    const hurt = d === DATA && L && L.pid && healthOf(L.pid, null, L, L.espn).inj;
-    return `${played}${hurt ? `<div class="pc-tiles">${healthTile(L.pid, null, L, L.espn)}</div>` : ''}<div class="pc-box"><p class="pc-sub">Not on our ${esc(wkLabel(d).toLowerCase())} board: a bye, ruled out, not on a roster yet, or projected too low to list.</p></div>`;
+    // the tiles stay (owner 2026-10-17: "bye players missing tiles feels very wrong"): the Projection tile says why there
+    // is no number (bye, back when and against whom; else the reason), the rest as for any week
+    const ups = (L && L.up) || [], wk = +d.week;
+    const bye = ups.some(u => u.w === wk && u.bye) || ((S && S.m) || []).some(m => m.w === wk && m.bye);
+    const nxt = ups.find(u => u.w > wk && !u.bye);
+    const h = d === DATA && L && L.pid ? healthOf(L.pid, null, L, L.espn) : null;
+    const projBody = bye ? `<div class="pc-big">Bye</div><div class="pc-tapsub">${nxt ? `back week ${nxt.w} ${nxt.h === 0 ? '@' : 'vs'} ${esc(nxt.o)}` : 'no game this week'}</div>`
+      : `<div class="pc-big">–</div><div class="pc-tapsub">${h && h.inj ? 'out this week' : 'not projected this week'}</div>`;
+    const projTile = goTile('Projection', projBody, 'log', 'g');
+    const cur = S ? S.g : [], fpg = cur.length ? cur.reduce((t, x) => t + pts(x.c, weights(), pos), 0) / cur.length : null;
+    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '')}${h ? healthTile(L.pid, null, L, L.espn) : ''}${GRADED[pos] ? gradeTile(L.pid) : ''}</div>` : '';
+    return `${played}${tiles}${bye ? '' : `<div class="pc-box"><p class="pc-sub">Not on our ${esc(wkLabel(d).toLowerCase())} board: ruled out, not on a roster yet, or projected too low to list.</p></div>`}`;
   };
   // Header extras from the career log doc (tools/player_logs.py): photo, jersey number, bio, recent snap share and,
   // for QBs, how often he scrambles. All current, like the rest of the header.

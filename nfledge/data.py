@@ -393,7 +393,9 @@ def fetch_practice_days(season: int) -> pd.DataFrame:
       days = sorted(i.get("practiceDays") or [], key=lambda x: x.get("date", ""))
       rows.append({"season": season, "week": i.get("week"), "gsis_id": (i.get("person") or {}).get("gsisId"),
                    "position": i.get("position"), "game_status": i.get("injuryStatus") or "None",
-                   "days": "".join(_DAY.get(x.get("status"), "?") for x in days)})
+                   "days": "".join(_DAY.get(x.get("status"), "?") for x in days),
+                   # each day's date, for the player card's practice timeline (owner 2026-10-17)
+                   "dates": ",".join(str(x.get("date") or "")[:10] for x in days)})
     nxt = (d.get("pagination") or {}).get("token")
     if not inj or not nxt or nxt == page:
       break
