@@ -15,10 +15,10 @@ table.dt.tiles tr.teamrow:hover > td { background: var(--row-hover); }
   #tab-players .scroll.scrolled table.ranks td.stick, #tab-players .scroll.scrolled table.ranks th.stick { width: 118px; min-width: 118px; max-width: 118px; }
 }
 
-/* rank on the photo's top-left corner, only while scrolled sideways (the # column is off screen then); a twin of the
+/* rank on the photo's bottom-left corner, only while scrolled sideways (the # column is off screen then); a twin of the
    team-logo badge on the opposite corner: same size, same cut-out ring, mirrored (owner 2026-10-17: "a tiny bit off") */
 /* quiet (owner: the white version was "way too prominent"), and fully inside the cell (the first one clipped left) */
-.pic .pic-rk { position: absolute; left: -1px; top: -2px; z-index: 2; min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px;
+.pic .pic-rk { position: absolute; left: -1px; bottom: -2px; z-index: 2; min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px;
   display: none; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; line-height: 1;
   background: color-mix(in srgb, var(--panel) 68%, transparent); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); color: color-mix(in srgb, var(--ink) 88%, transparent); font-variant-numeric: tabular-nums; }
 .dt-wrap .scroll.scrolled .pic .pic-rk { display: flex; animation: rk-in .16s ease-out; }
