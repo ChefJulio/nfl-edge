@@ -2099,3 +2099,10 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   injury rate leave any fixed curve off in some seasons. Not used: Fantasy rest-of-season values keep "healthy stays
   healthy" and the hold-one / 3-deep roster rules (sec. 9). Possible next angle: a curve that updates in-season from
   the current year's absence rate (shrunk toward the recent seasons), gated the same way at season end.
+- **PRE-REGISTERED 2026-10-17 (before running): (Z) the TD blend k** (docs/handset_audit.md #2). player_model.td_blend_k
+  = 150 is from the initial commit; "k 50 / 400: no effect" has no numbers. TD input = expected TDs + n / (n + k) x
+  (actual - expected), n = opportunities. Grid k {25, 50, 100, 150 (today), 300, 600, expected TDs only}. tools/
+  experiments.py 2021-2026 (variants td_k_*). CHOOSE the lowest fantasy MAE (relevant rows) on 2021-23; DECIDE on
+  2024-25: MAE lower than 150 with a 95% season-week CI excluding 0 and better in both seasons; guards: no position
+  significantly worse, start / sit gain not significantly worse (sec. 1 rule 7); CONFIRM on 2026 so far, same
+  direction. If 150 is the 2021-23 choice, keep it (now tested).
