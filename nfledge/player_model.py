@@ -79,6 +79,11 @@ def EFF_FEATURES(comp: str, opp: str, unit: str, exp: dict | None = None, group:
   # EXPERIMENT (2026-10-14): receivers' red-zone role x how often the team gets there (gl_struct's receiver analog).
   if exp.get("rz_struct") and comp == "rec_td":
     cols.append("rz_frac")
+  # EXPERIMENT (AK, INSIGHTS pre-registered 2026-10-17; owner: distance TDs vs goal-line TDs): explosiveness in WR
+  # receiving TDs. Explosive receivers beat their projected TDs (WR misses vs last season's yards per chance, Spearman
+  # +.15); his shrunk yards per target (same prior, season weights) as a term in the WR TD rate, weight fitted.
+  if exp.get("wr_td_explosive") and comp == "rec_td" and group == "WR":
+    cols.append("rec_yd_per_tgt")
   # EXPERIMENT (owner): QB rushing TDs by run type. A pocket QB's runs are mostly scrambles from midfield, so his
   # team scoring a lot shouldn't raise his rushing-TD rate the way it raises a goal-line runner's. QBs only: the
   # expected scramble share of his runs, and team scoring x his designed-run share (data sets both weights).
