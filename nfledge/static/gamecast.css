@@ -909,6 +909,16 @@ table.lg td.lg-gs, table.lg th.lg-gs { box-shadow: inset 1px 0 0 color-mix(in sr
 .ij-hero > div { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; border-radius: var(--r-md); background: color-mix(in srgb, var(--ink) 5%, transparent); min-width: 0; }
 .ij-hero small { font-size: var(--fs-xs); color: var(--muted); font-weight: 600; }
 .ij-hero b { font-size: var(--fs-lg); }
+/* this week's practice (owner 2026-10-17): a tile per day, then one plain sentence */
+.pr-k { margin-top: 12px; }
+.pr-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 6px 0 6px; }
+.pr-day { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 6px; border-radius: var(--r-md); }
+.pr-day small { font-size: var(--fs-xs); font-weight: 600; opacity: .8; }
+.pr-day b { font-size: var(--fs-md); }
+.pr-day.pr-F { background: rgba(111,220,140,.14); color: #7fe0a0; }
+.pr-day.pr-L { background: rgba(240,192,90,.16); color: #f3d38c; }
+.pr-day.pr-D { background: rgba(255,143,132,.16); color: #f59a91; }
+.pr-say { margin: 2px 0 0; color: var(--ink); font-size: var(--fs-md); }
 .ij-hero .ij-big { font-family: var(--font-display); font-size: var(--fs-2xl); line-height: 1.1; }
 .ij-hero .ij-big.good { color: #6fdc8c; } .ij-hero .ij-big.bad { color: #ff8f84; }
 .ij-hero .muted { font-size: var(--fs-xs); }

@@ -980,9 +980,31 @@
       || (now && now.status && now.status !== 'Active' ? now.status : '') || (h.inj ? 'Listed' : 'Healthy');
     const desCls = /^Out|Injured|IR/i.test(des) ? 'out' : /^Doubt/i.test(des) ? 'd' : /^Quest/i.test(des) ? 'q' : h.inj ? 'q' : 'ok';
     const pr = ((L && L.prac) || []).filter(e => e[0] === 'p' && e[1] >= new Date(Date.now() - 6 * 864e5).toISOString().slice(0, 10));
-    const WORD = { D: 'did not practice', L: 'limited', F: 'full' };
-    const prLine = pr.length ? 'Practiced: ' + Object.entries(pr.reduce((m, e) => { (m[e[2]] = m[e[2]] || []).push(new Date(e[1] + 'T12:00:00').toLocaleDateString([], { weekday: 'short' })); return m; }, {}))
-      .map(([c, ds]) => `${WORD[c] || c} ${ds.join(', ')}`).join('; ') : '';
+    // This week's practice as a strip (owner 2026-10-17: "Questionable (FFF)" was unreadable): a tile per day, colored
+    // full / limited / did not practice, and one plain sentence. Days from the dated report when it's in the data,
+    // else the letters in his status / the model's note, Wed-Fri (Mon-Wed before a Thursday game).
+    const code = (((p && (p.status || '') + ' ' + (p.inactive_why || '')) || '').match(/\(([DLF]{1,3})\)/) || [])[1] || '';
+    const tg = DATA && p ? teamGame(p.team, DATA) : null;
+    const thuGame = tg && /^Thu/.test(tg.kickoff || '');
+    const wd = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short' });
+    const days = pr.length ? pr.map(e => [wd(e[1]), e[2]])
+      : [...code].map((c, i, a) => [(thuGame ? ['Mon', 'Tue', 'Wed'] : ['Wed', 'Thu', 'Fri']).slice(3 - a.length)[i], c]);
+    const WORD = { D: 'did not practice', L: 'limited', F: 'full' }, TAG = { D: 'Missed', L: 'Limited', F: 'Full' };
+    const prSentence = (() => {
+      if (!days.length) return '';
+      const cs = days.map(x => x[1]);
+      if (cs.every(c => c === 'F')) return 'Full practice every day';
+      if (cs.every(c => c === 'D')) return 'Did not practice all week';
+      if (cs.every(c => c === 'L')) return 'Limited every day';
+      const runs = [];
+      days.forEach(([dname, c]) => { const r = runs[runs.length - 1]; if (r && r.c === c) r.d.push(dname); else runs.push({ c, d: [dname] }); });
+      const txt = runs.map(r => `${WORD[r.c]} ${r.d.length > 1 ? `${r.d[0]}-${r.d[r.d.length - 1]}` : r.d[0]}`).join(', ');
+      const R = { D: 0, L: 1, F: 2 }, d0 = R[cs[0]], d1 = R[cs[cs.length - 1]];
+      const trend = d1 > d0 ? ' (trending up)' : d1 < d0 ? ' (trending down)' : '';
+      return txt.charAt(0).toUpperCase() + txt.slice(1) + trend;
+    })();
+    const prStrip = days.length ? `<div class="pr-strip">${days.map(([dname, c]) => `<div class="pr-day pr-${c}"><small>${esc(dname)}</small><b>${TAG[c] || c}</b></div>`).join('')}</div>
+        <p class="pr-say">${esc(prSentence)}</p>` : '';
     // when he got hurt, as a date (owner 2026-10-17: "rather than trying to decipher it"): the in-game note's week, dated
     // from his games in the timeline; else the day he first appeared on the report
     const QN = { 1: '1st', 2: '2nd', 3: '3rd', 4: '4th', 5: 'overtime' };
@@ -1018,7 +1040,7 @@
           ${third}
         </div>
         ${hurt ? `<div class="ij-what">${esc(hurt)}</div>` : ''}
-        <p class="pc-sub">${h.inj ? esc(prLine || (p && p.inactive_why) || 'On the injury report.') : 'Not on the injury report and practicing fully.'}</p></div>`;
+        ${h.inj ? (prStrip ? `<div class="pc-k pr-k">Practice this week</div>${prStrip}` : '<p class="pc-sub">On the injury report.</p>') : '<p class="pc-sub">Not on the injury report and practicing fully.</p>'}</div>`;
     const tl = [];
     if (ep) tl.push(`Listed since week ${ep.w0}${ep.missed ? `, ${ep.missed} game${ep.missed === 1 ? '' : 's'} missed` : ''}${ep.list ? ` · on ${esc(ep.list)}` : ''}`);
     const timeline = h.inj && (tl.length || (now && now.comment)) ? `<div class="pc-box"><div class="pc-k">Timeline</div>${tl.map(t => `<div class="ij-line">${t}</div>`).join('')}
