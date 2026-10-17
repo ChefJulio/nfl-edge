@@ -2304,6 +2304,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   wr_td_explosive vs baseline: GATE fantasy MAE on WR relevant rows lower with a 95% season-week CI excluding 0 and
   lower in >= 4 of 6 seasons; guards: overall MAE not worse (CI upper < +0.002), WR P(1+ rec TD) Brier not worse,
   start / sit not significantly worse.
+- **RESULT {#wr-td-explosive} (AK) explosiveness in WR receiving TDs: FAIL (gate), switch off.** tools/experiments.py
+  2021-2026, 4,989 WR relevant rows. WR MAE 5.141 -> 5.141, +0.000 [-0.001, +0.002]; every season within +-0.001;
+  overall +0.000. Seen but not gated: WR start / sit gain 0.785 -> 0.800, +0.016 [+0.003, +0.030] (overall +0.006
+  [+0.001, +0.012]): the term reorders close WR pairs correctly more often without moving average error. Not adopted
+  on that (the gate was MAE; switching measures after the result is the forking path). PENDING: a fresh test with WR
+  start / sit as the primary measure, on full 2026 at season end (pre-register before running).
 - **PRE-REGISTERED 2026-10-17 (owner, Jalen Hurts ruled out with a blood clot shows 99% for week 7; "at your
   discretion"): (AH) the lookahead chain for newly injured players.** Today a player on this week's report who played
   his team's last game (no return-model state yet) counts as fully available from next week on. (B) of 2026-10-15

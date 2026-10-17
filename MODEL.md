@@ -335,6 +335,7 @@ The grade measures output, not style: fantasy points per game in the site's scor
 - **Rejected** - How much should last season and two seasons back count in a player's efficiency rates (today 1 / 0.6 / 0.3)? - Every mix from 0.3 to 1 for last season and 0 to 0.6 for two back was within noise on 2021-23; the best was no better on 2024-25 and worse on 2026 so far, so today's stays (2026-10). <!-- tried:eff-season-weights -->
 - **Rejected** - How much of his usual volume should a player get in his first game with a new team (half today)? - 30% to 70% were all within noise on 2021-23, and the best of them (70%) was worse on 2024-25, so half stays (2026-10). <!-- tried:newcomer-scale -->
 - **Rejected** - For efficiency stats where players barely differ from one another (a running back's yards per carry, a tight end's touchdown rate), how much should a player's own history count (a cap of 2,000 pseudo-plays on the pull toward the average)? - Caps from 500 to 100,000 were within noise on 2021-23; the best (500, more weight on his own rate) helped in 2024 and hurt in 2025, so 2,000 stays (2026-10). <!-- tried:shrink-cap -->
+- **Rejected** - Should a receiver's yards per target (how explosive he is) raise his projected touchdowns, since explosive receivers tend to beat their touchdown projections? - It didn't change the average miss for receivers (2021-26); it did pick the better of two similar receivers slightly more often, which will get its own test on the full 2026 season (2026-10). <!-- tried:wr-td-explosive -->
 
 ## Under the hood
 
