@@ -24,3 +24,12 @@ table.dt.tiles tr.teamrow:hover > td { background: var(--row-hover); }
 .dt-wrap .scroll.scrolled .pic .pic-rk { display: flex; animation: rk-in .16s ease-out; }
 @keyframes rk-in { from { transform: scale(.6); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .dt-wrap .scroll.scrolled .pic .pic-rk { animation: none; } }
+/* phones (owner 2026-10-17: "too much space between the player name column and the next columns"): Proj's header
+   (label + sort arrow) made it 90px with the number pushed to its far edge; Proj and Range now start right after
+   the names, trim their padding, and the rank column is just as wide as its number */
+@media (max-width: 640px) {
+  #tab-players table.ranks .projc, #tab-players table.ranks .rngc { text-align: left; padding-left: 4px; padding-right: 4px; }
+  /* left-aligned chip, fixed width, digits right-aligned inside: sits against the names and decimals still line up */
+  #tab-players table.ranks td.projc > .sc { display: inline-block; min-width: 3.3em; text-align: right; font-variant-numeric: tabular-nums; }
+  #tab-players table.ranks .rk { padding-left: 6px; padding-right: 2px; }
+}
