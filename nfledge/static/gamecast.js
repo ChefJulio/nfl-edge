@@ -1892,6 +1892,17 @@
     RJ.rk = tot; RJ.rkW = w;
     return tot;
   };
+  // a player's grade for team lists (the Players tile and its sheet): the OVR, or for rookies and second-year players
+  // (not graded two seasons back) this season's grade when higher with 4+ games (owner 2026-10-17); null = not graded
+  const teamGrade = pid => {
+    if (GR.cur === undefined) { GR.cur = null; grIndex().then(ix => ix && grSeason(ix.current)).then(g => { GR.cur = g || null; rerenderCard(); }); }
+    const g = GR.cur && GR.cur.players[pid];
+    if (!g || g[0] == null) return null;
+    if (GR.old === undefined) { GR.old = null; grSeason(GR.cur.season - 2).then(x => { GR.old = x || false; rerenderCard(); }); }
+    const young = GR.old && !(pid in GR.old.players), season = young && g[6] != null && (g[8] || 0) >= 4 && g[6] > g[0];
+    return { v: season ? g[6] : g[0], season, ovr: g[0], uq: !!g[9], row: g };
+  };
+  const gradeChip = gr => gr ? `<b class="tm-gr ${gr.uq ? '' : grTone(gr.v)}" title="${gr.season ? `Edge grade this season (${ovr(gr.ovr)} overall; young player)` : 'Edge grade (OVR)'}">${ovr(gr.v)}${gr.uq ? '*' : ''}</b>` : '<span class="muted">–</span>';
   const teamTiles = (abbr, d, L, pw) => {
     const tiles = [];
     // Power
@@ -1908,23 +1919,15 @@
     // Players: the team's top three by Edge grade (owner 2026-10-17: "go by player grades ... studs the last two seasons
     // have some weight"): the OVR, three seasons of output, a percentile within each position so QBs and receivers
     // compare; the roster and injury state from ros.json (rest of season), hurt = under 50% to play his next game
-    if (GR.cur === undefined) { GR.cur = null; grIndex().then(ix => ix && grSeason(ix.current)).then(g => { GR.cur = g || null; rerenderCard(); }); }
-    const rk = rosRanks(), gp = GR.cur && GR.cur.players;
-    // rookies and second-year players (not graded two seasons back) rank by this season alone when it's higher and he
-    // has 4+ games (owner 2026-10-17): a young breakout climbs; veterans keep the three-season OVR, so a hot five games
-    // doesn't reshuffle established stars
-    const old = GR.cur ? grSeason(GR.cur.season - 2) : null;
-    if (old && GR.old === undefined) { GR.old = null; old.then(x => { GR.old = x || false; rerenderCard(); }); }
-    const young = pid => GR.old && !(pid in GR.old.players);
-    const score = pid => { const g = gp[pid]; return young(pid) && g[6] != null && (g[8] || 0) >= 4 ? Math.max(g[0], g[6]) : g[0]; };
-    const top = rk && gp ? Object.entries(rk).filter(([pid, r]) => r.team === abbr && gp[pid] && gp[pid][0] != null)
-      .sort((a, b) => (gp[b[0]][9] ? 0 : 1) - (gp[a[0]][9] ? 0 : 1) || score(b[0]) - score(a[0])).slice(0, 3) : [];
-    const face = ([pid, r]) => { const ph = r.photo || NFLE.ui.headshot(r.espn), g = gp[pid];
-      return `<div class="tm-tp"><span class="tm-tpi">${ph ? `<img src="${esc(ph)}" alt="" width="30" height="30" loading="lazy">` : ''}</span><span class="tm-tpn">${esc(NFLE.fmt.short(r.name))}</span>${r.hurt ? '<span class="tm-tph" title="Under 50% to play his next game">inj</span>' : ''}<span class="tm-tpr">${esc(r.pos)} <b class="${g[9] ? '' : grTone(score(pid))}" title="${score(pid) > g[0] ? `Edge grade this season (${ovr(g[0])} overall; young player)` : 'Edge grade (OVR)'}">${ovr(score(pid))}${uqMark(g)}</b></span></div>`; };
+    const rk = rosRanks();
+    const top = rk ? Object.entries(rk).filter(([pid, r]) => r.team === abbr && teamGrade(pid))
+      .sort((a, b) => { const x = teamGrade(a[0]), y = teamGrade(b[0]); return (x.uq - y.uq) || y.v - x.v; }).slice(0, 3) : [];
+    const face = ([pid, r]) => { const ph = r.photo || NFLE.ui.headshot(r.espn);
+      return `<div class="tm-tp"><span class="tm-tpi">${ph ? `<img src="${esc(ph)}" alt="" width="30" height="30" loading="lazy">` : ''}</span><span class="tm-tpn">${esc(NFLE.fmt.short(r.name))}</span>${r.hurt ? '<span class="tm-tph" title="Under 50% to play his next game">inj</span>' : ''}<span class="tm-tpr">${esc(r.pos)} ${gradeChip(teamGrade(pid))}</span></div>`; };
     const wkRows = teamPlayerRows(abbr, d);
     tiles.push(tapTile('Players', top.length ? `<div class="tm-tps">${top.map(face).join('')}</div>` : '<div class="pc-tapsub">Loading&hellip;</div>', 'Players',
       `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
-        ${wkRows ? `<table class="bx tm-pl tiles"><thead><tr><th>Player</th><th class="num">Proj</th><th>Tier</th><th class="num">FP/G</th></tr></thead><tbody>${wkRows}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>
+        ${wkRows ? `<table class="bx tm-pl tiles"><thead><tr><th>Player</th><th class="num">Proj</th><th class="num" title="Edge grade; sorted by it (ungraded players last, by projection)">Grd</th><th class="num">FP/G</th></tr></thead><tbody>${wkRows}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>
        <div class="pc-k tm-dck">Depth chart</div><div class="dc-wrap" data-dc="${esc(abbr)}"></div>`));
     // Schedule: the rest of the season
     const O = oddsData(), sch = O && O.sched && O.sched[abbr], left = sch ? sch.filter(g => g[3] == null && g[0] >= +d.week) : [];
@@ -1991,9 +1994,13 @@
       : `<div class="pc-box"><div class="pc-k">${esc(wkLabel(d))}</div><b>Bye</b></div>`;
     return { html: `${week}${rootLine(abbr, d)}${teamTiles(abbr, d, TLOGS[abbr], pw)}`, players: '' };
   };
-  const teamPlayerRows = (abbr, d) => Object.entries(d.players).filter(([, p]) => p.team === abbr).sort((a, b) => b[1].proj - a[1].proj).map(([pid, p]) => { const s = scaled(p, d);
+  // the Players sheet's list: by grade (owner 2026-10-17: "replace tier with grade ... and sort by it"), ungraded last
+  const teamPlayerRows = (abbr, d) => Object.entries(d.players).filter(([, p]) => p.team === abbr)
+    .map(([pid, p]) => [pid, p, teamGrade(pid)])
+    .sort((a, b) => (b[2] ? 1 : 0) - (a[2] ? 1 : 0) || (a[2] && b[2] ? (a[2].uq - b[2].uq) || b[2].v - a[2].v : 0) || b[1].proj - a[1].proj)
+    .map(([pid, p, gr]) => { const s = scaled(p, d);
     return `<tr class="teamrow" style="${NFLE.fmt.rowStyle(d.teams, p.team)}" data-open-pid="${esc(pid)}"><td>${NFLE.ui.player({ name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, badges: injTag(p.status) }, d.teams)}</td>
-      <td class="num"><b>${f1(s.proj)}</b></td><td><span class="tier t-${esc(p.slot)}">${esc(p.tier)}</span></td><td class="num muted">${p.fpg != null ? f1(p.fpg) : ''}</td></tr>`; }).join('');
+      <td class="num"><b>${f1(s.proj)}</b></td><td class="num">${gradeChip(gr)}</td><td class="num muted">${p.fpg != null ? f1(p.fpg) : ''}</td></tr>`; }).join('');
   // the Power ranking box (the Power tile's sheet)
   const teamPowerBox = pw => {
     const unit = (label, v, rk, pp, total) => `<div class="tm-u${total ? ' tm-tot' : ''}"><span class="tm-ul">${label}</span><span class="tm-uv">${sgn(v)}</span>${rkChip(rk)}
