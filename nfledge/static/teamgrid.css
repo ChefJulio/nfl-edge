@@ -5,23 +5,26 @@
 .tg-div { margin-bottom: 14px; }
 .tg-dh { margin: 0 2px 6px; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .tg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.tg-tile { position: relative; overflow: hidden; display: flex; align-items: center; min-height: 82px; padding: 12px 14px;
-  border: 1px solid color-mix(in srgb, var(--tc) 35%, var(--line)); border-radius: var(--r-lg); text-align: left; cursor: pointer;
-  color: #fff; font: inherit; min-width: 0; box-shadow: var(--shadow);
-  background: linear-gradient(90deg, color-mix(in srgb, var(--tc) 22%, var(--panel)) 0%, color-mix(in srgb, var(--tc) 38%, var(--panel)) 55%,
-                                     color-mix(in srgb, var(--tc) 58%, var(--panel)) 100%);
+.tg-tile { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  min-height: 84px; padding: 12px 12px 12px 14px; border: 1px solid color-mix(in srgb, var(--tc) 40%, var(--line)); border-radius: var(--r-lg);
+  text-align: left; cursor: pointer; color: #fff; font: inherit; min-width: 0; box-shadow: var(--shadow);
+  /* dark under the text, the team color building toward the logo (owner 2026-10-17: more readable) */
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tc) 16%, #0d0f13) 0%, color-mix(in srgb, var(--tc) 30%, #0d0f13) 55%,
+                                     color-mix(in srgb, var(--tc) 52%, #0d0f13) 100%);
   transition: transform var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease); }
 .tg-tile:hover { border-color: color-mix(in srgb, var(--tc) 70%, #fff); }
 .tg-tile:active { transform: scale(.98); }
-/* the logo, big, just spilling past the right edge and fading toward the name */
-.tg-lg { position: absolute; right: -14px; top: 50%; width: 104px; height: 104px; margin-top: -52px; object-fit: contain; pointer-events: none;
-  -webkit-mask-image: linear-gradient(270deg, rgba(0,0,0,.95) 20%, rgba(0,0,0,.5) 65%, transparent 100%);
-  mask-image: linear-gradient(270deg, rgba(0,0,0,.95) 20%, rgba(0,0,0,.5) 65%, transparent 100%); }
-.tg-txt { position: relative; display: flex; flex-direction: column; gap: 3px; min-width: 0; padding-right: 64px; }
-.tg-nm { font-weight: 800; font-size: var(--fs-lg); line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  text-shadow: 0 1px 3px rgba(0,0,0,.55); }
-.tg-meta { display: flex; gap: 8px; align-items: baseline; font-size: var(--fs-sm); text-shadow: 0 1px 2px rgba(0,0,0,.5); }
-.tg-meta b { font-size: var(--fs-md); font-variant-numeric: tabular-nums; }
-.tg-rk { font-size: var(--fs-xs); font-weight: 600; color: rgba(255,255,255,.72); }
-@media (max-width: 420px) { .tg-tile { min-height: 74px; padding: 10px 12px; } .tg-lg { width: 88px; height: 88px; margin-top: -44px; right: -16px; }
-  .tg-txt { padding-right: 50px; } .tg-nm { font-size: var(--fs-md); } }
+/* the logo whole, inside the tile (owner: no bleeding off the edge) */
+.tg-lg { order: 2; flex: none; width: 64px; height: 64px; object-fit: contain; pointer-events: none; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
+.tg-txt { order: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.tg-nm { font-weight: 800; font-size: var(--fs-xl); line-height: 1.05; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+.tg-meta { display: flex; gap: 8px; align-items: center; }
+.tg-meta b { font-size: var(--fs-lg); font-weight: 800; font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+.tg-rk { font-size: var(--fs-xs); font-weight: 700; padding: 2px 7px; border-radius: var(--r-pill); background: rgba(0,0,0,.38); color: rgba(255,255,255,.9); }
+@media (max-width: 420px) {
+  .tg-tile { min-height: 76px; padding: 10px 8px 10px 12px; gap: 6px; }
+  .tg-lg { width: 48px; height: 48px; }
+  .tg-nm { font-size: var(--fs-lg); }
+  .tg-meta b { font-size: var(--fs-md); }
+}
