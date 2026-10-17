@@ -1047,3 +1047,11 @@ html.pc-open { overflow: hidden; }
 
 /* final scores tinted (owner 2026-10-17): winner green, loser red; the loser's side still dims */
 .mt-side.won .mt-num { color: #6fdc8c; } .mt-side.lost .mt-num { color: #ff8f84; }
+/* the @ / vs sits on the team-name row (owner 2026-10-17), the pregame "Tossup" label above it */
+.mt-at { align-self: center; height: 55px; flex-direction: column-reverse; justify-content: flex-start; line-height: 17px; }  /* a side's height: score 34 + name row 4 + 17 */
+@media (max-width: 400px) { .mt-at { height: 51px; } }  /* score 30 */
+.mt-at small { margin: 0 0 2px; line-height: 1; }
+/* logos inside the tile, none of them cut off at its edges (owner 2026-10-17): the tile's height less a margin, inset */
+.mt-lg, .mt-lg.away, .mt-lg.home { top: 8px; height: calc(100% - 16px); width: auto; aspect-ratio: 1; margin-top: 0; }
+.mt-lg.away { left: 8px; } .mt-lg.home { right: 8px; }
+@media (max-width: 400px) { .mt-lg, .mt-lg.away, .mt-lg.home { width: auto; height: calc(100% - 16px); margin-top: 0; } }
