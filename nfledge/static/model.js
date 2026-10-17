@@ -91,6 +91,7 @@
           bar.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.t === a.dataset.title));
           a.querySelectorAll('h3').forEach((h, i) => { if (!h.id) h.id = `ma-${areas.indexOf(a)}-${i}`; });
           toc.innerHTML = [...a.querySelectorAll('h3')].map(h => `<a href="#${esc(h.id)}">${esc(h.textContent)}</a>`).join('');
+          toc.parentElement.classList.toggle('no-toc', !toc.children.length);  // no subsections: no empty side column
           try { sessionStorage.setItem('nfle-model-area', a.dataset.title); } catch (e) { /* private mode */ }
         };
         bar.innerHTML = areas.map(a => `<button type="button" role="tab" data-t="${esc(a.dataset.title)}">${esc(a.dataset.title.replace(/^\d+\.\s*/, ''))}</button>`).join('');
