@@ -44,6 +44,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
      chance of a false pass). A position that looks strong only after the fact is a lead: re-test it on an untouched
      season before shipping. Other positions are still checked as guards (team volume is shared, so a change aimed
      at one position moves the others' projections).
+  7. MAE vs bias (2026-10-17; owner: "we're a prediction model priding ourselves on accuracy backed by data ... you
+     decide"): fantasy changes are decided on MAE, the start / sit decision gain is a guard (not significantly
+     worse), and bias is reported but not gated. Points are right-skewed, so the MAE-best forecast sits a little
+     below the mean; chasing zero bias trades away accuracy. Bias matters only where it flips decisions, which the
+     decision guard measures. Closes the redistribution "owner's call (pending)" (sec. 5, 2026-10-15).
 
 ## 2. Data quirks (nflverse / nflreadpy and others)
 - **Scrambles are `pass=1, rush=0`** in nflverse pbp. Any rushing filter must include `qb_scramble==1` or QB
@@ -606,8 +611,8 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 ## 9. Open threads / next steps (as of 2026-10-12)
 - **Hand-set values queue (2026-10-17): docs/handset_audit.md.** 22 model values without fitting or a numbered
   test (4 high impact: prior-season weight, TD blend k, Tuesday / week availability model settings, redistribution
-  minimum share). Each gets its own pre-registration here before it runs. Pending owner call: redistribution MAE vs
-  bias trade-off (sec. 5, 2026-10-15).
+  minimum share). Each gets its own pre-registration here before it runs, decided by sec. 1 rule 7 (MAE, start /
+  sit guard).
 - **PRE-REGISTERED 2026-10-15 (owner: "still annoyed McLaughlin is projected 2.6 even if Judkins sits"): newcomer
   discount.** Wk 6 CLE: Estime signed this week (off MIN's practice squad) and gets ~12 carries from his old role;
   McLaughlin (the incumbent) ~3. Descriptive (2021-25 backtest, RB/WR/TE mid-season movers, 126 players): first game
@@ -723,7 +728,8 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   [-0.006, +0.008] fails the 0.003 bound (2024 +0.012). REDISTRIBUTION: overall no difference (+0.000 [-0.001,
   +0.001]), but on the 5.7% of rows it changes (1,825) MAE is worse with it, +0.031 [+0.019, +0.042], while it
   removes the bias (teammates of a sitting player: -0.15 without, +0.01 with): the same mean-vs-MAE trade-off as the
-  rejected linear calibration. Owner's call (pending).
+  rejected linear calibration. Owner's call (2026-10-17): MAE decides, start / sit gain guards (sec. 1 rule 7); the
+  strength is being searched under that rule ((V), docs/handset_audit.md #4).
 - **Return games, fact check (owner 2026-10-15: "players returning from injury have huge fantasy games all the
   time").** Skill players averaging 8+ half-PPR before the absence, 2019-25 (n 473): pre-injury 12.5, return game
   10.8, next 3 games 11.0; booms (>= 1.5x his average) 14.2% of return games vs 18.5% of his other games, busts
