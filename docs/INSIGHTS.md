@@ -2256,3 +2256,16 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   effw_*), tools/grid_eval.py: CHOOSE the lowest fantasy MAE (relevant rows) on 2021-23; DECIDE on 2024-25: lower than
   today with a 95% season-week CI excluding 0 and lower in both seasons; guards: no position significantly worse,
   start / sit not significantly worse (sec. 1 rule 7); CONFIRM 2026 so far, same direction. Today's the choice -> keep.
+- **PRE-REGISTERED 2026-10-17 (owner, Jalen Hurts ruled out with a blood clot shows 99% for week 7; "at your
+  discretion"): (AH) the lookahead chain for newly injured players.** Today a player on this week's report who played
+  his team's last game (no return-model state yet) counts as fully available from next week on. (B) of 2026-10-15
+  passed its Brier gate (0.215 -> 0.150) but was held back for ranking fairness (healthy players also miss games and
+  are counted at 1.0). On review, the chain shipped for players already out (A) has the same footing: once back he
+  counts 1.0 (stay = 1.0), so B extends that treatment; it is tested on what the site ranks with. Variant: his next
+  game = this week's chance to play (as now); if he misses it, a return-model state (missed 1, active, his report
+  status and injury, the calendar) chains his later games, back = 1.0 thereafter. Everyone else unchanged.
+  tools/newinj_eval.py, walk-forward 2022-25 (return model fit on seasons before; backtest rows cache/experiments/
+  adopted_*, weeks 3-17, QB / RB / WR / TE projected >= 3 if active): predicted points over his team's next 6 games
+  (projection if active x chance to play each game) vs actual points. GATE: MAE lower with a 95% CI over season-weeks
+  excluding 0, lower in >= 3 of 4 seasons; guard: mean weekly rank correlation (Spearman) not lower (CI lower bound >
+  -0.002). Reported: newly injured rows alone.
