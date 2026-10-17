@@ -198,7 +198,7 @@
           value: r => r._proj,
           html: r => r._act != null
             ? (() => { const g = r._live ? null : gamePct(r.pos, r._actSite);
-              return `<span class="pv-stack"><b class="pv act-v${g == null ? '' : g >= 80 ? ' gr-hi' : g <= 30 ? ' gr-lo' : ' gr-mid'}" title="${r._live ? 'Live' : 'Final'}: ${f1(r._act)} pts · projected ${f1(r._likelyOut ? r._ifact : r._proj)}${g != null ? ` · game grade ${50 + Math.round(g * 49 / 99)}` : ''}"><span class="pv-tag">${r._live ? '<span class="live-dot"></span>live' : 'final'}</span>${f1(r._act)}</b><span class="pv-was">proj ${f1(r._likelyOut ? r._ifact : r._proj)}</span></span>`; })()
+              return `<span class="pv-stack"><b class="pv act-v${g == null ? '' : g >= 80 ? ' gr-hi' : g <= 30 ? ' gr-lo' : ' gr-mid'}" title="${r._live ? 'Live' : 'Final'}: ${f1(r._act)} pts · projected ${f1(r._likelyOut ? r._ifact : r._proj)}${g != null ? ` · game grade ${50 + Math.round(g * 49 / 99)}` : ''}"><span class="pv-tag">${r._live ? '<span class="live-dot"></span>live' : 'final'}</span>${f1(r._act)}</b><span class="pv-was">proj <b>${f1(r._likelyOut ? r._ifact : r._proj)}</b></span></span>`; })()
             : r._likelyOut
               ? `<b class="pv" title="Under 10% to play: projected 0">0.0</b><span class="ifact" title="${esc(range(r))}">if he plays ${f1(r._ifact)}</span>`
               : `<b class="pv" title="${esc(range(r))}">${f1(r._proj)}</b>${condLine(r)}` },

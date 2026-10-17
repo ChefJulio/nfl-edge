@@ -86,3 +86,4 @@ td.projc .pv-stack .pv-was { white-space: nowrap; }
 td.projc .pv .pv-tag { font-size: 10px; font-weight: 600; letter-spacing: .02em; margin-right: 4px; vertical-align: 2px;
   color: color-mix(in srgb, var(--tfg, #fff) 50%, transparent); }
 td.projc .pv .pv-tag .live-dot { width: 6px; height: 6px; margin-right: 3px; vertical-align: 1px; }
+td.projc .pv-was b { color: var(--tfg, #fff); font-weight: 600; }  /* the projected number white, "proj" dimmed */
