@@ -595,9 +595,10 @@
     const opp = g => `<td class="lg-opp tm-opp ${oppTone(g)}"${g.mc ? ` style="--mc:${esc(g.mc)}"` : ''}${oppTip(g) ? ` title="${oppTip(g)}"` : ''}><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>`;
     // Grd (owner 2026-10-17): the game's output graded against the whole season's qualified games at his position
     // (0-99; this season's unplayed weeks filled from last season's; tools/player_logs.py), where Rk is that week only
-    const grdCell = g => g.gr != null ? `<span class="lg-rk ${g.gr >= 80 ? 'rk-good' : g.gr <= 30 ? 'rk-bad' : 'rk-mid'}">${g.gr}</span>` : '–';  // the Rk chip's look
+    // one grade, two time scales (owner 2026-10-17): shown on the OVR's own 50-99 scale and colors
+    const grdCell = g => g.gr != null ? `<span class="lg-rk ${g.gr >= 80 ? 'rk-good' : g.gr <= 30 ? 'rk-bad' : 'rk-mid'}">${ovr(g.gr)}</span>` : '–';
     const head = `${grpHead(7)}
-      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num" title="Game grade: his fantasy output that game as a percentile (0-99) of every game by qualified players at his position that season (early in a season, last season's games fill the weeks not played yet)">Grd</th><th class="num">Snap</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
+      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num" title="Game grade, on the OVR's 50-99 scale: his fantasy output that game against every game by qualified players at his position that season (early in a season, last season's games fill the weeks not played yet)">Gm Grd</th><th class="num">Snap</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
     const blank = stat.map((c, i) => `<td class="num${gcl(i)}">–</td>`).join('');
     const body = seasons.map(S => {
       const isCur = S.s === L.cur, rows = S.g.map(g => ({ w: g.w, g }));
@@ -1053,10 +1054,10 @@
   };
   // Grade tile (owner 2026-10-16: OVR moved here from the header, then the Grade tab folded into its sheet): his OVR;
   // the sheet holds the whole grade (gradeTab) from his history shard (GRH, loaded with the page)
-  const gradeTile = pid => {
+  const gradeTile = (pid, L) => {
     const r = GR.cur && GR.cur.players[pid];
     if (GR.cur === undefined || GR.cur === null) return '';
-    const detail = GRH[pid] ? gradeTab(pid, GRH[pid]) : '<div class="pc-box"><p class="pc-sub">Loading grade&hellip;</p></div>';
+    const detail = GRH[pid] ? gradeTab(pid, GRH[pid], L) : '<div class="pc-box"><p class="pc-sub">Loading grade&hellip;</p></div>';
     return tapTile('Grade', r ? `<div class="pc-big ${r[9] ? '' : grTone(r[0])}">${ovr(r[0])}${uqMark(r)} <small>OVR</small></div><div class="pc-tapsub">${GR.cur.season} · ${esc(r[1])}</div>`
       : '<div class="pc-big">– <small>OVR</small></div><div class="pc-tapsub">Not graded</div>', 'NFL Edge grade', detail);
   };
@@ -1110,7 +1111,7 @@
             projDetail + muDetail.replace('<div class="pc-box">', '<div class="pc-box"><div class="pc-k">Matchup effect</div>'))}
         ${formTile(L, p.pos, fpg, e.games || p.sc.g, `${d.season} season before week ${d.week}`, `<div class="pc-box pc-season">${seasonHtml(p, d, L)}</div>`)}
         ${d === DATA ? healthTile(pid, p, L, p.espn) : ''}
-        ${GRADED[p.pos] ? gradeTile(pid) : ''}
+        ${GRADED[p.pos] ? gradeTile(pid, L) : ''}
       </div>
       ${g ? `<div class="pc-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>` : ''}`;
     return html;
@@ -1131,7 +1132,7 @@
       : `<div class="pc-big">–</div><div class="pc-tapsub">${h && h.inj ? 'out this week' : 'not projected this week'}</div>`;
     const projTile = goTile('Projection', projBody, 'log', 'g');
     const cur = S ? S.g : [], fpg = cur.length ? cur.reduce((t, x) => t + pts(x.c, weights(), pos), 0) / cur.length : null;
-    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '')}${h ? healthTile(L.pid, null, L, L.espn) : ''}${GRADED[pos] ? gradeTile(L.pid) : ''}</div>` : '';
+    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '')}${h ? healthTile(L.pid, null, L, L.espn) : ''}${GRADED[pos] ? gradeTile(L.pid, L) : ''}</div>` : '';
     return `${played}${tiles}${bye ? '' : `<div class="pc-box"><p class="pc-sub">Not on our ${esc(wkLabel(d).toLowerCase())} board: ruled out, not on a roster yet, or projected too low to list.</p></div>`}`;
   };
   // Header extras from the career log doc (tools/player_logs.py): photo, jersey number, bio, recent snap share and,
@@ -1402,7 +1403,16 @@
   const ovr = p => 50 + Math.round(p * 49 / 99);
   // [9] = 1: under the qualifying minimum but with a real role (2+ games at half the snaps), graded on those games
   const uqMark = r => r && r[9] ? '*' : '';
-  const gradeTab = (pid, docs) => {
+  // the same grade game by game (owner 2026-10-17: "i don't like the idea of 2 separately computed grades"): this
+  // season's games as chips on the OVR scale, newest last; the game log's Gm Grd column is the same number
+  const gameGrades = L => {
+    const S = L && (L.seasons || []).find(x => x.s === L.cur), gs = S ? S.g.filter(g => g.gr != null).sort((a, b) => a.w - b.w) : [];
+    if (!gs.length) return '';
+    return `<div class="pc-box"><div class="pc-k">Game grades · ${S.s}</div><div class="gg-strip">${gs.map(g =>
+      `<div class="gg" title="Week ${g.w} ${g.h === 0 ? '@' : 'vs'} ${esc(g.o)}"><small>Wk ${g.w}</small><span class="lg-rk ${g.gr >= 80 ? 'rk-good' : g.gr <= 30 ? 'rk-bad' : 'rk-mid'}">${ovr(g.gr)}</span><small class="muted">${g.h === 0 ? '@' : ''}${esc(g.o)}</small></div>`).join('')}</div>
+      <p class="pc-sub">Each game graded the same way as the overall: his fantasy output that game against every game by qualified ${esc(L.pos || '')}s this season, on the same 50-99 scale. The overall above smooths these over three seasons.</p></div>`;
+  };
+  const gradeTab = (pid, docs, L) => {
     const all = docs.filter(d => d && d.players[pid]).sort((a, b) => b.season - a.season);
     const rows = all.filter(d => d.players[pid][0] != null);  // graded seasons (the rest: played, not graded)
     if (!rows.length) return '<div class="pc-box"><p class="pc-sub">No grade: grades cover quarterbacks, running backs, receivers and tight ends since 1999 who met the NFL\'s qualifying minimum in a season (per team game: 14 pass attempts, 6.25 carries, or 1.875 catches).</p></div>';
@@ -1425,6 +1435,7 @@
     return `<div class="pc-box"><div class="pc-k">Current form</div>
         <div class="ij-dur"><div class="pc-big ${r[9] ? '' : grTone(r[0])}">${ovr(r[0])}${uqMark(r)} <small>OVR</small></div>
           <div class="pc-sub">Over his last three seasons weighted to ${D.season}, he produced <b>${f1(r[4])}</b> fantasy points per game, more than ${r[0]}% of the ${nq ? `${nq} ` : ''}qualified ${posName}${r[9] ? ` (*under the qualifying minimum: graded on his ${r[8]} games with half the snaps or more, not counted in the rankings)` : ''}${r[3] < 8 ? ' (a small sample so far, so it leans on the position average)' : ''}.</div></div></div>
+      ${gameGrades(L)}
       <div class="pc-box"><div class="pc-k">The stats behind it · percentile among ${posName}</div><p class="pc-sub">Higher and greener is better for every stat. For rates where less is better (drops, sacks, interceptions) the percentile is flipped: 99 = fewest.</p><div class="eg-bars">${bars}</div></div>
       <div class="pc-box pc-logbox"><div class="pc-k">By season · that season only</div><div class="lg-scroll"><table class="lg"><thead><tr class="lg-ch"><th>Season</th><th class="num">OVR</th><th class="num" title="Games played">G</th><th class="num" title="Fantasy points per game (site scoring)">Pts / g</th></tr></thead><tbody>${hist}</tbody></table></div>
         <p class="pc-sub">How it works: the overall measures output: fantasy points per game in this site's scoring (yards, touchdowns, catches, turnovers), pulled toward the position average by an amount measured from game-to-game swings, so a few big games can't make a 99. The rankings use players who met the NFL's qualifying minimum that season (per team game: 14 pass attempts, 6.25 carries, or 1.875 catches). A player under it who still played half the snaps or more in at least two games (a spot starter) gets an asterisked grade from those games, measured against the qualified players. Current form weights his last three seasons 1 / 0.6 / 0.3; each season in the table uses that season alone. OVR runs 50-99: his percentile among the qualified at his position, scaled so the lowest is a 50. The stats above show how he gets there (efficiency, role, and tracking measures as percentiles). Stats: nflverse play-by-play, Next Gen Stats, PFR advanced stats (2018 on). Seasons before 2018 (marked <i>box</i>) have the same OVR, but the stats behind it are box-score rates, and a spot starter's games are picked by workload instead of snaps. A dash means he played but too little to grade.</p></div>`;
