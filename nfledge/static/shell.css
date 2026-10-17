@@ -107,3 +107,12 @@ html.land-anim #tab-players .scroll tbody tr:nth-child(n+13) { animation-delay: 
   box-shadow: 0 8px 12px -10px rgba(0,0,0,.7); }
 /* desktop: tabs as wide as their labels, not five stretched segments */
 @media (min-width: 1100px) { #tab-page .pc-page .pc-tabs { display: inline-flex; } #tab-page .pc-page .pc-tabs button { flex: 0 0 auto; padding: 7px 18px; } }
+
+/* Player / team pages: one card level, not three (aesthetic pass 2026-10-16). Sections sit flat on the page card,
+   divided by a hairline; the small stat tiles inside keep their shape. Side-by-side boxes (the projection / expected
+   line pair) keep a subtle fill so the pair still reads as two. */
+#tab-page .pc-page .pc-box { background: transparent; border: 0; border-top: 1px solid var(--line); border-radius: 0;
+  padding: 14px 0 10px; box-shadow: none; }
+#tab-page .pc-page .pc-grid > .pc-box { background: color-mix(in srgb, var(--ink) 3%, transparent); border: 0; border-radius: var(--r-md);
+  padding: 10px 12px; }
+#tab-page .pc-page .pc-box.pc-profile { border-top: 0; padding-top: 4px; }

@@ -83,7 +83,7 @@ details.howto div { margin-top: 8px; color: var(--muted); font-size: var(--fs-sm
 .sbtn span { color: var(--muted); font-weight: 500; }
 .spanel[hidden] { display: none; }
 .spanel { padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--panel2); display: grid; gap: 12px; }
-.sp-h { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin-bottom: 6px; }
+.sp-h { font-size: var(--fs-sm); text-transform: none; letter-spacing: 0; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
 .sp-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; } .sp-row .sp-h { margin: 0; }
 .sp-presets { display: flex; gap: 6px; flex-wrap: wrap; }
 .sp-presets button { background: var(--panel); border: 1px solid var(--line); color: var(--ink); font: inherit; font-size: var(--fs-sm); font-weight: 600; padding: 5px 11px; border-radius: 999px; cursor: pointer; }
@@ -259,7 +259,7 @@ tr.main { cursor: pointer; }
 tr.detail td { background: var(--panel2); white-space: normal; border-radius: var(--r-sm); }
 .dgrid { display: grid; grid-template-columns: 1fr; gap: 14px; padding: 6px 4px; }
 @media (min-width: 900px) { .dgrid { grid-template-columns: 1.1fr 1.5fr auto; } }
-.dh { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+.dh { font-size: var(--fs-sm); text-transform: none; letter-spacing: 0; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
 .dgrid .line { display: flex; flex-wrap: wrap; gap: 4px 10px; }
 .small { font-size: var(--fs-sm); }
 .wbars .wb { fill: var(--accent); } .wbars .wb-miss { stroke: var(--faint); stroke-width: 1.5; }

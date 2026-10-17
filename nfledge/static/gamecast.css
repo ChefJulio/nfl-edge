@@ -124,16 +124,16 @@ html.pc-open { overflow: hidden; }
 .sg-r > * { padding: 7px 2px; min-width: 0; }
 .sg-r + .sg-r { border-top: 1px solid color-mix(in srgb, var(--line) 75%, transparent); }
 .sg-k { grid-column: 1; }
-.sg-k { display: flex; align-items: center; font-size: var(--fs-2xs); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.sg-k { display: flex; align-items: center; font-size: var(--fs-xs); font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--muted); }
 .sg-c { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; line-height: 1.15; }
 .sg-c b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-lg); font-weight: 700; letter-spacing: 0; }
 .sg-c b i { font-style: normal; font-size: var(--fs-xs); font-weight: 600; color: var(--muted); margin-left: 1px; }
 .sg-c small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px;
-  font-size: var(--fs-2xs); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  font-size: var(--fs-xs); font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--muted); }
 .sg-c[title] { cursor: help; }
 .sg-chart { grid-column: 2 / -1; padding: 6px 0 2px !important; }
 .sg-h { grid-column: 1 / -1; padding: 8px 0 0; border-top: 1px solid color-mix(in srgb, var(--line) 75%, transparent); margin-top: 2px;
-  font-size: var(--fs-2xs); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  font-size: var(--fs-xs); font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--muted); }
 .sg-tight .sg-c b { font-size: var(--fs-base); } .sg-tight .sg-r > * { padding: 5px 1px; }
 .pc-profile { margin: -2px 0 12px; padding-top: 4px; padding-bottom: 4px; }
 @media (max-width: 560px) {
@@ -176,14 +176,14 @@ html.pc-open { overflow: hidden; }
 .pc-more { display: block; width: 100%; margin-top: 8px; padding: 8px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--panel);
   color: var(--accent); font: inherit; font-size: var(--fs-md); font-weight: 700; cursor: pointer; }
 .pc-more:hover { border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); }
-.pc-k2 { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin-right: 4px; }
+.pc-k2 { font-size: var(--fs-sm); text-transform: none; letter-spacing: 0; color: var(--muted); font-weight: 600; margin-right: 4px; }
 .pc-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: var(--fs-md); margin-top: 3px; }
 .pc-flags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; }
 .pc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
 @media (max-width: 560px) { .pc-grid { grid-template-columns: 1fr; } .pc { padding: 14px 14px 12px; } .pc-ov { padding: 10px 8px; } }
 .pc-box { background: var(--panel2); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 10px 12px; min-width: 0; }
 .pc-box .line { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 2px; }
-.pc-k { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; }
+.pc-k { font-size: var(--fs-sm); text-transform: none; letter-spacing: 0; color: var(--muted); font-weight: 600; }
 .pc-big { font-size: 26px; font-weight: 700; letter-spacing: 0; line-height: 1.15; } .pc-big.sm { font-size: var(--fs-xl); }
 .pc-big small { font-size: var(--fs-md); font-weight: 600; color: var(--muted); }
 .pc-sub { font-size: var(--fs-sm); color: var(--muted); margin-top: 4px; }
@@ -392,7 +392,7 @@ article.game.flash { box-shadow: 0 0 0 3px var(--accent), var(--shadow); transit
 @media (max-width: 560px) { .pl { grid-template-columns: 52px minmax(0, 1fr); } .pl-side { grid-column: 2; align-items: flex-start; flex-direction: row; gap: 10px; } }
 /* box score */
 .bx-team { margin-bottom: 14px; } .bx-th { display: flex; align-items: center; gap: 8px; font-size: var(--fs-lg); padding-bottom: 6px; border-bottom: 3px solid var(--tc); margin-bottom: 6px; }
-.bx-t { margin: 8px 0 4px; overflow-x: auto; } .bx-h { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
+.bx-t { margin: 8px 0 4px; overflow-x: auto; } .bx-h { font-size: var(--fs-sm); text-transform: none; letter-spacing: 0; color: var(--muted); font-weight: 600; margin-bottom: 2px; }
 .bx-h small { text-transform: none; letter-spacing: 0; font-weight: 600; }
 table.bx { width: 100%; border-collapse: collapse; font-size: var(--fs-md); }
 table.bx th { font-size: var(--fs-xs); color: var(--muted); font-weight: 700; text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
@@ -421,7 +421,7 @@ button.bx-n:hover { color: var(--accent); text-decoration: underline; } .bx-n.pl
 .wp-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .wp-call { font-size: var(--fs-xl); font-weight: 700; letter-spacing: 0; line-height: 1.15; white-space: nowrap; }
 .wp-why { font-size: var(--fs-md); font-weight: 600; color: var(--muted); }
-.wp-src { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin-bottom: 4px; }
+.wp-src { font-size: var(--fs-sm); text-transform: none; letter-spacing: 0; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
 .wp.toss .wp-call { color: var(--muted); }
 .wp-bar { position: relative; display: flex; height: 10px; margin-top: 9px; border-radius: var(--r-sm); overflow: hidden; }
 .wp-bar .wp-a { background: var(--ac); } .wp-bar .wp-h { flex: 1; background: var(--hc); }
@@ -494,7 +494,7 @@ table.lg tr > :nth-child(1), table.lg tr.lg-season .lg-pin { box-shadow: -12px 0
 /* gamecast Pregame: depth charts */
 .pd-team { margin: 0 0 14px; } .pd-team .bx-th { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 .pd-src { font-size: var(--fs-xs); font-weight: 500; margin-left: auto; }
-.pd-k { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin: 8px 0 2px; }
+.pd-k { font-size: var(--fs-sm); font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--muted); margin: 8px 0 2px; }
 .pd-k + .dc-row { border-top: 0; }
 .pd-more { display: inline-block; margin-top: 6px; font-size: var(--fs-sm); }
 /* player page: Injuries tab */
@@ -659,7 +659,7 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .rt-own .pc-k { grid-column: 1 / -1; margin: 0; }
 .rt-wl { display: flex; gap: 14px; justify-content: flex-end; font-size: var(--fs-md); color: var(--muted); }
 .rt-wl b { color: var(--ink); }
-.rt-hd { display: flex; justify-content: space-between; font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .05em; color: var(--faint); padding: 2px 0 4px; }
+.rt-hd { display: flex; justify-content: space-between; font-size: var(--fs-sm); text-transform: none; letter-spacing: 0; color: var(--faint); padding: 2px 0 4px; }
 .rt-g { border-top: 1px solid var(--line); }
 .rt-g summary { display: flex; align-items: center; gap: 8px; padding: 7px 0; cursor: pointer; list-style: none; }
 .rt-g summary::-webkit-details-marker { display: none; }

@@ -27,7 +27,7 @@ table.lg-rank td.good { color: #6fdc8c; } table.lg-rank td.bad { color: #ff8f84;
 .lg-mv-tag { margin-left: 6px; font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill); background: rgba(240,192,90,.16); color: #f0c05a; vertical-align: 1px; line-height: var(--tag-h); }
 .lg-mv-s { font-size: var(--fs-sm); margin-top: -2px; }
 .lg-mv-row { display: grid; grid-template-columns: 52px 1fr; gap: 8px; align-items: baseline; line-height: 1.45; }
-.lg-mv-k { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.lg-mv-k { font-size: var(--fs-sm); font-weight: 600; letter-spacing: 0; text-transform: none; }
 .lg-mv-k.good { color: #6fdc8c; } .lg-mv-k.bad { color: #ff8a80; }
 .lg-mv-f { font-size: var(--fs-sm); padding: 0 2px; }
 .lg-tbl .lg-cond + .lg-cond { margin-left: 4px; }

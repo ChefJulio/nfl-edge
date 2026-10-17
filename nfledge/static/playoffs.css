@@ -2,12 +2,12 @@
 .po-body { padding: 12px 14px 16px; overflow-x: auto; }
 .po-bracket { display: flex; gap: 14px; align-items: stretch; min-width: min-content; margin-bottom: 18px; }
 .po-side { display: flex; flex-direction: column; gap: 8px; }
-.po-st { font-size: var(--fs-sm); font-weight: 700; letter-spacing: .05em; color: var(--muted); text-transform: uppercase; }
+.po-st { font-size: var(--fs-sm); font-weight: 600; letter-spacing: 0; color: var(--muted); text-transform: none; }
 .po-side.mirror .po-st { text-align: right; }
 .po-note { text-transform: none; letter-spacing: 0; font-weight: 600; color: #e0b04a; }
 .po-rounds { display: flex; gap: 12px; flex: 1; }
 .po-round { display: flex; flex-direction: column; width: 172px; flex: none; }
-.po-rl { font-size: var(--fs-xs); font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; white-space: nowrap; }
+.po-rl { font-size: var(--fs-sm); font-weight: 600; color: var(--muted); text-transform: none; letter-spacing: 0; margin-bottom: 6px; white-space: nowrap; }
 .po-games { display: flex; flex-direction: column; justify-content: space-around; gap: 10px; flex: 1; }
 .po-final { align-self: center; }
 .po-final .po-game { border-color: color-mix(in srgb, #e0b04a 60%, var(--line)); box-shadow: 0 0 0 1px color-mix(in srgb, #e0b04a 30%, transparent); }
