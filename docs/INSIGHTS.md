@@ -2239,3 +2239,8 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   coverage gap from 80% 0.022 both ways (QB flex 73.6 -> 73.8%). The widening factor is 1 (config [uncertainty] all
   off), so the variant used the offsets as they are. Ranges are calibrated within noise already: the in-sample source
   doesn't show up as too-narrow ranges. Range calibration closed.
+- **PRE-REGISTERED 2026-10-17 (before running): (AF) within-season recency in team ratings** (docs/handset_audit.md #5).
+  team_model.half_life_weeks = 3 ("6 no help" on games, no numbers). Grid {2, 3 (today), 4, 6, 8}. tools/game_eval.py
+  --only=fitted, model-only, paired by game. CHOOSE the lowest margin MAE on 2021-23; DECIDE on 2024-25: lower than 3
+  with a 95% CI over season-weeks excluding 0 and lower in both seasons; CONFIRM 2026 so far, same direction; then
+  fantasy MAE not worse (tools/experiments.py, CI upper < +0.003). Today's the choice -> keep (now tested).
