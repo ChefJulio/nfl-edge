@@ -1877,13 +1877,15 @@
     if (ST.s[season] === undefined) { ST.s[season] = null; NFLE.load(`data/standings/${season}.json`).then(x => { ST.s[season] = x || false; rerenderCard(); }).catch(() => { ST.s[season] = false; }); }
     const x = ST.s[season]; return x && (x.teams || []).find(r => r.team === abbr);
   };
-  // rest-of-season points (ros.json, under this page's scoring) and rank at the position, every player
+  // rest-of-season points PER GAME HE PLAYS (ros.json, this page's scoring) and rank at the position, every player:
+  // how good, not how available (owner 2026-10-17: "lamar jackson should definitely be on that short list ... recent
+  // injury doesn't make him less of a star"); hurt = under 50% to play his next game
   const rosRanks = () => {
     if (!RJ.d) { loadRos(); return null; }
     if (RJ.rk && RJ.rkW === weights()) return RJ.rk;
     const w = weights(), tot = {};
     Object.entries(RJ.d.players).forEach(([pid, x]) => { tot[pid] = { pos: x.pos, team: x.team, name: x.name, photo: x.photo, espn: x.espn,
-      v: x.w.reduce((t, z) => t + z[1] * pts(z[5], w, x.pos), 0) }; });
+      v: x.w.length ? x.w.reduce((t, z) => t + pts(z[5], w, x.pos), 0) / x.w.length : 0, hurt: !!(x.w[0] && x.w[0][1] < 0.5) }; });
     const byPos = {};
     Object.entries(tot).forEach(([pid, r]) => (byPos[r.pos] = byPos[r.pos] || []).push([pid, r]));
     Object.values(byPos).forEach(a => a.sort((x, y) => y[1].v - x[1].v).forEach(([, r], i) => { r.rk = i + 1; }));
@@ -1906,7 +1908,7 @@
     // Players: top three by rest-of-season rank at their position
     const rk = rosRanks(), top = rk ? Object.entries(rk).filter(([, r]) => r.team === abbr).sort((a, b) => a[1].rk - b[1].rk || b[1].v - a[1].v).slice(0, 3) : [];
     const face = ([pid, r]) => { const ph = r.photo || NFLE.ui.headshot(r.espn);
-      return `<div class="tm-tp"><span class="tm-tpi">${ph ? `<img src="${esc(ph)}" alt="" width="30" height="30" loading="lazy">` : ''}</span><span class="tm-tpn">${esc(NFLE.fmt.short(r.name))}</span><b class="tm-tpr">${esc(r.pos)}${r.rk}</b></div>`; };
+      return `<div class="tm-tp"><span class="tm-tpi">${ph ? `<img src="${esc(ph)}" alt="" width="30" height="30" loading="lazy">` : ''}</span><span class="tm-tpn">${esc(NFLE.fmt.short(r.name))}</span>${r.hurt ? '<span class="tm-tph" title="Under 50% to play his next game">inj</span>' : ''}<b class="tm-tpr">${esc(r.pos)}${r.rk}</b></div>`; };
     const wkRows = teamPlayerRows(abbr, d);
     tiles.push(tapTile('Players', top.length ? `<div class="tm-tps">${top.map(face).join('')}</div>` : '<div class="pc-tapsub">Loading&hellip;</div>', 'Players',
       `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>

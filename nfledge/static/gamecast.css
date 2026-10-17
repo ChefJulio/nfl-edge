@@ -1031,3 +1031,4 @@ html.pc-open { overflow: hidden; }
 /* a sheet's tables: column heads stick under the sheet's own title row (--sheeth, set when it opens), below it */
 .sheet thead th { top: var(--sheeth, 0px); z-index: 2; }
 .sheet .sheet-h { z-index: 4; }
+.tm-tph { flex: none; font-size: var(--fs-2xs); font-weight: 700; color: #ff8f84; text-transform: uppercase; letter-spacing: .03em; }
