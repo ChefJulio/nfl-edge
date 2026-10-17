@@ -108,6 +108,45 @@ def main():
     tot[f"{k}_wr"] = tg[k].rank(ascending=k in FEWER_BETTER, method="min")
   season_rank = {(int(r.season), r.player_id): {"trk": int(r.prk), "tr": [int(getattr(r, f"{k}_wr")) for k in RANKED]}
                  for r in tot.itertuples()}
+  # Game grade, GRD (owner 2026-10-17: "pure output ... normalize it over an entire season, not just that week"): a
+  # game's fantasy points as a percentile (0-99) among every regular-season game that season by QUALIFIED players at
+  # his position (the season grade's pool: the NFL's per-team-game minimums, tools/grade_build.py QUALIFY), ties half.
+  # Unlike Rk (that week's finish), a 22-point game grades the same in a quiet week as in a shootout week.
+  from grade_build import QUALIFY  # noqa: E402 (tools/ is on the path as the script's folder)
+  QCOL = {"att": "attempts", "ru_n": "carries", "rec": "reception"}
+  tgm = st.groupby(["season", "team"]).week.nunique()
+  last_tm = st.sort_values("week").groupby(["season", "player_id"]).team.last()
+  grade_pool, qual_of = {}, {}
+  need = [c for c in ("attempts", "carries", "reception") if c not in tot]  # the totals may already hold some
+  qtot = tot.merge(st.groupby(["season", "player_id"])[need].sum().reset_index(), on=["season", "player_id"]) if need else tot
+  for (season, pos), x in qtot.groupby(["season", "position"]):
+    if pos not in QUALIFY:
+      continue
+    n_tg = np.array([tgm.get((season, last_tm.get((season, pid))), np.nan) for pid in x.player_id], float)
+    ok = np.zeros(len(x), bool)
+    for col, rate in QUALIFY[pos]:
+      ok |= (x[QCOL[col]].to_numpy(float) >= rate * n_tg)
+    q = set(x.player_id[ok])
+    qual_of[(int(season), pos)] = q
+    grade_pool[(int(season), pos)] = np.sort(st[(st.season == season) & (st.position == pos) & st.player_id.isin(q)].fp.to_numpy(float))
+  # This season isn't over (owner 2026-10-17): its pool is this season's games so far plus LAST season's qualified
+  # games from the weeks not played yet, so it has a full season's shape from week 1 and becomes all this season by
+  # the end (five weeks alone made early percentiles jumpy).
+  cur_s = int(st.season.max())
+  done = int(st[st.season == cur_s].week.max())
+  for pos in POS:
+    prev = qual_of.get((cur_s - 1, pos))
+    if prev is None or (cur_s, pos) not in grade_pool:
+      continue
+    fill = st[(st.season == cur_s - 1) & (st.position == pos) & (st.week > done) & st.player_id.isin(prev)].fp.to_numpy(float)
+    grade_pool[(cur_s, pos)] = np.sort(np.concatenate([grade_pool[(cur_s, pos)], fill]))
+
+  def game_grade(season, pos, fp):
+    v = grade_pool.get((int(season), pos))
+    if v is None or len(v) < 20:
+      return None
+    below, upto = np.searchsorted(v, fp, "left"), np.searchsorted(v, fp, "right")
+    return int(min(99, np.floor(100 * (below + 0.5 * (upto - below)) / len(v))))
   # Playoff games (owner, 2026-10-14: taken seriously, kept apart from the regular season): every season's POST rows
   post = [cache.get("stats", s, lambda: nfl.load_player_stats([s]).select(D.STAT_COLS), stale=False)
           for s in range(FIRST_SEASON, data.current_season + 1)]
@@ -212,6 +251,9 @@ def main():
                 "c": [round(float(getattr(r, k)), 1) for k in SCORE_KEYS],
                 "x": [int(r.completions), int(r.attempts), int(r.carries), int(r.targets)], "rk": int(r.prk),
                 "r": [int(getattr(r, f"{k}_wr")) for k in RANKED]}
+        gr = game_grade(r.season, r.position, r.fp)
+        if gr is not None:
+          game["gr"] = gr
         if sp is not None and not pd.isna(sp):
           game["sn"] = int(round(100 * float(sp)))
         if o.get("mu") is not None:
@@ -236,6 +278,9 @@ def main():
                 "c": [round(float(getattr(r, k)), 1) for k in SCORE_KEYS],
                 "x": [int(r.completions), int(r.attempts), int(r.carries), int(r.targets)], "rk": int(r.prk),
                 "r": [int(getattr(r, f"{k}_wr")) for k in RANKED]}
+        gr = game_grade(r.season, r.position, r.fp)  # against that season's regular-season pool
+        if gr is not None:
+          game["gr"] = gr
         sp = snap_post.get((int(r.season), int(r.week), pid))
         if sp is not None and not pd.isna(sp):
           game["sn"] = int(round(100 * float(sp)))

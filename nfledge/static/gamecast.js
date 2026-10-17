@@ -593,8 +593,11 @@
     const oppTip = g => g.mu != null ? `Our pregame matchup: ${muSigned(g.mu)} pts vs an average opponent`
       : g.mr ? `Our pregame matchup rank: ${ord(g.mr)} of 32 vs ${esc(pos)}s (1st = toughest)` : '';
     const opp = g => `<td class="lg-opp tm-opp ${oppTone(g)}"${g.mc ? ` style="--mc:${esc(g.mc)}"` : ''}${oppTip(g) ? ` title="${oppTip(g)}"` : ''}><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>`;
-    const head = `${grpHead(6)}
-      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num">Snap</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
+    // Grd (owner 2026-10-17): the game's output graded against the whole season's qualified games at his position
+    // (0-99; this season's unplayed weeks filled from last season's; tools/player_logs.py), where Rk is that week only
+    const grdCell = g => g.gr != null ? `<span class="lg-rk ${g.gr >= 80 ? 'rk-good' : g.gr <= 30 ? 'rk-bad' : 'rk-mid'}">${g.gr}</span>` : '–';  // the Rk chip's look
+    const head = `${grpHead(7)}
+      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num" title="Game grade: his fantasy output that game as a percentile (0-99) of every game by qualified players at his position that season (early in a season, last season's games fill the weeks not played yet)">Grd</th><th class="num">Snap</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
     const blank = stat.map((c, i) => `<td class="num${gcl(i)}">–</td>`).join('');
     const body = seasons.map(S => {
       const isCur = S.s === L.cur, rows = S.g.map(g => ({ w: g.w, g }));
@@ -607,7 +610,7 @@
       const played = (g, label) => { const v = pts(g.c, w, pos), pj = projOf(g);
         return `<tr${tileAttrs(g)}><td>${esc(label)}</td>${opp(g)}<td class="num lg-fp">${g.r ? chip(f1(v), g.rk) : f1(v)}</td>
           <td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td>
-          <td class="num"><span class="lg-rk ${rkClass(g.rk)}">${g.rk}</span></td><td class="num">${g.sn != null ? (g.r ? `<span class="sc ${snapTone(g.sn)}">${g.sn}</span>` : g.sn) : '–'}</td>
+          <td class="num"><span class="lg-rk ${rkClass(g.rk)}">${g.rk}</span></td><td class="num">${grdCell(g)}</td><td class="num">${g.sn != null ? (g.r ? `<span class="sc ${snapTone(g.sn)}">${g.sn}</span>` : g.sn) : '–'}</td>
           ${stat.map(([, fn, ri, ex], i) => { const v = fn(g);
             // a zero ties most of the position (0 rush TD can "rank" top 10): red (owner 2026-10-16), except Int / fumbles
             // (fewer is better)
@@ -623,25 +626,25 @@
         const tc = (v, r) => rk && r != null ? chip(v, r) : v, avgSn = sn.length ? Math.round(sn.reduce((t, g) => t + g.sn, 0) / sn.length) : null;
         return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num lg-fp">${tc(f1(pts(T.c, w, pos)), rk && rk.trk)}</td>
           <td class="num muted">${pjs.every(v => v != null) ? f1(pjs.reduce((a, b) => a + b, 0)) : '–'}</td>
-          <td class="num">${rk && rk.trk ? `<span class="lg-rk ${rkClass(rk.trk)}" title="His ${esc(pos)} finish that season (fantasy points, site scoring)">${rk.trk}</span>` : ''}</td>
+          <td class="num">${rk && rk.trk ? `<span class="lg-rk ${rkClass(rk.trk)}" title="His ${esc(pos)} finish that season (fantasy points, site scoring)">${rk.trk}</span>` : ''}</td><td></td>
           <td class="num">${avgSn == null ? '–' : rk ? `<span class="sc ${snapTone(avgSn)}">${avgSn}</span>` : avgSn}</td>${stat.map(([, fn, ri, ex], i) => { const v = fn(T); return `<td class="num${gcl(i)}">${offRole(v, ex) ?? tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null)}</td>`; }).join('')}</tr>
-          <tr class="lg-gap"><td colspan="${6 + stat.length}"></td></tr>`;
+          <tr class="lg-gap"><td colspan="${7 + stat.length}"></td></tr>`;
       };
       const trs = totRow(S.g, S.tr ? S : null) + rows.map(r => {
-        if (r.u && r.u.bye) return byeRow(r.w, 4 + stat.length);
-        if (r.u && r.u.miss != null) return `<tr class="lg-miss"${tileAttrs(r.u)}><td>${r.w}</td>${r.u.o ? opp(r.u) : '<td class="lg-opp">&ndash;</td>'}<td class="num">${missTag(r.u)}</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">${r.u.sn != null ? r.u.sn : '&ndash;'}</td>${blank}</tr>`;
+        if (r.u && r.u.bye) return byeRow(r.w, 5 + stat.length);
+        if (r.u && r.u.miss != null) return `<tr class="lg-miss"${tileAttrs(r.u)}><td>${r.w}</td>${r.u.o ? opp(r.u) : '<td class="lg-opp">&ndash;</td>'}<td class="num">${missTag(r.u)}</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">${r.u.sn != null ? r.u.sn : '&ndash;'}</td>${blank}</tr>`;
         if (r.u) {
           const pj = projOf(r.u);
-          return `<tr class="lg-up"${tileAttrs(r.u)}><td>${r.w}</td>${opp(r.u)}<td class="num">–</td><td class="num">${pj != null ? f1(pj) : '–'}</td><td class="num">–</td><td class="num">–</td>${blank}</tr>`;
+          return `<tr class="lg-up"${tileAttrs(r.u)}><td>${r.w}</td>${opp(r.u)}<td class="num">–</td><td class="num">${pj != null ? f1(pj) : '–'}</td><td class="num">–</td><td class="num">–</td><td class="num">–</td>${blank}</tr>`;
         }
         return played(r.g, r.g.w);
       }).join('');
       const sum = opts.last ? '' : ` · ${S.g.length} game${S.g.length === 1 ? '' : 's'}${S.g.length ? ` · ${f1(fpg)} FP/G` : ''}`;
       // playoffs first (as Sleeper does), their own block: not in the regular-season totals, finishes or FP/G
       const pg = opts.last || opts.season ? [] : (S.pg || []);
-      const sub = (label, gs) => `<tr class="lg-sub"><td colspan="${6 + stat.length}"><span class="lg-pin">${label}${gs ? ` · ${gs.length} game${gs.length === 1 ? '' : 's'} · ${f1(gs.reduce((t, g) => t + pts(g.c, w, pos), 0) / gs.length)} FP/G` : ''}</span></td></tr>`;
+      const sub = (label, gs) => `<tr class="lg-sub"><td colspan="${7 + stat.length}"><span class="lg-pin">${label}${gs ? ` · ${gs.length} game${gs.length === 1 ? '' : 's'} · ${f1(gs.reduce((t, g) => t + pts(g.c, w, pos), 0) / gs.length)} FP/G` : ''}</span></td></tr>`;
       const po = pg.length ? `${sub('Playoffs', pg)}${head}${totRow(pg)}${[...pg].reverse().map(g => played(g, g.po)).join('')}${S.g.length || rows.length ? sub('Regular season') : ''}` : '';
-      return `<tbody data-season="${S.s}"><tr class="lg-season"><td colspan="${6 + stat.length}"><span class="lg-pin"><b>${S.s}</b> ${tmL(team)}${sum}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
+      return `<tbody data-season="${S.s}"><tr class="lg-season"><td colspan="${7 + stat.length}"><span class="lg-pin"><b>${S.s}</b> ${tmL(team)}${sum}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
     }).join('');
     if (opts.last || opts.season) return `<div class="lg-scroll"><table class="lg">${body}</table></div>`;
     // Career view (owner 2026-10-16, after Sleeper's career table): one row per regular season, its totals on the
