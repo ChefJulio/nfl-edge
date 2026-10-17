@@ -26,8 +26,9 @@ def asset_version() -> str:
   """Short content hash of the shared assets, added to their links (?v=) so a deploy reaches phones at once
   instead of after the browser's cache lifetime (GitHub Pages: 10 minutes)."""
   h = hashlib.sha1()
-  for f in sorted(STATIC_DIR.iterdir()):
+  for f in sorted(STATIC_DIR.rglob("*")):  # subfolders too (wordmarks/)
     if f.is_file():
+      h.update(f.relative_to(STATIC_DIR).as_posix().encode())
       h.update(f.read_bytes())
   return h.hexdigest()[:10]
 
@@ -37,9 +38,11 @@ def write_site_assets(root_dir: Path) -> None:
   week page (current, lookahead and archived) links to these, so improvements reach old pages without rebuilding
   them."""
   (root_dir / "assets").mkdir(parents=True, exist_ok=True)
-  for f in STATIC_DIR.iterdir():
+  for f in STATIC_DIR.rglob("*"):  # subfolders too (wordmarks/<TEAM>.png, tools/wordmarks_build.py)
     if f.is_file():
-      (root_dir / "assets" / f.name).write_bytes(f.read_bytes())
+      dst = root_dir / "assets" / f.relative_to(STATIC_DIR)
+      dst.parent.mkdir(parents=True, exist_ok=True)
+      dst.write_bytes(f.read_bytes())
   (root_dir / "game.html").write_text(page_html("game.html", V=asset_version()), encoding="utf-8")
 
 

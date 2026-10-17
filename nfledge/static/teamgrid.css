@@ -28,3 +28,8 @@
   .tg-nm { font-size: var(--fs-lg); }
   .tg-meta b { font-size: var(--fs-md); }
 }
+/* the team's wordmark in place of the typed name (owner 2026-10-17): same height for every team, wide ones shrink to fit */
+.tg-nm { display: block; }
+.tg-wm { display: block; height: 26px; width: auto; max-width: 100%; object-fit: contain; object-position: left center;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.55)); }
+@media (max-width: 420px) { .tg-wm { height: 20px; } }

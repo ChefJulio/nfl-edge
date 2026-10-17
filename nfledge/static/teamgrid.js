@@ -1,6 +1,7 @@
 // Teams > All teams (owner 2026-10-17): every team as a tile, grouped by conference and division (East, North, South,
 // West), each division ordered by record then our Power rank. Tap a tile for the team card. Uses the week data only
-// (D.teams: name, logo, colors, division; D.power: record, rank).
+// (D.teams: name, logo, colors, division; D.power: record, rank). The name is the team's wordmark (white, location line
+// trimmed; tools/wordmarks_build.py), the typed nickname if it doesn't load.
 (() => {
   const NFLE = window.NFLE, esc = NFLE.esc;
   const DIVS = ['East', 'North', 'South', 'West'];
@@ -9,7 +10,8 @@
   // off the right edge and fading toward the text; team-color gradient, darker under the text
   const tile = (t, i, p) => `<button type="button" class="tg-tile tm-open" data-tm="${esc(t)}" style="--tc:${esc(i.color || '#555')};--tc2:${esc(i.color2 || i.color || '#555')}">
       <img class="tg-lg" src="${esc(NFLE.fmt.logoSrc(i.logo, 224))}" alt="" loading="lazy">
-      <span class="tg-txt"><span class="tg-nm">${esc(i.nick || t)}</span>
+      <span class="tg-txt"><span class="tg-nm"><img class="tg-wm" src="${esc(NFLE.root || '')}assets/wordmarks/${esc(t)}.png" alt="${esc(i.nick || t)}"
+        onerror="this.parentNode.textContent = this.alt"></span>
         <span class="tg-meta"><b>${esc(p.record || '0-0')}</b>${p.rank ? `<span class="tg-rk" title="Our Power rank">Power #${p.rank}</span>` : ''}</span></span></button>`;
   NFLE.areas.teamgrid = {
     mount(sec) {
