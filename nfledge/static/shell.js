@@ -44,6 +44,8 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     // team logo on its picked background, and a row's team trim (--tc / --tc2), from the week data's teams map
     logo: (teams, t, size = 18) => { const i = (teams || {})[t] || {}; return i.logo ? `<span class="logo" style="background:${esc(i.logo_bg || '#333')}"><img src="${esc(logoSrc(i.logo, size))}" alt="${esc(t)}" width="${size}" height="${size}" loading="lazy"></span>` : ''; },
     rowStyle: (teams, t) => { const i = (teams || {})[t] || {}; return `--tc:${i.color || '#666'};--tc2:${i.color2 || '#999'};--tfg:#ffffff`; },
+    // a player photo circle in his team's colors: primary fill, secondary ring (owner 2026-10-16)
+    picStyle: (teams, t) => { const i = (teams || {})[t] || {}; return i.color ? ` style="--pc1:${i.color};--pc2:${i.color2 || i.color}"` : ''; },
   };
   // One look everywhere (owner 2026-10-14): every list of players or teams is a row of team-colored tiles (table cls
   // 'tiles', row class 'teamrow', row style from tileStyle) with the same name cell, and every matchup is the Games
@@ -60,7 +62,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     player: (p, teams) => {
       const photo = p.photo || NFLE.ui.headshot(p.espn || (p.pid && NFLE.ui.ids[p.pid]));
       const pic = photo
-        ? `<span class="pic"><span class="pic-img"><img src="${esc(photo)}" alt="" width="34" height="34" loading="lazy" onerror="this.closest('.pic').classList.add('nopic')"></span><span class="pic-tm">${F.logo(teams, p.team, 11)}</span></span>`
+        ? `<span class="pic"${F.picStyle(teams, p.team)}><span class="pic-img"><img src="${esc(photo)}" alt="" width="34" height="34" loading="lazy" onerror="this.closest('.pic').classList.add('nopic')"></span><span class="pic-tm">${F.logo(teams, p.team, 11)}</span></span>`
         : NFLE.ui.tm(p.team, F.logo(teams, p.team, 26));
       const pos = p.pos ? `<span class="posb posb-${esc(p.grp || p.pos)}">${esc(p.pos)}</span> ` : '';
       const sub = p.subHtml != null ? p.subHtml : p.sub != null ? esc(p.sub) : NFLE.ui.tm(p.team);
