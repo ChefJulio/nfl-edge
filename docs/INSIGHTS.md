@@ -2283,6 +2283,22 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   CHOOSE the lowest fantasy MAE (relevant rows) on 2021-23; DECIDE on 2024-25 (CI excluding 0 below, better in both,
   no position significantly worse, start / sit not significantly worse); CONFIRM 2026 so far, same direction. Today's
   the choice -> keep. The lower bound (never binds) and the 100 fallback are left as they are.
+- **DESCRIPTIVE 2026-10-17 (owner: "do players that score more touchdowns from further out have more value than those
+  that typically only score touchdowns from goal line plays?"):** scratch/td_dist.py, play-by-play 2012-25, 1,028
+  player-season pairs (80+ touches / targets both years). Year to year (Spearman): long TDs (from 20+ out) per chance
+  .38; goal-line conversion (scoring when inside the 5) .03 (noise: not a skill); share of chances inside the 5
+  (role) .25; yards per chance .82. Next season's TDs per chance: yards per chance .47, long-TD rate .33 (but only .04
+  beyond yards per chance in a rank regression), goal-line conversion .07. So distance scorers are worth more because
+  they are explosive, which yards per chance carries. Our TD projections (walk-forward 2021-25, 541 RB / WR / TE
+  seasons): misses vs last season's yards per chance, Spearman .05 overall (RB .03, TE -.07) but WR +.15 (n 230):
+  explosive receivers beat their projected TDs. Found by slicing after looking: a lead, not evidence.
+- **QUEUED, PRE-REGISTERED 2026-10-17 (before building; runs after (AJ)): (AK) explosiveness in WR receiving TDs.**
+  Variant: the WR receiving-TD expectation per target gains a term in his prior yards per target (shrunk toward the
+  position x draft-tier mean like his other rates, same season weights), its weight fitted with the rest of the TD
+  model on the training seasons. WR only (the lead is WR; RB / TE unchanged). tools/experiments.py 2021-2026, variant
+  wr_td_explosive vs baseline: GATE fantasy MAE on WR relevant rows lower with a 95% season-week CI excluding 0 and
+  lower in >= 4 of 6 seasons; guards: overall MAE not worse (CI upper < +0.002), WR P(1+ rec TD) Brier not worse,
+  start / sit not significantly worse.
 - **PRE-REGISTERED 2026-10-17 (owner, Jalen Hurts ruled out with a blood clot shows 99% for week 7; "at your
   discretion"): (AH) the lookahead chain for newly injured players.** Today a player on this week's report who played
   his team's last game (no return-model state yet) counts as fully available from next week on. (B) of 2026-10-15

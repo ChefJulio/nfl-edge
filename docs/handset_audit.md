@@ -53,6 +53,9 @@ from desc ("for N yards", "sacked ... for -N"), as unit-strength evidence (a pla
 shows the unit's skill; one caused by the foul, like an offsides sack, is noise). Both variants gated the same way,
 so the test shows which signal matters, if either.
 
+Also queued (2026-10-17, owner's question on distance vs goal-line TDs): **(AK) explosiveness in WR receiving TDs**,
+pre-registered in INSIGHTS; runs after (AJ).
+
 Also queued (2026-10-17, found on Hockenson): **injured right before a bye.** A player hurt in the game before his bye is
 on no injury report until the week after (nflverse lists nobody on a bye team), so the return chain never starts:
 every later week reads 100%. ESPN's feed knows (status, return date). Test: seed the chain for bye-week teams from
