@@ -524,13 +524,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-09-30T04:04Z,,,,,,"Wilson finished Sunday's 23-16 victory over Tampa Bay with 10 tackles, including 1.5 sacks, and one defensed pass."
 3921690,Josh Oliver,Minnesota Vikings,Injured Reserve,2026-09-30T00:26Z,Biceps,Surgery,Not Specified,2027-01-17,IR,"The Vikings placed Oliver (biceps) on injured reserve Tuesday, Craig Peters of the team's official site reports."
 16772,Kyle Van Noy,Minnesota Vikings,Active,2026-09-30T00:20Z,,,,,,"The Vikings signed Van Noy from the practice squad to the active roster Tuesday, Craig Peters of the team's official site reports."
+3915525,Dre'Mont Jones,New England Patriots,Active,2026-10-17T02:17Z,,,,,,Jones (shoulder) does not have any injury designation ahead of Sunday's game against the Jets.
 4606666,Karon Prunty,New England Patriots,Out,2026-10-17T02:12Z,Hamstring,Not Specified,Not Specified,2026-10-22,OUT,Prunty (hamstring) has been ruled out ahead of Sunday's game against the Jets.
 3916923,Carlton Davis III,New England Patriots,Out,2026-10-17T02:09Z,Neck,Not Specified,Not Specified,2026-10-22,OUT,Davis (neck) has been ruled out ahead of Sunday's game against the Jets.
 4569173,Rhamondre Stevenson,New England Patriots,Active,2026-10-17T00:00Z,,,,,,"Stevenson's workload against the Jets on Sunday will depend on whether TreVeyon Henderson (ankle) is cleared to play, Evan Lazaar of the Patriots' official site reports."
 2574056,Kevin Byard,New England Patriots,Active,2026-10-16T20:43Z,,,,,,
 4368113,Charles Woods,New England Patriots,Active,2026-10-16T20:42Z,,,,,,
 16771,Morgan Moses,New England Patriots,Active,2026-10-16T20:42Z,,,,,,
-3915525,Dre'Mont Jones,New England Patriots,Active,2026-10-16T20:41Z,,,,,,
 4241720,Marcus Jones,New England Patriots,Active,2026-10-16T20:41Z,,,,,,
 4240042,Cory Durden,New England Patriots,Active,2026-10-16T20:40Z,,,,,,
 4432710,TreVeyon Henderson,New England Patriots,Questionable,2026-10-16T18:25Z,Ankle,Sprain,Right,2026-10-18,QUESTIONABLE,"Henderson said Friday that an MRI revealed he sustained a high-ankle sprain but that he is ""hoping to play"" Sunday against the Jets, Doug Kyed of the Boston Herald reports."
@@ -624,12 +624,14 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361331,Jamien Sherwood,New York Jets,Active,2026-10-08T04:15Z,,,,,,Sherwood finished with 13 total tackles (five solo) and one forced fumble in Sunday's 23-12 loss to Chicago.
 14958,Demario Davis,New York Jets,Active,2026-10-08T03:46Z,,,,,,Davis ended with 10 total tackles (five solo) and 1.0 sacks in Sunday's 23-12 loss to Chicago.
 4429005,Braiden McGregor,New York Jets,Injured Reserve,2026-10-07T21:44Z,Pectoral,Surgery,Not Specified,2027-02-15,IR,"McGregor (pectoral) was placed on the Jets' injured reserve list Wednesday, Eric Allen of the team's official site reports."
+3916409,Jonathan Greenard,Philadelphia Eagles,Active,2026-10-17T02:27Z,,,,,,Greenard (ankle) does not carry an injury designation into Sunday's game against Carolina.
+4571162,Jalyx Hunt,Philadelphia Eagles,Out,2026-10-17T02:25Z,Ankle,Not Specified,Not Specified,2026-10-26,OUT,Hunt (ankle/knee) has been ruled out ahead of Sunday's game against Carolina.
+4240456,Michael Carter II,Philadelphia Eagles,Out,2026-10-17T02:20Z,Abdomen,Not Specified,Not Specified,2026-10-26,OUT,Carter (abdomen) has been ruled out for Sunday's game against the Panthers.
+4431574,Eli Stowers,Philadelphia Eagles,Injured Reserve,2026-10-17T02:18Z,Quadriceps,Not Specified,Not Specified,2026-10-18,IR-R,Stowers (quadriceps) is questionable for Sunday's game against the Panthers.
+4241374,Grant Calcaterra,Philadelphia Eagles,Injured Reserve,2026-10-17T02:16Z,Back,Not Specified,Not Specified,2026-10-18,IR-R,Calcaterra (back) is questionable for Sunday's game against the Panthers.
 4360238,Dameon Pierce,Philadelphia Eagles,Active,2026-10-17T00:05Z,,,,,,"Pierce will be the Eagles' starting running back against the Panthers on Sunday due to the absences of both Saquon Barkley (hamstring) and Will Shipley (foot, IR)."
 4240585,AJ Epenesa,Philadelphia Eagles,Doubtful,2026-10-16T21:08Z,Back,Not Specified,Not Specified,2026-10-18,DOUBTFUL,doubtful
-3916409,Jonathan Greenard,Philadelphia Eagles,Active,2026-10-16T21:03Z,,,,,,
 4362805,Tyler Steen,Philadelphia Eagles,Active,2026-10-16T21:03Z,,,,,,
-4571162,Jalyx Hunt,Philadelphia Eagles,Out,2026-10-16T21:02Z,Ankle,Not Specified,Not Specified,2026-10-26,OUT,out
-4240456,Michael Carter II,Philadelphia Eagles,Out,2026-10-16T21:02Z,Abdomen,Not Specified,Not Specified,2026-10-26,OUT,out
 4248557,E.J. Jenkins,Philadelphia Eagles,Active,2026-10-16T20:39Z,,,,,,
 4241372,Hollywood Brown,Philadelphia Eagles,Active,2026-10-16T20:39Z,,,,,,
 4428850,Dontayvion Wicks,Philadelphia Eagles,Active,2026-10-16T20:34Z,,,,,,Wicks (hamstring) doesn't have a designation for Sunday's contest versus the Panthers.
@@ -642,8 +644,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4040715,Jalen Hurts,Philadelphia Eagles,Out,2026-10-15T17:11Z,Calf,Not Specified,Not Specified,2026-10-26,OUT,"The Eagles have ruled Hurts out for Sunday's game against the Panthers after a follow-up ultrasound performed on his calf Wednesday revealed movement in a small blood clot, Ian Rapoport of NFL Network reports."
 4035624,Landon Dickerson,Philadelphia Eagles,Injured Reserve,2026-10-15T01:09Z,Knee,Not Specified,Not Specified,2026-10-18,IR-R,Dickerson (knee) was designated to return from injured reserve Wednesday.
 4686911,Jakorian Bennett,Philadelphia Eagles,Injured Reserve,2026-10-15T01:04Z,Knee,Not Specified,Not Specified,2026-10-18,IR-R,Bennett (knee) had his  21-day practice window opened by the Eagles on Wednesday.
-4431574,Eli Stowers,Philadelphia Eagles,Injured Reserve,2026-10-15T00:23Z,Quadriceps,Not Specified,Not Specified,2026-10-18,IR-R,Stowers (quadriceps) was a limited participant at the Eagles' practice Wednesday.
-4241374,Grant Calcaterra,Philadelphia Eagles,Injured Reserve,2026-10-14T22:27Z,Back,Not Specified,Not Specified,2026-10-18,IR-R,The Eagles opened the 21-day practice window for Calcaterra (back) on Wednesday.
 4567802,Drew Kendall,Philadelphia Eagles,Questionable,2026-10-13T17:10Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 15835,Zach Ertz,Philadelphia Eagles,Active,2026-10-13T03:59Z,,,,,,"Ertz reverted to the Eagles' practice squad Monday, per the NFL's transaction log."
 4685759,Jalen Carter,Philadelphia Eagles,Active,2026-10-12T16:31Z,,,,,,"Carter logged five tackles (three solo), including 2.0 sacks, one pass defense and two forced fumbles during the Eagles' 19-17 loss to the Jaguars on Sunday in London."
