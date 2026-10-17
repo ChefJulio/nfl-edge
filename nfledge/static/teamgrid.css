@@ -35,3 +35,6 @@
 @media (max-width: 420px) { .tg-wm { height: 20px; } }
 .tg-meta { flex-wrap: nowrap; white-space: nowrap; }  /* a tie record (3-1-1) and the Power pill stay on one line */
 @media (max-width: 420px) { .tg-meta { gap: 6px; } .tg-rk { padding: 2px 6px; } }
+/* wordmark trimmed in black (owner 2026-10-17): a 1px outline from stacked shadows, the same on every team */
+.tg-wm { filter: drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000)
+  drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
