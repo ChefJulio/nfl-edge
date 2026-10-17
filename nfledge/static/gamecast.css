@@ -707,7 +707,7 @@ table.pst-tbl th.num, table.pst-tbl td.num { padding: 3px 1px; }
 tr.gr-dnp td { color: var(--faint); font-style: italic; } tr.gr-dnp td.num { text-align: center; }
 /* Game logs: stats packed together (owner 2026-10-15); the opponent column takes the leftover width when the table fits */
 table.lg td.num, table.lg th.num { padding-left: 2px; padding-right: 2px; }
-table.lg tr.lg-ch > th:nth-child(2), table.lg tbody tr:not(.lg-season):not(.lg-gh):not(.lg-ch) > td:nth-child(2) { width: 99%; }
+@media (min-width: 561px) { table.lg tr.lg-ch > th:nth-child(2), table.lg tbody tr:not(.lg-season):not(.lg-gh):not(.lg-ch) > td:nth-child(2) { width: 99%; } }  /* phones: the log overflows, and a % width there bloats Opp */
 
 /* tap-to-zoom photo / logo */
 [data-zoom] { cursor: zoom-in; }
@@ -764,6 +764,7 @@ table.pst-tbl td.pst-who + td.num, table.pst-tbl tr > th:first-child + th.num { 
   table.lg { border-spacing: 0 2px; }
   table.lg tbody tr:not(.lg-season):not(.lg-sub) td, table.lg th { padding-top: 2px; padding-bottom: 2px; }
   table.lg .sc { padding: 1px 2px; line-height: 1.2; }
+  table.lg .lg-rk { min-width: 22px; padding: 0 3px; }  /* ranks are 1-2 digits: a slimmer chip lets a QB's passing fit */
   /* breathing room after the last column (TD sat flush with the edge) */
   table.lg tr > :last-child { padding-right: 6px; }
   table.lg tr.lg-season td { padding-top: 8px; } table.lg tbody tr.lg-gap td { height: 3px; }
