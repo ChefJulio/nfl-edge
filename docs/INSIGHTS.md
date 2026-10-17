@@ -2166,3 +2166,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   sack, touchdown) by a regression of EPA on down, distance, field position and outcome, fit on unflagged plays of
   seasons before the one projected. One test, the full set (no sub-selection of flag types afterwards). Same harness
   and GATE as AB-a, each decided separately against today; if both pass, both together are checked the same way.
+- **PRE-REGISTERED 2026-10-17 (owner: "what if we pretended all pass interference calls went as completed passes to
+  the target instead?"): (AB-c) defensive pass interference as a pass play.** DPI is enforced as a catch at the spot
+  plus a first down, and its EPA says so, but the play is no_play and never reaches the pass unit. Offensive PI stays
+  out (crediting the foul as a catch would reward it; AB-b covers its called-back result). Descriptive, before this
+  pre-registration (scratch/dpi_persist.py, 2012-25, 261 a season, +1.73 EPA each): DPI EPA DRAWN by an offense per
+  game, odd vs even games r .25, next season .21 (2.5x general flag cost); COMMITTED by a defense .11 / .08 (noise).
+  team_model.dpi_pass = true: DPI plays join the pass unit at their own EPA. Same harness and GATE as AB-a, decided
+  separately against today; any that pass are combined and checked the same way.
