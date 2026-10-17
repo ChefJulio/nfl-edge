@@ -2213,3 +2213,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   not worse (CI upper < +0.002); (3) calibration error (10 bins) not above today's + 0.005; CONFIRM on 2026 so far,
   same direction. Injured-reserve players (return_timing.py, which shares these features) checked the same way
   before the features reach it.
+- **RESULT {#return-calendar} (AD) calendar days in the return chain: PASS (narrow), shipped.** tools/return_days_eval.py,
+  walk-forward 2022-25, 12,754 states. Next game: Brier .1128 -> .1121, -0.0007 [-0.0014, -0.0000], better 2023-25 (2022
+  +0.0001); active-roster states -0.0018 [-0.0034, -0.0002]. Next 2-6 games +0.0000 [-0.0003, +0.0004]. Calibration
+  error .0218 -> .0235 (bar +.005). 2026 so far -0.0001 (same direction, 478 states). Where it matters, by days to the
+  next game (actual / today / calendar): <= 5 16.5 / 20.1 / 16.9%; 6-8 20.0 / 19.7 / 19.0%; 9-12 24.1 / 20.1 / 24.6%;
+  13+ (after a bye) 31.9 / 22.3 / 29.0%: today's model said ~20% whatever the schedule. Injured reserve / PUP: -0.0001,
+  2 of 4 seasons: return_timing.py keeps its features. Shipped in nfledge/returns.py (CHAIN_FEATURES; the chain steps
+  through his team's real schedule, which also feeds Power C's QB availability).

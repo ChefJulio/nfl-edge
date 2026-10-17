@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 
 from .injuries import _SCORE, practice_features
-from .returns import FEATURES, ReturnModel
+from .returns import FEATURES, ReturnModel, _gamedays  # noqa: F401 (_gamedays: tools import it from here)
 
 H = 8
 FIRST_SEASON = 2019
@@ -36,12 +36,6 @@ def ir_min(season: int) -> int:
   return 4 if season >= 2022 else 3 if season >= 2020 else 8
 
 
-def _gamedays(data) -> dict:
-  s = data.schedules[data.schedules.game_type == "REG"]
-  out = {}
-  for x in s.itertuples():
-    out[(x.season, x.week, x.home_team)] = out[(x.season, x.week, x.away_team)] = pd.Timestamp(x.gameday)
-  return out
 
 
 def enrich(data, st: pd.DataFrame, practice: pd.DataFrame, espn: pd.DataFrame) -> pd.DataFrame:

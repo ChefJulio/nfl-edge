@@ -23,6 +23,19 @@ DESIG = {"R01": "ir", "R48": "ir_return", "R04": "pup", "A01": "active", "I01": 
 REPORT = {"Out": 3, "Doubtful": 2, "Questionable": 1}
 FEATURES = ["missed", "desig_ir", "desig_ir_return", "desig_pup", "desig_reserve_other", "desig_active",
             "report", "inj_code", "pos_code", "week", "missed_x_ir"]
+# The chain's hazard also reads the calendar (INSIGHTS {#return-calendar} (AD), owner 2026-10-17: byes, Thursday
+# games, time since he got hurt): gap = days from the game he just missed to his team's next one; days_out = days
+# from the last game before this absence to that next game. return_timing.py (IR) keeps FEATURES: no gain there.
+CHAIN_FEATURES = FEATURES + ["gap", "days_out"]
+
+
+def _gamedays(data) -> dict:
+  """(season, week, team) -> game date, regular season."""
+  s = data.schedules[data.schedules.game_type == "REG"]
+  out = {}
+  for x in s.itertuples():
+    out[(x.season, x.week, x.home_team)] = out[(x.season, x.week, x.away_team)] = pd.Timestamp(x.gameday)
+  return out
 
 
 def played_set(data) -> set:
@@ -179,7 +192,27 @@ class ReturnModel:
                      "position": x.position, "next_week": nw,
                      "back": (season, nw, gid) in self.played})
     d = pd.DataFrame(rows)
-    return self._encode(d) if len(d) else d
+    if not len(d):
+      return d
+    self._tw = {k: sorted(g.week.astype(int)) for k, g in team_weeks.groupby(["season", "team"])}
+    self._gd = _gamedays(self.data)
+    return self._calendar(self._encode(d))
+
+  def _day(self, season, week, team):
+    return self._gd.get((season, int(week), team), pd.NaT) if week is not None and week == week else pd.NaT
+
+  def _calendar(self, d: pd.DataFrame) -> pd.DataFrame:
+    """gap / days_out (CHAIN_FEATURES); last_played = his team's game before this run of missed games."""
+    gap, out, last = [], [], []
+    for x in d.itertuples():
+      ws = self._tw.get((x.season, x.team), [])
+      i = ws.index(int(x.week)) if int(x.week) in ws else None
+      lp = ws[i - int(x.missed)] if i is not None and i - int(x.missed) >= 0 else None
+      d1 = self._day(x.season, x.next_week, x.team)
+      gap.append((d1 - self._day(x.season, x.week, x.team)).days if pd.notna(d1) else np.nan)
+      out.append((d1 - self._day(x.season, lp, x.team)).days if lp is not None and pd.notna(d1) else np.nan)
+      last.append(lp)
+    return d.assign(gap=gap, days_out=out, last_played=last)
 
   @staticmethod
   def _encode(d: pd.DataFrame) -> pd.DataFrame:
@@ -215,14 +248,14 @@ class ReturnModel:
     self.stay_active = float(np.mean(stay)) if stay else 1.0
     make = lambda: HistGradientBoostingClassifier(  # noqa: E731
       max_iter=200, learning_rate=0.05, max_depth=3, random_state=0,
-      categorical_features=[FEATURES.index("inj_code"), FEATURES.index("pos_code")])
-    self.model = make().fit(d[FEATURES], d.back)
+      categorical_features=[CHAIN_FEATURES.index("inj_code"), CHAIN_FEATURES.index("pos_code")])
+    self.model = make().fit(d[CHAIN_FEATURES], d.back)
     # (An isotonic calibration on leave-one-season-out predictions was tested and made the walk-forward Brier
     # worse, 0.132 -> 0.136: older seasons' miscalibration doesn't carry forward. Raw model kept.)
     return self
 
   def hazard(self, d: pd.DataFrame) -> np.ndarray:
-    return self.model.predict_proba(d[FEATURES])[:, 1]
+    return self.model.predict_proba(d[CHAIN_FEATURES])[:, 1]
 
   def p_active(self, state: pd.DataFrame, horizon: int, first: np.ndarray | None = None,
                stay: float | None = None) -> np.ndarray:
@@ -248,8 +281,19 @@ class ReturnModel:
       # back this game, or back earlier and still active
       out[:, h] = (1 - still_out) * stay + back_now
       still_out = still_out * (1 - p)
+      # he missed next_week: the state moves to it, and the calendar to his team's following game (byes, short weeks)
+      nw, gap, dout = [], [], []
+      for x in s.itertuples():
+        ws = self._tw.get((x.season, x.team), [])
+        cur = int(x.next_week)
+        nxt = next((w for w in ws if w > cur), None)
+        d1 = self._day(x.season, nxt, x.team) if nxt is not None else pd.NaT
+        nw.append(nxt if nxt is not None else cur + 1)
+        gap.append((d1 - self._day(x.season, cur, x.team)).days if pd.notna(d1) else np.nan)
+        lp = x.last_played
+        dout.append((d1 - self._day(x.season, lp, x.team)).days if pd.notna(d1) and lp is not None and lp == lp else np.nan)
+      s["week"], s["next_week"], s["gap"], s["days_out"] = s.next_week, nw, gap, dout
       s["missed"] = s.missed + 1
-      s["week"] = s.week + 1
       s["missed_x_ir"] = s.missed * (s.desig_ir + s.desig_pup)
       s["report"] = np.where(s.report > 0, 3, 0)  # a player still out next week is listed Out (or on IR)
     return out
