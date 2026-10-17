@@ -831,3 +831,42 @@ table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; tex
   .pc-cols table.lg tr > :last-child { padding-right: 6px; }
   #tab-page .pc-cols .pc-box.pc-mini { padding-left: 0; padding-right: 0; background: none; box-shadow: none; }
 }
+
+/* Summary tiles (owner 2026-10-16): one number each, tap for the full detail in a sheet. Bordered, with a chevron,
+   so they read as tappable; two across on phones, four on wide screens. */
+.pc-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0 0 12px; }
+.pc-tiles .pc-pen { display: contents; }
+@media (min-width: 1100px) { .pc-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.pc-tap { position: relative; min-width: 0; padding: 10px 26px 10px 12px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--ink) 4%, var(--panel)); cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), transform var(--dur) var(--ease); }
+.pc-tap::after { content: "\203A"; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 22px; line-height: 1; color: var(--faint); }
+@media (hover: hover) { .pc-tap:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); background: color-mix(in srgb, var(--accent) 6%, var(--panel)); } }
+.pc-tap:active { transform: scale(.98); }
+.pc-tap:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pc-tap .pc-k { margin: 0 0 2px; }
+.pc-tap .pc-big { font-size: var(--fs-2xl); line-height: 1.15; white-space: nowrap; }
+.pc-tap .pc-big small { font-size: var(--fs-sm); color: var(--muted); font-weight: 600; }
+.pc-tapsub { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px; font-size: var(--fs-sm); color: var(--muted); min-height: 20px; }
+.pc-tap .pc-av { cursor: pointer; }
+
+/* the detail sheet: a bottom sheet on phones, a centered panel on wide screens */
+.sheet-ov { position: fixed; inset: 0; z-index: 210; display: flex; align-items: flex-end; justify-content: center;
+  background: rgba(5,7,10,.66); animation: sheet-fade var(--dur) var(--ease); }
+.sheet { width: 100%; max-height: 86vh; overflow: auto; overscroll-behavior: contain; background: var(--panel);
+  border: 1px solid var(--line); border-bottom: 0; border-radius: var(--r-lg) var(--r-lg) 0 0; box-shadow: var(--e3);
+  padding: 0 16px calc(16px + env(safe-area-inset-bottom)); animation: sheet-up .22s var(--ease); }
+.sheet-h { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 14px 0 10px; background: var(--panel); border-bottom: 1px solid var(--line); margin-bottom: 10px; }
+.sheet-h b { font-family: var(--font-display); font-size: var(--fs-lg); }
+.sheet-x { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel2); color: var(--ink);
+  font: inherit; font-size: 20px; line-height: 1; cursor: pointer; display: grid; place-items: center; padding: 0 0 2px; }
+.sheet .pc-box { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0 0 12px; margin: 0; }
+.sheet .pc-box + .pc-box { border-top: 1px solid var(--line); padding-top: 12px; }
+@media (min-width: 700px) {
+  .sheet-ov { align-items: center; }
+  .sheet { max-width: 560px; border-bottom: 1px solid var(--line); border-radius: var(--r-lg); max-height: 80vh; }
+}
+@keyframes sheet-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes sheet-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .sheet, .sheet-ov { animation: none; } }
