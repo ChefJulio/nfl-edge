@@ -328,7 +328,9 @@
       { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name, html: r => nameCell(r, flex) },
       { key: 'tot', label: 'ROS pts', num: true, cls: 'projc', title: 'Expected fantasy points from now through week 17 under your scoring, each game weighted by his chance to play', value: r => r._tot, html: r => `<b class="pv">${f0(r._tot)}</b>` },
       { key: 'ppg', label: 'Pts/G', num: true, title: 'Expected points per game he plays', value: r => r._ppg, html: r => f1(r._ppg) },
-      { key: 'games', label: 'Games', num: true, title: 'Games he is expected to play through week 17 (byes and expected absences excluded)', value: r => r._games, html: r => f1(r._games) },
+      // expected games (owner 2026-10-17 read "11.0" as a count): whole numbers plain, so a decimal flags injury risk
+      { key: 'games', label: 'Exp G', num: true, title: 'Expected games: his games left through week 17 (byes excluded), each counted by his chance to play it. 11 games with one at 70% = 10.7. A decimal means some injury risk.', value: r => r._games,
+        html: r => Math.abs(r._games - Math.round(r._games)) < 0.05 ? String(Math.round(r._games)) : f1(r._games) },
       { key: 'sched', label: 'Sched', num: true, first: 'desc', title: 'Points his remaining opponents add (+) or take away (-) in total, vs average opponents', value: r => r._sched,
         html: r => `<span class="ros-sched ${r._sched >= 1.5 ? 'pos' : r._sched <= -1.5 ? 'neg' : 'muted'}">${sgn(r._sched)}</span>` },
       { key: 'weeks', label: 'Weeks', sort: false, cls: 'l5', title: 'Expected points each remaining week; B = bye, dash = expected to sit, faded = under 50% to play', html: strip },
