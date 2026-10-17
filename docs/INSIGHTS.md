@@ -2082,3 +2082,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   current assumption (P = 0) in every season and its calibration error (10 bins) stays under 0.01; reported against a
   flat per-position rate (one number for every j) to show whether the horizon matters. If it passes, future weeks'
   chance to play for healthy players = 1 - curve(j), and lineup values become the expectation over who is available.
+- **RESULT {#injury-attrition} (Y) injury attrition curve: FAIL (calibration).** tools/attrition_eval.py, 222,100
+  healthy-regular week x horizon rows 2013-26. P(out injured) rises with horizon (all seasons: QB .031 at 1 week ->
+  .112 at 12, RB .025 -> .133, WR .029 -> .112, TE .031 -> .120). Walk-forward 2021-25: Brier beats P = 0 every season
+  (2021 .1104 -> .0991 ... 2025 .1094 -> .0970; the horizon adds ~.001 over a flat rate) but calibration error .027-.044
+  (bar .01): fit on every season since 2013, it runs low, because injury absences have risen over the decade (healthy
+  regulars out injured the next week, weeks 2-6: .018 in 2013-14, .034 in 2021-25; 2026 so far .031, not unusual,
+  checked for the owner, who had read that injuries are worse this year).
+- **PRE-REGISTERED 2026-10-17, second attempt after seeing (Y): (Y2) the same curve fit on the last 3 seasons only.**
+  Walk-forward 2021-25 (season s fits on s-3..s-1): Brier beats P = 0 every season AND calibration error < 0.01; and,
+  because this was designed after seeing (Y), the same on 2026 so far (fit 2023-25), which neither attempt used.

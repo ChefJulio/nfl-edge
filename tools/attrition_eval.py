@@ -14,6 +14,8 @@ from pathlib import Path
 import numpy as np
 
 POS = ["QB", "RB", "WR", "TE"]
+# seasons each fit uses: (Y) every earlier one (99); (Y2) the last 3, since absences have risen over the decade
+RECENT = next((int(a.split("=", 1)[1]) for a in sys.argv if a.startswith("--recent=")), 99)
 J = range(1, 13)
 CENSOR = {"Cut", "PS", "FA", "Ret"}
 
@@ -60,8 +62,8 @@ def main():
     print(f"  {pos}: " + " ".join(f"{x[x[:, 2] == j][:, 3].mean():.3f}" for j in J) + f"   (n {len(x)})")
   print("Walk-forward 2021-25 (fit on seasons before s): Brier of P = 0 / flat rate / curve; curve ECE")
   ok = True
-  for s in range(2021, 2026):
-    tr, te = R[R[:, 1] < s], R[R[:, 1] == s]
+  for s in range(2021, 2027):
+    tr, te = R[(R[:, 1] < s) & (R[:, 1] >= s - RECENT)], R[R[:, 1] == s]
     flat = {pi: tr[tr[:, 0] == pi][:, 3].mean() for pi in range(4)}
     curve = {(pi, j): tr[(tr[:, 0] == pi) & (tr[:, 2] == j)][:, 3].mean() for pi in range(4) for j in J}
     y = te[:, 3]
@@ -71,7 +73,7 @@ def main():
     bins = np.minimum((pc * 10).astype(int), 9)
     ece = sum(abs(pc[bins == b].mean() - y[bins == b].mean()) * (bins == b).sum() for b in range(10) if (bins == b).any()) / len(y)
     print(f"  {s}: rows {len(y)}  P=0 {b0:.4f}  flat {bf:.4f}  curve {bc:.4f}  ECE {ece:.4f}  (rate {y.mean():.3f})")
-    ok &= bc < b0 and ece < 0.01
+    ok &= bool(bc < b0 and ece < 0.01)
   print(f"GATE: {'PASS' if ok else 'FAIL'}")
 
 
