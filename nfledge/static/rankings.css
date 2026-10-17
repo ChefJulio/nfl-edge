@@ -39,7 +39,8 @@ table.dt.tiles tr.teamrow:hover > td { background: var(--row-hover); }
 table.ranks td.rk .rkn.rk-start { color: #8fe0a8; } table.ranks td.rk .rkn.rk-flex { color: #f3d38c; }
 table.ranks td.rk .rkn.rk-bench { color: color-mix(in srgb, var(--tfg, var(--ink)) 55%, transparent); }
 td.projc .pv-was { display: block; font-size: var(--fs-xs); font-weight: 600; color: color-mix(in srgb, var(--tfg, #fff) 50%, transparent); white-space: nowrap; }
-td.projc .pv.act-hi { color: #6fdc8c; } td.projc .pv.act-lo { color: #ff8f84; }
+/* final scores by game grade (the Grd column's thresholds); live ones stay white */
+td.projc .pv.gr-hi { color: #6fdc8c; } td.projc .pv.gr-mid { color: #f3d38c; } td.projc .pv.gr-lo { color: #ff8f84; }
 td.projc .pv .live-dot { width: 7px; height: 7px; margin-right: 4px; }
 .flag.fl-play { font-variant-numeric: tabular-nums; } .flag.fl-warn { color: #f3d38c; } .flag.fl-bad { color: #ff8f84; }
 /* phones: Proj and Matchup both in view without scrolling (owner 2026-10-17); the opponent's logo stands for his
@@ -66,3 +67,17 @@ td.projc .pv .live-dot { width: 7px; height: 7px; margin-right: 4px; }
    dimmed line is wider and extends left); owner 2026-10-17 */
 td.projc .pv-stack { display: inline-flex; flex-direction: column; align-items: flex-end; width: 50px; }
 td.projc .pv-stack .pv-was { white-space: nowrap; }
+
+@media (max-width: 640px) {
+  /* the header's label ends where the numbers end (same 50px box), the sort arrow just after it */
+  #tab-players table.ranks th.projc > .sc { display: inline-block; min-width: 50px; text-align: right; }
+}
+@media (max-width: 640px) {
+  /* room for "final · proj 14.3" under an actual score without sliding under the name column */
+  #tab-players table.ranks td.projc { min-width: 76px; }
+  #tab-players table.ranks td.projc .pv-stack .pv-was { font-size: 11px; }
+}
+@media (max-width: 640px) {
+  /* Pts right-aligned in its (slightly wider) column: numbers, header and the "final · proj" line share one edge */
+  #tab-players table.ranks td.projc, #tab-players table.ranks th.projc { text-align: right; padding-right: 6px; }
+}

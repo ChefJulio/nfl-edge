@@ -94,6 +94,13 @@
       </div>`;
 
     // -- derived values under the current scoring + league ---------------------------------------------------------
+    // game grades for final scores (owner 2026-10-17: white while live, "the grade coloring once the game is over"):
+    // this season's pool of qualified games as percentiles (tools/player_logs.py), the game log's Grd scale
+    let GPOOL = null;
+    NFLE.load('data/grades/game_pool.json').then(j => { GPOOL = j; if (mode === 'week') draw(false); }).catch(() => {});
+    const gamePct = (pos, v) => { const q = GPOOL && GPOOL.q[pos]; if (!q || v == null) return null;
+      let i = 0; while (i < 100 && q[i + 1] <= v) i++;
+      return i >= 100 ? 99 : Math.min(99, Math.round(i + (q[i + 1] > q[i] ? (v - q[i]) / (q[i + 1] - q[i]) : 0))); };
     const GAME_OF = Object.fromEntries((D.games || []).flatMap(g => [[g.away.team, g.id], [g.home.team, g.id]]));
     const derive = () => {
       const { w, lg } = state;
@@ -113,6 +120,8 @@
         // live (gamecast.js polls ESPN and shares NFLE.live): his box-score line and whether his game is on / over
         const lv = NFLE.live, st = lv && GAME_OF[r.team] && lv.byGame[GAME_OF[r.team]], ln = lv && r.espn && lv.lines[r.espn];
         if (ln && ln.line) r._act = pts(ln.line, w, r.pos);
+        // the same output in the site's scoring, for the game grade (the Grd pool is built in it)
+        r._actSite = ln && ln.line ? pts(ln.line, SC.built, r.pos) : r.sc.ac ? pts(r.sc.ac, SC.built, r.pos) : null;
         r._live = !!(st && st.state === 'in');
         if (r._act == null && st && st.state !== 'pre') r._act = 0;  // kicked off, no stats yet
       });
@@ -184,10 +193,12 @@
         { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name, html: r => nameCell(r, flex) },
         // once his game starts (owner 2026-10-17): what he's scored, the projection dimmed beneath; the sort stays by
         // projection. Live: the dot; final: green above his likely range (p75), red below it (p25)
-        { key: 'proj', label: 'Proj', num: true, cls: 'projc', title: 'Projected fantasy points under your scoring (tap a player for the full range of outcomes). Once his game starts: his actual points, with the projection beneath',
+        // "Pts" (owner 2026-10-17: the column holds projections AND actual scores); each actual is labeled live / final
+        { key: 'proj', label: 'Pts', num: true, cls: 'projc', title: 'Fantasy points under your scoring: our projection, until his game starts; then his actual points, marked live or final, with the projection beneath (tap a player for the full range of outcomes)',
           value: r => r._proj,
           html: r => r._act != null
-            ? `<span class="pv-stack"><b class="pv act-v${r._live ? '' : r._act > r._q[3] ? ' act-hi' : r._act < r._q[1] ? ' act-lo' : ''}" title="${r._live ? 'Live' : 'Final'}: ${f1(r._act)} pts · projected ${f1(r._likelyOut ? r._ifact : r._proj)}">${r._live ? '<span class="live-dot"></span>' : ''}${f1(r._act)}</b><span class="pv-was">proj ${f1(r._likelyOut ? r._ifact : r._proj)}</span></span>`
+            ? (() => { const g = r._live ? null : gamePct(r.pos, r._actSite);
+              return `<span class="pv-stack"><b class="pv act-v${g == null ? '' : g >= 80 ? ' gr-hi' : g <= 30 ? ' gr-lo' : ' gr-mid'}" title="${r._live ? 'Live' : 'Final'}: ${f1(r._act)} pts · projected ${f1(r._likelyOut ? r._ifact : r._proj)}${g != null ? ` · game grade ${50 + Math.round(g * 49 / 99)}` : ''}">${r._live ? '<span class="live-dot"></span>' : ''}${f1(r._act)}</b><span class="pv-was">${r._live ? 'live' : 'final'} · proj ${f1(r._likelyOut ? r._ifact : r._proj)}</span></span>`; })()
             : r._likelyOut
               ? `<b class="pv" title="Under 10% to play: projected 0">0.0</b><span class="ifact" title="${esc(range(r))}">if he plays ${f1(r._ifact)}</span>`
               : `<b class="pv" title="${esc(range(r))}">${f1(r._proj)}</b>${condLine(r)}` },

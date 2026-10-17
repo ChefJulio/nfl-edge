@@ -141,6 +141,14 @@ def main():
     fill = st[(st.season == cur_s - 1) & (st.position == pos) & (st.week > done) & st.player_id.isin(prev)].fp.to_numpy(float)
     grade_pool[(cur_s, pos)] = np.sort(np.concatenate([grade_pool[(cur_s, pos)], fill]))
 
+  # this season's pool as percentiles (site scoring), for client-side game grades (Rankings colors a final score by
+  # it; owner 2026-10-17): data/grades/game_pool.json {season, q: {pos: [p0 .. p100]}}
+  gp_dir = site / "data" / "grades"
+  gp_dir.mkdir(parents=True, exist_ok=True)
+  (gp_dir / "game_pool.json").write_text(json.dumps({"season": cur_s, "q": {
+    pos: [round(float(x), 2) for x in np.percentile(grade_pool[(cur_s, pos)], range(101))]
+    for pos in POS if len(grade_pool.get((cur_s, pos), [])) >= 20}}, separators=(",", ":")), encoding="utf-8")
+
   def game_grade(season, pos, fp):
     v = grade_pool.get((int(season), pos))
     if v is None or len(v) < 20:
