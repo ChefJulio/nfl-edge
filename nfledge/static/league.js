@@ -360,8 +360,12 @@
       if (!ROS) return ''; if (!r) return 'not projected back this season';
       const e = r.w.find(z => z[1] >= 0.5); return e ? `likely back week ${e[0]}` : 'not projected back this season'; };
     const irSection = () => { const ir = (mine.ir || []).filter(x => mine.ext.includes(x));
+      const ready = ir.filter(x => { const p = player(x); return p.proj != null && p.inactive < 0.5; });
       return ir.length ? `<h3 class="lg-h">IR</h3>${table(ir.map(x => { const p = player(x);
-        return row('IR', Object.assign({}, p, { opp: '', why: backWeek(x) || p.why || 'injured reserve', proj: p.proj, inactive: 0 })); }).join(''))}` : ''; };
+        // projected to play this week (owner 2026-10-17: an IR player can have a projection): starting him means
+        // activating him first, which takes a roster spot
+        return row('IR', Object.assign({}, p, ready.includes(x) ? {} : { opp: '', why: backWeek(x) || p.why || 'injured reserve', inactive: 0 })); }).join(''))}
+        ${ready.length ? `<p class="muted lg-note">${ready.map(x => `<b>${esc(player(x).name)}</b>`).join(', ')} ${ready.length > 1 ? 'project' : 'projects'} to play this week: starting ${ready.length > 1 ? 'them' : 'him'} means activating off IR first, which takes a roster spot.</p>` : ''}` : ''; };
     const lineupView = () => {
       const irSet = new Set(mine.ir || []);
       const ps = mine.ext.filter(x => !irSet.has(x)).map(player), cur = new Set(mine.starters);
