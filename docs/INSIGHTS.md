@@ -2092,3 +2092,10 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 - **PRE-REGISTERED 2026-10-17, second attempt after seeing (Y): (Y2) the same curve fit on the last 3 seasons only.**
   Walk-forward 2021-25 (season s fits on s-3..s-1): Brier beats P = 0 every season AND calibration error < 0.01; and,
   because this was designed after seeing (Y), the same on 2026 so far (fit 2023-25), which neither attempt used.
+- **RESULT {#injury-attrition-recent} (Y2) the attrition curve fit on the last 3 seasons: FAIL (calibration in 3 of 6
+  seasons).** tools/attrition_eval.py --recent=3. Brier beats P = 0 every season (2021 .1104 -> .0977 ... 2025 .1094 ->
+  .0962; 2026 so far .0862 -> .0774) and the horizon helps over a flat rate (~.0013); calibration error 2023-25
+  .0016-.0036 (pass) but 2021 .029, 2022 .016, 2026 .020 (1,705 rows, short horizons only). Year-to-year swings in the
+  injury rate leave any fixed curve off in some seasons. Not used: Fantasy rest-of-season values keep "healthy stays
+  healthy" and the hold-one / 3-deep roster rules (sec. 9). Possible next angle: a curve that updates in-season from
+  the current year's absence rate (shrunk toward the recent seasons), gated the same way at season end.
