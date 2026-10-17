@@ -2256,6 +2256,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   effw_*), tools/grid_eval.py: CHOOSE the lowest fantasy MAE (relevant rows) on 2021-23; DECIDE on 2024-25: lower than
   today with a 95% season-week CI excluding 0 and lower in both seasons; guards: no position significantly worse,
   start / sit not significantly worse (sec. 1 rule 7); CONFIRM 2026 so far, same direction. Today's the choice -> keep.
+- **RESULT {#eff-season-weights} (AG) season weights in player efficiency: FAIL, [1, .6, .3] kept (now tested; flat).**
+  tools/experiments.py 2021-2026 + tools/grid_eval.py. Choose 2021-23, MAE vs today: every cell within +-0.003, none with
+  a CI excluding 0 (last .3 / two back 0 +0.0029 [-0.0001, +0.0059] the worst); chosen .3 / .6 -0.0002 [-0.0031,
+  +0.0027]. Decide 2024-25: -0.0031 [-0.0065, +0.0003] (2024 -0.0029, 2025 -0.0033; no position significant); 2026 so
+  far +0.0053 [-0.0075, +0.0133] (fail). docs/handset_audit.md #6.
 - **PRE-REGISTERED 2026-10-17 (owner, Jalen Hurts ruled out with a blood clot shows 99% for week 7; "at your
   discretion"): (AH) the lookahead chain for newly injured players.** Today a player on this week's report who played
   his team's last game (no return-model state yet) counts as fully available from next week on. (B) of 2026-10-15
