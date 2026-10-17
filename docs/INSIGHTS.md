@@ -2145,3 +2145,24 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   +0.0005 [-0.0001, +0.0010] (2024 +0.0003, 2025 +0.0007; RB +0.0013 [-0.0000, +0.0028]); start / sit -0.004 [-0.012,
   +0.004]. 2026 so far -0.0002 [-0.0025, +0.0025]. Lower thresholds (hand out smaller shares) were slightly worse on
   2021-23, higher ones no better: today's sits at the flat bottom. docs/handset_audit.md #4.
+- **DESCRIPTIVE 2026-10-17, before pre-registering (AB): does flag-proneness persist?** tools/penalty_archive.py sorts
+  every flagged regular-season play 2012-26 (cache/penalty_plays): ~1,450 a season run then wiped out (called_back:
+  holding, DPI, offside; flag on offense 47%), ~950 pre-snap (false start, delay, neutral zone), the rest stood (their
+  yards already inside the play's EPA). The would-be result of 99.5% of called-back scrimmage plays reads from the text.
+  EPA a team gives away on wiped-out plays, per game (scratch/pen_persist.py, 2012-25): odd vs even games of a season r
+  .10 (offense) / .09 (defense); next season r .11 / .22. A season's figure is ~82% noise: the true team-to-team spread
+  is ~0.2 EPA per game, against ~6 points for offenses. Expectation: the fourth unit (AB-a) fits near zero.
+- **PRE-REGISTERED 2026-10-17 (before building): (AB-a) penalty-nullified plays as a fourth team unit.** team_model.
+  pen_unit = true: plays wiped out by a flag (play_type no_play with a penalty; called back and pre-snap) form a unit
+  "pen" with offense and defense ratings (EPA to the offense on those plays), its ridge penalty chosen by the same
+  time-split CV as the other units, so a streak shrinks. pen_net = league nullified plays per team-game x (our
+  expected pen EPA - theirs) enters the points formula as a fitted term beside st_net. tools/game_eval.py 2021-25
+  --only=fitted, paired by game, against today. GATE: margin MAE lower with the 95% CI over season-weeks excluding 0;
+  then fantasy MAE not worse (tools/experiments.py, CI upper < +0.003). Reported: the fitted pen weight and penalty per
+  season.
+- **PRE-REGISTERED 2026-10-17 (before building): (AB-b) called-back plays' would-be results as unit evidence.**
+  team_model.called_back = true: called-back scrimmage plays (from the archive: a pass, run or sack before the flag)
+  join the pass / rush units at their would-be EPA, estimated from the parsed outcome (yards, incomplete, interception,
+  sack, touchdown) by a regression of EPA on down, distance, field position and outcome, fit on unflagged plays of
+  seasons before the one projected. One test, the full set (no sub-selection of flag types afterwards). Same harness
+  and GATE as AB-a, each decided separately against today; if both pass, both together are checked the same way.
