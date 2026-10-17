@@ -29,6 +29,8 @@ from nfledge.config import load_config  # noqa: E402
 
 OUT = ROOT / "cache" / "carryover"
 VARIANTS = [(w, dk, hl) for hl in (3.0, 6.0) for w in (0.3, 0.6, 1.0) for dk in (8, 13, 19)]
+# INSIGHTS (X), 2026-10-17: the pre-registered grid; --gate chooses on 2022-23, decides on 2024-25, confirms on 2026
+X_GRID = [(w, dk, 3.0) for w in (0.3, 0.6, 1.0) for dk in (8, 10, 13)]
 BASE = (0.3, 8, 3.0)
 
 
@@ -107,10 +109,73 @@ def quick(base: dict):
     print("  ".join(out))
 
 
+def gate(base: dict):
+  """(X): margin MAE walk-forward; choose on 2022-23, decide on 2024-25, confirm on 2026."""
+  wm = base["report"]["win_model"]
+  cfg = copy.deepcopy(base)
+  cfg["data"]["history_seasons"] = 9
+  g = elo.finished(D.load_all(cfg).schedules)
+  elo_diff = dict(zip(g.game_id, elo.run(g, wm["elo_k"], wm["elo_hfa"], wm["elo_revert"], wm["elo_margin"])[0]))
+  res = {}
+  for v in X_GRID:
+    d = games_for(base, v)
+    d = d[d.home_score != d.away_score].copy()
+    d["won"] = (d.home_score > d.away_score).astype(float)
+    d["home"] = (d.location != "Neutral").astype(float)
+    d["rank_gap"] = d.away_rank - d.home_rank
+    d["elo"] = d.game_id.map(elo_diff) / 100
+    d["abs_err"] = (d.model_margin - (d.home_score - d.away_score)).abs()
+    d["p_blend"] = np.nan
+    for s in range(2022, 2027):
+      tr, m = d[d.season < s], (d.season == s)
+      w = logit_fit(tr[["home", "rank_gap", "elo"]].to_numpy(float), tr.won.to_numpy(float))
+      d.loc[m, "p_blend"] = 1 / (1 + np.exp(-d.loc[m, ["home", "rank_gap", "elo"]].to_numpy(float) @ w))
+    res[v] = d[d.season.between(2022, 2026) & d.spread_line.notna()].set_index("game_id")
+    print(f"  {v}: {len(res[v])} games", flush=True)
+  b = res[BASE]
+
+  def diff(v, seasons, col):
+    t, bb = res[v].reindex(b.index), b
+    m = bb.season.isin(seasons).to_numpy()
+    if col == "abs_err":
+      e = (t.abs_err - bb.abs_err).to_numpy()[m]
+    else:
+      e = ((t.p_blend - bb.won) ** 2 - (bb.p_blend - bb.won) ** 2).to_numpy()[m]
+    sw = (bb.season.astype(str) + "-" + bb.week.astype(str)).to_numpy()[m]
+    keys = np.unique(sw)
+    idx = [np.flatnonzero(sw == k) for k in keys]
+    rng = np.random.default_rng(0)
+    bs = [np.concatenate([idx[i] for i in rng.integers(0, len(keys), len(keys))]) for _ in range(2000)]
+    vals = [e[x].mean() for x in bs]
+    return e.mean(), np.percentile(vals, 2.5), np.percentile(vals, 97.5), int(m.sum())
+
+  print("CHOOSE on 2022-23 (margin MAE vs today):")
+  ch = {v: diff(v, [2022, 2023], "abs_err") for v in X_GRID}
+  for v, (m, lo, hi, n) in ch.items():
+    print(f"  weight {v[0]} fade {v[1]:2d}: {m:+.4f} [{lo:+.4f}, {hi:+.4f}]  ({n} games)")
+  best = min(ch, key=lambda v: ch[v][0])
+  print(f"  chosen: weight {best[0]}, fade by week {best[1]}")
+  if best == BASE:
+    print("GATE: today's setting is the choice -> keep (now tested)")
+    return
+  m, lo, hi, n = diff(best, [2024, 2025], "abs_err")
+  bm, blo, bhi, _ = diff(best, [2024, 2025], "p_blend")
+  print(f"DECIDE 2024-25: margin MAE {m:+.4f} [{lo:+.4f}, {hi:+.4f}] ({n} games); win Brier {bm:+.4f} [{blo:+.4f}, {bhi:+.4f}]")
+  for s in (2024, 2025):
+    print(f"  {s}: margin MAE {diff(best, [s], 'abs_err')[0]:+.4f}")
+  ok = hi < 0 and blo <= 0
+  print(f"  DECIDE {'PASS' if ok else 'FAIL'} (fantasy guard: run tools/experiments.py with this setting)")
+  cm, clo, chi, cn = diff(best, [2026], "abs_err")
+  print(f"CONFIRM 2026: margin MAE {cm:+.4f} [{clo:+.4f}, {chi:+.4f}] ({cn} games) -> {'PASS' if cm < 0 else 'FAIL'}")
+
+
 if __name__ == "__main__":
   base = load_config()
   if "--quick" in sys.argv:
     quick(base)
+    sys.exit()
+  if "--gate" in sys.argv:
+    gate(base)
     sys.exit()
   wm = base["report"]["win_model"]
   cfg = copy.deepcopy(base)

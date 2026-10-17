@@ -2044,3 +2044,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   exploitable: ranking players by our own projection selects the weeks we guessed high. The whole gain is moving every
   projection from its expected value to its median (calibrated rows then run 1-2 pts under at every tier), which would
   bias every sum the site makes (sec. 1 rule 7, scope). Not shipped; owner may overrule.
+- **PRE-REGISTERED 2026-10-17 (before running): (X) last season's weight in team ratings** (docs/handset_audit.md #1;
+  owner: "continue the queue"). team_model.prior_weight 0.3 fading to 0 by prior_decay_week 8 is from the initial
+  commit; the "insensitive" row (sec. 5) has no numbers; the parked game test (sec. 9, 2026-10-12, 3 seasons, fixed win
+  formula) found 0.6 fading by week 13 better in weeks 2-8 (margin MAE -0.13 [-0.24, -0.01] overall) and slightly worse
+  in 9+. Grid: weight {0.3, 0.6, 1.0} x fade week {8, 10, 13}, half-life 3 (half-life is #5, separate).
+  tools/carryover_eval.py walk-forward (every game re-rated with ranks as of the week before; win formula refit on
+  earlier seasons). Primary metric: margin MAE (the team model's own target), games weeks 2+ with a line. CHOOSE the
+  lowest margin MAE on 2022-23; DECIDE on 2024-25: margin MAE diff vs today with a 95% season-week CI excluding 0 below;
+  guards: shipped win-chance Brier not significantly worse, and fantasy MAE (tools/experiments.py 2021-25) CI upper <
+  +0.003 with no position significantly worse; CONFIRM on 2026 weeks so far, same direction. If today's setting is
+  the 2022-23 choice, keep it (now tested).
