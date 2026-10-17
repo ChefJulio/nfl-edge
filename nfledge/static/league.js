@@ -241,6 +241,14 @@
     };
 
     const last = n => String(n || '').split(' ').slice(-1)[0];  // "DJ Moore" -> "Moore"
+
+    // the uncertain teammate's other world as a change to the shown projection (owner 2026-10-17: changes add up when
+
+    // two teammates are uncertain, two totals don't); '' when it rounds to nothing
+
+    const condTxt = c => { const d = c.pSit >= 0.5 ? c.plays - c.sits : c.sits - c.plays;
+
+      return Math.abs(d) < 0.05 ? '' : `${NFLE.fmt.signed1(d)} if ${esc(last(c.name))} ${c.pSit >= 0.5 ? 'plays' : 'sits'}`; };
     // "Questionable (ESPN) (DL)" -> "Questionable per ESPN; practice: DNP, limited"
     const statusWords = st => {
       const m = String(st || '').match(/^(.*?)\s*\(([DLF]+)\)\s*$/), des = (m ? m[1] : String(st || '')).trim().replace(/\s*\(ESPN\)/, ' per ESPN');
@@ -287,7 +295,7 @@
     const row = (slot, p, extra = '') => p ? `<tr class="teamrow" style="${NFLE.fmt.rowStyle(TEAMS, p.team)}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}>
         <td class="lg-slot">${esc(slot)}</td><td>${NFLE.ui.player({ name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, pid: p.pid,
           subHtml: p.opp ? `${esc(p.home)} ${NFLE.ui.tm(p.opp)}` : p.why ? esc(p.why) : NFLE.ui.tm(p.team), badges: NFLE.injTag(p.status || '')
-            + (p.conds || []).map(c => `<span class="lg-cond">${f1(c.pSit >= 0.5 ? c.plays : c.sits)} if ${esc(last(c.name))} ${c.pSit >= 0.5 ? 'plays' : 'sits'}</span>`).join('') }, TEAMS)}</td>
+            + (p.conds || []).map(c => condTxt(c) && `<span class="lg-cond" title="${esc(`${f1(c.sits)} if ${c.name} sits, ${f1(c.plays)} if he plays`)}">${condTxt(c)}</span>`).join('') }, TEAMS)}</td>
         <td class="num"><b>${p.proj != null ? f1(p.proj) : '—'}</b></td><td class="num muted">${p.proj != null ? (p.inactive >= 0.05 ? pct(p.inactive) : '') : ''}</td>${extra}</tr>`
       : `<tr><td class="lg-slot">${esc(slot)}</td><td colspan="3" class="muted">empty</td>${extra}</tr>`;
     const table = (body, head = '<th>Slot</th><th>Player</th><th class="num">Proj</th><th class="num">Out%</th>') =>
@@ -315,7 +323,7 @@
       const why = p => p.exp == null ? 'not projected (bye, IR or out)'
         : p.inactive >= 0.15 ? `${pct(p.inactive)} to sit · ${f1(p.proj)} if he plays · ${esc(statusWords(p.status))}`
         : `projects ${f1(p.exp)}`;
-      const ifLines = p => (p.conds || []).map(c => `${f1(c.pSit >= 0.5 ? c.plays : c.sits)} if ${esc(last(c.name))} ${c.pSit >= 0.5 ? 'plays' : 'sits'}`);
+      const ifLines = p => (p.conds || []).map(condTxt).filter(Boolean);
       const nm = p => `<b>${esc(p.name)}</b>`;
       const sureCard = sure.length ? `<div class="lg-mv">
           <div class="lg-mv-row"><span class="lg-mv-k good">Start</span><div>${fill.slice(0, sure.length).map(p =>

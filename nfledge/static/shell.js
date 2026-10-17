@@ -36,6 +36,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const logoSrc = (url, size) => !url ? '' : !/a\.espncdn\.com\/i\/teamlogos\//.test(url) ? url
     : `https://a.espncdn.com/combiner/i?img=${encodeURIComponent(new URL(url).pathname)}&w=${px(size)}&h=${px(size)}`;
   NFLE.fmt = {
+    signed1: v => `${v >= 0 ? '+' : '-'}${Math.abs(v).toFixed(1)}`,  // a change in points: +0.9 / -0.7
     f1, logoSrc,
     sgn: v => v == null || isNaN(v) ? '' : Math.abs(v) < 0.05 ? '0.0' : `${v > 0 ? '+' : ''}${f1(v)}`,
     pct: v => v == null || isNaN(v) ? '' : `${Math.round(v * 100)}%`,

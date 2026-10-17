@@ -153,12 +153,14 @@
       return `<div class="who" title="${esc(r.takeaway || '')}"><span class="pic${r.photo ? '' : ' nopic'}"${NFLE.fmt.picStyle(TEAMS, r.team)}><span class="pic-img">${r.photo ? `<img src="${esc(r.photo)}" alt="" width="34" height="34" loading="lazy" onerror="this.closest('.pic').classList.add('nopic')">` : ''}</span><span class="pic-tm">${logo(r.team, 11)}</span></span><div class="nmw"><b class="nm">${flex ? `<span class="posb posb-${esc(r.pos)}">${esc(r.pos)}</span>` : ''}<span class="fn">${esc(ini)}</span>${rest ? `<span class="fn-rest">${esc(rest)}</span><span class="fn-dot">.</span>` : ''}${last ? ` ${esc(last)}` : ''}</b>${badges}</div></div>`;
     };
     // Two worlds, not a blend (owner 2026-10-15: availability is binary): the projection shown is the likelier world for
-    // the uncertain teammate; this line is the other one ("6.5 if Judkins plays").
+    // the uncertain teammate; this line is the change in the other one ("-0.7 if Moore plays"; owner 2026-10-17: a
+    // change adds up when two teammates are uncertain, two totals don't). Hover: both totals.
     const lastName = n => String(n || '').split(' ').slice(1).join(' ') || n;
     // up to two uncertain teammates, biggest swing first (cond, cond2)
     const condLine = r => [r.cond, r.cond2].filter(Boolean).map(c => {
-      const [nm, , pSit, plays, sits] = c, other = pSit >= 0.5 ? plays : sits;
-      return `<span class="pv-cond" title="${esc(`${f1(sits * r._ratio)} if ${nm} sits (${Math.round(100 * pSit)}% likely), ${f1(plays * r._ratio)} if he plays`)}">${f1(other * r._ratio)} if ${esc(lastName(nm))} ${pSit >= 0.5 ? 'plays' : 'sits'}</span>`;
+      const [nm, , pSit, plays, sits] = c, d = (pSit >= 0.5 ? plays - sits : sits - plays) * r._ratio;
+      if (Math.abs(d) < 0.05) return '';
+      return `<span class="pv-cond" title="${esc(`${f1(sits * r._ratio)} if ${nm} sits (${Math.round(100 * pSit)}% likely), ${f1(plays * r._ratio)} if he plays`)}">${NFLE.fmt.signed1(d)} if ${esc(lastName(nm))} ${pSit >= 0.5 ? 'plays' : 'sits'}</span>`;
     }).join('');
     const rankOf = (r, flex) => flex ? r._frank : r._rank;
     const columns = flex => {
