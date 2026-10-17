@@ -49,6 +49,10 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
      worse), and bias is reported but not gated. Points are right-skewed, so the MAE-best forecast sits a little
      below the mean; chasing zero bias trades away accuracy. Bias matters only where it flips decisions, which the
      decision guard measures. Closes the redistribution "owner's call (pending)" (sec. 5, 2026-10-15).
+     Scope (same day, after (W)): MAE decides between projections that stay EXPECTED values. Lineups, rest-of-season
+     totals, team totals and the Fantasy win chance add projections up, and medians don't add (the sum of medians
+     sits below the median of the sum), so a change whose gain is a shift toward the median is a change of what the
+     number means, not an accuracy gain; the median is shown already as the middle of each range.
 
 ## 2. Data quirks (nflverse / nflreadpy and others)
 - **Scrambles are `pass=1, rush=0`** in nflverse pbp. Any rushing filter must include `qb_scramble==1` or QB
@@ -2031,3 +2035,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   seasons; guards: no position significantly worse; start / sit gain (same-position pairs: a monotone curve keeps the
   order, so unchanged by construction; reported). CONFIRM: curve fit on 2021-25 applied to 2026 weeks so far, same
   direction, not significantly worse. Bias by tier reported. Ranges (p10 / p90) untouched in this test.
+- **RESULT {#median-calibration} (W) per-position median calibration curve: gate PASS, NOT SHIPPED (the gain is a
+  shift to medians).** tools/calib_eval.py: walk-forward 2022-25 MAE 5.155 -> 5.096, -0.059 [-0.092, -0.026], better
+  4/4 seasons (RB -0.092, WR -0.073 significant; QB +0.022, TE -0.038 no difference); 2026 confirm -0.020 [-0.067,
+  +0.071]. Decomposition (tools/calib_decomp.py): a constant per-position median shift alone (QB +0.4, RB -1.2, WR
+  -1.1, TE -1.0 pts) gives -0.063 [-0.086, -0.039]; the curve's SHAPE with each position's average kept gives -0.0006
+  [-0.023, +0.022]. So the tier pattern that motivated it (top-5 RBs / WRs over-projected, middle under) is not
+  exploitable: ranking players by our own projection selects the weeks we guessed high. The whole gain is moving every
+  projection from its expected value to its median (calibrated rows then run 1-2 pts under at every tier), which would
+  bias every sum the site makes (sec. 1 rule 7, scope). Not shipped; owner may overrule.

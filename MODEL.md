@@ -321,6 +321,7 @@ The grade measures output, not style: fantasy points per game in the site's scor
 - **Rejected** - Does a recent jump in a player's snap share (last 3 games against his usual) predict more targets and carries than his shares already show? - No: no gain for players whose snaps moved 15+ points, and tight ends got slightly worse; the jump already shows in his recent targets and carries (2026-10). <!-- tried:snap-trend -->
 - **Rejected** - When a starter sits, should the backups' snap shares decide who gets his work? - No: given each backup's depth rank and projected share, the fit put almost no weight on snap share and projections did not improve (2026-10). <!-- tried:absorb-snap -->
 - **Rejected** - Should running backs get more than half of a sitting teammate's work handed to them? - No: 65%, 80% and full strength each shrank the under-projection a little but did not lower the average miss, so half stays, now a tested value rather than a hand-set one (2026-10). <!-- tried:rb-redist-scale -->
+- **Rejected** - Should the final projection be bent per position so the top players come down and the middle comes up (they run about 1.2-1.5 points over and 0.3-0.6 under)? - No: the bend itself changed nothing (-0.001, within noise); the only gain came from lowering every projection to the typical (median) game, which would make lineup, team and rest-of-season totals add up too low. Projections stay expected values; the typical game is the middle of each range (2026-10). <!-- tried:median-calibration -->
 
 ## Under the hood
 
