@@ -604,6 +604,10 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Green Bay checks out: 13 titles, 37-28.
 
 ## 9. Open threads / next steps (as of 2026-10-12)
+- **Hand-set values queue (2026-10-17): docs/handset_audit.md.** 22 model values without fitting or a numbered
+  test (4 high impact: prior-season weight, TD blend k, Tuesday / week availability model settings, redistribution
+  minimum share). Each gets its own pre-registration here before it runs. Pending owner call: redistribution MAE vs
+  bias trade-off (sec. 5, 2026-10-15).
 - **PRE-REGISTERED 2026-10-15 (owner: "still annoyed McLaughlin is projected 2.6 even if Judkins sits"): newcomer
   discount.** Wk 6 CLE: Estime signed this week (off MIN's practice squad) and gets ~12 carries from his old role;
   McLaughlin (the incumbent) ~3. Descriptive (2021-25 backtest, RB/WR/TE mid-season movers, 126 players): first game
