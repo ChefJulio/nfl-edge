@@ -29,6 +29,32 @@
     return `<div class="po-bracket">${side(left, false)}${final}${side(right, true)}</div>${extra.map(g => `<div class="po-bracket">${side(g, false)}</div>`).join('')}
       ${d.seeded ? '' : d.season < 1975 ? '<p class="st-note muted">No seeds before 1975: home field rotated by division, not by record.</p>' : ''}`;
   };
+  // This season before the playoffs (owner 2026-10-17: the Bracket view sat on a loading shimmer): a projected bracket
+  // from the odds simulation. Wild card: the most likely seeds in their real pairings (2-7, 3-6, 4-5; the 1 seed's
+  // bye). Later rounds are reseeded, so no fixed matchups: each lists the teams most likely to get there, with the chance.
+  const projected = d => {
+    const by = Object.fromEntries(d.teams.map(r => [r.team, r]));
+    const tm = code => ({ modern: true, site: code, name: (by[code] || {}).nick || code });
+    const pc = v => v >= 0.995 ? '>99%' : v < 0.005 ? '<1%' : `${Math.round(v * 100)}%`;
+    const row = (code, seed, v) => `<div class="po-row win">${badge(tm(code))}${seed ? `<span class="po-seed">${seed}</span>` : ''}<span class="po-nm tm-open" data-tm="${esc(code)}">${esc(tm(code).name)}</span><b class="po-sc po-pc">${pc(v)}</b></div>`;
+    const card = (rows, meta) => `<div class="po-game">${rows}${meta ? `<div class="po-meta">${meta}</div>` : ''}</div>`;
+    const col = (label, cards) => `<div class="po-round"><div class="po-rl">${esc(label)}</div><div class="po-games">${cards.join('')}</div></div>`;
+    const top = (conf, k, n) => d.teams.filter(r => r.conf === conf).sort((a, b) => b[k] - a[k]).slice(0, n);
+    const side = (conf, mirror) => {
+      const seeds = Object.fromEntries((d.seeding[conf] || []).map(x => [x.seed, x]));
+      const sd = n => seeds[n] ? row(seeds[n].team, n, seeds[n].p) : '';
+      const rounds = [
+        col('Wild card', [card(sd(1), 'bye · how often in this seed'), ...[[2, 7], [3, 6], [4, 5]].map(([a, b]) => card(sd(a) + sd(b), 'how often in this seed'))]),
+        col('Divisional', [card(top(conf, 'p_div_round', 4).map(r => row(r.team, '', r.p_div_round)).join(''), 'most likely to get here')]),
+        col('Conference', [card(top(conf, 'p_conf_game', 2).map(r => row(r.team, '', r.p_conf_game)).join(''), 'most likely to get here')]),
+      ];
+      return `<div class="po-side${mirror ? ' mirror' : ''}"><div class="po-st">${conf}</div><div class="po-rounds">${(mirror ? rounds.reverse() : rounds).join('')}</div></div>`;
+    };
+    const sb = ['AFC', 'NFC'].map(c => top(c, 'p_sb', 1)[0]).filter(Boolean);
+    const final = `<div class="po-round po-final"><div class="po-rl">Super Bowl</div><div class="po-games">${card(sb.map(r => row(r.team, '', r.p_title)).join(''), 'chance to win it all')}</div></div>`;
+    return `<div class="po-bracket">${side('AFC', false)}${final}${side('NFC', true)}</div>
+      <p class="st-note muted">Projected from ${d.sims.toLocaleString()} simulated seasons as of week ${d.as_of_week}. Wild card: the most likely team in each seed and how often it lands there. Later rounds are reseeded after the wild card round, so they list the teams most likely to reach them, with the chance.</p>`;
+  };
   NFLE.areas.playoffs = {
     mount(sec) {
       sec.classList.remove('soon');
@@ -55,7 +81,12 @@
         NFLE.load(`data/playoffs/${s}.json`).then(d => {
           sub.textContent = d.era === 'standings' ? `${s}: before the playoff era` : `${s} postseason`;
           body.innerHTML = render(d);
-        }).catch(() => { sub.textContent = isCur ? `${s}: the playoffs haven't started` : 'No playoff data for that season.'; body.innerHTML = ''; });
+        }).catch(() => {
+          if (!isCur) { sub.textContent = 'No playoff data for that season.'; body.innerHTML = '<p class="muted">No playoff data for that season.</p>'; return; }
+          // not started yet: the projected bracket (an empty body would sit on the loading shimmer)
+          NFLE.load('data/playoffs/odds.json').then(o => { sub.textContent = `${s}: projected bracket`; body.innerHTML = projected(o); })
+            .catch(() => { sub.textContent = `${s}: the playoffs haven't started`; body.innerHTML = '<p class="muted">The playoffs have not started, and no projection is available yet.</p>'; });
+        });
       };
       viewSeg.addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) { view = b.dataset.v; load(+sel.value); } });
       NFLE.load('data/playoffs/index.json').then(ix => {
