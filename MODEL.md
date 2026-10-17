@@ -124,9 +124,9 @@ Ideas that sounded right but did not improve out-of-sample accuracy are switched
 - **Air-yards share, and snap share as an input.** No consistent gain (snap share stays as a role-change alert).
 
 
-## Inactive %
+## Chance to play
 
-Inactive % is the chance a player does not play this week; it is shown next to the projection, never folded into it.
+The chance a player plays this week; it is shown next to the projection ("62% to play"), never folded into it. The site shows it this one way everywhere, never as a chance to sit.
 
 ### Tuesday: before the first report
 
@@ -153,7 +153,7 @@ These were the chance to play before the one model above; they stay as its fallb
 
 ### How it is shown
 
-- **Scenarios, not discounts.** NFL availability is yes or no, so every projection is "if active", with Inactive% shown separately.
+- **Scenarios, not discounts.** NFL availability is yes or no, so every projection is "if active", with the chance to play shown separately.
 
 ### Reading the numbers
 

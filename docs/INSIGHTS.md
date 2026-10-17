@@ -14,7 +14,8 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 - **Free data only; avoid dependencies** (no paid sources, no CSS/JS frameworks; dev-only tools are OK).
 - **Full transparency:** formulas and fitted weights are public (Model tab section 10 is generated).
 - **NFL availability is binary:** a Questionable player plays his normal role or sits; never discount a
-  projection by play probability. Show "if active" projection + separate Inactive%; P < 0.5 = sits, volume
+  projection by play probability. Show "if active" projection + separate chance to PLAY ("62% to play"; 2026-10-17,
+  owner: one way everywhere, never the chance to sit); P < 0.5 = sits, volume
   redistributed; teammates get contingent "+X if he sits".
 - **Defaults:** half PPR, 10-team league, 1QB 2RB 2WR 1TE 1FLEX (all adjustable on the page).
 - **Presentation:** elegance and readability first; minimal, sleek, dark; important values easy to find; all

@@ -7,7 +7,7 @@
     <p>Market chances, ${esc(t.since)}&ndash;${esc(t.season)}. A well-calibrated forecast's favorites win about as often as their chance says; each season is scored with chances fit only on the seasons before it.</p>
     <table class="trk"><thead><tr><th>Favorite's chance</th><th class="num">Games</th><th class="num">Expected</th><th class="num">Won</th><th class="num">${esc(t.season)}</th></tr></thead>
     <tbody>${t.rows.map(r => `<tr${r.tossup ? ' class="toss"' : ''}><td>${esc(r.label)}</td><td class="num">${r.n}</td><td class="num">${Math.round(r.expected)}%</td><td class="num"><b>${Math.round(r.actual)}%</b></td><td class="num">${r.n_now ? `${Math.round(r.actual_now)}% <small>of ${r.n_now}</small>` : '&ndash;'}</td></tr>`).join('')}</tbody></table>`;
-  // "How accurate is our inactive %?" (data/history/availability_track.json via the build; tools/avail_track.py)
+  // "How accurate is our chance to play?" (data/history/availability_track.json via the build; tools/avail_track.py)
   const avail = a => {
     if (!a) return '';
     const f3 = v => v.toFixed(3);
@@ -39,7 +39,7 @@
       return `${head}<tr><td>${esc(s.label)}</td><td class="num">${s.n.toLocaleString()}</td><td class="num"><b>${s.played}%</b></td><td class="num">${s.predicted}%</td>
         <td class="num ${off ? 'av-off' : 'muted'}">${gap > 0 ? '+' : ''}${gap.toFixed(1)}</td></tr>`;
     }).join('');
-    return `<h2 id="avail-record">How accurate is our inactive %?</h2>
+    return `<h2 id="avail-record">How accurate is our chance to play?</h2>
       <p>Every number below was scored the way it would have worked live: each season (${esc(a.seasons)}) predicted by models trained only on the seasons before it, for quarterbacks, running backs, receivers and tight ends; players ruled Out are left out (that is 0% by rule). The error score is the average squared miss (a Brier score): lower is better, and 0 would mean never wrong.</p>
       <h3>Against the usual ways to read the injury report</h3>
       <table class="trk av-vs"><thead><tr><th>Final injury report, read as&hellip;</th><th class="num">Error</th><th></th></tr></thead><tbody>${vs}</tbody></table>
@@ -80,7 +80,7 @@
           if (cur) cur.appendChild(n); else if (n.nodeType === 1 && n.tagName === 'H1') n.remove();
         });
         const place = (re, html) => { if (html) (areas.find(a => re.test(a.dataset.title)) || areas[areas.length - 1]).insertAdjacentHTML('beforeend', html); };
-        place(/inactive|availability/i, avail(m.avail));
+        place(/chance to play|inactive|availability/i, avail(m.avail));
         place(/^games|game lines/i, track(m.track));
         let saved = null;
         try { saved = sessionStorage.getItem('nfle-model-area'); } catch (e) { /* private mode */ }

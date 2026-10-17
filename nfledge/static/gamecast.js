@@ -460,6 +460,7 @@
     box.innerHTML = '<p class="pc-sub">Loading news&hellip;</p>';
     fetchNews(espn).then(show).catch(() => { if (box.isConnected) box.innerHTML = '<p class="pc-sub">News unavailable right now.</p>'; });
   };
+  document.addEventListener('nfle-sheet', e => e.detail.querySelectorAll('.pc-news[data-espn]').forEach(nb => loadNews(nb.dataset.espn, nb, +nb.dataset.n || 3)));
   const wireNews = box => box.querySelectorAll('.nw-more').forEach(b => b.onclick = () => {
     const s = b.previousElementSibling; s.classList.toggle('clip'); b.textContent = s.classList.contains('clip') ? 'More' : 'Less';
   });
@@ -894,18 +895,70 @@
   const goTile = (k, body, goto, lv = '') => `<div class="pc-tap" role="button" tabindex="0" data-goto="${goto}"${lv ? ` data-lv-go="${lv}"` : ''}>
       <div class="pc-k">${esc(k)}</div>${body}</div>`;
   // Last 5 tile: his latest regular-season game's points over his last five, bars against our projection then
-  const last5Tile = (L, pos) => {
-    if (!L) return '';
+  // his last five regular-season games as bar slots (points, our projection then)
+  const last5Slots = (L, pos) => {
+    if (!L) return [];
     const w = weights(), gs = L.seasons.flatMap(S => S.g.map(g => ({ s: S.s, g }))).sort((a, b) => b.s - a.s || b.g.w - a.g.w).slice(0, 5).reverse();
-    if (!gs.length) return '';
     const built = (DATA && DATA.score && DATA.score.built) || HALF;
     const pj = g => g.pjl ? g.pj * (pts(g.pjl, w, pos) / Math.max(0.1, pts(g.pjl, built, pos))) : null;
-    const slots = gs.map(({ s, g }) => { const v = pts(g.c, w, pos), p = pj(g);
+    return gs.map(({ s, g }) => { const v = pts(g.c, w, pos), p = pj(g);
       return { w: g.w, v, pj: p, title: `${s} week ${g.w}: ${f1(v)} pts${p != null ? ` · we projected ${f1(p)}` : ''}` }; });
-    const L1 = gs[gs.length - 1];
-    return goTile(`Last ${gs.length}`, `<div class="pc-big">${f1(slots[slots.length - 1].v)} <small>pts</small></div>
-      <div class="pc-tapsub">${L1.s !== L.cur ? `${L1.s} ` : ''}Wk ${L1.g.w} ${L1.g.h === 0 ? '@' : 'vs'} ${esc(L1.g.o)}</div>
-      <div class="pc-tapbars">${miniBars(slots, { slotW: 22, H: 40, cls: 'mb-pts mb-sm' })}</div>`, 'log', 'g');
+  };
+  // Form tile (owner 2026-10-17: Season and Last 5 combined): season points per game, the last five games as bars;
+  // the season breakdown (with every week's points) in its sheet, else the game log
+  const formTile = (L, pos, fpg, games, title, detail) => {
+    const slots = last5Slots(L, pos);
+    if (fpg == null && !slots.length) return '';
+    const bars = slots.length ? `<div class="pc-tapbars">${miniBars(slots, { slotW: 22, H: 40, cls: 'mb-pts mb-sm' })}</div>` : '';
+    const body = fpg != null ? `<div class="pc-big">${f1(fpg)} <small>FP/G</small></div><div class="pc-tapsub">${f0(games)} games · last ${slots.length}</div>${bars}`
+      : `<div class="pc-big">${f1(slots[slots.length - 1].v)} <small>pts</small></div><div class="pc-tapsub">last game · last ${slots.length}</div>${bars}`;
+    return fpg != null ? tapTile('Form', body, title, detail) : goTile('Form', body, 'log', 'g');
+  };
+  // ---- Health (owner 2026-10-17: a tile instead of the Injuries tab, and a briefing that brings you up to speed) ----
+  // ros.json for our return model's week (the first upcoming week he's more likely than not to play)
+  const RJ = { d: undefined };
+  const loadRos = () => { if (RJ.d !== undefined) return; RJ.d = null;
+    NFLE.load('data/ros.json').then(j => { RJ.d = j; rerenderCard(); }).catch(() => {}); };
+  const backWeek = pid => { const r = RJ.d && RJ.d.players[pid];
+    if (!r) return null; const e = r.w.find(z => z[1] >= 0.5); return e && e[0] > RJ.d.from ? e[0] : e ? null : 'no'; };
+  const espnDate = d => new Date(d + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
+  const healthOf = (pid, p, L, espn) => {
+    loadInj(); loadRos();
+    const now = espn && DINJ && DINJ[espn];
+    const wk = DATA ? +DATA.week : null;
+    const ep = (L && L.inj || []).find(e => L && e.s === L.cur && wk && e.w1 >= wk - 1);  // listed this week or last
+    const des = p && /^\s*(Questionable|Doubtful|Out|IR|PUP|NFI)/i.test(p.status || '');
+    const inj = (p && p.inactive >= 0.05) || des || (now && now.status && now.status !== 'Active') || (!p && ep);
+    const play = p && p.inactive != null ? 1 - p.inactive : null;
+    const what = [...new Set([now && now.type, now && now.detail && now.detail !== 'Not Specified' ? now.detail : '', now && now.side && now.side !== 'Not Specified' ? now.side : '']
+      .filter(Boolean))].join(' · ') || (ep && ep.part) || '';  // ESPN often repeats the type as the detail
+    return { inj, play, what, now, ep, back: backWeek(pid), wk };
+  };
+  const healthTile = (pid, p, L, espn) => {
+    const h = healthOf(pid, p, L, espn);
+    const ret = h.back && h.back !== 'no' ? `back ~wk ${h.back}` : h.now && h.now.return_date ? `est. ${espnDate(h.now.return_date)}` : '';
+    const big = !h.inj ? '<div class="pc-big good">Healthy</div>'
+      : h.play != null && h.play > 0.01 ? `<div class="pc-big ${h.play >= 0.75 ? '' : 'bad'}">${Math.round(h.play * 100)}% <small>to play</small></div>`
+      : '<div class="pc-big bad">Out</div>';
+    const sub = !h.inj ? 'no injury listed' : [h.what, ret].filter(Boolean).join(' · ') || 'on the injury report';
+    return tapTile('Health', `${big}<div class="pc-tapsub">${esc(sub)}</div>`, 'Health', injuryBrief(pid, p, L, espn, h));
+  };
+  // the briefing: this week, the timeline (since when, games missed, return estimates), the latest news, then history
+  const injuryBrief = (pid, p, L, espn, h) => {
+    const now = h.now, ep = h.ep;
+    const thisWeek = `<div class="pc-box"><div class="pc-k">This week</div>
+        <div class="ij-now">${h.inj ? '' : '<b class="good">Healthy</b>'}${p && p.status ? injTag(p.status) : ''}${h.what ? `<b>${esc(h.what)}</b>` : ''}</div>
+        ${h.inj && h.play != null ? `<div class="ij-line"><b>${h.play > 0.01 ? `${Math.round(h.play * 100)}% to play` : 'Out'}</b>${p && p.inactive_why ? ` <span class="muted">· ${esc(p.inactive_why)}</span>` : ''}</div>` : ''}
+        ${!h.inj ? '<p class="pc-sub">Not on the injury report and practicing fully.</p>' : ''}</div>`;
+    const tl = [];
+    if (ep) tl.push(`Listed since week ${ep.w0}${ep.missed ? `, ${ep.missed} game${ep.missed === 1 ? '' : 's'} missed` : ''}${ep.list ? ` · on ${esc(ep.list)}` : ''}${ep.ig ? ` · hurt in the week ${ep.ig[0]} game${ep.ig[1] ? ` (Q${ep.ig[1]})` : ''}` : ''}`);
+    if (h.back === 'no') tl.push('Our return model: not back this season');
+    else if (h.back) tl.push(`Our return model: likely back week ${h.back}`);
+    if (now && now.return_date) tl.push(`ESPN's estimated return: ${espnDate(now.return_date)}`);
+    const timeline = h.inj && (tl.length || (now && now.comment)) ? `<div class="pc-box"><div class="pc-k">Timeline</div>${tl.map(t => `<div class="ij-line">${t}</div>`).join('')}
+        ${now && now.comment ? `<p class="pc-sub">${esc(now.comment)}</p>` : ''}</div>` : '';
+    const news = espn ? `<div class="pc-box"><div class="pc-k">Latest news</div><div class="pc-news" data-espn="${esc(espn)}" data-n="2"></div></div>` : '';
+    return thisWeek + timeline + news + (L && (L.inj || L.dur) ? injuryTab(L, espn, true) : '');
   };
   // Grade tile (owner 2026-10-16: OVR moved here from the header, then the Grade tab folded into its sheet): his OVR;
   // the sheet holds the whole grade (gradeTab) from his history shard (GRH, loaded with the page)
@@ -931,7 +984,7 @@
     }
     // Availability rides on the projection: a chip always, the reason spelled out once there's real risk.
     const ia = p.inactive || 0, av = ia >= 0.5 ? 'av-out' : ia >= 0.05 ? 'av-q' : 'av-ok';
-    const avChip = `<span class="pc-av ${av}" title="${esc(p.inactive_why || '')}">${ia < 0.005 ? '&lt;1' : Math.round(ia * 100)}% inactive</span>`;
+    const avChip = `<span class="pc-av ${av}" title="${esc(p.inactive_why || '')}">${NFLE.fmt.toPlay(ia)} to play</span>`;
     const isLive = st && st.state === 'in';
     // One rank pill (our rank at his position), colored by roster tier: starter / flex range / bench.
     const slotTxt = { start: 'starter', flex: 'flex range', bench: 'bench depth' }[p.slot] || '';
@@ -941,7 +994,7 @@
                    p.low_sample ? '<span class="flag" title="Few games to learn from: a wider range">low data</span>' : ''].join('');
     const exp = expectedCells(p);
     // Summary (owner 2026-10-16): one number per tile, the full story in a sheet on tap (pc-tap / the sheet below)
-    const risk = ia >= 0.05 ? avChip : '';
+    const risk = ia >= 0.05 && d !== DATA ? avChip : '';  // this week the Health tile carries it
     const projDetail = `<div class="pc-box pc-proj"><div class="pc-kr"><span class="pc-k">Projection${ia >= 0.05 ? ' (if active)' : ''}</span>${avChip}</div>
           <div class="pc-bigrow"><div class="pc-big">${f1(s.proj)} <small>pts</small></div>${rankPill}${flags ? `<span class="pc-flags">${flags}</span>` : ''}</div>
           ${rangeSvg(s.q, s.proj)}
@@ -959,9 +1012,8 @@
       <div class="pc-tiles">
         ${tapTile('Projection', `<div class="pc-big">${f1(s.proj)} <small>pts</small></div><div class="pc-tapsub">${rankPill}${risk}</div>`, `${wkLabel(d)} projection`,
             projDetail + muDetail.replace('<div class="pc-box">', '<div class="pc-box"><div class="pc-k">Matchup effect</div>'))}
-        ${last5Tile(L, p.pos)}
-        ${fpg != null ? tapTile('Season', `<div class="pc-big">${f1(fpg)} <small>FP/G</small></div><div class="pc-tapsub">${f0(e.games || p.sc.g)} games</div>`,
-            `${d.season} season before week ${d.week}`, `<div class="pc-box pc-season">${seasonHtml(p, d, L)}</div>`) : ''}
+        ${formTile(L, p.pos, fpg, e.games || p.sc.g, `${d.season} season before week ${d.week}`, `<div class="pc-box pc-season">${seasonHtml(p, d, L)}</div>`)}
+        ${d === DATA ? healthTile(pid, p, L, p.espn) : ''}
         ${GRADED[p.pos] ? gradeTile(pid) : ''}
       </div>
       ${g ? `<div class="pc-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>` : ''}`;
@@ -973,7 +1025,8 @@
     const pos = L && L.pos;
     const played = g ? `<div class="pc-now"><div class="pc-k">Final</div><div class="pc-big">${f1(pts(g.c, weights(), pos))} <small>pts</small></div>
       <div class="pc-sub">${g.h === 0 ? '@' : 'vs'} ${tmL(g.o)} · ${ord(g.rk)} among ${esc(pos)}s${g.gid ? ` · <a href="${esc(gcUrl(g.gid, g.f || ''))}">Gamecast &rsaquo;</a>` : ''}</div></div>` : '';
-    return `${played}<div class="pc-box"><p class="pc-sub">Not on our ${esc(wkLabel(d).toLowerCase())} board: a bye, ruled out, not on a roster yet, or projected too low to list.</p></div>`;
+    const hurt = d === DATA && L && L.pid && healthOf(L.pid, null, L, L.espn).inj;
+    return `${played}${hurt ? `<div class="pc-tiles">${healthTile(L.pid, null, L, L.espn)}</div>` : ''}<div class="pc-box"><p class="pc-sub">Not on our ${esc(wkLabel(d).toLowerCase())} board: a bye, ruled out, not on a roster yet, or projected too low to list.</p></div>`;
   };
   // Header extras from the career log doc (tools/player_logs.py): photo, jersey number, bio, recent snap share and,
   // for QBs, how often he scrambles. All current, like the rest of the header.
@@ -1150,10 +1203,10 @@
     loadInj.busy = 1;
     getJSON(`${siteRoot()}data/espn_injuries/latest.json`).then(x => { DINJ = {}; x.rows.forEach(r => { DINJ[String(r.espn_id)] = r; }); rerenderCard(); }).catch(() => {});
   };
-  const injuryTab = (L, espn) => {
+  const injuryTab = (L, espn, brief = false) => {
     const eps = L.inj || [], d = L.dur;
     loadInj();
-    const now = espn && DINJ && DINJ[espn];
+    const now = !brief && espn && DINJ && DINJ[espn];
     const cur = now && now.status !== 'Active' ? `<div class="pc-box"><div class="pc-k">Right now · ESPN</div>
       <div class="ij-now"><span class="dc-tag dt-${now.status === 'Questionable' ? 'q' : now.status === 'Doubtful' ? 'd' : 'out'}">${esc(now.status)}</span>
         <b>${esc([now.type, now.detail && now.detail !== 'Not Specified' ? now.detail : '', now.side && now.side !== 'Not Specified' ? now.side : ''].filter(Boolean).join(' · '))}</b>
@@ -1284,7 +1337,7 @@
     const photo = photoUrl(L, espn), num = L && L.bio ? L.bio.num : null;
     if (cardTab === 'news' && !news) cardTab = 'ov';
     const graded = !!GRADED[pos];
-    if (cardTab === 'gr') cardTab = 'ov';  // the Grade tab became the Grade tile's sheet (a remembered tab may still say gr)
+    if (cardTab === 'gr' || cardTab === 'inj') cardTab = 'ov';  // Grade and Injuries became tile sheets  // the Grade tab became the Grade tile's sheet (a remembered tab may still say gr)
     if (graded && GRH[pid] === undefined) {
       GRH[pid] = null;
       NFLE.load(`data/grades/players/${pid.slice(-2)}.json`).catch(() => null).then(sh => {
@@ -1315,14 +1368,13 @@
         ${bioStrip(L, ' pc-bio-in')}
       </div>
       ${bioStrip(L)}
-      <div class="seg pc-tabs" role="tablist">${[['ov', 'Summary'], ['log', 'Game log'], ...(L && (L.inj || L.dur) ? [['inj', 'Injuries']] : []), ...(news ? [['news', 'News']] : [])]
+      <div class="seg pc-tabs" role="tablist">${[['ov', 'Summary'], ['log', 'Game log'], ...(news ? [['news', 'News']] : [])]
         .map(([k, l]) => `<button type="button" role="tab" data-pt="${k}" class="${cardTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${overview ? '' : pickerHtml()}${week}${overview ? '<div class="pc-pen"></div>' : ''}</div>
       <div class="pc-tab" data-pt="log"${cardTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every career game</div><div class="pc-log">${
         !LOGS[pid] ? '<div class="skel-zone"></div>' : !L ? '<p class="pc-sub">Game log unavailable.</p>'
           : isKind ? (L.seasons.length ? kindLog(L, L.seasons) : '<p class="pc-sub">No regular-season games with a recorded stat or snap.</p>')
           : L.seasons.length || (L.up || []).length ? logHtml(L, p || row) : '<p class="pc-sub">No NFL games yet.</p>'}</div></div></div>
-      ${L && (L.inj || L.dur) ? `<div class="pc-tab" data-pt="inj"${cardTab === 'inj' ? '' : ' hidden'}>${injuryTab(L, espn)}</div>` : ''}
       ${news ? `<div class="pc-tab" data-pt="news"${cardTab === 'news' ? '' : ' hidden'}><div class="pc-box pc-newsbox"><div class="pc-k">Recent news</div><div class="pc-news"></div></div></div>` : ''}`;
     body.querySelectorAll('.pc-news').forEach(nb => loadNews(espn, nb, +nb.dataset.n || 6));
     // his career from one small shard (data/penalties/players/<last 2 digits>.json) instead of every season's file
@@ -2495,6 +2547,7 @@
     ov.querySelector('.sheet-h b').textContent = tile.dataset.sheet;
     ov.querySelector('.sheet').setAttribute('aria-label', tile.dataset.sheet);
     ov.querySelector('.sheet-b').appendChild(tile.querySelector('template').content.cloneNode(true));
+    document.dispatchEvent(new CustomEvent('nfle-sheet', { detail: ov.querySelector('.sheet-b') }));
     ov.addEventListener('click', e => {
       if (e.target === ov || e.target.closest('.sheet-x')) { close(); return; }
       if (e.target.closest('a[href], .tm-open, [data-open-pid]')) setTimeout(close);  // the page's click rule runs first

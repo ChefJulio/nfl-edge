@@ -304,11 +304,11 @@
     // ---- views --------------------------------------------------------------------------------------------------
     // One row style for every table (owner 2026-10-17 audit): the slot (lineups only), the player with his chips wrapping
     // under the name inside the cell (a long chip used to push the numbers off a phone screen), the projection; the
-    // chance to sit is a chip ("35% out"), and the position chip shows only where the slot doesn't already say it
+    // chance to play is a chip ("65% to play"; owner 2026-10-17: one way everywhere), and the position chip shows only where the slot doesn't already say it
     // (FLEX, bench) or there is no slot (waivers sit under a position heading, so none there either).
     const badgesOf = (p, o = {}) => {
       const out = p.proj != null && p.inactive >= 0.05 && p.inactive < 0.99 ?  // ruled out: the O chip says it
-        `<span class="lg-out${p.inactive >= 0.5 ? ' hi' : ''}" title="Chance he sits">${pct(p.inactive)} out</span>` : '';
+        `<span class="lg-out${p.inactive >= 0.5 ? ' hi' : ''}" title="Chance he plays">${NFLE.fmt.toPlay(p.inactive)} to play</span>` : '';
       const conds = (p.conds || []).map(c => condTxt(c) && `<span class="lg-cond" title="${esc(`${f1(c.sits)} if ${c.name} sits, ${f1(c.plays)} if he plays`)}">${condTxt(c)}</span>`).join('');
       const lock = p.locked && !o.noLock ? '<span class="lg-lock" title="His game has kicked off: his spot is set">locked</span>' : '';
       const inner = lock + NFLE.injTag(p.status || '') + out + conds;
@@ -387,7 +387,7 @@
       // Readable moves (owner 2026-10-16): who comes in, who goes out and why, then one card per game-time call with
       // its two outcomes on their own lines.
       const why = p => p.exp == null ? 'not projected (bye, IR or out)'
-        : p.inactive >= 0.15 ? `${pct(p.inactive)} to sit · ${f1(p.proj)} if he plays · ${esc(statusWords(p.status))}`
+        : p.inactive >= 0.15 ? `${NFLE.fmt.toPlay(p.inactive)} to play · ${f1(p.proj)} if he plays · ${esc(statusWords(p.status))}`
         : `projects ${f1(p.exp)}`;
       const ifLines = p => (p.conds || []).map(condTxt).filter(Boolean);
       const nm = p => `<b>${esc(p.name)}</b>`;
@@ -408,7 +408,7 @@
           : other ? `start ${nm(other)} <b>${f1(other.proj)}</b>${cuff ? ` <span class="muted">(your ${esc(cuff.name)} only rises to ${f1(cc.sits)})</span>` : ''}` : 'pick up a fill-in';
         return `<div class="lg-mv gt">
             <div class="lg-mv-h">${nm(p)} <span class="lg-mv-tag">game-time call</span></div>
-            <div class="muted lg-mv-s">${pct(p.inactive)} to sit · ${esc(statusWords(p.status))}</div>
+            <div class="muted lg-mv-s">${NFLE.fmt.toPlay(p.inactive)} to play · ${esc(statusWords(p.status))}</div>
             <div class="lg-mv-row"><span class="lg-mv-k good">Plays</span><div>start him <b>${f1(p.proj)}</b></div></div>
             <div class="lg-mv-row"><span class="lg-mv-k bad">Out</span><div>${out}</div></div>
           </div>`;
@@ -458,7 +458,7 @@
           <div class="r"><div class="lg-tn">${esc(opp.name)}</div><div class="lg-big">${f1(eb)}</div>${live(opp.id)}</div></div>
         <div class="lg-bar"><span style="width:${(100 * pw).toFixed(1)}%"></span></div>
         <div class="lg-hh">${rows}</div>
-        <p class="muted lg-note">Win chance: each starter's projection and range under your scoring and his chance to sit, for both lineups, counting how players in the same game rise and fall together (a QB and his receivers most). Live points are the platform's.</p>`;
+        <p class="muted lg-note">Win chance: each starter's projection and range under your scoring and his chance to play, for both lineups, counting how players in the same game rise and fall together (a QB and his receivers most). Live points are the platform's.</p>`;
     };
 
     const WHEAD = '<th>Player</th><th class="num">This wk</th><th class="num" title="Expected points per remaining game, byes skipped">ROS/g</th>';

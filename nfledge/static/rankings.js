@@ -57,7 +57,7 @@
       <details class="howto rk-h-week"><summary>How to read</summary><div>
         <dl class="ht">
           <dt>#</dt><dd>Our rank at the position.</dd>
-          <dt>Proj</dt><dd>Points if he plays. Injured players show an Inactive % instead of a discount, since playing is yes/no.</dd>
+          <dt>Proj</dt><dd>Points if he plays. Injured players show their chance to play (Play%) instead of a discount, since playing is yes/no.</dd>
           <dt>Range</dt><dd>Floor to ceiling: 8 times in 10 his score lands inside it.</dd>
           <dt>Last 5</dt><dd>His last five games. Green beat our projection, red missed it; the white tick is the projection.</dd>
           <dt>Matchup</dt><dd>Points this opponent adds (+) or takes away (−) vs an average one. Green helps, red hurts; deeper = bigger.</dd>
@@ -182,8 +182,8 @@
         { key: 'l5', label: 'Last 5', sort: false, cls: 'l5', title: 'His last 5 games this season: bar = points scored, green = beat our projection for that game, red = missed it; the tick is our projection', html: l5 },
         { key: 'mu', label: 'Matchup', first: 'desc', cls: 'mu', title: 'Opponent, and the points facing them adds (+) or takes away (-) vs an average opponent: Vegas total, play volume and defense ratings together. Green helps, red hurts; deeper = bigger.',
           value: r => r.mu, html: r => `<span class="opp tm-open" data-tm="${esc(r.opp)}"><span class="vs">${esc(r.home)}</span>${logo(r.opp, 18)}<b>${esc(r.opp)}</b></span><span class="muv" style="color:${esc(r.mu_c || '')}" title="Facing ${esc(r.opp)} instead of an average opponent: ${sgn(r.mu)} pts">${sgn(r.mu)}</span>` },
-        { key: 'inactive', label: 'Inactive', cls: 'ctr', title: 'Chance he is inactive: injury (practice pattern + game status) or healthy scratch', value: r => r.inactive,
-          html: r => `<span title="${esc(r.inactive_why)}" class="${r.inactive >= 0.5 ? 'pill pill-bad' : r.inactive >= 0.15 ? 'pill pill-warn' : r.inactive >= 0.05 ? 'pill pill-soft' : 'quiet'}">${r.inactive < 0.005 ? '&lt;1%' : `${Math.round(100 * r.inactive)}%`}</span>` },
+        { key: 'inactive', label: 'Play%', cls: 'ctr', title: 'Chance he plays this week (injury report, practice pattern, game status, healthy scratches)', value: r => 1 - (r.inactive || 0),
+          html: r => `<span title="${esc(r.inactive_why)}" class="${r.inactive >= 0.5 ? 'pill pill-bad' : r.inactive >= 0.15 ? 'pill pill-warn' : r.inactive >= 0.05 ? 'pill pill-soft' : 'quiet'}">${NFLE.fmt.toPlay(r.inactive)}</span>` },
         { key: 'vol', label: 'Volume', first: 'desc', cls: 'volc', title: 'Projected volume; arrow = his recent usage share has moved up or down from his longer-run share (a role change)',
           value: r => r.vol && r.vol.v, html: r => r.vol ? `<span title="${esc(r.vol.d)}">${esc(r.vol.t)}${r.vol.a === 'up' ? '<i class="va va-up">&#9650;</i>' : r.vol.a === 'down' ? '<i class="va va-down">&#9660;</i>' : ''}</span>` : '' },
         { key: 'imp', label: 'Team pts', num: true, cls: 'impc', title: "Points his team is expected to score this game (Vegas implied total; our model's before lines post): more points, more scoring chances", value: r => r.imp, html: r => f1(r.imp) },
