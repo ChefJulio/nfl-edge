@@ -102,7 +102,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
             : `<span class="gf-pick miss">Upset &middot; a ${100 - f.pct}% chance</span>`;
       const main = sides.map(([s, sc, os, pct], i) => {
         const side = i ? 'home' : 'away';
-        const cls = `${fin && sc < os ? ' lost' : ''}${!fin && !f.tossup && pct < 50 ? ' dog' : ''}`;
+        const cls = `${fin && sc < os ? ' lost' : ''}${fin && sc > os ? ' won' : ''}${!fin && !f.tossup && pct < 50 ? ' dog' : ''}`;
         // the logo's visible edge (outside the score / name, which sit above it) and the name open the team page
         return `${s.logo_url ? `<img class="mt-lg ${side} tm-open" data-tm="${esc(s.team)}" src="${esc(F.logoSrc(s.logo_url, 112))}" alt="" loading="lazy">` : ''}
           <div class="mt-side ${side}${cls}"><span class="mt-num">${fin ? esc(sc) : `${esc(pct)}<small>%</small>`}</span>

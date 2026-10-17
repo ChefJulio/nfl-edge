@@ -2135,6 +2135,7 @@
         side.querySelector('.mt-num').textContent = st[k].score;
         side.classList.remove('dog');
         side.classList.toggle('lost', !live && st[k].score < st[k === 'away' ? 'home' : 'away'].score);
+        side.classList.toggle('won', !live && st[k].score > st[k === 'away' ? 'home' : 'away'].score);
         side.classList.toggle('has-ball', !!(sp && sp.offense.team === st[k].team));
         // once it's final, ESPN's record includes this game (the built page has the record from before kickoff)
         const rec = side.querySelector('.mt-nm small');
