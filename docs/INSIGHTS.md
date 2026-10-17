@@ -613,6 +613,17 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Green Bay checks out: 13 titles, 37-28.
 
 ## 9. Open threads / next steps (as of 2026-10-12)
+- **Fantasy: depth-aware values (2026-10-17; replaces a STOPGAP).** The Fantasy tab's waiver moves (league.js
+  movesFor) value a roster by its best lineup each remaining week by expected points, with every healthy player healthy
+  through week 17. So a backup's insurance (he plays when a starter is hurt) and the waiver wire's own depth (a D/ST
+  for a bye can be picked up that week) are worth ~0; the owner caught it ("drop McLaughlin for a second defense").
+  Stopgap shipped: hold-one positions (QB unless 2-QB / superflex, TE, K, D/ST) only upgrade, and RB / WR never drop
+  below 3 (league.js DEPTH_MIN). Remaining work: (1) weekly injury rates by position fitted from history (P a healthy
+  starter misses week k+j), applied to future weeks; (2) lineup value as the expectation over who is available (each
+  slot's expected points with the next man up when a starter sits; Poisson-binomial per position, flex last); (3) a
+  waiver replacement level per position (the best free agent each week) as the floor a roster spot must beat;
+  (4) check: rank-correlate predicted vs realized rest-of-season team points (2021-25 backtests) for the old and new
+  values; then remove the rules. Then the trade calculator and finder (owner: team-relative; both sides' gain) on it.
 - **Hand-set values queue (2026-10-17): docs/handset_audit.md.** 22 model values without fitting or a numbered
   test (4 high impact: prior-season weight, TD blend k, Tuesday / week availability model settings, redistribution
   minimum share). Each gets its own pre-registration here before it runs, decided by sec. 1 rule 7 (MAE, start /
