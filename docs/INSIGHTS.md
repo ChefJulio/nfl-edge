@@ -2234,3 +2234,8 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   s-1): mean pinball loss over p10 / p25 / p50 / p75 / p90, played rows, projection >= 1. GATE: lower with a 95% CI over
   season-weeks excluding 0 and lower in each of 2023-25; guard: top-three-tier 10-90% coverage no further from 80% on
   average. tools/range_eval.py.
+- **RESULT {#range-oos} (AE) ranges from out-of-sample misses: FAIL, today's kept (now tested).** 15,128 rows 2023-25:
+  pinball 1.3144 -> 1.3133, -0.0011 [-0.0034, +0.0011] (2023 -0.0006, 2024 +0.0009, 2025 -0.0036); top-three-tier
+  coverage gap from 80% 0.022 both ways (QB flex 73.6 -> 73.8%). The widening factor is 1 (config [uncertainty] all
+  off), so the variant used the offsets as they are. Ranges are calibrated within noise already: the in-sample source
+  doesn't show up as too-narrow ranges. Range calibration closed.
