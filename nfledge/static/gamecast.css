@@ -750,3 +750,16 @@ table.pst-tbl td.pst-who, table.pst-tbl th:first-child { width: 124px; min-width
 /* WebKit sizes this column ~12px under the sticky cell it holds (measured: static layout puts the next column at the
    cell's edge, sticky layout 12px inside it), so the first stat column keeps its content clear with padding */
 table.pst-tbl td.pst-who + td.num, table.pst-tbl tr > th:first-child + th.num { padding-left: 18px; }
+
+/* Phones: the whole game log (through TD) fits without scrolling sideways (owner 2026-10-16): narrower pinned week /
+   opponent columns (the opponent's sticky offset follows the week column), tighter chips, a slimmer scroll gutter. */
+@media (max-width: 560px) {
+  .lg-scroll { margin: 0 -8px; padding: 0 8px; }
+  table.lg th, table.lg td { padding-left: 4px; padding-right: 4px; }
+  table.lg td.num, table.lg th.num { padding-left: 1px; padding-right: 1px; }
+  table.lg tr > :nth-child(1) { min-width: 27px; } table.lg tr > :nth-child(2) { left: 27px; min-width: 42px; }
+  table.lg .sc { min-width: 1.45em; padding: 2px 2px; }
+  table.lg th { letter-spacing: .02em; }
+  /* one card level, not two: the log boxes sit flat on the page card (their table gets the width back) */
+  .pc-box.pc-logbox, .pc-box.pc-mini { padding-left: 0; padding-right: 0; border: 0; background: none; box-shadow: none; }
+}
