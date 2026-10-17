@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-05T04:04Z,,,,,,McMillan caught 14 of 16 targets for 192 yards and two touchdowns in Sunday's 32-26 win over the Lions.
 4428993,Haynes King,Carolina Panthers,Active,2026-10-04T23:08Z,,,,,,King (coach's decision) is inactive but will operate as the Panthers' emergency third quarterback Sunday night versus Detroit.
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
-4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-17T19:11Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
+4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-17T19:13Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
 4242659,Dayo Odeyingbo,Chicago Bears,Injured Reserve,2026-10-17T17:35Z,Quadriceps,Not Specified,Not Specified,2026-11-22,IR,ir
 4911952,Keyshaun Elliott,Chicago Bears,Out,2026-10-17T03:50Z,Quadriceps,Not Specified,Not Specified,2026-10-22,OUT,Elliott (quadriceps) has been ruled out for Sunday's game against the Falcons.
 4361093,Kyler Gordon,Chicago Bears,Questionable,2026-10-17T01:01Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Gordon (calf) is listed as questionable for Sunday's game against the Falcons.
@@ -624,6 +624,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361331,Jamien Sherwood,New York Jets,Active,2026-10-08T04:15Z,,,,,,Sherwood finished with 13 total tackles (five solo) and one forced fumble in Sunday's 23-12 loss to Chicago.
 14958,Demario Davis,New York Jets,Active,2026-10-08T03:46Z,,,,,,Davis ended with 10 total tackles (five solo) and 1.0 sacks in Sunday's 23-12 loss to Chicago.
 4429005,Braiden McGregor,New York Jets,Injured Reserve,2026-10-07T21:44Z,Pectoral,Surgery,Not Specified,2027-02-15,IR,"McGregor (pectoral) was placed on the Jets' injured reserve list Wednesday, Eric Allen of the team's official site reports."
+15797,Lane Johnson,Philadelphia Eagles,Out,2026-10-17T19:13Z,Personal,Not Specified,Not Specified,2027-02-15,OUT,out
 4040715,Jalen Hurts,Philadelphia Eagles,Out,2026-10-17T14:10Z,Calf,Not Specified,Not Specified,2026-10-26,OUT,"Hurts remains sidelined indefinitely due to a superficial blood clot in his calf, but the Eagles are not planning to place the Philadelphia quarterback on injured reserve, Adam Schefter of ESPN reports."
 4567802,Drew Kendall,Philadelphia Eagles,Questionable,2026-10-17T04:43Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Kendall (knee) is questionable for Sunday's game against the Panthers.
 4035624,Landon Dickerson,Philadelphia Eagles,Injured Reserve,2026-10-17T04:35Z,Knee,Not Specified,Not Specified,2026-10-18,IR-R,Dickerson (knee) is questionable for Sunday's game against Carolina.
@@ -648,8 +649,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 15835,Zach Ertz,Philadelphia Eagles,Active,2026-10-13T03:59Z,,,,,,"Ertz reverted to the Eagles' practice squad Monday, per the NFL's transaction log."
 4685759,Jalen Carter,Philadelphia Eagles,Active,2026-10-12T16:31Z,,,,,,"Carter logged five tackles (three solo), including 2.0 sacks, one pass defense and two forced fumbles during the Eagles' 19-17 loss to the Jaguars on Sunday in London."
 3050478,Jake Elliott,Philadelphia Eagles,Active,2026-10-12T14:13Z,,,,,,Elliott made his lone field-goal attempt and both of his extra-point tries during Sunday's 19-17 loss to the Jaguars in London.
-4870795,Makai Lemon,Philadelphia Eagles,Active,2026-10-12T03:34Z,,,,,,Lemon caught five of seven targets for 43 yards during Sunday's 19-17 loss to the Jaguars.
-4431492,Roman Wilson,Pittsburgh Steelers,Injured Reserve,2026-10-17T19:09Z,Finger,Not Specified,Left,2026-11-22,IR,ir
+4431492,Roman Wilson,Pittsburgh Steelers,Injured Reserve,2026-10-17T19:27Z,Finger,Not Specified,Left,2026-11-22,IR,"Wilson (finger) was placed on injured reserve Saturday, Ray Fittipaldo of the Pittsburgh Post-Gazette reports."
 4361411,Pat Freiermuth,Pittsburgh Steelers,Questionable,2026-10-17T16:29Z,Calf,,,2026-10-18,QUESTIONABLE,"Freiermuth (calf) was added to the injury report Saturday and is listed as questionable for Sunday's game against Tampa Bay, Adam Schefter of ESPN reports."
 4047650,DK Metcalf,Pittsburgh Steelers,Active,2026-10-17T16:27Z,,,,,,"The Steelers removed Metcalf (illness) from the injury report Saturday, and the veteran wide receiver will be available for Sunday's game against the Buccaneers, Adam Schefter of ESPN reports."
 3929846,DeShon Elliott,Pittsburgh Steelers,Injured Reserve,2026-10-17T01:42Z,Knee,Not Specified,Not Specified,2026-10-25,IR-R,"Elliott (knee) has been ruled out ahead of Sunday's game against the Buccaneers, Adam Caplan of SiriusXM NFL Radio reports."
@@ -774,22 +774,22 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035369,Jeffery Simmons,Tennessee Titans,Active,2026-10-09T19:41Z,,,,,,
 4870805,Anthony Hill Jr.,Tennessee Titans,Active,2026-10-07T01:15Z,,,,,,Hill tallied eight tackles (three solo) during the Titans' 24-18 loss to the Ravens on Sunday.
 4879480,Drew Moss,Tennessee Titans,Active,2026-10-05T19:07Z,,,,,,
+4697815,Rachaad White,Washington Commanders,Active,2026-10-17T19:29Z,,,,,,White (shoulder) doesn't have a designation for Monday's game at San Francisco.
+2976212,Stefon Diggs,Washington Commanders,Questionable,2026-10-17T19:24Z,Hamstring,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,Diggs (hamstring) is listed as questionable for Monday's game against San Francisco.
+3121422,Terry McLaurin,Washington Commanders,Active,2026-10-17T19:19Z,,,,,,McLaurin (hamstring) does not have an injury designation ahead of Monday's game against the 49ers.
+4567156,Treylon Burks,Washington Commanders,Active,2026-10-17T19:11Z,,,,,,
+3125248,Jeremy Reaves,Washington Commanders,Active,2026-10-17T19:11Z,,,,,,
+2971586,Fabian Moreau,Washington Commanders,Active,2026-10-17T19:11Z,,,,,,
+4426403,Nick Cross,Washington Commanders,Questionable,2026-10-17T19:10Z,Illness,,,2026-10-19,QUESTIONABLE,questionable
 2576980,Marcus Mariota,Washington Commanders,Out,2026-10-17T16:55Z,Knee - MCL,Sprain,Right,2026-11-01,OUT,"Mariota (knee) has been ruled out for Monday's game against the 49ers, Tashan Reed of The Washington Post reports."
 4361357,Javontae Jean-Baptiste,Washington Commanders,Out,2026-10-17T16:48Z,Pectoral,Not Specified,Not Specified,2026-11-01,OUT,out
 3929865,Charles Omenihu,Washington Commanders,Out,2026-10-17T16:47Z,Groin,Not Specified,Not Specified,2026-11-01,OUT,out
 4575131,Jacory Croskey-Merritt,Washington Commanders,Out,2026-10-17T16:46Z,Groin,Not Specified,Not Specified,2026-11-01,OUT,"Croskey-Merritt (groin) has been ruled out for Monday night's game against the 49ers, Tashan Reed of The Washington Post reports."
-2976212,Stefon Diggs,Washington Commanders,Questionable,2026-10-17T15:37Z,Hamstring,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,"Diggs (hamstring) was on the field for Saturday's practice session, Jonah Keim of ESPN.com reports."
-3121422,Terry McLaurin,Washington Commanders,Active,2026-10-17T15:33Z,,,,,,"McLaurin (hamstring) was on the field for Saturday's practice session, Jonah Keim of ESPN.com reports."
 3127586,Jeremy McNichols,Washington Commanders,Injured Reserve,2026-10-17T03:00Z,Quadriceps,Not Specified,Not Specified,2026-10-19,IR-R,McNichols (quadriceps) was a full participant in Friday's practice.
-4567156,Treylon Burks,Washington Commanders,Questionable,2026-10-16T23:15Z,Shoulder,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,Burks (shoulder) remained limited in Friday's practice.
 3068267,Austin Ekeler,Washington Commanders,Active,2026-10-16T23:13Z,,,,,,Ekeler (chest) remained limited in Friday's practice.
-4697815,Rachaad White,Washington Commanders,Active,2026-10-16T22:26Z,,,,,,White practiced in a limited capacity Friday due to a shoulder injury.
 2576736,Lucas Patrick,Washington Commanders,Questionable,2026-10-16T22:18Z,Illness,,,2026-10-19,QUESTIONABLE,questionable
 4259491,Javon Kinlaw,Washington Commanders,Questionable,2026-10-16T22:17Z,Ankle,,,2026-10-19,QUESTIONABLE,questionable
 4360378,Quan Martin,Washington Commanders,Active,2026-10-16T22:17Z,,,,,,
-2971586,Fabian Moreau,Washington Commanders,Questionable,2026-10-15T23:17Z,Knee,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
-3125248,Jeremy Reaves,Washington Commanders,Questionable,2026-10-15T23:16Z,,,,,,questionable
-4426403,Nick Cross,Washington Commanders,Active,2026-10-15T22:47Z,,,,,,"Cross (illness) will be a full participant in practices ahead of Monday's game against the 49ers, Tashan Reed of The Washington Post reports."
 4568617,Jordan Magee,Washington Commanders,Injured Reserve,2026-10-15T22:38Z,Hamstring,Not Specified,Not Specified,2026-10-19,IR-R,Magee (hamstring) was designated to return from injured reserve Thursday.
 5081432,Antonio Williams,Washington Commanders,Active,2026-10-14T00:36Z,,,,,,Williams hauled in all three of his targets for 31 yards and added a two-yard punt return during the Commanders' 27-27 tie with the Giants on Sunday.
 4572460,Tyler Owens,Washington Commanders,Questionable,2026-10-13T17:10Z,Hamstring,Not Specified,Not Specified,2026-10-19,QUESTIONABLE,questionable
