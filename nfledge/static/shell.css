@@ -127,3 +127,7 @@ html.land-anim #tab-players .scroll tbody tr:nth-child(n+13) { animation-delay: 
    flush with the card's top edge; the header's own padding keeps its spacing */
 .pc-card .pc { padding-top: 0; }
 .pc-card .pc-head { margin-top: 0 !important; }
+/* card grab bar (phones): the sheets' handle, over the header's tint */
+.pc-card .sheet-grab { z-index: 10; top: 6px; }
+.pc-card .pc-head { touch-action: pan-y; }
+@media (min-width: 641px) { .pc-card .sheet-grab { display: none; } }

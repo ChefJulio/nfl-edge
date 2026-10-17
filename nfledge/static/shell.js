@@ -253,7 +253,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   // (its scroll too). Links stay shareable; Back, the close button, a tap outside or Esc closes it. Phones: nearly full
   // screen, sliding up; desktop: a large centered panel. Tile sheets open above it.
   document.body.insertAdjacentHTML('beforeend', `<div class="pc-ov pc-page pc-card" id="pcOv" hidden><div class="pc-wrap">
-    <button type="button" class="pc-x" aria-label="Close">&times;</button>
+    <i class="sheet-grab" aria-hidden="true"></i><button type="button" class="pc-x" aria-label="Close">&times;</button>
     <div class="pc" role="dialog" aria-modal="true" aria-labelledby="pcName"><div class="pc-body"></div></div></div></div>`);
   const cardOv = document.getElementById('pcOv'), cardBox = cardOv.querySelector('.pc');
   NFLE.pageMode = true;
@@ -339,6 +339,39 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     try { history.replaceState(null, '', '#' + (r.p.subs.length < 2 ? r.p.key : `${r.p.key}/${r.s[0]}`)); } catch (e) { /* file:// */ }
   };
   NFLE.closeCard = closeCard;
+  // Phones (owner 2026-10-17: "the same behavior we have for sheets"): the card follows a downward drag from its header,
+  // or from anywhere once it is scrolled to the top; far or fast enough slides it away and closes it (as the close
+  // button does, so Back stays in step), else it springs back. Sideways swipes (a game log scrolling) are left alone.
+  const cardWrap = cardOv.querySelector('.pc-wrap');
+  let dy0 = 0, dx0 = 0, dmode = null, dlast = 0, dlastT = 0, dv = 0;
+  cardBox.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1 || !matchMedia('(max-width: 640px)').matches) { dmode = 'off'; return; }
+    dy0 = dlast = e.touches[0].clientY; dx0 = e.touches[0].clientX; dlastT = e.timeStamp; dv = 0;
+    dmode = e.target.closest('.pc-head') && cardBox.scrollTop <= 0 ? 'maybe' : null;
+  }, { passive: true });
+  cardBox.addEventListener('touchmove', e => {
+    if (dmode === 'off' || dmode === 'no') return;
+    const y = e.touches[0].clientY, dy = y - dy0, dx = e.touches[0].clientX - dx0;
+    if (e.timeStamp > dlastT) { dv = (y - dlast) / (e.timeStamp - dlastT); dlast = y; dlastT = e.timeStamp; }
+    if (dmode !== 'drag') {
+      if (Math.abs(dy) < 6 && Math.abs(dx) < 6) return;
+      dmode = dy > 0 && Math.abs(dy) > Math.abs(dx) && cardBox.scrollTop <= 0 ? 'drag' : 'no';
+      if (dmode !== 'drag') return;
+    }
+    e.preventDefault();
+    cardWrap.style.transition = 'none';
+    cardWrap.style.transform = `translateY(${Math.max(0, dy)}px)`;
+  }, { passive: false });
+  cardBox.addEventListener('touchend', () => {
+    if (dmode !== 'drag') { dmode = null; return; }
+    dmode = null;
+    const dy = dlast - dy0;
+    cardWrap.style.transition = 'transform .22s var(--ease)';
+    if (dy > 0.25 * cardWrap.offsetHeight || dv > 0.6) {
+      cardWrap.style.transform = 'translateY(100%)';
+      setTimeout(() => { closeCard(); cardWrap.style.transition = 'none'; cardWrap.style.transform = ''; }, 210);
+    } else cardWrap.style.transform = '';
+  });
   cardOv.addEventListener('click', e => { if (e.target === cardOv || e.target.closest('.pc-x')) closeCard(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !cardOv.hidden && !document.querySelector('.sheet-ov, .zoom-ov')) closeCard(); });
   const showPage = (kind, id) => {
