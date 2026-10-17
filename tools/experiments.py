@@ -114,6 +114,9 @@ VARIANTS = {
   # INSIGHTS (Z): the TD blend k (weight on actual TDs = n / (n + k)); 1e9 = expected TDs only
   **{f"td_k_{k}": variant(player_model__td_blend_k=k) for k in (25, 50, 100, 300, 600)},
   "td_k_xtd": variant(player_model__td_blend_k=1e9),
+  # INSIGHTS (AC): the redistribution trigger, smallest share handed out (today tgt .08, carry .15)
+  **{f"minshare_{int(t * 100)}_{int(c * 100)}": variant(injuries__redistribute_min_share={"tgt_share": t, "carry_share": c})
+     for t in (0.04, 0.06, 0.08, 0.12) for c in (0.08, 0.15, 0.25) if (t, c) != (0.08, 0.15)},
   "newcomer_05": variant(experiments__newcomer_scale=0.5),
   "ecr_blend_all": variant(experiments__ecr_blend_positions=["QB", "RB", "WR", "TE"]),
   "ecr_blend_none": variant(experiments__ecr_blend_positions=[]),

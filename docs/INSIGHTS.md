@@ -2132,3 +2132,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   tools/avail_grid_eval.py tuesday, 37,132 rows. Choose 2021-23: 7 leaves / 200 / min leaf 80, Brier .13461 vs today's
   (15 / 300 / 40) .13543. Decide 2024-25: +.00049 [+.00007, +.00094] (worse; 2024 -.00031, 2025 +.00126); 2026 +.00257.
   (Calibration figures printed by this run predate the alignment fix; the verdict rests on Brier.)
+- **PRE-REGISTERED 2026-10-17 (before running): (AC) the redistribution trigger** (docs/handset_audit.md #4).
+  injuries.redistribute_min_share = {tgt 0.08, carry 0.15}: the smallest projected share of a sitting player whose
+  volume is handed out; "lower / higher within noise" has no numbers. Grid tgt {.04, .06, .08, .12} x carry {.08, .15,
+  .25}. tools/experiments.py 2021-2026 (variants minshare_*), tools/grid_eval.py: CHOOSE the lowest MAE on 2021-23;
+  DECIDE on 2024-25 (CI excluding 0 below, better in both, no position significantly worse, start / sit not
+  significantly worse); CONFIRM 2026 so far, same direction. Today's the choice -> keep (now tested).
