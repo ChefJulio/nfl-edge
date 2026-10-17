@@ -113,7 +113,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
           ${i ? '' : `<span class="mt-at">${g.neutral ? 'vs' : '@'}${f.tossup && !fin ? '<small>Tossup</small>' : ''}</span>`}`;
       }).join('');
       // when (owner 2026-10-17): kickoff / Final / the live clock at the top middle; the footer keeps the rest
-      const when = fin ? '<span class="mt-fin">Final</span>' : `${esc(g.kickoff)}${g.neutral ? ' &middot; neutral' : ''}`;
+      const when = fin ? `<span class="mt-fin">${fin.ot ? 'Final/OT' : 'Final'}</span>` : `${esc(g.kickoff)}${g.neutral ? ' &middot; neutral' : ''}`;
       const st = fin ? verdict
         // the Vegas line when there is one (owner 2026-10-17: then no "ours", the big win chances above are ours); before
         // a line is posted, our pick in its place

@@ -1219,7 +1219,8 @@ def final_result(games: pd.DataFrame, g, fc: dict) -> dict | None:
     return None
   hs, as_ = int(row.home_score.iloc[0]), int(row.away_score.iloc[0])
   winner = g.home_team if hs > as_ else g.away_team if as_ > hs else None
-  return {"home": hs, "away": as_, "winner": winner,
+  ot = "overtime" in row and row.overtime.iloc[0] == 1  # the tile reads Final/OT (owner 2026-10-17)
+  return {"home": hs, "away": as_, "winner": winner, "ot": bool(ot),
           "fav_won": None if fc["tossup"] or winner is None else fc["fav"] == winner}
 
 
