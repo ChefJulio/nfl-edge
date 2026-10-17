@@ -606,8 +606,24 @@
       ['QB', 'TE', 'K', 'DEF'].forEach(pos => { if (L.slots.includes(pos) && !n(pos)) out.push(`no ${pos === 'DEF' ? 'D/ST' : pos}`); });
       return out;
     };
+    // Waiver replacement level for trades (owner 2026-10-17: "most people aren't looking for an upgrade at QB, not in
+    // return for a downgrade at flex"): each week either team may also start the best free agent at each position, so a
+    // player is worth only his edge over what's on waivers (a 1-QB league's spare QB, a TE or D/ST, ~nothing; a scarce
+    // RB or WR, most of his points). One free agent per position per week. Not used by the waiver card: there the free
+    // agent is the move.
+    let FAW = null, FAL = null;
+    const faWeek = k => {
+      if (FAL !== L) { FAW = new Map(); FAL = L; }
+      if (!FAW.has(k)) {
+        const fa = freeAgents(), best = {};
+        fa.forEach(p => { const v = weekOf(p.key, k); if (v && (!best[p.pos] || v.exp > best[p.pos].exp)) best[p.pos] = { ext: `fa:${p.pos}`, pos: p.pos, exp: v.exp }; });
+        FAW.set(k, Object.values(best));
+      }
+      return FAW.get(k);
+    };
+    const valueRepl = (keys, weeks) => weeks.reduce((t, k) => t + total(optimize([...keys.map(x => weekOf(x, k)).filter(Boolean), ...faWeek(k)], L.slots)), 0);
     const tradeEval = (them, give, get) => {
-      const weeks = rosWeeks(), now = [weeks[0]];
+      const weeks = rosWeeks(), now = [weeks[0]], valueOf = valueRepl;
       const side = (t, out, inn) => {
         const before = t.ext, after = [...before.filter(x => !out.includes(x)), ...inn];
         const active = k => k.filter(x => !(t.ir || []).includes(x) || inn.includes(x));  // an IR player traded in needs a spot
@@ -618,9 +634,9 @@
     };
     const verdict = r => r.me.ros > 0.05 && r.them.ros > 0.05 ? ['good', 'Helps both']
       : r.me.ros > 0.05 ? ['', 'Helps you, costs them'] : r.them.ros > 0.05 ? ['bad', 'Helps them, costs you'] : ['bad', 'Helps neither'];
-    const findTrades = () => {
+    const findTrades = (only = null) => {
       const out = [], mk = keysOf(mine).filter(x => !['K', 'DEF'].includes(posOf(x)));
-      L.teams.filter(t => t.id !== mine.id).forEach(t => {
+      L.teams.filter(t => t.id !== mine.id && (!only || t.id === only)).forEach(t => {
         const tk = keysOf(t).filter(x => !['K', 'DEF'].includes(posOf(x)));
         const tryIt = (give, get) => {
           const r = tradeEval(t, give, get);
@@ -629,7 +645,12 @@
         mk.forEach(a => tk.forEach(b => tryIt([a], [b])));
         mk.forEach((a, i) => mk.slice(i + 1).forEach(a2 => tk.forEach(b => tryIt([a, a2], [b]))));  // you consolidate
       });
-      return out.sort((x, y) => Math.min(y.r.me.ros, y.r.them.ros) - Math.min(x.r.me.ros, x.r.them.ros)).slice(0, 8);
+      // variety: none of your players in more than two ideas
+      const used = {}, pick = [];
+      out.sort((x, y) => Math.min(y.r.me.ros, y.r.them.ros) - Math.min(x.r.me.ros, x.r.them.ros)).forEach(f => {
+        if (pick.length < 8 && f.give.every(x => (used[x] || 0) < 2)) { pick.push(f); f.give.forEach(x => { used[x] = (used[x] || 0) + 1; }); }
+      });
+      return pick;
     };
     const nameOf = x => player(x).name;
     const shortName = n => { const w = String(n || '').split(' '); return w.length > 1 && !/D\/ST$/.test(n) ? `${w[0][0]}. ${w.slice(1).join(' ')}` : n; };
@@ -654,24 +675,24 @@
             <div class="lg-tr-sides">${sideHtml('You', r.me)}${sideHtml(them.name, r.them)}</div></div>`;
       }
       const found = trade.found;
-      const finder = found == null ? `<button type="button" class="sbtn lg-find">Find trades that help both teams</button>`
+      const finder = found == null ? `<button type="button" class="sbtn lg-find">${them ? `Find trades with ${esc(them.name)} that help both` : 'Find trades that help both teams'}</button>`
         : found.length ? `<div class="lg-mv"><div class="lg-mv-h">Trades that help both</div>${found.map((f, i) =>
             `<button type="button" class="lg-tf" data-i="${i}"><div><b>${esc(f.t.name)}</b>: you give ${f.give.map(x => `<b>${esc(nameOf(x))}</b>`).join(' + ')}, get <b>${esc(nameOf(f.get[0]))}</b></div>
               <div class="muted">you ${f.r.me.ros >= 0 ? '+' : ''}${f1(f.r.me.ros)}/wk · them ${f.r.them.ros >= 0 ? '+' : ''}${f1(f.r.them.ros)}/wk</div></button>`).join('')}</div>`
         : '<p class="muted">No 1-for-1 or 2-for-1 trade helps both teams by our projections.</p>';
-      return `<p class="muted lg-note">Pick a team, then tap players to give and get. Each side's change = its best lineup every remaining week through ${ROS.through}, per week. A fair trade helps both. Values assume healthy players stay healthy, so a backup's insurance is undervalued; trades that leave fewer than ${DEPTH_MIN} RBs or WRs are flagged.</p>
+      return `<p class="muted lg-note">Pick a team, then tap players to give and get. Each side's change = its best lineup every remaining week through ${ROS.through}, per week. A fair trade helps both. Either team could also start the best free agent at each spot, so a player counts only for his edge over the waiver wire (a spare QB in a one-QB league is worth little). Values assume healthy players stay healthy; trades that leave fewer than ${DEPTH_MIN} RBs or WRs are flagged.</p>
         ${result}
         <div class="lg-tr-cols"><div><div class="lg-tr-h"><b>${esc(mine.name)}</b><span class="muted">you give</span></div><div class="lg-tps">${pick(mine, 'give')}</div></div>
-          <div><div class="lg-tr-h r"><select class="lg-trteam" aria-label="Trade with"><option value="">Trade with…</option>${others.map(t => `<option value="${esc(t.id)}"${them && t.id === them.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select><span class="muted">you get</span></div>
+          <div><div class="lg-tr-h r"><select class="lg-trteam" aria-label="Trade with"><option value="">Any team</option>${others.map(t => `<option value="${esc(t.id)}"${them && t.id === them.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select><span class="muted">you get</span></div>
             <div class="lg-tps">${them ? pick(them, 'get') : '<p class="muted">Choose a team.</p>'}</div></div></div>
         <div class="lg-finder">${finder}</div>`;
     };
     const wireTrade = box => {
       const sel = box.querySelector('.lg-trteam');
-      if (sel) sel.onchange = () => { trade.team = sel.value || null; trade.get = new Set(); draw(); };
+      if (sel) sel.onchange = () => { trade.team = sel.value || null; trade.get = new Set(); trade.found = null; draw(); };  // a new partner: new ideas
       box.querySelectorAll('.lg-tp').forEach(b => b.onclick = () => { const set = trade[b.dataset.side]; set.has(b.dataset.x) ? set.delete(b.dataset.x) : set.add(b.dataset.x); draw(); });
       const f = box.querySelector('.lg-find');
-      if (f) f.onclick = () => { f.textContent = 'Searching…'; f.disabled = true; setTimeout(() => { trade.found = findTrades(); draw(); }, 30); };
+      if (f) f.onclick = () => { f.textContent = 'Searching…'; f.disabled = true; setTimeout(() => { trade.found = findTrades(trade.team); draw(); }, 30); };
       box.querySelectorAll('.lg-tf').forEach(b => b.onclick = () => { const x = trade.found[+b.dataset.i];
         trade = { ...trade, team: x.t.id, give: new Set(x.give), get: new Set(x.get) }; draw(); box.scrollIntoView({ block: 'start', behavior: 'smooth' }); });
     };
