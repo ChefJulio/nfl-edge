@@ -1993,3 +1993,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   share, the backup's prior snap share says nothing more about how much of the starter's work he gets. Open lead from
   the first look: beneficiaries are under-projected at every snap level (~0.5-1 pt) while full conservation overshoots
   (redist_conserve): the redistribution strength in between has not been tuned. Switch stays off.
+- **PRE-REGISTERED 2026-10-17 (before running): (V) how much of a sitting starter's work reaches RBs** (owner, after
+  (U): "why was that number picked by hand? yes"). injuries.redistribution_scale = 0.5 is hand-set (initial commit,
+  2026-10-12: "keeps teammate projections near-unbiased"); never searched between 0.5 and full conservation (1.0,
+  redist_conserve, overshoots). (U)'s first look: RB beneficiaries under-projected +0.3 to +1.2 pts at every snap
+  level; the config note: "helps RB, slightly hurts WR". Named position (sec. 1 rule 6): RB receivers only; every other
+  receiver keeps 0.5. Grid RB scale {0.5 (today), 0.65, 0.8, 1.0}: pick the value with the lowest MAE on RB rows whose
+  projection moves > 0.05 pts in 2021-2024; DECIDE on 2025: those rows' MAE lower than 0.5 with a 95% season-week CI
+  excluding 0; guards on 2025: all rows MAE CI upper < +0.003, no position significantly worse; CONFIRM on 2026 weeks so
+  far: same direction on the affected RB rows, not significantly worse overall. Bias on affected RB rows reported.

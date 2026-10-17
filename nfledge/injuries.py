@@ -74,7 +74,9 @@ class InjuryModel:
     self.data, self.pm, self.cfg = data, pm, cfg
     hl = cfg["player_model"]["share_half_life_weeks"]
     self.hl = float(hl.get("default", 3.0)) if isinstance(hl, dict) else hl  # per-position setting: team-level default
-    self.scale = float(cfg.get("injuries", {}).get("redistribution_scale", 1.0))
+    # a number, or per receiving position ({RB = .., default = ..}; INSIGHTS (V))
+    sc = cfg.get("injuries", {}).get("redistribution_scale", 1.0)
+    self.scale = {k: float(v) for k, v in sc.items()} if isinstance(sc, dict) else float(sc)
     # EXPERIMENT (injuries.absorb_snap; INSIGHTS (U)): the receiver's share of his position group's recent snap share
     # as one more absorption column per (missing, receiving position)
     self.absorb_snap = bool(cfg.get("injuries", {}).get("absorb_snap", False))
@@ -1007,7 +1009,9 @@ class InjuryModel:
         rv = rv[rv.team.isin(set(vac.team))]
         if rv.empty:
           continue
-        add = np.clip(self._design(rv, vac, share, self.absorb_snap) @ self.coef[share], 0, None) * self.scale
+        scale = (rv.pos.map(self.scale).fillna(self.scale.get("default", 1.0)).to_numpy(float)
+                 if isinstance(self.scale, dict) else self.scale)
+        add = np.clip(self._design(rv, vac, share, self.absorb_snap) @ self.coef[share], 0, None) * scale
         if self.conserve:  # EXPERIMENT (injuries.redistribute_conserve): hand out all of the vacated share
           need = vac.groupby("team").eff_vac.sum()
           got = pd.Series(add, index=rv.index).groupby(rv.team).transform("sum")

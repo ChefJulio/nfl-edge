@@ -107,6 +107,10 @@ VARIANTS = {
   "redist_conserve": variant(injuries__redistribute_conserve=True),
   "absorb_snap": variant(injuries__absorb_snap=True),  # INSIGHTS (U)
   "snap_trend": variant(experiments__snap_trend=True),  # INSIGHTS (T)
+  # INSIGHTS (V): how much of a sitting starter's work reaches RBs (others stay 0.5)
+  "rb_scale_65": variant(injuries__redistribution_scale={"RB": 0.65, "default": 0.5}),
+  "rb_scale_80": variant(injuries__redistribution_scale={"RB": 0.8, "default": 0.5}),
+  "rb_scale_100": variant(injuries__redistribution_scale={"RB": 1.0, "default": 0.5}),
   "newcomer_05": variant(experiments__newcomer_scale=0.5),
   "ecr_blend_all": variant(experiments__ecr_blend_positions=["QB", "RB", "WR", "TE"]),
   "ecr_blend_none": variant(experiments__ecr_blend_positions=[]),
