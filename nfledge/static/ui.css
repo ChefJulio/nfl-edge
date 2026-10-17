@@ -110,7 +110,10 @@ button:active:not(:disabled), a.mt:active, .chip:active, .sbtn:active, [data-ope
 
 /* Aesthetic pass (2026-10-16): quieter Rankings rows (the status chip stays; per-day practice chips live on the player
    page), and a little motion where it helps: tiles lift on hover, tab content fades in. */
-#tab-players .badges .pr-days { display: none; }
+/* one chip per player (owner 2026-10-16): his most recent designation, the game status when there is one (Q / D / O), else
+   his latest practice day (DNP / LP / FP); the full practice week is on his page */
+#tab-players .badges .dc-tag ~ .pr-days { display: none; }
+#tab-players .badges .pr-days i:not(:last-child) { display: none; }
 @media (prefers-reduced-motion: no-preference) {
   @media (hover: hover) { a.mt { transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
     a.mt:hover { transform: translateY(-2px); box-shadow: var(--e2); } }
