@@ -320,6 +320,7 @@ The grade measures output, not style: fantasy points per game in the site's scor
 - **Rejected** - Should durability (the Injuries tab percentile) count games missed per 1,000 snaps instead of the share of games available? - No: it predicted next season's missed games worse in 5 of 6 seasons (rank correlation 0.028 lower, interval clear of zero), worst for quarterbacks; missed games already cut a player's snaps, so the rate counts the injury twice (2026-10). <!-- tried:durability-per-snap -->
 - **Rejected** - Does a recent jump in a player's snap share (last 3 games against his usual) predict more targets and carries than his shares already show? - No: no gain for players whose snaps moved 15+ points, and tight ends got slightly worse; the jump already shows in his recent targets and carries (2026-10). <!-- tried:snap-trend -->
 - **Rejected** - When a starter sits, should the backups' snap shares decide who gets his work? - No: given each backup's depth rank and projected share, the fit put almost no weight on snap share and projections did not improve (2026-10). <!-- tried:absorb-snap -->
+- **Rejected** - Should running backs get more than half of a sitting teammate's work handed to them? - No: 65%, 80% and full strength each shrank the under-projection a little but did not lower the average miss, so half stays, now a tested value rather than a hand-set one (2026-10). <!-- tried:rb-redist-scale -->
 
 ## Under the hood
 

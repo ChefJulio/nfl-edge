@@ -2012,3 +2012,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   projection moves > 0.05 pts in 2021-2024; DECIDE on 2025: those rows' MAE lower than 0.5 with a 95% season-week CI
   excluding 0; guards on 2025: all rows MAE CI upper < +0.003, no position significantly worse; CONFIRM on 2026 weeks so
   far: same direction on the affected RB rows, not significantly worse overall. Bias on affected RB rows reported.
+- **RESULT {#rb-redist-scale} (V) how much of a sitting starter's work reaches RBs: FAIL, 0.5 kept (now tested).**
+  tools/experiments.py baseline,rb_scale_65,rb_scale_80,rb_scale_100 2021-2026 + tools/rb_scale_eval.py. Choose window
+  2021-24, affected RB rows: 0.65 +0.0001 [-0.020, +0.021] (131 rows, bias -0.72 -> -0.63); 0.8 +0.004 [-0.020, +0.029]
+  (232, -0.73 -> -0.59); 1.0 +0.005 [-0.027, +0.040] (289, -0.92 -> -0.72). No value beats 0.5, so no decide / confirm
+  step. More strength shrinks the bias without lowering MAE (sec. 1 rule 7: MAE decides). Start / sit gain 2021-26 ALL
+  0.000 at 0.65 and 0.8. docs/handset_audit.md: redistribution_scale now TESTED.

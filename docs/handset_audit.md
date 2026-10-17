@@ -7,7 +7,7 @@ within noise" row, which has no numbers; docs/verdict_audit.md records it as "no
 out as fitted or tested. Each item gets its own pre-registration in INSIGHTS before it is run; results go there and
 in MODEL.md "What we tried".
 
-Already in progress: `injuries.redistribution_scale` = 0.5 (initial commit; INSIGHTS (V), RB scale grid).
+Done: `injuries.redistribution_scale` = 0.5, now TESTED (INSIGHTS (V) {#rb-redist-scale}: RB 0.65 / 0.8 / 1.0 no better).
 Related open decision: redistribution trades MAE for bias (INSIGHTS sec. 5, 2026-10-15: on the 1,825 rows it changes,
 MAE +0.031 [+0.019, +0.042] with it, while teammates of a sitting player go from -0.15 to +0.01 bias); "Owner's call
 (pending)".
