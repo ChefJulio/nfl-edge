@@ -1,7 +1,7 @@
 /* Players > Moves (moves.js) */
 .mv-tools { flex-wrap: wrap; }
 .mv-dl { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: var(--muted); }
-.mv-dl input, .mv-q { background: var(--panel2); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; font: inherit; font-size: var(--fs-md); color-scheme: dark; }
+.mv-dl input, .mv-q { background: var(--panel2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r-md); padding: 5px 8px; font: inherit; font-size: var(--fs-md); color-scheme: dark; }
 .mv-q { flex: 1; min-width: 160px; }
 .mv-date { font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
 .mv-tm { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
@@ -22,7 +22,7 @@ tr[data-open-pid] { cursor: pointer; }
 td.mv-who { min-width: 150px; }
 /* phones: season + search + Filters toggle; the note folds under the name and the Details column goes */
 @media (max-width: 640px) {
-  .mv-ftog { display: inline-block; background: var(--panel2); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font: inherit; font-size: var(--fs-md); font-weight: 700; }
+  .mv-ftog { display: inline-block; background: var(--panel2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r-md); padding: 6px 10px; font: inherit; font-size: var(--fs-md); font-weight: 700; }
   .mv-tools.closed .mv-team, .mv-tools.closed .mv-group, .mv-tools.closed .mv-pos, .mv-tools.closed .mv-dl { display: none; }
   .mv-q { min-width: 0; }
   .mv-dl { flex: 1 1 40%; } .mv-dl input { flex: 1; min-width: 0; }

@@ -36,9 +36,9 @@ section.soon .sec-head p { color: var(--muted); }
   .botbar svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
   .botbar .bb-row button.on { color: var(--accent); }
   .botbar .bb-sheet { position: absolute; right: 8px; bottom: calc(100% + 8px); display: flex; flex-direction: column; min-width: 180px;
-    background: var(--panel2); border: 1px solid var(--line); border-radius: 14px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+    background: var(--panel2); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 6px; box-shadow: var(--e3); }
   .botbar .bb-sheet[hidden] { display: none; }
-  .botbar .bb-sheet button { text-align: left; padding: 11px 12px; border-radius: 9px; background: none; border: 0; color: var(--ink);
+  .botbar .bb-sheet button { text-align: left; padding: 11px 12px; border-radius: var(--r-md); background: none; border: 0; color: var(--ink);
     font: inherit; font-size: var(--fs-base); font-weight: 600; cursor: pointer; }
   .botbar .bb-sheet button.on { background: color-mix(in srgb, var(--accent) 20%, transparent); }
 }
@@ -47,7 +47,7 @@ html.pc-open { overflow: visible; }
 #tab-page .pc-page { position: static; inset: auto; background: none; padding: 0; display: block; z-index: auto; }
 /* one centered 820px column (breadcrumbs + card) on wide screens; it used to sit at the left of the wide container */
 #tab-page { max-width: 820px; margin-left: auto; margin-right: auto; }
-#tab-page .pc-page .pc { width: 100%; max-width: 820px; margin: 0; border-radius: 14px; box-shadow: none; }
+#tab-page .pc-page .pc { width: 100%; max-width: 820px; margin: 0; border-radius: var(--r-lg); box-shadow: none; }
 /* the name / photo / position header stays in view while the page scrolls (owner 2026-10-14). 'clip' (not 'hidden')
    on the card: a hidden overflow makes the card its own scroll box, and a sticky child would never stick. */
 #tab-page .pc-page, #tab-page .pc-page .pc { overflow: clip; }  /* the page container kept the overlay's scroll box */
@@ -68,7 +68,7 @@ html:not(.land-rk) .fr-rk, html.land-rk .fr-gen { display: none !important; }
 html.land-ros .fr-rk .rk-mode .fr-wk { background: none; color: var(--muted); }
 html.land-rk .botbar .bb-row button.fr-on { color: var(--accent); }
 .fr-rows { padding: 4px 0 8px; }
-.fr-row, .fr-bar { border-radius: 10px; background: linear-gradient(90deg, var(--panel2) 0%, color-mix(in srgb, var(--ink) 7%, var(--panel2)) 50%, var(--panel2) 100%);
+.fr-row, .fr-bar { border-radius: var(--r-md); background: linear-gradient(90deg, var(--panel2) 0%, color-mix(in srgb, var(--ink) 7%, var(--panel2)) 50%, var(--panel2) 100%);
   background-size: 200% 100%; animation: fr-shim 1.3s linear infinite; }
 .fr-row { height: 58px; margin: 6px 0; }
 .fr-gen { padding-top: 6px; } .fr-h { height: 26px; width: 55%; margin: 8px 0 10px; } .fr-p { height: 14px; width: 85%; margin-bottom: 16px; }

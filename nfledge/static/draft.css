@@ -1,5 +1,5 @@
 /* Teams > Draft (draft.js) */
-#tab-teams-draft .dr-q { flex: 1; min-width: 150px; max-width: 260px; padding: 7px 11px; border-radius: 8px; border: 1px solid var(--line);
+#tab-teams-draft .dr-q { flex: 1; min-width: 150px; max-width: 260px; padding: 7px 11px; border-radius: var(--r-md); border: 1px solid var(--line);
   background: var(--panel2); color: var(--ink); font: inherit; font-size: var(--fs-md); }
 .dr-tm { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; cursor: pointer; }
 .dr-hof { font-size: var(--fs-xs); font-weight: 700; padding: 0 6px; border-radius: var(--chip-r); background: #e8c46a; color: #2a2108; vertical-align: 1px; line-height: var(--chip-h); }
