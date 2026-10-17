@@ -2483,7 +2483,7 @@
     close(); last = tile;
     const ov = document.createElement('div');
     ov.className = 'sheet-ov';
-    ov.innerHTML = '<div class="sheet" role="dialog" aria-modal="true"><div class="sheet-h"><b></b><button type="button" class="sheet-x" aria-label="Close">&times;</button></div><div class="sheet-b"></div></div>';
+    ov.innerHTML = '<div class="sheet" role="dialog" aria-modal="true"><div class="sheet-h"><i class="sheet-grab" aria-hidden="true"></i><b></b><button type="button" class="sheet-x" aria-label="Close">&times;</button></div><div class="sheet-b"></div></div>';
     ov.querySelector('.sheet-h b').textContent = tile.dataset.sheet;
     ov.querySelector('.sheet').setAttribute('aria-label', tile.dataset.sheet);
     ov.querySelector('.sheet-b').appendChild(tile.querySelector('template').content.cloneNode(true));
@@ -2494,6 +2494,56 @@
     document.addEventListener('keydown', onKey);
     document.body.appendChild(ov);
     ov.querySelector('.sheet-x').focus();
+    if (matchMedia('(max-width: 699px)').matches) drag(ov, ov.querySelector('.sheet'));
+  };
+  // Phones (owner 2026-10-16): the sheet follows the finger. It opens at up to SNAP of the screen; dragging up grows
+  // it to FULL; dragging down shrinks it back from full, or slides it away from its opening size (far or fast
+  // enough), else it springs back. Content scrolls as usual: a downward drag only moves the sheet once its content
+  // is at the top, and from the grab bar / title row always.
+  const SNAP = 0.62, FULL = 0.92;
+  const drag = (ov, sh) => {
+    const vh = () => innerHeight, cap = () => Math.min(sh.scrollHeight, FULL * vh());
+    let full = false;
+    const setH = (h, anim) => { sh.classList.toggle('sheet-anim', !!anim); sh.style.maxHeight = `${Math.round(h)}px`; };
+    setH(Math.min(sh.scrollHeight, SNAP * vh()));
+    let y0 = 0, t0 = 0, h0 = 0, mode = null, lastY = 0, lastT = 0, v = 0;
+    sh.addEventListener('touchstart', e => {
+      if (e.touches.length !== 1) return;
+      y0 = lastY = e.touches[0].clientY; t0 = lastT = e.timeStamp; h0 = sh.offsetHeight; v = 0;
+      mode = e.target.closest('.sheet-h') ? 'drag' : null;  // body touches decide on the first move
+    }, { passive: true });
+    sh.addEventListener('touchmove', e => {
+      const y = e.touches[0].clientY, dy = y - y0;
+      if (e.timeStamp > lastT) { v = (y - lastY) / (e.timeStamp - lastT); lastY = y; lastT = e.timeStamp; }
+      if (mode === null && Math.abs(dy) > 4) {
+        mode = (dy > 0 && sh.scrollTop <= 0) || (dy < 0 && !full && sh.offsetHeight < cap() - 1) ? 'drag' : 'scroll';
+      }
+      if (mode !== 'drag') return;
+      e.preventDefault();
+      if (dy < 0) { sh.style.transform = ''; setH(Math.min(cap(), h0 - dy)); }  // up: grow
+      else { setH(h0); sh.style.transform = `translateY(${dy}px)`; }  // down: slide, the height kept
+    }, { passive: false });
+    sh.addEventListener('touchend', () => {
+      if (mode !== 'drag') { mode = null; return; }
+      mode = null;
+      const dy = lastY - y0, snapH = Math.min(sh.scrollHeight, SNAP * vh());
+      sh.classList.add('sheet-anim');
+      if (dy < 0) {  // grew: settle full, or back
+        full = dy < -50 || v < -0.4;
+        setH(full ? cap() : h0, true);
+        return;
+      }
+      const far = dy > 0.3 * h0 || v > 0.6;
+      sh.style.transform = '';
+      if (full && far && h0 - dy > snapH * 0.6) { full = false; setH(snapH, true); return; }  // full -> opening size
+      if (far) {  // away
+        sh.style.transform = `translateY(${h0 + 40}px)`;
+        ov.classList.add('sheet-out');
+        setTimeout(close, 200);
+        return;
+      }
+      setH(h0, true);  // not far enough: spring back
+    });
   };
   document.addEventListener('click', e => {
     const t = e.target.closest && e.target.closest('.pc-tap[data-sheet]');

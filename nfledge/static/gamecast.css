@@ -859,6 +859,13 @@ table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; tex
 .sheet-h { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 10px;
   padding: 14px 0 10px; background: var(--panel); border-bottom: 1px solid var(--line); margin-bottom: 10px; }
 .sheet-h b { font-family: var(--font-display); font-size: var(--fs-lg); }
+/* drag handle (phones): the sheet follows the finger (gamecast.js drag); hidden on the centered desktop panel */
+.sheet-grab { position: absolute; left: 50%; top: 6px; width: 38px; height: 5px; margin-left: -19px; border-radius: 3px;
+  background: color-mix(in srgb, var(--ink) 28%, transparent); }
+.sheet-h { touch-action: none; }
+.sheet.sheet-anim { transition: max-height .26s var(--ease), transform .22s var(--ease); }
+.sheet-ov.sheet-out { opacity: 0; transition: opacity .2s var(--ease); }
+@media (min-width: 700px) { .sheet-grab { display: none; } }
 .sheet-x { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel2); color: var(--ink);
   font: inherit; font-size: 20px; line-height: 1; cursor: pointer; display: grid; place-items: center; padding: 0 0 2px; }
 .sheet .pc-box { background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0 0 12px; margin: 0; }
@@ -882,3 +889,4 @@ table.lg tr.lg-car td:first-child b { font-weight: 700; }
 .pc-tap-row { padding: 9px 26px 9px 12px; margin: 0 0 12px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .pc-tap-row .pc-k { margin: 0; }
 .pc-penrow { font-size: var(--fs-md); color: var(--muted); } .pc-penrow b { color: var(--ink); font-weight: 700; }
+@media (max-width: 699px) { .sheet-h { padding-top: 20px; } }  /* room for the grab bar */
