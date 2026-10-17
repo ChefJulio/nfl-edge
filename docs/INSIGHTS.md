@@ -39,6 +39,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
      ideas (2021-25 carries ~50 significance verdicts, ~1.25 chance passes expected).
   5. Exceptions stay explicit: owner designs ship unless significantly worse; display probabilities gate on
      calibration (ECE / Brier), not MAE.
+  6. Position-specific changes (2026-10-17): a change may ship for one position only when that position is named in
+     the pre-registration (one test, not four: picking the best of four positions afterward roughly quadruples the
+     chance of a false pass). A position that looks strong only after the fact is a lead: re-test it on an untouched
+     season before shipping. Other positions are still checked as guards (team volume is shared, so a change aimed
+     at one position moves the others' projections).
 
 ## 2. Data quirks (nflverse / nflreadpy and others)
 - **Scrambles are `pass=1, rush=0`** in nflverse pbp. Any rushing filter must include `qb_scramble==1` or QB
