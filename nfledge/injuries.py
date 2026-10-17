@@ -75,6 +75,9 @@ class InjuryModel:
     hl = cfg["player_model"]["share_half_life_weeks"]
     self.hl = float(hl.get("default", 3.0)) if isinstance(hl, dict) else hl  # per-position setting: team-level default
     self.scale = float(cfg.get("injuries", {}).get("redistribution_scale", 1.0))
+    # EXPERIMENT (injuries.absorb_snap; INSIGHTS (U)): the receiver's share of his position group's recent snap share
+    # as one more absorption column per (missing, receiving position)
+    self.absorb_snap = bool(cfg.get("injuries", {}).get("absorb_snap", False))
     self.conserve = bool(cfg.get("injuries", {}).get("redistribute_conserve", False))
 
   def _gb_params(self) -> dict:
@@ -404,10 +407,11 @@ class InjuryModel:
 
   # -- absorption features ---------------------------------------------------------------------------------------
   @staticmethod
-  def _design(recv: pd.DataFrame, vac: pd.DataFrame, share: str) -> np.ndarray:
+  def _design(recv: pd.DataFrame, vac: pd.DataFrame, share: str, snap: bool = False) -> np.ndarray:
     """recv: teammates (team, pos, rank, s_norm). vac: absences (team, pos, eff_vac). One column per
-    (missing pos, receiving pos, rank) plus (missing pos, receiving pos, share-weighted)."""
-    cols = []
+    (missing pos, receiving pos, rank) plus (missing pos, receiving pos, share-weighted); with snap, one more per
+    (missing pos, receiving pos), snap-weighted, after all of those (absorption_table reads the first ones)."""
+    cols, extra = [], []
     v = vac.groupby(["team", "pos"]).eff_vac.sum()
     for m in MISSING[share]:
       vm = recv.team.map(v.xs(m, level="pos") if m in v.index.get_level_values("pos") else pd.Series(dtype=float))
@@ -417,7 +421,9 @@ class InjuryModel:
         for k in RANKS:
           cols.append(vm * isr * (np.minimum(recv["rank"].to_numpy(), 3) == k))
         cols.append(vm * isr * recv.s_norm.to_numpy())
-    return np.column_stack(cols)
+        if snap:
+          extra.append(vm * isr * recv.snap_norm.to_numpy())
+    return np.column_stack(cols + extra)
 
   @staticmethod
   def _receivers(df: pd.DataFrame, share: str, rank_col: str | None = None) -> pd.DataFrame:
@@ -432,6 +438,10 @@ class InjuryModel:
     tot = d.groupby(["team", "pos"])[hat].transform("sum")
     n = d.groupby(["team", "pos"])[hat].transform("size")
     d["s_norm"] = np.where(tot > 0, d[hat] / tot.replace(0, np.nan), 1.0 / n)
+    if "snap_pct" in d:
+      sp = d.snap_pct.astype(float).fillna(0.0)
+      st = sp.groupby([d.team, d.pos]).transform("sum")
+      d["snap_norm"] = np.where(st > 0, sp / st.replace(0, np.nan), 1.0 / n)
     return d
 
   def _fit_absorption(self, seasons):
@@ -456,7 +466,7 @@ class InjuryModel:
         for share, (num, den) in SHARES.items():
           vac = absent.assign(eff_vac=absent[f"{share}_hat"] * (1 - absent.absent_frac))
           rv = self._receivers(mates, share)
-          X[share].append(self._design(rv, vac, share))
+          X[share].append(self._design(rv, vac, share, self.absorb_snap))
           y[share].append((rv[num] / rv[den].replace(0, np.nan)).fillna(0).to_numpy() - rv[f"{share}_hat"].to_numpy())
           pos[share].append(rv.pos.to_numpy())
     self.coef, self.drift, self.n_obs = {}, {}, {}
@@ -997,7 +1007,7 @@ class InjuryModel:
         rv = rv[rv.team.isin(set(vac.team))]
         if rv.empty:
           continue
-        add = np.clip(self._design(rv, vac, share) @ self.coef[share], 0, None) * self.scale
+        add = np.clip(self._design(rv, vac, share, self.absorb_snap) @ self.coef[share], 0, None) * self.scale
         if self.conserve:  # EXPERIMENT (injuries.redistribute_conserve): hand out all of the vacated share
           need = vac.groupby("team").eff_vac.sum()
           got = pd.Series(add, index=rv.index).groupby(rv.team).transform("sum")

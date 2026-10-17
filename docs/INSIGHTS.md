@@ -1980,3 +1980,16 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   2021-25, `tools/experiments.py baseline,absorb_snap`. GATE (as redist_conserve's): on rows whose projection changes
   by > 0.05 pts, MAE lower with a 95% season-week CI excluding 0 and better in >= 4 of 5 seasons; overall MAE CI upper
   < +0.003; no position significantly worse. Bias on affected rows reported, by the snap buckets above.
+- **RESULT {#snap-trend} (T) snap trend as an early sign of a role change: FAIL (no effect; a guard worse).**
+  tools/experiments.py baseline,snap_trend 2021-2025 + tools/snap_eval.py. Primary (RB / WR / TE, |snap_trend| >=
+  0.15, 4,934 rows): MAE 4.943 -> 4.943, +0.0002 [-0.0025, +0.0031] (width 0.0056), better 2/5 seasons. Snaps up (906
+  rows): bias -0.17 -> -0.02, MAE unchanged. All rows +0.0015 [+0.0001, +0.0029], TE +0.0025 [+0.0003, +0.0049]
+  (significantly worse); start / sit gain 0.000. A snap jump already shows in his recent targets and carries, which the
+  share regressions weight by recency. Switch stays off.
+- **RESULT {#absorb-snap} (U) a backup's snap share in who absorbs a sitting teammate's work: FAIL (no effect).**
+  tools/experiments.py baseline,absorb_snap 2021-2025 + tools/snap_eval.py. The absorption fit (non-negative least
+  squares) put almost no weight on the snap column: only 70 rows moved > 0.05 pts, MAE 4.680 -> 4.672, -0.008 [-0.040,
+  +0.024], better 2/5; all rows -0.0000 [-0.0002, +0.0002], no position different. Given depth rank and projected
+  share, the backup's prior snap share says nothing more about how much of the starter's work he gets. Open lead from
+  the first look: beneficiaries are under-projected at every snap level (~0.5-1 pt) while full conservation overshoots
+  (redist_conserve): the redistribution strength in between has not been tuned. Switch stays off.

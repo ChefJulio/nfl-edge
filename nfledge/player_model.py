@@ -171,6 +171,9 @@ def SHARE_FEATURES(share: str, exp: dict | None = None, group: str | None = None
     cols += ["ay_share", "ay_share_long"]
   if exp.get("snap_input"):
     cols.append("snap_pct")
+  # EXPERIMENT (experiments.snap_trend; INSIGHTS (T)): last-3-games snap share minus the recency-weighted share
+  if exp.get("snap_trend") and share in ("carry_share", "tgt_share"):
+    cols.append("snap_trend")
   # EXPERIMENT (experiments.route_input): route participation (dropbacks on field / team dropbacks) for targets.
   # Participation is published only after each season, so this can be backtested but not run live from nflverse.
   # EXPERIMENT (experiments.share_quality; pre-registered 2026-10-16): his quality (EB-shrunk opponent-adjusted EPA per
@@ -697,6 +700,11 @@ class PlayerModel:
                            minlength=len(ids))
     snap_den = np.bincount(codes, weights=L.w_use.to_numpy(float) * has_pct, minlength=len(ids))
     f["snap_pct"] = pd.Series(snap_num, index=ids) / pd.Series(snap_den, index=ids).replace(0, np.nan)
+    if self.cfg.get("experiments", {}).get("snap_trend"):
+      # EXPERIMENT (INSIGHTS (T)): a fresh role change his target / carry shares haven't caught up with yet
+      s3 = (L[L.offense_pct.notna()].sort_values(["season", "week"]).groupby("gsis_id").tail(3)
+            .groupby("gsis_id").offense_pct.mean())
+      f["snap_trend"] = (s3.reindex(ids) - f["snap_pct"]).fillna(0.0)
     if self.cfg.get("experiments", {}).get("grade_prior"):
       f["grade_fpg"] = self._grade_asof(season, week).reindex(f.index)
     tprr_den = wsum("dropbacks_on_field", "w_eff")
