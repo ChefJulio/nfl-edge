@@ -1467,6 +1467,9 @@
     const name = row.name || (L && L.name), pos = (L && L.pos) || row.pos, team = (L && L.team) || row.team, espn = row.espn || (L && L.espn);
     if (!LOGS[pid]) ensureLog(pid).then(() => { if (cardPid === pid) renderCard(pid); });
     cardNeeds();
+    // warm the news the News tab and the Health sheet show (cached 5 minutes, one request in flight per player)
+    { const e = (DATA && DATA.players[pid] && DATA.players[pid].espn) || (LOGS[pid] && LOGS[pid].espn);
+      if (e && !(NEWS[e] && Date.now() - NEWS[e].t < 300000)) fetchNews(e).catch(() => {}); }
     if (!name) { body.innerHTML = `<p class="pc-none">${LOGS[pid] ? 'No card for this player.' : 'Loading&hellip;'}</p>`; return; }
     const info = tInfo(team), news = !!espn;
     const photo = photoUrl(L, espn), num = L && L.bio ? L.bio.num : null;
@@ -1564,7 +1567,7 @@
                      NFI: 'Non-football injury list', SUSP: 'Suspended', HOLD: 'Did not report' };
   const dKey = (s, t) => `${s}/${t}`;
   const loadDepth = (s, abbr) => {
-    const again = () => { if (cardTeam === abbr && teamTab === 'dc') renderTeam(abbr); };
+    const again = () => { if (cardTeam === abbr) depthHtml(abbr); refreshDepth(abbr); };  // depthHtml asks for the team's file
     if (DIDX === undefined) {
       DIDX = null;
       getJSON(`${siteRoot()}data/depth/index.json`).then(x => { DIDX = x; again(); }).catch(() => { DIDX = false; again(); });
@@ -1625,10 +1628,14 @@
         <p class="pc-sub">${listedName} for that week (starters in bold, backups in order)${W.u ? '' : sel.s >= 2012 ? ". A team's first game shows the listed chart: before it has played, the preseason chart beats last season's playing time (83% vs 71% of starters right in 2025-26)" : ''}. Tags: ${tags}. Team depth charts are labeled "unofficial" and can lag reality.</p>`;
     return `<div class="pc-wkbar">${seasonSel}${weekSel}</div>${seg}${body}`;
   };
-  const wireDepth = (body, abbr) => {
-    const box = body.querySelector('.pc-tab[data-tt="dc"]'); if (!box) return;
+  // the depth chart lives in the team card's Players sheet (owner 2026-10-17): a .dc-wrap[data-dc] container, drawn
+  // and wired when the sheet opens and again whenever a depth / injury file it waits on arrives
+  const refreshDepth = abbr => document.querySelectorAll(`.dc-wrap[data-dc="${CSS.escape(abbr)}"]`).forEach(box => wireDepth(box, abbr, true));
+  const wireDepth = (box, abbr, draw = false) => {
+    if (!box) return;
+    if (draw) box.innerHTML = depthHtml(abbr);
     const ss = box.querySelector('.dc-season'), ws = box.querySelector('.dc-week');
-    const redraw = () => { box.innerHTML = depthHtml(abbr); wireDepth(body, abbr); };
+    const redraw = () => wireDepth(box, abbr, true);
     if (ss) ss.onchange = () => { dSel[abbr] = { s: +ss.value, w: dSel[abbr].w }; redraw(); };
     if (ws) ws.onchange = () => { dSel[abbr].w = +ws.value; redraw(); };
     box.querySelectorAll('[data-dm]').forEach(b => { b.onclick = () => { dMode = b.dataset.dm; redraw(); }; });
@@ -1862,8 +1869,75 @@
       return { id: g.id, tot, lev: 2 * g.p_home * (1 - g.p_home) * tot, teams: hit.map(h => h[0]) };
     }).filter(x => x.tot >= 0.05).sort((a, b) => b.lev - a.lev).slice(0, 3);
   }).catch(() => []);
+  // ---- team card Summary (owner 2026-10-17: "bring our ideas from player cards"): the week's matchup, then four tiles,
+  // each opening a sheet: Power, Season (division place), Players (top three by rest-of-season rank; the sheet holds
+  // this week's fantasy players and the depth chart), Schedule (what's left) ----
+  const ST = { s: {} };  // standings by season (division place on the Season tile)
+  const standingsRow = (season, abbr) => {
+    if (ST.s[season] === undefined) { ST.s[season] = null; NFLE.load(`data/standings/${season}.json`).then(x => { ST.s[season] = x || false; rerenderCard(); }).catch(() => { ST.s[season] = false; }); }
+    const x = ST.s[season]; return x && (x.teams || []).find(r => r.team === abbr);
+  };
+  // rest-of-season points (ros.json, under this page's scoring) and rank at the position, every player
+  const rosRanks = () => {
+    if (!RJ.d) { loadRos(); return null; }
+    if (RJ.rk && RJ.rkW === weights()) return RJ.rk;
+    const w = weights(), tot = {};
+    Object.entries(RJ.d.players).forEach(([pid, x]) => { tot[pid] = { pos: x.pos, team: x.team, name: x.name, photo: x.photo, espn: x.espn,
+      v: x.w.reduce((t, z) => t + z[1] * pts(z[5], w, x.pos), 0) }; });
+    const byPos = {};
+    Object.entries(tot).forEach(([pid, r]) => (byPos[r.pos] = byPos[r.pos] || []).push([pid, r]));
+    Object.values(byPos).forEach(a => a.sort((x, y) => y[1].v - x[1].v).forEach(([, r], i) => { r.rk = i + 1; }));
+    RJ.rk = tot; RJ.rkW = w;
+    return tot;
+  };
+  const teamTiles = (abbr, d, L, pw) => {
+    const tiles = [];
+    // Power
+    if (pw) tiles.push(tapTile('Power', `<div class="pc-big">${ord(pw.rank)}</div><div class="pc-tapsub">${sgn(pw.net)} pts/g vs avg${pw.move ? ` · ${pw.move > 0 ? '▲' : '▼'}${Math.abs(pw.move)}` : ''}</div>`,
+      `Power ranking · ${esc(wkLabel(d))}`, teamPowerBox(pw)));
+    // Season: record and division place
+    const S = L && L.seasons.find(x => x.s === L.cur), sr = standingsRow(d.season, abbr);
+    const rec = (sr && `${sr.w}-${sr.l}${sr.t ? `-${sr.t}` : ''}`) || (S && S.rec) || (pw && pw.record) || '';
+    const place = sr ? `${ord(sr.div_rank)} in ${esc(sr.div)}` : '';
+    const stLine = sr ? `<div class="pc-box"><div class="pc-k">${esc(sr.div)} · ${ord(sr.div_rank)}${sr.seed ? ` · ${sr.conf} seed ${sr.seed}` : ''}</div><div class="tm-stats">
+        ${[['Division', sr.div_rec], ['Conference', sr.conf_rec], ['Home', sr.home], ['Away', sr.away], ['Streak', sr.streak], ['Point diff', sgn(sr.diff).replace('.0', '')]].map(([k, v]) => `<div class="tm-st"><div class="pc-k">${k}</div><div class="tm-stv">${esc(v || '')}</div></div>`).join('')}</div></div>` : '';
+    if (rec) tiles.push(tapTile('Season', `<div class="pc-big">${esc(rec)}</div><div class="pc-tapsub">${place || '&nbsp;'}</div>`,
+      `${d.season} season`, `${stLine}${L ? teamSeasonBox(L) : ''}<div class="tm-pen" data-pen="${esc(abbr)}"></div>`));
+    // Players: top three by rest-of-season rank at their position
+    const rk = rosRanks(), top = rk ? Object.entries(rk).filter(([, r]) => r.team === abbr).sort((a, b) => a[1].rk - b[1].rk || b[1].v - a[1].v).slice(0, 3) : [];
+    const face = ([pid, r]) => { const ph = r.photo || NFLE.ui.headshot(r.espn);
+      return `<div class="tm-tp"><span class="tm-tpi">${ph ? `<img src="${esc(ph)}" alt="" width="30" height="30" loading="lazy">` : ''}</span><span class="tm-tpn">${esc(NFLE.fmt.short(r.name))}</span><b class="tm-tpr">${esc(r.pos)}${r.rk}</b></div>`; };
+    const wkRows = teamPlayerRows(abbr, d);
+    tiles.push(tapTile('Players', top.length ? `<div class="tm-tps">${top.map(face).join('')}</div>` : '<div class="pc-tapsub">Loading&hellip;</div>', 'Players',
+      `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
+        ${wkRows ? `<table class="bx tm-pl tiles"><thead><tr><th>Player</th><th class="num">Proj</th><th>Tier</th><th class="num">FP/G</th></tr></thead><tbody>${wkRows}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>
+       <div class="pc-k tm-dck">Depth chart</div><div class="dc-wrap" data-dc="${esc(abbr)}"></div>`));
+    // Schedule: the rest of the season
+    const O = oddsData(), sch = O && O.sched && O.sched[abbr], left = sch ? sch.filter(g => g[3] == null && g[0] >= +d.week) : [];
+    const pow = Object.fromEntries((d.power || []).map(x => [x.team, x]));
+    const nextTxt = left.slice(0, 3).map(g => `${g[2] ? '' : '@'}${esc(g[1])}`).join(' · ');
+    if (pw) tiles.push(tapTile('Schedule', `<div class="pc-big">${ord(pw.sos_next_rk)} <small>hardest left</small></div><div class="pc-tapsub">${nextTxt ? `Next: ${nextTxt}` : '&nbsp;'}</div>`, 'Schedule',
+      `<div class="pc-box"><div class="pc-k">Rest of the season</div>${left.length ? `<div class="tm-sched">${left.map(g => { const o = pow[g[1]] || {};
+          return `<div class="tm-sg tm-open" data-tm="${esc(g[1])}"><span class="tm-sw">Wk ${g[0]}</span><span class="tm-sv">${g[2] ? 'vs' : '@'}</span>${tLogo(g[1], 22)}<b>${esc(o.nick || g[1])}</b><span class="muted">${esc(o.record || '')}</span>${rkChip(o.rank, 'Their Power rank')}</div>`; }).join('')}</div>` : '<p class="pc-sub">Loading schedule&hellip;</p>'}
+        <p class="pc-sub">Strength of schedule, by the opponents' Power ratings: so far ${ord(pw.sos_past_rk)} hardest, the rest of the way ${ord(pw.sos_next_rk)} hardest (1st = toughest).</p></div>`));
+    return tiles.length ? `<div class="pc-tiles tm-tiles">${tiles.join('')}</div>` : '';
+  };
+  // a sheet opened from a team tile: penalties and the depth chart fill in there (the sheet is a copy made at open)
+  document.addEventListener('nfle-sheet', e => {
+    e.detail.querySelectorAll('.dc-wrap[data-dc]').forEach(box => wireDepth(box, box.dataset.dc, true));
+    e.detail.querySelectorAll('.tm-pen[data-pen]').forEach(tp => { const abbr = tp.dataset.pen;
+      penIndex().then(ix => ix && penSeason(ix.current).then(D => D && D.teams[abbr] && D.teams[abbr].g >= 1 ? D : penSeason(ix.current - 1)))
+        .then(D => { if (D) tp.innerHTML = teamPenBox(abbr, D); }); });
+  });
+  // warm what the team sheets fetch (depth chart, penalties) as the card opens, so a tap finds them ready; each
+  // loader caches and de-duplicates, so repeat renders cost nothing
+  const prefetchTeam = abbr => {
+    depthHtml(abbr);
+    penIndex().then(ix => ix && penSeason(ix.current)).catch(() => {});
+  };
   const renderTeam = abbr => {
     const body = document.querySelector('#pcOv .pc-body');
+    prefetchTeam(abbr);
     const d = cardData(), L = TLOGS[abbr], info = tInfo(abbr);
     cardNeeds();
     // Header, season box and game log are current; the Week tab (matchup, Power, players) follows the picker.
@@ -1872,28 +1946,19 @@
       <div class="pc-head" style="--tc:${esc(info.color || '#666')}"><span class="pc-logo-z" data-zoom="${esc(info.logo ? logoSrc(info.logo, 500) : '')}" role="button" tabindex="0" aria-label="Show a bigger logo">${tLogo(abbr, 34)}</span>
         <div class="pc-id"><h3 id="pcName">${esc(info.name || abbr)}</h3>
           <div class="pc-meta"><b>${esc((L && (L.seasons.find(s => s.s === L.cur) || {}).rec) || '')}</b>${info.division ? ` <span class="muted">${esc(info.division)}</span>` : ''}</div></div></div>
-      <div class="seg pc-tabs" role="tablist">${[['ov', 'Week'], ['log', 'Game log'], ['pl', 'Players'], ['dc', 'Depth'], ['po', 'Playoffs']].map(([k, l]) => `<button type="button" role="tab" data-tt="${k}" class="${teamTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-      <div class="pc-tab" data-tt="ov"${teamTab === 'ov' ? '' : ' hidden'}>${pickerHtml()}<div class="pc-cols"><div class="pc-col">${wk.html}</div><div class="pc-col"><div class="tm-season">${L ? teamSeasonBox(L) : ''}</div><div class="tm-pen"></div></div></div></div>
+      <div class="seg pc-tabs" role="tablist">${[['ov', 'Summary'], ['log', 'Game log'], ['po', 'Playoffs']].map(([k, l]) => `<button type="button" role="tab" data-tt="${k}" class="${teamTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="pc-tab" data-tt="ov"${teamTab === 'ov' ? '' : ' hidden'}>${pickerHtml()}${wk.html}</div>
       <div class="pc-tab" data-tt="log"${teamTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every game since 1999</div><div class="tm-log">${L ? teamLogHtml(L, abbr) : '<p class="pc-sub">Loading game log&hellip;</p>'}</div></div></div>
-      <div class="pc-tab" data-tt="pl"${teamTab === 'pl' ? '' : ' hidden'}>${pickerHtml()}${d ? `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
-        ${wk.players ? `<table class="bx tm-pl tiles"><thead><tr><th>Player</th><th class="num">Proj</th><th>Tier</th><th class="num">FP/G</th></tr></thead><tbody>${wk.players}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>` : wkWait(d)}</div>
-      <div class="pc-tab" data-tt="dc"${teamTab === 'dc' ? '' : ' hidden'}>${teamTab === 'dc' ? depthHtml(abbr) : ''}</div>
       <div class="pc-tab" data-tt="po"${teamTab === 'po' ? '' : ' hidden'}>${teamTab === 'po' ? rootingHtml(abbr) + teamPlayoffs(abbr) : ''}</div>`;
     body.querySelectorAll('[data-tt]').forEach(b => b.onclick = () => {
       teamTab = b.dataset.tt;
       rememberTab(`t:${abbr}`, teamTab);
-      if (teamTab === 'dc') { body.querySelector('.pc-tab[data-tt="dc"]').innerHTML = depthHtml(abbr); wireDepth(body, abbr); }
       if (teamTab === 'po') body.querySelector('.pc-tab[data-tt="po"]').innerHTML = rootingHtml(abbr) + teamPlayoffs(abbr);
       body.querySelectorAll('.pc-tabs [data-tt]').forEach(x => x.classList.toggle('on', x === b));
       body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.tt !== teamTab; });
     });
     body.querySelectorAll('[data-tt-go]').forEach(b => b.onclick = () => { const t = body.querySelector(`.pc-tabs [data-tt="${b.dataset.ttGo}"]`); if (t) { t.click(); t.scrollIntoView({ block: 'nearest' }); } });
     wireTeamLog(body, abbr);
-    wireDepth(body, abbr);
-    // penalties: the current season once it has games, else the last one
-    const tp = body.querySelector('.tm-pen');
-    if (tp) penIndex().then(ix => ix && penSeason(ix.current).then(D => D && D.teams[abbr] && D.teams[abbr].g >= 1 ? D : penSeason(ix.current - 1)))
-      .then(D => { if (cardTeam === abbr && D) tp.innerHTML = teamPenBox(abbr, D); });
     body.addEventListener('click', e => {  // playoff game rows open their gamecast
       const g = e.target.closest('.tpo-g[data-gid]'); if (!g || e.target.closest('button, a')) return;
       location.href = gcUrl(g.dataset.gid, '');
@@ -1910,24 +1975,24 @@
     // the Games tab's tile (win chances, line, ours; the score once it starts, repainted live)
     const week = g ? `<div class="pc-k pc-mtk">${esc(wkLabel(d))}</div><div class="pc-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>`
       : `<div class="pc-box"><div class="pc-k">${esc(wkLabel(d))}</div><b>Bye</b></div>`;
+    return { html: `${week}${rootLine(abbr, d)}${teamTiles(abbr, d, TLOGS[abbr], pw)}`, players: '' };
+  };
+  const teamPlayerRows = (abbr, d) => Object.entries(d.players).filter(([, p]) => p.team === abbr).sort((a, b) => b[1].proj - a[1].proj).map(([pid, p]) => { const s = scaled(p, d);
+    return `<tr class="teamrow" style="${NFLE.fmt.rowStyle(d.teams, p.team)}" data-open-pid="${esc(pid)}"><td>${NFLE.ui.player({ name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, badges: injTag(p.status) }, d.teams)}</td>
+      <td class="num"><b>${f1(s.proj)}</b></td><td><span class="tier t-${esc(p.slot)}">${esc(p.tier)}</span></td><td class="num muted">${p.fpg != null ? f1(p.fpg) : ''}</td></tr>`; }).join('');
+  // the Power ranking box (the Power tile's sheet)
+  const teamPowerBox = pw => {
     const unit = (label, v, rk, pp, total) => `<div class="tm-u${total ? ' tm-tot' : ''}"><span class="tm-ul">${label}</span><span class="tm-uv">${sgn(v)}</span>${rkChip(rk)}
       <span class="tm-ub"><span style="${v >= 0 ? `left:50%;width:${Math.min(50, Math.abs(v) * 10)}%` : `right:50%;width:${Math.min(50, Math.abs(v) * 10)}%`}" class="${v >= 0 ? 'pos' : 'neg'}"></span></span>
       ${pp != null ? `<span class="tm-pp muted" title="EPA per 100 plays">${sgn(pp)}</span>` : '<span></span>'}</div>`;
-    // one full-width box (it was alone in a two-column grid, leaving the right half empty); wide screens split it:
-    // rank + unit bars left, the note + rank-by-week chart right
-    const power = pw ? `<div class="pc-box tm-pwbox"><div class="tm-pwl"><div class="pc-k">Power ranking</div>
+    return `<div class="pc-box tm-pwbox"><div class="tm-pwl"><div class="pc-k">Power ranking</div>
         <div class="tm-pw"><div><div class="pc-big">${ord(pw.rank)}</div><div class="pc-sub">rank range ${esc(pw.range)}${pw.move ? ` · ${pw.move > 0 ? '▲' : '▼'}${Math.abs(pw.move)} from the week before` : ''}</div></div>
           <div><div class="pc-big sm">${sgn(pw.net)} <small>pts/g vs avg</small></div></div></div>
         <div class="tm-units">${unit('Offense', pw.off, pw.off_rk, null, true)}${unit('Pass O', pw.pass_o, pw.pass_o_rk, pw.pass_o_pp)}${unit('Run O', pw.rush_o, pw.rush_o_rk, pw.rush_o_pp)}
           ${unit('Defense', pw.def, pw.def_rk, null, true)}${unit('Pass D', pw.pass_d, pw.pass_d_rk, pw.pass_d_pp)}${unit('Run D', pw.rush_d, pw.rush_d_rk, pw.rush_d_pp)}
           ${unit('Special teams', pw.st, pw.st_rk, null, true)}</div></div>
         <div class="tm-pwr"><div class="pc-sub">Points per game vs an average team (opponent-adjusted). Schedule so far ${ord(pw.sos_past_rk)} hardest · rest of season ${ord(pw.sos_next_rk)} hardest.</div>
-        ${rankTrend(pw.rank_hist) ? `<div class="pc-k" style="margin-top:10px">Power rank by week</div>${rankTrend(pw.rank_hist)}` : ''}</div></div>` : '';
-    const players = Object.entries(d.players).filter(([, p]) => p.team === abbr).sort((a, b) => b[1].proj - a[1].proj);
-    const plRows = players.map(([pid, p]) => { const s = scaled(p, d);
-      return `<tr class="teamrow" style="${NFLE.fmt.rowStyle(d.teams, p.team)}" data-open-pid="${esc(pid)}"><td>${NFLE.ui.player({ name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, badges: injTag(p.status) }, d.teams)}</td>
-        <td class="num"><b>${f1(s.proj)}</b></td><td><span class="tier t-${esc(p.slot)}">${esc(p.tier)}</span></td><td class="num muted">${p.fpg != null ? f1(p.fpg) : ''}</td></tr>`; }).join('');
-    return { html: `${week}${rootLine(abbr, d)}<div class="pc-grid tm-grid">${power}</div>`, players: plRows };
+        ${rankTrend(pw.rank_hist) ? `<div class="pc-k" style="margin-top:10px">Power rank by week</div>${rankTrend(pw.rank_hist)}` : ''}</div></div>`;
   };
   const wireTeamLog = (body, abbr) => {
     const sel = body.querySelector('[data-topp]');
@@ -1955,6 +2020,7 @@
     if (window.NFLE && NFLE.cardRestore) teamTab = TABS[`t:${abbr}`] || 'ov';
     else if (abbr !== cardTeam || ov.hidden || (window.NFLE && NFLE.freshPage)) teamTab = 'ov';
     if (abbr !== cardTeam) teamOpp = '';
+    if (teamTab === 'pl' || teamTab === 'dc') teamTab = 'ov';  // Players / Depth became the Players tile's sheet
     // a fresh card starts on the page's week; card-to-card keeps the picked one (page mode: the shell flags fresh)
     if (ov.hidden || !cardWk || (window.NFLE && NFLE.freshPage)) cardWk = pageKey();
     cardPid = null; cardTeam = abbr;

@@ -1014,3 +1014,17 @@ html.pc-open { overflow: hidden; }
 .pc-big.mid { color: #f3d38c; }
 .pc-tapsub .pv-pj { color: var(--ink); font-weight: 600; }
 .pc-rng .rng-a { fill: var(--ink); stroke: var(--panel); stroke-width: 2; }
+/* team card Summary tiles (owner 2026-10-17): Players tile = top three by rest-of-season rank; Schedule sheet rows */
+.tm-tiles { margin-top: 12px; }
+.tm-tps { display: flex; flex-direction: column; gap: 4px; margin-top: 2px; }
+.tm-tp { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.tm-tpi { flex: none; width: 26px; height: 26px; border-radius: 50%; overflow: hidden; background: color-mix(in srgb, var(--ink) 10%, transparent); }
+.tm-tpi img { width: 26px; height: 26px; object-fit: cover; }
+.tm-tpn { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tm-tpr { flex: none; font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
+.tm-dck { margin: 14px 2px 6px; }
+.tm-sched { display: flex; flex-direction: column; gap: 6px; }
+.tm-sg { display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-radius: var(--r-sm); cursor: pointer; }
+.tm-sg:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.tm-sw { width: 42px; color: var(--muted); font-size: var(--fs-sm); } .tm-sv { width: 20px; color: var(--muted); font-size: var(--fs-sm); }
+.tm-sg b { flex: 1; } .tm-sg .muted { font-size: var(--fs-sm); }
