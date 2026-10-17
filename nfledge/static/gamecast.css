@@ -280,7 +280,7 @@ table.lg tbody tr[data-gid]:active td { background: color-mix(in srgb, var(--acc
 .nw-i { padding: 9px 0 9px 10px; border-top: 1px solid var(--line); border-left: 3px solid transparent; }
 .nw-i:first-child { border-top: 0; } .nw-i.fresh { border-left-color: var(--accent); }
 .nw-t { font-size: var(--fs-xs); color: var(--muted); font-weight: 600; }
-.nw-h { font-weight: 700; line-height: 1.38; margin-top: 2px; }
+.nw-h { font-weight: 600; line-height: 1.38; margin-top: 2px; }  /* semibold: a column of 700 headlines read as a wall */
 .nw-s { font-size: var(--fs-md); color: var(--muted); line-height: 1.45; margin-top: 4px; }
 .nw-s.clip { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .nw-more { font: inherit; font-size: var(--fs-sm); font-weight: 700; color: var(--accent); background: none; border: 0; padding: 2px 0; cursor: pointer; }

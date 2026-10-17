@@ -303,6 +303,12 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     return { p, s };
   };
   let lastRoute = null;  // the list route a page was opened from (breadcrumb), with its scroll position
+  // The page's tab strip sticks just under its sticky header (second visual audit): the header's height varies (names,
+  // phone vs desktop, re-renders), so it's read after each render and while scrolling (one cheap layout read a frame).
+  const pcHead = () => { const tp = document.getElementById('tab-page'), h = tp && tp.querySelector('.pc-head');
+    if (h) tp.style.setProperty('--pchead', `${h.offsetHeight}px`); };
+  let phRaf = 0;
+  window.addEventListener('scroll', () => { if (!phRaf) phRaf = requestAnimationFrame(() => { phRaf = 0; pcHead(); }); }, { passive: true });
   const scrolls = {};
   let onPage = false;
   const showPage = (kind, id) => {
@@ -327,6 +333,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       NFLE.freshPage = fresh;
       if (fn) fn(decodeURIComponent(id));
       NFLE.freshPage = false;
+      requestAnimationFrame(pcHead);
       // the name for the last crumb, once the card has rendered it
       setTimeout(() => { const h = document.getElementById('pcName'); const here = crumbs.querySelector('.cr-here'); if (h && here) here.textContent = h.textContent.replace(/^#\d+\s*/, ''); }, 60);
     };
