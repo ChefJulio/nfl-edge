@@ -5,10 +5,12 @@
   const NFLE = window.NFLE, esc = NFLE.esc;
   const DIVS = ['East', 'North', 'South', 'West'];
   const winPct = rec => { const [w, l, t] = String(rec || '0-0').split('-').map(Number); const g = w + l + (t || 0); return g ? (w + 0.5 * (t || 0)) / g : 0; };
+  // the matchup tiles' look (owner 2026-10-17: "the logo blown up within the background"): the logo large, bleeding
+  // off the right edge and fading toward the text; team-color gradient, darker under the text
   const tile = (t, i, p) => `<button type="button" class="tg-tile tm-open" data-tm="${esc(t)}" style="--tc:${esc(i.color || '#555')};--tc2:${esc(i.color2 || i.color || '#555')}">
-      <span class="tg-logo" style="background:${esc(i.logo_bg || '#333')}"><img src="${esc(NFLE.fmt.logoSrc(i.logo, 112))}" alt="" width="40" height="40" loading="lazy"></span>
-      <span class="tg-nm">${esc(i.nick || t)}</span>
-      <span class="tg-meta"><b>${esc(p.record || '0-0')}</b>${p.rank ? `<span class="tg-rk" title="Our Power rank">#${p.rank}</span>` : ''}</span></button>`;
+      <img class="tg-lg" src="${esc(NFLE.fmt.logoSrc(i.logo, 224))}" alt="" loading="lazy">
+      <span class="tg-txt"><span class="tg-nm">${esc(i.nick || t)}</span>
+        <span class="tg-meta"><b>${esc(p.record || '0-0')}</b>${p.rank ? `<span class="tg-rk" title="Our Power rank">Power #${p.rank}</span>` : ''}</span></span></button>`;
   NFLE.areas.teamgrid = {
     mount(sec) {
       sec.classList.remove('soon');
