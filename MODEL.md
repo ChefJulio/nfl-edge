@@ -91,6 +91,7 @@ The team's projected dropbacks and rushes then turn shares into opportunities.
 
 ### What we tried
 
+- **Shipped** - Should the Fantasy tab's matchup win chance account for players in the same game rising and falling together (a quarterback and his receivers)? - Yes: on simulated head-to-heads its stated chances matched actual results better for stacked lineups (calibration error 0.020 -> 0.016 to 0.018 in 2025, also better in 2026) and no worse for others (2026-10). <!-- tried:h2h-corr -->
 - **Rejected** - Does adding our Edge grade (recent fantasy points per game) to the usage model improve projections? - No: average miss 0.003 points worse, worse in 3 of 5 seasons; the usage and per-chance inputs already carry the same information (2026-10). <!-- tried:edge-grade-prior -->
 - **Rejected** - Does a player's efficiency per touch or target predict a bigger share of the work? - No: average miss 0.002 points worse overall, no position better (2026-10). <!-- tried:share-quality -->
 - **Shipped** - Should a rookie with no NFL games get an estimated role in his debut instead of zero? - Yes, if the depth chart lists him first or second: on weeks 1-2 of 2016-20, which no other test had used, the average miss for debuting players fell by 1.0 point and by 0.07 for everyone, better every season. A first version that also covered deeper rookies failed: most of them barely play (2026-10). <!-- tried:debut-prior-v1 --> <!-- tried:debut-prior-v2 -->

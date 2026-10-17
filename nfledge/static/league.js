@@ -261,10 +261,26 @@
       return out;
     };
     const total = rows => rows.reduce((t, r) => t + (r.p && r.p.exp != null ? r.p.exp : 0), 0);
-    const spread = rows => Math.sqrt(rows.reduce((t, r) => {
-      const p = r.p; if (!p || p.exp == null) return t;
-      return t + p.pa * p.sd * p.sd + p.pa * (1 - p.pa) * p.proj * p.proj;  // range + the chance he sits
-    }, 0));
+    // Win-chance spread, correlation-aware (INSIGHTS thread 6, {#h2h-corr}; owner 2026-10-16: "we lean towards being
+    // correct"): each starter's variance (range + the chance he sits) plus, for every pair in one game, rho x s_i x s_j.
+    // rho = correlation of standardized misses by position pair, teammates or opponents, fit on 2021-25 backtests
+    // (tools/h2h_eval.py): a QB and his own receivers swing together, so a stack is less certain than independent sums.
+    const RHO = { 'same:QB-WR': 0.244, 'same:QB-TE': 0.195, 'same:QB-RB': 0.028, 'same:RB-RB': -0.048, 'same:RB-TE': -0.034,
+      'same:RB-WR': -0.022, 'same:TE-TE': -0.033, 'same:TE-WR': -0.019, 'same:WR-WR': -0.012, 'opp:QB-QB': 0.143, 'opp:QB-TE': 0.09,
+      'opp:QB-WR': 0.051, 'opp:QB-RB': 0.013, 'opp:WR-WR': 0.035, 'opp:TE-WR': 0.028, 'opp:TE-TE': 0.017, 'opp:RB-RB': -0.014,
+      'opp:RB-WR': 0.005, 'opp:RB-TE': 0.003 };
+    const live = rows => rows.map(r => r.p).filter(p => p && p.exp != null);
+    const sOf = p => Math.sqrt(p.pa * p.sd * p.sd + p.pa * (1 - p.pa) * p.proj * p.proj);
+    const rhoOf = (p, q) => {
+      if (!p.team || !q.team) return 0;
+      const same = p.team === q.team;
+      if (!same && p.opp !== q.team) return 0;  // not the same game
+      return RHO[`${same ? 'same' : 'opp'}:${[p.pos, q.pos].sort().join('-')}`] || 0;
+    };
+    const covIn = ps => ps.reduce((t, p, i) => t + ps.slice(i + 1).reduce((u, q) => u + rhoOf(p, q) * sOf(p) * sOf(q), 0), 0);
+    const covX = (as, bs) => as.reduce((t, p) => t + bs.reduce((u, q) => u + rhoOf(p, q) * sOf(p) * sOf(q), 0), 0);
+    const varOf = ps => ps.reduce((t, p) => t + sOf(p) ** 2, 0) + 2 * covIn(ps);
+    const spreadDiff = (a, b) => { const A = live(a), B = live(b); return Math.sqrt(Math.max(varOf(A) + varOf(B) - 2 * covX(A, B), 1e-6)); };
     const phi = z => 0.5 * (1 + Math.tanh(0.7978845608 * (z + 0.044715 * z * z * z)));
 
     // ---- views --------------------------------------------------------------------------------------------------
@@ -344,14 +360,14 @@
         const st = (m.starters && m.starters[t.id]) || t.starters;
         return L.slots.map((s, i) => ({ slot: s, p: ps.find(p => p.ext === st[i]) || null }));
       };
-      const a = lineupOf(mine), b = lineupOf(opp), ea = total(a), eb = total(b), sd = Math.hypot(spread(a), spread(b)) || 1;
+      const a = lineupOf(mine), b = lineupOf(opp), ea = total(a), eb = total(b), sd = spreadDiff(a, b) || 1;
       const pw = phi((ea - eb) / sd);
       const side = (t, rows, e, live) => `<div class="lg-side"><div class="lg-tn">${esc(t.name)}</div><div class="lg-big">${f1(e)}</div>
         <div class="muted">projected${live ? ` · ${f1(live)} so far` : ''}</div>${table(rows.map(r => row(r.slot, r.p)).join(''))}</div>`;
       return `<div class="lg-wp"><b>${pct(pw)}</b> to win <span class="muted">(projected ${f1(ea)} - ${f1(eb)}, both teams' current lineups)</span>
           <div class="lg-bar"><span style="width:${(100 * pw).toFixed(1)}%"></span></div></div>
         <div class="lg-vs">${side(mine, a, ea, m.points[mine.id])}${side(opp, b, eb, m.points[opp.id])}</div>
-        <p class="muted lg-note">Win chance: each starter's projection and range under your scoring, and his chance to sit, added up for both lineups. Live points are the platform's.</p>`;
+        <p class="muted lg-note">Win chance: each starter's projection and range under your scoring and his chance to sit, for both lineups, counting how players in the same game rise and fall together (a QB and his receivers most). Live points are the platform's.</p>`;
     };
 
     const waiversView = () => {

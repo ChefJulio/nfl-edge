@@ -1920,3 +1920,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   half-life 3 (-0.004, no CI), gl_struct, job_security, Power C (M), Matchups rank N (Q), I2's fantasy leg, healthy3,
   Edge v1.2, points_seasons 6 (no CI), the ESPN Doubtful rate, hybrid (already registered). Gate template: sec. 1.
   MODEL.md "What we tried": P, R, O now read "Unresolved (too small to measure)".
+- **RESULT {#h2h-corr} thread 6, correlation-aware Fantasy matchup win chance: PASS -> SHIPPED (owner: "let the data
+  decide, we lean towards being correct").** tools/h2h_eval.py (v1 sampled lineups with pandas filters and took over an
+  hour; stopped and rewritten with per-week arrays, same definitions; no result was read from v1). rho fit on 2021-24
+  for the 2025 decision (same team QB-WR +0.240, QB-TE +0.176, QB-RB +0.029, RB/WR/TE teammates -0.01 to -0.06;
+  opponents QB-QB +0.138, QB-TE +0.087, QB-WR +0.050, others ~0). 20,000 matchups per kind. ECE current -> corr:
+  2025 unstacked 0.0116 -> 0.0125 (within 0.002), QB+1 0.0200 -> 0.0183, QB+2 0.0203 -> 0.0160; 2026 (weeks 3-5)
+  unstacked 0.0046 -> 0.0041, QB+1 0.0126 -> 0.0121, QB+2 0.0094 -> 0.0086; Brier equal to the third decimal
+  everywhere (QB+2 2025 0.2086 -> 0.2084). Gate met in both seasons. Live (league.js): rho refit on 2021-25 (same QB-WR
+  +0.244, QB-TE +0.195; opp QB-QB +0.143, QB-TE +0.090), spread = sqrt(var A + var B - 2 cov(A, B)) with same-game pairs
+  only; kickers / defenses carry no correlation. Effects are small (stacks a little less confident), as expected.

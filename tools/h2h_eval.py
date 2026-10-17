@@ -58,38 +58,49 @@ def fit_rho(d: pd.DataFrame) -> dict:
   return out
 
 
-def lineup(rng, pool: pd.DataFrame, kind: str):
-  """Row indices of a lineup: unstacked, or a QB plus 1 / 2 of his own pass catchers."""
-  used_games, out = set(), []
-  need = dict(SLOTS)
+class Week:
+  """One test week's pool as arrays: row indices by position, each row's game, catchers (WR / TE) by team."""
+
+  def __init__(self, g: pd.DataFrame):
+    self.idx = {pos: g.index[g.pos == pos].to_numpy() for pos in SLOTS}
+    self.game = dict(zip(g.index, g.game_id))
+    self.team = dict(zip(g.index, g.team))
+    self.pos = dict(zip(g.index, g.pos))
+    c = g[g.pos.isin(CATCH)]
+    self.mates = {t: x.index.to_numpy() for t, x in c.groupby("team")}
+
+
+def lineup(rng, W: Week, kind: str):
+  """Row indices of a lineup: unstacked (no two starters from one game), or a QB plus 1 / 2 of his own pass catchers
+  (the rest from other games)."""
+  need, out, used = dict(SLOTS), [], set()
   if kind != "unstacked":
-    qbs = pool[pool.pos == "QB"]
+    k = 1 if kind == "qb1" else 2
     for _ in range(50):
-      q = qbs.iloc[rng.integers(len(qbs))]
-      mates = pool[(pool.team == q.team) & pool.pos.isin(CATCH)]
-      k = 1 if kind == "qb1" else 2
-      if len(mates) >= k:
-        pick = mates.iloc[rng.choice(len(mates), k, replace=False)]
-        out = [q.name] + list(pick.index)
-        need["QB"] -= 1
-        for p in pick.pos:
-          need[p] -= 1
-        if min(need.values()) < 0:
-          out, need = [], dict(SLOTS)
-          continue
-        used_games.add(q.game_id)
-        break
+      q = W.idx["QB"][rng.integers(len(W.idx["QB"]))]
+      m = W.mates.get(W.team[q], np.array([], dtype=int))
+      if len(m) < k:
+        continue
+      pick = rng.choice(m, k, replace=False)
+      nd = dict(SLOTS); nd["QB"] -= 1
+      for x in pick:
+        nd[W.pos[x]] -= 1
+      if min(nd.values()) < 0:
+        continue
+      out, need = [q, *pick], nd
+      used.add(W.game[q])
+      break
     if not out:
       return None
   for pos, n in need.items():
-    cand = pool[(pool.pos == pos) & ~pool.game_id.isin(used_games)]
-    for _ in range(n):
-      if not len(cand):
-        return None
-      r = cand.iloc[rng.integers(len(cand))]
-      out.append(r.name)
-      used_games.add(r.game_id)
-      cand = cand[cand.game_id != r.game_id]
+    got = 0
+    for x in rng.permutation(W.idx[pos]):
+      if got == n:
+        break
+      if W.game[x] not in used:
+        out.append(x); used.add(W.game[x]); got += 1
+    if got < n:
+      return None
   return out
 
 
@@ -124,14 +135,14 @@ def main():
         print(f"  {k[2]:4s} {k[0]}-{k[1]}: {rho[k]:+.3f}")
     test = d[d.season == s]
     weeks = sorted(test.week.unique())
+    W = {w: Week(test[test.week == w]) for w in weeks}
     rng = np.random.default_rng(s)
     print(f"\n{s} (weeks {weeks[0]}-{weeks[-1]}):")
     for kind in ("unstacked", "qb1", "qb2"):
       pc, pn, y = [], [], []
       while len(y) < n:
         w = weeks[rng.integers(len(weeks))]
-        pool = test[test.week == w]
-        A, B = lineup(rng, pool, kind), lineup(rng, pool, "unstacked")
+        A, B = lineup(rng, W[w], kind), lineup(rng, W[w], "unstacked")
         if A is None or B is None:
           continue
         ea, eb = cols["E"][A].sum(), cols["E"][B].sum()
