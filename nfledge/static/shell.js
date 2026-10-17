@@ -115,7 +115,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       // when (owner 2026-10-17): kickoff / Final / the live clock at the top middle; the footer keeps the rest
       const when = fin ? '<span class="mt-fin">Final</span>' : `${esc(g.kickoff)}${g.neutral ? ' &middot; neutral' : ''}`;
       const st = fin ? verdict
-        : `<span class="mt-odds">Vegas: ${vegas(g.vegas_line)} &middot; <span title="${esc(f.model_why || '')}">ours ${f.model_tossup ? 'tossup' : `${T(f.model_fav)} ${esc(f.model_pct)}%`}</span></span>`;
+        : `<span class="mt-odds">Vegas: ${vegas(g.vegas_line)}</span>`;  // our pick is the big win chances above (owner 2026-10-17: no "ours")
       return `<a class="mt ${fin ? 'is-final' : 'is-pre'}${f.tossup && !fin ? ' toss' : ''}" data-gid="${esc(g.id)}" href="${esc(href || (NFLE.gameHref ? NFLE.gameHref(g) : '#'))}" style="${esc(g.bt_style || '')}">
         <div class="mt-main"><div class="mt-when">${when}</div>${main}</div><div class="mt-st">${st}</div></a>`;
     },
