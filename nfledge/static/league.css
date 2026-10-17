@@ -103,3 +103,5 @@ table.lg-tbl td.lg-gain.good { color: #6fdc8c; font-weight: 700; }
 .lg-tp-n { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .lg-tp-n b { font-size: var(--fs-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lg-tp-n .muted { font-size: var(--fs-xs); }
+.lg-tr-pos { margin: 12px 0 4px; } .lg-tr-pos .posb { font-size: var(--fs-xs); }
+.lg-tr-cols { align-items: start; } .lg-tps { align-content: start; }  /* uneven position groups: buttons keep their height */

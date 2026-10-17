@@ -659,9 +659,14 @@
       const others = L.teams.filter(t => t.id !== mine.id);
       const them = others.find(t => t.id === trade.team) || null;
       const weeks = rosWeeks();
-      const pick = (t, side) => t.ext.map(x => ({ x, p: player(x) })).sort((a, b) => (b.p.exp ?? -1) - (a.p.exp ?? -1)).map(({ x, p }) => {
-        const on = trade[side].has(x), ros = weeks.reduce((u, k) => u + ((weekOf(x, k) || {}).exp || 0), 0);
-        return `<button type="button" class="lg-tp${on ? ' on' : ''}" data-side="${side}" data-x="${esc(x)}"><span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span><span class="lg-tp-n"><b>${esc(shortName(p.name))}</b><span class="muted">${(t.ir || []).includes(x) ? 'IR · ' : ''}${perG(ros, gamesOf(x))}/g</span></span></button>`;
+      // grouped by position (owner 2026-10-17), best first by points per game; the two sides' blocks line up
+      const POS_ORDER = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'];
+      const pick = (t, side, pos) => t.ext.map(x => ({ x, p: player(x) })).filter(o => o.p.pos === pos).map(o => {
+        const ros = weeks.reduce((u, k) => u + ((weekOf(o.x, k) || {}).exp || 0), 0), g = gamesOf(o.x);
+        return { ...o, pg: g ? ros / g : 0, ros, g };
+      }).sort((a, b) => b.pg - a.pg).map(({ x, p, ros, g }) => {
+        const on = trade[side].has(x);
+        return `<button type="button" class="lg-tp${on ? ' on' : ''}" data-side="${side}" data-x="${esc(x)}"><span class="lg-tp-n"><b>${esc(shortName(p.name))}</b><span class="muted">${(t.ir || []).includes(x) ? 'IR · ' : ''}${perG(ros, g)}/g</span></span></button>`;
       }).join('');
       let result = '';
       if (them && (trade.give.size || trade.get.size)) {
@@ -682,9 +687,12 @@
         : '<p class="muted">No 1-for-1 or 2-for-1 trade helps both teams by our projections.</p>';
       return `<p class="muted lg-note">Pick a team, then tap players to give and get. Each side's change = its best lineup every remaining week through ${ROS.through}, per week. A fair trade helps both. Either team could also start the best free agent at each spot, so a player counts only for his edge over the waiver wire (a spare QB in a one-QB league is worth little). Values assume healthy players stay healthy; trades that leave fewer than ${DEPTH_MIN} RBs or WRs are flagged.</p>
         ${result}
-        <div class="lg-tr-cols"><div><div class="lg-tr-h"><b>${esc(mine.name)}</b><span class="muted">you give</span></div><div class="lg-tps">${pick(mine, 'give')}</div></div>
-          <div><div class="lg-tr-h r"><select class="lg-trteam" aria-label="Trade with"><option value="">Any team</option>${others.map(t => `<option value="${esc(t.id)}"${them && t.id === them.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select><span class="muted">you get</span></div>
-            <div class="lg-tps">${them ? pick(them, 'get') : '<p class="muted">Choose a team.</p>'}</div></div></div>
+        <div class="lg-tr-cols"><div class="lg-tr-h"><b>${esc(mine.name)}</b><span class="muted">you give</span></div>
+          <div class="lg-tr-h r"><select class="lg-trteam" aria-label="Trade with"><option value="">Any team</option>${others.map(t => `<option value="${esc(t.id)}"${them && t.id === them.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select><span class="muted">you get</span></div></div>
+        ${POS_ORDER.filter(pos => mine.ext.some(x => player(x).pos === pos) || (them && them.ext.some(x => player(x).pos === pos))).map(pos =>
+          `<div class="lg-tr-pos"><span class="posb ${['QB', 'RB', 'WR', 'TE'].includes(pos) ? `posb-${pos}` : 'lg-slot-any'}">${pos === 'DEF' ? 'D/ST' : pos}</span></div>
+          <div class="lg-tr-cols"><div class="lg-tps">${pick(mine, 'give', pos)}</div><div class="lg-tps">${them ? pick(them, 'get', pos) : ''}</div></div>`).join('')}
+        ${them ? '' : '<p class="muted">Choose a team to pick players from theirs, or find trades with any team below.</p>'}
         <div class="lg-finder">${finder}</div>`;
     };
     const wireTrade = box => {
