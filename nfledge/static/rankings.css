@@ -18,7 +18,7 @@ table.dt.tiles tr.teamrow:hover > td { background: var(--row-hover); }
 /* rank on the photo's top-left corner, only while scrolled sideways (the # column is off screen then); a twin of the
    team-logo badge on the opposite corner: same size, same cut-out ring, mirrored (owner 2026-10-17: "a tiny bit off") */
 /* quiet (owner: the white version was "way too prominent"), and fully inside the cell (the first one clipped left) */
-.pic .pic-rk { position: absolute; left: -2px; top: -3px; z-index: 2; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 8px;
+.pic .pic-rk { position: absolute; left: -1px; top: -2px; z-index: 2; min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px;
   display: none; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; line-height: 1;
   background: color-mix(in srgb, var(--ink) 12%, var(--panel)); color: color-mix(in srgb, var(--ink) 80%, transparent);
   box-shadow: 0 0 0 2px var(--panel); font-variant-numeric: tabular-nums; }
