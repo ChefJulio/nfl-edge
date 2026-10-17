@@ -15,8 +15,8 @@ import pandas as pd
 from . import elo
 from .config import ROOT
 from .team_model import UNITS, game_lines, team_volume_features
+from .site_assets import asset_version, page_html, write_site_assets
 
-PAGES_DIR = Path(__file__).parent / "pages"  # page shells (plain HTML with %TOKENS%, filled by render)
 LEAGUE_PASS_SHARE = 0.58  # weight of pass vs rush when combining unit ratings into one number
 
 
@@ -1478,14 +1478,6 @@ def past_projections(root_dir: Path, season: int, week: int, n: int = 8) -> dict
   return out
 
 
-def page_html(name: str, **tokens) -> str:
-  """A page shell from nfledge/pages/ with its %TOKENS% filled (plain replacement: the pages hold no logic)."""
-  out = (PAGES_DIR / name).read_text(encoding="utf-8")
-  for k, v in tokens.items():
-    out = out.replace(f"%{k}%", str(v))
-  return out
-
-
 def render(ctx: dict, out_path: Path) -> Path:
   """Write one week: the page shell (<page>.html, the same for every week) and its numbers (<page>.json), plus the
   shared site files (assets/, game.html; the current week also writes data/model.json and weeks.json)."""
@@ -1528,28 +1520,3 @@ def render(ctx: dict, out_path: Path) -> Path:
     # come back to it and offers a refresh when the site has newer numbers (shell.js, stale check)
     (root_dir / "build.json").write_text(json.dumps({"generated": ctx["generated"]}), encoding="utf-8")
   return out_path
-
-
-STATIC_DIR = Path(__file__).resolve().parent / "static"
-
-
-def asset_version() -> str:
-  """Short content hash of the shared assets, added to their links (?v=) so a deploy reaches phones at once
-  instead of after the browser's cache lifetime (GitHub Pages: 10 minutes)."""
-  import hashlib
-  h = hashlib.sha1()
-  for f in sorted(STATIC_DIR.iterdir()):
-    if f.is_file():
-      h.update(f.read_bytes())
-  return h.hexdigest()[:10]
-
-
-def write_site_assets(root_dir: Path) -> None:
-  """Shared files at the site root: the game page and the live / player-card / gamecast script and styles. Every
-  week page (current, lookahead and archived) links to these, so improvements reach old pages without rebuilding
-  them."""
-  (root_dir / "assets").mkdir(parents=True, exist_ok=True)
-  for f in STATIC_DIR.iterdir():
-    if f.is_file():
-      (root_dir / "assets" / f.name).write_bytes(f.read_bytes())
-  (root_dir / "game.html").write_text(page_html("game.html", V=asset_version()), encoding="utf-8")

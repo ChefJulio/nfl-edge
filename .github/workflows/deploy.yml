@@ -23,13 +23,79 @@ permissions:
   contents: write   # commits newly finished weeks to the archive branch
   pages: write
   id-token: write
+  actions: read     # the UI-only path downloads the last deployed site (another run's artifact)
 
 concurrency:
   group: pages
   cancel-in-progress: false   # never interrupt a run mid-way through committing archive pages
 
 jobs:
+  # UI-only pushes (every changed file under nfledge/static/) skip the data pipeline: the 'fast' job takes the last
+  # deployed site, drops the new assets in (tools/assets_deploy.py) and deploys in ~2 minutes. Anything else, the
+  # schedule and manual runs do the full build; so does a failed fast path (e.g. the last site's artifact expired).
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      fast: ${{ steps.diff.outputs.fast }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: diff
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          fast=false
+          if [ "${{ github.event_name }}" = push ] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            files=$(git diff --name-only "$BEFORE" "${{ github.sha }}")
+            echo "$files"
+            if [ -n "$files" ] && ! echo "$files" | grep -qv '^nfledge/static/'; then fast=true; fi
+          fi
+          echo "fast=$fast" >> "$GITHUB_OUTPUT"
+          echo "UI-only fast path: $fast"
+
+  fast:
+    needs: plan
+    if: needs.plan.outputs.fast == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find the last deployed site
+        id: last
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # the newest site bundle any run uploaded (a run's overall status can read failed although it deployed:
+          # a failed fast path followed by a good full build)
+          id=$(gh api "repos/${{ github.repository }}/actions/artifacts?name=github-pages&per_page=100" -q '[.artifacts[] | select(.expired | not)] | sort_by(.created_at) | last | .workflow_run.id // empty')
+          test -n "$id"
+          echo "last site: run $id"
+          echo "run=$id" >> "$GITHUB_OUTPUT"
+      - uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: last
+          run-id: ${{ steps.last.outputs.run }}
+          github-token: ${{ github.token }}
+      - name: New assets over the last site
+        run: |
+          mkdir site && tar -xf last/artifact.tar -C site
+          python3 tools/assets_deploy.py --site=site
+      - uses: actions/configure-pages@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+          retention-days: 7
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
   deploy:
+    needs: [plan, fast]
+    if: always() && (needs.plan.outputs.fast != 'true' || needs.fast.result == 'failure')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     environment:
@@ -156,5 +222,6 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
+          retention-days: 7   # the UI-only path builds on the last deployed site, so keep it past a skipped schedule
       - id: deployment
         uses: actions/deploy-pages@v4
