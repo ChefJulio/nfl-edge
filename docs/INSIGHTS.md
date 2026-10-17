@@ -2283,6 +2283,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   CHOOSE the lowest fantasy MAE (relevant rows) on 2021-23; DECIDE on 2024-25 (CI excluding 0 below, better in both,
   no position significantly worse, start / sit not significantly worse); CONFIRM 2026 so far, same direction. Today's
   the choice -> keep. The lower bound (never binds) and the 100 fallback are left as they are.
+- **RESULT {#shrink-cap} (AJ) the shrinkage cap: FAIL, 2000 kept (now tested).** tools/experiments.py 2021-2026 +
+  tools/grid_eval.py. Choose 2021-23 vs 2000: 500 -0.0015 [-0.0043, +0.0015] (chosen), 1000 -0.0010, 5000 +0.0010,
+  100000 +0.0014. Decide 2024-25 (500): +0.0013 [-0.0017, +0.0043] (2024 -0.0027, 2025 +0.0052; RB +0.0038); 2026 so
+  far -0.0026 [-0.0041, -0.0018]. Mixed by season: the cap matters (the gradient over 2021-23 is monotone: less
+  shrinkage slightly better) but not reliably. docs/handset_audit.md #8.
 - **DESCRIPTIVE 2026-10-17 (owner: "do players that score more touchdowns from further out have more value than those
   that typically only score touchdowns from goal line plays?"):** scratch/td_dist.py, play-by-play 2012-25, 1,028
   player-season pairs (80+ touches / targets both years). Year to year (Spearman): long TDs (from 20+ out) per chance
