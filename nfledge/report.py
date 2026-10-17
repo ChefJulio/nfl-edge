@@ -595,7 +595,7 @@ def week_data(ctx: dict) -> str:
         "ecr_flex": None if pd.isna(r["ecr_flex"]) else r["ecr_flex"], "ecr_flex_stale": bool(r["ecr_flex_stale"])}
   games = []
   for g in ctx["games"]:
-    games.append({k: g[k] for k in ("id", "away", "home", "kickoff", "neutral", "fc", "vegas_line", "vegas_total",
+    games.append({k: g[k] for k in ("id", "away", "home", "kickoff", "neutral", "site", "fc", "vegas_line", "vegas_total",
                                     "battles", "extras", "plays", "power_rk", "final", "bt_style", "colors",
                                     "gameday", "gametime")})
   # Rankings: players on bye per position (with their season line, for FP/G under the viewer's scoring) and
@@ -1226,6 +1226,43 @@ def forecast(g, p_model: float, k_vegas: float, tossup: float, names: dict, ts: 
           "model_fav": m_fav, "model_nick": names.get(m_fav, m_fav), "model_pct": m_pct, "model_tossup": m_pct < round(tossup * 100)}
 
 
+# where a neutral-site game is played (owner 2026-10-17: "London", not "neutral"): by stadium name, then by the
+# stadium id's city code (nflverse ids are city + number; one London game carries JAX00), else the stadium's own name
+NEUTRAL_STADIUM = {"Wembley Stadium": "London", "Tottenham Stadium": "London", "Tottenham Hotspur Stadium": "London",
+                   "Twickenham Stadium": "London", "Allianz Arena": "Munich", "FC Bayern Munich Stadium": "Munich",
+                   "Deutsche Bank Park": "Frankfurt", "Olympiastadion": "Berlin", "Croke Park": "Dublin",
+                   "Azteca Stadium": "Mexico City", "Estadio Banorte": "Mexico City", "Arena Corinthians": "Sao Paulo",
+                   "Maracana Stadium": "Rio de Janeiro", "Bernabeu": "Madrid", "Stade de France": "Paris",
+                   "Melbourne Cricket Ground": "Melbourne"}
+NEUTRAL_CODE = {"LON": "London", "GER": "Munich", "MUN": "Munich", "FRA": "Frankfurt", "BER": "Berlin", "DUB": "Dublin",
+                "MEX": "Mexico City", "SAO": "Sao Paulo", "RIO": "Rio de Janeiro", "MAD": "Madrid", "PAR": "Paris",
+                "MEL": "Melbourne", "PIT": "Pittsburgh", "VEG": "Las Vegas", "CLE": "Cleveland", "DET": "Detroit",
+                "MIA": "Miami", "SFO": "Santa Clara", "IND": "Indianapolis", "ATL": "Atlanta", "NOR": "New Orleans",
+                "NYC": "East Rutherford", "HOU": "Houston", "TAM": "Tampa", "LAX": "Inglewood", "PHO": "Glendale",
+                "JAX": "Jacksonville", "MIN": "Minneapolis"}
+
+
+# nflverse lists the 2025 international games at the home team's own stadium (checked 2026-10-17)
+NEUTRAL_GAME = {"2025_01_KC_LAC": "Sao Paulo", "2025_04_MIN_PIT": "Dublin", "2025_05_MIN_CLE": "London",
+                "2025_06_DEN_NYJ": "London", "2025_07_LA_JAX": "London", "2025_10_ATL_IND": "Berlin",
+                "2025_11_WAS_MIA": "Madrid"}
+HOME_CODE = {"PIT": "PIT", "CLE": "CLE", "NYJ": "NYC", "NYG": "NYC", "JAX": "JAX", "IND": "IND", "MIA": "MIA",
+             "LAC": "LAX", "LA": "LAX"}  # teams whose own stadium code a mislabeled neutral game would carry
+
+
+def neutral_city(g) -> str | None:
+  if g.game_id in NEUTRAL_GAME:
+    return NEUTRAL_GAME[g.game_id]
+  stadium, sid = getattr(g, "stadium", None), getattr(g, "stadium_id", None)
+  if isinstance(stadium, str) and stadium in NEUTRAL_STADIUM:  # named international venues are reliable
+    return NEUTRAL_STADIUM[stadium]
+  if g.week <= 18 and isinstance(sid, str) and HOME_CODE.get(g.home_team) == sid[:3]:
+    return None  # a regular-season "neutral" game at the home team's own stadium: the venue data is wrong, say neutral
+  if isinstance(sid, str) and sid[:3] in NEUTRAL_CODE:
+    return NEUTRAL_CODE[sid[:3]]
+  return stadium if isinstance(stadium, str) and stadium else None
+
+
 def final_result(games: pd.DataFrame, g, fc: dict) -> dict | None:
   """Final score once the game is over, and how the forecast fared: a favorite winning or an upset (a 65%
   favorite should lose about 1 time in 3), or, for a tossup, simply who won."""
@@ -1378,7 +1415,7 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
     out.append({"id": g.game_id, "gameday": str(g.gameday), "gametime": str(g.gametime),
                 "colors": {g.away_team: col[g.away_team], g.home_team: col[g.home_team]},
                 "away": away, "home": home, "kickoff": kickoff_text(g.gameday, g.gametime),
-                "neutral": g.location == "Neutral", "fc": fc,
+                "neutral": g.location == "Neutral", "site": neutral_city(g) if g.location == "Neutral" else None, "fc": fc,
                 "vegas_line": spread_text(v_fav, vm) if pd.notna(vm) else None,
                 "vegas_total": vt if pd.notna(vt) else None, "battles": battles, "extras": [st_row, home_row],
                 "plays": plays, "bt_style": f"--ac:{col[g.away_team]};--hc:{col[g.home_team]}",
