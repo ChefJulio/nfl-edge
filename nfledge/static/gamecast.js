@@ -2142,9 +2142,11 @@
         if (rec && !live && st[k].record) rec.textContent = st[k].record;
       });
       const winner = st.away.score > st.home.score ? st.away.team : st.home.score > st.away.score ? st.home.team : null;
+      const when = tile.querySelector('.mt-when');
+      if (when) when.innerHTML = live ? `<span class="mt-live"><span class="live-dot"></span>${esc(st.short || '')}</span>` : `<span class="mt-fin">${esc(st.detail || 'Final')}</span>`;
       tile.querySelector('.mt-st').innerHTML = live
-        ? `<span class="mt-live"><span class="live-dot"></span>${esc(st.short || '')}</span>${sp && sp.text ? `<span>${tmL(sp.offense.team)} ball · ${esc(sp.text)}</span>` : ''}${sp && sp.red ? '<span class="mt-red">red zone</span>' : ''}`
-        : `<span class="mt-fin">${esc(st.detail || 'Final')}</span>${g && g.fc ? verdict(g.fc, winner) : ''}`;
+        ? `${sp && sp.text ? `<span>${tmL(sp.offense.team)} ball · ${esc(sp.text)}</span>` : ''}${sp && sp.red ? '<span class="mt-red">red zone</span>' : ''}`
+        : `${g && g.fc ? verdict(g.fc, winner) : ''}`;
     });
   };
   const paintPill = () => {

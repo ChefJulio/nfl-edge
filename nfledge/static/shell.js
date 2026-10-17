@@ -109,11 +109,12 @@ document.addEventListener('touchstart', () => {}, { passive: true });
             <span class="mt-nm">${T(s.team, `<b>${wordmark(s)}</b>`)} <small>${esc(s.record)}</small></span></div>
           ${i ? '' : `<span class="mt-at">${g.neutral ? 'vs' : '@'}${f.tossup && !fin ? '<small>Tossup</small>' : ''}</span>`}`;
       }).join('');
-      const st = fin ? `<span class="mt-fin">Final</span>${verdict}`
-        : `<span>${esc(g.kickoff)}${g.neutral ? ' &middot; neutral' : ''}</span>
-           <span class="mt-odds">${g.vegas_line ? `<b>${esc(g.vegas_line)}</b>` : 'no line yet'} &middot; <span title="${esc(f.model_why || '')}">ours ${f.model_tossup ? 'tossup' : `${T(f.model_fav)} ${esc(f.model_pct)}%`}</span></span>`;
+      // when (owner 2026-10-17): kickoff / Final / the live clock at the top middle; the footer keeps the rest
+      const when = fin ? '<span class="mt-fin">Final</span>' : `${esc(g.kickoff)}${g.neutral ? ' &middot; neutral' : ''}`;
+      const st = fin ? verdict
+        : `<span class="mt-odds">${g.vegas_line ? `<b>${esc(g.vegas_line)}</b>` : 'no line yet'} &middot; <span title="${esc(f.model_why || '')}">ours ${f.model_tossup ? 'tossup' : `${T(f.model_fav)} ${esc(f.model_pct)}%`}</span></span>`;
       return `<a class="mt ${fin ? 'is-final' : 'is-pre'}${f.tossup && !fin ? ' toss' : ''}" data-gid="${esc(g.id)}" href="${esc(href || (NFLE.gameHref ? NFLE.gameHref(g) : '#'))}" style="${esc(g.bt_style || '')}">
-        <div class="mt-main">${main}</div><div class="mt-st">${st}</div></a>`;
+        <div class="mt-main"><div class="mt-when">${when}</div>${main}</div><div class="mt-st">${st}</div></a>`;
     },
   };
   // lists that show players by id wait for this (with NFLE.week()) before drawing, so their rows come up with faces.

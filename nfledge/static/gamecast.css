@@ -1054,3 +1054,11 @@ html.pc-open { overflow: hidden; }
 .mt-nm small { position: relative; z-index: 1; padding: 1px 5px; border-radius: var(--r-pill, 999px); background: rgba(10,12,16,.88); color: rgba(255,255,255,.88); text-shadow: none; }
 .mt-lg { z-index: 0; } .mt-side { z-index: 1; }  /* score, name and record always above the logos */
 .mt-at { padding-bottom: 3px; }  /* "@" / "vs" glyphs sit low in their line: lift them to the wordmarks' visual middle */
+
+/* the game's when at the top middle (owner 2026-10-17): kickoff, Final or the live clock; the footer, centered,
+   keeps the line and our pick, the result verdict or the live possession, and goes when it has nothing */
+.mt-main { padding-top: 26px; }
+.mt-when { position: absolute; top: 7px; left: 50%; transform: translateX(-50%); z-index: 2; font-size: var(--fs-xs); color: var(--muted);
+  white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.75); }
+.mt-st { justify-content: center; }
+.mt-st:empty { display: none; }
