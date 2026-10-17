@@ -2762,6 +2762,8 @@
     document.addEventListener('keydown', onKey);
     document.body.appendChild(ov);
     ov.querySelector('.sheet-x').focus();
+    // tables inside stick their heads just under the sheet's title row, not on top of it (owner 2026-10-17)
+    ov.querySelector('.sheet').style.setProperty('--sheeth', `${ov.querySelector('.sheet-h').offsetHeight}px`);
     if (matchMedia('(max-width: 699px)').matches) drag(ov, ov.querySelector('.sheet'));
   };
   // Phones (owner 2026-10-16): the sheet follows the finger. It opens at up to SNAP of the screen; dragging up grows
@@ -2774,10 +2776,17 @@
     let full = false;
     const setH = (h, anim) => { sh.classList.toggle('sheet-anim', !!anim); sh.style.maxHeight = `${Math.round(h)}px`; };
     setH(Math.min(sh.scrollHeight, SNAP * vh()));
-    let y0 = 0, t0 = 0, h0 = 0, mode = null, lastY = 0, lastT = 0, v = 0;
+    let y0 = 0, t0 = 0, h0 = 0, s0 = 0, mode = null, lastY = 0, lastT = 0, v = 0, glide = 0;
+    // after a drag that ran into full height, the content keeps the finger's speed for a moment and slows (a native
+    // scroll can't take over mid-gesture once the drag has claimed it)
+    const coast = vel => { cancelAnimationFrame(glide); let sp = -vel * 16, prev = performance.now();
+      const step = t => { const dt = Math.min(32, t - prev); prev = t; sh.scrollTop += sp * dt / 16; sp *= Math.pow(0.95, dt / 16);
+        if (Math.abs(sp) > 0.5) glide = requestAnimationFrame(step); };
+      glide = requestAnimationFrame(step); };
     sh.addEventListener('touchstart', e => {
       if (e.touches.length !== 1) return;
-      y0 = lastY = e.touches[0].clientY; t0 = lastT = e.timeStamp; h0 = sh.offsetHeight; v = 0;
+      cancelAnimationFrame(glide);
+      y0 = lastY = e.touches[0].clientY; t0 = lastT = e.timeStamp; h0 = sh.offsetHeight; s0 = sh.scrollTop; v = 0;
       mode = e.target.closest('.sheet-h') ? 'drag' : null;  // body touches decide on the first move
     }, { passive: true });
     sh.addEventListener('touchmove', e => {
@@ -2788,7 +2797,10 @@
       }
       if (mode !== 'drag') return;
       e.preventDefault();
-      if (dy < 0) { sh.style.transform = ''; setH(Math.min(cap(), h0 - dy)); }  // up: grow
+      // up: grow; once at full height, the rest of the same swipe scrolls the content (owner 2026-10-17: it got
+      // "caught" at full and needed a second swipe)
+      if (dy < 0) { sh.style.transform = ''; const want = h0 - dy, c = cap(); setH(Math.min(c, want));
+        if (want > c) { full = true; sh.scrollTop = s0 + (want - c); } }
       else { setH(h0); sh.style.transform = `translateY(${dy}px)`; }  // down: slide, the height kept
     }, { passive: false });
     sh.addEventListener('touchend', () => {
@@ -2796,9 +2808,11 @@
       mode = null;
       const dy = lastY - y0, snapH = Math.min(sh.scrollHeight, SNAP * vh());
       sh.classList.add('sheet-anim');
-      if (dy < 0) {  // grew: settle full, or back
-        full = dy < -50 || v < -0.4;
+      if (dy < 0) {  // grew: settle full (and let the content glide on if the swipe ran into full), or back
+        const ranIn = h0 - dy > cap();
+        full = full || ranIn || dy < -50 || v < -0.4;
         setH(full ? cap() : h0, true);
+        if (ranIn && v < -0.2) coast(v);
         return;
       }
       const far = dy > 0.3 * h0 || v > 0.6;

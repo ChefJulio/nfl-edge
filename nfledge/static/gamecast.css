@@ -1028,3 +1028,6 @@ html.pc-open { overflow: hidden; }
 .tm-sg:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
 .tm-sw { width: 42px; color: var(--muted); font-size: var(--fs-sm); } .tm-sv { width: 20px; color: var(--muted); font-size: var(--fs-sm); }
 .tm-sg b { flex: 1; } .tm-sg .muted { font-size: var(--fs-sm); }
+/* a sheet's tables: column heads stick under the sheet's own title row (--sheeth, set when it opens), below it */
+.sheet thead th { top: var(--sheeth, 0px); z-index: 2; }
+.sheet .sheet-h { z-index: 4; }
