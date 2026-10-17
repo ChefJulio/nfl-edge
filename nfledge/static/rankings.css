@@ -81,3 +81,8 @@ td.projc .pv-stack .pv-was { white-space: nowrap; }
   /* Pts right-aligned in its (slightly wider) column: numbers, header and the "final · proj" line share one edge */
   #tab-players table.ranks td.projc, #tab-players table.ranks th.projc { text-align: right; padding-right: 6px; }
 }
+
+/* "final" / "live" beside the actual score, dimmed and small (owner 2026-10-17); the line under it is just "proj" */
+td.projc .pv .pv-tag { font-size: 10px; font-weight: 600; letter-spacing: .02em; margin-right: 4px; vertical-align: 2px;
+  color: color-mix(in srgb, var(--tfg, #fff) 50%, transparent); }
+td.projc .pv .pv-tag .live-dot { width: 6px; height: 6px; margin-right: 3px; vertical-align: 1px; }
