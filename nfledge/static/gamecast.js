@@ -1072,11 +1072,16 @@
           ${p.mu != null ? `<span class="pc-muv">${muHtml(p, opp && opp.team)} <small>pts</small></span>` : muHtml(p)}</div>
         <div class="pc-sub">${p.mu != null ? `Facing ${tmL(p.opp)} instead of an average opponent ${Math.abs(p.mu) < 0.05 ? 'changes nothing' : `${p.mu > 0 ? 'adds' : 'takes away'} ${f1(Math.abs(p.mu))} pts`}: its Vegas total, the play volume and the defense ratings together.`
             : `This defense ${p.mpts >= 0 ? 'adds' : 'takes away'} ${f1(Math.abs(p.mpts || 0))} pts vs an average one.`}</div></div>`;
+    // projected to sit (owner 2026-10-17, Lamar ruled out: "shouldn't his projection tile read Out"): the tile leads
+    // with that, his if-active points below; the sheet keeps the full projection, marked "(if active)"
+    const projBig = ia >= 0.5
+      ? `<div class="pc-big bad">${ia >= 0.95 ? 'Out' : 'Likely out'}</div><div class="pc-tapsub">${f1(s.proj)} pts if he plays${ia < 0.95 ? ` · ${NFLE.fmt.toPlay(ia)} to play` : ''}</div>`
+      : `<div class="pc-big">${f1(s.proj)} <small>pts</small></div><div class="pc-tapsub">${rankPill}${risk}</div>`;
     const e = p.ext || {}, fpg = p.sc.ss && p.sc.g ? pts(p.sc.ss, w, p.pos) / p.sc.g : null;
     const html = `
       ${now}
       <div class="pc-tiles">
-        ${tapTile('Projection', `<div class="pc-big">${f1(s.proj)} <small>pts</small></div><div class="pc-tapsub">${rankPill}${risk}</div>`, `${wkLabel(d)} projection`,
+        ${tapTile('Projection', projBig, `${wkLabel(d)} projection`,
             projDetail + muDetail.replace('<div class="pc-box">', '<div class="pc-box"><div class="pc-k">Matchup effect</div>'))}
         ${formTile(L, p.pos, fpg, e.games || p.sc.g, `${d.season} season before week ${d.week}`, `<div class="pc-box pc-season">${seasonHtml(p, d, L)}</div>`)}
         ${d === DATA ? healthTile(pid, p, L, p.espn) : ''}
