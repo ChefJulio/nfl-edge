@@ -598,7 +598,7 @@
     // one grade, two time scales (owner 2026-10-17): shown on the OVR's own 50-99 scale and colors
     const grdCell = g => g.gr != null ? `<span class="lg-rk ${g.gr >= 80 ? 'rk-good' : g.gr <= 30 ? 'rk-bad' : 'rk-mid'}">${ovr(g.gr)}</span>` : '–';
     const head = `${grpHead(7)}
-      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num" title="Game grade, on the OVR's 50-99 scale: his fantasy output that game against every game by qualified players at his position that season (early in a season, last season's games fill the weeks not played yet)">Gm Grd</th><th class="num">Snap</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
+      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num" title="Game grade, on the OVR's 50-99 scale: his fantasy output that game against every game by qualified players at his position that season (early in a season, last season's games fill the weeks not played yet)">Grd</th><th class="num">Snap</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
     const blank = stat.map((c, i) => `<td class="num${gcl(i)}">–</td>`).join('');
     const body = seasons.map(S => {
       const isCur = S.s === L.cur, rows = S.g.map(g => ({ w: g.w, g }));
