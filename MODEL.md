@@ -338,6 +338,16 @@ The grade measures output, not style: fantasy points per game in the site's scor
 - **Rejected** - Should a receiver's yards per target (how explosive he is) raise his projected touchdowns, since explosive receivers tend to beat their touchdown projections? - It didn't change the average miss for receivers (2021-26); it did pick the better of two similar receivers slightly more often, which will get its own test on the full 2026 season (2026-10). <!-- tried:wr-td-explosive -->
 - **Rejected** - League scoring shifts year to year (about 3%; up to 5% off in our projections in 2024, the first dynamic-kickoff year). Should projections be scaled by how this season's scoring is running against them so far? - It fixed the level (2024: 5.5% low became 2.0%) but didn't make individual projections more accurate: a single game varies far more than the season's level, and it was worse on 2024-25 by the average miss (2026-10). <!-- tried:season-calibration -->
 
+## Rule changes and scoring eras
+
+League scoring isn't constant. For quarterbacks, running backs, receivers and tight ends together (half PPR), it was 111-119 points per team-game in 1999-2003, climbed through the passing boom to a peak of 138 in 2020, and has fallen since (125-131), moving about 3% from one season to the next. Rule changes explain part of it:
+
+- **Passing rules and their enforcement.** 2004's illegal-contact emphasis (passing yards per team-game 214 to 225 in one season), quarterback protections (2006, 2009), defenseless-receiver protections (2010-11), and the 2018 catch-rule and roughing changes. Most of these arrive as officiating emphasis, so their size can't be known in advance.
+- **Field position from kickoffs.** Kickoffs from the 35 (2011), touchbacks to the 25 (2016), fair catches as touchbacks (2023), then the dynamic kickoff with touchbacks to the 30 (2024) and the 35 (2025), which moved where drives start by about five yards. Our projections ran 5.5% low in 2024.
+- **Scoring and structure.** Extra points from 33 yards (2015: more misses, more two-point tries), a 17th game (2021), overtime possession for both teams (playoffs 2022, regular season 2025). 2020's empty stadiums (not a rule) briefly erased home-field advantage.
+
+**How the model handles it.** Projections, ranges and chances to play are per game and learned from recent seasons, with Vegas totals (which price a new rule in from day one) as inputs. Grades, game grades and finishes are percentiles within each season or week, so they compare across eras on their own. Season totals don't: a 17-game season adds about 6% with no change per game, so compare across eras per game. We tested scaling projections by how this season's scoring runs against them: it fixed the level but not individual accuracy (see Projections, What we tried), and a rule-change input was not built: about five cases since 1999, each different, would make it a hand-set guess.
+
 ## Under the hood
 
 How the data flows, how the model is validated, how this page stays current, and the live formulas.

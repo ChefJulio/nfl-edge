@@ -59,6 +59,9 @@ MAE (INSIGHTS {#wr-td-explosive}); WR start / sit better, rechecked as its own t
 Done (2026-10-17, owner: scoring by year / rule changes): **(AL) in-season calibration of the projection level** FAIL
 (INSIGHTS {#season-calibration}: fixes the level, not individual accuracy).
 
+Watch (2026-10-17, rule changes review): **a tush-push ban** would be a sudden change to QB goal-line rushing TDs (Hurts
+above all). If one passes, pre-register a reset of QB goal-line TD rates before that season's first week.
+
 Also queued (2026-10-17, found on Hockenson): **injured right before a bye.** A player hurt in the game before his bye is
 on no injury report until the week after (nflverse lists nobody on a bye team), so the return chain never starts:
 every later week reads 100%. ESPN's feed knows (status, return date). Test: seed the chain for bye-week teams from
