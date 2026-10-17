@@ -55,13 +55,12 @@ td.actc .live-dot { width: 7px; height: 7px; margin-right: 5px; }
 .mt:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
 .mt-main { position: relative; display: grid; grid-template-columns: 78px minmax(0, 1fr) auto minmax(0, 1fr) 78px; grid-template-areas: ". sa at sh .";
   align-items: center; gap: 0 8px; padding: 14px 10px 10px; min-height: 84px; }
-/* big logos on the outside, only just spilling past the tile's edges, fading softly toward the middle */
-.mt-lg { position: absolute; top: 50%; width: 112px; height: 112px; margin-top: -56px; object-fit: contain; pointer-events: none; }
+/* logos on the outside, whole and inside the tile (owner 2026-10-17: none cut off at the edges, no fade): the tile's
+   height less an 8px margin, 8px in from its side; the score and name sit above them */
+.mt-lg { position: absolute; top: 8px; height: calc(100% - 16px); width: auto; aspect-ratio: 1; object-fit: contain; pointer-events: none; }
 .mt-lg.tm-open { pointer-events: auto; }  /* its visible edge opens the team (the score / name sit above it) */
 .mt .tm-open:hover b, .mt-stake .tm-open:hover { text-decoration: underline; }
-.mt-lg.away { left: -10px; -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%);
-  mask-image: linear-gradient(90deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%); }
-.mt-lg.home { right: -10px; -webkit-mask-image: linear-gradient(270deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%);
+.mt-lg.away { left: 8px; } .mt-lg.home { right: 8px; }
   mask-image: linear-gradient(270deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%); }
 .mt-side { position: relative; display: flex; flex-direction: column; min-width: 0; line-height: 1.1; text-shadow: 0 1px 2px rgba(0,0,0,.75), 0 0 12px rgba(0,0,0,.5); }
 /* numbers and names sit toward the middle, clear of the logos (owner 2026-10-16: "push the percentages / scores inward") */
@@ -82,7 +81,7 @@ td.actc .live-dot { width: 7px; height: 7px; margin-right: 5px; }
 .mt-fin { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--ink); }
 .mt-live { color: var(--ink); font-weight: 700; } .mt-red { color: #ff8f84; font-weight: 700; }
 @media (max-width: 560px) { .mt-main { grid-template-columns: 52px minmax(0, 1fr) auto minmax(0, 1fr) 52px; } }
-@media (max-width: 400px) { .mt-main { grid-template-columns: 48px minmax(0, 1fr) auto minmax(0, 1fr) 48px; } .mt-lg { width: 96px; height: 96px; margin-top: -48px; } .mt-num { font-size: 30px; } }
+@media (max-width: 400px) { .mt-main { grid-template-columns: 48px minmax(0, 1fr) auto minmax(0, 1fr) 48px; } .mt-num { font-size: 30px; } }
 svg.fd { display: block; width: 100%; height: 22px; margin-top: 6px; border-radius: var(--r-xs); overflow: hidden; }
 .fd-turf { fill: #1f5a32; } .fd-red { fill: rgba(255,77,79,.22); }
 .fd-l { stroke: rgba(255,255,255,.35); stroke-width: .3; } .fd-l.mid { stroke: rgba(255,255,255,.6); stroke-width: .45; }
@@ -1051,7 +1050,7 @@ html.pc-open { overflow: hidden; }
 .mt-at { align-self: center; height: 55px; flex-direction: column-reverse; justify-content: flex-start; line-height: 17px; }  /* a side's height: score 34 + name row 4 + 17 */
 @media (max-width: 400px) { .mt-at { height: 51px; } }  /* score 30 */
 .mt-at small { margin: 0 0 2px; line-height: 1; }
-/* logos inside the tile, none of them cut off at its edges (owner 2026-10-17): the tile's height less a margin, inset */
-.mt-lg, .mt-lg.away, .mt-lg.home { top: 8px; height: calc(100% - 16px); width: auto; aspect-ratio: 1; margin-top: 0; }
-.mt-lg.away { left: 8px; } .mt-lg.home { right: 8px; }
-@media (max-width: 400px) { .mt-lg, .mt-lg.away, .mt-lg.home { width: auto; height: calc(100% - 16px); margin-top: 0; } }
+/* the record reads over a full-strength logo (owner 2026-10-17, no logo fade): a small dark pill */
+.mt-nm small { position: relative; z-index: 1; padding: 1px 5px; border-radius: var(--r-pill, 999px); background: rgba(10,12,16,.88); color: rgba(255,255,255,.88); text-shadow: none; }
+.mt-lg { z-index: 0; } .mt-side { z-index: 1; }  /* score, name and record always above the logos */
+.mt-at { padding-bottom: 3px; }  /* "@" / "vs" glyphs sit low in their line: lift them to the wordmarks' visual middle */
