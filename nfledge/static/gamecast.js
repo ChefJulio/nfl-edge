@@ -21,6 +21,14 @@
   // ---------------------------------------------------------------------------------------------------- helpers
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   // a team name / logo that opens its page (owner 2026-10-16: every one on the site, except the logo on a player photo)
+  // Two-column pages on wide screens: a late-loading box (penalties) goes to whichever column is shorter, so the columns
+  // end near each other; phones keep the stacked order the markup gives (second visual audit)
+  const balanceCols = el => {
+    const cols = el && el.closest('.pc-cols'), mine = el && el.closest('.pc-col');
+    if (!cols || !mine || !matchMedia('(min-width: 1100px)').matches) return;
+    const other = [...cols.children].find(c => c !== mine && c.classList.contains('pc-col'));
+    if (other && other.offsetHeight + el.offsetHeight < mine.offsetHeight) other.appendChild(el);
+  };
   const tmL = (t, html) => t ? `<span class="tm-open" data-tm="${esc(t)}">${html == null ? esc(t) : html}</span>` : (html || '');
   const f1 = v => (v == null || isNaN(v)) ? '' : (Math.round(v * 10) / 10).toFixed(1);
   const f0 = v => (v == null || isNaN(v)) ? '' : String(Math.round(v));
@@ -1209,7 +1217,7 @@
     body.querySelectorAll('.pc-news').forEach(nb => loadNews(espn, nb, +nb.dataset.n || 6));
     // his career from one small shard (data/penalties/players/<last 2 digits>.json) instead of every season's file
     if (L) body.querySelectorAll('.pc-pen').forEach(pb => NFLE.load(`data/penalties/players/${pid.slice(-2)}.json`).catch(() => null)
-      .then(sh => { if (cardPid === pid) pb.innerHTML = playerPenBox(pid, ((sh || {})[pid] || []).map(([season, ...x]) => ({ season, players: { [pid]: x } }))); }));
+      .then(sh => { if (cardPid === pid) { pb.innerHTML = playerPenBox(pid, ((sh || {})[pid] || []).map(([season, ...x]) => ({ season, players: { [pid]: x } }))); balanceCols(pb); } }));
     // the Grade tab's history: his own small shard (data/grades/players/<last 2 digits>.json), loaded when the tab opens
     const loadGrades = () => body.querySelectorAll('.pc-grade').forEach(gb => { if (gb.dataset.loaded) return; gb.dataset.loaded = '1';
       NFLE.load(`data/grades/players/${pid.slice(-2)}.json`).catch(() => null).then(sh => {
