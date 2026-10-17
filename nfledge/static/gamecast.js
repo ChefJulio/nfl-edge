@@ -1910,10 +1910,17 @@
     // compare; the roster and injury state from ros.json (rest of season), hurt = under 50% to play his next game
     if (GR.cur === undefined) { GR.cur = null; grIndex().then(ix => ix && grSeason(ix.current)).then(g => { GR.cur = g || null; rerenderCard(); }); }
     const rk = rosRanks(), gp = GR.cur && GR.cur.players;
+    // rookies and second-year players (not graded two seasons back) rank by this season alone when it's higher and he
+    // has 4+ games (owner 2026-10-17): a young breakout climbs; veterans keep the three-season OVR, so a hot five games
+    // doesn't reshuffle established stars
+    const old = GR.cur ? grSeason(GR.cur.season - 2) : null;
+    if (old && GR.old === undefined) { GR.old = null; old.then(x => { GR.old = x || false; rerenderCard(); }); }
+    const young = pid => GR.old && !(pid in GR.old.players);
+    const score = pid => { const g = gp[pid]; return young(pid) && g[6] != null && (g[8] || 0) >= 4 ? Math.max(g[0], g[6]) : g[0]; };
     const top = rk && gp ? Object.entries(rk).filter(([pid, r]) => r.team === abbr && gp[pid] && gp[pid][0] != null)
-      .sort((a, b) => (gp[b[0]][9] ? 0 : 1) - (gp[a[0]][9] ? 0 : 1) || gp[b[0]][0] - gp[a[0]][0]).slice(0, 3) : [];
+      .sort((a, b) => (gp[b[0]][9] ? 0 : 1) - (gp[a[0]][9] ? 0 : 1) || score(b[0]) - score(a[0])).slice(0, 3) : [];
     const face = ([pid, r]) => { const ph = r.photo || NFLE.ui.headshot(r.espn), g = gp[pid];
-      return `<div class="tm-tp"><span class="tm-tpi">${ph ? `<img src="${esc(ph)}" alt="" width="30" height="30" loading="lazy">` : ''}</span><span class="tm-tpn">${esc(NFLE.fmt.short(r.name))}</span>${r.hurt ? '<span class="tm-tph" title="Under 50% to play his next game">inj</span>' : ''}<span class="tm-tpr">${esc(r.pos)} <b class="${g[9] ? '' : grTone(g[0])}" title="Edge grade (OVR)">${ovr(g[0])}${uqMark(g)}</b></span></div>`; };
+      return `<div class="tm-tp"><span class="tm-tpi">${ph ? `<img src="${esc(ph)}" alt="" width="30" height="30" loading="lazy">` : ''}</span><span class="tm-tpn">${esc(NFLE.fmt.short(r.name))}</span>${r.hurt ? '<span class="tm-tph" title="Under 50% to play his next game">inj</span>' : ''}<span class="tm-tpr">${esc(r.pos)} <b class="${g[9] ? '' : grTone(score(pid))}" title="${score(pid) > g[0] ? `Edge grade this season (${ovr(g[0])} overall; young player)` : 'Edge grade (OVR)'}">${ovr(score(pid))}${uqMark(g)}</b></span></div>`; };
     const wkRows = teamPlayerRows(abbr, d);
     tiles.push(tapTile('Players', top.length ? `<div class="tm-tps">${top.map(face).join('')}</div>` : '<div class="pc-tapsub">Loading&hellip;</div>', 'Players',
       `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
