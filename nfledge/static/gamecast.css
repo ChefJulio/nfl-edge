@@ -809,3 +809,25 @@ table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; tex
 #tab-page .pc-page .pc-head.pc-head-hero::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 50%;
   width: 260px; height: 260px; transform: translate(-50%, -50%); background: var(--tlogo) center / contain no-repeat;
   opacity: .16; pointer-events: none; }
+
+/* Desktop player page (owner 2026-10-16): the header carries the bio on its right, a bigger photo and name; the
+   copy under the header is for phones and tablets. One text scale across both columns. */
+.pc-bio-in { display: none; }
+@media (min-width: 1100px) {
+  #tab-page .pc-page .pc-head .pc-bio-in { display: flex; margin: 0 0 0 auto; align-self: center; gap: 28px; }
+  #tab-page .pc-page .pc-head ~ .pc-bio { display: none; }
+  #tab-page .pc-page .pc-head.pc-head-hero { min-height: 124px; }
+  #tab-page .pc-page .pc-head .pc-pic { width: 118px; height: 104px; }
+  #tab-page .pc-page .pc-head h3 { font-size: var(--fs-2xl); }
+  #tab-page .pc-cols .nw-h { font-size: var(--fs-md); }
+  #tab-page .pc-cols .nw-s { font-size: var(--fs-sm); }
+}
+/* the Week tab's "This season" log in the narrower right column: the phone's horizontal compaction, so it ends at TD */
+@media (min-width: 1100px) {
+  .pc-cols table.lg th, .pc-cols table.lg td { padding-left: 4px; padding-right: 4px; }
+  .pc-cols table.lg td.num, .pc-cols table.lg th.num { padding-left: 1px; padding-right: 1px; }
+  .pc-cols table.lg tr > :nth-child(1) { min-width: 30px; } .pc-cols table.lg tr > :nth-child(2) { left: 30px; min-width: 46px; }
+  .pc-cols table.lg .sc { padding: 2px 3px; }
+  .pc-cols table.lg tr > :last-child { padding-right: 6px; }
+  #tab-page .pc-cols .pc-box.pc-mini { padding-left: 0; padding-right: 0; background: none; box-shadow: none; }
+}

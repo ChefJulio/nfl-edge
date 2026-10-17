@@ -21,14 +21,6 @@
   // ---------------------------------------------------------------------------------------------------- helpers
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   // a team name / logo that opens its page (owner 2026-10-16: every one on the site, except the logo on a player photo)
-  // Two-column pages on wide screens: a late-loading box (penalties) goes to whichever column is shorter, so the columns
-  // end near each other; phones keep the stacked order the markup gives (second visual audit)
-  const balanceCols = el => {
-    const cols = el && el.closest('.pc-cols'), mine = el && el.closest('.pc-col');
-    if (!cols || !mine || !matchMedia('(min-width: 1100px)').matches) return;
-    const other = [...cols.children].find(c => c !== mine && c.classList.contains('pc-col'));
-    if (other && other.offsetHeight + el.offsetHeight < mine.offsetHeight) other.appendChild(el);
-  };
   const tmL = (t, html) => t ? `<span class="tm-open" data-tm="${esc(t)}">${html == null ? esc(t) : html}</span>` : (html || '');
   const f1 = v => (v == null || isNaN(v)) ? '' : (Math.round(v * 10) / 10).toFixed(1);
   const f0 = v => (v == null || isNaN(v)) ? '' : String(Math.round(v));
@@ -910,7 +902,7 @@
   const money = m => m >= 100 ? `$${f0(m)}M` : m >= 1 ? `$${f1(m)}M` : `$${f0(m * 1000)}K`;
   // Compact header (owner 2026-10-16, after a Sleeper reference): age / height / weight / NFL years in a slim strip
   // under the name; draft, college and contract in their own section lower on the Week tab.
-  const bioStrip = L => {
+  const bioStrip = (L, cls = '') => {
     if (!L || !L.bio) return '';
     const b = L.bio, it = [];
     const item = (v, k, t = '') => `<div${t ? ` title="${esc(t)}"` : ''}><small>${k}</small><b>${v}</b></div>`;
@@ -918,7 +910,7 @@
     if (b.ht) it.push(item(esc(`${Math.floor(b.ht / 12)}'${b.ht % 12}"`), 'Height'));
     if (b.wt) it.push(item(`${esc(b.wt)}<i> lb</i>`, 'Weight'));
     if (b.exp != null) it.push(b.exp === 0 && b.exp_s === L.cur ? item('Rookie', 'Exp') : item(esc(b.exp), 'Exp', b.exp_s === L.cur ? 'NFL seasons' : `NFL seasons, as of ${b.exp_s}`));
-    return it.length ? `<div class="pc-bio">${it.join('')}</div>` : '';
+    return it.length ? `<div class="pc-bio${cls}">${it.join('')}</div>` : '';
   };
   const profileBox = L => {
     if (!L || !L.bio) return '';
@@ -1200,9 +1192,10 @@
     const overview = isKind || retired;
     const week = isKind ? kindOverview(L, espn) + profileBox(L)
       : retired ? weekExtras(pid, L, row, espn) + (offCareer(L) ? `<div class="pc-box"><div class="pc-k">By season (regular season)</div>${offCareer(L)}</div>` : '') + profileBox(L)
-      // two columns on wide screens (owner 2026-10-16): this week on the left, news / games / penalties on the right
-      : `<div class="pc-cols"><div class="pc-col">${d === undefined || d === null ? wkWait(d) : p ? playerWeek(pid, p, d, L) : playerOff(L, d)}${profileBox(L)}</div>
-         <div class="pc-col">${weekExtras(pid, L, p || row, espn)}<div class="pc-pen"></div></div></div>`;
+      // two columns on wide screens (owner 2026-10-16): this week and penalties on the left; news, this season's games
+      // and draft & contract on the right. Fixed sides (owner), sized so the two usually end near each other.
+      : `<div class="pc-cols"><div class="pc-col">${d === undefined || d === null ? wkWait(d) : p ? playerWeek(pid, p, d, L) : playerOff(L, d)}<div class="pc-pen"></div></div>
+         <div class="pc-col">${weekExtras(pid, L, p || row, espn)}${profileBox(L)}</div></div>`;
     body.innerHTML = `
       <div class="pc-head pc-head-hero" style="--tc:${esc(info.color || '#666')};--tc2:${esc(info.color2 || info.color || '#999')}${info.logo ? `;--tlogo:url('${esc(logoSrc(info.logo, 300))}')` : ''}">
         ${photo ? `<div class="pc-pic" data-zoom="${esc(uncrop(photoBig(L, espn) || photo))}" role="button" tabindex="0" aria-label="Show a bigger photo"><img src="${esc(photo)}" alt="" width="72" height="72" loading="lazy" onerror="this.parentNode.classList.add('nopic')">${team ? `<span class="pc-pic-tm">${tLogo(team, 16)}</span>` : ''}</div>`
@@ -1210,6 +1203,7 @@
         <div class="pc-id"><h3 id="pcName">${num != null ? `<span class="pc-num">#${esc(num)}</span>` : ''}${esc(name)}</h3>
           <div class="pc-meta">${pos ? `<span class="posb posb-${esc(pos)}">${esc(pos)}</span>` : ''}${graded ? grChip(pid, GR.cur) : ''} ${team ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(team)}">${esc(info.name || team)}</button>` : L && lastPlayed && lastPlayed < L.cur ? `<span class="muted">Last played ${esc(lastPlayed)}</span>` : '<span class="muted">Free agent</span>'}</div>
 </div>
+        ${bioStrip(L, ' pc-bio-in')}
       </div>
       ${bioStrip(L)}
       <div class="seg pc-tabs" role="tablist">${[['ov', overview ? 'Overview' : 'Week'], ['log', 'Game log'], ...(graded ? [['gr', 'Grade']] : []), ...(L && (L.inj || L.dur) ? [['inj', 'Injuries']] : []), ...(news ? [['news', 'News']] : [])]
@@ -1225,7 +1219,7 @@
     body.querySelectorAll('.pc-news').forEach(nb => loadNews(espn, nb, +nb.dataset.n || 6));
     // his career from one small shard (data/penalties/players/<last 2 digits>.json) instead of every season's file
     if (L) body.querySelectorAll('.pc-pen').forEach(pb => NFLE.load(`data/penalties/players/${pid.slice(-2)}.json`).catch(() => null)
-      .then(sh => { if (cardPid === pid) { pb.innerHTML = playerPenBox(pid, ((sh || {})[pid] || []).map(([season, ...x]) => ({ season, players: { [pid]: x } }))); balanceCols(pb); } }));
+      .then(sh => { if (cardPid === pid) { pb.innerHTML = playerPenBox(pid, ((sh || {})[pid] || []).map(([season, ...x]) => ({ season, players: { [pid]: x } }))); } }));
     // the Grade tab's history: his own small shard (data/grades/players/<last 2 digits>.json), loaded when the tab opens
     const loadGrades = () => body.querySelectorAll('.pc-grade').forEach(gb => { if (gb.dataset.loaded) return; gb.dataset.loaded = '1';
       NFLE.load(`data/grades/players/${pid.slice(-2)}.json`).catch(() => null).then(sh => {

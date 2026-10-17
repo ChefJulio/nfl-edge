@@ -97,8 +97,8 @@ html.land-anim #tab-players .scroll tbody tr:nth-child(n+13) { animation-delay: 
    (gamecast.js .pc-cols). Below 1100px the wrappers are plain blocks, so phones and tablets are unchanged. */
 .pc-cols, .pc-col { min-width: 0; }
 @media (min-width: 1100px) {
-  #tab-page { max-width: 1232px; }
-  #tab-page .pc-page .pc { max-width: 1232px; }
+  #tab-page { max-width: 1100px; }  /* wider stretched rows and tables past easy reading */
+  #tab-page .pc-page .pc { max-width: 1100px; }
   .pc-cols { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 0 14px; align-items: start; }
 }
 
