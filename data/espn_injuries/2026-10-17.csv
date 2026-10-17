@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-05T04:04Z,,,,,,McMillan caught 14 of 16 targets for 192 yards and two touchdowns in Sunday's 32-26 win over the Lions.
 4428993,Haynes King,Carolina Panthers,Active,2026-10-04T23:08Z,,,,,,King (coach's decision) is inactive but will operate as the Panthers' emergency third quarterback Sunday night versus Detroit.
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
-4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-17T08:00Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-17T09:00Z,Undisclosed,,,2026-10-18,IR,ir
 4911952,Keyshaun Elliott,Chicago Bears,Out,2026-10-17T03:50Z,Quadriceps,Not Specified,Not Specified,2026-10-22,OUT,Elliott (quadriceps) has been ruled out for Sunday's game against the Falcons.
 4242659,Dayo Odeyingbo,Chicago Bears,Out,2026-10-17T01:05Z,Quadriceps,Not Specified,Not Specified,2026-10-22,OUT,Odeyingbo (quadriceps) has been ruled out for Sunday's game against the Falcons.
 4361093,Kyler Gordon,Chicago Bears,Out,2026-10-17T01:01Z,Calf,Not Specified,Not Specified,2026-10-18,PUP-R,Gordon (calf) is listed as questionable for Sunday's game against the Falcons.
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035661,Julian Blackmon,New Orleans Saints,Active,2026-10-11T16:37Z,,,,,,Blackmon (shoulder) is active for Sunday's game against the Vikings.
 4698597,Barion Brown,New Orleans Saints,Active,2026-10-11T16:22Z,,,,,,Brown (thigh) is active for Sunday's game against the Vikings.
 3115383,Davon Godchaux,New Orleans Saints,Active,2026-10-10T16:20Z,,,,,,Godchaux (groin) does not have an injury designation for Sunday's game against the Vikings.
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-17T08:00Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-17T09:00Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4259566,Andrew Thomas,New York Giants,Questionable,2026-10-17T04:50Z,Groin,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Thomas (groin) is questionable for Sunday's game against the Saints.
 4240706,Jason Pinnock,New York Giants,Active,2026-10-17T04:47Z,,,,,,Pinnock (concussion) doesn't carry an injury designation for Sunday's game against the Saints.
 4921249,Colton Hood,New York Giants,Out,2026-10-17T02:39Z,Concussion,Concussion,Not Specified,2026-10-25,OUT,Hood (concussion) has been ruled out ahead of Sunday's game against the Saints.
