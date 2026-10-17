@@ -771,3 +771,7 @@ table.pst-tbl td.pst-who + td.num, table.pst-tbl tr > th:first-child + th.num { 
   /* one card level, not two: the log boxes sit flat on the page card (their table gets the width back) */
   .pc-box.pc-logbox, .pc-box.pc-mini { padding-left: 0; padding-right: 0; border: 0; background: none; box-shadow: none; }
 }
+
+/* Game log as an even grid (owner's Sleeper reference, 2026-10-16): each chip fills its cell's width, so values line
+   up as same-size blocks instead of pills of varying width. */
+table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; text-align: center; }
