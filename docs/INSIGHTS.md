@@ -624,6 +624,8 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   waiver replacement level per position (the best free agent each week) as the floor a roster spot must beat;
   (4) check: rank-correlate predicted vs realized rest-of-season team points (2021-25 backtests) for the old and new
   values; then remove the rules. Then the trade calculator and finder (owner: team-relative; both sides' gain) on it.
+- **Queued (2026-10-17): (AB) penalties in team ratings** (docs/handset_audit.md: penalty-nullified plays, 87% of them,
+  never reach the team model).
 - **Hand-set values queue (2026-10-17): docs/handset_audit.md.** 22 model values without fitting or a numbered
   test (4 high impact: prior-season weight, TD blend k, Tuesday / week availability model settings, redistribution
   minimum share). Each gets its own pre-registration here before it runs, decided by sec. 1 rule 7 (MAE, start /

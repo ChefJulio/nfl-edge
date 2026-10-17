@@ -37,6 +37,16 @@ MAE +0.031 [+0.019, +0.042] with it, while teammates of a sitting player go from
 | 21 | low | Confidence label (engine.py:441), low-data flag (:399) | cv .55 / .8; < 40 opportunities | Low confidence / boom-bust / low data labels | Never calibrated | cut at terciles of realized spread; check labels sort actual spread |
 | 22 | low | ESPN early-week `PRIOR_WEIGHT` / `PRIOR_CAP` (espn_calib.py:47, 45) | 5 / 50 | Pseudo-counts for early-week ESPN status rates | Hand-set; archive from 2026-10-13 only | {2, 5, 10} x {25, 50, 100} at season end, or "unresolved" |
 
+Queue order (2026-10-17): #3 availability settings (running, INSIGHTS (AA)) -> #4 redistribution trigger -> **(AB)
+penalties in team ratings** -> range calibration -> the medium items.
+
+**(AB) penalties in team ratings** (owner 2026-10-17: "are we accounting for a team's penalties in their rankings?").
+Penalties on plays that stand are inside those plays' EPA, but plays a penalty wipes out (false starts, holding, DPI,
+offsides: play_type no_play) are not rated: 2025, 2,240 of 2,583 (87%) left out; their net EPA per team-game has sd
+0.80 (-1.54 to +1.37) against ~6 for offenses overall. Test: a fourth unit (penalty-nullified plays: offense and
+defense ratings, its own fitted ridge penalty, so a hot streak shrinks), pen_net in the points model; gate on game
+margin MAE walk-forward (tools/game_eval.py), fantasy MAE guard. Open question it answers: does flag-proneness persist?
+
 Also queued (2026-10-17, owner kept the single-number display; this is accuracy plumbing): **range calibration.**
 The p10 / p90 ranges feed the Floor / Middle / Ceiling row, the confidence label and the Fantasy win chance. A look
 at 2021-25 backtests: 10-90% ranges hold 73-75% of outcomes for top-tier RBs / QBs (should be 80%), and bottom tiers
