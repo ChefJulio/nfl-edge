@@ -1066,3 +1066,9 @@ html.pc-open { overflow: hidden; }
 .mt-nm small { position: absolute; top: 100%; margin-top: 3px; font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
 .mt-side.away .mt-nm small { right: 0; } .mt-side.home .mt-nm small { left: 0; }
 .mt-main { padding-bottom: 24px; }
+
+/* the Schedule sheet's played games and bye (owner 2026-10-17: the whole season) */
+.tm-sres { flex: none; white-space: nowrap; font-size: var(--fs-sm); font-weight: 700; font-variant-numeric: tabular-nums; }
+.tm-sres.r-W { color: #6fdc8c; } .tm-sres.r-L { color: #ff8f84; } .tm-sres.r-T { color: var(--muted); }
+.tm-sg.tm-done b { color: color-mix(in srgb, var(--ink) 78%, transparent); }
+.tm-sg.tm-bye { cursor: default; } .tm-sg.tm-bye:hover { background: none; }
