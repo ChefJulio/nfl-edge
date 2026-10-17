@@ -274,18 +274,18 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3139387,D.J. Reed,Detroit Lions,Active,2026-10-04T23:18Z,,,,,,Reed (ribs) is active for Sunday night's matchup with the Panthers.
 4260409,Derrick Barnes,Detroit Lions,Active,2026-09-30T03:46Z,,,,,,Barnes registered eight tackles (five solo) and a defensed pass Sunday in a 31-24 victory against the Jets.
 3045463,Chuck Clark,Detroit Lions,Active,2026-09-30T03:37Z,,,,,,"Clark finished Sunday's 31-24 win over the Jets with seven tackles, including 1.0 sacks, and a forced fumble."
+4428037,Jacob Monk,Green Bay Packers,Questionable,2026-10-17T04:27Z,Quadriceps,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Monk (quadriceps) is questionable for Sunday's game against the Cowboys.
+4242390,Aaron Banks,Green Bay Packers,Questionable,2026-10-17T04:24Z,Toe,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Banks (knee/toe) is questionable for Sunday's game against Dallas.
+4258206,Benjamin St-Juste,Green Bay Packers,Out,2026-10-17T04:23Z,Hamstring,Not Specified,Not Specified,2026-10-25,OUT,St-Juste (hamstring) has been ruled out for Sunday's game against Dallas.
+4259762,Jonathan Ford,Green Bay Packers,Out,2026-10-17T04:22Z,Calf,Not Specified,Not Specified,2026-10-25,OUT,Ford (calf) has been ruled out for Sunday's game against the Cowboys.
 5076652,Brandon Cisse,Green Bay Packers,Questionable,2026-10-17T02:13Z,Hip,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Cisse (hip) is listed as questionable for Sunday's game against the Cowboys, Wes Hodkiewicz of the Packers' official site reports."
 4259493,Keisean Nixon,Green Bay Packers,Active,2026-10-17T02:10Z,,,,,,"Nixon (groin) does not carry an injury designation into Sunday's game against the Cowboys, Wes Hodkiewicz of the Packers' official site reports."
 4431487,Savion Williams,Green Bay Packers,Injured Reserve,2026-10-17T02:07Z,Ankle,Sprain,Not Specified,2026-10-18,IR-R,"Williams (ankle) is questionable for Sunday's game against the Cowboys, Wes Hodkiewicz of the Packers' official site reports."
 4430191,Skyy Moore,Green Bay Packers,Out,2026-10-16T23:03Z,Ankle,Not Specified,Left,2026-10-25,OUT,"Moore (ankle) has been ruled out for Sunday night's game against the Cowboys, Wes Hodkiewicz of the Packers' official site reports."
 4361791,Devonte Wyatt,Green Bay Packers,Active,2026-10-16T20:51Z,,,,,,
-4258206,Benjamin St-Juste,Green Bay Packers,Out,2026-10-16T20:50Z,Hamstring,Not Specified,Not Specified,2026-10-25,OUT,out
-4259762,Jonathan Ford,Green Bay Packers,Out,2026-10-16T20:49Z,Calf,Not Specified,Not Specified,2026-10-25,OUT,out
 4047365,Josh Jacobs,Green Bay Packers,Out,2026-10-16T19:57Z,Personal,Not Specified,Not Specified,2026-10-25,RESERVE-CEL,"Jacobs (personal) will be removed from the Commissioner's Exempt List on Monday and be eligible to play as soon as the Packers' Week 7 game at Detroit, Tom Pelissero of Netflix reports."
 4428863,Evan Williams,Green Bay Packers,Active,2026-10-16T00:27Z,,,,,,Williams (illness) was a full participant at practice Thursday.
 4240677,Jordon Riley,Green Bay Packers,Out,2026-10-15T01:53Z,Achilles,Not Specified,Not Specified,2026-10-18,PUP-R,"Riley (Achilles) had his 21-day practice window opened by the Packers on Wednesday, Mike Spofford of the team's official site reports."
-4428037,Jacob Monk,Green Bay Packers,Questionable,2026-10-13T17:10Z,Quadriceps,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
-4242390,Aaron Banks,Green Bay Packers,Questionable,2026-10-13T17:10Z,Toe,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4887255,Anthony Campbell,Green Bay Packers,Questionable,2026-10-13T17:10Z,Ankle,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4360887,Donovan Jennings,Green Bay Packers,Active,2026-10-12T19:12Z,,,,,,
 4361423,Micah Parsons,Green Bay Packers,Out,2026-10-12T17:41Z,Knee - ACL,Surgery,Left,2026-10-25,PUP-R,"The Packers aren't planning on opening Parsons' (knee) 21-day practice window this week ahead of Sunday's game against the Cowboys, Adam Schefter of ESPN reports."
@@ -524,6 +524,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-09-30T04:04Z,,,,,,"Wilson finished Sunday's 23-16 victory over Tampa Bay with 10 tackles, including 1.5 sacks, and one defensed pass."
 3921690,Josh Oliver,Minnesota Vikings,Injured Reserve,2026-09-30T00:26Z,Biceps,Surgery,Not Specified,2027-01-17,IR,"The Vikings placed Oliver (biceps) on injured reserve Tuesday, Craig Peters of the team's official site reports."
 16772,Kyle Van Noy,Minnesota Vikings,Active,2026-09-30T00:20Z,,,,,,"The Vikings signed Van Noy from the practice squad to the active roster Tuesday, Craig Peters of the team's official site reports."
+4685298,Will Campbell,New England Patriots,Questionable,2026-10-17T04:16Z,Knee - MCL,Sprain,Right,2026-10-18,QUESTIONABLE,Campbell (knee) is questionable for Sunday's game against the Jets.
 4368113,Charles Woods,New England Patriots,Active,2026-10-17T04:12Z,,,,,,Woods (shoulder) does not have an injury designation for Sunday's game against the Jets.
 3915525,Dre'Mont Jones,New England Patriots,Active,2026-10-17T02:17Z,,,,,,Jones (shoulder) does not have any injury designation ahead of Sunday's game against the Jets.
 4606666,Karon Prunty,New England Patriots,Out,2026-10-17T02:12Z,Hamstring,Not Specified,Not Specified,2026-10-22,OUT,Prunty (hamstring) has been ruled out ahead of Sunday's game against the Jets.
@@ -535,7 +536,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4240042,Cory Durden,New England Patriots,Active,2026-10-16T20:40Z,,,,,,
 4432710,TreVeyon Henderson,New England Patriots,Questionable,2026-10-16T18:25Z,Ankle,Sprain,Right,2026-10-18,QUESTIONABLE,"Henderson said Friday that an MRI revealed he sustained a high-ankle sprain but that he is ""hoping to play"" Sunday against the Jets, Doug Kyed of the Boston Herald reports."
 4047646,A.J. Brown,New England Patriots,Injured Reserve,2026-10-16T16:10Z,Ankle,Sprain,Right,2026-10-18,IR-R,"Brown (ankle) practiced all three days this week, Mark Daniels of MassLive.com reports."
-4685298,Will Campbell,New England Patriots,Questionable,2026-10-16T01:58Z,Knee - MCL,Sprain,Right,2026-10-18,QUESTIONABLE,Campbell (knee) was a limited participant at practice Thursday.
 4686772,Christian Gonzalez,New England Patriots,Active,2026-10-15T23:25Z,,,,,,Gonzalez (shoulder) was a full participant in Thursday's practice.
 4565293,Marcus Bryant,New England Patriots,Injured Reserve,2026-10-15T00:55Z,Ankle,Not Specified,Not Specified,2026-10-18,IR-R,The Patriots opened the 21-day practice window Wednesday for Bryant (ankle) to return from injured reserve.
 4428930,Craig Woodson,New England Patriots,Questionable,2026-10-14T21:19Z,Shoulder,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
@@ -624,13 +624,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361331,Jamien Sherwood,New York Jets,Active,2026-10-08T04:15Z,,,,,,Sherwood finished with 13 total tackles (five solo) and one forced fumble in Sunday's 23-12 loss to Chicago.
 14958,Demario Davis,New York Jets,Active,2026-10-08T03:46Z,,,,,,Davis ended with 10 total tackles (five solo) and 1.0 sacks in Sunday's 23-12 loss to Chicago.
 4429005,Braiden McGregor,New York Jets,Injured Reserve,2026-10-07T21:44Z,Pectoral,Surgery,Not Specified,2027-02-15,IR,"McGregor (pectoral) was placed on the Jets' injured reserve list Wednesday, Eric Allen of the team's official site reports."
+4240585,AJ Epenesa,Philadelphia Eagles,Doubtful,2026-10-17T04:31Z,Back,Not Specified,Not Specified,2026-10-18,DOUBTFUL,Epenesa (back) is doubtful for Sunday's game against the Panthers.
 3916409,Jonathan Greenard,Philadelphia Eagles,Active,2026-10-17T02:27Z,,,,,,Greenard (ankle) does not carry an injury designation into Sunday's game against Carolina.
 4571162,Jalyx Hunt,Philadelphia Eagles,Out,2026-10-17T02:25Z,Ankle,Not Specified,Not Specified,2026-10-26,OUT,Hunt (ankle/knee) has been ruled out ahead of Sunday's game against Carolina.
 4240456,Michael Carter II,Philadelphia Eagles,Out,2026-10-17T02:20Z,Abdomen,Not Specified,Not Specified,2026-10-26,OUT,Carter (abdomen) has been ruled out for Sunday's game against the Panthers.
 4431574,Eli Stowers,Philadelphia Eagles,Injured Reserve,2026-10-17T02:18Z,Quadriceps,Not Specified,Not Specified,2026-10-18,IR-R,Stowers (quadriceps) is questionable for Sunday's game against the Panthers.
 4241374,Grant Calcaterra,Philadelphia Eagles,Injured Reserve,2026-10-17T02:16Z,Back,Not Specified,Not Specified,2026-10-18,IR-R,Calcaterra (back) is questionable for Sunday's game against the Panthers.
 4360238,Dameon Pierce,Philadelphia Eagles,Active,2026-10-17T00:05Z,,,,,,"Pierce will be the Eagles' starting running back against the Panthers on Sunday due to the absences of both Saquon Barkley (hamstring) and Will Shipley (foot, IR)."
-4240585,AJ Epenesa,Philadelphia Eagles,Doubtful,2026-10-16T21:08Z,Back,Not Specified,Not Specified,2026-10-18,DOUBTFUL,doubtful
 4362805,Tyler Steen,Philadelphia Eagles,Active,2026-10-16T21:03Z,,,,,,
 4248557,E.J. Jenkins,Philadelphia Eagles,Active,2026-10-16T20:39Z,,,,,,
 4241372,Hollywood Brown,Philadelphia Eagles,Active,2026-10-16T20:39Z,,,,,,
