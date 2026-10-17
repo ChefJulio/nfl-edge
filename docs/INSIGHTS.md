@@ -2018,3 +2018,16 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   (232, -0.73 -> -0.59); 1.0 +0.005 [-0.027, +0.040] (289, -0.92 -> -0.72). No value beats 0.5, so no decide / confirm
   step. More strength shrinks the bias without lowering MAE (sec. 1 rule 7: MAE decides). Start / sit gain 2021-26 ALL
   0.000 at 0.65 and 0.8. docs/handset_audit.md: redistribution_scale now TESTED.
+- **PRE-REGISTERED 2026-10-17 (before running): (W) a per-position calibration curve on the final projection**
+  (owner, on whether elite outliers distort the model: "sure try it"). Look first (cached baselines 2021-25, played
+  rows by projected rank within position): top-5 RBs actual - projected -1.21 [-2.24, -0.20], top-5 WRs -1.55 [-2.39,
+  -0.68], WR 6-12 -0.80; middle tiers +0.3 to +0.6: projections too spread out at the top. The rejected "final linear
+  calibration" (sec. 5, +0.013) was one least-squares line; this is a monotone MEDIAN curve per position (sec. 1 rule 7:
+  MAE decides). Curve: the fit rows' projections cut into 20 equal-count bins; each bin's median actual; made
+  non-decreasing by weighted pool-adjacent-violators (weights = bin counts); applied by linear interpolation between
+  the bins' median projections, flat beyond the ends. Rows: tools/experiments.py relevant rows of the cached baseline
+  backtests (played, 2+ prior games, top-N by consensus). Walk-forward: season s in 2022-2025 uses a curve fit on
+  2021..s-1 only. GATE: pooled MAE (calibrated - raw) with a 95% season-week CI excluding 0 below, better in >= 3 of 4
+  seasons; guards: no position significantly worse; start / sit gain (same-position pairs: a monotone curve keeps the
+  order, so unchanged by construction; reported). CONFIRM: curve fit on 2021-25 applied to 2026 weeks so far, same
+  direction, not significantly worse. Bias by tier reported. Ranges (p10 / p90) untouched in this test.
