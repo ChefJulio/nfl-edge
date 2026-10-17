@@ -1954,3 +1954,24 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   snaps, and per-snap exposure ties the score to role (starters log more snaps per missed game) rather than to how
   often he gets hurt. Kept A. The earlier check that started this (backup QBs rank high under A) is real but small:
   starting QBs average the 45th percentile; a snap-share pool cut (10-35%) barely moves it (45th -> 47th).
+- **PRE-REGISTERED 2026-10-17 (before building): (T) snap trend as an early sign of a role change** (owner, after
+  "snap share as an input" was recalled as tried: "if we're projecting snap counts ... isn't that potentially a good
+  indicator?"). snap_input (the recency-weighted snap share) added nothing once target / carry shares were known. New
+  angle: snap_trend = his offense snap share averaged over his last 3 games played minus that recency-weighted share,
+  an input to the target-share and carry-share regressions (experiments.snap_trend). Hypothesis: a fresh jump in snaps
+  (new starter, depth change) precedes the share catching up. Walk-forward 2021-25, `tools/experiments.py
+  baseline,snap_trend`. Primary rows: RB / WR / TE with |snap_trend| >= 0.15 (the role changers). GATE: on the primary
+  rows, fantasy MAE lower with a 95% season-week CI excluding 0 and better in >= 4 of 5 seasons; guards: all rows MAE
+  CI upper < +0.003, no position significantly worse. MDE to be reported from the run's own interval (no earlier test
+  on this subset).
+- **PRE-REGISTERED 2026-10-17 (before building): (U) a backup's snap share in who absorbs a sitting teammate's work**
+  (owner: "a wr or backup rb that has solid snap share, what happens to their fantasy output when the player ahead of
+  them gets injured compared to players with lower snap shares"). First look (cached baselines 2021-25, played rows the
+  model handed some vacated share): beneficiaries under-projected at every snap level (RB +0.3 to +1.2 pts, WR 60%+
+  +0.7), largest for RBs at 40-60% prior snaps (+1.22, n 149); no clean gradient, every bucket within noise. Handing
+  out ALL the vacated share already failed (redist_conserve). New: the absorption regression gets one more column per
+  (missing, receiving position): vacated share x his share of his position group's recent snap share
+  (injuries.absorb_snap), so the learned split can follow snaps as well as depth rank and projected share. Walk-forward
+  2021-25, `tools/experiments.py baseline,absorb_snap`. GATE (as redist_conserve's): on rows whose projection changes
+  by > 0.05 pts, MAE lower with a 95% season-week CI excluding 0 and better in >= 4 of 5 seasons; overall MAE CI upper
+  < +0.003; no position significantly worse. Bias on affected rows reported, by the snap buckets above.
