@@ -2304,6 +2304,25 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   wr_td_explosive vs baseline: GATE fantasy MAE on WR relevant rows lower with a 95% season-week CI excluding 0 and
   lower in >= 4 of 6 seasons; guards: overall MAE not worse (CI upper < +0.002), WR P(1+ rec TD) Brier not worse,
   start / sit not significantly worse.
+- **DESCRIPTIVE 2026-10-17 (owner: "do players score more annually? ... worth normalizing by year?" and "rule changes
+  as signals that affect scoring?"):** scratch/era.py, QB / RB / WR / TE half-PPR points per team-game: 1999-2003
+  111-119, 2010-16 122-133, peak 2020 138.1, 2021-25 125-131 and falling (trend 1999-2025 +0.79 a year; 2015-25 -0.65);
+  season to season +-3.6 (sd 4.4). Rule-change years: 2004 illegal contact, pass yards 213.7 -> 225.1; 2024 dynamic
+  kickoff; 2025 touchbacks to the 35, yet scoring fell (124.6). Our walk-forward projections' overall bias (actual -
+  projected, played rows, projection >= 3): 2021 -2.6%, 2022 -0.9%, 2023 +0.6%, 2024 +5.5%, 2025 -1.6%: the model
+  trains on prior seasons, so a season's environment reaches it late (Vegas totals carry part of it). Grades and
+  ranks are within-season percentiles already. A rule-change flag as an input: ~5 cases since 1999, each different,
+  and unvalidatable as a hand-set number; covered empirically by (AL).
+- **PRE-REGISTERED 2026-10-17 (before running): (AL) in-season calibration of the projection level.** For week w of
+  season s, every projection x r(s, w), r = (A + k M) / (P + k M): A, P = actual and projected points of the season's
+  played rows (projection >= 3) in weeks before w; M = their mean projection; k pseudo player-games (shrinks r to 1
+  early). One league-wide r (uniform: never reorders players within a week, so start / sit is unchanged). Grid k
+  {250, 1000, 4000} (no in-sample estimate available before 2021). tools/env_eval.py on the walk-forward backtests
+  (cache/experiments/adopted_*), weeks 3-18, rows played with projection >= 3: CHOOSE the lowest MAE on 2021-23;
+  DECIDE on 2024-25: MAE lower with a 95% CI over season-weeks excluding 0 and lower in both seasons; guard: no
+  position significantly worse. Reported: each season's bias before / after, 2024-25 (the kickoff-rule years) by
+  week. If it passes: ship as a projection-level factor (live, from this season's finished weeks), and a field-
+  position prior for mechanical rule changes is pre-registered as a second step for weeks 1-2.
 - **RESULT {#wr-td-explosive} (AK) explosiveness in WR receiving TDs: FAIL (gate), switch off.** tools/experiments.py
   2021-2026, 4,989 WR relevant rows. WR MAE 5.141 -> 5.141, +0.000 [-0.001, +0.002]; every season within +-0.001;
   overall +0.000. Seen but not gated: WR start / sit gain 0.785 -> 0.800, +0.016 [+0.003, +0.030] (overall +0.006

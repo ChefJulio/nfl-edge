@@ -56,6 +56,9 @@ so the test shows which signal matters, if either.
 Done (2026-10-17, owner's question on distance vs goal-line TDs): **(AK) explosiveness in WR receiving TDs** FAIL on
 MAE (INSIGHTS {#wr-td-explosive}); WR start / sit better, rechecked as its own test on full 2026.
 
+Also queued (2026-10-17, owner: scoring by year / rule changes): **(AL) in-season calibration of the projection level**,
+pre-registered in INSIGHTS; tools/env_eval.py.
+
 Also queued (2026-10-17, found on Hockenson): **injured right before a bye.** A player hurt in the game before his bye is
 on no injury report until the week after (nflverse lists nobody on a bye team), so the return chain never starts:
 every later week reads 100%. ESPN's feed knows (status, return date). Test: seed the chain for bye-week teams from
