@@ -990,12 +990,15 @@
     const upG = w => { const u = ((L && L.up) || []).find(x => x.w === w && !x.bye); return u ? ['g', '', u.o, u.h === 0 ? '@' : 'vs', '', u.w] : null; };
     const nextG = games.find(e => e[1] > today);
     const ourG = h.back && h.back !== 'no' ? games.find(e => e[5] === h.back) || upG(h.back) : null;
+    // our return model's chance he plays that game (owner 2026-10-17: the play % beside "Expected back")
+    const backRow = ourG && RJ.d && RJ.d.players[pid] && RJ.d.players[pid].w.find(z => z[0] === h.back);
+    const backP = backRow ? `${NFLE.fmt.toPlay(1 - backRow[1])} to play` : 'our return model';
     const espnG = now && now.return_date ? games.find(e => e[1] >= now.return_date) : null;
     const onBye = ((L && L.up) || []).some(x => x.w === h.wk && x.bye);  // no game this week: nothing to play
     const out = h.inj && (h.play == null || h.play < 0.5);
     const third = out
       ? (ourG || espnG || h.back === 'no' ? `<div><small>Expected back</small><b>${esc(ourG ? gameTxt(ourG) : h.back === 'no' ? 'Not this season' : gameTxt(espnG))}</b>
-          <span class="muted">${ourG ? (espnG ? `ESPN: ${esc(gameTxt(espnG).toLowerCase())}` : 'our return model') : h.back === 'no' ? 'our return model' : 'ESPN estimate'}</span></div>` : '')
+          <span class="muted">${ourG ? backP + (espnG && espnG[5] !== ourG[5] ? `<br>ESPN: ${esc(gameTxt(espnG).toLowerCase())}` : '') : h.back === 'no' ? 'our return model' : 'ESPN estimate'}</span></div>` : '')
       : nextG ? `<div><small>Next game</small><b>${esc(new Date(nextG[1] + 'T12:00:00').toLocaleDateString([], { weekday: 'short' }))} ${esc(nextG[3])} ${esc(nextG[2])}</b><span class="muted">week ${nextG[5]}</span></div>` : '';
     const thisWeek = `<div class="pc-box"><div class="pc-k">This week</div>
         <div class="ij-hero">
