@@ -596,6 +596,10 @@
     // Grd (owner 2026-10-17): the game's output graded against the whole season's qualified games at his position
     // (0-99; this season's unplayed weeks filled from last season's; tools/player_logs.py), where Rk is that week only
     // one grade, two time scales (owner 2026-10-17): shown on the OVR's own 50-99 scale and colors
+    // the totals row's Grd: that season's grade on its own (the grade sheet's "By season" OVR), from his grade history
+    const seasonGrd = s => { const d = (GRH[L.pid] || []).find(x => x && x.season === s), x = d && d.players[L.pid];
+      const g = x ? (x[6] ?? x[0]) : null;
+      return g == null ? '' : `<span class="lg-rk ${x[9] ? 'rk-mid' : g >= 80 ? 'rk-good' : g <= 30 ? 'rk-bad' : 'rk-mid'}" title="His ${s} grade (that season only), the grade sheet's OVR">${ovr(g)}${uqMark(x)}</span>`; };
     const grdCell = g => g.gr != null ? `<span class="lg-rk ${g.gr >= 80 ? 'rk-good' : g.gr <= 30 ? 'rk-bad' : 'rk-mid'}">${ovr(g.gr)}</span>` : '–';
     const head = `${grpHead(7)}
       <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num" title="Game grade, on the OVR's 50-99 scale: his fantasy output that game against every game by qualified players at his position that season (early in a season, last season's games fill the weeks not played yet)">Grd</th><th class="num">Snap</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
@@ -627,7 +631,7 @@
         const tc = (v, r) => rk && r != null ? chip(v, r) : v, avgSn = sn.length ? Math.round(sn.reduce((t, g) => t + g.sn, 0) / sn.length) : null;
         return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num lg-fp">${tc(f1(pts(T.c, w, pos)), rk && rk.trk)}</td>
           <td class="num muted">${pjs.every(v => v != null) ? f1(pjs.reduce((a, b) => a + b, 0)) : '–'}</td>
-          <td class="num">${rk && rk.trk ? `<span class="lg-rk ${rkClass(rk.trk)}" title="His ${esc(pos)} finish that season (fantasy points, site scoring)">${rk.trk}</span>` : ''}</td><td></td>
+          <td class="num">${rk && rk.trk ? `<span class="lg-rk ${rkClass(rk.trk)}" title="His ${esc(pos)} finish that season (fantasy points, site scoring)">${rk.trk}</span>` : ''}</td><td class="num">${rk ? seasonGrd(rk.s) : ''}</td>
           <td class="num">${avgSn == null ? '–' : rk ? `<span class="sc ${snapTone(avgSn)}">${avgSn}</span>` : avgSn}</td>${stat.map(([, fn, ri, ex], i) => { const v = fn(T); return `<td class="num${gcl(i)}">${offRole(v, ex) ?? tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null)}</td>`; }).join('')}</tr>
           <tr class="lg-gap"><td colspan="${7 + stat.length}"></td></tr>`;
       };
