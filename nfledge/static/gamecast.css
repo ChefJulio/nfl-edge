@@ -1032,3 +1032,4 @@ html.pc-open { overflow: hidden; }
 .sheet thead th { top: var(--sheeth, 0px); z-index: 2; }
 .sheet .sheet-h { z-index: 4; }
 .tm-tph { flex: none; font-size: var(--fs-2xs); font-weight: 700; color: #ff8f84; text-transform: uppercase; letter-spacing: .03em; }
+.tm-tpr b { font-size: var(--fs-sm); color: var(--ink); } .tm-tpr b.good { color: #6fdc8c; } .tm-tpr b.bad { color: #ff8f84; }

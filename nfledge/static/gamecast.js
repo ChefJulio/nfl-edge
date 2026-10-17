@@ -1905,10 +1905,15 @@
         ${[['Division', sr.div_rec], ['Conference', sr.conf_rec], ['Home', sr.home], ['Away', sr.away], ['Streak', sr.streak], ['Point diff', sgn(sr.diff).replace('.0', '')]].map(([k, v]) => `<div class="tm-st"><div class="pc-k">${k}</div><div class="tm-stv">${esc(v || '')}</div></div>`).join('')}</div></div>` : '';
     if (rec) tiles.push(tapTile('Season', `<div class="pc-big">${esc(rec)}</div><div class="pc-tapsub">${place || '&nbsp;'}</div>`,
       `${d.season} season`, `${stLine}${L ? teamSeasonBox(L) : ''}<div class="tm-pen" data-pen="${esc(abbr)}"></div>`));
-    // Players: top three by rest-of-season rank at their position
-    const rk = rosRanks(), top = rk ? Object.entries(rk).filter(([, r]) => r.team === abbr).sort((a, b) => a[1].rk - b[1].rk || b[1].v - a[1].v).slice(0, 3) : [];
-    const face = ([pid, r]) => { const ph = r.photo || NFLE.ui.headshot(r.espn);
-      return `<div class="tm-tp"><span class="tm-tpi">${ph ? `<img src="${esc(ph)}" alt="" width="30" height="30" loading="lazy">` : ''}</span><span class="tm-tpn">${esc(NFLE.fmt.short(r.name))}</span>${r.hurt ? '<span class="tm-tph" title="Under 50% to play his next game">inj</span>' : ''}<b class="tm-tpr">${esc(r.pos)}${r.rk}</b></div>`; };
+    // Players: the team's top three by Edge grade (owner 2026-10-17: "go by player grades ... studs the last two seasons
+    // have some weight"): the OVR, three seasons of output, a percentile within each position so QBs and receivers
+    // compare; the roster and injury state from ros.json (rest of season), hurt = under 50% to play his next game
+    if (GR.cur === undefined) { GR.cur = null; grIndex().then(ix => ix && grSeason(ix.current)).then(g => { GR.cur = g || null; rerenderCard(); }); }
+    const rk = rosRanks(), gp = GR.cur && GR.cur.players;
+    const top = rk && gp ? Object.entries(rk).filter(([pid, r]) => r.team === abbr && gp[pid] && gp[pid][0] != null)
+      .sort((a, b) => (gp[b[0]][9] ? 0 : 1) - (gp[a[0]][9] ? 0 : 1) || gp[b[0]][0] - gp[a[0]][0]).slice(0, 3) : [];
+    const face = ([pid, r]) => { const ph = r.photo || NFLE.ui.headshot(r.espn), g = gp[pid];
+      return `<div class="tm-tp"><span class="tm-tpi">${ph ? `<img src="${esc(ph)}" alt="" width="30" height="30" loading="lazy">` : ''}</span><span class="tm-tpn">${esc(NFLE.fmt.short(r.name))}</span>${r.hurt ? '<span class="tm-tph" title="Under 50% to play his next game">inj</span>' : ''}<span class="tm-tpr">${esc(r.pos)} <b class="${g[9] ? '' : grTone(g[0])}" title="Edge grade (OVR)">${ovr(g[0])}${uqMark(g)}</b></span></div>`; };
     const wkRows = teamPlayerRows(abbr, d);
     tiles.push(tapTile('Players', top.length ? `<div class="tm-tps">${top.map(face).join('')}</div>` : '<div class="pc-tapsub">Loading&hellip;</div>', 'Players',
       `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
