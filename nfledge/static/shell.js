@@ -218,7 +218,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   // Four parents (owner, 2026-10-14): Players (incl. transactions = player news) and Teams (incl. playoffs, draft).
   const NAV = [
     { key: 'players', label: 'Players', subs: [['rankings', 'Rankings', 'tab-players'], ['stats', 'Stats'], ['roles', 'Roles', 'tab-roles'], ['injuries', 'Injuries'], ['moves', 'Moves'], ['trends', 'Trends']] },
-    { key: 'teams', label: 'Teams', subs: [['power', 'Power', 'tab-power'], ['standings', 'Standings'], ['playoffs', 'Playoffs'], ['stats', 'Stats'], ['draft', 'Draft']] },
+    { key: 'teams', label: 'Teams', subs: [['all', 'All teams'], ['power', 'Power', 'tab-power'], ['standings', 'Standings'], ['playoffs', 'Playoffs'], ['stats', 'Stats'], ['draft', 'Draft']] },
     { key: 'games', label: 'Games', subs: [['matchups', 'Matchups', 'tab-games']] },
     // your own fantasy league (Sleeper / public ESPN import; owner 2026-10-15)
     { key: 'league', label: 'Fantasy', subs: [['league', 'My League', 'tab-league']] },  // tab named Fantasy (owner 2026-10-16)
@@ -226,7 +226,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   ];
   // Client-rendered tabs: section id -> area module (assets/<area>.js + .css), loaded the first time the tab opens.
   // A module registers NFLE.areas[<area>] = { mount(section) } and renders into its section.
-  const AREAS = { 'tab-teams-standings': 'standings', 'tab-teams-stats': 'teamstats', 'tab-players-stats': 'playerstats',
+  const AREAS = { 'tab-teams-all': 'teamgrid', 'tab-teams-standings': 'standings', 'tab-teams-stats': 'teamstats', 'tab-players-stats': 'playerstats',
                   'tab-players-injuries': 'injuries', 'tab-players': 'rankings', 'tab-teams-draft': 'draft',
                   'tab-teams-playoffs': 'playoffs', 'tab-players-moves': 'moves', 'tab-power': 'power',
                   'tab-games': 'matchups', 'tab-roles': 'roles', 'tab-model': 'model',

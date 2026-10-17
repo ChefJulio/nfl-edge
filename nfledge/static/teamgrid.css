@@ -1,0 +1,20 @@
+/* Teams > All teams (teamgrid.js): conference columns, a 2 x 2 block per division, team-colored tiles */
+.tg-confs { display: grid; gap: 18px; }
+@media (min-width: 900px) { .tg-confs { grid-template-columns: 1fr 1fr; } }
+.tg-ch { margin: 4px 2px 8px; font-size: var(--fs-lg); }
+.tg-div { margin-bottom: 14px; }
+.tg-dh { margin: 0 2px 6px; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.tg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tg-tile { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: center;
+  padding: 10px 12px; border: 0; border-radius: var(--r-md); text-align: left; cursor: pointer; color: #fff; font: inherit; min-width: 0;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--tc) 62%, #0d0f13), color-mix(in srgb, var(--tc2) 30%, #0d0f13));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.07); transition: transform var(--dur-fast) var(--ease), filter var(--dur-fast) var(--ease); }
+.tg-tile:hover { filter: brightness(1.12); }
+.tg-tile:active { transform: scale(.98); }
+.tg-logo { grid-row: span 2; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  box-shadow: 0 0 0 2px rgba(255,255,255,.18), 0 2px 6px rgba(0,0,0,.4); }
+.tg-logo img { width: 32px; height: 32px; object-fit: contain; }
+.tg-nm { font-weight: 700; font-size: var(--fs-md); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.tg-meta { display: flex; gap: 8px; align-items: baseline; font-size: var(--fs-sm); color: rgba(255,255,255,.82); }
+.tg-meta b { font-variant-numeric: tabular-nums; }
+.tg-rk { font-size: var(--fs-xs); font-weight: 700; color: rgba(255,255,255,.7); }
