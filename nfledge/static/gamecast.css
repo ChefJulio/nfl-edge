@@ -47,10 +47,10 @@ td.actc .live-dot { width: 7px; height: 7px; margin-right: 5px; }
 
 /* ---- Matchups tiles (week pages): one per row on phones, as many as fit wider; each opens the gamecast ---- */
 .games { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); gap: 12px; }
-/* --ac / --hc = the two teams' colors (picked to be distinct), blending into each other across the middle */
+/* --ac / --hc = the two teams' colors (picked to be distinct), blending into each other across the middle, on a diagonal (owner 2026-10-17) */
 .mt { display: grid; min-width: 0; overflow: hidden; text-decoration: none; color: var(--ink); border: 1px solid var(--line); border-radius: var(--r-lg);
   box-shadow: var(--shadow); transition: border-color .15s;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--ac) 46%, var(--panel)) 0%, color-mix(in srgb, var(--ac) 20%, var(--panel)) 42%,
+  background: linear-gradient(120deg, color-mix(in srgb, var(--ac) 46%, var(--panel)) 0%, color-mix(in srgb, var(--ac) 20%, var(--panel)) 42%,
                                      color-mix(in srgb, var(--hc) 20%, var(--panel)) 58%, color-mix(in srgb, var(--hc) 46%, var(--panel)) 100%); }
 .mt:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
 .mt-main { position: relative; display: grid; grid-template-columns: 78px minmax(0, 1fr) auto minmax(0, 1fr) 78px; grid-template-areas: ". sa at sh .";
