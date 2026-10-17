@@ -326,18 +326,33 @@
     const table = (body, head = '<th>Slot</th><th>Player</th><th class="num">Proj</th>') =>
       `<div class="lg-scroll"><table class="bx tiles lg-tbl"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
 
+    // Waiver claim window (owner 2026-10-17): order resets to inverse standings Tuesday ~2am Central, claims made during
+    // Tuesday process Wednesday ~2am; after that unclaimed players are free agents, first come first served, so the
+    // order only matters inside that window (a player dropped later is on waivers for 24 hours: rare enough to skip).
+    const claimWindow = () => {
+      const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric', hourCycle: 'h23' })
+        .formatToParts(new Date()).map(x => [x.type, x.value]));
+      const h = +p.hour;
+      return (p.weekday === 'Tue' && h >= 2) || (p.weekday === 'Wed' && h < 2);
+    };
+    // The waiver wire as information, not orders (owner 2026-10-17: close calls are the manager's judgment, e.g. a
+    // backup's upside the projections can't see): the free agents who'd improve your team most, and your players
+    // whose own rest-of-season projection free agents at their position beat. No add-drop pairs.
     const movesCard = () => {
       if (!ROS) { NFLE.load('data/ros.json').then(j => { ROS = j; if (view === 'lineup') draw(); }, () => {}); return '<div class="lg-mv lg-moves"><div class="muted">Checking the waiver wire…</div></div>'; }
-      const { moves, open } = movesFor();
-      const good = movePlan(3, 1);
-      const stream = moves.filter(m => !good.some(g => g.add.key === m.add.key || (m.drop != null && g.drop === m.drop)) && m.wk >= 0.5).sort((a, b) => b.wk - a.wk)[0];
-      const line = (m, big) => `<div class="lg-mv-row"><span class="lg-mv-k good">${big}</span><div>Add <b>${esc(m.add.name)}</b> <span class="muted">${esc(m.add.pos)}</span>${m.drop != null ? `, drop <b>${esc(dropName(m.drop))}</b>` : open ? ' <span class="muted">(open bench spot)</span>' : ''}
-          <div class="muted lg-mv-s">${m.ros >= 0.5 ? '+' : ''}${Math.round(m.ros)} rest of season · ${NFLE.fmt.signed1(m.wk)} this week</div></div></div>`;
-      const wv = mine.faab != null ? `$${mine.faab} FAAB left` : mine.waiver ? `you're #${mine.waiver} of ${L.teams.length} on waivers` : '';
-      return `<div class="lg-mv lg-moves"><div class="lg-mv-h">Waiver moves${wv ? ` <span class="muted lg-wv">${wv}</span>` : ''}</div>
-          ${good.length ? good.map(m => line(m, `+${Math.round(m.ros)}`)).join('') : '<div class="muted">No free agent improves your team over the rest of the season by our projections.</div>'}
-          ${stream ? `<div class="lg-mv-row"><span class="lg-mv-k good">Week</span><div>This week only: add <b>${esc(stream.add.name)}</b>${stream.drop != null ? `, drop <b>${esc(dropName(stream.drop))}</b>` : ''} <span class="muted">${NFLE.fmt.signed1(stream.wk)} this week</span></div></div>` : ''}
-          <div class="muted lg-mv-f">Gain = your best lineup each remaining week through ${ROS.through} with the move, summed. One QB, TE, K and D/ST is enough (moves there are upgrades); at least ${DEPTH_MIN} RBs and WRs stay. Trade value isn't counted.</div></div>`;
+      const { moves } = movesFor(), weeks = rosWeeks();
+      const best = moves.filter(m => m.ros >= 1).slice(0, 3);
+      const fa = freeAgents();
+      const own = mine.ext.filter(x => !(mine.ir || []).includes(x)).map(x => ({ x, p: player(x), ros: weeks.reduce((t, k) => t + ((weekOf(x, k) || {}).exp || 0), 0) }));
+      const below = own.map(o => ({ ...o, beat: fa.filter(f => f.pos === o.p.pos && f.ros > o.ros) }))
+        .filter(o => o.beat.length && o.p.pos).sort((a, b) => b.beat.length - a.beat.length || a.ros - b.ros).slice(0, 4);
+      const wv = mine.faab != null ? `$${mine.faab} FAAB left` : mine.waiver && claimWindow() ? `claims process Wed ~2am CT · you're #${mine.waiver} of ${L.teams.length}` : '';
+      return `<div class="lg-mv lg-moves"><div class="lg-mv-h">Waiver wire${wv ? ` <span class="muted lg-wv">${wv}</span>` : ''}</div>
+          <div class="lg-mv-sub">Best available for you</div>
+          ${best.length ? best.map(m => `<div class="lg-mv-row"><span class="lg-mv-k good">+${Math.round(m.ros)}</span><div><b>${esc(m.add.name)}</b> <span class="muted">${esc(m.add.pos)} · ROS ${Math.round(m.add.ros)} · ${NFLE.fmt.signed1(m.wk)} this week</span></div></div>`).join('')
+            : '<div class="muted">No free agent improves your team over the rest of the season by our projections.</div>'}
+          ${below.length ? `<div class="lg-mv-sub">Below the waiver wire</div>${below.map(o => `<div class="lg-mv-row"><span class="lg-mv-k bad">${esc(o.p.pos)}</span><div><b>${esc(o.p.name)}</b> <span class="muted">ROS ${Math.round(o.ros)} · ${o.beat.length} free agent${o.beat.length === 1 ? '' : 's'} project more (best: ${esc(o.beat.sort((a, b) => b.ros - a.ros)[0].name)} ${Math.round(o.beat[0].ros)})</span></div></div>`).join('')}` : ''}
+          <div class="muted lg-mv-f">+X = how much he'd add to your team: your best lineup each remaining week through ${ROS.through}, summed, making room with whoever costs least (one QB, TE, K and D/ST is enough; ${DEPTH_MIN} RBs and WRs stay). ROS = his own expected points. Upside the projections can't see is your call.</div></div>`;
     };
     const lineupView = () => {
       const ps = mine.ext.map(player), cur = new Set(mine.starters);
@@ -421,7 +436,7 @@
       if (!ROS) return '<p class="muted">Loading rest-of-season projections…</p>';
       const { moves } = movesFor(), gain = Object.fromEntries(moves.map(m => [m.add.key, m]));
       const forYou = p => { const m = gain[p.key];
-        return `<td class="num lg-gain ${m && m.ros > 0.5 ? 'good' : 'muted'}"${m ? ` title="${esc(`Add ${p.name}${m.drop != null ? `, drop ${dropName(m.drop)}` : ''}: ${m.ros >= 0 ? '+' : ''}${Math.round(m.ros)} rest of season, ${NFLE.fmt.signed1(m.wk)} this week`)}"` : ''}>${m ? `${m.ros >= 0.5 ? '+' : ''}${Math.round(m.ros)}` : ''}${m && m.drop != null && m.ros > 0.5 ? `<small>for ${esc(last(dropName(m.drop)))}</small>` : ''}</td>`; };
+        return `<td class="num lg-gain ${m && m.ros > 0.5 ? 'good' : 'muted'}"${m ? ` title="${esc(`${m.ros >= 0 ? '+' : ''}${Math.round(m.ros)} to your team rest of season, ${NFLE.fmt.signed1(m.wk)} this week`)}"` : ''}>${m ? `${m.ros >= 0.5 ? '+' : ''}${Math.round(m.ros)}` : ''}</td>`; };
       const fa = freeAgents();
       const pick = pos => fa.filter(p => p.pos === pos).sort((a, b) => b.ros - a.ros).slice(0, MOVE_POOL)
         .sort((a, b) => ((gain[b.key] || {}).ros ?? -1e9) - ((gain[a.key] || {}).ros ?? -1e9) || b.ros - a.ros).slice(0, 6);
@@ -514,21 +529,6 @@
       }).filter(Boolean);
       return { moves: moves.sort((x, y) => y.ros - x.ros), open, base };
     };
-    // A plan, not a list: the best move, then the best one on the roster it leaves (no player dropped twice, no add
-    // repeated), while each still gains at least `min` rest-of-season points
-    const movePlan = (n = 3, min = 1) => {
-      const plan = [];
-      let roster = null;
-      for (let i = 0; i < n; i++) {
-        const { moves, base } = movesFor(roster);
-        const m = moves.find(x => x.ros >= min && !plan.some(q => q.add.key === x.add.key));
-        if (!m) break;
-        plan.push(m);
-        roster = [...base.filter(x => x !== m.drop), m.add.key];
-      }
-      return plan;
-    };
-    const dropName = d => d == null ? null : player(d).name;
 
     // ---- league rankings: every team's best lineup this week and for each remaining week through 17 (ros.json:
     // each week's projected stat line x his chance to play, so byes, injuries and returns all count), summed
