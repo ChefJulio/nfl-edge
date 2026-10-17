@@ -53,6 +53,13 @@ from desc ("for N yards", "sacked ... for -N"), as unit-strength evidence (a pla
 shows the unit's skill; one caused by the foul, like an offsides sack, is noise). Both variants gated the same way,
 so the test shows which signal matters, if either.
 
+Also queued (2026-10-17, found on Hockenson): **injured right before a bye.** A player hurt in the game before his bye is
+on no injury report until the week after (nflverse lists nobody on a bye team), so the return chain never starts:
+every later week reads 100%. ESPN's feed knows (status, return date). Test: seed the chain for bye-week teams from
+ESPN's post-game status the way the current week's early-week bridge does (MODEL.md "Early-week injury news"), scored
+on 2022-25 players hurt before a bye (ESPN captures archive). The site already avoids showing the 100% as a return
+estimate (gamecast.js backWeek).
+
 Also queued (2026-10-17, owner kept the single-number display; this is accuracy plumbing): **range calibration.**
 The p10 / p90 ranges feed the Floor / Middle / Ceiling row, the confidence label and the Fantasy win chance. A look
 at 2021-25 backtests: 10-90% ranges hold 73-75% of outcomes for top-tier RBs / QBs (should be 80%), and bottom tiers
