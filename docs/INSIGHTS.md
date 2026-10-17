@@ -2267,6 +2267,10 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   fantasy MAE (relevant rows) on 2021-23; DECIDE on 2024-25 (CI excluding 0 below, better in both, no position
   significantly worse, start / sit not significantly worse); CONFIRM 2026 so far, same direction. Today's the choice
   -> keep. (Relevant rows include the newcomers and the teammates whose volume they take.)
+- **RESULT {#newcomer-scale} (AI) the newcomer multiplier: FAIL, 0.5 kept (now tested).** tools/experiments.py 2021-2026 +
+  tools/grid_eval.py. Choose 2021-23 vs 0.5: .3 +0.0005, .4 +0.0002, .6 -0.0001, .7 -0.0002 [-0.0013, +0.0008] (chosen).
+  Decide 2024-25 (.7): +0.0014 [+0.0004, +0.0026], worse both seasons (WR +0.0026); 2026 so far -0.0016. The
+  multiplier is flat near 0.5 and a weaker cut is worse later. docs/handset_audit.md #7.
 - **PRE-REGISTERED 2026-10-17 (owner, Jalen Hurts ruled out with a blood clot shows 99% for week 7; "at your
   discretion"): (AH) the lookahead chain for newly injured players.** Today a player on this week's report who played
   his team's last game (no return-model state yet) counts as fully available from next week on. (B) of 2026-10-15

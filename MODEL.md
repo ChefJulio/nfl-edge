@@ -333,6 +333,7 @@ The grade measures output, not style: fantasy points per game in the site's scor
 - **Rejected** - How fast should a team's older games this season fade from its ratings (half-life 3 weeks)? - Tried 2, 4, 6 and 8 weeks; the best on 2021-23 (8) was no better on 2024-25, so 3 stays. 4 weeks looked slightly better on later seasons and will get its own test on the full 2026 season (2026-10). <!-- tried:half-life -->
 - **Shipped** - A player hurt in his last game who is on this week's injury report counted as fully healthy from next week on; should the return model chain his later weeks the way it does for players already out? - Yes: predicted points over his next six games got closer to what happened (average miss 16.92 to 16.75 for all players, better every season 2022-25) and the week's rankings matched outcomes better (rank correlation +0.006) (2026-10). <!-- tried:newinj-chain -->
 - **Rejected** - How much should last season and two seasons back count in a player's efficiency rates (today 1 / 0.6 / 0.3)? - Every mix from 0.3 to 1 for last season and 0 to 0.6 for two back was within noise on 2021-23; the best was no better on 2024-25 and worse on 2026 so far, so today's stays (2026-10). <!-- tried:eff-season-weights -->
+- **Rejected** - How much of his usual volume should a player get in his first game with a new team (half today)? - 30% to 70% were all within noise on 2021-23, and the best of them (70%) was worse on 2024-25, so half stays (2026-10). <!-- tried:newcomer-scale -->
 
 ## Under the hood
 

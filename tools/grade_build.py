@@ -1,5 +1,9 @@
 """NFL Edge grade: one number per offensive player (QB / RB / WR / TE) for player pages, data/grades.json.
 
+NOTE (2026-10-17): the LIVE grade is output-based (MODEL.md "Edge grade"): fantasy points per game over this season
+and the two before (SEASON_W), shrunk toward the qualified-player mean by measured pseudo-games, shown as a
+percentile among qualified players. The EPA-value description below is the earlier v1 (kept for --eval).
+
 Usage: python tools/grade_build.py [--site=site]      build the grades (CI, daily)
        python tools/grade_build.py --eval              walk-forward validation (the gate; prints the table)
 
