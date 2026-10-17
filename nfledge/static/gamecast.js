@@ -929,7 +929,8 @@
     const ep = (L && L.inj || []).find(e => L && e.s === L.cur && wk && e.w1 >= wk - 1);  // listed this week or last
     const des = p && /^\s*(Questionable|Doubtful|Out|IR|PUP|NFI)/i.test(p.status || '');
     const inj = (p && p.inactive >= 0.05) || des || (now && now.status && now.status !== 'Active') || (!p && ep);
-    const play = p && p.inactive != null ? 1 - p.inactive : null;
+    const rw = !p && RJ.d && RJ.d.players[pid] && RJ.d.players[pid].w.find(z => z[0] === RJ.d.from);  // off the board: the return model
+    const play = p && p.inactive != null ? 1 - p.inactive : rw ? rw[1] : null;
     const what = [...new Set([now && now.type, now && now.detail && now.detail !== 'Not Specified' ? now.detail : '', now && now.side && now.side !== 'Not Specified' ? now.side : '']
       .filter(Boolean))].join(' · ') || (ep && ep.part) || '';  // ESPN often repeats the type as the detail
     return { inj, play, what, now, ep, back: backWeek(pid), wk };
@@ -956,20 +957,56 @@
     const row = e => e[0] === 'p'
       ? `<div class="pt-row"><span class="pt-d">${day(e[1])}</span><span class="pr-chip pr-${e[2]}">${e[2] === 'D' ? 'DNP' : e[2] + 'P'}</span><span>${PR_WORD[e[2]] || ''}${e[3] ? ` · <b>${esc(e[3])}</b>` : ''}</span></div>`
       : `<div class="pt-row pt-g"><span class="pt-d">${day(e[1])}</span><span class="pt-gm">${esc(e[3])} ${tmL(e[2])}</span><span>${e[4] === '' ? '<b>next game</b>' : e[4] === 'out' ? '<b class="bad">did not play</b>' : `played · ${esc(e[4])}% of snaps`}</span></div>`;
-    return `<div class="pc-box"><div class="pc-k">Practice and games</div><div class="pt-list">${past.map(row).join('')}${next ? row(next) : ''}</div></div>`;
+    // newest first (owner 2026-10-17): the next game on top, then the latest six going back
+    return `<div class="pc-box"><div class="pc-k">Practice and games</div><div class="pt-list">${next ? row(next) : ''}${past.slice().reverse().map(row).join('')}</div></div>`;
   };
   // the briefing: this week, the timeline (since when, games missed, return estimates), the latest news, then history
   const injuryBrief = (pid, p, L, espn, h) => {
     const now = h.now, ep = h.ep;
+    // This week as a header (owner 2026-10-17: "make that look nicer and use the free space"): status, chance to play
+    // and expected return side by side, then what and when he got hurt, then this week's practice in plain words
+    const des = ((p && p.status) || '').replace(/\s*\(.*$/, '').replace(/\s*\(ESPN\)/, '').trim()
+      || (now && now.status && now.status !== 'Active' ? now.status : '') || (h.inj ? 'Listed' : 'Healthy');
+    const desCls = /^Out|Injured|IR/i.test(des) ? 'out' : /^Doubt/i.test(des) ? 'd' : /^Quest/i.test(des) ? 'q' : h.inj ? 'q' : 'ok';
+    const pr = ((L && L.prac) || []).filter(e => e[0] === 'p' && e[1] >= new Date(Date.now() - 6 * 864e5).toISOString().slice(0, 10));
+    const WORD = { D: 'did not practice', L: 'limited', F: 'full' };
+    const prLine = pr.length ? 'Practiced: ' + Object.entries(pr.reduce((m, e) => { (m[e[2]] = m[e[2]] || []).push(new Date(e[1] + 'T12:00:00').toLocaleDateString([], { weekday: 'short' })); return m; }, {}))
+      .map(([c, ds]) => `${WORD[c] || c} ${ds.join(', ')}`).join('; ') : '';
+    // when he got hurt, as a date (owner 2026-10-17: "rather than trying to decipher it"): the in-game note's week, dated
+    // from his games in the timeline; else the day he first appeared on the report
+    const QN = { 1: '1st', 2: '2nd', 3: '3rd', 4: '4th', 5: 'overtime' };
+    const gEv = w => ((L && L.prac) || []).find(e => e[0] === 'g' && e[5] === w);
+    const longDay = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+    const firstListed = ep && ((L && L.prac) || []).find(e => e[0] === 'p' && e[1] >= (gEv(ep.w0 - 1) || [0, ''])[1]);
+    const hurtWhen = ep && ep.ig ? (g => g ? `Hurt ${longDay(g[1])} ${g[3]} ${g[2]}${ep.ig[1] ? ` (${QN[ep.ig[1]] || `Q${ep.ig[1]}`}${ep.ig[1] < 5 ? ' quarter' : ''})` : ''}`
+        : `Hurt in the week ${ep.ig[0]} game`)(gEv(ep.ig[0]))
+      : ep && firstListed ? `First listed ${longDay(firstListed[1])}` : '';
+    const hurt = [h.what, hurtWhen].filter(Boolean).join(' · ');
+    // third cell (owner 2026-10-17: "expected back being a date seems weak"): a game, not a date. Likely to play this
+    // week: his next game. Out: the game he's projected back for (our return model), ESPN's date as its game too.
+    const games = ((L && L.prac) || []).filter(e => e[0] === 'g'), today = new Date().toISOString().slice(0, 10);
+    const gameTxt = g => g ? `Week ${g[5]} ${g[3]} ${g[2]}` : '';
+    // a week's game from the dated timeline, else his schedule in the career log (IR players have no practice report)
+    const upG = w => { const u = ((L && L.up) || []).find(x => x.w === w && !x.bye); return u ? ['g', '', u.o, u.h === 0 ? '@' : 'vs', '', u.w] : null; };
+    const nextG = games.find(e => e[1] > today);
+    const ourG = h.back && h.back !== 'no' ? games.find(e => e[5] === h.back) || upG(h.back) : null;
+    const espnG = now && now.return_date ? games.find(e => e[1] >= now.return_date) : null;
+    const onBye = ((L && L.up) || []).some(x => x.w === h.wk && x.bye);  // no game this week: nothing to play
+    const out = h.inj && (h.play == null || h.play < 0.5);
+    const third = out
+      ? (ourG || espnG || h.back === 'no' ? `<div><small>Expected back</small><b>${esc(ourG ? gameTxt(ourG) : h.back === 'no' ? 'Not this season' : gameTxt(espnG))}</b>
+          <span class="muted">${ourG ? (espnG ? `ESPN: ${esc(gameTxt(espnG).toLowerCase())}` : 'our return model') : h.back === 'no' ? 'our return model' : 'ESPN estimate'}</span></div>` : '')
+      : nextG ? `<div><small>Next game</small><b>${esc(new Date(nextG[1] + 'T12:00:00').toLocaleDateString([], { weekday: 'short' }))} ${esc(nextG[3])} ${esc(nextG[2])}</b><span class="muted">week ${nextG[5]}</span></div>` : '';
     const thisWeek = `<div class="pc-box"><div class="pc-k">This week</div>
-        <div class="ij-now">${h.inj ? '' : '<b class="good">Healthy</b>'}${p && p.status ? injTag(p.status) : ''}${h.what ? `<b>${esc(h.what)}</b>` : ''}</div>
-        ${h.inj && h.play != null ? `<div class="ij-line"><b>${h.play > 0.01 ? `${Math.round(h.play * 100)}% to play` : 'Out'}</b>${p && p.inactive_why ? ` <span class="muted">· ${esc(p.inactive_why)}</span>` : ''}</div>` : ''}
-        ${!h.inj ? '<p class="pc-sub">Not on the injury report and practicing fully.</p>' : ''}</div>`;
+        <div class="ij-hero">
+          <div><small>Status</small><b class="ij-st ij-${desCls}">${esc(des)}</b></div>
+          <div><small>Chance to play</small><b class="ij-big ${!h.inj || (h.play != null && h.play >= 0.75) ? 'good' : h.play != null && h.play < 0.5 ? 'bad' : ''}">${h.play != null ? NFLE.fmt.toPlay(1 - h.play) : onBye ? '<span class="muted">Bye</span>' : h.inj ? '&ndash;' : '&gt;99%'}</b></div>
+          ${third}
+        </div>
+        ${hurt ? `<div class="ij-what">${esc(hurt)}</div>` : ''}
+        <p class="pc-sub">${h.inj ? esc(prLine || (p && p.inactive_why) || 'On the injury report.') : 'Not on the injury report and practicing fully.'}</p></div>`;
     const tl = [];
-    if (ep) tl.push(`Listed since week ${ep.w0}${ep.missed ? `, ${ep.missed} game${ep.missed === 1 ? '' : 's'} missed` : ''}${ep.list ? ` · on ${esc(ep.list)}` : ''}${ep.ig ? ` · hurt in the week ${ep.ig[0]} game${ep.ig[1] ? ` (Q${ep.ig[1]})` : ''}` : ''}`);
-    if (h.back === 'no') tl.push('Our return model: not back this season');
-    else if (h.back) tl.push(`Our return model: likely back week ${h.back}`);
-    if (now && now.return_date) tl.push(`ESPN's estimated return: ${espnDate(now.return_date)}`);
+    if (ep) tl.push(`Listed since week ${ep.w0}${ep.missed ? `, ${ep.missed} game${ep.missed === 1 ? '' : 's'} missed` : ''}${ep.list ? ` · on ${esc(ep.list)}` : ''}`);
     const timeline = h.inj && (tl.length || (now && now.comment)) ? `<div class="pc-box"><div class="pc-k">Timeline</div>${tl.map(t => `<div class="ij-line">${t}</div>`).join('')}
         ${now && now.comment ? `<p class="pc-sub">${esc(now.comment)}</p>` : ''}</div>` : '';
     const news = espn ? `<div class="pc-box"><div class="pc-k">Latest news</div><div class="pc-news" data-espn="${esc(espn)}" data-n="2"></div></div>` : '';

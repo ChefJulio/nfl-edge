@@ -326,7 +326,7 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
   """gsis -> this season's practice days and games in date order (owner 2026-10-17: "the date the report was out,
   show the last 6, include games in that timeline, dates near each"). Events: ["p", date, D/L/F, game status on the
   week's last day or ""], ["g", date, opponent, "vs"/"@", snap share or "out" or "" (upcoming)]. Players who were on a
-  practice report this season only; the card shows the latest few."""
+  practice report this season only; the card shows the latest few. Game events end with their week."""
   if practice is None or "dates" not in practice:
     return {}
   pr = practice[(practice.season == cur) & practice.gsis_id.notna()]
@@ -357,7 +357,7 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
         continue
       s_ = snap.get((gid, w))
       res = (int(round(100 * float(s_))) if s_ is not None and s_ == s_ else "out") if gm[0] <= today else ""
-      ev.append(["g", gm[0], gm[1], gm[2], res])
+      ev.append(["g", gm[0], gm[1], gm[2], res, w])  # w: the week (the card dates "hurt in the week N game")
     ev.sort(key=lambda e: (e[1], 0 if e[0] == "p" else 1))
     out[gid] = ev
   return out
