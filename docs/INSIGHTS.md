@@ -2244,3 +2244,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   --only=fitted, model-only, paired by game. CHOOSE the lowest margin MAE on 2021-23; DECIDE on 2024-25: lower than 3
   with a 95% CI over season-weeks excluding 0 and lower in both seasons; CONFIRM 2026 so far, same direction; then
   fantasy MAE not worse (tools/experiments.py, CI upper < +0.003). Today's the choice -> keep (now tested).
+- **RESULT {#half-life} (AF) team-rating half-life: FAIL, 3 kept (now tested); PENDING CHECK at season end.**
+  tools/game_eval.py 2021-26 (scratch/af_compare.py). Choose 2021-23 vs 3 (10.389): 2 +0.026, 4 -0.014, 6 -0.026, 8
+  -0.029 [-0.100, +0.042] (chosen). Decide 2024-25 (8): -0.046 [-0.170, +0.087], 2024 -0.114, 2025 +0.021 (fail).
+  Not the pre-registered pick but seen: 4 on 2024-25 -0.052 [-0.099, -0.002], both seasons, 2026 so far -0.018; 2 is
+  worse (+0.101 [+0.008, +0.203]). Adopting 4 now would be picking after seeing; instead a fresh pre-registered test
+  at season end: 4 vs 3 on full 2026 (gate: lower margin MAE, CI excluding 0).
