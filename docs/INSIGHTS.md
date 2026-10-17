@@ -1930,3 +1930,18 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   everywhere (QB+2 2025 0.2086 -> 0.2084). Gate met in both seasons. Live (league.js): rho refit on 2021-25 (same QB-WR
   +0.244, QB-TE +0.195; opp QB-QB +0.143, QB-TE +0.090), spread = sqrt(var A + var B - 2 cov(A, B)) with same-game pairs
   only; kickers / defenses carry no correlation. Effects are small (stacks a little less confident), as expected.
+- **PRE-REGISTERED 2026-10-17 (before building): (S) durability per snap instead of per game** (owner: "maybe
+  durability itself should be measured by snaps rather than games?", after a check that low-snap backups look durable
+  because they are rarely on the field). Today (tools/player_logs.py injury_history): A = share of his team's games
+  he was not out injured (2013 on), shrunk toward the position group's pooled rate by 17 games, percentile within the
+  group. New: B = games missed injured per 1,000 snaps played (offense snaps for QB / RB / WR / TE / OL, defense snaps
+  for DL / LB / DB; kickers, punters, long snappers excluded), shrunk toward the group's pooled rate by K snaps.
+  Rows: player-seasons T = 2014-2025 where he was on the roster for 8+ of his team's games in T, with history from
+  2013 to T-1; both scores use only that history. Target: share of his team's games in T he missed injured (the same
+  episode logic). Metric: Spearman rank correlation, within each position group, of the score (more durable = higher)
+  with fewer games missed in T; a season's value = the groups' correlations weighted by rows. K per group from
+  {250, 500, 1000, 2000}, chosen on T = 2014-2019 only. GATE (decide on T = 2020-2025, untouched by the K choice):
+  ship if B - A > 0 with a 95% player-cluster bootstrap CI excluding 0 AND B better in at least 4 of the 6 seasons;
+  otherwise keep A. MDE: no earlier test on these rows; ~1,500 rows a season and the two scores share their inputs,
+  so the paired interval should be far narrower than either correlation's (to be reported). Reported alongside:
+  every group, and QBs on their own (the case that started this).
