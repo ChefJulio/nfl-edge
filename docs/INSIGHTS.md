@@ -2055,3 +2055,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   guards: shipped win-chance Brier not significantly worse, and fantasy MAE (tools/experiments.py 2021-25) CI upper <
   +0.003 with no position significantly worse; CONFIRM on 2026 weeks so far, same direction. If today's setting is
   the 2022-23 choice, keep it (now tested).
+- **RESULT {#prior-season-weight} (X) last season's weight in team ratings: FAIL, 0.3 fading by week 8 kept (now
+  tested).** tools/carryover_eval.py --gate. Choose 2022-23 (510 games): every alternative beat today, 1.0 fading by
+  week 10 most (margin MAE -0.190 [-0.290, -0.100]; 0.6 / wk 13 -0.188). Decide 2024-25 (511 games): that choice +0.017
+  [-0.140, +0.173] (2024 -0.010, 2025 +0.043) and the win chance worse (Brier +0.0037 [+0.0007, +0.0066]); 2026 so far
+  +0.046 (63 games). The 2022-23 advantage did not carry to later seasons (the parked 3-season look leaned on 2022-23
+  too). docs/handset_audit.md #1 now TESTED.
