@@ -2323,6 +2323,16 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   position significantly worse. Reported: each season's bias before / after, 2024-25 (the kickoff-rule years) by
   week. If it passes: ship as a projection-level factor (live, from this season's finished weeks), and a field-
   position prior for mechanical rule changes is pre-registered as a second step for weeks 1-2.
+- **RESULT {#season-calibration} (AL) in-season calibration of the projection level: FAIL, not shipped.** tools/
+  env_eval.py, 18,173 rows 2021-25. Choose 2021-23: k 250 -0.0113 [-0.0167, -0.0063] (chosen), 1000 -0.0083, 4000
+  -0.0044. Decide 2024-25: +0.0112 [+0.0005, +0.0233] (2024 +0.0297, 2025 -0.0070; RB, WR worse). It did fix the level:
+  bias 2021 -2.6 -> -1.4%, 2022 -0.9 -> +0.1%, 2023 +0.6 -> +1.7%, 2024 +5.5 -> +2.0%, 2025 -1.6 -> -0.9% (r in 2024
+  reached 1.03-1.05 by week 4). Why MAE got worse where bias improved: outcomes are right-skewed (median / mean
+  0.74-0.81), so raising projections toward the mean costs absolute error. Not gated, squared error: 2021 -0.04, 2022
+  +0.03, 2023 +0.06, 2024 -0.13, 2025 +0.02 (on ~38): a season-level bias of up to 5% (~0.4 pts a game) is small next
+  to a single game's spread (~6 pts). Answer to the owner: scoring environments shift +-3% a year and rule changes
+  move them, but correcting for it doesn't make individual projections more accurate; the rule-change prior step is
+  not pursued. Where the level would matter is in sums (rest-of-season totals, win chances): a possible later test.
 - **RESULT {#wr-td-explosive} (AK) explosiveness in WR receiving TDs: FAIL (gate), switch off.** tools/experiments.py
   2021-2026, 4,989 WR relevant rows. WR MAE 5.141 -> 5.141, +0.000 [-0.001, +0.002]; every season within +-0.001;
   overall +0.000. Seen but not gated: WR start / sit gain 0.785 -> 0.800, +0.016 [+0.003, +0.030] (overall +0.006
