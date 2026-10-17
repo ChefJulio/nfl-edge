@@ -1997,7 +1997,19 @@
     return { html: `${week}${rootLine(abbr, d)}${teamTiles(abbr, d, TLOGS[abbr], pw)}`, players: '' };
   };
   // the Players sheet's list: by grade (owner 2026-10-17: "replace tier with grade ... and sort by it"), ungraded last
-  const teamPlayerRows = (abbr, d) => Object.entries(d.players).filter(([, p]) => p.team === abbr)
+  const teamPlayerRows = (abbr, d) => {
+    const own = Object.entries(d.players).filter(([, p]) => p.team === abbr);
+    if (own.length || teamGame(abbr, d) || !RJ.d) return weekPlayerRows(own, d);
+    // a bye week (owner 2026-10-17): the week's file lists no one, so the same list from the rest-of-season roster
+    // (ros.json), "Bye" in place of a projection; FP/G from his season totals
+    const w = weights();
+    return Object.entries(RJ.d.players).filter(([, x]) => x.team === abbr && x.g >= 1)
+      .map(([pid, x]) => [pid, x, teamGrade(pid), pts(x.ss, w, x.pos) / x.g])
+      .sort((a, b) => (b[2] ? 1 : 0) - (a[2] ? 1 : 0) || (a[2] && b[2] ? (a[2].uq - b[2].uq) || b[2].v - a[2].v : 0) || b[3] - a[3])
+      .map(([pid, x, gr, fpg]) => `<tr class="teamrow" style="${NFLE.fmt.rowStyle(d.teams, x.team)}" data-open-pid="${esc(pid)}"><td>${NFLE.ui.player({ name: x.name, pos: x.pos, team: x.team, photo: x.photo, espn: x.espn }, d.teams)}</td>
+      <td class="num muted">Bye</td><td class="num">${gradeChip(gr)}</td><td class="num muted">${f1(fpg)}</td></tr>`).join('');
+  };
+  const weekPlayerRows = (own, d) => own
     .map(([pid, p]) => [pid, p, teamGrade(pid)])
     .sort((a, b) => (b[2] ? 1 : 0) - (a[2] ? 1 : 0) || (a[2] && b[2] ? (a[2].uq - b[2].uq) || b[2].v - a[2].v : 0) || b[1].proj - a[1].proj)
     .map(([pid, p, gr]) => { const s = scaled(p, d);
