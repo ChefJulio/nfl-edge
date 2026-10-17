@@ -1126,24 +1126,28 @@
       ${penTypes(T.types)}${pl ? `<div class="pc-k pen-sub">Most flagged</div><div class="pen-pl">${pl}</div>` : ''}
       <p class="pc-sub">Regular season. Counts each play's main penalty, declined ones included (0 yards).</p></div>`;
   };
-  // Summary tile: his latest flagged season, the full history in its sheet
-  const playerPenTile = (pid, docs) => {
-    const box = playerPenBox(pid, docs);
-    if (!box) return '';
-    const D = docs.filter(d => d && d.players[pid]).sort((a, b) => b.season - a.season)[0], r = D.players[pid];
-    return tapTile('Penalties', `<div class="pc-big">${r[1]} <small>${r[1] === 1 ? 'flag' : 'flags'}</small></div><div class="pc-tapsub">${D.season} · ${r[2]} yd</div>`, 'Penalties', box);
+  // Summary tile (owner 2026-10-16): flags in his current season (his last one if he's not playing now), 0 included,
+  // career total under it; the sheet has that season's calls and every season he played, flagged or not.
+  // seasons: from his career log (games played; team = his last game's), flags from the penalty shard (1999 on)
+  const penSeasons = (pid, docs, L) => {
+    const by = Object.fromEntries(docs.filter(d => d && d.players[pid]).map(d => [d.season, d.players[pid]]));
+    const played = ((L && L.seasons) || []).filter(S => S.g.length && S.s >= 1999).map(S => ({ s: S.s, t: S.g[S.g.length - 1].t || '' }));
+    const ss = new Set([...played.map(x => x.s), ...Object.keys(by).map(Number)]);
+    return [...ss].sort((a, b) => b - a).map(y => { const x = by[y], pl = played.find(q => q.s === y);
+      return { s: y, t: x ? x[0] : pl ? pl.t : '', n: x ? x[1] : 0, y: x ? x[2] : 0, types: x ? x[3] : [] }; });
   };
-  // player: every season he drew a flag (seasons from his career log), newest first
-  const playerPenBox = (pid, docs) => {
-    const rows = docs.filter(d => d && d.players[pid]).sort((a, b) => b.season - a.season);
-    if (!rows.length) return '';
-    const D = rows[0], r = D.players[pid];
-    const tot = rows.reduce((a, d) => [a[0] + d.players[pid][1], a[1] + d.players[pid][2]], [0, 0]);
-    const hist = rows.map(d => { const x = d.players[pid]; return `<tr><td><b>${d.season}</b></td><td>${esc(x[0])}</td><td class="num">${x[1]}</td><td class="num">${x[2]}</td><td class="pen-top">${esc((x[3][0] || [''])[0])}</td></tr>`; }).join('');
-    return `<div class="pc-box"><div class="pc-k">Penalties · ${D.season}: ${r[1]} for ${r[2]} yards</div>${penTypes(r[3])}
-      ${rows.length > 1 ? `<div class="pc-k pen-sub">Career: ${tot[0]} for ${tot[1]} yards</div>
+  const playerPenTile = (pid, docs, L) => {
+    const rows = penSeasons(pid, docs, L);
+    const cs = L && rows.some(r => r.s === L.cur) ? L.cur : rows.length ? rows[0].s : L && L.cur;
+    if (!cs) return '';
+    const r = rows.find(x => x.s === cs) || { s: cs, n: 0, y: 0, types: [] };
+    const tot = rows.reduce((a, x) => [a[0] + x.n, a[1] + x.y], [0, 0]);
+    const hist = rows.map(x => `<tr${x.n ? '' : ' class="muted"'}><td><b>${x.s}</b></td><td>${esc(x.t)}</td><td class="num">${x.n}</td><td class="num">${x.y}</td><td class="pen-top">${esc((x.types[0] || [''])[0])}</td></tr>`).join('');
+    const box = `<div class="pc-box"><div class="pc-k">${r.s}: ${r.n ? `${r.n} for ${r.y} yards` : 'no flags'}</div>${penTypes(r.types)}
+      ${rows.length ? `<div class="pc-k pen-sub">Career: ${tot[0] ? `${tot[0]} for ${tot[1]} yards` : 'no flags'} in ${rows.length} ${rows.length === 1 ? 'season' : 'seasons'}</div>
       <div class="lg-scroll"><table class="lg"><thead><tr class="lg-ch"><th>Season</th><th>Team</th><th class="num">Flags</th><th class="num">Yds</th><th>Most often</th></tr></thead><tbody>${hist}</tbody></table></div>` : ''}
-      <p class="pc-sub">Regular season, accepted and declined. Only seasons with a flag are listed.</p></div>`;
+      <p class="pc-sub">Regular season, accepted and declined, since 1999.</p></div>`;
+    return tapTile('Penalties', `<div class="pc-big">${r.n} <small>${r.n === 1 ? 'flag' : 'flags'}</small></div><div class="pc-tapsub">${r.s} · career ${tot[0]}</div>`, 'Penalties', box);
   };
   // ---- NFL Edge grade (data/grades/<season>.json, tools/grade_build.py): percentile of EPA over replacement per game
   // over his last three seasons (weighted to the latest, shrunk by sample size) among his position's players that season.
@@ -1236,7 +1240,7 @@
     body.querySelectorAll('.pc-news').forEach(nb => loadNews(espn, nb, +nb.dataset.n || 6));
     // his career from one small shard (data/penalties/players/<last 2 digits>.json) instead of every season's file
     if (L) body.querySelectorAll('.pc-pen').forEach(pb => NFLE.load(`data/penalties/players/${pid.slice(-2)}.json`).catch(() => null)
-      .then(sh => { if (cardPid === pid) { pb.innerHTML = playerPenTile(pid, ((sh || {})[pid] || []).map(([season, ...x]) => ({ season, players: { [pid]: x } }))); } }));
+      .then(sh => { if (cardPid === pid) { pb.innerHTML = playerPenTile(pid, ((sh || {})[pid] || []).map(([season, ...x]) => ({ season, players: { [pid]: x } })), L); } }));
     // the Grade tab's history: his own small shard (data/grades/players/<last 2 digits>.json), loaded when the tab opens
     const loadGrades = () => body.querySelectorAll('.pc-grade').forEach(gb => { if (gb.dataset.loaded) return; gb.dataset.loaded = '1';
       NFLE.load(`data/grades/players/${pid.slice(-2)}.json`).catch(() => null).then(sh => {
