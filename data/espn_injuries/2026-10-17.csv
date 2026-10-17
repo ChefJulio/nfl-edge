@@ -124,8 +124,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-05T04:04Z,,,,,,McMillan caught 14 of 16 targets for 192 yards and two touchdowns in Sunday's 32-26 win over the Lions.
 4428993,Haynes King,Carolina Panthers,Active,2026-10-04T23:08Z,,,,,,King (coach's decision) is inactive but will operate as the Panthers' emergency third quarterback Sunday night versus Detroit.
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-17T02:01Z,Undisclosed,,,2026-10-18,IR,ir
 4242659,Dayo Odeyingbo,Chicago Bears,Out,2026-10-17T01:05Z,Quadriceps,Not Specified,Not Specified,2026-10-22,OUT,Odeyingbo (quadriceps) has been ruled out for Sunday's game against the Falcons.
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-17T01:01Z,Undisclosed,,,2026-10-18,IR,ir
 4361093,Kyler Gordon,Chicago Bears,Out,2026-10-17T01:01Z,Calf,Not Specified,Not Specified,2026-10-18,PUP-R,Gordon (calf) is listed as questionable for Sunday's game against the Falcons.
 4426374,Tyrique Stevenson Sr.,Chicago Bears,Questionable,2026-10-17T00:59Z,Hip,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Stevenson (hip) is questionable for Sunday's game against the Falcons.
 3121544,T.J. Edwards,Chicago Bears,Out,2026-10-17T00:52Z,Hamstring,Not Specified,Not Specified,2026-10-22,OUT,Edwards (hamstring) has been ruled out for Sunday's game against the Falcons.
@@ -249,8 +249,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2612151,Alex Singleton,Denver Broncos,Active,2026-10-07T01:38Z,,,,,,Singleton recorded 14 total tackles (seven solo) during Sunday's 24-14 loss to San Francisco.
 3929914,Adam Prentice,Denver Broncos,Active,2026-10-03T23:03Z,,,,,,"The Broncos signed Prentice from their practice squad to their 53-man roster Saturday, Aric DiLalla of the team's official site reports."
 4039059,Brandon Jones,Denver Broncos,Active,2026-10-01T01:34Z,,,,,,Jones posted 12 tackles (10 solo) and one pass defense during the Broncos' 30-26 win over the Rams on Sunday.
+4035434,Devin White,Detroit Lions,Injured Reserve,2026-10-17T02:00Z,Forearm,Surgery,Not Specified,2026-11-22,IR,The Lions placed White (forearm) on injured reserve Friday.
 3126997,Tom Kennedy,Detroit Lions,Injured Reserve,2026-10-17T01:51Z,Knee - MCL,Surgery,Right,2027-02-15,IR,The Lions placed Kennedy (knee) on injured reserve Friday.
-4035434,Devin White,Detroit Lions,Injured Reserve,2026-10-16T20:41Z,Forearm,Surgery,Not Specified,2026-11-22,IR,ir
 4611506,Ben Bartch,Detroit Lions,Injured Reserve,2026-10-16T20:41Z,Foot,Not Specified,Not Specified,2026-11-22,IR,ir
 5123663,Isaac TeSlaa,Detroit Lions,Active,2026-10-14T02:28Z,,,,,,TeSlaa failed to haul in either of his two targets during the Lions' 45-21 win over the Cardinals on Sunday.
 3910229,Rock Ya-Sin,Detroit Lions,Questionable,2026-10-13T17:10Z,Hamstring,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
@@ -374,11 +374,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4882093,Bhayshul Tuten,Jacksonville Jaguars,Active,2026-10-11T18:51Z,,,,,,Tuten carried the ball 22 times for 72 yards and caught two of three targets for 24 yards in Sunday's 19-17 win over the Eagles.
 4432620,Parker Washington,Jacksonville Jaguars,Active,2026-10-11T18:43Z,,,,,,Washington caught six of nine targets for 124 yards and two touchdowns in Sunday's 19-17 win over the Eagles.
 4836472,Bryan Thomas Jr.,Jacksonville Jaguars,Active,2026-10-11T13:43Z,,,,,,"Thomas was ejected from Sunday's game in London after receiving an unnecessary roughness penalty for fighting with the Eagles' Jeremiah Trotter following the opening kickoff, Michael DiRocco of ESPN.com reports."
+4040432,L'Jarius Sneed,Kansas City Chiefs,Questionable,2026-10-17T02:03Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Sneed (knee) is listed as questionable for Sunday's game against the Chargers.
 4683062,Xavier Worthy,Kansas City Chiefs,Active,2026-10-16T23:52Z,,,,,,Worthy will be the Chiefs' top wideout against the Chargers on Sunday due to the absence of Rashee Rice (hamstring/knee).
 4569659,Josh Simmons,Kansas City Chiefs,Out,2026-10-16T20:48Z,Back,Not Specified,Not Specified,2026-10-25,OUT,out
 4871063,Peter Woods,Kansas City Chiefs,Active,2026-10-16T20:48Z,,,,,,
 4428331,Rashee Rice,Kansas City Chiefs,Out,2026-10-16T18:15Z,Hamstring,Not Specified,Not Specified,2026-10-25,OUT,"Rice (hamstring/knee) will not play Sunday against the Chargers, Sam McDowell of The Kansas City Star reports."
-4040432,L'Jarius Sneed,Kansas City Chiefs,Questionable,2026-10-14T21:22Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4362921,Tyquan Thornton,Kansas City Chiefs,Injured Reserve,2026-10-13T18:29Z,Ankle,Surgery,Left,2027-01-17,IR,The Chiefs placed Thornton (ankle) on injured reserve Tuesday.
 4362759,Nick Bolton,Kansas City Chiefs,Active,2026-10-07T01:36Z,,,,,,Bolton posted nine tackles (four solo) during the Chiefs' 30-27 win over the Raiders on Sunday.
 4880124,Mansoor Delane,Kansas City Chiefs,Active,2026-10-07T01:23Z,,,,,,Delane tallied 10 tackles (seven solo) and one pass defense during the Chiefs' 30-27 win over the Raiders on Sunday.
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035661,Julian Blackmon,New Orleans Saints,Active,2026-10-11T16:37Z,,,,,,Blackmon (shoulder) is active for Sunday's game against the Vikings.
 4698597,Barion Brown,New Orleans Saints,Active,2026-10-11T16:22Z,,,,,,Brown (thigh) is active for Sunday's game against the Vikings.
 3115383,Davon Godchaux,New Orleans Saints,Active,2026-10-10T16:20Z,,,,,,Godchaux (groin) does not have an injury designation for Sunday's game against the Vikings.
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-17T01:01Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-17T02:01Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4429148,Theo Johnson,New York Giants,Out,2026-10-16T23:08Z,Neck,Not Specified,Not Specified,2026-10-25,OUT,Johnson (neck) has been ruled out for Sunday's game against the Saints.
 4430261,Tyler Nubin,New York Giants,Out,2026-10-16T21:16Z,Neck,Not Specified,Not Specified,2026-10-25,OUT,out
 4921249,Colton Hood,New York Giants,Out,2026-10-16T21:16Z,Concussion,Concussion,Not Specified,2026-10-25,OUT,out
@@ -749,12 +749,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4034779,Ko Kieft,Tampa Bay Buccaneers,Active,2026-10-07T22:50Z,,,,,,"Kieft (elbow) does not carry an injury designation into Thursday's game against the Cowboys, Brianna Dix of the Buccaneers' official site reports."
 3894856,Anthony Nelson,Tampa Bay Buccaneers,Active,2026-10-07T18:57Z,,,,,,
 4428522,Tykee Smith,Tampa Bay Buccaneers,Active,2026-10-07T00:56Z,,,,,,Smith recorded six tackles (four solo) and a forced fumble during the Buccaneers' 17-14 loss to the Packers on Sunday.
+4360978,David Martin-Robinson,Tennessee Titans,Active,2026-10-17T01:55Z,,,,,,Martin-Robinson (hamstring) does not have any injury designation ahead of Sunday's game against the Colts.
 4036134,Amani Hooker,Tennessee Titans,Active,2026-10-17T01:53Z,,,,,,Hooker (concussion) does not have any injury designation ahead of Sunday's game against the Colts.
 4039052,Jordan Elliott,Tennessee Titans,Out,2026-10-17T01:48Z,Personal,,,2026-10-25,OUT,Elliott (personal) has been ruled out ahead of Sunday's game against the Colts.
 4685617,Kevin Winston Jr.,Tennessee Titans,Out,2026-10-16T23:17Z,Quadriceps,Not Specified,Not Specified,2026-10-25,OUT,"Winston (quadriceps) has been ruled out ahead of Sunday's game against the Colts, Paul Kuharsky of PaulKuharsky.com reports."
 4570469,Marcus Harris,Tennessee Titans,Active,2026-10-16T20:38Z,,,,,,
 4428557,Tyjae Spears,Tennessee Titans,Questionable,2026-10-16T20:35Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Spears (knee) is listed as questionable for Sunday's game against the Colts.
-4360978,David Martin-Robinson,Tennessee Titans,Active,2026-10-15T23:22Z,,,,,,Martin-Robinson (hamstring) was a limited participant at practice Thursday.
 4429607,Cor'Dale Flott,Tennessee Titans,Active,2026-10-14T23:12Z,,,,,,Flott (chest) was a full participant in Wednesday's practice session.
 3916148,Tony Pollard,Tennessee Titans,Active,2026-10-14T20:37Z,,,,,,Pollard was a non-participant in Wednesday's practice due to rest.
 4883647,Elic Ayomanor,Tennessee Titans,Active,2026-10-14T02:41Z,,,,,,Ayomanor caught one of two passes for 17 yards during the Titans' 26-3 loss to the Texans on Sunday. He also added a tackle on special teams.
