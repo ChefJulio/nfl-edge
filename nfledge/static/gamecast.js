@@ -572,6 +572,11 @@
     const all = L.seasons.flatMap(s => s.g);
     const rushy = pos !== 'QB' && pos !== 'RB' && all.reduce((t, g) => t + g.x[2], 0) >= 8;
     const groups = logCols(pos, rushy), stat = groups.flatMap(([, cols, ex]) => cols.map(([n, fn, ri]) => [n, fn, ri, ex]));
+    // a divider where each stat group starts (owner 2026-10-17: passing ran straight into rushing below the heads)
+    const gstart = new Set();
+    groups.reduce((k, [, cols], gi) => { if (gi) gstart.add(k); return k + cols.length; }, 0);
+    const gcl = i => gstart.has(i) ? ' lg-gs' : '';
+    const grpHead = lead => `<tr class="lg-gh"><th colspan="${lead}"></th>${groups.map(([n, cols], gi) => `<th colspan="${cols.length}" class="lg-grp${gi ? ' lg-gs' : ''}">${n}</th>`).join('')}</tr>`;
     const nil = v => +v === 0 || v === '0/0' || v === '';  // nothing in that column (C/A '0/0', YPC '')
     const offRole = (v, ex) => ex && nil(v) ? `<span class="muted">${v === '0/0' || v === '' ? '–' : v}</span>` : null;
     const lg = league(), need = (lg.teams || 10) * Math.max(1, lg[pos] || 1);
@@ -587,9 +592,9 @@
     const oppTip = g => g.mu != null ? `Our pregame matchup: ${muSigned(g.mu)} pts vs an average opponent`
       : g.mr ? `Our pregame matchup rank: ${ord(g.mr)} of 32 vs ${esc(pos)}s (1st = toughest)` : '';
     const opp = g => `<td class="lg-opp tm-opp ${oppTone(g)}"${g.mc ? ` style="--mc:${esc(g.mc)}"` : ''}${oppTip(g) ? ` title="${oppTip(g)}"` : ''}><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>`;
-    const head = `<tr class="lg-gh"><th colspan="6"></th>${groups.map(([n, cols]) => `<th colspan="${cols.length}" class="lg-grp">${n}</th>`).join('')}</tr>
-      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num">Snap</th>${stat.map(([n]) => `<th class="num">${n}</th>`).join('')}</tr>`;
-    const blank = `<td class="num">–</td>`.repeat(stat.length);
+    const head = `${grpHead(6)}
+      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num">Snap</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
+    const blank = stat.map((c, i) => `<td class="num${gcl(i)}">–</td>`).join('');
     const body = seasons.map(S => {
       const isCur = S.s === L.cur, rows = S.g.map(g => ({ w: g.w, g }));
       if (isCur) up.forEach(u => rows.push({ w: u.w, u }));
@@ -602,11 +607,11 @@
         return `<tr${tileAttrs(g)}><td>${esc(label)}</td>${opp(g)}<td class="num lg-fp">${g.r ? chip(f1(v), g.rk) : f1(v)}</td>
           <td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td>
           <td class="num"><span class="lg-rk ${rkClass(g.rk)}">${g.rk}</span></td><td class="num">${g.sn != null ? (g.r ? `<span class="sc ${snapTone(g.sn)}">${g.sn}</span>` : g.sn) : '–'}</td>
-          ${stat.map(([, fn, ri, ex]) => { const v = fn(g);
+          ${stat.map(([, fn, ri, ex], i) => { const v = fn(g);
             // a zero ties most of the position (0 rush TD can "rank" top 10): red (owner 2026-10-16), except Int / fumbles
             // (fewer is better)
             const off = offRole(v, ex);
-            return `<td class="num">${off != null ? off : ri != null && g.r ? (+v === 0 && ri !== 2 && ri !== 8 ? `<span class="sc rk-bad">${v}</span>` : chip(v, g.r[ri])) : v}</td>`; }).join('')}</tr>`; };
+            return `<td class="num${gcl(i)}">${off != null ? off : ri != null && g.r ? (+v === 0 && ri !== 2 && ri !== 8 ? `<span class="sc rk-bad">${v}</span>` : chip(v, g.r[ri])) : v}</td>`; }).join('')}</tr>`; };
       // season totals right under the column heads (owner 2026-10-16): the games summed into one stat line, so every
       // column (C/A, YPC) reads it as it reads a game; Snap = average, Proj = total only when every game had one.
       // Colored by the season total's finish at his position (rk = S.trk / S.tr from tools/player_logs.py; not playoffs)
@@ -618,7 +623,7 @@
         return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num lg-fp">${tc(f1(pts(T.c, w, pos)), rk && rk.trk)}</td>
           <td class="num muted">${pjs.every(v => v != null) ? f1(pjs.reduce((a, b) => a + b, 0)) : '–'}</td>
           <td class="num">${rk && rk.trk ? `<span class="lg-rk ${rkClass(rk.trk)}" title="His ${esc(pos)} finish that season (fantasy points, site scoring)">${rk.trk}</span>` : ''}</td>
-          <td class="num">${avgSn == null ? '–' : rk ? `<span class="sc ${snapTone(avgSn)}">${avgSn}</span>` : avgSn}</td>${stat.map(([, fn, ri, ex]) => { const v = fn(T); return `<td class="num">${offRole(v, ex) ?? tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null)}</td>`; }).join('')}</tr>
+          <td class="num">${avgSn == null ? '–' : rk ? `<span class="sc ${snapTone(avgSn)}">${avgSn}</span>` : avgSn}</td>${stat.map(([, fn, ri, ex], i) => { const v = fn(T); return `<td class="num${gcl(i)}">${offRole(v, ex) ?? tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null)}</td>`; }).join('')}</tr>
           <tr class="lg-gap"><td colspan="${6 + stat.length}"></td></tr>`;
       };
       const trs = totRow(S.g, S.tr ? S : null) + rows.map(r => {
@@ -649,14 +654,14 @@
       return `<tr class="lg-car" data-go-season="${S.s}" title="Show his ${S.s} games"><td><b>${S.s}</b></td><td class="lg-opp">${tmL(gs[gs.length - 1].t)}</td>
         <td class="num">${gs.length}</td><td class="num lg-fp">${tc(f1(tot), rk && rk.trk)}</td><td class="num">${f1(tot / gs.length)}</td>
         <td class="num">${rk && rk.trk ? `<span class="lg-rk ${rkClass(rk.trk)}">${rk.trk}</span>` : '–'}</td>
-        ${stat.map(([, fn, ri, ex]) => { const v = fn(T); return `<td class="num">${offRole(v, ex) ?? tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null)}</td>`; }).join('')}</tr>`;
+        ${stat.map(([, fn, ri, ex], i) => { const v = fn(T); return `<td class="num${gcl(i)}">${offRole(v, ex) ?? tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null)}</td>`; }).join('')}</tr>`;
     }).join('');
     const allG = carS.flatMap(S => S.g), CT = allG.length ? sumOf(allG) : null, ctot = CT ? pts(CT.c, w, pos) : 0;
     const carTot = CT && carS.length > 1 ? `<tr class="lg-tot" title="Regular season, ${carS[carS.length - 1].s}-${carS[0].s}"><td>Car</td><td class="lg-opp">${carS.length} yrs</td>
         <td class="num">${allG.length}</td><td class="num lg-fp">${f1(ctot)}</td><td class="num">${f1(ctot / allG.length)}</td><td class="num"></td>
-        ${stat.map(([, fn, , ex]) => { const v = fn(CT); return `<td class="num">${offRole(v, ex) ?? v}</td>`; }).join('')}</tr><tr class="lg-gap"><td colspan="${6 + stat.length}"></td></tr>` : '';
-    const carHead = `<tr class="lg-gh"><th colspan="6"></th>${groups.map(([n, cols]) => `<th colspan="${cols.length}" class="lg-grp">${n}</th>`).join('')}</tr>
-      <tr class="lg-ch"><th>Year</th><th>Team</th><th class="num" title="Games played">G</th><th class="num">Pts</th><th class="num" title="Fantasy points per game">FP/G</th><th class="num" title="His ${esc(pos)} finish that season">Rk</th>${stat.map(([n]) => `<th class="num">${n}</th>`).join('')}</tr>`;
+        ${stat.map(([, fn, , ex], i) => { const v = fn(CT); return `<td class="num${gcl(i)}">${offRole(v, ex) ?? v}</td>`; }).join('')}</tr><tr class="lg-gap"><td colspan="${6 + stat.length}"></td></tr>` : '';
+    const carHead = `${grpHead(6)}
+      <tr class="lg-ch"><th>Year</th><th>Team</th><th class="num" title="Games played">G</th><th class="num">Pts</th><th class="num" title="Fantasy points per game">FP/G</th><th class="num" title="His ${esc(pos)} finish that season">Rk</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
     const view = carS.length > 1 ? logView : 'g';
     const legend = `<div class="lg-leg"><span>Opponent color = our pregame matchup (2021 on): green helped, red hurt, deeper = bigger</span>
       <span>· Rk = his ${esc(pos)} finish that week (green = starter in your league size) · Proj = our projection then (green = beat it) · Tap a game to open its gamecast</span></div>`;

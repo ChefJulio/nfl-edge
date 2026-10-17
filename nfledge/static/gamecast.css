@@ -890,3 +890,5 @@ table.lg tr.lg-car td:first-child b { font-weight: 700; }
 .pc-tap-row .pc-k { margin: 0; }
 .pc-penrow { font-size: var(--fs-md); color: var(--muted); } .pc-penrow b { color: var(--ink); font-weight: 700; }
 @media (max-width: 699px) { .sheet-h { padding-top: 20px; } }  /* room for the grab bar */
+/* stat groups divided (owner 2026-10-17): a hairline and a little room where rushing / receiving / passing start */
+table.lg td.lg-gs, table.lg th.lg-gs { box-shadow: inset 1px 0 0 color-mix(in srgb, var(--ink) 22%, transparent); padding-left: 6px !important; }
