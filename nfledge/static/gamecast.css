@@ -64,7 +64,8 @@ td.actc .live-dot { width: 7px; height: 7px; margin-right: 5px; }
 .mt-lg.home { right: -10px; -webkit-mask-image: linear-gradient(270deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%);
   mask-image: linear-gradient(270deg, rgba(0,0,0,.9) 15%, rgba(0,0,0,.45) 60%, transparent 100%); }
 .mt-side { position: relative; display: flex; flex-direction: column; min-width: 0; line-height: 1.1; text-shadow: 0 1px 2px rgba(0,0,0,.75), 0 0 12px rgba(0,0,0,.5); }
-.mt-side.away { grid-area: sa; align-items: flex-start; } .mt-side.home { grid-area: sh; align-items: flex-end; text-align: right; }
+/* numbers and names sit toward the middle, clear of the logos (owner 2026-10-16: "push the percentages / scores inward") */
+.mt-side.away { grid-area: sa; align-items: flex-end; text-align: right; } .mt-side.home { grid-area: sh; align-items: flex-start; text-align: left; }
 .mt-num { font-size: 34px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
 .mt-num small { font-size: var(--fs-lg); font-weight: 700; margin-left: 1px; opacity: .75; }
 .mt-nm { margin-top: 4px; font-size: var(--fs-sm); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
