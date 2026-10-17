@@ -627,12 +627,45 @@
       const pg = opts.last || opts.season ? [] : (S.pg || []);
       const sub = (label, gs) => `<tr class="lg-sub"><td colspan="${6 + stat.length}"><span class="lg-pin">${label}${gs ? ` · ${gs.length} game${gs.length === 1 ? '' : 's'} · ${f1(gs.reduce((t, g) => t + pts(g.c, w, pos), 0) / gs.length)} FP/G` : ''}</span></td></tr>`;
       const po = pg.length ? `${sub('Playoffs', pg)}${head}${totRow(pg)}${[...pg].reverse().map(g => played(g, g.po)).join('')}${S.g.length || rows.length ? sub('Regular season') : ''}` : '';
-      return `<tbody><tr class="lg-season"><td colspan="${6 + stat.length}"><span class="lg-pin"><b>${S.s}</b> ${tmL(team)}${sum}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
+      return `<tbody data-season="${S.s}"><tr class="lg-season"><td colspan="${6 + stat.length}"><span class="lg-pin"><b>${S.s}</b> ${tmL(team)}${sum}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
     }).join('');
     if (opts.last || opts.season) return `<div class="lg-scroll"><table class="lg">${body}</table></div>`;
+    // Career view (owner 2026-10-16, after Sleeper's career table): one row per regular season, its totals on the
+    // game log's own columns and chips (Wk -> season, Opp -> team, Proj -> FP/G); tap a season for its games.
+    // Six fixed columns like the game log's (no snap average), so it fits a phone through TD as the log does;
+    // a career total row on top (owner 2026-10-16), unchipped since there's no career rank.
+    const sumOf = gs => { const add = k => gs[0][k].map((_, i) => gs.reduce((t, g) => t + (+g[k][i] || 0), 0)); return { c: add('c'), x: add('x') }; };
+    const carS = L.seasons.filter(S => S.g.length);
+    const car = carS.map(S => {
+      const gs = S.g, T = sumOf(gs), rk = S.tr ? S : null, tc = (v, r) => rk && r != null ? chip(v, r) : v, tot = pts(T.c, w, pos);
+      return `<tr class="lg-car" data-go-season="${S.s}" title="Show his ${S.s} games"><td><b>${S.s}</b></td><td class="lg-opp">${tmL(gs[gs.length - 1].t)}</td>
+        <td class="num">${gs.length}</td><td class="num lg-fp">${tc(f1(tot), rk && rk.trk)}</td><td class="num">${f1(tot / gs.length)}</td>
+        <td class="num">${rk && rk.trk ? `<span class="lg-rk ${rkClass(rk.trk)}">${rk.trk}</span>` : '–'}</td>
+        ${stat.map(([, fn, ri]) => `<td class="num">${tc(fn(T), rk && rk.tr && ri != null ? rk.tr[ri] : null)}</td>`).join('')}</tr>`;
+    }).join('');
+    const allG = carS.flatMap(S => S.g), CT = allG.length ? sumOf(allG) : null, ctot = CT ? pts(CT.c, w, pos) : 0;
+    const carTot = CT && carS.length > 1 ? `<tr class="lg-tot" title="Regular season, ${carS[carS.length - 1].s}-${carS[0].s}"><td>Car</td><td class="lg-opp">${carS.length} yrs</td>
+        <td class="num">${allG.length}</td><td class="num lg-fp">${f1(ctot)}</td><td class="num">${f1(ctot / allG.length)}</td><td class="num"></td>
+        ${stat.map(([, fn]) => `<td class="num">${fn(CT)}</td>`).join('')}</tr><tr class="lg-gap"><td colspan="${6 + stat.length}"></td></tr>` : '';
+    const carHead = `<tr class="lg-gh"><th colspan="6"></th>${groups.map(([n, cols]) => `<th colspan="${cols.length}" class="lg-grp">${n}</th>`).join('')}</tr>
+      <tr class="lg-ch"><th>Year</th><th>Team</th><th class="num" title="Games played">G</th><th class="num">Pts</th><th class="num" title="Fantasy points per game">FP/G</th><th class="num" title="His ${esc(pos)} finish that season">Rank</th>${stat.map(([n]) => `<th class="num">${n}</th>`).join('')}</tr>`;
+    const view = carS.length > 1 ? logView : 'g';
     const legend = `<div class="lg-leg"><span>Opponent color = our pregame matchup (2021 on): green helped, red hurt, deeper = bigger</span>
       <span>· Rank = his ${esc(pos)} finish that week (green = starter in your league size) · Proj = our projection then (green = beat it) · Tap a game to open its gamecast</span></div>`;
-    return `${legend}<div class="lg-scroll"><table class="lg">${body}</table></div>`;
+    const games = `${legend}<div class="lg-scroll"><table class="lg">${body}</table></div>`;
+    if (carS.length < 2) return games;
+    return `<div class="seg lg-views" role="tablist"><button type="button" data-lv="s" class="${view === 's' ? 'on' : ''}">Seasons</button><button type="button" data-lv="g" class="${view === 'g' ? 'on' : ''}">Games</button></div>
+      <div class="lg-v" data-lv="s"${view === 's' ? '' : ' hidden'}><div class="lg-leg"><span>Regular season. Chips = his ${esc(pos)} finish that season · Tap a season for its games</span></div>
+        <div class="lg-scroll"><table class="lg lg-career"><tbody>${carHead}${carTot}${car}</tbody></table></div></div>
+      <div class="lg-v" data-lv="g"${view === 'g' ? '' : ' hidden'}>${games}</div>`;
+  };
+  // Game log view: career seasons or every game; kept across re-renders and players for the session
+  let logView = 's';
+  const showLogView = (box, v, season) => {
+    logView = v;
+    box.querySelectorAll('[data-lv]').forEach(x => x.matches('button') ? x.classList.toggle('on', x.dataset.lv === v) : (x.hidden = x.dataset.lv !== v));
+    const tb = season && box.querySelector(`tbody[data-season="${season}"]`);
+    if (tb) scrollTo({ top: tb.getBoundingClientRect().top + scrollY - stickTop() });  // where the previous season's heads let go
   };
   // A game's gamecast, with the week file that holds our numbers for it when we have one (2021 on: its Pregame
   // tab reads it). Older games open with ESPN's data only (box scores back to 1999, plays from about 2005).
@@ -640,7 +673,11 @@
   // Every log row opens that game's gamecast. g.gid / g.f (week file) come from tools/player_logs.py.
   const tileAttrs = g => g.gid ? ` data-gid="${esc(g.gid)}"${g.f ? ` data-f="${esc(g.f)}"` : ''} title="Open the gamecast"` : '';
   const wireLogRows = box => box && box.addEventListener('click', e => {
+    const lv = e.target.closest('button[data-lv]');
+    if (lv) { showLogView(box, lv.dataset.lv); return; }
     if (e.target.closest('button, a, select, input')) return;
+    const car = e.target.closest('tr[data-go-season]');
+    if (car) { showLogView(box, 'g', car.dataset.goSeason); return; }
     const tr = e.target.closest('tr[data-gid]'); if (!tr) return;
     location.href = gcUrl(tr.dataset.gid, tr.dataset.f || '');
   });

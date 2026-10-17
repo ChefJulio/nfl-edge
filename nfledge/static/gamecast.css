@@ -870,3 +870,9 @@ table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; tex
 @keyframes sheet-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes sheet-fade { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .sheet, .sheet-ov { animation: none; } }
+
+/* Game log: Seasons / Games switch; the career table's rows open that season's games */
+.seg.lg-views { margin: 0 0 8px; }
+table.lg tbody tr.lg-car { cursor: pointer; }
+@media (hover: hover) { table.lg tbody tr.lg-car:hover td { background: color-mix(in srgb, var(--accent) 12%, var(--panel2)); } }
+table.lg tr.lg-car td:first-child b { font-weight: 700; }
