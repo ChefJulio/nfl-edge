@@ -2106,3 +2106,8 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   2024-25: MAE lower than 150 with a 95% season-week CI excluding 0 and better in both seasons; guards: no position
   significantly worse, start / sit gain not significantly worse (sec. 1 rule 7); CONFIRM on 2026 so far, same
   direction. If 150 is the 2021-23 choice, keep it (now tested).
+- **RESULT {#td-blend-k} (Z) the TD blend k: FAIL, 150 kept (now tested; truly insensitive).** tools/experiments.py
+  2021-2026 + tools/grid_eval.py. Choose 2021-23, MAE vs 150: k 25 -0.0004 [-0.0012, +0.0005], 50 -0.0003, 100 -0.0001,
+  300 +0.0002, 600 +0.0005, expected TDs only +0.0012 [-0.0009, +0.0032]. Decide 2024-25 (k 25): +0.0010 [-0.0005,
+  +0.0025] (2024 -0.0002, 2025 +0.0021), RB +0.0024 [+0.0006, +0.0044] worse; start / sit +0.007 (no difference);
+  2026 +0.0016. The whole range sits within +-0.0012: TD shrinkage strength barely moves MAE. docs/handset_audit.md #2.
