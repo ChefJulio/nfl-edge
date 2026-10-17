@@ -1037,3 +1037,10 @@ html.pc-open { overflow: hidden; }
 .sheet .lg-fit table.lg thead th { position: sticky; top: var(--sheeth, 0px); z-index: 3; background: var(--panel2); }
 .tm-tph { flex: none; font-size: var(--fs-2xs); font-weight: 700; color: #ff8f84; text-transform: uppercase; letter-spacing: .03em; }
 .tm-gr { font-size: var(--fs-sm); color: var(--ink); font-variant-numeric: tabular-nums; } .tm-gr.good { color: #6fdc8c; } .tm-gr.bad { color: #ff8f84; }
+
+/* matchup tiles: the team's wordmark in place of the typed nickname (owner 2026-10-17), black-trimmed like All teams */
+.mt-nm { display: flex; align-items: center; gap: 6px; overflow: visible; }
+.mt-side.away .mt-nm { justify-content: flex-end; }
+.mt-wm { display: block; height: 15px; width: auto; max-width: 112px; object-fit: contain;
+  filter: drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000) drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+.mt-nm b:has(.mt-wm) { display: inline-flex; align-items: center; }

@@ -91,6 +91,8 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     // the Games tab's matchup tile: logos outside, team colors blending, win chance (score once it starts); live
     // games are repainted by gamecast.js (NFLE.paintTiles finds tiles by data-gid wherever they are)
     matchTile: (g, href) => {
+      // the team's wordmark (owner 2026-10-17, as on All teams: tools/wordmarks_build.py), the typed nickname if it fails
+      const wordmark = s => `<img class="mt-wm" src="${esc(NFLE.root || '')}assets/wordmarks/${esc(s.team)}.png" alt="${esc(s.nick)}" onerror="this.replaceWith(this.alt)">`;
       const f = g.fc || {}, fin = g.final;
       const sides = [[g.away, fin && fin.away, fin && fin.home, f.p_away], [g.home, fin && fin.home, fin && fin.away, f.p_home]];
       const T = NFLE.ui.tm;
@@ -104,7 +106,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
         // the logo's visible edge (outside the score / name, which sit above it) and the name open the team page
         return `${s.logo_url ? `<img class="mt-lg ${side} tm-open" data-tm="${esc(s.team)}" src="${esc(F.logoSrc(s.logo_url, 112))}" alt="" loading="lazy">` : ''}
           <div class="mt-side ${side}${cls}"><span class="mt-num">${fin ? esc(sc) : `${esc(pct)}<small>%</small>`}</span>
-            <span class="mt-nm">${T(s.team, `<b>${esc(s.nick)}</b>`)} <small>${esc(s.record)}</small></span></div>
+            <span class="mt-nm">${T(s.team, `<b>${wordmark(s)}</b>`)} <small>${esc(s.record)}</small></span></div>
           ${i ? '' : `<span class="mt-at">${g.neutral ? 'vs' : '@'}${f.tossup && !fin ? '<small>Tossup</small>' : ''}</span>`}`;
       }).join('');
       const st = fin ? `<span class="mt-fin">Final</span>${verdict}`
