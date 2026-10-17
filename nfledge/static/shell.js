@@ -195,8 +195,10 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     const h = D.head, live = !(CFG.archive || CFG.lookahead), pending = live && !h.injury_report;
     const sc = h.scoring === 'half' ? 'Half PPR' : h.scoring === 'ppr' ? 'PPR' : String(h.scoring || '').replace(/^./, c => c.toUpperCase());
     hw.querySelector('.hpop').innerHTML = [
-      `<span>Data through <b>week ${esc(h.data_week)}</b>${CFG.lookahead ? ' (all games played so far)' : ''}</span>`,
-      h.n_final ? `<span><b>${h.n_final} of ${h.n_games}</b> games final</span>` : '',
+      // two different weeks (owner 2026-10-17 read them as one): what the projections are built on, and how far
+      // this week's own games have got (a live week's projections use only earlier weeks, as before kickoff)
+      `<span>Projections use games through <b>week ${esc(h.data_week)}</b>${CFG.lookahead ? ' (all games played so far)' : ''}</span>`,
+      h.n_final ? `<span>Week ${esc(D.week)} so far: <b>${h.n_final} of ${h.n_games}</b> games final</span>` : '',
       `<span>Scoring <b id="scoreName">${esc(sc)}</b></span>`,
       pending ? '<span class="alert">Injury report pending: last week\'s statuses (and early ESPN injury news) are used</span>' : live ? '<span>Injury report <b>in</b></span>' : '',
       `<span>Updated ${esc(D.generated || '')}</span>`].join('');
