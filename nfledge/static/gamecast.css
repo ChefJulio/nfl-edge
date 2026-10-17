@@ -1007,3 +1007,10 @@ html.pc-open { overflow: hidden; }
 .gg-strip { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 6px; }
 .gg { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 40px; }
 .gg small { font-size: var(--fs-2xs); color: var(--muted); }
+/* Points tile once his game starts (owner 2026-10-17, as on Rankings): dimmed final / live tag, the actual (white live,
+   game-grade colored final), "proj" dimmed with its number white; his score's dot on the range bar in the sheet */
+.pc-tap .pc-big .pv-tag { font-size: 11px; font-weight: 600; margin-right: 5px; vertical-align: 4px; color: var(--muted); }
+.pc-tap .pc-big .pv-tag .live-dot { width: 6px; height: 6px; margin-right: 3px; }
+.pc-big.mid { color: #f3d38c; }
+.pc-tapsub .pv-pj { color: var(--ink); font-weight: 600; }
+.pc-rng .rng-a { fill: var(--ink); stroke: var(--panel); stroke-width: 2; }

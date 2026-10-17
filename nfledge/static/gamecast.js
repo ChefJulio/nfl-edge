@@ -734,12 +734,13 @@
     cardPid = null; cardTeam = null;
     if (location.hash.startsWith('#player/') || location.hash.startsWith('#team/')) { try { history.replaceState(null, '', location.pathname + location.search + prevHash); } catch (e) { /* ignore */ } }
   };
-  const rangeSvg = (q, proj) => {
-    const top = Math.max(10, q[4] * 1.1), W = 260, x = v => 4 + (W - 8) * Math.min(Math.max(v, 0), top) / top;
+  const rangeSvg = (q, proj, act = null) => {
+    const top = Math.max(10, q[4] * 1.1, act != null ? act * 1.05 : 0), W = 260, x = v => 4 + (W - 8) * Math.min(Math.max(v, 0), top) / top;
     return `<svg class="pc-rng" viewBox="0 0 ${W} 26" width="100%" height="26" aria-hidden="true">
       <line x1="${x(q[0])}" y1="11" x2="${x(q[4])}" y2="11" class="rng-w"/>
       <rect x="${x(q[1])}" y="5" width="${Math.max(x(q[3]) - x(q[1]), 2)}" height="12" rx="3" class="rng-b"/>
       <line x1="${x(proj)}" y1="1" x2="${x(proj)}" y2="21" class="rng-p"/>
+      ${act != null ? `<circle cx="${x(act)}" cy="11" r="5" class="rng-a"/>` : ''}
       <text x="${x(q[0])}" y="25" class="pc-rt">${f0(q[0])}</text><text x="${x(q[4])}" y="25" class="pc-rt" text-anchor="end">${f0(q[4])}</text></svg>`;
   };
   // Small bars over season-week slots, the rankings' Last 5 look: value above each bar, the week below, BYE for a
@@ -1065,18 +1066,29 @@
     return tapTile('Grade', r ? `<div class="pc-big ${r[9] ? '' : grTone(r[0])}">${ovr(r[0])}${uqMark(r)} <small>OVR</small></div><div class="pc-tapsub">${GR.cur.season} · ${esc(r[1])}</div>`
       : '<div class="pc-big">– <small>OVR</small></div><div class="pc-tapsub">Not graded</div>', 'NFL Edge grade', detail);
   };
+  // A game's grade (0-99 percentile) from this season's pool of qualified games (data/grades/game_pool.json, the Grd
+  // column's scale), in the site's scoring; loaded on first need, the card redraws when it arrives
+  const GPOOL = { d: undefined };
+  const gamePct = (pos, v) => {
+    if (GPOOL.d === undefined) { GPOOL.d = null; NFLE.load('data/grades/game_pool.json').then(j => { GPOOL.d = j; rerenderCard(); }).catch(() => {}); }
+    const q = GPOOL.d && GPOOL.d.q[pos]; if (!q || v == null) return null;
+    let i = 0; while (i < 100 && q[i + 1] <= v) i++;
+    return i >= 100 ? 99 : Math.min(99, Math.round(i + (q[i + 1] > q[i] ? (v - q[i]) / (q[i + 1] - q[i]) : 0)));
+  };
   // The player's weekly section for the selected week (projection, matchup, availability, season to date).
   const playerWeek = (pid, p, d, L) => {
     const g = teamGame(p.team, d), opp = g && (g.away.team === p.team ? g.home : g.away);
     const s = scaled(p, d), w = weights(), live = d === DATA;
     const ln = live ? LIVE.lines[p.espn] : null, st = live && g ? LIVE.byGame[g.id] : null;
     const ac = ln ? ln.line : (p.sc.ac || null);
-    let now = '';
+    let now = '', actV = null, actLive = false, actPct = null;
     if (ac) {
       const v = pts(ac, w, p.pos), isLive = st && st.state === 'in';
+      actV = v; actLive = !!isLive;
+      actPct = isLive ? null : gamePct(p.pos, pts(ac, (DATA && DATA.score && DATA.score.built) || HALF, p.pos));
       const tag = isLive ? `<span class="live-dot"></span>Live · ${esc(st.short || '')}` : 'Final';
-      now = `<div class="pc-now${isLive ? ' is-live' : ''}"><div class="pc-k">${tag}</div><div class="pc-big">${f1(v)} <small>pts</small></div>
-        <div class="pc-sub">${ln ? `${esc(statLineText(ln, p.pos))}${isLive ? '' : ' · '}` : ''}${isLive ? '' : (v > s.q[3] ? '<b class="good">above his likely range</b>' : v < s.q[1] ? '<b class="bad">below his likely range</b>' : 'within his likely range')}</div></div>`;
+      now = `<div class="pc-now${isLive ? ' is-live' : ''}"><div class="pc-k">${tag}</div><div class="pc-big ${actPct == null ? '' : actPct >= 80 ? 'good' : actPct <= 30 ? 'bad' : 'mid'}">${f1(v)} <small>pts</small></div>
+        <div class="pc-sub">${ln ? `${esc(statLineText(ln, p.pos))}${isLive ? '' : ' · '}` : ''}${isLive ? '' : (v > s.q[3] ? '<b class="good">above his likely range</b>' : v < s.q[1] ? '<b class="bad">below his likely range</b>' : 'within his likely range')}${actPct != null ? ` · game grade <b>${ovr(actPct)}</b>` : ''}</div></div>`;
     }
     // Availability rides on the projection: a chip always, the reason spelled out once there's real risk.
     const ia = p.inactive || 0, av = ia >= 0.5 ? 'av-out' : ia >= 0.05 ? 'av-q' : 'av-ok';
@@ -1104,15 +1116,17 @@
             : `This defense ${p.mpts >= 0 ? 'adds' : 'takes away'} ${f1(Math.abs(p.mpts || 0))} pts vs an average one.`}</div></div>`;
     // projected to sit (owner 2026-10-17, Lamar ruled out: "shouldn't his projection tile read Out"): the tile leads
     // with that, his if-active points below; the sheet keeps the full projection, marked "(if active)"
-    const projBig = ia >= 0.5
+    const actTone = actPct == null ? '' : actPct >= 80 ? 'good' : actPct <= 30 ? 'bad' : 'mid';
+    const projBig = actV != null
+      ? `<div class="pc-big ${actTone}"><span class="pv-tag">${actLive ? '<span class="live-dot"></span>live' : 'final'}</span>${f1(actV)} <small>pts</small></div><div class="pc-tapsub">proj <b class="pv-pj">${f1(s.proj)}</b> ${rankPill}</div>`
+      : ia >= 0.5
       ? `<div class="pc-big bad">${ia >= 0.95 ? 'Out' : 'Likely out'}</div><div class="pc-tapsub">${f1(s.proj)} pts if he plays${ia < 0.95 ? ` · ${NFLE.fmt.toPlay(ia)} to play` : ''}</div>`
       : `<div class="pc-big">${f1(s.proj)} <small>pts</small></div><div class="pc-tapsub">${rankPill}${risk}</div>`;
     const e = p.ext || {}, fpg = p.sc.ss && p.sc.g ? pts(p.sc.ss, w, p.pos) / p.sc.g : null;
     const html = `
-      ${now}
       <div class="pc-tiles">
-        ${tapTile('Projection', projBig, `${wkLabel(d)} projection`,
-            projDetail + muDetail.replace('<div class="pc-box">', '<div class="pc-box"><div class="pc-k">Matchup effect</div>'))}
+        ${tapTile(actV != null ? 'Points' : 'Projection', projBig, `${wkLabel(d)} ${actV != null ? 'points' : 'projection'}`,
+            now + projDetail.replace(rangeSvg(s.q, s.proj), rangeSvg(s.q, s.proj, actV)) + muDetail.replace('<div class="pc-box">', '<div class="pc-box"><div class="pc-k">Matchup effect</div>'))}
         ${formTile(L, p.pos, fpg, e.games || p.sc.g, `${d.season} season before week ${d.week}`, `<div class="pc-box pc-season">${seasonHtml(p, d, L)}</div>`)}
         ${d === DATA ? healthTile(pid, p, L, p.espn) : ''}
         ${GRADED[p.pos] ? gradeTile(pid, L) : ''}
