@@ -793,4 +793,18 @@ table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; tex
   margin-bottom: -12px; align-self: flex-end; }
 #tab-page .pc-page .pc-head .pc-pic img { border-radius: 0; object-fit: contain; object-position: center bottom; }
 #tab-page .pc-page .pc-head .pc-pic-tm { display: none; }
-#tab-page .pc-page .pc-head .pc-hero-lg { left: -22px; right: auto; width: 150px; opacity: .14; }
+
+/* Player page header tinted in the team's primary color (owner 2026-10-16): strongest behind the headshot, fading to
+   the card on the right so the name stays crisp; opaque, since the header is sticky. */
+#tab-page .pc-page .pc-head.pc-head-hero {
+  background: linear-gradient(100deg, color-mix(in srgb, var(--tc) 55%, var(--panel)) 0%,
+    color-mix(in srgb, var(--tc) 22%, var(--panel)) 55%, var(--panel) 100%); }
+
+/* bigger, more centered logo (owner 2026-10-16): a slightly taller header lets it grow without cropping */
+#tab-page .pc-page .pc-head.pc-head-hero { min-height: 108px; }
+#tab-page .pc-page .pc-head .pc-pic { width: 100px; height: 88px; margin-left: 14px; }
+
+/* the team logo is drawn by the photo itself, so it is always centered on the player (owner 2026-10-16) */
+#tab-page .pc-page .pc-head .pc-pic { overflow: visible; isolation: isolate; }
+#tab-page .pc-page .pc-head .pc-pic::before { content: ""; position: absolute; z-index: -1; left: 50%; bottom: 2px; width: 170px;
+  height: 100px; transform: translateX(-50%); background: var(--tlogo) center / contain no-repeat; opacity: .2; pointer-events: none; }

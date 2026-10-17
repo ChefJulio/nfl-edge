@@ -52,8 +52,8 @@ html.pc-open { overflow: visible; }
    on the card: a hidden overflow makes the card its own scroll box, and a sticky child would never stick. */
 #tab-page .pc-page, #tab-page .pc-page .pc { overflow: clip; }  /* the page container kept the overlay's scroll box */
 #tab-page .pc-page .pc-head { position: sticky; top: var(--navh, 0px); z-index: 6; background: var(--panel);
-  margin: -6px -18px 12px; padding: 10px 52px 10px 18px; }
-@media (max-width: 560px) { #tab-page .pc-page .pc-head { margin: -6px -14px 12px; padding: 8px 48px 8px 14px; } }
+  margin: -18px -18px 12px; padding: 22px 52px 10px 18px; }  /* flush with the card's top edge: tints fill its rounded corners */
+@media (max-width: 560px) { #tab-page .pc-page .pc-head { margin: -14px -14px 12px; padding: 16px 48px 8px 14px; } }
 #tab-page .pc-x { display: none; }
 .crumbs { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: var(--fs-md); margin: 0 0 12px; color: var(--muted); }
 .crumbs a { color: var(--muted); text-decoration: none; } .crumbs a:hover { color: var(--ink); }

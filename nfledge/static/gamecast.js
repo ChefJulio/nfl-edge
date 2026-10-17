@@ -1204,8 +1204,7 @@
       : `<div class="pc-cols"><div class="pc-col">${d === undefined || d === null ? wkWait(d) : p ? playerWeek(pid, p, d, L) : playerOff(L, d)}${profileBox(L)}</div>
          <div class="pc-col">${weekExtras(pid, L, p || row, espn)}<div class="pc-pen"></div></div></div>`;
     body.innerHTML = `
-      <div class="pc-head" style="--tc:${esc(info.color || '#666')};--tc2:${esc(info.color2 || info.color || '#999')}">
-        ${info.logo ? `<span class="pc-hero-lg" style="background-image:url('${esc(logoSrc(info.logo, 300))}')" aria-hidden="true"></span>` : ''}
+      <div class="pc-head pc-head-hero" style="--tc:${esc(info.color || '#666')};--tc2:${esc(info.color2 || info.color || '#999')}${info.logo ? `;--tlogo:url('${esc(logoSrc(info.logo, 300))}')` : ''}">
         ${photo ? `<div class="pc-pic" data-zoom="${esc(uncrop(photoBig(L, espn) || photo))}" role="button" tabindex="0" aria-label="Show a bigger photo"><img src="${esc(photo)}" alt="" width="72" height="72" loading="lazy" onerror="this.parentNode.classList.add('nopic')">${team ? `<span class="pc-pic-tm">${tLogo(team, 16)}</span>` : ''}</div>`
           : team ? tmL(team, tLogo(team, 34)) : ''}
         <div class="pc-id"><h3 id="pcName">${num != null ? `<span class="pc-num">#${esc(num)}</span>` : ''}${esc(name)}</h3>
