@@ -491,6 +491,7 @@ class PlayerModel:
     L = self.ledger[self.ledger.season.isin(seasons) & ~self.ledger.excluded]
     self._feat_cache = {}  # features depend on the priors
     mu, mu_pos, k = {}, {}, {}
+    self.k_raw = {}
     for opp, (_, unit, comps) in OPP_TYPES.items():
       d = L[L[opp] > 0].copy()
       d["grp"] = pos_group(opp, d.pos).to_numpy()
@@ -517,8 +518,11 @@ class PlayerModel:
           grand = np.average(m, weights=n)
           var_between = np.average((m - grand) ** 2, weights=n)
           tau2 = var_between - sigma2 * np.mean(1.0 / n)
-          kk = sigma2 / tau2 if tau2 > 0 else 2000.0
-          k[(opp, grp, c)] = float(np.clip(kk, 5.0, 2000.0))
+          kk = sigma2 / tau2 if tau2 > 0 else float("inf")  # tau2 <= 0: no between-player spread measured
+          self.k_raw[(opp, grp, c)] = kk  # diagnostics (docs/handset_audit.md #8): how often the bounds bind
+          # upper bound: binds for 9-15 of 22 cells (most with no measurable between-player spread, k = inf), so it
+          # sets how much a player's own rate counts there (INSIGHTS (AJ); player_model.shrink_k_max, default 2000)
+          k[(opp, grp, c)] = float(np.clip(kk, 5.0, float(self.pcfg.get("shrink_k_max", 2000.0))))
     self.prior = Prior(mu, mu_pos, k)
     self._fit_minor_priors(L)
     return self.prior

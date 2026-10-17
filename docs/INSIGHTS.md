@@ -2271,6 +2271,18 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   tools/grid_eval.py. Choose 2021-23 vs 0.5: .3 +0.0005, .4 +0.0002, .6 -0.0001, .7 -0.0002 [-0.0013, +0.0008] (chosen).
   Decide 2024-25 (.7): +0.0014 [+0.0004, +0.0026], worse both seasons (WR +0.0026); 2026 so far -0.0016. The
   multiplier is flat near 0.5 and a weaker cut is worse later. docs/handset_audit.md #7.
+- **DESCRIPTIVE 2026-10-17 (docs/handset_audit.md #8, count first): the shrinkage bounds.** Player efficiency rates are
+  shrunk toward position x draft-tier means with strength k (pseudo-opportunities) by method of moments, clipped to
+  [5, 2000]. scratch/kbind.py, models trained for 2022 and 2025: of 22 rate cells, the lower bound never binds; the
+  UPPER binds in 15 (2022) and 9 (2025), mostly where no between-player spread is measurable (tau2 <= 0, k = inf: RB
+  rush yards / TDs / adjusted EPA per carry, RB receiving per target, TE receiving TDs, QB INT rate), else 2,100-3,500.
+  Finite k: median 414 (2022) / 238 (2025). So the cap alone sets how much a player's own history counts in those
+  rates (200 carries: 200 / 2,200 = 9% own).
+- **PRE-REGISTERED 2026-10-17 (before running): (AJ) the shrinkage cap.** player_model.shrink_k_max: grid {500, 1000,
+  2000 (today), 5000, 100000 (~ the prior alone)}. tools/experiments.py 2021-2026 (variants kmax_*), tools/grid_eval.py:
+  CHOOSE the lowest fantasy MAE (relevant rows) on 2021-23; DECIDE on 2024-25 (CI excluding 0 below, better in both,
+  no position significantly worse, start / sit not significantly worse); CONFIRM 2026 so far, same direction. Today's
+  the choice -> keep. The lower bound (never binds) and the 100 fallback are left as they are.
 - **PRE-REGISTERED 2026-10-17 (owner, Jalen Hurts ruled out with a blood clot shows 99% for week 7; "at your
   discretion"): (AH) the lookahead chain for newly injured players.** Today a player on this week's report who played
   his team's last game (no return-model state yet) counts as fully available from next week on. (B) of 2026-10-15

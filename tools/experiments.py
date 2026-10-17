@@ -121,6 +121,8 @@ VARIANTS = {
   **{f"minshare_{int(t * 100)}_{int(c * 100)}": variant(injuries__redistribute_min_share={"tgt_share": t, "carry_share": c})
      for t in (0.04, 0.06, 0.08, 0.12) for c in (0.08, 0.15, 0.25) if (t, c) != (0.08, 0.15)},
   "newcomer_05": variant(experiments__newcomer_scale=0.5),
+  # (AJ) the shrinkage cap (INSIGHTS, pre-registered 2026-10-17); today 2000
+  **{f"kmax_{int(k)}": variant(player_model__shrink_k_max=k) for k in (500, 1000, 5000, 100000)},
   # (AI) the newcomer multiplier grid (INSIGHTS, pre-registered 2026-10-17); today 0.5
   **{f"newcomer_s{int(x * 10)}": variant(experiments__newcomer_scale=x) for x in (0.3, 0.4, 0.6, 0.7)},
   "ecr_blend_all": variant(experiments__ecr_blend_positions=["QB", "RB", "WR", "TE"]),
