@@ -6,7 +6,7 @@
 /* Theme tokens, focus ring and motion live in ui.css (loaded by every page, game.html too). */
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 var(--font);
+body { margin: 0; background: var(--bg); color: var(--ink); font: var(--fs-base)/1.45 var(--font);
        font-feature-settings: "tnum" 1, "cv11" 1; -webkit-font-smoothing: antialiased; }
 a { color: var(--accent); }
 .wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }  /* one centered column for every page (gamecast too) */

@@ -5,7 +5,7 @@
 /* Dark only, whatever the device setting (owner's call). */
 /* (theme tokens: ui.css :root, shared with the week pages) */
 .gc-page { margin: 0; background: var(--bg); color: var(--ink); -webkit-text-size-adjust: 100%;
-  font: 14px/1.45 var(--font);
+  font: var(--fs-base)/1.45 var(--font);
   font-feature-settings: "tnum" 1; -webkit-font-smoothing: antialiased; }
 .gc-page *, .pc-ov * { box-sizing: border-box; }
 .gc-page a { color: var(--accent); }

@@ -104,3 +104,9 @@ button:active:not(:disabled), a.mt:active, .chip:active, .sbtn:active, [data-ope
   background: linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent); animation: skel 1.3s ease-in-out infinite; }
 .skel-zone.sm:empty { min-height: 156px; }
 @keyframes skel { to { transform: translateX(100%); } }
+
+/* Wide screens read at desktop distance: the whole type scale one step up (second visual audit; phones unchanged) */
+@media (min-width: 1100px) { :root { --fs-2xs: 11px; --fs-xs: 12px; --fs-sm: 13px; --fs-md: 14px; --fs-base: 15px; --fs-lg: 17px; } }
+/* ...except Power's 16-column table, which needs the phone scale to fit the 1280 column without scrolling */
+@media (min-width: 1100px) { table.power { --fs-2xs: 10px; --fs-xs: 11px; --fs-sm: 12px; --fs-md: 13px; --fs-base: 14px; font-size: 14px; }
+  table.dt.power td, table.dt.power th { padding-left: 6px; padding-right: 6px; } table.power .rk-b { min-width: 30px; padding: 0 4px; } }
