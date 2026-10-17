@@ -124,17 +124,17 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-05T04:04Z,,,,,,McMillan caught 14 of 16 targets for 192 yards and two touchdowns in Sunday's 32-26 win over the Lions.
 4428993,Haynes King,Carolina Panthers,Active,2026-10-04T23:08Z,,,,,,King (coach's decision) is inactive but will operate as the Panthers' emergency third quarterback Sunday night versus Detroit.
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
+4242659,Dayo Odeyingbo,Chicago Bears,Out,2026-10-17T01:05Z,Quadriceps,Not Specified,Not Specified,2026-10-22,OUT,Odeyingbo (quadriceps) has been ruled out for Sunday's game against the Falcons.
 4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-17T01:01Z,Undisclosed,,,2026-10-18,IR,ir
+4361093,Kyler Gordon,Chicago Bears,Out,2026-10-17T01:01Z,Calf,Not Specified,Not Specified,2026-10-18,PUP-R,Gordon (calf) is listed as questionable for Sunday's game against the Falcons.
 4426374,Tyrique Stevenson Sr.,Chicago Bears,Questionable,2026-10-17T00:59Z,Hip,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Stevenson (hip) is questionable for Sunday's game against the Falcons.
 3121544,T.J. Edwards,Chicago Bears,Out,2026-10-17T00:52Z,Hamstring,Not Specified,Not Specified,2026-10-22,OUT,Edwards (hamstring) has been ruled out for Sunday's game against the Falcons.
 4259545,D'Andre Swift,Chicago Bears,Active,2026-10-16T23:44Z,,,,,,"Swift will once again absorb a heavier backfield workload after Kyle Monangai (thumb/toe) was ruled out for Sunday's game against the Falcons, Larry Mayer of the Bears' official site reports."
 15168,Case Keenum,Chicago Bears,Active,2026-10-16T23:40Z,,,,,,"Caleb Williams (hamstring) is listed as questionable for Sunday's game against Atlanta, but if he's not given the green light to return, then it's unclear whether Keenum or Tyson Bagent starts under center for Chicago, Larry Mayer of the Bears' official site reports."
 4434153,Tyson Bagent,Chicago Bears,Active,2026-10-16T23:33Z,,,,,,"Whether Bagent starts or serves in a backup role against the Falcons on Sunday depends largely on whether Caleb William (hamstring) is cleared to return from a three-game absence, Larry Mayer of the Bears' official site reports."
-4242659,Dayo Odeyingbo,Chicago Bears,Out,2026-10-16T19:13Z,Quadriceps,Not Specified,Not Specified,2026-10-22,OUT,out
 4911952,Keyshaun Elliott,Chicago Bears,Out,2026-10-16T19:13Z,Quadriceps,Not Specified,Not Specified,2026-10-22,OUT,out
 4608686,Kyle Monangai,Chicago Bears,Out,2026-10-16T19:09Z,Toe,Sprain,Not Specified,2026-10-22,OUT,Monangai (thumb/toe) was ruled out for Sunday's game in Atlanta.
 4431611,Caleb Williams,Chicago Bears,Questionable,2026-10-16T19:03Z,Hamstring,Strain,Right,2026-10-18,QUESTIONABLE,Williams (hamstring) is listed as questionable for Sunday's game against Atlanta.
-4361093,Kyler Gordon,Chicago Bears,Out,2026-10-15T00:36Z,Calf,Not Specified,Not Specified,2026-10-18,PUP-R,Gordon (calf) was estimated as a full participant on the Bears' official injury report Wednesday.
 4432804,Shemar Turner,Chicago Bears,Active,2026-10-14T01:37Z,,,,,,The Bears activated Turner (knee) from their reserve/PUP list Tuesday.
 2973405,Kalif Raymond,Chicago Bears,Active,2026-10-13T23:34Z,,,,,,Raymond caught three of four passes for six yards and logged one carry for minus-2 yards during the Bears' 31-7 loss to the Packers on Sunday. He also returned one punt for nine yards.
 3134690,Montez Sweat,Chicago Bears,Suspension,2026-10-13T20:16Z,Suspension,Not Specified,Not Specified,2026-11-02,RESERVE-SUS,"The NFL announced Tuesday that Sweat has been suspended two games without pay for violating the league's performance-enhancing substances policy, Brad Biggs of the Chicago Tribune reports."
@@ -224,8 +224,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2577417,Dak Prescott,Dallas Cowboys,Active,2026-10-09T03:56Z,,,,,,Prescott completed 24 of 42 passes for 316 yards with a touchdown and two interceptions in the Cowboys' 24-16 loss to the Buccaneers on Thursday night.
 4361579,Javonte Williams,Dallas Cowboys,Active,2026-10-09T03:49Z,,,,,,Williams rushed 12 times for 45 yards and a touchdown and brought in two of three targets for 17 yards in the Cowboys' 24-16 loss to the Buccaneers on Thursday night.
 4568652,Tyler Smith,Dallas Cowboys,Active,2026-10-08T23:09Z,,,,,,"Smith (thumb) is active for Thursday's game against the Buccaneers, Patrik Walker of the Cowboys' official site reports."
+4040608,Jonathon Cooper,Denver Broncos,Active,2026-10-17T01:11Z,,,,,,"Cooper (personal) was reinstated from the Commissioner Exempt List on Friday, Tom Pelissero of Netflix reports."
 3051876,Evan Engram,Denver Broncos,Active,2026-10-17T00:43Z,,,,,,Engram caught both targets for 13 yards in Denver's 17-14 overtime win over the Seahawks on Thursday night.
-4040608,Jonathon Cooper,Denver Broncos,Active,2026-10-16T19:45Z,,,,,,
 3128429,Courtland Sutton,Denver Broncos,Active,2026-10-16T05:04Z,,,,,,Sutton brought in two of three targets for 19 yards in the Broncos' 17-14 overtime win over the Seahawks on Thursday.
 4372016,Jaylen Waddle,Denver Broncos,Active,2026-10-16T04:58Z,,,,,,Waddle secured four of seven targets for 24 yards in the Broncos' 17-14 overtime win over the Seahawks on Thursday.
 4426338,Bo Nix,Denver Broncos,Active,2026-10-16T04:54Z,,,,,,Nix completed 17 of 27 passes for 107 yards with no touchdowns or interceptions and rushed four times for two yards in the Broncos' 17-14 overtime win over the Seahawks on Thursday. He also recovered a fumble.
@@ -324,6 +324,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686422,Xavier Hutchinson,Houston Texans,Active,2026-10-12T04:08Z,,,,,,Hutchinson caught four of five targets for 65 yards in Sunday's 26-3 win over the Titans.
 4586312,Jaylin Noel,Houston Texans,Active,2026-10-12T01:20Z,,,,,,Noel caught all five of his targets for 41 yards and a touchdown during Sunday's 26-3 win over Tennessee.
 4432577,C.J. Stroud,Houston Texans,Active,2026-10-11T23:04Z,,,,,,Stroud completed 26 of 34 passes for 261 yards and a touchdown in Sunday's 26-3 win over the Titans. He added five rushing yards and a TD on six carries.
+4362523,Will Mallory,Indianapolis Colts,Injured Reserve,2026-10-17T01:17Z,Thumb,Not Specified,Not Specified,2026-10-18,IR-R,Mallory (thumb) is listed as questionable for Sunday's game against the Titans.
 4061956,Ashton Dulin,Indianapolis Colts,Out,2026-10-16T23:40Z,Hamstring,Not Specified,Not Specified,2026-10-25,OUT,"Dulin (hamstring) has been ruled out ahead of Sunday's game against the Titans, Joel A. Erickson of The Indianapolis Star reports."
 4892240,Jalen Travis,Indianapolis Colts,Active,2026-10-16T20:10Z,,,,,,
 4431459,Tyler Warren,Indianapolis Colts,Questionable,2026-10-16T19:57Z,Groin,,,2026-10-18,QUESTIONABLE,Warren (groin) is listed as questionable for Sunday's game against the Titans after being added to the practice report Friday as a limited participant.
@@ -341,7 +342,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242335,Jonathan Taylor,Indianapolis Colts,Active,2026-10-11T23:41Z,,,,,,Taylor carried the ball 15 times for 45 yards and caught three of four targets for 37 yards in Sunday's 34-22 loss to Pittsburgh.
 4037361,Charvarius Ward,Indianapolis Colts,Active,2026-10-11T16:07Z,,,,,,Ward (groin) is active for Sunday's game against Pittsburgh.
 3843843,Arden Key,Indianapolis Colts,Injured Reserve,2026-10-10T17:51Z,Hamstring,Not Specified,Not Specified,2026-11-08,IR,The Colts placed Key (hamstring) on injured reserve Saturday.
-4362523,Will Mallory,Indianapolis Colts,Injured Reserve,2026-10-09T23:56Z,Thumb,Not Specified,Not Specified,2026-10-18,IR-R,Mallory (thumb) has been ruled out ahead of Sunday's game against the Steelers.
 4430957,Tanor Bortolini,Indianapolis Colts,Active,2026-10-09T19:55Z,,,,,,
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Active,2026-10-08T23:25Z,,,,,,Davis-Gaither (knee) was a full participant at practice Thursday.
 4682909,Justin Walley,Indianapolis Colts,Active,2026-10-07T02:34Z,,,,,,"Walley recorded eight tackles (five solo), including 1.0 sacks, during the Colts' 30-13 win over the Commanders on Sunday in London."
@@ -724,15 +724,15 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4592823,Beau Stephens,Seattle Seahawks,Active,2026-10-14T00:01Z,,,,,,
 4597703,Tory Horton,Seattle Seahawks,Active,2026-10-13T01:33Z,,,,,,Horton did not draw any targets during Sunday's 32-29 loss versus the 49ers.
 4569547,Nick Kallerup,Seattle Seahawks,Active,2026-10-12T19:38Z,,,,,,
+3871102,David Sills V,Tampa Bay Buccaneers,Injured Reserve,2026-10-17T01:18Z,Hamstring,Not Specified,Not Specified,2026-10-18,IR-R,Sills (hamstring) is listed as questionable for Sunday's game against the Steelers.
+4816107,Benjamin Morrison,Tampa Bay Buccaneers,Doubtful,2026-10-17T01:10Z,Quadriceps,Not Specified,Not Specified,2026-10-18,DOUBTFUL,Morrison (quadriceps) is listed as doubtful for Sunday's game against the Steelers.
 4870998,Josiah Trotter,Tampa Bay Buccaneers,Questionable,2026-10-17T01:01Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Trotter (knee) is listed as questionable for Sunday's game against the Steelers.
 4596472,Jalon Daniels,Tampa Bay Buccaneers,Active,2026-10-17T00:10Z,,,,,,Daniels will be the Buccaneers' starting quarterback against the Steelers after Baker Mayfield (right thumb) was ruled out.
 4034790,Antoine Winfield Jr.,Tampa Bay Buccaneers,Out,2026-10-16T23:26Z,Ribs,Fracture,Not Specified,2026-10-25,OUT,"Winfield (ribs) has been ruled out ahead of Sunday's game against the Steelers, Brianna Dix of the Buccaneers' official site reports."
 4430871,Sean Tucker,Tampa Bay Buccaneers,Questionable,2026-10-16T20:57Z,Quadriceps,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Tucker (quadriceps) is listed as questionable and considered a game-time decision for Sunday's matchup with Pittsburgh, Brianna Dix of the Buccaneers' official site reports."
-4816107,Benjamin Morrison,Tampa Bay Buccaneers,Doubtful,2026-10-16T19:22Z,Quadriceps,Not Specified,Not Specified,2026-10-18,DOUBTFUL,doubtful
 3052587,Baker Mayfield,Tampa Bay Buccaneers,Out,2026-10-16T17:07Z,Thumb,Dislocated,Right,2026-10-25,OUT,"Mayfield (thumb) will not play Sunday, Brianna Dix of the Buccaneers' official site reports."
 4890885,Ayden Garnes,Tampa Bay Buccaneers,Questionable,2026-10-14T20:48Z,Ankle,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4429511,SirVocea Dennis,Tampa Bay Buccaneers,Questionable,2026-10-13T17:10Z,Ankle,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
-3871102,David Sills V,Tampa Bay Buccaneers,Injured Reserve,2026-10-12T23:06Z,Hamstring,Not Specified,Not Specified,2026-10-18,IR-R,"Sills (hamstring) had his 21-day practice window opened by the Buccaneers on Monday, Scott Smith &amp; Brianna Dix of the team's official website reports."
 4686884,Luke Haggard,Tampa Bay Buccaneers,Active,2026-10-12T19:43Z,,,,,,
 4685549,Billy Schrauth,Tampa Bay Buccaneers,Active,2026-10-12T19:43Z,,,,,,
 4429007,DeMonte Capehart,Tampa Bay Buccaneers,Active,2026-10-12T19:43Z,,,,,,
