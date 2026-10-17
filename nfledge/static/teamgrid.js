@@ -29,7 +29,21 @@
       <img class="tg-lg" src="${esc(NFLE.fmt.logoSrc(i.logo, 224))}" alt="" loading="lazy">
       <span class="tg-txt"><span class="tg-nm"><img class="tg-wm" src="${esc(NFLE.root || '')}assets/wordmarks/${esc(t)}.png" alt="${esc(i.nick || t)}"
         onerror="this.parentNode.textContent = this.alt"></span>
-        <span class="tg-meta"><b>${esc(p.record || '0-0')}</b>${p.rank ? `<span class="tg-rk" title="Our Power rank">Power #${p.rank}</span>` : ''}</span></span></button>`;
+        <span class="tg-meta"><b>${esc(p.record || '0-0')}</b>${p.rank ? `<span class="tg-rk" title="Our Power rank">Power #${p.rank}</span>` : ''}</span></span>
+      <span class="tg-mini"><b>${esc(p.record || '0-0')}</b>${p.rank ? `<i title="Our Power rank">#${p.rank}</i>` : ''}</span></button>`;
+  // phones (owner 2026-10-17, "all teams visible on the immediate screen without scrolling"; the previous layout is
+  // git tag teamgrid-v1, docs/archive/teamgrid-v1): a division per row, four logo tiles across, the row height sized so
+  // all eight rows fit between the grid's top and the bottom bar
+  const PHONE = matchMedia('(max-width: 600px)');
+  const fit = sec => {
+    const g = sec.querySelector('.tg-confs'); if (!g) return;
+    if (!PHONE.matches || !sec.offsetParent) { g.style.removeProperty('--tgr'); return; }
+    const bar = document.querySelector('.botbar'), bottom = bar && bar.getClientRects().length ? bar.getBoundingClientRect().top : innerHeight;
+    const top = g.getBoundingClientRect().top + scrollY;  // as laid out at the top of the page
+    g.style.setProperty('--tgr', '50px');
+    const extra = bottom - 8 - top - g.getBoundingClientRect().height;
+    g.style.setProperty('--tgr', `${Math.max(32, Math.min(84, 50 + extra / 8))}px`);
+  };
   NFLE.areas.teamgrid = {
     mount(sec) {
       sec.classList.remove('soon');
@@ -39,11 +53,15 @@
         const conf = c => `<div class="tg-conf"><h3 class="tg-ch">${c}</h3>${DIVS.map(dv => {
           const ts = Object.keys(teams).filter(t => teams[t].division === `${c} ${dv}`)
             .sort((a, b) => winPct((power[b] || {}).record) - winPct((power[a] || {}).record) || ((power[a] || {}).rank || 99) - ((power[b] || {}).rank || 99));
-          return ts.length ? `<div class="tg-div"><h4 class="tg-dh">${c} ${dv}</h4><div class="tg-grid">${ts.map(t => tile(t, teams[t], power[t] || {})).join('')}</div></div>` : '';
+          return ts.length ? `<div class="tg-div"><h4 class="tg-dh"><span class="tg-dc">${c} </span>${dv}</h4><div class="tg-grid">${ts.map(t => tile(t, teams[t], power[t] || {})).join('')}</div></div>` : '';
         }).join('')}</div>`;
         const body = sec.querySelector('.tg-body');
         body.classList.remove('skel-zone');
         body.innerHTML = Object.keys(teams).length ? `<div class="tg-confs">${conf('AFC')}${conf('NFC')}</div>` : '<p class="muted">Team data is not available on this page.</p>';
+        fit(sec);
+        if (!sec._tgFit) { sec._tgFit = 1; const re = () => requestAnimationFrame(() => fit(sec));
+          addEventListener('resize', re); PHONE.addEventListener('change', re);
+          new MutationObserver(re).observe(sec, { attributes: true, attributeFilter: ['hidden', 'class'] }); }
       });
     },
   };

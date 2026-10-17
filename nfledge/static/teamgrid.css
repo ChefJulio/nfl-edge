@@ -41,3 +41,24 @@
 /* the wordmark's trim and shadow reach past the image's edges: the name box no longer clips them (owner 2026-10-17,
    the Dolphins' cut-off shadow); only the typed-name fallback still truncates with an ellipsis */
 .tg-nm:has(.tg-wm) { overflow: visible; }
+
+/* phones (owner 2026-10-17): all 32 on one screen. A division per row (its name turned sideways at the left), four
+   logo tiles across with record and Power rank; --tgr (row height) is set by teamgrid.js to fill the screen */
+.tg-mini { display: none; }
+@media (max-width: 600px) {
+  #tab-teams-all .sec-head { display: none; }
+  .tg-confs { gap: 8px; }
+  .tg-ch { margin: 0 2px 4px; font-size: var(--fs-sm); letter-spacing: .04em; }
+  .tg-div { display: grid; grid-template-columns: 14px 1fr; gap: 4px; margin-bottom: 4px; }
+  .tg-dh { margin: 0; writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; font-size: 9px; letter-spacing: .1em; }
+  .tg-dc { display: none; }
+  .tg-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+  .tg-tile { flex-direction: column; justify-content: center; gap: 1px; min-height: 0; height: var(--tgr, 56px); padding: 3px 2px;
+    border-radius: 10px; box-shadow: none;
+    background: linear-gradient(170deg, color-mix(in srgb, var(--tc) 55%, #0d0f13) 0%, color-mix(in srgb, var(--tc) 22%, #0d0f13) 100%); }
+  .tg-txt { display: none; }
+  .tg-lg { order: 0; width: calc(var(--tgr, 56px) - 18px); height: calc(var(--tgr, 56px) - 18px); max-width: 80%; }
+  .tg-mini { display: flex; gap: 4px; align-items: baseline; font-size: 11px; line-height: 1; white-space: nowrap; }
+  .tg-mini b { font-weight: 800; font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+  .tg-mini i { font-style: normal; font-weight: 600; color: rgba(255,255,255,.62); }
+}
