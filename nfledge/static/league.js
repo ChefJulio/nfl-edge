@@ -120,10 +120,13 @@
       return {
         platform: 'sleeper', id, name: lg.name, season: lg.season, week, kw, dw, unmodeled,
         slots: (lg.roster_positions || []).filter(s => !['BN', 'IR', 'TAXI'].includes(s)),
+        size: (lg.roster_positions || []).filter(s => !['IR', 'TAXI'].includes(s)).length,  // starters + bench
         scoring,
         teams: (rosters || []).map(r => { const st = r.settings || {};
           return { id: String(r.roster_id), owner: r.owner_id, name: uName[r.owner_id] || `Team ${r.roster_id}`,
                    ext: (r.players || []).map(String), starters: (r.starters || []).map(String),
+                   ir: [...(r.reserve || []), ...(r.taxi || [])].map(String),  // not on the bench count
+                   waiver: st.waiver_position || null, faab: lg.settings && lg.settings.waiver_type === 2 ? (lg.settings.waiver_budget || 0) - (st.waiver_budget_used || 0) : null,
                    record: { w: st.wins || 0, l: st.losses || 0, t: st.ties || 0, pf: (st.fpts || 0) + (st.fpts_decimal || 0) / 100 } }; }),
         matchup(teamId) {
           const me = byRoster[teamId];
@@ -164,12 +167,14 @@
         const starters = slots.map(sl => { const i = left.findIndex(e => ESPN_SLOT[e.lineupSlotId] === sl); return i < 0 ? '' : String(left.splice(i, 1)[0].playerId); });
         const ov = ((t.record || {}).overall) || {};
         return { id: String(t.id), owner: (t.owners || [])[0], name: t.name || `${t.location || ''} ${t.nickname || ''}`.trim(),
-                 ext: entries.map(e => String(e.playerId)), starters,
+                 ext: entries.map(e => String(e.playerId)), starters, ir: entries.filter(e => e.lineupSlotId === 21).map(e => String(e.playerId)),
+                 waiver: t.waiverRank || null, faab: (st.acquisitionSettings || {}).isUsingAcquisitionBudget ? ((st.acquisitionSettings || {}).acquisitionBudget || 0) - ((t.transactionCounter || {}).acquisitionBudgetSpent || 0) : null,
                  record: { w: ov.wins || 0, l: ov.losses || 0, t: ov.ties || 0, pf: ov.pointsFor || 0 } };
       });
       const games = (d.schedule || []).filter(g => g.matchupPeriodId === week || (g.home && g.home.pointsByScoringPeriod && g.home.pointsByScoringPeriod[week] != null));
       return {
         platform: 'espn', id, name: st.name, season, week, slots, scoring, kw, dw, unmodeled, teams, espnNames: names,
+        size: Object.entries((st.rosterSettings || {}).lineupSlotCounts || {}).filter(([sid]) => +sid !== 21).reduce((t, [, n]) => t + n, 0),
         matchup(teamId) {
           const g = games.find(x => String((x.home || {}).teamId) === teamId || String((x.away || {}).teamId) === teamId);
           if (!g) return null;
@@ -214,18 +219,21 @@
       const dt = dstTeam(x);
       if (dt) {
         const v = KD ? dWeek(dt, KD.from) : null;
-        return { ext: x, name: `${(TEAMS[dt] || {}).nick || dt} D/ST`, pos: 'DEF', team: dt, proj: v ? v.pts : null, pa: v ? 1 : 0, exp: v ? v.pts : null,
+        return { ext: x, name: `${(TEAMS[dt] || {}).nick || dt} D/ST`, pos: 'DEF', team: dt, proj: v ? v.pts : null, pa: v ? 1 : 0, exp: v ? v.pts : null, locked: started(dt),
                  sd: 5.5, inactive: 0, opp: v ? v.opp : '', home: v ? (v.home ? 'vs' : '@') : '', why: v ? '' : 'on bye' };
       }
       const e = L.espnNames && L.espnNames[x], dst = /^[A-Z]{2,3}$/.test(x);
       return { ext: x, name: e ? e.name : (dst ? `${(TEAMS[x] || {}).nick || x} D/ST` : `Player ${x}`), pos: e ? e.pos : (dst ? 'DEF' : ''),
                team: dst ? x : '', proj: null, exp: null };
     };
+    // his game has kicked off this week: his lineup spot can't change (owner 2026-10-17: Sutton, locked after Thursday's
+    // game, was suggested off the bench)
+    const started = t => { const k = t && NFLE.fmt.kickoff(D.games, t); return k != null && Date.now() >= k; };
     const fromPid = (g, x) => {
       const p = D.players[g], nm = IDS.names[g];
       if (!p && KBY[g]) {  // a kicker: our kicking projection under this league's kicking settings
         const o = KBY[g], proj = kWeek(g, KD.from);
-        return { ext: x, pid: g, name: o.name, pos: 'K', team: o.team, proj, pa: proj == null ? 0 : 1, exp: proj, sd: 4.3, inactive: 0,
+        return { ext: x, pid: g, name: o.name, pos: 'K', team: o.team, proj, pa: proj == null ? 0 : 1, exp: proj, sd: 4.3, inactive: 0, locked: started(o.team),
                  why: proj == null ? 'on bye' : '' };
       }
       if (!p) return { ext: x, pid: g, name: nm ? nm[0] : g, pos: nm ? nm[1] : '', team: nm ? nm[2] : '', proj: null, exp: null, why: 'no projection this week (bye, out, or not on our board)' };
@@ -237,10 +245,11 @@
       // swing first (owner 2026-10-16: Coleman's projection assumes DJ Moore sits, not just Palmer)
       const conds = [p.cond, p.cond2].filter(Boolean).map(c => ({ name: c[0], pid: c[1], pSit: c[2], plays: c[3] * r, sits: c[4] * r }));
       return { ext: x, pid: g, name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, status: p.status, opp: p.opp, home: p.home,
-               proj, pa, exp: proj * pa, sd, inactive: p.inactive || 0, conds };
+               proj, pa, exp: proj * pa, sd, inactive: p.inactive || 0, conds, locked: started(p.team) };
     };
 
-    const last = n => String(n || '').split(' ').slice(-1)[0];  // "DJ Moore" -> "Moore"
+    // "DJ Moore" -> "Moore", "Chris Rodriguez Jr." -> "Rodriguez" (suffixes skipped)
+    const last = n => { const w = String(n || '').split(' ').filter(x => !/^(jr\.?|sr\.?|ii|iii|iv|v)$/i.test(x)); return w[w.length - 1] || n; };
 
     // the uncertain teammate's other world as a change to the shown projection (owner 2026-10-17: changes add up when
     // two teammates are uncertain, two totals don't); '' when it rounds to nothing
@@ -253,17 +262,21 @@
       return [des, days && `practice: ${days}`].filter(Boolean).join('; ') || 'injury report';
     };
     // ---- best lineup: fixed slots first (scarcest eligibility), then flex / superflex, by expected points -----------
+    // current: the lineup as set, aligned with slots. A player whose game has kicked off is locked: a starter keeps his
+    // slot, a bench player can't come in. Slots fill scarcest first; rows come back in the league's slot order (owner
+    // 2026-10-17: FLEX listed after D/ST was jarring).
     const optimize = (players, slots, current = []) => {
-      const pool = players.filter(p => p.exp != null).sort((a, b) => b.exp - a.exp), used = new Set(), out = [];
+      const res = slots.map(() => null), used = new Set();
+      current.forEach((p, i) => { if (p && p.locked && i < slots.length) { res[i] = p; used.add(p.ext); } });
+      const pool = players.filter(p => p.exp != null && !p.locked && !used.has(p.ext)).sort((a, b) => b.exp - a.exp);
       const keep = current.filter(p => p && p.exp == null && ['DEF', 'K'].includes(p.pos));  // on bye / not projected: as you set them
-      const order = [...slots].sort((a, b) => (ELIG[a] || []).length - (ELIG[b] || []).length);
-      order.forEach(s => {
-        const el = ELIG[s] || [], pick = pool.find(p => !used.has(p.ext) && el.includes(p.pos))
+      slots.map((s, i) => i).filter(i => !res[i]).sort((a, b) => (ELIG[slots[a]] || []).length - (ELIG[slots[b]] || []).length).forEach(i => {
+        const el = ELIG[slots[i]] || [], pick = pool.find(p => !used.has(p.ext) && el.includes(p.pos))
           || keep.find(p => !used.has(p.ext) && el.includes(p.pos));
         if (pick) used.add(pick.ext);
-        out.push({ slot: s, p: pick || null });
+        res[i] = pick || null;
       });
-      return out;
+      return slots.map((s, i) => ({ slot: s, p: res[i] }));
     };
     const total = rows => rows.reduce((t, r) => t + (r.p && r.p.exp != null ? r.p.exp : 0), 0);
     // Win-chance spread, correlation-aware (INSIGHTS thread 6, {#h2h-corr}; owner 2026-10-16: "we lean towards being
@@ -297,7 +310,8 @@
       const out = p.proj != null && p.inactive >= 0.05 && p.inactive < 0.99 ?  // ruled out: the O chip says it
         `<span class="lg-out${p.inactive >= 0.5 ? ' hi' : ''}" title="Chance he sits">${pct(p.inactive)} out</span>` : '';
       const conds = (p.conds || []).map(c => condTxt(c) && `<span class="lg-cond" title="${esc(`${f1(c.sits)} if ${c.name} sits, ${f1(c.plays)} if he plays`)}">${condTxt(c)}</span>`).join('');
-      const inner = NFLE.injTag(p.status || '') + out + conds;
+      const lock = p.locked ? '<span class="lg-lock" title="His game has kicked off: his spot is set">locked</span>' : '';
+      const inner = lock + NFLE.injTag(p.status || '') + out + conds;
       return inner ? `<div class="badges lg-badges">${inner}</div>` : '';
     };
     const row = (slot, p, extra = '', o = {}) => {
@@ -312,6 +326,19 @@
     const table = (body, head = '<th>Slot</th><th>Player</th><th class="num">Proj</th>') =>
       `<div class="lg-scroll"><table class="bx tiles lg-tbl"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
 
+    const movesCard = () => {
+      if (!ROS) { NFLE.load('data/ros.json').then(j => { ROS = j; if (view === 'lineup') draw(); }, () => {}); return '<div class="lg-mv lg-moves"><div class="muted">Checking the waiver wire…</div></div>'; }
+      const { moves, open } = movesFor();
+      const good = movePlan(3, 1);
+      const stream = moves.filter(m => !good.some(g => g.add.key === m.add.key || (m.drop != null && g.drop === m.drop)) && m.wk >= 0.5).sort((a, b) => b.wk - a.wk)[0];
+      const line = (m, big) => `<div class="lg-mv-row"><span class="lg-mv-k good">${big}</span><div>Add <b>${esc(m.add.name)}</b> <span class="muted">${esc(m.add.pos)}</span>${m.drop != null ? `, drop <b>${esc(dropName(m.drop))}</b>` : open ? ' <span class="muted">(open bench spot)</span>' : ''}
+          <div class="muted lg-mv-s">${m.ros >= 0.5 ? '+' : ''}${Math.round(m.ros)} rest of season · ${NFLE.fmt.signed1(m.wk)} this week</div></div></div>`;
+      const wv = mine.faab != null ? `$${mine.faab} FAAB left` : mine.waiver ? `you're #${mine.waiver} of ${L.teams.length} on waivers` : '';
+      return `<div class="lg-mv lg-moves"><div class="lg-mv-h">Waiver moves${wv ? ` <span class="muted lg-wv">${wv}</span>` : ''}</div>
+          ${good.length ? good.map(m => line(m, `+${Math.round(m.ros)}`)).join('') : '<div class="muted">No free agent improves your team over the rest of the season by our projections.</div>'}
+          ${stream ? `<div class="lg-mv-row"><span class="lg-mv-k good">Week</span><div>This week only: add <b>${esc(stream.add.name)}</b>${stream.drop != null ? `, drop <b>${esc(dropName(stream.drop))}</b>` : ''} <span class="muted">${NFLE.fmt.signed1(stream.wk)} this week</span></div></div>` : ''}
+          <div class="muted lg-mv-f">Gain = your best lineup each remaining week through ${ROS.through} with the move, summed. One QB, TE, K and D/ST is enough (moves there are upgrades); at least ${DEPTH_MIN} RBs and WRs stay. Trade value isn't counted.</div></div>`;
+    };
     const lineupView = () => {
       const ps = mine.ext.map(player), cur = new Set(mine.starters);
       const curStart = mine.starters.map(x => ps.find(p => p.ext === x));
@@ -363,7 +390,7 @@
           <div class="muted lg-mv-f">Best lineup: <b class="good">+${f1(gain)}</b> expected points.${unsure.length ? ' Inactives are posted 90 minutes before each kickoff.' : ''}</div></div>`;
       const unproj = curRows.filter(r => r.p && r.p.exp == null && r.slot !== 'DEF' && r.slot !== 'K').map(r => r.p);
       const bench = ps.filter(p => !bestSet.has(p.ext) && p.exp != null).sort((a, b) => b.exp - a.exp);
-      return `${swaps}${unproj.length ? `<p class="muted lg-note">Starting with no projection: ${unproj.map(p => `${esc(p.name)} (${esc(p.why || 'not projected')})`).join(', ')}.</p>` : ''}
+      return `${swaps}${movesCard()}${unproj.length ? `<p class="muted lg-note">Starting with no projection: ${unproj.map(p => `${esc(p.name)} (${esc(p.why || 'not projected')})`).join(', ')}.</p>` : ''}
         <h3 class="lg-h">Best lineup <span class="muted">${f1(total(best))} expected</span></h3>
         ${table(best.map(r => row(r.slot, r.p)).join(''))}
         <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') || '<tr><td colspan="3" class="muted">No projected bench players.</td></tr>')}
@@ -391,56 +418,125 @@
 
     const WHEAD = '<th>Player</th><th class="num">This wk</th><th class="num">ROS</th>';
     const waiversView = () => {
-      const rostered = new Set(L.teams.flatMap(t => t.ext.map(gsisOf).filter(Boolean)));
-      const rosByPid = {};
-      if (ROS) Object.entries(ROS.players).forEach(([pid, x]) => {
-        let t = 0; x.w.forEach(([wk, pa, mu, opp, home, line]) => { if (!(wk === ROS.from && x.k && Date.now() >= Date.parse(x.k))) t += pa * pts(line, L.scoring, x.pos); });
-        rosByPid[pid] = t;
-      });
-      const free = Object.entries(D.players).filter(([pid, p]) => !rostered.has(pid) && ['QB', 'RB', 'WR', 'TE'].includes(p.pos)).map(([pid]) => fromPid(pid, pid));
-      const byPos = ['QB', 'RB', 'WR', 'TE'].map(pos => {
-        const list = free.filter(p => p.pos === pos).map(p => Object.assign(p, { ros: rosByPid[p.pid] })).sort((x, y) => (y.ros ?? y.exp) - (x.ros ?? x.exp)).slice(0, 6);
-        return `<h3 class="lg-h">${pos}</h3>${table(list.map(p => row(pos, p, `<td class="num">${p.ros != null ? Math.round(p.ros) : ''}</td>`, { noSlot: true })).join('') || '<tr><td colspan="3" class="muted">None projected.</td></tr>',
-          WHEAD)}`;
-      }).join('');
-      const kFree = Object.entries(KBY).filter(([g]) => !rostered.has(g)).map(([g, o]) => {
-        const r = fromPid(g, g); r.ros = o.w.reduce((t, e) => t + kScore(e[2]), 0); return r; })
-        .sort((a, b) => b.ros - a.ros).slice(0, 6);
-      const rosteredD = new Set(L.teams.flatMap(t => t.ext.map(dstTeam).filter(Boolean)));
-      const dFree = KD && KD.dst ? Object.keys(KD.dst).filter(t => !rosteredD.has(t)).map(t => {
-        const r = player(L.platform === 'espn' ? String(-16000 - +(Object.entries(ESPN_TEAM).find(([, c]) => c === t) || [0])[0]) : t);
-        r.ros = KD.dst[t].w.reduce((a, e) => a + (dWeek(t, e[0]) || { pts: 0 }).pts, 0); return r; }).sort((a, b) => b.ros - a.ros).slice(0, 6) : [];
-      const dHtml = L.slots.includes('DEF') ? `<h3 class="lg-h">D/ST</h3>${table(dFree.map(p => row('DEF', p, `<td class="num">${Math.round(p.ros)}</td>`, { noSlot: true })).join(''),
-        WHEAD.replace('Player', 'Team'))}` : '';
-      const kHtml = L.slots.includes('K') ? `<h3 class="lg-h">K</h3>${table(kFree.map(p => row('K', p, `<td class="num">${Math.round(p.ros)}</td>`, { noSlot: true })).join(''), WHEAD)}` : '';
-      return `${kHtml ? '' : ''}<p class="muted lg-note">Unrostered in your league, best rest-of-season first (expected points through week 17 under your scoring).</p>${byPos}${kHtml}${dHtml}`;
+      if (!ROS) return '<p class="muted">Loading rest-of-season projections…</p>';
+      const { moves } = movesFor(), gain = Object.fromEntries(moves.map(m => [m.add.key, m]));
+      const forYou = p => { const m = gain[p.key];
+        return `<td class="num lg-gain ${m && m.ros > 0.5 ? 'good' : 'muted'}"${m ? ` title="${esc(`Add ${p.name}${m.drop != null ? `, drop ${dropName(m.drop)}` : ''}: ${m.ros >= 0 ? '+' : ''}${Math.round(m.ros)} rest of season, ${NFLE.fmt.signed1(m.wk)} this week`)}"` : ''}>${m ? `${m.ros >= 0.5 ? '+' : ''}${Math.round(m.ros)}` : ''}${m && m.drop != null && m.ros > 0.5 ? `<small>for ${esc(last(dropName(m.drop)))}</small>` : ''}</td>`; };
+      const fa = freeAgents();
+      const pick = pos => fa.filter(p => p.pos === pos).sort((a, b) => b.ros - a.ros).slice(0, MOVE_POOL)
+        .sort((a, b) => ((gain[b.key] || {}).ros ?? -1e9) - ((gain[a.key] || {}).ros ?? -1e9) || b.ros - a.ros).slice(0, 6);
+      const sect = (pos, label = pos) => { const list = pick(pos);
+        return list.length ? `<h3 class="lg-h">${label}</h3>${table(list.map(p => row(pos, p, `<td class="num">${Math.round(p.ros)}</td>${forYou(p)}`, { noSlot: true })).join(''),
+          (pos === 'DEF' ? WHEAD.replace('Player', 'Team') : WHEAD) + '<th class="num">For you</th>')}` : ''; };
+      return `<p class="muted lg-note">Unrostered in your league. ROS = his expected points through week ${ROS.through} under your scoring; For you = what adding him does to your team's best lineups through week ${ROS.through}, with the best drop. Each position's best ${MOVE_POOL} by ROS, most useful to you first.</p>
+        ${['QB', 'RB', 'WR', 'TE'].map(p => sect(p)).join('')}${L.slots.includes('K') ? sect('K') : ''}${L.slots.includes('DEF') ? sect('DEF', 'D/ST') : ''}`;
     };
+
+    // ---- rest-of-season value of a set of players: their best lineup each remaining week through 17, summed (ros.json:
+    // each week's projected line x his chance to play, so byes, injuries and returns count). Keys are platform ids, or
+    // 'g:<gsis>' / 'd:<team>' for free agents. Shared by the Teams view and Moves.
+    let WKC = new Map(), WKL = null;  // week value cache, per loaded league (its scoring)
+    const weekOf = (key, k) => {
+      if (WKL !== L) { WKC = new Map(); WKL = L; }
+      const ck = `${key}|${k}`;
+      if (WKC.has(ck)) return WKC.get(ck);
+      const g = key.startsWith('g:') ? key.slice(2) : key.startsWith('d:') ? null : gsisOf(key);
+      const dt = key.startsWith('d:') ? key.slice(2) : (!g && dstTeam(key));
+      let v = null;
+      if (dt) { const d = dWeek(dt, k); v = d ? { ext: key, pos: 'DEF', exp: d.pts } : null; }
+      else if (g && !ROS.players[g] && KBY[g]) { const e = kWeek(g, k); v = e == null ? null : { ext: key, pos: 'K', exp: e }; }
+      else if (g && ROS.players[g]) {
+        const r = ROS.players[g], e = r.w.find(z => z[0] === k);
+        v = !e || (k === ROS.from && r.k && Date.now() >= Date.parse(r.k)) ? null : { ext: key, pos: r.pos, exp: e[1] * pts(e[5], L.scoring, r.pos) };
+      }
+      WKC.set(ck, v);
+      return v;
+    };
+    const rosWeeks = () => { const w = []; for (let k = ROS.from; k <= ROS.through; k++) w.push(k); return w; };
+    const valueOf = (keys, weeks) => weeks.reduce((t, k) => t + total(optimize(keys.map(x => weekOf(x, k)).filter(Boolean), L.slots)), 0);
+    // Free agents with rest-of-season points (expected, under this league's scoring), best first per position
+    const freeAgents = () => {
+      const rostered = new Set(L.teams.flatMap(t => t.ext.map(gsisOf).filter(Boolean)));
+      const ros = g => rosWeeks().reduce((t, k) => t + ((weekOf(`g:${g}`, k) || {}).exp || 0), 0);
+      const out = Object.entries(D.players).filter(([pid, p]) => !rostered.has(pid) && ['QB', 'RB', 'WR', 'TE'].includes(p.pos))
+        .map(([pid]) => Object.assign(fromPid(pid, pid), { key: `g:${pid}`, ros: ros(pid) }));
+      if (L.slots.includes('K')) Object.entries(KBY).filter(([g]) => !rostered.has(g))
+        .forEach(([g]) => out.push(Object.assign(fromPid(g, g), { key: `g:${g}`, ros: ros(g) })));
+      const rosteredD = new Set(L.teams.flatMap(t => t.ext.map(dstTeam).filter(Boolean)));
+      if (L.slots.includes('DEF') && KD && KD.dst) Object.keys(KD.dst).filter(t => !rosteredD.has(t)).forEach(t => {
+        const r = player(L.platform === 'espn' ? String(-16000 - +(Object.entries(ESPN_TEAM).find(([, c]) => c === t) || [0])[0]) : t);
+        out.push(Object.assign(r, { key: `d:${t}`, ros: rosWeeks().reduce((a, k) => a + ((weekOf(`d:${t}`, k) || {}).exp || 0), 0) }));
+      });
+      return out;
+    };
+    // Moves (owner 2026-10-17: "pick this guy up off waivers and drop this guy"): for each of the best free agents at
+    // each position, your team's rest-of-season value (best lineup every remaining week, summed) with him added and each
+    // non-IR player dropped (or none, with an open bench spot); the best drop per add, ranked by the gain. This week's
+    // gain alongside, from the same weekly values.
+    const MOVE_POOL = 8;  // free agents tried per position (the best by their own rest-of-season points)
+    // Roster rules (owner 2026-10-17). Hold-one positions (one starting slot, streamable from waivers when he has a bye:
+    // QB unless 2-QB / superflex, TE, K, D/ST): a move there must be an upgrade that drops the same position, never a
+    // second copy. RB / WR: never drop below DEPTH_MIN.
+    // STOPGAP: these rules stand in for depth the values don't see. Rest-of-season values assume every healthy player
+    // stays healthy and play the best lineup by expected points, so a backup's insurance (he plays when a starter is
+    // hurt) and the waiver wire's own depth (a D/ST for a bye can be picked up that week) are worth ~0 to them.
+    // Remaining work (docs/INSIGHTS.md sec. 9, "Fantasy: depth-aware values"): fitted weekly injury rates by position,
+    // lineup value as an expectation over who's available, and a waiver replacement level; then drop these rules.
+    const DEPTH_MIN = 3;
+    const POSK = new Map();
+    const posOf = k => { if (!POSK.has(k)) POSK.set(k, k.startsWith('d:') ? 'DEF' : k.startsWith('g:') ? fromPid(k.slice(2), k.slice(2)).pos : player(k).pos); return POSK.get(k); };
+    const holdOne = pos => ['TE', 'K', 'DEF'].includes(pos)
+      || (pos === 'QB' && !L.slots.includes('SUPER_FLEX') && L.slots.filter(x => x === 'QB').length < 2);
+    const allowed = (base, a, d) => {
+      const n = pos => base.filter(x => posOf(x) === pos).length;
+      if (holdOne(a.pos) && n(a.pos) >= 1 && (d == null || posOf(d) !== a.pos)) return false;
+      const dp = d == null ? null : posOf(d);
+      if (['RB', 'WR'].includes(dp) && n(dp) - 1 + (a.pos === dp ? 1 : 0) < DEPTH_MIN) return false;
+      return true;
+    };
+    const movesFor = (roster = null) => {
+      const weeks = rosWeeks(), now = [weeks[0]];
+      const base = roster || mine.ext.filter(x => !(mine.ir || []).includes(x));
+      const baseRos = valueOf(base, weeks), baseWk = valueOf(base, now);
+      const open = L.size ? base.length < L.size : false;
+      const fa = freeAgents();
+      const pool = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'].flatMap(pos => fa.filter(p => p.pos === pos).sort((a, b) => b.ros - a.ros).slice(0, MOVE_POOL));
+      const drops = open ? [null, ...base] : base;
+      const moves = pool.map(a => {
+        let best = null;
+        drops.forEach(d => {
+          if (!allowed(base, a, d)) return;
+          const keys = [...base.filter(x => x !== d), a.key];
+          const ros = valueOf(keys, weeks) - baseRos;
+          if (!best || ros > best.ros) best = { add: a, drop: d, ros, wk: valueOf(keys, now) - baseWk };
+        });
+        return best;
+      }).filter(Boolean);
+      return { moves: moves.sort((x, y) => y.ros - x.ros), open, base };
+    };
+    // A plan, not a list: the best move, then the best one on the roster it leaves (no player dropped twice, no add
+    // repeated), while each still gains at least `min` rest-of-season points
+    const movePlan = (n = 3, min = 1) => {
+      const plan = [];
+      let roster = null;
+      for (let i = 0; i < n; i++) {
+        const { moves, base } = movesFor(roster);
+        const m = moves.find(x => x.ros >= min && !plan.some(q => q.add.key === x.add.key));
+        if (!m) break;
+        plan.push(m);
+        roster = [...base.filter(x => x !== m.drop), m.add.key];
+      }
+      return plan;
+    };
+    const dropName = d => d == null ? null : player(d).name;
 
     // ---- league rankings: every team's best lineup this week and for each remaining week through 17 (ros.json:
     // each week's projected stat line x his chance to play, so byes, injuries and returns all count), summed
     const teamsView = () => {
       if (!ROS) return '<p class="muted">Loading rest-of-season projections…</p>';
-      const now = Date.now(), weeks = [];
-      for (let k = ROS.from; k <= ROS.through; k++) weeks.push(k);
-      const rows = L.teams.map(t => {
-        const ps = t.ext.map(player);
-        const wk = total(optimize(ps, L.slots));
-        let ros = 0;
-        weeks.forEach(k => {
-          const cand = t.ext.map(x => {
-            const g = gsisOf(x), r = g && ROS.players[g];
-            const dt = !g && dstTeam(x);
-            if (dt) { const v = dWeek(dt, k); return v ? { ext: x, pos: 'DEF', exp: v.pts } : null; }
-            if (!r && g && KBY[g]) { const v = kWeek(g, k); return v == null || (k === KD.from && false) ? null : { ext: x, pos: 'K', exp: v }; }
-            if (!r) return null;
-            const e = r.w.find(z => z[0] === k);
-            if (!e || (k === ROS.from && r.k && now >= Date.parse(r.k))) return null;
-            return { ext: x, pos: r.pos, exp: e[1] * pts(e[5], L.scoring, r.pos) };
-          }).filter(Boolean);
-          ros += total(optimize(cand, L.slots));
-        });
-        return { t, wk, ros };
-      });
+      const weeks = rosWeeks();
+      const rows = L.teams.map(t => { const ps = t.ext.map(player);
+        return { t, wk: total(optimize(ps, L.slots, (t.starters || []).map(x => ps.find(p => p.ext === x) || null))), ros: valueOf(t.ext, weeks) }; });
       rows.sort((a, b) => b.ros - a.ros);
       const avg = rows.reduce((s_, r) => s_ + r.ros, 0) / rows.length;
       const wkRank = rows.slice().sort((a, b) => b.wk - a.wk).map(r => r.t.id);

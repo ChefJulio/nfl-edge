@@ -53,3 +53,8 @@ table.lg-tbl .who { min-width: 0; } table.lg-tbl .nmw { min-width: 0; }
 @media (max-width: 560px) { table.lg-rank .lg-pf, table.lg-rank .lg-avg { display: none; } table.lg-rank th, table.lg-rank td { padding-left: 6px; padding-right: 6px; } }
 @media (min-width: 900px) { #tab-league .lg-body > .lg-scroll, #tab-league .lg-body > .lg-h, #tab-league .lg-body > .lg-swaps,
   #tab-league .lg-body > .lg-note { max-width: 760px; } }
+.lg-lock { display: inline-block; font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill);
+  background: rgba(255,255,255,.08); color: var(--muted); line-height: var(--tag-h); }
+.lg-moves { margin: 0 0 10px; } .lg-gain small { display: block; font-size: var(--fs-2xs); color: var(--muted); font-weight: 600; }
+table.lg-tbl td.lg-gain.good { color: #6fdc8c; font-weight: 700; }
+.lg-wv { font-size: var(--fs-sm); font-weight: 500; margin-left: 6px; }

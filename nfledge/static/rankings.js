@@ -210,9 +210,7 @@
       return j;
     });
     // kickoff (ms) of a team's game this week: gameday + gametime are Eastern (EDT from mid-March to early November)
-    const kickoff = t => { const g = (D.games || []).find(x => x.away.team === t || x.home.team === t);
-      if (!g || !g.gameday || !g.gametime) return null; const m = +g.gameday.slice(5, 7), d = +g.gameday.slice(8, 10);
-      const edt = (m > 3 && m < 11) || (m === 3 && d >= 9) || (m === 11 && d < 3); return Date.parse(`${g.gameday}T${g.gametime}:00${edt ? '-04:00' : '-05:00'}`); };
+    const kickoff = t => NFLE.fmt.kickoff(D.games, t);
     const oppOf = t => { const g = (D.games || []).find(x => x.away.team === t || x.home.team === t);
       return g ? { opp: g.home.team === t ? g.away.team : g.home.team, home: g.home.team === t ? 'vs' : '@' } : null; };
     const kdRows = p => {

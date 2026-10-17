@@ -37,6 +37,10 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     : `https://a.espncdn.com/combiner/i?img=${encodeURIComponent(new URL(url).pathname)}&w=${px(size)}&h=${px(size)}`;
   NFLE.fmt = {
     signed1: v => `${v >= 0 ? '+' : '-'}${Math.abs(v).toFixed(1)}`,  // a change in points: +0.9 / -0.7
+    // kickoff (ms) of a team's game in a week's games: gameday + gametime are Eastern (EDT mid-March to early November)
+    kickoff: (games, t) => { const g = (games || []).find(x => x.away.team === t || x.home.team === t);
+      if (!g || !g.gameday || !g.gametime) return null; const m = +g.gameday.slice(5, 7), d = +g.gameday.slice(8, 10);
+      const edt = (m > 3 && m < 11) || (m === 3 && d >= 9) || (m === 11 && d < 3); return Date.parse(`${g.gameday}T${g.gametime}:00${edt ? '-04:00' : '-05:00'}`); },
     f1, logoSrc,
     sgn: v => v == null || isNaN(v) ? '' : Math.abs(v) < 0.05 ? '0.0' : `${v > 0 ? '+' : ''}${f1(v)}`,
     pct: v => v == null || isNaN(v) ? '' : `${Math.round(v * 100)}%`,
