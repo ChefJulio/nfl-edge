@@ -775,3 +775,14 @@ table.pst-tbl td.pst-who + td.num, table.pst-tbl tr > th:first-child + th.num { 
 /* Game log as an even grid (owner's Sleeper reference, 2026-10-16): each chip fills its cell's width, so values line
    up as same-size blocks instead of pills of varying width. */
 table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; text-align: center; }
+
+/* Compact player header (owner 2026-10-16): a faint team logo behind the name; bio as one slim strip below it */
+.pc-head { position: relative; overflow: hidden; }
+.pc-hero-lg { position: absolute; right: -28px; top: 50%; width: 170px; height: 170px; transform: translateY(-50%);
+  background: center / contain no-repeat; opacity: .10; pointer-events: none; }
+.pc-head > :not(.pc-hero-lg) { position: relative; }
+.pc-bio { display: flex; gap: 22px; margin: 0 0 12px; padding: 0 2px; }
+.pc-bio > div { display: flex; flex-direction: column; min-width: 0; }
+.pc-bio small { font-size: var(--fs-xs); font-weight: 600; color: var(--muted); }
+.pc-bio b { font-family: var(--font-display); font-size: var(--fs-lg); font-weight: 700; line-height: 1.2; }
+.pc-bio b i { font-style: normal; font-size: var(--fs-sm); color: var(--muted); font-weight: 600; }

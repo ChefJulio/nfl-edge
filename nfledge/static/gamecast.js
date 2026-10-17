@@ -908,13 +908,21 @@
   // Profile box under the header (current, like the header): bio, draft slot, and the current contract
   // (OverTheCap via nflverse; $M). Desktop: one row of six; phones: rows of three (CSS --n).
   const money = m => m >= 100 ? `$${f0(m)}M` : m >= 1 ? `$${f1(m)}M` : `$${f0(m * 1000)}K`;
+  // Compact header (owner 2026-10-16, after a Sleeper reference): age / height / weight / NFL years in a slim strip
+  // under the name; draft, college and contract in their own section lower on the Week tab.
+  const bioStrip = L => {
+    if (!L || !L.bio) return '';
+    const b = L.bio, it = [];
+    const item = (v, k, t = '') => `<div${t ? ` title="${esc(t)}"` : ''}><small>${k}</small><b>${v}</b></div>`;
+    if (b.born) it.push(item(((Date.now() - new Date(b.born + 'T12:00:00')) / 31557600000).toFixed(1), 'Age', `Born ${b.born}`));
+    if (b.ht) it.push(item(esc(`${Math.floor(b.ht / 12)}'${b.ht % 12}"`), 'Height'));
+    if (b.wt) it.push(item(`${esc(b.wt)}<i> lb</i>`, 'Weight'));
+    if (b.exp != null) it.push(b.exp === 0 && b.exp_s === L.cur ? item('Rookie', 'Exp') : item(esc(b.exp), 'Exp', b.exp_s === L.cur ? 'NFL seasons' : `NFL seasons, as of ${b.exp_s}`));
+    return it.length ? `<div class="pc-bio">${it.join('')}</div>` : '';
+  };
   const profileBox = L => {
     if (!L || !L.bio) return '';
     const b = L.bio, bio = [];
-    if (b.born) bio.push(cell(((Date.now() - new Date(b.born + 'T12:00:00')) / 31557600000).toFixed(1), 'Age', `Born ${b.born}`));
-    if (b.ht) bio.push(cell(esc(`${Math.floor(b.ht / 12)}'${b.ht % 12}"`), 'Height'));
-    if (b.wt) bio.push(cell(`${esc(b.wt)}<i>lb</i>`, 'Weight'));
-    if (b.exp != null) bio.push(b.exp === 0 && b.exp_s === L.cur ? cell('Rookie', 'NFL yrs') : cell(esc(b.exp), 'NFL yrs', b.exp_s === L.cur ? '' : `As of ${b.exp_s}`));
     const dr = b.draft;
     if (dr) bio.push(dr.u ? cell('UDFA', 'Draft', 'Undrafted free agent')
       : cell(`R${dr.r}:${dr.p}`, `Draft '${String(dr.y).slice(2)}`, `${dr.y} draft: round ${dr.r}, pick ${dr.p} (${ord(dr.o)} overall)`));
@@ -928,7 +936,7 @@
       k.fa ? cell(esc(k.fa), 'Free agent', `Hits free agency in ${k.fa} if not extended (paid through ${k.fa - 1}; void years excluded)`)
         : k.yrs ? cell(esc(k.yrs), 'Years') : ''] : [];
     if (!bio.length && !deal.length) return '';
-    return `<div class="pc-box pc-profile">${sg([sgRow(null, bio), deal.length ? `<div class="sg-h">Contract</div>${sgRow(null, deal)}` : ''], 6, { labels: false, cls: 'sg-prof' })}</div>`;
+    return `<div class="pc-box pc-profile"><div class="pc-k">Draft & contract</div>${sg([bio.length ? sgRow(null, bio) : '', deal.length ? sgRow(null, deal) : ''], 6, { labels: false, cls: 'sg-prof' })}</div>`;
   };
   // Week tab, below the weekly section: his three latest news items and this season's games (his last five before
   // his first game of the season), each with a way into the full tab. Both are current, whatever week is picked.
@@ -1190,20 +1198,21 @@
     const lastPlayed = L ? (L.seasons.find(S => S.g.length) || {}).s : null;
     const retired = !isKind && !!L && !L.team && !p && !(DATA && DATA.players[pid]) && lastPlayed && lastPlayed < L.cur;
     const overview = isKind || retired;
-    const week = isKind ? kindOverview(L, espn)
-      : retired ? weekExtras(pid, L, row, espn) + (offCareer(L) ? `<div class="pc-box"><div class="pc-k">By season (regular season)</div>${offCareer(L)}</div>` : '')
+    const week = isKind ? kindOverview(L, espn) + profileBox(L)
+      : retired ? weekExtras(pid, L, row, espn) + (offCareer(L) ? `<div class="pc-box"><div class="pc-k">By season (regular season)</div>${offCareer(L)}</div>` : '') + profileBox(L)
       // two columns on wide screens (owner 2026-10-16): this week on the left, news / games / penalties on the right
-      : `<div class="pc-cols"><div class="pc-col">${d === undefined || d === null ? wkWait(d) : p ? playerWeek(pid, p, d, L) : playerOff(L, d)}</div>
+      : `<div class="pc-cols"><div class="pc-col">${d === undefined || d === null ? wkWait(d) : p ? playerWeek(pid, p, d, L) : playerOff(L, d)}${profileBox(L)}</div>
          <div class="pc-col">${weekExtras(pid, L, p || row, espn)}<div class="pc-pen"></div></div></div>`;
     body.innerHTML = `
       <div class="pc-head" style="--tc:${esc(info.color || '#666')}">
+        ${info.logo ? `<span class="pc-hero-lg" style="background-image:url('${esc(logoSrc(info.logo, 300))}')" aria-hidden="true"></span>` : ''}
         ${photo ? `<div class="pc-pic" data-zoom="${esc(uncrop(photoBig(L, espn) || photo))}" role="button" tabindex="0" aria-label="Show a bigger photo"><img src="${esc(photo)}" alt="" width="72" height="72" loading="lazy" onerror="this.parentNode.classList.add('nopic')">${team ? `<span class="pc-pic-tm">${tLogo(team, 16)}</span>` : ''}</div>`
           : team ? tmL(team, tLogo(team, 34)) : ''}
         <div class="pc-id"><h3 id="pcName">${num != null ? `<span class="pc-num">#${esc(num)}</span>` : ''}${esc(name)}</h3>
           <div class="pc-meta">${pos ? `<span class="posb posb-${esc(pos)}">${esc(pos)}</span>` : ''}${graded ? grChip(pid, GR.cur) : ''} ${team ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(team)}">${esc(info.name || team)}</button>` : L && lastPlayed && lastPlayed < L.cur ? `<span class="muted">Last played ${esc(lastPlayed)}</span>` : '<span class="muted">Free agent</span>'}</div>
 </div>
       </div>
-      ${profileBox(L)}
+      ${bioStrip(L)}
       <div class="seg pc-tabs" role="tablist">${[['ov', overview ? 'Overview' : 'Week'], ['log', 'Game log'], ...(graded ? [['gr', 'Grade']] : []), ...(L && (L.inj || L.dur) ? [['inj', 'Injuries']] : []), ...(news ? [['news', 'News']] : [])]
         .map(([k, l]) => `<button type="button" role="tab" data-pt="${k}" class="${cardTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       ${graded ? `<div class="pc-tab" data-pt="gr"${cardTab === 'gr' ? '' : ' hidden'}><div class="pc-grade"><p class="pc-sub">Loading grade&hellip;</p></div></div>` : ''}

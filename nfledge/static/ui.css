@@ -114,6 +114,8 @@ button:active:not(:disabled), a.mt:active, .chip:active, .sbtn:active, [data-ope
    his latest practice day (DNP / LP / FP); the full practice week is on his page */
 #tab-players .badges .dc-tag ~ .pr-days { display: none; }
 #tab-players .badges .pr-days i:not(:last-child) { display: none; }
+/* healthy (no game status, full practice last) = no indicator at all (owner 2026-10-16) */
+#tab-players .badges .pr-days:has(> i.pr-F:last-child) { display: none; }
 @media (prefers-reduced-motion: no-preference) {
   @media (hover: hover) { a.mt { transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
     a.mt:hover { transform: translateY(-2px); box-shadow: var(--e2); } }
