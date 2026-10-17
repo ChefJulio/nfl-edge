@@ -2221,3 +2221,16 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   13+ (after a bye) 31.9 / 22.3 / 29.0%: today's model said ~20% whatever the schedule. Injured reserve / PUP: -0.0001,
   2 of 4 seasons: return_timing.py keeps its features. Shipped in nfledge/returns.py (CHAIN_FEATURES; the chain steps
   through his team's real schedule, which also feeds Power C's QB availability).
+- **DESCRIPTIVE 2026-10-17, before pre-registering: range calibration today** (the queued item; scratch/range_desc.py,
+  walk-forward backtests 2021-25 cache/experiments/adopted_*, played, projection >= 1). Overall 10-90% ranges hold 82.3%
+  (7.4% below p10, 10.3% above p90). By position x weekly rank tier (top / starter / flex / deep): top three tiers
+  75.8-82.1% (QB flex lowest; RB / TE flex 12-13% above p90); deep tiers 85-90% (points can't go below 0, so p10 sits
+  at the floor: 1-5% below). The earlier "top tiers 73-75%" note predates later model changes.
+- **PRE-REGISTERED 2026-10-17 (before running): (AE) ranges from out-of-sample misses.** engine._fit_quantiles takes
+  each position's quantile offsets from projections on the TRAINING seasons, made by a model fit on those seasons
+  (in-sample misses run small). Variant: the same binning (12 projection bins per position, >= 30 rows), fit on the
+  walk-forward backtest's own rows from every earlier test season (out of sample), on misses divided by the row's
+  widening factor m (games, low sample, injury boost; engine.py), then x m again. Score on 2023-25 (each fit on 2021 ..
+  s-1): mean pinball loss over p10 / p25 / p50 / p75 / p90, played rows, projection >= 1. GATE: lower with a 95% CI over
+  season-weeks excluding 0 and lower in each of 2023-25; guard: top-three-tier 10-90% coverage no further from 80% on
+  average. tools/range_eval.py.
