@@ -189,7 +189,9 @@
     const ICON = {
       wind: '<path d="M3 8h9a3 3 0 1 0-3-3M3 12h13a3 3 0 1 1-3 3M3 16h6"/>',
       rain: '<path d="M7 14a4 4 0 0 1 .5-8A5 5 0 0 1 17 7a3.5 3.5 0 0 1 0 7z"/><path d="M8 17l-1 3M12 17l-1 3M16 17l-1 3"/>',
-      snow: '<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/>',
+      // six arms, each with a chevron branch near its tip (owner: a plain asterisk read as a footnote mark)
+      snow: '<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/><path d="M9.5 7L12 4.5 14.5 7M9.5 17l2.5 2.5 2.5-2.5'
+        + 'M15.08 7.34l3.42.91-.92 3.42M8.92 16.66l-3.42-.91.92-3.42M8.92 7.34l-3.42.91.92 3.42M15.08 16.66l3.42-.91-.92-3.42"/>',
     };
     const wxMark = t => { const w = WX[t]; if (!w) return '';
       const k = w.snow > 0 ? 'snow' : w.pop >= 50 ? 'rain' : w.wind >= 15 ? 'wind' : null;

@@ -93,3 +93,4 @@ td.mu .wx { display: inline-flex; vertical-align: -2px; margin-left: 4px; color:
 td.mu .wx svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 td.mu .wx-snow { color: #e6f0ff; } td.mu .wx-wind { color: #b9c4d3; }
 td.grdc, th.grdc, td.snapc, th.snapc { text-align: center; }
+td.mu .wx-snow svg { stroke-width: 1.6; }
