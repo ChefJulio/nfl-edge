@@ -5,6 +5,7 @@ dependencies; report.render writes them on every full build."""
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from pathlib import Path
 
@@ -43,8 +44,13 @@ def write_site_assets(root_dir: Path) -> None:
 
 
 def restamp_pages(root_dir: Path) -> int:
-  """Point every page's asset links at the current version (?v=<hash>); returns how many pages changed."""
+  """Point every page's asset links at the current version (?v=<hash>), and build.json's "assets" at it so pages
+  left open offer a refresh (shell.js stale check); returns how many pages changed."""
   v, n = asset_version(), 0
+  bj = root_dir / "build.json"
+  if bj.exists():
+    b = json.loads(bj.read_text(encoding="utf-8"))
+    bj.write_text(json.dumps({**b, "assets": v}), encoding="utf-8")
   for p in root_dir.rglob("*.html"):
     s = p.read_text(encoding="utf-8")
     t = VERSION_RX.sub(f"?v={v}", s)

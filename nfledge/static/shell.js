@@ -109,16 +109,18 @@ document.addEventListener('touchstart', () => {}, { passive: true });
 })();
 // A page left open keeps showing what it loaded, and phones keep tabs alive for days. When you come back to the
 // current week's page (and at most every 10 minutes), ask the site for its build stamp (build.json, report.render);
-// if it's newer than this page's numbers, offer a refresh. Never reloads on its own: you may be mid-read. Nothing is
+// if it's newer than this page's numbers or code, offer a refresh. Never reloads on its own: you may be mid-read. Nothing is
 // cached across visits, so a reload always gets the new build.
 (() => {
   const NFLE = window.NFLE, CFG = window.NFLE_CFG || {};
   if (!CFG.current || !NFLE) return;
   let last = Date.now(), shown = false;
+  // the asset version this page loaded (its own shell.js link: ?v=<hash>)
+  const MYV = ((document.querySelector('script[src*="shell.js?v="]') || {}).src || '').split('?v=')[1] || '';
   const show = () => {
     shown = true;
     const b = document.createElement('button');
-    b.type = 'button'; b.className = 'stale-pill'; b.innerHTML = '<i></i>New numbers &middot; <b>Refresh</b>';
+    b.type = 'button'; b.className = 'stale-pill'; b.innerHTML = '<i></i>Site updated &middot; <b>Refresh</b>';
     b.onclick = () => location.reload();
     document.body.appendChild(b);
   };
@@ -128,7 +130,9 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     try {
       const r = await fetch(new URL('build.json', NFLE.root), { cache: 'no-store' });
       const b = r.ok ? await r.json() : null, D = NFLE.weekData && NFLE.weekData();
+      // new numbers (a full build), or new site code (a UI-only deploy keeps the numbers but changes the assets)
       if (b && D && b.generated && D.generated && b.generated !== D.generated) show();
+      else if (b && b.assets && MYV && b.assets !== MYV) show();
     } catch (e) { /* offline: try again next time */ }
   };
   document.addEventListener('visibilitychange', () => check());

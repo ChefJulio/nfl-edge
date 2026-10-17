@@ -1018,12 +1018,18 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
   qb_eff = {t: pbar.get(t, 1.0) * rb.qb_term(usual.get(t, starters.get(t)), t) + (1 - pbar.get(t, 1.0)) * rb.qb_term(backup.get(t), t)
             for t in rb.teams}
   history, qb_by_week = {}, {}
+  # a week's rating depends only on (season, week): kept on the engine, so the current page and the 12 lookahead
+  # pages (each charting weeks 2..its own) compute every week once instead of ~150 times (~2 min a build)
+  memo = eng.__dict__.setdefault("_power_hist", {})
   for w in range(2, week + 1):
-    rw = eng.tm.fit(season, w)
-    qb_by_week[w] = starters_asof(eng, season, w)
-    vw = league_volume(eng, season, w, rw)
-    us_w, bk_w, pb_w = powerc.inputs(eng, season, w, qb_by_week[w])
-    history[w] = powerc.blend(unit_points(rw, vw, us_w, fw), unit_points(rw, vw, bk_w, fw), pb_w).net
+    if (season, w) not in memo:
+      rw = eng.tm.fit(season, w)
+      qb_w = starters_asof(eng, season, w)
+      vw = league_volume(eng, season, w, rw)
+      us_w, bk_w, pb_w = powerc.inputs(eng, season, w, qb_w)
+      memo[(season, w)] = (qb_w, powerc.blend(unit_points(rw, vw, us_w, fw), unit_points(rw, vw, bk_w, fw), pb_w).net)
+    qb_w, net_w = memo[(season, w)]
+    qb_by_week[w], history[w] = dict(qb_w), net_w.copy()
   # Each week's rating uses that week's starting QB (it's who plays), so a backup's start moves the line: flag those
   # weeks against the team's usual starter (the one who started most of them), so the trend doesn't read as the team
   # changing (owner 2026-10-16, after an outside review: Washington -0.66 -> -8.64 -> -1.21 as Daniels sat and returned)
@@ -1518,5 +1524,5 @@ def render(ctx: dict, out_path: Path) -> Path:
     (root_dir / "weeks.json").write_text(json.dumps(nav["seasons"], separators=(",", ":")), encoding="utf-8")
     # the current build's stamp: a page left open (phones keep tabs alive for days) asks for this tiny file when you
     # come back to it and offers a refresh when the site has newer numbers (shell.js, stale check)
-    (root_dir / "build.json").write_text(json.dumps({"generated": ctx["generated"]}), encoding="utf-8")
+    (root_dir / "build.json").write_text(json.dumps({"generated": ctx["generated"], "assets": asset_version()}), encoding="utf-8")
   return out_path
