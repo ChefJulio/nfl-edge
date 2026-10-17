@@ -89,8 +89,10 @@
   const sideOf = (g, team) => g && (g.away.team === team ? g.away : g.home.team === team ? g.home : null);
   // ESPN's 500 px logos come out ragged when the browser shrinks them; its resizer downsamples them properly
   // (3x the display size, so retina screens stay sharp). Same rule as report.logo_src.
+  // ESPN's resizer returns an empty image above ~600 px for some sources (the 4096 px dark Raiders logo): cap it
+  const px = size => Math.min(600, Math.max(24, size * 3));
   const logoSrc = (url, size) => /a\.espncdn\.com\/i\/teamlogos\//.test(url)
-    ? `https://a.espncdn.com/combiner/i?img=${url.split('a.espncdn.com')[1]}&w=${Math.max(24, size * 3)}&h=${Math.max(24, size * 3)}` : url;
+    ? `https://a.espncdn.com/combiner/i?img=${url.split('a.espncdn.com')[1]}&w=${px(size)}&h=${px(size)}` : url;
   const logo = (url, bg, size = 22, alt = '') => url
     ? `<span class="nl" style="background:${esc(bg || '#333')};width:${size + 6}px;height:${size + 6}px"><img src="${esc(logoSrc(url, size))}" alt="${esc(alt)}" width="${size}" height="${size}" loading="lazy"></span>` : '';
 
@@ -878,8 +880,32 @@
     : p.dvp ? `<span style="color:${esc(p.dvp_color || '')}" title="Old-style matchup rank: their defense vs ${esc(p.pos)}s (1st = toughest)">${esc(p.dvp)}</span>` : '';
   const gameHref = (g, d = DATA) => `${siteRoot()}game.html?d=${encodeURIComponent(d.__rel || CFG.data)}&g=${encodeURIComponent(g.id)}`;
   // A tappable summary tile: a label, one number (body) and a hidden detail that opens in a sheet (bottom of file)
-  const tapTile = (k, body, title, detail) => `<div class="pc-tap" role="button" tabindex="0" aria-haspopup="dialog" data-sheet="${esc(title)}">
+  const tapTile = (k, body, title, detail, cls = '') => `<div class="pc-tap${cls}" role="button" tabindex="0" aria-haspopup="dialog" data-sheet="${esc(title)}">
       <div class="pc-k">${esc(k)}</div>${body}<template>${detail}</template></div>`;
+  // ... or opens one of the page's tabs (goto), optionally in a game log view (lv)
+  const goTile = (k, body, goto, lv = '') => `<div class="pc-tap" role="button" tabindex="0" data-goto="${goto}"${lv ? ` data-lv-go="${lv}"` : ''}>
+      <div class="pc-k">${esc(k)}</div>${body}</div>`;
+  // Last 5 tile: his latest regular-season game's points over his last five, bars against our projection then
+  const last5Tile = (L, pos) => {
+    if (!L) return '';
+    const w = weights(), gs = L.seasons.flatMap(S => S.g.map(g => ({ s: S.s, g }))).sort((a, b) => b.s - a.s || b.g.w - a.g.w).slice(0, 5).reverse();
+    if (!gs.length) return '';
+    const built = (DATA && DATA.score && DATA.score.built) || HALF;
+    const pj = g => g.pjl ? g.pj * (pts(g.pjl, w, pos) / Math.max(0.1, pts(g.pjl, built, pos))) : null;
+    const slots = gs.map(({ s, g }) => { const v = pts(g.c, w, pos), p = pj(g);
+      return { w: g.w, v, pj: p, title: `${s} week ${g.w}: ${f1(v)} pts${p != null ? ` · we projected ${f1(p)}` : ''}` }; });
+    const L1 = gs[gs.length - 1];
+    return goTile(`Last ${gs.length}`, `<div class="pc-big">${f1(slots[slots.length - 1].v)} <small>pts</small></div>
+      <div class="pc-tapsub">${L1.s !== L.cur ? `${L1.s} ` : ''}Wk ${L1.g.w} ${L1.g.h === 0 ? '@' : 'vs'} ${esc(L1.g.o)}</div>
+      <div class="pc-tapbars">${miniBars(slots, { slotW: 22, H: 40, cls: 'mb-pts mb-sm' })}</div>`, 'log', 'g');
+  };
+  // Grade tile (owner 2026-10-16: moved here from the header): his OVR, the Grade tab on tap
+  const gradeTile = pid => {
+    const r = GR.cur && GR.cur.players[pid];
+    if (GR.cur === undefined || GR.cur === null) return '';
+    return goTile('Grade', r ? `<div class="pc-big ${r[9] ? '' : grTone(r[0])}">${ovr(r[0])}${uqMark(r)} <small>OVR</small></div><div class="pc-tapsub">${GR.cur.season} · ${esc(r[1])}</div>`
+      : '<div class="pc-big">– <small>OVR</small></div><div class="pc-tapsub">Not graded</div>', 'gr');
+  };
   // The player's weekly section for the selected week (projection, matchup, availability, season to date).
   const playerWeek = (pid, p, d, L) => {
     const g = teamGame(p.team, d), opp = g && (g.away.team === p.team ? g.home : g.away);
@@ -921,11 +947,12 @@
     const html = `
       ${now}
       <div class="pc-tiles">
-        ${tapTile('Projection', `<div class="pc-big">${f1(s.proj)} <small>pts</small></div><div class="pc-tapsub">${rankPill}${risk}</div>`, `${wkLabel(d)} projection`, projDetail)}
-        ${tapTile('Matchup', `<div class="pc-big">${p.mu != null ? `${muHtml(p, opp && opp.team)} <small>pts</small>` : muHtml(p) || '–'}</div><div class="pc-tapsub">${esc(p.home)} ${esc(opp ? opp.team : p.opp || '')}</div>`, 'Matchup effect', muDetail)}
+        ${tapTile('Projection', `<div class="pc-big">${f1(s.proj)} <small>pts</small></div><div class="pc-tapsub">${rankPill}${risk}</div>`, `${wkLabel(d)} projection`,
+            projDetail + muDetail.replace('<div class="pc-box">', '<div class="pc-box"><div class="pc-k">Matchup effect</div>'))}
+        ${last5Tile(L, p.pos)}
         ${fpg != null ? tapTile('Season', `<div class="pc-big">${f1(fpg)} <small>FP/G</small></div><div class="pc-tapsub">${f0(e.games || p.sc.g)} games</div>`,
             `${d.season} season before week ${d.week}`, `<div class="pc-box pc-season">${seasonHtml(p, d, L)}</div>`) : ''}
-        <div class="pc-pen"></div>
+        ${GRADED[p.pos] ? gradeTile(pid) : ''}
       </div>
       ${g ? `<div class="pc-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>` : ''}`;
     return html;
@@ -1190,7 +1217,8 @@
       ${rows.length ? `<div class="pc-k pen-sub">Career: ${tot[0] ? `${tot[0]} for ${tot[1]} yards` : 'no flags'} in ${rows.length} ${rows.length === 1 ? 'season' : 'seasons'}</div>
       <div class="lg-scroll"><table class="lg"><thead><tr class="lg-ch"><th>Season</th><th>Team</th><th class="num">Flags</th><th class="num">Yds</th><th>Most often</th></tr></thead><tbody>${hist}</tbody></table></div>` : ''}
       <p class="pc-sub">Regular season, accepted and declined, since 1999.</p></div>`;
-    return tapTile('Penalties', `<div class="pc-big">${r.n} <small>${r.n === 1 ? 'flag' : 'flags'}</small></div><div class="pc-tapsub">${r.s} · career ${tot[0]}</div>`, 'Penalties', box);
+    // a slim row under draft & contract (owner 2026-10-16: extra stats, not a headline tile)
+    return tapTile('Penalties', `<div class="pc-penrow"><b>${r.n}</b> ${r.n === 1 ? 'flag' : 'flags'} in ${r.s} · <b>${tot[0]}</b> career</div>`, 'Penalties', box, ' pc-tap-row');
   };
   // ---- NFL Edge grade (data/grades/<season>.json, tools/grade_build.py): percentile of EPA over replacement per game
   // over his last three seasons (weighted to the latest, shrunk by sample size) among his position's players that season.
@@ -1204,7 +1232,6 @@
   const ovr = p => 50 + Math.round(p * 49 / 99);
   // [9] = 1: under the qualifying minimum but with a real role (2+ games at half the snaps), graded on those games
   const uqMark = r => r && r[9] ? '*' : '';
-  const grChip = (pid, cur) => { const r = cur && cur.players[pid]; return r ? `<span class="eg-chip ${r[9] ? 'eg-uq' : grTone(r[0])}" title="NFL Edge overall (${cur.season}), 50-99 among qualified ${esc(r[1])}s${r[9] ? `; under the qualifying minimum, graded on his ${r[8]} games with half the snaps or more` : ''}">OVR <b>${ovr(r[0])}${uqMark(r)}</b></span>` : ''; };
   const gradeTab = (pid, docs) => {
     const all = docs.filter(d => d && d.players[pid]).sort((a, b) => b.season - a.season);
     const rows = all.filter(d => d.players[pid][0] != null);  // graded seasons (the rest: played, not graded)
@@ -1258,14 +1285,14 @@
       : retired ? weekExtras(pid, L, row, espn) + (offCareer(L) ? `<div class="pc-box"><div class="pc-k">By season (regular season)</div>${offCareer(L)}</div>` : '') + profileBox(L)
       // two columns on wide screens (owner 2026-10-16): the summary tiles, game and this season's games on the left;
       // news and draft & contract on the right. Fixed sides (owner).
-      : `<div class="pc-cols"><div class="pc-col">${d === undefined || d === null ? wkWait(d) : p ? playerWeek(pid, p, d, L) : `${playerOff(L, d)}<div class="pc-tiles"><div class="pc-pen"></div></div>`}${logMini(pid, L, p || row)}</div>
-         <div class="pc-col">${newsMini(espn)}${profileBox(L)}</div></div>`;
+      : `<div class="pc-cols"><div class="pc-col">${d === undefined || d === null ? wkWait(d) : p ? playerWeek(pid, p, d, L) : playerOff(L, d)}${logMini(pid, L, p || row)}</div>
+         <div class="pc-col">${newsMini(espn)}${profileBox(L)}<div class="pc-pen"></div></div></div>`;
     body.innerHTML = `
       <div class="pc-head pc-head-hero" style="--tc:${esc(info.color || '#666')};--tc2:${esc(info.color2 || info.color || '#999')}${info.logo ? `;--tlogo:url('${esc(logoSrc(info.logo, 300))}')` : ''}">
         ${photo ? `<div class="pc-pic" data-zoom="${esc(uncrop(photoBig(L, espn) || photo))}" role="button" tabindex="0" aria-label="Show a bigger photo"><img src="${esc(photo)}" alt="" width="72" height="72" loading="lazy" onerror="this.parentNode.classList.add('nopic')">${team ? `<span class="pc-pic-tm">${tLogo(team, 16)}</span>` : ''}</div>`
           : team ? tmL(team, tLogo(team, 34)) : ''}
         <div class="pc-id"><h3 id="pcName">${num != null ? `<span class="pc-num">#${esc(num)}</span>` : ''}${esc(name)}</h3>
-          <div class="pc-meta">${pos ? `<span class="posb posb-${esc(pos)}">${esc(pos)}</span>` : ''}${graded ? grChip(pid, GR.cur) : ''} ${team ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(team)}">${esc(info.name || team)}</button>` : L && lastPlayed && lastPlayed < L.cur ? `<span class="muted">Last played ${esc(lastPlayed)}</span>` : '<span class="muted">Free agent</span>'}</div>
+          <div class="pc-meta">${pos ? `<span class="posb posb-${esc(pos)}">${esc(pos)}</span>` : ''}${team ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(team)}">${esc(info.name || team)}</button>` : L && lastPlayed && lastPlayed < L.cur ? `<span class="muted">Last played ${esc(lastPlayed)}</span>` : '<span class="muted">Free agent</span>'}</div>
 </div>
         ${bioStrip(L, ' pc-bio-in')}
       </div>
@@ -1273,7 +1300,7 @@
       <div class="seg pc-tabs" role="tablist">${[['ov', 'Summary'], ['log', 'Game log'], ...(graded ? [['gr', 'Grade']] : []), ...(L && (L.inj || L.dur) ? [['inj', 'Injuries']] : []), ...(news ? [['news', 'News']] : [])]
         .map(([k, l]) => `<button type="button" role="tab" data-pt="${k}" class="${cardTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       ${graded ? `<div class="pc-tab" data-pt="gr"${cardTab === 'gr' ? '' : ' hidden'}><div class="pc-grade"><p class="pc-sub">Loading grade&hellip;</p></div></div>` : ''}
-      <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${overview ? '' : pickerHtml()}${week}${overview ? '<div class="pc-tiles"><div class="pc-pen"></div></div>' : ''}</div>
+      <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${overview ? '' : pickerHtml()}${week}${overview ? '<div class="pc-pen"></div>' : ''}</div>
       <div class="pc-tab" data-pt="log"${cardTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every career game</div><div class="pc-log">${
         !LOGS[pid] ? '<div class="skel-zone"></div>' : !L ? '<p class="pc-sub">Game log unavailable.</p>'
           : isKind ? (L.seasons.length ? kindLog(L, L.seasons) : '<p class="pc-sub">No regular-season games with a recorded stat or snap.</p>')
@@ -1301,6 +1328,8 @@
     body.querySelectorAll('.pc-tabs [data-pt]').forEach(b => b.onclick = () => showTab(b.dataset.pt));
     // "Show more" opens the full tab, scrolled to the top of the card (the tabs bar) so it reads from the start.
     body.querySelectorAll('[data-goto]').forEach(b => b.onclick = () => {
+      const lb = b.dataset.lvGo && body.querySelector('.pc-tab[data-pt="log"] .pc-log');
+      if (lb) showLogView(lb, b.dataset.lvGo);
       showTab(b.dataset.goto);
       body.querySelector('.pc-tabs').scrollIntoView({ block: 'start', behavior: 'smooth' });
     });
@@ -2465,5 +2494,6 @@
   });
   document.addEventListener('keydown', e => {
     if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.pc-tap[data-sheet]')) { e.preventDefault(); open(e.target); }
+    else if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.pc-tap[data-goto]')) { e.preventDefault(); e.target.click(); }
   });
 })();

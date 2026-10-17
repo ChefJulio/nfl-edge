@@ -877,3 +877,9 @@ table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; tex
 table.lg tbody tr.lg-car { cursor: pointer; }
 @media (hover: hover) { table.lg tbody tr.lg-car:hover td { background: color-mix(in srgb, var(--accent) 12%, var(--panel2)); } }
 table.lg tr.lg-car td:first-child b { font-weight: 700; }
+/* Last 5 tile's bars; the penalties row (a slim tappable line under draft & contract) */
+.pc-tapbars { margin-top: 4px; overflow: hidden; }
+.pc-tapbars .mb { display: block; max-width: 100%; height: auto; }
+.pc-tap-row { padding: 9px 26px 9px 12px; margin: 0 0 12px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.pc-tap-row .pc-k { margin: 0; }
+.pc-penrow { font-size: var(--fs-md); color: var(--muted); } .pc-penrow b { color: var(--ink); font-weight: 700; }

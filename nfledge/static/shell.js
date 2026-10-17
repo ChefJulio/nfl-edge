@@ -31,8 +31,10 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   NFLE.esc = NFLE.esc || esc;
   const f1 = v => v == null || isNaN(v) ? '' : (Math.round(v * 10) / 10).toFixed(1);
+  // ESPN's resizer returns an empty image above ~600 px for some sources (the 4096 px dark Raiders logo): cap it
+  const px = size => Math.min(600, Math.max(24, size * 3));
   const logoSrc = (url, size) => !url ? '' : !/a\.espncdn\.com\/i\/teamlogos\//.test(url) ? url
-    : `https://a.espncdn.com/combiner/i?img=${encodeURIComponent(new URL(url).pathname)}&w=${Math.max(24, size * 3)}&h=${Math.max(24, size * 3)}`;
+    : `https://a.espncdn.com/combiner/i?img=${encodeURIComponent(new URL(url).pathname)}&w=${px(size)}&h=${px(size)}`;
   NFLE.fmt = {
     f1, logoSrc,
     sgn: v => v == null || isNaN(v) ? '' : Math.abs(v) < 0.05 ? '0.0' : `${v > 0 ? '+' : ''}${f1(v)}`,
