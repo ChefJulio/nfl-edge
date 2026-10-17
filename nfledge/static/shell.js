@@ -385,7 +385,12 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   window.addEventListener('hashchange', () => route(location.hash, false));
   let saved = null; try { saved = localStorage.getItem('nfledge-tab'); } catch (e) { /* ignore */ }
   // A page link opened directly: its breadcrumb points at the tab you last used.
-  if (PAGE.test(location.hash.slice(1))) { lastRoute = parse(saved) || parse('players'); route(location.hash, false); }
+  // (a team page under Teams, a player page under Players, unless the saved tab is already in that section)
+  if (PAGE.test(location.hash.slice(1))) {
+    const sec = location.hash.slice(1).startsWith('team/') ? 'teams' : 'players';
+    lastRoute = (saved && saved.startsWith(sec) ? parse(saved) : null) || parse(sec);
+    route(location.hash, false);
+  }
   else show(parse(location.hash) || parse(saved) || parse('players'), !CARD.test(location.hash.slice(1)));
   window.NFLE_SHELL = { go: h => { const r = parse(h); if (r) show(r, true); } };
 })();

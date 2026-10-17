@@ -82,7 +82,8 @@ table:not(.no-zebra) > tbody > tr:not(.teamrow):not([style]):nth-child(even) > t
    Rows brighten whatever their team color; buttons and tiles also give a little. shell.js enables :active on iOS. */
 html { -webkit-tap-highlight-color: transparent; }
 tr[data-open-pid]:active > td, tr[data-pid]:active > td, tr[data-gid]:active > td, tr[data-tm]:active > td, tr.tm-open:active > td { filter: brightness(1.35); }
-button, a.mt, .chip, .sbtn, .tm-open, [data-open-pid]:not(tr) { transition: transform .08s ease-out, filter .08s ease-out; }
+/* (their transition list, transform / filter included, is the one shared rule near the top: a second declaration
+   here overrode it and killed the hover color easing) */
 button:active:not(:disabled), a.mt:active, .chip:active, .sbtn:active, [data-open-pid]:not(tr):active { transform: scale(.96); filter: brightness(1.25); }
 .tm-open:not(tr):active { filter: brightness(1.4); }
 @media (prefers-reduced-motion: reduce) { button:active, a.mt:active, .chip:active, .sbtn:active { transform: none; } }
