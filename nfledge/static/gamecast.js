@@ -1875,14 +1875,16 @@
   const pageMode = () => !!(window.NFLE && window.NFLE.pageMode);
   const openTeam = abbr => {
     if (pageMode()) { if (location.hash !== `#team/${abbr}`) location.hash = `team/${abbr}`; else showTeam(abbr); return; }
-    if (DATA && DATA.__rel) { location.href = `${siteRoot()}${DATA.__rel.replace(/\.json$/, '.html')}#team/${encodeURIComponent(abbr)}`; return; }
     showTeam(abbr);
   };
   const showTeam = abbr => {
     if (!DATA) return;
     const ov = ensureOverlay();
     if (!location.hash.startsWith('#player/') && !location.hash.startsWith('#team/')) prevHash = location.hash;
-    if (abbr !== cardTeam) { teamTab = TABS[`t:${abbr}`] || 'ov'; teamOpp = ''; }
+    // a team you tap opens on Summary (owner 2026-10-17); one you come back to down the card stack keeps its tab
+    if (window.NFLE && NFLE.cardRestore) teamTab = TABS[`t:${abbr}`] || 'ov';
+    else if (abbr !== cardTeam || ov.hidden || (window.NFLE && NFLE.freshPage)) teamTab = 'ov';
+    if (abbr !== cardTeam) teamOpp = '';
     // a fresh card starts on the page's week; card-to-card keeps the picked one (page mode: the shell flags fresh)
     if (ov.hidden || !cardWk || (window.NFLE && NFLE.freshPage)) cardWk = pageKey();
     cardPid = null; cardTeam = abbr;
@@ -1895,15 +1897,16 @@
 
   const openPlayer = pid => {
     if (pageMode()) { if (location.hash !== `#player/${pid}`) location.hash = `player/${pid}`; else showPlayer(pid); return; }
-    // the game page has no app shell: go to the player's page on this game's week page (Back returns to the game)
-    if (DATA && DATA.__rel) { location.href = `${siteRoot()}${DATA.__rel.replace(/\.json$/, '.html')}#player/${encodeURIComponent(pid)}`; return; }
     showPlayer(pid);
   };
   const showPlayer = pid => {
     if (!DATA) return;
     const ov = ensureOverlay();
     if (!location.hash.startsWith('#player/') && !location.hash.startsWith('#team/')) prevHash = location.hash;
-    if (pid !== cardPid) cardTab = TABS[`p:${pid}`] || 'ov';
+    // a player you tap opens on Summary (owner 2026-10-17: "not remember what tab i was on before"); one you come back
+    // to down the card stack keeps its tab
+    if (window.NFLE && NFLE.cardRestore) cardTab = TABS[`p:${pid}`] || 'ov';
+    else if (pid !== cardPid || ov.hidden || (window.NFLE && NFLE.freshPage)) cardTab = 'ov';
     if (ov.hidden || !cardWk || (window.NFLE && NFLE.freshPage)) cardWk = pageKey();
     cardPid = pid; cardTeam = null;
     renderCard(pid);

@@ -919,3 +919,77 @@ table.lg td.lg-gs, table.lg th.lg-gs { box-shadow: inset 1px 0 0 color-mix(in sr
 .ij-hero .ij-st { font-size: var(--fs-md); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 2px 8px; }
 @media (max-width: 560px) { .ij-hero { gap: 6px; } .ij-hero > div { padding: 9px 8px; } }
 .ij-hero .ij-st { font-size: var(--fs-sm); padding: 2px 7px; overflow: visible; text-overflow: clip; letter-spacing: 0; }
+
+/* ---- Player / team cards: the overlay (moved from shell.css 2026-10-17 so pages without the app shell's tabs, like
+   game.html, show the same cards; shell.js runs the overlay on every page) ---- */
+/* player / team CARDS (#player/<id>, #team/<abbr>; owner 2026-10-17: pages became cards again): an overlay over the
+   list you came from. The card is its own scroll box, so everything sticky inside it (header, tabs, game log heads)
+   sticks to the card's top: --navh is 0 inside it. Phones: nearly full screen, sliding up; desktop: a large panel. */
+html.pc-open { overflow: hidden; }
+.pc-card { --navh: 0px; position: fixed; inset: 0; z-index: 60; background: rgba(5,7,10,.66); display: flex; align-items: center;
+  justify-content: center; padding: 3vh 16px; overflow: hidden; }
+.pc-card[hidden] { display: none; }
+/* stacked cards: the card below (a still copy) sits behind, a little smaller and dimmer; the top card's backdrop
+   lightens so the two dims together match one */
+.pc-under { z-index: 59; pointer-events: none; background: rgba(5,7,10,.45); }
+.pc-under .pc-wrap { transform: scale(.94) translateY(-14px); transform-origin: top center; filter: brightness(.8); animation: none !important; }
+.pc-under .pc-x { display: none; }
+.pc-card.pc-stacked { background: rgba(5,7,10,.4); }
+@media (min-width: 641px) { .pc-under .pc-wrap { transform: scale(.96) translateY(-18px); } }
+.pc-card .pc-wrap { position: relative; width: min(1100px, 100%); max-height: 94vh; display: flex; }
+.pc-card .pc { width: 100%; max-height: 94vh; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; margin: 0;
+  border-radius: var(--r-lg); box-shadow: var(--e3); -webkit-overflow-scrolling: touch; }
+.pc-card .pc-x { position: absolute; top: 10px; right: 10px; z-index: 9; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 85%, transparent); color: var(--ink); font: inherit; font-size: 22px; line-height: 1; cursor: pointer;
+  display: grid; place-items: center; padding: 0 0 2px; }
+@media (max-width: 640px) {
+  .pc-card { padding: 0; align-items: flex-end; }
+  .pc-card .pc-wrap { width: 100%; height: calc(100% - 12px); max-height: none; }
+  .pc-card .pc { max-height: none; height: 100%; border-radius: var(--r-lg) var(--r-lg) 0 0; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+}
+/* opening (owner 2026-10-17: "a slide up from bottom animation rather than just appearing"): phones slide the card up
+   from below the screen, like the sheets; desktop's centered panel rises a little and fades in. The backdrop fades. */
+@media (prefers-reduced-motion: no-preference) {
+  .pc-card:not([hidden]):not(.pc-under) { animation: card-dim .3s ease-out; }
+  .pc-card:not([hidden]) .pc-wrap { animation: card-in .26s var(--ease); }
+  @keyframes card-dim { from { background-color: rgba(5,7,10,0); } }
+  @keyframes card-in { from { transform: translateY(48px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @media (max-width: 640px) {
+    .pc-card:not([hidden]) .pc-wrap { animation: card-up .34s cubic-bezier(.2, .8, .2, 1); }
+    @keyframes card-up { from { transform: translateY(100%); } to { transform: none; } }
+  }
+}
+/* the name / photo / position header stays in view while the card scrolls (owner 2026-10-14) */
+.pc-page .pc-head { position: sticky; top: var(--navh, 0px); z-index: 6; background: var(--panel);
+  margin: -18px -18px 12px; padding: 22px 52px 10px 18px; }  /* flush with the card's top edge: tints fill its rounded corners */
+@media (max-width: 560px) { .pc-page .pc-head { margin: -14px -14px 12px; padding: 16px 48px 8px 14px; } }
+
+/* Player and team pages on wide screens (owner 2026-10-16): the full content column, Week tab in two columns
+   (gamecast.js .pc-cols). Below 1100px the wrappers are plain blocks, so phones and tablets are unchanged. */
+.pc-cols, .pc-col { min-width: 0; }
+@media (min-width: 1100px) {
+  .pc-cols { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 0 14px; align-items: start; }
+}
+
+/* the page tabs stay reachable: sticky right under the sticky header (shell.js sets --pchead) */
+.pc-page .pc-tabs { position: sticky; top: calc(var(--navh, 0px) + var(--pchead, 0px)); z-index: 5;
+  box-shadow: 0 8px 12px -10px rgba(0,0,0,.7); }
+/* desktop: tabs as wide as their labels, not five stretched segments */
+@media (min-width: 1100px) { .pc-page .pc-tabs { display: inline-flex; } .pc-page .pc-tabs button { flex: 0 0 auto; padding: 7px 18px; } }
+
+/* Player / team pages: one card level, not three (aesthetic pass 2026-10-16). Sections sit flat on the page card,
+   divided by a hairline; the small stat tiles inside keep their shape. Side-by-side boxes (the projection / expected
+   line pair) keep a subtle fill so the pair still reads as two. */
+.pc-page .pc-box { background: transparent; border: 0; border-top: 1px solid var(--line); border-radius: 0;
+  padding: 14px 0 10px; box-shadow: none; }
+.pc-page .pc-grid > .pc-box { background: color-mix(in srgb, var(--ink) 3%, transparent); border: 0; border-radius: var(--r-md);
+  padding: 10px 12px; }
+.pc-page .pc-box.pc-profile { border-top: 0; padding-top: 4px; }
+/* a sticky child sticks inside its scroll box's padding: the card has no top padding, so the header sits (and sticks)
+   flush with the card's top edge; the header's own padding keeps its spacing */
+.pc-card .pc { padding-top: 0; }
+.pc-card .pc-head { margin-top: 0 !important; }
+/* card grab bar (phones): the sheets' handle, over the header's tint */
+.pc-card .sheet-grab { z-index: 10; top: 6px; }
+.pc-card .pc-head { touch-action: pan-y; }
+@media (min-width: 641px) { .pc-card .sheet-grab { display: none; } }

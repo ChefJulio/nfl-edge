@@ -247,7 +247,9 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const PAGE = /^(player|team)\/(.+)$/;  // player / team cards (rendered by gamecast.js into #pcOv)
   const nav = document.querySelector('nav.tabs');
   const main = document.querySelector('main .wrap');
-  if (!nav || !main) return;
+  // Pages without the tab bar (game.html) still run the cards (owner 2026-10-17: a player tapped in the gamecast opened
+  // over the Players tab of another page): the card opens over the page itself and closing returns to it.
+  const listless = !nav || !main;
   const parent = k => NAV.find(p => p.key === k) || NAV[0];
   const sectionId = (p, s) => s[2] || `tab-${p.key}-${s[0]}`;
   // Player / team CARDS (owner 2026-10-17: "make player pages cards again"): #player/<id> and #team/<abbr> open the
@@ -266,20 +268,19 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   cardOv.parentNode.appendChild(cardOv);  // above the stack copy
   NFLE.pageMode = true;
   // Placeholder sections for tabs not built yet (one per sub-tab), so routing is uniform.
-  NAV.forEach(p => p.subs.forEach(s => {
+  if (!listless) NAV.forEach(p => p.subs.forEach(s => {
     if (!document.getElementById(sectionId(p, s))) {
       main.insertAdjacentHTML('beforeend', `<section id="${sectionId(p, s)}" class="soon"><div class="sec-head"><div><h2>${s[1] === p.label ? p.label : `${p.label} &middot; ${s[1]}`}</h2><p>Coming soon.</p></div></div></section>`);
     }
   }));
   // Phones show the short label where one exists, so all seven parent tabs fit on one line (owner's pick).
-  nav.innerHTML = `<div class="wrap nav-par" role="tablist">${NAV.map(p => `<button type="button" role="tab" data-par="${p.key}">${p.short
+  if (!listless) nav.innerHTML = `<div class="wrap nav-par" role="tablist">${NAV.map(p => `<button type="button" role="tab" data-par="${p.key}">${p.short
       ? `<span class="lbl-long">${p.label}</span><span class="lbl-short">${p.short}</span>` : p.label}</button>`).join('')}</div>
     <div class="wrap nav-sub" hidden></div>`;
   // --navh: the sticky top bar's height (0 where it's hidden), so things that stick below it (the player / team page
   // header) know where to stop.
   const setNavH = () => document.documentElement.style.setProperty('--navh', `${getComputedStyle(nav).display === 'none' ? 0 : nav.offsetHeight}px`);
-  if (window.ResizeObserver) new ResizeObserver(setNavH).observe(nav);
-  window.addEventListener('resize', setNavH);
+  if (!listless) { if (window.ResizeObserver) new ResizeObserver(setNavH).observe(nav); window.addEventListener('resize', setNavH); }
   // Phones: a bottom tab bar (owner's choice, 2026-10-14). Five slots: the four busiest parents + More (a sheet with
   // the rest); the sub-tab chips stay in the top bar. The top strip (parent tabs in the top bar, short labels) is
   // kept for a possible future setting: set NAV_MODE = 'top'. Desktop always uses the top strip.
@@ -296,7 +297,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const navMode = NAV_MODE;
   const BOTTOM = NAV.map(p => p.key);  // all five parents fit: no More sheet
   let bot = null;
-  if (navMode === 'bottom') {
+  if (navMode === 'bottom' && !listless) {
     document.documentElement.classList.add('nav-bottom');
     // the page's first-paint copy (pages/week.html) when there is one; older archived pages have none
     bot = document.querySelector('body > .botbar') || document.createElement('div');
@@ -317,7 +318,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     phone.addEventListener('change', place);
     NFLE.placeBar = place;
   }
-  const subBar = nav.querySelector('.nav-sub');
+  const subBar = listless ? null : nav.querySelector('.nav-sub');
   const parse = h => {
     h = (h || '').replace(/^#/, '');
     if (!h || CARD.test(h)) return null;
@@ -351,8 +352,9 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const closeCard = () => {
     if (cardOv.hidden) return;
     if (depth > 1 || (!deep && depth > 0)) { history.back(); return; }
-    const r = lastRoute || parse('players');
     hideCard(); deep = false;
+    if (listless) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* file:// */ } return; }
+    const r = lastRoute || parse('players');
     try { history.replaceState(null, '', '#' + (r.p.subs.length < 2 ? r.p.key : `${r.p.key}/${r.s[0]}`)); } catch (e) { /* file:// */ }
   };
   NFLE.closeCard = closeCard;
@@ -395,7 +397,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !cardOv.hidden && !document.querySelector('.sheet-ov, .zoom-ov')) closeCard(); });
   const showPage = (kind, id) => {
     // a direct link has no list behind it: a team card opens over Teams, a player card over Players
-    if (!lastRoute) { const home = kind === 'team' ? 'teams' : 'players'; show(parse(home), false); deep = true; }
+    if (!lastRoute && !listless) { const home = kind === 'team' ? 'teams' : 'players'; show(parse(home), false); deep = true; }
     const fresh = !onPage;  // opened from a list (not card-to-card): the card starts on this page's week
     const fn = kind === 'player' ? NFLE.showPlayer : NFLE.showTeam;
     // depth of this card: its history entry's (Back / Forward), else one deeper than the open card
@@ -406,8 +408,9 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     cardOv.hidden = false;
     document.documentElement.classList.add('pc-open');
     NFLE.freshPage = fresh;
+    NFLE.cardRestore = d < was;  // back down the stack: the card keeps the tab it was on; any other open starts on Summary
     if (fn) fn(decodeURIComponent(id));
-    NFLE.freshPage = false;
+    NFLE.freshPage = NFLE.cardRestore = false;
     settle();
     cardBox.scrollTop = top;
     requestAnimationFrame(pcHead);
@@ -416,7 +419,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     if (!st) { try { history.replaceState({ nfleCard: depth }, ''); } catch (e) { /* file:// */ } }
     showUnder(depth);
     onPage = true;
-    document.dispatchEvent(new CustomEvent('nfle-route', { detail: { parent: lastRoute.p.key, sub: 'card', section: 'pcOv' } }));
+    document.dispatchEvent(new CustomEvent('nfle-route', { detail: { parent: lastRoute ? lastRoute.p.key : '', sub: 'card', section: 'pcOv' } }));
   };
   const show = (r, push) => {
     if (lastRoute && lastRoute !== r) scrolls[sectionId(lastRoute.p, lastRoute.s)] = window.scrollY;
@@ -455,7 +458,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       show({ p, s }, true);
     }
   };
-  nav.addEventListener('click', onNav);
+  if (!listless) nav.addEventListener('click', onNav);
   if (bot) {
     bot.addEventListener('click', onNav);
     document.addEventListener('click', e => { const sh = bot.querySelector('.bb-sheet'); if (sh && !bot.contains(e.target)) sh.hidden = true; });
@@ -463,6 +466,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const route = (h, push) => {
     const m = (h || '').replace(/^#/, '').match(PAGE);
     if (m) { showPage(m[1], m[2]); return true; }
+    if (listless) { hideCard(); deep = false; return true; }  // the card's entry left: the page itself
     const r = parse(h);
     if (r) { const back = !cardOv.hidden && lastRoute && r.p === lastRoute.p && r.s === lastRoute.s;
       hideCard(); deep = false;
@@ -473,7 +477,9 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   window.addEventListener('hashchange', () => route(location.hash, false));
   let saved = null; try { saved = localStorage.getItem('nfledge-tab'); } catch (e) { /* ignore */ }
   // A card link opened directly: over the tab you last used in that section (Teams for a team, Players for a player)
-  if (PAGE.test(location.hash.slice(1))) {
+  if (listless) {
+    if (PAGE.test(location.hash.slice(1))) { deep = true; route(location.hash, false); }
+  } else if (PAGE.test(location.hash.slice(1))) {
     const sec = location.hash.slice(1).startsWith('team/') ? 'teams' : 'players';
     show((saved && saved.startsWith(sec) ? parse(saved) : null) || parse(sec), false);
     deep = true;
