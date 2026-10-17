@@ -107,3 +107,13 @@ button:active:not(:disabled), a.mt:active, .chip:active, .sbtn:active, [data-ope
 /* ...except Power's 16-column table, which needs the phone scale to fit the 1280 column without scrolling */
 @media (min-width: 1100px) { table.power { --fs-2xs: 10px; --fs-xs: 11px; --fs-sm: 12px; --fs-md: 13px; --fs-base: 14px; font-size: 14px; }
   table.dt.power td, table.dt.power th { padding-left: 6px; padding-right: 6px; } table.power .rk-b { min-width: 30px; padding: 0 4px; } }
+
+/* Aesthetic pass (2026-10-16): quieter Rankings rows (the status chip stays; per-day practice chips live on the player
+   page), and a little motion where it helps: tiles lift on hover, tab content fades in. */
+#tab-players .badges .pr-days { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  @media (hover: hover) { a.mt { transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+    a.mt:hover { transform: translateY(-2px); box-shadow: var(--e2); } }
+  main section.on { animation: sec-in .18s var(--ease); }
+  @keyframes sec-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+}
