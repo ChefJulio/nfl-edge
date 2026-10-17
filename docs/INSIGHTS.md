@@ -2111,3 +2111,11 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   300 +0.0002, 600 +0.0005, expected TDs only +0.0012 [-0.0009, +0.0032]. Decide 2024-25 (k 25): +0.0010 [-0.0005,
   +0.0025] (2024 -0.0002, 2025 +0.0021), RB +0.0024 [+0.0006, +0.0044] worse; start / sit +0.007 (no difference);
   2026 +0.0016. The whole range sits within +-0.0012: TD shrinkage strength barely moves MAE. docs/handset_audit.md #2.
+- **PRE-REGISTERED 2026-10-17 (before running): (AA) the Tuesday and week availability models' settings**
+  (docs/handset_audit.md #3: never searched). nfledge/tuesday.py TUE_GB (300 iterations, 15 leaves, min leaf 40) and
+  WEEK_GB (400, 31, 40), both learning rate .05, l2 1. Grid per model: leaves {7, 15, 31, 63} x iterations {200, 400}
+  x min leaf {20, 40, 80}. tools/avail_grid_eval.py, the live pipeline (week model: fit + per-stage calibration, T.week_
+  model; Tuesday model: T.fit) walk-forward. Metric: Brier (week model: stages 1-3 pooled; Tuesday: its own rows).
+  CHOOSE the lowest Brier on 2021-23; DECIDE on 2024-25: lower than today with a 95% CI (player-game clusters)
+  excluding 0 and lower in both seasons; guard: calibration error (10 bins) not above today's + 0.005; CONFIRM 2026 so
+  far, same direction. Each model decided separately (two pre-named tests).

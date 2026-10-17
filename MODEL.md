@@ -1,5 +1,5 @@
 ---
-documented_code_hash: fe89a34ece7a3d8d
+documented_code_hash: 6e487bfc855ecdf0
 ---
 # How the model works
 

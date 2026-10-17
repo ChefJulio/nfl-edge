@@ -184,11 +184,15 @@ def features(x: pd.DataFrame) -> pd.DataFrame:
   return f
 
 
+# Gradient-boosting settings of the Tuesday model and the one-for-every-day week model (INSIGHTS (AA) tests them)
+TUE_GB = dict(max_iter=300, learning_rate=0.05, max_leaf_nodes=15, min_samples_leaf=40, l2_regularization=1.0)
+WEEK_GB = dict(max_iter=400, learning_rate=0.05, max_leaf_nodes=31, min_samples_leaf=40, l2_regularization=1.0)
+
+
 def fit(rows: pd.DataFrame):
   from sklearn.ensemble import HistGradientBoostingClassifier
   t = rows.dropna(subset=["y"])
-  return HistGradientBoostingClassifier(max_iter=300, learning_rate=0.05, max_leaf_nodes=15, min_samples_leaf=40,
-                                        l2_regularization=1.0, random_state=0).fit(features(t), t.y)
+  return HistGradientBoostingClassifier(**TUE_GB, random_state=0).fit(features(t), t.y)
 
 
 # ---- EXPERIMENT (I): one model for every day of the week ----------------------------------------------------------
@@ -339,8 +343,7 @@ def week_features(x: pd.DataFrame) -> pd.DataFrame:
 def week_fit(rows: pd.DataFrame):
   from sklearn.ensemble import HistGradientBoostingClassifier
   t = rows.dropna(subset=["y"])
-  return HistGradientBoostingClassifier(max_iter=400, learning_rate=0.05, max_leaf_nodes=31, min_samples_leaf=40,
-                                        l2_regularization=1.0, random_state=0).fit(week_features(t), t.y)
+  return HistGradientBoostingClassifier(**WEEK_GB, random_state=0).fit(week_features(t), t.y)
 
 
 def week_model(rows: pd.DataFrame, season: int):
