@@ -94,7 +94,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       // the team's wordmark (owner 2026-10-17, as on All teams: tools/wordmarks_build.py), the typed nickname if it fails
       // the line in words (owner 2026-10-17): "JAX -2.5" -> "JAX by 2.5", "PK" -> "pick'em"
       const vegas = l => { const m = /^([A-Z]{2,3}) -(\d+(?:\.\d)?)$/.exec(l || '');
-        return m ? `<b>${esc(m[1])} by ${+m[2]}</b>` : l === 'PK' ? "<b>pick'em</b>" : l ? `<b>${esc(l)}</b>` : 'no line yet'; };
+        return m ? `<b>${esc(m[1])} by ${+m[2]}</b>` : l === 'PK' ? "<b>pick'em</b>" : `<b>${esc(l)}</b>`; };
       const wordmark = s => `<img class="mt-wm" src="${esc(NFLE.root || '')}assets/wordmarks/${esc(s.team)}.png" alt="${esc(s.nick)}" onerror="this.replaceWith(this.alt)">`;
       const f = g.fc || {}, fin = g.final;
       const sides = [[g.away, fin && fin.away, fin && fin.home, f.p_away], [g.home, fin && fin.home, fin && fin.away, f.p_home]];
@@ -115,7 +115,10 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       // when (owner 2026-10-17): kickoff / Final / the live clock at the top middle; the footer keeps the rest
       const when = fin ? '<span class="mt-fin">Final</span>' : `${esc(g.kickoff)}${g.neutral ? ' &middot; neutral' : ''}`;
       const st = fin ? verdict
-        : `<span class="mt-odds">Vegas: ${vegas(g.vegas_line)}</span>`;  // our pick is the big win chances above (owner 2026-10-17: no "ours")
+        // the Vegas line when there is one (owner 2026-10-17: then no "ours", the big win chances above are ours); before
+        // a line is posted, our pick in its place
+        : g.vegas_line ? `<span class="mt-odds">Vegas: ${vegas(g.vegas_line)}</span>`
+          : f.model_fav || f.model_tossup ? `<span class="mt-odds" title="${esc(f.model_why || '')}">No Vegas line yet &middot; ours ${f.model_tossup ? 'tossup' : `<b>${T(f.model_fav)} ${esc(f.model_pct)}%</b>`}</span>` : '';
       return `<a class="mt ${fin ? 'is-final' : 'is-pre'}${f.tossup && !fin ? ' toss' : ''}" data-gid="${esc(g.id)}" href="${esc(href || (NFLE.gameHref ? NFLE.gameHref(g) : '#'))}" style="${esc(g.bt_style || '')}">
         <div class="mt-main"><div class="mt-when">${when}</div>${main}</div><div class="mt-st">${st}</div></a>`;
     },
