@@ -46,6 +46,12 @@ offsides: play_type no_play) are not rated: 2025, 2,240 of 2,583 (87%) left out;
 0.80 (-1.54 to +1.37) against ~6 for offenses overall. Test: a fourth unit (penalty-nullified plays: offense and
 defense ratings, its own fitted ridge penalty, so a hot streak shrinks), pen_net in the points model; gate on game
 margin MAE walk-forward (tools/game_eval.py), fantasy MAE guard. Open question it answers: does flag-proneness persist?
+Second variant (owner 2026-10-17: "plays negated by penalty ... do we ignore those plays completely too?"): yes, the
+negated action (the called-back 40-yard catch, the sack erased by offsides) never reaches the ratings; its result
+exists only in the play description (yards_gained is 0). (AB-b): also rate the negated play's would-be result, parsed
+from desc ("for N yards", "sacked ... for -N"), as unit-strength evidence (a play that worked despite a flag still
+shows the unit's skill; one caused by the foul, like an offsides sack, is noise). Both variants gated the same way,
+so the test shows which signal matters, if either.
 
 Also queued (2026-10-17, owner kept the single-number display; this is accuracy plumbing): **range calibration.**
 The p10 / p90 ranges feed the Floor / Middle / Ceiling row, the confidence label and the Fantasy win chance. A look
