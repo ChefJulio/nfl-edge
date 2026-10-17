@@ -2121,3 +2121,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   CHOOSE the lowest Brier on 2021-23; DECIDE on 2024-25: lower than today with a 95% CI (player-game clusters)
   excluding 0 and lower in both seasons; guard: calibration error (10 bins) not above today's + 0.005; CONFIRM 2026 so
   far, same direction. Each model decided separately (two pre-named tests).
+- **RESULT {#avail-gb-week} (AA, week model) availability settings: FAIL on the 2026 confirm, today's kept (now
+  tested; re-check at season end).** tools/avail_grid_eval.py week, 134,106 rows. Choose 2021-23: 31 leaves / 200
+  iterations / min leaf 80, Brier .10554 vs today's (31 / 400 / 40) .10736. Decide 2024-25: -.00133 [-.00187, -.00078],
+  2024 -.00195, 2025 -.00075 (pass). Confirm 2026 so far: +.00017 (fail, small sample). The calibration figures this run
+  printed (.1335 -> .1359) were misaligned (predictions paired with other rows' outcomes; fixed in the tool); Brier was
+  computed per season and is unaffected. PENDING CHECK at season end: rerun the decide-confirm on full 2026; if the
+  2026 sign flips, ship 31 / 200 / 80.
+- **RESULT {#avail-gb-tuesday} (AA, Tuesday model) availability settings: FAIL, today's kept (now tested).**
+  tools/avail_grid_eval.py tuesday, 37,132 rows. Choose 2021-23: 7 leaves / 200 / min leaf 80, Brier .13461 vs today's
+  (15 / 300 / 40) .13543. Decide 2024-25: +.00049 [+.00007, +.00094] (worse; 2024 -.00031, 2025 +.00126); 2026 +.00257.
+  (Calibration figures printed by this run predate the alignment fix; the verdict rests on Brier.)

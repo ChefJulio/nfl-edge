@@ -66,8 +66,10 @@ def main():
       out.append(((run(gb, s)[m] - te.y[m]) ** 2))
     return pd.concat(out)
 
-  combos = [dict(max_leaf_nodes=a, max_iter=b, min_samples_leaf=c) for a, b, c in GRID]
   today = {k: base[k] for k in ("max_leaf_nodes", "max_iter", "min_samples_leaf")}
+  combos = [dict(max_leaf_nodes=a, max_iter=b, min_samples_leaf=c) for a, b, c in GRID]
+  if today not in combos:  # today's settings are always a candidate (the Tuesday model's 300 iterations aren't on the grid)
+    combos.append(dict(today))
   print(f"{which}: {len(rows)} rows; today {today}", flush=True)
   sc = {}
   for gb in combos:
@@ -89,8 +91,9 @@ def main():
   lo, hi = np.percentile(bt, [2.5, 97.5])
   per = {s: (brier(best, [s]) - brier(today, [s])).mean() for s in (2024, 2025)}
   y = te.y[m].to_numpy()
-  pn = pd.concat([run(best, s) for s in (2024, 2025)])[m].to_numpy()
-  pb = pd.concat([run(today, s) for s in (2024, 2025)])[m].to_numpy()
+  # aligned to te's rows (rows aren't sorted by season, so a plain concat would pair predictions with other outcomes)
+  pn = pd.concat([run(best, s) for s in (2024, 2025)]).reindex(te.index)[m].to_numpy()
+  pb = pd.concat([run(today, s) for s in (2024, 2025)]).reindex(te.index)[m].to_numpy()
   en, eb = ece(pn, y), ece(pb, y)
   ok = hi < 0 and all(v < 0 for v in per.values()) and en <= eb + 0.005
   print(f"DECIDE 2024-25: Brier diff {diff.mean():+.5f} [{lo:+.5f}, {hi:+.5f}], per season " + " ".join(f"{s} {v:+.5f}" for s, v in per.items())
