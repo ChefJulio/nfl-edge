@@ -2174,3 +2174,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   game, odd vs even games r .25, next season .21 (2.5x general flag cost); COMMITTED by a defense .11 / .08 (noise).
   team_model.dpi_pass = true: DPI plays join the pass unit at their own EPA. Same harness and GATE as AB-a, decided
   separately against today; any that pass are combined and checked the same way.
+- **AMENDMENT 2026-10-17, before any (AB) run (found while building).** Wiped-out plays are not all outside the
+  ratings: called-back RUNS (rush = 1 on a no_play row: 365 in 2024, mostly offensive holding, -0.65 EPA each) sit in
+  the rush unit today at the flag's EPA, while called-back passes (qb_dropback 0) never reach the pass unit. So: (AB-a)
+  the pen unit takes every wiped-out play and those rows leave the rush unit (a play counts in one unit); reported with
+  it, not gated: the rush unit without them alone (team_model.rush_no_play = false), to show which half moves.
+  (AB-c) DPI rows carry no passer in nflverse: they are credited to the team's main passer that game (most dropbacks).
