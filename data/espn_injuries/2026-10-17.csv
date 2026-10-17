@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-05T04:04Z,,,,,,McMillan caught 14 of 16 targets for 192 yards and two touchdowns in Sunday's 32-26 win over the Lions.
 4428993,Haynes King,Carolina Panthers,Active,2026-10-04T23:08Z,,,,,,King (coach's decision) is inactive but will operate as the Panthers' emergency third quarterback Sunday night versus Detroit.
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
-4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-17T22:00Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
+4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-17T22:20Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
 4431611,Caleb Williams,Chicago Bears,Questionable,2026-10-17T20:37Z,Hamstring,Strain,Right,2026-10-18,QUESTIONABLE,"Williams (hamstring) is expected to start Sunday's game against the Falcons, Adam Schefter of ESPN reports."
 4242659,Dayo Odeyingbo,Chicago Bears,Injured Reserve,2026-10-17T17:35Z,Quadriceps,Not Specified,Not Specified,2026-11-22,IR,ir
 4911952,Keyshaun Elliott,Chicago Bears,Out,2026-10-17T03:50Z,Quadriceps,Not Specified,Not Specified,2026-10-22,OUT,Elliott (quadriceps) has been ruled out for Sunday's game against the Falcons.
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035661,Julian Blackmon,New Orleans Saints,Active,2026-10-11T16:37Z,,,,,,Blackmon (shoulder) is active for Sunday's game against the Vikings.
 4698597,Barion Brown,New Orleans Saints,Active,2026-10-11T16:22Z,,,,,,Brown (thigh) is active for Sunday's game against the Vikings.
 3115383,Davon Godchaux,New Orleans Saints,Active,2026-10-10T16:20Z,,,,,,Godchaux (groin) does not have an injury designation for Sunday's game against the Vikings.
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-17T21:08Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-17T22:20Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4259566,Andrew Thomas,New York Giants,Questionable,2026-10-17T04:50Z,Groin,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Thomas (groin) is questionable for Sunday's game against the Saints.
 4240706,Jason Pinnock,New York Giants,Active,2026-10-17T04:47Z,,,,,,Pinnock (concussion) doesn't carry an injury designation for Sunday's game against the Saints.
 4921249,Colton Hood,New York Giants,Out,2026-10-17T02:39Z,Concussion,Concussion,Not Specified,2026-10-25,OUT,Hood (concussion) has been ruled out ahead of Sunday's game against the Saints.
@@ -628,13 +628,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4040715,Jalen Hurts,Philadelphia Eagles,Injured Reserve,2026-10-17T20:02Z,Calf,Not Specified,Not Specified,2026-11-22,IR,"The Eagles placed Hurts (calf) on injured reserve Saturday, Adam Schefter of ESPN reports."
 15797,Lane Johnson,Philadelphia Eagles,Out,2026-10-17T19:13Z,Personal,Not Specified,Not Specified,2027-02-15,OUT,out
 4567802,Drew Kendall,Philadelphia Eagles,Questionable,2026-10-17T04:43Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Kendall (knee) is questionable for Sunday's game against the Panthers.
-4035624,Landon Dickerson,Philadelphia Eagles,Injured Reserve,2026-10-17T04:35Z,Knee,Not Specified,Not Specified,2026-10-18,IR-R,Dickerson (knee) is questionable for Sunday's game against Carolina.
+4035624,Landon Dickerson,Philadelphia Eagles,Injured Reserve,2026-10-17T04:35Z,Knee,Not Specified,Not Specified,2026-10-26,IR-R,Dickerson (knee) is questionable for Sunday's game against Carolina.
 4240585,AJ Epenesa,Philadelphia Eagles,Doubtful,2026-10-17T04:31Z,Back,Not Specified,Not Specified,2026-10-18,DOUBTFUL,Epenesa (back) is doubtful for Sunday's game against the Panthers.
 3916409,Jonathan Greenard,Philadelphia Eagles,Active,2026-10-17T02:27Z,,,,,,Greenard (ankle) does not carry an injury designation into Sunday's game against Carolina.
 4571162,Jalyx Hunt,Philadelphia Eagles,Out,2026-10-17T02:25Z,Ankle,Not Specified,Not Specified,2026-10-26,OUT,Hunt (ankle/knee) has been ruled out ahead of Sunday's game against Carolina.
 4240456,Michael Carter II,Philadelphia Eagles,Out,2026-10-17T02:20Z,Abdomen,Not Specified,Not Specified,2026-10-26,OUT,Carter (abdomen) has been ruled out for Sunday's game against the Panthers.
-4431574,Eli Stowers,Philadelphia Eagles,Injured Reserve,2026-10-17T02:18Z,Quadriceps,Not Specified,Not Specified,2026-10-18,IR-R,Stowers (quadriceps) is questionable for Sunday's game against the Panthers.
-4241374,Grant Calcaterra,Philadelphia Eagles,Injured Reserve,2026-10-17T02:16Z,Back,Not Specified,Not Specified,2026-10-18,IR-R,Calcaterra (back) is questionable for Sunday's game against the Panthers.
+4431574,Eli Stowers,Philadelphia Eagles,Injured Reserve,2026-10-17T02:18Z,Quadriceps,Not Specified,Not Specified,2026-10-26,IR-R,Stowers (quadriceps) is questionable for Sunday's game against the Panthers.
+4241374,Grant Calcaterra,Philadelphia Eagles,Injured Reserve,2026-10-17T02:16Z,Back,Not Specified,Not Specified,2026-10-26,IR-R,Calcaterra (back) is questionable for Sunday's game against the Panthers.
 4360238,Dameon Pierce,Philadelphia Eagles,Active,2026-10-17T00:05Z,,,,,,"Pierce will be the Eagles' starting running back against the Panthers on Sunday due to the absences of both Saquon Barkley (hamstring) and Will Shipley (foot, IR)."
 4362805,Tyler Steen,Philadelphia Eagles,Active,2026-10-16T21:03Z,,,,,,
 4248557,E.J. Jenkins,Philadelphia Eagles,Active,2026-10-16T20:39Z,,,,,,
@@ -646,7 +646,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360698,Joe Milton III,Philadelphia Eagles,Active,2026-10-16T15:37Z,,,,,,"The Eagles are signing Milton off the Cowboys' practice squad, NFL reporter Jordan Schultz reports."
 3139368,Marcus Epps,Philadelphia Eagles,Active,2026-10-16T04:20Z,,,,,,Epps (groin) practiced fully Thursday.
 4685201,Tanner McKee,Philadelphia Eagles,Active,2026-10-15T17:29Z,,,,,,"McKee appears lined up to start Sunday's game against the Panthers after the Eagles announced Wednesday that Jalen Hurts has been ruled out for Week 6 due to a superficial blood clot on his calf, Dave Zangaro of NBC Sports Philadelphia reports."
-4686911,Jakorian Bennett,Philadelphia Eagles,Injured Reserve,2026-10-15T01:04Z,Knee,Not Specified,Not Specified,2026-10-18,IR-R,Bennett (knee) had his  21-day practice window opened by the Eagles on Wednesday.
+4686911,Jakorian Bennett,Philadelphia Eagles,Injured Reserve,2026-10-15T01:04Z,Knee,Not Specified,Not Specified,2026-10-26,IR-R,Bennett (knee) had his  21-day practice window opened by the Eagles on Wednesday.
 4685759,Jalen Carter,Philadelphia Eagles,Active,2026-10-12T16:31Z,,,,,,"Carter logged five tackles (three solo), including 2.0 sacks, one pass defense and two forced fumbles during the Eagles' 19-17 loss to the Jaguars on Sunday in London."
 3050478,Jake Elliott,Philadelphia Eagles,Active,2026-10-12T14:13Z,,,,,,Elliott made his lone field-goal attempt and both of his extra-point tries during Sunday's 19-17 loss to the Jaguars in London.
 4431492,Roman Wilson,Pittsburgh Steelers,Injured Reserve,2026-10-17T19:27Z,Finger,Not Specified,Left,2026-11-22,IR,"Wilson (finger) was placed on injured reserve Saturday, Ray Fittipaldo of the Pittsburgh Post-Gazette reports."
