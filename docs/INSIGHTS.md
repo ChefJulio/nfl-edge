@@ -2139,3 +2139,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   .25}. tools/experiments.py 2021-2026 (variants minshare_*), tools/grid_eval.py: CHOOSE the lowest MAE on 2021-23;
   DECIDE on 2024-25 (CI excluding 0 below, better in both, no position significantly worse, start / sit not
   significantly worse); CONFIRM 2026 so far, same direction. Today's the choice -> keep (now tested).
+- **RESULT {#redist-min-share} (AC) the redistribution trigger: FAIL, tgt .08 / carry .15 kept (now tested; flat).**
+  tools/experiments.py 2021-2026 + tools/grid_eval.py. Choose 2021-23, MAE vs today: every cell within +-0.0007, none
+  with a CI excluding 0; best tgt .08 / carry .08 -0.0000 [-0.0004, +0.0003] (carry .25 the same). Decide 2024-25:
+  +0.0005 [-0.0001, +0.0010] (2024 +0.0003, 2025 +0.0007; RB +0.0013 [-0.0000, +0.0028]); start / sit -0.004 [-0.012,
+  +0.004]. 2026 so far -0.0002 [-0.0025, +0.0025]. Lower thresholds (hand out smaller shares) were slightly worse on
+  2021-23, higher ones no better: today's sits at the flat bottom. docs/handset_audit.md #4.
