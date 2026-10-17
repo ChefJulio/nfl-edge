@@ -59,5 +59,10 @@ td.projc .pv .live-dot { width: 7px; height: 7px; margin-right: 4px; }
 #tab-players table.ranks td.projc .sc, #tab-players table.ranks th.projc .sc { background: none; box-shadow: none; padding-left: 0; padding-right: 0; }
 @media (max-width: 640px) {
   /* the actual score lines up with the projections around it (same fixed width, digits right) */
-  #tab-players table.ranks td.projc .pv.act-v { display: inline-block; min-width: 50px; text-align: right; font-variant-numeric: tabular-nums; }
+  #tab-players table.ranks td.projc .pv.act-v { font-variant-numeric: tabular-nums; }
 }
+
+/* actual over projection: one stack, both lines on the same right edge as the projections in other rows (the
+   dimmed line is wider and extends left); owner 2026-10-17 */
+td.projc .pv-stack { display: inline-flex; flex-direction: column; align-items: flex-end; width: 50px; }
+td.projc .pv-stack .pv-was { white-space: nowrap; }
