@@ -919,8 +919,19 @@
   const RJ = { d: undefined };
   const loadRos = () => { if (RJ.d !== undefined) return; RJ.d = null;
     NFLE.load('data/ros.json').then(j => { RJ.d = j; rerenderCard(); }).catch(() => {}); };
+  // a week only when our return model is following him: every later week at 100% means no injury on record (e.g.
+  // hurt in the game before his bye, before any report lists him), not a return estimate; ESPN's date fills in then
   const backWeek = pid => { const r = RJ.d && RJ.d.players[pid];
-    if (!r) return null; const e = r.w.find(z => z[1] >= 0.5); return e && e[0] > RJ.d.from ? e[0] : e ? null : 'no'; };
+    if (!r || !r.w.some(z => z[1] < 0.995)) return null;
+    const e = r.w.find(z => z[1] >= 0.5); return e && e[0] > RJ.d.from ? e[0] : e ? null : 'no'; };
+  // the NFL week a date falls in (weeks run Tuesday to Monday), from this week's earliest kickoff in ros.json
+  const weekOfDate = d => {
+    if (!RJ.d) return null;
+    if (RJ.t0 === undefined) { const ks = Object.values(RJ.d.players).map(x => x.k).filter(Boolean).sort();
+      RJ.t0 = ks.length ? Date.parse(ks[0]) - 2 * 864e5 : null; }  // the Tuesday before Thursday night
+    if (RJ.t0 == null) return null;
+    return RJ.d.from + Math.max(0, Math.floor((Date.parse(d + 'T12:00:00Z') - RJ.t0) / (7 * 864e5)));
+  };
   const espnDate = d => new Date(d + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
   const healthOf = (pid, p, L, espn) => {
     loadInj(); loadRos();
@@ -993,7 +1004,7 @@
     // our return model's chance he plays that game (owner 2026-10-17: the play % beside "Expected back")
     const backRow = ourG && RJ.d && RJ.d.players[pid] && RJ.d.players[pid].w.find(z => z[0] === h.back);
     const backP = backRow ? `${NFLE.fmt.toPlay(1 - backRow[1])} to play` : 'our return model';
-    const espnG = now && now.return_date ? games.find(e => e[1] >= now.return_date) : null;
+    const espnG = now && now.return_date ? games.find(e => e[1] >= now.return_date) || upG(weekOfDate(now.return_date)) : null;
     const onBye = ((L && L.up) || []).some(x => x.w === h.wk && x.bye);  // no game this week: nothing to play
     const out = h.inj && (h.play == null || h.play < 0.5);
     const third = out
