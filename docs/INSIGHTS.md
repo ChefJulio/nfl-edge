@@ -2180,3 +2180,19 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   the pen unit takes every wiped-out play and those rows leave the rush unit (a play counts in one unit); reported with
   it, not gated: the rush unit without them alone (team_model.rush_no_play = false), to show which half moves.
   (AB-c) DPI rows carry no passer in nflverse: they are credited to the team's main passer that game (most dropbacks).
+- **RESULT {#pen-unit} (AB-a) penalty-wiped plays as a fourth unit: FAIL (as the persistence check predicted).**
+  tools/game_eval.py 2021-25 --only=fitted, 1,279 games paired (scratch/ab_compare.py). Today 10.428 (winners 61.9%).
+  Pen unit: +0.005 [-0.038, +0.046] (2021 +0.096, 2022 -0.018, 2023 -0.008, 2024 -0.107, 2025 +0.062); its fitted points
+  weight swings 1.01 / 0.21 / -0.03 / 1.92 / 1.73 by season. Reported, not gated: the rush unit without its wiped-out
+  runs alone -0.002 [-0.009, +0.005] (no difference: the inconsistency costs nothing measurable). Switches kept off
+  (team_model.pen_unit, rush_no_play).
+- **RESULT {#dpi-pass} (AB-c) defensive pass interference as a pass play: FAIL.** +0.017 [-0.006, +0.039] (worse in
+  2021 and 2025, flat otherwise); with the pen unit -0.008 [-0.058, +0.039]. Drawing DPI persists more than flags in
+  general, but ~0.5 a game at +1.7 EPA is a high-variance slice: adding it to the pass unit moves ratings more than it
+  informs them. Switch kept off (team_model.dpi_pass).
+- **RESULT {#called-back} (AB-b) called-back plays at their would-be result: FAIL (closest of the three).** -0.022
+  [-0.051, +0.007] (2021 +0.001, 2022 -0.061, 2023 -0.024, 2024 -0.000, 2025 -0.025; winners 61.9 -> 63.2%); total MAE
+  +0.013. Not better than noise; no re-run on these seasons. Switch kept off (team_model.called_back); its pieces (the
+  archive's would-be parse, the EPA regression) stay for a fresh pre-registered test on 2026 at season end.
+  Answer to the owner's question: penalties are not missing from the team ratings in any way that measurably costs
+  game accuracy. Flags on plays that stand are inside those plays' EPA; wiped-out plays are mostly noise team to team.

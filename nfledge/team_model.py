@@ -7,6 +7,7 @@ defense). Plays are weighted by recency within the season, plus a decaying prior
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -56,6 +57,38 @@ def prior_team_dropbacks(qbteam: pd.DataFrame, season: int, week: int) -> pd.Ser
   return pd.Series((last.prior + last.n).to_numpy(), index=pd.MultiIndex.from_arrays([last.qb, last.team]))
 
 
+def flagged_plays(cfg: dict) -> pd.DataFrame | None:
+  """EXPERIMENT plumbing for (AB) penalties in team ratings (INSIGHTS, pre-registered 2026-10-17): the sorted archive
+  of flagged plays from tools/penalty_archive.py (kind stood / called_back / pre_snap, unit off / st, penalty_type).
+  Read only when an (AB) switch is on; if a variant ships, its columns move into data.PBP_COLS instead."""
+  files = sorted((Path(__file__).resolve().parent.parent / cfg["data"]["cache_dir"] / "penalty_plays" / "v2").glob("*.parquet"))
+  if not files:
+    raise FileNotFoundError("run tools/penalty_archive.py first (the (AB) experiments read its archive)")
+  cols = ["game_id", "play_id", "kind", "unit", "penalty_type", "wb_yards", "wb_inc", "wb_int", "wb_sack", "wb_td", "wb_ok"]
+  return pd.concat([pd.read_parquet(f, columns=cols) for f in files], ignore_index=True)
+
+
+WB_X = ["down", "ydstogo", "yardline_100", "yards", "inc", "int", "sack", "td"]
+
+
+def would_be_epa(pbp: pd.DataFrame, cb: pd.DataFrame) -> np.ndarray:
+  """(AB-b) EPA a called-back play would have had, from its parsed result: a regression of EPA on down, distance,
+  field position and outcome, fit on unflagged passes and runs of the seasons BEFORE each called-back play's season
+  (the window's first season, which no tested week weighs, uses its own)."""
+  from sklearn.ensemble import HistGradientBoostingRegressor
+  real = pbp[(pbp.epa.notna()) & pbp.play_type.isin(["pass", "run"]) & pbp.down.notna()]
+  real = real.assign(yards=real.yards_gained.fillna(0), inc=((real.pass_attempt == 1) & (real.complete_pass == 0)
+                     & (real.interception == 0) & (real.sack == 0)).astype(int), int=real.interception,
+                     td=((real.touchdown == 1) & (real.td_team == real.posteam)).astype(int))
+  out = np.full(len(cb), np.nan)
+  for sn in sorted(cb.season.unique()):
+    tr = real[real.season < sn] if (real.season < sn).any() else real[real.season == sn]
+    m = HistGradientBoostingRegressor(max_iter=200, learning_rate=0.1, random_state=0).fit(tr[WB_X].astype(float), tr.epa)
+    i = (cb.season == sn).to_numpy()
+    out[i] = m.predict(cb.loc[i, WB_X].astype(float))
+  return out
+
+
 def unit_plays(pbp: pd.DataFrame, cfg: dict, qbexp: pd.DataFrame | None = None,
                qbteam: pd.DataFrame | None = None) -> dict[str, pd.DataFrame]:
   tm = cfg["team_model"]
@@ -71,10 +104,53 @@ def unit_plays(pbp: pd.DataFrame, cfg: dict, qbexp: pd.DataFrame | None = None,
     "rush": live & pbp.is_designed_rush & keep,
     "st": live & pbp.is_st,
   }
+  # EXPERIMENTS (AB), off unless set: penalty-wiped plays. Today called-back RUNS (rush = 1 on a no_play row) sit in
+  # the rush unit at the flag's EPA while called-back passes reach no unit (INSIGHTS (AB) amendment).
+  pen_unit, dpi_pass, called_back = tm.get("pen_unit", False), tm.get("dpi_pass", False), tm.get("called_back", False)
+  noplay = pbp.play_type == "no_play"
+  if pen_unit or dpi_pass or called_back:
+    fl = flagged_plays(cfg)
+    key = pd.MultiIndex.from_arrays([pbp.game_id, pbp.play_id])
+    k = fl.set_index(["game_id", "play_id"])
+    kind = pd.Series(k.kind.reindex(key).to_numpy(), index=pbp.index)
+    scrim = pd.Series(k.unit.reindex(key).to_numpy(), index=pbp.index) == "off"
+    ptype = pd.Series(k.penalty_type.reindex(key).to_numpy(), index=pbp.index)
+  if not tm.get("rush_no_play", True) or pen_unit:  # (AB-a) a play counts in one unit: wiped runs leave rush
+    sel["rush"] = sel["rush"] & ~noplay
+  if pen_unit:  # (AB-a) every wiped-out scrimmage play (called back or pre-snap), EPA to the offense
+    sel["pen"] = live & noplay & kind.isin(["called_back", "pre_snap"]) & scrim
+  dpi = None
+  if dpi_pass:  # (AB-c) defensive pass interference as a pass play at its own EPA (a catch at the spot + 1st down)
+    dpi = live & noplay & (ptype == "Defensive Pass Interference") & keep
+    sel["pass"] = sel["pass"] | dpi
+    if pen_unit:
+      sel["pen"] = sel["pen"] & ~dpi  # counted once, as a pass
+  if called_back:  # (AB-b) called-back passes and runs at their would-be EPA (parsed result), in the pass / rush unit
+    wb = {c: pd.Series(k[c].reindex(key).to_numpy(), index=pbp.index) for c in ("wb_yards", "wb_inc", "wb_int", "wb_sack", "wb_td", "wb_ok")}
+    cbm = live & noplay & (kind == "called_back") & scrim & wb["wb_ok"].fillna(False).astype(bool) & keep & pbp.down.notna()
+    if dpi is not None:
+      cbm = cbm & ~dpi  # a DPI counts at its enforced EPA under (AB-c)
+    cbp = pbp.loc[cbm].assign(yards=wb["wb_yards"][cbm].fillna(0.0), inc=wb["wb_inc"][cbm].astype(int),
+                              int=wb["wb_int"][cbm].astype(int), sack=wb["wb_sack"][cbm].astype(int), td=wb["wb_td"][cbm].astype(int))
+    pbp = pbp.copy()
+    pbp.loc[cbm, "epa"] = would_be_epa(pbp, cbp)
+    flag = lambda c: wb[c].fillna(False).astype(bool)
+    is_pass = (pbp["pass"] == 1) | flag("wb_inc") | flag("wb_int") | flag("wb_sack")
+    sel["pass"] = sel["pass"] | (cbm & is_pass)
+    sel["rush"] = (sel["rush"] & ~noplay) | (cbm & ~is_pass & (pbp.rush == 1))
+    if "pen" in sel:
+      sel["pen"] = sel["pen"] & ~cbm
+    dpi = cbm if dpi is None else (dpi | cbm)  # rows needing a passer filled
   cols = ["season", "week", "game_id", "posteam", "defteam", "home", "div", "epa"]
   out = {u: pbp.loc[m, cols].reset_index(drop=True) for u, m in sel.items()}
   ps = pbp.loc[sel["pass"]]
-  out["pass"]["qb"] = ps.passer_player_id.fillna(ps.rusher_player_id).to_numpy()
+  qb = ps.passer_player_id.fillna(ps.rusher_player_id)
+  if dpi is not None:  # nflverse names no passer on a wiped play: the team's main passer that game (most dropbacks)
+    db = pbp[pbp.is_dropback].assign(q=pbp.passer_player_id.fillna(pbp.rusher_player_id)).dropna(subset=["q"])
+    main = db.groupby(["game_id", "posteam"]).q.agg(lambda x: x.value_counts().index[0])
+    miss = qb.isna()
+    qb[miss] = main.reindex(pd.MultiIndex.from_arrays([ps.game_id[miss], ps.posteam[miss]])).to_numpy()
+  out["pass"]["qb"] = qb.to_numpy()
   if qbexp is not None:
     pri = qbexp.set_index(["qb", "season", "week"]).prior
     key = pd.MultiIndex.from_arrays([out["pass"].qb, out["pass"].season, out["pass"].week])
@@ -247,7 +323,8 @@ class TeamModel:
                     for u, p in self.plays.items()}
     for d in self.designs.values():
       d.inexp_alpha = float(cfg["team_model"].get("qb_inexp_alpha", 1.0))
-    self.alphas = {u: 100.0 for u in UNITS}
+    self.units = tuple(self.plays)  # UNITS, plus "pen" when the (AB-a) experiment is on
+    self.alphas = {u: 100.0 for u in self.units}
     self.alpha_qb = 1e9
     self.cv_loss = {}
     self._cache: dict = {}
@@ -295,7 +372,7 @@ class TeamModel:
     icpt, home, off, dfn, se_off, se_def, hdiv = {}, {}, {}, {}, {}, {}, {}
     raw_off, raw_def, plays_pg = {}, {}, {}
     qb, qb_inexp, qb_new = None, 0.0, 0.0
-    for u in UNITS:
+    for u in self.units:
       w = self.weights(u, season, target_week)
       d = self.designs[u]
       beta = d.solve(w, alphas[u], self.alpha_qb)
@@ -348,7 +425,7 @@ class TeamModel:
     team-game offensive EPA/play, score weighted MSE. Never random CV."""
     grid = self.cfg["team_model"]["alpha_grid"]
     best = {}
-    for u in UNITS:
+    for u in self.units:
       p = self.plays[u]
       d = self.designs[u]
       losses = np.zeros(len(grid))
@@ -533,7 +610,7 @@ class GameModel:
     g["opp_pace_allowed"] = g.opp.map(vf.pace_allowed)
     g["proe_team"] = g.team.map(vf.proe)
     g["pass_rate_team"] = g.team.map(vf.pass_rate)
-    for u in UNITS:
+    for u in r.off.columns:  # UNITS, plus "pen" under the (AB-a) experiment
       qbs = g.qb.tolist() if "qb" in g else [None] * len(g)
       qb_of = dict(zip(zip(g.game_id, g.team), qbs))
       oq = [qb_of.get((gid, o)) for gid, o in zip(g.game_id, g.opp)]
@@ -544,6 +621,8 @@ class GameModel:
     # Net special-teams edge per game: our ST plays vs theirs, scaled to league ST plays per team-game.
     n_st = r.plays_pg.get("st", 11.0)
     g["st_net"] = n_st * (g.epa_st - g.opp_epa_st)
+    if "epa_pen" in g:  # (AB-a) net EPA on penalty-wiped plays per game, the same construction
+      g["pen_net"] = r.plays_pg.get("pen", 6.0) * (g.epa_pen - g.opp_epa_pen)
     return g
 
   def fit(self, train: pd.DataFrame, points_rows: pd.DataFrame | None = None):
@@ -565,7 +644,7 @@ class GameModel:
     # game-level backtest (tools/game_eval.py) can test the fitted weight against alternatives.
     st_w = self.cfg["team_model"].get("points_st_weight", "fitted")
     if st_w == "fitted":
-      self.points = Linear.fit(t, "points", ["off_epa_game", "st_net"], name="points")
+      self.points = Linear.fit(t, "points", ["off_epa_game", "st_net"] + (["pen_net"] if "pen_net" in t else []), name="points")
     else:
       m = Linear.fit(t.assign(points=t.points - float(st_w) * t.st_net), "points", ["off_epa_game"], name="points")
       self.points = Linear(["off_epa_game", "st_net"], np.append(m.coef, float(st_w)), "points")

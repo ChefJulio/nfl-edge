@@ -1,5 +1,5 @@
 ---
-documented_code_hash: ee77ef73df23e1c8
+documented_code_hash: cd142de96866769a
 ---
 # How the model works
 
@@ -327,6 +327,7 @@ The grade measures output, not style: fantasy points per game in the site's scor
 - **Rejected** - How quickly should a player's touchdown rate move from what his usage predicts toward his actual touchdowns (the blend strength, 150 opportunities)? - Any setting from 25 to 600, or expected touchdowns only, changed the average miss by 0.001 or less; the best of them was no better on later seasons, so 150 stays, now tested (2026-10). <!-- tried:td-blend-k -->
 - **Rejected** - Are the chance-to-play models (Tuesday, and the one model for the rest of the week) built with the best settings (tree size, number of rounds, smallest group per leaf)? - Kept as they are: for the week model the best alternative (smaller learning run, bigger leaves) was better on 2024-25 but not on 2026 so far, to be rechecked at season end; for the Tuesday model it was worse on later seasons (2026-10). <!-- tried:avail-gb-week --> <!-- tried:avail-gb-tuesday -->
 - **Rejected** - When a player sits, how small a share of his team's volume should still be handed out to teammates (8% of targets, 15% of carries)? - Every setting from 4% to 12% (targets) and 8% to 25% (carries) moved the average miss by under 0.001; the best was no better on later seasons, so today's stays, now tested (2026-10). <!-- tried:redist-min-share -->
+- **Rejected** - Should a team's penalties count in its ratings? Plays a flag wipes out (holding, false starts, offside) never reach the ratings, so we tried rating them as their own unit, counting defensive pass interference as a pass play, and counting called-back plays at the result they would have had. None improved predicted game margins; how often a team gets flagged barely carries over from one half of a season to the other (2026-10). <!-- tried:pen-unit --> <!-- tried:dpi-pass --> <!-- tried:called-back -->
 
 ## Under the hood
 
