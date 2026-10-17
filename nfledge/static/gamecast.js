@@ -2799,6 +2799,10 @@
     ov.querySelector('.sheet-x').focus();
     // tables inside stick their heads just under the sheet's title row, not on top of it (owner 2026-10-17)
     ov.querySelector('.sheet').style.setProperty('--sheeth', `${ov.querySelector('.sheet-h').offsetHeight}px`);
+    // a sideways-scroll box (.lg-scroll) is its own sticky frame, so a head inside one stuck --sheeth down into its
+    // rows (owner 2026-10-17, the grade sheet's By season): one that fits drops the scroll box so its head sticks to
+    // the sheet; one too wide keeps scrolling sideways and its head stays put (gamecast.css)
+    ov.querySelectorAll('.sheet-b .lg-scroll').forEach(b => b.classList.toggle('lg-fit', b.scrollWidth <= b.clientWidth + 1));
     if (matchMedia('(max-width: 699px)').matches) drag(ov, ov.querySelector('.sheet'));
   };
   // Phones (owner 2026-10-17: no half-open state): a sheet opens at full height (or its content's, if shorter) and

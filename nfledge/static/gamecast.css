@@ -1031,5 +1031,9 @@ html.pc-open { overflow: hidden; }
 /* a sheet's tables: column heads stick under the sheet's own title row (--sheeth, set when it opens), below it */
 .sheet thead th { top: var(--sheeth, 0px); z-index: 2; }
 .sheet .sheet-h { z-index: 4; }
+.sheet .lg-scroll:not(.lg-fit) thead th { top: 0; }
+.sheet .lg-scroll.lg-fit { overflow: visible; }
+.sheet .lg-fit table.lg tr > :nth-child(1)::before { content: none; }  /* the sideways-scroll edge cover: nothing scrolls under it here */
+.sheet .lg-fit table.lg thead th { position: sticky; top: var(--sheeth, 0px); z-index: 3; background: var(--panel2); }
 .tm-tph { flex: none; font-size: var(--fs-2xs); font-weight: 700; color: #ff8f84; text-transform: uppercase; letter-spacing: .03em; }
 .tm-gr { font-size: var(--fs-sm); color: var(--ink); font-variant-numeric: tabular-nums; } .tm-gr.good { color: #6fdc8c; } .tm-gr.bad { color: #ff8f84; }
