@@ -1945,3 +1945,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   otherwise keep A. MDE: no earlier test on these rows; ~1,500 rows a season and the two scores share their inputs,
   so the paired interval should be far narrower than either correlation's (to be reported). Reported alongside:
   every group, and QBs on their own (the case that started this).
+- **RESULT {#durability-per-snap} (S) durability per snap instead of per game: FAIL (clearly worse).**
+  tools/durability_eval.py, 1,226-1,652 rows a season. K chosen on 2014-19: 250 snaps everywhere but TE (2000).
+  Decide 2020-25: within-group Spearman with fewer games missed next season, A (today) 0.128-0.167 a season vs B
+  0.073-0.135; B - A -0.028, 95% player-cluster CI [-0.039, -0.016] (width 0.022), B better 1 of 6 seasons. Every group
+  worse or level (WR +0.007); QBs worst: A +0.103, B -0.024 (per-snap history says nothing about a QB's next season).
+  Why, likely: missed games already shrink a player's snaps, so the rate double-counts the injury that cost him the
+  snaps, and per-snap exposure ties the score to role (starters log more snaps per missed game) rather than to how
+  often he gets hurt. Kept A. The earlier check that started this (backup QBs rank high under A) is real but small:
+  starting QBs average the 45th percentile; a snap-share pool cut (10-35%) barely moves it (45th -> 47th).

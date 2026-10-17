@@ -692,7 +692,9 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
         qs = [x[1] for x in evs if x[0] == wk and x[1]]
         e["ig"] = [wk, qs[0] if qs else None]
     out[gid] = {"eps": [{k: v for k, v in e.items() if v not in ("", None)} for e in reversed(eps)],
-                "games": int((g.season >= SNAPS_FROM).sum()), "missed": sum(e["missed"] or 0 for e in eps)}
+                "games": int((g.season >= SNAPS_FROM).sum()), "missed": sum(e["missed"] or 0 for e in eps),
+                # team games per season on the roster (not written to the pages; tools/durability_eval.py)
+                "gs": {int(k): int(v) for k, v in g.season[g.season >= SNAPS_FROM].value_counts().items()}}
   # Durability: share of his team's games he was available for (games missed inside injury episodes count against
   # him; healthy scratches and suspensions don't), shrunk toward his position's average by one season of games
   # (17), then his percentile among everyone at the position with a season or more of games.
