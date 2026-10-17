@@ -2196,3 +2196,20 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   archive's would-be parse, the EPA regression) stay for a fresh pre-registered test on 2026 at season end.
   Answer to the owner's question: penalties are not missing from the team ratings in any way that measurably costs
   game accuracy. Flags on plays that stand are inside those plays' EPA; wiped-out plays are mostly noise team to team.
+- **DESCRIPTIVE 2026-10-17 (owner: "do we account for likelihood of coming back after a bye? ... total calendar dates
+  to return after certain injuries? ... affects thursday game return likelihood right?"):** the return chain
+  (nfledge/returns.py) counts GAMES missed and skips byes; it has no calendar. Injured players still on the active
+  roster, 2014-26 (22,052 states, scratch/ret_days.py), P(back next game) by days to it: <= 5 (Thursday) 26.0%, 6-8
+  29.8%, 9-12 37.4%, 13+ (after a bye) 46.2%; after one missed game 33.8 / 38.5 / 48.2 / 55.2%. Concussion 38 / 53 / 68
+  / 66% (the extra days matter most: a protocol clock), hamstring 37 / 43 / 44 / 66%, ankle 31 / 38 / 41 / 61%, knee
+  30 / 35 / 45 / 52%. The current week's practice model was already checked for short weeks / extra rest (within 1.4
+  points, section above): practice days carry it there. The return chain (later weeks, Expected back) does not.
+- **PRE-REGISTERED 2026-10-17 (before building): (AD) calendar days in the return chain.** Two features added to the
+  return model's state: gap = days from the game he just missed to his team's next game; days_out = days from the
+  last game he played to that next game. The chain steps them along his team's real schedule (byes, Thursday games).
+  tools/return_days_eval.py, walk-forward 2022-25 (each season fit on the seasons before), the harness of tools/
+  lookahead_chain_eval.py. GATE: (1) P(back next game) Brier on every state, pooled, lower with a 95% bootstrap CI
+  (2,000 player-episode resamples) excluding 0 and lower in >= 3 of 4 seasons; (2) the chain over his next 2-6 games
+  not worse (CI upper < +0.002); (3) calibration error (10 bins) not above today's + 0.005; CONFIRM on 2026 so far,
+  same direction. Injured-reserve players (return_timing.py, which shares these features) checked the same way
+  before the features reach it.
