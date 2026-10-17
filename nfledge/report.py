@@ -1134,15 +1134,30 @@ def _rgb_dist(a: str, b: str) -> float:
   return sum((x - y) ** 2 for x, y in zip(ra, rb)) ** 0.5
 
 
+def vivid(color: str) -> str:
+  """A dark team color lifted with its hue kept (owner 2026-10-17: "bears grey ... look a little muted"): lightness up
+  to 0.34 and saturation to at least 0.5, so deep navy reads as navy, not the slate that mixing in white gives; near
+  greys (Raiders black) stay grey; colors already light enough are untouched. Same rule as teamgrid.js vivid()."""
+  import colorsys
+  r, g, b = (int(color.lstrip("#")[i:i + 2], 16) / 255 for i in (0, 2, 4))
+  h, l, s = colorsys.rgb_to_hls(r, g, b)
+  if l >= 0.3:
+    return color
+  s = s if max(r, g, b) - min(r, g, b) < 0.04 else max(s, 0.5)
+  return "#" + "".join(f"{round(v * 255):02x}" for v in colorsys.hls_to_rgb(h, 0.34, s))
+
+
 def battle_colors(ts: "TeamStyle", away: str, home: str) -> dict:
   """One bar color per team for a game, visible on the dark card and distinct from each other: the primary
-  colors, falling back to a secondary when the two teams' primaries look alike (e.g. two navy teams)."""
-  ap, asec = (ts.visible(c) for c in ts.c.get(away, ("#666666", "#999999")))
-  hp, hsec = (ts.visible(c) for c in ts.c.get(home, ("#666666", "#999999")))
-  for a, h in ((ap, hp), (ap, hsec), (asec, hp), (asec, hsec)):
-    if _rgb_dist(a, h) >= 110:
-      return {away: a, home: h}
-  return {away: ap, home: "#9aa3b2"}
+  colors, falling back to a secondary when the two teams' primaries look alike (e.g. two navy teams). Which color is
+  chosen on the plain-lightened versions (as before); the chosen one is then shown vivid() (dark ones lifted with
+  their hue kept) and only lightened further if still too dark for the tile."""
+  aw, hm = ts.c.get(away, ("#666666", "#999999")), ts.c.get(home, ("#666666", "#999999"))
+  show = lambda c: ts.visible(vivid(c))
+  for i, j in ((0, 0), (0, 1), (1, 0), (1, 1)):
+    if _rgb_dist(ts.visible(aw[i]), ts.visible(hm[j])) >= 110:
+      return {away: show(aw[i]), home: show(hm[j])}
+  return {away: show(aw[0]), home: "#9aa3b2"}
 
 
 def logistic(x):
