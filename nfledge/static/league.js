@@ -343,16 +343,16 @@
       const { moves } = movesFor(), weeks = rosWeeks();
       const best = moves.filter(m => m.ros >= 1).slice(0, 3);
       const fa = freeAgents();
-      const own = mine.ext.filter(x => !(mine.ir || []).includes(x)).map(x => ({ x, p: player(x), ros: weeks.reduce((t, k) => t + ((weekOf(x, k) || {}).exp || 0), 0) }));
+      const own = mine.ext.filter(x => !(mine.ir || []).includes(x)).map(x => ({ x, p: player(x), ros: weeks.reduce((t, k) => t + ((weekOf(x, k) || {}).exp || 0), 0), games: gamesOf(x) }));
       const below = own.map(o => ({ ...o, beat: fa.filter(f => f.pos === o.p.pos && f.ros > o.ros) }))
         .filter(o => o.beat.length && o.p.pos).sort((a, b) => b.beat.length - a.beat.length || a.ros - b.ros).slice(0, 4);
       const wv = mine.faab != null ? `$${mine.faab} FAAB left` : mine.waiver && claimWindow() ? `claims process Wed ~2am CT · you're #${mine.waiver} of ${L.teams.length}` : '';
       return `<div class="lg-mv lg-moves"><div class="lg-mv-h">Waiver wire${wv ? ` <span class="muted lg-wv">${wv}</span>` : ''}</div>
           <div class="lg-mv-sub">Best available for you</div>
-          ${best.length ? best.map(m => `<div class="lg-mv-row"><span class="lg-mv-k good">+${Math.round(m.ros)}</span><div><b>${esc(m.add.name)}</b> <span class="muted">${esc(m.add.pos)} · ROS ${Math.round(m.add.ros)} · ${NFLE.fmt.signed1(m.wk)} this week</span></div></div>`).join('')
+          ${best.length ? best.map(m => `<div class="lg-mv-row"><span class="lg-mv-k good">${perWk(m.ros)}</span><div><b>${esc(m.add.name)}</b> <span class="muted">${esc(m.add.pos)} · ${perG(m.add.ros, m.add.games)} per game rest of season · ${NFLE.fmt.signed1(m.wk)} this week</span></div></div>`).join('')
             : '<div class="muted">No free agent improves your team over the rest of the season by our projections.</div>'}
-          ${below.length ? `<div class="lg-mv-sub">Below the waiver wire</div>${below.map(o => `<div class="lg-mv-row"><span class="lg-mv-k bad">${esc(o.p.pos)}</span><div><b>${esc(o.p.name)}</b> <span class="muted">ROS ${Math.round(o.ros)} · ${o.beat.length} free agent${o.beat.length === 1 ? '' : 's'} project more (best: ${esc(o.beat.sort((a, b) => b.ros - a.ros)[0].name)} ${Math.round(o.beat[0].ros)})</span></div></div>`).join('')}` : ''}
-          <div class="muted lg-mv-f">+X = how much he'd add to your team: your best lineup each remaining week through ${ROS.through}, summed, making room with whoever costs least (one QB, TE, K and D/ST is enough; ${DEPTH_MIN} RBs and WRs stay). ROS = his own expected points. Upside the projections can't see is your call.</div></div>`;
+          ${below.length ? `<div class="lg-mv-sub">Below the waiver wire</div>${below.map(o => `<div class="lg-mv-row"><span class="lg-mv-k bad">${esc(o.p.pos)}</span><div><b>${esc(o.p.name)}</b> <span class="muted">${perG(o.ros, o.games)} per game · ${o.beat.length} free agent${o.beat.length === 1 ? '' : 's'} project more (best: ${esc(o.beat.sort((a, b) => b.ros - a.ros)[0].name)} ${perG(o.beat[0].ros, o.beat[0].games)})</span></div></div>`).join('')}` : ''}
+          <div class="muted lg-mv-f">+X = what he'd add to your team per week, your best lineup each remaining week through ${ROS.through}, making room with whoever costs least (one QB, TE, K and D/ST is enough; ${DEPTH_MIN} RBs and WRs stay). Per game = his expected points per remaining game, byes skipped. Upside the projections can't see is your call.</div></div>`;
     };
     const lineupView = () => {
       const ps = mine.ext.map(player), cur = new Set(mine.starters);
@@ -431,19 +431,19 @@
         <p class="muted lg-note">Win chance: each starter's projection and range under your scoring and his chance to sit, for both lineups, counting how players in the same game rise and fall together (a QB and his receivers most). Live points are the platform's.</p>`;
     };
 
-    const WHEAD = '<th>Player</th><th class="num">This wk</th><th class="num">ROS</th>';
+    const WHEAD = '<th>Player</th><th class="num">This wk</th><th class="num" title="Expected points per remaining game, byes skipped">ROS/g</th>';
     const waiversView = () => {
       if (!ROS) return '<p class="muted">Loading rest-of-season projections…</p>';
       const { moves } = movesFor(), gain = Object.fromEntries(moves.map(m => [m.add.key, m]));
       const forYou = p => { const m = gain[p.key];
-        return `<td class="num lg-gain ${m && m.ros > 0.5 ? 'good' : 'muted'}"${m ? ` title="${esc(`${m.ros >= 0 ? '+' : ''}${Math.round(m.ros)} to your team rest of season, ${NFLE.fmt.signed1(m.wk)} this week`)}"` : ''}>${m ? `${m.ros >= 0.5 ? '+' : ''}${Math.round(m.ros)}` : ''}</td>`; };
+        return `<td class="num lg-gain ${m && m.ros > 0.5 ? 'good' : 'muted'}"${m ? ` title="${esc(`${perWk(m.ros)} per week to your team (${m.ros >= 0 ? '+' : ''}${Math.round(m.ros)} through week ${ROS.through}), ${NFLE.fmt.signed1(m.wk)} this week`)}"` : ''}>${m ? perWk(m.ros) : ''}</td>`; };
       const fa = freeAgents();
       const pick = pos => fa.filter(p => p.pos === pos).sort((a, b) => b.ros - a.ros).slice(0, MOVE_POOL)
         .sort((a, b) => ((gain[b.key] || {}).ros ?? -1e9) - ((gain[a.key] || {}).ros ?? -1e9) || b.ros - a.ros).slice(0, 6);
       const sect = (pos, label = pos) => { const list = pick(pos);
-        return list.length ? `<h3 class="lg-h">${label}</h3>${table(list.map(p => row(pos, p, `<td class="num">${Math.round(p.ros)}</td>${forYou(p)}`, { noSlot: true })).join(''),
-          (pos === 'DEF' ? WHEAD.replace('Player', 'Team') : WHEAD) + '<th class="num">For you</th>')}` : ''; };
-      return `<p class="muted lg-note">Unrostered in your league. ROS = his expected points through week ${ROS.through} under your scoring; For you = what adding him does to your team's best lineups through week ${ROS.through}, with the best drop. Each position's best ${MOVE_POOL} by ROS, most useful to you first.</p>
+        return list.length ? `<h3 class="lg-h">${label}</h3>${table(list.map(p => row(pos, p, `<td class="num" title="${esc(`${Math.round(p.ros)} expected points over ${p.games} games`)}">${perG(p.ros, p.games)}</td>${forYou(p)}`, { noSlot: true })).join(''),
+          (pos === 'DEF' ? WHEAD.replace('Player', 'Team') : WHEAD) + '<th class="num" title="What he adds to your team per remaining week">For you</th>')}` : ''; };
+      return `<p class="muted lg-note">Unrostered in your league. ROS/g = his expected points per remaining game through week ${ROS.through} under your scoring (byes skipped); For you = what adding him does to your team's best lineups, per remaining week. Each position's best ${MOVE_POOL}, most useful to you first.</p>
         ${['QB', 'RB', 'WR', 'TE'].map(p => sect(p)).join('')}${L.slots.includes('K') ? sect('K') : ''}${L.slots.includes('DEF') ? sect('DEF', 'D/ST') : ''}`;
     };
 
@@ -468,19 +468,29 @@
       return v;
     };
     const rosWeeks = () => { const w = []; for (let k = ROS.from; k <= ROS.through; k++) w.push(k); return w; };
+    // ROS shown per game (owner 2026-10-17: "50 points over however many weeks are left ... did he have his bye
+    // already?"): his expected points over his remaining games (byes skipped); team gains per remaining week
+    // his TEAM's remaining games (a week he isn't projected counts as 0 points, not as no game)
+    const teamOfKey = key => { if (key.startsWith('d:')) return key.slice(2);
+      const g = key.startsWith('g:') ? key.slice(2) : gsisOf(key);
+      return g ? ((ROS.players[g] || D.players[g] || KBY[g] || {}).team) : dstTeam(key); };
+    const gamesOf = key => { const t = teamOfKey(key), byes = new Set(((ROS.byes || {})[t]) || []);
+      return rosWeeks().filter(k => !byes.has(k) && !(k === ROS.from && started(t))).length; };
+    const perG = (tot, n) => n ? f1(tot / n) : '–';
+    const perWk = v => `${v >= 0.05 ? '+' : ''}${f1(v / Math.max(1, rosWeeks().length))}`;
     const valueOf = (keys, weeks) => weeks.reduce((t, k) => t + total(optimize(keys.map(x => weekOf(x, k)).filter(Boolean), L.slots)), 0);
     // Free agents with rest-of-season points (expected, under this league's scoring), best first per position
     const freeAgents = () => {
       const rostered = new Set(L.teams.flatMap(t => t.ext.map(gsisOf).filter(Boolean)));
       const ros = g => rosWeeks().reduce((t, k) => t + ((weekOf(`g:${g}`, k) || {}).exp || 0), 0);
       const out = Object.entries(D.players).filter(([pid, p]) => !rostered.has(pid) && ['QB', 'RB', 'WR', 'TE'].includes(p.pos))
-        .map(([pid]) => Object.assign(fromPid(pid, pid), { key: `g:${pid}`, ros: ros(pid) }));
+        .map(([pid]) => Object.assign(fromPid(pid, pid), { key: `g:${pid}`, ros: ros(pid), games: gamesOf(`g:${pid}`) }));
       if (L.slots.includes('K')) Object.entries(KBY).filter(([g]) => !rostered.has(g))
-        .forEach(([g]) => out.push(Object.assign(fromPid(g, g), { key: `g:${g}`, ros: ros(g) })));
+        .forEach(([g]) => out.push(Object.assign(fromPid(g, g), { key: `g:${g}`, ros: ros(g), games: gamesOf(`g:${g}`) })));
       const rosteredD = new Set(L.teams.flatMap(t => t.ext.map(dstTeam).filter(Boolean)));
       if (L.slots.includes('DEF') && KD && KD.dst) Object.keys(KD.dst).filter(t => !rosteredD.has(t)).forEach(t => {
         const r = player(L.platform === 'espn' ? String(-16000 - +(Object.entries(ESPN_TEAM).find(([, c]) => c === t) || [0])[0]) : t);
-        out.push(Object.assign(r, { key: `d:${t}`, ros: rosWeeks().reduce((a, k) => a + ((weekOf(`d:${t}`, k) || {}).exp || 0), 0) }));
+        out.push(Object.assign(r, { key: `d:${t}`, ros: rosWeeks().reduce((a, k) => a + ((weekOf(`d:${t}`, k) || {}).exp || 0), 0), games: gamesOf(`d:${t}`) }));
       });
       return out;
     };
