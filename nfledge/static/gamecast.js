@@ -662,13 +662,13 @@
       <span>· Rk = his ${esc(pos)} finish that week (green = starter in your league size) · Proj = our projection then (green = beat it) · Tap a game to open its gamecast</span></div>`;
     const games = `${legend}<div class="lg-scroll"><table class="lg">${body}</table></div>`;
     if (carS.length < 2) return games;
-    return `<div class="seg lg-views" role="tablist"><button type="button" data-lv="s" class="${view === 's' ? 'on' : ''}">Seasons</button><button type="button" data-lv="g" class="${view === 'g' ? 'on' : ''}">Games</button></div>
+    return `<div class="seg lg-views" role="tablist"><button type="button" data-lv="g" class="${view === 'g' ? 'on' : ''}">Games</button><button type="button" data-lv="s" class="${view === 's' ? 'on' : ''}">Seasons</button></div>
       <div class="lg-v" data-lv="s"${view === 's' ? '' : ' hidden'}><div class="lg-leg"><span>Regular season. Chips = his ${esc(pos)} finish that season · Tap a season for its games</span></div>
         <div class="lg-scroll"><table class="lg lg-career"><tbody>${carHead}${carTot}${car}</tbody></table></div></div>
       <div class="lg-v" data-lv="g"${view === 'g' ? '' : ' hidden'}>${games}</div>`;
   };
   // Game log view: career seasons or every game; kept across re-renders and players for the session
-  let logView = 's';
+  let logView = 'g';
   const showLogView = (box, v, season) => {
     logView = v;
     box.querySelectorAll('[data-lv]').forEach(x => x.matches('button') ? x.classList.toggle('on', x.dataset.lv === v) : (x.hidden = x.dataset.lv !== v));
@@ -899,12 +899,14 @@
       <div class="pc-tapsub">${L1.s !== L.cur ? `${L1.s} ` : ''}Wk ${L1.g.w} ${L1.g.h === 0 ? '@' : 'vs'} ${esc(L1.g.o)}</div>
       <div class="pc-tapbars">${miniBars(slots, { slotW: 22, H: 40, cls: 'mb-pts mb-sm' })}</div>`, 'log', 'g');
   };
-  // Grade tile (owner 2026-10-16: moved here from the header): his OVR, the Grade tab on tap
+  // Grade tile (owner 2026-10-16: OVR moved here from the header, then the Grade tab folded into its sheet): his OVR;
+  // the sheet holds the whole grade (gradeTab) from his history shard (GRH, loaded with the page)
   const gradeTile = pid => {
     const r = GR.cur && GR.cur.players[pid];
     if (GR.cur === undefined || GR.cur === null) return '';
-    return goTile('Grade', r ? `<div class="pc-big ${r[9] ? '' : grTone(r[0])}">${ovr(r[0])}${uqMark(r)} <small>OVR</small></div><div class="pc-tapsub">${GR.cur.season} · ${esc(r[1])}</div>`
-      : '<div class="pc-big">– <small>OVR</small></div><div class="pc-tapsub">Not graded</div>', 'gr');
+    const detail = GRH[pid] ? gradeTab(pid, GRH[pid]) : '<div class="pc-box"><p class="pc-sub">Loading grade&hellip;</p></div>';
+    return tapTile('Grade', r ? `<div class="pc-big ${r[9] ? '' : grTone(r[0])}">${ovr(r[0])}${uqMark(r)} <small>OVR</small></div><div class="pc-tapsub">${GR.cur.season} · ${esc(r[1])}</div>`
+      : '<div class="pc-big">– <small>OVR</small></div><div class="pc-tapsub">Not graded</div>', 'NFL Edge grade', detail);
   };
   // The player's weekly section for the selected week (projection, matchup, availability, season to date).
   const playerWeek = (pid, p, d, L) => {
@@ -1223,6 +1225,7 @@
   // ---- NFL Edge grade (data/grades/<season>.json, tools/grade_build.py): percentile of EPA over replacement per game
   // over his last three seasons (weighted to the latest, shrunk by sample size) among his position's players that season.
   const GR = { ix: null, s: {} };
+  const GRH = {};  // pid -> his grade history docs (data/grades/players/<last 2 digits>.json); null while loading
   const grIndex = () => GR.ix || (GR.ix = NFLE.load('data/grades/index.json').catch(() => null));
   const grSeason = s => GR.s[s] || (GR.s[s] = NFLE.load(`data/grades/${s}.json`).catch(() => null));
   const GRADED = { QB: 1, RB: 1, WR: 1, TE: 1 };
@@ -1252,7 +1255,7 @@
       const x = d.players[pid], g = x[6] ?? x[0];
       if (x[0] == null) return `<tr class="muted"><td><b>${d.season}</b></td><td class="num" title="Not graded: too few games with a real role (needs the qualifying minimum, or 2+ games with a starter's workload)">–</td><td class="num">${x[8] ?? '–'}</td><td class="num">${f1(x[7])}</td></tr>`;
       return `<tr><td><b>${d.season}</b>${d.basis === 'box' ? ' <small class="muted" title="Box-score stats only before 2018: same OVR, simpler stats behind it">box</small>' : ''}</td><td class="num"><span class="eg-chip ${x[9] ? 'eg-uq' : grTone(g)}"><b>${ovr(g)}${uqMark(x)}</b></span></td><td class="num">${x[8] ?? '–'}</td><td class="num">${f1(x[7])}</td></tr>`; }).join('');
-    return `<div class="pc-box"><div class="pc-k">NFL Edge grade · current form</div>
+    return `<div class="pc-box"><div class="pc-k">Current form</div>
         <div class="ij-dur"><div class="pc-big ${r[9] ? '' : grTone(r[0])}">${ovr(r[0])}${uqMark(r)} <small>OVR</small></div>
           <div class="pc-sub">Over his last three seasons weighted to ${D.season}, he produced <b>${f1(r[4])}</b> fantasy points per game, more than ${r[0]}% of the ${nq ? `${nq} ` : ''}qualified ${posName}${r[9] ? ` (*under the qualifying minimum: graded on his ${r[8]} games with half the snaps or more, not counted in the rankings)` : ''}${r[3] < 8 ? ' (a small sample so far, so it leans on the position average)' : ''}.</div></div></div>
       <div class="pc-box"><div class="pc-k">The stats behind it · percentile among ${posName}</div><p class="pc-sub">Higher and greener is better for every stat. For rates where less is better (drops, sacks, interceptions) the percentile is flipped: 99 = fewest.</p><div class="eg-bars">${bars}</div></div>
@@ -1273,7 +1276,14 @@
     const photo = photoUrl(L, espn), num = L && L.bio ? L.bio.num : null;
     if (cardTab === 'news' && !news) cardTab = 'ov';
     const graded = !!GRADED[pos];
-    if (cardTab === 'gr' && !graded) cardTab = 'ov';
+    if (cardTab === 'gr') cardTab = 'ov';  // the Grade tab became the Grade tile's sheet (a remembered tab may still say gr)
+    if (graded && GRH[pid] === undefined) {
+      GRH[pid] = null;
+      NFLE.load(`data/grades/players/${pid.slice(-2)}.json`).catch(() => null).then(sh => {
+        GRH[pid] = ((sh || {})[pid] || []).map(([season, basis, rec, labels, nq]) => ({ season, basis, players: { [pid]: rec }, stats: { [rec[1]]: labels }, qualified: { [rec[1]]: nq } }));
+        if (cardPid === pid) renderCard(pid);
+      });
+    }
     // the current season's grades drive the header chip; the Grade tab loads every season on first open
     if (graded && GR.cur === undefined) { GR.cur = null; grIndex().then(ix => ix && grSeason(ix.current)).then(d => { GR.cur = d || null; if (cardPid === pid) renderCard(pid); }); }
     const isKind = !!(L && L.kind);  // a non-fantasy page (defense, line, specialists): no week projections
@@ -1297,9 +1307,8 @@
         ${bioStrip(L, ' pc-bio-in')}
       </div>
       ${bioStrip(L)}
-      <div class="seg pc-tabs" role="tablist">${[['ov', 'Summary'], ['log', 'Game log'], ...(graded ? [['gr', 'Grade']] : []), ...(L && (L.inj || L.dur) ? [['inj', 'Injuries']] : []), ...(news ? [['news', 'News']] : [])]
+      <div class="seg pc-tabs" role="tablist">${[['ov', 'Summary'], ['log', 'Game log'], ...(L && (L.inj || L.dur) ? [['inj', 'Injuries']] : []), ...(news ? [['news', 'News']] : [])]
         .map(([k, l]) => `<button type="button" role="tab" data-pt="${k}" class="${cardTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-      ${graded ? `<div class="pc-tab" data-pt="gr"${cardTab === 'gr' ? '' : ' hidden'}><div class="pc-grade"><p class="pc-sub">Loading grade&hellip;</p></div></div>` : ''}
       <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${overview ? '' : pickerHtml()}${week}${overview ? '<div class="pc-pen"></div>' : ''}</div>
       <div class="pc-tab" data-pt="log"${cardTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every career game</div><div class="pc-log">${
         !LOGS[pid] ? '<div class="skel-zone"></div>' : !L ? '<p class="pc-sub">Game log unavailable.</p>'
@@ -1311,21 +1320,19 @@
     // his career from one small shard (data/penalties/players/<last 2 digits>.json) instead of every season's file
     if (L) body.querySelectorAll('.pc-pen').forEach(pb => NFLE.load(`data/penalties/players/${pid.slice(-2)}.json`).catch(() => null)
       .then(sh => { if (cardPid === pid) { pb.innerHTML = playerPenTile(pid, ((sh || {})[pid] || []).map(([season, ...x]) => ({ season, players: { [pid]: x } })), L); } }));
-    // the Grade tab's history: his own small shard (data/grades/players/<last 2 digits>.json), loaded when the tab opens
-    const loadGrades = () => body.querySelectorAll('.pc-grade').forEach(gb => { if (gb.dataset.loaded) return; gb.dataset.loaded = '1';
-      NFLE.load(`data/grades/players/${pid.slice(-2)}.json`).catch(() => null).then(sh => {
-        const docs = ((sh || {})[pid] || []).map(([season, basis, rec, labels, nq]) => ({ season, basis, players: { [pid]: rec }, stats: { [rec[1]]: labels }, qualified: { [rec[1]]: nq } }));
-        if (cardPid === pid) gb.innerHTML = gradeTab(pid, docs); }); });
-    if (cardTab === 'gr') loadGrades();
     body.querySelectorAll('.pc-log').forEach(wireLogRows);
     const showTab = k => {
       cardTab = k;
       rememberTab(`p:${pid}`, k);
-      if (k === 'gr') loadGrades();
       body.querySelectorAll('.pc-tabs [data-pt]').forEach(x => x.classList.toggle('on', x.dataset.pt === k));
       body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.pt !== cardTab; });
     };
-    body.querySelectorAll('.pc-tabs [data-pt]').forEach(b => b.onclick = () => showTab(b.dataset.pt));
+    body.querySelectorAll('.pc-tabs [data-pt]').forEach(b => b.onclick = () => {
+      // the Game log tab always opens on Games (owner 2026-10-16); Seasons is a tap away inside it
+      const lb = b.dataset.pt === 'log' && body.querySelector('.pc-tab[data-pt="log"] .pc-log');
+      if (lb) showLogView(lb, 'g');
+      showTab(b.dataset.pt);
+    });
     // "Show more" opens the full tab, scrolled to the top of the card (the tabs bar) so it reads from the start.
     body.querySelectorAll('[data-goto]').forEach(b => b.onclick = () => {
       const lb = b.dataset.lvGo && body.querySelector('.pc-tab[data-pt="log"] .pc-log');
