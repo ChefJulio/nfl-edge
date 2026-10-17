@@ -424,10 +424,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4875295,Jackson Powers-Johnson,Las Vegas Raiders,Active,2026-10-09T00:37Z,,,,,,Powers-Johnson (groin) was a full participant in practice Thursday.
 4379416,Quay Walker,Las Vegas Raiders,Active,2026-10-07T01:50Z,,,,,,"Walker registered six tackles (four solo), including 1.0 sacks, during the Raiders' 30-27 loss to the Chiefs on Sunday."
 4685978,Darrell Luter Jr.,Las Vegas Raiders,Active,2026-10-05T18:47Z,,,,,,
+4430870,KeAndre Lambert-Smith,Los Angeles Chargers,Injured Reserve,2026-10-17T01:31Z,Hamstring,Not Specified,Not Specified,2026-10-18,IR-R,Lambert-Smith (hamstring) is questionable for Sunday's game against Kansas City.
+3691739,Derwin James Jr.,Los Angeles Chargers,Out,2026-10-17T01:29Z,Hamstring,Not Specified,Not Specified,2026-11-01,OUT,James (hamstring) has been ruled out for Sunday's game against the Chiefs.
+3843769,Donte Jackson,Los Angeles Chargers,Out,2026-10-17T01:24Z,Hamstring,Not Specified,Not Specified,2026-11-01,OUT,Jackson (hamstring) has been ruled out ahead of Sunday's game against the Chiefs.
+4241597,Daiyan Henley,Los Angeles Chargers,Questionable,2026-10-17T01:21Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Henley (knee) is listed as questionable for Sunday's game against the Chiefs.
 4686612,Tre' Harris,Los Angeles Chargers,Out,2026-10-16T23:46Z,Hamstring,Not Specified,Not Specified,2026-11-01,OUT,Harris (hamstring) has been ruled out for Sunday's game against the Chiefs.
 4838693,Rodney Shelley,Los Angeles Chargers,Doubtful,2026-10-16T20:15Z,Hamstring,Not Specified,Not Specified,2026-10-18,DOUBTFUL,doubtful
-3843769,Donte Jackson,Los Angeles Chargers,Out,2026-10-16T20:15Z,Hamstring,Not Specified,Not Specified,2026-11-01,OUT,out
-3691739,Derwin James Jr.,Los Angeles Chargers,Out,2026-10-16T20:15Z,Hamstring,Not Specified,Not Specified,2026-11-01,OUT,out
 4683487,Joe Alt,Los Angeles Chargers,Out,2026-10-16T20:15Z,Neck,Not Specified,Not Specified,2026-11-01,OUT,out
 4040842,Kayode Awosika,Los Angeles Chargers,Out,2026-10-16T20:15Z,Lower Leg,Not Specified,Not Specified,2026-11-01,OUT,out
 4360745,Kendall Williamson,Los Angeles Chargers,Active,2026-10-16T20:15Z,,,,,,
@@ -437,12 +439,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4612826,Ladd McConkey,Los Angeles Chargers,Active,2026-10-16T19:27Z,,,,,,"McConkey (foot) doesn't have an injury designation for Sunday's game against the Chiefs, Noah Furtado of The Athletic reports."
 3051738,Marquez Valdes-Scantling,Los Angeles Chargers,Active,2026-10-16T00:59Z,,,,,,Valdes-Scantling (ribs) was a full participant in Thursday's practice.
 4685553,Brenen Thompson,Los Angeles Chargers,Questionable,2026-10-16T00:41Z,Quadriceps,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Thompson (quadriceps) was a limited participant in Thursday's practice.
-4430870,KeAndre Lambert-Smith,Los Angeles Chargers,Injured Reserve,2026-10-15T22:29Z,Hamstring,Not Specified,Not Specified,2026-10-18,IR-R,Lambert-Smith (hamstring) was a limited participant in Thursday's practice.
 3917668,Alec Ingold,Los Angeles Chargers,Injured Reserve,2026-10-15T20:06Z,Shoulder,Not Specified,Not Specified,2026-11-22,IR,The Chargers placed Ingold on injured reserve Thursday due to a shoulder injury.
 2579621,Denzel Perryman,Los Angeles Chargers,Injured Reserve,2026-10-15T01:08Z,Undisclosed,Not Specified,Not Specified,2026-11-01,IR,"Chargers head coach Jim Harbaugh said Wednesday that Perryman (undisclosed) won't be reinstated from injured reserve ahead of Sunday's game against the Chiefs, Alex Insdorf of BoltBeat.com reports."
 2979860,Dalvin Tomlinson,Los Angeles Chargers,Questionable,2026-10-14T22:39Z,Hamstring,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 5089178,Jamaree Caldwell,Los Angeles Chargers,Questionable,2026-10-14T22:38Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
-4241597,Daiyan Henley,Los Angeles Chargers,Questionable,2026-10-14T22:38Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 3886812,Jake Browning,Los Angeles Chargers,Active,2026-10-13T23:13Z,,,,,,"The Chargers signed Browning to the practice squad Tuesday, Noah Furtado of The Athletic reports."
 4241263,Charlie Kolar,Los Angeles Chargers,Active,2026-10-13T01:51Z,,,,,,Kolar reeled in three of four targets for 37 yards during Sunday's 23-17 loss versus the Broncos. He also lost a fumble.
 4596334,Keaton Mitchell,Los Angeles Chargers,Active,2026-10-13T01:05Z,,,,,,Mitchell took six carries for 11 yards and caught three of four targets for 18 yards during Sunday's 23-17 loss versus the Broncos.
@@ -649,10 +649,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685759,Jalen Carter,Philadelphia Eagles,Active,2026-10-12T16:31Z,,,,,,"Carter logged five tackles (three solo), including 2.0 sacks, one pass defense and two forced fumbles during the Eagles' 19-17 loss to the Jaguars on Sunday in London."
 3050478,Jake Elliott,Philadelphia Eagles,Active,2026-10-12T14:13Z,,,,,,Elliott made his lone field-goal attempt and both of his extra-point tries during Sunday's 19-17 loss to the Jaguars in London.
 4870795,Makai Lemon,Philadelphia Eagles,Active,2026-10-12T03:34Z,,,,,,Lemon caught five of seven targets for 43 yards during Sunday's 19-17 loss to the Jaguars.
+3873935,Jamel Dean,Pittsburgh Steelers,Questionable,2026-10-17T01:30Z,Ankle,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Dean (ankle) is listed as questionable ahead of Sunday's game against the Buccaneers, Adam Caplan of SiriusXM NFL Radio reports."
 4685261,Germie Bernard,Pittsburgh Steelers,Active,2026-10-16T23:54Z,,,,,,Bernard and return specialist Kaden Wetjen are the only wide receivers on Pittsburgh's active roster without injury designations for Week 6.
 4047650,DK Metcalf,Pittsburgh Steelers,Questionable,2026-10-16T19:42Z,Illness,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Metcalf is listed as questionable for Sunday's game against the Buccaneers after missing Friday's practice due to an illness.
 4038815,Rico Dowdle,Pittsburgh Steelers,Questionable,2026-10-16T19:35Z,Toe,,,2026-10-18,QUESTIONABLE,Dowdle (toe) is listed as questionable for Sunday's game against the Buccaneers after being a full participant in practice Thursday and Friday.
-3873935,Jamel Dean,Pittsburgh Steelers,Questionable,2026-10-14T23:07Z,Ankle,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Dean (ankle) was a limited participant at the Steelers' practice Wednesday, Mike DeFabo of The Athletic reports."
 3045373,Jalen Ramsey,Pittsburgh Steelers,Questionable,2026-10-14T20:07Z,Wrist,Fracture,Right,2026-10-18,QUESTIONABLE,questionable
 4426694,Keeanu Benton,Pittsburgh Steelers,Questionable,2026-10-14T20:06Z,Ankle,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,questionable
 4430802,Darnell Washington,Pittsburgh Steelers,Active,2026-10-14T02:11Z,,,,,,Washington caught two of three targets for 12 yards during the Steelers' 34-22 win over the Colts on Sunday.
