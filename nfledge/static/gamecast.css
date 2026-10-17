@@ -1039,7 +1039,6 @@ html.pc-open { overflow: hidden; }
 
 /* matchup tiles: the team's wordmark in place of the typed nickname (owner 2026-10-17), black-trimmed like All teams */
 .mt-nm { display: flex; align-items: center; gap: 6px; overflow: visible; }
-.mt-side.away .mt-nm { flex-direction: row-reverse; justify-content: flex-start; }  /* away: record then name, mirroring home (owner 2026-10-17) */
 .mt-wm { display: block; height: 15px; width: auto; max-width: 112px; object-fit: contain;
   filter: drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000) drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
 .mt-nm b:has(.mt-wm) { display: inline-flex; align-items: center; }
@@ -1050,8 +1049,6 @@ html.pc-open { overflow: hidden; }
 .mt-at { align-self: center; height: 55px; flex-direction: column-reverse; justify-content: flex-start; line-height: 17px; }  /* a side's height: score 34 + name row 4 + 17 */
 @media (max-width: 400px) { .mt-at { height: 51px; } }  /* score 30 */
 .mt-at small { margin: 0 0 2px; line-height: 1; }
-/* the record reads over a full-strength logo (owner 2026-10-17, no logo fade): a small dark pill */
-.mt-nm small { position: relative; z-index: 1; padding: 1px 5px; border-radius: var(--r-pill, 999px); background: rgba(10,12,16,.88); color: rgba(255,255,255,.88); text-shadow: none; }
 .mt-lg { z-index: 0; } .mt-side { z-index: 1; }  /* score, name and record always above the logos */
 .mt-at { padding-bottom: 3px; }  /* "@" / "vs" glyphs sit low in their line: lift them to the wordmarks' visual middle */
 
@@ -1062,3 +1059,10 @@ html.pc-open { overflow: hidden; }
   white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,.75); }
 .mt-st { justify-content: center; }
 .mt-st:empty { display: none; }
+/* records (owner 2026-10-17: "somewhere more neat"): a small line under each name, aligned with it toward the middle;
+   out of the row so the @ stays on the names */
+.mt-side.away .mt-nm { justify-content: flex-end; }
+.mt-nm { position: relative; }
+.mt-nm small { position: absolute; top: 100%; margin-top: 3px; font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
+.mt-side.away .mt-nm small { right: 0; } .mt-side.home .mt-nm small { left: 0; }
+.mt-main { padding-bottom: 24px; }
