@@ -254,7 +254,7 @@ table.tm-pl td { white-space: normal; }
 table.lg { border-collapse: separate; border-spacing: 0 3px; font-size: var(--fs-sm); min-width: 100%; }
 table.lg th, table.lg td { padding: 4px 7px; white-space: nowrap; }
 table.lg th { font-size: var(--fs-xs); color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; text-align: left; }
-table.lg .num { text-align: right; }
+table.lg .num { text-align: center; }  /* heads over their chips: values fill the cell centered, so the label centers too */
 table.lg tr > :nth-child(1), table.lg tr > :nth-child(2) { position: sticky; z-index: 1; background: var(--panel2); }
 table.lg tr > :nth-child(1) { left: 0; min-width: 40px; } table.lg tr > :nth-child(2) { left: 40px; min-width: 52px; }  /* 40: fits WC / DIV / CON */
 table.lg tr.lg-season td, table.lg tr.lg-gh th { position: static; }
