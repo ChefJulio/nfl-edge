@@ -87,3 +87,9 @@ td.projc .pv .pv-tag { font-size: 10px; font-weight: 600; letter-spacing: .02em;
   color: color-mix(in srgb, var(--tfg, #fff) 50%, transparent); }
 td.projc .pv .pv-tag .live-dot { width: 6px; height: 6px; margin-right: 3px; vertical-align: 1px; }
 td.projc .pv-was b { color: var(--tfg, #fff); font-weight: 600; }  /* the projected number white, "proj" dimmed */
+
+/* weather mark beside the opponent (wind / rain / snow at kickoff) */
+td.mu .wx { display: inline-flex; vertical-align: -2px; margin-left: 4px; color: #9fc4ff; }
+td.mu .wx svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+td.mu .wx-snow { color: #e6f0ff; } td.mu .wx-wind { color: #b9c4d3; }
+td.grdc, th.grdc, td.snapc, th.snapc { text-align: center; }

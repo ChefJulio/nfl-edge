@@ -56,15 +56,14 @@
       <details class="howto rk-h-week"><summary>How to read</summary><div>
         <dl class="ht">
           <dt>#</dt><dd>Our rank at the position.</dd>
-          <dt>Proj</dt><dd>Points if he plays. Injured players show their chance to play (Play%) instead of a discount, since playing is yes/no.</dd>
-          <dt>Range</dt><dd>Floor to ceiling: 8 times in 10 his score lands inside it.</dd>
+          <dt>Pts</dt><dd>Points if he plays (hover for his floor-to-ceiling range). Injured players show their chance to play instead of a discount, since playing is yes/no. Once his game starts: his actual points, with the projection under it.</dd>
+          <dt>Matchup</dt><dd>Points this opponent adds (+) or takes away (−) vs an average one. Green helps, red hurts; deeper = bigger. A wind, rain or snow mark = weather worth knowing at kickoff.</dd>
+          <dt>Grd</dt><dd>His Edge grade: three seasons of fantasy output, ranked within his position (50 to 99).</dd>
           <dt>Last 5</dt><dd>His last five games. Green beat our projection, red missed it; the white tick is the projection.</dd>
-          <dt>Matchup</dt><dd>Points this opponent adds (+) or takes away (−) vs an average one. Green helps, red hurts; deeper = bigger.</dd>
-          <dt>Volume</dt><dd>Projected dropbacks / carries / targets. An arrow means his recent role is growing or shrinking.</dd>
-          <dt>Team pts</dt><dd>Points his team is expected to score (Vegas implied total).</dd>
+          <dt>Snap%</dt><dd>His share of his offense's snaps this season.</dd>
           <dt>TD</dt><dd>Chance of at least one touchdown (QBs: projected passing TDs).</dd>
         </dl>
-        <p class="ht-note">Tap a player for his page. A yellow edge = projection boosted by a teammate's absence.</p>
+        <p class="ht-note">Tap a player for his page. A green "+ inj" tag = projection raised by a teammate's absence.</p>
       </div></details>
       <div class="card">
         <div class="toolbar">
@@ -184,6 +183,19 @@
       return `<span class="pv-cond" title="${esc(`${f1(sits * r._ratio)} if ${nm} sits (${Math.round(100 * pSit)}% likely), ${f1(plays * r._ratio)} if he plays`)}">${NFLE.fmt.signed1(d)} if ${esc(lastName(nm))} ${pSit >= 0.5 ? 'plays' : 'sits'}</span>`;
     }).join('');
     const rankOf = (r, flex) => flex ? r._frank : r._rank;
+    // weather that matters (owner 2026-10-17): a small mark beside the opponent only for wind 15+ mph, a 50%+ chance
+    // of rain or any snow at kickoff (live week, outdoor games; data.forecast_conditions); the forecast in its tooltip
+    const WX = Object.fromEntries((D.games || []).flatMap(g => g.wx ? [[g.away.team, g.wx], [g.home.team, g.wx]] : []));
+    const ICON = {
+      wind: '<path d="M3 8h9a3 3 0 1 0-3-3M3 12h13a3 3 0 1 1-3 3M3 16h6"/>',
+      rain: '<path d="M7 14a4 4 0 0 1 .5-8A5 5 0 0 1 17 7a3.5 3.5 0 0 1 0 7z"/><path d="M8 17l-1 3M12 17l-1 3M16 17l-1 3"/>',
+      snow: '<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/>',
+    };
+    const wxMark = t => { const w = WX[t]; if (!w) return '';
+      const k = w.snow > 0 ? 'snow' : w.pop >= 50 ? 'rain' : w.wind >= 15 ? 'wind' : null;
+      if (!k) return '';
+      const tip = [w.wind != null ? `wind ${Math.round(w.wind)} mph` : '', w.pop != null ? `${w.pop}% chance of rain` : '', w.snow > 0 ? `${w.snow} cm snow` : ''].filter(Boolean).join(' · ');
+      return `<span class="wx wx-${k}" title="Kickoff forecast: ${esc(tip)}"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">${ICON[k]}</svg></span>`; };
     const columns = flex => {
       const range = r => `Floor ${f1(r._q[0])} · middle ${f1(r._q[1])}-${f1(r._q[3])} · ceiling ${f1(r._q[4])}`;
       const cols = [
@@ -205,15 +217,19 @@
         // Matchup right after Proj (owner 2026-10-17: the two numbers a start / sit call hinges on); his team's implied
         // points (the Team pts column) folded into its tooltip
         { key: 'mu', label: 'Matchup', first: 'desc', cls: 'mu', title: 'Opponent, and the points facing them adds (+) or takes away (-) vs an average opponent: Vegas total, play volume and defense ratings together. Green helps, red hurts; deeper = bigger.',
-          value: r => r.mu, html: r => `<span class="opp tm-open" data-tm="${esc(r.opp)}"><span class="vs">${esc(r.home)}</span>${logo(r.opp, 18)}<b>${esc(r.opp)}</b></span><span class="muv" style="color:${esc(r.mu_c || '')}" title="Facing ${esc(r.opp)} instead of an average opponent: ${sgn(r.mu)} pts${r.imp != null ? ` · his team is expected to score ${f1(r.imp)}` : ''}">${sgn(r.mu)}</span>` },
-        { key: 'range', label: 'Range', num: true, cls: 'rngc', title: 'Floor to ceiling: 8 times in 10 his score lands in this range (10th to 90th percentile of how past projections like this turned out)',
-          value: r => r._q[4] - r._q[0], html: r => `<span title="${esc(range(r))}">${Math.round(r._q[0])}&ndash;${Math.round(r._q[4])}</span>` },
+          value: r => r.mu, html: r => `<span class="opp tm-open" data-tm="${esc(r.opp)}"><span class="vs">${esc(r.home)}</span>${logo(r.opp, 18)}<b>${esc(r.opp)}</b></span>${wxMark(r.team)}<span class="muv" style="color:${esc(r.mu_c || '')}" title="Facing ${esc(r.opp)} instead of an average opponent: ${sgn(r.mu)} pts${r.imp != null ? ` · his team is expected to score ${f1(r.imp)}` : ''}">${sgn(r.mu)}</span>` },
+        // Grd (owner 2026-10-17, replacing Range: the floor-to-ceiling range stays in the Pts tooltip and the card): the
+        // Edge grade, the team cards' number (gamecast.js NFLE.gradeOf)
+        { key: 'grd', label: 'Grd', num: true, cls: 'grdc', first: 'desc', title: "Edge grade (OVR): three seasons of fantasy output, a percentile within his position (rookies and second-year players: this season's when higher)",
+          value: r => { const g = NFLE.gradeOf && NFLE.gradeOf(r.pid); return g ? g.v : -1; },
+          html: r => { const g = NFLE.gradeOf && NFLE.gradeOf(r.pid); return g ? NFLE.gradeChip(g) : '<span class="muted">&ndash;</span>'; } },
         // season FP/G folded into its tooltip (owner 2026-10-17: the FP/G column repeated it)
         { key: 'l5', label: 'Last 5', sort: false, cls: 'l5', title: 'His last 5 games this season: bar = points scored, green = beat our projection for that game, red = missed it; the tick is our projection',
           html: r => `<span title="${r._fpg != null ? `Season: ${f1(r._fpg)} FP/G` : ''}">${l5(r)}</span>` },
 
-        { key: 'vol', label: 'Volume', first: 'desc', cls: 'volc', title: 'Projected volume; arrow = his recent usage share has moved up or down from his longer-run share (a role change)',
-          value: r => r.vol && r.vol.v, html: r => r.vol ? `<span title="${esc(r.vol.d)}">${esc(r.vol.t)}${r.vol.a === 'up' ? '<i class="va va-up">&#9650;</i>' : r.vol.a === 'down' ? '<i class="va va-down">&#9660;</i>' : ''}</span>` : '' },
+        // Snap% (owner 2026-10-17, replacing Volume): his share of the offense's snaps this season, the plainest read on role
+        { key: 'snap', label: 'Snap%', num: true, cls: 'snapc', first: 'desc', title: "His share of his offense's snaps this season",
+          value: r => r.ext && r.ext.snap != null ? r.ext.snap : -1, html: r => r.ext && r.ext.snap != null ? `${Math.round(r.ext.snap * 100)}%` : '' },
         { key: 'td', label: pos === 'QB' ? 'Pass TD' : 'TD', num: true, cls: 'tdc', title: pos === 'QB' ? 'Projected passing touchdowns (hover for his rushing TD chance)' : 'Chance he scores at least one touchdown',
           value: r => r.td && r.td.v, html: r => r.td ? `<span title="${esc(r.td.d)}">${esc(r.td.t)}</span>` : '' },
       ];
@@ -427,6 +443,7 @@
     };
     // live scores (gamecast.js, every ~minute on game days): redraw in place, no re-sort
     document.addEventListener('nfle-live', () => { if (mode === 'week') draw(false); });
+    document.addEventListener('nfle-grades', () => { if (mode === 'week') draw(false); });
     const showPos = p => {
       pos = p;
       sec.querySelectorAll('.posbar button').forEach(b => b.classList.toggle('on', b.dataset.pos === p));

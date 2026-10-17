@@ -156,6 +156,20 @@ def week_nav(data, season: int, week: int, current_week: int, prefix: str) -> di
           "is_current": season == cur and week == current_week, "current_href": f"{prefix}index.html"}
 
 
+def with_weather(games: list, wk, live: bool) -> list:
+  """The live week's games get a display-only forecast (data.forecast_conditions): wind, rain chance, snow."""
+  if live and len(wk):
+    from nfledge.data import forecast_conditions
+    try:
+      wx = forecast_conditions(wk)
+    except Exception:  # weather is decoration: never fail a build over it
+      wx = {}
+    for g in games:
+      if g["id"] in wx:
+        g["wx"] = wx[g["id"]]
+  return games
+
+
 def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict, res=None, ev=None,
                bt_seasons=(), archive: bool = False, lookahead: int = 0) -> dict:
   """Everything one season / week page needs (shared by run.py and tools/build_archive.py); report.render turns
@@ -172,7 +186,7 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
     "lookahead": lookahead, "data_week": int(data.latest_week) if lookahead else week - 1,
     "generated": time.strftime("%Y-%m-%d %H:%M"), "injury_report": injury_report,
     "players": rp.player_rankings(eng, proj, season, week, cfg),
-    "games": rp.matchups(eng, season, week, cfg, proj, power),
+    "games": with_weather(rp.matchups(eng, season, week, cfg, proj, power), wk, live=not (archive or lookahead)),
     "power": power, "teams": rp.team_info(data.teams), "power_vol": rp.league_volume(eng, season, week, eng.tm.fit(season, week)),
     "roles": rp.role_changes(eng, season, week, cfg), "backtest": rp.backtest_summary(ev),
     "bt_seasons": " and ".join(map(str, bt_seasons)) or "n/a", "bt_takeaway": backtest_takeaway(ev),

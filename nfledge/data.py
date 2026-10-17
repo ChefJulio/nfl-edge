@@ -552,6 +552,31 @@ def forecast_wind(games: pd.DataFrame) -> pd.Series:
   return out
 
 
+def forecast_conditions(games: pd.DataFrame) -> dict:
+  """Display only (owner 2026-10-17: a weather mark in Rankings' Matchup column): game_id -> {wind (mph, kickoff
+  window mean), pop (max % chance of rain), snow (cm)} for outdoor games, from Open-Meteo (free, no key). Indoor,
+  neutral-site or unresolved games are left out. The projections use forecast_wind only."""
+  out = {}
+  for g in games.itertuples():
+    if g.roof in INDOOR_ROOFS or g.location == "Neutral" or g.home_team not in STADIUMS or pd.isna(g.gameday):
+      continue
+    lat, lon = STADIUMS[g.home_team]
+    hour = int(str(g.gametime or "13:00").split(":")[0])
+    url = (f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}"
+           f"&hourly=wind_speed_10m,precipitation_probability,snowfall&wind_speed_unit=mph&timezone=America%2FNew_York"
+           f"&start_date={g.gameday}&end_date={g.gameday}")
+    try:
+      with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "nfl-edge-site/1.0"}), timeout=10) as r:
+        h = json.loads(r.read())["hourly"]
+      win = lambda k: [v for v in h.get(k, [])[hour:hour + 4] if v is not None]
+      w, pop, sn = win("wind_speed_10m"), win("precipitation_probability"), win("snowfall")
+      out[g.game_id] = {"wind": round(float(np.mean(w)), 1) if w else None, "pop": int(max(pop)) if pop else None,
+                        "snow": round(float(sum(sn)), 1) if sn else None}
+    except Exception:
+      pass
+  return out
+
+
 def team_name_fix(s: pd.Series) -> pd.Series:
   """nflverse uses LA for the Rams in pbp but LAR in some rosters/depth charts."""
   return s.replace({"LAR": "LA"})

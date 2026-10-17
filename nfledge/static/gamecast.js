@@ -1895,14 +1895,16 @@
   // a player's grade for team lists (the Players tile and its sheet): the OVR, or for rookies and second-year players
   // (not graded two seasons back) this season's grade when higher with 4+ games (owner 2026-10-17); null = not graded
   const teamGrade = pid => {
-    if (GR.cur === undefined) { GR.cur = null; grIndex().then(ix => ix && grSeason(ix.current)).then(g => { GR.cur = g || null; rerenderCard(); }); }
+    const done = () => { rerenderCard(); document.dispatchEvent(new Event('nfle-grades')); };
+    if (GR.cur === undefined) { GR.cur = null; grIndex().then(ix => ix && grSeason(ix.current)).then(g => { GR.cur = g || null; done(); }); }
     const g = GR.cur && GR.cur.players[pid];
     if (!g || g[0] == null) return null;
-    if (GR.old === undefined) { GR.old = null; grSeason(GR.cur.season - 2).then(x => { GR.old = x || false; rerenderCard(); }); }
+    if (GR.old === undefined) { GR.old = null; grSeason(GR.cur.season - 2).then(x => { GR.old = x || false; done(); }); }
     const young = GR.old && !(pid in GR.old.players), season = young && g[6] != null && (g[8] || 0) >= 4 && g[6] > g[0];
     return { v: season ? g[6] : g[0], season, ovr: g[0], uq: !!g[9], row: g };
   };
   const gradeChip = gr => gr ? `<b class="tm-gr ${gr.uq ? '' : grTone(gr.v)}" title="${gr.season ? `Edge grade this season (${ovr(gr.ovr)} overall; young player)` : 'Edge grade (OVR)'}">${ovr(gr.v)}${gr.uq ? '*' : ''}</b>` : '<span class="muted">–</span>';
+  NFLE.gradeOf = pid => teamGrade(pid); NFLE.gradeChip = gr => gradeChip(gr);  // Rankings' Grd column (rankings.js)
   const teamTiles = (abbr, d, L, pw) => {
     const tiles = [];
     // Power
