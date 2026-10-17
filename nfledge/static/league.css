@@ -31,3 +31,25 @@ table.lg-rank td.good { color: #6fdc8c; } table.lg-rank td.bad { color: #ff8f84;
 .lg-mv-k.good { color: #6fdc8c; } .lg-mv-k.bad { color: #ff8a80; }
 .lg-mv-f { font-size: var(--fs-sm); padding: 0 2px; }
 .lg-tbl .lg-cond + .lg-cond { margin-left: 4px; }
+
+/* Audit pass (owner 2026-10-17): chips wrap under the name inside its cell, so a long one ("-0.8 if Diggs plays")
+   never pushes the numbers off a phone; one chip for practice like Rankings (game status, else the latest day; none
+   when healthy); the chance to sit as a chip; quieter header; desktop tables at reading width */
+table.lg-tbl td.lg-who { width: 100%; }
+table.lg-tbl .who { min-width: 0; } table.lg-tbl .nmw { min-width: 0; }
+.lg-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; white-space: normal; }
+.lg-badges .lg-cond, .lg-tbl .lg-cond + .lg-cond { margin-left: 0; }
+.lg-out { display: inline-block; font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill);
+  background: rgba(240,192,90,.16); color: #f0c05a; line-height: var(--tag-h); }
+.lg-out.hi { background: rgba(255,143,132,.16); color: #ff8f84; }
+#tab-league .badges .dc-tag ~ .pr-days { display: none; }
+#tab-league .badges .pr-days i:not(:last-child) { display: none; }
+#tab-league .badges .pr-days:has(> i.pr-F:last-child) { display: none; }
+.lg-unmod { margin-top: 4px; font-size: var(--fs-sm); color: var(--muted); }
+.lg-unmod summary { cursor: pointer; list-style: none; } .lg-unmod summary::-webkit-details-marker { display: none; }
+.lg-unmod summary::after { content: " \203A"; } .lg-unmod[open] summary::after { content: ""; }
+.lg-unmod p { margin: 4px 0 0; }
+.lg-change { font: inherit; font-size: var(--fs-sm); background: none; border: 0; color: var(--accent); cursor: pointer; padding: 4px 0; }
+@media (max-width: 560px) { table.lg-rank .lg-pf, table.lg-rank .lg-avg { display: none; } table.lg-rank th, table.lg-rank td { padding-left: 6px; padding-right: 6px; } }
+@media (min-width: 900px) { #tab-league .lg-body > .lg-scroll, #tab-league .lg-body > .lg-h, #tab-league .lg-body > .lg-swaps,
+  #tab-league .lg-body > .lg-note { max-width: 760px; } }

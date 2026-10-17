@@ -243,11 +243,8 @@
     const last = n => String(n || '').split(' ').slice(-1)[0];  // "DJ Moore" -> "Moore"
 
     // the uncertain teammate's other world as a change to the shown projection (owner 2026-10-17: changes add up when
-
     // two teammates are uncertain, two totals don't); '' when it rounds to nothing
-
     const condTxt = c => { const d = c.pSit >= 0.5 ? c.plays - c.sits : c.sits - c.plays;
-
       return Math.abs(d) < 0.05 ? '' : `${NFLE.fmt.signed1(d)} if ${esc(last(c.name))} ${c.pSit >= 0.5 ? 'plays' : 'sits'}`; };
     // "Questionable (ESPN) (DL)" -> "Questionable per ESPN; practice: DNP, limited"
     const statusWords = st => {
@@ -292,13 +289,27 @@
     const phi = z => 0.5 * (1 + Math.tanh(0.7978845608 * (z + 0.044715 * z * z * z)));
 
     // ---- views --------------------------------------------------------------------------------------------------
-    const row = (slot, p, extra = '') => p ? `<tr class="teamrow" style="${NFLE.fmt.rowStyle(TEAMS, p.team)}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}>
-        <td class="lg-slot">${esc(slot)}</td><td>${NFLE.ui.player({ name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, pid: p.pid,
-          subHtml: p.opp ? `${esc(p.home)} ${NFLE.ui.tm(p.opp)}` : p.why ? esc(p.why) : NFLE.ui.tm(p.team), badges: NFLE.injTag(p.status || '')
-            + (p.conds || []).map(c => condTxt(c) && `<span class="lg-cond" title="${esc(`${f1(c.sits)} if ${c.name} sits, ${f1(c.plays)} if he plays`)}">${condTxt(c)}</span>`).join('') }, TEAMS)}</td>
-        <td class="num"><b>${p.proj != null ? f1(p.proj) : '—'}</b></td><td class="num muted">${p.proj != null ? (p.inactive >= 0.05 ? pct(p.inactive) : '') : ''}</td>${extra}</tr>`
-      : `<tr><td class="lg-slot">${esc(slot)}</td><td colspan="3" class="muted">empty</td>${extra}</tr>`;
-    const table = (body, head = '<th>Slot</th><th>Player</th><th class="num">Proj</th><th class="num">Out%</th>') =>
+    // One row style for every table (owner 2026-10-17 audit): the slot (lineups only), the player with his chips wrapping
+    // under the name inside the cell (a long chip used to push the numbers off a phone screen), the projection; the
+    // chance to sit is a chip ("35% out"), and the position chip shows only where the slot doesn't already say it
+    // (FLEX, bench) or there is no slot (waivers sit under a position heading, so none there either).
+    const badgesOf = p => {
+      const out = p.proj != null && p.inactive >= 0.05 && p.inactive < 0.99 ?  // ruled out: the O chip says it
+        `<span class="lg-out${p.inactive >= 0.5 ? ' hi' : ''}" title="Chance he sits">${pct(p.inactive)} out</span>` : '';
+      const conds = (p.conds || []).map(c => condTxt(c) && `<span class="lg-cond" title="${esc(`${f1(c.sits)} if ${c.name} sits, ${f1(c.plays)} if he plays`)}">${condTxt(c)}</span>`).join('');
+      const inner = NFLE.injTag(p.status || '') + out + conds;
+      return inner ? `<div class="badges lg-badges">${inner}</div>` : '';
+    };
+    const row = (slot, p, extra = '', o = {}) => {
+      const slotTd = o.noSlot ? '' : `<td class="lg-slot">${esc(slot)}</td>`;
+      if (!p) return `<tr>${slotTd}<td colspan="2" class="muted">empty</td>${extra}</tr>`;
+      const pos = o.noSlot || slot === p.pos ? '' : p.pos;
+      return `<tr class="teamrow" style="${NFLE.fmt.rowStyle(TEAMS, p.team)}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}>${slotTd}
+        <td class="lg-who">${NFLE.ui.player({ name: p.name, pos, team: p.team, photo: p.photo, espn: p.espn, pid: p.pid,
+          subHtml: p.opp ? `${esc(p.home)} ${NFLE.ui.tm(p.opp)}` : p.why ? esc(p.why) : NFLE.ui.tm(p.team), badges: badgesOf(p) }, TEAMS)}</td>
+        <td class="num"><b>${p.proj != null ? f1(p.proj) : '—'}</b></td>${extra}</tr>`;
+    };
+    const table = (body, head = '<th>Slot</th><th>Player</th><th class="num">Proj</th>') =>
       `<div class="lg-scroll"><table class="bx tiles lg-tbl"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
 
     const lineupView = () => {
@@ -355,7 +366,7 @@
       return `${swaps}${unproj.length ? `<p class="muted lg-note">Starting with no projection: ${unproj.map(p => `${esc(p.name)} (${esc(p.why || 'not projected')})`).join(', ')}.</p>` : ''}
         <h3 class="lg-h">Best lineup <span class="muted">${f1(total(best))} expected</span></h3>
         ${table(best.map(r => row(r.slot, r.p)).join(''))}
-        <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') || '<tr><td colspan="4" class="muted">No projected bench players.</td></tr>')}
+        <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') || '<tr><td colspan="3" class="muted">No projected bench players.</td></tr>')}
         <p class="muted lg-note">Expected points = our projection under your league's scoring x his chance to play. Kickers and team defenses are projected under your league's own kicking and D/ST settings (3-and-outs and 4th-down stops aren't modeled). Scoring bonuses (100-yard games, 2-point tries) aren't modeled.</p>`;
     };
 
@@ -378,6 +389,7 @@
         <p class="muted lg-note">Win chance: each starter's projection and range under your scoring and his chance to sit, for both lineups, counting how players in the same game rise and fall together (a QB and his receivers most). Live points are the platform's.</p>`;
     };
 
+    const WHEAD = '<th>Player</th><th class="num">This wk</th><th class="num">ROS</th>';
     const waiversView = () => {
       const rostered = new Set(L.teams.flatMap(t => t.ext.map(gsisOf).filter(Boolean)));
       const rosByPid = {};
@@ -388,8 +400,8 @@
       const free = Object.entries(D.players).filter(([pid, p]) => !rostered.has(pid) && ['QB', 'RB', 'WR', 'TE'].includes(p.pos)).map(([pid]) => fromPid(pid, pid));
       const byPos = ['QB', 'RB', 'WR', 'TE'].map(pos => {
         const list = free.filter(p => p.pos === pos).map(p => Object.assign(p, { ros: rosByPid[p.pid] })).sort((x, y) => (y.ros ?? y.exp) - (x.ros ?? x.exp)).slice(0, 6);
-        return `<h3 class="lg-h">${pos}</h3>${table(list.map(p => row(pos, p, `<td class="num">${p.ros != null ? Math.round(p.ros) : ''}</td>`)).join('') || '<tr><td colspan="5" class="muted">None projected.</td></tr>',
-          '<th></th><th>Player</th><th class="num">This wk</th><th class="num">Out%</th><th class="num">ROS</th>')}`;
+        return `<h3 class="lg-h">${pos}</h3>${table(list.map(p => row(pos, p, `<td class="num">${p.ros != null ? Math.round(p.ros) : ''}</td>`, { noSlot: true })).join('') || '<tr><td colspan="3" class="muted">None projected.</td></tr>',
+          WHEAD)}`;
       }).join('');
       const kFree = Object.entries(KBY).filter(([g]) => !rostered.has(g)).map(([g, o]) => {
         const r = fromPid(g, g); r.ros = o.w.reduce((t, e) => t + kScore(e[2]), 0); return r; })
@@ -398,10 +410,9 @@
       const dFree = KD && KD.dst ? Object.keys(KD.dst).filter(t => !rosteredD.has(t)).map(t => {
         const r = player(L.platform === 'espn' ? String(-16000 - +(Object.entries(ESPN_TEAM).find(([, c]) => c === t) || [0])[0]) : t);
         r.ros = KD.dst[t].w.reduce((a, e) => a + (dWeek(t, e[0]) || { pts: 0 }).pts, 0); return r; }).sort((a, b) => b.ros - a.ros).slice(0, 6) : [];
-      const dHtml = L.slots.includes('DEF') ? `<h3 class="lg-h">D/ST</h3>${table(dFree.map(p => row('DEF', p, `<td class="num">${Math.round(p.ros)}</td>`)).join(''),
-        '<th></th><th>Team</th><th class="num">This wk</th><th class="num">Out%</th><th class="num">ROS</th>')}` : '';
-      const kHtml = L.slots.includes('K') ? `<h3 class="lg-h">K</h3>${table(kFree.map(p => row('K', p, `<td class="num">${Math.round(p.ros)}</td>`)).join(''),
-        '<th></th><th>Player</th><th class="num">This wk</th><th class="num">Out%</th><th class="num">ROS</th>')}` : '';
+      const dHtml = L.slots.includes('DEF') ? `<h3 class="lg-h">D/ST</h3>${table(dFree.map(p => row('DEF', p, `<td class="num">${Math.round(p.ros)}</td>`, { noSlot: true })).join(''),
+        WHEAD.replace('Player', 'Team'))}` : '';
+      const kHtml = L.slots.includes('K') ? `<h3 class="lg-h">K</h3>${table(kFree.map(p => row('K', p, `<td class="num">${Math.round(p.ros)}</td>`, { noSlot: true })).join(''), WHEAD)}` : '';
       return `${kHtml ? '' : ''}<p class="muted lg-note">Unrostered in your league, best rest-of-season first (expected points through week 17 under your scoring).</p>${byPos}${kHtml}${dHtml}`;
     };
 
@@ -436,12 +447,12 @@
       const body = rows.map((r, i) => {
         const rc = r.t.record || {};
         return `<tr class="${r.t.id === mine.id ? 'lg-me' : ''}"><td class="num"><b>${i + 1}</b></td><td><b>${esc(r.t.name)}</b>${r.t.id === mine.id ? ' <span class="lg-you">you</span>' : ''}</td>
-          <td class="num"><b>${Math.round(r.ros)}</b></td><td class="num ${r.ros >= avg ? 'good' : 'bad'}">${r.ros >= avg ? '+' : ''}${Math.round(r.ros - avg)}</td>
+          <td class="num"><b>${Math.round(r.ros)}</b></td><td class="num lg-avg ${r.ros >= avg ? 'good' : 'bad'}">${r.ros >= avg ? '+' : ''}${Math.round(r.ros - avg)}</td>
           <td class="num">${f1(r.wk)} <span class="muted">(${wkRank.indexOf(r.t.id) + 1})</span></td>
-          <td class="num">${rc.w ?? ''}-${rc.l ?? ''}${rc.t ? `-${rc.t}` : ''}</td><td class="num muted">${rc.pf ? Math.round(rc.pf) : ''}</td></tr>`;
+          <td class="num">${rc.w ?? ''}-${rc.l ?? ''}${rc.t ? `-${rc.t}` : ''}</td><td class="num muted lg-pf">${rc.pf ? Math.round(rc.pf) : ''}</td></tr>`;
       }).join('');
       return `<p class="muted lg-note">Ranked by rest-of-season strength: each team's best lineup by our projections for every remaining week through ${ROS.through}, summed (byes, injuries and players coming back included). This week's number in parentheses is its rank. Kickers and team defenses included.</p>
-        <div class="lg-scroll"><table class="bx lg-tbl lg-rank"><thead><tr><th class="num">#</th><th>Team</th><th class="num">ROS</th><th class="num">vs avg</th><th class="num">This wk</th><th class="num">Record</th><th class="num">PF</th></tr></thead><tbody>${body}</tbody></table></div>`;
+        <div class="lg-scroll"><table class="bx lg-tbl lg-rank"><thead><tr><th class="num">#</th><th>Team</th><th class="num">ROS</th><th class="num lg-avg">vs avg</th><th class="num">This wk</th><th class="num">Record</th><th class="num lg-pf">PF</th></tr></thead><tbody>${body}</tbody></table></div>`;
     };
 
     const draw = () => {
@@ -452,9 +463,9 @@
     };
 
     const header = () => {
-      sec.innerHTML = `<div class="sec-head"><div><h2>${esc(L.name)}</h2><p>${L.platform === 'sleeper' ? 'Sleeper' : 'ESPN'} · week ${esc(String(L.week))} · ${L.teams.length} teams · our projections under your league's scoring.</p>${(L.unmodeled || []).length ? `<p class="muted lg-note">Your league also scores ${esc([...new Set(L.unmodeled)].join(', '))}: not in our projections yet.</p>` : ''}</div></div>
+      sec.innerHTML = `<div class="sec-head"><div><h2>${esc(L.name)}</h2><p>${L.platform === 'sleeper' ? 'Sleeper' : 'ESPN'} · week ${esc(String(L.week))} · ${L.teams.length} teams · our projections under your league's scoring.</p>${(L.unmodeled || []).length ? `<details class="lg-unmod"><summary>${new Set(L.unmodeled).size} scoring rules not modeled</summary><p class="muted">Your league also scores ${esc([...new Set(L.unmodeled)].join(', '))}: not in our projections yet.</p></details>` : ''}</div></div>
         <div class="lg-top"><label>Your team <select class="lg-team">${L.teams.map(t => `<option value="${esc(t.id)}"${mine && t.id === mine.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
-          <button type="button" class="sbtn lg-change">Change league</button></div>
+          <button type="button" class="lg-change">Change league</button></div>
         <div class="seg lg-seg">${[['lineup', 'Lineup'], ['matchup', 'Matchup'], ['teams', 'Teams'], ['waivers', 'Waivers']].map(([k, l]) => `<button type="button" data-v="${k}" class="${view === k ? 'on' : ''}">${l}</button>`).join('')}</div>
         <div class="lg-body"></div>`;
       sec.querySelector('.lg-team').onchange = e => { mine = L.teams.find(t => t.id === e.target.value); saved.team = mine.id; save(); draw(); };
