@@ -2072,3 +2072,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   [-0.140, +0.173] (2024 -0.010, 2025 +0.043) and the win chance worse (Brier +0.0037 [+0.0007, +0.0066]); 2026 so far
   +0.046 (63 games). The 2022-23 advantage did not carry to later seasons (the parked 3-season look leaned on 2022-23
   too). docs/handset_audit.md #1 now TESTED.
+- **PRE-REGISTERED 2026-10-17 (before running): (Y) injury attrition for rest-of-season values** (owner: "you can
+  continue", step 2 of the Fantasy depth work, sec. 9). Rest-of-season values assume every healthy player stays healthy
+  through week 17. Measure instead: for a REGULAR who is HEALTHY in week w (played, offense snap share >= 50%, not inside
+  an injury episode), P(he misses week w+j injured) for j = 1..12 (a missed week with a roster tag inside an injury
+  episode; byes skipped; cut / practice squad / free agent / retired censored), by position, from the career logs
+  (tools/attrition_eval.py; snap counts 2013 on). Curve = per-position rate at each j, fit on seasons before s. GATE
+  (a display probability: calibration, sec. 1 rule 5): walk-forward 2021-25, the curve's Brier on P(out) beats the
+  current assumption (P = 0) in every season and its calibration error (10 bins) stays under 0.01; reported against a
+  flat per-position rate (one number for every j) to show whether the horizon matters. If it passes, future weeks'
+  chance to play for healthy players = 1 - curve(j), and lineup values become the expectation over who is available.
