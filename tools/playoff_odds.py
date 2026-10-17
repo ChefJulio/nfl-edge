@@ -40,7 +40,7 @@ def model_p(home: str, away: str, neutral: bool, ranks: dict, elo_now: dict, wm:
 
 
 def simulate(sched, teams, season: int, week: int, ranks: dict, wm: dict, n: int, rng, lines_weeks=None, drift: float = 0.0,
-             keep: bool = False, played_before: int | None = None, ranks_by_week: dict | None = None) -> dict:
+             keep: bool = False, played_before: int | None = None, ranks_by_week: dict | None = None, jobs: int = 1) -> dict:
   """Monte Carlo of the rest of `season` from before `week`'s games. lines_weeks: weeks whose Vegas lines may be used
   (None = every line on file, the live case; the backtest passes {week}: lines known at that time).
   drift: team strength isn't fixed for the rest of the season. Each simulated season gives every team a strength
@@ -81,16 +81,14 @@ def simulate(sched, teams, season: int, week: int, ranks: dict, wm: dict, n: int
   def pm(h, a, neutral=False):
     x = np.log(1 / model_p(h, a, neutral, ranks, elo_now, wm) - 1) * -1 + cur[idx[h]] - cur[idx[a]]
     return 1 / (1 + np.exp(-x))
+  # each simulated season's seeding (the tiebreakers: nearly all of this step's time) uses no random draws, so it runs
+  # across processes first (jobs); the playoff draws below then use rng in the same order as before
+  all_seeds = _run_seeds(L0.by, L0.conf, L0.div, all_teams, n_po, homes, aways, hw, jobs)
   for s in range(n):
     cur = shock[s]
-    by = {t: list(v) for t, v in L0.by.items()}
-    for t in all_teams:
-      by.setdefault(t, [])
     for h, a, w in zip(homes, aways, hw[s]):
-      by[h].append((a, 1.0 if w else 0.0, 0.0, 0.0)); by[a].append((h, 0.0 if w else 1.0, 0.0, 0.0))
       wins[idx[h if w else a]] += 1
-    L = League.from_results(by, L0.conf, L0.div)
-    seeds = L.seeds(n_po)
+    seeds = all_seeds[s]
     champs = []
     for conf, order in seeds.items():
       for i, t in enumerate(order):
@@ -135,6 +133,29 @@ def simulate(sched, teams, season: int, week: int, ranks: dict, wm: dict, n: int
     out["ctx"] = {"by0": L0.by, "conf": L0.conf, "div": L0.div, "teams": all_teams, "n_po": n_po, "X": X, "hw": hw,
                   "games": left.assign(p_home=p).reset_index(drop=True)}
   return out
+
+
+def _seedings(args) -> list:
+  """Worker: each simulated season's seeds (conference -> teams in seed order) from its regular-season results."""
+  by0, conf, div, teams, n_po, homes, aways, rows = args
+  out = []
+  for row in rows:
+    by = {t: list(by0.get(t, [])) for t in teams}
+    for h, a, w in zip(homes, aways, row):
+      by[h].append((a, 1.0 if w else 0.0, 0.0, 0.0)); by[a].append((h, 0.0 if w else 1.0, 0.0, 0.0))
+    out.append(League.from_results(by, conf, div).seeds(n_po))
+  return out
+
+
+def _run_seeds(by0, conf, div, teams, n_po, homes, aways, hw, jobs: int) -> list:
+  base = (by0, conf, div, teams, n_po, homes, aways)
+  rows = list(hw)
+  if jobs <= 1 or len(rows) < 200:
+    return _seedings((*base, rows))
+  from concurrent.futures import ProcessPoolExecutor
+  k = -(-len(rows) // (jobs * 4))
+  with ProcessPoolExecutor(jobs) as ex:
+    return [x for part in ex.map(_seedings, [(*base, rows[i:i + k]) for i in range(0, len(rows), k)]) for x in part]
 
 
 def _outcomes(args) -> np.ndarray:
@@ -221,7 +242,8 @@ def rooting(res: dict, week: int, n_flip: int = 2000, n_case: int = 500, jobs: i
   return out
 
 
-def odds_history(sched, teams, wm, site: Path, archive: Path, season: int, week: int, drift: float, ranks_now: dict) -> dict:
+def odds_history(sched, teams, wm, site: Path, archive: Path, season: int, week: int, drift: float, ranks_now: dict,
+                 jobs: int = 1) -> dict:
   """Odds going into each week of `season` (make playoffs / division / top seed): the odds-by-week chart. Kept in
   <site>/data/playoffs/hist_<season>.json (committed to the archive branch by CI). The current week is recomputed every
   run (games before it only, today's ranks and lines); past weeks are kept once written, and missing ones are rebuilt
@@ -235,9 +257,9 @@ def odds_history(sched, teams, wm, site: Path, archive: Path, season: int, week:
       continue
     rk = week_ranks(site, season, w) or week_ranks(archive, season, w)
     if rk:
-      h["weeks"][str(w)] = snap(simulate(sched, teams, season, w, rk, wm, 2000, rng, lines_weeks={w}, drift=drift))
+      h["weeks"][str(w)] = snap(simulate(sched, teams, season, w, rk, wm, 2000, rng, lines_weeks={w}, drift=drift, jobs=jobs))
   h["weeks"][str(week)] = snap(simulate(sched, teams, season, week, ranks_now, wm, 4000, rng, lines_weeks=None, drift=drift,
-                                        played_before=week))
+                                        played_before=week, jobs=jobs))
   f.parent.mkdir(parents=True, exist_ok=True)
   f.write_text(json.dumps(h, separators=(",", ":")), encoding="utf-8")
   return h
@@ -387,10 +409,11 @@ def main():
     return
   ranks = {RELOCATED.get(r["team"], r["team"]): r["rank"] for r in idx.get("power") or []}
   drift = float(cfg["report"].get("playoff_drift", 0.0))
+  jobs = int(opt.get("jobs", os.cpu_count() or 1))
   res = simulate(sched, teams, current, week, ranks, wm, int(opt.get("sims", 10000)), np.random.default_rng(), lines_weeks=None,
-                 drift=drift, keep=True)
-  root = rooting(res, week, int(opt.get("flip", 2000)), int(opt.get("case", 500)), int(opt.get("jobs", os.cpu_count() or 1)))
-  hist = odds_history(sched, teams, wm, site, Path(opt.get("archive", ROOT.parent / "nfl-edge-archive")), current, week, drift, ranks)
+                 drift=drift, keep=True, jobs=jobs)
+  root = rooting(res, week, int(opt.get("flip", 2000)), int(opt.get("case", 500)), jobs)
+  hist = odds_history(sched, teams, wm, site, Path(opt.get("archive", ROOT.parent / "nfl-edge-archive")), current, week, drift, ranks, jobs)
   info = teams.assign(team_abbr=teams.team_abbr.replace(RELOCATED)).drop_duplicates("team_abbr").set_index("team_abbr")
   for r in res["rows"]:
     r.update({"nick": info.at[r["team"], "team_nick"], "logo": info.at[r["team"], "team_logo_espn"], "color": info.at[r["team"], "team_color"]})
