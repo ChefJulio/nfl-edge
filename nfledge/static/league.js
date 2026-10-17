@@ -306,11 +306,11 @@
     // under the name inside the cell (a long chip used to push the numbers off a phone screen), the projection; the
     // chance to sit is a chip ("35% out"), and the position chip shows only where the slot doesn't already say it
     // (FLEX, bench) or there is no slot (waivers sit under a position heading, so none there either).
-    const badgesOf = p => {
+    const badgesOf = (p, o = {}) => {
       const out = p.proj != null && p.inactive >= 0.05 && p.inactive < 0.99 ?  // ruled out: the O chip says it
         `<span class="lg-out${p.inactive >= 0.5 ? ' hi' : ''}" title="Chance he sits">${pct(p.inactive)} out</span>` : '';
       const conds = (p.conds || []).map(c => condTxt(c) && `<span class="lg-cond" title="${esc(`${f1(c.sits)} if ${c.name} sits, ${f1(c.plays)} if he plays`)}">${condTxt(c)}</span>`).join('');
-      const lock = p.locked ? '<span class="lg-lock" title="His game has kicked off: his spot is set">locked</span>' : '';
+      const lock = p.locked && !o.noLock ? '<span class="lg-lock" title="His game has kicked off: his spot is set">locked</span>' : '';
       const inner = lock + NFLE.injTag(p.status || '') + out + conds;
       return inner ? `<div class="badges lg-badges">${inner}</div>` : '';
     };
@@ -354,8 +354,17 @@
           ${below.length ? `<div class="lg-mv-sub">Below the waiver wire</div>${below.map(o => `<div class="lg-mv-row"><span class="lg-mv-k bad">${esc(o.p.pos)}</span><div><b>${esc(o.p.name)}</b> <span class="muted">${perG(o.ros, o.games)} per game · ${o.beat.length} free agent${o.beat.length === 1 ? '' : 's'} project more (best: ${esc(o.beat.sort((a, b) => b.ros - a.ros)[0].name)} ${perG(o.beat[0].ros, o.beat[0].games)})</span></div></div>`).join('')}` : ''}
           <div class="muted lg-mv-f">+X = what he'd add to your team per week, your best lineup each remaining week through ${ROS.through}, making room with whoever costs least (one QB, TE, K and D/ST is enough; ${DEPTH_MIN} RBs and WRs stay). Per game = his expected points per remaining game, byes skipped. Upside the projections can't see is your call.</div></div>`;
     };
+    // IR (owner 2026-10-17: "no mention of IR slots"): listed under the bench with when he's likely back (the first week
+    // the return model gives him at least an even chance to play); never in the lineup
+    const backWeek = x => { const g = gsisOf(x), r = ROS && g && ROS.players[g];
+      if (!ROS) return ''; if (!r) return 'not projected back this season';
+      const e = r.w.find(z => z[1] >= 0.5); return e ? `likely back week ${e[0]}` : 'not projected back this season'; };
+    const irSection = () => { const ir = (mine.ir || []).filter(x => mine.ext.includes(x));
+      return ir.length ? `<h3 class="lg-h">IR</h3>${table(ir.map(x => { const p = player(x);
+        return row('IR', Object.assign({}, p, { opp: '', why: backWeek(x) || p.why || 'injured reserve', proj: p.proj, inactive: 0 })); }).join(''))}` : ''; };
     const lineupView = () => {
-      const ps = mine.ext.map(player), cur = new Set(mine.starters);
+      const irSet = new Set(mine.ir || []);
+      const ps = mine.ext.filter(x => !irSet.has(x)).map(player), cur = new Set(mine.starters);
       const curStart = mine.starters.map(x => ps.find(p => p.ext === x));
       const best = optimize(ps, L.slots, curStart), bestSet = new Set(best.filter(r => r.p).map(r => r.p.ext));
       const curRows = L.slots.map((s, i) => ({ slot: s, p: ps.find(p => p.ext === mine.starters[i]) || null }));
@@ -409,6 +418,7 @@
         <h3 class="lg-h">Best lineup <span class="muted">${f1(total(best))} expected</span></h3>
         ${table(best.map(r => row(r.slot, r.p)).join(''))}
         <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') || '<tr><td colspan="3" class="muted">No projected bench players.</td></tr>')}
+        ${irSection()}
         <p class="muted lg-note">Expected points = our projection under your league's scoring x his chance to play. Kickers and team defenses are projected under your league's own kicking and D/ST settings (3-and-outs and 4th-down stops aren't modeled). Scoring bonuses (100-yard games, 2-point tries) aren't modeled.</p>`;
     };
 
@@ -423,11 +433,27 @@
       };
       const a = lineupOf(mine), b = lineupOf(opp), ea = total(a), eb = total(b), sd = spreadDiff(a, b) || 1;
       const pw = phi((ea - eb) / sd);
-      const side = (t, rows, e, live) => `<div class="lg-side"><div class="lg-tn">${esc(t.name)}</div><div class="lg-big">${f1(e)}</div>
-        <div class="muted">projected${live ? ` · ${f1(live)} so far` : ''}</div>${table(rows.map(r => row(r.slot, r.p)).join(''))}</div>`;
-      return `<div class="lg-wp"><b>${pct(pw)}</b> to win <span class="muted">(projected ${f1(ea)} - ${f1(eb)}, both teams' current lineups)</span>
-          <div class="lg-bar"><span style="width:${(100 * pw).toFixed(1)}%"></span></div></div>
-        <div class="lg-vs">${side(mine, a, ea, m.points[mine.id])}${side(opp, b, eb, m.points[opp.id])}</div>
+      // Head to head by slot (owner 2026-10-17, after Sleeper's match screen): your starter on the left, theirs on the
+      // right, the slot in the middle with each side's projection next to it
+      const short = n => { const w = String(n || '').split(' '); return w.length > 1 && !/D\/ST$/.test(n) ? `${w[0][0]}. ${w.slice(1).join(' ')}` : n; };
+      const when = p => { if (!p || !p.team) return ''; const k = NFLE.fmt.kickoff(D.games, p.team);
+        if (k == null) return p.why ? esc(p.why) : '';
+        const t = new Date(k).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+        return `${Date.now() >= k ? 'played' : esc(t)} ${esc(p.home || '')} ${p.opp ? NFLE.ui.tm(p.opp) : ''}`; };
+      const cell = (p, right) => !p ? '<div class="lg-hh-p muted">empty</div>'
+        : `<div class="lg-hh-p${right ? ' r' : ''}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}><b>${esc(short(p.name))}</b>
+            <span class="lg-hh-s"><span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span> ${NFLE.ui.tm(p.team)}</span>
+            <span class="lg-hh-s muted">${when(p)}</span>${badgesOf(p, { noLock: true })}</div>`;
+      const num = p => p && p.proj != null ? f1(p.proj) : '–';
+      const rows = L.slots.map((s, i) => `<div class="lg-hh-row">${cell(a[i].p, false)}<div class="lg-hh-n">${num(a[i].p)}</div>
+          <span class="lg-hh-slot posb ${['QB', 'RB', 'WR', 'TE'].includes(s) ? `posb-${s}` : 'lg-slot-any'}">${esc(s === 'SUPER_FLEX' ? 'SF' : s === 'FLEX' ? 'FLX' : s)}</span>
+          <div class="lg-hh-n">${num(b[i].p)}</div>${cell(b[i].p, true)}</div>`).join('');
+      const live = id => m.points[id] ? `<div class="muted lg-hh-live">${f1(m.points[id])} so far</div>` : '';
+      return `<div class="lg-hh-top"><div><div class="lg-tn">${esc(mine.name)}</div><div class="lg-big">${f1(ea)}</div>${live(mine.id)}</div>
+          <div class="lg-hh-wp"><b>${pct(pw)}</b><span class="muted">to win</span></div>
+          <div class="r"><div class="lg-tn">${esc(opp.name)}</div><div class="lg-big">${f1(eb)}</div>${live(opp.id)}</div></div>
+        <div class="lg-bar"><span style="width:${(100 * pw).toFixed(1)}%"></span></div>
+        <div class="lg-hh">${rows}</div>
         <p class="muted lg-note">Win chance: each starter's projection and range under your scoring and his chance to sit, for both lineups, counting how players in the same game rise and fall together (a QB and his receivers most). Live points are the platform's.</p>`;
     };
 
@@ -522,7 +548,9 @@
     const movesFor = (roster = null) => {
       const weeks = rosWeeks(), now = [weeks[0]];
       const base = roster || mine.ext.filter(x => !(mine.ir || []).includes(x));
-      const baseRos = valueOf(base, weeks), baseWk = valueOf(base, now);
+      // IR players (owner 2026-10-17) take no roster spot and are never drops, but count once they're projected back
+      const ir = (mine.ir || []).filter(x => mine.ext.includes(x)), withIr = k => [...k, ...ir];
+      const baseRos = valueOf(withIr(base), weeks), baseWk = valueOf(withIr(base), now);
       const open = L.size ? base.length < L.size : false;
       const fa = freeAgents();
       const pool = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF'].flatMap(pos => fa.filter(p => p.pos === pos).sort((a, b) => b.ros - a.ros).slice(0, MOVE_POOL));
@@ -531,7 +559,7 @@
         let best = null;
         drops.forEach(d => {
           if (!allowed(base, a, d)) return;
-          const keys = [...base.filter(x => x !== d), a.key];
+          const keys = withIr([...base.filter(x => x !== d), a.key]);
           const ros = valueOf(keys, weeks) - baseRos;
           if (!best || ros > best.ros) best = { add: a, drop: d, ros, wk: valueOf(keys, now) - baseWk };
         });
@@ -561,10 +589,93 @@
         <div class="lg-scroll"><table class="bx lg-tbl lg-rank"><thead><tr><th class="num">#</th><th>Team</th><th class="num">ROS</th><th class="num lg-avg">vs avg</th><th class="num">This wk</th><th class="num">Record</th><th class="num lg-pf">PF</th></tr></thead><tbody>${body}</tbody></table></div>`;
     };
 
+
+    // ---- trades (owner 2026-10-17: "trade value is relative to your team and the league's rules"): what a trade does
+    // to EACH side's best lineups through week 17 (the waiver card's method), per remaining week; this week alongside;
+    // roster depth after it. A fair trade helps both. The finder searches 1-for-1 and 2-for-1 swaps with every team for
+    // ones that help both sides, ranked by the smaller gain.
+    let trade = { team: null, give: new Set(), get: new Set(), found: null };
+    const keysOf = t => t.ext.filter(x => !(t.ir || []).includes(x));
+    const depthIssues = keys => {
+      const n = pos => keys.filter(k => posOf(k) === pos).length, out = [];
+      ['RB', 'WR'].forEach(pos => { if (n(pos) < DEPTH_MIN) out.push(`${n(pos)} ${pos}s`); });
+      ['QB', 'TE', 'K', 'DEF'].forEach(pos => { if (L.slots.includes(pos) && !n(pos)) out.push(`no ${pos === 'DEF' ? 'D/ST' : pos}`); });
+      return out;
+    };
+    const tradeEval = (them, give, get) => {
+      const weeks = rosWeeks(), now = [weeks[0]];
+      const side = (t, out, inn) => {
+        const before = t.ext, after = [...before.filter(x => !out.includes(x)), ...inn];
+        const active = k => k.filter(x => !(t.ir || []).includes(x) || inn.includes(x));  // an IR player traded in needs a spot
+        return { ros: (valueOf(after, weeks) - valueOf(before, weeks)) / Math.max(1, weeks.length), wk: valueOf(after, now) - valueOf(before, now),
+                 depth: depthIssues(active(after)), extra: active(after).length - active(before).length };
+      };
+      return { me: side(mine, give, get), them: side(them, get, give) };
+    };
+    const verdict = r => r.me.ros > 0.05 && r.them.ros > 0.05 ? ['good', 'Helps both']
+      : r.me.ros > 0.05 ? ['', 'Helps you, costs them'] : r.them.ros > 0.05 ? ['bad', 'Helps them, costs you'] : ['bad', 'Helps neither'];
+    const findTrades = () => {
+      const out = [], mk = keysOf(mine).filter(x => !['K', 'DEF'].includes(posOf(x)));
+      L.teams.filter(t => t.id !== mine.id).forEach(t => {
+        const tk = keysOf(t).filter(x => !['K', 'DEF'].includes(posOf(x)));
+        const tryIt = (give, get) => {
+          const r = tradeEval(t, give, get);
+          if (r.me.ros > 0.05 && r.them.ros > 0.05 && !r.me.depth.length && !r.them.depth.length) out.push({ t, give, get, r });
+        };
+        mk.forEach(a => tk.forEach(b => tryIt([a], [b])));
+        mk.forEach((a, i) => mk.slice(i + 1).forEach(a2 => tk.forEach(b => tryIt([a, a2], [b]))));  // you consolidate
+      });
+      return out.sort((x, y) => Math.min(y.r.me.ros, y.r.them.ros) - Math.min(x.r.me.ros, x.r.them.ros)).slice(0, 8);
+    };
+    const nameOf = x => player(x).name;
+    const shortName = n => { const w = String(n || '').split(' '); return w.length > 1 && !/D\/ST$/.test(n) ? `${w[0][0]}. ${w.slice(1).join(' ')}` : n; };
+    const tradeView = () => {
+      if (!ROS) { NFLE.load('data/ros.json').then(j => { ROS = j; if (view === 'trade') draw(); }, () => {}); return '<p class="muted">Loading rest-of-season projections…</p>'; }
+      const others = L.teams.filter(t => t.id !== mine.id);
+      const them = others.find(t => t.id === trade.team) || null;
+      const weeks = rosWeeks();
+      const pick = (t, side) => t.ext.map(x => ({ x, p: player(x) })).sort((a, b) => (b.p.exp ?? -1) - (a.p.exp ?? -1)).map(({ x, p }) => {
+        const on = trade[side].has(x), ros = weeks.reduce((u, k) => u + ((weekOf(x, k) || {}).exp || 0), 0);
+        return `<button type="button" class="lg-tp${on ? ' on' : ''}" data-side="${side}" data-x="${esc(x)}"><span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span><span class="lg-tp-n"><b>${esc(shortName(p.name))}</b><span class="muted">${(t.ir || []).includes(x) ? 'IR · ' : ''}${perG(ros, gamesOf(x))}/g</span></span></button>`;
+      }).join('');
+      let result = '';
+      if (them && (trade.give.size || trade.get.size)) {
+        const r = tradeEval(them, [...trade.give], [...trade.get]), [cls, txt] = verdict(r);
+        const sideHtml = (label, x) => `<div class="lg-tr-side"><div class="lg-tn">${esc(label)}</div>
+            <div class="lg-big ${x.ros > 0.05 ? 'good' : x.ros < -0.05 ? 'bad' : ''}">${x.ros >= 0 ? '+' : ''}${f1(x.ros)}<small> /wk</small></div>
+            <div class="muted">rest of season · ${NFLE.fmt.signed1(x.wk)} this week</div>
+            ${x.depth.length ? `<div class="lg-tr-warn">Leaves ${esc(x.depth.join(', '))}</div>` : ''}
+            ${x.extra > 0 ? `<div class="muted">needs ${x.extra} roster spot${x.extra === 1 ? '' : 's'} (a drop)</div>` : ''}</div>`;
+        result = `<div class="lg-mv lg-trade"><div class="lg-mv-h"><span class="lg-verdict ${cls}">${txt}</span></div>
+            <div class="lg-tr-sides">${sideHtml('You', r.me)}${sideHtml(them.name, r.them)}</div></div>`;
+      }
+      const found = trade.found;
+      const finder = found == null ? `<button type="button" class="sbtn lg-find">Find trades that help both teams</button>`
+        : found.length ? `<div class="lg-mv"><div class="lg-mv-h">Trades that help both</div>${found.map((f, i) =>
+            `<button type="button" class="lg-tf" data-i="${i}"><div><b>${esc(f.t.name)}</b>: you give ${f.give.map(x => `<b>${esc(nameOf(x))}</b>`).join(' + ')}, get <b>${esc(nameOf(f.get[0]))}</b></div>
+              <div class="muted">you ${f.r.me.ros >= 0 ? '+' : ''}${f1(f.r.me.ros)}/wk · them ${f.r.them.ros >= 0 ? '+' : ''}${f1(f.r.them.ros)}/wk</div></button>`).join('')}</div>`
+        : '<p class="muted">No 1-for-1 or 2-for-1 trade helps both teams by our projections.</p>';
+      return `<p class="muted lg-note">Pick a team, then tap players to give and get. Each side's change = its best lineup every remaining week through ${ROS.through}, per week. A fair trade helps both. Values assume healthy players stay healthy, so a backup's insurance is undervalued; trades that leave fewer than ${DEPTH_MIN} RBs or WRs are flagged.</p>
+        ${result}
+        <div class="lg-tr-cols"><div><div class="lg-tr-h"><b>${esc(mine.name)}</b><span class="muted">you give</span></div><div class="lg-tps">${pick(mine, 'give')}</div></div>
+          <div><div class="lg-tr-h r"><select class="lg-trteam" aria-label="Trade with"><option value="">Trade with…</option>${others.map(t => `<option value="${esc(t.id)}"${them && t.id === them.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select><span class="muted">you get</span></div>
+            <div class="lg-tps">${them ? pick(them, 'get') : '<p class="muted">Choose a team.</p>'}</div></div></div>
+        <div class="lg-finder">${finder}</div>`;
+    };
+    const wireTrade = box => {
+      const sel = box.querySelector('.lg-trteam');
+      if (sel) sel.onchange = () => { trade.team = sel.value || null; trade.get = new Set(); draw(); };
+      box.querySelectorAll('.lg-tp').forEach(b => b.onclick = () => { const set = trade[b.dataset.side]; set.has(b.dataset.x) ? set.delete(b.dataset.x) : set.add(b.dataset.x); draw(); });
+      const f = box.querySelector('.lg-find');
+      if (f) f.onclick = () => { f.textContent = 'Searching…'; f.disabled = true; setTimeout(() => { trade.found = findTrades(); draw(); }, 30); };
+      box.querySelectorAll('.lg-tf').forEach(b => b.onclick = () => { const x = trade.found[+b.dataset.i];
+        trade = { ...trade, team: x.t.id, give: new Set(x.give), get: new Set(x.get) }; draw(); box.scrollIntoView({ block: 'start', behavior: 'smooth' }); });
+    };
     const draw = () => {
       if (!L) return connectView();
       const box = sec.querySelector('.lg-body');
-      box.innerHTML = view === 'lineup' ? lineupView() : view === 'matchup' ? matchupView() : view === 'teams' ? teamsView() : waiversView();
+      box.innerHTML = view === 'lineup' ? lineupView() : view === 'matchup' ? matchupView() : view === 'teams' ? teamsView() : view === 'trade' ? tradeView() : waiversView();
+      if (view === 'trade') wireTrade(box);
       if (NFLE.ui && NFLE.ui.ready) NFLE.ui.ready.then(() => {});
     };
 
@@ -572,13 +683,14 @@
       sec.innerHTML = `<div class="sec-head"><div><h2>${esc(L.name)}</h2><p>${L.platform === 'sleeper' ? 'Sleeper' : 'ESPN'} · week ${esc(String(L.week))} · ${L.teams.length} teams · our projections under your league's scoring.</p>${(L.unmodeled || []).length ? `<details class="lg-unmod"><summary>${new Set(L.unmodeled).size} scoring rules not modeled</summary><p class="muted">Your league also scores ${esc([...new Set(L.unmodeled)].join(', '))}: not in our projections yet.</p></details>` : ''}</div></div>
         <div class="lg-top"><label>Your team <select class="lg-team">${L.teams.map(t => `<option value="${esc(t.id)}"${mine && t.id === mine.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
           <button type="button" class="lg-change">Change league</button></div>
-        <div class="seg lg-seg">${[['lineup', 'Lineup'], ['matchup', 'Matchup'], ['teams', 'Teams'], ['waivers', 'Waivers']].map(([k, l]) => `<button type="button" data-v="${k}" class="${view === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+        <div class="seg lg-seg">${[['lineup', 'Lineup'], ['matchup', 'Matchup'], ['teams', 'Teams'], ['waivers', 'Waivers'], ['trade', 'Trade']].map(([k, l]) => `<button type="button" data-v="${k}" class="${view === k ? 'on' : ''}">${l}</button>`).join('')}</div>
         <div class="lg-body"></div>`;
-      sec.querySelector('.lg-team').onchange = e => { mine = L.teams.find(t => t.id === e.target.value); saved.team = mine.id; save(); draw(); };
+      sec.querySelector('.lg-team').onchange = e => { mine = L.teams.find(t => t.id === e.target.value); saved.team = mine.id; save();
+        trade = { team: null, give: new Set(), get: new Set(), found: null }; draw(); };
       sec.querySelector('.lg-change').onclick = () => { saved = null; save(); L = null; connectView(); };
       sec.querySelector('.lg-seg').onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; view = b.dataset.v;
         sec.querySelectorAll('.lg-seg button').forEach(x => x.classList.toggle('on', x === b));
-        if ((view === 'waivers' || view === 'teams') && !ROS) NFLE.load('data/ros.json').then(j => { ROS = j; draw(); }, () => draw()); else draw(); };
+        if (['waivers', 'teams', 'trade'].includes(view) && !ROS) NFLE.load('data/ros.json').then(j => { ROS = j; draw(); }, () => draw()); else draw(); };
     };
 
     const open = async s => {
