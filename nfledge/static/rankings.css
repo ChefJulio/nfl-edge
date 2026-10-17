@@ -30,6 +30,34 @@ table.dt.tiles tr.teamrow:hover > td { background: var(--row-hover); }
 @media (max-width: 640px) {
   #tab-players table.ranks .projc, #tab-players table.ranks .rngc { text-align: left; padding-left: 4px; padding-right: 4px; }
   /* left-aligned chip, fixed width, digits right-aligned inside: sits against the names and decimals still line up */
-  #tab-players table.ranks td.projc > .sc { display: inline-block; min-width: 3.3em; text-align: right; font-variant-numeric: tabular-nums; }
+  #tab-players table.ranks td.projc > .sc { display: inline-block; min-width: 50px; text-align: right; font-variant-numeric: tabular-nums; }
   #tab-players table.ranks .rk { padding-left: 6px; padding-right: 2px; }
+}
+
+/* agreed columns (owner 2026-10-17): the rank colored by tier; actual over a dimmed projection once his game starts;
+   chance to play on the injury badge */
+table.ranks td.rk .rkn.rk-start { color: #8fe0a8; } table.ranks td.rk .rkn.rk-flex { color: #f3d38c; }
+table.ranks td.rk .rkn.rk-bench { color: color-mix(in srgb, var(--tfg, var(--ink)) 55%, transparent); }
+td.projc .pv-was { display: block; font-size: var(--fs-xs); font-weight: 600; color: color-mix(in srgb, var(--tfg, #fff) 50%, transparent); white-space: nowrap; }
+td.projc .pv.act-hi { color: #6fdc8c; } td.projc .pv.act-lo { color: #ff8f84; }
+td.projc .pv .live-dot { width: 7px; height: 7px; margin-right: 4px; }
+.flag.fl-play { font-variant-numeric: tabular-nums; } .flag.fl-warn { color: #f3d38c; } .flag.fl-bad { color: #ff8f84; }
+/* phones: Proj and Matchup both in view without scrolling (owner 2026-10-17); the opponent's logo stands for his
+   abbreviation there (the full name is a tap away) */
+@media (max-width: 640px) {
+  #tab-players table.ranks td.mu .opp b { display: none; }
+  #tab-players table.ranks .mu { padding-left: 4px; padding-right: 6px; }
+  #tab-players table.ranks th.projc { padding-right: 2px; }
+}
+/* phones: the conditional line under a projection ("-0.7 if Moore plays") and the "if he plays" / "proj" notes wrap
+   at the chip's width instead of widening the column (they pushed Matchup out of view on RB / WR / FLEX) */
+@media (max-width: 640px) {
+  #tab-players table.ranks td.projc .pv-cond, #tab-players table.ranks td.projc .ifact { display: block; max-width: 4.8em; white-space: normal; line-height: 1.15; }
+}
+/* Proj without the number chip (owner 2026-10-17): the bold figure stands on its own; the fixed width above keeps
+   the decimals lined up */
+#tab-players table.ranks td.projc .sc, #tab-players table.ranks th.projc .sc { background: none; box-shadow: none; padding-left: 0; padding-right: 0; }
+@media (max-width: 640px) {
+  /* the actual score lines up with the projections around it (same fixed width, digits right) */
+  #tab-players table.ranks td.projc .pv.act-v { display: inline-block; min-width: 50px; text-align: right; font-variant-numeric: tabular-nums; }
 }

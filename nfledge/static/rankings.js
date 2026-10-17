@@ -94,6 +94,7 @@
       </div>`;
 
     // -- derived values under the current scoring + league ---------------------------------------------------------
+    const GAME_OF = Object.fromEntries((D.games || []).flatMap(g => [[g.away.team, g.id], [g.home.team, g.id]]));
     const derive = () => {
       const { w, lg } = state;
       all.forEach(r => {
@@ -109,6 +110,11 @@
         r._ratio = ratio;
         r._fpg = r.sc.g ? pts(r.sc.ss, w, r.pos) / r.sc.g : r.fpg;
         r._act = r.sc.ac ? pts(r.sc.ac, w, r.pos) : r.act;
+        // live (gamecast.js polls ESPN and shares NFLE.live): his box-score line and whether his game is on / over
+        const lv = NFLE.live, st = lv && GAME_OF[r.team] && lv.byGame[GAME_OF[r.team]], ln = lv && r.espn && lv.lines[r.espn];
+        if (ln && ln.line) r._act = pts(ln.line, w, r.pos);
+        r._live = !!(st && st.state === 'in');
+        if (r._act == null && st && st.state !== 'pre') r._act = 0;  // kicked off, no stats yet
       });
       const rank = {};
       ['QB', 'RB', 'WR', 'TE'].forEach(p => all.filter(r => r.pos === p).sort((a, b) => b._proj - a._proj).forEach((r, i) => { r._rank = i + 1; rank[r.pid] = i + 1; }));
@@ -147,7 +153,10 @@
       }).join('')}</svg>`;
     };
     const nameCell = (r, flex) => {
-      const badges = (r.status || r.boost >= 1 || r.low_sample) ? `<div class="badges">${NFLE.injTag(r.status)}${r.boost >= 1 ? `<span class="flag f-up" title="Raised by volume vacated by: ${esc(r.boost_from)}">+${f1(r.boost)} inj</span>` : ''}${r.low_sample ? '<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>' : ''}</div>` : '';
+      // his chance to play rides on the injury badge when it's in doubt (owner 2026-10-17: the Play% column read >99%
+      // for nearly everyone)
+      const pct = r.inactive >= 0.05 ? `<span class="flag fl-play ${r.inactive >= 0.5 ? 'fl-bad' : r.inactive >= 0.15 ? 'fl-warn' : ''}" title="${esc(r.inactive_why || '')}">${NFLE.fmt.toPlay(r.inactive)}</span>` : '';
+      const badges = (r.status || r.boost >= 1 || r.low_sample || pct) ? `<div class="badges">${NFLE.injTag(r.status)}${pct}${r.boost >= 1 ? `<span class="flag f-up" title="Raised by volume vacated by: ${esc(r.boost_from)}">+${f1(r.boost)} inj</span>` : ''}${r.low_sample ? '<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>' : ''}</div>` : '';
       // first name on top, last name below, badges to the right (owner 2026-10-17); scrolled sideways the pinned
       // column narrows and each line truncates (rankings.css)
       const [first, lastN] = NFLE.fmt.split(r.name);
@@ -169,27 +178,31 @@
     const columns = flex => {
       const range = r => `Floor ${f1(r._q[0])} · middle ${f1(r._q[1])}-${f1(r._q[3])} · ceiling ${f1(r._q[4])}`;
       const cols = [
-        { key: 'rank', label: '#', num: true, first: 'asc', cls: 'rk', title: 'Our rank at the position (owner 2026-10-15: our ranks only, no expert consensus shown)',
-          value: r => rankOf(r, flex), html: r => `<b class="rkn">${rankOf(r, flex)}</b>` },
+        // the rank carries the tier as its color (owner 2026-10-17: the Tier column only repeated it)
+        { key: 'rank', label: '#', num: true, first: 'asc', cls: 'rk', title: 'Our rank at the position. Color = tier in your league: green starter, amber flex range, gray bench',
+          value: r => rankOf(r, flex), html: r => `<b class="rkn rk-${r._slot}" title="${{ start: 'Starter', flex: 'Flex range', bench: 'Bench depth' }[r._slot]} in a ${state.lg.teams}-team league (${esc(r._tier)})">${rankOf(r, flex)}</b>` },
         { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name, html: r => nameCell(r, flex) },
-        { key: 'proj', label: 'Proj', num: true, cls: 'projc', title: 'Projected fantasy points under your scoring (tap a player for the full range of outcomes)', value: r => r._proj,
-          html: r => r._likelyOut
-            ? `<b class="pv" title="Under 10% to play: projected 0">0.0</b><span class="ifact" title="${esc(range(r))}">if he plays ${f1(r._ifact)}</span>`
-            : `<b class="pv" title="${esc(range(r))}">${f1(r._proj)}</b>${condLine(r)}` },
+        // once his game starts (owner 2026-10-17): what he's scored, the projection dimmed beneath; the sort stays by
+        // projection. Live: the dot; final: green above his likely range (p75), red below it (p25)
+        { key: 'proj', label: 'Proj', num: true, cls: 'projc', title: 'Projected fantasy points under your scoring (tap a player for the full range of outcomes). Once his game starts: his actual points, with the projection beneath',
+          value: r => r._proj,
+          html: r => r._act != null
+            ? `<b class="pv act-v${r._live ? '' : r._act > r._q[3] ? ' act-hi' : r._act < r._q[1] ? ' act-lo' : ''}" title="${r._live ? 'Live' : 'Final'}: ${f1(r._act)} pts · projected ${f1(r._likelyOut ? r._ifact : r._proj)}">${r._live ? '<span class="live-dot"></span>' : ''}${f1(r._act)}</b><span class="pv-was">proj ${f1(r._likelyOut ? r._ifact : r._proj)}</span>`
+            : r._likelyOut
+              ? `<b class="pv" title="Under 10% to play: projected 0">0.0</b><span class="ifact" title="${esc(range(r))}">if he plays ${f1(r._ifact)}</span>`
+              : `<b class="pv" title="${esc(range(r))}">${f1(r._proj)}</b>${condLine(r)}` },
+        // Matchup right after Proj (owner 2026-10-17: the two numbers a start / sit call hinges on); his team's implied
+        // points (the Team pts column) folded into its tooltip
+        { key: 'mu', label: 'Matchup', first: 'desc', cls: 'mu', title: 'Opponent, and the points facing them adds (+) or takes away (-) vs an average opponent: Vegas total, play volume and defense ratings together. Green helps, red hurts; deeper = bigger.',
+          value: r => r.mu, html: r => `<span class="opp tm-open" data-tm="${esc(r.opp)}"><span class="vs">${esc(r.home)}</span>${logo(r.opp, 18)}<b>${esc(r.opp)}</b></span><span class="muv" style="color:${esc(r.mu_c || '')}" title="Facing ${esc(r.opp)} instead of an average opponent: ${sgn(r.mu)} pts${r.imp != null ? ` · his team is expected to score ${f1(r.imp)}` : ''}">${sgn(r.mu)}</span>` },
         { key: 'range', label: 'Range', num: true, cls: 'rngc', title: 'Floor to ceiling: 8 times in 10 his score lands in this range (10th to 90th percentile of how past projections like this turned out)',
           value: r => r._q[4] - r._q[0], html: r => `<span title="${esc(range(r))}">${Math.round(r._q[0])}&ndash;${Math.round(r._q[4])}</span>` },
-        ...(RK.show_act ? [{ key: 'act', label: 'Actual', num: true, cls: 'actc', title: 'What he scored: live during his game (pulsing dot), final once it ends. Green = above his likely range (75th pct), red = below it (25th pct), colored only when final',
-          value: r => r._act, html: r => r._act == null ? '' : `<span class="act-v ${r._act > r._q[3] ? 'act-hi' : r._act < r._q[1] ? 'act-lo' : ''}">${f1(r._act)}</span>` }] : []),
-        { key: 'fpg', label: 'FP/G', num: true, cls: 'fpgc', title: 'Season fantasy points per game', value: r => r._fpg, html: r => f1(r._fpg) },
-        { key: 'tier', label: 'Tier', first: 'asc', cls: 'tierc', value: r => r._rank, html: r => `<span class="tier t-${r._slot}" title="${{ start: 'Starter', flex: 'Flex range', bench: 'Bench depth' }[r._slot]} in a ${state.lg.teams}-team league">${r._tier}</span>` },
-        { key: 'l5', label: 'Last 5', sort: false, cls: 'l5', title: 'His last 5 games this season: bar = points scored, green = beat our projection for that game, red = missed it; the tick is our projection', html: l5 },
-        { key: 'mu', label: 'Matchup', first: 'desc', cls: 'mu', title: 'Opponent, and the points facing them adds (+) or takes away (-) vs an average opponent: Vegas total, play volume and defense ratings together. Green helps, red hurts; deeper = bigger.',
-          value: r => r.mu, html: r => `<span class="opp tm-open" data-tm="${esc(r.opp)}"><span class="vs">${esc(r.home)}</span>${logo(r.opp, 18)}<b>${esc(r.opp)}</b></span><span class="muv" style="color:${esc(r.mu_c || '')}" title="Facing ${esc(r.opp)} instead of an average opponent: ${sgn(r.mu)} pts">${sgn(r.mu)}</span>` },
-        { key: 'inactive', label: 'Play%', cls: 'ctr', title: 'Chance he plays this week (injury report, practice pattern, game status, healthy scratches)', value: r => 1 - (r.inactive || 0),
-          html: r => `<span title="${esc(r.inactive_why)}" class="${r.inactive >= 0.5 ? 'pill pill-bad' : r.inactive >= 0.15 ? 'pill pill-warn' : r.inactive >= 0.05 ? 'pill pill-soft' : 'quiet'}">${NFLE.fmt.toPlay(r.inactive)}</span>` },
+        // season FP/G folded into its tooltip (owner 2026-10-17: the FP/G column repeated it)
+        { key: 'l5', label: 'Last 5', sort: false, cls: 'l5', title: 'His last 5 games this season: bar = points scored, green = beat our projection for that game, red = missed it; the tick is our projection',
+          html: r => `<span title="${r._fpg != null ? `Season: ${f1(r._fpg)} FP/G` : ''}">${l5(r)}</span>` },
+
         { key: 'vol', label: 'Volume', first: 'desc', cls: 'volc', title: 'Projected volume; arrow = his recent usage share has moved up or down from his longer-run share (a role change)',
           value: r => r.vol && r.vol.v, html: r => r.vol ? `<span title="${esc(r.vol.d)}">${esc(r.vol.t)}${r.vol.a === 'up' ? '<i class="va va-up">&#9650;</i>' : r.vol.a === 'down' ? '<i class="va va-down">&#9660;</i>' : ''}</span>` : '' },
-        { key: 'imp', label: 'Team pts', num: true, cls: 'impc', title: "Points his team is expected to score this game (Vegas implied total; our model's before lines post): more points, more scoring chances", value: r => r.imp, html: r => f1(r.imp) },
         { key: 'td', label: pos === 'QB' ? 'Pass TD' : 'TD', num: true, cls: 'tdc', title: pos === 'QB' ? 'Projected passing touchdowns (hover for his rushing TD chance)' : 'Chance he scores at least one touchdown',
           value: r => r.td && r.td.v, html: r => r.td ? `<span title="${esc(r.td.d)}">${esc(r.td.t)}</span>` : '' },
       ];
@@ -401,6 +414,8 @@
       sec.querySelector('#scoreSum').textContent = `· ${name}, ${state.lg.teams} teams`;
       document.dispatchEvent(new Event('nfle-scoring'));  // open player page / live points re-score too
     };
+    // live scores (gamecast.js, every ~minute on game days): redraw in place, no re-sort
+    document.addEventListener('nfle-live', () => { if (mode === 'week') draw(false); });
     const showPos = p => {
       pos = p;
       sec.querySelectorAll('.posbar button').forEach(b => b.classList.toggle('on', b.dataset.pos === p));

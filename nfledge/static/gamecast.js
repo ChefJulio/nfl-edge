@@ -2055,6 +2055,9 @@
       } catch (e) { /* keep last good */ }
     }));
     paintRows(); paintTiles(); paintPill();
+    // client-rendered tables (Rankings) read the live box scores and game states and redraw themselves
+    window.NFLE.live = { lines: LIVE.lines, byGame: LIVE.byGame };
+    document.dispatchEvent(new Event('nfle-live'));
     if (cardPid) renderCard(cardPid); else if (cardTeam) renderTeam(cardTeam);
     const sts = Object.values(LIVE.byGame);
     const soon = sts.some(s => s.state === 'pre' && new Date(s.date).getTime() - now < 30 * 60000);
