@@ -37,5 +37,11 @@ MAE +0.031 [+0.019, +0.042] with it, while teammates of a sitting player go from
 | 21 | low | Confidence label (engine.py:441), low-data flag (:399) | cv .55 / .8; < 40 opportunities | Low confidence / boom-bust / low data labels | Never calibrated | cut at terciles of realized spread; check labels sort actual spread |
 | 22 | low | ESPN early-week `PRIOR_WEIGHT` / `PRIOR_CAP` (espn_calib.py:47, 45) | 5 / 50 | Pseudo-counts for early-week ESPN status rates | Hand-set; archive from 2026-10-13 only | {2, 5, 10} x {25, 50, 100} at season end, or "unresolved" |
 
+Also queued (2026-10-17, owner kept the single-number display; this is accuracy plumbing): **range calibration.**
+The p10 / p90 ranges feed the Floor / Middle / Ceiling row, the confidence label and the Fantasy win chance. A look
+at 2021-25 backtests: 10-90% ranges hold 73-75% of outcomes for top-tier RBs / QBs (should be 80%), and bottom tiers
+are lopsided (0-3% below p10, ~10% above p90). Score with quantile (pinball) loss + coverage by tier; fix only if it
+beats today ("range-widening multipliers" were rejected earlier, sec. 5). Display stays a single number.
+
 Duplicates to remove when touched: `SIGNIFICANT` (injuries.py:29) repeats `redistribute_min_share`; a season-weight
 map in player_model.py:574 (grade_prior experiment, off) repeats `eff_season_weights`.
