@@ -227,7 +227,7 @@ def relevant(res: pd.DataFrame) -> pd.DataFrame:
 
 
 def week_bootstrap(diff: pd.Series, weeks: pd.Series, n: int = 2000, seed: int = 0) -> tuple[float, float]:
-  """95% CI of the mean of diff, resampling whole season-weeks."""
+  """95% CI of the mean of diff, resampling whole groups: season-weeks (the default use), or players (gsis_id)."""
   g = pd.DataFrame({"d": diff.to_numpy(), "w": weeks.to_numpy()}).groupby("w").d.agg(["sum", "size"])
   s, c = g["sum"].to_numpy(), g["size"].to_numpy()
   rng = np.random.default_rng(seed)
@@ -253,7 +253,9 @@ def compare(results: dict[str, pd.DataFrame], ref: str) -> pd.DataFrame:
       if name != ref:
         d = err - err_ref
         lo, hi = week_bootstrap(d, m.season.astype(str) + "-" + m.week.astype(str))
-        row.update({"d_mae": d.mean(), "ci_lo": lo, "ci_hi": hi,
+        # the same interval resampling whole players instead (a player's games share his errors; INSIGHTS thread 8)
+        plo, phi = week_bootstrap(d, m.gsis_id)
+        row.update({"d_mae": d.mean(), "ci_lo": lo, "ci_hi": hi, "pl_lo": plo, "pl_hi": phi,
                     "verdict": "better" if hi < 0 else "worse" if lo > 0 else "no difference"})
       rows.append(row)
   return pd.DataFrame(rows)

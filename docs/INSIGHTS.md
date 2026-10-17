@@ -1861,3 +1861,30 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   standing: backtests feed the game's recorded wind (pbp, data.py game_wind) while live builds feed an Open-Meteo
   forecast mean (data.forecast_wind) - the penalty was tuned on the former; the live-input archive (thread 1) is the
   way to measure how the two compare. The +7.5 yds with no penalty stays open ((a)-(c) above).
+- **PRE-REGISTERED 2026-10-16 (before running): thread 6, correlation-aware Fantasy matchup win chance.** Today
+  (league.js): P(win) = Phi((E_a - E_b) / sqrt(sum of each starter's variance)), variance = pa x sd^2 + pa(1-pa) x
+  proj^2, sd = (p90 - p10) / 2.563, players independent. New: add 2 x rho x s_i x s_j for every pair of starters in
+  the same game (same lineup: + ; opposing lineups: the cross-covariance enters the difference with a minus sign), rho
+  by position pair and relation (same team / opponents), fit as the correlation of standardized residuals
+  ((actual - proj) / s) on seasons before the test season (2021 on). Rows: tools/h2h_eval.py, latest baseline
+  backtests, simulated 1-QB / 2-RB / 3-WR / 1-TE lineups from that week's players with proj >= 3, three kinds:
+  unstacked (no two starters from one game), QB+1 and QB+2 (QB with one / two of his pass catchers), opponents drawn
+  unstacked; 20,000 matchups per kind per test season. Metric: calibration (expected calibration error over 10
+  probability bins) and Brier on actual results. Decide on 2025, confirm on 2026 (weeks so far). GATE: ship (to the
+  owner, who approves the display change) if, in BOTH seasons, ECE is lower for QB+1 and QB+2 and unstacked Brier /
+  ECE are not worse (within 0.002); else keep independent sums and record.
+- **Thread 7 (2026-10-16): rest-of-season accuracy, descriptive (tools/ros_eval.py).** No archive of the live
+  rest-of-season numbers exists (lookahead pages are rebuilt every run), so this scores a walk-forward stand-in: at
+  week W, projection if active x the team's remaining games, vs points actually scored from W on (missed games = 0);
+  baseline = FP/G so far x the same games. 2021-25, W = 4 / 8 / 12, players projected 5+ with 3+ games (2,563).
+  Spearman ours vs baseline: all positions by season 0.615 / 0.635 / 0.656 / 0.659 / 0.679 vs 0.619 / 0.608 / 0.647 /
+  0.628 / 0.613 (better 4 of 5, tied 2021); by position and W ours is better in 11 of 12 cells (QB W8 0.515 vs 0.564);
+  TE weakest (0.25 at W 4-8). Bias of assuming every remaining game is played: actual / projected - 1 = -15.8% (base
+  -18.2%), i.e. ~16% of rest-of-season points never happen (injuries, benchings, rest). The live page projects healthy
+  players at 100% for every lookahead week, so its rest-of-season totals likely carry the same over-projection.
+  Candidate (not run): a games-missed discount by position for healthy players in the lookahead, fit on earlier
+  seasons; gate on rest-of-season bias and Spearman, decide 2025 / confirm 2026, then the unified lookahead
+  availability "next angle" (sec. 9) as its own pre-registration.
+- **Thread 8 (2026-10-16), part: player-cluster bootstrap.** tools/experiments.py now prints, next to the
+  season-week interval (ci_lo / ci_hi), the same interval resampling whole players (pl_lo / pl_hi). First use
+  (baseline vs qb_newteam 2021-25): nearly identical (ALL [0.000, 0.001] both; QB [0.000, 0.005] vs [0.001, 0.005]).
