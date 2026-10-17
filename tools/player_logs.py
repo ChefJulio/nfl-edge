@@ -10,6 +10,7 @@ The page re-scores fantasy points with the viewer's scoring; the weekly position
 """
 import json
 import re
+from collections import Counter
 import sys
 from pathlib import Path
 
@@ -404,6 +405,19 @@ def espn_str(e):
   return e if e.isdigit() else None
 
 
+def rows_by(df: pd.DataFrame | None, key: str) -> dict:
+  """{key value: [row, ...]} in frame order, rows as plain namedtuples. One pass over the frame instead of a
+  groupby into thousands of small frames read back row by row (that pandas overhead was most of this step's time);
+  extension columns (pyarrow strings) go to object first, whose per-item access is far slower to iterate."""
+  if df is None or not len(df):
+    return {}
+  ext = {c: object for c in df.columns if not isinstance(df[c].dtype, np.dtype)}
+  out: dict = {}
+  for r in (df.astype(ext) if ext else df).itertuples(index=False):
+    out.setdefault(getattr(r, key), []).append(r)
+  return out
+
+
 def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: pd.DataFrame, ros: pd.DataFrame,
                snaps: pd.DataFrame, bios: dict, written: set, injuries: dict | None = None,
                post_snaps: pd.DataFrame | None = None, round_of: dict | None = None):
@@ -427,9 +441,9 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
     st[c] = st[c].replace(D.RELOCATED)
   pst, st = st[st.season_type == "POST"], st[st.season_type == "REG"]
   round_of = round_of or {}
-  pst_by = {k: g for k, g in pst.groupby("player_id")}
+  pst_by = rows_by(pst, "player_id")
   ps = post_snaps[post_snaps.gsis_id.notna()].assign(team=lambda x: x.team.replace(D.RELOCATED)) if post_snaps is not None else None
-  psnap_by = {k: g for k, g in ps.groupby("gsis_id")} if ps is not None else {}
+  psnap_by = rows_by(ps, "gsis_id")
   home_of, gid_of, opp_of = {}, {}, {}
   for g in allsched.itertuples():
     h, a = D.RELOCATED.get(g.home_team, g.home_team), D.RELOCATED.get(g.away_team, g.away_team)
@@ -447,14 +461,16 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
   pos_of.update(dict(zip(rs_sorted.gsis_id, rs_sorted.position)))
   # real player ids only (00-0012345): one source carries a placeholder "0" that became data/players/0.json
   ids = {g for g in (set(st.player_id) | set(ros.gsis_id) | set(sn.gsis_id)) - written if isinstance(g, str) and GSIS_RE.match(g)}
-  stat_by = {k: g for k, g in st.groupby("player_id")}
-  snap_by = {k: g for k, g in sn.groupby("gsis_id")}
-  ros_by = {k: g for k, g in ros[ros.status == "ACT"].groupby("gsis_id")}
+  stat_by = rows_by(st, "player_id")
+  snap_by = rows_by(sn, "gsis_id")
+  # active-roster weeks per player and season, weeks in order (a stable sort: two teams in one week keep frame order)
+  ros_by = rows_by(ros[ros.status == "ACT"].sort_values(["gsis_id", "season", "week"], kind="stable"), "gsis_id")
   sched_w, n_weeks = team_weeks(allsched)
   ros_w = roster_weeks(ros)
-  last_ros = rs_sorted.drop_duplicates("gsis_id", keep="last").set_index("gsis_id")
+  last_ros = rs_sorted.drop_duplicates("gsis_id", keep="last")
   name_of = dict(zip(st.player_id, st.player_display_name))
-  name_of.update(dict(zip(last_ros.index, last_ros.full_name)))
+  name_of.update(dict(zip(last_ros.gsis_id, last_ros.full_name)))
+  last_ros = {k: v[0] for k, v in rows_by(last_ros, "gsis_id").items()}
   out_dir = site / "data" / "players"
   n = 0
   r1 = lambda v: int(v) if float(v).is_integer() else round(float(v), 1)  # noqa: E731
@@ -467,7 +483,7 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
     games = {}
     g = stat_by.get(pid)
     if g is not None:
-      for r in g.itertuples():
+      for r in g:
         key = (int(r.season), int(r.week))
         e = {"w": key[1], "t": r.team, "o": r.opponent_team, "h": home_of.get((key[0], key[1], r.team), 1)}
         if keys:
@@ -479,7 +495,7 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
     sg = snap_by.get(pid)
     unit = SNAP_UNIT[kind]
     if sg is not None:
-      for r in sg.itertuples():
+      for r in sg:
         key = (int(r.season), int(r.week))
         e = games.get(key)
         if e is None:
@@ -499,7 +515,7 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
         e["gid"] = gid
       seasons.setdefault(s, []).append(e)
     playoffs = {}  # (season, week) -> game, same shape + the round
-    for r in (pst_by[pid].itertuples() if pid in pst_by else []):
+    for r in pst_by.get(pid, []):
       rnd = round_of.get((int(r.season), int(r.week), r.team))
       if rnd is None:
         continue
@@ -510,7 +526,7 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
       if any(ret):
         e["r"] = ret
       playoffs[(int(r.season), int(r.week))] = e
-    for r in (psnap_by[pid].itertuples() if pid in psnap_by else []):
+    for r in psnap_by.get(pid, []):
       key = (int(r.season), int(r.week))
       rnd = round_of.get((key[0], key[1], r.team))
       if rnd is None:
@@ -529,13 +545,14 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
     for (s, w), e in sorted(playoffs.items()):
       pg.setdefault(s, []).append(e)
     rs = {}
-    rg = ros_by.get(pid)
-    if rg is not None:
-      for s, x in rg.groupby("season"):
-        rs[str(int(s))] = ["/".join(dict.fromkeys(x.sort_values("week").team)), int(x.week.nunique())]
-    lr = last_ros.loc[pid] if pid in last_ros.index else None
+    by_season: dict = {}
+    for r in ros_by.get(pid, []):
+      by_season.setdefault(int(r.season), []).append(r)
+    for s_, x in sorted(by_season.items()):
+      rs[str(s_)] = ["/".join(dict.fromkeys(r.team for r in x)), len({r.week for r in x})]
+    lr = last_ros.get(pid)
     team = lr.team if lr is not None and int(lr.season) == cur and lr.status not in ("CUT", "RET") else None
-    espn = espn_str(lr.get("espn_id")) if lr is not None else None
+    espn = espn_str(getattr(lr, "espn_id", None)) if lr is not None else None
     if espn is None and pid in pinfo.index:
       espn = espn_str(pinfo.at[pid, "espn_id"])
     name = name_of.get(pid) or (pinfo.at[pid, "display_name"] if pid in pinfo.index else pid)
@@ -628,8 +645,11 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
     def close():
       nonlocal cur_ep
       if cur_ep:
-        parts = pd.Series(cur_ep.pop("parts"))
-        cur_ep["part"] = parts.mode().iloc[0] if len(parts) else ("Undisclosed" if cur_ep.get("list") else "")
+        # the part listed most; ties to the alphabetically first, as pandas' mode() sorts them (a Series per
+        # episode was ~17 s of this step)
+        cnt = Counter(cur_ep.pop("parts"))
+        top = max(cnt.values(), default=0)
+        cur_ep["part"] = min(k for k, n in cnt.items() if n == top) if cnt else ("Undisclosed" if cur_ep.get("list") else "")
         if not cur_ep.pop("counted"):
           cur_ep["missed"] = cur_ep["played"] = None  # before 2012: no snap counts to tell
         eps.append(cur_ep)
@@ -850,15 +870,12 @@ def team_logs(site: Path, cfg: dict, data, cache, nfl, allsched: pd.DataFrame, p
                    "ot": bool(x.overtime == 1)})
   T = pd.DataFrame(rows)
   T["r"] = np.where(T.ps > T.pa, "W", np.where(T.ps < T.pa, "L", "T"))
-  def stat(gid, team, k):
-    try:
-      v = ts.at[(gid, team), k]
-      return None if pd.isna(v) else float(v)
-    except KeyError:
-      return None
   for k in ("yd", "py", "ry", "ep", "to", "fd", "sk"):
-    T[k] = [stat(a, b, k) for a, b in zip(T.gid, T.team)]
-    T["o_" + k] = [stat(a, b, k) for a, b in zip(T.gid, T.opp)]
+    # one plain dict per stat, (game id, team) -> value: a pandas cell lookup per game was ~25 s of this step
+    lk = ts[k].to_dict() if k in ts.columns else {}
+    stat = lambda gid, team: None if pd.isna(v := lk.get((gid, team), np.nan)) else float(v)  # noqa: E731
+    T[k] = [stat(a, b) for a, b in zip(T.gid, T.team)]
+    T["o_" + k] = [stat(a, b) for a, b in zip(T.gid, T.opp)]
   # season summaries + league ranks (per-game averages; 1 = best)
   agg = T.groupby(["season", "team"]).agg(gp=("ps", "size"), w=("r", lambda s: (s == "W").sum()), l=("r", lambda s: (s == "L").sum()),
                                           t=("r", lambda s: (s == "T").sum()), pf=("ps", "mean"), pa=("pa", "mean"),
@@ -875,6 +892,7 @@ def team_logs(site: Path, cfg: dict, data, cache, nfl, allsched: pd.DataFrame, p
   r1 = lambda v, n=1: None if v is None or pd.isna(v) else round(float(v), n)
   # playoff games per (team, season), kept apart from the regular season (round in "po")
   po = {}
+  ts_rows = ts.to_dict("index")  # (game id, team) -> its stats, for the per-game lookups below
   for x in (postsched.itertuples() if postsched is not None else []):
     if pd.isna(x.home_score):
       continue
@@ -891,11 +909,8 @@ def team_logs(site: Path, cfg: dict, data, cache, nfl, allsched: pd.DataFrame, p
         m = ps_ - pa_ - line
         e["ats"] = "W" if m > 0 else "L" if m < 0 else "P"
       def stat(t, k):
-        try:
-          v = ts.at[(x.game_id, t), k]
-          return None if pd.isna(v) else float(v)
-        except KeyError:
-          return None
+        v = ts_rows.get((x.game_id, t), {}).get(k, np.nan)
+        return None if pd.isna(v) else float(v)
       e["s"] = [r1(stat(team, "yd"), 0), r1(stat(team, "py"), 0), r1(stat(team, "ry"), 0), r1(stat(team, "ep")), r1(stat(team, "to"), 0), r1(stat(team, "fd"), 0)]
       e["os"] = [r1(stat(opp, "yd"), 0), r1(stat(opp, "py"), 0), r1(stat(opp, "ry"), 0), r1(stat(opp, "ep")), r1(stat(opp, "to"), 0)]
       po.setdefault((team, int(x.season)), []).append(e)
