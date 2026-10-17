@@ -20,8 +20,7 @@ table.dt.tiles tr.teamrow:hover > td { background: var(--row-hover); }
 /* quiet (owner: the white version was "way too prominent"), and fully inside the cell (the first one clipped left) */
 .pic .pic-rk { position: absolute; left: -1px; top: -2px; z-index: 2; min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px;
   display: none; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; line-height: 1;
-  background: color-mix(in srgb, var(--ink) 12%, var(--panel)); color: color-mix(in srgb, var(--ink) 80%, transparent);
-  box-shadow: 0 0 0 2px var(--panel); font-variant-numeric: tabular-nums; }
+  background: color-mix(in srgb, var(--panel) 68%, transparent); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); color: color-mix(in srgb, var(--ink) 88%, transparent); font-variant-numeric: tabular-nums; }
 .dt-wrap .scroll.scrolled .pic .pic-rk { display: flex; animation: rk-in .16s ease-out; }
 @keyframes rk-in { from { transform: scale(.6); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .dt-wrap .scroll.scrolled .pic .pic-rk { animation: none; } }
