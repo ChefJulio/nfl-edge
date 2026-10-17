@@ -72,13 +72,14 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
   cur = cur[[not any((season, w, g) in m.played for w in range(int(wk) + 1, current_week + 1))
              for g, wk in zip(cur.gsis_id, cur.week)]]
   cur = cur[cur.next_week >= current_week - 1]  # still out as of his team's most recent game
-  if cur.empty:
-    return {w: {} for w in weeks}, {w: {} for w in weeks}, {w: pd.DataFrame() for w in weeks}
   horizon = 18
   now_report = now_report or {}
+  new = _newly_injured(data, m, season, current_week, now_report, set(cur.gsis_id))
+  if cur.empty and new.empty:
+    return {w: {} for w in weeks}, {w: {} for w in weeks}, {w: pd.DataFrame() for w in weeks}
   first = np.array([float(now_report[g]) if (g in now_report and int(nw) == current_week) else np.nan
                     for g, nw in zip(cur.gsis_id, cur.next_week)])
-  pa = m.p_active(cur, horizon, first=first, stay=1.0)  # once back, like a healthy player (also 1.0 here)
+  pa = m.p_active(cur, horizon, first=first, stay=1.0) if len(cur) else np.zeros((0, horizon))  # once back: 1.0
   ir_rows = np.where(cur.desig.to_numpy() == "ir")[0]
   if len(ir_rows) and cache_dir is not None and gb is not None:
     from . import return_timing as RT
@@ -99,6 +100,10 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
     sub = full.loc[list(zip(cur.gsis_id.iloc[ir_rows], cur.week.iloc[ir_rows]))].reset_index()
     sub["p_now"] = first[ir_rows]
     pa[ir_rows, :] = RT.predict(rt, sub, horizon)
+  if len(new):  # newly injured: this week's chance p, else the chain from missing this week's game; back = 1.0
+    p0 = new.p_now.to_numpy()[:, None]
+    cur = pd.concat([cur, new], ignore_index=True)
+    pa = np.vstack([pa, p0 + (1 - p0) * m.p_active(new, horizon, stay=1.0)])
   s = data.schedules
   reg = s[(s.season == season) & (s.game_type == "REG")]
   team_weeks = {t: sorted(set(reg[reg.home_team == t].week) | set(reg[reg.away_team == t].week))
@@ -129,6 +134,36 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
                        "full_name": info.at[x.gsis_id, "full_name"], "depth_rank": np.nan})
     avail[w], status[w], extra[w] = a, t_, pd.DataFrame(rows)
   return avail, status, extra
+
+
+def _newly_injured(data, m, season: int, week: int, now_report: dict, known: set) -> pd.DataFrame:
+  """(AH, INSIGHTS {#newinj-chain}, owner 2026-10-17: Jalen Hurts ruled out, then 99% for the next week) players on
+  this week's report who played their team's previous game and have no return state: the state after missing this
+  week's game (missed 1, active, report status, injury, calendar), with p_now = this week's chance to play. The
+  lookahead counted them fully available from next week on."""
+  inj = data.injuries
+  inj = inj[(inj.season == season) & (inj.week == week) & (inj.game_type == "REG") & inj.gsis_id.notna()]
+  inj = inj.drop_duplicates("gsis_id", keep="last").set_index("gsis_id")
+  r = data.rosters
+  r = r[(r.season == season) & r.gsis_id.notna()].sort_values("week").drop_duplicates("gsis_id", keep="last").set_index("gsis_id")
+  rows = []
+  for g, p_now in now_report.items():
+    if g in known or g not in r.index or (season, week, g) in m.played:
+      continue
+    team = r.at[g, "team"]
+    ws = m._tw.get((season, team), [])
+    prev = next((w for w in reversed(ws) if w < week), None)
+    nxt = next((w for w in ws if w > week), None)
+    if week not in ws or prev is None or nxt is None or (season, prev, g) not in m.played:
+      continue
+    status = inj.at[g, "report_status"] if g in inj.index else None
+    rows.append({"season": season, "week": week, "gsis_id": g, "team": team, "missed": 1, "desig": "active",
+                 "report": REPORT.get(status, 0) if isinstance(status, str) else 0,
+                 "injury": inj.at[g, "report_primary_injury"] if g in inj.index else None,
+                 "position": r.at[g, "position"], "next_week": nxt, "back": False, "p_now": float(np.clip(p_now, 0, 1))})
+  if not rows:
+    return pd.DataFrame()
+  return m._calendar(ReturnModel._encode(pd.DataFrame(rows)))
 
 
 def _injury_code(s: pd.Series) -> pd.Series:

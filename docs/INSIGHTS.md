@@ -2269,3 +2269,10 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   (projection if active x chance to play each game) vs actual points. GATE: MAE lower with a 95% CI over season-weeks
   excluding 0, lower in >= 3 of 4 seasons; guard: mean weekly rank correlation (Spearman) not lower (CI lower bound >
   -0.002). Reported: newly injured rows alone.
+- **RESULT {#newinj-chain} (AH) the chain for newly injured players: PASS, shipped.** tools/newinj_eval.py, 14,985 rows
+  2022-25 (3,077 newly injured). Points over the next 6 games, MAE 16.916 -> 16.749, -0.167 [-0.198, -0.138], better
+  4/4 seasons (2022 -0.167, 2023 -0.127, 2024 -0.162, 2025 -0.212). Weekly Spearman 0.6725 -> 0.6781, +0.0055 [+0.0036,
+  +0.0076]: ranking against healthy players improves, so the fairness worry that held B back does not hold. Newly
+  injured alone: MAE 18.06 -> 17.25; predicted 46.6 -> 43.4 points vs 41.1 actual. Shipped in nfledge/returns.py
+  (_newly_injured; lookahead weeks, rest of season, Fantasy values, Power C). Live check: Hurts (ruled out, blood
+  clot) week 7 100% -> 22%, then 35 / 46%; Lamar 27 / 48 / 61%.
