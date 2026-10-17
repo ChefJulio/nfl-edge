@@ -1097,7 +1097,8 @@
     const all = Object.entries(D.teams).filter(([, x]) => x.g), per = x => x.n / x.g, yper = x => x.y / x.g, dper = x => x.dn / x.g;
     const rank = (f, asc) => 1 + all.filter(([, x]) => asc ? f(x) < f(T) : f(x) > f(T)).length;
     const tone = r => r <= 8 ? 'good' : r >= 25 ? 'bad' : '';
-    const cellR = (v, lab, r, tip) => `<div class="pen-c"><div class="pen-v">${v}</div><div class="pen-k">${lab}</div><span class="pen-r ${tone(r)}" title="${esc(tip)}">${ord(r)}</span></div>`;
+    // the same tile as the season stats above it (label, value, rank chip; second visual audit: one tile spec)
+    const cellR = (v, lab, r, tip) => `<div class="tm-st"><div class="pc-k">${lab}</div><div class="tm-stv">${v}</div>${rkChip(r, tip)}</div>`;
     const pl = T.players.map(([g, n, y]) => { const ps = (D.pos || {})[g];
       return `<button type="button" class="pen-p" data-open-pid="${esc(g)}">${ps ? `<span class="pen-pos">${esc(ps)}</span>` : ''}<b>${esc(D.names[g] || g)}</b> <span class="muted">${n} &middot; ${y} yd</span></button>`; }).join('');
     return `<div class="pc-box"><div class="pc-k">Penalties · ${D.season} · ${T.g} games</div>
@@ -1335,7 +1336,8 @@
   const rankTrend = hist => {
     const wk = Object.keys(hist || {}).map(Number).sort((a, b) => a - b);
     if (wk.length < 2) return '';
-    const W = 300, H = 80, X = w => 14 + (W - 28) * (w - wk[0]) / Math.max(1, wk[wk.length - 1] - wk[0]), Y = r => 8 + (H - 26) * (r - 1) / 31;
+    // 1-32 on the full height keeps the league position readable (top teams near the top); 60 high (was 80, mostly empty)
+    const W = 300, H = 60, X = w => 14 + (W - 28) * (w - wk[0]) / Math.max(1, wk[wk.length - 1] - wk[0]), Y = r => 8 + (H - 26) * (r - 1) / 31;
     const pts_ = wk.map(w => `${X(w).toFixed(1)},${Y(hist[w]).toFixed(1)}`).join(' ');
     return `<svg class="tm-trend" viewBox="0 0 ${W} ${H}" width="100%" height="${H}" aria-label="Power rank by week">
       <line x1="14" x2="${W - 14}" y1="${Y(16.5)}" y2="${Y(16.5)}" class="tm-tr-mid"/><polyline points="${pts_}" class="tm-tr-line"/>

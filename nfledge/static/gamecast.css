@@ -338,7 +338,7 @@ nav.gc-tabs a:hover { color: var(--ink); } nav.gc-tabs a.on { color: var(--ink);
 .gc-col { display: grid; gap: 16px; align-content: start; min-width: 0; }
 .gcs { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 14px 14px 12px; box-shadow: var(--shadow); scroll-margin-top: 50px; min-width: 0; }
 .gcs h3 { margin: 0 0 8px; font-size: var(--fs-lg); display: flex; align-items: center; gap: 8px; }
-.gcs .src { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .05em; font-weight: 700; padding: 0 8px; border-radius: var(--r-pill);
+.gcs .src { font-size: var(--fs-xs); text-transform: none; letter-spacing: .02em; font-weight: 700; padding: 0 8px; border-radius: var(--r-pill);
   background: color-mix(in srgb, #ff4d4f 16%, transparent); color: #ff8f84; line-height: var(--tag-h); }
 .gcs .src.us { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
 .gcs-note { margin: -2px 0 8px; font-size: var(--fs-sm); color: var(--muted); }
@@ -479,10 +479,10 @@ table.gc-rt { width: 100%; font-size: var(--fs-md); } .bx-th-in { display: inlin
 .dc-p.first .dc-n { font-weight: 700; color: var(--ink); }
 /* injury tag after a name: tinted chip (as on Players > Injuries), red = out / reserve lists, orange = D, amber = Q */
 .dc-tag { display: inline-block; margin-left: 5px; padding: 0 6px; border-radius: var(--chip-r); font-size: var(--fs-xs); font-weight: 700;
-  letter-spacing: .02em; line-height: var(--chip-h); vertical-align: 1px; border: 1px solid transparent; cursor: help; }
-.dc-tag.dt-out { background: rgba(242,120,109,.16); border-color: rgba(242,120,109,.32); color: #f59a91; }
-.dc-tag.dt-d { background: rgba(240,150,80,.16); border-color: rgba(240,150,80,.32); color: #f4b37f; }
-.dc-tag.dt-q { background: rgba(224,176,74,.14); border-color: rgba(224,176,74,.3); color: #f3d38c; }
+  letter-spacing: .02em; line-height: var(--chip-h); vertical-align: 1px; border: 0; cursor: help; }  /* tinted data chip, no outline */
+.dc-tag.dt-out { background: rgba(242,120,109,.18); color: #f59a91; }
+.dc-tag.dt-d { background: rgba(240,150,80,.18); color: #f4b37f; }
+.dc-tag.dt-q { background: rgba(224,176,74,.17); color: #f3d38c; }
 .dc-p a.dc-ext { text-decoration: none; } .dc-p a.dc-ext:hover { text-decoration: underline; text-underline-offset: 3px; }
 .dc-pct { margin-left: 4px; font-size: var(--fs-xs); color: var(--faint); font-variant-numeric: tabular-nums; }
 .dc-p.first .dc-pct { color: var(--muted); }
@@ -520,10 +520,10 @@ table.tpo-rd { width: 100%; }
 .tpo-rd { display: inline-block; min-width: 30px; font-size: var(--fs-xs); font-weight: 700; color: var(--muted); letter-spacing: .05em; }
 
 /* NFL Edge grade: header chip + Grade tab bars */
-.eg-chip { display: inline-flex; align-items: baseline; gap: 4px; margin-left: 6px; padding: 0 6px; border-radius: var(--chip-r); font-size: var(--fs-xs); font-weight: 700; letter-spacing: .05em; color: var(--muted); background: var(--panel2); border: 1px solid var(--line); vertical-align: middle; line-height: var(--chip-h); }
+.eg-chip { display: inline-flex; align-items: baseline; gap: 4px; margin-left: 6px; padding: 0 6px; border-radius: var(--chip-r); font-size: var(--fs-xs); font-weight: 700; letter-spacing: .05em; color: var(--muted); background: rgba(255,255,255,.07); border: 0; vertical-align: middle; line-height: var(--chip-h); }
 .eg-chip b { font-size: var(--fs-md); color: var(--ink); letter-spacing: 0; }
-.eg-chip.good { border-color: color-mix(in srgb, #6fdc8c 55%, var(--line)); } .eg-chip.good b { color: #6fdc8c; }
-.eg-chip.bad { border-color: color-mix(in srgb, #ff8f84 50%, var(--line)); } .eg-chip.bad b { color: #ff8f84; }
+.eg-chip.good { background: rgba(111,220,140,.14); } .eg-chip.good b { color: #6fdc8c; }
+.eg-chip.bad { background: rgba(242,120,109,.14); } .eg-chip.bad b { color: #ff8f84; }
 td .eg-chip { margin-left: 0; }
 .eg-bars { display: grid; gap: 7px; margin-top: 6px; }
 /* label, then its percentile right beside it, then the bar (owner: the number reads with its label) */
@@ -548,7 +548,7 @@ td .eg-chip { margin-left: 0; }
 .pen-p { font: inherit; font-size: var(--fs-sm); color: var(--ink); background: var(--panel2); border: 1px solid var(--line); border-radius: var(--r-md); padding: 4px 9px; cursor: pointer; }
 td.pen-top { color: var(--muted); font-size: var(--fs-sm); }
 .pen-pos { display: inline-block; min-width: 2.4em; margin-right: 6px; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .02em; color: var(--muted); background: var(--panel); border-radius: var(--r-sm); padding: 1px 5px; text-align: center; }
-.eg-chip.eg-uq { border-style: dashed; } .eg-chip.eg-uq b { color: var(--muted); }
+.eg-chip.eg-uq { background: transparent; box-shadow: inset 0 0 0 1px var(--line); } .eg-chip.eg-uq b { color: var(--muted); }
 .dc-p.dc-hurt { opacity: .55; } .dc-p.dc-hurt .dc-n { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 70%, transparent); }
 .ij-ig { display: block; font-size: var(--fs-xs); color: var(--muted); margin-top: 2px; }
 /* the Games tab's matchup tile on player / team pages */
@@ -622,7 +622,7 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .rp-card .rp-what { height: 50px; } .rp-card .rp-what.long { line-height: 25px; }
 /* practice days next to the status tag: one letter per day */
 .pr-days { display: inline-flex; gap: 2px; margin-left: 4px; vertical-align: 1px; }
-.pr-days i { font-style: normal; font-size: var(--fs-2xs); font-weight: 700; padding: 0 4px; height: 15px; line-height: 15px; text-align: center; border-radius: var(--r-xs); letter-spacing: .02em; }
+.pr-days i { font-style: normal; font-size: var(--fs-2xs); font-weight: 700; padding: 0 5px; height: var(--chip-h); line-height: var(--chip-h); text-align: center; border-radius: var(--r-xs); letter-spacing: .02em; }
 .pr-days .pr-F { color: #7fe0a0; background: rgba(111,220,140,.14); }
 .pr-days .pr-L { color: #f3d38c; background: rgba(224,176,74,.16); }
 .pr-days .pr-D { color: #f59a91; background: rgba(242,120,109,.16); }
@@ -673,7 +673,8 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .rt-dt .rt-main td { font-weight: 700; }
 .rt-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; margin: 8px 0 2px; font-size: var(--fs-md); }
 .rt-line .pc-k { margin: 0 4px 0 0; }
-.rt-more { margin-left: auto; background: none; border: 1px solid var(--line); color: var(--accent); border-radius: 999px; padding: 2px 10px; font: inherit; font-size: var(--fs-sm); cursor: pointer; }
+.rt-more { margin-left: auto; background: none; border: 0; color: var(--accent); padding: 2px 0; font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer; }
+.rt-more:hover { text-decoration: underline; }
 .oc-stats { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 6px !important; }
 .oc-stats .tm-st { padding: 8px 10px; }
 .oc-stats .tm-stv { font-size: 20px; }
