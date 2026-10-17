@@ -49,6 +49,13 @@ html.pc-open { overflow: hidden; }
 .pc-card { --navh: 0px; position: fixed; inset: 0; z-index: 60; background: rgba(5,7,10,.66); display: flex; align-items: center;
   justify-content: center; padding: 3vh 16px; overflow: hidden; }
 .pc-card[hidden] { display: none; }
+/* stacked cards: the card below (a still copy) sits behind, a little smaller and dimmer; the top card's backdrop
+   lightens so the two dims together match one */
+.pc-under { z-index: 59; pointer-events: none; background: rgba(5,7,10,.45); }
+.pc-under .pc-wrap { transform: scale(.94) translateY(-14px); transform-origin: top center; filter: brightness(.8); animation: none !important; }
+.pc-under .pc-x { display: none; }
+.pc-card.pc-stacked { background: rgba(5,7,10,.4); }
+@media (min-width: 641px) { .pc-under .pc-wrap { transform: scale(.96) translateY(-18px); } }
 .pc-card .pc-wrap { position: relative; width: min(1100px, 100%); max-height: 94vh; display: flex; }
 .pc-card .pc { width: 100%; max-height: 94vh; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; margin: 0;
   border-radius: var(--r-lg); box-shadow: var(--e3); -webkit-overflow-scrolling: touch; }

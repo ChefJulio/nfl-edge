@@ -257,7 +257,13 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   document.body.insertAdjacentHTML('beforeend', `<div class="pc-ov pc-page pc-card" id="pcOv" hidden><div class="pc-wrap">
     <i class="sheet-grab" aria-hidden="true"></i><button type="button" class="pc-x" aria-label="Close">&times;</button>
     <div class="pc" role="dialog" aria-modal="true" aria-labelledby="pcName"><div class="pc-body"></div></div></div></div>`);
-  const cardOv = document.getElementById('pcOv'), cardBox = cardOv.querySelector('.pc');
+  // Stacked cards (owner 2026-10-17: "if i click on a player from a team card, then swipe that player card away, the
+  // team card is still there"): opening a card from a card leaves a still copy of the one below in #pcUnder (outside
+  // #pcOv, so the renderer never touches it), slightly smaller behind the new card; dragging the top card reveals it.
+  // Closing steps back one card (history), which renders the live card below again where you left it.
+  document.body.insertAdjacentHTML('beforeend', '<div class="pc-ov pc-page pc-card pc-under" id="pcUnder" hidden aria-hidden="true" inert></div>');
+  const cardOv = document.getElementById('pcOv'), cardBox = cardOv.querySelector('.pc'), under = document.getElementById('pcUnder');
+  cardOv.parentNode.appendChild(cardOv);  // above the stack copy
   NFLE.pageMode = true;
   // Placeholder sections for tabs not built yet (one per sub-tab), so routing is uniform.
   NAV.forEach(p => p.subs.forEach(s => {
@@ -326,16 +332,25 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   // phone vs desktop, re-renders), so it's read after each render and while scrolling (one cheap layout read a frame).
   // the card's tab strip sticks just under its sticky header, whose height varies (names, phone vs desktop,
   // re-renders): read after each render and while the card scrolls (one cheap layout read a frame)
-  const pcHead = () => { const h = cardOv.querySelector('.pc-head'); if (h) cardOv.style.setProperty('--pchead', `${h.offsetHeight}px`); };
+  const pcHead = () => { const h = cardBox.querySelector('.pc-head'); if (h) cardOv.style.setProperty('--pchead', `${h.offsetHeight}px`); };
   let phRaf = 0;
   cardBox.addEventListener('scroll', () => { if (!phRaf) phRaf = requestAnimationFrame(() => { phRaf = 0; pcHead(); }); }, { passive: true });
   const scrolls = {};
   let onPage = false, depth = 0, deep = false;  // depth: cards opened since the list (card-to-card adds one)
-  const hideCard = () => { cardOv.hidden = true; document.documentElement.classList.remove('pc-open'); onPage = false; depth = 0; };
-  // close: back to the list (every card opened on the way), or, for a card opened from a link, onto the list in place
+  const snaps = [];  // snaps[d]: the card at depth d as last seen ({ el: a still copy, top: its scroll })
+  const snapshot = () => { const el = cardOv.querySelector('.pc-wrap').cloneNode(true);
+    el.querySelectorAll('[id]').forEach(x => x.removeAttribute('id'));
+    el.style.transform = ''; el.style.transition = '';
+    return { el, top: cardBox.scrollTop }; };
+  const showUnder = d => { const s = snaps[d - 1]; under.replaceChildren(); under.hidden = !s; cardOv.classList.toggle('pc-stacked', !!s);
+    if (s) { under.appendChild(s.el); s.el.querySelector('.pc').scrollTop = s.top; } };
+  const hideCard = () => { cardOv.hidden = true; document.documentElement.classList.remove('pc-open'); onPage = false; depth = 0;
+    snaps.length = 0; showUnder(0); settle(); };
+  const settle = () => { cardWrap.style.transition = 'none'; cardWrap.style.transform = ''; };
+  // close: back one card (stacked), else back to the list, or, for a card opened from a link, onto the list in place
   const closeCard = () => {
     if (cardOv.hidden) return;
-    if (!deep && depth > 0) { history.go(-depth); return; }
+    if (depth > 1 || (!deep && depth > 0)) { history.back(); return; }
     const r = lastRoute || parse('players');
     hideCard(); deep = false;
     try { history.replaceState(null, '', '#' + (r.p.subs.length < 2 ? r.p.key : `${r.p.key}/${r.s[0]}`)); } catch (e) { /* file:// */ }
@@ -371,9 +386,11 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     cardWrap.style.transition = 'transform .22s var(--ease)';
     if (dy > 0.25 * cardWrap.offsetHeight || dv > 0.6) {
       cardWrap.style.transform = 'translateY(100%)';
-      setTimeout(() => { closeCard(); cardWrap.style.transition = 'none'; cardWrap.style.transform = ''; }, 210);
+      setTimeout(closeCard, 210);  // it stays off screen until the card below renders or the overlay hides (settle)
     } else cardWrap.style.transform = '';
   });
+  // a card opened on a card slides up over it (the first one animates from CSS as the overlay appears)
+  const playIn = () => { cardWrap.style.animation = 'none'; void cardWrap.offsetWidth; cardWrap.style.animation = ''; };
   cardOv.addEventListener('click', e => { if (e.target === cardOv || e.target.closest('.pc-x')) closeCard(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !cardOv.hidden && !document.querySelector('.sheet-ov, .zoom-ov')) closeCard(); });
   const showPage = (kind, id) => {
@@ -381,16 +398,23 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     if (!lastRoute) { const home = kind === 'team' ? 'teams' : 'players'; show(parse(home), false); deep = true; }
     const fresh = !onPage;  // opened from a list (not card-to-card): the card starts on this page's week
     const fn = kind === 'player' ? NFLE.showPlayer : NFLE.showTeam;
+    // depth of this card: its history entry's (Back / Forward), else one deeper than the open card
+    const st = history.state && history.state.nfleCard, was = cardOv.hidden ? 0 : depth, d = st || was + 1;
+    let top = 0;
+    if (d > was && was > 0) { snaps[was] = snapshot(); playIn(); }  // card on card: the one below, as you leave it
+    else if (d < was) { top = snaps[d] ? snaps[d].top : 0; snaps.length = d; }  // back down: where you were on it
     cardOv.hidden = false;
     document.documentElement.classList.add('pc-open');
     NFLE.freshPage = fresh;
     if (fn) fn(decodeURIComponent(id));
     NFLE.freshPage = false;
-    cardBox.scrollTop = 0;
+    settle();
+    cardBox.scrollTop = top;
     requestAnimationFrame(pcHead);
     // each card's history entry remembers how many cards deep it is, so Back (card 2 -> card 1) counts down, not up
-    const st = history.state && history.state.nfleCard;
-    if (st) depth = st; else { depth += 1; try { history.replaceState({ nfleCard: depth }, ''); } catch (e) { /* file:// */ } }
+    depth = d;
+    if (!st) { try { history.replaceState({ nfleCard: depth }, ''); } catch (e) { /* file:// */ } }
+    showUnder(depth);
     onPage = true;
     document.dispatchEvent(new CustomEvent('nfle-route', { detail: { parent: lastRoute.p.key, sub: 'card', section: 'pcOv' } }));
   };
