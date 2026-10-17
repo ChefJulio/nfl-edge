@@ -741,3 +741,11 @@ table.lg tr.lg-season td::before, table.lg tr.lg-gh th::before { content: none; 
 table.lg tr.lg-miss td { color: var(--faint); }
 .lg-tag { display: inline-block; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .03em; padding: 0 6px; border-radius: var(--chip-r);
   color: var(--muted); background: color-mix(in srgb, var(--ink) 8%, transparent); line-height: var(--chip-h); }
+
+/* the first stat column next to the pinned names: wide values ("27/51", "C/ATT") were centered in a column narrower
+   than them and spilled under the pinned cell (second visual audit) */
+/* one width in px for the header and body (9.5em differed: their font sizes differ) */
+table.pst-tbl td.pst-who, table.pst-tbl th:first-child { width: 124px; min-width: 124px; max-width: 124px; box-sizing: border-box; }
+/* WebKit sizes this column ~12px under the sticky cell it holds (measured: static layout puts the next column at the
+   cell's edge, sticky layout 12px inside it), so the first stat column keeps its content clear with padding */
+table.pst-tbl td.pst-who + td.num, table.pst-tbl tr > th:first-child + th.num { padding-left: 18px; }
