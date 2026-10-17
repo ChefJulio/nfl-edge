@@ -8,9 +8,16 @@ table.dt.tiles tr.teamrow:hover > td { background: var(--row-hover); }
 /* Scrolled sideways: keep the team trim on the pinned cell (its edge shadow joins the trim instead of replacing it;
    table.css's generic .scrolled shadow would drop the trim) */
 .dt-wrap .scroll.scrolled table.tiles tr.teamrow > td.stick { --extra: 8px 0 10px -8px rgba(0,0,0,.85); box-shadow: var(--top), var(--side), var(--extra); }
-/* First-name fold: snaps to the initial once the table is scrolled at all ("Josh Allen" -> "J. Allen"), with a short
-   animation, instead of following the scroll pixel by pixel (mid-fold names looked sliced in iOS Safari) */
-.dt-wrap table.tiles .fn-rest { max-width: var(--w, 9em); transition: max-width .18s ease; -webkit-mask-image: none; mask-image: none; }
-.dt-wrap .scroll.scrolled table.tiles .fn-rest { max-width: 0; }
-.dt-wrap table.tiles .fn-dot { max-width: 0; transition: max-width .18s ease; }
-.dt-wrap .scroll.scrolled table.tiles .fn-dot { max-width: .3em; }
+/* two-line names (ui.css .nm2): scrolled sideways the pinned column narrows (the first-name fold it replaces lived here) */
+#tab-players table.ranks td.stick, #tab-players table.ranks th.stick { transition: width .18s ease, min-width .18s ease, max-width .18s ease; }
+@media (max-width: 640px) {
+  #tab-players table.ranks td.stick, #tab-players table.ranks th.stick { width: 150px; min-width: 150px; max-width: 150px; }
+  #tab-players .scroll.scrolled table.ranks td.stick, #tab-players .scroll.scrolled table.ranks th.stick { width: 118px; min-width: 118px; max-width: 118px; }
+}
+
+/* rank on the photo's top-left corner, only while scrolled sideways (the # column is off screen then) */
+.pic .pic-rk { position: absolute; left: -7px; top: -6px; z-index: 2; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px;
+  display: none; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; line-height: 1;
+  background: var(--panel); color: var(--ink); box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--ink) 35%, transparent), 0 1px 3px rgba(0,0,0,.5);
+  font-variant-numeric: tabular-nums; }
+.dt-wrap .scroll.scrolled .pic .pic-rk { display: flex; }

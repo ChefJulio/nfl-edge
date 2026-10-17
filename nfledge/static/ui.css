@@ -39,7 +39,8 @@ h1, h2, h3, .brand h1, .sec-head h2, .pc-id h3, .wk-nav select, .netc b.sc, b.pv
 tr.teamrow > td { background: var(--row); color: #fff; border: 0;
   --top: 0 0 #0000; --side: 0 0 #0000; --extra: 0 0 #0000;
   box-shadow: var(--top), var(--side), var(--extra); transition: background-color var(--dur-fast) var(--ease); }
-tr.teamrow > td:first-child { border-radius: var(--r-sm) 0 0 var(--r-sm); --side: inset 3px 0 0 var(--tc), inset 5px 0 0 var(--tc2); }
+/* no left stripe (owner 2026-10-17): the headshot's team ring and logo already say whose row it is */
+tr.teamrow > td:first-child { border-radius: var(--r-sm) 0 0 var(--r-sm); }
 tr.teamrow > td:last-child { border-radius: 0 var(--r-sm) var(--r-sm) 0; }
 tr.teamrow:hover > td { background: var(--row-hover); }
 tr.teamrow .quiet, tr.teamrow .sub, tr.teamrow .st small, tr.teamrow .fc, tr.teamrow .vs { color: color-mix(in srgb, var(--tfg) 75%, transparent); }
@@ -48,6 +49,17 @@ tr.teamrow .quiet, tr.teamrow .sub, tr.teamrow .st small, tr.teamrow .fc, tr.tea
 .who { display: flex; align-items: center; gap: 9px; }
 .who b { font-weight: 600; }
 .who .sub { font-size: var(--fs-xs); display: block; line-height: 1.2; font-weight: 500; }
+/* two-line names (owner 2026-10-17): first name (+ small details) on top, last name below, badges to the right */
+.nm2w { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.nm2 { display: flex; flex-direction: column; min-width: 0; }
+.nm2 .l1 { font-size: var(--fs-xs); font-weight: 500; color: var(--muted); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nm2 .l1 .sub { display: inline; }
+.who .nm2 .l1 .posb { font-size: 9px; line-height: 1.3; padding: 0 3px; vertical-align: 1px; }
+.nm2 .l2 { display: block; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nm-b { flex: none; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; margin-top: 0; }
+/* scrolled sideways: the pinned name column gives up width; names truncate, only the injury letter stays */
+.dt-wrap .scroll.scrolled td.stick .nm2 { max-width: 6.5em; }
+.dt-wrap .scroll.scrolled td.stick .nm-b > :not(.dc-tag) { display: none; }
 .pic { position: relative; flex: none; width: 34px; height: 34px; margin-right: 3px; }
 .pic-img { display: block; width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
   background: color-mix(in srgb, var(--pc1, #3a3f47) 55%, var(--panel2)); box-shadow: 0 0 0 1.5px var(--pc2, rgba(255,255,255,.16)); }  /* team colors (owner 2026-10-16) */

@@ -50,6 +50,9 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     rkc: n => n <= 8 ? 'rk1' : n <= 16 ? 'rk2' : n <= 24 ? 'rk3' : 'rk4',  // league-rank badge color (top 8 green ... bottom 8 red)
     posb: p => ['QB', 'RB', 'WR', 'TE', 'K', 'DST'].includes(p) ? `<span class="posb posb-${esc(p)}">${esc(p)}</span>` : esc(p),
     short: n => { const i = String(n).indexOf(' '); return i < 0 ? String(n) : String(n).slice(i + 1); },  // 'Josh Allen' -> 'Allen'
+    // [first, last] for two-line names (owner 2026-10-17): 'Amon-Ra St. Brown' -> ['Amon-Ra', 'St. Brown'],
+    // 'Marvin Harrison Jr.' -> ['Marvin', 'Harrison Jr.']; one word -> ['', word]
+    split: n => { const s = String(n || '').trim(), i = s.indexOf(' '); return i < 0 ? ['', s] : [s.slice(0, i), s.slice(i + 1)]; },
     // team logo on its picked background, and a row's team trim (--tc / --tc2), from the week data's teams map
     logo: (teams, t, size = 18) => { const i = (teams || {})[t] || {}; return i.logo ? `<span class="logo" style="background:${esc(i.logo_bg || '#333')}"><img src="${esc(logoSrc(i.logo, size))}" alt="${esc(t)}" width="${size}" height="${size}" loading="lazy"></span>` : ''; },
     rowStyle: (teams, t) => { const i = (teams || {})[t] || {}; return `--tc:${i.color || '#666'};--tc2:${i.color2 || '#999'};--tfg:#ffffff`; },
@@ -75,7 +78,10 @@ document.addEventListener('touchstart', () => {}, { passive: true });
         : NFLE.ui.tm(p.team, F.logo(teams, p.team, 26));
       const pos = p.pos ? `<span class="posb posb-${esc(p.grp || p.pos)}">${esc(p.pos)}</span> ` : '';
       const sub = p.subHtml != null ? p.subHtml : p.sub != null ? esc(p.sub) : NFLE.ui.tm(p.team);
-      return `<div class="who">${pic}<div class="nmw"><b class="nm">${esc(p.name)}</b><span class="sub">${pos}${sub}</span>${p.badges || ''}</div></div>`;
+      // two lines (owner 2026-10-17): first name with the small details (position, team) on top, last name below,
+      // badges to the right; narrower than "full name / details", and each line truncates when the table scrolls
+      const [first, last] = F.split(p.name);
+      return `<div class="who">${pic}<div class="nmw nm2w"><span class="nm2"><span class="l1">${first ? `<span class="fnm">${esc(first)}</span> ` : ''}${pos}<span class="sub">${sub}</span></span><b class="nm l2">${esc(last)}</b></span>${p.badges ? `<span class="nm-b">${p.badges}</span>` : ''}</div></div>`;
     },
     // a team: logo, nickname, sub line (default "KC")
     team: (t, teams, sub, extra = '') => {

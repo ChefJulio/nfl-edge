@@ -17,7 +17,6 @@
   const f0 = v => v == null ? '' : String(Math.round(v));
   const f1 = v => v == null || isNaN(v) ? '' : (Math.round(v * 10) / 10).toFixed(1);
   const sgn = v => v == null ? '' : Math.abs(v) < 0.05 ? '0.0' : `${v > 0 ? '+' : ''}${f1(v)}`;
-  const nameParts = n => { const i = String(n).indexOf(' '); return i < 0 ? [n, '', ''] : [n[0], n.slice(1, i), n.slice(i + 1)]; };
 
   NFLE.areas.rankings = {
     mount(sec) {
@@ -148,9 +147,13 @@
       }).join('')}</svg>`;
     };
     const nameCell = (r, flex) => {
-      const [ini, rest, last] = nameParts(r.name);
       const badges = (r.status || r.boost >= 1 || r.low_sample) ? `<div class="badges">${NFLE.injTag(r.status)}${r.boost >= 1 ? `<span class="flag f-up" title="Raised by volume vacated by: ${esc(r.boost_from)}">+${f1(r.boost)} inj</span>` : ''}${r.low_sample ? '<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>' : ''}</div>` : '';
-      return `<div class="who" title="${esc(r.takeaway || '')}"><span class="pic${r.photo ? '' : ' nopic'}"${NFLE.fmt.picStyle(TEAMS, r.team)}><span class="pic-img">${r.photo ? `<img src="${esc(r.photo)}" alt="" width="34" height="34" loading="lazy" onerror="this.closest('.pic').classList.add('nopic')">` : ''}</span><span class="pic-tm">${logo(r.team, 11)}</span></span><div class="nmw"><b class="nm">${flex ? `<span class="posb posb-${esc(r.pos)}">${esc(r.pos)}</span>` : ''}<span class="fn">${esc(ini)}</span>${rest ? `<span class="fn-rest">${esc(rest)}</span><span class="fn-dot">.</span>` : ''}${last ? ` ${esc(last)}` : ''}</b>${badges}</div></div>`;
+      // first name on top, last name below, badges to the right (owner 2026-10-17); scrolled sideways the pinned
+      // column narrows and each line truncates (rankings.css)
+      const [first, lastN] = NFLE.fmt.split(r.name);
+      // his rank rides on the photo's corner once the # column scrolls away (owner 2026-10-17; rankings.css)
+      const rk = r._rrank != null ? (flex ? r._rfrank : r._rrank) : (flex ? r._frank : r._rank);
+      return `<div class="who" title="${esc(r.takeaway || '')}"><span class="pic${r.photo ? '' : ' nopic'}"${NFLE.fmt.picStyle(TEAMS, r.team)}>${rk != null ? `<span class="pic-rk" aria-hidden="true">${rk}</span>` : ''}<span class="pic-img">${r.photo ? `<img src="${esc(r.photo)}" alt="" width="34" height="34" loading="lazy" onerror="this.closest('.pic').classList.add('nopic')">` : ''}</span><span class="pic-tm">${logo(r.team, 11)}</span></span><div class="nmw nm2w"><span class="nm2"><span class="l1">${flex ? `<span class="posb posb-${esc(r.pos)}">${esc(r.pos)}</span> ` : ''}${esc(first)}</span><b class="nm l2">${esc(lastN)}</b></span>${badges ? badges.replace('<div class="badges">', '<div class="badges nm-b">') : ''}</div></div>`;
     };
     // Two worlds, not a blend (owner 2026-10-15: availability is binary): the projection shown is the likelier world for
     // the uncertain teammate; this line is the change in the other one ("-0.7 if Moore plays"; owner 2026-10-17: a

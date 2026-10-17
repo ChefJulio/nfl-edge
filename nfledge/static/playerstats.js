@@ -14,7 +14,8 @@
   const groupOf = pos => Object.keys(GROUPS).find(g => GROUPS[g].includes(pos)) || 'Other';
   const div = (a, b) => b ? a / b : null;
   const fmt = {
-    i: v => v == null ? '' : Math.round(v).toLocaleString(), y: v => v == null ? '' : String(Math.round(v)),  // y: years, no comma d1: v => v == null ? '' : v.toFixed(1), d2: v => v == null ? '' : v.toFixed(2),
+    i: v => v == null ? '' : Math.round(v).toLocaleString(), y: v => v == null ? '' : String(Math.round(v)),  // y: years, no comma
+    d1: v => v == null ? '' : v.toFixed(1), d2: v => v == null ? '' : v.toFixed(2),
     pct: v => v == null ? '' : `${(100 * v).toFixed(1)}%`, s: v => v == null ? '' : esc(v), epa: v => v == null ? '' : (v > 0 ? '+' : '') + v.toFixed(2),
     money: v => v == null ? '' : v >= 1 ? `$${v.toFixed(1)}M` : `$${Math.round(v * 1000)}K`,
   };
@@ -175,7 +176,7 @@
         score();
         sub.textContent = `${s} ${stype === 'post' ? 'playoffs' : 'regular season'}: ${all.length.toLocaleString()} players`;
         draw(true);
-      }).catch(() => { sub.textContent = 'No player stats for that season.'; }); };
+      }).catch(e => { console.error('[stats]', e); sub.textContent = 'No player stats for that season.'; }); };
       sec.querySelector('.ps-type').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (b && !b.disabled) { stype = b.dataset.t; load(+selS.value); } });
       selP.onchange = () => { pos = selP.value; store('nfledge-ps-pos', pos); draw(true); };
       sec.querySelector('.ps-per').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) { per = b.dataset.v === 'pg'; store('nfledge-ps-per', per ? 'pg' : 'tot'); draw(false); } });
