@@ -789,24 +789,24 @@ table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; tex
 
 /* Player page header (owner 2026-10-16): no circle - the headshot cutout stands on the team-color line, the faint team
    logo behind him on the left (overrides the generic .pc-pic circle above; other cards keep it). */
-#tab-page .pc-page .pc-head .pc-pic { width: 88px; height: 76px; border-radius: 0; background: none; box-shadow: none;
+.pc-page .pc-head .pc-pic { width: 88px; height: 76px; border-radius: 0; background: none; box-shadow: none;
   margin-bottom: -12px; align-self: flex-end; }
-#tab-page .pc-page .pc-head .pc-pic img { border-radius: 0; object-fit: contain; object-position: center bottom; }
-#tab-page .pc-page .pc-head .pc-pic-tm { display: none; }
+.pc-page .pc-head .pc-pic img { border-radius: 0; object-fit: contain; object-position: center bottom; }
+.pc-page .pc-head .pc-pic-tm { display: none; }
 
 /* Player page header tinted in the team's primary color (owner 2026-10-16): strongest behind the headshot, fading to
    the card on the right so the name stays crisp; opaque, since the header is sticky. */
-#tab-page .pc-page .pc-head.pc-head-hero {
+.pc-page .pc-head.pc-head-hero {
   background: linear-gradient(100deg, color-mix(in srgb, var(--tc) 55%, var(--panel)) 0%,
     color-mix(in srgb, var(--tc) 22%, var(--panel)) 55%, var(--panel) 100%); }
 
 /* bigger, more centered logo (owner 2026-10-16): a slightly taller header lets it grow without cropping */
-#tab-page .pc-page .pc-head.pc-head-hero { min-height: 108px; }
-#tab-page .pc-page .pc-head .pc-pic { width: 100px; height: 88px; margin-left: 14px; }
+.pc-page .pc-head.pc-head-hero { min-height: 108px; }
+.pc-page .pc-head .pc-pic { width: 100px; height: 88px; margin-left: 14px; }
 
 /* big team logo watermark centered in the whole header, behind the name and photo (owner 2026-10-16) */
-#tab-page .pc-page .pc-head.pc-head-hero { isolation: isolate; overflow: hidden; }
-#tab-page .pc-page .pc-head.pc-head-hero::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 50%;
+.pc-page .pc-head.pc-head-hero { isolation: isolate; overflow: hidden; }
+.pc-page .pc-head.pc-head-hero::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 50%;
   width: 260px; height: 260px; transform: translate(-50%, -50%); background: var(--tlogo) center / contain no-repeat;
   opacity: .16; pointer-events: none; }
 
@@ -814,13 +814,13 @@ table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; tex
    copy under the header is for phones and tablets. One text scale across both columns. */
 .pc-bio-in { display: none; }
 @media (min-width: 1100px) {
-  #tab-page .pc-page .pc-head .pc-bio-in { display: flex; margin: 0 0 0 auto; align-self: center; gap: 28px; }
-  #tab-page .pc-page .pc-head ~ .pc-bio { display: none; }
-  #tab-page .pc-page .pc-head.pc-head-hero { min-height: 124px; }
-  #tab-page .pc-page .pc-head .pc-pic { width: 118px; height: 104px; }
-  #tab-page .pc-page .pc-head h3 { font-size: var(--fs-2xl); }
-  #tab-page .pc-cols .nw-h { font-size: var(--fs-md); }
-  #tab-page .pc-cols .nw-s { font-size: var(--fs-sm); }
+  .pc-page .pc-head .pc-bio-in { display: flex; margin: 0 0 0 auto; align-self: center; gap: 28px; }
+  .pc-page .pc-head ~ .pc-bio { display: none; }
+  .pc-page .pc-head.pc-head-hero { min-height: 124px; }
+  .pc-page .pc-head .pc-pic { width: 118px; height: 104px; }
+  .pc-page .pc-head h3 { font-size: var(--fs-2xl); }
+  .pc-page .pc-cols .nw-h { font-size: var(--fs-md); }
+  .pc-page .pc-cols .nw-s { font-size: var(--fs-sm); }
 }
 /* the Week tab's "This season" log in the narrower right column: the phone's horizontal compaction, so it ends at TD */
 @media (min-width: 1100px) {
@@ -829,7 +829,7 @@ table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; tex
   .pc-cols table.lg tr > :nth-child(1) { min-width: 30px; } .pc-cols table.lg tr > :nth-child(2) { left: 30px; min-width: 46px; }
   .pc-cols table.lg .sc { padding: 2px 3px; }
   .pc-cols table.lg tr > :last-child { padding-right: 6px; }
-  #tab-page .pc-cols .pc-box.pc-mini { padding-left: 0; padding-right: 0; background: none; box-shadow: none; }
+  .pc-page .pc-cols .pc-box.pc-mini { padding-left: 0; padding-right: 0; background: none; box-shadow: none; }
 }
 
 /* Summary tiles (owner 2026-10-16): one number each, tap for the full detail in a sheet. Bordered, with a chevron,

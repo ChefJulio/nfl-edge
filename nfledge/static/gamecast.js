@@ -494,7 +494,7 @@
   // (the browser does the sticking: no lag, and the box's end is where it lets go). Script only lays the boxes out
   // when the table's size changes and keeps the copy's sideways scroll in step with the table's.
   const stickTop = () => {
-    const h = document.querySelector('#tab-page .pc-page .pc-head'), nav = document.querySelector('nav.tabs');
+    const h = document.querySelector('#pcOv:not([hidden]) .pc-head'), nav = document.querySelector('nav.tabs');
     return h ? (parseFloat(getComputedStyle(h).top) || 0) + h.offsetHeight : nav ? nav.offsetHeight : 0;
   };
   const layHeads = tbl => {
@@ -673,7 +673,10 @@
     logView = v;
     box.querySelectorAll('[data-lv]').forEach(x => x.matches('button') ? x.classList.toggle('on', x.dataset.lv === v) : (x.hidden = x.dataset.lv !== v));
     const tb = season && box.querySelector(`tbody[data-season="${season}"]`);
-    if (tb) scrollTo({ top: tb.getBoundingClientRect().top + scrollY - stickTop() });  // where the previous season's heads let go
+    // where the previous season's heads let go; inside a card the card scrolls, not the window
+    const sc = tb && tb.closest('.pc-card .pc');
+    if (tb && sc) sc.scrollTo({ top: tb.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - stickTop() });
+    else if (tb) scrollTo({ top: tb.getBoundingClientRect().top + scrollY - stickTop() });
   };
   // A game's gamecast, with the week file that holds our numbers for it when we have one (2021 on: its Pregame
   // tab reads it). Older games open with ESPN's data only (box scores back to 1999, plays from about 2005).
@@ -711,7 +714,7 @@
   };
   let prevHash = '';
   const closePlayer = () => {
-    if (pageMode() && (location.hash.startsWith('#player/') || location.hash.startsWith('#team/'))) { history.back(); return; }
+    if (pageMode() && window.NFLE && NFLE.closeCard) { NFLE.closeCard(); return; }
     const ov = document.getElementById('pcOv'); if (ov) ov.hidden = true;
     document.documentElement.classList.remove('pc-open');
     cardPid = null; cardTeam = null;

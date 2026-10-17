@@ -242,16 +242,20 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const OLD = { players: 'players/rankings', roles: 'players/roles', power: 'teams/power', games: 'games', model: 'model',
                playoffs: 'teams/playoffs', draft: 'teams/draft', transactions: 'players/moves' };
   const CARD = /^g-/;  // old matchup-tile links: gamecast.js turns them into gamecast links
-  const PAGE = /^(player|team)\/(.+)$/;  // player / team pages (rendered by gamecast.js into #pcOv in the page section)
+  const PAGE = /^(player|team)\/(.+)$/;  // player / team cards (rendered by gamecast.js into #pcOv)
   const nav = document.querySelector('nav.tabs');
   const main = document.querySelector('main .wrap');
   if (!nav || !main) return;
   const parent = k => NAV.find(p => p.key === k) || NAV[0];
   const sectionId = (p, s) => s[2] || `tab-${p.key}-${s[0]}`;
-  // The player / team page: a section holding the card renderer's container (#pcOv, found by gamecast.js) under a
-  // breadcrumb trail back to where you came from.
-  main.insertAdjacentHTML('beforeend', `<section id="tab-page"><nav class="crumbs" aria-label="Breadcrumb"></nav>
-    <div class="pc-ov pc-page" id="pcOv"><div class="pc"><div class="pc-body"></div></div></div></section>`);
+  // Player / team CARDS (owner 2026-10-17: "make player pages cards again"): #player/<id> and #team/<abbr> open the
+  // card renderer's container (#pcOv, found by gamecast.js) over whatever list you were on, which stays put underneath
+  // (its scroll too). Links stay shareable; Back, the close button, a tap outside or Esc closes it. Phones: nearly full
+  // screen, sliding up; desktop: a large centered panel. Tile sheets open above it.
+  document.body.insertAdjacentHTML('beforeend', `<div class="pc-ov pc-page pc-card" id="pcOv" hidden><div class="pc-wrap">
+    <button type="button" class="pc-x" aria-label="Close">&times;</button>
+    <div class="pc" role="dialog" aria-modal="true" aria-labelledby="pcName"><div class="pc-body"></div></div></div></div>`);
+  const cardOv = document.getElementById('pcOv'), cardBox = cardOv.querySelector('.pc');
   NFLE.pageMode = true;
   // Placeholder sections for tabs not built yet (one per sub-tab), so routing is uniform.
   NAV.forEach(p => p.subs.forEach(s => {
@@ -318,41 +322,42 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   let lastRoute = null;  // the list route a page was opened from (breadcrumb), with its scroll position
   // The page's tab strip sticks just under its sticky header (second visual audit): the header's height varies (names,
   // phone vs desktop, re-renders), so it's read after each render and while scrolling (one cheap layout read a frame).
-  const pcHead = () => { const tp = document.getElementById('tab-page'), h = tp && tp.querySelector('.pc-head');
-    if (h) tp.style.setProperty('--pchead', `${h.offsetHeight}px`); };
+  // the card's tab strip sticks just under its sticky header, whose height varies (names, phone vs desktop,
+  // re-renders): read after each render and while the card scrolls (one cheap layout read a frame)
+  const pcHead = () => { const h = cardOv.querySelector('.pc-head'); if (h) cardOv.style.setProperty('--pchead', `${h.offsetHeight}px`); };
   let phRaf = 0;
-  window.addEventListener('scroll', () => { if (!phRaf) phRaf = requestAnimationFrame(() => { phRaf = 0; pcHead(); }); }, { passive: true });
+  cardBox.addEventListener('scroll', () => { if (!phRaf) phRaf = requestAnimationFrame(() => { phRaf = 0; pcHead(); }); }, { passive: true });
   const scrolls = {};
-  let onPage = false;
+  let onPage = false, depth = 0, deep = false;  // depth: cards opened since the list (card-to-card adds one)
+  const hideCard = () => { cardOv.hidden = true; document.documentElement.classList.remove('pc-open'); onPage = false; depth = 0; };
+  // close: back to the list (every card opened on the way), or, for a card opened from a link, onto the list in place
+  const closeCard = () => {
+    if (cardOv.hidden) return;
+    if (!deep && depth > 0) { history.go(-depth); return; }
+    const r = lastRoute || parse('players');
+    hideCard(); deep = false;
+    try { history.replaceState(null, '', '#' + (r.p.subs.length < 2 ? r.p.key : `${r.p.key}/${r.s[0]}`)); } catch (e) { /* file:// */ }
+  };
+  NFLE.closeCard = closeCard;
+  cardOv.addEventListener('click', e => { if (e.target === cardOv || e.target.closest('.pc-x')) closeCard(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !cardOv.hidden && !document.querySelector('.sheet-ov, .zoom-ov')) closeCard(); });
   const showPage = (kind, id) => {
-    // no list behind it (a direct link): a team page sits under Teams, a player page under Players
-    const home = NAV.find(x => x.key === (kind === 'team' ? 'teams' : 'players')) || NAV[0];
-    const from = lastRoute || { p: home, s: home.subs[0] };
-    main.querySelectorAll(':scope > section').forEach(x => x.classList.toggle('on', x.id === 'tab-page'));
-    nav.querySelectorAll('[data-par]').forEach(b => b.classList.toggle('on', b.dataset.par === from.p.key));
-    if (bot) bot.querySelectorAll('.bb-row [data-par]').forEach(b => b.classList.toggle('on', b.dataset.par === from.p.key));
-    subBar.hidden = true; subBar.innerHTML = '';
-    if (NFLE.placeBar) NFLE.placeBar();
-    const crumbs = document.querySelector('#tab-page .crumbs');
-    const fromHash = from.p.subs.length < 2 ? from.p.key : `${from.p.key}/${from.s[0]}`;
-    crumbs.innerHTML = `<button type="button" class="cr-back" aria-label="Back">&lsaquo;</button>
-      <a href="#${fromHash}">${from.p.label}</a>${from.p.subs.length > 1 ? `<span>&rsaquo;</span><a href="#${fromHash}">${from.s[1]}</a>` : ''}
-      <span>&rsaquo;</span><b class="cr-here">${kind === 'team' ? id : '&hellip;'}</b>`;
-    crumbs.querySelector('.cr-back').onclick = () => { if (history.length > 1 && lastRoute) history.back(); else location.hash = fromHash; };
-    window.scrollTo({ top: 0 });
-    const fresh = !onPage;  // opened from a list (not page-to-page): the card starts on this page's week
-    const render = () => {
-      const fn = kind === 'player' ? NFLE.showPlayer : NFLE.showTeam;
-      NFLE.freshPage = fresh;
-      if (fn) fn(decodeURIComponent(id));
-      NFLE.freshPage = false;
-      requestAnimationFrame(pcHead);
-      // the name for the last crumb, once the card has rendered it
-      setTimeout(() => { const h = document.getElementById('pcName'); const here = crumbs.querySelector('.cr-here'); if (h && here) here.textContent = h.textContent.replace(/^#\d+\s*/, ''); }, 60);
-    };
-    render();
+    // a direct link has no list behind it: a team card opens over Teams, a player card over Players
+    if (!lastRoute) { const home = kind === 'team' ? 'teams' : 'players'; show(parse(home), false); deep = true; }
+    const fresh = !onPage;  // opened from a list (not card-to-card): the card starts on this page's week
+    const fn = kind === 'player' ? NFLE.showPlayer : NFLE.showTeam;
+    cardOv.hidden = false;
+    document.documentElement.classList.add('pc-open');
+    NFLE.freshPage = fresh;
+    if (fn) fn(decodeURIComponent(id));
+    NFLE.freshPage = false;
+    cardBox.scrollTop = 0;
+    requestAnimationFrame(pcHead);
+    // each card's history entry remembers how many cards deep it is, so Back (card 2 -> card 1) counts down, not up
+    const st = history.state && history.state.nfleCard;
+    if (st) depth = st; else { depth += 1; try { history.replaceState({ nfleCard: depth }, ''); } catch (e) { /* file:// */ } }
     onPage = true;
-    document.dispatchEvent(new CustomEvent('nfle-route', { detail: { parent: from.p.key, sub: 'page', section: 'tab-page' } }));
+    document.dispatchEvent(new CustomEvent('nfle-route', { detail: { parent: lastRoute.p.key, sub: 'card', section: 'pcOv' } }));
   };
   const show = (r, push) => {
     if (lastRoute && lastRoute !== r) scrolls[sectionId(lastRoute.p, lastRoute.s)] = window.scrollY;
@@ -398,17 +403,21 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   }
   const route = (h, push) => {
     const m = (h || '').replace(/^#/, '').match(PAGE);
-    if (m) { if (lastRoute) scrolls[sectionId(lastRoute.p, lastRoute.s)] = window.scrollY; showPage(m[1], m[2]); return true; }
-    const r = parse(h); if (r) { show(r, push); return true; }
+    if (m) { showPage(m[1], m[2]); return true; }
+    const r = parse(h);
+    if (r) { const back = !cardOv.hidden && lastRoute && r.p === lastRoute.p && r.s === lastRoute.s;
+      hideCard(); deep = false;
+      if (!back) show(r, push);  // closing a card over the same list leaves it as it was (scroll included)
+      return true; }
     return false;
   };
   window.addEventListener('hashchange', () => route(location.hash, false));
   let saved = null; try { saved = localStorage.getItem('nfledge-tab'); } catch (e) { /* ignore */ }
-  // A page link opened directly: its breadcrumb points at the tab you last used.
-  // (a team page under Teams, a player page under Players, unless the saved tab is already in that section)
+  // A card link opened directly: over the tab you last used in that section (Teams for a team, Players for a player)
   if (PAGE.test(location.hash.slice(1))) {
     const sec = location.hash.slice(1).startsWith('team/') ? 'teams' : 'players';
-    lastRoute = (saved && saved.startsWith(sec) ? parse(saved) : null) || parse(sec);
+    show((saved && saved.startsWith(sec) ? parse(saved) : null) || parse(sec), false);
+    deep = true;
     route(location.hash, false);
   }
   else show(parse(location.hash) || parse(saved) || parse('players'), !CARD.test(location.hash.slice(1)));
