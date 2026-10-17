@@ -23,6 +23,22 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 - **Tests on Brave on iPhone (= WebKit).** Verify mobile with `tools/screenshot.py` (WebKit), never only Chrome.
 - Works by pointing at a topic ("do the thinking"); expects a plan for big features, then execution; impatient with
   slow runs (keep backtests fast, report ETAs, explain long waits).
+- **Standard gate (2026-10-16, thread 8; use unless a pre-registration says why not).** Gates had drifted (margins
+  +0.003 / +0.005 / 0, seasons-better 3/5 vs 4/5, intervals over weeks vs games; docs/verdict_audit.md):
+  1. Before running: estimate the interval width from the nearest earlier test on the same rows. If the smallest
+     effect it could detect (MDE = 0.71 x CI width) exceeds the plausible effect, don't run it as a ship test:
+     redesign (more rows, a forward test) or record it as "unresolved (too small to measure)".
+  2. Improvement: paired difference on identical rows, 95% bootstrap CI over season-weeks (player metrics; the
+     player-cluster interval reported alongside) or over games (game metrics); CI excludes 0 in the helpful
+     direction AND better in at least two thirds of seasons (3/4, 4/5, 4/6).
+  3. Guards, "not worse" = CI upper below: fantasy MAE +0.003, any position not significantly worse; game margin
+     MAE +0.02; availability Brier +0.0005; playoff / division Brier +0.001; Spearman -0.005. Start / sit decision
+     gain reported next to MAE (a guard too, if the owner adopts it).
+  4. Seasons: decide on the usual walk-forward window, and re-confirm any ship with |effect| <= 0.005 fantasy MAE on
+     an untouched season (2026 at season end) before calling it settled; prefer decide-2025 / confirm-2026 for new
+     ideas (2021-25 carries ~50 significance verdicts, ~1.25 chance passes expected).
+  5. Exceptions stay explicit: owner designs ship unless significantly worse; display probabilities gate on
+     calibration (ECE / Brier), not MAE.
 
 ## 2. Data quirks (nflverse / nflreadpy and others)
 - **Scrambles are `pass=1, rush=0`** in nflverse pbp. Any rushing filter must include `qb_scramble==1` or QB
@@ -1888,3 +1904,19 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 - **Thread 8 (2026-10-16), part: player-cluster bootstrap.** tools/experiments.py now prints, next to the
   season-week interval (ci_lo / ci_hi), the same interval resampling whole players (pl_lo / pl_hi). First use
   (baseline vs qb_newteam 2021-25): nearly identical (ALL [0.000, 0.001] both; QB [0.000, 0.005] vs [0.001, 0.005]).
+- **Thread 8 (2026-10-16): power and multiple-comparison audit; full table in docs/verdict_audit.md (~120 verdicts).**
+  MDE = 0.71 x the 95% CI width (80% power, two-sided 5%), compared with the effect the notebook expected, else the
+  notebook's own "negligible" margin (fantasy MAE 0.003, margin MAE 0.02, availability Brier 0.0005, playoff Brier
+  0.001, Spearman 0.005). RELABELLED "unresolved (too small to measure)", not rejected: (P) {#skill-absence-margin}
+  MDE 0.31 vs a ~0.03-0.12 plausible gain; (R) {#qb-newteam} 0.22 vs ~0.2; (O) {#qb-blend-winchance} 0.0036 vs
+  <= 0.0004; also route_input, age_input, gl_share, rbbc+gl_share, qb_rush_split, K, L1 (near miss), L2,
+  practice_rest, learned Edge grade, Edge v2, the leak-free Sleeper blend, division unders since 2020, and three
+  "not worse" bars whose CI was wider than the bar (prior carryover KEPT, I2's MAE step, scratch_carry v2).
+  Failures that hold up (harm significant or gain excluded): redist_conserve, return v2, the IR-minimum chain rule,
+  blowout 5-95, share_quality, grade_prior, Edge v1.1, debut v1, (N) {#odds-weekly-c}. 2021-25: 50 significance-style
+  verdicts, 21 passed (expected by chance ~1.25); four passes sit at the CI edge (gl_struct, job_security, (M), hybrid),
+  about one could be chance; repeated attempts at the same questions add hidden comparisons. PENDING CHECK, 2026
+  season end, re-confirm the small ships: newcomer (-0.002), def_terms drop (-0.002), snap-map fix (-0.003, 90% CI),
+  half-life 3 (-0.004, no CI), gl_struct, job_security, Power C (M), Matchups rank N (Q), I2's fantasy leg, healthy3,
+  Edge v1.2, points_seasons 6 (no CI), the ESPN Doubtful rate, hybrid (already registered). Gate template: sec. 1.
+  MODEL.md "What we tried": P, R, O now read "Unresolved (too small to measure)".
