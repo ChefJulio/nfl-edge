@@ -2492,7 +2492,8 @@
   // kickoff in the viewer's own time zone, with AM / PM (owner 2026-10-18); "1 PM", not "1:00 PM"
   const kickMs = g => NFLE.fmt && NFLE.fmt.kickoff ? NFLE.fmt.kickoff(DATA.games, g.home.team) : null;
   const localTime = ms => ms == null ? '' : new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).replace(':00', '');
-  const localDay = ms => ms == null ? '' : new Date(ms).toLocaleDateString([], { weekday: 'short' });
+  // the window's day and date, local (owner 2026-10-18: "we should have dates on this page"): "Thu Oct 15"
+  const localDay = ms => ms == null ? '' : new Date(ms).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }).replace(',', '');
   const miniTile = g => {
     const st = LIVE.byGame[g.id], live = st && st.state === 'in', fin = g.final || (st && st.state === 'post');
     const sit = live ? (st.sit || (LIVE.sums[st.id] && sitFromPlays(LIVE.sums[st.id]))) : null;
@@ -2521,7 +2522,7 @@
     const groups = new Map();
     DATA.games.forEach(g => { const w = windowOf(g); if (!groups.has(w.key)) groups.set(w.key, { lab: w.lab, games: [], first: null });
       const G = groups.get(w.key), k = kickMs(g); G.games.push(g); if (k != null && (G.first == null || k < G.first)) G.first = k; });
-    groups.forEach(G => { if (G.first != null) G.lab = `${localDay(G.first)} ${localTime(G.first)}${G.lab.includes('morning') || G.games.some(g => g.site) ? ` · ${G.games.find(g => g.site) ? G.games.find(g => g.site).site : ''}` : ''}`.replace(/ · $/, ''); });
+    groups.forEach(G => { if (G.first != null) G.lab = `${localDay(G.first)} · ${localTime(G.first)}${G.lab.includes('morning') || G.games.some(g => g.site) ? ` · ${G.games.find(g => g.site) ? G.games.find(g => g.site).site : ''}` : ''}`.replace(/ · $/, ''); });
     const order = [...groups.keys()].sort();
     const elapsedOf = g => { const st = LIVE.byGame[g.id]; if (!st || st.state !== 'in') return null;
       const m = String(st.clock || '').match(/^(\d+):(\d{2})/), c = m ? +m[1] * 60 + +m[2] : 0, per = st.period || 1;
@@ -3420,9 +3421,20 @@
         if (isTry(lastReal) && !lastReal.scoringPlay) res = { text: 'Touchdown', cls: 'good' };
       }
       return `<div class="rc-d" style="--tc:${esc(tm.color || '#666')}"><button type="button" class="rc-h" data-drive="${esc(d.id)}">${tm.logo ? logo(tm.logo, '#111', 18, tm.team) : ''}<b>${esc(tm.team || '')} drive</b>
-          ${isCur ? '<span class="rc-now"><span class="live-dot"></span>Now</span>' : `<span class="dr-res ${res.cls}">${esc(res.text)}</span>`}<span class="muted rc-m">${esc(d.description || '')}</span></button>
+          ${isCur ? '<span class="rc-now"><span class="live-dot"></span>Now</span>' : `<span class="dr-res ${res.cls}">${esc(res.text)}</span>`}<span class="muted rc-m">${esc(d.description || '')}</span>${driveScore(d, info, st.drives)}</button>
         <ol class="ds-ps">${isCur && st.live ? presnap(st, info) : ''}${playRows([...(d.plays || [])].reverse(), info, names)}</ol></div>`;
     }).join('');
+  };
+  // the score before and after a drive, when it changed (owner 2026-10-18): "ARI 15–16 → 18–16"
+  const driveScore = (d, info, all) => {
+    const pl = d.plays || []; if (!pl.length) return '';
+    const flat = all.flatMap(x => x.plays || []), i = flat.indexOf(pl[0]), before = i > 0 ? flat[i - 1] : null;
+    const a0 = before ? before.awayScore : 0, h0 = before ? before.homeScore : 0, z = pl[pl.length - 1], a1 = z.awayScore, h1 = z.homeScore;
+    if (a0 === a1 && h0 === h1) return '';
+    // the score after it, the side that scored in green with what it added (owner: "ARI 15–16 → 18–16" was confusing)
+    const side = (t, v, d) => `<span class="${d > 0 ? 'dsc-up' : ''}">${esc(t)} ${v}</span>`;
+    const da = a1 - a0, dh = h1 - h0;
+    return `<span class="dsc">${side(info.away.team, a1, da)} &ndash; ${side(info.home.team, h1, dh).replace(/(<span[^>]*>)(\S+) (\d+)/, '$1$3 $2')}${da > 0 ? ` <span class="rp-yd gain">+${da} ${esc(info.away.team)}</span>` : ''}${dh > 0 ? ` <span class="rp-yd gain">+${dh} ${esc(info.home.team)}</span>` : ''}</span>`;
   };
   const DOWN_CLS = t => /^1st/.test(t) ? 'd1' : /^3rd/.test(t) ? 'd3' : /^4th/.test(t) ? 'd4' : '';
   const driveSheet = (did, st, info, sum) => {
@@ -3480,7 +3492,7 @@
     const html = `<div class="ds" style="--tc:${esc(tm.color)}">
       <div class="ds-res dv-${cls || 'pu'}"><span class="ds-tag">${esc(res.text || 'In progress')}</span></div>
       ${kh ? `<div class="ds-key ${kh.cls}">${linkNames(esc(kh.h), [info.away.team, info.home.team])}</div>` : ''}
-      ${score && (lab === 'TD' || lab === 'FG' || /safety/i.test(res.text)) ? `<div class="ds-sc">${score}</div>` : ''}
+      ${driveScore(d, info, st.drives) ? `<div class="ds-sc">${driveScore(d, info, st.drives)}</div>` : ''}
       <div class="ds-meta">${first ? `${when(first)} &rarr; ${when(lastP)}` : ''}${n ? ` · ${n.n} plays · ${n.yd} yds · ${esc(n.t)}` : ''}${startTxt ? ` · from ${esc(startTxt)}` : ''}</div>
       ${field}${wpHtml}
       ${fpRows ? `<div class="ds-k">Fantasy points this drive</div><div class="pi">${fpRows}</div>` : ''}
