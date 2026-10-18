@@ -2541,3 +2541,19 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   (data/live_inputs/gameday_<date>.json: ruling, time, the model's pre-ruling chance); tools/gameday_audit.py after
   the week's snap counts: GATE to keep it - no INACTIVE override played; ACTIVE-Questionable played rate's 95% CI
   includes 0.974; Brier of the overridden chances below the pre-ruling chances on the same players.
+- **PRE-REGISTERED 2026-10-18 (owner: "healthy scratch model needs to be fixed when starters ahead of them get hurt";
+  Tanner McKee, PHI QB1 with Jalen Hurts on IR, read 44% to play and the starter pick fell to Cole Payton): (AV)
+  "out ahead" counts reserve-list starters.** The healthy-scratch model's ahead_out (players at his position, out this
+  week, with a bigger recent snap share) is built from the week's ACT / INA roster rows, so a starter moved to IR /
+  PUP / NFI (roster status RES) drops out of it: McKee had ahead_out 0, while Huntley (Lamar Out, still ACT) had 1.
+  The model itself handles promoted backups (QB rank 1 with a starter out ahead: predicted 97.7%, played 94.1%,
+  2021-25 in-sample). Variant (injuries.ahead_reserve): out = on the report Out / Doubtful OR on a reserve list this
+  week; their snap share = their last known (earlier weeks). Test: the scratch model refit walk-forward 2021-25 (season
+  s trained on seasons before, production's settings), Brier on not-on-report rows. GATE: rows whose ahead_out changes,
+  Brier lower with the 95% CI over season-weeks excluding 0; all rows not worse (CI upper < +0.0005).
+- **RESULT {#ahead-reserve} (AV) "out ahead" counts reserve-list starters: PASS, shipped.** tools/ahead_eval.py, the
+  healthy-scratch model refit walk-forward 2021-25 on 36,936 not-on-report rows; ahead_out changes on 5,216 (14.1%).
+  Changed rows: played 89.3%, production predicted 85.9% (under, the bug), the variant 89.6%; Brier 0.0713 -> 0.0682,
+  -0.0031 [-0.0050, -0.0011]. All rows -0.00029 [-0.00059, +0.00001]. Live: config injuries.ahead_reserve = true
+  (Tanner McKee: ahead_out 0 -> 1). Pattern noted (owner: "players on IR threw a wrench ... over and over"): an audit
+  of every consumer that picks "this week's players" by roster status or board membership is under way.

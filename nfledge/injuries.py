@@ -604,6 +604,28 @@ class InjuryModel:
     grp = rg.groupby(["week", "team", "pos"])
     # "Ahead" = bigger recent snap share at the same position (injured players drop off the depth chart).
     out_snap = rg[rg.is_out].groupby(["week", "team", "pos"]).snap_avg.apply(list)
+    if self.cfg.get("injuries", {}).get("ahead_reserve"):
+      # (AV) starters out this week who are no longer on the ACT / INA rows (moved to a reserve list: IR, PUP, NFI), or
+      # on the report but off the roster rows: they still stand ahead of their backups (Jalen Hurts on IR, 2026 wk 6).
+      # Their snap share = the last one known from earlier weeks.
+      res = r[(r.status == "RES") & r.week.isin(rg.week.unique())][["week", "team", "gsis_id", "pos"]]
+      inrows = set(zip(rg.week, rg.gsis_id))
+      gone = pd.concat([res, rg.iloc[0:0][["week", "team", "gsis_id", "pos"]]])
+      rep_out = pd.DataFrame(list(out_rep), columns=["week", "gsis_id"])
+      tp = r.drop_duplicates(["gsis_id"], keep="last").set_index("gsis_id")[["team", "pos"]]
+      rep_out = rep_out[rep_out.gsis_id.isin(tp.index)].assign(team=lambda z: z.gsis_id.map(tp.team), pos=lambda z: z.gsis_id.map(tp.pos))
+      gone = pd.concat([gone, rep_out]).drop_duplicates(["week", "gsis_id"])
+      gone = gone[[(w, g) not in inrows for w, g in zip(gone.week, gone.gsis_id)]]
+      hist_sa = rg[rg.snap_avg > 0][["week", "gsis_id", "snap_avg"]].sort_values("week")
+      by_g = {g: list(zip(x.week, x.snap_avg)) for g, x in hist_sa.groupby("gsis_id")}
+      def last_sa(g, w):
+        v = [sa for ww, sa in by_g.get(g, []) if ww <= w]
+        return v[-1] if v else None
+      extra = [(w, t, p_, last_sa(g, w)) for w, t, p_, g in zip(gone.week, gone.team, gone.pos, gone.gsis_id)]
+      extra = pd.DataFrame([e for e in extra if e[3] is not None], columns=["week", "team", "pos", "snap_avg"])
+      if len(extra):
+        add = extra.groupby(["week", "team", "pos"]).snap_avg.apply(list)
+        out_snap = pd.concat([out_snap, add]).groupby(level=[0, 1, 2]).sum()
     rg["ahead_out"] = [sum(1 for x in out_snap.get((w, t, p), []) if x > sa + 0.05)
                        for w, t, p, sa in zip(rg.week, rg.team, rg.pos, rg.snap_avg)]
     rg["rookie"] = (pd.to_numeric(rg.years_exp, errors="coerce").fillna(1) == 0).astype(int)

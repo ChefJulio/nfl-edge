@@ -1,5 +1,5 @@
 ---
-documented_code_hash: db52c93374a0d976
+documented_code_hash: 6fc2ee5216a79ca8
 ---
 # How the model works
 
@@ -337,6 +337,7 @@ The grade measures output, not style: fantasy points per game in the site's scor
 - **Rejected** - Should a day a player wasn't on the practice report count as a full practice in the availability model? - No: it predicted worse (Brier +0.002, 2021-25). Being off the report carries its own signal: players newly added late in the week played 84%, players dropped off the report late played only 71% (often moved to IR), against 92% for players listed full all week (2026-10). <!-- tried:off-report -->
 - **Shipped** - Should the availability model know a team's final injury report is out from the league's report calendar (fixed by game day) instead of guessing from who's listed? - Yes: the guess was sometimes late, and on those player-days the calendar cut the error by a third (Brier 0.173 to 0.108, 2021-25) (2026-10). <!-- tried:calendar-stage -->
 - **Shipped** - Should each team's depth chart be read as of its own game day instead of the week's first game (after a Thursday game, Sunday teams' charts were frozen at Thursday night)? - Yes: projections got slightly more accurate (error -0.001, QB and RB both better, no position worse) and start/sit calls improved (2025) (2026-10). <!-- tried:depth-per-team -->
+- **Shipped** - When a starter goes on injured reserve, should his backups' healthy-scratch odds still see him as out ahead of them? - Yes: it had been dropping reserve-list starters, so promoted backups were predicted to play 86% vs 89% actual; the fix lands at 90% and is more accurate (Brier -0.003 on those players, 2021-25) (2026-10). <!-- tried:ahead-reserve -->
 - **Rejected** - Should short-week practice reports (Thursday games, mostly estimated walkthroughs) be read differently? - More accurate (Brier -0.007 on those weeks) but its probabilities were miscalibrated by up to 12 points, beyond the 2-point limit; not shipped (2026-10). <!-- tried:short-week -->
 - **Unresolved** - Second look at the short-week reports with calibration judged against the current model's own: more accurate again, but too few short weeks to rule out a calibration loss (error difference +0.002, interval up to +0.019); not shipped, revisit as weeks add up (2026-10). <!-- tried:short-week-2 -->
 - **Rejected** - How much should last season and two seasons back count in a player's efficiency rates (today 1 / 0.6 / 0.3)? - Every mix from 0.3 to 1 for last season and 0 to 0.6 for two back was within noise on 2021-23; the best was no better on 2024-25 and worse on 2026 so far, so today's stays (2026-10). <!-- tried:eff-season-weights -->
