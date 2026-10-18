@@ -935,7 +935,9 @@ def dst_logs(site: Path, cache, nfl, data, allsched: pd.DataFrame) -> None:
   num = lambda c: pd.to_numeric(t[c], errors="coerce").fillna(0) if c in t else pd.Series(0.0, index=t.index)
   t = t.assign(
     sack=num("def_sacks"), int=num("def_interceptions"), fum_rec=num("fumble_recovery_opp"), ff=num("def_fumbles_forced"),
-    def_td=num("def_tds") + num("fumble_recovery_tds"), st_td=num("special_teams_tds"), safe=num("def_safeties"),
+    # def_tds already holds the defense's fumble-return TDs; fumble_recovery_tds would add offenses recovering their own
+    # fumble in the end zone (2025: Texans wk 15, Titans wk 5) - not D/ST points
+    def_td=num("def_tds"), st_td=num("special_teams_tds"), safe=num("def_safeties"),
     blk=num("def_punt_blocks") + num("def_fg_blocks") + num("def_pat_blocks"), pass_def=num("def_pass_defended"),
     tkl_loss=num("def_tackles_for_loss"), def_2pt=num("def_2pt_made"),
     oyd=num("passing_yards") + num("rushing_yards") - num("sack_yards_lost").abs())
