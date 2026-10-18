@@ -201,7 +201,6 @@
     const kScore = line => (KD ? KD.k_keys : []).reduce((t, key, i) => t + (line[i] || 0) * ((L.kw || {})[key] || 0), 0);
     const dWeek = (team, wk) => { const o = KD && KD.dst && KD.dst[team]; const e = o && o.w.find(z => z[0] === wk);
       return e ? { pts: dstScore(Object.fromEntries(KD.d_keys.map((k, i) => [k, e[3][i]])), L.dw || {}), opp: e[1], home: e[2] } : null; };
-    NFLE.leagueDst = L.dw ? { w: L.dw, name: L.name } : null;  // D/ST cards score with this league's settings
     const kWeek = (g, wk) => { const o = KBY[g]; const e = o && o.w.find(z => z[0] === wk); return e ? kScore(e[2]) : null; };
     const TEAMS = D.teams || {}, KEYS = D.score.keys;
     let saved = null;
@@ -721,7 +720,7 @@
         <div class="lg-body"></div>`;
       sec.querySelector('.lg-team').onchange = e => { mine = L.teams.find(t => t.id === e.target.value); saved.team = mine.id; save();
         trade = { team: null, give: new Set(), get: new Set(), found: null }; draw(); };
-      sec.querySelector('.lg-change').onclick = () => { saved = null; save(); L = null; connectView(); };
+      sec.querySelector('.lg-change').onclick = () => { saved = null; save(); L = null; NFLE.leagueDst = null; connectView(); };
       sec.querySelector('.lg-seg').onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; view = b.dataset.v;
         sec.querySelectorAll('.lg-seg button').forEach(x => x.classList.toggle('on', x === b));
         if (['waivers', 'teams', 'trade'].includes(view) && !ROS) NFLE.load('data/ros.json').then(j => { ROS = j; draw(); }, () => draw()); else draw(); };
@@ -731,6 +730,7 @@
       sec.innerHTML = '<p class="muted">Loading your league…</p>';
       try {
         L = s.platform === 'espn' ? await espn.load(s.league, season) : await sleeper.load(s.league);
+        NFLE.leagueDst = L && L.dw ? { w: L.dw, name: L.name } : null;  // D/ST cards score with this league's settings
         mine = L.teams.find(t => t.id === s.team) || L.teams.find(t => s.user && t.owner === s.user) || L.teams[0];
         saved = Object.assign({}, s, { team: mine.id }); save();
         header(); draw();
