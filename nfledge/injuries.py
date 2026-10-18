@@ -366,15 +366,11 @@ class InjuryModel:
     long = days.days.fillna("").str.len() >= 3
     t = pd.DataFrame({"team": team, "fin": (has_gs | long).to_numpy()}).dropna(subset=["team"])
     fin = set(t[t.fin].team)
-    # (AP, {#calendar-stage}) the calendar: a team's final report is out once its third report day's reports are in
-    # (practice_calendar; seen = the latest date on any report this week). The rule above was sometimes late (nobody
-    # listed all week), never early: Brier 0.173 -> 0.108 on those rows, 2021-25.
-    if "dates" in days:
-      from .practice_calendar import team_report_days
-      seen = max((d for v in days.dates.dropna() for d in str(v).split(",") if d), default="")
-      for tm_, ds in team_report_days(self.data.schedules, season, week).items():
-        if len(ds) >= 3 and ds[2] <= seen:
-          fin.add(tm_)
+    # (AP, {#calendar-stage}) the week clock: a team's final report is out once its third report day's 4 p.m. ET
+    # deadline has passed (nfledge/week_clock.py, per team; Thursday / Monday / Saturday games included). The rule
+    # above was sometimes late (nobody listed all week), never early: Brier 0.173 -> 0.108 on those rows, 2021-25.
+    from .week_clock import Clock
+    fin |= Clock(self.data.schedules).final_report_teams(season, week)
     return fin
 
   def prob(self, rep: str, prac: str) -> float:

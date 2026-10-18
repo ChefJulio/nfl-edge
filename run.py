@@ -16,6 +16,7 @@ from nfledge import backtest as bt
 from nfledge import docs
 from nfledge import report as rp
 from nfledge import returns
+from nfledge.week_clock import Clock
 from nfledge.config import ROOT, load_config, load_scoring
 from nfledge.data import forecast_wind, load_all
 from nfledge.engine import POSITIONS, Engine
@@ -115,26 +116,10 @@ def cached_backtest(data, cfg, scoring) -> tuple[pd.DataFrame | None, list[int]]
   return res, seasons
 
 
-ROLLOVER_HOUR_ET = 6  # the page moves on to the next week at 06:00 Eastern on the Tuesday after a week's last game
-
-
 def display_week(data, now: pd.Timestamp | None = None) -> int:
-  """The week the page shows: the week being played (any game final) until Tuesday 06:00 ET after its last game
-  (so a Monday night game is still 'this week'), then the next week. Before the season: week 1."""
-  s = data.schedules
-  reg = s[(s.season == data.current_season) & (s.game_type == "REG")]
-  w = int(data.latest_week)
-  if w < 1:
-    return 1
-  games = reg[reg.week == w]
-  if games.home_score.isna().any():
-    return w
-  kick = pd.to_datetime(games.gameday.astype(str) + " " + games.gametime.fillna("13:00").astype(str))
-  last = kick.max().normalize()
-  days = (1 - last.weekday()) % 7 or 7  # the next Tuesday after the last game day
-  roll = (last + pd.Timedelta(days=days, hours=ROLLOVER_HOUR_ET)).tz_localize("America/New_York")
-  now = now or pd.Timestamp.now(tz="America/New_York")
-  return w if now < roll else min(w + 1, int(reg.week.max()))
+  """The week the page shows (nfledge/week_clock.py): the week being played until 06:00 ET on the Tuesday after its
+  last game (a Monday night game is still 'this week'; a game not final holds it), then the next week."""
+  return Clock(data.schedules, now).current_week(data.current_season)
 
 
 FIRST_ARCHIVE_SEASON = 2021
@@ -185,6 +170,7 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
     "n_final": n_final, "n_games": n_games, "has_actuals": n_final > 0, "nav": nav, "archive": archive,
     "lookahead": lookahead, "data_week": int(data.latest_week) if lookahead else week - 1,
     "generated": time.strftime("%Y-%m-%d %H:%M"), "injury_report": injury_report,
+    "clock": Clock(data.schedules).to_json(season, week),
     "players": rp.player_rankings(eng, proj, season, week, cfg),
     "games": with_weather(rp.matchups(eng, season, week, cfg, proj, power), wk, live=not (archive or lookahead)),
     "power": power, "teams": rp.team_info(data.teams), "power_vol": rp.league_volume(eng, season, week, eng.tm.fit(season, week)),

@@ -391,11 +391,13 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
   games = {}
   for g in sch.itertuples():
     for t, o, h in ((g.home_team, g.away_team, "vs"), (g.away_team, g.home_team, "@")):
-      games[(D.RELOCATED.get(t, t), int(g.week))] = (str(g.gameday)[:10], D.RELOCATED.get(o, o), h)
+      games[(D.RELOCATED.get(t, t), int(g.week))] = (str(g.gameday)[:10], D.RELOCATED.get(o, o), h, bool(pd.notna(g.home_score)))
   team_wk = {(r.gsis_id, int(r.week)): ROSTER_TEAM.get(r.team, r.team)
              for r in ros[(ros.season == cur) & ros.gsis_id.notna()][["gsis_id", "week", "team"]].itertuples()}
   snap = {(r.gsis_id, int(r.week)): r.offense_pct for r in sn[sn.season == cur][["gsis_id", "week", "offense_pct"]].itertuples()}
-  today = pd.Timestamp.now(tz="America/New_York").strftime("%Y-%m-%d")
+  # a game counts as played-or-missed once it is final AND its snap counts are published (the week clock's "final";
+  # owner 2026-10-18: a game played today, or snaps not in yet, read as "did not play")
+  snap_weeks = {int(w) for w in sn[sn.season == cur].week.dropna().unique()}
   out = {}
   for gid, x in pr.groupby("gsis_id"):
     ev = []
@@ -411,8 +413,8 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
       if not gm:
         continue
       s_ = snap.get((gid, w))
-      res = (int(round(100 * float(s_))) if s_ is not None and s_ == s_ else "out") if gm[0] <= today else ""
-      ev.append(["g", gm[0], gm[1], gm[2], res, w])  # w: the week (the card dates "hurt in the week N game")
+      res = (int(round(100 * float(s_))) if s_ is not None and s_ == s_ else "out") if (gm[3] and w in snap_weeks) else ""
+      ev.append(["g", gm[0], gm[1], gm[2], res, w])  # gm[3] (final) stays out of the file  # w: the week (the card dates "hurt in the week N game")
     ev.sort(key=lambda e: (e[1], 0 if e[0] == "p" else 1))
     out[gid] = ev
   return out

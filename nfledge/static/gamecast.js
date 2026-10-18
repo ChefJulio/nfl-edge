@@ -971,12 +971,12 @@
   const practiceTl = L => {
     const ev = (L && L.prac) || [];
     if (!ev.length) return '';
-    const today = new Date().toISOString().slice(0, 10);
+    const today = NFLE.clock.today();  // Eastern date (UTC rolled over at 8 pm ET: tonight's game read as past)
     const past = ev.filter(e => e[1] <= today).slice(-6), next = ev.find(e => e[1] > today && e[0] === 'g');
     const day = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
     const row = e => e[0] === 'p'
       ? `<div class="pt-row"><span class="pt-d">${day(e[1])}</span><span class="pr-chip pr-${e[2]}">${e[2] === 'D' ? 'DNP' : e[2] + 'P'}</span><span>${PR_WORD[e[2]] || ''}${e[3] ? ` · <b>${esc(e[3])}</b>` : ''}</span></div>`
-      : `<div class="pt-row pt-g"><span class="pt-d">${day(e[1])}</span><span class="pt-gm">${esc(e[3])} ${tmL(e[2])}</span><span>${e[4] === '' ? '<b>next game</b>' : e[4] === 'out' ? '<b class="bad">did not play</b>' : `played · ${esc(e[4])}% of snaps`}</span></div>`;
+      : `<div class="pt-row pt-g"><span class="pt-d">${day(e[1])}</span><span class="pt-gm">${esc(e[3])} ${tmL(e[2])}</span><span>${e[4] === '' ? (e[1] < today ? '<span class="muted">result pending</span>' : e[1] === today ? '<b>today</b>' : '<b>next game</b>') : e[4] === 'out' ? '<b class="bad">did not play</b>' : `played · ${esc(e[4])}% of snaps`}</span></div>`;
     // newest first (owner 2026-10-17): the next game on top, then the latest six going back
     return `<div class="pc-box"><div class="pc-k">Practice and games</div><div class="pt-list">${next ? row(next) : ''}${past.slice().reverse().map(row).join('')}</div></div>`;
   };
@@ -988,17 +988,22 @@
     const des = ((p && p.status) || '').replace(/\s*\(.*$/, '').replace(/\s*\(ESPN\)/, '').trim()
       || (now && now.status && now.status !== 'Active' ? now.status : '') || (h.inj ? 'Listed' : 'Healthy');
     const desCls = /^Out|Injured|IR/i.test(des) ? 'out' : /^Doubt/i.test(des) ? 'd' : /^Quest/i.test(des) ? 'q' : h.inj ? 'q' : 'ok';
-    const pr = ((L && L.prac) || []).filter(e => e[0] === 'p' && e[1] >= new Date(Date.now() - 6 * 864e5).toISOString().slice(0, 10));
+    const pr = ((L && L.prac) || []).filter(e => e[0] === 'p' && e[1] >= NFLE.clock.etDate(new Date(Date.now() - 6 * 864e5)));
     // This week's practice as a strip (owner 2026-10-17: "Questionable (FFF)" was unreadable): a tile per day, colored
     // full / limited / did not practice, and one plain sentence. Days from the dated report when it's in the data,
     // else the letters in his status / the model's note, Wed-Fri (Mon-Wed before a Thursday game).
     const code = (((p && (p.status || '') + ' ' + (p.inactive_why || '')) || '').match(/\(([DLF-]{1,3})\)/) || [])[1] || '';
-    const tg = DATA && p ? teamGame(p.team, DATA) : null;
-    const thuGame = tg && /^Thu/.test(tg.kickoff || '');
     const wd = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short' });
-    const days = pr.length ? pr.map(e => [wd(e[1]), e[2]])
-      : [...code].map((c, i, a) => [(thuGame ? ['Mon', 'Tue', 'Wed'] : ['Wed', 'Thu', 'Fri']).slice(3 - a.length)[i], c]);
-    const WORD = { D: 'did not practice', L: 'limited', F: 'full' }, TAG = { D: 'Missed', L: 'Limited', F: 'Full' };
+    // report days from the week clock (Thursday, Monday and Saturday games included); the status letters follow them
+    const rdays = p ? NFLE.clock.reports(p.team).map(r => r.weekday) : [];
+    // every report day this week (the clock), listed or not: before his first listing he practiced fully, after he
+    // dropped off '-' ({#off-report}); days still ahead are left off
+    const reps = p ? NFLE.clock.reports(p.team).filter(r => r.in) : [];
+    const on = Object.fromEntries(pr.map(e => [e[1], e[2]])), first = pr.length ? pr[0][1] : null;
+    const days = reps.length && pr.length ? reps.map(r => [r.weekday, on[r.date] || (r.date < first ? 'F' : '-')])
+      : pr.length ? pr.map(e => [wd(e[1]), e[2]])
+      : [...code].map((c, i) => [rdays[i] || ['Wed', 'Thu', 'Fri'][i], c]);
+    const WORD = { D: 'did not practice', L: 'limited', F: 'full', '-': 'not on the report' }, TAG = { D: 'Missed', L: 'Limited', F: 'Full', '-': 'Not listed' };
     const prSentence = (() => {
       if (!days.length) return '';
       const cs = days.map(x => x[1]);
@@ -1026,7 +1031,7 @@
     const hurt = [h.what, hurtWhen].filter(Boolean).join(' · ');
     // third cell (owner 2026-10-17: "expected back being a date seems weak"): a game, not a date. Likely to play this
     // week: his next game. Out: the game he's projected back for (our return model), ESPN's date as its game too.
-    const games = ((L && L.prac) || []).filter(e => e[0] === 'g'), today = new Date().toISOString().slice(0, 10);
+    const games = ((L && L.prac) || []).filter(e => e[0] === 'g'), today = NFLE.clock.today();
     const gameTxt = g => g ? `Week ${g[5]} ${g[3]} ${g[2]}` : '';
     // a week's game from the dated timeline, else his schedule in the career log (IR players have no practice report)
     const upG = w => { const u = ((L && L.up) || []).find(x => x.w === w && !x.bye); return u ? ['g', '', u.o, u.h === 0 ? '@' : 'vs', '', u.w] : null; };

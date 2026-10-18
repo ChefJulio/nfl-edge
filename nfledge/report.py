@@ -618,6 +618,8 @@ def week_data(ctx: dict) -> str:
          "roles": [{k: r.get(k) for k in ("pid", "name", "pos", "team", "week", "snap_now", "snap_prev", "opp_now",
                                           "opp_prev", "touches", "takeaway")} for r in ctx.get("roles") or []],
          "power_vol": ctx.get("power_vol"),
+         # the week clock (nfledge/week_clock.py): kickoffs, report deadlines, rollover; the browser applies the time
+         "clock": ctx.get("clock"),
          "head": {"data_week": ctx["data_week"], "n_final": ctx["n_final"], "n_games": ctx["n_games"],
                   "injury_report": bool(ctx["injury_report"]), "scoring": ctx["scoring"],
                   "has_actuals": bool(ctx.get("has_actuals"))},

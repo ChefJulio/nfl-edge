@@ -40,7 +40,8 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     // Availability is shown one way everywhere (owner 2026-10-17): his chance to PLAY, "62%"; never the chance to sit
     toPlay: inactive => { const p = 1 - (inactive || 0); return p > 0.995 ? '&gt;99%' : p < 0.005 ? '&lt;1%' : `${Math.round(p * 100)}%`; },
     // kickoff (ms) of a team's game in a week's games: gameday + gametime are Eastern (EDT mid-March to early November)
-    kickoff: (games, t) => { const g = (games || []).find(x => x.away.team === t || x.home.team === t);
+    kickoff: (games, t) => { const k = NFLE.clock && NFLE.clock.kick(t); if (k != null) return k;  // the week clock first
+      const g = (games || []).find(x => x.away.team === t || x.home.team === t);
       if (!g || !g.gameday || !g.gametime) return null;
       // Eastern offset from the browser's time-zone data (a hand-made EDT rule had Nov 1 2026 as EDT: kickoffs an hour early)
       const guess = Date.parse(`${g.gameday}T${g.gametime}:00-05:00`);
@@ -169,6 +170,38 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   addEventListener('scroll', hide, { passive: true, capture: true });
   addEventListener('resize', hide);
 })();
+// The week clock in the browser (nfledge/week_clock.py writes D.clock into every week page): kickoffs, practice-report
+// deadlines, rollover and the waiver run as ISO times, applied to the current time here, so the page knows where the
+// week stands between builds (owner 2026-10-18: "make every day of the week a day where we expect things").
+(() => {
+  const NFLE = window.NFLE;
+  let C = null;
+  NFLE.week && NFLE.week().then(D => { C = D && D.clock; });
+  const ms = iso => iso ? Date.parse(iso) : null;
+  const team = t => C && C.teams && C.teams[t];
+  // today's date in Eastern time (not UTC: after 8 pm ET the UTC date is already tomorrow)
+  const etDate = (d = new Date()) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+  NFLE.clock = {
+    ready: () => !!C,
+    data: () => C,
+    today: () => etDate(),
+    etDate,
+    kick: t => { const x = team(t); return x ? ms(x.kick) : null; },
+    // 'final' | 'live' | 'upcoming' | null (bye / unknown); live games ESPN marks final are 'final' via finals()
+    state: (t, finals) => { const x = team(t); if (!x) return null;
+      if (x.final || (finals && finals.has(t))) return 'final';
+      return Date.now() >= ms(x.kick) ? 'live' : 'upcoming'; },
+    started: t => { const x = team(t); return !!x && (x.final || Date.now() >= ms(x.kick)); },
+    // this week's report days for a team: [{date, due, weekday, in}] (in = its 4 pm ET deadline has passed)
+    reports: t => { const x = team(t); if (!x) return [];
+      return x.reports.map(r => ({ date: r.date, due: ms(r.due), in: Date.now() >= ms(r.due),
+        weekday: new Date(r.date + 'T12:00:00').toLocaleDateString([], { weekday: 'short' }) })); },
+    reportsIn: t => NFLE.clock.reports(t).filter(r => r.in).length,
+    finalReportIn: t => { const r = NFLE.clock.reports(t); return r.length > 0 && r[r.length - 1].in; },
+    rollover: () => C ? ms(C.rollover) : null,
+    waivers: () => C ? ms(C.waivers) : null,
+  };
+})();
 // A page left open keeps showing what it loaded, and phones keep tabs alive for days. When you come back to the
 // current week's page (and at most every 10 minutes), ask the site for its build stamp (build.json, report.render);
 // if it's newer than this page's numbers or code, offer a refresh. Never reloads on its own: you may be mid-read. Nothing is
@@ -245,9 +278,19 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   }
   // Page details: a tooltip on the (i) (hover on desktop, tap on phones); amber while the injury report is pending.
   const hw = document.querySelector('.hinfo-w'), hb = hw.querySelector('.hinfo');
+  // injury reports from the week clock (owner 2026-10-18): how many teams' final reports are in, which are next
+  const repLine = D => {
+    const ts = Object.keys((D.clock && D.clock.teams) || {});
+    if (!ts.length || !NFLE.clock) return D.head.injury_report ? '<span>Injury report <b>in</b></span>' : '';
+    const fin = ts.filter(t => NFLE.clock.finalReportIn(t)).length;
+    if (fin === ts.length) return '<span>Final injury reports <b>in</b> for every team</span>';
+    const nxt = ts.flatMap(t => NFLE.clock.reports(t).filter(r => !r.in)).sort((a, b) => a.due - b.due)[0];
+    const when = nxt ? new Date(nxt.due).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }) : '';
+    return `<span${fin ? '' : ' class="alert"'}>Final injury reports in for <b>${fin} of ${ts.length}</b> teams${when ? ` · next report due ${esc(when)}` : ''}</span>`;
+  };
   NFLE.week().then(D => {
     if (!D || !D.head) return;
-    const h = D.head, live = !(CFG.archive || CFG.lookahead), pending = live && !h.injury_report;
+    const h = D.head, live = !(CFG.archive || CFG.lookahead), pending = live && !h.injury_report && !(D.clock && Object.keys(D.clock.teams || {}).some(t => NFLE.clock.reportsIn(t)));
     const sc = h.scoring === 'half' ? 'Half PPR' : h.scoring === 'ppr' ? 'PPR' : String(h.scoring || '').replace(/^./, c => c.toUpperCase());
     hw.querySelector('.hpop').innerHTML = [
       // two different weeks (owner 2026-10-17 read them as one): what the projections are built on, and how far
@@ -255,7 +298,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       `<span>Projections use games through <b>week ${esc(h.data_week)}</b>${CFG.lookahead ? ' (all games played so far)' : ''}</span>`,
       h.n_final ? `<span>Week ${esc(D.week)} so far: <b>${h.n_final} of ${h.n_games}</b> games final</span>` : '',
       `<span>Scoring <b id="scoreName">${esc(sc)}</b></span>`,
-      pending ? '<span class="alert">Injury report pending: last week\'s statuses (and early ESPN injury news) are used</span>' : live ? '<span>Injury report <b>in</b></span>' : '',
+      live ? repLine(D) : '',
       `<span>Updated ${esc(D.generated || '')}</span>`].join('');
     hb.classList.toggle('warn', pending);
     hw.hidden = false;

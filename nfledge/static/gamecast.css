@@ -1106,3 +1106,4 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
   text-shadow: 1px 0 0 #000, -1px 0 0 #000, 0 1px 0 #000, 0 -1px 0 #000, 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 0 2px 3px rgba(0,0,0,.5); }
 @media (max-width: 400px) { .mt-tn { font-size: 20px; } }
 .pr-days .pr-n { color: var(--faint, #6b7380); background: rgba(255,255,255,.05); }  /* not on the report that day */
+.pr-day.pr-- { background: rgba(255,255,255,.05); color: var(--muted); }  /* not on the report that day */
