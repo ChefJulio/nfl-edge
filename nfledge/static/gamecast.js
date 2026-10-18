@@ -2400,7 +2400,19 @@
       return `<circle cx="${X(s.t).toFixed(1)}" cy="${Y(s.home).toFixed(1)}" r="${tm === 'score' ? 3.4 : 3}" class="wp-m wp-${tm}"><title>${esc(s.play.text)}</title></circle>`;
     }).join('');
     const lastPt = pts_[pts_.length - 1];
-    return `<svg class="wp" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="ESPN win probability over the game">
+    // the scale (owner 2026-10-18: "no indication about which team is favored, no scale"): each team's 100% at its
+    // edge, 75 / 50 marks, and who leads now at the end of the line. HTML over the chart (the SVG stretches, text in it
+    // would too).
+    [0.25, 0.75].forEach(v => { grid += `<line x1="${pad}" y1="${Y(v)}" x2="${W - pad}" y2="${Y(v)}" class="wp-q4"/>`; });
+    const pct = v => (100 * Y(v) / H).toFixed(2);
+    const lead = lastPt.home >= 0.5 ? info.home : info.away, lp = Math.max(lastPt.home, 1 - lastPt.home);
+    const xr = 100 * X(lastPt.t) / W;
+    const axis = `<div class="wp-ax" aria-hidden="true">
+      <span class="wp-ax-tm" style="top:${pct(1)}%;--tc:${esc(info.home.color)}">${esc(info.home.team)} 100%</span>
+      <span class="wp-ax-n" style="top:${pct(0.75)}%">75%</span><span class="wp-ax-n" style="top:${pct(0.5)}%">50%</span><span class="wp-ax-n" style="top:${pct(0.25)}%">75%</span>
+      <span class="wp-ax-tm bot" style="top:${pct(0)}%;--tc:${esc(info.away.color)}">${esc(info.away.team)} 100%</span></div>`;
+    const now = `<span class="wp-now-tag${xr > 70 ? ' left' : ''}" style="left:${xr.toFixed(2)}%;top:${pct(lastPt.home)}%;--tc:${esc(lead.color)}">${esc(lead.team)} ${Math.round(100 * lp)}%</span>`;
+    return `${axis}<div class="wp-plot">${now}<svg class="wp" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="ESPN win probability over the game">
       <defs><clipPath id="wpTop"><rect x="0" y="0" width="${W}" height="${Y(0.5)}"/></clipPath><clipPath id="wpBot"><rect x="0" y="${Y(0.5)}" width="${W}" height="${H}"/></clipPath></defs>
       <rect x="0" y="0" width="${W}" height="${H}" class="wp-bg"/>${grid}
       <path d="${area}" style="fill:${esc(info.home.color)}" class="wp-a" clip-path="url(#wpTop)"/>
@@ -2408,7 +2420,7 @@
       <line x1="${pad}" y1="${Y(0.5)}" x2="${W - pad}" y2="${Y(0.5)}" class="wp-50"/>
       <path d="${line}" class="wp-line"/>${marks}
       <circle cx="${X(lastPt.t)}" cy="${Y(lastPt.home)}" r="4" class="wp-now"/>
-      <line class="wp-hair" x1="0" x2="0" y1="${pad}" y2="${H - pad}" style="display:none"/></svg>`;
+      <line class="wp-hair" x1="0" x2="0" y1="${pad}" y2="${H - pad}" style="display:none"/></svg></div>`;
   };
   // One battle bar (report.tug): away team on the left, home on the right, the edge on the winner's side.
   const btChip = (r, what) => `<span class="bt-rk">${r ? `<span class="rk-b sm ${r <= 8 ? 'rk1' : r <= 16 ? 'rk2' : r <= 24 ? 'rk3' : 'rk4'}" title="${esc(what)}: ${ord(r)} of 32">${ord(r)}</span>` : ''}</span>`;
@@ -2916,7 +2928,7 @@
     const qrows = Object.keys(rows).map(Number).sort((a, b) => a - b).map(q => `<div class="dvq"><span class="dv-q">${periodName(q)}</span><div class="dvs">${rows[q].join('')}</div></div>`).join('');
     return `<section class="gcs story" data-k="story"><h3>How it's gone <span class="src">ESPN</span></h3>
       <div class="wp-wrap">${wpChart(st.ser, info, null)}<div class="wp-tip" hidden></div></div>
-      <div class="wp-leg"><span><i class="wp-m wp-score"></i>score</span><span><i class="wp-m wp-to"></i>turnover</span><span class="muted">${esc(info.home.team)} favored above the line, ${esc(info.away.team)} below</span></div>
+      <div class="wp-leg"><span><i class="wp-m wp-score"></i>score</span><span><i class="wp-m wp-to"></i>turnover</span></div>
       ${qrows ? `<div class="dvs-k muted">Every drive (tap one for the whole drive)</div>${qrows}` : ''}</section>`;
   };
   // ---- Drive sheet (owner 2026-10-18: "a summary of the drive, especially how it ended and who scored or what
@@ -3131,9 +3143,9 @@
         // keep the whole tooltip inside the chart: centered on the finger, clamped by its measured width (a % clamp
         // let the wide play text run off the screen edge near the ends)
         tip.hidden = false;
-        const W = tip.parentElement.getBoundingClientRect().width, tw = tip.offsetWidth;
+        const pr = tip.parentElement.getBoundingClientRect(), W = pr.width, tw = tip.offsetWidth, cx = r.left - pr.left + x * r.width;
         tip.style.transform = 'none';
-        tip.style.left = `${Math.max(0, Math.min(W - tw, x * W - tw / 2))}px`;
+        tip.style.left = `${Math.max(0, Math.min(W - tw, cx - tw / 2))}px`;
       };
       svg.addEventListener('mousemove', move); svg.addEventListener('touchstart', move, { passive: true });
       svg.addEventListener('touchmove', move, { passive: true });

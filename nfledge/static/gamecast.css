@@ -1244,3 +1244,22 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 :is(.now, .ds) .fl-h.fl-fg { stroke: none; } :is(.now, .ds) .fl-miss { stroke: #ff8f84; fill: #ff8f84; stroke-dasharray: 4 2; } :is(.now, .ds) .fl-h.fl-miss { stroke: none; }
 :is(.now, .ds) .fl-to { fill: #ff8f84; } :is(.now, .ds) .fl-x { stroke: #ff4d4f; stroke-width: 2.4; stroke-linecap: round; }
 :is(.now, .ds) .fl-t.fl-gain, :is(.now, .ds) .fl-t.fl-loss, :is(.now, .ds) .fl-t.fl-pen, :is(.now, .ds) .fl-t.fl-td, :is(.now, .ds) .fl-t.fl-fg, :is(.now, .ds) .fl-t.fl-miss { stroke: rgba(10,30,18,.85); stroke-dasharray: none; }
+/* win chart scale (owner 2026-10-18) */
+.wp-q4 { stroke: var(--line); stroke-dasharray: 2 4; }
+.wp-ax { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.wp-ax span { position: absolute; left: 8px; transform: translateY(-50%); font-size: 10px; font-weight: 700; line-height: 1; white-space: nowrap; }
+.wp-ax-n { color: var(--faint, #6b7380); }
+.wp-ax-tm { padding: 3px 6px; border-radius: 999px; color: #fff; background: color-mix(in srgb, var(--tc) 70%, #000 0%); box-shadow: 0 0 0 1px rgba(255,255,255,.12); }
+.wp-ax span.wp-ax-tm { transform: translateY(2px); } .wp-ax span.wp-ax-tm.bot { transform: translateY(calc(-100% - 2px)); }
+.wp-ax span.wp-ax-now { left: auto; transform: translate(-50%, -50%); margin-left: 0; padding: 3px 7px; border-radius: 999px; font-size: 11px; color: #fff;
+  background: color-mix(in srgb, var(--tc) 80%, #000); box-shadow: 0 0 0 1.5px rgba(255,255,255,.55); transform: translate(10px, -50%); }
+.wp-ax span.wp-ax-now.left { transform: translate(calc(-100% - 10px), -50%); }
+/* the scale is its own column left of the plot (no overlap with the quarter labels) */
+.wp-wrap:has(.wp-ax) { display: grid; grid-template-columns: 62px minmax(0, 1fr); }
+.wp-wrap .wp-ax { position: relative; inset: auto; }
+.wp-ax span { left: 0; } .wp-ax-n { left: auto !important; right: 6px; }
+.wp-plot { position: relative; min-width: 0; }
+.wp-now-tag { position: absolute; z-index: 1; pointer-events: none; transform: translate(10px, -50%); padding: 3px 7px; border-radius: 999px; font-size: 11px;
+  font-weight: 700; line-height: 1; white-space: nowrap; color: #fff; background: color-mix(in srgb, var(--tc) 80%, #000); box-shadow: 0 0 0 1.5px rgba(255,255,255,.55); }
+.wp-now-tag.left { transform: translate(calc(-100% - 10px), -50%); }
+.wp-wrap:has(.wp-ax) { grid-template-columns: 70px minmax(0, 1fr); } .wp-ax-tm { padding: 3px 5px; }
