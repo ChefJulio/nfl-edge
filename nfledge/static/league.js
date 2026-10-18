@@ -347,12 +347,19 @@
       const below = own.map(o => ({ ...o, beat: fa.filter(f => f.pos === o.p.pos && f.ros > o.ros) }))
         .filter(o => o.beat.length && o.p.pos).sort((a, b) => b.beat.length - a.beat.length || a.ros - b.ros).slice(0, 4);
       const wv = mine.faab != null ? `$${mine.faab} FAAB left` : mine.waiver && claimWindow() ? `claims process Wed ~2am CT · you're #${mine.waiver} of ${L.teams.length}` : '';
-      return `<div class="lg-mv lg-moves"><div class="lg-mv-h">Waiver wire${wv ? ` <span class="muted lg-wv">${wv}</span>` : ''}</div>
+      // (owner 2026-10-18) the same player rows as the lineup: photo, name, team colors; what he's worth on the right
+      const infoRow = (p, tag, val, sub, cls = '') => `<tr class="teamrow" style="${NFLE.fmt.rowStyle(TEAMS, p.team)}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}>
+          <td class="lg-slot">${esc(tag)}</td><td class="lg-who">${NFLE.ui.player({ name: p.name, team: p.team, photo: p.photo, espn: p.espn, pid: p.pid, subHtml: sub }, TEAMS)}</td>
+          <td class="num"><b class="${cls}">${val}</b></td></tr>`;
+      const addRows = best.map(m => infoRow(m.add, m.add.pos, perWk(m.ros), `${perG(m.add.ros, m.add.games)}/g · ${NFLE.fmt.signed1(m.wk)} this wk`, 'good'));
+      const belowRows = below.map(o => { const top = o.beat.sort((a, b) => b.ros - a.ros)[0];
+        return infoRow(o.p, o.p.pos, o.beat.length, `${perG(o.ros, o.games)}/g · top FA ${esc(last(top.name))} ${perG(top.ros, top.games)}`, 'bad'); });
+      return `<h3 class="lg-h">Waiver wire${wv ? ` <span class="muted lg-wv">${wv}</span>` : ''}</h3>
           <div class="lg-mv-sub">Best available for you</div>
-          ${best.length ? best.map(m => `<div class="lg-mv-row"><span class="lg-mv-k good">${perWk(m.ros)}</span><div><b>${esc(m.add.name)}</b> <span class="muted">${esc(m.add.pos)} · ${perG(m.add.ros, m.add.games)} per game rest of season · ${NFLE.fmt.signed1(m.wk)} this week</span></div></div>`).join('')
-            : '<div class="muted">No free agent improves your team over the rest of the season by our projections.</div>'}
-          ${below.length ? `<div class="lg-mv-sub">Below the waiver wire</div>${below.map(o => `<div class="lg-mv-row"><span class="lg-mv-k bad">${esc(o.p.pos)}</span><div><b>${esc(o.p.name)}</b> <span class="muted">${perG(o.ros, o.games)} per game · ${o.beat.length} free agent${o.beat.length === 1 ? '' : 's'} project more (best: ${esc(o.beat.sort((a, b) => b.ros - a.ros)[0].name)} ${perG(o.beat[0].ros, o.beat[0].games)})</span></div></div>`).join('')}` : ''}
-          <div class="muted lg-mv-f">+X = what he'd add to your team per week, your best lineup each remaining week through ${ROS.through}, making room with whoever costs least (one QB, TE, K and D/ST is enough; ${DEPTH_MIN} RBs and WRs stay). Per game = his expected points per remaining game, byes skipped. Upside the projections can't see is your call.</div></div>`;
+          ${addRows.length ? table(addRows.join(''), '<th>Pos</th><th>Free agent</th><th class="num" title="What he adds to your team per week, rest of season">+/wk</th>')
+            : '<p class="muted">No free agent improves your team over the rest of the season by our projections.</p>'}
+          ${belowRows.length ? `<div class="lg-mv-sub">Below the waiver wire</div>${table(belowRows.join(''), '<th>Pos</th><th>Your player</th><th class="num" title="Free agents at his position who project more the rest of the season">Beat by</th>')}` : ''}
+          <p class="muted lg-note">+/wk = what he'd add to your team per week, your best lineup each remaining week through ${ROS.through}, making room with whoever costs least (one QB, TE, K and D/ST is enough; ${DEPTH_MIN} RBs and WRs stay). Beat by = free agents at his position who project more (top FA = the best of them). /g = expected points per remaining game, byes skipped. Upside the projections can't see is your call.</p>`;
     };
     // IR (owner 2026-10-17: "no mention of IR slots"): listed under the bench with when he's likely back (the first week
     // the return model gives him at least an even chance to play); never in the lineup
@@ -418,11 +425,12 @@
           <div class="muted lg-mv-f">Best lineup: <b class="good">+${f1(gain)}</b> expected points.${unsure.length ? ' Inactives are posted 90 minutes before each kickoff.' : ''}</div></div>`;
       const unproj = curRows.filter(r => r.p && r.p.exp == null && r.slot !== 'DEF' && r.slot !== 'K').map(r => r.p);
       const bench = ps.filter(p => !bestSet.has(p.ext) && p.exp != null).sort((a, b) => b.exp - a.exp);
-      return `${swaps}${movesCard()}${unproj.length ? `<p class="muted lg-note">Starting with no projection: ${unproj.map(p => `${esc(p.name)} (${esc(p.why || 'not projected')})`).join(', ')}.</p>` : ''}
+      return `${swaps}${unproj.length ? `<p class="muted lg-note">Starting with no projection: ${unproj.map(p => `${esc(p.name)} (${esc(p.why || 'not projected')})`).join(', ')}.</p>` : ''}
         <h3 class="lg-h">Best lineup <span class="muted">${f1(total(best))} expected</span></h3>
         ${table(best.map(r => row(r.slot, r.p)).join(''))}
         <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') || '<tr><td colspan="3" class="muted">No projected bench players.</td></tr>')}
         ${irSection()}
+        ${movesCard()}
         <p class="muted lg-note">Expected points = our projection under your league's scoring x his chance to play. Kickers and team defenses are projected under your league's own kicking and D/ST settings (3-and-outs and 4th-down stops aren't modeled). Scoring bonuses (100-yard games, 2-point tries) aren't modeled.</p>`;
     };
 
