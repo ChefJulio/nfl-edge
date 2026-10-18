@@ -1,4 +1,5 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment
+4361307,Trey McBride,Arizona Cardinals,Active,2026-10-18T23:51Z,,,,,,McBride caught seven of nine targets for 53 yards in Sunday's 18-16 win over the Rams.
 4430841,Carson Beck,Arizona Cardinals,Out,2026-10-18T18:45Z,Coach's Decision,Not Specified,Not Specified,2026-10-25,INACTIVE,"Beck (coach's decision) is inactive and is designated as Arizona's emergency third quarterback for Sunday's matchup versus the Rams, Darren Urban of the Cardinals' official site reports."
 4430821,Kitan Crawford,Arizona Cardinals,Active,2026-10-18T18:44Z,,,,,,Crawford (ankle) is active for Sunday's game against the Rams.
 4244606,Zaven Collins,Arizona Cardinals,Active,2026-10-18T18:43Z,,,,,,Collins (hip) is active for Sunday's game against the Rams.
@@ -23,7 +24,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2578570,Jacoby Brissett,Arizona Cardinals,Active,2026-10-12T01:39Z,,,,,,Brissett completed 29 of 47 passes for 292 yards with three touchdowns and one interception while adding two rushes for 19 yards and a seven-yard reception on his only target in the Cardinals' 45-21 loss to the Lions on Sunday.
 4360761,Michael Wilson,Arizona Cardinals,Active,2026-10-12T01:23Z,,,,,,Wilson brought in four of seven targets for 30 yards and completed his only pass attempt for seven yards in the Cardinals' 45-21 loss to the Lions on Sunday.
 4374045,Teagan Quitoriano,Arizona Cardinals,Active,2026-10-12T00:49Z,,,,,,Quitoriano caught both of his targets for 15 yards and two touchdowns during Sunday's 45-21 loss to Detroit.
-4361307,Trey McBride,Arizona Cardinals,Active,2026-10-12T00:39Z,,,,,,McBride brought in nine of 10 targets for 66 yards and a touchdown in the Cardinals' 45-21 loss to the Lions on Sunday.
 4595343,Kendal Daniels,Atlanta Falcons,Questionable,2026-10-18T19:51Z,Neck,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,Daniels (neck) is alert and has movement in all his extremities while being evaluated at Grady Memorial Hospital.
 4431194,Billy Bowman Jr.,Atlanta Falcons,Questionable,2026-10-18T19:38Z,Hamstring,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"Bowman (hamstring) is doubtful to return to Sunday's game against Atlanta, William McFadden of the Falcons' official site reports."
 4870988,Avieon Terrell,Atlanta Falcons,Active,2026-10-18T19:33Z,,,,,,"Terrell (head) returned to Sunday's game against the Bears, William McFadden of the Falcons' official site reports."
@@ -324,6 +324,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428989,Chris Braswell,Houston Texans,Active,2026-10-12T19:13Z,,,,,,
 2971573,Ka'imi Fairbairn,Houston Texans,Active,2026-10-12T14:21Z,,,,,,"Fairbairn converted on all six of his kicks (four field goals, two extra points) during the Texans' 26-3 win over the Titans on Sunday."
 3117256,Dalton Schultz,Houston Texans,Active,2026-10-12T04:27Z,,,,,,Schultz caught three of four targets for 30 yards during Sunday's 26-3 win over the Titans.
+4688813,Josh Downs,Indianapolis Colts,Active,2026-10-18T23:50Z,,,,,,Downs caught four of eight targets for 40 yards in Sunday's 26-20 loss to the Titans. He added seven rushing yards on his only carry.
+3917792,Daniel Jones,Indianapolis Colts,Active,2026-10-18T23:46Z,,,,,,Jones completed 22 of 42 passes for 269 yards and a touchdown with two interceptions in Sunday's 26-20 loss to the Titans.
+4242335,Jonathan Taylor,Indianapolis Colts,Active,2026-10-18T23:40Z,,,,,,Taylor carried the ball 21 times for 94 yards and a touchdown and caught two of four targets for 57 yards in Sunday's 26-20 loss to the Titans. He also lost a fumble.
 3914922,Rigoberto Sanchez,Indianapolis Colts,Questionable,2026-10-18T19:42Z,Foot,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,"Sanchez (foot) is questionable to return to Sunday's game against the Titans, Jake Arthur of Roundtable.io reports."
 4427250,Sauce Gardner,Indianapolis Colts,Questionable,2026-10-18T18:49Z,Calf,Not Specified,Left,2026-10-18,QUESTIONABLE,"Gardner (calf) is questionable to return to Sunday's game against the Titans, Jake Arthur of Roundtable.io reports."
 4429684,Anthony Gould,Indianapolis Colts,Questionable,2026-10-18T18:46Z,Concussion,Concussion,Not Specified,2026-10-25,QUESTIONABLE,"Gould (concussion) won't return to Sunday's game against the Titans, Mike Chappell of Fox 59 News Indianapolis reports."
@@ -336,13 +339,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4892240,Jalen Travis,Indianapolis Colts,Active,2026-10-16T20:10Z,,,,,,
 4566154,Jaylahn Tuimoloau,Indianapolis Colts,Active,2026-10-15T19:55Z,,,,,,
 4427298,Matt Goncalves,Indianapolis Colts,Active,2026-10-15T19:55Z,,,,,,
-4688813,Josh Downs,Indianapolis Colts,Active,2026-10-15T19:55Z,,,,,,Downs (rest/hamstring) upgraded to full participation at Thursday's practice.
 4360078,Alec Pierce,Indianapolis Colts,Injured Reserve,2026-10-15T00:54Z,Heel,Not Specified,Left,2026-10-25,IR,"Pierce was spotted without a cast on his left ankle/heel Wednesday, James Boyd of The Athletic reports."
 15818,Keenan Allen,Indianapolis Colts,Active,2026-10-14T20:51Z,,,,,,Allen was a non-participant in Wednesday's practice due to rest.
 2971281,Pharaoh Brown,Indianapolis Colts,Active,2026-10-13T21:17Z,,,,,,Brown was signed to the 53-man roster Tuesday.
 4571557,Spencer Shrader,Indianapolis Colts,Active,2026-10-12T15:30Z,,,,,,Shrader made all five of his field-goal attempts and converted on his lone point-after try during Sunday's 34-22 loss to the Steelers on Sunday.
-3917792,Daniel Jones,Indianapolis Colts,Active,2026-10-11T23:47Z,,,,,,Jones completed 24 of 44 passes for 267 yards without a touchdown or interception and added four rushing yards on three carries in Sunday's 34-22 loss to the Steelers.
-4242335,Jonathan Taylor,Indianapolis Colts,Active,2026-10-11T23:41Z,,,,,,Taylor carried the ball 15 times for 45 yards and caught three of four targets for 37 yards in Sunday's 34-22 loss to Pittsburgh.
 4037361,Charvarius Ward,Indianapolis Colts,Active,2026-10-11T16:07Z,,,,,,Ward (groin) is active for Sunday's game against Pittsburgh.
 3843843,Arden Key,Indianapolis Colts,Injured Reserve,2026-10-10T17:51Z,Hamstring,Not Specified,Not Specified,2026-11-08,IR,The Colts placed Key (hamstring) on injured reserve Saturday.
 4430957,Tanor Bortolini,Indianapolis Colts,Active,2026-10-09T19:55Z,,,,,,
