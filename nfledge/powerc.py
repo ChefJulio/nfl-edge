@@ -92,8 +92,7 @@ def inputs(eng, season: int, week: int, recent: dict, now: dict | None = None, b
     for t in (g.home_team, g.away_team):
       weeks.setdefault(D.RELOCATED.get(t, t), []).append(int(g.week))
   dc = D.depth_for_week(d, season, week)
-  q2 = dc[(dc.pos == "QB") & (dc["rank"] == 2)]
-  qb2 = {D.RELOCATED.get(t, t): g for t, g in zip(q2.team, q2.gsis_id)}
+  qb2 = _qb2(d, dc, usual)
   backup, pbar = {}, {}
   for t, q in usual.items():
     backup[t] = recent.get(t) if recent.get(t) not in (None, q) else qb2.get(t)
@@ -135,8 +134,7 @@ def _from_plan(eng, season: int, week: int, usual: dict, recent: dict, plan: dic
   sch = d.schedules[(d.schedules.season == season) & (d.schedules.game_type == "REG") & d.schedules.home_score.notna()]
   done = {(D.RELOCATED.get(t, t), int(w)) for w, h, a in zip(sch.week, sch.home_team, sch.away_team) for t in (h, a)}
   dc = D.depth_for_week(d, season, week)
-  q2 = dc[(dc.pos == "QB") & (dc["rank"] == 2)]
-  qb2 = {D.RELOCATED.get(t, t): g for t, g in zip(q2.team, q2.gsis_id)}
+  qb2 = _qb2(d, dc, usual)
   backup, pbar = {}, {}
   for t, q in usual.items():
     backup[t] = recent.get(t) if recent.get(t) not in (None, q) else qb2.get(t)
@@ -148,6 +146,22 @@ def _from_plan(eng, season: int, week: int, usual: dict, recent: dict, plan: dic
     if by_week is not None:
       by_week[t] = dict(zip(rem, ps))
   return backup, pbar
+
+
+def _qb2(d, dc: pd.DataFrame, usual: dict) -> dict:
+  """team -> its backup QB: the best-ranked QB on the depth chart who is neither the usual starter nor on a reserve list
+  (IR audit 2026-10-18: "rank 2" picked a third-stringer when the IR'd starter stayed listed, and Cole Payton over
+  Tanner McKee when the chart read McKee / Payton / Milton / Hurts)."""
+  from . import data as D
+  from .returns import reserve_now
+  res = reserve_now(d)
+  q = dc[dc.pos == "QB"].sort_values("rank")
+  out = {}
+  for t, g in zip(q.team, q.gsis_id):
+    t = D.RELOCATED.get(t, t)
+    if t not in out and g != usual.get(t) and g not in res:
+      out[t] = g
+  return out
 
 
 def blend(u_usual: pd.DataFrame, u_backup: pd.DataFrame, pbar: dict) -> pd.DataFrame:

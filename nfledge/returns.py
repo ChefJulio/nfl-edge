@@ -65,11 +65,19 @@ def availability_plan(data, proj: pd.DataFrame, week: int, espn_feed: pd.DataFra
   # players ESPN lists on IR who are off this week's board (IR players aren't projected: Jalen Hurts, placed on IR
   # before missing a game, was absent from the plan and Power read "absent" as healthy, 2026-10-18): out this week, then
   # the newly-injured chain with the IR floor
-  for g in espn_ir(data, espn_feed):
+  ir = espn_ir(data, espn_feed)
+  for g in ir:
+    now_report.setdefault(g, 0.0)
+  # nflverse's reserve lists too (IR, PUP, NFI, suspension: roster status RES), for players ESPN's IR list misses (PUP /
+  # NFI, ESPN lag, an unmatched ESPN id; IR audit 2026-10-18): newly placed ones start the chain; everyone on a list is
+  # out this week (set after the lookahead, so long-term reserve players keep their IR-model inputs untouched)
+  for g in reserve_now(data, new_only=True):
     now_report.setdefault(g, 0.0)
   later = list(range(week + 1, last + 1))
   avail, status, extra = lookahead_availability(data, week, later, now_report, espn_feed=espn_feed, cache_dir=cache_dir, gb=gb)
   avail[week] = dict(now_report)
+  for g in reserve_now(data):
+    avail[week][g] = 0.0
   return {"avail": avail, "status": status, "extra": extra}
 
 
@@ -98,6 +106,8 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
   horizon = 18
   now_report = now_report or {}
   ir_now = espn_ir(data, espn_feed)
+  for g in reserve_now(data, new_only=True):
+    ir_now.setdefault(g, None)  # (IR audit) newly on a reserve list: the league minimum; ESPN's date when it has one
   new = _newly_injured(data, m, season, current_week, now_report, set(cur.gsis_id), ir=ir_now)
   if cur.empty and new.empty:
     return {w: {} for w in weeks}, {w: {} for w in weeks}, {w: pd.DataFrame() for w in weeks}
@@ -149,6 +159,10 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
       if w not in tw:
         continue
       k = sum(1 for g in tw if x.week < g <= w)  # his team's games from his last state through week w
+      if k == 0 and w == x.week and getattr(x, "bye_start", False) is True:
+        p = 0.0 if w in zero.get(x.gsis_id, ()) else float(x.p_now)  # (IR audit) placed in his bye week: his next game
+        a[x.gsis_id], t_[x.gsis_id] = p, f"{p:.0%} to play"
+        continue
       if k < 1 or k > horizon:
         continue
       p = 0.0 if w in zero.get(x.gsis_id, ()) else float(pa[i, k - 1])
@@ -164,6 +178,21 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
                        "full_name": info.at[x.gsis_id, "full_name"], "depth_rank": np.nan})
     avail[w], status[w], extra[w] = a, t_, pd.DataFrame(rows)
   return avail, status, extra
+
+
+def reserve_now(data, new_only: bool = False) -> set:
+  """QB / RB / WR / TE on a reserve list (nflverse roster status RES) in the current season's latest roster week;
+  new_only: placed there since the week before (players already on it have return states and the IR model)."""
+  r = data.rosters[(data.rosters.season == data.current_season) & data.rosters.gsis_id.notna()]
+  if not len(r):
+    return set()
+  last = int(r.week.max())
+  cur = r[(r.week == last) & (r.status == "RES") & r.position.isin(["QB", "RB", "WR", "TE", "FB"])]
+  out = set(cur.gsis_id)
+  if new_only:
+    before = set(r[(r.week == last - 1) & (r.status == "RES")].gsis_id)
+    out -= before
+  return out
 
 
 def espn_ir(data, feed: pd.DataFrame | None) -> dict:
@@ -226,11 +255,14 @@ def _newly_injured(data, m, season: int, week: int, now_report: dict, known: set
     team = r.at[g, "team"]
     ws = m._tw.get((season, team), [])
     prev = next((w for w in reversed(ws) if w < week), None)
-    nxt = next((w for w in ws if w > week), None)
-    if week not in ws or prev is None or nxt is None or (season, prev, g) not in m.played:
+    # his team's bye this week (IR audit 2026-10-18: an IR placement in a bye week was skipped): the state is the one
+    # after missing his next game, and that game gets p_now (lookahead_availability: "bye_start")
+    gw = week if week in ws else next((w for w in ws if w > week), None)
+    nxt = next((w for w in ws if gw is not None and w > gw), None)
+    if gw is None or prev is None or nxt is None or (season, prev, g) not in m.played:
       continue
     status = inj.at[g, "report_status"] if g in inj.index else None
-    rows.append({"season": season, "week": week, "gsis_id": g, "team": team, "missed": 1, "desig": "active",
+    rows.append({"season": season, "week": gw, "bye_start": gw != week, "gsis_id": g, "team": team, "missed": 1, "desig": "active",
                  "report": REPORT.get(status, 0) if isinstance(status, str) else 0,
                  "injury": inj.at[g, "report_primary_injury"] if g in inj.index else None,
                  "position": r.at[g, "position"], "next_week": nxt, "back": False, "p_now": 0.0 if g in ir else float(np.clip(p_now, 0, 1))})

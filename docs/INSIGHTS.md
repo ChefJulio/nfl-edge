@@ -2557,3 +2557,18 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   -0.0031 [-0.0050, -0.0011]. All rows -0.00029 [-0.00059, +0.00001]. Live: config injuries.ahead_reserve = true
   (Tanner McKee: ahead_out 0 -> 1). Pattern noted (owner: "players on IR threw a wrench ... over and over"): an audit
   of every consumer that picks "this week's players" by roster status or board membership is under way.
+- **IR audit 2026-10-18 (owner: "players on IR threw a wrench in our model over and over"), fixes shipped.** One audit
+  of every consumer that picks "this week's players" by roster status or board membership. Fine as built: vacated-
+  volume redistribution (an IR'd WR1 / RB1's share is redistributed exactly as for one listed Out), the QB starter
+  pick, depth features, CB personnel, the Tuesday model, display. Gaps fixed (rules, no fitted values; checked on week
+  6 data): (1) {#ahead-reserve}, above. (2) The availability plan missed reserve-list players ESPN's IR list doesn't
+  carry (PUP / NFI / ESPN lag / unmatched ids): every skill player on a reserve list is now out this week (69 entries
+  this week, Power reads them instead of "absent = healthy"); those NEWLY placed (not on a list the week before) start
+  the return chain with the IR floor; long-term reserve players keep their IR-model inputs untouched (a first version
+  fed them p_now 0 and shifted 19 players' return odds 2-4 points: reverted). (3) A player placed on IR in his team's
+  bye week was skipped by the newly-injured chain: his state now starts from his next game (simulated Amon-Ra St.
+  Brown, DET bye week 6: out weeks 7-10, then 64% / 69% / 75%). (4) Power's backup QB: the best-ranked QB who is neither
+  the usual starter nor on a reserve list (was "depth rank 2": Cole Payton over Tanner McKee). Remaining, small:
+  qb2_play_rate needs a board QB at depth rank 1 (skipped when an IR'd starter keeps slot 1; the scratch model, now
+  fixed, covers it); the debut prior's absolute depth_rank <= 2; lookahead games with no Vegas line ignore the starting
+  QB in the opponent's points (gm.predict without starters).
