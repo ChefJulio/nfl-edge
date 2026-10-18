@@ -11,15 +11,15 @@ table.power td.nbc { min-width: 150px; }
 .nb-t i { position: absolute; display: block; }
 .nb-z { top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,.28); }
 .nb-w { top: 5px; height: 6px; box-sizing: border-box; border-left: 1px solid rgba(255,255,255,.6); border-right: 1px solid rgba(255,255,255,.6);
-  background: linear-gradient(transparent 2px, rgba(255,255,255,.45) 2px, rgba(255,255,255,.45) 4px, transparent 4px); z-index: 1; }
+  background: linear-gradient(transparent 2px, rgba(255,255,255,.45) 2px, rgba(255,255,255,.45) 4px, transparent 4px); }  /* after the bar: on top, no z-index (it would float over the pinned Team column) */
 .nb-b { top: 3px; height: 10px; border-radius: 2px; opacity: .85; }
 .nb-b.pos { background: #4fbf74; } .nb-b.neg { background: #e8756b; }
 .nb-qb { grid-column: 2; font-size: var(--fs-2xs); font-weight: 700; color: #f1d391; margin-top: 2px; }
 table.power td.odc, table.power th.odc { text-align: center; }
-/* strength / weakness: best unit (green up) over worst (red down) */
-.sw { display: flex; flex-direction: column; gap: 1px; font-size: var(--fs-xs); white-space: nowrap; }
-.sw i { font-style: normal; font-size: 8px; margin-right: 4px; vertical-align: 1px; }
-.sw b { font-weight: 700; } .sw-b i, .sw-b b { color: #6fdc8c; } .sw-w i, .sw-w b { color: #ff8f84; }
+/* unit ranks: each side of the ball (Off, Def) leads its pass / run units, set off by a hairline; units a step smaller */
+table.power td.grp, table.power th.grp { box-shadow: inset 1px 0 0 rgba(255,255,255,.08); }
+table.power td.un .rk-b { min-width: 30px; font-size: var(--fs-2xs); opacity: .9; }
+table.power th.un { color: rgba(255,255,255,.45); }
 /* schedule: played / left as words */
 .sd { display: flex; flex-direction: column; gap: 1px; font-size: var(--fs-xs); white-space: nowrap; }
 .sd i { font-style: normal; color: rgba(255,255,255,.55); display: inline-block; width: 40px; }

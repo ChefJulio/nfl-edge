@@ -129,15 +129,20 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   let idsP = null;
   Object.defineProperty(NFLE.ui, 'ready', { get: () => idsP || (idsP = NFLE.load('data/espn_ids.json').then(m => { NFLE.ui.ids = m || {}; }).catch(() => {})) });
 })();
-// Tap tips (owner 2026-10-17): inside an area marked data-taptip, tapping anything with a title shows it in a small
-// bubble (phones have no hover); tapping elsewhere, scrolling or tapping it again closes it. Team links (.tm-open) and
-// sortable headers keep their own taps.
+// Tap tips (owner 2026-10-17: "tooltips everywhere"): on a touch screen (no hover), tapping anything with a title shows
+// it in a small bubble; tapping elsewhere, scrolling or tapping it again closes it. Things that already do something
+// on a tap keep it: names (open a card), links, buttons, tiles, column headers, form fields.
 (() => {
+  const TOUCH = matchMedia('(hover: none)');
+  const ACTS = '.who, .tm-open, [data-open-pid]:not(tr), a[href], button, summary, th, input, select, label, .seg, [role="button"], [data-sheet], [data-zoom], [data-goto]';
   let pop = null, at = null;
   const hide = () => { if (pop) pop.remove(); pop = at = null; };
   document.addEventListener('click', e => {
-    const el = e.target.closest('[data-taptip] [title]');
-    if (!el || e.target.closest('.tm-open, th, a, button') || !el.title) { hide(); return; }
+    if (!TOUCH.matches) return;
+    // the tapped thing's tip, else its table cell's when the cell has just one (a tap needn't land on the number itself)
+    const cell = e.target.closest('td'), inCell = cell ? cell.querySelectorAll('[title]') : [];
+    const el = e.target.closest('[title]') || (inCell.length === 1 ? inCell[0] : null);
+    if (!el || !el.title || e.target.closest(ACTS)) { hide(); return; }
     if (at === el) { hide(); return; }
     hide();
     at = el; pop = document.createElement('div'); pop.className = 'tip-pop'; pop.textContent = el.title;

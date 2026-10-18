@@ -2749,7 +2749,12 @@
       }
     }
     if (e.target.closest('a[href], input, select, .pc-tabs, .seg')) return;
+    // a whole row opens its player / team only from the name (owner 2026-10-17: "tapping a player's ypc doesn't need to
+    // bring you to his page; name is enough"): the photo + name block (.who), else the pinned or first cell; the rest
+    // of the row shows its tips on a tap (shell.js)
+    const inName = row => { const nm = row.querySelector('.who') || row.querySelector('td.stick') || row.cells[0]; return !nm || nm.contains(e.target); };
     for (let n = e.target; n && n !== document; n = n.parentElement) {
+      if (n.tagName === 'TR' && ((n.dataset && n.dataset.openPid) || (n.classList.contains('tm-open') && n.dataset.tm) || n.matches('tr.main[data-pid]')) && !inName(n)) return;
       if (n.dataset && n.dataset.openPid) { openPlayer(n.dataset.openPid); return; }
       if (n.classList && n.classList.contains('tm-open') && n.dataset.tm) { openTeam(n.dataset.tm); return; }
       if (n.matches && n.matches('tr.main[data-pid]')) { openPlayer(n.dataset.pid); return; }
