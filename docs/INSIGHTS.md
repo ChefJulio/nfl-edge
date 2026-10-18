@@ -2490,3 +2490,17 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   past the +0.01 gate. So the 11.7-point decile gap in {#short-week} was mostly noise (production is about as
   calibrated there), but 1,079 rows can't rule out a 2-point calibration loss. Accuracy gain stands (Brier -0.0068
   [-0.0099, -0.0034]). Not shipped; revisit when 2026's short weeks add rows.
+- **Week clock (owner 2026-10-18), shipped in stages; REMAINING WORK.** nfledge/week_clock.py (+ tests/test_week_clock.py,
+  10 calendar cases) is the one source for the week: current week, kickoffs (zoneinfo), per-team report deadlines,
+  rollover, waiver run; written to every week page as "clock" and applied in the browser (shell.js NFLE.clock).
+  Moved onto it: run.display_week; InjuryModel.final_report_teams (per team; replaced a league-wide report date);
+  kickoff times in the browser (also fixed a DST bug: Nov 1 2026 read as EDT); the header's report status (per team,
+  next deadline); ET dates and practice strips on the card; game-log results only once final with snaps published;
+  builds on report deadlines / inactives / rollover (tools/news_watch.py). Still inferring on their own (from the
+  2026-10-18 audit), to move next: (1) league.js claimWindow (hard-coded Tue 2am-Wed 2am CT for every platform; use
+  clock.waivers and the league's own settings); (2) data.latest_week means "any game final", not "completed" (engine
+  live flag for the Sleeper-blend experiment, OFF; fitting loops include a partial week - check before changing, it can
+  move projections); (3) depth chart snapshot frozen after a Thursday game for Sunday teams (data.depth_for_week,
+  depth_build.py); (4) ESPN snapshot / news file dates in UTC (espn_snapshot.py, espn_news.py); (5) espn_calib
+  EARLY_DAYS vs the live bridge's report-presence rule; (6) gamecast.js weekOfDate (assumes a Thursday opener);
+  (7) the tuesday.py stage taken from the player's own day count rather than the calendar.
