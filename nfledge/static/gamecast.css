@@ -1398,3 +1398,14 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .ff-r .pi-hs { width: 26px; height: 26px; flex: none; }
 .ff-n { flex: 1; min-width: 0; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ff-p { font-size: 15px; font-variant-numeric: tabular-nums; } .ff-p.hi { color: var(--good); } .ff-p.lo { color: var(--muted); }
+/* logos dead center in their circle (an inline image sat on the text baseline, a few px high) */
+.nl img { display: block; }
+/* Fantasy tab mirrored (owner 2026-10-18): the away column reads in, the home column reads out, the points meet in the middle */
+.ff-head > span:last-child { flex-direction: row-reverse; }
+.ff-cols > div:last-child .ff-r { flex-direction: row-reverse; text-align: right; }
+.ff-cols > div:first-child .ff-p, .ff-cols > div:last-child .ff-p { min-width: 34px; }
+.ff-cols > div:first-child .ff-p { text-align: right; } .ff-cols > div:last-child .ff-p { text-align: left; }
+.ff-cols { gap: 0; } .ff-cols > div:first-child { padding-right: 8px; border-right: 1px solid var(--line); } .ff-cols > div:last-child { padding-left: 8px; }
+.ff-k { text-align: center; }
+.ff-cols, .ff-head { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.ff-head > span:last-child { justify-content: flex-start; }
