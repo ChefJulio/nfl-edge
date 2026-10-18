@@ -62,6 +62,11 @@ def availability_plan(data, proj: pd.DataFrame, week: int, espn_feed: pd.DataFra
   last = int(s[(s.season == season) & (s.game_type == "REG")].week.max())
   hurt = proj[(proj.status.fillna("") != "") & (proj.avail < 1)]
   now_report = dict(zip(hurt.gsis_id, hurt.avail.astype(float)))
+  # players ESPN lists on IR who are off this week's board (IR players aren't projected: Jalen Hurts, placed on IR
+  # before missing a game, was absent from the plan and Power read "absent" as healthy, 2026-10-18): out this week, then
+  # the newly-injured chain with the IR floor
+  for g in espn_ir(data, espn_feed):
+    now_report.setdefault(g, 0.0)
   later = list(range(week + 1, last + 1))
   avail, status, extra = lookahead_availability(data, week, later, now_report, espn_feed=espn_feed, cache_dir=cache_dir, gb=gb)
   avail[week] = dict(now_report)
