@@ -10,3 +10,20 @@ table.dt td.in-note { max-width: 420px; white-space: normal; font-size: var(--fs
 .in-tabs { margin: 10px 0 8px; } .in-tabs .in-n { opacity: .6; font-weight: 600; margin-left: 2px; }
 .in-more { margin: 8px 4px 0; font-size: var(--fs-sm); }
 .in-more .linkish { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; cursor: pointer; text-decoration: underline; }
+
+/* This week dashboard (injuries.js drawDash) */
+.in-top { display: flex; gap: 8px; align-items: center; margin: 4px 0 12px; flex-wrap: wrap; }
+.in-top .in-q { flex: 1 1 180px; min-width: 0; }
+.in-b { margin-bottom: 14px; } .in-b > summary { cursor: pointer; padding: 6px 2px; font-size: var(--fs-md); list-style: none; }
+.in-b > summary::-webkit-details-marker { display: none; }
+.in-b > summary::before { content: '\25B8'; display: inline-block; width: 1em; color: var(--muted); transition: transform .15s; }
+.in-b[open] > summary::before { transform: rotate(90deg); }
+.in-b .in-n { font-weight: 700; color: var(--muted); margin: 0 4px; } .in-b summary .muted { font-size: var(--fs-sm); }
+.in-b-gt > summary b { color: #f1d391; } .in-b-out > summary b { color: #ff8f84; } .in-b-likely > summary b { color: #9fd9ae; }
+td.in-when { white-space: nowrap; font-size: var(--fs-xs); }
+.in-none { margin: 12px 4px; }
+.in-top .in-q { padding: 9px 12px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--panel2); color: var(--ink); font: inherit; }
+/* dashboard rows: the injury / practice tags on their own line under the name, so Play%, Proj and Game fit a phone */
+.in-dt .nm2w { flex-wrap: wrap; row-gap: 3px; } .in-dt .nm2w .nm-b { flex-basis: 100%; }
+.in-dt .nm-b .badges { margin-top: 0; }
+.in-dt .nm-b, .in-dt .nm-b .badges { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 3px; }

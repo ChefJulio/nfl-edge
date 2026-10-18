@@ -15,13 +15,17 @@
     mount(sec) {
       sec.classList.remove('soon');
       sec.innerHTML = `<div class="sec-head"><div><h2>Injuries</h2><p class="in-sub">Loading&hellip;</p></div></div>
-        <div class="dt-card"><div class="dt-tools">
+        <div class="in-top"><input class="dt-search in-q" type="search" placeholder="Find a player" aria-label="Find a player" autocomplete="off">
+          <div class="seg in-view"><button type="button" data-w="dash" class="on">This week</button><button type="button" data-w="full">Full list</button></div></div>
+        <div class="in-dash"></div>
+        <div class="dt-card in-full" hidden><div class="dt-tools">
           <select class="dt-select in-team" aria-label="Team"><option value="">All teams</option></select>
           <div class="seg in-scope"><button type="button" data-v="fan">Fantasy</button><button type="button" data-v="all">All</button></div>
         </div><div class="seg in-tabs" role="tablist"></div><div class="skel-zone in-tbl"></div><p class="in-more muted" hidden></p></div>
         <p class="st-note muted">Status, injury, estimated return and notes from ESPN's injury feed (updated daily). Play % is ours: the chance he plays this week, from the injury report, practice participation and his history (see the Model tab). Sorted by his projection if he plays; tap Grd to sort by the Edge grade.</p>`;
       const sub = sec.querySelector('.in-sub'), selT = sec.querySelector('.in-team');
-      let scope = 'fan', tab = 'q', all = [], table = null, showSure = false;
+      let scope = 'fan', tab = 'q', all = [], table = null, showSure = false, WK = null, view = 'dash';
+      const q = sec.querySelector('.in-q');
       // listed but all but certain to play (our 99%+: full practice, cleared): hidden unless asked for (owner 2026-10-18)
       const sure = r => r.inactive != null && r.inactive < 0.015;  // shown as 99% or >99%
       const cols = [
@@ -41,7 +45,55 @@
         { key: 'updated', label: 'Updated', first: 'desc', value: r => r.updated, html: r => r.updated ? `<span title="${esc(new Date(r.updated).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}">${esc(ago(r.updated))}</span>` : '' },
         { key: 'comment', label: 'Latest', sort: false, cls: 'in-note', html: r => `<span title="${esc(r.comment || '')}">${esc(r.comment || '')}</span>` },
       ];
-      const base = () => all.filter(r => (scope === 'all' || r.pid) && (!selT.value || r.abbr === selT.value));
+      const base = () => { const t = q.value.trim().toLowerCase();
+        return all.filter(r => (scope === 'all' || r.pid) && (!selT.value || r.abbr === selT.value) && (!t || r.name.toLowerCase().includes(t))); };
+      // This week (owner 2026-10-18: "a quick look at the guys actually dealing with injury ... the most practical
+      // version"): players on our board this week with any chance of sitting, in three buckets by our chance he plays,
+      // biggest projection first; the search box finds anyone. Our numbers, so it's as fresh as the last build.
+      const BUCKETS = [['gt', 'Game-time calls', 'a real chance either way', p => p >= 0.15 && p < 0.85],
+                       ['out', 'Expected out', 'plan around him', p => p < 0.15],
+                       ['likely', 'Probably playing', 'listed, but expect him', p => p >= 0.85]];
+      const kick = t => { const g = ((WK && WK.games) || []).find(x => x.away.team === t || x.home.team === t);
+        // short: "Sun 1:00p" (the date is this week's anyway)
+        const short = g && g.gameday ? (() => { const [h, m] = String(g.gametime || '13:00').split(':').map(Number);
+          return `${new Date(g.gameday + 'T12:00:00').toLocaleDateString([], { weekday: 'short' })} ${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')}${h < 12 ? 'a' : 'p'}`; })() : '';
+        return g ? { txt: short, opp: g.home.team === t ? g.away.team : g.home.team, home: g.home.team === t, fin: !!g.final } : null; };
+      const dashCols = [
+        { key: 'name', label: 'Player', stick: true, sort: false, html: r => NFLE.ui.player({ name: r.name, pos: r.pos, team: r.team, photo: r.photo, espn: r.espn,
+            subHtml: r.k ? `${r.k.home ? 'vs' : '@'} ${NFLE.ui.tm(r.k.opp)}` : NFLE.ui.tm(r.team), badges: NFLE.injTag ? NFLE.injTag(r.status) : '' }, TEAMS) },
+        { key: 'play', label: 'Play%', num: true, sort: false, title: 'Our chance he plays this week',
+          html: r => `<span class="in-pct" style="--p:${Math.round(100 * r.inactive)}">${NFLE.fmt.toPlay(r.inactive)}</span>` },
+        { key: 'proj', label: 'Proj', num: true, sort: false, cls: 'projc', title: 'Projected points if he plays', html: r => `<b>${r.proj.toFixed(1)}</b>` },
+        { key: 'when', label: 'Game', sort: false, cls: 'in-when', html: r => r.k ? `<span class="muted">${esc(r.k.fin ? 'final' : r.k.txt)}</span>` : '<span class="muted">bye</span>' },
+      ];
+      // on the injury report (a status before the practice letters) or a real chance of sitting; everyone carries a
+      // ~1.5% baseline scratch risk, so that alone isn't an injury
+      const listed = p => !!String(p.status || '').split('(')[0].trim() || (p.inactive || 0) >= 0.05;
+      const drawDash = () => {
+        const box = sec.querySelector('.in-dash');
+        if (!WK) return;
+        const t = q.value.trim().toLowerCase();
+        const ps = Object.entries(WK.players || {}).map(([pid, p]) => ({ pid, name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn,
+            status: p.status, inactive: p.inactive || 0, proj: +(p.proj || 0), k: kick(p.team) }))
+          .filter(r => listed(r) && (!t || r.name.toLowerCase().includes(t) || r.team.toLowerCase() === t));
+        box.innerHTML = '';
+        BUCKETS.forEach(([k, label, note, inB]) => {
+          const rs = ps.filter(r => inB(1 - r.inactive)).sort((a, b) => b.proj - a.proj);
+          if (!rs.length) return;
+          const open = k !== 'likely' || !!t;
+          box.insertAdjacentHTML('beforeend', `<details class="in-b in-b-${k}"${open ? ' open' : ''}><summary><b>${label}</b> <span class="in-n">${rs.length}</span> <span class="muted">${note}</span></summary><div class="in-bt"></div></details>`);
+          NFLE.Table(box.lastElementChild.querySelector('.in-bt'), { columns: dashCols, rows: rs, cls: 'tiles in-dt',
+            rowClass: () => 'teamrow', rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.team)} data-open-pid="${esc(r.pid)}"` });
+        });
+        // a search for someone who isn't hurt says so (owner: find specific guys quickly)
+        const healthy = t ? Object.values(WK.players || {}).filter(p => !listed(p) && p.name.toLowerCase().includes(t)).slice(0, 5) : [];
+        if (healthy.length) box.insertAdjacentHTML('beforeend', `<p class="muted in-none">${healthy.map(p => `<b>${esc(p.name)}</b>`).join(', ')}: not on the injury list, expected to play.</p>`);
+        if (!box.children.length) box.innerHTML = `<p class="muted in-none">${t ? 'No player on our board matches.' : 'Nobody on our board is in doubt this week.'}</p>`;
+      };
+      const setView = v => { view = v; sec.querySelectorAll('.in-view button').forEach(b => b.classList.toggle('on', b.dataset.w === v));
+        sec.querySelector('.in-dash').hidden = v !== 'dash'; sec.querySelector('.in-full').hidden = v !== 'full'; if (v === 'dash') drawDash(); else draw(); };
+      sec.querySelector('.in-view').addEventListener('click', e => { const b = e.target.closest('[data-w]'); if (b) setView(b.dataset.w); });
+      q.addEventListener('input', () => { if (view === 'dash') drawDash(); else draw(); });
       const inTab = () => base().filter(r => tabOf(r.status) === tab);
       const rows = () => inTab().filter(r => showSure || !sure(r));
       const draw = () => {
@@ -58,7 +110,7 @@
       };
       // the page's week data (our availability) loads on its own (NFLE.week waits for it)
       Promise.all([NFLE.load('data/espn_injuries/latest.json'), NFLE.week()]).then(([d, wk]) => {
-        TEAMS = (wk && wk.teams) || {};
+        TEAMS = (wk && wk.teams) || {}; WK = wk;
         const byEspn = {}, nameToAbbr = {};
         if (wk) {
           Object.entries(wk.players || {}).forEach(([pid, p]) => { if (p.espn) byEspn[String(p.espn)] = [pid, p]; });
@@ -69,9 +121,9 @@
           return Object.assign({}, r, { abbr: nameToAbbr[r.team] || '', pid: hit ? hit[0] : null, pos: hit ? hit[1].pos : '', inactive: hit ? hit[1].inactive : null,
             proj: hit && hit[1].proj != null ? +hit[1].proj : null });
         });
-        sub.textContent = `${all.length} players listed by ESPN, ${all.filter(r => r.pid).length} on our board · fetched ${ago(d.fetched)}`;
+        sub.textContent = `Who might sit this week, by our chance he plays · full ESPN list: ${all.length} players, fetched ${ago(d.fetched)}`;
         [...new Set(all.map(r => r.abbr).filter(Boolean))].sort().forEach(a => selT.insertAdjacentHTML('beforeend', `<option>${esc(a)}</option>`));
-        draw();
+        drawDash();
       }).catch(() => { sub.textContent = 'The injury list is not available right now.'; });
       selT.onchange = draw;
       sec.querySelector('.in-more').addEventListener('click', e => { if (e.target.closest('button')) { showSure = !showSure; draw(); } });
