@@ -2371,7 +2371,10 @@
     const lab = h < 12 ? `${d} ${g.site || 'morning'}` : h < 16 ? `${d} 1 PM` : h < 18 ? `${d} 4 PM` : `${d} night`;
     return { key: `${g.gameday} ${h < 12 ? 0 : h < 16 ? 1 : h < 18 ? 2 : 3}`, lab };
   };
-  const clock12 = t => { const [h, m] = String(t || '').split(':').map(Number); return isNaN(h) ? '' : `${(h + 11) % 12 + 1}:${String(m).padStart(2, '0')}`; };
+  // kickoff in the viewer's own time zone, with AM / PM (owner 2026-10-18); "1 PM", not "1:00 PM"
+  const kickMs = g => NFLE.fmt && NFLE.fmt.kickoff ? NFLE.fmt.kickoff(DATA.games, g.home.team) : null;
+  const localTime = ms => ms == null ? '' : new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).replace(':00', '');
+  const localDay = ms => ms == null ? '' : new Date(ms).toLocaleDateString([], { weekday: 'short' });
   const miniTile = g => {
     const st = LIVE.byGame[g.id], live = st && st.state === 'in', fin = g.final || (st && st.state === 'post');
     const sit = live ? (st.sit || (LIVE.sums[st.id] && sitFromPlays(LIVE.sums[st.id]))) : null;
@@ -2382,7 +2385,7 @@
     const dd = sit && sit.shortDownDistanceText ? String(sit.shortDownDistanceText).replace(/Goal/i, 'G') : '';
     const status = live ? `<span><span class="live-dot"></span>${esc(`${periodName(st.period)} ${st.clock || ''}`.trim())}</span>${dd ? `<span class="mg-dd">${esc(dd).replace(/ &amp; /, '&#8239;&amp;&#8239;')}</span>` : ''}`
       : fin ? (st && /OT/i.test(st.detail || '') || (g.final && g.final.ot) ? 'Final/OT' : 'Final')
-      : esc(clock12(g.gametime));
+      : esc(localTime(kickMs(g)));
     const row = (s, k, n, other) => {
       const lost = fin && n != null && other != null && n < other, ball = sp && sp.offense.team === s.team;
       const num = n != null ? esc(n) : f[`p_${k}`] != null ? `${esc(f[`p_${k}`])}<small>%</small>` : '';
@@ -2398,7 +2401,9 @@
     const box = document.querySelector('.mgrid');
     if (!box || !DATA) return;
     const groups = new Map();
-    DATA.games.forEach(g => { const w = windowOf(g); if (!groups.has(w.key)) groups.set(w.key, { lab: w.lab, games: [] }); groups.get(w.key).games.push(g); });
+    DATA.games.forEach(g => { const w = windowOf(g); if (!groups.has(w.key)) groups.set(w.key, { lab: w.lab, games: [], first: null });
+      const G = groups.get(w.key), k = kickMs(g); G.games.push(g); if (k != null && (G.first == null || k < G.first)) G.first = k; });
+    groups.forEach(G => { if (G.first != null) G.lab = `${localDay(G.first)} ${localTime(G.first)}${G.lab.includes('morning') || G.games.some(g => g.site) ? ` · ${G.games.find(g => g.site) ? G.games.find(g => g.site).site : ''}` : ''}`.replace(/ · $/, ''); });
     const order = [...groups.keys()].sort();
     const elapsedOf = g => { const st = LIVE.byGame[g.id]; if (!st || st.state !== 'in') return null;
       const m = String(st.clock || '').match(/^(\d+):(\d{2})/), c = m ? +m[1] * 60 + +m[2] : 0, per = st.period || 1;
