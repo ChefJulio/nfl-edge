@@ -28,3 +28,5 @@ td.in-when { white-space: nowrap; font-size: var(--fs-xs); }
 .in-dt .nm-b .badges { margin-top: 0; }
 .in-dt .nm-b, .in-dt .nm-b .badges { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 3px; }
 .in-when .in-g, .in-when .in-o { display: block; } .in-when .in-g { color: var(--muted); } .in-when .in-o { color: var(--ink); font-weight: 600; margin-top: 2px; }
+/* his game has kicked off or ended: dimmed, last in its group */
+.in-dt tr.in-gone > td { opacity: .42; }

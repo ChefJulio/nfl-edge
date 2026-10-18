@@ -57,14 +57,16 @@
         // short: "Sun 1:00p" (the date is this week's anyway)
         const short = g && g.gameday ? (() => { const [h, m] = String(g.gametime || '13:00').split(':').map(Number);
           return `${new Date(g.gameday + 'T12:00:00').toLocaleDateString([], { weekday: 'short' })} ${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')}${h < 12 ? 'a' : 'p'}`; })() : '';
-        return g ? { txt: short, opp: g.home.team === t ? g.away.team : g.home.team, home: g.home.team === t, fin: !!g.final } : null; };
+        // kicked off or final: his status no longer matters this week (owner 2026-10-18: dim the ones who have played)
+        const ko = g ? NFLE.fmt.kickoff(WK.games, t) : null, gone = !!(g && (g.final || (ko != null && Date.now() >= ko)));
+        return g ? { txt: short, gone, opp: g.home.team === t ? g.away.team : g.home.team, home: g.home.team === t, fin: !!g.final } : null; };
       const dashCols = [
         { key: 'name', label: 'Player', stick: true, sort: false, html: r => NFLE.ui.player({ name: r.name, pos: r.pos, team: r.team, photo: r.photo, espn: r.espn,
             subHtml: NFLE.ui.tm(r.team), badges: NFLE.injTag ? NFLE.injTag(r.status) : '' }, TEAMS) },
         { key: 'play', label: 'Play%', num: true, sort: false, title: 'Our chance he plays this week',
           html: r => `<span class="in-pct" style="--p:${Math.round(100 * r.inactive)}">${NFLE.fmt.toPlay(r.inactive)}</span>` },
         { key: 'proj', label: 'Proj', num: true, sort: false, cls: 'projc', title: 'Projected points if he plays', html: r => `<b>${r.proj.toFixed(1)}</b>` },
-        { key: 'when', label: 'Game', sort: false, cls: 'in-when', html: r => r.k ? `<span class="in-g">${esc(r.k.fin ? 'final' : r.k.txt)}</span><span class="in-o">${r.k.home ? 'vs' : '@'} ${NFLE.ui.tm(r.k.opp)}</span>` : '<span class="muted">bye</span>' },
+        { key: 'when', label: 'Game', sort: false, cls: 'in-when', html: r => r.k ? `<span class="in-g">${esc(r.k.fin ? 'Final' : r.k.gone ? 'Playing' : r.k.txt)}</span><span class="in-o">${r.k.home ? 'vs' : '@'} ${NFLE.ui.tm(r.k.opp)}</span>` : '<span class="muted">bye</span>' },
       ];
       // on the injury report (a status before the practice letters) or a real chance of sitting; everyone carries a
       // ~1.5% baseline scratch risk, so that alone isn't an injury
@@ -78,12 +80,12 @@
           .filter(r => listed(r) && (!t || r.name.toLowerCase().includes(t) || r.team.toLowerCase() === t));
         box.innerHTML = '';
         BUCKETS.forEach(([k, label, note, inB]) => {
-          const rs = ps.filter(r => inB(1 - r.inactive)).sort((a, b) => b.proj - a.proj);
+          const rs = ps.filter(r => inB(1 - r.inactive)).sort((a, b) => (!!(a.k && a.k.gone) - !!(b.k && b.k.gone)) || b.proj - a.proj);
           if (!rs.length) return;
           const open = k !== 'likely' || !!t;
           box.insertAdjacentHTML('beforeend', `<details class="in-b in-b-${k}"${open ? ' open' : ''}><summary><b>${label}</b> <span class="in-n">${rs.length}</span> <span class="muted">${note}</span></summary><div class="in-bt"></div></details>`);
           NFLE.Table(box.lastElementChild.querySelector('.in-bt'), { columns: dashCols, rows: rs, cls: 'tiles in-dt',
-            rowClass: () => 'teamrow', rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.team)} data-open-pid="${esc(r.pid)}"` });
+            rowClass: r => `teamrow${r.k && r.k.gone ? ' in-gone' : ''}`, rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.team)} data-open-pid="${esc(r.pid)}"` });
         });
         // a search for someone who isn't hurt says so (owner: find specific guys quickly)
         const healthy = t ? Object.values(WK.players || {}).filter(p => !listed(p) && p.name.toLowerCase().includes(t)).slice(0, 5) : [];
