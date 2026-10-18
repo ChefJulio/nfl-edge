@@ -190,7 +190,7 @@
   const BY = {
     player: ['player', null, [], 'v'], team: ['team', (P, j, G, D) => D.teams[P.o[j]], [], 'v'], opp: ['opponent', (P, j, G, D) => D.teams[P.d[j]], [], 'v'],
     coach: ['head coach', offCoach, [], 'v'], season: ['season', (P, j, G, D) => D.season, [], 'kd'],
-    week: ['week', (P, j, G) => { const g = G[P.g[j]]; return g[2] ? 100 + g[1] : g[1]; }, [], 'k'],
+    week: ['week', (P, j, G) => { const g = G[P.g[j]]; return g[2] ? 100 + g[1] : g[1]; }, [], 'kd'],  // newest first, like season (owner 2026-10-18)
     qtr: ['quarter', (P, j) => P.q[j] >= 5 ? 5 : P.q[j], [], 'k'], down: ['down', (P, j) => P.dn[j] || null, [], 'k'],
     dist: ['yards to go', (P, j) => Math.min(P.tg[j], 15), [], 'k'], zone: ['field position', (P, j) => Math.floor((100 - P.yl[j]) / 10), [], 'k'],
     score: ['score margin', (P, j) => Math.max(-3, Math.min(3, Math.sign(P.sd[j]) * Math.ceil(Math.abs(P.sd[j]) / 8))), [], 'k'],

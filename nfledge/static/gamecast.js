@@ -3025,7 +3025,7 @@
   const turningCards = (sum, info, ser, n) => {
     const nm = {}, names = fullNames(sum, nm);
     const sw = ser.map((x, i) => ({ x, d: i ? x.home - ser[i - 1].home : 0 })).filter(o => !nonPlay(o.x.play))
-      .sort((a, b) => Math.abs(b.d) - Math.abs(a.d)).slice(0, n).sort((a, b) => a.x.t - b.x.t);
+      .sort((a, b) => Math.abs(b.d) - Math.abs(a.d)).slice(0, n).sort((a, b) => b.x.t - a.x.t);  // newest first (owner 2026-10-18)
     if (!sw.length) return '<p class="muted">No win-probability data for these plays.</p>';
     return `<ol class="lpf-list">${sw.map(({ x, d }) => {
       const p = x.play, a = spot(p.start, info);
@@ -3408,8 +3408,8 @@
     }).filter(r => Math.abs(r.fp) >= 0.05).sort((a, b) => b.fp - a.fp).slice(0, 5).map(r => `<div class="pi-row"${r.pid ? ` data-open-pid="${esc(r.pid)}"` : ''}>${r.id ? `<img class="pi-hs" src="${esc(NFLE.ui ? NFLE.ui.headshot(r.id) : '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : '<span class="pi-hs"></span>'}
         <span class="pi-nm">${esc(names[r.o.key] || r.o.key)}</span><span class="pi-st">${statText(r.o.s)}</span>
         <b class="pi-fp ${r.fp > 0 ? 'up' : 'dn'}">${r.fp > 0 ? '+' : '&minus;'}${f1(Math.abs(r.fp))}</b></div>`).join('');
-    // every play: when, the down, a headline, the spots, the yards
-    const rows = playRows(plays, info, names, key);
+    // every play: when, the down, a headline, the spots, the yards; newest first (owner 2026-10-18: "newer at the top")
+    const rows = playRows([...plays].reverse(), info, names, key);
     const html = `<div class="ds" style="--tc:${esc(tm.color)}">
       <div class="ds-res dv-${cls || 'pu'}"><span class="ds-tag">${esc(res.text || 'In progress')}</span></div>
       ${kh ? `<div class="ds-key ${kh.cls}">${linkNames(esc(kh.h), [info.away.team, info.home.team])}</div>` : ''}
