@@ -2,7 +2,7 @@
 stored with the site's assets as nfledge/static/wordmarks/<TEAM>.png. Run by hand when a team rebrands; the files are
 committed (no per-visit fetch from GitHub).
 
-Usage: python tools/wordmarks_build.py
+Usage: python tools/wordmarks_build.py [--meta]   (--meta: print the size table for shell.js WM)
 Each mark is: white (its own shape, recolored, so every team reads on the dark tiles), the location line dropped (owner:
 "dolphins is the only one including the team location": MIAMI over Dolphins, BALTIMORE over Ravens), cropped tight.
 Location line = a band of lettering ABOVE the main (tallest) band and under 45% of its height; bands below the main one
@@ -104,7 +104,21 @@ def process(im: Image.Image) -> tuple[Image.Image, bool]:
   return (white.crop(box) if box else white), dropped
 
 
+def meta() -> dict:
+  """team -> [width / height, ink share] of each stored mark (shell.js WM: matchup tiles size every mark to about the
+  same amount of ink, owner 2026-10-17: "boldness and width and sizing are very inconsistent")."""
+  out = {}
+  for f in sorted(OUT.glob("*.png")):
+    im = Image.open(f)
+    out[f.stem] = [round(im.width / im.height, 2), round(float((np.array(im.split()[3]) > 80).mean()), 2)]
+  return out
+
+
 def main():
+  if "--meta" in sys.argv:  # print the WM table for nfledge/static/shell.js
+    import json
+    print(json.dumps(meta(), separators=(",", ":")))
+    return
   import nflreadpy as nfl
   t = nfl.load_teams().to_pandas()
   # current franchises only (the site's codes; nflverse also lists OAK, SD, STL, LAR)
