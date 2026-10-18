@@ -130,10 +130,12 @@
     else if (cdist(a.color, h.color) < 90 && a.alt && cdist(a.alt, h.color) >= 90) a.color = a.alt;
     [a, h].forEach(x => { if (luma(x.color) < 40 && x.alt && luma(x.alt) > luma(x.color) && cdist(x.alt, (x === a ? h : a).color) >= 90) x.color = x.alt; });
   };
+  const TEAM_ID = {};  // ESPN team id -> our code (who has the ball after a play: play.end.team)
   const evInfo = ev => {
     const c = ev.competitions[0], st = c.status || ev.status, t = st.type;
     const side = {};
     c.competitors.forEach(x => {
+      TEAM_ID[String(x.team.id)] = ourCode(x.team.abbreviation);
       side[x.homeAway] = { team: ourCode(x.team.abbreviation), espnTeam: x.team.abbreviation, id: x.team.id,
                            score: +x.score || 0, logo: x.team.logo, color: '#' + (x.team.color || '666666'),
                            alt: '#' + (x.team.alternateColor || '999999'), record: (x.records && x.records[0] && x.records[0].summary) || '' };
@@ -310,11 +312,13 @@
     const fd = new Set(snaps.filter((p, i) => snaps[i + 1] && snaps[i + 1].start.down === 1 && !p.scoringPlay && !p.isTurnover).map(p => p.id));
     return driveLanes0(plays, info, team).map(l => Object.assign(l, { fd: fd.has(l.id) }));
   };
-  const driveLanes0 = (plays, info, team) => plays.filter(p => p.start && !nonPlay(p) && !/kickoff|punt/i.test(pType(p))
-    && (!stPlay(p) || /field goal/i.test(pType(p)) || (p.scoringPlay && /touchdown/i.test(`${pType(p)} ${p.text || ''}`)))).map(p => {
+  const keptKick = (p, info, team) => { const e = p.end && p.end.team && TEAM_ID[String(p.end.team.id)]; return /punt/i.test(`${pType(p)} ${p.text || ''}`) && e === team; };
+  const driveLanes0 = (plays, info, team) => plays.filter(p => p.start && !nonPlay(p) && (!/kickoff|punt/i.test(pType(p)) || keptKick(p, info, team))
+    && (!stPlay(p) || /field goal/i.test(pType(p)) || (p.scoringPlay && /touchdown/i.test(`${pType(p)} ${p.text || ''}`)) || keptKick(p, info, team))).map(p => {
     const a = spot(p.start, info), b = spot(p.end, info);
     if (!a || a.offense.team !== team) return null;
     const t = `${pType(p)} ${p.text || ''}`;
+    if (keptKick(p, info, team) && b) return { id: p.id, a: a.x, b: b.x, dir: a.dir, kind: 'gain', label: `Punt: ${team} ball` };
     if (/field goal/i.test(t)) {
       const good = /is GOOD/i.test(t) || (p.scoringPlay && !/no good|blocked|missed/i.test(t));
       return { id: p.id, a: a.x, b: a.dir === 1 ? 100 : 0, dir: a.dir, kind: good ? 'fg' : 'miss', label: good ? 'FG good' : 'FG no good' };
@@ -359,7 +363,7 @@
     to: new RegExp(` to (${NM})(?= [a-z]| \\(|\\.|,|$)`),
     picked: new RegExp(`INTERCEPTED by (${NM})(?= [a-z]| \\(|\\.|,)`),
     punt: /punts (\d+) yards/, kick: /kicks (\d+) yards/, fg: /(\d+) yard field goal is (GOOD|No Good|BLOCKED)/i,
-    ret: new RegExp(`\\. (${NM}) (?:to|pushed|ran|for|MUFFS)`), pen: /PENALTY on ([A-Z]{2,4})-[^,]*, ([^,]+), (\d+) yards/,
+    ret: new RegExp(`\\. (${NM}) (?:to|pushed|ran|for|MUFFS)`), pen: /PENALTY on ([A-Z]{2,4})(?:-[^,]*)?, ([^,]+), (\d+) yards/,
   };
   const fullNames = (sum, ids = null) => {  // ids (optional): filled with the same keys -> ESPN athlete id
     const m = {};
@@ -405,6 +409,18 @@
     // by the offense and the play went on ("FUMBLES, and recovers ... D.Maye pass ... to H.Henry for 20 yards") -> that
     // play, recovered; otherwise the action before the fumble, then lost to / recovered by the team that got it.
     const fi = raw.search(/FUMBLES/);
+    // a kick whose return is fumbled (owner 2026-10-18: "JK Scott fumbles, offense recovers" said nothing): the kick,
+    // the returner's fumble, and who has it after the play (ESPN's possession at its end, which follows a review; the
+    // text can still say the overturned recovery)
+    const after = pl.end && pl.end.team && TEAM_ID[String(pl.end.team.id)];
+    const kickRx = / punts \d+ yards| kicks \d+ yards/;  // the play type can be just "Fumble Recovery (Opponent)"
+    if (fi >= 0 && !pl.inner && (/punt|kickoff/i.test(t) || kickRx.test(` ${raw.slice(0, fi)}`)) && after && ctx.off) {
+      const kick = playHead(Object.assign({}, pl, { text: raw.slice(0, fi).trim(), type: { text: / kicks \d+ yards/.test(` ${raw}`) ? 'Kickoff' : 'Punt' }, inner: true }), names, ctx).h;
+      const fumbler = (raw.slice(0, fi).match(RX.ret) || [])[1];
+      const kicker = /kickoff/i.test(t) || / kicks \d+ yards/.test(` ${raw}`) ? ctx.other : ctx.off;  // a kickoff's play lists the receiving team as the offense
+      return { h: `${kick.replace(/, [^,]* returns .*$/, '')}, ${fumbler ? `${nm(fumbler)} fumbles the return` : 'return fumbled'}, ${after === kicker ? `${after} recovers` : `${after} keeps it`}`,
+               cls: after === kicker ? 'good' : '', raw: full, eff: raw, lost: false };
+    }
     if (fi >= 0 && !pl.inner) {
       const recs = [...raw.matchAll(/(?:RECOVERED|recovered) by ([A-Z]{2,4})-/g)], rec = recs.length ? ourCode(recs[recs.length - 1][1]) : '';
       const ret = /kickoff|punt/i.test(t), loser = ret ? ctx.other : ctx.off;  // on a kick the returner's team fumbles
