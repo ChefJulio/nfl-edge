@@ -25,6 +25,10 @@
   const f1 = v => (v == null || isNaN(v)) ? '' : (Math.round(v * 10) / 10).toFixed(1);
   const f0 = v => (v == null || isNaN(v)) ? '' : String(Math.round(v));
   const pc = v => `${Math.round(v * 100)}%`;
+  // A win chance as text (owner 2026-10-18: "win prob should never read 100% until the score is final"): ">99%" /
+  // "<1%" while the game can still turn; 100% / 0% only once it's over.
+  const wpTxt = (v, final = false) => { const r = Math.round(v * 100); return final ? `${r}%` : r >= 100 ? '&gt;99%' : r <= 0 ? '&lt;1%' : `${r}%`; };
+  const gameOver = () => !!(GP.info && GP.info.state === 'post' && (!GP.replay || GP.replay.i >= GP.replay.plays.length - 1));
   const ord = n => n ? `${n}${(n % 100 >= 11 && n % 100 <= 13) ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th')}` : '';
   const el = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; };
   // Plain GETs only: a cache-mode option makes Chromium add Cache-Control / Pragma request headers, which turns the
@@ -424,7 +428,7 @@
     let wpHtml = '';
     if (wp && off) {
       const home = off === info.home.team, b0 = Math.round(100 * (home ? wp[0] : 1 - wp[0])), b1 = Math.round(100 * (home ? wp[1] : 1 - wp[1])), d = b1 - b0;
-      wpHtml = `<div class="pi-wp"><span>${esc(off)} win chance</span> <b>${b0}%</b> <span class="rp-ar">&rarr;</span> <b>${b1}%</b>
+      wpHtml = `<div class="pi-wp"><span>${esc(off)} win chance</span> <b>${wpTxt(b0 / 100)}</b> <span class="rp-ar">&rarr;</span> <b>${wpTxt(b1 / 100)}</b>
         <span class="pi-d ${d > 0 ? 'up' : d < 0 ? 'dn' : ''}">${d > 0 ? '+' : d < 0 ? '&minus;' : '±'}${Math.abs(d)}</span></div>`;
     }
     return `<div class="pi">${rows}${wpHtml}</div>`;
@@ -2413,7 +2417,7 @@
       <span class="wp-ax-tm" style="top:${pct(1)}%;--tc:${esc(info.home.color)}">${esc(info.home.team)} 100%</span>
       <span class="wp-ax-n" style="top:${pct(0.75)}%">75%</span><span class="wp-ax-n" style="top:${pct(0.5)}%">50%</span><span class="wp-ax-n" style="top:${pct(0.25)}%">75%</span>
       <span class="wp-ax-tm bot" style="top:${pct(0)}%;--tc:${esc(info.away.color)}">${esc(info.away.team)} 100%</span></div>`;
-    const now = `<span class="wp-now-tag${xr > 70 ? ' left' : ''}" style="left:${xr.toFixed(2)}%;top:${Math.min(88, Math.max(12, +pct(lastPt.home)))}%;--tc:${esc(lead.color)}">${esc(lead.team)} ${Math.round(100 * lp)}%</span>`;
+    const now = `<span class="wp-now-tag${xr > 70 ? ' left' : ''}" style="left:${xr.toFixed(2)}%;top:${Math.min(88, Math.max(12, +pct(lastPt.home)))}%;--tc:${esc(lead.color)}">${esc(lead.team)} ${wpTxt(lp, gameOver())}</span>`;
     return `${axis}<div class="wp-plot">${now}<svg class="wp" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="ESPN win probability over the game">
       <defs><clipPath id="wpTop"><rect x="0" y="0" width="${W}" height="${Y(0.5)}"/></clipPath><clipPath id="wpBot"><rect x="0" y="${Y(0.5)}" width="${W}" height="${H}"/></clipPath></defs>
       <rect x="0" y="0" width="${W}" height="${H}" class="wp-bg"/>${grid}
@@ -2859,7 +2863,7 @@
     return null;
   };
   const wpBar = (info, wp, note = '') => wp == null ? '' : `<div class="wpb">
-      <div class="wpb-k"><span style="color:${esc(info.away.color)}">${esc(info.away.team)} <b>${pc(1 - wp)}</b></span><span class="muted">Win chance${note}</span><span style="color:${esc(info.home.color)}"><b>${pc(wp)}</b> ${esc(info.home.team)}</span></div>
+      <div class="wpb-k"><span style="color:${esc(info.away.color)}">${esc(info.away.team)} <b>${wpTxt(1 - wp, gameOver())}</b></span><span class="muted">Win chance${note}</span><span style="color:${esc(info.home.color)}"><b>${wpTxt(wp, gameOver())}</b> ${esc(info.home.team)}</span></div>
       <div class="wpb-bar"><span style="width:${((1 - wp) * 100).toFixed(1)}%;background:${esc(info.away.color)}"></span><span style="flex:1;background:${esc(info.home.color)}"></span></div></div>`;
   const nowCard = (st, info, sum) => {
     const ser = st.ser, wp = ser.length ? ser[ser.length - 1].home : null;
@@ -2969,7 +2973,7 @@
     if (ser.length) {
       const before = i0 > 0 ? all[i0 - 1].home : ser[0].home, after = ser[ser.length - 1].home, sgn = tm === info.home ? 1 : -1;
       const b0 = Math.round(100 * (sgn > 0 ? before : 1 - before)), b1 = Math.round(100 * (sgn > 0 ? after : 1 - after)), dd = b1 - b0;
-      wpHtml = `<div class="ds-wp"><span class="muted">${esc(tm.team)} win chance</span> <b>${b0}%</b> <span class="rp-ar">&rarr;</span> <b>${b1}%</b>
+      wpHtml = `<div class="ds-wp"><span class="muted">${esc(tm.team)} win chance</span> <b>${wpTxt(b0 / 100)}</b> <span class="rp-ar">&rarr;</span> <b>${wpTxt(b1 / 100)}</b>
         <span class="pi-d ${dd > 0 ? 'up' : dd < 0 ? 'dn' : ''}">${dd > 0 ? '+' : dd < 0 ? '&minus;' : '&plusmn;'}${Math.abs(dd)}</span></div>`;
     }
     // fantasy points the drive produced, per player (the play-by-play text, as the replay does)
@@ -3141,7 +3145,7 @@
         if (!best) return;
         const vx = 6 + (640 - 12) * best.t / T;
         hair.setAttribute('x1', vx); hair.setAttribute('x2', vx); hair.style.display = '';
-        tip.innerHTML = `<b>${best.play.period ? periodName(best.play.period.number) : ''} ${esc(best.play.clock ? best.play.clock.displayValue : '')}</b> · ${esc(GP.info.home.team)} ${pc(best.home)} / ${esc(GP.info.away.team)} ${pc(1 - best.home)}<br>${esc(best.play.text)}`;
+        tip.innerHTML = `<b>${best.play.period ? periodName(best.play.period.number) : ''} ${esc(best.play.clock ? best.play.clock.displayValue : '')}</b> · ${esc(GP.info.home.team)} ${wpTxt(best.home, gameOver() && best === ser[ser.length - 1])} / ${esc(GP.info.away.team)} ${wpTxt(1 - best.home, gameOver() && best === ser[ser.length - 1])}<br>${esc(best.play.text)}`;
         // keep the whole tooltip inside the chart: centered on the finger, clamped by its measured width (a % clamp
         // let the wide play text run off the screen edge near the ends)
         tip.hidden = false;
