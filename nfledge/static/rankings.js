@@ -299,7 +299,7 @@
           { key: 'take', label: 'Takeaways', num: true, title: 'Expected interceptions + fumble recoveries', value: r => r._e.take, html: r => f1(r._e.take) }]),
         { key: 'tier', label: 'Tier', first: 'asc', cls: 'tierc', value: r => r._rank, html: r => `<span class="tier t-${r._slot}" title="${r._slot === 'start' ? 'Starter' : 'Bench'} in a ${state.lg.teams}-team league">${r._tier}</span>` }];
     };
-    const kdAttrs = r => r.pos === 'DST' ? `style="${rowStyle(r.team)}" data-tm="${esc(r.team)}" data-team="${esc(r.team)}"`
+    const kdAttrs = r => r.pos === 'DST' ? `style="${rowStyle(r.team)}" data-open-pid="${esc(r.pid)}" data-team="${esc(r.team)}"`
       : `style="${rowStyle(r.team)}" data-pid="${esc(r.pid)}" data-open-pid="${esc(r.pid)}" data-team="${esc(r.team)}"`;
     const kdNote = p => `<p class="muted kd-note">${p === 'K' ? 'Kickers' : 'Team defenses'}: standard ESPN scoring (${p === 'K' ? 'field goals 3 / 4 / 5 by distance, misses −1, extra points 1' : 'sacks 1, takeaways 2, touchdowns 6, points-allowed tiers'}); the scoring panel applies to QB / RB / WR / TE.${KD && D.week < KD.from ? ' Kicker and defense projections cover the current week through week 17.' : ''}</p>`;
     const kdDraw = p => {

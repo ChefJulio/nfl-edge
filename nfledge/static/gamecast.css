@@ -1090,3 +1090,10 @@ html.pc-open { overflow: hidden; }
 .thr-key { fill: rgba(255,255,255,.6); font-size: 9.5px; white-space: pre; } .thr-key .k1 { fill: #f08a4b; } .thr-key .k2 { fill: #6fdc8c; } .thr-key .k3 { fill: #ff6b5e; } .thr-key .k0 { fill: rgba(255,255,255,.75); }
 .thr-stats { margin-top: 10px; }
 .thr-avt, .thr-lbl { paint-order: stroke; stroke: #172233; stroke-width: 3px; stroke-linejoin: round; }
+
+/* D/ST cards (gamecast.js renderDst) */
+table.dst-parts, table.dst-log { width: 100%; }
+table.dst-parts tr.dst-tot td { border-top: 1px solid var(--line); }
+table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
+.dst-ls { margin: 10px 0 4px; } .dst-ls:first-child { margin-top: 0; }
+.dst-note { margin: 10px 2px 0; }

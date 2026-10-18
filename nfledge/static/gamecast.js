@@ -1540,7 +1540,88 @@
       <div class="pc-box pc-logbox"><div class="pc-k">By season · that season only</div><div class="lg-scroll"><table class="lg"><thead><tr class="lg-ch"><th>Season</th><th class="num">OVR</th><th class="num" title="Games played">G</th><th class="num" title="Fantasy points per game (site scoring)">Pts / g</th></tr></thead><tbody>${hist}</tbody></table></div>
         <p class="pc-sub">How it works: the overall measures output: fantasy points per game in this site's scoring (yards, touchdowns, catches, turnovers), pulled toward the position average by an amount measured from game-to-game swings, so a few big games can't make a 99. The rankings use players who met the NFL's qualifying minimum that season (per team game: 14 pass attempts, 6.25 carries, or 1.875 catches). A player under it who still played half the snaps or more in at least two games (a spot starter) gets an asterisked grade from those games, measured against the qualified players. Current form weights his last three seasons 1 / 0.6 / 0.3; each season in the table uses that season alone. OVR runs 50-99: his percentile among the qualified at his position, scaled so the lowest is a 50. The stats above show how he gets there (efficiency, role, and tracking measures as percentiles). Stats: nflverse play-by-play, Next Gen Stats, PFR advanced stats (2018 on). Seasons before 2018 (marked <i>box</i>) have the same OVR, but the stats behind it are box-score rates, and a spot starter's games are picked by workload instead of snaps. A dash means he played but too little to grade.</p></div>`;
   };
+  // ------------------------------------------------------------------------------------------------ D/ST cards
+  // (owner 2026-10-18: "d/st ... don't have cards at all") a team defense opens like a player: id DST-<TEAM>.
+  // Projections from data/kdst.json (nfledge/defenses.py: expected stats, points / yards allowed as normal(mu, sd));
+  // games played from data/dst/<TEAM>.json (tools/player_logs.py dst_logs). Scored with the loaded league's D/ST
+  // settings when the Fantasy tab has one (NFLE.leagueDst), else standard ESPN scoring, as Rankings shows.
+  const DSTL = {}, KDJ = { d: undefined };
+  let dstTab = 'ov';
+  const kdLoad = () => { if (KDJ.d !== undefined) return; KDJ.d = null; NFLE.load('data/kdst.json').then(j => { KDJ.d = j || false; rerenderCard(); }).catch(() => { KDJ.d = false; }); };
+  const dstLoad = t => { if (DSTL[t] !== undefined) return; DSTL[t] = null;
+    NFLE.load(`data/dst/${encodeURIComponent(t)}.json`).then(j => { DSTL[t] = j || false; rerenderCard(); }).catch(() => { DSTL[t] = false; }); };
+  const dstRules = () => NFLE.leagueDst && NFLE.leagueDst.w ? { w: NFLE.leagueDst.w, name: `${NFLE.leagueDst.name || 'your league'}'s scoring` }
+    : { w: NFLE.kdst.STD_D, name: 'standard ESPN scoring' };
+  const projLine = (j, row) => Object.fromEntries(j.d_keys.map((k, i) => [k, row[3][i]]));
+  // a game played: the actual line, points / yards allowed known exactly (a tiny spread puts the tier on the number)
+  const actLine = (keys, l) => { const o = Object.fromEntries(keys.map((k, i) => [k, l[i]]));
+    return Object.assign(o, { pa_mu: o.pa, pa_sd: 0.01, ya_mu: o.ya, ya_sd: 0.01 }); };
+  // points by source, for the This-week sheet
+  const dstParts = (ln, w) => {
+    const K = NFLE.kdst, pts = k => (ln[k] || 0) * (w[k] || 0);
+    const tier = (mu, sd, tiers) => (tiers || []).reduce((t, [lo, hi, p]) => t + p * K.pBetween(mu, sd, lo, hi), 0);
+    return [['Sacks', ln.sack, pts('sack')], ['Interceptions', ln.int, pts('int')], ['Fumble recoveries', ln.fum_rec, pts('fum_rec')],
+      ['Forced fumbles', ln.ff, pts('ff')], ['Defense / return TDs', (ln.def_td || 0) + (ln.st_td || 0), pts('def_td') + pts('st_td')],
+      ['Safeties, blocks, other', null, pts('safe') + pts('blk') + pts('pass_def') + pts('tkl_loss') + pts('forced_punts') + pts('def_2pt')],
+      ['Points allowed', ln.pa_mu, tier(ln.pa_mu, ln.pa_sd, w.pa_tiers) + (w.pts_allow || 0) * ln.pa_mu],
+      ['Yards allowed', ln.ya_mu, tier(ln.ya_mu, ln.ya_sd, w.ya_tiers) + (w.yds_allow || 0) * ln.ya_mu]];
+  };
+  const renderDst = t => {
+    const body = document.querySelector('#pcOv .pc-body');
+    kdLoad(); dstLoad(t);
+    const d = cardData() || DATA, info = tInfo(t), J = KDJ.d, G = DSTL[t], R_ = dstRules();
+    const proj = J && J.dst && J.dst[t] ? J.dst[t].w : [];
+    const wk = d ? +d.week : null, now = proj.find(r => r[0] === wk), later = proj.filter(r => r[0] > wk);
+    const S = G && G.seasons ? G.seasons.find(s => s.s === (G.cur || (d && d.season))) : null, games = S ? S.g : [];
+    const gpts = g => NFLE.kdst.dstScore(actLine(G.keys, g.l), R_.w);
+    const pw = d && (d.power || []).find(x => x.team === t);
+    const name = `${info.nick || t} D/ST`;
+    // This week
+    const nowLn = now ? projLine(J, now) : null, nowPts = nowLn ? NFLE.kdst.dstScore(nowLn, R_.w) : null;
+    const wkTile = nowLn ? tapTile('This week', `<div class="pc-big">${f1(nowPts)} <small>pts</small></div><div class="pc-tapsub">${now[2] ? 'vs' : '@'} ${esc(now[1])} · ${f1(nowLn.pa_mu)} pts allowed</div>`,
+      `${name}: week ${wk}`, `<div class="pc-box"><div class="pc-k">Week ${wk} ${now[2] ? 'vs' : '@'} ${esc(now[1])} · ${esc(R_.name)}</div>
+        <table class="bx dst-parts"><thead><tr><th>Expected</th><th class="num">Stat</th><th class="num">Pts</th></tr></thead><tbody>
+        ${dstParts(nowLn, R_.w).map(([k, v, p]) => `<tr><td>${k}</td><td class="num">${v == null ? '' : f1(v)}</td><td class="num"><b>${(p >= 0 ? '+' : '') + f1(p)}</b></td></tr>`).join('')}
+        <tr class="dst-tot"><td>Total</td><td></td><td class="num"><b>${f1(nowPts)}</b></td></tr></tbody></table>
+        <p class="pc-sub">Expected counts for this game (pass rush and takeaway rates, the opponent's offense and quarterback) and the
+        likely spread of points and yards allowed, scored with ${esc(R_.name)}.</p></div>`)
+      : tapTile('This week', `<div class="pc-big">${J === null ? '&ndash;' : 'Bye'}</div><div class="pc-tapsub">${J === null ? 'Loading&hellip;' : 'no game this week'}</div>`, `${name}: week ${wk}`, '<div class="pc-box"><p class="pc-sub">No game projected this week.</p></div>');
+    // Matchup: the opponent's offense
+    const opp = now ? now[1] : null, op = opp && d && (d.power || []).find(x => x.team === opp);
+    const muTile = op ? tapTile('Matchup', `<div class="pc-big">${tLogo(opp, 26)} <small>${ord(op.off_rk)} offense</small></div><div class="pc-tapsub">${op.qb_note ? esc(op.qb_note) : `${esc(op.record || '')} · ${ord(op.rank)} in Power`}</div>`,
+      `${name} vs ${opp}`, `<div class="pc-box"><div class="pc-k">${esc(tInfo(opp).name || opp)} offense</div><div class="tm-stats">
+        ${[['Offense', ord(op.off_rk)], ['Pass O', ord(op.pass_o_rk)], ['Run O', ord(op.rush_o_rk)], ['Power', ord(op.rank)]].map(([k, v]) => `<div class="tm-st"><div class="pc-k">${k}</div><div class="tm-stv">${v}</div></div>`).join('')}</div>
+        ${op.qb_note ? `<p class="pc-sub">${esc(op.qb_note)}.</p>` : ''}<p class="pc-sub"><span class="tm-open" data-tm="${esc(opp)}">Open the ${esc(tInfo(opp).nick || opp)} page &rsaquo;</span></p></div>`) : '';
+    // Season so far
+    const sp = games.map(gpts), avg = sp.length ? sp.reduce((a, b) => a + b, 0) / sp.length : null;
+    const seasonTile = goTile('Season', sp.length ? `<div class="pc-big">${f1(avg)} <small>pts/g</small></div><div class="pc-tapsub">${sp.length} games · last: ${f1(sp[sp.length - 1])}</div>`
+      : `<div class="pc-big">&ndash;</div><div class="pc-tapsub">${G === null ? 'Loading&hellip;' : 'no games yet'}</div>`, 'dlog');
+    // Rest of season
+    const lp = later.map(r => [r, NFLE.kdst.dstScore(projLine(J, r), R_.w)]), tot = lp.reduce((a, x) => a + x[1], 0);
+    const rosTile = lp.length ? tapTile('Rest of season', `<div class="pc-big">${f1(tot / lp.length)} <small>pts/g</small></div><div class="pc-tapsub">${lp.length} games after this week</div>`,
+      `${name}: rest of season`, `<div class="pc-box"><div class="pc-k">Projected, after this week · ${esc(R_.name)}</div><div class="tm-sched">${lp.map(([r, v]) =>
+        `<div class="tm-sg tm-open" data-tm="${esc(r[1])}"><span class="tm-sw">Wk ${r[0]}</span><span class="tm-sv">${r[2] ? 'vs' : '@'}</span>${tLogo(r[1], 22)}<b>${esc(tInfo(r[1]).nick || r[1])}</b><span class="tm-sres ${v >= 8 ? 'r-W' : v < 5 ? 'r-L' : 'r-T'}">${f1(v)}</span></div>`).join('')}</div>
+        <p class="pc-sub">Green = a good week to start (8+), red = one to avoid (under 5).</p></div>`) : '';
+    // Game log
+    const logRows = (G && G.seasons || []).map(Sx => `<div class="pc-k dst-ls">${Sx.s}</div><table class="bx dst-log"><thead><tr><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num" title="Sacks">Sck</th><th class="num" title="Interceptions">INT</th><th class="num" title="Fumble recoveries">FR</th><th class="num" title="Defense and return touchdowns">TD</th><th class="num" title="Points allowed">PA</th><th class="num" title="Yards allowed">YA</th></tr></thead><tbody>
+      ${[...Sx.g].reverse().map(g => { const v = NFLE.kdst.dstScore(actLine(G.keys, g.l), R_.w), L_ = Object.fromEntries(G.keys.map((k, i) => [k, g.l[i]]));
+        return `<tr><td>${g.w}</td><td><span class="tm-open" data-tm="${esc(g.o)}">${g.h ? 'vs' : '@'} ${esc(g.o)}</span></td><td class="num"><b class="${v >= 10 ? 'good' : v < 3 ? 'bad' : ''}">${f1(v)}</b></td><td class="num">${L_.sack}</td><td class="num">${L_.int}</td><td class="num">${L_.fum_rec}</td><td class="num">${L_.def_td + L_.st_td}</td><td class="num">${L_.pa}</td><td class="num">${L_.ya}</td></tr>`; }).join('')}</tbody></table>`).join('');
+    body.innerHTML = `
+      <div class="pc-head" style="--tc:${esc(info.color || '#666')}"><span class="tm-open" data-tm="${esc(t)}">${tLogo(t, 34)}</span>
+        <div class="pc-id"><h3 id="pcName">${esc(name)}</h3>
+          <div class="pc-meta"><b>${esc((pw && pw.record) || '')}</b> <span class="muted">Defense / special teams${pw ? ` · ${ord(pw.def_rk)} defense in Power` : ''}</span></div></div></div>
+      <div class="seg pc-tabs" role="tablist">${[['ov', 'Summary'], ['dlog', 'Game log']].map(([k, l]) => `<button type="button" role="tab" data-dt="${k}" class="${dstTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <div class="pc-tab" data-dt="ov"${dstTab === 'ov' ? '' : ' hidden'}><div class="pc-tiles">${wkTile}${muTile}${seasonTile}${rosTile}</div>
+        <p class="pc-sub dst-note">Scored with ${esc(R_.name)}. <span class="tm-open" data-tm="${esc(t)}">Open the ${esc(info.nick || t)} team page &rsaquo;</span></p></div>
+      <div class="pc-tab" data-dt="dlog"${dstTab === 'dlog' ? '' : ' hidden'}><div class="pc-box">${G ? logRows || '<p class="pc-sub">No games yet.</p>' : '<p class="pc-sub">Loading game log&hellip;</p>'}</div></div>`;
+    const show = k => { dstTab = k; body.querySelectorAll('[data-dt]').forEach(x => x.classList.toggle('on', x.dataset.dt === k && x.tagName === 'BUTTON'));
+      body.querySelectorAll('.pc-tab[data-dt]').forEach(x => { x.hidden = x.dataset.dt !== k; }); };
+    body.querySelectorAll('button[data-dt]').forEach(b => b.onclick = () => show(b.dataset.dt));
+    body.querySelectorAll('[data-goto="dlog"]').forEach(b => b.onclick = () => show('dlog'));
+    NFLE.paintTiles && NFLE.paintTiles();
+  };
   const renderCard = pid => {
+    if (String(pid).startsWith('DST-')) return renderDst(String(pid).slice(4));  // team defenses: their own card
     const body = document.querySelector('#pcOv .pc-body');
     const d = cardData(), L = LOGS[pid] && !LOGS[pid].missing ? LOGS[pid] : null;
     const p = d ? d.players[pid] : null;
@@ -2166,6 +2247,7 @@
     if (window.NFLE && NFLE.cardRestore) cardTab = TABS[`p:${pid}`] || 'ov';
     else if (pid !== cardPid || ov.hidden || (window.NFLE && NFLE.freshPage)) cardTab = 'ov';
     if (ov.hidden || !cardWk || (window.NFLE && NFLE.freshPage)) cardWk = pageKey();
+    if (String(pid).startsWith('DST-') && pid !== cardPid) dstTab = 'ov';
     cardPid = pid; cardTeam = null;
     renderCard(pid);
     ov.hidden = false;

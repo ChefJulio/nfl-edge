@@ -347,6 +347,7 @@ def main():
              post_snaps=sn_post, round_of=round_of, prac=prac)
   team_logs(site, cfg, data, cache, nfl, allsched, postsched)
   qb_throws(site, cache, nfl, data.pbp, data.current_season)
+  dst_logs(site, cache, nfl, data, allsched)
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -907,6 +908,65 @@ def bio_map(rosters: pd.DataFrame, draft: pd.DataFrame | None = None, contracts:
       b["deal"] = deals[x.gsis_id]
     out[x.gsis_id] = {k: v for k, v in b.items() if v is not None}
   return out
+
+
+# D/ST stat line per game (owner 2026-10-18: D/ST cards). Keys match the browser's D/ST scorer (shell.js NFLE.kdst
+# DSTAT) plus points and yards allowed, so a finished game is scored with the league's own D/ST rules.
+DST_KEYS = ["sack", "int", "fum_rec", "ff", "def_td", "st_td", "safe", "blk", "pass_def", "tkl_loss", "forced_punts", "def_2pt", "pa", "ya"]
+
+
+def dst_logs(site: Path, cache, nfl, data, allsched: pd.DataFrame) -> None:
+  """data/dst/<TEAM>.json: {team, keys, seasons: [{s, g: [{w, o, h, gid, l: [DST_KEYS values]}]}]} for this season and
+  last, regular season. Team stats from nflverse (load_team_stats, weekly); forced punts from play-by-play (the
+  opponent's punts); points allowed = the opponent's score; yards allowed = the opponent's net yards."""
+  cur = data.current_season
+  seasons = [cur - 1, cur]
+  frames = []
+  for season in seasons:
+    t = cache.get("teamstats", season, lambda: nfl.load_team_stats([season], summary_level="week"),
+                  stale=(season == cur and cache.age_hours("teamstats", season) > 6))
+    if t is not None and len(t):
+      frames.append(t[t.season_type == "REG"])
+  if not frames:
+    return
+  t = pd.concat(frames, ignore_index=True)
+  for c in ("team", "opponent_team"):
+    t[c] = t[c].replace(D.RELOCATED)
+  num = lambda c: pd.to_numeric(t[c], errors="coerce").fillna(0) if c in t else pd.Series(0.0, index=t.index)
+  t = t.assign(
+    sack=num("def_sacks"), int=num("def_interceptions"), fum_rec=num("fumble_recovery_opp"), ff=num("def_fumbles_forced"),
+    def_td=num("def_tds") + num("fumble_recovery_tds"), st_td=num("special_teams_tds"), safe=num("def_safeties"),
+    blk=num("def_punt_blocks") + num("def_fg_blocks") + num("def_pat_blocks"), pass_def=num("def_pass_defended"),
+    tkl_loss=num("def_tackles_for_loss"), def_2pt=num("def_2pt_made"),
+    oyd=num("passing_yards") + num("rushing_yards") - num("sack_yards_lost").abs())
+  # the opponent's row: its net yards are this defense's yards allowed
+  opp_yd = dict(zip(zip(t.game_id, t.team), t.oyd))
+  pb = data.pbp[(data.pbp.season.isin(seasons)) & (data.pbp.play_type == "punt")]
+  punts = pb.groupby(["game_id", "posteam"]).size().to_dict()
+  sch = allsched[allsched.season.isin(seasons) & (allsched.game_type == "REG")]
+  score = {}
+  for g in sch.itertuples():
+    if pd.notna(g.home_score):
+      h, a = D.RELOCATED.get(g.home_team, g.home_team), D.RELOCATED.get(g.away_team, g.away_team)
+      score[(g.game_id, h)], score[(g.game_id, a)] = (int(g.away_score), 1), (int(g.home_score), 0)
+  out_dir = site / "data" / "dst"
+  out_dir.mkdir(parents=True, exist_ok=True)
+  n = 0
+  for team, g in t.sort_values(["season", "week"]).groupby("team"):
+    by = {}
+    for r in g.itertuples():
+      pa = score.get((r.game_id, team))
+      if pa is None:
+        continue
+      line = [float(getattr(r, k)) for k in DST_KEYS[:10]]
+      line += [float(punts.get((r.game_id, r.opponent_team), 0)), float(r.def_2pt), float(pa[0]),
+               float(opp_yd.get((r.game_id, r.opponent_team), 0.0))]
+      by.setdefault(int(r.season), []).append({"w": int(r.week), "o": r.opponent_team, "h": pa[1], "gid": r.game_id,
+                                               "l": [round(v, 1) for v in line]})
+    doc = {"team": team, "cur": cur, "keys": DST_KEYS, "seasons": [{"s": s_, "g": by[s_]} for s_ in sorted(by, reverse=True)]}
+    (out_dir / f"{team}.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
+    n += 1
+  print(f"[logs] wrote {n} D/ST game logs to {out_dir}", flush=True)
 
 
 # pass direction, kept out of the model's PBP_COLS (adding one there refetches every cached season of the model's play-by-

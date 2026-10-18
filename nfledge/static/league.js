@@ -201,6 +201,7 @@
     const kScore = line => (KD ? KD.k_keys : []).reduce((t, key, i) => t + (line[i] || 0) * ((L.kw || {})[key] || 0), 0);
     const dWeek = (team, wk) => { const o = KD && KD.dst && KD.dst[team]; const e = o && o.w.find(z => z[0] === wk);
       return e ? { pts: dstScore(Object.fromEntries(KD.d_keys.map((k, i) => [k, e[3][i]])), L.dw || {}), opp: e[1], home: e[2] } : null; };
+    NFLE.leagueDst = L.dw ? { w: L.dw, name: L.name } : null;  // D/ST cards score with this league's settings
     const kWeek = (g, wk) => { const o = KBY[g]; const e = o && o.w.find(z => z[0] === wk); return e ? kScore(e[2]) : null; };
     const TEAMS = D.teams || {}, KEYS = D.score.keys;
     let saved = null;
@@ -219,11 +220,11 @@
       const dt = dstTeam(x);
       if (dt) {
         const v = KD ? dWeek(dt, KD.from) : null;
-        return { ext: x, name: `${(TEAMS[dt] || {}).nick || dt} D/ST`, pos: 'DEF', team: dt, proj: v ? v.pts : null, pa: v ? 1 : 0, exp: v ? v.pts : null, locked: started(dt),
+        return { ext: x, pid: `DST-${dt}`, name: `${(TEAMS[dt] || {}).nick || dt} D/ST`, pos: 'DEF', team: dt, proj: v ? v.pts : null, pa: v ? 1 : 0, exp: v ? v.pts : null, locked: started(dt),
                  sd: 5.5, inactive: 0, opp: v ? v.opp : '', home: v ? (v.home ? 'vs' : '@') : '', why: v ? '' : 'on bye' };
       }
       const e = L.espnNames && L.espnNames[x], dst = /^[A-Z]{2,3}$/.test(x);
-      return { ext: x, name: e ? e.name : (dst ? `${(TEAMS[x] || {}).nick || x} D/ST` : `Player ${x}`), pos: e ? e.pos : (dst ? 'DEF' : ''),
+      return { ext: x, pid: dst ? `DST-${x}` : undefined, name: e ? e.name : (dst ? `${(TEAMS[x] || {}).nick || x} D/ST` : `Player ${x}`), pos: e ? e.pos : (dst ? 'DEF' : ''),
                team: dst ? x : '', proj: null, exp: null };
     };
     // his game has kicked off this week: his lineup spot can't change (owner 2026-10-17: Sutton, locked after Thursday's
