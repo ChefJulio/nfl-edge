@@ -1333,7 +1333,8 @@
             : `This defense ${p.mpts >= 0 ? 'adds' : 'takes away'} ${f1(Math.abs(p.mpts || 0))} pts vs an average one.`}</div></div>`;
     // projected to sit (owner 2026-10-17, Lamar ruled out: "shouldn't his projection tile read Out"): the tile leads
     // with that, his if-active points below; the sheet keeps the full projection, marked "(if active)"
-    const actTone = actPct == null ? '' : actPct >= 80 ? 'good' : actPct <= 30 ? 'bad' : 'mid';
+    // against his own likely range, as Rankings (owner 2026-10-18): white inside, green above, red below (live: green only)
+    const actTone = actV == null ? '' : actV > s.q[3] ? 'good' : !actLive && actV < s.q[1] ? 'bad' : '';
     const projBig = actV != null
       ? `<div class="pc-big ${actTone}"><span class="pv-tag">${actLive ? '<span class="live-dot"></span>live' : 'final'}</span>${f1(actV)} <small>pts</small></div><div class="pc-tapsub">proj <b class="pv-pj">${f1(s.proj)}</b> ${rankPill}</div>`
       : ia >= 0.5
