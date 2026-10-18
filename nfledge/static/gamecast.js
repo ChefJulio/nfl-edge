@@ -130,7 +130,17 @@
     else if (cdist(a.color, h.color) < 90 && a.alt && cdist(a.alt, h.color) >= 90) a.color = a.alt;
     [a, h].forEach(x => { if (luma(x.color) < 40 && x.alt && luma(x.alt) > luma(x.color) && cdist(x.alt, (x === a ? h : a).color) >= 90) x.color = x.alt; });
   };
-  const TEAM_ID = {};  // ESPN team id -> our code (who has the ball after a play: play.end.team)
+  const TEAM_ID = {};
+  // where a play started and ended (owner 2026-10-18): "LAC 16 → LAC 20"; a touchdown ends in the end zone; when the
+  // other team has it after the play, its name leads the end spot ("KC ball at LAC 41")
+  const spotLine = p => {
+    const a = p.start && p.start.possessionText, b = p.end && p.end.possessionText;
+    if (!a) return '';
+    const t0 = p.start.team && TEAM_ID[String(p.start.team.id)], t1 = p.end && p.end.team && TEAM_ID[String(p.end.team.id)];
+    const td = p.scoringPlay && /touchdown/i.test(`${(p.type || {}).text || ''} ${p.text || ''}`);
+    const end = td ? 'end zone' : b ? (t1 && t0 && t1 !== t0 ? `${t1} ball at ${b}` : b) : '';
+    return end && end !== a ? `${esc(a)} &rarr; ${esc(end)}` : `at ${esc(a)}`;
+  };  // ESPN team id -> our code (who has the ball after a play: play.end.team)
   const evInfo = ev => {
     const c = ev.competitions[0], st = c.status || ev.status, t = st.type;
     const side = {};
@@ -2793,7 +2803,7 @@
       const chipHtml = chips.map(([c, k]) => `<span class="pc-chip ${k}" title="${CHIP_TIP[c] || ''}">${c}</span>`).join('');
       const cls = `${p.scoringPlay ? ' pl-score' : ''}${p.isPenalty && !p.scoringPlay ? ' pl-pen' : ''}${st ? ' pl-st' : ''}`;
       return `<li class="pl${cls}" data-k="p${esc(p.id)}"${off ? ` style="--pt:${esc(off.color)}"` : ''}><div class="pl-when">${when}</div>
-        <div class="pl-what">${dd || chipHtml ? `<div class="pl-dd">${chipHtml}${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>` : ''}${p.start && p.start.possessionText && dd ? `<span class="muted">at ${esc(p.start.possessionText)}</span>` : ''}</div>` : ''}
+        <div class="pl-what">${dd || chipHtml ? `<div class="pl-dd">${chipHtml}${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>` : ''}${p.start && p.start.possessionText && dd ? `<span class="muted pl-sp">${spotLine(p)}</span>` : ''}</div>` : ''}
           <div class="pl-hl ${hd.cls}">${linkNames(esc(hd.h), teams)}${ydChip}</div><div class="pl-txt pl-raw" title="Tap for the official text">${linkNames(esc(hd.raw), teams)}</div></div>
         <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${tmL(info.away.team)} ${p.awayScore}–${p.homeScore} ${tmL(info.home.team)}</b>` : ''}${swing}</div></li>`;
     };
@@ -3359,7 +3369,8 @@
       const net = a && b && !stPlay(p) && a.offense.team === b.offense.team && !p.scoringPlay ? Math.round((b.x - a.x) * a.dir) : null;
       const chip = p.scoringPlay ? '<span class="pc-chip c-sc">SCORE</span>' : p.isTurnover ? '<span class="pc-chip c-to">TURNOVER</span>'
         : p.isPenalty ? '<span class="pc-chip c-pen">FLAG</span>' : net != null ? `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)}</span>` : '';
-      return `<li class="ds-p${p === key ? ' key' : ''}"><span class="ds-w">${when(p)}</span><span class="ds-h">${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span> ` : ''}${linkNames(esc(hd.h), [info.away.team, info.home.team])}</span>${chip}</li>`;
+      const sl = spotLine(p);
+      return `<li class="ds-p${p === key ? ' key' : ''}"><span class="ds-w">${when(p)}</span><span class="ds-h">${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span> ` : ''}${linkNames(esc(hd.h), [info.away.team, info.home.team])}${sl ? `<span class="ds-sp">${sl}</span>` : ''}</span>${chip}</li>`;
     }).join('');
     const html = `<div class="ds" style="--tc:${esc(tm.color)}">
       <div class="ds-res dv-${cls || 'pu'}"><span class="ds-tag">${esc(res.text || 'In progress')}</span></div>

@@ -1418,3 +1418,4 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .ff-opp .ff-tag { color: var(--bad); background: color-mix(in srgb, var(--bad) 18%, transparent); }
 .ff-mine { background: color-mix(in srgb, var(--good) 7%, transparent); }
 .gc-tabs + section { margin-top: 12px; }
+.ds-sp { display: block; font-size: 11.5px; color: var(--muted); margin-top: 1px; font-weight: 400; }
