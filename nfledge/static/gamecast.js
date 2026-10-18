@@ -322,6 +322,19 @@
   const pType = p => String((p.type && p.type.text) || '');
   const nonPlay = p => /timeout|end period|end of|two-minute|end game|official|end quarter/i.test(pType(p))
     || /^(END (GAME|QUARTER|OF)|Timeout|Two-Minute)/i.test(String(p.text || ''));
+  // timeouts, warnings and period ends in words, not ESPN's capitals ("TIMEOUT #1 BY LAC AT 01:53." -> "LAC timeout (1st)")
+  const ORD = ['', '1st', '2nd', '3rd'];
+  const nonPlayText = p => {
+    const t = String(p.text || ''), m = t.match(/TIMEOUT #(\d) BY ([A-Z]{2,3})/i);
+    if (m) return `${ourCode(m[2].toUpperCase())} timeout (${ORD[+m[1]] || `#${m[1]}`})`;
+    if (/OFFICIAL TIMEOUT|TV TIMEOUT/i.test(t)) return 'Official timeout';
+    if (/TWO-MINUTE/i.test(t)) return 'Two-minute warning';
+    const q = t.match(/END (?:OF )?(?:QUARTER|PERIOD) (\d)/i);
+    if (q) return +q[1] === 2 ? 'End of the half' : +q[1] === 4 ? 'End of regulation' : `End of Q${q[1]}`;
+    if (/END GAME/i.test(t)) return 'End of the game';
+    if (/END (?:OF )?HALF/i.test(t)) return 'End of the half';
+    return t.charAt(0) + t.slice(1).toLowerCase().replace(/\.$/, '');
+  };
   const stPlay = p => /kickoff|punt|field goal|extra point|two-point|onside|blocked/i.test(pType(p)) && !/return \(offense\)/i.test(pType(p))
     || /\bkicks\b|\bpunts\b|extra point|field goal/i.test(String(p.text || ''));
   // ---- Replay card (owner 2026-10-14: readable at a glance): "1st & 10 at ATL 35" / "Aaron Jones 8-yard run" /
@@ -351,6 +364,8 @@
   };
   // ctx: { off, other } our team codes for the offense at the snap and its opponent (who lost a fumble)
   const ACT = new RegExp(`^${NM} (?:pass|scrambles|sacked|left|right|up the middle|middle|kneels)\\b`);
+  const retYds = (raw, pl) => { const k = raw.search(/ (?:kicks|punts) /), m = k >= 0 ? raw.slice(k).match(/ for (-?\d+) yards?| for no gain/) : null;
+    return m ? (m[1] != null ? +m[1] : 0) : (pl.statYardage || 0); };
   const playHead = (pl, names, ctx = {}) => {
     // the official text leads with formation and eligibility notes: "(Shotgun) C.Lomu reported in as eligible. D.Maye ..."
     // also "Direct snap to C.Heyward." (a wildcat snap note) and ESPN's stray leading space (" R.Stevenson up the middle")
@@ -403,8 +418,10 @@
     else if (/pass reception|passing touchdown/i.test(t)) h = `${nm(g('lead'))} ${g('to') ? `to ${nm(g('to'))}` : 'pass'}, ${yds(y)}`;
     else if (/pass incompletion/i.test(t)) h = `${nm(g('lead'))} incomplete${g('to') ? ` to ${nm(g('to'))}` : ''}`;
     else if (/^rush|rushing touchdown/i.test(t)) h = y > 0 ? `${nm(g('lead'))} ${y}-yard run` : `${nm(g('lead'))} run, ${yds(y)}`;
-    else if (/punt/i.test(t)) h = `${nm(g('lead'))} punts ${g('punt') || ''} yards${/Touchback/i.test(raw) ? ', touchback' : g('ret') ? `, ${nm(g('ret'))} returns ${pl.statYardage || 0}` : ''}`;
-    else if (/kickoff/i.test(t)) h = /Touchback/i.test(raw) ? 'Kickoff, touchback' : `Kickoff: ${nm(g('ret'))} returns it ${pl.statYardage || 0} yards`;
+    // the return's own yards from the text ("... to LAC 9. K.Mitchell to LAC 14 for 5 yards"): ESPN's net yardage
+    // includes a penalty on the play (owner 2026-10-18: "returns it -5 yards")
+    else if (/punt/i.test(t)) h = `${nm(g('lead'))} punts ${g('punt') || ''} yards${/Touchback/i.test(raw) ? ', touchback' : g('ret') ? `, ${nm(g('ret'))} returns ${retYds(raw, pl)}` : ''}${pl.isPenalty ? ', flag on the play' : ''}`;
+    else if (/kickoff/i.test(t)) h = /Touchback/i.test(raw) ? 'Kickoff, touchback' : `Kickoff: ${nm(g('ret'))} returns it ${retYds(raw, pl)} yard${retYds(raw, pl) === 1 ? '' : 's'}${pl.isPenalty ? ', flag on the play' : ''}`;
     else if (/extra point/i.test(t)) { const k = (raw.match(new RegExp(`^(${NM}) extra point`)) || [])[1], ok = /is GOOD/i.test(raw);
       h = `${k ? `${nm(k)} e` : 'E'}xtra point ${ok ? 'good' : /block/i.test(raw) ? 'blocked' : 'no good'}`; cls = ok ? 'good' : 'bad'; }
     else if (/two-point/i.test(t)) { const ok = /ATTEMPT SUCCEEDS/i.test(raw), inner = raw.replace(/^TWO-POINT CONVERSION ATTEMPT\.\s*/, '').split('. ATTEMPT')[0];
@@ -2381,7 +2398,7 @@
       const when = tile.querySelector('.mt-when');
       if (when) when.innerHTML = live ? `<span class="mt-live"><span class="live-dot"></span>${esc(st.short || '')}</span>` : `<span class="mt-fin">${esc(st.detail || 'Final')}</span>`;
       tile.querySelector('.mt-st').innerHTML = live
-        ? `${sp && sp.text ? `<span>${esc(sp.offense.team)} ball · ${esc(sp.text)}</span>` : ''}${sp && sp.red ? '<span class="mt-red">red zone</span>' : ''}`
+        ? `${sp && sit && sit.shortDownDistanceText ? `<span class="mt-sit"><b>${esc(sp.offense.team)}</b><span class="rp-d ${DOWN_CLS(sit.shortDownDistanceText)}">${esc(sit.shortDownDistanceText)}</span>${sit.possessionText ? `<span>at ${esc(sit.possessionText)}</span>` : ''}</span>` : sp && sp.text ? `<span>${esc(sp.offense.team)} ball · ${esc(sp.text)}</span>` : ''}${sp && sp.red ? '<span class="mt-red">red zone</span>' : ''}`
         : `${g && g.fc ? verdict(g.fc, winner) : ''}`;
     });
     sortTiles();
@@ -2597,7 +2614,7 @@
     ['Q1', 'Q2', 'Q3', 'Q4'].concat(ot ? ['OT'] : []).forEach((q, i) => { grid += `<text x="${X(i * 900 + 450)}" y="${H - 10}" class="wp-q">${q}</text>`; });
     const marks = pts_.filter(s => s.play.scoringPlay || s.play.isTurnover).map(s => {
       const tm = s.play.scoringPlay ? 'score' : 'to';
-      return `<circle cx="${X(s.t).toFixed(1)}" cy="${Y(s.home).toFixed(1)}" r="${tm === 'score' ? 3.4 : 3}" class="wp-m wp-${tm}"><title>${esc(s.play.text)}</title></circle>`;
+      return `<circle cx="${X(s.t).toFixed(1)}" cy="${Y(s.home).toFixed(1)}" r="${tm === 'score' ? 3.4 : 3}" class="wp-m wp-${tm}"><title>${esc(playHead(s.play, {}).h)}</title></circle>`;
     }).join('');
     const lastPt = pts_[pts_.length - 1];
     // the scale (owner 2026-10-18: "no indication about which team is favored, no scale"): each team's 100% at its
@@ -2714,13 +2731,20 @@
       });
     });
     const teams = [info.away.team, info.home.team];
+    const LOGN = fullNames(sum);
     const playRow = (p) => {
       const wp = wpAfter[p.id], d = wp ? wp.now - wp.prev : 0;
       const swing = Math.abs(d) >= 0.01 ? `<span class="pl-wp" title="Change in ESPN's live win probability on this play">${tmL(d > 0 ? info.home.team : info.away.team)} +${Math.round(Math.abs(d) * 100)}%</span>` : '';
       const when = `${p.period ? periodName(p.period.number) : ''} ${esc(p.clock ? p.clock.displayValue : '')}`;
       // Not plays (timeouts, two-minute warning, end of quarter / game): thin muted divider rows.
-      if (isNonPlay(p)) return `<li class="pl pl-np"><div class="pl-when">${when}</div><div class="pl-what"><div class="pl-txt">${esc(p.text)}</div></div><div></div></li>`;
-      const dd = (p.start && (p.start.downDistanceText || p.start.shortDownDistanceText)) || '';
+      if (isNonPlay(p)) return `<li class="pl pl-np"><div class="pl-when">${when}</div><div class="pl-what"><div class="pl-txt">${esc(nonPlayText(p))}</div></div><div></div></li>`;
+      const dd = (p.start && p.start.down ? (p.start.shortDownDistanceText || p.start.downDistanceText) : '') || '';
+      // the play as a headline (owner 2026-10-18: "beautify this area too"), the yards it gained, the official text below
+      const a0 = spot(p.start, info), b0 = spot(p.end, info);
+      const hd = playHead(p, LOGN, a0 ? { off: a0.offense.team, other: a0.offense.team === info.away.team ? info.home.team : info.away.team } : {});
+      const net = a0 && b0 && a0.offense.team === b0.offense.team && !p.scoringPlay && !/No Play/i.test(String(p.text || '')) && !stPlay(p) && p.start && p.start.down
+        ? Math.round((b0.x - a0.x) * a0.dir) : null;
+      const ydChip = net == null || /incomplete/i.test(String(p.text || '')) ? '' : `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)}</span>`;
       const fd = firstDown.has(p.id), st = isST(p), t = ttype(p), txt = String(p.text || '');
       // Tint = the team with the ball; special-teams plays stay neutral. Event types are chips, not row colors.
       const off = st ? null : teamOf(p.start && p.start.team && p.start.team.id);
@@ -2742,7 +2766,8 @@
       const chipHtml = chips.map(([c, k]) => `<span class="pc-chip ${k}" title="${CHIP_TIP[c] || ''}">${c}</span>`).join('');
       const cls = `${p.scoringPlay ? ' pl-score' : ''}${p.isPenalty && !p.scoringPlay ? ' pl-pen' : ''}${st ? ' pl-st' : ''}`;
       return `<li class="pl${cls}" data-k="p${esc(p.id)}"${off ? ` style="--pt:${esc(off.color)}"` : ''}><div class="pl-when">${when}</div>
-        <div class="pl-what">${dd || chipHtml ? `<div class="pl-dd">${chipHtml}${esc(dd)}</div>` : ''}<div class="pl-txt">${linkNames(esc(p.text), teams)}</div></div>
+        <div class="pl-what">${dd || chipHtml ? `<div class="pl-dd">${chipHtml}${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>` : ''}${p.start && p.start.possessionText && dd ? `<span class="muted">at ${esc(p.start.possessionText)}</span>` : ''}</div>` : ''}
+          <div class="pl-hl ${hd.cls}">${linkNames(esc(hd.h), teams)}${ydChip}</div><div class="pl-txt pl-raw" title="Tap for the official text">${linkNames(esc(hd.raw), teams)}</div></div>
         <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${tmL(info.away.team)} ${p.awayScore}–${p.homeScore} ${tmL(info.home.team)}</b>` : ''}${swing}</div></li>`;
     };
     const order = o.sort !== 'old';  // newest first unless asked otherwise
@@ -3238,7 +3263,7 @@
         <b class="pi-fp ${r.fp > 0 ? 'up' : 'dn'}">${r.fp > 0 ? '+' : '&minus;'}${f1(Math.abs(r.fp))}</b></div>`).join('');
     // every play: when, the down, a headline, the yards
     const rows = plays.map(p => {
-      if (nonPlay(p)) return `<li class="ds-p np"><span class="ds-w">${when(p)}</span><span class="ds-h muted">${esc(p.text || '')}</span></li>`;
+      if (nonPlay(p)) return `<li class="ds-p np"><span class="ds-w">${when(p)}</span><span class="ds-h muted">${esc(nonPlayText(p))}</span></li>`;
       const hd = head(p), dd = p.start && p.start.down ? (p.start.shortDownDistanceText || p.start.downDistanceText || '') : '';
       const a = spot(p.start, info), b = spot(p.end, info);
       const net = a && b && !stPlay(p) && a.offense.team === b.offense.team && !p.scoringPlay ? Math.round((b.x - a.x) * a.dir) : null;
@@ -3343,10 +3368,8 @@
       ${fantasyCard(st, info)}
       <div class="seg gc-panes" role="tablist">${GPANES.map(([k, l]) => `<button type="button" role="tab" data-pane="${k}" class="${GP.pane === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       ${GP.pane === 'plays' ? `<section class="gcs" id="gcLog"><h3>Game log</h3>
-            <div class="lg-bar"><div class="seg">${[['drive', 'By drive'], ['every', 'Every play']].map(([k, l]) => `<button type="button" data-view="${k}" class="${GP.view === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-              <div class="seg">${[['all', 'All'], ['score', 'Scoring'], ['to', 'Turnovers'], ['pen', 'Penalties']].map(([k, l]) => `<button type="button" data-filter="${k}" class="${GP.filter === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-              <input type="search" id="lgQ" placeholder="Player or text" value="${esc(GP.q)}" aria-label="Filter plays">
-              <div class="seg">${[['new', 'Newest'], ['old', 'Oldest'], ['impact', 'Biggest swings']].map(([k, l]) => `<button type="button" data-sort="${k}" class="${GP.sort === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>
+            <div class="lg-bar"><div class="seg">${[['drive', 'By drive'], ['every', 'Every play']].map(([k, l]) => `<button type="button" data-view="${k}" class="${GP.view === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['new', 'Newest'], ['old', 'Oldest'], ['impact', 'Swings']].map(([k, l]) => `<button type="button" data-sort="${k}" class="${GP.sort === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['all', 'All'], ['score', 'Scoring'], ['to', 'Turnovers'], ['pen', 'Penalties']].map(([k, l]) => `<button type="button" data-filter="${k}" class="${GP.filter === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+              <input type="search" id="lgQ" placeholder="Player or text" value="${esc(GP.q)}" aria-label="Filter plays"></div>
             <div id="lgBody">${!sum ? '<p class="muted">Plays appear once the game starts.</p>'
               : !allPlays(sum).length && info.state === 'post' ? '<p class="muted">ESPN has no play-by-play for this game (games before about 2005 only have box scores).</p>'
               : gameLog(sum, info, ser, upto)}</div></section>`
@@ -3422,6 +3445,7 @@
     // replay controls
     root.querySelectorAll('[data-rp]').forEach(b => b.onclick = () => replayCmd(b.dataset.rp));
     root.querySelectorAll('.rp-card .rp-raw').forEach(e => e.onclick = () => e.classList.toggle('open'));  // clamped to 3 lines
+    root.querySelectorAll('.pl-raw').forEach(e => e.onclick = ev => { if (!ev.target.closest('[data-open-pid]')) e.classList.toggle('open'); });  // the official text, one line until tapped
     root.querySelectorAll('[data-rps]').forEach(b => b.onclick = () => {
       GP.rpSpeed = b.dataset.rps;
       if (GP.replay && GP.replay.timer) startReplayTimer(GP.replay);

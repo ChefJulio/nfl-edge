@@ -1369,3 +1369,19 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .lpf-sc { margin-left: auto; font-variant-numeric: tabular-nums; }
 .lpf .pi { margin-top: 4px; }
 .wp-tip .lpf-t { font-size: 15px; margin: 4px 0 2px; } .wp-tip .tip-wp { display: flex; justify-content: space-between; font-size: 12px; } .wp-tip .tip-wp b { font-size: 14px; }
+/* game log rows as play headlines (owner 2026-10-18) */
+.pl-dd { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-bottom: 2px; }
+.pl-dd .rp-d { font-size: 12px; }
+.pl-hl { font-size: 15px; font-weight: 700; line-height: 1.3; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.pl-hl.good { color: var(--good); } .pl-hl.bad { color: var(--bad); } .pl-hl .rp-yd { font-size: 11px; }
+.pl .pl-raw { font-size: 11.5px; color: var(--muted); line-height: 1.35; margin-top: 2px; font-weight: 400; cursor: pointer;
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.pl .pl-raw.open { -webkit-line-clamp: unset; display: block; }
+.pl-score .pl-txt.pl-raw { font-weight: 400; }
+/* the controls: two compact rows */
+.lg-bar { gap: 6px; } .lg-bar .seg button { padding: 5px 9px; font-size: 13px; }
+.lg-bar input { order: 9; flex-basis: 100%; }
+.lg-bar { gap: 6px; } .lg-bar .seg { flex: none; } .lg-bar .seg button { padding: 4px 9px; font-size: 12.5px; }
+.lg-bar input { order: 0; flex: 1 1 90px; min-width: 90px; flex-basis: auto; padding: 4px 9px; font-size: 13px; }
+.mt-sit { display: inline-flex; align-items: center; gap: 7px; } .mt-sit b { color: var(--ink); } .mt-sit .rp-d { font-size: inherit; }
+.pl-np .pl-txt { text-transform: none; letter-spacing: 0; font-size: 12px; font-style: italic; }
