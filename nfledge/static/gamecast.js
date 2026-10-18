@@ -2762,7 +2762,7 @@
         const pl = (d.plays || []).filter(p => ids.has(String(p.id)));
         if (!pl.length || pl.length === (d.plays || []).length) return pl.length ? d : null;
         const real = pl.filter(p => p.start && p.start.down && !nonPlay(p) && !stPlay(p));
-        const a = spot(pl[0].start, info), b = spot(pl[pl.length - 1].end, info);
+        const a = real.length ? spot(real[0].start, info) : null, b = spot(pl[pl.length - 1].end, info);  // from the first snap (not the kickoff)
         const yd = a && b && a.offense.team === b.offense.team ? Math.round((b.x - a.x) * a.dir) : 0;
         return Object.assign({}, d, { plays: pl, displayResult: '', result: '', isScore: false,
           description: `${real.length} play${real.length === 1 ? '' : 's'}, ${yd} yards, ${mmss(Math.max(0, elapsed(pl[pl.length - 1]) - elapsed(pl[0])))}` });
@@ -2771,7 +2771,7 @@
     const plays = drives.flatMap(d => d.plays || []);
     const last = plays[plays.length - 1] || null;
     const lastD = drives[drives.length - 1] || null;
-    const cur = !ids ? (sum && sum.drives && sum.drives.current ? drives.find(d => String(d.id) === String(sum.drives.current.id)) || null : null)
+    let cur = !ids ? (sum && sum.drives && sum.drives.current ? drives.find(d => String(d.id) === String(sum.drives.current.id)) || null : null)
       : lastD && !lastD.displayResult && !lastD.result ? lastD : null;
     const ser = sum ? wpSeries(sum).filter(x => !ids || ids.has(String(x.play.id))) : [];
     // the situation: ESPN's live one, or where the last play left the ball
@@ -2829,10 +2829,20 @@
     const score = ids && last ? { home: last.homeScore, away: last.awayScore } : { home: info.home.score, away: info.away.score };
     const per = ids && last ? (last.period || {}).number || 1 : info.period;
     const clock = ids && last ? (last.clock || {}).displayValue || '' : info.clock;
-    const secs = ids && last ? elapsed(last) : info.state === 'post' ? 3600 : (() => {
+    // game time now: the scoreboard clock live; in a replay, the clock at the next snap (the clock ran until then)
+    const nextP = ids ? rp.plays[rp.i + 1] : null;
+    const secs = ids && last ? (nextP ? elapsed(nextP) : elapsed(last)) : info.state === 'post' ? 3600 : (() => {
       const m = String(info.clock || '').match(/^(\d+):(\d{2})/), c = m ? +m[1] * 60 + +m[2] : 0, p_ = info.period || 1;
       return p_ <= 4 ? (p_ - 1) * 900 + (900 - c) : 3600 + (p_ - 5) * 600 + (600 - c);
     })();
+    // the drive in progress: its time runs from its first snap to now (owner 2026-10-18: ESPN's "2 plays, 0:05" counts
+    // first snap to latest snap, so it leaves out the last play and the clock that has run since: 1:38 -> 1:33 while the
+    // clock read 1:26)
+    if (cur && (cur.plays || []).length && (ids || info.state === 'in')) {
+      const t0 = elapsed(cur.plays[0]), t = mmss(Math.max(0, secs - t0));
+      cur = Object.assign({}, cur, { description: String(cur.description || '').replace(/\d+:\d{2}$/, t) });
+      drives = drives.map(d => String(d.id) === String(cur.id) ? cur : d);
+    }
     return { drives, plays, last, cur, ser, sit, tos, lines, tstats, score, per, clock, secs, live: !ids && info.state === 'in', replay: !!ids,
              ended: ids ? false : info.state === 'post' };
   };
