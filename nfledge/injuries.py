@@ -365,7 +365,17 @@ class InjuryModel:
     has_gs = days.game_status.fillna("None").astype(str).isin(["None", "nan", ""]).__invert__()
     long = days.days.fillna("").str.len() >= 3
     t = pd.DataFrame({"team": team, "fin": (has_gs | long).to_numpy()}).dropna(subset=["team"])
-    return set(t[t.fin].team)
+    fin = set(t[t.fin].team)
+    # (AP, {#calendar-stage}) the calendar: a team's final report is out once its third report day's reports are in
+    # (practice_calendar; seen = the latest date on any report this week). The rule above was sometimes late (nobody
+    # listed all week), never early: Brier 0.173 -> 0.108 on those rows, 2021-25.
+    if "dates" in days:
+      from .practice_calendar import team_report_days
+      seen = max((d for v in days.dates.dropna() for d in str(v).split(",") if d), default="")
+      for tm_, ds in team_report_days(self.data.schedules, season, week).items():
+        if len(ds) >= 3 and ds[2] <= seen:
+          fin.add(tm_)
+    return fin
 
   def prob(self, rep: str, prac: str) -> float:
     if rep == "Out":
@@ -773,18 +783,24 @@ class InjuryModel:
       final = self.final_report_teams(days, season, week)
     scratch = self.scratch_prob(season, week)
     p["scratch_avail"] = p.gsis_id.map(scratch).fillna(1.0)
-    # display only (owner 2026-10-18: Tyler Warren showed one "LP" labelled Wednesday): each team's practice dates this
-    # week, so a player first listed Friday reads "FFL" (off the report before then = practiced fully); the model reads x.days
+    # display only (owner 2026-10-18: Tyler Warren showed one "LP" labelled Wednesday): each team's report days from the
+    # calendar (practice_calendar: fixed by game day, plus any extra day it filed), so a player first listed Friday reads
+    # "FFL" (off the report before then = practiced fully); days not reached yet are left off. The model reads x.days.
     team_dates = {}
     if use_days and "dates" in days:
-      tm = dict(zip(p.gsis_id, p.team))
+      from .practice_calendar import team_report_days
+      tm, filed = dict(zip(p.gsis_id, p.team)), {}
       for g, ds in days.dates.dropna().items():
         if g in tm:
-          team_dates.setdefault(tm[g], set()).update(d for d in str(ds).split(",") if d)
+          filed.setdefault(tm[g], set()).update(d for d in str(ds).split(",") if d)
+      cal = team_report_days(self.data.schedules, season, week, filed)
+      # a day counts once some team's report for it is in (else it hasn't happened yet)
+      seen = max((d for v in filed.values() for d in v), default="")
+      team_dates = {t: [d for d in ds if d <= seen] for t, ds in cal.items()}
 
     def shown(x, team) -> str:
       dd, ds = str(x.days.iloc[0] or "").replace("?", ""), [d for d in str(x.dates.iloc[0] or "").split(",") if d] if "dates" in x else []
-      allds = sorted(team_dates.get(team, set()))[-3:]
+      allds = list(team_dates.get(team, []))
       if not dd or len(ds) != len(dd) or not allds:
         return dd
       on = dict(zip(ds, dd))

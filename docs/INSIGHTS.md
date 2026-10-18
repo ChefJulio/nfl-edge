@@ -2466,3 +2466,16 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   and walk-forward as the model's own fit (avail_hist 2018 on), test 2021-25, status not Out. GATE: Brier lower with
   the 95% CI over season-weeks excluding 0 on short-week rows, all rows not worse (CI upper < +0.0005), calibration
   by decile within 2 points on short-week rows.
+- **RESULT {#calendar-stage} (AP) the week's stage from the calendar: PASS, shipped.** tools/stage_eval.py, 52,029
+  player-days replayed 2021-25 at the end of each derived report day. The rules disagree on 74 (0.1%), all the
+  heuristic calling the final report LATE (nobody listed all three days, no game status), never early. Disagreeing
+  rows: Brier 0.1728 -> 0.1081, -0.0647 [-0.0934, -0.0322]; all rows -0.00009 [-0.00018, -0.00002]. Shipped in
+  InjuryModel.final_report_teams: final once the team's third calendar report day's reports are in (the old rule
+  kept as well; it was never early). nfledge/practice_calendar.py is the foundation (owner: "use it as a way to expect
+  reports ... a foundation"): report days per team for display and expectations whatever the model tests say.
+- **RESULT {#short-week} (AQ) short-week practice reports: FAIL (calibration gate).** Same tool, full-week model
+  with a short-week flag (<= 5 days since his team's last game), 1,079 short-week rows of 16,596, 2021-25. Short-week
+  rows Brier 0.1021 -> 0.0953, -0.0068 [-0.0099, -0.0034]; all rows -0.0005 [-0.0007, -0.0003]: accuracy passes. But
+  calibration on short-week rows was off by up to 11.7 points by decile (gate: 2), so not shipped. ~108 rows per
+  decile makes that gate noisy; a follow-up would compare against production's own calibration on those rows,
+  registered before running.
