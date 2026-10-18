@@ -2335,6 +2335,28 @@
         ? `${sp && sp.text ? `<span>${esc(sp.offense.team)} ball · ${esc(sp.text)}</span>` : ''}${sp && sp.red ? '<span class="mt-red">red zone</span>' : ''}`
         : `${g && g.fc ? verdict(g.fc, winner) : ''}`;
     });
+    sortTiles();
+  };
+  // Matchups order (owner 2026-10-18: "live games first ... nearest end of game first"): live games, the furthest
+  // along first; then games still to come, by kickoff; then finals, the latest first. Re-sorted on every poll; tiles
+  // only move when the order changes.
+  const sortTiles = () => {
+    const box = document.querySelector('.games');
+    if (!box || !DATA) return;
+    const tiles = [...box.querySelectorAll(':scope > a.mt[data-gid]')];
+    const kick = gid => { const g = DATA.games.find(x => x.id === gid); return g && NFLE.fmt && NFLE.fmt.kickoff ? NFLE.fmt.kickoff(DATA.games, g.home.team) || 0 : 0; };
+    const key = t => {
+      const gid = t.dataset.gid, st = LIVE.byGame[gid], g = DATA.games.find(x => x.id === gid);
+      if (st && st.state === 'in') {
+        const m = String(st.clock || '').match(/^(\d+):(\d{2})/), c = m ? +m[1] * 60 + +m[2] : 0, per = st.period || 1;
+        return [0, -(per <= 4 ? (per - 1) * 900 + (900 - c) : 3600 + (per - 5) * 600 + (600 - c))];
+      }
+      if ((st && st.state === 'post') || (g && g.final) || t.classList.contains('is-final')) return [2, -kick(gid)];
+      return [1, kick(gid)];
+    };
+    const ks = new Map(tiles.map((t, i) => [t, [...key(t), i]]));
+    const sorted = [...tiles].sort((a, b) => { const x = ks.get(a), y = ks.get(b); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; });
+    if (sorted.some((t, i) => t !== tiles[i])) sorted.forEach(t => box.appendChild(t));
   };
   const paintPill = () => {
     const pill = document.getElementById('livePill'); if (!pill) return;
