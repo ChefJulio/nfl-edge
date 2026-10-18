@@ -8,6 +8,9 @@ on:
     # The page rolls over to the next week at 06:00 ET Tuesday. GitHub's schedules are best-effort (often late,
     # sometimes skipped: the 10:00 run never fired on 2026-10-13), so Tuesday gets its own early run as well:
     # 11:30 UTC = 07:30 EDT / 06:30 EST, after the rollover in both.
+    # Since 2026-10-18 the week clock drives builds through news-watch.yml (report deadlines, inactives, rollover for
+    # every game day); these fixed times stay as a safety net. GitHub schedules run in UTC: after DST ends (Nov 1) each
+    # lands an hour earlier in Eastern time.
     - cron: "0 14 * * *"
     - cron: "30 11 * * 2"
     # Practice reports come out in the afternoon (teams post ~4-5 PM ET, NFL.com and ESPN follow), so the 10:00

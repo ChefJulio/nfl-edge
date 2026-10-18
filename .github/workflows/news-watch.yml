@@ -3,6 +3,9 @@ name: News watch
 # Every 30 minutes: start a full build when a player who matters changes injury status (tools/news_watch.py). The
 # scheduled builds (deploy.yml) still run as before; this catches news between them (owner 2026-10-17: Jalen Hurts
 # went on IR on a Saturday afternoon). GitHub's schedules are best-effort, so a check can run late or be skipped.
+# Also the week clock (owner 2026-10-18; nfledge/week_clock.py, the live site's index.json "clock"): a build starts once
+# a practice-report deadline (+45 min), a kickoff's inactives (75 min before) or the Tuesday rollover has passed since
+# the site was built, whatever the game day (Thursday, Monday and Saturday weeks included).
 on:
   schedule:
     - cron: "7,37 * * * *"

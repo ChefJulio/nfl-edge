@@ -49,11 +49,44 @@ def built_from() -> dict:
   return {str(r.get("espn_id")): r.get("status") or "" for r in rows if r.get("espn_id")}
 
 
+INDEX = {}  # the live site's index.json, fetched once (board + clock)
+
+
 def relevant() -> dict:
   """espn_id -> 'Name (POS, TEAM, proj)' for the live week's board, projected MIN_PROJ+."""
-  d = get(f"{SITE}index.json?nocache={int(datetime.now().timestamp())}")
+  d = INDEX.setdefault("d", get(f"{SITE}index.json?nocache={int(datetime.now().timestamp())}"))
   return {str(p["espn"]): f"{p.get('name')} ({p.get('pos')}, {p.get('team')}, {p.get('proj', 0):.1f})"
           for p in (d.get("players") or {}).values() if p.get("espn") and (p.get("proj") or 0) >= MIN_PROJ}
+
+
+# Week-clock events (owner 2026-10-18: "make every day of the week a day where we expect things"): the live site's
+# clock (week_clock.py, index.json "clock") lists every team's report deadlines, kickoffs and the rollover; a build
+# starts once one of these has passed since the site was built.
+REPORT_LAG_MIN = 45     # NFL.com / ESPN publish a team's report up to ~45 minutes after its 4 p.m. ET deadline
+INACTIVES_MIN = 75      # inactives are posted 90 minutes before kickoff; build 75 minutes before
+ROLLOVER_LAG_MIN = 10
+
+
+def clock_events(clock: dict) -> list:
+  """[(when, label)] for the week: report deadlines (+lag, one per time), inactives per kickoff slot, rollover."""
+  ev = {}
+  for t, x in (clock.get("teams") or {}).items():
+    for r in x.get("reports", []):
+      ev.setdefault(datetime.fromisoformat(r["due"]) + timedelta(minutes=REPORT_LAG_MIN), f"practice reports due {r['date']}")
+    if x.get("kick") and not x.get("final"):
+      ev.setdefault(datetime.fromisoformat(x["kick"]) - timedelta(minutes=INACTIVES_MIN),
+                    f"inactives for the {x['kick'][11:16]} ET kickoff on {x['kick'][:10]}")
+  if clock.get("rollover"):
+    ev.setdefault(datetime.fromisoformat(clock["rollover"]) + timedelta(minutes=ROLLOVER_LAG_MIN), "the week rolls over")
+  return sorted(ev.items())
+
+
+def due_events(clock: dict, now) -> list:
+  """Clock events that have passed since the site was built (clock["built"])."""
+  if not clock.get("built"):
+    return []
+  b = datetime.fromisoformat(clock["built"])
+  return [lbl for w, lbl in clock_events(clock) if b < w <= now]
 
 
 def recent_build() -> str | None:
@@ -86,10 +119,14 @@ def main():
     b = now.get(eid, ("", ""))[0]
     if a != b and (a in SERIOUS or b in SERIOUS):
       changes.append(f"{label}: {a or 'healthy'} -> {b or 'healthy'}")
-  if not changes:
-    print(f"[watch] no status changes for {len(who)} relevant players since the last build")
+  due = due_events(INDEX.get("d", {}).get("clock") or {}, datetime.now(timezone.utc))
+  if due:
+    print("[watch] week clock: " + "; ".join(due))
+  if not changes and not due:
+    print(f"[watch] no status changes for {len(who)} relevant players and no clock events since the last build")
     return
-  print("[watch] since the last build:\n  " + "\n  ".join(changes))
+  if changes:
+    print("[watch] since the last build:\n  " + "\n  ".join(changes))
   why = recent_build()
   if why:
     print(f"[watch] not starting a build: {why}")
