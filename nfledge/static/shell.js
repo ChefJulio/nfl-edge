@@ -317,7 +317,17 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     hb.classList.toggle('warn', pending);
     hw.hidden = false;
   });
-  hb.addEventListener('click', e => { e.stopPropagation(); const on = hw.classList.toggle('open'); hb.setAttribute('aria-expanded', on); });
+  // keep the popup on screen (owner 2026-10-18: on phones the header wraps, the button sits at the left and the popup,
+  // anchored to its right edge, ran off the left side): measured when it opens, shifted back inside a 12px margin
+  const fitPop = () => {
+    const pop = hw.querySelector('.hpop'); if (!pop) return;
+    pop.style.transform = '';
+    const r = pop.getBoundingClientRect(), vw = document.documentElement.clientWidth;
+    const dx = r.left < 12 ? 12 - r.left : r.right > vw - 12 ? vw - 12 - r.right : 0;
+    if (dx) pop.style.transform = `translateX(${Math.round(dx)}px)`;
+  };
+  hb.addEventListener('click', e => { e.stopPropagation(); const on = hw.classList.toggle('open'); hb.setAttribute('aria-expanded', on); if (on) fitPop(); });
+  hw.addEventListener('mouseenter', () => requestAnimationFrame(fitPop));
   document.addEventListener('click', e => { if (!hw.contains(e.target)) { hw.classList.remove('open'); hb.setAttribute('aria-expanded', 'false'); } });
 })();
 (() => {
