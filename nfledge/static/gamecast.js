@@ -3520,7 +3520,7 @@
   const wireGame = () => {
     const root = document.getElementById('gc');
     root.querySelectorAll('[data-gtab]').forEach(b => b.onclick = () => { GP.tab = b.dataset.gtab; renderGame(); });
-    root.querySelectorAll('[data-pane]').forEach(b => b.onclick = () => { GP.pane = b.dataset.pane; renderGame(); });
+    root.querySelectorAll('[data-pane]').forEach(b => b.onclick = () => { GP.pane = b.dataset.pane; GP.paneSet = true; renderGame(); });
     root.querySelectorAll('[data-plsub]').forEach(b => b.onclick = () => { GP.plSub = b.dataset.plsub; renderGame(); });
     const toPane = (k, sel) => { GP.pane = k; renderGame(); const e = document.querySelector(sel || '.gc-panes'); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     root.querySelectorAll('[data-pane-go]').forEach(b => b.onclick = () => toPane(b.dataset.paneGo));
@@ -3622,7 +3622,10 @@
       const evs = await weekEvents(GP.season, GP.week);
       const ev = evs.find(e => evKey(e) === gKey(GP.away, GP.home));
       if (!ev) throw new Error('game not found on ESPN');
+      const first = !GP.info;
       GP.info = evInfo(ev);
+      // a final game opens on Box score > Fantasy (owner 2026-10-18); a live one on Plays > Recent
+      if (first && GP.info.realState === 'post' && !GP.paneSet) { GP.pane = 'box'; GP.pst = '__fp'; }
       // Our Matchups colors are already chosen to be distinct from each other (ESPN's can be near-identical).
       if (GP.g && GP.g.colors) { GP.info.away.color = GP.g.colors[GP.away] || GP.info.away.color; GP.info.home.color = GP.g.colors[GP.home] || GP.info.home.color; }
       else distinctColors(GP.info);  // a link without the week file: ESPN's colors, made distinct here
