@@ -2415,3 +2415,12 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   facing a team missing >= 15% of its target share, MAE lower with a 95% CI over games excluding 0; all games not worse
   (CI upper < +0.01). Report the fitted b per stat (sign and size) and the MDE: {#skill-absence-margin} was too small
   to measure, so a FAIL here is labelled "unresolved" unless its CI rules out a gain of 0.2 points per affected game.
+- **RESULT {#dst-absence} (AN) opponent pass-catcher absences in D/ST sacks and takeaways: FAIL (resolved: no
+  meaningful effect).** tools/dst_absence_eval.py, D/ST model walk-forward, 2,398 defense-games 2021-25 (253 vs an
+  opponent missing >= 15% of its targets), b fit on seasons before, test 2022-25. Fitted multipliers small and unstable
+  (b_sack -0.21 to +0.17, b_int +0.14 to +0.65, b_fum_rec -0.02 to +0.20 per 100% of share: a 20% absence moves a stat
+  by a few percent). Affected games (206): MAE 4.143 -> 4.166, +0.023 [-0.004, +0.050]; all (1,918): 3.971 -> 3.975,
+  +0.004 [+0.001, +0.008] - worse. The CI rules out the 0.2-point gain, so FAIL, not "unresolved". Why: the current
+  model is already calibrated on exactly these games - projected 6.40 vs actual 6.34 points; sacks 2.45 vs 2.48, INTs
+  0.74 vs 0.76, FR 0.50 vs 0.49. A short-handed offense doesn't give up more sacks or turnovers than its rates say
+  (and Vegas already lowers its points). D/ST stays as is.
