@@ -618,5 +618,35 @@
 "pre": 0.4254,
 "post": 0.974,
 "status": "Active (LLL)"
+},
+"00-0038705": {
+"name": "Emari Demercado",
+"team": "DAL",
+"pos": "RB",
+"ruling": "INA",
+"at": "2026-10-18T23:06:00+00:00",
+"pre": 0.3046,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040009": {
+"name": "Savion Williams",
+"team": "GB",
+"pos": "WR",
+"ruling": "ACT",
+"at": "2026-10-18T23:04:00+00:00",
+"pre": 0.225,
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0040930": {
+"name": "Camden Brown",
+"team": "DAL",
+"pos": "WR",
+"ruling": "INA",
+"at": "2026-10-18T22:55:00+00:00",
+"pre": 0.1762,
+"post": 0.0,
+"status": "Inactive"
 }
 }
