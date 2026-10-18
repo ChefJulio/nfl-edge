@@ -2604,7 +2604,7 @@
   };
 
   // ------------------------------------------------------------------------------------------------- game page
-  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null, tab: null, pane: 'plays', fpAll: false, drvAll: false };
+  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null, tab: null, pane: 'flow', fpAll: false, drvAll: false };
   const parseGid = gid => { const m = String(gid || '').match(/^(\d{4})_(\d{2})_([A-Z]{2,3})_([A-Z]{2,3})$/); return m ? { season: +m[1], week: +m[2], away: m[3], home: m[4] } : null; };
   const wpSeries = (sum) => {
     const plays = allPlays(sum).flatMap(d => d.plays || []);
@@ -2965,7 +2965,9 @@
     };
     // Fantasy (owner 2026-10-18): both teams side by side, by position, each sorted by fantasy points (the league's scoring)
     const fpBlock = () => {
-      const by = {};
+      const by = {}, going = info.state === 'in' || !!opt.lines, frac = Math.min(1, (opt.secs != null ? opt.secs : (info.state === 'post' ? 3600 : 0)) / 3600) || 0.5;
+      let lgm = null; try { lgm = JSON.parse(localStorage.getItem('nfledge-mine') || 'null'); } catch (e) { /* none */ }
+      const TAG = {}; if (lgm) { (lgm.opp || []).forEach(x => { TAG[x] = 'opp'; }); (lgm.mine || []).forEach(x => { TAG[x] = 'mine'; }); }
       Object.entries(lines).forEach(([id, o]) => {
         const pid = map[id], pp = pid && DATA && DATA.players[pid];
         // off this week's board (no position on file): from what he did, passing = QB, more carries than targets = RB,
@@ -2974,14 +2976,18 @@
         const pos = pp ? pp.pos : guess, side = sides.find(x => x.team === o.team);
         if (!pos || !['QB', 'RB', 'WR', 'TE'].includes(pos) || !side) return;
         const fp = pts(o.line, w, pos);
-        ((by[pos] = by[pos] || { [sides[0].team]: [], [sides[1].team]: [] })[o.team] || []).push({ id, pid, o, fp });
+        ((by[pos] = by[pos] || { [sides[0].team]: [], [sides[1].team]: [] })[o.team] || []).push({ id, pid, o, fp, proj: pp ? scaled(pp).proj : null, tag: TAG[pid] });
       });
-      const col = rows => rows.sort((a, b) => b.fp - a.fp).map(r => `<div class="ff-r"${r.pid ? ` data-open-pid="${esc(r.pid)}"` : ''}><img class="pi-hs" src="${esc(NFLE.ui ? NFLE.ui.headshot(r.id) : '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
-          <span class="ff-n">${esc(r.o.short || r.o.name)}</span><b class="ff-p ${r.fp >= 15 ? 'hi' : r.fp < 3 ? 'lo' : ''}">${f1(r.fp)}</b></div>`).join('') || '<div class="ff-r muted">-</div>';
+      // points colored by pace against his projection while it's on (else by size), the projection under them, your
+      // players and your opponent's marked
+      const tone = r => r.proj > 0 && going ? (r.fp / r.proj >= Math.max(frac, 0.15) ? 'hi' : r.fp / r.proj < frac * 0.6 ? 'bad' : '') : r.fp >= 15 ? 'hi' : r.fp < 3 ? 'lo' : '';
+      const col = rows => rows.sort((a, b) => b.fp - a.fp).map(r => `<div class="ff-r${r.tag ? ` ff-${r.tag}` : ''}"${r.pid ? ` data-open-pid="${esc(r.pid)}"` : ''}><img class="pi-hs" src="${esc(NFLE.ui ? NFLE.ui.headshot(r.id) : '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+          <span class="ff-n">${esc(r.o.short || r.o.name)}${r.tag ? `<i class="ff-tag" title="${r.tag === 'mine' ? 'Yours' : "Your opponent's"}">${r.tag === 'mine' ? 'YOURS' : 'OPP'}</i>` : ''}</span>
+          <span class="ff-pp"><b class="ff-p ${tone(r)}">${f1(r.fp)}</b>${r.proj != null ? `<small class="ff-pj">of ${f1(r.proj)}</small>` : ''}</span></div>`).join('') || '<div class="ff-r muted">-</div>';
       const lg = leagueName();
       return `<div class="pst-team" data-pst="__fp"${pick === '__fp' ? '' : ' hidden'}><div class="ff-head">${sides.map(x => `<span>${logo(x.logo, '#111', 18, x.team)} ${esc(x.team)}</span>`).join('')}</div>
         ${['QB', 'RB', 'WR', 'TE'].filter(k => by[k]).map(k => `<div class="ff-pos"><div class="ff-k">${k}</div><div class="ff-cols"><div>${col(by[k][sides[0].team])}</div><div>${col(by[k][sides[1].team])}</div></div></div>`).join('') || '<p class="muted">No fantasy points yet.</p>'}
-        <p class="gcs-note">Fantasy points this game, ${lg ? `${esc(lg)} scoring` : 'your scoring'}.</p></div>`;
+        <p class="gcs-note">Fantasy points this game, ${lg ? `${esc(lg)} scoring` : 'your scoring'}, of his projection${going ? ' (green: on pace or better)' : ''}.${lgm ? '' : " Connect your league on the Fantasy tab to see your players and your opponent's marked."}</p></div>`;
     };
     const tabs = [[sides[0].team, sides[0]], ['__fp', null], [sides[1].team, sides[1]]];
     const seg = `<div class="seg pst-seg" role="tablist">${tabs.map(([k, x]) => `<button type="button" role="tab" data-pst="${esc(k)}" class="${k === pick ? 'on' : ''}">${x ? `${logo(x.logo, '#111', 18, x.team)} ${esc(x.team)}` : 'Fantasy'}</button>`).join('')}</div>`;
@@ -3279,7 +3285,7 @@
       ? order.map(h => `<div class="dvq"><span class="dv-q">${HALF[h] || periodName(h)}</span><div class="dvs">${rows[h].slice().reverse().join('')}</div></div>`).join('')
       : `<div class="dvq"><span class="dv-q">Latest drives</span><div class="dvs">${order.flatMap(h => rows[h].slice().reverse()).slice(0, 3).join('')}</div></div>`;
     const more = total > 3 ? `<button type="button" class="fps-more" data-drvall="1">${GP.drvAll ? 'Show the latest only' : `Show all ${total} drives`}</button>` : '';
-    return `<section class="gcs story" data-k="story"><h3>How it's gone <span class="src">ESPN</span></h3>
+    return `<section class="gcs story" data-k="story"><h3>Win chance <span class="src">ESPN</span></h3>
       <div class="wp-wrap">${wpChart(st.ser, info, null)}<div class="wp-tip" hidden></div></div>
       <div class="wp-leg"><span><i class="wp-m wp-score"></i>score</span><span><i class="wp-m wp-to"></i>turnover</span></div>
       ${qrows ? `<div class="dvs-k muted">Tap a drive for the whole drive</div>${qrows}${more}` : ''}</section>`;
@@ -3358,38 +3364,12 @@
       <div class="ds-k">Plays</div><ol class="ds-ps">${rows}</ol></div>`;
     return { title: `${tm.team} drive${lab ? ` · ${lab}` : ''}`, html };
   };
-  const KEY_STATS = ['Yards per Play', 'Total Yards', '3rd down efficiency', 'Turnovers', 'Possession'];
-  const fantasyCard = (st, info) => {
-    if (!DATA) return '';
-    const map = byEspn(), w = leagueW(), U = NFLE.ui, teams = DATA.teams || {};
-    const byPid = {}; Object.entries(st.lines).forEach(([e, o]) => { if (map[e]) byPid[map[e]] = o; });
-    let lg = null; try { lg = JSON.parse(localStorage.getItem('nfledge-mine') || 'null'); } catch (e) { /* none */ }
-    const tag = {}; if (lg) { (lg.opp || []).forEach(p => { tag[p] = 'opp'; }); (lg.mine || []).forEach(p => { tag[p] = 'mine'; }); }
-    const side = [info.away.team, info.home.team], frac = Math.min(1, st.secs / 3600), going = st.live || st.replay;
-    const rows = Object.entries(DATA.players).filter(([, p]) => side.includes(p.team) && ['QB', 'RB', 'WR', 'TE'].includes(p.pos)).map(([pid, p]) => {
-      const ln = byPid[pid], fp = ln ? pts(ln.line, w, p.pos) : 0;
-      return { pid, p, proj: scaled(p).proj, fp, ln, t: tag[pid] };
-    }).filter(r => r.t || r.proj >= 5 || r.fp >= 3)
-      .sort((a, b) => ((b.t === 'mine') - (a.t === 'mine')) || ((b.t === 'opp') - (a.t === 'opp')) || (b.fp - a.fp) || (b.proj - a.proj));
-    if (!rows.length) return '';
-    const n = GP.fpAll ? rows.length : Math.min(rows.length, 6);
-    const row = r => {
-      const pace = r.proj > 0 ? r.fp / r.proj : 0, tone = pace >= Math.max(frac, 0.15) ? 'good' : pace < frac * 0.6 ? 'bad' : 'mid';
-      const cell = U ? U.player({ name: r.p.name, team: r.p.team, espn: r.p.espn, pos: r.p.pos, sub: r.ln ? statLineText(r.ln, r.p.pos) : 'No stats yet' }, teams) : esc(r.p.name);
-      return `<div class="fpr" data-open-pid="${esc(r.pid)}">${r.t ? `<span class="fp-tag ${r.t === 'opp' ? 'foe' : r.t}">${r.t === 'mine' ? 'Yours' : 'Opp'}</span>` : ''}<div class="fpr-who">${cell}</div>
-        <div class="fpr-n"><b class="${tone}">${f1(r.fp)}</b><span class="muted">of ${f1(r.proj)}</span>
-        <span class="fpr-bar" title="Points so far vs his projection; the tick is where he'd be on pace"><i class="${tone}" style="width:${Math.min(100, pace * 100).toFixed(0)}%"></i>${going ? `<em style="left:${(frac * 100).toFixed(0)}%"></em>` : ''}</span></div></div>`;
-    };
-    const note = lg ? `<span class="src">${esc(lg.league || 'your league')}</span>` : '';
-    return `<section class="gcs fps" data-k="fps"><h3>Fantasy ${note}</h3>
-      ${rows.slice(0, n).map(row).join('')}
-      ${rows.length > 6 ? `<button type="button" class="fps-more" data-fpall="1">${GP.fpAll ? 'Show fewer' : `Show all ${rows.length}`}</button>` : ''}
-      <p class="gcs-note">Points so far under your scoring, of his projection; the tick marks where he'd be on pace.${st.replay ? ' In a replay, rebuilt from the plays so far.' : ''}${lg ? '' : " Connect your league on the Fantasy tab to see your players and your opponent's marked here."}</p></section>`;
-  };
   const FOOTBALL = `<span class="fb-chip" title="Has the ball"><svg class="sb-fb" viewBox="0 0 32 20" role="img" aria-label="Has the ball">${FB_BODY}</svg></span>`;
   const GTABS = [['pre', 'Pregame'], ['live', 'Live'], ['post', 'Postgame']];
   // Live tab: one pane at a time, picked here (owner 2026-10-15: "if i pick stats i see stats"); box score first
-  const GPANES = [['plays', 'Plays'], ['box', 'Box score'], ['team', 'Team stats']];
+  // one pane (owner 2026-10-18: "condense ... so we're not duplicating the displays"): the game's flow (win chance and
+  // every drive), the plays, the box score (with its Fantasy tab) and the team stats
+  const GPANES = [['flow', 'Game flow'], ['plays', 'Plays'], ['box', 'Box score'], ['team', 'Team stats']];
   // Live updates re-render the page; keep what the viewer is reading where it is (owner 2026-10-18: "when i'm
   // scrolled down, live updates shift stuff"): the keyed element nearest the top of the screen is measured before and
   // the page scrolled by however far it moved after.
@@ -3440,18 +3420,16 @@
         <input type="range" min="0" max="${rp.plays.length - 1}" value="${rp.i}" aria-label="Replay position"><span class="muted rp-pos">Play ${rp.i + 1} of ${rp.plays.length}</span>
         <button type="button" data-rp="off">Exit replay</button>` : '<button type="button" data-rp="on">Replay this game play by play</button>'}</section>` : ''}
       ${nowCard(st, info, sum)}
-      ${storyCard(st, info)}
-      ${st.tstats && teamStats(sum, info, KEY_STATS, st.tstats) ? `<section class="gcs" data-k="ks"><h3>Key stats</h3>${teamStats(sum, info, KEY_STATS, st.tstats)}${st.replay ? '' : '<button type="button" class="fps-more" data-pane-go="team">All team stats</button>'}</section>` : ''}
-      ${fantasyCard(st, info)}
       <div class="seg gc-panes" role="tablist">${GPANES.map(([k, l]) => `<button type="button" role="tab" data-pane="${k}" class="${GP.pane === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-      ${GP.pane === 'plays' ? `<section class="gcs" id="gcLog"><h3>Game log</h3>
+      ${GP.pane === 'flow' ? storyCard(st, info) || '<section class="gcs"><p class="muted">The game flow fills in once the game starts.</p></section>'
+      : GP.pane === 'plays' ? `<section class="gcs" id="gcLog"><h3>Game log</h3>
             <div class="lg-bar"><div class="seg">${[['drive', 'By drive'], ['every', 'Every play']].map(([k, l]) => `<button type="button" data-view="${k}" class="${GP.view === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['new', 'Newest'], ['old', 'Oldest'], ['impact', 'Swings']].map(([k, l]) => `<button type="button" data-sort="${k}" class="${GP.sort === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['all', 'All'], ['score', 'Scoring'], ['to', 'Turnovers'], ['pen', 'Penalties']].map(([k, l]) => `<button type="button" data-filter="${k}" class="${GP.filter === k ? 'on' : ''}">${l}</button>`).join('')}</div>
               <input type="search" id="lgQ" placeholder="Player or text" value="${esc(GP.q)}" aria-label="Filter plays"></div>
             <div id="lgBody">${!sum ? '<p class="muted">Plays appear once the game starts.</p>'
               : !allPlays(sum).length && info.state === 'post' ? '<p class="muted">ESPN has no play-by-play for this game (games before about 2005 only have box scores).</p>'
               : gameLog(sum, info, ser, upto)}</div></section>`
       : GP.pane === 'team' ? `<section class="gcs" id="gcTeam"><h3>Team stats</h3>${st.replay ? '<p class="gcs-note">As of this play, counted from the play-by-play.</p>' : ''}${sum ? teamStats(sum, info, null, st.replay ? st.tstats : null) || '<p class="muted">Not available yet.</p>' : ''}</section>`
-      : playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: st.replay ? 'As of this play, counted from the play-by-play.' : '', lines: st.replay ? st.lines : null, empty: 'The box score fills in once the game starts.' })}`;
+      : playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: st.replay ? 'As of this play, counted from the play-by-play.' : '', lines: st.replay ? st.lines : null, secs: st.secs, empty: 'The box score fills in once the game starts.' })}`;
     root.innerHTML = `
       <section class="sb">${side(info.away, false)}<div class="sb-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<b>${esc(status)}</b>${!nx && sp && sit && sit.shortDownDistanceText
         ? `<span class="sb-dd">${esc(sit.shortDownDistanceText)}${sit.possessionText ? ` · ${esc(sit.possessionText)}` : ''}</span>` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}</section>

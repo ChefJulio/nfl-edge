@@ -1409,3 +1409,11 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .ff-k { text-align: center; }
 .ff-cols, .ff-head { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .ff-head > span:last-child { justify-content: flex-start; }
+/* Fantasy tab: projection under the points, your / opponent's players marked */
+.ff-pp { display: inline-flex; flex-direction: column; align-items: flex-end; line-height: 1.05; flex: none; }
+.ff-cols > div:last-child .ff-pp { align-items: flex-start; }
+.ff-pj { font-size: 10px; color: var(--muted); } .ff-p.bad { color: var(--bad); }
+.ff-tag { font-style: normal; font-size: 8.5px; font-weight: 800; letter-spacing: .05em; margin: 0 5px; padding: 0 4px; border-radius: 3px; vertical-align: 1px; }
+.ff-mine .ff-tag { color: var(--good); background: color-mix(in srgb, var(--good) 20%, transparent); }
+.ff-opp .ff-tag { color: var(--bad); background: color-mix(in srgb, var(--bad) 18%, transparent); }
+.ff-mine { background: color-mix(in srgb, var(--good) 7%, transparent); }
