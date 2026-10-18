@@ -25,14 +25,15 @@
       const cols = [
         { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name,
           html: r => NFLE.ui.player({ name: r.name, pos: r.pos, team: r.abbr, espn: r.espn_id, subHtml: r.abbr ? NFLE.ui.tm(r.abbr) : NFLE.esc(r.team || '') }, TEAMS) },
+        // Play% first after the name (owner 2026-10-18: "people going there want to see the % they play")
+        { key: 'inactive', label: 'Play%', num: true, title: 'Our chance he plays this week', value: r => r.inactive == null ? null : 1 - r.inactive,
+          html: r => r.inactive == null ? '<span class="muted">&ndash;</span>' : `<span class="in-pct" style="--p:${Math.round(100 * r.inactive)}">${NFLE.fmt.toPlay(r.inactive)}</span>` },
         { key: 'proj', label: 'Proj', num: true, first: 'desc', cls: 'projc', title: 'Our projected points if he plays this week (blank: not on our board, or no game)',
           value: r => r.proj, html: r => r.proj == null ? '<span class="muted">&ndash;</span>' : `<b>${r.proj.toFixed(1)}</b>` },
         { key: 'grd', label: 'Grd', num: true, first: 'desc', title: 'Edge grade (OVR): three seasons of fantasy output, a percentile within his position',
           value: r => { const g = r.pid && NFLE.gradeOf && NFLE.gradeOf(r.pid); return g ? g.v : null; },
           html: r => { const g = r.pid && NFLE.gradeOf && NFLE.gradeOf(r.pid); return g ? NFLE.gradeChip(g) : '<span class="muted">&ndash;</span>'; } },
         { key: 'status', label: 'Status', first: 'asc', value: r => ORDER[r.status] || 9, html: r => `<span class="in-st in-${tone(r.status)}">${esc(r.status)}</span>` },
-        { key: 'inactive', label: 'Play%', num: true, title: 'Our chance he plays this week', value: r => r.inactive == null ? null : 1 - r.inactive,
-          html: r => r.inactive == null ? '<span class="muted">&ndash;</span>' : `<span class="in-pct" style="--p:${Math.round(100 * r.inactive)}">${NFLE.fmt.toPlay(r.inactive)}</span>` },
         { key: 'injury', label: 'Injury', first: 'asc', value: r => r.type, html: r => esc([r.type, r.detail && r.detail !== r.type ? r.detail : '', r.side && r.side !== 'Not Specified' ? r.side : ''].filter(Boolean).join(' · ')) },
         { key: 'return_date', label: 'Est. return', first: 'asc', value: r => r.return_date, html: r => esc(r.return_date ? new Date(r.return_date + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }) : '') },
         { key: 'updated', label: 'Updated', first: 'desc', value: r => r.updated, html: r => r.updated ? `<span title="${esc(new Date(r.updated).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}">${esc(ago(r.updated))}</span>` : '' },
