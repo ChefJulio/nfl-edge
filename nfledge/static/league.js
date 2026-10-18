@@ -236,7 +236,12 @@
         return { ext: x, pid: g, name: o.name, pos: 'K', team: o.team, proj, pa: proj == null ? 0 : 1, exp: proj, sd: 4.3, inactive: 0, locked: started(o.team),
                  why: proj == null ? 'on bye' : '' };
       }
-      if (!p) return { ext: x, pid: g, name: nm ? nm[0] : g, pos: nm ? nm[1] : '', team: nm ? nm[2] : '', proj: null, exp: null, why: 'no projection this week (bye, out, or not on our board)' };
+      if (!p) {  // not on this week's board: the rest-of-season file knows him (owner 2026-10-18: bye-week players count)
+        const r = ROS && ROS.players && ROS.players[g], team = r ? r.team : nm ? nm[2] : '';
+        const bye = !!(ROS && team && ((ROS.byes || {})[team] || []).includes(D.week));
+        return { ext: x, pid: g, name: r ? r.name : nm ? nm[0] : g, pos: r ? r.pos : nm ? nm[1] : '', team, photo: r && r.photo, espn: r && r.espn,
+                 proj: null, exp: null, why: bye ? 'on bye this week' : 'no projection this week (out, or not on our board)' };
+      }
       const proj = pts(p.sc.pj, L.scoring, p.pos), pa = 1 - (p.inactive || 0);
       // sd from his range (10th-90th percentile spans 2.56 sd), rescaled to this league's scoring
       const base = pts(p.sc.pj, D.score.built, p.pos), r = base > 0.3 ? proj / base : 1;
@@ -321,7 +326,7 @@
       return `<tr class="teamrow" style="${NFLE.fmt.rowStyle(TEAMS, p.team)}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}>${slotTd}
         <td class="lg-who">${NFLE.ui.player({ name: p.name, pos, team: p.team, photo: p.photo, espn: p.espn, pid: p.pid,
           subHtml: p.opp ? `${esc(p.home)} ${NFLE.ui.tm(p.opp)}` : p.why ? esc(p.why) : NFLE.ui.tm(p.team), badges: badgesOf(p) }, TEAMS)}</td>
-        <td class="num"><b>${p.proj != null ? f1(p.proj) : '—'}</b></td>${extra}</tr>`;
+        <td class="num"><b>${p.proj != null ? f1(p.proj) : /bye/.test(p.why || '') ? '<span class="muted">Bye</span>' : '—'}</b></td>${extra}</tr>`;
     };
     const table = (body, head = '<th>Slot</th><th>Player</th><th class="num">Proj</th>') =>
       `<div class="lg-scroll"><table class="bx tiles lg-tbl"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
@@ -424,7 +429,8 @@
         : `<div class="lg-swaps">${sureCard}${gtCards}
           <div class="muted lg-mv-f">Best lineup: <b class="good">+${f1(gain)}</b> expected points.${unsure.length ? ' Inactives are posted 90 minutes before each kickoff.' : ''}</div></div>`;
       const unproj = curRows.filter(r => r.p && r.p.exp == null && r.slot !== 'DEF' && r.slot !== 'K').map(r => r.p);
-      const bench = ps.filter(p => !bestSet.has(p.ext) && p.exp != null).sort((a, b) => b.exp - a.exp);
+      // players with no projection this week (on bye, out) stay listed, after the projected ones (owner 2026-10-18)
+      const bench = ps.filter(p => !bestSet.has(p.ext)).sort((a, b) => (b.exp != null) - (a.exp != null) || (b.exp || 0) - (a.exp || 0));
       return `${swaps}${unproj.length ? `<p class="muted lg-note">Starting with no projection: ${unproj.map(p => `${esc(p.name)} (${esc(p.why || 'not projected')})`).join(', ')}.</p>` : ''}
         <h3 class="lg-h">Best lineup <span class="muted">${f1(total(best))} expected</span></h3>
         ${table(best.map(r => row(r.slot, r.p)).join(''))}
@@ -521,7 +527,10 @@
     const freeAgents = () => {
       const rostered = new Set(L.teams.flatMap(t => t.ext.map(gsisOf).filter(Boolean)));
       const ros = g => rosWeeks().reduce((t, k) => t + ((weekOf(`g:${g}`, k) || {}).exp || 0), 0);
-      const out = Object.entries(D.players).filter(([pid, p]) => !rostered.has(pid) && ['QB', 'RB', 'WR', 'TE'].includes(p.pos))
+      // this week's board plus the rest-of-season file (owner 2026-10-18: a free agent on bye this week still counts)
+      const cand = new Map(Object.entries(D.players).map(([pid, p]) => [pid, p.pos]));
+      Object.entries((ROS && ROS.players) || {}).forEach(([pid, p]) => { if (!cand.has(pid)) cand.set(pid, p.pos); });
+      const out = [...cand].filter(([pid, pos]) => !rostered.has(pid) && ['QB', 'RB', 'WR', 'TE'].includes(pos))
         .map(([pid]) => Object.assign(fromPid(pid, pid), { key: `g:${pid}`, ros: ros(pid), games: gamesOf(`g:${pid}`) }));
       if (L.slots.includes('K')) Object.entries(KBY).filter(([g]) => !rostered.has(g))
         .forEach(([g]) => out.push(Object.assign(fromPid(g, g), { key: `g:${g}`, ros: ros(g), games: gamesOf(`g:${g}`) })));
