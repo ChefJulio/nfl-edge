@@ -41,8 +41,12 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     toPlay: inactive => { const p = 1 - (inactive || 0); return p > 0.995 ? '&gt;99%' : p < 0.005 ? '&lt;1%' : `${Math.round(p * 100)}%`; },
     // kickoff (ms) of a team's game in a week's games: gameday + gametime are Eastern (EDT mid-March to early November)
     kickoff: (games, t) => { const g = (games || []).find(x => x.away.team === t || x.home.team === t);
-      if (!g || !g.gameday || !g.gametime) return null; const m = +g.gameday.slice(5, 7), d = +g.gameday.slice(8, 10);
-      const edt = (m > 3 && m < 11) || (m === 3 && d >= 9) || (m === 11 && d < 3); return Date.parse(`${g.gameday}T${g.gametime}:00${edt ? '-04:00' : '-05:00'}`); },
+      if (!g || !g.gameday || !g.gametime) return null;
+      // Eastern offset from the browser's time-zone data (a hand-made EDT rule had Nov 1 2026 as EDT: kickoffs an hour early)
+      const guess = Date.parse(`${g.gameday}T${g.gametime}:00-05:00`);
+      const tz = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', timeZoneName: 'shortOffset' }).formatToParts(new Date(guess)).find(x => x.type === 'timeZoneName');
+      const off = tz && /GMT([+-]\d+)/.exec(tz.value);
+      return Date.parse(`${g.gameday}T${g.gametime}:00${off ? `${+off[1] < 0 ? '-' : '+'}${String(Math.abs(+off[1])).padStart(2, '0')}:00` : '-05:00'}`); },
     f1, logoSrc,
     sgn: v => v == null || isNaN(v) ? '' : Math.abs(v) < 0.05 ? '0.0' : `${v > 0 ? '+' : ''}${f1(v)}`,
     pct: v => v == null || isNaN(v) ? '' : `${Math.round(v * 100)}%`,
