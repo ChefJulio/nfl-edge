@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 
 from .injuries import _SCORE, practice_features
-from .returns import FEATURES, ReturnModel, _gamedays  # noqa: F401 (_gamedays: tools import it from here)
+from .returns import FEATURES, OPENED_FEATURES, ReturnModel, _gamedays  # noqa: F401 (_gamedays: tools import it from here)
 
 H = 8
 FIRST_SEASON = 2019
@@ -131,7 +131,7 @@ def _code_key() -> str:
 
 def training_rows(data, model: ReturnModel, gb: dict, seasons: list[int], cache_dir) -> pd.DataFrame:
   """Labelled state x k rows for `seasons` (cached per code version and season list)."""
-  f = Path(cache_dir) / f"return_timing_rows_{min(seasons)}_{max(seasons)}_{_code_key()}.parquet"
+  f = Path(cache_dir) / f"return_timing_rows_{min(seasons)}_{max(seasons)}{'_ox' if model.opened_out else ''}_{_code_key()}.parquet"
   if f.exists():
     return pd.read_parquet(f)
   st = model.states(sorted(data.seasons))
@@ -144,9 +144,11 @@ def training_rows(data, model: ReturnModel, gb: dict, seasons: list[int], cache_
   return xk
 
 
-def fit(xk: pd.DataFrame):
+def fit(xk: pd.DataFrame, opened_out: bool = False):
+  """opened_out: (AX) also read OPENED_FEATURES (the rows must come from a ReturnModel with opened_out on)."""
   from sklearn.ensemble import HistGradientBoostingClassifier
-  cols = [c for c in FEATS if xk[c].notna().any() and xk[c].nunique() > 1]  # e.g. no ESPN data before 2022
+  feats = FEATS + (OPENED_FEATURES if opened_out else [])
+  cols = [c for c in feats if xk[c].notna().any() and xk[c].nunique() > 1]  # e.g. no ESPN data before 2022
   m = HistGradientBoostingClassifier(**GB, random_state=0, categorical_features=[cols.index("inj_code"), cols.index("pos_code")])
   m.fit(xk[cols], xk.y)
   m.cols_ = cols

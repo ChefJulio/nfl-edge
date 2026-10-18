@@ -27,6 +27,10 @@ FEATURES = ["missed", "desig_ir", "desig_ir_return", "desig_pup", "desig_reserve
 # games, time since he got hurt): gap = days from the game he just missed to his team's next one; days_out = days
 # from the last game before this absence to that next game. return_timing.py (IR) keeps FEATURES: no gain there.
 CHAIN_FEATURES = FEATURES + ["gap", "days_out"]
+# (AX, injuries.opened_out) players who open the season on a reserve list: opened_out = 1 in those episodes (before
+# his first game of the season); prior_g = games he played the season before (every episode). Read by both the chain
+# and the direct IR model when the flag is on.
+OPENED_FEATURES = ["opened_out", "prior_g"]
 
 
 def _gamedays(data) -> dict:
@@ -118,7 +122,7 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
   if len(ir_rows) and cache_dir is not None and gb is not None:
     from . import return_timing as RT
     seasons = [s_ for s_ in range(RT.FIRST_SEASON, season) if s_ in set(data.seasons)]
-    rt = RT.fit(RT.training_rows(data, m, gb, seasons, cache_dir))
+    rt = RT.fit(RT.training_rows(data, m, gb, seasons, cache_dir), opened_out=m.opened_out)
     prac = pd.concat([data.avail_hist[["season", "week", "gsis_id", "days", "game_status"]],
                       data.practice[data.practice.season == season][["season", "week", "gsis_id", "days", "game_status"]]
                       if data.practice is not None else None], ignore_index=True)
@@ -265,7 +269,8 @@ def _newly_injured(data, m, season: int, week: int, now_report: dict, known: set
     rows.append({"season": season, "week": gw, "bye_start": gw != week, "gsis_id": g, "team": team, "missed": 1, "desig": "active",
                  "report": REPORT.get(status, 0) if isinstance(status, str) else 0,
                  "injury": inj.at[g, "report_primary_injury"] if g in inj.index else None,
-                 "position": r.at[g, "position"], "next_week": nxt, "back": False, "p_now": 0.0 if g in ir else float(np.clip(p_now, 0, 1))})
+                 "position": r.at[g, "position"], "next_week": nxt, "back": False, "p_now": 0.0 if g in ir else float(np.clip(p_now, 0, 1)),
+                 "opened_out": 0.0, "prior_g": m.prior_g(season, g)})
   if not rows:
     return pd.DataFrame()
   return m._calendar(ReturnModel._encode(pd.DataFrame(rows)))
@@ -278,9 +283,24 @@ def _injury_code(s: pd.Series) -> pd.Series:
 
 
 class ReturnModel:
-  def __init__(self, data, played: set):
-    """played: set of (season, week, gsis_id) for every player-game played (any snaps)."""
+  def __init__(self, data, played: set, opened_out: bool | None = None):
+    """played: set of (season, week, gsis_id) for every player-game played (any snaps). opened_out: (AX) episodes for
+    players who open the season on a reserve list, and the features that mark them (default: config
+    injuries.opened_out)."""
     self.data, self.played = data, played
+    if opened_out is None:
+      from .config import load_config
+      opened_out = load_config().get("injuries", {}).get("opened_out") is True
+    self.opened_out = bool(opened_out)
+    self.feats = CHAIN_FEATURES + (OPENED_FEATURES if self.opened_out else [])
+    games = {}
+    for s_, _, g in played:
+      games[(s_, g)] = games.get((s_, g), 0) + 1
+    self._games = games
+
+  def prior_g(self, season: int, gsis_id: str) -> float:
+    """Games he played the season before."""
+    return float(self._games.get((season - 1, gsis_id), 0))
 
   # -- episodes ----------------------------------------------------------------------------------------------------
   def states(self, seasons: list[int]) -> pd.DataFrame:
@@ -311,9 +331,10 @@ class ReturnModel:
       for a, b in zip(ws, ws[1:]):
         nxt[(season, team, a)] = b
     self._nxt = nxt
+    first_wk = team_weeks.groupby(["season", "team"]).week.min().to_dict()  # each team's first game
     rows = []
     for (season, gid), g in r.sort_values("week").groupby(["season", "gsis_id"]):
-      ever_played, missed = False, 0
+      ever_played, missed, opened = False, 0, False
       for x in g.itertuples(index=False):
         if (season, x.team, x.week) not in team_set:  # bye / no game
           continue
@@ -323,10 +344,14 @@ class ReturnModel:
         rep_status, body = inj.get((season, x.week, gid), (None, None))
         injured = (x.status == "RES") or (isinstance(rep_status, str) and rep_status in REPORT)
         if played:
-          ever_played, missed = True, 0
+          ever_played, missed, opened = True, 0, False
           continue
-        if not (ever_played and injured):
+        # (AX) on a reserve list at his team's first game, before playing that season: an episode from there
+        if self.opened_out and not ever_played and x.status == "RES" and x.week == first_wk.get((season, x.team)):
+          opened = True
+        if not ((ever_played or opened) and injured):
           missed = 0 if not injured else missed
+          opened = opened and injured
           continue
         missed += 1
         nw = nxt.get((season, x.team, x.week))
@@ -337,7 +362,8 @@ class ReturnModel:
                      "report": REPORT.get(rep_status, 0) if isinstance(rep_status, str) else 0,
                      "injury": body,
                      "position": x.position, "next_week": nw,
-                     "back": (season, nw, gid) in self.played})
+                     "back": (season, nw, gid) in self.played,
+                     "opened_out": float(opened and not ever_played), "prior_g": self.prior_g(season, gid)})
     d = pd.DataFrame(rows)
     if not len(d):
       return d
@@ -395,14 +421,14 @@ class ReturnModel:
     self.stay_active = float(np.mean(stay)) if stay else 1.0
     make = lambda: HistGradientBoostingClassifier(  # noqa: E731
       max_iter=200, learning_rate=0.05, max_depth=3, random_state=0,
-      categorical_features=[CHAIN_FEATURES.index("inj_code"), CHAIN_FEATURES.index("pos_code")])
-    self.model = make().fit(d[CHAIN_FEATURES], d.back)
+      categorical_features=[self.feats.index("inj_code"), self.feats.index("pos_code")])
+    self.model = make().fit(d[self.feats], d.back)
     # (An isotonic calibration on leave-one-season-out predictions was tested and made the walk-forward Brier
     # worse, 0.132 -> 0.136: older seasons' miscalibration doesn't carry forward. Raw model kept.)
     return self
 
   def hazard(self, d: pd.DataFrame) -> np.ndarray:
-    return self.model.predict_proba(d[CHAIN_FEATURES])[:, 1]
+    return self.model.predict_proba(d[self.feats])[:, 1]
 
   def p_active(self, state: pd.DataFrame, horizon: int, first: np.ndarray | None = None,
                stay: float | None = None) -> np.ndarray:

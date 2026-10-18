@@ -1,5 +1,5 @@
 ---
-documented_code_hash: a5c54b609b43e8f5
+documented_code_hash: bd1e2e6ab64e18bf
 ---
 # How the model works
 
@@ -341,6 +341,7 @@ The grade measures output, not style: fantasy points per game in the site's scor
 - **Rejected** - Should short-week practice reports (Thursday games, mostly estimated walkthroughs) be read differently? - More accurate (Brier -0.007 on those weeks) but its probabilities were miscalibrated by up to 12 points, beyond the 2-point limit; not shipped (2026-10). <!-- tried:short-week -->
 - **Unresolved** - Second look at the short-week reports with calibration judged against the current model's own: more accurate again, but too few short weeks to rule out a calibration loss (error difference +0.002, interval up to +0.019); not shipped, revisit as weeks add up (2026-10). <!-- tried:short-week-2 -->
 - **Rejected** - In weeks with no Vegas line yet (every week after this one), should the game model's points and game script rate each team's starting quarterback (it rated none, i.e. a league-average QB)? - Team points improve (error 7.74 -> 7.68, 2021-25) but player projections barely move (5.203 -> 5.199 rating the most recent starter, interval -0.0070 to +0.0003; 5.200 rating the projected starter on a second look): neither passed, not shipped (2026-10). <!-- tried:lookahead-qb --> <!-- tried:lookahead-qb-2 -->
+- **Rejected** - Players who open the season on injured reserve, PUP or another reserve list: should the return models give them a timeline (today they are never projected back)? - Not calibrated well enough: designated-to-return players came out 10-29 points too high and PUP up to 14 too low, 2022-25 (460 cases; roster codes exist only from 2021 and their meaning has shifted). Tried in the shared models and as a separate model; neither passed (2026-10). <!-- tried:opened-out --> <!-- tried:opened-out-2 -->
 - **Rejected** - How much should last season and two seasons back count in a player's efficiency rates (today 1 / 0.6 / 0.3)? - Every mix from 0.3 to 1 for last season and 0 to 0.6 for two back was within noise on 2021-23; the best was no better on 2024-25 and worse on 2026 so far, so today's stays (2026-10). <!-- tried:eff-season-weights -->
 - **Rejected** - How much of his usual volume should a player get in his first game with a new team (half today)? - 30% to 70% were all within noise on 2021-23, and the best of them (70%) was worse on 2024-25, so half stays (2026-10). <!-- tried:newcomer-scale -->
 - **Rejected** - For efficiency stats where players barely differ from one another (a running back's yards per carry, a tight end's touchdown rate), how much should a player's own history count (a cap of 2,000 pseudo-plays on the pull toward the average)? - Caps from 500 to 100,000 were within noise on 2021-23; the best (500, more weight on his own rate) helped in 2024 and hurt in 2025, so 2,000 stays (2026-10). <!-- tried:shrink-cap -->

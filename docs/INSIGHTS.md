@@ -613,7 +613,40 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   titles; AAFC titles listed separately (not NFL records). Playoff rate since the 1970 merger (or founding).
   Green Bay checks out: 13 titles, 37-28.
 
-## 9. Open threads / next steps (as of 2026-10-12)
+## 9. Open threads / next steps
+
+### STATUS BOARD (keep current: edit this list whenever an item opens, ships or closes; the log below is history)
+Updated 2026-10-18. Injury / return items first (owner 2026-10-18: "the injury/return model needs to be pristine").
+
+**Running / next up**
+1. OWNER DECISION: players who open the season on a reserve list (84 skill players in 2026: Conner, Charbonnet,
+   Pacheco, Pearsall, Higgins ...) are never projected back. (AX) and (AX2) FAILED (not calibrated: too little data,
+   codes drifting); "never back" scores worst of all. Options: keep it, or a labelled rule ({#opened-out-2}).
+2. (AY, to pre-register) injured right before a bye / known only to ESPN: no report that week, so the chain never
+   starts and every later week reads 100% (Tanner Hudson, torn pectoral, CIN bye week 6; Hockenson 2026-10-17).
+   Plan in docs/handset_audit.md ("injured right before a bye").
+3. (AU) game-day actives / inactives: shipped; its audit gate runs Tuesday after snap counts (tools/gameday_audit.py).
+   Gate fails -> the rule comes out.
+
+**Queued (pre-register before running)**
+- (AS) midweek stage from the calendar; (AT) one "early week" definition (week clock entry, 2026-10-18).
+- Week clock remaining moves (7 items, "Week clock ... REMAINING WORK" entry).
+- Partial Vegas lines: if any game of a week lacks a line, every game drops to the model's own volume
+  (team_model.GameModel.predict `.all()`); per-game fallback.
+- Small IR-audit leftovers: qb2_play_rate needs a board QB at depth rank 1; debut prior's absolute depth_rank <= 2;
+  kdst_build falls back to the last kicker when no kicker is active.
+- Fantasy depth-aware values (replaces a STOPGAP in league.js; first entry below).
+- Hand-set values not yet tested: docs/handset_audit.md #8-#22 (#14 = return-model settings), range calibration.
+
+**Pending checks**
+- News watcher relay (tools/news_watch.py): confirm the first run handed off to its successor (~21:45 UTC 2026-10-18).
+- (AF) team-rating half-life: re-check at season end.
+
+**Parked (owner)**: news push notifications; prior-season carryover in team ratings; market-implied ratings.
+
+**Closed recently**: (AX) / (AX2) FAIL; (AV) PASS shipped; IR audit fixes shipped; (AW) FAIL twice, closed; (AR) PASS shipped; (AQ) FAIL.
+
+### Log (chronological from here)
 - **Fantasy: depth-aware values (2026-10-17; replaces a STOPGAP).** The Fantasy tab's waiver moves (league.js
   movesFor) value a roster by its best lineup each remaining week by expected points, with every healthy player healthy
   through week 17. So a backup's insurance (he plays when a starter is hurt) and the waiver wire's own depth (a D/ST
@@ -2605,3 +2638,43 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   the QB makes the game model's own points better, but the player projections don't measurably follow (implied points
   are one input among several; volume shares and player rates dominate). Not retried without new information (e.g.
   a test of the lookahead pages' displayed implied totals, or a player model fit in model-only mode).
+- **PRE-REGISTERED 2026-10-18 (owner: "the injury/return model needs to be pristine"; audit of all 372 ESPN-listed skill
+  players): (AX) players who open the season on a reserve list get a return timeline.** ReturnModel.states starts an
+  episode only after a game played that season (ever_played), so a player on IR / PUP / NFI before week 1 has no
+  state: the lookahead never brings him back and his rest-of-season value is 0 (2026: 84 skill players, among them
+  James Conner, Zach Charbonnet, Isiah Pacheco, Ricky Pearsall, Jayden Higgins, Christian Kirk, Tank Dell). 2019-25:
+  ~70 a season; played that season R48 (IR, designated to return) 80%, R04 (PUP) 58%, R01 (IR) 24%; median return
+  week 7-9. Variant (injuries.opened_out): states also cover a player on a reserve list (roster status RES, any code)
+  in his team's first game who hasn't played that season, from that game until he plays; two features read by both
+  the chain and the direct IR model: opened_out (1 in those episodes) and prior_g (games he played the season
+  before, every episode). Test: tools/opened_out_eval.py, walk-forward 2022-25 (each season fit on the seasons
+  before), skill players, P(back by his k-th next game) k = 1..8, scored as production combines them (direct model
+  for IR, the chain otherwise, stay 1, step 1 = the practice estimate when on the report). GATE: (i) new episodes:
+  Brier lower than a per-code base rate (share back by game k in earlier seasons' opened-out episodes, same code
+  group and k), 95% CI by episode excluding 0, lower in >= 3 of 4 seasons (production's answer, never back, also
+  reported); (ii) new episodes calibrated: each code group (ir / ir_return / pup / other) x k-bucket (1-2 / 3-4 / 5-8)
+  with n >= 150 within 5 points; (iii) existing in-season episodes not worse: Brier CI upper < +0.002.
+- **RESULT {#opened-out} (AX) season-start reserve players in the shared return models: FAIL ((ii), (iii)), not
+  shipped.** tools/opened_out_eval.py, 2022-25, 460 opened-out episodes (19,879 state x k rows). (i) PASS: Brier 0.0701
+  vs per-code base rate 0.0860, -0.0158 [-0.0216, -0.0106], 3 of 4 seasons (production's "never back" 0.1041).
+  (ii) FAIL: R48 (IR, designated to return) over by 22-29 points (actual 17 / 34 / 55% by k 1-2 / 3-4 / 5-8; the base
+  rate was as far off), PUP under by up to 14, other reserve lists under by up to 11; IR (R01, the direct model) within
+  3. (iii) FAIL: in-season episodes 0.1180 -> 0.1190, +0.0010 [-0.0014, +0.0033] (the shared models moved). Descriptive
+  (scratch, after the result): roster codes exist from 2021 only (2019-20 week-1 reserve players coded A01); a week-1
+  R48 exists from 2024 only (15 cases: 88% / 71% back); R01 back that season 36 -> 10% 2021 -> 2025, 33% with 8+ games
+  the season before vs 13%.
+- **PRE-REGISTERED 2026-10-18, a second look at (AX) after its gate failed (labelled: weaker evidence than a first
+  test; one look only, a FAIL closes (AX) until new information).** (AX2) a dedicated direct model for opened-out
+  episodes: return_timing's model (its features + prior_g), trained only on opened-out episodes from 2021 on (codes
+  exist), walk-forward; the chain and the IR model untouched (trained without those episodes, production features), so
+  in-season predictions are identical by construction ((iii) reported, must be exactly 0). Same tool (--dedicated),
+  same rows, GATE (i) and (ii) as (AX).
+- **RESULT {#opened-out-2} (AX2) a dedicated direct model for opened-out episodes: FAIL ((i), (ii)); (AX) closed.**
+  (i) Brier 0.0868 vs base rate 0.0862, +0.0006 [-0.0071, +0.0089] (better in 2 of 4 seasons); (ii) R48 over by 10 /
+  13 points (k 1-2 / 3-4), PUP under by 12 at k 5-8, other reserve lists under by 8; IR within 3. (iii) 0 by
+  construction. Reading: ~460 episodes in four test seasons, codes only from 2021 and their meaning drifting (a week-1
+  R48 from 2024; R01 return rate 36 -> 10%) is too little to learn a calibrated timeline. Neither model nor the base
+  rate is calibrated; production's answer (never back, Brier 0.104) is the worst of all three. Code kept, off
+  (injuries.opened_out; ReturnModel(opened_out=)). OWNER DECISION pending (2026-10-18): keep "never back", or a
+  labelled rule (not a fitted model) for these players, e.g. the IR minimum + ESPN's return date, or their 2024-25
+  rates by code.
