@@ -5,3 +5,6 @@
 .in-pct { font-weight: 700; color: color-mix(in srgb, #f59a91 calc(var(--p) * 1%), var(--ink)); }
 table.dt td.in-note { max-width: 420px; white-space: normal; font-size: var(--fs-sm); color: var(--muted); line-height: 1.35; min-width: 260px; }
 #tab-players-injuries .seg { flex: none; }
+
+/* status tabs (injuries.js) */
+.in-tabs { margin: 10px 0 8px; } .in-tabs .in-n { opacity: .6; font-weight: 600; margin-left: 2px; }

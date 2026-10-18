@@ -2132,7 +2132,7 @@
     body.innerHTML = `
       <div class="pc-head" style="--tc:${esc(info.color || '#666')}"><span class="pc-logo-z" data-zoom="${esc(info.logo ? logoSrc(info.logo, 500) : '')}" role="button" tabindex="0" aria-label="Show a bigger logo">${tLogo(abbr, 34)}</span>
         <div class="pc-id"><h3 id="pcName">${esc(info.name || abbr)}</h3>
-          <div class="pc-meta"><b>${esc((L && (L.seasons.find(s => s.s === L.cur) || {}).rec) || '')}</b>${info.division ? ` <span class="muted">${esc(info.division)}</span>` : ''}</div></div></div>
+          <div class="pc-meta"><b>${esc((L && (L.seasons.find(s => s.s === L.cur) || {}).rec) || '')}</b>${info.division ? ` <span class="muted pc-div">${NFLE.ui.conf(info.division, 14)}</span>` : ''}</div></div></div>
       <div class="seg pc-tabs" role="tablist">${[['ov', 'Summary'], ['log', 'Game log'], ['po', 'Playoffs']].map(([k, l]) => `<button type="button" role="tab" data-tt="${k}" class="${teamTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       <div class="pc-tab" data-tt="ov"${teamTab === 'ov' ? '' : ' hidden'}>${pickerHtml()}${wk.html}</div>
       <div class="pc-tab" data-tt="log"${teamTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every game since 1999</div><div class="tm-log">${L ? teamLogHtml(L, abbr) : '<p class="pc-sub">Loading game log&hellip;</p>'}</div></div></div>
