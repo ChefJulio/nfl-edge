@@ -1282,3 +1282,6 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .sb-t.home .sb-lg .fb-chip { left: -7px; }
 .sb-lg .fb-chip .sb-fb { width: 15px; height: 9px; }
 .mt-side.away.has-ball .mt-num::after { right: calc(100% + 6px); } .mt-side.home.has-ball .mt-num::after { left: calc(100% + 6px); }
+/* the tap readout sits above the scale pills and the leader tag (owner 2026-10-18: clipped under them) */
+.wp-wrap .wp-tip { z-index: 5; background: var(--panel2); box-shadow: 0 6px 18px rgba(0,0,0,.5); }
+.wp-wrap:has(.wp-tip:not([hidden])) .wp-now-tag { opacity: 0; }

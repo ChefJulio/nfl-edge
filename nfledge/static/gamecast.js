@@ -2413,7 +2413,7 @@
       <span class="wp-ax-tm" style="top:${pct(1)}%;--tc:${esc(info.home.color)}">${esc(info.home.team)} 100%</span>
       <span class="wp-ax-n" style="top:${pct(0.75)}%">75%</span><span class="wp-ax-n" style="top:${pct(0.5)}%">50%</span><span class="wp-ax-n" style="top:${pct(0.25)}%">75%</span>
       <span class="wp-ax-tm bot" style="top:${pct(0)}%;--tc:${esc(info.away.color)}">${esc(info.away.team)} 100%</span></div>`;
-    const now = `<span class="wp-now-tag${xr > 70 ? ' left' : ''}" style="left:${xr.toFixed(2)}%;top:${pct(lastPt.home)}%;--tc:${esc(lead.color)}">${esc(lead.team)} ${Math.round(100 * lp)}%</span>`;
+    const now = `<span class="wp-now-tag${xr > 70 ? ' left' : ''}" style="left:${xr.toFixed(2)}%;top:${Math.min(88, Math.max(12, +pct(lastPt.home)))}%;--tc:${esc(lead.color)}">${esc(lead.team)} ${Math.round(100 * lp)}%</span>`;
     return `${axis}<div class="wp-plot">${now}<svg class="wp" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="ESPN win probability over the game">
       <defs><clipPath id="wpTop"><rect x="0" y="0" width="${W}" height="${Y(0.5)}"/></clipPath><clipPath id="wpBot"><rect x="0" y="${Y(0.5)}" width="${W}" height="${H}"/></clipPath></defs>
       <rect x="0" y="0" width="${W}" height="${H}" class="wp-bg"/>${grid}
