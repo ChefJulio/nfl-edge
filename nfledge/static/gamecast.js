@@ -2962,6 +2962,52 @@
         + tbl('Receiving', ['REC', 'TGT', 'YDS', 'TD'], mine.filter(o => o.tgt || v(o, 'reception')).sort((a, b) => v(b, 'rec_yd') - v(a, 'rec_yd')), o => [v(o, 'reception'), o.tgt, v(o, 'rec_yd'), v(o, 'rec_td')]);
     };
   };
+  // Kickers and team defenses from the play-by-play (the box score has no fantasy line for them): field goals by
+  // distance and extra points per kicker; per defense sacks, interceptions, fumble recoveries, defensive / return TDs,
+  // safeties, blocked kicks, and the points and yards it allowed. Scored with the league's kicker / D/ST rules, else
+  // standard ESPN scoring (NFLE.kdst).
+  const kdstLines = (plays, info, sum) => {
+    let lg = null; try { lg = JSON.parse(localStorage.getItem('nfledge-mine') || 'null'); } catch (e) { /* none */ }
+    const kw = (lg && lg.kw) || NFLE.kdst.STD_K, dw = (lg && lg.dw) || NFLE.kdst.STD_D;
+    const nm = {}, names = fullNames(sum, nm), teams = [info.away.team, info.home.team];
+    const other = t => t === teams[0] ? teams[1] : teams[0];
+    const band = y => y < 20 ? '0_19' : y < 30 ? '20_29' : y < 40 ? '30_39' : y < 50 ? '40_49' : y < 60 ? '50_59' : '60_';
+    const K = {}, D = {}; teams.forEach(t => { D[t] = { sack: 0, int: 0, fum_rec: 0, def_td: 0, st_td: 0, safe: 0, blk: 0, ya: 0 }; });
+    let ph = 0, pa = 0;
+    plays.forEach(p => {
+      if (nonPlay(p)) return;
+      const txt = String(p.text || ''), ty = pType(p), off = p.start && p.start.team && TEAM_ID[String(p.start.team.id)];
+      const end = p.end && p.end.team && TEAM_ID[String(p.end.team.id)];
+      const dh = (p.homeScore || 0) - ph, da = (p.awayScore || 0) - pa; ph = p.homeScore || ph; pa = p.awayScore || pa;
+      const scorer = dh > 0 ? info.home.team : da > 0 ? info.away.team : null;
+      const fg = txt.match(/(\d+) yard field goal is (GOOD|No Good|BLOCKED)/i), xp = txt.match(/extra point is (GOOD|No Good|BLOCKED)/i);
+      const kn = (txt.match(new RegExp(`(${NM}) (?:\\d+ yard field goal|extra point)`)) || [])[1];
+      if ((fg || xp) && kn && off) {
+        const k = K[kn] || (K[kn] = { key: kn, team: off, c: {}, line: [] });
+        const ok = /GOOD/.test((fg || xp)[2] || (fg || xp)[1]) && !/No Good/i.test((fg || xp)[0]);
+        const key = fg ? `${ok ? 'fgm' : 'fgmiss'}_${band(+fg[1])}` : ok ? 'xpm' : 'xpmiss';
+        k.c[key] = (k.c[key] || 0) + 1;
+        k.line.push(fg ? `${fg[1]} ${ok ? '✓' : '✗'}` : `XP ${ok ? '✓' : '✗'}`);
+      }
+      if (!off) return;
+      const def = other(off);
+      if (/blocked/i.test(txt) && /field goal|punt|extra point/i.test(`${ty} ${txt}`)) D[def].blk++;
+      if (/sack/i.test(ty)) D[def].sack++;
+      if (/interception/i.test(ty) || /INTERCEPTED/.test(txt)) D[def].int++;
+      if (/FUMBLES/.test(txt) && end && end !== off && !/punt|kick/i.test(ty)) D[end].fum_rec++;
+      if (scorer && /touchdown/i.test(`${ty} ${txt}`) && p.scoringPlay && scorer !== off) D[scorer][/punt|kick/i.test(`${ty}`) ? 'st_td' : 'def_td']++;
+      if (/safety/i.test(`${ty} ${txt}`) && scorer && scorer !== off) D[scorer].safe++;
+      if (p.start.down && !stPlay(p) && !/No Play/i.test(txt)) D[def].ya += +p.statYardage || 0;
+    });
+    const kRows = Object.values(K).map(k => ({ team: k.team, id: nm[k.key.replace(/\s+/g, '')], name: names[k.key.replace(/\s+/g, '')] || k.key,
+      fp: Object.entries(k.c).reduce((t, [key, n]) => t + n * (kw[key] || 0), 0), sub: k.line.join(', ') }));
+    const finalPts = { [info.home.team]: ph, [info.away.team]: pa };
+    const dRows = teams.map(t => { const x = D[t], allowed = finalPts[other(t)];
+      const ln = Object.assign({}, x, { pa_mu: allowed, pa_sd: 0.01, ya_mu: x.ya, ya_sd: 0.01 });
+      const bits = [x.sack && `${x.sack} sk`, x.int && `${x.int} INT`, x.fum_rec && `${x.fum_rec} FR`, (x.def_td + x.st_td) && `${x.def_td + x.st_td} TD`, `${allowed} pts allowed`].filter(Boolean);
+      return { team: t, dst: true, name: `${((DATA && DATA.teams && DATA.teams[t]) || {}).nick || t} D/ST`, fp: NFLE.kdst.dstScore(ln, dw), sub: bits.join(' · ') }; });
+    return { K: kRows, DST: dRows };
+  };
   const playerStats = (sum, info, opt = {}) => {
     const P = sum && sum.boxscore && sum.boxscore.players;
     if (!P || !P.length) return opt.empty ? `<section class="gcs" id="${opt.id || 'gcPst'}"><h3>${esc(opt.title || 'Player stats')}</h3><p class="muted">${esc(opt.empty)}</p></section>` : '';
@@ -3028,6 +3074,10 @@
       const lg = leagueName();
       return `<div class="pst-team" data-pst="__fp"${pick === '__fp' ? '' : ' hidden'}><div class="ff-head">${sides.map(x => `<span>${logo(x.logo, '#111', 18, x.team)} ${esc(x.team)}</span>`).join('')}</div>
         ${['QB', 'RB', 'WR', 'TE'].filter(k => by[k]).map(k => `<div class="ff-pos"><div class="ff-k">${k}</div><div class="ff-cols"><div>${col(by[k][sides[0].team])}</div><div>${col(by[k][sides[1].team])}</div></div></div>`).join('') || '<p class="muted">No fantasy points yet.</p>'}
+        ${(() => { const kd = kdstLines(opt.plays || allPlays(sum).flatMap(d => d.plays || []), info, sum);
+          const kcol = (rows, t) => rows.filter(r => r.team === t).sort((a, b) => b.fp - a.fp).map(r => `<div class="ff-r" title="${esc(r.sub)}">${r.dst ? logo((sides.find(x => x.team === r.team) || {}).logo, '#111', 20, r.team) : `<img class="pi-hs" src="${esc(r.id && NFLE.ui ? NFLE.ui.headshot(r.id) : '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`}
+            <span class="ff-n">${esc(r.name)}<small class="ff-sub">${esc(r.sub)}</small></span><span class="ff-pp"><b class="ff-p ${r.fp >= 10 ? 'hi' : r.fp < 3 ? 'lo' : ''}">${f1(r.fp)}</b></span></div>`).join('') || '<div class="ff-r muted">-</div>';
+          return [['K', kd.K], ['DST', kd.DST]].filter(([, rows]) => rows.length).map(([k, rows]) => `<div class="ff-pos"><div class="ff-k">${k === 'DST' ? 'D/ST' : k}</div><div class="ff-cols"><div>${kcol(rows, sides[0].team)}</div><div>${kcol(rows, sides[1].team)}</div></div></div>`).join(''); })()}
         <p class="gcs-note">Fantasy points this game, ${lg ? `${esc(lg)} scoring` : 'your scoring'}, of his projection${going ? ' (green: on pace or better)' : ''}.${lgm ? '' : " Connect your league on the Fantasy tab to see your players and your opponent's marked."}</p></div>`;
     };
     const tabs = [[sides[0].team, sides[0]], ['__fp', null], [sides[1].team, sides[1]]];
@@ -3506,7 +3556,7 @@
               : !allPlays(sum).length && info.state === 'post' ? '<p class="muted">ESPN has no play-by-play for this game (games before about 2005 only have box scores).</p>'
               : gameLog(sum, info, ser, upto)}</div></section>`
       : GP.pane === 'team' ? `<section class="gcs" id="gcTeam"><h3>Team stats</h3>${st.replay ? '<p class="gcs-note">As of this play, counted from the play-by-play.</p>' : ''}${sum ? teamStats(sum, info, null, st.replay ? st.tstats : null) || '<p class="muted">Not available yet.</p>' : ''}</section>`
-      : playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: st.replay ? 'As of this play, counted from the play-by-play.' : '', lines: st.replay ? st.lines : null, secs: st.secs, empty: 'The box score fills in once the game starts.' })}`;
+      : playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: st.replay ? 'As of this play, counted from the play-by-play.' : '', lines: st.replay ? st.lines : null, plays: st.replay ? st.plays : null, secs: st.secs, empty: 'The box score fills in once the game starts.' })}`;
     root.innerHTML = `
       <section class="sb">${side(info.away, false)}<div class="sb-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<b>${esc(status)}</b>${!nx && sp && sit && sit.shortDownDistanceText
         ? `<span class="sb-dd">${esc(sit.shortDownDistanceText)}${sit.possessionText ? ` · ${esc(sit.possessionText)}` : ''}</span>` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}</section>

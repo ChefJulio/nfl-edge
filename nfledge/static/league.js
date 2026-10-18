@@ -218,7 +218,7 @@
       try {
         const m = L.matchup(mine.id), opp = m && L.teams.find(t => t.id === m.opp);
         const ids = t => (t ? t.ext : []).map(gsisOf).filter(Boolean);
-        localStorage.setItem('nfledge-mine', JSON.stringify({ league: L.name, mine: ids(mine), opp: ids(opp), oppName: opp ? opp.name : '', w: L.scoring }));
+        localStorage.setItem('nfledge-mine', JSON.stringify({ league: L.name, mine: ids(mine), opp: ids(opp), oppName: opp ? opp.name : '', w: L.scoring, kw: L.kw || null, dw: L.dw || null }));
       } catch (e) { /* private mode */ }
     };
     const season = new Date().getMonth() < 2 ? new Date().getFullYear() - 1 : new Date().getFullYear();

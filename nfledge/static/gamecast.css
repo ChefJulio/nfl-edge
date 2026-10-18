@@ -1443,3 +1443,5 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .sit-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
 .sit-row .sit-tm { justify-self: start; } .sit-row .sit-dn { justify-self: center; } .sit-row .sit-at { justify-self: end; text-align: right; }
 .sit-at.rz b, .sit-at.rz .muted { color: #ff8f84; }
+.ff-n .ff-sub { display: block; font-size: 10px; font-weight: 500; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+.ff-r .nl { flex: none; }
