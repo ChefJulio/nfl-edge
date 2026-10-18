@@ -40,13 +40,13 @@
   // status = "<game designation> (<practice days>)", e.g. "Questionable (DLF)" or just " (D)" midweek: the designation
   // is a colored tag, each practice day its own chip in the NFL's report terms (FP green, LP amber, DNP red), so a
   // Wednesday DNP never reads as "Doubtful"
-  const PRAC = { D: 'Did not practice', L: 'Limited', F: 'Full' }, PRAB = { D: 'DNP', L: 'LP', F: 'FP' }, DAYS = ['Wed', 'Thu', 'Fri'];
+  const PRAC = { D: 'Did not practice', L: 'Limited', F: 'Full', '-': 'not on the report' }, PRAB = { D: 'DNP', L: 'LP', F: 'FP', '-': '&ndash;' }, DAYS = ['Wed', 'Thu', 'Fri'];
   const injTag = st => {
     if (!st) return '';
-    const m = String(st).match(/^(.*?)\s*\(([DLF]+)\)\s*$/), des = (m ? m[1] : String(st)).trim(), pr = m ? m[2] : '';
+    const m = String(st).match(/^(.*?)\s*\(([DLF-]+)\)\s*$/), des = (m ? m[1] : String(st)).trim(), pr = m ? m[2] : '';
     const c = des ? injCode(des) : '';
     const tag = c ? `<span class="dc-tag dt-${c === 'Q' ? 'q' : c === 'D' ? 'd' : 'out'}" title="${esc(des)}">${esc(c)}</span>` : '';
-    const days = pr ? `<span class="pr-days" title="Practice: ${esc([...pr].map((x, i) => `${DAYS[i] || ''} ${PRAC[x]}`).join(', '))}">${[...pr].map(x => `<i class="pr-${x}">${PRAB[x]}</i>`).join('')}</span>` : '';
+    const days = pr ? `<span class="pr-days" title="Practice: ${esc([...pr].map((x, i) => `${DAYS[i] || ''} ${PRAC[x]}`).join(', '))}">${[...pr].map(x => `<i class="pr-${x === '-' ? 'n' : x}">${PRAB[x]}</i>`).join('')}</span>` : '';
     return tag + days;
   };
   const getJSON = async (url, ms = 12000) => {
@@ -992,7 +992,7 @@
     // This week's practice as a strip (owner 2026-10-17: "Questionable (FFF)" was unreadable): a tile per day, colored
     // full / limited / did not practice, and one plain sentence. Days from the dated report when it's in the data,
     // else the letters in his status / the model's note, Wed-Fri (Mon-Wed before a Thursday game).
-    const code = (((p && (p.status || '') + ' ' + (p.inactive_why || '')) || '').match(/\(([DLF]{1,3})\)/) || [])[1] || '';
+    const code = (((p && (p.status || '') + ' ' + (p.inactive_why || '')) || '').match(/\(([DLF-]{1,3})\)/) || [])[1] || '';
     const tg = DATA && p ? teamGame(p.team, DATA) : null;
     const thuGame = tg && /^Thu/.test(tg.kickoff || '');
     const wd = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short' });

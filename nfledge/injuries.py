@@ -773,6 +773,22 @@ class InjuryModel:
       final = self.final_report_teams(days, season, week)
     scratch = self.scratch_prob(season, week)
     p["scratch_avail"] = p.gsis_id.map(scratch).fillna(1.0)
+    # display only (owner 2026-10-18: Tyler Warren showed one "LP" labelled Wednesday): each team's practice dates this
+    # week, so a player first listed Friday reads "FFL" (off the report Wednesday and Thursday = practiced fully); the model reads x.days
+    team_dates = {}
+    if use_days and "dates" in days:
+      tm = dict(zip(p.gsis_id, p.team))
+      for g, ds in days.dates.dropna().items():
+        if g in tm:
+          team_dates.setdefault(tm[g], set()).update(d for d in str(ds).split(",") if d)
+
+    def shown(x, team) -> str:
+      dd, ds = str(x.days.iloc[0] or "").replace("?", ""), [d for d in str(x.dates.iloc[0] or "").split(",") if d] if "dates" in x else []
+      allds = sorted(team_dates.get(team, set()))[-3:]
+      if not dd or len(ds) != len(dd) or not allds:
+        return dd
+      on = dict(zip(ds, dd))
+      return "".join(on.get(d, "F") for d in allds)  # not on that day's report = practiced fully (owner 2026-10-18)
     for i, row in p.iterrows():
       p.at[i, "avail"] = p.at[i, "scratch_avail"]  # healthy-scratch risk unless the injury report says more
       if row.team in published and use_days and row.gsis_id in days.index:
@@ -792,7 +808,8 @@ class InjuryModel:
         ruled = self.midweek_ruling(row.gsis_id, gs)
         if ruled:
           p.at[i, "avail"], label = ruled
-        p.at[i, "status"] = label + (f" ({x.days.iloc[0]})" if x.days.iloc[0] else "")
+        sd = shown(x, row.team)
+        p.at[i, "status"] = label + (f" ({sd})" if sd else "")
         continue
       if row.team in published:
         if row.gsis_id in cur_map.index:

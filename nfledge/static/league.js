@@ -262,8 +262,8 @@
       return Math.abs(d) < 0.05 ? '' : `${NFLE.fmt.signed1(d)} if ${esc(last(c.name))} ${c.pSit >= 0.5 ? 'plays' : 'sits'}`; };
     // "Questionable (ESPN) (DL)" -> "Questionable per ESPN; practice: DNP, limited"
     const statusWords = st => {
-      const m = String(st || '').match(/^(.*?)\s*\(([DLF]+)\)\s*$/), des = (m ? m[1] : String(st || '')).trim().replace(/\s*\(ESPN\)/, ' per ESPN');
-      const days = m ? [...m[2]].map(c => ({ D: 'DNP', L: 'limited', F: 'full' })[c]).join(', ') : '';
+      const m = String(st || '').match(/^(.*?)\s*\(([DLF-]+)\)\s*$/), des = (m ? m[1] : String(st || '')).trim().replace(/\s*\(ESPN\)/, ' per ESPN');
+      const days = m ? [...m[2]].map(c => ({ D: 'DNP', L: 'limited', F: 'full', '-': 'not listed' })[c]).join(', ') : '';
       return [des, days && `practice: ${days}`].filter(Boolean).join('; ') || 'injury report';
     };
     // ---- best lineup: fixed slots first (scarcest eligibility), then flex / superflex, by expected points -----------
