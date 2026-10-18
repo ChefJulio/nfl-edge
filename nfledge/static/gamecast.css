@@ -1450,3 +1450,7 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .mg-h { letter-spacing: .04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 380px) { .mg-h { font-size: 8.8px; letter-spacing: 0; } }
 .dsc .dsc-up { color: var(--good); font-weight: 800; } .dsc .rp-yd { margin-left: 6px; font-size: 11px; }
+/* the scoreboard in the matchup tiles' diagonal team-color gradient (owner 2026-10-18) */
+.sb { background: linear-gradient(120deg, color-mix(in srgb, var(--ac) 50%, var(--panel)) 0%, color-mix(in srgb, var(--ac) 22%, var(--panel)) 40%,
+  color-mix(in srgb, var(--hc) 22%, var(--panel)) 60%, color-mix(in srgb, var(--hc) 50%, var(--panel)) 100%); }
+.sb .sb-t, .sb .sb-mid { background: transparent; }

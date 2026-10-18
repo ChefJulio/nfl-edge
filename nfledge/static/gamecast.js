@@ -3570,7 +3570,7 @@
       : GP.pane === 'team' ? `<section class="gcs" id="gcTeam"><h3>Team stats</h3>${st.replay ? '<p class="gcs-note">As of this play, counted from the play-by-play.</p>' : ''}${sum ? teamStats(sum, info, null, st.replay ? st.tstats : null) || '<p class="muted">Not available yet.</p>' : ''}</section>`
       : playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: st.replay ? 'As of this play, counted from the play-by-play.' : '', lines: st.replay ? st.lines : null, plays: st.replay ? st.plays : null, secs: st.secs, empty: 'The box score fills in once the game starts.' })}`;
     root.innerHTML = `
-      <section class="sb">${side(info.away, false)}<div class="sb-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<b>${esc(status)}</b>${!nx && sp && sit && sit.shortDownDistanceText
+      <section class="sb" style="--ac:${esc(info.away.color)};--hc:${esc(info.home.color)}">${side(info.away, false)}<div class="sb-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<b>${esc(status)}</b>${!nx && sp && sit && sit.shortDownDistanceText
         ? `<span class="sb-dd">${esc(sit.shortDownDistanceText)}${sit.possessionText ? ` · ${esc(sit.possessionText)}` : ''}</span>` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}</section>
       <div class="seg gc-tabs" role="tablist">${GTABS.map(([k, l]) => `<button type="button" role="tab" data-gtab="${k}" class="${tab === k ? 'on' : ''}">${k === 'live' && info.state === 'in' ? '<span class="live-dot"></span>' : ''}${k === 'live' && info.state === 'post' && !rp ? 'Final' : l}</button>`).join('')}</div>
       ${tab === 'pre' ? preTab(g) : live()}`;
