@@ -139,3 +139,9 @@ button:active:not(:disabled), a.mt:active, .chip:active, .sbtn:active, [data-ope
 .tip-pop { position: fixed; z-index: 300; max-width: min(320px, calc(100vw - 16px)); padding: 7px 10px; border-radius: 8px;
   background: #0d1015; border: 1px solid var(--line); box-shadow: 0 6px 20px rgba(0,0,0,.5); color: var(--ink);
   font-size: var(--fs-sm); line-height: 1.35; pointer-events: none; }
+/* the name never gives way to its badges (owner 2026-10-18: two "if X plays" chips squeezed Keon Coleman to "K / C"):
+   the name keeps a readable width; the badges take what's left and wrap onto a second line */
+.nm2w .nm2 { flex: 0 0 auto; min-width: min(6.5em, 45%); max-width: 100%; }
+.nm2w .nm-b { flex: 0 1 auto; min-width: 0; }
+.nm2w .nm-b .badges { flex-wrap: wrap; }
+.nm2w .nm-b .badges > * { white-space: nowrap; }  /* a chip stays one piece; chips stack when they don't fit side by side */
