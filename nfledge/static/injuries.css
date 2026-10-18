@@ -27,3 +27,4 @@ td.in-when { white-space: nowrap; font-size: var(--fs-xs); }
 .in-dt .nm2w { flex-wrap: wrap; row-gap: 3px; } .in-dt .nm2w .nm-b { flex-basis: 100%; }
 .in-dt .nm-b .badges { margin-top: 0; }
 .in-dt .nm-b, .in-dt .nm-b .badges { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 3px; }
+.in-when .in-g, .in-when .in-o { display: block; } .in-when .in-g { color: var(--muted); } .in-when .in-o { color: var(--ink); font-weight: 600; margin-top: 2px; }
