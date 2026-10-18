@@ -1363,3 +1363,5 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .lpf-r .pi-fp { margin-left: 8px; }
 /* (the site's global .opp is the table's opponent cell: never reuse it) */
 .lpf { min-width: 0; } .lpf-r { min-width: 0; }
+/* the box score's team switch spans the row, each team half (owner 2026-10-18) */
+.seg.pst-seg { display: flex; width: 100%; } .seg.pst-seg button { flex: 1 1 0; justify-content: center; display: inline-flex; align-items: center; gap: 8px; }
