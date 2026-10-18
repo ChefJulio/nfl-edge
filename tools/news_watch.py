@@ -22,6 +22,7 @@ SITE = os.environ.get("SITE_URL", "https://chefjulio.github.io/nfl-edge/").rstri
 MIN_PROJ = 8.0
 SERIOUS = {"Doubtful", "Out", "Injured Reserve", "Physically Unable to Perform", "Suspension", "Reserve/Suspended"}
 QUIET_MIN = 30
+EVERY_MIN = 10   # the relay looks this often
 
 
 def get(url: str):
@@ -106,8 +107,9 @@ def recent_build() -> str | None:
   return None
 
 
-def main():
-  dry = "--dry-run" in sys.argv
+def check(dry: bool) -> None:
+  """One look: status changes and week-clock events since the last build; start a build if any (cooldown aside)."""
+  INDEX.clear()  # the live site's index.json can change between looks (a build finished)
   try:
     now, then, who = espn_now(), built_from(), relevant()
   except Exception as e:
@@ -136,6 +138,44 @@ def main():
     return
   subprocess.run(["gh", "workflow", "run", "deploy.yml"], check=True)
   print("[watch] started a full build")
+
+
+def others_running() -> bool:
+  """Another watcher run already in progress (this run excluded)."""
+  me = os.environ.get("GITHUB_RUN_ID", "")
+  try:
+    runs = json.loads(subprocess.run(["gh", "run", "list", "--workflow", "news-watch.yml", "--limit", "10",
+                                      "--json", "databaseId,status"], capture_output=True, text=True, check=True).stdout)
+  except Exception:
+    return False
+  return any(r["status"] in ("in_progress", "queued") and str(r["databaseId"]) != me for r in runs)
+
+
+def main():
+  """--loop=MINUTES (owner 2026-10-18: GitHub's scheduler ran the 30-minute check twice in a day): look every
+  EVERY_MIN minutes for MINUTES, then start the next watcher run (a relay; a running job isn't subject to the
+  scheduler). A cron-started run that finds a watcher already running exits: the cron is only the backstop."""
+  dry = "--dry-run" in sys.argv
+  loop = next((int(a.split("=", 1)[1]) for a in sys.argv if a.startswith("--loop=")), 0)
+  if not loop:
+    check(dry)
+    return
+  if others_running():
+    print("[watch] a watcher is already running; this one stops")
+    return
+  import time
+  end = time.time() + loop * 60
+  while True:
+    try:
+      check(dry)
+    except Exception as e:  # one bad look never ends the relay
+      print(f"[watch] check failed ({e})")
+    if time.time() + EVERY_MIN * 60 >= end:
+      break
+    time.sleep(EVERY_MIN * 60)
+  if not dry:
+    subprocess.run(["gh", "workflow", "run", "news-watch.yml"], check=False)
+    print("[watch] relay: started the next watcher")
 
 
 if __name__ == "__main__":

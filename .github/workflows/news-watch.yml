@@ -1,6 +1,8 @@
 name: News watch
 
-# Every 30 minutes: start a full build when a player who matters changes injury status (tools/news_watch.py). The
+# A relay of long runs (each looks every 10 minutes for ~5.5 hours, then starts the next; the cron below only
+# restarts the relay if it ever breaks - GitHub's scheduler ran the 30-minute check twice on 2026-10-18).
+# Each look: start a full build when a player who matters changes injury status (tools/news_watch.py). The
 # scheduled builds (deploy.yml) still run as before; this catches news between them (owner 2026-10-17: Jalen Hurts
 # went on IR on a Saturday afternoon). GitHub's schedules are best-effort, so a check can run late or be skipped.
 # Also the week clock (owner 2026-10-18; nfledge/week_clock.py, the live site's index.json "clock"): a build starts once
@@ -15,14 +17,10 @@ permissions:
   actions: write    # start deploy.yml (workflow_dispatch) and list its runs
   contents: read
 
-concurrency:
-  group: news-watch
-  cancel-in-progress: true
-
 jobs:
   watch:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 350   # the relay: ~5.5 hours of looks, then it starts its successor
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,4 +29,4 @@ jobs:
       - name: Compare ESPN's injury feed with the live site's
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python tools/news_watch.py
+        run: python tools/news_watch.py --loop=320
