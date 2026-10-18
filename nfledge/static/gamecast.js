@@ -3326,17 +3326,35 @@
   }).join('');
   // Recent (owner 2026-10-18: "catch up the user on the most recent plays"): the drive on now and the one before it,
   // newest first, each under its drive's header
+  // the play about to happen (owner 2026-10-18: "pre snap - awaiting snap"): the clock, the down and the spot, live only
+  const presnap = (st, info) => {
+    const sit = st.sit || {}, dd = sit.shortDownDistanceText || '';
+    if (!dd) return '';
+    return `<li class="ds-p ps-next"><span class="ds-w">${esc(`${periodName(info.period)} ${info.clock || ''}`.trim())}</span><span class="ds-h"><span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>
+      ${sit.possessionText ? `<span class="muted">at ${esc(sit.possessionText)}</span>` : ''}<span class="ds-sp"><span class="live-dot"></span>Pre-snap, awaiting the snap&hellip;</span></span></li>`;
+  };
   const recentView = (st, info, sum) => {
     const ds = st.drives.filter(d => (d.plays || []).length).slice(-2).reverse();
     if (!ds.length) return '<p class="muted">Plays appear once the game starts.</p>';
     const names = fullNames(sum);
     const teamOf = id => String(id) === String(info.home.id) ? info.home : String(id) === String(info.away.id) ? info.away : null;
-    return ds.map(d => {
-      const tm = teamOf(d.team && d.team.id) || {}, isCur = st.cur && String(st.cur.id) === String(d.id) && (st.live || st.replay);
-      const res = driveResult(d, tm, info, !!isCur);
+    // between plays after a score (ESPN keeps the scoring drive "current" until the kick): that drive is over, and
+    // what's next (the try or the kickoff) leads
+    const nx = st.live ? nextUp(st, info) : null;
+    const next = nx ? `<ol class="ds-ps"><li class="ds-p ps-next"><span class="ds-w">${esc(`${periodName(info.period)} ${info.clock || ''}`.trim())}</span><span class="ds-h">${nx.head}
+      <span class="ds-sp"><span class="live-dot"></span>Awaiting the ${/try/i.test(nx.head) ? 'try' : 'kick'}&hellip;</span></span></li></ol>` : '';
+    const lastReal = [...st.plays].reverse().find(p => !nonPlay(p));
+    return next + ds.map(d => {
+      const tm = teamOf(d.team && d.team.id) || {}, isCur = !nx && st.cur && String(st.cur.id) === String(d.id) && (st.live || st.replay);
+      let res = driveResult(d, tm, info, !!isCur);
+      if (nx && !res.text && lastReal && (d.plays || []).includes(lastReal)) {
+        const t = `${pType(lastReal)} ${lastReal.text || ''}`;
+        res = { text: lastReal.scoringPlay ? (/field goal/i.test(t) ? 'Field goal' : isTry(lastReal) ? 'Touchdown' : /safety/i.test(t) ? 'Safety' : 'Touchdown') : 'Ended', cls: lastReal.scoringPlay ? 'good' : '' };
+        if (isTry(lastReal) && !lastReal.scoringPlay) res = { text: 'Touchdown', cls: 'good' };
+      }
       return `<div class="rc-d" style="--tc:${esc(tm.color || '#666')}"><button type="button" class="rc-h" data-drive="${esc(d.id)}">${tm.logo ? logo(tm.logo, '#111', 18, tm.team) : ''}<b>${esc(tm.team || '')} drive</b>
           ${isCur ? '<span class="rc-now"><span class="live-dot"></span>Now</span>' : `<span class="dr-res ${res.cls}">${esc(res.text)}</span>`}<span class="muted rc-m">${esc(d.description || '')}</span></button>
-        <ol class="ds-ps">${playRows([...(d.plays || [])].reverse(), info, names)}</ol></div>`;
+        <ol class="ds-ps">${isCur && st.live ? presnap(st, info) : ''}${playRows([...(d.plays || [])].reverse(), info, names)}</ol></div>`;
     }).join('');
   };
   const DOWN_CLS = t => /^1st/.test(t) ? 'd1' : /^3rd/.test(t) ? 'd3' : /^4th/.test(t) ? 'd4' : '';
