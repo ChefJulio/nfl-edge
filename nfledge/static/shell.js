@@ -63,9 +63,6 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   // 'tiles', row class 'teamrow', row style from tileStyle) with the same name cell, and every matchup is the Games
   // tab's tile. Teams map = the week data's (NFLE.week() -> D.teams: logo, logo_bg, color, color2, nick).
   const F = NFLE.fmt;
-  // team -> [width / height, ink share] of each wordmark (python tools/wordmarks_build.py --meta); WM_INK = the ink
-  // area (px^2) every mark aims for: a 4.8:1 mark at 60% ink comes out 15px tall
-  const WM = {"ARI":[10.59,0.55],"ATL":[8.96,0.62],"BAL":[7.18,0.54],"BUF":[3.88,0.7],"CAR":[4.83,0.6],"CHI":[7.05,0.8],"CIN":[11.05,0.59],"CLE":[4.07,0.76],"DAL":[5.82,0.72],"DEN":[8.73,0.52],"DET":[3.79,0.67],"GB":[3.38,0.7],"HOU":[10.56,0.5],"IND":[4.04,0.65],"JAX":[4.48,0.48],"KC":[4.55,0.77],"LA":[4.53,0.49],"LAC":[5.81,0.39],"LV":[6.17,0.72],"MIA":[5.15,0.36],"MIN":[3.03,0.39],"NE":[4.31,0.47],"NO":[4.31,0.39],"NYG":[2.61,0.7],"NYJ":[5.27,0.66],"PHI":[6.18,0.6],"PIT":[3.6,0.53],"SEA":[9.3,0.48],"SF":[2.99,0.7],"TB":[3.62,0.39],"TEN":[6.44,0.53],"WAS":[5.1,0.66]}, WM_INK = 648;
   NFLE.ui = {
     headshot: espn => espn ? `https://a.espncdn.com/i/headshots/nfl/players/full/${encodeURIComponent(espn)}.png` : '',
     ids: {},  // gsis -> ESPN id (data/espn_ids.json, tools/stats_build.py): a headshot for any list with a player id
@@ -98,14 +95,10 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       // the line in words (owner 2026-10-17): "JAX -2.5" -> "JAX by 2.5", "PK" -> "pick'em"
       const vegas = l => { const m = /^([A-Z]{2,3}) -(\d+(?:\.\d)?)$/.exec(l || '');
         return m ? `<b>${esc(m[1])} by ${+m[2]}</b>` : l === 'PK' ? "<b>pick'em</b>" : `<b>${esc(l)}</b>`; };
-      // each mark sized to about the same amount of ink (owner 2026-10-17: "boldness and width and sizing are very
-      // inconsistent"): wide or thin marks taller, compact or heavy ones shorter; height 11-21px, width up to 118px
-      const wordmark = s => {
-        const m = WM[s.team];
-        const h = m ? Math.max(11, Math.min(21, Math.sqrt(WM_INK / (m[0] * m[1])))) : 15, w = m ? Math.min(118, h * m[0]) : 0;
-        const size = m ? ` style="height:${(w / m[0]).toFixed(1)}px;width:${w.toFixed(1)}px;max-width:none"` : '';
-        return `<img class="mt-wm" src="${esc(NFLE.root || '')}assets/wordmarks/${esc(s.team)}.png" alt="${esc(s.nick)}"${size} onerror="this.replaceWith(this.alt)">`;
-      };
+      // the team name in one scoreboard font (owner 2026-10-18, Barlow Condensed ExtraBold italic, self-hosted, OFL): the
+      // official wordmarks are each team's own drawn lettering, so weight, spacing and height never matched; the images
+      // stay on All teams (teamgrid.js), the per-mark sizing is in git history (b562159)
+      const wordmark = s => `<span class="mt-tn">${esc(s.nick)}</span>`;
       const f = g.fc || {}, fin = g.final;
       const sides = [[g.away, fin && fin.away, fin && fin.home, f.p_away], [g.home, fin && fin.home, fin && fin.away, f.p_home]];
       const T = NFLE.ui.tm;

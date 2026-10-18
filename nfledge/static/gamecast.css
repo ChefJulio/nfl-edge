@@ -1097,3 +1097,11 @@ table.dst-parts tr.dst-tot td { border-top: 1px solid var(--line); }
 table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .dst-ls { margin: 10px 0 4px; } .dst-ls:first-child { margin-top: 0; }
 .dst-note { margin: 10px 2px 0; }
+
+/* matchup tiles: team names in the scoreboard font (shell.js matchTile; owner 2026-10-18) */
+@font-face { font-family: 'Barlow Condensed'; font-style: italic; font-weight: 800; font-display: swap;
+  src: url('fonts/barlow-condensed-800-italic.woff2') format('woff2'); }
+.mt-tn { display: block; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-style: italic; font-weight: 800;
+  font-size: 22px; line-height: 1; letter-spacing: .03em; text-transform: uppercase; color: #fff; white-space: nowrap;
+  text-shadow: 1px 0 0 #000, -1px 0 0 #000, 0 1px 0 #000, 0 -1px 0 #000, 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 0 2px 3px rgba(0,0,0,.5); }
+@media (max-width: 400px) { .mt-tn { font-size: 20px; } }
