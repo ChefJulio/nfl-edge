@@ -78,6 +78,10 @@
     try { const s = JSON.parse(localStorage.getItem('nfledge-scoring') || 'null'); if (s && s.w) return s.w; } catch (e) { /* default */ }
     return (DATA && DATA.score && DATA.score.presets && DATA.score.presets['Half PPR']) || HALF;
   };
+  // fantasy scoring for the gamecast's fantasy numbers: the connected league's (league.js saves it with the roster),
+  // else the site's picked scoring (owner 2026-10-18)
+  const leagueW = () => { try { const m = JSON.parse(localStorage.getItem('nfledge-mine') || 'null'); if (m && m.w && Object.keys(m.w).length) return m.w; } catch (e) { /* none */ } return weights(); };
+  const leagueName = () => { try { const m = JSON.parse(localStorage.getItem('nfledge-mine') || 'null'); return m && m.w ? m.league : ''; } catch (e) { return ''; } };
   const pts = (c, w, pos) => c.reduce((t, v, i) => t + (v || 0) * (w[KEYS()[i]] || 0), 0) + (pos === 'TE' ? (c[5] || 0) * (w.te_bonus || 0) : 0);
   // A projection and its range under the viewer's scoring: exact re-score of the stat line, ratio for the rest.
   const scaled = (p, d = DATA) => {
@@ -2904,13 +2908,13 @@
     // owner 2026-10-14: no projection comparisons here, just what happened. Passing, rushing and receiving stay separate
     // tables (a QB who runs shows in both); each of those rows ends with the player's whole-game fantasy points in the
     // viewer's scoring, so the same total repeats across his tables.
-    const lines = boxLines(sum), map = byEspn(), w = weights();
+    const lines = boxLines(sum), map = byEspn(), w = leagueW();
     const FP_CATS = ['passing', 'rushing', 'receiving'];
     const fpOf = id => { const o = lines[id]; if (!o) return null; const pid = map[id], pp = pid && DATA && DATA.players[pid]; return pts(o.line, w, pp ? pp.pos : ''); };
     const U = NFLE.ui, teams = (DATA && DATA.teams) || {};
     if (!GSIS_OF && U && U.ids && Object.keys(U.ids).length) { GSIS_OF = {}; Object.entries(U.ids).forEach(([g, e]) => { GSIS_OF[e] = g; }); }
     const sides = [info.away, info.home];
-    const pick = sides.some(x => x.team === GP.pst) ? GP.pst : info.away.team;
+    const pick = GP.pst === '__fp' || sides.some(x => x.team === GP.pst) ? GP.pst : info.away.team;
     const block = side => {
       const tp = P.find(x => ourCode(x.team.abbreviation) === side.team);
       if (!tp) return '';
@@ -2934,8 +2938,29 @@
       }).join('');
       return `<div class="pst-team" data-pst="${esc(side.team)}"${side.team === pick ? '' : ' hidden'}>${cats || '<p class="muted">No player stats.</p>'}</div>`;
     };
-    const seg = `<div class="seg pst-seg" role="tablist">${sides.map(x => `<button type="button" role="tab" data-pst="${esc(x.team)}" class="${x.team === pick ? 'on' : ''}">${logo(x.logo, '#111', 18, x.team)} ${esc(x.team)}</button>`).join('')}</div>`;
-    return `<section class="gcs" id="${opt.id || 'gcPst'}"><h3>${esc(opt.title || 'Player stats')} <span class="src">ESPN</span></h3>${opt.note ? `<p class="gcs-note">${esc(opt.note)}</p>` : ''}${seg}${sides.map(block).join('')}</section>`;
+    // Fantasy (owner 2026-10-18): both teams side by side, by position, each sorted by fantasy points (the league's scoring)
+    const fpBlock = () => {
+      const by = {};
+      Object.entries(lines).forEach(([id, o]) => {
+        const pid = map[id], pp = pid && DATA && DATA.players[pid];
+        // off this week's board (no position on file): from what he did, passing = QB, more carries than targets = RB,
+        // else a receiver (a tight end lands with the WRs)
+        const guess = o.att >= 3 ? 'QB' : o.car > o.tgt ? 'RB' : (o.tgt || o.line.some(v => v)) ? 'WR' : null;
+        const pos = pp ? pp.pos : guess, side = sides.find(x => x.team === o.team);
+        if (!pos || !['QB', 'RB', 'WR', 'TE'].includes(pos) || !side) return;
+        const fp = pts(o.line, w, pos);
+        ((by[pos] = by[pos] || { [sides[0].team]: [], [sides[1].team]: [] })[o.team] || []).push({ id, pid, o, fp });
+      });
+      const col = rows => rows.sort((a, b) => b.fp - a.fp).map(r => `<div class="ff-r"${r.pid ? ` data-open-pid="${esc(r.pid)}"` : ''}><img class="pi-hs" src="${esc(NFLE.ui ? NFLE.ui.headshot(r.id) : '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+          <span class="ff-n">${esc(r.o.short || r.o.name)}</span><b class="ff-p ${r.fp >= 15 ? 'hi' : r.fp < 3 ? 'lo' : ''}">${f1(r.fp)}</b></div>`).join('') || '<div class="ff-r muted">-</div>';
+      const lg = leagueName();
+      return `<div class="pst-team" data-pst="__fp"${pick === '__fp' ? '' : ' hidden'}><div class="ff-head">${sides.map(x => `<span>${logo(x.logo, '#111', 18, x.team)} ${esc(x.team)}</span>`).join('')}</div>
+        ${['QB', 'RB', 'WR', 'TE'].filter(k => by[k]).map(k => `<div class="ff-pos"><div class="ff-k">${k}</div><div class="ff-cols"><div>${col(by[k][sides[0].team])}</div><div>${col(by[k][sides[1].team])}</div></div></div>`).join('') || '<p class="muted">No fantasy points yet.</p>'}
+        <p class="gcs-note">Fantasy points this game, ${lg ? `${esc(lg)} scoring` : 'your scoring'}.</p></div>`;
+    };
+    const tabs = [[sides[0].team, sides[0]], ['__fp', null], [sides[1].team, sides[1]]];
+    const seg = `<div class="seg pst-seg" role="tablist">${tabs.map(([k, x]) => `<button type="button" role="tab" data-pst="${esc(k)}" class="${k === pick ? 'on' : ''}">${x ? `${logo(x.logo, '#111', 18, x.team)} ${esc(x.team)}` : 'Fantasy'}</button>`).join('')}</div>`;
+    return `<section class="gcs" id="${opt.id || 'gcPst'}"><h3>${esc(opt.title || 'Player stats')} <span class="src">ESPN</span></h3>${opt.note ? `<p class="gcs-note">${esc(opt.note)}</p>` : ''}${seg}${block(sides[0])}${fpBlock()}${block(sides[1])}</section>`;
   };
   // Turning points as cards (owner 2026-10-18: "our elegant visual presentation"): the quarter, clock, down and spot,
   // the score after it, the play as a headline, the win-chance swing from the side it helped, and what it gave each
@@ -3302,7 +3327,7 @@
   const KEY_STATS = ['Yards per Play', 'Total Yards', '3rd down efficiency', 'Turnovers', 'Possession'];
   const fantasyCard = (st, info) => {
     if (!DATA) return '';
-    const map = byEspn(), w = weights(), U = NFLE.ui, teams = DATA.teams || {};
+    const map = byEspn(), w = leagueW(), U = NFLE.ui, teams = DATA.teams || {};
     const byPid = {}; Object.entries(st.lines).forEach(([e, o]) => { if (map[e]) byPid[map[e]] = o; });
     let lg = null; try { lg = JSON.parse(localStorage.getItem('nfledge-mine') || 'null'); } catch (e) { /* none */ }
     const tag = {}; if (lg) { (lg.opp || []).forEach(p => { tag[p] = 'opp'; }); (lg.mine || []).forEach(p => { tag[p] = 'mine'; }); }

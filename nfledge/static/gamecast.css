@@ -1389,3 +1389,12 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 :is(.now, .ds) .fl-fd { stroke: #ffd43b; stroke-width: 1.6; stroke-linecap: round; }
 :is(.now, .ds) .fl-1st { fill: #ffd43b; font-size: 8px; font-weight: 800; }
 .now-try { font-size: 13px; font-weight: 600; margin-top: 2px; } .now-try.good { color: var(--good); } .now-try.bad { color: var(--bad); }
+/* box score: the Fantasy tab, both teams side by side by position (owner 2026-10-18) */
+.ff-head { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 2px 0 4px; font-weight: 800; font-size: 13px; }
+.ff-head span { display: inline-flex; align-items: center; gap: 6px; }
+.ff-pos { margin-top: 10px; } .ff-k { font-size: var(--fs-xs); font-weight: 800; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; }
+.ff-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ff-r { display: flex; align-items: center; gap: 7px; padding: 4px 0; border-bottom: 1px solid var(--line); cursor: pointer; min-width: 0; }
+.ff-r .pi-hs { width: 26px; height: 26px; flex: none; }
+.ff-n { flex: 1; min-width: 0; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ff-p { font-size: 15px; font-variant-numeric: tabular-nums; } .ff-p.hi { color: var(--good); } .ff-p.lo { color: var(--muted); }
