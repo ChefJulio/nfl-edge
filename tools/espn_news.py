@@ -14,6 +14,7 @@ Writes <out>/<YYYY-MM-DD>.json (raw blurbs) and <out>/ingame.json (in-game injur
 [{espn, name, team, week, q, published, text}]). Unofficial endpoint; any failure is non-fatal.
 """
 import datetime as dt
+from zoneinfo import ZoneInfo
 import json
 import re
 import sys
@@ -133,7 +134,7 @@ def main():
   rows = json.loads(inj_path.read_text(encoding="utf-8")).get("rows", [])
   inj = {str(r["espn_id"]): r for r in rows if r.get("espn_id")}
   out.mkdir(parents=True, exist_ok=True)
-  today = out / f"{dt.datetime.now(dt.timezone.utc):%Y-%m-%d}.json"
+  today = out / f"{dt.datetime.now(ZoneInfo("America/New_York")):%Y-%m-%d}.json"  # the Eastern date (week clock, owner 2026-10-18): a UTC date was already tomorrow after 8 pm ET
   if not today.exists():
     blurbs = []
     for i, e in enumerate(inj):

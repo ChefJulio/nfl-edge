@@ -933,13 +933,13 @@
   const backWeek = pid => { const r = RJ.d && RJ.d.players[pid];
     if (!r || !r.w.some(z => z[1] < 0.995)) return null;
     const e = r.w.find(z => z[1] >= 0.5); return e && e[0] > RJ.d.from ? e[0] : e ? null : 'no'; };
-  // the NFL week a date falls in (weeks run Tuesday to Monday), from this week's earliest kickoff in ros.json
+  // the NFL week a date falls in, from the week clock: this week until its rollover (Tuesday 06:00 ET after its last
+  // game), then a week per 7 days (owner 2026-10-18; it assumed every week opened on a Thursday)
   const weekOfDate = d => {
-    if (!RJ.d) return null;
-    if (RJ.t0 === undefined) { const ks = Object.values(RJ.d.players).map(x => x.k).filter(Boolean).sort();
-      RJ.t0 = ks.length ? Date.parse(ks[0]) - 2 * 864e5 : null; }  // the Tuesday before Thursday night
-    if (RJ.t0 == null) return null;
-    return RJ.d.from + Math.max(0, Math.floor((Date.parse(d + 'T12:00:00Z') - RJ.t0) / (7 * 864e5)));
+    const C = NFLE.clock && NFLE.clock.data(), roll = NFLE.clock && NFLE.clock.rollover();
+    if (!C || roll == null) return null;
+    const t = Date.parse(d + 'T12:00:00-05:00');
+    return t < roll ? C.week : C.week + 1 + Math.floor((t - roll) / (7 * 864e5));
   };
   const espnDate = d => new Date(d + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
   const healthOf = (pid, p, L, espn) => {

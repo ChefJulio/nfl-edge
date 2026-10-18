@@ -10,6 +10,7 @@ Writes <out>/<YYYY-MM-DD>.csv (one row per listed player; an existing file for t
 Unofficial public endpoint (like the NFL.com practice feed): may change without notice; failures are non-fatal.
 """
 import datetime as dt
+from zoneinfo import ZoneInfo
 import json
 import sys
 from pathlib import Path
@@ -27,7 +28,7 @@ def main():
     print("[espn] snapshot skipped: empty or unavailable feed")
     return
   out.mkdir(parents=True, exist_ok=True)
-  path = out / f"{dt.datetime.now(dt.timezone.utc):%Y-%m-%d}.csv"
+  path = out / f"{dt.datetime.now(ZoneInfo("America/New_York")):%Y-%m-%d}.csv"  # the Eastern date (week clock, owner 2026-10-18): a UTC date was already tomorrow after 8 pm ET
   df.to_csv(path, index=False)
   latest = {"v": 1, "fetched": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
             "rows": json.loads(df.to_json(orient="records"))}
