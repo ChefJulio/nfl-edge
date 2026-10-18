@@ -528,5 +528,25 @@
 "pre": 0.1278,
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0034827": {
+"name": "DJ Moore",
+"team": "BUF",
+"pos": "WR",
+"ruling": "INA",
+"at": "2026-10-18T18:57:00+00:00",
+"pre": 0.4254,
+"post": 0.0,
+"status": "Inactive (DDL)"
+},
+"00-0036988": {
+"name": "Josh Palmer",
+"team": "BUF",
+"pos": "WR",
+"ruling": "ACT",
+"at": "2026-10-18T19:00:00+00:00",
+"pre": 0.4254,
+"post": 0.974,
+"status": "Active (LLL)"
 }
 }
