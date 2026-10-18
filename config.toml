@@ -134,6 +134,7 @@ week_elo_per_100 = 0.3242
 # Optional model inputs. Defaults reflect the walk-forward backtest (decided on 2025, confirmed on 2026):
 # implied_total won clearly; air_yards and snap_input did not help consistently.
 implied_total = true    # Vegas implied team total as an efficiency input
+depth_per_team = true   # (AR, {#depth-per-team}) each team's depth chart as of its own game, not the week's first
 air_yards = false       # air-yards share (volume) + aDOT (receiving yards)
 # Wind: "fixed" = the hand-set penalty in [player_model] (wind_threshold_mph etc.); "linear" / "quadratic" = wind
 # (mph; domes 0) as a fitted input to every passing-efficiency regression. Audit: fixed beats both no-wind (TE

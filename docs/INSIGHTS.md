@@ -2520,3 +2520,9 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   definition: espn_calib.EARLY_DAYS (calibration: capture within 3 days of the team's last game) vs the live bridge
   (no report published yet): align both on the week clock (before the team's first report deadline) and refit the
   ESPN early-week rates.
+- **RESULT {#depth-per-team} (AR) each team's depth chart as of its own game: PASS, shipped.** tools/experiments.py
+  baseline,depth_per_team 2025 (daily snapshots exist from 2025), ~15-20 teams' charts change a week (879 depth rows
+  over 2025). Fantasy MAE ALL 5.168 -> 5.166, -0.001 [-0.003, -0.000] (player-resampled [-0.003, -0.000]): QB -0.003
+  [-0.008, -0.000], RB -0.003 [-0.005, -0.000], WR / TE no difference; no position worse. Start / sit gain +0.010
+  [+0.001, +0.021]. Rows whose depth input doesn't change are identical, so the gain sits on the changed rows. Range
+  calibration and availability Brier unchanged. Live: config experiments.depth_per_team = true.
