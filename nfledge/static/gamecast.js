@@ -2378,7 +2378,9 @@
     const sp = sit ? spot(sit, st) : null;
     const score = k => st && st.state !== 'pre' ? st[k].score : g.final ? g.final[k] : null;
     const as = score('away'), hs = score('home'), f = g.fc || {};
-    const status = live ? `<span class="live-dot"></span>${esc(`${periodName(st.period)} ${st.clock || ''}`.trim())}`
+    // live: the clock, and the down on the right (owner 2026-10-18; "Goal" as "G" so the widest, "OT 10:00 3rd & G", fits)
+    const dd = sit && sit.shortDownDistanceText ? String(sit.shortDownDistanceText).replace(/Goal/i, 'G') : '';
+    const status = live ? `<span><span class="live-dot"></span>${esc(`${periodName(st.period)} ${st.clock || ''}`.trim())}</span>${dd ? `<span class="mg-dd">${esc(dd).replace(/ &amp; /, '&#8239;&amp;&#8239;')}</span>` : ''}`
       : fin ? (st && /OT/i.test(st.detail || '') || (g.final && g.final.ot) ? 'Final/OT' : 'Final')
       : esc(clock12(g.gametime));
     const row = (s, k, n, other) => {

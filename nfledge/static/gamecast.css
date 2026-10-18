@@ -1336,3 +1336,9 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .mg-g { grid-template-columns: repeat(var(--span, 1), minmax(0, 1fr)); }
 .mg { grid-template-rows: 12px 1fr 1fr; }
 .mg-st { line-height: 12px; }
+.mg-st { display: flex; justify-content: space-between; gap: 4px; }
+.mg-st > span:first-child { flex: none; } .mg-dd { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-weight: 600; color: var(--ink); opacity: .85; }
+@media (max-width: 380px) { .mg { padding-left: 5px; padding-right: 5px; } .mg-st { font-size: 8.6px; gap: 3px; letter-spacing: -.01em; }
+  .mg-st .live-dot { width: 5px; height: 5px; margin-right: 2px; } }
+@media (max-width: 380px) { .mg-st { gap: 2px; letter-spacing: -.035em; } .mg { padding-left: 4px; padding-right: 4px; } }
+@media (max-width: 380px) { .mg-st .live-dot { display: none; } }  /* the red border already says live */
