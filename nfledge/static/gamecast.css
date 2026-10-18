@@ -1285,3 +1285,9 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 /* the tap readout sits above the scale pills and the leader tag (owner 2026-10-18: clipped under them) */
 .wp-wrap .wp-tip { z-index: 5; background: var(--panel2); box-shadow: 0 6px 18px rgba(0,0,0,.5); }
 .wp-wrap:has(.wp-tip:not([hidden])) .wp-now-tag { opacity: 0; }
+/* drive rows by half (owner 2026-10-18): a wider label column, the quarter-change tag on the chip */
+.dvq { grid-template-columns: 40px minmax(0, 1fr); }
+.dvq .dv-q { font-size: var(--fs-xs); line-height: 1.15; white-space: normal; }
+.dv-qt { position: absolute; top: -7px; right: 6px; font-style: normal; font-size: 9px; font-weight: 800; letter-spacing: .04em; padding: 1px 5px;
+  border-radius: 999px; background: var(--panel); color: var(--ink); border: 1px solid var(--line); line-height: 1.3; }
+.dvs { row-gap: 9px; padding-top: 3px; }

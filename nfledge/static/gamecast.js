@@ -2933,15 +2933,23 @@
   const storyCard = (st, info) => {
     if (!st.plays.length) return '';
     const teamOf = id => String(id) === String(info.home.id) ? info.home : String(id) === String(info.away.id) ? info.away : null;
+    // one row per half, newest first, and newest first within it (owner 2026-10-18); the drive during which a quarter
+    // turned over (or the first one after the break) carries the new quarter's tag
+    const half = per => per <= 2 ? 1 : per <= 4 ? 2 : per;
+    const HALF = { 1: '1st half', 2: '2nd half' };
     const rows = {};
+    let prevEnd = null;
     st.drives.forEach(d => {
-      const tm = teamOf(d.team && d.team.id) || {}, per = (d.plays[0].period || {}).number || 1;
+      const tm = teamOf(d.team && d.team.id) || {}, pl = d.plays || [];
+      const p0 = (pl[0].period || {}).number || 1, p1 = (pl[pl.length - 1].period || {}).number || p0;
+      const turn = p1 > p0 && half(p1) === half(p0) ? p1 : prevEnd != null && p0 > prevEnd && half(p0) === half(prevEnd) ? p0 : null;
+      prevEnd = p1;
       const [lab, cls] = driveTag(d, (st.live || st.replay) && st.cur && String(d.id) === String(st.cur.id));
       const n = drvNums(d);
       const sub = n ? `${n.n} pl · ${n.yd} yd · ${n.t}` : '';
-      (rows[per] = rows[per] || []).push(`<button type="button" class="dv dv-${cls || 'pu'}" style="--tc:${esc(tm.color || '#666')}" data-drive="${esc(d.id)}" title="${esc(`${tm.team || ''} drive: ${d.description || ''}${lab ? ` · ${driveResult(d, tm, info, false).text}` : ''}`)}"><i></i><span class="dv-t">${esc(tm.team || '')} <b>${esc(lab || '...')}</b></span>${sub ? `<span class="dv-s">${esc(sub)}</span>` : ''}</button>`);
+      (rows[half(p0)] = rows[half(p0)] || []).push(`<button type="button" class="dv dv-${cls || 'pu'}" style="--tc:${esc(tm.color || '#666')}" data-drive="${esc(d.id)}" title="${esc(`${tm.team || ''} drive: ${d.description || ''}${lab ? ` · ${driveResult(d, tm, info, false).text}` : ''}${turn ? ` · ${periodName(turn)} began` : ''}`)}"><i></i>${turn ? `<em class="dv-qt">${periodName(turn)}</em>` : ''}<span class="dv-t">${esc(tm.team || '')} <b>${esc(lab || '...')}</b></span>${sub ? `<span class="dv-s">${esc(sub)}</span>` : ''}</button>`);
     });
-    const qrows = Object.keys(rows).map(Number).sort((a, b) => a - b).map(q => `<div class="dvq"><span class="dv-q">${periodName(q)}</span><div class="dvs">${rows[q].join('')}</div></div>`).join('');
+    const qrows = Object.keys(rows).map(Number).sort((a, b) => b - a).map(h => `<div class="dvq"><span class="dv-q">${HALF[h] || periodName(h)}</span><div class="dvs">${rows[h].slice().reverse().join('')}</div></div>`).join('');
     return `<section class="gcs story" data-k="story"><h3>How it's gone <span class="src">ESPN</span></h3>
       <div class="wp-wrap">${wpChart(st.ser, info, null)}<div class="wp-tip" hidden></div></div>
       <div class="wp-leg"><span><i class="wp-m wp-score"></i>score</span><span><i class="wp-m wp-to"></i>turnover</span></div>
