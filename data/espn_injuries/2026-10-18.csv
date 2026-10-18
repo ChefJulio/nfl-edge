@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-05T04:04Z,,,,,,McMillan caught 14 of 16 targets for 192 yards and two touchdowns in Sunday's 32-26 win over the Lions.
 4428993,Haynes King,Carolina Panthers,Active,2026-10-04T23:08Z,,,,,,King (coach's decision) is inactive but will operate as the Panthers' emergency third quarterback Sunday night versus Detroit.
 4431551,Lee Hunter,Carolina Panthers,Active,2026-10-04T23:01Z,,,,,,
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-18T05:00Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,ir
+4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-18T06:01Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
 4242659,Dayo Odeyingbo,Chicago Bears,Injured Reserve,2026-10-17T23:30Z,Quadriceps,Not Specified,Not Specified,2026-11-22,IR,The Bears placed Odeyingbo (quadriceps) on injured reserve Saturday.
 4257364,Zavier Scott,Chicago Bears,Active,2026-10-17T23:21Z,,,,,,The Bears elevated Scott from the practice squad ahead of Sunday's game against the Falcons.
 4361093,Kyler Gordon,Chicago Bears,Questionable,2026-10-17T23:16Z,Calf,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,The Bears activated Gordon (calf) from reserve/PUP on Saturday.
@@ -275,7 +275,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4260409,Derrick Barnes,Detroit Lions,Active,2026-09-30T03:46Z,,,,,,Barnes registered eight tackles (five solo) and a defensed pass Sunday in a 31-24 victory against the Jets.
 3045463,Chuck Clark,Detroit Lions,Active,2026-09-30T03:37Z,,,,,,"Clark finished Sunday's 31-24 win over the Jets with seven tackles, including 1.0 sacks, and a forced fumble."
 4259762,Jonathan Ford,Green Bay Packers,Injured Reserve,2026-10-18T02:56Z,Calf,Not Specified,Not Specified,2026-11-15,IR,The Packers placed Ford (calf) on injured reserve Saturday.
-4578436,Coleman Owen,Green Bay Packers,Active,2026-10-18T02:00Z,,,,,,The Packers elevated Owen from the practice squad ahead of Sunday's game against the Cowboys.
+4578436,Coleman Owen,Green Bay Packers,Active,2026-10-18T02:00Z,,,,,,The Packers elevated Owen from the practice squad Saturday ahead of Sunday's game against the Cowboys.
 2983055,Javon Hargrave,Green Bay Packers,Injured Reserve,2026-10-18T01:58Z,Achilles,Surgery,Not Specified,2027-02-15,IR,The Packers placed Hargrave (Achilles) on injured reserve Saturday.
 4431487,Savion Williams,Green Bay Packers,Questionable,2026-10-18T01:53Z,Ankle,Sprain,Not Specified,2026-10-18,QUESTIONABLE,The Packers activated Williams (ankle) from injured reserve Saturday.
 4430191,Skyy Moore,Green Bay Packers,Injured Reserve,2026-10-17T21:54Z,Ankle,Not Specified,Left,2026-11-15,IR,The Packers placed Moore (ankle) on injured reserve Saturday.
@@ -375,7 +375,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4432620,Parker Washington,Jacksonville Jaguars,Active,2026-10-11T18:43Z,,,,,,Washington caught six of nine targets for 124 yards and two touchdowns in Sunday's 19-17 win over the Eagles.
 4836472,Bryan Thomas Jr.,Jacksonville Jaguars,Active,2026-10-11T13:43Z,,,,,,"Thomas was ejected from Sunday's game in London after receiving an unnecessary roughness penalty for fighting with the Eagles' Jeremiah Trotter following the opening kickoff, Michael DiRocco of ESPN.com reports."
 3118892,Justin Watson,Kansas City Chiefs,Active,2026-10-18T02:11Z,,,,,,"The Chiefs elevated Watson from the practice squad ahead of Sunday's game against the Chargers, Matt Derrick of ChiefsDigest.com reports."
-5093923,Andrew Armstrong,Kansas City Chiefs,Active,2026-10-18T02:09Z,,,,,,"The Chiefs elevated Armstrong from the practice squad ahead of Sunday's game against the Chargers, Matt Derrick of ChiefsDigest.com reports."
+5093923,Andrew Armstrong,Kansas City Chiefs,Active,2026-10-18T02:09Z,,,,,,"The Chiefs have elevated Armstrong from the practice squad ahead of Sunday's game against the Chargers, Matt Derrick of ChiefsDigest.com reports."
 4569659,Josh Simmons,Kansas City Chiefs,Out,2026-10-17T04:19Z,Back,Not Specified,Not Specified,2026-10-25,OUT,Simmons (back) has been ruled out for Sunday's game against the Chargers.
 4040432,L'Jarius Sneed,Kansas City Chiefs,Questionable,2026-10-17T02:03Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Sneed (knee) is listed as questionable for Sunday's game against the Chargers.
 4683062,Xavier Worthy,Kansas City Chiefs,Active,2026-10-16T23:52Z,,,,,,Worthy will be the Chiefs' top wideout against the Chargers on Sunday due to the absence of Rashee Rice (hamstring/knee).
@@ -650,7 +650,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685201,Tanner McKee,Philadelphia Eagles,Active,2026-10-15T17:29Z,,,,,,"McKee appears lined up to start Sunday's game against the Panthers after the Eagles announced Wednesday that Jalen Hurts has been ruled out for Week 6 due to a superficial blood clot on his calf, Dave Zangaro of NBC Sports Philadelphia reports."
 4685759,Jalen Carter,Philadelphia Eagles,Active,2026-10-12T16:31Z,,,,,,"Carter logged five tackles (three solo), including 2.0 sacks, one pass defense and two forced fumbles during the Eagles' 19-17 loss to the Jaguars on Sunday in London."
 4240577,Brandon Smith,Pittsburgh Steelers,Active,2026-10-18T02:41Z,,,,,,The Steelers elevated Smith from the practice squad ahead of Sunday's game against the Bucs.
-4035198,Brandon Johnson,Pittsburgh Steelers,Active,2026-10-18T01:50Z,,,,,,The Steelers elevated Johnson from the practice squad ahead of Sunday's game against the Bucs.
+4035198,Brandon Johnson,Pittsburgh Steelers,Active,2026-10-18T01:50Z,,,,,,The Steelers have elevated Johnson from the practice squad ahead of Sunday's game against the Bucs.
 4428119,Lew Nichols,Pittsburgh Steelers,Active,2026-10-18T01:48Z,,,,,,The Steelers signed Nichols off their practice squad Saturday.
 4431492,Roman Wilson,Pittsburgh Steelers,Injured Reserve,2026-10-17T19:27Z,Finger,Not Specified,Left,2026-11-22,IR,"Wilson (finger) was placed on injured reserve Saturday, Ray Fittipaldo of the Pittsburgh Post-Gazette reports."
 4361411,Pat Freiermuth,Pittsburgh Steelers,Questionable,2026-10-17T16:29Z,Calf,,,2026-10-18,QUESTIONABLE,"Freiermuth (calf) was added to the injury report Saturday and is listed as questionable for Sunday's game against Tampa Bay, Adam Schefter of ESPN reports."
@@ -725,7 +725,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3924327,Drew Lock,Seattle Seahawks,Active,2026-10-14T23:17Z,,,,,,"Lock (forearm) won't carry an injury designation into Thursday night's matchup with Denver, John Boyle of the Seahawks' official site reports."
 4426385,Zach Charbonnet,Seattle Seahawks,Out,2026-10-14T22:14Z,Knee - ACL,Surgery,Left,2026-10-25,PUP-R,"Charbonnet (knee) has been ruled out for Thursday's game at Denver, Corbin K. Smith of EmeraldCitySpectrum.com reports."
 4568024,Josh Williams,Tampa Bay Buccaneers,Active,2026-10-18T02:04Z,,,,,,The Bucs elevated Williams from the practice squad ahead of Sunday's game against the Steelers.
-3120590,Easton Stick,Tampa Bay Buccaneers,Active,2026-10-18T02:02Z,,,,,,The Bucs elevated Stick from the practice squad ahead of Sunday's game against the Steelers.
+3120590,Easton Stick,Tampa Bay Buccaneers,Active,2026-10-18T02:02Z,,,,,,The Bucs have elevated Stick from the practice squad ahead of Sunday's game against the Steelers.
 3871102,David Sills V,Tampa Bay Buccaneers,Injured Reserve,2026-10-17T01:18Z,Hamstring,Not Specified,Not Specified,2026-10-18,IR-R,Sills (hamstring) is listed as questionable for Sunday's game against the Steelers.
 4816107,Benjamin Morrison,Tampa Bay Buccaneers,Doubtful,2026-10-17T01:10Z,Quadriceps,Not Specified,Not Specified,2026-10-18,DOUBTFUL,Morrison (quadriceps) is listed as doubtful for Sunday's game against the Steelers.
 4870998,Josiah Trotter,Tampa Bay Buccaneers,Questionable,2026-10-17T01:01Z,Knee,Not Specified,Not Specified,2026-10-18,QUESTIONABLE,Trotter (knee) is listed as questionable for Sunday's game against the Steelers.
