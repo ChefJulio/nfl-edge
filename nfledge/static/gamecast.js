@@ -214,7 +214,7 @@
   // the offense is going, the red zone shaded.
   // The football (owner 2026-10-18: "a better football icon"): leather body, white tip stripes, stitched laces; a
   // 32 x 20 drawing, used by the scoreboard, the field and (as a data URI in gamecast.css) the matchup tiles.
-  const FB_BODY = "<defs><linearGradient id='nfleFb' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#a85a24'/><stop offset='.55' stop-color='#7d3b14'/><stop offset='1' stop-color='#5a2a0d'/></linearGradient></defs><path d='M1.5 10C6 2 26 2 30.5 10 26 18 6 18 1.5 10Z' fill='url(#nfleFb)' stroke='#2e1406' stroke-width='1'/><path d='M8 5.6C12.5 3.6 19.5 3.6 24 5.6' fill='none' stroke='#fff' stroke-opacity='.28' stroke-width='1.1' stroke-linecap='round'/><path d='M6.6 5.2Q4.9 10 6.6 14.8M25.4 5.2Q27.1 10 25.4 14.8' fill='none' stroke='#fff' stroke-width='1.5' stroke-linecap='round'/><path d='M11 10H21' fill='none' stroke='#fff' stroke-width='1.4' stroke-linecap='round'/><path d='M12.6 8.3V11.7M14.8 8.3V11.7M17.2 8.3V11.7M19.4 8.3V11.7' fill='none' stroke='#fff' stroke-width='1.1' stroke-linecap='round'/>";
+  const FB_BODY = "<defs><linearGradient id='nfleFb' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#a85a24'/><stop offset='.55' stop-color='#7d3b14'/><stop offset='1' stop-color='#5a2a0d'/></linearGradient></defs><path d='M1.5 10C6 2 26 2 30.5 10 26 18 6 18 1.5 10Z' fill='url(#nfleFb)' stroke='#2e1406' stroke-width='1'/><path d='M9 5.4C13 3.9 19 3.9 23 5.4' fill='none' stroke='#fff' stroke-opacity='.22' stroke-width='.8' stroke-linecap='round'/><path d='M6.9 6Q5.6 10 6.9 14M25.1 6Q26.4 10 25.1 14' fill='none' stroke='#fff' stroke-opacity='.9' stroke-width='.9' stroke-linecap='round'/><path d='M12.5 10H19.5' fill='none' stroke='#fff' stroke-width='.9' stroke-linecap='round'/><path d='M13.7 9V11M15.2 9V11M16.8 9V11M18.3 9V11' fill='none' stroke='#fff' stroke-width='.7' stroke-linecap='round'/>";
   // The field (owner 2026-10-18): end zones in team colors with their codes, a line every 5 yards, numbers, the line
   // of scrimmage in blue and the first-down line in yellow, the ball pointing the way the offense is going, the red zone
   // shaded. lanes: the drive chart, one row per play from its snap to where it ended (owner: "show how far each play
@@ -3035,7 +3035,7 @@
       ${rows.length > 6 ? `<button type="button" class="fps-more" data-fpall="1">${GP.fpAll ? 'Show fewer' : `Show all ${rows.length}`}</button>` : ''}
       <p class="gcs-note">Points so far under your scoring, of his projection; the tick marks where he'd be on pace.${st.replay ? ' In a replay, rebuilt from the plays so far.' : ''}${lg ? '' : " Connect your league on the Fantasy tab to see your players and your opponent's marked here."}</p></section>`;
   };
-  const FOOTBALL = `<svg class="sb-fb" viewBox="0 0 32 20" role="img" aria-label="Has the ball">${FB_BODY}</svg>`;
+  const FOOTBALL = `<span class="fb-chip" title="Has the ball"><svg class="sb-fb" viewBox="0 0 32 20" role="img" aria-label="Has the ball">${FB_BODY}</svg></span>`;
   const GTABS = [['pre', 'Pregame'], ['live', 'Live'], ['post', 'Postgame']];
   // Live tab: one pane at a time, picked here (owner 2026-10-15: "if i pick stats i see stats"); box score first
   const GPANES = [['plays', 'Plays'], ['box', 'Box score'], ['team', 'Team stats']];
@@ -3075,8 +3075,8 @@
     }
     const side = (s, isHome) => {
       const to = (st.live || st.replay) && st.tos ? st.tos[isHome ? 'home' : 'away'] : null;
-      return `<div class="sb-t tm-open${isHome ? ' home' : ''}" data-tm="${esc(s.team)}" style="--tc:${esc(s.color)}">${logo(s.logo, '#111', 40, s.team)}
-      <div class="sb-id"><div class="sb-n"><span class="sb-full">${esc((g && (isHome ? g.home.nick : g.away.nick)) || s.team)}</span><span class="sb-ab">${esc(s.team)}</span>${sp && !sp.kick && sp.offense.team === s.team ? FOOTBALL : ''}</div><div class="sb-r">${esc(s.record || '')}</div>${to != null
+      return `<div class="sb-t tm-open${isHome ? ' home' : ''}" data-tm="${esc(s.team)}" style="--tc:${esc(s.color)}"><span class="sb-lg">${logo(s.logo, '#111', 40, s.team)}${sp && !sp.kick && sp.offense.team === s.team ? FOOTBALL : ''}</span>
+      <div class="sb-id"><div class="sb-n"><span class="sb-full">${esc((g && (isHome ? g.home.nick : g.away.nick)) || s.team)}</span><span class="sb-ab">${esc(s.team)}</span></div><div class="sb-r">${esc(s.record || '')}</div>${to != null
         ? `<div class="sb-to" title="Timeouts left">${[0, 1, 2].map(i => `<i class="${i < to ? 'on' : ''}"></i>`).join('')}</div>` : ''}</div>
       <div class="sb-s">${isHome ? hs : as}</div></div>`;
     };

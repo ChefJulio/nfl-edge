@@ -75,10 +75,12 @@ td.actc .live-dot { width: 7px; height: 7px; margin-right: 5px; }
 .mt-side.lost { opacity: .45; } .mt-lg:has(+ .mt-side.lost) { opacity: .35; }
 /* possession: a small football at the score's inner top corner, out of the layout (owner 2026-10-18: the old dot after
    the name wrapped under wordmark names and pushed that side's name and record out of line) */
-.mt-side.has-ball::after { content: ""; position: absolute; top: -2px; width: 18px; height: 11px; pointer-events: none;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 20'%3E%3Cdefs%3E%3ClinearGradient id='nfleFb' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23a85a24'/%3E%3Cstop offset='.55' stop-color='%237d3b14'/%3E%3Cstop offset='1' stop-color='%235a2a0d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M1.5 10C6 2 26 2 30.5 10 26 18 6 18 1.5 10Z' fill='url%28%23nfleFb%29' stroke='%232e1406' stroke-width='1'/%3E%3Cpath d='M8 5.6C12.5 3.6 19.5 3.6 24 5.6' fill='none' stroke='%23fff' stroke-opacity='.28' stroke-width='1.1' stroke-linecap='round'/%3E%3Cpath d='M6.6 5.2Q4.9 10 6.6 14.8M25.4 5.2Q27.1 10 25.4 14.8' fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round'/%3E%3Cpath d='M11 10H21' fill='none' stroke='%23fff' stroke-width='1.4' stroke-linecap='round'/%3E%3Cpath d='M12.6 8.3V11.7M14.8 8.3V11.7M17.2 8.3V11.7M19.4 8.3V11.7' fill='none' stroke='%23fff' stroke-width='1.1' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat; filter: drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
+.mt-side.has-ball .mt-num { position: relative; }
+.mt-side.has-ball .mt-num::after { content: ""; position: absolute; top: 50%; width: 18px; height: 11px; transform: translateY(-50%);
+  pointer-events: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 20'%3E%3Cdefs%3E%3ClinearGradient id='nfleFb' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23a85a24'/%3E%3Cstop offset='.55' stop-color='%237d3b14'/%3E%3Cstop offset='1' stop-color='%235a2a0d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M1.5 10C6 2 26 2 30.5 10 26 18 6 18 1.5 10Z' fill='url%28%23nfleFb%29' stroke='%232e1406' stroke-width='1'/%3E%3Cpath d='M9 5.4C13 3.9 19 3.9 23 5.4' fill='none' stroke='%23fff' stroke-opacity='.22' stroke-width='.8' stroke-linecap='round'/%3E%3Cpath d='M6.9 6Q5.6 10 6.9 14M25.1 6Q26.4 10 25.1 14' fill='none' stroke='%23fff' stroke-opacity='.9' stroke-width='.9' stroke-linecap='round'/%3E%3Cpath d='M12.5 10H19.5' fill='none' stroke='%23fff' stroke-width='.9' stroke-linecap='round'/%3E%3Cpath d='M13.7 9V11M15.2 9V11M16.8 9V11M18.3 9V11' fill='none' stroke='%23fff' stroke-width='.7' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat; filter: drop-shadow(0 1px 1px rgba(0,0,0,.55)); }
+
 .mt-main .mt-side.has-ball { position: relative; }
-.mt-side.away.has-ball::after { right: -12px; } .mt-side.home.has-ball::after { left: -12px; }
+
 /* footer: one line always; the kickoff text gives way (ellipsis) before the odds do */
 .mt-st { display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 4px 10px; font-size: var(--fs-sm); color: var(--muted);
   white-space: nowrap; padding: 7px 12px 9px; background: color-mix(in srgb, var(--panel) 72%, transparent); border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
@@ -1265,3 +1267,18 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .wp-wrap:has(.wp-ax) { grid-template-columns: 70px minmax(0, 1fr); } .wp-ax-tm { padding: 3px 5px; }
 
 .sb-fb { width: 22px; height: 14px; filter: drop-shadow(0 1px 1px rgba(0,0,0,.5)); }
+
+/* the football on a small chip (owner 2026-10-18: "looks weird there bleeding onto the score") */
+.fb-chip { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 20px; margin-left: 8px; flex: none;
+  border-radius: 999px; background: rgba(13,15,19,.8); border: 1px solid rgba(255,255,255,.2); box-shadow: 0 1px 3px rgba(0,0,0,.45); }
+.sb-t.home .fb-chip { margin-left: 0; margin-right: 8px; order: -1; }
+.fb-chip .sb-fb { width: 18px; height: 11px; margin: 0; filter: none; }
+.sb-lg { position: relative; display: inline-flex; flex: none; }
+.sb-lg .fb-chip { position: absolute; margin: 0; right: -10px; bottom: -6px; width: 26px; height: 17px; }
+.sb-t.home .sb-lg .fb-chip { right: auto; left: -10px; margin: 0; }
+.sb-lg .fb-chip .sb-fb { width: 17px; height: 11px; }
+/* the logo badge, quieter (owner 2026-10-18: "make the chip less prominent") */
+.sb-lg .fb-chip { width: 22px; height: 14px; right: -7px; bottom: -4px; background: rgba(13,15,19,.6); border: 0; box-shadow: none; }
+.sb-t.home .sb-lg .fb-chip { left: -7px; }
+.sb-lg .fb-chip .sb-fb { width: 15px; height: 9px; }
+.mt-side.away.has-ball .mt-num::after { right: calc(100% + 6px); } .mt-side.home.has-ball .mt-num::after { left: calc(100% + 6px); }
