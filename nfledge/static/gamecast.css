@@ -1419,3 +1419,13 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .ff-mine { background: color-mix(in srgb, var(--good) 7%, transparent); }
 .gc-tabs + section { margin-top: 12px; }
 .ds-sp { display: block; font-size: 11.5px; color: var(--muted); margin-top: 1px; font-weight: 400; }
+
+/* Plays > Recent / Game log (owner 2026-10-18) */
+.pl-sub { margin-bottom: 10px; }
+.rc-d { margin-bottom: 14px; }
+.rc-h { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; width: 100%; padding: 8px 10px; border-radius: var(--r-md); border: 0; cursor: pointer;
+  font: inherit; color: var(--ink); text-align: left; background: color-mix(in srgb, var(--tc) 28%, var(--panel2)); box-shadow: inset 4px 0 0 var(--tc); }
+.rc-h .rc-m { margin-left: auto; font-size: 12px; }
+.rc-now { display: inline-flex; align-items: center; font-weight: 700; color: #ffd43b; } .rc-now .live-dot { width: 7px; height: 7px; }
+.ds-h.good { color: var(--good); } .ds-h.bad { color: var(--bad); }
+.ds-h .rp-d { font-weight: 700; }

@@ -2630,7 +2630,7 @@
   };
 
   // ------------------------------------------------------------------------------------------------- game page
-  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null, tab: null, pane: 'flow', fpAll: false, drvAll: false };
+  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null, tab: null, pane: 'plays', plSub: 'recent', fpAll: false, drvAll: false };
   const parseGid = gid => { const m = String(gid || '').match(/^(\d{4})_(\d{2})_([A-Z]{2,3})_([A-Z]{2,3})$/); return m ? { season: +m[1], week: +m[2], away: m[3], home: m[4] } : null; };
   const wpSeries = (sum) => {
     const plays = allPlays(sum).flatMap(d => d.plays || []);
@@ -3310,6 +3310,35 @@
   // ---- Drive sheet (owner 2026-10-18: "a summary of the drive, especially how it ended and who scored or what
   // happened, and a list of the plays"): the result and the play that decided it, the score after, where it started and
   // ended on the field, the win chance it moved, the fantasy points it produced, then every play.
+  // Play rows, as the drive sheet and the Recent view show them: when, the down, the play as a headline, where it
+  // started and ended, and its yards (or what it was: a score, a turnover, a flag)
+  const playRows = (plays, info, names, key = null) => plays.map(p => {
+    const when = q => `${periodName((q.period || {}).number || 1)} ${esc((q.clock || {}).displayValue || '')}`;
+    if (nonPlay(p)) return `<li class="ds-p np"><span class="ds-w">${when(p)}</span><span class="ds-h muted">${esc(nonPlayText(p))}</span></li>`;
+    const a = spot(p.start, info), b = spot(p.end, info);
+    const hd = playHead(p, names, a ? { off: a.offense.team, other: a.offense.team === info.away.team ? info.home.team : info.away.team } : {});
+    const dd = p.start && p.start.down ? (p.start.shortDownDistanceText || p.start.downDistanceText || '') : '';
+    const net = a && b && !stPlay(p) && a.offense.team === b.offense.team && !p.scoringPlay ? Math.round((b.x - a.x) * a.dir) : null;
+    const chip = p.scoringPlay ? '<span class="pc-chip c-sc">SCORE</span>' : p.isTurnover ? '<span class="pc-chip c-to">TURNOVER</span>'
+      : p.isPenalty ? '<span class="pc-chip c-pen">FLAG</span>' : net != null && !/incomplete/i.test(String(p.text || '')) ? `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)}</span>` : '';
+    const sl = spotLine(p);
+    return `<li class="ds-p${p === key ? ' key' : ''}"><span class="ds-w">${when(p)}</span><span class="ds-h ${hd.cls}">${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span> ` : ''}${linkNames(esc(hd.h), [info.away.team, info.home.team])}${sl ? `<span class="ds-sp">${sl}</span>` : ''}</span>${chip}</li>`;
+  }).join('');
+  // Recent (owner 2026-10-18: "catch up the user on the most recent plays"): the drive on now and the one before it,
+  // newest first, each under its drive's header
+  const recentView = (st, info, sum) => {
+    const ds = st.drives.filter(d => (d.plays || []).length).slice(-2).reverse();
+    if (!ds.length) return '<p class="muted">Plays appear once the game starts.</p>';
+    const names = fullNames(sum);
+    const teamOf = id => String(id) === String(info.home.id) ? info.home : String(id) === String(info.away.id) ? info.away : null;
+    return ds.map(d => {
+      const tm = teamOf(d.team && d.team.id) || {}, isCur = st.cur && String(st.cur.id) === String(d.id) && (st.live || st.replay);
+      const res = driveResult(d, tm, info, !!isCur);
+      return `<div class="rc-d" style="--tc:${esc(tm.color || '#666')}"><button type="button" class="rc-h" data-drive="${esc(d.id)}">${tm.logo ? logo(tm.logo, '#111', 18, tm.team) : ''}<b>${esc(tm.team || '')} drive</b>
+          ${isCur ? '<span class="rc-now"><span class="live-dot"></span>Now</span>' : `<span class="dr-res ${res.cls}">${esc(res.text)}</span>`}<span class="muted rc-m">${esc(d.description || '')}</span></button>
+        <ol class="ds-ps">${playRows([...(d.plays || [])].reverse(), info, names)}</ol></div>`;
+    }).join('');
+  };
   const DOWN_CLS = t => /^1st/.test(t) ? 'd1' : /^3rd/.test(t) ? 'd3' : /^4th/.test(t) ? 'd4' : '';
   const driveSheet = (did, st, info, sum) => {
     const d = st.drives.find(x => String(x.id) === String(did));
@@ -3361,17 +3390,8 @@
     }).filter(r => Math.abs(r.fp) >= 0.05).sort((a, b) => b.fp - a.fp).slice(0, 5).map(r => `<div class="pi-row"${r.pid ? ` data-open-pid="${esc(r.pid)}"` : ''}>${r.id ? `<img class="pi-hs" src="${esc(NFLE.ui ? NFLE.ui.headshot(r.id) : '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : '<span class="pi-hs"></span>'}
         <span class="pi-nm">${esc(names[r.o.key] || r.o.key)}</span><span class="pi-st">${statText(r.o.s)}</span>
         <b class="pi-fp ${r.fp > 0 ? 'up' : 'dn'}">${r.fp > 0 ? '+' : '&minus;'}${f1(Math.abs(r.fp))}</b></div>`).join('');
-    // every play: when, the down, a headline, the yards
-    const rows = plays.map(p => {
-      if (nonPlay(p)) return `<li class="ds-p np"><span class="ds-w">${when(p)}</span><span class="ds-h muted">${esc(nonPlayText(p))}</span></li>`;
-      const hd = head(p), dd = p.start && p.start.down ? (p.start.shortDownDistanceText || p.start.downDistanceText || '') : '';
-      const a = spot(p.start, info), b = spot(p.end, info);
-      const net = a && b && !stPlay(p) && a.offense.team === b.offense.team && !p.scoringPlay ? Math.round((b.x - a.x) * a.dir) : null;
-      const chip = p.scoringPlay ? '<span class="pc-chip c-sc">SCORE</span>' : p.isTurnover ? '<span class="pc-chip c-to">TURNOVER</span>'
-        : p.isPenalty ? '<span class="pc-chip c-pen">FLAG</span>' : net != null ? `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)}</span>` : '';
-      const sl = spotLine(p);
-      return `<li class="ds-p${p === key ? ' key' : ''}"><span class="ds-w">${when(p)}</span><span class="ds-h">${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span> ` : ''}${linkNames(esc(hd.h), [info.away.team, info.home.team])}${sl ? `<span class="ds-sp">${sl}</span>` : ''}</span>${chip}</li>`;
-    }).join('');
+    // every play: when, the down, a headline, the spots, the yards
+    const rows = playRows(plays, info, names, key);
     const html = `<div class="ds" style="--tc:${esc(tm.color)}">
       <div class="ds-res dv-${cls || 'pu'}"><span class="ds-tag">${esc(res.text || 'In progress')}</span></div>
       ${kh ? `<div class="ds-key ${kh.cls}">${linkNames(esc(kh.h), [info.away.team, info.home.team])}</div>` : ''}
@@ -3442,7 +3462,9 @@
       <div class="seg gc-panes" role="tablist">${GPANES.map(([k, l]) => `<button type="button" role="tab" data-pane="${k}" class="${GP.pane === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       ${GP.pane === 'flow' ? (storyCard(st, info) || '<section class="gcs"><p class="muted">The game flow fills in once the game starts.</p></section>')
         + (st.ended && !rp && ser.length >= 2 ? `<section class="gcs"><h3>Turning points</h3><p class="gcs-note">The plays that moved ESPN's win probability the most.</p>${turningCards(sum, info, ser, 6)}</section>` : '')
-      : GP.pane === 'plays' ? `<section class="gcs" id="gcLog"><h3>Game log</h3>
+      : GP.pane === 'plays' && GP.plSub === 'recent' ? `<section class="gcs" id="gcLog"><div class="seg pl-sub">${[['recent', 'Recent'], ['log', 'Game log']].map(([k, l]) => `<button type="button" data-plsub="${k}" class="${GP.plSub === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+            ${sum ? recentView(st, info, sum) : '<p class="muted">Plays appear once the game starts.</p>'}</section>`
+      : GP.pane === 'plays' ? `<section class="gcs" id="gcLog"><div class="seg pl-sub">${[['recent', 'Recent'], ['log', 'Game log']].map(([k, l]) => `<button type="button" data-plsub="${k}" class="${GP.plSub === k ? 'on' : ''}">${l}</button>`).join('')}</div>
             <div class="lg-bar"><div class="seg">${[['drive', 'By drive'], ['every', 'Every play']].map(([k, l]) => `<button type="button" data-view="${k}" class="${GP.view === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['new', 'Newest'], ['old', 'Oldest'], ['impact', 'Swings']].map(([k, l]) => `<button type="button" data-sort="${k}" class="${GP.sort === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['all', 'All'], ['score', 'Scoring'], ['to', 'Turnovers'], ['pen', 'Penalties']].map(([k, l]) => `<button type="button" data-filter="${k}" class="${GP.filter === k ? 'on' : ''}">${l}</button>`).join('')}</div>
               <input type="search" id="lgQ" placeholder="Player or text" value="${esc(GP.q)}" aria-label="Filter plays"></div>
             <div id="lgBody">${!sum ? '<p class="muted">Plays appear once the game starts.</p>'
@@ -3463,6 +3485,7 @@
     const root = document.getElementById('gc');
     root.querySelectorAll('[data-gtab]').forEach(b => b.onclick = () => { GP.tab = b.dataset.gtab; renderGame(); });
     root.querySelectorAll('[data-pane]').forEach(b => b.onclick = () => { GP.pane = b.dataset.pane; renderGame(); });
+    root.querySelectorAll('[data-plsub]').forEach(b => b.onclick = () => { GP.plSub = b.dataset.plsub; renderGame(); });
     const toPane = (k, sel) => { GP.pane = k; renderGame(); const e = document.querySelector(sel || '.gc-panes'); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     root.querySelectorAll('[data-pane-go]').forEach(b => b.onclick = () => toPane(b.dataset.paneGo));
     root.querySelectorAll('[data-drive]').forEach(b => b.onclick = () => {
