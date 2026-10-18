@@ -1431,3 +1431,5 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .ds-h .rp-d { font-weight: 700; }
 .ps-next { background: color-mix(in srgb, #ffd43b 7%, transparent); border-radius: 6px; padding-left: 6px; padding-right: 6px; }
 .ps-next .ds-sp { color: var(--ink); opacity: .8; font-style: italic; } .ps-next .live-dot { width: 6px; height: 6px; margin-right: 5px; }
+/* a touchdown headline is the highlight (owner 2026-10-18), wherever a play reads as a headline */
+:is(.ds-h, .pl-hl, .lpf-t, .now-lh, .ds-key, .now-try).td { color: var(--good); font-weight: 700; }

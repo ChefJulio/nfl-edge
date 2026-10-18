@@ -349,9 +349,10 @@
     || /^(END (GAME|QUARTER|OF)|Timeout|Two-Minute)/i.test(String(p.text || ''));
   // timeouts, warnings and period ends in words, not ESPN's capitals ("TIMEOUT #1 BY LAC AT 01:53." -> "LAC timeout (1st)")
   const ORD = ['', '1st', '2nd', '3rd'];
+  const PBP_CODE = { ARZ: 'ARI', BLT: 'BAL', CLV: 'CLE', HST: 'HOU', LA: 'LA', LAR: 'LA', WSH: 'WAS' };  // the official text's own team codes
   const nonPlayText = p => {
     const t = String(p.text || ''), m = t.match(/TIMEOUT #(\d) BY ([A-Z]{2,3})/i);
-    if (m) return `${ourCode(m[2].toUpperCase())} timeout (${ORD[+m[1]] || `#${m[1]}`})`;
+    if (m) return `${PBP_CODE[m[2].toUpperCase()] || ourCode(m[2].toUpperCase())} timeout (${ORD[+m[1]] || `#${m[1]}`})`;
     if (/OFFICIAL TIMEOUT|TV TIMEOUT/i.test(t)) return 'Official timeout';
     if (/TWO-MINUTE/i.test(t)) return 'Two-minute warning';
     const q = t.match(/END (?:OF )?(?:QUARTER|PERIOD) (\d)/i);
@@ -460,10 +461,10 @@
     else if (/punt/i.test(t)) h = `${nm(g('lead'))} punts ${g('punt') || ''} yards${/Touchback/i.test(raw) ? ', touchback' : g('ret') ? `, ${nm(g('ret'))} returns ${retYds(raw, pl)}` : ''}${pl.isPenalty ? ', flag on the play' : ''}`;
     else if (/kickoff/i.test(t)) h = /Touchback/i.test(raw) ? 'Kickoff, touchback' : `Kickoff: ${nm(g('ret'))} returns it ${retYds(raw, pl)} yard${retYds(raw, pl) === 1 ? '' : 's'}${pl.isPenalty ? ', flag on the play' : ''}`;
     else if (/extra point/i.test(t)) { const k = (raw.match(new RegExp(`^(${NM}) extra point`)) || [])[1], ok = /is GOOD/i.test(raw);
-      h = `${k ? `${nm(k)} e` : 'E'}xtra point ${ok ? 'good' : /block/i.test(raw) ? 'blocked' : 'no good'}`; cls = ok ? 'good' : 'bad'; }
+      h = `${k ? `${nm(k)} e` : 'E'}xtra point ${ok ? 'good' : /block/i.test(raw) ? 'blocked' : 'no good'}`; cls = ok ? '' : 'bad'; }
     else if (/two-point/i.test(t)) { const ok = /ATTEMPT SUCCEEDS/i.test(raw), inner = raw.replace(/^TWO-POINT CONVERSION ATTEMPT\.\s*/, '').split('. ATTEMPT')[0];
       const r = ACT.test(inner) ? action(inner) : null;
-      h = `Two-point try${r ? `: ${r.h.replace(/, (?:\d+ yards?|no gain|loss of \d+)$/, '')}` : ''}, ${ok ? 'good' : 'no good'}`; cls = ok ? 'good' : 'bad'; }
+      h = `Two-point try${r ? `: ${r.h.replace(/, (?:\d+ yards?|no gain|loss of \d+)$/, '')}` : ''}, ${ok ? 'good' : 'no good'}`; cls = ok ? '' : 'bad'; }
     else if (/field goal/i.test(t)) { const r = g('fg', 2); h = `${g('fg') || ''}-yard field goal, ${/good/i.test(r || t) && !/no good/i.test(r || '') ? 'good' : r && /block/i.test(r) ? 'blocked' : 'no good'}`; cls = /good/i.test(t) ? 'good' : 'bad'; }
     else if (/penalty/i.test(t)) { const m = raw.match(RX.pen); h = m ? `Penalty, ${m[1]}: ${m[2]}, ${m[3]} yards` : 'Penalty'; cls = 'pen'; }  // not 'flag': site.css .flag is a white badge
     else h = t || raw.split('. ')[0];
@@ -3319,7 +3320,10 @@
     const hd = playHead(p, names, a ? { off: a.offense.team, other: a.offense.team === info.away.team ? info.home.team : info.away.team } : {});
     const dd = p.start && p.start.down ? (p.start.shortDownDistanceText || p.start.downDistanceText || '') : '';
     const net = a && b && !stPlay(p) && a.offense.team === b.offense.team && !p.scoringPlay ? Math.round((b.x - a.x) * a.dir) : null;
-    const chip = p.scoringPlay ? '<span class="pc-chip c-sc">SCORE</span>' : p.isTurnover ? '<span class="pc-chip c-to">TURNOVER</span>'
+    const tt = `${pType(p)} ${p.text || ''}`, tryP = isTry(p), fgP = /field goal/i.test(tt);
+    const scoreTag = /safety/i.test(tt) ? 'SAFETY' : tryP ? (/two-point/i.test(pType(p)) ? '2PT' : 'XP') : fgP ? 'FG' : 'TD';
+    const chip = p.scoringPlay ? `<span class="pc-chip c-sc">${scoreTag}</span>` : (tryP || (fgP && /no good|blocked|missed/i.test(tt))) ? '<span class="pc-chip c-to">NO GOOD</span>'
+      : p.isTurnover ? '<span class="pc-chip c-to">TURNOVER</span>'
       : p.isPenalty ? '<span class="pc-chip c-pen">FLAG</span>' : net != null && !/incomplete/i.test(String(p.text || '')) ? `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)}</span>` : '';
     const sl = spotLine(p);
     return `<li class="ds-p${p === key ? ' key' : ''}"><span class="ds-w">${when(p)}</span><span class="ds-h ${hd.cls}">${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span> ` : ''}${linkNames(esc(hd.h), [info.away.team, info.home.team])}${sl ? `<span class="ds-sp">${sl}</span>` : ''}</span>${chip}</li>`;
