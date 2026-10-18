@@ -2479,3 +2479,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   calibration on short-week rows was off by up to 11.7 points by decile (gate: 2), so not shipped. ~108 rows per
   decile makes that gate noisy; a follow-up would compare against production's own calibration on those rows,
   registered before running.
+- **PRE-REGISTERED 2026-10-18, a second look at (AQ) after its calibration gate failed (owner: "AQ, why wait?";
+  weaker evidence than a first pass, recorded as such): (AQ2) short-week flag, calibration judged against
+  production's own.** Same rows, models and walk-forward as {#short-week}. Calibration error = mean absolute gap
+  between predicted and actual play rate over 10 equal-count bins (ECE) on short-week rows. GATE: (i) short-week
+  Brier lower with the CI excluding 0 (already met); (ii) ECE of the flag model minus production's ECE on the same
+  rows: 95% bootstrap CI (resampling season-weeks) upper bound < +0.01; (iii) all rows not worse (CI upper < +0.0005).
+- **RESULT {#short-week-2} (AQ2) short-week flag, calibration vs production's: FAIL (unresolved).** Production's
+  own short-week calibration error (ECE) 0.0329, the flag model's 0.0353: +0.0024 [-0.0284, +0.0185], the upper bound
+  past the +0.01 gate. So the 11.7-point decile gap in {#short-week} was mostly noise (production is about as
+  calibrated there), but 1,079 rows can't rule out a 2-point calibration loss. Accuracy gain stands (Brier -0.0068
+  [-0.0099, -0.0034]). Not shipped; revisit when 2026's short weeks add rows.

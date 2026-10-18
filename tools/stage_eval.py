@@ -73,6 +73,22 @@ def main():
   print(f"[AQ] short-week rows: Brier {((sh.p0 - sh.played) ** 2).mean():.4f} -> {((sh.p1 - sh.played) ** 2).mean():.4f}, {m:+.4f} [{lo:+.4f}, {hi:+.4f}]")
   print(f"[AQ] all rows: {ma:+.4f} [{loa:+.4f}, {hia:+.4f}]; calibration (short weeks) max decile gap {100 * (c.p - c.y).abs().max():.1f} points")
   print("[AQ] GATE:", "PASS" if hi < 0 and hia < 0.0005 and (c.p - c.y).abs().max() <= 0.02 else "FAIL")
+  # (AQ2) calibration against production's own on the same rows: ECE (10 equal-count bins), bootstrap over season-weeks
+  def ece(df, col):
+    b_ = pd.qcut(df[col].rank(method="first"), 10, labels=False)
+    g_ = df.assign(b=b_).groupby("b").agg(p=(col, "mean"), y=("played", "mean"), n=(col, "size"))
+    return float((g_.p - g_.y).abs().mul(g_.n).sum() / g_.n.sum())
+  e0, e1 = ece(sh, "p0"), ece(sh, "p1")
+  keys = sh.g.unique(); rng = np.random.default_rng(0); bt = []
+  grp = {k: v for k, v in sh.groupby("g")}
+  for _ in range(1000):
+    smp = pd.concat([grp[k] for k in rng.choice(keys, len(keys))])
+    bt.append(ece(smp, "p1") - ece(smp, "p0"))
+  lo2, hi2 = np.percentile(bt, [2.5, 97.5])
+  print(f"[AQ2] short-week ECE production {e0:.4f}, flag {e1:.4f}, diff {e1 - e0:+.4f} [{lo2:+.4f}, {hi2:+.4f}]")
+  print("[AQ2] GATE:", "PASS" if hi < 0 and hi2 < 0.01 and hia < 0.0005 else "FAIL")
+  if "--aq-only" in sys.argv:
+    return
 
   # ---------------- (AP) stage by the calendar vs the heuristic, replayed at the end of each derived report day
   pr = pd.concat([dated(cdir, s) for s in TEST], ignore_index=True).drop_duplicates(["season", "week", "gsis_id"], keep="last")
