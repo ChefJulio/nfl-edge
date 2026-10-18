@@ -1,0 +1,105 @@
+"""News watch (owner 2026-10-17, after Jalen Hurts went on IR on a Saturday afternoon and the site waited for the next
+scheduled build): every 30 minutes (.github/workflows/news-watch.yml) compare ESPN's injury feed with the copy the
+live site was built from (data/espn_injuries/latest.json) and start a full build when a player who matters changes
+status in a way that moves projections.
+
+Who matters: anyone on the live week's board projected 8+ points (about 100 players: every starting QB, the
+fantasy starters). What counts: a move to or from Doubtful, Out, injured reserve, PUP or a suspension (Questionable
+<-> Active is left to the scheduled builds, which follow the practice reports). A build is skipped while one is
+running or queued, or if one started in the last 30 minutes (it will pick the news up, or the next check will).
+
+Standard library only (runs without installing the project). Usage: python tools/news_watch.py [--dry-run]
+"""
+import json
+import os
+import subprocess
+import sys
+import urllib.request
+from datetime import datetime, timedelta, timezone
+
+ESPN = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries"
+SITE = os.environ.get("SITE_URL", "https://chefjulio.github.io/nfl-edge/").rstrip("/") + "/"
+MIN_PROJ = 8.0
+SERIOUS = {"Doubtful", "Out", "Injured Reserve", "Physically Unable to Perform", "Suspension", "Reserve/Suspended"}
+QUIET_MIN = 30
+
+
+def get(url: str):
+  req = urllib.request.Request(url, headers={"User-Agent": "nfl-edge-news-watch/1.0", "Cache-Control": "no-cache"})
+  with urllib.request.urlopen(req, timeout=30) as r:
+    return json.load(r)
+
+
+def espn_now() -> dict:
+  """espn_id -> (status, name) from the live feed (players listed nowhere are healthy)."""
+  out = {}
+  for team in get(ESPN).get("injuries", []):
+    for i in team.get("injuries", []):
+      a = i.get("athlete", {})
+      href = (a.get("links") or [{}])[0].get("href", "")
+      if "/id/" in href:
+        out[href.split("/id/")[1].split("/")[0]] = (i.get("status") or "", a.get("displayName") or "")
+  return out
+
+
+def built_from() -> dict:
+  """espn_id -> status in the feed the live site was built with."""
+  rows = get(f"{SITE}data/espn_injuries/latest.json?nocache={int(datetime.now().timestamp())}")
+  rows = rows if isinstance(rows, list) else rows.get("rows") or rows.get("players") or []
+  return {str(r.get("espn_id")): r.get("status") or "" for r in rows if r.get("espn_id")}
+
+
+def relevant() -> dict:
+  """espn_id -> 'Name (POS, TEAM, proj)' for the live week's board, projected MIN_PROJ+."""
+  d = get(f"{SITE}index.json?nocache={int(datetime.now().timestamp())}")
+  return {str(p["espn"]): f"{p.get('name')} ({p.get('pos')}, {p.get('team')}, {p.get('proj', 0):.1f})"
+          for p in (d.get("players") or {}).values() if p.get("espn") and (p.get("proj") or 0) >= MIN_PROJ}
+
+
+def recent_build() -> str | None:
+  """Why not to start a build now (one running, queued or just started), else None."""
+  try:
+    runs = json.loads(subprocess.run(["gh", "run", "list", "--workflow", "deploy.yml", "--limit", "5",
+                                      "--json", "status,createdAt"], capture_output=True, text=True, check=True).stdout)
+  except Exception as e:  # can't tell: build anyway (the deploy's concurrency group queues it behind a running one)
+    print(f"[watch] couldn't list runs ({e})")
+    return None
+  now = datetime.now(timezone.utc)
+  for r in runs:
+    if r["status"] in ("in_progress", "queued", "waiting", "pending"):
+      return f"a build is {r['status']}"
+    if now - datetime.fromisoformat(r["createdAt"].replace("Z", "+00:00")) < timedelta(minutes=QUIET_MIN):
+      return f"a build started at {r['createdAt']}"
+  return None
+
+
+def main():
+  dry = "--dry-run" in sys.argv
+  try:
+    now, then, who = espn_now(), built_from(), relevant()
+  except Exception as e:
+    print(f"[watch] couldn't read a source ({e}); nothing to do")
+    return
+  changes = []
+  for eid, label in who.items():
+    a = then.get(eid, "")
+    b = now.get(eid, ("", ""))[0]
+    if a != b and (a in SERIOUS or b in SERIOUS):
+      changes.append(f"{label}: {a or 'healthy'} -> {b or 'healthy'}")
+  if not changes:
+    print(f"[watch] no status changes for {len(who)} relevant players since the last build")
+    return
+  print("[watch] since the last build:\n  " + "\n  ".join(changes))
+  why = recent_build()
+  if why:
+    print(f"[watch] not starting a build: {why}")
+    return
+  if dry:
+    print("[watch] --dry-run: would start a build")
+    return
+  subprocess.run(["gh", "workflow", "run", "deploy.yml"], check=True)
+  print("[watch] started a full build")
+
+
+if __name__ == "__main__":
+  main()

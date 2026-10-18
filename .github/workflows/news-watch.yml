@@ -1,0 +1,31 @@
+name: News watch
+
+# Every 30 minutes: start a full build when a player who matters changes injury status (tools/news_watch.py). The
+# scheduled builds (deploy.yml) still run as before; this catches news between them (owner 2026-10-17: Jalen Hurts
+# went on IR on a Saturday afternoon). GitHub's schedules are best-effort, so a check can run late or be skipped.
+on:
+  schedule:
+    - cron: "7,37 * * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write    # start deploy.yml (workflow_dispatch) and list its runs
+  contents: read
+
+concurrency:
+  group: news-watch
+  cancel-in-progress: true
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools/news_watch.py
+          sparse-checkout-cone-mode: false
+      - name: Compare ESPN's injury feed with the live site's
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python tools/news_watch.py

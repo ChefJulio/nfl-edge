@@ -2359,3 +2359,10 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   injured alone: MAE 18.06 -> 17.25; predicted 46.6 -> 43.4 points vs 41.1 actual. Shipped in nfledge/returns.py
   (_newly_injured; lookahead weeks, rest of season, Fantasy values, Power C). Live check: Hurts (ruled out, blood
   clot) week 7 100% -> 22%, then 35 / 46%; Lamar 27 / 48 / 61%.
+  CORRECTION 2026-10-17 (owner: "Hurts is on IR now"): Power C was never wired to it. nfledge/powerc.py's branch for a
+  usual starter on this week's report who played the previous game still counted him healthy after this week (Hurts on
+  IR: back for 11 of 12 remaining games, 91.7%, Eagles Net -1.1). Now powerc._newly runs the same chain (56%). Added
+  with it, for players ESPN lists on injured reserve before nflverse's rosters do (returns.espn_ir / ir_newly): out
+  for the league minimum (4 games) or until ESPN's estimated return date if later, then the chain from the active
+  state (the chain's IR state is learned mostly from season-ending stays and put Hurts at 7%). Hurts: 48.5%. A rule
+  and a feed, no fitted values: same path for the player projections' lookahead.

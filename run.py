@@ -250,6 +250,7 @@ def main():
     from nfledge.espn import fetch_injuries
     from nfledge.injuries import InjuryModel
     feed = fetch_injuries()
+    data.espn_feed = feed  # read by Power's QB availability (powerc._newly: ESPN's IR list)
     bridge = InjuryModel.build_espn_bridge(data, season, week, feed)
     if bridge:
       print(f"[run] ESPN early-week injury news for {len(bridge)} players (official report not out)", flush=True)

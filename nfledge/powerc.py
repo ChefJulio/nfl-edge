@@ -42,6 +42,23 @@ def usual_starters(eng, season: int, week: int) -> dict:
   return out
 
 
+def _newly(eng, m, season: int, week: int, q: str, p_now: float, n: int) -> list:
+  """P(plays) over a team's next n games for a usual starter on this week's report who played its last game: this
+  week's chance, then the return chain from missing this week (returns._newly_injured, the player projections' AH
+  path), with ESPN's IR list applied (out for the league minimum or until ESPN's return date). Before 2026-10-17 he counted as fully
+  healthy after this week (Jalen Hurts on IR with a blood clot rated back for 11 of 12 games: Power's Net -1.1)."""
+  from . import returns as R
+  ir = R.espn_ir(eng.data, getattr(eng.data, "espn_feed", None))
+  row = R._newly_injured(eng.data, m, season, week, {q: p_now}, set(), ir=ir)
+  if row.empty or n < 1:  # bye this week or no previous game: the old rule
+    return [p_now] + [1.0] * (n - 1)
+  p0 = 0.0 if q in ir else p_now
+  pa = p0 + (1 - p0) * m.p_active(row, HORIZON, stay=1.0)
+  if q in ir:
+    pa = R.ir_newly(eng.data, pa, season, row.team.iloc[0], week, ir[q])
+  return [p0] + [float(pa[0, min(k, HORIZON) - 1]) for k in range(1, n)]
+
+
 def inputs(eng, season: int, week: int, recent: dict, now: dict | None = None, by_week: dict | None = None) -> tuple[dict, dict, dict]:
   """(usual, backup, pbar): team -> usual starter, backup, and the usual starter's mean chance to play over the
   team's remaining games from `week` on. recent: team -> this week's (or most recent) starter. now: gsis -> this
@@ -80,8 +97,8 @@ def inputs(eng, season: int, week: int, recent: dict, now: dict | None = None, b
       i, last = row[q]
       ks = [sum(1 for x in weeks[t] if last < x <= r) for r in rem]
       ps = [float(pa[i, min(max(k, 1), HORIZON) - 1]) for k in ks]
-    elif q in now:  # on this week's report but not out as of last game: this week's chance, then healthy
-      ps = [float(now[q])] + [1.0] * (len(rem) - 1)
+    elif q in now:  # on this week's report but not out as of last game: this week's chance, then the return chain
+      ps = _newly(eng, m, season, week, q, float(now[q]), len(rem))
     else:
       ps = [1.0] * len(rem)
     pbar[t] = float(np.mean(ps))

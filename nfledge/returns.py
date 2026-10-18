@@ -74,7 +74,8 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
   cur = cur[cur.next_week >= current_week - 1]  # still out as of his team's most recent game
   horizon = 18
   now_report = now_report or {}
-  new = _newly_injured(data, m, season, current_week, now_report, set(cur.gsis_id))
+  ir_now = espn_ir(data, espn_feed)
+  new = _newly_injured(data, m, season, current_week, now_report, set(cur.gsis_id), ir=ir_now)
   if cur.empty and new.empty:
     return {w: {} for w in weeks}, {w: {} for w in weeks}, {w: pd.DataFrame() for w in weeks}
   first = np.array([float(now_report[g]) if (g in now_report and int(nw) == current_week) else np.nan
@@ -103,7 +104,11 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
   if len(new):  # newly injured: this week's chance p, else the chain from missing this week's game; back = 1.0
     p0 = new.p_now.to_numpy()[:, None]
     cur = pd.concat([cur, new], ignore_index=True)
-    pa = np.vstack([pa, p0 + (1 - p0) * m.p_active(new, horizon, stay=1.0)])
+    pn = p0 + (1 - p0) * m.p_active(new, horizon, stay=1.0)
+    on_ir = new.gsis_id.isin(ir_now).to_numpy()
+    for j in np.flatnonzero(on_ir):
+      pn[j:j + 1] = ir_newly(data, pn[j:j + 1], season, new.team.iloc[j], current_week, ir_now.get(new.gsis_id.iloc[j]))
+    pa = np.vstack([pa, pn])
   s = data.schedules
   reg = s[(s.season == season) & (s.game_type == "REG")]
   team_weeks = {t: sorted(set(reg[reg.home_team == t].week) | set(reg[reg.away_team == t].week))
@@ -136,11 +141,41 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
   return avail, status, extra
 
 
-def _newly_injured(data, m, season: int, week: int, now_report: dict, known: set) -> pd.DataFrame:
+def espn_ir(data, feed: pd.DataFrame | None) -> dict:
+  """gsis -> ESPN's estimated return date (or None) for players ESPN lists on injured reserve right now (owner
+  2026-10-17: Jalen Hurts placed on IR on a Saturday, before nflverse's rosters show it): matched through the rosters'
+  ESPN ids."""
+  if feed is None or not len(feed) or "status" not in feed:
+    return {}
+  f = feed[feed.status == "Injured Reserve"].dropna(subset=["espn_id"])
+  r = data.rosters[data.rosters.espn_id.notna()]
+  m = dict(zip(r.espn_id.astype(str).str.replace(r"\.0$", "", regex=True), r.gsis_id))
+  ret = pd.to_datetime(f.get("return_date"), errors="coerce", utc=True).dt.tz_convert(None) if "return_date" in f else pd.Series(pd.NaT, index=f.index)
+  return {m[i]: (None if pd.isna(d) else d) for i, d in zip(f.espn_id.astype(str), ret) if i in m and isinstance(m[i], str)}
+
+
+def ir_newly(data, pa: np.ndarray, season: int, team: str, week: int, ret) -> np.ndarray:
+  """A player newly placed on IR (owner 2026-10-17): this week's game is the first of the league minimum, so he sits
+  his next (minimum - 1) games, or every game before ESPN's estimated return date if that is later; after that the
+  newly-injured chain (pa: one row of P(active) for his games after this week). The chain itself stays on the
+  active-player state: its IR state is learned mostly from season-ending stays (Hurts, back Nov 22 per ESPN, came
+  out at 7% for the rest of the season under it)."""
+  from .return_timing import ir_min
+  s = data.schedules
+  g = s[(s.season == season) & (s.game_type == "REG") & ((s.home_team == team) | (s.away_team == team)) & (s.week > week)].sort_values("week")
+  n_min = max(ir_min(season) - 1, 0)
+  n_ret = int((pd.to_datetime(g.gameday) < ret).sum()) if ret is not None else 0
+  pa = pa.copy()
+  pa[:, :max(n_min, n_ret)] = 0.0
+  return pa
+
+
+def _newly_injured(data, m, season: int, week: int, now_report: dict, known: set, ir: set = frozenset()) -> pd.DataFrame:
   """(AH, INSIGHTS {#newinj-chain}, owner 2026-10-17: Jalen Hurts ruled out, then 99% for the next week) players on
   this week's report who played their team's previous game and have no return state: the state after missing this
   week's game (missed 1, active, report status, injury, calendar), with p_now = this week's chance to play. The
-  lookahead counted them fully available from next week on."""
+  lookahead counted them fully available from next week on. ir: players already placed on injured reserve (espn_ir):
+  p_now 0 (their minimum stay and ESPN's return date: ir_newly)."""
   inj = data.injuries
   inj = inj[(inj.season == season) & (inj.week == week) & (inj.game_type == "REG") & inj.gsis_id.notna()]
   inj = inj.drop_duplicates("gsis_id", keep="last").set_index("gsis_id")
@@ -160,7 +195,7 @@ def _newly_injured(data, m, season: int, week: int, now_report: dict, known: set
     rows.append({"season": season, "week": week, "gsis_id": g, "team": team, "missed": 1, "desig": "active",
                  "report": REPORT.get(status, 0) if isinstance(status, str) else 0,
                  "injury": inj.at[g, "report_primary_injury"] if g in inj.index else None,
-                 "position": r.at[g, "position"], "next_week": nxt, "back": False, "p_now": float(np.clip(p_now, 0, 1))})
+                 "position": r.at[g, "position"], "next_week": nxt, "back": False, "p_now": 0.0 if g in ir else float(np.clip(p_now, 0, 1))})
   if not rows:
     return pd.DataFrame()
   return m._calendar(ReturnModel._encode(pd.DataFrame(rows)))
