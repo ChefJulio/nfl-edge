@@ -29,6 +29,9 @@ class Engine:
     if cfg.get("experiments", {}).get("snap_map") == "rosters" and "gsis_id_roster" in data.snaps:
       import dataclasses  # A/B only: the pre-2026-10-14 roster-only snap id map
       data = dataclasses.replace(data, snaps=data.snaps.assign(gsis_id=data.snaps.gsis_id_roster))
+    if cfg.get("experiments", {}).get("depth_per_team"):
+      import dataclasses  # (AR) A/B: each team's depth chart as of its own game
+      data = dataclasses.replace(data, depth_per_team=True)
     self.data, self.cfg, self.scoring, self.positions = data, cfg, scoring, list(positions)
     self.tm = TeamModel(data.pbp, cfg, data.qb_career)
     self.team_ledger = team_game_ledger(data.pbp, data.schedules)
@@ -258,7 +261,9 @@ class Engine:
     from . import sleeper as SL
     from .player_model import STAT_KEYS
     try:
-      live = week > self.data.completed_weeks(season)
+      # the week being played or later (week clock); completed_weeks already counts a live week with one final game
+      from .week_clock import Clock
+      live = week >= Clock(self.data.schedules).current_week(season) if season == self.data.current_season else False
       sp = SL.week_points(season, week, ROOT / self.cfg["data"]["cache_dir"], self.scoring, self.data.rosters, live=live)
     except Exception as e:  # Sleeper down: ours alone
       _log(f"sleeper projections {season} wk {week}: unavailable ({type(e).__name__}); not blended")

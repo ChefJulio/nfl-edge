@@ -60,6 +60,7 @@ def variant(**kw):
 
 VARIANTS = {
   "baseline": variant(),
+  "depth_per_team": variant(experiments__depth_per_team=True),  # (AR) 2026-10-18
   # --- previously decided on 1-2 seasons; re-checked on 5 ---
   "no_implied_total": variant(experiments__implied_total=False),
   "def_drop": variant(experiments__def_terms="drop"),

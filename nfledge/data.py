@@ -146,7 +146,8 @@ TEAM_COLS = {"posteam", "defteam", "home_team", "away_team", "team", "opp", "rec
 @dataclass
 class Data:
   current_season: int
-  latest_week: int  # latest fully completed regular-season week of current_season
+  latest_week: int  # latest regular-season week of current_season with ANY game final (the live week counts from its
+  # first final game; consumers filter to final games). Which week the site is in: nfledge/week_clock.py
   seasons: list[int]
   pbp: pd.DataFrame  # processed regular-season plays
   schedules: pd.DataFrame
@@ -165,6 +166,7 @@ class Data:
   teams: pd.DataFrame | None = None  # team names + colors
   qb_career: pd.Series | None = None  # career pass attempts before the loaded window, by gsis_id
   pfr_def: pd.DataFrame | None = None  # PFR weekly advanced defensive stats (pressures, coverage, tackling)
+  depth_per_team: bool = False  # EXPERIMENT (AR, experiments.depth_per_team): each team's depth chart as of its own game
 
   def __post_init__(self):
     """One code per franchise across seasons and sources: older nflverse seasons use the codes of the time (OAK
@@ -181,6 +183,7 @@ class Data:
             f[col] = f[col].replace(RELOCATED)
 
   def completed_weeks(self, season: int) -> int:
+    """Last week with any final game (current season, see latest_week; may be the live week), else the season's last."""
     if season == self.current_season:
       return self.latest_week
     return int(self.schedules.loc[(self.schedules.season == season) & (self.schedules.game_type == "REG"),
@@ -517,6 +520,23 @@ def depth_for_week(data: Data, season: int, week: int) -> pd.DataFrame:
       dts = pd.to_datetime(raw.dt.unique(), utc=True)
     snap = dts.max().strftime("%Y-%m-%dT%H:%M:%SZ")
     d = raw[(raw.dt == snap) & raw.pos_abb.isin(POSITIONS)]
+    if data.depth_per_team and len(sched):
+      # (AR) each team's chart: the last snapshot before its own game day + 1 day (a Sunday team keeps Friday's moves)
+      all_dts = pd.to_datetime(raw.dt.unique(), utc=True)
+      parts = []
+      for g in sched.itertuples():
+        gd = pd.to_datetime(g.gameday)
+        if pd.isna(gd):
+          continue
+        ok = all_dts[all_dts.tz_localize(None) < gd + pd.Timedelta(days=1)]
+        if not len(ok):
+          continue
+        sn = ok.max().strftime("%Y-%m-%dT%H:%M:%SZ")
+        for t in (g.home_team, g.away_team):
+          parts.append(raw[(raw.dt == sn) & (raw.team == t) & raw.pos_abb.isin(POSITIONS)])
+      if parts:
+        new = pd.concat(parts, ignore_index=True)
+        d = pd.concat([d[~d.team.isin(set(new.team))], new], ignore_index=True)  # teams on bye keep the week's base chart
     d = d.rename(columns={"pos_abb": "pos", "pos_rank": "rank"})[["team", "gsis_id", "pos", "rank"]]
   else:  # <= 2024: weekly snapshots
     d = raw[(raw.week == min(week, raw.week.max())) & (raw.formation == "Offense") &

@@ -2504,3 +2504,19 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   depth_build.py); (4) ESPN snapshot / news file dates in UTC (espn_snapshot.py, espn_news.py); (5) espn_calib
   EARLY_DAYS vs the live bridge's report-presence rule; (6) gamecast.js weekOfDate (assumes a Thursday opener);
   (7) the tuesday.py stage taken from the player's own day count rather than the calendar.
+- **PRE-REGISTERED 2026-10-18 (week clock audit, owner: "keep going"): (AR) each team's depth chart as of its own
+  game.** data.depth_for_week takes one daily ESPN depth snapshot for the whole week, the last before the week's
+  FIRST game day + 1 day, so after a Thursday game every Sunday / Monday team's chart is frozen at Thursday night
+  (Friday changes - a starter demoted, a backup promoted - never reach its projection). Variant
+  (experiments.depth_per_team): per team, the last snapshot before its own game day + 1 day (still before kickoff:
+  no leakage). Daily snapshots exist from 2025 only, so tools/experiments.py baseline,depth_per_team 2025 (and 2026
+  weeks 1-5 reported, not gated). GATE: fantasy MAE on the rows whose depth input changes lower with the 95% CI over
+  season-weeks excluding 0; all rows not worse (CI upper < +0.003); no position significantly worse.
+- **QUEUED 2026-10-18 (week clock, model side; each needs its own pre-registration before running):** (AS) midweek
+  stage from the calendar: live the partial-week model is picked by the player's own listed-day count (a player first
+  listed Thursday is "stage 1"), while the partial models are trained on players listed from the first report day;
+  variant: stage = the team's report days in (week clock) with days before his first listing filled as full practice
+  (the {#off-report} display rule), partial models retrained on the same construction. (AT) one "early week"
+  definition: espn_calib.EARLY_DAYS (calibration: capture within 3 days of the team's last game) vs the live bridge
+  (no report published yet): align both on the week clock (before the team's first report deadline) and refit the
+  ESPN early-week rates.
