@@ -2902,13 +2902,37 @@
   const PST_NAME = { passing: 'Passing', rushing: 'Rushing', receiving: 'Receiving', fumbles: 'Fumbles', defensive: 'Defense',
                      interceptions: 'Interceptions', kickReturns: 'Kick returns', puntReturns: 'Punt returns', kicking: 'Kicking', punting: 'Punting' };
   let GSIS_OF = null;  // ESPN id -> gsis, built once from NFLE.ui.ids
+  // A replay's box score (owner 2026-10-18: "player/team/fantasy stats reflect the point in time where the replay is"):
+  // rebuilt from the plays so far (stateAt's lines), names and teams from the final box score; passing, rushing and
+  // receiving with fantasy points (ESPN's other columns exist only as final totals)
+  const asOfBox = (sum, info, lines, w) => {
+    const fin = boxLines(sum), map = byEspn(), K = KEYS(), ix = k => K.indexOf(k), teams = (DATA && DATA.teams) || {}, U = NFLE.ui;
+    const rows = Object.values(lines).map(o => Object.assign({}, o, { name: (fin[o.id] || {}).name || '', team: (fin[o.id] || {}).team || '' })).filter(o => o.team);
+    const v = (o, k) => ix(k) >= 0 ? o.line[ix(k)] || 0 : 0;
+    const fpOf = o => { const pid = map[o.id], pp = pid && DATA && DATA.players[pid]; return pts(o.line, w, pp ? pp.pos : ''); };
+    const cell = o => { const pid = map[o.id], dp = pid && DATA && DATA.players[pid];
+      return U ? U.player({ name: o.name, team: o.team, espn: o.id, pos: dp ? dp.pos : '' }, teams) : esc(o.name); };
+    const tbl = (title, head, list, vals) => list.length ? `<div class="pst-cat"><div class="bx-h">${title}</div><div class="lg-scroll"><table class="bx tiles pst-tbl"><thead><tr><th>Player</th>${head.map(h => `<th class="num"><span class="sc h">${h}</span></th>`).join('')}<th class="num pst-fp"><span class="sc h">FP</span></th></tr></thead>
+      <tbody>${list.map(o => `<tr class="teamrow" style="${teams[o.team] ? NFLE.fmt.rowStyle(teams, o.team) : ''}"${map[o.id] ? ` data-open-pid="${esc(map[o.id])}"` : ''}><td class="pst-who">${cell(o)}</td>${vals(o).map(x => `<td class="num"><span class="sc">${esc(x)}</span></td>`).join('')}<td class="num pst-fp"><span class="sc fp">${f1(fpOf(o))}</span></td></tr>`).join('')}</tbody></table></div></div>` : '';
+    return team => {
+      const mine = rows.filter(o => o.team === team);
+      return tbl('Passing', ['C/ATT', 'YDS', 'TD', 'INT'], mine.filter(o => o.att).sort((a, b) => b.att - a.att), o => [`${o.comp}/${o.att}`, v(o, 'pass_yd'), v(o, 'pass_td'), v(o, 'interception')])
+        + tbl('Rushing', ['CAR', 'YDS', 'TD'], mine.filter(o => o.car).sort((a, b) => b.car - a.car), o => [o.car, v(o, 'rush_yd'), v(o, 'rush_td')])
+        + tbl('Receiving', ['REC', 'TGT', 'YDS', 'TD'], mine.filter(o => o.tgt || v(o, 'reception')).sort((a, b) => v(b, 'rec_yd') - v(a, 'rec_yd')), o => [v(o, 'reception'), o.tgt, v(o, 'rec_yd'), v(o, 'rec_td')]);
+    };
+  };
   const playerStats = (sum, info, opt = {}) => {
     const P = sum && sum.boxscore && sum.boxscore.players;
     if (!P || !P.length) return opt.empty ? `<section class="gcs" id="${opt.id || 'gcPst'}"><h3>${esc(opt.title || 'Player stats')}</h3><p class="muted">${esc(opt.empty)}</p></section>` : '';
     // owner 2026-10-14: no projection comparisons here, just what happened. Passing, rushing and receiving stay separate
     // tables (a QB who runs shows in both); each of those rows ends with the player's whole-game fantasy points in the
     // viewer's scoring, so the same total repeats across his tables.
-    const lines = boxLines(sum), map = byEspn(), w = leagueW();
+    const lines = opt.lines || boxLines(sum), map = byEspn(), w = leagueW();
+    if (opt.lines) {  // a replay's moment: names and teams from the final box score
+      const fin = boxLines(sum);
+      Object.values(lines).forEach(o => { if (!o.team && fin[o.id]) { o.team = fin[o.id].team; o.name = fin[o.id].name; o.short = fin[o.id].short; } });
+    }
+    const asOf = opt.lines ? asOfBox(sum, info, lines, w) : null;
     const FP_CATS = ['passing', 'rushing', 'receiving'];
     const fpOf = id => { const o = lines[id]; if (!o) return null; const pid = map[id], pp = pid && DATA && DATA.players[pid]; return pts(o.line, w, pp ? pp.pos : ''); };
     const U = NFLE.ui, teams = (DATA && DATA.teams) || {};
@@ -2916,6 +2940,7 @@
     const sides = [info.away, info.home];
     const pick = GP.pst === '__fp' || sides.some(x => x.team === GP.pst) ? GP.pst : info.away.team;
     const block = side => {
+      if (asOf) return `<div class="pst-team" data-pst="${esc(side.team)}"${side.team === pick ? '' : ' hidden'}>${asOf(side.team) || '<p class="muted">No stats yet.</p>'}</div>`;
       const tp = P.find(x => ourCode(x.team.abbreviation) === side.team);
       if (!tp) return '';
       const style = teams[side.team] ? NFLE.fmt.rowStyle(teams, side.team) : `--tc:${side.color || '#666'};--tc2:${side.color || '#999'};--tfg:#ffffff`;
@@ -3067,22 +3092,31 @@
     if (!ids) { lines = sum ? boxLines(sum) : {}; tstats = espnTeamStats(sum); } else {
       const nm = {}, names = fullNames(sum, nm), K = KEYS();
       lines = {};
-      const ts = {}; [info.away, info.home].forEach(x => { ts[x.team] = { yd: 0, n: 0, c3: 0, a3: 0, to: 0, top: 0 }; });
+      const ts = {}; [info.away, info.home].forEach(x => { ts[x.team] = { yd: 0, n: 0, c3: 0, a3: 0, c4: 0, a4: 0, to: 0, top: 0, py: 0, ry: 0, fd: 0, sk: 0, sky: 0, pn: 0, pny: 0 }; });
+      // penalties, every play (declined ones don't count): "PENALTY on LAC-T.Wease, Offensive Holding, 10 yards"
+      plays.forEach(p => { [...String(p.text || '').matchAll(/PENALTY on ([A-Z]{2,3})-[^,]+, [^,]+, (\d+) yards?/g)].forEach(m => {
+        if (/declined/i.test(String(p.text || '').slice(m.index, m.index + 160))) return;
+        const T = ts[ourCode(m[1])]; if (T) { T.pn++; T.pny += +m[2]; } }); });
       drives.forEach(d => {
         const tm = teamOf(d.team && d.team.id), T = tm && ts[tm.team];
         const real = (d.plays || []).filter(p => p.start && p.start.down && !nonPlay(p) && !stPlay(p) && !/No Play/i.test(p.text || ''));
         real.forEach((p, i) => {
           if (!T) return;
-          T.yd += +p.statYardage || 0; T.n++;
-          if (p.start.down === 3) { T.a3++; const nx = real[i + 1]; if (p.scoringPlay || (nx && nx.start.down === 1)) T.c3++; }
+          const y = +p.statYardage || 0, ty = pType(p), nx = real[i + 1], conv = p.scoringPlay || (nx && nx.start.down === 1);
+          T.yd += y; T.n++;
+          if (/sack/i.test(ty)) { const m = String(p.text || '').match(/sacked[^.]*? for (-?\d+) yards?/), sy = m ? +m[1] : y; T.sk++; T.sky -= sy; T.py += y; } else if (/pass|interception/i.test(ty)) T.py += y; else T.ry += y;
+          if (nx && nx.start.down === 1 && !p.scoringPlay) T.fd++;
+          if (p.start.down === 3) { T.a3++; if (conv) T.c3++; }
+          if (p.start.down === 4) { T.a4++; if (conv) T.c4++; }
           if (p.isTurnover) T.to++;
         });
         const full = all.find(x => x.id === d.id), n = full && full.plays.length === d.plays.length && drvNums(d);
         if (T) T.top += n ? (+n.t.split(':')[0] * 60 + +n.t.split(':')[1]) : Math.max(0, elapsed(d.plays[d.plays.length - 1]) - elapsed(d.plays[0]));
       });
       tstats = {};
-      Object.entries(ts).forEach(([t, x]) => { tstats[t] = { 'Total Yards': String(x.yd), 'Yards per Play': x.n ? (x.yd / x.n).toFixed(1) : '0.0',
-        '3rd down efficiency': `${x.c3}-${x.a3}`, Turnovers: String(x.to), Possession: mmss(x.top) }; });
+      Object.entries(ts).forEach(([t, x]) => { tstats[t] = { 'Total Yards': String(x.yd), Passing: String(x.py), Rushing: String(x.ry), '1st Downs': String(x.fd),
+        '3rd down efficiency': `${x.c3}-${x.a3}`, '4th down efficiency': `${x.c4}-${x.a4}`, 'Yards per Play': x.n ? (x.yd / x.n).toFixed(1) : '0.0',
+        'Total Plays': String(x.n), Turnovers: String(x.to), 'Sacks-Yards Lost': `${x.sk}-${x.sky}`, Penalties: `${x.pn}-${x.pny}`, Possession: mmss(x.top) }; });
       plays.forEach(p => {
         if (nonPlay(p)) return;
         const a = spot(p.start, info);
@@ -3416,8 +3450,8 @@
             <div id="lgBody">${!sum ? '<p class="muted">Plays appear once the game starts.</p>'
               : !allPlays(sum).length && info.state === 'post' ? '<p class="muted">ESPN has no play-by-play for this game (games before about 2005 only have box scores).</p>'
               : gameLog(sum, info, ser, upto)}</div></section>`
-      : GP.pane === 'team' ? `<section class="gcs" id="gcTeam"><h3>Team stats</h3>${sum ? teamStats(sum, info) || '<p class="muted">Not available yet.</p>' : ''}</section>`
-      : playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: rp ? 'Box score shows the final totals during a replay.' : '', empty: 'The box score fills in once the game starts.' })}`;
+      : GP.pane === 'team' ? `<section class="gcs" id="gcTeam"><h3>Team stats</h3>${st.replay ? '<p class="gcs-note">As of this play, counted from the play-by-play.</p>' : ''}${sum ? teamStats(sum, info, null, st.replay ? st.tstats : null) || '<p class="muted">Not available yet.</p>' : ''}</section>`
+      : playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: st.replay ? 'As of this play, counted from the play-by-play.' : '', lines: st.replay ? st.lines : null, empty: 'The box score fills in once the game starts.' })}`;
     root.innerHTML = `
       <section class="sb">${side(info.away, false)}<div class="sb-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<b>${esc(status)}</b>${!nx && sp && sit && sit.shortDownDistanceText
         ? `<span class="sb-dd">${esc(sit.shortDownDistanceText)}${sit.possessionText ? ` · ${esc(sit.possessionText)}` : ''}</span>` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}</section>
