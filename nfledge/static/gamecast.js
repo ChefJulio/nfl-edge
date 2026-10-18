@@ -2511,10 +2511,10 @@
       const at = p.start && p.start.possessionText ? p.start.possessionText : '';
       const a = spot(p.start, st), red = a && (a.dir === 1 ? a.x >= 80 : a.x <= 20) && !stPlay(p);
       const rows = c.rows.map(r => `<div class="pi-row lpf-r" data-open-pid="${esc(r.pid)}"><img class="pi-hs" src="${esc(NFLE.ui ? NFLE.ui.headshot(r.id) : '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
-          <span class="pi-nm">${esc(r.name)}</span>${r.tag === 'opp' ? '<span class="fp-tag opp lpf-tag">Opp</span>' : ''}<span class="pi-st">${statText(r.s)}</span>
+          <span class="pi-nm">${esc(r.name)}</span>${r.tag === 'opp' ? '<span class="fp-tag foe lpf-tag">Opp</span>' : ''}<span class="pi-st">${statText(r.s)}</span>
           <span class="lpf-tot" title="His fantasy points this game after the play">${f1(r.total)}</span>
           <b class="pi-fp ${r.fp > 0 ? 'up' : 'dn'}">${r.fp > 0 ? '+' : '&minus;'}${f1(Math.abs(r.fp))}</b></div>`).join('');
-      return `<li class="lpf${p.scoringPlay ? ' scored' : ''}${c.rows.every(r => r.tag === 'opp') ? ' opp' : ''}">
+      return `<li class="lpf${p.scoringPlay ? ' scored' : ''}${c.rows.every(r => r.tag === 'opp') ? ' lpf-o' : ''}">
         <a class="lpf-h" href="${esc(gameHref(DATA.games.find(x => x.id === c.gid) || { id: c.gid }))}">
           <span class="lpf-g">${lg(st.away)}<b>${esc(st.away.team)}</b> ${esc(p.awayScore)}&ndash;${esc(p.homeScore)} <b>${esc(st.home.team)}</b>${lg(st.home)}</span>
           <span class="lpf-w">${esc(`${periodName((p.period || {}).number || 1)} ${(p.clock || {}).displayValue || ''}`.trim())}</span>
@@ -3204,7 +3204,7 @@
     const row = r => {
       const pace = r.proj > 0 ? r.fp / r.proj : 0, tone = pace >= Math.max(frac, 0.15) ? 'good' : pace < frac * 0.6 ? 'bad' : 'mid';
       const cell = U ? U.player({ name: r.p.name, team: r.p.team, espn: r.p.espn, pos: r.p.pos, sub: r.ln ? statLineText(r.ln, r.p.pos) : 'No stats yet' }, teams) : esc(r.p.name);
-      return `<div class="fpr" data-open-pid="${esc(r.pid)}">${r.t ? `<span class="fp-tag ${r.t}">${r.t === 'mine' ? 'Yours' : 'Opp'}</span>` : ''}<div class="fpr-who">${cell}</div>
+      return `<div class="fpr" data-open-pid="${esc(r.pid)}">${r.t ? `<span class="fp-tag ${r.t === 'opp' ? 'foe' : r.t}">${r.t === 'mine' ? 'Yours' : 'Opp'}</span>` : ''}<div class="fpr-who">${cell}</div>
         <div class="fpr-n"><b class="${tone}">${f1(r.fp)}</b><span class="muted">of ${f1(r.proj)}</span>
         <span class="fpr-bar" title="Points so far vs his projection; the tick is where he'd be on pace"><i class="${tone}" style="width:${Math.min(100, pace * 100).toFixed(0)}%"></i>${going ? `<em style="left:${(frac * 100).toFixed(0)}%"></em>` : ''}</span></div></div>`;
     };
