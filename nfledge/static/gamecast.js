@@ -169,6 +169,44 @@
     });
     return out;
   };
+  // Touchdown and try as two plays (owner 2026-10-18: "they're separate plays in reality"): ESPN usually reports the
+  // extra point / two-point try inside the touchdown's play ("... for 6 yards, TOUCHDOWN. K.Fairbairn extra point is GOOD,
+  // Center-..."), with the score after both. Split right after each summary arrives: the touchdown keeps its id, its own
+  // text and a score without the try; the try follows it (id "<id>-try", the same clock, the score after it, the same
+  // win-probability entry). Already-separate tries and TOUCHDOWN NULLIFIED plays are left alone.
+  const TRY_RX = /(?:^|\.\s+)((?:[A-Z][a-z]?\.[A-Za-z'\-]+(?:\s(?:Jr\.|Sr\.|II|III|IV))?\s+extra point|TWO-POINT CONVERSION ATTEMPT)[\s\S]*)$/;
+  const splitTries = sum => {
+    if (!sum || !sum.drives || sum._split) return sum;
+    sum._split = true;
+    const wpAdd = [];
+    const seen = new Set();
+    const drives = [...(sum.drives.previous || []), ...(sum.drives.current ? [sum.drives.current] : [])];
+    let prev = null;
+    drives.forEach(d => {
+      if (seen.has(d)) return; seen.add(d);
+      const out = [];
+      (d.plays || []).forEach(p => {
+        const txt = String(p.text || ''), m = /TOUCHDOWN(?! NULLIFIED)/.test(txt) && p.scoringPlay ? txt.match(TRY_RX) : null;
+        if (!m || /extra point|two-point/i.test(String((p.type || {}).text || ''))) { out.push(p); prev = p; return; }
+        const tryText = m[1].trim(), tdText = txt.slice(0, txt.length - m[0].length).trim().replace(/[^.]$/, c => `${c}.`);
+        const two = /TWO-POINT/.test(tryText);
+        const pts = two ? (/ATTEMPT SUCCEEDS/i.test(tryText) ? 2 : 0) : (/extra point is GOOD/i.test(tryText) ? 1 : 0);
+        // the scoring side: whose score went up on the play
+        const ph = prev ? prev.homeScore : 0, pa = prev ? prev.awayScore : 0, home = p.homeScore - ph >= p.awayScore - pa;
+        const td = Object.assign({}, p, { text: tdText, scoreValue: 6,
+          homeScore: p.homeScore - (home ? pts : 0), awayScore: p.awayScore - (home ? 0 : pts) });
+        const tr = Object.assign({}, p, { id: `${p.id}-try`, text: tryText, scoringPlay: pts > 0, scoreValue: pts, statYardage: 0, isTurnover: false,
+          isPenalty: false, type: { id: two ? 'try2' : 'xp', text: two ? 'Two-Point Conversion' : 'Extra Point' }, start: Object.assign({}, p.end || {}, { down: 0 }) });
+        out.push(td, tr); prev = tr;
+        const w = (sum.winprobability || []).find(x => String(x.playId) === String(p.id));
+        if (w) wpAdd.push([String(p.id), Object.assign({}, w, { playId: tr.id })]);
+      });
+      d.plays = out;
+    });
+    // each try's win-probability entry goes right after its touchdown's
+    wpAdd.forEach(([id, w]) => { const i = sum.winprobability.findIndex(x => String(x.playId) === id); sum.winprobability.splice(i + 1, 0, w); });
+    return sum;
+  };
   const allPlays = sum => {
     const d = sum.drives || {};
     const drives = [...(d.previous || [])];
@@ -367,6 +405,11 @@
     else if (/^rush|rushing touchdown/i.test(t)) h = y > 0 ? `${nm(g('lead'))} ${y}-yard run` : `${nm(g('lead'))} run, ${yds(y)}`;
     else if (/punt/i.test(t)) h = `${nm(g('lead'))} punts ${g('punt') || ''} yards${/Touchback/i.test(raw) ? ', touchback' : g('ret') ? `, ${nm(g('ret'))} returns ${pl.statYardage || 0}` : ''}`;
     else if (/kickoff/i.test(t)) h = /Touchback/i.test(raw) ? 'Kickoff, touchback' : `Kickoff: ${nm(g('ret'))} returns it ${pl.statYardage || 0} yards`;
+    else if (/extra point/i.test(t)) { const k = (raw.match(new RegExp(`^(${NM}) extra point`)) || [])[1], ok = /is GOOD/i.test(raw);
+      h = `${k ? `${nm(k)} e` : 'E'}xtra point ${ok ? 'good' : /block/i.test(raw) ? 'blocked' : 'no good'}`; cls = ok ? 'good' : 'bad'; }
+    else if (/two-point/i.test(t)) { const ok = /ATTEMPT SUCCEEDS/i.test(raw), inner = raw.replace(/^TWO-POINT CONVERSION ATTEMPT\.\s*/, '').split('. ATTEMPT')[0];
+      const r = ACT.test(inner) ? action(inner) : null;
+      h = `Two-point try${r ? `: ${r.h.replace(/, (?:\d+ yards?|no gain|loss of \d+)$/, '')}` : ''}, ${ok ? 'good' : 'no good'}`; cls = ok ? 'good' : 'bad'; }
     else if (/field goal/i.test(t)) { const r = g('fg', 2); h = `${g('fg') || ''}-yard field goal, ${/good/i.test(r || t) && !/no good/i.test(r || '') ? 'good' : r && /block/i.test(r) ? 'blocked' : 'no good'}`; cls = /good/i.test(t) ? 'good' : 'bad'; }
     else if (/penalty/i.test(t)) { const m = raw.match(RX.pen); h = m ? `Penalty, ${m[1]}: ${m[2]}, ${m[3]} yards` : 'Penalty'; cls = 'pen'; }  // not 'flag': site.css .flag is a white badge
     else h = t || raw.split('. ')[0];
@@ -2455,7 +2498,7 @@
       st.state === 'in' ? now - (LIVE.fetched[st.id] || 0) > (NFLE.feedOpen ? 20000 : 55000) : st.realState === 'post' && !LIVE.fetched[st.id]);
     await Promise.all(jobs.map(async ([, st]) => {
       try {
-        const sum = await getJSON(ESPN.sum + st.id);
+        const sum = splitTries(await getJSON(ESPN.sum + st.id));
         LIVE.sums[st.id] = sum; LIVE.fetched[st.id] = Date.now();
         Object.assign(LIVE.lines, boxLines(sum));
       } catch (e) { /* keep last good */ }
@@ -2684,7 +2727,7 @@
       const chips = [];
       // a touchdown's text carries its extra point ("... TOUCHDOWN. X extra point is GOOD"): TD first
       if (p.scoringPlay) chips.push(/touchdown/i.test(t + txt) ? ['TD', 'c-sc'] : /field goal/i.test(t + txt) ? ['FG', 'c-sc'] : /extra point|two-point/i.test(t) ? ['XP', 'c-sc'] : /safety/i.test(t + txt) ? ['SAFETY', 'c-sc'] : ['TD', 'c-sc']);
-      else if (st) chips.push([/kickoff|kicks/i.test(t + txt) ? 'KICKOFF' : /punt/i.test(t + txt) ? 'PUNT' : /field goal/i.test(t + txt) ? 'FG' : 'ST', 'c-st']);
+      else if (st) chips.push([/extra point|two-point/i.test(t) ? (/two-point/i.test(t) ? '2PT' : 'XP') : /kickoff|kicks/i.test(t + txt) ? 'KICKOFF' : /punt/i.test(t + txt) ? 'PUNT' : /field goal/i.test(t + txt) ? 'FG' : 'ST', 'c-st']);
       // ESPN doesn't flag lost fumbles on kickoffs / punts as turnovers: the kicking team recovering is one.
       const kicker = st && (txt.match(/(?:kicks|punts)\b.*?\bfrom ([A-Z]{2,3}) \d/) || [])[1];
       const recBy = (txt.match(/RECOVERED by ([A-Z]{2,3})-/) || [])[1];
@@ -3035,6 +3078,11 @@
       const sp = { x: scorer === info.away ? 85 : 15, dir: scorer === info.away ? 1 : -1, toGo: scorer === info.away ? 100 : 0, offense: scorer, kick: true, red: true, text: '' };
       return { head: `<b>${tmL(scorer.team)} try</b> · after the touchdown`, sp };
     }
+    if (isTry(L) && !L.scoringPlay) {  // a missed try: the touchdown's team still kicks off
+      const before = i > 1 ? st.plays[i - 2] : null, tdh = L.homeScore - (before ? before.homeScore : 0), tda = L.awayScore - (before ? before.awayScore : 0);
+      const k = tdh > tda ? info.home : info.away;
+      return { head: `<b>Kickoff</b> · ${tmL(k.team)} kicks to ${tmL(other(k).team)}`, sp: tee(k, 35) };
+    }
     if (L.scoringPlay && scorer) {
       const safety = /safety/i.test(`${pType(L)} ${L.text || ''}`);
       const k = safety ? other(scorer) : scorer;
@@ -3346,7 +3394,14 @@
         if (!best) return;
         const vx = 6 + (640 - 12) * best.t / T;
         hair.setAttribute('x1', vx); hair.setAttribute('x2', vx); hair.style.display = '';
-        tip.innerHTML = `<b>${best.play.period ? periodName(best.play.period.number) : ''} ${esc(best.play.clock ? best.play.clock.displayValue : '')}</b> · ${esc(GP.info.home.team)} ${wpTxt(best.home, gameOver() && best === ser[ser.length - 1])} / ${esc(GP.info.away.team)} ${wpTxt(1 - best.home, gameOver() && best === ser[ser.length - 1])}<br>${esc(best.play.text)}`;
+        // the play as everywhere else (owner 2026-10-18): when, the down, the score after it, a headline; the chances
+        const bp = best.play, fin = gameOver() && best === ser[ser.length - 1], I = GP.info;
+        const a = spot(bp.start, I), hd = playHead(bp, fullNames(GP.sum), a ? { off: a.offense.team, other: a.offense.team === I.away.team ? I.home.team : I.away.team } : {});
+        const dd = bp.start && bp.start.down ? (bp.start.shortDownDistanceText || bp.start.downDistanceText || '') : '';
+        tip.innerHTML = `<div class="lpf-h"><span class="lpf-w">${esc(`${bp.period ? periodName(bp.period.number) : ''} ${bp.clock ? bp.clock.displayValue : ''}`.trim())}</span>
+          ${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>` : ''}<span class="lpf-g lpf-sc">${esc(I.away.team)} ${esc(bp.awayScore)}&ndash;${esc(bp.homeScore)} ${esc(I.home.team)}</span></div>
+          <div class="lpf-t ${hd.cls}">${esc(hd.h)}</div>
+          <div class="tip-wp"><span style="color:${esc(I.away.color)}">${esc(I.away.team)} <b>${wpTxt(1 - best.home, fin)}</b></span><span class="muted">win chance</span><span style="color:${esc(I.home.color)}"><b>${wpTxt(best.home, fin)}</b> ${esc(I.home.team)}</span></div>`;
         // keep the whole tooltip inside the chart: centered on the finger, clamped by its measured width (a % clamp
         // let the wide play text run off the screen edge near the ends)
         tip.hidden = false;
@@ -3414,7 +3469,7 @@
       if (GP.g && GP.g.colors) { GP.info.away.color = GP.g.colors[GP.away] || GP.info.away.color; GP.info.home.color = GP.g.colors[GP.home] || GP.info.home.color; }
       else distinctColors(GP.info);  // a link without the week file: ESPN's colors, made distinct here
       // the box score links players to our pages through the id map (NFLE.ui.ready, fetched on first use)
-      if (GP.info.realState !== 'pre') [GP.sum] = await Promise.all([getJSON(ESPN.sum + ev.id), NFLE.ui && NFLE.ui.ready]);
+      if (GP.info.realState !== 'pre') { [GP.sum] = await Promise.all([getJSON(ESPN.sum + ev.id), NFLE.ui && NFLE.ui.ready]); splitTries(GP.sum); }
       // Player cards opened from this page show the live / final line too.
       if (GP.sum) Object.assign(LIVE.lines, boxLines(GP.sum));
       if (GP.g) LIVE.byGame[GP.g.id] = GP.info;

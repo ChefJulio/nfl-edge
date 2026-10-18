@@ -1368,3 +1368,4 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .lpf.to { border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); }
 .lpf-sc { margin-left: auto; font-variant-numeric: tabular-nums; }
 .lpf .pi { margin-top: 4px; }
+.wp-tip .lpf-t { font-size: 15px; margin: 4px 0 2px; } .wp-tip .tip-wp { display: flex; justify-content: space-between; font-size: 12px; } .wp-tip .tip-wp b { font-size: 14px; }
