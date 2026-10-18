@@ -22,6 +22,7 @@ ET = "America/New_York"
 ROLLOVER_HOUR_ET = 6      # the site moves to the next week at 06:00 ET on the Tuesday after a week's last game
 REPORT_DUE_HOUR_ET = 16   # practice reports are due 4 p.m. ET (league policy)
 GAME_HOURS = 4            # a game is treated as live up to this long after kickoff when no final score is in yet
+INACTIVES_MIN = 90       # game-day inactives are posted 90 minutes before kickoff
 WAIVER_RUN = ("Wed", 3)   # Sleeper / ESPN default waiver processing, Wednesday ~03:00 ET (~2 a.m. CT)
 
 
@@ -55,6 +56,10 @@ class TeamWeek:
   def reports_in(self, now: pd.Timestamp) -> int:
     """How many of this week's report deadlines have passed (0-3)."""
     return sum(1 for _, due in self.reports if now >= due)
+
+  def inactives_in(self, now: pd.Timestamp) -> bool:
+    """Game-day actives / inactives are posted (kickoff - 90 minutes)."""
+    return now >= self.kick - pd.Timedelta(minutes=INACTIVES_MIN)
 
   def final_report_in(self, now: pd.Timestamp) -> bool:
     return bool(self.reports) and now >= self.reports[-1][1]
@@ -140,5 +145,6 @@ class Clock:
     return {"tz": ET, "built": iso(self.now), "week": week, "rollover": iso(self.rollover(season, week)),
             "waivers": iso(self.waiver_run(season, week)), "due_hour": REPORT_DUE_HOUR_ET,
             "teams": {t: {"kick": iso(tw.kick), "opp": tw.opp, "home": tw.home, "final": tw.final,
+                          "inactives": iso(tw.kick - pd.Timedelta(minutes=INACTIVES_MIN)),
                           "reports": [{"date": d, "due": iso(due)} for d, due in tw.reports]}
                       for t, tw in sorted(self.teams(season, week).items())}}

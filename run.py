@@ -53,7 +53,7 @@ def attach_data(eng, data):
 
 
 def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict | None = None, espn_hist: Path | None = None,
-                 espn_midweek: dict | None = None, espn_questionable: dict | None = None):
+                 espn_midweek: dict | None = None, espn_questionable: dict | None = None, espn_gameday: dict | None = None):
   """Trained engine + this week's projections, cached on disk. Presentation-only changes (report.py, the
   template) reuse it, so a re-render takes seconds instead of minutes. espn_bridge (live week only): early-week
   ESPN injury statuses (InjuryModel.build_espn_bridge); part of the cache key, so new ESPN news re-projects.
@@ -66,6 +66,8 @@ def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict |
                 if espn_bridge else "")
   if espn_midweek:
     bridge_key += "_m" + hashlib.sha1(json.dumps(sorted(espn_midweek.items())).encode()).hexdigest()[:8]
+  if espn_gameday:  # (AU) game-day actives / inactives
+    bridge_key += "_g" + hashlib.sha1(json.dumps(sorted((k, v[0]) for k, v in espn_gameday.items())).encode()).hexdigest()[:8]
   if espn_questionable:  # display only, but it's in the cached projections' status column
     bridge_key += "_q" + hashlib.sha1(json.dumps(sorted(espn_questionable)).encode()).hexdigest()[:8]
   path = cache_dir / f"model_{state_key(data, cfg, scoring, season, week)}{bridge_key}.pkl"
@@ -80,6 +82,8 @@ def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict |
     eng.injury_model.espn_midweek = espn_midweek
   if espn_questionable and eng.injury_model is not None:
     eng.injury_model.espn_questionable = espn_questionable
+  if espn_gameday and eng.injury_model is not None:
+    eng.injury_model.espn_gameday = espn_gameday
   if espn_bridge and eng.injury_model is not None:
     from nfledge.espn_calib import learned_rates
     eng.injury_model.espn_bridge = espn_bridge
@@ -232,12 +236,17 @@ def main():
   print(f"[run] projecting {season} week {week}", flush=True)
 
   # Early-week bridge (nfledge/espn.py, espn_calib.py): the live week only, never --week rebuilds or backtests.
-  bridge, midweek, quest, feed = {}, {}, {}, None
+  bridge, midweek, quest, feed, gameday = {}, {}, {}, None, {}
   if not args.week:
     from nfledge.espn import fetch_injuries
     from nfledge.injuries import InjuryModel
     feed = fetch_injuries()
     data.espn_feed = feed  # read by Power's QB availability (powerc._newly: ESPN's IR list)
+    from nfledge.espn import gameday_rulings
+    gameday = gameday_rulings(data, feed)
+    if gameday:
+      print(f"[run] game-day rulings (ESPN, past inactives): {sum(v[0] == 'INA' for v in gameday.values())} inactive, "
+            f"{sum(v[0] == 'ACT' for v in gameday.values())} active", flush=True)
     bridge = InjuryModel.build_espn_bridge(data, season, week, feed)
     if bridge:
       print(f"[run] ESPN early-week injury news for {len(bridge)} players (official report not out)", flush=True)
@@ -248,7 +257,7 @@ def main():
   out_path = Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week)
   eng, proj = cached_model(data, cfg, scoring, season, week, espn_bridge=bridge,
                            espn_hist=out_path.parent / "data" / "espn_injuries", espn_midweek=midweek,
-                           espn_questionable=quest)
+                           espn_questionable=quest, espn_gameday=gameday)
 
   ev, bt_seasons, res = None, [], None
   if not args.no_backtest:
@@ -268,6 +277,15 @@ def main():
     from nfledge import live_inputs
     f = live_inputs.write(out.parent, data, eng.games(season, week), proj, season, week)
     print(f"[run] live inputs archived -> {f.name}", flush=True)
+    if gameday and "pre_gameday" in proj:  # (AU) every game-day override with the model's chance before it, for the audit
+      gf = out.parent / "data" / "live_inputs" / f"gameday_{season}_{week:02d}.json"
+      log = json.loads(gf.read_text(encoding="utf-8")) if gf.exists() else {}
+      for x in proj[proj.pre_gameday.notna()].itertuples():
+        log.setdefault(x.gsis_id, {"name": x.full_name, "team": x.team, "pos": x.pos, "ruling": gameday[x.gsis_id][0],
+                                   "at": gameday[x.gsis_id][1], "pre": round(float(x.pre_gameday), 4),
+                                   "post": round(float(x.avail), 4), "status": x.status})
+      gf.write_text(json.dumps(log, indent=0), encoding="utf-8")
+      print(f"[run] game-day overrides archived: {len(log)} -> {gf.name}", flush=True)
   if args.lookahead and plan is not None:
     build_lookahead(eng, data, cfg, scoring, season, week, out.parent, plan)
   print(f"[run] wrote {out} in {time.time() - t0:.0f}s")

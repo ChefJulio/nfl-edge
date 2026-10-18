@@ -26,6 +26,47 @@ URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries"
 STATUS_MAP = {"Out": "Out", "Injured Reserve": "IR", "Doubtful": "Doubtful"}
 
 
+def gameday_rulings(data, feed: pd.DataFrame | None, now=None) -> dict:
+  """(AU, {#gameday}) gsis -> ("INA" | "ACT", ESPN update time) for players on teams past their inactives time
+  (week_clock: kickoff - 90 min). ESPN marks a declared inactive fantasy status INACTIVE (status Out) and flips a
+  listed player who dresses to Active; only updates on game day count (an Active from earlier in the week is not a
+  ruling). Matched through the rosters' ESPN ids."""
+  if feed is None or not len(feed) or "status" not in feed:
+    return {}
+  from .week_clock import Clock, ET
+  c = Clock(data.schedules, now)
+  week = c.current_week(data.current_season)
+  teams = {t: tw for t, tw in c.teams(data.current_season, week).items() if tw.inactives_in(c.now) and not tw.final}
+  if not teams:
+    return {}
+  ab = {}  # ESPN team display name -> our code
+  if getattr(data, "teams", None) is not None and "team_name" in data.teams:
+    ab = dict(zip(data.teams.team_name, data.teams.team_abbr))
+  r = data.rosters[data.rosters.espn_id.notna()]
+  gs = dict(zip(r.espn_id.astype(str).str.replace(r"\.0$", "", regex=True), r.gsis_id))
+  out = {}
+  for x in feed.dropna(subset=["espn_id"]).itertuples():
+    t = D_RELOC(ab.get(x.team, ""))
+    tw = teams.get(t)
+    g = gs.get(str(x.espn_id))
+    if tw is None or not isinstance(g, str):
+      continue
+    up = pd.to_datetime(x.updated, errors="coerce", utc=True)
+    if pd.isna(up) or up.tz_convert(ET).date() != tw.kick.date():
+      continue  # not updated on game day: not this game's ruling
+    fs = str(getattr(x, "fantasy_status", "") or "")
+    if fs == "INACTIVE":
+      out[g] = ("INA", up.isoformat())
+    elif x.status == "Active":
+      out[g] = ("ACT", up.isoformat())
+  return out
+
+
+def D_RELOC(t: str) -> str:
+  from .data import RELOCATED
+  return RELOCATED.get(t, t)
+
+
 def fetch_injuries(timeout: int = 30) -> pd.DataFrame:
   """One row per listed player (empty frame on any failure)."""
   try:

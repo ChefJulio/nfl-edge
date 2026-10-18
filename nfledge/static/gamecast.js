@@ -35,7 +35,7 @@
   const injCode = st => {
     const t = String(st || '').trim();
     return /^(ir\b|injured reserve)/i.test(t) ? 'IR' : /^(susp|sspd)/i.test(t) ? 'SSPD' : /^(pup|physically)/i.test(t) ? 'PUP'
-      : /^(nfi|non-football)/i.test(t) ? 'NFI' : /^out/i.test(t) ? 'O' : /^doubt/i.test(t) ? 'D' : /^question/i.test(t) ? 'Q' : t.split(/\s/)[0].toUpperCase();
+      : /^(nfi|non-football)/i.test(t) ? 'NFI' : /^inactive/i.test(t) ? 'INA' : /^active/i.test(t) ? 'ACT' : /^out/i.test(t) ? 'O' : /^doubt/i.test(t) ? 'D' : /^question/i.test(t) ? 'Q' : t.split(/\s/)[0].toUpperCase();
   };
   // status = "<game designation> (<practice days>)", e.g. "Questionable (DLF)" or just " (D)" midweek: the designation
   // is a colored tag, each practice day its own chip in the NFL's report terms (FP green, LP amber, DNP red), so a
@@ -45,7 +45,9 @@
     if (!st) return '';
     const m = String(st).match(/^(.*?)\s*\(([DLF-]+)\)\s*$/), des = (m ? m[1] : String(st)).trim(), pr = m ? m[2] : '';
     const c = des ? injCode(des) : '';
-    const tag = c ? `<span class="dc-tag dt-${c === 'Q' ? 'q' : c === 'D' ? 'd' : 'out'}" title="${esc(des)}">${esc(c)}</span>` : '';
+    // game day (AU): INA = declared inactive, ACT = a listed player who dressed (game-day rulings, espn.gameday_rulings)
+    const tip = c === 'INA' ? 'Declared inactive for this game' : c === 'ACT' ? 'Was questionable; declared active for this game' : des;
+    const tag = c ? `<span class="dc-tag dt-${c === 'Q' ? 'q' : c === 'D' ? 'd' : c === 'ACT' ? 'act' : 'out'}" title="${esc(tip)}">${esc(c)}</span>` : '';
     const days = pr ? `<span class="pr-days" title="Practice: ${esc([...pr].map((x, i) => `${DAYS[i] || ''} ${PRAC[x]}`).join(', '))}">${[...pr].map(x => `<i class="pr-${x === '-' ? 'n' : x}">${PRAB[x]}</i>`).join('')}</span>` : '';
     return tag + days;
   };

@@ -2526,3 +2526,18 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   [-0.008, -0.000], RB -0.003 [-0.005, -0.000], WR / TE no difference; no position worse. Start / sit gain +0.010
   [+0.001, +0.021]. Rows whose depth input doesn't change are identical, so the gain sits on the changed rows. Range
   calibration and availability Brier unchanged. Live: config experiments.depth_per_team = true.
+- **PRE-REGISTERED 2026-10-18 (owner, Sunday of week 6: "how often does that signal really mean the player plays ...
+  be diligent"): (AU) game-day actives / inactives.** Measured first (nflverse weekly rosters ACT / INA on game day x
+  final injury status, played = any snap, 2019-25, QB / RB / WR / TE): Questionable declared ACTIVE 97.4% played
+  (n 1,992), INACTIVE 0.0% (871); Doubtful ACTIVE 28.6% (14), INACTIVE 0.0% (328); Out INACTIVE 0.0% (1,821); not on
+  the report INACTIVE 0.0% (5,089: healthy scratches). 69.6% of Questionable players are declared active. Today the
+  site ignores the game-day list (the midweek ESPN rule stops at the final report, so a Questionable player ESPN marks
+  inactive stays at his pre-game chance). Live source, checked on week 6's 1 p.m. slate: ESPN's feed marks declared
+  inactives status Out + fantasy status INACTIVE (updated 11:33-11:46 ET, after the 11:30 posting) and flips a
+  Questionable player who dresses to Active (Caleb Williams 11:46 ET); nflverse rosters lag a day. Rule (measured
+  rates, no fitted values): once a team is past its inactives time (week clock: kickoff - 90 min), on our board:
+  ESPN INACTIVE -> P(plays) 0; Questionable now ESPN Active (updated on game day) -> 0.974; Doubtful now Active ->
+  0.286 (n 14, noted). Nobody else changes. Prospective check (this week on): each override archived
+  (data/live_inputs/gameday_<date>.json: ruling, time, the model's pre-ruling chance); tools/gameday_audit.py after
+  the week's snap counts: GATE to keep it - no INACTIVE override played; ACTIVE-Questionable played rate's 95% CI
+  includes 0.974; Brier of the overridden chances below the pre-ruling chances on the same players.

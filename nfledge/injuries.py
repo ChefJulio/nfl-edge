@@ -36,6 +36,7 @@ OUT_ROSTER = {"RES", "INA", "PUP", "NON", "SUS", "EXE", "CUT", "RET", "TRD", "TR
 
 _SCORE = {"D": 0.0, "L": 1.0, "F": 2.0}
 GAME_STATUSES = ("None", "QUESTIONABLE", "DOUBTFUL")
+GAMEDAY_ACTIVE = {"questionable": 0.974, "doubtful": 0.286}  # (AU) played rate once declared active, 2019-25 skill players
 
 
 def practice_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -717,6 +718,7 @@ class InjuryModel:
   espn_rates: dict | None = None  # bucket -> learned P(active) (espn_calib.learned_rates); None = carry-forward rates
   espn_midweek: dict | None = None  # gsis_id -> ESPN bucket ruled after his team's report started (build_espn_bridge)
   espn_questionable: dict | None = None  # gsis_id -> "Questionable": fresh ESPN Q, display only (availability)
+  espn_gameday: dict | None = None  # (AU) gsis_id -> ("INA" | "ACT", time): game-day rulings (espn.gameday_rulings)
 
   def midweek_ruling(self, gsis_id: str, game_status) -> tuple[float, str] | None:
     """A fresh ESPN Out / IR for a player on this week's practice report, before his final game status: its measured
@@ -850,6 +852,25 @@ class InjuryModel:
         if rep != "None":
           p.at[i, "avail"] = float(self.p_next.get(rep, 1.0))
           p.at[i, "status"] = f"{rep} last wk"
+    # (AU, {#gameday}) game-day actives / inactives, once a team's are posted (espn.gameday_rulings, week clock): a
+    # declared inactive doesn't play (0 of 3,000+ skill players 2019-25); a Questionable player who dresses played 97.4%
+    # (n 1,992), a Doubtful one 28.6% (n 14). Measured rates, nothing fitted. pre_gameday keeps the model's chance for
+    # the prospective audit (tools/gameday_audit.py).
+    gd = self.espn_gameday or {}
+    if gd:
+      p["pre_gameday"] = np.nan
+      for i, row in p.iterrows():
+        r_ = gd.get(row.gsis_id)
+        if not r_:
+          continue
+        st = str(p.at[i, "status"] or "")
+        des = st.split("(")[0].strip().lower()
+        if r_[0] == "INA":
+          p.at[i, "pre_gameday"], p.at[i, "avail"] = p.at[i, "avail"], 0.0
+          p.at[i, "status"] = "Inactive" + (f" ({st.split('(', 1)[1]}" if "(" in st else "")
+        elif r_[0] == "ACT" and des in ("questionable", "doubtful"):
+          p.at[i, "pre_gameday"], p.at[i, "avail"] = p.at[i, "avail"], GAMEDAY_ACTIVE[des]
+          p.at[i, "status"] = "Active" + (f" ({st.split('(', 1)[1]}" if "(" in st else "")
     # ESPN's Questionable, shown but not used (owner 2026-10-15: rows showed ESPN's O / D but never its Q): only where
     # there's no designation yet ("" or practice days only) or just last week's; the chance to play is unchanged
     for i, row in p.iterrows():

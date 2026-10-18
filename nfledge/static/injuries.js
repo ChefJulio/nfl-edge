@@ -70,7 +70,9 @@
       ];
       // on the injury report (a status before the practice letters) or a real chance of sitting; everyone carries a
       // ~1.5% baseline scratch risk, so that alone isn't an injury
-      const listed = p => !!String(p.status || '').split('(')[0].trim() || (p.inactive || 0) >= 0.05;
+      // (2026-10-18: a ">= 5% chance of sitting" clause pulled in healthy backup QBs, whose chance is the healthy-scratch
+      // model's chance of taking a snap, not an injury)
+      const listed = p => !!String(p.status || '').split('(')[0].trim();
       const drawDash = () => {
         const box = sec.querySelector('.in-dash');
         if (!WK) return;
