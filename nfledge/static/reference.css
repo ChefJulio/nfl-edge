@@ -23,3 +23,11 @@
 .rf-k { font-size: 11px; color: var(--muted); font-weight: 700; } .rf-v { font-size: 24px; font-weight: 800; margin: 2px 0; }
 .rf-n { font-size: 10.5px; color: var(--muted); }
 .rf { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 14px 12px 12px; }
+.rf-grp { margin: 22px 2px 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-size: 13px; }
+.rf-sub { margin: 12px 0 6px; }
+.rf-bars { display: flex; align-items: flex-end; gap: 3px; height: 90px; }
+.rf-bar { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; }
+.rf-bar i { display: block; width: 100%; border-radius: 3px 3px 0 0; background: color-mix(in srgb, var(--accent) 70%, transparent); }
+.rf-bar span { font-size: 8.5px; color: var(--muted); margin-top: 2px; }
+.rf-plain { background: transparent !important; font-weight: 600; color: var(--muted); }
+.rf-list tbody th { white-space: normal; font-weight: 600; font-size: 12.5px; }
