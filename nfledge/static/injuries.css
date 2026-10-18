@@ -8,3 +8,5 @@ table.dt td.in-note { max-width: 420px; white-space: normal; font-size: var(--fs
 
 /* status tabs (injuries.js) */
 .in-tabs { margin: 10px 0 8px; } .in-tabs .in-n { opacity: .6; font-weight: 600; margin-left: 2px; }
+.in-more { margin: 8px 4px 0; font-size: var(--fs-sm); }
+.in-more .linkish { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; cursor: pointer; text-decoration: underline; }

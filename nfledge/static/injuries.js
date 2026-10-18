@@ -18,10 +18,12 @@
         <div class="dt-card"><div class="dt-tools">
           <select class="dt-select in-team" aria-label="Team"><option value="">All teams</option></select>
           <div class="seg in-scope"><button type="button" data-v="fan">Fantasy</button><button type="button" data-v="all">All</button></div>
-        </div><div class="seg in-tabs" role="tablist"></div><div class="skel-zone in-tbl"></div></div>
+        </div><div class="seg in-tabs" role="tablist"></div><div class="skel-zone in-tbl"></div><p class="in-more muted" hidden></p></div>
         <p class="st-note muted">Status, injury, estimated return and notes from ESPN's injury feed (updated daily). Play % is ours: the chance he plays this week, from the injury report, practice participation and his history (see the Model tab). Sorted by his projection if he plays; tap Grd to sort by the Edge grade.</p>`;
       const sub = sec.querySelector('.in-sub'), selT = sec.querySelector('.in-team');
-      let scope = 'fan', tab = 'q', all = [], table = null;
+      let scope = 'fan', tab = 'q', all = [], table = null, showSure = false;
+      // listed but all but certain to play (our 99%+: full practice, cleared): hidden unless asked for (owner 2026-10-18)
+      const sure = r => r.inactive != null && r.inactive < 0.015;  // shown as 99% or >99%
       const cols = [
         { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name,
           html: r => NFLE.ui.player({ name: r.name, pos: r.pos, team: r.abbr, espn: r.espn_id, subHtml: r.abbr ? NFLE.ui.tm(r.abbr) : NFLE.esc(r.team || '') }, TEAMS) },
@@ -40,14 +42,19 @@
         { key: 'comment', label: 'Latest', sort: false, cls: 'in-note', html: r => `<span title="${esc(r.comment || '')}">${esc(r.comment || '')}</span>` },
       ];
       const base = () => all.filter(r => (scope === 'all' || r.pid) && (!selT.value || r.abbr === selT.value));
-      const rows = () => base().filter(r => tabOf(r.status) === tab);
+      const inTab = () => base().filter(r => tabOf(r.status) === tab);
+      const rows = () => inTab().filter(r => showSure || !sure(r));
       const draw = () => {
         sec.querySelectorAll('.in-scope button').forEach(b => b.classList.toggle('on', b.dataset.v === scope));
         const b0 = base();
-        sec.querySelector('.in-tabs').innerHTML = TABS.map(([k, l]) => `<button type="button" role="tab" data-t="${k}" class="${tab === k ? 'on' : ''}">${l} <span class="in-n">${b0.filter(r => tabOf(r.status) === k).length}</span></button>`).join('');
+        sec.querySelector('.in-tabs').innerHTML = TABS.map(([k, l]) => `<button type="button" role="tab" data-t="${k}" class="${tab === k ? 'on' : ''}">${l} <span class="in-n">${b0.filter(r => tabOf(r.status) === k && (showSure || !sure(r))).length}</span></button>`).join('');
         if (!table) table = NFLE.Table(sec.querySelector('.in-tbl'), { howto: true, columns: cols, rows: rows(), sort: { key: 'proj', dir: 'desc' },
           cls: 'tiles', rowClass: () => 'teamrow', rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.abbr)}${r.pid ? ` data-open-pid="${esc(r.pid)}"` : ''}` });
         else table.update(rows());
+        const n = inTab().filter(sure).length, more = sec.querySelector('.in-more');
+        more.hidden = !n;
+        more.innerHTML = showSure ? `Showing ${n} listed but expected to play (99%+). <button type="button" class="linkish">Hide them</button>`
+          : `${n} more listed but expected to play (99%+). <button type="button" class="linkish">Show them</button>`;
       };
       // the page's week data (our availability) loads on its own (NFLE.week waits for it)
       Promise.all([NFLE.load('data/espn_injuries/latest.json'), NFLE.week()]).then(([d, wk]) => {
@@ -67,6 +74,7 @@
         draw();
       }).catch(() => { sub.textContent = 'The injury list is not available right now.'; });
       selT.onchange = draw;
+      sec.querySelector('.in-more').addEventListener('click', e => { if (e.target.closest('button')) { showSure = !showSure; draw(); } });
       sec.querySelector('.in-tabs').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (b) { tab = b.dataset.t; draw(); } });
       document.addEventListener('nfle-grades', () => { if (table) table.update(rows()); });  // grades arrive after the list
       sec.querySelector('.in-scope').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) { scope = b.dataset.v; draw(); } });
