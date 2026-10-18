@@ -478,5 +478,55 @@
 "pre": 0.0846,
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0036849": {
+"name": "Tutu Atwell",
+"team": "LA",
+"pos": "WR",
+"ruling": "INA",
+"at": "2026-10-18T18:47:00+00:00",
+"pre": 0.7766,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041027": {
+"name": "Jeremiyah Love",
+"team": "ARI",
+"pos": "RB",
+"ruling": "INA",
+"at": "2026-10-18T18:37:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0041399": {
+"name": "CJ Daniels",
+"team": "LA",
+"pos": "WR",
+"ruling": "INA",
+"at": "2026-10-18T18:47:00+00:00",
+"pre": 0.176,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041561": {
+"name": "Carson Beck",
+"team": "ARI",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T18:37:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (ESPN) (FFL)"
+},
+"00-0041568": {
+"name": "Ty Simpson",
+"team": "LA",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T18:47:00+00:00",
+"pre": 0.1278,
+"post": 0.0,
+"status": "Inactive"
 }
 }
