@@ -212,6 +212,9 @@
   // owner 2026-10-18: readable at a glance, like a TV broadcast: end zones in team colors with their codes, a line
   // every 5 yards, numbers, the line of scrimmage in blue and the first-down line in yellow, the ball pointing the way
   // the offense is going, the red zone shaded.
+  // The football (owner 2026-10-18: "a better football icon"): leather body, white tip stripes, stitched laces; a
+  // 32 x 20 drawing, used by the scoreboard, the field and (as a data URI in gamecast.css) the matchup tiles.
+  const FB_BODY = "<defs><linearGradient id='nfleFb' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#a85a24'/><stop offset='.55' stop-color='#7d3b14'/><stop offset='1' stop-color='#5a2a0d'/></linearGradient></defs><path d='M1.5 10C6 2 26 2 30.5 10 26 18 6 18 1.5 10Z' fill='url(#nfleFb)' stroke='#2e1406' stroke-width='1'/><path d='M8 5.6C12.5 3.6 19.5 3.6 24 5.6' fill='none' stroke='#fff' stroke-opacity='.28' stroke-width='1.1' stroke-linecap='round'/><path d='M6.6 5.2Q4.9 10 6.6 14.8M25.4 5.2Q27.1 10 25.4 14.8' fill='none' stroke='#fff' stroke-width='1.5' stroke-linecap='round'/><path d='M11 10H21' fill='none' stroke='#fff' stroke-width='1.4' stroke-linecap='round'/><path d='M12.6 8.3V11.7M14.8 8.3V11.7M17.2 8.3V11.7M19.4 8.3V11.7' fill='none' stroke='#fff' stroke-width='1.1' stroke-linecap='round'/>";
   // The field (owner 2026-10-18): end zones in team colors with their codes, a line every 5 yards, numbers, the line
   // of scrimmage in blue and the first-down line in yellow, the ball pointing the way the offense is going, the red zone
   // shaded. lanes: the drive chart, one row per play from its snap to where it ended (owner: "show how far each play
@@ -240,8 +243,7 @@
     const ball = sp ? `${sp.red ? `<rect x="${sp.dir === 1 ? X(80) : X(0)}" y="0" width="60" height="${H}" class="fd-red"/>` : ''}
       ${!sp.noBall ? `<line x1="${X(sp.x)}" y1="0" x2="${X(sp.x)}" y2="${H}" class="fd-los"/>` : ''}
       ${!sp.kick && !sp.noBall && sp.toGo !== (sp.dir === 1 ? 100 : 0) ? `<line x1="${X(sp.toGo)}" y1="0" x2="${X(sp.toGo)}" y2="${H}" class="fd-go"/>` : ''}` : '';
-    const fb = sp && !sp.noBall ? `<path d="M${X(sp.x) - 8} ${by} C${X(sp.x) - 4} ${by - 6}, ${X(sp.x) + 4} ${by - 6}, ${X(sp.x) + 8} ${by} C${X(sp.x) + 4} ${by + 6}, ${X(sp.x) - 4} ${by + 6}, ${X(sp.x) - 8} ${by} Z" class="fd-ball"/>
-      <path d="M${X(sp.x) - 3.2} ${by} H${X(sp.x) + 3.2} M${X(sp.x) - 1.6} ${by - 1.4} V${by + 1.4} M${X(sp.x)} ${by - 1.4} V${by + 1.4} M${X(sp.x) + 1.6} ${by - 1.4} V${by + 1.4}" class="fd-lace"/>
+    const fb = sp && !sp.noBall ? `<g transform="translate(${X(sp.x) - 10} ${by - 6.25}) scale(.625)">${FB_BODY}</g>
       ${sp.kick ? '' : `<path d="M${X(sp.x) + sp.dir * 11} ${by} l${-sp.dir * 4} -4 v8 z" class="fd-dir"/>`}` : '';
     return `<svg class="fd" viewBox="0 0 360 ${H}" style="aspect-ratio:360/${H}" role="img" aria-label="${sp && sp.offense ? esc(`${sp.offense.team} ball${sp.text ? `, ${sp.text}` : ''}`) : 'Drive chart'}">
       <rect x="30" y="0" width="300" height="${H}" class="fd-turf"/>${ez(0, info.away, -90)}${ez(330, info.home, 90)}${g}${ball}${rows}${fb}</svg>`;
@@ -2880,7 +2882,7 @@
         ${dd ? `<span class="sit-dn rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>` : ''}${at ? `<span class="sit-at"><span class="muted">at</span> <b>${esc(at)}</b></span>` : ''}
         ${sp.red ? '<span class="sit-rz">Red zone</span>' : ''}</div>`
       : `<b>${esc(st.ended ? 'Final' : info.detail || '')}</b>`;
-    const drive = cur && curTeam && sp && curTeam.team === sp.offense.team && cur.description
+    const drive = cur && curTeam && sp && curTeam.team === sp.offense.team && cur.description && !/^0 plays/.test(cur.description)
       ? `<div class="now-drv"><span class="muted">This drive</span> ${esc(cur.description)}</div>` : '';
     const lanes = cur && sp && curTeam && curTeam.team === sp.offense.team ? driveLanes(cur.plays || [], info, sp.offense.team) : [];
     // the last play as a headline, with what it put in the box score for each player (fantasy points); after a score
@@ -3033,7 +3035,7 @@
       ${rows.length > 6 ? `<button type="button" class="fps-more" data-fpall="1">${GP.fpAll ? 'Show fewer' : `Show all ${rows.length}`}</button>` : ''}
       <p class="gcs-note">Points so far under your scoring, of his projection; the tick marks where he'd be on pace.${st.replay ? ' In a replay, rebuilt from the plays so far.' : ''}${lg ? '' : " Connect your league on the Fantasy tab to see your players and your opponent's marked here."}</p></section>`;
   };
-  const FOOTBALL = '<svg class="sb-fb" viewBox="0 0 26 14" aria-label="Has the ball"><path d="M1 7C5 1 21 1 25 7 21 13 5 13 1 7Z"/><path d="M9 7h8M11 5.3v3.4M13 5.3v3.4M15 5.3v3.4" class="lace"/></svg>';
+  const FOOTBALL = `<svg class="sb-fb" viewBox="0 0 32 20" role="img" aria-label="Has the ball">${FB_BODY}</svg>`;
   const GTABS = [['pre', 'Pregame'], ['live', 'Live'], ['post', 'Postgame']];
   // Live tab: one pane at a time, picked here (owner 2026-10-15: "if i pick stats i see stats"); box score first
   const GPANES = [['plays', 'Plays'], ['box', 'Box score'], ['team', 'Team stats']];
