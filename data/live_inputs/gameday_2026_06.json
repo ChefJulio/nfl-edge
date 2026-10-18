@@ -1,0 +1,482 @@
+{
+"00-0028986": {
+"name": "Case Keenum",
+"team": "CHI",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T16:02:00+00:00",
+"pre": 0.3184,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0033662": {
+"name": "Cooper Rush",
+"team": "ATL",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T16:08:00+00:00",
+"pre": 0.0781,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0033906": {
+"name": "Alvin Kamara",
+"team": "NO",
+"pos": "RB",
+"ruling": "ACT",
+"at": "2026-10-18T15:43:00+00:00",
+"pre": 0.9372,
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0034796": {
+"name": "Lamar Jackson",
+"team": "BAL",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T15:33:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0034844": {
+"name": "Saquon Barkley",
+"team": "PHI",
+"pos": "RB",
+"ruling": "INA",
+"at": "2026-10-18T15:33:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0034855": {
+"name": "Baker Mayfield",
+"team": "TB",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T15:52:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0035021": {
+"name": "Ashton Dulin",
+"team": "IND",
+"pos": "WR",
+"ruling": "INA",
+"at": "2026-10-18T15:34:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0035662": {
+"name": "Marquise Brown",
+"team": "PHI",
+"pos": "WR",
+"ruling": "INA",
+"at": "2026-10-18T15:45:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (ESPN) (LLF)"
+},
+"00-0035676": {
+"name": "A.J. Brown",
+"team": "NE",
+"pos": "WR",
+"ruling": "ACT",
+"at": "2026-10-18T15:35:00+00:00",
+"pre": 0.3824,
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0035685": {
+"name": "David Montgomery",
+"team": "HOU",
+"pos": "RB",
+"ruling": "INA",
+"at": "2026-10-18T12:03:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0036139": {
+"name": "Rico Dowdle",
+"team": "PIT",
+"pos": "RB",
+"ruling": "ACT",
+"at": "2026-10-18T15:58:00+00:00",
+"pre": 0.9372,
+"post": 0.974,
+"status": "Active (LFF)"
+},
+"00-0036265": {
+"name": "AJ Dillon",
+"team": "CAR",
+"pos": "RB",
+"ruling": "INA",
+"at": "2026-10-18T15:44:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0036862": {
+"name": "Ben Skowronek",
+"team": "PIT",
+"pos": "WR",
+"ruling": "INA",
+"at": "2026-10-18T15:42:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0036876": {
+"name": "Kylen Granson",
+"team": "TEN",
+"pos": "TE",
+"ruling": "INA",
+"at": "2026-10-18T15:44:00+00:00",
+"pre": 0.7773,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0036894": {
+"name": "Pat Freiermuth",
+"team": "PIT",
+"pos": "TE",
+"ruling": "ACT",
+"at": "2026-10-18T15:54:00+00:00",
+"pre": 0.9176,
+"post": 0.974,
+"status": "Active"
+},
+"00-0037013": {
+"name": "Zach Wilson",
+"team": "NO",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T15:53:00+00:00",
+"pre": 0.0908,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0037239": {
+"name": "Chris Olave",
+"team": "NO",
+"pos": "WR",
+"ruling": "ACT",
+"at": "2026-10-18T15:38:00+00:00",
+"pre": 0.9176,
+"post": 0.974,
+"status": "Active (DDL)"
+},
+"00-0038120": {
+"name": "Breece Hall",
+"team": "NYJ",
+"pos": "RB",
+"ruling": "INA",
+"at": "2026-10-18T15:35:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0038951": {
+"name": "Sean Tucker",
+"team": "TB",
+"pos": "RB",
+"ruling": "INA",
+"at": "2026-10-18T16:21:00+00:00",
+"pre": 0.7069,
+"post": 0.0,
+"status": "Inactive (DLL)"
+},
+"00-0038998": {
+"name": "Jake Haener",
+"team": "NYG",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T16:15:00+00:00",
+"pre": 0.0756,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0039032": {
+"name": "Tyjae Spears",
+"team": "TEN",
+"pos": "RB",
+"ruling": "ACT",
+"at": "2026-10-18T16:13:00+00:00",
+"pre": 0.9521,
+"post": 0.974,
+"status": "Active (LDF)"
+},
+"00-0039356": {
+"name": "Ja'Tavion Sanders",
+"team": "CAR",
+"pos": "TE",
+"ruling": "INA",
+"at": "2026-10-18T16:06:00+00:00",
+"pre": 0.2088,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0039398": {
+"name": "Joe Milton III",
+"team": "PHI",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T15:43:00+00:00",
+"pre": 0.1048,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0039847": {
+"name": "Theo Johnson",
+"team": "NYG",
+"pos": "TE",
+"ruling": "INA",
+"at": "2026-10-18T15:54:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (LLD)"
+},
+"00-0039890": {
+"name": "Adonai Mitchell",
+"team": "NYJ",
+"pos": "WR",
+"ruling": "INA",
+"at": "2026-10-18T15:35:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0039918": {
+"name": "Caleb Williams",
+"team": "CHI",
+"pos": "QB",
+"ruling": "ACT",
+"at": "2026-10-18T15:46:00+00:00",
+"pre": 0.7069,
+"post": 0.974,
+"status": "Active (FFF)"
+},
+"00-0040128": {
+"name": "Tyler Warren",
+"team": "IND",
+"pos": "TE",
+"ruling": "INA",
+"at": "2026-10-18T15:38:00+00:00",
+"pre": 0.8413,
+"post": 0.0,
+"status": "Inactive (FFL)"
+},
+"00-0040203": {
+"name": "Will Howard",
+"team": "PIT",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T15:52:00+00:00",
+"pre": 0.0756,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040206": {
+"name": "Riley Leonard",
+"team": "IND",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T15:50:00+00:00",
+"pre": 0.0797,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040236": {
+"name": "Kyle Monangai",
+"team": "CHI",
+"pos": "RB",
+"ruling": "INA",
+"at": "2026-10-18T15:49:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0040644": {
+"name": "Trevor Etienne",
+"team": "CAR",
+"pos": "RB",
+"ruling": "ACT",
+"at": "2026-10-18T16:16:00+00:00",
+"pre": 0.3824,
+"post": 0.974,
+"status": "Active (FFF)"
+},
+"00-0040734": {
+"name": "TreVeyon Henderson",
+"team": "NE",
+"pos": "RB",
+"ruling": "ACT",
+"at": "2026-10-18T15:41:00+00:00",
+"pre": 0.619,
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0040784": {
+"name": "Quinshon Judkins",
+"team": "CLE",
+"pos": "RB",
+"ruling": "INA",
+"at": "2026-10-18T15:41:00+00:00",
+"pre": 0.7818,
+"post": 0.0,
+"status": "Inactive (DDL)"
+},
+"00-0040870": {
+"name": "Ja'Kobi Lane",
+"team": "BAL",
+"pos": "WR",
+"ruling": "ACT",
+"at": "2026-10-18T15:47:00+00:00",
+"pre": 0.3333,
+"post": 0.974,
+"status": "Active (FFF)"
+},
+"00-0040876": {
+"name": "Elijah Sarratt",
+"team": "BAL",
+"pos": "WR",
+"ruling": "INA",
+"at": "2026-10-18T16:22:00+00:00",
+"pre": 0.3025,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040879": {
+"name": "Matthew Hibner",
+"team": "BAL",
+"pos": "TE",
+"ruling": "INA",
+"at": "2026-10-18T15:33:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0040886": {
+"name": "Nicholas Singleton",
+"team": "TEN",
+"pos": "RB",
+"ruling": "INA",
+"at": "2026-10-18T15:41:00+00:00",
+"pre": 0.3453,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041032": {
+"name": "Kenyon Sadiq",
+"team": "NYJ",
+"pos": "TE",
+"ruling": "ACT",
+"at": "2026-10-18T15:45:00+00:00",
+"pre": 0.9372,
+"post": 0.974,
+"status": "Active (LLF)"
+},
+"00-0041092": {
+"name": "Taylen Green",
+"team": "CLE",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T15:35:00+00:00",
+"pre": 0.0864,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041106": {
+"name": "C.J. Williams",
+"team": "JAX",
+"pos": "WR",
+"ruling": "INA",
+"at": "2026-10-18T12:02:00+00:00",
+"pre": 0.2954,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041123": {
+"name": "Behren Morton",
+"team": "NE",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T16:08:00+00:00",
+"pre": 0.0864,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041149": {
+"name": "Haynes King",
+"team": "CAR",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T16:10:00+00:00",
+"pre": 0.0885,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041194": {
+"name": "Jack Strand",
+"team": "ATL",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T15:51:00+00:00",
+"pre": 0.082,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041314": {
+"name": "Tanner Arkin",
+"team": "NE",
+"pos": "TE",
+"ruling": "INA",
+"at": "2026-10-18T15:51:00+00:00",
+"pre": 0.8249,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041472": {
+"name": "Marlin Klein",
+"team": "HOU",
+"pos": "TE",
+"ruling": "INA",
+"at": "2026-10-18T12:03:00+00:00",
+"pre": 0.4269,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041490": {
+"name": "Eli Heidenreich",
+"team": "PIT",
+"pos": "RB",
+"ruling": "INA",
+"at": "2026-10-18T15:59:00+00:00",
+"pre": 0.292,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041511": {
+"name": "Omar Cooper Jr.",
+"team": "NYJ",
+"pos": "WR",
+"ruling": "ACT",
+"at": "2026-10-18T15:55:00+00:00",
+"pre": 0.3333,
+"post": 0.974,
+"status": "Active (LLF)"
+},
+"00-0041565": {
+"name": "Drew Allar",
+"team": "PIT",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T15:55:00+00:00",
+"pre": 0.0846,
+"post": 0.0,
+"status": "Inactive"
+}
+}
