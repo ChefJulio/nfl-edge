@@ -2382,7 +2382,7 @@
   };
 
   // ------------------------------------------------------------------------------------------------- game page
-  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null, tab: null, pane: 'plays', fpAll: false };
+  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null, tab: null, pane: 'plays', fpAll: false, drvAll: false };
   const parseGid = gid => { const m = String(gid || '').match(/^(\d{4})_(\d{2})_([A-Z]{2,3})_([A-Z]{2,3})$/); return m ? { season: +m[1], week: +m[2], away: m[3], home: m[4] } : null; };
   const wpSeries = (sum) => {
     const plays = allPlays(sum).flatMap(d => d.plays || []);
@@ -2925,7 +2925,7 @@
     if (/downs/i.test(r)) return ['Downs', 'to'];
     if (/safety/i.test(r)) return ['Safety', 'to'];
     if (/punt/i.test(r)) return ['Punt', 'pu'];
-    if (/half|game|end/i.test(r)) return [/game/i.test(r) ? 'End' : 'Half', 'pu'];
+    if (/half|game|end|regulation/i.test(r)) return [/game/i.test(r) ? 'End' : /regulation|4th/i.test(r) ? 'End reg' : 'Half', 'pu'];
     return [r.split(' ')[0], 'pu'];
   };
   // Every drive, one row per quarter (owner 2026-10-18: "slightly more detailed ... group drives by quarter using rows"):
@@ -2947,11 +2947,17 @@
       const sub = n ? `${n.n} pl · ${n.yd} yd · ${n.t}` : '';
       (rows[half(p0)] = rows[half(p0)] || []).push(`<button type="button" class="dv dv-${cls || 'pu'}" style="--tc:${esc(tm.color || '#666')}" data-drive="${esc(d.id)}" title="${esc(`${tm.team || ''} drive: ${d.description || ''}${lab ? ` · ${driveResult(d, tm, info, false).text}` : ''} · started ${start}`)}"><i></i><span class="dv-t">${esc(tm.team || '')} <b>${esc(lab || '...')}</b></span>${sub ? `<span class="dv-s">${esc(sub)}</span>` : ''}<span class="dv-at">${esc(start)}</span></button>`);
     });
-    const qrows = Object.keys(rows).map(Number).sort((a, b) => b - a).map(h => `<div class="dvq"><span class="dv-q">${HALF[h] || periodName(h)}</span><div class="dvs">${rows[h].slice().reverse().join('')}</div></div>`).join('');
+    // collapsed by default to the latest three (owner 2026-10-18: "a single row by default ... expand to see all")
+    const order = Object.keys(rows).map(Number).sort((a, b) => b - a);
+    const total = order.reduce((t, h) => t + rows[h].length, 0);
+    const qrows = GP.drvAll || total <= 3
+      ? order.map(h => `<div class="dvq"><span class="dv-q">${HALF[h] || periodName(h)}</span><div class="dvs">${rows[h].slice().reverse().join('')}</div></div>`).join('')
+      : `<div class="dvq"><span class="dv-q">Latest drives</span><div class="dvs">${order.flatMap(h => rows[h].slice().reverse()).slice(0, 3).join('')}</div></div>`;
+    const more = total > 3 ? `<button type="button" class="fps-more" data-drvall="1">${GP.drvAll ? 'Show the latest only' : `Show all ${total} drives`}</button>` : '';
     return `<section class="gcs story" data-k="story"><h3>How it's gone <span class="src">ESPN</span></h3>
       <div class="wp-wrap">${wpChart(st.ser, info, null)}<div class="wp-tip" hidden></div></div>
       <div class="wp-leg"><span><i class="wp-m wp-score"></i>score</span><span><i class="wp-m wp-to"></i>turnover</span></div>
-      ${qrows ? `<div class="dvs-k muted">Every drive (tap one for the whole drive)</div>${qrows}` : ''}</section>`;
+      ${qrows ? `<div class="dvs-k muted">Tap a drive for the whole drive</div>${qrows}${more}` : ''}</section>`;
   };
   // ---- Drive sheet (owner 2026-10-18: "a summary of the drive, especially how it ended and who scored or what
   // happened, and a list of the plays"): the result and the play that decided it, the score after, where it started and
@@ -3141,6 +3147,7 @@
       if (sh && NFLE.sheet) NFLE.sheet(sh.title, sh.html, b);
     });
     root.querySelectorAll('[data-fpall]').forEach(b => b.onclick = () => { GP.fpAll = !GP.fpAll; renderGame(); });
+    root.querySelectorAll('[data-drvall]').forEach(b => b.onclick = () => { GP.drvAll = !GP.drvAll; renderGame(); });
     root.querySelectorAll('[data-view]').forEach(b => b.onclick = () => { GP.view = b.dataset.view; renderGame(); });
     root.querySelectorAll('[data-filter]').forEach(b => b.onclick = () => { GP.filter = b.dataset.filter; renderGame(); });
     root.querySelectorAll('[data-sort]').forEach(b => b.onclick = () => { GP.sort = b.dataset.sort; renderGame(); });
