@@ -16,11 +16,15 @@
   // week folded into Net (shown only when this week's QB changes it), Offense / Defense as rank badges, the five units
   // as one heat strip, the schedule as two words. Every number is still in a tooltip.
   const badge = (rk, tip) => `<span class="rk-b ${F.rkc(rk)}" title="${esc(tip)}">${F.ord(rk)}</span>`;
-  const heat = rk => `hsl(${Math.round(120 * (32 - rk) / 31)} 52% 36%)`;  // 1st green ... 32nd red
-  const UNITS = [['pass_o', 'PO', 'Pass offense', 'per 100 dropbacks, incl. starting QB'], ['rush_o', 'RO', 'Run offense', 'per 100 designed runs'],
-                 ['pass_d', 'PD', 'Pass defense', 'per 100 dropbacks faced'], ['rush_d', 'RD', 'Run defense', 'per 100 runs faced'], ['st', 'ST', 'Special teams', '']];
-  const units = r => `<span class="us">${UNITS.map(([k, l, nm, per], i) => `<span class="ub${i === 2 || i === 4 ? ' gap' : ''}" style="background:${heat(r[`${k}_rk`])}"
-      title="${esc(nm)}: ${F.sgn(r[k])} pts/game, ${F.ord(r[`${k}_rk`])}${r[`${k}_pp`] != null && per ? ` (${F.sgn(r[`${k}_pp`])} ${per})` : ''}">${l}</span>`).join('')}</span>`;
+  // Strength / Weakness (owner 2026-10-17, replacing a five-block heat strip: "hate the units column"): the team's
+  // best and worst unit by league rank, in words; all five in its tap / hover tip
+  const UNITS = [['pass_o', 'Pass O', 'per 100 dropbacks, incl. starting QB'], ['rush_o', 'Run O', 'per 100 designed runs'],
+                 ['pass_d', 'Pass D', 'per 100 dropbacks faced'], ['rush_d', 'Run D', 'per 100 runs faced'], ['st', 'ST', '']];
+  const sw = r => { const u = UNITS.map(([k, l]) => [l, r[`${k}_rk`], r[k]]).filter(x => x[1]).sort((a, b) => a[1] - b[1]);
+    if (!u.length) return '';
+    const best = u[0], worst = u[u.length - 1];
+    const tip = UNITS.map(([k, l, per]) => `${l} ${F.sgn(r[k])} (${F.ord(r[`${k}_rk`])})`).join(' · ') + ' (pts/game vs average, league rank)';
+    return `<span class="sw" title="${esc(tip)}"><span class="sw-b"><i>&#9650;</i>${esc(best[0])} <b>${F.ord(best[1])}</b></span><span class="sw-w"><i>&#9660;</i>${esc(worst[0])} <b>${F.ord(worst[1])}</b></span></span>`; };
   const word = rk => rk <= 8 ? 'hard' : rk >= 25 ? 'easy' : 'avg';
   const sched = r => r.sos_past_rk ? `<span class="sd" title="Opponents' strength vs average: played ${F.sgn(r.sos_past)} pts/game (${F.ord(r.sos_past_rk)} hardest), left ${F.sgn(r.sos_next)} (${F.ord(r.sos_next_rk)} hardest)">`
     + `<span><i>played</i> <b class="sd-${word(r.sos_past_rk)}">${word(r.sos_past_rk)}</b></span><span><i>left</i> <b class="sd-${word(r.sos_next_rk)}">${word(r.sos_next_rk)}</b></span></span>` : '';
@@ -40,13 +44,13 @@
       { key: 'rank', label: '#', num: true, first: 'asc', cls: 'rk',
         html: r => `<span class="rkn">${r.rank}</span>${r.move > 0 ? `<span class="mv up">&#9650;${r.move}</span>` : r.move < 0 ? `<span class="mv dn">&#9660;${-r.move}</span>` : '<span class="mv">&ndash;</span>'}${r.qb_note ? `<span class="mv qbx" title="${esc(r.qb_note)}: this week's rating uses him">QB</span>` : ''}` },
       { key: 'nick', label: 'Team', stick: true, first: 'asc',
-        html: r => `<div class="who">${F.logo(teams, r.team, 26)}<div><b><span class="nm-full">${esc(r.nick)}</span><span class="nm-short">${esc(r.team)}</span></b><span class="sub">${esc(r.team)} &middot; ${esc(r.record)}</span></div></div>` },
+        html: r => `<div class="who tm-open" data-tm="${esc(r.team)}" title="Open the ${esc(r.nick)} team page">${F.logo(teams, r.team, 26)}<div><b><span class="nm-full">${esc(r.nick)}</span><span class="nm-short">${esc(r.team)}</span></b><span class="sub">${esc(r.team)} &middot; ${esc(r.record)}</span></div></div>` },
       { key: 'net', label: 'Net', num: true, cls: 'key nbc', title: 'Points per game vs an average team; the whisker is the rank range', html: bar },
       { key: 'off', label: 'Off', num: true, cls: 'odc', title: 'Offense rank (Pass O + Run O)', value: r => r.off,
         html: r => badge(r.off_rk, `Offense ${F.sgn(r.off)} pts/game: Pass O ${F.sgn(r.pass_o)} + Run O ${F.sgn(r.rush_o)}`) },
       { key: 'def', label: 'Def', num: true, cls: 'odc', title: 'Defense rank (Pass D + Run D)', value: r => r.def,
         html: r => badge(r.def_rk, `Defense ${F.sgn(r.def)} pts/game: Pass D ${F.sgn(r.pass_d)} + Run D ${F.sgn(r.rush_d)}`) },
-      { key: 'units', label: 'Units', sort: false, cls: 'usc', title: 'Pass O, Run O, Pass D, Run D, special teams: green = top of the league, red = bottom', html: units },
+      { key: 'sw', label: 'Strength / Weakness', sort: false, cls: 'swc', title: 'Best and worst of pass O, run O, pass D, run D and special teams, by league rank', html: sw },
       { key: 'sos_next', label: 'Schedule', first: 'desc', title: 'How hard the schedule has been and will be', html: sched },
       { key: 'trend', label: 'Trend', sort: false, cls: 'hide-sm',
         html: r => `<span${(r.qb_hist || []).some(Boolean) ? ' title="Hollow rings: weeks rated with a backup QB starting"' : ''}>${spark(r.net_hist, 84, 22, r.qb_hist || [])}</span>` },
@@ -62,16 +66,18 @@
             <dl class="ht">
               <dt>Net</dt><dd>How good the team is from here on: opponent-adjusted points per game vs an average team (Offense + Defense + special teams). The bar runs from zero; its thin whisker is the rank range, where the team could rank given the uncertainty (10th to 90th percentile): short = settled, long = a few games could move it a lot. A quarterback who is out counts by his chance to be back in each remaining game.</dd>
               <dt>This week</dt><dd>Shown under Net only when this week's starting quarterback changes the rating (the QB tag by the rank); Matchups uses it.</dd>
-              <dt>Off / Def</dt><dd>League ranks: green = top 8, red = bottom 8. Hover for the points.</dd>
-              <dt>Units</dt><dd>Pass offense, run offense, pass defense, run defense, special teams, each shaded by league rank (green 1st to red 32nd). Hover a block for its points per game (per-play rating x a typical game's ${n(v.pass, 34)} dropbacks, ${n(v.rush, 25)} runs, ${n(v.st, 11)} special-teams plays).</dd>
+              <dt>Off / Def</dt><dd>League ranks: green = top 8, red = bottom 8. Tap or hover for the points.</dd>
+              <dt>Strength / Weakness</dt><dd>The best and worst of the team's five units (pass offense, run offense, pass defense, run defense, special teams) by league rank. Tap or hover it for all five, in points per game (per-play rating x a typical game's ${n(v.pass, 34)} dropbacks, ${n(v.rush, 25)} runs, ${n(v.st, 11)} special-teams plays).</dd>
               <dt>Schedule</dt><dd>How hard the opponents were (played) and will be (left), by their Power ratings: hard = top 8, easy = bottom 8.</dd>
-              <dt>Arrows</dt><dd>Move since last week.</dd>
+              <dt>Arrows</dt><dd>Move since last week. Tap a team for its page; tap anything else for its numbers.</dd>
             </dl>
           </div></details>
           <div class="pw-tbl"></div>`;
         const teams = D.teams || {};
         NFLE.Table(sec.querySelector('.pw-tbl'), { columns: columns(teams, D.power), rows: D.power, sort: { key: 'rank', dir: 'asc' }, cls: 'tiles power',
-          rowClass: () => 'teamrow tm-open', rowAttrs: r => `style="${F.rowStyle(teams, r.team)}" data-tm="${esc(r.team)}" title="Open the ${esc(r.nick)} team page"` });
+          // only the team (logo and name) opens its page (owner 2026-10-17), so the rest of the row can show its tips on a tap
+          rowClass: () => 'teamrow', rowAttrs: r => `style="${F.rowStyle(teams, r.team)}"` });
+        sec.querySelector('.pw-tbl').setAttribute('data-taptip', '');
       });
     },
   };

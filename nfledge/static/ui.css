@@ -134,3 +134,8 @@ button:active:not(:disabled), a.mt:active, .chip:active, .sbtn:active, [data-ope
   main section.on { animation: sec-in .18s var(--ease); }
   @keyframes sec-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 }
+
+/* tap tips (shell.js): a title shown on tap inside [data-taptip] */
+.tip-pop { position: fixed; z-index: 300; max-width: min(320px, calc(100vw - 16px)); padding: 7px 10px; border-radius: 8px;
+  background: #0d1015; border: 1px solid var(--line); box-shadow: 0 6px 20px rgba(0,0,0,.5); color: var(--ink);
+  font-size: var(--fs-sm); line-height: 1.35; pointer-events: none; }

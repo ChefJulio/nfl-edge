@@ -129,6 +129,27 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   let idsP = null;
   Object.defineProperty(NFLE.ui, 'ready', { get: () => idsP || (idsP = NFLE.load('data/espn_ids.json').then(m => { NFLE.ui.ids = m || {}; }).catch(() => {})) });
 })();
+// Tap tips (owner 2026-10-17): inside an area marked data-taptip, tapping anything with a title shows it in a small
+// bubble (phones have no hover); tapping elsewhere, scrolling or tapping it again closes it. Team links (.tm-open) and
+// sortable headers keep their own taps.
+(() => {
+  let pop = null, at = null;
+  const hide = () => { if (pop) pop.remove(); pop = at = null; };
+  document.addEventListener('click', e => {
+    const el = e.target.closest('[data-taptip] [title]');
+    if (!el || e.target.closest('.tm-open, th, a, button') || !el.title) { hide(); return; }
+    if (at === el) { hide(); return; }
+    hide();
+    at = el; pop = document.createElement('div'); pop.className = 'tip-pop'; pop.textContent = el.title;
+    document.body.appendChild(pop);
+    const r = el.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+    const x = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2));
+    const y = r.top - h - 8 >= 8 ? r.top - h - 8 : r.bottom + 8;
+    pop.style.left = `${x}px`; pop.style.top = `${y}px`;
+  });
+  addEventListener('scroll', hide, { passive: true, capture: true });
+  addEventListener('resize', hide);
+})();
 // A page left open keeps showing what it loaded, and phones keep tabs alive for days. When you come back to the
 // current week's page (and at most every 10 minutes), ask the site for its build stamp (build.json, report.render);
 // if it's newer than this page's numbers or code, offer a refresh. Never reloads on its own: you may be mid-read. Nothing is
