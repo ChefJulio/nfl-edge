@@ -2448,3 +2448,21 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   calibration off up to 9 points; C beats B (-0.0023 [-0.0038, -0.0010]) because it gives the distinction back. The
   listed-days string already encodes it (a 1-day 'L' is a late addition or an early drop). Display keeps padded FP
   for days before his first listing only (that day he practiced, unlisted); see the display note.
+- **PRE-REGISTERED 2026-10-18 (owner: "practice days are uniform ... can be back tracked from the game date"):
+  (AP) the week's stage from the calendar.** League policy fixes the three report days by game day (Sun game: Wed-Fri;
+  Mon: Thu-Sat; Thu: Mon-Wed; Fri / Sat: Tue-Thu; Wed: Sun-Tue); 2026 check: 181 of 186 team-weeks' dated reports
+  fall inside them (the 5 others: Melbourne week 1, extra report days in travel weeks). Today the site calls a
+  team's final report out when anyone on it has a game status or 3 listed days (InjuryModel.final_report_teams),
+  which uses the full-week model early in a week with extra report days, and the partial model late when nobody was
+  listed all week. Variant: final once the third derived report day's report is in (extra filed days kept as days).
+  Test, tools/stage_eval.py: dated reports 2021-25 (refetched with {#off-report}), each team-week replayed at the end
+  of each derived report day (what was published by then; game status only with the third), both rules choosing
+  the model (full-week vs partial k = 1 / 2), models trained walk-forward as production on seasons before. Scored:
+  Brier on played, status not Out. GATE: rows where the rules disagree, calendar Brier lower with the 95% CI over
+  season-weeks excluding 0; all rows not worse (CI upper < +0.0005). Report how often they disagree.
+- **PRE-REGISTERED 2026-10-18 (same thread): (AQ) short-week practice reports.** Teams playing 3-4 days after their
+  last game (Thursday after Sunday, etc.) mostly hold walkthroughs and file ESTIMATED participation. Variant: the
+  full-week practice model gets a short-week flag (days from his team's previous game to this one <= 5). Same rows
+  and walk-forward as the model's own fit (avail_hist 2018 on), test 2021-25, status not Out. GATE: Brier lower with
+  the 95% CI over season-weeks excluding 0 on short-week rows, all rows not worse (CI upper < +0.0005), calibration
+  by decile within 2 points on short-week rows.
