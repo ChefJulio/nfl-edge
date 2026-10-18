@@ -112,7 +112,10 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       const wordmark = s => `<span class="mt-tn">${esc(s.nick)}</span>`;
       const f = g.fc || {}, fin = g.final;
       const sides = [[g.away, fin && fin.away, fin && fin.home, f.p_away], [g.home, fin && fin.home, fin && fin.away, f.p_home]];
-      const T = NFLE.ui.tm;
+      // (the playoff-stakes line, matchups.js, likewise)
+      // the whole tile opens the gamecast (owner 2026-10-18: "tapping anywhere on a matchup tile should bring to the
+      // gamecast"): team names, logos and codes in it are plain text, not team links
+      const T = (t, html) => html == null ? esc(t) : html;
       const verdict = !fin ? '' : !fin.winner ? '<span class="gf-pick toss">Tie</span>'
         : f.tossup ? `<span class="gf-pick toss">Tossup &middot; ${T(fin.winner)} won</span>`
           : fin.fav_won ? `<span class="gf-pick ok">Favorite won &middot; ${f.pct}%</span>`
@@ -120,8 +123,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       const main = sides.map(([s, sc, os, pct], i) => {
         const side = i ? 'home' : 'away';
         const cls = `${fin && sc < os ? ' lost' : ''}${fin && sc > os ? ' won' : ''}${!fin && !f.tossup && pct < 50 ? ' dog' : ''}`;
-        // the logo's visible edge (outside the score / name, which sit above it) and the name open the team page
-        return `${s.logo_url ? `<img class="mt-lg ${side} tm-open" data-tm="${esc(s.team)}" src="${esc(F.logoSrc(s.logo_url, 112))}" alt="" loading="lazy">` : ''}
+        return `${s.logo_url ? `<img class="mt-lg ${side}" src="${esc(F.logoSrc(s.logo_url, 112))}" alt="" loading="lazy">` : ''}
           <div class="mt-side ${side}${cls}"><span class="mt-num">${fin ? esc(sc) : `${esc(pct)}<small>%</small>`}</span>
             <span class="mt-nm">${T(s.team, `<b>${wordmark(s)}</b>`)} <small>${esc(s.record)}</small></span></div>
           ${i ? '' : `<span class="mt-at">${g.neutral ? 'vs' : '@'}${f.tossup && !fin ? '<small>Tossup</small>' : ''}</span>`}`;
