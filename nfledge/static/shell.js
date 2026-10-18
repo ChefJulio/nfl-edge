@@ -125,7 +125,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
         const cls = `${fin && sc < os ? ' lost' : ''}${fin && sc > os ? ' won' : ''}${!fin && !f.tossup && pct < 50 ? ' dog' : ''}`;
         return `${s.logo_url ? `<img class="mt-lg ${side}" src="${esc(F.logoSrc(s.logo_url, 112))}" alt="" loading="lazy">` : ''}
           <div class="mt-side ${side}${cls}"><span class="mt-num">${fin ? esc(sc) : `${esc(pct)}<small>%</small>`}</span>
-            <span class="mt-nm">${T(s.team, `<b>${wordmark(s)}</b>`)} <small>${esc(s.record)}</small></span></div>
+            <span class="mt-nm">${T(s.team, `<b>${wordmark(s)}</b>`)} <small>${NFLE.recSpan(s.team, s.record)}</small></span></div>
           ${i ? '' : `<span class="mt-at">${g.neutral ? 'vs' : '@'}${f.tossup && !fin ? '<small>Tossup</small>' : ''}</span>`}`;
       }).join('');
       // when (owner 2026-10-17): kickoff / Final / the live clock at the top middle; the footer keeps the rest
@@ -139,6 +139,18 @@ document.addEventListener('touchstart', () => {}, { passive: true });
         <div class="mt-main"><div class="mt-when">${when}</div>${main}</div><div class="mt-st">${st}</div></a>`;
     },
   };
+  // A team's record as of now (owner 2026-10-18: "records aren't updating once their game is final"): the week build's
+  // record until the live scoreboard (gamecast.js, NFLE.live) has the team, then ESPN's, which counts a game the moment
+  // it ends (before that it is the record going in, so it is never behind the build). Anything showing a record carries
+  // data-rec="<team>" and is refreshed on every live update.
+  NFLE.rec = (team, fallback = '') => {
+    const by = NFLE.live && NFLE.live.byGame;
+    if (by) for (const st of Object.values(by)) for (const k of ['away', 'home']) if (st[k] && st[k].team === team && st[k].record) return st[k].record;
+    return fallback;
+  };
+  NFLE.recSpan = (team, fallback) => `<span data-rec="${NFLE.esc ? NFLE.esc(team) : team}">${NFLE.esc ? NFLE.esc(NFLE.rec(team, fallback || '')) : NFLE.rec(team, fallback || '')}</span>`;
+  document.addEventListener('nfle-live', () => document.querySelectorAll('[data-rec]').forEach(e => {
+    const r = NFLE.rec(e.dataset.rec, e.textContent); if (r && r !== e.textContent) e.textContent = r; }));
   // lists that show players by id wait for this (with NFLE.week()) before drawing, so their rows come up with faces.
   // Fetched on first use, not on every page load: 77 KB the landing Rankings page doesn't need (its players carry
   // their ESPN ids), and it competed with index.json for the first paint (Lighthouse 2026-10-16).

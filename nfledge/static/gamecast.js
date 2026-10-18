@@ -2146,7 +2146,7 @@
     const place = sr ? `${ord(sr.div_rank)} in ${esc(sr.div)}` : '';
     const stLine = sr ? `<div class="pc-box"><div class="pc-k">${esc(sr.div)} · ${ord(sr.div_rank)}${sr.seed ? ` · ${NFLE.ui.conf(`${sr.conf} seed ${sr.seed}`, 12)}` : ''}</div><div class="tm-stats">
         ${[['Division', sr.div_rec], ['Conference', sr.conf_rec], ['Home', sr.home], ['Away', sr.away], ['Streak', sr.streak], ['Point diff', sgn(sr.diff).replace('.0', '')]].map(([k, v]) => `<div class="tm-st"><div class="pc-k">${k}</div><div class="tm-stv">${esc(v || '')}</div></div>`).join('')}</div></div>` : '';
-    if (rec) tiles.push(tapTile('Season', `<div class="pc-big">${esc(rec)}</div><div class="pc-tapsub">${place || '&nbsp;'}</div>`,
+    if (rec) tiles.push(tapTile('Season', `<div class="pc-big">${NFLE.recSpan(abbr, rec)}</div><div class="pc-tapsub">${place || '&nbsp;'}</div>`,
       `${d.season} season`, `${stLine}${L ? teamSeasonBox(L) : ''}<div class="tm-pen" data-pen="${esc(abbr)}"></div>`));
     // Players: the team's top three by Edge grade (owner 2026-10-17: "go by player grades ... studs the last two seasons
     // have some weight"): the OVR, three seasons of output, a percentile within each position so QBs and receivers
@@ -3325,7 +3325,7 @@
     const side = (s, isHome) => {
       const to = (st.live || st.replay) && st.tos ? st.tos[isHome ? 'home' : 'away'] : null;
       return `<div class="sb-t tm-open${isHome ? ' home' : ''}" data-tm="${esc(s.team)}" style="--tc:${esc(s.color)}"><span class="sb-lg">${logo(s.logo, '#111', 40, s.team)}${sp && !sp.kick && sp.offense.team === s.team ? FOOTBALL : ''}</span>
-      <div class="sb-id"><div class="sb-n"><span class="sb-full">${esc((g && (isHome ? g.home.nick : g.away.nick)) || s.team)}</span><span class="sb-ab">${esc(s.team)}</span></div><div class="sb-r">${esc(s.record || '')}</div>${to != null
+      <div class="sb-id"><div class="sb-n"><span class="sb-full">${esc((g && (isHome ? g.home.nick : g.away.nick)) || s.team)}</span><span class="sb-ab">${esc(s.team)}</span></div><div class="sb-r">${NFLE.recSpan(s.team, s.record || '')}</div>${to != null
         ? `<div class="sb-to" title="Timeouts left">${[0, 1, 2].map(i => `<i class="${i < to ? 'on' : ''}"></i>`).join('')}</div>` : ''}</div>
       <div class="sb-s">${isHome ? hs : as}</div></div>`;
     };

@@ -38,7 +38,7 @@
       { key: 'rank', label: '#', num: true, first: 'asc', cls: 'rk',
         html: r => `<span class="rkn">${r.rank}</span>${r.move > 0 ? `<span class="mv up">&#9650;${r.move}</span>` : r.move < 0 ? `<span class="mv dn">&#9660;${-r.move}</span>` : '<span class="mv">&ndash;</span>'}${r.qb_note ? `<span class="mv qbx" title="${esc(r.qb_note)}: this week's rating uses him">QB</span>` : ''}` },
       { key: 'nick', label: 'Team', stick: true, first: 'asc',
-        html: r => `<div class="who tm-open" data-tm="${esc(r.team)}" title="Open the ${esc(r.nick)} team page">${F.logo(teams, r.team, 26)}<div><b><span class="nm-full">${esc(r.nick)}</span><span class="nm-short">${esc(r.team)}</span></b><span class="sub">${esc(r.team)} &middot; ${esc(r.record)}</span></div></div>` },
+        html: r => `<div class="who tm-open" data-tm="${esc(r.team)}" title="Open the ${esc(r.nick)} team page">${F.logo(teams, r.team, 26)}<div><b><span class="nm-full">${esc(r.nick)}</span><span class="nm-short">${esc(r.team)}</span></b><span class="sub">${esc(r.team)} &middot; ${NFLE.recSpan(r.team, r.record)}</span></div></div>` },
       { key: 'net', label: 'Net', num: true, cls: 'key nbc', title: 'Points per game vs an average team; the whisker is the rank range', html: bar },
       { key: 'off', label: 'Off', num: true, cls: 'odc grp', title: 'Offense rank (Pass O + Run O)', value: r => r.off,
         html: r => badge(r.off_rk, `Offense ${F.sgn(r.off)} pts/game: Pass O ${F.sgn(r.pass_o)} + Run O ${F.sgn(r.rush_o)}`) },
