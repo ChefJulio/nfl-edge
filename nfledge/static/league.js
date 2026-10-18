@@ -119,6 +119,8 @@
       const unmodeled = Object.entries(lg.scoring_settings || {}).filter(([k, v]) => +v && !SLEEPER_USED.has(k)).map(([k]) => NICE[k] || k.replace(/_/g, ' '));
       return {
         platform: 'sleeper', id, name: lg.name, season: lg.season, week, kw, dw, unmodeled,
+        // waivers (owner 2026-10-18, the week clock): the league's run day (JS weekday, Sun = 0) or daily waivers
+        waiverDay: lg.settings && lg.settings.daily_waivers ? 'daily' : ((((lg.settings || {}).waiver_day_of_week ?? 2) + 1) % 7),
         slots: (lg.roster_positions || []).filter(s => !['BN', 'IR', 'TAXI'].includes(s)),
         size: (lg.roster_positions || []).filter(s => !['IR', 'TAXI'].includes(s)).length,  // starters + bench
         scoring,
@@ -173,7 +175,7 @@
       });
       const games = (d.schedule || []).filter(g => g.matchupPeriodId === week || (g.home && g.home.pointsByScoringPeriod && g.home.pointsByScoringPeriod[week] != null));
       return {
-        platform: 'espn', id, name: st.name, season, week, slots, scoring, kw, dw, unmodeled, teams, espnNames: names,
+        platform: 'espn', id, name: st.name, season, week, slots, scoring, kw, dw, unmodeled, teams, espnNames: names, waiverDay: 3,
         size: Object.entries((st.rosterSettings || {}).lineupSlotCounts || {}).filter(([sid]) => +sid !== 21).reduce((t, [, n]) => t + n, 0),
         matchup(teamId) {
           const g = games.find(x => String((x.home || {}).teamId) === teamId || String((x.away || {}).teamId) === teamId);
@@ -331,15 +333,22 @@
     const table = (body, head = '<th>Slot</th><th>Player</th><th class="num">Proj</th>') =>
       `<div class="lg-scroll"><table class="bx tiles lg-tbl"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
 
-    // Waiver claim window (owner 2026-10-17): order resets to inverse standings Tuesday ~2am Central, claims made during
-    // Tuesday process Wednesday ~2am; after that unclaimed players are free agents, first come first served, so the
-    // order only matters inside that window (a player dropped later is on waivers for 24 hours: rare enough to skip).
-    const claimWindow = () => {
-      const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric', hourCycle: 'h23' })
-        .formatToParts(new Date()).map(x => [x.type, x.value]));
-      const h = +p.hour;
-      return (p.weekday === 'Tue' && h >= 2) || (p.weekday === 'Wed' && h < 2);
+    // Waiver claim window (owner 2026-10-17; on the week clock 2026-10-18): the order resets when the week rolls over
+    // (Tuesday); claims run on the league's waiver day (Sleeper: its setting; ESPN: Wednesday) at ~03:00 ET; after that
+    // unclaimed players are free agents, first come first served, so the order only matters inside that window (a
+    // player dropped later is on waivers for a day: rare enough to skip). Daily-waiver leagues: always a claim race.
+    const waiverRun = () => {
+      const w = NFLE.clock && NFLE.clock.waivers();  // the clock's default run: Wednesday 03:00 ET after the rollover
+      if (w == null || L.waiverDay === 'daily') return null;
+      return w + (((L.waiverDay ?? 3) - 3 + 7) % 7) * 864e5;
     };
+    const claimWindow = () => {
+      if (L.waiverDay === 'daily') return true;
+      const run = waiverRun(), roll = NFLE.clock && NFLE.clock.rollover();
+      return run != null && roll != null && Date.now() >= roll - 4 * 3600e3 && Date.now() < run;
+    };
+    const runText = () => { const r = waiverRun();
+      return L.waiverDay === 'daily' ? 'claims process daily' : r ? `claims process ${new Date(r).toLocaleString([], { weekday: 'short', hour: 'numeric' })}` : 'claims process Wed'; };
     // The waiver wire as information, not orders (owner 2026-10-17: close calls are the manager's judgment, e.g. a
     // backup's upside the projections can't see): the free agents who'd improve your team most, and your players
     // whose own rest-of-season projection free agents at their position beat. No add-drop pairs.
@@ -351,7 +360,7 @@
       const own = mine.ext.filter(x => !(mine.ir || []).includes(x)).map(x => ({ x, p: player(x), ros: weeks.reduce((t, k) => t + ((weekOf(x, k) || {}).exp || 0), 0), games: gamesOf(x) }));
       const below = own.map(o => ({ ...o, beat: fa.filter(f => f.pos === o.p.pos && f.ros > o.ros) }))
         .filter(o => o.beat.length && o.p.pos).sort((a, b) => b.beat.length - a.beat.length || a.ros - b.ros).slice(0, 4);
-      const wv = mine.faab != null ? `$${mine.faab} FAAB left` : mine.waiver && claimWindow() ? `claims process Wed ~2am CT · you're #${mine.waiver} of ${L.teams.length}` : '';
+      const wv = mine.faab != null ? `$${mine.faab} FAAB left` : mine.waiver && claimWindow() ? `${runText()} · you're #${mine.waiver} of ${L.teams.length}` : '';
       // (owner 2026-10-18) the same player rows as the lineup: photo, name, team colors; what he's worth on the right
       const infoRow = (p, tag, val, sub, cls = '') => `<tr class="teamrow" style="${NFLE.fmt.rowStyle(TEAMS, p.team)}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}>
           <td class="lg-slot">${esc(tag)}</td><td class="lg-who">${NFLE.ui.player({ name: p.name, team: p.team, photo: p.photo, espn: p.espn, pid: p.pid, subHtml: sub }, TEAMS)}</td>
