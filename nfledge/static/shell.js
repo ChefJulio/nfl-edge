@@ -75,7 +75,9 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       const photo = p.photo || NFLE.ui.headshot(p.espn || (p.pid && NFLE.ui.ids[p.pid]));
       const pic = photo
         ? `<span class="pic"${F.picStyle(teams, p.team)}><span class="pic-img"><img src="${esc(photo)}" alt="" width="34" height="34" loading="lazy" onerror="this.closest('.pic').classList.add('nopic')"></span><span class="pic-tm">${F.logo(teams, p.team, 11)}</span></span>`
-        : NFLE.ui.tm(p.team, F.logo(teams, p.team, 26));
+        // no photo (a team defense, a player without a headshot): the team logo in the headshot's own frame, same size
+        // as a photo in every list (owner 2026-10-18: D/ST logos were smaller than the headshots beside them)
+        : `<span class="pic nopic"${F.picStyle(teams, p.team)}><span class="pic-img"></span><span class="pic-tm">${F.logo(teams, p.team, 34)}</span></span>`;
       const pos = p.pos ? `<span class="posb posb-${esc(p.grp || p.pos)}">${esc(p.pos)}</span> ` : '';
       const sub = p.subHtml != null ? p.subHtml : p.sub != null ? esc(p.sub) : NFLE.ui.tm(p.team);
       // two lines (owner 2026-10-17): first name with the small details (position, team) on top, last name below,

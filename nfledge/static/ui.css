@@ -69,7 +69,7 @@ tr.teamrow .quiet, tr.teamrow .sub, tr.teamrow .st small, tr.teamrow .fc, tr.tea
 .pic .pic-tm .logo img { width: 14px; height: 14px; }  /* fills more of its 17px frame (owner 2026-10-17) */
 .pic.nopic .pic-img img { display: none; }
 .pic.nopic .pic-tm { inset: 0; display: grid; place-items: center; }
-.pic.nopic .pic-tm .logo { width: 34px; height: 34px; box-shadow: none; } .pic.nopic .pic-tm .logo img { width: 24px; height: 24px; }
+.pic.nopic .pic-tm .logo { width: 100%; height: 100%; box-shadow: none; } .pic.nopic .pic-tm .logo img { width: 72%; height: 72%; }  /* fills the frame, whatever size a list gives it */
 
 /* Number chips (shell.js NFLE.chips; owner 2026-10-15). Since 2026-10-16 (owner: "try the one key value thing, or
    multiple key values") every stat keeps its chip's spacing and alignment, but only a table's key columns (cls 'key')
