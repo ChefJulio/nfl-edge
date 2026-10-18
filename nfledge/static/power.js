@@ -12,28 +12,46 @@
     const pts = v.map((x, i) => `${(i * w / (v.length - 1)).toFixed(1)},${y(x)}`).join(' ');
     return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="currentColor" stroke-width="1.5"/>${qb.map((f, i) => f ? `<circle class="spark-qb" cx="${(i * w / (v.length - 1)).toFixed(1)}" cy="${y(v[i])}" r="3"/>` : '').join('')}<circle cx="${w}" cy="${y(v[v.length - 1])}" r="2.2" fill="currentColor"/></svg>`;
   };
-  const mc = (v, rk, cls = 'mv2', sm = '') => `<div class="mc"><span class="${cls} sc">${F.sgn(v)}</span><span class="rk-b${sm} ${F.rkc(rk)}">${F.ord(rk)}</span></div>`;
-  const sched = (v, rk, o, d) => rk ? `<div class="mc" title="Opposing defenses ${F.sgn(o)} + opposing offenses ${F.sgn(d)} pts/game vs average"><span class="mv2 sc">${F.sgn(v)}</span><span class="rk-b ${F.rkc(33 - rk)}" title="1st = hardest (red), 32nd = easiest (green)">${F.ord(rk)}</span></div><span class="sub">${rk <= 8 ? 'hard' : rk >= 25 ? 'easy' : 'average'}</span>` : '';
-  const columns = teams => [
-    { key: 'rank', label: '#', num: true, first: 'asc', cls: 'rk',
-      html: r => `<span class="rkn">${r.rank}</span>${r.move > 0 ? `<span class="mv up">&#9650;${r.move}</span>` : r.move < 0 ? `<span class="mv dn">&#9660;${-r.move}</span>` : '<span class="mv">&ndash;</span>'}${r.qb_note ? `<span class="mv qbx" title="${esc(r.qb_note)}: this week's rating uses him">QB</span>` : ''}` },
-    { key: 'nick', label: 'Team', stick: true, first: 'asc',
-      html: r => `<div class="who">${F.logo(teams, r.team, 26)}<div><b><span class="nm-full">${esc(r.nick)}</span><span class="nm-short">${esc(r.team)}</span></b><span class="sub">${esc(r.team)} &middot; ${esc(r.record)}</span></div></div>` },
-    { key: 'net', label: 'Net', num: true, cls: 'key',
-      html: r => `<div class="netc"><b class="sc">${F.sgn(r.net)}</b><span class="sub" title="80% of simulations rank this team between ${esc(String(r.range).replace('-', ' and '))} (ratings resampled within their uncertainty). Narrow = settled; wide = a few more games could move them a lot.">rank range ${esc(r.range)}</span></div>` },
-    { key: 'net_now', label: 'This week', num: true, cls: 'key', title: "Net with this week's starting quarterback",
-      html: r => r.net_now == null ? '' : `<div class="mc"><span class="mv2 sc">${F.sgn(r.net_now)}</span><span class="rk-b sm ${F.rkc(r.rank_now)}">${F.ord(r.rank_now)}</span></div>` },
-    { key: 'off', label: 'Offense', title: 'Pass O + Run O', html: r => `<span title="Pass O ${F.sgn(r.pass_o)} + Run O ${F.sgn(r.rush_o)}">${mc(r.off, r.off_rk)}</span>` },
-    { key: 'def', label: 'Defense', title: 'Pass D + Run D', html: r => `<span title="Pass D ${F.sgn(r.pass_d)} + Run D ${F.sgn(r.rush_d)}">${mc(r.def, r.def_rk)}</span>` },
-    ...[['pass_o', 'Pass O', 'per 100 dropbacks, incl. starting QB'], ['rush_o', 'Run O', 'per 100 designed runs'],
-        ['pass_d', 'Pass D', 'per 100 dropbacks faced'], ['rush_d', 'Run D', 'per 100 runs faced'], ['st', 'ST', '']].map(([k, label, nm]) => ({
-      key: k, label, cls: 'minor',
-      html: r => `<span${r[`${k}_pp`] != null ? ` title="${F.sgn(r[`${k}_pp`])} ${nm}"` : ''}>${mc(r[k], r[`${k}_rk`], 'mv3', ' sm')}</span>` })),
-    { key: 'sos_past', label: 'Schedule played', html: r => sched(r.sos_past, r.sos_past_rk, r.sos_past_o, r.sos_past_d) },
-    { key: 'sos_next', label: 'Schedule left', html: r => sched(r.sos_next, r.sos_next_rk, r.sos_next_o, r.sos_next_d) },
-    { key: 'trend', label: 'Trend', sort: false, cls: 'hide-sm',
-      html: r => `<span${(r.qb_hist || []).some(Boolean) ? ' title="Hollow rings: weeks rated with a backup QB starting"' : ''}>${spark(r.net_hist, 84, 22, r.qb_hist || [])}</span>` },
-  ];
+  // Laid out to read at a glance (owner 2026-10-17): Net as a bar from zero with the rank range as a whisker, This
+  // week folded into Net (shown only when this week's QB changes it), Offense / Defense as rank badges, the five units
+  // as one heat strip, the schedule as two words. Every number is still in a tooltip.
+  const badge = (rk, tip) => `<span class="rk-b ${F.rkc(rk)}" title="${esc(tip)}">${F.ord(rk)}</span>`;
+  const heat = rk => `hsl(${Math.round(120 * (32 - rk) / 31)} 52% 36%)`;  // 1st green ... 32nd red
+  const UNITS = [['pass_o', 'PO', 'Pass offense', 'per 100 dropbacks, incl. starting QB'], ['rush_o', 'RO', 'Run offense', 'per 100 designed runs'],
+                 ['pass_d', 'PD', 'Pass defense', 'per 100 dropbacks faced'], ['rush_d', 'RD', 'Run defense', 'per 100 runs faced'], ['st', 'ST', 'Special teams', '']];
+  const units = r => `<span class="us">${UNITS.map(([k, l, nm, per], i) => `<span class="ub${i === 2 || i === 4 ? ' gap' : ''}" style="background:${heat(r[`${k}_rk`])}"
+      title="${esc(nm)}: ${F.sgn(r[k])} pts/game, ${F.ord(r[`${k}_rk`])}${r[`${k}_pp`] != null && per ? ` (${F.sgn(r[`${k}_pp`])} ${per})` : ''}">${l}</span>`).join('')}</span>`;
+  const word = rk => rk <= 8 ? 'hard' : rk >= 25 ? 'easy' : 'avg';
+  const sched = r => r.sos_past_rk ? `<span class="sd" title="Opponents' strength vs average: played ${F.sgn(r.sos_past)} pts/game (${F.ord(r.sos_past_rk)} hardest), left ${F.sgn(r.sos_next)} (${F.ord(r.sos_next_rk)} hardest)">`
+    + `<span><i>played</i> <b class="sd-${word(r.sos_past_rk)}">${word(r.sos_past_rk)}</b></span><span><i>left</i> <b class="sd-${word(r.sos_next_rk)}">${word(r.sos_next_rk)}</b></span></span>` : '';
+  const columns = (teams, rows) => {
+    // the bar's scale: every team's net and the ends of every rank range (a rank range maps to the nets at those ranks)
+    const byRank = rows.map(r => r.net).sort((a, b) => b - a);
+    const ends = r => { const [hi, lo] = String(r.range || '').split('-').map(Number); return hi && lo ? [byRank[lo - 1], byRank[hi - 1]] : [r.net, r.net]; };
+    const all = rows.flatMap(r => [r.net, ...ends(r)]).filter(x => x != null);
+    const lo = Math.min(0, ...all), hi = Math.max(0, ...all), X = v => `${((v - lo) / (hi - lo || 1) * 100).toFixed(1)}%`;
+    const bar = r => { const [a, b] = ends(r), qb = r.net_now != null && Math.abs(r.net_now - r.net) >= 0.1;
+      return `<div class="nb" title="Net ${F.sgn(r.net)} pts/game vs average. Whisker: 80% of simulations rank them ${esc(String(r.range).replace('-', ' to '))}">`
+        + `<b>${F.sgn(r.net)}</b><span class="nb-t"><i class="nb-z" style="left:${X(0)}"></i>`
+        + `<i class="nb-w" style="left:${X(a)};width:calc(${X(b)} - ${X(a)})"></i>`
+        + `<i class="nb-b ${r.net >= 0 ? 'pos' : 'neg'}" style="left:${X(Math.min(0, r.net))};width:calc(${X(Math.max(0, r.net))} - ${X(Math.min(0, r.net))})"></i></span>`
+        + `${qb ? `<span class="nb-qb" title="With this week's starting QB (${esc(r.qb_note || '')}): ${F.ord(r.rank_now)}">this week ${F.sgn(r.net_now)}</span>` : ''}</div>`; };
+    return [
+      { key: 'rank', label: '#', num: true, first: 'asc', cls: 'rk',
+        html: r => `<span class="rkn">${r.rank}</span>${r.move > 0 ? `<span class="mv up">&#9650;${r.move}</span>` : r.move < 0 ? `<span class="mv dn">&#9660;${-r.move}</span>` : '<span class="mv">&ndash;</span>'}${r.qb_note ? `<span class="mv qbx" title="${esc(r.qb_note)}: this week's rating uses him">QB</span>` : ''}` },
+      { key: 'nick', label: 'Team', stick: true, first: 'asc',
+        html: r => `<div class="who">${F.logo(teams, r.team, 26)}<div><b><span class="nm-full">${esc(r.nick)}</span><span class="nm-short">${esc(r.team)}</span></b><span class="sub">${esc(r.team)} &middot; ${esc(r.record)}</span></div></div>` },
+      { key: 'net', label: 'Net', num: true, cls: 'key nbc', title: 'Points per game vs an average team; the whisker is the rank range', html: bar },
+      { key: 'off', label: 'Off', num: true, cls: 'odc', title: 'Offense rank (Pass O + Run O)', value: r => r.off,
+        html: r => badge(r.off_rk, `Offense ${F.sgn(r.off)} pts/game: Pass O ${F.sgn(r.pass_o)} + Run O ${F.sgn(r.rush_o)}`) },
+      { key: 'def', label: 'Def', num: true, cls: 'odc', title: 'Defense rank (Pass D + Run D)', value: r => r.def,
+        html: r => badge(r.def_rk, `Defense ${F.sgn(r.def)} pts/game: Pass D ${F.sgn(r.pass_d)} + Run D ${F.sgn(r.rush_d)}`) },
+      { key: 'units', label: 'Units', sort: false, cls: 'usc', title: 'Pass O, Run O, Pass D, Run D, special teams: green = top of the league, red = bottom', html: units },
+      { key: 'sos_next', label: 'Schedule', first: 'desc', title: 'How hard the schedule has been and will be', html: sched },
+      { key: 'trend', label: 'Trend', sort: false, cls: 'hide-sm',
+        html: r => `<span${(r.qb_hist || []).some(Boolean) ? ' title="Hollow rings: weeks rated with a backup QB starting"' : ''}>${spark(r.net_hist, 84, 22, r.qb_hist || [])}</span>` },
+    ];
+  };
   NFLE.areas.power = {
     mount(sec) {
       NFLE.week().then(D => {
@@ -42,19 +60,17 @@
         sec.innerHTML = `<div class="sec-head"><div><h2>Power rankings</h2><p>How good each team is from here on, in points per game vs an average team.</p></div></div>
           <details class="howto"><summary>How to read</summary><div>
             <dl class="ht">
-              <dt>Every number</dt><dd>Opponent-adjusted points per game vs an average team. Higher is better everywhere, defense included, and the columns add up: Offense = Pass O + Run O, Defense = Pass D + Run D, Net = Offense + Defense + ST.</dd>
-              <dt>Rank and Net</dt><dd>Rest of the season: a quarterback who is out counts by his chance to be back in each remaining game (his backup the rest), so a one-week absence barely moves a team and a season-ending one counts fully.</dd>
-              <dt>This week</dt><dd>The same rating with this week's starting quarterback, the one Matchups uses. A QB tag means someone other than the usual starter is expected to start.</dd>
-              <dt>Units</dt><dd>Per-play rating × a typical game's plays (about ${n(v.pass, 34)} dropbacks, ${n(v.rush, 25)} runs, ${n(v.st, 11)} special-teams plays). Hover a unit for its per-play rating. Pass O includes the current starting QB.</dd>
-              <dt>Rank range</dt><dd>Where the team could rank given the uncertainty (10th–90th percentile). Narrow = settled; wide = a few games could move it a lot.</dd>
-              <dt>Badges</dt><dd>League ranks: green = top 8, red = bottom 8.</dd>
-              <dt>Schedule</dt><dd>Points per game opponents took away (played) or will (left). Positive = tougher than average; 1st = hardest.</dd>
+              <dt>Net</dt><dd>How good the team is from here on: opponent-adjusted points per game vs an average team (Offense + Defense + special teams). The bar runs from zero; its thin whisker is the rank range, where the team could rank given the uncertainty (10th to 90th percentile): short = settled, long = a few games could move it a lot. A quarterback who is out counts by his chance to be back in each remaining game.</dd>
+              <dt>This week</dt><dd>Shown under Net only when this week's starting quarterback changes the rating (the QB tag by the rank); Matchups uses it.</dd>
+              <dt>Off / Def</dt><dd>League ranks: green = top 8, red = bottom 8. Hover for the points.</dd>
+              <dt>Units</dt><dd>Pass offense, run offense, pass defense, run defense, special teams, each shaded by league rank (green 1st to red 32nd). Hover a block for its points per game (per-play rating x a typical game's ${n(v.pass, 34)} dropbacks, ${n(v.rush, 25)} runs, ${n(v.st, 11)} special-teams plays).</dd>
+              <dt>Schedule</dt><dd>How hard the opponents were (played) and will be (left), by their Power ratings: hard = top 8, easy = bottom 8.</dd>
               <dt>Arrows</dt><dd>Move since last week.</dd>
             </dl>
           </div></details>
           <div class="pw-tbl"></div>`;
         const teams = D.teams || {};
-        NFLE.Table(sec.querySelector('.pw-tbl'), { columns: columns(teams), rows: D.power, sort: { key: 'rank', dir: 'asc' }, cls: 'tiles power',
+        NFLE.Table(sec.querySelector('.pw-tbl'), { columns: columns(teams, D.power), rows: D.power, sort: { key: 'rank', dir: 'asc' }, cls: 'tiles power',
           rowClass: () => 'teamrow tm-open', rowAttrs: r => `style="${F.rowStyle(teams, r.team)}" data-tm="${esc(r.team)}" title="Open the ${esc(r.nick)} team page"` });
       });
     },
