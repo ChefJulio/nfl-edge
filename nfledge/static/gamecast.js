@@ -2446,7 +2446,7 @@
     evs.forEach(ev => { const g = games[evKey(ev)]; if (g) LIVE.byGame[g.id] = evInfo(ev); });
     const now = Date.now();
     const jobs = Object.entries(LIVE.byGame).filter(([, st]) =>
-      st.state === 'in' ? now - (LIVE.fetched[st.id] || 0) > 55000 : st.realState === 'post' && !LIVE.fetched[st.id]);
+      st.state === 'in' ? now - (LIVE.fetched[st.id] || 0) > (NFLE.feedOpen ? 20000 : 55000) : st.realState === 'post' && !LIVE.fetched[st.id]);
     await Promise.all(jobs.map(async ([, st]) => {
       try {
         const sum = await getJSON(ESPN.sum + st.id);
@@ -2463,8 +2463,58 @@
     const soon = sts.some(s => s.state === 'pre' && new Date(s.date).getTime() - now < 30 * 60000);
     const live = sts.some(s => s.state === 'in');
     const later = sts.some(s => s.state === 'pre');
-    const next = live ? 30000 : soon ? 60000 : later ? 300000 : 0;
+    const next = live ? (NFLE.feedOpen ? 20000 : 30000) : soon ? 60000 : later ? 300000 : 0;
     if (next && !SIM) LIVE.timer = setTimeout(pollWeek, next);
+  };
+  // ---- Live plays feed (owner 2026-10-18, after Sleeper's: "a single feed to monitor ... plays my players' fpts got
+  // affected by", cleaner and in our play style): every play, across this week's games, that moved the fantasy points
+  // of the given players (the Fantasy tab passes the lineup's starters, the opponent's too on request), newest first.
+  // Each card: the game and score after the play, the quarter, clock and down, the play as a headline, then a row per
+  // player in it with what it gave him (the league's scoring) and his running total. Read from the box scores this
+  // page already polls (every 20 s while the feed is open).
+  NFLE.livePlays = (ids, w) => {
+    if (!DATA) return [];
+    w = w || weights();
+    const map = byEspn(), K = KEYS(), cards = [];
+    Object.entries(LIVE.byGame).forEach(([gid, st]) => {
+      const sum = LIVE.sums[st.id];
+      if (!sum) return;
+      const nm = {}, names = fullNames(sum, nm), run = {};
+      allPlays(sum).flatMap(d => d.plays || []).forEach(p => {
+        if (nonPlay(p)) return;
+        const a = spot(p.start, st);
+        const hd = playHead(p, names, a ? { off: a.offense.team, other: a.offense.team === st.away.team ? st.home.team : st.away.team } : {});
+        const rows = [];
+        playStats(hd.eff, hd.lost).forEach(o => {
+          const id = nm[o.key.replace(/\s+/g, '')], pid = id && map[id], pp = pid && DATA.players[pid];
+          if (!pp) return;
+          const fp = pts(K.map(k => o.s[k] || 0), w, pp.pos);
+          run[pid] = (run[pid] || 0) + fp;
+          if (ids.has(pid) && Math.abs(fp) >= 0.05) rows.push({ pid, id, pp, tag: ids.get(pid), fp, total: run[pid], s: o.s, name: names[o.key.replace(/\s+/g, '')] || pp.name });
+        });
+        if (rows.length) cards.push({ p, hd, rows, st, gid, t: p.wallclock ? Date.parse(p.wallclock) : elapsed(p) });
+      });
+    });
+    return cards.sort((a, b) => b.t - a.t);
+  };
+  NFLE.livePlaysHtml = (cards, opts = {}) => {
+    if (!cards.length) return `<p class="muted">${esc(opts.empty || 'No plays yet. Plays that move your players\' points show up here once their games kick off.')}</p>`;
+    const lg = (s_, n = 16) => logo(s_.logo, '#111', n, s_.team);
+    return `<ol class="lpf-list">${cards.slice(0, opts.limit || 80).map(c => {
+      const { p, hd, st } = c, dd = p.start && p.start.down ? (p.start.shortDownDistanceText || p.start.downDistanceText || '') : '';
+      const at = p.start && p.start.possessionText ? p.start.possessionText : '';
+      const a = spot(p.start, st), red = a && (a.dir === 1 ? a.x >= 80 : a.x <= 20) && !stPlay(p);
+      const rows = c.rows.map(r => `<div class="pi-row lpf-r" data-open-pid="${esc(r.pid)}"><img class="pi-hs" src="${esc(NFLE.ui ? NFLE.ui.headshot(r.id) : '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+          <span class="pi-nm">${esc(r.name)}</span>${r.tag === 'opp' ? '<span class="fp-tag opp lpf-tag">Opp</span>' : ''}<span class="pi-st">${statText(r.s)}</span>
+          <span class="lpf-tot" title="His fantasy points this game after the play">${f1(r.total)}</span>
+          <b class="pi-fp ${r.fp > 0 ? 'up' : 'dn'}">${r.fp > 0 ? '+' : '&minus;'}${f1(Math.abs(r.fp))}</b></div>`).join('');
+      return `<li class="lpf${p.scoringPlay ? ' scored' : ''}${c.rows.every(r => r.tag === 'opp') ? ' opp' : ''}">
+        <a class="lpf-h" href="${esc(gameHref(DATA.games.find(x => x.id === c.gid) || { id: c.gid }))}">
+          <span class="lpf-g">${lg(st.away)}<b>${esc(st.away.team)}</b> ${esc(p.awayScore)}&ndash;${esc(p.homeScore)} <b>${esc(st.home.team)}</b>${lg(st.home)}</span>
+          <span class="lpf-w">${esc(`${periodName((p.period || {}).number || 1)} ${(p.clock || {}).displayValue || ''}`.trim())}</span>
+          ${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>${at ? `<span class="muted">at ${esc(at)}</span>` : ''}` : ''}${red ? '<span class="sit-rz lpf-rz">RZ</span>' : ''}</a>
+        <div class="lpf-t ${hd.cls}">${esc(hd.h)}</div>${rows}</li>`;
+    }).join('')}</ol>`;
   };
   const startLive = () => {
     // after the first paint, not during it: the scoreboard + finished-game box scores (~75 KB) and the repaint they

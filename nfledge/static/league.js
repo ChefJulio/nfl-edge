@@ -207,7 +207,7 @@
     const TEAMS = D.teams || {}, KEYS = D.score.keys;
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem(LS) || 'null'); } catch (e) { /* none */ }
-    let L = null, mine = null, ROS = null, view = 'lineup';
+    let L = null, mine = null, ROS = null, view = 'lineup', feedWho = 'mine';
     const save = () => { try { localStorage.setItem(LS, JSON.stringify(saved)); } catch (e) { /* private mode */ } };
     // the gamecast marks the viewer's players and this week's opponent's (owner 2026-10-18: "viewers might want to know
     // how their fantasy players are doing"): our player ids, written whenever the league or the team changes
@@ -739,10 +739,25 @@
       box.querySelectorAll('.lg-tf').forEach(b => b.onclick = () => { const x = trade.found[+b.dataset.i];
         trade = { ...trade, team: x.t.id, give: new Set(x.give), get: new Set(x.get) }; draw(); box.scrollIntoView({ block: 'start', behavior: 'smooth' }); });
     };
+    // Live plays (owner 2026-10-18): every play this week that moved your starters' points (your opponent's too, on
+    // request), newest first, scored under this league's settings; gamecast.js builds the feed from the live box scores
+    const liveView = () => {
+      const m = L.matchup(mine.id), opp = m && L.teams.find(t => t.id === m.opp);
+      const st = t => ((m && m.starters && m.starters[t.id]) || t.starters || []).map(gsisOf).filter(Boolean);
+      const ids = new Map();
+      if (feedWho !== 'mine' && opp) st(opp).forEach(g => ids.set(g, 'opp'));
+      if (feedWho !== 'opp') st(mine).forEach(g => ids.set(g, 'mine'));
+      const cards = NFLE.livePlays ? NFLE.livePlays(ids, L.scoring) : [];
+      const seg = `<div class="seg lpf-who">${[['mine', 'My starters'], ['both', opp ? `+ ${opp.name}` : 'Both'], ['opp', opp ? opp.name : 'Opponent']].map(([k, l]) => `<button type="button" data-who="${k}" class="${feedWho === k ? 'on' : ''}">${esc(l)}</button>`).join('')}</div>`;
+      return `${seg}<p class="muted lg-note">Every play that moved these players' points, newest first, under your league's scoring; the number beside each player is his game total after the play. Updates every 20 seconds while open.</p>
+        ${NFLE.livePlaysHtml ? NFLE.livePlaysHtml(cards) : ''}`;
+    };
     const draw = () => {
       if (!L) return connectView();
       const box = sec.querySelector('.lg-body');
-      box.innerHTML = view === 'lineup' ? lineupView() : view === 'matchup' ? matchupView() : view === 'teams' ? teamsView() : view === 'trade' ? tradeView() : waiversView();
+      NFLE.feedOpen = view === 'live';
+      box.innerHTML = view === 'live' ? liveView() : view === 'lineup' ? lineupView() : view === 'matchup' ? matchupView() : view === 'teams' ? teamsView() : view === 'trade' ? tradeView() : waiversView();
+      box.querySelectorAll('[data-who]').forEach(b => b.onclick = () => { feedWho = b.dataset.who; draw(); });
       if (view === 'trade') wireTrade(box);
       if (NFLE.ui && NFLE.ui.ready) NFLE.ui.ready.then(() => {});
     };
@@ -751,7 +766,7 @@
       sec.innerHTML = `<div class="sec-head"><div><h2>${esc(L.name)}</h2><p>${L.platform === 'sleeper' ? 'Sleeper' : 'ESPN'} · week ${esc(String(L.week))} · ${L.teams.length} teams · our projections under your league's scoring.</p>${(L.unmodeled || []).length ? `<details class="lg-unmod"><summary>${new Set(L.unmodeled).size} scoring rules not modeled</summary><p class="muted">Your league also scores ${esc([...new Set(L.unmodeled)].join(', '))}: not in our projections yet.</p></details>` : ''}</div></div>
         <div class="lg-top"><label>Your team <select class="lg-team">${L.teams.map(t => `<option value="${esc(t.id)}"${mine && t.id === mine.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
           <button type="button" class="lg-change">Change league</button></div>
-        <div class="seg lg-seg">${[['lineup', 'Lineup'], ['matchup', 'Matchup'], ['teams', 'Teams'], ['waivers', 'Waivers'], ['trade', 'Trade']].map(([k, l]) => `<button type="button" data-v="${k}" class="${view === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+        <div class="seg lg-seg">${[['lineup', 'Lineup'], ['matchup', 'Matchup'], ['live', 'Live'], ['teams', 'Teams'], ['waivers', 'Waivers'], ['trade', 'Trade']].map(([k, l]) => `<button type="button" data-v="${k}" class="${view === k ? 'on' : ''}">${l}</button>`).join('')}</div>
         <div class="lg-body"></div>`;
       sec.querySelector('.lg-team').onchange = e => { mine = L.teams.find(t => t.id === e.target.value); saved.team = mine.id; save(); shareMine();
         trade = { team: null, give: new Set(), get: new Set(), found: null }; draw(); };
@@ -761,6 +776,8 @@
         if (['waivers', 'teams', 'trade'].includes(view) && !ROS) NFLE.load('data/ros.json').then(j => { ROS = j; draw(); }, () => draw()); else draw(); };
     };
 
+    // the feed redraws on every live update while it's showing
+    document.addEventListener('nfle-live', () => { if (L && view === 'live' && sec.isConnected && !sec.hidden) draw(); });
     const open = async s => {
       sec.innerHTML = '<p class="muted">Loading your league…</p>';
       try {
