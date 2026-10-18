@@ -73,7 +73,12 @@ td.actc .live-dot { width: 7px; height: 7px; margin-right: 5px; }
 .mt-at small { margin-top: 3px; font-size: var(--fs-2xs); letter-spacing: .05em; text-transform: uppercase; color: var(--ink); opacity: .75; }
 .mt-side.dog .mt-num, .mt.toss .mt-num { opacity: .6; }
 .mt-side.lost { opacity: .45; } .mt-lg:has(+ .mt-side.lost) { opacity: .35; }
-.mt-side.has-ball .mt-nm b::after { content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 6px; border-radius: 50%; background: #c47a2c; vertical-align: 1px; }
+/* possession: a small football at the score's inner top corner, out of the layout (owner 2026-10-18: the old dot after
+   the name wrapped under wordmark names and pushed that side's name and record out of line) */
+.mt-side.has-ball::after { content: ""; position: absolute; top: -1px; width: 15px; height: 9px; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 14'%3E%3Cpath d='M1 7C5 1 21 1 25 7 21 13 5 13 1 7Z' fill='%23b8692a'/%3E%3Cpath d='M9 7h8M11 5.3v3.4M13 5.3v3.4M15 5.3v3.4' stroke='%23fff' stroke-width='1.3' stroke-linecap='round' fill='none'/%3E%3C/svg%3E") center / contain no-repeat; }
+.mt-main .mt-side.has-ball { position: relative; }
+.mt-side.away.has-ball::after { right: -12px; } .mt-side.home.has-ball::after { left: -12px; }
 /* footer: one line always; the kickoff text gives way (ellipsis) before the odds do */
 .mt-st { display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 4px 10px; font-size: var(--fs-sm); color: var(--muted);
   white-space: nowrap; padding: 7px 12px 9px; background: color-mix(in srgb, var(--panel) 72%, transparent); border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
@@ -1228,3 +1233,14 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .ds-p.np { font-size: var(--fs-xs); padding: 4px 0; } .ds-p.key { background: color-mix(in srgb, var(--tc) 14%, transparent); border-radius: 6px; padding-left: 6px; padding-right: 6px; }
 .ds-w { color: var(--muted); font-size: var(--fs-xs); white-space: nowrap; }
 .ds .pi-row { height: 30px; }
+/* drive chart rows (owner 2026-10-18) */
+:is(.now, .ds) svg.fd { aspect-ratio: auto; }
+:is(.now, .ds) .fl-snap { fill: #fff; }
+:is(.now, .ds) .fl-b { stroke-width: 4; stroke-linecap: round; }
+:is(.now, .ds) .fl-t { font-size: 10px; font-weight: 800; paint-order: stroke; stroke: rgba(10,30,18,.85); stroke-width: 3px; stroke-linejoin: round; }
+:is(.now, .ds) .fl-gain { stroke: #7dffa0; fill: #7dffa0; } :is(.now, .ds) .fl-loss { stroke: #ff8f84; fill: #ff8f84; }
+:is(.now, .ds) .fl-zero { fill: #d6dbe2; } :is(.now, .ds) .fl-pen { stroke: #ffd43b; fill: #ffd43b; stroke-dasharray: 3 2; }
+:is(.now, .ds) .fl-h.fl-pen { stroke: none; } :is(.now, .ds) .fl-td { stroke: #ffd43b; fill: #ffd43b; } :is(.now, .ds) .fl-fg { stroke: #8fbfff; fill: #8fbfff; stroke-dasharray: 4 2; }
+:is(.now, .ds) .fl-h.fl-fg { stroke: none; } :is(.now, .ds) .fl-miss { stroke: #ff8f84; fill: #ff8f84; stroke-dasharray: 4 2; } :is(.now, .ds) .fl-h.fl-miss { stroke: none; }
+:is(.now, .ds) .fl-to { fill: #ff8f84; } :is(.now, .ds) .fl-x { stroke: #ff4d4f; stroke-width: 2.4; stroke-linecap: round; }
+:is(.now, .ds) .fl-t.fl-gain, :is(.now, .ds) .fl-t.fl-loss, :is(.now, .ds) .fl-t.fl-pen, :is(.now, .ds) .fl-t.fl-td, :is(.now, .ds) .fl-t.fl-fg, :is(.now, .ds) .fl-t.fl-miss { stroke: rgba(10,30,18,.85); stroke-dasharray: none; }

@@ -212,24 +212,62 @@
   // owner 2026-10-18: readable at a glance, like a TV broadcast: end zones in team colors with their codes, a line
   // every 5 yards, numbers, the line of scrimmage in blue and the first-down line in yellow, the ball pointing the way
   // the offense is going, the red zone shaded.
-  const fieldSvg = (sp, info, trail = []) => {
+  // The field (owner 2026-10-18): end zones in team colors with their codes, a line every 5 yards, numbers, the line
+  // of scrimmage in blue and the first-down line in yellow, the ball pointing the way the offense is going, the red zone
+  // shaded. lanes: the drive chart, one row per play from its snap to where it ended (owner: "show how far each play
+  // went ... stack the plays vertically"), the ball in the row after the last.
+  const fieldSvg = (sp, info, lanes = []) => {
     const X = y => 30 + y * 3;
+    const n = lanes.length, LH = n > 12 ? 10 : 13, top = 8;
+    const ballRow = sp && !sp.noBall;
+    const H = n ? Math.max(60, top + (n + (ballRow ? 1 : 0)) * LH + 20) : 60;
     let g = '';
-    for (let y = 5; y < 100; y += 5) g += `<line x1="${X(y)}" y1="0" x2="${X(y)}" y2="60" class="fd-l${y % 10 ? ' five' : ''}${y === 50 ? ' mid' : ''}"/>`;
-    for (let y = 10; y < 100; y += 10) g += `<text x="${X(y)}" y="55" class="fd-n">${y <= 50 ? y : 100 - y}</text>`;
-    const ez = (x, s_, rot) => `<rect x="${x}" y="0" width="30" height="60" style="fill:${esc(s_.color)}"/>
-      <text x="${x + 15}" y="30" class="fd-ez" transform="rotate(${rot} ${x + 15} 30)">${esc(s_.team)}</text>`;
-    const ball = sp ? `${sp.red ? `<rect x="${sp.dir === 1 ? X(80) : X(0)}" y="0" width="60" height="60" class="fd-red"/>` : ''}
-      ${trail.length ? `<line x1="${X(trail[0])}" y1="26" x2="${X(sp.x)}" y2="26" class="fd-trail" style="stroke:${esc(sp.offense.color)}"/>
-        ${trail.map((t, i) => `<circle cx="${X(t)}" cy="26" r="${i ? 2.2 : 3.4}" class="fd-snap${i ? '' : ' first'}"/>`).join('')}` : ''}
-      <line x1="${X(sp.x)}" y1="0" x2="${X(sp.x)}" y2="60" class="fd-los"/>
-      ${!sp.kick && sp.toGo !== (sp.dir === 1 ? 100 : 0) ? `<line x1="${X(sp.toGo)}" y1="0" x2="${X(sp.toGo)}" y2="60" class="fd-go"/>` : ''}
-      <path d="M${X(sp.x) - 8} 26 C${X(sp.x) - 4} 20, ${X(sp.x) + 4} 20, ${X(sp.x) + 8} 26 C${X(sp.x) + 4} 32, ${X(sp.x) - 4} 32, ${X(sp.x) - 8} 26 Z" class="fd-ball"/>
-      <path d="M${X(sp.x) - 3.2} 26 H${X(sp.x) + 3.2} M${X(sp.x) - 1.6} 24.6 V27.4 M${X(sp.x)} 24.6 V27.4 M${X(sp.x) + 1.6} 24.6 V27.4" class="fd-lace"/>
-      ${sp.kick ? '' : `<path d="M${X(sp.x) + sp.dir * 11} 26 l${-sp.dir * 4} -4 v8 z" class="fd-dir"/>`}` : '';
-    return `<svg class="fd" viewBox="0 0 360 60" role="img" aria-label="${sp ? esc(`${sp.offense.team} ball, ${sp.text}`) : 'Field'}">
-      <rect x="30" y="0" width="300" height="60" class="fd-turf"/>${ez(0, info.away, -90)}${ez(330, info.home, 90)}${g}${ball}</svg>`;
+    for (let y = 5; y < 100; y += 5) g += `<line x1="${X(y)}" y1="0" x2="${X(y)}" y2="${H}" class="fd-l${y % 10 ? ' five' : ''}${y === 50 ? ' mid' : ''}"/>`;
+    for (let y = 10; y < 100; y += 10) g += `<text x="${X(y)}" y="${H - 5}" class="fd-n">${y <= 50 ? y : 100 - y}</text>`;
+    const ez = (x, s_, rot) => `<rect x="${x}" y="0" width="30" height="${H}" style="fill:${esc(s_.color)}"/>
+      <text x="${x + 15}" y="${H / 2}" class="fd-ez" transform="rotate(${rot} ${x + 15} ${H / 2})">${esc(s_.team)}</text>`;
+    // one row per play: a dot at the snap, a bar to where it ended, an arrowhead, the result at the tip
+    const rows = lanes.map((l, i) => {
+      const y = top + i * LH + LH / 2, xa = X(l.a), xb = X(l.b), mv = Math.sign(xb - xa) || l.dir;
+      const lab = `<text x="${xb + mv * 5}" y="${y + 3.4}" class="fl-t fl-${l.kind}" text-anchor="${(mv > 0 && xb > 300) || (mv < 0 && xb >= 60) ? 'end' : 'start'}"
+        ${(mv > 0 && xb > 300) || (mv < 0 && xb < 60) ? `transform="translate(${-mv * (2 * 5 + (Math.abs(xb - xa) || 0) + 6)} 0)"` : ''}>${esc(l.label)}</text>`;
+      if (l.kind === 'to') return `<circle cx="${xa}" cy="${y}" r="2.4" class="fl-snap"/><path d="M${xa - 3.5} ${y - 3.5} l7 7 M${xa + 3.5} ${y - 3.5} l-7 7" class="fl-x"/>${lab.replace(`x="${xb + mv * 5}"`, `x="${xa + 7}"`).replace(/text-anchor="\w+"/, 'text-anchor="start"').replace(/transform="[^"]*"/, '')}`;
+      const bar = Math.abs(xb - xa) >= 1 ? `<line x1="${xa}" y1="${y}" x2="${xb - mv * 3}" y2="${y}" class="fl-b fl-${l.kind}"/>
+        <path d="M${xb} ${y} l${-mv * 4.5} -3.6 v7.2 z" class="fl-h fl-${l.kind}"/>` : '';
+      return `<circle cx="${xa}" cy="${y}" r="2.4" class="fl-snap"/>${bar}${lab}`;
+    }).join('');
+    const by = n ? top + n * LH + LH / 2 : 26;
+    const ball = sp ? `${sp.red ? `<rect x="${sp.dir === 1 ? X(80) : X(0)}" y="0" width="60" height="${H}" class="fd-red"/>` : ''}
+      ${!sp.noBall ? `<line x1="${X(sp.x)}" y1="0" x2="${X(sp.x)}" y2="${H}" class="fd-los"/>` : ''}
+      ${!sp.kick && !sp.noBall && sp.toGo !== (sp.dir === 1 ? 100 : 0) ? `<line x1="${X(sp.toGo)}" y1="0" x2="${X(sp.toGo)}" y2="${H}" class="fd-go"/>` : ''}` : '';
+    const fb = sp && !sp.noBall ? `<path d="M${X(sp.x) - 8} ${by} C${X(sp.x) - 4} ${by - 6}, ${X(sp.x) + 4} ${by - 6}, ${X(sp.x) + 8} ${by} C${X(sp.x) + 4} ${by + 6}, ${X(sp.x) - 4} ${by + 6}, ${X(sp.x) - 8} ${by} Z" class="fd-ball"/>
+      <path d="M${X(sp.x) - 3.2} ${by} H${X(sp.x) + 3.2} M${X(sp.x) - 1.6} ${by - 1.4} V${by + 1.4} M${X(sp.x)} ${by - 1.4} V${by + 1.4} M${X(sp.x) + 1.6} ${by - 1.4} V${by + 1.4}" class="fd-lace"/>
+      ${sp.kick ? '' : `<path d="M${X(sp.x) + sp.dir * 11} ${by} l${-sp.dir * 4} -4 v8 z" class="fd-dir"/>`}` : '';
+    return `<svg class="fd" viewBox="0 0 360 ${H}" style="aspect-ratio:360/${H}" role="img" aria-label="${sp && sp.offense ? esc(`${sp.offense.team} ball${sp.text ? `, ${sp.text}` : ''}`) : 'Drive chart'}">
+      <rect x="30" y="0" width="300" height="${H}" class="fd-turf"/>${ez(0, info.away, -90)}${ez(330, info.home, 90)}${g}${ball}${rows}${fb}</svg>`;
   };
+  // The drive chart's rows: every scrimmage play (and a field goal try) of `team`'s drive, from its snap to where it
+  // ended, labelled by what happened.
+  // (a touchdown's text carries its extra point, which reads as special teams: kept)
+  const driveLanes = (plays, info, team) => plays.filter(p => p.start && !nonPlay(p) && !/kickoff|punt/i.test(pType(p))
+    && (!stPlay(p) || /field goal/i.test(pType(p)) || (p.scoringPlay && /touchdown/i.test(`${pType(p)} ${p.text || ''}`)))).map(p => {
+    const a = spot(p.start, info), b = spot(p.end, info);
+    if (!a || a.offense.team !== team) return null;
+    const t = `${pType(p)} ${p.text || ''}`;
+    if (/field goal/i.test(t)) {
+      const good = /is GOOD/i.test(t) || (p.scoringPlay && !/no good|blocked|missed/i.test(t));
+      return { a: a.x, b: a.dir === 1 ? 100 : 0, dir: a.dir, kind: good ? 'fg' : 'miss', label: good ? 'FG good' : 'FG no good' };
+    }
+    if (p.isTurnover && !p.scoringPlay) return { a: a.x, b: a.x, dir: a.dir, kind: 'to', label: /intercept/i.test(t) ? 'INT' : /fumble/i.test(t) ? 'FUM' : 'Turnover' };
+    if (p.scoringPlay && /touchdown/i.test(t)) return { a: a.x, b: a.dir === 1 ? 100 : 0, dir: a.dir, kind: 'td', label: 'TD' };
+    const bx = b && b.offense.team === team ? b.x : a.x, net = Math.round((bx - a.x) * a.dir);
+    if (/No Play/i.test(t) || (p.isPenalty && /PENALTY/.test(t) && !/for -?\d+ yards?(?!.*PENALTY)/.test(t.split('PENALTY')[0]))) {
+      return { a: a.x, b: bx, dir: a.dir, kind: 'pen', label: `Flag ${net > 0 ? '+' : net < 0 ? '-' : ''}${Math.abs(net)}` };
+    }
+    if (/sack/i.test(t)) return { a: a.x, b: bx, dir: a.dir, kind: 'loss', label: `Sack ${net}` };
+    if (/incomplete/i.test(t)) return { a: a.x, b: a.x, dir: a.dir, kind: 'zero', label: 'inc' };
+    return { a: a.x, b: bx, dir: a.dir, kind: net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero', label: net > 0 ? `+${net}` : net < 0 ? `${net}` : '0' };
+  }).filter(Boolean);
   // What kind of play (the game log, the game state): not a play at all (timeouts, quarter ends), special teams.
   const pType = p => String((p.type && p.type.text) || '');
   const nonPlay = p => /timeout|end period|end of|two-minute|end game|official|end quarter/i.test(pType(p))
@@ -2832,8 +2870,7 @@
       : `<b>${esc(st.ended ? 'Final' : info.detail || '')}</b>`;
     const drive = cur && curTeam && sp && curTeam.team === sp.offense.team && cur.description
       ? `<div class="now-drv"><span class="muted">This drive</span> ${esc(cur.description)}</div>` : '';
-    const trail = cur && sp && curTeam && curTeam.team === sp.offense.team
-      ? (cur.plays || []).filter(p => p.start && p.start.down && !nonPlay(p) && !stPlay(p)).map(p => spot(p.start, info)).filter(x => x && x.offense.team === sp.offense.team).map(x => x.x) : [];
+    const lanes = cur && sp && curTeam && curTeam.team === sp.offense.team ? driveLanes(cur.plays || [], info, sp.offense.team) : [];
     // the last play as a headline, with what it put in the box score for each player (fantasy points); after a score
     // it stays up until the next snap (owner: "freeze that scoring player there until the kickoff happens")
     let last = '';
@@ -2846,7 +2883,7 @@
       last = `<div class="now-last${L.scoringPlay ? ' scored' : ''}"><div class="now-lk muted">${L.scoringPlay ? 'Last score' : 'Last play'}${L.clock ? ` · ${periodName((L.period || {}).number || 1)} ${esc(L.clock.displayValue || '')}` : ''}</div>
         <div class="now-lh ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}</div>${nonPlay(L) ? '' : playImpact(L, hd, info, sum, nm, names, '')}</div>`;
     }
-    return `<section class="sit now" data-k="now"><div class="sit-dd">${head}</div>${sp ? fieldSvg(sp, info, trail) : ''}${drive}${last}${wpBar(info, wp, note)}</section>`;
+    return `<section class="sit now" data-k="now"><div class="sit-dd">${head}</div>${sp ? fieldSvg(sp, info, lanes) : ''}${drive}${last}${wpBar(info, wp, note)}</section>`;
   };
   // Drive results in a word, from the offense's side (driveResult has the long form).
   const driveTag = (d, current) => {
@@ -2908,7 +2945,8 @@
     let end = key && key.end ? spot(key.end, info) : null;
     if (key && key.scoringPlay && !/field goal/i.test(pType(key) + key.text)) end = { x: tm === info.away ? 100 : 0 };
     const sp = snaps.length ? Object.assign({}, snaps[0], { x: end && end.x != null ? end.x : snaps[snaps.length - 1].x, kick: true, red: false }) : null;
-    const field = sp ? fieldSvg(sp, info, snaps.map(x => x.x)) : '';
+    const lanes = driveLanes(plays, info, tm.team);
+    const field = lanes.length ? fieldSvg(Object.assign({}, sp || { x: lanes[0].a, dir: lanes[0].dir, offense: tm }, { noBall: true, red: false }), info, lanes) : '';
     const startTxt = first && first.start && first.start.possessionText ? first.start.possessionText : '';
     // win chance across the drive, from the offense's side
     const ids = new Set(plays.map(p => String(p.id))), ser = st.ser.filter(x => ids.has(String(x.play.id)));
