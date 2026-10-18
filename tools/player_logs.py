@@ -346,6 +346,7 @@ def main():
   other_logs(site, cache, nfl, data.current_season, allsched, pinfo, all_ros, sn, bios, written=set(everyone), injuries=injuries,
              post_snaps=sn_post, round_of=round_of, prac=prac)
   team_logs(site, cfg, data, cache, nfl, allsched, postsched)
+  qb_throws(site, cache, nfl, data.pbp, data.current_season)
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -906,6 +907,55 @@ def bio_map(rosters: pd.DataFrame, draft: pd.DataFrame | None = None, contracts:
       b["deal"] = deals[x.gsis_id]
     out[x.gsis_id] = {k: v for k, v in b.items() if v is not None}
   return out
+
+
+# pass direction, kept out of the model's PBP_COLS (adding one there refetches every cached season of the model's play-by-
+# play): its own small cache of [game_id, play_id, pass_location] per season, refetched when the season has new games
+LOC_COLS = ["game_id", "play_id", "pass_location"]
+RES = {"inc": 0, "comp": 1, "td": 2, "int": 3}
+
+
+def qb_throws(site: Path, cache, nfl, pbp: pd.DataFrame, cur: int) -> None:
+  """Every regular-season pass a QB threw in the loaded seasons, for the player card's Throws chart (owner 2026-10-17:
+  the air-yards-by-side graphic): data/throws/<gsis>.json = {pid, keys, s: {season: [[week, quarter, air yards, side
+  (0 left / 1 middle / 2 right / -1 unknown), result (0 incomplete / 1 complete / 2 TD / 3 INT), YAC or null,
+  receiver, play id], ...]}}. Spikes and throws without air yards (nflverse leaves them blank) are left out."""
+  x = pbp[(pbp.season_type == "REG") & pbp.passer_player_id.notna() & pbp.air_yards.notna() & (pbp.qb_spike != 1)
+          & (pbp.pass_attempt == 1) & (pbp.sack != 1)]
+  locs = []
+  for season in sorted(x.season.unique()):
+    season = int(season)
+    want = set(x[x.season == season].game_id)
+    loc = cache.get("pbploc", season, lambda: nfl.load_pbp([season]).select(LOC_COLS), stale=False)
+    if loc is None or (season == cur and want - set(loc.game_id)):
+      loc = cache.get("pbploc", season, lambda: nfl.load_pbp([season]).select(LOC_COLS), stale=True)
+    if loc is not None:
+      locs.append(loc)
+  if locs:
+    x = x.merge(pd.concat(locs, ignore_index=True), on=["game_id", "play_id"], how="left")
+  else:
+    x = x.assign(pass_location=None)
+  side = x.pass_location.map({"left": 0, "middle": 1, "right": 2}).fillna(-1).astype(int)
+  res = np.where(x.interception == 1, RES["int"], np.where(x.pass_touchdown == 1, RES["td"],
+                 np.where(x.complete_pass == 1, RES["comp"], RES["inc"])))
+  x = x.assign(side=side, res=res)
+  out_dir = site / "data" / "throws"
+  out_dir.mkdir(parents=True, exist_ok=True)
+  n = 0
+  for pid, g in x.sort_values(["season", "week", "play_id"]).groupby("passer_player_id"):
+    if len(g) < 20:  # a trick-play passer, not a QB
+      continue
+    seasons = {}
+    for r in g.itertuples():
+      yac = None if pd.isna(r.yards_after_catch) else int(r.yards_after_catch)
+      rec = r.receiver_player_name if isinstance(r.receiver_player_name, str) else ""
+      seasons.setdefault(str(int(r.season)), []).append([int(r.week), int(r.qtr), int(r.air_yards), int(r.side), int(r.res),
+                                                         yac, rec, int(r.play_id)])
+    doc = {"pid": pid, "keys": ["w", "q", "air", "side", "res", "yac", "rec", "play"], "s": seasons}
+    (out_dir / f"{pid}.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
+    n += 1
+  size = sum(f.stat().st_size for f in out_dir.glob("*.json"))
+  print(f"[logs] wrote {n} QB throw charts ({size / 1e6:.1f} MB) to {out_dir}", flush=True)
 
 
 def qb_scrambles(pbp: pd.DataFrame) -> dict:

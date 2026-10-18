@@ -142,10 +142,11 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     // the tapped thing's tip, else its table cell's when the cell has just one (a tap needn't land on the number itself)
     const cell = e.target.closest('td'), inCell = cell ? cell.querySelectorAll('[title]') : [];
     const el = e.target.closest('[title]') || (inCell.length === 1 ? inCell[0] : null);
-    if (!el || !el.title || e.target.closest(ACTS)) { hide(); return; }
+    const tt = el && el.getAttribute('title');  // SVG elements have no .title property
+    if (!el || !tt || e.target.closest(ACTS)) { hide(); return; }
     if (at === el) { hide(); return; }
     hide();
-    at = el; pop = document.createElement('div'); pop.className = 'tip-pop'; pop.textContent = el.title;
+    at = el; pop = document.createElement('div'); pop.className = 'tip-pop'; pop.textContent = tt;
     document.body.appendChild(pop);
     const r = el.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
     const x = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2));

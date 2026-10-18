@@ -1072,3 +1072,21 @@ html.pc-open { overflow: hidden; }
 .tm-sres.r-W { color: #6fdc8c; } .tm-sres.r-L { color: #ff8f84; } .tm-sres.r-T { color: var(--muted); }
 .tm-sg.tm-done b { color: color-mix(in srgb, var(--ink) 78%, transparent); }
 .tm-sg.tm-bye { cursor: default; } .tm-sg.tm-bye:hover { background: none; }
+
+/* Throws chart (gamecast.js thrSvg) */
+.thr-head { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.thr-svg { display: block; width: 100%; height: auto; max-width: 460px; margin: 0 auto; }
+.thr-fld { fill: #172233; } .thr-bh { fill: rgba(255,120,60,.13); }
+.thr-yl { stroke: rgba(255,255,255,.12); stroke-width: 1; } .thr-ln { stroke: rgba(255,255,255,.1); stroke-dasharray: 3 5; }
+.thr-yn { fill: rgba(255,255,255,.45); font-size: 10px; text-anchor: end; }
+.thr-los { stroke: rgba(255,255,255,.8); stroke-width: 1.5; } .thr-lbl { fill: rgba(255,255,255,.7); font-size: 8.5px; font-weight: 700; letter-spacing: .06em; }
+.thr-avg { stroke-width: 1.4; stroke-dasharray: 6 4; } .thr-avg.h1 { stroke: #c9a94c; } .thr-avg.h2 { stroke: #f1d391; }
+.thr-avt { font-size: 9.5px; font-weight: 700; } .thr-avt.h1 { fill: #c9a94c; } .thr-avt.h2 { fill: #f1d391; }
+.thr-d { stroke-width: 1.4; } .thr-r1 { fill: #f08a4b; stroke: rgba(0,0,0,.35); } .thr-r0 { fill: none; stroke: rgba(255,255,255,.75); }
+.thr-r2 { fill: #6fdc8c; stroke: #fff; } .thr-d.sm { opacity: .72; } .thr-d.thr-r0.sm { opacity: .55; }
+.thr-int path { stroke: #ff6b5e; stroke-width: 2.2; stroke-linecap: round; } .thr-hit { fill: transparent; }
+.thr-qb { opacity: .95; }
+.thr-side { fill: rgba(255,255,255,.6); font-size: 10.5px; font-weight: 700; letter-spacing: .04em; }
+.thr-key { fill: rgba(255,255,255,.6); font-size: 9.5px; white-space: pre; } .thr-key .k1 { fill: #f08a4b; } .thr-key .k2 { fill: #6fdc8c; } .thr-key .k3 { fill: #ff6b5e; } .thr-key .k0 { fill: rgba(255,255,255,.75); }
+.thr-stats { margin-top: 10px; }
+.thr-avt, .thr-lbl { paint-order: stroke; stroke: #172233; stroke-width: 3px; stroke-linejoin: round; }

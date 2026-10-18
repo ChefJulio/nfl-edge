@@ -1066,6 +1066,87 @@
     return tapTile('Grade', r ? `<div class="pc-big ${r[9] ? '' : grTone(r[0])}">${ovr(r[0])}${uqMark(r)} <small>OVR</small></div><div class="pc-tapsub">${GR.cur.season} · ${esc(r[1])}</div>`
       : '<div class="pc-big">– <small>OVR</small></div><div class="pc-tapsub">Not graded</div>', 'NFL Edge grade', detail);
   };
+  // Throws (owner 2026-10-17, from a depth-by-side air-yards graphic): a QB's passes on a field, depth up from the line
+  // of scrimmage, left / middle / right across (nflverse's pass_location; each throw nudged sideways within its third by
+  // its play id, so dots don't stack and stay put between redraws); filled = complete, hollow = incomplete, green = TD,
+  // red X = interception; the half averages (one game) or the season's (whole season). data/throws/<gsis>.json
+  // (tools/player_logs.py qb_throws), loaded when a QB's card opens.
+  const TH = {};
+  const thrLoad = pid => { if (TH[pid] !== undefined) return; TH[pid] = null;
+    NFLE.load(`data/throws/${encodeURIComponent(pid)}.json`).then(j => { TH[pid] = j || false; rerenderCard(); }).catch(() => { TH[pid] = false; }); };
+  const thrSeasons = T => Object.keys((T && T.s) || {}).sort((a, b) => b - a);
+  const mean = a => a.length ? a.reduce((t, v) => t + v, 0) / a.length : null;
+  const throwsTile = (pid, L) => {
+    thrLoad(pid);
+    const T = TH[pid];
+    if (T === false) return '';
+    const s = thrSeasons(T)[0], a = T && s ? T.s[s] : null;
+    const body = a ? `<div class="pc-big">${f1(mean(a.map(x => x[2])))} <small>air yds / throw</small></div><div class="pc-tapsub">${s} · ${Math.round(100 * a.filter(x => x[2] >= 20).length / a.length)}% thrown 20+</div>`
+      : '<div class="pc-big">&ndash;</div><div class="pc-tapsub">Loading&hellip;</div>';
+    const photo = L && L.bio && L.bio.photo ? faceCrop(L.bio.photo) : '';
+    return tapTile('Throws', body, 'Throws', `<div class="pc-box thr" data-thr="${esc(pid)}" data-photo="${esc(photo)}"><p class="pc-sub">Loading throws&hellip;</p></div>`);
+  };
+  const hash01 = n => { let h = (n * 2654435761) >>> 0; h ^= h >>> 15; h = Math.imul(h, 2246822519) >>> 0; h ^= h >>> 13; return (h >>> 0) / 4294967295; };
+  const RESN = ['incomplete', 'complete', 'touchdown', 'intercepted'], SIDE = ['left', 'middle', 'right'];
+  const thrSvg = (a, one, photo) => {
+    const W = 340, top = 14, bot = 52, lx = 6, rx = W - 30, pw = rx - lx;
+    const maxA = Math.max(...a.map(x => x[2]), 10), hi = Math.min(60, Math.max(30, Math.ceil(maxA / 10) * 10)), lo = -10;
+    const PH = (hi - lo) * 6.2, H = top + PH + bot, Y = v => top + (hi - Math.max(lo, Math.min(hi, v))) / (hi - lo) * PH;
+    const lane = pw / 3, X = (side, play) => { const sd = side < 0 ? 1 : side; return lx + lane * sd + lane / 2 + (hash01(play) * 2 - 1) * lane * 0.38; };
+    const r = one ? 5 : 3.2;
+    const grid = [];
+    for (let v = lo; v <= hi; v += 10) if (v !== 0) grid.push(`<line x1="${lx}" x2="${rx}" y1="${Y(v)}" y2="${Y(v)}" class="thr-yl"/><text x="${W - 4}" y="${Y(v) + 4}" class="thr-yn">${v}</text>`);
+    const lanesL = [1, 2].map(i => `<line x1="${lx + lane * i}" x2="${lx + lane * i}" y1="${top}" y2="${top + PH}" class="thr-ln"/>`).join('');
+    // the higher average's label sits above its line, the lower one's below (two close averages don't print over each other)
+    // lines under the dots, their labels over them (outlined in the field color, readable over a dot)
+    const avgLine = (v, label, cls, below) => v == null ? ['', ''] : [`<line x1="${lx}" x2="${rx}" y1="${Y(v)}" y2="${Y(v)}" class="thr-avg ${cls}"/>`,
+      `<text x="${lx + 4}" y="${Y(v) + (below ? 12 : -4)}" class="thr-avt ${cls}">${label}: ${f1(v)}</text>`];
+    const a1 = mean(a.filter(x => x[1] <= 2).map(x => x[2])), a2 = mean(a.filter(x => x[1] >= 3).map(x => x[2]));
+    const av = one ? [avgLine(a1, '1st half avg', 'h1', a2 != null && a1 < a2), avgLine(a2, '2nd half avg', 'h2', a1 != null && a2 <= a1)]
+      : [avgLine(mean(a.map(x => x[2])), 'Season avg', 'h1')];
+    const avgs = av.map(x => x[0]).join(''), avgT = av.map(x => x[1]).join('');
+    const dots = a.map(x => { const cx = X(x[3], x[7]).toFixed(1), cy = Y(x[2]).toFixed(1);
+      const tip = `${one ? '' : `Wk ${x[0]} · `}Q${x[1] > 4 ? 'OT' : x[1]} · ${x[2]} air yds ${x[3] >= 0 ? SIDE[x[3]] : ''}${x[6] ? ` to ${x[6]}` : ''} · ${RESN[x[4]]}${x[4] === 1 || x[4] === 2 ? (x[5] != null ? `, +${x[5]} after catch` : '') : ''}${x[2] > hi ? ` (${x[2]} yds, off the chart)` : ''}`;
+      const t = `title="${esc(tip)}"`;
+      return x[4] === 3 ? `<g class="thr-int" ${t}><title>${esc(tip)}</title><path d="M${cx - r} ${cy - r}L${+cx + r} ${+cy + r}M${+cx + r} ${cy - r}L${cx - r} ${+cy + r}"/><circle cx="${cx}" cy="${cy}" r="${r + 2}" class="thr-hit"/></g>`
+        : `<circle cx="${cx}" cy="${cy}" r="${r}" class="thr-d thr-r${x[4]}${one ? '' : ' sm'}" ${t}><title>${esc(tip)}</title></circle>`; }).join('');
+    const face = photo ? `<image href="${esc(photo)}" x="${lx + pw / 2 - 22}" y="${top + PH - 44}" width="44" height="44" class="thr-qb" clip-path="url(#thrClip)"/>` : '';
+    return `<svg class="thr-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Pass chart">
+      <defs><clipPath id="thrClip"><circle cx="${lx + pw / 2}" cy="${top + PH - 22}" r="22"/></clipPath></defs>
+      <rect x="${lx}" y="${top}" width="${pw}" height="${Y(0) - top}" class="thr-fld"/><rect x="${lx}" y="${Y(0)}" width="${pw}" height="${top + PH - Y(0)}" class="thr-bh"/>
+      ${grid.join('')}${lanesL}<line x1="${lx}" x2="${rx}" y1="${Y(0)}" y2="${Y(0)}" class="thr-los"/>
+      ${face}${avgs}${dots}${avgT}
+      <text x="${rx - 4}" y="${Y(0) - 5}" class="thr-lbl" text-anchor="end">LINE OF SCRIMMAGE</text>
+      ${SIDE.map((sd, i) => `<text x="${lx + lane * i + lane / 2}" y="${top + PH + 18}" class="thr-side" text-anchor="middle">${sd[0].toUpperCase() + sd.slice(1)}</text>`).join('')}
+      <text x="${lx}" y="${top + PH + 38}" class="thr-key"><tspan class="k1">●</tspan> complete  <tspan class="k0">○</tspan> incomplete  <tspan class="k2">●</tspan> TD  <tspan class="k3">✕</tspan> INT</text>
+    </svg>`;
+  };
+  const thrStats = a => {
+    const n = a.length, pct = k => n ? `${Math.round(100 * k / n)}%` : '–', comp = b => b.filter(x => x[4] === 1 || x[4] === 2).length;
+    const deep = a.filter(x => x[2] >= 20), behind = a.filter(x => x[2] < 0), sides = [0, 1, 2].map(i => a.filter(x => x[3] === i).length);
+    const st = (k, v, t) => `<div class="tm-st" title="${esc(t)}"><div class="pc-k">${k}</div><div class="tm-stv">${v}</div></div>`;
+    return `<div class="tm-stats thr-stats">${st('Throws', n, 'Passes with an air-yards mark (spikes left out)')}${st('Air yds / throw', f1(mean(a.map(x => x[2]))), 'Average depth of target past the line of scrimmage')}
+      ${st('Complete', pct(comp(a)), `${comp(a)} of ${n}`)}${st('Deep (20+)', `${pct(deep.length)}`, `${deep.length} throws 20+ yards downfield, ${comp(deep)} complete`)}
+      ${st('Behind line', pct(behind.length), `${behind.length} throws behind the line of scrimmage (screens, swings)`)}
+      ${st('L / M / R', sides.map(v => pct(v)).join(' · '), 'Share of throws to the left, middle and right')}</div>`;
+  };
+  const drawThrows = box => {
+    const pid = box.dataset.thr, T = TH[pid];
+    if (!T) { if (T === undefined) thrLoad(pid); return; }
+    const L = LOGS[pid], ss = thrSeasons(T);
+    const opp = (s, w) => { const S = L && (L.seasons || []).find(x => +x.s === +s), g = S && S.g.find(x => x.w === w); return g ? `${g.h === 0 ? '@' : 'vs'} ${g.o}` : ''; };
+    const opts = ss.map(s => { const wks = [...new Set(T.s[s].map(x => x[0]))].sort((a, b) => b - a);
+      return `<optgroup label="${s}"><option value="${s}|">${s} season</option>${wks.map(w => `<option value="${s}|${w}">Wk ${w} ${esc(opp(s, w))}</option>`).join('')}</optgroup>`; }).join('');
+    const first = ss[0], lastWk = first ? Math.max(...T.s[first].map(x => x[0])) : null;
+    box.innerHTML = `<div class="thr-head"><select class="pc-wkpick thr-pick" aria-label="Game or season">${opts}</select></div><div class="thr-chart"></div><div class="thr-st"></div>`;
+    const sel = box.querySelector('.thr-pick');
+    sel.value = `${first}|${lastWk}`;
+    const paint = () => { const [s, w] = sel.value.split('|'), a = T.s[s].filter(x => !w || x[0] === +w);
+      box.querySelector('.thr-chart').innerHTML = a.length ? thrSvg(a, !!w, box.dataset.photo) : '<p class="pc-sub">No throws.</p>';
+      box.querySelector('.thr-st').innerHTML = thrStats(a) + `<p class="pc-sub">Depth = air yards, how far past the line of scrimmage the ball was thrown (negative = behind it). Side is where the pass went (left, middle, right, as the offense sees it); dots spread out within each third. Tap a dot for the throw.</p>`; };
+    sel.onchange = paint; paint();
+  };
+  document.addEventListener('nfle-sheet', e => e.detail.querySelectorAll('.thr[data-thr]').forEach(drawThrows));
   // A game's grade (0-99 percentile) from this season's pool of qualified games (data/grades/game_pool.json, the Grd
   // column's scale), in the site's scoring; loaded on first need, the card redraws when it arrives
   const GPOOL = { d: undefined };
@@ -1130,6 +1211,7 @@
         ${formTile(L, p.pos, fpg, e.games || p.sc.g, `${d.season} season before week ${d.week}`, `<div class="pc-box pc-season">${seasonHtml(p, d, L)}</div>`)}
         ${d === DATA ? healthTile(pid, p, L, p.espn) : ''}
         ${GRADED[p.pos] ? gradeTile(pid, L) : ''}
+        ${p.pos === 'QB' ? throwsTile(pid, L) : ''}
       </div>
       ${g ? `<div class="pc-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>` : ''}`;
     return html;
@@ -1150,7 +1232,7 @@
       : `<div class="pc-big">–</div><div class="pc-tapsub">${h && h.inj ? 'out this week' : 'not projected this week'}</div>`;
     const projTile = goTile('Projection', projBody, 'log', 'g');
     const cur = S ? S.g : [], fpg = cur.length ? cur.reduce((t, x) => t + pts(x.c, weights(), pos), 0) / cur.length : null;
-    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '')}${h ? healthTile(L.pid, null, L, L.espn) : ''}${GRADED[pos] ? gradeTile(L.pid, L) : ''}</div>` : '';
+    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '')}${h ? healthTile(L.pid, null, L, L.espn) : ''}${GRADED[pos] ? gradeTile(L.pid, L) : ''}${pos === 'QB' ? throwsTile(L.pid, L) : ''}</div>` : '';
     return `${played}${tiles}${bye ? '' : `<div class="pc-box"><p class="pc-sub">Not on our ${esc(wkLabel(d).toLowerCase())} board: ruled out, not on a roster yet, or projected too low to list.</p></div>`}`;
   };
   // Header extras from the career log doc (tools/player_logs.py): photo, jersey number, bio, recent snap share and,
