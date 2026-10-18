@@ -133,6 +133,20 @@
   const TEAM_ID = {};
   // where a play started and ended (owner 2026-10-18): "LAC 16 → LAC 20"; a touchdown ends in the end zone; when the
   // other team has it after the play, its name leads the end spot ("KC ball at LAC 41")
+  // a play's downs and spots as two pairs (owner 2026-10-18): "1st & 10 → 2nd & 5" and "NE 47 → DAL 48"; a new set
+  // of downs reads green, a change of possession names the team now with the ball, a touchdown ends in the end zone
+  const playPairs = p => {
+    const s0 = p.start || {}, e0 = p.end || {};
+    const d0 = s0.down ? (s0.shortDownDistanceText || s0.downDistanceText || '') : '';
+    const t0 = s0.team && TEAM_ID[String(s0.team.id)], t1 = e0.team && TEAM_ID[String(e0.team.id)];
+    const td = p.scoringPlay && /touchdown/i.test(`${(p.type || {}).text || ''} ${p.text || ''}`);
+    const swap = t0 && t1 && t0 !== t1;
+    const d1 = td || isTry(p) ? '' : swap ? `${t1} ball` : e0.down ? (e0.shortDownDistanceText || e0.downDistanceText || '') : '';
+    const downs = d0 ? `<span class="pp"><span class="rp-d ${DOWN_CLS(d0)}">${esc(d0)}</span>${d1 && (d1 !== d0 || (e0.possessionText && e0.possessionText !== s0.possessionText)) ? ` <span class="rp-ar">&rarr;</span> <span class="rp-d ${swap ? 'chg' : /^1st/.test(d1) ? 'd1' : DOWN_CLS(d1)}">${esc(d1)}</span>` : ''}</span>` : '';
+    const a = s0.possessionText, b = td ? 'end zone' : e0.possessionText;
+    const spots = a ? `<span class="pp muted">${esc(a)}${b && b !== a ? ` <span class="rp-ar">&rarr;</span> ${esc(b)}` : ''}</span>` : '';
+    return { downs, spots };
+  };
   const spotLine = p => {
     const a = p.start && p.start.possessionText, b = p.end && p.end.possessionText;
     if (!a) return '';
@@ -2804,7 +2818,7 @@
       const chipHtml = chips.map(([c, k]) => `<span class="pc-chip ${k}" title="${CHIP_TIP[c] || ''}">${c}</span>`).join('');
       const cls = `${p.scoringPlay ? ' pl-score' : ''}${p.isPenalty && !p.scoringPlay ? ' pl-pen' : ''}${st ? ' pl-st' : ''}`;
       return `<li class="pl${cls}" data-k="p${esc(p.id)}"${off ? ` style="--pt:${esc(off.color)}"` : ''}><div class="pl-when">${when}</div>
-        <div class="pl-what">${dd || chipHtml ? `<div class="pl-dd">${chipHtml}${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>` : ''}${p.start && p.start.possessionText && dd ? `<span class="muted pl-sp">${spotLine(p)}</span>` : ''}</div>` : ''}
+        <div class="pl-what">${(() => { const pp = playPairs(p); return chipHtml || pp.downs || pp.spots ? `<div class="pl-dd">${chipHtml}${pp.downs}${pp.spots}</div>` : ''; })()}
           <div class="pl-hl ${hd.cls}">${linkNames(esc(hd.h), teams)}${ydChip}</div><div class="pl-txt pl-raw" title="Tap for the official text">${linkNames(esc(hd.raw), teams)}</div></div>
         <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${tmL(info.away.team)} ${p.awayScore}–${p.homeScore} ${tmL(info.home.team)}</b>` : ''}${swing}</div></li>`;
     };
@@ -3325,8 +3339,8 @@
     const chip = p.scoringPlay ? `<span class="pc-chip c-sc">${scoreTag}</span>` : (tryP || (fgP && /no good|blocked|missed/i.test(tt))) ? '<span class="pc-chip c-to">NO GOOD</span>'
       : p.isTurnover ? '<span class="pc-chip c-to">TURNOVER</span>'
       : p.isPenalty ? '<span class="pc-chip c-pen">FLAG</span>' : net != null && !/incomplete/i.test(String(p.text || '')) ? `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)}</span>` : '';
-    const sl = spotLine(p);
-    return `<li class="ds-p${p === key ? ' key' : ''}"><span class="ds-w">${when(p)}</span><span class="ds-h ${hd.cls}">${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span> ` : ''}${linkNames(esc(hd.h), [info.away.team, info.home.team])}${sl ? `<span class="ds-sp">${sl}</span>` : ''}</span>${chip}</li>`;
+    const pp = playPairs(p);
+    return `<li class="ds-p${p === key ? ' key' : ''}"><span class="ds-w">${when(p)}</span><span class="ds-h ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}${pp.downs || pp.spots ? `<span class="ds-sp pps">${pp.downs}${pp.spots}</span>` : ''}</span>${chip}</li>`;
   }).join('');
   // Recent (owner 2026-10-18: "catch up the user on the most recent plays"): the drive on now and the one before it,
   // newest first, each under its drive's header

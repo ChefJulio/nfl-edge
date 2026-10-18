@@ -1433,3 +1433,9 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .ps-next .ds-sp { color: var(--ink); opacity: .8; font-style: italic; } .ps-next .live-dot { width: 6px; height: 6px; margin-right: 5px; }
 /* a touchdown headline is the highlight (owner 2026-10-18), wherever a play reads as a headline */
 :is(.ds-h, .pl-hl, .lpf-t, .now-lh, .ds-key, .now-try).td { color: var(--good); font-weight: 700; }
+/* downs and spots as two pairs under the headline (owner 2026-10-18) */
+.pps { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 3px; }
+.pp { display: inline-flex; align-items: baseline; gap: 4px; white-space: nowrap; }
+.pp .rp-d { font-size: 12px; font-weight: 700; } .pp .rp-ar { margin: 0; }
+.pp .rp-d.chg { color: #8fbfff; }
+.pl-dd .pp { font-size: 12px; }
