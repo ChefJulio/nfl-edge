@@ -548,5 +548,75 @@
 "pre": 0.4254,
 "post": 0.974,
 "status": "Active (LLL)"
+},
+"00-0038579": {
+"name": "Aidan O'Connell",
+"team": "LV",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T19:13:00+00:00",
+"pre": 0.0736,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0039067": {
+"name": "Rashee Rice",
+"team": "KC",
+"pos": "WR",
+"ruling": "INA",
+"at": "2026-10-18T19:07:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0039824": {
+"name": "Jared Wiley",
+"team": "KC",
+"pos": "TE",
+"ruling": "INA",
+"at": "2026-10-18T19:07:00+00:00",
+"pre": 0.1959,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040184": {
+"name": "KeAndre Lambert-Smith",
+"team": "LAC",
+"pos": "WR",
+"ruling": "ACT",
+"at": "2026-10-18T19:07:00+00:00",
+"pre": 0.3824,
+"post": 0.974,
+"status": "Active (LLF)"
+},
+"00-0040727": {
+"name": "Tre Harris",
+"team": "LAC",
+"pos": "WR",
+"ruling": "INA",
+"at": "2026-10-18T19:01:00+00:00",
+"pre": 0.0,
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0040906": {
+"name": "Garrett Nussmeier",
+"team": "KC",
+"pos": "QB",
+"ruling": "INA",
+"at": "2026-10-18T19:07:00+00:00",
+"pre": 0.0906,
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041550": {
+"name": "Brenen Thompson",
+"team": "LAC",
+"pos": "WR",
+"ruling": "ACT",
+"at": "2026-10-18T19:14:00+00:00",
+"pre": 0.4254,
+"post": 0.974,
+"status": "Active (LLL)"
 }
 }
