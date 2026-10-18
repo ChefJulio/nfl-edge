@@ -209,19 +209,33 @@
     return { x, dir, toGo, offense: offAway ? info.away : info.home, down: s.down, distance: s.distance,
              text: s.downDistanceText || s.shortDownDistanceText || '', red: s.isRedZone || (dir === 1 ? x >= 80 : x <= 20) };
   };
-  const fieldSvg = (sp, info) => {
-    const X = y => 10 + y * 1.0;
-    let lines = '';
-    for (let y = 10; y < 100; y += 10) lines += `<line x1="${X(y)}" y1="1" x2="${X(y)}" y2="19" class="fd-l${y === 50 ? ' mid' : ''}"/>`;
-    const ball = sp ? `<line x1="${X(sp.toGo)}" y1="1" x2="${X(sp.toGo)}" y2="19" class="fd-go"/>
-      <ellipse cx="${X(sp.x)}" cy="10" rx="2.6" ry="1.8" class="fd-ball"/>
-      <path d="M${X(sp.x) + sp.dir * 3.6} 10 l${-sp.dir * 2.2} -2.2 v4.4 z" class="fd-dir"/>` : '';
-    return `<svg class="fd" viewBox="0 0 120 20" preserveAspectRatio="none" aria-hidden="true">
-      <rect x="0" y="0" width="120" height="20" class="fd-turf"/>
-      ${sp && sp.red ? `<rect x="${sp.dir === 1 ? X(80) : X(0)}" y="0" width="20" height="20" class="fd-red"/>` : ''}
-      <rect x="0" y="0" width="10" height="20" style="fill:${esc(info.away.color)}"/><rect x="110" y="0" width="10" height="20" style="fill:${esc(info.home.color)}"/>
-      ${lines}${ball}</svg>`;
+  // owner 2026-10-18: readable at a glance, like a TV broadcast: end zones in team colors with their codes, a line
+  // every 5 yards, numbers, the line of scrimmage in blue and the first-down line in yellow, the ball pointing the way
+  // the offense is going, the red zone shaded.
+  const fieldSvg = (sp, info, trail = []) => {
+    const X = y => 30 + y * 3;
+    let g = '';
+    for (let y = 5; y < 100; y += 5) g += `<line x1="${X(y)}" y1="0" x2="${X(y)}" y2="60" class="fd-l${y % 10 ? ' five' : ''}${y === 50 ? ' mid' : ''}"/>`;
+    for (let y = 10; y < 100; y += 10) g += `<text x="${X(y)}" y="55" class="fd-n">${y <= 50 ? y : 100 - y}</text>`;
+    const ez = (x, s_, rot) => `<rect x="${x}" y="0" width="30" height="60" style="fill:${esc(s_.color)}"/>
+      <text x="${x + 15}" y="30" class="fd-ez" transform="rotate(${rot} ${x + 15} 30)">${esc(s_.team)}</text>`;
+    const ball = sp ? `${sp.red ? `<rect x="${sp.dir === 1 ? X(80) : X(0)}" y="0" width="60" height="60" class="fd-red"/>` : ''}
+      ${trail.length ? `<line x1="${X(trail[0])}" y1="26" x2="${X(sp.x)}" y2="26" class="fd-trail" style="stroke:${esc(sp.offense.color)}"/>
+        ${trail.map((t, i) => `<circle cx="${X(t)}" cy="26" r="${i ? 2.2 : 3.4}" class="fd-snap${i ? '' : ' first'}"/>`).join('')}` : ''}
+      <line x1="${X(sp.x)}" y1="0" x2="${X(sp.x)}" y2="60" class="fd-los"/>
+      ${!sp.kick && sp.toGo !== (sp.dir === 1 ? 100 : 0) ? `<line x1="${X(sp.toGo)}" y1="0" x2="${X(sp.toGo)}" y2="60" class="fd-go"/>` : ''}
+      <path d="M${X(sp.x) - 8} 26 C${X(sp.x) - 4} 20, ${X(sp.x) + 4} 20, ${X(sp.x) + 8} 26 C${X(sp.x) + 4} 32, ${X(sp.x) - 4} 32, ${X(sp.x) - 8} 26 Z" class="fd-ball"/>
+      <path d="M${X(sp.x) - 3.2} 26 H${X(sp.x) + 3.2} M${X(sp.x) - 1.6} 24.6 V27.4 M${X(sp.x)} 24.6 V27.4 M${X(sp.x) + 1.6} 24.6 V27.4" class="fd-lace"/>
+      ${sp.kick ? '' : `<path d="M${X(sp.x) + sp.dir * 11} 26 l${-sp.dir * 4} -4 v8 z" class="fd-dir"/>`}` : '';
+    return `<svg class="fd" viewBox="0 0 360 60" role="img" aria-label="${sp ? esc(`${sp.offense.team} ball, ${sp.text}`) : 'Field'}">
+      <rect x="30" y="0" width="300" height="60" class="fd-turf"/>${ez(0, info.away, -90)}${ez(330, info.home, 90)}${g}${ball}</svg>`;
   };
+  // What kind of play (the game log, the game state): not a play at all (timeouts, quarter ends), special teams.
+  const pType = p => String((p.type && p.type.text) || '');
+  const nonPlay = p => /timeout|end period|end of|two-minute|end game|official|end quarter/i.test(pType(p))
+    || /^(END (GAME|QUARTER|OF)|Timeout|Two-Minute)/i.test(String(p.text || ''));
+  const stPlay = p => /kickoff|punt|field goal|extra point|two-point|onside|blocked/i.test(pType(p)) && !/return \(offense\)/i.test(pType(p))
+    || /\bkicks\b|\bpunts\b|extra point|field goal/i.test(String(p.text || ''));
   // ---- Replay card (owner 2026-10-14: readable at a glance): "1st & 10 at ATL 35" / "Aaron Jones 8-yard run" /
   // "-> 2nd & 2", and the play drawn on the mini field (line of scrimmage, first-down line, an arrow from start to
   // finish: green gain, red loss, neutral kick / change of possession). Headlines come from ESPN's play type, the
@@ -374,53 +388,6 @@
         <span class="pi-d ${d > 0 ? 'up' : d < 0 ? 'dn' : ''}">${d > 0 ? '+' : d < 0 ? '&minus;' : '±'}${Math.abs(d)}</span></div>`;
     }
     return `<div class="pi">${rows}${wpHtml}</div>`;
-  };
-  const playFieldSvg = (a, b, info) => {
-    const X = v => 10 + v;
-    let lines = '';
-    for (let v = 10; v < 100; v += 10) lines += `<line x1="${X(v)}" y1="1" x2="${X(v)}" y2="19" class="fd-l${v === 50 ? ' mid' : ''}"/>`;
-    let mark = '';
-    if (a && b) {
-      const same = a.offense.team === b.offense.team, d = b.x - a.x, gain = same && d * a.dir > 0, loss = same && d * a.dir < 0;
-      const cls = !same ? 'fd-ar kick' : gain ? 'fd-ar gain' : loss ? 'fd-ar loss' : '';
-      mark = `${a.down ? `<line x1="${X(a.toGo)}" y1="1" x2="${X(a.toGo)}" y2="19" class="fd-go"/>` : ''}<line x1="${X(a.x)}" y1="1" x2="${X(a.x)}" y2="19" class="fd-los"/>`;
-      if (cls && Math.abs(d) >= 0.5) {
-        const s0 = Math.sign(d);
-        const x2 = X(b.x) - s0 * 1.6, tip = `M${X(b.x)} 10 l${-s0 * 2.6} -2.6 v5.2 z`;
-        mark += `<line x1="${X(a.x)}" y1="10" x2="${x2}" y2="10" class="fd-halo"/><path d="${tip}" class="fd-halo"/>`
-          + `<line x1="${X(a.x)}" y1="10" x2="${x2}" y2="10" class="${cls}"/><path d="${tip}" class="${cls} head"/>`;
-      }
-    } else if (a) mark = `<line x1="${X(a.x)}" y1="1" x2="${X(a.x)}" y2="19" class="fd-los"/>`;  // an event: just where the ball sits
-    return `<svg class="fd" viewBox="0 0 120 20" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="0" width="120" height="20" class="fd-turf"/>
-      <rect x="0" y="0" width="10" height="20" style="fill:${esc(info.away.color)}"/><rect x="110" y="0" width="10" height="20" style="fill:${esc(info.home.color)}"/>${lines}${mark}</svg>`;
-  };
-  const replayCard = (pl, info, sum) => {
-    const a = spot(pl.start, info), b = spot(pl.end, info), ids = {}, names = fullNames(sum, ids);
-    const hd = playHead(pl, names, a ?{ off: a.offense.team, other: a.offense.team === info.away.team ? info.home.team : info.away.team } : {});
-    // timeouts, quarter ends, the two-minute warning: an event, not a play (no down line, nothing next)
-    const event = /timeout|end period|end of|two-minute/i.test((pl.type && pl.type.text) || '');
-    const off = a && !event ? a.offense.team : '';
-    // top: who has it and where; bottom: the down before -> the down after (owner: "2nd & 10 -> 3rd & 2")
-    const kick = /kickoff/i.test((pl.type && pl.type.text) || '');
-    const where = event || kick || !pl.start ? '' : String(pl.start.possessionText || '').replace(/^50$/, 'midfield');
-    const before = event ? '' : pl.start && pl.start.down ? (pl.start.shortDownDistanceText || pl.start.downDistanceText || '') : kick ? 'Kickoff' : '';
-    const changed = a && b && a.offense.team !== b.offense.team;
-    const after = !pl.end || !pl.end.downDistanceText ? '' : changed ? `${b.offense.team} ball, ${pl.end.downDistanceText}` : pl.end.shortDownDistanceText || pl.end.downDistanceText;
-    // color code (owner 2026-10-15): the offense in its team color, the yards gained green / lost red, and the downs
-    // by urgency (a fresh 1st down green, 3rd amber, 4th red)
-    const offSide = off ? (info.away.team === off ? info.away : info.home) : null;
-    const pill = t => { const sd = info.away.team === t ? info.away : info.home.team === t ? info.home : null;
-      return `<span class="rp-tm tm-open" data-tm="${esc(t)}" style="--tc:${esc((sd && sd.color) || '#555')}">${esc(t)}</span>`; };
-    const dc = t => /^1st/.test(t) ? 'd1' : /^3rd/.test(t) ? 'd3' : /^4th/.test(t) ? 'd4' : '';
-    const net = a && b && !event && !changed && !kick && !/punt|field goal|extra point|kickoff/i.test((pl.type && pl.type.text) || '') ? Math.round((b.x - a.x) * a.dir) : null;
-    const chip = net == null ? '' : `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)} yd${Math.abs(net) === 1 ? '' : 's'}</span>`;
-    const afterHtml = !after ? '' : changed ? `${pill(b.offense.team)} <span class="rp-d chg">${esc(pl.end.shortDownDistanceText || pl.end.downDistanceText)}</span>`
-      : `<span class="rp-d ${dc(after)}${/^1st/.test(after) && !/^1st/.test(before) ? ' new' : ''}">${esc(after)}</span>`;
-    return `<section class="sit rp-card"><div class="rp-dd">${offSide ? `${pill(off)} <b>ball</b>` : ''}${where ? `${off ? ' · ' : ''}${esc(where)}` : ''}</div>
-      <div class="rp-what ${hd.cls}${hd.h.length > 44 ? ' long' : ''}">${esc(hd.h)}</div>${playFieldSvg(event ? b : a, event ? null : b, info)}
-      <div class="rp-next">${!event && (before || after) ? `<span class="rp-d ${dc(before)}">${esc(before)}</span>${after ? ` <span class="rp-ar">&rarr;</span> ${afterHtml}` : ''}${chip}` : ''}</div>
-      ${event ? '<div class="pi"></div>' : playImpact(pl, hd, info, sum, ids, names, off)}
-      <div class="rp-raw" title="Tap for the full play">${esc(hd.raw)}</div></section>`;
   };
   const sitFromPlays = (sum) => {  // after the last play (finished games, replay, or no live situation yet)
     const pl = allPlays(sum).flatMap(d => d.plays || []);
@@ -2371,7 +2338,7 @@
   };
 
   // ------------------------------------------------------------------------------------------------- game page
-  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null, tab: null, pane: 'box' };
+  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null, tab: null, pane: 'plays', fpAll: false };
   const parseGid = gid => { const m = String(gid || '').match(/^(\d{4})_(\d{2})_([A-Z]{2,3})_([A-Z]{2,3})$/); return m ? { season: +m[1], week: +m[2], away: m[3], home: m[4] } : null; };
   const wpSeries = (sum) => {
     const plays = allPlays(sum).flatMap(d => d.plays || []);
@@ -2414,17 +2381,24 @@
       <span class="tug"><span class="tug-o" style="width:${(+x.split).toFixed(1)}%"></span><span class="tug-mid"></span></span>
       <span class="bt-v r">${x.side === 'home' ? v : x.side === 'even' ? '<i>even</i>' : ''}</span>${btChip(x.home_rk, x.home_what)}</div>`;
   };
-  const teamStats = (sum, info) => {
-    const T = (sum.boxscore && sum.boxscore.teams) || [];
-    if (T.length < 2) return '';
+  const espnTeamStats = sum => {
+    const T = (sum && sum.boxscore && sum.boxscore.teams) || [];
+    if (T.length < 2) return null;
     const by = {}; T.forEach(t => { by[ourCode(t.team.abbreviation)] = Object.fromEntries((t.statistics || []).map(s => [s.label, s.displayValue])); });
+    return by;
+  };
+  const teamStats = (sum, info, only = null, by = null) => {
+    by = by || espnTeamStats(sum);
+    if (!by) return '';
     const a = by[info.away.team] || {}, h = by[info.home.team] || {};
     const num = s => { if (s == null) return null; s = String(s); if (/^\d+:\d+$/.test(s)) { const [m, x] = s.split(':'); return +m * 60 + +x; }
                         if (/^\d+-\d+$/.test(s)) { const [m, n] = s.split('-').map(Number); return n ? m / n : 0; } const v = parseFloat(s); return isNaN(v) ? null : v; };
     const rows = ['Total Yards', 'Passing', 'Rushing', '1st Downs', '3rd down efficiency', '4th down efficiency', 'Red Zone (Made-Att)',
                   'Yards per Play', 'Total Plays', 'Turnovers', 'Sacks-Yards Lost', 'Penalties', 'Possession']
-      .filter(k => a[k] != null || h[k] != null).map(k => {
-        const x = num(a[k]), y = num(h[k]), tot = (x || 0) + (y || 0), sa = tot > 0 && x != null && y != null ? x / tot : 0.5;
+      .filter(k => (a[k] != null || h[k] != null) && (!only || only.includes(k))).map(k => {
+        // the bar leans toward the side doing better: fewer is better for turnovers, sacks taken and penalties
+        const x = num(a[k]), y = num(h[k]), tot = (x || 0) + (y || 0), lessIsMore = /Turnovers|Sacks|Penalties/.test(k);
+        const sa = tot > 0 && x != null && y != null ? (lessIsMore ? y / tot : x / tot) : 0.5;
         return `<div class="ts-row"><span class="ts-v">${esc(a[k] ?? '')}</span><span class="ts-k">${esc(k)}</span><span class="ts-v r">${esc(h[k] ?? '')}</span>
           <span class="ts-bar"><span style="width:${(sa * 100).toFixed(1)}%;background:${esc(info.away.color)}"></span><span style="flex:1;background:${esc(info.home.color)}"></span></span></div>`;
       }).join('');
@@ -2476,11 +2450,7 @@
       || (o.filter === 'to' && p.isTurnover) || (o.filter === 'pen' && p.isPenalty)) && (!q || String(p.text).toLowerCase().includes(q));
     // First downs: ESPN doesn't flag them; a down-and-distance play earned one if the drive's next real play starts
     // at 1st down (a touchdown is its own highlight).
-    const ttype = p => String((p.type && p.type.text) || '');
-    const isNonPlay = p => /timeout|end period|end of|two-minute|end game|official|end quarter/i.test(ttype(p))
-      || /^(END (GAME|QUARTER|OF)|Timeout|Two-Minute)/i.test(String(p.text || ''));
-    const isST = p => /kickoff|punt|field goal|extra point|two-point|onside|blocked/i.test(ttype(p)) && !/return \(offense\)/i.test(ttype(p))
-      || /\bkicks\b|\bpunts\b|extra point|field goal/i.test(String(p.text || ''));
+    const ttype = pType, isNonPlay = nonPlay, isST = stPlay;
     const firstDown = new Set();
     drives.forEach(d => {
       const real = (d.plays || []).filter(p => p.start && p.start.down && !isNonPlay(p) && !isST(p));
@@ -2542,7 +2512,7 @@
       html = ds.map(({ d, plays }) => {
         const tm = teamOf(d.team && d.team.id) || {};
         const res = driveResult(d, tm, info, d === sum.drives.current);
-        return `<div class="dr"><div class="dr-h" style="--tc:${esc(tm.color || '#666')}"><span class="tm-open dr-tm" data-tm="${esc(tm.team || '')}">${tm.logo ? logo(tm.logo, '#111', 16, tm.team) : ''}<b>${esc(tm.team || '')} drive</b></span>
+        return `<div class="dr" data-drive-id="${esc(d.id)}"><div class="dr-h" style="--tc:${esc(tm.color || '#666')}"><span class="tm-open dr-tm" data-tm="${esc(tm.team || '')}">${tm.logo ? logo(tm.logo, '#111', 16, tm.team) : ''}<b>${esc(tm.team || '')} drive</b></span>
           <span class="dr-res ${res.cls}">${esc(res.text)}</span>
           <span class="muted">${esc(d.description || '')}</span></div><ol class="pls">${plays.map(playRow).join('')}</ol></div>`;
       }).join('') || '<p class="muted">No plays match.</p>';
@@ -2713,9 +2683,233 @@
     return { id: null, state: st, realState: st, detail: g.final ? 'Final' : g.kickoff, short: '', period: 0, clock: '',
              away: side(g.away, 'away'), home: side(g.home, 'home'), sit: null, date: null, offline: true };
   };
+  // ---- Live tab (owner 2026-10-18: "what am i looking for ... the current state as well as how the game has been
+  // going"): NOW (situation, field, this drive, win chance) -> STORY (win chance over the game, every drive) -> key
+  // stats -> fantasy (points so far vs projection, the viewer's own players marked) -> the detail panes.
+  // ---- One game state for live and replay (owner 2026-10-18: "replay mode should look identical to live as if it
+  // were simulating that point in time"): what the Live tab draws, as of the replay's play (rp) or now. Live reads
+  // ESPN's situation, box score and team stats; a replay rebuilds them from the plays so far (the official text:
+  // playStats), so a replayed moment shows the drive, the stats and the fantasy points as they stood.
+  const mmss = t => `${Math.floor(t / 60)}:${String(Math.round(t % 60)).padStart(2, '0')}`;
+  const isTry = p => /extra point|two-point|2pt|conversion/i.test(`${pType(p)} ${p.text || ''}`);
+  const drvNums = d => {  // plays / yards / time from ESPN's "8 plays, 75 yards, 4:12"
+    const m = String(d.description || '').match(/(\d+) plays?, (-?\d+) yards?, (\d+:\d{2})/);
+    return m ? { n: +m[1], yd: +m[2], t: m[3] } : null;
+  };
+  const stateAt = (sum, info, rp) => {
+    const all = sum ? allPlays(sum) : [];
+    const ids = rp ? new Set(rp.plays.slice(0, rp.i + 1).map(p => String(p.id))) : null;
+    const teamOf = id => String(id) === String(info.home.id) ? info.home : String(id) === String(info.away.id) ? info.away : null;
+    let drives = all;
+    if (ids) {  // drives so far; one cut short loses its result and gets its numbers so far
+      drives = all.map(d => {
+        const pl = (d.plays || []).filter(p => ids.has(String(p.id)));
+        if (!pl.length || pl.length === (d.plays || []).length) return pl.length ? d : null;
+        const real = pl.filter(p => p.start && p.start.down && !nonPlay(p) && !stPlay(p));
+        const a = spot(pl[0].start, info), b = spot(pl[pl.length - 1].end, info);
+        const yd = a && b && a.offense.team === b.offense.team ? Math.round((b.x - a.x) * a.dir) : 0;
+        return Object.assign({}, d, { plays: pl, displayResult: '', result: '', isScore: false,
+          description: `${real.length} play${real.length === 1 ? '' : 's'}, ${yd} yards, ${mmss(Math.max(0, elapsed(pl[pl.length - 1]) - elapsed(pl[0])))}` });
+      }).filter(Boolean);
+    }
+    const plays = drives.flatMap(d => d.plays || []);
+    const last = plays[plays.length - 1] || null;
+    const lastD = drives[drives.length - 1] || null;
+    const cur = !ids ? (sum && sum.drives && sum.drives.current ? drives.find(d => String(d.id) === String(sum.drives.current.id)) || null : null)
+      : lastD && !lastD.displayResult && !lastD.result ? lastD : null;
+    const ser = sum ? wpSeries(sum).filter(x => !ids || ids.has(String(x.play.id))) : [];
+    // the situation: ESPN's live one, or where the last play left the ball
+    let sit = !ids ? (info.state === 'in' ? (info.sit || (sum && sitFromPlays(sum))) : null)
+      : last ? Object.assign({}, last.end || {}, { lastPlay: last }) : null;
+    if (sit && !sit.lastPlay && last) sit = Object.assign({}, sit, { lastPlay: last });
+    // timeouts: ESPN's live count, or 3 a half less the ones called so far
+    let tos = sit && sit.homeTimeouts != null && !ids ? { home: sit.homeTimeouts, away: sit.awayTimeouts } : null;
+    if (ids && last) {
+      const per = (last.period || {}).number || 1, half = per <= 2 ? [1, 2] : per <= 4 ? [3, 4] : [per];
+      const used = { home: 0, away: 0 };
+      plays.filter(p => half.includes((p.period || {}).number) && /timeout/i.test(pType(p))).forEach(p => {
+        const m = String(p.text || '').match(/by ([A-Z]{2,3})/), t = m && ourCode(m[1]);
+        if (t === info.home.team) used.home++; else if (t === info.away.team) used.away++;
+      });
+      tos = { home: Math.max(0, (per >= 5 ? 2 : 3) - used.home), away: Math.max(0, (per >= 5 ? 2 : 3) - used.away) };
+    }
+    // fantasy lines and team stats: ESPN's box score live; rebuilt from the plays in a replay
+    let lines, tstats;
+    if (!ids) { lines = sum ? boxLines(sum) : {}; tstats = espnTeamStats(sum); } else {
+      const nm = {}, names = fullNames(sum, nm), K = KEYS();
+      lines = {};
+      const ts = {}; [info.away, info.home].forEach(x => { ts[x.team] = { yd: 0, n: 0, c3: 0, a3: 0, to: 0, top: 0 }; });
+      drives.forEach(d => {
+        const tm = teamOf(d.team && d.team.id), T = tm && ts[tm.team];
+        const real = (d.plays || []).filter(p => p.start && p.start.down && !nonPlay(p) && !stPlay(p) && !/No Play/i.test(p.text || ''));
+        real.forEach((p, i) => {
+          if (!T) return;
+          T.yd += +p.statYardage || 0; T.n++;
+          if (p.start.down === 3) { T.a3++; const nx = real[i + 1]; if (p.scoringPlay || (nx && nx.start.down === 1)) T.c3++; }
+          if (p.isTurnover) T.to++;
+        });
+        const full = all.find(x => x.id === d.id), n = full && full.plays.length === d.plays.length && drvNums(d);
+        if (T) T.top += n ? (+n.t.split(':')[0] * 60 + +n.t.split(':')[1]) : Math.max(0, elapsed(d.plays[d.plays.length - 1]) - elapsed(d.plays[0]));
+      });
+      tstats = {};
+      Object.entries(ts).forEach(([t, x]) => { tstats[t] = { 'Total Yards': String(x.yd), 'Yards per Play': x.n ? (x.yd / x.n).toFixed(1) : '0.0',
+        '3rd down efficiency': `${x.c3}-${x.a3}`, Turnovers: String(x.to), Possession: mmss(x.top) }; });
+      plays.forEach(p => {
+        if (nonPlay(p)) return;
+        const a = spot(p.start, info);
+        const hd = playHead(p, names, a ? { off: a.offense.team, other: a.offense.team === info.away.team ? info.home.team : info.away.team } : {});
+        playStats(hd.eff, hd.lost).forEach(o => {
+          const id = nm[o.key.replace(/\s+/g, '')];
+          if (!id) return;
+          const r = lines[id] || (lines[id] = { id, line: K.map(() => 0), tgt: 0, car: 0, att: 0, comp: 0 });
+          K.forEach((k, i) => { if (o.s[k]) r.line[i] += o.s[k]; });
+          if ('pass_att' in o.s || 'pass_yd' in o.s || o.s.interception) r.att++;
+          if ('pass_yd' in o.s) r.comp++;
+          if ('rush_yd' in o.s) r.car++;
+          if (o.s.reception) r.tgt++;
+        });
+      });
+    }
+    const score = ids && last ? { home: last.homeScore, away: last.awayScore } : { home: info.home.score, away: info.away.score };
+    const per = ids && last ? (last.period || {}).number || 1 : info.period;
+    const clock = ids && last ? (last.clock || {}).displayValue || '' : info.clock;
+    const secs = ids && last ? elapsed(last) : info.state === 'post' ? 3600 : (() => {
+      const m = String(info.clock || '').match(/^(\d+):(\d{2})/), c = m ? +m[1] * 60 + +m[2] : 0, p_ = info.period || 1;
+      return p_ <= 4 ? (p_ - 1) * 900 + (900 - c) : 3600 + (p_ - 5) * 600 + (600 - c);
+    })();
+    return { drives, plays, last, cur, ser, sit, tos, lines, tstats, score, per, clock, secs, live: !ids && info.state === 'in', replay: !!ids,
+             ended: ids ? false : info.state === 'post' };
+  };
+  // Between plays (owner 2026-10-18: "between plays we should infer the expected state"): after a touchdown the try,
+  // after a made try / field goal / safety the kickoff, at halftime the second-half kickoff. The kicking team's tee
+  // is its own 35 (a safety: its own 20).
+  const nextUp = (st, info) => {
+    const L = st.last;
+    if (!L || st.ended) return null;
+    const i = st.plays.indexOf(L), prev = i > 0 ? st.plays[i - 1] : null;
+    const dh = L.homeScore - (prev ? prev.homeScore : 0), da = L.awayScore - (prev ? prev.awayScore : 0);
+    const scorer = dh > da ? info.home : da > dh ? info.away : null, other = s_ => (s_ === info.home ? info.away : info.home);
+    const tee = (k, yd) => ({ x: k === info.away ? yd : 100 - yd, dir: k === info.away ? 1 : -1, toGo: null, offense: k, kick: true, red: false, text: '' });
+    const per = (L.period || {}).number || 1;
+    if (L.scoringPlay && scorer && !isTry(L) && (dh === 6 || da === 6)) {
+      const sp = { x: scorer === info.away ? 85 : 15, dir: scorer === info.away ? 1 : -1, toGo: scorer === info.away ? 100 : 0, offense: scorer, kick: true, red: true, text: '' };
+      return { head: `<b>${tmL(scorer.team)} try</b> · after the touchdown`, sp };
+    }
+    if (L.scoringPlay && scorer) {
+      const safety = /safety/i.test(`${pType(L)} ${L.text || ''}`);
+      const k = safety ? other(scorer) : scorer;
+      return { head: `<b>Kickoff</b> · ${tmL(k.team)} kicks to ${tmL(other(k).team)}`, sp: tee(k, safety ? 20 : 35) };
+    }
+    if (per === 2 && /end (of )?(half|2nd quarter|period)|halftime/i.test(`${pType(L)} ${L.text || ''}`)) {
+      const first = st.drives[0], recv1 = first && (String(first.team.id) === String(info.home.id) ? info.home : info.away);
+      return recv1 ? { head: `<b>Halftime</b> · ${tmL(recv1.team)} kicks off to start the 3rd`, sp: tee(recv1, 35) } : { head: '<b>Halftime</b>', sp: null };
+    }
+    return null;
+  };
+  const wpBar = (info, wp, note = '') => wp == null ? '' : `<div class="wpb">
+      <div class="wpb-k"><span style="color:${esc(info.away.color)}">${esc(info.away.team)} <b>${pc(1 - wp)}</b></span><span class="muted">Win chance${note}</span><span style="color:${esc(info.home.color)}"><b>${pc(wp)}</b> ${esc(info.home.team)}</span></div>
+      <div class="wpb-bar"><span style="width:${((1 - wp) * 100).toFixed(1)}%;background:${esc(info.away.color)}"></span><span style="flex:1;background:${esc(info.home.color)}"></span></div></div>`;
+  const nowCard = (st, info, sum) => {
+    const ser = st.ser, wp = ser.length ? ser[ser.length - 1].home : null;
+    const nx = nextUp(st, info);
+    const sp = nx ? nx.sp : st.sit ? spot(st.sit, info) : null;
+    const cur = !nx && st.cur, curTeam = cur && cur.team && (String(cur.team.id) === String(info.home.id) ? info.home : String(cur.team.id) === String(info.away.id) ? info.away : null);
+    // the offense's change in win chance since this drive's first play
+    let note = '';
+    if (cur && curTeam && ser.length) {
+      const pid = new Set((cur.plays || []).map(p => String(p.id)));
+      const i0 = ser.findIndex(x => pid.has(String(x.play.id)));
+      if (i0 > 0) {
+        const d = (ser[ser.length - 1].home - ser[i0 - 1].home) * (curTeam === info.home ? 1 : -1);
+        if (Math.abs(d) >= 0.01) note = ` · <b class="${d > 0 ? 'good' : 'bad'}">${esc(curTeam.team)} ${d > 0 ? '+' : '&minus;'}${Math.round(Math.abs(d) * 100)}</b> this drive`;
+      }
+    }
+    const head = nx ? nx.head : sp ? `<b>${tmL(sp.offense.team)} ball</b>${sp.text ? ` · ${esc(sp.text)}` : ''}${sp.red ? ' · <span class="gl-red">red zone</span>' : ''}`
+      : `<b>${esc(st.ended ? 'Final' : info.detail || '')}</b>`;
+    const drive = cur && curTeam && sp && curTeam.team === sp.offense.team && cur.description
+      ? `<div class="now-drv"><span class="muted">This drive</span> ${esc(cur.description)}</div>` : '';
+    const trail = cur && sp && curTeam && curTeam.team === sp.offense.team
+      ? (cur.plays || []).filter(p => p.start && p.start.down && !nonPlay(p) && !stPlay(p)).map(p => spot(p.start, info)).filter(x => x && x.offense.team === sp.offense.team).map(x => x.x) : [];
+    // the last play as a headline, with what it put in the box score for each player (fantasy points); after a score
+    // it stays up until the next snap (owner: "freeze that scoring player there until the kickoff happens")
+    let last = '';
+    // timeouts and quarter ends aren't plays: the last real one
+    const real = st.plays.filter(p => !nonPlay(p)), L = real[real.length - 1] || null;
+    if (L && L.text) {
+      const nm = {}, names = fullNames(sum, nm), a = spot(L.start, info);
+      const off = a ? a.offense.team : '';
+      const hd = playHead(L, names, a ? { off, other: off === info.away.team ? info.home.team : info.away.team } : {});
+      last = `<div class="now-last${L.scoringPlay ? ' scored' : ''}"><div class="now-lk muted">${L.scoringPlay ? 'Last score' : 'Last play'}${L.clock ? ` · ${periodName((L.period || {}).number || 1)} ${esc(L.clock.displayValue || '')}` : ''}</div>
+        <div class="now-lh ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}</div>${nonPlay(L) ? '' : playImpact(L, hd, info, sum, nm, names, '')}</div>`;
+    }
+    return `<section class="sit now"><div class="sit-dd">${head}</div>${sp ? fieldSvg(sp, info, trail) : ''}${drive}${last}${wpBar(info, wp, note)}</section>`;
+  };
+  // Drive results in a word, from the offense's side (driveResult has the long form).
+  const driveTag = (d, current) => {
+    const r = String(d.displayResult || d.result || '');
+    if (!r) return current ? ['Now', 'now'] : ['', ''];
+    if (/touchdown/i.test(r)) return ['TD', 'td'];
+    if (/missed|blocked/i.test(r)) return [/punt/i.test(r) ? 'Blk punt' : 'Miss FG', 'to'];
+    if (/field goal/i.test(r)) return ['FG', 'fg'];
+    if (/intercept/i.test(r)) return ['INT', 'to'];
+    if (/fumble/i.test(r)) return ['FUM', 'to'];
+    if (/downs/i.test(r)) return ['Downs', 'to'];
+    if (/safety/i.test(r)) return ['Safety', 'to'];
+    if (/punt/i.test(r)) return ['Punt', 'pu'];
+    if (/half|game|end/i.test(r)) return [/game/i.test(r) ? 'End' : 'Half', 'pu'];
+    return [r.split(' ')[0], 'pu'];
+  };
+  // Every drive, one row per quarter (owner 2026-10-18: "slightly more detailed ... group drives by quarter using rows"):
+  // team, result, and its plays / yards / time.
+  const storyCard = (st, info) => {
+    if (!st.plays.length) return '';
+    const teamOf = id => String(id) === String(info.home.id) ? info.home : String(id) === String(info.away.id) ? info.away : null;
+    const rows = {};
+    st.drives.forEach(d => {
+      const tm = teamOf(d.team && d.team.id) || {}, per = (d.plays[0].period || {}).number || 1;
+      const [lab, cls] = driveTag(d, (st.live || st.replay) && st.cur && String(d.id) === String(st.cur.id));
+      const n = drvNums(d);
+      const sub = n ? `${n.n} pl · ${n.yd} yd · ${n.t}` : '';
+      (rows[per] = rows[per] || []).push(`<button type="button" class="dv dv-${cls || 'pu'}" style="--tc:${esc(tm.color || '#666')}" data-drive="${esc(d.id)}" title="${esc(`${tm.team || ''} drive: ${d.description || ''}${lab ? ` · ${driveResult(d, tm, info, false).text}` : ''}`)}"><i></i><span class="dv-t">${esc(tm.team || '')} <b>${esc(lab || '...')}</b></span>${sub ? `<span class="dv-s">${esc(sub)}</span>` : ''}</button>`);
+    });
+    const qrows = Object.keys(rows).map(Number).sort((a, b) => a - b).map(q => `<div class="dvq"><span class="dv-q">${periodName(q)}</span><div class="dvs">${rows[q].join('')}</div></div>`).join('');
+    return `<section class="gcs story"><h3>How it's gone <span class="src">ESPN</span></h3>
+      <div class="wp-wrap">${wpChart(st.ser, info, null)}<div class="wp-tip" hidden></div></div>
+      <div class="wp-leg"><span><i class="wp-m wp-score"></i>score</span><span><i class="wp-m wp-to"></i>turnover</span><span class="muted">${esc(info.home.team)} favored above the line, ${esc(info.away.team)} below</span></div>
+      ${qrows ? `<div class="dvs-k muted">Every drive (tap one for its plays)</div>${qrows}` : ''}</section>`;
+  };
+  const KEY_STATS = ['Yards per Play', 'Total Yards', '3rd down efficiency', 'Turnovers', 'Possession'];
+  const fantasyCard = (st, info) => {
+    if (!DATA) return '';
+    const map = byEspn(), w = weights(), U = NFLE.ui, teams = DATA.teams || {};
+    const byPid = {}; Object.entries(st.lines).forEach(([e, o]) => { if (map[e]) byPid[map[e]] = o; });
+    let lg = null; try { lg = JSON.parse(localStorage.getItem('nfledge-mine') || 'null'); } catch (e) { /* none */ }
+    const tag = {}; if (lg) { (lg.opp || []).forEach(p => { tag[p] = 'opp'; }); (lg.mine || []).forEach(p => { tag[p] = 'mine'; }); }
+    const side = [info.away.team, info.home.team], frac = Math.min(1, st.secs / 3600), going = st.live || st.replay;
+    const rows = Object.entries(DATA.players).filter(([, p]) => side.includes(p.team) && ['QB', 'RB', 'WR', 'TE'].includes(p.pos)).map(([pid, p]) => {
+      const ln = byPid[pid], fp = ln ? pts(ln.line, w, p.pos) : 0;
+      return { pid, p, proj: scaled(p).proj, fp, ln, t: tag[pid] };
+    }).filter(r => r.t || r.proj >= 5 || r.fp >= 3)
+      .sort((a, b) => ((b.t === 'mine') - (a.t === 'mine')) || ((b.t === 'opp') - (a.t === 'opp')) || (b.fp - a.fp) || (b.proj - a.proj));
+    if (!rows.length) return '';
+    const n = GP.fpAll ? rows.length : Math.min(rows.length, 6);
+    const row = r => {
+      const pace = r.proj > 0 ? r.fp / r.proj : 0, tone = pace >= Math.max(frac, 0.15) ? 'good' : pace < frac * 0.6 ? 'bad' : 'mid';
+      const cell = U ? U.player({ name: r.p.name, team: r.p.team, espn: r.p.espn, pos: r.p.pos, sub: r.ln ? statLineText(r.ln, r.p.pos) : 'No stats yet' }, teams) : esc(r.p.name);
+      return `<div class="fpr" data-open-pid="${esc(r.pid)}">${r.t ? `<span class="fp-tag ${r.t}">${r.t === 'mine' ? 'Yours' : 'Opp'}</span>` : ''}<div class="fpr-who">${cell}</div>
+        <div class="fpr-n"><b class="${tone}">${f1(r.fp)}</b><span class="muted">of ${f1(r.proj)}</span>
+        <span class="fpr-bar" title="Points so far vs his projection; the tick is where he'd be on pace"><i class="${tone}" style="width:${Math.min(100, pace * 100).toFixed(0)}%"></i>${going ? `<em style="left:${(frac * 100).toFixed(0)}%"></em>` : ''}</span></div></div>`;
+    };
+    const note = lg ? `<span class="src">${esc(lg.league || 'your league')}</span>` : '';
+    return `<section class="gcs fps"><h3>Fantasy ${note}</h3>
+      ${rows.slice(0, n).map(row).join('')}
+      ${rows.length > 6 ? `<button type="button" class="fps-more" data-fpall="1">${GP.fpAll ? 'Show fewer' : `Show all ${rows.length}`}</button>` : ''}
+      <p class="gcs-note">Points so far under your scoring, of his projection; the tick marks where he'd be on pace.${st.replay ? ' In a replay, rebuilt from the plays so far.' : ''}${lg ? '' : " Connect your league on the Fantasy tab to see your players and your opponent's marked here."}</p></section>`;
+  };
+  const FOOTBALL = '<svg class="sb-fb" viewBox="0 0 26 14" aria-label="Has the ball"><path d="M1 7C5 1 21 1 25 7 21 13 5 13 1 7Z"/><path d="M9 7h8M11 5.3v3.4M13 5.3v3.4M15 5.3v3.4" class="lace"/></svg>';
   const GTABS = [['pre', 'Pregame'], ['live', 'Live'], ['post', 'Postgame']];
   // Live tab: one pane at a time, picked here (owner 2026-10-15: "if i pick stats i see stats"); box score first
-  const GPANES = [['box', 'Box score'], ['plays', 'Plays'], ['wp', 'Win %'], ['team', 'Team stats']];
+  const GPANES = [['plays', 'Plays'], ['box', 'Box score'], ['team', 'Team stats']];
   const renderGame = () => {
     const root = document.getElementById('gc'), { sum, info, g } = GP;
     const rp = GP.replay;
@@ -2723,40 +2917,38 @@
     const upto = rp ? rp.t : null;
     // Opens on the tab that fits the game's state; the viewer's pick sticks after that.
     const tab = GP.tab || (rp ? 'live' : info.state === 'pre' ? 'pre' : info.state === 'in' ? 'live' : 'post');
-    // header numbers: live/final from ESPN, or the replay position
-    let hs = info.home.score, as = info.away.score, status = info.state === 'in' ? `${periodName(info.period)} ${info.clock}` : (info.detail || '');
-    let sit = info.state === 'in' ? (info.sit || (sum && sitFromPlays(sum))) : null;
-    if (rp && rp.play) {
-      hs = rp.play.homeScore; as = rp.play.awayScore;
-      status = `${rp.play.period ? periodName(rp.play.period.number) : ''} ${rp.play.clock ? rp.play.clock.displayValue : ''} · replay`;
-      sit = Object.assign({}, rp.play.end || {}, { lastPlay: { text: rp.play.text } });
-    }
-    const sp = sit ? spot(sit, info) : null;
-    const wpNow = (() => { const s = upto != null ? ser.filter(x => x.t <= upto) : ser; return s.length ? s[s.length - 1].home : null; })();
+    // one state for both: now (live / final), or as of the replay's play
+    const st = stateAt(sum, info, rp && rp.play ? rp : null);
+    let hs = st.score.home, as = st.score.away;
+    let status = rp && rp.play ? `${periodName(st.per)} ${st.clock} · replay` : info.state === 'in' ? `${periodName(info.period)} ${info.clock}` : (info.detail || '');
+    const sit = st.live || st.replay ? st.sit : null;
+    const nx = st.live || st.replay ? nextUp(st, info) : null;
+    const sp = nx ? nx.sp : sit ? spot(sit, info) : null;
     if (info.state === 'pre' && !rp) {  // no 0-0 before kickoff, and a short kickoff time (ESPN's long one crowds phones)
       hs = ''; as = '';
       if (info.date) status = new Date(info.date).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
     }
-    const side = (s, isHome) => `<div class="sb-t tm-open${isHome ? ' home' : ''}" data-tm="${esc(s.team)}" style="--tc:${esc(s.color)}">${logo(s.logo, '#111', 40, s.team)}
-      <div class="sb-id"><div class="sb-n"><span class="sb-full">${esc((g && (isHome ? g.home.nick : g.away.nick)) || s.team)}</span><span class="sb-ab">${esc(s.team)}</span></div><div class="sb-r">${esc(s.record || '')}</div></div>
-      <div class="sb-s">${isHome ? hs : as}</div>${sp && sp.offense.team === s.team ? '<i class="sb-ball" title="Has the ball"></i>' : ''}</div>`;
+    const side = (s, isHome) => {
+      const to = (st.live || st.replay) && st.tos ? st.tos[isHome ? 'home' : 'away'] : null;
+      return `<div class="sb-t tm-open${isHome ? ' home' : ''}" data-tm="${esc(s.team)}" style="--tc:${esc(s.color)}">${logo(s.logo, '#111', 40, s.team)}
+      <div class="sb-id"><div class="sb-n"><span class="sb-full">${esc((g && (isHome ? g.home.nick : g.away.nick)) || s.team)}</span><span class="sb-ab">${esc(s.team)}</span>${sp && !sp.kick && sp.offense.team === s.team ? FOOTBALL : ''}</div><div class="sb-r">${esc(s.record || '')}</div>${to != null
+        ? `<div class="sb-to" title="Timeouts left">${[0, 1, 2].map(i => `<i class="${i < to ? 'on' : ''}"></i>`).join('')}</div>` : ''}</div>
+      <div class="sb-s">${isHome ? hs : as}</div></div>`;
+    };
     const live = () => info.state === 'pre'
       ? `<section class="gcs"><p class="muted">Kicks off ${esc(kickText(g) || 'soon')}. The live view (field position, ESPN's win probability, every play, box score) starts at kickoff.</p></section>`
       : info.offline ? '<section class="gcs"><p class="muted">Live data from ESPN is unavailable right now. Try again in a minute.</p></section>'
-      : `${rp && rp.play ? replayCard(rp.play, info, sum) : sp ? `<section class="sit"><div class="sit-dd"><b>${tmL(sp.offense.team)} ball</b>${sp.text ? ` · ${esc(sp.text)}` : ''}${sp.red ? ' · <span class="gl-red">red zone</span>' : ''}</div>
-        ${fieldSvg(sp, info)}${sit.lastPlay && sit.lastPlay.text ? `<div class="sit-last"><span class="muted">Last play:</span> ${linkNames(esc(sit.lastPlay.text), [info.away.team, info.home.team])}</div>` : ''}</section>` : ''}
+      : `${nowCard(st, info, sum)}
       ${GP.canReplay ? `<section class="rp">${rp ? `<button type="button" data-rp="first">&laquo;</button><button type="button" data-rp="prev">&lsaquo;</button>
         <button type="button" data-rp="play">${rp.timer ? 'Pause' : 'Play'}</button><button type="button" data-rp="next">&rsaquo;</button><button type="button" data-rp="last">&raquo;</button>
         <span class="seg rp-speed">${[['slow', 'Slow'], ['normal', 'Normal'], ['fast', 'Fast']].map(([k, l]) => `<button type="button" data-rps="${k}" class="${(GP.rpSpeed || 'normal') === k ? 'on' : ''}">${l}</button>`).join('')}</span>
         <input type="range" min="0" max="${rp.plays.length - 1}" value="${rp.i}" aria-label="Replay position"><span class="muted rp-pos">Play ${rp.i + 1} of ${rp.plays.length}</span>
         <button type="button" data-rp="off">Exit replay</button>` : '<button type="button" data-rp="on">Replay this game play by play</button>'}</section>` : ''}
+      ${storyCard(st, info)}
+      ${st.tstats && teamStats(sum, info, KEY_STATS, st.tstats) ? `<section class="gcs"><h3>Key stats</h3>${teamStats(sum, info, KEY_STATS, st.tstats)}${st.replay ? '' : '<button type="button" class="fps-more" data-pane-go="team">All team stats</button>'}</section>` : ''}
+      ${fantasyCard(st, info)}
       <div class="seg gc-panes" role="tablist">${GPANES.map(([k, l]) => `<button type="button" role="tab" data-pane="${k}" class="${GP.pane === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-      ${GP.pane === 'wp' ? `<section class="gcs" id="gcWp"><h3>Live win probability <span class="src">ESPN</span></h3>
-            <p class="gcs-note">ESPN's in-game model, updated every play. Not NFL Edge's forecast: our pregame chances are on the Pregame tab.</p>
-            ${wpNow != null ? `<div class="wp-now-t"><span style="color:${esc(info.away.color)}">${tmL(info.away.team)} ${pc(1 - wpNow)}</span><span style="color:${esc(info.home.color)}">${tmL(info.home.team)} ${pc(wpNow)}</span></div>` : ''}
-            <div class="wp-wrap">${sum ? wpChart(ser, info, upto) : ''}<div class="wp-tip" hidden></div></div>
-            <div class="wp-leg"><span><i class="wp-m wp-score"></i>score</span><span><i class="wp-m wp-to"></i>turnover</span><span class="muted">Above the line: ${tmL(info.home.team)} favored · below: ${tmL(info.away.team)}</span></div></section>`
-      : GP.pane === 'plays' ? `<section class="gcs" id="gcLog"><h3>Game log</h3>
+      ${GP.pane === 'plays' ? `<section class="gcs" id="gcLog"><h3>Game log</h3>
             <div class="lg-bar"><div class="seg">${[['drive', 'By drive'], ['every', 'Every play']].map(([k, l]) => `<button type="button" data-view="${k}" class="${GP.view === k ? 'on' : ''}">${l}</button>`).join('')}</div>
               <div class="seg">${[['all', 'All'], ['score', 'Scoring'], ['to', 'Turnovers'], ['pen', 'Penalties']].map(([k, l]) => `<button type="button" data-filter="${k}" class="${GP.filter === k ? 'on' : ''}">${l}</button>`).join('')}</div>
               <input type="search" id="lgQ" placeholder="Player or text" value="${esc(GP.q)}" aria-label="Filter plays">
@@ -2767,7 +2959,8 @@
       : GP.pane === 'team' ? `<section class="gcs" id="gcTeam"><h3>Team stats</h3>${sum ? teamStats(sum, info) || '<p class="muted">Not available yet.</p>' : ''}</section>`
       : playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: rp ? 'Box score shows the final totals during a replay.' : '', empty: 'The box score fills in once the game starts.' })}`;
     root.innerHTML = `
-      <section class="sb">${side(info.away, false)}<div class="sb-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<b>${esc(status)}</b></div>${side(info.home, true)}</section>
+      <section class="sb">${side(info.away, false)}<div class="sb-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<b>${esc(status)}</b>${!nx && sp && sit && sit.shortDownDistanceText
+        ? `<span class="sb-dd">${esc(sit.shortDownDistanceText)}${sit.possessionText ? ` · ${esc(sit.possessionText)}` : ''}</span>` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}</section>
       <div class="seg gc-tabs" role="tablist">${GTABS.map(([k, l]) => `<button type="button" role="tab" data-gtab="${k}" class="${tab === k ? 'on' : ''}">${k === 'live' && info.state === 'in' ? '<span class="live-dot"></span>' : ''}${l}</button>`).join('')}</div>
       ${tab === 'pre' ? preTab(g) : tab === 'live' ? live() : postTab(sum, info, g, ser)}`;
     wireGame();
@@ -2776,6 +2969,10 @@
     const root = document.getElementById('gc');
     root.querySelectorAll('[data-gtab]').forEach(b => b.onclick = () => { GP.tab = b.dataset.gtab; renderGame(); });
     root.querySelectorAll('[data-pane]').forEach(b => b.onclick = () => { GP.pane = b.dataset.pane; renderGame(); });
+    const toPane = (k, sel) => { GP.pane = k; renderGame(); const e = document.querySelector(sel || '.gc-panes'); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    root.querySelectorAll('[data-pane-go]').forEach(b => b.onclick = () => toPane(b.dataset.paneGo));
+    root.querySelectorAll('[data-drive]').forEach(b => b.onclick = () => { GP.view = 'drive'; GP.filter = 'all'; GP.q = ''; GP.sort = 'old'; toPane('plays', `[data-drive-id="${b.dataset.drive}"]`); });
+    root.querySelectorAll('[data-fpall]').forEach(b => b.onclick = () => { GP.fpAll = !GP.fpAll; renderGame(); });
     root.querySelectorAll('[data-view]').forEach(b => b.onclick = () => { GP.view = b.dataset.view; renderGame(); });
     root.querySelectorAll('[data-filter]').forEach(b => b.onclick = () => { GP.filter = b.dataset.filter; renderGame(); });
     root.querySelectorAll('[data-sort]').forEach(b => b.onclick = () => { GP.sort = b.dataset.sort; renderGame(); });
@@ -2785,7 +2982,8 @@
     // win-probability hover: nearest play
     const svg = root.querySelector('svg.wp'), tip = root.querySelector('.wp-tip');
     if (svg && tip) {
-      const ser = wpSeries(GP.sum).filter(s => !GP.replay || s.t <= GP.replay.t);
+      const rpIds = GP.replay ? new Set(GP.replay.plays.slice(0, GP.replay.i + 1).map(p => String(p.id))) : null;
+      const ser = wpSeries(GP.sum).filter(s => !rpIds || rpIds.has(String(s.play.id)));
       const T = ser.some(s => s.t > 3600) ? 4200 : 3600;
       const hair = svg.querySelector('.wp-hair');
       const move = ev => {

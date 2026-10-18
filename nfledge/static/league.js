@@ -209,6 +209,15 @@
     try { saved = JSON.parse(localStorage.getItem(LS) || 'null'); } catch (e) { /* none */ }
     let L = null, mine = null, ROS = null, view = 'lineup';
     const save = () => { try { localStorage.setItem(LS, JSON.stringify(saved)); } catch (e) { /* private mode */ } };
+    // the gamecast marks the viewer's players and this week's opponent's (owner 2026-10-18: "viewers might want to know
+    // how their fantasy players are doing"): our player ids, written whenever the league or the team changes
+    const shareMine = () => {
+      try {
+        const m = L.matchup(mine.id), opp = m && L.teams.find(t => t.id === m.opp);
+        const ids = t => (t ? t.ext : []).map(gsisOf).filter(Boolean);
+        localStorage.setItem('nfledge-mine', JSON.stringify({ league: L.name, mine: ids(mine), opp: ids(opp), oppName: opp ? opp.name : '' }));
+      } catch (e) { /* private mode */ }
+    };
     const season = new Date().getMonth() < 2 ? new Date().getFullYear() - 1 : new Date().getFullYear();
 
     // ---- player lookup: platform id -> our player (projection row when we have one) --------------------------------
@@ -744,9 +753,9 @@
           <button type="button" class="lg-change">Change league</button></div>
         <div class="seg lg-seg">${[['lineup', 'Lineup'], ['matchup', 'Matchup'], ['teams', 'Teams'], ['waivers', 'Waivers'], ['trade', 'Trade']].map(([k, l]) => `<button type="button" data-v="${k}" class="${view === k ? 'on' : ''}">${l}</button>`).join('')}</div>
         <div class="lg-body"></div>`;
-      sec.querySelector('.lg-team').onchange = e => { mine = L.teams.find(t => t.id === e.target.value); saved.team = mine.id; save();
+      sec.querySelector('.lg-team').onchange = e => { mine = L.teams.find(t => t.id === e.target.value); saved.team = mine.id; save(); shareMine();
         trade = { team: null, give: new Set(), get: new Set(), found: null }; draw(); };
-      sec.querySelector('.lg-change').onclick = () => { saved = null; save(); L = null; NFLE.leagueDst = null; connectView(); };
+      sec.querySelector('.lg-change').onclick = () => { saved = null; save(); try { localStorage.removeItem('nfledge-mine'); } catch (e) { /* ignore */ } L = null; NFLE.leagueDst = null; connectView(); };
       sec.querySelector('.lg-seg').onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; view = b.dataset.v;
         sec.querySelectorAll('.lg-seg button').forEach(x => x.classList.toggle('on', x === b));
         if (['waivers', 'teams', 'trade'].includes(view) && !ROS) NFLE.load('data/ros.json').then(j => { ROS = j; draw(); }, () => draw()); else draw(); };
@@ -758,7 +767,7 @@
         L = s.platform === 'espn' ? await espn.load(s.league, season) : await sleeper.load(s.league);
         NFLE.leagueDst = L && L.dw ? { w: L.dw, name: L.name } : null;  // D/ST cards score with this league's settings
         mine = L.teams.find(t => t.id === s.team) || L.teams.find(t => s.user && t.owner === s.user) || L.teams[0];
-        saved = Object.assign({}, s, { team: mine.id }); save();
+        saved = Object.assign({}, s, { team: mine.id }); save(); shareMine();
         header(); draw();
       } catch (e) {
         saved = null; save(); connectView(`Couldn't load that league: ${e.message}`);
