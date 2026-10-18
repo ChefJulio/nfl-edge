@@ -1365,3 +1365,6 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .lpf { min-width: 0; } .lpf-r { min-width: 0; }
 /* the box score's team switch spans the row, each team half (owner 2026-10-18) */
 .seg.pst-seg { display: flex; width: 100%; } .seg.pst-seg button { flex: 1 1 0; justify-content: center; display: inline-flex; align-items: center; gap: 8px; }
+.lpf.to { border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); }
+.lpf-sc { margin-left: auto; font-variant-numeric: tabular-nums; }
+.lpf .pi { margin-top: 4px; }

@@ -2682,7 +2682,8 @@
       // Tint = the team with the ball; special-teams plays stay neutral. Event types are chips, not row colors.
       const off = st ? null : teamOf(p.start && p.start.team && p.start.team.id);
       const chips = [];
-      if (p.scoringPlay) chips.push(/field goal/i.test(t + txt) ? ['FG', 'c-sc'] : /extra point/i.test(t + txt) ? ['XP', 'c-sc'] : /safety/i.test(t + txt) ? ['SAFETY', 'c-sc'] : ['TD', 'c-sc']);
+      // a touchdown's text carries its extra point ("... TOUCHDOWN. X extra point is GOOD"): TD first
+      if (p.scoringPlay) chips.push(/touchdown/i.test(t + txt) ? ['TD', 'c-sc'] : /field goal/i.test(t + txt) ? ['FG', 'c-sc'] : /extra point|two-point/i.test(t) ? ['XP', 'c-sc'] : /safety/i.test(t + txt) ? ['SAFETY', 'c-sc'] : ['TD', 'c-sc']);
       else if (st) chips.push([/kickoff|kicks/i.test(t + txt) ? 'KICKOFF' : /punt/i.test(t + txt) ? 'PUNT' : /field goal/i.test(t + txt) ? 'FG' : 'ST', 'c-st']);
       // ESPN doesn't flag lost fumbles on kickoffs / punts as turnovers: the kicking team recovering is one.
       const kicker = st && (txt.match(/(?:kicks|punts)\b.*?\bfrom ([A-Z]{2,3}) \d/) || [])[1];
@@ -2861,6 +2862,27 @@
     const seg = `<div class="seg pst-seg" role="tablist">${sides.map(x => `<button type="button" role="tab" data-pst="${esc(x.team)}" class="${x.team === pick ? 'on' : ''}">${logo(x.logo, '#111', 18, x.team)} ${esc(x.team)}</button>`).join('')}</div>`;
     return `<section class="gcs" id="${opt.id || 'gcPst'}"><h3>${esc(opt.title || 'Player stats')} <span class="src">ESPN</span></h3>${opt.note ? `<p class="gcs-note">${esc(opt.note)}</p>` : ''}${seg}${sides.map(block).join('')}</section>`;
   };
+  // Turning points as cards (owner 2026-10-18: "our elegant visual presentation"): the quarter, clock, down and spot,
+  // the score after it, the play as a headline, the win-chance swing from the side it helped, and what it gave each
+  // player in fantasy points (the Live feed's and drive sheets' look).
+  const turningCards = (sum, info, ser, n) => {
+    const nm = {}, names = fullNames(sum, nm);
+    const sw = ser.map((x, i) => ({ x, d: i ? x.home - ser[i - 1].home : 0 })).filter(o => !nonPlay(o.x.play))
+      .sort((a, b) => Math.abs(b.d) - Math.abs(a.d)).slice(0, n).sort((a, b) => a.x.t - b.x.t);
+    if (!sw.length) return '<p class="muted">No win-probability data for these plays.</p>';
+    return `<ol class="lpf-list">${sw.map(({ x, d }) => {
+      const p = x.play, a = spot(p.start, info);
+      const hd = playHead(p, names, a ? { off: a.offense.team, other: a.offense.team === info.away.team ? info.home.team : info.away.team } : {});
+      const helped = d >= 0 ? info.home.team : info.away.team;  // the side whose chance rose
+      const dd = p.start && p.start.down ? (p.start.shortDownDistanceText || p.start.downDistanceText || '') : '';
+      const at = p.start && p.start.possessionText ? p.start.possessionText : '';
+      return `<li class="lpf${p.scoringPlay ? ' scored' : ''}${p.isTurnover ? ' to' : ''}"><div class="lpf-h">
+          <span class="lpf-w">${esc(`${periodName((p.period || {}).number || 1)} ${(p.clock || {}).displayValue || ''}`.trim())}</span>
+          ${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>${at ? `<span class="muted">at ${esc(at)}</span>` : ''}` : ''}
+          <span class="lpf-g lpf-sc">${esc(info.away.team)} ${esc(p.awayScore)}&ndash;${esc(p.homeScore)} ${esc(info.home.team)}</span></div>
+        <div class="lpf-t ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}</div>${playImpact(p, hd, info, sum, nm, names, helped)}</li>`;
+    }).join('')}</ol>`;
+  };
   // ---- Postgame tab: the recap once it's final.
   const postTab = (sum, info, g, ser) => {
     if (info.state !== 'post') return `<section class="gcs"><p class="muted">${info.state === 'pre' ? 'The recap appears once the game is over.' : 'The game is still going; the recap appears at the final whistle. Follow it on the Live tab.'}</p></section>`;
@@ -2879,7 +2901,7 @@
         ${hasWp ? `<section class="gcs"><h3>Win probability <span class="src">ESPN</span></h3><p class="gcs-note">ESPN's in-game model over the whole game, not NFL Edge's forecast.</p>
           <div class="wp-wrap">${wpChart(ser, info, null)}<div class="wp-tip" hidden></div></div></section>
         <section class="gcs"><h3>Turning points</h3><p class="gcs-note">The plays that moved ESPN's win probability the most.</p>
-          ${gameLog(sum, info, ser, null, { sort: 'impact', filter: 'all', q: '', limit: 6, note: false })}</section>` : ''}</div>
+          ${turningCards(sum, info, ser, 6)}</section>` : ''}</div>
       <div class="gc-col"><section class="gcs"><h3>Team stats</h3>${sum ? teamStats(sum, info) || '<p class="muted">Not available.</p>' : ''}</section></div></div>
       ${playerStats(sum, info)}`;
   };
