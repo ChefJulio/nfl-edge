@@ -42,8 +42,21 @@
         tbl.style.minWidth = `${cols.reduce((t, c) => t + wd(c), 0)}px`;
       } else tbl.style.minWidth = '';
     };
+    // opt.howto (owner 2026-10-17: column meanings go in a "How to read" blip, not tips a phone can't reach): a How to
+    // read above the table listing every column that has a title, kept in step with the columns (setColumns); a
+    // string adds a closing note
+    let how = null;
+    const howto = () => {
+      if (!opt.howto) return;
+      const defs = cols.filter(c => c.title && c.label);
+      if (!how && mount.previousElementSibling && mount.previousElementSibling.classList.contains('tbl-howto')) how = mount.previousElementSibling;  // a table rebuilt in the same spot
+      if (!how) { how = document.createElement('details'); how.className = 'howto tbl-howto'; how.innerHTML = '<summary>How to read</summary><div></div>'; mount.before(how); }
+      how.hidden = !defs.length;
+      how.lastElementChild.innerHTML = `<dl class="ht">${defs.map(c => `<dt>${esc(c.label)}</dt><dd>${esc(c.title)}</dd>`).join('')}</dl>${typeof opt.howto === 'string' ? `<p class="ht-note">${esc(opt.howto)}</p>` : ''}`;
+    };
     const head = () => {
       sizes();
+      howto();
       tbl.tHead.innerHTML = `<tr>${cols.map(c => {
         const cls = [c.num ? 'num' : '', c.stick ? 'stick' : '', c.sort === false ? 'nosort' : 'can-sort', c.cls || '',
                      sort && sort.key === c.key ? `sorted-${sort.dir} sorted` : ''].filter(Boolean).join(' ');

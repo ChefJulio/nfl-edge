@@ -64,7 +64,7 @@
         sec.querySelectorAll('.ts-side button').forEach(b => b.classList.toggle('on', b.dataset.v === side));
         sec.querySelectorAll('.ts-per button').forEach(b => b.classList.toggle('on', (b.dataset.v === 'pg') === per));
         const cols = columns(side, per);
-        if (!table) table = NFLE.Table(sec.querySelector('.ts-tbl'), { columns: cols, rows, sort: { key: 'pts', dir: side === 'd' ? 'asc' : 'desc' },
+        if (!table) table = NFLE.Table(sec.querySelector('.ts-tbl'), { howto: true, columns: cols, rows, sort: { key: 'pts', dir: side === 'd' ? 'asc' : 'desc' },
           cls: 'tiles', rowClass: () => 'teamrow tm-open', rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.team)} data-tm="${esc(r.team)}"` });
         else { table.setColumns(cols); table.update(rows); }
       };

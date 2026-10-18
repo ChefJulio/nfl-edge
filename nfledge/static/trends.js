@@ -473,9 +473,9 @@
             // rates compare with the league rate; counts (0 decimals: yards, catches, TDs...) as a share of the league total
             m[2] === 0
               ? { key: 'dv', label: 'Share of league', num: true, value: r => lg > 0 ? r.v / lg : null,
-                  html: r => lg > 0 ? `${(100 * r.v / lg).toFixed(1)}%` : '–' }
+                  html: r => lg > 0 ? `<span title="League total ${fmt(lg, m[2])}">${(100 * r.v / lg).toFixed(1)}%</span>` : '–' }
               : { key: 'dv', label: 'vs league', num: true, value: r => isFinite(r.v) ? r.v - lg : null,
-                  html: r => { const d = r.v - lg; return isFinite(d) ? `<span class="${d > 0 ? 'tr-up' : d < 0 ? 'tr-dn' : ''}">${d > 0 ? '+' : ''}${fmt(d, m[2])}</span>` : '–'; } },
+                  html: r => { const d = r.v - lg; return isFinite(d) ? `<span title="League ${fmt(lg, m[2])}" class="${d > 0 ? 'tr-up' : d < 0 ? 'tr-dn' : ''}">${d > 0 ? '+' : ''}${fmt(d, m[2])}</span>` : '–'; } },
             ...extras.map(([k, mm]) => ({ key: `m_${k}`, label: mm[0], num: true,
               value: r => { const v = mm[1](r.a); return isFinite(v) ? v : null; }, html: r => fmt(mm[1](r.a), mm[2]) })),
           ];

@@ -146,7 +146,7 @@
       const draw = (resort) => {
         sec.querySelectorAll('.ps-per button').forEach(b => b.classList.toggle('on', (b.dataset.v === 'pg') === per));
         const cols = columns();
-        if (!table) table = NFLE.Table(sec.querySelector('.ps-tbl'), { columns: cols, rows: rows(), sort: { key: SORT0[pos], dir: 'desc' }, cls: 'tiles',
+        if (!table) table = NFLE.Table(sec.querySelector('.ps-tbl'), { howto: true, columns: cols, rows: rows(), sort: { key: SORT0[pos], dir: 'desc' }, cls: 'tiles',
           rowClass: () => 'teamrow', rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.team)}${/^\d\d-\d{7}$/.test(r.pid) ? ` data-open-pid="${esc(r.pid)}"` : ''}` });
         else { table.setColumns(cols); table.update(rows()); if (resort) table.setSort({ key: SORT0[pos], dir: 'desc' }); }
       };

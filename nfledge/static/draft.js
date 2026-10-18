@@ -53,7 +53,7 @@
           && (!q || (r.pfr_player_name || '').toLowerCase().includes(q) || (r.college || '').toLowerCase().includes(q)));
       };
       const draw = () => {
-        if (!table) table = NFLE.Table(sec.querySelector('.dr-tbl'), { columns: columns(teams), rows: filtered(), sort: { key: 'pick', dir: 'asc' },
+        if (!table) table = NFLE.Table(sec.querySelector('.dr-tbl'), { howto: true, columns: columns(teams), rows: filtered(), sort: { key: 'pick', dir: 'asc' },
           cls: 'tiles', rowClass: () => 'teamrow', rowAttrs: r => `${NFLE.ui.tileStyle(teams, r.fr)}${r.gsis_id ? ` data-open-pid="${esc(r.gsis_id)}"` : ''}` });
         else { table.setColumns(columns(teams)); table.update(filtered()); }
       };
