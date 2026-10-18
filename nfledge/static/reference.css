@@ -1,0 +1,25 @@
+/* Model > Reference (owner 2026-10-18) */
+.rf-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 4px 0 12px; }
+.rf-wn { font-size: 12px; }
+.rf { margin-bottom: 14px; }
+.rf-h { display: flex; align-items: baseline; gap: 10px; } .rf-h h3 { margin: 0; }
+.rf-span { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rf-note, .rf-rule { font-size: 12px; color: var(--muted); margin: 4px 0 8px; } .rf-rule { color: var(--warn); }
+.rf-seg { margin: 4px 0 8px; } .rf-seg button { font-size: 12.5px; padding: 4px 9px; }
+.rf-scroll { overflow-x: auto; }
+.rf-t { border-collapse: separate; border-spacing: 3px; width: 100%; font-variant-numeric: tabular-nums; }
+.rf-t th { font-size: 11px; font-weight: 700; color: var(--muted); text-align: center; white-space: nowrap; padding: 2px 4px; }
+.rf-t tbody th { text-align: left; color: var(--ink); }
+.rf-c { text-align: center; font-size: 13px; font-weight: 700; padding: 6px 4px; border-radius: 6px; min-width: 46px;
+  background: hsla(var(--h), 70%, 45%, var(--a)); color: var(--ink); }
+.rf-c.thin { opacity: .42; } .rf-na { background: transparent; }
+.rf-fgs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 3px 14px; }
+.rf-fg { display: grid; grid-template-columns: 28px minmax(0, 1fr) 40px; align-items: center; gap: 6px; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.rf-fg span { color: var(--muted); text-align: right; } .rf-fg b { text-align: right; }
+.rf-fg i { display: block; height: 7px; border-radius: 4px; background: color-mix(in srgb, var(--good) 70%, transparent); }
+.rf-fg.thin { opacity: .45; }
+.rf-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 8px; }
+.rf-tile { padding: 10px; border-radius: var(--r-md); background: var(--panel2); border: 1px solid var(--line); }
+.rf-k { font-size: 11px; color: var(--muted); font-weight: 700; } .rf-v { font-size: 24px; font-weight: 800; margin: 2px 0; }
+.rf-n { font-size: 10.5px; color: var(--muted); }
+.rf { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 14px 12px 12px; }

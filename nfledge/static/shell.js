@@ -341,7 +341,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     // site"), all one section (league.js switches views on nfle-route)
     { key: 'league', label: 'Fantasy', subs: [['lineup', 'Lineup', 'tab-league'], ['matchup', 'Matchup', 'tab-league'], ['live', 'Live', 'tab-league'],
                                               ['teams', 'Teams', 'tab-league'], ['waivers', 'Waivers', 'tab-league'], ['trade', 'Trade', 'tab-league']] },
-    { key: 'model', label: 'Model', subs: [['model', 'Model', 'tab-model']] },
+    { key: 'model', label: 'Model', subs: [['model', 'Model', 'tab-model'], ['reference', 'Reference']] },  // Reference: league rates (owner 2026-10-18)
   ];
   // Client-rendered tabs: section id -> area module (assets/<area>.js + .css), loaded the first time the tab opens.
   // A module registers NFLE.areas[<area>] = { mount(section) } and renders into its section.
@@ -349,7 +349,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
                   'tab-players-injuries': 'injuries', 'tab-players': 'rankings', 'tab-teams-draft': 'draft',
                   'tab-teams-playoffs': 'playoffs', 'tab-players-moves': 'moves', 'tab-power': 'power',
                   'tab-games': 'matchups', 'tab-roles': 'roles', 'tab-model': 'model',
-                  'tab-players-trends': 'trends', 'tab-league': 'league' };
+                  'tab-players-trends': 'trends', 'tab-league': 'league', 'tab-model-reference': 'reference' };
   const ver = (document.currentScript && new URL(document.currentScript.src).search) || '';
   const loaded = {};
   const NFLE = window.NFLE = window.NFLE || {};

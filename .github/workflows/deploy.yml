@@ -212,6 +212,10 @@ jobs:
       # Team page > Depth: every team's latest depth chart (ESPN's, via nflverse; after Player game logs, which it links to).
       - name: Depth charts
         run: python tools/depth_build.py --site=site
+      # Model > Reference: league-wide rates by down / distance, kicks, drives, leads (tools/reference_build.py; finished
+      # seasons cached, the current one refetched).
+      - name: Reference tables
+        run: python tools/reference_build.py --out site/data/reference.json || true
       # Players > Trends: compact play-by-play per season since 1999 (finished seasons cached), queried in the browser.
       - name: Trends
         run: python tools/trends_build.py --site=site
