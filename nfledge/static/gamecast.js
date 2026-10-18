@@ -2940,7 +2940,8 @@
   // after a made try / field goal / safety the kickoff, at halftime the second-half kickoff. The kicking team's tee
   // is its own 35 (a safety: its own 20).
   const nextUp = (st, info) => {
-    const L = st.last;
+    // the last real play (a timeout, TV break or quarter end after a score isn't one; owner 2026-10-18, LAC's field goal)
+    const real = st.plays.filter(p => !nonPlay(p)), L = real[real.length - 1];
     if (!L || st.ended) return null;
     const i = st.plays.indexOf(L), prev = i > 0 ? st.plays[i - 1] : null;
     const dh = L.homeScore - (prev ? prev.homeScore : 0), da = L.awayScore - (prev ? prev.awayScore : 0);
@@ -3227,6 +3228,8 @@
       ${tab === 'pre' ? preTab(g) : tab === 'live' ? live() : postTab(sum, info, g, ser)}`;
     wireGame();
   };
+  // the chart's readout sits under it (owner 2026-10-18: it covered the line when it floated over the chart)
+  const TIP_HINT = '<span class="muted">Tap or drag on the chart for any moment of the game</span>';
   const wireGame = () => {
     const root = document.getElementById('gc');
     root.querySelectorAll('[data-gtab]').forEach(b => b.onclick = () => { GP.tab = b.dataset.gtab; renderGame(); });
@@ -3248,6 +3251,7 @@
     // win-probability hover: nearest play
     const svg = root.querySelector('svg.wp'), tip = root.querySelector('.wp-tip');
     if (svg && tip) {
+      tip.hidden = false; tip.innerHTML = TIP_HINT;
       const rpIds = GP.replay ? new Set(GP.replay.plays.slice(0, GP.replay.i + 1).map(p => String(p.id))) : null;
       const ser = wpSeries(GP.sum).filter(s => !rpIds || rpIds.has(String(s.play.id)));
       const T = ser.some(s => s.t > 3600) ? 4200 : 3600;
@@ -3269,7 +3273,7 @@
       };
       svg.addEventListener('mousemove', move); svg.addEventListener('touchstart', move, { passive: true });
       svg.addEventListener('touchmove', move, { passive: true });
-      svg.addEventListener('mouseleave', () => { tip.hidden = true; hair.style.display = 'none'; });
+      svg.addEventListener('mouseleave', () => { tip.innerHTML = TIP_HINT; hair.style.display = 'none'; });
     }
     // postgame player stats: one team at a time
     root.querySelectorAll('.pst-seg [data-pst]').forEach(b => b.onclick = () => {

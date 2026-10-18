@@ -1284,7 +1284,6 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .mt-side.away.has-ball .mt-num::after { right: calc(100% + 6px); } .mt-side.home.has-ball .mt-num::after { left: calc(100% + 6px); }
 /* the tap readout sits above the scale pills and the leader tag (owner 2026-10-18: clipped under them) */
 .wp-wrap .wp-tip { z-index: 5; background: var(--panel2); box-shadow: 0 6px 18px rgba(0,0,0,.5); }
-.wp-wrap:has(.wp-tip:not([hidden])) .wp-now-tag { opacity: 0; }
 /* drive rows by half (owner 2026-10-18): a wider label column, the quarter-change tag on the chip */
 .dvq { grid-template-columns: 40px minmax(0, 1fr); }
 .dvq .dv-q { font-size: var(--fs-xs); line-height: 1.15; white-space: normal; }
@@ -1342,3 +1341,6 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
   .mg-st .live-dot { width: 5px; height: 5px; margin-right: 2px; } }
 @media (max-width: 380px) { .mg-st { gap: 2px; letter-spacing: -.035em; } .mg { padding-left: 4px; padding-right: 4px; } }
 @media (max-width: 380px) { .mg-st .live-dot { display: none; } }  /* the red border already says live */
+/* the readout under the chart, not over it */
+.wp-wrap .wp-tip { position: static; grid-column: 1 / -1; transform: none !important; left: auto !important; width: auto; margin-top: 8px; min-height: 2.7em;
+  box-shadow: none; background: var(--panel2); font-size: 12.5px; }
