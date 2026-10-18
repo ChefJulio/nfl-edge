@@ -280,8 +280,9 @@
     // one row per play: a dot at the snap, a bar to where it ended, an arrowhead, the result at the tip
     const rows = lanes.map((l, i) => {
       const y = top + i * LH + LH / 2, xa = X(l.a), xb = X(l.b), mv = Math.sign(xb - xa) || l.dir;
-      const lab = `<text x="${xb + mv * 5}" y="${y + 3.4}" class="fl-t fl-${l.kind}" text-anchor="${(mv > 0 && xb > 300) || (mv < 0 && xb >= 60) ? 'end' : 'start'}"
-        ${(mv > 0 && xb > 300) || (mv < 0 && xb < 60) ? `transform="translate(${-mv * (2 * 5 + (Math.abs(xb - xa) || 0) + 6)} 0)"` : ''}>${esc(l.label)}</text>`;
+      const fdm = l.fd ? `<line x1="${xb + mv * 1.5}" y1="${y - LH / 2 + 1.5}" x2="${xb + mv * 1.5}" y2="${y + LH / 2 - 1.5}" class="fl-fd"/>` : '';
+      const lab = `${fdm}<text x="${xb + mv * 5}" y="${y + 3.4}" class="fl-t fl-${l.kind}" text-anchor="${(mv > 0 && xb > 300) || (mv < 0 && xb >= 60) ? 'end' : 'start'}"
+        ${(mv > 0 && xb > 300) || (mv < 0 && xb < 60) ? `transform="translate(${-mv * (2 * 5 + (Math.abs(xb - xa) || 0) + 6)} 0)"` : ''}>${esc(l.label)}${l.fd ? '<tspan class="fl-1st"> 1st</tspan>' : ''}</text>`;
       if (l.kind === 'to') return `<circle cx="${xa}" cy="${y}" r="2.4" class="fl-snap"/><path d="M${xa - 3.5} ${y - 3.5} l7 7 M${xa + 3.5} ${y - 3.5} l-7 7" class="fl-x"/>${lab.replace(`x="${xb + mv * 5}"`, `x="${xa + 7}"`).replace(/text-anchor="\w+"/, 'text-anchor="start"').replace(/transform="[^"]*"/, '')}`;
       const bar = Math.abs(xb - xa) >= 1 ? `<line x1="${xa}" y1="${y}" x2="${xb - mv * 3}" y2="${y}" class="fl-b fl-${l.kind}"/>
         <path d="M${xb} ${y} l${-mv * 4.5} -3.6 v7.2 z" class="fl-h fl-${l.kind}"/>` : '';
@@ -299,24 +300,30 @@
   // The drive chart's rows: every scrimmage play (and a field goal try) of `team`'s drive, from its snap to where it
   // ended, labelled by what happened.
   // (a touchdown's text carries its extra point, which reads as special teams: kept)
-  const driveLanes = (plays, info, team) => plays.filter(p => p.start && !nonPlay(p) && !/kickoff|punt/i.test(pType(p))
+  const driveLanes = (plays, info, team) => {
+    // first downs: a snap whose drive's next snap is a 1st down (a touchdown is its own mark)
+    const snaps = plays.filter(p => p.start && p.start.down && !nonPlay(p) && !stPlay(p) && !/No Play/i.test(String(p.text || '')));
+    const fd = new Set(snaps.filter((p, i) => snaps[i + 1] && snaps[i + 1].start.down === 1 && !p.scoringPlay && !p.isTurnover).map(p => p.id));
+    return driveLanes0(plays, info, team).map(l => Object.assign(l, { fd: fd.has(l.id) }));
+  };
+  const driveLanes0 = (plays, info, team) => plays.filter(p => p.start && !nonPlay(p) && !/kickoff|punt/i.test(pType(p))
     && (!stPlay(p) || /field goal/i.test(pType(p)) || (p.scoringPlay && /touchdown/i.test(`${pType(p)} ${p.text || ''}`)))).map(p => {
     const a = spot(p.start, info), b = spot(p.end, info);
     if (!a || a.offense.team !== team) return null;
     const t = `${pType(p)} ${p.text || ''}`;
     if (/field goal/i.test(t)) {
       const good = /is GOOD/i.test(t) || (p.scoringPlay && !/no good|blocked|missed/i.test(t));
-      return { a: a.x, b: a.dir === 1 ? 100 : 0, dir: a.dir, kind: good ? 'fg' : 'miss', label: good ? 'FG good' : 'FG no good' };
+      return { id: p.id, a: a.x, b: a.dir === 1 ? 100 : 0, dir: a.dir, kind: good ? 'fg' : 'miss', label: good ? 'FG good' : 'FG no good' };
     }
-    if (p.isTurnover && !p.scoringPlay) return { a: a.x, b: a.x, dir: a.dir, kind: 'to', label: /intercept/i.test(t) ? 'INT' : /fumble/i.test(t) ? 'FUM' : 'Turnover' };
-    if (p.scoringPlay && /touchdown/i.test(t)) return { a: a.x, b: a.dir === 1 ? 100 : 0, dir: a.dir, kind: 'td', label: 'TD' };
+    if (p.isTurnover && !p.scoringPlay) return { id: p.id, a: a.x, b: a.x, dir: a.dir, kind: 'to', label: /intercept/i.test(t) ? 'INT' : /fumble/i.test(t) ? 'FUM' : 'Turnover' };
+    if (p.scoringPlay && /touchdown/i.test(t)) return { id: p.id, a: a.x, b: a.dir === 1 ? 100 : 0, dir: a.dir, kind: 'td', label: 'TD' };
     const bx = b && b.offense.team === team ? b.x : a.x, net = Math.round((bx - a.x) * a.dir);
     if (/No Play/i.test(t) || (p.isPenalty && /PENALTY/.test(t) && !/for -?\d+ yards?(?!.*PENALTY)/.test(t.split('PENALTY')[0]))) {
-      return { a: a.x, b: bx, dir: a.dir, kind: 'pen', label: `Flag ${net > 0 ? '+' : net < 0 ? '-' : ''}${Math.abs(net)}` };
+      return { id: p.id, a: a.x, b: bx, dir: a.dir, kind: 'pen', label: `Flag ${net > 0 ? '+' : net < 0 ? '-' : ''}${Math.abs(net)}` };
     }
-    if (/sack/i.test(t)) return { a: a.x, b: bx, dir: a.dir, kind: 'loss', label: `Sack ${net}` };
-    if (/incomplete/i.test(t)) return { a: a.x, b: a.x, dir: a.dir, kind: 'zero', label: 'inc' };
-    return { a: a.x, b: bx, dir: a.dir, kind: net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero', label: net > 0 ? `+${net}` : net < 0 ? `${net}` : '0' };
+    if (/sack/i.test(t)) return { id: p.id, a: a.x, b: bx, dir: a.dir, kind: 'loss', label: `Sack ${net}` };
+    if (/incomplete/i.test(t)) return { id: p.id, a: a.x, b: a.x, dir: a.dir, kind: 'zero', label: 'inc' };
+    return { id: p.id, a: a.x, b: bx, dir: a.dir, kind: net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero', label: net > 0 ? `+${net}` : net < 0 ? `${net}` : '0' };
   }).filter(Boolean);
   // What kind of play (the game log, the game state): not a play at all (timeouts, quarter ends), special teams.
   const pType = p => String((p.type && p.type.text) || '');
@@ -3145,18 +3152,29 @@
       : `<b>${esc(st.ended ? 'Final' : info.detail || '')}</b>`;
     const drive = cur && curTeam && sp && curTeam.team === sp.offense.team && cur.description && !/^0 plays/.test(cur.description)
       ? `<div class="now-drv"><span class="muted">This drive</span> ${esc(cur.description)}</div>` : '';
-    const lanes = cur && sp && curTeam && curTeam.team === sp.offense.team ? driveLanes(cur.plays || [], info, sp.offense.team) : [];
+    let lanes = cur && sp && curTeam && curTeam.team === sp.offense.team ? driveLanes(cur.plays || [], info, sp.offense.team) : [];
+    // after a score (owner 2026-10-18: "keep the field illustrated summary up in this state"): the drive that just ended
+    if (nx && st.last) {
+      const lr = st.plays.filter(p => !nonPlay(p)), lp = lr[lr.length - 1];
+      const dr = lp && st.drives.find(d => (d.plays || []).some(p => String(p.id) === String(lp.id) || String(p.id) === String(lp.id).replace(/-try$/, '')));
+      const dt = dr && dr.team && (String(dr.team.id) === String(info.home.id) ? info.home : info.away);
+      if (dr && dt) lanes = driveLanes(dr.plays || [], info, dt.team);
+    }
     // the last play as a headline, with what it put in the box score for each player (fantasy points); after a score
     // it stays up until the next snap (owner: "freeze that scoring player there until the kickoff happens")
     let last = '';
     // timeouts and quarter ends aren't plays: the last real one
-    const real = st.plays.filter(p => !nonPlay(p)), L = real[real.length - 1] || null;
+    const real = st.plays.filter(p => !nonPlay(p));
+    let L = real[real.length - 1] || null, tryP = null;
+    // after the try, the touchdown is the score to show (its fantasy points), the try a line under it
+    if (L && isTry(L) && real.length > 1 && real[real.length - 2].scoringPlay) { tryP = L; L = real[real.length - 2]; }
     if (L && L.text) {
       const nm = {}, names = fullNames(sum, nm), a = spot(L.start, info);
       const off = a ? a.offense.team : '';
       const hd = playHead(L, names, a ? { off, other: off === info.away.team ? info.home.team : info.away.team } : {});
+      const th = tryP ? playHead(tryP, names, {}) : null;
       last = `<div class="now-last${L.scoringPlay ? ' scored' : ''}"><div class="now-lk muted">${L.scoringPlay ? 'Last score' : 'Last play'}${L.clock ? ` · ${periodName((L.period || {}).number || 1)} ${esc(L.clock.displayValue || '')}` : ''}</div>
-        <div class="now-lh ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}</div>${nonPlay(L) ? '' : playImpact(L, hd, info, sum, nm, names, '')}</div>`;
+        <div class="now-lh ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}</div>${th ? `<div class="now-try ${th.cls}">${esc(th.h)}</div>` : ''}${nonPlay(L) ? '' : playImpact(L, hd, info, sum, nm, names, '')}</div>`;
     }
     return `<section class="sit now" data-k="now"><div class="sit-dd">${head}</div>${sp ? fieldSvg(sp, info, lanes) : ''}${drive}${last}${wpBar(info, wp, note)}</section>`;
   };

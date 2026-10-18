@@ -1385,3 +1385,7 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .lg-bar input { order: 0; flex: 1 1 90px; min-width: 90px; flex-basis: auto; padding: 4px 9px; font-size: 13px; }
 .mt-sit { display: inline-flex; align-items: center; gap: 7px; } .mt-sit b { color: var(--ink); } .mt-sit .rp-d { font-size: inherit; }
 .pl-np .pl-txt { text-transform: none; letter-spacing: 0; font-size: 12px; font-style: italic; }
+/* first downs on the drive chart: a short first-down line at the arrowhead, "1st" after the yards */
+:is(.now, .ds) .fl-fd { stroke: #ffd43b; stroke-width: 1.6; stroke-linecap: round; }
+:is(.now, .ds) .fl-1st { fill: #ffd43b; font-size: 8px; font-weight: 800; }
+.now-try { font-size: 13px; font-weight: 600; margin-top: 2px; } .now-try.good { color: var(--good); } .now-try.bad { color: var(--bad); }
