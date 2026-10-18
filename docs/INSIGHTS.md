@@ -2404,3 +2404,14 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   final): Power QB-back share on this week's page / week 7's / week 8's - PHI 0.485 / 0.530 / 0.582 (lookahead pages
   had 1.0), BAL 0.659 / 0.719 / 0.763, TB 0.662 / 0.722 / 0.763, CHI 0.918 / 0.937 / 0.951; Caleb Williams 71% this
   week, then 80 / 87 / 91%; healthy teams' 0.995-0.999 scratch-risk drift gone (1.000).
+- **PRE-REGISTERED 2026-10-18 (owner, spot-starting Bucs D/ST vs a Steelers offense missing Pittman and Roman Wilson;
+  queued, not run): (AN) opponent pass-catcher absences in D/ST sacks and takeaways.** D/ST points allowed already come
+  from Vegas implied points (injuries priced in); sacks, INTs and fumbles recovered come from 16-game rates and ignore
+  who is missing. Input (knowable before kickoff, as in {#skill-absence-margin}): the opponent's share of targets over
+  its last 3 games held by WR / TE / RB listed Out or Doubtful on the final report (fresh absences only), plus a QB
+  change flag already in the game model. Variant: sacks, INTs and FR each x exp(b x missing share), one b per stat fit
+  by Poisson regression on the D/ST model's walk-forward residuals in the seasons before (tools/dst_eval.py), 2022-25.
+  Scored on ESPN standard D/ST points (and the owner's Sleeper scoring alongside, not gated). GATE: on defense-games
+  facing a team missing >= 15% of its target share, MAE lower with a 95% CI over games excluding 0; all games not worse
+  (CI upper < +0.01). Report the fitted b per stat (sign and size) and the MDE: {#skill-absence-margin} was too small
+  to measure, so a FAIL here is labelled "unresolved" unless its CI rules out a gain of 0.2 points per affected game.
