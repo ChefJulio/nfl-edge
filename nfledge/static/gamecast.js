@@ -3519,7 +3519,8 @@
   const wireGame = () => {
     const root = document.getElementById('gc');
     root.querySelectorAll('[data-gtab]').forEach(b => b.onclick = () => { GP.tab = b.dataset.gtab; renderGame(); });
-    root.querySelectorAll('[data-pane]').forEach(b => b.onclick = () => { GP.pane = b.dataset.pane; GP.paneSet = true; renderGame(); });
+    // Box score opens on its Fantasy tab (owner 2026-10-18); a team picked there sticks while you stay on Box score
+    root.querySelectorAll('[data-pane]').forEach(b => b.onclick = () => { if (b.dataset.pane === 'box' && GP.pane !== 'box') GP.pst = '__fp'; GP.pane = b.dataset.pane; GP.paneSet = true; renderGame(); });
     root.querySelectorAll('[data-plsub]').forEach(b => b.onclick = () => { GP.plSub = b.dataset.plsub; renderGame(); });
     const toPane = (k, sel) => { GP.pane = k; renderGame(); const e = document.querySelector(sel || '.gc-panes'); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     root.querySelectorAll('[data-pane-go]').forEach(b => b.onclick = () => toPane(b.dataset.paneGo));
