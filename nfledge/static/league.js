@@ -207,7 +207,10 @@
     const TEAMS = D.teams || {}, KEYS = D.score.keys;
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem(LS) || 'null'); } catch (e) { /* none */ }
-    let L = null, mine = null, ROS = null, view = 'lineup', feedWho = 'mine';
+    // the view is the site's Fantasy sub-tab (shell.js NAV: #league/<view>)
+    const VIEWS = ['lineup', 'matchup', 'live', 'teams', 'waivers', 'trade'];
+    const fromHash = () => { const m = location.hash.match(/^#league\/(\w+)/); return m && VIEWS.includes(m[1]) ? m[1] : null; };
+    let L = null, mine = null, ROS = null, view = fromHash() || 'lineup', feedWho = 'mine';
     const save = () => { try { localStorage.setItem(LS, JSON.stringify(saved)); } catch (e) { /* private mode */ } };
     // the gamecast marks the viewer's players and this week's opponent's (owner 2026-10-18: "viewers might want to know
     // how their fantasy players are doing"): our player ids, written whenever the league or the team changes
@@ -766,16 +769,19 @@
       sec.innerHTML = `<div class="sec-head"><div><h2>${esc(L.name)}</h2><p>${L.platform === 'sleeper' ? 'Sleeper' : 'ESPN'} · week ${esc(String(L.week))} · ${L.teams.length} teams · our projections under your league's scoring.</p>${(L.unmodeled || []).length ? `<details class="lg-unmod"><summary>${new Set(L.unmodeled).size} scoring rules not modeled</summary><p class="muted">Your league also scores ${esc([...new Set(L.unmodeled)].join(', '))}: not in our projections yet.</p></details>` : ''}</div></div>
         <div class="lg-top"><label>Your team <select class="lg-team">${L.teams.map(t => `<option value="${esc(t.id)}"${mine && t.id === mine.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
           <button type="button" class="lg-change">Change league</button></div>
-        <div class="seg lg-seg">${[['lineup', 'Lineup'], ['matchup', 'Matchup'], ['live', 'Live'], ['teams', 'Teams'], ['waivers', 'Waivers'], ['trade', 'Trade']].map(([k, l]) => `<button type="button" data-v="${k}" class="${view === k ? 'on' : ''}">${l}</button>`).join('')}</div>
         <div class="lg-body"></div>`;
       sec.querySelector('.lg-team').onchange = e => { mine = L.teams.find(t => t.id === e.target.value); saved.team = mine.id; save(); shareMine();
         trade = { team: null, give: new Set(), get: new Set(), found: null }; draw(); };
       sec.querySelector('.lg-change').onclick = () => { saved = null; save(); try { localStorage.removeItem('nfledge-mine'); } catch (e) { /* ignore */ } L = null; NFLE.leagueDst = null; connectView(); };
-      sec.querySelector('.lg-seg').onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; view = b.dataset.v;
-        sec.querySelectorAll('.lg-seg button').forEach(x => x.classList.toggle('on', x === b));
-        if (['waivers', 'teams', 'trade'].includes(view) && !ROS) NFLE.load('data/ros.json').then(j => { ROS = j; draw(); }, () => draw()); else draw(); };
     };
 
+    const setView = v => {
+      if (!VIEWS.includes(v)) return;
+      view = v;
+      if (!L) return;
+      if (['waivers', 'teams', 'trade'].includes(view) && !ROS) NFLE.load('data/ros.json').then(j => { ROS = j; draw(); }, () => draw()); else draw();
+    };
+    document.addEventListener('nfle-route', e => { if (e.detail && e.detail.parent === 'league') setView(e.detail.sub); else NFLE.feedOpen = false; });
     // the feed redraws on every live update while it's showing
     document.addEventListener('nfle-live', () => { if (L && view === 'live' && sec.isConnected && !sec.hidden) draw(); });
     const open = async s => {
@@ -785,7 +791,7 @@
         NFLE.leagueDst = L && L.dw ? { w: L.dw, name: L.name } : null;  // D/ST cards score with this league's settings
         mine = L.teams.find(t => t.id === s.team) || L.teams.find(t => s.user && t.owner === s.user) || L.teams[0];
         saved = Object.assign({}, s, { team: mine.id }); save(); shareMine();
-        header(); draw();
+        header(); setView(view);
       } catch (e) {
         saved = null; save(); connectView(`Couldn't load that league: ${e.message}`);
       }

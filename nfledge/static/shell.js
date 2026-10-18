@@ -315,7 +315,10 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     { key: 'teams', label: 'Teams', subs: [['all', 'All teams'], ['power', 'Power', 'tab-power'], ['standings', 'Standings'], ['playoffs', 'Playoffs'], ['stats', 'Stats'], ['draft', 'Draft']] },
     { key: 'games', label: 'Games', subs: [['matchups', 'Matchups', 'tab-games']] },
     // your own fantasy league (Sleeper / public ESPN import; owner 2026-10-15)
-    { key: 'league', label: 'Fantasy', subs: [['league', 'My League', 'tab-league']] },  // tab named Fantasy (owner 2026-10-16)
+    // tab named Fantasy (owner 2026-10-16); its views are the site's sub-tabs (owner 2026-10-18: "uniform with the rest of the
+    // site"), all one section (league.js switches views on nfle-route)
+    { key: 'league', label: 'Fantasy', subs: [['lineup', 'Lineup', 'tab-league'], ['matchup', 'Matchup', 'tab-league'], ['live', 'Live', 'tab-league'],
+                                              ['teams', 'Teams', 'tab-league'], ['waivers', 'Waivers', 'tab-league'], ['trade', 'Trade', 'tab-league']] },
     { key: 'model', label: 'Model', subs: [['model', 'Model', 'tab-model']] },
   ];
   // Client-rendered tabs: section id -> area module (assets/<area>.js + .css), loaded the first time the tab opens.
