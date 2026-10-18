@@ -353,15 +353,16 @@ class Engine:
   def project_week(self, season: int, week: int, use_injuries: bool = True, use_vegas: bool = True,
                    wind: pd.Series | None = None, quiet: bool = False, ratings=None,
                    blend: bool = True, avail_override: dict | None = None, status_override: dict | None = None,
-                   extra_cands: pd.DataFrame | None = None) -> pd.DataFrame:
+                   extra_cands: pd.DataFrame | None = None, starters: dict | None = None) -> pd.DataFrame:
     """avail_override / status_override / extra_cands: lookahead weeks, where availability comes from the
-    return-timing model and injured-reserve players expected back are added to the roster."""
+    return-timing model and injured-reserve players expected back are added to the roster. starters: team -> the
+    QB the game model rates (its points and, with no Vegas line, its own spread); None rates no QB."""
     r = ratings or self.tm.fit(season, week)
     # Past plays are judged against defenses as they were; this week's opponents get personnel adjustments.
     r_game = self.game_ratings(season, week, r) if use_injuries else r
     vf = team_volume_features(self.team_ledger, season, week, self.cfg)
     games = self.games(season, week)
-    tp = self.gm.predict(games, r_game, vf, use_vegas=use_vegas)
+    tp = self.gm.predict(games, r_game, vf, use_vegas=use_vegas, starters=starters)
     f = self.pm.features(season, week, r)
     cands = self.candidates(season, week)
     if extra_cands is not None and len(extra_cands):

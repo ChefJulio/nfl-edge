@@ -2572,3 +2572,36 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   qb2_play_rate needs a board QB at depth rank 1 (skipped when an IR'd starter keeps slot 1; the scratch model, now
   fixed, covers it); the debut prior's absolute depth_rank <= 2; lookahead games with no Vegas line ignore the starting
   QB in the opponent's points (gm.predict without starters).
+- **PRE-REGISTERED 2026-10-18 (IR audit follow-up, "proceed at your discretion"): (AW) the game model rates a
+  starting QB in the player projections.** Engine.project_week calls the game model with no starters, so qb_term = 0
+  for every team: its points (and, with no Vegas line, its own spread, which sets the projected pass rate) treat every
+  offense as having a league-average QB, though the game model is fit on rows rated with each game's actual QB. With
+  Vegas lines (the current week, every backtest week) only the points fallback is touched, so backtests never saw it;
+  every lookahead week (7-18 today: no lines posted) is fully exposed: elite-QB teams under, backup-QB teams over.
+  Test: tools/lookahead_qb_eval.py, walk-forward 2021-25, weeks 3+, injuries on, project_week in model-only mode
+  (use_vegas=False: what a lookahead week sees), three arms on identical rows: none (production); asof (each team's
+  most recent starter before the week: what a lookahead week knows); game (the game's starter, most dropbacks, the
+  stand-in for an announced starter as in {#game-eval-starter}). Rows: experiments.py "relevant" rows of the none arm.
+  GATE (asof vs none): player MAE lower with the 95% CI over season-weeks excluding 0, and no position's CI entirely
+  above 0. Ship: lookahead weeks pass each team's projected starter (Power's usual starter, the backup when the plan
+  has the usual starter under 50% that week); the current week passes this week's projected starter too (touches only
+  the no-line points fallback). Secondary, reported: the game arm; team points MAE.
+- **RESULT {#lookahead-qb} (AW) the game model rates a starting QB in the player projections: FAIL (narrowly), not
+  shipped.** tools/lookahead_qb_eval.py, walk-forward 2021-25, model-only mode, 12,480 relevant player-weeks. asof
+  (most recent starter) vs none: MAE 5.203 -> 5.199, -0.0034 [-0.0070, +0.0003] (lower in 4 of 5 seasons; QB -0.0144
+  [-0.0315, +0.0016], RB -0.0038, WR +0.0001, TE -0.0002: no position worse). game (the game's starter) vs none: -0.0041
+  [-0.0078, -0.0006]. Team points MAE 7.741 -> 7.671 asof (-0.070 [-0.130, -0.017]), 7.625 game (-0.117 [-0.177,
+  -0.060]): the game model's points clearly improve; the player projections barely move (implied points are one input
+  among several). Gate (asof arm) failed on the CI's upper end.
+- **PRE-REGISTERED 2026-10-18, a second look at (AW) after its gate failed (labelled as such: weaker evidence than a
+  first test).** The asof arm rates last week's starter even when the injury model already has him out this week; the
+  rule production would use rates the projected starter (who the projections themselves start, injuries included:
+  Engine.project_week projects once, takes each team's top non-sitting QB, projects again). Arm proj vs none, same
+  rows, same harness, same GATE (MAE lower, 95% CI over season-weeks excluding 0; no position's CI entirely above 0).
+  One look only: a FAIL closes (AW) until there is new information.
+- **RESULT {#lookahead-qb-2} (AW) second look, the projected starter: FAIL; (AW) closed.** proj vs none: MAE 5.203 -> 5.200, -0.0022
+  [-0.0055, +0.0009] (QB -0.0089 [-0.0234, +0.0053]; no position worse); team points 7.741 -> 7.676 (-0.065 [-0.119,
+  -0.015]). Kept: Engine.project_week(starters=) (default None, production unchanged) for the eval. Reading: rating
+  the QB makes the game model's own points better, but the player projections don't measurably follow (implied points
+  are one input among several; volume shares and player rates dominate). Not retried without new information (e.g.
+  a test of the lookahead pages' displayed implied totals, or a player model fit in model-only mode).
