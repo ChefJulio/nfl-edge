@@ -2945,7 +2945,7 @@
       const [lab, cls] = driveTag(d, (st.live || st.replay) && st.cur && String(d.id) === String(st.cur.id));
       const n = drvNums(d);
       const sub = n ? `${n.n} pl · ${n.yd} yd · ${n.t}` : '';
-      (rows[half(p0)] = rows[half(p0)] || []).push(`<button type="button" class="dv dv-${cls || 'pu'}" style="--tc:${esc(tm.color || '#666')}" data-drive="${esc(d.id)}" title="${esc(`${tm.team || ''} drive: ${d.description || ''}${lab ? ` · ${driveResult(d, tm, info, false).text}` : ''} · started ${start}`)}"><i></i><span class="dv-t">${esc(tm.team || '')} <b>${esc(lab || '...')}</b><em class="dv-at">${esc(start)}</em></span>${sub ? `<span class="dv-s">${esc(sub)}</span>` : ''}</button>`);
+      (rows[half(p0)] = rows[half(p0)] || []).push(`<button type="button" class="dv dv-${cls || 'pu'}" style="--tc:${esc(tm.color || '#666')}" data-drive="${esc(d.id)}" title="${esc(`${tm.team || ''} drive: ${d.description || ''}${lab ? ` · ${driveResult(d, tm, info, false).text}` : ''} · started ${start}`)}"><i></i><span class="dv-t">${esc(tm.team || '')} <b>${esc(lab || '...')}</b></span>${sub ? `<span class="dv-s">${esc(sub)}</span>` : ''}<span class="dv-at">${esc(start)}</span></button>`);
     });
     const qrows = Object.keys(rows).map(Number).sort((a, b) => b - a).map(h => `<div class="dvq"><span class="dv-q">${HALF[h] || periodName(h)}</span><div class="dvs">${rows[h].slice().reverse().join('')}</div></div>`).join('');
     return `<section class="gcs story" data-k="story"><h3>How it's gone <span class="src">ESPN</span></h3>

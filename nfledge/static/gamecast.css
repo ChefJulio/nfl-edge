@@ -1293,3 +1293,12 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .dvs { row-gap: 9px; padding-top: 3px; }
 .dv-t { display: flex; align-items: baseline; gap: 4px; width: 100%; }
 .dv-at { margin-left: auto; padding-left: 8px; font-style: normal; font-size: 10px; color: var(--muted); white-space: nowrap; }
+/* three chips a row on phones (owner 2026-10-18: "too tall"): the half's label above its chips, compact three-line chips */
+.dvq { display: block; padding: 8px 0 10px; }
+.dvq .dv-q { display: block; margin: 0 0 6px; font-size: var(--fs-xs); font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.dvs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding-top: 0; }
+@media (min-width: 700px) { .dvs { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
+.dv { min-width: 0; padding: 5px 6px 5px 10px; gap: 0; }
+.dv-t { display: block; width: auto; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dv-s { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.dv-at { margin: 0; padding: 0; font-style: normal; font-size: 10px; color: var(--faint, #6b7380); white-space: nowrap; }
