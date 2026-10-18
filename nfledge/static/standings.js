@@ -57,14 +57,14 @@
         for (const conf of ['AFC', 'NFC']) {
           const teams = doc.teams.filter(r => r.conf === conf);
           if (view === 'conf') {
-            body.insertAdjacentHTML('beforeend', `<h3 class="st-h">${conf}</h3><div class="st-tbl"></div>`);
+            body.insertAdjacentHTML('beforeend', `<h3 class="st-h">${NFLE.ui.conf(conf, 20)}</h3><div class="st-tbl"></div>`);
             const rows = [...teams].sort((a, b) => a.conf_rank - b.conf_rank);
             NFLE.Table(body.lastElementChild, { columns: columns(ties, 'conf'), rows, sort: { key: 'conf_rank', dir: 'asc' },
               cls: 'tiles', rowClass: r => `teamrow tm-open${r.conf_rank === doc.playoff_teams ? ' st-cut' : ''}`, rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.team)} data-tm="${esc(r.team)}"` });
           } else {
             const divs = [...new Set(teams.map(r => r.div))].sort();
             for (const d of divs) {
-              body.insertAdjacentHTML('beforeend', `<h3 class="st-h">${esc(d)}</h3><div class="st-tbl"></div>`);
+              body.insertAdjacentHTML('beforeend', `<h3 class="st-h">${NFLE.ui.conf(d, 18)}</h3><div class="st-tbl"></div>`);
               const rows = teams.filter(r => r.div === d).sort((a, b) => a.div_rank - b.div_rank);
               NFLE.Table(body.lastElementChild, { columns: columns(ties, 'div'), rows, sort: { key: 'nick', dir: 'asc' },
                 cls: 'tiles', rowClass: () => 'teamrow tm-open', rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.team)} data-tm="${esc(r.team)}"` });

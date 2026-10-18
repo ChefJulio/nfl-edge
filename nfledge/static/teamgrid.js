@@ -50,7 +50,7 @@
       sec.innerHTML = '<div class="sec-head"><div><h2>All teams</h2><p>Every team by conference and division. Tap one for its page.</p></div></div><div class="tg-body skel-zone"></div>';
       NFLE.week().then(D => {
         const teams = (D && D.teams) || {}, power = Object.fromEntries(((D && D.power) || []).map(r => [r.team, r]));
-        const conf = c => `<div class="tg-conf"><h3 class="tg-ch">${c}</h3>${DIVS.map(dv => {
+        const conf = c => `<div class="tg-conf"><h3 class="tg-ch">${NFLE.ui.conf(c, 20)}</h3>${DIVS.map(dv => {
           const ts = Object.keys(teams).filter(t => teams[t].division === `${c} ${dv}`)
             .sort((a, b) => winPct((power[b] || {}).record) - winPct((power[a] || {}).record) || ((power[a] || {}).rank || 99) - ((power[b] || {}).rank || 99));
           return ts.length ? `<div class="tg-div"><h4 class="tg-dh"><span class="tg-dc">${c} </span>${dv}</h4><div class="tg-grid">${ts.map(t => tile(t, teams[t], power[t] || {})).join('')}</div></div>` : '';

@@ -145,3 +145,7 @@ button:active:not(:disabled), a.mt:active, .chip:active, .sbtn:active, [data-ope
 .nm2w .nm-b { flex: 0 1 auto; min-width: 0; }
 .nm2w .nm-b .badges { flex-wrap: wrap; }
 .nm2w .nm-b .badges > * { white-space: nowrap; }  /* a chip stays one piece; chips stack when they don't fit side by side */
+
+/* AFC / NFC labels with their logo (shell.js NFLE.ui.conf) */
+.conf-n { display: inline-flex; align-items: center; gap: .35em; }
+.conf-lg { width: auto; flex: none; filter: drop-shadow(0 0 1px rgba(0,0,0,.6)); }

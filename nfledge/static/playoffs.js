@@ -25,7 +25,7 @@
     const groups = d.groups || [];
     const left = groups[0], right = groups[1], extra = groups.slice(2);
     const final = d.final ? `<div class="po-round po-final"><div class="po-rl">${esc(d.final.label)}</div><div class="po-games">${d.final.games.map(gameCard).join('')}</div></div>` : '';
-    const side = (g, mirror) => g ? `<div class="po-side${mirror ? ' mirror' : ''}"><div class="po-st">${esc(g.title)}${g.title === 'AAFC' ? ' <span class="po-note">not counted in NFL records</span>' : ''}</div><div class="po-rounds">${(mirror ? [...g.rounds].reverse() : g.rounds).map(roundCol).join('')}</div></div>` : '';
+    const side = (g, mirror) => g ? `<div class="po-side${mirror ? ' mirror' : ''}"><div class="po-st">${NFLE.ui.conf(g.title, 16)}${g.title === 'AAFC' ? ' <span class="po-note">not counted in NFL records</span>' : ''}</div><div class="po-rounds">${(mirror ? [...g.rounds].reverse() : g.rounds).map(roundCol).join('')}</div></div>` : '';
     return `<div class="po-bracket">${side(left, false)}${final}${side(right, true)}</div>${extra.map(g => `<div class="po-bracket">${side(g, false)}</div>`).join('')}
       ${d.seeded ? '' : d.season < 1975 ? '<p class="st-note muted">No seeds before 1975: home field rotated by division, not by record.</p>' : ''}`;
   };
@@ -48,7 +48,7 @@
         col('Divisional', [card(top(conf, 'p_div_round', 4).map(r => row(r.team, '', r.p_div_round)).join(''), 'most likely to get here')]),
         col('Conference', [card(top(conf, 'p_conf_game', 2).map(r => row(r.team, '', r.p_conf_game)).join(''), 'most likely to get here')]),
       ];
-      return `<div class="po-side${mirror ? ' mirror' : ''}"><div class="po-st">${conf}</div><div class="po-rounds">${(mirror ? rounds.reverse() : rounds).join('')}</div></div>`;
+      return `<div class="po-side${mirror ? ' mirror' : ''}"><div class="po-st">${NFLE.ui.conf(conf, 16)}</div><div class="po-rounds">${(mirror ? rounds.reverse() : rounds).join('')}</div></div>`;
     };
     const sb = ['AFC', 'NFC'].map(c => top(c, 'p_sb', 1)[0]).filter(Boolean);
     const final = `<div class="po-round po-final"><div class="po-rl">Super Bowl</div><div class="po-games">${card(sb.map(r => row(r.team, '', r.p_title)).join(''), 'chance to win it all')}</div></div>`;
@@ -115,7 +115,7 @@
         TEAMS = (wk && wk.teams) || {};
         sub.textContent = `${d.season} playoff odds as of week ${d.as_of_week} · ${d.sims.toLocaleString()} simulated seasons`;
         const by = Object.fromEntries(d.teams.map(r => [r.team, r]));
-        const seeding = ['AFC', 'NFC'].map(c => `<div class="od-conf"><div class="po-st">${c}</div>${(d.seeding[c] || []).map(s => {
+        const seeding = ['AFC', 'NFC'].map(c => `<div class="od-conf"><div class="po-st">${NFLE.ui.conf(c, 16)}</div>${(d.seeding[c] || []).map(s => {
           const r = by[s.team] || {};
           return `<div class="od-seed tm-open" data-tm="${esc(s.team)}" style="${NFLE.fmt.rowStyle(TEAMS, s.team)}"><b class="od-sn">${s.seed}</b>${logo(r)}<span class="od-nm">${esc(r.nick || s.team)}</span><span class="od-rec">${r.w}-${r.l}${r.t ? `-${r.t}` : ''}</span><span class="od-sp">${pct(s.p)}</span></div>`;
         }).join('')}</div>`).join('');
@@ -131,7 +131,7 @@
             </tbody></table></div></details>` : '';
         body.innerHTML = `<div class="od-seeding">${seeding}</div>
           <p class="st-note muted od-note">Most likely seeding: the team most often in each seed, and how often. The NFL reseeds after the wild-card round, so this is not a fixed bracket.</p>
-          <div class="dt-tools od-tools"><div class="seg od-cf"><button type="button" data-c="">All</button><button type="button" data-c="AFC">AFC</button><button type="button" data-c="NFC">NFC</button></div></div>
+          <div class="dt-tools od-tools"><div class="seg od-cf"><button type="button" data-c="">All</button><button type="button" data-c="AFC">${NFLE.ui.conf('AFC', 13)}</button><button type="button" data-c="NFC">${NFLE.ui.conf('NFC', 13)}</button></div></div>
           <div class="od-tbl"></div>${track}`;
         const cols = [
           { key: 'team', label: 'Team', stick: true, first: 'asc', value: r => r.nick, html: r => NFLE.ui.team(r.team, TEAMS, esc(r.div)) },

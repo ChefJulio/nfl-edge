@@ -69,6 +69,10 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     tileStyle: (teams, t) => `style="${F.rowStyle(teams, t)}"`,
     // A team name or logo that opens the team page (owner 2026-10-16: every one on the site, except the small logo on
     // a player's photo). html: what to show (default: the abbreviation).
+    // AFC / NFC with the conference logo (owner 2026-10-18: "the red and blue ones"; ESPN's marks, assets/conf/); a
+    // division name ("AFC East") gets the logo before it; anything else passes through
+    conf: (label, size = 16) => { const m = /^(AFC|NFC)\b/.exec(String(label || ''));
+      return m ? `<span class="conf-n"><img class="conf-lg" src="${esc(NFLE.root || '')}assets/conf/${m[1]}.png" alt="" height="${size}" style="height:${size}px">${esc(label)}</span>` : esc(label); },
     tm: (t, html, cls = '') => t ? `<span class="tm-open${cls ? ` ${cls}` : ''}" data-tm="${esc(t)}">${html == null ? esc(t) : html}</span>` : (html || ''),
     // p: { name, team, pos, grp (badge color group), photo | espn | pid, sub (default: team, linked) | subHtml, badges }
     player: (p, teams) => {
