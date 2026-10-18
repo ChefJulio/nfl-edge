@@ -99,8 +99,14 @@
   const px = size => Math.min(600, Math.max(24, size * 3));
   const logoSrc = (url, size) => /a\.espncdn\.com\/i\/teamlogos\//.test(url)
     ? `https://a.espncdn.com/combiner/i?img=${url.split('a.espncdn.com')[1]}&w=${px(size)}&h=${px(size)}` : url;
-  const logo = (url, bg, size = 22, alt = '') => url
-    ? `<span class="nl" style="background:${esc(bg || '#333')};width:${size + 6}px;height:${size + 6}px"><img src="${esc(logoSrc(url, size))}" alt="${esc(alt)}" width="${size}" height="${size}" loading="lazy"></span>` : '';
+  // a team's logo as the site draws it everywhere else (owner 2026-10-18: the Rams' blue on black was lost): our pair
+  // of ESPN's dark-background logo and the backing color picked to frame it (DATA.teams), whatever logo / color the
+  // caller had (ESPN's scoreboard gives the standard logo); unknown teams keep what was passed
+  const logo = (url, bg, size = 22, alt = '') => {
+    const T = alt && DATA && DATA.teams && DATA.teams[alt];
+    const u = T && T.logo ? T.logo : url, b = T && T.logo_bg ? T.logo_bg : (bg || '#333');
+    return u ? `<span class="nl" style="background:${esc(b)};width:${size + 6}px;height:${size + 6}px"><img src="${esc(logoSrc(u, size))}" alt="${esc(alt)}" width="${size}" height="${size}" loading="lazy"></span>` : '';
+  };
 
   // ------------------------------------------------------------------------------------------------------- ESPN
   const weekEvents = async (season, week) => {
