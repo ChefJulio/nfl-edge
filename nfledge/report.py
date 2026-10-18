@@ -997,7 +997,7 @@ def records(eng, season: int, week: int) -> dict:
           for t, (w, l, tie) in rec.items()}
 
 
-def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None = None) -> tuple[list, list]:
+def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None = None, plan: dict | None = None) -> tuple[list, list]:
   rb = eng.tm.fit(season, week, bootstrap=cfg["team_model"]["bootstrap_samples"])
   vol = league_volume(eng, season, week, rb)
   starters = starters_asof(eng, season, week)
@@ -1013,7 +1013,8 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
   if proj is not None and "avail" in proj:
     q_ = proj[proj.pos == "QB"]
     now = dict(zip(q_.gsis_id, q_.avail.astype(float)))
-  usual, backup, pbar = powerc.inputs(eng, season, week, starters, now)
+  # the live build's availability plan ((AM): the same numbers every page's projections use); else the chain
+  usual, backup, pbar = powerc.inputs(eng, season, week, starters, now, plan=plan["avail"] if plan else None)
   u = powerc.blend(unit_points(rb, vol, usual, fw), unit_points(rb, vol, backup, fw), pbar)
   qb_eff = {t: pbar.get(t, 1.0) * rb.qb_term(usual.get(t, starters.get(t)), t) + (1 - pbar.get(t, 1.0)) * rb.qb_term(backup.get(t), t)
             for t in rb.teams}

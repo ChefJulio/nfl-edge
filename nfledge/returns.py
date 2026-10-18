@@ -50,6 +50,24 @@ def played_set(data) -> set:
   return played
 
 
+def availability_plan(data, proj: pd.DataFrame, week: int, espn_feed: pd.DataFrame | None, cache_dir, gb: dict) -> dict:
+  """(AM, owner 2026-10-17: one source of truth) the live build's availability plan, computed once as of the current
+  week and passed to every page's projections and to Power: {"avail": week -> {gsis: P(plays)}, "status": week ->
+  {gsis: text}, "extra": week -> IR players expected back}, for this week (the injury model's chance, players it
+  marks injured) and every later regular-season week (lookahead_availability). The chain starts from this week's
+  chance for every player the injury model lists, whatever the source (practice report, ESPN bridge, Tuesday model,
+  carried status), not only practice-report players."""
+  season = data.current_season
+  s = data.schedules
+  last = int(s[(s.season == season) & (s.game_type == "REG")].week.max())
+  hurt = proj[(proj.status.fillna("") != "") & (proj.avail < 1)]
+  now_report = dict(zip(hurt.gsis_id, hurt.avail.astype(float)))
+  later = list(range(week + 1, last + 1))
+  avail, status, extra = lookahead_availability(data, week, later, now_report, espn_feed=espn_feed, cache_dir=cache_dir, gb=gb)
+  avail[week] = dict(now_report)
+  return {"avail": avail, "status": status, "extra": extra}
+
+
 def lookahead_availability(data, current_week: int, weeks: list[int], now_report: dict | None = None,
                            espn_feed: pd.DataFrame | None = None, cache_dir=None, gb: dict | None = None) -> tuple[dict, dict, dict]:
   """For each lookahead week: {gsis_id: P(active)} and {gsis_id: status text} for players out injured now, plus
@@ -104,11 +122,7 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
   if len(new):  # newly injured: this week's chance p, else the chain from missing this week's game; back = 1.0
     p0 = new.p_now.to_numpy()[:, None]
     cur = pd.concat([cur, new], ignore_index=True)
-    pn = p0 + (1 - p0) * m.p_active(new, horizon, stay=1.0)
-    on_ir = new.gsis_id.isin(ir_now).to_numpy()
-    for j in np.flatnonzero(on_ir):
-      pn[j:j + 1] = ir_newly(data, pn[j:j + 1], season, new.team.iloc[j], current_week, ir_now.get(new.gsis_id.iloc[j]))
-    pa = np.vstack([pa, pn])
+    pa = np.vstack([pa, p0 + (1 - p0) * m.p_active(new, horizon, stay=1.0)])
   s = data.schedules
   reg = s[(s.season == season) & (s.game_type == "REG")]
   team_weeks = {t: sorted(set(reg[reg.home_team == t].week) | set(reg[reg.away_team == t].week))
@@ -116,6 +130,12 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
   r = data.rosters
   last = r[(r.season == season) & r.gsis_id.isin(cur.gsis_id)].sort_values("week").groupby("gsis_id").tail(1)
   info = last.set_index("gsis_id")
+  # (AM, owner chose A 2026-10-17) the IR floor for players ESPN lists on IR whom nflverse hasn't designated yet
+  # (designated ones are on the direct model, which knows the minimum and ESPN's date): no game for the league minimum
+  # from his team's next unplayed game, nor before ESPN's estimated return date (only 3.6% of 922 IR stints 2022-25
+  # played before it); newly injured and already out alike (Hurts, out week 6 then IR, sat on the chain at 56%)
+  zero = {x.gsis_id: ir_zero_weeks(data, season, x.team, current_week, ir_now[x.gsis_id])
+          for x in cur.itertuples() if x.gsis_id in ir_now and x.desig != "ir"}
   avail, status, extra = {}, {}, {}
   for w in weeks:
     a, t_, rows = {}, {}, []
@@ -126,7 +146,7 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
       k = sum(1 for g in tw if x.week < g <= w)  # his team's games from his last state through week w
       if k < 1 or k > horizon:
         continue
-      p = float(pa[i, k - 1])
+      p = 0.0 if w in zero.get(x.gsis_id, ()) else float(pa[i, k - 1])
       a[x.gsis_id] = p
       t_[x.gsis_id] = f"{p:.0%} to play"
       # a reserve-list player joins that week's roster with his chance to play, like an injured active player: under
@@ -152,6 +172,19 @@ def espn_ir(data, feed: pd.DataFrame | None) -> dict:
   m = dict(zip(r.espn_id.astype(str).str.replace(r"\.0$", "", regex=True), r.gsis_id))
   ret = pd.to_datetime(f.get("return_date"), errors="coerce", utc=True).dt.tz_convert(None) if "return_date" in f else pd.Series(pd.NaT, index=f.index)
   return {m[i]: (None if pd.isna(d) else d) for i, d in zip(f.espn_id.astype(str), ret) if i in m and isinstance(m[i], str)}
+
+
+def ir_zero_weeks(data, season: int, team: str, week: int, ret) -> set:
+  """Weeks an injured-reserve player can't play (owner 2026-10-17, (AM)): his team's first league-minimum games not
+  yet played from `week` on (placement counts from the next game), and every game before ESPN's estimated return date."""
+  from .return_timing import ir_min
+  s = data.schedules
+  g = s[(s.season == season) & (s.game_type == "REG") & ((s.home_team == team) | (s.away_team == team))
+        & (s.week >= week) & s.home_score.isna()].sort_values("week")
+  out = set(int(w) for w in g.week.head(ir_min(season)))
+  if ret is not None:
+    out |= set(int(w) for w in g[pd.to_datetime(g.gameday) < ret].week)
+  return out
 
 
 def ir_newly(data, pa: np.ndarray, season: int, team: str, week: int, ret) -> np.ndarray:
@@ -230,6 +263,11 @@ class ReturnModel:
     team_weeks = pd.concat([reg[["season", "week", "home_team"]].rename(columns={"home_team": "team"}),
                             reg[["season", "week", "away_team"]].rename(columns={"away_team": "team"})])
     team_set = set(zip(team_weeks.season, team_weeks.team, team_weeks.week))  # (season, team, week)
+    # only games already played can be missed (owner 2026-10-18: "only 1 game has been played, it's Sunday early AM"):
+    # nflverse's weekly rosters list the current week from its first game on, so between Thursday and Monday night every
+    # injured player got a missed game his team hadn't played yet (Hurts read as already out, Caleb Williams 4 straight)
+    fin = reg[reg.home_score.notna()]
+    final_set = set(zip(fin.season, fin.home_team, fin.week)) | set(zip(fin.season, fin.away_team, fin.week))
     nxt = {}  # (season, team, week) -> team's next game week
     for (season, team), g in team_weeks.groupby(["season", "team"]):
       ws = sorted(g.week)
@@ -241,6 +279,8 @@ class ReturnModel:
       ever_played, missed = False, 0
       for x in g.itertuples(index=False):
         if (season, x.team, x.week) not in team_set:  # bye / no game
+          continue
+        if (season, x.team, x.week) not in final_set:  # his team hasn't played that week yet
           continue
         played = (season, x.week, gid) in self.played
         rep_status, body = inj.get((season, x.week, gid), (None, None))

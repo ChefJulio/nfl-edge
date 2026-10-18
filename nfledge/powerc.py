@@ -59,14 +59,21 @@ def _newly(eng, m, season: int, week: int, q: str, p_now: float, n: int) -> list
   return [p0] + [float(pa[0, min(k, HORIZON) - 1]) for k in range(1, n)]
 
 
-def inputs(eng, season: int, week: int, recent: dict, now: dict | None = None, by_week: dict | None = None) -> tuple[dict, dict, dict]:
+def inputs(eng, season: int, week: int, recent: dict, now: dict | None = None, by_week: dict | None = None,
+           plan: dict | None = None) -> tuple[dict, dict, dict]:
   """(usual, backup, pbar): team -> usual starter, backup, and the usual starter's mean chance to play over the
   team's remaining games from `week` on. recent: team -> this week's (or most recent) starter. now: gsis -> this
   week's chance to play (replaces the chain's first step). by_week: if a dict is given, it is filled with team ->
-  {week: P(usual starter plays)} for every remaining game (the playoff odds use them game by game)."""
+  {week: P(usual starter plays)} for every remaining game (the playoff odds use them game by game).
+  plan: the live build's availability plan (returns.availability_plan, (AM) 2026-10-17: week -> {gsis: P(plays)}
+  for injured players, as of the current week, the same numbers every page's projections use): when given it is the
+  only source, so Power and the player pages can't disagree (lookahead pages included); without it (archive pages,
+  walk-forward tools) the chain below, as recorded."""
   from . import data as D
   d = eng.data
   usual = usual_starters(eng, season, week)
+  if plan is not None:
+    return usual, *_from_plan(eng, season, week, usual, recent, plan, by_week)
   m, st = _states(eng)
   known = (st.season < season) | ((st.season == season) & (st.next_week < week))
   m.fit_frame(st[known])
@@ -105,6 +112,42 @@ def inputs(eng, season: int, week: int, recent: dict, now: dict | None = None, b
     if by_week is not None:
       by_week[t] = dict(zip(rem, ps))
   return usual, backup, pbar
+
+
+def _team_weeks(d, season: int) -> dict:
+  from . import data as D
+  sch = d.schedules[(d.schedules.season == season) & (d.schedules.game_type == "REG")]
+  weeks = {}
+  for g in sch.itertuples():
+    for t in (g.home_team, g.away_team):
+      weeks.setdefault(D.RELOCATED.get(t, t), []).append(int(g.week))
+  return weeks
+
+
+def _from_plan(eng, season: int, week: int, usual: dict, recent: dict, plan: dict, by_week: dict | None) -> tuple[dict, dict]:
+  """(backup, pbar) from the availability plan: the usual starter's P(plays) in each remaining game (1.0 when the plan
+  doesn't list him: healthy)."""
+  from . import data as D
+  d = eng.data
+  weeks = _team_weeks(d, season)
+  # remaining = not yet played: a team whose game this week is final is past it (its pre-game chance would linger:
+  # Caleb Williams at 71% for a week-6 game he had already missed)
+  sch = d.schedules[(d.schedules.season == season) & (d.schedules.game_type == "REG") & d.schedules.home_score.notna()]
+  done = {(D.RELOCATED.get(t, t), int(w)) for w, h, a in zip(sch.week, sch.home_team, sch.away_team) for t in (h, a)}
+  dc = D.depth_for_week(d, season, week)
+  q2 = dc[(dc.pos == "QB") & (dc["rank"] == 2)]
+  qb2 = {D.RELOCATED.get(t, t): g for t, g in zip(q2.team, q2.gsis_id)}
+  backup, pbar = {}, {}
+  for t, q in usual.items():
+    backup[t] = recent.get(t) if recent.get(t) not in (None, q) else qb2.get(t)
+    rem = sorted(x for x in weeks.get(t, []) if x >= week and (t, x) not in done)
+    if not rem:
+      continue
+    ps = [float(plan.get(x, {}).get(q, 1.0)) for x in rem]
+    pbar[t] = float(np.mean(ps))
+    if by_week is not None:
+      by_week[t] = dict(zip(rem, ps))
+  return backup, pbar
 
 
 def blend(u_usual: pd.DataFrame, u_backup: pd.DataFrame, pbar: dict) -> pd.DataFrame:

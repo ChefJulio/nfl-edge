@@ -2366,3 +2366,41 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   for the league minimum (4 games) or until ESPN's estimated return date if later, then the chain from the active
   state (the chain's IR state is learned mostly from season-ending stays and put Hurts at 7%). Hurts: 48.5%. A rule
   and a feed, no fitted values: same path for the player projections' lookahead.
+- **PRE-REGISTERED 2026-10-17 (owner: "one source of truth ... sensible first and backed by data"): (AM) one
+  availability plan for every page.** Audit (after the Hurts IR fix): three copies of "will he play in week X" drifted -
+  the lookahead (returns.lookahead_availability), Power (powerc, its own chain: lookahead pages counted an injured QB
+  healthy after that page's week, Hurts 93% on week 8's page), and the current-week injury model; the chain started only
+  for practice-report players; ESPN's IR list reached only newly injured players. Change: run.py builds ONE plan per
+  build, as of the current week (P(plays) per injured player per remaining week; the current week from the injury
+  model), passed explicitly to every page's projections AND to Power (powerc reads it instead of its own chain when
+  given; archive pages and every walk-forward tool keep the historical path, so recorded results cannot move). Players
+  whose current-week chance comes from any source (practice report, ESPN bridge, Tuesday model, carried status) start
+  the newly-injured chain, not only practice-report players. Two parts change predictions and are tested first:
+  (1) ESPN IR for players already out: route a state to the IR direct model (return_timing, already shipped for IR by
+  nflverse designation) when ESPN lists him on IR even though nflverse's designation is not IR yet. Test:
+  tools/return_hybrid_eval.py --espn-ir, walk-forward 2023-25 (ESPN captures 2022-on), skill positions, rows with
+  ESPN IR and designation not IR; production (chain) vs routed (direct model). GATE: Brier lower with the 95% CI by
+  episode excluding 0, better in >= 2 of 3 seasons, every k-bucket calibrated within 5 points; and all rows' Brier not
+  worse (CI upper < +0.001). Fail: ESPN IR stays newly-injured-only. (2) the ESPN return-date floor for newly injured
+  IR players (shipped earlier today with the league minimum): from the captures 2022-25, the share of IR players with an
+  ESPN return date who played a game before that date. GATE: <= 10% -> keep the floor; else drop it (league minimum
+  only, a rule). The rest (one plan, Power reading it, the broader chain start) applies already-tested models to more
+  players / pages; checked by the before / after table of every injured player and QB-dependent team.
+- **RESULT {#avail-plan} (AM) one availability plan: shipped; ESPN-IR routing for players already out FAIL (not
+  shipped); return-date floor PASS (kept, widened by owner choice).** (1) tools/return_hybrid_eval.py --espn-ir,
+  walk-forward 2023-24 (2025 had no such rows), 41 episodes / 277 rows with ESPN IR and no IR designation yet: direct
+  model Brier 0.2122 -> 0.1520, -0.0602 [-0.1243, -0.0028], better 2/2 seasons; all rows -0.0011 [-0.0022, -0.0000];
+  but k-bucket calibration 3-4 games -7.2 points and 5-8 +5.7 (gate: within 5): FAIL as registered (production's chain
+  was off by +26 / +16 / +18 points on the same rows; a re-registered gate comparing calibration with production's
+  is a possible follow-up, not run). The tool was updated to share the chain's schedule tables (AD came after it).
+  (2) ESPN return-date floor, captures 2022-25: 922 IR stints with a return date ahead of a game; 3.6% played before
+  it (2022 3.9%, 2023 4.8%, 2024 3.0%, 2025 3.2%): PASS (<= 10%). Owner chose (A): the floor (league minimum from his
+  team's next unplayed game, and ESPN's return date) applies to every ESPN-IR player not yet designated, already out
+  or newly injured (test 2 measured all IR stints) - a rule and a measured date, no routing to the direct model.
+  (3) Found while checking, fixed: ReturnModel.states counted a game as missed before it was played (nflverse's weekly
+  rosters list the week from its first game on), so from Thursday to Monday night every injured player carried a
+  phantom missed game (Hurts read as already out; Caleb Williams 4 straight misses, 48% next week). Only final games
+  count now; walk-forward results are unaffected (every past game is final). Live check, week 6 (Sunday, 1 game
+  final): Power QB-back share on this week's page / week 7's / week 8's - PHI 0.485 / 0.530 / 0.582 (lookahead pages
+  had 1.0), BAL 0.659 / 0.719 / 0.763, TB 0.662 / 0.722 / 0.763, CHI 0.918 / 0.937 / 0.951; Caleb Williams 71% this
+  week, then 80 / 87 / 91%; healthy teams' 0.995-0.999 scratch-risk drift gone (1.000).

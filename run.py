@@ -171,10 +171,10 @@ def with_weather(games: list, wk, live: bool) -> list:
 
 
 def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict, res=None, ev=None,
-               bt_seasons=(), archive: bool = False, lookahead: int = 0) -> dict:
+               bt_seasons=(), archive: bool = False, lookahead: int = 0, plan: dict | None = None) -> dict:
   """Everything one season / week page needs (shared by run.py and tools/build_archive.py); report.render turns
   it into the page's JSON."""
-  power = rp.team_tables(eng, season, week, cfg, proj)
+  power = rp.team_tables(eng, season, week, cfg, proj, plan=plan)
   wk = data.schedules[(data.schedules.season == season) & (data.schedules.week == week)
                       & (data.schedules.game_type == "REG")]
   n_final, n_games = int(wk.home_score.notna().sum()), len(wk)
@@ -201,8 +201,13 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
   }
 
 
-def build_lookahead(eng, data, cfg, scoring, season: int, week: int, site: Path, now_report: dict | None = None,
-                    espn_feed=None):
+def gb_cfg(cfg) -> dict:
+  g = cfg.get("injuries", {})
+  return {"max_iter": int(g.get("gb_iterations", 200)), "learning_rate": float(g.get("gb_learning_rate", 0.05)),
+          "max_depth": int(g.get("gb_max_depth", 3))}
+
+
+def build_lookahead(eng, data, cfg, scoring, season: int, week: int, site: Path, plan: dict):
   """Every later week of the season, projected from today's data: real opponents, current ratings and depth
   charts, Vegas lines once posted (else the model's own). Injuries: nothing is known that far out, so everyone on
   the active roster is assumed healthy (IR stays off the roster); no weather. Rebuilt every run, never archived."""
@@ -212,18 +217,14 @@ def build_lookahead(eng, data, cfg, scoring, season: int, week: int, site: Path,
   weeks = list(range(week + 1, last + 1))
   # Players out injured now: P(active) each later week from the return-timing model; under 50% he sits and his
   # volume is redistributed (same binary rule as the current week); injured-reserve players expected back return.
-  # now_report: this week's chance to play for players on its practice report (the chain starts from it)
-  # IR players: the direct return-timing model (return_timing.py), fed this week's practice and ESPN's live feed
-  g = cfg.get("injuries", {})
-  gb = {"max_iter": int(g.get("gb_iterations", 200)), "learning_rate": float(g.get("gb_learning_rate", 0.05)),
-        "max_depth": int(g.get("gb_max_depth", 3))}
-  avail, status, extra = returns.lookahead_availability(data, week, weeks, now_report, espn_feed=espn_feed,
-                                                        cache_dir=ROOT / cfg["data"]["cache_dir"], gb=gb)
+  # plan: the build's one availability plan (returns.availability_plan, (AM)): the chain from this week's chance for
+  # every player the injury model lists; IR players on the direct return-timing model, fed ESPN's live feed
+  avail, status, extra = plan["avail"], plan["status"], plan["extra"]
   for w in weeks:
     proj = eng.project_week(season, w, use_injuries=True, quiet=True, avail_override=avail.get(w, {}),
                             status_override=status.get(w, {}), extra_cands=extra.get(w))
     ctx = build_page(eng, data, cfg, scoring, season, w, proj,
-                     nav=week_nav(data, season, w, week, prefix="../"), lookahead=w - week)
+                     nav=week_nav(data, season, w, week, prefix="../"), lookahead=w - week, plan=plan)
     check_script(rp.render(ctx, site / str(season) / f"week-{w:02d}.html"))
   print(f"[run] lookahead weeks {week + 1}-{last} in {time.time() - t0:.0f}s", flush=True)
 
@@ -268,9 +269,11 @@ def main():
     res, bt_seasons = cached_backtest(data, cfg, scoring)
     ev = bt.evaluate(res, POSITIONS, ecr_only=True)
 
+  # (AM) the live build's one availability plan, as of this week: every page's projections and Power read it
+  plan = None if args.week else returns.availability_plan(data, proj, week, feed, ROOT / cfg["data"]["cache_dir"], gb_cfg(cfg))
   ctx = build_page(eng, data, cfg, scoring, season, week, proj,
                    nav=week_nav(data, season, week, display_week(data) if not args.week else week, prefix=""),
-                   res=res, ev=ev, bt_seasons=bt_seasons)
+                   res=res, ev=ev, bt_seasons=bt_seasons, plan=plan)
   if ctx["model_doc"]["stale"]:
     print("[run] warning: MODEL.md is out of date (model code/config changed); see tools/model_doc.py", flush=True)
   out = rp.render(ctx, Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week))
@@ -279,9 +282,8 @@ def main():
     from nfledge import live_inputs
     f = live_inputs.write(out.parent, data, eng.games(season, week), proj, season, week)
     print(f"[run] live inputs archived -> {f.name}", flush=True)
-  if args.lookahead:
-    rep = proj[proj.on_report] if "on_report" in proj else proj.iloc[0:0]
-    build_lookahead(eng, data, cfg, scoring, season, week, out.parent, dict(zip(rep.gsis_id, rep.avail)), espn_feed=feed)
+  if args.lookahead and plan is not None:
+    build_lookahead(eng, data, cfg, scoring, season, week, out.parent, plan)
   print(f"[run] wrote {out} in {time.time() - t0:.0f}s")
   if args.open:
     webbrowser.open(out.as_uri())

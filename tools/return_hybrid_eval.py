@@ -164,8 +164,9 @@ def score(seasons, use_rule):
     cols = [c for c in F3 if tr[c].notna().any() and tr[c].nunique() > 1]  # 2019-20 training: no ESPN data
     m3 = HistGradientBoostingClassifier(max_iter=300, learning_rate=0.05, max_depth=4, random_state=0,
                                         categorical_features=[cols.index("inj_code"), cols.index("pos_code")]).fit(tr[cols], tr.y)
-    b = ReturnModel(data, played); b._nxt = base_m._nxt; b.fit_frame(ST[ST.season < season])
-    rc = RuleChain(data, played); rc._nxt = base_m._nxt; rc.model = b.model
+    # production's chain steps through each team's schedule (AD, after this tool was written): share base_m's tables
+    b = ReturnModel(data, played); b._nxt, b._tw, b._gd = base_m._nxt, base_m._tw, base_m._gd; b.fit_frame(ST[ST.season < season])
+    rc = RuleChain(data, played); rc._nxt, rc._tw, rc._gd = base_m._nxt, base_m._tw, base_m._gd; rc.model = b.model
     t = ST[(ST.season == season) & ST.position.map(POS_GROUP).isin(["QB", "RB", "WR", "TE"])]
     first = t.p_now.to_numpy()
     pb = b.p_active(t.reset_index(drop=True), H, first=first, stay=1.0)
@@ -179,7 +180,7 @@ def score(seasons, use_rule):
     te["v3"] = np.where(te.impossible > 0, 0.0, v)
     te["hybrid"] = np.where(te.desig == "ir", te.v3, te.base)
     te["ep"] = te.season.astype(str) + "-" + te.gsis_id + "-" + (te.week - te.missed).astype(int).astype(str)
-    out.append(te[["season", "ep", "desig", "k", "y", "base", "rule", "v3", "hybrid", "impossible"]])
+    out.append(te[["season", "ep", "desig", "k", "y", "base", "rule", "v3", "hybrid", "impossible", "espn_ir"]])
   return pd.concat(out, ignore_index=True)
 
 
@@ -201,6 +202,19 @@ def compare(R, col, name, both=False, margin=0.0):
   return lo, hi, per, c
 
 
+if "--espn-ir" in sys.argv:
+  # (AM, pre-registered 2026-10-17) ESPN lists him on IR before nflverse's designation says so: the direct model
+  # (as for designated IR) vs production's chain, walk-forward 2023-25 (ESPN captures 2022 on)
+  H3 = score([2023, 2024, 2025], False)
+  aff = H3[(H3.desig != "ir") & (H3.espn_ir > 0)]
+  print(f"[espn-ir] affected rows {len(aff)} ({aff.ep.nunique()} episodes) of {len(H3)}")
+  lo3, hi3, per3, c3 = compare(aff, "v3", "ESPN IR, not designated: direct model vs chain")
+  H3["hy_espn"] = np.where((H3.desig == "ir") | (H3.espn_ir > 0), H3.v3, H3.base)
+  H3b = H3.assign(base=H3.hybrid)  # all rows: production hybrid vs the routed hybrid
+  lo4, hi4, _, _ = compare(H3b, "hy_espn", "all rows: hybrid vs hybrid + ESPN IR")
+  ok = hi3 < 0 and (per3.sv < per3.sb).sum() >= 2 and (c3.gap.abs() <= 5).all() and hi4 < 0.001
+  print("[espn-ir] GATE:", "PASS" if ok else "FAIL")
+  sys.exit(0)
 H1 = score(TEST, False)
 IR = H1[H1.desig == "ir"]
 lo, hi, per, c = compare(IR, "hybrid", "hybrid 2021-22, IR rows")
