@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 3d9f49736f3e1902
+documented_code_hash: 23735ff8306f242b
 ---
 # How the model works
 
@@ -334,6 +334,7 @@ The grade measures output, not style: fantasy points per game in the site's scor
 - **Shipped** - A player hurt in his last game who is on this week's injury report counted as fully healthy from next week on; should the return model chain his later weeks the way it does for players already out? - Yes: predicted points over his next six games got closer to what happened (average miss 16.92 to 16.75 for all players, better every season 2022-25) and the week's rankings matched outcomes better (rank correlation +0.006) (2026-10). <!-- tried:newinj-chain -->
 - **Shipped** - Should every page (and Power) read one availability plan per build, with ESPN's IR list honored before nflverse's rosters catch up? - Yes for one plan and the IR floor (league minimum, ESPN's return date: only 3.6% of IR players came back before it, 2022-25); routing those players to the IR timing model was more accurate but missed its calibration gate, so not shipped (2026-10). <!-- tried:avail-plan -->
 - **Rejected** - Should a team defense project more sacks and takeaways when the opponent is missing pass catchers? - No: on 206 such games 2022-25 the current projection was already on target (6.40 projected vs 6.34 actual points), and adjusting made it slightly worse (error +0.02); Vegas already lowers the points a short-handed offense scores (2026-10). <!-- tried:dst-absence -->
+- **Rejected** - Should a day a player wasn't on the practice report count as a full practice in the availability model? - No: it predicted worse (Brier +0.002, 2021-25). Being off the report carries its own signal: players newly added late in the week played 84%, players dropped off the report late played only 71% (often moved to IR), against 92% for players listed full all week (2026-10). <!-- tried:off-report -->
 - **Rejected** - How much should last season and two seasons back count in a player's efficiency rates (today 1 / 0.6 / 0.3)? - Every mix from 0.3 to 1 for last season and 0 to 0.6 for two back was within noise on 2021-23; the best was no better on 2024-25 and worse on 2026 so far, so today's stays (2026-10). <!-- tried:eff-season-weights -->
 - **Rejected** - How much of his usual volume should a player get in his first game with a new team (half today)? - 30% to 70% were all within noise on 2021-23, and the best of them (70%) was worse on 2024-25, so half stays (2026-10). <!-- tried:newcomer-scale -->
 - **Rejected** - For efficiency stats where players barely differ from one another (a running back's yards per carry, a tight end's touchdown rate), how much should a player's own history count (a cap of 2,000 pseudo-plays on the pull toward the average)? - Caps from 500 to 100,000 were within noise on 2021-23; the best (500, more weight on his own rate) helped in 2024 and hurt in 2025, so 2,000 stays (2026-10). <!-- tried:shrink-cap -->

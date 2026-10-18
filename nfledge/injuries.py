@@ -774,7 +774,7 @@ class InjuryModel:
     scratch = self.scratch_prob(season, week)
     p["scratch_avail"] = p.gsis_id.map(scratch).fillna(1.0)
     # display only (owner 2026-10-18: Tyler Warren showed one "LP" labelled Wednesday): each team's practice dates this
-    # week, so a player first listed Friday reads "FFL" (off the report Wednesday and Thursday = practiced fully); the model reads x.days
+    # week, so a player first listed Friday reads "FFL" (off the report before then = practiced fully); the model reads x.days
     team_dates = {}
     if use_days and "dates" in days:
       tm = dict(zip(p.gsis_id, p.team))
@@ -788,7 +788,10 @@ class InjuryModel:
       if not dd or len(ds) != len(dd) or not allds:
         return dd
       on = dict(zip(ds, dd))
-      return "".join(on.get(d, "F") for d in allds)  # not on that day's report = practiced fully (owner 2026-10-18)
+      # before his first listing he practiced unlisted (owner 2026-10-18: show FP); after he drops off it's often an
+      # IR move or release, not a clean bill ({#off-report}: 71% played), so '-'
+      first = min(ds)
+      return "".join(on.get(d, "F" if d < first else "-") for d in allds)
     for i, row in p.iterrows():
       p.at[i, "avail"] = p.at[i, "scratch_avail"]  # healthy-scratch risk unless the injury report says more
       if row.team in published and use_days and row.gsis_id in days.index:

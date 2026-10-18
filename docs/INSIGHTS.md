@@ -2424,3 +2424,27 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   model is already calibrated on exactly these games - projected 6.40 vs actual 6.34 points; sacks 2.45 vs 2.48, INTs
   0.74 vs 0.76, FR 0.50 vs 0.49. A short-handed offense doesn't give up more sacks or turnovers than its rates say
   (and Vegas already lowers its points). D/ST stays as is.
+- **PRE-REGISTERED 2026-10-18 (owner: "full participant and on the practice report full participant are technically
+  different, but by how much? ... we should be tracking all practice participation ... assume they practiced full when
+  nothing reported"): (AO) days off the practice report.** The availability model reads each player's listed days
+  only ('L' for a player first listed Friday, the same string as one listed only Wednesday). NFL.com's practice API
+  dates every listed day (stored since 2026-10-17; refetched for 2018-25 for this test). Team practice dates = the
+  dates anyone on that team's report that week was listed. Padded string = his status on each team date, 'F' where
+  he wasn't listed (the league's rule: a player not on the report practiced fully). Descriptive (the owner's "by how
+  much"): play rate and model residual for days listed F vs days off the report, by position in the week (before his
+  first listing = a new injury; after his last = dropped off). Test, the full-week practice model (final reports,
+  status not Out), walk-forward 2021-25 trained on seasons before (2018 on): A production (listed days only);
+  B padded ('F' for days off); C padded + a count of days off the report (keeps listed-F and unlisted apart).
+  GATE (B or C replaces A): Brier lower with the 95% CI over season-weeks excluding 0, better in >= 4 of 5 seasons,
+  calibration by decile within 2 points; C over B only if C beats B with the CI excluding 0. Rows whose string
+  changes reported alone. The partial-week models keep raw strings (their day count marks the stage).
+- **RESULT {#off-report} (AO) days off the practice report: FAIL (production keeps listed days only).**
+  tools/offreport_eval.py, 31,034 labelled practice weeks 2018-25, all dated (refetched); padding changed 19.3% of
+  strings. Descriptive (status not Out, played rate): listed FFF all week 92.0%; off the report BEFORE his first
+  listing (a new injury, e.g. FFL) 83.9% (n 3,439); off it AFTER his last listing 70.8% (n 1,354: dropped off the
+  report is often a move to IR / release, not a clean bill); off in the MIDDLE 87.6% (n 655). So "not listed" is
+  not "listed as full": it carries its own information. Walk-forward 2021-25: B (padded with F) worse, Brier 0.0993
+  -> 0.1011, +0.0019 [+0.0009, +0.0029], 2/5; C (padded + days-off count) 0.0988, -0.0004 [-0.0013, +0.0003], 3/5,
+  calibration off up to 9 points; C beats B (-0.0023 [-0.0038, -0.0010]) because it gives the distinction back. The
+  listed-days string already encodes it (a 1-day 'L' is a late addition or an early drop). Display keeps padded FP
+  for days before his first listing only (that day he practiced, unlisted); see the display note.
