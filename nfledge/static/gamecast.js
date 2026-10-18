@@ -3244,8 +3244,7 @@
     const sit = st.sit || {}, dd = sit.shortDownDistanceText || '', at = sit.possessionText || '';
     const toEz = sp && !sp.kick ? Math.round(sp.dir === 1 ? 100 - sp.x : sp.x) : null;
     const head = nx ? nx.head : sp ? `<div class="sit-row"><span class="sit-tm tm-open" data-tm="${esc(sp.offense.team)}" style="--tc:${esc(sp.offense.color)}">${logo(sp.offense.logo, '#111', 18, sp.offense.team)}${esc(sp.offense.team)}</span>
-        ${dd ? `<span class="sit-dn rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>` : ''}${at ? `<span class="sit-at"><span class="muted">at</span> <b>${esc(at)}</b></span>` : ''}
-        ${sp.red ? '<span class="sit-rz">Red zone</span>' : ''}</div>`
+        ${dd ? `<span class="sit-dn rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>` : '<span></span>'}${at ? `<span class="sit-at${sp.red ? ' rz' : ''}"${sp.red ? ' title="Red zone"' : ''}><span class="muted">at</span> <b>${esc(at)}</b></span>` : '<span></span>'}</div>`
       : `<b>${esc(st.ended ? 'Final' : info.detail || '')}</b>`;
     const drive = cur && curTeam && sp && curTeam.team === sp.offense.team && cur.description && !/^0 plays/.test(cur.description)
       ? `<div class="now-drv"><span class="muted">This drive</span> ${esc(cur.description)}</div>` : '';

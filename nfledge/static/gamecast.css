@@ -1439,3 +1439,7 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .pp .rp-d { font-size: 12px; font-weight: 700; } .pp .rp-ar { margin: 0; }
 .pp .rp-d.chg { color: #8fbfff; }
 .pl-dd .pp { font-size: 12px; }
+/* situation row (owner 2026-10-18): team left, the down centered, the spot right; the spot reads red in the red zone */
+.sit-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.sit-row .sit-tm { justify-self: start; } .sit-row .sit-dn { justify-self: center; } .sit-row .sit-at { justify-self: end; text-align: right; }
+.sit-at.rz b, .sit-at.rz .muted { color: #ff8f84; }
