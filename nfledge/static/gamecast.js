@@ -2942,10 +2942,11 @@
       const tm = teamOf(d.team && d.team.id) || {}, pl = d.plays || [];
       const p0 = (pl[0].period || {}).number || 1, p1 = (pl[pl.length - 1].period || {}).number || p0;
       const start = `${periodName(p0)} ${(pl[0].clock || {}).displayValue || ''}`.trim();
-      const [lab, cls] = driveTag(d, (st.live || st.replay) && st.cur && String(d.id) === String(st.cur.id));
+      let [lab, cls] = driveTag(d, (st.live || st.replay) && st.cur && String(d.id) === String(st.cur.id));
+      if (lab === 'Half' && p1 >= 4) lab = p1 === 4 ? 'End reg' : 'End';  // ESPN calls the end of regulation "End of half" too
       const n = drvNums(d);
       const sub = n ? `${n.n} pl · ${n.yd} yd · ${n.t}` : '';
-      (rows[half(p0)] = rows[half(p0)] || []).push(`<button type="button" class="dv dv-${cls || 'pu'}" style="--tc:${esc(tm.color || '#666')}" data-drive="${esc(d.id)}" title="${esc(`${tm.team || ''} drive: ${d.description || ''}${lab ? ` · ${driveResult(d, tm, info, false).text}` : ''} · started ${start}`)}"><i></i><span class="dv-t">${esc(tm.team || '')} <b>${esc(lab || '...')}</b></span>${sub ? `<span class="dv-s">${esc(sub)}</span>` : ''}<span class="dv-at">${esc(start)}</span></button>`);
+      (rows[half(p0)] = rows[half(p0)] || []).push(`<button type="button" class="dv dv-${cls || 'pu'}" style="--tc:${esc(tm.color || '#666')}" data-drive="${esc(d.id)}" title="${esc(`${tm.team || ''} drive: ${d.description || ''}${lab ? ` · ${driveResult(d, tm, info, false).text}` : ''} · started ${start}`)}"><i></i><span class="dv-t">${st.live && st.cur && String(d.id) === String(st.cur.id) ? '<span class="live-dot dv-live" title="Drive in progress"></span>' : ''}${esc(tm.team || '')} <b>${esc(lab || '...')}</b></span>${sub ? `<span class="dv-s">${esc(sub)}</span>` : ''}<span class="dv-at">${esc(start)}</span></button>`);
     });
     // collapsed by default to the latest three (owner 2026-10-18: "a single row by default ... expand to see all")
     const order = Object.keys(rows).map(Number).sort((a, b) => b - a);

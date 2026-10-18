@@ -1302,3 +1302,5 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .dv-t { display: block; width: auto; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dv-s { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .dv-at { margin: 0; padding: 0; font-style: normal; font-size: 10px; color: var(--faint, #6b7380); white-space: nowrap; }
+.dv-live { width: 7px; height: 7px; margin-right: 5px; vertical-align: 1px; }
+.dv-live { position: absolute; top: 7px; right: 7px; margin: 0; }
