@@ -1304,3 +1304,35 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .dv-at { margin: 0; padding: 0; font-style: normal; font-size: 10px; color: var(--faint, #6b7380); white-space: nowrap; }
 .dv-live { width: 7px; height: 7px; margin-right: 5px; vertical-align: 1px; }
 .dv-live { position: absolute; top: 7px; right: 7px; margin: 0; }
+
+/* ---- Matchups on one phone screen (owner 2026-10-18; previous phone layout: tag matchups-v1) ---- */
+.mgrid { display: none; }
+@media (max-width: 600px) {
+  .mgrid { display: block; } .mgrid + .games { display: none; }
+  #matchups .sec-head { margin-bottom: 4px; } #matchups .sec-head h2 { font-size: var(--fs-lg); }
+}
+.mg-grp { margin-top: 6px; } .mg-grp:first-child { margin-top: 0; }
+.mg-h { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 3px 2px; }
+.mg-g { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.mg { position: relative; display: grid; grid-template-rows: auto 1fr 1fr; height: var(--mgh, 52px); min-width: 0; padding: 3px 7px 3px 6px; border-radius: 9px;
+  color: var(--ink); text-decoration: none; border: 1px solid color-mix(in srgb, var(--line) 80%, transparent); overflow: hidden;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ta) 42%, var(--panel)) 0%, var(--panel) 52%, color-mix(in srgb, var(--th) 42%, var(--panel)) 100%); }
+.mg.live { border-color: rgba(255,77,79,.55); } .mg.rz { box-shadow: inset 0 0 0 1.5px #ff6b6b; }
+.mg-st { font-size: 9.5px; font-weight: 700; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.25; }
+.mg.live .mg-st { color: var(--ink); } .mg.fin .mg-st { text-transform: uppercase; letter-spacing: .05em; }
+.mg-st .live-dot { width: 6px; height: 6px; margin-right: 3px; }
+.mg-r { display: flex; align-items: center; gap: 4px; min-width: 0; line-height: 1; }
+.mg-r.lost { opacity: .45; }
+.mg-lg { flex: none; width: 15px; height: 15px; display: inline-flex; } .mg-lg img { width: 15px; height: 15px; object-fit: contain; }
+.mg-r b { font-size: 12px; font-weight: 800; letter-spacing: .02em; }
+.mg-n { margin-left: auto; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.mg-n.pct { font-size: 11px; font-weight: 700; color: var(--muted); } .mg-n small { font-size: 8px; }
+.mg-ball { width: 14px; height: 9px; flex: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 20'%3E%3Cdefs%3E%3ClinearGradient id='nfleFb' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23a85a24'/%3E%3Cstop offset='.55' stop-color='%237d3b14'/%3E%3Cstop offset='1' stop-color='%235a2a0d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M1.5 10C6 2 26 2 30.5 10 26 18 6 18 1.5 10Z' fill='url%28%23nfleFb%29' stroke='%232e1406' stroke-width='1'/%3E%3Cpath d='M9 5.4C13 3.9 19 3.9 23 5.4' fill='none' stroke='%23fff' stroke-opacity='.22' stroke-width='.8' stroke-linecap='round'/%3E%3Cpath d='M6.9 6Q5.6 10 6.9 14M25.1 6Q26.4 10 25.1 14' fill='none' stroke='%23fff' stroke-opacity='.9' stroke-width='.9' stroke-linecap='round'/%3E%3Cpath d='M12.5 10H19.5' fill='none' stroke='%23fff' stroke-width='.9' stroke-linecap='round'/%3E%3Cpath d='M13.7 9V11M15.2 9V11M16.8 9V11M18.3 9V11' fill='none' stroke='%23fff' stroke-width='.7' stroke-linecap='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+@media (min-height: 760px) { .mg-r b { font-size: 13px; } .mg-n { font-size: 17px; } .mg-lg, .mg-lg img { width: 17px; height: 17px; } }
+/* windows flow three columns wide; one spans as many columns as it has games */
+.mgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 5px; align-items: start; }
+@media (max-width: 600px) { .mgrid { display: grid; } section:has(> .mgrid) > .sec-head { display: none; } }
+.mg-grp { margin: 0; grid-column: span var(--span, 1); min-width: 0; }
+.mg-g { grid-template-columns: repeat(var(--span, 1), minmax(0, 1fr)); }
+.mg { grid-template-rows: 12px 1fr 1fr; }
+.mg-st { line-height: 12px; }

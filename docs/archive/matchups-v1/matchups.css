@@ -1,0 +1,48 @@
+/* matchup tile rules from gamecast.css as of tag matchups-v1 (2026-10-18) */
+.mt { display: grid; min-width: 0; overflow: hidden; text-decoration: none; color: var(--ink); border: 1px solid var(--line); border-radius: var(--r-lg);
+.mt:hover { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+.mt-main { position: relative; display: grid; grid-template-columns: 78px minmax(0, 1fr) auto minmax(0, 1fr) 78px; grid-template-areas: ". sa at sh .";
+.mt-lg { position: absolute; top: 8px; height: calc(100% - 16px); width: auto; aspect-ratio: 1; object-fit: contain; pointer-events: none; }
+.mt-lg.tm-open { pointer-events: auto; }  /* its visible edge opens the team (the score / name sit above it) */
+.mt .tm-open:hover b, .mt-stake .tm-open:hover { text-decoration: underline; }
+.mt-lg.away { left: 8px; } .mt-lg.home { right: 8px; }
+.mt-side { position: relative; display: flex; flex-direction: column; min-width: 0; line-height: 1.1; text-shadow: 0 1px 2px rgba(0,0,0,.75), 0 0 12px rgba(0,0,0,.5); }
+.mt-side.away { grid-area: sa; align-items: flex-end; text-align: right; } .mt-side.home { grid-area: sh; align-items: flex-start; text-align: left; }
+.mt-num { font-size: 34px; font-weight: 700; letter-spacing: 0; line-height: 1; }
+.mt-num small { font-size: var(--fs-lg); font-weight: 700; margin-left: 1px; opacity: .75; }
+.mt-nm { margin-top: 4px; font-size: var(--fs-sm); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mt-nm b { font-weight: 700; } .mt-nm small { font-size: var(--fs-xs); color: var(--muted); }
+.mt-at { position: relative; grid-area: at; display: flex; flex-direction: column; align-items: center; font-size: var(--fs-lg); font-weight: 700; color: var(--muted); }
+.mt-at small { margin-top: 3px; font-size: var(--fs-2xs); letter-spacing: .05em; text-transform: uppercase; color: var(--ink); opacity: .75; }
+.mt-side.dog .mt-num, .mt.toss .mt-num { opacity: .6; }
+.mt-side.lost { opacity: .45; } .mt-lg:has(+ .mt-side.lost) { opacity: .35; }
+.mt-side.has-ball .mt-num { position: relative; }
+.mt-side.has-ball .mt-num::after { content: ""; position: absolute; top: 50%; width: 18px; height: 11px; transform: translateY(-50%);
+.mt-main .mt-side.has-ball { position: relative; }
+.mt-st { display: flex; flex-wrap: nowrap; justify-content: space-between; align-items: center; gap: 4px 10px; font-size: var(--fs-sm); color: var(--muted);
+.mt-st b { color: var(--ink); } .mt-st > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; } .mt-st .mt-odds { flex: none; }
+.mt-fin { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--ink); }
+.mt-live { color: var(--ink); font-weight: 700; } .mt-red { color: #ff8f84; font-weight: 700; }
+@media (max-width: 560px) { .mt-main { grid-template-columns: 52px minmax(0, 1fr) auto minmax(0, 1fr) 52px; } }
+@media (max-width: 400px) { .mt-main { grid-template-columns: 48px minmax(0, 1fr) auto minmax(0, 1fr) 48px; } .mt-num { font-size: 30px; } }
+.mt-nm { display: flex; align-items: center; gap: 6px; overflow: visible; }
+.mt-wm { display: block; height: 15px; width: auto; max-width: 112px; object-fit: contain;
+.mt-nm b:has(.mt-wm) { display: inline-flex; align-items: center; }
+.mt-side.won .mt-num { color: #6fdc8c; } .mt-side.lost .mt-num { color: #ff8f84; }
+.mt-at { align-self: center; height: 55px; flex-direction: column-reverse; justify-content: flex-start; line-height: 17px; }  /* a side's height: score 34 + name row 4 + 17 */
+@media (max-width: 400px) { .mt-at { height: 51px; } }  /* score 30 */
+.mt-at small { margin: 0 0 2px; line-height: 1; }
+.mt-lg { z-index: 0; } .mt-side { z-index: 1; }  /* score, name and record always above the logos */
+.mt-at { padding-bottom: 3px; }  /* "@" / "vs" glyphs sit low in their line: lift them to the wordmarks' visual middle */
+.mt-main { padding-top: 26px; }
+.mt-when { position: absolute; top: 7px; left: 50%; transform: translateX(-50%); z-index: 2; font-size: var(--fs-xs); color: var(--muted);
+.mt-st { justify-content: center; }
+.mt-st:empty { display: none; }
+.mt-side.away .mt-nm { justify-content: flex-end; }
+.mt-nm { position: relative; }
+.mt-nm small { position: absolute; top: 100%; margin-top: 3px; font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
+.mt-side.away .mt-nm small { right: 0; } .mt-side.home .mt-nm small { left: 0; }
+.mt-main { padding-bottom: 24px; }
+.mt-tn { display: block; font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif; font-style: italic; font-weight: 800;
+@media (max-width: 400px) { .mt-tn { font-size: 20px; } }
+.mt-side.away.has-ball .mt-num::after { right: calc(100% + 6px); } .mt-side.home.has-ball .mt-num::after { left: calc(100% + 6px); }

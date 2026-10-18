@@ -2336,6 +2336,7 @@
         : `${g && g.fc ? verdict(g.fc, winner) : ''}`;
     });
     sortTiles();
+    paintMini();
   };
   // Matchups order (owner 2026-10-18: "live games first ... nearest end of game first"): live games, the furthest
   // along first; then games still to come, by kickoff; then finals, the latest first. Re-sorted on every poll; tiles
@@ -2358,6 +2359,71 @@
     const sorted = [...tiles].sort((a, b) => { const x = ks.get(a), y = ks.get(b); return x[0] - y[0] || x[1] - y[1] || x[2] - y[2]; });
     if (sorted.some((t, i) => t !== tiles[i])) sorted.forEach(t => box.appendChild(t));
   };
+  // ---- Matchups on one phone screen (owner 2026-10-18: "all the matchups on one phone screen without scrolling,
+  // grouped by game start window ... small enough to fit but still informative about the game state"; the big tiles
+  // stay on wider screens; the previous phone layout is git tag matchups-v1, docs/archive/matchups-v1). A row of
+  // mini tiles per kickoff window (Thursday night, an international morning, Sunday 1 PM / 4 PM / night, Monday
+  // night), each tile the state line (kickoff, live clock, final) and two team rows (logo, code, score or win chance),
+  // the team with the ball marked, the red zone edged red, the loser dimmed. Row heights stretch to fill the screen.
+  const DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const windowOf = g => {
+    const d = DAY[new Date(`${g.gameday}T12:00:00Z`).getUTCDay()], h = +String(g.gametime || '13:00').slice(0, 2);
+    const lab = h < 12 ? `${d} ${g.site || 'morning'}` : h < 16 ? `${d} 1 PM` : h < 18 ? `${d} 4 PM` : `${d} night`;
+    return { key: `${g.gameday} ${h < 12 ? 0 : h < 16 ? 1 : h < 18 ? 2 : 3}`, lab };
+  };
+  const clock12 = t => { const [h, m] = String(t || '').split(':').map(Number); return isNaN(h) ? '' : `${(h + 11) % 12 + 1}:${String(m).padStart(2, '0')}`; };
+  const miniTile = g => {
+    const st = LIVE.byGame[g.id], live = st && st.state === 'in', fin = g.final || (st && st.state === 'post');
+    const sit = live ? (st.sit || (LIVE.sums[st.id] && sitFromPlays(LIVE.sums[st.id]))) : null;
+    const sp = sit ? spot(sit, st) : null;
+    const score = k => st && st.state !== 'pre' ? st[k].score : g.final ? g.final[k] : null;
+    const as = score('away'), hs = score('home'), f = g.fc || {};
+    const status = live ? `<span class="live-dot"></span>${esc(`${periodName(st.period)} ${st.clock || ''}`.trim())}`
+      : fin ? (st && /OT/i.test(st.detail || '') || (g.final && g.final.ot) ? 'Final/OT' : 'Final')
+      : esc(clock12(g.gametime));
+    const row = (s, k, n, other) => {
+      const lost = fin && n != null && other != null && n < other, ball = sp && sp.offense.team === s.team;
+      const num = n != null ? esc(n) : f[`p_${k}`] != null ? `${esc(f[`p_${k}`])}<small>%</small>` : '';
+      return `<span class="mg-r${lost ? ' lost' : ''}"><span class="mg-lg"><img src="${esc(NFLE.fmt.logoSrc(s.logo_url, 22))}" alt="" loading="lazy"></span>
+        <b>${esc(s.team)}</b>${ball ? '<i class="mg-ball" title="Has the ball"></i>' : ''}<span class="mg-n${n == null ? ' pct' : ''}">${num}</span></span>`;
+    };
+    const c = g.colors || {};
+    return `<a class="mg${live ? ' live' : ''}${sp && sp.red ? ' rz' : ''}${fin ? ' fin' : ''}" data-gid="${esc(g.id)}" href="${esc(gameHref(g))}"
+      style="--ta:${esc(c[g.away.team] || '#444')};--th:${esc(c[g.home.team] || '#444')}"><span class="mg-st">${status}</span>
+      ${row(g.away, 'away', as, hs)}${row(g.home, 'home', hs, as)}</a>`;
+  };
+  const paintMini = () => {
+    const box = document.querySelector('.mgrid');
+    if (!box || !DATA) return;
+    const groups = new Map();
+    DATA.games.forEach(g => { const w = windowOf(g); if (!groups.has(w.key)) groups.set(w.key, { lab: w.lab, games: [] }); groups.get(w.key).games.push(g); });
+    const order = [...groups.keys()].sort();
+    const elapsedOf = g => { const st = LIVE.byGame[g.id]; if (!st || st.state !== 'in') return null;
+      const m = String(st.clock || '').match(/^(\d+):(\d{2})/), c = m ? +m[1] * 60 + +m[2] : 0, per = st.period || 1;
+      return per <= 4 ? (per - 1) * 900 + (900 - c) : 3600 + (per - 5) * 600 + (600 - c); };
+    const rank = g => { const e = elapsedOf(g); return e != null ? -10000 + -e : (g.final || (LIVE.byGame[g.id] || {}).state === 'post') ? 1 : 0; };
+    box.innerHTML = order.map(k => { const G = groups.get(k);
+      const gs = G.games.map((g, i) => [g, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(x => x[0]);
+      // a window spans as many of the three columns as it has games, so small windows share a row in time order
+      return `<div class="mg-grp" style="--span:${Math.min(3, gs.length)}"><div class="mg-h">${esc(G.lab)}</div><div class="mg-g">${gs.map(miniTile).join('')}</div></div>`; }).join('');
+    fitMini(box);
+  };
+  // rows sized so every group fits between the grid's top and the bottom bar (as All teams does)
+  const fitMini = box => {
+    if (!matchMedia('(max-width: 600px)').matches || !box.offsetParent) { box.style.removeProperty('--mgh'); return; }
+    const bar = document.querySelector('.botbar'), bottom = bar && bar.getClientRects().length ? bar.getBoundingClientRect().top : innerHeight;
+    box.style.setProperty('--mgh', '52px');
+    const top = box.getBoundingClientRect().top + scrollY - (scrollY > 0 ? scrollY : 0);
+    // tile rows: tiles laid out in different rows (getClientRects tops), counted once
+    const rows = new Set([...box.querySelectorAll('.mg')].map(t => Math.round(t.getBoundingClientRect().top))).size;
+    const extra = bottom - 8 - box.getBoundingClientRect().top - box.getBoundingClientRect().height;
+    box.style.setProperty('--mgh', `${Math.max(44, Math.min(78, 52 + extra / Math.max(1, rows)))}px`);
+    // the header above can still change (the live pill arrives after the first poll): check once more next frame
+    if (!box._refit) { box._refit = 1; requestAnimationFrame(() => { box._refit = 0;
+      const over = box.getBoundingClientRect().bottom - (bottom - 8);
+      if (over > 1) { const h = parseFloat(box.style.getPropertyValue('--mgh')) || 52; box.style.setProperty('--mgh', `${Math.max(44, h - over / Math.max(1, rows))}px`); } }); }
+  };
+  NFLE.paintMini = paintMini;
   const paintPill = () => {
     const pill = document.getElementById('livePill'); if (!pill) return;
     const sts = Object.values(LIVE.byGame), live = sts.filter(s => s.state === 'in').length;

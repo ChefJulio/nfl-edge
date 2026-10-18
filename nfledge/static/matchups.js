@@ -11,8 +11,11 @@
       NFLE.week().then(D => {
         if (!D || !D.games || !NFLE.gameHref) return;  // no week data: keep whatever the page has
         sec.innerHTML = `<div class="sec-head"><div><h2>Matchups</h2></div></div>
-          ${D.games.length ? `<div class="games">${D.games.map(tile).join('')}</div>` : '<p class="muted">No games this week.</p>'}`;
+          ${D.games.length ? `<div class="mgrid" aria-label="Every game by kickoff window"></div><div class="games">${D.games.map(tile).join('')}</div>` : '<p class="muted">No games this week.</p>'}`;
         NFLE.paintTiles();
+        if (NFLE.paintMini) NFLE.paintMini();  // phones: every game on one screen (gamecast.js), repainted with the live tiles
+        if (!sec._mgFit) { sec._mgFit = 1; const re = () => requestAnimationFrame(() => NFLE.paintMini && NFLE.paintMini());
+          addEventListener('resize', re); new MutationObserver(re).observe(sec, { attributes: true, attributeFilter: ['hidden', 'class'] }); }
         // the week's biggest games for the playoff race (rooting guide data, gamecast.js NFLE.rootStakes)
         if (NFLE.rootStakes) NFLE.rootStakes().then(top => top.forEach((x, i) => {
           const el = sec.querySelector(`.mt[data-gid="${CSS.escape(x.id)}"]`);
