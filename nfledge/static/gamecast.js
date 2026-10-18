@@ -3015,26 +3015,17 @@
     }).join('')}</ol>`;
   };
   // ---- Postgame tab: the recap once it's final.
-  const postTab = (sum, info, g, ser) => {
-    if (info.state !== 'post') return `<section class="gcs"><p class="muted">${info.state === 'pre' ? 'The recap appears once the game is over.' : 'The game is still going; the recap appears at the final whistle. Follow it on the Live tab.'}</p></section>`;
+  // Final (owner 2026-10-18: the Postgame tab repeated the Live tab): the Now card's place shows the result, how the
+  // forecast fared, and the replay; Game flow adds the turning points
+  const resultCard = (info, g) => {
     const a = info.away, h = info.home, winner = a.score > h.score ? a.team : h.score > a.score ? h.team : null;
     const f = g && g.fc;
     const call = f ? `<div class="pg-call">${verdict(f, winner)}
       <span class="muted">${f.src === 'Vegas' ? `Vegas gave ${f.tossup ? `a tossup (${tmL(f.fav, esc(f.nick))} ${f.pct}%)` : `${tmL(f.fav, esc(f.nick))} ${f.pct}%`}` : 'No Vegas line'} · our model gave ${tmL(f.model_fav, esc(f.model_nick))} ${f.model_pct}%${f.model_tossup ? ' (tossup)' : ''}</span></div>` : '';
-    const result = `<section class="gcs"><h3>Result</h3><div class="pg-res">
+    return `<section class="gcs" data-k="now"><h3>Result</h3><div class="pg-res">
       <span class="tm-open${winner === a.team ? ' won' : ''}" data-tm="${esc(a.team)}">${logo(a.logo, '#111', 26, a.team)}<b>${esc(a.team)}</b> ${a.score}</span><span class="muted">${esc(info.detail || 'Final')}</span>
       <span class="tm-open${winner === h.team ? ' won' : ''}" data-tm="${esc(h.team)}">${h.score} <b>${esc(h.team)}</b>${logo(h.logo, '#111', 26, h.team)}</span></div>${call}
       ${GP.canReplay ? '<div class="rp"><button type="button" data-rp="on">Replay this game play by play</button></div>' : ''}</section>`;
-    // Older games: ESPN has no win probability (and before ~2005 no plays), so those sections are left out, and
-    // without our week file there are no projections: the box score takes that slot.
-    const hasWp = ser.length >= 2;
-    return `<div class="gc-grid"><div class="gc-col">${result}
-        ${hasWp ? `<section class="gcs"><h3>Win probability <span class="src">ESPN</span></h3><p class="gcs-note">ESPN's in-game model over the whole game, not NFL Edge's forecast.</p>
-          <div class="wp-wrap">${wpChart(ser, info, null)}<div class="wp-tip" hidden></div></div></section>
-        <section class="gcs"><h3>Turning points</h3><p class="gcs-note">The plays that moved ESPN's win probability the most.</p>
-          ${turningCards(sum, info, ser, 6)}</section>` : ''}</div>
-      <div class="gc-col"><section class="gcs"><h3>Team stats</h3>${sum ? teamStats(sum, info) || '<p class="muted">Not available.</p>' : ''}</section></div></div>
-      ${playerStats(sum, info)}`;
   };
   // ESPN unreachable: still show the game from our own week file (Pregame works; final score if we have it).
   const infoFromG = g => {
@@ -3365,7 +3356,8 @@
     return { title: `${tm.team} drive${lab ? ` · ${lab}` : ''}`, html };
   };
   const FOOTBALL = `<span class="fb-chip" title="Has the ball"><svg class="sb-fb" viewBox="0 0 32 20" role="img" aria-label="Has the ball">${FB_BODY}</svg></span>`;
-  const GTABS = [['pre', 'Pregame'], ['live', 'Live'], ['post', 'Postgame']];
+  // two tabs: Pregame, and the game itself ("Live" while it's on, "Final" after)
+  const GTABS = [['pre', 'Pregame'], ['live', 'Live']];
   // Live tab: one pane at a time, picked here (owner 2026-10-15: "if i pick stats i see stats"); box score first
   // one pane (owner 2026-10-18: "condense ... so we're not duplicating the displays"): the game's flow (win chance and
   // every drive), the plays, the box score (with its Fantasy tab) and the team stats
@@ -3392,7 +3384,7 @@
     const ser = sum ? wpSeries(sum) : [];
     const upto = rp ? rp.t : null;
     // Opens on the tab that fits the game's state; the viewer's pick sticks after that.
-    const tab = GP.tab || (rp ? 'live' : info.state === 'pre' ? 'pre' : info.state === 'in' ? 'live' : 'post');
+    const tab = GP.tab === 'pre' || (!GP.tab && !rp && info.state === 'pre') ? 'pre' : 'live';
     // one state for both: now (live / final), or as of the replay's play
     const st = stateAt(sum, info, rp && rp.play ? rp : null);
     let hs = st.score.home, as = st.score.away;
@@ -3414,14 +3406,15 @@
     const live = () => info.state === 'pre'
       ? `<section class="gcs"><p class="muted">Kicks off ${esc(kickText(g) || 'soon')}. The live view (field position, ESPN's win probability, every play, box score) starts at kickoff.</p></section>`
       : info.offline ? '<section class="gcs"><p class="muted">Live data from ESPN is unavailable right now. Try again in a minute.</p></section>'
-      : `${GP.canReplay ? `<section class="rp">${rp ? `<button type="button" data-rp="first">&laquo;</button><button type="button" data-rp="prev">&lsaquo;</button>
+      : `${GP.canReplay && rp ? `<section class="rp">${rp ? `<button type="button" data-rp="first">&laquo;</button><button type="button" data-rp="prev">&lsaquo;</button>
         <button type="button" data-rp="play">${rp.timer ? 'Pause' : 'Play'}</button><button type="button" data-rp="next">&rsaquo;</button><button type="button" data-rp="last">&raquo;</button>
         <span class="seg rp-speed">${[['slow', 'Slow'], ['normal', 'Normal'], ['fast', 'Fast']].map(([k, l]) => `<button type="button" data-rps="${k}" class="${(GP.rpSpeed || 'normal') === k ? 'on' : ''}">${l}</button>`).join('')}</span>
         <input type="range" min="0" max="${rp.plays.length - 1}" value="${rp.i}" aria-label="Replay position"><span class="muted rp-pos">Play ${rp.i + 1} of ${rp.plays.length}</span>
         <button type="button" data-rp="off">Exit replay</button>` : '<button type="button" data-rp="on">Replay this game play by play</button>'}</section>` : ''}
-      ${nowCard(st, info, sum)}
+      ${st.ended && !rp ? resultCard(info, g) : nowCard(st, info, sum)}
       <div class="seg gc-panes" role="tablist">${GPANES.map(([k, l]) => `<button type="button" role="tab" data-pane="${k}" class="${GP.pane === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-      ${GP.pane === 'flow' ? storyCard(st, info) || '<section class="gcs"><p class="muted">The game flow fills in once the game starts.</p></section>'
+      ${GP.pane === 'flow' ? (storyCard(st, info) || '<section class="gcs"><p class="muted">The game flow fills in once the game starts.</p></section>')
+        + (st.ended && !rp && ser.length >= 2 ? `<section class="gcs"><h3>Turning points</h3><p class="gcs-note">The plays that moved ESPN's win probability the most.</p>${turningCards(sum, info, ser, 6)}</section>` : '')
       : GP.pane === 'plays' ? `<section class="gcs" id="gcLog"><h3>Game log</h3>
             <div class="lg-bar"><div class="seg">${[['drive', 'By drive'], ['every', 'Every play']].map(([k, l]) => `<button type="button" data-view="${k}" class="${GP.view === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['new', 'Newest'], ['old', 'Oldest'], ['impact', 'Swings']].map(([k, l]) => `<button type="button" data-sort="${k}" class="${GP.sort === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['all', 'All'], ['score', 'Scoring'], ['to', 'Turnovers'], ['pen', 'Penalties']].map(([k, l]) => `<button type="button" data-filter="${k}" class="${GP.filter === k ? 'on' : ''}">${l}</button>`).join('')}</div>
               <input type="search" id="lgQ" placeholder="Player or text" value="${esc(GP.q)}" aria-label="Filter plays"></div>
@@ -3433,8 +3426,8 @@
     root.innerHTML = `
       <section class="sb">${side(info.away, false)}<div class="sb-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<b>${esc(status)}</b>${!nx && sp && sit && sit.shortDownDistanceText
         ? `<span class="sb-dd">${esc(sit.shortDownDistanceText)}${sit.possessionText ? ` · ${esc(sit.possessionText)}` : ''}</span>` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}</section>
-      <div class="seg gc-tabs" role="tablist">${GTABS.map(([k, l]) => `<button type="button" role="tab" data-gtab="${k}" class="${tab === k ? 'on' : ''}">${k === 'live' && info.state === 'in' ? '<span class="live-dot"></span>' : ''}${l}</button>`).join('')}</div>
-      ${tab === 'pre' ? preTab(g) : tab === 'live' ? live() : postTab(sum, info, g, ser)}`;
+      <div class="seg gc-tabs" role="tablist">${GTABS.map(([k, l]) => `<button type="button" role="tab" data-gtab="${k}" class="${tab === k ? 'on' : ''}">${k === 'live' && info.state === 'in' ? '<span class="live-dot"></span>' : ''}${k === 'live' && info.state === 'post' && !rp ? 'Final' : l}</button>`).join('')}</div>
+      ${tab === 'pre' ? preTab(g) : live()}`;
     wireGame();
   };
   // the chart's readout sits under it (owner 2026-10-18: it covered the line when it floated over the chart)

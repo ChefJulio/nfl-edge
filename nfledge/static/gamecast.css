@@ -1417,3 +1417,4 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .ff-mine .ff-tag { color: var(--good); background: color-mix(in srgb, var(--good) 20%, transparent); }
 .ff-opp .ff-tag { color: var(--bad); background: color-mix(in srgb, var(--bad) 18%, transparent); }
 .ff-mine { background: color-mix(in srgb, var(--good) 7%, transparent); }
+.gc-tabs + section { margin-top: 12px; }
