@@ -14,6 +14,7 @@ the current season is redone when its count of final games changes.
 """
 import json
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -188,7 +189,11 @@ def main():
   done, post_seasons = 0, []
   for s in seasons:
     tf, pf_ = cache.path("seasonstats_teams_v2", s), cache.path("seasonstats_players", s)  # v2: penalty count fix
-    redo = not tf.exists() or not pf_.exists() or (s == current and cache.meta.get(meta_key) != n_final_cur)
+    # this season also redoes while a final game was missing from nflverse at the last build (a late-posted Monday
+    # game), retried hourly (2026-10-19: the final-game count alone never changed again, so it waited a week)
+    lag = s == current and cache.meta.get(f"{meta_key}_missing", 1) and \
+      (time.time() - float(cache.meta.get(f"{meta_key}_at", 0))) / 3600 > D.LAG_RETRY_HOURS
+    redo = not tf.exists() or not pf_.exists() or (s == current and cache.meta.get(meta_key) != n_final_cur) or bool(lag)
     po_done = int((is_type(sched[sched.season == s].game_type, "POST") & sched[sched.season == s].home_score.notna()).sum())
     tfp, pfp = cache.path("seasonstats_teams_post_v2", s), cache.path("seasonstats_players_post", s)
     redo_po = po_done > 0 and (not tfp.exists() or not pfp.exists() or cache.meta.get(f"{meta_key}_post_{s}") != po_done)
@@ -216,6 +221,16 @@ def main():
       ts.to_parquet(tf, index=False); pl.to_parquet(pf_, index=False)
       if s == current:
         cache.meta[meta_key] = n_final_cur
+        # final games whose teams have no player-stat rows yet: flag them for the hourly retry
+        fin = sched[(sched.season == s) & (sched.game_type == "REG") & sched.home_score.notna()]
+        reg = ps[is_type(ps.season_type, "REG")]
+        have = set(zip(reg.week.astype(int), reg.team.replace(RELOCATED)))
+        miss = [g for g in fin.itertuples() if (int(g.week), RELOCATED.get(g.home_team, g.home_team)) not in have
+                or (int(g.week), RELOCATED.get(g.away_team, g.away_team)) not in have]
+        cache.meta[f"{meta_key}_missing"] = len(miss)
+        cache.meta[f"{meta_key}_at"] = time.time()
+        if miss:
+          print(f"[stats] {len(miss)} final games not in nflverse's player stats yet: retry next run after an hour", flush=True)
       done += 1
     if redo_po:
       tsp, plp = build("POST")
