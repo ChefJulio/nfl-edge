@@ -74,6 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4038441,Justice Hill,Baltimore Ravens,Active,2026-10-14T02:01Z,,,,,,Hill turned four carries into 73 yards and caught two of four targets for five yards during the Ravens' 30-23 overtime win over the Falcons on Sunday.
 4565311,Aeneas Peebles,Baltimore Ravens,Active,2026-10-12T18:57Z,,,,,,
 4697745,Tyler Loop,Baltimore Ravens,Active,2026-10-12T17:20Z,,,,,,Loop went 3-for-3 on field-goal attempts and made his lone extra-point try during the Ravens' 30-23 overtime win over the Falcons on Sunday.
+3918298,Josh Allen,Buffalo Bills,Active,2026-10-19T07:45Z,,,,,,Allen completed 23 of 33 passes for 255 yards with two touchdowns and no interceptions and rushed five times for one yard in the Bills' 33-30 win over the Raiders on Sunday.
 4379399,James Cook III,Buffalo Bills,Active,2026-10-19T07:39Z,,,,,,Cook rushed 22 times for 95 yards and a touchdown and brought in all three targets for 58 yards in the Bills' 33-30 win over the Raiders on Sunday.
 4385690,Dalton Kincaid,Buffalo Bills,Questionable,2026-10-18T22:39Z,Ribs,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Kincaid (ribs) is questionable to return to Sunday's game against the Raiders.
 3116733,Bradley Chubb,Buffalo Bills,Active,2026-10-18T21:23Z,,,,,,"Chubb (ribs) has returned to Sunday's game against the Raiders, Jay Skurski of The Buffalo News reports."
@@ -91,7 +92,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429501,Ray Davis,Buffalo Bills,Active,2026-10-14T02:57Z,,,,,,Davis caught his lone target for 31 yards while adding two carries for two yards and three kickoff returns for 114 yards during the Bills' 37-34 overtime win over the Rams on Monday.
 4635008,Keon Coleman,Buffalo Bills,Active,2026-10-13T23:25Z,,,,,,Coleman caught a seven-yard touchdown pass on two targets during the Bills' 37-34 overtime win over the Rams on Monday.
 4373678,Khalil Shakir,Buffalo Bills,Active,2026-10-13T05:22Z,,,,,,Shakir brought in all three targets for 80 yards in the Bills' 37-34 overtime win over the Rams on Monday night.
-3918298,Josh Allen,Buffalo Bills,Active,2026-10-13T04:50Z,,,,,,Allen completed 12 of 19 passes for 210 yards with one touchdown and one interception while adding 10 carries for 121 yards and another score and a two-point conversion pass in the Bills' 37-34 overtime win against the Rams on Monday night.
 4832035,Davison Igbinosun,Buffalo Bills,Active,2026-10-11T03:11Z,,,,,,"Even with Christian Benford (toe) back from injury, Igbinosun is still expected to have a role in the Bills' secondary for Monday's game against the Rams, Nick Suss of ESPN.com reports."
 4379778,Christian Benford,Buffalo Bills,Active,2026-10-10T19:17Z,,,,,,"Benford (toe) does not carry an injury designation into Monday night's game against the Rams, Joe Buscaglia of The Athletic reports."
 4683153,Skyler Bell,Buffalo Bills,Active,2026-10-10T18:14Z,,,,,,"Bell will make his NFL regular-season debut against the Rams on Monday due to the absence of Joshua Palmer (shoulder), Cameron Wolfe of NFL Network reports."
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360763,Brycen Tremayne,Carolina Panthers,Active,2026-10-06T03:00Z,,,,,,Tremayne caught two of three passes for 32 yards during Sunday's 32-26 win over the Lions.
 4567096,John Metchie III,Carolina Panthers,Active,2026-10-06T02:21Z,,,,,,Metchie caught three of five targets for 37 yards during the Panthers' 32-26 win over the Lions on Sunday.
 4427132,Ikem Ekwonu,Carolina Panthers,Out,2026-10-06T01:04Z,Knee,Surgery,Right,2026-11-08,PUP-R,"Coach Dave Canales said Monday that Ekwonu (knee) is still a considerable time away from returning to action, Mike Kaye of ESPN reports."
-4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-19T07:01Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
+4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-19T08:01Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
 4431611,Caleb Williams,Chicago Bears,Active,2026-10-19T06:31Z,,,,,,Williams completed 30 of 36 passes for 305 yards with a touchdown and no interceptions while adding four rushes for three yards in the Bears' 31-23 win over the Falcons on Sunday. He also fumbled once but recovered.
 4259545,D'Andre Swift,Chicago Bears,Active,2026-10-19T06:25Z,,,,,,Swift rushed 16 times for 44 yards and two touchdowns and brought in four of five targets for 26 yards in the Bears' 31-23 win over the Falcons on Sunday.
 4426386,Roschon Johnson,Chicago Bears,Active,2026-10-19T00:55Z,,,,,,Johnson rushed 13 times for 51 yards and a touchdown in Sunday's 31-23 win over the Falcons. He caught both of his targets for 34 yards.
@@ -174,6 +174,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4427729,Demetrius Knight Jr.,Cincinnati Bengals,Active,2026-10-07T02:23Z,,,,,,Knight finished Sunday's 22-17 loss to the Jaguars with six tackles (three solo).
 4690070,Mitchell Tinsley,Cincinnati Bengals,Active,2026-10-06T02:52Z,,,,,,Tinsley caught three of his seven targets for 49 yards in the Bengals' 22-17 loss to the Jaguars on Sunday.
 4572036,DJ Turner II,Cincinnati Bengals,Active,2026-10-02T20:17Z,,,,,,
+3122840,Deshaun Watson,Cleveland Browns,Active,2026-10-19T07:58Z,,,,,,Watson completed 16 of 26 passes for 164 yards with no touchdowns or interceptions and added eight carries for 29 yards in the Browns' 13-10 win over the Ravens on Sunday.
 4832800,Denzel Boston,Cleveland Browns,Active,2026-10-19T02:29Z,,,,,,Boston caught one of five targets for 15 yards in Sunday's 13-10 win over the Ravens.
 4241463,Jerry Jeudy,Cleveland Browns,Active,2026-10-19T01:12Z,,,,,,Jeudy caught all four targets for 69 yards in Sunday's 13-10 win over the Ravens.
 5150249,Justin Jefferson,Cleveland Browns,Questionable,2026-10-18T19:28Z,Hip,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,Jefferson (hip) is questionable to return to Sunday's game against the Ravens.
@@ -198,7 +199,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3115485,Elgton Jenkins,Cleveland Browns,Active,2026-10-15T21:02Z,,,,,,
 4569682,Audric Estime,Cleveland Browns,Active,2026-10-13T21:45Z,,,,,,The Browns signed Estime to the 53-man roster Tuesday.
 4601080,Raheim Sanders,Cleveland Browns,Injured Reserve,2026-10-13T21:00Z,Hip,Not Specified,Not Specified,2026-11-15,IR,The Browns placed Sanders (hip) on injured reserve Tuesday.
-4258620,Andre Szmyt,Cleveland Browns,Active,2026-10-12T14:52Z,,,,,,Szmyt made both of his field-goal attempts but missed his lone extra-point try during Sunday's 17-12 loss to the Jets on Sunday.
 4361579,Javonte Williams,Dallas Cowboys,Active,2026-10-19T04:23Z,,,,,,Williams rushed 11 times for 41 yards and a touchdown while catching both of his targets for nine yards in Sunday's 23-13 loss to the Packers.
 2577417,Dak Prescott,Dallas Cowboys,Active,2026-10-19T04:22Z,,,,,,"Prescott completed 34 of 54 passes for 258 yards, one touchdown and two interceptions in Sunday's 23-13 loss to the Packers. He also rushed twice for seven yards."
 4426354,George Pickens,Dallas Cowboys,Active,2026-10-19T04:21Z,,,,,,Pickens caught six of 11 targets for 73 yards in Sunday's 23-13 loss to the Packers.
@@ -399,6 +399,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3055899,Harrison Butker,Kansas City Chiefs,Active,2026-10-05T03:50Z,,,,,,Butker converted his only field-goal attempt and all three of his PATs during Sunday's 30-27 win over the Raiders.
 4361964,Chamarri Conner,Kansas City Chiefs,Active,2026-09-30T23:24Z,,,,,,Conner (knee) was a full participant at practice Wednesday.
 4361340,Tyreke Smith,Kansas City Chiefs,Active,2026-09-28T18:35Z,,,,,,
+4432665,Brock Bowers,Las Vegas Raiders,Active,2026-10-19T07:53Z,,,,,,Bowers brought in four of nine targets for 70 yards in the Raiders' 33-30 loss to the Bills on Sunday.
+4890973,Ashton Jeanty,Las Vegas Raiders,Active,2026-10-19T07:50Z,,,,,,Jeanty rushed 10 times for 22 yards and a touchdown and brought in four of six targets for 36 yards in the Raiders' 33-30 loss to the Bills on Sunday.
 4382466,Jalen Nailor,Las Vegas Raiders,Active,2026-10-19T03:25Z,,,,,,Nailor caught one of four targets for nine yards during Sunday's 33-30 loss to the Bills.
 4686658,Mike Washington Jr.,Las Vegas Raiders,Active,2026-10-19T02:13Z,,,,,,Washington rushed nine times for 43 yards in Sunday's 33-30 loss to the Bills. He added one catch for seven yards on one target.
 4428718,Tre Tucker,Las Vegas Raiders,Active,2026-10-19T00:24Z,,,,,,Tucker caught five of seven targets for 97 yards and two touchdowns in Sunday's 33-30 loss to the Bills.
@@ -413,9 +415,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5155825,Carter Runyon,Las Vegas Raiders,Injured Reserve,2026-10-17T02:53Z,Lower Body,Not Specified,Not Specified,2026-10-25,IR-R,"Runyon (lower body) has been ruled out ahead of Sunday's game against the Bills, Sam Warren of The Athletic reports."
 4432775,Dont'e Thornton Jr.,Las Vegas Raiders,Injured Reserve,2026-10-16T22:08Z,Hamstring,Not Specified,Not Specified,2026-10-25,IR-R,"Thornton (hamstring) won't be activated from injured reserve for Sunday's game against the Bills,  Sam Warren of The Athletic reports."
 3045172,Folorunso Fatukasi,Las Vegas Raiders,Active,2026-10-16T00:34Z,,,,,,
-4432665,Brock Bowers,Las Vegas Raiders,Active,2026-10-16T00:25Z,,,,,,Bowers (knee) practiced fully Thursday. Ryan McFadden of ESPN.com reports.
 4243916,Patrick Johnson,Las Vegas Raiders,Active,2026-10-15T01:44Z,,,,,,Johnson (stinger/neck) was a full participant in Wednesday's practice.
-4890973,Ashton Jeanty,Las Vegas Raiders,Active,2026-10-14T23:54Z,,,,,,"Jeanty (foot) was listed as a full participant on Wednesday's injury report, Sam Warren of The Athletic reports."
 4241983,Cody White,Las Vegas Raiders,Active,2026-10-14T00:06Z,,,,,,White caught two of four passes for 44 yards during Sunday's 45-17 loss to the Patriots.
 4429086,Michael Mayer,Las Vegas Raiders,Active,2026-10-13T01:16Z,,,,,,Mayer caught his only target for two yards during Sunday's 45-17 loss to the Patriots.
 4430896,JJ Pegues,Las Vegas Raiders,Active,2026-10-12T19:16Z,,,,,,
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4880281,Jordyn Tyson,New Orleans Saints,Injured Reserve,2026-10-12T18:59Z,Hamstring,Strain,Right,2026-11-08,IR-R,"Saints head coach Kellen Moore said Monday that Tyson (hamstring) is ""progressing well"" but isn't on track to return to practice this week, Jeff Nowak of WWL New Orleans reports."
 3051909,Daniel Carlson,New Orleans Saints,Active,2026-10-12T15:17Z,,,,,,Carlson went 1-for-2 on extra-point tries during the Saints' 23-13 loss to the Vikings on Sunday.
 4569559,Devaughn Vele,New Orleans Saints,Active,2026-10-12T00:08Z,,,,,,Vele secured four of six targets for 26 yards in the Saints' 23-13 loss to the Vikings on Sunday.
-3115303,Jermaine Eluemunor,New York Giants,Out,2026-10-19T07:01Z,Calf,Not Specified,Not Specified,2026-10-25,INACTIVE,inactive
+3115303,Jermaine Eluemunor,New York Giants,Out,2026-10-19T08:01Z,Calf,Not Specified,Not Specified,2026-10-25,INACTIVE,inactive
 4361050,Isaiah Likely,New York Giants,Active,2026-10-19T01:35Z,,,,,,Likely caught six of 11 targets for 99 yards and a touchdown in Sunday's 34-27 loss to the Saints.
 4696981,Cam Skattebo,New York Giants,Active,2026-10-19T01:31Z,,,,,,Skattebo played only six snaps and got zero carries or targets in the Giants' 34-27 loss to the Saints on Sunday.
 4433970,J.J. McCarthy,New York Giants,Active,2026-10-19T01:20Z,,,,,,"McCarthy replaced Jameis Winston in the fourth quarter of Sunday's 34-27 loss to the Saints, completing 11 of 21 passes for 243 yards and one touchdown with one interception."
