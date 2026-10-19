@@ -1142,7 +1142,10 @@
     const ev = (L && L.prac) || [];
     if (!ev.length) return '';
     const today = NFLE.clock.today();  // Eastern date (UTC rolled over at 8 pm ET: tonight's game read as past)
-    const past = ev.filter(e => e[1] <= today).slice(-6), next = ev.find(e => e[1] > today && e[0] === 'g');
+    // the last six practice days (owner 2026-10-19: games had been taking slots) and the games between them and today
+    const done = ev.filter(e => e[1] <= today), pr6 = done.filter(e => e[0] === 'p').slice(-6);
+    const from = pr6.length ? pr6[0][1] : '';
+    const past = done.filter(e => e[1] >= from), next = ev.find(e => e[1] > today && e[0] === 'g');
     const day = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
     const row = e => e[0] === 'p'
       ? `<div class="pt-row"><span class="pt-d">${day(e[1])}</span><span class="pr-chip pr-${e[2]}">${e[2] === 'D' ? 'DNP' : e[2] + 'P'}</span><span>${PR_WORD[e[2]] || ''}${e[4] ? ' <span class="muted">· not on the report</span>' : ''}${e[3] ? ` · <b>${esc(e[3])}</b>` : ''}</span></div>`
