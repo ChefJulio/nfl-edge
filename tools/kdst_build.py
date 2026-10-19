@@ -19,6 +19,7 @@ import pandas as pd  # noqa: E402
 
 from nfledge import data as D  # noqa: E402
 from nfledge import defenses as DF  # noqa: E402
+from nfledge import machine  # noqa: E402
 from nfledge.kickers import LINE, KickerModel, implied_points, load_kicks  # noqa: E402
 
 THROUGH = 17
@@ -88,6 +89,7 @@ def main():
   (site / "data").mkdir(parents=True, exist_ok=True)
   (site / "data" / "kdst.json").write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
   print(f"[kdst] kickers {len(out_k)} teams, defenses {len(out_d)}, weeks {week}-{THROUGH}", flush=True)
+  machine.add_kdst(site)  # this week's kickers and defenses in rankings.md (the week build ran before this)
 
 
 if __name__ == "__main__":

@@ -6,7 +6,8 @@ fetches a URL sees an empty frame. Each current-week build also writes, at the s
   model.md          the Model tab as Markdown: MODEL.md with this build's live values, each track record in its area
   model/<area>.md   the same, one file per area (model.md is too big for some fetchers in one go)
   model/index.html  the same as a static page (no JavaScript), for ordinary crawlers
-  rankings.md       this week's projections, one Markdown table per position
+  rankings.md       this week's projections, one Markdown table per position; kickers and team defenses are added
+                    by tools/kdst_build.py (add_kdst), which runs after the week build
   power.md          power rankings; games.md: this week's games; notebook.md: the lab notebook (docs/INSIGHTS.md)
 
 No robots.txt: the site is served under /nfl-edge/ and crawlers read robots.txt only at the domain root.
@@ -18,6 +19,7 @@ from __future__ import annotations
 
 import html
 import json
+import math
 import re
 from pathlib import Path
 
@@ -115,8 +117,8 @@ def rankings_md(week: dict, base: str) -> str:
          f"Generated {week.get('generated', '')}. Projected fantasy points in half-PPR scoring, IF the player plays. "
          "Play = his chance to take the field; Injury = his chance to sit injured (injury report, practice); Scratch = "
          "his chance to be a healthy scratch (inactive while healthy, e.g. a backup quarterback). Under 10% to play shows "
-         "as likely out. Range = 10th-90th percentile outcome. Kickers and team defenses are in "
-         f"{base}data/kdst.json. Full data: {base}index.json ; method: {base}model/chance-to-play.md", ""]
+         "as likely out. Range = 10th-90th percentile outcome. Full data: "
+         f"{base}index.json ; method: {base}model/chance-to-play.md", ""]
   for pos in POS:
     # as the app ranks them: by projection, near-certain outs (under 10% to play) after everyone else
     rows = sorted((p for p in ps if p.get("pos") == pos and p.get("rank")),
@@ -134,6 +136,66 @@ def rankings_md(week: dict, base: str) -> str:
                  f"{rng} | {_pct(pl)} | {_pct(p.get('inactive') or 0.0)} | {_pct(p.get('scratch') or 0.0)} | {st} |")
     out.append("")
   return "\n".join(out)
+
+
+# Kicker and D/ST scoring: standard ESPN rules, as the Rankings tab scores them (nfledge/static/shell.js NFLE.kdst)
+STD_K = {"fgm_0_19": 3, "fgm_20_29": 3, "fgm_30_39": 3, "fgm_40_49": 4, "fgm_50_59": 5, "fgm_60_": 5, "fgmiss_0_19": -1,
+         "fgmiss_20_29": -1, "fgmiss_30_39": -1, "fgmiss_40_49": -1, "fgmiss_50_59": -1, "fgmiss_60_": -1, "xpm": 1, "xpmiss": -1}
+STD_D = {"sack": 1, "int": 2, "fum_rec": 2, "def_td": 6, "st_td": 6, "safe": 2, "blk": 2}
+PA_TIERS = ((0, 0, 5), (1, 6, 4), (7, 13, 3), (14, 17, 1), (18, 27, 0), (28, 34, -1), (35, 45, -3), (46, math.inf, -5))
+KD_MARK = "<!-- kickers and defenses: tools/kdst_build.py -->"
+
+
+def _between(mu: float, sd: float, lo: float, hi: float) -> float:
+  """P(lo <= X <= hi) for an integer outcome of normal(mu, sd); below 0 counts as 0 (shell.js pBetween)."""
+  phi = lambda z: 0.5 * (1 + math.erf(z / math.sqrt(2)))  # noqa: E731
+  return (1.0 if hi == math.inf else phi((hi + 0.5 - mu) / sd)) - (0.0 if lo <= 0 else phi((lo - 0.5 - mu) / sd))
+
+
+def kdst_md(kd: dict, week: dict) -> str:
+  """This week's kickers and team defenses, ranked as the Rankings tab ranks them (data/kdst.json lines)."""
+  wk, teams = int(week["week"]), week.get("teams") or {}
+  opp = {}
+  for g in week.get("games") or []:
+    a, h = g["away"]["team"], g["home"]["team"]
+    opp[a], opp[h] = "@" + h, "vs " + a
+  ks = []
+  for team, o in (kd.get("k") or {}).items():
+    e = next((x for x in o["w"] if x[0] == wk), None)
+    if e:
+      ln = dict(zip(kd["k_keys"], e[2]))
+      ks.append((sum(v * STD_K.get(k, 0) for k, v in ln.items()), o["name"], team, e[1],
+                 sum(v for k, v in ln.items() if k.startswith("fg")), ln.get("xpm", 0)))
+  ds = []
+  for team, o in (kd.get("dst") or {}).items():
+    e = next((x for x in o["w"] if x[0] == wk), None)
+    if e:
+      ln = dict(zip(kd["d_keys"], e[3]))
+      v = sum(ln.get(k, 0) * w for k, w in STD_D.items()) + sum(p * _between(ln["pa_mu"], ln["pa_sd"], lo, hi) for lo, hi, p in PA_TIERS)
+      ds.append((v, team, ln["pa_mu"], ln["sack"], ln["int"] + ln["fum_rec"]))
+  if not ks and not ds:
+    return ""
+  out = [KD_MARK, "## K", "", f"Standard scoring (FG 0-39 yds 3, 40-49 4, 50+ 5, miss -1; XP 1, miss -1). Data: data/kdst.json "
+         f"(built {kd.get('built', '')}).", "", "| Rank | Kicker | Team | Opp | Proj | Team implied points | FG attempts | XP made |",
+         "|---|---|---|---|---|---|---|---|"]
+  out += [f"| {i} | {n} | {t} | {opp.get(t, 'bye')} | {v:.1f} | {imp:.1f} | {fga:.1f} | {xpa:.1f} |"
+          for i, (v, n, t, imp, fga, xpa) in enumerate(sorted(ks, key=lambda r: -r[0]), 1)]
+  out += ["", "## DST", "", "Standard scoring (sack 1, takeaway 2, defensive or return TD 6, safety 2, block 2; points allowed: "
+          "0 = 5, 1-6 = 4, 7-13 = 3, 14-17 = 1, 18-27 = 0, 28-34 = -1, 35-45 = -3, 46+ = -5).", "",
+          "| Rank | Defense | Opp | Proj | Points allowed | Sacks | Takeaways |", "|---|---|---|---|---|---|---|"]
+  out += [f"| {i} | {t} {(teams.get(t) or {}).get('nick', '')} | {opp.get(t, 'bye')} | {v:.1f} | {pa:.1f} | {sk:.1f} | {tk:.1f} |"
+          for i, (v, t, pa, sk, tk) in enumerate(sorted(ds, key=lambda r: -r[0]), 1)]
+  return "\n".join(out) + "\n"
+
+
+def add_kdst(root: Path) -> None:
+  """Add (or replace) the kicker and D/ST tables at the end of rankings.md, once data/kdst.json is built."""
+  rk, kp, wp = root / "rankings.md", root / "data" / "kdst.json", root / "index.json"
+  if not (rk.exists() and kp.exists() and wp.exists()):
+    return
+  s = rk.read_text(encoding="utf-8").split(KD_MARK)[0].rstrip() + "\n\n"
+  rk.write_text(s + kdst_md(json.loads(kp.read_text(encoding="utf-8")), json.loads(wp.read_text(encoding="utf-8"))),
+                encoding="utf-8")
 
 
 def power_md(week: dict, base: str) -> str:
@@ -196,7 +258,7 @@ are the same content in plain text and JSON.
 - [How the model works, all areas in one file]({base}model.md) ({_kb(sizes.get('model.md', 0))})
 - [How the model works (static HTML)]({base}model/): the same, as a web page without JavaScript
 - [This week's rankings (Markdown)]({base}rankings.md): projections per position with ranges, chance to play, and
-  its injury and healthy-scratch parts
+  its injury and healthy-scratch parts; kickers and team defenses
 - [Power rankings (Markdown)]({base}power.md): every team's rest-of-season and this-week rating, units, rank range
 - [This week's games (Markdown)]({base}games.md): kickoff, QBs, Vegas line and total, market and model chances, finals
 - [Lab notebook (Markdown)]({base}notebook.md) ({_kb(sizes.get('notebook.md', 0))}, too big for some fetchers in one
