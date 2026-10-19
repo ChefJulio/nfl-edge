@@ -14,3 +14,9 @@ th.ps-custom { white-space: nowrap; }
 th.sorted-asc .ps-sort, th.sorted-desc .ps-sort { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); }
 
 .seg button:disabled { opacity: .4; cursor: default; }
+
+/* a name search pauses the season / position filters (owner 2026-10-18) */
+.ps-searchnote { margin: 6px 12px 2px; font-size: var(--fs-sm); color: var(--muted); }
+.ps-searchnote b { color: var(--ink); }
+.ps-paused { opacity: .45; }
+.ps-searchnote .linkish { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; font-weight: 700; cursor: pointer; }

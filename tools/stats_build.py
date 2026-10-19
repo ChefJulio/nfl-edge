@@ -230,9 +230,38 @@ def main():
       write_players(out / f"players_{s}_post.json", pd.read_parquet(pfp), s, current, bios, espn_of)
       post_seasons.append(s)
   cache.save_meta()
+  # All years (owner 2026-10-18: "we need an all positions and all years filter"; a name search finds a player
+  # whatever the filters): one row per player, regular-season careers since FIRST, from the per-season caches
+  frames = [pd.read_parquet(cache.path("seasonstats_players", s)).assign(season=s) for s in range(FIRST, current + 1)
+            if cache.path("seasonstats_players", s).exists()]
+  if frames:
+    car = career_rows(frames)
+    write_players(out / "players_career.json", car, current, current, bios, espn_of)
+    print(f"[stats] careers: {len(car)} players", flush=True)
   (out / "index.json").write_text(json.dumps({"v": V, "seasons": seasons, "current": current, "keys": SCORE_KEYS,
-                                               "post": post_seasons}), encoding="utf-8")
+                                               "post": post_seasons, "career": bool(frames)}), encoding="utf-8")
   print(f"[stats] {len(seasons)} seasons ({done} recomputed) -> {out}", flush=True)
+
+
+RATES = ["snap_pct", "snap_pct_d", "snap_pct_st", "tgt_share", "car_share"]  # per-season shares: games-weighted over a career
+
+
+def career_rows(frames: list) -> pd.DataFrame:
+  """Season rows (players_<season>, a "season" column) -> one row per player: counting stats summed, the longest
+  field goal, shares weighted by games (seasons that have them), name / position / team from his latest season,
+  plus "first" (first season), "season" (latest) and "nsea" (seasons played)."""
+  c = pd.concat(frames, ignore_index=True).sort_values("season")
+  c = c[c.pid.astype(str) != "0"]  # one source's placeholder id (see player_logs GSIS_RE)
+  num = [x for x in c.select_dtypes("number").columns if x not in ("season", "fg_long", *RATES)]
+  g = c.groupby("pid")
+  out = g[num].sum(min_count=1)
+  out["fg_long"] = g.fg_long.max()
+  for r in RATES:
+    if r in c:
+      w = c.games.fillna(0).where(c[r].notna(), 0)
+      out[r] = (c[r].fillna(0) * w).groupby(c.pid).sum() / w.groupby(c.pid).sum().replace(0, np.nan)
+  out = out.join(g[["name", "pos", "team"]].last()).join(g.season.agg(first="min", season="max", nsea="nunique"))
+  return out.reset_index()
 
 
 def _clean(v):
@@ -258,12 +287,15 @@ def write_team(path: Path, ts: pd.DataFrame, season: int, teams: pd.DataFrame):
 def write_players(path: Path, pl: pd.DataFrame, season: int, current: int, bios: dict, espn: dict | None = None):
   num = [c for c in pl.columns if c not in ("pid", "name", "pos", "team")]
   rows = []
+  per_row = "season" in pl  # careers: each player's latest season dates his age, experience and contract
   for r in pl.itertuples(index=False):
+    if per_row:
+      season = int(r.season)
     b = bios.get(r.pid, {})
     d, k = b.get("draft") or {}, b.get("deal") or {}
     born = b.get("born")
     age = round((pd.Timestamp(f"{season}-09-07") - pd.Timestamp(born)).days / 365.25, 1) if born else None
-    rows.append([r.pid, r.name, r.pos, r.team] + [_clean(getattr(r, c)) for c in num] + [
+    rows.append([r.pid, _clean(r.name), _clean(r.pos), _clean(r.team)] + [_clean(getattr(r, c)) for c in num] + [
       age, b.get("ht"), b.get("wt"), (b.get("college") or "").split(";")[0].strip() or None,
       (b.get("exp") - (b.get("exp_s", season) - season)) if b.get("exp") is not None else None,
       d.get("y"), d.get("r"), d.get("p"), d.get("o"), 1 if d.get("u") else 0,

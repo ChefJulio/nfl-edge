@@ -76,6 +76,9 @@
   add('fp', 'FPts', 'Fantasy', r => r._fp, 'd1', 'Fantasy points in your scoring', 'desc', true);
   add('fpg', 'FP/G', 'Fantasy', r => div(r._fp, r.games), 'd1', 'Fantasy points per game');
   add('fp_rank', 'Pos rank', 'Fantasy', r => r._rank, 'i', 'Fantasy-points finish at his position', 'asc');
+  // careers (All years / a name search): the seasons he played, "2005-11", seasons count on hover
+  const SPAN = { key: 'span', label: 'Seasons', first: 'asc', num: true, title: 'First and latest season (regular season)',
+    value: r => r.first, html: r => r.first == null ? '' : `<span title="${r.nsea} season${r.nsea === 1 ? '' : 's'}">${r.first === r.season ? r.first : `${r.first}&ndash;${String(r.season).slice(2)}`}</span>` };
   const BY = Object.fromEntries(A.map(a => [a.key, a]));
   const DEFAULTS = {
     All: ['games', 'snaps_o', 'passing_yards', 'rushing_yards', 'receiving_yards', 'fp', 'fpg'],
@@ -107,11 +110,22 @@
           <div class="seg ps-type"><button type="button" data-t="reg">Regular season</button><button type="button" data-t="post">Playoffs</button></div>
           <select class="dt-select ps-pos" aria-label="Position">${['All', ...Object.keys(GROUPS)].map(g => `<option value="${g}">${g === 'All' ? 'All positions' : g}</option>`).join('')}</select>
           <div class="seg ps-per"><button type="button" data-v="tot">Totals</button><button type="button" data-v="pg">Per game</button></div>
-          <input class="ps-q" type="search" placeholder="Find a player" aria-label="Find a player">
-        </div><div class="skel-zone ps-tbl"></div></div>
+          <input class="ps-q" type="search" placeholder="Find any player, any year" aria-label="Find a player">
+        </div><p class="ps-searchnote" hidden></p><div class="skel-zone ps-tbl"></div></div>
         <p class="st-note muted">Regular season, raw (not adjusted for opponents). Fantasy points use your scoring settings (Rankings &rsaquo; Scoring &amp; league). The last three columns are yours: pick any stat, bio, draft or contract detail.</p>`;
       const sub = sec.querySelector('.ps-sub'), selS = sec.querySelector('.ps-season'), selP = sec.querySelector('.ps-pos'), q = sec.querySelector('.ps-q');
       let all = [], pos = store('nfledge-ps-pos') || 'QB', per = store('nfledge-ps-per') === 'pg', table = null;
+      // careers (data/stats/players_career.json): the All years view, and every name search (owner 2026-10-18: "if i
+      // type in marion barber his name should show up no matter what year or stats or position im filtering")
+      let career = null, careerP = null, seasonRows = [], lastMode = '', seasonSub = '';
+      const note = sec.querySelector('.ps-searchnote');
+      const term = () => q.value.trim().toLowerCase();
+      // a team code ("dal") still filters the picked season by team, as before
+      const searching = () => term().length >= 2 && !Object.keys(TEAMS).some(t => t.toLowerCase() === term());
+      const view = () => searching() || selS.value === 'all' ? 'career' : 'season';
+      const curPos = () => searching() ? 'All' : pos;
+      const toRows = d => d.rows.map(v => { const r = Object.fromEntries(d.cols.map((c, i) => [c, v[i]])); r._g = groupOf(r.pos); return r; });
+      const loadCareer = () => careerP || (careerP = NFLE.load('data/stats/players_career.json').then(d => { career = toRows(d); score(career); return career; }));
       let custom = (() => { try { return JSON.parse(store('nfledge-ps-custom') || 'null') || ['age', 'draft', 'apy']; } catch (e) { return ['age', 'draft', 'apy']; } })();
       if (!DEFAULTS[pos]) pos = 'QB';
       selP.value = pos;
@@ -124,10 +138,11 @@
       const columns = () => [
         { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name,
           html: r => NFLE.ui.player({ name: r.name, pos: r.pos, grp: groupOf(r.pos), team: r.team, espn: r.espn }, TEAMS) },
-        ...DEFAULTS[pos].map(k => col(BY[k])),
+        ...(view() === 'career' ? [SPAN] : []),
+        ...DEFAULTS[curPos()].map(k => col(BY[k])),
         ...custom.map((k, i) => col(BY[k] || null, i)),
       ];
-      const score = () => {
+      const score = (all) => {
         const w = (NFLE.weights && NFLE.weights()) || HALF;
         all.forEach(r => {
           r._fp = (r.passing_yards || 0) * (w.pass_yd || 0) + (r.passing_tds || 0) * (w.pass_td || 0) + (r.passing_interceptions || 0) * (w.interception || 0)
@@ -139,17 +154,28 @@
         all.forEach(r => (byG[r._g] = byG[r._g] || []).push(r));
         Object.values(byG).forEach(g => g.sort((a, b) => b._fp - a._fp).forEach((r, i) => { r._rank = r._fp > 0 ? i + 1 : null; }));
       };
+      // a name search: every player whose name has the words (any order), all positions, all years; else the filters
       const rows = () => {
-        const t = q.value.trim().toLowerCase();
+        const t = term(), words = t.split(/\s+/).filter(Boolean);
+        if (searching()) return (career || []).filter(r => { const n = (r.name || '').toLowerCase(); return words.every(x => n.includes(x)); });
+        all = view() === 'career' ? (career || []) : seasonRows;
         return all.filter(r => (pos === 'All' || r._g === pos) && (!t || (r.name || '').toLowerCase().includes(t) || (r.team || '').toLowerCase() === t));
       };
       const draw = (resort) => {
+        if (view() === 'career' && !career) { sub.textContent = 'Loading every season\u2026'; loadCareer().then(() => draw(true)); return; }
         sec.querySelectorAll('.ps-per button').forEach(b => b.classList.toggle('on', (b.dataset.v === 'pg') === per));
-        const cols = columns();
-        if (!table) table = NFLE.Table(sec.querySelector('.ps-tbl'), { howto: true, columns: cols, rows: rows(), sort: { key: SORT0[pos], dir: 'desc' }, cls: 'tiles',
+        const srch = searching();
+        note.hidden = !srch;
+        if (srch) note.innerHTML = `Searching every season and position for <b>${esc(q.value.trim())}</b>, career totals. <button type="button" class="linkish ps-clear">Clear</button> to go back to ${esc(selS.value === 'all' ? 'all years' : selS.value)}, ${esc(pos === 'All' ? 'all positions' : pos)}.`;
+        sec.querySelectorAll('.ps-season, .ps-pos, .ps-type').forEach(x => x.classList.toggle('ps-paused', srch));
+        sub.textContent = view() === 'season' ? seasonSub : srch ? 'Every season and position' : `All years, ${IX ? IX.seasons[0] : ''}-${IX ? IX.current : ''} regular season: ${career.length.toLocaleString()} players`;
+        const mode = `${view()}|${curPos()}`, cols = columns(), rs = rows(), sk = { key: SORT0[curPos()], dir: 'desc' };
+        if (!table) table = NFLE.Table(sec.querySelector('.ps-tbl'), { howto: true, columns: cols, rows: rs, sort: sk, cls: 'tiles',
           rowClass: () => 'teamrow', rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.team)}${/^\d\d-\d{7}$/.test(r.pid) ? ` data-open-pid="${esc(r.pid)}"` : ''}` });
-        else { table.setColumns(cols); table.update(rows()); if (resort) table.setSort({ key: SORT0[pos], dir: 'desc' }); }
+        else { table.setColumns(cols); table.update(rs); if (resort || mode !== lastMode) table.setSort(sk); }
+        lastMode = mode;
       };
+      sec.addEventListener('click', e => { if (e.target.closest('.ps-clear')) { q.value = ''; draw(true); } });
       // Custom-column sort buttons: the table ignores clicks on header controls, so they sort it themselves
       // (first tap = the stat's natural direction, the next flips it).
       sec.addEventListener('click', e => {
@@ -167,26 +193,30 @@
       // Regular season / Playoffs (owner 2026-10-14): separate files, never mixed (players_<season>_post.json)
       let stype = 'reg', IX = null;
       const typeBtns = () => sec.querySelectorAll('.ps-type button').forEach(b => {
-        const has = b.dataset.t === 'reg' || (IX && (IX.post || []).includes(+selS.value));
+        const has = b.dataset.t === 'reg' || (selS.value !== 'all' && IX && (IX.post || []).includes(+selS.value));
         b.disabled = !has; b.title = has ? '' : 'No playoff games that season'; b.classList.toggle('on', b.dataset.t === stype);
       });
-      const load = s => { if (stype === 'post' && !(IX && (IX.post || []).includes(s))) stype = 'reg'; typeBtns();
+      const load = s => {
+        if (s === 'all') { stype = 'reg'; typeBtns(); return loadCareer().then(() => draw(true)); }  // careers: regular season only
+        s = +s;
+        if (stype === 'post' && !(IX && (IX.post || []).includes(s))) stype = 'reg'; typeBtns();
         return NFLE.load(`data/stats/players_${s}${stype === 'post' ? '_post' : ''}.json`).then(d => {
-        all = d.rows.map(v => { const r = Object.fromEntries(d.cols.map((c, i) => [c, v[i]])); r._g = groupOf(r.pos); return r; });
-        score();
-        sub.textContent = `${s} ${stype === 'post' ? 'playoffs' : 'regular season'}: ${all.length.toLocaleString()} players`;
+        seasonRows = toRows(d);
+        score(seasonRows);
+        seasonSub = `${s} ${stype === 'post' ? 'playoffs' : 'regular season'}: ${seasonRows.length.toLocaleString()} players`;
         draw(true);
       }).catch(e => { console.error('[stats]', e); sub.textContent = 'No player stats for that season.'; }); };
-      sec.querySelector('.ps-type').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (b && !b.disabled) { stype = b.dataset.t; load(+selS.value); } });
+      sec.querySelector('.ps-type').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (b && !b.disabled) { stype = b.dataset.t; load(selS.value); } });
       selP.onchange = () => { pos = selP.value; store('nfledge-ps-pos', pos); draw(true); };
       sec.querySelector('.ps-per').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) { per = b.dataset.v === 'pg'; store('nfledge-ps-per', per ? 'pg' : 'tot'); draw(false); } });
-      q.oninput = () => table && table.update(rows());
-      document.addEventListener('nfle-scoring', () => { if (all.length) { score(); draw(false); } });
+      // the first search letters fetch the careers; search on / off swaps the columns
+      q.oninput = () => { if (table) draw(false); };
+      document.addEventListener('nfle-scoring', () => { score(seasonRows); if (career) score(career); if (table) draw(false); });
       NFLE.load('data/stats/index.json').then(ix => {
         IX = ix;
         const want = pageSeason() && ix.seasons.includes(pageSeason()) ? pageSeason() : ix.current;
-        selS.innerHTML = [...ix.seasons].reverse().map(s => `<option value="${s}"${s === want ? ' selected' : ''}>${s}</option>`).join('');
-        selS.onchange = () => load(+selS.value);
+        selS.innerHTML = (ix.career ? '<option value="all">All years</option>' : '') + [...ix.seasons].reverse().map(s => `<option value="${s}"${s === want ? ' selected' : ''}>${s}</option>`).join('');
+        selS.onchange = () => load(selS.value);
         load(want);
       }).catch(() => { sub.textContent = 'Player stats are not available on this page.'; });
     },
