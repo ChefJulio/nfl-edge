@@ -665,6 +665,21 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
   name_of = dict(zip(st.player_id, st.player_display_name))
   name_of.update(dict(zip(last_ros.gsis_id, last_ros.full_name)))
   last_ros = {k: v[0] for k, v in rows_by(last_ros, "gsis_id").items()}
+  # defenders' game grades (owner 2026-10-18: "get the grades working"): a game's IDP points (IDP123, as the season
+  # grade) against every game that season by qualified defenders in his group; qualification is grade_build's
+  import grade_build as GB
+  dg, _, _, dqual = GB.defense_table(cache, cur, allsched)
+  dpools = GB.defense_game_pools(dg, dqual)
+  dgame = {(a, int(b), int(c)): (p, f) for a, b, c, p, f in zip(dg.gsis_id, dg.season, dg.week, dg.pos, dg.fp)}
+
+  def def_grade(pid, s, w, pos):
+    # on the field without a stat line (snaps only): a 0-point game in his group, not an ungraded one
+    x = dgame.get((pid, s, w)) or ((GB.DEF_GROUP[pos], 0.0) if pos in GB.DEF_GROUP else None)
+    v = dpools.get((s, x[0])) if x else None
+    if v is None or len(v) < 20:
+      return None
+    below, upto = np.searchsorted(v, x[1], "left"), np.searchsorted(v, x[1], "right")
+    return int(min(99, np.floor(100 * (below + 0.5 * (upto - below)) / len(v))))
   out_dir = site / "data" / "players"
   n = 0
   for pid in ids:
@@ -706,6 +721,9 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
         a = adv.get((pid, s, w))
         if a is not None:
           e["a"] = a
+        gr = def_grade(pid, s, w, pos)
+        if gr is not None:
+          e["gr"] = gr
     seasons = {}
     for (s, w), e in sorted(games.items()):
       gid = gid_of.get((s, w, e["t"]))

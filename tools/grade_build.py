@@ -839,8 +839,10 @@ def defense_games(cache, cur: int) -> pd.DataFrame:
   return pd.concat(out, ignore_index=True)
 
 
-def build_defense(out: Path, cur: int, sched: pd.DataFrame, cache) -> None:
-  """Adds DL / LB / DB records (the skill records' layout) to data/grades/<season>.json, 1999..cur."""
+def defense_table(cache, cur: int, sched: pd.DataFrame):
+  """(player-games, player-seasons, spot-starter seasons, qualified {(gsis, season)}): the one place defenders'
+  qualification lives; build_defense grades seasons from it, tools/player_logs.py grades single games against the
+  qualified players' games."""
   g = defense_games(cache, cur)
   g["games"] = 1.0
   g["tk_all"] = g.tk + g.ast
@@ -865,6 +867,26 @@ def build_defense(out: Path, cur: int, sched: pd.DataFrame, cache) -> None:
   tsub = sub_g.groupby(["gsis_id", "season"]).agg(agg).reset_index()
   tsub["rtg_n"] = _rating(tsub.ccmp, tsub.ctgt, tsub.cyd, tsub.ctd, tsub.cint) * tsub.ctgt
   qual = set(zip(t.gsis_id[t.qual], t.season[t.qual]))
+  return g, t, tsub, qual
+
+
+def defense_game_pools(g: pd.DataFrame, qual: set) -> dict:
+  """(season, group) -> sorted IDP points of every game by a qualified defender; the current season padded with last
+  season's games from the weeks not played yet (as the skill players' pools, tools/player_logs.py)."""
+  q = g[[(a, b) in qual for a, b in zip(g.gsis_id, g.season)]]
+  pools = {(int(s), p): np.sort(x.fp.to_numpy(float)) for (s, p), x in q.groupby(["season", "pos"])}
+  cur_s = int(g.season.max())
+  done = int(g[g.season == cur_s].week.max()) if (g.season == cur_s).any() else 0
+  for p in DEF_POS:
+    prev = q[(q.season == cur_s - 1) & (q.pos == p) & (q.week > done)].fp.to_numpy(float)
+    if len(prev):
+      pools[(cur_s, p)] = np.sort(np.concatenate([pools.get((cur_s, p), np.array([])), prev]))
+  return pools
+
+
+def build_defense(out: Path, cur: int, sched: pd.DataFrame, cache) -> None:
+  """Adds DL / LB / DB records (the skill records' layout) to data/grades/<season>.json, 1999..cur."""
+  g, t, tsub, qual = defense_table(cache, cur, sched)
   qg = g[[(a, b) in qual for a, b in zip(g.gsis_id, g.season)]]
   fpri = {pos: mom_prior(qg[qg.pos == pos].assign(games=1.0), "fp", "games") or (float(qg[qg.pos == pos].fp.mean()), 3.0)
           for pos in DEF_POS}

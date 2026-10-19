@@ -1565,9 +1565,9 @@
     const rk = hasRet ? (L.ret_keys || []) : [];
     const idp = L.kind === 'def', w = idp ? weights() : null;
     const ak = idp && seasons.some(S => S.g.some(g => g.a)) ? Object.keys(ADV_COLS) : [], akI = k => (L.adv_keys || []).indexOf(k);
-    const head = `<tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Snap</th>${idp ? '<th class="num" title="IDP fantasy points, your scoring">Pts</th>' : ''}${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}${ak.map(k => `<th class="num lg-adv" title="${esc(ADV_COLS[k][1])}">${ADV_COLS[k][0]}</th>`).join('')}${rk.map(k => `<th class="num" title="${esc(RET_COLS[k][1])}">${RET_COLS[k][0]}</th>`).join('')}</tr>`;
-    const n = 3 + (idp ? 1 : 0) + keys.length + ak.length + rk.length;
-    const ptsCell = g => idp ? `<td class="num"><b>${f1(idpPts(L, g, w))}</b></td>` : '';
+    const head = `<tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Snap</th>${idp ? '<th class="num" title="IDP fantasy points, your scoring">Pts</th><th class="num" title="Game grade, on the OVR\'s 50-99 scale: his IDP points that game against every game by qualified defenders in his group that season">Grd</th>' : ''}${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}${ak.map(k => `<th class="num lg-adv" title="${esc(ADV_COLS[k][1])}">${ADV_COLS[k][0]}</th>`).join('')}${rk.map(k => `<th class="num" title="${esc(RET_COLS[k][1])}">${RET_COLS[k][0]}</th>`).join('')}</tr>`;
+    const n = 3 + (idp ? 2 : 0) + keys.length + ak.length + rk.length;
+    const ptsCell = g => idp ? `<td class="num"><b>${f1(idpPts(L, g, w))}</b></td><td class="num">${g.gr != null ? `<span class="lg-rk ${g.gr >= 80 ? 'rk-good' : g.gr <= 30 ? 'rk-bad' : 'rk-mid'}">${ovr(g.gr)}</span>` : '–'}</td>` : '';
     const advCells = g => ak.map(k => `<td class="num lg-adv">${g.a ? nfmt(g.a[akI(k)]) : '–'}</td>`).join('');
     const body = seasons.map(S => {
       const t = kindTotals(L, S.g), team = S.g.length ? S.g[S.g.length - 1].t : '';
@@ -1578,7 +1578,7 @@
         if (gs.length < 2 || opts.compact) return '';
         const sum = (g2, i) => gs.reduce((a, g) => a + (+((g[g2] || [])[i]) || 0), 0), sn = gs.filter(g => g.sn != null);
         const at = idp ? advTotals(L, gs) : null;
-        return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num">${sn.length ? Math.round(sn.reduce((a, g) => a + g.sn, 0) / sn.length) : '–'}</td>${idp ? `<td class="num"><b>${f1(gs.reduce((x, g) => x + idpPts(L, g, w), 0))}</b></td>` : ''}${keys.map(k => `<td class="num">${nfmt(sum('d', (L.keys || []).indexOf(k)))}</td>`).join('')}${ak.map(k => `<td class="num lg-adv">${at.n ? nfmt(at[k] || 0) : '–'}</td>`).join('')}${rk.map((k, i) => `<td class="num">${nfmt(sum('r', i))}</td>`).join('')}</tr>
+        return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num">${sn.length ? Math.round(sn.reduce((a, g) => a + g.sn, 0) / sn.length) : '–'}</td>${idp ? `<td class="num"><b>${f1(gs.reduce((x, g) => x + idpPts(L, g, w), 0))}</b></td><td></td>` : ''}${keys.map(k => `<td class="num">${nfmt(sum('d', (L.keys || []).indexOf(k)))}</td>`).join('')}${ak.map(k => `<td class="num lg-adv">${at.n ? nfmt(at[k] || 0) : '–'}</td>`).join('')}${rk.map((k, i) => `<td class="num">${nfmt(sum('r', i))}</td>`).join('')}</tr>
           <tr class="lg-gap"><td colspan="${n}"></td></tr>`;
       };
       const miss = g => `<tr class="lg-miss"${tileAttrs(g)}><td>${g.w}</td>${g.o ? `<td class="lg-opp tm-opp"><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>` : '<td class="lg-opp">&ndash;</td>'}
@@ -1748,7 +1748,7 @@
     if (!gs.length) return '';
     return `<div class="pc-box"><div class="pc-k">Game grades · ${S.s}</div><div class="gg-strip">${gs.map(g =>
       `<div class="gg" title="Week ${g.w} ${g.h === 0 ? '@' : 'vs'} ${esc(g.o)}"><small>Wk ${g.w}</small><span class="lg-rk ${g.gr >= 80 ? 'rk-good' : g.gr <= 30 ? 'rk-bad' : 'rk-mid'}">${ovr(g.gr)}</span><small class="muted">${g.h === 0 ? '@' : ''}${esc(g.o)}</small></div>`).join('')}</div>
-      <p class="pc-sub">Each game graded the same way as the overall: his fantasy output that game against every game by qualified ${esc(L.pos || '')}s this season, on the same 50-99 scale. The overall above smooths these over three seasons.</p></div>`;
+      <p class="pc-sub">Each game graded the same way as the overall: his ${L.kind === 'def' ? 'IDP points' : 'fantasy output'} that game against every game by qualified ${esc(L.kind === 'def' ? ({ DL: 'defensive linemen', LB: 'linebackers', DB: 'defensive backs' })[DEF_GROUP[L.pos] || 'DB'] : `${L.pos || ''}s`)} this season, on the same 50-99 scale. The overall above smooths these over three seasons.</p></div>`;
   };
   const gradeTab = (pid, docs, L) => {
     const all = docs.filter(d => d && d.players[pid]).sort((a, b) => b.season - a.season);
