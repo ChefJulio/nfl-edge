@@ -631,6 +631,7 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
 **Queued (pre-register before running)**
 - (AS) midweek stage from the calendar; (AT) one "early week" definition (week clock entry, 2026-10-18).
 - Week clock remaining moves (7 items, "Week clock ... REMAINING WORK" entry).
+- (BB) is the quarterback swing too small? (pre-registered 2026-10-19, log below; qbrun arm and scorer to build).
 - Partial Vegas lines: if any game of a week lacks a line, every game drops to the model's own volume
   (team_model.GameModel.predict `.all()`); per-game fallback.
 - Small IR-audit leftovers: qb2_play_rate needs a board QB at depth rank 1; debut prior's absolute depth_rank <= 2;
@@ -2835,3 +2836,32 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   starts a build when nflverse republishes the play-by-play after the week's Sunday games are final. Thursday games
   wait for Sunday's (a midweek refit would move the weekend's projections before lineups lock: untested). To watch on
   the first live Mondays: how far the Monday-night players' projections move (not covered by the gate).
+- **PRE-REGISTERED 2026-10-19 (owner, on the Ravens' "this week +0.5": "that lamar is 0.5 team epa better than
+  huntley?"): (BB) is the quarterback swing too small?** The live fit rates Lamar Jackson +0.037 EPA/dropback (+1.1
+  pts/game at 37.7 dropbacks x 0.743 pts/EPA) and Tyler Huntley -0.004 (-0.1): Lamar -> Huntley moves the Ravens ~1.2
+  pts/game, where the market typically moves several. Josh Allen +1.6, Burrow +0.7, Hurts -0.6; Tanner McKee -6.5,
+  nearly all the inexperienced term. Suspected causes: (1) QB effects are ridge-shrunk hard (qb_alpha_grid picks 300,
+  tuned by time-split CV on play EPA, never on starter changes), so the team pass coefficient keeps the starter's
+  quality when he sits; (2) the QB term covers dropbacks only: designed QB runs sit in the team rush unit and stay
+  with the team. Prior evidence, none of it a test of this: removing QB effects changed game margin MAE +0.011
+  [-0.075, +0.096] (they add almost nothing at their size); experienced backups starting are overrated +2.15 [-0.56,
+  +4.78] (Vegas +0.55, n 90; finding 2026-10-16); new arrivals +6.07; usual starter returning +1.48 [-1.76, +4.83].
+  Test (tools/game_eval.py, corrected harness: each game rates its actual starter; walk-forward 2021-25, each season
+  tuned and trained on the two before; --save for paired rows; a new tools/qb_swing_eval.py scores them).
+  Rows: "QB-change team-games" = the game's starter (most dropbacks) is not the team's usual starter (most starts this
+  season before that week), plus the usual starter's first game back after missing one or more; every other
+  team-game is "same QB". Arms: base (production); a100 and a30 (team_model.qb_alpha_grid fixed at [100] / [30]:
+  less QB shrinkage; team penalties still tuned); qbrun (new, behind config team_model.qb_rush_effects: a QB term in
+  the rush unit on designed QB runs, same penalty as the pass unit's, applied to the game's starter); reported only:
+  qbrun with the better of a100 / a30.
+  Diagnosis first (reported, sets nothing): base's signed gap to the market on QB-change rows from the changed team's
+  side (model margin - Vegas closing margin; + = we rate them better than the market), by kind (backup in, starter
+  back, new arrival, inexperienced), next to the same on same-QB rows.
+  GATE, each arm vs base, paired by game, 95% CI from a bootstrap over season-weeks: (1) on QB-change rows the mean
+  |model margin - Vegas margin| is lower, CI excluding 0 (the market's line is a far less noisy yardstick than one
+  game's score, and the quantity in question is the size of the swing); (2) on QB-change rows the margin MAE against
+  actual results is not worse (CI upper < +0.10), and on all games not worse (CI upper < +0.02), so an arm can't pass
+  by copying the market while missing results; (3) fantasy MAE, all relevant players (tools/experiments.py
+  2021-2025), not worse (CI upper < +0.005). Ship: an arm passing all three (two passing: the lower QB-change gap to
+  Vegas). Reported, not gated: the implied Lamar -> Huntley swing and the five largest live QB swings under each arm;
+  win-chance Brier on QB-change games (tools/win_rank_eval.py basis).
