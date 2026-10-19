@@ -1,5 +1,5 @@
 ---
-documented_code_hash: a06268fd97d85f5e
+documented_code_hash: b960ac069326d362
 ---
 # How the model works
 
@@ -208,7 +208,7 @@ Ratings are estimated per play. On the Power tab they are shown as **points per 
 - its neutral-situation pass rate over expected (PROE: win probability 20-80%, quarters 1-3);
 - game script: the Vegas spread when lines are posted, otherwise the model's own projected margin.
 
-Player projections also use the Vegas total and spread when every game that week has a line. Matchups always uses the model-only version.
+Player projections also use the Vegas total and spread for every game that has both; a game without a line (taken off the board) uses the model's own numbers, game by game. Matchups always uses the model-only version.
 
 **Points.** Expected offensive EPA per game (dropbacks × pass EPA + rushes × rush EPA, against this opponent, including home field and the starting QB), plus the special-teams edge, converts to points through a calibration learned on the 6 seasons before: {{ L.points_model }}. It uses a longer window than other components because two seasons pin down the special-teams weight poorly.
 

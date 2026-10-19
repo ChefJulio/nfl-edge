@@ -655,16 +655,23 @@ class GameModel:
     """Team-perspective predictions: plays, dropbacks, rushes, expected points. Model-only mode replaces the
     Vegas spread with the model's own margin (one fixed-point iteration) and drops the Vegas total."""
     g = self._features(matchup_frame(games, starters), r, vf)
-    if use_vegas and g.spread_team.notna().all() and g.total_line.notna().all():
+    # per game (2026-10-19): a game with both Vegas numbers uses them; a game without (a line off the board) goes
+    # model-only on its own. It had been all-or-nothing: one missing line sent every game of the week model-only.
+    has = (g.spread_team.notna() & g.total_line.notna()) if use_vegas else pd.Series(False, index=g.index)
+    if has.all():
       g["plays_hat"] = self.plays_vegas.predict(g)
       g["pass_rate_hat"] = self.pass_rate.predict(g)
     else:
+      vegas_spread = g.spread_team.copy()
       g["plays_hat"] = self.plays_model.predict(g)
       g["spread_team"] = 0.0
       for _ in range(2):
         pts = self._points(g)
         game_total = pts.groupby(g.game_id).transform("sum")
         g["spread_team"] = 2 * pts - game_total  # our points minus opponent points
+      if has.any():
+        g.loc[has, "spread_team"] = vegas_spread[has]
+        g.loc[has, "plays_hat"] = self.plays_vegas.predict(g[has])
       g["pass_rate_hat"] = self.pass_rate.predict(g)
     g["dropbacks_hat"] = g.plays_hat * g.pass_rate_hat
     g["rushes_hat"] = g.plays_hat - g.dropbacks_hat
