@@ -776,13 +776,14 @@
     // request), newest first, scored under this league's settings; gamecast.js builds the feed from the live box scores
     const liveView = () => {
       const m = L.matchup(mine.id), opp = m && L.teams.find(t => t.id === m.opp);
-      const st = t => ((m && m.starters && m.starters[t.id]) || t.starters || []).map(gsisOf).filter(Boolean);
+      // starters as our ids; a team defense (Sleeper's team code, ESPN's team id) as DST-<team> (scored per play too)
+      const st = t => ((m && m.starters && m.starters[t.id]) || t.starters || []).map(x => gsisOf(x) || (dstTeam(x) ? `DST-${dstTeam(x)}` : null)).filter(Boolean);
       const ids = new Map();
       if (feedWho !== 'mine' && opp) st(opp).forEach(g => ids.set(g, 'opp'));
       if (feedWho !== 'opp') st(mine).forEach(g => ids.set(g, 'mine'));
-      const cards = NFLE.livePlays ? NFLE.livePlays(ids, L.scoring) : [];
+      const cards = NFLE.livePlays ? NFLE.livePlays(ids, L.scoring, { kw: L.kw, dw: L.dw }) : [];
       const seg = `<div class="seg lpf-who">${[['mine', 'My starters'], ['both', opp ? `+ ${opp.name}` : 'Both'], ['opp', opp ? opp.name : 'Opponent']].map(([k, l]) => `<button type="button" data-who="${k}" class="${feedWho === k ? 'on' : ''}">${esc(l)}</button>`).join('')}</div>`;
-      return `${seg}<p class="muted lg-note">Every play that moved these players' points, newest first, under your league's scoring; the number beside each player is his game total after the play. Updates every 20 seconds while open.</p>
+      return `${seg}<p class="muted lg-note">Every play that moved these players' points, newest first, under your league's scoring (kickers and defenses too; a defense's points-allowed tier counts only at the end of its game); the number beside each player is his game total after the play. Updates every 20 seconds while open.</p>
         ${NFLE.livePlaysHtml ? NFLE.livePlaysHtml(cards) : ''}`;
     };
     const draw = () => {
@@ -792,7 +793,8 @@
       box.innerHTML = view === 'live' ? liveView() : view === 'lineup' ? lineupView() : view === 'matchup' ? matchupView() : view === 'teams' ? teamsView() : view === 'trade' ? tradeView() : waiversView();
       box.querySelectorAll('[data-who]').forEach(b => b.onclick = () => { feedWho = b.dataset.who; draw(); });
       if (view === 'trade') wireTrade(box);
-      if (NFLE.ui && NFLE.ui.ready) NFLE.ui.ready.then(() => {});
+      // the site-wide id map (kickers in the live feed): redraw once when it arrives, never again after
+      if (NFLE.ui && NFLE.ui.ready && !NFLE.ui.ids) NFLE.ui.ready.then(() => { if (L && view === 'live') draw(); });
     };
 
     const header = () => {

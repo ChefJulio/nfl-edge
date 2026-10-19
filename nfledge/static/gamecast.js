@@ -2777,16 +2777,23 @@
   // Each card: the game and score after the play, the quarter, clock and down, the play as a headline, then a row per
   // player in it with what it gave him (the league's scoring) and his running total. Read from the box scores this
   // page already polls (every 20 s while the feed is open).
-  NFLE.livePlays = (ids, w) => {
+  // kd: { kw, dw } the league's kicker / D/ST settings (owner 2026-10-19: the feed skipped kickers and defenses); each
+  // field goal / extra point and each defensive event (sack, takeaway, defensive or return TD, safety, block) scores on
+  // its play; points-allowed tiers are scored on the whole game, so they never appear here
+  NFLE.livePlays = (ids, w, kd = {}) => {
     if (!DATA) return [];
     w = w || weights();
+    const kw = kd.kw || NFLE.kdst.STD_K, dw = kd.dw || NFLE.kdst.STD_D;
+    const band = y => y < 20 ? '0_19' : y < 30 ? '20_29' : y < 40 ? '30_39' : y < 50 ? '40_49' : y < 60 ? '50_59' : '60_';
     const map = byEspn(), K = KEYS(), cards = [];
     Object.entries(LIVE.byGame).forEach(([gid, st]) => {
       const sum = LIVE.sums[st.id];
       if (!sum) return;
       const nm = {}, names = fullNames(sum, nm), run = {};
+      let ph = 0, pa_ = 0;
       allPlays(sum).flatMap(d => d.plays || []).forEach(p => {
         if (nonPlay(p)) return;
+        const dh = (p.homeScore || 0) - ph, da = (p.awayScore || 0) - pa_; ph = p.homeScore || ph; pa_ = p.awayScore || pa_;
         const a = spot(p.start, st);
         const hd = playHead(p, names, a ? { off: a.offense.team, other: a.offense.team === st.away.team ? st.home.team : st.away.team } : {});
         const rows = [];
@@ -2797,6 +2804,36 @@
           run[pid] = (run[pid] || 0) + fp;
           if (ids.has(pid) && Math.abs(fp) >= 0.05) rows.push({ pid, id, pp, tag: ids.get(pid), fp, total: run[pid], s: o.s, name: names[o.key.replace(/\s+/g, '')] || pp.name });
         });
+        // kicker: a field goal or extra point
+        const txt = String(p.text || ''), ty = pType(p), off = p.start && p.start.team && TEAM_ID[String(p.start.team.id)];
+        const fg = txt.match(/(\d+) yard field goal is (GOOD|No Good|BLOCKED)/i), xp = txt.match(/extra point is (GOOD|No Good|BLOCKED)/i);
+        const kn = (txt.match(new RegExp(`(${NM}) (?:\\d+ yard field goal|extra point)`)) || [])[1];
+        const kid = kn && nm[kn.replace(/\s+/g, '')], kpid = kid && (map[kid] || espnGsis(kid));  // kickers aren't on the board: the site-wide id map
+        if ((fg || xp) && kpid && ids.has(kpid)) {
+          const ok = /^GOOD$/i.test((fg || xp)[fg ? 2 : 1]);
+          const key = fg ? `${ok ? 'fgm' : 'fgmiss'}_${band(+fg[1])}` : ok ? 'xpm' : 'xpmiss', fp = kw[key] || 0;
+          run[kpid] = (run[kpid] || 0) + fp;
+          if (Math.abs(fp) >= 0.05) rows.push({ pid: kpid, id: kid, tag: ids.get(kpid), fp, total: run[kpid], s: {}, txt: fg ? `${fg[1]}-yd FG ${ok ? 'good' : 'missed'}` : `XP ${ok ? 'good' : 'missed'}`, name: names[kn.replace(/\s+/g, '')] || kn });
+        }
+        // team defense: the defense on this play (a return or defensive TD: the scoring side)
+        if (off) {
+          const def = off === st.away.team ? st.home.team : st.away.team, end = p.end && p.end.team && TEAM_ID[String(p.end.team.id)];
+          const scorer = dh > 0 ? st.home.team : da > 0 ? st.away.team : null, ev = {};
+          if (/blocked/i.test(txt) && /field goal|punt|extra point/i.test(`${ty} ${txt}`)) ev.blk = 1;
+          if (/sack/i.test(ty)) ev.sack = 1;
+          if (/interception/i.test(ty) || /INTERCEPTED/.test(txt)) ev.int = 1;
+          if (/FUMBLES/.test(txt) && end && end !== off && !/punt|kick/i.test(ty)) ev.fum_rec = 1;
+          if (scorer && scorer !== off && p.scoringPlay && /touchdown/i.test(`${ty} ${txt}`)) ev[/punt|kick/i.test(ty) ? 'st_td' : 'def_td'] = 1;
+          if (scorer && scorer !== off && /safety/i.test(`${ty} ${txt}`)) ev.safe = 1;
+          const team = Object.keys(ev).some(k => k === 'def_td' || k === 'st_td' || k === 'safe') ? scorer : def, dpid = `DST-${team}`;
+          const fp = Object.entries(ev).reduce((t, [k, n]) => t + n * (dw[k] || 0), 0);
+          if (ids.has(dpid) && Math.abs(fp) >= 0.05) {
+            run[dpid] = (run[dpid] || 0) + fp;
+            const words = { sack: 'sack', int: 'INT', fum_rec: 'fumble recovery', def_td: 'defensive TD', st_td: 'return TD', safe: 'safety', blk: 'block' };
+            rows.push({ pid: dpid, id: null, dst: team, tag: ids.get(dpid), fp, total: run[dpid], s: {}, txt: Object.keys(ev).map(k => words[k]).join(', '),
+                        name: `${((DATA.teams || {})[team] || {}).nick || team} D/ST` });
+          }
+        }
         if (rows.length) cards.push({ p, hd, rows, st, gid, t: p.wallclock ? Date.parse(p.wallclock) : elapsed(p) });
       });
     });
@@ -2809,8 +2846,8 @@
       const { p, hd, st } = c, dd = p.start && p.start.down ? (p.start.shortDownDistanceText || p.start.downDistanceText || '') : '';
       const at = p.start && p.start.possessionText ? p.start.possessionText : '';
       const a = spot(p.start, st), red = a && (a.dir === 1 ? a.x >= 80 : a.x <= 20) && !stPlay(p);
-      const rows = c.rows.map(r => `<div class="pi-row lpf-r" data-open-pid="${esc(r.pid)}"><img class="pi-hs" src="${esc(NFLE.ui ? NFLE.ui.headshot(r.id) : '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
-          <span class="pi-nm">${esc(r.name)}</span>${r.tag === 'opp' ? '<span class="fp-tag foe lpf-tag">Opp</span>' : ''}<span class="pi-st">${statText(r.s)}</span>
+      const rows = c.rows.map(r => `<div class="pi-row lpf-r" data-open-pid="${esc(r.pid)}">${r.dst ? `<span class="pi-hs">${logo(((DATA.teams || {})[r.dst] || {}).logo, '#111', 22, r.dst)}</span>` : `<img class="pi-hs" src="${esc(NFLE.ui ? NFLE.ui.headshot(r.id) : '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`}
+          <span class="pi-nm">${esc(r.name)}</span>${r.tag === 'opp' ? '<span class="fp-tag foe lpf-tag">Opp</span>' : ''}<span class="pi-st">${r.txt ? esc(r.txt) : statText(r.s)}</span>
           <span class="lpf-tot" title="His fantasy points this game after the play">${f1(r.total)}</span>
           <b class="pi-fp ${r.fp > 0 ? 'up' : 'dn'}">${r.fp > 0 ? '+' : '&minus;'}${f1(Math.abs(r.fp))}</b></div>`).join('');
       return `<li class="lpf${p.scoringPlay ? ' scored' : ''}${c.rows.every(r => r.tag === 'opp') ? ' lpf-o' : ''}">
@@ -3130,6 +3167,7 @@
   const PST_NAME = { passing: 'Passing', rushing: 'Rushing', receiving: 'Receiving', fumbles: 'Fumbles', defensive: 'Defense',
                      interceptions: 'Interceptions', kickReturns: 'Kick returns', puntReturns: 'Punt returns', kicking: 'Kicking', punting: 'Punting' };
   let GSIS_OF = null;  // ESPN id -> gsis, built once from NFLE.ui.ids
+  const espnGsis = id => { const U = NFLE.ui; if (!GSIS_OF && U && U.ids && Object.keys(U.ids).length) { GSIS_OF = {}; Object.entries(U.ids).forEach(([g, e]) => { GSIS_OF[e] = g; }); } return GSIS_OF ? GSIS_OF[String(id)] : undefined; };
   // A replay's box score (owner 2026-10-18: "player/team/fantasy stats reflect the point in time where the replay is"):
   // rebuilt from the plays so far (stateAt's lines), names and teams from the final box score; passing, rushing and
   // receiving with fantasy points (ESPN's other columns exist only as final totals)
