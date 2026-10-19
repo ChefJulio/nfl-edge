@@ -124,9 +124,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4427132,Ikem Ekwonu,Carolina Panthers,Out,2026-10-06T01:04Z,Knee,Surgery,Right,2026-11-08,PUP-R,"Coach Dave Canales said Monday that Ekwonu (knee) is still a considerable time away from returning to action, Mike Kaye of ESPN reports."
 4568263,Ryan Fitzgerald,Carolina Panthers,Active,2026-10-05T16:08Z,,,,,,Fitzgerald connected on both of his field-goal tries and two of his four point-after attempts in Sunday's 32-26 win over the Lions.
 4685720,Bryce Young,Carolina Panthers,Active,2026-10-05T04:20Z,,,,,,Young completed 29 of 41 passes for 329 yards and two touchdowns while rushing three times for three yards in Sunday's 32-26 win over the Lions.
+4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-19T07:01Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
 4431611,Caleb Williams,Chicago Bears,Active,2026-10-19T06:31Z,,,,,,Williams completed 30 of 36 passes for 305 yards with a touchdown and no interceptions while adding four rushes for three yards in the Bears' 31-23 win over the Falcons on Sunday. He also fumbled once but recovered.
 4259545,D'Andre Swift,Chicago Bears,Active,2026-10-19T06:25Z,,,,,,Swift rushed 16 times for 44 yards and two touchdowns and brought in four of five targets for 26 yards in the Bears' 31-23 win over the Falcons on Sunday.
-4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-19T06:01Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
 4426386,Roschon Johnson,Chicago Bears,Active,2026-10-19T00:55Z,,,,,,Johnson rushed 13 times for 51 yards and a touchdown in Sunday's 31-23 win over the Falcons. He caught both of his targets for 34 yards.
 3930040,Jonah Jackson,Chicago Bears,Questionable,2026-10-18T19:39Z,Hip,Not Specified,Not Specified,2026-10-22,QUESTIONABLE,Jackson (hip) is doubtful to return to Sunday's game against the Falcons.
 3916577,Cam Lewis,Chicago Bears,Active,2026-10-18T18:26Z,,,,,,"Lewis returned to Sunday's game against the Falcons, Brad Biggs of the Chicago Tribune reports."
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4880281,Jordyn Tyson,New Orleans Saints,Injured Reserve,2026-10-12T18:59Z,Hamstring,Strain,Right,2026-11-08,IR-R,"Saints head coach Kellen Moore said Monday that Tyson (hamstring) is ""progressing well"" but isn't on track to return to practice this week, Jeff Nowak of WWL New Orleans reports."
 3051909,Daniel Carlson,New Orleans Saints,Active,2026-10-12T15:17Z,,,,,,Carlson went 1-for-2 on extra-point tries during the Saints' 23-13 loss to the Vikings on Sunday.
 4569559,Devaughn Vele,New Orleans Saints,Active,2026-10-12T00:08Z,,,,,,Vele secured four of six targets for 26 yards in the Saints' 23-13 loss to the Vikings on Sunday.
-3115303,Jermaine Eluemunor,New York Giants,Out,2026-10-19T06:01Z,Calf,Not Specified,Not Specified,2026-10-25,INACTIVE,inactive
+3115303,Jermaine Eluemunor,New York Giants,Out,2026-10-19T07:01Z,Calf,Not Specified,Not Specified,2026-10-25,INACTIVE,inactive
 4361050,Isaiah Likely,New York Giants,Active,2026-10-19T01:35Z,,,,,,Likely caught six of 11 targets for 99 yards and a touchdown in Sunday's 34-27 loss to the Saints.
 4696981,Cam Skattebo,New York Giants,Active,2026-10-19T01:31Z,,,,,,Skattebo played only six snaps and got zero carries or targets in the Giants' 34-27 loss to the Saints on Sunday.
 4433970,J.J. McCarthy,New York Giants,Active,2026-10-19T01:20Z,,,,,,"McCarthy replaced Jameis Winston in the fourth quarter of Sunday's 34-27 loss to the Saints, completing 11 of 21 passes for 243 yards and one touchdown with one interception."
