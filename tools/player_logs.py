@@ -232,7 +232,12 @@ def main():
   # so before that "ACT" just means on the roster (Allen's 4 missed games in 2018 read as played).
   tot = sn[["offense_snaps", "defense_snaps", "st_snaps"]].fillna(0).sum(axis=1)
   played = set(zip(sn.gsis_id[tot > 0], sn.season[tot > 0].astype(int), sn.week[tot > 0].astype(int)))
-  prac = practice_timeline(data.practice, allsched, sn, all_ros, data.current_season, gameday_ina(site))
+  # plus any stat (weekly player stats, from the play-by-play): snap counts come from Pro Football Reference via
+  # nflverse a day or more after a game (2026-10-18, Sunday night: snaps for 1 of 12 final games, stats for 9), and
+  # until then a listed player who played read as a missed game. Same rule as returns.played_set.
+  stat_played = set(zip(data.stats.player_id, data.stats.season.astype(int), data.stats.week.astype(int)))
+  played |= stat_played
+  prac = practice_timeline(data.practice, allsched, sn, all_ros, data.current_season, gameday_ina(site), stat_played)
   injuries = injury_history(cache, nfl, data.current_season, all_ros, allsched, played,
                             ingame_events(cache, nfl, data.current_season, all_ros, site))
   scr = qb_scrambles(data.pbp)
@@ -378,7 +383,7 @@ FULL_COLS = ["player_id", "player_display_name", "position", "season", "week", "
 # Every regular-season week in a player's game log (owner 2026-10-16: "weeks the player didn't play should still be
 # there"): the weeks he has no game get a row saying why, from his weekly roster status that week.
 def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: pd.DataFrame, cur: int,
-                      ina: dict | None = None) -> dict:
+                      ina: dict | None = None, stat_played: set | None = None) -> dict:
   """gsis -> this season's practice days and games in date order (owner 2026-10-17: "the date the report was out,
   show the last 6, include games in that timeline, dates near each"). Events: ["p", date, D/L/F, game status on the
   week's last day or "", 1 when inferred], ["g", date, opponent, "vs"/"@", snap share or "out" or "" (upcoming), week].
@@ -454,6 +459,8 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
       res = (int(round(100 * float(s_))) if s_ is not None and s_ == s_ else "out") if (gm[3] and gm[4] in snap_games) else ""
       if res == "" and gm[3] and (cur, w) in (ina or {}).get(gid, {}):
         res = "out"  # declared inactive on game day (gameday_ina), before the snaps are out
+      elif res == "" and gm[3] and (gid, cur, w) in (stat_played or set()):
+        res = "p"  # a stat line in it: played, his snap share not out yet
       ev.append(["g", gm[0], gm[1], gm[2], res, w])  # gm[3] (final) stays out of the file  # w: the week (the card dates "hurt in the week N game")
     ev.sort(key=lambda e: (e[1], 0 if e[0] == "p" else 1))
     out[gid] = ev
