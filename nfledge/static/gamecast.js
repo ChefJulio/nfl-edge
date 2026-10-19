@@ -1133,7 +1133,7 @@
     const past = ev.filter(e => e[1] <= today).slice(-6), next = ev.find(e => e[1] > today && e[0] === 'g');
     const day = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
     const row = e => e[0] === 'p'
-      ? `<div class="pt-row"><span class="pt-d">${day(e[1])}</span><span class="pr-chip pr-${e[2]}">${e[2] === 'D' ? 'DNP' : e[2] + 'P'}</span><span>${PR_WORD[e[2]] || ''}${e[3] ? ` · <b>${esc(e[3])}</b>` : ''}</span></div>`
+      ? `<div class="pt-row"><span class="pt-d">${day(e[1])}</span><span class="pr-chip pr-${e[2]}">${e[2] === 'D' ? 'DNP' : e[2] + 'P'}</span><span>${PR_WORD[e[2]] || ''}${e[4] ? ' <span class="muted">· not on the report</span>' : ''}${e[3] ? ` · <b>${esc(e[3])}</b>` : ''}</span></div>`
       : `<div class="pt-row pt-g"><span class="pt-d">${day(e[1])}</span><span class="pt-gm">${esc(e[3])} ${tmL(e[2])}</span><span>${e[4] === '' ? (e[1] < today ? '<span class="muted">result pending</span>' : e[1] === today ? '<b>today</b>' : '<b>next game</b>') : e[4] === 'out' ? '<b class="bad">did not play</b>' : `played · ${esc(e[4])}% of snaps`}</span></div>`;
     // newest first (owner 2026-10-17): the next game on top, then the latest six going back
     return `<div class="pc-box"><div class="pc-k">Practice and games</div><div class="pt-list">${next ? row(next) : ''}${past.slice().reverse().map(row).join('')}</div></div>`;

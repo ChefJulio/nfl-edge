@@ -398,12 +398,28 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
   # a game counts as played-or-missed once it is final AND its snap counts are published (the week clock's "final";
   # owner 2026-10-18: a game played today, or snaps not in yet, read as "did not play")
   snap_weeks = {int(w) for w in sn[sn.season == cur].week.dropna().unique()}
+  # each team's report days per week (the calendar plus any day it filed): a report day before his first listing that
+  # week = practiced fully, unlisted (owner 2026-10-18: Warren's Wed / Thu read as nothing above Friday's LP; the
+  # same inference as the week strip and the status letters, injuries.py). After he drops off it stays unknown.
+  from nfledge.practice_calendar import team_report_days
+  filed = {}
+  for r in pr[["gsis_id", "week", "dates"]].itertuples():
+    t = team_wk.get((r.gsis_id, int(r.week)))
+    if t:
+      filed.setdefault(int(r.week), {}).setdefault(t, set()).update(d for d in str(r.dates or "").split(",") if d)
+  seen = {w: max((d for v in f.values() for d in v), default="") for w, f in filed.items()}  # days reached so far
+  cal = {w: team_report_days(allsched, cur, w, f) for w, f in filed.items()}
   out = {}
   for gid, x in pr.groupby("gsis_id"):
     ev = []
     for r in x.sort_values("week").itertuples():
       ds = [d for d in str(r.dates or "").split(",") if d]
       gs = "" if r.game_status in (None, "None") else str(r.game_status).capitalize()
+      if ds and len(ds) == len(str(r.days)):
+        t = team_wk.get((gid, int(r.week)))
+        for d in cal.get(int(r.week), {}).get(t, []):
+          if d < min(ds) and d <= seen.get(int(r.week), ""):
+            ev.append(["p", d, "F", "", 1])  # 1 = inferred (not on that day's report)
       for i, (d, c) in enumerate(zip(ds, str(r.days))):
         ev.append(["p", d, c, gs if i == len(ds) - 1 else ""])
     weeks = sorted({int(w) for w in x.week})
