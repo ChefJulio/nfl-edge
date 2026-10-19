@@ -2636,6 +2636,20 @@ Updated 2026-10-18. Injury / return items first (owner 2026-10-18: "the injury/r
   29.2%. The same pre-registered gate, walk-forward 2021-25 on 166 promoted backups: inactive 1.20%, model 4.11% (up to
   56.9%), rule 1.37%; Brier 0.0166 -> 0.0123, -0.0043 [-0.0092, -0.0008]: PASS. Live: config injuries.nextup_qb =
   0.0093 (the 2019-25 rate). Tanner McKee: 11% -> 0.9%.
+- **PRE-REGISTERED 2026-10-19: (AY5) the backup-QB rule names the backup by who dressed, not depth rank.** The rule
+  (config qb2_play_rate) takes QB1 = depth rank 1 and QB2 = depth rank 2; a depth-rank-2 QB2 played only 74.6% of the
+  games his QB1 sat (a QB3 or a stale chart; {#nextup-qb2} found the same errors). Variant: QB1 = last game's starter
+  (most snaps, 30%+), QB2 = the healthy QB who dressed as his backup last game, best depth rank first
+  (InjuryModel._qb_picks). Test (tools/qb2_dressed_eval.py), 2019-25, team-weeks where last game's starter took no
+  snap: did the named QB2 take a snap, depth rank 2 vs the dressed backup. GATE: the dressed backup's play rate higher,
+  95% CI over team-weeks (paired) excluding 0; and in team-weeks where the starter played, the named QB2's relief rate
+  not above qb2_play_rate's 0.232 by more than 5 points.
+- **RESULT {#qb2-dressed} (AY5) backup QB named by who dressed: FAIL, not shipped.** tools/qb2_dressed_eval.py,
+  2019-25: 211 team-weeks where last game's starter took no snap; the two ways name the same QB2 in 198. Named QB2
+  played: depth rank 2 79.6%, dressed backup 81.0%, +0.014 [-0.014, +0.047]. Where they differ (13): 38.5% vs 61.5%,
+  too few to clear the gate. Relief rate when the starter plays: 23.0% / 23.7% (fine). Takeaway: the depth chart's
+  QB2 is right almost always; the rule's real gap is that a correctly named QB2 plays only ~80% of his starter's missed
+  games (another QB starts: a signing, a QB3 promoted, a gadget QB), which "1.0 when QB1 sits" overstates.
 - **IR audit 2026-10-18 (owner: "players on IR threw a wrench in our model over and over"), fixes shipped.** One audit
   of every consumer that picks "this week's players" by roster status or board membership. Fine as built: vacated-
   volume redistribution (an IR'd WR1 / RB1's share is redistributed exactly as for one listed Out), the QB starter
