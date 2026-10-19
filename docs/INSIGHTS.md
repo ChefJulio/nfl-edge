@@ -2020,6 +2020,27 @@ Updated 2026-10-18. Injury / return items first (owner 2026-10-18: "the injury/r
   snaps, and per-snap exposure ties the score to role (starters log more snaps per missed game) rather than to how
   often he gets hurt. Kept A. The earlier check that started this (backup QBs rank high under A) is real but small:
   starting QBs average the 45th percentile; a snap-share pool cut (10-35%) barely moves it (45th -> 47th).
+- **PRE-REGISTERED 2026-10-19 (owner, on (S): "shouldn't we be testing how many snaps we expect the player to survive
+  before missing a game? rather than just flat missing games"): (S2) durability judged by snaps survived.** (S)'s
+  target, share of next season's games missed, carries exposure like the per-game score does (a backup who barely
+  plays rarely gets hurt, so both call him durable). New target, per player-season T (2014-25, 8+ team games on the
+  roster in T, history 2013..T-1, same rows as (S) otherwise): his unit snaps (offense for QB / RB / WR / TE / OL,
+  defense for DL / LB / DB) in T before his first game missed injured (on the report or an injury reserve list and not
+  active), the event; no such game = censored at his snaps in T. Players out injured in their first week of T and
+  rows with no snaps in T are left out. Scores: A (today: share of games available, shrunk 17 games) and B (games
+  missed injured per 1,000 snaps, shrunk with (S)'s K: 250, TE 2000; not re-chosen). Metric: Harrell's concordance
+  (C-index) of the score with snaps survived, within each position group, weighted by rows. GATE (2020-25): ship B as
+  the card's durability if B - A > 0 with a 95% player-cluster bootstrap CI excluding 0 AND B better in at least 4
+  of 6 seasons; else keep A. Reported: every group, QBs alone.
+- **RESULT {#durability-snaps} (S2) durability judged by snaps survived: PASS, shipped.** tools/durability_snaps_eval.py,
+  2020-25, 1,332-1,404 rows a season (622-667 events). C-index with snaps survived: A 0.550-0.570, B 0.573-0.595; B - A
+  +0.026, 95% player-cluster CI [+0.021, +0.031], B better 6 of 6 seasons and in every group (QB 0.541 -> 0.582, LB
+  0.547 -> 0.594, OL 0.577 -> 0.581). Reported alongside (not gating): regulars only (30+ unit snaps a game in their
+  history) the two are level, B - A +0.004, B better 5 of 6: the per-game score's edge in (S) came from rewarding
+  low exposure, which a per-snap target no longer pays. Live (tools/player_logs.py injury_history): per-snap durability
+  for QB / RB / WR / TE / OL / DL / LB / DB (K 250; TE 2000), percentile among the group's players with 1,000+ snaps;
+  under 1,000 snaps no percentile ("too little time on the field to rank"); kickers, punters, long snappers keep the
+  per-game share. Supersedes {#durability-per-snap}'s verdict: that test's target carried exposure too.
 - **PRE-REGISTERED 2026-10-17 (before building): (T) snap trend as an early sign of a role change** (owner, after
   "snap share as an input" was recalled as tried: "if we're projecting snap counts ... isn't that potentially a good
   indicator?"). snap_input (the recency-weighted snap share) added nothing once target / carry shares were known. New

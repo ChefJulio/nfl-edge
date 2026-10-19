@@ -1721,10 +1721,15 @@
     if (d && d.games) {
       const pct = d.pct != null ? Math.round(d.pct * 100) : null, tone = pct == null ? '' : pct >= 67 ? 'good' : pct <= 33 ? 'bad' : '';
       dur = `<div class="pc-box"><div class="pc-k">Durability · since 2013</div>
-        <div class="ij-dur"><div class="pc-big ${tone}">${pct != null ? `${ord(pct)}` : '–'} <small>percentile</small></div>
-          <div class="pc-sub">${pct != null ? `More durable than ${pct}% of ${esc(GRP_LABEL[d.grp] || d.grp)} with a season or more of games` : ''}${d.small ? ' (few games yet: pulled toward the position average)' : ''}.</div></div>
-        ${sg([sgRow(null, [cell(`${Math.round(d.avail * 100)}%`, 'Available', 'Share of his team\'s games he was not out injured'), cell(f0(d.games), 'Team games'), cell(f0(d.missed), 'Missed', 'Games missed injured'), cell(f0(eps.length), 'Injuries', 'Injury episodes listed')])], 4, { labels: false, cls: 'sg-tight' })}
-        <p class="pc-sub">Counts his team's games while he was on the roster, from 2013 (snap counts tell who played); games missed inside an injury episode count against him (healthy scratches and suspensions don't). Ranked after pulling short careers toward the position average by one season of games.</p></div>`;
+        <div class="ij-dur"><div class="pc-big ${tone}">${pct != null ? `${ord(pct)} <small>percentile</small>` : d.snaps != null ? '<span class="muted">Not ranked</span>' : '– <small>percentile</small>'}</div>
+          <div class="pc-sub">${pct != null ? `More durable than ${pct}% of ${esc(GRP_LABEL[d.grp] || d.grp)} with ${d.snaps != null ? '1,000 or more snaps' : 'a season or more of games'}${d.small && d.snaps == null ? ' (few games yet: pulled toward the position average)' : ''}.` : d.snaps != null ? `Too little time on the field to rank (${Math.round(d.snaps).toLocaleString()} snaps; 1,000 needed).` : ''}</div></div>
+        ${d.snaps != null
+          // (S2) per snap on the field (owner 2026-10-19): games missed injured per 1,000 snaps
+          ? sg([sgRow(null, [cell(d.per1k.toFixed(1), 'Missed / 1k snaps', 'Games missed injured per 1,000 snaps he played'), cell(Math.round(d.snaps).toLocaleString(), 'Snaps', d.grp === 'DL' || d.grp === 'LB' || d.grp === 'DB' ? 'Defensive snaps since 2013' : 'Offensive snaps since 2013'), cell(f0(d.missed), 'Missed', 'Games missed injured'), cell(f0(eps.length), 'Injuries', 'Injury episodes listed')])], 4, { labels: false, cls: 'sg-tight' })
+          : sg([sgRow(null, [cell(`${Math.round(d.avail * 100)}%`, 'Available', 'Share of his team\'s games he was not out injured'), cell(f0(d.games), 'Team games'), cell(f0(d.missed), 'Missed', 'Games missed injured'), cell(f0(eps.length), 'Injuries', 'Injury episodes listed')])], 4, { labels: false, cls: 'sg-tight' })}
+        <p class="pc-sub">${d.snaps != null
+          ? 'Games missed while on the injury report or an injury reserve list (healthy scratches and suspensions don\'t count), per 1,000 snaps he was on the field, from 2013: a backup who rarely plays isn\'t called durable for staying healthy on the sideline. Little time on the field is pulled toward the position average; ranked among players with 1,000+ snaps.'
+          : 'Counts his team\'s games while he was on the roster, from 2013; games missed inside an injury episode count against him (healthy scratches and suspensions don\'t). Ranked after pulling short careers toward the position average by one season of games.'}</p></div>`;
     }
     if (!eps.length) return cur + dur + '<div class="pc-box"><p class="pc-sub">No injuries on the official reports since 2009.</p></div>';
     // recurring body parts: by games missed, then by how often listed

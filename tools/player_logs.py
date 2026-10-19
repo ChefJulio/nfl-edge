@@ -238,7 +238,9 @@ def main():
   stat_played = set(zip(data.stats.player_id, data.stats.season.astype(int), data.stats.week.astype(int)))
   played |= stat_played
   prac = practice_timeline(data.practice, allsched, sn, all_ros, data.current_season, gameday_ina(site), stat_played)
-  injuries = injury_history(cache, nfl, data.current_season, all_ros, allsched, played,
+  sn13 = sn[sn.season >= 2013]
+  unit_snaps = {"off": sn13.groupby("gsis_id").offense_snaps.sum().to_dict(), "def": sn13.groupby("gsis_id").defense_snaps.sum().to_dict()}
+  injuries = injury_history(cache, nfl, data.current_season, all_ros, allsched, played, unit_snaps,
                             ingame_events(cache, nfl, data.current_season, all_ros, site))
   scr = qb_scrambles(data.pbp)
   out_dir = site / "data" / "players"
@@ -848,6 +850,7 @@ def ingame_events(cache, nfl, cur: int, ros: pd.DataFrame, site: Path) -> dict:
 
 
 def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFrame, played: set,
+                   unit_snaps: dict | None = None,
                    ig: dict | None = None) -> dict:
   """gsis -> [episode], newest first. An episode = consecutive team games where he was on the injury report or a
   reserve list for an injury (a bye doesn't break it; a game played with no listing ends it). Per episode: season,
@@ -892,6 +895,7 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
       cur_ep = None
 
     last_season = None
+    wk_out = []  # (season, week, out injured): (S2) durability by snaps survived, tools/durability_eval.py
     for s, w, st, code in zip(g.season, g.week, g.status, g.status_description_abbr):
       s, w = int(s), int(w)
       if s != last_season:
@@ -904,6 +908,8 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
       # snap (owner 2026-10-18: "0 snaps has never meant injured ... lots of players are active and don't play");
       # before that, a snap
       active = st == "ACT" if s >= INA_FROM else (gid, s, w) in played if counted else st == "ACT"
+      if counted:
+        wk_out.append((s, w, bool((lst or res) and not active)))
       if lst or res:  # a week off the report and off reserve lists ends the episode (backups who rarely play
         # would otherwise "miss" every later game)
         if cur_ep is None:
@@ -933,24 +939,44 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
     out[gid] = {"eps": [{k: v for k, v in e.items() if v not in ("", None)} for e in reversed(eps)],
                 "games": int((g.season >= SNAPS_FROM).sum()), "missed": sum(e["missed"] or 0 for e in eps),
                 # team games per season on the roster (not written to the pages; tools/durability_eval.py)
-                "gs": {int(k): int(v) for k, v in g.season[g.season >= SNAPS_FROM].value_counts().items()}}
+                "gs": {int(k): int(v) for k, v in g.season[g.season >= SNAPS_FROM].value_counts().items()},
+                "wk": wk_out}
   # Durability: share of his team's games he was available for (games missed inside injury episodes count against
   # him; healthy scratches and suspensions don't), shrunk toward his position's average by one season of games
   # (17), then his percentile among everyone at the position with a season or more of games.
   grp = {**{p: "OL" for p in "T OT G OG C OL".split()}, **{p: "DL" for p in "DE DT NT DL".split()},
          **{p: "LB" for p in "LB ILB OLB MLB".split()}, **{p: "DB" for p in "CB S SS FS SAF DB".split()},
          "FB": "RB", "PK": "K"}
+  # (S2, {#durability-snaps}; owner 2026-10-19: "a player who plays 3 snaps a game and never gets injured over 3
+  # years" vs a 40-snap player who missed one game in 8 isn't more durable) skill and defensive players: games missed
+  # injured per 1,000 snaps of his unit (offense / defense), shrunk toward the group's rate by K snaps (250; TE 2000),
+  # percentile among the group's players with 1,000+ snaps. Judged by snaps survived before the next missed game it
+  # beat the per-game share every season 2020-25. Kickers, punters, long snappers: the per-game share as before.
   df = pd.DataFrame([(g, v["games"], v["missed"]) for g, v in out.items()], columns=["gsis_id", "games", "missed"])
   df["grp"] = [grp.get(str(pos_of.get(g)), str(pos_of.get(g))) for g in df.gsis_id]
   prior = df[df.games >= 17].groupby("grp").apply(lambda x: 1 - x.missed.sum() / x.games.sum()).to_dict()
   df["avail"] = 1 - df.missed / df.games.where(df.games > 0, 1)
   df["shrunk"] = [(a * n + prior.get(gp, 0.95) * 17) / (n + 17) for a, n, gp in zip(df.avail, df.games, df.grp)]
-  peers = {gp: np.sort(x[x.games >= 17].shrunk.to_numpy()) for gp, x in df.groupby("grp")}
-  for x in df.itertuples():
+  OFFG, DEFG = {"QB", "RB", "WR", "TE", "OL"}, {"DL", "LB", "DB"}
+  us = unit_snaps or {}
+  df["snaps"] = [float(us.get(("off" if gp in OFFG else "def"), {}).get(g, 0.0)) if gp in OFFG | DEFG else np.nan
+                 for g, gp in zip(df.gsis_id, df.grp)]
+  per_snap = df.grp.isin(OFFG | DEFG) & bool(us)
+  r0 = {gp: x.missed.sum() / max(1.0, x.snaps.sum()) * 1000 for gp, x in df[per_snap].groupby("grp")}
+  kk = {gp: (2000 if gp == "TE" else 250) for gp in OFFG | DEFG}
+  df.loc[per_snap, "shrunk"] = [-((m + r0[gp] * kk[gp] / 1000) / ((sn + kk[gp]) / 1000))
+                                for m, sn, gp in zip(df[per_snap].missed, df[per_snap].snaps, df[per_snap].grp)]
+  qual = np.where(per_snap, df.snaps >= 1000, df.games >= 17)
+  qs = pd.Series(qual, index=df.index)
+  peers = {gp: np.sort(df.shrunk[(df.grp == gp) & qs].to_numpy(dtype=float)) for gp in df.grp.unique()}
+  for x, q in zip(df.itertuples(), qual):
     pr = peers.get(x.grp)
     pct = float(np.searchsorted(pr, x.shrunk, side="right") / len(pr)) if pr is not None and len(pr) else None
+    ps = bool(per_snap.loc[x.Index])
     out[x.gsis_id]["dur"] = {"games": int(x.games), "missed": int(x.missed), "avail": round(float(x.avail), 3),
-                             "pct": None if pct is None else round(pct, 3), "grp": x.grp, "small": bool(x.games < 17)}
+                             # under 1,000 snaps: too little time on the field to rank either way (no percentile)
+                             "pct": None if pct is None or (ps and not q) else round(pct, 3), "grp": x.grp, "small": not bool(q),
+                             **({"snaps": int(x.snaps), "per1k": round(float(x.missed / max(x.snaps, 1.0) * 1000), 2)} if ps else {})}
   return out
 
 
