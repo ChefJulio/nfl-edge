@@ -2261,19 +2261,23 @@
     const m = rtGoal(rtTeam(O, abbr));
     const games = R.games.map((g, i) => {
       const [sw, se, ph, pa] = T.g[i], own = g.home === abbr || g.away === abbr;
-      const home = own ? g.home === abbr : sw[m] >= 0;
-      const gain = k => home ? sw[k] : -sw[k];  // this team's change if the side it roots for wins
+      // the side to root for: the one the race they're in wants; if that's within noise, the biggest clear swing in
+      // another chance (a wild-card hopeful can still have a division race riding on a game), else the race's own sign
       const real = k => Math.abs(sw[k]) >= 0.005 && Math.abs(sw[k]) >= 2 * se[k];
-      return { g, own, root: home ? g.home : g.away, vs: home ? g.away : g.home, v: gain(m), sig: real(m), gain, real,
+      const clear = [0, 1, 2].filter(real).sort((a, b) => Math.abs(sw[b]) - Math.abs(sw[a]));
+      const k0 = real(m) ? m : clear.length ? clear[0] : sw[m] !== 0 ? m : sw.findIndex(v => v !== 0);
+      const home = own ? g.home === abbr : k0 < 0 || sw[k0] > 0;
+      const gain = k => home ? sw[k] : -sw[k];  // this team's change if the side it roots for wins
+      return { g, own, root: home ? g.home : g.away, vs: home ? g.away : g.home, v: gain(m), sig: clear.length > 0, gain, real, zero: k0 < 0,
                pw: home ? ph : pa, pl: home ? pa : ph };
-    }).sort((a, b) => b.own - a.own || Math.abs(b.v) - Math.abs(a.v));
+    }).sort((a, b) => b.own - a.own || b.sig - a.sig || Math.abs(b.v) - Math.abs(a.v));
     return { m, T, games };
   };
   // one line for the Week tab (current week only)
   const rootLine = (abbr, d) => {
     const O = oddsData(), x = O && +O.season === +d.season && O.root && +O.root.week === +d.week ? rtRows(O, abbr) : null;
     if (!x) return '';
-    const sig = x.games.filter(r => !r.own && r.sig && r.v > 0).slice(0, 3);
+    const sig = x.games.filter(r => !r.own && r.real(x.m) && r.v > 0).slice(0, 3);
     return `<div class="pc-box rt-line"><span class="pc-k">Rooting interests</span> ${sig.length
       ? sig.map(r => `${tmL(r.root, `<b>${esc(rtTeam(O, r.root).nick || r.root)}</b>`)} <small class="muted">${rtPts(r.v)}</small>`).join(' · ')
       : '<span class="muted">no other game moves their odds much</span>'} <button type="button" class="rt-more" data-tt-go="po">Full guide</button></div>`;
@@ -2317,28 +2321,31 @@
     // clear of simulation noise first, then the rest, greyed, by size
     const own = x.games.find(r => r.own), rest = x.games.filter(r => !r.own);
     const sig = rest.filter(r => r.sig), small = rest.filter(r => !r.sig);
-    const chips = r => [0, 1, 2].filter(k => k !== x.m && r.real(k) && Math.abs(r.gain(k)) >= 0.01).map(k => {
-      const v = r.gain(k);
-      return `<span class="rt-chip ${v > 0 ? 'good' : 'bad'}"${v < 0 ? ` title="Helps their chance to ${goal}, hurts their chance to ${RT_GOAL[k]}"` : ''}>${RT_SHORT[k]} ${rtPts(v)}</span>`;
+    // three columns (owner 2026-10-19): the change in each chance if the side named wins; green / red = helps / hurts,
+    // clear of noise; bold = the race they're in (the order and the side to root for follow it)
+    const cols = r => [0, 1, 2].map(k => {
+      const v = r.gain(k), ok = r.real(k);
+      return `<span class="rt-c${k === x.m ? ' main' : ''}${ok ? (v > 0 ? ' good' : ' bad') : ''}">${rtPts(v)}</span>`;
     }).join('');
+    const head = label => `<div class="rt-hd"><span class="rt-hl">${label}</span>${RT_SHORT.map((c, k) => `<span class="rt-c${k === x.m ? ' main' : ''}">${c}</span>`).join('')}</div>`;
     const detail = r => `<table class="bx rt-dt"><thead><tr><th></th><th class="num">If ${tmL(r.root, esc(nick(r.root)))} win</th><th class="num">If ${tmL(r.vs, esc(nick(r.vs)))} win</th></tr></thead><tbody>
       ${[0, 1, 2].map(k => `<tr${k === x.m ? ' class="rt-main"' : ''}><td>${RT_SHORT[k]}</td><td class="num">${rtPct(r.pw[k])}</td><td class="num">${rtPct(r.pl[k])}</td></tr>`).join('')}</tbody></table>`;
     // no change in any simulated season: no side to root for, so the game as scheduled
-    const row = r => `<details class="rt-g${r.sig ? '' : ' rt-q'}"><summary>${r.v === 0
+    const row = r => `<details class="rt-g${r.sig ? '' : ' rt-q'}"><summary>${r.zero
         ? `${tmL(r.g.away, tLogo(r.g.away, 20))}<span class="rt-nm">${tmL(r.g.away, esc(nick(r.g.away)))} @ ${tmL(r.g.home, esc(nick(r.g.home)))}</span>`
         : `${tmL(r.root, tLogo(r.root, 20))}<span class="rt-nm">${tmL(r.root, `<b>${esc(nick(r.root))}</b>`)} over ${tmL(r.vs, esc(nick(r.vs)))}</span>`}
-        ${r.sig ? chips(r) : ''}<span class="rt-v ${r.sig && r.v > 0 ? 'good' : ''}">${rtPts(r.v)}</span></summary>${detail(r)}</details>`;
-    const say = sig.filter(r => r.v > 0).slice(0, 4).map(r => tmL(r.root, esc(nick(r.root))));
+        ${cols(r)}</summary>${detail(r)}</details>`;
+    const say = sig.filter(r => r.real(x.m) && r.v > 0).slice(0, 4).map(r => tmL(r.root, esc(nick(r.root))));
     const ownHtml = own ? `<div class="rt-own"><div class="pc-k">Their game</div>${tmL(own.vs, tLogo(own.vs, 20))}<span>${own.g.home === abbr ? 'vs' : '@'} ${tmL(own.vs, `<b>${esc(nick(own.vs))}</b>`)}</span>
         <span class="rt-wl"><span>Win <b>${rtPct(own.pw[x.m])}</b></span><span>Lose <b>${rtPct(own.pl[x.m])}</b></span></span></div>`
       : `<p class="pc-sub">Bye this week: how the rest of the league's games move their chances.</p>`;
     return `<div class="pc-box rt-box"><div class="pc-k">Rooting guide · week ${O.root.week}</div>
       <p class="rt-say">${say.length ? `Root for the <b>${say.length > 1 ? `${say.slice(0, -1).join(', ')}</b> and <b>${say[say.length - 1]}` : say[0]}</b>.` : 'No other game this week moves their odds much.'}</p>
       ${ownHtml}
-      ${sig.length ? `<div class="rt-list"><div class="rt-hd"><span>Root for</span><span>Chance to ${goal}, pts</span></div>${sig.map(row).join('')}</div>` : ''}
-      ${small.length ? `<div class="rt-list"><div class="rt-hd"><span>${sig.length ? 'Every other game' : 'Every game'}</span><span>pts</span></div>${small.map(row).join('')}</div>` : ''}
-      <p class="pc-sub">Each number is the change in their chance to ${goal} between the two results: the same ${O.root.n_flip.toLocaleString()} simulated seasons with only that game flipped. Tap a game for both outcomes. Green / red tags: the game also moves another chance by a point or more (red means the two pull opposite ways).</p>
-      <p class="pc-sub">Grey: under half a point or within simulation noise, so the better side for them isn't settled. Games far from their race still count through the tiebreakers (strength of victory and of schedule), but rarely: one flipped season of ${O.root.n_flip.toLocaleString()} is ${(100 / O.root.n_flip).toFixed(2)} points, and 0.0 means the result changed nothing in any of them.</p></div>`;
+      ${sig.length ? `<div class="rt-list">${head('Root for')}${sig.map(row).join('')}</div>` : ''}
+      ${small.length ? `<div class="rt-list">${head(sig.length ? 'Every other game' : 'Every game')}${small.map(row).join('')}</div>` : ''}
+      <p class="pc-sub">Each number is how many points their chance to make the playoffs, win the division or get the top seed goes up (or down) if the side named wins rather than loses: the same ${O.root.n_flip.toLocaleString()} simulated seasons with only that game flipped. Bold: the race they're in (${goal}), which sets the order and the side to root for. Green / red: helps / hurts by half a point or more, clear of simulation noise; "Root for" holds every game with one of those. Tap a game for both outcomes.</p>
+      <p class="pc-sub">Grey: under half a point or within simulation noise in all three, so the better side for them isn't settled. Games far from their race still count through the tiebreakers (strength of victory and of schedule), but rarely: one flipped season of ${O.root.n_flip.toLocaleString()} is ${(100 / O.root.n_flip).toFixed(2)} points, and 0.0 means the result changed nothing in any of them.</p></div>`;
   };
   const rootingHtml = abbr => {
     const O = oddsData();

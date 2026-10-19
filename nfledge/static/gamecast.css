@@ -673,7 +673,15 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .rt-v { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 42px; text-align: right; }
 .rt-v.good { color: var(--good); }
 .rt-list + .rt-list { margin-top: 10px; }
-.rt-q .rt-nm, .rt-q .rt-v { color: var(--faint); }
+.rt-q .rt-nm { color: var(--faint); }
+.rt-hd { align-items: flex-end; gap: 8px; }
+.rt-hl { flex: 1; min-width: 0; }
+.rt-c { flex: none; width: 50px; text-align: right; font-variant-numeric: tabular-nums; font-size: var(--fs-sm); color: var(--faint); }
+.rt-hd .rt-c { font-size: var(--fs-xs); line-height: 1.2; white-space: normal; }
+.rt-c.main { font-weight: 700; }
+.rt-hd .rt-c.main { color: var(--muted); }
+.rt-c.good { color: var(--good); }
+.rt-c.bad { color: var(--bad); }
 .rt-q .rt-nm b { font-weight: 400; }
 .rt-chip { font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill); white-space: nowrap; line-height: var(--tag-h); }
 .rt-chip.good { background: rgba(69,194,107,.14); color: var(--good); }

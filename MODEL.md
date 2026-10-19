@@ -145,7 +145,7 @@ Connect a Sleeper league (your username, then pick the league) or a public ESPN 
   - Players: its top players by Edge grade; the sheet has every fantasy player's projection and grade and the depth chart (by playing time or as listed, any week since 2001).
   - Schedule: how hard its remaining schedule is and the next three opponents; the sheet has the whole season.
 - **Game log**: every game since 1999 with the line and whether it covered, win chances, Power rank and box numbers, filterable by opponent (with the head-to-head record).
-- **Playoffs**: its chances to make it, win the division and get the top seed, how they have moved week by week, the rooting guide (every game this week and how much it moves its odds, each found by simulating the season with only that game flipped), and its postseason history.
+- **Playoffs**: its chances to make it, win the division and get the top seed, how they have moved week by week, the rooting guide (every game this week and how much it moves each of its three chances, each found by simulating the season with only that game flipped), and its postseason history.
 
 ### Model
 
@@ -412,7 +412,7 @@ Playoff odds come from playing out the rest of the season thousands of times wit
 
 ### Rooting guide
 
-For each of this week's unplayed games, the rooting guide asks how much the result changes a team's chances (make the playoffs, win the division, get the top seed). It takes 2,000 of the simulated seasons and replays each one twice with only that game's result flipped, so the "if the home team wins" and "if the away team wins" chances come from the same seasons and the difference is that game's own effect (splitting seasons by who happened to win would mix in noise from every other game). Every game is listed, ranked by that swing; swings under half a point or within simulation noise are greyed. A game between two teams of the other conference still counts: its result can change a tiebreaker such as strength of victory or of schedule, though rarely (one flipped season in 2,000 is 0.05 points, so most such games show 0.0). Best and worst case: all of this week's games going the team's preferred way, or all the other way.
+For each of this week's unplayed games, the rooting guide asks how much the result changes a team's chances (make the playoffs, win the division, get the top seed). It takes 2,000 of the simulated seasons and replays each one twice with only that game's result flipped, so the "if the home team wins" and "if the away team wins" chances come from the same seasons and the difference is that game's own effect (splitting seasons by who happened to win would mix in noise from every other game). Every game is listed with its swing in all three chances. Games are ranked by the chance the team is racing for (making the playoffs; once that is settled, the division; then the top seed); swings under half a point or within simulation noise are greyed, and a game with a clear swing in any of the three is listed under "Root for". A game between two teams of the other conference still counts: its result can change a tiebreaker such as strength of victory or of schedule, though rarely (one flipped season in 2,000 is 0.05 points, so most such games show 0.0). Best and worst case: all of this week's games going the team's preferred way, or all the other way.
 
 ### What we tried
 
