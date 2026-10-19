@@ -50,7 +50,7 @@
         <dl class="ht">
           <dt>ROS pts</dt><dd>Points we expect from him from now through week 17, in your scoring. Each game is projected against its real opponent, then scaled by his chance to play.</dd>
           <dt>Pts/G</dt><dd>Those points per game he's expected to play.</dd>
-          <dt>Games</dt><dd>Games he's expected to play (byes and expected absences don't count).</dd>
+          <dt>Exp G</dt><dd>Games he's expected to play (byes and expected absences don't count).</dd>
           <dt>Sched</dt><dd>Points his remaining opponents add (+) or take away (−) in total.</dd>
           <dt>Weeks</dt><dd>Each week's expected points. B = bye, dash = expected to sit, faded = under 50% to play.</dd>
         </dl>
@@ -209,7 +209,7 @@
       if (!k) return '';
       const tip = [w.wind != null ? `wind ${Math.round(w.wind)} mph` : '', w.pop != null ? `${w.pop}% chance of rain` : '', w.snow > 0 ? `${w.snow} cm snow` : ''].filter(Boolean).join(' · ');
       return `<span class="wx wx-${k}" title="Kickoff forecast: ${esc(tip)}"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">${ICON[k]}</svg></span>`; };
-    const columns = flex => {
+    const columns = (flex, tp = pos) => {  // tp: this table's position (the TD column's label follows it)
       const range = r => `Floor ${f1(r._q[0])} · middle ${f1(r._q[1])}-${f1(r._q[3])} · ceiling ${f1(r._q[4])}`;
       const cols = [
         // the rank carries the tier as its color (owner 2026-10-17: the Tier column only repeated it)
@@ -246,7 +246,7 @@
         // Snap% (owner 2026-10-17, replacing Volume): his share of the offense's snaps this season, the plainest read on role
         { key: 'snap', label: 'Snap%', num: true, cls: 'snapc', first: 'desc', title: "His share of his offense's snaps this season",
           value: r => r.ext && r.ext.snap != null ? r.ext.snap : -1, html: r => r.ext && r.ext.snap != null ? `${Math.round(r.ext.snap * 100)}%` : '' },
-        { key: 'td', label: pos === 'QB' ? 'Pass TD' : 'TD', num: true, cls: 'tdc', title: pos === 'QB' ? 'Projected passing touchdowns (hover for his rushing TD chance)' : 'Chance he scores at least one touchdown',
+        { key: 'td', label: tp === 'QB' ? 'Pass TD' : 'TD', num: true, cls: 'tdc', title: tp === 'QB' ? 'Projected passing touchdowns (hover for his rushing TD chance)' : 'Chance he scores at least one touchdown',
           value: r => r.td && r.td.v, html: r => r.td ? `<span title="${esc(r.td.d)}">${esc(r.td.t)}</span>` : '' },
       ];
       return cols;
@@ -272,11 +272,11 @@
     const kickoff = t => NFLE.fmt.kickoff(D.games, t);
     const oppOf = t => { const g = (D.games || []).find(x => x.away.team === t || x.home.team === t);
       return g ? { opp: g.home.team === t ? g.away.team : g.home.team, home: g.home.team === t ? 'vs' : '@' } : null; };
-    const kdRows = p => {
+    const kdRows = (p, m = mode) => {
       const t = q.trim().toLowerCase(), wk = D.week;
-      let rows = KDA[p].map(r => {
-        const e = r.by[wk];
-        if (mode === 'ros') {  // this week's game drops out once it kicks off (as for players)
+      let rows = KDA[p].map(r0 => {
+        const e = r0.by[wk], r = Object.assign({}, r0);
+        if (m === 'ros') {  // this week's game drops out once it kicks off (as for players)
           const ko = kickoff(r.team), started = ko != null && Date.now() >= ko;
           const ws = Object.entries(r.by).filter(([w]) => +w >= (KD ? KD.from : wk) && !(started && +w === D.week));
           const tot = ws.reduce((a, [, x]) => a + x.v, 0);
@@ -320,7 +320,7 @@
       const view = sec.querySelector(`.posview[data-pos="${p}"]`);
       if (!KD) { loadKD().then(() => kdDraw(p)).catch(() => { view.querySelector('.byes-box').innerHTML = '<p class="muted">Kicker and defense projections are not available right now.</p>'; }); return; }
       const box = view.querySelector(mode === 'ros' ? '.ros-tbl' : '.rk-tbl'), store = mode === 'ros' ? rosTables : tables;
-      const opts = { columns: kdColumns(p), rows: kdRows(p), cls: `sortable ranks tiles${p === 'DST' ? '' : ''}`, sort: { key: 'proj', dir: 'desc' },
+      const opts = { columns: kdColumns(p), rows: kdRows(p), cls: 'sortable ranks tiles', sort: { key: 'proj', dir: 'desc' },
                      rowAttrs: kdAttrs, rowClass: r => `main teamrow${r.pos === 'DST' ? ' tm-open' : ''}` };
       if (!store[p]) store[p] = NFLE.Table(box, opts);
       else { store[p].setColumns(opts.columns); store[p].update(opts.rows); }
@@ -443,11 +443,11 @@
         if (KDP.includes(p)) { if (mode === 'week') kdDraw(p); return; }
         const rows = rowsFor(p);
         if (!tables[p]) {
-          tables[p] = NFLE.Table(view.querySelector('.rk-tbl'), { columns: columns(p === 'FLEX'), rows, cls: 'sortable ranks tiles', sort: { key: 'proj', dir: 'desc' }, rowAttrs, rowClass });
+          tables[p] = NFLE.Table(view.querySelector('.rk-tbl'), { columns: columns(p === 'FLEX', p), rows, cls: 'sortable ranks tiles', sort: { key: 'proj', dir: 'desc' }, rowAttrs, rowClass });
           // the landing animation (pages/week.html adds html.land-anim) plays on this first draw only, not on sorts
           setTimeout(() => document.documentElement.classList.remove('land-anim'), 1200);
         }
-        else { tables[p].setColumns(columns(p === 'FLEX')); tables[p].update(rows); if (resort) tables[p].setSort({ key: 'proj', dir: 'desc' }); }
+        else { tables[p].setColumns(columns(p === 'FLEX', p)); tables[p].update(rows); if (resort) tables[p].setSort({ key: 'proj', dir: 'desc' }); }
         view.querySelector('.byes-box').innerHTML = byesHtml(p);
       });
       const name = state.preset || 'Custom';
@@ -468,7 +468,7 @@
       if (mode === 'ros') rosDraw(!rosTables[p]);
     };
     sec.querySelector('.posbar').addEventListener('click', e => { const b = e.target.closest('[data-pos]'); if (b) showPos(b.dataset.pos); });
-    sec.querySelector('#psearch').oninput = e => { q = e.target.value; POS.forEach(p => tables[p] && tables[p].update(KDP.includes(p) ? kdRows(p) : rowsFor(p))); if (mode === 'ros') rosDraw(false); };
+    sec.querySelector('#psearch').oninput = e => { q = e.target.value; POS.forEach(p => tables[p] && tables[p].update(KDP.includes(p) ? kdRows(p, 'week') : rowsFor(p))); if (mode === 'ros') rosDraw(false); };
     window.nfleWeights = () => state.w;
     window.nfleApplyScoring = () => draw();
 
