@@ -1535,6 +1535,54 @@
           : tapTile('Ball skills', `<div class="pc-big">${f0((t.int || 0) + (t.pd || 0))} <small>INT + PD</small></div><div class="pc-tapsub">${f0(t.int || 0)} interceptions</div>`, 'Ball skills', `<div class="pc-box">${kindGrid(L, t)}</div>`);
     return `<div class="pc-tiles">${form}${role}${L.team ? healthTile(L.pid, null, L, espn) : ''}${gradeTile(L.pid, L)}</div>`;
   };
+  // A roster defender's week (owner 2026-10-18: "give them the same tiles ... offensive players have"): the offense
+  // card's layout and tiles. Points = that week's IDP points with its game grade (or why there's no game: bye, out,
+  // not played yet); Form = IDP points per game that season through that week, the last five as bars; Health (this
+  // week); Grade; then his team's game. The pass-rush / coverage / tackling detail lives in the Points and Form sheets.
+  const MISS_WORD = { INA: 'Inactive', IR: 'Injured reserve', PUP: 'PUP list', Res: 'Reserve list', DNP: 'Did not play', FA: 'Not on a roster', PS: 'Practice squad', Cut: 'Released' };
+  const defLine = (L, g) => { const t = kindTotals(L, [g]), bits = [`${f0((t.tk || 0) + (t.ast || 0))} tkl`];
+    [['sk', 'sk'], ['tfl', 'TFL'], ['int', 'INT'], ['pd', 'PD'], ['ff', 'FF'], ['td', 'TD']].forEach(([k, l]) => { if (t[k]) bits.push(`${nfmt(t[k])} ${l}`); });
+    return bits.join(' · '); };
+  const defWeek = (L, d) => {
+    const wk = +d.week, S = L.seasons.find(x => +x.s === +d.season), w = weights();
+    const g = S && S.g.find(x => x.w === wk), m = S && (S.m || []).find(x => x.w === wk);
+    const h = d === DATA ? healthOf(L.pid, null, L, L.espn) : null;
+    const team = (g && g.t) || L.team, game = team ? teamGame(team, d) : null;
+    let ptsTile;
+    if (g) {
+      const v = idpPts(L, g, w), tone = g.gr == null ? '' : g.gr >= 80 ? 'good' : g.gr <= 30 ? 'bad' : '';
+      const sheet = `<div class="pc-box"><div class="pc-k">Week ${wk} ${g.h === 0 ? '@' : 'vs'} ${esc(g.o)}${g.gid ? ` · <a href="${esc(gcUrl(g.gid, ''))}">Gamecast &rsaquo;</a>` : ''}</div>
+        ${kindGrid(L, kindTotals(L, [g]))}${advGrid(L, [g])}${g.gr != null ? `<p class="pc-sub">Game grade <b>${ovr(g.gr)}</b>: his IDP points against every game by qualified ${esc({ DL: 'defensive linemen', LB: 'linebackers', DB: 'defensive backs' }[DEF_GROUP[L.pos] || 'DB'])} that season.</p>` : ''}</div>`;
+      ptsTile = tapTile('Points', `<div class="pc-big ${tone}"><span class="pv-tag">final</span>${f1(v)} <small>pts</small></div><div class="pc-tapsub">${g.gr != null ? `grd <b>${ovr(g.gr)}</b> · ` : ''}${esc(defLine(L, g))}</div>`, `Week ${wk} points`, sheet);
+    } else {
+      const st = game && LIVE.byGame[game.id];
+      const body = m && m.bye ? '<div class="pc-big">Bye</div><div class="pc-tapsub">no game this week</div>'
+        : m && m.miss ? `<div class="pc-big bad">${esc(m.miss === 'DNP' ? 'DNP' : m.miss === 'INA' ? 'Inactive' : m.miss)}</div><div class="pc-tapsub">${esc(MISS_WORD[m.miss] || '')}${m.o ? ` · ${m.h === 0 ? '@' : 'vs'} ${esc(m.o)}` : ''}</div>`
+          : st && st.state === 'in' ? '<div class="pc-big"><span class="live-dot"></span>Live</div><div class="pc-tapsub">IDP points once the game is final</div>'
+            : h && h.inj && h.play != null && h.play < 0.5 ? `<div class="pc-big bad">Out</div><div class="pc-tapsub">${esc(h.what || 'injured')}</div>`
+              : `<div class="pc-big">&ndash;</div><div class="pc-tapsub">${game ? `${game.home.team === team ? 'vs' : '@'} ${esc(game.home.team === team ? game.away.team : game.home.team)} · not played yet` : 'no game'}</div>`;
+      ptsTile = goTile('Points', body, 'log', 'g');
+    }
+    // Form: that season through this week; bars = his last five games up to it
+    const sofar = S ? S.g.filter(x => x.w <= wk) : [];
+    const upto = L.seasons.flatMap(x => x.g.filter(y => +x.s < +d.season || (+x.s === +d.season && y.w <= wk)).map(y => ({ s: x.s, g: y })))
+      .sort((a, b) => b.s - a.s || b.g.w - a.g.w).slice(0, 5).reverse();
+    const slots = upto.map(({ s: y, g: x }) => ({ w: x.w, v: idpPts(L, x, w), pj: null, title: `${y} week ${x.w}: ${f1(idpPts(L, x, w))} IDP pts` }));
+    const fpg = sofar.length ? sofar.reduce((t, x) => t + idpPts(L, x, w), 0) / sofar.length : null;
+    const formBody = fpg != null ? `<div class="pc-big">${f1(fpg)} <small>pts/G</small></div><div class="pc-tapsub">${sofar.length} game${sofar.length === 1 ? '' : 's'} · last ${slots.length}</div>`
+      : `<div class="pc-big">&ndash;</div><div class="pc-tapsub">no games yet in ${esc(d.season)}</div>`;
+    const bars = slots.length ? `<div class="pc-tapbars">${miniBars(slots, { slotW: 22, H: 40, cls: 'mb-pts mb-sm' })}</div>` : '';
+    const formSheet = sofar.length ? `<div class="pc-box"><div class="pc-k">${esc(d.season)} through week ${wk}</div>${kindGrid(L, kindTotals(L, sofar))}${advGrid(L, sofar)}</div>` : '';
+    const form = formSheet ? tapTile('Form', formBody + bars, `${d.season} season`, formSheet) : goTile('Form', formBody + bars, 'log', 'g');
+    return `<div class="pc-tiles">${ptsTile}${form}${h ? healthTile(L.pid, null, L, L.espn) : ''}${gradeTile(L.pid, L)}</div>
+      ${game ? `<div class="pc-mt">${NFLE.ui.matchTile(game, gameHref(game, d))}</div>` : ''}`;
+  };
+  // this season's games under the tiles (as the offense card's), Show more = the full log
+  const defMini = L => {
+    const S = L.seasons.find(x => x.s === L.cur && x.g.length) || L.seasons.find(x => x.g.length);
+    return S ? `<div class="pc-box pc-mini"><div class="pc-k">${S.s === L.cur ? 'This season' : `${S.s} games`}</div><div class="pc-log">${kindLog(L, [S], { compact: true })}</div>
+      <button type="button" class="pc-more" data-goto="log">Show more</button></div>` : '';
+  };
   const KIND_NAME = { def: 'Defense', k: 'Kicking', p: 'Punting', ol: 'Offensive line', ls: 'Long snapper', off: 'Offense' };
   const kindTotals = (L, games) => {
     const t = {}, keys = L.keys || [], rk = L.ret_keys || [];
@@ -1897,8 +1945,13 @@
     // retired / off every roster this season and not on the picked week's board: a career overview, no week picker
     const lastPlayed = L ? (L.seasons.find(S => S.g.length) || {}).s : null;
     const retired = !isKind && !!L && !L.team && !p && !(DATA && DATA.players[pid]) && lastPlayed && lastPlayed < L.cur;
-    const overview = isKind || retired;
-    const week = isKind ? kindOverview(L, espn) + profileBox(L)
+    // a defender on a roster this season: the offense card's week layout (defWeek); other kinds and retired defenders
+    // keep the career overview
+    const defCard = !!(L && L.kind === 'def' && L.team);
+    const overview = (isKind && !defCard) || retired;
+    const week = defCard ? `<div class="pc-cols"><div class="pc-col">${d === undefined || d === null ? wkWait(d) : defWeek(L, d)}${defMini(L)}</div>
+         <div class="pc-col">${newsMini(espn)}${profileBox(L)}<div class="pc-pen"></div></div></div>`
+      : isKind ? kindOverview(L, espn) + profileBox(L)
       : retired ? weekExtras(pid, L, row, espn) + (offCareer(L) ? `<div class="pc-box"><div class="pc-k">By season (regular season)</div>${offCareer(L)}</div>` : '') + profileBox(L)
       // two columns on wide screens (owner 2026-10-16): the summary tiles, game and this season's games on the left;
       // news and draft & contract on the right. Fixed sides (owner).
