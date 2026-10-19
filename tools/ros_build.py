@@ -56,7 +56,7 @@ def main():
       if w == week or "name" not in o:  # identity from the earliest week he appears (this week's when listed)
         o.update({"name": p["name"], "pos": p["pos"], "team": p["team"], "espn": p.get("espn") or "", "photo": p.get("photo") or "",
                   "ss": p["sc"].get("ss"), "g": p["sc"].get("g")})  # season line so far: FP/G under any scoring
-      pa = round(1.0 - float(p.get("inactive") or 0.0), 3)
+      pa = round(float(p["play"]) if p.get("play") is not None else 1.0 - float(p.get("inactive") or 0.0), 3)  # (AY3) takes the field
       o["w"].append([w, pa, round(float(p.get("mu") or 0.0), 2), p.get("opp") or "", p.get("home") or "",
                      [round(float(v), 3) for v in p["sc"]["pj"]]])
       if w == week and p["team"] in kick:

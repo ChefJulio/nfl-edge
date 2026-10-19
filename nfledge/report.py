@@ -590,6 +590,7 @@ def week_data(ctx: dict) -> str:
         "rank": r["rank"],
         "tier": r["tier"], "slot": r["slot"], "ecr": None if pd.isna(r["ecr"]) else r["ecr"],
         "status": r["status"] or "", "inactive": r["inactive"], "inactive_why": r["inactive_why"],
+        "scratch": r["scratch"], "play": r["play"], "play_why": r["play_why"],
         "boost": r["boost"], "boost_from": r["boost_from"], "cond": r.get("cond"), "cond2": r.get("cond2"), "low_sample": r["low_sample"], "conf": r["conf"],
         "mu": r["mu"], "mu_hi": r["mu_hi"], "mu_c": r["mu_c"],
         "takeaway": r["takeaway"], "fpg": None if pd.isna(r["fpg"]) else r["fpg"],
@@ -705,7 +706,10 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
         "tier": r.tier, "slot": r.slot, "takeaway": r.takeaway, "tags": r.tags, "conf": r.confidence,
         "vol": volume_cell(r), "td": td_cell(r), "byes": byes.get(r.team, []), "pend": pend.get(r.team, []),
         "imp": float(r.implied_pts) if pd.notna(getattr(r, "implied_pts", np.nan)) else None,
-        "status": r.status, "avail": r.avail, "inactive": 1 - r.avail,
+        # (AY3) inactive = injury only (Health, injury tags); scratch = healthy-scratch risk; play = takes the field
+        # (injury x scratch x the backup-QB rule): expected points and "likely out" projections
+        "status": r.status, "avail": r.avail, "inactive": 1 - float(getattr(r, "inj_avail", r.avail)),
+        "scratch": round(float(getattr(r, "scratch", 0.0)), 3), "play": round(float(r.avail), 3), "play_why": play_why(r),
         "inactive_why": inactive_why(r), "boost": r.injury_boost, "boost_from": r.boost_from or "",
         # two worlds for a teammate of an uncertain player: [name, pid, P(he sits), proj if he plays, proj if he sits]
         # anchored to his final projection (the default world, after team-share normalization); the other world = that
@@ -768,11 +772,20 @@ def cond_pair(r, k: str = "cond") -> list | None:
   return [name, getattr(r, f"{k}_pid"), round(p_sit, 3), round(float(plays), 2), round(float(sits), 2)]
 
 
+def play_why(r) -> str:
+  """(AY3) why his chance to take the field is under 100% apart from injury: the backup-QB rule or healthy-scratch risk."""
+  if getattr(r, "qb2_of", ""):  # injuries.apply: the backup QB plays when the starter sits
+    return f"Backup QB: he plays if {r.qb2_of} sits, plus relief snaps when {r.qb2_of} plays"
+  sc = float(getattr(r, "scratch", 0.0))
+  if sc >= 0.1:
+    return (f"{sc:.0%} chance he's a healthy scratch (on the inactive list without an injury), from how often he has "
+            "dressed lately, his depth chart spot and who is out ahead of him")
+  return ""
+
+
 def inactive_why(r) -> str:
   if getattr(r, "tuesday", ""):  # InjuryModel.tuesday_probs: before the team's first report of the week
     return r.tuesday
-  if getattr(r, "qb2_of", ""):  # injuries.apply: the backup QB plays when the starter sits
-    return (f"Backup QB: he plays if {r.qb2_of} sits, plus relief snaps when {r.qb2_of} plays")
   if r.status and r.status.startswith("Questionable (ESPN)"):  # display only (InjuryModel.espn_questionable)
     days = r.status[len("Questionable (ESPN)"):].strip(" ()")
     words = {"D": "DNP", "L": "limited", "F": "full"}
@@ -796,17 +809,20 @@ def inactive_why(r) -> str:
     return f"Practice so far: {prac}. How players with that start to the week played, before the final report"
   if r.status:
     return "Injury report + practice pattern: " + r.status
-  if r.avail < 0.9:
-    return "Healthy-scratch risk from his recent active/inactive history, depth chart spot and who is out ahead of him"
-  return "Not on the injury report; regular role"
+  return "Not on the injury report"
 
 
 def takeaway(r) -> str:
   bits = []
-  if r.avail < 0.5:
-    return f"Likely inactive ({r.status or 'healthy scratch risk'})"
-  if r.avail < 0.9:
-    bits.append(f"{1 - r.avail:.0%} chance inactive" + (f" ({r.status})" if r.status else " (scratch risk)"))
+  ia, sc = 1 - float(getattr(r, "inj_avail", r.avail)), float(getattr(r, "scratch", 0.0))
+  if ia > 0.5:
+    return f"Likely out ({r.status or 'injury'})"
+  if sc >= 0.5:
+    return "Likely a healthy scratch"
+  if ia > 0.1:
+    bits.append(f"{ia:.0%} chance out" + (f" ({r.status})" if r.status else ""))
+  if sc >= 0.1:
+    bits.append(f"{sc:.0%} healthy-scratch risk")
   if r.injury_boost >= 1.0:
     bits.append(f"+{r.injury_boost:.1f} pts from vacated volume ({r.boost_from})")
   if r.if_sits_gain >= 1.0:
@@ -834,11 +850,15 @@ def takeaway_tags(r) -> list[dict]:
   full detail for the tooltip). Same facts and order as takeaway(); the player card keeps the sentence."""
   last = lambda names: ", ".join(n.split(" ", 1)[-1] for n in str(names).split(", ") if n)
   tags = []
-  if r.avail < 0.5:
-    return [{"t": "Likely out", "k": "bad", "d": f"Likely inactive ({r.status or 'healthy scratch risk'})"}]
-  if r.avail < 0.9:
-    tags.append({"t": f"{1 - r.avail:.0%} inactive", "k": "warn",
-                 "d": f"{1 - r.avail:.0%} chance inactive ({r.status or 'healthy scratch risk'})"})
+  ia, sc = 1 - float(getattr(r, "inj_avail", r.avail)), float(getattr(r, "scratch", 0.0))
+  if ia > 0.5:
+    return [{"t": "Likely out", "k": "bad", "d": f"Likely out ({r.status or 'injury'})"}]
+  if sc >= 0.5:
+    return [{"t": "Likely scratch", "k": "bad", "d": f"{sc:.0%} chance he's a healthy scratch (inactive without an injury)"}]
+  if ia > 0.1:
+    tags.append({"t": f"{ia:.0%} out", "k": "warn", "d": f"{ia:.0%} chance out ({r.status or 'injury'})"})
+  if sc >= 0.1:
+    tags.append({"t": f"{sc:.0%} scratch", "k": "warn", "d": f"{sc:.0%} chance he's a healthy scratch (inactive without an injury)"})
   if r.injury_boost >= 1.0:
     tags.append({"t": f"+{r.injury_boost:.1f} from injuries", "k": "good",
                  "d": f"+{r.injury_boost:.1f} pts from volume vacated by {r.boost_from}"})

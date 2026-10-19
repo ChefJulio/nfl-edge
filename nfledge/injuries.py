@@ -525,12 +525,22 @@ class InjuryModel:
       latest = r[r.week == r.groupby("team").week.transform("max")]
       r = pd.concat([r, fut.merge(latest.drop(columns=["week"]), on="team")], ignore_index=True)
     # ACT and INA are both the 53-man roster (INA = that week's game-day inactive list, i.e. the outcome).
-    rg = r[r.status.isin(["ACT", "INA"])].merge(tg, on=["week", "team"])[["week", "team", "gsis_id", "pos", "years_exp"]]
+    rg = r[r.status.isin(["ACT", "INA"])].merge(tg, on=["week", "team"])[["week", "team", "gsis_id", "pos", "years_exp", "status"]]
     rg = rg.drop_duplicates(["week", "gsis_id"])
     rg = rg.merge(tg, on=["week", "team"], how="left")
     played, observable = self._played_sets()
-    rg["active"] = [(season, w, g) in played for w, g in zip(rg.week, rg.gsis_id)]
-    rg["observable"] = rg.gsis_id.isin(observable)
+    # (AY3, owner 2026-10-18: "0 snaps has never meant injured ... lots of players are active and don't play"; "it
+    # shouldn't conflate availability with healthy scratches at all"): scratch_label = "dressed" makes the label the
+    # game-day active list (ACT vs INA on the weekly roster, 2019 on), not "took a snap", and the history features
+    # dressed weeks; a dressed backup who never plays is no longer a scratch.
+    dressed_label = self.cfg.get("injuries", {}).get("scratch_label") == "dressed"
+    if dressed_label:
+      rg["active"] = (rg.status == "ACT").to_numpy()
+      ina_teams = set(zip(r[r.status == "INA"].week, r[r.status == "INA"].team))  # weeks whose inactives are posted
+      rg["observable"] = [(w, t) in ina_teams for w, t in zip(rg.week, rg.team)]
+    else:
+      rg["active"] = [(season, w, g) in played for w, g in zip(rg.week, rg.gsis_id)]
+      rg["observable"] = rg.gsis_id.isin(observable)
     inj = d.injuries[(d.injuries.season == season) & d.injuries.report_status.notna()]
     on_report = set(zip(inj.week, inj.gsis_id))
     rg["on_report"] = [(w, g) in on_report for w, g in zip(rg.week, rg.gsis_id)]
@@ -555,6 +565,8 @@ class InjuryModel:
     sn_ = d.snaps[(d.snaps.season == season)] if "team" in d.snaps else d.snaps.iloc[0:0]
     seen |= set(zip(sn_.week, sn_.team.replace({"LAR": "LA"}))) if len(sn_) else set()
     observed = pd.Series([(w, t) in seen for w, t in zip(rg.week, rg.team)], index=rg.index)
+    if dressed_label:
+      observed = rg.observable.astype(bool)  # the week's game-day inactive list is published
     done = rg.final.fillna(False).astype(bool) & (rg.week <= self.data.completed_weeks(season)) & observed
     # History excludes injury-report weeks (those absences are injuries, not scratches) and unplayed weeks.
     hist = (done & ~rg.on_report).astype(int)
@@ -994,6 +1006,13 @@ class InjuryModel:
     # 2, not on the injury report) = P(QB1 sits) + P(QB1 plays) x r, r = how often a healthy QB2 plays anyway (relief,
     # blowouts; 0.232 measured 2021-23). Tested 2024-25 on QB2s whose starter had a chance to sit: Brier 0.2283 -> 0.1957
     # (-0.0326 [-0.0562, -0.0093]). The healthy-scratch model scored him as a generic backup unless QB1 was Out / D.
+    # (AY3) injury availability apart from the healthy-scratch risk (owner 2026-10-18: "it shouldn't conflate
+    # availability with healthy scratches at all"): where only the scratch model spoke (avail is its number), he is
+    # healthy (inj_avail 1) with that scratch risk; else the injury models' number, no scratch part. avail itself
+    # stays "takes the field" (injury x scratch, the backup-QB rule below): sits, redistribution, starter picks.
+    only_scratch = np.isclose(p.avail.astype(float), p.scratch_avail.astype(float)) & ~p.status.fillna("").astype(str).str.startswith("Inactive")
+    p["inj_avail"] = np.where(only_scratch, 1.0, p.avail.astype(float))
+    p["scratch"] = np.where(only_scratch, 1.0 - p.scratch_avail.astype(float), 0.0)
     r2 = self.cfg.get("injuries", {}).get("qb2_play_rate")
     p["qb2_of"] = ""
     if r2 is not None:

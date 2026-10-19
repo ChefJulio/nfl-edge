@@ -189,6 +189,10 @@ sleeper_blend = {}
 
 [injuries]
 ahead_reserve = true   # (AV, {#ahead-reserve}) starters on IR / off the roster rows still count as out ahead of their backups
+# (AY3, {#scratch-dressed}) the healthy-scratch label is the game-day active list (ACT vs INA, 2019 on), not "took a snap":
+# a dressed backup who never plays isn't a scratch. Walk-forward 2021-25, Brier on not-on-report rows vs that label
+# 0.0753 -> 0.0397 (-0.0355 [-0.0367, -0.0343]); QBs predicted 47.9% inactive vs 16.5% actual -> 16.6%.
+scratch_label = "dressed"
 # Practice models get a player's recent role (mean snap share, last 3 games) for RB / WR / TE; QBs get none (owner
 # question 2026-10-15, Drake Maye 6.5-11% inactive at full practice). Walk-forward 2021-25: availability Brier on
 # injury-report players 0.0987 -> 0.0931 (-0.0056 [-0.0068, -0.0044]), better at every position (QB -0.0099) and

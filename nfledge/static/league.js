@@ -260,7 +260,8 @@
         return { ext: x, pid: g, name: r ? r.name : nm ? nm[0] : g, pos: r ? r.pos : nm ? nm[1] : '', team, photo: r && r.photo, espn: r && r.espn,
                  proj: null, exp: null, why: bye ? 'on bye this week' : 'no projection this week (out, or not on our board)' };
       }
-      const proj = pts(p.sc.pj, L.scoring, p.pos), pa = 1 - (p.inactive || 0);
+      // expected points: his chance to take the field (injury x healthy scratch x backup role; (AY3) "play"), not just health
+      const proj = pts(p.sc.pj, L.scoring, p.pos), pa = p.play != null ? p.play : 1 - (p.inactive || 0);
       // sd from his range (10th-90th percentile spans 2.56 sd), rescaled to this league's scoring
       const base = pts(p.sc.pj, D.score.built, p.pos), r = base > 0.3 ? proj / base : 1;
       const sd = ((p.q[4] - p.q[0]) * r) / 2.563;

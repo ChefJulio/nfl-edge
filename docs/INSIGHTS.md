@@ -2590,6 +2590,27 @@ Updated 2026-10-18. Injury / return items first (owner 2026-10-18: "the injury/r
   -0.0031 [-0.0050, -0.0011]. All rows -0.00029 [-0.00059, +0.00001]. Live: config injuries.ahead_reserve = true
   (Tanner McKee: ahead_out 0 -> 1). Pattern noted (owner: "players on IR threw a wrench ... over and over"): an audit
   of every consumer that picks "this week's players" by roster status or board membership is under way.
+- **PRE-REGISTERED 2026-10-18 (owner: "0 snaps has never meant injured ... lots of players are active and don't play";
+  "it shouldn't conflate availability with healthy scratches at all"; Tanner McKee, healthy, read 55% to play): (AY3)
+  the healthy-scratch model's label is the game-day active list, not a snap.** Today the label is "took a snap", so a
+  dressed backup who never plays reads as a scratch (McKee: weeks 1-3 inactive as QB3, 4-5 dressed as QB2, 0 snaps all
+  five; act_rate 0.16, 46%). Variant (injuries.scratch_label = "dressed"): label = on the weekly roster's game-day
+  active list (ACT) vs inactive (INA), 2019 on, only weeks whose inactives are published; the history features
+  (rate, last game) count dressed weeks; same features and settings otherwise. Rows: not on the injury report (a
+  healthy scratch by definition: 4,676 of 8,010 skill-player inactives 2019-26). Test (tools/scratch_dressed_eval.py):
+  walk-forward 2021-25, season s trained on 2019..s-1, both models scored against the dressed label (what the site
+  shows as "not a healthy scratch"). GATE: Brier lower with the 95% CI over season-weeks excluding 0, and calibrated
+  (predicted vs actual inactive rate within 2 points overall and for QBs). Ships with a display split: Health / injury
+  tags = injury availability only; healthy-scratch risk its own tag; the chance he takes the field (injury x scratch x
+  the backup-QB rule) drives sits and expected points.
+- **RESULT {#scratch-dressed} (AY3) the healthy-scratch label = the game-day active list: PASS, shipped.**
+  tools/scratch_dressed_eval.py, walk-forward 2021-25 on 34,911 not-on-report rows with published inactives (dressed
+  91.3%). Brier vs the dressed label: snap model 0.0753 -> dressed model 0.0397, -0.0355 [-0.0367, -0.0343].
+  Calibration (inactive actual / snap model / dressed model): all 8.7% / 14.6% / 8.9%; QB 16.5% / 47.9% / 16.6%; RB
+  8.4 / 9.4 / 8.4; WR 6.6 / 7.3 / 6.7; TE 6.7 / 7.7 / 7.5. Live: config injuries.scratch_label = "dressed". Display
+  split shipped with it: inactive (Health, injury tags) = injury only; scratch = its own "Scratch x%" tag and card state;
+  play = takes the field (sits, redistribution, starter picks, Fantasy expected points). Tanner McKee: Health
+  healthy; P(dressed) 87% from this model alone (three QB3 inactives, depth chart still rank 2 in week 6).
 - **IR audit 2026-10-18 (owner: "players on IR threw a wrench in our model over and over"), fixes shipped.** One audit
   of every consumer that picks "this week's players" by roster status or board membership. Fine as built: vacated-
   volume redistribution (an IR'd WR1 / RB1's share is redistributed exactly as for one listed Out), the QB starter

@@ -119,7 +119,7 @@
         // Near-certain outs (owner 2026-10-16: under 10% to play) project 0 and sink below the active players; the
         // line if he does play stays beside it. 10-50% keep their if-active line (owner's call).
         r._ifact = r._proj;
-        r._likelyOut = r.inactive >= OUT_LINE;
+        r._likelyOut = (r.play != null ? 1 - r.play : r.inactive) >= OUT_LINE;  // (AY3) out or a near-certain healthy scratch
         if (r._likelyOut) r._proj = 0;
         r._q = r.q.map(v => v * ratio);  // p10, p25, p50, p75, p90
         r._ratio = ratio;
@@ -173,7 +173,9 @@
       // his chance to play rides on the injury badge when it's in doubt (owner 2026-10-17: the Play% column read >99%
       // for nearly everyone)
       const pct = r.inactive >= 0.05 ? `<span class="flag fl-play ${r.inactive >= 0.5 ? 'fl-bad' : r.inactive >= 0.15 ? 'fl-warn' : ''}" title="${esc(r.inactive_why || '')}">${NFLE.fmt.toPlay(r.inactive)}</span>` : '';
-      const badges = (r.status || r.boost >= 1 || r.low_sample || pct) ? `<div class="badges">${NFLE.injTag(r.status)}${pct}${r.boost >= 1 ? `<span class="flag f-up" title="Raised by volume vacated by: ${esc(r.boost_from)}">+${f1(r.boost)} inj</span>` : ''}${r.low_sample ? '<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>' : ''}</div>` : '';
+      // (AY3) healthy-scratch risk is its own chip, never the injury one: "Scratch 30%" (chance he's inactive without an injury)
+      const scr = (r.scratch || 0) >= 0.1 ? `<span class="flag fl-scr${r.scratch >= 0.5 ? ' fl-bad' : ''}" title="${esc(r.play_why || 'Healthy-scratch risk')}">Scratch ${Math.round(100 * r.scratch)}%</span>` : '';
+      const badges = (r.status || r.boost >= 1 || r.low_sample || pct || scr) ? `<div class="badges">${NFLE.injTag(r.status)}${pct}${scr}${r.boost >= 1 ? `<span class="flag f-up" title="Raised by volume vacated by: ${esc(r.boost_from)}">+${f1(r.boost)} inj</span>` : ''}${r.low_sample ? '<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>' : ''}</div>` : '';
       // first name on top, last name below, badges to the right (owner 2026-10-17); scrolled sideways the pinned
       // column narrows and each line truncates (rankings.css)
       const [first, lastN] = NFLE.fmt.split(r.name);
