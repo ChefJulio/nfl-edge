@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4244607,Akayleb Evans,Carolina Panthers,Active,2026-10-07T02:31Z,,,,,,Evans recorded 11 total tackles (nine solo) and a pass defensed during Sunday night's 32-26 win over the Lions.
 4360763,Brycen Tremayne,Carolina Panthers,Active,2026-10-06T03:00Z,,,,,,Tremayne caught two of three passes for 32 yards during Sunday's 32-26 win over the Lions.
 4567096,John Metchie III,Carolina Panthers,Active,2026-10-06T02:21Z,,,,,,Metchie caught three of five targets for 37 yards during the Panthers' 32-26 win over the Lions on Sunday.
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-19T17:19Z,Undisclosed,,,2026-10-18,IR,ir
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-19T18:06Z,Undisclosed,,,2026-10-18,IR,ir
 4426374,Tyrique Stevenson Sr.,Chicago Bears,Out,2026-10-19T16:28Z,Hip,Not Specified,Not Specified,2026-10-22,QUESTIONABLE,out
 4608686,Kyle Monangai,Chicago Bears,Out,2026-10-19T16:28Z,Toe,Sprain,Not Specified,2026-10-22,QUESTIONABLE,out
 3121544,T.J. Edwards,Chicago Bears,Out,2026-10-19T16:28Z,Hamstring,Not Specified,Not Specified,2026-10-22,QUESTIONABLE,out
@@ -212,7 +212,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242355,Jake Ferguson,Dallas Cowboys,Active,2026-10-19T04:15Z,,,,,,Ferguson caught two of three targets for 13 yards during Sunday night's 23-13 loss to the Packers.
 4241389,CeeDee Lamb,Dallas Cowboys,Active,2026-10-19T03:55Z,,,,,,Lamb caught nine of 18 targets for 70 yards in Sunday's 23-13 loss to the Packers.
 3676833,KaVontae Turpin,Dallas Cowboys,Questionable,2026-10-19T02:25Z,Ribs,Not Specified,Not Specified,2026-10-26,QUESTIONABLE,"Turpin (ribs) has been ruled out for the rest of Sunday night's contest versus the Packers, Tommy Yarrish of the Cowboys' official site reports."
-4428914,Dee Winters,Dallas Cowboys,Doubtful,2026-10-19T01:25Z,Achilles,Strain,Not Specified,2026-10-26,DOUBTFUL,"Winters (ankle) is questionable to return to Sunday night's contest against Green Bay, Nick Harris of the Fort Worth Star-Telegram reports."
+4428914,Dee Winters,Dallas Cowboys,Doubtful,2026-10-19T01:25Z,Ankle,Strain,Not Specified,2026-10-26,DOUBTFUL,"Winters (ankle) is questionable to return to Sunday night's contest against Green Bay, Nick Harris of the Fort Worth Star-Telegram reports."
 4426506,Joey Porter Jr.,Dallas Cowboys,Active,2026-10-18T23:09Z,,,,,,"Porter (ankle) is active for Sunday night's contest against Green Bay, Patrik Walker of the Cowboys' official site reports."
 4362478,Emari Demercado,Dallas Cowboys,Active,2026-10-18T23:06Z,,,,,,"Demercado (coach's decision) is inactive for Sunday night's matchup with the Packers, Patrik Walker of the Cowboys' official site reports."
 4870960,LT Overton,Dallas Cowboys,Active,2026-10-18T22:55Z,,,,,,
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4036131,Noah Fant,New Orleans Saints,Active,2026-10-13T23:55Z,,,,,,Fant brought in his lone target for seven yards during the Saints' 23-13 loss to the Vikings on Sunday.
 3051909,Daniel Carlson,New Orleans Saints,Active,2026-10-12T15:17Z,,,,,,Carlson went 1-for-2 on extra-point tries during the Saints' 23-13 loss to the Vikings on Sunday.
 4569559,Devaughn Vele,New Orleans Saints,Active,2026-10-12T00:08Z,,,,,,Vele secured four of six targets for 26 yards in the Saints' 23-13 loss to the Vikings on Sunday.
-3115303,Jermaine Eluemunor,New York Giants,Out,2026-10-19T17:19Z,Calf,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,out
+3115303,Jermaine Eluemunor,New York Giants,Out,2026-10-19T18:06Z,Calf,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,out
 4429148,Theo Johnson,New York Giants,Out,2026-10-19T17:10Z,Neck,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,out
 4430261,Tyler Nubin,New York Giants,Out,2026-10-19T17:10Z,Neck,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,out
 4921249,Colton Hood,New York Giants,Out,2026-10-19T17:10Z,Concussion,Concussion,Not Specified,2026-10-25,QUESTIONABLE,out
