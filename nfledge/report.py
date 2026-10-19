@@ -618,6 +618,13 @@ def week_data(ctx: dict) -> str:
            "sos_past_o", "sos_past_d", "sos_next_o", "sos_next_d", "rank_hist", "net_hist", "qb_hist", "qb_note",
            "net_now", "rank_now", "qb_back")
   power = [{k: r.get(k) for k in pkeys} for r in ctx.get("power") or []]
+  if not (ctx["archive"] or ctx["lookahead"]):
+    # "This week" describes this week's game: once a team's game is final it's history (owner 2026-10-19: the Ravens
+    # read "this week +0.5, Huntley over Lamar" on Monday for a game played Sunday). Matchups already used rank_now.
+    done = {g[s]["team"] for g in ctx.get("games") or [] if (g.get("final") or {}).get("home") is not None for s in ("away", "home")}
+    for r in power:
+      if r["team"] in done:
+        r.update(qb_note="", net_now=None, rank_now=None)
   out = {"season": ctx["season"], "week": ctx["week"], "generated": ctx["generated"], "archive": ctx["archive"],
          "power": power, "teams": ctx.get("teams", {}),
          "lookahead": ctx["lookahead"], "tossup_pct": ctx["tossup_pct"], "espn_team": ESPN_TEAM,
