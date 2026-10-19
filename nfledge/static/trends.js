@@ -1,7 +1,7 @@
 // Players > Trends: a play-level query builder over every run and pass play since 1999 (data/plays/<season>.json +
 // <season>_x.json charting, tools/trends_build.py). The query reads as a sentence of tappable chips ("Rushing YPC for
 // BAL players, 4th quarter, 2022-2024, by player"); the answer is a leaderboard against the league in the same
-// situation, with a minimum sample (small samples greyed, not hidden), a trend line when grouped by season, and a
+// situation, with a minimum sample (smaller samples hidden), a trend line when grouped by season, and a
 // shareable link (?t=..., read once then dropped). Everything is counted in the browser from the season files.
 // Coverage: every filter / metric / grouping names the columns it needs; index.json lists, per season, the columns
 // charted on >= 90% of the plays they apply to, and a query only counts seasons that have all it needs (and says
@@ -190,7 +190,9 @@
   const BY = {
     player: ['player', null, [], 'v'], team: ['team', (P, j, G, D) => D.teams[P.o[j]], [], 'v'], opp: ['opponent', (P, j, G, D) => D.teams[P.d[j]], [], 'v'],
     coach: ['head coach', offCoach, [], 'v'], season: ['season', (P, j, G, D) => D.season, [], 'kd'],
-    week: ['week', (P, j, G) => { const g = G[P.g[j]]; return g[2] ? 100 + g[1] : g[1]; }, [], 'kd'],  // newest first, like season (owner 2026-10-18)
+    // playoff weeks on the 2021+ numbering (wild card = 19), so each round groups and labels the same in every season:
+    // before 2021 the regular season had 17 weeks and the wild card was week 18
+    week: ['week', (P, j, G, D) => { const g = G[P.g[j]]; return g[2] ? 100 + g[1] + (+D.season < 2021 ? 1 : 0) : g[1]; }, [], 'kd'],  // newest first, like season (owner 2026-10-18)
     qtr: ['quarter', (P, j) => P.q[j] >= 5 ? 5 : P.q[j], [], 'k'], down: ['down', (P, j) => P.dn[j] || null, [], 'k'],
     dist: ['yards to go', (P, j) => Math.min(P.tg[j], 15), [], 'k'], zone: ['field position', (P, j) => Math.floor((100 - P.yl[j]) / 10), [], 'k'],
     score: ['score margin', (P, j) => Math.max(-3, Math.min(3, Math.sign(P.sd[j]) * Math.ceil(Math.abs(P.sd[j]) / 8))), [], 'k'],

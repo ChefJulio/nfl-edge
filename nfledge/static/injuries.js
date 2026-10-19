@@ -8,7 +8,8 @@
   // tabs by status (owner 2026-10-18: "tabs for questionable and out, sorted by grades or projections")
   const TABS = [['q', 'Questionable', ['Questionable', 'Doubtful', 'Day-To-Day']], ['out', 'Out', ['Out']],
                 ['ir', 'IR', ['Injured Reserve', 'Physically Unable to Perform', 'Suspension', 'Reserve/Suspended']]];
-  const tabOf = st => (TABS.find(t => t[2].includes(st)) || ['other'])[0];
+  // a status ESPN adds later goes to the nearest tab instead of a hidden one: reserve-type lists to IR, anything "Out" to Out
+  const tabOf = st => (TABS.find(t => t[2].includes(st)) || [/reserve|suspen|unable|non-football|exempt/i.test(st || '') ? 'ir' : /out/i.test(st || '') ? 'out' : 'q'])[0];
   const tone = s => /Out|Reserve|Suspension/.test(s) ? 'bad' : /Doubtful/.test(s) ? 'warn' : /Questionable|Day/.test(s) ? 'q' : '';
   const ago = iso => { const h = (Date.now() - new Date(iso)) / 3.6e6; return h < 1 ? 'just now' : h < 24 ? `${Math.round(h)}h ago` : `${Math.round(h / 24)}d ago`; };
   NFLE.areas.injuries = {

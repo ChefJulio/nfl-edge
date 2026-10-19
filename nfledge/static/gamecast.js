@@ -1575,6 +1575,8 @@
       const body = m && m.bye ? '<div class="pc-big">Bye</div><div class="pc-tapsub">no game this week</div>'
         : m && m.miss ? `<div class="pc-big bad">${esc(m.miss === 'DNP' ? 'DNP' : m.miss === 'INA' ? 'Inactive' : m.miss)}</div><div class="pc-tapsub">${esc(MISS_WORD[m.miss] || '')}${m.o ? ` · ${m.h === 0 ? '@' : 'vs'} ${esc(m.o)}` : ''}</div>`
           : st && st.state === 'in' ? '<div class="pc-big"><span class="live-dot"></span>Live</div><div class="pc-tapsub">IDP points once the game is final</div>'
+            // the game is over but his line isn't in the log yet (rebuilt from nflverse after the games)
+            : game && (game.final || (st && st.state === 'post')) ? '<div class="pc-big">Final</div><div class="pc-tapsub">his IDP points appear after the next stats update</div>'
             : h && h.inj && h.play != null && h.play < 0.5 ? `<div class="pc-big bad">Out</div><div class="pc-tapsub">${esc(h.what || 'injured')}</div>`
               : `<div class="pc-big">&ndash;</div><div class="pc-tapsub">${game ? `${game.home.team === team ? 'vs' : '@'} ${esc(game.home.team === team ? game.away.team : game.home.team)} · not played yet` : 'no game'}</div>`;
       ptsTile = goTile('Points', body, 'log', 'g');

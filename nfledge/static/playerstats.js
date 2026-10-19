@@ -127,7 +127,7 @@
           <div class="seg ps-per"><button type="button" data-v="tot">Totals</button><button type="button" data-v="pg">Per game</button></div>
           <input class="ps-q" type="search" placeholder="Find any player, any year" aria-label="Find a player">
         </div><p class="ps-searchnote" hidden></p><div class="skel-zone ps-tbl"></div></div>
-        <p class="st-note muted">Regular season, raw (not adjusted for opponents). Fantasy points use your scoring settings (Rankings &rsaquo; Scoring &amp; league). The last three columns are yours: pick any stat, bio, draft or contract detail.</p>`;
+        <p class="st-note muted">Raw stats, not adjusted for opponents (All years = regular-season careers). Fantasy points use your scoring settings (Rankings &rsaquo; Scoring &amp; league). The last three columns are yours: pick any stat, bio, draft or contract detail.</p>`;
       const sub = sec.querySelector('.ps-sub'), selS = sec.querySelector('.ps-season'), selP = sec.querySelector('.ps-pos'), q = sec.querySelector('.ps-q');
       let all = [], pos = store('nfledge-ps-pos') || 'QB', per = store('nfledge-ps-per') === 'pg', table = null;
       // careers (data/stats/players_career.json): the All years view, and every name search (owner 2026-10-18: "if i

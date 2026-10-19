@@ -57,7 +57,7 @@
           <div class="seg ts-side"><button type="button" data-v="o">Offense</button><button type="button" data-v="d">Defense</button></div>
           <div class="seg ts-per"><button type="button" data-v="tot">Totals</button><button type="button" data-v="pg">Per game</button></div>
         </div><div class="skel-zone ts-tbl"></div></div>
-        <p class="st-note muted">Regular season, from play-by-play. Defense = what opponents did against them. Sorting starts with the best value.</p>`;
+        <p class="st-note muted">From play-by-play, for the season and part (regular season or playoffs) picked above. Defense = what opponents did against them. Sorting starts with the best value.</p>`;
       const sel = sec.querySelector('.ts-season'), sub = sec.querySelector('.ts-sub');
       let side = store('nfledge-ts-side') === 'd' ? 'd' : 'o', per = store('nfledge-ts-per') === 'pg', rows = [], table = null, season = null;
       const draw = () => {
