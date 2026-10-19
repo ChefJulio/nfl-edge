@@ -31,3 +31,5 @@
 .rf-bar span { font-size: 8.5px; color: var(--muted); margin-top: 2px; }
 .rf-plain { background: transparent !important; font-weight: 600; color: var(--muted); }
 .rf-list tbody th { white-space: normal; font-weight: 600; font-size: 12.5px; }
+.rf-says { font-size: 12.5px; color: var(--ink); margin: 2px 0 8px; opacity: .9; } .rf-says b { color: var(--muted); font-weight: 700; }
+.rf-t .rf-corner { text-align: left; font-size: 10.5px; color: var(--muted); font-weight: 600; text-transform: none; }
