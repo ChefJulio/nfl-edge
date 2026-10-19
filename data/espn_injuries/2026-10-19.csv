@@ -74,6 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4038441,Justice Hill,Baltimore Ravens,Active,2026-10-14T02:01Z,,,,,,Hill turned four carries into 73 yards and caught two of four targets for five yards during the Ravens' 30-23 overtime win over the Falcons on Sunday.
 4565311,Aeneas Peebles,Baltimore Ravens,Active,2026-10-12T18:57Z,,,,,,
 4697745,Tyler Loop,Baltimore Ravens,Active,2026-10-12T17:20Z,,,,,,Loop went 3-for-3 on field-goal attempts and made his lone extra-point try during the Ravens' 30-23 overtime win over the Falcons on Sunday.
+4379399,James Cook III,Buffalo Bills,Active,2026-10-19T07:39Z,,,,,,Cook rushed 22 times for 95 yards and a touchdown and brought in all three targets for 58 yards in the Bills' 33-30 win over the Raiders on Sunday.
 4385690,Dalton Kincaid,Buffalo Bills,Questionable,2026-10-18T22:39Z,Ribs,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Kincaid (ribs) is questionable to return to Sunday's game against the Raiders.
 3116733,Bradley Chubb,Buffalo Bills,Active,2026-10-18T21:23Z,,,,,,"Chubb (ribs) has returned to Sunday's game against the Raiders, Jay Skurski of The Buffalo News reports."
 4039303,Ed Oliver,Buffalo Bills,Out,2026-10-18T19:10Z,Knee,Not Specified,Not Specified,2026-11-01,INACTIVE,Oliver (knee) is inactive for Sunday's game against the Raiders.
@@ -91,7 +92,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4635008,Keon Coleman,Buffalo Bills,Active,2026-10-13T23:25Z,,,,,,Coleman caught a seven-yard touchdown pass on two targets during the Bills' 37-34 overtime win over the Rams on Monday.
 4373678,Khalil Shakir,Buffalo Bills,Active,2026-10-13T05:22Z,,,,,,Shakir brought in all three targets for 80 yards in the Bills' 37-34 overtime win over the Rams on Monday night.
 3918298,Josh Allen,Buffalo Bills,Active,2026-10-13T04:50Z,,,,,,Allen completed 12 of 19 passes for 210 yards with one touchdown and one interception while adding 10 carries for 121 yards and another score and a two-point conversion pass in the Bills' 37-34 overtime win against the Rams on Monday night.
-4379399,James Cook III,Buffalo Bills,Active,2026-10-13T04:15Z,,,,,,"Cook rushed 10 times for 121 yards and a touchdown and brought in his only target for seven yards in the Bills' 37-34 overtime win over the Rams on Monday night. He also committed two fumbles, losing one."
 4832035,Davison Igbinosun,Buffalo Bills,Active,2026-10-11T03:11Z,,,,,,"Even with Christian Benford (toe) back from injury, Igbinosun is still expected to have a role in the Bills' secondary for Monday's game against the Rams, Nick Suss of ESPN.com reports."
 4379778,Christian Benford,Buffalo Bills,Active,2026-10-10T19:17Z,,,,,,"Benford (toe) does not carry an injury designation into Monday night's game against the Rams, Joe Buscaglia of The Athletic reports."
 4683153,Skyler Bell,Buffalo Bills,Active,2026-10-10T18:14Z,,,,,,"Bell will make his NFL regular-season debut against the Rams on Monday due to the absence of Joshua Palmer (shoulder), Cameron Wolfe of NFL Network reports."
@@ -99,6 +99,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3930086,Dawson Knox,Buffalo Bills,Active,2026-10-06T02:41Z,,,,,,Knox caught both of his targets for 13 yards in the Bills' 29-26 loss to the Patriots on Sunday.
 5076951,Jalon Kilgore,Buffalo Bills,Active,2026-10-05T18:30Z,,,,,,
 3917232,Tyler Bass,Buffalo Bills,Active,2026-10-05T02:01Z,,,,,,Bass went 2-for-2 on field-goal attempts and made both of his PATs during Sunday's 29-26 loss to the Patriots.
+4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-19T07:22Z,,,,,,McMillan secured six of nine targets for 86 yards in the Panthers' 25-14 win over the Eagles on Sunday.
 4241416,Chuba Hubbard,Carolina Panthers,Active,2026-10-19T07:18Z,,,,,,Hubbard rushed 28 times for 120 yards and a touchdown and brought in one of two targets for one yard in the Panthers' 25-14 win over the Eagles on Sunday.
 2576925,Darren Waller,Carolina Panthers,Active,2026-10-19T02:57Z,,,,,,Waller failed to catch either of his two targets in Sunday's 25-14 win over the Eagles.
 4372780,Tommy Tremble,Carolina Panthers,Active,2026-10-19T00:35Z,,,,,,Tremble caught all four targets for 46 yards and two touchdowns in Sunday's 25-14 win over the Eagles.
@@ -123,7 +124,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360763,Brycen Tremayne,Carolina Panthers,Active,2026-10-06T03:00Z,,,,,,Tremayne caught two of three passes for 32 yards during Sunday's 32-26 win over the Lions.
 4567096,John Metchie III,Carolina Panthers,Active,2026-10-06T02:21Z,,,,,,Metchie caught three of five targets for 37 yards during the Panthers' 32-26 win over the Lions on Sunday.
 4427132,Ikem Ekwonu,Carolina Panthers,Out,2026-10-06T01:04Z,Knee,Surgery,Right,2026-11-08,PUP-R,"Coach Dave Canales said Monday that Ekwonu (knee) is still a considerable time away from returning to action, Mike Kaye of ESPN reports."
-4568263,Ryan Fitzgerald,Carolina Panthers,Active,2026-10-05T16:08Z,,,,,,Fitzgerald connected on both of his field-goal tries and two of his four point-after attempts in Sunday's 32-26 win over the Lions.
 4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-19T07:01Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
 4431611,Caleb Williams,Chicago Bears,Active,2026-10-19T06:31Z,,,,,,Williams completed 30 of 36 passes for 305 yards with a touchdown and no interceptions while adding four rushes for three yards in the Bears' 31-23 win over the Falcons on Sunday. He also fumbled once but recovered.
 4259545,D'Andre Swift,Chicago Bears,Active,2026-10-19T06:25Z,,,,,,Swift rushed 16 times for 44 yards and two touchdowns and brought in four of five targets for 26 yards in the Bears' 31-23 win over the Falcons on Sunday.
@@ -624,6 +624,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4808766,Mason Taylor,New York Jets,Active,2026-10-09T21:44Z,,,,,,"Taylor (thumb) does not carry an injury designation into Sunday's game against the Browns, Daniel Oyefusi of ESPN.com reports."
 4361331,Jamien Sherwood,New York Jets,Active,2026-10-08T04:15Z,,,,,,Sherwood finished with 13 total tackles (five solo) and one forced fumble in Sunday's 23-12 loss to Chicago.
 14958,Demario Davis,New York Jets,Active,2026-10-08T03:46Z,,,,,,Davis ended with 10 total tackles (five solo) and 1.0 sacks in Sunday's 23-12 loss to Chicago.
+4241478,DeVonta Smith,Philadelphia Eagles,Active,2026-10-19T07:30Z,,,,,,Smith brought in seven of 14 targets for 75 yards and a touchdown in the Eagles' 25-14 loss to the Panthers on Sunday.
 4870795,Makai Lemon,Philadelphia Eagles,Active,2026-10-19T02:45Z,,,,,,Lemon caught three of six targets for 19 yards in Sunday's 25-14 loss to the Panthers.
 3121023,Dallas Goedert,Philadelphia Eagles,Active,2026-10-19T01:14Z,,,,,,Goedert caught six of eight targets for 61 yards during Sunday's 25-14 loss to the Panthers.
 4428850,Dontayvion Wicks,Philadelphia Eagles,Active,2026-10-18T20:02Z,,,,,,"Wicks (undisclosed) returned to Sunday's contest versus the Panthers, Brooks Kubena of The Athletic reports."
@@ -648,7 +649,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4040715,Jalen Hurts,Philadelphia Eagles,Injured Reserve,2026-10-17T20:02Z,Calf,Not Specified,Not Specified,2026-11-22,IR,The Eagles placed Hurts (calf) on injured reserve Saturday.
 3916409,Jonathan Greenard,Philadelphia Eagles,Active,2026-10-17T02:27Z,,,,,,Greenard (ankle) does not carry an injury designation into Sunday's game against Carolina.
 4360238,Dameon Pierce,Philadelphia Eagles,Active,2026-10-17T00:05Z,,,,,,"Pierce will be the Eagles' starting running back against the Panthers on Sunday due to the absences of both Saquon Barkley (hamstring) and Will Shipley (foot, IR)."
-4362805,Tyler Steen,Philadelphia Eagles,Active,2026-10-16T21:03Z,,,,,,
 4361411,Pat Freiermuth,Pittsburgh Steelers,Active,2026-10-19T03:26Z,,,,,,Freiermuth caught two of three targets for 11 yards in Sunday's 26-19 overtime win over the Bucs.
 4047650,DK Metcalf,Pittsburgh Steelers,Active,2026-10-19T02:15Z,,,,,,Metcalf caught 11 of 15 targets for 93 yards in Sunday's 26-19 overtime win over the Buccaneers.
 4038815,Rico Dowdle,Pittsburgh Steelers,Active,2026-10-19T02:12Z,,,,,,Dowdle carried the ball seven times for 40 yards and caught three of four targets for nine yards in Sunday's 26-19 overtime win over the Buccaneers.
