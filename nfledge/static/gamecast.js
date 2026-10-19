@@ -1239,15 +1239,11 @@
     NFLE.load(`data/throws/${encodeURIComponent(pid)}.json`).then(j => { TH[pid] = j || false; rerenderCard(); }).catch(() => { TH[pid] = false; }); };
   const thrSeasons = T => Object.keys((T && T.s) || {}).sort((a, b) => b - a);
   const mean = a => a.length ? a.reduce((t, v) => t + v, 0) / a.length : null;
-  const throwsTile = (pid, L) => {
-    thrLoad(pid);
-    const T = TH[pid];
-    if (T === false) return '';
-    const s = thrSeasons(T)[0], a = T && s ? T.s[s] : null;
-    const body = a ? `<div class="pc-big">${f1(mean(a.map(x => x[2])))} <small>air yds / throw</small></div><div class="pc-tapsub">${s} · ${Math.round(100 * a.filter(x => x[2] >= 20).length / a.length)}% thrown 20+</div>`
-      : '<div class="pc-big">&ndash;</div><div class="pc-tapsub">Loading&hellip;</div>';
+  // QBs' throws chart: its own card tab (owner 2026-10-18: a fifth Summary tile made the grid 2-2-1; "find a new home")
+  const THSEL = {};  // the picked game / season per QB, kept across live re-renders
+  const throwsTab = (pid, L) => {
     const photo = L && L.bio && L.bio.photo ? faceCrop(L.bio.photo) : '';
-    return tapTile('Throws', body, 'Throws', `<div class="pc-box thr" data-thr="${esc(pid)}" data-photo="${esc(photo)}"><p class="pc-sub">Loading throws&hellip;</p></div>`);
+    return `<div class="pc-box thr" data-thr="${esc(pid)}" data-photo="${esc(photo)}"><p class="pc-sub">Loading throws&hellip;</p></div>`;
   };
   const hash01 = n => { let h = (n * 2654435761) >>> 0; h ^= h >>> 15; h = Math.imul(h, 2246822519) >>> 0; h ^= h >>> 13; return (h >>> 0) / 4294967295; };
   const RESN = ['incomplete', 'complete', 'touchdown', 'intercepted'], SIDE = ['left', 'middle', 'right'];
@@ -1303,11 +1299,11 @@
     const first = ss[0], lastWk = first ? Math.max(...T.s[first].map(x => x[0])) : null;
     box.innerHTML = `<div class="thr-head"><select class="pc-wkpick thr-pick" aria-label="Game or season">${opts}</select></div><div class="thr-chart"></div><div class="thr-st"></div>`;
     const sel = box.querySelector('.thr-pick');
-    sel.value = `${first}|${lastWk}`;
+    sel.value = THSEL[pid] && [...sel.options].some(o => o.value === THSEL[pid]) ? THSEL[pid] : `${first}|${lastWk}`;
     const paint = () => { const [s, w] = sel.value.split('|'), a = T.s[s].filter(x => !w || x[0] === +w);
       box.querySelector('.thr-chart').innerHTML = a.length ? thrSvg(a, !!w, box.dataset.photo) : '<p class="pc-sub">No throws.</p>';
       box.querySelector('.thr-st').innerHTML = thrStats(a) + `<p class="pc-sub">Depth = air yards, how far past the line of scrimmage the ball was thrown (negative = behind it). Side is where the pass went (left, middle, right, as the offense sees it); dots spread out within each third. Tap a dot for the throw.</p>`; };
-    sel.onchange = paint; paint();
+    sel.onchange = () => { THSEL[pid] = sel.value; paint(); }; paint();
   };
   document.addEventListener('nfle-sheet', e => e.detail.querySelectorAll('.thr[data-thr]').forEach(drawThrows));
   // A game's grade (0-99 percentile) from this season's pool of qualified games (data/grades/game_pool.json, the Grd
@@ -1377,7 +1373,6 @@
         ${formTile(L, p.pos, fpg, e.games || p.sc.g, `${d.season} season before week ${d.week}`, `<div class="pc-box pc-season">${seasonHtml(p, d, L)}</div>`)}
         ${d === DATA ? healthTile(pid, p, L, p.espn) : ''}
         ${GRADED[p.pos] ? gradeTile(pid, L) : ''}
-        ${p.pos === 'QB' ? throwsTile(pid, L) : ''}
       </div>
       ${g ? `<div class="pc-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>` : ''}`;
     return html;
@@ -1398,7 +1393,7 @@
       : `<div class="pc-big">–</div><div class="pc-tapsub">${h && h.inj ? 'out this week' : 'not projected this week'}</div>`;
     const projTile = goTile('Projection', projBody, 'log', 'g');
     const cur = S ? S.g : [], fpg = cur.length ? cur.reduce((t, x) => t + pts(x.c, weights(), pos), 0) / cur.length : null;
-    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '')}${h ? healthTile(L.pid, null, L, L.espn) : ''}${GRADED[pos] ? gradeTile(L.pid, L) : ''}${pos === 'QB' ? throwsTile(L.pid, L) : ''}</div>` : '';
+    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '')}${h ? healthTile(L.pid, null, L, L.espn) : ''}${GRADED[pos] ? gradeTile(L.pid, L) : ''}</div>` : '';
     return `${played}${tiles}${bye ? '' : `<div class="pc-box"><p class="pc-sub">Not on our ${esc(wkLabel(d).toLowerCase())} board: ruled out, not on a roster yet, or projected too low to list.</p></div>`}`;
   };
   // Header extras from the career log doc (tools/player_logs.py): photo, jersey number, bio, recent snap share and,
@@ -1802,7 +1797,11 @@
     if (!name) { body.innerHTML = `<p class="pc-none">${LOGS[pid] ? 'No card for this player.' : 'Loading&hellip;'}</p>`; return; }
     const info = tInfo(team), news = !!espn;
     const photo = photoUrl(L, espn), num = L && L.bio ? L.bio.num : null;
+    const thr = pos === 'QB' && !(L && L.kind);
+    if (thr) thrLoad(pid);
+    const hasThr = thr && TH[pid] !== false;
     if (cardTab === 'news' && !news) cardTab = 'ov';
+    if (cardTab === 'thr' && !hasThr) cardTab = 'ov';
     const graded = !!GRADED[pos];
     if (cardTab === 'gr' || cardTab === 'inj') cardTab = 'ov';  // Grade and Injuries became tile sheets  // the Grade tab became the Grade tile's sheet (a remembered tab may still say gr)
     if (graded && GRH[pid] === undefined) {
@@ -1835,19 +1834,21 @@
         ${bioStrip(L, ' pc-bio-in')}
       </div>
       ${bioStrip(L)}
-      <div class="seg pc-tabs" role="tablist">${[['ov', 'Summary'], ['log', 'Game log'], ...(news ? [['news', 'News']] : [])]
+      <div class="seg pc-tabs" role="tablist">${[['ov', 'Summary'], ['log', 'Game log'], ...(hasThr ? [['thr', 'Throws']] : []), ...(news ? [['news', 'News']] : [])]
         .map(([k, l]) => `<button type="button" role="tab" data-pt="${k}" class="${cardTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${overview ? '' : pickerHtml()}${week}${overview ? '<div class="pc-pen"></div>' : ''}</div>
       <div class="pc-tab" data-pt="log"${cardTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every career game</div><div class="pc-log">${
         !LOGS[pid] ? '<div class="skel-zone"></div>' : !L ? '<p class="pc-sub">Game log unavailable.</p>'
           : isKind ? (L.seasons.length ? kindLog(L, L.seasons) : '<p class="pc-sub">No regular-season games with a recorded stat or snap.</p>')
           : L.seasons.length || (L.up || []).length ? logHtml(L, p || row) : '<p class="pc-sub">No NFL games yet.</p>'}</div></div></div>
+      ${hasThr ? `<div class="pc-tab" data-pt="thr"${cardTab === 'thr' ? '' : ' hidden'}>${throwsTab(pid, L)}</div>` : ''}
       ${news ? `<div class="pc-tab" data-pt="news"${cardTab === 'news' ? '' : ' hidden'}><div class="pc-box pc-newsbox"><div class="pc-k">Recent news</div><div class="pc-news"></div></div></div>` : ''}`;
     body.querySelectorAll('.pc-news').forEach(nb => loadNews(espn, nb, +nb.dataset.n || 6));
     // his career from one small shard (data/penalties/players/<last 2 digits>.json) instead of every season's file
     if (L) body.querySelectorAll('.pc-pen').forEach(pb => NFLE.load(`data/penalties/players/${pid.slice(-2)}.json`).catch(() => null)
       .then(sh => { if (cardPid === pid) { pb.innerHTML = playerPenTile(pid, ((sh || {})[pid] || []).map(([season, ...x]) => ({ season, players: { [pid]: x } })), L); } }));
     body.querySelectorAll('.pc-log').forEach(wireLogRows);
+    body.querySelectorAll('.pc-tab .thr[data-thr]').forEach(drawThrows);
     const showTab = k => {
       cardTab = k;
       rememberTab(`p:${pid}`, k);
