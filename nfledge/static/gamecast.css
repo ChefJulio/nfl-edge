@@ -1455,3 +1455,13 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
   color-mix(in srgb, var(--hc) 22%, var(--panel)) 60%, color-mix(in srgb, var(--hc) 50%, var(--panel)) 100%); }
 .sb .sb-t, .sb .sb-mid { background: transparent; }
 tr.lg-pend td.muted { text-align: left; white-space: nowrap; font-size: 12px; }
+
+/* header status pill (owner 2026-10-18): this week's game status, loud when he's out */
+.pc-st { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px 2px 7px; border-radius: 999px; font-size: var(--fs-sm);
+  font-weight: 800; letter-spacing: .02em; text-transform: uppercase; line-height: 1.5; }
+.pc-st i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+.pc-st small { font-weight: 600; opacity: .75; text-transform: none; letter-spacing: 0; margin-left: 2px; }
+.pc-st.st-out { background: #d9473c; color: #fff; box-shadow: 0 0 0 1px rgba(255,255,255,.12) inset; }
+.pc-st.st-d { background: rgba(240,150,80,.22); color: #f6bd8c; }
+.pc-st.st-q { background: rgba(224,176,74,.2); color: #f3d38c; }
+.pc-st.st-act { background: rgba(111,220,140,.16); color: #7fe0a0; }

@@ -55,6 +55,19 @@
     const days = pr ? `<span class="pr-days" title="Practice: ${esc([...pr].map((x, i) => `${DAYS[i] || ''} ${PRAC[x]}`).join(', '))}">${[...pr].map(x => `<i class="pr-${x === '-' ? 'n' : x}">${PRAB[x]}</i>`).join('')}</span>` : '';
     return tag + days;
   };
+  // This week's game status as a header pill (owner 2026-10-18, Tyler Warren ruled inactive Sunday morning: "it's just
+  // not apparent on our site he's out"; Sleeper leads its card with OUT). From the live week's board, whatever week
+  // the card's picker shows.
+  const statusPill = pid => {
+    const q = DATA && DATA.players && DATA.players[pid]; if (!q) return '';
+    const c = injCode(q.status), ia = q.inactive || 0, wk = `wk ${DATA.week}`;
+    const [k, txt, tip] = c === 'INA' ? ['out', 'Inactive', `Declared inactive for week ${DATA.week}`]
+      : c === 'IR' ? ['out', 'Injured reserve', 'On injured reserve'] : c === 'PUP' || c === 'NFI' ? ['out', c, q.status]
+      : c === 'SSPD' ? ['out', 'Suspended', q.status] : c === 'O' || ia >= 0.95 ? ['out', 'Out', q.inactive_why || 'Out']
+      : c === 'D' ? ['d', 'Doubtful', q.inactive_why || ''] : c === 'Q' ? ['q', 'Questionable', q.inactive_why || '']
+      : c === 'ACT' ? ['act', 'Active', `Was questionable; declared active for week ${DATA.week}`] : [];
+    return k ? `<span class="pc-st st-${k}" title="${esc(tip || '')}"><i></i>${esc(txt)}<small>${wk}</small></span>` : '';
+  };
   const getJSON = async (url, ms = 12000) => {
     const c = new AbortController(), t = setTimeout(() => c.abort(), ms);
     try {
@@ -1101,10 +1114,12 @@
   const healthTile = (pid, p, L, espn) => {
     const h = healthOf(pid, p, L, espn);
     const ret = h.back && h.back !== 'no' ? `back ~wk ${h.back}` : h.now && h.now.return_date ? `est. ${espnDate(h.now.return_date)}` : '';
-    const big = !h.inj ? '<div class="pc-big good">Healthy</div>'
+    // game day (owner 2026-10-18): once inactives are posted the tile says Active or Inactive, not a chance
+    const gd = p && injCode(p.status), ina = gd === 'INA', act = gd === 'ACT';
+    const big = ina ? '<div class="pc-big bad">Inactive</div>' : act ? '<div class="pc-big good">Active</div>' : !h.inj ? '<div class="pc-big good">Healthy</div>'
       : h.play != null && h.play > 0.01 ? `<div class="pc-big ${h.play >= 0.75 ? '' : 'bad'}">${Math.round(h.play * 100)}% <small>to play</small></div>`
       : '<div class="pc-big bad">Out</div>';
-    const sub = !h.inj ? 'no injury listed' : [h.what, ret].filter(Boolean).join(' · ') || 'on the injury report';
+    const sub = ina || act ? [`${ina ? 'ruled out' : 'declared active'} for wk ${h.wk}`, h.what].filter(Boolean).join(' · ') : !h.inj ? 'no injury listed' : [h.what, ret].filter(Boolean).join(' · ') || 'on the injury report';
     return tapTile('Health', `${big}<div class="pc-tapsub">${esc(sub)}</div>`, 'Health', injuryBrief(pid, p, L, espn, h));
   };
   // Practice and games, dated (owner 2026-10-17: "the date the report was out, show the last 6, include games in that
@@ -1349,6 +1364,8 @@
     const actTone = actV == null ? '' : actV > s.q[3] ? 'good' : !actLive && actV < s.q[1] ? 'bad' : '';
     const projBig = actV != null
       ? `<div class="pc-big ${actTone}"><span class="pv-tag">${actLive ? '<span class="live-dot"></span>live' : 'final'}</span>${f1(actV)} <small>pts</small></div><div class="pc-tapsub">proj <b class="pv-pj">${f1(s.proj)}</b> ${rankPill}</div>`
+      : live && injCode(p.status) === 'INA'
+      ? `<div class="pc-big bad">Inactive</div><div class="pc-tapsub">ruled out before kickoff · was ${f1(s.proj)}</div>`
       : ia >= 0.5
       ? `<div class="pc-big bad">${ia >= 0.95 ? 'Out' : 'Likely out'}</div><div class="pc-tapsub">${f1(s.proj)} pts if he plays${ia < 0.95 ? ` · ${NFLE.fmt.toPlay(ia)} to play` : ''}</div>`
       : `<div class="pc-big">${f1(s.proj)} <small>pts</small></div><div class="pc-tapsub">${rankPill}${risk}</div>`;
@@ -1813,7 +1830,7 @@
         ${photo ? `<div class="pc-pic" data-zoom="${esc(uncrop(photoBig(L, espn) || photo))}" role="button" tabindex="0" aria-label="Show a bigger photo"><img src="${esc(photo)}" alt="" width="72" height="72" loading="lazy" onerror="this.parentNode.classList.add('nopic')">${team ? `<span class="pc-pic-tm">${tLogo(team, 16)}</span>` : ''}</div>`
           : team ? tmL(team, tLogo(team, 34)) : ''}
         <div class="pc-id"><h3 id="pcName">${num != null ? `<span class="pc-num">#${esc(num)}</span>` : ''}${esc(name)}</h3>
-          <div class="pc-meta">${pos ? `<span class="posb posb-${esc(pos)}">${esc(pos)}</span>` : ''}${team ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(team)}">${esc(info.name || team)}</button>` : L && lastPlayed && lastPlayed < L.cur ? `<span class="muted">Last played ${esc(lastPlayed)}</span>` : '<span class="muted">Free agent</span>'}</div>
+          <div class="pc-meta">${pos ? `<span class="posb posb-${esc(pos)}">${esc(pos)}</span>` : ''}${team ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(team)}">${esc(info.name || team)}</button>` : L && lastPlayed && lastPlayed < L.cur ? `<span class="muted">Last played ${esc(lastPlayed)}</span>` : '<span class="muted">Free agent</span>'}${statusPill(pid)}</div>
 </div>
         ${bioStrip(L, ' pc-bio-in')}
       </div>
