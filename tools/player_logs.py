@@ -390,6 +390,9 @@ ADV_FIRST = 2018
 
 # Every regular-season week in a player's game log (owner 2026-10-16: "weeks the player didn't play should still be
 # there"): the weeks he has no game get a row saying why, from his weekly roster status that week.
+INA_FROM = 2019  # first season the weekly rosters mark game-day inactives (INA)
+
+
 def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: pd.DataFrame, cur: int,
                       ina: dict | None = None, stat_played: set | None = None) -> dict:
   """gsis -> this season's practice days and games in date order (owner 2026-10-17: "the date the report was out,
@@ -414,6 +417,8 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
   rc = ros[(ros.season == cur) & ros.gsis_id.notna()][["gsis_id", "week", "team", "status"]]
   team_wk = {(r.gsis_id, int(r.week)): ROSTER_TEAM.get(r.team, r.team) for r in rc.itertuples()}
   st_wk = {(r.gsis_id, int(r.week)): r.status for r in rc.itertuples()}
+  st_exact = st_wk  # that week's own roster row (no carry-forward)
+  ina_posted = {(ROSTER_TEAM.get(t, t), int(w)) for t, w in zip(rc[rc.status == "INA"].team, rc[rc.status == "INA"].week)}  # game-day list out
   ros_weeks = sorted({int(w) for w in rc.week})
   snap = {(r.gsis_id, int(r.week)): r.offense_pct for r in sn[sn.season == cur][["gsis_id", "week", "offense_pct"]].itertuples()}
   # a game counts as played-or-missed once it is final AND its snap counts are published (the week clock's "final";
@@ -464,11 +469,23 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
       if not gm or (w <= max(ros_weeks, default=0) and at(st_wk, gid, w) not in ("ACT", "INA")):
         continue
       s_ = snap.get((gid, w))
-      res = (int(round(100 * float(s_))) if s_ is not None and s_ == s_ else "out") if (gm[3] and gm[4] in snap_games) else ""
-      if res == "" and gm[3] and (cur, w) in (ina or {}).get(gid, {}):
-        res = "out"  # declared inactive on game day (gameday_ina), before the snaps are out
-      elif res == "" and gm[3] and (gid, cur, w) in (stat_played or set()):
-        res = "p"  # a stat line in it: played, his snap share not out yet
+      # a final game: inactive (game-day list, ESPN's ruling, or a reserve list) = "out"; his snap share once
+      # posted and over 0; else a stat line = "p" (played, share not out yet); else on the active list = "a" (dressed,
+      # no snap or none posted yet: available, not a missed game). Snaps alone never make it "out" (owner 2026-10-18).
+      res = ""
+      if gm[3]:
+        rs = st_exact.get((gid, w))
+        posted = (t, w) in ina_posted
+        if (cur, w) in (ina or {}).get(gid, {}) or (posted and rs in ("INA", "RES")):
+          res = "out"
+        elif gm[4] in snap_games and s_ is not None and s_ == s_ and float(s_) > 0:
+          res = int(round(100 * float(s_)))
+        elif (gid, cur, w) in (stat_played or set()):
+          res = "p"
+        elif posted and rs == "ACT":
+          res = "a"
+        elif gm[4] in snap_games:
+          res = "out"  # snaps posted, none for him, no game-day list to say otherwise
       ev.append(["g", gm[0], gm[1], gm[2], res, w])  # gm[3] (final) stays out of the file  # w: the week (the card dates "hurt in the week N game")
     ev.sort(key=lambda e: (e[1], 0 if e[0] == "p" else 1))
     out[gid] = ev
@@ -883,7 +900,10 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
       lst = listed.get((gid, s, w))
       res = RESERVE.get(code) if st == "RES" else None
       counted = s >= SNAPS_FROM  # before snap counts nobody can tell who sat: listed, not counted
-      active = (gid, s, w) in played if counted else st == "ACT"
+      # from 2019 the weekly rosters mark the game-day inactives: dressed (ACT) = available, whether or not he got a
+      # snap (owner 2026-10-18: "0 snaps has never meant injured ... lots of players are active and don't play");
+      # before that, a snap
+      active = st == "ACT" if s >= INA_FROM else (gid, s, w) in played if counted else st == "ACT"
       if lst or res:  # a week off the report and off reserve lists ends the episode (backups who rarely play
         # would otherwise "miss" every later game)
         if cur_ep is None:

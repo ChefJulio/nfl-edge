@@ -1149,10 +1149,10 @@
       : (() => {
         // colored by what happened (owner 2026-10-18): played green, missed red, hurt during it orange (the
         // play-by-play injury notes or a news blurb, the episodes' ig = [week, quarter])
-        const ig = e[4] !== '' && e[4] !== 'out' && ((L && L.inj) || []).map(x => x.s === L.cur && x.ig && x.ig[0] === e[5] ? x.ig : null).find(Boolean);
+        const ig = e[4] !== '' && e[4] !== 'out' && e[4] !== 'a' && ((L && L.inj) || []).map(x => x.s === L.cur && x.ig && x.ig[0] === e[5] ? x.ig : null).find(Boolean);
         const cls = e[4] === '' ? '' : e[4] === 'out' ? ' pt-miss' : ig ? ' pt-hurt' : ' pt-ok';
         const res = e[4] === '' ? (e[1] < today ? '<span class="muted">result pending</span>' : e[1] === today ? '<b>today</b>' : '<b>next game</b>')
-          : e[4] === 'out' ? '<b>did not play</b>' : `played${e[4] === 'p' ? '' : ` · ${esc(e[4])}% of snaps`}${ig ? ` · <b>hurt${ig[1] ? ` ${ig[1] >= 5 ? 'OT' : `Q${ig[1]}`}` : ''}</b>` : ''}`;
+          : e[4] === 'out' ? '<b>did not play</b>' : e[4] === 'a' ? 'active · no snaps' : `played${e[4] === 'p' ? '' : ` · ${esc(e[4])}% of snaps`}${ig ? ` · <b>hurt${ig[1] ? ` ${ig[1] >= 5 ? 'OT' : `Q${ig[1]}`}` : ''}</b>` : ''}`;
         return `<div class="pt-row pt-g${cls}"><span class="pt-d">${day(e[1])}</span><span class="pt-gm">${esc(e[3])} ${tmL(e[2])}</span><span>${res}</span></div>`;
       })();
     // newest first (owner 2026-10-17): the next game on top, then the latest six going back
