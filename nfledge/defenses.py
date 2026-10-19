@@ -37,12 +37,13 @@ def load_games(cache, seasons: list[int], schedules: pd.DataFrame) -> pd.DataFra
   """One row per (season, week, team) as a DEFENSE: its stats + the opponent's offensive stats (o_*) + points /
   yards allowed."""
   import nflreadpy as nfl
+  from .data import behind_finals
   frames = []
   for s in seasons:
     def get(s=s):
       d = nfl.load_team_stats([s])
       return d.to_pandas() if hasattr(d, "to_pandas") else d
-    frames.append(cache.get("tstats", s, get, stale=False))
+    frames.append(cache.get("tstats", s, get, stale=behind_finals(cache, "tstats", s, schedules)))  # a final game missing
   t = pd.concat(frames, ignore_index=True)
   t = t[t.season_type == "REG"].fillna(0)
   t["def_td_all"] = t.def_tds + t.fumble_recovery_tds

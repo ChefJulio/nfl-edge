@@ -20,8 +20,10 @@ STANDARD = {**{f"fgm_{b}": 3.0 for b in ("0_19", "20_29", "30_39")}, "fgm_40_49"
             **{f"fgmiss_{b}": -1.0 for b in BANDS}, "xpm": 1.0, "xpmiss": -1.0}
 
 
-def load_kicks(cache, seasons: list[int]) -> pd.DataFrame:
-  """Kicker-games (regular season) with made / missed per band and PATs."""
+def load_kicks(cache, seasons: list[int], schedules: pd.DataFrame | None = None) -> pd.DataFrame:
+  """Kicker-games (regular season) with made / missed per band and PATs. schedules: refetch a season whose cached copy
+  lacks a final game (data.behind_finals; the live season)."""
+  from .data import behind_finals
   import nflreadpy as nfl
   frames = []
   for s in seasons:
@@ -31,7 +33,7 @@ def load_kicks(cache, seasons: list[int]) -> pd.DataFrame:
       cols = ["player_id", "player_display_name", "position", "season", "week", "season_type", "team", "opponent_team",
               "fg_att", "pat_att", "pat_made", "pat_missed"] + [f"fg_made_{b}" for b in BANDS] + [f"fg_missed_{b}" for b in BANDS]
       return d[(d.position == "K")][[c for c in cols if c in d.columns]]
-    frames.append(cache.get("kstats", s, get, stale=False))
+    frames.append(cache.get("kstats", s, get, stale=behind_finals(cache, "kstats", s, schedules)))
   k = pd.concat(frames, ignore_index=True)
   k = k[k.season_type == "REG"].fillna(0)
   for b in BANDS:

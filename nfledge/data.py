@@ -194,6 +194,25 @@ def _to_pd(df):
   return df if isinstance(df, pd.DataFrame) else df.to_pandas()
 
 
+def behind_finals(cache: Cache, name: str, season: int, schedules: pd.DataFrame | None) -> bool:
+  """A cached per-week frame (week, team columns) that lacks a team of a final regular-season game and wasn't fetched
+  in the last LAG_RETRY_HOURS: refetch it. For loaders outside load_all (kicker and team stats, kickers.py /
+  defenses.py), which read their cache with stale=False and so kept the first copy all season (2026-10-18: both
+  stopped at week 5). No schedule: only a missing file counts."""
+  p = cache.path(name, season)
+  if not p.exists():
+    return True
+  if schedules is None or cache.age_hours(name, season) < LAG_RETRY_HOURS:
+    return False
+  fin = schedules[(schedules.season == season) & (schedules.game_type == "REG") & schedules.home_score.notna()]
+  if not len(fin):
+    return False
+  st = pd.read_parquet(p, columns=["week", "team"])
+  have = set(zip(st.week.astype(int), st.team.replace(RELOCATED)))
+  need = {(int(w), RELOCATED.get(t, t)) for w, h, a in zip(fin.week, fin.home_team, fin.away_team) for t in (h, a)}
+  return not need <= have
+
+
 def missing_finals(cache: Cache, season: int, reg: pd.DataFrame) -> set[str]:
   """Final regular-season games absent from the cached play-by-play, snaps, or player stats (a game counts as
   present in stats once both teams have rows for that week)."""

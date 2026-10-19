@@ -44,8 +44,8 @@ def main():
     if f.exists():
       pages[w] = json.loads(f.read_text(encoding="utf-8"))
   c = D.Cache(ROOT / "cache")
-  k = load_kicks(c, [season - 2, season - 1, season])
   sched = c.get("schedules", "since1999", None, stale=False)
+  k = load_kicks(c, [season - 2, season - 1, season], sched)
   m = KickerModel().fit(k[(k.season < season) | (k.week < week)], implied_points(sched))
   cur_k = k[k.season == season].sort_values("week").groupby("team").tail(1)  # the team's latest kicker
   kick = {t: (r.player_id, r.player_display_name) for t, r in zip(cur_k.team, cur_k.itertuples())}
