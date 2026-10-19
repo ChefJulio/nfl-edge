@@ -24,6 +24,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4363538,Chad Ryland,Arizona Cardinals,Active,2026-10-12T16:46Z,,,,,,Ryland made all three of his extra-point attempts but missed his lone field-goal try during the Cardinals' 45-21 loss to the Lions on Sunday.
 3045523,Kendrick Bourne,Arizona Cardinals,Active,2026-10-12T02:48Z,,,,,,Bourne caught five of eight targets for 70 yards during Sunday's 45-21 loss to the Lions.
 4374045,Teagan Quitoriano,Arizona Cardinals,Active,2026-10-12T00:49Z,,,,,,Quitoriano caught both of his targets for 15 yards and two touchdowns during Sunday's 45-21 loss to Detroit.
+4430807,Bijan Robinson,Atlanta Falcons,Active,2026-10-19T06:18Z,,,,,,Robinson rushed nine times for 61 yards and brought in both targets for minus-8 yards in the Falcons' 31-23 loss to the Bears on Sunday.
 4241474,Brian Robinson Jr.,Atlanta Falcons,Active,2026-10-19T03:20Z,,,,,,Robinson rushed once for one yard while reeling in both of his targets for nine yards during Sunday's 31-23 loss to the Bears.
 4361409,Jahan Dotson,Atlanta Falcons,Active,2026-10-19T00:46Z,,,,,,Dotson caught three of five targets for 87 yards and a touchdown during Sunday's 31-23 loss to Chicago.
 4595343,Kendal Daniels,Atlanta Falcons,Questionable,2026-10-18T19:51Z,Neck,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,Daniels (neck) was alert and had movement in all his extremities while being evaluated at Grady Memorial Hospital.
@@ -45,7 +46,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 10621,Nick Folk,Atlanta Falcons,Active,2026-10-12T17:24Z,,,,,,"Folk converted all five of his kicks (three field goals, two extra points) during Sunday's 30-23 overtime loss to the Ravens."
 4360248,Kyle Pitts Sr.,Atlanta Falcons,Active,2026-10-12T04:52Z,,,,,,Pitts caught five of six targets for 42 yards and a touchdown in Sunday's 30-23 overtime loss to the Ravens.
 4426502,Drake London,Atlanta Falcons,Active,2026-10-12T04:20Z,,,,,,London caught seven of 11 targets for 118 yards in Sunday's 30-23 overtime loss to the Ravens.
-4430807,Bijan Robinson,Atlanta Falcons,Active,2026-10-12T04:12Z,,,,,,Robinson rushed 17 times for 86 yards while catching four of seven targets for 32 yards in Sunday's 30-23 overtime loss to the Ravens.
 16713,Jake Matthews,Atlanta Falcons,Active,2026-10-11T23:22Z,,,,,,"Matthews (groin) is active for Sunday night's game against the Ravens, Tori McElhaney of the Falcons' official site reports."
 3045527,Samson Ebukam,Atlanta Falcons,Active,2026-10-11T23:08Z,,,,,,
 4360807,Yasir Abdullah,Atlanta Falcons,Injured Reserve,2026-10-11T03:43Z,Hamstring,Not Specified,Not Specified,2026-11-08,IR,"The Falcons placed Abdullah (hamstring) on injured reserve Saturday, Tori McElhaney of the team's official site reports."
@@ -124,6 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4427132,Ikem Ekwonu,Carolina Panthers,Out,2026-10-06T01:04Z,Knee,Surgery,Right,2026-11-08,PUP-R,"Coach Dave Canales said Monday that Ekwonu (knee) is still a considerable time away from returning to action, Mike Kaye of ESPN reports."
 4568263,Ryan Fitzgerald,Carolina Panthers,Active,2026-10-05T16:08Z,,,,,,Fitzgerald connected on both of his field-goal tries and two of his four point-after attempts in Sunday's 32-26 win over the Lions.
 4685720,Bryce Young,Carolina Panthers,Active,2026-10-05T04:20Z,,,,,,Young completed 29 of 41 passes for 329 yards and two touchdowns while rushing three times for three yards in Sunday's 32-26 win over the Lions.
+4259545,D'Andre Swift,Chicago Bears,Active,2026-10-19T06:25Z,,,,,,Swift rushed 16 times for 44 yards and two touchdowns and brought in four of five targets for 26 yards in the Bears' 31-23 win over the Falcons on Sunday.
 4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-19T06:01Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
 4426386,Roschon Johnson,Chicago Bears,Active,2026-10-19T00:55Z,,,,,,Johnson rushed 13 times for 51 yards and a touchdown in Sunday's 31-23 win over the Falcons. He caught both of his targets for 34 yards.
 3930040,Jonah Jackson,Chicago Bears,Questionable,2026-10-18T19:39Z,Hip,Not Specified,Not Specified,2026-10-22,QUESTIONABLE,Jackson (hip) is doubtful to return to Sunday's game against the Falcons.
@@ -140,7 +141,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431611,Caleb Williams,Chicago Bears,Active,2026-10-18T15:46Z,,,,,,Williams (hamstring) is listed as active for Sunday's game against the Falcons.
 4242659,Dayo Odeyingbo,Chicago Bears,Injured Reserve,2026-10-17T23:30Z,Quadriceps,Not Specified,Not Specified,2026-11-22,IR,The Bears placed Odeyingbo (quadriceps) on injured reserve Saturday.
 4257364,Zavier Scott,Chicago Bears,Active,2026-10-17T23:21Z,,,,,,The Bears have elevated Scott from the practice squad ahead of Sunday's game against the Falcons.
-4259545,D'Andre Swift,Chicago Bears,Active,2026-10-16T23:44Z,,,,,,"Swift will once again absorb a heavier backfield workload after Kyle Monangai (thumb/toe) was ruled out for Sunday's game against the Falcons, Larry Mayer of the Bears' official site reports."
 4432804,Shemar Turner,Chicago Bears,Active,2026-10-14T01:37Z,,,,,,The Bears activated Turner (knee) from their reserve/PUP list Tuesday.
 2973405,Kalif Raymond,Chicago Bears,Active,2026-10-13T23:34Z,,,,,,Raymond caught three of four passes for six yards and logged one carry for minus-2 yards during the Bears' 31-7 loss to the Packers on Sunday. He also returned one punt for nine yards.
 3134690,Montez Sweat,Chicago Bears,Suspension,2026-10-13T20:16Z,Suspension,Not Specified,Not Specified,2026-11-02,RESERVE-SUS,"The NFL announced Tuesday that Sweat has been suspended two games without pay for violating the league's performance-enhancing substances policy, Brad Biggs of the Chicago Tribune reports."
@@ -524,6 +524,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-09-30T04:04Z,,,,,,"Wilson finished Sunday's 23-16 victory over Tampa Bay with 10 tackles, including 1.5 sacks, and one defensed pass."
 3921690,Josh Oliver,Minnesota Vikings,Injured Reserve,2026-09-30T00:26Z,Biceps,Surgery,Not Specified,2027-01-17,IR,"The Vikings placed Oliver (biceps) on injured reserve Tuesday, Craig Peters of the team's official site reports."
 16772,Kyle Van Noy,Minnesota Vikings,Active,2026-09-30T00:20Z,,,,,,"The Vikings signed Van Noy from the practice squad to the active roster Tuesday, Craig Peters of the team's official site reports."
+4431452,Drake Maye,New England Patriots,Active,2026-10-19T06:11Z,,,,,,Maye completed 18 of 32 passes for 235 yards with three touchdowns and no interceptions and rushed four times for 24 yards in the Patriots' 26-19 win over the Jets on Sunday.
 4047646,A.J. Brown,New England Patriots,Active,2026-10-19T05:51Z,,,,,,Brown secured three of 10 targets for 27 yards in the Patriots' 26-19 win over the Jets on Sunday and fumbled once but recovered.
 3046439,Hunter Henry,New England Patriots,Active,2026-10-19T01:00Z,,,,,,Henry caught four of five targets for 48 yards and a touchdown in Sunday's 26-19 win over the Jets.
 4427095,DeMario Douglas,New England Patriots,Active,2026-10-19T00:47Z,,,,,,Douglas caught seven of eight targets for 86 yards and a touchdown in Sunday's 26-19 win over the Jets.
@@ -548,7 +549,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241720,Marcus Jones,New England Patriots,Active,2026-10-16T20:41Z,,,,,,
 4240042,Cory Durden,New England Patriots,Active,2026-10-16T20:40Z,,,,,,
 4686772,Christian Gonzalez,New England Patriots,Active,2026-10-15T23:25Z,,,,,,Gonzalez (shoulder) was a full participant in Thursday's practice.
-4565293,Marcus Bryant,New England Patriots,Injured Reserve,2026-10-15T00:55Z,Ankle,Not Specified,Not Specified,2026-10-22,IR-R,The Patriots opened the 21-day practice window Wednesday for Bryant (ankle) to return from injured reserve.
 3929645,Juwan Johnson,New Orleans Saints,Active,2026-10-19T02:49Z,,,,,,Johnson failed to reel in either of his targets during Sunday's 34-27 win over the Giants.
 3054850,Alvin Kamara,New Orleans Saints,Active,2026-10-19T00:47Z,,,,,,Kamara carried the ball seven times for 34 yards and caught two of four targets for 35 yards and a touchdown in Sunday's 34-27 win over the Giants.
 4599739,Kendre Miller,New Orleans Saints,Active,2026-10-19T00:42Z,,,,,,Miller carried the ball 20 times for 70 yards and caught both his targets for zero yards in Sunday's 34-27 win over the Giants.
@@ -599,6 +599,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431321,Dru Phillips,New York Giants,Active,2026-10-13T23:07Z,,,,,,Phillips had five total tackles (five solo) and 2.0 sacks in Sunday's 27-27 tie with the Commanders.
 4691043,Nikko Reed,New York Giants,Active,2026-10-12T19:30Z,,,,,,
 5082353,J.C. Davis,New York Giants,Active,2026-10-12T19:30Z,,,,,,
+4569618,Garrett Wilson,New York Jets,Active,2026-10-19T06:05Z,,,,,,Wilson brought in four of six targets for 44 yards in the Jets' 26-19 loss to the Patriots on Sunday.
 5083315,Kenyon Sadiq,New York Jets,Active,2026-10-19T03:29Z,,,,,,Sadiq caught one of three targets for 12 yards in Sunday's 26-19 loss to the Patriots.
 4700136,Kiko Mauigoa,New York Jets,Questionable,2026-10-18T17:37Z,Thigh,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,Mauigoa (thigh) is questionable to return to Sunday's game against the Jets.
 4723820,Omar Cooper Jr.,New York Jets,Active,2026-10-18T15:55Z,,,,,,Cooper (ankle) is active for Sunday's game against the Patriots.
@@ -617,7 +618,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3124679,Jason Sanders,New York Jets,Active,2026-10-12T14:55Z,,,,,,Sanders made his lone field-goal attempt and both of his extra-point tries during the Jets' 17-12 win over the Browns on Sunday.
 4685248,David Bailey,New York Jets,Active,2026-10-12T14:47Z,,,,,,"Bailey recorded seven tackles (five solo), including 3.0 sacks, during the Jets' 17-12 win over the Browns on Sunday."
 15864,Geno Smith,New York Jets,Active,2026-10-11T21:29Z,,,,,,Smith completed 17 of 30 pass attempts for 182 yards and a touchdown in Sunday's 17-12 win over the Browns. He also rushed five times for seven yards and lost a fumble.
-4569618,Garrett Wilson,New York Jets,Active,2026-10-11T20:51Z,,,,,,Wilson caught seven of 11 targets for 104 yards and a touchdown in Sunday's 17-12 win over the Browns.
 4362840,Kingsley Enagbare,New York Jets,Active,2026-10-11T16:00Z,,,,,,Enagbare (knee) is active for Sunday's game against the Browns.
 4361767,Will McDonald IV,New York Jets,Active,2026-10-11T15:58Z,,,,,,McDonald (calf) is active for Sunday's game against the Browns.
 4426817,Jarvis Brownlee Jr.,New York Jets,Active,2026-10-10T00:39Z,,,,,,"Brownlee (concussion) does not have an injury designation ahead of Sunday's game against the Browns, Daniel Oyefusi of ESPN.com reports."
