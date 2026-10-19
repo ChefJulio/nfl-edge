@@ -631,7 +631,6 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
 **Queued (pre-register before running)**
 - (AS) midweek stage from the calendar; (AT) one "early week" definition (week clock entry, 2026-10-18).
 - Week clock remaining moves (7 items, "Week clock ... REMAINING WORK" entry).
-- (BA) refit the team ratings once Sunday's games are in (pre-registered 2026-10-19, log below; harness to write).
 - Partial Vegas lines: if any game of a week lacks a line, every game drops to the model's own volume
   (team_model.GameModel.predict `.all()`); per-game fallback.
 - Small IR-audit leftovers: qb2_play_rate needs a board QB at depth rank 1; debut prior's absolute depth_rank <= 2;
@@ -645,7 +644,7 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
 
 **Parked (owner)**: news push notifications; prior-season carryover in team ratings; market-implied ratings.
 
-**Closed recently**: (AX) / (AX2) FAIL; (AV) PASS shipped; IR audit fixes shipped; (AW) FAIL twice, closed; (AR) PASS shipped; (AQ) FAIL.
+**Closed recently**: (BA) Monday refit FAIL (no accuracy gain; display call is the owner's); (AX) / (AX2) FAIL; (AV) PASS shipped; IR audit fixes shipped; (AW) FAIL twice, closed; (AR) PASS shipped; (AQ) FAIL.
 
 ### Log (chronological from here)
 - **Fantasy: depth-aware values (2026-10-17; replaces a STOPGAP).** The Fantasy tab's waiver moves (league.js
@@ -2812,3 +2811,15 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   clock gets the event); Power and Matchups say "Ratings include games through Sunday; <Monday teams> update
   Tuesday"; the rest-of-season schedule drops the games already played; the week-by-week history keeps one point per
   week, written at the rollover as now.
+- **RESULT {#monday-refit} (BA) refit the team ratings once Sunday's games are in: FAIL, not shipped.**
+  tools/monday_refit_eval.py, walk-forward 2021-25, N = 2..17 (TeamModel.fit gained `exclude`, game_ids left out;
+  production never passes it). Week N+1 (1,196 games): Brier stale 0.2223, monday 0.2221, tuesday 0.2215; monday -
+  stale -0.0001 [-0.0035, +0.0030]: gate (1) FAIL. By season +0.0007 / -0.0042 / +0.0027 / +0.0000 / +0.0001. Week N's
+  Monday games (95): 0.2509 -> 0.2486, -0.0023 [-0.0056, +0.0011]: gate (2) PASS. Reported, not gated: N+2 -0.0040
+  [-0.0065, -0.0017], N+3 -0.0031 [-0.0057, -0.0005], N+4 -0.0002 [-0.0031, +0.0027]; monday vs tuesday within
+  +0.0007 at every horizon (leaving out the Monday game costs nothing measurable); N+1 games with a Monday-night team
+  -0.0003, without -0.0001 (no mixed-vintage harm). Not a bug: the arms' N+1 win chances differ by 4.4 points on
+  average (0.8 monday vs tuesday). Reading: even the full Tuesday refit beats stale on N+1 by only 0.0008, well inside
+  this test's reach (~0.003), so a week of results moves next week's win chance a lot but its accuracy too little to
+  measure. The N+2 / N+3 gains are post hoc (week N+1's games are on the site by Tuesday, refit). Kept: the Tuesday
+  rollover; the display question (Power showing Sunday's results on Monday) is the owner's, not an accuracy case.

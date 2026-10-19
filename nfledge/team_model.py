@@ -330,9 +330,12 @@ class TeamModel:
     self._cache: dict = {}
 
   # -- fitting ---------------------------------------------------------------------------------------------------
-  def weights(self, unit: str, season: int, target_week: int) -> np.ndarray:
+  def weights(self, unit: str, season: int, target_week: int, exclude: frozenset | None = None) -> np.ndarray:
+    """exclude: game_ids left out (weight 0), e.g. a week's Monday game for a fit taken Monday morning ((BA))."""
     p = self.plays[unit]
     w = asof_weights(p.season, p.week, season, target_week, self.cfg)
+    if exclude:
+      w = np.where(p.game_id.isin(exclude).to_numpy(), 0.0, w)
     ex = self.cfg.get("experiments", {})
     if float(ex.get("elite_boost", 0) or 0):
       w = self._elite_weights(unit, w, ex)
@@ -364,8 +367,9 @@ class TeamModel:
       mult = 1 + b * ((opp_def <= k).astype(float) + (opp_off <= k).astype(float))
     return w * np.nan_to_num(np.clip(mult, 0.05, None), nan=1.0)
 
-  def fit(self, season: int, target_week: int, bootstrap: int = 0, alphas: dict | None = None) -> Ratings:
-    key = (season, target_week, bootstrap)
+  def fit(self, season: int, target_week: int, bootstrap: int = 0, alphas: dict | None = None,
+          exclude: frozenset | None = None) -> Ratings:
+    key = (season, target_week, bootstrap, exclude or None)
     if key in self._cache and alphas is None:
       return self._cache[key]
     alphas = alphas or self.alphas
@@ -373,7 +377,7 @@ class TeamModel:
     raw_off, raw_def, plays_pg = {}, {}, {}
     qb, qb_inexp, qb_new = None, 0.0, 0.0
     for u in self.units:
-      w = self.weights(u, season, target_week)
+      w = self.weights(u, season, target_week, exclude)
       d = self.designs[u]
       beta = d.solve(w, alphas[u], self.alpha_qb)
       icpt[u], off[u], dfn[u], home[u], hdiv[u] = _unpack(beta, self.teams)
@@ -383,6 +387,8 @@ class TeamModel:
         qb_new = float(beta[d.i_new]) if d.i_new is not None else 0.0
       p = self.plays[u]
       cur = (p.season == season) & (p.week < target_week)
+      if exclude:
+        cur &= ~p.game_id.isin(exclude)
       if cur.any():
         raw_off[u] = p[cur].groupby("posteam").epa.mean()
         raw_def[u] = p[cur].groupby("defteam").epa.mean()
