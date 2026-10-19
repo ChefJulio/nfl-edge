@@ -740,6 +740,16 @@
       if (isCur) up.forEach(u => rows.push({ w: u.w, u }));
       // weeks without a game of his (tools/player_logs.py missed_weeks): byes, and why he sat
       if (!opts.last) (S.m || []).forEach(m => rows.push({ w: m.w, u: m }));
+      // this week's game once it has kicked off, before the log's rebuild (snap counts land a day or two later; owner
+      // 2026-10-18, Tyler Warren inactive and his week missing): his live / final box-score points, or why he sat
+      if (isCur && !opts.last && p && DATA && +DATA.season === S.s && !rows.some(r => r.w === +DATA.week)) {
+        const gm = teamGame(p.team), st = gm && LIVE.byGame[gm.id], ln = p.espn && LIVE.lines[String(p.espn)];
+        if (gm && (gm.final || (st && st.state !== 'pre'))) {
+          const home = gm.home.team === p.team, u = { w: +DATA.week, o: home ? gm.away.team : gm.home.team, h: home ? 1 : 0 };
+          if (ln) rows.push({ w: u.w, u: Object.assign(u, { live: ln, fin: !!(gm.final || (st && st.state === 'post')) }) });
+          else rows.push({ w: u.w, u: Object.assign(u, { miss: /inactive/i.test(p.status || '') ? 'INA' : /^out/i.test(p.status || '') ? 'Out' : 'DNP' }) });
+        }
+      }
       rows.sort((a, b) => b.w - a.w);  // newest first: scrolling down goes back in time (owner, 2026-10-14)
       const fps = S.g.map(g => pts(g.c, w, pos)), fpg = fps.length ? fps.reduce((a, b) => a + b, 0) / fps.length : 0;
       const team = S.g.length ? S.g[S.g.length - 1].t : '';
@@ -768,6 +778,8 @@
       };
       const trs = totRow(S.g, S.tr ? S : null) + rows.map(r => {
         if (r.u && r.u.bye) return byeRow(r.w, 5 + stat.length);
+        if (r.u && r.u.live) { const v = pts(r.u.live.line, w, pos), pj = p && p.proj != null ? scaled(p).proj : null;
+          return `<tr class="lg-pend" title="${r.u.fin ? 'Final' : 'Live'}: ${esc(statLineText(r.u.live, pos))} (full line once the game's snap counts are published)"><td>${r.w}</td>${opp(r.u)}<td class="num lg-fp"><b>${f1(v)}</b></td><td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td><td class="num muted" colspan="${3 + stat.length}">${r.u.fin ? 'final' : 'live'} · ${esc(statLineText(r.u.live, pos))}</td></tr>`; }
         if (r.u && r.u.miss != null) return `<tr class="lg-miss"${tileAttrs(r.u)}><td>${r.w}</td>${r.u.o ? opp(r.u) : '<td class="lg-opp">&ndash;</td>'}<td class="num">${missTag(r.u)}</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">${r.u.sn != null ? r.u.sn : '&ndash;'}</td>${blank}</tr>`;
         if (r.u) {
           const pj = projOf(r.u);

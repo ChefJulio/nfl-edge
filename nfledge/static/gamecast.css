@@ -1454,3 +1454,4 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .sb { background: linear-gradient(120deg, color-mix(in srgb, var(--ac) 50%, var(--panel)) 0%, color-mix(in srgb, var(--ac) 22%, var(--panel)) 40%,
   color-mix(in srgb, var(--hc) 22%, var(--panel)) 60%, color-mix(in srgb, var(--hc) 50%, var(--panel)) 100%); }
 .sb .sb-t, .sb .sb-mid { background: transparent; }
+tr.lg-pend td.muted { text-align: left; white-space: nowrap; font-size: 12px; }

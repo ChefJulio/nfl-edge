@@ -2678,3 +2678,32 @@ Updated 2026-10-18. Injury / return items first (owner 2026-10-18: "the injury/r
   (injuries.opened_out; ReturnModel(opened_out=)). OWNER DECISION pending (2026-10-18): keep "never back", or a
   labelled rule (not a fitted model) for these players, e.g. the IR minimum + ESPN's return date, or their 2024-25
   rates by code.
+- **PRE-REGISTERED 2026-10-18 (owner: "our injury model is still broken especially relating to game time decisions
+  that end up inactive. look at tyler warren"): (AY) a last-day downgrade in the practice model.** Week 6: Tyler
+  Warren (Q, Full / Full / Limited) 84% -> inactive; Quinshon Judkins (Q, DDL) 78% and Sean Tucker (Q, DLL) 71% ->
+  inactive. Descriptive 2018-25 (data.avail_hist): Questionable players played 69.4% (n 8,303); a downgrade on the last
+  practice day (its score below the day before) 57.2% (n 449); FFL 53% (n 38). The practice model sees the first and
+  last days and their difference (trend), not a drop on the final day. Variant: two more inputs, last_change (last day's
+  score minus the day before's; 0 with one day) and downgraded (last_change < 0). Test: tools/downgrade_eval.py,
+  production's features (practice + role + rest) and settings, walk-forward 2021-25 (season s trained on seasons
+  before), labelled weeks not ruled Out. GATE: downgrade rows Brier lower, 95% CI over season-weeks excluding 0, and
+  their mean prediction within 5 points of the actual rate; all rows not worse (CI upper < +0.0005).
+- **RESULT {#last-day-downgrade} (AY) a last-day downgrade in the practice model: FAIL (production is already calibrated
+  there).** tools/downgrade_eval.py, 2021-25, 486 downgrade rows of 16,596: played 62.6%, production 63.7%, variant
+  63.8%; Brier -0.0015 [-0.0039, +0.0010]; Questionable downgrades 303: played 57.8%, production 57.8%. All rows -0.00017
+  [-0.00034, +0.00001]. Warren was not a downgrade: his report was Friday only, "L" (the site pads the days before his
+  first listing with F, {#off-report}), i.e. a late addition. Walk-forward production on Questionable players: all 5,596
+  played 70.8%, predicted 69.9%; listed one day only 430: 64.7% vs 68.3%; Friday-only "L" 221: 63.3% vs 71.5% (its
+  0.8-0.9 band: 13 rows, 61.5% vs 85.0%; Warren 84%).
+- **PRE-REGISTERED 2026-10-18, a new hypothesis from (AY)'s check: (AZ) late additions.** A player first listed on his
+  team's last report day of a full report week is a new injury; the model sees "one day listed" (n_days) but not
+  whether his team held a full week of reports. Variant: late_add = listed on one day only while his team listed
+  someone on 3+ days that week; added to production's features. Test: tools/downgrade_eval.py --late, same harness.
+  GATE: late-add rows Brier lower (95% CI over season-weeks excluding 0) and their mean prediction within 5 points of
+  the actual rate; all rows not worse (CI upper < +0.0005).
+- **RESULT {#late-add} (AZ) late additions: FAIL (no miscalibration to fix).** 1,967 late-add rows (listed one day
+  while the team listed someone 3+ days): played 81.8%, production 80.3%, variant 80.4%; Brier -0.0001 [-0.0004,
+  +0.0003]; the Questionable ones (423): played 64.8%, production 68.3% (within noise). All rows -0.00015 [-0.00026,
+  -0.00004]. Reading for the owner's question: the practice model is calibrated on game-time decisions (Questionable:
+  70.8% played, 69.9% predicted); Warren's 84% sat near the top of a group that plays ~65%, and the game-day ruling
+  (AU) set him to 0 at the inactives deadline as designed.
