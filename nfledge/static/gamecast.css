@@ -1465,3 +1465,8 @@ tr.lg-pend td.muted { text-align: left; white-space: nowrap; font-size: 12px; }
 .pc-st.st-d { background: rgba(240,150,80,.22); color: #f6bd8c; }
 .pc-st.st-q { background: rgba(224,176,74,.2); color: #f3d38c; }
 .pc-st.st-act { background: rgba(111,220,140,.16); color: #7fe0a0; }
+
+/* Practice and games: game rows by outcome (owner 2026-10-18) */
+.pt-row.pt-g.pt-ok { background: rgba(111,220,140,.12); } .pt-row.pt-g.pt-ok b { color: #7fe0a0; }
+.pt-row.pt-g.pt-miss { background: rgba(242,120,109,.16); } .pt-row.pt-g.pt-miss b { color: #f59a91; }
+.pt-row.pt-g.pt-hurt { background: rgba(240,150,80,.18); } .pt-row.pt-g.pt-hurt b { color: #f6bd8c; }

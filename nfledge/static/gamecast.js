@@ -1126,6 +1126,7 @@
   // timeline"): his latest six practice days and games this season plus his next game (career log prac,
   // tools/player_logs.py practice_timeline)
   const PR_WORD = { D: 'Did not practice', L: 'Limited', F: 'Full' };
+  const QN = { 1: '1st', 2: '2nd', 3: '3rd', 4: '4th', 5: 'overtime' };
   const practiceTl = L => {
     const ev = (L && L.prac) || [];
     if (!ev.length) return '';
@@ -1134,7 +1135,15 @@
     const day = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
     const row = e => e[0] === 'p'
       ? `<div class="pt-row"><span class="pt-d">${day(e[1])}</span><span class="pr-chip pr-${e[2]}">${e[2] === 'D' ? 'DNP' : e[2] + 'P'}</span><span>${PR_WORD[e[2]] || ''}${e[4] ? ' <span class="muted">· not on the report</span>' : ''}${e[3] ? ` · <b>${esc(e[3])}</b>` : ''}</span></div>`
-      : `<div class="pt-row pt-g"><span class="pt-d">${day(e[1])}</span><span class="pt-gm">${esc(e[3])} ${tmL(e[2])}</span><span>${e[4] === '' ? (e[1] < today ? '<span class="muted">result pending</span>' : e[1] === today ? '<b>today</b>' : '<b>next game</b>') : e[4] === 'out' ? '<b class="bad">did not play</b>' : `played · ${esc(e[4])}% of snaps`}</span></div>`;
+      : (() => {
+        // colored by what happened (owner 2026-10-18): played green, missed red, hurt during it orange (the
+        // play-by-play injury notes or a news blurb, the episodes' ig = [week, quarter])
+        const ig = e[4] !== '' && e[4] !== 'out' && ((L && L.inj) || []).map(x => x.s === L.cur && x.ig && x.ig[0] === e[5] ? x.ig : null).find(Boolean);
+        const cls = e[4] === '' ? '' : e[4] === 'out' ? ' pt-miss' : ig ? ' pt-hurt' : ' pt-ok';
+        const res = e[4] === '' ? (e[1] < today ? '<span class="muted">result pending</span>' : e[1] === today ? '<b>today</b>' : '<b>next game</b>')
+          : e[4] === 'out' ? '<b>did not play</b>' : `played · ${esc(e[4])}% of snaps${ig ? ` · <b>hurt${ig[1] ? ` ${ig[1] >= 5 ? 'OT' : `Q${ig[1]}`}` : ''}</b>` : ''}`;
+        return `<div class="pt-row pt-g${cls}"><span class="pt-d">${day(e[1])}</span><span class="pt-gm">${esc(e[3])} ${tmL(e[2])}</span><span>${res}</span></div>`;
+      })();
     // newest first (owner 2026-10-17): the next game on top, then the latest six going back
     return `<div class="pc-box"><div class="pc-k">Practice and games</div><div class="pt-list">${next ? row(next) : ''}${past.slice().reverse().map(row).join('')}</div></div>`;
   };
@@ -1145,7 +1154,7 @@
     // and expected return side by side, then what and when he got hurt, then this week's practice in plain words
     const des = ((p && p.status) || '').replace(/\s*\(.*$/, '').replace(/\s*\(ESPN\)/, '').trim()
       || (now && now.status && now.status !== 'Active' ? now.status : '') || (h.inj ? 'Listed' : 'Healthy');
-    const desCls = /^Out|Injured|IR/i.test(des) ? 'out' : /^Doubt/i.test(des) ? 'd' : /^Quest/i.test(des) ? 'q' : h.inj ? 'q' : 'ok';
+    const desCls = /^(Out|Inactive|Injured|IR)/i.test(des) ? 'out' : /^Doubt/i.test(des) ? 'd' : /^Quest/i.test(des) ? 'q' : h.inj ? 'q' : 'ok';
     const pr = ((L && L.prac) || []).filter(e => e[0] === 'p' && e[1] >= NFLE.clock.etDate(new Date(Date.now() - 6 * 864e5)));
     // This week's practice as a strip (owner 2026-10-17: "Questionable (FFF)" was unreadable): a tile per day, colored
     // full / limited / did not practice, and one plain sentence. Days from the dated report when it's in the data,
@@ -1179,7 +1188,6 @@
         <p class="pr-say">${esc(prSentence)}</p>` : '';
     // when he got hurt, as a date (owner 2026-10-17: "rather than trying to decipher it"): the in-game note's week, dated
     // from his games in the timeline; else the day he first appeared on the report
-    const QN = { 1: '1st', 2: '2nd', 3: '3rd', 4: '4th', 5: 'overtime' };
     const gEv = w => ((L && L.prac) || []).find(e => e[0] === 'g' && e[5] === w);
     const longDay = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
     const firstListed = ep && ((L && L.prac) || []).find(e => e[0] === 'p' && e[1] >= (gEv(ep.w0 - 1) || [0, ''])[1]);
