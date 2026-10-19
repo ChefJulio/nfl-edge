@@ -698,5 +698,55 @@
 "at": "2026-10-15T22:54:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0031408": {
+"name": "Mike Evans",
+"team": "SF",
+"pos": "WR",
+"pre": 0.5714,
+"ruling": "ACT",
+"at": "2026-10-19T22:50:00+00:00",
+"post": 0.974,
+"status": "Active (DDD)"
+},
+"00-0031588": {
+"name": "Stefon Diggs",
+"team": "WAS",
+"pos": "WR",
+"pre": 0.3824,
+"ruling": "ACT",
+"at": "2026-10-19T22:48:00+00:00",
+"post": 0.974,
+"status": "Active (DLL)"
+},
+"00-0032268": {
+"name": "Marcus Mariota",
+"team": "WAS",
+"pos": "QB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-10-19T22:52:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0035719": {
+"name": "Deebo Samuel Sr.",
+"team": "SF",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-10-19T22:56:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0040589": {
+"name": "Kurtis Rourke",
+"team": "SF",
+"pos": "QB",
+"pre": 0.0992,
+"ruling": "INA",
+"at": "2026-10-19T22:56:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
