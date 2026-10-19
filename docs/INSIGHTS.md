@@ -616,7 +616,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 ## 9. Open threads / next steps
 
 ### STATUS BOARD (keep current: edit this list whenever an item opens, ships or closes; the log below is history)
-Updated 2026-10-18. Injury / return items first (owner 2026-10-18: "the injury/return model needs to be pristine").
+Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/return model needs to be pristine").
 
 **Running / next up**
 1. OWNER DECISION: players who open the season on a reserve list (84 skill players in 2026: Conner, Charbonnet,
@@ -631,6 +631,7 @@ Updated 2026-10-18. Injury / return items first (owner 2026-10-18: "the injury/r
 **Queued (pre-register before running)**
 - (AS) midweek stage from the calendar; (AT) one "early week" definition (week clock entry, 2026-10-18).
 - Week clock remaining moves (7 items, "Week clock ... REMAINING WORK" entry).
+- (BA) refit the team ratings once Sunday's games are in (pre-registered 2026-10-19, log below; harness to write).
 - Partial Vegas lines: if any game of a week lacks a line, every game drops to the model's own volume
   (team_model.GameModel.predict `.all()`); per-game fallback.
 - Small IR-audit leftovers: qb2_play_rate needs a board QB at depth rank 1; debut prior's absolute depth_rank <= 2;
@@ -2788,3 +2789,26 @@ Updated 2026-10-18. Injury / return items first (owner 2026-10-18: "the injury/r
   -0.00004]. Reading for the owner's question: the practice model is calibrated on game-time decisions (Questionable:
   70.8% played, 69.9% predicted); Warren's 84% sat near the top of a group that plays ~65%, and the game-day ruling
   (AU) set him to 0 at the inactives deadline as designed.
+- **PRE-REGISTERED 2026-10-19 (owner: "it's monday now. we don't modify power rankings until tuesday right? why?"):
+  (BA) refit the team ratings once Sunday's games are in, not at the Tuesday rollover.** Today the ratings (and with
+  them Power's rank, the model's win chances, playoff odds, rest-of-season projections) are fit on games before the
+  week the site shows (TeamModel.fit(season, week): plays with week < target), so week N's results wait for the 06:00
+  ET Tuesday rollover, ~36 hours after Sunday's games. Only injuries / starting QBs move Power in between. Variant:
+  from Monday morning, fit on every game of week N whose play-by-play has landed except that week's Monday game(s)
+  (Thursday, Saturday, Sunday incl. SNF), with Elo updated through the same games; the page stays week N. Test
+  (tools/monday_refit_eval.py, to write; needs a game cutoff in TeamModel.fit / weights), walk-forward 2021-25,
+  N = 2..17, three arms on identical rows: stale (production on Monday: weeks < N), monday (the variant), tuesday
+  (weeks <= N: today's post-rollover fit, a reference, not gated). Prediction: the model-only win chance (power-rank
+  gap + Elo + home, config report.win_model), ranks from each arm's net ratings with each team's usual starter (the
+  backtest has no injury plan). Scored: week N+1's games (what Monday's Power and Matchups inform); week N's Monday
+  games (the variant moves their win chance mid-week: both teams' opponents are refit, their own games are not).
+  Metric: Brier, paired by game, 95% CI from a bootstrap over season-weeks.
+  GATE: (1) week N+1, monday vs stale: Brier lower, CI excluding 0; (2) week N's Monday games, monday vs stale: CI
+  upper below +0.01 (small n, ~120 games: a guard against harm, not a test of gain). Reported, not gated: weeks
+  N+1..N+4; monday vs tuesday (the cost of leaving out the Monday game); N+1 games involving a Monday-night team vs
+  not (mixed-vintage ratings: two teams' ratings a game behind). Expectation written down: (1) should pass (more
+  data); the gate's real work is (2) and catching a bias from the half-life weights treating a partial week N as a
+  full one. Ship if PASS: a build after the last Sunday game's play-by-play lands refits as above (the news watcher's
+  clock gets the event); Power and Matchups say "Ratings include games through Sunday; <Monday teams> update
+  Tuesday"; the rest-of-season schedule drops the games already played; the week-by-week history keeps one point per
+  week, written at the rollover as now.
