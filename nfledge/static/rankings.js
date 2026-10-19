@@ -224,7 +224,7 @@
               // against his own likely range (owner 2026-10-18): white inside p25-p75, green above, red below; live, only
               // green once he's already past it (falling short mid-game isn't a miss yet)
               const lo = r._q[1], hi = r._q[3], tone = r._act > hi ? ' gr-hi' : !r._live && r._act < lo ? ' gr-lo' : '';
-              return `<span class="pv-stack"><b class="pv act-v${tone}" title="${r._live ? 'Live' : 'Final'}: ${f1(r._act)} pts · projected ${f1(r._likelyOut ? r._ifact : r._proj)}${g != null ? ` · game grade ${50 + Math.round(g * 49 / 99)}` : ''}"><span class="pv-tag">${r._live ? '<span class="live-dot"></span>live' : 'final'}</span>${f1(r._act)}</b><span class="pv-was">proj <b>${f1(r._likelyOut ? r._ifact : r._proj)}</b></span></span>`; })()
+              return `<span class="pv-stack"><b class="pv act-v${tone}" title="${r._live ? 'Live' : 'Final'}: ${f1(r._act)} pts · projected ${f1(r._proj)}${r._likelyOut ? ` (ruled out; ${f1(r._ifact)} if he had played)` : ''}${g != null ? ` · game grade ${50 + Math.round(g * 49 / 99)}` : ''}"><span class="pv-tag">${r._live ? '<span class="live-dot"></span>live' : 'final'}</span>${f1(r._act)}</b><span class="pv-was">proj <b>${f1(r._proj)}</b></span></span>`; })()
             : r._likelyOut
               ? `<b class="pv" title="Under 10% to play: projected 0">0.0</b><span class="ifact" title="${esc(range(r))}">if he plays ${f1(r._ifact)}</span>`
               : `<b class="pv" title="${esc(range(r))}">${f1(r._proj)}</b>${condLine(r)}` },
