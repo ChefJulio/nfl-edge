@@ -640,6 +640,12 @@ class InjuryModel:
         out_snap = pd.concat([out_snap, add]).groupby(level=[0, 1, 2]).sum()
     rg["ahead_out"] = [sum(1 for x in out_snap.get((w, t, p), []) if x > sa + 0.05)
                        for w, t, p, sa in zip(rg.week, rg.team, rg.pos, rg.snap_avg)]
+    # (AY4) healthy teammates at his position ahead of him by recent snap share (not out, not on the report): the
+    # next-up QB with none of them is the real next man (depth charts err: Flacco 2020, Winston 2024 ...)
+    healthy = rg[~rg.is_out & ~rg.on_report][["week", "team", "pos", "gsis_id", "snap_avg"]]
+    hs = healthy.groupby(["week", "team", "pos"]).apply(lambda g: list(zip(g.gsis_id, g.snap_avg))).to_dict() if len(healthy) else {}
+    rg["ahead_healthy"] = [sum(1 for g_, sa_ in hs.get((w, t, p_), []) if g_ != g and sa_ > sa + 0.05)
+                           for w, t, p_, g, sa in zip(rg.week, rg.team, rg.pos, rg.gsis_id, rg.snap_avg)]
     rg["rookie"] = (pd.to_numeric(rg.years_exp, errors="coerce").fillna(1) == 0).astype(int)
     for p_ in ("QB", "RB", "WR", "TE"):
       rg[f"is_{p_}"] = (rg.pos == p_).astype(int)
@@ -745,7 +751,19 @@ class InjuryModel:
       self._scratch_cache[season] = self.scratch_table(season)
     t = self._scratch_cache[season]
     t = t[t.week == week]
-    return pd.Series(self.scratch_model.predict_proba(t[self.scratch_cols])[:, 1], index=t.gsis_id.to_numpy())
+    p = pd.Series(self.scratch_model.predict_proba(t[self.scratch_cols])[:, 1], index=t.gsis_id.to_numpy())
+    rate = self.cfg.get("injuries", {}).get("nextup_qb")
+    if rate is not None:  # (AY4, {#nextup-qb}) the next-up QB, nobody healthy ahead of him: the measured inactive rate
+      m = self.nextup_rows(t).to_numpy()
+      p[m] = 1.0 - float(rate)
+    return p
+
+  @staticmethod
+  def nextup_rows(t: pd.DataFrame) -> pd.Series:
+    """(AY4) QBs next up (someone ahead of him out, depth rank - out ahead <= 1) with no healthy QB ahead of him by
+    recent snap share."""
+    return ((t.is_QB == 1) & (t.ahead_out >= 1) & ((t["rank"] - t.ahead_out) <= 1)
+            & (t.get("ahead_healthy", pd.Series(1, index=t.index)) == 0))
 
   # -- application -----------------------------------------------------------------------------------------------
   espn_bridge: dict | None = None  # gsis_id -> ESPN bucket (live week only; see espn.py / espn_calib.py)

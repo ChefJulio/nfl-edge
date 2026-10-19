@@ -2611,6 +2611,22 @@ Updated 2026-10-18. Injury / return items first (owner 2026-10-18: "the injury/r
   split shipped with it: inactive (Health, injury tags) = injury only; scratch = its own "Scratch x%" tag and card state;
   play = takes the field (sits, redistribution, starter picks, Fantasy expected points). Tanner McKee: Health
   healthy; P(dressed) 87% from this model alone (three QB3 inactives, depth chart still rank 2 in week 6).
+- **PRE-REGISTERED 2026-10-18 (owner: "mckee was never going to sit this game once hurts got ruled out"): (AY4) the
+  next-up QB is not a healthy scratch.** After (AY3) McKee read 11% healthy-scratch risk: a QB next up by the depth
+  chart (someone ahead out, rank - out ahead <= 1) who rarely dressed before was inactive 10% of the time (5 of 50,
+  2019-25), but all 5 were depth-chart errors (another healthy QB was the real next man: Flacco 2020, Gilbert 2020,
+  Hill / Siemian 2021, Winston 2024). Rule (injuries.nextup_qb): a next-up QB with no healthy QB at his team (not out,
+  not on the report) ahead of him by recent snap share (more than 0.05) gets the measured inactive rate of that group
+  instead of the model's number; 2019-25 in-sample: 1 of 240 inactive (0.4%; Ben DiNucci 2020, benched). Test
+  (tools/nextup_eval.py): walk-forward 2021-25, the rate from seasons before s, against production (AY3) on those rows.
+  GATE: Brier on the rule's rows not worse (CI upper < +0.0005) and calibrated (within 1 point); other rows unchanged.
+- **RESULT {#nextup-qb} (AY4) the next-up QB rule: FAIL (by the calibration clause), not shipped.**
+  tools/nextup_eval.py, walk-forward 2021-25: 210 rule rows, 0 inactive. Brier 0.00100 -> 0.00030, -0.00070
+  [-0.00111, -0.00034] (the accuracy clause passes); the rule's rate from earlier seasons averaged 1.37% vs 0.00%
+  actual, outside the pre-registered 1-point band (production said 1.92%, up to 15.7% on single players). The miss is
+  in the owner's direction: next-up QBs with nobody healthy ahead are inactive even less than the rule assumed (the
+  only case 2019-25: Ben DiNucci 2020, benched). Code kept off (config injuries.nextup_qb unset). A re-test needs its
+  own pre-registration (e.g. calibration judged against production's, or a gate on events, not a point band).
 - **IR audit 2026-10-18 (owner: "players on IR threw a wrench in our model over and over"), fixes shipped.** One audit
   of every consumer that picks "this week's players" by roster status or board membership. Fine as built: vacated-
   volume redistribution (an IR'd WR1 / RB1's share is redistributed exactly as for one listed Out), the QB starter
