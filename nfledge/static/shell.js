@@ -426,6 +426,11 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   let bot = null;
   if (navMode === 'bottom' && !listless) {
     document.documentElement.classList.add('nav-bottom');
+    // keyboard up (a text field focused, owner 2026-10-18: "when i search and type i can't see the players being
+    // filtered"): the fixed bottom bar rides on top of the keyboard on phones, so it steps aside while typing
+    const typing = el => el && el.matches && el.matches('input:not([type=checkbox]):not([type=radio]):not([type=button]), textarea');
+    document.addEventListener('focusin', e => { if (typing(e.target)) document.documentElement.classList.add('kb-open'); });
+    document.addEventListener('focusout', e => { if (typing(e.target)) document.documentElement.classList.remove('kb-open'); });
     // the page's first-paint copy (pages/week.html) when there is one; older archived pages have none
     bot = document.querySelector('body > .botbar') || document.createElement('div');
     bot.className = 'botbar';

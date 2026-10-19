@@ -121,11 +121,18 @@
       const note = sec.querySelector('.ps-searchnote');
       const term = () => q.value.trim().toLowerCase();
       // a team code ("dal") still filters the picked season by team, as before
-      const searching = () => term().length >= 2 && !Object.keys(TEAMS).some(t => t.toLowerCase() === term());
+      const searching = () => career !== false && term().length >= 2 && !Object.keys(TEAMS).some(t => t.toLowerCase() === term());
       const view = () => searching() || selS.value === 'all' ? 'career' : 'season';
       const curPos = () => searching() ? 'All' : pos;
       const toRows = d => d.rows.map(v => { const r = Object.fromEntries(d.cols.map((c, i) => [c, v[i]])); r._g = groupOf(r.pos); return r; });
-      const loadCareer = () => careerP || (careerP = NFLE.load('data/stats/players_career.json').then(d => { career = toRows(d); score(career); return career; }));
+      // no careers file (an older build): searches filter the picked season, as before
+      // search results in priority order (owner 2026-10-18: "active players first, then most prolific"): playing this
+      // season, then career games (every position has them; fantasy points would bury linemen and defenders), then
+      // career fantasy points. The Seasons column carries that order while searching; tapping a header re-sorts.
+      const RELSPAN = Object.assign({}, SPAN, { first: 'desc', title: 'Search order: active players first, then most career games',
+        value: r => (IX && r.season === IX.current ? 1e7 : 0) + (r.games || 0) * 1e3 + Math.min(999, Math.max(0, r._fp || 0) / 10) });
+      const loadCareer = () => careerP || (careerP = NFLE.load('data/stats/players_career.json').then(d => { career = toRows(d); score(career); return career; })
+        .catch(() => { career = false; if (table) draw(true); return null; }));
       let custom = (() => { try { return JSON.parse(store('nfledge-ps-custom') || 'null') || ['age', 'draft', 'apy']; } catch (e) { return ['age', 'draft', 'apy']; } })();
       if (!DEFAULTS[pos]) pos = 'QB';
       selP.value = pos;
@@ -138,7 +145,7 @@
       const columns = () => [
         { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name,
           html: r => NFLE.ui.player({ name: r.name, pos: r.pos, grp: groupOf(r.pos), team: r.team, espn: r.espn }, TEAMS) },
-        ...(view() === 'career' ? [SPAN] : []),
+        ...(view() === 'career' ? [searching() ? RELSPAN : SPAN] : []),
         ...DEFAULTS[curPos()].map(k => col(BY[k])),
         ...custom.map((k, i) => col(BY[k] || null, i)),
       ];
@@ -158,18 +165,18 @@
       const rows = () => {
         const t = term(), words = t.split(/\s+/).filter(Boolean);
         if (searching()) return (career || []).filter(r => { const n = (r.name || '').toLowerCase(); return words.every(x => n.includes(x)); });
-        all = view() === 'career' ? (career || []) : seasonRows;
+        all = view() === 'career' && career ? career : seasonRows;
         return all.filter(r => (pos === 'All' || r._g === pos) && (!t || (r.name || '').toLowerCase().includes(t) || (r.team || '').toLowerCase() === t));
       };
       const draw = (resort) => {
-        if (view() === 'career' && !career) { sub.textContent = 'Loading every season\u2026'; loadCareer().then(() => draw(true)); return; }
+        if (view() === 'career' && career === null) { sub.textContent = 'Loading every season\u2026'; loadCareer().then(() => draw(true)); return; }
         sec.querySelectorAll('.ps-per button').forEach(b => b.classList.toggle('on', (b.dataset.v === 'pg') === per));
         const srch = searching();
         note.hidden = !srch;
         if (srch) note.innerHTML = `Searching every season and position for <b>${esc(q.value.trim())}</b>, career totals. <button type="button" class="linkish ps-clear">Clear</button> to go back to ${esc(selS.value === 'all' ? 'all years' : selS.value)}, ${esc(pos === 'All' ? 'all positions' : pos)}.`;
         sec.querySelectorAll('.ps-season, .ps-pos, .ps-type').forEach(x => x.classList.toggle('ps-paused', srch));
         sub.textContent = view() === 'season' ? seasonSub : srch ? 'Every season and position' : `All years, ${IX ? IX.seasons[0] : ''}-${IX ? IX.current : ''} regular season: ${career.length.toLocaleString()} players`;
-        const mode = `${view()}|${curPos()}`, cols = columns(), rs = rows(), sk = { key: SORT0[curPos()], dir: 'desc' };
+        const mode = `${view()}|${curPos()}|${srch}`, cols = columns(), rs = rows(), sk = { key: srch ? 'span' : SORT0[curPos()], dir: 'desc' };
         if (!table) table = NFLE.Table(sec.querySelector('.ps-tbl'), { howto: true, columns: cols, rows: rs, sort: sk, cls: 'tiles',
           rowClass: () => 'teamrow', rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.team)}${/^\d\d-\d{7}$/.test(r.pid) ? ` data-open-pid="${esc(r.pid)}"` : ''}` });
         else { table.setColumns(cols); table.update(rs); if (resort || mode !== lastMode) table.setSort(sk); }
@@ -211,6 +218,8 @@
       sec.querySelector('.ps-per').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (b) { per = b.dataset.v === 'pg'; store('nfledge-ps-per', per ? 'pg' : 'tot'); draw(false); } });
       // the first search letters fetch the careers; search on / off swaps the columns
       q.oninput = () => { if (table) draw(false); };
+      // phones: bring the box to the top so the matches show between it and the keyboard
+      q.addEventListener('focus', () => { if (innerWidth <= 640) setTimeout(() => scrollTo({ top: q.getBoundingClientRect().top + scrollY - 12, behavior: 'smooth' }), 250); });
       document.addEventListener('nfle-scoring', () => { score(seasonRows); if (career) score(career); if (table) draw(false); });
       NFLE.load('data/stats/index.json').then(ix => {
         IX = ix;
