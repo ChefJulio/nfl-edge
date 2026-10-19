@@ -648,5 +648,55 @@
 "pre": 0.1762,
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0036879": {
+"name": "Sam Ehlinger",
+"team": "DEN",
+"pos": "QB",
+"pre": 0.0795,
+"ruling": "INA",
+"at": "2026-10-15T23:08:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040621": {
+"name": "Montorie Foster Jr",
+"team": "SEA",
+"pos": "WR",
+"pre": 0.1857,
+"ruling": "INA",
+"at": "2026-10-15T22:54:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040673": {
+"name": "Jalen Milroe",
+"team": "SEA",
+"pos": "QB",
+"pre": 0.0795,
+"ruling": "INA",
+"at": "2026-10-15T23:03:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041133": {
+"name": "Dallen Bentley",
+"team": "DEN",
+"pos": "TE",
+"pre": 0.1754,
+"ruling": "INA",
+"at": "2026-10-15T22:49:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041178": {
+"name": "Robert Henry Jr.",
+"team": "SEA",
+"pos": "RB",
+"pre": 0.6056,
+"ruling": "INA",
+"at": "2026-10-15T22:54:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
