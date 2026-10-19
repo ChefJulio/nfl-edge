@@ -1365,7 +1365,7 @@
     const projBig = actV != null
       ? `<div class="pc-big ${actTone}"><span class="pv-tag">${actLive ? '<span class="live-dot"></span>live' : 'final'}</span>${f1(actV)} <small>pts</small></div><div class="pc-tapsub">proj <b class="pv-pj">${f1(s.proj)}</b> ${rankPill}</div>`
       : live && injCode(p.status) === 'INA'
-      ? `<div class="pc-big bad">Inactive</div><div class="pc-tapsub">ruled out before kickoff · was ${f1(s.proj)}</div>`
+      ? `<div class="pc-big">0.0 <small>pts</small></div><div class="pc-tapsub">was ${f1(s.proj)} if active</div>`  // the header pill and Health tile say Inactive (owner)
       : ia >= 0.5
       ? `<div class="pc-big bad">${ia >= 0.95 ? 'Out' : 'Likely out'}</div><div class="pc-tapsub">${f1(s.proj)} pts if he plays${ia < 0.95 ? ` · ${NFLE.fmt.toPlay(ia)} to play` : ''}</div>`
       : `<div class="pc-big">${f1(s.proj)} <small>pts</small></div><div class="pc-tapsub">${rankPill}${risk}</div>`;
