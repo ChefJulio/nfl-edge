@@ -3438,7 +3438,7 @@
     const sit = st.sit || {}, dd = sit.shortDownDistanceText || '';
     if (!dd) return '';
     return `<li class="ds-p ps-next"><span class="ds-w">${esc(`${periodName(info.period)} ${info.clock || ''}`.trim())}</span><span class="ds-h"><span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>
-      ${sit.possessionText ? `<span class="muted">at ${esc(sit.possessionText)}</span>` : ''}<span class="ds-sp"><span class="live-dot"></span>Pre-snap, awaiting the snap&hellip;</span></span></li>`;
+      ${sit.possessionText ? `<span class="muted">at ${esc(sit.possessionText)}</span>` : ''}<span class="ds-sp"><span class="live-dot"></span>Awaiting result&hellip;</span></span></li>`;
   };
   const recentView = (st, info, sum) => {
     const ds = st.drives.filter(d => (d.plays || []).length).slice(-2).reverse();
