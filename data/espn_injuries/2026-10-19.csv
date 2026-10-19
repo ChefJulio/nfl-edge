@@ -49,6 +49,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 16713,Jake Matthews,Atlanta Falcons,Active,2026-10-11T23:22Z,,,,,,"Matthews (groin) is active for Sunday night's game against the Ravens, Tori McElhaney of the Falcons' official site reports."
 3045527,Samson Ebukam,Atlanta Falcons,Active,2026-10-11T23:08Z,,,,,,
 4360807,Yasir Abdullah,Atlanta Falcons,Injured Reserve,2026-10-11T03:43Z,Hamstring,Not Specified,Not Specified,2026-11-08,IR,"The Falcons placed Abdullah (hamstring) on injured reserve Saturday, Tori McElhaney of the team's official site reports."
+4035671,Tyler Huntley,Baltimore Ravens,Active,2026-10-19T08:05Z,,,,,,Huntley completed 19 of 31 passes for 165 yards with a touchdown and no interceptions and added five rushes for 28 yards in the Ravens' 13-10 loss to the Browns on Sunday. He also fumbled once but recovered.
 4429615,Zay Flowers,Baltimore Ravens,Active,2026-10-19T05:39Z,,,,,,Flowers brought in six of 11 targets for 66 yards and rushed once for one yard in the Ravens' 13-10 loss to the Browns on Sunday.
 3043078,Derrick Henry,Baltimore Ravens,Active,2026-10-19T05:31Z,,,,,,Henry rushed 17 times for 58 yards and brought in his only target for two yards in the Ravens' 13-10 loss to the Browns on Sunday. He also lost a fumble.
 4876132,Josh Cuevas,Baltimore Ravens,Active,2026-10-19T01:04Z,,,,,,Cuevas caught four of five targets for 44 yards and a touchdown during Sunday's 13-10 loss to Cleveland.
@@ -62,7 +63,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4432260,Matt Hibner,Baltimore Ravens,Out,2026-10-18T15:33Z,Hand,Not Specified,Not Specified,2026-10-25,INACTIVE,inactive
 3916387,Lamar Jackson,Baltimore Ravens,Out,2026-10-18T15:33Z,Ankle,Sprain,Left,2026-10-25,INACTIVE,inactive
 4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-10-18T15:33Z,,,,,,
-4035671,Tyler Huntley,Baltimore Ravens,Active,2026-10-16T23:17Z,,,,,,"Huntley will be the Ravens' starting QB against the Browns on Sunday after Lamar Jackson (ankle) was ruled out, Ryan Mink of the Ravens' official site reports."
 4035479,John Simpson,Baltimore Ravens,Active,2026-10-16T20:28Z,,,,,,
 4698244,Teddye Buchanan,Baltimore Ravens,Active,2026-10-16T20:28Z,,,,,,
 4430831,Trenton Simpson,Baltimore Ravens,Active,2026-10-16T20:28Z,,,,,,
@@ -599,6 +599,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431321,Dru Phillips,New York Giants,Active,2026-10-13T23:07Z,,,,,,Phillips had five total tackles (five solo) and 2.0 sacks in Sunday's 27-27 tie with the Commanders.
 4691043,Nikko Reed,New York Giants,Active,2026-10-12T19:30Z,,,,,,
 5082353,J.C. Davis,New York Giants,Active,2026-10-12T19:30Z,,,,,,
+4685247,Braelon Allen,New York Jets,Active,2026-10-19T08:14Z,,,,,,Allen rushed 17 times for 78 yards and brought in both targets for 26 yards in the Jets' 26-19 loss to the Patriots on Sunday.
 4569618,Garrett Wilson,New York Jets,Active,2026-10-19T06:05Z,,,,,,Wilson brought in four of six targets for 44 yards in the Jets' 26-19 loss to the Patriots on Sunday.
 5083315,Kenyon Sadiq,New York Jets,Active,2026-10-19T03:29Z,,,,,,Sadiq caught one of three targets for 12 yards in Sunday's 26-19 loss to the Patriots.
 4700136,Kiko Mauigoa,New York Jets,Questionable,2026-10-18T17:37Z,Thigh,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,Mauigoa (thigh) is questionable to return to Sunday's game against the Jets.
@@ -612,7 +613,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426686,Dane Belton,New York Jets,Active,2026-10-18T15:35Z,,,,,,
 4569371,Isaiah Williams,New York Jets,Active,2026-10-17T00:22Z,,,,,,Williams should continue to serve as the No. 3 wide receiver behind Garrett Wilson and Tim Patrick for Sunday's game against the Patriots due to the absence of Adonai Mitchell (finger).
 3134353,Tim Patrick,New York Jets,Active,2026-10-17T00:12Z,,,,,,Patrick is expected to retain a regular role in three-receiver sets Sunday against the Patriots after the Jets ruled out Adonai Mitchell (finger).
-4685247,Braelon Allen,New York Jets,Active,2026-10-17T00:02Z,,,,,,Allen will once again operate as the Jets' primary running back for Sunday's game against the Patriots due to the absence of Breece Hall (quadriceps).
 4695404,Isaiah Davis,New York Jets,Active,2026-10-13T00:50Z,,,,,,Davis rushed twice for eight yards while catching one of two targets for nine yards during Sunday's 17-12 win over the Browns.
 4574142,Nate Lynn,New York Jets,Active,2026-10-12T19:32Z,,,,,,
 3124679,Jason Sanders,New York Jets,Active,2026-10-12T14:55Z,,,,,,Sanders made his lone field-goal attempt and both of his extra-point tries during the Jets' 17-12 win over the Browns on Sunday.
