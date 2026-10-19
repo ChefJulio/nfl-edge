@@ -2407,13 +2407,14 @@
     // the bye in its week, the rest with the opponent's record and Power rank; the tile previews the next three
     const O = oddsData(), sch = O && O.sched && O.sched[abbr], left = sch ? sch.filter(g => g[3] == null && g[0] >= +d.week) : [];
     const pow = Object.fromEntries((d.power || []).map(x => [x.team, x]));
-    const nextTxt = left.slice(0, 3).map(g => `${g[2] ? '' : '@'}${esc(g[1])}`).join(' · ');
+    // the next three opponents as logos (owner 2026-10-19), "@" for road games; the code in the tooltip
+    const nextLogos = left.slice(0, 3).map(g => `<span class="tm-nx" title="${g[2] ? 'vs' : '@'} ${esc(g[1])}">${g[2] ? '' : '<i>@</i>'}${tLogo(g[1], 24)}</span>`).join('');
     const weeks = sch ? Array.from({ length: Math.max(18, ...sch.map(g => g[0])) }, (_, i) => sch.find(g => g[0] === i + 1) || i + 1) : [];
     const schRow = g => { if (typeof g === 'number') return `<div class="tm-sg tm-bye"><span class="tm-sw">Wk ${g}</span><span class="muted">Bye</span></div>`;
       const o = pow[g[1]] || {}, done = g[3] != null, r = !done ? '' : g[3] > g[4] ? 'W' : g[3] < g[4] ? 'L' : 'T';
       return `<div class="tm-sg tm-open${done ? ' tm-done' : ''}" data-tm="${esc(g[1])}"><span class="tm-sw">Wk ${g[0]}</span><span class="tm-sv">${g[2] ? 'vs' : '@'}</span>${tLogo(g[1], 22)}<b>${esc(o.nick || g[1])}</b>`
         + (done ? `<span class="tm-sres r-${r}">${r} ${g[3]}-${g[4]}</span>` : `<span class="muted">${esc(o.record || '')}</span>${rkChip(o.rank, 'Their Power rank')}`) + '</div>'; };
-    if (pw) tiles.push(tapTile('Schedule', `<div class="pc-big">${ord(pw.sos_next_rk)} <small>hardest left</small></div><div class="pc-tapsub">${nextTxt ? `Next: ${nextTxt}` : '&nbsp;'}</div>`, 'Schedule',
+    if (pw) tiles.push(tapTile('Schedule', `<div class="pc-big">${ord(pw.sos_next_rk)} <small>hardest left</small></div><div class="pc-tapsub tm-nxrow">${nextLogos ? `<span>Next</span>${nextLogos}` : '&nbsp;'}</div>`, 'Schedule',
       `<div class="pc-box"><div class="pc-k">${esc(d.season)} season</div>${weeks.length ? `<div class="tm-sched">${weeks.map(schRow).join('')}</div>` : '<p class="pc-sub">Loading schedule&hellip;</p>'}
         <p class="pc-sub">Strength of schedule, by the opponents' Power ratings: so far ${ord(pw.sos_past_rk)} hardest, the rest of the way ${ord(pw.sos_next_rk)} hardest (1st = toughest).</p></div>`));
     return tiles.length ? `<div class="pc-tiles tm-tiles">${tiles.join('')}</div>` : '';
