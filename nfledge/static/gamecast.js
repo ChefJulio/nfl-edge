@@ -130,8 +130,12 @@
   };
 
   // ------------------------------------------------------------------------------------------------------- ESPN
+  // ESPN numbers the playoffs as their own season type: weeks 1-3 (wild card, divisional, conference), 5 = Super Bowl
+  // (4 is the Pro Bowl). Ours continue the regular season: 19-22 from 2021 (18-21 before, a 17-week season).
   const weekEvents = async (season, week) => {
-    const d = await getJSON(`${ESPN.sb}?seasontype=2&week=${week}&dates=${season}`);
+    const reg = +season >= 2021 ? 18 : 17, po = +week > reg;
+    const w = po ? (+week - reg === 4 ? 5 : +week - reg) : week;
+    const d = await getJSON(`${ESPN.sb}?seasontype=${po ? 3 : 2}&week=${w}&dates=${season}`);
     return d.events || [];
   };
   const evKey = ev => ev.competitions[0].competitors.map(t => ourCode(t.team.abbreviation)).sort().join('-');
@@ -3893,7 +3897,15 @@
       if (!GP.info && GP.g) { GP.info = infoFromG(GP.g); renderGame(); }
       else if (!GP.info) document.getElementById('gc').innerHTML = `<p class="gc-loading">Live data unavailable right now (${esc(e.message)}). Try again in a minute.</p>`;
     }
-    if (GP.info && GP.info.realState === 'in' && !document.hidden) GP.timer = setTimeout(pollGame, 15000);
+    // live: every 15 s; before kickoff: every 5 minutes, then every minute from 30 minutes out, so a page opened early
+    // turns live by itself (it had needed a reload)
+    if (GP.info && !document.hidden) {
+      if (GP.info.realState === 'in') GP.timer = setTimeout(pollGame, 15000);
+      else if (GP.info.realState === 'pre') {
+        const to = Date.parse(GP.info.date) - Date.now();
+        GP.timer = setTimeout(pollGame, !(to > 30 * 60000) ? 60000 : Math.min(5 * 60000, to - 30 * 60000 + 1000));
+      }
+    }
   };
   const initGame = async () => {
     const d = Q.get('d') || '', gid = Q.get('g') || '';
@@ -3909,7 +3921,7 @@
     document.title = `${id.away} @ ${id.home} · Gamecast · NFL Edge`;
     await pollGame();
     if (location.hash.startsWith('#player/')) openPlayer(location.hash.slice(8));
-    document.addEventListener('visibilitychange', () => { if (!document.hidden && GP.info && GP.info.realState === 'in') pollGame(); });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && GP.info && (GP.info.realState === 'in' || GP.info.realState === 'pre')) pollGame(); });
     document.addEventListener('nfle-scoring', () => renderGame());
     if (Q.get('replay') === '1' && GP.canReplay) replayCmd('on');
   };
