@@ -464,7 +464,7 @@
         <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') || '<tr><td colspan="3" class="muted">No projected bench players.</td></tr>')}
         ${irSection()}
         ${movesCard()}
-        <p class="muted lg-note">Expected points = our projection under your league's scoring x his chance to play. Kickers and team defenses are projected under your league's own kicking and D/ST settings (3-and-outs and 4th-down stops aren't modeled). Scoring bonuses (100-yard games, 2-point tries) aren't modeled.</p>`;
+        <p class="muted lg-note">Expected points = our projection under your league's scoring x his chance to play. Kickers and team defenses are projected under your league's own kicking and D/ST settings (3-and-outs and 4th-down stops aren't modeled). Scoring bonuses (100-yard games, 2-point tries) aren't modeled.${L.slots.some(x => /^(DL|LB|DB|IDP_FLEX|DE|DT|CB|S)$/.test(x)) ? ' Defender (IDP) slots are not projected yet, so they stay as you set them on your platform.' : ''}</p>`;
     };
 
     // A starter whose game is on or over (owner 2026-10-19: the win chance ignored live scores): his points so far
