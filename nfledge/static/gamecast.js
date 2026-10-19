@@ -2251,7 +2251,8 @@
   };
   const RT_GOAL = ['make the playoffs', 'win the division', 'get the top seed'], RT_SHORT = ['Playoffs', 'Division', 'Top seed'];
   const rtPct = v => v >= 0.9995 ? '>99.9%' : v > 0 && v < 0.0005 ? '<0.1%' : `${(v * 100).toFixed(1)}%`;
-  const rtPts = v => `${v >= 0 ? '+' : '−'}${Math.abs(v * 100).toFixed(1)}`;
+  // points; under a tenth of a point keeps two decimals (one flipped season of 2,000 = 0.05)
+  const rtPts = v => v === 0 ? '0.0' : `${v > 0 ? '+' : '−'}${Math.abs(v * 100).toFixed(Math.abs(v) < 0.001 ? 2 : 1)}`;
   const rtGoal = r => r.p_playoffs > 0.03 && r.p_playoffs < 0.95 ? 0 : r.p_div > 0.03 && r.p_div < 0.97 ? 1 : r.p_bye > 0.02 && r.p_bye < 0.98 ? 2 : 0;
   const rtTeam = (O, t) => (O.teams || []).find(r => r.team === t) || {};
   const rtRows = (O, abbr) => {
@@ -2311,16 +2312,22 @@
     const x = rtRows(O, abbr);
     if (!x) return '';
     const nick = t => rtTeam(O, t).nick || t, goal = RT_GOAL[x.m];
+    // every game this week is listed (owner 2026-10-19: "i want every matchup and its effect"; a game between two
+    // teams of the other conference still reaches this team through tiebreakers like strength of schedule): the ones
+    // clear of simulation noise first, then the rest, greyed, by size
     const own = x.games.find(r => r.own), rest = x.games.filter(r => !r.own);
-    const sig = rest.filter(r => r.sig), quiet = rest.length - sig.length;
+    const sig = rest.filter(r => r.sig), small = rest.filter(r => !r.sig);
     const chips = r => [0, 1, 2].filter(k => k !== x.m && r.real(k) && Math.abs(r.gain(k)) >= 0.01).map(k => {
       const v = r.gain(k);
       return `<span class="rt-chip ${v > 0 ? 'good' : 'bad'}"${v < 0 ? ` title="Helps their chance to ${goal}, hurts their chance to ${RT_GOAL[k]}"` : ''}>${RT_SHORT[k]} ${rtPts(v)}</span>`;
     }).join('');
     const detail = r => `<table class="bx rt-dt"><thead><tr><th></th><th class="num">If ${tmL(r.root, esc(nick(r.root)))} win</th><th class="num">If ${tmL(r.vs, esc(nick(r.vs)))} win</th></tr></thead><tbody>
       ${[0, 1, 2].map(k => `<tr${k === x.m ? ' class="rt-main"' : ''}><td>${RT_SHORT[k]}</td><td class="num">${rtPct(r.pw[k])}</td><td class="num">${rtPct(r.pl[k])}</td></tr>`).join('')}</tbody></table>`;
-    const row = r => `<details class="rt-g"><summary>${tmL(r.root, tLogo(r.root, 20))}<span class="rt-nm">${tmL(r.root, `<b>${esc(nick(r.root))}</b>`)} over ${tmL(r.vs, esc(nick(r.vs)))}</span>
-        ${chips(r)}<span class="rt-v ${r.v > 0 ? 'good' : ''}">${rtPts(r.v)}</span></summary>${detail(r)}</details>`;
+    // no change in any simulated season: no side to root for, so the game as scheduled
+    const row = r => `<details class="rt-g${r.sig ? '' : ' rt-q'}"><summary>${r.v === 0
+        ? `${tmL(r.g.away, tLogo(r.g.away, 20))}<span class="rt-nm">${tmL(r.g.away, esc(nick(r.g.away)))} @ ${tmL(r.g.home, esc(nick(r.g.home)))}</span>`
+        : `${tmL(r.root, tLogo(r.root, 20))}<span class="rt-nm">${tmL(r.root, `<b>${esc(nick(r.root))}</b>`)} over ${tmL(r.vs, esc(nick(r.vs)))}</span>`}
+        ${r.sig ? chips(r) : ''}<span class="rt-v ${r.sig && r.v > 0 ? 'good' : ''}">${rtPts(r.v)}</span></summary>${detail(r)}</details>`;
     const say = sig.filter(r => r.v > 0).slice(0, 4).map(r => tmL(r.root, esc(nick(r.root))));
     const ownHtml = own ? `<div class="rt-own"><div class="pc-k">Their game</div>${tmL(own.vs, tLogo(own.vs, 20))}<span>${own.g.home === abbr ? 'vs' : '@'} ${tmL(own.vs, `<b>${esc(nick(own.vs))}</b>`)}</span>
         <span class="rt-wl"><span>Win <b>${rtPct(own.pw[x.m])}</b></span><span>Lose <b>${rtPct(own.pl[x.m])}</b></span></span></div>`
@@ -2329,8 +2336,9 @@
       <p class="rt-say">${say.length ? `Root for the <b>${say.length > 1 ? `${say.slice(0, -1).join(', ')}</b> and <b>${say[say.length - 1]}` : say[0]}</b>.` : 'No other game this week moves their odds much.'}</p>
       ${ownHtml}
       ${sig.length ? `<div class="rt-list"><div class="rt-hd"><span>Root for</span><span>Chance to ${goal}, pts</span></div>${sig.map(row).join('')}</div>` : ''}
-      ${quiet ? `<p class="pc-sub">${quiet} other game${quiet > 1 ? 's' : ''}: negligible (under half a point, or within simulation noise).</p>` : ''}
-      <p class="pc-sub">Each number is the change in their chance to ${goal} between the two results: the same ${O.root.n_flip.toLocaleString()} simulated seasons with only that game flipped. Tap a game for both outcomes. Green / red tags: the game also moves another chance by a point or more (red means the two pull opposite ways).</p></div>`;
+      ${small.length ? `<div class="rt-list"><div class="rt-hd"><span>${sig.length ? 'Every other game' : 'Every game'}</span><span>pts</span></div>${small.map(row).join('')}</div>` : ''}
+      <p class="pc-sub">Each number is the change in their chance to ${goal} between the two results: the same ${O.root.n_flip.toLocaleString()} simulated seasons with only that game flipped. Tap a game for both outcomes. Green / red tags: the game also moves another chance by a point or more (red means the two pull opposite ways).</p>
+      <p class="pc-sub">Grey: under half a point or within simulation noise, so the better side for them isn't settled. Games far from their race still count through the tiebreakers (strength of victory and of schedule), but rarely: one flipped season of ${O.root.n_flip.toLocaleString()} is ${(100 / O.root.n_flip).toFixed(2)} points, and 0.0 means the result changed nothing in any of them.</p></div>`;
   };
   const rootingHtml = abbr => {
     const O = oddsData();

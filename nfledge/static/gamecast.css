@@ -672,6 +672,9 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .rt-nm { flex: 1; min-width: 0; font-size: var(--fs-base); }
 .rt-v { font-weight: 700; font-variant-numeric: tabular-nums; min-width: 42px; text-align: right; }
 .rt-v.good { color: var(--good); }
+.rt-list + .rt-list { margin-top: 10px; }
+.rt-q .rt-nm, .rt-q .rt-v { color: var(--faint); }
+.rt-q .rt-nm b { font-weight: 400; }
 .rt-chip { font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill); white-space: nowrap; line-height: var(--tag-h); }
 .rt-chip.good { background: rgba(69,194,107,.14); color: var(--good); }
 .rt-chip.bad { background: rgba(242,120,109,.14); color: var(--bad); }
