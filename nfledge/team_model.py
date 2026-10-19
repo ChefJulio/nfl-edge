@@ -151,6 +151,15 @@ def unit_plays(pbp: pd.DataFrame, cfg: dict, qbexp: pd.DataFrame | None = None,
     miss = qb.isna()
     qb[miss] = main.reindex(pd.MultiIndex.from_arrays([ps.game_id[miss], ps.posteam[miss]])).to_numpy()
   out["pass"]["qb"] = qb.to_numpy()
+  if tm.get("qb_rush_effects"):
+    # EXPERIMENT (BB) qbrun, off unless set: a designed run by a quarterback (50+ career dropbacks in the data) carries
+    # his own term in the rush unit; "starter" (the game's main passer) gives each QB's share of his team's runs
+    rs = pbp.loc[sel["rush"]]
+    dbs = pbp[pbp.is_dropback].assign(q=pbp.passer_player_id.fillna(pbp.rusher_player_id)).dropna(subset=["q"])
+    qbs = set(dbs.q.value_counts().loc[lambda x: x >= 50].index)
+    out["rush"]["qb"] = rs.rusher_player_id.where(rs.rusher_player_id.isin(qbs)).to_numpy()
+    main = dbs.groupby(["game_id", "posteam"]).q.agg(lambda x: x.value_counts().index[0])
+    out["rush"]["starter"] = main.reindex(pd.MultiIndex.from_arrays([rs.game_id, rs.posteam])).to_numpy()
   if qbexp is not None:
     pri = qbexp.set_index(["qb", "season", "week"]).prior
     key = pd.MultiIndex.from_arrays([out["pass"].qb, out["pass"].season, out["pass"].week])
@@ -214,7 +223,8 @@ class Design:
   persist (corr -0.02 season to season) and travel distance / time zones have no measurable effect, but the
   home edge is ~0.8 pts smaller in division games (p = 0.03) - hence the optional division interaction."""
 
-  def __init__(self, plays: pd.DataFrame, teams: list[str], division: bool = True, qbs: bool = False):
+  def __init__(self, plays: pd.DataFrame, teams: list[str], division: bool = True, qbs: bool = False,
+               partial: bool = False):
     """qbs=True (pass unit) appends a quarterback one-hot block and an inexperienced-QB indicator, so pass
     offense = team (line, receivers, scheme) + quarterback, each with its own ridge penalty."""
     self.teams = teams
@@ -234,13 +244,16 @@ class Design:
     self.qbs = []
     self.i_inexp = self.i_new = None
     if qbs and "qb" in plays:
+      # partial (EXPERIMENT (BB) qbrun, rush unit): only rows naming a QB get his column; the pass unit names one on
+      # every dropback (unknown = "UNK")
+      m = plays.qb.notna().to_numpy() if partial else np.ones(len(plays), bool)
       q = plays.qb.fillna("UNK")
-      self.qbs = sorted(q.unique())
+      self.qbs = sorted(q[m].unique())
       qi = q.map({k: i for i, k in enumerate(self.qbs)}).to_numpy()
       inexp = plays["qb_inexp"].to_numpy(dtype=float) if "qb_inexp" in plays else np.zeros(len(plays))
-      data = np.concatenate([data, np.ones(len(plays)), inexp])
-      r = np.concatenate([r, rows, rows])
-      c = np.concatenate([c, self.base_p + qi, np.full(len(plays), self.base_p + len(self.qbs))])
+      data = np.concatenate([data, np.ones(int(m.sum())), inexp])
+      r = np.concatenate([r, rows[m], rows])
+      c = np.concatenate([c, self.base_p + qi[m], np.full(len(plays), self.base_p + len(self.qbs))])
       self.i_inexp = self.base_p + len(self.qbs)
       if "qb_newteam" in plays:  # EXPERIMENT (INSIGHTS (R)): the new-to-the-team indicator, one more column
         self.i_new = self.i_inexp + 1
@@ -301,6 +314,15 @@ class Ratings:
   qb_newteam: float = 0.0  # EXPERIMENT (INSIGHTS (R)): extra effect for an experienced QB new to the team
   qb_team_prior: pd.Series | None = None  # dropbacks per (QB, team) entering this week
   newteam_cut: float = 0.0
+  qb_rush: pd.Series | None = None  # EXPERIMENT (BB) qbrun: QB effects on his own designed runs (EPA/run)
+  qb_run_share: dict = field(default_factory=dict)  # his share of his team's designed runs in his starts (shrunk)
+  qb_run_league: float = 0.0  # the league's QB share of designed runs (an unknown QB's share)
+
+  def rush_term(self, qb) -> float:
+    """(BB) qbrun: rush EPA per team designed run from the starting QB's own runs (0 when off or QB unknown)."""
+    if self.qb_rush is None or qb is None or (isinstance(qb, float) and np.isnan(qb)):
+      return 0.0
+    return float(self.qb_run_share.get(qb, self.qb_run_league)) * float(self.qb_rush.get(qb, 0.0))
 
   def qb_term(self, qb, team=None) -> float:
     """Pass EPA/play contribution of a specific quarterback (0 when QB effects are off or QB unknown). `team` is
@@ -314,7 +336,7 @@ class Ratings:
     return out
 
   def expected_epa(self, off_team: str, def_team: str, unit: str, home: int, div: int = 0, qb=None) -> float:
-    q = self.qb_term(qb, off_team) if unit == "pass" else 0.0
+    q = self.qb_term(qb, off_team) if unit == "pass" else self.rush_term(qb) if unit == "rush" else 0.0
     return (self.intercept[unit] + self.off.at[off_team, unit] + self.dfn.at[def_team, unit] + q
             + (self.home[unit] + self.home_div.get(unit, 0.0) * div) * home)
 
@@ -336,8 +358,9 @@ class TeamModel:
     self.plays = unit_plays(pbp, cfg, self.qbexp, self.qbteam)
     self.teams = sorted(set(pbp.posteam.dropna()) | set(pbp.defteam.dropna()))
     div = cfg["team_model"].get("division_hfa", True)
-    self.designs = {u: Design(p, self.teams, division=div, qbs=(u == "pass" and self.use_qb))
-                    for u, p in self.plays.items()}
+    self.qb_rush = bool(cfg["team_model"].get("qb_rush_effects", False)) and self.use_qb  # EXPERIMENT (BB) qbrun
+    self.designs = {u: Design(p, self.teams, division=div, qbs=self.use_qb and (u == "pass" or (u == "rush" and self.qb_rush)),
+                              partial=(u == "rush")) for u, p in self.plays.items()}
     for d in self.designs.values():
       d.inexp_alpha = float(cfg["team_model"].get("qb_inexp_alpha", 1.0))
     self.units = tuple(self.plays)  # UNITS, plus "pen" when the (AB-a) experiment is on
@@ -404,12 +427,22 @@ class TeamModel:
     icpt, home, off, dfn, se_off, se_def, hdiv = {}, {}, {}, {}, {}, {}, {}
     raw_off, raw_def, plays_pg = {}, {}, {}
     qb, qb_inexp, qb_new = None, 0.0, 0.0
+    qb_rush, run_share, run_league = None, {}, 0.0
     for u in self.units:
       w = self.weights(u, season, target_week, exclude)
       d = self.designs[u]
       beta = d.solve(w, alphas[u], self.alpha_qb)
       icpt[u], off[u], dfn[u], home[u], hdiv[u] = _unpack(beta, self.teams)
-      if d.qbs:
+      if d.qbs and u == "rush":  # EXPERIMENT (BB) qbrun: QB run effects and each QB's share of his team's runs
+        qb_rush = pd.Series(beta[d.base_p:d.base_p + len(d.qbs)], index=d.qbs)
+        pr = self.plays[u]
+        on, isq = w > 0, pr.qb.notna().to_numpy()
+        run_league = float(w[on & isq].sum() / max(w[on].sum(), 1e-9))
+        k = float(self.cfg["team_model"].get("qb_run_share_k", 100.0))
+        mine = pd.Series(w[on & isq]).groupby(pr.qb.to_numpy()[on & isq]).sum()
+        led = pd.Series(w[on]).groupby(pr.starter.to_numpy()[on]).sum()
+        run_share = ((mine.reindex(led.index).fillna(0) + k * run_league) / (led + k)).to_dict()
+      elif d.qbs:
         qb = pd.Series(beta[d.base_p:d.base_p + len(d.qbs)], index=d.qbs)
         qb_inexp = float(beta[d.i_inexp])
         qb_new = float(beta[d.i_new]) if d.i_new is not None else 0.0
@@ -431,7 +464,7 @@ class TeamModel:
                 qb, qb_inexp, prior_dropbacks(self.qbexp, season, target_week),
                 float(self.cfg["team_model"].get("qb_inexp_dropbacks", 150)), qb_new,
                 prior_team_dropbacks(self.qbteam, season, target_week) if self.qbteam is not None else None,
-                float(self.new_cut or 0.0))
+                float(self.new_cut or 0.0), qb_rush, run_share, run_league)
     if alphas is self.alphas:
       self._cache[key] = r
     return r

@@ -753,7 +753,7 @@ class PlayerModel:
         j["def_rush"] = j.opp.map(r.dfn["rush"])
         # Supporting-cast passing offense includes the quarterback who actually started that game.
         j["off_pass"] = j.team.map(r.off["pass"]) + np.array([r.qb_term(q, t) for q, t in zip(j.qb, j.team)])
-        j["off_rush"] = j.team.map(r.off["rush"])
+        j["off_rush"] = j.team.map(r.off["rush"]) + np.array([r.rush_term(q) for q in j.qb])  # 0 unless (BB) qbrun
         j["implied_pts"] = j.total_line / 2 + j.spread_team / 2
         for sh in ("db_share", "carry_share", "tgt_share"):
           j[f"{sh}_x_spread"] = j[sh].fillna(0) * j.spread_team.fillna(0)
