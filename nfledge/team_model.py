@@ -186,6 +186,23 @@ def asof_weights(season_col: pd.Series, week_col: pd.Series, season: int, target
   return w
 
 
+def sunday_refit(schedules: pd.DataFrame, plays: pd.DataFrame, season: int, week: int) -> tuple | None:
+  """(through, exclude) game_id sets once every game of `week` through its last Sunday is final with its plays in
+  (TeamModel.set_live), else None: Thursday through Sunday count together, never a Thursday game alone mid-week;
+  exclude = the week's games after that Sunday (Monday night). All or nothing: a Sunday game whose plays haven't
+  landed holds the whole refit."""
+  g = schedules[(schedules.season == season) & (schedules.week == week) & (schedules.game_type == "REG")]
+  day = pd.to_datetime(g.gameday)
+  sun = day[day.dt.weekday == 6]
+  if g.empty or sun.empty:
+    return None
+  early, late = g[day <= sun.max()], g[day > sun.max()]
+  have = set(plays.game_id[plays.season == season])
+  if early.home_score.isna().any() or not set(early.game_id) <= have:
+    return None
+  return frozenset(early.game_id), frozenset(late.game_id)
+
+
 # ----------------------------------------------------------------------------------------------------------------
 # Weighted ridge
 # ----------------------------------------------------------------------------------------------------------------
@@ -328,6 +345,15 @@ class TeamModel:
     self.alpha_qb = 1e9
     self.cv_loss = {}
     self._cache: dict = {}
+    self.live: tuple | None = None  # set_live: the current week's ratings take in its finished games (owner, (BA))
+
+  def set_live(self, season: int, week: int, through: frozenset, exclude: frozenset) -> None:
+    """Owner decision 2026-10-19 after (BA) (refitting Monday neither helped nor hurt; shipped for currency, owner-design
+    rule): once every game of the current week through its Sunday is final with its plays in, fit(season, week) means
+    "as of now": week `week`'s plays count (the weights of a fit for week + 1) except `exclude` (its Monday game(s)).
+    Only the live build calls this, after training (training loops fit past weeks, never with this on); `through` is
+    kept for the page's label."""
+    self.live = (season, week, through, exclude)
 
   # -- fitting ---------------------------------------------------------------------------------------------------
   def weights(self, unit: str, season: int, target_week: int, exclude: frozenset | None = None) -> np.ndarray:
@@ -369,6 +395,8 @@ class TeamModel:
 
   def fit(self, season: int, target_week: int, bootstrap: int = 0, alphas: dict | None = None,
           exclude: frozenset | None = None) -> Ratings:
+    if exclude is None and self.live and (season, target_week) == self.live[:2]:
+      return self.fit(season, target_week + 1, bootstrap, alphas, exclude=self.live[3])
     key = (season, target_week, bootstrap, exclude or None)
     if key in self._cache and alphas is None:
       return self._cache[key]

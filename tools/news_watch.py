@@ -90,6 +90,34 @@ def due_events(clock: dict, now) -> list:
   return [lbl for w, lbl in clock_events(clock) if b < w <= now]
 
 
+PBP = "https://api.github.com/repos/nflverse/nflverse-data/releases/tags/pbp"
+
+
+def sunday_pbp_due(d: dict) -> list:
+  """Monday refit (owner 2026-10-19, nfledge/team_model.py sunday_refit): once every game of the week through its
+  last Sunday is final and nflverse has republished the season's play-by-play since the live site was built, a build
+  takes Sunday's games into the ratings. Quiet once the site has them (index.json "refit") or before Sunday is over."""
+  c = d.get("clock") or {}
+  if d.get("refit") or not c.get("built"):
+    return []
+  kicks = [(x["kick"], bool(x.get("final"))) for x in (c.get("teams") or {}).values() if x.get("kick")]
+  suns = [k for k, _ in kicks if datetime.fromisoformat(k).weekday() == 6]
+  if not suns:
+    return []
+  last_sun = max(datetime.fromisoformat(k).date() for k in suns)
+  if not all(f for k, f in kicks if datetime.fromisoformat(k).date() <= last_sun):
+    return []
+  try:
+    season = int(d.get("season"))
+    up = [a["updated_at"] for a in get(PBP).get("assets", []) if a.get("name") == f"play_by_play_{season}.parquet"]
+  except Exception as e:  # can't tell: the scheduled builds pick it up
+    print(f"[watch] couldn't read nflverse's play-by-play release ({e})")
+    return []
+  if up and datetime.fromisoformat(up[0].replace("Z", "+00:00")) > datetime.fromisoformat(c["built"]):
+    return [f"nflverse play-by-play updated {up[0]} (Sunday's games into the ratings)"]
+  return []
+
+
 def recent_build() -> str | None:
   """Why not to start a build now (one running, queued or just started), else None."""
   try:
@@ -121,7 +149,7 @@ def check(dry: bool) -> None:
     b = now.get(eid, ("", ""))[0]
     if a != b and (a in SERIOUS or b in SERIOUS):
       changes.append(f"{label}: {a or 'healthy'} -> {b or 'healthy'}")
-  due = due_events(INDEX.get("d", {}).get("clock") or {}, datetime.now(timezone.utc))
+  due = due_events(INDEX.get("d", {}).get("clock") or {}, datetime.now(timezone.utc)) + sunday_pbp_due(INDEX.get("d", {}))
   if due:
     print("[watch] week clock: " + "; ".join(due))
   if not changes and not due:

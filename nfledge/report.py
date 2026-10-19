@@ -626,6 +626,8 @@ def week_data(ctx: dict) -> str:
          "roles": [{k: r.get(k) for k in ("pid", "name", "pos", "team", "week", "snap_now", "snap_prev", "opp_now",
                                           "opp_prev", "touches", "takeaway")} for r in ctx.get("roles") or []],
          "power_vol": ctx.get("power_vol"),
+         # this week's games the ratings already count (TeamModel.set_live): {"through": [game_id], "pending": [...]}
+         "refit": ctx.get("refit"),
          # the week clock (nfledge/week_clock.py): kickoffs, report deadlines, rollover; the browser applies the time
          "clock": ctx.get("clock"),
          "head": {"data_week": ctx["data_week"], "n_final": ctx["n_final"], "n_games": ctx["n_games"],
@@ -1014,9 +1016,17 @@ def schedule_faced(eng, season: int, week: int, r, starters: dict, qb_eff: dict 
   return out
 
 
-def records(eng, season: int, week: int) -> dict:
+def live_also(eng, season: int, week: int) -> frozenset:
+  """The current week's games the ratings already count (TeamModel.set_live), for Elo and records; else none."""
+  lv = eng.tm.live
+  return lv[2] if lv and (season, week) == lv[:2] else frozenset()
+
+
+def records(eng, season: int, week: int, current: bool = False) -> dict:
+  """W-L before `week`; current (the live page): every finished game, this week's too (a record is a fact, not a
+  model input: owner 2026-10-19, Monday's Power showed records a week old)."""
   s = eng.data.schedules
-  s = s[(s.season == season) & (s.game_type == "REG") & s.home_score.notna() & (s.week < week)]
+  s = s[(s.season == season) & (s.game_type == "REG") & s.home_score.notna() & ((s.week < week) | current)]
   rec = {}
   for g in s.itertuples():
     for t, pf, pa in ((g.home_team, g.home_score, g.away_score), (g.away_team, g.away_score, g.home_score)):
@@ -1026,7 +1036,8 @@ def records(eng, season: int, week: int) -> dict:
           for t, (w, l, tie) in rec.items()}
 
 
-def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None = None, plan: dict | None = None) -> tuple[list, list]:
+def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None = None, plan: dict | None = None,
+                current: bool = False) -> tuple[list, list]:
   rb = eng.tm.fit(season, week, bootstrap=cfg["team_model"]["bootstrap_samples"])
   vol = league_volume(eng, season, week, rb)
   starters = starters_asof(eng, season, week)
@@ -1087,7 +1098,7 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
     if c in sos:
       sos[c] = sos[c] * fw["play"]
   sos_rk = {c: rk(sos[c].dropna()) for c in ("past", "next")}
-  rec = records(eng, season, week)
+  rec = records(eng, season, week, current)
   rows = []
   for team in rb.teams:
     move = int(prev_rank[team] - ranks["net"][team]) if prev_rank is not None and team in prev_rank else 0
@@ -1313,7 +1324,7 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
   r = eng.game_ratings(season, week)
   tossup, wm = cfg["report"]["tossup_below"], cfg["report"]["win_model"]
   k_vegas = vegas_win_k(eng.data.schedules, season, week)
-  elo_now = elo.ratings_before(eng.data.schedules, season, week, wm)
+  elo_now = elo.ratings_before(eng.data.schedules, season, week, wm, live_also(eng, season, week))
   vf = team_volume_features(eng.team_ledger, season, week, eng.cfg)
   games = eng.games(season, week)
   starters = {}

@@ -59,7 +59,11 @@
       NFLE.week().then(D => {
         if (!D || !D.power || !D.power.length || !('net_hist' in D.power[0])) return;  // older week file: keep the page's table
         const v = D.power_vol || {}, n = (x, d) => x ? Math.round(x) : d;
-        sec.innerHTML = `<div class="sec-head"><div><h2>Power rankings</h2><p>How good each team is from here on, in points per game vs an average team.</p></div></div>
+        // Monday (owner 2026-10-19): the ratings already count this week's games through Sunday (report "refit")
+        const rf = D.refit, nick = t => ((D.teams || {})[t] || {}).nick || t;
+        const late = rf ? (rf.pending || []).map(id => (D.games || []).find(g => g.id === id)).filter(Boolean) : [];
+        const fresh = rf ? `<p class="pw-fresh">Updated with this week's games through Sunday.${late.length ? ` ${late.map(g => `${esc(nick(g.away.team))} and ${esc(nick(g.home.team))}`).join(', ')} update after Monday night.` : ''}</p>` : '';
+        sec.innerHTML = `<div class="sec-head"><div><h2>Power rankings</h2><p>How good each team is from here on, in points per game vs an average team.</p>${fresh}</div></div>
           <details class="howto"><summary>How to read</summary><div>
             <dl class="ht">
               <dt>Net</dt><dd>How good the team is from here on: opponent-adjusted points per game vs an average team (Offense + Defense + special teams). The bar runs from zero; its thin whisker is the rank range, where the team could rank given the uncertainty (10th to 90th percentile): short = settled, long = a few games could move it a lot. A quarterback who is out counts by his chance to be back in each remaining game.</dd>

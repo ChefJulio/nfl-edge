@@ -35,10 +35,11 @@ def finished(schedules: pd.DataFrame) -> pd.DataFrame:
   return schedules[schedules.home_score.notna()].sort_values(["season", "gameday", "gametime"]).reset_index(drop=True)
 
 
-def ratings_before(schedules: pd.DataFrame, season: int, week: int, w: dict) -> dict:
-  """Every team's Elo going into (season, week), from games finished before it only."""
+def ratings_before(schedules: pd.DataFrame, season: int, week: int, w: dict, also: frozenset = frozenset()) -> dict:
+  """Every team's Elo going into (season, week), from games finished before it only; also: game_ids of `week`
+  itself to count (the current week's games through Sunday once the ratings take them in: TeamModel.set_live)."""
   g = finished(schedules)
-  g = g[(g.season < season) | ((g.season == season) & (g.week < week))]
+  g = g[(g.season < season) | ((g.season == season) & ((g.week < week) | g.game_id.isin(also)))]
   _, r, last = run(g, w["elo_k"], w["elo_hfa"], w["elo_revert"], w["elo_margin"])
   if last is not None and last < season:  # the offseason pull before the first game of a new season
     r = {t: MEAN + (v - MEAN) * (1 - w["elo_revert"]) for t, v in r.items()}

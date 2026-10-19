@@ -40,12 +40,14 @@ def model_p(home: str, away: str, neutral: bool, ranks: dict, elo_now: dict, wm:
 
 
 def simulate(sched, teams, season: int, week: int, ranks: dict, wm: dict, n: int, rng, lines_weeks=None, drift: float = 0.0,
-             keep: bool = False, played_before: int | None = None, ranks_by_week: dict | None = None, jobs: int = 1) -> dict:
+             keep: bool = False, played_before: int | None = None, ranks_by_week: dict | None = None, jobs: int = 1,
+             elo_also: frozenset = frozenset()) -> dict:
   """Monte Carlo of the rest of `season` from before `week`'s games. lines_weeks: weeks whose Vegas lines may be used
   (None = every line on file, the live case; the backtest passes {week}: lines known at that time).
   drift: team strength isn't fixed for the rest of the season. Each simulated season gives every team a strength
   shift ~ N(0, drift x sqrt(share of the season left)) in log-odds, added to all its remaining games (and playoff
-  games), so far-off games are less certain than next week's. Fit on the backtest (see backtest_drift)."""
+  games), so far-off games are less certain than next week's. Fit on the backtest (see backtest_drift).
+  elo_also: game_ids of `week` the live ratings already count (index.json "refit"), so Elo matches the ranks."""
   reg = sched[(sched.season == season) & (sched.game_type == "REG")].copy()
   reg["home_team"], reg["away_team"] = reg.home_team.replace(RELOCATED), reg.away_team.replace(RELOCATED)
   # played_before: count only games before that week (pre-week odds with today's lines, for the odds-by-week chart)
@@ -53,7 +55,7 @@ def simulate(sched, teams, season: int, week: int, ranks: dict, wm: dict, n: int
   played = reg[reg.home_score.notna() & (reg.week < cut)] if cut is not None else reg[reg.home_score.notna()]
   left = reg.drop(played.index)
   L0 = League.from_schedule(played.assign(game_type="REG"), teams, season)
-  elo_now = elo.ratings_before(sched, season, week, wm)
+  elo_now = elo.ratings_before(sched, season, week, wm, elo_also)
   k = vegas_win_k(sched, season, week)
   p = []
   for g in left.itertuples():
@@ -410,8 +412,9 @@ def main():
   ranks = {RELOCATED.get(r["team"], r["team"]): r["rank"] for r in idx.get("power") or []}
   drift = float(cfg["report"].get("playoff_drift", 0.0))
   jobs = int(opt.get("jobs", os.cpu_count() or 1))
+  also = frozenset((idx.get("refit") or {}).get("through") or [])
   res = simulate(sched, teams, current, week, ranks, wm, int(opt.get("sims", 10000)), np.random.default_rng(), lines_weeks=None,
-                 drift=drift, keep=True, jobs=jobs)
+                 drift=drift, keep=True, jobs=jobs, elo_also=also)
   root = rooting(res, week, int(opt.get("flip", 2000)), int(opt.get("case", 500)), jobs)
   hist = odds_history(sched, teams, wm, site, Path(opt.get("archive", ROOT.parent / "nfl-edge-archive")), current, week, drift, ranks, jobs)
   info = teams.assign(team_abbr=teams.team_abbr.replace(RELOCATED)).drop_duplicates("team_abbr").set_index("team_abbr")

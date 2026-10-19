@@ -641,10 +641,11 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
 **Pending checks**
 - News watcher relay (tools/news_watch.py): confirm the first run handed off to its successor (~21:45 UTC 2026-10-18).
 - (AF) team-rating half-life: re-check at season end.
+- Monday refit (BA, shipped 2026-10-19): on the first live Mondays, how far the Monday-night players' projections move when Sunday's games enter the ratings.
 
 **Parked (owner)**: news push notifications; prior-season carryover in team ratings; market-implied ratings.
 
-**Closed recently**: (BA) Monday refit FAIL (no accuracy gain; display call is the owner's); (AX) / (AX2) FAIL; (AV) PASS shipped; IR audit fixes shipped; (AW) FAIL twice, closed; (AR) PASS shipped; (AQ) FAIL.
+**Closed recently**: (BA) Monday refit FAIL on gain, guard passed; shipped by owner decision; (AX) / (AX2) FAIL; (AV) PASS shipped; IR audit fixes shipped; (AW) FAIL twice, closed; (AR) PASS shipped; (AQ) FAIL.
 
 ### Log (chronological from here)
 - **Fantasy: depth-aware values (2026-10-17; replaces a STOPGAP).** The Fantasy tab's waiver moves (league.js
@@ -2823,3 +2824,14 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   this test's reach (~0.003), so a week of results moves next week's win chance a lot but its accuracy too little to
   measure. The N+2 / N+3 gains are post hoc (week N+1's games are on the site by Tuesday, refit). Kept: the Tuesday
   rollover; the display question (Power showing Sunday's results on Monday) is the owner's, not an accuracy case.
+- **Owner decision 2026-10-19 on (BA): ship the Monday refit into the model (owner-design rule).** "i'd like them to
+  update and feel current on mondays, but i don't want to recklessly force it into our model" -> after the gates were
+  explained (no gain, guard passed): "feels like we can justify just using the normal model". One set of numbers
+  (a display-only copy would have left Power's rank and the win chances disagreeing). Built: team_model.sunday_refit
+  (every game through the week's last Sunday final with its plays in, all or nothing; the Monday game(s) excluded);
+  TeamModel.set_live, set by run.py after training only, makes fit(season, week) the week + 1 fit minus the Monday
+  game(s); Elo the same (elo.ratings_before `also`; playoff_odds reads index.json "refit"); records count every
+  finished game on the live page; Power says "Updated with this week's games through Sunday"; tools/news_watch.py
+  starts a build when nflverse republishes the play-by-play after the week's Sunday games are final. Thursday games
+  wait for Sunday's (a midweek refit would move the weekend's projections before lineups lock: untested). To watch on
+  the first live Mondays: how far the Monday-night players' projections move (not covered by the gate).

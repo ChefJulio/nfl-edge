@@ -20,6 +20,7 @@ from nfledge.week_clock import Clock
 from nfledge.config import ROOT, load_config, load_scoring
 from nfledge.data import forecast_wind, load_all
 from nfledge.engine import POSITIONS, Engine
+from nfledge.team_model import sunday_refit
 
 
 def model_code() -> str:
@@ -91,6 +92,12 @@ def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict |
     if eng.injury_model.espn_rates:
       print("[run] ESPN early-week rates: " + ", ".join(f"{b} {v['p']:.0%} active ({v['n']} outcomes)"
                                                          for b, v in eng.injury_model.espn_rates.items()), flush=True)
+  # Monday currency (owner 2026-10-19, after (BA)): once the week's games through Sunday are final with their plays
+  # in, the current week's ratings take them in (after training, so no training row sees it; Monday night stays out)
+  rf = sunday_refit(data.schedules, eng.tm.plays["pass"], season, week)
+  if rf:
+    eng.tm.set_live(season, week, *rf)
+    print(f"[run] ratings include this week's {len(rf[0])} games through Sunday ({len(rf[1])} Monday game(s) to come)", flush=True)
   games = eng.games(season, week)
   if games.empty:
     sys.exit(f"No regular-season games found for {season} week {week}.")
@@ -163,7 +170,7 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
                bt_seasons=(), archive: bool = False, lookahead: int = 0, plan: dict | None = None) -> dict:
   """Everything one season / week page needs (shared by run.py and tools/build_archive.py); report.render turns
   it into the page's JSON."""
-  power = rp.team_tables(eng, season, week, cfg, proj, plan=plan)
+  power = rp.team_tables(eng, season, week, cfg, proj, plan=plan, current=not (archive or lookahead))
   wk = data.schedules[(data.schedules.season == season) & (data.schedules.week == week)
                       & (data.schedules.game_type == "REG")]
   n_final, n_games = int(wk.home_score.notna().sum()), len(wk)
@@ -177,6 +184,9 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
     "clock": Clock(data.schedules).to_json(season, week),
     "players": rp.player_rankings(eng, proj, season, week, cfg),
     "games": with_weather(rp.matchups(eng, season, week, cfg, proj, power), wk, live=not (archive or lookahead)),
+    # the current week's games the ratings already count (Power's "through Sunday" label; playoff_odds' Elo)
+    "refit": ({"through": sorted(eng.tm.live[2]), "pending": sorted(eng.tm.live[3])}
+              if eng.tm.live and eng.tm.live[:2] == (season, week) and not (archive or lookahead) else None),
     "power": power, "teams": rp.team_info(data.teams), "power_vol": rp.league_volume(eng, season, week, eng.tm.fit(season, week)),
     "roles": rp.role_changes(eng, season, week, cfg), "backtest": rp.backtest_summary(ev),
     "bt_seasons": " and ".join(map(str, bt_seasons)) or "n/a", "bt_takeaway": backtest_takeaway(ev),

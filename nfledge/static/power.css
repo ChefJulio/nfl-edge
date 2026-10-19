@@ -33,3 +33,4 @@ table.power td.nbc { width: 230px; }
 }
 @media (max-width: 560px) { table.power td.rk, table.power th.rk { width: 34px; padding-left: 2px; padding-right: 4px; } }
 table.power tr.teamrow { cursor: default; } table.power .who.tm-open { cursor: pointer; }
+.sec-head p.pw-fresh { color: var(--faint); font-size: var(--fs-sm); }
