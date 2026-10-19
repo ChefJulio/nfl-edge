@@ -2627,6 +2627,15 @@ Updated 2026-10-18. Injury / return items first (owner 2026-10-18: "the injury/r
   in the owner's direction: next-up QBs with nobody healthy ahead are inactive even less than the rule assumed (the
   only case 2019-25: Ben DiNucci 2020, benched). Code kept off (config injuries.nextup_qb unset). A re-test needs its
   own pre-registration (e.g. calibration judged against production's, or a gate on events, not a point band).
+- **RESULT {#nextup-qb2} (AY4, revised definition) the promoted backup QB: PASS, shipped.** Owner, on the snap rule: "backup qbs
+  only ever get snaps in serious garbage time or if the starter gets hurt" - backups' snap shares can't rank them (it
+  passed McKee, Payton and Milton alike). Revised: each team-week's starting QB from pre-game facts
+  (InjuryModel._qb_picks): last game's starter (most snaps, 30%+) if healthy, else the healthy QBs who dressed as his
+  backups last game, best depth rank first. 2019-25: returning starter 30 of 3,045 inactive (1.0%: week 17-18 rests and
+  benchings, left to the model), promoted backup 2 of 214 (0.9%; the model averaged 3.6%, up to 32.6%), everyone else
+  29.2%. The same pre-registered gate, walk-forward 2021-25 on 166 promoted backups: inactive 1.20%, model 4.11% (up to
+  56.9%), rule 1.37%; Brier 0.0166 -> 0.0123, -0.0043 [-0.0092, -0.0008]: PASS. Live: config injuries.nextup_qb =
+  0.0093 (the 2019-25 rate). Tanner McKee: 11% -> 0.9%.
 - **IR audit 2026-10-18 (owner: "players on IR threw a wrench in our model over and over"), fixes shipped.** One audit
   of every consumer that picks "this week's players" by roster status or board membership. Fine as built: vacated-
   volume redistribution (an IR'd WR1 / RB1's share is redistributed exactly as for one listed Out), the QB starter

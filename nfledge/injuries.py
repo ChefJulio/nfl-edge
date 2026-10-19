@@ -640,12 +640,7 @@ class InjuryModel:
         out_snap = pd.concat([out_snap, add]).groupby(level=[0, 1, 2]).sum()
     rg["ahead_out"] = [sum(1 for x in out_snap.get((w, t, p), []) if x > sa + 0.05)
                        for w, t, p, sa in zip(rg.week, rg.team, rg.pos, rg.snap_avg)]
-    # (AY4) healthy teammates at his position ahead of him by recent snap share (not out, not on the report): the
-    # next-up QB with none of them is the real next man (depth charts err: Flacco 2020, Winston 2024 ...)
-    healthy = rg[~rg.is_out & ~rg.on_report][["week", "team", "pos", "gsis_id", "snap_avg"]]
-    hs = healthy.groupby(["week", "team", "pos"]).apply(lambda g: list(zip(g.gsis_id, g.snap_avg))).to_dict() if len(healthy) else {}
-    rg["ahead_healthy"] = [sum(1 for g_, sa_ in hs.get((w, t, p_), []) if g_ != g and sa_ > sa + 0.05)
-                           for w, t, p_, g, sa in zip(rg.week, rg.team, rg.pos, rg.gsis_id, rg.snap_avg)]
+    rg["qb_pick"] = self._qb_picks(rg)
     rg["rookie"] = (pd.to_numeric(rg.years_exp, errors="coerce").fillna(1) == 0).astype(int)
     for p_ in ("QB", "RB", "WR", "TE"):
       rg[f"is_{p_}"] = (rg.pos == p_).astype(int)
@@ -759,11 +754,34 @@ class InjuryModel:
     return p
 
   @staticmethod
+  def _qb_picks(rg: pd.DataFrame) -> list:
+    """(AY4) each team-week's starting QB from what was known before the game (owner 2026-10-18: backups' snaps say
+    nothing; who dressed does): last game's starter (the most snaps, 30%+) if he is healthy this week ("starter"); else
+    the healthy QBs who dressed as his backups last game (game-day active), best depth rank first ("promoted").
+    Healthy = not out and not on the injury report. Rows: "starter" / "promoted" for the pick, "" otherwise."""
+    q = rg[rg.is_QB == 1] if "is_QB" in rg else rg[rg.pos == "QB"]
+    pick = {}
+    for team, g in q.groupby("team"):
+      wks = sorted(g.week.unique())
+      for i in range(1, len(wks)):
+        prev, cur = g[g.week == wks[i - 1]], g[g.week == wks[i]]
+        healthy = set(cur[~cur.is_out & ~cur.on_report].gsis_id)
+        top = prev.sort_values("snap", ascending=False)
+        starter = top.gsis_id.iloc[0] if len(top) and top.snap.fillna(0).iloc[0] > 0.3 else None
+        if starter in healthy:
+          pick[(wks[i], team)] = (starter, "starter")
+          continue
+        dressed = set(prev[prev.status == "ACT"].gsis_id) - {starter}
+        cand = cur[cur.gsis_id.isin(dressed & healthy)].sort_values("rank")
+        if len(cand):
+          pick[(wks[i], team)] = (cand.gsis_id.iloc[0], "promoted")
+    return [pick[(w, t)][1] if pick.get((w, t), (None,))[0] == g else ""
+            for w, t, g in zip(rg.week, rg.team, rg.gsis_id)]
+
+  @staticmethod
   def nextup_rows(t: pd.DataFrame) -> pd.Series:
-    """(AY4) QBs next up (someone ahead of him out, depth rank - out ahead <= 1) with no healthy QB ahead of him by
-    recent snap share."""
-    return ((t.is_QB == 1) & (t.ahead_out >= 1) & ((t["rank"] - t.ahead_out) <= 1)
-            & (t.get("ahead_healthy", pd.Series(1, index=t.index)) == 0))
+    """(AY4) the promoted backup QB: his team's starter is out and he dressed as the backup last game (_qb_picks)."""
+    return t.get("qb_pick", pd.Series("", index=t.index)) == "promoted"
 
   # -- application -----------------------------------------------------------------------------------------------
   espn_bridge: dict | None = None  # gsis_id -> ESPN bucket (live week only; see espn.py / espn_calib.py)
