@@ -243,7 +243,9 @@ def main():
     feed = fetch_injuries()
     data.espn_feed = feed  # read by Power's QB availability (powerc._newly: ESPN's IR list)
     from nfledge.espn import gameday_rulings
-    gameday = gameday_rulings(data, feed)
+    gf = ((Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week)).parent
+          / "data" / "live_inputs" / f"gameday_{season}_{week:02d}.json")  # this week's rulings so far (written below)
+    gameday = gameday_rulings(data, feed, saved=json.loads(gf.read_text(encoding="utf-8")) if gf.exists() else None)
     if gameday:
       print(f"[run] game-day rulings (ESPN, past inactives): {sum(v[0] == 'INA' for v in gameday.values())} inactive, "
             f"{sum(v[0] == 'ACT' for v in gameday.values())} active", flush=True)
@@ -281,9 +283,10 @@ def main():
       gf = out.parent / "data" / "live_inputs" / f"gameday_{season}_{week:02d}.json"
       log = json.loads(gf.read_text(encoding="utf-8")) if gf.exists() else {}
       for x in proj[proj.pre_gameday.notna()].itertuples():
-        log.setdefault(x.gsis_id, {"name": x.full_name, "team": x.team, "pos": x.pos, "ruling": gameday[x.gsis_id][0],
-                                   "at": gameday[x.gsis_id][1], "pre": round(float(x.pre_gameday), 4),
-                                   "post": round(float(x.avail), 4), "status": x.status})
+        e = log.setdefault(x.gsis_id, {"name": x.full_name, "team": x.team, "pos": x.pos,
+                                       "pre": round(float(x.pre_gameday), 4)})  # pre: the chance before the first ruling
+        if e.get("ruling") != gameday[x.gsis_id][0]:  # new, or ESPN reversed it: the latest ruling stands
+          e.update(ruling=gameday[x.gsis_id][0], at=gameday[x.gsis_id][1], post=round(float(x.avail), 4), status=x.status)
       gf.write_text(json.dumps(log, indent=0), encoding="utf-8")
       print(f"[run] game-day overrides archived: {len(log)} -> {gf.name}", flush=True)
   if args.lookahead and plan is not None:

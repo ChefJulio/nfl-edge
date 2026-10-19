@@ -26,25 +26,29 @@ URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries"
 STATUS_MAP = {"Out": "Out", "Injured Reserve": "IR", "Doubtful": "Doubtful"}
 
 
-def gameday_rulings(data, feed: pd.DataFrame | None, now=None) -> dict:
+def gameday_rulings(data, feed: pd.DataFrame | None, now=None, saved: dict | None = None) -> dict:
   """(AU, {#gameday}) gsis -> ("INA" | "ACT", ESPN update time) for players on teams past their inactives time
   (week_clock: kickoff - 90 min). ESPN marks a declared inactive fantasy status INACTIVE (status Out) and flips a
   listed player who dresses to Active; only updates on game day count (an Active from earlier in the week is not a
-  ruling). Matched through the rosters' ESPN ids."""
-  if feed is None or not len(feed) or "status" not in feed:
-    return {}
+  ruling). Matched through the rosters' ESPN ids.
+  A ruling is a fact about the week, so it holds after the final whistle too (owner 2026-10-18: Tyler Warren, ruled
+  inactive Sunday morning, read "Questionable" again once his game ended, because ESPN's entry moves on and nflverse's
+  rosters mark INA a day or two later). saved: this week's archived rulings (run.py's gameday_<season>_<week>.json,
+  gsis -> {"ruling", "at", "team"}): they fill in for any player the feed no longer rules on."""
   from .week_clock import Clock, ET
   c = Clock(data.schedules, now)
   week = c.current_week(data.current_season)
-  teams = {t: tw for t, tw in c.teams(data.current_season, week).items() if tw.inactives_in(c.now) and not tw.final}
+  teams = {t: tw for t, tw in c.teams(data.current_season, week).items() if tw.inactives_in(c.now)}
   if not teams:
     return {}
+  out = {g: (v["ruling"], v["at"]) for g, v in (saved or {}).items() if v.get("team") in teams}
+  if feed is None or not len(feed) or "status" not in feed:
+    return out
   ab = {}  # ESPN team display name -> our code
   if getattr(data, "teams", None) is not None and "team_name" in data.teams:
     ab = dict(zip(data.teams.team_name, data.teams.team_abbr))
   r = data.rosters[data.rosters.espn_id.notna()]
   gs = dict(zip(r.espn_id.astype(str).str.replace(r"\.0$", "", regex=True), r.gsis_id))
-  out = {}
   for x in feed.dropna(subset=["espn_id"]).itertuples():
     t = D_RELOC(ab.get(x.team, ""))
     tw = teams.get(t)

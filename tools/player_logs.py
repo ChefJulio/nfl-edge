@@ -244,7 +244,7 @@ def main():
   by_player = {pid: g for pid, g in sts.groupby("player_id")}
   post_by = {pid: g for pid, g in post[post.player_id.isin(everyone)].sort_values(["season", "week"]).groupby("player_id")}
   sched_w, n_weeks = team_weeks(allsched)
-  ros_w = roster_weeks(all_ros[all_ros.gsis_id.isin(everyone)])
+  ros_w = roster_weeks(all_ros[all_ros.gsis_id.isin(everyone)], gameday_ina(site))
   n = 0
   for pid in everyone:
     g = by_player.get(pid)
@@ -442,13 +442,37 @@ def team_weeks(allsched: pd.DataFrame) -> tuple[dict, dict]:
   return games, n_weeks
 
 
-def roster_weeks(ros: pd.DataFrame) -> dict:
-  """gsis_id -> {(season, week): (team, status, status code)} from the weekly rosters (2002 on)."""
+def gameday_ina(site: Path) -> dict:
+  """gsis_id -> {(season, week): team}: the game-day inactives ESPN ruled (run.py archives each week's rulings in
+  data/live_inputs/gameday_<season>_<week>.json). nflverse's weekly rosters mark INA a day or two after the games
+  (owner 2026-10-18: Tyler Warren's inactive week read as nothing meanwhile); this bridges that gap."""
+  out = {}
+  for f in (site / "data" / "live_inputs").glob("gameday_*.json"):
+    try:
+      s_, w = map(int, f.stem.split("_")[1:3])
+      log = json.loads(f.read_text(encoding="utf-8"))
+    except (ValueError, OSError):
+      continue
+    for g, v in log.items():
+      if v.get("ruling") == "INA" and v.get("team"):
+        t = "LA" if v["team"] == "LAR" else v["team"]
+        out.setdefault(g, {})[(s_, w)] = D.RELOCATED.get(t, t)
+  return out
+
+
+def roster_weeks(ros: pd.DataFrame, ina: dict | None = None) -> dict:
+  """gsis_id -> {(season, week): (team, status, status code)} from the weekly rosters (2002 on). ina (gameday_ina):
+  game-day inactives for weeks the rosters don't mark yet (no row, or still ACT); a published INA / reserve stands."""
   r = ros.dropna(subset=["gsis_id"])[["gsis_id", "season", "week", "team", "status", "status_description_abbr"]]
   r = r.assign(team=r.team.replace({"LAR": "LA"}).map(lambda t: D.RELOCATED.get(t, t)))
   out = {}
   for g, s_, w, t, st_, ab in zip(r.gsis_id, r.season.astype(int), r.week.astype(int), r.team, r.status, r.status_description_abbr):
     out.setdefault(g, {})[(s_, w)] = (t, st_, ab)
+  for g, wk in (ina or {}).items():
+    for k, t in wk.items():
+      cur = out.get(g, {}).get(k)
+      if cur is None or cur[1] == "ACT":
+        out.setdefault(g, {})[k] = (t, "INA", None)
   return out
 
 
@@ -567,7 +591,7 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
   # active-roster weeks per player and season, weeks in order (a stable sort: two teams in one week keep frame order)
   ros_by = rows_by(ros[ros.status == "ACT"].sort_values(["gsis_id", "season", "week"], kind="stable"), "gsis_id")
   sched_w, n_weeks = team_weeks(allsched)
-  ros_w = roster_weeks(ros)
+  ros_w = roster_weeks(ros, gameday_ina(site))
   last_ros = rs_sorted.drop_duplicates("gsis_id", keep="last")
   name_of = dict(zip(st.player_id, st.player_display_name))
   name_of.update(dict(zip(last_ros.gsis_id, last_ros.full_name)))
