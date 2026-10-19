@@ -139,7 +139,8 @@
           if (!me) return null;
           const opp = (mu || []).find(m => m.matchup_id === me.matchup_id && String(m.roster_id) !== String(teamId));
           return opp ? { opp: String(opp.roster_id), points: { [teamId]: me.points || 0, [opp.roster_id]: opp.points || 0 },
-                         starters: { [teamId]: (me.starters || []).map(String), [opp.roster_id]: (opp.starters || []).map(String) } } : null;
+                         starters: { [teamId]: (me.starters || []).map(String), [opp.roster_id]: (opp.starters || []).map(String) },
+                         pp: Object.assign({}, me.players_points || {}, opp.players_points || {}) } : null;  // each player's points, league scoring
         },
         defName: t => t,  // Sleeper team defenses are the team code ("MIN")
       };
@@ -466,6 +467,30 @@
         <p class="muted lg-note">Expected points = our projection under your league's scoring x his chance to play. Kickers and team defenses are projected under your league's own kicking and D/ST settings (3-and-outs and 4th-down stops aren't modeled). Scoring bonuses (100-yard games, 2-point tries) aren't modeled.</p>`;
     };
 
+    // A starter whose game is on or over (owner 2026-10-19: the win chance ignored live scores): his points so far
+    // (ESPN's live box score, your scoring) plus his projection for the part of the game left, its spread shrinking with
+    // it; final = exactly what he scored (no stat line = 0). Kickers and defenses keep their projection (the live box
+    // doesn't carry their scoring).
+    const gameDone = team => {
+      const gm = (D.games || []).find(g => g.away.team === team || g.home.team === team);
+      const st = gm && NFLE.live && NFLE.live.byGame && NFLE.live.byGame[gm.id];
+      if (!st || st.state === 'pre') return null;
+      if (st.state === 'post') return 1;
+      const [mm, ss] = String(st.clock || '15:00').split(':').map(Number), per = +st.period || 1;
+      return per > 4 ? 0.98 : Math.min(0.98, ((per - 1) * 900 + (900 - (mm * 60 + (ss || 0)))) / 3600);
+    };
+    // a finished game: the platform's own points for him when it has them (your league's exact scoring, bonuses,
+    // kickers and defenses included); in progress: ESPN's live box (refreshed every 30 s; the platform's is from page load)
+    const inGame = (p, pp) => {
+      if (!p || p.exp == null) return p;
+      const f = gameDone(p.team);
+      if (f == null) return p;
+      const plat = f >= 1 && pp && pp[p.ext] != null ? +pp[p.ext] : null;
+      if (plat == null && ['K', 'DEF'].includes(p.pos)) return p;
+      const ln = p.espn && NFLE.live && NFLE.live.lines && NFLE.live.lines[String(p.espn)];
+      const now = plat != null ? plat : ln ? pts(ln.line, L.scoring, p.pos) : 0, left = 1 - f;
+      return Object.assign({}, p, { live: now, fin: f >= 1, exp: now + p.proj * left, proj: p.proj * left, sd: p.sd * Math.sqrt(left), pa: 1 });
+    };
     const matchupView = () => {
       const m = L.matchup(mine.id);
       if (!m) return '<p class="muted">No matchup this week (bye or playoffs over).</p>';
@@ -473,7 +498,7 @@
       const lineupOf = t => {
         const ps = t.ext.map(player);
         const st = (m.starters && m.starters[t.id]) || t.starters;
-        return L.slots.map((s, i) => ({ slot: s, p: ps.find(p => p.ext === st[i]) || null }));
+        return L.slots.map((s, i) => ({ slot: s, p: inGame(ps.find(p => p.ext === st[i]) || null, m.pp) }));
       };
       const a = lineupOf(mine), b = lineupOf(opp), ea = total(a), eb = total(b), sd = spreadDiff(a, b) || 1;
       const pw = phi((ea - eb) / sd);
@@ -488,7 +513,7 @@
         : `<div class="lg-hh-p${right ? ' r' : ''}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}><b>${esc(short(p.name))}</b>
             <span class="lg-hh-s"><span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span> ${NFLE.ui.tm(p.team)}</span>
             <span class="lg-hh-s muted">${when(p)}</span>${badgesOf(p, { noLock: true })}</div>`;
-      const num = p => p && p.proj != null ? f1(p.proj) : '–';
+      const num = p => !p || p.proj == null ? '–' : p.live != null ? `<span class="lg-hh-lv">${f1(p.live)}<small>${p.fin ? 'final' : 'live'}</small></span>` : f1(p.proj);
       const rows = L.slots.map((s, i) => `<div class="lg-hh-row">${cell(a[i].p, false)}<div class="lg-hh-n">${num(a[i].p)}</div>
           <span class="lg-hh-slot posb ${['QB', 'RB', 'WR', 'TE'].includes(s) ? `posb-${s}` : 'lg-slot-any'}">${esc(s === 'SUPER_FLEX' ? 'SF' : s === 'FLEX' ? 'FLX' : s)}</span>
           <div class="lg-hh-n">${num(b[i].p)}</div>${cell(b[i].p, true)}</div>`).join('');
@@ -498,7 +523,7 @@
           <div class="r"><div class="lg-tn">${esc(opp.name)}</div><div class="lg-big">${f1(eb)}</div>${live(opp.id)}</div></div>
         <div class="lg-bar"><span style="width:${(100 * pw).toFixed(1)}%"></span></div>
         <div class="lg-hh">${rows}</div>
-        <p class="muted lg-note">Win chance: each starter's projection and range under your scoring and his chance to play, for both lineups, counting how players in the same game rise and fall together (a QB and his receivers most). Live points are the platform's.</p>`;
+        <p class="muted lg-note">Win chance: each starter's projection and range under your scoring and his chance to play, for both lineups, counting how players in the same game rise and fall together (a QB and his receivers most). Once a game starts, its players count their live points (ESPN, your scoring) plus their projection for the time left, so the chance moves with the games; totals above are those expected finals. "So far" is the platform's own live total.</p>`;
     };
 
     const WHEAD = '<th>Player</th><th class="num">This wk</th><th class="num" title="Expected points per remaining game, byes skipped">ROS/g</th>';
@@ -788,7 +813,7 @@
     };
     document.addEventListener('nfle-route', e => { if (e.detail && e.detail.parent === 'league') setView(e.detail.sub); else NFLE.feedOpen = false; });
     // the feed redraws on every live update while it's showing
-    document.addEventListener('nfle-live', () => { if (L && view === 'live' && sec.isConnected && !sec.hidden) draw(); });
+    document.addEventListener('nfle-live', () => { if (L && (view === 'live' || view === 'matchup') && sec.isConnected && !sec.hidden) draw(); });  // the matchup's win chance follows the live scores
     const open = async s => {
       sec.innerHTML = '<p class="muted">Loading your league…</p>';
       try {
@@ -820,7 +845,10 @@
         sec.querySelector('.lg-hint').textContent = plat === 'espn' ? 'ESPN: your public league\'s id.' : 'Sleeper: your username, or a league id.'; };
       const go = async () => {
         const v = inp.value.trim(); if (!v) return;
-        if (plat === 'espn') return open({ platform: 'espn', league: v.replace(/\D/g, '') });
+        if (plat === 'espn') {  // a pasted web address: the number after leagueId= (joining every digit folded in the season)
+          const m = v.match(/leagueId=(\d+)/i);
+          return open({ platform: 'espn', league: m ? m[1] : v.replace(/\D/g, '') });
+        }
         if (/^\d{10,}$/.test(v)) return open({ platform: 'sleeper', league: v });
         pick.innerHTML = '<p class="muted">Finding your leagues…</p>';
         try {
