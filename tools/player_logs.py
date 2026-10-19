@@ -364,7 +364,7 @@ KIND_OF = {**{p: "off" for p in "QB RB WR TE FB HB".split()},
 KIND_STATS = {
   "def": [("tk", "def_tackles_solo"), ("ast", "def_tackle_assists"), ("tfl", "def_tackles_for_loss"), ("sk", "def_sacks"),
           ("qbh", "def_qb_hits"), ("int", "def_interceptions"), ("pd", "def_pass_defended"), ("ff", "def_fumbles_forced"),
-          ("fr", "fumble_recovery_opp"), ("td", "def_tds")],
+          ("fr", "fumble_recovery_opp"), ("td", "def_tds"), ("sf", "def_safeties"), ("blk", "def_blocks")],
   "k": [("fgm", "fg_made"), ("fga", "fg_att"), ("lng", "fg_long"), ("xpm", "pat_made"), ("xpa", "pat_att")],
   "p": [("pu", "pt_att"), ("yd", "pt_yards"), ("net", "pt_net_yards"), ("i20", "pt_inside_20"), ("lng", "pt_long")],
   "ol": [], "ls": [],
@@ -376,8 +376,16 @@ SNAP_UNIT = {"def": "defense_pct", "ol": "offense_pct", "off": "offense_pct", "k
 RANKED = ["pass_yd", "pass_td", "interception", "rush_yd", "rush_td", "reception", "rec_yd", "rec_td", "fumble_lost",
           "completions", "attempts", "carries", "targets"]  # = SCORE_KEYS + the game row's x stats, in that order
 FEWER_BETTER = {"interception", "fumble_lost"}
+BLOCKS = ["def_punt_blocks", "def_fg_blocks", "def_pat_blocks"]  # summed into def_blocks (blocked kicks, IDP scoring)
 FULL_COLS = ["player_id", "player_display_name", "position", "season", "week", "season_type", "team", "opponent_team"] + \
-  sorted({c for v in KIND_STATS.values() for _, c in v} | {c for _, c in RET})
+  sorted(({c for v in KIND_STATS.values() for _, c in v} | {c for _, c in RET} | set(BLOCKS)) - {"def_blocks"})
+# PFR's advanced defense per game (2018 on; load_pfr_advstats "def"), the page's "a" array in this order: pressures,
+# hurries, blitzes, coverage targets / completions / yards / TDs allowed, missed tackles (owner 2026-10-18: "complete
+# stats" for individual defenders). Sacks and QB hits come from the box score ("d").
+ADV_DEF = [("prs", "def_pressures"), ("hur", "def_times_hurried"), ("blz", "def_times_blitzed"), ("tgt", "def_targets"),
+           ("cmp", "def_completions_allowed"), ("yda", "def_yards_allowed"), ("tda", "def_receiving_td_allowed"),
+           ("mt", "def_missed_tackles")]
+ADV_FIRST = 2018
 
 
 # Every regular-season week in a player's game log (owner 2026-10-16: "weeks the player didn't play should still be
@@ -598,10 +606,11 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
   ("d", in "keys" order), returns ("r") when he had any, his unit's snap share ("sn"). Plus "ros": per season, his
   team(s) and weeks on the active roster (the career table for players without stats, e.g. linemen before 2012).
   Playoff games ("pg" per season, round in "po"), kept apart from the regular season like the fantasy pass."""
+  r1 = lambda v: int(v) if float(v).is_integer() else round(float(v), 1)  # noqa: E731
   frames = []
   for s in range(FIRST_SEASON, cur + 1):
     x = cache.get("stats_full", s, lambda: nfl.load_player_stats([s]).select(FULL_COLS).to_pandas(),
-                  stale=s == cur and cache.age_hours("stats_full", s) > 6)
+                  stale=(s == cur and cache.age_hours("stats_full", s) > 6) or cache.lacks("stats_full", s, FULL_COLS))
     if x is not None and len(x):
       frames.append(x[x.season_type.isin(["REG", "POST"])])
   cache.save_meta()
@@ -609,6 +618,19 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
   st = st[~st.player_id.isin(written)].copy()
   for c in FULL_COLS[8:]:
     st[c] = pd.to_numeric(st[c], errors="coerce").fillna(0)
+  st["def_blocks"] = st[BLOCKS].sum(axis=1)
+  # PFR advanced defense, keyed (gsis, season, week); PFR ids map to gsis through nflverse's player table
+  p2g = pinfo.reset_index().dropna(subset=["pfr_id"]).drop_duplicates("pfr_id").set_index("pfr_id")["gsis_id"] \
+    if "pfr_id" in pinfo.columns else pd.Series(dtype=object)
+  adv = {}
+  for s in range(ADV_FIRST, cur + 1):
+    a = cache.get("pfrdef", s, lambda: nfl.load_pfr_advstats([s], stat_type="def", summary_level="week"),
+                  stale=s == cur and cache.age_hours("pfrdef", s) > 6)
+    if a is None or not len(a):
+      continue
+    a = a[a.game_type == "REG"] if "game_type" in a else a
+    for r in a.assign(g=a.pfr_player_id.map(p2g)).dropna(subset=["g"]).itertuples():
+      adv[(r.g, int(r.season), int(r.week))] = [r1(getattr(r, c)) if pd.notna(getattr(r, c)) else 0 for _, c in ADV_DEF]
   for c in ("team", "opponent_team"):
     st[c] = st[c].replace(D.RELOCATED)
   pst, st = st[st.season_type == "POST"], st[st.season_type == "REG"]
@@ -645,7 +667,6 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
   last_ros = {k: v[0] for k, v in rows_by(last_ros, "gsis_id").items()}
   out_dir = site / "data" / "players"
   n = 0
-  r1 = lambda v: int(v) if float(v).is_integer() else round(float(v), 1)  # noqa: E731
   for pid in ids:
     pos = pos_of.get(pid)
     if not isinstance(pos, str) and pid in pinfo.index:
@@ -680,6 +701,11 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
         pct = getattr(r, unit)
         if pd.notna(pct):
           e["sn"] = int(round(100 * float(pct)))
+    if kind == "def":
+      for (s, w), e in games.items():
+        a = adv.get((pid, s, w))
+        if a is not None:
+          e["a"] = a
     seasons = {}
     for (s, w), e in sorted(games.items()):
       gid = gid_of.get((s, w, e["t"]))
@@ -730,6 +756,7 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
     name = name_of.get(pid) or (pinfo.at[pid, "display_name"] if pid in pinfo.index else pid)
     doc = {"pid": pid, "name": name, "espn": espn, "pos": pos if isinstance(pos, str) else None, "kind": kind,
            "keys": [k for k, _ in keys], "ret_keys": [k for k, _ in RET], "cur": cur, "team": team,
+           **({"adv_keys": [k for k, _ in ADV_DEF]} if kind == "def" else {}),
            "seasons": [{"s": s, "g": seasons.get(s, []), **({"pg": pg[s]} if s in pg else {}),
                         "m": missed_weeks(s, seasons.get(s, []), ros_w.get(pid, {}), sched_w, n_weeks.get(s, 0), gid_of)}
                        for s in sorted(set(seasons) | set(pg), reverse=True)], "ros": rs, "bio": bios.get(pid, {})}

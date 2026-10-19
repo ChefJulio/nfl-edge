@@ -16,6 +16,9 @@
   // rec_yd, rec_td, fumble_lost, te_bonus). Bonuses (100-yard games, first downs, 2-pt tries) aren't projected.
   const SLEEPER_SCORE = { pass_yd: 'pass_yd', pass_td: 'pass_td', pass_int: 'interception', rush_yd: 'rush_yd', rush_td: 'rush_td',
                           rec: 'reception', rec_yd: 'rec_yd', rec_td: 'rec_td', fum_lost: 'fumble_lost', bonus_rec_te: 'te_bonus' };
+  // IDP (owner 2026-10-18): Sleeper's idp_* keys are ours as-is; a league without them keeps the site's IDP weights
+  const SLEEPER_IDP = ['idp_tkl_solo', 'idp_tkl_ast', 'idp_tkl_loss', 'idp_sack', 'idp_qb_hit', 'idp_int', 'idp_ff', 'idp_fum_rec',
+                       'idp_pass_def', 'idp_def_td', 'idp_safe', 'idp_blk_kick'];
   const ESPN_STAT = { 3: 'pass_yd', 4: 'pass_td', 20: 'interception', 24: 'rush_yd', 25: 'rush_td', 53: 'reception', 42: 'rec_yd',
                       43: 'rec_td', 72: 'fumble_lost' };
   const ESPN_SLOT = { 0: 'QB', 2: 'RB', 4: 'WR', 6: 'TE', 23: 'FLEX', 7: 'SUPER_FLEX', 16: 'DEF', 17: 'K' };
@@ -81,7 +84,7 @@
                       26: 'SEA', 27: 'TB', 28: 'WAS', 29: 'CAR', 30: 'JAX', 33: 'BAL', 34: 'HOU' };
   const dstTeam = x => { const n = +x; if (n <= -16001 && n >= -16034) return ESPN_TEAM[-16000 - n] || null;
     if (/^[A-Z]{2,3}$/.test(x)) return ({ LAR: 'LA', WSH: 'WAS', JAC: 'JAX' })[x] || x; return null; };
-  const SLEEPER_USED = new Set([...Object.keys(SLEEPER_SCORE), 'fgm', 'fgmiss', 'fgm_yds', 'fgm_yds_over_30', 'xpm', 'xpmiss',
+  const SLEEPER_USED = new Set([...Object.keys(SLEEPER_SCORE), ...SLEEPER_IDP, 'fgm', 'fgmiss', 'fgm_yds', 'fgm_yds_over_30', 'xpm', 'xpmiss',
     'fgm_0_19', 'fgm_20_29', 'fgm_30_39', 'fgm_40_49', 'fgm_50p', 'fgm_50_59', 'fgm_60p', 'fgmiss_0_19', 'fgmiss_20_29', 'fgmiss_30_39',
     'fgmiss_40_49', 'fgmiss_50p', 'sack', 'int', 'fum_rec', 'ff', 'def_td', 'def_st_td', 'st_td', 'safe', 'blk_kick', 'def_pass_def', 'tkl_loss',
     'def_forced_punts', 'def_2pt', 'pts_allow', 'yds_allow', 'pts_allow_0', 'pts_allow_1_6', 'pts_allow_7_13', 'pts_allow_14_20',
@@ -114,6 +117,7 @@
       const uName = Object.fromEntries((users || []).map(u => [u.user_id, (u.metadata && u.metadata.team_name) || u.display_name]));
       const scoring = {};
       Object.entries(SLEEPER_SCORE).forEach(([k, ours]) => { scoring[ours] = +((lg.scoring_settings || {})[k] || 0); });
+      if (SLEEPER_IDP.some(k => k in (lg.scoring_settings || {}))) SLEEPER_IDP.forEach(k => { scoring[k] = +((lg.scoring_settings || {})[k] || 0); });
       const byRoster = Object.fromEntries((mu || []).map(m => [m.roster_id, m]));
       const kw = sleeperK(lg.scoring_settings || {}), dw = sleeperD(lg.scoring_settings || {});
       const unmodeled = Object.entries(lg.scoring_settings || {}).filter(([k, v]) => +v && !SLEEPER_USED.has(k)).map(([k]) => NICE[k] || k.replace(/_/g, ' '));

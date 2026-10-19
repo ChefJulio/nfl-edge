@@ -223,17 +223,20 @@ def main():
       cache.meta[f"{meta_key}_post_{s}"] = po_done
       cache.save_meta()  # a long first run (every season's pbp) can stop midway: keep what's done
     ts, pl = pd.read_parquet(tf), pd.read_parquet(pf_)
+    pl = with_def(pl, def_extras(cache, nfl, s, current, pfr2gsis))
+    pl.to_parquet(cache.path("seasonstats_players_def", s), index=False)  # with the extras: the careers read these
     write_team(out / f"teams_{s}.json", ts, s, teams)
     write_players(out / f"players_{s}.json", pl, s, current, bios, espn_of)
     if po_done and tfp.exists() and pfp.exists():
       write_team(out / f"teams_{s}_post.json", pd.read_parquet(tfp), s, teams)
-      write_players(out / f"players_{s}_post.json", pd.read_parquet(pfp), s, current, bios, espn_of)
+      write_players(out / f"players_{s}_post.json", with_def(pd.read_parquet(pfp), def_extras(cache, nfl, s, current, pfr2gsis, "POST")),
+                    s, current, bios, espn_of)
       post_seasons.append(s)
   cache.save_meta()
   # All years (owner 2026-10-18: "we need an all positions and all years filter"; a name search finds a player
   # whatever the filters): one row per player, regular-season careers since FIRST, from the per-season caches
-  frames = [pd.read_parquet(cache.path("seasonstats_players", s)).assign(season=s) for s in range(FIRST, current + 1)
-            if cache.path("seasonstats_players", s).exists()]
+  frames = [pd.read_parquet(cache.path("seasonstats_players_def", s)).assign(season=s) for s in range(FIRST, current + 1)
+            if cache.path("seasonstats_players_def", s).exists()]
   if frames:
     car = career_rows(frames)
     write_players(out / "players_career.json", car, current, current, bios, espn_of)
@@ -241,6 +244,39 @@ def main():
   (out / "index.json").write_text(json.dumps({"v": V, "seasons": seasons, "current": current, "keys": SCORE_KEYS,
                                                "post": post_seasons, "career": bool(frames)}), encoding="utf-8")
   print(f"[stats] {len(seasons)} seasons ({done} recomputed) -> {out}", flush=True)
+
+
+# Defenders (owner 2026-10-18: "individual defense players ... complete stats"): per player-season extras merged into
+# each season's rows when written (no play-by-play recompute): safeties, opponent fumble recoveries and blocked kicks
+# from the weekly stats; pressures, hurries, blitzes, coverage allowed and missed tackles from PFR (2018 on).
+DEF_BOX = {"def_safeties": "def_safeties", "def_fum_rec": "fumble_recovery_opp"}
+DEF_PFR = {"prs": "def_pressures", "hur": "def_times_hurried", "blz": "def_times_blitzed", "cov_tgt": "def_targets",
+           "cov_cmp": "def_completions_allowed", "cov_yds": "def_yards_allowed", "cov_td": "def_receiving_td_allowed",
+           "cov_int": "def_ints", "mt": "def_missed_tackles", "tk_comb": "def_tackles_combined"}
+
+
+def def_extras(cache, nfl, s: int, current: int, p2g: pd.Series, st: str = "REG") -> pd.DataFrame:
+  """pid -> the defense extras for season s (empty frame when nothing is published)."""
+  import player_logs as PL
+  out = []
+  x = cache.get("stats_full", s, lambda: nfl.load_player_stats([s]).select(PL.FULL_COLS).to_pandas(),
+                stale=(s == current and cache.age_hours("stats_full", s) > 6) or cache.lacks("stats_full", s, PL.FULL_COLS))
+  if x is not None and len(x):
+    x = x[is_type(x.season_type, st)]
+    for c in list(DEF_BOX.values()) + PL.BLOCKS:
+      x[c] = pd.to_numeric(x[c], errors="coerce").fillna(0)
+    b = x.groupby("player_id")[list(DEF_BOX.values()) + PL.BLOCKS].sum()
+    b = b.rename(columns={v: k for k, v in DEF_BOX.items()}).assign(def_blocks=b[PL.BLOCKS].sum(axis=1)).drop(columns=PL.BLOCKS)
+    out.append(b)
+  if s >= 2018:
+    a = cache.get("pfrdef", s, lambda: nfl.load_pfr_advstats([s], stat_type="def", summary_level="week"),
+                  stale=s == current and cache.age_hours("pfrdef", s) > 6)
+    if a is not None and len(a):
+      a = a[is_type(a.game_type, st)].assign(g=lambda d: d.pfr_player_id.map(p2g)).dropna(subset=["g"])
+      for c in DEF_PFR.values():
+        a[c] = pd.to_numeric(a[c], errors="coerce").fillna(0)
+      out.append(a.groupby("g")[list(DEF_PFR.values())].sum().rename(columns={v: k for k, v in DEF_PFR.items()}))
+  return pd.concat(out, axis=1) if out else pd.DataFrame()
 
 
 RATES = ["snap_pct", "snap_pct_d", "snap_pct_st", "tgt_share", "car_share"]  # per-season shares: games-weighted over a career
@@ -267,6 +303,17 @@ def career_rows(frames: list) -> pd.DataFrame:
   tg = c.dropna(subset=["team"]).groupby(["pid", "team"]).agg(n=("games", "sum"), s0=("season", "min")).reset_index()
   out["team"] = tg.sort_values(["pid", "n", "s0"], ascending=[True, False, True]).drop_duplicates("pid").set_index("pid").team
   return out.reset_index()
+
+
+def with_def(pl: pd.DataFrame, ex: pd.DataFrame) -> pd.DataFrame:
+  """The season rows plus the defense extras (0 where a player has none; the PFR columns stay empty before 2018)."""
+  if not len(ex):
+    return pl
+  m = pl.merge(ex, left_on="pid", right_index=True, how="left")
+  for c in ex.columns:
+    if c in DEF_BOX or c == "def_blocks":
+      m[c] = m[c].fillna(0)
+  return m
 
 
 def _clean(v):

@@ -754,6 +754,178 @@ def build_historic(out: Path, cur_first: int, sched: pd.DataFrame, scoring, cach
   return done
 
 
+# ---- Defenders (owner 2026-10-18: "individual defense players in our system too ... 50-99 grades") ----------------
+# The same OVR as the skill grades: fantasy points per game, here IDP points under Sleeper's default IDP123
+# (nfledge/report.py), shrunk toward the qualified players' average at the position (method of moments on qualified
+# player-games), current form over this season and the two before (SEASON_W), as a percentile among the qualified.
+# Groups: DL (DE DT NT DL), LB (LB ILB OLB MLB), DB (CB S SS FS SAF DB) by his listed position that season.
+# Who qualifies: 2012 on, an average defensive snap share of DEF_QUAL or more over his team's games (the snap counts);
+# before 2012 (no snap counts) games with a real role (DEF_ROLE: 2+ tackles, or a sack, interception or pass
+# defended) in at least half his team's games. Spot starters (SUB_GAMES+ games at SUB_SNAP of the snaps, or role
+# games before 2012) are graded on those games against the qualified pool, flagged like the skill players.
+# Stat bars: box-score rates every season; pressures, coverage allowed and missed tackles from PFR (2018 on).
+DEF_GROUP = {**{p: "DL" for p in "DE DT NT DL".split()}, **{p: "LB" for p in "LB ILB OLB MLB".split()},
+             **{p: "DB" for p in "CB S SS FS SAF DB".split()}}
+DEF_POS = ["DL", "LB", "DB"]
+DEF_QUAL, DEF_SNAP_FIRST, DEF_PFR_FIRST = 0.40, 2012, 2018
+DEF_BARS = {  # key, numerator, denominator, label, lower is better, needs PFR
+  "DL": [("sk_pg", "sk", "games", "Sacks / game", 0, 0), ("prs_pg", "prs", "games", "Pressures / game", 0, 1),
+         ("tfl_pg", "tfl", "games", "Tackles for loss / game", 0, 0), ("tk_pg", "tk_all", "games", "Tackles / game", 0, 0),
+         ("mt_pct", "mt", "tk_try", "Missed tackle %", 1, 1)],
+  "LB": [("tk_pg", "tk_all", "games", "Tackles / game", 0, 0), ("tfl_pg", "tfl", "games", "Tackles for loss / game", 0, 0),
+         ("prs_pg", "prs", "games", "Pressures / game", 0, 1), ("ypt", "cyd", "ctgt", "Yards / target allowed", 1, 1),
+         ("mt_pct", "mt", "tk_try", "Missed tackle %", 1, 1)],
+  "DB": [("ypt", "cyd", "ctgt", "Yards / target allowed", 1, 1), ("rtg", "rtg_n", "ctgt", "Passer rating allowed", 1, 1),
+         ("bp_pg", "bp", "games", "INT + passes defended / game", 0, 0), ("tk_pg", "tk_all", "games", "Tackles / game", 0, 0),
+         ("mt_pct", "mt", "tk_try", "Missed tackle %", 1, 1)],
+}
+
+
+def _rating(c, a, y, t, i):
+  """NFL passer rating (each part capped 0-2.375); NaN without attempts."""
+  a = np.where(a > 0, a, np.nan)
+  cl = lambda v: np.clip(v, 0, 2.375)  # noqa: E731
+  return (cl((c / a - 0.3) * 5) + cl((y / a - 3) * 0.25) + cl(t / a * 20) + cl(2.375 - i / a * 25)) / 6 * 100
+
+
+def defense_games(cache, cur: int) -> pd.DataFrame:
+  """One row per defender-game (regular season, 1999 on): IDP points, box stats, his snap share (2012 on) and PFR's
+  advanced defense (2018 on)."""
+  import nflreadpy as nfl
+  import player_logs as PL
+  from nfledge.report import IDP123
+  players = cache.get("players", "all", lambda: nfl.load_players(), stale=False)
+  p2g = players.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
+  out = []
+  for s in range(HIST_FIRST, cur + 1):
+    x = cache.get("stats_full", s, lambda: nfl.load_player_stats([s]).select(PL.FULL_COLS).to_pandas(),
+                  stale=(s == cur and cache.age_hours("stats_full", s) > 6) or cache.lacks("stats_full", s, PL.FULL_COLS))
+    if x is None or not len(x):
+      continue
+    x = x[(x.season_type == "REG") & x.position.isin(DEF_GROUP)].copy()
+    num = [c for _, c in PL.KIND_STATS["def"] if c != "def_blocks"] + PL.BLOCKS
+    for c in num:
+      x[c] = pd.to_numeric(x[c], errors="coerce").fillna(0)
+    g = pd.DataFrame({"gsis_id": x.player_id, "season": s, "week": x.week.astype(int), "pos": x.position.map(DEF_GROUP),
+                      "team": x.team.map(lambda t: D.RELOCATED.get(t, t)),
+                      "tk": x.def_tackles_solo, "ast": x.def_tackle_assists, "tfl": x.def_tackles_for_loss, "sk": x.def_sacks,
+                      "qbh": x.def_qb_hits, "int": x.def_interceptions, "pd": x.def_pass_defended, "ff": x.def_fumbles_forced,
+                      "fr": x.fumble_recovery_opp, "td": x.def_tds, "sf": x.def_safeties, "blk": x[PL.BLOCKS].sum(axis=1)})
+    w = IDP123
+    g["fp"] = (g.tk * w["idp_tkl_solo"] + g.ast * w["idp_tkl_ast"] + g.tfl * w["idp_tkl_loss"] + g.sk * w["idp_sack"]
+               + g.qbh * w["idp_qb_hit"] + g.int * w["idp_int"] + g.pd * w["idp_pass_def"] + g.ff * w["idp_ff"]
+               + g.fr * w["idp_fum_rec"] + g.td * w["idp_def_td"] + g.sf * w["idp_safe"] + g.blk * w["idp_blk_kick"])
+    g["snap"] = np.nan
+    if s >= DEF_SNAP_FIRST:
+      sn = cache.get("snaps", s, lambda: nfl.load_snap_counts([s]), stale=False)
+      if sn is not None and len(sn):
+        sn = sn[sn.game_type == "REG"] if "game_type" in sn else sn
+        sn = sn.assign(g=sn.pfr_player_id.map(p2g)).dropna(subset=["g"])
+        sp = dict(zip(zip(sn.g, sn.week.astype(int)), pd.to_numeric(sn.defense_pct, errors="coerce")))
+        g["snap"] = [sp.get((a, b), np.nan) for a, b in zip(g.gsis_id, g.week)]
+    for c in ("prs", "ctgt", "ccmp", "cyd", "ctd", "cint", "mt", "tkc"):
+      g[c] = np.nan
+    if s >= DEF_PFR_FIRST:
+      a = cache.get("pfrdef", s, lambda: nfl.load_pfr_advstats([s], stat_type="def", summary_level="week"),
+                    stale=s == cur and cache.age_hours("pfrdef", s) > 6)
+      if a is not None and len(a):
+        a = a[a.game_type == "REG"].assign(g=lambda d: d.pfr_player_id.map(p2g)).dropna(subset=["g"])
+        cols = {"prs": "def_pressures", "ctgt": "def_targets", "ccmp": "def_completions_allowed", "cyd": "def_yards_allowed",
+                "ctd": "def_receiving_td_allowed", "cint": "def_ints", "mt": "def_missed_tackles", "tkc": "def_tackles_combined"}
+        idx = {k: dict(zip(zip(a.g, a.week.astype(int)), pd.to_numeric(a[v], errors="coerce").fillna(0))) for k, v in cols.items()}
+        for k in cols:
+          g[k] = [idx[k].get((p, wk), 0.0) for p, wk in zip(g.gsis_id, g.week)]
+    out.append(g)
+  return pd.concat(out, ignore_index=True)
+
+
+def build_defense(out: Path, cur: int, sched: pd.DataFrame, cache) -> None:
+  """Adds DL / LB / DB records (the skill records' layout) to data/grades/<season>.json, 1999..cur."""
+  g = defense_games(cache, cur)
+  g["games"] = 1.0
+  g["tk_all"] = g.tk + g.ast
+  g["bp"] = g.int + g.pd
+  g["tk_try"] = g.tkc + g.mt
+  g["rtg_n"] = 0.0  # filled per season below (a rating isn't a sum)
+  g["role"] = ((g.tk_all >= 2) | (g.sk > 0) | (g.int > 0) | (g.pd > 0)) if True else None
+  mode1 = lambda x: (lambda m: m.iloc[0] if len(m) else None)(x.dropna().mode())  # noqa: E731
+  num = ["fp", "games", "tk", "ast", "tk_all", "tfl", "sk", "qbh", "int", "pd", "bp", "ff", "fr", "td", "prs", "ctgt", "ccmp",
+         "cyd", "ctd", "cint", "mt", "tkc", "tk_try"]
+  agg = {**{c: "sum" for c in num}, "pos": mode1, "team": mode1}
+  t = g.groupby(["gsis_id", "season"]).agg(agg).reset_index()
+  t["snap_sum"] = g.groupby(["gsis_id", "season"]).snap.sum(min_count=1).to_numpy()
+  t["role_g"] = g.groupby(["gsis_id", "season"]).role.sum().to_numpy()
+  t["rtg_n"] = _rating(t.ccmp, t.ctgt, t.cyd, t.ctd, t.cint) * t.ctgt  # rating x targets: rate = rtg_n / ctgt
+  tgames = team_games(sched)
+  t["tgm"] = [tgames.get((tm, s), np.nan) for tm, s in zip(t.team, t.season)]
+  snap_era = t.season >= DEF_SNAP_FIRST
+  t["qual"] = np.where(snap_era, t.snap_sum.fillna(0) >= DEF_QUAL * t.tgm, t.role_g >= 0.5 * t.tgm)
+  # spot starters' games: half the snaps (2012 on) or a role game (before)
+  sub_g = g[np.where(g.season >= DEF_SNAP_FIRST, g.snap >= SUB_SNAP, g.role)]
+  tsub = sub_g.groupby(["gsis_id", "season"]).agg(agg).reset_index()
+  tsub["rtg_n"] = _rating(tsub.ccmp, tsub.ctgt, tsub.cyd, tsub.ctd, tsub.cint) * tsub.ctgt
+  qual = set(zip(t.gsis_id[t.qual], t.season[t.qual]))
+  qg = g[[(a, b) in qual for a, b in zip(g.gsis_id, g.season)]]
+  fpri = {pos: mom_prior(qg[qg.pos == pos].assign(games=1.0), "fp", "games") or (float(qg[qg.pos == pos].fp.mean()), 3.0)
+          for pos in DEF_POS}
+
+  def form(tab, s, ids):
+    wf, wg = pd.Series(0.0, index=ids), pd.Series(0.0, index=ids)
+    for lag, w in enumerate(SEASON_W):
+      prev = tab[tab.season == s - lag].drop_duplicates("gsis_id").set_index("gsis_id").reindex(ids)
+      wf, wg = wf + w * prev.fp.fillna(0), wg + w * prev.games.fillna(0)
+    return wf, wg
+
+  def rate(o, nu, de):
+    return (o[nu] / o[de].replace(0, np.nan)).replace([np.inf, -np.inf], np.nan)
+
+  n_all = 0
+  for s in sorted(t.season.unique()):
+    f = out / f"{int(s)}.json"
+    doc = json.loads(f.read_text(encoding="utf-8")) if f.exists() else {"season": int(s), "stats": {}, "qualified": {}, "players": {}}
+    one = t[t.season == s].drop_duplicates("gsis_id").set_index("gsis_id")
+    for pos in DEF_POS:
+      ids = [x for x in one.index[(one.pos == pos) & one.qual]]
+      if len(ids) < 5:
+        continue
+      o = one.loc[ids]
+      m, k = fpri[pos]
+      wf, wg = form(t, s, ids)
+      cur_v, sea_v = (wf + k * m) / (wg + k), (o.fp + k * m) / (o.games + k)
+      bars = [b for b in DEF_BARS[pos] if s >= DEF_PFR_FIRST or not b[5]]
+      bp = {}
+      for key, nu, de, _, low, _p in bars:
+        v = rate(o, nu, de)
+        v = v.fillna(v.median()).fillna(0.0)
+        bp[key] = (99 - pct(v)) if low else pct(v)
+      gp, sg = pct(cur_v), pct(sea_v)
+      doc["stats"][pos] = [b[3] for b in bars]
+      doc["qualified"][pos] = len(ids)
+      for x in ids:
+        doc["players"][x] = [int(gp[x]), pos, int(o.games[x]), int(round(wg[x])), round(float(cur_v[x]), 1),
+                             [int(bp[b[0]][x]) for b in bars], int(sg[x]), round(float(o.fp[x] / o.games[x]), 1), int(o.games[x])]
+      # spot starters: graded on their role games against the qualified pool ([9] = 1)
+      sub = tsub[(tsub.season == s) & (tsub.pos == pos) & (tsub.games >= SUB_GAMES)].drop_duplicates("gsis_id").set_index("gsis_id")
+      uq = [x for x in sub.index if x not in doc["players"]]
+      if uq:
+        u = sub.loc[uq]
+        uwf, uwg = form(tsub, s, uq)
+        ucur, usea = (uwf + k * m) / (uwg + k), (u.fp + k * m) / (u.games + k)
+        ug, usg = pct_vs(cur_v, ucur), pct_vs(sea_v, usea)
+        ub = {}
+        for key, nu, de, _, low, _p in bars:
+          ref = rate(o, nu, de)
+          v = rate(u, nu, de).fillna(ref.median()).fillna(0.0)
+          ref = ref.fillna(ref.median()).fillna(0.0)
+          ub[key] = (99 - pct_vs(ref, v)) if low else pct_vs(ref, v)
+        for x in uq:
+          doc["players"][x] = [int(ug[x]), pos, int(u.games[x]), int(round(uwg[x])), round(float(ucur[x]), 1),
+                               [int(ub[b[0]][x]) for b in bars], int(usg[x]), round(float(u.fp[x] / u.games[x]), 1), int(u.games[x]), 1]
+      n_all += len(ids) + len(uq)
+    f.write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
+  print(f"[grades] defenders: {n_all} graded player-seasons, {int(t.season.min())}-{int(t.season.max())}", flush=True)
+
+
 def main():
   opt = dict(a[2:].split("=", 1) if "=" in a else (a[2:], "1") for a in sys.argv[1:] if a.startswith("--"))
   cfg = load_config()
@@ -783,6 +955,7 @@ def main():
   # seasons before FIRST: box-score grades (same OVR), built once and cached; listed ahead of the rest in index.json
   sched = D.Cache(ROOT / cfg["data"]["cache_dir"]).get("schedules", "since1999", None, stale=False)
   old = build_historic(out, FIRST, sched if sched is not None else data.schedules, load_scoring(), ROOT / cfg["data"]["cache_dir"])
+  build_defense(out, cur, sched if sched is not None else data.schedules, D.Cache(ROOT / cfg["data"]["cache_dir"]))
   ix = json.loads((out / "index.json").read_text(encoding="utf-8"))
   ix["seasons"] = sorted(set(old) | set(ix["seasons"]))
   ix["box_before"] = FIRST

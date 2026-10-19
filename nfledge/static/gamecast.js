@@ -86,14 +86,18 @@
     Object.entries((DATA && DATA.espn_team) || { LA: 'LAR', WAS: 'WSH' }).forEach(([k, v]) => { m[v] = k; });
     return m[a] || a;
   };
+  // IDP weights (defenders): the scoring's own, else Sleeper's default IDP123 (nfledge/report.py IDP123)
+  const IDP123 = { idp_tkl_solo: 2, idp_tkl_ast: 1, idp_tkl_loss: 2, idp_sack: 6, idp_qb_hit: 1, idp_int: 6, idp_ff: 3, idp_fum_rec: 3,
+                   idp_pass_def: 3, idp_def_td: 6, idp_safe: 2, idp_blk_kick: 3 };
+  const withIdp = w => w && w.idp_tkl_solo != null ? w : Object.assign({}, (DATA && DATA.score && DATA.score.idp) || IDP123, w || {});
   const weights = () => {
-    if (window.nfleWeights) return window.nfleWeights();
-    try { const s = JSON.parse(localStorage.getItem('nfledge-scoring') || 'null'); if (s && s.w) return s.w; } catch (e) { /* default */ }
-    return (DATA && DATA.score && DATA.score.presets && DATA.score.presets['Half PPR']) || HALF;
+    if (window.nfleWeights) return withIdp(window.nfleWeights());
+    try { const s = JSON.parse(localStorage.getItem('nfledge-scoring') || 'null'); if (s && s.w) return withIdp(s.w); } catch (e) { /* default */ }
+    return withIdp((DATA && DATA.score && DATA.score.presets && DATA.score.presets['Half PPR']) || HALF);
   };
   // fantasy scoring for the gamecast's fantasy numbers: the connected league's (league.js saves it with the roster),
   // else the site's picked scoring (owner 2026-10-18)
-  const leagueW = () => { try { const m = JSON.parse(localStorage.getItem('nfledge-mine') || 'null'); if (m && m.w && Object.keys(m.w).length) return m.w; } catch (e) { /* none */ } return weights(); };
+  const leagueW = () => { try { const m = JSON.parse(localStorage.getItem('nfledge-mine') || 'null'); if (m && m.w && Object.keys(m.w).length) return withIdp(m.w); } catch (e) { /* none */ } return weights(); };
   const leagueName = () => { try { const m = JSON.parse(localStorage.getItem('nfledge-mine') || 'null'); return m && m.w ? m.league : ''; } catch (e) { return ''; } };
   const pts = (c, w, pos) => c.reduce((t, v, i) => t + (v || 0) * (w[KEYS()[i]] || 0), 0) + (pos === 'TE' ? (c[5] || 0) * (w.te_bonus || 0) : 0);
   // A projection and its range under the viewer's scoring: exact re-score of the stat line, ratio for the rest.
@@ -1231,10 +1235,13 @@
   // Grade tile (owner 2026-10-16: OVR moved here from the header, then the Grade tab folded into its sheet): his OVR;
   // the sheet holds the whole grade (gradeTab) from his history shard (GRH, loaded with the page)
   const gradeTile = (pid, L) => {
-    const r = GR.cur && GR.cur.players[pid];
     if (GR.cur === undefined || GR.cur === null) return '';
+    let r = GR.cur.players[pid], yr = GR.cur.season, latest = false;
+    // not graded this season (hurt, or too few games yet; owner 2026-10-18, Myles Garrett): his latest graded season
+    if (!r && GRH[pid]) { const d = GRH[pid].filter(x => x && x.players[pid] && x.players[pid][0] != null).sort((a, b) => b.season - a.season)[0];
+      if (d) { r = d.players[pid]; yr = d.season; latest = true; } }
     const detail = GRH[pid] ? gradeTab(pid, GRH[pid], L) : '<div class="pc-box"><p class="pc-sub">Loading grade&hellip;</p></div>';
-    return tapTile('Grade', r ? `<div class="pc-big ${r[9] ? '' : grTone(r[0])}">${ovr(r[0])}${uqMark(r)} <small>OVR</small></div><div class="pc-tapsub">${GR.cur.season} · ${esc(r[1])}</div>`
+    return tapTile('Grade', r ? `<div class="pc-big ${r[9] ? '' : grTone(r[0])}">${ovr(r[0])}${uqMark(r)} <small>OVR</small></div><div class="pc-tapsub">${yr} · ${esc(r[1])}${latest ? ' (latest)' : ''}</div>`
       : '<div class="pc-big">– <small>OVR</small></div><div class="pc-tapsub">Not graded</div>', 'NFL Edge grade', detail);
   };
   // Throws (owner 2026-10-17, from a depth-by-side air-yards graphic): a QB's passes on a field, depth up from the line
@@ -1470,12 +1477,64 @@
   // its stat keys (tools/player_logs.py other_logs); no projections, points or ranks.
   const KIND_COLS = {
     def: { tk: ['Tk', 'Solo tackles'], ast: ['Ast', 'Assisted tackles'], tfl: ['TFL', 'Tackles for loss'], sk: ['Sk', 'Sacks'], qbh: ['QBH', 'QB hits'],
-           int: ['Int', 'Interceptions'], pd: ['PD', 'Passes defended'], ff: ['FF', 'Forced fumbles'], fr: ['FR', 'Fumble recoveries'], td: ['TD', 'Defensive TDs'] },
+           int: ['Int', 'Interceptions'], pd: ['PD', 'Passes defended'], ff: ['FF', 'Forced fumbles'], fr: ['FR', 'Fumble recoveries'], td: ['TD', 'Defensive TDs'],
+           sf: ['Sfty', 'Safeties'], blk: ['Blk', 'Blocked kicks'] },
     k: { fgm: ['FGM', 'Field goals made'], fga: ['FGA', 'Field goals attempted'], lng: ['Lng', 'Longest field goal'], xpm: ['XPM', 'Extra points made'], xpa: ['XPA', 'Extra points attempted'] },
     p: { pu: ['Punts', 'Punts'], yd: ['Yds', 'Punt yards'], net: ['Net', 'Net punt yards'], i20: ['In20', 'Inside the 20'], lng: ['Lng', 'Longest punt'] },
     off: { car: ['Car', 'Carries'], ryd: ['Rush yd', 'Rushing yards'], rec: ['Rec', 'Receptions'], yd: ['Rec yd', 'Receiving yards'], td: ['TD', 'Receiving TDs'] },
   };
   const RET_COLS = { kr: ['KR', 'Kick returns'], kry: ['KR yd', 'Kick return yards'], pr: ['PR', 'Punt returns'], pry: ['PR yd', 'Punt return yards'] };
+  // ---- Individual defenders (owner 2026-10-18: "individual defense players in our system too with complete stats and a
+  // presentable player card"): IDP points under the scoring's idp_* weights (Sleeper's IDP123 by default), PFR's
+  // advanced defense per game ("a", adv_keys; 2018 on), grades as DL / LB / DB (tools/grade_build.py build_defense)
+  const IDP_OF = { tk: 'idp_tkl_solo', ast: 'idp_tkl_ast', tfl: 'idp_tkl_loss', sk: 'idp_sack', qbh: 'idp_qb_hit', int: 'idp_int', pd: 'idp_pass_def',
+                   ff: 'idp_ff', fr: 'idp_fum_rec', td: 'idp_def_td', sf: 'idp_safe', blk: 'idp_blk_kick' };
+  const ADV_COLS = { prs: ['Prs', 'Pressures: sacks, QB hits and hurries (PFR, 2018 on)'], tgt: ['Tgt', 'Passes thrown into his coverage'],
+                     yda: ['Yds', 'Yards allowed in coverage'], mt: ['MT', 'Missed tackles'] };
+  const DEF_GROUP = { DE: 'DL', DT: 'DL', NT: 'DL', DL: 'DL', LB: 'LB', ILB: 'LB', OLB: 'LB', MLB: 'LB', CB: 'DB', S: 'DB', SS: 'DB', FS: 'DB', SAF: 'DB', DB: 'DB' };
+  const idpPts = (L, g, w) => (L.keys || []).reduce((t, k, i) => t + ((g.d || [])[i] || 0) * ((w || weights())[IDP_OF[k]] || 0), 0);
+  const advTotals = (L, games) => { const ak = L.adv_keys || [], t = { n: 0 };
+    games.forEach(g => { if (g.a) { t.n++; ak.forEach((k, i) => { t[k] = (t[k] || 0) + (g.a[i] || 0); }); } }); return t; };
+  const ratingAllowed = (c, a, y, td, i) => { if (!a) return null; const cl = v => Math.max(0, Math.min(2.375, v));
+    return (cl((c / a - 0.3) * 5) + cl((y / a - 3) * 0.25) + cl(td / a * 20) + cl(2.375 - (i || 0) / a * 25)) / 6 * 100; };
+  // the advanced block of a stat grid (seasons with PFR rows only)
+  const advGrid = (L, games) => {
+    const a = advTotals(L, games), t = kindTotals(L, games); if (!a.n) return '';
+    const tkl = (t.tk || 0) + (t.ast || 0);
+    return sg([sgRow('Pass rush', [cell(f0(a.prs || 0), 'Pressures', 'Sacks, QB hits and hurries'), cell(f0(a.hur || 0), 'Hurries'), cell(f0(a.blz || 0), 'Blitzes'),
+                  cell(f1((a.prs || 0) / a.n), 'Prs / game')]),
+               sgRow('Coverage', [cell(f0(a.tgt || 0), 'Targets'), cell(a.tgt ? `${Math.round(100 * a.cmp / a.tgt)}%` : '–', 'Cmp allowed'),
+                  cell(a.tgt ? f1(a.yda / a.tgt) : '–', 'Yds / tgt'), cell(f0(a.tda || 0), 'TD allowed'),
+                  cell(a.tgt ? f1(ratingAllowed(a.cmp, a.tgt, a.yda, a.tda, t.int)) : '–', 'Rating', 'Passer rating on throws into his coverage')]),
+               sgRow('Tackling', [cell(f0(tkl), 'Tackles'), cell(f0(a.mt || 0), 'Missed'), cell(tkl + (a.mt || 0) ? `${Math.round(100 * (a.mt || 0) / (tkl + (a.mt || 0)))}%` : '–', 'Missed %')])],
+              5, { labels: true, cls: 'sg-season' });
+  };
+  // Summary tiles: Form (IDP points), his role's tile, Health (current players), Grade
+  const defTiles = (L, espn) => {
+    const S = L.seasons.find(x => x.g.length);
+    if (!S) return '';
+    const pos = DEF_GROUP[L.pos] || 'DB', w = weights(), t = kindTotals(L, S.g), a = advTotals(L, S.g);
+    const fpg = S.g.reduce((x, g) => x + idpPts(L, g, w), 0) / S.g.length;
+    const gs = L.seasons.flatMap(x => x.g.map(g => ({ s: x.s, g }))).sort((p1, p2) => p2.s - p1.s || p2.g.w - p1.g.w).slice(0, 5).reverse();
+    const slots = gs.map(({ s: y, g }) => ({ w: g.w, v: idpPts(L, g, w), pj: null, title: `${y} week ${g.w}: ${f1(idpPts(L, g, w))} IDP pts` }));
+    const lab = S.s === L.cur ? `${S.s} season` : `${S.s} season (his latest)`;
+    const seasonBox = `<div class="pc-box"><div class="pc-k">${lab}</div>${kindGrid(L, t)}${advGrid(L, S.g)}</div>
+      <div class="pc-box pc-mini"><div class="pc-k">${S.s} games</div><div class="pc-log">${kindLog(L, [S], { compact: true })}</div></div>`;
+    const form = tapTile('Form', `<div class="pc-big">${f1(fpg)} <small>IDP pts/G</small></div><div class="pc-tapsub">${f0(S.g.length)} game${S.g.length === 1 ? '' : 's'} · last ${slots.length}</div>
+      <div class="pc-tapbars">${miniBars(slots, { slotW: 22, H: 40, cls: 'mb-pts mb-sm' })}</div>`, `${S.s} season`, seasonBox);
+    const tkl = (t.tk || 0) + (t.ast || 0);
+    // a linebacker who rushes the passer (edge OLBs; owner: Micah Parsons) gets the pass-rush tile, by his own stats:
+    // 2+ pressures a game (PFR, 2018 on), else 0.35+ sacks a game
+    const rusher = pos === 'DL' || (pos === 'LB' && (a.n ? (a.prs || 0) / a.n >= 2 : (t.sk || 0) / Math.max(1, t.g) >= 0.35));
+    const role = rusher
+      ? tapTile('Pass rush', `<div class="pc-big">${nfmt(t.sk || 0)} <small>sacks</small></div><div class="pc-tapsub">${a.n ? `${f0(a.prs || 0)} pressures · ` : ''}${f0(t.qbh || 0)} QB hits</div>`, 'Pass rush', `<div class="pc-box">${advGrid(L, S.g) || kindGrid(L, t)}</div>`)
+      : pos === 'LB'
+        ? tapTile('Tackling', `<div class="pc-big">${f0(tkl)} <small>tackles</small></div><div class="pc-tapsub">${nfmt(t.tfl || 0)} TFL${a.n && tkl ? ` · ${Math.round(100 * (a.mt || 0) / (tkl + (a.mt || 0)))}% missed` : ''}</div>`, 'Tackling', `<div class="pc-box">${advGrid(L, S.g) || kindGrid(L, t)}</div>`)
+        : a.n && a.tgt
+          ? tapTile('Coverage', `<div class="pc-big">${f1(ratingAllowed(a.cmp, a.tgt, a.yda, a.tda, t.int))} <small>rating allowed</small></div><div class="pc-tapsub">${f0(a.tgt)} targets · ${f1(a.yda / a.tgt)} yds/tgt</div>`, 'Coverage', `<div class="pc-box">${advGrid(L, S.g)}</div>`)
+          : tapTile('Ball skills', `<div class="pc-big">${f0((t.int || 0) + (t.pd || 0))} <small>INT + PD</small></div><div class="pc-tapsub">${f0(t.int || 0)} interceptions</div>`, 'Ball skills', `<div class="pc-box">${kindGrid(L, t)}</div>`);
+    return `<div class="pc-tiles">${form}${role}${L.team ? healthTile(L.pid, null, L, espn) : ''}${gradeTile(L.pid, L)}</div>`;
+  };
   const KIND_NAME = { def: 'Defense', k: 'Kicking', p: 'Punting', ol: 'Offensive line', ls: 'Long snapper', off: 'Offense' };
   const kindTotals = (L, games) => {
     const t = {}, keys = L.keys || [], rk = L.ret_keys || [];
@@ -1504,17 +1563,22 @@
     const cols = KIND_COLS[L.kind] || {}, keys = (L.keys || []).filter(k => cols[k]);
     const hasRet = seasons.some(S => S.g.some(g => g.r) || (S.pg || []).some(g => g.r));
     const rk = hasRet ? (L.ret_keys || []) : [];
-    const head = `<tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Snap</th>${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}${rk.map(k => `<th class="num" title="${esc(RET_COLS[k][1])}">${RET_COLS[k][0]}</th>`).join('')}</tr>`;
-    const n = 3 + keys.length + rk.length;
+    const idp = L.kind === 'def', w = idp ? weights() : null;
+    const ak = idp && seasons.some(S => S.g.some(g => g.a)) ? Object.keys(ADV_COLS) : [], akI = k => (L.adv_keys || []).indexOf(k);
+    const head = `<tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Snap</th>${idp ? '<th class="num" title="IDP fantasy points, your scoring">Pts</th>' : ''}${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}${ak.map(k => `<th class="num lg-adv" title="${esc(ADV_COLS[k][1])}">${ADV_COLS[k][0]}</th>`).join('')}${rk.map(k => `<th class="num" title="${esc(RET_COLS[k][1])}">${RET_COLS[k][0]}</th>`).join('')}</tr>`;
+    const n = 3 + (idp ? 1 : 0) + keys.length + ak.length + rk.length;
+    const ptsCell = g => idp ? `<td class="num"><b>${f1(idpPts(L, g, w))}</b></td>` : '';
+    const advCells = g => ak.map(k => `<td class="num lg-adv">${g.a ? nfmt(g.a[akI(k)]) : '–'}</td>`).join('');
     const body = seasons.map(S => {
       const t = kindTotals(L, S.g), team = S.g.length ? S.g[S.g.length - 1].t : '';
       const row = (g, label) => `<tr${tileAttrs(g)}><td>${esc(label)}</td><td class="lg-opp tm-opp"><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>
-        <td class="num">${g.sn != null ? g.sn : '–'}</td>${keys.map(k => `<td class="num">${nfmt((g.d || [])[(L.keys || []).indexOf(k)])}</td>`).join('')}${rk.map((k, i) => `<td class="num">${g.r ? nfmt(g.r[i]) : '–'}</td>`).join('')}</tr>`;
+        <td class="num">${g.sn != null ? g.sn : '–'}</td>${ptsCell(g)}${keys.map(k => `<td class="num">${nfmt((g.d || [])[(L.keys || []).indexOf(k)])}</td>`).join('')}${advCells(g)}${rk.map((k, i) => `<td class="num">${g.r ? nfmt(g.r[i]) : '–'}</td>`).join('')}</tr>`;
       // season totals under the column heads (owner 2026-10-16), as in the fantasy log: sums, snap share averaged
       const tot = gs => {
         if (gs.length < 2 || opts.compact) return '';
         const sum = (g2, i) => gs.reduce((a, g) => a + (+((g[g2] || [])[i]) || 0), 0), sn = gs.filter(g => g.sn != null);
-        return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num">${sn.length ? Math.round(sn.reduce((a, g) => a + g.sn, 0) / sn.length) : '–'}</td>${keys.map(k => `<td class="num">${nfmt(sum('d', (L.keys || []).indexOf(k)))}</td>`).join('')}${rk.map((k, i) => `<td class="num">${nfmt(sum('r', i))}</td>`).join('')}</tr>
+        const at = idp ? advTotals(L, gs) : null;
+        return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num">${sn.length ? Math.round(sn.reduce((a, g) => a + g.sn, 0) / sn.length) : '–'}</td>${idp ? `<td class="num"><b>${f1(gs.reduce((x, g) => x + idpPts(L, g, w), 0))}</b></td>` : ''}${keys.map(k => `<td class="num">${nfmt(sum('d', (L.keys || []).indexOf(k)))}</td>`).join('')}${ak.map(k => `<td class="num lg-adv">${at.n ? nfmt(at[k] || 0) : '–'}</td>`).join('')}${rk.map((k, i) => `<td class="num">${nfmt(sum('r', i))}</td>`).join('')}</tr>
           <tr class="lg-gap"><td colspan="${n}"></td></tr>`;
       };
       const miss = g => `<tr class="lg-miss"${tileAttrs(g)}><td>${g.w}</td>${g.o ? `<td class="lg-opp tm-opp"><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>` : '<td class="lg-opp">&ndash;</td>'}
@@ -1549,7 +1613,7 @@
   };
   const kindOverview = (L, espn) => {
     const last = L.seasons.find(S => S.g.length);
-    const season = last ? `<div class="pc-box"><div class="pc-k">${last.s === L.cur ? `${last.s} season so far` : `${last.s} season (his latest)`}</div>${kindGrid(L, kindTotals(L, last.g))}</div>` : '';
+    const season = L.kind === 'def' && last ? defTiles(L, espn) : last ? `<div class="pc-box"><div class="pc-k">${last.s === L.cur ? `${last.s} season so far` : `${last.s} season (his latest)`}</div>${kindGrid(L, kindTotals(L, last.g))}</div>` : '';
     const career = L.seasons.flatMap(S => S.g);
     const car = career.length ? `<div class="pc-box"><div class="pc-k">Career (regular season${career.some(g => g.sn != null) ? '; snaps from 2013' : ''})</div>${kindGrid(L, kindTotals(L, career))}</div>` : '';
     const recent = last ? `<div class="pc-box pc-mini"><div class="pc-k">${last.s === L.cur ? 'This season' : `${last.s} games`}</div><div class="pc-log">${kindLog(L, [last], { compact: true })}</div>
@@ -1689,9 +1753,12 @@
   const gradeTab = (pid, docs, L) => {
     const all = docs.filter(d => d && d.players[pid]).sort((a, b) => b.season - a.season);
     const rows = all.filter(d => d.players[pid][0] != null);  // graded seasons (the rest: played, not graded)
-    if (!rows.length) return '<div class="pc-box"><p class="pc-sub">No grade: grades cover quarterbacks, running backs, receivers and tight ends since 1999 who met the NFL\'s qualifying minimum in a season (per team game: 14 pass attempts, 6.25 carries, or 1.875 catches).</p></div>';
+    if (!rows.length) return L && L.kind === 'def'
+      ? '<div class="pc-box"><p class="pc-sub">No grade: defenders are graded from 1999 when they played a real role in a season (from 2012, 40% of the defensive snaps over the team\'s games; before that, a role in half its games), or started 2+ games.</p></div>'
+      : '<div class="pc-box"><p class="pc-sub">No grade: grades cover quarterbacks, running backs, receivers and tight ends since 1999 who met the NFL\'s qualifying minimum in a season (per team game: 14 pass attempts, 6.25 carries, or 1.875 catches).</p></div>';
     const D = rows[0], r = D.players[pid], pos = r[1], labels = D.stats[pos] || [];
-    const posName = { QB: 'quarterbacks', RB: 'running backs', WR: 'wide receivers', TE: 'tight ends' }[pos] || pos;
+    const isDef = ['DL', 'LB', 'DB'].includes(pos);
+    const posName = { QB: 'quarterbacks', RB: 'running backs', WR: 'wide receivers', TE: 'tight ends', DL: 'defensive linemen', LB: 'linebackers', DB: 'defensive backs' }[pos] || pos;
     const f1 = v => v == null ? '–' : v.toFixed(1), nq = (D.qualified || {})[pos];
     // grade files built before 2026-10-15 label the flipped stats "X rate (lower is better)": plain names now, with one
     // note above the bars that high / green is good for every stat (rates where less is better are flipped)
@@ -1708,11 +1775,11 @@
       return `<tr><td><b>${d.season}</b>${d.basis === 'box' ? ' <small class="muted" title="Box-score stats only before 2018: same OVR, simpler stats behind it">box</small>' : ''}</td><td class="num"><span class="eg-chip ${x[9] ? 'eg-uq' : grTone(g)}"><b>${ovr(g)}${uqMark(x)}</b></span></td><td class="num">${x[8] ?? '–'}</td><td class="num">${f1(x[7])}</td></tr>`; }).join('');
     return `<div class="pc-box"><div class="pc-k">Current form</div>
         <div class="ij-dur"><div class="pc-big ${r[9] ? '' : grTone(r[0])}">${ovr(r[0])}${uqMark(r)} <small>OVR</small></div>
-          <div class="pc-sub">Over his last three seasons weighted to ${D.season}, he produced <b>${f1(r[4])}</b> fantasy points per game, more than ${r[0]}% of the ${nq ? `${nq} ` : ''}qualified ${posName}${r[9] ? ` (*under the qualifying minimum: graded on his ${r[8]} games with half the snaps or more, not counted in the rankings)` : ''}${r[3] < 8 ? ' (a small sample so far, so it leans on the position average)' : ''}.</div></div></div>
+          <div class="pc-sub">Over his last three seasons weighted to ${D.season}, he produced <b>${f1(r[4])}</b> ${isDef ? 'IDP ' : ''}fantasy points per game, more than ${r[0]}% of the ${nq ? `${nq} ` : ''}qualified ${posName}${r[9] ? ` (*under the qualifying minimum: graded on his ${r[8]} games with half the snaps or more, not counted in the rankings)` : ''}${r[3] < 8 ? ' (a small sample so far, so it leans on the position average)' : ''}.</div></div></div>
       ${gameGrades(L)}
-      <div class="pc-box"><div class="pc-k">The stats behind it · percentile among ${posName}</div><p class="pc-sub">Higher and greener is better for every stat. For rates where less is better (drops, sacks, interceptions) the percentile is flipped: 99 = fewest.</p><div class="eg-bars">${bars}</div></div>
+      <div class="pc-box"><div class="pc-k">The stats behind it · percentile among ${posName}</div><p class="pc-sub">Higher and greener is better for every stat. For rates where less is better (${isDef ? 'yards and rating allowed, missed tackles' : 'drops, sacks, interceptions'}) the percentile is flipped: 99 = fewest.</p><div class="eg-bars">${bars}</div></div>
       <div class="pc-box pc-logbox"><div class="pc-k">By season · that season only</div><div class="lg-scroll"><table class="lg"><thead><tr class="lg-ch"><th>Season</th><th class="num">OVR</th><th class="num" title="Games played">G</th><th class="num" title="Fantasy points per game (site scoring)">Pts / g</th></tr></thead><tbody>${hist}</tbody></table></div>
-        <p class="pc-sub">How it works: the overall measures output: fantasy points per game in this site's scoring (yards, touchdowns, catches, turnovers), pulled toward the position average by an amount measured from game-to-game swings, so a few big games can't make a 99. The rankings use players who met the NFL's qualifying minimum that season (per team game: 14 pass attempts, 6.25 carries, or 1.875 catches). A player under it who still played half the snaps or more in at least two games (a spot starter) gets an asterisked grade from those games, measured against the qualified players. Current form weights his last three seasons 1 / 0.6 / 0.3; each season in the table uses that season alone. OVR runs 50-99: his percentile among the qualified at his position, scaled so the lowest is a 50. The stats above show how he gets there (efficiency, role, and tracking measures as percentiles). Stats: nflverse play-by-play, Next Gen Stats, PFR advanced stats (2018 on). Seasons before 2018 (marked <i>box</i>) have the same OVR, but the stats behind it are box-score rates, and a spot starter's games are picked by workload instead of snaps. A dash means he played but too little to grade.</p></div>`;
+        ${isDef ? `<p class="pc-sub">How it works: the overall measures output: IDP fantasy points per game under Sleeper's default IDP123 scoring (solo tackle and TFL 2, assisted tackle and QB hit 1, forced fumble, fumble recovery and pass defended 3, sack and interception 6, touchdown 6, safety 2, blocked kick 3), pulled toward the position average by an amount measured from game-to-game swings, so a few big games can't make a 99. Groups: defensive linemen (DE, DT, NT), linebackers (inside and outside) and defensive backs, by his listed position. The rankings use defenders with a real role that season: from 2012, 40% or more of the defensive snaps over his team's games; before 2012 (no snap counts), a role (2+ tackles, a sack, interception or pass defended) in half its games. A spot starter (2+ games at half the snaps) gets an asterisked grade from those games. Current form weights his last three seasons 1 / 0.6 / 0.3. OVR runs 50-99, his percentile among the qualified at his group. The stats above: box-score rates, plus pressures, coverage allowed and missed tackles from PFR (2018 on). Stats: nflverse weekly stats and snap counts, PFR advanced defense.</p></div>` : `<p class="pc-sub">How it works: the overall measures output: fantasy points per game in this site's scoring (yards, touchdowns, catches, turnovers), pulled toward the position average by an amount measured from game-to-game swings, so a few big games can't make a 99. The rankings use players who met the NFL's qualifying minimum that season (per team game: 14 pass attempts, 6.25 carries, or 1.875 catches). A player under it who still played half the snaps or more in at least two games (a spot starter) gets an asterisked grade from those games, measured against the qualified players. Current form weights his last three seasons 1 / 0.6 / 0.3; each season in the table uses that season alone. OVR runs 50-99: his percentile among the qualified at his position, scaled so the lowest is a 50. The stats above show how he gets there (efficiency, role, and tracking measures as percentiles). Stats: nflverse play-by-play, Next Gen Stats, PFR advanced stats (2018 on). Seasons before 2018 (marked <i>box</i>) have the same OVR, but the stats behind it are box-score rates, and a spot starter's games are picked by workload instead of snaps. A dash means he played but too little to grade.</p></div>`}`;
   };
   // ------------------------------------------------------------------------------------------------ D/ST cards
   // (owner 2026-10-18: "d/st ... don't have cards at all") a team defense opens like a player: id DST-<TEAM>.
@@ -1815,7 +1882,7 @@
     const hasThr = thr && TH[pid] !== false;
     if (cardTab === 'news' && !news) cardTab = 'ov';
     if (cardTab === 'thr' && !hasThr) cardTab = 'ov';
-    const graded = !!GRADED[pos];
+    const graded = !!GRADED[pos] || !!(L && L.kind === 'def');
     if (cardTab === 'gr' || cardTab === 'inj') cardTab = 'ov';  // Grade and Injuries became tile sheets  // the Grade tab became the Grade tile's sheet (a remembered tab may still say gr)
     if (graded && GRH[pid] === undefined) {
       GRH[pid] = null;

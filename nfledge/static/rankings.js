@@ -28,9 +28,12 @@
     const SC = D.score, RK = D.rk, TEAMS = D.teams || {};
     const nweek = (D.week || 1) - 1;
     const logo = (t, size) => NFLE.fmt.logo(TEAMS, t, size), rowStyle = t => NFLE.fmt.rowStyle(TEAMS, t);
-    const defaults = () => ({ preset: 'Half PPR', w: { ...SC.presets['Half PPR'] }, lg: { teams: SC.league.teams, ...SC.league.starters, flex: SC.league.flex, superflex: 0 } });
+    // IDP (defenders) ride in the same weights; presets set the offense only (owner 2026-10-18)
+    const IDP = SC.idp || {};
+    const defaults = () => ({ preset: 'Half PPR', w: { ...SC.presets['Half PPR'], ...IDP }, lg: { teams: SC.league.teams, ...SC.league.starters, flex: SC.league.flex, superflex: 0 } });
     let state = defaults();
     try { const s = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (s && s.w && s.lg) state = s; } catch (e) { /* default */ }
+    state.w = { ...IDP, ...state.w };  // saved before IDP existed: its defaults
     const pts = (c, w, pos) => (c || []).reduce((t, v, i) => t + v * (w[SC.keys[i]] || 0), 0) + (pos === 'TE' ? (c || [])[5] * (w.te_bonus || 0) : 0);
     const all = Object.entries(D.players).map(([pid, p]) => Object.assign({ pid }, p));
     let pos = 'QB', tables = {}, q = '', mode = 'week', ROS = null, rosAll = [];
@@ -79,6 +82,12 @@
                  ['rush_td', 'Rushing TD', 0.5], ['reception', 'Reception', 0.25], ['rec_yd', 'Receiving yards per point', 1, 1], ['rec_td', 'Receiving TD', 0.5],
                  ['fumble_lost', 'Fumble lost', 0.5], ['te_bonus', 'TE reception bonus', 0.25]]
                 .map(([k, l, st, inv]) => `<label>${l} <input type="number" step="${st}"${inv ? ' min="1" data-inv="1"' : ''} data-k="${k}"></label>`).join('')}
+            </div>
+            <div class="sp-col"><div class="sp-h">Defenders (IDP)</div>
+              ${[['idp_tkl_solo', 'Solo tackle'], ['idp_tkl_ast', 'Assisted tackle'], ['idp_tkl_loss', 'Tackle for loss'], ['idp_sack', 'Sack'],
+                 ['idp_qb_hit', 'QB hit'], ['idp_int', 'Interception'], ['idp_pass_def', 'Pass defended'], ['idp_ff', 'Forced fumble'],
+                 ['idp_fum_rec', 'Fumble recovery'], ['idp_def_td', 'Defensive TD'], ['idp_safe', 'Safety'], ['idp_blk_kick', 'Blocked kick']]
+                .map(([k, l]) => `<label>${l} <input type="number" step="0.5" data-k="${k}"></label>`).join('')}
             </div>
             <div class="sp-col"><div class="sp-h">League (sets the tiers)</div>
               ${[['teams', 'Teams', 4, 32], ['QB', 'QB', 0, 3], ['RB', 'RB', 0, 4], ['WR', 'WR', 0, 5], ['TE', 'TE', 0, 3], ['flex', 'Flex (RB/WR/TE)', 0, 4], ['superflex', 'Superflex (any)', 0, 2]]
@@ -473,7 +482,7 @@
     const changed = () => { state.preset = Object.keys(SC.presets).find(n => sameW(state.w, SC.presets[n])) || 'Custom'; sync(); draw(); save(); };
     Object.keys(SC.presets).forEach(n => {
       const b = document.createElement('button'); b.type = 'button'; b.textContent = n;
-      b.onclick = () => { state.w = { ...SC.presets[n] }; changed(); };
+      b.onclick = () => { state.w = { ...state.w, ...SC.presets[n] }; changed(); };  // the IDP weights stay
       presetBox.appendChild(b);
     });
     panel.querySelectorAll('input[data-k]').forEach(i => i.onchange = () => { const v = parseFloat(i.value); if (isNaN(v)) return; state.w[i.dataset.k] = i.dataset.inv ? (v > 0 ? 1 / v : 0) : v; changed(); });

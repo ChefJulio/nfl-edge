@@ -290,6 +290,13 @@ def season_stats(eng, season: int, week: int) -> pd.DataFrame:
 # Stat order shared with the page's scoring panel (rows carry their stat lines in this order).
 SCORE_KEYS = ["pass_yd", "pass_td", "interception", "rush_yd", "rush_td", "reception", "rec_yd", "rec_td",
               "fumble_lost"]
+# Individual defensive players (owner 2026-10-18: "individual defense players in our system too"): Sleeper's IDP
+# scoring keys, defaulting to Sleeper's default IDP123 (QB hit / assisted tackle 1; solo tackle / TFL 2; forced
+# fumble / fumble recovery / pass defended 3; sack / INT 6). TD, safety and blocked kick: 6 / 2 / 3 (our choice).
+IDP_KEYS = ["idp_tkl_solo", "idp_tkl_ast", "idp_tkl_loss", "idp_sack", "idp_qb_hit", "idp_int", "idp_ff", "idp_fum_rec",
+            "idp_pass_def", "idp_def_td", "idp_safe", "idp_blk_kick"]
+IDP123 = {"idp_tkl_solo": 2.0, "idp_tkl_ast": 1.0, "idp_tkl_loss": 2.0, "idp_sack": 6.0, "idp_qb_hit": 1.0, "idp_int": 6.0,
+          "idp_ff": 3.0, "idp_fum_rec": 3.0, "idp_pass_def": 3.0, "idp_def_td": 6.0, "idp_safe": 2.0, "idp_blk_kick": 3.0}
 
 
 def scoring_settings(scoring, cfg: dict) -> str:
@@ -301,7 +308,7 @@ def scoring_settings(scoring, cfg: dict) -> str:
              "6-pt pass TD": {**half, "pass_td": 6}, "TE premium": {**half, "te_bonus": 0.5}}
   built = {**{k: float(v) for k, v in scoring.weights.items()}, "te_bonus": float(scoring.te_reception_bonus)}
   t = cfg["tiers"]
-  return json.dumps({"keys": SCORE_KEYS, "presets": presets, "built": built,
+  return json.dumps({"keys": SCORE_KEYS, "presets": presets, "built": built, "idp": IDP123,
                      "league": {"teams": int(t["teams"]), "starters": t["starters"], "flex": int(t["flex"]),
                                 "superflex": 0}}, separators=(",", ":"))
 

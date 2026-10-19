@@ -13,6 +13,9 @@
   };
   const groupOf = pos => Object.keys(GROUPS).find(g => GROUPS[g].includes(pos)) || 'Other';
   const div = (a, b) => b ? a / b : null;
+  // NFL passer rating (each part capped 0-2.375), for coverage allowed
+  const passerRating = (c, a, y, t, i) => { if (!a) return null; const cl = v => Math.max(0, Math.min(2.375, v));
+    return (cl((c / a - 0.3) * 5) + cl((y / a - 3) * 0.25) + cl(t / a * 20) + cl(2.375 - (i || 0) / a * 25)) / 6 * 100; };
   const fmt = {
     i: v => v == null ? '' : Math.round(v).toLocaleString(), y: v => v == null ? '' : String(Math.round(v)),  // y: years, no comma
     d1: v => v == null ? '' : v.toFixed(1), d2: v => v == null ? '' : v.toFixed(2),
@@ -67,6 +70,18 @@
   raw('def_tackles_for_loss', 'TFL', 'Defense'); raw('def_sacks', 'Sacks', 'Defense', 'd1'); raw('def_qb_hits', 'QB hits', 'Defense');
   raw('def_interceptions', 'Def INT', 'Defense'); raw('def_pass_defended', 'PD', 'Defense', 'i', 'Passes defended');
   raw('def_fumbles_forced', 'FF', 'Defense', 'i', 'Fumbles forced'); raw('def_tds', 'Def TD', 'Defense');
+  raw('def_fum_rec', 'FR', 'Defense', 'i', 'Opponent fumbles recovered'); raw('def_safeties', 'Safeties', 'Defense');
+  raw('def_blocks', 'Blocks', 'Defense', 'i', 'Blocked punts, field goals and extra points');
+  // PFR advanced defense (2018 on): pass rush, coverage allowed, tackling
+  raw('prs', 'Pressures', 'Pass rush', 'i', 'Sacks, QB hits and hurries (PFR, 2018 on)'); raw('hur', 'Hurries', 'Pass rush');
+  raw('blz', 'Blitzes', 'Pass rush', 'i', 'Times he blitzed (defensive backs and linebackers)');
+  raw('cov_tgt', 'Tgt allowed', 'Coverage', 'i', 'Passes thrown at the receiver he covered (PFR, 2018 on)');
+  add('cov_cmp_pct', 'Cmp% allowed', 'Coverage', r => div(r.cov_cmp, r.cov_tgt), 'pct', 'Completion rate on throws into his coverage', 'asc');
+  raw('cov_yds', 'Yds allowed', 'Coverage'); raw('cov_td', 'TD allowed', 'Coverage');
+  add('cov_ypt', 'Yds/tgt allowed', 'Coverage', r => div(r.cov_yds, r.cov_tgt), 'd1', 'Yards allowed per target', 'asc');
+  add('cov_rtg', 'Rating allowed', 'Coverage', r => passerRating(r.cov_cmp, r.cov_tgt, r.cov_yds, r.cov_td, r.cov_int), 'd1', 'Passer rating on throws into his coverage', 'asc');
+  raw('mt', 'Missed tkl', 'Tackling', 'i', 'Missed tackles (PFR, 2018 on)');
+  add('mt_pct', 'Missed %', 'Tackling', r => div(r.mt, (r.mt || 0) + (r.tk_comb || 0)), 'pct', 'Missed tackles / (tackles + missed)', 'asc');
   add('fg', 'FG', 'Kicking', r => r.fg_att ? `${r.fg_made}/${r.fg_att}` : null, 's'); raw('fg_made', 'FGM', 'Kicking');
   add('fg_pct', 'FG%', 'Kicking', r => div(r.fg_made, r.fg_att), 'pct'); add('fg_long', 'Long', 'Kicking', r => r.fg_att ? r.fg_long : null, 'i');
   add('pat', 'XP', 'Kicking', r => r.pat_att ? `${r.pat_made}/${r.pat_att}` : null, 's');
@@ -87,12 +102,12 @@
     WR: ['games', 'targets', 'receptions', 'receiving_yards', 'ypt', 'receiving_tds', 'tgt_share', 'adot', 'fp', 'fpg'],
     TE: ['games', 'targets', 'receptions', 'receiving_yards', 'ypt', 'receiving_tds', 'tgt_share', 'snap_pct', 'fp', 'fpg'],
     OL: ['games', 'snaps_o', 'snap_pct', 'snaps_st'],
-    DL: ['games', 'tackles', 'def_tackles_for_loss', 'def_sacks', 'def_qb_hits', 'def_fumbles_forced', 'snaps_d', 'snap_pct_d'],
-    LB: ['games', 'tackles', 'def_tackles_for_loss', 'def_sacks', 'def_interceptions', 'def_pass_defended', 'snaps_d', 'snap_pct_d'],
-    DB: ['games', 'tackles', 'def_interceptions', 'def_pass_defended', 'def_fumbles_forced', 'def_tds', 'snaps_d', 'snap_pct_d'],
+    DL: ['games', 'tackles', 'def_tackles_for_loss', 'def_sacks', 'prs', 'def_qb_hits', 'def_fumbles_forced', 'snap_pct_d', 'fp', 'fpg'],
+    LB: ['games', 'tackles', 'def_tackles_for_loss', 'def_sacks', 'prs', 'def_interceptions', 'def_pass_defended', 'mt_pct', 'snap_pct_d', 'fp', 'fpg'],
+    DB: ['games', 'tackles', 'def_interceptions', 'def_pass_defended', 'cov_tgt', 'cov_ypt', 'cov_rtg', 'mt_pct', 'snap_pct_d', 'fp', 'fpg'],
     K: ['games', 'fg', 'fg_pct', 'fg_long', 'pat'], P: ['games', 'pt_att', 'pt_avg'],
   };
-  const SORT0 = { QB: 'fp', RB: 'fp', WR: 'fp', TE: 'fp', All: 'fp', OL: 'snaps_o', DL: 'def_sacks', LB: 'tackles', DB: 'tackles', K: 'fg_made', P: 'pt_att' };
+  const SORT0 = { QB: 'fp', RB: 'fp', WR: 'fp', TE: 'fp', All: 'fp', OL: 'snaps_o', DL: 'fp', LB: 'fp', DB: 'fp', K: 'fg_made', P: 'pt_att' };
   const CUSTOM = 3;
   const pickHtml = (slot, key) => `<select class="ps-pick" data-slot="${slot}" aria-label="Custom column ${slot + 1}"><option value="">+ column</option>${
     [...new Set(A.map(a => a.group))].map(g => `<optgroup label="${esc(g)}">${A.filter(a => a.group === g).map(a => `<option value="${a.key}"${a.key === key ? ' selected' : ''}>${esc(a.label)}</option>`).join('')}</optgroup>`).join('')}</select>${
@@ -155,7 +170,13 @@
           r._fp = (r.passing_yards || 0) * (w.pass_yd || 0) + (r.passing_tds || 0) * (w.pass_td || 0) + (r.passing_interceptions || 0) * (w.interception || 0)
             + (r.rushing_yards || 0) * (w.rush_yd || 0) + (r.rushing_tds || 0) * (w.rush_td || 0) + (r.receptions || 0) * (w.reception || 0)
             + (r.receiving_yards || 0) * (w.rec_yd || 0) + (r.receiving_tds || 0) * (w.rec_td || 0) + (r.fumbles_lost_total || 0) * (w.fumble_lost || 0)
-            + (r.pos === 'TE' ? (r.receptions || 0) * (w.te_bonus || 0) : 0);
+            + (r.pos === 'TE' ? (r.receptions || 0) * (w.te_bonus || 0) : 0)
+            // IDP (defenders; owner 2026-10-18): the scoring's idp_* weights
+            + (r.def_tackles_solo || 0) * (w.idp_tkl_solo || 0) + (r.def_tackle_assists || 0) * (w.idp_tkl_ast || 0)
+            + (r.def_tackles_for_loss || 0) * (w.idp_tkl_loss || 0) + (r.def_sacks || 0) * (w.idp_sack || 0) + (r.def_qb_hits || 0) * (w.idp_qb_hit || 0)
+            + (r.def_interceptions || 0) * (w.idp_int || 0) + (r.def_pass_defended || 0) * (w.idp_pass_def || 0) + (r.def_fumbles_forced || 0) * (w.idp_ff || 0)
+            + (r.def_fum_rec || 0) * (w.idp_fum_rec || 0) + (r.def_tds || 0) * (w.idp_def_td || 0) + (r.def_safeties || 0) * (w.idp_safe || 0)
+            + (r.def_blocks || 0) * (w.idp_blk_kick || 0);
         });
         const byG = {};
         all.forEach(r => (byG[r._g] = byG[r._g] || []).push(r));
