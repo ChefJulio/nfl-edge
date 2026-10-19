@@ -435,7 +435,14 @@
     raw = raw.replace(/\s*TWO-POINT CONVERSION ATTEMPT\..*$/, '');
     const nm = x => x ? (names[x.replace(/\s+/g, '')] || x) : '';
     const g = (k, i = 1) => { const m = raw.match(RX[k]); return m ? m[i] : null; };
-    const t = (pl.type && pl.type.text) || '', y = pl.statYardage || 0;
+    const t = (pl.type && pl.type.text) || '';
+    // a flag on a play that counts ("... to GB 12 for 11 yards ... PENALTY on DAL-T.Booker, Unnecessary Roughness, 15
+    // yards, enforced at GB 12."): ESPN's statYardage folds the penalty in (-19 there; owner 2026-10-18: "flournoy 19
+    // yard loss?"), so the play's own yards come from the text and the flag is named after it
+    const penM = !pl.inner && !/No Play/i.test(raw) && /PENALTY on/.test(raw) ? raw.match(RX.pen) : null;
+    const ownY = penM ? (/no gain/.test(raw.split('PENALTY')[0]) ? 0 : (raw.split('PENALTY')[0].match(/for (-?\d+) yards?/) || [])[1]) : null;
+    const y = ownY != null ? +ownY : (pl.statYardage || 0);
+    const penTail = penM ? `, flag on ${ourCode(penM[1])}: ${penM[2]}, ${penM[3]} yards` : '';
     const td = /touchdown/i.test(t) || /TOUCHDOWN/.test(raw);
     const yds = n => n === 0 ? 'no gain' : n < 0 ? `loss of ${-n}` : `${n} yard${n === 1 ? '' : 's'}`;
     // a scrimmage action read from the text alone (ESPN's play type names the fumble, not what led to it)
@@ -483,10 +490,10 @@
       return { h: `${h}${tdD ? `, ${rec} TD` : ''}`.replace(/\s{2,}/g, ' '), cls: lost ? 'bad' : '', raw: full, eff: raw, lost };
     }
     if (/interception/i.test(t)) { h = `${nm(g('lead'))} intercepted${g('picked') ? ` by ${nm(g('picked'))}` : ''}`; cls = 'bad'; }
-    else if (/sack/i.test(t)) { h = `${nm(g('lead'))} sacked, ${yds(y)}`; cls = 'bad'; }
-    else if (/pass reception|passing touchdown/i.test(t)) h = `${nm(g('lead'))} ${g('to') ? `to ${nm(g('to'))}` : 'pass'}, ${yds(y)}`;
+    else if (/sack/i.test(t)) { h = `${nm(g('lead'))} sacked, ${yds(y)}${penTail}`; cls = 'bad'; }
+    else if (/pass reception|passing touchdown/i.test(t)) h = `${nm(g('lead'))} ${g('to') ? `to ${nm(g('to'))}` : 'pass'}, ${yds(y)}${penTail}`;
     else if (/pass incompletion/i.test(t)) h = `${nm(g('lead'))} incomplete${g('to') ? ` to ${nm(g('to'))}` : ''}`;
-    else if (/^rush|rushing touchdown/i.test(t)) h = y > 0 ? `${nm(g('lead'))} ${y}-yard run` : `${nm(g('lead'))} run, ${yds(y)}`;
+    else if (/^rush|rushing touchdown/i.test(t)) h = (y > 0 ? `${nm(g('lead'))} ${y}-yard run` : `${nm(g('lead'))} run, ${yds(y)}`) + penTail;
     // the return's own yards from the text ("... to LAC 9. K.Mitchell to LAC 14 for 5 yards"): ESPN's net yardage
     // includes a penalty on the play (owner 2026-10-18: "returns it -5 yards")
     else if (/punt/i.test(t)) h = `${nm(g('lead'))} punts ${g('punt') || ''} yards${/Touchback/i.test(raw) ? ', touchback' : g('ret') ? `, ${nm(g('ret'))} returns ${retYds(raw, pl)}` : ''}${pl.isPenalty ? ', flag on the play' : ''}`;
