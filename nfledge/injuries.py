@@ -824,10 +824,9 @@ class InjuryModel:
       if not dd or len(ds) != len(dd) or not allds:
         return dd
       on = dict(zip(ds, dd))
-      # before his first listing he practiced unlisted (owner 2026-10-18: show FP); after he drops off it's often an
-      # IR move or release, not a clean bill ({#off-report}: 71% played), so '-'
-      first = min(ds)
-      return "".join(on.get(d, "F" if d < first else "-") for d in allds)
+      # a report day he isn't listed on = full participation (owner 2026-10-18: "full participation if they're healthy
+      # that day and not listed"), before his first listing and after he drops off alike
+      return "".join(on.get(d, "F") for d in allds)
     for i, row in p.iterrows():
       p.at[i, "avail"] = p.at[i, "scratch_avail"]  # healthy-scratch risk unless the injury report says more
       if row.team in published and use_days and row.gsis_id in days.index:

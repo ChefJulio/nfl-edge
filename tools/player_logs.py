@@ -232,7 +232,7 @@ def main():
   # so before that "ACT" just means on the roster (Allen's 4 missed games in 2018 read as played).
   tot = sn[["offense_snaps", "defense_snaps", "st_snaps"]].fillna(0).sum(axis=1)
   played = set(zip(sn.gsis_id[tot > 0], sn.season[tot > 0].astype(int), sn.week[tot > 0].astype(int)))
-  prac = practice_timeline(data.practice, allsched, sn, all_ros, data.current_season)
+  prac = practice_timeline(data.practice, allsched, sn, all_ros, data.current_season, gameday_ina(site))
   injuries = injury_history(cache, nfl, data.current_season, all_ros, allsched, played,
                             ingame_events(cache, nfl, data.current_season, all_ros, site))
   scr = qb_scrambles(data.pbp)
@@ -377,13 +377,19 @@ FULL_COLS = ["player_id", "player_display_name", "position", "season", "week", "
 
 # Every regular-season week in a player's game log (owner 2026-10-16: "weeks the player didn't play should still be
 # there"): the weeks he has no game get a row saying why, from his weekly roster status that week.
-def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: pd.DataFrame, cur: int) -> dict:
+def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: pd.DataFrame, cur: int,
+                      ina: dict | None = None) -> dict:
   """gsis -> this season's practice days and games in date order (owner 2026-10-17: "the date the report was out,
   show the last 6, include games in that timeline, dates near each"). Events: ["p", date, D/L/F, game status on the
-  week's last day or ""], ["g", date, opponent, "vs"/"@", snap share or "out" or "" (upcoming)]. Players who were on a
-  practice report this season only; the card shows the latest few. Game events end with their week."""
+  week's last day or "", 1 when inferred], ["g", date, opponent, "vs"/"@", snap share or "out" or "" (upcoming), week].
+  Every report day of the season (owner 2026-10-18: "rows for every day we know there's practice. full participation
+  if they're healthy that day and not listed"): his listing that day if he was on the report, else full participation
+  while he's on the 53-man roster (ACT / INA that week; reserve lists, practice squad and free agents get no row).
+  Report days: each team's calendar (practice_calendar: fixed by game day, plus any day it filed), through the latest
+  day any team has filed. Every rostered player this season; the card shows the latest few."""
   if practice is None or "dates" not in practice:
     return {}
+  from nfledge.practice_calendar import team_report_days
   pr = practice[(practice.season == cur) & practice.gsis_id.notna()]
   if not len(pr):
     return {}
@@ -391,45 +397,63 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
   games = {}
   for g in sch.itertuples():
     for t, o, h in ((g.home_team, g.away_team, "vs"), (g.away_team, g.home_team, "@")):
-      games[(D.RELOCATED.get(t, t), int(g.week))] = (str(g.gameday)[:10], D.RELOCATED.get(o, o), h, bool(pd.notna(g.home_score)))
-  team_wk = {(r.gsis_id, int(r.week)): ROSTER_TEAM.get(r.team, r.team)
-             for r in ros[(ros.season == cur) & ros.gsis_id.notna()][["gsis_id", "week", "team"]].itertuples()}
+      games[(D.RELOCATED.get(t, t), int(g.week))] = (str(g.gameday)[:10], D.RELOCATED.get(o, o), h, bool(pd.notna(g.home_score)), g.game_id)
+  rc = ros[(ros.season == cur) & ros.gsis_id.notna()][["gsis_id", "week", "team", "status"]]
+  team_wk = {(r.gsis_id, int(r.week)): ROSTER_TEAM.get(r.team, r.team) for r in rc.itertuples()}
+  st_wk = {(r.gsis_id, int(r.week)): r.status for r in rc.itertuples()}
+  ros_weeks = sorted({int(w) for w in rc.week})
   snap = {(r.gsis_id, int(r.week)): r.offense_pct for r in sn[sn.season == cur][["gsis_id", "week", "offense_pct"]].itertuples()}
   # a game counts as played-or-missed once it is final AND its snap counts are published (the week clock's "final";
-  # owner 2026-10-18: a game played today, or snaps not in yet, read as "did not play")
-  snap_weeks = {int(w) for w in sn[sn.season == cur].week.dropna().unique()}
-  # each team's report days per week (the calendar plus any day it filed): a report day before his first listing that
-  # week = practiced fully, unlisted (owner 2026-10-18: Warren's Wed / Thu read as nothing above Friday's LP; the
-  # same inference as the week strip and the status letters, injuries.py). After he drops off it stays unknown.
-  from nfledge.practice_calendar import team_report_days
-  filed = {}
-  for r in pr[["gsis_id", "week", "dates"]].itertuples():
-    t = team_wk.get((r.gsis_id, int(r.week)))
+  # owner 2026-10-18: a game played today, or snaps not in yet, read as "did not play"). Per game: nflverse posts a
+  # week's snaps game by game (2026-10-18: Josh Allen's late game read "did not play" beside the early games' snaps).
+  snap_games = set(sn[sn.season == cur].game_id.dropna()) if "game_id" in sn else set()
+
+  def at(m, gid, w):  # this week's roster row, else his latest earlier one (this week's roster not out yet)
+    for k in range(w, 0, -1):
+      v = m.get((gid, k))
+      if v is not None:
+        return v
+    return None
+
+  # what each listed player's report said, by date; and the days each team filed, by week
+  listed, filed = {}, {}
+  for r in pr.sort_values("week").itertuples():
+    ds = [d for d in str(r.dates or "").split(",") if d]
+    if len(ds) != len(str(r.days)):
+      continue
+    gs = "" if r.game_status in (None, "None") else str(r.game_status).capitalize()
+    for i, (d, c) in enumerate(zip(ds, str(r.days))):
+      listed[(r.gsis_id, d)] = (c, gs if i == len(ds) - 1 else "")
+    t = at(team_wk, r.gsis_id, int(r.week))
     if t:
-      filed.setdefault(int(r.week), {}).setdefault(t, set()).update(d for d in str(r.dates or "").split(",") if d)
-  seen = {w: max((d for v in f.values() for d in v), default="") for w, f in filed.items()}  # days reached so far
-  cal = {w: team_report_days(allsched, cur, w, f) for w, f in filed.items()}
+      filed.setdefault(int(r.week), {}).setdefault(t, set()).update(ds)
+  seen = max((d for f in filed.values() for v in f.values() for d in v), default="")  # the latest day reached
+  cal = {w: team_report_days(allsched, cur, w, filed.get(w)) for w in sorted(filed)}
+  last_w = max(cal) if cal else 0
   out = {}
-  for gid, x in pr.groupby("gsis_id"):
+  for gid in {g for g, _ in team_wk} | {g for g, _ in listed}:
     ev = []
-    for r in x.sort_values("week").itertuples():
-      ds = [d for d in str(r.dates or "").split(",") if d]
-      gs = "" if r.game_status in (None, "None") else str(r.game_status).capitalize()
-      if ds and len(ds) == len(str(r.days)):
-        t = team_wk.get((gid, int(r.week)))
-        for d in cal.get(int(r.week), {}).get(t, []):
-          if d < min(ds) and d <= seen.get(int(r.week), ""):
-            ev.append(["p", d, "F", "", 1])  # 1 = inferred (not on that day's report)
-      for i, (d, c) in enumerate(zip(ds, str(r.days))):
-        ev.append(["p", d, c, gs if i == len(ds) - 1 else ""])
-    weeks = sorted({int(w) for w in x.week})
-    for w in range(1, max(weeks) + 2):  # his games through the week after his latest report (the next one)
-      t = team_wk.get((gid, w)) or team_wk.get((gid, max(weeks)))
+    for w, tdays in cal.items():
+      t, st = at(team_wk, gid, w), at(st_wk, gid, w)
+      for d in tdays.get(t, []) if t else []:
+        if d > seen:
+          continue
+        if (gid, d) in listed:
+          c, gs = listed[(gid, d)]
+          ev.append(["p", d, c, gs])
+        elif st in ("ACT", "INA"):
+          ev.append(["p", d, "F", "", 1])  # 1 = inferred: on the roster, not on that day's report
+    if not ev:
+      continue
+    for w in range(1, last_w + 2):  # his games through the week after the latest report week (the next one)
+      t = at(team_wk, gid, w)
       gm = t and games.get((t, w))
-      if not gm:
+      if not gm or (w <= max(ros_weeks, default=0) and at(st_wk, gid, w) not in ("ACT", "INA")):
         continue
       s_ = snap.get((gid, w))
-      res = (int(round(100 * float(s_))) if s_ is not None and s_ == s_ else "out") if (gm[3] and w in snap_weeks) else ""
+      res = (int(round(100 * float(s_))) if s_ is not None and s_ == s_ else "out") if (gm[3] and gm[4] in snap_games) else ""
+      if res == "" and gm[3] and (cur, w) in (ina or {}).get(gid, {}):
+        res = "out"  # declared inactive on game day (gameday_ina), before the snaps are out
       ev.append(["g", gm[0], gm[1], gm[2], res, w])  # gm[3] (final) stays out of the file  # w: the week (the card dates "hurt in the week N game")
     ev.sort(key=lambda e: (e[1], 0 if e[0] == "p" else 1))
     out[gid] = ev

@@ -1163,11 +1163,11 @@
     const wd = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short' });
     // report days from the week clock (Thursday, Monday and Saturday games included); the status letters follow them
     const rdays = p ? NFLE.clock.reports(p.team).map(r => r.weekday) : [];
-    // every report day this week (the clock), listed or not: before his first listing he practiced fully, after he
-    // dropped off '-' ({#off-report}); days still ahead are left off
+    // every report day this week (the clock), listed or not: unlisted = full participation (owner 2026-10-18), before
+    // his first listing and after he drops off alike; days still ahead are left off
     const reps = p ? NFLE.clock.reports(p.team).filter(r => r.in) : [];
-    const on = Object.fromEntries(pr.map(e => [e[1], e[2]])), first = pr.length ? pr[0][1] : null;
-    const days = reps.length && pr.length ? reps.map(r => [r.weekday, on[r.date] || (r.date < first ? 'F' : '-')])
+    const on = Object.fromEntries(pr.map(e => [e[1], e[2]]));
+    const days = reps.length && pr.length ? reps.map(r => [r.weekday, on[r.date] || 'F'])
       : pr.length ? pr.map(e => [wd(e[1]), e[2]])
       : [...code].map((c, i) => [rdays[i] || ['Wed', 'Thu', 'Fri'][i], c]);
     const WORD = { D: 'did not practice', L: 'limited', F: 'full', '-': 'not on the report' }, TAG = { D: 'Missed', L: 'Limited', F: 'Full', '-': 'Not listed' };
@@ -1190,7 +1190,7 @@
     // from his games in the timeline; else the day he first appeared on the report
     const gEv = w => ((L && L.prac) || []).find(e => e[0] === 'g' && e[5] === w);
     const longDay = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
-    const firstListed = ep && ((L && L.prac) || []).find(e => e[0] === 'p' && e[1] >= (gEv(ep.w0 - 1) || [0, ''])[1]);
+    const firstListed = ep && ((L && L.prac) || []).find(e => e[0] === 'p' && !e[4] && e[1] >= (gEv(ep.w0 - 1) || [0, ''])[1]);
     const hurtWhen = ep && ep.ig ? (g => g ? `Hurt ${longDay(g[1])} ${g[3]} ${g[2]}${ep.ig[1] ? ` (${QN[ep.ig[1]] || `Q${ep.ig[1]}`}${ep.ig[1] < 5 ? ' quarter' : ''})` : ''}`
         : `Hurt in the week ${ep.ig[0]} game`)(gEv(ep.ig[0]))
       : ep && firstListed ? `First listed ${longDay(firstListed[1])}` : '';
