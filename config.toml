@@ -193,7 +193,7 @@ ahead_reserve = true   # (AV, {#ahead-reserve}) starters on IR / off the roster 
 # a dressed backup who never plays isn't a scratch. Walk-forward 2021-25, Brier on not-on-report rows vs that label
 # 0.0753 -> 0.0397 (-0.0355 [-0.0367, -0.0343]); QBs predicted 47.9% inactive vs 16.5% actual -> 16.6%.
 scratch_label = "dressed"
-# (AY4, {#nextup-qb}) the promoted backup QB (owner 2026-10-18: "mckee was never going to sit"; backups' snaps say
+# (AY4, {#nextup-qb2}) the promoted backup QB (owner 2026-10-18: "mckee was never going to sit"; backups' snaps say
 # nothing, who dressed does): his team's starter is out and he dressed as the backup last game -> the measured
 # inactive rate, 2 of 214 2019-25. Walk-forward 2021-25 on 166: model 4.11% (up to 56.9%) vs actual 1.20%, rule 1.37%;
 # Brier 0.0166 -> 0.0123 [-0.0092, -0.0008].

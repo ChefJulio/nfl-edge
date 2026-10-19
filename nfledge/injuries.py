@@ -748,7 +748,7 @@ class InjuryModel:
     t = t[t.week == week]
     p = pd.Series(self.scratch_model.predict_proba(t[self.scratch_cols])[:, 1], index=t.gsis_id.to_numpy())
     rate = self.cfg.get("injuries", {}).get("nextup_qb")
-    if rate is not None:  # (AY4, {#nextup-qb}) the next-up QB, nobody healthy ahead of him: the measured inactive rate
+    if rate is not None:  # (AY4, {#nextup-qb2}) the promoted backup QB (dressed as the backup, starter out): the measured inactive rate
       m = self.nextup_rows(t).to_numpy()
       p[m] = 1.0 - float(rate)
     return p
