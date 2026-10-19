@@ -24,6 +24,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4363538,Chad Ryland,Arizona Cardinals,Active,2026-10-12T16:46Z,,,,,,Ryland made all three of his extra-point attempts but missed his lone field-goal try during the Cardinals' 45-21 loss to the Lions on Sunday.
 3045523,Kendrick Bourne,Arizona Cardinals,Active,2026-10-12T02:48Z,,,,,,Bourne caught five of eight targets for 70 yards during Sunday's 45-21 loss to the Lions.
 4374045,Teagan Quitoriano,Arizona Cardinals,Active,2026-10-12T00:49Z,,,,,,Quitoriano caught both of his targets for 15 yards and two touchdowns during Sunday's 45-21 loss to Detroit.
+4426502,Drake London,Atlanta Falcons,Active,2026-10-19T07:13Z,,,,,,London brought in four of 10 targets for 62 yards in the Falcons' 31-23 loss to the Bears on Sunday.
 4430807,Bijan Robinson,Atlanta Falcons,Active,2026-10-19T06:18Z,,,,,,Robinson rushed nine times for 61 yards and brought in both targets for minus-8 yards in the Falcons' 31-23 loss to the Bears on Sunday.
 4241474,Brian Robinson Jr.,Atlanta Falcons,Active,2026-10-19T03:20Z,,,,,,Robinson rushed once for one yard while reeling in both of his targets for nine yards during Sunday's 31-23 loss to the Bears.
 4361409,Jahan Dotson,Atlanta Falcons,Active,2026-10-19T00:46Z,,,,,,Dotson caught three of five targets for 87 yards and a touchdown during Sunday's 31-23 loss to Chicago.
@@ -45,7 +46,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4575860,Robert Longerbeam,Atlanta Falcons,Active,2026-10-12T18:56Z,,,,,,
 10621,Nick Folk,Atlanta Falcons,Active,2026-10-12T17:24Z,,,,,,"Folk converted all five of his kicks (three field goals, two extra points) during Sunday's 30-23 overtime loss to the Ravens."
 4360248,Kyle Pitts Sr.,Atlanta Falcons,Active,2026-10-12T04:52Z,,,,,,Pitts caught five of six targets for 42 yards and a touchdown in Sunday's 30-23 overtime loss to the Ravens.
-4426502,Drake London,Atlanta Falcons,Active,2026-10-12T04:20Z,,,,,,London caught seven of 11 targets for 118 yards in Sunday's 30-23 overtime loss to the Ravens.
 16713,Jake Matthews,Atlanta Falcons,Active,2026-10-11T23:22Z,,,,,,"Matthews (groin) is active for Sunday night's game against the Ravens, Tori McElhaney of the Falcons' official site reports."
 3045527,Samson Ebukam,Atlanta Falcons,Active,2026-10-11T23:08Z,,,,,,
 4360807,Yasir Abdullah,Atlanta Falcons,Injured Reserve,2026-10-11T03:43Z,Hamstring,Not Specified,Not Specified,2026-11-08,IR,"The Falcons placed Abdullah (hamstring) on injured reserve Saturday, Tori McElhaney of the team's official site reports."
@@ -99,6 +99,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3930086,Dawson Knox,Buffalo Bills,Active,2026-10-06T02:41Z,,,,,,Knox caught both of his targets for 13 yards in the Bills' 29-26 loss to the Patriots on Sunday.
 5076951,Jalon Kilgore,Buffalo Bills,Active,2026-10-05T18:30Z,,,,,,
 3917232,Tyler Bass,Buffalo Bills,Active,2026-10-05T02:01Z,,,,,,Bass went 2-for-2 on field-goal attempts and made both of his PATs during Sunday's 29-26 loss to the Patriots.
+4241416,Chuba Hubbard,Carolina Panthers,Active,2026-10-19T07:18Z,,,,,,Hubbard rushed 28 times for 120 yards and a touchdown and brought in one of two targets for one yard in the Panthers' 25-14 win over the Eagles on Sunday.
 2576925,Darren Waller,Carolina Panthers,Active,2026-10-19T02:57Z,,,,,,Waller failed to catch either of his two targets in Sunday's 25-14 win over the Eagles.
 4372780,Tommy Tremble,Carolina Panthers,Active,2026-10-19T00:35Z,,,,,,Tremble caught all four targets for 46 yards and two touchdowns in Sunday's 25-14 win over the Eagles.
 4242975,Jaelan Phillips,Carolina Panthers,Active,2026-10-18T19:23Z,,,,,,"Phillips (hamstring) has returned to Sunday's game against the Eagles, Kassidy Hill of the Panthers' official site reports."
@@ -123,7 +124,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4567096,John Metchie III,Carolina Panthers,Active,2026-10-06T02:21Z,,,,,,Metchie caught three of five targets for 37 yards during the Panthers' 32-26 win over the Lions on Sunday.
 4427132,Ikem Ekwonu,Carolina Panthers,Out,2026-10-06T01:04Z,Knee,Surgery,Right,2026-11-08,PUP-R,"Coach Dave Canales said Monday that Ekwonu (knee) is still a considerable time away from returning to action, Mike Kaye of ESPN reports."
 4568263,Ryan Fitzgerald,Carolina Panthers,Active,2026-10-05T16:08Z,,,,,,Fitzgerald connected on both of his field-goal tries and two of his four point-after attempts in Sunday's 32-26 win over the Lions.
-4685720,Bryce Young,Carolina Panthers,Active,2026-10-05T04:20Z,,,,,,Young completed 29 of 41 passes for 329 yards and two touchdowns while rushing three times for three yards in Sunday's 32-26 win over the Lions.
 4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-19T07:01Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out
 4431611,Caleb Williams,Chicago Bears,Active,2026-10-19T06:31Z,,,,,,Williams completed 30 of 36 passes for 305 yards with a touchdown and no interceptions while adding four rushes for three yards in the Bears' 31-23 win over the Falcons on Sunday. He also fumbled once but recovered.
 4259545,D'Andre Swift,Chicago Bears,Active,2026-10-19T06:25Z,,,,,,Swift rushed 16 times for 44 yards and two touchdowns and brought in four of five targets for 26 yards in the Bears' 31-23 win over the Falcons on Sunday.
