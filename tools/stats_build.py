@@ -248,7 +248,8 @@ RATES = ["snap_pct", "snap_pct_d", "snap_pct_st", "tgt_share", "car_share"]  # p
 
 def career_rows(frames: list) -> pd.DataFrame:
   """Season rows (players_<season>, a "season" column) -> one row per player: counting stats summed, the longest
-  field goal, shares weighted by games (seasons that have them), name / position / team from his latest season,
+  field goal, shares weighted by games (seasons that have them), name / position from his latest season, team =
+  the one he played the most games for,
   plus "first" (first season), "season" (latest) and "nsea" (seasons played)."""
   c = pd.concat(frames, ignore_index=True).sort_values("season")
   c = c[c.pid.astype(str) != "0"]  # one source's placeholder id (see player_logs GSIS_RE)
@@ -260,7 +261,11 @@ def career_rows(frames: list) -> pd.DataFrame:
     if r in c:
       w = c.games.fillna(0).where(c[r].notna(), 0)
       out[r] = (c[r].fillna(0) * w).groupby(c.pid).sum() / w.groupby(c.pid).sum().replace(0, np.nan)
-  out = out.join(g[["name", "pos", "team"]].last()).join(g.season.agg(first="min", season="max", nsea="nunique"))
+  out = out.join(g[["name", "pos"]].last()).join(g.season.agg(first="min", season="max", nsea="nunique"))
+  # his team: where he played the most games (owner 2026-10-18: LaDainian Tomlinson read NYJ, Adrian Peterson SEA,
+  # their last stops); ties go to the earlier team
+  tg = c.dropna(subset=["team"]).groupby(["pid", "team"]).agg(n=("games", "sum"), s0=("season", "min")).reset_index()
+  out["team"] = tg.sort_values(["pid", "n", "s0"], ascending=[True, False, True]).drop_duplicates("pid").set_index("pid").team
   return out.reset_index()
 
 

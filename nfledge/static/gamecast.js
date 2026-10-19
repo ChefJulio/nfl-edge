@@ -3324,7 +3324,10 @@
   const nowCard = (st, info, sum) => {
     const ser = st.ser, wp = ser.length ? ser[ser.length - 1].home : null;
     const nx = nextUp(st, info);
-    const sp = nx ? nx.sp : st.sit ? spot(st.sit, info) : null;
+    // the field never drops out (owner 2026-10-18: it vanished after a kickoff, ESPN's situation briefly carrying no
+    // possession): ESPN's situation, else where the last play ended (live), else an empty field with the latest drive
+    const lastRun = [...st.plays].reverse().find(p => !nonPlay(p));
+    const sp = nx ? nx.sp : (st.sit && spot(st.sit, info)) || (!st.ended && lastRun && spot(lastRun.end, info)) || null;
     const cur = !nx && st.cur, curTeam = cur && cur.team && (String(cur.team.id) === String(info.home.id) ? info.home : String(cur.team.id) === String(info.away.id) ? info.away : null);
     // the offense's change in win chance since this drive's first play
     let note = '';
@@ -3367,7 +3370,12 @@
       last = `<div class="now-last${L.scoringPlay ? ' scored' : ''}"><div class="now-lk muted">${L.scoringPlay ? 'Last score' : 'Last play'}${L.clock ? ` · ${periodName((L.period || {}).number || 1)} ${esc(L.clock.displayValue || '')}` : ''}</div>
         <div class="now-lh ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}</div>${th ? `<div class="now-try ${th.cls}">${esc(th.h)}</div>` : ''}${nonPlay(L) ? '' : playImpact(L, hd, info, sum, nm, names, '')}</div>`;
     }
-    return `<section class="sit now" data-k="now"><div class="sit-dd">${head}</div>${sp ? fieldSvg(sp, info, lanes) : ''}${drive}${last}${wpBar(info, wp, note)}</section>`;
+    if (!sp && !lanes.length) {  // no ball to place: the latest drive's plays on an empty field
+      const dr = [...st.drives].reverse().find(d => (d.plays || []).length), dt = dr && dr.team && (String(dr.team.id) === String(info.home.id) ? info.home : info.away);
+      if (dr && dt) lanes = driveLanes(dr.plays, info, dt.team);
+    }
+    const field = sp ? fieldSvg(sp, info, lanes) : fieldSvg({ noBall: true, red: false }, info, lanes);
+    return `<section class="sit now" data-k="now"><div class="sit-dd">${head}</div>${field}${drive}${last}${wpBar(info, wp, note)}</section>`;
   };
   // Drive results in a word, from the offense's side (driveResult has the long form).
   const driveTag = (d, current) => {
