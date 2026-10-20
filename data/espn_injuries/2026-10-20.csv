@@ -74,13 +74,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3126356,Marlon Humphrey,Baltimore Ravens,Active,2026-10-15T20:49Z,,,,,,
 3052743,Trey Hendrickson,Baltimore Ravens,Active,2026-10-15T00:00Z,,,,,,Hendrickson (finger) was a full participant at practice Wednesday.
 4038441,Justice Hill,Baltimore Ravens,Active,2026-10-14T02:01Z,,,,,,Hill turned four carries into 73 yards and caught two of four targets for five yards during the Ravens' 30-23 overtime win over the Falcons on Sunday.
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-20T18:00Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-20T19:06Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus
 3915416,DJ Moore,Buffalo Bills,Questionable,2026-10-20T16:10Z,Shoulder - AC Joint,Sprain,Not Specified,2026-11-01,QUESTIONABLE,questionable
 4039303,Ed Oliver,Buffalo Bills,Questionable,2026-10-20T16:10Z,Knee,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable
 3917232,Tyler Bass,Buffalo Bills,Active,2026-10-20T02:07Z,,,,,,Bass converted all four of his field-goal attempts and all three of his extra-point tries during Buffalo's win over the Raiders on Sunday.
 3915411,Ty Johnson,Buffalo Bills,Active,2026-10-20T00:47Z,,,,,,Johnson logged a three-yard carry and caught both of his targets for 24 yards during the Bills' 33-30 win over the Raiders on Sunday.
 4242433,Joshua Palmer,Buffalo Bills,Active,2026-10-20T00:42Z,,,,,,Palmer caught one of two targets for 37 yards during Buffalo's 33-30 win over Las Vegas on Sunday.
-4429501,Ray Davis,Buffalo Bills,Active,2026-10-20T00:35Z,,,,,,"Davis logged a four-yard carry, a five-yard catch on his lone target and returned three kickoffs for 85 yards during the Bills' 33-30 win over the Raiders on Sunday."
+4429501,Ray Davis,Buffalo Bills,Active,2026-10-20T00:35Z,,,,,,Davis logged a four-yard carry and a five-yard catch on his lone target while returning three kickoffs for 85 yards during the Bills' 33-30 win over the Raiders on Sunday.
 4385690,Dalton Kincaid,Buffalo Bills,Active,2026-10-19T21:50Z,,,,,,Kincaid (ribs) returned to Sunday's 33-30 win at Las Vegas and finished with seven catches (on eight targets) for 38 yards.
 3915487,Mike Danna,Buffalo Bills,Active,2026-10-19T16:23Z,,,,,,
 4869533,Jude Bowry,Buffalo Bills,Active,2026-10-19T16:23Z,,,,,,
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4243256,Devin Lloyd,Carolina Panthers,Active,2026-10-07T02:41Z,,,,,,Lloyd recorded nine total tackles (five solo) during Sunday night's 32-26 win against Detroit.
 4244607,Akayleb Evans,Carolina Panthers,Active,2026-10-07T02:31Z,,,,,,Evans recorded 11 total tackles (nine solo) and a pass defensed during Sunday night's 32-26 win over the Lions.
 4360763,Brycen Tremayne,Carolina Panthers,Active,2026-10-06T03:00Z,,,,,,Tremayne caught two of three passes for 32 yards during Sunday's 32-26 win over the Lions.
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-20T18:00Z,Undisclosed,,,2026-10-18,IR,ir
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-20T19:06Z,Undisclosed,,,2026-10-18,IR,ir
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-20T16:10Z,Toe,Sprain,Not Specified,2026-10-22,QUESTIONABLE,questionable
 3121544,T.J. Edwards,Chicago Bears,Questionable,2026-10-20T16:10Z,Hamstring,Not Specified,Not Specified,2026-10-22,QUESTIONABLE,questionable
 17427,Cairo Santos,Chicago Bears,Active,2026-10-20T02:52Z,,,,,,Santos made one of his two field-goal attempts and all four PATs in the Bears' 31-23 win over the Falcons on Sunday.
@@ -149,6 +149,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4432804,Shemar Turner,Chicago Bears,Active,2026-10-14T01:37Z,,,,,,The Bears activated Turner (knee) from their reserve/PUP list Tuesday.
 2973405,Kalif Raymond,Chicago Bears,Active,2026-10-13T23:34Z,,,,,,Raymond caught three of four passes for six yards and logged one carry for minus-2 yards during the Bears' 31-7 loss to the Packers on Sunday. He also returned one punt for nine yards.
 3134690,Montez Sweat,Chicago Bears,Suspension,2026-10-13T20:16Z,Suspension,Not Specified,Not Specified,2026-11-02,RESERVE-SUS,"The NFL announced Tuesday that Sweat has been suspended two games without pay for violating the league's performance-enhancing substances policy, Brad Biggs of the Chicago Tribune reports."
+4819215,Josh Kattus,Cincinnati Bengals,Active,2026-10-20T18:49Z,,,,,,The Bengals have signed Kattus to their practice squad.
 3050481,Tanner Hudson,Cincinnati Bengals,Injured Reserve,2026-10-19T23:18Z,Pectoral,Strain,Not Specified,2027-02-15,IR,Hudson (pectoral) was placed on injured reserve by the Bengals on Monday.
 4384852,Dohnte Meyers,Cincinnati Bengals,Active,2026-10-14T02:47Z,,,,,,Meyers brought in both of his targets for 12 yards during the Bengals' 31-24 win over the Dolphins on Sunday.
 5092508,Colbie Young,Cincinnati Bengals,Questionable,2026-10-13T17:10Z,Knee,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
@@ -173,7 +174,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4567098,Jordan Battle,Cincinnati Bengals,Active,2026-10-08T20:41Z,,,,,,
 4427729,Demetrius Knight Jr.,Cincinnati Bengals,Active,2026-10-07T02:23Z,,,,,,Knight finished Sunday's 22-17 loss to the Jaguars with six tackles (three solo).
 4690070,Mitchell Tinsley,Cincinnati Bengals,Active,2026-10-06T02:52Z,,,,,,Tinsley caught three of his seven targets for 49 yards in the Bengals' 22-17 loss to the Jaguars on Sunday.
-4572036,DJ Turner II,Cincinnati Bengals,Active,2026-10-02T20:17Z,,,,,,
 4685702,Quinshon Judkins,Cleveland Browns,Questionable,2026-10-20T16:10Z,Ankle,Not Specified,Right,2026-10-25,QUESTIONABLE,questionable
 4873232,Mason Graham,Cleveland Browns,Questionable,2026-10-20T16:10Z,Knee - MCL,Sprain,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4600415,Mike Hall Jr.,Cleveland Browns,Questionable,2026-10-20T16:10Z,Ankle,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
@@ -274,6 +274,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3139387,D.J. Reed,Detroit Lions,Active,2026-10-04T23:18Z,,,,,,Reed (ribs) is active for Sunday night's matchup with the Panthers.
 4260409,Derrick Barnes,Detroit Lions,Active,2026-09-30T03:46Z,,,,,,Barnes registered eight tackles (five solo) and a defensed pass Sunday in a 31-24 victory against the Jets.
 3045463,Chuck Clark,Detroit Lions,Active,2026-09-30T03:37Z,,,,,,"Clark finished Sunday's 31-24 win over the Jets with seven tackles, including 1.0 sacks, and a forced fumble."
+5076652,Brandon Cisse,Green Bay Packers,Active,2026-10-20T19:05Z,,,,,,
 4258206,Benjamin St-Juste,Green Bay Packers,Questionable,2026-10-20T16:10Z,Hamstring,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4242390,Aaron Banks,Green Bay Packers,Questionable,2026-10-20T16:10Z,Toe,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4869461,Trey Smack,Green Bay Packers,Active,2026-10-20T02:27Z,,,,,,Smack made all three of his field-goal attempts and both of his extra-point tries during Green Bay's win over the Cowboys on Sunday.
@@ -288,7 +289,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4036378,Jordan Love,Green Bay Packers,Active,2026-10-19T04:15Z,,,,,,"Love completed 23 of 41 passes for 276 yards, one touchdown and one interception in Sunday's 23-13 win over the Cowboys. He also rushed twice for 14 yards and a touchdown."
 4249836,Pierre Strong Jr.,Green Bay Packers,Active,2026-10-19T04:14Z,,,,,,Strong rushed 11 times for 28 yards in Sunday night's 23-13 win over the Cowboys. He caught five of six targets for 39 yards.
 4572680,Tucker Kraft,Green Bay Packers,Active,2026-10-19T04:10Z,,,,,,Kraft caught five of eight targets for 37 yards in Sunday night's 23-13 win over the Cowboys.
-5076652,Brandon Cisse,Green Bay Packers,Questionable,2026-10-19T03:36Z,Shoulder,Stinger,Right,2026-10-25,QUESTIONABLE,Cisse (neck) is questionable to return to Sunday night's contest against Dallas.
 4428037,Jacob Monk,Green Bay Packers,Active,2026-10-18T23:13Z,,,,,,Monk (quadriceps) is active for Sunday night's game against the Cowboys.
 4887255,Anthony Campbell,Green Bay Packers,Active,2026-10-18T23:09Z,,,,,,Campbell (ankle) is active for Sunday night's game against the Cowboys.
 4259762,Jonathan Ford,Green Bay Packers,Injured Reserve,2026-10-18T02:56Z,Calf,Not Specified,Not Specified,2026-11-15,IR,The Packers placed Ford (calf) on injured reserve Saturday.
@@ -524,6 +524,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-09-30T04:04Z,,,,,,"Wilson finished Sunday's 23-16 victory over Tampa Bay with 10 tackles, including 1.5 sacks, and one defensed pass."
 3921690,Josh Oliver,Minnesota Vikings,Injured Reserve,2026-09-30T00:26Z,Biceps,Surgery,Not Specified,2027-01-17,IR,"The Vikings placed Oliver (biceps) on injured reserve Tuesday, Craig Peters of the team's official site reports."
 16772,Kyle Van Noy,Minnesota Vikings,Active,2026-09-30T00:20Z,,,,,,"The Vikings signed Van Noy from the practice squad to the active roster Tuesday, Craig Peters of the team's official site reports."
+4362890,Ben Brown,New England Patriots,Doubtful,2026-10-20T18:21Z,Knee,Not Specified,Not Specified,2026-10-22,DOUBTFUL,doubtful
+4259646,Alijah Vera-Tucker,New England Patriots,Doubtful,2026-10-20T18:19Z,Hamstring,Not Specified,Not Specified,2026-10-22,DOUBTFUL,doubtful
 4606666,Karon Prunty,New England Patriots,Questionable,2026-10-20T16:10Z,Hamstring,Not Specified,Not Specified,2026-10-22,QUESTIONABLE,questionable
 4688779,Channing Canada,New England Patriots,Questionable,2026-10-20T16:10Z,Hamstring,Not Specified,Not Specified,2026-10-22,QUESTIONABLE,questionable
 3916923,Carlton Davis III,New England Patriots,Questionable,2026-10-20T16:10Z,Neck,Not Specified,Not Specified,2026-10-22,QUESTIONABLE,questionable
@@ -540,8 +542,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3046439,Hunter Henry,New England Patriots,Active,2026-10-19T01:00Z,,,,,,Henry caught four of five targets for 48 yards and a touchdown in Sunday's 26-19 win over the Jets.
 4427095,DeMario Douglas,New England Patriots,Active,2026-10-19T00:47Z,,,,,,Douglas caught seven of eight targets for 86 yards and a touchdown in Sunday's 26-19 win over the Jets.
 16771,Morgan Moses,New England Patriots,Questionable,2026-10-18T20:43Z,Foot,Not Specified,Not Specified,2026-10-22,QUESTIONABLE,"Moses (ankle) was spotted wearing a walking boot after Sunday's 26-19 win over the Jets, Andrew Callahan of the Boston Herald reports."
-4362890,Ben Brown,New England Patriots,Questionable,2026-10-18T19:58Z,Knee,Not Specified,Not Specified,2026-10-22,QUESTIONABLE,Brown (knee) won't return to Sunday's game against the Jets.
-4259646,Alijah Vera-Tucker,New England Patriots,Questionable,2026-10-18T19:31Z,Hamstring,Not Specified,Not Specified,2026-10-22,DOUBTFUL,Vera-Tucker (hamstring) has been ruled out for the remainder of Sunday's game against the Jets.
 4685298,Will Campbell,New England Patriots,Active,2026-10-18T16:41Z,,,,,,Campbell (knee) is active for Sunday's game against the Jets.
 4428930,Craig Woodson,New England Patriots,Active,2026-10-18T15:51Z,,,,,,
 4245273,Christian Elliss,New England Patriots,Active,2026-10-18T15:51Z,,,,,,
@@ -574,13 +574,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429040,Vernon Broughton,New Orleans Saints,Active,2026-10-17T03:48Z,,,,,,"Broughton (illness) does not have an injury designation for Sunday's game against the Giants, Jeff Nowak of The Big 870 New Orleans reports."
 4567224,Colby Wooden,New Orleans Saints,Active,2026-10-15T21:57Z,,,,,,
 4372533,Tyree Wilson,New Orleans Saints,Active,2026-10-15T21:56Z,,,,,,
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-20T18:00Z,Calf,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-20T19:06Z,Calf,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4430261,Tyler Nubin,New York Giants,Questionable,2026-10-20T16:10Z,Neck,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4921249,Colton Hood,New York Giants,Questionable,2026-10-20T16:10Z,Concussion,Concussion,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4429148,Theo Johnson,New York Giants,Questionable,2026-10-20T16:10Z,Neck,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 5082424,Dominic Zvada,New York Giants,Active,2026-10-20T02:58Z,,,,,,Zvada made both of his field-goal attempts and his sole PAT in the Giants' 34-27 loss to the Saints on Sunday.
 4682648,Malachi Fields,New York Giants,Active,2026-10-20T02:00Z,,,,,,Fields caught two of eight targets for 19 yards during the Giants' 34-27 loss to the Saints on Sunday.
-4040761,Devin Singletary,New York Giants,Active,2026-10-20T01:39Z,,,,,,Singletary logged four carries into 14 yards and hauled in his lone target for 19 yards during Sunday's 34-27 loss to the Saints on Sunday.
+4040761,Devin Singletary,New York Giants,Active,2026-10-20T01:39Z,,,,,,Singletary turned four carries into 14 yards and hauled in his lone target for 19 yards during Sunday's 34-27 loss to the Saints on Sunday.
 5144942,CJ Okoye,New York Giants,Active,2026-10-19T17:10Z,,,,,,
 4243322,Jake Haener,New York Giants,Active,2026-10-19T17:10Z,,,,,,
 4361050,Isaiah Likely,New York Giants,Active,2026-10-19T01:35Z,,,,,,Likely caught six of 11 targets for 99 yards and a touchdown in Sunday's 34-27 loss to the Saints.
