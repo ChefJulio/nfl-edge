@@ -3131,3 +3131,20 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   short-stint quarterbacks (AJ McCarron, Joe Webb, Brandon Allen: top by dropbacks on their last team's window), so
   "starter" needs a better definition. Next: score the 2026 returners at season end (data that exists then), and
   define a starter by games started, not window rank.
+- **PRE-REGISTERED 2026-10-20 (owner: "can we lean more into espn expected return date"; chose B and D): (BI) a return
+  date on a Doubtful / Questionable listing.** Today ESPN's date counts only with Out / IR: an early-week Doubtful is the
+  4.2% bucket, a Questionable changes nothing (display only). Variant: ESPN Doubtful or Questionable with a return date
+  7+ days past his team's next game is the "Out+ret" bucket (1.8%), in the early-week bridge, midweek rulings and the bye
+  rule. Test: tools/espn_date_status_eval.py, ESPN captures 2022-25 (return_timing.CAPTURES), the latest capture between
+  his last game and his next (that game, played = took a snap). GATE: those rows (n >= 30) played at most 5%, 95%
+  Wilson upper bound <= 10%. Reported: the same rows by status, and with the date 1-6 days past the game.
+- **PRE-REGISTERED 2026-10-20: (BJ) return timing anchored on ESPN's date.** ESPN's dates run late (players back a
+  median 14 days after). Today: no game before the date when it is 14+ days past his next game, else / after it the
+  generic chain. Variant: for a state with an ESPN capture (Out / Doubtful / IR) the chain's per-game hazard is the
+  measured P(back at this game | not yet back) by days from ESPN's date to the game (before it, 0-6, 7-13, 14-20, 21-34,
+  35+), from earlier seasons only, shrunk toward the pooled rate with 20 pseudo-cases; no date = today's chain. Test:
+  tools/return_espn_eval.py's harness (states 2023-25, each fit on seasons before; 2022 has no earlier captures), base
+  = production (chain + the long-date rule), label = played his team's k-th game after the state, k = 1..6; 2026 so far
+  CONFIRM. GATE: (1) states with a capture, Brier over k = 1..6 lower, 95% CI (2,000 state resamples) upper < 0,
+  improvement >= 0.003, lower in >= 2 of 3 seasons; (2) all states not worse (CI upper < +0.0005); (3) calibration (k =
+  1..6, states with a capture) not above today's + 0.005; CONFIRM same direction. Reported: the measured rates by bucket.
