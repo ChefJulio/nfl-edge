@@ -2509,7 +2509,8 @@
     const pw = (d.power || []).find(x => x.team === abbr), g = teamGame(abbr, d);
     const opp = g && (g.away.team === abbr ? g.home : g.away), home = g && g.home.team === abbr;
     // the Games tab's tile (win chances, line, ours; the score once it starts, repainted live)
-    const week = g ? `<div class="pc-k pc-mtk">${esc(wkLabel(d))}</div><div class="pc-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>`
+    // no "Week N" label over the tile (owner 2026-10-20: fit the summary on one phone screen; the picker names the week)
+    const week = g ? `<div class="pc-mt tm-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>`
       : `<div class="pc-box"><div class="pc-k">${esc(wkLabel(d))}</div><b>Bye</b></div>`;
     return { html: `${week}${seasonRow(abbr, d)}${teamTiles(abbr, d, TLOGS[abbr], pw)}`, players: '' };
   };
