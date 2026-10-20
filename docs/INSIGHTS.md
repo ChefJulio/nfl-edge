@@ -3096,3 +3096,10 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   forward by season (rates from earlier seasons; 2022 uses the normal-week rates). GATE: (1) Brier for his next game vs
   today's 1.0: lower, 95% CI over team-byes with upper < 0, improvement >= 0.01; (2) calibration: mean predicted within 5
   points of the played rate; reported: per bucket played rate before a bye vs in a normal week.
+- **RESULT {#bye-injury} (BG) injured right before a bye: FAIL (calibration), and too thin to decide the case that
+  matters.** tools/bye_injury_eval.py: 783 player-games 2022-25 with an ESPN status between the last game and 4 days
+  before the next (window rule), 49 right after a bye (37 team-byes): Questionable 46 (played 54.3%; normal weeks
+  43.6% of 645), Out 2 (0 played; normal 10.3% of 39), Doubtful 1 (0; normal 3.2%). (1) Brier vs today's 1.0 .4898 ->
+  .2779, -0.2119 [-0.4001, -0.0203]: pass. (2) predicted 37.6% vs played 51.0%: FAIL (the Questionable bye rate,
+  shrunk toward the normal week's, under-predicts: a bye adds a week of recovery). The Wayback archive has almost no
+  bye-week Out cases; 2026's daily snapshots will add them.
