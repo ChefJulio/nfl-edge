@@ -1121,9 +1121,14 @@ class InjuryModel:
     # likely-out teammate's "if he plays" world is shown too.
     for k in ("cond", "cond2"):
       p[f"{k}_name"], p[f"{k}_pid"], p[f"{k}_p_sit"], p[f"{k}_plays"], p[f"{k}_sits"] = "", "", np.nan, np.nan, np.nan
-    unsure = cont[(cont.p_play >= 0.05) & (cont.p_play <= 0.95) & cont.gsis_id.isin(set(p.gsis_id))]
+    unsure = [(u, False) for _, u in cont[(cont.p_play >= 0.05) & (cont.p_play <= 0.95) & cont.gsis_id.isin(set(p.gsis_id))].iterrows()]
+    # (owner 2026-10-20: Lamar Jackson / Tyler Huntley) injured quarterbacks too: their swap runs on the "sits" flag
+    # (the backup inherits the dropbacks), not the contributor list; a backup whose chance is the backup-QB rule isn't one
+    uq = p0[(p0.pos == "QB") & (p0.qb2_of.fillna("") == "") & p0.inj_avail.between(0.05, 0.95)]
+    unsure += [(pd.Series({"gsis_id": x.gsis_id, "team": x.team, "full_name": x.full_name, "p_play": float(x.avail)}), True)
+               for x in uq.itertuples()]
     cands = {}  # row -> [(|swing|, name, pid, p_sit, plays, sits)], swings under 0.3 points ignored
-    for _, u in unsure.iterrows():
+    for u, is_qb in unsure:
       alt_p = p0.copy()
       if u.p_play < 0.5:  # benched in the default scenario: the other world is him playing
         alt_p.loc[alt_p.gsis_id == u.gsis_id, "sits"] = False
@@ -1131,7 +1136,7 @@ class InjuryModel:
         plays, sat = alt.proj, p.proj
       else:  # playing in the default scenario: the other world is him sitting
         alt_p.loc[alt_p.gsis_id == u.gsis_id, "sits"] = True
-        alt = self._redistribute(alt_p, pd.concat([sits, u.to_frame().T]), wind)
+        alt = self._redistribute(alt_p, sits if is_qb else pd.concat([sits, u.to_frame().T]), wind)
         plays, sat = p.proj, alt.proj
       d = (sat - plays).where((p.team == u.team) & (p.gsis_id != u.gsis_id), 0.0)
       for i in d.index[d.abs() > 0.3]:

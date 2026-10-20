@@ -241,8 +241,11 @@
       try {
         const m = L.matchup(mine.id), opp = m && L.teams.find(t => t.id === m.opp);
         const ids = t => (t ? t.ext : []).map(gsisOf).filter(Boolean);
-        localStorage.setItem('nfledge-mine', JSON.stringify({ league: L.name, mine: ids(mine), opp: ids(opp), oppName: opp ? opp.name : '', w: L.scoring, kw: L.kw || null, dw: L.dw || null }));
+        const n = s => L.slots.filter(x => x === s).length;
+        const lg = { teams: L.teams.length, QB: n('QB'), RB: n('RB'), WR: n('WR'), TE: n('TE'), flex: n('FLEX') + n('WRRB_FLEX') + n('REC_FLEX'), superflex: n('SUPER_FLEX') };
+        localStorage.setItem('nfledge-mine', JSON.stringify({ league: L.name, mine: ids(mine), opp: ids(opp), oppName: opp ? opp.name : '', w: L.scoring, lg, kw: L.kw || null, dw: L.dw || null }));
       } catch (e) { /* private mode */ }
+      document.dispatchEvent(new Event('nfle-mine'));  // Rankings follows the active team's scoring
     };
     const season = new Date().getMonth() < 2 ? new Date().getFullYear() - 1 : new Date().getFullYear();
 
@@ -842,6 +845,7 @@
         TEAMS_.list = TEAMS_.list.filter(x => x !== saved && !sameTeam(x, saved));
         TEAMS_.active = 0; saveTeams();
         try { localStorage.removeItem('nfledge-mine'); } catch (e) { /* ignore */ }
+        document.dispatchEvent(new Event('nfle-mine'));
         L = null; NFLE.leagueDst = null;
         if (TEAMS_.list.length) open(TEAMS_.list[0]); else { saved = null; try { localStorage.removeItem(LS); } catch (e) { /* ignore */ } connectView(); }
       };

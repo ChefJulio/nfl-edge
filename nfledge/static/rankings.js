@@ -10,7 +10,12 @@
   const NFLE = window.NFLE, esc = NFLE.esc;
   const LS_KEY = 'nfledge-scoring';
   const POS = ['QB', 'RB', 'WR', 'TE', 'FLEX', 'K', 'DST'];
-  const OUT_LINE = 0.9;  // inactive chance at which a player projects 0 (owner 2026-10-16: under 10% to play)
+  const OUT_LINE = 0.9;
+  // Two worlds in one cell (owner 2026-10-20, Lamar Jackson / Tyler Huntley): when a player is 20-80% to play, he and
+  // the teammate whose role hangs on him show both projections: the likelier world as the number (it sorts), the other
+  // dimmed beneath. 20-80%: the other world is at least a 1-in-5 chance (the Q tag's 32-88% would add it for an 85%
+  // starter's backup, an outcome that rarely happens).
+  const TWO_LO = 0.2, TWO_HI = 0.8;  // inactive chance at which a player projects 0 (owner 2026-10-16: under 10% to play)
   const KDP = ['K', 'DST'];  // kickers / team defenses: data/kdst.json, standard ESPN scoring (owner 2026-10-15)
   const POS_LABEL = { DST: 'D/ST' };
   const FLEX_DEPTH = 150;  // a 14-team 2RB/2WR/1TE/1FLEX league starts 84 flex-eligible players; 150 adds waiver depth
@@ -31,8 +36,15 @@
     // IDP (defenders) ride in the same weights; presets set the offense only (owner 2026-10-18)
     const IDP = SC.idp || {};
     const defaults = () => ({ preset: 'Half PPR', w: { ...SC.presets['Half PPR'], ...IDP }, lg: { teams: SC.league.teams, ...SC.league.starters, flex: SC.league.flex, superflex: 0 } });
-    let state = defaults();
-    try { const s = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (s && s.w && s.lg) state = s; } catch (e) { /* default */ }
+    // the active claimed fantasy team (league.js shareMine) sets the scoring by default (owner 2026-10-20); picking a
+    // preset or editing a value is the viewer's own choice (src 'own') and sticks until they pick their league again
+    const mine = () => { try { const m = JSON.parse(localStorage.getItem('nfledge-mine') || 'null'); return m && m.w && m.league ? m : null; } catch (e) { return null; } };
+    const fromTeam = m => ({ src: 'team', preset: m.league, w: { ...IDP, ...m.w },
+                             lg: m.lg && m.lg.teams ? { ...m.lg } : { teams: SC.league.teams, ...SC.league.starters, flex: SC.league.flex, superflex: 0 } });
+    const start = () => { const m = mine(); return m ? fromTeam(m) : defaults(); };
+    let state = null;
+    try { const s = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (s && s.w && s.lg && s.src === 'own') state = s; } catch (e) { /* default */ }
+    state = state || start();
     state.w = { ...IDP, ...state.w };  // saved before IDP existed: its defaults
     const pts = (c, w, pos) => (c || []).reduce((t, v, i) => t + v * (w[SC.keys[i]] || 0), 0) + (pos === 'TE' ? (c || [])[5] * (w.te_bonus || 0) : 0);
     const all = Object.entries(D.players).map(([pid, p]) => Object.assign({ pid }, p));
@@ -121,6 +133,15 @@
         r._ifact = r._proj;
         r._likelyOut = (r.play != null ? 1 - r.play : r.inactive) >= OUT_LINE;  // (AY3) out or a near-certain healthy scratch
         if (r._likelyOut) r._proj = 0;
+        const pl = 1 - (r.inactive || 0), lastNm = n => String(n || '').split(' ').slice(1).join(' ') || n;
+        r._two = null;
+        if (!r._likelyOut && pl >= TWO_LO && pl <= TWO_HI) {  // his own two worlds: plays / sits (0)
+          r._two = pl >= 0.5 ? { alt: 0, txt: 'if he sits' } : { alt: r._proj, txt: 'if he plays', dim: true };
+          if (pl < 0.5) r._proj = 0;
+        } else if (r.cond && 1 - r.cond[2] >= TWO_LO && 1 - r.cond[2] <= TWO_HI) {  // a teammate's: the other world
+          const [nm, , pSit, plays, sits] = r.cond;
+          r._two = pSit >= 0.5 ? { alt: plays * ratio, txt: `if ${lastNm(nm)} plays` } : { alt: sits * ratio, txt: `if ${lastNm(nm)} sits` };
+        }
         r._q = r.q.map(v => v * ratio);  // p10, p25, p50, p75, p90
         r._ratio = ratio;
         r._fpg = r.sc.g ? pts(r.sc.ss, w, r.pos) / r.sc.g : r.fpg;
@@ -223,6 +244,8 @@
               return `<span class="pv-stack"><b class="pv act-v${tone}" title="${r._live ? 'Live' : 'Final'}: ${f1(r._act)} pts · projected ${f1(r._proj)}${r._likelyOut ? ` (ruled out; ${f1(r._ifact)} if he had played)` : ''}${g != null ? ` · game grade ${50 + Math.round(g * 49 / 99)}` : ''}"><span class="pv-tag">${r._live ? '<span class="live-dot"></span>live' : 'final'}</span>${f1(r._act)}</b><span class="pv-was">proj <b>${f1(r._proj)}</b></span></span>`; })()
             : r._likelyOut
               ? `<b class="pv" title="Under 10% to play: projected 0">0.0</b><span class="ifact" title="${esc(range(r))}">if he plays ${f1(r._ifact)}</span>`
+              : r._two
+              ? `<b class="pv${r._two.dim ? ' pv-dim' : ''}" title="${esc(range(r))}">${f1(r._proj)}</b><span class="ifact">${f1(r._two.alt)} ${esc(r._two.txt)}</span>`
               : `<b class="pv" title="${esc(range(r))}">${f1(r._proj)}</b>` },
         // Matchup right after Proj (owner 2026-10-17: the two numbers a start / sit call hinges on); his team's implied
         // points (the Team pts column) folded into its tooltip
@@ -446,8 +469,9 @@
       });
       const name = state.preset || 'Custom';
       const sn = document.getElementById('scoreName'); if (sn) sn.textContent = name;
-      sec.querySelector('#scoreSub').textContent = name === 'Custom' ? 'Custom-scoring' : name;
-      sec.querySelector('.rosSub').textContent = name === 'Custom' ? 'Custom-scoring' : name;
+      const sub = name === 'Custom' ? 'Custom-scoring' : state.src === 'team' ? `${name}-scoring` : name;
+      sec.querySelector('#scoreSub').textContent = sub;
+      sec.querySelector('.rosSub').textContent = sub;
       sec.querySelector('#scoreSum').textContent = `· ${name}, ${state.lg.teams} teams`;
       document.dispatchEvent(new Event('nfle-scoring'));  // open player page / live points re-score too
     };
@@ -475,15 +499,28 @@
       presetBox.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.textContent === state.preset));
     };
     const save = () => { try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) { /* private mode */ } };
-    const changed = () => { state.preset = Object.keys(SC.presets).find(n => sameW(state.w, SC.presets[n])) || 'Custom'; sync(); draw(); save(); };
+    const changed = () => { state.src = 'own'; state.preset = Object.keys(SC.presets).find(n => sameW(state.w, SC.presets[n])) || 'Custom'; sync(); draw(); save(); };
+    const useTeam = m => { state = fromTeam(m); sync(); draw(); save(); };
+    const teamBtn = document.createElement('button'); teamBtn.type = 'button'; teamBtn.className = 'sp-team';
+    teamBtn.onclick = () => { const m = mine(); if (m) useTeam(m); };
+    presetBox.appendChild(teamBtn);
+    const paintTeam = () => { const m = mine(); teamBtn.hidden = !m; teamBtn.textContent = m ? m.league : ''; };
+    paintTeam();
     Object.keys(SC.presets).forEach(n => {
       const b = document.createElement('button'); b.type = 'button'; b.textContent = n;
       b.onclick = () => { state.w = { ...state.w, ...SC.presets[n] }; changed(); };  // the IDP weights stay
       presetBox.appendChild(b);
     });
+    // switching or removing the active team: follow it unless the viewer picked their own scoring
+    document.addEventListener('nfle-mine', () => {
+      paintTeam();
+      if (state.src === 'own') return;
+      const m = mine();
+      if (m) useTeam(m); else { state = defaults(); sync(); draw(); save(); }
+    });
     panel.querySelectorAll('input[data-k]').forEach(i => i.onchange = () => { const v = parseFloat(i.value); if (isNaN(v)) return; state.w[i.dataset.k] = i.dataset.inv ? (v > 0 ? 1 / v : 0) : v; changed(); });
     panel.querySelectorAll('input[data-l]').forEach(i => i.onchange = () => { const v = parseInt(i.value, 10); if (isNaN(v) || v < 0) return; state.lg[i.dataset.l] = i.dataset.l === 'teams' ? Math.max(4, v) : v; changed(); });
-    sec.querySelector('#spReset').onclick = () => { state = defaults(); changed(); };
+    sec.querySelector('#spReset').onclick = () => { state = defaults(); changed(); };  // an explicit choice too
     btn.onclick = () => { panel.hidden = !panel.hidden; btn.setAttribute('aria-expanded', String(!panel.hidden)); };
     sync();
     showPos('QB');

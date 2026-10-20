@@ -778,6 +778,9 @@ def cond_pair(r, k: str = "cond") -> list | None:
   p_sit = float(getattr(r, f"{k}_p_sit"))
   d = float(getattr(r, f"{k}_sits") - getattr(r, f"{k}_plays"))
   plays, sits = (r.proj - d, r.proj) if p_sit >= 0.5 else (r.proj, r.proj + d)
+  # the swing is measured before team-share normalization, so the anchored other world can dip under zero for a backup
+  # who barely plays in it (Huntley if Lamar plays: -1.4); a world where he hardly takes the field is worth 0, not less
+  plays, sits = max(0.0, plays), max(0.0, sits)
   return [name, getattr(r, f"{k}_pid"), round(p_sit, 3), round(float(plays), 2), round(float(sits), 2)]
 
 
