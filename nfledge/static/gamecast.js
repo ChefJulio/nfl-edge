@@ -58,10 +58,10 @@
       const off = des ? injCode(des) : '', p = 1 - ina, band = TAG_BANDS.find(([lo]) => p >= lo)[1];
       const res = ['IR', 'PUP', 'NFI', 'SSPD'].includes(off);
       const c = res && (band === 'D' || band === 'O') ? off : band;
-      const tip = `${Math.round(100 * p)}% to play by our projection${des ? ` · status: ${des}` : ''}`;
-      const tag = c ? `<span class="dc-tag dt-${c === 'Q' ? 'q' : c === 'D' ? 'd' : 'out'}" title="${esc(tip)}">${esc(c)}</span>` : '';
-      const days = pr ? `<span class="pr-days" title="Practice: ${esc([...pr].map((x, i) => `${DAYS[i] || ''} ${PRAC[x]}`).join(', '))}">${[...pr].map(x => `<i class="pr-${x === '-' ? 'n' : x}">${PRAB[x]}</i>`).join('')}</span>` : '';
-      return tag + days;
+      // no practice-day chips in rows (owner 2026-10-20: "keep that info in the health tile"): in the tip only
+      const tip = `${Math.round(100 * p)}% to play by our projection${des ? ` · status: ${des}` : ''}`
+        + (pr ? ` · practice: ${[...pr].map((x, i) => `${DAYS[i] || ''} ${PRAB[x]}`).join(', ')}` : '');
+      return c ? `<span class="dc-tag dt-${c === 'Q' ? 'q' : c === 'D' ? 'd' : 'out'}" title="${esc(tip)}">${esc(c)}</span>` : '';
     }
     if (!st) return '';
     const c = des ? injCode(des) : '';
