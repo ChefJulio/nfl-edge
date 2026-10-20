@@ -631,6 +631,7 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
 **Queued (pre-register before running)**
 - (AS) midweek stage from the calendar; (AT) one "early week" definition (week clock entry, 2026-10-18).
 - Week clock remaining moves (7 items, "Week clock ... REMAINING WORK" entry).
+- (BC) give the model each quarterback's track record (pre-registered 2026-10-19, log below; arms to build).
 - Partial Vegas lines: if any game of a week lacks a line, every game drops to the model's own volume
   (team_model.GameModel.predict `.all()`); per-game fallback.
 - Small IR-audit leftovers: qb2_play_rate needs a board QB at depth rank 1; debut prior's absolute depth_rank <= 2;
@@ -2879,3 +2880,33 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   stays behind team_model.qb_rush_effects (off). Fantasy: a100 ALL -0.001 [-0.001, +0.000], a30 -0.001 [-0.002,
   -0.000]. Lead: the error sits in how a non-usual starter is rated (few, scattered, shrunk-to-average plays), not in
   the usual starter's rating.
+- **Finding 2026-10-19 (owner: "our model might not take qb quality seriously enough? a team sucks if their qb sucks,
+  and a team is good if their qb is a baller"), exploratory, run after (BB)'s results: the game model underweights
+  quarterback quality.** Usual-starter team-games 2021-25 from (BB)'s base predictions, QB quality = his EPA/dropback
+  on every earlier dropback in the data, shrunk with 200 pseudo-dropbacks at the league mean. By quintile, model -
+  Vegas / model - actual from the team's side: bottom +1.62 / +1.80, 20-40 +1.00 / +0.55, 40-60 -0.75 / -1.42, 60-80
+  -1.17 / -1.46, top -2.59 [-2.96, -2.22] / -2.96 [-4.12, -1.80]. Regression on 1,504 team-games, holding the model's
+  own margin: each 0.1 EPA/dropback of QB edge over the opponent's QB (sd 0.122) = +2.10 pts [+1.34, +2.91] of actual
+  margin the model misses (Vegas sees +2.26 [+2.03, +2.49]); the model's margin itself is not compressed against
+  results (-0.059 [-0.317, +0.187]). Reading: the market prices a QB's track record and we don't; the team ratings
+  see recent plays (half-life 3 weeks, last season gone by week 8), QB terms shrunk toward 0, so a stable, long-run
+  skill is mostly discarded, which also fits backups reading too well ((BB)). Exploratory: chosen after seeing
+  (BB), on the same games; (BC) tests a fix and checks 2026 as data this finding never saw.
+- **PRE-REGISTERED 2026-10-19: (BC) give the model each quarterback's track record.** Career quality q = EPA per
+  dropback on his dropbacks before the game (every season in the data), shrunk with K = 200 pseudo-dropbacks at the
+  league mean (the finding's measure; K = 100 and 400 reported). Arms, each behind config (off = production):
+  qbprior (team_model.qb_prior_scale): the pass unit's QB effects are shrunk toward lambda x (q - league) instead of
+  toward 0, q from dropbacks BEFORE the current season (no double counting of the plays the fit sees); lambda tuned
+  by the existing time-split CV over {0, 0.25, 0.5, 0.75, 1} jointly with the QB penalty. qbedge (game_model
+  qb_career_edge): a points-formula input, own q - opponent's q (as of before the game, current season included),
+  coefficient fit by least squares on the training seasons like the formula's other inputs.
+  Test: tools/game_eval.py 2021-25 (corrected harness), --save per arm, scored by tools/qb_swing_eval.py (extended
+  with the gates below); fantasy tools/experiments.py 2021-2025. 2026 weeks 2-6 scored the same way and reported as
+  the out-of-sample check.
+  GATE, each arm vs base, paired, 95% CI from a bootstrap over season-weeks: (1) all games margin MAE against actual
+  results lower, CI upper < 0, and the mean improvement at least 0.05 points (minimum effect, after (BB)); (2) on
+  QB-change games, |model margin - Vegas margin| lower, CI upper < 0; (3) fantasy MAE, all relevant players, not
+  worse (CI upper < +0.005). Ship: an arm passing all three; both passing: the larger all-games improvement. If one
+  ships, Power, Matchups and the playoff odds use it too (the QB term is how Power's "this week" and rest-of-season
+  ratings move with the starter). Reported, not gated: the finding's QB-edge slope re-run on each arm (should move
+  toward 0); the (BB) diagnosis by kind; the live Lamar -> Huntley swing; 2026 weeks 2-6.
