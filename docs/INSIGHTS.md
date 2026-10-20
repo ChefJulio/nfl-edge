@@ -632,6 +632,7 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
 - (AS) midweek stage from the calendar; (AT) one "early week" definition (week clock entry, 2026-10-18).
 - Week clock remaining moves (7 items, "Week clock ... REMAINING WORK" entry).
 - (BC) give the model each quarterback's track record (pre-registered 2026-10-19, log below; arms to build).
+- (BD) ESPN's estimated return date in the return chain (pre-registered 2026-10-19, log below).
 - Partial Vegas lines: if any game of a week lacks a line, every game drops to the model's own volume
   (team_model.GameModel.predict `.all()`); per-game fallback.
 - Small IR-audit leftovers: qb2_play_rate needs a board QB at depth rank 1; debut prior's absolute depth_rank <= 2;
@@ -2916,3 +2917,27 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   not worse than base (CI upper < +0.10), the games where a wrong QB value would hurt most. |model - Vegas| on
   QB-change games moves to reported, not gated. Gates (1) and (3) unchanged. Standing rule from here: gates score
   accuracy on outcomes; the market is a benchmark and a diagnostic, never a pass condition.
+- **Scan 2026-10-19 (owner, Monday night after week 6: "scan [key injuries] manually and report back").** Against
+  the live site: Davante Adams (ruptured hamstring Sunday, procedure, ESPN return Nov 25) read 100% every later week;
+  Romeo Doubs (IR Monday, return Nov 29) 100% (the rollover's IR path should catch him); Deebo Samuel (ESPN return
+  Nov 8, ~week 10) 75% by week 9; Terry McLaurin's week-6 card read 0% to play for a game he started (an ESPN Out
+  posted mid-game: fixed, rulings posted after a team's kickoff no longer apply to that game). Cause of the first and
+  third: ESPN's estimated return date reaches the current week (bridge / midweek buckets), newly placed IR (floor) and
+  IR players (return_timing.py), but not the return chain every other injured player's later weeks come from, though
+  ESPN's dates run late, not early (median 14 days; INSIGHTS bridge entry). Waivers run Wednesday ~03:00 ET, so
+  Monday / Tuesday rest-of-season values are the ones people act on.
+- **PRE-REGISTERED 2026-10-19 (owner: "at your discretion"): (BD) ESPN's estimated return date in the return chain.**
+  Variant: the chain's hazard (returns.ReturnModel, CHAIN_FEATURES) gains espn_wk (weeks from his team's next game to
+  ESPN's return date, from the latest capture between the game he just missed and that next game: return_timing.enrich,
+  the IR model's own feature), espn_has, espn_out (ESPN status Out); as the chain steps to his team's following game
+  espn_wk drops by that gap / 7 (the date is fixed). No capture = missing (seasons before 2022; the model handles it).
+  Test: tools/return_espn_eval.py, the harness of tools/return_days_eval.py: every return-model state, walk-forward
+  2022-25 (each season fit on the seasons before), label = played his team's k-th game after it, k = 1..6; 2026 so far
+  as CONFIRM. GATE: (1) states with an ESPN capture, Brier over k = 1..6 pooled: lower, 95% CI over 2,000 player-state
+  resamples with upper < 0, improvement at least 0.003 (minimum effect), lower in >= 3 of 4 seasons; (2) all states,
+  k = 1..6: not worse (CI upper < +0.0005); (3) calibration error (10 bins, k = 1, states with a capture) not above
+  today's + 0.005; CONFIRM 2026 same direction. Ship: the live chain uses it for players already out and for newly
+  injured ones (their state gets the live feed's date), so lookahead weeks, rest of season, Fantasy values and Power C
+  all move. Reported, not gated: states whose ESPN date is 14+ days past the next game (the Adams case); a rule arm
+  (no game before ESPN's date when it is 14+ days past the next game and ESPN says Out) on the same rows; IR / PUP
+  states apart (return_timing.py already reads ESPN).
