@@ -3078,3 +3078,21 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   rows were mostly depth players; a version limited to players whose long-window role was large (Tank Dell's 14.8%
   target share) is to be pre-registered and judged on 2026's returns as they happen (data (BF) never saw), not on
   2021-25 again.
+- **Rollover check 2026-10-20 (owner: "confirm the auto tuesday rollover worked"): it did.** The watcher started the
+  build at 06:10 ET (rollover + 10 min); week 7 live; later builds as data landed (archived week 6 with all 14 finals
+  incl. MNF by 14:26 UTC); week 7's Power arrows equal the archived week-6 page for all 32 teams. Players: Adams w7 5%,
+  w8-10 0, w12 72% (long-date rule); Doubs IR 0 through w10, w12 73%; Deebo w7 5%, w9 65%; Lamar w7 35%. Gap seen:
+  Terry McLaurin (knee, left MNF, ESPN Out to Nov 1) reads 100% for week 8: Washington is on bye in week 7, so he is on
+  no board this week and nothing starts his chain (status board item (AY), Hockenson / Tank Hudson).
+- **PRE-REGISTERED 2026-10-20 (owner: "yes"): (BG) injured right before a bye.** During his team's bye week a player
+  is on no board (engine candidates are this week's playing teams), so ESPN's post-game status never reaches him and
+  the lookahead reads him healthy for his next game and every one after. Variant: for a team on bye this week, a QB /
+  RB / WR / TE whose ESPN status (Out / Doubtful / Questionable / IR) was updated after his last game gets a newly-
+  injured state starting at his next game (returns._newly_injured bye_start), that game's chance = the bye rate for his
+  ESPN bucket (Out with a return date 7+ days past that game / Out / Doubtful / Questionable), then the chain. The bye
+  rates are measured on bye-week cases from seasons before (2022-25 ESPN captures: the latest capture between his last
+  game and 4 days before his next game; label = played his next game), shrunk toward the normal-week bridge rate with 10
+  pseudo-cases. IR keeps its floor (espn_ir). Test: tools/bye_injury_eval.py, rows = those players 2022-25, walk-
+  forward by season (rates from earlier seasons; 2022 uses the normal-week rates). GATE: (1) Brier for his next game vs
+  today's 1.0: lower, 95% CI over team-byes with upper < 0, improvement >= 0.01; (2) calibration: mean predicted within 5
+  points of the played rate; reported: per bucket played rate before a bye vs in a normal week.
