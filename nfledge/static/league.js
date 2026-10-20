@@ -388,15 +388,18 @@
       const infoRow = (p, tag, val, sub, cls = '') => `<tr class="teamrow" style="${NFLE.fmt.rowStyle(TEAMS, p.team)}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}>
           <td class="lg-slot">${esc(tag)}</td><td class="lg-who">${NFLE.ui.player({ name: p.name, team: p.team, photo: p.photo, espn: p.espn, pid: p.pid, subHtml: sub }, TEAMS)}</td>
           <td class="num"><b class="${cls}">${val}</b></td></tr>`;
-      const addRows = best.map(m => infoRow(m.add, m.add.pos, perWk(m.ros), `${perG(m.add.ros, m.add.games)}/g · ${NFLE.fmt.signed1(m.wk)} this wk`, 'good'));
+      // Proj = this week's projection, as the lineup rows show it (owner 2026-10-20); what he adds to your team per week
+      // (the order) moves to the line under his name
+      const projCell = a => a.proj != null ? f1(a.proj) : /bye/.test(a.why || '') ? '<span class="muted">Bye</span>' : '—';
+      const addRows = best.map(m => infoRow(m.add, m.add.pos, projCell(m.add), `${perG(m.add.ros, m.add.games)}/g · ${perWk(m.ros)}/wk for you`));
       const belowRows = below.map(o => { const top = o.beat.sort((a, b) => b.ros - a.ros)[0];
         return infoRow(o.p, o.p.pos, o.beat.length, `${perG(o.ros, o.games)}/g · top FA ${esc(last(top.name))} ${perG(top.ros, top.games)}`, 'bad'); });
       return `<h3 class="lg-h">Waiver wire${wv ? ` <span class="muted lg-wv">${wv}</span>` : ''}</h3>
           <div class="lg-mv-sub">Best available for you</div>
-          ${addRows.length ? table(addRows.join(''), '<th>Pos</th><th>Free agent</th><th class="num" title="What he adds to your team per week, rest of season">+/wk</th>')
+          ${addRows.length ? table(addRows.join(''), '<th>Pos</th><th>Free agent</th><th class="num" title="His projection this week, your scoring">Proj</th>')
             : '<p class="muted">No free agent improves your team over the rest of the season by our projections.</p>'}
           ${belowRows.length ? `<div class="lg-mv-sub">Below the waiver wire</div>${table(belowRows.join(''), '<th>Pos</th><th>Your player</th><th class="num" title="Free agents at his position who project more the rest of the season">Beat by</th>')}` : ''}
-          <p class="muted lg-note">Best available = the top three free agents at each position that improve your team. +/wk = what he'd add to your team per week, your best lineup each remaining week through ${ROS.through}, making room with whoever costs least (one QB, TE, K and D/ST is enough; ${DEPTH_MIN} RBs and WRs stay). Beat by = free agents at his position who project more (top FA = the best of them). /g = expected points per remaining game, byes skipped. Upside the projections can't see is your call.</p>`;
+          <p class="muted lg-note">Best available = the top three free agents at each position that improve your team. /wk for you = what he'd add to your team per week (the order), your best lineup each remaining week through ${ROS.through}, making room with whoever costs least (one QB, TE, K and D/ST is enough; ${DEPTH_MIN} RBs and WRs stay). Beat by = free agents at his position who project more (top FA = the best of them). /g = expected points per remaining game, byes skipped. Upside the projections can't see is your call.</p>`;
     };
     // IR (owner 2026-10-17: "no mention of IR slots"): listed under the bench with when he's likely back (the first week
     // the return model gives him at least an even chance to play); never in the lineup
