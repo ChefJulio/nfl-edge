@@ -688,15 +688,24 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .rt-chip.bad { background: rgba(242,120,109,.14); color: var(--bad); }
 .rt-dt { margin: 0 0 8px 28px; width: calc(100% - 28px); font-size: var(--fs-sm); }
 .rt-dt .rt-main td { font-weight: 700; }
-.rt-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; margin: 8px 0 2px; font-size: var(--fs-md); }
-.rt-line .pc-k { margin: 0 4px 0 0; }
 .rt-more { margin-left: auto; background: none; border: 0; color: var(--accent); padding: 2px 0; font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer; }
 .rt-more:hover { text-decoration: underline; }
 .oc-stats { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 6px !important; }
 .oc-stats .tm-st { padding: 8px 10px; }
 .oc-stats .tm-stv { font-size: 20px; }
 .oc-stats .pc-sub { font-size: 11px; margin: 2px 0 0; }
-.pc-box.rt-line { margin: 8px 0 0; padding: 10px 12px; }
+.pc-box.ts-box { margin: 8px 0 0; padding: 10px 10px 8px; }
+.ts-grid { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px 2px; margin-top: 6px; }
+.ts-c { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 3px 0 4px; border-radius: 8px; min-width: 0; }
+.ts-c.cur { box-shadow: inset 0 0 0 1.5px var(--accent); }
+.ts-w { font-size: var(--fs-2xs); color: var(--faint); font-variant-numeric: tabular-nums; line-height: 1; }
+.ts-w i { font-style: normal; margin-left: 1px; }
+.ts-c .nl { width: 26px !important; height: 26px !important; }
+.ts-c .nl img { width: 20px !important; height: 20px !important; }
+.ts-r { font-size: var(--fs-2xs); font-weight: 700; line-height: 1.1; text-align: center; color: var(--muted); min-height: 1.1em; }
+.ts-r small { display: block; font-weight: 400; color: var(--faint); font-size: 9px; }
+.ts-r.w { color: var(--good); } .ts-r.l { color: var(--bad); }
+.ts-bye { font-size: 9px; font-weight: 700; color: var(--faint); letter-spacing: .04em; margin-top: 7px; }
 
 /* Live tab pane picker (one pane visible at a time) */
 .gc-panes { position: sticky; top: 0; z-index: 5; display: flex; width: 100%; margin: 8px 0 10px; background: var(--panel); }

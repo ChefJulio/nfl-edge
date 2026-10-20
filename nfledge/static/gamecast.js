@@ -2273,14 +2273,24 @@
     }).sort((a, b) => b.own - a.own || b.sig - a.sig || Math.abs(b.v) - Math.abs(a.v));
     return { m, T, games };
   };
-  // one line for the Week tab (current week only)
-  const rootLine = (abbr, d) => {
-    const O = oddsData(), x = O && +O.season === +d.season && O.root && +O.root.week === +d.week ? rtRows(O, abbr) : null;
-    if (!x) return '';
-    const sig = x.games.filter(r => !r.own && r.real(x.m) && r.v > 0).slice(0, 3);
-    return `<div class="pc-box rt-line"><span class="pc-k">Rooting interests</span> ${sig.length
-      ? sig.map(r => `${tmL(r.root, `<b>${esc(rtTeam(O, r.root).nick || r.root)}</b>`)} <small class="muted">${rtPts(r.v)}</small>`).join(' · ')
-      : '<span class="muted">no other game moves their odds much</span>'} <button type="button" class="rt-more" data-tt-go="po">Full guide</button></div>`;
+  // the whole regular season at a glance (owner 2026-10-20: replaces the rooting line on the Week tab): every week's
+  // opponent, results so far, this week outlined, byes marked; tap an opponent for its card. From odds.json's schedule
+  // (data/playoffs/odds.json sched: [week, opp, home, pf, pa, date]), the current season only.
+  const seasonRow = (abbr, d) => {
+    const O = oddsData();
+    const sch = O && +O.season === +d.season ? (O.sched || {})[abbr] : null;
+    if (!sch || !sch.length) return '';
+    const by = Object.fromEntries(sch.map(g => [g[0], g])), n = Math.max(18, ...sch.map(g => g[0]));
+    const cells = Array.from({ length: n }, (_, i) => i + 1).map(w => {
+      const g = by[w], cur = +w === +d.week ? ' cur' : '';
+      if (!g) return `<div class="ts-c bye${cur}"><span class="ts-w">${w}</span><span class="ts-bye">BYE</span></div>`;
+      const [, o, home, pf, pa, day] = g, done = pf != null && pa != null;
+      const res = done ? (pf > pa ? 'W' : pf < pa ? 'L' : 'T') : '';
+      const tip = `Week ${w} · ${day || ''} · ${home ? 'vs' : '@'} ${(rtTeam(O, o).nick || o)}${done ? ` · ${res} ${pf}-${pa}` : ''}`;
+      return `<div class="ts-c${cur}" title="${esc(tip)}"><span class="ts-w">${w}${home ? '' : '<i>@</i>'}</span>${tmL(o, tLogo(o, 22))}`
+        + `<span class="ts-r ${res === 'W' ? 'w' : res === 'L' ? 'l' : ''}">${done ? `${res} <small>${pf}-${pa}</small>` : ''}</span></div>`;
+    }).join('');
+    return `<div class="pc-box ts-box"><div class="pc-k">${esc(d.season)} schedule</div><div class="ts-grid">${cells}</div></div>`;
   };
   // odds by week: lines going into each week, dashed to next week's best / worst case; schedule along the bottom
   const oddsChart = (abbr, O) => {
@@ -2501,7 +2511,7 @@
     // the Games tab's tile (win chances, line, ours; the score once it starts, repainted live)
     const week = g ? `<div class="pc-k pc-mtk">${esc(wkLabel(d))}</div><div class="pc-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>`
       : `<div class="pc-box"><div class="pc-k">${esc(wkLabel(d))}</div><b>Bye</b></div>`;
-    return { html: `${week}${rootLine(abbr, d)}${teamTiles(abbr, d, TLOGS[abbr], pw)}`, players: '' };
+    return { html: `${week}${seasonRow(abbr, d)}${teamTiles(abbr, d, TLOGS[abbr], pw)}`, players: '' };
   };
   // the Players sheet's list: by grade (owner 2026-10-17: "replace tier with grade ... and sort by it"), ungraded last
   const teamPlayerRows = (abbr, d) => {
