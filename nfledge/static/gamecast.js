@@ -49,9 +49,11 @@
   // week"): his injury chance to sit this week from the model, the latest data before his game; the tag then names our
   // projection in the NFL's words, not whatever label is current (the official designation and practice days stay in
   // the tip / chips). Bands = halfway between how often players with each final official status played (2019-25, QB /
-  // RB / WR / TE on the report): none 83%, Questionable 62%, Doubtful 3%, Out ~0 -> no tag at 72%+, Q from 32%, D from
-  // 3%, O below. A reserve list (IR, PUP, NFI, SSPD) keeps its own code while we have him under 32%.
-  const TAG_BANDS = [[0.72, ''], [0.32, 'Q'], [0.03, 'D'], [-1, 'O']];
+  // RB / WR / TE on the report): none 83%, Questionable 62%, Doubtful 3%, Out ~0; the no-tag line (owner 2026-10-20:
+  // "bump the threshold for Q ... 90%+ish") is halfway between a regular NOT on the next week's report (played 92.8%,
+  // 33,856 player-weeks) and one on it with no designation (83%) -> no tag at 88%+, Q from 32%, D from 3%, O below. A
+  // reserve list (IR, PUP, NFI, SSPD) keeps its own code while we have him under 32%.
+  const TAG_BANDS = [[0.88, ''], [0.32, 'Q'], [0.03, 'D'], [-1, 'O']];
   const injTag = (st, ina) => {
     const m = String(st || '').match(/^(.*?)\s*\(([DLF-]+)\)\s*$/), des = (m ? m[1] : String(st || '')).trim(), pr = m ? m[2] : '';
     if (ina != null && ina === ina) {
