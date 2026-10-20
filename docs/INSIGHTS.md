@@ -635,7 +635,7 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
    Gate fails -> the rule comes out.
 
 **Queued (pre-register before running)**
-- Role for returning STARTERS (after (BF) failed on mostly depth players): pre-register, judge on 2026 returns.
+- (BH) role for returning starters: pre-registered 2026-10-20, running on 2020 + 2026.
 - (AS) midweek stage from the calendar; (AT) one "early week" definition (week clock entry, 2026-10-18).
 - Week clock remaining moves (7 items, "Week clock ... REMAINING WORK" entry).
 - Partial Vegas lines: if any game of a week lacks a line, every game drops to the model's own volume
@@ -3111,3 +3111,14 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   as of week 7: Terry McLaurin (ESPN Doubtful) week 8 100% -> 4%, then 33 / 49%; Marcus Mariota (already on the chain)
   week 8 32%. Known lean: the normal-week rates are pessimistic before a bye (Questionable played 54% vs 44%); to
   measure on 2026's daily snapshots at season end.
+- **PRE-REGISTERED 2026-10-20 (owner: "queue, run it"): (BH) a role for returning STARTERS.** (BF) filled every empty
+  recent window (403 returns, mostly depth players) and lost on MAE. Variant (experiments.return_role = "starters"):
+  the same fill (long-window shares x the walk-forward first-game-back factor by position) only for a player who was a
+  starter in that long window, by rank among his last team's players at his position group: WR / TE top 3 by long
+  target share, RB top 1 by long carry share, QB top 1 by long dropback share (ranks, not cutoffs). Data (BF) never
+  saw: 2020 (history 9 seasons, so it trains on 2018-19) and 2026 weeks so far. tools/experiments.py
+  baseline,return_starters 2020,2026; tools/return_role_eval.py --variant=return_starters --seasons=2020,2026.
+  GATE: (1) touched rows (played), MAE lower, 95% CI over season-weeks with upper < 0, improvement >= 0.5 points;
+  (2) all relevant rows not worse (CI upper < +0.003); (3) touched rows' mean projection within 1.5 points of the mean
+  actual. Reported: by position; the touched players by name. Expected: few touched rows (a few dozen), so (1) may
+  fail on width alone; that is a valid outcome.
