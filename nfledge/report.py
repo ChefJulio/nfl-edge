@@ -1058,7 +1058,9 @@ def records(eng, season: int, week: int, current: bool = False) -> dict:
 
 
 def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None = None, plan: dict | None = None,
-                current: bool = False) -> tuple[list, list]:
+                current: bool = False, published: dict | None = None) -> tuple[list, list]:
+  """published: {week: {team: (rank, net)}} from the season's archived pages; when given, past weeks' arrows, rank
+  trend and net trend read them (what those pages show) instead of a recomputation."""
   rb = eng.tm.fit(season, week, bootstrap=cfg["team_model"]["bootstrap_samples"])
   vol = league_volume(eng, season, week, rb)
   starters = starters_asof(eng, season, week)
@@ -1111,7 +1113,11 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
   sim_rank = (-sims).argsort(axis=1).argsort(axis=1) + 1
   lo = pd.Series(np.percentile(sim_rank, 10, axis=0), index=u.index).round().astype(int)
   hi = pd.Series(np.percentile(sim_rank, 90, axis=0), index=u.index).round().astype(int)
-  prev_rank = hist[week - 1].rank(ascending=False) if (week - 1) in hist else None
+  published = published or {}
+  if (week - 1) in published:
+    prev_rank = pd.Series({t: v[0] for t, v in published[week - 1].items()})
+  else:
+    prev_rank = hist[week - 1].rank(ascending=False) if (week - 1) in hist else None
   rk = lambda s: s.rank(ascending=False, method="min").astype(int)
   ranks = {c: rk(u[c]) for c in u.columns}
   rank_now = rk(u_now.net)
@@ -1139,7 +1145,9 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
       "sos_next": float(sp.get("next", np.nan)), "sos_next_rk": int(sos_rk["next"].get(team, 0)),
       "sos_past_o": float(sp.get("off_past", np.nan)), "sos_past_d": float(sp.get("def_past", np.nan)),
       "sos_next_o": float(sp.get("off_next", np.nan)), "sos_next_d": float(sp.get("def_next", np.nan)),
-      "net_hist": [round(float(x), 2) for x in hist.loc[team].tolist() if pd.notna(x)] if team in hist.index else [],
+      # past weeks as their archived pages show them; this week = the headline net
+      "net_hist": [round(float(u.at[team, "net"] if w == week else published[w][team][1] if team in published.get(w, {}) else x), 2)
+                   for w, x in hist.loc[team].items() if pd.notna(x)] if team in hist.index else [],
       # 1 where that week's rating used a QB other than his usual starter (aligned with net_hist)
       "qb_hist": [int(bool(usual.get(team)) and qb_by_week[w].get(team) != usual.get(team))
                   for w, x in hist.loc[team].items() if pd.notna(x)] if team in hist.index else [],
@@ -1147,6 +1155,7 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
                   if usual.get(team) and starters.get(team) and starters.get(team) != usual[team] else ""),
       # this week's point is the headline rank (bootstrap fit + projected starters), so trend and header agree
       "rank_hist": {**({int(w): int(v) for w, v in hist_rk.loc[team].items() if pd.notna(v)} if team in hist_rk.index else {}),
+                    **{int(w): int(p[team][0]) for w, p in published.items() if team in p},
                     int(week): int(ranks["net"][team])},
     })
   return sorted(rows, key=lambda x: x["rank"])

@@ -168,10 +168,22 @@ def with_weather(games: list, wk, live: bool) -> list:
 
 
 def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict, res=None, ev=None,
-               bt_seasons=(), archive: bool = False, lookahead: int = 0, plan: dict | None = None) -> dict:
+               bt_seasons=(), archive: bool = False, lookahead: int = 0, plan: dict | None = None,
+               site_dir: Path | None = None) -> dict:
   """Everything one season / week page needs (shared by run.py and tools/build_archive.py); report.render turns
   it into the page's JSON."""
-  power = rp.team_tables(eng, season, week, cfg, proj, plan=plan, current=not (archive or lookahead))
+  # Power's arrows and trend read the season's earlier archived pages (site_dir/<season>/week-NN.json), so they show
+  # what those pages show (owner 2026-10-20: week 5's page said 14th, week 6's arrow implied 15th)
+  published = {}
+  if site_dir is not None and not lookahead:
+    for w in range(1, week):
+      f = Path(site_dir) / str(season) / f"week-{w:02d}.json"
+      if f.exists():
+        try:
+          published[w] = {r["team"]: (r["rank"], r["net"]) for r in json.loads(f.read_text(encoding="utf-8")).get("power") or []}
+        except (ValueError, KeyError):
+          pass
+  power = rp.team_tables(eng, season, week, cfg, proj, plan=plan, current=not (archive or lookahead), published=published)
   wk = data.schedules[(data.schedules.season == season) & (data.schedules.week == week)
                       & (data.schedules.game_type == "REG")]
   n_final, n_games = int(wk.home_score.notna().sum()), len(wk)
@@ -281,7 +293,8 @@ def main():
   plan = None if args.week else returns.availability_plan(data, proj, week, feed, ROOT / cfg["data"]["cache_dir"], gb_cfg(cfg))
   ctx = build_page(eng, data, cfg, scoring, season, week, proj,
                    nav=week_nav(data, season, week, display_week(data) if not args.week else week, prefix=""),
-                   res=res, ev=ev, bt_seasons=bt_seasons, plan=plan)
+                   res=res, ev=ev, bt_seasons=bt_seasons, plan=plan,
+                   site_dir=(Path(args.out).parent if args.out else None))
   if ctx["model_doc"]["stale"]:
     print("[run] warning: MODEL.md is out of date (model code/config changed); see tools/model_doc.py", flush=True)
   out = rp.render(ctx, Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week))

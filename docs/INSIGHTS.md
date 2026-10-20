@@ -619,7 +619,7 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/return model needs to be pristine").
 
 **Running / next up**
-1. IN PROGRESS (owner delegated 2026-10-19, after Tank Dell: IR to return since the opener, full practices in week 6,
+1. SHIPPED 2026-10-20 as (BE2) (owner); history kept: (owner delegated 2026-10-19, after Tank Dell: IR to return since the opener, full practices in week 6,
    coach naming week 7, on no page at all): reserve-list players whose practice window is open (on this week's report;
    before his team's first report of the week, last week's) join the board and get a return state. Built on branch
    wip/window-open (returns.window_open / _window_states, run.py extra candidates), NOT shipped: a local build showed
@@ -635,6 +635,7 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
    Gate fails -> the rule comes out.
 
 **Queued (pre-register before running)**
+- Role for returning STARTERS (after (BF) failed on mostly depth players): pre-register, judge on 2026 returns.
 - (AS) midweek stage from the calendar; (AT) one "early week" definition (week clock entry, 2026-10-18).
 - Week clock remaining moves (7 items, "Week clock ... REMAINING WORK" entry).
 - Partial Vegas lines: if any game of a week lacks a line, every game drops to the model's own volume
@@ -3062,3 +3063,18 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   mostly depth players coming back to small roles, many scoring 0; a share of the old role over-projects them, and
   MAE favors the near-0 projection on such skewed rows. The established starter (Dell) is the rare case here; a
   version for players whose long-window role was large is a new hypothesis, to test on data this one hasn't seen.
+- **Owner decision 2026-10-20: (BE2) shipped ("ship be2").** config injuries.reserve_rows = true: tuesday.week_rows /
+  week_now_rows reserve=True (reserve inputs, reserve-aware calibration); returns.window_open players are this week's
+  candidates (run.py extra_cands) and keep the model's chance in the plan; before his team's first report a
+  window-open player is rated by the week model at stage 0 (was: ESPN's IR bucket, 0); the midweek ESPN IR rate (38%,
+  built for active players newly placed on IR) no longer overrides them; opened-the-season-on-a-list players get a
+  return state for the lookahead (returns._window_states). Live stage-0 rows now set on_now = 0 as the training rows do.
+- **Owner decision 2026-10-20 (Vikings: week 5's page said 14th, week 6's arrow implied 15th): Power's history reads
+  the archived pages.** tools/build_archive.py rebuilds the current season's pages whenever docs.code_fingerprint
+  changes (archive.json "_model/<season>"); run.build_page passes the season's earlier pages (site_dir/<season>/week-NN.json)
+  to report.team_tables, whose arrows (vs last week's page), rank trend and net trend read them. Checked locally: all
+  32 teams' arrows and week-5 trend points equal the rebuilt week-5 page. Cost: ~5 min per model change in CI.
+- **Queued (owner: "up to you"), a new hypothesis after (BF) failed: a role for returning STARTERS.** (BF)'s touched
+  rows were mostly depth players; a version limited to players whose long-window role was large (Tank Dell's 14.8%
+  target share) is to be pre-registered and judged on 2026's returns as they happen (data (BF) never saw), not on
+  2021-25 again.

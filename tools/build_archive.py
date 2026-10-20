@@ -26,6 +26,7 @@ for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 import run  # noqa: E402
+from nfledge import docs  # noqa: E402
 from nfledge import report as rp  # noqa: E402
 from nfledge.config import load_config, load_scoring  # noqa: E402
 from nfledge.data import load_all  # noqa: E402
@@ -69,14 +70,21 @@ def build_season(season: int, out_dir: str, missing_only: bool, built: dict) -> 
   current_week = run.display_week(data)
   weeks = archive_weeks(data, current_week).get(season, [])
   cov = {w: coverage(data, season, w) for w in weeks}
+  # The current season's pages are rebuilt whenever the model changes (owner 2026-10-20): Power's arrows and trend read
+  # them, so last week's page and this week's arrow always come from the same model (each page still uses only what was
+  # known before its week).
+  fp = docs.code_fingerprint()
+  stale_model = season == data.current_season and built.get(f"_model/{season}") != fp
   todo = []
   for w in weeks:
     was = built.get(f"{season}/{w}")
     exists = (Path(out_dir) / str(season) / f"week-{w:02d}.html").exists()
     # A page with no record predates the manifest: take it as complete rather than rebuild every page once.
-    if not (missing_only and exists) or (was is not None and any(n > o for n, o in zip(cov[w], was))):
+    if not (missing_only and exists) or stale_model or (was is not None and any(n > o for n, o in zip(cov[w], was))):
       todo.append(w)
   done = {f"{season}/{w}": cov[w] for w in weeks}
+  if season == data.current_season:
+    done[f"_model/{season}"] = fp
   if not todo:
     return done
   t0 = time.time()
@@ -84,7 +92,7 @@ def build_season(season: int, out_dir: str, missing_only: bool, built: dict) -> 
   for w in todo:
     proj = eng.project_week(season, w, use_injuries=True, quiet=True)  # realized game wind for past games
     ctx = run.build_page(eng, data, cfg, scoring, season, w, proj,
-                         nav=run.week_nav(data, season, w, current_week, prefix="../"), archive=True)
+                         nav=run.week_nav(data, season, w, current_week, prefix="../"), archive=True, site_dir=Path(out_dir))
     path = rp.render(ctx, Path(out_dir) / str(season) / f"week-{w:02d}.html")
     run.check_script(path)
     print(f"  {season} week {w}: {path.stat().st_size / 1e6:.1f} MB", flush=True)

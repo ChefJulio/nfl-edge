@@ -194,6 +194,9 @@ debut_prior = "d12"
 sleeper_blend = {}
 
 [injuries]
+# (BE2) adopted 2026-10-20 by owner decision (INSIGHTS {#reserve-avail-2}): reserve-list players whose practice window
+# is open are candidates, rated by the week model with reserve inputs and their own calibration (was: off the board).
+reserve_rows = true
 ahead_reserve = true   # (AV, {#ahead-reserve}) starters on IR / off the roster rows still count as out ahead of their backups
 # (AY3, {#scratch-dressed}) the healthy-scratch label is the game-day active list (ACT vs INA, 2019 on), not "took a snap":
 # a dressed backup who never plays isn't a scratch. Walk-forward 2021-25, Brier on not-on-report rows vs that label

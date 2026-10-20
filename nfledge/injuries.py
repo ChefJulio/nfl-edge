@@ -230,10 +230,13 @@ class InjuryModel:
     if not hasattr(self, "_week_ctx"):
       rep_rows, hurt = self._tues_inputs()
       self._week_ctx = T._Ctx(self.data, rep_rows, hurt)
-      w = T.week_rows(self.data, rep_rows, hurt).dropna(subset=["y"])
+      # (BE2, owner 2026-10-20) reserve-list players with an open practice window are rows too, with the reserve
+      # inputs and their own calibration (tuesday.week_rows reserve=True)
+      self._week_res = bool(self.cfg.get("injuries", {}).get("reserve_rows"))
+      w = T.week_rows(self.data, rep_rows, hurt, reserve=self._week_res).dropna(subset=["y"])
       self._week_all = w[~((w.stage == 3) & (w.gs_now == "Out"))]
       self._week_models = {}
-    x = T.week_now_rows(self._week_ctx, items)
+    x = T.week_now_rows(self._week_ctx, items, reserve=self._week_res)
     out = np.full(len(x), np.nan)
     for s_ in sorted(set(x.season)):
       if s_ not in self._week_models:
@@ -842,6 +845,12 @@ class InjuryModel:
     p["avail"], p["status"], p["partial_week"], p["on_report"] = 1.0, "", False, False
     p["tuesday"] = ""  # report.inactive_why: why the Tuesday model says what it says
     tues = None
+    # (BE2) reserve-list players whose practice window is open (returns.window_open): rated by the week model, which
+    # was tested on them; the midweek ESPN IR rate (built for active players newly placed on IR) doesn't override it
+    wo = set()
+    if self.cfg.get("injuries", {}).get("reserve_rows") and self.cfg.get("injuries", {}).get("week_model"):
+      from .returns import window_open
+      wo = set(window_open(self.data, week).gsis_id)
     cur_map = cur.set_index("gsis_id")
     prev_map = prev.drop_duplicates("gsis_id").set_index("gsis_id")
     pr = self.data.practice
@@ -892,7 +901,7 @@ class InjuryModel:
         gs = x.game_status.iloc[0]
         label = gs.title() if gs != "None" else ""
         ruled = self.midweek_ruling(row.gsis_id, gs)
-        if ruled:
+        if ruled and not (row.gsis_id in wo and ruled[1].startswith("IR")):
           p.at[i, "avail"], label = ruled
         sd = shown(x, row.team)
         p.at[i, "status"] = label + (f" ({sd})" if sd else "")
@@ -903,6 +912,11 @@ class InjuryModel:
           rep, prac = _report(x.report_status), _practice(x.practice_status)
           p.at[i, "avail"] = self.prob(rep, prac)
           p.at[i, "status"] = rep if rep != "None" else ""
+      elif row.gsis_id in wo:
+        # (BE2) window open, before his team's first report of the week: the week model at stage 0
+        v = self.week_prob([(row.gsis_id, season, week, row.team, row.pos, "", "None", 0)])[0]
+        if v == v:
+          p.at[i, "avail"], p.at[i, "status"] = float(v), "IR (practice window open)"
       elif self.espn_bridge and row.gsis_id in self.espn_bridge:
         # This week's report isn't out, but ESPN has injury news from after his last game: its bucket's P(active),
         # learned from how earlier early-week ESPN statuses turned out (espn_calib.py); before any outcomes, the

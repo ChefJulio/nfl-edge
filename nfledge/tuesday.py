@@ -417,7 +417,7 @@ def week_now_rows(ctx: _Ctx, items: list, reserve: bool = False) -> pd.DataFrame
     k = prev[-1] if prev else None
     seen = _days(days)
     rows.append({"season": s, "week": w, "gsis_id": g, "team": team, "pos": pos or ctx.pos_of.get(g, ""),
-                 **ctx.block(g, s, team, k, w), "y": np.nan, "stage": st, "on_now": 1.0, "days_now": seen,
+                 **ctx.block(g, s, team, k, w), "y": np.nan, "stage": st, "on_now": float(st > 0), "days_now": seen,
                  "wn_D": seen.count("D"), "wn_L": seen.count("L"), "wn_F": seen.count("F"),
                  "w_first": SCORE.get(seen[0], np.nan) if seen else np.nan,
                  "w_last": SCORE.get(seen[-1], np.nan) if seen else np.nan,
