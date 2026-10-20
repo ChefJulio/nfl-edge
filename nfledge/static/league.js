@@ -7,6 +7,7 @@
 (() => {
   const NFLE = window.NFLE, esc = NFLE.esc;
   const LS = 'nfledge-league';
+  const LT = 'nfledge-teams';  // every claimed team (switcher)
   const f1 = v => v == null || isNaN(v) ? '' : (Math.round(v * 10) / 10).toFixed(1);
   const pct = v => `${Math.round(100 * v)}%`;
   const UA = {};  // browsers set their own User-Agent; nothing to send
@@ -212,11 +213,28 @@
     const TEAMS = D.teams || {}, KEYS = D.score.keys;
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem(LS) || 'null'); } catch (e) { /* none */ }
+    // claimed teams (owner 2026-10-20: "claim and switch between multiple teams"): { list: [{ platform, league, team,
+    // user, label, lname }], active }; the single saved league from before migrates in as the first
+    let TEAMS_ = null;
+    try { TEAMS_ = JSON.parse(localStorage.getItem(LT) || 'null'); } catch (e) { /* none */ }
+    if (!TEAMS_ || !Array.isArray(TEAMS_.list)) TEAMS_ = { list: saved && saved.league ? [saved] : [], active: 0 };
+    if (TEAMS_.list.length) saved = TEAMS_.list[Math.min(TEAMS_.active || 0, TEAMS_.list.length - 1)];
+    const sameTeam = (a, b) => a && b && a.platform === b.platform && String(a.league) === String(b.league) && String(a.team) === String(b.team);
+    const saveTeams = () => { try { localStorage.setItem(LT, JSON.stringify(TEAMS_)); } catch (e) { /* private mode */ } };
     // the view is the site's Fantasy sub-tab (shell.js NAV: #league/<view>)
     const VIEWS = ['lineup', 'matchup', 'live', 'teams', 'waivers', 'trade'];
     const fromHash = () => { const m = location.hash.match(/^#league\/(\w+)/); return m && VIEWS.includes(m[1]) ? m[1] : null; };
     let L = null, mine = null, ROS = null, view = fromHash() || 'lineup', feedWho = 'mine';
-    const save = () => { try { localStorage.setItem(LS, JSON.stringify(saved)); } catch (e) { /* private mode */ } };
+    const save = () => {
+      try { localStorage.setItem(LS, JSON.stringify(saved)); } catch (e) { /* private mode */ }
+      // the active entry follows (team picked, names learned); a new one is added and becomes active
+      if (saved && saved.league) {
+        const i = TEAMS_.list.findIndex(x => x.platform === saved.platform && String(x.league) === String(saved.league)
+                                             && (x.team == null || saved.team == null || String(x.team) === String(saved.team)));
+        if (i >= 0) { TEAMS_.list[i] = saved; TEAMS_.active = i; } else { TEAMS_.list.push(saved); TEAMS_.active = TEAMS_.list.length - 1; }
+        saveTeams();
+      }
+    };
     // the gamecast marks the viewer's players and this week's opponent's (owner 2026-10-18: "viewers might want to know
     // how their fantasy players are doing"): our player ids, written whenever the league or the team changes
     const shareMine = () => {
@@ -809,12 +827,23 @@
 
     const header = () => {
       sec.innerHTML = `<div class="sec-head"><div><h2>${esc(L.name)}</h2><p>${L.platform === 'sleeper' ? 'Sleeper' : 'ESPN'} · week ${esc(String(L.week))} · ${L.teams.length} teams · our projections under your league's scoring.</p>${(L.unmodeled || []).length ? `<details class="lg-unmod"><summary>${new Set(L.unmodeled).size} scoring rules not modeled</summary><p class="muted">Your league also scores ${esc([...new Set(L.unmodeled)].join(', '))}: not in our projections yet.</p></details>` : ''}</div></div>
+        ${switcher()}
         <div class="lg-top"><label>Your team <select class="lg-team">${L.teams.map(t => `<option value="${esc(t.id)}"${mine && t.id === mine.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
-          <button type="button" class="lg-change">Change league</button></div>
+          <button type="button" class="lg-change">Remove this team</button></div>
         <div class="lg-body"></div>`;
-      sec.querySelector('.lg-team').onchange = e => { mine = L.teams.find(t => t.id === e.target.value); saved.team = mine.id; save(); shareMine();
+      wireSwitcher(sec);
+      sec.querySelector('.lg-team').onchange = e => { mine = L.teams.find(t => t.id === e.target.value);
+        TEAMS_.list = TEAMS_.list.filter(x => !(sameTeam(x, Object.assign({}, saved, { team: mine.id })) && x !== saved));  // no duplicate claim
+        saved = Object.assign(saved, { team: mine.id, label: mine.name, lname: L.name, unpicked: false }); save(); shareMine();
+        sec.querySelector('.lg-switch').outerHTML = switcher(); wireSwitcher(sec);
         trade = { team: null, give: new Set(), get: new Set(), found: null }; draw(); };
-      sec.querySelector('.lg-change').onclick = () => { saved = null; save(); try { localStorage.removeItem('nfledge-mine'); } catch (e) { /* ignore */ } L = null; NFLE.leagueDst = null; connectView(); };
+      sec.querySelector('.lg-change').onclick = () => {
+        TEAMS_.list = TEAMS_.list.filter(x => x !== saved && !sameTeam(x, saved));
+        TEAMS_.active = 0; saveTeams();
+        try { localStorage.removeItem('nfledge-mine'); } catch (e) { /* ignore */ }
+        L = null; NFLE.leagueDst = null;
+        if (TEAMS_.list.length) open(TEAMS_.list[0]); else { saved = null; try { localStorage.removeItem(LS); } catch (e) { /* ignore */ } connectView(); }
+      };
     };
 
     const setView = v => {
@@ -832,29 +861,62 @@
         L = s.platform === 'espn' ? await espn.load(s.league, season) : await sleeper.load(s.league);
         NFLE.leagueDst = L && L.dw ? { w: L.dw, name: L.name } : null;  // D/ST cards score with this league's settings
         mine = L.teams.find(t => t.id === s.team) || L.teams.find(t => s.user && t.owner === s.user) || L.teams[0];
-        saved = Object.assign({}, s, { team: mine.id }); save(); shareMine();
+        // an ESPN league has no owner to match: until a team is picked, the first one shows and the switcher says so
+        const picked = s.team != null || !!(s.user && L.teams.some(t => t.owner === s.user));
+        saved = Object.assign(s, { team: mine.id, label: mine.name, lname: L.name, unpicked: !picked && L.platform === 'espn' }); save(); shareMine();
         header(); setView(view);
       } catch (e) {
-        saved = null; save(); connectView(`Couldn't load that league: ${e.message}`);
+        connectView(`Couldn't load that league: ${e.message}`);
       }
     };
 
+    // the claimed teams as chips: tap one to switch, + to add another (owner 2026-10-20)
+    const switcher = () => `<div class="lg-switch">${TEAMS_.list.map((x, i) => `<button type="button" class="lg-chip${x === saved ? ' on' : ''}" data-i="${i}">
+        <b>${esc(x.unpicked ? 'Pick your team' : (x.label || 'Team'))}</b><small>${esc(x.lname || (x.platform === 'espn' ? 'ESPN league' : 'Sleeper league'))}</small></button>`).join('')}
+        <button type="button" class="lg-chip lg-add" aria-label="Add a team">+</button></div>`;
+    const wireSwitcher = root => {
+      const sw = root.querySelector('.lg-switch'); if (!sw) return;
+      sw.onclick = e => {
+        const b = e.target.closest('.lg-chip'); if (!b) return;
+        if (b.classList.contains('lg-add')) { connectView(); return; }
+        const x = TEAMS_.list[+b.dataset.i];
+        if (x && x !== saved) { TEAMS_.active = +b.dataset.i; saveTeams(); trade = { team: null, give: new Set(), get: new Set(), found: null }; open(x); }
+      };
+    };
+    // Sleeper: every team the user owns this season, claimed at once (owner: "auto claim")
+    const claimSleeper = async (username) => {
+      const r = await sleeper.leaguesFor(username, season);
+      if (!r.leagues.length) throw new Error(`No ${season} Sleeper leagues for ${username}`);
+      const B = 'https://api.sleeper.app/v1', found = [];
+      await Promise.all(r.leagues.map(async l => {
+        const [rosters, users] = await Promise.all([getJSON(`${B}/league/${l.id}/rosters`), getJSON(`${B}/league/${l.id}/users`)]);
+        (rosters || []).filter(x => x.owner_id === r.user || (x.co_owners || []).includes(r.user)).forEach(x => {
+          const u = (users || []).find(z => z.user_id === x.owner_id) || {};
+          found.push({ platform: 'sleeper', league: l.id, user: r.user, team: String(x.roster_id),
+                       label: (u.metadata && u.metadata.team_name) || u.display_name || `Team ${x.roster_id}`, lname: l.name });
+        });
+      }));
+      return found;
+    };
+
     function connectView(err = '') {
-      sec.innerHTML = `<div class="sec-head"><div><h2>My League</h2><p>Bring your fantasy league here: your lineup, matchup and waiver pickups with our projections under your league's own scoring.</p></div></div>
+      sec.innerHTML = `<div class="sec-head"><div><h2>${TEAMS_.list.length ? 'Add a team' : 'My League'}</h2><p>Bring your fantasy league here: your lineup, matchup and waiver pickups with our projections under your league's own scoring.</p></div></div>
+        ${TEAMS_.list.length ? switcher() : ''}
         ${err ? `<p class="lg-err">${esc(err)}</p>` : ''}
         <div class="card lg-connect">
           <div class="seg lg-plat"><button type="button" data-p="sleeper" class="on">Sleeper</button><button type="button" data-p="espn">ESPN</button></div>
-          <p class="muted lg-hint">Sleeper: your username, or a league id.</p>
+          <p class="muted lg-hint">Sleeper: your username (claims every team you own) or a league id.</p>
           <div class="lg-form"><input type="text" class="lg-in" placeholder="Sleeper username or league id" autocomplete="off"><button type="button" class="sbtn lg-go">Connect</button></div>
           <div class="lg-pick"></div>
           <p class="muted lg-note">Saved on this device only. ESPN: public leagues only (league settings: "make league viewable to public"); the id is the leagueId= number in your league's web address. Yahoo isn't supported (it needs a login server).</p>
         </div>`;
+      wireSwitcher(sec);
       let plat = 'sleeper';
       const inp = sec.querySelector('.lg-in'), pick = sec.querySelector('.lg-pick');
       sec.querySelector('.lg-plat').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return; plat = b.dataset.p;
         sec.querySelectorAll('.lg-plat button').forEach(x => x.classList.toggle('on', x === b));
         inp.placeholder = plat === 'espn' ? 'ESPN league id' : 'Sleeper username or league id';
-        sec.querySelector('.lg-hint').textContent = plat === 'espn' ? 'ESPN: your public league\'s id.' : 'Sleeper: your username, or a league id.'; };
+        sec.querySelector('.lg-hint').textContent = plat === 'espn' ? 'ESPN: your public league\'s id; then pick your team.' : 'Sleeper: your username (claims every team you own) or a league id.'; };
       const go = async () => {
         const v = inp.value.trim(); if (!v) return;
         if (plat === 'espn') {  // a pasted web address: the number after leagueId= (joining every digit folded in the season)
@@ -862,12 +924,15 @@
           return open({ platform: 'espn', league: m ? m[1] : v.replace(/\D/g, '') });
         }
         if (/^\d{10,}$/.test(v)) return open({ platform: 'sleeper', league: v });
-        pick.innerHTML = '<p class="muted">Finding your leagues…</p>';
+        pick.innerHTML = '<p class="muted">Finding your teams…</p>';
         try {
-          const r = await sleeper.leaguesFor(v, season);
-          if (!r.leagues.length) { pick.innerHTML = `<p class="lg-err">No ${season} Sleeper leagues for ${esc(v)}.</p>`; return; }
-          pick.innerHTML = r.leagues.map(l => `<button type="button" class="sbtn lg-lg" data-id="${esc(l.id)}">${esc(l.name)}</button>`).join('');
-          pick.onclick = e => { const b = e.target.closest('[data-id]'); if (b) open({ platform: 'sleeper', league: b.dataset.id, user: r.user }); };
+          const found = await claimSleeper(v);
+          if (!found.length) { pick.innerHTML = `<p class="lg-err">${esc(v)} doesn't own a team in a ${season} Sleeper league.</p>`; return; }
+          const fresh = found.filter(f => !TEAMS_.list.some(x => sameTeam(x, f)));
+          TEAMS_.list.push(...fresh); saveTeams();
+          const first = fresh[0] || TEAMS_.list.find(x => sameTeam(x, found[0]));
+          TEAMS_.active = TEAMS_.list.indexOf(first); saveTeams();
+          open(first);
         } catch (e) { pick.innerHTML = `<p class="lg-err">${esc(e.message)}</p>`; }
       };
       sec.querySelector('.lg-go').onclick = go;
