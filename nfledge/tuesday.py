@@ -100,6 +100,11 @@ class _Ctx:
     ro = d.rosters.dropna(subset=["gsis_id"])
     rr = ro[ro.status == "RES"]
     self.res = set(zip(rr.gsis_id, rr.season.astype(int), rr.week.astype(int)))
+    # (BE) the list a reserve player is on: 1 designated to return (R48), 2 injured reserve (R01), 3 PUP / NFI (R04 /
+    # R05), 4 any other reserve code
+    code = rr.status_description_abbr.map({"R48": 1.0, "R01": 2.0, "R04": 3.0, "R05": 3.0}).fillna(4.0) \
+      if "status_description_abbr" in rr else pd.Series(4.0, index=rr.index)
+    self.res_code = dict(zip(zip(rr.gsis_id, rr.season.astype(int), rr.week.astype(int)), code))
     last = ro.drop_duplicates("gsis_id", keep="last").set_index("gsis_id")
     self.born = pd.to_datetime(last.birth_date, errors="coerce")
     self.pos_of = last.position.replace({"FB": "RB", "HB": "RB"}).to_dict()  # (I2) rows with no position recorded
@@ -139,6 +144,17 @@ class _Ctx:
             "ep_weeks": float(min(ep_w, 8)), "ep_D": ep_days.count("D"), "ep_L": ep_days.count("L"), "ep_F": ep_days.count("F"),
             "why": self.why.get((s, k, g), "none") if k is not None else "none", "bye": float(k is not None and k1 - k > 1),
             "age": (pd.Timestamp(f"{s}-09-01") - bd).days / 365.25 if pd.notna(bd) else np.nan}
+
+  def reserve(self, g, s: int, team: str, k: int | None) -> dict:
+    """(BE) on a reserve list at his previous team game k: the list and how many team weeks in a row (capped 17)."""
+    if k is None or (g, s, k) not in self.res:
+      return {"res_prev": 0.0, "res_code": 0.0, "res_weeks": 0.0}
+    n = 0
+    for x in reversed([x for x in self.tw.get((s, team), []) if x <= k]):
+      if (g, s, x) not in self.res:
+        break
+      n += 1
+    return {"res_prev": 1.0, "res_code": float(self.res_code.get((g, s, k), 4.0)), "res_weeks": float(min(n, 17))}
 
   def label(self, g, s: int, team: str, w: int) -> float:
     return float((g, s, w) in self.on) if (s, w, team) in self.final else np.nan
@@ -199,9 +215,11 @@ def fit(rows: pd.DataFrame):
 STAGES = (0, 1, 2, 3)  # 0 = Tuesday (no report yet), 1 = Wednesday, 2 = Thursday, 3 = final report
 
 
-def week_rows(d, rep_rows: pd.DataFrame, hurt: set) -> pd.DataFrame:
+def week_rows(d, rep_rows: pd.DataFrame, hurt: set, reserve: bool = False) -> pd.DataFrame:
   """(player, game w) for everyone on game w's final report or in the Tuesday population for game w, at each stage
-  of the week: the Tuesday block (from his previous game) + this week's report as it stood at that stage."""
+  of the week: the Tuesday block (from his previous game) + this week's report as it stood at that stage.
+  reserve (BE): a player on a reserve list at his previous game is a row too when his practice window is visibly open
+  (stage 0: on his previous week's report; stages 1-3: on this week's), with the res_* inputs."""
   ctx = _Ctx(d, rep_rows, hurt)
   targets = {}
   for r in rep_rows.itertuples():
@@ -218,16 +236,21 @@ def week_rows(d, rep_rows: pd.DataFrame, hurt: set) -> pd.DataFrame:
       continue
     prev = [x for x in ctx.tw.get((s, team), []) if x < w]
     k = prev[-1] if prev else None
-    if k is not None and (g, s, k) in ctx.res:
+    on_res = k is not None and (g, s, k) in ctx.res
+    if on_res and not reserve:
       continue  # already on a reserve list: the return-timing model's job
     base = {"season": s, "week": w, "gsis_id": g, "team": team, "pos": pos, **ctx.block(g, s, team, k, w),
-            "y": ctx.label(g, s, team, w)}
+            "y": ctx.label(g, s, team, w), **(ctx.reserve(g, s, team, k) if reserve else {})}
     now = ctx.rep.get((g, s, w))
+    if on_res and now is None and (g, s, k) not in ctx.rep:
+      continue  # window not visibly open at any stage
     days_now, gs_now = (_days(now.days), _gs(now.game_status)) if now is not None else ("", "None")
     why_now = ctx.why.get((s, w, g), "none") if now is not None else "none"
     for st in STAGES:
       if 0 < st < 3 and len(days_now) < 3:
         continue  # a short report week (Thursday game) has no separate Wednesday / Thursday stage
+      if on_res and (now is None if st > 0 else (g, s, k) not in ctx.rep):
+        continue  # (BE) only once his window is visible at this stage
       seen = days_now if st == 3 else days_now[:st] if st else ""
       on_now = float(now is not None and st > 0)
       rows.append({**base, "stage": st, "on_now": on_now, "days_now": seen,
@@ -330,6 +353,9 @@ def week_features(x: pd.DataFrame) -> pd.DataFrame:
       f[c] = x[c].astype(float).to_numpy()
   for c in ("on_now", "wn_D", "wn_L", "wn_F", "w_first", "w_last"):
     f[c] = x[c].astype(float).to_numpy()
+  if "res_prev" in x.columns:  # (BE) reserve-list inputs (rows built with reserve=True)
+    for c in ("res_prev", "res_code", "res_weeks"):
+      f[c] = x[c].astype(float).to_numpy()
   f["w_trend"] = f.w_last - f.w_first
   for st in STAGES:
     f[f"stage_{st}"] = (x.stage == st).astype(float).to_numpy()
@@ -355,18 +381,25 @@ def week_model(rows: pd.DataFrame, season: int):
   prev, tr0 = rows[(rows.season == season - 1)].dropna(subset=["y"]), rows[rows.season < season - 1].dropna(subset=["y"])
   if len(prev) and len(tr0) > 1000:
     pp = week_fit(tr0).predict_proba(week_features(prev))[:, 1]
+    iso = lambda m: IsotonicRegression(out_of_bounds="clip", y_min=0.0, y_max=1.0).fit(pp[m], prev.y.to_numpy()[m])  # noqa: E731
+    res = (prev.res_prev == 1).to_numpy() if "res_prev" in prev.columns else None
     for st in STAGES:
       k = (prev.stage == st).to_numpy()
-      if k.sum() >= 200:
-        cal[st] = IsotonicRegression(out_of_bounds="clip", y_min=0.0, y_max=1.0).fit(pp[k], prev.y.to_numpy()[k])
+      if res is not None and (k & res).sum() >= 100:  # (BE2) reserve rows calibrated on their own
+        cal[(st, 1)], cal[(st, 0)] = iso(k & res), iso(k & ~res)
+      elif k.sum() >= 200:
+        cal[st] = iso(k)
   return m, cal
 
 
 def week_predict(model, x: pd.DataFrame) -> np.ndarray:
   m, cal = model
   p = m.predict_proba(week_features(x))[:, 1]
-  for st, iso in cal.items():
-    k = (x.stage == st).to_numpy()
+  for key, iso in cal.items():
+    if isinstance(key, tuple):  # (BE2) (stage, reserve 1 / 0)
+      k = ((x.stage == key[0]) & ((x.res_prev == 1) == bool(key[1]))).to_numpy()
+    else:
+      k = (x.stage == key).to_numpy()
     if k.any():
       p[k] = iso.predict(p[k])
   # isotonic steps can reach exactly 0 or 1 (every calibration-season player in that band sat / played); certainty is
@@ -374,7 +407,7 @@ def week_predict(model, x: pd.DataFrame) -> np.ndarray:
   return np.clip(p, 0.01, 0.99)
 
 
-def week_now_rows(ctx: _Ctx, items: list) -> pd.DataFrame:
+def week_now_rows(ctx: _Ctx, items: list, reserve: bool = False) -> pd.DataFrame:
   """Rows for prediction (live, or a backtest week): items = (gsis, season, week, team, pos, days so far, game status
   or "None", stage 1-3). The Tuesday block from his previous team game + this week's report as it stands."""
   rows = []
@@ -388,5 +421,6 @@ def week_now_rows(ctx: _Ctx, items: list) -> pd.DataFrame:
                  "wn_D": seen.count("D"), "wn_L": seen.count("L"), "wn_F": seen.count("F"),
                  "w_first": SCORE.get(seen[0], np.nan) if seen else np.nan,
                  "w_last": SCORE.get(seen[-1], np.nan) if seen else np.nan,
-                 "gs_now": _gs(gs) if st == 3 else "None", "why_now": ctx.why.get((s, w, g), "none")})
+                 "gs_now": _gs(gs) if st == 3 else "None", "why_now": ctx.why.get((s, w, g), "none"),
+                 **(ctx.reserve(g, s, team, k) if reserve else {})})
   return pd.DataFrame(rows)

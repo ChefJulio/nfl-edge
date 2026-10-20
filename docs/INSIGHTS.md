@@ -3020,3 +3020,30 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   stages 1 and 3: mean predicted within 3 points of the played rate, each; CONFIRM 2026 same direction on (1).
   Reported: played rate and prediction by res_code x final status; Jeremy McNichols / Tank Dell type rows (window open,
   full practice, no status). Ship: (BE) live as above.
+- **RESULT {#reserve-avail} (BE) roster designation as an input, not a gate: FAIL (gate 3 at stage 1), large gains.**
+  tools/reserve_avail_eval.py, 2021-25: 3,353 reserve-window rows (839 players), played 39.9%. (1) Brier vs today's 0
+  .3993 -> .1861, -0.2132 [-0.2491, -0.1789]: PASS. (2) other rows .1172 -> .1170, -0.0002 [-0.0006, +0.0002]: PASS.
+  (3) stage 3 predicted 63.8% vs played 63.9%: pass; stage 1 53.9% vs 45.5%: FAIL (stage 0 17.9 / 18.6; stage 2 54.4 /
+  45.5). CONFIRM 2026: .3607 -> .1856. Stage 3 by list x status (played / predicted): designated to return,
+  Questionable 53.6 / 59.2% (192), none 69.6 / 65.7% (56); IR, Questionable 68.0 / 65.4% (172), none 87.0 / 81.2% (46);
+  PUP / NFI Questionable 59.6 / 61.9% (57); Doubtful 0 of 31 anywhere. Window open, no final status, practiced: 82.9%
+  played, 80.2% predicted (146; Jeremy McNichols' 97% came from the active-roster model). Reading: midweek
+  calibration is fit on the season before, ~95% active-roster rows, and its stage-1 map doesn't fit reserve players.
+- **PRE-REGISTERED 2026-10-20, a second look at (BE) after gate 3 failed (labelled: weaker evidence than a first
+  test): (BE2) reserve-aware calibration.** Same rows, harness and gates; one change: tuesday.week_model's per-stage
+  isotonic calibration is fit separately for reserve rows (res_prev = 1) and other rows when the calibration season
+  has at least 100 reserve rows at that stage, else pooled as before.
+- **PRE-REGISTERED 2026-10-20 (owner: "we need a case for players that missed the entire last season ... more of a snap
+  count"; Tank Dell projected 0.0): (BF) a role for players returning to an empty recent-usage window.** Today a
+  player's usage shares come from a recency window that holds this season's games and last season's fading by week
+  8, so his first game back after a lost season (Dell) or after missing this season's first half reads a share of 0
+  and a projection near 0: 429 such first games back 2021-25 (300 mid-season returns, 129 after a lost season; 52 with
+  half the snaps or more). Variant (experiments.return_role): when the recent window is empty and the long window
+  (this and the two previous seasons, efficiency weights) is not, his shares = long-window shares x his position's
+  first-game-back factor, fit on seasons before the target season (actual share in that game over the long-window
+  share, ratio of sums; QB dropbacks, RB carries, WR / TE targets; < 15 cases -> pooled; fit on 2019-25 for 2026: QB
+  0.80, RB 0.76, WR 0.67, TE 0.46). Test: tools/experiments.py baseline,return_role 2021-2025 (cached backtests) scored
+  on (a) the touched rows (first game back with an empty recent window, played) and (b) all relevant rows.
+  GATE: (1) touched rows, fantasy MAE lower, 95% CI over season-weeks with upper < 0, improvement >= 0.5 points; (2)
+  all relevant rows not worse (CI upper < +0.003); (3) touched rows, mean projection within 1.5 points of mean actual.
+  Reported: by position; mid-season returns vs lost-season returns.

@@ -108,6 +108,7 @@ VARIANTS = {
   "qb_run": variant(team_model__qb_rush_effects=True),  # INSIGHTS (BB) qbrun
   "qb_prior": variant(team_model__qb_prior_scale="tune"),  # INSIGHTS (BC) qbprior
   "qb_edge": variant(game_model__qb_career_edge=True),  # INSIGHTS (BC) qbedge
+  "return_role": variant(experiments__return_role=True),  # INSIGHTS (BF)
   "redistribution_0": variant(injuries__redistribution_scale=0.0),
   "redistribution_1": variant(injuries__redistribution_scale=1.0),
   "redist_conserve": variant(injuries__redistribute_conserve=True),

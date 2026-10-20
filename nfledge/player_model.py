@@ -606,6 +606,46 @@ class PlayerModel:
     cache[key] = (ratings, f)
     return f.copy()
 
+  def _return_ratio(self, season: int) -> dict:
+    """(BF) per position: a returning player's share in his first game back, over his long-window share before it
+    (ratio of sums), for every first game back with an empty recent window in the seasons before `season`
+    (walk-forward). QB dropbacks, RB carries, WR / TE targets. Positions with < 15 cases take the pooled ratio."""
+    cache = self.__dict__.setdefault("_ret_ratio", {})
+    if season in cache:
+      return cache[season]
+    from .team_model import prior_season_weight
+    eff = list(self.pcfg.get("eff_season_weights", EFF_SEASON_WEIGHTS))
+    prim = {"QB": ("db", "team_db"), "RB": ("carries", "team_rush"), "WR": ("tgt", "team_db"), "TE": ("tgt", "team_db")}
+    L = self.ledger[(self.ledger.season < season) & ~self.ledger.excluded].sort_values(["gsis_id", "season", "week"])
+    num, den = {}, {}
+    for g, x in L.groupby("gsis_id", sort=False):
+      pos = x.pos.iloc[0]
+      if pos not in prim:
+        continue
+      a, b = prim[pos]
+      se, wk = x.season.to_numpy(), x.week.to_numpy()
+      na, nb = x[a].to_numpy(float), x[b].to_numpy(float)
+      for i in range(1, len(x)):
+        s_, w_ = se[i], wk[i]
+        cur = (se[:i] == s_) & (wk[:i] < w_)
+        if cur.any() or ((se[:i] == s_ - 1).any() and prior_season_weight(int(w_), self.cfg) > 0):
+          continue
+        wts = np.select([se[:i] == s_ - 1, se[:i] == s_ - 2], [eff[1], eff[2]], 0.0)
+        if (wts * nb[:i]).sum() <= 0 or nb[i] <= 0:
+          continue
+        lsh = (wts * np.nan_to_num(na[:i])).sum() / (wts * nb[:i]).sum()
+        num[pos] = num.get(pos, 0.0) + np.nan_to_num(na[i]) / nb[i]
+        den[pos] = den.get(pos, 0.0) + lsh
+        num.setdefault(pos + "_n", 0)
+        num[pos + "_n"] += 1
+    tot_n = sum(v for k, v in num.items() if k.endswith("_n"))
+    pooled = sum(num.get(p, 0.0) for p in prim) / max(sum(den.get(p, 0.0) for p in prim), 1e-9) if tot_n else 1.0
+    out = {"all": float(pooled)}
+    for p in prim:
+      out[p] = float(num[p] / den[p]) if num.get(p + "_n", 0) >= 15 and den.get(p, 0) > 0 else float(pooled)
+    cache[season] = out
+    return out
+
   def _features(self, season: int, week: int, ratings) -> pd.DataFrame:
     L = self.ledger
     L = L[(L.season < season) | (L.week < week)]
@@ -668,6 +708,20 @@ class PlayerModel:
     f["last_season"] = last.season
     f["pos"] = self.info.position.reindex(f.index)
     f["tier"] = self.info.tier.reindex(f.index).fillna("UDFA")
+    if self.cfg.get("experiments", {}).get("return_role"):
+      # EXPERIMENT (BF): a player whose recent-usage window is empty (no game this season yet, last season faded out
+      # by the target week, or a lost season: Tank Dell) but who has usage in the long window (this and the two
+      # previous seasons) gets his long-window shares x the measured first-game-back factor for his position
+      # (_return_ratio: fit on seasons before this one). Today those shares are empty and the role reads 0.
+      short = wsum("team_db", "w_use") + wsum("team_rush", "w_use")
+      lng = wsum("team_db", "w_eff") + wsum("team_rush", "w_eff")
+      back = (short == 0) & (lng > 0)
+      if back.any():
+        ratio = self._return_ratio(season)
+        fac = f.pos.map(ratio).fillna(ratio.get("all", 1.0))
+        for name in ("db_share", "carry_share", "tgt_share", "route_share", "ay_share", "i10_share"):
+          f.loc[back, name] = f.loc[back, name + "_long"] * fac[back]
+        f.attrs["return_role"] = set(f.index[back])
 
     # Efficiency: EB-shrunk component rates + opponent-adjusted EPA per opportunity.
     for opp, (_, unit, comps) in OPP_TYPES.items():
