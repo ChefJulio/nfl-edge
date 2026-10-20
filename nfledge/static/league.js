@@ -276,10 +276,6 @@
     // "DJ Moore" -> "Moore", "Chris Rodriguez Jr." -> "Rodriguez" (suffixes skipped)
     const last = n => { const w = String(n || '').split(' ').filter(x => !/^(jr\.?|sr\.?|ii|iii|iv|v)$/i.test(x)); return w[w.length - 1] || n; };
 
-    // the uncertain teammate's other world as a change to the shown projection (owner 2026-10-17: changes add up when
-    // two teammates are uncertain, two totals don't); '' when it rounds to nothing
-    const condTxt = c => { const d = c.pSit >= 0.5 ? c.plays - c.sits : c.sits - c.plays;
-      return Math.abs(d) < 0.05 ? '' : `${NFLE.fmt.signed1(d)} if ${esc(last(c.name))} ${c.pSit >= 0.5 ? 'plays' : 'sits'}`; };
     // "Questionable (ESPN) (DL)" -> "Questionable per ESPN; practice: DNP, limited"
     const statusWords = st => {
       const m = String(st || '').match(/^(.*?)\s*\(([DLF-]+)\)\s*$/), des = (m ? m[1] : String(st || '')).trim().replace(/\s*\(ESPN\)/, ' per ESPN');
@@ -334,9 +330,9 @@
     const badgesOf = (p, o = {}) => {
       const out = p.proj != null && p.inactive >= 0.05 && p.inactive < 0.99 ?  // ruled out: the O chip says it
         `<span class="lg-out${p.inactive >= 0.5 ? ' hi' : ''}" title="Chance he plays">${NFLE.fmt.toPlay(p.inactive)} to play</span>` : '';
-      const conds = (p.conds || []).map(c => condTxt(c) && `<span class="lg-cond" title="${esc(`${f1(c.sits)} if ${c.name} sits, ${f1(c.plays)} if he plays`)}">${condTxt(c)}</span>`).join('');
       const lock = p.locked && !o.noLock ? '<span class="lg-lock" title="His game has kicked off: his spot is set">locked</span>' : '';
-      const inner = lock + NFLE.injTag(p.status || '') + out + conds;
+      // no "+0.5 if X plays" badge (owner 2026-10-20: the in-depth detail is on the player's page)
+      const inner = lock + NFLE.injTag(p.status || '') + out;
       return inner ? `<div class="badges lg-badges">${inner}</div>` : '';
     };
     const row = (slot, p, extra = '', o = {}) => {
@@ -385,24 +381,24 @@
         .filter(o => o.beat.length && o.p.pos).sort((a, b) => b.beat.length - a.beat.length || a.ros - b.ros).slice(0, 4);
       const wv = mine.faab != null ? `$${mine.faab} FAAB left` : mine.waiver && claimWindow() ? `${runText()} · you're #${mine.waiver} of ${L.teams.length}` : '';
       // (owner 2026-10-18) the same player rows as the lineup: photo, name, team colors; what he's worth on the right
-      const infoRow = (p, tag, val, sub, cls = '') => `<tr class="teamrow" style="${NFLE.fmt.rowStyle(TEAMS, p.team)}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}>
+      const infoRow = (p, tag, val, sub, cls = '', pre = '') => `<tr class="teamrow" style="${NFLE.fmt.rowStyle(TEAMS, p.team)}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}>
           <td class="lg-slot">${esc(tag)}</td><td class="lg-who">${NFLE.ui.player({ name: p.name, team: p.team, photo: p.photo, espn: p.espn, pid: p.pid, subHtml: sub }, TEAMS)}</td>
-          <td class="num"><b class="${cls}">${val}</b></td></tr>`;
+          ${pre}<td class="num"><b class="${cls}">${val}</b></td></tr>`;
       // Proj = this week's projection, as the lineup rows show it (owner 2026-10-20); what he adds to your team per week
       // (the order) moves to the line under his name
       const projCell = a => a.proj != null ? f1(a.proj) : /bye/.test(a.why || '') ? '<span class="muted">Bye</span>' : '—';
       // grouped by position (owner 2026-10-20): a label row per position, its best three under it
       const POSW = { QB: 'Quarterbacks', RB: 'Running backs', WR: 'Receivers', TE: 'Tight ends', K: 'Kickers', DEF: 'Defenses' };
-      const addRows = best.map((m, i) => (i === 0 || best[i - 1].add.pos !== m.add.pos ? `<tr class="lg-grp"><td colspan="3">${esc(POSW[m.add.pos] || m.add.pos)}</td></tr>` : '')
-        + infoRow(m.add, m.add.pos, projCell(m.add), `${perG(m.add.ros, m.add.games)}/g · ${perWk(m.ros)}/wk for you`));
+      const addRows = best.map((m, i) => (i === 0 || best[i - 1].add.pos !== m.add.pos ? `<tr class="lg-grp"><td colspan="4">${esc(POSW[m.add.pos] || m.add.pos)}</td></tr>` : '')
+        + infoRow(m.add, m.add.pos, projCell(m.add), '', '', `<td class="num"><b class="good">${perWk(m.ros)}</b></td>`));
       const belowRows = below.map(o => { const top = o.beat.sort((a, b) => b.ros - a.ros)[0];
         return infoRow(o.p, o.p.pos, o.beat.length, `${perG(o.ros, o.games)}/g · top FA ${esc(last(top.name))} ${perG(top.ros, top.games)}`, 'bad'); });
       return `<h3 class="lg-h">Waiver wire${wv ? ` <span class="muted lg-wv">${wv}</span>` : ''}</h3>
           <div class="lg-mv-sub">Best available for you</div>
-          ${addRows.length ? table(addRows.join(''), '<th>Pos</th><th>Free agent</th><th class="num" title="His projection this week, your scoring">Proj</th>').replace('lg-tbl', 'lg-tbl lg-grouped')
+          ${addRows.length ? table(addRows.join(''), '<th>Pos</th><th>Free agent</th><th class="num" title="What he adds to your team per week, rest of season (the order)">+/wk</th><th class="num" title="His projection this week, your scoring">Proj</th>').replace('lg-tbl', 'lg-tbl lg-grouped')
             : '<p class="muted">No free agent improves your team over the rest of the season by our projections.</p>'}
           ${belowRows.length ? `<div class="lg-mv-sub">Below the waiver wire</div>${table(belowRows.join(''), '<th>Pos</th><th>Your player</th><th class="num" title="Free agents at his position who project more the rest of the season">Beat by</th>')}` : ''}
-          <p class="muted lg-note">Best available = the top three free agents at each position that improve your team. /wk for you = what he'd add to your team per week (the order), your best lineup each remaining week through ${ROS.through}, making room with whoever costs least (one QB, TE, K and D/ST is enough; ${DEPTH_MIN} RBs and WRs stay). Beat by = free agents at his position who project more (top FA = the best of them). /g = expected points per remaining game, byes skipped. Upside the projections can't see is your call.</p>`;
+          <p class="muted lg-note">Best available = the top three free agents at each position that improve your team. +/wk = what he'd add to your team per week (the order); Proj = his projection this week, your best lineup each remaining week through ${ROS.through}, making room with whoever costs least (one QB, TE, K and D/ST is enough; ${DEPTH_MIN} RBs and WRs stay). Beat by = free agents at his position who project more (top FA = the best of them). /g = expected points per remaining game, byes skipped. Upside the projections can't see is your call.</p>`;
     };
     // IR (owner 2026-10-17: "no mention of IR slots"): listed under the bench with when he's likely back (the first week
     // the return model gives him at least an even chance to play); never in the lineup
@@ -443,11 +439,10 @@
       const why = p => p.exp == null ? 'not projected (bye, IR or out)'
         : p.inactive >= 0.15 ? `${NFLE.fmt.toPlay(p.inactive)} to play · ${f1(p.proj)} if he plays · ${esc(statusWords(p.status))}`
         : `projects ${f1(p.exp)}`;
-      const ifLines = p => (p.conds || []).map(condTxt).filter(Boolean);
       const nm = p => `<b>${esc(p.name)}</b>`;
       const sureCard = sure.length ? `<div class="lg-mv">
           <div class="lg-mv-row"><span class="lg-mv-k good">Start</span><div>${fill.slice(0, sure.length).map(p =>
-            `<div>${nm(p)} <span class="muted">${f1(p.exp)}${ifLines(p).length ? ` · ${ifLines(p).join(' · ')}` : ''}</span></div>`).join('')}</div></div>
+            `<div>${nm(p)} <span class="muted">${f1(p.exp)}</span></div>`).join('')}</div></div>
           <div class="lg-mv-row"><span class="lg-mv-k bad">Bench</span><div>${sure.map(p => `<div>${nm(p)} <span class="muted">${why(p)}</span></div>`).join('')}</div></div>
         </div>` : '';
       const gtCards = unsure.map(p => {

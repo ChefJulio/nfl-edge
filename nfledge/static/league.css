@@ -18,7 +18,6 @@ table.lg-tbl td.num, table.lg-tbl th.num { white-space: nowrap; }
 table.lg-rank tr.lg-me td { background: rgba(122,162,255,.10); }
 .lg-you { font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill); background: rgba(122,162,255,.2); color: #a9c1ff; line-height: var(--tag-h); }
 table.lg-rank td.good { color: #6fdc8c; } table.lg-rank td.bad { color: #ff8f84; }
-.lg-cond { display: inline-block; margin-left: 6px; font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill); background: rgba(122,162,255,.16); color: #a9c1ff; line-height: var(--tag-h); }
 /* lineup moves as cards (owner 2026-10-16: "make it more readable") */
 .lg-swaps { display: grid; gap: 8px; } .lg-swaps:not(.good) { padding: 0; background: none; }
 .lg-mv { padding: 10px 12px; border-radius: var(--r-md); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); display: grid; gap: 6px; }
@@ -30,7 +29,6 @@ table.lg-rank td.good { color: #6fdc8c; } table.lg-rank td.bad { color: #ff8f84;
 .lg-mv-k { font-size: var(--fs-sm); font-weight: 600; letter-spacing: 0; text-transform: none; }
 .lg-mv-k.good { color: #6fdc8c; } .lg-mv-k.bad { color: #ff8a80; }
 .lg-mv-f { font-size: var(--fs-sm); padding: 0 2px; }
-.lg-tbl .lg-cond + .lg-cond { margin-left: 4px; }
 
 /* Audit pass (owner 2026-10-17): chips wrap under the name inside its cell, so a long one ("-0.8 if Diggs plays")
    never pushes the numbers off a phone; one chip for practice like Rankings (game status, else the latest day; none
@@ -38,7 +36,6 @@ table.lg-rank td.good { color: #6fdc8c; } table.lg-rank td.bad { color: #ff8f84;
 table.lg-tbl td.lg-who { width: 100%; }
 table.lg-tbl .who { min-width: 0; } table.lg-tbl .nmw { min-width: 0; }
 .lg-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; white-space: normal; }
-.lg-badges .lg-cond, .lg-tbl .lg-cond + .lg-cond { margin-left: 0; }
 .lg-out { display: inline-block; font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill);
   background: rgba(240,192,90,.16); color: #f0c05a; line-height: var(--tag-h); }
 .lg-out.hi { background: rgba(255,143,132,.16); color: #ff8f84; }
