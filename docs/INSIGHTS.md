@@ -2992,3 +2992,31 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   pbar) and schedule strength, so Power's ranks, Matchups' model win chance and the playoff odds move with it. The
   Matchups battle bars stay pure EPA per 100 plays (owner rule: explanations in EPA/100). Pending check: 2026's games
   at season end, margin MAE base vs adopted.
+- **Descriptive 2026-10-20 (owner questions, before (BE) / (BF)).** (a) Snap share after an absence, established RB / WR
+  / TE (50%+ of snaps over the 4 games before), 2019-25, relative to before: after a bye 0.94 / 0.93 / 0.93 / 0.92 in
+  return games 1-4 (n 1,841); 3-5 weeks 0.80 / 0.87 / 0.87 / 0.87 (306); 6-10 weeks 0.71 / 0.78 / 0.82 / 0.84 (107);
+  11-16 weeks 0.63 / 0.71 / 0.65 / 0.64 (50); a lost season or more 0.66 / 0.73 / 0.78 / 0.72 (27): long absences come
+  back on a snap count, and part of the role doesn't return (scratch/return_snaps.py). (b) Ruling timing: day-1 DNP
+  played 42.6% (5,168), by final status Out 0.6% / Doubtful 1.9% / Questionable 59.6% / none 81.1%; DNP all week with
+  no status 70%. ESPN Out first seen (2022-25 captures, normal weeks): game day 17% played (65), Monday 29% (2,083),
+  Tuesday 22% (215), Wednesday-Saturday 0 of 71; still Out at the last capture 20% vs changed 45% (scratch/
+  ruling_timing.py; the archive is mostly Monday / Tuesday snapshots). (c) Practice report days 2026: Sunday-game teams
+  Wed / Thu / Fri (160 each, Mon / Tue / Sat 1 each), Thursday-game teams Mon / Tue / Wed (10 / 12 / 12), Monday-game
+  teams Thu / Fri / Sat.
+- **PRE-REGISTERED 2026-10-20 (owner: "shouldn't we treat active players in the nfl as players that might play, and
+  their practice participation is the best signal ... are we treating their injury list status too importantly?"; "yea
+  go ahead"): (BE) roster designation as an input, not a gate.** Today a reserve-list player is never a candidate
+  (engine.candidates: ACT / INA only), the availability plan sets him to 0 this week, and the one week model never
+  trains on him (tuesday.week_rows skips anyone on a reserve list at his previous game). Variant: a reserve-list player
+  whose practice window is visibly open (stage 0: on his previous week's report; stages 1-3: on this week's) becomes a
+  row and a live candidate, with inputs res_prev (on a list at his previous team game), res_code (designated to return /
+  injured reserve / PUP / other, from the roster's status code) and res_weeks (consecutive team weeks on the list,
+  capped 17); every other row gets 0s. The same model and calibration rate everyone. Live: returns.window_open
+  candidates (branch wip/window-open), the plan no longer zeroes them; the lookahead state for opened-out players stays
+  as built there. Test: tools/reserve_avail_eval.py, rows of tools/week_avail_eval.py, walk-forward 2021-25 (week_model:
+  season s trained on seasons before, calibrated on s-1), 2026 so far CONFIRM. GATE: (1) reserve-window rows, Brier vs
+  today's 0 (they are off the board): lower, 95% CI over season-weeks with upper < 0, improvement >= 0.01; (2) every
+  other row, variant model vs today's model: not worse (CI upper < +0.0005); (3) calibration on reserve-window rows at
+  stages 1 and 3: mean predicted within 3 points of the played rate, each; CONFIRM 2026 same direction on (1).
+  Reported: played rate and prediction by res_code x final status; Jeremy McNichols / Tank Dell type rows (window open,
+  full practice, no status). Ship: (BE) live as above.
