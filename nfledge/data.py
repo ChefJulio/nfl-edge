@@ -82,7 +82,10 @@ class Cache:
     self.meta = json.loads(self.meta_path.read_text()) if self.meta_path.exists() else {}
 
   def save_meta(self):
-    self.meta_path.write_text(json.dumps(self.meta, indent=2))
+    # atomic (parallel backtest workers share this file: a plain write left two objects in it, 2026-10-20)
+    tmp = self.meta_path.with_suffix(f".{os.getpid()}.tmp")
+    tmp.write_text(json.dumps(self.meta, indent=2))
+    os.replace(tmp, self.meta_path)
 
   def path(self, name: str, season) -> Path:
     return self.dir / f"{name}_{season}.parquet"
