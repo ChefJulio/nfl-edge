@@ -635,7 +635,7 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
    Gate fails -> the rule comes out.
 
 **Queued (pre-register before running)**
-- (BH) role for returning starters: pre-registered 2026-10-20, running on 2020 + 2026.
+- Returning starters' role ((BH) FAIL, 9 cases): define a starter by games started; score 2026 returners at season end.
 - (AS) midweek stage from the calendar; (AT) one "early week" definition (week clock entry, 2026-10-18).
 - Week clock remaining moves (7 items, "Week clock ... REMAINING WORK" entry).
 - Partial Vegas lines: if any game of a week lacks a line, every game drops to the model's own volume
@@ -3122,3 +3122,12 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   (2) all relevant rows not worse (CI upper < +0.003); (3) touched rows' mean projection within 1.5 points of the mean
   actual. Reported: by position; the touched players by name. Expected: few touched rows (a few dozen), so (1) may
   fail on width alone; that is a valid outcome.
+- **RESULT {#return-starters} (BH) a role for returning starters: FAIL (too few cases).** tools/experiments.py
+  baseline,return_starters 2020,2026 (history 9) + tools/return_role_eval.py --variant=return_starters (first attempt
+  crashed on a corrupted cache/meta.json from parallel workers, fixed with atomic writes; no result was read). Touched
+  rows that played: 9, all 2020 (the 2026 returners named at week 7, Aiyuk / Mixon / Carr / Amari Cooper / Diontae
+  Johnson, haven't played yet): MAE 2.193 -> 1.669, -0.524 [-1.764, +1.140]: FAIL on width; all relevant rows +0.001
+  [+0.000, +0.002]: pass (< +0.003); mean projection 0.01 -> 1.66 vs 2.20 actual: pass. The rank rule also caught
+  short-stint quarterbacks (AJ McCarron, Joe Webb, Brandon Allen: top by dropbacks on their last team's window), so
+  "starter" needs a better definition. Next: score the 2026 returners at season end (data that exists then), and
+  define a starter by games started, not window rank.
