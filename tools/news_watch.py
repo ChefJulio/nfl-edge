@@ -20,6 +20,7 @@ from datetime import datetime, timedelta, timezone
 ESPN = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries"
 SITE = os.environ.get("SITE_URL", "https://chefjulio.github.io/nfl-edge/").rstrip("/") + "/"
 MIN_PROJ = 8.0
+MIN_ROS = 5.0  # rest-of-season board: lookahead lines run lower (no Vegas lines yet); ~anyone a manager starts or stashes
 SERIOUS = {"Doubtful", "Out", "Injured Reserve", "Physically Unable to Perform", "Suspension", "Reserve/Suspended"}
 QUIET_MIN = 30
 EVERY_MIN = 10   # the relay looks this often
@@ -32,32 +33,74 @@ def get(url: str):
 
 
 def espn_now() -> dict:
-  """espn_id -> (status, name) from the live feed (players listed nowhere are healthy)."""
+  """espn_id -> (status, name, return date or "") from the live feed (players listed nowhere are healthy)."""
   out = {}
   for team in get(ESPN).get("injuries", []):
     for i in team.get("injuries", []):
       a = i.get("athlete", {})
       href = (a.get("links") or [{}])[0].get("href", "")
       if "/id/" in href:
-        out[href.split("/id/")[1].split("/")[0]] = (i.get("status") or "", a.get("displayName") or "")
+        out[href.split("/id/")[1].split("/")[0]] = (i.get("status") or "", a.get("displayName") or "",
+                                                    str((i.get("details") or {}).get("returnDate") or "")[:10])
   return out
 
 
 def built_from() -> dict:
-  """espn_id -> status in the feed the live site was built with."""
+  """espn_id -> (status, return date or "") in the feed the live site was built with."""
   rows = get(f"{SITE}data/espn_injuries/latest.json?nocache={int(datetime.now().timestamp())}")
   rows = rows if isinstance(rows, list) else rows.get("rows") or rows.get("players") or []
-  return {str(r.get("espn_id")): r.get("status") or "" for r in rows if r.get("espn_id")}
+  return {str(r.get("espn_id")): (r.get("status") or "", str(r.get("return_date") or "")[:10]) for r in rows if r.get("espn_id")}
+
+
+RET_MOVE_DAYS = 7  # a return date moving this far (about a game) changes what the model does with it
+
+
+def date_moved(a: str, b: str) -> bool:
+  """(owner 2026-10-20: "shouldn't we have it treat a moving return date as something worth action?") ESPN's
+  estimated return date feeds the model (long-date rule, Out+ret bucket, IR floor, IR return model): a date that
+  appears, disappears or moves RET_MOVE_DAYS+ (a season-ending update moves it months) is news; day-level nudges
+  of a placeholder date are not."""
+  if not a and not b:
+    return False
+  if not a or not b:
+    return True
+  try:
+    return abs((datetime.fromisoformat(b) - datetime.fromisoformat(a)).days) >= RET_MOVE_DAYS
+  except ValueError:
+    return a != b
 
 
 INDEX = {}  # the live site's index.json, fetched once (board + clock)
 
 
+HALF_PPR = {"pass_yd": 0.04, "pass_td": 4, "interception": -2, "rush_yd": 0.1, "rush_td": 6, "reception": 0.5,
+            "rec_yd": 0.1, "rec_td": 6, "fumble_lost": -2}
+
+
 def relevant() -> dict:
-  """espn_id -> 'Name (POS, TEAM, proj)' for the live week's board, projected MIN_PROJ+."""
+  """espn_id -> 'Name (POS, TEAM, proj)' for the live week's board, projected MIN_PROJ+, plus (owner 2026-10-20:
+  Terry McLaurin's season-ending news came in his team's bye week, when he is on no board) everyone on the rest-of-
+  season board (data/ros.json) whose expected line if he plays averages MIN_PROJ+ half-PPR points over his next
+  three games (MIN_ROS: lookahead lines run lower than this week's board)."""
   d = INDEX.setdefault("d", get(f"{SITE}index.json?nocache={int(datetime.now().timestamp())}"))
-  return {str(p["espn"]): f"{p.get('name')} ({p.get('pos')}, {p.get('team')}, {p.get('proj', 0):.1f})"
-          for p in (d.get("players") or {}).values() if p.get("espn") and (p.get("proj") or 0) >= MIN_PROJ}
+  out = {str(p["espn"]): f"{p.get('name')} ({p.get('pos')}, {p.get('team')}, {p.get('proj', 0):.1f})"
+         for p in (d.get("players") or {}).values() if p.get("espn") and (p.get("proj") or 0) >= MIN_PROJ}
+  try:
+    ros = get(f"{SITE}data/ros.json?nocache={int(datetime.now().timestamp())}")
+  except Exception as e:  # the board alone still works
+    print(f"[watch] couldn't read ros.json ({e})")
+    return out
+  keys = ros.get("keys") or []
+  for p in (ros.get("players") or {}).values():
+    if not p.get("espn") or str(p["espn"]) in out:
+      continue
+    lines = [w[5] for w in (p.get("w") or [])[:3] if len(w) > 5 and w[5]]
+    if not lines:
+      continue
+    pts = sum(sum(HALF_PPR.get(k, 0) * v for k, v in zip(keys, ln)) for ln in lines) / len(lines)
+    if pts >= MIN_ROS:
+      out[str(p["espn"])] = f"{p.get('name')} ({p.get('pos')}, {p.get('team')}, {pts:.1f} ros)"
+  return out
 
 
 # Week-clock events (owner 2026-10-18: "make every day of the week a day where we expect things"): the live site's
@@ -145,10 +188,12 @@ def check(dry: bool) -> None:
     return
   changes = []
   for eid, label in who.items():
-    a = then.get(eid, "")
-    b = now.get(eid, ("", ""))[0]
+    a, ra = then.get(eid, ("", ""))
+    b, rb = now.get(eid, ("", "", ""))[0], now.get(eid, ("", "", ""))[2]
     if a != b and (a in SERIOUS or b in SERIOUS):
       changes.append(f"{label}: {a or 'healthy'} -> {b or 'healthy'}")
+    elif (a in SERIOUS or b in SERIOUS) and date_moved(ra, rb):
+      changes.append(f"{label}: {b} return date {ra or 'none'} -> {rb or 'none'}")
   due = due_events(INDEX.get("d", {}).get("clock") or {}, datetime.now(timezone.utc)) + sunday_pbp_due(INDEX.get("d", {}))
   if due:
     print("[watch] week clock: " + "; ".join(due))
