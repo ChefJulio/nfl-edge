@@ -619,9 +619,15 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/return model needs to be pristine").
 
 **Running / next up**
-1. OWNER DECISION: players who open the season on a reserve list (84 skill players in 2026: Conner, Charbonnet,
-   Pacheco, Pearsall, Higgins ...) are never projected back. (AX) and (AX2) FAILED (not calibrated: too little data,
-   codes drifting); "never back" scores worst of all. Options: keep it, or a labelled rule ({#opened-out-2}).
+1. IN PROGRESS (owner delegated 2026-10-19, after Tank Dell: IR to return since the opener, full practices in week 6,
+   coach naming week 7, on no page at all): reserve-list players whose practice window is open (on this week's report;
+   before his team's first report of the week, last week's) join the board and get a return state. Built on branch
+   wip/window-open (returns.window_open / _window_states, run.py extra candidates), NOT shipped: a local build showed
+   (a) the practice model rates them as if on the active roster (Jeremy McNichols, IR, full practice, no game status:
+   97%) though he can only play if activated: measure P(played | window open, practice pattern, final status) on
+   2019-25 and use it for the current week; (b) a veteran back from a lost season has no role (Dell's shares read 0,
+   projection 0.0; rookies have a draft prior, he has nothing): a role prior from his last seasons played. Then
+   pre-register the check (played share vs our chance for touched players).
 2. (AY, to pre-register) injured right before a bye / known only to ESPN: no report that week, so the chain never
    starts and every later week reads 100% (Tanner Hudson, torn pectoral, CIN bye week 6; Hockenson 2026-10-17).
    Plan in docs/handset_audit.md ("injured right before a bye").
