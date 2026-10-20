@@ -175,7 +175,7 @@
       const pct = r.inactive >= 0.05 ? `<span class="flag fl-play ${r.inactive >= 0.5 ? 'fl-bad' : r.inactive >= 0.15 ? 'fl-warn' : ''}" title="${esc(r.inactive_why || '')}">${NFLE.fmt.toPlay(r.inactive)}</span>` : '';
       // (AY3) healthy-scratch risk is its own chip, never the injury one: "Scratch 30%" (chance he's inactive without an injury)
       const scr = (r.scratch || 0) >= 0.1 ? `<span class="flag fl-scr${r.scratch >= 0.5 ? ' fl-bad' : ''}" title="${esc(r.play_why || 'Healthy-scratch risk')}">Scratch ${Math.round(100 * r.scratch)}%</span>` : '';
-      const badges = (r.status || r.boost >= 1 || r.low_sample || pct || scr) ? `<div class="badges">${NFLE.injTag(r.status)}${pct}${scr}${r.boost >= 1 ? `<span class="flag f-up" title="Raised by volume vacated by: ${esc(r.boost_from)}">+${f1(r.boost)} inj</span>` : ''}${r.low_sample ? '<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>' : ''}</div>` : '';
+      const badges = (r.status || r.boost >= 1 || r.low_sample || pct || scr) ? `<div class="badges">${NFLE.injTag(r.status, r.inactive)}${pct}${scr}${r.boost >= 1 ? `<span class="flag f-up" title="Raised by volume vacated by: ${esc(r.boost_from)}">+${f1(r.boost)} inj</span>` : ''}${r.low_sample ? '<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>' : ''}</div>` : '';
       // first name on top, last name below, badges to the right (owner 2026-10-17); scrolled sideways the pinned
       // column narrows and each line truncates (rankings.css)
       const [first, lastN] = NFLE.fmt.split(r.name);

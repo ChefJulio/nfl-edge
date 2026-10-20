@@ -45,9 +45,25 @@
   // is a colored tag, each practice day its own chip in the NFL's report terms (FP green, LP amber, DNP red), so a
   // Wednesday DNP never reads as "Doubtful"
   const PRAC = { D: 'Did not practice', L: 'Limited', F: 'Full', '-': 'not on the report' }, PRAB = { D: 'DNP', L: 'LP', F: 'FP', '-': '&ndash;' }, DAYS = ['Wed', 'Thu', 'Fri'];
-  const injTag = st => {
+  // ina (owner 2026-10-20: "simplify all those to just Q D O IR SSPD ... in line with our projection for them in that
+  // week"): his injury chance to sit this week from the model, the latest data before his game; the tag then names our
+  // projection in the NFL's words, not whatever label is current (the official designation and practice days stay in
+  // the tip / chips). Bands = halfway between how often players with each final official status played (2019-25, QB /
+  // RB / WR / TE on the report): none 83%, Questionable 62%, Doubtful 3%, Out ~0 -> no tag at 72%+, Q from 32%, D from
+  // 3%, O below. A reserve list (IR, PUP, NFI, SSPD) keeps its own code while we have him under 32%.
+  const TAG_BANDS = [[0.72, ''], [0.32, 'Q'], [0.03, 'D'], [-1, 'O']];
+  const injTag = (st, ina) => {
+    const m = String(st || '').match(/^(.*?)\s*\(([DLF-]+)\)\s*$/), des = (m ? m[1] : String(st || '')).trim(), pr = m ? m[2] : '';
+    if (ina != null && ina === ina) {
+      const off = des ? injCode(des) : '', p = 1 - ina, band = TAG_BANDS.find(([lo]) => p >= lo)[1];
+      const res = ['IR', 'PUP', 'NFI', 'SSPD'].includes(off);
+      const c = res && (band === 'D' || band === 'O') ? off : band;
+      const tip = `${Math.round(100 * p)}% to play by our projection${des ? ` · status: ${des}` : ''}`;
+      const tag = c ? `<span class="dc-tag dt-${c === 'Q' ? 'q' : c === 'D' ? 'd' : 'out'}" title="${esc(tip)}">${esc(c)}</span>` : '';
+      const days = pr ? `<span class="pr-days" title="Practice: ${esc([...pr].map((x, i) => `${DAYS[i] || ''} ${PRAC[x]}`).join(', '))}">${[...pr].map(x => `<i class="pr-${x === '-' ? 'n' : x}">${PRAB[x]}</i>`).join('')}</span>` : '';
+      return tag + days;
+    }
     if (!st) return '';
-    const m = String(st).match(/^(.*?)\s*\(([DLF-]+)\)\s*$/), des = (m ? m[1] : String(st)).trim(), pr = m ? m[2] : '';
     const c = des ? injCode(des) : '';
     // game day (AU): INA = declared inactive, ACT = a listed player who dressed (game-day rulings, espn.gameday_rulings)
     const tip = c === 'INA' ? 'Declared inactive for this game' : c === 'ACT' ? 'Was questionable; declared active for this game' : des;
@@ -1366,7 +1382,7 @@
     // One rank pill (our rank at his position), colored by roster tier: starter / flex range / bench.
     const slotTxt = { start: 'starter', flex: 'flex range', bench: 'bench depth' }[p.slot] || '';
     const rankPill = `<span class="pc-rk t-${esc(p.slot)}" title="Our #${p.rank} ${esc(p.pos)} for ${esc(wkLabel(d).toLowerCase())} · ${esc(p.tier)} tier${slotTxt ? ` (${slotTxt})` : ''}">${esc(p.pos)} #${p.rank}</span>`;
-    const flags = [injTag(p.status),
+    const flags = [injTag(p.status, p.inactive),
                    p.boost >= 1 ? `<span class="flag f-up" title="Raised by volume vacated by ${esc(p.boost_from)}">+${f1(p.boost)} from injuries</span>` : '',
                    p.low_sample ? '<span class="flag" title="Few games to learn from: a wider range">low data</span>' : ''].join('');
     const exp = expectedCells(p);
@@ -2561,7 +2577,7 @@
     .map(([pid, p]) => [pid, p, teamGrade(pid)])
     .sort((a, b) => (b[2] ? 1 : 0) - (a[2] ? 1 : 0) || (a[2] && b[2] ? (a[2].uq - b[2].uq) || b[2].v - a[2].v : 0) || b[1].proj - a[1].proj)
     .map(([pid, p, gr]) => { const s = scaled(p, d);
-    return `<tr class="teamrow" style="${NFLE.fmt.rowStyle(d.teams, p.team)}" data-open-pid="${esc(pid)}"><td>${NFLE.ui.player({ name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, badges: injTag(p.status) }, d.teams)}</td>
+    return `<tr class="teamrow" style="${NFLE.fmt.rowStyle(d.teams, p.team)}" data-open-pid="${esc(pid)}"><td>${NFLE.ui.player({ name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, badges: injTag(p.status, p.inactive) }, d.teams)}</td>
       <td class="num"><b>${f1(s.proj)}</b></td><td class="num">${gradeChip(gr)}</td><td class="num muted">${p.fpg != null ? f1(p.fpg) : ''}</td></tr>`; }).join('');
   // the Power ranking box (the Power tile's sheet)
   const teamPowerBox = pw => {
@@ -3211,7 +3227,7 @@
     const players = Object.entries((DATA && DATA.players) || {}).filter(([, p]) => p.team === a.team || p.team === h.team).sort((x, y) => y[1].proj - x[1].proj);
     const plTable = s => {
       const rows = players.filter(([, p]) => p.team === s.team).map(([pid, p]) => { const sc = scaled(p);
-        return `<tr><td class="bx-who"><button type="button" class="bx-n" data-open-pid="${esc(pid)}">${esc(p.name)}</button> <span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>${injTag(p.status)}</td>
+        return `<tr><td class="bx-who"><button type="button" class="bx-n" data-open-pid="${esc(pid)}">${esc(p.name)}</button> <span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>${injTag(p.status, p.inactive)}</td>
           <td class="num"><b>${f1(sc.proj)}</b></td><td class="num muted">${f0(sc.q[0])}–${f0(sc.q[4])}</td><td class="num">${muHtml(p, s === a ? h.team : a.team)}</td></tr>`; }).join('');
       return `<div class="bx-team" style="--tc:${esc(g.colors[s.team])}"><div class="bx-th tm-open" data-tm="${esc(s.team)}">${lg(s, 20)}<b>${esc(s.team)}</b></div>
         ${rows ? `<table class="bx"><thead><tr><th>Player</th><th class="num">Proj</th><th class="num">Range</th><th class="num">Matchup</th></tr></thead><tbody>${rows}</tbody></table>` : '<p class="muted">No fantasy-relevant players listed.</p>'}</div>`;

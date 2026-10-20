@@ -350,7 +350,7 @@
         `<span class="lg-out${p.inactive >= 0.5 ? ' hi' : ''}" title="Chance he plays">${NFLE.fmt.toPlay(p.inactive)} to play</span>` : '';
       const lock = p.locked && !o.noLock ? '<span class="lg-lock" title="His game has kicked off: his spot is set">locked</span>' : '';
       // no "+0.5 if X plays" badge (owner 2026-10-20: the in-depth detail is on the player's page)
-      const inner = lock + NFLE.injTag(p.status || '') + out;
+      const inner = lock + NFLE.injTag(p.status || '', p.proj != null ? p.inactive : null) + out;
       return inner ? `<div class="badges lg-badges">${inner}</div>` : '';
     };
     const row = (slot, p, extra = '', o = {}) => {
