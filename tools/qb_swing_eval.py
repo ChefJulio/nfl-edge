@@ -180,13 +180,16 @@ def bc_main():
       wk = base.wk.to_numpy()
       t1 = boot_ci((er_a - er_b).to_numpy()[m], wk[m])
       t2 = boot_ci((gv_a - gv_b).to_numpy()[c], wk[c])
+      t3 = boot_ci((er_a - er_b).to_numpy()[c], wk[c])
       print(f"  {lab}: {m.sum()} games, {c.sum()} QB-change")
       print(f"    all games margin MAE {er_b[m].mean():.3f} -> {er_a[m].mean():.3f}, {fmt(t1)}")
-      print(f"    QB-change |model - Vegas| {gv_b[c].mean():.3f} -> {gv_a[c].mean():.3f}, {fmt(t2)}")
+      print(f"    QB-change margin MAE {er_b[c].mean():.3f} -> {er_a[c].mean():.3f}, {fmt(t3)}")
+      print(f"    QB-change |model - Vegas| (reported) {gv_b[c].mean():.3f} -> {gv_a[c].mean():.3f}, {fmt(t2)}")
       if lab.startswith("2021"):
-        ok1, ok2 = t1[2] < 0 and t1[0] <= -0.05, t2[2] < 0
+        # (BC) amended 2026-10-19 before results: gates score accuracy on outcomes; the market is reported only
+        ok1, ok2 = t1[2] < 0 and t1[0] <= -0.05, t3[2] < 0.10
         print(f"    GATE (1) all games better by >= 0.05, CI upper < 0: {'PASS' if ok1 else 'FAIL'}")
-        print(f"    GATE (2) QB-change closer to Vegas, CI upper < 0: {'PASS' if ok2 else 'FAIL'}")
+        print(f"    GATE (2) QB-change games not worse on results, CI upper < +0.10: {'PASS' if ok2 else 'FAIL'}")
         print(f"    games gates: {'PASS' if ok1 and ok2 else 'FAIL'} (fantasy gate (3): tools/experiments.py)")
         for s in sorted(base.season[base.season <= 2025].unique()):
           ms = m & (base.season == s).to_numpy()

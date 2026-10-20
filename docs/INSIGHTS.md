@@ -2910,3 +2910,9 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   ships, Power, Matchups and the playoff odds use it too (the QB term is how Power's "this week" and rest-of-season
   ratings move with the starter). Reported, not gated: the finding's QB-edge slope re-run on each arm (should move
   toward 0); the (BB) diagnosis by kind; the live Lamar -> Huntley swing; 2026 weeks 2-6.
+- **AMENDMENT to (BC), 2026-10-19, before any result was seen (runs had started; no output read).** Owner: "we want to
+  be more accurate as a prediction model, using vegas as a comparison, not a strict 'closer to'". Gate (2) rewarded
+  agreeing with the market for its own sake; it becomes: (2) on QB-change games, margin MAE against actual results
+  not worse than base (CI upper < +0.10), the games where a wrong QB value would hurt most. |model - Vegas| on
+  QB-change games moves to reported, not gated. Gates (1) and (3) unchanged. Standing rule from here: gates score
+  accuracy on outcomes; the market is a benchmark and a diagnostic, never a pass condition.
