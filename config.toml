@@ -16,6 +16,12 @@ nfl_api_practice = true
 # First season of labelled practice history for the availability model (one-time fetch, then cached).
 practice_history_start = 2018
 
+[game_model]
+# (BC) adopted 2026-10-19 (INSIGHTS {#qb-track}): the points formula takes each starting QB's track record (career EPA
+# per dropback, shrunk with 200 pseudo-dropbacks) minus his opponent's; Power carries it through report.qb_value.
+# Game margin MAE 2021-25 10.435 -> 10.291 [-0.281, -0.013]; the elite / bad QB bias (+2.2 pts per 0.1 EPA/db) -> +0.2.
+qb_career_edge = true
+
 [team_model]
 # Prior-season plays enter the ridge fit with one flat weight: full (1.0) for week-1 projections, since they are
 # all there is, then prior_weight x (decay - week) / (decay - 1) (about 0.26 at week 2) ...

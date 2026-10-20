@@ -631,7 +631,6 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
 **Queued (pre-register before running)**
 - (AS) midweek stage from the calendar; (AT) one "early week" definition (week clock entry, 2026-10-18).
 - Week clock remaining moves (7 items, "Week clock ... REMAINING WORK" entry).
-- (BC) qbedge PASSED its gates but fades by season (2025 and 2026 worse): OWNER DECISION, adopt or investigate the trend first.
 - Partial Vegas lines: if any game of a week lacks a line, every game drops to the model's own volume
   (team_model.GameModel.predict `.all()`); per-game fallback.
 - Small IR-audit leftovers: qb2_play_rate needs a board QB at depth rank 1; debut prior's absolute depth_rank <= 2;
@@ -640,6 +639,7 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
 - Hand-set values not yet tested: docs/handset_audit.md #8-#22 (#14 = return-model settings), range calibration.
 
 **Pending checks**
+- (BC) qbedge adopted 2026-10-19: at season end, 2026 game margin MAE base vs adopted (tools/game_eval.py 2026).
 - ESPN long-date rule (owner decision 2026-10-19): at season end, 2026's touched players' played share before / after ESPN's date.
 - News watcher relay (tools/news_watch.py): confirm the first run handed off to its successor (~21:45 UTC 2026-10-18).
 - (AF) team-rating half-life: re-check at season end.
@@ -2975,3 +2975,14 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   Checked on live data: Deebo Samuel (Out, Nov 8) week 7 0%, week 9 on the chain (that game is on the date itself);
   Davante Adams as of the week 7 rollover: weeks 8-10 0%, week 12 69%. To check at season end on 2026's own cases
   (daily ESPN snapshots since 2026-10-13): played share before / after ESPN's date for players the rule touched.
+- **Decision 2026-10-19 on (BC) qbedge (owner: "the qb thing, you choose"): ADOPTED.** Before deciding, an exploratory
+  look at the fade (scratch/qb_fade.py; not pre-registered): the base model's QB-edge miss by season, per 0.1 EPA/db,
+  2021-26: +2.80 / +1.78 / +3.80 / +2.40 / +0.67 / +1.48 (career measure; a recent-two-seasons measure gives the same
+  shape), qbedge: +1.35 / -0.62 / +2.76 / +0.49 / -3.35 / -0.37. The model underrates QB quality every season; 2025 was
+  the season it did least, and a fixed correction overshot there; qbedge's six-season average residual is ~0. So the
+  fade is one season's small bias, not a stale track record. Shipped: config game_model.qb_career_edge = true (points
+  formula, fitted weight 10-15 points per team per 1.0 EPA/db across 2021-26); report.qb_value adds 2 x weight x his
+  track record above the league, per dropback, to Power's pass offense, its rest-of-season blend (usual / backup by
+  pbar) and schedule strength, so Power's ranks, Matchups' model win chance and the playoff odds move with it. The
+  Matchups battle bars stay pure EPA per 100 plays (owner rule: explanations in EPA/100). Pending check: 2026's games
+  at season end, margin MAE base vs adopted.

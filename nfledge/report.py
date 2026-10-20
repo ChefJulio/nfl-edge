@@ -959,14 +959,26 @@ def formula_weights(eng) -> dict:
   b points per EPA; a special-teams EPA edge counts 2c on the margin (c adds to your score, c comes off the
   opponent's). Power uses these so its Net is the model's own margin vs an average team, matching Matchups."""
   pc = dict(zip(eng.gm.points.cols, eng.gm.points.coef[1:]))
-  return {"play": float(pc["off_epa_game"]), "st": 2.0 * float(pc["st_net"])}
+  # (BC) qb: the QB track-record edge counts d points for his team and -d for the opponent: 2d on the margin per unit
+  # of his track record above the league (0 when game_model.qb_career_edge is off)
+  return {"play": float(pc["off_epa_game"]), "st": 2.0 * float(pc["st_net"]), "qb": 2.0 * float(pc.get("qb_edge", 0.0))}
+
+
+def qb_value(r, qb, team, w: dict, vol: dict) -> float:
+  """A quarterback's value to his pass offense in EPA per dropback: his rating (qb_term) plus, (BC) adopted
+  2026-10-19, his track record above the league converted from margin points at league dropbacks (w["qb"] /
+  (w["play"] x dropbacks per game)), so Power, its schedule strength and its rest-of-season blend all carry it."""
+  v = r.qb_term(qb, team)
+  if w.get("qb"):
+    v += w["qb"] / (w["play"] * vol["pass"]) * r.qb_quality(qb)
+  return v
 
 
 def unit_points(r, vol: dict, starters: dict, w: dict) -> pd.DataFrame:
   """Model margin per game vs an average opponent on a neutral field, per unit, at league-average volume (so
   units add up): EPA per game x the game model's points-formula weights (formula_weights). Pass O includes the
   starting QB's effect; defense signs flipped so positive is always good."""
-  qb = pd.Series({t: r.qb_term(starters.get(t), t) for t in r.teams})
+  qb = pd.Series({t: qb_value(r, starters.get(t), t, w, vol) for t in r.teams})
   u = pd.DataFrame(index=r.teams)
   u["pass_o"] = (r.off["pass"] + qb) * vol["pass"] * w["play"]
   u["rush_o"] = r.off["rush"] * vol["rush"] * w["play"]
@@ -979,7 +991,8 @@ def unit_points(r, vol: dict, starters: dict, w: dict) -> pd.DataFrame:
   return u
 
 
-def schedule_faced(eng, season: int, week: int, r, starters: dict, qb_eff: dict | None = None) -> pd.DataFrame:
+def schedule_faced(eng, season: int, week: int, r, starters: dict, qb_eff: dict | None = None, w: dict | None = None,
+                   vol: dict | None = None) -> pd.DataFrame:
   """Strength of schedule in points per game, unit by unit and weighted by the plays actually involved.
   Played: every offensive play is charged with the opposing unit it faced (dropbacks vs that pass defense,
   runs vs that run defense) and every defensive play with the opposing offense (incl. its passer); summed and
@@ -993,7 +1006,8 @@ def schedule_faced(eng, season: int, week: int, r, starters: dict, qb_eff: dict 
   games = cur.groupby("team").size()
   off_faced = -(P.defteam.map(r.dfn["pass"]).groupby(P.posteam).sum()
                 + R.defteam.map(r.dfn["rush"]).groupby(R.posteam).sum())
-  qbt = pd.Series([r.qb_term(q, t) for q, t in zip(P.qb, P.posteam)], index=P.index, dtype=float)  # float even when no games are played yet (week 1)
+  qv = (lambda q, t: qb_value(r, q, t, w, vol)) if w and vol else r.qb_term  # noqa: E731
+  qbt = pd.Series([qv(q, t) for q, t in zip(P.qb, P.posteam)], index=P.index, dtype=float)  # float even when no games are played yet (week 1)
   def_faced = ((P.posteam.map(r.off["pass"]) + qbt).groupby(P.defteam).sum()
                + R.posteam.map(r.off["rush"]).groupby(R.defteam).sum())
   out = pd.DataFrame({"off_past": off_faced / games, "def_past": def_faced / games})
@@ -1010,7 +1024,7 @@ def schedule_faced(eng, season: int, week: int, r, starters: dict, qb_eff: dict 
       rows.append({"team": t,
                    "off_next": -(r.dfn.at[o, "pass"] * db_pg.get(t, np.nan) + r.dfn.at[o, "rush"] * ru_pg.get(t, np.nan)),
                    # future opponents: their expected QB (powerc, when given), else this week's starter
-                   "def_next": ((r.off.at[o, "pass"] + (qb_eff[o] if qb_eff and o in qb_eff else r.qb_term(starters.get(o), o)))
+                   "def_next": ((r.off.at[o, "pass"] + (qb_eff[o] if qb_eff and o in qb_eff else qv(starters.get(o), o)))
                                 * db_pg.get(o, np.nan)
                                 + r.off.at[o, "rush"] * ru_pg.get(o, np.nan))})
   if rows:
@@ -1063,7 +1077,8 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
   # the live build's availability plan ((AM): the same numbers every page's projections use); else the chain
   usual, backup, pbar = powerc.inputs(eng, season, week, starters, now, plan=plan["avail"] if plan else None)
   u = powerc.blend(unit_points(rb, vol, usual, fw), unit_points(rb, vol, backup, fw), pbar)
-  qb_eff = {t: pbar.get(t, 1.0) * rb.qb_term(usual.get(t, starters.get(t)), t) + (1 - pbar.get(t, 1.0)) * rb.qb_term(backup.get(t), t)
+  qb_eff = {t: pbar.get(t, 1.0) * qb_value(rb, usual.get(t, starters.get(t)), t, fw, vol)
+            + (1 - pbar.get(t, 1.0)) * qb_value(rb, backup.get(t), t, fw, vol)
             for t in rb.teams}
   history, qb_by_week = {}, {}
   # a week's rating depends only on (season, week): kept on the engine, so the current page and the 12 lookahead
@@ -1100,7 +1115,7 @@ def team_tables(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | Non
   rk = lambda s: s.rank(ascending=False, method="min").astype(int)
   ranks = {c: rk(u[c]) for c in u.columns}
   rank_now = rk(u_now.net)
-  sos = schedule_faced(eng, season, week, rb, starters, qb_eff)
+  sos = schedule_faced(eng, season, week, rb, starters, qb_eff, fw, vol)
   for c in ("off_past", "def_past", "off_next", "def_next", "past", "next"):  # same points scale as the units
     if c in sos:
       sos[c] = sos[c] * fw["play"]
