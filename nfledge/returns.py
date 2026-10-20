@@ -155,6 +155,13 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
   # played before it); newly injured and already out alike (Hurts, out week 6 then IR, sat on the chain at 56%)
   zero = {x.gsis_id: ir_zero_weeks(data, season, x.team, current_week, ir_now[x.gsis_id])
           for x in cur.itertuples() if x.gsis_id in ir_now and x.desig != "ir"}
+  # owner decision 2026-10-19 after (BD): ESPN Out with a return date two or more weeks past his next game: no game
+  # before that date (the current week keeps the injury model's own number), the chain after it
+  long_out = espn_out_long(data, espn_feed, current_week)
+  for x in cur.itertuples():
+    if x.gsis_id in long_out and x.gsis_id not in zero and x.desig != "ir":
+      zero[x.gsis_id] = {w for w in ir_zero_weeks(data, season, x.team, current_week, long_out[x.gsis_id], minimum=False)
+                         if w != current_week}
   avail, status, extra = {}, {}, {}
   for w in weeks:
     a, t_, rows = {}, {}, []
@@ -212,14 +219,49 @@ def espn_ir(data, feed: pd.DataFrame | None) -> dict:
   return {m[i]: (None if pd.isna(d) else d) for i, d in zip(f.espn_id.astype(str), ret) if i in m and isinstance(m[i], str)}
 
 
-def ir_zero_weeks(data, season: int, team: str, week: int, ret) -> set:
+ESPN_LONG_DAYS = 14
+
+
+def espn_out_long(data, feed: pd.DataFrame | None, week: int) -> dict:
+  """gsis -> ESPN's estimated return date for players ESPN lists Out (not injured reserve: espn_ir) whose date is at
+  least ESPN_LONG_DAYS past his team's next unplayed game. Owner decision 2026-10-19 after (BD) ("taking espn expected
+  return dates seriously makes a whole lot of sense so do it"): those players played 32% of their next six games where
+  the chain said 51% (31 cases 2022-25), and ESPN's dates run late, not early (median 14 days); Davante Adams (ruptured
+  hamstring, back after the week 11 bye) read 100% every later week."""
+  if feed is None or not len(feed) or "status" not in feed or "return_date" not in feed:
+    return {}
+  f = feed[feed.status == "Out"].dropna(subset=["espn_id"])
+  ret = pd.to_datetime(f.return_date, errors="coerce", utc=True).dt.tz_convert(None)
+  r = data.rosters[(data.rosters.season == data.current_season) & data.rosters.espn_id.notna() & data.rosters.gsis_id.notna()]
+  r = r.sort_values("week").drop_duplicates("gsis_id", keep="last")
+  ids = {str(e).split(".")[0]: (g, t) for e, g, t in zip(r.espn_id, r.gsis_id, r.team)}
+  s = data.schedules
+  s = s[(s.season == data.current_season) & (s.game_type == "REG") & (s.week >= week) & s.home_score.isna()]
+  nxt = {}
+  for g in s.sort_values("gameday").itertuples():
+    for t in (g.home_team, g.away_team):
+      nxt.setdefault(t, pd.Timestamp(g.gameday))
+  out = {}
+  for e, d in zip(f.espn_id.astype(str), ret):
+    hit = ids.get(e)
+    if hit is None or pd.isna(d):
+      continue
+    g, t = hit
+    n = nxt.get(t if t != "LAR" else "LA")
+    if n is not None and (d - n).days >= ESPN_LONG_DAYS:
+      out[g] = d
+  return out
+
+
+def ir_zero_weeks(data, season: int, team: str, week: int, ret, minimum: bool = True) -> set:
   """Weeks an injured-reserve player can't play (owner 2026-10-17, (AM)): his team's first league-minimum games not
-  yet played from `week` on (placement counts from the next game), and every game before ESPN's estimated return date."""
+  yet played from `week` on (placement counts from the next game), and every game before ESPN's estimated return date.
+  minimum=False: only the ESPN date (espn_out_long: a player ESPN lists Out, not on a reserve list)."""
   from .return_timing import ir_min
   s = data.schedules
   g = s[(s.season == season) & (s.game_type == "REG") & ((s.home_team == team) | (s.away_team == team))
         & (s.week >= week) & s.home_score.isna()].sort_values("week")
-  out = set(int(w) for w in g.week.head(ir_min(season)))
+  out = set(int(w) for w in g.week.head(ir_min(season))) if minimum else set()
   if ret is not None:
     out |= set(int(w) for w in g[pd.to_datetime(g.gameday) < ret].week)
   return out
