@@ -104,7 +104,8 @@ def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict |
   wind = forecast_wind(games.set_index("game_id"))
   hist_wind = eng.team_ledger.drop_duplicates("game_id").set_index("game_id").wind
   wind = wind.fillna(hist_wind.reindex(wind.index))
-  proj = eng.project_week(season, week, use_injuries=True, wind=wind)
+  # reserve-list players whose practice window is open are this week's candidates too (returns.window_open)
+  proj = eng.project_week(season, week, use_injuries=True, wind=wind, extra_cands=returns.window_open(data, week))
   attach_data(eng, None)  # raw data is reloaded every run; keep the cache small
   with open(path, "wb") as f:
     pickle.dump((eng, proj), f, protocol=pickle.HIGHEST_PROTOCOL)

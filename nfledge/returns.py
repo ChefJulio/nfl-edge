@@ -80,8 +80,10 @@ def availability_plan(data, proj: pd.DataFrame, week: int, espn_feed: pd.DataFra
   later = list(range(week + 1, last + 1))
   avail, status, extra = lookahead_availability(data, week, later, now_report, espn_feed=espn_feed, cache_dir=cache_dir, gb=gb)
   avail[week] = dict(now_report)
+  open_ = set(window_open(data, week).gsis_id)
   for g in reserve_now(data):
-    avail[week][g] = 0.0
+    if g not in open_:  # a window-open player keeps the injury model's chance (his report: Out = 0)
+      avail[week][g] = 0.0
   return {"avail": avail, "status": status, "extra": extra}
 
 
@@ -113,6 +115,10 @@ def lookahead_availability(data, current_week: int, weeks: list[int], now_report
   for g in reserve_now(data, new_only=True):
     ir_now.setdefault(g, None)  # (IR audit) newly on a reserve list: the league minimum; ESPN's date when it has one
   new = _newly_injured(data, m, season, current_week, now_report, set(cur.gsis_id), ir=ir_now)
+  # window-open reserve players with no return state (opened the season on the list): owner decision 2026-10-19
+  opened = _window_states(data, m, season, current_week, now_report, set(cur.gsis_id) | (set(new.gsis_id) if len(new) else set()))
+  if len(opened):
+    new = pd.concat([new, opened], ignore_index=True) if len(new) else opened
   if cur.empty and new.empty:
     return {w: {} for w in weeks}, {w: {} for w in weeks}, {w: pd.DataFrame() for w in weeks}
   first = np.array([float(now_report[g]) if (g in now_report and int(nw) == current_week) else np.nan
@@ -204,6 +210,60 @@ def reserve_now(data, new_only: bool = False) -> set:
     before = set(r[(r.week == last - 1) & (r.status == "RES")].gsis_id)
     out -= before
   return out
+
+
+def window_open(data, week: int) -> pd.DataFrame:
+  """QB / RB / WR / TE on a reserve list whose practice window is open: on this week's injury report, or last week's
+  (before this week's first report). Owner decision (delegated) 2026-10-19, Tank Dell: on IR to return since the
+  opener, practicing in full in week 6, his coach naming week 7 for his debut, and on no page at all (players who open
+  the season on a reserve list were never projected back; (AX) / (AX2) failed, "never back" scored worst). These join
+  this week's candidates (the injury model rates them from their report: Out = 0) and, without a return state yet,
+  get one for the lookahead chain (_window_states). Columns as engine candidates."""
+  season = data.current_season
+  r = data.rosters[(data.rosters.season == season) & data.rosters.gsis_id.notna()]
+  if not len(r):
+    return pd.DataFrame(columns=["gsis_id", "team", "pos", "full_name", "depth_rank"])
+  r = r[r.week == r.groupby("team").week.transform("max")]
+  r = r[(r.status == "RES") & r.position.isin(["QB", "RB", "WR", "TE", "FB", "HB"])]
+  inj = data.injuries
+  inj = inj[(inj.season == season) & (inj.game_type == "REG") & inj.gsis_id.notna()]
+  now = inj[inj.week == week]
+  published = set(now.team.replace({"LAR": "LA"}))
+  # this week's report decides once his team's is out (not on it = not practicing); before that, last week's
+  last = inj[inj.week == week - 1]
+  on = set(now.gsis_id) | set(last[~last.team.replace({"LAR": "LA"}).isin(published)].gsis_id)
+  r = r[r.gsis_id.isin(on)].drop_duplicates("gsis_id", keep="last")
+  return pd.DataFrame({"gsis_id": r.gsis_id.to_numpy(), "team": r.team.replace({"LAR": "LA"}).to_numpy(),
+                       "pos": r.position.replace({"FB": "RB", "HB": "RB"}).to_numpy(), "full_name": r.full_name.to_numpy(),
+                       "depth_rank": np.nan})
+
+
+def _window_states(data, m, season: int, week: int, now_report: dict, known: set) -> pd.DataFrame:
+  """Return states for window-open reserve players who have none (opened the season on the list): designated to
+  return, every team game so far missed, this week's chance first (now_report; 0 when not rated)."""
+  wo = window_open(data, week)
+  inj = data.injuries
+  inj = inj[(inj.season == season) & inj.week.isin([week, week - 1]) & (inj.game_type == "REG") & inj.gsis_id.notna()]
+  inj = inj.sort_values("week").drop_duplicates("gsis_id", keep="last").set_index("gsis_id")
+  rows = []
+  for x in wo.itertuples():
+    if x.gsis_id in known:
+      continue
+    ws = m._tw.get((season, x.team), [])
+    gw = week if week in ws else next((w for w in ws if w > week), None)
+    nxt = next((w for w in ws if gw is not None and w > gw), None)
+    if gw is None or nxt is None:
+      continue
+    status = inj.at[x.gsis_id, "report_status"] if x.gsis_id in inj.index else None
+    rows.append({"season": season, "week": gw, "bye_start": gw != week, "gsis_id": x.gsis_id, "team": x.team,
+                 "missed": sum(1 for w in ws if w < gw) + 1, "desig": "ir_return",
+                 "report": REPORT.get(status, 0) if isinstance(status, str) else 0,
+                 "injury": inj.at[x.gsis_id, "report_primary_injury"] if x.gsis_id in inj.index else None,
+                 "position": x.pos, "next_week": nxt, "back": False, "p_now": float(np.clip(now_report.get(x.gsis_id, 0.0), 0, 1)),
+                 "opened_out": 1.0, "prior_g": m.prior_g(season, x.gsis_id)})
+  if not rows:
+    return pd.DataFrame()
+  return m._calendar(ReturnModel._encode(pd.DataFrame(rows)))
 
 
 def espn_ir(data, feed: pd.DataFrame | None) -> dict:
