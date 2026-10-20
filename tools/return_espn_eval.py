@@ -70,8 +70,6 @@ EN = RT.enrich(data, ST, prac, ESP)[["season", "gsis_id", "week"] + ESPN]
 ST = ST.merge(EN.drop_duplicates(["season", "gsis_id", "week"]), on=["season", "gsis_id", "week"], how="left")
 ST["espn_has"] = ST.espn_has.fillna(0.0)
 ST["espn_out"] = ST.espn_out.fillna(0.0)
-mk = lambda: HistGradientBoostingClassifier(max_iter=200, learning_rate=0.05, max_depth=3, random_state=0,  # noqa: E731
-                                            categorical_features=[FEAT2.index("inj_code"), FEAT2.index("pos_code")])
 
 
 def chain(model, state: pd.DataFrame, feats: list[str], rule: bool = False) -> np.ndarray:
@@ -108,11 +106,15 @@ for season in TEST + [CONFIRM]:
   base = HistGradientBoostingClassifier(max_iter=200, learning_rate=0.05, max_depth=3, random_state=0,
                                         categorical_features=[FEAT1.index("inj_code"), FEAT1.index("pos_code")])
   base = base.fit(ST.loc[known, FEAT1], ST.loc[known, "back"])
-  var = mk().fit(ST.loc[known, FEAT2], ST.loc[known, "back"])
+  # columns with no data in the training seasons drop out (as return_timing.fit does): no ESPN captures before 2022-09,
+  # so the 2022 test season's variant equals today's chain
+  fs = [c for c in FEAT2 if ST.loc[known, c].notna().any() and ST.loc[known, c].nunique() > 1]
+  var = HistGradientBoostingClassifier(max_iter=200, learning_rate=0.05, max_depth=3, random_state=0,
+                                       categorical_features=[fs.index("inj_code"), fs.index("pos_code")]).fit(ST.loc[known, fs], ST.loc[known, "back"])
   t = ST[ST.season == season].reset_index(drop=True)
   if season == CONFIRM:
     t = t[t.next_week < data.completed_weeks(season) + 1].reset_index(drop=True)
-  b, v, rl = chain(base, t, FEAT1), chain(var, t, FEAT2), chain(base, t, FEAT1, rule=True)
+  b, v, rl = chain(base, t, FEAT1), chain(var, t, fs), chain(base, t, FEAT1, rule=True)
   for i, x in enumerate(t.itertuples()):
     for k in range(1, H + 1):
       lab = m.active_after(season, x.gsis_id, x.team, int(x.week), k)

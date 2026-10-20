@@ -632,7 +632,7 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
 - (AS) midweek stage from the calendar; (AT) one "early week" definition (week clock entry, 2026-10-18).
 - Week clock remaining moves (7 items, "Week clock ... REMAINING WORK" entry).
 - (BC) give the model each quarterback's track record (pre-registered 2026-10-19, log below; arms to build).
-- (BD) ESPN's estimated return date in the return chain (pre-registered 2026-10-19, log below).
+- (BD) FAILED as a learned input; lead: a rule for long ESPN dates (Adams case, 31 cases: played 32%, we say 51%). Owner decision / new data.
 - Partial Vegas lines: if any game of a week lacks a line, every game drops to the model's own volume
   (team_model.GameModel.predict `.all()`); per-game fallback.
 - Small IR-audit leftovers: qb2_play_rate needs a board QB at depth rank 1; debut prior's absolute depth_rank <= 2;
@@ -2941,3 +2941,16 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   all move. Reported, not gated: states whose ESPN date is 14+ days past the next game (the Adams case); a rule arm
   (no game before ESPN's date when it is 14+ days past the next game and ESPN says Out) on the same rows; IR / PUP
   states apart (return_timing.py already reads ESPN).
+- **RESULT {#return-espn} (BD) ESPN's estimated return date in the return chain: FAIL, not shipped.**
+  tools/return_espn_eval.py, walk-forward 2022-25, 12,754 states (7,450 with an ESPN capture; by season 2,747 / 2,316 /
+  2,305 / 82: the Wayback backfill is thin for 2025). Harness note (mechanical, set after the first run crashed with no
+  output read): columns with no data in a training window drop out, as return_timing.fit does, so the 2022 test
+  season, trained on 2019-21 with no captures, equals today's chain. (1) states with a capture, k = 1-6: Brier .1621
+  -> .1632, +0.0011 [-0.0006, +0.0026], better 2 of 4 (2022 equal; 2023 +.0068, trained on one season of captures;
+  2024 -.0029; 2025 -.0091): FAIL. (2) all states +0.0004 [-0.0005, +0.0013]: pass. (3) calibration .0215 -> .0179:
+  pass. CONFIRM 2026 (94 states with a capture) -0.0806. Reported, the Adams case (ESPN Out, date 14+ days past the
+  next game; 31 states): played 32.2% of the next six games, today 50.9%, variant 19.7%, rule (no game before ESPN's
+  date) 24.6%; Brier .2221 -> variant .1530 (-0.069 [-0.169, +0.019]), rule .1160 (-0.106 [-0.189, -0.037]). IR / PUP
+  states +0.0022 [+0.0003, +0.0042] (return_timing.py already reads ESPN). Reading: as a learned input the date needs
+  more seasons of captures than exist; where it is long, today's chain is badly optimistic and a plain rule fixes
+  most of it, but on 31 cases and as a reported arm, so it is a lead, not a result.
