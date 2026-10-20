@@ -646,6 +646,7 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
 - Hand-set values not yet tested: docs/handset_audit.md #8-#22 (#14 = return-model settings), range calibration.
 
 **Pending checks**
+- Bye-week ESPN rule (owner 2026-10-20): at season end, played rate after a bye by ESPN bucket on 2026 snapshots vs the rates used.
 - (BC) qbedge adopted 2026-10-19: at season end, 2026 game margin MAE base vs adopted (tools/game_eval.py 2026).
 - ESPN long-date rule (owner decision 2026-10-19): at season end, 2026's touched players' played share before / after ESPN's date.
 - News watcher relay (tools/news_watch.py): confirm the first run handed off to its successor (~21:45 UTC 2026-10-18).
@@ -3103,3 +3104,10 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   .2779, -0.2119 [-0.4001, -0.0203]: pass. (2) predicted 37.6% vs played 51.0%: FAIL (the Questionable bye rate,
   shrunk toward the normal week's, under-predicts: a bye adds a week of recovery). The Wayback archive has almost no
   bye-week Out cases; 2026's daily snapshots will add them.
+- **Owner decision 2026-10-20 on (BG): the bridge's rule for bye teams (consistency, not a test pass).** returns.bye_espn:
+  a QB / RB / WR / TE on a team with no game this week whose ESPN status (Out / Doubtful) was updated after his last
+  game gets, for his next game, the bridge's bucket (Out+ret against that next game, Out, Doubtful) and its learned rate
+  (else the prior), via the newly-injured chain's bye_start; IR keeps its floor; Questionable stays display-only. Live
+  as of week 7: Terry McLaurin (ESPN Doubtful) week 8 100% -> 4%, then 33 / 49%; Marcus Mariota (already on the chain)
+  week 8 32%. Known lean: the normal-week rates are pessimistic before a bye (Questionable played 54% vs 44%); to
+  measure on 2026's daily snapshots at season end.

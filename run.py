@@ -290,7 +290,8 @@ def main():
     ev = bt.evaluate(res, POSITIONS, ecr_only=True)
 
   # (AM) the live build's one availability plan, as of this week: every page's projections and Power read it
-  plan = None if args.week else returns.availability_plan(data, proj, week, feed, ROOT / cfg["data"]["cache_dir"], gb_cfg(cfg))
+  plan = None if args.week else returns.availability_plan(data, proj, week, feed, ROOT / cfg["data"]["cache_dir"], gb_cfg(cfg),
+                                                          espn_rates=getattr(eng.injury_model, "espn_rates", None))
   ctx = build_page(eng, data, cfg, scoring, season, week, proj,
                    nav=week_nav(data, season, week, display_week(data) if not args.week else week, prefix=""),
                    res=res, ev=ev, bt_seasons=bt_seasons, plan=plan,

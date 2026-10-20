@@ -54,7 +54,54 @@ def played_set(data) -> set:
   return played
 
 
-def availability_plan(data, proj: pd.DataFrame, week: int, espn_feed: pd.DataFrame | None, cache_dir, gb: dict) -> dict:
+def bye_espn(data, feed: pd.DataFrame | None, week: int, rates: dict | None) -> dict:
+  """gsis -> P(plays his next game) for QB / RB / WR / TE whose team is on bye this week and whose ESPN status (Out /
+  Doubtful) was updated after his team's last game. Owner decision 2026-10-20 after (BG) (too few bye-week cases to
+  measure: 2 Out): the same bucket and rate the early-week bridge gives every playing team's players (espn_calib: Out
+  with a return date a week+ past his next game "Out+ret", Out, Doubtful; learned rates, else their priors), applied to
+  his next game. Before this he was on no board all bye week and read healthy (Terry McLaurin, knee, 2026 week 7). IR
+  keeps its floor (espn_ir); Questionable stays display-only, as for everyone."""
+  from .espn import STATUS_MAP
+  from .espn_calib import PRIORS, bucket
+  if feed is None or not len(feed) or "status" not in feed:
+    return {}
+  season = data.current_season
+  s = data.schedules[(data.schedules.season == season) & (data.schedules.game_type == "REG")]
+  playing = set(s[s.week == week].home_team) | set(s[s.week == week].away_team)
+  done = s[s.home_score.notna() & (s.week < week)]
+  last_day = pd.concat([done[["home_team", "gameday"]].set_axis(["team", "day"], axis=1),
+                        done[["away_team", "gameday"]].set_axis(["team", "day"], axis=1)]).groupby("team").day.max()
+  fut = s[s.week > week].sort_values("gameday")
+  next_day = {}
+  for g in fut.itertuples():
+    for t in (g.home_team, g.away_team):
+      next_day.setdefault(t, g.gameday)
+  r = data.rosters[(data.rosters.season == season) & data.rosters.espn_id.notna() & data.rosters.gsis_id.notna()]
+  r = r[r.position.isin(["QB", "RB", "WR", "TE", "FB"])].sort_values("week").drop_duplicates("gsis_id", keep="last")
+  ids = {str(e).split(".")[0]: (g, t if t != "LAR" else "LA") for e, g, t in zip(r.espn_id, r.gsis_id, r.team)}
+  out = {}
+  for x in feed.itertuples():
+    rep = STATUS_MAP.get(str(x.status))
+    hit = ids.get(str(x.espn_id))
+    if rep not in ("Out", "Doubtful") or hit is None:
+      continue
+    g, team = hit
+    if team in playing or team not in last_day.index or team not in next_day:
+      continue
+    upd = pd.to_datetime(getattr(x, "updated", None), utc=True, errors="coerce")
+    if pd.isna(upd) or upd.tz_convert("America/New_York").date() < pd.Timestamp(last_day[team]).date():
+      continue  # news from before his last game
+    b = bucket(x.status, getattr(x, "return_date", None), next_day[team]) or rep
+    rate = (rates or {}).get(b)
+    if rate:
+      out[g] = float(rate["p"])
+    elif b in PRIORS and PRIORS[b].get("n"):
+      out[g] = float(PRIORS[b]["played"]) / float(PRIORS[b]["n"])
+  return out
+
+
+def availability_plan(data, proj: pd.DataFrame, week: int, espn_feed: pd.DataFrame | None, cache_dir, gb: dict,
+                      espn_rates: dict | None = None) -> dict:
   """(AM, owner 2026-10-17: one source of truth) the live build's availability plan, computed once as of the current
   week and passed to every page's projections and to Power: {"avail": week -> {gsis: P(plays)}, "status": week ->
   {gsis: text}, "extra": week -> IR players expected back}, for this week (the injury model's chance, players it
@@ -77,6 +124,9 @@ def availability_plan(data, proj: pd.DataFrame, week: int, espn_feed: pd.DataFra
   # out this week (set after the lookahead, so long-term reserve players keep their IR-model inputs untouched)
   for g in reserve_now(data, new_only=True):
     now_report.setdefault(g, 0.0)
+  # players on a bye team with fresh ESPN injury news: their next game at the bridge's rate, then the chain
+  for g, p_ in bye_espn(data, espn_feed, week, espn_rates).items():
+    now_report.setdefault(g, p_)
   later = list(range(week + 1, last + 1))
   avail, status, extra = lookahead_availability(data, week, later, now_report, espn_feed=espn_feed, cache_dir=cache_dir, gb=gb)
   avail[week] = dict(now_report)
