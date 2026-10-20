@@ -646,6 +646,7 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
 - Hand-set values not yet tested: docs/handset_audit.md #8-#22 (#14 = return-model settings), range calibration.
 
 **Pending checks**
+- (BJ) lead: at season end, return timing anchored on ESPN's date on 2026 daily snapshots only (failed on sparse 2022-25 captures; 2026 so far -0.24 on 50 states).
 - Bye-week ESPN rule (owner 2026-10-20): at season end, played rate after a bye by ESPN bucket on 2026 snapshots vs the rates used.
 - (BC) qbedge adopted 2026-10-19: at season end, 2026 game margin MAE base vs adopted (tools/game_eval.py 2026).
 - ESPN long-date rule (owner decision 2026-10-19): at season end, 2026's touched players' played share before / after ESPN's date.
@@ -3153,3 +3154,12 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   next game (he played); 4 with a date 1-6 days past (1 played). The live feed shows why: all 126 Doubtful /
   Questionable listings carry a return date, and it is the date of his team's next game (bye teams: Nov 1, week 8): a
   placeholder. On those listings ESPN's date carries no information beyond the status; nothing changes.
+- **RESULT {#return-anchor} (BJ) return timing anchored on ESPN's date: FAIL.** tools/return_anchor_eval.py, 2023-25,
+  9,294 states (3,251 with a dated Out / IR capture; 2025 only 82). Measured hazard by days from the date to the game
+  (fit for 2025): before 0.00, 0-6 0.28, 7-13 0.07, 14-20 0.02, 21-34 0.01, 35+ 0.01. (1) dated states k = 1-6 Brier
+  .1399 -> .1516, +0.0116 [+0.0060, +0.0171], worse all 3 seasons: FAIL; (2) all states +0.0040 [+0.0020, +0.0060]:
+  FAIL; (3) calibration .0459 -> .0822: FAIL. Played vs predicted by game k (dated): k4 .31 / base .27 / variant .19,
+  k6 .39 / .34 / .21: anchoring on one snapshot's date reads "still out past the date" as long-term, but ESPN moves
+  the date and players come back. CONFIRM 2026 (50 dated states, daily snapshots): -0.2401, the opposite way: with
+  fresh dates it may work. Lead, not a result: re-test at season end on 2026's daily snapshots alone (data this test
+  never scored), where each build sees the date as of that day.
