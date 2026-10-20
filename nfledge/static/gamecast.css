@@ -701,7 +701,11 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .ts-box .pc-k { margin-bottom: 0; }
 .ts-grid { display: grid; gap: 1px; margin-top: 6px; }
 .ts-c { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 2px 0 3px; border-radius: 6px; min-width: 0; }
-.ts-c.cur { box-shadow: inset 0 0 0 1.5px var(--accent); }
+/* a timeline: past games full color with their result bar, this week's opponent ringed in the accent with a dot
+   until it's final, later games dimmed */
+.ts-c.fut .nl { opacity: .45; }
+.ts-c.cur .nl { box-shadow: 0 0 0 2px var(--panel2), 0 0 0 3.5px var(--accent); }
+.ts-c.cur .ts-r:not(.w):not(.l):not(.t) { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
 .ts-c .nl { width: 18px !important; height: 18px !important; }
 .ts-c .nl img { width: 14px !important; height: 14px !important; }
 .ts-r { width: 70%; height: 3px; border-radius: 2px; background: transparent; }

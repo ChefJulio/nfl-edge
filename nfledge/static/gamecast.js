@@ -2280,9 +2280,18 @@
     const O = oddsData();
     const sch = O && +O.season === +d.season ? (O.sched || {})[abbr] : null;
     if (!sch || !sch.length) return '';
-    const by = Object.fromEntries(sch.map(g => [g[0], g])), n = Math.max(18, ...sch.map(g => g[0]));
+    const by = Object.fromEntries(sch.map(g => [g[0], g.slice()])), n = Math.max(18, ...sch.map(g => g[0]));
+    // this week's result from the same source as the game tile above it (the week's data, or ESPN's live feed once
+    // it's final), so the row never lags the tile (odds.json is rewritten only when the site rebuilds)
+    const tg = teamGame(abbr, d), cw = by[+d.week];
+    if (tg && cw) {
+      const st = LIVE.byGame && LIVE.byGame[tg.id], home = tg.home.team === abbr;
+      const fin = tg.final && tg.final.home != null ? [tg.final.home, tg.final.away]
+        : st && st.state === 'post' ? [st.home.score, st.away.score] : null;
+      if (fin) [cw[3], cw[4]] = home ? [fin[0], fin[1]] : [fin[1], fin[0]];
+    }
     const cells = Array.from({ length: n }, (_, i) => i + 1).map(w => {
-      const g = by[w], cur = +w === +d.week ? ' cur' : '';
+      const g = by[w], cur = +w === +d.week ? ' cur' : +w > +d.week ? ' fut' : '';
       // one row (owner 2026-10-20: "more compact and fit on one row"): logo + a result bar; the rest in the tip
       if (!g) return `<div class="ts-c bye${cur}" title="Week ${w} · bye"><span class="ts-bye"></span></div>`;
       const [, o, home, pf, pa, day] = g, done = pf != null && pa != null;
