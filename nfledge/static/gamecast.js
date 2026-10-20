@@ -2283,14 +2283,14 @@
     const by = Object.fromEntries(sch.map(g => [g[0], g])), n = Math.max(18, ...sch.map(g => g[0]));
     const cells = Array.from({ length: n }, (_, i) => i + 1).map(w => {
       const g = by[w], cur = +w === +d.week ? ' cur' : '';
-      if (!g) return `<div class="ts-c bye${cur}"><span class="ts-w">${w}</span><span class="ts-bye">BYE</span></div>`;
+      // one row (owner 2026-10-20: "more compact and fit on one row"): logo + a result bar; the rest in the tip
+      if (!g) return `<div class="ts-c bye${cur}" title="Week ${w} · bye"><span class="ts-bye"></span></div>`;
       const [, o, home, pf, pa, day] = g, done = pf != null && pa != null;
       const res = done ? (pf > pa ? 'W' : pf < pa ? 'L' : 'T') : '';
       const tip = `Week ${w} · ${day || ''} · ${home ? 'vs' : '@'} ${(rtTeam(O, o).nick || o)}${done ? ` · ${res} ${pf}-${pa}` : ''}`;
-      return `<div class="ts-c${cur}" title="${esc(tip)}"><span class="ts-w">${w}${home ? '' : '<i>@</i>'}</span>${tmL(o, tLogo(o, 22))}`
-        + `<span class="ts-r ${res === 'W' ? 'w' : res === 'L' ? 'l' : ''}">${done ? `${res} <small>${pf}-${pa}</small>` : ''}</span></div>`;
+      return `<div class="ts-c${cur}" title="${esc(tip)}">${tmL(o, tLogo(o, 18))}<span class="ts-r ${res === 'W' ? 'w' : res === 'L' ? 'l' : res ? 't' : ''}"></span></div>`;
     }).join('');
-    return `<div class="pc-box ts-box"><div class="pc-k">${esc(d.season)} schedule</div><div class="ts-grid">${cells}</div></div>`;
+    return `<div class="pc-box ts-box"><div class="pc-k">${esc(d.season)} schedule</div><div class="ts-grid" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${cells}</div></div>`;
   };
   // odds by week: lines going into each week, dashed to next week's best / worst case; schedule along the bottom
   const oddsChart = (abbr, O) => {
