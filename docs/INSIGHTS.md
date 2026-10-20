@@ -3047,3 +3047,18 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   GATE: (1) touched rows, fantasy MAE lower, 95% CI over season-weeks with upper < 0, improvement >= 0.5 points; (2)
   all relevant rows not worse (CI upper < +0.003); (3) touched rows, mean projection within 1.5 points of mean actual.
   Reported: by position; mid-season returns vs lost-season returns.
+- **RESULT {#reserve-avail-2} (BE2) reserve-aware calibration (second look, weaker evidence): FAIL (gate 3 at stage 3,
+  by 0.4 points).** Same harness. (1) .3993 -> .1925, -0.2068 [-0.2397, -0.1766]: pass; (2) -0.0002 [-0.0005, +0.0002]:
+  pass; (3) stage 1 44.4% predicted vs 45.5% played: pass; stage 3 60.5% vs 63.9% (3.4 points, bar 3): FAIL (stage 0
+  13.6 / 18.6, stage 2 45.3 / 45.5). CONFIRM 2026 .3607 -> .1852. Window open, no status, practiced: 82.9% played,
+  77.1% predicted. Both looks put every stage within 3-8 points of the truth on players the site rates 0% today (40%
+  of them play); each misses one calibration bar. Owner decision pending: ship one as an owner-design rule, or not.
+- **RESULT {#return-role} (BF) a role for players returning to an empty recent window: FAIL.** tools/experiments.py
+  baseline,return_role 2021-25 + tools/return_role_eval.py (touched rows: baseline recent shares empty, stored as 0, and
+  the variant filled them; first scorer pass matched none and was fixed before any numbers were read). 403 touched rows
+  that played, mean actual 2.05 points: MAE 1.975 -> 2.428, +0.453 [+0.319, +0.587]: FAIL; mean projection 0.41 ->
+  1.63 (gate 3 pass). All relevant rows +0.000 [-0.001, +0.002]. By kind: mid-season returns 352 (WR 121: actual 1.06,
+  today 0.19, variant 1.60), lost-season returns 51 (WR 21: 0.51 / 0.03 / 1.03). Reading: the touched players are
+  mostly depth players coming back to small roles, many scoring 0; a share of the old role over-projects them, and
+  MAE favors the near-0 projection on such skewed rows. The established starter (Dell) is the rare case here; a
+  version for players whose long-window role was large is a new hypothesis, to test on data this one hasn't seen.
