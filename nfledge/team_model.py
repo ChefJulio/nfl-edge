@@ -40,6 +40,26 @@ def prior_dropbacks(qbexp: pd.DataFrame, season: int, week: int) -> pd.Series:
   return pd.Series((last.prior + last.n).to_numpy(), index=last.qb.to_numpy())
 
 
+def qb_quality_table(pbp: pd.DataFrame) -> tuple[pd.DataFrame, float]:
+  """(BC) a QB's track record: per (qb, season, week) his dropbacks and EPA through that week (cumulative, every
+  season in the data), and the league's EPA per dropback. qb_quality_asof turns it into a shrunk rate."""
+  db = pbp[pbp.is_dropback & pbp.epa.notna()].assign(qb=pbp.passer_player_id.fillna(pbp.rusher_player_id)).dropna(subset=["qb"])
+  g = db.groupby(["qb", "season", "week"]).epa.agg(["sum", "size"]).reset_index().sort_values(["qb", "season", "week"])
+  g["c_sum"], g["c_n"] = g.groupby("qb")["sum"].cumsum(), g.groupby("qb")["size"].cumsum()
+  return g[["qb", "season", "week", "c_sum", "c_n"]], float(db.epa.mean())
+
+
+def qb_quality_asof(table: pd.DataFrame, lg: float, season: int, week: int, k: float, before_season: bool = False) -> pd.Series:
+  """(BC) qb -> EPA per dropback on his dropbacks before (season, week) (before_season: before the season's first
+  week), shrunk with k pseudo-dropbacks at the league rate lg."""
+  if before_season:
+    t = table[table.season < season]
+  else:
+    t = table[(table.season < season) | ((table.season == season) & (table.week < week))]
+  last = t.groupby("qb").tail(1)
+  return pd.Series(((last.c_sum + k * lg) / (last.c_n + k)).to_numpy(), index=last.qb.to_numpy())
+
+
 def qb_team_experience(pbp: pd.DataFrame) -> pd.DataFrame:
   """Dropbacks each QB had for each team BEFORE each (season, week) within the play-by-play window. Feeds the
   new-to-the-team QB term (EXPERIMENT team_model.qb_newteam_dropbacks; INSIGHTS (R))."""
@@ -264,8 +284,8 @@ class Design:
     self.X = sp.csr_matrix((data, (r, c)), shape=(len(plays), self.p))
     self.y = plays.epa.to_numpy(dtype=float)
 
-  def solve(self, w: np.ndarray, alpha: float, alpha_qb: float = 1e9) -> np.ndarray:
-    return self.solve_normal(*self.normal(w), alpha, alpha_qb)
+  def solve(self, w: np.ndarray, alpha: float, alpha_qb: float = 1e9, mu: np.ndarray | None = None) -> np.ndarray:
+    return self.solve_normal(*self.normal(w), alpha, alpha_qb, mu)
 
   def normal(self, w: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Weighted normal equations X'WX, X'Wy. They don't depend on the penalties, so CV builds them once per fold
@@ -275,7 +295,10 @@ class Design:
     Xw = X.multiply(w[keep][:, None]).tocsr()
     return (X.T @ Xw).toarray(), Xw.T @ self.y[keep]
 
-  def solve_normal(self, A: np.ndarray, b: np.ndarray, alpha: float, alpha_qb: float = 1e9) -> np.ndarray:
+  def solve_normal(self, A: np.ndarray, b: np.ndarray, alpha: float, alpha_qb: float = 1e9,
+                   mu: np.ndarray | None = None) -> np.ndarray:
+    """mu: (BC) qbprior, the value each QB effect is shrunk toward (aligned with self.qbs; None = 0, production):
+    the penalty alpha_qb x (beta - mu)^2 moves alpha_qb x mu to the right-hand side."""
     pen = np.full(self.p, alpha)
     pen[0] = 0.0
     if self.qbs:
@@ -283,6 +306,9 @@ class Design:
       pen[self.i_inexp] = self.inexp_alpha  # inexperienced-QB indicator: lightly penalized league-level effect
       if self.i_new is not None:
         pen[self.i_new] = self.inexp_alpha  # new-to-the-team indicator, same footing
+    if mu is not None and self.qbs:
+      b = b.copy()
+      b[self.base_p:self.base_p + len(self.qbs)] += alpha_qb * mu
     M = A + np.diag(pen) + 1e-9 * np.eye(self.p)
     # Ridge normal equations are symmetric positive-definite: Cholesky is the right solver and ~170x faster
     # than np.linalg.solve here (85 ms vs 0.5 ms for the pass unit; the general LU path thrashes OpenBLAS).
@@ -317,6 +343,14 @@ class Ratings:
   qb_rush: pd.Series | None = None  # EXPERIMENT (BB) qbrun: QB effects on his own designed runs (EPA/run)
   qb_run_share: dict = field(default_factory=dict)  # his share of his team's designed runs in his starts (shrunk)
   qb_run_league: float = 0.0  # the league's QB share of designed runs (an unknown QB's share)
+  qb_q: pd.Series | None = None  # (BC) each QB's track record (shrunk EPA/dropback) entering this week
+  qb_lg: float = 0.0  # league EPA/dropback
+
+  def qb_quality(self, qb) -> float:
+    """(BC) his track record minus the league's (0 for an unknown QB)."""
+    if self.qb_q is None or qb is None or (isinstance(qb, float) and np.isnan(qb)):
+      return 0.0
+    return float(self.qb_q.get(qb, self.qb_lg)) - self.qb_lg
 
   def rush_term(self, qb) -> float:
     """(BB) qbrun: rush EPA per team designed run from the starting QB's own runs (0 when off or QB unknown)."""
@@ -368,7 +402,19 @@ class TeamModel:
     self.alpha_qb = 1e9
     self.cv_loss = {}
     self._cache: dict = {}
+    self.qbq, self.qb_lg = qb_quality_table(pbp)  # (BC) QB track records
+    self.qbq_k = float(cfg["team_model"].get("qb_quality_k", 200.0))
+    ps = cfg["team_model"].get("qb_prior_scale")  # (BC) qbprior: None = off (production), "tune", or a number
+    self.qb_prior_tune = ps == "tune"
+    self.qb_prior_lambda = 0.0 if ps in (None, "tune") else float(ps)
     self.live: tuple | None = None  # set_live: the current week's ratings take in its finished games (owner, (BA))
+
+  def qb_mu(self, d: "Design", season: int, lam: float) -> np.ndarray | None:
+    """(BC) qbprior: lam x (track record before `season` - league) per QB in d.qbs; None when off."""
+    if not lam or not d.qbs:
+      return None
+    q = qb_quality_asof(self.qbq, self.qb_lg, season, 1, self.qbq_k, before_season=True)
+    return lam * (q.reindex(d.qbs).fillna(self.qb_lg).to_numpy() - self.qb_lg)
 
   def set_live(self, season: int, week: int, through: frozenset, exclude: frozenset) -> None:
     """Owner decision 2026-10-19 after (BA) (refitting Monday neither helped nor hurt; shipped for currency, owner-design
@@ -431,7 +477,7 @@ class TeamModel:
     for u in self.units:
       w = self.weights(u, season, target_week, exclude)
       d = self.designs[u]
-      beta = d.solve(w, alphas[u], self.alpha_qb)
+      beta = d.solve(w, alphas[u], self.alpha_qb, self.qb_mu(d, season, self.qb_prior_lambda) if u == "pass" else None)
       icpt[u], off[u], dfn[u], home[u], hdiv[u] = _unpack(beta, self.teams)
       if d.qbs and u == "rush":  # EXPERIMENT (BB) qbrun: QB run effects and each QB's share of his team's runs
         qb_rush = pd.Series(beta[d.base_p:d.base_p + len(d.qbs)], index=d.qbs)
@@ -464,7 +510,8 @@ class TeamModel:
                 qb, qb_inexp, prior_dropbacks(self.qbexp, season, target_week),
                 float(self.cfg["team_model"].get("qb_inexp_dropbacks", 150)), qb_new,
                 prior_team_dropbacks(self.qbteam, season, target_week) if self.qbteam is not None else None,
-                float(self.new_cut or 0.0), qb_rush, run_share, run_league)
+                float(self.new_cut or 0.0), qb_rush, run_share, run_league,
+                qb_quality_asof(self.qbq, self.qb_lg, season, target_week, self.qbq_k), self.qb_lg)
     if alphas is self.alphas:
       self._cache[key] = r
     return r
@@ -525,8 +572,10 @@ class TeamModel:
     p, d = self.plays["pass"], self.designs["pass"]
     qgrid = self.cfg["team_model"].get("qb_alpha_grid", [30, 100, 300, 1000, 1e9])
     tgrid = [a for a in self.cfg["team_model"]["alpha_grid"] if 30 <= a <= 1000]
-    grid = [(a, b) for a in tgrid for b in qgrid]
+    lgrid = [0.0, 0.25, 0.5, 0.75, 1.0] if self.qb_prior_tune else [self.qb_prior_lambda]  # (BC) qbprior
+    grid = [(a, b, lam) for a in tgrid for b in qgrid for lam in lgrid]
     losses = np.zeros(len(grid))
+    mu1 = {}
     for season, week in folds:
       test = ((p.season == season) & (p.week == week)).to_numpy()
       if not test.any():
@@ -536,15 +585,19 @@ class TeamModel:
       Xt = d.X[test]
       keys = [p.game_id[test].to_numpy(), p.posteam[test].to_numpy()]
       A, rhs = d.normal(w)
-      for i, (a, b) in enumerate(grid):
-        pred = Xt @ d.solve_normal(A, rhs, a, b)
+      if season not in mu1:
+        mu1[season] = self.qb_mu(d, season, 1.0)
+      for i, (a, b, lam) in enumerate(grid):
+        pred = Xt @ d.solve_normal(A, rhs, a, b, None if mu1[season] is None or not lam else lam * mu1[season])
         pg = pd.Series(pred).groupby(keys).mean()
         pg.index.names = ["game_id", "posteam"]
         losses[i] += float(np.sum(tg.n * (tg.epa - pg.reindex(tg.index)) ** 2))
-    a, b = grid[int(np.argmin(losses))]
-    self.alphas["pass"], self.alpha_qb = float(a), float(b)
+    a, b, lam = grid[int(np.argmin(losses))]
+    self.alphas["pass"], self.alpha_qb, self.qb_prior_lambda = float(a), float(b), float(lam)
     self.cv_loss["pass"] = float(np.min(losses))
     self.qb_cv = dict(zip(grid, losses))
+    if self.qb_prior_tune:
+      print(f"[team model] (BC) qbprior: lambda {lam} (team {a}, QB {b})", flush=True)
 
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -690,6 +743,8 @@ class GameModel:
     g["st_net"] = n_st * (g.epa_st - g.opp_epa_st)
     if "epa_pen" in g:  # (AB-a) net EPA on penalty-wiped plays per game, the same construction
       g["pen_net"] = r.plays_pg.get("pen", 6.0) * (g.epa_pen - g.opp_epa_pen)
+    # (BC) qbedge input: own QB's track record minus the opponent's (EPA/dropback); used only when the switch is on
+    g["qb_edge"] = [r.qb_quality(q) - r.qb_quality(o) for q, o in zip(qbs, oq)]
     return g
 
   def fit(self, train: pd.DataFrame, points_rows: pd.DataFrame | None = None):
@@ -711,7 +766,8 @@ class GameModel:
     # game-level backtest (tools/game_eval.py) can test the fitted weight against alternatives.
     st_w = self.cfg["team_model"].get("points_st_weight", "fitted")
     if st_w == "fitted":
-      self.points = Linear.fit(t, "points", ["off_epa_game", "st_net"] + (["pen_net"] if "pen_net" in t else []), name="points")
+      self.points = Linear.fit(t, "points", ["off_epa_game", "st_net"] + (["pen_net"] if "pen_net" in t else [])
+                               + (["qb_edge"] if self.cfg.get("game_model", {}).get("qb_career_edge") else []), name="points")
     else:
       m = Linear.fit(t.assign(points=t.points - float(st_w) * t.st_net), "points", ["off_epa_game"], name="points")
       self.points = Linear(["off_epa_game", "st_net"], np.append(m.coef, float(st_w)), "points")
