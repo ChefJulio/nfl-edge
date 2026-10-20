@@ -373,9 +373,12 @@
     const movesCard = () => {
       if (!ROS) { NFLE.load('data/ros.json').then(j => { ROS = j; if (view === 'lineup') draw(); }, () => {}); return '<div class="lg-mv lg-moves"><div class="muted">Checking the waiver wire…</div></div>'; }
       const { moves } = movesFor(), weeks = rosWeeks();
-      // the best free agent at each position, ranked by what he adds (owner 2026-10-20: a friend's list was three QBs,
-      // the same upgrade three ways, hiding a receiver who beat her WRs)
-      const seen = new Set(), best = moves.filter(m => m.ros >= 1 && !seen.has(m.add.pos) && seen.add(m.add.pos)).slice(0, 4);
+      // the top three free agents at each position that improve the team (owner 2026-10-20: a friend's list was three
+      // QBs, the same upgrade three ways, hiding a receiver who beat her WRs; "top 3 to add at each position"),
+      // positions ordered by their best gain
+      const byPos = {};
+      moves.filter(m => m.ros >= 1).forEach(m => { (byPos[m.add.pos] = byPos[m.add.pos] || []).push(m); });
+      const best = Object.values(byPos).sort((a, b) => b[0].ros - a[0].ros).flatMap(ms => ms.slice(0, 3));
       const fa = freeAgents();
       const own = mine.ext.filter(x => !(mine.ir || []).includes(x)).map(x => ({ x, p: player(x), ros: weeks.reduce((t, k) => t + ((weekOf(x, k) || {}).exp || 0), 0), games: gamesOf(x) }));
       const below = own.map(o => ({ ...o, beat: fa.filter(f => f.pos === o.p.pos && f.ros > o.ros) }))
@@ -393,7 +396,7 @@
           ${addRows.length ? table(addRows.join(''), '<th>Pos</th><th>Free agent</th><th class="num" title="What he adds to your team per week, rest of season">+/wk</th>')
             : '<p class="muted">No free agent improves your team over the rest of the season by our projections.</p>'}
           ${belowRows.length ? `<div class="lg-mv-sub">Below the waiver wire</div>${table(belowRows.join(''), '<th>Pos</th><th>Your player</th><th class="num" title="Free agents at his position who project more the rest of the season">Beat by</th>')}` : ''}
-          <p class="muted lg-note">Best available = the top free agent at each position that improves your team. +/wk = what he'd add to your team per week, your best lineup each remaining week through ${ROS.through}, making room with whoever costs least (one QB, TE, K and D/ST is enough; ${DEPTH_MIN} RBs and WRs stay). Beat by = free agents at his position who project more (top FA = the best of them). /g = expected points per remaining game, byes skipped. Upside the projections can't see is your call.</p>`;
+          <p class="muted lg-note">Best available = the top three free agents at each position that improve your team. +/wk = what he'd add to your team per week, your best lineup each remaining week through ${ROS.through}, making room with whoever costs least (one QB, TE, K and D/ST is enough; ${DEPTH_MIN} RBs and WRs stay). Beat by = free agents at his position who project more (top FA = the best of them). /g = expected points per remaining game, byes skipped. Upside the projections can't see is your call.</p>`;
     };
     // IR (owner 2026-10-17: "no mention of IR slots"): listed under the bench with when he's likely back (the first week
     // the return model gives him at least an even chance to play); never in the lineup

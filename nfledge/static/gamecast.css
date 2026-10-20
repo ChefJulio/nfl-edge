@@ -699,6 +699,9 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .pc-mt.tm-mt { margin: 4px 0 6px; }
 .pc-page .pc-box.ts-box { padding: 6px 0 4px; margin: 0; border-top: 0; }
 .ts-box .pc-k { margin-bottom: 0; }
+.pc-tap.ts-head { display: inline-block; padding: 2px 18px 2px 0; border: 0; background: none; border-radius: 0; }
+.pc-tap.ts-head::after { right: 2px; font-size: 18px; }
+@media (hover: hover) { .pc-tap.ts-head:hover { background: none; } .pc-tap.ts-head:hover .pc-k { color: var(--accent); } }
 .ts-grid { display: grid; gap: 1px; margin-top: 6px; }
 .ts-c { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 2px 0 3px; border-radius: 6px; min-width: 0; }
 /* a timeline: past games full color with their result bar, this week's opponent ringed in the accent with a dot
