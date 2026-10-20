@@ -716,6 +716,15 @@ class PlayerModel:
       short = wsum("team_db", "w_use") + wsum("team_rush", "w_use")
       lng = wsum("team_db", "w_eff") + wsum("team_rush", "w_eff")
       back = (short == 0) & (lng > 0)
+      if self.cfg["experiments"].get("return_role") == "starters":
+        # EXPERIMENT (BH): only a starter in that long window, by rank on his last team: WR / TE top 3 by target
+        # share, RB top 1 by carries, QB top 1 by dropbacks
+        grp = f.pos.map({"WR": "R", "TE": "R", "RB": "B", "QB": "Q"})
+        key = pd.Series(np.select([grp == "R", grp == "B", grp == "Q"],
+                                  [f.tgt_share_long, f.carry_share_long, f.db_share_long], np.nan), index=f.index)
+        rk = key.groupby([f.last_team, grp]).rank(ascending=False, method="first")
+        top = grp.map({"R": 3, "B": 1, "Q": 1})
+        back = back & (rk <= top).fillna(False)
       if back.any():
         ratio = self._return_ratio(season)
         fac = f.pos.map(ratio).fillna(ratio.get("all", 1.0))

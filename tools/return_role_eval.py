@@ -35,22 +35,25 @@ def ci(diff: np.ndarray, cl: np.ndarray):
 
 
 def main():
+  opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
+  var = opt.get("variant", "return_role")  # (BH): --variant=return_starters --seasons=2020,2026
+  seasons = [int(x) for x in opt.get("seasons", "2021,2022,2023,2024,2025").split(",")]
   rows = []
-  for s in range(2021, 2026):
-    b, v = newest("baseline", s), newest("return_role", s)
+  for s in seasons:
+    b, v = newest("baseline", s), newest(var, s)
     sh = ["db_share", "carry_share", "tgt_share"]
     m = b[KEY + sh + ["pos", "full_name", "proj", "actual", "last_season", "played"]].merge(
       v[KEY + sh + ["proj"]].rename(columns={"proj": "proj_v", **{c: c + "_v" for c in sh}}), on=KEY, how="inner")
     # touched: the variant filled his empty recent shares (the cache stores empty shares as 0)
     touched = (m[sh].fillna(0).abs().sum(axis=1) == 0) & (m[[c + "_v" for c in sh]].fillna(0).abs().sum(axis=1) > 0)
     t = m[touched & m.played.astype(bool)]
-    rows.append(t)
+    rows.append(t.assign(season=s))
   r = pd.concat(rows, ignore_index=True).dropna(subset=["actual"])
   r["eb"], r["ev"] = (r.proj - r.actual).abs(), (r.proj_v - r.actual).abs()
   r["kind"] = np.where(r.last_season < r.season - 1, "after a lost season", "mid-season return")
   cl = (r.season.astype(str) + "-" + r.week.astype(str)).to_numpy()
   g1 = ci((r.ev - r.eb).to_numpy(), cl)
-  print(f"touched rows 2021-25: {len(r)} (played)")
+  print(f"touched rows {seasons}: {len(r)} (played); players: {', '.join(sorted(set(r.full_name))[:40])}")
   print(f"(1) MAE {r.eb.mean():.3f} -> {r.ev.mean():.3f}, {g1[0]:+.3f} [{g1[1]:+.3f}, {g1[2]:+.3f}]  "
         f"{'PASS' if g1[2] < 0 and g1[0] <= -0.5 else 'FAIL'}")
   gap = abs(r.proj_v.mean() - r.actual.mean())
