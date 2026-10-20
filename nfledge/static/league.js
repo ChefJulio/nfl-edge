@@ -828,8 +828,9 @@
     const header = () => {
       sec.innerHTML = `<div class="sec-head"><div><h2>${esc(L.name)}</h2><p>${L.platform === 'sleeper' ? 'Sleeper' : 'ESPN'} · week ${esc(String(L.week))} · ${L.teams.length} teams · our projections under your league's scoring.</p>${(L.unmodeled || []).length ? `<details class="lg-unmod"><summary>${new Set(L.unmodeled).size} scoring rules not modeled</summary><p class="muted">Your league also scores ${esc([...new Set(L.unmodeled)].join(', '))}: not in our projections yet.</p></details>` : ''}</div></div>
         ${switcher()}
-        <div class="lg-top"><label>Your team <select class="lg-team">${L.teams.map(t => `<option value="${esc(t.id)}"${mine && t.id === mine.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
-          <button type="button" class="lg-change">Remove this team</button></div>
+        <div class="lg-top"><label title="Which team in this league is yours: changing it re-claims this chip">Your team <select class="lg-team">${L.teams.map(t => `<option value="${esc(t.id)}"${mine && t.id === mine.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
+          <button type="button" class="lg-change">Remove this team</button>
+          <small class="muted lg-tnote">Not yours? Pick yours here: this team's chip switches to it.</small></div>
         <div class="lg-body"></div>`;
       wireSwitcher(sec);
       sec.querySelector('.lg-team').onchange = e => { mine = L.teams.find(t => t.id === e.target.value);
@@ -880,7 +881,10 @@
         const b = e.target.closest('.lg-chip'); if (!b) return;
         if (b.classList.contains('lg-add')) { connectView(); return; }
         const x = TEAMS_.list[+b.dataset.i];
-        if (x && x !== saved) { TEAMS_.active = +b.dataset.i; saveTeams(); trade = { team: null, give: new Set(), get: new Set(), found: null }; open(x); }
+        // on the add screen every chip goes back to its team, the active one too (owner 2026-10-20: "my navigation gets
+        // locked here"); on a team's page the active chip is already showing
+        const adding = !!sec.querySelector('.lg-connect');
+        if (x && (x !== saved || adding)) { TEAMS_.active = +b.dataset.i; saveTeams(); trade = { team: null, give: new Set(), get: new Set(), found: null }; open(x); }
       };
     };
     // Sleeper: every team the user owns this season, claimed at once (owner: "auto claim")
@@ -901,7 +905,7 @@
 
     function connectView(err = '') {
       sec.innerHTML = `<div class="sec-head"><div><h2>${TEAMS_.list.length ? 'Add a team' : 'My League'}</h2><p>Bring your fantasy league here: your lineup, matchup and waiver pickups with our projections under your league's own scoring.</p></div></div>
-        ${TEAMS_.list.length ? switcher() : ''}
+        ${TEAMS_.list.length ? `${switcher()}<p class="muted lg-hint">Tap a team to go back to it.</p>` : ''}
         ${err ? `<p class="lg-err">${esc(err)}</p>` : ''}
         <div class="card lg-connect">
           <div class="seg lg-plat"><button type="button" data-p="sleeper" class="on">Sleeper</button><button type="button" data-p="espn">ESPN</button></div>
