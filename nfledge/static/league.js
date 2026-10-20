@@ -416,6 +416,10 @@
         // activating him first, which takes a roster spot
         return row('IR', Object.assign({}, p, ready.includes(x) ? {} : { opp: '', why: backWeek(x) || p.why || 'injured reserve', inactive: 0 })); }).join(''))}
         ${ready.length ? `<p class="muted lg-note">${ready.map(x => `<b>${esc(player(x).name)}</b>`).join(', ')} ${ready.length > 1 ? 'project' : 'projects'} to play this week: starting ${ready.length > 1 ? 'them' : 'him'} means activating off IR first, which takes a roster spot.</p>` : ''}` : ''; };
+    // open roster spots (owner 2026-10-20: "display empty bench spots"): the league's roster size (starters + bench, IR
+    // and taxi apart) minus the players on it; a free agent fills one without a drop
+    const emptyBench = n => { const k = L.size ? Math.max(0, L.size - n) : 0;
+      return Array.from({ length: k }, () => `<tr class="lg-empty"><td class="lg-slot">BN</td><td class="muted">Empty <span class="lg-empty-sub">· open roster spot</span></td><td class="num muted">&mdash;</td></tr>`).join(''); };
     const lineupView = () => {
       const irSet = new Set(mine.ir || []);
       const ps = mine.ext.filter(x => !irSet.has(x)).map(player), cur = new Set(mine.starters);
@@ -472,7 +476,7 @@
       return `${swaps}${unproj.length ? `<p class="muted lg-note">Starting with no projection: ${unproj.map(p => `${esc(p.name)} (${esc(p.why || 'not projected')})`).join(', ')}.</p>` : ''}
         <h3 class="lg-h">Best lineup <span class="muted">${f1(total(best))} expected</span></h3>
         ${table(best.map(r => row(r.slot, r.p)).join(''))}
-        <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') || '<tr><td colspan="3" class="muted">No projected bench players.</td></tr>')}
+        <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') + emptyBench(ps.length) || '<tr><td colspan="3" class="muted">No projected bench players.</td></tr>')}
         ${irSection()}
         ${movesCard()}
         <p class="muted lg-note">Expected points = our projection under your league's scoring x his chance to play. Kickers and team defenses are projected under your league's own kicking and D/ST settings (3-and-outs and 4th-down stops aren't modeled). Scoring bonuses (100-yard games, 2-point tries) aren't modeled.${L.slots.some(x => /^(DL|LB|DB|IDP_FLEX|DE|DT|CB|S)$/.test(x)) ? ' Defender (IDP) slots are not projected yet, so they stay as you set them on your platform.' : ''}</p>`;

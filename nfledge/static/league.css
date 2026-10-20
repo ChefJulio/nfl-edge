@@ -115,3 +115,4 @@ table.lg-grouped tr.lg-grp td { background: none; border: 0; box-shadow: none; p
   font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
 table.lg-grouped tbody tr.lg-grp:first-child td { padding-top: 4px; }
 table.lg-grouped td.lg-slot, table.lg-grouped thead th:first-child { display: none; }
+table.lg-tbl tr.lg-empty td { opacity: .65; } .lg-empty-sub { font-size: var(--fs-xs); }
