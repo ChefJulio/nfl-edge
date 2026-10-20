@@ -3148,3 +3148,8 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   CONFIRM. GATE: (1) states with a capture, Brier over k = 1..6 lower, 95% CI (2,000 state resamples) upper < 0,
   improvement >= 0.003, lower in >= 2 of 3 seasons; (2) all states not worse (CI upper < +0.0005); (3) calibration (k =
   1..6, states with a capture) not above today's + 0.005; CONFIRM same direction. Reported: the measured rates by bucket.
+- **RESULT {#espn-date-status} (BI) a return date on a Doubtful / Questionable listing: FAIL (nothing to use).**
+  tools/espn_date_status_eval.py, 2022-25 captures: 1 Doubtful / Questionable listing with a date 7+ days past the
+  next game (he played); 4 with a date 1-6 days past (1 played). The live feed shows why: all 126 Doubtful /
+  Questionable listings carry a return date, and it is the date of his team's next game (bye teams: Nov 1, week 8): a
+  placeholder. On those listings ESPN's date carries no information beyond the status; nothing changes.
