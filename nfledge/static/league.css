@@ -109,3 +109,9 @@ table.lg-tbl td.lg-gain.good { color: #6fdc8c; font-weight: 700; }
 /* matchup: a started player's live / final points (owner 2026-10-19) */
 .lg-hh-lv { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.1; }
 .lg-hh-lv small { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+
+/* waiver card, grouped by position (owner 2026-10-20): a plain label row per position; the position column is implied */
+table.lg-grouped tr.lg-grp td { background: none; border: 0; box-shadow: none; padding: 12px 2px 4px; font-size: var(--fs-xs);
+  font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+table.lg-grouped tbody tr.lg-grp:first-child td { padding-top: 4px; }
+table.lg-grouped td.lg-slot, table.lg-grouped thead th:first-child { display: none; }
