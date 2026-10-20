@@ -631,7 +631,6 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
 **Queued (pre-register before running)**
 - (AS) midweek stage from the calendar; (AT) one "early week" definition (week clock entry, 2026-10-18).
 - Week clock remaining moves (7 items, "Week clock ... REMAINING WORK" entry).
-- (BB) is the quarterback swing too small? (pre-registered 2026-10-19, log below; qbrun arm and scorer to build).
 - Partial Vegas lines: if any game of a week lacks a line, every game drops to the model's own volume
   (team_model.GameModel.predict `.all()`); per-game fallback.
 - Small IR-audit leftovers: qb2_play_rate needs a board QB at depth rank 1; debut prior's absolute depth_rank <= 2;
@@ -646,7 +645,7 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
 
 **Parked (owner)**: news push notifications; prior-season carryover in team ratings; market-implied ratings.
 
-**Closed recently**: (BA) Monday refit FAIL on gain, guard passed; shipped by owner decision; (AX) / (AX2) FAIL; (AV) PASS shipped; IR audit fixes shipped; (AW) FAIL twice, closed; (AR) PASS shipped; (AQ) FAIL.
+**Closed recently**: (BB) QB swing: premise confirmed, shrinkage arms FAIL, qbrun negligible pass not shipped; (BA) Monday refit FAIL on gain, guard passed; shipped by owner decision; (AX) / (AX2) FAIL; (AV) PASS shipped; IR audit fixes shipped; (AW) FAIL twice, closed; (AR) PASS shipped; (AQ) FAIL.
 
 ### Log (chronological from here)
 - **Fantasy: depth-aware values (2026-10-17; replaces a STOPGAP).** The Fantasy tab's waiver moves (league.js
@@ -2865,3 +2864,18 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   2021-2025), not worse (CI upper < +0.005). Ship: an arm passing all three (two passing: the lower QB-change gap to
   Vegas). Reported, not gated: the implied Lamar -> Huntley swing and the five largest live QB swings under each arm;
   win-chance Brier on QB-change games (tools/win_rank_eval.py basis).
+- **RESULT {#qb-swing} (BB) is the quarterback swing too small?: premise CONFIRMED; a100 / a30 FAIL; qbrun passed
+  by a negligible margin and is NOT shipped (owner: "skip").** tools/game_eval.py + tools/qb_swing_eval.py, 1,279
+  games 2021-25 (527 QB-change games). Diagnosis (base, model - Vegas margin from the team's side): same QB -0.38
+  [-0.50, -0.27] (n 1,937); backup in +1.73 [+1.22, +2.23] (199); new arrival +2.61 [+2.01, +3.25] (188);
+  inexperienced -0.55 [-1.27, +0.17] (160); starter back -0.25 [-1.23, +0.80] (74): teams starting an experienced
+  backup or a new arrival are rated well above the market; the inexperienced term is about right. a100: (1) +0.022
+  [-0.068, +0.110] FAIL, (2) QB-change MAE +0.084 [+0.000, +0.171] FAIL, all games -0.002; backup-in gap 1.73 -> 1.84.
+  a30: (1) -0.026 [-0.168, +0.119] FAIL, (2) +0.142 [-0.009, +0.292] FAIL, all +0.024 [-0.065, +0.113] FAIL;
+  backup-in gap 1.69. So QB shrinkage is not why backups read too good. qbrun: (1) -0.001 [-0.002, -0.000], (2)
+  -0.001, all -0.001, fantasy ALL -0.000 [-0.000, +0.000]: every gate passed by about a thousandth of a point (designed
+  QB runs are ~5% of designed runs; Lamar +0.008 EPA/run). Not shipped: the gate had no minimum effect size (my error;
+  future gates state one), and shipping means plumbing a term into Power / Matchups for no visible change; the code
+  stays behind team_model.qb_rush_effects (off). Fantasy: a100 ALL -0.001 [-0.001, +0.000], a30 -0.001 [-0.002,
+  -0.000]. Lead: the error sits in how a non-usual starter is rated (few, scattered, shrunk-to-average plays), not in
+  the usual starter's rating.
