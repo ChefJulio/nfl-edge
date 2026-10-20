@@ -123,3 +123,5 @@ table.lg-tbl tr.lg-empty td { opacity: .65; } .lg-empty-sub { font-size: var(--f
 .lg-chip.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
 .lg-chip.lg-add { justify-content: center; align-items: center; font-size: 20px; font-weight: 700; color: var(--accent); min-width: 44px; }
 .lg-tnote { flex-basis: 100%; margin-top: -6px; font-size: var(--fs-xs); }
+/* a long note beside a name wraps instead of widening the table (owner 2026-10-20: Tank Dell's row stretched it) */
+table.lg-tbl .nm2 .l1 { white-space: normal; }

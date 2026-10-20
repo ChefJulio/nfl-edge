@@ -277,7 +277,7 @@
         const r = ROS && ROS.players && ROS.players[g], team = r ? r.team : nm ? nm[2] : '';
         const bye = !!(ROS && team && ((ROS.byes || {})[team] || []).includes(D.week));
         return { ext: x, pid: g, name: r ? r.name : nm ? nm[0] : g, pos: r ? r.pos : nm ? nm[1] : '', team, photo: r && r.photo, espn: r && r.espn,
-                 proj: null, exp: null, why: bye ? 'on bye this week' : 'no projection this week (out, or not on our board)' };
+                 proj: null, exp: null, why: bye ? 'on bye this week' : 'not projected this week' };  // short: the line sits beside his name (owner 2026-10-20)
       }
       // expected points: his chance to take the field (injury x healthy scratch x backup role; (AY3) "play"), not just health
       const proj = pts(p.sc.pj, L.scoring, p.pos), pa = p.play != null ? p.play : 1 - (p.inactive || 0);
