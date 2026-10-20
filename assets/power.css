@@ -1,0 +1,34 @@
+/* Teams > Power (power.js): table styles in site.css (table.power). */
+/* QB-change flags (report.team_tables qb_hist / qb_note) */
+svg.spark .spark-qb { fill: none; stroke: var(--warn); stroke-width: 1.5; }
+
+/* Net bar (power.js bar): the number, then a bar from zero (green up, red down) with the rank range as a whisker */
+table.power td.nbc { min-width: 150px; }
+.nb { display: grid; grid-template-columns: 42px 1fr; align-items: center; column-gap: 8px; }
+.nb > b { font-size: var(--fs-lg); font-weight: 700; text-align: right; }
+.nb-t { position: relative; height: 16px; min-width: 90px; }
+.nb-t i { position: absolute; display: block; }
+.nb-z { top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,.28); }
+.nb-w { top: 5px; height: 6px; box-sizing: border-box; border-left: 1px solid rgba(255,255,255,.6); border-right: 1px solid rgba(255,255,255,.6);
+  background: linear-gradient(transparent 2px, rgba(255,255,255,.45) 2px, rgba(255,255,255,.45) 4px, transparent 4px); }  /* after the bar: on top, no z-index (it would float over the pinned Team column) */
+.nb-b { top: 3px; height: 10px; border-radius: 2px; opacity: .85; }
+.nb-b.pos { background: #4fbf74; } .nb-b.neg { background: #e8756b; }
+table.power td.odc, table.power th.odc { text-align: center; }
+/* unit ranks: each side of the ball (Off, Def) leads its pass / run units, set off by a hairline; units a step smaller */
+table.power td.grp, table.power th.grp { box-shadow: inset 1px 0 0 rgba(255,255,255,.08); }
+table.power td.un .rk-b { min-width: 30px; font-size: var(--fs-2xs); opacity: .9; }
+table.power th.un { color: rgba(255,255,255,.45); }
+/* schedule: played / left as words */
+.sd { display: flex; flex-direction: column; gap: 1px; font-size: var(--fs-xs); white-space: nowrap; }
+.sd i { font-style: normal; color: rgba(255,255,255,.55); display: inline-block; width: 40px; }
+.sd b { font-weight: 700; } .sd-hard { color: #ff8f84; } .sd-easy { color: #6fdc8c; } .sd-avg { color: rgba(255,255,255,.8); }
+@media (max-width: 560px) { table.power td.nbc { min-width: 128px; } .nb { grid-template-columns: 36px 1fr; column-gap: 6px; } .nb-t { min-width: 70px; } }
+table.power td.nbc { width: 230px; }
+@media (max-width: 560px) {
+  table.power td.nbc { width: auto; min-width: 106px; padding-left: 4px; padding-right: 4px; }
+  .nb { grid-template-columns: 32px 1fr; column-gap: 5px; } .nb > b { font-size: var(--fs-md); } .nb-t { min-width: 68px; }
+  table.power td.odc, table.power th.odc { padding-left: 3px; padding-right: 3px; } table.power .odc .rk-b { min-width: 34px; padding: 0 4px; }
+}
+@media (max-width: 560px) { table.power td.rk, table.power th.rk { width: 34px; padding-left: 2px; padding-right: 4px; } }
+table.power tr.teamrow { cursor: default; } table.power .who.tm-open { cursor: pointer; }
+.sec-head p.pw-fresh { color: var(--faint); font-size: var(--fs-sm); }

@@ -1,0 +1,151 @@
+/* Typeface (owner 2026-10-16, after trying Barlow and a 10-font comparison: "lets try titillium web"): Titillium Web for
+   text, headings and numbers. Self-hosted, Latin subset, ~12 KB per weight (400 / 600 / 700; 500 falls back to 400);
+   week.html / game.html preload the two most used. */
+@font-face { font-family: "Titillium Web"; font-style: normal; font-weight: 400; font-display: swap; src: url("titillium-400.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Titillium Web"; font-style: normal; font-weight: 600; font-display: swap; src: url("titillium-600.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Titillium Web"; font-style: normal; font-weight: 700; font-display: swap; src: url("titillium-700.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* Theme + design tokens, shared by the week pages and game.html (was site.css only, so the gamecast missed them). */
+/* Dark only, whatever the device setting (owner's call). */
+:root { color-scheme: dark;
+  --bg: #0d0f13; --panel: #15181d; --panel2: #1a1e24; --ink: #e9ecf0; --muted: #98a0ab;
+  --line: #262b33; --accent: #6d9eff; --good: #45c26b; --bad: #f2786d; --warn: #e0b04a;
+  --shadow: 0 1px 2px rgba(0,0,0,.4); --qb: #ff6f91; --rb: #34d399; --wr: #60a5fa; --te: #fbbf24;
+  /* Design tokens (owner 2026-10-16: sleek, consistent). Use these instead of one-off values. */
+  --faint: #7d8590;  /* was #6b737e: 3.7:1 on panels, under AA for small text */
+  --row: #171a20; --row-hover: #1e222a;  /* table rows / tiles */
+  --fs-2xs: 10px; --fs-xs: 11px; --fs-sm: 12px; --fs-md: 13px; --fs-base: 14px; --fs-lg: 16px; --fs-xl: 20px; --fs-2xl: 28px;
+  --r-xs: 4px; --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-pill: 999px;
+  --chip-h: 18px; --chip-r: 5px; --tag-h: 20px;  /* two chip families: data chips and tag pills */
+  --e1: 0 1px 2px rgba(0,0,0,.35); --e2: 0 4px 14px rgba(0,0,0,.35); --e3: 0 12px 32px rgba(0,0,0,.45);
+  --ease: cubic-bezier(.2, .7, .2, 1); --dur-fast: 120ms; --dur: 200ms;
+}
+/* keyboard focus: one visible ring everywhere (mouse / touch focus stays clean) */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r-xs); }
+/* interaction feedback on everything clickable */
+button, .chip, .sbtn, .seg button, a.mt, .tm-open, [data-open-pid] { transition: background-color var(--dur-fast) var(--ease),
+  border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease),
+  transform .08s ease-out, filter .08s ease-out; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+:root { --font: "Titillium Web", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+  --font-display: var(--font); }
+h1, h2, h3, .brand h1, .sec-head h2, .pc-id h3, .wk-nav select, .netc b.sc, b.pv, .rkn, .mt-num, .sb-s, .lg-big, .lg-wp > b,
+.pc-big, .sb-n { font-family: var(--font-display); letter-spacing: 0; }
+/* Shared tile look (owner 2026-10-14: one look everywhere), loaded by every page (week.html, game.html):
+   team-colored tile rows (tr.teamrow + --tc / --tc2 from NFLE.fmt.rowStyle), the team logo badge, the name cell
+   (.who) and the player headshot with its team badge (.pic). Built by NFLE.ui in shell.js.
+   A small two-tone stripe on the left of each row, 3px primary + 2px secondary (owner 2026-10-16: the full primary
+   outline + side stripes were busy on desktop and seamed at the pinned column). --top / --side / --extra stay as
+   hooks other rules use. */
+tr.teamrow > td { background: var(--row); color: #fff; border: 0;
+  --top: 0 0 #0000; --side: 0 0 #0000; --extra: 0 0 #0000;
+  box-shadow: var(--top), var(--side), var(--extra); transition: background-color var(--dur-fast) var(--ease); }
+/* no left stripe (owner 2026-10-17): the headshot's team ring and logo already say whose row it is */
+tr.teamrow > td:first-child { border-radius: var(--r-sm) 0 0 var(--r-sm); }
+tr.teamrow > td:last-child { border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+tr.teamrow:hover > td { background: var(--row-hover); }
+tr.teamrow .quiet, tr.teamrow .sub, tr.teamrow .st small, tr.teamrow .fc, tr.teamrow .vs { color: color-mix(in srgb, var(--tfg) 75%, transparent); }
+.logo { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px rgba(255,255,255,.18); }
+.logo img { width: 18px; height: 18px; object-fit: contain; }
+.who { display: flex; align-items: center; gap: 9px; }
+.who b { font-weight: 600; }
+.who .sub { font-size: var(--fs-xs); display: block; line-height: 1.2; font-weight: 500; }
+/* two-line names (owner 2026-10-17): first name (+ small details) on top, last name below, badges to the right */
+.nm2w { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.nm2 { display: flex; flex-direction: column; min-width: 0; }
+.nm2 .l1 { font-size: var(--fs-xs); font-weight: 500; color: var(--muted); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nm2 .l1 .sub { display: inline; }
+.who .nm2 .l1 .posb { font-size: 9px; line-height: 1.3; padding: 0 3px; vertical-align: 1px; }
+.nm2 .l2 { display: block; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nm-b { flex: none; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; margin-top: 0; }
+/* scrolled sideways: the pinned name column gives up width; names truncate, only the injury letter stays */
+.dt-wrap .scroll.scrolled td.stick .nm2 { max-width: 6.5em; }
+.dt-wrap .scroll.scrolled td.stick .nm-b > :not(.dc-tag) { display: none; }
+.pic { position: relative; flex: none; width: 34px; height: 34px; margin-right: 3px; }
+.pic-img { display: block; width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
+  background: color-mix(in srgb, var(--pc1, #3a3f47) 55%, var(--panel2)); box-shadow: 0 0 0 1.5px var(--pc2, rgba(255,255,255,.16)); }  /* team colors (owner 2026-10-16) */
+.pic-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pic .pic-tm { position: absolute; right: -6px; bottom: -4px; z-index: 1; }
+.pic .pic-tm .logo { width: 17px; height: 17px; box-shadow: 0 0 0 2px var(--panel), 0 1px 3px rgba(0,0,0,.5); }
+.pic .pic-tm .logo img { width: 14px; height: 14px; }  /* fills more of its 17px frame (owner 2026-10-17) */
+.pic.nopic .pic-img img { display: none; }
+.pic.nopic .pic-tm { inset: 0; display: grid; place-items: center; }
+.pic.nopic .pic-tm .logo { width: 100%; height: 100%; box-shadow: none; } .pic.nopic .pic-tm .logo img { width: 72%; height: 72%; }  /* fills the frame, whatever size a list gives it */
+
+/* Number chips (shell.js NFLE.chips; owner 2026-10-15). Since 2026-10-16 (owner: "try the one key value thing, or
+   multiple key values") every stat keeps its chip's spacing and alignment, but only a table's key columns (cls 'key')
+   and the column it is sorted by draw the chip; colored rank chips keep their tint everywhere. */
+table .sc { display: inline-block; min-width: 1.8em; padding: 2px 4px; border-radius: var(--r-sm); background: transparent;
+  font-variant-numeric: tabular-nums; line-height: 1.25; text-align: center; }
+table th .sc.h { background: transparent; color: inherit; font-weight: 700; }
+table td.key .sc, table td.sorted .sc { background: rgba(255,255,255,.08); }
+table th.key .sc.h, table th.sorted .sc.h { background: rgba(255,255,255,.05); }
+table th.num, table td.num { padding-left: 2px; padding-right: 2px; }
+
+/* Alternating rows wherever rows aren't team-colored (owner 2026-10-15): a faint overlay on every other body row,
+   layered over each cell's own background so pinned columns stripe too. Team-colored rows (.teamrow / inline style),
+   header rows inside a body, and tables marked no-zebra are left alone. */
+table:not(.no-zebra) > tbody > tr:not(.teamrow):not([style]):nth-child(even) > td {
+  background-image: linear-gradient(rgba(255,255,255,.018), rgba(255,255,255,.018)); }
+.ts-row:nth-child(even) { background: rgba(255,255,255,.018); border-radius: var(--r-sm); }
+/* Pressed look the moment a finger lands, not on release (owner 2026-10-16: feel snappier); replaces iOS's grey tap box.
+   Rows brighten whatever their team color; buttons and tiles also give a little. shell.js enables :active on iOS. */
+html { -webkit-tap-highlight-color: transparent; }
+tr[data-open-pid]:active > td, tr[data-pid]:active > td, tr[data-gid]:active > td, tr[data-tm]:active > td, tr.tm-open:active > td { filter: brightness(1.35); }
+/* (their transition list, transform / filter included, is the one shared rule near the top: a second declaration
+   here overrode it and killed the hover color easing) */
+button:active:not(:disabled), a.mt:active, .chip:active, .sbtn:active, [data-open-pid]:not(tr):active { transform: scale(.96); filter: brightness(1.25); }
+.tm-open:not(tr):active { filter: brightness(1.4); }
+@media (prefers-reduced-motion: reduce) { button:active, a.mt:active, .chip:active, .sbtn:active { transform: none; } }
+/* "New numbers - Refresh" (shell.js stale check): floats above the bottom bar, one tap reloads */
+.stale-pill { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--bbh, 0px) + 14px); z-index: 50;
+  display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 999px; font: inherit; font-size: var(--fs-md);
+  color: var(--ink); background: var(--panel2); border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--line));
+  box-shadow: var(--e3); cursor: pointer; }
+.stale-pill b { color: var(--accent); }
+.stale-pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.stale-pill:active { transform: translateX(-50%) scale(.96); }
+
+/* Loading placeholders (owner 2026-10-16): an empty .skel-zone shows faint shimmering rows at about the height of what
+   loads into it, so the page doesn't jump when the data lands; anything rendered into it replaces them (:empty). */
+.skel-zone:empty { position: relative; overflow: hidden; min-height: 320px; border-radius: var(--r-md);
+  background: repeating-linear-gradient(to bottom, rgba(255,255,255,.045) 0 46px, transparent 46px 52px); }
+.skel-zone:empty::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent); animation: skel 1.3s ease-in-out infinite; }
+.skel-zone.sm:empty { min-height: 156px; }
+@keyframes skel { to { transform: translateX(100%); } }
+
+/* Wide screens read at desktop distance: the whole type scale one step up (second visual audit; phones unchanged) */
+@media (min-width: 1100px) { :root { --fs-2xs: 11px; --fs-xs: 12px; --fs-sm: 13px; --fs-md: 14px; --fs-base: 15px; --fs-lg: 17px; } }
+/* ...except Power's 16-column table, which needs the phone scale to fit the 1280 column without scrolling */
+@media (min-width: 1100px) { table.power { --fs-2xs: 10px; --fs-xs: 11px; --fs-sm: 12px; --fs-md: 13px; --fs-base: 14px; font-size: 14px; }
+  table.dt.power td, table.dt.power th { padding-left: 6px; padding-right: 6px; } table.power .rk-b { min-width: 30px; padding: 0 4px; } }
+
+/* Aesthetic pass (2026-10-16): quieter Rankings rows (the status chip stays; per-day practice chips live on the player
+   page), and a little motion where it helps: tiles lift on hover, tab content fades in. */
+/* one chip per player (owner 2026-10-16): his most recent designation, the game status when there is one (Q / D / O), else
+   his latest practice day (DNP / LP / FP); the full practice week is on his page */
+#tab-players .badges .dc-tag ~ .pr-days { display: none; }
+#tab-players .badges .pr-days i:not(:last-child) { display: none; }
+/* healthy (no game status, full practice last) = no indicator at all (owner 2026-10-16) */
+#tab-players .badges .pr-days:has(> i.pr-F:last-child) { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  @media (hover: hover) { a.mt { transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+    a.mt:hover { transform: translateY(-2px); box-shadow: var(--e2); } }
+  main section.on { animation: sec-in .18s var(--ease); }
+  @keyframes sec-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+}
+
+/* tap tips (shell.js): a title shown on tap, touch screens */
+.tip-pop { position: fixed; z-index: 300; max-width: min(320px, calc(100vw - 16px)); padding: 7px 10px; border-radius: 8px;
+  background: #0d1015; border: 1px solid var(--line); box-shadow: 0 6px 20px rgba(0,0,0,.5); color: var(--ink);
+  font-size: var(--fs-sm); line-height: 1.35; pointer-events: none; }
+/* the name never gives way to its badges (owner 2026-10-18: two "if X plays" chips squeezed Keon Coleman to "K / C"):
+   the name keeps a readable width; the badges take what's left and wrap onto a second line */
+.nm2w .nm2 { flex: 0 0 auto; min-width: min(6.5em, 45%); max-width: 100%; }
+.nm2w .nm-b { flex: 0 1 auto; min-width: 0; }
+.nm2w .nm-b .badges { flex-wrap: wrap; }
+.nm2w .nm-b .badges > * { white-space: nowrap; }  /* a chip stays one piece; chips stack when they don't fit side by side */
+
+/* AFC / NFC labels with their logo (shell.js NFLE.ui.conf) */
+.conf-n { display: inline-flex; align-items: center; gap: .35em; }
+.conf-lg { width: auto; flex: none; filter: drop-shadow(0 0 1px rgba(0,0,0,.6)); }

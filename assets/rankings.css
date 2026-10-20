@@ -1,0 +1,96 @@
+/* Players > Rankings (rankings.js). The table styles still live in templates/report.html.j2 until the week pages
+   become a thin shell (phase 6); table.dt defaults are overridden for the tile rows here. */
+table.dt.tiles { border-collapse: separate; border-spacing: 0 3px; margin-top: -3px; }
+table.dt.tiles tbody td { border-bottom: 0; }
+table.dt.tiles thead th { border-bottom: 0; }
+table.dt.tiles tr.teamrow > td.stick { background: var(--row); }
+table.dt.tiles tr.teamrow:hover > td { background: var(--row-hover); }
+/* Scrolled sideways: keep the team trim on the pinned cell (its edge shadow joins the trim instead of replacing it;
+   table.css's generic .scrolled shadow would drop the trim) */
+.dt-wrap .scroll.scrolled table.tiles tr.teamrow > td.stick { --extra: 8px 0 10px -8px rgba(0,0,0,.85); box-shadow: var(--top), var(--side), var(--extra); }
+/* two-line names (ui.css .nm2): scrolled sideways the pinned column narrows (the first-name fold it replaces lived here) */
+#tab-players table.ranks td.stick, #tab-players table.ranks th.stick { transition: width .18s ease, min-width .18s ease, max-width .18s ease; }
+@media (max-width: 640px) {
+  #tab-players table.ranks td.stick, #tab-players table.ranks th.stick { width: 150px; min-width: 150px; max-width: 150px; }
+  #tab-players .scroll.scrolled table.ranks td.stick, #tab-players .scroll.scrolled table.ranks th.stick { width: 118px; min-width: 118px; max-width: 118px; }
+}
+
+/* rank on the photo's bottom-left corner, only while scrolled sideways (the # column is off screen then); a twin of the
+   team-logo badge on the opposite corner: same size, same cut-out ring, mirrored (owner 2026-10-17: "a tiny bit off") */
+/* quiet (owner: the white version was "way too prominent"), and fully inside the cell (the first one clipped left) */
+.pic .pic-rk { position: absolute; left: -1px; bottom: -2px; z-index: 2; min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px;
+  display: none; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; line-height: 1;
+  background: color-mix(in srgb, var(--panel) 68%, transparent); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); color: color-mix(in srgb, var(--ink) 88%, transparent); font-variant-numeric: tabular-nums; }
+.dt-wrap .scroll.scrolled .pic .pic-rk { display: flex; animation: rk-in .16s ease-out; }
+@keyframes rk-in { from { transform: scale(.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .dt-wrap .scroll.scrolled .pic .pic-rk { animation: none; } }
+/* phones (owner 2026-10-17: "too much space between the player name column and the next columns"): Proj's header
+   (label + sort arrow) made it 90px with the number pushed to its far edge; Proj and Range now start right after
+   the names, trim their padding, and the rank column is just as wide as its number */
+@media (max-width: 640px) {
+  #tab-players table.ranks .projc, #tab-players table.ranks .rngc { text-align: left; padding-left: 4px; padding-right: 4px; }
+  /* left-aligned chip, fixed width, digits right-aligned inside: sits against the names and decimals still line up */
+  #tab-players table.ranks td.projc > .sc { display: inline-block; min-width: 50px; text-align: right; font-variant-numeric: tabular-nums; }
+  #tab-players table.ranks .rk { padding-left: 6px; padding-right: 2px; }
+}
+
+/* agreed columns (owner 2026-10-17): the rank colored by tier; actual over a dimmed projection once his game starts;
+   chance to play on the injury badge */
+table.ranks td.rk .rkn.rk-start { color: #8fe0a8; } table.ranks td.rk .rkn.rk-flex { color: #f3d38c; }
+table.ranks td.rk .rkn.rk-bench { color: color-mix(in srgb, var(--tfg, var(--ink)) 55%, transparent); }
+td.projc .pv-was { display: block; font-size: var(--fs-xs); font-weight: 600; color: color-mix(in srgb, var(--tfg, #fff) 50%, transparent); white-space: nowrap; }
+/* final scores by game grade (the Grd column's thresholds); live ones stay white */
+td.projc .pv.gr-hi { color: #6fdc8c; } td.projc .pv.gr-mid { color: #f3d38c; } td.projc .pv.gr-lo { color: #ff8f84; }
+td.projc .pv .live-dot { width: 7px; height: 7px; margin-right: 4px; }
+.flag.fl-play { font-variant-numeric: tabular-nums; } .flag.fl-warn { color: #f3d38c; } .flag.fl-bad { color: #ff8f84; }
+/* phones: Proj and Matchup both in view without scrolling (owner 2026-10-17); the opponent's logo stands for his
+   abbreviation there (the full name is a tap away) */
+@media (max-width: 640px) {
+  #tab-players table.ranks td.mu .opp b { display: none; }
+  #tab-players table.ranks .mu { padding-left: 4px; padding-right: 6px; }
+  #tab-players table.ranks th.projc { padding-right: 2px; }
+}
+/* phones: the conditional line under a projection ("-0.7 if Moore plays") and the "if he plays" / "proj" notes wrap
+   at the chip's width instead of widening the column (they pushed Matchup out of view on RB / WR / FLEX) */
+@media (max-width: 640px) {
+  #tab-players table.ranks td.projc .pv-cond, #tab-players table.ranks td.projc .ifact { display: block; max-width: 4.8em; white-space: normal; line-height: 1.15; }
+}
+/* Proj without the number chip (owner 2026-10-17): the bold figure stands on its own; the fixed width above keeps
+   the decimals lined up */
+#tab-players table.ranks td.projc .sc, #tab-players table.ranks th.projc .sc { background: none; box-shadow: none; padding-left: 0; padding-right: 0; }
+@media (max-width: 640px) {
+  /* the actual score lines up with the projections around it (same fixed width, digits right) */
+  #tab-players table.ranks td.projc .pv.act-v { font-variant-numeric: tabular-nums; }
+}
+
+/* actual over projection: one stack, both lines on the same right edge as the projections in other rows (the
+   dimmed line is wider and extends left); owner 2026-10-17 */
+td.projc .pv-stack { display: inline-flex; flex-direction: column; align-items: flex-end; width: 50px; }
+td.projc .pv-stack .pv-was { white-space: nowrap; }
+
+@media (max-width: 640px) {
+  /* the header's label ends where the numbers end (same 50px box), the sort arrow just after it */
+  #tab-players table.ranks th.projc > .sc { display: inline-block; min-width: 50px; text-align: right; }
+}
+@media (max-width: 640px) {
+  /* room for "final · proj 14.3" under an actual score without sliding under the name column */
+  #tab-players table.ranks td.projc { min-width: 76px; }
+  #tab-players table.ranks td.projc .pv-stack .pv-was { font-size: 11px; }
+}
+@media (max-width: 640px) {
+  /* Pts right-aligned in its (slightly wider) column: numbers, header and the "final · proj" line share one edge */
+  #tab-players table.ranks td.projc, #tab-players table.ranks th.projc { text-align: right; padding-right: 6px; }
+}
+
+/* "final" / "live" beside the actual score, dimmed and small (owner 2026-10-17); the line under it is just "proj" */
+td.projc .pv .pv-tag { font-size: 10px; font-weight: 600; letter-spacing: .02em; margin-right: 4px; vertical-align: 2px;
+  color: color-mix(in srgb, var(--tfg, #fff) 50%, transparent); }
+td.projc .pv .pv-tag .live-dot { width: 6px; height: 6px; margin-right: 3px; vertical-align: 1px; }
+td.projc .pv-was b { color: var(--tfg, #fff); font-weight: 600; }  /* the projected number white, "proj" dimmed */
+
+/* weather mark beside the opponent (wind / rain / snow at kickoff) */
+td.mu .wx { display: inline-flex; vertical-align: -2px; margin-left: 4px; color: #9fc4ff; }
+td.mu .wx svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+td.mu .wx-snow { color: #e6f0ff; } td.mu .wx-wind { color: #b9c4d3; }
+td.grdc, th.grdc, td.snapc, th.snapc { text-align: center; }
+td.mu .wx-snow svg { stroke-width: 1.6; }

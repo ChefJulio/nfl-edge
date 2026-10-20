@@ -1,0 +1,64 @@
+/* Teams > All teams (teamgrid.js): conference columns, a 2 x 2 block per division, team-colored tiles */
+.tg-confs { display: grid; gap: 18px; }
+@media (min-width: 900px) { .tg-confs { grid-template-columns: 1fr 1fr; } }
+.tg-ch { margin: 4px 2px 8px; font-size: var(--fs-lg); }
+.tg-div { margin-bottom: 14px; }
+.tg-dh { margin: 0 2px 6px; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.tg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tg-tile { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  min-height: 84px; padding: 12px 12px 12px 14px; border: 1px solid color-mix(in srgb, var(--tc) 40%, var(--line)); border-radius: var(--r-lg);
+  text-align: left; cursor: pointer; color: #fff; font: inherit; min-width: 0; box-shadow: var(--shadow);
+  /* dark under the text, the team color building toward the logo (owner 2026-10-17: more readable) */
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tc) 16%, #0d0f13) 0%, color-mix(in srgb, var(--tc) 30%, #0d0f13) 55%,
+                                     color-mix(in srgb, var(--tc) 52%, #0d0f13) 100%);
+  transition: transform var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease); }
+.tg-tile:hover { border-color: color-mix(in srgb, var(--tc) 70%, #fff); }
+.tg-tile:active { transform: scale(.98); }
+/* the logo whole, inside the tile (owner: no bleeding off the edge) */
+.tg-lg { order: 2; flex: none; width: 64px; height: 64px; object-fit: contain; pointer-events: none; filter: drop-shadow(0 2px 6px rgba(0,0,0,.45)); }
+.tg-txt { order: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.tg-nm { font-weight: 800; font-size: var(--fs-xl); line-height: 1.05; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+.tg-meta { display: flex; gap: 8px; align-items: center; }
+.tg-meta b { font-size: var(--fs-lg); font-weight: 800; font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+.tg-rk { font-size: var(--fs-xs); font-weight: 700; padding: 2px 7px; border-radius: var(--r-pill); background: rgba(0,0,0,.38); color: rgba(255,255,255,.9); }
+@media (max-width: 420px) {
+  .tg-tile { min-height: 76px; padding: 10px 8px 10px 12px; gap: 6px; }
+  .tg-lg { width: 48px; height: 48px; }
+  .tg-nm { font-size: var(--fs-lg); }
+  .tg-meta b { font-size: var(--fs-md); }
+}
+/* the team's wordmark in place of the typed name (owner 2026-10-17): same height for every team, wide ones shrink to fit */
+.tg-nm { display: block; }
+.tg-wm { display: block; height: 26px; width: auto; max-width: 100%; object-fit: contain; object-position: left center;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.55)); }
+@media (max-width: 420px) { .tg-wm { height: 20px; } }
+.tg-meta { flex-wrap: nowrap; white-space: nowrap; }  /* a tie record (3-1-1) and the Power pill stay on one line */
+@media (max-width: 420px) { .tg-meta { gap: 6px; } .tg-rk { padding: 2px 6px; } }
+/* wordmark trimmed in black (owner 2026-10-17): a 1px outline from stacked shadows, the same on every team */
+.tg-wm { filter: drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000)
+  drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
+/* the wordmark's trim and shadow reach past the image's edges: the name box no longer clips them (owner 2026-10-17,
+   the Dolphins' cut-off shadow); only the typed-name fallback still truncates with an ellipsis */
+.tg-nm:has(.tg-wm) { overflow: visible; }
+
+/* phones (owner 2026-10-17): all 32 on one screen. A division per row (its name turned sideways at the left), four
+   logo tiles across with record and Power rank; --tgr (row height) is set by teamgrid.js to fill the screen */
+.tg-mini { display: none; }
+@media (max-width: 600px) {
+  #tab-teams-all .sec-head { display: none; }
+  .tg-confs { gap: 8px; }
+  .tg-ch { margin: 0 2px 4px; font-size: var(--fs-sm); letter-spacing: .04em; }
+  .tg-div { display: grid; grid-template-columns: 14px 1fr; gap: 4px; margin-bottom: 4px; }
+  .tg-dh { margin: 0; writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; font-size: 9px; letter-spacing: .1em; }
+  .tg-dc { display: none; }
+  .tg-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+  .tg-tile { flex-direction: column; justify-content: center; gap: 1px; min-height: 0; height: var(--tgr, 56px); padding: 3px 2px;
+    border-radius: 10px; box-shadow: none;
+    background: linear-gradient(170deg, color-mix(in srgb, var(--tc) 55%, #0d0f13) 0%, color-mix(in srgb, var(--tc) 22%, #0d0f13) 100%); }
+  .tg-txt { display: none; }
+  .tg-lg { order: 0; width: calc(var(--tgr, 56px) - 18px); height: calc(var(--tgr, 56px) - 18px); max-width: 80%; }
+  .tg-mini { display: flex; gap: 4px; align-items: baseline; font-size: 11px; line-height: 1; white-space: nowrap; }
+  .tg-mini b { font-weight: 800; font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+  .tg-mini i { font-style: normal; font-weight: 600; color: rgba(255,255,255,.62); }
+}

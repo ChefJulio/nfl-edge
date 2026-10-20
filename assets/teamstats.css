@@ -1,0 +1,4 @@
+/* Teams > Stats (teamstats.js): shared table styles in table.css */
+#tab-teams-stats .seg { flex: none; }
+
+.seg button:disabled { opacity: .4; cursor: default; }

@@ -1,0 +1,111 @@
+/* League tab (league.js): import your Sleeper / ESPN league */
+.lg-connect { padding: 16px; max-width: 560px; }
+.lg-form { display: flex; gap: 8px; margin: 8px 0; } .lg-form .sbtn { flex: none; width: auto; margin: 0; }  /* phones: .sbtn is full width */ .lg-in { flex: 1; min-width: 0; font: inherit; padding: 9px 12px; border-radius: var(--r-md);
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+.lg-pick { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0; }
+.lg-err { color: #ff8f84; } .lg-hint { margin: 10px 0 0; } .lg-note { font-size: var(--fs-sm); margin: 8px 2px; }
+.lg-top { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 12px; }
+.lg-top select { font: inherit; padding: 6px 10px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--panel); color: var(--ink); margin-left: 6px; }
+.lg-seg { margin: 0 0 12px; }
+.lg-h { font-size: var(--fs-lg); margin: 16px 0 6px; } .lg-h .muted { font-weight: 500; font-size: var(--fs-md); margin-left: 6px; }
+.lg-swaps { padding: 10px 12px; border-radius: var(--r-md); background: rgba(255,255,255,.05); } .lg-swaps .good, .lg-swaps.good { color: #6fdc8c; }
+table.lg-tbl td.lg-slot { font-size: var(--fs-xs); font-weight: 700; color: var(--muted); width: 3.5em; }
+table.lg-tbl td.num, table.lg-tbl th.num { white-space: nowrap; }
+.lg-wp { margin: 4px 0 14px; } .lg-wp b { font-size: 24px; }
+.lg-bar { height: 8px; border-radius: var(--r-xs); background: rgba(255,143,132,.35); margin-top: 6px; overflow: hidden; } .lg-bar span { display: block; height: 100%; background: #6fdc8c; }
+.lg-vs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } @media (max-width: 760px) { .lg-vs { grid-template-columns: 1fr; } }
+.lg-tn { font-weight: 700; } .lg-big { font-size: 26px; font-weight: 700; }
+table.lg-rank tr.lg-me td { background: rgba(122,162,255,.10); }
+.lg-you { font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill); background: rgba(122,162,255,.2); color: #a9c1ff; line-height: var(--tag-h); }
+table.lg-rank td.good { color: #6fdc8c; } table.lg-rank td.bad { color: #ff8f84; }
+.lg-cond { display: inline-block; margin-left: 6px; font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill); background: rgba(122,162,255,.16); color: #a9c1ff; line-height: var(--tag-h); }
+/* lineup moves as cards (owner 2026-10-16: "make it more readable") */
+.lg-swaps { display: grid; gap: 8px; } .lg-swaps:not(.good) { padding: 0; background: none; }
+.lg-mv { padding: 10px 12px; border-radius: var(--r-md); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); display: grid; gap: 6px; }
+.lg-mv.gt { border-color: rgba(240,192,90,.35); }
+.lg-mv-h { font-size: var(--fs-base); }
+.lg-mv-tag { margin-left: 6px; font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill); background: rgba(240,192,90,.16); color: #f0c05a; vertical-align: 1px; line-height: var(--tag-h); }
+.lg-mv-s { font-size: var(--fs-sm); margin-top: -2px; }
+.lg-mv-row { display: grid; grid-template-columns: 52px 1fr; gap: 8px; align-items: baseline; line-height: 1.45; }
+.lg-mv-k { font-size: var(--fs-sm); font-weight: 600; letter-spacing: 0; text-transform: none; }
+.lg-mv-k.good { color: #6fdc8c; } .lg-mv-k.bad { color: #ff8a80; }
+.lg-mv-f { font-size: var(--fs-sm); padding: 0 2px; }
+.lg-tbl .lg-cond + .lg-cond { margin-left: 4px; }
+
+/* Audit pass (owner 2026-10-17): chips wrap under the name inside its cell, so a long one ("-0.8 if Diggs plays")
+   never pushes the numbers off a phone; one chip for practice like Rankings (game status, else the latest day; none
+   when healthy); the chance to sit as a chip; quieter header; desktop tables at reading width */
+table.lg-tbl td.lg-who { width: 100%; }
+table.lg-tbl .who { min-width: 0; } table.lg-tbl .nmw { min-width: 0; }
+.lg-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; white-space: normal; }
+.lg-badges .lg-cond, .lg-tbl .lg-cond + .lg-cond { margin-left: 0; }
+.lg-out { display: inline-block; font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill);
+  background: rgba(240,192,90,.16); color: #f0c05a; line-height: var(--tag-h); }
+.lg-out.hi { background: rgba(255,143,132,.16); color: #ff8f84; }
+#tab-league .badges .dc-tag ~ .pr-days { display: none; }
+#tab-league .badges .pr-days i:not(:last-child) { display: none; }
+#tab-league .badges .pr-days:has(> i.pr-F:last-child) { display: none; }
+.lg-unmod { margin-top: 4px; font-size: var(--fs-sm); color: var(--muted); }
+.lg-unmod summary { cursor: pointer; list-style: none; } .lg-unmod summary::-webkit-details-marker { display: none; }
+.lg-unmod summary::after { content: " \203A"; } .lg-unmod[open] summary::after { content: ""; }
+.lg-unmod p { margin: 4px 0 0; }
+.lg-change { font: inherit; font-size: var(--fs-sm); background: none; border: 0; color: var(--accent); cursor: pointer; padding: 4px 0; }
+@media (max-width: 560px) { table.lg-rank .lg-pf, table.lg-rank .lg-avg { display: none; } table.lg-rank th, table.lg-rank td { padding-left: 6px; padding-right: 6px; } }
+@media (min-width: 900px) { #tab-league .lg-body > .lg-scroll, #tab-league .lg-body > .lg-h, #tab-league .lg-body > .lg-swaps,
+  #tab-league .lg-body > .lg-note { max-width: 760px; } }
+.lg-lock { display: inline-block; font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill);
+  background: rgba(255,255,255,.08); color: var(--muted); line-height: var(--tag-h); }
+.lg-moves { margin: 0 0 10px; } .lg-gain small { display: block; font-size: var(--fs-2xs); color: var(--muted); font-weight: 600; }
+table.lg-tbl td.lg-gain.good { color: #6fdc8c; font-weight: 700; }
+.lg-wv { font-size: var(--fs-sm); font-weight: 500; margin-left: 6px; }
+.lg-mv-sub { font-size: var(--fs-xs); font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-top: 4px; }
+
+/* Trade view (owner 2026-10-17): tap-to-pick rosters, both sides' change, a finder for trades that help both */
+.lg-tr-pick { display: block; margin: 0 0 10px; } .lg-tr-pick select { font: inherit; padding: 6px 10px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--panel); color: var(--ink); margin-left: 6px; }
+.lg-tr-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.lg-tps { display: grid; gap: 4px; }
+.lg-tp { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; font: inherit; padding: 8px 10px; border-radius: var(--r-md);
+  border: 1px solid var(--line); background: var(--panel2); color: var(--ink); cursor: pointer; }
+.lg-tp b { flex: 1; min-width: 0; font-weight: 600; } .lg-tp .muted { font-size: var(--fs-sm); }
+.lg-tp.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--panel2)); }
+.lg-trade { margin: 0 0 12px; }
+.lg-tr-sides { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.lg-big.good { color: #6fdc8c; } .lg-big.bad { color: #ff8f84; } .lg-big small { font-size: var(--fs-sm); color: var(--muted); font-weight: 600; }
+.lg-tr-warn { color: #f0c05a; font-size: var(--fs-sm); margin-top: 2px; }
+.lg-verdict { font-weight: 700; } .lg-verdict.good { color: #6fdc8c; } .lg-verdict.bad { color: #ff8f84; }
+.lg-finder { margin-top: 14px; }
+.lg-tf { display: block; width: 100%; text-align: left; font: inherit; color: var(--ink); background: none; border: 0; border-top: 1px solid var(--line); padding: 8px 0; cursor: pointer; }
+.lg-tf:first-of-type { border-top: 0; }
+
+/* Matchup head to head (owner 2026-10-17, after Sleeper): one team each side, slot in the middle */
+.lg-hh-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 8px; margin: 4px 0 6px; }
+.lg-hh-top .r { text-align: right; } .lg-hh-wp { display: flex; flex-direction: column; align-items: center; } .lg-hh-wp b { font-size: 22px; }
+.lg-hh { margin-top: 12px; display: grid; gap: 2px; }
+.lg-hh-row { display: grid; grid-template-columns: minmax(0, 1fr) 2.6em 2.6em 2.6em minmax(0, 1fr); align-items: center; gap: 4px;
+  padding: 8px 0; border-top: 1px solid var(--line); }
+.lg-hh-row:first-child { border-top: 0; }
+.lg-hh-p { min-width: 0; display: flex; flex-direction: column; gap: 1px; cursor: pointer; }
+.lg-hh-p.r { align-items: flex-end; text-align: right; } .lg-hh-p.r .lg-badges { justify-content: flex-end; }
+.lg-hh-p b { font-size: var(--fs-base); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.lg-hh-s { font-size: var(--fs-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.lg-hh-n { font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+.lg-hh-slot { justify-self: center; min-width: 2.4em; text-align: center; }
+.lg-hh-live { font-size: var(--fs-sm); }
+.lg-slot-any { background: rgba(255,255,255,.08); color: var(--muted); }
+
+/* trade rosters side by side on phones too (owner 2026-10-17): compact rows, the partner picker heads the right column */
+.lg-tr-h { display: flex; flex-direction: column; gap: 2px; height: 62px; justify-content: flex-end; margin: 4px 0 6px; }
+.lg-tr-h.r { align-items: flex-end; text-align: right; }
+.lg-tr-h b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.lg-tr-h select { font: inherit; font-weight: 700; padding: 4px 8px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--panel); color: var(--ink); max-width: 100%; }
+.lg-tr-h .muted { font-size: var(--fs-xs); }
+.lg-tp { padding: 6px 8px; gap: 6px; }
+.lg-tp-n { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.lg-tp-n b { font-size: var(--fs-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lg-tp-n .muted { font-size: var(--fs-xs); }
+.lg-tr-pos { margin: 12px 0 4px; } .lg-tr-pos .posb { font-size: var(--fs-xs); }
+.lg-tr-cols { align-items: start; } .lg-tps { align-content: start; }  /* uneven position groups: buttons keep their height */
+
+/* matchup: a started player's live / final points (owner 2026-10-19) */
+.lg-hh-lv { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.1; }
+.lg-hh-lv small { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }

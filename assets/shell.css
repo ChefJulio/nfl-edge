@@ -1,0 +1,79 @@
+/* App shell: parent tabs (scrolling strip on narrow screens) + sub-tab chips. Shared by every week page. */
+nav.tabs { position: sticky; top: 0; z-index: 10; background: var(--bg); border-bottom: 1px solid var(--line); }
+nav.tabs .nav-par { display: flex; gap: 20px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+nav.tabs .nav-par::-webkit-scrollbar { display: none; }
+nav.tabs .nav-par button { flex: none; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted);
+  font: inherit; font-weight: 600; font-size: var(--fs-base); padding: 12px 0 10px; cursor: pointer; }
+nav.tabs .nav-par button:hover { color: var(--ink); }
+nav.tabs .nav-par button.on { color: var(--ink); border-bottom-color: var(--accent); }
+.nav-sub { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-top: 8px; padding-bottom: 9px; border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
+.nav-sub[hidden] { display: none; }
+.nav-sub::-webkit-scrollbar { display: none; }
+.nav-sub .chip { flex: none; font: inherit; font-size: var(--fs-sm); font-weight: 600; color: var(--muted); background: var(--panel2);
+  border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+.nav-sub .chip:hover { color: var(--ink); }
+.nav-sub .chip.on { color: var(--ink); background: color-mix(in srgb, var(--accent) 22%, var(--panel2)); border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+nav.tabs .lbl-short { display: none; }
+@media (max-width: 640px) {
+  nav.tabs .nav-par { gap: 11px; } nav.tabs .nav-par button { font-size: var(--fs-md); }
+}
+@media (max-width: 480px) { nav.tabs .lbl-long { display: none; } nav.tabs .lbl-short { display: inline; }
+  /* six sub-tabs (Players) fit a 390px phone: tighter chips that stretch to fill the row; narrower screens scroll */
+  .nav-sub { gap: 4px; } .nav-sub .chip { flex: 1 0 auto; padding: 5px 7px; font-size: var(--fs-sm); text-align: center; } }
+section.soon .sec-head p { color: var(--muted); }
+/* Optional bottom tab bar (phones, ?nav=bottom): fixed, above the home indicator; the top bar keeps the sub-tab chips */
+.botbar { display: none; }
+@media (max-width: 640px) {
+  html.nav-bottom nav.tabs { display: none; }
+  html.nav-bottom body { padding-bottom: var(--bbh, 64px); }
+  .botbar .nav-sub { border-top: 0; padding: 8px 16px 2px; }
+  html.nav-bottom .botbar { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    background: color-mix(in srgb, var(--bg) 97%, transparent); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+    border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+  html.nav-bottom.kb-open .botbar { display: none; }
+  html.nav-bottom.kb-open body { padding-bottom: 0; }
+  .botbar .bb-row { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; }
+  .botbar .bb-row button { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0 7px; background: none; border: 0;
+    color: var(--muted); font: inherit; font-size: var(--fs-xs); font-weight: 600; cursor: pointer; }
+  .botbar svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .botbar .bb-row button.on { color: var(--accent); }
+  .botbar .bb-sheet { position: absolute; right: 8px; bottom: calc(100% + 8px); display: flex; flex-direction: column; min-width: 180px;
+    background: var(--panel2); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 6px; box-shadow: var(--e3); }
+  .botbar .bb-sheet[hidden] { display: none; }
+  .botbar .bb-sheet button { text-align: left; padding: 11px 12px; border-radius: var(--r-md); background: none; border: 0; color: var(--ink);
+    font: inherit; font-size: var(--fs-base); font-weight: 600; cursor: pointer; }
+  .botbar .bb-sheet button.on { background: color-mix(in srgb, var(--accent) 20%, transparent); }
+}
+/* First-paint frame (pages/week.html): which one shows, and the shimmer rows standing in for the table */
+html:not(.land-rk) .fr-rk, html.land-rk .fr-gen { display: none !important; }
+.fr-ros-t, html.land-ros .fr-wk-t { display: none; } html.land-ros .fr-ros-t { display: block; }
+.fr-head { height: 35px; border-bottom: 1px solid var(--line); }
+.fr-rk .rk-mode .fr-wk, html.land-ros .fr-rk .rk-mode .fr-ros { background: var(--panel2); color: var(--ink); }
+html.land-ros .fr-rk .rk-mode .fr-wk { background: none; color: var(--muted); }
+html.land-rk .botbar .bb-row button.fr-on { color: var(--accent); }
+.fr-rows { padding: 4px 0 8px; }
+.fr-row, .fr-bar { border-radius: var(--r-md); background: linear-gradient(90deg, var(--panel2) 0%, color-mix(in srgb, var(--ink) 7%, var(--panel2)) 50%, var(--panel2) 100%);
+  background-size: 200% 100%; animation: fr-shim 1.3s linear infinite; }
+.fr-row { height: 58px; margin: 6px 0; }
+.fr-gen { padding-top: 6px; } .fr-h { height: 26px; width: 55%; margin: 8px 0 10px; } .fr-p { height: 14px; width: 85%; margin-bottom: 16px; }
+@keyframes fr-shim { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .fr-row, .fr-bar { animation: none; } }
+/* Landing: the real rows rise into place as they replace the shimmer, staggered down the first screen (owner
+   2026-10-16); first draw only (html.land-anim, dropped by rankings.js), never on sorts or filters */
+@keyframes fr-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+html.land-anim #tab-players .scroll tbody tr { animation: fr-in .38s cubic-bezier(.2, .7, .3, 1) both; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(1) { animation-delay: 35ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(2) { animation-delay: 70ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(3) { animation-delay: 105ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(4) { animation-delay: 140ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(5) { animation-delay: 175ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(6) { animation-delay: 210ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(7) { animation-delay: 245ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(8) { animation-delay: 280ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(9) { animation-delay: 315ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(10) { animation-delay: 350ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(11) { animation-delay: 385ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(12) { animation-delay: 420ms; }
+html.land-anim #tab-players .scroll tbody tr:nth-child(n+13) { animation-delay: 455ms; }
+@media (prefers-reduced-motion: reduce) { html.land-anim #tab-players .scroll tbody tr { animation: none; } }
+
