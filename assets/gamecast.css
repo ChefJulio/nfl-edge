@@ -688,15 +688,32 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .rt-chip.bad { background: rgba(242,120,109,.14); color: var(--bad); }
 .rt-dt { margin: 0 0 8px 28px; width: calc(100% - 28px); font-size: var(--fs-sm); }
 .rt-dt .rt-main td { font-weight: 700; }
-.rt-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 6px; margin: 8px 0 2px; font-size: var(--fs-md); }
-.rt-line .pc-k { margin: 0 4px 0 0; }
 .rt-more { margin-left: auto; background: none; border: 0; color: var(--accent); padding: 2px 0; font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer; }
 .rt-more:hover { text-decoration: underline; }
 .oc-stats { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 6px !important; }
 .oc-stats .tm-st { padding: 8px 10px; }
 .oc-stats .tm-stv { font-size: 20px; }
 .oc-stats .pc-sub { font-size: 11px; margin: 2px 0 0; }
-.pc-box.rt-line { margin: 8px 0 0; padding: 10px 12px; }
+.pc-box.ts-box { margin: 8px 0 0; padding: 10px 10px 8px; }
+/* team card summary, compact (owner 2026-10-20: "fit that 3rd player on my iphone screen without scrolling") */
+.pc-mt.tm-mt { margin: 4px 0 6px; }
+.pc-page .pc-box.ts-box { padding: 6px 0 4px; margin: 0; border-top: 0; }
+.ts-box .pc-k { margin-bottom: 0; }
+.pc-tap.ts-head { display: inline-block; padding: 2px 18px 2px 0; border: 0; background: none; border-radius: 0; }
+.pc-tap.ts-head::after { right: 2px; font-size: 18px; }
+@media (hover: hover) { .pc-tap.ts-head:hover { background: none; } .pc-tap.ts-head:hover .pc-k { color: var(--accent); } }
+.ts-grid { display: grid; gap: 1px; margin-top: 6px; }
+.ts-c { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 2px 0 3px; border-radius: 6px; min-width: 0; }
+/* a timeline: past games full color with their result bar, this week's opponent ringed in the accent with a dot
+   until it's final, later games dimmed */
+.ts-c.fut .nl { opacity: .45; }
+.ts-c.cur .nl { box-shadow: 0 0 0 2px var(--panel2), 0 0 0 3.5px var(--accent); }
+.ts-c.cur .ts-r:not(.w):not(.l):not(.t) { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+.ts-c .nl { width: 18px !important; height: 18px !important; }
+.ts-c .nl img { width: 14px !important; height: 14px !important; }
+.ts-r { width: 70%; height: 3px; border-radius: 2px; background: transparent; }
+.ts-r.w { background: var(--good); } .ts-r.l { background: var(--bad); } .ts-r.t { background: var(--muted); }
+.ts-bye { width: 8px; height: 2px; margin: 8px 0 6px; border-radius: 1px; background: var(--faint); }
 
 /* Live tab pane picker (one pane visible at a time) */
 .gc-panes { position: sticky; top: 0; z-index: 5; display: flex; width: 100%; margin: 8px 0 10px; background: var(--panel); }
@@ -1032,7 +1049,9 @@ html.pc-open { overflow: hidden; }
 .pc-tapsub .pv-pj { color: var(--ink); font-weight: 600; }
 .pc-rng .rng-a { fill: var(--ink); stroke: var(--panel); stroke-width: 2; }
 /* team card Summary tiles (owner 2026-10-17): Players tile = top three by rest-of-season rank; Schedule sheet rows */
-.tm-tiles { margin-top: 12px; }
+.tm-tiles { margin-top: 8px; gap: 6px; }
+.tm-tiles .pc-tap { padding-top: 7px; padding-bottom: 7px; }
+.tm-tiles .pc-tapsub { margin-top: 2px; }
 .tm-tps { display: flex; flex-direction: column; gap: 4px; margin-top: 2px; }
 .tm-tp { display: flex; align-items: center; gap: 7px; min-width: 0; }
 .tm-tpi { flex: none; width: 26px; height: 26px; border-radius: 50%; overflow: hidden; background: color-mix(in srgb, var(--ink) 10%, transparent); }

@@ -2273,14 +2273,36 @@
     }).sort((a, b) => b.own - a.own || b.sig - a.sig || Math.abs(b.v) - Math.abs(a.v));
     return { m, T, games };
   };
-  // one line for the Week tab (current week only)
-  const rootLine = (abbr, d) => {
-    const O = oddsData(), x = O && +O.season === +d.season && O.root && +O.root.week === +d.week ? rtRows(O, abbr) : null;
-    if (!x) return '';
-    const sig = x.games.filter(r => !r.own && r.real(x.m) && r.v > 0).slice(0, 3);
-    return `<div class="pc-box rt-line"><span class="pc-k">Rooting interests</span> ${sig.length
-      ? sig.map(r => `${tmL(r.root, `<b>${esc(rtTeam(O, r.root).nick || r.root)}</b>`)} <small class="muted">${rtPts(r.v)}</small>`).join(' · ')
-      : '<span class="muted">no other game moves their odds much</span>'} <button type="button" class="rt-more" data-tt-go="po">Full guide</button></div>`;
+  // the whole regular season at a glance (owner 2026-10-20: replaces the rooting line on the Week tab): every week's
+  // opponent, results so far, this week outlined, byes marked; tap an opponent for its card. From odds.json's schedule
+  // (data/playoffs/odds.json sched: [week, opp, home, pf, pa, date]), the current season only.
+  const seasonRow = (abbr, d, pw) => {
+    const O = oddsData();
+    const sch = O && +O.season === +d.season ? (O.sched || {})[abbr] : null;
+    if (!sch || !sch.length) return '';
+    const by = Object.fromEntries(sch.map(g => [g[0], g.slice()])), n = Math.max(18, ...sch.map(g => g[0]));
+    // this week's result from the same source as the game tile above it (the week's data, or ESPN's live feed once
+    // it's final), so the row never lags the tile (odds.json is rewritten only when the site rebuilds)
+    const tg = teamGame(abbr, d), cw = by[+d.week];
+    if (tg && cw) {
+      const st = LIVE.byGame && LIVE.byGame[tg.id], home = tg.home.team === abbr;
+      const fin = tg.final && tg.final.home != null ? [tg.final.home, tg.final.away]
+        : st && st.state === 'post' ? [st.home.score, st.away.score] : null;
+      if (fin) [cw[3], cw[4]] = home ? [fin[0], fin[1]] : [fin[1], fin[0]];
+    }
+    const cells = Array.from({ length: n }, (_, i) => i + 1).map(w => {
+      const g = by[w], cur = +w === +d.week ? ' cur' : +w > +d.week ? ' fut' : '';
+      // one row (owner 2026-10-20: "more compact and fit on one row"): logo + a result bar; the rest in the tip
+      if (!g) return `<div class="ts-c bye${cur}" title="Week ${w} · bye"><span class="ts-bye"></span></div>`;
+      const [, o, home, pf, pa, day] = g, done = pf != null && pa != null;
+      const res = done ? (pf > pa ? 'W' : pf < pa ? 'L' : 'T') : '';
+      const tip = `Week ${w} · ${day || ''} · ${home ? 'vs' : '@'} ${(rtTeam(O, o).nick || o)}${done ? ` · ${res} ${pf}-${pa}` : ''}`;
+      return `<div class="ts-c${cur}" title="${esc(tip)}">${tmL(o, tLogo(o, 18))}<span class="ts-r ${res === 'W' ? 'w' : res === 'L' ? 'l' : res ? 't' : ''}"></span></div>`;
+    }).join('');
+    // the header names how hard the rest of it is and opens the schedule sheet (the logos open their teams)
+    const head = pw ? `<div class="pc-tap ts-head" role="button" tabindex="0" aria-haspopup="dialog" data-sheet="Schedule"><div class="pc-k">${esc(d.season)} schedule · ${ord(pw.sos_next_rk)} hardest left</div><template>${schedSheet(abbr, d, pw)}</template></div>`
+      : `<div class="pc-k">${esc(d.season)} schedule</div>`;
+    return `<div class="pc-box ts-box">${head}<div class="ts-grid" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${cells}</div></div>`;
   };
   // odds by week: lines going into each week, dashed to next week's best / worst case; schedule along the bottom
   const oddsChart = (abbr, O) => {
@@ -2406,6 +2428,20 @@
   };
   const gradeChip = gr => gr ? `<b class="tm-gr ${gr.uq ? '' : grTone(gr.v)}" title="${gr.season ? `Edge grade this season (${ovr(gr.ovr)} overall; young player)` : 'Edge grade (OVR)'}">${ovr(gr.v)}${gr.uq ? '*' : ''}</b>` : '<span class="muted">–</span>';
   NFLE.gradeOf = pid => teamGrade(pid); NFLE.gradeChip = gr => gradeChip(gr);  // Rankings' Grd column (rankings.js)
+  // The season's schedule sheet (owner 2026-10-17: "not just games yet to be played"): played games with the result,
+  // the bye in its week, the rest with the opponent's record and Power rank; strength of schedule below. Opened from
+  // the schedule row's header (and the Schedule tile where the Playoffs tile can't show: a past season's page).
+  const schedSheet = (abbr, d, pw) => {
+    const O = oddsData(), sch = O && +O.season === +d.season && O.sched ? O.sched[abbr] : null;
+    const pow = Object.fromEntries((d.power || []).map(x => [x.team, x]));
+    const weeks = sch ? Array.from({ length: Math.max(18, ...sch.map(g => g[0])) }, (_, i) => sch.find(g => g[0] === i + 1) || i + 1) : [];
+    const schRow = g => { if (typeof g === 'number') return `<div class="tm-sg tm-bye"><span class="tm-sw">Wk ${g}</span><span class="muted">Bye</span></div>`;
+      const o = pow[g[1]] || {}, done = g[3] != null, r = !done ? '' : g[3] > g[4] ? 'W' : g[3] < g[4] ? 'L' : 'T';
+      return `<div class="tm-sg tm-open${done ? ' tm-done' : ''}" data-tm="${esc(g[1])}"><span class="tm-sw">Wk ${g[0]}</span><span class="tm-sv">${g[2] ? 'vs' : '@'}</span>${tLogo(g[1], 22)}<b>${esc(o.nick || g[1])}</b>`
+        + (done ? `<span class="tm-sres r-${r}">${r} ${g[3]}-${g[4]}</span>` : `<span class="muted">${esc(o.record || '')}</span>${rkChip(o.rank, 'Their Power rank')}`) + '</div>'; };
+    return `<div class="pc-box"><div class="pc-k">${esc(d.season)} season</div>${weeks.length ? `<div class="tm-sched">${weeks.map(schRow).join('')}</div>` : '<p class="pc-sub">Loading schedule&hellip;</p>'}
+      ${pw ? `<p class="pc-sub">Strength of schedule, by the opponents' Power ratings: so far ${ord(pw.sos_past_rk)} hardest, the rest of the way ${ord(pw.sos_next_rk)} hardest (1st = toughest).</p>` : ''}</div>`;
+  };
   const teamTiles = (abbr, d, L, pw) => {
     const tiles = [];
     // Power
@@ -2432,20 +2468,22 @@
       `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
         ${wkRows ? `<table class="bx tm-pl tiles"><thead><tr><th>Player</th><th class="num">Proj</th><th class="num" title="Edge grade; sorted by it (ungraded players last, by projection)">Grd</th><th class="num">FP/G</th></tr></thead><tbody>${wkRows}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>
        <div class="pc-k tm-dck">Depth chart</div><div class="dc-wrap" data-dc="${esc(abbr)}"></div>`));
-    // Schedule: the whole season (owner 2026-10-17: "not just games yet to be played"): played games with the result,
-    // the bye in its week, the rest with the opponent's record and Power rank; the tile previews the next three
-    const O = oddsData(), sch = O && O.sched && O.sched[abbr], left = sch ? sch.filter(g => g[3] == null && g[0] >= +d.week) : [];
-    const pow = Object.fromEntries((d.power || []).map(x => [x.team, x]));
-    // the next three opponents as logos (owner 2026-10-19), "@" for road games; the code in the tooltip
-    const nextLogos = left.slice(0, 3).map(g => `<span class="tm-nx" title="${g[2] ? 'vs' : '@'} ${esc(g[1])}">${g[2] ? '' : '<i>@</i>'}${tLogo(g[1], 24)}</span>`).join('');
-    const weeks = sch ? Array.from({ length: Math.max(18, ...sch.map(g => g[0])) }, (_, i) => sch.find(g => g[0] === i + 1) || i + 1) : [];
-    const schRow = g => { if (typeof g === 'number') return `<div class="tm-sg tm-bye"><span class="tm-sw">Wk ${g}</span><span class="muted">Bye</span></div>`;
-      const o = pow[g[1]] || {}, done = g[3] != null, r = !done ? '' : g[3] > g[4] ? 'W' : g[3] < g[4] ? 'L' : 'T';
-      return `<div class="tm-sg tm-open${done ? ' tm-done' : ''}" data-tm="${esc(g[1])}"><span class="tm-sw">Wk ${g[0]}</span><span class="tm-sv">${g[2] ? 'vs' : '@'}</span>${tLogo(g[1], 22)}<b>${esc(o.nick || g[1])}</b>`
-        + (done ? `<span class="tm-sres r-${r}">${r} ${g[3]}-${g[4]}</span>` : `<span class="muted">${esc(o.record || '')}</span>${rkChip(o.rank, 'Their Power rank')}`) + '</div>'; };
-    if (pw) tiles.push(tapTile('Schedule', `<div class="pc-big">${ord(pw.sos_next_rk)} <small>hardest left</small></div><div class="pc-tapsub tm-nxrow">${nextLogos ? `<span>Next</span>${nextLogos}` : '&nbsp;'}</div>`, 'Schedule',
-      `<div class="pc-box"><div class="pc-k">${esc(d.season)} season</div>${weeks.length ? `<div class="tm-sched">${weeks.map(schRow).join('')}</div>` : '<p class="pc-sub">Loading schedule&hellip;</p>'}
-        <p class="pc-sub">Strength of schedule, by the opponents' Power ratings: so far ${ord(pw.sos_past_rk)} hardest, the rest of the way ${ord(pw.sos_next_rk)} hardest (1st = toughest).</p></div>`));
+    // Playoffs (owner 2026-10-20, replacing the Schedule tile now that the schedule row shows every week): the chance to
+    // make it, the division, the move since last week; opens the Playoffs tab. A past season's page has no odds: the
+    // Schedule tile stays there.
+    const O = oddsData(), po = O && +O.season === +d.season ? rtTeam(O, abbr) : null;
+    if (po && po.team) {
+      const big = v => v >= 0.995 ? '>99%' : v > 0 && v < 0.005 ? '<1%' : `${Math.round(v * 100)}%`;
+      const H = O.hist || {}, prev = H[O.as_of_week - 1] && H[O.as_of_week - 1][abbr];
+      const mv = prev ? Math.round((po.p_playoffs - prev[0]) * 100) : 0;
+      tiles.push(`<div class="pc-tap" role="button" tabindex="0" data-tt-go="po"><div class="pc-k">Playoffs</div><div class="pc-big">${big(po.p_playoffs)} <small>to make it</small></div>`
+        + `<div class="pc-tapsub">Division ${big(po.p_div)}${mv ? ` · ${mv > 0 ? '▲' : '▼'}${Math.abs(mv)}` : ''}</div></div>`);
+    } else if (pw) {
+      const sch = O && O.sched && O.sched[abbr], left = sch ? sch.filter(g => g[3] == null && g[0] >= +d.week) : [];
+      const nextLogos = left.slice(0, 3).map(g => `<span class="tm-nx" title="${g[2] ? 'vs' : '@'} ${esc(g[1])}">${g[2] ? '' : '<i>@</i>'}${tLogo(g[1], 24)}</span>`).join('');
+      tiles.push(tapTile('Schedule', `<div class="pc-big">${ord(pw.sos_next_rk)} <small>hardest left</small></div><div class="pc-tapsub tm-nxrow">${nextLogos ? `<span>Next</span>${nextLogos}` : '&nbsp;'}</div>`, 'Schedule',
+        schedSheet(abbr, d, pw)));
+    }
     return tiles.length ? `<div class="pc-tiles tm-tiles">${tiles.join('')}</div>` : '';
   };
   // a sheet opened from a team tile: penalties and the depth chart fill in there (the sheet is a copy made at open)
@@ -2476,7 +2514,9 @@
       <div class="pc-tab" data-tt="ov"${teamTab === 'ov' ? '' : ' hidden'}>${pickerHtml()}${wk.html}</div>
       <div class="pc-tab" data-tt="log"${teamTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every game since 1999</div><div class="tm-log">${L ? teamLogHtml(L, abbr) : '<p class="pc-sub">Loading game log&hellip;</p>'}</div></div></div>
       <div class="pc-tab" data-tt="po"${teamTab === 'po' ? '' : ' hidden'}>${teamTab === 'po' ? rootingHtml(abbr) + teamPlayoffs(abbr) : ''}</div>`;
-    body.querySelectorAll('[data-tt]').forEach(b => b.onclick = () => {
+    // the tab buttons only: '[data-tt]' also matched the tab panels, so any click inside Summary (the Playoffs tile)
+    // bubbled to its panel and switched straight back to Summary
+    body.querySelectorAll('.pc-tabs [data-tt]').forEach(b => b.onclick = () => {
       teamTab = b.dataset.tt;
       rememberTab(`t:${abbr}`, teamTab);
       if (teamTab === 'po') body.querySelector('.pc-tab[data-tt="po"]').innerHTML = rootingHtml(abbr) + teamPlayoffs(abbr);
@@ -2499,9 +2539,10 @@
     const pw = (d.power || []).find(x => x.team === abbr), g = teamGame(abbr, d);
     const opp = g && (g.away.team === abbr ? g.home : g.away), home = g && g.home.team === abbr;
     // the Games tab's tile (win chances, line, ours; the score once it starts, repainted live)
-    const week = g ? `<div class="pc-k pc-mtk">${esc(wkLabel(d))}</div><div class="pc-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>`
+    // no "Week N" label over the tile (owner 2026-10-20: fit the summary on one phone screen; the picker names the week)
+    const week = g ? `<div class="pc-mt tm-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>`
       : `<div class="pc-box"><div class="pc-k">${esc(wkLabel(d))}</div><b>Bye</b></div>`;
-    return { html: `${week}${rootLine(abbr, d)}${teamTiles(abbr, d, TLOGS[abbr], pw)}`, players: '' };
+    return { html: `${week}${seasonRow(abbr, d, pw)}${teamTiles(abbr, d, TLOGS[abbr], pw)}`, players: '' };
   };
   // the Players sheet's list: by grade (owner 2026-10-17: "replace tier with grade ... and sort by it"), ungraded last
   const teamPlayerRows = (abbr, d) => {

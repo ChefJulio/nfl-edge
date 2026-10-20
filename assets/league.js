@@ -7,6 +7,7 @@
 (() => {
   const NFLE = window.NFLE, esc = NFLE.esc;
   const LS = 'nfledge-league';
+  const LT = 'nfledge-teams';  // every claimed team (switcher)
   const f1 = v => v == null || isNaN(v) ? '' : (Math.round(v * 10) / 10).toFixed(1);
   const pct = v => `${Math.round(100 * v)}%`;
   const UA = {};  // browsers set their own User-Agent; nothing to send
@@ -212,11 +213,28 @@
     const TEAMS = D.teams || {}, KEYS = D.score.keys;
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem(LS) || 'null'); } catch (e) { /* none */ }
+    // claimed teams (owner 2026-10-20: "claim and switch between multiple teams"): { list: [{ platform, league, team,
+    // user, label, lname }], active }; the single saved league from before migrates in as the first
+    let TEAMS_ = null;
+    try { TEAMS_ = JSON.parse(localStorage.getItem(LT) || 'null'); } catch (e) { /* none */ }
+    if (!TEAMS_ || !Array.isArray(TEAMS_.list)) TEAMS_ = { list: saved && saved.league ? [saved] : [], active: 0 };
+    if (TEAMS_.list.length) saved = TEAMS_.list[Math.min(TEAMS_.active || 0, TEAMS_.list.length - 1)];
+    const sameTeam = (a, b) => a && b && a.platform === b.platform && String(a.league) === String(b.league) && String(a.team) === String(b.team);
+    const saveTeams = () => { try { localStorage.setItem(LT, JSON.stringify(TEAMS_)); } catch (e) { /* private mode */ } };
     // the view is the site's Fantasy sub-tab (shell.js NAV: #league/<view>)
     const VIEWS = ['lineup', 'matchup', 'live', 'teams', 'waivers', 'trade'];
     const fromHash = () => { const m = location.hash.match(/^#league\/(\w+)/); return m && VIEWS.includes(m[1]) ? m[1] : null; };
     let L = null, mine = null, ROS = null, view = fromHash() || 'lineup', feedWho = 'mine';
-    const save = () => { try { localStorage.setItem(LS, JSON.stringify(saved)); } catch (e) { /* private mode */ } };
+    const save = () => {
+      try { localStorage.setItem(LS, JSON.stringify(saved)); } catch (e) { /* private mode */ }
+      // the active entry follows (team picked, names learned); a new one is added and becomes active
+      if (saved && saved.league) {
+        const i = TEAMS_.list.findIndex(x => x.platform === saved.platform && String(x.league) === String(saved.league)
+                                             && (x.team == null || saved.team == null || String(x.team) === String(saved.team)));
+        if (i >= 0) { TEAMS_.list[i] = saved; TEAMS_.active = i; } else { TEAMS_.list.push(saved); TEAMS_.active = TEAMS_.list.length - 1; }
+        saveTeams();
+      }
+    };
     // the gamecast marks the viewer's players and this week's opponent's (owner 2026-10-18: "viewers might want to know
     // how their fantasy players are doing"): our player ids, written whenever the league or the team changes
     const shareMine = () => {
@@ -259,7 +277,7 @@
         const r = ROS && ROS.players && ROS.players[g], team = r ? r.team : nm ? nm[2] : '';
         const bye = !!(ROS && team && ((ROS.byes || {})[team] || []).includes(D.week));
         return { ext: x, pid: g, name: r ? r.name : nm ? nm[0] : g, pos: r ? r.pos : nm ? nm[1] : '', team, photo: r && r.photo, espn: r && r.espn,
-                 proj: null, exp: null, why: bye ? 'on bye this week' : 'no projection this week (out, or not on our board)' };
+                 proj: null, exp: null, why: bye ? 'on bye this week' : 'not projected this week' };  // short: the line sits beside his name (owner 2026-10-20)
       }
       // expected points: his chance to take the field (injury x healthy scratch x backup role; (AY3) "play"), not just health
       const proj = pts(p.sc.pj, L.scoring, p.pos), pa = p.play != null ? p.play : 1 - (p.inactive || 0);
@@ -276,10 +294,6 @@
     // "DJ Moore" -> "Moore", "Chris Rodriguez Jr." -> "Rodriguez" (suffixes skipped)
     const last = n => { const w = String(n || '').split(' ').filter(x => !/^(jr\.?|sr\.?|ii|iii|iv|v)$/i.test(x)); return w[w.length - 1] || n; };
 
-    // the uncertain teammate's other world as a change to the shown projection (owner 2026-10-17: changes add up when
-    // two teammates are uncertain, two totals don't); '' when it rounds to nothing
-    const condTxt = c => { const d = c.pSit >= 0.5 ? c.plays - c.sits : c.sits - c.plays;
-      return Math.abs(d) < 0.05 ? '' : `${NFLE.fmt.signed1(d)} if ${esc(last(c.name))} ${c.pSit >= 0.5 ? 'plays' : 'sits'}`; };
     // "Questionable (ESPN) (DL)" -> "Questionable per ESPN; practice: DNP, limited"
     const statusWords = st => {
       const m = String(st || '').match(/^(.*?)\s*\(([DLF-]+)\)\s*$/), des = (m ? m[1] : String(st || '')).trim().replace(/\s*\(ESPN\)/, ' per ESPN');
@@ -334,9 +348,9 @@
     const badgesOf = (p, o = {}) => {
       const out = p.proj != null && p.inactive >= 0.05 && p.inactive < 0.99 ?  // ruled out: the O chip says it
         `<span class="lg-out${p.inactive >= 0.5 ? ' hi' : ''}" title="Chance he plays">${NFLE.fmt.toPlay(p.inactive)} to play</span>` : '';
-      const conds = (p.conds || []).map(c => condTxt(c) && `<span class="lg-cond" title="${esc(`${f1(c.sits)} if ${c.name} sits, ${f1(c.plays)} if he plays`)}">${condTxt(c)}</span>`).join('');
       const lock = p.locked && !o.noLock ? '<span class="lg-lock" title="His game has kicked off: his spot is set">locked</span>' : '';
-      const inner = lock + NFLE.injTag(p.status || '') + out + conds;
+      // no "+0.5 if X plays" badge (owner 2026-10-20: the in-depth detail is on the player's page)
+      const inner = lock + NFLE.injTag(p.status || '') + out;
       return inner ? `<div class="badges lg-badges">${inner}</div>` : '';
     };
     const row = (slot, p, extra = '', o = {}) => {
@@ -373,25 +387,36 @@
     const movesCard = () => {
       if (!ROS) { NFLE.load('data/ros.json').then(j => { ROS = j; if (view === 'lineup') draw(); }, () => {}); return '<div class="lg-mv lg-moves"><div class="muted">Checking the waiver wire…</div></div>'; }
       const { moves } = movesFor(), weeks = rosWeeks();
-      const best = moves.filter(m => m.ros >= 1).slice(0, 3);
+      // the top three free agents at each position that improve the team (owner 2026-10-20: a friend's list was three
+      // QBs, the same upgrade three ways, hiding a receiver who beat her WRs; "top 3 to add at each position"),
+      // positions ordered by their best gain
+      const byPos = {};
+      moves.filter(m => m.ros >= 1).forEach(m => { (byPos[m.add.pos] = byPos[m.add.pos] || []).push(m); });
+      const best = Object.values(byPos).sort((a, b) => b[0].ros - a[0].ros).flatMap(ms => ms.slice(0, 3));
       const fa = freeAgents();
       const own = mine.ext.filter(x => !(mine.ir || []).includes(x)).map(x => ({ x, p: player(x), ros: weeks.reduce((t, k) => t + ((weekOf(x, k) || {}).exp || 0), 0), games: gamesOf(x) }));
       const below = own.map(o => ({ ...o, beat: fa.filter(f => f.pos === o.p.pos && f.ros > o.ros) }))
         .filter(o => o.beat.length && o.p.pos).sort((a, b) => b.beat.length - a.beat.length || a.ros - b.ros).slice(0, 4);
       const wv = mine.faab != null ? `$${mine.faab} FAAB left` : mine.waiver && claimWindow() ? `${runText()} · you're #${mine.waiver} of ${L.teams.length}` : '';
       // (owner 2026-10-18) the same player rows as the lineup: photo, name, team colors; what he's worth on the right
-      const infoRow = (p, tag, val, sub, cls = '') => `<tr class="teamrow" style="${NFLE.fmt.rowStyle(TEAMS, p.team)}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}>
+      const infoRow = (p, tag, val, sub, cls = '', pre = '') => `<tr class="teamrow" style="${NFLE.fmt.rowStyle(TEAMS, p.team)}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}>
           <td class="lg-slot">${esc(tag)}</td><td class="lg-who">${NFLE.ui.player({ name: p.name, team: p.team, photo: p.photo, espn: p.espn, pid: p.pid, subHtml: sub }, TEAMS)}</td>
-          <td class="num"><b class="${cls}">${val}</b></td></tr>`;
-      const addRows = best.map(m => infoRow(m.add, m.add.pos, perWk(m.ros), `${perG(m.add.ros, m.add.games)}/g · ${NFLE.fmt.signed1(m.wk)} this wk`, 'good'));
+          ${pre}<td class="num"><b class="${cls}">${val}</b></td></tr>`;
+      // Proj = this week's projection, as the lineup rows show it (owner 2026-10-20); what he adds to your team per week
+      // (the order) moves to the line under his name
+      const projCell = a => a.proj != null ? f1(a.proj) : /bye/.test(a.why || '') ? '<span class="muted">Bye</span>' : '—';
+      // grouped by position (owner 2026-10-20): a label row per position, its best three under it
+      const POSW = { QB: 'Quarterbacks', RB: 'Running backs', WR: 'Receivers', TE: 'Tight ends', K: 'Kickers', DEF: 'Defenses' };
+      const addRows = best.map((m, i) => (i === 0 || best[i - 1].add.pos !== m.add.pos ? `<tr class="lg-grp"><td colspan="4">${esc(POSW[m.add.pos] || m.add.pos)}</td></tr>` : '')
+        + infoRow(m.add, m.add.pos, projCell(m.add), '', '', `<td class="num"><b class="good">${perWk(m.ros)}</b></td>`));
       const belowRows = below.map(o => { const top = o.beat.sort((a, b) => b.ros - a.ros)[0];
         return infoRow(o.p, o.p.pos, o.beat.length, `${perG(o.ros, o.games)}/g · top FA ${esc(last(top.name))} ${perG(top.ros, top.games)}`, 'bad'); });
       return `<h3 class="lg-h">Waiver wire${wv ? ` <span class="muted lg-wv">${wv}</span>` : ''}</h3>
           <div class="lg-mv-sub">Best available for you</div>
-          ${addRows.length ? table(addRows.join(''), '<th>Pos</th><th>Free agent</th><th class="num" title="What he adds to your team per week, rest of season">+/wk</th>')
+          ${addRows.length ? table(addRows.join(''), '<th>Pos</th><th>Free agent</th><th class="num" title="What he adds to your team per week, rest of season (the order)">+/wk</th><th class="num" title="His projection this week, your scoring">Proj</th>').replace('lg-tbl', 'lg-tbl lg-grouped')
             : '<p class="muted">No free agent improves your team over the rest of the season by our projections.</p>'}
           ${belowRows.length ? `<div class="lg-mv-sub">Below the waiver wire</div>${table(belowRows.join(''), '<th>Pos</th><th>Your player</th><th class="num" title="Free agents at his position who project more the rest of the season">Beat by</th>')}` : ''}
-          <p class="muted lg-note">+/wk = what he'd add to your team per week, your best lineup each remaining week through ${ROS.through}, making room with whoever costs least (one QB, TE, K and D/ST is enough; ${DEPTH_MIN} RBs and WRs stay). Beat by = free agents at his position who project more (top FA = the best of them). /g = expected points per remaining game, byes skipped. Upside the projections can't see is your call.</p>`;
+          <p class="muted lg-note">Best available = the top three free agents at each position that improve your team. +/wk = what he'd add to your team per week (the order); Proj = his projection this week, your best lineup each remaining week through ${ROS.through}, making room with whoever costs least (one QB, TE, K and D/ST is enough; ${DEPTH_MIN} RBs and WRs stay). Beat by = free agents at his position who project more (top FA = the best of them). /g = expected points per remaining game, byes skipped. Upside the projections can't see is your call.</p>`;
     };
     // IR (owner 2026-10-17: "no mention of IR slots"): listed under the bench with when he's likely back (the first week
     // the return model gives him at least an even chance to play); never in the lineup
@@ -405,6 +430,10 @@
         // activating him first, which takes a roster spot
         return row('IR', Object.assign({}, p, ready.includes(x) ? {} : { opp: '', why: backWeek(x) || p.why || 'injured reserve', inactive: 0 })); }).join(''))}
         ${ready.length ? `<p class="muted lg-note">${ready.map(x => `<b>${esc(player(x).name)}</b>`).join(', ')} ${ready.length > 1 ? 'project' : 'projects'} to play this week: starting ${ready.length > 1 ? 'them' : 'him'} means activating off IR first, which takes a roster spot.</p>` : ''}` : ''; };
+    // open roster spots (owner 2026-10-20: "display empty bench spots"): the league's roster size (starters + bench, IR
+    // and taxi apart) minus the players on it; a free agent fills one without a drop
+    const emptyBench = n => { const k = L.size ? Math.max(0, L.size - n) : 0;
+      return Array.from({ length: k }, () => `<tr class="lg-empty"><td class="lg-slot">BN</td><td class="muted">Empty <span class="lg-empty-sub">· open roster spot</span></td><td class="num muted">&mdash;</td></tr>`).join(''); };
     const lineupView = () => {
       const irSet = new Set(mine.ir || []);
       const ps = mine.ext.filter(x => !irSet.has(x)).map(player), cur = new Set(mine.starters);
@@ -428,11 +457,10 @@
       const why = p => p.exp == null ? 'not projected (bye, IR or out)'
         : p.inactive >= 0.15 ? `${NFLE.fmt.toPlay(p.inactive)} to play · ${f1(p.proj)} if he plays · ${esc(statusWords(p.status))}`
         : `projects ${f1(p.exp)}`;
-      const ifLines = p => (p.conds || []).map(condTxt).filter(Boolean);
       const nm = p => `<b>${esc(p.name)}</b>`;
       const sureCard = sure.length ? `<div class="lg-mv">
           <div class="lg-mv-row"><span class="lg-mv-k good">Start</span><div>${fill.slice(0, sure.length).map(p =>
-            `<div>${nm(p)} <span class="muted">${f1(p.exp)}${ifLines(p).length ? ` · ${ifLines(p).join(' · ')}` : ''}</span></div>`).join('')}</div></div>
+            `<div>${nm(p)} <span class="muted">${f1(p.exp)}</span></div>`).join('')}</div></div>
           <div class="lg-mv-row"><span class="lg-mv-k bad">Bench</span><div>${sure.map(p => `<div>${nm(p)} <span class="muted">${why(p)}</span></div>`).join('')}</div></div>
         </div>` : '';
       const gtCards = unsure.map(p => {
@@ -461,7 +489,7 @@
       return `${swaps}${unproj.length ? `<p class="muted lg-note">Starting with no projection: ${unproj.map(p => `${esc(p.name)} (${esc(p.why || 'not projected')})`).join(', ')}.</p>` : ''}
         <h3 class="lg-h">Best lineup <span class="muted">${f1(total(best))} expected</span></h3>
         ${table(best.map(r => row(r.slot, r.p)).join(''))}
-        <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') || '<tr><td colspan="3" class="muted">No projected bench players.</td></tr>')}
+        <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') + emptyBench(ps.length) || '<tr><td colspan="3" class="muted">No projected bench players.</td></tr>')}
         ${irSection()}
         ${movesCard()}
         <p class="muted lg-note">Expected points = our projection under your league's scoring x his chance to play. Kickers and team defenses are projected under your league's own kicking and D/ST settings (3-and-outs and 4th-down stops aren't modeled). Scoring bonuses (100-yard games, 2-point tries) aren't modeled.${L.slots.some(x => /^(DL|LB|DB|IDP_FLEX|DE|DT|CB|S)$/.test(x)) ? ' Defender (IDP) slots are not projected yet, so they stay as you set them on your platform.' : ''}</p>`;
@@ -799,12 +827,24 @@
 
     const header = () => {
       sec.innerHTML = `<div class="sec-head"><div><h2>${esc(L.name)}</h2><p>${L.platform === 'sleeper' ? 'Sleeper' : 'ESPN'} · week ${esc(String(L.week))} · ${L.teams.length} teams · our projections under your league's scoring.</p>${(L.unmodeled || []).length ? `<details class="lg-unmod"><summary>${new Set(L.unmodeled).size} scoring rules not modeled</summary><p class="muted">Your league also scores ${esc([...new Set(L.unmodeled)].join(', '))}: not in our projections yet.</p></details>` : ''}</div></div>
-        <div class="lg-top"><label>Your team <select class="lg-team">${L.teams.map(t => `<option value="${esc(t.id)}"${mine && t.id === mine.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
-          <button type="button" class="lg-change">Change league</button></div>
+        ${switcher()}
+        <div class="lg-top"><label title="Which team in this league is yours: changing it re-claims this chip">Your team <select class="lg-team">${L.teams.map(t => `<option value="${esc(t.id)}"${mine && t.id === mine.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select></label>
+          <button type="button" class="lg-change">Remove this team</button>
+          <small class="muted lg-tnote">Not yours? Pick yours here: this team's chip switches to it.</small></div>
         <div class="lg-body"></div>`;
-      sec.querySelector('.lg-team').onchange = e => { mine = L.teams.find(t => t.id === e.target.value); saved.team = mine.id; save(); shareMine();
+      wireSwitcher(sec);
+      sec.querySelector('.lg-team').onchange = e => { mine = L.teams.find(t => t.id === e.target.value);
+        TEAMS_.list = TEAMS_.list.filter(x => !(sameTeam(x, Object.assign({}, saved, { team: mine.id })) && x !== saved));  // no duplicate claim
+        saved = Object.assign(saved, { team: mine.id, label: mine.name, lname: L.name, unpicked: false }); save(); shareMine();
+        sec.querySelector('.lg-switch').outerHTML = switcher(); wireSwitcher(sec);
         trade = { team: null, give: new Set(), get: new Set(), found: null }; draw(); };
-      sec.querySelector('.lg-change').onclick = () => { saved = null; save(); try { localStorage.removeItem('nfledge-mine'); } catch (e) { /* ignore */ } L = null; NFLE.leagueDst = null; connectView(); };
+      sec.querySelector('.lg-change').onclick = () => {
+        TEAMS_.list = TEAMS_.list.filter(x => x !== saved && !sameTeam(x, saved));
+        TEAMS_.active = 0; saveTeams();
+        try { localStorage.removeItem('nfledge-mine'); } catch (e) { /* ignore */ }
+        L = null; NFLE.leagueDst = null;
+        if (TEAMS_.list.length) open(TEAMS_.list[0]); else { saved = null; try { localStorage.removeItem(LS); } catch (e) { /* ignore */ } connectView(); }
+      };
     };
 
     const setView = v => {
@@ -822,29 +862,65 @@
         L = s.platform === 'espn' ? await espn.load(s.league, season) : await sleeper.load(s.league);
         NFLE.leagueDst = L && L.dw ? { w: L.dw, name: L.name } : null;  // D/ST cards score with this league's settings
         mine = L.teams.find(t => t.id === s.team) || L.teams.find(t => s.user && t.owner === s.user) || L.teams[0];
-        saved = Object.assign({}, s, { team: mine.id }); save(); shareMine();
+        // an ESPN league has no owner to match: until a team is picked, the first one shows and the switcher says so
+        const picked = s.team != null || !!(s.user && L.teams.some(t => t.owner === s.user));
+        saved = Object.assign(s, { team: mine.id, label: mine.name, lname: L.name, unpicked: !picked && L.platform === 'espn' }); save(); shareMine();
         header(); setView(view);
       } catch (e) {
-        saved = null; save(); connectView(`Couldn't load that league: ${e.message}`);
+        connectView(`Couldn't load that league: ${e.message}`);
       }
     };
 
+    // the claimed teams as chips: tap one to switch, + to add another (owner 2026-10-20)
+    const switcher = () => `<div class="lg-switch">${TEAMS_.list.map((x, i) => `<button type="button" class="lg-chip${x === saved ? ' on' : ''}" data-i="${i}">
+        <b>${esc(x.unpicked ? 'Pick your team' : (x.label || 'Team'))}</b><small>${esc(x.lname || (x.platform === 'espn' ? 'ESPN league' : 'Sleeper league'))}</small></button>`).join('')}
+        <button type="button" class="lg-chip lg-add" aria-label="Add a team">+</button></div>`;
+    const wireSwitcher = root => {
+      const sw = root.querySelector('.lg-switch'); if (!sw) return;
+      sw.onclick = e => {
+        const b = e.target.closest('.lg-chip'); if (!b) return;
+        if (b.classList.contains('lg-add')) { connectView(); return; }
+        const x = TEAMS_.list[+b.dataset.i];
+        // on the add screen every chip goes back to its team, the active one too (owner 2026-10-20: "my navigation gets
+        // locked here"); on a team's page the active chip is already showing
+        const adding = !!sec.querySelector('.lg-connect');
+        if (x && (x !== saved || adding)) { TEAMS_.active = +b.dataset.i; saveTeams(); trade = { team: null, give: new Set(), get: new Set(), found: null }; open(x); }
+      };
+    };
+    // Sleeper: every team the user owns this season, claimed at once (owner: "auto claim")
+    const claimSleeper = async (username) => {
+      const r = await sleeper.leaguesFor(username, season);
+      if (!r.leagues.length) throw new Error(`No ${season} Sleeper leagues for ${username}`);
+      const B = 'https://api.sleeper.app/v1', found = [];
+      await Promise.all(r.leagues.map(async l => {
+        const [rosters, users] = await Promise.all([getJSON(`${B}/league/${l.id}/rosters`), getJSON(`${B}/league/${l.id}/users`)]);
+        (rosters || []).filter(x => x.owner_id === r.user || (x.co_owners || []).includes(r.user)).forEach(x => {
+          const u = (users || []).find(z => z.user_id === x.owner_id) || {};
+          found.push({ platform: 'sleeper', league: l.id, user: r.user, team: String(x.roster_id),
+                       label: (u.metadata && u.metadata.team_name) || u.display_name || `Team ${x.roster_id}`, lname: l.name });
+        });
+      }));
+      return found;
+    };
+
     function connectView(err = '') {
-      sec.innerHTML = `<div class="sec-head"><div><h2>My League</h2><p>Bring your fantasy league here: your lineup, matchup and waiver pickups with our projections under your league's own scoring.</p></div></div>
+      sec.innerHTML = `<div class="sec-head"><div><h2>${TEAMS_.list.length ? 'Add a team' : 'My League'}</h2><p>Bring your fantasy league here: your lineup, matchup and waiver pickups with our projections under your league's own scoring.</p></div></div>
+        ${TEAMS_.list.length ? `${switcher()}<p class="muted lg-hint">Tap a team to go back to it.</p>` : ''}
         ${err ? `<p class="lg-err">${esc(err)}</p>` : ''}
         <div class="card lg-connect">
           <div class="seg lg-plat"><button type="button" data-p="sleeper" class="on">Sleeper</button><button type="button" data-p="espn">ESPN</button></div>
-          <p class="muted lg-hint">Sleeper: your username, or a league id.</p>
+          <p class="muted lg-hint">Sleeper: your username (claims every team you own) or a league id.</p>
           <div class="lg-form"><input type="text" class="lg-in" placeholder="Sleeper username or league id" autocomplete="off"><button type="button" class="sbtn lg-go">Connect</button></div>
           <div class="lg-pick"></div>
           <p class="muted lg-note">Saved on this device only. ESPN: public leagues only (league settings: "make league viewable to public"); the id is the leagueId= number in your league's web address. Yahoo isn't supported (it needs a login server).</p>
         </div>`;
+      wireSwitcher(sec);
       let plat = 'sleeper';
       const inp = sec.querySelector('.lg-in'), pick = sec.querySelector('.lg-pick');
       sec.querySelector('.lg-plat').onclick = e => { const b = e.target.closest('[data-p]'); if (!b) return; plat = b.dataset.p;
         sec.querySelectorAll('.lg-plat button').forEach(x => x.classList.toggle('on', x === b));
         inp.placeholder = plat === 'espn' ? 'ESPN league id' : 'Sleeper username or league id';
-        sec.querySelector('.lg-hint').textContent = plat === 'espn' ? 'ESPN: your public league\'s id.' : 'Sleeper: your username, or a league id.'; };
+        sec.querySelector('.lg-hint').textContent = plat === 'espn' ? 'ESPN: your public league\'s id; then pick your team.' : 'Sleeper: your username (claims every team you own) or a league id.'; };
       const go = async () => {
         const v = inp.value.trim(); if (!v) return;
         if (plat === 'espn') {  // a pasted web address: the number after leagueId= (joining every digit folded in the season)
@@ -852,12 +928,15 @@
           return open({ platform: 'espn', league: m ? m[1] : v.replace(/\D/g, '') });
         }
         if (/^\d{10,}$/.test(v)) return open({ platform: 'sleeper', league: v });
-        pick.innerHTML = '<p class="muted">Finding your leagues…</p>';
+        pick.innerHTML = '<p class="muted">Finding your teams…</p>';
         try {
-          const r = await sleeper.leaguesFor(v, season);
-          if (!r.leagues.length) { pick.innerHTML = `<p class="lg-err">No ${season} Sleeper leagues for ${esc(v)}.</p>`; return; }
-          pick.innerHTML = r.leagues.map(l => `<button type="button" class="sbtn lg-lg" data-id="${esc(l.id)}">${esc(l.name)}</button>`).join('');
-          pick.onclick = e => { const b = e.target.closest('[data-id]'); if (b) open({ platform: 'sleeper', league: b.dataset.id, user: r.user }); };
+          const found = await claimSleeper(v);
+          if (!found.length) { pick.innerHTML = `<p class="lg-err">${esc(v)} doesn't own a team in a ${season} Sleeper league.</p>`; return; }
+          const fresh = found.filter(f => !TEAMS_.list.some(x => sameTeam(x, f)));
+          TEAMS_.list.push(...fresh); saveTeams();
+          const first = fresh[0] || TEAMS_.list.find(x => sameTeam(x, found[0]));
+          TEAMS_.active = TEAMS_.list.indexOf(first); saveTeams();
+          open(first);
         } catch (e) { pick.innerHTML = `<p class="lg-err">${esc(e.message)}</p>`; }
       };
       sec.querySelector('.lg-go').onclick = go;

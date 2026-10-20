@@ -18,7 +18,6 @@ table.lg-tbl td.num, table.lg-tbl th.num { white-space: nowrap; }
 table.lg-rank tr.lg-me td { background: rgba(122,162,255,.10); }
 .lg-you { font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill); background: rgba(122,162,255,.2); color: #a9c1ff; line-height: var(--tag-h); }
 table.lg-rank td.good { color: #6fdc8c; } table.lg-rank td.bad { color: #ff8f84; }
-.lg-cond { display: inline-block; margin-left: 6px; font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill); background: rgba(122,162,255,.16); color: #a9c1ff; line-height: var(--tag-h); }
 /* lineup moves as cards (owner 2026-10-16: "make it more readable") */
 .lg-swaps { display: grid; gap: 8px; } .lg-swaps:not(.good) { padding: 0; background: none; }
 .lg-mv { padding: 10px 12px; border-radius: var(--r-md); background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); display: grid; gap: 6px; }
@@ -30,7 +29,6 @@ table.lg-rank td.good { color: #6fdc8c; } table.lg-rank td.bad { color: #ff8f84;
 .lg-mv-k { font-size: var(--fs-sm); font-weight: 600; letter-spacing: 0; text-transform: none; }
 .lg-mv-k.good { color: #6fdc8c; } .lg-mv-k.bad { color: #ff8a80; }
 .lg-mv-f { font-size: var(--fs-sm); padding: 0 2px; }
-.lg-tbl .lg-cond + .lg-cond { margin-left: 4px; }
 
 /* Audit pass (owner 2026-10-17): chips wrap under the name inside its cell, so a long one ("-0.8 if Diggs plays")
    never pushes the numbers off a phone; one chip for practice like Rankings (game status, else the latest day; none
@@ -38,7 +36,6 @@ table.lg-rank td.good { color: #6fdc8c; } table.lg-rank td.bad { color: #ff8f84;
 table.lg-tbl td.lg-who { width: 100%; }
 table.lg-tbl .who { min-width: 0; } table.lg-tbl .nmw { min-width: 0; }
 .lg-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; white-space: normal; }
-.lg-badges .lg-cond, .lg-tbl .lg-cond + .lg-cond { margin-left: 0; }
 .lg-out { display: inline-block; font-size: var(--fs-xs); font-weight: 700; padding: 0 8px; border-radius: var(--r-pill);
   background: rgba(240,192,90,.16); color: #f0c05a; line-height: var(--tag-h); }
 .lg-out.hi { background: rgba(255,143,132,.16); color: #ff8f84; }
@@ -109,3 +106,22 @@ table.lg-tbl td.lg-gain.good { color: #6fdc8c; font-weight: 700; }
 /* matchup: a started player's live / final points (owner 2026-10-19) */
 .lg-hh-lv { display: inline-flex; flex-direction: column; align-items: center; line-height: 1.1; }
 .lg-hh-lv small { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+
+/* waiver card, grouped by position (owner 2026-10-20): a plain label row per position; the position column is implied */
+table.lg-grouped tr.lg-grp td { background: none; border: 0; box-shadow: none; padding: 12px 2px 4px; font-size: var(--fs-xs);
+  font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+table.lg-grouped tbody tr.lg-grp:first-child td { padding-top: 4px; }
+table.lg-grouped td.lg-slot, table.lg-grouped thead th:first-child { display: none; }
+table.lg-tbl tr.lg-empty td { opacity: .65; } .lg-empty-sub { font-size: var(--fs-xs); }
+/* claimed teams (owner 2026-10-20): one chip per team, tap to switch, + to add */
+.lg-switch { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 10px; scrollbar-width: none; }
+.lg-switch::-webkit-scrollbar { display: none; }
+.lg-chip { flex: none; display: flex; flex-direction: column; align-items: flex-start; gap: 0; max-width: 170px; padding: 6px 12px;
+  border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel); color: var(--ink); font: inherit; cursor: pointer; text-align: left; }
+.lg-chip b { font-size: var(--fs-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.lg-chip small { font-size: var(--fs-2xs); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.lg-chip.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
+.lg-chip.lg-add { justify-content: center; align-items: center; font-size: 20px; font-weight: 700; color: var(--accent); min-width: 44px; }
+.lg-tnote { flex-basis: 100%; margin-top: -6px; font-size: var(--fs-xs); }
+/* a long note beside a name wraps instead of widening the table (owner 2026-10-20: Tank Dell's row stretched it) */
+table.lg-tbl .nm2 .l1 { white-space: normal; }

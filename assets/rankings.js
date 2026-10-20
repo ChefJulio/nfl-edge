@@ -183,16 +183,8 @@
       const rk = r._rrank != null ? (flex ? r._rfrank : r._rrank) : (flex ? r._frank : r._rank);
       return `<div class="who" title="${esc(r.takeaway || '')}"><span class="pic${r.photo ? '' : ' nopic'}"${NFLE.fmt.picStyle(TEAMS, r.team)}>${rk != null ? `<span class="pic-rk" aria-hidden="true">${rk}</span>` : ''}<span class="pic-img">${r.photo ? `<img src="${esc(r.photo)}" alt="" width="34" height="34" loading="lazy" onerror="this.closest('.pic').classList.add('nopic')">` : ''}</span><span class="pic-tm">${logo(r.team, 11)}</span></span><div class="nmw nm2w"><span class="nm2"><span class="l1">${flex ? `<span class="posb posb-${esc(r.pos)}">${esc(r.pos)}</span> ` : ''}${esc(first)}</span><b class="nm l2">${esc(lastN)}</b></span>${badges ? badges.replace('<div class="badges">', '<div class="badges nm-b">') : ''}</div></div>`;
     };
-    // Two worlds, not a blend (owner 2026-10-15: availability is binary): the projection shown is the likelier world for
-    // the uncertain teammate; this line is the change in the other one ("-0.7 if Moore plays"; owner 2026-10-17: a
-    // change adds up when two teammates are uncertain, two totals don't). Hover: both totals.
-    const lastName = n => String(n || '').split(' ').slice(1).join(' ') || n;
-    // up to two uncertain teammates, biggest swing first (cond, cond2)
-    const condLine = r => [r.cond, r.cond2].filter(Boolean).map(c => {
-      const [nm, , pSit, plays, sits] = c, d = (pSit >= 0.5 ? plays - sits : sits - plays) * r._ratio;
-      if (Math.abs(d) < 0.05) return '';
-      return `<span class="pv-cond" title="${esc(`${f1(sits * r._ratio)} if ${nm} sits (${Math.round(100 * pSit)}% likely), ${f1(plays * r._ratio)} if he plays`)}">${NFLE.fmt.signed1(d)} if ${esc(lastName(nm))} ${pSit >= 0.5 ? 'plays' : 'sits'}</span>`;
-    }).join('');
+    // The projection shown is the likelier world for an uncertain teammate (owner 2026-10-15: availability is binary).
+    // The "+0.5 if X plays" line under it is gone from the table (owner 2026-10-20): that detail is on the player's page.
     const rankOf = (r, flex) => flex ? r._frank : r._rank;
     // weather that matters (owner 2026-10-17): a small mark beside the opponent only for wind 15+ mph, a 50%+ chance
     // of rain or any snow at kickoff (live week, outdoor games; data.forecast_conditions); the forecast in its tooltip
@@ -229,7 +221,7 @@
               return `<span class="pv-stack"><b class="pv act-v${tone}" title="${r._live ? 'Live' : 'Final'}: ${f1(r._act)} pts · projected ${f1(r._proj)}${r._likelyOut ? ` (ruled out; ${f1(r._ifact)} if he had played)` : ''}${g != null ? ` · game grade ${50 + Math.round(g * 49 / 99)}` : ''}"><span class="pv-tag">${r._live ? '<span class="live-dot"></span>live' : 'final'}</span>${f1(r._act)}</b><span class="pv-was">proj <b>${f1(r._proj)}</b></span></span>`; })()
             : r._likelyOut
               ? `<b class="pv" title="Under 10% to play: projected 0">0.0</b><span class="ifact" title="${esc(range(r))}">if he plays ${f1(r._ifact)}</span>`
-              : `<b class="pv" title="${esc(range(r))}">${f1(r._proj)}</b>${condLine(r)}` },
+              : `<b class="pv" title="${esc(range(r))}">${f1(r._proj)}</b>` },
         // Matchup right after Proj (owner 2026-10-17: the two numbers a start / sit call hinges on); his team's implied
         // points (the Team pts column) folded into its tooltip
         { key: 'mu', label: 'Matchup', first: 'desc', cls: 'mu', title: 'Opponent, and the points facing them adds (+) or takes away (-) vs an average opponent: Vegas total, play volume and defense ratings together. Green helps, red hurts; deeper = bigger.',
