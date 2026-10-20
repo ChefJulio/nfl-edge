@@ -973,6 +973,8 @@ class InjuryModel:
                           s[["away_team", "gameday"]].set_axis(["team", "day"], axis=1)]).groupby("team").day.max()
     w = data.schedules[(data.schedules.season == season) & (data.schedules.week == week)]
     game_day = {**dict(zip(w.home_team, w.gameday)), **dict(zip(w.away_team, w.gameday))}
+    from .week_clock import kickoff
+    kick = {t: kickoff(d, tm) for t, d, tm in [*zip(w.home_team, w.gameday, w.gametime), *zip(w.away_team, w.gameday, w.gametime)]}
     out = {}
     for x in feed.itertuples():
       rep = ("Questionable" if str(x.status) == "Questionable" else None) if questionable else STATUS_MAP.get(str(x.status))
@@ -985,6 +987,8 @@ class InjuryModel:
       upd = pd.to_datetime(x.updated, utc=True, errors="coerce")
       if pd.isna(upd) or upd.tz_convert("America/New_York").date() < pd.Timestamp(last_day[team]).date():
         continue  # news from before his last game: last week's report already covers it
+      if kick.get(team) is not None and upd >= kick[team]:
+        continue  # posted after this week's kickoff: about his next game (Terry McLaurin, hurt in 2026 week 6's MNF)
       if questionable:
         out[gsis] = rep
         continue
