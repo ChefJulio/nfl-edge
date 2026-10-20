@@ -54,6 +54,8 @@ td.projc .pv .live-dot { width: 7px; height: 7px; margin-right: 4px; }
    at the chip's width instead of widening the column (they pushed Matchup out of view on RB / WR / FLEX) */
 @media (max-width: 640px) {
   #tab-players table.ranks td.projc .ifact { display: block; max-width: 4.8em; white-space: normal; line-height: 1.15; }
+  /* two worlds ("0.0 if Jackson plays"): a smaller line, two rows at most instead of three */
+  #tab-players table.ranks td.projc .pv + .ifact { font-size: var(--fs-xs); max-width: 6.4em; }
 }
 /* Proj without the number chip (owner 2026-10-17): the bold figure stands on its own; the fixed width above keeps
    the decimals lined up */
@@ -94,3 +96,5 @@ td.mu .wx svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-lineca
 td.mu .wx-snow { color: #e6f0ff; } td.mu .wx-wind { color: #b9c4d3; }
 td.grdc, th.grdc, td.snapc, th.snapc { text-align: center; }
 td.mu .wx-snow svg { stroke-width: 1.6; }
+/* two worlds (owner 2026-10-20): the less likely player's 0.0 dimmed */
+.pv.pv-dim { opacity: .45; }
