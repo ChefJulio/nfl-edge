@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4243256,Devin Lloyd,Carolina Panthers,Active,2026-10-07T02:41Z,,,,,,Lloyd recorded nine total tackles (five solo) during Sunday night's 32-26 win against Detroit.
 4244607,Akayleb Evans,Carolina Panthers,Active,2026-10-07T02:31Z,,,,,,Evans recorded 11 total tackles (nine solo) and a pass defensed during Sunday night's 32-26 win over the Lions.
 4360763,Brycen Tremayne,Carolina Panthers,Active,2026-10-06T03:00Z,,,,,,Tremayne caught two of three passes for 32 yards during Sunday's 32-26 win over the Lions.
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-20T17:49Z,Undisclosed,,,2026-10-18,IR,ir
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-20T18:00Z,Undisclosed,,,2026-10-18,IR,ir
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-20T16:10Z,Toe,Sprain,Not Specified,2026-10-22,QUESTIONABLE,questionable
 3121544,T.J. Edwards,Chicago Bears,Questionable,2026-10-20T16:10Z,Hamstring,Not Specified,Not Specified,2026-10-22,QUESTIONABLE,questionable
 17427,Cairo Santos,Chicago Bears,Active,2026-10-20T02:52Z,,,,,,Santos made one of his two field-goal attempts and all four PATs in the Bears' 31-23 win over the Falcons on Sunday.
@@ -541,7 +541,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4427095,DeMario Douglas,New England Patriots,Active,2026-10-19T00:47Z,,,,,,Douglas caught seven of eight targets for 86 yards and a touchdown in Sunday's 26-19 win over the Jets.
 16771,Morgan Moses,New England Patriots,Questionable,2026-10-18T20:43Z,Foot,Not Specified,Not Specified,2026-10-22,QUESTIONABLE,"Moses (ankle) was spotted wearing a walking boot after Sunday's 26-19 win over the Jets, Andrew Callahan of the Boston Herald reports."
 4362890,Ben Brown,New England Patriots,Questionable,2026-10-18T19:58Z,Knee,Not Specified,Not Specified,2026-10-22,QUESTIONABLE,Brown (knee) won't return to Sunday's game against the Jets.
-4259646,Alijah Vera-Tucker,New England Patriots,Questionable,2026-10-18T19:31Z,Hamstring,Not Specified,Not Specified,2026-10-22,QUESTIONABLE,Vera-Tucker (hamstring) has been ruled out for the remainder of Sunday's game against the Jets.
+4259646,Alijah Vera-Tucker,New England Patriots,Questionable,2026-10-18T19:31Z,Hamstring,Not Specified,Not Specified,2026-10-22,DOUBTFUL,Vera-Tucker (hamstring) has been ruled out for the remainder of Sunday's game against the Jets.
 4685298,Will Campbell,New England Patriots,Active,2026-10-18T16:41Z,,,,,,Campbell (knee) is active for Sunday's game against the Jets.
 4428930,Craig Woodson,New England Patriots,Active,2026-10-18T15:51Z,,,,,,
 4245273,Christian Elliss,New England Patriots,Active,2026-10-18T15:51Z,,,,,,
@@ -750,7 +750,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3894856,Anthony Nelson,Tampa Bay Buccaneers,Active,2026-10-07T18:57Z,,,,,,
 4428522,Tykee Smith,Tampa Bay Buccaneers,Active,2026-10-07T00:56Z,,,,,,Smith recorded six tackles (four solo) and a forced fumble during the Buccaneers' 17-14 loss to the Packers on Sunday.
 4685617,Kevin Winston Jr.,Tennessee Titans,Questionable,2026-10-20T16:10Z,Quadriceps,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
-4039052,Jordan Elliott,Tennessee Titans,Active,2026-10-20T14:12Z,,,,,,
 3925357,Calvin Ridley,Tennessee Titans,Active,2026-10-20T02:31Z,,,,,,Ridley failed to haul in either of his two targets during the Titans' 26-20 win over the Colts on Sunday.
 4686728,Gunnar Helm,Tennessee Titans,Active,2026-10-20T02:24Z,,,,,,Helm was on the field for 33 of 46 offensive snaps (71.7 percent) but didn't show up on the box score otherwise during the Titans' 26-20 win over the Colts on Sunday.
 3124084,Joey Slye,Tennessee Titans,Active,2026-10-20T01:46Z,,,,,,Slye went 4-for-4 on field-goal tries and made both of his PATs during Sunday's 26-20 win over the Colts.
@@ -774,6 +773,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685145,Jaylon Jones,Tennessee Titans,Active,2026-10-12T19:45Z,,,,,,
 4240657,Michael Carter,Tennessee Titans,Active,2026-10-12T19:45Z,,,,,,
 3120464,John Franklin-Myers,Tennessee Titans,Active,2026-10-09T19:41Z,,,,,,
+4035369,Jeffery Simmons,Tennessee Titans,Active,2026-10-09T19:41Z,,,,,,
 3929865,Charles Omenihu,Washington Commanders,Questionable,2026-10-20T16:10Z,Groin,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable
 2576980,Marcus Mariota,Washington Commanders,Doubtful,2026-10-20T16:10Z,Knee - MCL,Sprain,Right,2026-11-01,DOUBTFUL,doubtful
 5278092,T.J. Maguranyanga,Washington Commanders,Active,2026-10-20T16:02Z,,,,,,
