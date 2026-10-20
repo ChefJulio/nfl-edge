@@ -631,7 +631,7 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
 **Queued (pre-register before running)**
 - (AS) midweek stage from the calendar; (AT) one "early week" definition (week clock entry, 2026-10-18).
 - Week clock remaining moves (7 items, "Week clock ... REMAINING WORK" entry).
-- (BC) give the model each quarterback's track record (pre-registered 2026-10-19, log below; arms to build).
+- (BC) qbedge PASSED its gates but fades by season (2025 and 2026 worse): OWNER DECISION, adopt or investigate the trend first.
 - (BD) FAILED as a learned input; lead: a rule for long ESPN dates (Adams case, 31 cases: played 32%, we say 51%). Owner decision / new data.
 - Partial Vegas lines: if any game of a week lacks a line, every game drops to the model's own volume
   (team_model.GameModel.predict `.all()`); per-game fallback.
@@ -2954,3 +2954,14 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   states +0.0022 [+0.0003, +0.0042] (return_timing.py already reads ESPN). Reading: as a learned input the date needs
   more seasons of captures than exist; where it is long, today's chain is badly optimistic and a plain rule fixes
   most of it, but on 31 cases and as a reported arm, so it is a lead, not a result.
+- **RESULT {#qb-track} (BC) give the model each quarterback's track record: qbedge PASSED all three gates but is NOT
+  adopted yet (it does not hold on 2026 and fades by season: owner's call); qbprior FAIL.** tools/game_eval.py 2021-26 +
+  tools/qb_swing_eval.py --bc (amended gate 2), 1,279 games 2021-25 (527 QB-change). qbedge: (1) all games margin MAE
+  10.435 -> 10.291, -0.144 [-0.281, -0.013] (>= 0.05): PASS; (2) QB-change games -0.206 [-0.473, +0.050]: PASS; (3)
+  fantasy ALL +0.000 (the backtests use Vegas lines, so the points formula never reaches projections): PASS. By season
+  -0.364 / -0.189 / -0.155 / -0.121 / +0.108 (2021-25); 2026 so far (77 games) +0.061 [-0.435, +0.593]. QB-edge slope
+  +2.20 -> +0.19 [-0.85, +1.23] (the bias is gone); gap to Vegas, backup in 1.73 -> 0.82, new arrival 2.61 -> 1.33,
+  same QB -0.38 -> -0.14; QB-change |model - Vegas| 4.05 -> 3.43 (reported). qbprior (lambda tuned per season: 0.25 /
+  0.75 / 1.0, QB penalty moving with it): (1) -0.057 [-0.141, +0.024] FAIL; (2) -0.132 pass; fantasy ALL +0.000; slope
+  +1.62. Not adopted under the owner's rule (clean passes are adopted when they also hold on the current season):
+  2026 runs the wrong way (within noise) and the gain shrinks every season to a loss in 2025, unexplained.
