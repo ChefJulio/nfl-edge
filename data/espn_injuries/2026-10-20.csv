@@ -674,6 +674,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035687,Michael Pittman Jr.,Pittsburgh Steelers,Injured Reserve,2026-10-10T19:52Z,Foot,Plantar Fasciitis,Left,2026-11-15,IR,The Steelers placed Pittman (foot) on injured reserve Saturday.
 4430947,Yahya Black,Pittsburgh Steelers,Active,2026-10-10T19:17Z,,,,,,
 4820584,Robert Spears-Jennings,Pittsburgh Steelers,Active,2026-10-08T23:17Z,,,,,,"Spears-Jennings is on track to start Sunday's contest against the Colts, Nick Farabaugh of PennLive.com reports."
+4696044,Kaelon Black,San Francisco 49ers,Active,2026-10-20T04:22Z,,,,,,Black rushed eight times for 34 yards and brought in his only target for three yards in the 49ers' 23-17 win over the Commanders on Monday night.
 3040151,George Kittle,San Francisco 49ers,Active,2026-10-20T03:53Z,,,,,,Kittle brought in five of eight targets for 69 yards and a touchdown in the 49ers' 23-17 win over the Commanders on Monday night.
 4361741,Brock Purdy,San Francisco 49ers,Active,2026-10-20T03:48Z,,,,,,Purdy completed 21 of 29 passes for 264 yards with one touchdown and no interceptions while adding five rushes for 28 yards in the 49ers' 23-17 win over the Commanders on Monday night.
 16737,Mike Evans,San Francisco 49ers,Doubtful,2026-10-20T03:40Z,Achilles,Soreness,Right,2026-10-25,DOUBTFUL,doubtful
@@ -694,7 +695,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3895856,Christian Kirk,San Francisco 49ers,Injured Reserve,2026-10-19T20:47Z,Calf,Not Specified,Not Specified,2026-10-25,IR-R,"The 49ers downgraded Kirk (calf) to out for Monday's game against the Commanders, Matt Maiocco of NBC Sports Bay Area reports."
 4693371,James Thompson Jr.,San Francisco 49ers,Active,2026-10-18T02:56Z,,,,,,Thompson (ankle) doesn't carry an injury designation into Monday night's game against the Commanders.
 4432244,Romello Height,San Francisco 49ers,Active,2026-10-17T23:37Z,,,,,,
-4696044,Kaelon Black,San Francisco 49ers,Active,2026-10-17T21:51Z,,,,,,"Black was excused from Saturday's practice to address a personal matter but does not have an injury designation for Monday's Week 6 matchup against Washington, Nick Wagoner of ESPN.com reports."
 3916075,Colton McKivitz,San Francisco 49ers,Active,2026-10-17T21:06Z,,,,,,
 16002,Kyle Juszczyk,San Francisco 49ers,Active,2026-10-16T23:21Z,,,,,,"Juszczyk (knee) was a full participant in Friday's practice, Harrison Rich of the San Francisco Chronicle reports."
 4565779,Carver Willis,San Francisco 49ers,Active,2026-10-16T22:33Z,,,,,,
@@ -774,6 +774,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685145,Jaylon Jones,Tennessee Titans,Active,2026-10-12T19:45Z,,,,,,
 4240657,Michael Carter,Tennessee Titans,Active,2026-10-12T19:45Z,,,,,,
 3120464,John Franklin-Myers,Tennessee Titans,Active,2026-10-09T19:41Z,,,,,,
+5081432,Antonio Williams,Washington Commanders,Active,2026-10-20T04:26Z,,,,,,Williams brought in three of four targets for 50 yards in the Commanders' 23-17 loss to the 49ers on Monday night.
+4360635,Chig Okonkwo,Washington Commanders,Active,2026-10-20T04:18Z,,,,,,Okonkwo brought in all seven targets for 69 yards in the Commanders' 23-17 loss to the 49ers on Monday night.
 4697815,Rachaad White,Washington Commanders,Active,2026-10-20T04:13Z,,,,,,White rushed seven times for 27 yards and brought in four of five targets for 30 yards and a touchdown in the Commanders' 23-17 loss to the 49ers on Monday night.
 2976212,Stefon Diggs,Washington Commanders,Active,2026-10-20T04:06Z,,,,,,Diggs brought in six of seven targets for 44 yards and a touchdown in the Commanders' 23-17 loss to the 49ers on Monday night.
 4426348,Jayden Daniels,Washington Commanders,Active,2026-10-20T04:00Z,,,,,,Daniels completed 29 of 40 passes for 300 yards with two touchdowns and no interceptions while adding four rushes for 10 yards in the Commanders' 23-17 loss to the 49ers on Monday night.
@@ -797,5 +799,3 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3125248,Jeremy Reaves,Washington Commanders,Active,2026-10-18T01:36Z,,,,,,Reaves (rib) doesn't carry an injury designation into Monday night's game against the 49ers.
 4567156,Treylon Burks,Washington Commanders,Active,2026-10-17T19:38Z,,,,,,Burks (shoulder) doesn't have a designation for Monday's game in San Francisco.
 3068267,Austin Ekeler,Washington Commanders,Active,2026-10-17T19:36Z,,,,,,Ekeler (chest) does not carry an injury designation into Monday's game against the 49ers.
-4360378,Quan Martin,Washington Commanders,Active,2026-10-16T22:17Z,,,,,,
-5081432,Antonio Williams,Washington Commanders,Active,2026-10-14T00:36Z,,,,,,Williams hauled in all three of his targets for 31 yards and added a two-yard punt return during the Commanders' 27-27 tie with the Giants on Sunday.
