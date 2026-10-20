@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3126356,Marlon Humphrey,Baltimore Ravens,Active,2026-10-15T20:49Z,,,,,,
 3052743,Trey Hendrickson,Baltimore Ravens,Active,2026-10-15T00:00Z,,,,,,Hendrickson (finger) was a full participant at practice Wednesday.
 4038441,Justice Hill,Baltimore Ravens,Active,2026-10-14T02:01Z,,,,,,Hill turned four carries into 73 yards and caught two of four targets for five yards during the Ravens' 30-23 overtime win over the Falcons on Sunday.
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-20T03:27Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-20T03:40Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus
 3917232,Tyler Bass,Buffalo Bills,Active,2026-10-20T02:07Z,,,,,,Bass converted all four of his field-goal attempts and all three of his extra-point tries during Buffalo's win over the Raiders on Sunday.
 3915411,Ty Johnson,Buffalo Bills,Active,2026-10-20T00:47Z,,,,,,Johnson logged a three-yard carry and caught both of his targets for 24 yards during the Bills' 33-30 win over the Raiders on Sunday.
 4242433,Joshua Palmer,Buffalo Bills,Active,2026-10-20T00:42Z,,,,,,Palmer caught one of two targets for 37 yards during Buffalo's 33-30 win over Las Vegas on Sunday.
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429040,Vernon Broughton,New Orleans Saints,Active,2026-10-17T03:48Z,,,,,,"Broughton (illness) does not have an injury designation for Sunday's game against the Giants, Jeff Nowak of The Big 870 New Orleans reports."
 4567224,Colby Wooden,New Orleans Saints,Active,2026-10-15T21:57Z,,,,,,
 4372533,Tyree Wilson,New Orleans Saints,Active,2026-10-15T21:56Z,,,,,,
-3115303,Jermaine Eluemunor,New York Giants,Out,2026-10-20T03:27Z,Calf,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,out
+3115303,Jermaine Eluemunor,New York Giants,Out,2026-10-20T03:40Z,Calf,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,out
 5082424,Dominic Zvada,New York Giants,Active,2026-10-20T02:58Z,,,,,,Zvada made both of his field-goal attempts and his sole PAT in the Giants' 34-27 loss to the Saints on Sunday.
 4682648,Malachi Fields,New York Giants,Active,2026-10-20T02:00Z,,,,,,Fields caught two of eight targets for 19 yards during the Giants' 34-27 loss to the Saints on Sunday.
 4040761,Devin Singletary,New York Giants,Active,2026-10-20T01:39Z,,,,,,Singletary logged four carries into 14 yards and hauled in his lone target for 19 yards during Sunday's 34-27 loss to the Saints on Sunday.
@@ -675,7 +675,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430947,Yahya Black,Pittsburgh Steelers,Active,2026-10-10T19:17Z,,,,,,
 4820584,Robert Spears-Jennings,Pittsburgh Steelers,Active,2026-10-08T23:17Z,,,,,,"Spears-Jennings is on track to start Sunday's contest against the Colts, Nick Farabaugh of PennLive.com reports."
 3116097,Luke Gifford,San Francisco 49ers,Questionable,2026-10-20T02:08Z,Groin,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"Gifford (groin) is questionable to return to Monday's game against the Commanders, Nick Wagoner of ESPN.com reports."
-16737,Mike Evans,San Francisco 49ers,Questionable,2026-10-20T02:02Z,Achilles,Soreness,Right,2026-10-25,QUESTIONABLE,"Evans (Achilles) has been ruled out for the remainder of Monday night's game against the Commanders, Nick Wagoner of ESPN.com reports."
+16737,Mike Evans,San Francisco 49ers,Questionable,2026-10-20T02:02Z,Achilles,Soreness,Right,2026-10-25,DOUBTFUL,"Evans (Achilles) has been ruled out for the remainder of Monday night's game against the Commanders, Nick Wagoner of ESPN.com reports."
 4685623,Mykel Williams,San Francisco 49ers,Active,2026-10-19T23:13Z,,,,,,"Williams (knee) is active for Monday night's game against the Commanders, Brooke Evans of the team's official site reports."
 4565200,Upton Stout,San Francisco 49ers,Active,2026-10-19T23:09Z,,,,,,"Stout (shoulder) is active for Monday night's game against the Commanders, Brooke Evans reports."
 3115928,Malik Turner,San Francisco 49ers,Active,2026-10-19T23:04Z,,,,,,The 49ers elevated Turner from the practice squad to the active roster ahead of Monday night's game against the Commanders.
