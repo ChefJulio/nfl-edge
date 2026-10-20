@@ -203,14 +203,12 @@ def power_md(week: dict, base: str) -> str:
   sg = lambda v: "" if v is None else f"{v:+.1f}"  # noqa: E731
   out = [f"# NFL Edge power rankings: {week['season']} week {week['week']}", "",
          "Rank and Net = how good each team is from here on: opponent-adjusted points per game vs an average team over "
-         "its remaining games, an injured starting QB counted by his chance to be back each week. This week = the same "
-         "rating with this week's starter. Offense + Defense + ST = Net. Rank range = 10th-90th percentile rank over "
-         f"4,000 simulations. Method: {base}model/games.md", "",
-         "| Rank | Team | Record | Net | This week (rank) | Offense | Defense | ST | Rank range | QB note |", "|---|---|---|---|---|---|---|---|---|---|"]
+         "its remaining games, an injured starting QB counted by his chance to be back each week. Offense + Defense + "
+         f"ST = Net. Rank range = 10th-90th percentile rank over 4,000 simulations. Method: {base}model/games.md", "",
+         "| Rank | Team | Record | Net | Offense | Defense | ST | Rank range |", "|---|---|---|---|---|---|---|---|"]
   for r in rows:
     out.append(f"| {r['rank']} | {r['team']} {r.get('nick', '')} | {r.get('record', '')} | {sg(r.get('net'))} | "
-               f"{sg(r.get('net_now'))} ({r.get('rank_now', '')}) | {sg(r.get('off'))} | {sg(r.get('def'))} | {sg(r.get('st'))} | "
-               f"{r.get('range', '')} | {r.get('qb_note', '')} |")
+               f"{sg(r.get('off'))} | {sg(r.get('def'))} | {sg(r.get('st'))} | {r.get('range', '')} |")
   return "\n".join(out) + "\n"
 
 

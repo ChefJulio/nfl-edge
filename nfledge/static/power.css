@@ -1,7 +1,6 @@
 /* Teams > Power (power.js): table styles in site.css (table.power). */
 /* QB-change flags (report.team_tables qb_hist / qb_note) */
 svg.spark .spark-qb { fill: none; stroke: var(--warn); stroke-width: 1.5; }
-.mv.qbx { display: inline-block; margin-left: 4px; padding: 0 6px; border-radius: var(--chip-r); font-size: var(--fs-xs); font-weight: 700; color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, transparent); line-height: var(--chip-h); }
 
 /* Net bar (power.js bar): the number, then a bar from zero (green up, red down) with the rank range as a whisker */
 table.power td.nbc { min-width: 150px; }
@@ -14,7 +13,6 @@ table.power td.nbc { min-width: 150px; }
   background: linear-gradient(transparent 2px, rgba(255,255,255,.45) 2px, rgba(255,255,255,.45) 4px, transparent 4px); }  /* after the bar: on top, no z-index (it would float over the pinned Team column) */
 .nb-b { top: 3px; height: 10px; border-radius: 2px; opacity: .85; }
 .nb-b.pos { background: #4fbf74; } .nb-b.neg { background: #e8756b; }
-.nb-qb { grid-column: 2; font-size: var(--fs-2xs); font-weight: 700; color: #f1d391; margin-top: 2px; }
 table.power td.odc, table.power th.odc { text-align: center; }
 /* unit ranks: each side of the ball (Off, Def) leads its pass / run units, set off by a hairline; units a step smaller */
 table.power td.grp, table.power th.grp { box-shadow: inset 1px 0 0 rgba(255,255,255,.08); }

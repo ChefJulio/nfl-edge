@@ -12,9 +12,10 @@
     const pts = v.map((x, i) => `${(i * w / (v.length - 1)).toFixed(1)},${y(x)}`).join(' ');
     return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="currentColor" stroke-width="1.5"/>${qb.map((f, i) => f ? `<circle class="spark-qb" cx="${(i * w / (v.length - 1)).toFixed(1)}" cy="${y(v[i])}" r="3"/>` : '').join('')}<circle cx="${w}" cy="${y(v[v.length - 1])}" r="2.2" fill="currentColor"/></svg>`;
   };
-  // Laid out to read at a glance (owner 2026-10-17): Net as a bar from zero with the rank range as a whisker, This
-  // week folded into Net (shown only when this week's QB changes it), Offense / Defense as rank badges, the five units
-  // as one heat strip, the schedule as two words. Every number is still in a tooltip.
+  // Laid out to read at a glance (owner 2026-10-17): Net as a bar from zero with the rank range as a whisker,
+  // Offense / Defense as rank badges, the five units as one heat strip, the schedule as two words. Every number is
+  // still in a tooltip. One strength per team (owner 2026-10-19): the rest-of-season rating, injuries already counted;
+  // no "this week" figure or QB tag (this week's lineup lives in Matchups and the projections).
   const badge = (rk, tip) => `<span class="rk-b ${F.rkc(rk)}" title="${esc(tip)}">${F.ord(rk)}</span>`;
   // every unit shown (owner 2026-10-17): a rank badge per unit, next to its side of the ball; the points in its tip
   const PER = { pass_o: 'per 100 dropbacks, incl. starting QB', rush_o: 'per 100 designed runs', pass_d: 'per 100 dropbacks faced', rush_d: 'per 100 runs faced' };
@@ -28,15 +29,14 @@
     const ends = r => { const [hi, lo] = String(r.range || '').split('-').map(Number); return hi && lo ? [byRank[lo - 1], byRank[hi - 1]] : [r.net, r.net]; };
     const all = rows.flatMap(r => [r.net, ...ends(r)]).filter(x => x != null);
     const lo = Math.min(0, ...all), hi = Math.max(0, ...all), X = v => `${((v - lo) / (hi - lo || 1) * 100).toFixed(1)}%`;
-    const bar = r => { const [a, b] = ends(r), qb = r.net_now != null && Math.abs(r.net_now - r.net) >= 0.1;
+    const bar = r => { const [a, b] = ends(r);
       return `<div class="nb" title="Net ${F.sgn(r.net)} pts/game vs average. Whisker: 80% of simulations rank them ${esc(String(r.range).replace('-', ' to '))}">`
         + `<b>${F.sgn(r.net)}</b><span class="nb-t"><i class="nb-z" style="left:${X(0)}"></i>`
         + `<i class="nb-b ${r.net >= 0 ? 'pos' : 'neg'}" style="left:${X(Math.min(0, r.net))};width:calc(${X(Math.max(0, r.net))} - ${X(Math.min(0, r.net))})"></i>`
-        + `<i class="nb-w" style="left:${X(a)};width:calc(${X(b)} - ${X(a)})"></i></span>`
-        + `${qb ? `<span class="nb-qb" title="With this week's starting QB (${esc(r.qb_note || '')}): ${F.ord(r.rank_now)}">this week ${F.sgn(r.net_now)}</span>` : ''}</div>`; };
+        + `<i class="nb-w" style="left:${X(a)};width:calc(${X(b)} - ${X(a)})"></i></span></div>`; };
     return [
       { key: 'rank', label: '#', num: true, first: 'asc', cls: 'rk',
-        html: r => `<span class="rkn">${r.rank}</span>${r.move > 0 ? `<span class="mv up">&#9650;${r.move}</span>` : r.move < 0 ? `<span class="mv dn">&#9660;${-r.move}</span>` : '<span class="mv">&ndash;</span>'}${r.qb_note ? `<span class="mv qbx" title="${esc(r.qb_note)}: this week's rating uses him">QB</span>` : ''}` },
+        html: r => `<span class="rkn">${r.rank}</span>${r.move > 0 ? `<span class="mv up">&#9650;${r.move}</span>` : r.move < 0 ? `<span class="mv dn">&#9660;${-r.move}</span>` : '<span class="mv">&ndash;</span>'}` },
       { key: 'nick', label: 'Team', stick: true, first: 'asc',
         html: r => `<div class="who tm-open" data-tm="${esc(r.team)}" title="Open the ${esc(r.nick)} team page">${F.logo(teams, r.team, 26)}<div><b><span class="nm-full">${esc(r.nick)}</span><span class="nm-short">${esc(r.team)}</span></b><span class="sub">${esc(r.team)} &middot; ${NFLE.recSpan(r.team, r.record)}</span></div></div>` },
       { key: 'net', label: 'Net', num: true, cls: 'key nbc', title: 'Points per game vs an average team; the whisker is the rank range', html: bar },
@@ -67,7 +67,6 @@
           <details class="howto"><summary>How to read</summary><div>
             <dl class="ht">
               <dt>Net</dt><dd>How good the team is from here on: opponent-adjusted points per game vs an average team (Offense + Defense + special teams). The bar runs from zero; its thin whisker is the rank range, where the team could rank given the uncertainty (10th to 90th percentile): short = settled, long = a few games could move it a lot. A quarterback who is out counts by his chance to be back in each remaining game.</dd>
-              <dt>This week</dt><dd>Shown under Net only when this week's starting quarterback changes the rating (the QB tag by the rank); Matchups uses it.</dd>
               <dt>Off / Def / ST</dt><dd>League ranks (green = top 8, red = bottom 8): offense, then its pass and run units; defense, then its pass and run units; special teams. Offense = Pass + Run, Defense = Pass + Run. Tap or hover a rank for its points per game (per-play rating x a typical game's ${n(v.pass, 34)} dropbacks, ${n(v.rush, 25)} runs, ${n(v.st, 11)} special-teams plays).</dd>
               <dt>Schedule</dt><dd>How hard the opponents were (played) and will be (left), by their Power ratings: hard = top 8, easy = bottom 8.</dd>
               <dt>Arrows</dt><dd>Move since last week. Tap a team for its page; tap a rank or number for the detail.</dd>
