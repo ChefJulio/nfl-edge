@@ -964,8 +964,8 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     if (!ps.length || ps.some(p => !n[p])) return { old: [], now: [] };  // a pair no name has: no past match
     const k = ps.reduce((a, b) => (n[a] <= n[b] ? a : b));
     return (PAIRS[k] || (PAIRS[k] = NFLE.load(`data/stats/finder_past/${k}.json`).then(j => String(j.d || '').split('\n').map(line => {
-      const [id, name, pos, a, b, w] = line.split('|'), nn = norm(name);
-      return { pid: /^\d{5}$/.test(id) ? `00-00${id}` : id, name, pos, first: +a, last: +b, w: +w / 9, n: nn, t: nn.split(' ') };
+      const [id, name, pos, a, b, w, hof] = line.split('|'), nn = norm(name);
+      return { pid: /^\d{5}$/.test(id) ? `00-00${id}` : id, name, pos, first: +a, last: +b, w: +w / 9, hof: hof ? +hof : 0, n: nn, t: nn.split(' ') };
     })).catch(() => { delete PAIRS[k]; return []; }))).then(rows => {
       const old = [], now = [];
       rows.forEach(r => { if (cur.have.has(r.pid)) return;
@@ -1015,7 +1015,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       const row = (e, teams) => e.isTeam
         ? `<div class="fnd-r tm-open" role="option" data-tm="${esc(e.team)}">${NFLE.ui.team(e.team, teams, esc(e.team))}<span class="fnd-v">${right(e, opts)}</span></div>`
         : `<div class="fnd-r" role="option" data-open-pid="${esc(e.pid)}">${NFLE.ui.player({ name: e.name, team: e.team, pos: e.pos, photo: e.photo, espn: e.espn, pid: e.pid,
-            badges: e.status && NFLE.injTag ? NFLE.injTag(e.status, e.inactive) : '' }, teams)}<span class="fnd-v">${right(e, opts)}</span></div>`;
+            badges: e.hof ? `<span class="hof-b" title="Pro Football Hall of Fame, class of ${e.hof}">HOF</span>` : e.status && NFLE.injTag ? NFLE.injTag(e.status, e.inactive) : '' }, teams)}<span class="fnd-v">${right(e, opts)}</span></div>`;
       // current players first, then past ones once their list is in (a second paint, same keystroke)
       const paint = (cur, old, teams, done) => {
         if (my !== seq) return;  // a newer keystroke

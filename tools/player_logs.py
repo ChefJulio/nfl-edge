@@ -228,6 +228,17 @@ def main():
                        [cache.get("rosters", s, lambda: nfl.load_rosters_weekly([s]), stale=False) for s in range(2002, first_loaded)]
                        + [data.rosters] if x is not None and len(x)], ignore_index=True)
   bios = bio_map(all_ros, data.draft, contracts)
+  # a past player's card leads with NFL.com's photo when it's a real one: his signature team (Tomlinson a Charger, not
+  # ESPN's last-team Jet); NFL's gray helmet renders stay behind ESPN's headshot (tools/photo_check.py)
+  import photo_check
+  past = {g: b["photo"] for g, b in bios.items() if b.get("photo") and b.get("exp_s", data.current_season) < data.current_season}
+  for g in photo_check.real_photos(past, cache.dir):
+    bios[g]["nfl_pic"] = 1
+  # Hall of Fame class (tools/hof_build.py): the card's HOF badge
+  hof_csv = ROOT / "data" / "history" / "hof.csv"
+  if hof_csv.exists():
+    for g, c in pd.read_csv(hof_csv)[["gsis_id", "cls"]].itertuples(index=False):
+      bios.setdefault(g, {})["hof"] = int(c)
   # who actually played each game: any snaps (PFR, 2012 on). Weekly rosters only mark game-day inactives from 2019,
   # so before that "ACT" just means on the roster (Allen's 4 missed games in 2018 read as played).
   tot = sn[["offense_snaps", "defense_snaps", "st_snaps"]].fillna(0).sum(axis=1)

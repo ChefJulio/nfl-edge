@@ -316,7 +316,7 @@ def write_finder_past(out: Path, car: pd.DataFrame):
   tomlinson"): everyone with a career row since FIRST, filed under every two-letter pair inside his name's words
   (<out>/<pair>.json; "tomlinson" sits under to, om, ml, li, in, ns, so, on), so a search loads one small file, its
   rarest pair's (<out>/index.json: rows per pair), and finds a name by any part of it. A row is one line,
-  "id|name|pos|first|last|weight": id without its "00-00" (gsis ids are 00-00 + 5 digits; anything else in full),
+  "id|name|pos|first|last|weight[|hof class]": id without its "00-00" (gsis ids are 00-00 + 5 digits; anything else in full),
   weight 0-9 ranking same-name matches (log of career half-PPR points for offense and kickers, of games x 4 for
   everyone else). His photo, team and the rest come with his card. Current-roster players are dropped in the browser."""
   n = lambda c: pd.to_numeric(car[c], errors="coerce").fillna(0) if c in car else 0  # noqa: E731
@@ -325,12 +325,15 @@ def write_finder_past(out: Path, car: pd.DataFrame):
         - 2 * n("fumbles_lost_total") + 3 * n("fg_made") + n("pat_made"))
   raw = np.where(car.pos.isin(["QB", "RB", "FB", "WR", "TE", "K"]), fp, 4 * n("games")).clip(0)
   weight = np.minimum(9, np.floor(np.log10(1 + raw) * 2.4)).astype(int)  # 10k points ~ 9, 1k ~ 7, 100 ~ 4
+  hof_csv = Path(__file__).resolve().parent.parent / "data" / "history" / "hof.csv"  # tools/hof_build.py
+  hof = dict(pd.read_csv(hof_csv)[["gsis_id", "cls"]].itertuples(index=False)) if hof_csv.exists() else {}
   shards: dict[str, list[str]] = {}
   for p, nm, ps, a, b, w in zip(car.pid, car.name, car.pos, car["first"], car.season, weight):
     if not isinstance(nm, str) or not nm or not isinstance(p, str):
       continue
     pid = p[5:] if re.fullmatch(r"00-00\d{5}", p) else p
-    line = "|".join([pid, nm.replace("|", " "), ps if isinstance(ps, str) else "", str(int(a)), str(int(b)), str(int(w))])
+    line = "|".join([pid, nm.replace("|", " "), ps if isinstance(ps, str) else "", str(int(a)), str(int(b)), str(int(w))]
+                    + ([str(int(hof[p]))] if p in hof else []))
     for k in {w0[i:i + 2] for w0 in finder_norm(nm).split() for i in range(len(w0) - 1)}:
       shards.setdefault(k, []).append(line)
   if out.exists():

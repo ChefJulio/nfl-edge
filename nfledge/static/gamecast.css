@@ -1563,3 +1563,7 @@ span.nm-link { display: inline; }
 .rp-hl svg, .c-clip svg { color: #ff4e45; }
 a.pc-chip.c-clip, a.pc-chip.c-clip:visited { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; background: color-mix(in srgb, #ff4e45 16%, transparent);
   color: var(--ink); font-size: 11px; align-self: center; }
+/* Hall of Fame badge (card header, finder rows) */
+.hof-b { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 11px; font-weight: 800; letter-spacing: .04em;
+  color: #1a1405; background: linear-gradient(135deg, #f5d77a, #c99a2e); vertical-align: middle; }
+.pc-meta .hof-b { margin-right: 6px; }

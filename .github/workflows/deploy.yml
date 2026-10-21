@@ -167,6 +167,10 @@ jobs:
       # League tab: kicker (and team-defense) projections, this week through 17 (reads the week pages above).
       - name: Kickers and defenses
         run: python tools/kdst_build.py --site=site
+      # Hall of Fame list (Wikipedia; refreshes data/history/hof.csv for this build, the committed copy if it fails).
+      # Read by the player logs (card badge) and the stats build (finder).
+      - name: Hall of Fame
+        run: python tools/hof_build.py || true
       # Career game logs for the player card (one JSON per player; reads the week data files built above).
       - name: Player game logs
         run: python tools/player_logs.py --site=site

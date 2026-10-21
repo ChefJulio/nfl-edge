@@ -1483,13 +1483,20 @@
   // a player off every roster this season: ESPN's headshot first (owner 2026-10-18, Marion Barber: NFL's "headshot"
   // for older players is often a blank helmet render, while ESPN's, as on the Stats tab, is his photo); NFL's
   // stays the fallback (the img swaps to it if ESPN has none). Current players keep NFL's sharper photo.
+  // Except a real NFL photo (owner 2026-10-21, Tomlinson shown as a Jet: "can we get LTs picture to be from his best
+  // season?"): NFL.com keeps a retired player's signature-team photo, ESPN his last team's; bio.nfl_pic marks NFL's
+  // that are photos, not gray renders (tools/photo_check.py). ESPN's is then the fallback.
   const espnPic = espn => espn ? `https://a.espncdn.com/i/headshots/nfl/players/full/${encodeURIComponent(espn)}.png` : '';
+  // Pro Football Hall of Fame (owner 2026-10-21; tools/hof_build.py -> bio.hof = class year)
+  const hofBadge = L => L && L.bio && L.bio.hof ? `<span class="hof-b" title="Pro Football Hall of Fame, class of ${esc(L.bio.hof)}">HOF</span>` : '';
   const pastPlayer = L => !!(L && L.bio && L.bio.exp_s && L.cur && L.bio.exp_s < L.cur);
-  const photoBig = (L, espn) => (pastPlayer(L) && espn ? espnPic(espn) : '') || (L && L.bio && L.bio.photo ? L.bio.photo : '') || espnPic(espn);
+  const espnFirst = L => pastPlayer(L) && !L.bio.nfl_pic;
+  const photoBig = (L, espn) => (espnFirst(L) && espn ? espnPic(espn) : '') || (L && L.bio && L.bio.photo ? L.bio.photo : '') || espnPic(espn);
   // NFL image-service URLs carry their crop / size in the path: drop it for the original upload
   const uncrop = u => String(u || '').replace(/\/(upload|private)\/[^/]*c_thumb[^/]*\//, '/$1/f_auto,q_auto,w_1000/');
-  const photoUrl = (L, espn) => (pastPlayer(L) && espn ? espnPic(espn) : '') || (L && L.bio && L.bio.photo ? faceCrop(L.bio.photo) : '') || espnPic(espn);
-  const photoAlt = (L, espn) => pastPlayer(L) && espn && L.bio.photo ? faceCrop(L.bio.photo) : '';  // NFL's, if ESPN's fails
+  const photoUrl = (L, espn) => (espnFirst(L) && espn ? espnPic(espn) : '') || (L && L.bio && L.bio.photo ? faceCrop(L.bio.photo) : '') || espnPic(espn);
+  const photoAlt = (L, espn) => espnFirst(L) && espn && L.bio.photo ? faceCrop(L.bio.photo)  // NFL's, if ESPN's fails
+    : pastPlayer(L) && L.bio.nfl_pic && espn ? espnPic(espn) : '';  // and the other way round
   // Profile box under the header (current, like the header): bio, draft slot, and the current contract
   // (OverTheCap via nflverse; $M). Desktop: one row of six; phones: rows of three (CSS --n).
   const money = m => m >= 100 ? `$${f0(m)}M` : m >= 1 ? `$${f1(m)}M` : `$${f0(m * 1000)}K`;
@@ -2032,7 +2039,7 @@
         ${photo ? `<div class="pc-pic" data-zoom="${esc(uncrop(photoBig(L, espn) || photo))}" role="button" tabindex="0" aria-label="Show a bigger photo"><img src="${esc(photo)}"${photoAlt(L, espn) ? ` data-alt="${esc(photoAlt(L, espn))}"` : ''} alt="" width="72" height="72" loading="lazy" onerror="if(this.dataset.alt){this.src=this.dataset.alt;this.dataset.alt=''}else this.parentNode.classList.add('nopic')">${team ? `<span class="pc-pic-tm">${tLogo(team, 16)}</span>` : ''}</div>`
           : team ? tmL(team, tLogo(team, 34)) : ''}
         <div class="pc-id"><h3 id="pcName">${num != null ? `<span class="pc-num">#${esc(num)}</span>` : ''}${esc(name)}</h3>
-          <div class="pc-meta">${pos ? `<span class="posb posb-${esc(pos)}">${esc(pos)}</span>` : ''}${team ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(team)}">${esc(info.name || team)}</button>` : L && lastPlayed && lastPlayed < L.cur ? `<span class="muted">Last played ${esc(lastPlayed)}</span>` : '<span class="muted">Free agent</span>'}${statusPill(pid)}</div>
+          <div class="pc-meta">${pos ? `<span class="posb posb-${esc(pos)}">${esc(pos)}</span>` : ''}${hofBadge(L)}${team ? `<button type="button" class="tm-open pc-tlink" data-tm="${esc(team)}">${esc(info.name || team)}</button>` : L && lastPlayed && lastPlayed < L.cur ? `<span class="muted">Last played ${esc(lastPlayed)}</span>` : '<span class="muted">Free agent</span>'}${statusPill(pid)}</div>
 </div>
         ${bioStrip(L, ' pc-bio-in')}
       </div>
