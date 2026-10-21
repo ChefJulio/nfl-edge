@@ -347,6 +347,9 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     { key: 'league', label: 'Fantasy', subs: [['lineup', 'Lineup', 'tab-league'], ['matchup', 'Matchup', 'tab-league'], ['live', 'Live', 'tab-league'],
                                               ['teams', 'Teams', 'tab-league'], ['waivers', 'Waivers', 'tab-league'], ['trade', 'Trade', 'tab-league']] },
     { key: 'model', label: 'Model', subs: [['model', 'Model', 'tab-model'], ['reference', 'Reference']] },  // Reference: league rates (owner 2026-10-18)
+    // Home (owner 2026-10-20: a landing page, "I want to..." tiles): not in the tab bars; the logo opens it, and it is
+    // where a first visit lands (a returning visitor still gets the last tab used)
+    { key: 'home', label: 'Home', subs: [['home', 'Home', 'tab-home']], hidden: true },
   ];
   // Client-rendered tabs: section id -> area module (assets/<area>.js + .css), loaded the first time the tab opens.
   // A module registers NFLE.areas[<area>] = { mount(section) } and renders into its section.
@@ -354,7 +357,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
                   'tab-players-injuries': 'injuries', 'tab-players': 'rankings', 'tab-teams-draft': 'draft',
                   'tab-teams-playoffs': 'playoffs', 'tab-players-moves': 'moves', 'tab-power': 'power',
                   'tab-games': 'matchups', 'tab-roles': 'roles', 'tab-model': 'model',
-                  'tab-players-trends': 'trends', 'tab-league': 'league', 'tab-model-reference': 'reference' };
+                  'tab-players-trends': 'trends', 'tab-league': 'league', 'tab-model-reference': 'reference', 'tab-home': 'home' };
   const ver = (document.currentScript && new URL(document.currentScript.src).search) || '';
   const loaded = {};
   const NFLE = window.NFLE = window.NFLE || {};
@@ -390,6 +393,9 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   // Pages without the tab bar (game.html) still run the cards (owner 2026-10-17: a player tapped in the gamecast opened
   // over the Players tab of another page): the card opens over the page itself and closing returns to it.
   const listless = !nav || !main;
+  if (main && !document.getElementById('tab-home')) main.insertAdjacentHTML('afterbegin', '<section id="tab-home"></section>');
+  // the logo opens Home (pages built before Home existed link it to #players)
+  document.querySelectorAll('a.brand').forEach(a => { a.href = a.getAttribute('href').replace(/#.*$/, '') + '#home'; a.title = 'Home'; });
   const parent = k => NAV.find(p => p.key === k) || NAV[0];
   const sectionId = (p, s) => s[2] || `tab-${p.key}-${s[0]}`;
   // Player / team CARDS (owner 2026-10-17: "make player pages cards again"): #player/<id> and #team/<abbr> open the
@@ -414,7 +420,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     }
   }));
   // Phones show the short label where one exists, so all seven parent tabs fit on one line (owner's pick).
-  if (!listless) nav.innerHTML = `<div class="wrap nav-par" role="tablist">${NAV.map(p => `<button type="button" role="tab" data-par="${p.key}">${p.short
+  if (!listless) nav.innerHTML = `<div class="wrap nav-par" role="tablist">${NAV.filter(p => !p.hidden).map(p => `<button type="button" role="tab" data-par="${p.key}">${p.short
       ? `<span class="lbl-long">${p.label}</span><span class="lbl-short">${p.short}</span>` : p.label}</button>`).join('')}</div>
     <div class="wrap nav-sub" hidden></div>`;
   // --navh: the sticky top bar's height (0 where it's hidden), so things that stick below it (the player / team page
@@ -434,8 +440,9 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     more: '<circle cx="5.5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18.5" cy="12" r="1.4"/>',
   };
   const svg = k => `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">${ICON[k]}</svg>`;
+  NFLE.navIcon = svg;  // Home's tiles (home.js)
   const navMode = NAV_MODE;
-  const BOTTOM = NAV.map(p => p.key);  // all five parents fit: no More sheet
+  const BOTTOM = NAV.filter(p => !p.hidden).map(p => p.key);  // all five parents fit: no More sheet (Home isn't a tab)
   let bot = null;
   if (navMode === 'bottom' && !listless) {
     document.documentElement.classList.add('nav-bottom');
@@ -448,7 +455,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     bot = document.querySelector('body > .botbar') || document.createElement('div');
     bot.className = 'botbar';
     bot.removeAttribute('aria-hidden');
-    const extra = NAV.filter(p => !BOTTOM.includes(p.key));  // parents beyond the bar go in a More sheet (none today)
+    const extra = NAV.filter(p => !p.hidden && !BOTTOM.includes(p.key));  // parents beyond the bar go in a More sheet (none today)
     bot.innerHTML = `<nav class="bb-row">${BOTTOM.map(k => `<button type="button" data-par="${k}">${svg(k)}<span>${parent(k).label}</span></button>`).join('')}
       ${extra.length ? `<button type="button" data-more>${svg('more')}<span>More</span></button>` : ''}</nav>
       ${extra.length ? `<div class="bb-sheet" hidden>${extra.map(p => `<button type="button" data-par="${p.key}">${p.label}</button>`).join('')}</div>` : ''}`;
@@ -713,7 +720,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     // the cards need the week's data (gamecast.js loads it, then calls this); a stack built before it would be empty
     NFLE.runStack = () => { NFLE.runStack = null; buildStack(sg); };
   }
-  else show(parse(location.hash) || parse(saved) || parse('players'), !CARD.test(location.hash.slice(1)));
+  else show(parse(location.hash) || parse(saved) || parse('home'), !CARD.test(location.hash.slice(1)));
   window.NFLE_SHELL = { go: h => { const r = parse(h); if (r) show(r, true); } };
 })();
 // Number chips in every data table (owner 2026-10-15, after the box score): a cell whose value is a stat (digits with

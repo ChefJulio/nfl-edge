@@ -27,13 +27,13 @@
 <body>
 <script>/* which frame to draw (shell.js picks the same tab: the hash, else the last tab you used) */
 (() => { const get = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
-  const r = location.hash.slice(1) || get('nfledge-tab') || 'players', sub = get('nfledge-sub-players') || 'rankings';
+  const r = location.hash.slice(1) || get('nfledge-tab') || 'home', sub = get('nfledge-sub-players') || 'rankings';
   const rk = r === 'players/rankings' || (r === 'players' && sub === 'rankings');
   document.documentElement.classList.add('nav-bottom', rk ? 'land-rk' : 'land-other', 'land-anim');
   if (rk && get('nfledge-rk-mode') === 'ros') document.documentElement.classList.add('land-ros'); })();</script>
 <header class="top"><div class="wrap">
   <div class="hdr">
-    <a class="brand" href="%ROOT%index.html#players" title="Current week's rankings"><h1>NFL <span>Edge</span></h1></a>
+    <a class="brand" href="%ROOT%index.html#home" title="Home"><h1>NFL <span>Edge</span></h1></a>
     <div class="wk-nav">
       <a class="wk-step" id="wkPrev" aria-label="Previous week" role="button">&lsaquo;</a>
       <select id="pickWeek" aria-label="Season and week"><option>%WK%</option></select>
