@@ -453,6 +453,8 @@
   const ACT = new RegExp(`^${NM} (?:pass|scrambles|sacked|left|right|up the middle|middle|kneels)\\b`);
   const retYds = (raw, pl) => { const k = raw.search(/ (?:kicks|punts) /), m = k >= 0 ? raw.slice(k).match(/ for (-?\d+) yards?| for no gain/) : null;
     return m ? (m[1] != null ? +m[1] : 0) : (pl.statYardage || 0); };
+  // "Tanner McKee" -> "T. McKee", "Amon-Ra St. Brown" -> "A. St. Brown"; an official abbreviation ("T.McKee") stays as is
+  const shortName = n => /^\S+\s+\S/.test(n) ? n.replace(/^(\S)\S*\s+/, '$1. ') : n;
   const playHead = (pl, names, ctx = {}) => {
     // the official text leads with formation and eligibility notes: "(Shotgun) C.Lomu reported in as eligible. D.Maye ..."
     // also "Direct snap to C.Heyward." (a wildcat snap note) and ESPN's stray leading space (" R.Stevenson up the middle")
@@ -463,7 +465,8 @@
     let raw = full;
     if (/REVERSED\./.test(raw)) raw = raw.slice(raw.lastIndexOf('REVERSED.') + 9).trim().replace(lead_, '');
     raw = raw.replace(/\s*TWO-POINT CONVERSION ATTEMPT\..*$/, '');
-    const nm = x => x ? (names[x.replace(/\s+/g, '')] || x) : '';
+    // headlines name players by first initial (owner 2026-10-20: "use first name initials, shorten a bit"): "T. McKee"
+    const nm = x => x ? shortName(names[x.replace(/\s+/g, '')] || x) : '';
     const g = (k, i = 1) => { const m = raw.match(RX[k]); return m ? m[i] : null; };
     const t = (pl.type && pl.type.text) || '';
     // a flag on a play that counts ("... to GB 12 for 11 yards ... PENALTY on DAL-T.Booker, Unnecessary Roughness, 15
@@ -3095,7 +3098,7 @@
     const cached = PLINK.get(sum), be = byEspn(), nb = Object.keys(be).length;
     if (cached && cached.nb === nb) return cached;
     const ids = {}, names = fullNames(sum, ids), m = {};
-    Object.entries(ids).forEach(([k, e]) => { const pid = be[e]; if (!pid) return; m[esc(k)] = pid; if (names[k]) m[esc(names[k])] = pid; });
+    Object.entries(ids).forEach(([k, e]) => { const pid = be[e]; if (!pid) return; m[esc(k)] = pid; if (names[k]) { m[esc(names[k])] = pid; m[esc(shortName(names[k]))] = pid; } });
     const keys = Object.keys(m).sort((a, b) => b.length - a.length).map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
     const v = { nb, m, re: keys.length ? new RegExp(`(^|[^A-Za-z.'])(${keys.join('|')})(?![A-Za-z'])`, 'g') : null };
     PLINK.set(sum, v);
