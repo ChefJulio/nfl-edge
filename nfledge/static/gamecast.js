@@ -3047,11 +3047,18 @@
     const rows = ['Total Yards', 'Passing', 'Rushing', '1st Downs', '3rd down efficiency', '4th down efficiency', 'Red Zone (Made-Att)',
                   'Yards per Play', 'Total Plays', 'Turnovers', 'Sacks-Yards Lost', 'Penalties', 'Possession']
       .filter(k => (a[k] != null || h[k] != null) && (!only || only.includes(k))).map(k => {
-        // the bar leans toward the side doing better: fewer is better for turnovers, sacks taken and penalties
-        const x = num(a[k]), y = num(h[k]), tot = (x || 0) + (y || 0), lessIsMore = /Turnovers|Sacks|Penalties/.test(k);
+        // the bar leans toward the side doing better: fewer is better for turnovers, sacks taken and penalties. Sacks and
+        // penalties read "count-yards" ("5-38"), not made-attempted: compared on the yards (they counted 5/38 as a rate,
+        // so the team sacked more looked better)
+        const yardsOf = v => { const m = String(v ?? '').match(/^\d+-(\d+)$/); return m ? +m[1] : num(v); };
+        const cy = /Sacks|Penalties/.test(k), x = cy ? yardsOf(a[k]) : num(a[k]), y = cy ? yardsOf(h[k]) : num(h[k]);
+        const tot = (x || 0) + (y || 0), lessIsMore = /Turnovers|Sacks|Penalties/.test(k);
         const sa = tot > 0 && x != null && y != null ? (lessIsMore ? y / tot : x / tot) : 0.5;
+        // the better team's logo where the colors meet (owner 2026-10-20); none on a tie
+        const best = Math.abs(sa - 0.5) < 1e-9 ? null : sa > 0.5 ? info.away.team : info.home.team;
+        const at = Math.min(96, Math.max(4, sa * 100));  // a lopsided row keeps its logo on the bar
         return `<div class="ts-row"><span class="ts-v">${esc(a[k] ?? '')}</span><span class="ts-k">${esc(k)}</span><span class="ts-v r">${esc(h[k] ?? '')}</span>
-          <span class="ts-bar"><span style="width:${(sa * 100).toFixed(1)}%;background:${esc(info.away.color)}"></span><span style="flex:1;background:${esc(info.home.color)}"></span></span></div>`;
+          <span class="ts-bar"><span class="ts-fill"><span style="width:${(sa * 100).toFixed(1)}%;background:${esc(info.away.color)}"></span><span style="flex:1;background:${esc(info.home.color)}"></span></span>${best ? `<span class="ts-lg" style="left:${at.toFixed(1)}%" title="${esc(best)} better">${tLogo(best, 20)}</span>` : ''}</span></div>`;
       }).join('');
     return `<div class="ts-head">${tmL(info.away.team, `<b>${esc(info.away.team)}</b>`)}${tmL(info.home.team, `<b>${esc(info.home.team)}</b>`)}</div>${rows}`;
   };
