@@ -546,7 +546,7 @@
             <span class="lg-hh-s muted">${when(p)}</span>${badgesOf(p, { noLock: true })}</div>`;
       const num = p => !p || p.proj == null ? '–' : p.live != null ? `<span class="lg-hh-lv">${f1(p.live)}<small>${p.fin ? 'final' : 'live'}</small></span>` : f1(p.proj);
       const rows = L.slots.map((s, i) => `<div class="lg-hh-row">${cell(a[i].p, false)}<div class="lg-hh-n">${num(a[i].p)}</div>
-          <span class="lg-hh-slot posb ${['QB', 'RB', 'WR', 'TE'].includes(s) ? `posb-${s}` : 'lg-slot-any'}">${esc(s === 'SUPER_FLEX' ? 'SF' : s === 'FLEX' ? 'FLX' : s)}</span>
+          <span class="lg-hh-slot posb ${/FLEX|^BN$/.test(s) ? 'lg-slot-any' : `posb-${s}`}">${esc(s === 'SUPER_FLEX' ? 'SF' : s === 'FLEX' ? 'FLX' : s)}</span>
           <div class="lg-hh-n">${num(b[i].p)}</div>${cell(b[i].p, true)}</div>`).join('');
       const live = id => m.points[id] ? `<div class="muted lg-hh-live">${f1(m.points[id])} so far</div>` : '';
       return `<div class="lg-hh-top"><div><div class="lg-tn">${esc(mine.name)}</div><div class="lg-big">${f1(ea)}</div>${live(mine.id)}</div>
@@ -789,7 +789,7 @@
         <div class="lg-tr-cols"><div class="lg-tr-h"><b>${esc(mine.name)}</b><span class="muted">you give</span></div>
           <div class="lg-tr-h r"><select class="lg-trteam" aria-label="Trade with"><option value="">Any team</option>${others.map(t => `<option value="${esc(t.id)}"${them && t.id === them.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select><span class="muted">you get</span></div></div>
         ${POS_ORDER.filter(pos => mine.ext.some(x => player(x).pos === pos) || (them && them.ext.some(x => player(x).pos === pos))).map(pos =>
-          `<div class="lg-tr-pos"><span class="posb ${['QB', 'RB', 'WR', 'TE'].includes(pos) ? `posb-${pos}` : 'lg-slot-any'}">${pos === 'DEF' ? 'D/ST' : pos}</span></div>
+          `<div class="lg-tr-pos"><span class="posb ${/FLEX|^BN$/.test(pos) ? 'lg-slot-any' : `posb-${pos}`}">${pos === 'DEF' ? 'D/ST' : pos}</span></div>
           <div class="lg-tr-cols"><div class="lg-tps">${pick(mine, 'give', pos)}</div><div class="lg-tps">${them ? pick(them, 'get', pos) : ''}</div></div>`).join('')}
         ${them ? '' : '<p class="muted">Choose a team to pick players from theirs, or find trades with any team below.</p>'}
         <div class="lg-finder">${finder}</div>`;

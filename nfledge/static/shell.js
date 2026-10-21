@@ -53,7 +53,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     pct: v => v == null || isNaN(v) ? '' : `${Math.round(v * 100)}%`,
     ord: n => !n ? '' : `${n}${n % 100 >= 10 && n % 100 <= 20 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th')}`,
     rkc: n => n <= 8 ? 'rk1' : n <= 16 ? 'rk2' : n <= 24 ? 'rk3' : 'rk4',  // league-rank badge color (top 8 green ... bottom 8 red)
-    posb: p => ['QB', 'RB', 'WR', 'TE', 'K', 'DST'].includes(p) ? `<span class="posb posb-${esc(p)}">${esc(p)}</span>` : esc(p),
+    posb: p => p ? `<span class="posb posb-${esc(String(p).replace(/[^A-Za-z]/g, ''))}">${esc(p)}</span>` : '',  // every position has a color (ui.css)
     short: n => { const i = String(n).indexOf(' '); return i < 0 ? String(n) : String(n).slice(i + 1); },  // 'Josh Allen' -> 'Allen'
     // [first, last] for two-line names (owner 2026-10-17): 'Amon-Ra St. Brown' -> ['Amon-Ra', 'St. Brown'],
     // 'Marvin Harrison Jr.' -> ['Marvin', 'Harrison Jr.']; one word -> ['', word]

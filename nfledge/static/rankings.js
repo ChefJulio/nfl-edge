@@ -9,7 +9,9 @@
 (() => {
   const NFLE = window.NFLE, esc = NFLE.esc;
   const LS_KEY = 'nfledge-scoring';
-  const POS = ['QB', 'RB', 'WR', 'TE', 'FLEX', 'K', 'DST'];
+  // ALL (owner 2026-10-20: "make an all positions tab"): QB / RB / WR / TE under your scoring, ranked together (K and
+  // D/ST keep their own tabs: they're scored with standard ESPN rules, not yours, so their points don't compare)
+  const POS = ['QB', 'RB', 'WR', 'TE', 'FLEX', 'ALL', 'K', 'DST'];
   const OUT_LINE = 0.9;
   // Two worlds in one cell (owner 2026-10-20, Lamar Jackson / Tyler Huntley): when a player is 20-80% to play, he and
   // the teammate whose role hangs on him show both projections: the likelier world as the number (it sorts), the other
@@ -17,7 +19,9 @@
   // starter's backup, an outcome that rarely happens).
   const TWO_LO = 0.2, TWO_HI = 0.8;  // inactive chance at which a player projects 0 (owner 2026-10-16: under 10% to play)
   const KDP = ['K', 'DST'];  // kickers / team defenses: data/kdst.json, standard ESPN scoring (owner 2026-10-15)
-  const POS_LABEL = { DST: 'D/ST' };
+  const POS_LABEL = { DST: 'D/ST', ALL: 'All' };
+  const ALL_DEPTH = 220;  // every relevant QB / RB / WR / TE
+  const mixOf = p => (p === 'FLEX' || p === 'ALL' ? p : false);  // mixed-position tables: badges, their own rank
   const FLEX_DEPTH = 150;  // a 14-team 2RB/2WR/1TE/1FLEX league starts 84 flex-eligible players; 150 adds waiver depth
   const f0 = v => v == null ? '' : String(Math.round(v));
   const f1 = v => v == null || isNaN(v) ? '' : (Math.round(v * 10) / 10).toFixed(1);
@@ -169,6 +173,7 @@
       fill(['QB', 'RB', 'WR', 'TE'], lg.teams * (lg.superflex || 0));
       all.forEach(r => { r._slot = slot[r.pid]; r._tier = `${r.pos}${Math.floor((r._rank - 1) / lg.teams) + 1}`; });
       all.filter(r => ['RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._proj - a._proj).forEach((r, i) => { r._frank = i + 1; });
+      all.filter(r => ['QB', 'RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._proj - a._proj).forEach((r, i) => { r._arank = i + 1; });
     };
 
     // -- cells (same markup and classes as the server template) ----------------------------------------------------
@@ -209,12 +214,12 @@
       // column narrows and each line truncates (rankings.css)
       const [first, lastN] = NFLE.fmt.split(r.name);
       // his rank rides on the photo's corner once the # column scrolls away (owner 2026-10-17; rankings.css)
-      const rk = r._rrank != null ? (flex ? r._rfrank : r._rrank) : (flex ? r._frank : r._rank);
+      const rk = r._rrank != null ? (flex === 'ALL' ? r._rarank : flex ? r._rfrank : r._rrank) : rankOf(r, flex);
       return `<div class="who" title="${esc(r.takeaway || '')}"><span class="pic${r.photo ? '' : ' nopic'}"${NFLE.fmt.picStyle(TEAMS, r.team)}>${rk != null ? `<span class="pic-rk" aria-hidden="true">${rk}</span>` : ''}<span class="pic-img">${r.photo ? `<img src="${esc(r.photo)}" alt="" width="34" height="34" loading="lazy" onerror="this.closest('.pic').classList.add('nopic')">` : ''}</span><span class="pic-tm">${logo(r.team, 11)}</span></span><div class="nmw nm2w"><span class="nm2"><span class="l1">${flex ? `<span class="posb posb-${esc(r.pos)}">${esc(r.pos)}</span> ` : ''}${esc(first)}</span><b class="nm l2">${esc(lastN)}</b></span>${badges ? badges.replace('<div class="badges">', '<div class="badges nm-b">') : ''}</div></div>`;
     };
     // The projection shown is the likelier world for an uncertain teammate (owner 2026-10-15: availability is binary).
     // The "+0.5 if X plays" line under it is gone from the table (owner 2026-10-20): that detail is on the player's page.
-    const rankOf = (r, flex) => flex ? r._frank : r._rank;
+    const rankOf = (r, flex) => (flex === 'ALL' ? r._arank : flex ? r._frank : r._rank);
     // weather that matters (owner 2026-10-17): a small mark beside the opponent only for wind 15+ mph, a 50%+ chance
     // of rain or any snow at kickoff (live week, outdoor games; data.forecast_conditions); the forecast in its tooltip
     const WX = Object.fromEntries((D.games || []).flatMap(g => g.wx ? [[g.away.team, g.wx], [g.home.team, g.wx]] : []));
@@ -270,7 +275,8 @@
         // Snap% (owner 2026-10-17, replacing Volume): his share of the offense's snaps this season, the plainest read on role
         { key: 'snap', label: 'Snap%', num: true, cls: 'snapc', first: 'desc', title: "His share of his offense's snaps this season",
           value: r => r.ext && r.ext.snap != null ? r.ext.snap : -1, html: r => r.ext && r.ext.snap != null ? `${Math.round(r.ext.snap * 100)}%` : '' },
-        { key: 'td', label: tp === 'QB' ? 'Pass TD' : 'TD', num: true, cls: 'tdc', title: tp === 'QB' ? 'Projected passing touchdowns (hover for his rushing TD chance)' : 'Chance he scores at least one touchdown',
+        { key: 'td', label: tp === 'QB' ? 'Pass TD' : 'TD', num: true, cls: 'tdc', title: tp === 'QB' ? 'Projected passing touchdowns (hover for his rushing TD chance)'
+            : tp === 'ALL' ? 'QBs: projected passing touchdowns; everyone else: chance he scores at least one touchdown' : 'Chance he scores at least one touchdown',
           value: r => r.td && r.td.v, html: r => r.td ? `<span title="${esc(r.td.d)}">${esc(r.td.t)}</span>` : '' },
       ];
       return cols;
@@ -352,7 +358,8 @@
     };
     const rowsFor = p => {
       const t = q.trim().toLowerCase();
-      const base = p === 'FLEX' ? all.filter(r => ['RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._proj - a._proj).slice(0, FLEX_DEPTH) : all.filter(r => r.pos === p);
+      const base = p === 'FLEX' ? all.filter(r => ['RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._proj - a._proj).slice(0, FLEX_DEPTH)
+        : p === 'ALL' ? all.filter(r => ['QB', 'RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._proj - a._proj).slice(0, ALL_DEPTH) : all.filter(r => r.pos === p);
       return t ? base.filter(r => r.name.toLowerCase().includes(t)) : base;
     };
     const rowAttrs = r => `style="${rowStyle(r.team)}" data-pid="${esc(r.pid)}" data-espn="${esc(r.espn || '')}" data-team="${esc(r.team)}" data-name="${esc(r.name.toLowerCase())}" data-pos="${esc(r.pos)}"`;
@@ -388,6 +395,7 @@
       fill(['QB', 'RB', 'WR', 'TE'], lg.teams * (lg.superflex || 0));
       rosAll.forEach(r => { r._rslot = slot[r.pid]; r._rtier = `${r.pos}${Math.floor((r._rrank - 1) / lg.teams) + 1}`; });
       rosAll.filter(r => ['RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._tot - a._tot).forEach((r, i) => { r._rfrank = i + 1; });
+      rosAll.filter(r => ['QB', 'RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._tot - a._tot).forEach((r, i) => { r._rarank = i + 1; });
     };
     const strip = r => {
       const wks = []; for (let k = ROS.from; k <= ROS.through; k++) wks.push(k);
@@ -407,7 +415,7 @@
       }).join('')}</svg>`;
     };
     const rosColumns = flex => [
-      { key: 'rank', label: '#', num: true, first: 'asc', cls: 'rk', title: 'Our rest-of-season rank at the position', value: r => flex ? r._rfrank : r._rrank, html: r => `<b class="rkn">${flex ? r._rfrank : r._rrank}</b>` },
+      { key: 'rank', label: '#', num: true, first: 'asc', cls: 'rk', title: 'Our rest-of-season rank at the position', value: r => (flex === 'ALL' ? r._rarank : flex ? r._rfrank : r._rrank), html: r => `<b class="rkn">${flex === 'ALL' ? r._rarank : flex ? r._rfrank : r._rrank}</b>` },
       { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name, html: r => nameCell(r, flex) },
       { key: 'tot', label: 'ROS pts', num: true, cls: 'projc', title: 'Expected fantasy points from now through week 17 under your scoring, each game weighted by his chance to play', value: r => r._tot, html: r => `<b class="pv">${f0(r._tot)}</b>` },
       { key: 'ppg', label: 'Pts/G', num: true, title: 'Expected points per game he plays', value: r => r._ppg, html: r => f1(r._ppg) },
@@ -422,7 +430,8 @@
     ];
     const rosRows = p => {
       const t = q.trim().toLowerCase();
-      const base = p === 'FLEX' ? rosAll.filter(r => ['RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._tot - a._tot).slice(0, FLEX_DEPTH) : rosAll.filter(r => r.pos === p);
+      const base = p === 'FLEX' ? rosAll.filter(r => ['RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._tot - a._tot).slice(0, FLEX_DEPTH)
+        : p === 'ALL' ? rosAll.filter(r => ['QB', 'RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._tot - a._tot).slice(0, ALL_DEPTH) : rosAll.filter(r => r.pos === p);
       return t ? base.filter(r => r.name.toLowerCase().includes(t)) : base;
     };
     const rosDraw = (resort = true) => {
@@ -430,7 +439,7 @@
       if (!ROS) return;
       rosDerive();
       const box = sec.querySelector(`.posview[data-pos="${pos}"] .ros-tbl`);
-      const opts = { columns: rosColumns(pos === 'FLEX'), rows: rosRows(pos), cls: 'sortable ranks tiles ros', sort: { key: 'tot', dir: 'desc' }, rowAttrs,
+      const opts = { columns: rosColumns(mixOf(pos)), rows: rosRows(pos), cls: 'sortable ranks tiles ros', sort: { key: 'tot', dir: 'desc' }, rowAttrs,
                      rowClass: r => `main teamrow${(D.players[r.pid] || {}).inactive >= 0.5 ? ' out' : ''}` };
       if (!rosTables[pos]) rosTables[pos] = NFLE.Table(box, opts);
       else { rosTables[pos].setColumns(opts.columns); rosTables[pos].update(opts.rows); if (resort) rosTables[pos].setSort({ key: 'tot', dir: 'desc' }); }
@@ -470,12 +479,12 @@
         if (KDP.includes(p)) { if (mode === 'week') kdDraw(p); return; }
         const rows = rowsFor(p);
         if (!tables[p]) {
-          tables[p] = NFLE.Table(view.querySelector('.rk-tbl'), { columns: columns(p === 'FLEX', p), rows, cls: 'sortable ranks tiles', sort: { key: 'proj', dir: 'desc' }, rowAttrs, rowClass });
+          tables[p] = NFLE.Table(view.querySelector('.rk-tbl'), { columns: columns(mixOf(p), p), rows, cls: 'sortable ranks tiles', sort: { key: 'proj', dir: 'desc' }, rowAttrs, rowClass });
           landing = false;
           // the landing animation (pages/week.html adds html.land-anim) plays on this first draw only, not on sorts
           setTimeout(() => document.documentElement.classList.remove('land-anim'), 1200);
         }
-        else { tables[p].setColumns(columns(p === 'FLEX', p)); tables[p].update(rows); if (resort) tables[p].setSort({ key: 'proj', dir: 'desc' }); }
+        else { tables[p].setColumns(columns(mixOf(p), p)); tables[p].update(rows); if (resort) tables[p].setSort({ key: 'proj', dir: 'desc' }); }
         view.querySelector('.byes-box').innerHTML = byesHtml(p);
       });
       const name = state.preset || 'Custom';

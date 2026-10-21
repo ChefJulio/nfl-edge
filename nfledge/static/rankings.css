@@ -98,3 +98,8 @@ td.grdc, th.grdc, td.snapc, th.snapc { text-align: center; }
 td.mu .wx-snow svg { stroke-width: 1.6; }
 /* two worlds (owner 2026-10-20): the less likely player's 0.0 dimmed */
 .pv.pv-dim { opacity: .45; }
+/* phones: eight position buttons (All joined, owner 2026-10-20) share the card's width instead of pushing past it */
+@media (max-width: 640px) {
+  #tab-players .posbar { display: flex; width: 100%; box-sizing: border-box; }
+  #tab-players .posbar button { flex: 1 1 auto; min-width: 0; padding: 5px 2px; font-size: var(--fs-sm); }
+}
