@@ -70,6 +70,9 @@ def main():
   played = set(zip(sn.game_id, sn.gsis_id))
   status = ro.drop_duplicates(["season", "week", "team", "gsis_id"], keep="last").set_index(["season", "week", "team", "gsis_id"]).status
   outrep = set(map(tuple, inj[["season", "week", "team", "gsis_id"]].itertuples(index=False)))
+  roster_status = {}
+  for k, stt in status.items():
+    roster_status.setdefault(k[:3], {})[k] = stt
   rows = []
   games = sn[sn.season >= first][["season", "week", "team", "game_id"]].drop_duplicates().sort_values(["team", "season", "week"])
   for x in games.itertuples():
@@ -94,6 +97,13 @@ def main():
       for k in KINDS:
         rec[f"{d}_{k}_OFF"] = sum(rec[f"{d}_{k}_{gp}"] for gp in OFF)
         rec[f"{d}_{k}_DEF"] = sum(rec[f"{d}_{k}_{gp}"] for gp in DEF)
+    # (BR) arrivals: regulars elsewhere now on this team's roster (report availability, offense, on-field value)
+    ros = {p for (se, wk, tm, p), stt in roster_status.get((x.season, x.week, x.team), {}).items() if stt in ("ACT", "INA")}
+    arr = L.arrivals(x.team, int(x.season), int(x.week), ros, {r[0] for r in regs})
+    extra = sum(r[2] * val(int(x.season), r[0], r[1]) for r in arr
+                if r[1] in OFF and (x.season, x.week, x.team, r[0]) not in outrep)
+    rec["report_rapmarr_OFF"] = rec["report_rapm_OFF"] + extra
+    rec["n_arrivals"] = sum(1 for r in arr if r[1] in OFF)
     rows.append({"season": int(x.season), "week": int(x.week), "team": x.team, "game_id": x.game_id, **rec})
   df = pd.DataFrame(rows)
   df.to_parquet(OUT, index=False)

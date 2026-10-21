@@ -3356,3 +3356,21 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   binned games by VEGAS's confidence: conditioning on a sharper forecaster's view picks games where he knows more, so
   our numbers look timid there by construction. Binned by our own chance, the model is calibrated. Lesson: judge
   calibration by the model's own bins; the gap to Vegas is resolution (telling games apart), not calibration.
+- **Note 2026-10-20:** the "parked" carryover lead (sec. 9, 2026-10-12) was already tested as (X) on 2026-10-17 (FAIL:
+  the 2022-23 gain didn't hold in 2024-25). Not re-run.
+- **PRE-REGISTERED 2026-10-20 (owner: "investigate it reasonably"): (BR) arrivals in the lineup term.** The early
+  season is our weakest stretch and (BM) says Vegas knows the offseason; the shipped lineup term (BP2) sees departures
+  (last season's regulars no longer on the roster count as out) but not arrivals (a player new to the team has no
+  history with it), and it did nothing in weeks 1-4. Variant: a player on the team's roster that week (ACT / INA, not
+  Out / Doubtful) who is not among its regulars but was a regular (role >= 0.3) in his own last 8 games for other
+  teams counts with delta = his role there (recent = 0: the team's ratings never saw him) x his on-field value.
+  Offense only, as shipped. Harness = (BQ)'s: BASE = home + rank gap + Elo + lineup (shipped); ARRIVE = the same
+  with arrivals in the lineup sums; production's form, walk-forward, scored 2022-25. GATE: weeks 1-6 Brier lower by
+  >= 0.002 with the 95% CI upper < 0 and lower in >= 3 of 4 seasons; all weeks not worse (CI upper < +0.0005);
+  CONFIRM 2026 weeks 1-6 same direction. Reported: weeks 7+, the number of arrivals per team-game by week.
+- **RESULT {#lineup-arrivals} (BR) arrivals in the lineup term: FAIL (worse).** tools/lineup_build.py (arrivals:
+  3.2 offensive per team in week 1, 0.8 in weeks 2-4) + tools/arrivals_eval.py, 2022-25. Weeks 1-6 (370 games): base
+  .2368, arrive .2375, +0.0007 [-0.0010, +0.0024], better 1 of 4 seasons; week 1 alone .2176 -> .2229; weeks 7+ +0.0006
+  [-0.0000, +0.0012]; 2026 weeks 1-6 -0.0004 (90 games). A player's on-field value with his old team does not
+  transfer to his new one: the plus-minus carries his team's context (QB, line, scheme) as much as his own play,
+  which also fits individual values being stable only within a team. Departures (shipped) stay; arrivals don't.

@@ -42,6 +42,10 @@ class Lineups:
       games = g[["season", "week", "game_id"]].drop_duplicates().sort_values(["season", "week"]).reset_index(drop=True)
       per = {gid: (dict(zip(x.gsis_id, x.share)), dict(zip(x.gsis_id, x.grp))) for gid, x in g.groupby("game_id")}
       self.by_team[team] = (games, per)
+    # (BR) each player's own games (any team), for arrivals: [(season, week, team, share, grp)] in order
+    self.by_player = {}
+    for p, g in sh[sh.share > 0].sort_values(["season", "week"]).groupby("gsis_id"):
+      self.by_player[p] = list(zip(g.season, g.week, g.team, g.share, g.grp))
 
   def regulars(self, team: str, season: int, week: int) -> list[tuple[str, str, float, float]]:
     """[(gsis_id, group, role, recent)] for the team's game in (season, week), from games strictly before it."""
@@ -68,6 +72,29 @@ class Lineups:
       last = gids[int(np.where(on)[0][-1])]
       out.append((p, per[last][1][p], role, recent))
     return out
+
+
+  def arrivals(self, team: str, season: int, week: int, roster: set, regulars: set) -> list[tuple[str, str, float, float]]:
+    """(BR) players on the team's roster this week who aren't its regulars but were regulars elsewhere (role >= 0.3 in
+    their own last 8 games, the latest of them for another team): [(gsis_id, group, role, recent=0)]; the team's
+    ratings never saw them, so an available arrival adds his whole role."""
+    out = []
+    for p in roster - regulars:
+      h = [x for x in self.by_player.get(p, []) if (x[0], x[1]) < (season, week)][-N_BACK:]
+      if not h or h[-1][2] == team:
+        continue
+      sh = np.array([x[3] for x in h])
+      wts = 0.5 ** (np.arange(len(h) - 1, -1, -1) / HALF)
+      role = float((wts * sh).sum() / wts.sum())
+      if role >= MIN_ROLE:
+        out.append((p, h[-1][4], role, 0.0))
+    return out
+
+
+def roster_ids(rosters: pd.DataFrame, season: int, week: int, team: str) -> set:
+  """The team's players that week who could play: active or game-day inactive."""
+  ro = rosters[(rosters.season == season) & (rosters.week == week) & (rosters.team == team) & rosters.status.isin(["ACT", "INA"])]
+  return set(ro.gsis_id.dropna())
 
 
 class Values:
