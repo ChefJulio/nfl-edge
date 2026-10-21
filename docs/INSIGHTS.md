@@ -3206,3 +3206,21 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   .2377 / .2410 / .2401 (ours ahead: the market over-reacts to the present). Blend weights (2022-25, reading only):
   our rank gap .0113, market .0168, Elo .263 per 100. Lead, not a result: the horizon split suggests the market's edge
   is short-term news that our injury handling (Power rank C, returns) partly covers already.
+- **PRE-REGISTERED 2026-10-20 (owner: "try it"; clarified: market data may be a model input, the aim is to beat
+  Vegas on outcomes): (BM) preseason win totals, ours vs Vegas vs both.** Vegas = the preseason over/under win total
+  (data/history/preseason_win_totals.csv, tools/win_totals_build.py: Pro-Football-Reference via the Wayback Machine,
+  2016-26). Ours = production's playoff simulation as of week 1 with NO Vegas lines (lines_weeks empty; Power's ranks
+  from the week-1 lineup + Elo + home), projected wins, 2,000 seasons. Seasons 2021-25 (what the engine backtests),
+  160 team-seasons. Outcome: final regular-season wins (ties = 0.5). Arms: VEGAS; OURS; MIX50 = the plain average (no
+  fitting, the primary arm); MIXFIT = a + b x Vegas + c x ours, least squares fit walk-forward on earlier seasons
+  (scored 2022-25). GATE ("beat Vegas"): MIX50 MAE lower than VEGAS by >= 0.05 wins with the 95% CI (2,000 team-season
+  resamples) upper < 0, lower in >= 3 of 5 seasons. Reported: OURS vs VEGAS, MIXFIT vs VEGAS (2022-25), RMSE, and
+  rank correlation with final wins.
+- **RESULT {#preseason-wins} (BM) preseason win totals, ours vs Vegas vs both: FAIL (Vegas ahead, mix ties it).**
+  tools/preseason_wins_eval.py, 2021-25, 160 team-seasons. MAE (wins) Vegas 2.247, ours 2.338, MIX50 2.241; RMSE 2.731
+  / 2.851 / 2.722; rank corr with final wins .496 / .417 / .489. OURS - VEGAS +0.091 [-0.083, +0.261]; MIX50 - VEGAS
+  -0.006 [-0.094, +0.079] (gate needs <= -0.05 and CI upper < 0): FAIL; better 3 of 5 seasons; MIXFIT (2022-25) -0.006
+  [-0.069, +0.062]. Ours and Vegas agree .78 on order. Our biggest misses vs Vegas were rebuilding teams we rated as
+  average (2021 HOU 8.1 vs Vegas 4.0, final 4; 2022 DEN 7.3 vs 10.5, final 5 was ours right); preseason is the model's
+  weakest point (last season's play + this week-1 lineup, no offseason roster news). Within the noise of 160
+  team-seasons; data/history/preseason_win_totals.csv also holds 2016-20 and 2026 for later tests.
