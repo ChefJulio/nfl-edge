@@ -6,8 +6,8 @@
   color: var(--ink); text-decoration: none; }
 .hm-t:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
 .hm-t:active { background: var(--panel2); }
-.hm-k { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: var(--fs-md); font-weight: 600; margin-bottom: 6px; }
-.hm-go { font-size: 20px; line-height: 1; }
+.hm-k { display: flex; align-items: center; justify-content: space-between; color: var(--ink); font-size: var(--fs-lg, 17px); font-weight: 700; margin-bottom: 6px; }
+.hm-go { font-size: 20px; line-height: 1; color: var(--muted); font-weight: 400; }
 .hm-l { list-style: none; margin: 0; padding: 0; }
 .hm-l li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
 .hm-l li:first-child { border-top: 0; }
