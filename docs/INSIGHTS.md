@@ -3461,3 +3461,26 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   tools/lineup_build.py (q from earlier seasons: .656-.665) + tools/questionable_eval.py, 2022-25, 1,084 games: base
   .2213, quest .2210, -0.0003 [-0.0007, +0.0002], better 3 of 4 seasons, 2026 +0.0001. It touches half of team-games
   but moves the lineup term by ~16% of its typical size. Not shipped.
+- **PRE-REGISTERED 2026-10-20 (owner: "keep trying"): (BX) two game-specific signals the win chance ignores.**
+  (a) QBQ: the team's starting QB (most offensive snaps in its previous game) is Questionable on the week's final
+  injury report (the formula assumes he plays at full strength; playing hurt). Feature = home flag - away flag.
+  (b) DEFGRP: defensive absences valued by position group, not by player (individual defensive on-field values are
+  noise): the lineup term's delta (role if available else 0, minus recent; report availability) summed over DL / LB /
+  CB / S regulars, each group with its own fitted weight. Harness = (BW)'s (production's form with the shipped offensive
+  lineup term, walk-forward, scored 2022-25). Each arm vs BASE separately. GATE per arm: Brier lower by >= 0.001 with
+  the 95% CI (2,000 game resamples) upper < 0, lower in >= 3 of 4 seasons, 2026 so far same direction. Reported: the
+  fitted weights, how many games have a Questionable starting QB, whether that QB played.
+- **RESULT {#qbq-defgrp} (BX) Questionable starting QB; defensive absences by group: FAIL (both).** tools/bx_eval.py,
+  2022-25, 1,084 games, base .2213. QBQ (66 games with the starter Questionable; he played 55% of the time, 88 cases
+  2021-26): -0.0003 [-0.0009, +0.0004], better 2 of 4, 2026 +0.0012; weight -0.38; on those games base .2535 vs Vegas
+  .2240 (the harness rates last week's starter; production's projected starter already covers the sit case). DEFGRP:
+  +0.0005 [-0.0019, +0.0033], 2 of 4, 2026 -0.0066 (90 games); weights DL .05, LB .14, CB .07, S -.07: noise again.
+- **PRE-REGISTERED 2026-10-20: (BY) team-specific home field.** One league-wide home term today. Variant: home x
+  team indicator for each of the 32 home teams (ridge, shrunk toward the league term: L2 penalty, strength chosen by
+  leave-one-season-out on the training seasons), on top of BASE (home + rank gap + Elo + lineup). Harness = (BX)'s,
+  walk-forward 2022-25. GATE: Brier lower by >= 0.001 with the 95% CI upper < 0, lower in >= 3 of 4 seasons, 2026 same
+  direction. Reported: the teams with the largest fitted home edges.
+- **RESULT {#team-hfa} (BY) team-specific home field: FAIL.** tools/hfa_eval.py, 2022-25: base .2213, team .2217,
+  +0.0005 [-0.0014, +0.0022], better 1 of 4, 2026 -0.0039 (90 games). (2022's fold had one training season, so its
+  penalty was the middle value, 3; later folds chose 30, the strongest offered.) Largest fitted extra home edges (2025
+  fit): GB .10, BUF .10, PIT .10, MIN .09; smallest NE -.13, ARI -.11, NO -.11, i.e. recent home records, not stadiums.
