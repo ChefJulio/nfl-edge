@@ -924,6 +924,12 @@ document.addEventListener('touchstart', () => {}, { passive: true });
 // page's list stays as it is. Everyone on a roster is findable, projected this week or not (data/roster.json,
 // tools/depth_build.py roster_directory: active, reserve lists, practice squads), plus the teams. A pick opens the
 // card (the site's click rule, gamecast.js). Ranked by how well the name matches, then by fantasy relevance.
+// Past players (owner 2026-10-21: "no tomlinson? ... a section for historical players, active players should have
+// priority"): everyone with a career since 1999, in their own section under the current ones. Loaded per search, not
+// up front (owner: "lazy load everything but the name/position/years active"): tools/stats_build.py write_finder_past
+// files each player under every two-letter pair in his name, and a search fetches the file of its rarest pair
+// (data/stats/finder_past/<pair>.json, ~2 KB typical), which holds every name containing it ("linson" finds Tomlinson).
+// Players from it who played this season (linemen, defenders: not on the fantasy roster list) join the current ones.
 // NFLE.finder(input, { value(pid) -> html for the right side (a page's own number, e.g. Rankings' points in your
 // scoring), limit })
 (() => {
@@ -946,14 +952,35 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     }
     Object.entries(teams).forEach(([t, i]) => { const e = { team: t, name: i.name || t, isTeam: true, rel: 1.5 };
       e.n = norm(`${i.name || ''} ${t}`); e.t = e.n.split(' '); out.push(e); });
-    return { list: out, teams };
+    return { list: out, teams, season: D && D.season, have: new Set(out.map(e => e.pid)) };
   }));
-  // how well a name matches: the whole name from its start, the last name, every word starting a name word, anywhere
+  const PAIRS = {};  // pair -> parsed rows
+  let PIDX = null;
+  const pairIndex = () => PIDX || (PIDX = NFLE.load('data/stats/finder_past/index.json').then(j => j.n).catch(() => ({})));
+  const pairsOf = q => [...new Set(q.split(' ').flatMap(w => [...Array(Math.max(0, w.length - 1)).keys()].map(i => w.slice(i, i + 2))))];
+  // a search's past players: { old (before this season), now (played this season, not on a fantasy roster) }
+  const pastFor = q => Promise.all([index(), pairIndex()]).then(([cur, n]) => {
+    const ps = pairsOf(q);
+    if (!ps.length || ps.some(p => !n[p])) return { old: [], now: [] };  // a pair no name has: no past match
+    const k = ps.reduce((a, b) => (n[a] <= n[b] ? a : b));
+    return (PAIRS[k] || (PAIRS[k] = NFLE.load(`data/stats/finder_past/${k}.json`).then(j => String(j.d || '').split('\n').map(line => {
+      const [id, name, pos, a, b, w] = line.split('|'), nn = norm(name);
+      return { pid: /^\d{5}$/.test(id) ? `00-00${id}` : id, name, pos, first: +a, last: +b, w: +w / 9, n: nn, t: nn.split(' ') };
+    })).catch(() => { delete PAIRS[k]; return []; }))).then(rows => {
+      const old = [], now = [];
+      rows.forEach(r => { if (cur.have.has(r.pid)) return;
+        if (cur.season && r.last >= cur.season) now.push({ ...r, rel: 0.4 * r.w, years: true });
+        else old.push({ ...r, rel: r.w, years: true, past: true }); });
+      return { old, now };
+    });
+  });
+  // how well a name matches: a name word starting with it (first or last name alike; relevance breaks the tie: "brady"
+  // is Tom Brady before Brady Poppinga), every word of it starting a name word, or anywhere inside ("linson")
   const matchScore = (e, q, qt) => {
     if (e.n.startsWith(q)) return 4;
     if (e.isTeam && e.t.includes(q)) return 4;  // "phi", "eagles"
-    if (qt.length === 1 && e.t.slice(1).some(w => w.startsWith(q))) return 3;
-    if (qt.every(x => e.t.some(w => w.startsWith(x)))) return 2;
+    if (qt.length === 1 && e.t.some(w => w.startsWith(q))) return 4;
+    if (qt.every(x => e.t.some(w => w.startsWith(x)))) return 3;
     if (q.length >= 3 && e.n.replace(/ /g, '').includes(q.replace(/ /g, ''))) return 1;
     return 0;
   };
@@ -961,6 +988,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     const v = !e.isTeam && opts.value ? opts.value(e.pid) : '';
     if (v) return v;
     if (e.isTeam) return '<span class="muted">Team</span>';
+    if (e.years) return `<span class="fnd-tag">${e.first === e.last ? e.first : `${e.first}-${e.last}`}</span>`;
     if (e.tag) return `<span class="fnd-tag">${esc(TAG[e.tag] || e.tag)}</span>`;
     if (e.bye) return `<span class="fnd-tag">Bye${e.fpg ? ` · ${(Math.round(e.fpg * 10) / 10).toFixed(1)} FP/G` : ''}</span>`;
     if (e.proj != null) return `<b>${(Math.round(e.proj * 10) / 10).toFixed(1)}</b>`;
@@ -975,28 +1003,40 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     pop.id = `fnd-${Math.random().toString(36).slice(2, 8)}`;
     input.setAttribute('aria-controls', pop.id); input.setAttribute('aria-autocomplete', 'list'); input.setAttribute('autocomplete', 'off');
     host.appendChild(pop);
-    let act = 0, seq = 0;
+    let act = 0, seq = 0, pastT = 0;
     const close = () => { pop.hidden = true; input.setAttribute('aria-expanded', 'false'); };
     const mark = () => pop.querySelectorAll('.fnd-r').forEach((r, i) => r.classList.toggle('on', i === act));
     const draw = () => {
       const q = norm(input.value), my = ++seq;
       if (!q) { close(); return; }
-      index().then(({ list, teams }) => {
+      const qt = q.split(' ');
+      const best = (list, n) => list.map(e => { const m = matchScore(e, q, qt); return m ? [m * 10 + e.rel, e] : null; }).filter(Boolean)
+        .sort((a, b) => b[0] - a[0]).slice(0, n).map(x => x[1]);
+      const row = (e, teams) => e.isTeam
+        ? `<div class="fnd-r tm-open" role="option" data-tm="${esc(e.team)}">${NFLE.ui.team(e.team, teams, esc(e.team))}<span class="fnd-v">${right(e, opts)}</span></div>`
+        : `<div class="fnd-r" role="option" data-open-pid="${esc(e.pid)}">${NFLE.ui.player({ name: e.name, team: e.team, pos: e.pos, photo: e.photo, espn: e.espn, pid: e.pid,
+            badges: e.status && NFLE.injTag ? NFLE.injTag(e.status, e.inactive) : '' }, teams)}<span class="fnd-v">${right(e, opts)}</span></div>`;
+      // current players first, then past ones once their list is in (a second paint, same keystroke)
+      const paint = (cur, old, teams, done) => {
         if (my !== seq) return;  // a newer keystroke
-        const qt = q.split(' ');
-        const hits = list.map(e => { const m = matchScore(e, q, qt); return m ? [m * 10 + e.rel, e] : null; }).filter(Boolean)
-          .sort((a, b) => b[0] - a[0]).slice(0, limit).map(x => x[1]);
-        act = 0;
-        pop.innerHTML = hits.length ? hits.map(e => e.isTeam
-          ? `<div class="fnd-r tm-open" role="option" data-tm="${esc(e.team)}">${NFLE.ui.team(e.team, teams, esc(e.team))}<span class="fnd-v">${right(e, opts)}</span></div>`
-          : `<div class="fnd-r" role="option" data-open-pid="${esc(e.pid)}">${NFLE.ui.player({ name: e.name, team: e.team, pos: e.pos, photo: e.photo, espn: e.espn, pid: e.pid,
-              badges: e.status && NFLE.injTag ? NFLE.injTag(e.status, e.inactive) : '' }, teams)}<span class="fnd-v">${right(e, opts)}</span></div>`).join('')
-          : '<div class="fnd-none muted">No player or team by that name</div>';
+        const keep = pop.querySelector('.fnd-r.on'), was = keep ? keep.dataset.openPid || keep.dataset.tm : null;
+        pop.innerHTML = (cur.length ? cur.map(e => row(e, teams)).join('') : '')
+          + (old.length ? `<div class="fnd-sec" role="presentation">Past players</div>${old.map(e => row(e, teams)).join('')}` : '')
+          || (done ? '<div class="fnd-none muted">No player or team by that name</div>' : '<div class="fnd-none muted">Searching...</div>');
+        const rows = [...pop.querySelectorAll('.fnd-r')], i = rows.findIndex(r => (r.dataset.openPid || r.dataset.tm) === was);
+        act = i >= 0 ? i : 0;
         pop.hidden = false; input.setAttribute('aria-expanded', 'true'); mark();
+      };
+      index().then(({ list, teams }) => {
+        paint(best(list, limit), [], teams, false);
+        // past players once typing pauses: one small file per search, not one per keystroke
+        clearTimeout(pastT);
+        pastT = setTimeout(() => pastFor(q).then(({ old, now }) => { const cur = best(list.concat(now), limit);
+          paint(cur, best(old, cur.length ? Math.max(3, limit - cur.length) : limit), teams, true); }), 150);
       });
     };
     input.addEventListener('input', draw);
-    input.addEventListener('focus', () => { if (input.value.trim()) draw(); });
+    input.addEventListener('focus', () => { pairIndex(); if (input.value.trim()) draw(); });
     input.addEventListener('keydown', e => {
       const rows = pop.querySelectorAll('.fnd-r');
       if (e.key === 'Escape') { close(); return; }

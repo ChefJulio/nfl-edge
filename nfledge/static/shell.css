@@ -104,3 +104,5 @@ html.standalone nav.tabs, html.standalone nav.gc-tabs, html.standalone .gc-jump,
 .fnd-v { flex: none; font-size: var(--fs-sm); text-align: right; white-space: nowrap; }
 .fnd-tag { color: var(--muted); font-size: 12px; }
 .fnd-none { padding: 10px; font-size: var(--fs-sm); }
+.fnd-sec { padding: 8px 8px 4px; margin-top: 4px; border-top: 1px solid var(--line); font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--muted); }

@@ -13,8 +13,11 @@ helpers in tools/player_logs.py). Finished seasons are aggregated once and cache
 the current season is redone when its count of final games changes.
 """
 import json
+import re
+import shutil
 import sys
 import time
+import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -256,6 +259,7 @@ def main():
     car = career_rows(frames)
     write_players(out / "players_career.json", car, current, current, bios, espn_of)
     print(f"[stats] careers: {len(car)} players", flush=True)
+    write_finder_past(out / "finder_past", car)
   (out / "index.json").write_text(json.dumps({"v": V, "seasons": seasons, "current": current, "keys": SCORE_KEYS,
                                                "post": post_seasons, "career": bool(frames)}), encoding="utf-8")
   print(f"[stats] {len(seasons)} seasons ({done} recomputed) -> {out}", flush=True)
@@ -295,6 +299,47 @@ def def_extras(cache, nfl, s: int, current: int, p2g: pd.Series, st: str = "REG"
 
 
 RATES = ["snap_pct", "snap_pct_d", "snap_pct_st", "tgt_share", "car_share"]  # per-season shares: games-weighted over a career
+
+
+def finder_norm(t: str) -> str:
+  """A name as the finder compares it (shell.js norm, keep the two in step): accents off, lowercase, periods and
+  apostrophes dropped ("A.J." -> "aj"), anything else between words a space."""
+  t = unicodedata.normalize("NFD", str(t or ""))
+  t = "".join(ch for ch in t if not unicodedata.combining(ch)).lower()
+  t = re.sub(r"[.'\u2019]", "", t)
+  return re.sub(r"[^a-z0-9]+", " ", t).strip()
+
+
+def write_finder_past(out: Path, car: pd.DataFrame):
+  """The player finder's past players (owner 2026-10-21: "no tomlinson? can we add a section for historical
+  players"; "lazy load everything but the name/position/years active"; "what if i search linson looking for
+  tomlinson"): everyone with a career row since FIRST, filed under every two-letter pair inside his name's words
+  (<out>/<pair>.json; "tomlinson" sits under to, om, ml, li, in, ns, so, on), so a search loads one small file, its
+  rarest pair's (<out>/index.json: rows per pair), and finds a name by any part of it. A row is one line,
+  "id|name|pos|first|last|weight": id without its "00-00" (gsis ids are 00-00 + 5 digits; anything else in full),
+  weight 0-9 ranking same-name matches (log of career half-PPR points for offense and kickers, of games x 4 for
+  everyone else). His photo, team and the rest come with his card. Current-roster players are dropped in the browser."""
+  n = lambda c: pd.to_numeric(car[c], errors="coerce").fillna(0) if c in car else 0  # noqa: E731
+  fp = (n("passing_yards") / 25 + 4 * n("passing_tds") - 2 * n("passing_interceptions") + n("rushing_yards") / 10
+        + 6 * (n("rushing_tds") + n("receiving_tds")) + 0.5 * n("receptions") + n("receiving_yards") / 10
+        - 2 * n("fumbles_lost_total") + 3 * n("fg_made") + n("pat_made"))
+  raw = np.where(car.pos.isin(["QB", "RB", "FB", "WR", "TE", "K"]), fp, 4 * n("games")).clip(0)
+  weight = np.minimum(9, np.floor(np.log10(1 + raw) * 2.4)).astype(int)  # 10k points ~ 9, 1k ~ 7, 100 ~ 4
+  shards: dict[str, list[str]] = {}
+  for p, nm, ps, a, b, w in zip(car.pid, car.name, car.pos, car["first"], car.season, weight):
+    if not isinstance(nm, str) or not nm or not isinstance(p, str):
+      continue
+    pid = p[5:] if re.fullmatch(r"00-00\d{5}", p) else p
+    line = "|".join([pid, nm.replace("|", " "), ps if isinstance(ps, str) else "", str(int(a)), str(int(b)), str(int(w))])
+    for k in {w0[i:i + 2] for w0 in finder_norm(nm).split() for i in range(len(w0) - 1)}:
+      shards.setdefault(k, []).append(line)
+  if out.exists():
+    shutil.rmtree(out)
+  out.mkdir(parents=True)
+  for k, lines in shards.items():
+    (out / f"{k}.json").write_text(json.dumps({"v": 1, "d": "\n".join(lines)}, separators=(",", ":")), encoding="utf-8")
+  (out / "index.json").write_text(json.dumps({"v": 1, "n": {k: len(v) for k, v in sorted(shards.items())}}, separators=(",", ":")), encoding="utf-8")
+  print(f"[stats] finder past players: {len(car)} in {len(shards)} pair files", flush=True)
 
 
 def career_rows(frames: list) -> pd.DataFrame:
