@@ -3257,3 +3257,39 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   results (lines through last week were set before last week's games); adding Elo (which has them) barely moves it.
   Direction: stop guessing at team-strength signals; the missing piece is game-specific, and the win formula's only
   game-specific input today is the starting QB (non-QB absences don't reach it at all).
+- **PRE-REGISTERED 2026-10-20 (owner: "yesss lineup value ... get going"): (BO) lineup value: who's missing (or back)
+  beyond the QB.** Gap split: the whole gap to Vegas is game-specific; the win formula's only game-specific input is
+  the QB. Data (tools/lineup_build.py): snap counts for every position (gsis ids via the players table: the weekly
+  rosters carry no PFR id for linemen, which is why availability history has none), weekly roster status, the final
+  injury report, contracts. For each team-game 2021-26 and each non-QB player with this team in its previous 8 games
+  (weights 0.5^(games ago / 3), the team ratings' recency): recent = weighted mean snap share (0 when he missed),
+  role = weighted mean share in the games he played; kept if role >= 0.3. Available now (REPORT, known by Saturday) =
+  on the team's roster for that week (ACT or INA) and not Out / Doubtful on the final report. delta = (role if
+  available else 0) - recent: a new absence costs his role, a return adds back what the rating missed, a long-gone
+  player counts 0 (the ratings already learned without him). Quality q = his cap-share percentile within his position
+  group that season (contracts; none on file = 0.5). Features, home minus away: OFF = sum of delta x q over OL / WR /
+  TE / RB, DEF = over DL / LB / CB / S. Test = (BN)'s harness (Matchups win chance as of the game's week, logistic fit
+  walk-forward on earlier seasons, scored 2022-25, ties dropped): BASE = home + rank gap + Elo; LINEUP = BASE + OFF +
+  DEF. GATE: Brier lower by >= 0.002 with the 95% CI (2,000 game resamples) upper < 0, lower in >= 3 of 4 seasons,
+  CONFIRM 2026 (games so far) same direction. Reported, not gated: SNAP (q = 1); INACTIVES (also out when on the
+  game-day inactive list, known ~90 minutes before kickoff, what the closing line sees); ACTUAL (did not play: a
+  ceiling, hindsight); per-group weights (8 groups, fit 2021-25, reading only); weeks 1-4 / 5-12 / 13-18; the gap to
+  Vegas's line on the same games. A pass ships into the Matchups win chance (and the playoff simulation's this-week
+  games) and is the base for outcome-validated grades for every position.
+- **RESULT {#lineup-value} (BO) lineup value beyond the QB: FAIL.** tools/lineup_build.py + tools/lineup_eval.py,
+  2022-25, 1,084 games. Brier base .2250; LINEUP (report, cap-weighted) .2255: +0.0005 [-0.0005, +0.0016], better 2 of 4
+  seasons, CONFIRM 2026 +0.0009: FAIL. SNAP +0.0010; per-group weights .2264 (overfit, RB / S signs wrong).
+  INACTIVES -0.0012 [-0.0031, +0.0007]; ACTUAL (hindsight ceiling) -0.0020 [-0.0043, +0.0003]. By weeks (base /
+  inactives / actual / Vegas): 1-4 .2340 / .2337 / .2334 / .2253; 5-12 .2263 / .2265 / .2266 / .2109; 13-18 .2171 /
+  .2136 / .2114 / .1997: what signal there is is late-season rest (2024 PHI week 18 is the biggest absence in the
+  data). Measured this crudely (snap share x cap share), even perfect knowledge of who played closes ~0.002 of the
+  ~0.015 gap. Owner's next idea, the right one: value players by EPA with them on the field (participation data,
+  every play's 22 players, 2016-25; not published for the current season).
+- **Gap split CORRECTION (2026-10-20, tools/gap_split_loo.py).** "The whole gap is game-specific" overstated it. A
+  fairer market view (ratings fit to every closing spread of the season INCLUDING this week's other games, leaving
+  out only this game's line) still only ties ours (.2274 vs .2257, +0.0017 [-0.0040, +0.0075]) and the line still
+  beats it by .0175; but that reconstruction reproduces the line poorly (corr .83, residual sd 3.3 points), so much
+  of the .0175 is strength the line knows and a spread-fit rating loses, not game-specific news. Honest reading: we
+  match a simple market-derived rating; how the line's remaining edge splits between better strength and
+  game-specific information is NOT determined by this method. (BO)'s ceiling (~0.002 from who played) says absences,
+  measured crudely, are a small part.
