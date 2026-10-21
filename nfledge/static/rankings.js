@@ -116,8 +116,14 @@
     // -- derived values under the current scoring + league ---------------------------------------------------------
     // game grades for final scores (owner 2026-10-17: white while live, "the grade coloring once the game is over"):
     // this season's pool of qualified games as percentiles (tools/player_logs.py), the game log's Grd scale
-    let GPOOL = null;
-    NFLE.load('data/grades/game_pool.json').then(j => { GPOOL = j; if (mode === 'week') draw(false); }).catch(() => {});
+    let GPOOL = null, gradeT = 0;
+    // grade data arriving after the first draw: one redraw for arrivals close together (the game pool and the season
+    // grades land ~25 ms apart; owner 2026-10-20: "any reason we're still up at 4 redraws?")
+    // late data fills its own cells in place (Table.refresh), never a whole-table redraw: grades -> the Grd cells, the
+    // game pool -> the Pts cells of finished games (their color)
+    const fill = keys => POS.forEach(p => { if (tables[p] && !KDP.includes(p)) tables[p].refresh(keys); });
+    const gradesIn = () => { clearTimeout(gradeT); gradeT = setTimeout(() => { if (mode === 'week') fill(['grd']); }, 0); };
+    NFLE.load('data/grades/game_pool.json').then(j => { GPOOL = j; if (mode === 'week') fill(['proj']); }).catch(() => {});
     const gamePct = (pos, v) => { const q = GPOOL && GPOOL.q[pos]; if (!q || v == null) return null;
       let i = 0; while (i < 100 && q[i + 1] <= v) i++;
       return i >= 100 ? 99 : Math.min(99, Math.round(i + (q[i + 1] > q[i] ? (v - q[i]) / (q[i + 1] - q[i]) : 0))); };
@@ -255,7 +261,8 @@
         // Edge grade, the team cards' number (gamecast.js NFLE.gradeOf)
         { key: 'grd', label: 'Grd', num: true, cls: 'grdc', first: 'desc', title: "Edge grade (OVR): three seasons of fantasy output, a percentile within his position (rookies and second-year players: this season's when higher)",
           value: r => { const g = NFLE.gradeOf && NFLE.gradeOf(r.pid); return g ? g.v : -1; },
-          html: r => { const g = NFLE.gradeOf && NFLE.gradeOf(r.pid); return g ? NFLE.gradeChip(g) : '<span class="muted">&ndash;</span>'; } },
+          html: r => { if (NFLE.gradesReady && !NFLE.gradesReady()) return '<span class="cell-load" aria-label="loading"></span>';
+            const g = NFLE.gradeOf && NFLE.gradeOf(r.pid); return g ? NFLE.gradeChip(g) : '<span class="muted">&ndash;</span>'; } },
         // season FP/G folded into its tooltip (owner 2026-10-17: the FP/G column repeated it)
         { key: 'l5', label: 'Last 5', sort: false, cls: 'l5', title: 'His last 5 games this season: bar = points scored, green = beat our projection for that game, red = missed it; the tick is our projection',
           html: r => `<span title="${r._fpg != null ? `Season: ${f1(r._fpg)} FP/G` : ''}">${l5(r)}</span>` },
@@ -481,7 +488,7 @@
     };
     // live scores (gamecast.js, every ~minute on game days): redraw in place, no re-sort
     document.addEventListener('nfle-live', () => { if (mode === 'week') draw(false); });
-    document.addEventListener('nfle-grades', () => { if (mode === 'week') draw(false); });
+    document.addEventListener('nfle-grades', gradesIn);
     const showPos = p => {
       pos = p;
       sec.querySelectorAll('.posbar button').forEach(b => b.classList.toggle('on', b.dataset.pos === p));

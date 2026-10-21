@@ -2445,17 +2445,28 @@
   };
   // a player's grade for team lists (the Players tile and its sheet): the OVR, or for rookies and second-year players
   // (not graded two seasons back) this season's grade when higher with 4+ games (owner 2026-10-17); null = not graded
+  // both grade files (this season's and two seasons back, for the young-player rule) load as one step and announce
+  // once (owner 2026-10-20: two separate arrivals redrew the Rankings table twice on load); NFLE.gradesReady() says
+  // whether they're in, so lists show a loading mark in the cell meanwhile
+  const loadGrades = () => {
+    if (GR.cur !== undefined) return;
+    GR.cur = null;
+    const done = () => { GR.ready = true; rerenderCard(); document.dispatchEvent(new Event('nfle-grades')); };
+    grIndex().then(ix => ix && grSeason(ix.current))
+      .then(g => { GR.cur = g || null; return GR.cur ? grSeason(GR.cur.season - 2) : null; })
+      .then(x => { GR.old = x || false; done(); }, () => { GR.old = GR.old || false; done(); });
+  };
   const teamGrade = pid => {
-    const done = () => { rerenderCard(); document.dispatchEvent(new Event('nfle-grades')); };
-    if (GR.cur === undefined) { GR.cur = null; grIndex().then(ix => ix && grSeason(ix.current)).then(g => { GR.cur = g || null; done(); }); }
-    const g = GR.cur && GR.cur.players[pid];
+    loadGrades();
+    const g = GR.ready && GR.cur && GR.cur.players[pid];
     if (!g || g[0] == null) return null;
-    if (GR.old === undefined) { GR.old = null; grSeason(GR.cur.season - 2).then(x => { GR.old = x || false; done(); }); }
     const young = GR.old && !(pid in GR.old.players), season = young && g[6] != null && (g[8] || 0) >= 4 && g[6] > g[0];
     return { v: season ? g[6] : g[0], season, ovr: g[0], uq: !!g[9], row: g };
   };
   const gradeChip = gr => gr ? `<b class="tm-gr ${gr.uq ? '' : grTone(gr.v)}" title="${gr.season ? `Edge grade this season (${ovr(gr.ovr)} overall; young player)` : 'Edge grade (OVR)'}">${ovr(gr.v)}${gr.uq ? '*' : ''}</b>` : '<span class="muted">–</span>';
   NFLE.gradeOf = pid => teamGrade(pid); NFLE.gradeChip = gr => gradeChip(gr);  // Rankings' Grd column (rankings.js)
+  NFLE.gradesReady = () => !!GR.ready;
+  loadGrades();  // start now, so the first Rankings draw usually has them
   // The season's schedule sheet (owner 2026-10-17: "not just games yet to be played"): played games with the result,
   // the bye in its week, the rest with the opponent's record and Power rank; strength of schedule below. Opened from
   // the schedule row's header (and the Schedule tile where the Playoffs tile can't show: a past season's page).

@@ -66,7 +66,14 @@
     };
     let gen = 0;
     const BATCH = 40;
-    let lastKey = null;
+    let lastKey = null, shown = [];
+    const cellHtml = (c, r) => c.html ? c.html(r) : esc(r[c.key] ?? '');
+    const rowHtml = r => `<tr${opt.rowClass ? ` class="${esc(opt.rowClass(r))}"` : ''}${opt.rowAttrs ? ' ' + opt.rowAttrs(r) : ''}>${cols.map(c => {
+      // the sorted column's numbers keep their chip (owner 2026-10-16: chips only on key / sorted columns)
+      const cls = [c.num ? 'num' : '', c.stick ? 'stick' : '', c.cls || '', sort && sort.key === c.key && !c.stick ? 'sorted' : ''].filter(Boolean).join(' ');
+      return `<td${cls ? ` class="${cls}"` : ''}>${cellHtml(c, r)}</td>`;
+    }).join('')}</tr>`;
+    const keyOf = rs => rs.map(rowHtml).join('').replace(/ rise(?=")/g, '');
     const body = () => {
       let rs = rows;
       if (sort) {
@@ -79,11 +86,6 @@
           }).map(x => x[2]);
         }
       }
-      const rowHtml = r => `<tr${opt.rowClass ? ` class="${esc(opt.rowClass(r))}"` : ''}${opt.rowAttrs ? ' ' + opt.rowAttrs(r) : ''}>${cols.map(c => {
-        // the sorted column's numbers keep their chip (owner 2026-10-16: chips only on key / sorted columns)
-        const cls = [c.num ? 'num' : '', c.stick ? 'stick' : '', c.cls || '', sort && sort.key === c.key && !c.stick ? 'sorted' : ''].filter(Boolean).join(' ');
-        return `<td${cls ? ` class="${cls}"` : ''}>${c.html ? c.html(r) : esc(r[c.key] ?? '')}</td>`;
-      }).join('')}</tr>`;
       // The rows that fill the screen first, the rest in batches after it paints (owner 2026-10-16: "lazy load so the
       // important stuff gets drawn more quickly"; the landing QB table drew 31 rows of ~70 elements for 5 in view).
       // A newer draw (sort, filter, new data) cancels the batches of an older one.
@@ -92,14 +94,14 @@
       // ~11 times in its first second). The one-off "rise" class doesn't count as a change.
       const all = rs.map(rowHtml), key = all.join('').replace(/ rise(?=")/g, '');
       if (key === lastKey && tbl.tBodies[0].rows.length) return;
-      lastKey = key;
+      lastKey = key; shown = rs;
       const my = ++gen, tb = tbl.tBodies[0], first = Math.max(12, Math.ceil(innerHeight / 45));
       tb.innerHTML = all.slice(0, first).join('');
       if (rs.length <= first) return;
       let i = first;
       const more = () => {
         if (my !== gen) return;
-        tb.insertAdjacentHTML('beforeend', all.slice(i, i + BATCH).join(''));
+        tb.insertAdjacentHTML('beforeend', rs.slice(i, i + BATCH).map(rowHtml).join(''));  // fresh: cells may have been refreshed
         i += BATCH;
         if (i < rs.length) setTimeout(more, 0); else layout();
       };
@@ -158,6 +160,18 @@
     }, { passive: true });
     const api = {
       update(r) { rows = r || []; body(); layout(); },
+      // late data for some columns (owner 2026-10-20: "loading symbol the elements themselves instead of redrawing the
+      // whole row"): re-render just those cells in place; rows, order and any landing animation stay. A refreshed
+      // column that is the sort column can change the order: then a normal redraw.
+      refresh(keys) {
+        if (sort && keys.includes(sort.key)) { body(); layout(); return; }
+        const ix = keys.map(k => cols.findIndex(c => c.key === k)).filter(i => i >= 0);
+        const trs = tbl.tBodies[0].rows;
+        for (let i = 0; i < trs.length && i < shown.length; i++) {
+          ix.forEach(ci => { const td = trs[i].cells[ci], h = cellHtml(cols[ci], shown[i]); if (td && td.innerHTML !== h) td.innerHTML = h; });
+        }
+        lastKey = keyOf(shown);
+      },
       setColumns(c) { cols = c; if (sort && !cols.some(x => x.key === sort.key)) sort = null; head(); body(); layout(); },
       setSort(x) { sort = x; head(); body(); layout(); },
       getSort: () => sort,
