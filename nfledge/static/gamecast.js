@@ -3172,7 +3172,7 @@
       const cls = `${p.scoringPlay ? ' pl-score' : ''}${p.isPenalty && !p.scoringPlay ? ' pl-pen' : ''}${st ? ' pl-st' : ''}`;
       return `<li class="pl${cls}" data-k="p${esc(p.id)}"${off ? ` style="--pt:${esc(off.color)}"` : ''}><div class="pl-when">${when}</div>
         <div class="pl-what">${(() => { const pp = playPairs(p); return chipHtml || pp.downs || pp.spots ? `<div class="pl-dd">${chipHtml}${pp.downs}${pp.spots}</div>` : ''; })()}
-          <div class="pl-hl ${hd.cls}">${linkNames(esc(hd.h), teams)}${ydChip}</div><div class="pl-txt pl-raw" title="Tap for the official text">${linkNames(esc(hd.raw), teams)}</div></div>
+          <div class="pl-hl ${hd.cls}">${linkNames(esc(hd.h), teams)}${ydChip}</div>${fieldStrip(p, info)}<div class="pl-txt pl-raw" title="Tap for the official text">${linkNames(esc(hd.raw), teams)}</div></div>
         <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${tmL(info.away.team)} ${p.awayScore}–${p.homeScore} ${tmL(info.home.team)}</b>` : ''}${swing}</div></li>`;
     };
     const order = o.sort !== 'old';  // newest first unless asked otherwise
@@ -3739,6 +3739,29 @@
   // ended on the field, the win chance it moved, the fantasy points it produced, then every play.
   // Play rows, as the drive sheet and the Recent view show them: when, the down, the play as a headline, where it
   // started and ended, and its yards (or what it was: a score, a turnover, a flag)
+  // A play's strip of field (owner 2026-10-20: "a minimal visual of a strip that represents the field and how far the
+  // play went along it"): the offense always drives left to right, its end zone on the left in its color and the
+  // opponent's on the right; a dot where the ball was snapped, a bar to where it ended (green gain, red loss, amber on a
+  // flag, gray for kicks, red to where a turnover left it); a touchdown runs into the end zone. 120 yards wide.
+  const fieldStrip = (p, info) => {
+    const a = spot(p.start, info);
+    if (!a || a.x == null || nonPlay(p)) return '';
+    const b = spot(p.end, info), rel = x => (a.dir === 1 ? x : 100 - x);
+    const t = `${pType(p)} ${p.text || ''}`, s0 = rel(a.x);
+    const td = /touchdown/i.test(t) && p.scoringPlay;
+    const defTd = td && b && a.offense.team !== b.offense.team && !/kick|punt/i.test(pType(p));
+    let e = b && b.x != null ? rel(b.x) : s0;
+    if (td) e = defTd ? -5 : 105;  // into the end zone (a pick-six: back the other way)
+    else if (/field goal/i.test(t)) e = 110;  // the kick, to the posts
+    const kick = stPlay(p) && !/field goal/i.test(t);
+    const cls = p.isTurnover ? 'to' : p.isPenalty && /no play/i.test(t) ? 'pen' : kick ? 'st' : /field goal/i.test(t) ? (p.scoringPlay ? 'gain' : 'loss')
+      : e > s0 ? 'gain' : e < s0 ? 'loss' : 'zero';
+    const pc = y => ((10 + Math.max(-10, Math.min(110, y))) / 120 * 100).toFixed(2);
+    const off = a.offense, opp = off.team === info.away.team ? info.home : info.away;
+    const lo = Math.min(s0, e), hi = Math.max(s0, e);
+    return `<span class="fs" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
+      + `${hi - lo >= 0.5 ? `<i class="fs-seg fs-${cls}" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%"></i>` : ''}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
+  };
   const playRows = (plays, info, names, key = null) => plays.map(p => {
     const when = q => `${periodName((q.period || {}).number || 1)} ${esc((q.clock || {}).displayValue || '')}`;
     if (nonPlay(p)) return `<li class="ds-p np"><span class="ds-w">${when(p)}</span><span class="ds-h muted">${esc(nonPlayText(p))}</span></li>`;
@@ -3752,7 +3775,7 @@
       : p.isTurnover ? '<span class="pc-chip c-to">TURNOVER</span>'
       : p.isPenalty ? '<span class="pc-chip c-pen">FLAG</span>' : net != null && !/incomplete/i.test(String(p.text || '')) ? `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)}</span>` : '';
     const pp = playPairs(p);
-    return `<li class="ds-p${p === key ? ' key' : ''}"><span class="ds-w">${when(p)}</span><span class="ds-h ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}${pp.downs || pp.spots ? `<span class="ds-sp pps">${pp.downs}${pp.spots}</span>` : ''}</span>${chip}</li>`;
+    return `<li class="ds-p${p === key ? ' key' : ''}"><span class="ds-w">${when(p)}</span><span class="ds-h ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}${pp.downs || pp.spots ? `<span class="ds-sp pps">${pp.downs}${pp.spots}</span>` : ''}${fieldStrip(p, info)}</span>${chip}</li>`;
   }).join('');
   // Recent (owner 2026-10-18: "catch up the user on the most recent plays"): the drive on now and the one before it,
   // newest first, each under its drive's header

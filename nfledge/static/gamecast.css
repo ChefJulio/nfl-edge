@@ -1531,3 +1531,16 @@ tr.lg-pend td.muted { text-align: left; white-space: nowrap; font-size: 12px; }
   .pc-card .pc-wrap { height: calc(100% - 12px - var(--sat, 0px)); }
   .pc-card.pc-stacked:not(.pc-under) .pc-wrap { height: calc(100% - 12px - 40px - var(--sat, 0px)); }
 }
+/* a play's strip of field (gamecast.js fieldStrip): offense drives left to right; end zones in team colors */
+.fs { position: relative; display: block; height: 6px; margin: 7px 0 2px; max-width: 320px; border-radius: 3px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent); }
+.fs i { position: absolute; top: 0; bottom: 0; display: block; }
+.fs-ez { width: 8.33%; opacity: .45; }
+.fs-l { left: 0; background: var(--oc); border-radius: 3px 0 0 3px; } .fs-r { right: 0; background: var(--dc); border-radius: 0 3px 3px 0; }
+.fs-50 { left: 50%; width: 1px; background: color-mix(in srgb, var(--ink) 22%, transparent); }
+.fs-seg { border-radius: 2px; }
+.fs-gain { background: var(--good); } .fs-loss, .fs-to { background: var(--bad); } .fs-pen { background: #f0b545; }
+.fs-st { background: color-mix(in srgb, var(--ink) 40%, transparent); } .fs-zero { background: var(--muted); }
+.fs-dot { width: 2px; top: -2px !important; bottom: -2px !important; margin-left: -1px; border-radius: 1px; background: var(--ink); }  /* the snap */
+.fs-seg { min-width: 3px; }
+.pl-what .fs { margin: 6px 0 4px; }
