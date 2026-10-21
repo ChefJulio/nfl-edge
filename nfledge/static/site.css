@@ -459,3 +459,6 @@ nav.gc-tabs .gc-wrap, .gc-jump, nav.tabs .nav-par, .nav-sub, .doc table { overfl
   background: linear-gradient(90deg, var(--panel2) 0%, color-mix(in srgb, var(--ink) 9%, var(--panel2)) 50%, var(--panel2) 100%);
   background-size: 200% 100%; animation: fr-shim 1.3s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .cell-load { animation: none; } }
+/* footer: the owner's Buy Me a Coffee link */
+footer a.foot-bmc { color: var(--accent); font-weight: 600; text-decoration: none; white-space: nowrap; }
+footer a.foot-bmc:hover { text-decoration: underline; }
