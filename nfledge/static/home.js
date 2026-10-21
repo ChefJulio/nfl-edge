@@ -41,7 +41,7 @@
     sec.innerHTML = `<div class="hm">
       <div class="sec-head"><div><h2>I want to&hellip;</h2><p>${esc(wk)} on NFL Edge. Pick a place to start.</p></div></div>
       <details class="howto"><summary>What is this?</summary><div>
-        <p>A free NFL model. Every week it projects every player and team from play-by-play data and injury reports, ranks
+        <p>A free NFL prediction model. Every week it projects every player and team from play-by-play data and injury reports, ranks
         teams by how good they really are, tracks games live, and plugs into your Sleeper or ESPN league.</p>
         <p class="muted">No ads, no sign-up. The Model tab shows how it works, and what we tried that didn't.</p>
       </div></details>
