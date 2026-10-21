@@ -1393,6 +1393,23 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
       lineups[t] = LU.team_term(lus.regulars(t, season, week), avail, lambda p, g: vals(season, p, g))
   pname = dict(zip(eng.data.rosters.gsis_id, eng.data.rosters.full_name)) if lineups else {}
 
+  # (BT2) the final regular-season week: a team whose playoff spot and bye are settled (P(playoffs) >= .99, P(bye) >= .99
+  # or <= .01) rests starters; settled teams won 51% of 88 final-week games 2002-19 where the base said 67%. Owner-design
+  # ship 2026-10-20 (gate's CI crossed 0); weight from 2002-19 (2021-25 fit: -1.38). Odds from the Playoffs tab's
+  # simulation, run here with Power's ranks, as of before the week's games.
+  settled, st_w = {}, float(wm.get("final_week_settled", 0.0))
+  reg = eng.data.schedules[(eng.data.schedules.season == season) & (eng.data.schedules.game_type == "REG")]
+  if st_w and len(reg) and week == int(reg.week.max()) and rk:
+    import importlib
+    import sys
+    sys.path.insert(0, str(ROOT / "tools"))
+    po = importlib.import_module("playoff_odds")
+    ranks = {t: int(p["rank"]) for t, p in rk.items() if p.get("rank")}
+    # as of before the week's games (the test's definition; archived pages keep their pregame number)
+    res = po.simulate(eng.data.schedules, eng.data.teams, season, week, ranks, wm, 2000, np.random.default_rng(season),
+                      drift=float(cfg["report"].get("playoff_drift", 0.0)), played_before=week)
+    settled = {r["team"]: float(r["p_playoffs"] >= 0.99 and (r["p_bye"] >= 0.99 or r["p_bye"] <= 0.01)) for r in res["rows"]}
+
   def lineup_note(t):
     """The biggest changes behind a team's lineup term (>= ~2 points of win chance each), for the model note."""
     # only above-average players (an "out" that hurts, a "back" that helps); a below-average regular's absence nudges
@@ -1433,13 +1450,15 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
     rk_a, rk_h = rank_of(g.away_team, "rank_now"), rank_of(g.home_team, "rank_now")
     e_a, e_h = elo_now.get(g.away_team, elo.MEAN), elo_now.get(g.home_team, elo.MEAN)
     lu = lu_w * ((lineups.get(g.home_team) or {}).get("off", 0.0) - (lineups.get(g.away_team) or {}).get("off", 0.0))
+    stk = st_w * (settled.get(g.home_team, 0.0) - settled.get(g.away_team, 0.0))
     x = (wm["week_home"] * (g.location != "Neutral") + wm["week_elo_per_100"] * (e_h - e_a) / 100
-         + (wm["week_rank_gap"] * (rk_a - rk_h) if rk_a and rk_h else 0.0) + lu)
+         + (wm["week_rank_gap"] * (rk_a - rk_h) if rk_a and rk_h else 0.0) + lu + stk)
     fc = forecast(g, float(logistic(x)), k_vegas, tossup, names, ts)
     notes = [f"{t} {n}" for t in (g.away_team, g.home_team) if (n := lineup_note(t))]
+    rest = [f"{t} has nothing left to play for (starters often rest)" for t in (g.away_team, g.home_team) if settled.get(t)]
     fc["model_why"] = (f"Our model: this week's rank {g.away_team} {rk_a} vs {g.home_team} {rk_h}, Elo {e_a:.0f} vs "
                        f"{e_h:.0f}{'' if g.location == 'Neutral' else ', plus home field'}"
-                       f"{'; lineup changes: ' + '; '.join(notes) if notes else ''}")
+                       f"{'; lineup changes: ' + '; '.join(notes) if notes else ''}{'; ' + '; '.join(rest) if rest else ''}")
     # Who wins each battle. Every bar is a tug of war, away team on the left and home team on the right. The
     # model margin = both offense-vs-defense matchups + special teams + home field + play volume (never shown).
     vol_of = tp[tp.game_id == g.game_id].set_index("team")

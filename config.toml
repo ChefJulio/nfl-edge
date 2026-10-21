@@ -140,6 +140,10 @@ week_home = 0.1659
 week_rank_gap = 0.0314
 week_elo_per_100 = 0.3193
 week_lineup_off = 11.789
+# (BT2, owner-design ship 2026-10-20): final regular-season week, a team whose playoff spot and bye are settled. Settled
+# teams won 51% of 88 final-week games 2002-19 where Elo + home said 67%; the weight was negative in all 18 leave-one-out
+# fits (-0.93 to -1.24), Brier -0.009 [-0.021, +0.003]; 2022-25 week 18 .2363 -> .2152 in (BT). Confirm on 2026 week 18.
+final_week_settled = -1.1
 
 [experiments]
 # Optional model inputs. Defaults reflect the walk-forward backtest (decided on 2025, confirmed on 2026):

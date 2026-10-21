@@ -102,10 +102,13 @@ def simulate(sched, teams, season: int, week: int, ranks: dict, wm: dict, n: int
           X[s, 0, idx[t]] = True
           X[s, 1, idx[t]] = i < 4
           X[s, 2, idx[t]] = i == 0
-      count["bye"][idx[order[0]]] += 1
-      # wild card: 2v7, 3v6, 4v5 (higher seed hosts); seed 1 waits
-      alive = [order[0]]
-      for hi, lo in ((1, 6), (2, 5), (3, 4)):  # 7-team format (2020 on: the only seasons simulated here)
+      # 7-team format (2020 on): seed 1 waits, wild card 2v7, 3v6, 4v5. 6-team format (1990-2019, used by
+      # tools/stakes_final_eval.py): seeds 1 and 2 wait, wild card 3v6, 4v5. Higher seed hosts.
+      byes, pairs = ((order[:1], ((1, 6), (2, 5), (3, 4))) if len(order) >= 7 else (order[:2], ((2, 5), (3, 4))))
+      for t in byes:
+        count["bye"][idx[t]] += 1
+      alive = list(byes)
+      for hi, lo in pairs:
         h, a = order[hi], order[lo]
         alive.append(h if rng.random() < pm(h, a) else a)
       alive.sort(key=lambda t: order.index(t))

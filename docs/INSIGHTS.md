@@ -3374,3 +3374,45 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   [-0.0000, +0.0012]; 2026 weeks 1-6 -0.0004 (90 games). A player's on-field value with his old team does not
   transfer to his new one: the plus-minus carries his team's context (QB, line, scheme) as much as his own play,
   which also fits individual values being stable only within a team. Departures (shipped) stay; arrivals don't.
+- **Check 2026-10-20 (owner: "aren't sacks allowed, pressures allowed ... measurable?"): pressure-based pass
+  protection values are LESS stable than EPA-based ones; not pursued.** tools/ol_build.py: ridge plus-minus on
+  "pressured or sacked" over 190,027 dropbacks 2016-25 (participation's was_pressure, number of rushers in the
+  context); single-season values' rank corr with next season: OL .15 (EPA-based .30), QB .42, DL .13, LB .20, TE .11.
+  Pressure tracks the quarterback (holding the ball, pocket movement) more than any one lineman. Sacks / pressures
+  ALLOWED by a named blocker come only from film charting (PFF, SIS, FTN; paid); free FTN charting (in-season via
+  nflverse) has QB-fault sacks and rusher / blitzer counts but no blocker. Run-blocking by gap (run_location /
+  run_gap + depth-chart slots) remains untested.
+- **PRE-REGISTERED 2026-10-20 (owner: "make our model better. you're at the wheel"): (BT) playoff stakes in the game
+  win chance.** (L) tested stakes for player availability (fantasy), not the game; weeks 13-18 are where the line beats
+  us most. As of before each week (cache/playoff_odds_weekly.parquet, the Playoffs tab's simulation, finished games
+  only): SETTLED = playoff chance >= .99 and bye chance >= .99 or <= .01 (in, seed tier fixed: rests starters);
+  ELIMINATED = playoff chance <= .01. Features, home minus away, zero before week 15: settled x [week 18], settled x
+  [weeks 15-17], eliminated. Harness = (BQ)'s (production's form with the shipped lineup term, walk-forward, scored
+  2022-25). GATE: weeks 15-18 Brier lower by >= 0.003 with the 95% CI (2,000 game resamples) upper < 0 and lower in
+  >= 3 of 4 seasons (all other weeks unchanged by construction). Confirmation on 2026 weeks 15-18 at season end.
+  Reported: the fitted weights, how many teams are flagged per week, Vegas on the same games.
+- **RESULT {#stakes-game} (BT) playoff stakes in the game win chance: FAIL; week 18 is a lead.**
+  tools/stakes_game_eval.py, weeks 15-18 2022-25, 255 games: base .2135, stakes .2096 (Vegas .1943); -0.0039
+  [-0.0190, +0.0106], better 2 of 4 seasons: FAIL. By week (base / stakes / Vegas): 15 .1894 / .1935 / .1820; 16 .2304 /
+  .2267 / .2121; 17 .1976 / .2030 / .1848; 18 .2363 / .2152 / .1979. Weights (fit 2021-25, reading only): settled x
+  week 18 -1.60 (a settled team's log-odds; ~8 teams settled entering week 18), settled weeks 15-17 +0.48, eliminated
+  -0.32 (noise; 9-14 teams flagged). The week-18 effect is large and plausible (rested starters) but picked after
+  seeing the split: confirm on data never used (BT2) before shipping.
+- **PRE-REGISTERED 2026-10-20: (BT2) final-week "settled" teams, confirmed on 2002-19.** Data never used by (BT): the
+  last regular-season week of 2002-2019 (week 17; 2002-19 had 16 games). Settled (as (BT): P(playoffs) >= .99 and
+  P(bye) >= .99 or <= .01) from tools/playoff_odds.simulate before that week's games, 2,000 seasons, ranks from Elo
+  (our engine doesn't backtest before 2021), no Vegas lines. Base = home + Elo gap (production's Elo settings);
+  STAKES = base + settled gap (home minus away). Fit: leave-one-season-out over 2002-19 (each season scored by a fit
+  on the other 17). GATE: Brier lower by >= 0.003 with the 95% CI (2,000 game resamples) upper < 0, the settled weight
+  negative in every fold, lower in >= 10 of 18 seasons. If it passes: ship a week-18 settled term in the Matchups win
+  chance (weight refit on 2021-25 in production's form), confirm on 2026 week 18.
+- **RESULT {#stakes-final} (BT2) final-week settled teams, 2002-19: FAIL on the Brier CI; OWNER-DESIGN SHIP (the
+  model's driver, owner: "you're at the wheel").** tools/stakes_final_eval.py (tools/playoff_odds.simulate now plays
+  the 6-team format with two byes for pre-2020 seasons), 288 final-week games, 96 with a settled team: Brier .2168 ->
+  .2076, -0.0092 [-0.0206, +0.0026]: FAIL; settled weight negative in all 18 leave-one-season-out fits (-0.93 to
+  -1.24); better 10 of 18 seasons. Settled teams won .511 of 88 games against an unsettled opponent where the base said
+  .668 (about 3 standard errors). Two independent samples agree ((BT) week 18 2022-25: .2363 -> .2152). Shipped:
+  config final_week_settled = -1.1 (2002-19's size; 2021-25 production-form fit -1.38 on 35 games), Matchups only,
+  final regular-season week only, settled from the Playoffs simulation as of before the week (checked on 2025 week 18:
+  the same 7 teams as the backtest odds). The model note says "X has nothing left to play for (starters often rest)".
+  Confirm on 2026 week 18 (and each season after); revert if settled teams there win at their base rate.
