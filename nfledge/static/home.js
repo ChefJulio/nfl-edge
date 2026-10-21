@@ -40,6 +40,11 @@
     const tile = (href, label, body) => `<a class="hm-t" href="#${href}"><div class="hm-k">${label}<span class="hm-go" aria-hidden="true">&rsaquo;</span></div>${body}</a>`;
     sec.innerHTML = `<div class="hm">
       <div class="sec-head"><div><h2>I want to&hellip;</h2><p>${esc(wk)} on NFL Edge. Pick a place to start.</p></div></div>
+      <details class="howto"><summary>What is this?</summary><div>
+        <p>A free NFL model. Every week it projects every player and team from play-by-play data and injury reports, ranks
+        teams by how good they really are, tracks games live, and plugs into your Sleeper or ESPN league.</p>
+        <p class="muted">No ads, no sign-up. The Model tab shows how it works, and what we tried that didn't.</p>
+      </div></details>
       <div class="hm-grid">
         ${tile('players/rankings', 'See weekly projections', `<ul class="hm-l">${proj}</ul><p class="hm-f">Top projected at each position &middot; all players in Rankings</p>`)}
         ${tile('teams/power', 'See team power rankings', `<ul class="hm-l">${pw}</ul><p class="hm-f">Net points per game vs an average team</p>`)}
