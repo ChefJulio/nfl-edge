@@ -66,7 +66,8 @@
       return c ? `<span class="dc-tag dt-${c === 'Q' ? 'q' : c === 'D' ? 'd' : 'out'}" title="${esc(tip)}">${esc(c)}</span>` : '';
     }
     if (!st) return '';
-    const c = des ? injCode(des) : '';
+    // only a real designation makes a tag: a note ("On report last wk", "Left last game early") read as "ON" / "LEFT"
+    const c0 = des ? injCode(des) : '', c = ['IR', 'SSPD', 'PUP', 'NFI', 'INA', 'ACT', 'O', 'D', 'Q'].includes(c0) ? c0 : '';
     // game day (AU): INA = declared inactive, ACT = a listed player who dressed (game-day rulings, espn.gameday_rulings)
     const tip = c === 'INA' ? 'Declared inactive for this game' : c === 'ACT' ? 'Was questionable; declared active for this game' : des;
     const tag = c ? `<span class="dc-tag dt-${c === 'Q' ? 'q' : c === 'D' ? 'd' : c === 'ACT' ? 'act' : 'out'}" title="${esc(tip)}">${esc(c)}</span>` : '';

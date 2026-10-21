@@ -448,7 +448,7 @@
       rosAll = Object.entries(j.players).map(([pid, x]) => {
         const live = D.players[pid] || {};
         return { pid, name: x.name, pos: x.pos, team: x.team, espn: x.espn, photo: x.photo || live.photo, k: x.k, wk: x.w,
-                 ss: x.ss, g: x.g, status: live.status || '', takeaway: live.takeaway || '' };
+                 ss: x.ss, g: x.g, status: live.status || '', inactive: live.inactive, takeaway: live.takeaway || '' };  // inactive: the tag is our band, as in Weekly
       });
       sec.querySelector('.ros-note').textContent = `Weeks ${j.from}-${j.through}${(j.missing || []).length ? ` (weeks ${j.missing.join(', ')} not built yet, counted as 0)` : ''} · built ${j.built || ''}.`;
     });
