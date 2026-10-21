@@ -38,8 +38,10 @@ def load(first: int, last: int):
   ro = ro[ro.game_type == "REG"][["season", "week", "team", "gsis_id", "status"]].dropna(subset=["gsis_id"])
   inj = pd.concat([pd.read_parquet(c / f"injuries_{y}.parquet") for y in range(first, last + 1) if (c / f"injuries_{y}.parquet").exists()],
                   ignore_index=True)
-  inj = inj[(inj.game_type == "REG") & inj.report_status.isin(["Out", "Doubtful"])][["season", "week", "team", "gsis_id"]]
-  return sn, ro, inj
+  inj = inj[inj.game_type == "REG"]
+  qst = inj[inj.report_status == "Questionable"][["season", "week", "team", "gsis_id"]]
+  inj = inj[inj.report_status.isin(["Out", "Doubtful"])][["season", "week", "team", "gsis_id"]]
+  return sn, ro, inj, qst
 
 
 def contracts_q(seasons) -> dict:
@@ -55,7 +57,21 @@ def contracts_q(seasons) -> dict:
 def main():
   a = [int(x) for x in sys.argv[1:3]]
   first, last = a if len(a) == 2 else (2021, date.today().year)
-  sn, ro, inj = load(first, last)
+  sn, ro, inj, qst = load(first, last)
+  # (BW) share of Questionable listings that played, from seasons before each one scored (2018 on)
+  qset = set(map(tuple, qst.itertuples(index=False)))
+  qrate_by = {}
+  for y in range(2018, last + 1):
+    q = pd.read_parquet(ROOT / "cache" / f"injuries_{y}.parquet")
+    q = q[(q.game_type == "REG") & (q.report_status == "Questionable")]
+    s_ = pd.read_parquet(ROOT / "cache" / f"snaps_{y}.parquet")
+    pmap = dict(zip(pd.read_parquet(ROOT / "cache" / "players_all.parquet").dropna(subset=["pfr_id", "gsis_id"]).pfr_id,
+                    pd.read_parquet(ROOT / "cache" / "players_all.parquet").dropna(subset=["pfr_id", "gsis_id"]).gsis_id))
+    pl_ = set(zip(s_.week, s_.pfr_player_id.map(pmap), s_.team))
+    qrate_by[y] = (sum((w, g, t) in pl_ for w, g, t in zip(q.week, q.gsis_id, q.team)), len(q))
+  qrate = {y: sum(qrate_by[k][0] for k in qrate_by if k < y) / max(1, sum(qrate_by[k][1] for k in qrate_by if k < y))
+           for y in range(first, last + 1)}
+  print("Questionable played share used per season:", {y: round(v, 3) for y, v in qrate.items()})
   cap = contracts_q(range(first, last + 1))
   main_grp = sn.groupby("gsis_id").grp.agg(lambda x: x.value_counts().index[0])
   val = Values()
@@ -103,6 +119,11 @@ def main():
     extra = sum(r[2] * val(int(x.season), r[0], r[1]) for r in arr
                 if r[1] in OFF and (x.season, x.week, x.team, r[0]) not in outrep)
     rec["report_rapmarr_OFF"] = rec["report_rapm_OFF"] + extra
+    # (BW) Questionable regulars at the measured chance to play
+    rec["report_rapmq_OFF"] = rec["report_rapm_OFF"] - sum(
+      r[2] * (1 - qrate[int(x.season)]) * val(int(x.season), r[0], r[1]) for r in regs
+      if r[1] in OFF and (x.season, x.week, x.team, r[0]) in qset and (x.season, x.week, x.team, r[0]) not in outrep
+      and status.get((x.season, x.week, x.team, r[0])) in ("ACT", "INA"))
     rec["n_arrivals"] = sum(1 for r in arr if r[1] in OFF)
     rows.append({"season": int(x.season), "week": int(x.week), "team": x.team, "game_id": x.game_id, **rec})
   df = pd.DataFrame(rows)

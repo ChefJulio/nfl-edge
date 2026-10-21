@@ -3450,3 +3450,14 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   already average enough plays that recovery bounces and outlier plays wash out; config switches stay off.
   Pattern across (BU), (BV), (X): the team-strength side is saturated with this data (tuning and input cleaning move
   the win chance by < 0.002); what's left is information the play-by-play doesn't carry.
+- **PRE-REGISTERED 2026-10-20 (owner: "nope no money": free data only): (BW) Questionable players at their real
+  chance to play in the lineup term.** The shipped term (BP2) counts a Questionable regular as fully available, but
+  66.2% of Questionable listings 2018-25 played (64-69% every season). Variant: a Questionable regular's expected role
+  = role x q, q = the share of Questionable listings that played in seasons before the one scored (all positions);
+  everything else as shipped (report availability, offense, on-field values). Harness = (BR)'s (production's form,
+  walk-forward, scored 2022-25). GATE: Brier lower by >= 0.001 (it changes few players: a refinement, not a new
+  signal) with the 95% CI (2,000 game resamples) upper < 0, lower in >= 3 of 4 seasons, 2026 so far same direction.
+- **RESULT {#lineup-questionable} (BW) Questionable players at their real chance to play: FAIL (too small).**
+  tools/lineup_build.py (q from earlier seasons: .656-.665) + tools/questionable_eval.py, 2022-25, 1,084 games: base
+  .2213, quest .2210, -0.0003 [-0.0007, +0.0002], better 3 of 4 seasons, 2026 +0.0001. It touches half of team-games
+  but moves the lineup term by ~16% of its typical size. Not shipped.
