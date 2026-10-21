@@ -1583,14 +1583,20 @@ def schedule_note(x) -> str:
 
 
 def role_changes(eng, season: int, week: int, cfg: dict) -> list:
-  L = eng.pm.ledger
-  L = L[(L.season == season) & (L.week < week) & L.pos.isin(["RB", "WR", "TE", "QB"])].copy()
+  full = eng.pm.ledger
+  full = full[((full.season < season) | ((full.season == season) & (full.week < week))) & full.pos.isin(["RB", "WR", "TE", "QB"])]
+  L = full[full.season == season].copy()
   if L.empty:
     return []
   L["opp_share"] = (L.carries + L.tgt) / (L.team_rush + L.team_db).replace(0, np.nan)
   last_team_week = L.groupby("team").week.max()
   out = []
   thr_s, thr_o = cfg["player_model"]["role_change_snap_jump"], cfg["player_model"]["role_change_opp_jump"]
+  # already held in a typical 12-team league (expert consensus positional rank before the spike game): a bigger role
+  # for a starter is news, but not a waiver add (owner 2026-10-20: Hubbard, Pollard, Flowers on the list)
+  HELD = {"QB": 16, "RB": 30, "WR": 40, "TE": 14}
+  e = eng.data.ecr if getattr(eng.data, "ecr", None) is not None else pd.DataFrame(columns=["season", "week", "gsis_id", "ecr"])
+  ecr = e[e.season == season].set_index(["week", "gsis_id"]).ecr
   for gid, g in L.sort_values("week").groupby("gsis_id"):
     last = g.iloc[-1]
     if last.week != last_team_week.get(last.team):
@@ -1601,13 +1607,48 @@ def role_changes(eng, season: int, week: int, cfg: dict) -> list:
     ds = (last.offense_pct or 0) - (prev_snap if pd.notna(prev_snap) else 0)
     do = (last.opp_share or 0) - (prev_opp if pd.notna(prev_opp) else 0)
     if (pd.notna(ds) and ds >= thr_s) or (pd.notna(do) and do >= thr_o):
+      # an established regular back from injury is returning to his usual role, not changing it (owner 2026-10-20:
+      # "aj brown and zay flowers ... leagues are expected to hold even while injured"): usual = his snap share over
+      # his last 10 games before this one, any season (median); full-time (>= 60%) and back to it -> not a role change
+      hist = full[(full.gsis_id == gid)].sort_values(["season", "week"]).iloc[:-1].tail(10)
+      usual = hist.offense_pct.median() if len(hist) else 0.0  # median: his own injury-shortened games barely move it
+      if pd.notna(usual) and usual >= 0.6 and (last.offense_pct or 0) <= usual + 0.1:
+        continue
+      rk = ecr.get((int(last.week), gid))
+      if rk is not None and pd.notna(rk) and rk <= HELD.get(last.pos, 0):
+        continue
       name = eng.pm.info.full_name.get(gid, gid)
+      if last.pos == "QB":  # (owner 2026-10-20: "touches not yet" for McKee, the new starter) dropbacks are his touches
+        touches = int(last.db + last.carries)
+        take = qb_takeaway(eng, L, last, season, week)
+      else:
+        touches = int(last.carries + last.tgt)
+        take = role_takeaway(last.offense_pct or 0, last.opp_share or 0, touches)
       out.append({"name": name, "pid": gid, "pos": last.pos, "team": last.team, "week": int(last.week),
                   "snap_now": last.offense_pct, "snap_prev": prev_snap, "opp_now": last.opp_share,
-                  "opp_prev": prev_opp, "touches": int(last.carries + last.tgt), "score": (ds or 0) + 2 * (do or 0),
-                  "takeaway": role_takeaway(last.offense_pct or 0, last.opp_share or 0, int(last.carries + last.tgt))})
+                  "opp_prev": prev_opp, "touches": touches, "score": (ds or 0) + 2 * (do or 0), "takeaway": take})
   out.sort(key=lambda x: -x["score"])
   return out[:30]
+
+
+def qb_takeaway(eng, L: pd.DataFrame, last, season: int, week: int) -> str:
+  """A quarterback's role change: did he take over as the starter, and from whom (hurt or benched)."""
+  if (last.offense_pct or 0) < 0.7:
+    return "Relief snaps: watch"
+  prev = L[(L.team == last.team) & (L.pos == "QB") & (L.week < last.week) & (L.week >= last.week - 3) & (L.gsis_id != last.gsis_id)]
+  mine = L[(L.gsis_id == last.gsis_id) & (L.week < last.week) & (L.week >= last.week - 3)]
+  if len(mine) and mine.offense_pct.mean() >= 0.7:
+    return "Starter again: superflex / 2-QB start"
+  if prev.empty:
+    return "Took over as the starter: superflex / 2-QB add"
+  old = prev.groupby("gsis_id").offense_pct.mean().idxmax()
+  who = str(eng.pm.info.full_name.get(old, old)).split()[-1]
+  inj = eng.data.injuries
+  hurt = not inj[(inj.season == season) & (inj.week.between(week - 1, week)) & (inj.gsis_id == old)
+                 & inj.report_status.isin(["Out", "Doubtful", "Questionable"])].empty
+  ro = eng.data.rosters
+  hurt = hurt or not ro[(ro.season == season) & (ro.week == week) & (ro.gsis_id == old) & (ro.status == "RES")].empty
+  return f"New starter with {who} hurt: superflex / 2-QB add" if hurt else f"Took over from {who}: superflex / 2-QB add"
 
 
 def role_takeaway(snap: float, opp: float, touches: int) -> str:
