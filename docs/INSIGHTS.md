@@ -3163,3 +3163,24 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   the date and players come back. CONFIRM 2026 (50 dated states, daily snapshots): -0.2401, the opposite way: with
   fresh dates it may work. Lead, not a result: re-test at season end on 2026's daily snapshots alone (data this test
   never scored), where each build sees the date as of that day.
+- **PRE-REGISTERED 2026-10-20 (owner: "so we can't test against vegas" / "sure"): (BK) projected final wins, ours vs
+  the market.** Descriptive (reported, not gated: Vegas is a benchmark, nothing ships from it). 2021-25, checkpoints
+  weeks 3 / 5 / 9 / 13 (before that week's games), 160 team-seasons each. Ours = production's playoff simulation
+  (tools/playoff_odds.simulate: Power's ranks from this week's lineup + Elo + home, this week's Vegas lines for this
+  week's games, 2,000 seasons) -> projected wins. MARKET = the same simulation with Power's ranks replaced by market
+  ranks: per-team ratings fit by ridge least squares to every closing spread of the season so far through this week
+  (spread = home rating - away rating + home field, neutral sites without it, weeks weighted by half-life 4 weeks,
+  ridge 1.0), so only lines that existed then; Elo, the win model and this week's lines unchanged. CEILING (not a
+  test: uses lines that did not exist yet) = wins so far + the vig-free closing-moneyline chance of every remaining
+  game. Scored on final regular-season wins: mean absolute error and mean within-season Spearman; ours - market with
+  a 95% CI over 2,000 team-season resamples. Hypothesis: ours ahead of the market early (weeks 3-5) is unlikely; within
+  0.1 wins MAE of it would be a strong showing.
+- **RESULT {#market-wins} (BK) projected final wins, ours vs the market: TIE.** tools/market_wins_eval.py, 2021-25, 160
+  team-seasons per checkpoint. MAE (wins) ours / market / ceiling: week 3 2.10 / 2.08 / 1.51 (ours - market +0.012
+  [-0.031, +0.054]); week 5 1.91 / 1.92 / 1.42 (-0.004 [-0.044, +0.036]); week 9 1.55 / 1.55 / 1.25 (-0.008 [-0.038,
+  +0.021]); week 13 1.11 / 1.11 / 0.96 (+0.006 [-0.011, +0.024]). Spearman with final wins ours / market: .566 / .552,
+  .692 / .677, .795 / .789, .877 / .875 (ours a hair higher at every checkpoint). By season MAE within 0.03 every year.
+  Simple baselines (scratch descriptive run): pace 4.52 / 2.68 / 1.88 / 1.25, record + .500 2.38 / 2.18 / 1.81 / 1.31.
+  Our ranks and the market's agree only .76-.80 (Spearman) at the same accuracy: different information. Lead, not a
+  result: a blend of our ratings and the spread-fit market ratings (pre-register before testing). The ceiling's edge
+  comes from lines set later (injuries and form known by then), not a fair comparison.
