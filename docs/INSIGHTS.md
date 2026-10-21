@@ -3416,3 +3416,20 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   final regular-season week only, settled from the Playoffs simulation as of before the week (checked on 2025 week 18:
   the same 7 teams as the backtest odds). The model note says "X has nothing left to play for (starters often rest)".
   Confirm on 2026 week 18 (and each season after); revert if settled teams there win at their base rate.
+- **PRE-REGISTERED 2026-10-20 (owner: "make our model better. you're at the wheel"): (BU) team-rating shrinkage and
+  recency tuned on GAME outcomes.** The ratings' ridge penalties are chosen by predicting next week's per-play EPA (a
+  noisy target); half-life 3 was "insensitive" for fantasy and game-tested only inside (X)'s carryover grid. Grid:
+  alpha_scale (a multiplier on the CV-tuned penalties, team_model.alpha_scale) {1/3, 1, 3} x half_life_weeks {2, 3,
+  4.5}, everything else as shipped. tools/engine_tune_eval.py (tools/rank_predictor.season_ranks: every 2021-26 game
+  re-rated with ranks as of the week before). Primary metric: Brier of the win chance (home + rank gap + Elo, refit
+  walk-forward on earlier seasons), games with a line, weeks 2+. CHOOSE the lowest Brier on 2022-23; DECIDE on 2024-25:
+  Brier lower by >= 0.002 with the 95% CI over season-weeks below 0, margin MAE not worse (CI upper < +0.05); CONFIRM
+  2026 weeks so far same direction; before shipping, fantasy MAE (tools/experiments.py 2021-25) CI upper < +0.003. If
+  today's setting is the 2022-23 choice, keep it (now tested).
+- **RESULT {#engine-tune} (BU) team-rating shrinkage and recency tuned on game outcomes: FAIL (flat), today's settings
+  kept (now game-tested).** tools/engine_tune_eval.py, 1,097 games 2022-26. CHOOSE 2022-23 (Brier vs today): alpha
+  x1/3 hl 2 -0.0015 [-0.0035, +0.0004] (lowest); every other cell within +-0.0007. DECIDE 2024-25: that choice +0.0003
+  [-0.0014, +0.0020], margin MAE +0.063, 2026 +0.0046: FAIL. On 2024-25 every cell is within +-0.0007 of today (best
+  alpha x3 hl 3 -0.0005). The win chance is insensitive to how the ratings shrink and forget across a 9x range of
+  penalties and 2-4.5 week half-lives: the ratings' tuning is not where accuracy is hiding. team_model.alpha_scale
+  stays 1 (the knob remains for future tests).

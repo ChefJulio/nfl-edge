@@ -557,7 +557,8 @@ class TeamModel:
           pg.index.names = ["game_id", "posteam"]
           err = tg.epa - pg.reindex(tg.index)
           losses[i] += float(np.sum(tg.n * err ** 2))
-      best[u] = float(grid[int(np.argmin(losses))])
+      # alpha_scale (BU): a multiplier on the CV choice, to test shrinkage tuned on game outcomes; 1 = as tuned
+      best[u] = float(grid[int(np.argmin(losses))]) * float(self.cfg["team_model"].get("alpha_scale", 1.0))
       self.cv_loss[u] = float(np.min(losses))
     self.alphas = best
     if self.use_qb:
