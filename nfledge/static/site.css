@@ -104,8 +104,8 @@ details.howto div { margin-top: 8px; color: var(--muted); font-size: var(--fs-sm
    scroll sideways, which traps position: sticky inside its wrapper, so a copy of its header rides in a zero-height
    sticky strip under the tabs (shown once the real one scrolls away) and follows the table's sideways scroll. */
 .scroll.fits { overflow: visible; }
-.scroll.fits thead th { top: var(--navh, 45px); }
-.fhead { position: sticky; top: var(--navh, 45px); height: 0; z-index: 6; visibility: hidden; }
+.scroll.fits thead th { top: calc(var(--navh, 45px) + var(--sat, 0px)); }
+.fhead { position: sticky; top: calc(var(--navh, 45px) + var(--sat, 0px)); height: 0; z-index: 6; visibility: hidden; }
 .fhead.show { visibility: visible; }
 .fhead-in { overflow: hidden; background: var(--panel); border-bottom: 1px solid var(--line); box-shadow: 0 6px 12px -8px rgba(0,0,0,.5); }
 .fhead table { width: auto; table-layout: fixed; margin: 0 !important; border-spacing: 0 !important; }

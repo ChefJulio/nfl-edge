@@ -1004,7 +1004,7 @@ html.pc-open { overflow: hidden; }
   }
 }
 /* the name / photo / position header stays in view while the card scrolls (owner 2026-10-14) */
-.pc-page .pc-head { position: sticky; top: var(--navh, 0px); z-index: 6; background: var(--panel);
+.pc-page .pc-head { position: sticky; top: calc(var(--navh, 0px) + var(--sat, 0px)); z-index: 6; background: var(--panel);
   margin: -18px -18px 12px; padding: 22px 52px 10px 18px; }  /* flush with the card's top edge: tints fill its rounded corners */
 @media (max-width: 560px) { .pc-page .pc-head { margin: -14px -14px 12px; padding: 16px 48px 8px 14px; } }
 
@@ -1016,7 +1016,7 @@ html.pc-open { overflow: hidden; }
 }
 
 /* the page tabs stay reachable: sticky right under the sticky header (shell.js sets --pchead) */
-.pc-page .pc-tabs { position: sticky; top: calc(var(--navh, 0px) + var(--pchead, 0px)); z-index: 5;
+.pc-page .pc-tabs { position: sticky; top: calc(var(--navh, 0px) + var(--sat, 0px) + var(--pchead, 0px)); z-index: 5;
   box-shadow: 0 8px 12px -10px rgba(0,0,0,.7); }
 /* desktop: tabs as wide as their labels, not five stretched segments */
 @media (min-width: 1100px) { .pc-page .pc-tabs { display: inline-flex; } .pc-page .pc-tabs button { flex: 0 0 auto; padding: 7px 18px; } }

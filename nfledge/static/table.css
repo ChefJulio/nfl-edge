@@ -6,8 +6,8 @@
   background: linear-gradient(to right, transparent, color-mix(in srgb, var(--bg) 85%, transparent)); opacity: 0; transition: opacity var(--dur) var(--ease); }
 .dt-wrap.more::after { opacity: 1; }
 .dt-wrap .scroll.fits { overflow: visible; }
-.dt-wrap .scroll.fits table.dt thead th { top: var(--navh, 45px); }
-.dt-wrap .fhead { position: sticky; top: var(--navh, 45px); height: 0; z-index: 6; visibility: hidden; }
+.dt-wrap .scroll.fits table.dt thead th { top: calc(var(--navh, 45px) + var(--sat, 0px)); }
+.dt-wrap .fhead { position: sticky; top: calc(var(--navh, 45px) + var(--sat, 0px)); height: 0; z-index: 6; visibility: hidden; }
 .dt-wrap .fhead.show { visibility: visible; }
 .dt-wrap .fhead-in { overflow: hidden; background: var(--panel); border-bottom: 1px solid var(--line); box-shadow: 0 6px 12px -8px rgba(0,0,0,.5); }
 .dt-wrap .fhead table { width: auto; table-layout: fixed; margin: 0 !important; border-spacing: 0 !important; }
