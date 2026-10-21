@@ -125,3 +125,8 @@ table.lg-tbl tr.lg-empty td { opacity: .65; } .lg-empty-sub { font-size: var(--f
 .lg-tnote { flex-basis: 100%; margin-top: -6px; font-size: var(--fs-xs); }
 /* a long note beside a name wraps instead of widening the table (owner 2026-10-20: Tank Dell's row stretched it) */
 table.lg-tbl .nm2 .l1 { white-space: normal; }
+/* start / bench odds (league.js h2h): the chance the incoming player outscores the one he replaces; toss-ups flagged */
+.lg-h2h { margin-top: 6px; font-size: var(--fs-sm); color: var(--muted); }
+.lg-h2h.tu { color: var(--ink); }
+.lg-tu { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 11px; font-weight: 800; letter-spacing: .03em;
+  background: color-mix(in srgb, var(--warn) 22%, transparent); color: var(--warn); margin-right: 4px; }

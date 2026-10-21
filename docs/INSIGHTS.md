@@ -3517,3 +3517,32 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   The health tile took the clock's deadline as "report in" (and a 6-day window took last Friday's entry as this
   week's); the build counted a day once ANY team had filed it. Now per team: the week data's `filed` (report dates in
   our practice data); a day past its deadline that isn't there reads "not in yet".
+- **DESCRIPTIVE 2026-10-21 (owner, via a friend: Woody Marks 15.3 over Kenneth Walker 14.4, "is the model worth
+  anything?").** Cached baseline backtests 2021-25, weeks 4+, 3+ games (tools/vs_naive.py): MAE model / season FP/G /
+  experts (ECR pts): QB 6.09 / 6.30 / 6.12, RB 5.21 / 5.59 / 5.33, WR 5.15 / 5.51 / 5.14, TE 4.37 / 4.67 / 4.40; start /
+  sit pairs model / FP/G / experts RB 69.2% / 65.8% / 69.0% (WR 64.7 / 61.3 / 65.0). Season FP/G far above the
+  projection does not carry: RBs 6+ above (n 64) FP/G 18.7, projected 11.1, scored 11.8; bellcows (65%+ carries) 4+
+  above (n 69) FP/G 20.0, experts 17.5, model 14.2, actual 14.5 (scratch/bellcow.py). Backups turned lead (n 41) model
+  14.2, actual 15.2. Big model-vs-expert gaps (scratch/disagree.py): model 5+ below experts (RB n 134) model 13.9,
+  experts 20.8, actual 15.6 (truth ~1/4 toward the experts); 5+ above (n 37) model 12.2, experts 5.7, actual 11.0.
+  Rushing efficiency is not pulled too far toward average (tools/eff_resid.py: the lowest-efficiency backs ran +0.25
+  ypc ABOVE projection; TD/carry calibrated). Volume for backs gaining a sitter's work is calibrated (proj 12.7, actual
+  12.7 carries, n 163; only the 10%+ added-share bucket overshoots, n 12). Marks' 15.3 = 10.9 own + 1.75 redistributed
+  (Montgomery 32% to play; Jawhar Jordan, practice squad, off the board) + 2.6 team-share normalization, in a game Houston
+  is favored by 10.5 (tools/explain_proj.py). Found: midweek the site runs WITHOUT the expert blend (nflverse ECR is
+  scraped Fridays; the display's ECR is last week's) - the early-week ECR forward test (sec. 9, tools/ecr_snapshot.py)
+  is the path; the backtest accuracy above is the blended Friday-Sunday state.
+- **Shipped 2026-10-21: start / bench odds and toss-ups (League lineup).** tools/h2h_curve.py: how often the higher
+  projection outscores the other by gap, every same-position same-week pair 2021-25 (238k): 0-0.5 51%, 0.5-1 54%, 1-1.5
+  56%, 1.5-2 59%, 2-3 61%, 3-4 65%, 4-6 69%, 6+ 78%. Each suggested swap shows its chance; under 1.5 points: "Toss-up:
+  start either".
+- **PARKED (owner 2026-10-21: "keep that recorded but obscured from the main list"): show disagreements on the player
+  card** - when we differ a lot from the experts or his season form, say so and why (matchup, volume, efficiency
+  regressing). Not built.
+- **QUEUED (pre-register next): (CA) with-or-without workloads.** Braelon Allen (Breece Hall 40% to play) 10.6 if Hall
+  sits, 9.9 if he plays; with Hall wks 1-3 he averaged 5.7 PPR, without (wks 4-6) 13.2. Woody Marks "if Montgomery
+  plays" 14.2 vs 7.7 PPR in weeks 1-4 with him. The usage half-life blends games with and without the teammate, and the
+  "plays" world never removes the bump. Variant: a player's shares estimated separately from recent games with / without
+  a teammate whose availability is uncertain or who returns, shrunk toward the blend by games in each.
+- **QUEUED: prospective model-vs-expert disagreement log** (gaps of 3+ points each week, outcomes after), from the
+  archived week pages.
