@@ -3224,3 +3224,25 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   average (2021 HOU 8.1 vs Vegas 4.0, final 4; 2022 DEN 7.3 vs 10.5, final 5 was ours right); preseason is the model's
   weakest point (last season's play + this week-1 lineup, no offseason roster news). Within the noise of 160
   team-seasons; data/history/preseason_win_totals.csv also holds 2016-20 and 2026 for later tests.
+- **PRE-REGISTERED 2026-10-20 (owner: "yes"): (BN) Vegas preseason win totals as an early-season prior.** (BM): before
+  the season Vegas knows the offseason (departures, coaching, rebuilds) and we don't; (BK)/(BL): by midseason we tie
+  or beat market-derived ratings. Test: the Matchups win chance for this week's game (report.win_model week_*: home +
+  rank gap of this week's lineup + Elo gap). For every regular-season game 2021-26, as of its own week (Power's "This
+  week" rank from tools/market_games_eval's engine path, Elo before the week), vt_gap = home team's preseason win total
+  - away team's (data/history/preseason_win_totals.csv). Arms, logistic fit walk-forward on earlier seasons, scored
+  2022-25: BASE = home + rank gap + Elo gap (production's form, refit the same way); PRIOR = BASE + vt_gap x [weeks 1-4]
+  + vt_gap x [weeks 5-8] + vt_gap x [weeks 9+] (the data picks how fast it fades). Ties dropped. CI = 2,000 resamples of
+  games. GATE: (1) weeks 1-8 Brier lower by >= 0.002 with the 95% CI upper < 0; (2) all weeks not worse (CI upper <
+  +0.0005); (3) weeks 1-8 lower in >= 3 of 4 seasons; CONFIRM 2026 weeks 1-6 same direction. Reported: Vegas's own
+  game-line Brier on the same games (the bar to beat), weeks 1-4 / 5-8 / 9+ separately, the fitted weights. A pass
+  ships the term into week_* (fit on 2021-25) and the playoff simulation's future games by the game's band.
+- **RESULT {#vegas-prior} (BN) Vegas preseason win totals as an early-season prior: FAIL.** tools/vegas_prior_eval.py,
+  2022-25, 1,084 games. Brier base / prior / Vegas lines: weeks 1-4 .2340 / .2308 / .2253; 5-8 .2407 / .2403 / .2185;
+  9+ .2150 / .2219 / .2010. (1) weeks 1-8 -0.0019 [-0.0085, +0.0049]: FAIL (short of -0.002, CI spans 0); (2) all weeks
+  +0.0030 [-0.0008, +0.0067]: FAIL (weeks 9+ worse: 2022 was fit on 2021 alone, six weights on ~270 games); (3) weeks
+  1-8 lower 3 of 4 seasons (2022 worse); CONFIRM 2026 weeks 1-6 (90 games) +0.0024, the wrong way. Weights fit 2021-25
+  (reading only): win-total gap .114 per win in weeks 1-4, .134 in 5-8, .014 from 9: the preseason view keeps
+  mattering through week 8, then is gone. The bigger finding is the bar: on this week's games Vegas's lines beat our
+  win chance by ~.006 in weeks 1-4, ~.02 in 5-8 and ~.014 from week 9 (lines carry this week's injuries, weather and
+  news). Lead, not a result: a one-weight version (gap x [weeks 1-8]) fit on more seasons once the engine backtests
+  before 2021; the win totals for 2016-20 are on file.
