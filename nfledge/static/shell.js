@@ -731,3 +731,79 @@ document.addEventListener('touchstart', () => {}, { passive: true });
                   pa_tiers: [[0, 0, 5], [1, 6, 4], [7, 13, 3], [14, 17, 1], [18, 27, 0], [28, 34, -1], [35, 45, -3], [46, Infinity, -5]] };
   NFLE.kdst = { DSTAT, Phi, pBetween, dstScore, kScore, STD_K, STD_D };
 })();
+// Home-screen app (iOS "Add to Home Screen" / installed PWA): no browser chrome, so two things the browser normally
+// handles are ours. ?standalone=1 turns this on in a normal tab (testing).
+(() => {
+  const NFLE = window.NFLE, html = document.documentElement;
+  const standalone = navigator.standalone === true || matchMedia('(display-mode: standalone)').matches
+    || /[?&]standalone=1\b/.test(location.search);
+  if (!standalone) return;
+  html.classList.add('standalone');
+  // (1) Bottom bar drift (owner 2026-10-20, screenshot: the bar rides up to mid-screen). WebKit bug in standalone mode
+  // (bugs.webkit.org 297779, Apple forums 800154): after the keyboard closes the layout viewport keeps its keyboard-
+  // shrunk height, and position: fixed anchors to it. When the visual viewport's bottom and the layout viewport's
+  // bottom disagree by more than a toolbar's worth, pin the bar to the visual bottom; otherwise plain CSS (bottom: 0).
+  const bot = document.querySelector('body > .botbar'), vv = window.visualViewport;
+  if (bot && vv) {
+    let raf = 0;
+    const fix = () => {
+      raf = 0;
+      const drift = vv.offsetTop + vv.height - html.clientHeight;
+      if (Math.abs(drift) > 40 && !html.classList.contains('kb-open')) {
+        bot.style.top = `${Math.round(vv.offsetTop + vv.height - bot.offsetHeight)}px`;
+        bot.style.bottom = 'auto';
+      } else if (bot.style.top) {
+        bot.style.top = ''; bot.style.bottom = '';
+      }
+    };
+    const soon = () => { if (!raf) raf = requestAnimationFrame(fix); };
+    vv.addEventListener('resize', soon);
+    vv.addEventListener('scroll', soon);
+    addEventListener('scroll', soon, { passive: true });
+    // the keyboard just closed: nudge WebKit to re-measure the viewport (a same-position scroll), then re-check
+    document.addEventListener('focusout', () => setTimeout(() => { scrollTo(scrollX, scrollY); fix(); }, 350));
+    NFLE.fixBar = fix;
+  }
+  // (2) Pull down to refresh (owner 2026-10-20: "where the browser doesn't already handle it"): from the top of the
+  // page, pull past the line and let go. Refresh = refetch the page and the build stamp past the HTTP cache, then
+  // reload, so new numbers and new site code both arrive (a home-screen app otherwise keeps old code until it's killed).
+  const TH = 70, MAX = 110;
+  const ptr = document.createElement('div');
+  ptr.className = 'ptr'; ptr.setAttribute('aria-hidden', 'true');
+  ptr.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg>';
+  document.body.appendChild(ptr);
+  let y0 = null, x0 = 0, pull = 0, busy = false;
+  const blocked = t => html.classList.contains('pc-open') || html.classList.contains('kb-open')
+    || document.querySelector('.sheet-ov, .zoom-ov') || (t && t.closest && t.closest('input, textarea, select, .bb-sheet'));
+  const draw = () => {
+    const d = Math.min(pull, MAX) * 0.6, k = Math.min(1, pull / TH);
+    ptr.style.opacity = String(Math.min(1, pull / 30));
+    ptr.style.transform = `translateY(${d - 44}px) scale(${0.6 + 0.4 * k})`;
+    ptr.querySelector('svg').style.transform = `rotate(${Math.round(k * 300)}deg)`;
+    ptr.classList.toggle('ready', pull >= TH);
+  };
+  const reset = () => { pull = 0; ptr.classList.remove('ready'); ptr.style.opacity = '0'; ptr.style.transform = ''; };
+  const go = async () => {
+    busy = true;
+    ptr.classList.add('busy'); ptr.style.opacity = '1'; ptr.style.transform = 'translateY(14px) scale(1)';
+    ptr.querySelector('svg').style.transform = '';
+    try {
+      await Promise.all([fetch(location.href, { cache: 'reload' }), fetch(new URL('build.json', NFLE.root), { cache: 'reload' })]);
+    } catch (e) { /* offline: the reload shows what the cache has */ }
+    location.reload();
+  };
+  const start = (x, y, t) => { y0 = (busy || scrollY > 0 || blocked(t)) ? null : y; x0 = x; pull = 0; };
+  const move = (x, y) => {
+    if (y0 == null) return;
+    const dy = y - y0, dx = x - x0;
+    if (pull === 0 && Math.abs(dx) > Math.abs(dy)) { y0 = null; return; }  // a sideways swipe (tables, chips)
+    if (dy <= 0 || scrollY > 0) { reset(); return; }
+    pull = dy; draw();
+  };
+  const end = () => { if (y0 == null) return; y0 = null; if (pull >= TH) go(); else reset(); };
+  addEventListener('touchstart', e => { if (e.touches.length === 1) start(e.touches[0].clientX, e.touches[0].clientY, e.target); else y0 = null; }, { passive: true });
+  addEventListener('touchmove', e => { if (e.touches.length === 1) move(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+  addEventListener('touchend', end, { passive: true });
+  addEventListener('touchcancel', () => { y0 = null; reset(); }, { passive: true });
+  NFLE.ptr = { start, move, end };  // tests drive it directly (Playwright WebKit has no multi-point touch drag)
+})();
