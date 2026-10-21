@@ -1,17 +1,22 @@
-/* Home (home.js): four big "I want to..." tiles; two by two on phones, a row of four on wide screens */
-.home { padding: 14px 0 8px; }
-.home-h { font-size: 26px; line-height: 1.15; margin: 4px 0 14px; letter-spacing: -.01em; }
-.home-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-@media (min-width: 900px) { .home-grid { grid-template-columns: repeat(4, 1fr); } }
-.home-tile { --tile: var(--accent); position: relative; display: flex; flex-direction: column; gap: 8px; min-height: 156px; padding: 16px 16px 30px;
-  border-radius: var(--r-lg); border: 1px solid var(--line); color: var(--ink); text-decoration: none; box-shadow: var(--e2, 0 2px 10px rgba(0,0,0,.3));
-  background: linear-gradient(160deg, color-mix(in srgb, var(--tile) 20%, var(--panel)) 0%, var(--panel) 62%);
-  transition: transform .12s var(--ease, ease), border-color .12s; }
-.home-tile:hover { border-color: color-mix(in srgb, var(--tile) 55%, var(--line)); }
-.home-tile:active { transform: scale(.98); }
-.home-tile svg { width: 30px; height: 30px; fill: none; stroke: var(--tile); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.home-tile b { font-size: 18px; line-height: 1.2; }
-.home-tile span { color: var(--muted); font-size: var(--fs-sm); line-height: 1.35; }
-.home-go { position: absolute; right: 14px; bottom: 8px; font-size: 24px; font-style: normal; color: color-mix(in srgb, var(--tile) 70%, var(--muted)); }
-.ht-players { --tile: #6ea8ff; } .ht-teams { --tile: #f3b45b; } .ht-games { --tile: #5fd08a; } .ht-league { --tile: #c38bff; }
-@media (prefers-reduced-motion: reduce) { .home-tile { transition: none; } }
+/* Home (home.js): the site's own look, flat panels like the player card's tap tiles, each previewing its tab */
+.hm { padding: 4px 0 8px; }
+.hm-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 760px) { .hm-grid { grid-template-columns: 1fr 1fr; } }
+.hm-t { display: block; padding: 12px 14px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg);
+  color: var(--ink); text-decoration: none; }
+.hm-t:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.hm-t:active { background: var(--panel2); }
+.hm-k { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: var(--fs-md); font-weight: 600; margin-bottom: 6px; }
+.hm-go { font-size: 20px; line-height: 1; }
+.hm-l { list-style: none; margin: 0; padding: 0; }
+.hm-l li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
+.hm-l li:first-child { border-top: 0; }
+.hm-n { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hm-at { flex: 0 1 auto; }
+.hm-m { color: var(--muted); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.hm-when { margin-left: auto; }
+.hm-v { font-variant-numeric: tabular-nums; min-width: 40px; text-align: right; }
+.hm-rk { width: 18px; color: var(--muted); font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.hm-f { margin: 6px 0 0; color: var(--muted); font-size: var(--fs-xs); }
+.hm-p { margin: 2px 0 2px; color: var(--muted); font-size: var(--fs-md); line-height: 1.4; }
+.hm-p b { color: var(--ink); }
