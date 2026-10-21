@@ -12,17 +12,23 @@
       NFLE.week().then(D => draw(sec, D)).catch(() => { sec.innerHTML = '<div class="hm"><p class="muted">Couldn\'t load this week.</p></div>'; });
     },
   };
+  const go = e => {
+    if (e.target.closest('[data-open-pid], .tm-open')) return;  // the card opens (the page's click rule)
+    const t = e.target.closest('.hm-t');
+    if (t && (e.type === 'click' || e.key === 'Enter')) location.hash = t.dataset.href;
+  };
   const draw = (sec, D) => {
+    if (!sec.dataset.goes) { sec.dataset.goes = '1'; sec.addEventListener('click', go); sec.addEventListener('keydown', go); }
     const T = D.teams || {}, logo = (t, s = 20) => NFLE.fmt.logo(T, t, s), nick = t => (T[t] || {}).nick || t;
     // projections: the top projected player at each position
     const P = Object.entries(D.players || {}).map(([pid, p]) => Object.assign({ pid }, p));
     // (as Rankings: a player under 50% to play doesn't lead with his "if he plays" number)
     const plays = p => (p.play != null ? p.play : 1 - (p.inactive || 0)) >= 0.5;
     const top = ['QB', 'RB', 'WR', 'TE'].map(pos => P.filter(p => p.pos === pos && p.proj != null && plays(p)).sort((a, b) => b.proj - a.proj)[0]).filter(Boolean);
-    const proj = top.map(p => `<li><span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>${logo(p.team, 18)}<span class="hm-n">${esc(p.name)}</span><b class="hm-v">${f1(p.proj)}</b></li>`).join('');
+    const proj = top.map(p => `<li><span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>${logo(p.team, 18)}<span class="hm-n"><button type="button" class="nm-link hm-nl" data-open-pid="${esc(p.pid)}">${esc(p.name)}</button></span><b class="hm-v">${f1(p.proj)}</b></li>`).join('');
     // power: the top four, net points per game vs an average team
     const pw = (D.power || []).slice().sort((a, b) => a.rank - b.rank).slice(0, 4)
-      .map(t => `<li><span class="hm-rk">${t.rank}</span>${logo(t.team)}<span class="hm-n">${esc(t.nick || nick(t.team))}</span><span class="hm-m">${esc(t.record || '')}</span><b class="hm-v">${signed(t.net)}</b></li>`).join('');
+      .map(t => `<li><span class="hm-rk">${t.rank}</span>${logo(t.team)}<span class="hm-n"><span class="tm-open hm-nl" data-tm="${esc(t.team)}">${esc(t.nick || nick(t.team))}</span></span><span class="hm-m">${esc(t.record || '')}</span><b class="hm-v">${signed(t.net)}</b></li>`).join('');
     // games: the next ones to kick off (else the week's last finals)
     const G = (D.games || []).slice().sort((a, b) => `${a.gameday} ${a.gametime}`.localeCompare(`${b.gameday} ${b.gametime}`));
     const up = G.filter(g => !g.final), show = (up.length ? up : G.slice(-3)).slice(0, 4);
@@ -37,7 +43,8 @@
       ? `<p class="hm-p">Your team in <b>${esc(mine.league)}</b>${mine.oppName ? ` vs ${esc(mine.oppName)}` : ''}: the best lineup, waiver adds by position and trade checks.</p>`
       : '<p class="hm-p">Connect your Sleeper or ESPN league: the best lineup each week, waiver adds by position and trade checks, under your league\'s scoring.</p>';
     const wk = D.week ? `Week ${D.week}` : 'This week';
-    const tile = (href, label, body) => `<a class="hm-t" href="#${href}"><div class="hm-k">${label}<span class="hm-go" aria-hidden="true">&rsaquo;</span></div>${body}</a>`;
+    // a tile opens its tab; a player or team named inside it opens that card instead (a link can't hold links)
+    const tile = (href, label, body) => `<div class="hm-t" role="link" tabindex="0" data-href="#${href}"><div class="hm-k">${label}<span class="hm-go" aria-hidden="true">&rsaquo;</span></div>${body}</div>`;
     sec.innerHTML = `<div class="hm">
       <div class="sec-head"><div><h2>I want to&hellip;</h2><p>${esc(wk)} on NFL Edge. Pick a place to start.</p></div></div>
       <details class="howto"><summary>What is this?</summary><div>

@@ -125,9 +125,17 @@
     const r = base > 0.3 ? now / base : 1;
     return { proj: base > 0.3 ? p.proj * r : now, q: p.q.map(v => v * r), ratio: r };
   };
+  // ESPN athlete id -> our player id: every player with a card (owner 2026-10-20: "make player names clickable within
+  // gamecast and wherever else they show up"; defenders, kickers and linemen weren't on this week's board), the board's
+  // own ids on top. Rebuilt when the board or the id file changes.
+  let BYE = null, BYE_K = '';
   const byEspn = () => {
+    const U = window.NFLE && NFLE.ui, nIds = U && U.ids ? Object.keys(U.ids).length : 0, k = `${DATA ? 1 : 0}:${nIds}`;
+    if (BYE && k === BYE_K) return BYE;
     const m = {};
+    if (nIds) Object.entries(U.ids).forEach(([g, e]) => { if (e) m[String(e)] = g; });
     if (DATA) Object.entries(DATA.players).forEach(([pid, p]) => { if (p.espn) m[p.espn] = pid; });
+    BYE = m; BYE_K = k;
     return m;
   };
   const teamGame = (team, d = DATA) => d && d.games.find(g => g.away.team === team || g.home.team === team);
@@ -2112,11 +2120,11 @@
     const liveWk = sel.s === DIDX.current && sel.w === weeks[weeks.length - 1];  // the current chart: ESPN's live injury list
     const weekSel = `<select class="pc-wkpick dc-week" aria-label="Week">${weeks.map(w => `<option value="${w}"${w === sel.w ? ' selected' : ''}>${wkName(sel.s, w, post)}</option>`).join('')}</select>`;
     const who = ([pi, rank, tag], i, pct = null, starter = null, hurt = false) => {
-      const [name, pid, espn] = f.players[pi];
+      const [name, pid0, espn] = f.players[pi], pid = pid0 || (espn ? byEspn()[String(espn)] : null);  // every player with a card
       const live = liveWk && espn && DINJ && DINJ[espn];
       const t = liveWk && DINJ ? (live ? ESPN_TAG[live.status] : null) : tag;
       const title = live ? `${live.status}${live.type ? ` (${live.type})` : ''}` : TAG_NAME[t] || t;
-      // our player page when he has one (offensive skill players), else his ESPN page
+      // our player page (any player with an ESPN id on file), else his ESPN page
       const nm = pid ? `<button type="button" class="bx-n dc-n" data-open-pid="${esc(pid)}">${esc(name)}</button>`
         : espn ? `<a class="dc-n dc-ext" href="https://www.espn.com/nfl/player/_/id/${esc(espn)}" target="_blank" rel="noopener" title="ESPN player page">${esc(name)}</a>` : `<span class="dc-n">${esc(name)}</span>`;
       const bold = starter != null ? starter : i === 0 || rank === 1;
@@ -2501,7 +2509,7 @@
     const top = rk ? Object.entries(rk).filter(([pid, r]) => r.team === abbr && teamGrade(pid))
       .sort((a, b) => { const x = teamGrade(a[0]), y = teamGrade(b[0]); return (x.uq - y.uq) || y.v - x.v; }).slice(0, 3) : [];
     const face = ([pid, r]) => { const ph = r.photo || NFLE.ui.headshot(r.espn);
-      return `<div class="tm-tp"><span class="tm-tpi">${ph ? `<img src="${esc(ph)}" alt="" width="30" height="30" loading="lazy">` : ''}</span><span class="tm-tpn">${esc(NFLE.fmt.short(r.name))}</span>${r.hurt ? '<span class="tm-tph" title="Under 50% to play his next game">inj</span>' : ''}<span class="tm-tpr">${esc(r.pos)} ${gradeChip(teamGrade(pid))}</span></div>`; };
+      return `<div class="tm-tp" data-open-pid="${esc(pid)}"><span class="tm-tpi">${ph ? `<img src="${esc(ph)}" alt="" width="30" height="30" loading="lazy">` : ''}</span><span class="tm-tpn">${esc(NFLE.fmt.short(r.name))}</span>${r.hurt ? '<span class="tm-tph" title="Under 50% to play his next game">inj</span>' : ''}<span class="tm-tpr">${esc(r.pos)} ${gradeChip(teamGrade(pid))}</span></div>`; };
     const wkRows = teamPlayerRows(abbr, d);
     tiles.push(tapTile('Players', top.length ? `<div class="tm-tps">${top.map(face).join('')}</div>` : '<div class="pc-tapsub">Loading&hellip;</div>', 'Players',
       `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
@@ -2955,7 +2963,7 @@
           <span class="lpf-g">${lg(st.away)}<b>${esc(st.away.team)}</b> ${esc(p.awayScore)}&ndash;${esc(p.homeScore)} <b>${esc(st.home.team)}</b>${lg(st.home)}</span>
           <span class="lpf-w">${esc(`${periodName((p.period || {}).number || 1)} ${(p.clock || {}).displayValue || ''}`.trim())}</span>
           ${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>${at ? `<span class="muted">at ${esc(at)}</span>` : ''}` : ''}${red ? '<span class="sit-rz lpf-rz">RZ</span>' : ''}</a>
-        <div class="lpf-t ${hd.cls}">${esc(hd.h)}</div>${rows}</li>`;
+        <div class="lpf-t ${hd.cls}">${linkNames(esc(hd.h), [st.away.team, st.home.team], LIVE.sums[st.id])}</div>${rows}</li>`;
     }).join('')}</ol>`;
   };
   const startLive = () => {
@@ -3074,7 +3082,21 @@
     });
     return ABBR;
   };
-  const linkNames = (html, teams) => {
+  const PLINK = new WeakMap();
+  const playLinks = sum => {  // a game's players, by the names its play text uses (full and abbreviated) -> our id
+    if (!sum || typeof sum !== 'object') return null;
+    const cached = PLINK.get(sum), be = byEspn(), nb = Object.keys(be).length;
+    if (cached && cached.nb === nb) return cached;
+    const ids = {}, names = fullNames(sum, ids), m = {};
+    Object.entries(ids).forEach(([k, e]) => { const pid = be[e]; if (!pid) return; m[esc(k)] = pid; if (names[k]) m[esc(names[k])] = pid; });
+    const keys = Object.keys(m).sort((a, b) => b.length - a.length).map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const v = { nb, m, re: keys.length ? new RegExp(`(^|[^A-Za-z.'])(${keys.join('|')})(?![A-Za-z'])`, 'g') : null };
+    PLINK.set(sum, v);
+    return v;
+  };
+  const linkNames = (html, teams, sum = GP.sum) => {
+    const L = playLinks(sum);
+    if (L && L.re) return html.replace(L.re, (all, pre, name) => `${pre}<button type="button" class="nm-link" data-open-pid="${esc(L.m[name])}">${name}</button>`);
     if (!DATA) return html;
     const m = abbrMap();
     return html.replace(/\b([A-Z])\.((?:St\. )?[A-Z][A-Za-z'\-]+(?: (?:Jr\.|Sr\.|II|III|IV))?)/g, (all, i, rest) => {
@@ -3193,7 +3215,7 @@
       const wks = Object.keys(f.weeks).map(Number).sort((a, b) => a - b), wk = wks.filter(x => x <= week).pop() || wks[0];
       const W = f.weeks[wk], live = wk === wks[wks.length - 1] && !(g.final);  // the latest chart of a game not played yet
       const chip = ([pi, pct, ftag], bold) => {
-        const [name, pid, espn] = f.players[pi];
+        const [name, pid0, espn] = f.players[pi], pid = pid0 || (espn ? byEspn()[String(espn)] : null);
         const li = live && DINJ && espn ? DINJ[espn] : null, tag = live && DINJ ? (li ? ESPN_TAG[li.status] : null) : ftag;
         const nm = pid ? `<button type="button" class="bx-n dc-n" data-open-pid="${esc(pid)}">${esc(name)}</button>` : `<span class="dc-n">${esc(name)}</span>`;
         return `<span class="dc-p${bold ? ' first' : ''}">${nm}${pct != null ? `<span class="dc-pct">${pct}%</span>` : ''}${tag ? `<span class="dc-tag dt-${tag === 'Q' ? 'q' : tag === 'D' ? 'd' : 'out'}" title="${esc(TAG_NAME[tag] || tag)}">${esc(tag)}</span>` : ''}</span>`;
@@ -3400,8 +3422,9 @@
       return `<div class="pst-team" data-pst="__fp"${pick === '__fp' ? '' : ' hidden'}><div class="ff-head">${sides.map(x => `<span>${logo(x.logo, '#111', 18, x.team)} ${esc(x.team)}</span>`).join('')}</div>
         ${['QB', 'RB', 'WR', 'TE'].filter(k => by[k]).map(k => `<div class="ff-pos"><div class="ff-k">${k}</div><div class="ff-cols"><div>${col(by[k][sides[0].team])}</div><div>${col(by[k][sides[1].team])}</div></div></div>`).join('') || '<p class="muted">No fantasy points yet.</p>'}
         ${(() => { const kd = kdstLines(opt.plays || allPlays(sum).flatMap(d => d.plays || []), info, sum);
-          const kcol = (rows, t) => rows.filter(r => r.team === t).sort((a, b) => b.fp - a.fp).map(r => `<div class="ff-r" title="${esc(r.sub)}">${r.dst ? logo((sides.find(x => x.team === r.team) || {}).logo, '#111', 20, r.team) : `<img class="pi-hs" src="${esc(r.id && NFLE.ui ? NFLE.ui.headshot(r.id) : '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`}
-            <span class="ff-n">${esc(r.name)}<small class="ff-sub">${esc(r.sub)}</small></span><span class="ff-pp"><b class="ff-p ${r.fp >= 10 ? 'hi' : r.fp < 3 ? 'lo' : ''}">${f1(r.fp)}</b></span></div>`).join('') || '<div class="ff-r muted">-</div>';
+          const kcol = (rows, t) => rows.filter(r => r.team === t).sort((a, b) => b.fp - a.fp).map(r => { const kp = r.dst ? `DST-${r.team}` : r.id ? byEspn()[String(r.id)] : null;  // kicker / D/ST cards
+            return `<div class="ff-r" title="${esc(r.sub)}"${kp ? ` data-open-pid="${esc(kp)}"` : ''}>${r.dst ? logo((sides.find(x => x.team === r.team) || {}).logo, '#111', 20, r.team) : `<img class="pi-hs" src="${esc(r.id && NFLE.ui ? NFLE.ui.headshot(r.id) : '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`}
+            <span class="ff-n">${esc(r.name)}<small class="ff-sub">${esc(r.sub)}</small></span><span class="ff-pp"><b class="ff-p ${r.fp >= 10 ? 'hi' : r.fp < 3 ? 'lo' : ''}">${f1(r.fp)}</b></span></div>`; }).join('') || '<div class="ff-r muted">-</div>';
           return [['K', kd.K], ['DST', kd.DST]].filter(([, rows]) => rows.length).map(([k, rows]) => `<div class="ff-pos"><div class="ff-k">${k === 'DST' ? 'D/ST' : k}</div><div class="ff-cols"><div>${kcol(rows, sides[0].team)}</div><div>${kcol(rows, sides[1].team)}</div></div></div>`).join(''); })()}
         <p class="gcs-note">Fantasy points this game, ${lg ? `${esc(lg)} scoring` : 'your scoring'}, of his projection${going ? ' (green: on pace or better)' : ''}.${lgm ? '' : " Connect your league on the Fantasy tab to see your players and your opponent's marked."}</p></div>`;
     };
@@ -3648,7 +3671,7 @@
       const hd = playHead(L, names, a ? { off, other: off === info.away.team ? info.home.team : info.away.team } : {});
       const th = tryP ? playHead(tryP, names, {}) : null;
       last = `<div class="now-last${L.scoringPlay ? ' scored' : ''}"><div class="now-lk muted">${L.scoringPlay ? 'Last score' : 'Last play'}${L.clock ? ` · ${periodName((L.period || {}).number || 1)} ${esc(L.clock.displayValue || '')}` : ''}</div>
-        <div class="now-lh ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}</div>${th ? `<div class="now-try ${th.cls}">${esc(th.h)}</div>` : ''}${nonPlay(L) ? '' : playImpact(L, hd, info, sum, nm, names, '')}</div>`;
+        <div class="now-lh ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}</div>${th ? `<div class="now-try ${th.cls}">${linkNames(esc(th.h), [info.away.team, info.home.team], sum)}</div>` : ''}${nonPlay(L) ? '' : playImpact(L, hd, info, sum, nm, names, '')}</div>`;
     }
     if (!sp && !lanes.length) {  // no ball to place: the latest drive's plays on an empty field
       const dr = [...st.drives].reverse().find(d => (d.plays || []).length), dt = dr && dr.team && (String(dr.team.id) === String(info.home.id) ? info.home : info.away);
@@ -3951,7 +3974,7 @@
         const dd = bp.start && bp.start.down ? (bp.start.shortDownDistanceText || bp.start.downDistanceText || '') : '';
         tip.innerHTML = `<div class="lpf-h"><span class="lpf-w">${esc(`${bp.period ? periodName(bp.period.number) : ''} ${bp.clock ? bp.clock.displayValue : ''}`.trim())}</span>
           ${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>` : ''}<span class="lpf-g lpf-sc">${esc(I.away.team)} ${esc(bp.awayScore)}&ndash;${esc(bp.homeScore)} ${esc(I.home.team)}</span></div>
-          <div class="lpf-t ${hd.cls}">${esc(hd.h)}</div>
+          <div class="lpf-t ${hd.cls}">${linkNames(esc(hd.h), [I.away.team, I.home.team], GP.sum)}</div>
           <div class="tip-wp"><span style="color:${esc(I.away.color)}">${esc(I.away.team)} <b>${wpTxt(1 - best.home, fin)}</b></span><span class="muted">win chance</span><span style="color:${esc(I.home.color)}"><b>${wpTxt(best.home, fin)}</b> ${esc(I.home.team)}</span></div>`;
         // keep the whole tooltip inside the chart: centered on the finger, clamped by its measured width (a % clamp
         // let the wide play text run off the screen edge near the ends)

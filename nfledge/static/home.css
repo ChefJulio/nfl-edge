@@ -20,3 +20,5 @@
 .hm-f { margin: 6px 0 0; color: var(--muted); font-size: var(--fs-xs); }
 .hm-p { margin: 2px 0 2px; color: var(--muted); font-size: var(--fs-md); line-height: 1.4; }
 .hm-p b { color: var(--ink); }
+.hm-t { cursor: pointer; }
+.hm-nl { text-decoration: none; font-weight: 600; }
