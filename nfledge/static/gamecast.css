@@ -1544,3 +1544,6 @@ tr.lg-pend td.muted { text-align: left; white-space: nowrap; font-size: 12px; }
 .fs-dot { width: 2px; top: -2px !important; bottom: -2px !important; margin-left: -1px; border-radius: 1px; background: var(--ink); }  /* the snap */
 .fs-seg { min-width: 3px; }
 .pl-what .fs { margin: 6px 0 4px; }
+/* penalty yards tacked on to a play (yellow); striped where they run back over the play's own yards */
+.fs-stripe { background: repeating-linear-gradient(135deg, #f0b545 0 3px, var(--good) 3px 6px) !important; }
+span.nm-link { display: inline; }

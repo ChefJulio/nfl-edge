@@ -3103,12 +3103,12 @@
   };
   const linkNames = (html, teams, sum = GP.sum) => {
     const L = playLinks(sum);
-    if (L && L.re) return html.replace(L.re, (all, pre, name) => `${pre}<button type="button" class="nm-link" data-open-pid="${esc(L.m[name])}">${name}</button>`);
+    if (L && L.re) return html.replace(L.re, (all, pre, name) => `${pre}<span class="nm-link" role="link" tabindex="0" data-open-pid="${esc(L.m[name])}">${name}</span>`);
     if (!DATA) return html;
     const m = abbrMap();
     return html.replace(/\b([A-Z])\.((?:St\. )?[A-Z][A-Za-z'\-]+(?: (?:Jr\.|Sr\.|II|III|IV))?)/g, (all, i, rest) => {
       const c = (m[`${i}.${rest}`] || []).filter(x => !teams || teams.includes(x.team));
-      return c.length === 1 ? `<button type="button" class="nm-link" data-open-pid="${esc(c[0].pid)}">${all}</button>` : all;
+      return c.length === 1 ? `<span class="nm-link" role="link" tabindex="0" data-open-pid="${esc(c[0].pid)}">${all}</span>` : all;
     });
   };
   // opts overrides the Live tab's controls (the Postgame tab asks for just the top few swings).
@@ -3172,7 +3172,7 @@
       const cls = `${p.scoringPlay ? ' pl-score' : ''}${p.isPenalty && !p.scoringPlay ? ' pl-pen' : ''}${st ? ' pl-st' : ''}`;
       return `<li class="pl${cls}" data-k="p${esc(p.id)}"${off ? ` style="--pt:${esc(off.color)}"` : ''}><div class="pl-when">${when}</div>
         <div class="pl-what">${(() => { const pp = playPairs(p); return chipHtml || pp.downs || pp.spots ? `<div class="pl-dd">${chipHtml}${pp.downs}${pp.spots}</div>` : ''; })()}
-          <div class="pl-hl ${hd.cls}">${linkNames(esc(hd.h), teams)}${ydChip}</div>${fieldStrip(p, info)}<div class="pl-txt pl-raw" title="Tap for the official text">${linkNames(esc(hd.raw), teams)}</div></div>
+          <div class="pl-hl ${hd.cls}"><span class="pl-hl-t">${linkNames(esc(hd.h), teams)}</span>${ydChip}</div>${fieldStrip(p, info)}<div class="pl-txt pl-raw" title="Tap for the official text">${linkNames(esc(hd.raw), teams)}</div></div>
         <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${tmL(info.away.team)} ${p.awayScore}–${p.homeScore} ${tmL(info.home.team)}</b>` : ''}${swing}</div></li>`;
     };
     const order = o.sort !== 'old';  // newest first unless asked otherwise
@@ -3751,6 +3751,13 @@
     const td = /touchdown/i.test(t) && p.scoringPlay;
     const defTd = td && b && a.offense.team !== b.offense.team && !/kick|punt/i.test(pType(p));
     let e = b && b.x != null ? rel(b.x) : s0;
+    // a flag enforced on top of a play that counts: the play's own yards from the text before "PENALTY"
+    let mid = null;
+    if (!td && /PENALTY on/.test(String(p.text || '')) && !/no play/i.test(t) && !p.isTurnover) {
+      const pre = String(p.text).split('PENALTY')[0], m = pre.match(/for (-?\d+) yards?/);
+      const own = /no gain/.test(pre) ? 0 : m ? +m[1] : null;
+      if (own != null && Math.abs(s0 + own - e) >= 1) mid = s0 + own;
+    }
     if (td) e = defTd ? -5 : 105;  // into the end zone (a pick-six: back the other way)
     else if (/field goal/i.test(t)) e = 110;  // the kick, to the posts
     const kick = stPlay(p) && !/field goal/i.test(t);
@@ -3758,9 +3765,17 @@
       : e > s0 ? 'gain' : e < s0 ? 'loss' : 'zero';
     const pc = y => ((10 + Math.max(-10, Math.min(110, y))) / 120 * 100).toFixed(2);
     const off = a.offense, opp = off.team === info.away.team ? info.home : info.away;
-    const lo = Math.min(s0, e), hi = Math.max(s0, e);
+    const seg = (x0, x1, c) => { const lo = Math.min(x0, x1), hi = Math.max(x0, x1);
+      return hi - lo >= 0.5 ? `<i class="fs-seg fs-${c}" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%"></i>` : ''; };
+    let bars;
+    if (mid != null) {
+      const play = seg(s0, mid, mid > s0 ? 'gain' : mid < s0 ? 'loss' : 'zero');
+      // the penalty from where the play ended: past it, plain yellow; back over the play's own yards, striped
+      const back = (e - mid) * (mid - s0) < 0, over = back ? (Math.abs(e - mid) <= Math.abs(mid - s0) ? e : s0) : mid;
+      bars = play + (back ? seg(mid, over, 'pen fs-stripe') + seg(over, e, 'pen') : seg(mid, e, 'pen'));
+    } else bars = seg(s0, e, cls);
     return `<span class="fs" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
-      + `${hi - lo >= 0.5 ? `<i class="fs-seg fs-${cls}" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%"></i>` : ''}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
+      + `${bars}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
   };
   const playRows = (plays, info, names, key = null) => plays.map(p => {
     const when = q => `${periodName((q.period || {}).number || 1)} ${esc((q.clock || {}).displayValue || '')}`;
@@ -4265,6 +4280,7 @@
     if (t && !e.target.closest('a[href], .tm-open, [data-open-pid]')) open(t);
   });
   document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.matches && e.target.matches('span.nm-link[data-open-pid]')) { e.preventDefault(); e.target.click(); return; }
     if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.pc-tap[data-sheet]')) { e.preventDefault(); open(e.target); }
     else if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.pc-tap[data-goto]')) { e.preventDefault(); e.target.click(); }
   });
