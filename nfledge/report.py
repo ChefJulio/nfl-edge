@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from . import elo
+from . import lineup as LU
 from .config import ROOT
 from .team_model import UNITS, game_lines, team_volume_features
 from .site_assets import asset_version, page_html, write_site_assets
@@ -1378,6 +1379,28 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
   def rank_of(team, key):
     return int(rk[team][key]) if team in rk else None
 
+  # (BP2) who's missing or back beyond the QB, valued by on-field play (nfledge/lineup.py): offense only (individual
+  # defensive values don't carry over season to season and their weight's sign was unstable). Owner-design ship
+  # 2026-10-20 (its gate failed narrowly: better 4 of 4 seasons and 2026); season-end confirmation pre-registered.
+  lu_w = float(wm.get("week_lineup_off", 0.0))
+  lineups = {}
+  if lu_w:
+    if getattr(eng, "_lineups", None) is None:
+      eng._lineups = (LU.Lineups(LU.shares(eng.data.snaps)), LU.Values())
+    lus, vals = eng._lineups
+    for t in set(games.home_team) | set(games.away_team):
+      avail = LU.report_available(eng.data.rosters, eng.data.injuries, season, week, t)
+      lineups[t] = LU.team_term(lus.regulars(t, season, week), avail, lambda p, g: vals(season, p, g))
+  pname = dict(zip(eng.data.rosters.gsis_id, eng.data.rosters.full_name)) if lineups else {}
+
+  def lineup_note(t):
+    """The biggest changes behind a team's lineup term (>= ~2 points of win chance each), for the model note."""
+    # only above-average players (an "out" that hurts, a "back" that helps); a below-average regular's absence nudges
+    # the number the other way, which is real in the model but reads wrong in a note
+    parts = [x for x in (lineups.get(t) or {}).get("parts", [])
+             if x[1] not in LU.DEF and x[2] * x[3] > 0 and abs(lu_w * x[3]) >= 0.08][:2]
+    return ", ".join(f"{LU.last_name(pname.get(p, p))} {'out' if d < 0 else 'back'}" for p, _g, d, _c in parts)
+
   # The points formula: points = a + b x (dropbacks x E[pass EPA] + rushes x E[rush EPA]) + c x special-teams net,
   # E[EPA] = league average + offense + defense (+ QB) + home field. It sets each battle bar's length (below).
   pc = dict(zip(eng.gm.points.cols, eng.gm.points.coef[1:]))
@@ -1409,11 +1432,14 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
     # column), not the rest-of-season Power rank: INSIGHTS (Q), tools/win_rank_eval.py. The margin is never published.
     rk_a, rk_h = rank_of(g.away_team, "rank_now"), rank_of(g.home_team, "rank_now")
     e_a, e_h = elo_now.get(g.away_team, elo.MEAN), elo_now.get(g.home_team, elo.MEAN)
+    lu = lu_w * ((lineups.get(g.home_team) or {}).get("off", 0.0) - (lineups.get(g.away_team) or {}).get("off", 0.0))
     x = (wm["week_home"] * (g.location != "Neutral") + wm["week_elo_per_100"] * (e_h - e_a) / 100
-         + (wm["week_rank_gap"] * (rk_a - rk_h) if rk_a and rk_h else 0.0))
+         + (wm["week_rank_gap"] * (rk_a - rk_h) if rk_a and rk_h else 0.0) + lu)
     fc = forecast(g, float(logistic(x)), k_vegas, tossup, names, ts)
+    notes = [f"{t} {n}" for t in (g.away_team, g.home_team) if (n := lineup_note(t))]
     fc["model_why"] = (f"Our model: this week's rank {g.away_team} {rk_a} vs {g.home_team} {rk_h}, Elo {e_a:.0f} vs "
-                       f"{e_h:.0f}{'' if g.location == 'Neutral' else ', plus home field'}")
+                       f"{e_h:.0f}{'' if g.location == 'Neutral' else ', plus home field'}"
+                       f"{'; lineup changes: ' + '; '.join(notes) if notes else ''}")
     # Who wins each battle. Every bar is a tug of war, away team on the left and home team on the right. The
     # model margin = both offense-vs-defense matchups + special teams + home field + play volume (never shown).
     vol_of = tp[tp.game_id == g.game_id].set_index("team")

@@ -5,7 +5,7 @@ For a target season s: every pass / run play of seasons s-3..s-1 (weights 0.25 /
 .05-.95 at 0.25). EPA = context + sum(offense values of the 11 on offense) + sum(defense effects of the 11 on
 defense); ridge, each player shrunk toward a prior mu = a_group + b_group x log(1 + his weighted plays) (fit from a
 first pass with mu = 0), lambda per side picked by predicting season s-1's plays from s-4..s-2.
-Output cache/rapm_values.parquet: target, gsis_id, side (off / def), grp, value (EPA per play, + = good), plays.
+Output data/history/rapm_values.parquet: target, gsis_id, side (off / def), grp, value (EPA per play, + = good), plays.
 Participation (cache/participation_<y>.parquet) is FTN's via nflverse, 2016-25 (none in-season).
 """
 import sys
@@ -18,7 +18,7 @@ import pandas as pd  # noqa: E402
 import scipy.sparse as sp  # noqa: E402
 from scipy.linalg import cho_factor, cho_solve  # noqa: E402
 
-OUT = ROOT / "cache" / "rapm_values.parquet"
+OUT = ROOT / "data" / "history" / "rapm_values.parquet"  # read by nfledge/lineup.py (live) and the backtests
 VALID = ROOT / "cache" / "rapm_single.parquet"
 FIRST, LAST = 2016, 2025
 TARGETS = list(range(2020, 2027))

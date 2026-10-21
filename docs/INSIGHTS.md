@@ -3324,3 +3324,27 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   data, rank corr with next season, 300+ plays both): QB .39, RB .33, OL .30, WR .28, TE .19; LB .16, S .09, DL .04,
   CB .03: offensive values (linemen included) carry over, individual defensive values are noise. The inactives arm
   passing every bar is a reported arm out of nine, not a result: confirm on data it never saw before shipping.
+- **OWNER-DESIGN SHIP 2026-10-20 (owner: "you choose") + PRE-REGISTERED confirmation: (BP2) the lineup term (RAPM,
+  Saturday-report availability, OFFENSE ONLY) goes live in the Matchups win chance though its gate failed** (OFF + DEF
+  -0.0012, CI spans 0). Offense only because individual defensive values don't carry over (validity .03-.16) and the
+  defense weight flipped sign when refit on 2021-26 (+1.1 -> -2.7); offense only in the same walk-forward harness
+  (production's form, no intercept): -0.0016 [-0.0035, +0.0002], better 4 of 4 seasons, 2026 -0.0043. Coefficients
+  refit in production's form on 2021-26 games so far: home .1659, rank gap .0314, Elo .3193/100, lineup 11.79 per EPA
+  per play (median game gap .009 -> ~2.5 points of win chance, 90th percentile ~7). Everything below reads "RAPM" as
+  this offense-only term.
+  CONFIRMATION at season end on games it never saw (2026 weeks 7-18, values for 2026 fixed from 2016-25 plays):
+  tools/lineup_eval.py scored on those games only, BASE vs RAPM (report) vs RAPM (inactives), each fit on 2021-25 +
+  2026 weeks 1-6. Keep RAPM-report if its Brier is not above BASE's; RAPM-inactives (with a game-day refresh about 90
+  minutes before kickoff) replaces it if lower than RAPM-report by >= 0.001; else revert to BASE. Recompute-able from
+  history (weekly roster INA status, final injury reports and snaps persist), so no live logging is needed.
+- **PRE-REGISTERED 2026-10-20 (owner: "keep drilling ... more accurate independent of vegas"): (BQ) mismatch
+  calibration: stretch the rank gap at the extremes.** Upset analysis (2022-26 walk-forward): when Vegas gives our
+  favorite 70%+, he won .785 and we said .722; our 80%+ picks won .894 vs .827. The win formula's rank gap treats
+  every place alike, so it can't say "far better". Variant QRANK: each team's rank mapped to the normal quantile of
+  its place among 32 (z = Phi^-1((32.5 - rank) / 32)), gap = z_home - z_away, replacing the rank gap. Harness = (BN)'s
+  (Matchups win chance as of the game's week), production's form (no intercept), arms fit walk-forward on earlier
+  seasons, scored 2022-25, ties dropped. BASE = home + rank gap + Elo + lineup (offense, as shipped). QRANK = home +
+  z gap + Elo + lineup. GATE: Brier lower by >= 0.001 (the most a calibration fix of this size can gain is about that:
+  6 points of bias on a third of games), 95% CI (2,000 game resamples) upper < 0, lower in >= 3 of 4 seasons, and the
+  calibration gap in games we price at 70%+ smaller; CONFIRM 2026 same direction. Reported: both gaps together; the
+  net-rating gap instead (tested worse before: INSIGHTS power-rank-as-predictor); Vegas on the same games.

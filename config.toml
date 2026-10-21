@@ -132,9 +132,14 @@ elo_per_100 = 0.4449
 # week_*: the Matchups win chance for THIS week's game, from the rank of this week's lineup (Power's "This week").
 # tools/win_rank_eval.py (INSIGHTS (Q)), walk-forward 2022-26: Brier 0.2203 vs 0.2214 with the rest-of-season rank
 # and 0.2220 with the previous starter (-0.0017 [-0.0033, -0.0001]); fit on every season 2021-26.
-week_home = 0.1838
-week_rank_gap = 0.0313
-week_elo_per_100 = 0.3242
+# 2026-10-20 (BP2, owner-design ship): refit jointly with the lineup term (nfledge/lineup.py: who's missing or back
+# beyond the QB, offense only, valued by on-field EPA per play) on 2021-26 games; walk-forward 2022-25 -0.0016 Brier
+# [-0.0035, +0.0002], better 4 of 4 seasons, 2026 -0.0043 (the pre-registered gate needed -0.002 with the CI below 0).
+# Season-end confirmation pre-registered (INSIGHTS (BP2)). week_lineup_off = 0 turns it off.
+week_home = 0.1659
+week_rank_gap = 0.0314
+week_elo_per_100 = 0.3193
+week_lineup_off = 11.789
 
 [experiments]
 # Optional model inputs. Defaults reflect the walk-forward backtest (decided on 2025, confirmed on 2026):

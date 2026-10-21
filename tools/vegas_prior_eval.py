@@ -52,6 +52,7 @@ def season_rows(season: int) -> pd.DataFrame:
         continue
       rows.append({"season": season, "week": int(w), "game_id": x.game_id, "home_team": x.home_team, "away_team": x.away_team,
                    "home": float(x.location != "Neutral"), "gap": rk[x.away_team] - rk[x.home_team],
+                   "rk_h": rk[x.home_team], "rk_a": rk[x.away_team], "net_h": float(a[x.home_team]), "net_a": float(a[x.away_team]),
                    "elo": (el.get(x.home_team, elo.MEAN) - el.get(x.away_team, elo.MEAN)) / 100,
                    "ml_h": x.home_moneyline, "ml_a": x.away_moneyline, "y": int(x.home_score > x.away_score)})
     print(f"[vegas prior] {season} week {w}", flush=True)
