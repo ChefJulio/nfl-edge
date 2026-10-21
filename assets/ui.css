@@ -10,6 +10,8 @@
   --bg: #0d0f13; --panel: #15181d; --panel2: #1a1e24; --ink: #e9ecf0; --muted: #98a0ab;
   --line: #262b33; --accent: #6d9eff; --good: #45c26b; --bad: #f2786d; --warn: #e0b04a;
   --shadow: 0 1px 2px rgba(0,0,0,.4); --qb: #ff6f91; --rb: #34d399; --wr: #60a5fa; --te: #fbbf24;
+  /* every other position (owner 2026-10-20: "color code ALL positions"): specialists, team defense, line, back seven */
+  --k: #c084fc; --dst: #ef4444; --ol: #d6a77a; --dl: #f87171; --lb: #fb923c; --cb: #22d3ee; --s: #a3e635;
   /* Design tokens (owner 2026-10-16: sleek, consistent). Use these instead of one-off values. */
   --faint: #7d8590;  /* was #6b737e: 3.7:1 on panels, under AA for small text */
   --row: #171a20; --row-hover: #1e222a;  /* table rows / tiles */
@@ -149,3 +151,39 @@ button:active:not(:disabled), a.mt:active, .chip:active, .sbtn:active, [data-ope
 /* AFC / NFC labels with their logo (shell.js NFLE.ui.conf) */
 .conf-n { display: inline-flex; align-items: center; gap: .35em; }
 .conf-lg { width: auto; flex: none; filter: drop-shadow(0 0 1px rgba(0,0,0,.6)); }
+
+/* position badges and position buttons for every position (QB / RB / WR / TE: site.css, gamecast.css) */
+.posb-K, .posb-P, .posb-LS, .posb-PK { background: color-mix(in srgb, var(--k) 20%, transparent); color: var(--k); }
+.seg button.pos-K, .seg button.pos-P, .seg button.pos-LS, .seg button.pos-PK { color: var(--k); }
+.seg button.pos-K.on, .seg button.pos-P.on, .seg button.pos-LS.on, .seg button.pos-PK.on { background: color-mix(in srgb, var(--k) 20%, var(--panel)); }
+.posb-DST, .posb-DEF, .posb-DST { background: color-mix(in srgb, var(--dst) 20%, transparent); color: var(--dst); }
+.seg button.pos-DST, .seg button.pos-DEF, .seg button.pos-DST { color: var(--dst); }
+.seg button.pos-DST.on, .seg button.pos-DEF.on, .seg button.pos-DST.on { background: color-mix(in srgb, var(--dst) 20%, var(--panel)); }
+.posb-OL, .posb-T, .posb-G, .posb-C, .posb-OT, .posb-OG, .posb-LT, .posb-LG, .posb-RG, .posb-RT { background: color-mix(in srgb, var(--ol) 20%, transparent); color: var(--ol); }
+.seg button.pos-OL, .seg button.pos-T, .seg button.pos-G, .seg button.pos-C, .seg button.pos-OT, .seg button.pos-OG, .seg button.pos-LT, .seg button.pos-LG, .seg button.pos-RG, .seg button.pos-RT { color: var(--ol); }
+.seg button.pos-OL.on, .seg button.pos-T.on, .seg button.pos-G.on, .seg button.pos-C.on, .seg button.pos-OT.on, .seg button.pos-OG.on, .seg button.pos-LT.on, .seg button.pos-LG.on, .seg button.pos-RG.on, .seg button.pos-RT.on { background: color-mix(in srgb, var(--ol) 20%, var(--panel)); }
+.posb-DL, .posb-DE, .posb-DT, .posb-NT, .posb-EDGE, .posb-LDE, .posb-RDE, .posb-LDT, .posb-RDT { background: color-mix(in srgb, var(--dl) 20%, transparent); color: var(--dl); }
+.seg button.pos-DL, .seg button.pos-DE, .seg button.pos-DT, .seg button.pos-NT, .seg button.pos-EDGE, .seg button.pos-LDE, .seg button.pos-RDE, .seg button.pos-LDT, .seg button.pos-RDT { color: var(--dl); }
+.seg button.pos-DL.on, .seg button.pos-DE.on, .seg button.pos-DT.on, .seg button.pos-NT.on, .seg button.pos-EDGE.on, .seg button.pos-LDE.on, .seg button.pos-RDE.on, .seg button.pos-LDT.on, .seg button.pos-RDT.on { background: color-mix(in srgb, var(--dl) 20%, var(--panel)); }
+.posb-LB, .posb-ILB, .posb-OLB, .posb-MLB, .posb-SLB, .posb-WLB, .posb-LILB, .posb-RILB { background: color-mix(in srgb, var(--lb) 20%, transparent); color: var(--lb); }
+.seg button.pos-LB, .seg button.pos-ILB, .seg button.pos-OLB, .seg button.pos-MLB, .seg button.pos-SLB, .seg button.pos-WLB, .seg button.pos-LILB, .seg button.pos-RILB { color: var(--lb); }
+.seg button.pos-LB.on, .seg button.pos-ILB.on, .seg button.pos-OLB.on, .seg button.pos-MLB.on, .seg button.pos-SLB.on, .seg button.pos-WLB.on, .seg button.pos-LILB.on, .seg button.pos-RILB.on { background: color-mix(in srgb, var(--lb) 20%, var(--panel)); }
+.posb-CB, .posb-DB, .posb-LCB, .posb-RCB, .posb-NB { background: color-mix(in srgb, var(--cb) 20%, transparent); color: var(--cb); }
+.seg button.pos-CB, .seg button.pos-DB, .seg button.pos-LCB, .seg button.pos-RCB, .seg button.pos-NB { color: var(--cb); }
+.seg button.pos-CB.on, .seg button.pos-DB.on, .seg button.pos-LCB.on, .seg button.pos-RCB.on, .seg button.pos-NB.on { background: color-mix(in srgb, var(--cb) 20%, var(--panel)); }
+.posb-S, .posb-FS, .posb-SS, .posb-SAF { background: color-mix(in srgb, var(--s) 20%, transparent); color: var(--s); }
+.seg button.pos-S, .seg button.pos-FS, .seg button.pos-SS, .seg button.pos-SAF { color: var(--s); }
+.seg button.pos-S.on, .seg button.pos-FS.on, .seg button.pos-SS.on, .seg button.pos-SAF.on { background: color-mix(in srgb, var(--s) 20%, var(--panel)); }
+.posb-FB, .posb-HB { background: color-mix(in srgb, var(--rb) 20%, transparent); color: var(--rb); }
+.seg button.pos-FB, .seg button.pos-HB { color: var(--rb); }
+.seg button.pos-FB.on, .seg button.pos-HB.on { background: color-mix(in srgb, var(--rb) 20%, var(--panel)); }
+
+/* Clear X in every text box with text (shell.js handles the tap): a gray disc with a dark cross, readable on both
+   themes; Safari's own search X is hidden so there's one, always shown, not only while focused */
+input:is([type="search"], [type="text"], :not([type])):not(:placeholder-shown):not(:disabled):not([readonly]) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='9' fill='%238b93a1'/%3E%3Cpath d='M6.5 6.5l7 7M13.5 6.5l-7 7' stroke='%23111318' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important; background-position: right 9px center !important; background-size: 16px 16px !important; padding-right: 32px !important;
+}
+input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; display: none; }
+/* filters set aside while a search runs (Draft, Moves, Injuries): dimmed */
+.dt-tools select:disabled, .dt-tools input:disabled, .dt-select:disabled, .in-scope button:disabled, .in-tabs button:disabled { opacity: .4; cursor: default; }

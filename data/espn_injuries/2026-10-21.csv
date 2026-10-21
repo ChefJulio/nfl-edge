@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-10-18T15:33Z,,,,,,
 4698244,Teddye Buchanan,Baltimore Ravens,Active,2026-10-16T20:28Z,,,,,,
 4430831,Trenton Simpson,Baltimore Ravens,Active,2026-10-16T20:28Z,,,,,,
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-21T21:52Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-21T22:01Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus
 4044133,Sam Franklin Jr.,Buffalo Bills,Suspension,2026-10-21T14:13Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus
 3930086,Dawson Knox,Buffalo Bills,Active,2026-10-21T00:48Z,,,,,,Knox caught his only target for no gain during Sunday's 33-30 win at Las Vegas.
 3915416,DJ Moore,Buffalo Bills,Questionable,2026-10-20T16:10Z,Shoulder - AC Joint,Sprain,Not Specified,2026-11-01,QUESTIONABLE,questionable
@@ -549,9 +549,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685298,Will Campbell,New England Patriots,Active,2026-10-18T16:41Z,,,,,,Campbell (knee) is active for Sunday's game against the Jets.
 4368113,Charles Woods,New England Patriots,Active,2026-10-17T04:12Z,,,,,,Woods (shoulder) does not have an injury designation for Sunday's game against the Jets.
 3915525,Dre'Mont Jones,New England Patriots,Active,2026-10-17T02:17Z,,,,,,Jones (shoulder) does not have an injury designation ahead of Sunday's game against the Jets.
+5081999,CJ Donaldson,New Orleans Saints,Questionable,2026-10-21T22:33Z,Shoulder,,,2026-10-25,QUESTIONABLE,"Donaldson (shoulder) was listed as a limited practice participant Wednesday, Katherine Terrell of ESPN reports."
 3054850,Alvin Kamara,New Orleans Saints,Questionable,2026-10-21T21:50Z,Back,,,2026-10-25,QUESTIONABLE,"Kamara (back) practiced in a limited capacity Wednesday, Katherine Terrell of ESPN reports."
 4433975,Kool-Aid McKinstry,New Orleans Saints,Active,2026-10-21T21:41Z,,,,,,
-5081999,CJ Donaldson,New Orleans Saints,Questionable,2026-10-21T21:40Z,Shoulder,,,2026-10-25,QUESTIONABLE,questionable
 4076951,Nathan Shepherd,New Orleans Saints,Active,2026-10-21T21:40Z,,,,,,
 4880281,Jordyn Tyson,New Orleans Saints,Injured Reserve,2026-10-21T13:31Z,Hamstring,Strain,Right,2026-11-08,IR-R,"Saints general manager Mickey Loomis said Tuesday that Tyson (hamstring) is ""getting closer"" but won't practice this week, Ross Jackson of WWL Louisiana reports."
 4241993,Pete Werner,New Orleans Saints,Active,2026-10-21T02:26Z,,,,,,"Werner recorded 11 total tackles (five solo), including 1.0 sacks, while also adding a pass defensed during Sunday's 34-27 win over the Giants."
@@ -574,10 +574,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4433938,Jeremiah Wright,New Orleans Saints,Active,2026-10-18T16:31Z,,,,,,Wright (concussion) is active for Sunday's game against the Giants.
 4432768,Lorenzo Styles Jr.,New Orleans Saints,Active,2026-10-18T15:46Z,,,,,,
 4429040,Vernon Broughton,New Orleans Saints,Active,2026-10-17T03:48Z,,,,,,"Broughton (illness) does not have an injury designation for Sunday's game against the Giants, Jeff Nowak of The Big 870 New Orleans reports."
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-21T21:52Z,Calf,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-21T22:01Z,Calf,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
+4040655,Darnell Mooney,New York Giants,Active,2026-10-21T21:56Z,,,,,,"Mooney (neck) was a full participant in Wednesday's practice, Dan Salomone of the Giants' official site reports."
 4426326,Kayvon Thibodeaux,New York Giants,Questionable,2026-10-21T20:28Z,Illness,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4260224,Jordan Stout,New York Giants,Questionable,2026-10-21T20:27Z,Knee,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
-4040655,Darnell Mooney,New York Giants,Active,2026-10-21T20:27Z,,,,,,
 4257188,Charlie Jones,New York Giants,Questionable,2026-10-21T20:26Z,Achilles,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4259566,Andrew Thomas,New York Giants,Questionable,2026-10-21T20:15Z,Groin,,,2026-10-25,QUESTIONABLE,questionable
 4686362,Marcus Mbow,New York Giants,Questionable,2026-10-21T20:15Z,Knee,,,2026-10-25,QUESTIONABLE,questionable

@@ -412,7 +412,11 @@ button.bx-n:hover { color: var(--accent); text-decoration: underline; } .bx-n.pl
 .ts-head { display: flex; justify-content: space-between; font-size: var(--fs-base); margin-bottom: 4px; }
 .ts-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 4px 10px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: var(--fs-md); }
 .ts-v { font-weight: 700; } .ts-v.r { text-align: right; } .ts-k { color: var(--muted); text-align: center; font-size: var(--fs-sm); }
-.ts-bar { grid-column: 1 / -1; display: flex; height: 5px; border-radius: var(--r-xs); overflow: hidden; opacity: .85; }
+.ts-bar { grid-column: 1 / -1; position: relative; display: block; height: 5px; margin: 7px 0 6px; }
+.ts-fill { display: flex; height: 100%; border-radius: var(--r-xs); overflow: hidden; opacity: .85; }
+/* the better team's logo sits where the two colors meet */
+.ts-lg { position: absolute; top: 50%; transform: translate(-50%, -50%); display: flex; line-height: 0; border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--panel); }
 /* ---- gamecast tabs: Pregame / Live / Postgame ---- */
 .gc-page .gc-tabs { display: flex; margin-top: 12px; } .gc-page .gc-tabs button { flex: 1; font-size: var(--fs-base); padding: 8px 10px; }
 .gc-tabs .live-dot { width: 7px; height: 7px; margin-right: 6px; }
@@ -1004,7 +1008,7 @@ html.pc-open { overflow: hidden; }
   }
 }
 /* the name / photo / position header stays in view while the card scrolls (owner 2026-10-14) */
-.pc-page .pc-head { position: sticky; top: var(--navh, 0px); z-index: 6; background: var(--panel);
+.pc-page .pc-head { position: sticky; top: calc(var(--navh, 0px) + var(--sat, 0px)); z-index: 6; background: var(--panel);
   margin: -18px -18px 12px; padding: 22px 52px 10px 18px; }  /* flush with the card's top edge: tints fill its rounded corners */
 @media (max-width: 560px) { .pc-page .pc-head { margin: -14px -14px 12px; padding: 16px 48px 8px 14px; } }
 
@@ -1016,7 +1020,7 @@ html.pc-open { overflow: hidden; }
 }
 
 /* the page tabs stay reachable: sticky right under the sticky header (shell.js sets --pchead) */
-.pc-page .pc-tabs { position: sticky; top: calc(var(--navh, 0px) + var(--pchead, 0px)); z-index: 5;
+.pc-page .pc-tabs { position: sticky; top: calc(var(--navh, 0px) + var(--sat, 0px) + var(--pchead, 0px)); z-index: 5;
   box-shadow: 0 8px 12px -10px rgba(0,0,0,.7); }
 /* desktop: tabs as wide as their labels, not five stretched segments */
 @media (min-width: 1100px) { .pc-page .pc-tabs { display: inline-flex; } .pc-page .pc-tabs button { flex: 0 0 auto; padding: 7px 18px; } }
@@ -1507,3 +1511,59 @@ tr.lg-pend td.muted { text-align: left; white-space: nowrap; font-size: 12px; }
 .tm-nx .nl img { width: 20px !important; height: 20px !important; }
 .tm-nx { display: inline-flex; align-items: center; gap: 1px; }
 .tm-nx i { font-style: normal; font-size: 12px; color: var(--muted); margin-right: 1px; }
+/* a sheet set aside under a card opened from it (shell.js): no re-entry animation when it comes back; a list's sheet
+   waits just behind the card (a card's sheet rides on its copy in .pc-under) */
+.sheet-ov.sheet-still, .sheet-ov.sheet-still .sheet { animation: none; }
+.sheet-ov.sheet-behind { z-index: 55; pointer-events: none; }
+.pc-under .sheet-ov { pointer-events: none; }
+/* the peek (shell.js): the name of the card directly behind (and its sheet), in the strip a stacked card leaves at the
+   top; tap = back. Phones: the stacked card is 40px shorter to make the strip; every card clears the status bar */
+.pc-peek { position: absolute; z-index: 2; top: calc(var(--sat, 0px) + 8px); left: 12px; max-width: calc(100% - 72px); height: 30px; display: flex;
+  align-items: center; gap: 6px; padding: 0 12px 0 9px; cursor: pointer; text-align: left; border-radius: 999px;
+  background: color-mix(in srgb, var(--panel2) 82%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid var(--line); box-shadow: var(--e2, 0 2px 8px rgba(0,0,0,.35));
+  color: var(--ink); font: inherit; font-size: var(--fs-sm); font-weight: 600; }
+.pc-peek[hidden] { display: none; }
+.pc-peek-a { font-size: 20px; line-height: 1; margin-top: -2px; }
+.pc-peek-t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (min-width: 641px) { .pc-peek { top: 2px; } }
+@media (max-width: 640px) {
+  .pc-card .pc-wrap { height: calc(100% - 12px - var(--sat, 0px)); }
+  .pc-card.pc-stacked:not(.pc-under) .pc-wrap { height: calc(100% - 12px - 40px - var(--sat, 0px)); }
+}
+/* a play's strip of field (gamecast.js fieldStrip): offense drives left to right; end zones in team colors */
+.fs { position: relative; display: block; height: 6px; margin: 7px 0 2px; max-width: 320px; border-radius: 3px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent); }
+.fs i { position: absolute; top: 0; bottom: 0; display: block; }
+.fs-ez { width: 8.33%; opacity: .45; }
+.fs-l { left: 0; background: var(--oc); border-radius: 3px 0 0 3px; } .fs-r { right: 0; background: var(--dc); border-radius: 0 3px 3px 0; }
+.fs-50 { left: 50%; width: 1px; background: color-mix(in srgb, var(--ink) 22%, transparent); }
+.fs-seg { border-radius: 2px; }
+.fs-gain { background: var(--good); } .fs-loss, .fs-to { background: var(--bad); } .fs-pen { background: #f0b545; }
+.fs-st { background: color-mix(in srgb, var(--ink) 40%, transparent); } .fs-zero { background: var(--muted); }
+.fs-dot { width: 2px; top: -2px !important; bottom: -2px !important; margin-left: -1px; border-radius: 1px; background: var(--ink); }  /* the snap */
+.fs-seg { min-width: 3px; }
+.pl-what .fs { margin: 6px 0 4px; }
+/* penalty yards tacked on to a play (yellow); striped where they run back over the play's own yards */
+.fs-stripe { background: repeating-linear-gradient(135deg, #f0b545 0 3px, var(--good) 3px 6px) !important; }
+span.nm-link { display: inline; }
+/* win-chance swing chip in the gaining team's color (gamecast.js swingChip) */
+.pi-d.pi-tm { background: color-mix(in srgb, var(--tc) 55%, var(--panel2)); color: #fff; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tc) 80%, #fff 20%); }
+/* one play anatomy (gamecast.js playMeta / playTitle / fieldStrip): the meta line, then the headline with its yards chip */
+.pm { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 3px; }
+.pm .rp-d, .pm .pp { font-size: 12px; }
+.lpf-h.pm { margin-bottom: 0; } .lpf-h.pm .lpf-sc { margin-left: auto; }
+.pt { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+.pt .rp-yd { font-size: 11px; }
+.ds-p { grid-template-columns: 62px minmax(0, 1fr); }
+.ds-b { min-width: 0; } .ds-b .ds-h { font-weight: 600; }
+/* video links: a game's highlights (Result card) and a play's clip when ESPN has one */
+.rp a.rp-hl, .rp a.rp-hl:visited { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: var(--fs-sm); border: 1px solid var(--line); background: var(--panel);
+  color: var(--ink); border-radius: var(--r-md); padding: 5px 10px; text-decoration: none; }
+.rp-hl svg, .c-clip svg { color: #ff4e45; }
+a.pc-chip.c-clip, a.pc-chip.c-clip:visited { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; background: color-mix(in srgb, #ff4e45 16%, transparent);
+  color: var(--ink); font-size: 11px; align-self: center; }
+/* Hall of Fame badge (card header, finder rows) */
+.hof-b { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 11px; font-weight: 800; letter-spacing: .04em;
+  color: #1a1405; background: linear-gradient(135deg, #f5d77a, #c99a2e); vertical-align: middle; }
+.pc-meta .hof-b { margin-right: 6px; }

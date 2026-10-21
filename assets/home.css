@@ -1,0 +1,24 @@
+/* Home (home.js): the site's own look, flat panels like the player card's tap tiles, each previewing its tab */
+.hm { padding: 4px 0 8px; }
+.hm-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 760px) { .hm-grid { grid-template-columns: 1fr 1fr; } }
+.hm-t { display: block; padding: 12px 14px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg);
+  color: var(--ink); text-decoration: none; }
+.hm-t:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.hm-t:active { background: var(--panel2); }
+.hm-k { display: flex; align-items: center; justify-content: space-between; color: var(--ink); font-size: var(--fs-lg, 17px); font-weight: 700; margin-bottom: 6px; }
+.hm-go { font-size: 20px; line-height: 1; color: var(--muted); font-weight: 400; }
+.hm-l { list-style: none; margin: 0; padding: 0; }
+.hm-l li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
+.hm-l li:first-child { border-top: 0; }
+.hm-n { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hm-at { flex: 0 1 auto; }
+.hm-m { color: var(--muted); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.hm-when { margin-left: auto; }
+.hm-v { font-variant-numeric: tabular-nums; min-width: 40px; text-align: right; }
+.hm-rk { width: 18px; color: var(--muted); font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.hm-f { margin: 6px 0 0; color: var(--muted); font-size: var(--fs-xs); }
+.hm-p { margin: 2px 0 2px; color: var(--muted); font-size: var(--fs-md); line-height: 1.4; }
+.hm-p b { color: var(--ink); }
+.hm-t { cursor: pointer; }
+.hm-nl { text-decoration: none; font-weight: 600; }

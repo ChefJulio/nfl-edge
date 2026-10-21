@@ -77,7 +77,8 @@
       const load = s => { if (stype === 'post' && !(IX && (IX.post || []).includes(s))) stype = 'reg'; typeBtns();
         return NFLE.load(`data/stats/teams_${s}${stype === 'post' ? '_post' : ''}.json`).then(d => {
         season = s;
-        rows = Object.entries(d.teams).map(([team, vals]) => Object.assign({ team }, d.info[team] || { nick: team }, Object.fromEntries(d.cols.map((c, i) => [c, vals[i]]))));
+        // the club as it was that season (OAK / SD / STL before their moves; shell.js fmt.era); a tap opens today's
+        rows = Object.entries(d.teams).map(([team, vals]) => Object.assign({}, d.info[team] || { nick: team }, { team: NFLE.fmt.era(team, s) }, Object.fromEntries(d.cols.map((c, i) => [c, vals[i]]))));
         sub.textContent = stype === 'post' ? `${s} playoffs: ${rows.length} teams` : `${s} regular season${rows.length && rows[0].g ? `, ${Math.max(...rows.map(r => r.g))} games` : ''}`;
         draw();
       }).catch(() => { sub.textContent = 'No team stats for that season.'; }); };

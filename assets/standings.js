@@ -72,7 +72,10 @@
           }
         }
       };
-      const load = s => NFLE.load(`data/standings/${s}.json`).then(d => { doc = d; draw(); })
+      // the clubs as they were that season (OAK / SD / STL before their moves; shell.js fmt.era), once per file
+      const eraDoc = d => { if (d && !d._era) { (d.teams || []).forEach(r => { const t = NFLE.fmt.era(r.team, d.season);
+        if (t !== r.team) { const o = NFLE.fmt.teamOf(TEAMS, t); Object.assign(r, { team: t, logo: o.logo || r.logo, color: o.color || r.color, nick: o.nick || r.nick }); } }); d._era = 1; } return d; };
+      const load = s => NFLE.load(`data/standings/${s}.json`).then(d => { doc = eraDoc(d); draw(); })
         .catch(() => { body.innerHTML = '<p class="muted st-pad">No standings for that season.</p>'; });
       sec.querySelector('.st-view').addEventListener('click', e => {
         const b = e.target.closest('[data-v]'); if (!b) return; view = b.dataset.v; store(VIEW_KEY, view); draw();

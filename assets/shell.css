@@ -61,21 +61,21 @@ html.land-rk .botbar .bb-row button.fr-on { color: var(--accent); }
 /* Landing: the real rows rise into place as they replace the shimmer, staggered down the first screen (owner
    2026-10-16); first draw only (html.land-anim, dropped by rankings.js), never on sorts or filters */
 @keyframes fr-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-html.land-anim #tab-players .scroll tbody tr { animation: fr-in .38s cubic-bezier(.2, .7, .3, 1) both; }
-html.land-anim #tab-players .scroll tbody tr:nth-child(1) { animation-delay: 35ms; }
-html.land-anim #tab-players .scroll tbody tr:nth-child(2) { animation-delay: 70ms; }
-html.land-anim #tab-players .scroll tbody tr:nth-child(3) { animation-delay: 105ms; }
-html.land-anim #tab-players .scroll tbody tr:nth-child(4) { animation-delay: 140ms; }
-html.land-anim #tab-players .scroll tbody tr:nth-child(5) { animation-delay: 175ms; }
-html.land-anim #tab-players .scroll tbody tr:nth-child(6) { animation-delay: 210ms; }
-html.land-anim #tab-players .scroll tbody tr:nth-child(7) { animation-delay: 245ms; }
-html.land-anim #tab-players .scroll tbody tr:nth-child(8) { animation-delay: 280ms; }
-html.land-anim #tab-players .scroll tbody tr:nth-child(9) { animation-delay: 315ms; }
-html.land-anim #tab-players .scroll tbody tr:nth-child(10) { animation-delay: 350ms; }
-html.land-anim #tab-players .scroll tbody tr:nth-child(11) { animation-delay: 385ms; }
-html.land-anim #tab-players .scroll tbody tr:nth-child(12) { animation-delay: 420ms; }
-html.land-anim #tab-players .scroll tbody tr:nth-child(n+13) { animation-delay: 455ms; }
-@media (prefers-reduced-motion: reduce) { html.land-anim #tab-players .scroll tbody tr { animation: none; } }
+html.land-anim #tab-players .scroll tbody tr.rise { animation: fr-in .38s cubic-bezier(.2, .7, .3, 1) both; }
+html.land-anim #tab-players .scroll tbody tr.rise:nth-child(1) { animation-delay: 35ms; }
+html.land-anim #tab-players .scroll tbody tr.rise:nth-child(2) { animation-delay: 70ms; }
+html.land-anim #tab-players .scroll tbody tr.rise:nth-child(3) { animation-delay: 105ms; }
+html.land-anim #tab-players .scroll tbody tr.rise:nth-child(4) { animation-delay: 140ms; }
+html.land-anim #tab-players .scroll tbody tr.rise:nth-child(5) { animation-delay: 175ms; }
+html.land-anim #tab-players .scroll tbody tr.rise:nth-child(6) { animation-delay: 210ms; }
+html.land-anim #tab-players .scroll tbody tr.rise:nth-child(7) { animation-delay: 245ms; }
+html.land-anim #tab-players .scroll tbody tr.rise:nth-child(8) { animation-delay: 280ms; }
+html.land-anim #tab-players .scroll tbody tr.rise:nth-child(9) { animation-delay: 315ms; }
+html.land-anim #tab-players .scroll tbody tr.rise:nth-child(10) { animation-delay: 350ms; }
+html.land-anim #tab-players .scroll tbody tr.rise:nth-child(11) { animation-delay: 385ms; }
+html.land-anim #tab-players .scroll tbody tr.rise:nth-child(12) { animation-delay: 420ms; }
+html.land-anim #tab-players .scroll tbody tr.rise:nth-child(n+13) { animation-delay: 455ms; }
+@media (prefers-reduced-motion: reduce) { html.land-anim #tab-players .scroll tbody tr.rise { animation: none; } }
 
 /* Home-screen app: pull-to-refresh indicator (shell.js); hidden above the top edge until a pull from the top */
 .ptr { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 8px); z-index: 80; width: 38px; height: 38px; margin-left: -19px;
@@ -86,3 +86,23 @@ html.land-anim #tab-players .scroll tbody tr:nth-child(n+13) { animation-delay: 
 .ptr.busy svg { animation: ptr-spin .8s linear infinite; }
 @keyframes ptr-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .ptr.busy svg { animation: none; } }
+/* Home-screen app (html.standalone, shell.js): the page runs edge to edge under the status bar (viewport-fit=cover),
+   so content scrolled up under the clock (owner 2026-10-20). An opaque strip behind the status bar, the page starts
+   below it, and everything that sticks to the top sits below it (--sat, added to each sticky offset). */
+html.standalone { --sat: env(safe-area-inset-top); }
+html.standalone body { padding-top: env(safe-area-inset-top); }
+html.standalone body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: env(safe-area-inset-top); background: var(--bg); z-index: 95; }
+html.standalone nav.tabs, html.standalone nav.gc-tabs, html.standalone .gc-jump, html.standalone .gc-panes { top: env(safe-area-inset-top); }
+
+/* player finder (shell.js NFLE.finder): matches drop down under the search box; the page's list stays put */
+.fnd-host { position: relative; }
+.fnd-pop { position: absolute; z-index: 60; top: calc(100% + 4px); right: 0; width: min(380px, calc(100vw - 32px)); max-height: min(70vh, 460px); overflow-y: auto;
+  overscroll-behavior: contain; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: 0 10px 30px rgba(0, 0, 0, .45); padding: 4px; }
+.fnd-r { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: var(--r-sm, 6px); cursor: pointer; }
+.fnd-r .who { flex: 1; min-width: 0; }
+.fnd-r.on, .fnd-r:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.fnd-v { flex: none; font-size: var(--fs-sm); text-align: right; white-space: nowrap; }
+.fnd-tag { color: var(--muted); font-size: 12px; }
+.fnd-none { padding: 10px; font-size: var(--fs-sm); }
+.fnd-sec { padding: 8px 8px 4px; margin-top: 4px; border-top: 1px solid var(--line); font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--muted); }

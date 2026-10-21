@@ -35,6 +35,17 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const px = size => Math.min(600, Math.max(24, size * 3));
   const logoSrc = (url, size) => !url ? '' : !/a\.espncdn\.com\/i\/teamlogos\//.test(url) ? url
     : `https://a.espncdn.com/combiner/i?img=${encodeURIComponent(new URL(url).pathname)}&w=${px(size)}&h=${px(size)}`;
+  // relocated clubs since 1999 (the site's history): today's code -> the old one, used before the move's season
+  const ERA = { LV: { until: 2020, code: 'OAK' }, LAC: { until: 2017, code: 'SD' }, LA: { until: 2016, code: 'STL' } };
+  // the old codes as teams-map entries: today's club with the era's name, ESPN's logo of the time and its colors
+  const OLD = {
+    OAK: { of: 'LV', name: 'Oakland Raiders' },
+    SD: { of: 'LAC', name: 'San Diego Chargers', color: '#0C2340', color2: '#FFC20E', logo_bg: '#0C2340' },
+    STL: { of: 'LA', name: 'St. Louis Rams', color: '#002244', color2: '#B3995D', logo_bg: '#002244' },
+  };
+  const oldTeam = (teams, t) => { const o = OLD[t]; if (!o) return null; const cur = (teams || {})[o.of] || {};  // logo + colors even before the teams map loads
+    const { of, ...rest } = o;
+    return { ...cur, ...rest, logo: `https://a.espncdn.com/i/teamlogos/nfl/500/${t.toLowerCase()}.png` }; };
   NFLE.fmt = {
     signed1: v => `${v >= 0 ? '+' : '-'}${Math.abs(v).toFixed(1)}`,  // a change in points: +0.9 / -0.7
     // Availability is shown one way everywhere (owner 2026-10-17): his chance to PLAY, "62%"; never the chance to sit
@@ -53,21 +64,28 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     pct: v => v == null || isNaN(v) ? '' : `${Math.round(v * 100)}%`,
     ord: n => !n ? '' : `${n}${n % 100 >= 10 && n % 100 <= 20 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th')}`,
     rkc: n => n <= 8 ? 'rk1' : n <= 16 ? 'rk2' : n <= 24 ? 'rk3' : 'rk4',  // league-rank badge color (top 8 green ... bottom 8 red)
-    posb: p => ['QB', 'RB', 'WR', 'TE', 'K', 'DST'].includes(p) ? `<span class="posb posb-${esc(p)}">${esc(p)}</span>` : esc(p),
+    posb: p => p ? `<span class="posb posb-${esc(String(p).replace(/[^A-Za-z]/g, ''))}">${esc(p)}</span>` : '',  // every position has a color (ui.css)
     short: n => { const i = String(n).indexOf(' '); return i < 0 ? String(n) : String(n).slice(i + 1); },  // 'Josh Allen' -> 'Allen'
     // [first, last] for two-line names (owner 2026-10-17): 'Amon-Ra St. Brown' -> ['Amon-Ra', 'St. Brown'],
     // 'Marvin Harrison Jr.' -> ['Marvin', 'Harrison Jr.']; one word -> ['', word]
     split: n => { const s = String(n || '').trim(), i = s.indexOf(' '); return i < 0 ? ['', s] : [s.slice(0, i), s.slice(i + 1)]; },
+    // Relocated franchises (owner 2026-10-21: "LT never played against LV, they were OAK then right?"): the data keeps
+    // today's codes everywhere (links, a franchise's seasons together); a past season shows the club as it was:
+    // era('LV', 2008) -> 'OAK'. The old codes have their own logo and colors (teamOf) and open today's team page (ui.tm).
+    era: (t, season) => { const e = ERA[t]; return e && season && +season < e.until ? e.code : t; },
+    franchise: t => (OLD[t] ? OLD[t].of : t),
+    teamOf: (teams, t) => (teams || {})[t] || oldTeam(teams, t) || {},
     // team logo on its picked background, and a row's team trim (--tc / --tc2), from the week data's teams map
-    logo: (teams, t, size = 18) => { const i = (teams || {})[t] || {}; return i.logo ? `<span class="logo" style="background:${esc(i.logo_bg || '#333')}"><img src="${esc(logoSrc(i.logo, size))}" alt="${esc(t)}" width="${size}" height="${size}" loading="lazy"></span>` : ''; },
-    rowStyle: (teams, t) => { const i = (teams || {})[t] || {}; return `--tc:${i.color || '#666'};--tc2:${i.color2 || '#999'};--tfg:#ffffff`; },
+    logo: (teams, t, size = 18) => { const i = NFLE.fmt.teamOf(teams, t); return i.logo ? `<span class="logo" style="background:${esc(i.logo_bg || '#333')}"><img src="${esc(logoSrc(i.logo, size))}" alt="${esc(t)}" width="${size}" height="${size}" loading="lazy"></span>` : ''; },
+    rowStyle: (teams, t) => { const i = NFLE.fmt.teamOf(teams, t); return `--tc:${i.color || '#666'};--tc2:${i.color2 || '#999'};--tfg:#ffffff`; },
     // a player photo circle in his team's colors: primary fill, secondary ring (owner 2026-10-16)
-    picStyle: (teams, t) => { const i = (teams || {})[t] || {}; return i.color ? ` style="--pc1:${i.color};--pc2:${i.color2 || i.color}"` : ''; },
+    picStyle: (teams, t) => { const i = NFLE.fmt.teamOf(teams, t); return i.color ? ` style="--pc1:${i.color};--pc2:${i.color2 || i.color}"` : ''; },
   };
   // One look everywhere (owner 2026-10-14): every list of players or teams is a row of team-colored tiles (table cls
   // 'tiles', row class 'teamrow', row style from tileStyle) with the same name cell, and every matchup is the Games
   // tab's tile. Teams map = the week data's (NFLE.week() -> D.teams: logo, logo_bg, color, color2, nick).
   const F = NFLE.fmt;
+  F.ERA = ERA;
   NFLE.ui = {
     headshot: espn => espn ? `https://a.espncdn.com/i/headshots/nfl/players/full/${encodeURIComponent(espn)}.png` : '',
     ids: {},  // gsis -> ESPN id (data/espn_ids.json, tools/stats_build.py): a headshot for any list with a player id
@@ -78,7 +96,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     // division name ("AFC East") gets the logo before it; anything else passes through
     conf: (label, size = 16) => { const m = /^(AFC|NFC)\b/.exec(String(label || ''));
       return m ? `<span class="conf-n"><img class="conf-lg" src="${esc(NFLE.root || '')}assets/conf/${m[1]}.png" alt="" height="${size}" style="height:${size}px">${esc(label)}</span>` : esc(label); },
-    tm: (t, html, cls = '') => t ? `<span class="tm-open${cls ? ` ${cls}` : ''}" data-tm="${esc(t)}">${html == null ? esc(t) : html}</span>` : (html || ''),
+    tm: (t, html, cls = '') => t ? `<span class="tm-open${cls ? ` ${cls}` : ''}" data-tm="${esc(F.franchise(t))}">${html == null ? esc(t) : html}</span>` : (html || ''),
     // p: { name, team, pos, grp (badge color group), photo | espn | pid, sub (default: team, linked) | subHtml, badges }
     player: (p, teams) => {
       const photo = p.photo || NFLE.ui.headshot(p.espn || (p.pid && NFLE.ui.ids[p.pid]));
@@ -96,7 +114,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     },
     // a team: logo, nickname, sub line (default "KC")
     team: (t, teams, sub, extra = '') => {
-      const i = (teams || {})[t] || {};
+      const i = F.teamOf(teams, t);
       return `<div class="who">${F.logo(teams, t, 26)}<div><b>${esc(i.nick || t)}</b>${extra}<span class="sub">${sub == null ? esc(t) : sub}</span></div></div>`;
     },
     // the Games tab's matchup tile: logos outside, team colors blending, win chance (score once it starts); live
@@ -347,6 +365,9 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     { key: 'league', label: 'Fantasy', subs: [['lineup', 'Lineup', 'tab-league'], ['matchup', 'Matchup', 'tab-league'], ['live', 'Live', 'tab-league'],
                                               ['teams', 'Teams', 'tab-league'], ['waivers', 'Waivers', 'tab-league'], ['trade', 'Trade', 'tab-league']] },
     { key: 'model', label: 'Model', subs: [['model', 'Model', 'tab-model'], ['reference', 'Reference']] },  // Reference: league rates (owner 2026-10-18)
+    // Home (owner 2026-10-20: a landing page, "I want to..." tiles): not in the tab bars; the logo opens it, and it is
+    // where a first visit lands (a returning visitor still gets the last tab used)
+    { key: 'home', label: 'Home', subs: [['home', 'Home', 'tab-home']], hidden: true },
   ];
   // Client-rendered tabs: section id -> area module (assets/<area>.js + .css), loaded the first time the tab opens.
   // A module registers NFLE.areas[<area>] = { mount(section) } and renders into its section.
@@ -354,7 +375,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
                   'tab-players-injuries': 'injuries', 'tab-players': 'rankings', 'tab-teams-draft': 'draft',
                   'tab-teams-playoffs': 'playoffs', 'tab-players-moves': 'moves', 'tab-power': 'power',
                   'tab-games': 'matchups', 'tab-roles': 'roles', 'tab-model': 'model',
-                  'tab-players-trends': 'trends', 'tab-league': 'league', 'tab-model-reference': 'reference' };
+                  'tab-players-trends': 'trends', 'tab-league': 'league', 'tab-model-reference': 'reference', 'tab-home': 'home' };
   const ver = (document.currentScript && new URL(document.currentScript.src).search) || '';
   const loaded = {};
   const NFLE = window.NFLE = window.NFLE || {};
@@ -377,11 +398,22 @@ document.addEventListener('touchstart', () => {}, { passive: true });
                playoffs: 'teams/playoffs', draft: 'teams/draft', transactions: 'players/moves' };
   const CARD = /^g-/;  // old matchup-tile links: gamecast.js turns them into gamecast links
   const PAGE = /^(player|team)\/(.+)$/;  // player / team cards (rendered by gamecast.js into #pcOv)
+  // The card stack lives in the URL (owner 2026-10-20: "make the nested navigation part of the url? so if i share a url
+  // it has the stack"): cards in order, joined by "+", each with the sheet open over it after ":", e.g.
+  // #team/PHI:players+player/00-0033885 = the Eagles card with its Players sheet, Goedert's card on top. Back pops one.
+  const SEG = /^(player|team)\/([^:+]+)(?::([a-z0-9-]+))?$/;
+  const segsOf = h => { const t = (h || '').replace(/^#/, ''); if (!t) return null;
+    const m = t.split('+').map(x => x.match(SEG)); return m.every(Boolean) ? m.map(x => ({ kind: x[1], id: x[2], sheet: x[3] || '' })) : null; };
+  const segStr = x => `${x.kind}/${x.id}${x.sheet ? ':' + x.sheet : ''}`;
+  NFLE.slug = t => String(t || '').toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   const nav = document.querySelector('nav.tabs');
   const main = document.querySelector('main .wrap');
   // Pages without the tab bar (game.html) still run the cards (owner 2026-10-17: a player tapped in the gamecast opened
   // over the Players tab of another page): the card opens over the page itself and closing returns to it.
   const listless = !nav || !main;
+  if (main && !document.getElementById('tab-home')) main.insertAdjacentHTML('afterbegin', '<section id="tab-home"></section>');
+  // the logo opens Home (pages built before Home existed link it to #players)
+  document.querySelectorAll('a.brand').forEach(a => { a.href = a.getAttribute('href').replace(/#.*$/, '') + '#home'; a.title = 'Home'; });
   const parent = k => NAV.find(p => p.key === k) || NAV[0];
   const sectionId = (p, s) => s[2] || `tab-${p.key}-${s[0]}`;
   // Player / team CARDS (owner 2026-10-17: "make player pages cards again"): #player/<id> and #team/<abbr> open the
@@ -406,7 +438,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     }
   }));
   // Phones show the short label where one exists, so all seven parent tabs fit on one line (owner's pick).
-  if (!listless) nav.innerHTML = `<div class="wrap nav-par" role="tablist">${NAV.map(p => `<button type="button" role="tab" data-par="${p.key}">${p.short
+  if (!listless) nav.innerHTML = `<div class="wrap nav-par" role="tablist">${NAV.filter(p => !p.hidden).map(p => `<button type="button" role="tab" data-par="${p.key}">${p.short
       ? `<span class="lbl-long">${p.label}</span><span class="lbl-short">${p.short}</span>` : p.label}</button>`).join('')}</div>
     <div class="wrap nav-sub" hidden></div>`;
   // --navh: the sticky top bar's height (0 where it's hidden), so things that stick below it (the player / team page
@@ -426,8 +458,9 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     more: '<circle cx="5.5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18.5" cy="12" r="1.4"/>',
   };
   const svg = k => `<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">${ICON[k]}</svg>`;
+  NFLE.navIcon = svg;  // Home's tiles (home.js)
   const navMode = NAV_MODE;
-  const BOTTOM = NAV.map(p => p.key);  // all five parents fit: no More sheet
+  const BOTTOM = NAV.filter(p => !p.hidden).map(p => p.key);  // all five parents fit: no More sheet (Home isn't a tab)
   let bot = null;
   if (navMode === 'bottom' && !listless) {
     document.documentElement.classList.add('nav-bottom');
@@ -440,7 +473,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     bot = document.querySelector('body > .botbar') || document.createElement('div');
     bot.className = 'botbar';
     bot.removeAttribute('aria-hidden');
-    const extra = NAV.filter(p => !BOTTOM.includes(p.key));  // parents beyond the bar go in a More sheet (none today)
+    const extra = NAV.filter(p => !p.hidden && !BOTTOM.includes(p.key));  // parents beyond the bar go in a More sheet (none today)
     bot.innerHTML = `<nav class="bb-row">${BOTTOM.map(k => `<button type="button" data-par="${k}">${svg(k)}<span>${parent(k).label}</span></button>`).join('')}
       ${extra.length ? `<button type="button" data-more>${svg('more')}<span>More</span></button>` : ''}</nav>
       ${extra.length ? `<div class="bb-sheet" hidden>${extra.map(p => `<button type="button" data-par="${p.key}">${p.label}</button>`).join('')}</div>` : ''}`;
@@ -480,11 +513,52 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     el.querySelectorAll('[id]').forEach(x => x.removeAttribute('id'));
     el.style.transform = ''; el.style.transition = '';
     return { el, top: cardBox.scrollTop }; };
+  const sheetAt = {}, sheetPend = {};  // sheets set aside under cards (below), by depth
+  cardOv.insertAdjacentHTML('afterbegin', '<button type="button" class="pc-peek" hidden><span class="pc-peek-a" aria-hidden="true">&lsaquo;</span><span class="pc-peek-t"></span></button>');
+  const peek = cardOv.querySelector('.pc-peek');
   const showUnder = d => { const s = snaps[d - 1]; under.replaceChildren(); under.hidden = !s; cardOv.classList.toggle('pc-stacked', !!s);
-    if (s) { under.appendChild(s.el); s.el.querySelector('.pc').scrollTop = s.top; } };
+    if (s) { under.appendChild(s.el); s.el.querySelector('.pc').scrollTop = s.top; }
+    // that card's sheet, if it had one open, sits on it (visible as the card above slides away)
+    const sh = s && sheetAt[d - 1];
+    if (sh) { sh.ov.classList.add('sheet-still'); under.appendChild(sh.ov); const x = sh.ov.querySelector('.sheet'); if (x) x.scrollTop = sh.top; }
+    // (owner 2026-10-20: "the view directly behind current view showing its header text ... so i can see what to expect
+    // if i swipe down"): its name (and its sheet's title) in the strip above the top card; tapping it goes back
+    peek.hidden = !s;
+    if (s) { const h = s.el.querySelector('.pc-id h3'), name = h ? [...h.childNodes].filter(n => !(n.classList && n.classList.contains('pc-num'))).map(n => n.textContent).join('').trim() : '';
+      const st = sh && sh.ov.querySelector('.sheet-h b');
+      peek.querySelector('.pc-peek-t').textContent = [name, st ? st.textContent : ''].filter(Boolean).join(' \u00b7 ');
+      peek.setAttribute('aria-label', `Back to ${peek.querySelector('.pc-peek-t').textContent}`); } };
+  // Sheets ride the card stack (owner 2026-10-20: "we open the depth chart and that slide disappears when we click on
+  // a player"): a sheet open when a card opens over it is set aside under the depth it belongs to (0 = the list) and
+  // comes back, scrolled where it was, when you return to that depth; closing past it discards it.
+  const stashSheet = d => { const ov = document.querySelector('body > .sheet-ov');
+    if (!ov) return; const sh = ov.querySelector('.sheet'); sheetAt[d] = { ov, top: sh ? sh.scrollTop : 0 };
+    ov.classList.add('sheet-still');
+    if (d === 0) ov.classList.add('sheet-behind'); else ov.remove(); };  // depth >= 1: showUnder puts it on its card
+  const restoreSheet = d => { Object.keys(sheetAt).forEach(k => { if (+k > d) delete sheetAt[k]; });
+    const s = sheetAt[d]; delete sheetAt[d];
+    const pend = sheetPend[d]; delete sheetPend[d];
+    if (!s && pend) { setTimeout(() => openSheetSlug(pend), 0); return; }  // a shared link's sheet, first visit
+    if (!s || document.querySelector('body > .sheet-ov:not(.sheet-behind)')) return;
+    s.ov.classList.remove('sheet-behind');
+    document.body.appendChild(s.ov); const sh = s.ov.querySelector('.sheet'); if (sh) sh.scrollTop = s.top; };
   const hideCard = () => { cardOv.hidden = true; document.documentElement.classList.remove('pc-open'); onPage = false; depth = 0;
-    snaps.length = 0; showUnder(0); settle(); };
-  const settle = () => { cardWrap.style.transition = 'none'; cardWrap.style.transform = ''; };
+    snaps.length = 0; showUnder(0); settle(); restoreSheet(0); };
+  const settle = () => { cardWrap.style.transition = 'none'; cardWrap.style.transform = ''; cardOv.style.backgroundColor = ''; peek.style.opacity = ''; };
+  // (owner 2026-10-20: "views that are underneath are sunken visually before popping into the right place"): the
+  // still copy underneath is shrunk, raised and dimmed (gamecast.css .pc-under); k = how far the top card has left
+  // (0..1) brings it to full size and brightness and fades the backdrop, so the real card lands where the copy is
+  const SUNK = () => matchMedia('(min-width: 641px)').matches ? [0.96, -18] : [0.94, -14];
+  const PEEK_H = 40;  // phones: the strip a stacked card leaves for the peek (gamecast.css .pc-stacked)
+  const rise = (k, ms = 0) => {
+    const w = under.querySelector(':scope > .pc-wrap');
+    const [sc, ty] = SUNK(), t = ms ? `transform ${ms}ms var(--ease), filter ${ms}ms var(--ease)` : 'none';
+    const land = depth - 1 > 1 && matchMedia('(max-width: 640px)').matches ? PEEK_H : 0;
+    if (w) { w.style.transition = t; w.style.transform = `scale(${sc + (1 - sc) * k}) translateY(${ty * (1 - k) + land * k}px)`; w.style.filter = `brightness(${0.8 + 0.2 * k})`; }
+    peek.style.opacity = String(1 - k);
+    cardOv.style.transition = ms ? `background-color ${ms}ms var(--ease)` : 'none';
+    cardOv.style.backgroundColor = k > 0 ? `rgba(5,7,10,${(0.4 * (1 - k)).toFixed(3)})` : '';
+  };
   // close: back one card (stacked), else back to the list, or, for a card opened from a link, onto the list in place
   const closeCard = () => {
     if (cardOv.hidden) return;
@@ -517,6 +591,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     e.preventDefault();
     cardWrap.style.transition = 'none';
     cardWrap.style.transform = `translateY(${Math.max(0, dy)}px)`;
+    if (!under.hidden) rise(Math.min(1, Math.max(0, dy) / cardWrap.offsetHeight));
   }, { passive: false });
   cardBox.addEventListener('touchend', () => {
     if (dmode !== 'drag') { dmode = null; return; }
@@ -525,21 +600,30 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     cardWrap.style.transition = 'transform .22s var(--ease)';
     if (dy > 0.25 * cardWrap.offsetHeight || dv > 0.6) {
       cardWrap.style.transform = 'translateY(100%)';
+      if (!under.hidden) rise(1, 210);
       setTimeout(closeCard, 210);  // it stays off screen until the card below renders or the overlay hides (settle)
-    } else cardWrap.style.transform = '';
+    } else { cardWrap.style.transform = ''; if (!under.hidden) rise(0, 220); }
   });
   // a card opened on a card slides up over it (the first one animates from CSS as the overlay appears)
   const playIn = () => { cardWrap.style.animation = 'none'; void cardWrap.offsetWidth; cardWrap.style.animation = ''; };
-  cardOv.addEventListener('click', e => { if (e.target === cardOv || e.target.closest('.pc-x')) closeCard(); });
+  const slideClose = () => {
+    if (under.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches) { closeCard(); return; }
+    cardWrap.style.transition = 'transform .21s var(--ease)';
+    cardWrap.style.transform = 'translateY(100%)';
+    rise(1, 210);
+    setTimeout(closeCard, 210);
+  };
+  cardOv.addEventListener('click', e => { if (e.target === cardOv || e.target.closest('.pc-x, .pc-peek')) slideClose(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !cardOv.hidden && !document.querySelector('.sheet-ov, .zoom-ov')) closeCard(); });
-  const showPage = (kind, id) => {
+  const showPage = (kind, id, dAt) => {
     // a direct link has no list behind it: a team card opens over Teams, a player card over Players
     if (!lastRoute && !listless) { const home = kind === 'team' ? 'teams' : 'players'; show(parse(home), false); deep = true; }
     const fresh = !onPage;  // opened from a list (not card-to-card): the card starts on this page's week
     const fn = kind === 'player' ? NFLE.showPlayer : NFLE.showTeam;
     // depth of this card: its history entry's (Back / Forward), else one deeper than the open card
-    const st = history.state && history.state.nfleCard, was = cardOv.hidden ? 0 : depth, d = st || was + 1;
+    const st = history.state && history.state.nfleCard, was = cardOv.hidden ? 0 : depth, d = dAt || st || was + 1;
     let top = 0;
+    if (d > was) stashSheet(was);  // a sheet on the card (or list) you're leaving waits for you to come back
     if (d > was && was > 0) { snaps[was] = snapshot(); playIn(); }  // card on card: the one below, as you leave it
     else if (d < was) { top = snaps[d] ? snaps[d].top : 0; snaps.length = d; }  // back down: where you were on it
     cardOv.hidden = false;
@@ -555,6 +639,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     depth = d;
     if (!st) { try { history.replaceState({ nfleCard: depth }, ''); } catch (e) { /* file:// */ } }
     showUnder(depth);
+    if (d < was) restoreSheet(d);
     onPage = true;
     document.dispatchEvent(new CustomEvent('nfle-route', { detail: { parent: lastRoute ? lastRoute.p.key : '', sub: 'card', section: 'pcOv' } }));
   };
@@ -600,9 +685,30 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     bot.addEventListener('click', onNav);
     document.addEventListener('click', e => { const sh = bot.querySelector('.bb-sheet'); if (sh && !bot.contains(e.target)) sh.hidden = true; });
   }
+  // a card's sheet named in the URL: open it once the card has drawn its tiles (some fill in after data loads)
+  const openSheetSlug = (slug, tries = 0, at = depth) => {
+    if (!slug || document.querySelector('body > .sheet-ov') || cardOv.hidden || depth !== at) return;  // moved on: drop it
+    const t = [...cardOv.querySelectorAll('.pc-tap[data-sheet]')].find(x => NFLE.slug(x.dataset.sheet) === slug);
+    if (t) t.click(); else if (tries < 20) setTimeout(() => openSheetSlug(slug, tries + 1, at), 150);
+  };
+  // the URL for opening a card from where you are: on a card, one deeper in the stack; on a list, a new stack
+  NFLE.cardHref = (kind, id) => { const cur = !cardOv.hidden && segsOf(location.hash);
+    return '#' + (cur ? cur.map(segStr).join('+') + '+' : '') + `${kind}/${id}`; };
+  // a sheet opened or closed over the top card: recorded on its segment (same history entry)
+  NFLE.sheetMark = slug => { const cur = !cardOv.hidden && segsOf(location.hash); if (!cur) return;
+    cur[cur.length - 1].sheet = slug || '';
+    try { history.replaceState(history.state, '', location.pathname + location.search + '#' + cur.map(segStr).join('+')); } catch (e) { /* file:// */ } };
+  // a shared stack: each card in order (its own history entry, so Back steps down it), its sheet opened as it was
+  // (the sheets of cards below the top one open when you step back to them: sheetPend)
+  const buildStack = segs => segs.forEach((x, i) => {
+    const h = location.pathname + location.search + '#' + segs.slice(0, i + 1).map(segStr).join('+');
+    try { if (i === 0) history.replaceState({ nfleCard: 1 }, '', h); else history.pushState({ nfleCard: i + 1 }, '', h); } catch (e) { /* file:// */ }
+    showPage(x.kind, x.id, i + 1);
+    if (i < segs.length - 1) { if (x.sheet) sheetPend[i + 1] = x.sheet; } else openSheetSlug(x.sheet);
+  });
   const route = (h, push) => {
-    const m = (h || '').replace(/^#/, '').match(PAGE);
-    if (m) { showPage(m[1], m[2]); return true; }
+    const segs = segsOf(h);
+    if (segs) { const top = segs[segs.length - 1]; showPage(top.kind, top.id, segs.length); openSheetSlug(top.sheet); return true; }
     if (listless) { hideCard(); deep = false; return true; }  // the card's entry left: the page itself
     const r = parse(h);
     if (r) { const back = !cardOv.hidden && lastRoute && r.p === lastRoute.p && r.s === lastRoute.s;
@@ -612,17 +718,27 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     return false;
   };
   window.addEventListener('hashchange', () => route(location.hash, false));
+  document.addEventListener('click', e => {
+    const a = !cardOv.hidden && e.target.closest && e.target.closest('a[href^="#player/"], a[href^="#team/"]');
+    if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey) return;
+    const m = a.getAttribute('href').slice(1).match(PAGE);
+    if (!m) return;
+    e.preventDefault(); location.hash = NFLE.cardHref(m[1], m[2]).slice(1);
+  });
   let saved = null; try { saved = localStorage.getItem('nfledge-tab'); } catch (e) { /* ignore */ }
   // A card link opened directly: over the tab you last used in that section (Teams for a team, Players for a player)
   if (listless) {
-    if (PAGE.test(location.hash.slice(1))) { deep = true; route(location.hash, false); }
-  } else if (PAGE.test(location.hash.slice(1))) {
-    const sec = location.hash.slice(1).startsWith('team/') ? 'teams' : 'players';
+    const sg = segsOf(location.hash);
+    if (sg) { deep = true; NFLE.runStack = () => { NFLE.runStack = null; buildStack(sg); }; }
+  } else if (segsOf(location.hash)) {
+    const sg = segsOf(location.hash);
+    const sec = sg[0].kind === 'team' ? 'teams' : 'players';
     show((saved && saved.startsWith(sec) ? parse(saved) : null) || parse(sec), false);
     deep = true;
-    route(location.hash, false);
+    // the cards need the week's data (gamecast.js loads it, then calls this); a stack built before it would be empty
+    NFLE.runStack = () => { NFLE.runStack = null; buildStack(sg); };
   }
-  else show(parse(location.hash) || parse(saved) || parse('players'), !CARD.test(location.hash.slice(1)));
+  else show(parse(location.hash) || parse(saved) || parse('home'), !CARD.test(location.hash.slice(1)));
   window.NFLE_SHELL = { go: h => { const r = parse(h); if (r) show(r, true); } };
 })();
 // Number chips in every data table (owner 2026-10-15, after the box score): a cell whose value is a stat (digits with
@@ -750,9 +866,13 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   // bottom disagree by more than a toolbar's worth, pin the bar to the visual bottom; otherwise plain CSS (bottom: 0).
   const bot = document.querySelector('body > .botbar'), vv = window.visualViewport;
   if (bot && vv) {
-    let raf = 0;
+    let raf = 0, touching = false;
+    // never during a gesture or a rubber-band bounce (owner 2026-10-20: pulling to refresh slid the bar up): the
+    // visual viewport moves then by design; the keyboard drift is a steady state, re-checked once the page settles
+    const overscrolled = () => scrollY < 0 || scrollY > html.scrollHeight - innerHeight + 1;
     const fix = () => {
       raf = 0;
+      if (touching || overscrolled()) return;
       const drift = vv.offsetTop + vv.height - html.clientHeight;
       if (Math.abs(drift) > 40 && !html.classList.contains('kb-open')) {
         bot.style.top = `${Math.round(vv.offsetTop + vv.height - bot.offsetHeight)}px`;
@@ -762,6 +882,10 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       }
     };
     const soon = () => { if (!raf) raf = requestAnimationFrame(fix); };
+    addEventListener('touchstart', () => { touching = true; }, { passive: true });
+    const settle = () => { touching = false; setTimeout(soon, 600); };  // after the bounce / momentum ends
+    addEventListener('touchend', settle, { passive: true });
+    addEventListener('touchcancel', settle, { passive: true });
     vv.addEventListener('resize', soon);
     vv.addEventListener('scroll', soon);
     addEventListener('scroll', soon, { passive: true });
@@ -811,4 +935,160 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   addEventListener('touchend', end, { passive: true });
   addEventListener('touchcancel', () => { y0 = null; reset(); }, { passive: true });
   NFLE.ptr = { start, move, end };  // tests drive it directly (Playwright WebKit has no multi-point touch drag)
+})();
+
+// Player finder (owner 2026-10-21: "a list that pops out ... when searching by name so it doesn't filter the list, just
+// provides a list of most relevant players by their name/relevance"): a search box's matches drop down under it, the
+// page's list stays as it is. Everyone on a roster is findable, projected this week or not (data/roster.json,
+// tools/depth_build.py roster_directory: active, reserve lists, practice squads), plus the teams. A pick opens the
+// card (the site's click rule, gamecast.js). Ranked by how well the name matches, then by fantasy relevance.
+// Past players (owner 2026-10-21: "no tomlinson? ... a section for historical players, active players should have
+// priority"): everyone with a career since 1999, in their own section under the current ones. Loaded per search, not
+// up front (owner: "lazy load everything but the name/position/years active"): tools/stats_build.py write_finder_past
+// files each player under every two-letter pair in his name, and a search fetches the file of its rarest pair
+// (data/stats/finder_past/<pair>.json, ~2 KB typical), which holds every name containing it ("linson" finds Tomlinson).
+// Players from it who played this season (linemen, defenders: not on the fantasy roster list) join the current ones.
+// NFLE.finder(input, { value(pid) -> html for the right side (a page's own number, e.g. Rankings' points in your
+// scoring), limit })
+(() => {
+  const NFLE = window.NFLE, esc = NFLE.esc;
+  const norm = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[.'’]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  const TAG = { PS: 'Practice squad', IR: 'IR', PUP: 'PUP', NFI: 'NFI', SUSP: 'Suspended', HOLD: 'Holdout', RES: 'Reserve list' };
+  let IDX = null;
+  const index = () => IDX || (IDX = Promise.all([NFLE.week(), NFLE.load('data/roster.json').catch(() => null), NFLE.ui.ready]).then(([D, R]) => {
+    const out = [], seen = new Set(), teams = (D && D.teams) || {};
+    const playing = new Set(((D && D.games) || []).flatMap(g => [g.away.team, g.home.team]));
+    const add = e => { if (!e.pid || seen.has(e.pid)) return; seen.add(e.pid); e.n = norm(e.name); e.t = e.n.split(' '); out.push(e); };
+    Object.entries((D && D.players) || {}).forEach(([pid, p]) => add({ pid, name: p.name, pos: p.pos, team: p.team, photo: p.photo, status: p.status, inactive: p.inactive, proj: p.proj,
+      rel: 1 + Math.min(1, (p.proj || 0) / 20) }));
+    Object.entries(((D && D.rk) || {}).byes || {}).forEach(([pos, l]) => l.forEach(b => add({ pid: b.pid, name: b.name, pos, team: b.team, bye: true, fpg: b.fpg,
+      rel: 0.9 + Math.min(1, (b.fpg || 0) / 20) })));
+    if (R && R.rows) {
+      const c = Object.fromEntries(R.cols.map((k, i) => [k, i]));
+      R.rows.forEach(r => add({ pid: r[c.pid], name: r[c.name], pos: r[c.pos], team: r[c.team], tag: r[c.tag], espn: r[c.espn], dir: true,
+        bye: D && D.games && !playing.has(r[c.team]), rel: r[c.tag] === 'PS' ? 0.2 : r[c.tag] ? 0.3 : 0.5 }));
+    }
+    Object.entries(teams).forEach(([t, i]) => { const e = { team: t, name: i.name || t, isTeam: true, rel: 1.5 };
+      e.n = norm(`${i.name || ''} ${t}`); e.t = e.n.split(' '); out.push(e); });
+    return { list: out, teams, season: D && D.season, have: new Set(out.map(e => e.pid)) };
+  }));
+  const PAIRS = {};  // pair -> parsed rows
+  let PIDX = null;
+  const pairIndex = () => PIDX || (PIDX = NFLE.load('data/stats/finder_past/index.json').then(j => j.n).catch(() => ({})));
+  const pairsOf = q => [...new Set(q.split(' ').flatMap(w => [...Array(Math.max(0, w.length - 1)).keys()].map(i => w.slice(i, i + 2))))];
+  // a search's past players: { old (before this season), now (played this season, not on a fantasy roster) }
+  const pastFor = q => Promise.all([index(), pairIndex()]).then(([cur, n]) => {
+    const ps = pairsOf(q);
+    if (!ps.length || ps.some(p => !n[p])) return { old: [], now: [] };  // a pair no name has: no past match
+    const k = ps.reduce((a, b) => (n[a] <= n[b] ? a : b));
+    return (PAIRS[k] || (PAIRS[k] = NFLE.load(`data/stats/finder_past/${k}.json`).then(j => String(j.d || '').split('\n').map(line => {
+      const [id, name, pos, a, b, w, hof] = line.split('|'), nn = norm(name);
+      return { pid: /^\d{5}$/.test(id) ? `00-00${id}` : id, name, pos, first: +a, last: +b, w: +w / 9, hof: hof ? +hof : 0, n: nn, t: nn.split(' ') };
+    })).catch(() => { delete PAIRS[k]; return []; }))).then(rows => {
+      const old = [], now = [];
+      rows.forEach(r => { if (cur.have.has(r.pid)) return;
+        if (cur.season && r.last >= cur.season) now.push({ ...r, rel: 0.4 * r.w, years: true });
+        else old.push({ ...r, rel: r.w, years: true, past: true }); });
+      return { old, now };
+    });
+  });
+  // how well a name matches: a name word starting with it (first or last name alike; relevance breaks the tie: "brady"
+  // is Tom Brady before Brady Poppinga), every word of it starting a name word, or anywhere inside ("linson")
+  const matchScore = (e, q, qt) => {
+    if (e.n.startsWith(q)) return 4;
+    if (e.isTeam && e.t.includes(q)) return 4;  // "phi", "eagles"
+    if (qt.length === 1 && e.t.some(w => w.startsWith(q))) return 4;
+    if (qt.every(x => e.t.some(w => w.startsWith(x)))) return 3;
+    if (q.length >= 3 && e.n.replace(/ /g, '').includes(q.replace(/ /g, ''))) return 1;
+    return 0;
+  };
+  const right = (e, opts) => {
+    const v = !e.isTeam && opts.value ? opts.value(e.pid) : '';
+    if (v) return v;
+    if (e.isTeam) return '<span class="muted">Team</span>';
+    if (e.years) return `<span class="fnd-tag">${e.first === e.last ? e.first : `${e.first}-${e.last}`}</span>`;
+    if (e.tag) return `<span class="fnd-tag">${esc(TAG[e.tag] || e.tag)}</span>`;
+    if (e.bye) return `<span class="fnd-tag">Bye${e.fpg ? ` · ${(Math.round(e.fpg * 10) / 10).toFixed(1)} FP/G` : ''}</span>`;
+    if (e.proj != null) return `<b>${(Math.round(e.proj * 10) / 10).toFixed(1)}</b>`;
+    return '<span class="muted">Not projected</span>';
+  };
+  NFLE.finder = (input, opts = {}) => {
+    const limit = opts.limit || 8;
+    const host = input.parentElement;
+    host.classList.add('fnd-host');
+    const pop = document.createElement('div');
+    pop.className = 'fnd-pop'; pop.hidden = true; pop.setAttribute('role', 'listbox');
+    pop.id = `fnd-${Math.random().toString(36).slice(2, 8)}`;
+    input.setAttribute('aria-controls', pop.id); input.setAttribute('aria-autocomplete', 'list'); input.setAttribute('autocomplete', 'off');
+    host.appendChild(pop);
+    let act = 0, seq = 0, pastT = 0;
+    const close = () => { pop.hidden = true; input.setAttribute('aria-expanded', 'false'); };
+    const mark = () => pop.querySelectorAll('.fnd-r').forEach((r, i) => r.classList.toggle('on', i === act));
+    const draw = () => {
+      const q = norm(input.value), my = ++seq;
+      if (!q) { close(); return; }
+      const qt = q.split(' ');
+      const best = (list, n) => list.map(e => { const m = matchScore(e, q, qt); return m ? [m * 10 + e.rel, e] : null; }).filter(Boolean)
+        .sort((a, b) => b[0] - a[0]).slice(0, n).map(x => x[1]);
+      const row = (e, teams) => e.isTeam
+        ? `<div class="fnd-r tm-open" role="option" data-tm="${esc(e.team)}">${NFLE.ui.team(e.team, teams, esc(e.team))}<span class="fnd-v">${right(e, opts)}</span></div>`
+        : `<div class="fnd-r" role="option" data-open-pid="${esc(e.pid)}">${NFLE.ui.player({ name: e.name, team: e.team, pos: e.pos, photo: e.photo, espn: e.espn, pid: e.pid,
+            badges: e.hof ? `<span class="hof-b" title="Pro Football Hall of Fame, class of ${e.hof}">HOF</span>` : NFLE.injTag && !e.past ? NFLE.injTag(e.status || '', e.inactive, e.pid) : '' }, teams)}<span class="fnd-v">${right(e, opts)}</span></div>`;
+      // current players first, then past ones once their list is in (a second paint, same keystroke)
+      const paint = (cur, old, teams, done) => {
+        if (my !== seq) return;  // a newer keystroke
+        const keep = pop.querySelector('.fnd-r.on'), was = keep ? keep.dataset.openPid || keep.dataset.tm : null;
+        pop.innerHTML = (cur.length ? cur.map(e => row(e, teams)).join('') : '')
+          + (old.length ? `<div class="fnd-sec" role="presentation">Past players</div>${old.map(e => row(e, teams)).join('')}` : '')
+          || (done ? '<div class="fnd-none muted">No player or team by that name</div>' : '<div class="fnd-none muted">Searching...</div>');
+        const rows = [...pop.querySelectorAll('.fnd-r')], i = rows.findIndex(r => (r.dataset.openPid || r.dataset.tm) === was);
+        act = i >= 0 ? i : 0;
+        pop.hidden = false; input.setAttribute('aria-expanded', 'true'); mark();
+      };
+      index().then(({ list, teams }) => {
+        paint(best(list, limit), [], teams, false);
+        // past players once typing pauses: one small file per search, not one per keystroke
+        clearTimeout(pastT);
+        pastT = setTimeout(() => pastFor(q).then(({ old, now }) => { const cur = best(list.concat(now), limit);
+          paint(cur, best(old, cur.length ? Math.max(3, limit - cur.length) : limit), teams, true); }), 150);
+      });
+    };
+    input.addEventListener('input', draw);
+    input.addEventListener('focus', () => { pairIndex(); if (input.value.trim()) draw(); });
+    input.addEventListener('keydown', e => {
+      const rows = pop.querySelectorAll('.fnd-r');
+      if (e.key === 'Escape') { close(); return; }
+      if (pop.hidden || !rows.length) return;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); act = (act + (e.key === 'ArrowDown' ? 1 : rows.length - 1)) % rows.length; mark(); }
+      else if (e.key === 'Enter') { e.preventDefault(); rows[act].click(); }
+    });
+    // a pick: the click rule opens the card; the list closes and the keyboard goes away
+    pop.addEventListener('click', e => { if (e.target.closest('.fnd-r')) setTimeout(() => { close(); input.blur(); }); });
+    pop.addEventListener('mousedown', e => e.preventDefault());  // keep focus in the box while picking
+    document.addEventListener('pointerdown', e => { if (!pop.hidden && !host.contains(e.target)) close(); });
+    return { close, refresh: draw };
+  };
+})();
+
+// A clear X in every text box (owner 2026-10-21: "a little X to display inline on the right to clear the input easily
+// rather than forcing user to backspace the whole thing"): drawn by ui.css in the box's right padding whenever it has
+// text (its placeholder is hidden; a box without one gets a blank one), so no markup changes anywhere. A tap on it
+// empties the box and fires the box's own input / change handlers (filters reset, the finder closes) without moving
+// the caret or dropping the keyboard.
+(() => {
+  const SEL = 'input[type="search"], input[type="text"], input:not([type])';
+  const ZONE = 32;  // px from the right edge: the X and its padding (ui.css)
+  const box = t => (t && t.matches && t.matches(SEL) && !t.disabled && !t.readOnly && t.value ? t : null);
+  const clearHit = e => { const el = box(e.target); if (!el) return null; const r = el.getBoundingClientRect();
+    return e.clientX >= r.right - ZONE && e.clientX <= r.right ? el : null; };
+  document.addEventListener('focusin', e => { if (e.target.matches && e.target.matches(SEL) && !e.target.hasAttribute('placeholder')) e.target.setAttribute('placeholder', ' '); });
+  document.addEventListener('pointerdown', e => {
+    const el = clearHit(e); if (!el) return;
+    e.preventDefault();  // no caret jump, the keyboard stays as it was
+    el.value = '';
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }, true);
+  // a desktop pointer over the X is a pointer, not a text cursor
+  document.addEventListener('mousemove', e => { if (e.target.matches && e.target.matches(SEL)) e.target.style.cursor = clearHit(e) ? 'pointer' : ''; });
 })();

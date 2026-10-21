@@ -9,7 +9,9 @@
 (() => {
   const NFLE = window.NFLE, esc = NFLE.esc;
   const LS_KEY = 'nfledge-scoring';
-  const POS = ['QB', 'RB', 'WR', 'TE', 'FLEX', 'K', 'DST'];
+  // ALL (owner 2026-10-20: "make an all positions tab"): QB / RB / WR / TE under your scoring, ranked together (K and
+  // D/ST keep their own tabs: they're scored with standard ESPN rules, not yours, so their points don't compare)
+  const POS = ['QB', 'RB', 'WR', 'TE', 'FLEX', 'ALL', 'K', 'DST'];
   const OUT_LINE = 0.9;
   // Two worlds in one cell (owner 2026-10-20, Lamar Jackson / Tyler Huntley): when a player is 20-80% to play, he and
   // the teammate whose role hangs on him show both projections: the likelier world as the number (it sorts), the other
@@ -17,7 +19,9 @@
   // starter's backup, an outcome that rarely happens).
   const TWO_LO = 0.2, TWO_HI = 0.8;  // inactive chance at which a player projects 0 (owner 2026-10-16: under 10% to play)
   const KDP = ['K', 'DST'];  // kickers / team defenses: data/kdst.json, standard ESPN scoring (owner 2026-10-15)
-  const POS_LABEL = { DST: 'D/ST' };
+  const POS_LABEL = { DST: 'D/ST', ALL: 'All' };
+  const ALL_DEPTH = 220;  // every relevant QB / RB / WR / TE
+  const mixOf = p => (p === 'FLEX' || p === 'ALL' ? p : false);  // mixed-position tables: badges, their own rank
   const FLEX_DEPTH = 150;  // a 14-team 2RB/2WR/1TE/1FLEX league starts 84 flex-eligible players; 150 adds waiver depth
   const f0 = v => v == null ? '' : String(Math.round(v));
   const f1 = v => v == null || isNaN(v) ? '' : (Math.round(v * 10) / 10).toFixed(1);
@@ -48,7 +52,7 @@
     state.w = { ...IDP, ...state.w };  // saved before IDP existed: its defaults
     const pts = (c, w, pos) => (c || []).reduce((t, v, i) => t + v * (w[SC.keys[i]] || 0), 0) + (pos === 'TE' ? (c || [])[5] * (w.te_bonus || 0) : 0);
     const all = Object.entries(D.players).map(([pid, p]) => Object.assign({ pid }, p));
-    let pos = 'QB', tables = {}, q = '', mode = 'week', ROS = null, rosAll = [];
+    let pos = 'QB', tables = {}, mode = 'week', ROS = null, rosAll = [];
     const rosTables = {};
     try { if (localStorage.getItem('nfledge-rk-mode') === 'ros') mode = 'ros'; } catch (e) { /* default */ }
     const rosOk = !D.archive;  // a past week's page: 'rest of season from now' means nothing there, weekly only
@@ -116,12 +120,21 @@
     // -- derived values under the current scoring + league ---------------------------------------------------------
     // game grades for final scores (owner 2026-10-17: white while live, "the grade coloring once the game is over"):
     // this season's pool of qualified games as percentiles (tools/player_logs.py), the game log's Grd scale
-    let GPOOL = null;
-    NFLE.load('data/grades/game_pool.json').then(j => { GPOOL = j; if (mode === 'week') draw(false); }).catch(() => {});
+    let GPOOL = null, gradeT = 0;
+    // grade data arriving after the first draw: one redraw for arrivals close together (the game pool and the season
+    // grades land ~25 ms apart; owner 2026-10-20: "any reason we're still up at 4 redraws?")
+    // late data fills its own cells in place (Table.refresh), never a whole-table redraw: grades -> the Grd cells, the
+    // game pool -> the Pts cells of finished games (their color)
+    const fill = keys => POS.forEach(p => { if (tables[p] && !KDP.includes(p)) tables[p].refresh(keys); });
+    const gradesIn = () => { clearTimeout(gradeT); gradeT = setTimeout(() => { if (mode === 'week') fill(['grd']); }, 0); };
+    NFLE.load('data/grades/game_pool.json').then(j => { GPOOL = j; if (mode === 'week') fill(['proj']); }).catch(() => {});
     const gamePct = (pos, v) => { const q = GPOOL && GPOOL.q[pos]; if (!q || v == null) return null;
       let i = 0; while (i < 100 && q[i + 1] <= v) i++;
       return i >= 100 ? 99 : Math.min(99, Math.round(i + (q[i + 1] > q[i] ? (v - q[i]) / (q[i + 1] - q[i]) : 0))); };
     const GAME_OF = Object.fromEntries((D.games || []).flatMap(g => [[g.away.team, g.id], [g.home.team, g.id]]));
+    // the teammate pairing to show: the first (bigger swing) whose teammate is genuinely uncertain (2026-10-21, Woody
+    // Marks: only the first pairing was checked; Schultz, 6% to sit, hid Montgomery, 68% to sit, in the second)
+    const cnd = r => [r.cond, r.cond2].find(c => c && 1 - c[2] >= TWO_LO && 1 - c[2] <= TWO_HI);
     const derive = () => {
       const { w, lg } = state;
       all.forEach(r => {
@@ -138,8 +151,8 @@
         if (!r._likelyOut && pl >= TWO_LO && pl <= TWO_HI) {  // his own two worlds: plays / sits (0)
           r._two = pl >= 0.5 ? { alt: 0, txt: 'if he sits' } : { alt: r._proj, txt: 'if he plays', dim: true };
           if (pl < 0.5) r._proj = 0;
-        } else if (r.cond && 1 - r.cond[2] >= TWO_LO && 1 - r.cond[2] <= TWO_HI) {  // a teammate's: the other world
-          const [nm, , pSit, plays, sits] = r.cond;
+        } else if (cnd(r)) {  // a teammate's: the other world
+          const [nm, , pSit, plays, sits] = cnd(r);
           r._two = pSit >= 0.5 ? { alt: plays * ratio, txt: `if ${lastNm(nm)} plays` } : { alt: sits * ratio, txt: `if ${lastNm(nm)} sits` };
         }
         r._q = r.q.map(v => v * ratio);  // p10, p25, p50, p75, p90
@@ -163,6 +176,7 @@
       fill(['QB', 'RB', 'WR', 'TE'], lg.teams * (lg.superflex || 0));
       all.forEach(r => { r._slot = slot[r.pid]; r._tier = `${r.pos}${Math.floor((r._rank - 1) / lg.teams) + 1}`; });
       all.filter(r => ['RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._proj - a._proj).forEach((r, i) => { r._frank = i + 1; });
+      all.filter(r => ['QB', 'RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._proj - a._proj).forEach((r, i) => { r._arank = i + 1; });
     };
 
     // -- cells (same markup and classes as the server template) ----------------------------------------------------
@@ -198,17 +212,18 @@
       const scr = (r.scratch || 0) >= 0.1 ? `<span class="flag fl-scr${r.scratch >= 0.5 ? ' fl-bad' : ''}" title="${esc(r.play_why || 'Healthy-scratch risk')}">Scratch ${Math.round(100 * r.scratch)}%</span>` : '';
       // no "+X inj" flag or highlight in the list (owner 2026-10-20): the teammate-injury boost is in the projection;
       // its detail is on the player's page
-      const badges = (r.status || r.low_sample || pct || scr) ? `<div class="badges">${NFLE.injTag(r.status, r.inactive)}${pct}${scr}${r.low_sample ? '<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>' : ''}</div>` : '';
+      const tag = NFLE.injTag(r.status, r.inactive, r.pid);
+      const badges = (tag || r.low_sample || pct || scr) ? `<div class="badges">${tag}${pct}${scr}${r.low_sample ? '<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>' : ''}</div>` : '';
       // first name on top, last name below, badges to the right (owner 2026-10-17); scrolled sideways the pinned
       // column narrows and each line truncates (rankings.css)
       const [first, lastN] = NFLE.fmt.split(r.name);
       // his rank rides on the photo's corner once the # column scrolls away (owner 2026-10-17; rankings.css)
-      const rk = r._rrank != null ? (flex ? r._rfrank : r._rrank) : (flex ? r._frank : r._rank);
+      const rk = r._rrank != null ? (flex === 'ALL' ? r._rarank : flex ? r._rfrank : r._rrank) : rankOf(r, flex);
       return `<div class="who" title="${esc(r.takeaway || '')}"><span class="pic${r.photo ? '' : ' nopic'}"${NFLE.fmt.picStyle(TEAMS, r.team)}>${rk != null ? `<span class="pic-rk" aria-hidden="true">${rk}</span>` : ''}<span class="pic-img">${r.photo ? `<img src="${esc(r.photo)}" alt="" width="34" height="34" loading="lazy" onerror="this.closest('.pic').classList.add('nopic')">` : ''}</span><span class="pic-tm">${logo(r.team, 11)}</span></span><div class="nmw nm2w"><span class="nm2"><span class="l1">${flex ? `<span class="posb posb-${esc(r.pos)}">${esc(r.pos)}</span> ` : ''}${esc(first)}</span><b class="nm l2">${esc(lastN)}</b></span>${badges ? badges.replace('<div class="badges">', '<div class="badges nm-b">') : ''}</div></div>`;
     };
     // The projection shown is the likelier world for an uncertain teammate (owner 2026-10-15: availability is binary).
     // The "+0.5 if X plays" line under it is gone from the table (owner 2026-10-20): that detail is on the player's page.
-    const rankOf = (r, flex) => flex ? r._frank : r._rank;
+    const rankOf = (r, flex) => (flex === 'ALL' ? r._arank : flex ? r._frank : r._rank);
     // weather that matters (owner 2026-10-17): a small mark beside the opponent only for wind 15+ mph, a 50%+ chance
     // of rain or any snow at kickoff (live week, outdoor games; data.forecast_conditions); the forecast in its tooltip
     const WX = Object.fromEntries((D.games || []).flatMap(g => g.wx ? [[g.away.team, g.wx], [g.home.team, g.wx]] : []));
@@ -255,7 +270,8 @@
         // Edge grade, the team cards' number (gamecast.js NFLE.gradeOf)
         { key: 'grd', label: 'Grd', num: true, cls: 'grdc', first: 'desc', title: "Edge grade (OVR): three seasons of fantasy output, a percentile within his position (rookies and second-year players: this season's when higher)",
           value: r => { const g = NFLE.gradeOf && NFLE.gradeOf(r.pid); return g ? g.v : -1; },
-          html: r => { const g = NFLE.gradeOf && NFLE.gradeOf(r.pid); return g ? NFLE.gradeChip(g) : '<span class="muted">&ndash;</span>'; } },
+          html: r => { if (NFLE.gradesReady && !NFLE.gradesReady()) return '<span class="cell-load" aria-label="loading"></span>';
+            const g = NFLE.gradeOf && NFLE.gradeOf(r.pid); return g ? NFLE.gradeChip(g) : '<span class="muted">&ndash;</span>'; } },
         // season FP/G folded into its tooltip (owner 2026-10-17: the FP/G column repeated it)
         { key: 'l5', label: 'Last 5', sort: false, cls: 'l5', title: 'His last 5 games this season: bar = points scored, green = beat our projection for that game, red = missed it; the tick is our projection',
           html: r => `<span title="${r._fpg != null ? `Season: ${f1(r._fpg)} FP/G` : ''}">${l5(r)}</span>` },
@@ -263,7 +279,8 @@
         // Snap% (owner 2026-10-17, replacing Volume): his share of the offense's snaps this season, the plainest read on role
         { key: 'snap', label: 'Snap%', num: true, cls: 'snapc', first: 'desc', title: "His share of his offense's snaps this season",
           value: r => r.ext && r.ext.snap != null ? r.ext.snap : -1, html: r => r.ext && r.ext.snap != null ? `${Math.round(r.ext.snap * 100)}%` : '' },
-        { key: 'td', label: tp === 'QB' ? 'Pass TD' : 'TD', num: true, cls: 'tdc', title: tp === 'QB' ? 'Projected passing touchdowns (hover for his rushing TD chance)' : 'Chance he scores at least one touchdown',
+        { key: 'td', label: tp === 'QB' ? 'Pass TD' : 'TD', num: true, cls: 'tdc', title: tp === 'QB' ? 'Projected passing touchdowns (hover for his rushing TD chance)'
+            : tp === 'ALL' ? 'QBs: projected passing touchdowns; everyone else: chance he scores at least one touchdown' : 'Chance he scores at least one touchdown',
           value: r => r.td && r.td.v, html: r => r.td ? `<span title="${esc(r.td.d)}">${esc(r.td.t)}</span>` : '' },
       ];
       return cols;
@@ -290,7 +307,7 @@
     const oppOf = t => { const g = (D.games || []).find(x => x.away.team === t || x.home.team === t);
       return g ? { opp: g.home.team === t ? g.away.team : g.home.team, home: g.home.team === t ? 'vs' : '@' } : null; };
     const kdRows = (p, m = mode) => {
-      const t = q.trim().toLowerCase(), wk = D.week;
+      const wk = D.week;
       let rows = KDA[p].map(r0 => {
         const e = r0.by[wk], r = Object.assign({}, r0);
         if (m === 'ros') {  // this week's game drops out once it kicks off (as for players)
@@ -302,7 +319,7 @@
         return e ? Object.assign(r, { _v: e.v, _e: e, _o: oppOf(r.team) }) : null;
       }).filter(Boolean).sort((a, b) => b._v - a._v);
       rows.forEach((r, i) => { r._rank = i + 1; r._tier = `${POS_LABEL[p] || p}${Math.floor(i / state.lg.teams) + 1}`; r._slot = i < state.lg.teams ? 'start' : 'bench'; });
-      return t ? rows.filter(r => r.name.toLowerCase().includes(t) || r.team.toLowerCase() === t) : rows;
+      return rows;
     };
     const kdWho = r => r.pos === 'DST' ? NFLE.ui.team(r.team, TEAMS, esc(r.team))
       : NFLE.ui.player({ name: r.name, team: r.team, photo: r.photo, sub: r.team }, TEAMS);
@@ -344,12 +361,15 @@
       view.querySelector('.byes-box').innerHTML = kdNote(p);
     };
     const rowsFor = p => {
-      const t = q.trim().toLowerCase();
-      const base = p === 'FLEX' ? all.filter(r => ['RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._proj - a._proj).slice(0, FLEX_DEPTH) : all.filter(r => r.pos === p);
-      return t ? base.filter(r => r.name.toLowerCase().includes(t)) : base;
+      const base = p === 'FLEX' ? all.filter(r => ['RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._proj - a._proj).slice(0, FLEX_DEPTH)
+        : p === 'ALL' ? all.filter(r => ['QB', 'RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._proj - a._proj).slice(0, ALL_DEPTH) : all.filter(r => r.pos === p);
+      return base;
     };
     const rowAttrs = r => `style="${rowStyle(r.team)}" data-pid="${esc(r.pid)}" data-espn="${esc(r.espn || '')}" data-team="${esc(r.team)}" data-name="${esc(r.name.toLowerCase())}" data-pos="${esc(r.pos)}"`;
-    const rowClass = r => `main teamrow${r.inactive >= 0.5 ? ' out' : ''}`;
+    // the landing rise-in (pages/week.html adds html.land-anim) belongs to the first draw's rows only: rows rebuilt
+    // while it plays (grades, live scores arriving) appear in place instead of fading in again (the load flicker)
+    let landing = document.documentElement.classList.contains('land-anim');
+    const rowClass = r => `main teamrow${r.inactive >= 0.5 ? ' out' : ''}${landing ? ' rise' : ''}`;
     const byesHtml = p => {
       const list = (RK.byes || {})[p] || [];
       return list.length ? `<div class="byes"><span>On bye</span>${list.map(b => `<span class="bye"><span class="tm-open" data-tm="${esc(b.team)}">${logo(b.team, 16)}</span><button type="button" class="nm-link" data-open-pid="${esc(b.pid)}">${esc(b.name)}</button> <span class="muted">${f1(b.sc && b.sc.g ? pts(b.sc.ss, state.w, p) / b.sc.g : b.fpg)} FP/G</span></span>`).join('')}</div>` : '';
@@ -378,6 +398,7 @@
       fill(['QB', 'RB', 'WR', 'TE'], lg.teams * (lg.superflex || 0));
       rosAll.forEach(r => { r._rslot = slot[r.pid]; r._rtier = `${r.pos}${Math.floor((r._rrank - 1) / lg.teams) + 1}`; });
       rosAll.filter(r => ['RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._tot - a._tot).forEach((r, i) => { r._rfrank = i + 1; });
+      rosAll.filter(r => ['QB', 'RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._tot - a._tot).forEach((r, i) => { r._rarank = i + 1; });
     };
     const strip = r => {
       const wks = []; for (let k = ROS.from; k <= ROS.through; k++) wks.push(k);
@@ -397,7 +418,7 @@
       }).join('')}</svg>`;
     };
     const rosColumns = flex => [
-      { key: 'rank', label: '#', num: true, first: 'asc', cls: 'rk', title: 'Our rest-of-season rank at the position', value: r => flex ? r._rfrank : r._rrank, html: r => `<b class="rkn">${flex ? r._rfrank : r._rrank}</b>` },
+      { key: 'rank', label: '#', num: true, first: 'asc', cls: 'rk', title: 'Our rest-of-season rank at the position', value: r => (flex === 'ALL' ? r._rarank : flex ? r._rfrank : r._rrank), html: r => `<b class="rkn">${flex === 'ALL' ? r._rarank : flex ? r._rfrank : r._rrank}</b>` },
       { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name, html: r => nameCell(r, flex) },
       { key: 'tot', label: 'ROS pts', num: true, cls: 'projc', title: 'Expected fantasy points from now through week 17 under your scoring, each game weighted by his chance to play', value: r => r._tot, html: r => `<b class="pv">${f0(r._tot)}</b>` },
       { key: 'ppg', label: 'Pts/G', num: true, title: 'Expected points per game he plays', value: r => r._ppg, html: r => f1(r._ppg) },
@@ -411,16 +432,16 @@
       { key: 'fpg', label: 'FP/G', num: true, cls: 'fpgc', title: 'Season fantasy points per game so far', value: r => r._fpg, html: r => f1(r._fpg) },
     ];
     const rosRows = p => {
-      const t = q.trim().toLowerCase();
-      const base = p === 'FLEX' ? rosAll.filter(r => ['RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._tot - a._tot).slice(0, FLEX_DEPTH) : rosAll.filter(r => r.pos === p);
-      return t ? base.filter(r => r.name.toLowerCase().includes(t)) : base;
+      const base = p === 'FLEX' ? rosAll.filter(r => ['RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._tot - a._tot).slice(0, FLEX_DEPTH)
+        : p === 'ALL' ? rosAll.filter(r => ['QB', 'RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._tot - a._tot).slice(0, ALL_DEPTH) : rosAll.filter(r => r.pos === p);
+      return base;
     };
     const rosDraw = (resort = true) => {
       if (KDP.includes(pos)) { kdDraw(pos); return; }
       if (!ROS) return;
       rosDerive();
       const box = sec.querySelector(`.posview[data-pos="${pos}"] .ros-tbl`);
-      const opts = { columns: rosColumns(pos === 'FLEX'), rows: rosRows(pos), cls: 'sortable ranks tiles ros', sort: { key: 'tot', dir: 'desc' }, rowAttrs,
+      const opts = { columns: rosColumns(mixOf(pos)), rows: rosRows(pos), cls: 'sortable ranks tiles ros', sort: { key: 'tot', dir: 'desc' }, rowAttrs,
                      rowClass: r => `main teamrow${(D.players[r.pid] || {}).inactive >= 0.5 ? ' out' : ''}` };
       if (!rosTables[pos]) rosTables[pos] = NFLE.Table(box, opts);
       else { rosTables[pos].setColumns(opts.columns); rosTables[pos].update(opts.rows); if (resort) rosTables[pos].setSort({ key: 'tot', dir: 'desc' }); }
@@ -431,7 +452,7 @@
       rosAll = Object.entries(j.players).map(([pid, x]) => {
         const live = D.players[pid] || {};
         return { pid, name: x.name, pos: x.pos, team: x.team, espn: x.espn, photo: x.photo || live.photo, k: x.k, wk: x.w,
-                 ss: x.ss, g: x.g, status: live.status || '', takeaway: live.takeaway || '' };
+                 ss: x.ss, g: x.g, status: live.status || '', inactive: live.inactive, takeaway: live.takeaway || '' };  // inactive: the tag is our band, as in Weekly
       });
       sec.querySelector('.ros-note').textContent = `Weeks ${j.from}-${j.through}${(j.missing || []).length ? ` (weeks ${j.missing.join(', ')} not built yet, counted as 0)` : ''} · built ${j.built || ''}.`;
     });
@@ -460,11 +481,12 @@
         if (KDP.includes(p)) { if (mode === 'week') kdDraw(p); return; }
         const rows = rowsFor(p);
         if (!tables[p]) {
-          tables[p] = NFLE.Table(view.querySelector('.rk-tbl'), { columns: columns(p === 'FLEX', p), rows, cls: 'sortable ranks tiles', sort: { key: 'proj', dir: 'desc' }, rowAttrs, rowClass });
+          tables[p] = NFLE.Table(view.querySelector('.rk-tbl'), { columns: columns(mixOf(p), p), rows, cls: 'sortable ranks tiles', sort: { key: 'proj', dir: 'desc' }, rowAttrs, rowClass });
+          landing = false;
           // the landing animation (pages/week.html adds html.land-anim) plays on this first draw only, not on sorts
           setTimeout(() => document.documentElement.classList.remove('land-anim'), 1200);
         }
-        else { tables[p].setColumns(columns(p === 'FLEX', p)); tables[p].update(rows); if (resort) tables[p].setSort({ key: 'proj', dir: 'desc' }); }
+        else { tables[p].setColumns(columns(mixOf(p), p)); tables[p].update(rows); if (resort) tables[p].setSort({ key: 'proj', dir: 'desc' }); }
         view.querySelector('.byes-box').innerHTML = byesHtml(p);
       });
       const name = state.preset || 'Custom';
@@ -477,7 +499,7 @@
     };
     // live scores (gamecast.js, every ~minute on game days): redraw in place, no re-sort
     document.addEventListener('nfle-live', () => { if (mode === 'week') draw(false); });
-    document.addEventListener('nfle-grades', () => { if (mode === 'week') draw(false); });
+    document.addEventListener('nfle-grades', gradesIn);
     const showPos = p => {
       pos = p;
       sec.querySelectorAll('.posbar button').forEach(b => b.classList.toggle('on', b.dataset.pos === p));
@@ -486,7 +508,20 @@
       if (mode === 'ros') rosDraw(!rosTables[p]);
     };
     sec.querySelector('.posbar').addEventListener('click', e => { const b = e.target.closest('[data-pos]'); if (b) showPos(b.dataset.pos); });
-    sec.querySelector('#psearch').oninput = e => { q = e.target.value; POS.forEach(p => tables[p] && tables[p].update(KDP.includes(p) ? kdRows(p, 'week') : rowsFor(p))); if (mode === 'ros') rosDraw(false); };
+    // Find a player (owner 2026-10-21): a pop-out of the best matches across every position, projected or not; the
+    // table under it stays as it is. Beside each: his rank and points here, in your scoring (rest of season in ROS mode)
+    const byPid = Object.fromEntries(all.map(r => [r.pid, r]));
+    const finderValue = pid => {
+      if (mode === 'ros') { const r = rosAll.find(x => x.pid === pid);
+        return r && r._rrank != null ? `<span class="muted">${esc(r.pos)}${r._rrank}</span> <b>${f0(r._tot)}</b> <span class="muted">ROS</span>` : ''; }
+      const r = byPid[pid];
+      if (r) return r._likelyOut ? '<span class="fnd-tag">Out</span>' : `<span class="muted">${esc(r.pos)}${r._rank}</span> <b>${f1(r._proj)}</b>`;
+      const k = KDA.K.find(x => x.pid === pid), e = k && k.by[D.week];
+      return e ? `<span class="muted">K</span> <b>${f1(e.v)}</b>` : '';
+    };
+    const finderBox = sec.querySelector('#psearch');
+    finderBox.addEventListener('focus', () => { if (!KD) loadKD().catch(() => {}); }, { once: true });
+    NFLE.finder(finderBox, { value: finderValue });
     window.nfleWeights = () => state.w;
     window.nfleApplyScoring = () => draw();
 

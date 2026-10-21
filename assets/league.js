@@ -353,7 +353,7 @@
         `<span class="lg-out${p.inactive >= 0.5 ? ' hi' : ''}" title="Chance he plays">${NFLE.fmt.toPlay(p.inactive)} to play</span>` : '';
       const lock = p.locked && !o.noLock ? '<span class="lg-lock" title="His game has kicked off: his spot is set">locked</span>' : '';
       // no "+0.5 if X plays" badge (owner 2026-10-20: the in-depth detail is on the player's page)
-      const inner = lock + NFLE.injTag(p.status || '', p.proj != null ? p.inactive : null) + out;
+      const inner = lock + NFLE.injTag(p.status || '', p.proj != null ? p.inactive : null, p.pid || null) + out;
       return inner ? `<div class="badges lg-badges">${inner}</div>` : '';
     };
     const row = (slot, p, extra = '', o = {}) => {
@@ -432,7 +432,7 @@
         // projected to play this week (owner 2026-10-17: an IR player can have a projection): starting him means
         // activating him first, which takes a roster spot
         return row('IR', Object.assign({}, p, ready.includes(x) ? {} : { opp: '', why: backWeek(x) || p.why || 'injured reserve', inactive: 0 })); }).join(''))}
-        ${ready.length ? `<p class="muted lg-note">${ready.map(x => `<b>${esc(player(x).name)}</b>`).join(', ')} ${ready.length > 1 ? 'project' : 'projects'} to play this week: starting ${ready.length > 1 ? 'them' : 'him'} means activating off IR first, which takes a roster spot.</p>` : ''}` : ''; };
+        ${ready.length ? `<p class="muted lg-note">${ready.map(x => { const q = player(x); return q.pid ? `<button type="button" class="nm-link" data-open-pid="${esc(q.pid)}"><b>${esc(q.name)}</b></button>` : `<b>${esc(q.name)}</b>`; }).join(', ')} ${ready.length > 1 ? 'project' : 'projects'} to play this week: starting ${ready.length > 1 ? 'them' : 'him'} means activating off IR first, which takes a roster spot.</p>` : ''}` : ''; };
     // open roster spots (owner 2026-10-20: "display empty bench spots"): the league's roster size (starters + bench, IR
     // and taxi apart) minus the players on it; a free agent fills one without a drop
     const emptyBench = n => { const k = L.size ? Math.max(0, L.size - n) : 0;
@@ -460,7 +460,8 @@
       const why = p => p.exp == null ? 'not projected (bye, IR or out)'
         : p.inactive >= 0.15 ? `${NFLE.fmt.toPlay(p.inactive)} to play · ${f1(p.proj)} if he plays · ${esc(statusWords(p.status))}`
         : `projects ${f1(p.exp)}`;
-      const nm = p => `<b>${esc(p.name)}</b>`;
+      // names open their player (owner 2026-10-20: "make player names clickable ... wherever else they show up")
+      const nm = p => p && p.pid ? `<button type="button" class="nm-link" data-open-pid="${esc(p.pid)}"><b>${esc(p.name)}</b></button>` : `<b>${esc(p ? p.name : '')}</b>`;
       const sureCard = sure.length ? `<div class="lg-mv">
           <div class="lg-mv-row"><span class="lg-mv-k good">Start</span><div>${fill.slice(0, sure.length).map(p =>
             `<div>${nm(p)} <span class="muted">${f1(p.exp)}</span></div>`).join('')}</div></div>
@@ -489,7 +490,7 @@
       const unproj = curRows.filter(r => r.p && r.p.exp == null && r.slot !== 'DEF' && r.slot !== 'K').map(r => r.p);
       // players with no projection this week (on bye, out) stay listed, after the projected ones (owner 2026-10-18)
       const bench = ps.filter(p => !bestSet.has(p.ext)).sort((a, b) => (b.exp != null) - (a.exp != null) || (b.exp || 0) - (a.exp || 0));
-      return `${swaps}${unproj.length ? `<p class="muted lg-note">Starting with no projection: ${unproj.map(p => `${esc(p.name)} (${esc(p.why || 'not projected')})`).join(', ')}.</p>` : ''}
+      return `${swaps}${unproj.length ? `<p class="muted lg-note">Starting with no projection: ${unproj.map(p => `${p.pid ? `<button type="button" class="nm-link" data-open-pid="${esc(p.pid)}">${esc(p.name)}</button>` : esc(p.name)} (${esc(p.why || 'not projected')})`).join(', ')}.</p>` : ''}
         <h3 class="lg-h">Best lineup <span class="muted">${f1(total(best))} expected</span></h3>
         ${table(best.map(r => row(r.slot, r.p)).join(''))}
         <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') + emptyBench(ps.length) || '<tr><td colspan="3" class="muted">No projected bench players.</td></tr>')}
@@ -546,7 +547,7 @@
             <span class="lg-hh-s muted">${when(p)}</span>${badgesOf(p, { noLock: true })}</div>`;
       const num = p => !p || p.proj == null ? '–' : p.live != null ? `<span class="lg-hh-lv">${f1(p.live)}<small>${p.fin ? 'final' : 'live'}</small></span>` : f1(p.proj);
       const rows = L.slots.map((s, i) => `<div class="lg-hh-row">${cell(a[i].p, false)}<div class="lg-hh-n">${num(a[i].p)}</div>
-          <span class="lg-hh-slot posb ${['QB', 'RB', 'WR', 'TE'].includes(s) ? `posb-${s}` : 'lg-slot-any'}">${esc(s === 'SUPER_FLEX' ? 'SF' : s === 'FLEX' ? 'FLX' : s)}</span>
+          <span class="lg-hh-slot posb ${/FLEX|^BN$/.test(s) ? 'lg-slot-any' : `posb-${s}`}">${esc(s === 'SUPER_FLEX' ? 'SF' : s === 'FLEX' ? 'FLX' : s)}</span>
           <div class="lg-hh-n">${num(b[i].p)}</div>${cell(b[i].p, true)}</div>`).join('');
       const live = id => m.points[id] ? `<div class="muted lg-hh-live">${f1(m.points[id])} so far</div>` : '';
       return `<div class="lg-hh-top"><div><div class="lg-tn">${esc(mine.name)}</div><div class="lg-big">${f1(ea)}</div>${live(mine.id)}</div>
@@ -789,7 +790,7 @@
         <div class="lg-tr-cols"><div class="lg-tr-h"><b>${esc(mine.name)}</b><span class="muted">you give</span></div>
           <div class="lg-tr-h r"><select class="lg-trteam" aria-label="Trade with"><option value="">Any team</option>${others.map(t => `<option value="${esc(t.id)}"${them && t.id === them.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}</select><span class="muted">you get</span></div></div>
         ${POS_ORDER.filter(pos => mine.ext.some(x => player(x).pos === pos) || (them && them.ext.some(x => player(x).pos === pos))).map(pos =>
-          `<div class="lg-tr-pos"><span class="posb ${['QB', 'RB', 'WR', 'TE'].includes(pos) ? `posb-${pos}` : 'lg-slot-any'}">${pos === 'DEF' ? 'D/ST' : pos}</span></div>
+          `<div class="lg-tr-pos"><span class="posb ${/FLEX|^BN$/.test(pos) ? 'lg-slot-any' : `posb-${pos}`}">${pos === 'DEF' ? 'D/ST' : pos}</span></div>
           <div class="lg-tr-cols"><div class="lg-tps">${pick(mine, 'give', pos)}</div><div class="lg-tps">${them ? pick(them, 'get', pos) : ''}</div></div>`).join('')}
         ${them ? '' : '<p class="muted">Choose a team to pick players from theirs, or find trades with any team below.</p>'}
         <div class="lg-finder">${finder}</div>`;
