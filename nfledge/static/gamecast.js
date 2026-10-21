@@ -590,6 +590,13 @@
     }
     return WPI.get(sum)[String(pl.id)] || null;
   };
+  // the swing chip names the team whose chance rose, in its color (owner 2026-10-20: "+8 looks the same for both teams":
+  // "MIN +8"); d = the change for the team named in the line before it
+  const swingChip = (d, team, info) => {
+    if (!d) return '<span class="pi-d">&plusmn;0</span>';
+    const t = d > 0 ? team : (team === info.home.team ? info.away : info.home).team, c = t === info.home.team ? info.home.color : info.away.color;
+    return `<span class="pi-d pi-tm" style="--tc:${esc(c || '#666')}">${esc(t)} +${Math.abs(d)}</span>`;
+  };
   const playImpact = (pl, hd, info, sum, ids, names, off) => {
     const map = byEspn(), w = weights(), K = KEYS();
     const rows = playStats(hd.eff, hd.lost).map(o => {
@@ -604,7 +611,7 @@
     if (wp && off) {
       const home = off === info.home.team, b0 = Math.round(100 * (home ? wp[0] : 1 - wp[0])), b1 = Math.round(100 * (home ? wp[1] : 1 - wp[1])), d = b1 - b0;
       wpHtml = `<div class="pi-wp"><span>${esc(off)} win chance</span> <b>${wpTxt(b0 / 100)}</b> <span class="rp-ar">&rarr;</span> <b>${wpTxt(b1 / 100)}</b>
-        <span class="pi-d ${d > 0 ? 'up' : d < 0 ? 'dn' : ''}">${d > 0 ? '+' : d < 0 ? '&minus;' : '±'}${Math.abs(d)}</span></div>`;
+        ${swingChip(d, off, info)}</div>`;
     }
     return `<div class="pi">${rows}${wpHtml}</div>`;
   };
@@ -3873,7 +3880,7 @@
       const before = i0 > 0 ? all[i0 - 1].home : ser[0].home, after = ser[ser.length - 1].home, sgn = tm === info.home ? 1 : -1;
       const b0 = Math.round(100 * (sgn > 0 ? before : 1 - before)), b1 = Math.round(100 * (sgn > 0 ? after : 1 - after)), dd = b1 - b0;
       wpHtml = `<div class="ds-wp"><span class="muted">${esc(tm.team)} win chance</span> <b>${wpTxt(b0 / 100)}</b> <span class="rp-ar">&rarr;</span> <b>${wpTxt(b1 / 100)}</b>
-        <span class="pi-d ${dd > 0 ? 'up' : dd < 0 ? 'dn' : ''}">${dd > 0 ? '+' : dd < 0 ? '&minus;' : '&plusmn;'}${Math.abs(dd)}</span></div>`;
+        ${swingChip(dd, tm.team, info)}</div>`;
     }
     // fantasy points the drive produced, per player (the play-by-play text, as the replay does)
     const map = byEspn(), w = weights(), K = KEYS(), agg = {};
