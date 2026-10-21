@@ -3433,3 +3433,20 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   alpha x3 hl 3 -0.0005). The win chance is insensitive to how the ratings shrink and forget across a 9x range of
   penalties and 2-4.5 week half-lives: the ratings' tuning is not where accuracy is hiding. team_model.alpha_scale
   stays 1 (the knob remains for future tests).
+- **PRE-REGISTERED 2026-10-20: (BV) take luck out of what the team ratings learn.** (BU) showed the ratings' tuning
+  is flat; this changes their input. (1) FUMBLE: on a scrimmage play with a fumble (1.6% of plays), who recovers is
+  close to a coin flip (lost 46%; EPA lost -4.98 vs kept -0.78): the play's EPA becomes epa - (lost - p) x L with p the
+  league's lost share and L the lost-minus-kept EPA gap, both from seasons before the one rated (a fumble still costs
+  its expected price; the recovery bounce does not count). (2) CLIP: each play's EPA capped at +-4 (2.1% of plays; a
+  tipped pick-six or a blown-coverage bomb says less about a team than its EPA does). Arms: FUMBLE, CLIP, BOTH (config
+  team_model.epa_fumble_luck / epa_clip, off by default). Harness = (BU)'s (every 2021-26 game re-rated, win chance
+  = home + rank gap + Elo refit walk-forward), scored on all of 2022-25 (no choose / decide split: three fixed arms).
+  GATE per arm: Brier lower by >= 0.002 with the 95% CI over season-weeks below 0, lower in >= 3 of 4 seasons, margin
+  MAE not worse (CI upper < +0.05), 2026 so far same direction; if more than one passes, the lowest Brier; then the
+  fantasy MAE guard (tools/experiments.py 2021-25, CI upper < +0.003) before shipping.
+- **RESULT {#epa-denoise} (BV) take luck out of the ratings' input: FAIL (all three arms).** tools/engine_tune_eval.py
+  --bv, 1,021 games 2022-25, base Brier .2219. FUMBLE -0.0004 [-0.0015, +0.0006], better 2 of 4, margin MAE -0.015,
+  2026 +0.0027; CLIP (+-4) +0.0002 [-0.0006, +0.0009], 1 of 4; BOTH +0.0006 [-0.0005, +0.0017], 0 of 4. The ratings
+  already average enough plays that recovery bounces and outlier plays wash out; config switches stay off.
+  Pattern across (BU), (BV), (X): the team-strength side is saturated with this data (tuning and input cleaning move
+  the win chance by < 0.002); what's left is information the play-by-play doesn't carry.

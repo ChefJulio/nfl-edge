@@ -161,6 +161,27 @@ def unit_plays(pbp: pd.DataFrame, cfg: dict, qbexp: pd.DataFrame | None = None,
     if "pen" in sel:
       sel["pen"] = sel["pen"] & ~cbm
     dpi = cbm if dpi is None else (dpi | cbm)  # rows needing a passer filled
+  # EXPERIMENTS (BV), off unless set: luck out of the ratings' input. epa_fumble_luck: a fumble costs its expected
+  # price, not the recovery bounce (lost share and the lost-minus-kept EPA gap from seasons before each play's);
+  # epa_clip: each play's EPA capped at +-c.
+  if tm.get("epa_fumble_luck") or tm.get("epa_clip"):
+    pbp = pbp.copy()
+  if tm.get("epa_fumble_luck") and "fumbled_1_player_id" in pbp:
+    fum = live & pbp.fumbled_1_player_id.notna() & pbp.play_type.isin(["pass", "run"])
+    lost = pbp.fumble_lost.fillna(0).astype(float)
+    adj = pd.Series(0.0, index=pbp.index)
+    for s in sorted(pbp.season.unique()):
+      prior = fum & (pbp.season < s)
+      if prior.sum() < 200:
+        prior = fum & (pbp.season == s)  # the first season on file: its own constants (no earlier fumbles)
+      p_lost = float(lost[prior].mean())
+      gap = float(pbp.epa[prior & (lost == 1)].mean() - pbp.epa[prior & (lost == 0)].mean())
+      m = fum & (pbp.season == s)
+      adj[m] = (lost[m] - p_lost) * gap
+    pbp["epa"] = pbp.epa - adj
+  if tm.get("epa_clip"):
+    c = float(tm["epa_clip"])
+    pbp["epa"] = pbp.epa.clip(-c, c)
   cols = ["season", "week", "game_id", "posteam", "defteam", "home", "div", "epa"]
   out = {u: pbp.loc[m, cols].reset_index(drop=True) for u, m in sel.items()}
   ps = pbp.loc[sel["pass"]]

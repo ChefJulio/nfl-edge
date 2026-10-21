@@ -24,6 +24,8 @@ from nfledge.config import load_config  # noqa: E402
 OUT = ROOT / "cache" / "engine_tune"
 GRID = [(a, hl) for a in (1 / 3, 1.0, 3.0) for hl in (2.0, 3.0, 4.5)]
 BASE = (1.0, 3.0)
+# (BV): input arms (name -> team_model overrides), scored on all of 2022-25: python tools/engine_tune_eval.py --bv
+BV = {"base": {}, "fumble": {"epa_fumble_luck": True}, "clip": {"epa_clip": 4.0}, "both": {"epa_fumble_luck": True, "epa_clip": 4.0}}
 
 
 def games_for(base: dict, v: tuple) -> pd.DataFrame:
@@ -40,6 +42,67 @@ def games_for(base: dict, v: tuple) -> pd.DataFrame:
   return d
 
 
+def games_bv(base: dict, name: str) -> pd.DataFrame:
+  path = OUT / f"bv_{name}.parquet"
+  if path.exists():
+    return pd.read_parquet(path)
+  cfg = copy.deepcopy(base)
+  cfg["team_model"].update(BV[name])
+  with ProcessPoolExecutor(max_workers=6) as ex:
+    d = pd.concat(list(ex.map(rp.season_ranks, [cfg] * 6, range(2021, 2027))), ignore_index=True)
+  d = d.rename(columns={"location_x": "location"}).drop(columns=["location_y"], errors="ignore")
+  OUT.mkdir(parents=True, exist_ok=True)
+  d.to_parquet(path)
+  return d
+
+
+def prep(d: pd.DataFrame, elo_diff: dict) -> pd.DataFrame:
+  d = d[d.home_score != d.away_score].copy()
+  d["won"] = (d.home_score > d.away_score).astype(float)
+  d["home"] = (d.location != "Neutral").astype(float)
+  d["rank_gap"] = d.away_rank - d.home_rank
+  d["elo"] = d.game_id.map(elo_diff) / 100
+  d["abs_err"] = (d.model_margin - (d.home_score - d.away_score)).abs()
+  d["p"] = np.nan
+  for s in range(2022, 2027):
+    tr, m = d[d.season < s], (d.season == s)
+    w = logit_fit(tr[["home", "rank_gap", "elo"]].to_numpy(float), tr.won.to_numpy(float))
+    d.loc[m, "p"] = 1 / (1 + np.exp(-d.loc[m, ["home", "rank_gap", "elo"]].to_numpy(float) @ w))
+  return d[d.season.between(2022, 2026) & d.spread_line.notna()].set_index("game_id")
+
+
+def season_week_ci(e: np.ndarray, sw: np.ndarray) -> tuple:
+  keys = np.unique(sw)
+  idx = [np.flatnonzero(sw == k) for k in keys]
+  rng = np.random.default_rng(0)
+  vals = [e[np.concatenate([idx[i] for i in rng.integers(0, len(keys), len(keys))])].mean() for _ in range(2000)]
+  return float(np.nanmean(e)), np.percentile(vals, 2.5), np.percentile(vals, 97.5)
+
+
+def main_bv(base: dict, elo_diff: dict):
+  res = {n: prep(games_bv(base, n), elo_diff) for n in BV}
+  b = res["base"]
+  m = (b.season <= 2025).to_numpy()
+  print(f"(BV) {int(m.sum())} games 2022-25; base Brier {((b.p - b.won) ** 2)[m].mean():.4f}")
+  sw = (b.season.astype(str) + "-" + b.week.astype(str)).to_numpy()
+  passed = {}
+  for n in ("fumble", "clip", "both"):
+    t = res[n].reindex(b.index)
+    eb = ((t.p - b.won) ** 2 - (b.p - b.won) ** 2).to_numpy()
+    em = (t.abs_err - b.abs_err).to_numpy()
+    mb, lo, hi = season_week_ci(eb[m], sw[m])
+    mm, mlo, mhi = season_week_ci(em[m], sw[m])
+    per = pd.Series(eb[m]).groupby(b.season.to_numpy()[m]).mean()
+    c26 = float(np.nanmean(eb[(b.season == 2026).to_numpy()]))
+    better = int((per < 0).sum())
+    ok = mb <= -0.002 and hi < 0 and better >= 3 and mhi < 0.05 and c26 < 0
+    if ok:
+      passed[n] = mb
+    print(f"  {n:6s}: Brier {mb:+.5f} [{lo:+.5f}, {hi:+.5f}], seasons better {better}/4 {per.round(4).to_dict()}; "
+          f"margin MAE {mm:+.3f} [{mlo:+.3f}, {mhi:+.3f}]; 2026 {c26:+.5f} -> {'PASS' if ok else 'FAIL'}")
+  print("GATE:", f"PASS: {min(passed, key=passed.get)} (fantasy MAE guard next)" if passed else "FAIL")
+
+
 def main():
   base = load_config()
   wm = base["report"]["win_model"]
@@ -47,6 +110,8 @@ def main():
   cfg["data"]["history_seasons"] = 9
   g = elo.finished(D.load_all(cfg).schedules)
   elo_diff = dict(zip(g.game_id, elo.run(g, wm["elo_k"], wm["elo_hfa"], wm["elo_revert"], wm["elo_margin"])[0]))
+  if "--bv" in sys.argv:
+    return main_bv(base, elo_diff)
   res = {}
   for v in GRID:
     d = games_for(base, v)
