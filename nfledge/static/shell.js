@@ -488,23 +488,52 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     el.querySelectorAll('[id]').forEach(x => x.removeAttribute('id'));
     el.style.transform = ''; el.style.transition = '';
     return { el, top: cardBox.scrollTop }; };
+  const sheetAt = {}, sheetPend = {};  // sheets set aside under cards (below), by depth
+  cardOv.insertAdjacentHTML('afterbegin', '<button type="button" class="pc-peek" hidden><span class="pc-peek-a" aria-hidden="true">&lsaquo;</span><span class="pc-peek-t"></span></button>');
+  const peek = cardOv.querySelector('.pc-peek');
   const showUnder = d => { const s = snaps[d - 1]; under.replaceChildren(); under.hidden = !s; cardOv.classList.toggle('pc-stacked', !!s);
-    if (s) { under.appendChild(s.el); s.el.querySelector('.pc').scrollTop = s.top; } };
+    if (s) { under.appendChild(s.el); s.el.querySelector('.pc').scrollTop = s.top; }
+    // that card's sheet, if it had one open, sits on it (visible as the card above slides away)
+    const sh = s && sheetAt[d - 1];
+    if (sh) { sh.ov.classList.add('sheet-still'); under.appendChild(sh.ov); const x = sh.ov.querySelector('.sheet'); if (x) x.scrollTop = sh.top; }
+    // (owner 2026-10-20: "the view directly behind current view showing its header text ... so i can see what to expect
+    // if i swipe down"): its name (and its sheet's title) in the strip above the top card; tapping it goes back
+    peek.hidden = !s;
+    if (s) { const h = s.el.querySelector('.pc-id h3'), name = h ? [...h.childNodes].filter(n => !(n.classList && n.classList.contains('pc-num'))).map(n => n.textContent).join('').trim() : '';
+      const st = sh && sh.ov.querySelector('.sheet-h b');
+      peek.querySelector('.pc-peek-t').textContent = [name, st ? st.textContent : ''].filter(Boolean).join(' \u00b7 ');
+      peek.setAttribute('aria-label', `Back to ${peek.querySelector('.pc-peek-t').textContent}`); } };
   // Sheets ride the card stack (owner 2026-10-20: "we open the depth chart and that slide disappears when we click on
   // a player"): a sheet open when a card opens over it is set aside under the depth it belongs to (0 = the list) and
   // comes back, scrolled where it was, when you return to that depth; closing past it discards it.
-  const sheetAt = {}, sheetPend = {};
   const stashSheet = d => { const ov = document.querySelector('body > .sheet-ov');
-    if (!ov) return; const sh = ov.querySelector('.sheet'); sheetAt[d] = { ov, top: sh ? sh.scrollTop : 0 }; ov.remove(); };
+    if (!ov) return; const sh = ov.querySelector('.sheet'); sheetAt[d] = { ov, top: sh ? sh.scrollTop : 0 };
+    ov.classList.add('sheet-still');
+    if (d === 0) ov.classList.add('sheet-behind'); else ov.remove(); };  // depth >= 1: showUnder puts it on its card
   const restoreSheet = d => { Object.keys(sheetAt).forEach(k => { if (+k > d) delete sheetAt[k]; });
     const s = sheetAt[d]; delete sheetAt[d];
     const pend = sheetPend[d]; delete sheetPend[d];
     if (!s && pend) { setTimeout(() => openSheetSlug(pend), 0); return; }  // a shared link's sheet, first visit
-    if (!s || document.querySelector('body > .sheet-ov')) return;
+    if (!s || document.querySelector('body > .sheet-ov:not(.sheet-behind)')) return;
+    s.ov.classList.remove('sheet-behind');
     document.body.appendChild(s.ov); const sh = s.ov.querySelector('.sheet'); if (sh) sh.scrollTop = s.top; };
   const hideCard = () => { cardOv.hidden = true; document.documentElement.classList.remove('pc-open'); onPage = false; depth = 0;
     snaps.length = 0; showUnder(0); settle(); restoreSheet(0); };
-  const settle = () => { cardWrap.style.transition = 'none'; cardWrap.style.transform = ''; };
+  const settle = () => { cardWrap.style.transition = 'none'; cardWrap.style.transform = ''; cardOv.style.backgroundColor = ''; peek.style.opacity = ''; };
+  // (owner 2026-10-20: "views that are underneath are sunken visually before popping into the right place"): the
+  // still copy underneath is shrunk, raised and dimmed (gamecast.css .pc-under); k = how far the top card has left
+  // (0..1) brings it to full size and brightness and fades the backdrop, so the real card lands where the copy is
+  const SUNK = () => matchMedia('(min-width: 641px)').matches ? [0.96, -18] : [0.94, -14];
+  const PEEK_H = 40;  // phones: the strip a stacked card leaves for the peek (gamecast.css .pc-stacked)
+  const rise = (k, ms = 0) => {
+    const w = under.querySelector(':scope > .pc-wrap');
+    const [sc, ty] = SUNK(), t = ms ? `transform ${ms}ms var(--ease), filter ${ms}ms var(--ease)` : 'none';
+    const land = depth - 1 > 1 && matchMedia('(max-width: 640px)').matches ? PEEK_H : 0;
+    if (w) { w.style.transition = t; w.style.transform = `scale(${sc + (1 - sc) * k}) translateY(${ty * (1 - k) + land * k}px)`; w.style.filter = `brightness(${0.8 + 0.2 * k})`; }
+    peek.style.opacity = String(1 - k);
+    cardOv.style.transition = ms ? `background-color ${ms}ms var(--ease)` : 'none';
+    cardOv.style.backgroundColor = k > 0 ? `rgba(5,7,10,${(0.4 * (1 - k)).toFixed(3)})` : '';
+  };
   // close: back one card (stacked), else back to the list, or, for a card opened from a link, onto the list in place
   const closeCard = () => {
     if (cardOv.hidden) return;
@@ -537,6 +566,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     e.preventDefault();
     cardWrap.style.transition = 'none';
     cardWrap.style.transform = `translateY(${Math.max(0, dy)}px)`;
+    if (!under.hidden) rise(Math.min(1, Math.max(0, dy) / cardWrap.offsetHeight));
   }, { passive: false });
   cardBox.addEventListener('touchend', () => {
     if (dmode !== 'drag') { dmode = null; return; }
@@ -545,12 +575,20 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     cardWrap.style.transition = 'transform .22s var(--ease)';
     if (dy > 0.25 * cardWrap.offsetHeight || dv > 0.6) {
       cardWrap.style.transform = 'translateY(100%)';
+      if (!under.hidden) rise(1, 210);
       setTimeout(closeCard, 210);  // it stays off screen until the card below renders or the overlay hides (settle)
-    } else cardWrap.style.transform = '';
+    } else { cardWrap.style.transform = ''; if (!under.hidden) rise(0, 220); }
   });
   // a card opened on a card slides up over it (the first one animates from CSS as the overlay appears)
   const playIn = () => { cardWrap.style.animation = 'none'; void cardWrap.offsetWidth; cardWrap.style.animation = ''; };
-  cardOv.addEventListener('click', e => { if (e.target === cardOv || e.target.closest('.pc-x')) closeCard(); });
+  const slideClose = () => {
+    if (under.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches) { closeCard(); return; }
+    cardWrap.style.transition = 'transform .21s var(--ease)';
+    cardWrap.style.transform = 'translateY(100%)';
+    rise(1, 210);
+    setTimeout(closeCard, 210);
+  };
+  cardOv.addEventListener('click', e => { if (e.target === cardOv || e.target.closest('.pc-x, .pc-peek')) slideClose(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !cardOv.hidden && !document.querySelector('.sheet-ov, .zoom-ov')) closeCard(); });
   const showPage = (kind, id, dAt) => {
     // a direct link has no list behind it: a team card opens over Teams, a player card over Players

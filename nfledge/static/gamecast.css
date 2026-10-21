@@ -1507,3 +1507,23 @@ tr.lg-pend td.muted { text-align: left; white-space: nowrap; font-size: 12px; }
 .tm-nx .nl img { width: 20px !important; height: 20px !important; }
 .tm-nx { display: inline-flex; align-items: center; gap: 1px; }
 .tm-nx i { font-style: normal; font-size: 12px; color: var(--muted); margin-right: 1px; }
+/* a sheet set aside under a card opened from it (shell.js): no re-entry animation when it comes back; a list's sheet
+   waits just behind the card (a card's sheet rides on its copy in .pc-under) */
+.sheet-ov.sheet-still, .sheet-ov.sheet-still .sheet { animation: none; }
+.sheet-ov.sheet-behind { z-index: 55; pointer-events: none; }
+.pc-under .sheet-ov { pointer-events: none; }
+/* the peek (shell.js): the name of the card directly behind (and its sheet), in the strip a stacked card leaves at the
+   top; tap = back. Phones: the stacked card is 40px shorter to make the strip; every card clears the status bar */
+.pc-peek { position: absolute; z-index: 2; top: calc(var(--sat, 0px) + 8px); left: 12px; max-width: calc(100% - 72px); height: 30px; display: flex;
+  align-items: center; gap: 6px; padding: 0 12px 0 9px; cursor: pointer; text-align: left; border-radius: 999px;
+  background: color-mix(in srgb, var(--panel2) 82%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border: 1px solid var(--line); box-shadow: var(--e2, 0 2px 8px rgba(0,0,0,.35));
+  color: var(--ink); font: inherit; font-size: var(--fs-sm); font-weight: 600; }
+.pc-peek[hidden] { display: none; }
+.pc-peek-a { font-size: 20px; line-height: 1; margin-top: -2px; }
+.pc-peek-t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (min-width: 641px) { .pc-peek { top: 2px; } }
+@media (max-width: 640px) {
+  .pc-card .pc-wrap { height: calc(100% - 12px - var(--sat, 0px)); }
+  .pc-card.pc-stacked:not(.pc-under) .pc-wrap { height: calc(100% - 12px - 40px - var(--sat, 0px)); }
+}
