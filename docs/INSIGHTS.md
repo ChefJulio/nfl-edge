@@ -3348,3 +3348,11 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   6 points of bias on a third of games), 95% CI (2,000 game resamples) upper < 0, lower in >= 3 of 4 seasons, and the
   calibration gap in games we price at 70%+ smaller; CONFIRM 2026 same direction. Reported: both gaps together; the
   net-rating gap instead (tested worse before: INSIGHTS power-rank-as-predictor); Vegas on the same games.
+- **RESULT {#mismatch-qrank} (BQ) mismatch calibration (normal-quantile rank gap): FAIL, and the premise was mostly an
+  artifact.** tools/mismatch_eval.py, 2022-25, 1,084 games, production's form with the shipped lineup term. Brier base
+  .2213, QRANK .2217 (+0.0004 [-0.0009, +0.0018]), better 1 of 4 seasons, 2026 -0.0002: FAIL; both gaps .2212
+  (-0.0001); net-rating gap .2217. Calibration of the base, binned by OUR chance: 50-60% said .550 won .590, 60-70%
+  .646 / .640, 70-80% .746 / .719, 80%+ .828 / .861; 70%+ gap .011 (QRANK .015). The "we said .722, won .785" finding
+  binned games by VEGAS's confidence: conditioning on a sharper forecaster's view picks games where he knows more, so
+  our numbers look timid there by construction. Binned by our own chance, the model is calibrated. Lesson: judge
+  calibration by the model's own bins; the gap to Vegas is resolution (telling games apart), not calibration.
