@@ -2631,7 +2631,9 @@
   // one sets the hash (a real history entry, so Back works); the shell routes it and calls NFLE.showPlayer / showTeam.
   const pageMode = () => !!(window.NFLE && window.NFLE.pageMode);
   const openTeam = abbr => {
-    if (pageMode()) { if (location.hash !== `#team/${abbr}`) location.hash = `team/${abbr}`; else showTeam(abbr); return; }
+    // the card stack in the URL (shell.js): one deeper than the card you're on
+    if (pageMode()) { const h = NFLE.cardHref ? NFLE.cardHref('team', abbr) : `#team/${abbr}`;
+      if (location.hash !== h && !location.hash.endsWith(`team/${abbr}`)) location.hash = h.slice(1); else showTeam(abbr); return; }
     showTeam(abbr);
   };
   const showTeam = abbr => {
@@ -2654,7 +2656,8 @@
   };
 
   const openPlayer = pid => {
-    if (pageMode()) { if (location.hash !== `#player/${pid}`) location.hash = `player/${pid}`; else showPlayer(pid); return; }
+    if (pageMode()) { const h = NFLE.cardHref ? NFLE.cardHref('player', pid) : `#player/${pid}`;
+      if (location.hash !== h && !location.hash.endsWith(`player/${pid}`)) location.hash = h.slice(1); else showPlayer(pid); return; }
     showPlayer(pid);
   };
   const showPlayer = pid => {
@@ -4064,7 +4067,9 @@
   // ------------------------------------------------------------------------------------------------------ init
   const initWeek = async () => {
     try { DATA = await getJSON(CFG.root + CFG.data, 12000, false); DATA.__rel = CFG.data; } catch (e) { DATA = null; return; }
-    if (location.hash.startsWith('#player/')) openPlayer(location.hash.slice(8));
+    // a card link (or a shared card stack, shell.js) opened directly: built now that the data is in
+    if (pageMode() && NFLE.runStack) NFLE.runStack();
+    else if (location.hash.startsWith('#player/')) openPlayer(location.hash.slice(8));
     else if (location.hash.startsWith('#team/')) openTeam(location.hash.slice(6));
     else if (location.hash.startsWith('#g-')) {  // old links to a matchup tile now open that game's gamecast
       const g = DATA.games.find(x => x.id === location.hash.slice(3));
@@ -4129,6 +4134,7 @@
     const ov = document.querySelector('.sheet-ov');
     if (!ov) return;
     ov.remove(); document.removeEventListener('keydown', onKey);
+    if (ov.dataset.card && NFLE.sheetMark) NFLE.sheetMark(null);
     if (last && last.isConnected) last.focus();
   };
   const open = tile => show(tile.dataset.sheet, tile.querySelector('template').content.cloneNode(true), tile);
@@ -4137,6 +4143,8 @@
     close(); last = opener || null;
     const ov = document.createElement('div');
     ov.className = 'sheet-ov';
+    // a card's sheet (a tile on #pcOv) is part of the card stack's URL (shell.js NFLE.sheetMark)
+    if (opener && opener.closest && opener.closest('#pcOv') && NFLE.sheetMark) { ov.dataset.card = '1'; NFLE.sheetMark(NFLE.slug(title)); }
     ov.innerHTML = '<div class="sheet" role="dialog" aria-modal="true"><div class="sheet-h"><i class="sheet-grab" aria-hidden="true"></i><b></b><button type="button" class="sheet-x" aria-label="Close">&times;</button></div><div class="sheet-b"></div></div>';
     ov.querySelector('.sheet-h b').textContent = title;
     ov.querySelector('.sheet').setAttribute('aria-label', title);
@@ -4145,7 +4153,10 @@
     document.dispatchEvent(new CustomEvent('nfle-sheet', { detail: ov.querySelector('.sheet-b') }));
     ov.addEventListener('click', e => {
       if (e.target === ov || e.target.closest('.sheet-x')) { close(); return; }
-      if (e.target.closest('a[href], .tm-open, [data-open-pid]')) setTimeout(close);  // the page's click rule runs first
+      // a player or team opens a card over the sheet, which the card stack sets aside and brings back (shell.js);
+      // any other link navigates away and closes it (the page's click rule runs first)
+      const a = e.target.closest('a[href], .tm-open, [data-open-pid]');
+      if (a && !(a.matches('.tm-open, [data-open-pid]') || /#(player|team)\//.test(a.getAttribute('href') || ''))) setTimeout(close);
     });
     document.addEventListener('keydown', onKey);
     document.body.appendChild(ov);

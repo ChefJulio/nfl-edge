@@ -377,6 +377,14 @@ document.addEventListener('touchstart', () => {}, { passive: true });
                playoffs: 'teams/playoffs', draft: 'teams/draft', transactions: 'players/moves' };
   const CARD = /^g-/;  // old matchup-tile links: gamecast.js turns them into gamecast links
   const PAGE = /^(player|team)\/(.+)$/;  // player / team cards (rendered by gamecast.js into #pcOv)
+  // The card stack lives in the URL (owner 2026-10-20: "make the nested navigation part of the url? so if i share a url
+  // it has the stack"): cards in order, joined by "+", each with the sheet open over it after ":", e.g.
+  // #team/PHI:players+player/00-0033885 = the Eagles card with its Players sheet, Goedert's card on top. Back pops one.
+  const SEG = /^(player|team)\/([^:+]+)(?::([a-z0-9-]+))?$/;
+  const segsOf = h => { const t = (h || '').replace(/^#/, ''); if (!t) return null;
+    const m = t.split('+').map(x => x.match(SEG)); return m.every(Boolean) ? m.map(x => ({ kind: x[1], id: x[2], sheet: x[3] || '' })) : null; };
+  const segStr = x => `${x.kind}/${x.id}${x.sheet ? ':' + x.sheet : ''}`;
+  NFLE.slug = t => String(t || '').toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   const nav = document.querySelector('nav.tabs');
   const main = document.querySelector('main .wrap');
   // Pages without the tab bar (game.html) still run the cards (owner 2026-10-17: a player tapped in the gamecast opened
@@ -482,8 +490,20 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     return { el, top: cardBox.scrollTop }; };
   const showUnder = d => { const s = snaps[d - 1]; under.replaceChildren(); under.hidden = !s; cardOv.classList.toggle('pc-stacked', !!s);
     if (s) { under.appendChild(s.el); s.el.querySelector('.pc').scrollTop = s.top; } };
+  // Sheets ride the card stack (owner 2026-10-20: "we open the depth chart and that slide disappears when we click on
+  // a player"): a sheet open when a card opens over it is set aside under the depth it belongs to (0 = the list) and
+  // comes back, scrolled where it was, when you return to that depth; closing past it discards it.
+  const sheetAt = {}, sheetPend = {};
+  const stashSheet = d => { const ov = document.querySelector('body > .sheet-ov');
+    if (!ov) return; const sh = ov.querySelector('.sheet'); sheetAt[d] = { ov, top: sh ? sh.scrollTop : 0 }; ov.remove(); };
+  const restoreSheet = d => { Object.keys(sheetAt).forEach(k => { if (+k > d) delete sheetAt[k]; });
+    const s = sheetAt[d]; delete sheetAt[d];
+    const pend = sheetPend[d]; delete sheetPend[d];
+    if (!s && pend) { setTimeout(() => openSheetSlug(pend), 0); return; }  // a shared link's sheet, first visit
+    if (!s || document.querySelector('body > .sheet-ov')) return;
+    document.body.appendChild(s.ov); const sh = s.ov.querySelector('.sheet'); if (sh) sh.scrollTop = s.top; };
   const hideCard = () => { cardOv.hidden = true; document.documentElement.classList.remove('pc-open'); onPage = false; depth = 0;
-    snaps.length = 0; showUnder(0); settle(); };
+    snaps.length = 0; showUnder(0); settle(); restoreSheet(0); };
   const settle = () => { cardWrap.style.transition = 'none'; cardWrap.style.transform = ''; };
   // close: back one card (stacked), else back to the list, or, for a card opened from a link, onto the list in place
   const closeCard = () => {
@@ -532,14 +552,15 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const playIn = () => { cardWrap.style.animation = 'none'; void cardWrap.offsetWidth; cardWrap.style.animation = ''; };
   cardOv.addEventListener('click', e => { if (e.target === cardOv || e.target.closest('.pc-x')) closeCard(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !cardOv.hidden && !document.querySelector('.sheet-ov, .zoom-ov')) closeCard(); });
-  const showPage = (kind, id) => {
+  const showPage = (kind, id, dAt) => {
     // a direct link has no list behind it: a team card opens over Teams, a player card over Players
     if (!lastRoute && !listless) { const home = kind === 'team' ? 'teams' : 'players'; show(parse(home), false); deep = true; }
     const fresh = !onPage;  // opened from a list (not card-to-card): the card starts on this page's week
     const fn = kind === 'player' ? NFLE.showPlayer : NFLE.showTeam;
     // depth of this card: its history entry's (Back / Forward), else one deeper than the open card
-    const st = history.state && history.state.nfleCard, was = cardOv.hidden ? 0 : depth, d = st || was + 1;
+    const st = history.state && history.state.nfleCard, was = cardOv.hidden ? 0 : depth, d = dAt || st || was + 1;
     let top = 0;
+    if (d > was) stashSheet(was);  // a sheet on the card (or list) you're leaving waits for you to come back
     if (d > was && was > 0) { snaps[was] = snapshot(); playIn(); }  // card on card: the one below, as you leave it
     else if (d < was) { top = snaps[d] ? snaps[d].top : 0; snaps.length = d; }  // back down: where you were on it
     cardOv.hidden = false;
@@ -555,6 +576,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     depth = d;
     if (!st) { try { history.replaceState({ nfleCard: depth }, ''); } catch (e) { /* file:// */ } }
     showUnder(depth);
+    if (d < was) restoreSheet(d);
     onPage = true;
     document.dispatchEvent(new CustomEvent('nfle-route', { detail: { parent: lastRoute ? lastRoute.p.key : '', sub: 'card', section: 'pcOv' } }));
   };
@@ -600,9 +622,30 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     bot.addEventListener('click', onNav);
     document.addEventListener('click', e => { const sh = bot.querySelector('.bb-sheet'); if (sh && !bot.contains(e.target)) sh.hidden = true; });
   }
+  // a card's sheet named in the URL: open it once the card has drawn its tiles (some fill in after data loads)
+  const openSheetSlug = (slug, tries = 0, at = depth) => {
+    if (!slug || document.querySelector('body > .sheet-ov') || cardOv.hidden || depth !== at) return;  // moved on: drop it
+    const t = [...cardOv.querySelectorAll('.pc-tap[data-sheet]')].find(x => NFLE.slug(x.dataset.sheet) === slug);
+    if (t) t.click(); else if (tries < 20) setTimeout(() => openSheetSlug(slug, tries + 1, at), 150);
+  };
+  // the URL for opening a card from where you are: on a card, one deeper in the stack; on a list, a new stack
+  NFLE.cardHref = (kind, id) => { const cur = !cardOv.hidden && segsOf(location.hash);
+    return '#' + (cur ? cur.map(segStr).join('+') + '+' : '') + `${kind}/${id}`; };
+  // a sheet opened or closed over the top card: recorded on its segment (same history entry)
+  NFLE.sheetMark = slug => { const cur = !cardOv.hidden && segsOf(location.hash); if (!cur) return;
+    cur[cur.length - 1].sheet = slug || '';
+    try { history.replaceState(history.state, '', location.pathname + location.search + '#' + cur.map(segStr).join('+')); } catch (e) { /* file:// */ } };
+  // a shared stack: each card in order (its own history entry, so Back steps down it), its sheet opened as it was
+  // (the sheets of cards below the top one open when you step back to them: sheetPend)
+  const buildStack = segs => segs.forEach((x, i) => {
+    const h = location.pathname + location.search + '#' + segs.slice(0, i + 1).map(segStr).join('+');
+    try { if (i === 0) history.replaceState({ nfleCard: 1 }, '', h); else history.pushState({ nfleCard: i + 1 }, '', h); } catch (e) { /* file:// */ }
+    showPage(x.kind, x.id, i + 1);
+    if (i < segs.length - 1) { if (x.sheet) sheetPend[i + 1] = x.sheet; } else openSheetSlug(x.sheet);
+  });
   const route = (h, push) => {
-    const m = (h || '').replace(/^#/, '').match(PAGE);
-    if (m) { showPage(m[1], m[2]); return true; }
+    const segs = segsOf(h);
+    if (segs) { const top = segs[segs.length - 1]; showPage(top.kind, top.id, segs.length); openSheetSlug(top.sheet); return true; }
     if (listless) { hideCard(); deep = false; return true; }  // the card's entry left: the page itself
     const r = parse(h);
     if (r) { const back = !cardOv.hidden && lastRoute && r.p === lastRoute.p && r.s === lastRoute.s;
@@ -612,15 +655,25 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     return false;
   };
   window.addEventListener('hashchange', () => route(location.hash, false));
+  document.addEventListener('click', e => {
+    const a = !cardOv.hidden && e.target.closest && e.target.closest('a[href^="#player/"], a[href^="#team/"]');
+    if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey) return;
+    const m = a.getAttribute('href').slice(1).match(PAGE);
+    if (!m) return;
+    e.preventDefault(); location.hash = NFLE.cardHref(m[1], m[2]).slice(1);
+  });
   let saved = null; try { saved = localStorage.getItem('nfledge-tab'); } catch (e) { /* ignore */ }
   // A card link opened directly: over the tab you last used in that section (Teams for a team, Players for a player)
   if (listless) {
-    if (PAGE.test(location.hash.slice(1))) { deep = true; route(location.hash, false); }
-  } else if (PAGE.test(location.hash.slice(1))) {
-    const sec = location.hash.slice(1).startsWith('team/') ? 'teams' : 'players';
+    const sg = segsOf(location.hash);
+    if (sg) { deep = true; NFLE.runStack = () => { NFLE.runStack = null; buildStack(sg); }; }
+  } else if (segsOf(location.hash)) {
+    const sg = segsOf(location.hash);
+    const sec = sg[0].kind === 'team' ? 'teams' : 'players';
     show((saved && saved.startsWith(sec) ? parse(saved) : null) || parse(sec), false);
     deep = true;
-    route(location.hash, false);
+    // the cards need the week's data (gamecast.js loads it, then calls this); a stack built before it would be empty
+    NFLE.runStack = () => { NFLE.runStack = null; buildStack(sg); };
   }
   else show(parse(location.hash) || parse(saved) || parse('players'), !CARD.test(location.hash.slice(1)));
   window.NFLE_SHELL = { go: h => { const r = parse(h); if (r) show(r, true); } };
