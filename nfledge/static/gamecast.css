@@ -1549,3 +1549,11 @@ tr.lg-pend td.muted { text-align: left; white-space: nowrap; font-size: 12px; }
 span.nm-link { display: inline; }
 /* win-chance swing chip in the gaining team's color (gamecast.js swingChip) */
 .pi-d.pi-tm { background: color-mix(in srgb, var(--tc) 55%, var(--panel2)); color: #fff; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tc) 80%, #fff 20%); }
+/* one play anatomy (gamecast.js playMeta / playTitle / fieldStrip): the meta line, then the headline with its yards chip */
+.pm { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 12px; color: var(--muted); font-weight: 600; margin-bottom: 3px; }
+.pm .rp-d, .pm .pp { font-size: 12px; }
+.lpf-h.pm { margin-bottom: 0; } .lpf-h.pm .lpf-sc { margin-left: auto; }
+.pt { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+.pt .rp-yd { font-size: 11px; }
+.ds-p { grid-template-columns: 62px minmax(0, 1fr); }
+.ds-b { min-width: 0; } .ds-b .ds-h { font-weight: 600; }

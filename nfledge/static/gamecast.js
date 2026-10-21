@@ -2961,8 +2961,7 @@
     if (!cards.length) return `<p class="muted">${esc(opts.empty || 'No plays yet. Plays that move your players\' points show up here once their games kick off.')}</p>`;
     const lg = (s_, n = 16) => logo(s_.logo, '#111', n, s_.team);
     return `<ol class="lpf-list">${cards.slice(0, opts.limit || 80).map(c => {
-      const { p, hd, st } = c, dd = p.start && p.start.down ? (p.start.shortDownDistanceText || p.start.downDistanceText || '') : '';
-      const at = p.start && p.start.possessionText ? p.start.possessionText : '';
+      const { p, hd, st } = c;
       const a = spot(p.start, st), red = a && (a.dir === 1 ? a.x >= 80 : a.x <= 20) && !stPlay(p);
       const rows = c.rows.map(r => `<div class="pi-row lpf-r" data-open-pid="${esc(r.pid)}">${r.dst ? `<span class="pi-hs">${logo(((DATA.teams || {})[r.dst] || {}).logo, '#111', 22, r.dst)}</span>` : `<img class="pi-hs" src="${esc(NFLE.ui ? NFLE.ui.headshot(r.id) : '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`}
           <span class="pi-nm">${esc(r.name)}</span>${r.tag === 'opp' ? '<span class="fp-tag foe lpf-tag">Opp</span>' : ''}<span class="pi-st">${r.txt ? esc(r.txt) : statText(r.s)}</span>
@@ -2972,8 +2971,8 @@
         <a class="lpf-h" href="${esc(gameHref(DATA.games.find(x => x.id === c.gid) || { id: c.gid }))}">
           <span class="lpf-g">${lg(st.away)}<b>${esc(st.away.team)}</b> ${esc(p.awayScore)}&ndash;${esc(p.homeScore)} <b>${esc(st.home.team)}</b>${lg(st.home)}</span>
           <span class="lpf-w">${esc(`${periodName((p.period || {}).number || 1)} ${(p.clock || {}).displayValue || ''}`.trim())}</span>
-          ${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>${at ? `<span class="muted">at ${esc(at)}</span>` : ''}` : ''}${red ? '<span class="sit-rz lpf-rz">RZ</span>' : ''}</a>
-        <div class="lpf-t ${hd.cls}">${linkNames(esc(hd.h), [st.away.team, st.home.team], LIVE.sums[st.id])}</div>${rows}</li>`;
+          ${red ? '<span class="sit-rz lpf-rz">RZ</span>' : ''}</a>${playMeta(p)}
+        ${playTitle('lpf-t', hd, linkNames(esc(hd.h), [st.away.team, st.home.team], LIVE.sums[st.id]), p, st)}${fieldStrip(p, st)}${rows}</li>`;
     }).join('')}</ol>`;
   };
   const startLive = () => {
@@ -3130,59 +3129,24 @@
     const q = o.q.trim().toLowerCase();
     const keep = p => (upto == null || elapsed(p) <= upto) && (o.filter === 'all' || (o.filter === 'score' && p.scoringPlay)
       || (o.filter === 'to' && p.isTurnover) || (o.filter === 'pen' && p.isPenalty)) && (!q || String(p.text).toLowerCase().includes(q));
-    // First downs: ESPN doesn't flag them; a down-and-distance play earned one if the drive's next real play starts
-    // at 1st down (a touchdown is its own highlight).
-    const ttype = pType, isNonPlay = nonPlay, isST = stPlay;
-    const firstDown = new Set();
-    drives.forEach(d => {
-      const real = (d.plays || []).filter(p => p.start && p.start.down && !isNonPlay(p) && !isST(p));
-      real.forEach((p, i) => {
-        const nx = real[i + 1];
-        if (!nx || nx.start.down !== 1 || p.scoringPlay || p.isTurnover) return;
-        if (/goal/i.test(p.start.downDistanceText || p.start.shortDownDistanceText || '')) return;  // goal to go: only a TD
-        // from 1st down a new set needs the full distance gained (else it's e.g. a replayed down after a no-play)
-        if (p.start.down === 1 && !(p.statYardage >= (p.start.distance || 10))) return;
-        firstDown.add(p.id);
-      });
-    });
+    const isNonPlay = nonPlay, isST = stPlay;
     const teams = [info.away.team, info.home.team];
     const LOGN = fullNames(sum);
     const playRow = (p) => {
       const wp = wpAfter[p.id], d = wp ? wp.now - wp.prev : 0;
-      const swing = Math.abs(d) >= 0.01 ? `<span class="pl-wp" title="Change in ESPN's live win probability on this play">${tmL(d > 0 ? info.home.team : info.away.team)} +${Math.round(Math.abs(d) * 100)}%</span>` : '';
+      const swing = Math.round(Math.abs(d) * 100) >= 1 ? swingChip(Math.round(d * 100), info.home.team, info) : '';  // as on the cards
       const when = `${p.period ? periodName(p.period.number) : ''} ${esc(p.clock ? p.clock.displayValue : '')}`;
       // Not plays (timeouts, two-minute warning, end of quarter / game): thin muted divider rows.
       if (isNonPlay(p)) return `<li class="pl pl-np"><div class="pl-when">${when}</div><div class="pl-what"><div class="pl-txt">${esc(nonPlayText(p))}</div></div><div></div></li>`;
-      const dd = (p.start && p.start.down ? (p.start.shortDownDistanceText || p.start.downDistanceText) : '') || '';
       // the play as a headline (owner 2026-10-18: "beautify this area too"), the yards it gained, the official text below
-      const a0 = spot(p.start, info), b0 = spot(p.end, info);
+      const a0 = spot(p.start, info);
       const hd = playHead(p, LOGN, a0 ? { off: a0.offense.team, other: a0.offense.team === info.away.team ? info.home.team : info.away.team } : {});
-      const net = a0 && b0 && a0.offense.team === b0.offense.team && !p.scoringPlay && !/No Play/i.test(String(p.text || '')) && !stPlay(p) && p.start && p.start.down
-        ? Math.round((b0.x - a0.x) * a0.dir) : null;
-      const ydChip = net == null || /incomplete/i.test(String(p.text || '')) ? '' : `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)}</span>`;
-      const fd = firstDown.has(p.id), st = isST(p), t = ttype(p), txt = String(p.text || '');
+      const st = isST(p);
       // Tint = the team with the ball; special-teams plays stay neutral. Event types are chips, not row colors.
       const off = st ? null : teamOf(p.start && p.start.team && p.start.team.id);
-      const chips = [];
-      // a touchdown's text carries its extra point ("... TOUCHDOWN. X extra point is GOOD"): TD first
-      if (p.scoringPlay) chips.push(/touchdown/i.test(t + txt) ? ['TD', 'c-sc'] : /field goal/i.test(t + txt) ? ['FG', 'c-sc'] : /extra point|two-point/i.test(t) ? ['XP', 'c-sc'] : /safety/i.test(t + txt) ? ['SAFETY', 'c-sc'] : ['TD', 'c-sc']);
-      else if (st) chips.push([/extra point|two-point/i.test(t) ? (/two-point/i.test(t) ? '2PT' : 'XP') : /kickoff|kicks/i.test(t + txt) ? 'KICKOFF' : /punt/i.test(t + txt) ? 'PUNT' : /field goal/i.test(t + txt) ? 'FG' : 'ST', 'c-st']);
-      // ESPN doesn't flag lost fumbles on kickoffs / punts as turnovers: the kicking team recovering is one.
-      const kicker = st && (txt.match(/(?:kicks|punts)\b.*?\bfrom ([A-Z]{2,3}) \d/) || [])[1];
-      const recBy = (txt.match(/RECOVERED by ([A-Z]{2,3})-/) || [])[1];
-      const stLost = st && /FUMBLES/.test(txt) && kicker && recBy && ourCode(recBy) === ourCode(kicker);
-      if (p.isTurnover || stLost) chips.push([/intercept/i.test(t + txt) ? 'INT' : /fumble/i.test(t + txt) ? 'FUM' : 'TO', 'c-to']);
-      if (/sack/i.test(t)) chips.push(['SACK', 'c-sk']);
-      if (p.isPenalty) chips.push(['FLAG', 'c-pen']);
-      if (fd) chips.push(['1ST', 'c-1st']);
-      const CHIP_TIP = { TD: 'Touchdown', FG: 'Field goal', XP: 'Extra point', SAFETY: 'Safety', KICKOFF: 'Kickoff (special teams)',
-                         PUNT: 'Punt (special teams)', ST: 'Special teams play', INT: 'Interception (turnover)', FUM: 'Fumble lost (turnover)',
-                         TO: 'Turnover', SACK: 'Sack', FLAG: 'Penalty on the play', '1ST': 'Gained a first down' };
-      const chipHtml = chips.map(([c, k]) => `<span class="pc-chip ${k}" title="${CHIP_TIP[c] || ''}">${c}</span>`).join('');
       const cls = `${p.scoringPlay ? ' pl-score' : ''}${p.isPenalty && !p.scoringPlay ? ' pl-pen' : ''}${st ? ' pl-st' : ''}`;
       return `<li class="pl${cls}" data-k="p${esc(p.id)}"${off ? ` style="--pt:${esc(off.color)}"` : ''}><div class="pl-when">${when}</div>
-        <div class="pl-what">${(() => { const pp = playPairs(p); return chipHtml || pp.downs || pp.spots ? `<div class="pl-dd">${chipHtml}${pp.downs}${pp.spots}</div>` : ''; })()}
-          <div class="pl-hl ${hd.cls}"><span class="pl-hl-t">${linkNames(esc(hd.h), teams)}</span>${ydChip}</div>${fieldStrip(p, info)}<div class="pl-txt pl-raw" title="Tap for the official text">${linkNames(esc(hd.raw), teams)}</div></div>
+        <div class="pl-what">${playMeta(p)}${playTitle('pl-hl', hd, linkNames(esc(hd.h), teams), p, info)}${fieldStrip(p, info)}<div class="pl-txt pl-raw" title="Tap for the official text">${linkNames(esc(hd.raw), teams)}</div></div>
         <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${tmL(info.away.team)} ${p.awayScore}–${p.homeScore} ${tmL(info.home.team)}</b>` : ''}${swing}</div></li>`;
     };
     const order = o.sort !== 'old';  // newest first unless asked otherwise
@@ -3461,13 +3425,10 @@
       const p = x.play, a = spot(p.start, info);
       const hd = playHead(p, names, a ? { off: a.offense.team, other: a.offense.team === info.away.team ? info.home.team : info.away.team } : {});
       const helped = d >= 0 ? info.home.team : info.away.team;  // the side whose chance rose
-      const dd = p.start && p.start.down ? (p.start.shortDownDistanceText || p.start.downDistanceText || '') : '';
-      const at = p.start && p.start.possessionText ? p.start.possessionText : '';
-      return `<li class="lpf${p.scoringPlay ? ' scored' : ''}${p.isTurnover ? ' to' : ''}"><div class="lpf-h">
-          <span class="lpf-w">${esc(`${periodName((p.period || {}).number || 1)} ${(p.clock || {}).displayValue || ''}`.trim())}</span>
-          ${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>${at ? `<span class="muted">at ${esc(at)}</span>` : ''}` : ''}
-          <span class="lpf-g lpf-sc">${esc(info.away.team)} ${esc(p.awayScore)}&ndash;${esc(p.homeScore)} ${esc(info.home.team)}</span></div>
-        <div class="lpf-t ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}</div>${fieldStrip(p, info)}${playImpact(p, hd, info, sum, nm, names, helped)}</li>`;
+      return `<li class="lpf${p.scoringPlay ? ' scored' : ''}${p.isTurnover ? ' to' : ''}">${playMeta(p,
+          `<span class="lpf-w">${esc(`${periodName((p.period || {}).number || 1)} ${(p.clock || {}).displayValue || ''}`.trim())}</span>`,
+          `<span class="lpf-g lpf-sc">${esc(info.away.team)} ${esc(p.awayScore)}&ndash;${esc(p.homeScore)} ${esc(info.home.team)}</span>`, 'lpf-h pm')}
+        ${playTitle('lpf-t', hd, linkNames(esc(hd.h), [info.away.team, info.home.team]), p, info)}${fieldStrip(p, info)}${playImpact(p, hd, info, sum, nm, names, helped)}</li>`;
     }).join('')}</ol>`;
   };
   // ---- Postgame tab: the recap once it's final.
@@ -3688,7 +3649,7 @@
       const hd = playHead(L, names, a ? { off, other: off === info.away.team ? info.home.team : info.away.team } : {});
       const th = tryP ? playHead(tryP, names, {}) : null;
       last = `<div class="now-last${L.scoringPlay ? ' scored' : ''}"><div class="now-lk muted">${L.scoringPlay ? 'Last score' : 'Last play'}${L.clock ? ` · ${periodName((L.period || {}).number || 1)} ${esc(L.clock.displayValue || '')}` : ''}</div>
-        <div class="now-lh ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}</div>${fieldStrip(L, info)}${th ? `<div class="now-try ${th.cls}">${linkNames(esc(th.h), [info.away.team, info.home.team], sum)}</div>` : ''}${nonPlay(L) ? '' : playImpact(L, hd, info, sum, nm, names, '')}</div>`;
+        ${playMeta(L)}${playTitle('now-lh', hd, linkNames(esc(hd.h), [info.away.team, info.home.team]), L, info)}${fieldStrip(L, info)}${th ? `<div class="now-try ${th.cls}">${linkNames(esc(th.h), [info.away.team, info.home.team], sum)}</div>` : ''}${nonPlay(L) ? '' : playImpact(L, hd, info, sum, nm, names, '')}</div>`;
     }
     if (!sp && !lanes.length) {  // no ball to place: the latest drive's plays on an empty field
       const dr = [...st.drives].reverse().find(d => (d.plays || []).length), dt = dr && dr.team && (String(dr.team.id) === String(info.home.id) ? info.home : info.away);
@@ -3787,20 +3748,57 @@
     return `<span class="fs" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
       + `${bars}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
   };
+  // ---- One anatomy for a play, everywhere (owner 2026-10-20: "are the play rows uniform everywhere they show up? don't
+  // want inconsistency"): a meta line (event tags, down -> down, spot -> spot), the headline with its yards chip, the
+  // field strip; each view adds its own extras (the game log: official text and win-chance swing; cards: fantasy
+  // impact and swing). Every view builds plays from these, so they can't drift apart.
+  const TAG_TIP = { TD: 'Touchdown', FG: 'Field goal', XP: 'Extra point', '2PT': 'Two-point try', SAFETY: 'Safety', KICKOFF: 'Kickoff (special teams)',
+                    PUNT: 'Punt (special teams)', ST: 'Special teams play', INT: 'Interception (turnover)', FUM: 'Fumble lost (turnover)',
+                    TO: 'Turnover', SACK: 'Sack', FLAG: 'Penalty on the play', '1ST': 'Gained a first down', 'NO GOOD': 'Kick or try that failed' };
+  // ESPN doesn't flag first downs: a down-and-distance play earned one when the offense keeps the ball at 1st down
+  // (a touchdown is its own tag; a 1st-and-10 needs the full distance, else it's a replayed down)
+  const isFirstDown = p => {
+    const s0 = p.start || {}, e0 = p.end || {};
+    if (!s0.down || e0.down !== 1 || p.scoringPlay || p.isTurnover || isTry(p) || stPlay(p) || /no play/i.test(String(p.text || ''))) return false;
+    if (!s0.team || !e0.team || String(s0.team.id) !== String(e0.team.id)) return false;
+    if (/goal/i.test(s0.downDistanceText || s0.shortDownDistanceText || '')) return false;
+    return !(s0.down === 1 && !(p.statYardage >= (s0.distance || 10)));
+  };
+  const playTags = p => {
+    const st = stPlay(p), t = pType(p), txt = String(p.text || ''), chips = [];
+    const fail = (isTry(p) || /field goal/i.test(t + txt)) && /no good|blocked|missed/i.test(t + txt);
+    // a touchdown's text carries its extra point ("... TOUCHDOWN. X extra point is GOOD"): TD first
+    if (p.scoringPlay) chips.push(/touchdown/i.test(t + txt) ? ['TD', 'c-sc'] : /field goal/i.test(t + txt) ? ['FG', 'c-sc'] : /two-point/i.test(t) ? ['2PT', 'c-sc']
+      : /extra point/i.test(t) ? ['XP', 'c-sc'] : /safety/i.test(t + txt) ? ['SAFETY', 'c-sc'] : ['TD', 'c-sc']);
+    else if (fail) chips.push(['NO GOOD', 'c-to']);
+    else if (st) chips.push([/extra point|two-point/i.test(t) ? (/two-point/i.test(t) ? '2PT' : 'XP') : /kickoff|kicks/i.test(t + txt) ? 'KICKOFF' : /punt/i.test(t + txt) ? 'PUNT' : /field goal/i.test(t + txt) ? 'FG' : 'ST', 'c-st']);
+    // ESPN doesn't flag lost fumbles on kickoffs / punts as turnovers: the kicking team recovering is one
+    const kicker = st && (txt.match(/(?:kicks|punts)\b.*?\bfrom ([A-Z]{2,3}) \d/) || [])[1];
+    const recBy = (txt.match(/RECOVERED by ([A-Z]{2,3})-/) || [])[1];
+    const stLost = st && /FUMBLES/.test(txt) && kicker && recBy && ourCode(recBy) === ourCode(kicker);
+    if (p.isTurnover || stLost) chips.push([/intercept/i.test(t + txt) ? 'INT' : /fumble/i.test(t + txt) ? 'FUM' : 'TO', 'c-to']);
+    if (/sack/i.test(t)) chips.push(['SACK', 'c-sk']);
+    if (p.isPenalty) chips.push(['FLAG', 'c-pen']);
+    if (isFirstDown(p)) chips.push(['1ST', 'c-1st']);
+    return chips.map(([c, k]) => `<span class="pc-chip ${k}" title="${TAG_TIP[c] || ''}">${c}</span>`).join('');
+  };
+  // the yards a scrimmage play gained (none for kicks, scores, wiped plays, incompletions)
+  const yardChip = (p, info) => {
+    const a = spot(p.start, info), b = spot(p.end, info), txt = String(p.text || '');
+    if (!a || !b || a.offense.team !== b.offense.team || p.scoringPlay || /No Play/i.test(txt) || stPlay(p) || !(p.start && p.start.down) || /incomplete/i.test(txt)) return '';
+    const net = Math.round((b.x - a.x) * a.dir);
+    return `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)}</span>`;
+  };
+  // lead / tail: a view's own items in the line (a card's clock and score)
+  const playMeta = (p, lead = '', tail = '', cls = 'pm') => { const pp = playPairs(p); return `<div class="${cls}">${lead}${playTags(p)}${pp.downs}${pp.spots}${tail}</div>`; };
+  const playTitle = (cls, hd, html, p, info) => `<div class="${cls} pt ${hd.cls}"><span class="pt-t">${html}</span>${yardChip(p, info)}</div>`;
   const playRows = (plays, info, names, key = null) => plays.map(p => {
     const when = q => `${periodName((q.period || {}).number || 1)} ${esc((q.clock || {}).displayValue || '')}`;
     if (nonPlay(p)) return `<li class="ds-p np"><span class="ds-w">${when(p)}</span><span class="ds-h muted">${esc(nonPlayText(p))}</span></li>`;
-    const a = spot(p.start, info), b = spot(p.end, info);
+    const a = spot(p.start, info);
     const hd = playHead(p, names, a ? { off: a.offense.team, other: a.offense.team === info.away.team ? info.home.team : info.away.team } : {});
-    const dd = p.start && p.start.down ? (p.start.shortDownDistanceText || p.start.downDistanceText || '') : '';
-    const net = a && b && !stPlay(p) && a.offense.team === b.offense.team && !p.scoringPlay ? Math.round((b.x - a.x) * a.dir) : null;
-    const tt = `${pType(p)} ${p.text || ''}`, tryP = isTry(p), fgP = /field goal/i.test(tt);
-    const scoreTag = /safety/i.test(tt) ? 'SAFETY' : tryP ? (/two-point/i.test(pType(p)) ? '2PT' : 'XP') : fgP ? 'FG' : 'TD';
-    const chip = p.scoringPlay ? `<span class="pc-chip c-sc">${scoreTag}</span>` : (tryP || (fgP && /no good|blocked|missed/i.test(tt))) ? '<span class="pc-chip c-to">NO GOOD</span>'
-      : p.isTurnover ? '<span class="pc-chip c-to">TURNOVER</span>'
-      : p.isPenalty ? '<span class="pc-chip c-pen">FLAG</span>' : net != null && !/incomplete/i.test(String(p.text || '')) ? `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)}</span>` : '';
-    const pp = playPairs(p);
-    return `<li class="ds-p${p === key ? ' key' : ''}"><span class="ds-w">${when(p)}</span><span class="ds-h ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}${pp.downs || pp.spots ? `<span class="ds-sp pps">${pp.downs}${pp.spots}</span>` : ''}${fieldStrip(p, info)}</span>${chip}</li>`;
+    return `<li class="ds-p${p === key ? ' key' : ''}"><span class="ds-w">${when(p)}</span><div class="ds-b">${playMeta(p)}`
+      + `${playTitle('ds-h', hd, linkNames(esc(hd.h), [info.away.team, info.home.team]), p, info)}${fieldStrip(p, info)}</div></li>`;
   }).join('');
   // Recent (owner 2026-10-18: "catch up the user on the most recent plays"): the drive on now and the one before it,
   // newest first, each under its drive's header
@@ -4026,10 +4024,9 @@
         // the play as everywhere else (owner 2026-10-18): when, the down, the score after it, a headline; the chances
         const bp = best.play, fin = gameOver() && best === ser[ser.length - 1], I = GP.info;
         const a = spot(bp.start, I), hd = playHead(bp, fullNames(GP.sum), a ? { off: a.offense.team, other: a.offense.team === I.away.team ? I.home.team : I.away.team } : {});
-        const dd = bp.start && bp.start.down ? (bp.start.shortDownDistanceText || bp.start.downDistanceText || '') : '';
-        tip.innerHTML = `<div class="lpf-h"><span class="lpf-w">${esc(`${bp.period ? periodName(bp.period.number) : ''} ${bp.clock ? bp.clock.displayValue : ''}`.trim())}</span>
-          ${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>` : ''}<span class="lpf-g lpf-sc">${esc(I.away.team)} ${esc(bp.awayScore)}&ndash;${esc(bp.homeScore)} ${esc(I.home.team)}</span></div>
-          <div class="lpf-t ${hd.cls}">${linkNames(esc(hd.h), [I.away.team, I.home.team], GP.sum)}</div>${fieldStrip(bp, I)}
+        tip.innerHTML = `${playMeta(bp, `<span class="lpf-w">${esc(`${bp.period ? periodName(bp.period.number) : ''} ${bp.clock ? bp.clock.displayValue : ''}`.trim())}</span>`,
+            `<span class="lpf-g lpf-sc">${esc(I.away.team)} ${esc(bp.awayScore)}&ndash;${esc(bp.homeScore)} ${esc(I.home.team)}</span>`, 'lpf-h pm')}
+          ${playTitle('lpf-t', hd, linkNames(esc(hd.h), [I.away.team, I.home.team], GP.sum), bp, I)}${fieldStrip(bp, I)}
           <div class="tip-wp"><span style="color:${esc(I.away.color)}">${esc(I.away.team)} <b>${wpTxt(1 - best.home, fin)}</b></span><span class="muted">win chance</span><span style="color:${esc(I.home.color)}"><b>${wpTxt(best.home, fin)}</b> ${esc(I.home.team)}</span></div>`;
         // keep the whole tooltip inside the chart: centered on the finger, clamped by its measured width (a % clamp
         // let the wide play text run off the screen edge near the ends)
