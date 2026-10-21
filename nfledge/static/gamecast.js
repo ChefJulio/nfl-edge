@@ -3460,7 +3460,7 @@
           <span class="lpf-w">${esc(`${periodName((p.period || {}).number || 1)} ${(p.clock || {}).displayValue || ''}`.trim())}</span>
           ${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>${at ? `<span class="muted">at ${esc(at)}</span>` : ''}` : ''}
           <span class="lpf-g lpf-sc">${esc(info.away.team)} ${esc(p.awayScore)}&ndash;${esc(p.homeScore)} ${esc(info.home.team)}</span></div>
-        <div class="lpf-t ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}</div>${playImpact(p, hd, info, sum, nm, names, helped)}</li>`;
+        <div class="lpf-t ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}</div>${fieldStrip(p, info)}${playImpact(p, hd, info, sum, nm, names, helped)}</li>`;
     }).join('')}</ol>`;
   };
   // ---- Postgame tab: the recap once it's final.
@@ -3681,7 +3681,7 @@
       const hd = playHead(L, names, a ? { off, other: off === info.away.team ? info.home.team : info.away.team } : {});
       const th = tryP ? playHead(tryP, names, {}) : null;
       last = `<div class="now-last${L.scoringPlay ? ' scored' : ''}"><div class="now-lk muted">${L.scoringPlay ? 'Last score' : 'Last play'}${L.clock ? ` · ${periodName((L.period || {}).number || 1)} ${esc(L.clock.displayValue || '')}` : ''}</div>
-        <div class="now-lh ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}</div>${th ? `<div class="now-try ${th.cls}">${linkNames(esc(th.h), [info.away.team, info.home.team], sum)}</div>` : ''}${nonPlay(L) ? '' : playImpact(L, hd, info, sum, nm, names, '')}</div>`;
+        <div class="now-lh ${hd.cls}">${linkNames(esc(hd.h), [info.away.team, info.home.team])}</div>${fieldStrip(L, info)}${th ? `<div class="now-try ${th.cls}">${linkNames(esc(th.h), [info.away.team, info.home.team], sum)}</div>` : ''}${nonPlay(L) ? '' : playImpact(L, hd, info, sum, nm, names, '')}</div>`;
     }
     if (!sp && !lanes.length) {  // no ball to place: the latest drive's plays on an empty field
       const dr = [...st.drives].reverse().find(d => (d.plays || []).length), dt = dr && dr.team && (String(dr.team.id) === String(info.home.id) ? info.home : info.away);
@@ -4022,7 +4022,7 @@
         const dd = bp.start && bp.start.down ? (bp.start.shortDownDistanceText || bp.start.downDistanceText || '') : '';
         tip.innerHTML = `<div class="lpf-h"><span class="lpf-w">${esc(`${bp.period ? periodName(bp.period.number) : ''} ${bp.clock ? bp.clock.displayValue : ''}`.trim())}</span>
           ${dd ? `<span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>` : ''}<span class="lpf-g lpf-sc">${esc(I.away.team)} ${esc(bp.awayScore)}&ndash;${esc(bp.homeScore)} ${esc(I.home.team)}</span></div>
-          <div class="lpf-t ${hd.cls}">${linkNames(esc(hd.h), [I.away.team, I.home.team], GP.sum)}</div>
+          <div class="lpf-t ${hd.cls}">${linkNames(esc(hd.h), [I.away.team, I.home.team], GP.sum)}</div>${fieldStrip(bp, I)}
           <div class="tip-wp"><span style="color:${esc(I.away.color)}">${esc(I.away.team)} <b>${wpTxt(1 - best.home, fin)}</b></span><span class="muted">win chance</span><span style="color:${esc(I.home.color)}"><b>${wpTxt(best.home, fin)}</b> ${esc(I.home.team)}</span></div>`;
         // keep the whole tooltip inside the chart: centered on the finger, clamped by its measured width (a % clamp
         // let the wide play text run off the screen edge near the ends)
