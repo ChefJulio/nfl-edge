@@ -3546,3 +3546,20 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   a teammate whose availability is uncertain or who returns, shrunk toward the blend by games in each.
 - **QUEUED: prospective model-vs-expert disagreement log** (gaps of 3+ points each week, outcomes after), from the
   archived week pages.
+- **REMOVED 2026-10-21 (owner: "i don't wanna label them as tossups or obscure the difference"):** the League start /
+  bench odds and toss-up labels shipped earlier the same day. tools/h2h_curve.py and its numbers stay as a reference.
+- **DESCRIPTIVE 2026-10-21 (owner: "start your studs, matchup proof, those guys exist"): no stud effect beyond the
+  projection.** Studs = top 8 RB / 12 WR / 6 QB / 5 TE by season-to-date FP/G (weeks 4+, 3+ games), cached baselines
+  2021-25. Raw head-to-heads looked like studs beat the projection gap (RB studs projected 0-1 below a non-stud won 52%,
+  4+ below 41%), but that is projection LEVEL: higher projections are noisier, so any gap is closer to a coin flip.
+  Logistic model of "the lower-projected player won" on gap, level, gap x level and stud flags (scratch/stud_logit.py):
+  at gap 1, level 15 the lower player wins RB 52.3% if neither is a stud vs 51.5% if he is a stud (69,648 pairs); WR
+  50.2% vs 47.5% (114,532). At equal projections studs' medians and floors match non-studs' (scratch/stud_dist.py: RB
+  proj 14-18 floor p25 9.2 vs 8.2, median residual -0.05 vs -0.24). Season FP/G as a second input to the projection:
+  walk-forward MAE worse every season 2022-25 for RB / WR / TE (scratch/form_coef.py).
+- **DESCRIPTIVE 2026-10-21 (owner idea): season-average expert rank (mean log weekly ECR, weeks before this one) as a
+  blend input** (scratch/avg_ecr.py, linear blends walk-forward 2022-25): RB MAE 5.251 model-only -> 5.254 with the
+  season average (this week's ECR 5.268; the site's blend 5.202), WR 5.156 -> 5.150 (this week's 5.100), QB 6.028 ->
+  6.001 (5.934). Start / sit RB 0.691 -> 0.691, WR 0.642 -> 0.645. Weaker than this week's ECR everywhere; as a midweek
+  stand-in (when this week's isn't out) it would add a little at QB / WR, nothing at RB. Fold into the early-week ECR
+  test (sec. 9) as a fallback variant rather than test alone.

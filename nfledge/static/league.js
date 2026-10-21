@@ -437,14 +437,6 @@
     // and taxi apart) minus the players on it; a free agent fills one without a drop
     const emptyBench = n => { const k = L.size ? Math.max(0, L.size - n) : 0;
       return Array.from({ length: k }, () => `<tr class="lg-empty"><td class="lg-slot">BN</td><td class="muted">Empty <span class="lg-empty-sub">· open roster spot</span></td><td class="num muted">&mdash;</td></tr>`).join(''); };
-    // How often the higher-projected player outscores the other, by projection gap (tools/h2h_curve.py: every same-
-    // position, same-week pair 2021-25, 238k pairs; owner 2026-10-21: a 0.9-point gap read as a recommendation). Under
-    // TOSSUP points the call is a toss-up (56% or less): either is fine.
-    const H2H = [[0, 0.5], [0.25, 0.513], [0.75, 0.538], [1.25, 0.557], [1.74, 0.592], [2.49, 0.612], [3.48, 0.649], [4.89, 0.692], [7.18, 0.753], [10.75, 0.823]];
-    const TOSSUP = 1.5;
-    const h2h = gap => { const g = Math.abs(gap);
-      for (let i = 1; i < H2H.length; i++) if (g <= H2H[i][0]) { const [x0, y0] = H2H[i - 1], [x1, y1] = H2H[i]; return y0 + (y1 - y0) * (g - x0) / (x1 - x0); }
-      return H2H[H2H.length - 1][1]; };
     const lineupView = () => {
       const irSet = new Set(mine.ir || []);
       const ps = mine.ext.filter(x => !irSet.has(x)).map(player), cur = new Set(mine.starters);
@@ -470,18 +462,10 @@
         : `projects ${f1(p.exp)}`;
       // names open their player (owner 2026-10-20: "make player names clickable ... wherever else they show up")
       const nm = p => p && p.pid ? `<button type="button" class="nm-link" data-open-pid="${esc(p.pid)}"><b>${esc(p.name)}</b></button>` : `<b>${esc(p ? p.name : '')}</b>`;
-      // each swap: the incoming player against the one he replaces (best first against best first), with how often
-      // a gap that size goes his way; under TOSSUP it's labeled a toss-up
-      const sureBy = sure.slice().sort((a, b) => (b.exp ?? -1) - (a.exp ?? -1)), ins = fill.slice(0, sure.length);
-      const odds = ins.map((p, i) => { const q = sureBy[i];
-        if (!q || q.exp == null || p.exp == null) return '';
-        const gap = p.exp - q.exp, pc = Math.round(100 * h2h(gap));
-        return `<div class="lg-h2h${gap < TOSSUP ? ' tu' : ''}">${gap < TOSSUP ? '<span class="lg-tu">Toss-up</span> ' : ''}${nm(p)} outscores ${esc(last(q.name))} ${pc}% of the time at a ${f1(gap)}-point gap${gap < TOSSUP ? ': start either' : ''}</div>`; }).join('');
       const sureCard = sure.length ? `<div class="lg-mv">
-          <div class="lg-mv-row"><span class="lg-mv-k good">Start</span><div>${ins.map(p =>
+          <div class="lg-mv-row"><span class="lg-mv-k good">Start</span><div>${fill.slice(0, sure.length).map(p =>
             `<div>${nm(p)} <span class="muted">${f1(p.exp)}</span></div>`).join('')}</div></div>
-          <div class="lg-mv-row"><span class="lg-mv-k bad">Bench</span><div>${sureBy.map(p => `<div>${nm(p)} <span class="muted">${why(p)}</span></div>`).join('')}</div></div>
-          ${odds}
+          <div class="lg-mv-row"><span class="lg-mv-k bad">Bench</span><div>${sure.map(p => `<div>${nm(p)} <span class="muted">${why(p)}</span></div>`).join('')}</div></div>
         </div>` : '';
       const gtCards = unsure.map(p => {
         // his backup on YOUR roster (a teammate whose projection depends on him), in the "he sits" world
