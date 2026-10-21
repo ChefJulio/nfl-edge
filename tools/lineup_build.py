@@ -21,10 +21,11 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 OUT = ROOT / "cache" / "lineup_rows.parquet"
-GROUP = {"T": "OL", "G": "OL", "C": "OL", "OL": "OL", "OT": "OL", "OG": "OL", "WR": "WR", "TE": "TE",
+GROUP = {"QB": "QB", "T": "OL", "G": "OL", "C": "OL", "OL": "OL", "OT": "OL", "OG": "OL", "WR": "WR", "TE": "TE",
          "RB": "RB", "HB": "RB", "FB": "RB", "DE": "DL", "DT": "DL", "NT": "DL", "DL": "DL",
          "LB": "LB", "ILB": "LB", "OLB": "LB", "MLB": "LB", "CB": "CB", "S": "S", "FS": "S", "SS": "S", "DB": "S"}
-OFF, DEF = ["OL", "WR", "TE", "RB"], ["DL", "LB", "CB", "S"]
+OFF, DEF = ["OL", "WR", "TE", "RB"], ["DL", "LB", "CB", "S"]  # QB: its own column, not in OFF (the formula has him)
+KINDS = ("snap", "cap", "rapm")  # rapm (BP): on-field value, tools/rapm_build.py
 N_BACK, HALF, MIN_ROLE = 8, 3.0, 0.3
 DEFS = ("report", "inactives", "actual")
 
@@ -38,7 +39,7 @@ def load(first: int, last: int):
   sn["gsis_id"] = sn.pfr_player_id.map(pid)
   sn = sn.dropna(subset=["gsis_id"])
   sn["grp"] = sn.position.map(GROUP)
-  sn["share"] = np.where(sn.grp.isin(OFF), sn.offense_pct.fillna(0), sn.defense_pct.fillna(0))
+  sn["share"] = np.where(sn.grp.isin(OFF + ["QB"]), sn.offense_pct.fillna(0), sn.defense_pct.fillna(0))
   ro = pd.concat([pd.read_parquet(c / f"rosters_{y}.parquet") for y in range(first, last + 1)], ignore_index=True)
   ro = ro[ro.game_type == "REG"][["season", "week", "team", "gsis_id", "status"]].dropna(subset=["gsis_id"])
   inj = pd.concat([pd.read_parquet(c / f"injuries_{y}.parquet") for y in range(first, last + 1) if (c / f"injuries_{y}.parquet").exists()],
@@ -63,6 +64,9 @@ def main():
   sn, ro, inj = load(first, last)
   cap = contracts_q(range(first, last + 1))
   main_grp = sn.groupby("gsis_id").grp.agg(lambda x: x.value_counts().index[0])
+  rv = pd.read_parquet(ROOT / "cache" / "rapm_values.parquet")
+  rapm = {(t, g, sd): v for t, g, sd, v in zip(rv.target, rv.gsis_id, rv.side, rv.value)}
+  rprior = {(t, sd, g[len("__prior_"):]): v for t, g, sd, v in zip(rv.target, rv.gsis_id, rv.side, rv.value) if g.startswith("__prior_")}
   # cap percentile within group per season, among players who played that season
   q = {}
   for s in range(first, last + 1):
@@ -96,7 +100,7 @@ def main():
           continue
         for p, sh in sub.items():
           ppl.setdefault(p, {})[gid] = sh
-      rec = {f"{d}_{k}_{grp}": 0.0 for d in DEFS for k in ("snap", "cap") for grp in OFF + DEF}
+      rec = {f"{d}_{k}_{grp}": 0.0 for d in DEFS for k in KINDS for grp in OFF + DEF + ["QB"]}
       for p, byg in ppl.items():
         sh = np.array([byg.get(gid, 0.0) for gid in hist.game_id])
         on = np.array([gid in byg and byg[gid] > 0 for gid in hist.game_id])
@@ -111,12 +115,15 @@ def main():
                  "inactives": st == "ACT" and not rep_out,
                  "actual": (x.game_id, p) in played}
         qq = q.get((x.season, p), 0.5)
+        side = "def" if grp in DEF else "off"
+        rq = rapm.get((x.season, p, side), rprior.get((x.season, side, grp), 0.0))
         for d in DEFS:
           delta = (role if avail[d] else 0.0) - recent
           rec[f"{d}_snap_{grp}"] += delta
           rec[f"{d}_cap_{grp}"] += delta * qq
+          rec[f"{d}_rapm_{grp}"] += delta * rq
       for d in DEFS:
-        for k in ("snap", "cap"):
+        for k in KINDS:
           rec[f"{d}_{k}_OFF"] = sum(rec[f"{d}_{k}_{gp}"] for gp in OFF)
           rec[f"{d}_{k}_DEF"] = sum(rec[f"{d}_{k}_{gp}"] for gp in DEF)
       rows.append({"season": int(x.season), "week": int(x.week), "team": team, "game_id": x.game_id, **rec})

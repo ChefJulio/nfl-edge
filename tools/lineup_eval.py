@@ -1,6 +1,6 @@
 """(BO) Lineup value in the Matchups win chance (pre-registered 2026-10-20, docs/INSIGHTS.md (BO)).
 
-Usage: python tools/lineup_eval.py        (needs cache/vegas_prior_eval.parquet and cache/lineup_rows.parquet)
+Usage: python tools/lineup_eval.py [--gate=lineup|rapm]   (BO gates lineup, (BP) rapm; needs cache/vegas_prior_eval.parquet and cache/lineup_rows.parquet)
 BASE = home + rank gap + Elo (as of the game's week); LINEUP = BASE + OFF + DEF (home minus away, report / cap).
 Logistic fit walk-forward on earlier seasons, scored 2022-25, 2026 CONFIRM.
 """
@@ -29,14 +29,16 @@ def main():
   miss = df[f"h_{feats[0]}"].isna() | df[f"a_{feats[0]}"].isna()
   print(f"{len(df)} games, {int(miss.sum())} without lineup rows (dropped)")
   df = df[~miss].copy()
-  for c in feats:
-    df[c] = df[f"h_{c}"] - df[f"a_{c}"]
+  df = pd.concat([df, pd.DataFrame({c: df[f"h_{c}"] - df[f"a_{c}"] for c in feats}, index=df.index)], axis=1)
   ml = lambda m: np.where(m > 0, 100 / (m + 100), -m / (-m + 100))  # noqa: E731
   ph, pa = ml(df.ml_h), ml(df.ml_a)
   df["vegas"] = ph / (ph + pa)
   arms = {"base": BASE, "lineup": BASE + ["report_cap_OFF", "report_cap_DEF"], "snap": BASE + ["report_snap_OFF", "report_snap_DEF"],
           "inactives": BASE + ["inactives_cap_OFF", "inactives_cap_DEF"], "actual": BASE + ["actual_cap_OFF", "actual_cap_DEF"],
-          "groups": BASE + [f"report_cap_{x}" for x in GROUPS]}
+          "groups": BASE + [f"report_cap_{x}" for x in GROUPS],
+          "rapm": BASE + ["report_rapm_OFF", "report_rapm_DEF"], "rapm_inact": BASE + ["inactives_rapm_OFF", "inactives_rapm_DEF"],
+          "rapm_actual": BASE + ["actual_rapm_OFF", "actual_rapm_DEF"], "rapm_qb": BASE + ["report_rapm_OFF", "report_rapm_DEF", "report_rapm_QB"]}
+  gate = next((a[7:] for a in sys.argv[1:] if a.startswith("--gate=")), "lineup")
   for s in TEST + [CONFIRM]:
     tr, te = df.season < s, df.season == s
     for arm, cols in arms.items():
@@ -56,20 +58,20 @@ def main():
   for arm in arms:
     if arm != "base":
       m, lo, hi = ci(arm)
-      print(f"  {arm:10s} - base {m:+.5f} [{lo:+.5f}, {hi:+.5f}]{'   <- gate' if arm == 'lineup' else ''}")
-  per = T.groupby("season")[["b_base", "b_lineup", "b_inactives", "b_actual"]].mean()
+      print(f"  {arm:10s} - base {m:+.5f} [{lo:+.5f}, {hi:+.5f}]{'   <- gate' if arm == gate else ''}")
+  per = T.groupby("season")[list(dict.fromkeys(["b_base", f"b_{gate}", "b_inactives", "b_actual", "b_rapm_inact", "b_rapm_actual"]))].mean()
   print(per.round(4).to_string())
   T = T.assign(band=pd.cut(T.week, [0, 4, 12, 18], labels=["wk 1-4", "wk 5-12", "wk 13-18"]))
-  print(T.groupby("band", observed=True)[["b_base", "b_lineup", "b_inactives", "b_actual", "b_vegas"]].mean().round(4).to_string())
+  print(T.groupby("band", observed=True)[list(dict.fromkeys(["b_base", "b_lineup", f"b_{gate}", "b_rapm_inact", "b_rapm_actual", "b_vegas"]))].mean().round(4).to_string())
   F = df[df.season.between(2021, 2025)]
-  for arm in ("lineup", "inactives", "actual", "groups"):
+  for arm in ("lineup", "inactives", "actual", "groups", "rapm", "rapm_inact", "rapm_actual", "rapm_qb"):
     m = LogisticRegression(C=1e6, max_iter=3000).fit(F[arms[arm]], F.y)
     print(f"  weights {arm} (fit 2021-25, reading only):", dict(zip(arms[arm][3:], m.coef_[0][3:].round(3))), " rank gap", round(m.coef_[0][1], 4))
   C = df[df.season == CONFIRM]
-  cd = (C.b_lineup - C.b_base).mean()
-  m, lo, hi = ci("lineup")
-  better = int((per.b_lineup < per.b_base).sum())
-  print(f"CONFIRM {CONFIRM}: {len(C)} games, lineup - base {cd:+.5f}")
+  cd = (C[f"b_{gate}"] - C.b_base).mean()
+  m, lo, hi = ci(gate)
+  better = int((per[f"b_{gate}"] < per.b_base).sum())
+  print(f"CONFIRM {CONFIRM}: {len(C)} games, {gate} - base {cd:+.5f}")
   print(f"seasons better {better}/4; GATE:", "PASS" if m <= -0.002 and hi < 0 and better >= 3 and cd < 0 else "FAIL")
 
 

@@ -3293,3 +3293,34 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   match a simple market-derived rating; how the line's remaining edge splits between better strength and
   game-specific information is NOT determined by this method. (BO)'s ceiling (~0.002 from who played) says absences,
   measured crudely, are a small part.
+- **Research 2026-10-20 (owner: "research this first"): per-play participation (all 22 players) for the current
+  season has no free source.** nflverse's 2023+ participation is FTN's, published only after the postseason (2025's
+  on 2026-02-10; nflreadr's schedule: "does not update during the season"); ESPN's play API names only the players
+  involved (passer / receiver / tackler); stat-api.com sells it ($49+/month, current season unconfirmed), as do PFF,
+  FTN, Sportradar. Free for 2026: per-game snap counts (every position). Design consequence: player values from
+  2016-25 plays; 2026 roles and absences from snap counts and reports; the backtest mirrors that exactly.
+- **PRE-REGISTERED 2026-10-20 (owner: "check lineups against EPA on the plays they are on the field for"): (BP)
+  on-field player value (ridge plus-minus) in the lineup term.** Player values (tools/rapm_build.py): for each target
+  season s (2018-26), every offense / defense play (pass or run, regular season + playoffs) of seasons s-3..s-1
+  (weights 0.25 / 0.5 / 1 by age; plays with win probability outside .05-.95 at 0.25), EPA = context (down, log
+  distance, field-position bins, home offense) + sum of the 11 offensive players' offense values - sum of the 11
+  defenders' defense values; ridge, each player shrunk toward a prior that depends on his position group and how much
+  he played (fit from a first pass: lightly used players are not assumed average), lambda per side chosen by
+  predicting season s-1's plays from s-4..s-2. Values in EPA per play, positive = good. Lineup term: (BO)'s delta
+  (role if available else 0, minus recent, REPORT availability) x the player's value, summed over non-QB offense and
+  over defense, home minus away (players without a value: their group's prior at zero plays). Test = (BO)'s harness:
+  BASE = home + rank gap + Elo; RAPM = BASE + OFF + DEF; logistic walk-forward, scored 2022-25. GATE: Brier lower by
+  >= 0.002, 95% CI upper < 0, lower in >= 3 of 4 seasons, CONFIRM 2026 same direction. Reported: INACTIVES and ACTUAL
+  (ceiling) versions; with the QB included; grade validity = rank correlation of a player's value with his value in
+  the next season's fit (players with 300+ plays in both), by position group; the top / bottom of each group.
+- **RESULT {#lineup-rapm} (BP) on-field player value in the lineup term: FAIL on the gated arm; the strongest lead
+  yet.** tools/rapm_build.py (334,409 plays 2016-25; lambdas chosen inside the grid after widening it to 100,000
+  before any scoring: off 3,000-10,000, def 1,000-10,000), tools/lineup_build.py, tools/lineup_eval.py --gate=rapm.
+  2022-25, 1,084 games, vs BASE .2250: RAPM (Saturday report) .2238, -0.0012 [-0.0032, +0.0008], better 4 of 4
+  seasons, CONFIRM 2026 -0.0026: FAIL (size and CI). Reported arms: RAPM + inactives -0.0026 [-0.0049, -0.0003], 4 of
+  4, 2026 -0.0003 (90 games); RAPM hindsight -0.0024 [-0.0046, -0.0002]; with the QB term -0.0016. Same lineups
+  valued by pay (BO) were +0.0005: valuing players by their on-field EPA is clearly the better measure. Weights (fit
+  2021-25, reading only): offense 11.6, defense 1.1 (inactives 14.2 / 3.1). Validity (single-season fits, disjoint
+  data, rank corr with next season, 300+ plays both): QB .39, RB .33, OL .30, WR .28, TE .19; LB .16, S .09, DL .04,
+  CB .03: offensive values (linemen included) carry over, individual defensive values are noise. The inactives arm
+  passing every bar is a reported arm out of nine, not a result: confirm on data it never saw before shipping.
