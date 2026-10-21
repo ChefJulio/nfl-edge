@@ -593,9 +593,9 @@
   // the swing chip names the team whose chance rose, in its color (owner 2026-10-20: "+8 looks the same for both teams":
   // "MIN +8"); d = the change for the team named in the line before it
   const swingChip = (d, team, info) => {
-    if (!d) return '<span class="pi-d">&plusmn;0</span>';
+    if (!d) return '<span class="pi-d">&plusmn;0%</span>';
     const t = d > 0 ? team : (team === info.home.team ? info.away : info.home).team, c = t === info.home.team ? info.home.color : info.away.color;
-    return `<span class="pi-d pi-tm" style="--tc:${esc(c || '#666')}">${esc(t)} +${Math.abs(d)}</span>`;
+    return `<span class="pi-d pi-tm" style="--tc:${esc(c || '#666')}">${esc(t)} +${Math.abs(d)}%</span>`;
   };
   const playImpact = (pl, hd, info, sum, ids, names, off) => {
     const map = byEspn(), w = weights(), K = KEYS();
