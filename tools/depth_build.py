@@ -212,6 +212,33 @@ def season_snaps(cache, nfl, season: int, pfr: pd.Series, live: bool) -> pd.Data
   return sn.dropna(subset=["gsis_id", "grp"])
 
 
+# The player directory for the site's searches (owner 2026-10-21: a search finds a player "whether they have a
+# projection this week or not"): everyone on a current roster at a fantasy position, on the active roster, a reserve
+# list or the practice squad. Each team's latest published roster week (teams' rosters post on different days).
+DIR_POS = ("QB", "RB", "FB", "WR", "TE", "K")
+DIR_STATUS = {"ACT": "", "DEV": "PS"}  # PS = practice squad; RES = a reserve list (its ROSTER_TAG, else "RES")
+
+
+def roster_directory(site: Path, cache, nfl, current: int, espn_of: dict):
+  """<site>/data/roster.json: {"v", "season", "cols": [pid, name, pos, team, tag, espn], "rows"} (tag: "" active,
+  "PS", "IR", "PUP", "NFI", "SUSP", "HOLD" or "RES"). Released, traded or retired rows are left out."""
+  ros = cache.get("rosters", current, lambda: nfl.load_rosters_weekly([current]), stale=cache.age_hours("rosters", current) > 24)
+  if ros is None or not len(ros):
+    return
+  ros = ros.dropna(subset=["gsis_id"]).copy()
+  ros["team"] = ros.team.replace({**FRANCHISE, **ROSTER_TEAM})
+  ros = ros[ros.week == ros.groupby("team").week.transform("max")]
+  ros = ros[ros.position.isin(DIR_POS) & ros.status.isin(set(DIR_STATUS) | {"RES"})].drop_duplicates("gsis_id", keep="last")
+  rows = []
+  for r in ros.sort_values(["team", "position", "full_name"]).itertuples(index=False):
+    tag = DIR_STATUS.get(r.status, ROSTER_TAG.get(r.status_description_abbr, "RES"))
+    espn = espn_of.get(r.gsis_id) or (str(int(r.espn_id)) if pd.notna(r.espn_id) else None)
+    rows.append([r.gsis_id, r.full_name, "RB" if r.position == "FB" else r.position, r.team, tag, espn])
+  doc = {"v": 1, "season": current, "cols": ["pid", "name", "pos", "team", "tag", "espn"], "rows": rows}
+  (site / "data" / "roster.json").write_text(json.dumps(doc, separators=(",", ":"), allow_nan=False), encoding="utf-8")
+  print(f"[depth] roster directory: {len(rows)} players", flush=True)
+
+
 def main():
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
   site = Path(opt.get("site", "site"))
@@ -319,6 +346,7 @@ def main():
   seasons = sorted(int(p.name) for p in out_root.glob("[0-9][0-9][0-9][0-9]") if p.is_dir())
   (out_root / "index.json").write_text(json.dumps({"v": V, "seasons": seasons, "current": current}), encoding="utf-8")
   (out_root / "latest.json").unlink(missing_ok=True)  # the v1 single snapshot
+  roster_directory(site, cache, nfl, current, espn_of)
 
 
 if __name__ == "__main__":

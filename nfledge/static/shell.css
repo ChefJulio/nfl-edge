@@ -93,3 +93,14 @@ html.standalone { --sat: env(safe-area-inset-top); }
 html.standalone body { padding-top: env(safe-area-inset-top); }
 html.standalone body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: env(safe-area-inset-top); background: var(--bg); z-index: 95; }
 html.standalone nav.tabs, html.standalone nav.gc-tabs, html.standalone .gc-jump, html.standalone .gc-panes { top: env(safe-area-inset-top); }
+
+/* player finder (shell.js NFLE.finder): matches drop down under the search box; the page's list stays put */
+.fnd-host { position: relative; }
+.fnd-pop { position: absolute; z-index: 60; top: calc(100% + 4px); right: 0; width: min(380px, calc(100vw - 32px)); max-height: min(70vh, 460px); overflow-y: auto;
+  overscroll-behavior: contain; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: 0 10px 30px rgba(0, 0, 0, .45); padding: 4px; }
+.fnd-r { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: var(--r-sm, 6px); cursor: pointer; }
+.fnd-r .who { flex: 1; min-width: 0; }
+.fnd-r.on, .fnd-r:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.fnd-v { flex: none; font-size: var(--fs-sm); text-align: right; white-space: nowrap; }
+.fnd-tag { color: var(--muted); font-size: 12px; }
+.fnd-none { padding: 10px; font-size: var(--fs-sm); }

@@ -52,7 +52,7 @@
     state.w = { ...IDP, ...state.w };  // saved before IDP existed: its defaults
     const pts = (c, w, pos) => (c || []).reduce((t, v, i) => t + v * (w[SC.keys[i]] || 0), 0) + (pos === 'TE' ? (c || [])[5] * (w.te_bonus || 0) : 0);
     const all = Object.entries(D.players).map(([pid, p]) => Object.assign({ pid }, p));
-    let pos = 'QB', tables = {}, q = '', mode = 'week', ROS = null, rosAll = [];
+    let pos = 'QB', tables = {}, mode = 'week', ROS = null, rosAll = [];
     const rosTables = {};
     try { if (localStorage.getItem('nfledge-rk-mode') === 'ros') mode = 'ros'; } catch (e) { /* default */ }
     const rosOk = !D.archive;  // a past week's page: 'rest of season from now' means nothing there, weekly only
@@ -303,7 +303,7 @@
     const oppOf = t => { const g = (D.games || []).find(x => x.away.team === t || x.home.team === t);
       return g ? { opp: g.home.team === t ? g.away.team : g.home.team, home: g.home.team === t ? 'vs' : '@' } : null; };
     const kdRows = (p, m = mode) => {
-      const t = q.trim().toLowerCase(), wk = D.week;
+      const wk = D.week;
       let rows = KDA[p].map(r0 => {
         const e = r0.by[wk], r = Object.assign({}, r0);
         if (m === 'ros') {  // this week's game drops out once it kicks off (as for players)
@@ -315,7 +315,7 @@
         return e ? Object.assign(r, { _v: e.v, _e: e, _o: oppOf(r.team) }) : null;
       }).filter(Boolean).sort((a, b) => b._v - a._v);
       rows.forEach((r, i) => { r._rank = i + 1; r._tier = `${POS_LABEL[p] || p}${Math.floor(i / state.lg.teams) + 1}`; r._slot = i < state.lg.teams ? 'start' : 'bench'; });
-      return t ? rows.filter(r => r.name.toLowerCase().includes(t) || r.team.toLowerCase() === t) : rows;
+      return rows;
     };
     const kdWho = r => r.pos === 'DST' ? NFLE.ui.team(r.team, TEAMS, esc(r.team))
       : NFLE.ui.player({ name: r.name, team: r.team, photo: r.photo, sub: r.team }, TEAMS);
@@ -357,10 +357,9 @@
       view.querySelector('.byes-box').innerHTML = kdNote(p);
     };
     const rowsFor = p => {
-      const t = q.trim().toLowerCase();
       const base = p === 'FLEX' ? all.filter(r => ['RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._proj - a._proj).slice(0, FLEX_DEPTH)
         : p === 'ALL' ? all.filter(r => ['QB', 'RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._proj - a._proj).slice(0, ALL_DEPTH) : all.filter(r => r.pos === p);
-      return t ? base.filter(r => r.name.toLowerCase().includes(t)) : base;
+      return base;
     };
     const rowAttrs = r => `style="${rowStyle(r.team)}" data-pid="${esc(r.pid)}" data-espn="${esc(r.espn || '')}" data-team="${esc(r.team)}" data-name="${esc(r.name.toLowerCase())}" data-pos="${esc(r.pos)}"`;
     // the landing rise-in (pages/week.html adds html.land-anim) belongs to the first draw's rows only: rows rebuilt
@@ -429,10 +428,9 @@
       { key: 'fpg', label: 'FP/G', num: true, cls: 'fpgc', title: 'Season fantasy points per game so far', value: r => r._fpg, html: r => f1(r._fpg) },
     ];
     const rosRows = p => {
-      const t = q.trim().toLowerCase();
       const base = p === 'FLEX' ? rosAll.filter(r => ['RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._tot - a._tot).slice(0, FLEX_DEPTH)
         : p === 'ALL' ? rosAll.filter(r => ['QB', 'RB', 'WR', 'TE'].includes(r.pos)).sort((a, b) => b._tot - a._tot).slice(0, ALL_DEPTH) : rosAll.filter(r => r.pos === p);
-      return t ? base.filter(r => r.name.toLowerCase().includes(t)) : base;
+      return base;
     };
     const rosDraw = (resort = true) => {
       if (KDP.includes(pos)) { kdDraw(pos); return; }
@@ -506,7 +504,20 @@
       if (mode === 'ros') rosDraw(!rosTables[p]);
     };
     sec.querySelector('.posbar').addEventListener('click', e => { const b = e.target.closest('[data-pos]'); if (b) showPos(b.dataset.pos); });
-    sec.querySelector('#psearch').oninput = e => { q = e.target.value; POS.forEach(p => tables[p] && tables[p].update(KDP.includes(p) ? kdRows(p, 'week') : rowsFor(p))); if (mode === 'ros') rosDraw(false); };
+    // Find a player (owner 2026-10-21): a pop-out of the best matches across every position, projected or not; the
+    // table under it stays as it is. Beside each: his rank and points here, in your scoring (rest of season in ROS mode)
+    const byPid = Object.fromEntries(all.map(r => [r.pid, r]));
+    const finderValue = pid => {
+      if (mode === 'ros') { const r = rosAll.find(x => x.pid === pid);
+        return r && r._rrank != null ? `<span class="muted">${esc(r.pos)}${r._rrank}</span> <b>${f0(r._tot)}</b> <span class="muted">ROS</span>` : ''; }
+      const r = byPid[pid];
+      if (r) return r._likelyOut ? '<span class="fnd-tag">Out</span>' : `<span class="muted">${esc(r.pos)}${r._rank}</span> <b>${f1(r._proj)}</b>`;
+      const k = KDA.K.find(x => x.pid === pid), e = k && k.by[D.week];
+      return e ? `<span class="muted">K</span> <b>${f1(e.v)}</b>` : '';
+    };
+    const finderBox = sec.querySelector('#psearch');
+    finderBox.addEventListener('focus', () => { if (!KD) loadKD().catch(() => {}); }, { once: true });
+    NFLE.finder(finderBox, { value: finderValue });
     window.nfleWeights = () => state.w;
     window.nfleApplyScoring = () => draw();
 

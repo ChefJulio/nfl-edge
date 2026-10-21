@@ -918,3 +918,96 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   addEventListener('touchcancel', () => { y0 = null; reset(); }, { passive: true });
   NFLE.ptr = { start, move, end };  // tests drive it directly (Playwright WebKit has no multi-point touch drag)
 })();
+
+// Player finder (owner 2026-10-21: "a list that pops out ... when searching by name so it doesn't filter the list, just
+// provides a list of most relevant players by their name/relevance"): a search box's matches drop down under it, the
+// page's list stays as it is. Everyone on a roster is findable, projected this week or not (data/roster.json,
+// tools/depth_build.py roster_directory: active, reserve lists, practice squads), plus the teams. A pick opens the
+// card (the site's click rule, gamecast.js). Ranked by how well the name matches, then by fantasy relevance.
+// NFLE.finder(input, { value(pid) -> html for the right side (a page's own number, e.g. Rankings' points in your
+// scoring), limit })
+(() => {
+  const NFLE = window.NFLE, esc = NFLE.esc;
+  const norm = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[.'’]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  const TAG = { PS: 'Practice squad', IR: 'IR', PUP: 'PUP', NFI: 'NFI', SUSP: 'Suspended', HOLD: 'Holdout', RES: 'Reserve list' };
+  let IDX = null;
+  const index = () => IDX || (IDX = Promise.all([NFLE.week(), NFLE.load('data/roster.json').catch(() => null), NFLE.ui.ready]).then(([D, R]) => {
+    const out = [], seen = new Set(), teams = (D && D.teams) || {};
+    const playing = new Set(((D && D.games) || []).flatMap(g => [g.away.team, g.home.team]));
+    const add = e => { if (!e.pid || seen.has(e.pid)) return; seen.add(e.pid); e.n = norm(e.name); e.t = e.n.split(' '); out.push(e); };
+    Object.entries((D && D.players) || {}).forEach(([pid, p]) => add({ pid, name: p.name, pos: p.pos, team: p.team, photo: p.photo, status: p.status, inactive: p.inactive, proj: p.proj,
+      rel: 1 + Math.min(1, (p.proj || 0) / 20) }));
+    Object.entries(((D && D.rk) || {}).byes || {}).forEach(([pos, l]) => l.forEach(b => add({ pid: b.pid, name: b.name, pos, team: b.team, bye: true, fpg: b.fpg,
+      rel: 0.9 + Math.min(1, (b.fpg || 0) / 20) })));
+    if (R && R.rows) {
+      const c = Object.fromEntries(R.cols.map((k, i) => [k, i]));
+      R.rows.forEach(r => add({ pid: r[c.pid], name: r[c.name], pos: r[c.pos], team: r[c.team], tag: r[c.tag], espn: r[c.espn], dir: true,
+        bye: D && D.games && !playing.has(r[c.team]), rel: r[c.tag] === 'PS' ? 0.2 : r[c.tag] ? 0.3 : 0.5 }));
+    }
+    Object.entries(teams).forEach(([t, i]) => { const e = { team: t, name: i.name || t, isTeam: true, rel: 1.5 };
+      e.n = norm(`${i.name || ''} ${t}`); e.t = e.n.split(' '); out.push(e); });
+    return { list: out, teams };
+  }));
+  // how well a name matches: the whole name from its start, the last name, every word starting a name word, anywhere
+  const matchScore = (e, q, qt) => {
+    if (e.n.startsWith(q)) return 4;
+    if (e.isTeam && e.t.includes(q)) return 4;  // "phi", "eagles"
+    if (qt.length === 1 && e.t.slice(1).some(w => w.startsWith(q))) return 3;
+    if (qt.every(x => e.t.some(w => w.startsWith(x)))) return 2;
+    if (q.length >= 3 && e.n.replace(/ /g, '').includes(q.replace(/ /g, ''))) return 1;
+    return 0;
+  };
+  const right = (e, opts) => {
+    const v = !e.isTeam && opts.value ? opts.value(e.pid) : '';
+    if (v) return v;
+    if (e.isTeam) return '<span class="muted">Team</span>';
+    if (e.tag) return `<span class="fnd-tag">${esc(TAG[e.tag] || e.tag)}</span>`;
+    if (e.bye) return `<span class="fnd-tag">Bye${e.fpg ? ` · ${(Math.round(e.fpg * 10) / 10).toFixed(1)} FP/G` : ''}</span>`;
+    if (e.proj != null) return `<b>${(Math.round(e.proj * 10) / 10).toFixed(1)}</b>`;
+    return '<span class="muted">Not projected</span>';
+  };
+  NFLE.finder = (input, opts = {}) => {
+    const limit = opts.limit || 8;
+    const host = input.parentElement;
+    host.classList.add('fnd-host');
+    const pop = document.createElement('div');
+    pop.className = 'fnd-pop'; pop.hidden = true; pop.setAttribute('role', 'listbox');
+    pop.id = `fnd-${Math.random().toString(36).slice(2, 8)}`;
+    input.setAttribute('aria-controls', pop.id); input.setAttribute('aria-autocomplete', 'list'); input.setAttribute('autocomplete', 'off');
+    host.appendChild(pop);
+    let act = 0, seq = 0;
+    const close = () => { pop.hidden = true; input.setAttribute('aria-expanded', 'false'); };
+    const mark = () => pop.querySelectorAll('.fnd-r').forEach((r, i) => r.classList.toggle('on', i === act));
+    const draw = () => {
+      const q = norm(input.value), my = ++seq;
+      if (!q) { close(); return; }
+      index().then(({ list, teams }) => {
+        if (my !== seq) return;  // a newer keystroke
+        const qt = q.split(' ');
+        const hits = list.map(e => { const m = matchScore(e, q, qt); return m ? [m * 10 + e.rel, e] : null; }).filter(Boolean)
+          .sort((a, b) => b[0] - a[0]).slice(0, limit).map(x => x[1]);
+        act = 0;
+        pop.innerHTML = hits.length ? hits.map(e => e.isTeam
+          ? `<div class="fnd-r tm-open" role="option" data-tm="${esc(e.team)}">${NFLE.ui.team(e.team, teams, esc(e.team))}<span class="fnd-v">${right(e, opts)}</span></div>`
+          : `<div class="fnd-r" role="option" data-open-pid="${esc(e.pid)}">${NFLE.ui.player({ name: e.name, team: e.team, pos: e.pos, photo: e.photo, espn: e.espn, pid: e.pid,
+              badges: e.status && NFLE.injTag ? NFLE.injTag(e.status, e.inactive) : '' }, teams)}<span class="fnd-v">${right(e, opts)}</span></div>`).join('')
+          : '<div class="fnd-none muted">No player or team by that name</div>';
+        pop.hidden = false; input.setAttribute('aria-expanded', 'true'); mark();
+      });
+    };
+    input.addEventListener('input', draw);
+    input.addEventListener('focus', () => { if (input.value.trim()) draw(); });
+    input.addEventListener('keydown', e => {
+      const rows = pop.querySelectorAll('.fnd-r');
+      if (e.key === 'Escape') { close(); return; }
+      if (pop.hidden || !rows.length) return;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); act = (act + (e.key === 'ArrowDown' ? 1 : rows.length - 1)) % rows.length; mark(); }
+      else if (e.key === 'Enter') { e.preventDefault(); rows[act].click(); }
+    });
+    // a pick: the click rule opens the card; the list closes and the keyboard goes away
+    pop.addEventListener('click', e => { if (e.target.closest('.fnd-r')) setTimeout(() => { close(); input.blur(); }); });
+    pop.addEventListener('mousedown', e => e.preventDefault());  // keep focus in the box while picking
+    document.addEventListener('pointerdown', e => { if (!pop.hidden && !host.contains(e.target)) close(); });
+    return { close, refresh: draw };
+  };
+})();
