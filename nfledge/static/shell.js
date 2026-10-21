@@ -750,9 +750,13 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   // bottom disagree by more than a toolbar's worth, pin the bar to the visual bottom; otherwise plain CSS (bottom: 0).
   const bot = document.querySelector('body > .botbar'), vv = window.visualViewport;
   if (bot && vv) {
-    let raf = 0;
+    let raf = 0, touching = false;
+    // never during a gesture or a rubber-band bounce (owner 2026-10-20: pulling to refresh slid the bar up): the
+    // visual viewport moves then by design; the keyboard drift is a steady state, re-checked once the page settles
+    const overscrolled = () => scrollY < 0 || scrollY > html.scrollHeight - innerHeight + 1;
     const fix = () => {
       raf = 0;
+      if (touching || overscrolled()) return;
       const drift = vv.offsetTop + vv.height - html.clientHeight;
       if (Math.abs(drift) > 40 && !html.classList.contains('kb-open')) {
         bot.style.top = `${Math.round(vv.offsetTop + vv.height - bot.offsetHeight)}px`;
@@ -762,6 +766,10 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       }
     };
     const soon = () => { if (!raf) raf = requestAnimationFrame(fix); };
+    addEventListener('touchstart', () => { touching = true; }, { passive: true });
+    const settle = () => { touching = false; setTimeout(soon, 600); };  // after the bounce / momentum ends
+    addEventListener('touchend', settle, { passive: true });
+    addEventListener('touchcancel', settle, { passive: true });
     vv.addEventListener('resize', soon);
     vv.addEventListener('scroll', soon);
     addEventListener('scroll', soon, { passive: true });
