@@ -1,5 +1,8 @@
 // Teams > Draft: every pick of a draft (data/draft/<year>.json, tools/draft_build.py, 1980 on) with how the career
 // turned out. Year picker, team / position / round filters, search; sortable. Drafted players we know open their page.
+// Search (owner 2026-10-21: a search shouldn't stack on the filters, and a name shouldn't need its year): 2+ letters
+// search every draft by player or school (data/draft/search.json, tools/draft_build.py), set the year / team /
+// position / round pickers aside (dimmed) and list the matches with their year; the 12 latest drafts with a match load.
 (() => {
   const NFLE = window.NFLE, esc = NFLE.esc;
   const pageSeason = () => { const m = location.pathname.match(/(\d{4})\/week-\d+\.html$/); return m ? +m[1] : null; };
@@ -14,7 +17,10 @@
     }
     return parts.join(' · ');
   };
-  const columns = teams => [
+  const YEAR_COL = { key: 'season', label: 'Year', num: true, first: 'desc', title: 'Draft year' };
+  const MAX_YEARS = 12;  // drafts loaded for one search (a school like Alabama matches nearly every year)
+  const columns = (teams, searching) => [
+    ...(searching ? [YEAR_COL] : []),
     { key: 'pick', label: 'Pick', num: true, first: 'asc', html: r => `<b>${r.pick}</b><span class="sub">R${r.round}:${r.in_rd}</span>` },
     { key: 'fr', label: 'Team', first: 'asc', value: r => r.team, html: r => {
         const t = teams[r.fr] || {};
@@ -46,16 +52,48 @@
         <p class="st-note muted">Pro Football Reference via nflverse. Career numbers include this season so far; Approximate Value (AV) rates a season at any position on one scale.</p>`;
       const sub = sec.querySelector('.dr-sub'), selY = sec.querySelector('.dr-year'), selT = sec.querySelector('.dr-team'),
             selP = sec.querySelector('.dr-pos'), selR = sec.querySelector('.dr-round'), qi = sec.querySelector('.dr-q');
-      let rows = [], table = null, teams = {};
-      const filtered = () => {
-        const q = qi.value.trim().toLowerCase();
-        return rows.filter(r => (!selT.value || r.fr === selT.value) && (!selP.value || r.category === selP.value) && (!selR.value || r.round === +selR.value)
-          && (!q || (r.pfr_player_name || '').toLowerCase().includes(q) || (r.college || '').toLowerCase().includes(q)));
-      };
-      const draw = () => {
-        if (!table) table = NFLE.Table(sec.querySelector('.dr-tbl'), { howto: true, columns: columns(teams), rows: filtered(), sort: { key: 'pick', dir: 'asc' },
+      let rows = [], table = null, teams = {}, hits = null, yearSub = '', seq = 0;
+      const filtered = () => hits || rows.filter(r => (!selT.value || r.fr === selT.value) && (!selP.value || r.category === selP.value) && (!selR.value || r.round === +selR.value));
+      const draw = (resort = false) => {
+        if (!table) table = NFLE.Table(sec.querySelector('.dr-tbl'), { howto: true, columns: columns(teams, !!hits), rows: filtered(), sort: { key: 'pick', dir: 'asc' },
           cls: 'tiles', rowClass: () => 'teamrow', rowAttrs: r => `${NFLE.ui.tileStyle(teams, r.fr)}${r.gsis_id ? ` data-open-pid="${esc(r.gsis_id)}"` : ''}` });
-        else { table.setColumns(columns(teams)); table.update(filtered()); }
+        else { table.setColumns(columns(teams, !!hits)); table.update(filtered()); }
+        if (resort) table.setSort(hits ? { key: 'season', dir: 'desc' } : { key: 'pick', dir: 'asc' });
+      };
+      // a year's rows (row order = the search index's), its clubs as they were that year (shell.js fmt.era)
+      const rowsOf = (d, y) => {
+        teams = Object.assign(teams, d.teams || {}, WT);  // the week map has both trim colors
+        return d.rows.map((v, i) => { const r = Object.assign({ season: y, _i: i }, Object.fromEntries(d.cols.map((c, j) => [c, v[j]])));
+          r.fr = NFLE.fmt.era(r.fr, y); return r; });
+      };
+      let SIX = null;
+      const searchIx = () => SIX || (SIX = NFLE.load('data/draft/search.json').then(j => {
+        const out = [];
+        Object.entries(j.y || {}).forEach(([y, txt]) => String(txt).split('\n').forEach((ln, i) => {
+          const k = ln.lastIndexOf('|');
+          out.push({ y: +y, i, n: ln.slice(0, k).toLowerCase(), c: String(j.c[+ln.slice(k + 1)] || '').toLowerCase() });
+        }));
+        return out;
+      }));
+      const search = () => {
+        const raw = qi.value.trim(), q = raw.toLowerCase(), my = ++seq, on = q.length >= 2;
+        [selY, selT, selP, selR].forEach(x => { x.disabled = on; });
+        if (!on) { const was = !!hits; hits = null; sub.textContent = yearSub; draw(was); return; }
+        searchIx().then(ix => {
+          const m = ix.filter(e => e.n.includes(q) || e.c.includes(q));
+          const ys = [...new Set(m.map(e => e.y))].sort((a, b) => b - a), use = ys.slice(0, MAX_YEARS);
+          return Promise.all(use.map(y => NFLE.load(`data/draft/${y}.json`).then(d => rowsOf(d, y)))).then(lists => {
+            if (my !== seq) return;  // a newer keystroke
+            const want = new Set(m.filter(e => use.includes(e.y)).map(e => `${e.y}:${e.i}`));
+            const was = !!hits;
+            hits = lists.flat().filter(r => want.has(`${r.season}:${r._i}`)).sort((a, b) => b.season - a.season || a.pick - b.pick);
+            const n = hits.length, all = m.length;
+            sub.textContent = !all ? `No pick matches "${raw}" in any draft` : ys.length > MAX_YEARS
+              ? `"${raw}": ${n} picks in the ${MAX_YEARS} latest drafts with one (${all} picks in ${ys.length} drafts)`
+              : `"${raw}": ${all} pick${all === 1 ? '' : 's'} in ${ys.length} draft${ys.length === 1 ? '' : 's'}`;
+            draw(!was);
+          });
+        }).catch(() => { if (my === seq) sub.textContent = 'Search is not available right now.'; });
       };
       const fill = (sel, vals) => {
         const cur = sel.value; sel.length = 1;
@@ -63,17 +101,15 @@
         sel.value = vals.some(v => String(v[0]) === cur) ? cur : '';
       };
       const load = y => NFLE.load(`data/draft/${y}.json`).then(d => {
-        teams = Object.assign({}, d.teams || {}, WT);  // the week map has both trim colors
-        rows = d.rows.map(v => Object.assign({ season: y }, Object.fromEntries(d.cols.map((c, i) => [c, v[i]]))));
-        rows.forEach(r => { r.fr = NFLE.fmt.era(r.fr, y); });  // the club as it was that year (SD drafted Tomlinson; shell.js fmt.era)
+        rows = rowsOf(d, y);
         fill(selT, [...new Set(rows.map(r => r.fr))].sort().map(a => [a, NFLE.fmt.teamOf(teams, a).nick || a]));
         fill(selP, [...new Set(rows.map(r => r.category).filter(Boolean))].sort().map(c => [c, c]));
         fill(selR, [...new Set(rows.map(r => r.round))].sort((a, b) => a - b).map(r => [r, `Round ${r}`]));
-        sub.textContent = `${y} NFL Draft: ${rows.length} picks`;
-        draw();
+        yearSub = `${y} NFL Draft: ${rows.length} picks`;
+        if (!hits) { sub.textContent = yearSub; draw(); }
       }).catch(() => { sub.textContent = 'No draft data for that year.'; });
       [selT, selP, selR].forEach(s => { s.onchange = () => table && table.update(filtered()); });
-      qi.oninput = () => table && table.update(filtered());
+      qi.oninput = search;
       let WT = {};
       Promise.all([NFLE.load('data/draft/index.json'), NFLE.week(), NFLE.ui.ready]).then(([ix, wk]) => {
         WT = (wk && wk.teams) || {};

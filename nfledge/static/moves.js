@@ -52,11 +52,14 @@
       const sub = $('.mv-sub'), selS = $('.mv-season'), selT = $('.mv-team'), selG = $('.mv-group'), selP = $('.mv-pos'),
             from = $('.mv-from'), to = $('.mv-to'), qi = $('.mv-q'), more = $('.mv-more');
       let rows = [], table = null, teams = {}, shown = STEP, season = null;
+      // a search (owner 2026-10-21: it shouldn't stack on the filters) looks through the whole season: team, type,
+      // position and dates are set aside (dimmed) while there's text; the season stays its scope
       const filtered = () => {
         const q = qi.value.trim().toLowerCase();
+        [selT, selG, selP, from, to].forEach(x => { x.disabled = !!q; });
+        if (q) return rows.filter(r => (r.name || '').toLowerCase().includes(q) || (r.text || '').toLowerCase().includes(q));
         return rows.filter(r => (!selT.value || r.team === selT.value) && (!selG.value || GROUP[r.type] === selG.value)
-          && (!selP.value || r.pos === selP.value) && (!from.value || r.date >= from.value) && (!to.value || r.date <= to.value)
-          && (!q || r.name.toLowerCase().includes(q) || r.text.toLowerCase().includes(q)));
+          && (!selP.value || r.pos === selP.value) && (!from.value || r.date >= from.value) && (!to.value || r.date <= to.value));
       };
       const draw = (reset = true) => {
         if (reset) shown = STEP;

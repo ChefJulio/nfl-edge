@@ -53,6 +53,9 @@ def main():
   draft = draft.assign(fr=draft.team.map(lambda x: FRANCHISE.get(x, x)))
   draft["in_rd"] = draft.pick - draft.groupby(["season", "round"]).pick.transform("min") + 1
   years = sorted(int(y) for y in draft.season.unique())
+  # the search over every draft (owner 2026-10-21: a name search shouldn't need its year): per year, "name|college"
+  # lines in the year file's row order, colleges as indexes into one list; ~100 KB gzipped, loaded on a first search
+  colleges, cidx, search = [], {}, {}
   for y in years:
     d = draft[draft.season == y].sort_values("pick")
     cols = COLS + ["fr", "in_rd"]
@@ -60,6 +63,15 @@ def main():
            "teams": {a: {"nick": t.at[a, "team_nick"], "logo": t.at[a, "team_logo_espn"], "color": t.at[a, "team_color"]}
                      for a in d.fr.unique() if a in t.index}}
     (out / f"{y}.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
+    lines = []
+    for nm, col in zip(d.pfr_player_name, d.college):
+      col = col if isinstance(col, str) else ""
+      if col not in cidx:
+        cidx[col] = len(colleges)
+        colleges.append(col)
+      lines.append(f"{(nm if isinstance(nm, str) else '').replace('|', ' ')}|{cidx[col]}")
+    search[str(y)] = "\n".join(lines)
+  (out / "search.json").write_text(json.dumps({"v": 1, "c": colleges, "y": search}, separators=(",", ":")), encoding="utf-8")
   (out / "index.json").write_text(json.dumps({"v": V, "years": years}), encoding="utf-8")
   print(f"[draft] {len(years)} drafts -> {out}", flush=True)
 

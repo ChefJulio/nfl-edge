@@ -1069,3 +1069,26 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     return { close, refresh: draw };
   };
 })();
+
+// A clear X in every text box (owner 2026-10-21: "a little X to display inline on the right to clear the input easily
+// rather than forcing user to backspace the whole thing"): drawn by ui.css in the box's right padding whenever it has
+// text (its placeholder is hidden; a box without one gets a blank one), so no markup changes anywhere. A tap on it
+// empties the box and fires the box's own input / change handlers (filters reset, the finder closes) without moving
+// the caret or dropping the keyboard.
+(() => {
+  const SEL = 'input[type="search"], input[type="text"], input:not([type])';
+  const ZONE = 32;  // px from the right edge: the X and its padding (ui.css)
+  const box = t => (t && t.matches && t.matches(SEL) && !t.disabled && !t.readOnly && t.value ? t : null);
+  const clearHit = e => { const el = box(e.target); if (!el) return null; const r = el.getBoundingClientRect();
+    return e.clientX >= r.right - ZONE && e.clientX <= r.right ? el : null; };
+  document.addEventListener('focusin', e => { if (e.target.matches && e.target.matches(SEL) && !e.target.hasAttribute('placeholder')) e.target.setAttribute('placeholder', ' '); });
+  document.addEventListener('pointerdown', e => {
+    const el = clearHit(e); if (!el) return;
+    e.preventDefault();  // no caret jump, the keyboard stays as it was
+    el.value = '';
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }, true);
+  // a desktop pointer over the X is a pointer, not a text cursor
+  document.addEventListener('mousemove', e => { if (e.target.matches && e.target.matches(SEL)) e.target.style.cursor = clearHit(e) ? 'pointer' : ''; });
+})();
