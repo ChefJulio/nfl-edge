@@ -3492,3 +3492,8 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   tools/experiments.py baseline vs lineup_epa, 2021-25. GATE (fantasy, sec. 1): overall MAE lower with the 95% CI over
   season-weeks below 0 and >= 0.01 points, no position significantly worse, better in >= 3 of 5 seasons.
   Reported: by position; start/sit accuracy.
+- **RESULT {#lineup-fantasy} (BZ) the lineup value in fantasy projections: FAIL (real but negligible).**
+  tools/experiments.py baseline,lineup_epa 2021-25 (12,480 player-weeks): MAE 5.177 -> 5.176, -0.001 [-0.001, -0.000]
+  (CI below 0 but a tenth of the 0.01 bar); QB / RB / WR / TE all "no difference"; seasons -0.000 / +0.000 / -0.000 /
+  -0.003 / -0.001; start/sit +0.004 points per pair [-0.001, +0.009] (WR +0.007 [+0.002, +0.013]). Vegas implied totals
+  already carry injuries for nearly every game; the efficiency terms barely move. experiments.lineup_epa_scale stays 0.
