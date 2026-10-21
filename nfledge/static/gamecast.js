@@ -21,7 +21,10 @@
   // ---------------------------------------------------------------------------------------------------- helpers
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   // a team name / logo that opens its page (owner 2026-10-16: every one on the site, except the logo on a player photo)
-  const tmL = (t, html) => t ? `<span class="tm-open" data-tm="${esc(t)}">${html == null ? esc(t) : html}</span>` : (html || '');
+  // a past season's code (OAK, SD, STL: shell.js fmt.era) opens today's club
+  const tmL = (t, html) => t ? `<span class="tm-open" data-tm="${esc(NFLE.fmt.franchise(t))}">${html == null ? esc(t) : html}</span>` : (html || '');
+  // a team as it was in a season (owner 2026-10-21: "LT never played against LV, they were OAK then")
+  const era = (t, season) => NFLE.fmt.era(t, season);
   const f1 = v => (v == null || isNaN(v)) ? '' : (Math.round(v * 10) / 10).toFixed(1);
   const f0 = v => (v == null || isNaN(v)) ? '' : String(Math.round(v));
   const pc = v => `${Math.round(v * 100)}%`;
@@ -151,7 +154,7 @@
   // of ESPN's dark-background logo and the backing color picked to frame it (DATA.teams), whatever logo / color the
   // caller had (ESPN's scoreboard gives the standard logo); unknown teams keep what was passed
   const logo = (url, bg, size = 22, alt = '') => {
-    const T = alt && DATA && DATA.teams && DATA.teams[alt];
+    const T = alt && DATA && DATA.teams && NFLE.fmt.teamOf(DATA.teams, alt);
     const u = T && T.logo ? T.logo : url, b = T && T.logo_bg ? T.logo_bg : (bg || '#333');
     return u ? `<span class="nl" style="background:${esc(b)};width:${size + 6}px;height:${size + 6}px"><img src="${esc(logoSrc(u, size))}" alt="${esc(alt)}" width="${size}" height="${size}" loading="lazy"></span>` : '';
   };
@@ -915,8 +918,12 @@
     location.href = gcUrl(tr.dataset.gid, tr.dataset.f || '');
   });
   const LOGP = {};  // pid -> in-flight fetch, so a re-render while loading doesn't refetch
+  // each game's teams as they were that season (OAK / SD / STL before their moves; shell.js fmt.era): every view of
+  // the log shows them so, and a tap still opens today's club (openTeam maps the old code back)
+  const eraLog = L => { (L.seasons || []).forEach(S => ['g', 'pg', 'm'].forEach(k => (Array.isArray(S[k]) ? S[k] : []).forEach(g => {
+    if (g && g.o) g.o = era(g.o, S.s); if (g && g.t) g.t = era(g.t, S.s); }))); return L; };
   const ensureLog = pid => LOGS[pid] ? Promise.resolve(LOGS[pid]) : (LOGP[pid] || (LOGP[pid] =
-    getJSON(`${siteRoot()}data/players/${encodeURIComponent(pid)}.json`).then(L => (LOGS[pid] = L)).catch(() => (LOGS[pid] = { missing: 1, seasons: [] }))));
+    getJSON(`${siteRoot()}data/players/${encodeURIComponent(pid)}.json`).then(L => (LOGS[pid] = eraLog(L))).catch(() => (LOGS[pid] = { missing: 1, seasons: [] }))));
 
   // ----------------------------------------------------------------------------------------------- player card
   let cardPid = null, cardTab = 'ov';  // the open tab survives live refreshes; a new player starts on Week
@@ -1724,7 +1731,7 @@
     const rows = years.map(y => {
       const S = bySeason[y], t = S ? kindTotals(L, S.g) : null, r = ros[y];
       const team = r ? r[0] : S && S.g.length ? S.g[S.g.length - 1].t : '';
-      return `<tr><td><b>${y}</b></td><td class="tm-opp">${team ? team.split('/').map(x => `<button type="button" class="tm-open" data-tm="${esc(x)}">${esc(x)}</button>`).join('/') : ''}</td>
+      return `<tr><td><b>${y}</b></td><td class="tm-opp">${team ? team.split('/').map(x => era(x, y)).map(x => `<button type="button" class="tm-open" data-tm="${esc(x)}">${esc(x)}</button>`).join('/') : ''}</td>
         <td class="num">${t ? t.g : '–'}</td><td class="num">${r ? r[1] : '–'}</td><td class="num">${t && t.sn != null ? `${Math.round(t.sn)}%` : '–'}</td>
         ${keys.map(k => `<td class="num">${t ? nfmt(t[k] || 0) : '–'}</td>`).join('')}</tr>`;
     }).join('');
@@ -2182,7 +2189,7 @@
   };
   const rkChip = (r, title = '') => r ? `<span class="rk-b ${r <= 8 ? 'rk1' : r <= 16 ? 'rk2' : r <= 24 ? 'rk3' : 'rk4'}"${title ? ` title="${esc(title)}"` : ''}>${ord(r)}</span>` : '';
   const sgn = v => v == null || isNaN(v) ? '' : `${v >= 0 ? '+' : ''}${(+v).toFixed(1)}`;
-  const tInfo = t => (DATA && DATA.teams && DATA.teams[t]) || {};
+  const tInfo = t => (DATA && DATA.teams && NFLE.fmt.teamOf(DATA.teams, t)) || {};
   const tLogo = (t, size = 20) => { const i = tInfo(t); return logo(i.logo, i.logo_bg, size, t); };
   const gcHref = (gid, f) => `${siteRoot()}game.html?g=${encodeURIComponent(gid)}${f ? `&d=${encodeURIComponent(f)}` : ''}`;
   const rankTrend = hist => {
@@ -2205,7 +2212,7 @@
       const w = gs.filter(g => g.r === 'W').length, l = gs.filter(g => g.r === 'L').length, t = gs.filter(g => g.r === 'T').length;
       h2h = `<div class="tm-h2h">${tmL(teamOpp, tLogo(teamOpp, 18))} <b>${esc(abbr)} vs ${tmL(teamOpp)} since 1999: ${w}-${l}${t ? `-${t}` : ''}</b> <span class="muted">(${gs.length} games)</span></div>`;
     }
-    const oppCell = (o, h, opr) => `<td class="lg-opp tm-opp ${opr ? (opr <= 8 ? 'mr-hard' : opr <= 16 ? 'mr-tough' : opr <= 24 ? 'mr-ok' : 'mr-easy') : ''}"><button type="button" class="tm-open" data-tm="${esc(o)}"${opr ? ` title="Their power rank that week: ${ord(opr)}"` : ''}>${h === 0 ? '@' : h === 2 ? 'vs ' : ''}${esc(o)}</button></td>`;
+    const oppCell = (o, h, opr, season) => `<td class="lg-opp tm-opp ${opr ? (opr <= 8 ? 'mr-hard' : opr <= 16 ? 'mr-tough' : opr <= 24 ? 'mr-ok' : 'mr-easy') : ''}"><button type="button" class="tm-open" data-tm="${esc(o)}"${opr ? ` title="Their power rank that week: ${ord(opr)}"` : ''}>${h === 0 ? '@' : h === 2 ? 'vs ' : ''}${esc(era(o, season))}</button></td>`;
     const pct = (v, m) => v == null && m == null ? '–' : `${v != null ? `${v}%` : '–'}<small> / ${m != null ? `${m}%` : '–'}</small>`;
     const head = `<tr class="lg-gh"><th colspan="7"></th><th colspan="5" class="lg-grp">Offense</th><th colspan="3" class="lg-grp">Allowed</th><th></th></tr>
       <tr class="lg-ch"><th>Wk</th><th>Opp</th><th>Result</th><th class="num">Line</th><th class="num" title="Pregame win chance: Vegas / our model (2021 on)">Odds</th><th class="num" title="Our power rank that week">Pwr</th><th class="num" title="Elo going in">Elo</th>
@@ -2223,7 +2230,7 @@
         const s = g.s || [], os = g.os || [];
         const res = `<span class="tm-res ${g.r === 'W' ? 'w' : g.r === 'L' ? 'l' : ''}">${g.r}</span> ${g.ps}-${g.pa}${g.ot ? ' <small>OT</small>' : ''}`;
         const line = g.ln != null ? `${g.ln > 0 ? '-' : g.ln < 0 ? '+' : ''}${g.ln === 0 ? 'PK' : Math.abs(g.ln).toFixed(1)}${g.ats ? ` <small class="ats-${g.ats}">${g.ats === 'W' ? 'cov' : g.ats === 'L' ? 'no' : 'push'}</small>` : ''}` : '–';
-        return `<tr${tileAttrs(g)}><td>${esc(label)}</td>${oppCell(g.o, g.h, g.opr)}<td class="tm-rc">${res}</td><td class="num">${line}</td><td class="num">${pct(g.vc, g.mc)}</td>
+        return `<tr${tileAttrs(g)}><td>${esc(label)}</td>${oppCell(g.o, g.h, g.opr, S.s)}<td class="tm-rc">${res}</td><td class="num">${line}</td><td class="num">${pct(g.vc, g.mc)}</td>
           <td class="num">${g.pr ? `<span class="lg-rk ${g.pr <= 8 ? 'rk-good' : g.pr <= 20 ? 'rk-mid' : 'rk-bad'}">${g.pr}</span>` : '–'}</td><td class="num muted">${g.elo || ''}</td>
           <td class="num">${f0(s[0])}</td><td class="num">${f0(s[1])}</td><td class="num">${f0(s[2])}</td><td class="num">${s[3] != null ? s[3].toFixed(1) : ''}</td><td class="num">${s[4] ?? ''}</td>
           <td class="num">${f0(os[0])}</td><td class="num">${os[3] != null ? os[3].toFixed(1) : ''}</td><td class="num">${os[4] ?? ''}</td>
@@ -2657,12 +2664,14 @@
   // one sets the hash (a real history entry, so Back works); the shell routes it and calls NFLE.showPlayer / showTeam.
   const pageMode = () => !!(window.NFLE && window.NFLE.pageMode);
   const openTeam = abbr => {
+    abbr = NFLE.fmt.franchise(abbr);  // a past season's code (SD) opens today's club (LAC)
     // the card stack in the URL (shell.js): one deeper than the card you're on
     if (pageMode()) { const h = NFLE.cardHref ? NFLE.cardHref('team', abbr) : `#team/${abbr}`;
       if (location.hash !== h && !location.hash.endsWith(`team/${abbr}`)) location.hash = h.slice(1); else showTeam(abbr); return; }
     showTeam(abbr);
   };
   const showTeam = abbr => {
+    abbr = NFLE.fmt.franchise(abbr);
     if (!DATA) return;
     const ov = ensureOverlay();
     if (!location.hash.startsWith('#player/') && !location.hash.startsWith('#team/')) prevHash = location.hash;

@@ -35,6 +35,17 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const px = size => Math.min(600, Math.max(24, size * 3));
   const logoSrc = (url, size) => !url ? '' : !/a\.espncdn\.com\/i\/teamlogos\//.test(url) ? url
     : `https://a.espncdn.com/combiner/i?img=${encodeURIComponent(new URL(url).pathname)}&w=${px(size)}&h=${px(size)}`;
+  // relocated clubs since 1999 (the site's history): today's code -> the old one, used before the move's season
+  const ERA = { LV: { until: 2020, code: 'OAK' }, LAC: { until: 2017, code: 'SD' }, LA: { until: 2016, code: 'STL' } };
+  // the old codes as teams-map entries: today's club with the era's name, ESPN's logo of the time and its colors
+  const OLD = {
+    OAK: { of: 'LV', name: 'Oakland Raiders' },
+    SD: { of: 'LAC', name: 'San Diego Chargers', color: '#0C2340', color2: '#FFC20E', logo_bg: '#0C2340' },
+    STL: { of: 'LA', name: 'St. Louis Rams', color: '#002244', color2: '#B3995D', logo_bg: '#002244' },
+  };
+  const oldTeam = (teams, t) => { const o = OLD[t]; if (!o) return null; const cur = (teams || {})[o.of] || {};  // logo + colors even before the teams map loads
+    const { of, ...rest } = o;
+    return { ...cur, ...rest, logo: `https://a.espncdn.com/i/teamlogos/nfl/500/${t.toLowerCase()}.png` }; };
   NFLE.fmt = {
     signed1: v => `${v >= 0 ? '+' : '-'}${Math.abs(v).toFixed(1)}`,  // a change in points: +0.9 / -0.7
     // Availability is shown one way everywhere (owner 2026-10-17): his chance to PLAY, "62%"; never the chance to sit
@@ -58,16 +69,23 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     // [first, last] for two-line names (owner 2026-10-17): 'Amon-Ra St. Brown' -> ['Amon-Ra', 'St. Brown'],
     // 'Marvin Harrison Jr.' -> ['Marvin', 'Harrison Jr.']; one word -> ['', word]
     split: n => { const s = String(n || '').trim(), i = s.indexOf(' '); return i < 0 ? ['', s] : [s.slice(0, i), s.slice(i + 1)]; },
+    // Relocated franchises (owner 2026-10-21: "LT never played against LV, they were OAK then right?"): the data keeps
+    // today's codes everywhere (links, a franchise's seasons together); a past season shows the club as it was:
+    // era('LV', 2008) -> 'OAK'. The old codes have their own logo and colors (teamOf) and open today's team page (ui.tm).
+    era: (t, season) => { const e = ERA[t]; return e && season && +season < e.until ? e.code : t; },
+    franchise: t => (OLD[t] ? OLD[t].of : t),
+    teamOf: (teams, t) => (teams || {})[t] || oldTeam(teams, t) || {},
     // team logo on its picked background, and a row's team trim (--tc / --tc2), from the week data's teams map
-    logo: (teams, t, size = 18) => { const i = (teams || {})[t] || {}; return i.logo ? `<span class="logo" style="background:${esc(i.logo_bg || '#333')}"><img src="${esc(logoSrc(i.logo, size))}" alt="${esc(t)}" width="${size}" height="${size}" loading="lazy"></span>` : ''; },
-    rowStyle: (teams, t) => { const i = (teams || {})[t] || {}; return `--tc:${i.color || '#666'};--tc2:${i.color2 || '#999'};--tfg:#ffffff`; },
+    logo: (teams, t, size = 18) => { const i = NFLE.fmt.teamOf(teams, t); return i.logo ? `<span class="logo" style="background:${esc(i.logo_bg || '#333')}"><img src="${esc(logoSrc(i.logo, size))}" alt="${esc(t)}" width="${size}" height="${size}" loading="lazy"></span>` : ''; },
+    rowStyle: (teams, t) => { const i = NFLE.fmt.teamOf(teams, t); return `--tc:${i.color || '#666'};--tc2:${i.color2 || '#999'};--tfg:#ffffff`; },
     // a player photo circle in his team's colors: primary fill, secondary ring (owner 2026-10-16)
-    picStyle: (teams, t) => { const i = (teams || {})[t] || {}; return i.color ? ` style="--pc1:${i.color};--pc2:${i.color2 || i.color}"` : ''; },
+    picStyle: (teams, t) => { const i = NFLE.fmt.teamOf(teams, t); return i.color ? ` style="--pc1:${i.color};--pc2:${i.color2 || i.color}"` : ''; },
   };
   // One look everywhere (owner 2026-10-14): every list of players or teams is a row of team-colored tiles (table cls
   // 'tiles', row class 'teamrow', row style from tileStyle) with the same name cell, and every matchup is the Games
   // tab's tile. Teams map = the week data's (NFLE.week() -> D.teams: logo, logo_bg, color, color2, nick).
   const F = NFLE.fmt;
+  F.ERA = ERA;
   NFLE.ui = {
     headshot: espn => espn ? `https://a.espncdn.com/i/headshots/nfl/players/full/${encodeURIComponent(espn)}.png` : '',
     ids: {},  // gsis -> ESPN id (data/espn_ids.json, tools/stats_build.py): a headshot for any list with a player id
@@ -78,7 +96,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     // division name ("AFC East") gets the logo before it; anything else passes through
     conf: (label, size = 16) => { const m = /^(AFC|NFC)\b/.exec(String(label || ''));
       return m ? `<span class="conf-n"><img class="conf-lg" src="${esc(NFLE.root || '')}assets/conf/${m[1]}.png" alt="" height="${size}" style="height:${size}px">${esc(label)}</span>` : esc(label); },
-    tm: (t, html, cls = '') => t ? `<span class="tm-open${cls ? ` ${cls}` : ''}" data-tm="${esc(t)}">${html == null ? esc(t) : html}</span>` : (html || ''),
+    tm: (t, html, cls = '') => t ? `<span class="tm-open${cls ? ` ${cls}` : ''}" data-tm="${esc(F.franchise(t))}">${html == null ? esc(t) : html}</span>` : (html || ''),
     // p: { name, team, pos, grp (badge color group), photo | espn | pid, sub (default: team, linked) | subHtml, badges }
     player: (p, teams) => {
       const photo = p.photo || NFLE.ui.headshot(p.espn || (p.pid && NFLE.ui.ids[p.pid]));
@@ -96,7 +114,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     },
     // a team: logo, nickname, sub line (default "KC")
     team: (t, teams, sub, extra = '') => {
-      const i = (teams || {})[t] || {};
+      const i = F.teamOf(teams, t);
       return `<div class="who">${F.logo(teams, t, 26)}<div><b>${esc(i.nick || t)}</b>${extra}<span class="sub">${sub == null ? esc(t) : sub}</span></div></div>`;
     },
     // the Games tab's matchup tile: logos outside, team colors blending, win chance (score once it starts); live

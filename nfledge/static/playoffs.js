@@ -7,9 +7,11 @@
   const NFLE = window.NFLE, esc = NFLE.esc;
   const logoUrl = code => `https://a.espncdn.com/combiner/i?img=${encodeURIComponent(`/i/teamlogos/nfl/500/${code.toLowerCase()}.png`)}&w=60&h=60`;
   const ESPN_CODE = { LA: 'lar', WAS: 'wsh', LV: 'lv' };
-  const badge = t => t.modern
-    ? `<img class="po-logo tm-open" data-tm="${esc(t.site)}" src="${esc(logoUrl(ESPN_CODE[t.site] || t.site))}" alt="" width="20" height="20" loading="lazy">`
-    : `<span class="po-txt" title="${esc(t.name)}">${esc(t.name.split(' ').map(w => w[0]).join('').slice(0, 3))}</span>`;
+  // the logo of the club as it was that season (OAK / SD / STL before their moves; shell.js fmt.era); taps open today's
+  let SEASON = null;
+  const badge = t => { const e = NFLE.fmt.era(t.site, SEASON); return t.modern
+    ? `<img class="po-logo tm-open" data-tm="${esc(t.site)}" src="${esc(logoUrl(e !== t.site ? e : ESPN_CODE[t.site] || t.site))}" alt="" width="20" height="20" loading="lazy">`
+    : `<span class="po-txt" title="${esc(t.name)}">${esc(t.name.split(' ').map(w => w[0]).join('').slice(0, 3))}</span>`; };
   const gameCard = g => {
     const homeWin = g.hs > g.as, row = (t, s, win) => `<div class="po-row${win ? ' win' : ''}">${badge(t)}${t.seed ? `<span class="po-seed">${t.seed}</span>` : ''}<span class="po-nm${t.modern ? ' tm-open' : ''}"${t.modern ? ` data-tm="${esc(t.site)}"` : ''}>${esc(t.name)}</span><b class="po-sc">${s}</b></div>`;
     const href = g.gid ? `${NFLE.root}game.html?g=${encodeURIComponent(g.gid)}` : '';
@@ -19,6 +21,7 @@
   };
   const roundCol = rd => `<div class="po-round"><div class="po-rl">${esc(rd.label)}</div><div class="po-games">${rd.games.map(gameCard).join('')}</div></div>`;
   const render = d => {
+    SEASON = d.season;
     if (d.era === 'standings') {
       return `<div class="po-none"><p>No playoffs in ${d.season}: the champion was decided by the standings.</p><p class="po-champ">Champion: <b>${esc(d.champion || '')}</b></p></div>`;
     }

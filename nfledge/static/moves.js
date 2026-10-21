@@ -24,7 +24,7 @@
   const columns = teams => [
     { key: 'date', label: 'Date', first: 'desc', html: r => `<span class="mv-date">${esc(day(r.date))}</span>` },
     { key: 'team', label: 'Team', first: 'asc', html: r => {
-        const t = teams[r.team] || {};
+        const t = NFLE.fmt.teamOf(teams, r.team);
         return `<span class="tm-open mv-tm" data-tm="${esc(r.team)}">${t.logo ? `<span class="st-logo" style="--tc:${esc(t.color || '#555')}"><img src="${esc(t.logo)}" alt="" width="18" height="18" loading="lazy"></span>` : ''}<span>${esc(r.team || '')}</span></span>`;
       } },
     { key: 'type', label: 'Move', first: 'asc', value: r => LABEL[r.type] || r.type,
@@ -78,7 +78,8 @@
       const load = y => NFLE.load(`data/transactions/${y}.json`).then(d => {
         season = y;
         rows = d.rows.map(v => Object.fromEntries(d.cols.map((c, i) => [c, v[i]])));
-        fill(selT, [...new Set(rows.map(r => r.team).filter(Boolean))].sort().map(a => [a, (teams[a] && teams[a].nick) || a]));
+        rows.forEach(r => { if (r.team) r.team = NFLE.fmt.era(r.team, season); });  // the club as it was (shell.js fmt.era)
+        fill(selT, [...new Set(rows.map(r => r.team).filter(Boolean))].sort().map(a => [a, NFLE.fmt.teamOf(teams, a).nick || a]));
         fill(selP, [...new Set(rows.map(r => r.pos).filter(Boolean))].sort().map(p => [p, p]));
         from.value = to.value = '';
         nset();

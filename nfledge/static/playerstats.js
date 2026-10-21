@@ -139,7 +139,10 @@
       const searching = () => career !== false && term().length >= 2 && !Object.keys(TEAMS).some(t => t.toLowerCase() === term());
       const view = () => searching() || selS.value === 'all' ? 'career' : 'season';
       const curPos = () => searching() ? 'All' : pos;
-      const toRows = d => d.rows.map(v => { const r = Object.fromEntries(d.cols.map((c, i) => [c, v[i]])); r._g = groupOf(r.pos); return r; });
+      // his team as it was (OAK / SD / STL before their moves; shell.js fmt.era): a season row by its season, a career
+      // row by his last one (a whole career before the move keeps the old name: Tomlinson's Chargers are SD)
+      const toRows = d => d.rows.map(v => { const r = Object.fromEntries(d.cols.map((c, i) => [c, v[i]])); r._g = groupOf(r.pos);
+        r.team = NFLE.fmt.era(r.team, r.season || d.season); return r; });
       // no careers file (an older build): searches filter the picked season, as before
       // search results in priority order (owner 2026-10-18: "active players first, then most prolific"): playing this
       // season, then career games (every position has them; fantasy points would bury linemen and defenders), then
@@ -187,7 +190,7 @@
         const t = term(), words = t.split(/\s+/).filter(Boolean);
         if (searching()) return (career || []).filter(r => { const n = (r.name || '').toLowerCase(); return words.every(x => n.includes(x)); });
         all = view() === 'career' && career ? career : seasonRows;
-        return all.filter(r => (pos === 'All' || r._g === pos) && (!t || (r.name || '').toLowerCase().includes(t) || (r.team || '').toLowerCase() === t));
+        return all.filter(r => (pos === 'All' || r._g === pos) && (!t || (r.name || '').toLowerCase().includes(t) || [r.team, NFLE.fmt.franchise(r.team)].some(x => (x || '').toLowerCase() === t)));
       };
       const draw = (resort) => {
         if (view() === 'career' && career === null) { sub.textContent = 'Loading every season\u2026'; loadCareer().then(() => draw(true)); return; }

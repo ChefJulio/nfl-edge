@@ -65,7 +65,8 @@
       const load = y => NFLE.load(`data/draft/${y}.json`).then(d => {
         teams = Object.assign({}, d.teams || {}, WT);  // the week map has both trim colors
         rows = d.rows.map(v => Object.assign({ season: y }, Object.fromEntries(d.cols.map((c, i) => [c, v[i]]))));
-        fill(selT, [...new Set(rows.map(r => r.fr))].sort().map(a => [a, (teams[a] && teams[a].nick) || a]));
+        rows.forEach(r => { r.fr = NFLE.fmt.era(r.fr, y); });  // the club as it was that year (SD drafted Tomlinson; shell.js fmt.era)
+        fill(selT, [...new Set(rows.map(r => r.fr))].sort().map(a => [a, NFLE.fmt.teamOf(teams, a).nick || a]));
         fill(selP, [...new Set(rows.map(r => r.category).filter(Boolean))].sort().map(c => [c, c]));
         fill(selR, [...new Set(rows.map(r => r.round))].sort((a, b) => a - b).map(r => [r, `Round ${r}`]));
         sub.textContent = `${y} NFL Draft: ${rows.length} picks`;
