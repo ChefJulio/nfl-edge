@@ -349,7 +349,10 @@
       return t ? base.filter(r => r.name.toLowerCase().includes(t)) : base;
     };
     const rowAttrs = r => `style="${rowStyle(r.team)}" data-pid="${esc(r.pid)}" data-espn="${esc(r.espn || '')}" data-team="${esc(r.team)}" data-name="${esc(r.name.toLowerCase())}" data-pos="${esc(r.pos)}"`;
-    const rowClass = r => `main teamrow${r.inactive >= 0.5 ? ' out' : ''}`;
+    // the landing rise-in (pages/week.html adds html.land-anim) belongs to the first draw's rows only: rows rebuilt
+    // while it plays (grades, live scores arriving) appear in place instead of fading in again (the load flicker)
+    let landing = document.documentElement.classList.contains('land-anim');
+    const rowClass = r => `main teamrow${r.inactive >= 0.5 ? ' out' : ''}${landing ? ' rise' : ''}`;
     const byesHtml = p => {
       const list = (RK.byes || {})[p] || [];
       return list.length ? `<div class="byes"><span>On bye</span>${list.map(b => `<span class="bye"><span class="tm-open" data-tm="${esc(b.team)}">${logo(b.team, 16)}</span><button type="button" class="nm-link" data-open-pid="${esc(b.pid)}">${esc(b.name)}</button> <span class="muted">${f1(b.sc && b.sc.g ? pts(b.sc.ss, state.w, p) / b.sc.g : b.fpg)} FP/G</span></span>`).join('')}</div>` : '';
@@ -461,6 +464,7 @@
         const rows = rowsFor(p);
         if (!tables[p]) {
           tables[p] = NFLE.Table(view.querySelector('.rk-tbl'), { columns: columns(p === 'FLEX', p), rows, cls: 'sortable ranks tiles', sort: { key: 'proj', dir: 'desc' }, rowAttrs, rowClass });
+          landing = false;
           // the landing animation (pages/week.html adds html.land-anim) plays on this first draw only, not on sorts
           setTimeout(() => document.documentElement.classList.remove('land-anim'), 1200);
         }

@@ -66,6 +66,7 @@
     };
     let gen = 0;
     const BATCH = 40;
+    let lastKey = null;
     const body = () => {
       let rs = rows;
       if (sort) {
@@ -86,13 +87,19 @@
       // The rows that fill the screen first, the rest in batches after it paints (owner 2026-10-16: "lazy load so the
       // important stuff gets drawn more quickly"; the landing QB table drew 31 rows of ~70 elements for 5 in view).
       // A newer draw (sort, filter, new data) cancels the batches of an older one.
+      // Nothing changed (data that arrived for rows not shown, a repeat event): keep the rows that are there, so a
+      // landing animation in progress isn't restarted (owner 2026-10-20: the rankings table flickered on load, rebuilt
+      // ~11 times in its first second). The one-off "rise" class doesn't count as a change.
+      const all = rs.map(rowHtml), key = all.join('').replace(/ rise(?=")/g, '');
+      if (key === lastKey && tbl.tBodies[0].rows.length) return;
+      lastKey = key;
       const my = ++gen, tb = tbl.tBodies[0], first = Math.max(12, Math.ceil(innerHeight / 45));
-      tb.innerHTML = rs.slice(0, first).map(rowHtml).join('');
+      tb.innerHTML = all.slice(0, first).join('');
       if (rs.length <= first) return;
       let i = first;
       const more = () => {
         if (my !== gen) return;
-        tb.insertAdjacentHTML('beforeend', rs.slice(i, i + BATCH).map(rowHtml).join(''));
+        tb.insertAdjacentHTML('beforeend', all.slice(i, i + BATCH).join(''));
         i += BATCH;
         if (i < rs.length) setTimeout(more, 0); else layout();
       };
