@@ -3442,7 +3442,14 @@
     return `<section class="gcs" data-k="now"><h3>Result</h3><div class="pg-res">
       <span class="tm-open${winner === a.team ? ' won' : ''}" data-tm="${esc(a.team)}">${logo(a.logo, '#111', 26, a.team)}<b>${esc(a.team)}</b> ${a.score}</span><span class="muted">${esc(info.detail || 'Final')}</span>
       <span class="tm-open${winner === h.team ? ' won' : ''}" data-tm="${esc(h.team)}">${h.score} <b>${esc(h.team)}</b>${logo(h.logo, '#111', 26, h.team)}</span></div>${call}
-      ${GP.canReplay ? '<div class="rp"><button type="button" data-rp="on">Replay this game play by play</button></div>' : ''}</section>`;
+      <div class="rp">${GP.canReplay ? '<button type="button" data-rp="on">Replay this game play by play</button>' : ''}${highlightsLink(info, g)}</div></section>`;
+  };
+  // (owner 2026-10-20: "linking to clips of plays") the game's official highlights on YouTube, by search
+  const highlightsLink = (info, g) => {
+    const m = String(((g || GP.g) || {}).id || '').match(/^(\d{4})_(\d{2})_/), nick = t => (tInfo(t) || {}).nick || t;
+    const wk = m ? (+m[2] > 18 ? 'playoffs' : `week ${+m[2]}`) : '';
+    const q = `${nick(info.away.team)} vs. ${nick(info.home.team)} game highlights ${m ? m[1] : ''} ${wk}`.replace(/\s+/g, ' ').trim();
+    return `<a class="rp-hl" href="https://www.youtube.com/results?search_query=${encodeURIComponent(q)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>Watch highlights</a>`;
   };
   // ESPN unreachable: still show the game from our own week file (Pregame works; final score if we have it).
   const infoFromG = g => {
@@ -3791,7 +3798,35 @@
   };
   // lead / tail: a view's own items in the line (a card's clock and score)
   const playMeta = (p, lead = '', tail = '', cls = 'pm') => { const pp = playPairs(p); return `<div class="${cls}">${lead}${playTags(p)}${pp.downs}${pp.spots}${tail}</div>`; };
-  const playTitle = (cls, hd, html, p, info) => `<div class="${cls} pt ${hd.cls}"><span class="pt-t">${html}</span>${yardChip(p, info)}</div>`;
+  const CLIPS = new WeakMap();
+  const clipIndex = sum => {
+    if (!sum || typeof sum !== 'object') return null;
+    if (CLIPS.has(sum)) return CLIPS.get(sum);
+    const m = {}, plays = allPlays(sum).flatMap(d => d.plays || []).filter(p => !nonPlay(p));
+    (sum.videos || []).forEach(v => {
+      const h = String(v.headline || v.title || ''), url = ((v.links || {}).web || {}).href || ((v.links || {}).mobile || {}).href;
+      if (!h || !url) return;
+      const words = (h.match(/\b[A-Z][a-zA-Z'.-]{2,}\b/g) || []).filter(w => !/^(TD|NFL|The|And|For|With|Touchdown|Field|Goal|Pass|Run|Interception|Game)$/i.test(w));
+      const yds = (h.match(/(\d{1,2})[- ]?(?:yd|yard)/i) || [])[1], td = /\bTD\b|touchdown/i.test(h);
+      let best = null, top = 0;
+      plays.forEach(p => {
+        const txt = String(p.text || ''), names = words.filter(w => txt.includes(w.replace(/\.$/, ''))).length;
+        const ok = names && ((yds && new RegExp(`\\b${yds} (?:yards?|yd)`).test(txt)) || (td && p.scoringPlay && /touchdown/i.test(`${pType(p)} ${txt}`)));
+        const score = ok ? names + (yds ? 1 : 0) : 0;
+        if (score > top) { top = score; best = p; }
+      });
+      if (best && !m[best.id]) m[best.id] = { url, title: h };
+    });
+    CLIPS.set(sum, m);
+    return m;
+  };
+  const clipFor = p => {
+    for (const sm of [GP.sum, ...Object.values(LIVE.sums || {})]) { const m = clipIndex(sm); if (m && m[p.id]) return m[p.id]; }
+    return null;
+  };
+  const clipChip = p => { const c = clipFor(p);
+    return c ? `<a class="pc-chip c-clip" href="${esc(c.url)}" target="_blank" rel="noopener" title="${esc(c.title)}"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>Clip</a>` : ''; };
+  const playTitle = (cls, hd, html, p, info) => `<div class="${cls} pt ${hd.cls}"><span class="pt-t">${html}</span>${yardChip(p, info)}${clipChip(p)}</div>`;
   const playRows = (plays, info, names, key = null) => plays.map(p => {
     const when = q => `${periodName((q.period || {}).number || 1)} ${esc((q.clock || {}).displayValue || '')}`;
     if (nonPlay(p)) return `<li class="ds-p np"><span class="ds-w">${when(p)}</span><span class="ds-h muted">${esc(nonPlayText(p))}</span></li>`;

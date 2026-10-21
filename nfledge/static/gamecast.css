@@ -1557,3 +1557,9 @@ span.nm-link { display: inline; }
 .pt .rp-yd { font-size: 11px; }
 .ds-p { grid-template-columns: 62px minmax(0, 1fr); }
 .ds-b { min-width: 0; } .ds-b .ds-h { font-weight: 600; }
+/* video links: a game's highlights (Result card) and a play's clip when ESPN has one */
+.rp a.rp-hl, .rp a.rp-hl:visited { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: var(--fs-sm); border: 1px solid var(--line); background: var(--panel);
+  color: var(--ink); border-radius: var(--r-md); padding: 5px 10px; text-decoration: none; }
+.rp-hl svg, .c-clip svg { color: #ff4e45; }
+a.pc-chip.c-clip, a.pc-chip.c-clip:visited { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; background: color-mix(in srgb, #ff4e45 16%, transparent);
+  color: var(--ink); font-size: 11px; align-self: center; }
