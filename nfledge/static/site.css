@@ -448,3 +448,9 @@ table.av-spots td.av-off { color: var(--warn); font-weight: 700; }
 .md-area > h2:first-child { margin-top: 0; }
 
 @media (max-width: 640px) { #psearch { max-width: none; } }  /* full width on phones, lined up with the scoring button */
+/* Sideways scrollers never scroll vertically (owner 2026-10-20: dragging a game-log table moved its rows under fixed
+   headers instead of scrolling the page). CSS turns overflow-y: visible into auto whenever overflow-x isn't visible,
+   so every sideways wrapper was also a small vertical scroller that iOS rubber-bands on a vertical drag. Hidden
+   hands vertical drags to the page; contain keeps a swipe at a table's edge from becoming the browser's back gesture. */
+.scroll, .lg-scroll, .bx-t, .po-body, .rf-scroll, .tr-gwrap, .gg-strip, .md-areas, .lg-switch, .pc .pc-tabs,
+nav.gc-tabs .gc-wrap, .gc-jump, nav.tabs .nav-par, .nav-sub, .doc table { overflow-y: hidden; overscroll-behavior-x: contain; }
