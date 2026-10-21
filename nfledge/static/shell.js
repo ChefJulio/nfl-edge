@@ -230,7 +230,12 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     shown = true;
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'stale-pill'; b.innerHTML = '<i></i>Site updated &middot; <b>Refresh</b>';
-    b.onclick = () => location.reload();
+    // past the HTTP cache first (GitHub Pages serves the page with max-age 600: a plain reload in a home-screen app can
+    // bring back the old page for up to 10 minutes)
+    b.onclick = async () => {
+      try { await Promise.all([fetch(location.href, { cache: 'reload' }), fetch(new URL('build.json', NFLE.root), { cache: 'reload' })]); } catch (e) { /* offline */ }
+      location.reload();
+    };
     document.body.appendChild(b);
   };
   const check = async (force = false) => {

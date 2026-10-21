@@ -1135,10 +1135,19 @@
     loadInj(); loadRos();
     const now = espn && DINJ && DINJ[espn];
     const wk = DATA ? +DATA.week : null;
-    const ep = (L && L.inj || []).find(e => L && e.s === L.cur && wk && e.w1 >= wk - 1);  // listed this week or last
+    // listed this week or last, and not since played through (owner 2026-10-20: Lambert-Smith, Questionable in week 6,
+    // played 87% of snaps, then read "Out" on his bye: an episode stays open across a bye because the bye week has no
+    // roster row to close it)
+    const playedWk = e => ((L && L.seasons) || []).some(x => x.s === e.s && (x.g || []).some(g => g.w === e.w1));
+    const ep = (L && L.inj || []).find(e => L && e.s === L.cur && wk && e.w1 >= wk - 1 && !playedWk(e));
     const des = p && /^\s*(Questionable|Doubtful|Out|IR|PUP|NFI)/i.test(p.status || '');
-    const inj = (p && p.inactive >= 0.05) || des || (now && now.status && now.status !== 'Active') || (!p && ep);
-    const rw = !p && RJ.d && RJ.d.players[pid] && RJ.d.players[pid].w.find(z => z[0] === RJ.d.from);  // off the board: the return model
+    // ESPN's current feed says Active: an older listing isn't an injury now (our own projection, p, still rules)
+    const espnActive = now && now.status === 'Active';
+    const inj = (p && p.inactive >= 0.05) || des || (now && now.status && !espnActive) || (!p && ep && !espnActive);
+    // off the board: the return model, at his next game week (a bye week has no game, so its chance reads 0)
+    const ups = (L && L.up) || [], byeAt = w => ups.some(u => u.w === w && u.bye);
+    const rws = !p && RJ.d && RJ.d.players[pid] ? RJ.d.players[pid].w : null;
+    const rw = rws && rws.find(z => z[0] >= RJ.d.from && !byeAt(z[0]));
     const play = p && p.inactive != null ? 1 - p.inactive : rw ? rw[1] : null;
     const what = [...new Set([now && now.type, now && now.detail && now.detail !== 'Not Specified' ? now.detail : '', now && now.side && now.side !== 'Not Specified' ? now.side : '']
       .filter(Boolean))].join(' · ') || (ep && ep.part) || '';  // ESPN often repeats the type as the detail
@@ -1151,7 +1160,8 @@
     const gd = p && injCode(p.status), ina = gd === 'INA', act = gd === 'ACT';
     const big = ina ? '<div class="pc-big bad">Inactive</div>' : act ? '<div class="pc-big good">Active</div>' : !h.inj ? '<div class="pc-big good">Healthy</div>'
       : h.play != null && h.play > 0.01 ? `<div class="pc-big ${h.play >= 0.75 ? '' : 'bad'}">${Math.round(h.play * 100)}% <small>to play</small></div>`
-      : '<div class="pc-big bad">Out</div>';
+      : h.play != null ? '<div class="pc-big bad">Out</div>'
+      : '<div class="pc-big bad">Injured</div>';  // listed but no chance on file: don't claim more than we know
     const sub = ina || act ? [`${ina ? 'ruled out' : 'declared active'} for wk ${h.wk}`, h.what].filter(Boolean).join(' · ') : !h.inj ? 'no injury listed' : [h.what, ret].filter(Boolean).join(' · ') || 'on the injury report';
     return tapTile('Health', `${big}<div class="pc-tapsub">${esc(sub)}</div>`, 'Health', injuryBrief(pid, p, L, espn, h));
   };

@@ -360,6 +360,9 @@ class Engine:
     r = ratings or self.tm.fit(season, week)
     # Past plays are judged against defenses as they were; this week's opponents get personnel adjustments.
     r_game = self.game_ratings(season, week, r) if use_injuries else r
+    lu_s = float(self.cfg.get("experiments", {}).get("lineup_epa_scale", 0.0))
+    if lu_s and use_injuries:  # EXPERIMENT (BZ): offenses missing (or getting back) regulars, projections only
+      r_game = self._lineup_adjust(r_game, season, week, lu_s)
     vf = team_volume_features(self.team_ledger, season, week, self.cfg)
     games = self.games(season, week)
     tp = self.gm.predict(games, r_game, vf, use_vegas=use_vegas, starters=starters)
@@ -407,6 +410,21 @@ class Engine:
     p["season"], p["week"] = season, week
     self.last_team_preds = tp
     return p
+
+  def _lineup_adjust(self, r, season: int, week: int, scale: float):
+    """(BZ) each offense's pass and rush EPA moved by its lineup sum (nfledge/lineup.py, report availability)."""
+    from . import lineup as LU
+    if getattr(self, "_lineups", None) is None:
+      self._lineups = (LU.Lineups(LU.shares(self.data.snaps)), LU.Values())
+    lus, vals = self._lineups
+    d = {t: LU.team_term(lus.regulars(t, season, week), LU.report_available(self.data.rosters, self.data.injuries, season, week, t),
+                         lambda p, g: vals(season, p, g))["off"] for t in r.off.index}
+    r2 = copy.copy(r)
+    r2.off = r.off.copy()
+    adj = pd.Series(d).reindex(r.off.index).fillna(0.0) * scale
+    for u in ("pass", "rush"):
+      r2.off[u] = r.off[u] + adj
+    return r2
 
   def game_ratings(self, season: int, week: int, r=None):
     """Ratings for this week's games: pass defenses adjusted for starting cornerbacks likely out."""

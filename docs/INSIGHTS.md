@@ -3484,3 +3484,11 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   +0.0005 [-0.0014, +0.0022], better 1 of 4, 2026 -0.0039 (90 games). (2022's fold had one training season, so its
   penalty was the middle value, 3; later folds chose 30, the strongest offered.) Largest fitted extra home edges (2025
   fit): GB .10, BUF .10, PIT .10, MIN .09; smallest NE -.13, ARI -.11, NO -.11, i.e. recent home records, not stadiums.
+- **PRE-REGISTERED 2026-10-20: (BZ) the lineup value in fantasy projections.** Projections already shift pass defenses
+  for starting cornerbacks likely out (engine.game_ratings, personnel); offenses get nothing for missing linemen or
+  receivers beyond the share redistribution. Variant (experiments.lineup_epa_scale = 1): in project_week only (not the
+  Matchups ratings, which have their own term), each team's offensive pass and rush EPA expectation moves by its
+  offensive lineup sum (nfledge/lineup.py, report availability; already in EPA per play, so no fitted weight).
+  tools/experiments.py baseline vs lineup_epa, 2021-25. GATE (fantasy, sec. 1): overall MAE lower with the 95% CI over
+  season-weeks below 0 and >= 0.01 points, no position significantly worse, better in >= 3 of 5 seasons.
+  Reported: by position; start/sit accuracy.
