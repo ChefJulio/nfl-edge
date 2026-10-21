@@ -132,6 +132,9 @@
       let i = 0; while (i < 100 && q[i + 1] <= v) i++;
       return i >= 100 ? 99 : Math.min(99, Math.round(i + (q[i + 1] > q[i] ? (v - q[i]) / (q[i + 1] - q[i]) : 0))); };
     const GAME_OF = Object.fromEntries((D.games || []).flatMap(g => [[g.away.team, g.id], [g.home.team, g.id]]));
+    // the teammate pairing to show: the first (bigger swing) whose teammate is genuinely uncertain (2026-10-21, Woody
+    // Marks: only the first pairing was checked; Schultz, 6% to sit, hid Montgomery, 68% to sit, in the second)
+    const cnd = r => [r.cond, r.cond2].find(c => c && 1 - c[2] >= TWO_LO && 1 - c[2] <= TWO_HI);
     const derive = () => {
       const { w, lg } = state;
       all.forEach(r => {
@@ -148,8 +151,8 @@
         if (!r._likelyOut && pl >= TWO_LO && pl <= TWO_HI) {  // his own two worlds: plays / sits (0)
           r._two = pl >= 0.5 ? { alt: 0, txt: 'if he sits' } : { alt: r._proj, txt: 'if he plays', dim: true };
           if (pl < 0.5) r._proj = 0;
-        } else if (r.cond && 1 - r.cond[2] >= TWO_LO && 1 - r.cond[2] <= TWO_HI) {  // a teammate's: the other world
-          const [nm, , pSit, plays, sits] = r.cond;
+        } else if (cnd(r)) {  // a teammate's: the other world
+          const [nm, , pSit, plays, sits] = cnd(r);
           r._two = pSit >= 0.5 ? { alt: plays * ratio, txt: `if ${lastNm(nm)} plays` } : { alt: sits * ratio, txt: `if ${lastNm(nm)} sits` };
         }
         r._q = r.q.map(v => v * ratio);  // p10, p25, p50, p75, p90
@@ -209,7 +212,8 @@
       const scr = (r.scratch || 0) >= 0.1 ? `<span class="flag fl-scr${r.scratch >= 0.5 ? ' fl-bad' : ''}" title="${esc(r.play_why || 'Healthy-scratch risk')}">Scratch ${Math.round(100 * r.scratch)}%</span>` : '';
       // no "+X inj" flag or highlight in the list (owner 2026-10-20): the teammate-injury boost is in the projection;
       // its detail is on the player's page
-      const badges = (r.status || r.low_sample || pct || scr) ? `<div class="badges">${NFLE.injTag(r.status, r.inactive)}${pct}${scr}${r.low_sample ? '<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>' : ''}</div>` : '';
+      const tag = NFLE.injTag(r.status, r.inactive, r.pid);
+      const badges = (tag || r.low_sample || pct || scr) ? `<div class="badges">${tag}${pct}${scr}${r.low_sample ? '<span class="flag" title="Few career opportunities: efficiency leans on the position x draft-round prior">low data</span>' : ''}</div>` : '';
       // first name on top, last name below, badges to the right (owner 2026-10-17); scrolled sideways the pinned
       // column narrows and each line truncates (rankings.css)
       const [first, lastN] = NFLE.fmt.split(r.name);

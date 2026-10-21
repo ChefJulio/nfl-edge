@@ -866,14 +866,11 @@ class InjuryModel:
     team_dates = {}
     if use_days and "dates" in days:
       from .practice_calendar import team_report_days
-      tm, filed = dict(zip(p.gsis_id, p.team)), {}
-      for g, ds in days.dates.dropna().items():
-        if g in tm:
-          filed.setdefault(tm[g], set()).update(d for d in str(ds).split(",") if d)
+      filed = {t: set(v) for t, v in self.filed_dates(season, week).items()}
       cal = team_report_days(self.data.schedules, season, week, filed)
-      # a day counts once some team's report for it is in (else it hasn't happened yet)
-      seen = max((d for v in filed.values() for d in v), default="")
-      team_dates = {t: [d for d in ds if d <= seen] for t, ds in cal.items()}
+      # a day counts once HIS TEAM's report for it is in our data (2026-10-21, Tyler Warren: any team's report used to
+      # count, so Indianapolis' Wednesday read "full" for everyone before it arrived; he had not practiced)
+      team_dates = {t: [d for d in ds if d in filed.get(t, set())] for t, ds in cal.items()}
 
     def shown(x, team) -> str:
       dd, ds = str(x.days.iloc[0] or "").replace("?", ""), [d for d in str(x.dates.iloc[0] or "").split(",") if d] if "dates" in x else []
@@ -960,7 +957,129 @@ class InjuryModel:
       st = p.at[i, "status"]
       if row.gsis_id in (self.espn_questionable or {}) and (st == "" or st.startswith(" (") or st.endswith("last wk")):
         p.at[i, "status"] = "Questionable (ESPN)" + (st if st.startswith(" (") else "")
+    p["tag"] = self.designations(p, season, week)
     return p
+
+  def filed_dates(self, season: int, week: int) -> dict:
+    """team -> sorted report dates of this week whose report is in our practice data (anyone on it listed that day).
+    A day not here hasn't reached us yet, even past its deadline: "not listed = practiced fully" only holds on a day
+    the team's report is in."""
+    pr = self.data.practice
+    if pr is None or "dates" not in pr:
+      return {}
+    x = pr[(pr.season == season) & (pr.week == week)].dropna(subset=["dates"])
+    ro = self.data.rosters
+    ro = ro[(ro.season == season) & (ro.week <= week) & ro.gsis_id.notna()].sort_values("week").drop_duplicates("gsis_id", keep="last")
+    team = dict(zip(ro.gsis_id, ro.team.replace({"LAR": "LA"})))
+    out = {}
+    for g, ds in zip(x.gsis_id, x.dates):
+      t = team.get(g)
+      if t:
+        out.setdefault(t, set()).update(d for d in str(ds).split(",") if d)
+    return {t: sorted(v) for t, v in out.items()}
+
+  def tag_map(self, season: int, week: int, board: pd.DataFrame | None = None) -> dict:
+    """gsis -> designation for every QB / RB / WR / TE / K on a roster (active, game-day inactive or a reserve list),
+    bye teams included; the board's own tags (availability) win for its players. Non-empty tags only."""
+    ro = self.data.rosters
+    ro = ro[(ro.season == season) & (ro.week <= week) & ro.gsis_id.notna()].sort_values("week").drop_duplicates("gsis_id", keep="last")
+    ro = ro[ro.position.isin(["QB", "RB", "FB", "WR", "TE", "K"]) & ro.status.isin(["ACT", "INA", "RES"])]
+    rows = pd.DataFrame({"gsis_id": ro.gsis_id.to_numpy(), "team": ro.team.replace({"LAR": "LA"}).to_numpy()})
+    out = {g: t for g, t in zip(rows.gsis_id, self.designations(rows, season, week)) if t}
+    if board is not None and "tag" in board:
+      for g, t in zip(board.gsis_id, board.tag):
+        if t:
+          out[g] = t
+        else:
+          out.pop(g, None)
+    return out
+
+  RESERVE_TAG = {"R01": "IR", "R48": "IR", "R04": "PUP", "R05": "NFI", "R40": "SSPD"}
+
+  def designations(self, p: pd.DataFrame, season: int, week: int) -> list:
+    """The injury tag a row shows (owner 2026-10-21: "we should use the official tags"), apart from our chance to play:
+      - a reserve list (IR, PUP, NFI, SSPD): its code;
+      - game day, once his team's actives / inactives are out (90 min before kickoff): inactive -> O, active -> none;
+      - his team's final report: its designation (Q / D / O; listed without one, or not listed -> none);
+      - before it (Tuesday -> the final report): Q if he missed his last game hurt (on its report, no snap; not when
+        its listed reason was rest or personal) or was hurt in it and not back (the play-by-play's injury note with no
+        "has returned to the game" after it; ingame.not_back); once his team's practice reports start, that Q holds
+        only while he's on them;
+      - O before the final report only when we're confident he sits: ESPN's Out with a return date past this game
+        (1.8% played early in the week, n 652; 0 of 43 midweek). A plain ESPN Out (34% played) or Doubtful isn't O.
+    Hurt during a game being played now: the page marks him Q live from ESPN's play text (gamecast.js).
+    Byes (owner 2026-10-21): "his last game" is his team's last game, wherever the bye fell, and a bye week files no
+    report, so a Tuesday Q holds through the bye until his team's first report of the week it plays again.
+    p: rows with gsis_id and team."""
+    out = [""] * len(p)
+    inj = self.data.injuries
+    published = set(inj[(inj.season == season) & (inj.week == week) & (inj.game_type == "REG")].team)
+    pr, days, final = self.data.practice, None, set()
+    if pr is not None:
+      days = pr[(pr.season == season) & (pr.week == week)].drop_duplicates("gsis_id", keep="last").set_index("gsis_id")
+      final = self.final_report_teams(days, season, week)
+    ro = self.data.rosters
+    ro = ro[(ro.season == season) & (ro.week <= week) & ro.gsis_id.notna()].sort_values("week").drop_duplicates("gsis_id", keep="last")
+    res = {g: self.RESERVE_TAG.get(a) for g, st, a in zip(ro.gsis_id, ro.status, ro.get("status_description_abbr", pd.Series("", index=ro.index)))
+           if st == "RES" and self.RESERVE_TAG.get(a)}
+    gd = self.espn_gameday or {}
+    ctx = None
+    if hasattr(self, "_week_ctx"):
+      ctx = self._week_ctx
+    else:
+      try:
+        from . import tuesday as T
+        ctx = self._week_ctx = T._Ctx(self.data, *self._tues_inputs())
+      except Exception:  # no Tuesday inputs (offline backtests): the official report alone
+        ctx = None
+
+    nb = []
+
+    def not_back() -> set:
+      if not nb:
+        try:
+          from pathlib import Path
+          from . import data as D
+          from . import tuesday as T
+          cache = D.Cache(Path(__file__).resolve().parent.parent / self.cfg["data"]["cache_dir"])
+          nb.append(T.hurt_not_back(self.data, cache, season))
+        except Exception:  # offline: no in-game rule
+          nb.append(set())
+      return nb[0]
+
+    def tuesday_q(g, team) -> bool:
+      if ctx is None:
+        return False
+      prev = [x for x in ctx.tw.get((season, team), []) if x < week]
+      if not prev:
+        return False
+      k = prev[-1]
+      if (g, season, k) not in ctx.on:  # missed it while on its injury report, for an injury
+        return (g, season, k) in ctx.rep and ctx.why.get((season, k, g), "none") not in ("rest", "personal")
+      return (g, season, k) in not_back()  # hurt in it and not back
+
+    for j, (i, row) in enumerate(p.iterrows()):
+      g, team = row.gsis_id, row.team
+      if g in res:
+        out[j] = res[g]
+        continue
+      r_ = gd.get(g)
+      if r_:
+        out[j] = "O" if r_[0] == "INA" else ""
+        continue
+      listed = days is not None and team in published and g in days.index
+      if team in final:
+        gs = str(days.game_status.loc[g]).upper() if listed else "NONE"
+        out[j] = {"OUT": "O", "DOUBTFUL": "D", "QUESTIONABLE": "Q"}.get(gs, "")
+        continue
+      bucket = (self.espn_midweek or {}).get(g) if team in published else (self.espn_bridge or {}).get(g)
+      if bucket == "Out+ret":
+        out[j] = "O"
+        continue
+      if team in published and not listed:
+        continue  # practice reports out and he isn't on them: practicing fully
+      out[j] = "Q" if tuesday_q(g, team) else ""
+    return out
 
   @staticmethod
   def build_espn_bridge(data, season: int, week: int, feed: pd.DataFrame, midweek: bool = False,

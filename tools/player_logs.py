@@ -842,6 +842,7 @@ def ingame_events(cache, nfl, cur: int, ros: pd.DataFrame, site: Path) -> dict:
     n = ingame.load(cache, nfl, s, rs, stale=s == cur and cache.age_hours("ingame", s) > 6)
     if n is None or not len(n):
       continue
+    n = ingame.hurt_rows(n)  # injuries, not returns
     n = n[(n.season_type == "REG") & n.gsis_id.notna()]
     for g, w, q in zip(n.gsis_id, n.week, n.qtr):
       out.setdefault((g, int(s)), []).append((int(w), int(q) if pd.notna(q) and q <= 4 else None, "pbp"))

@@ -72,7 +72,7 @@
         return g ? { txt: short, gone, opp: g.home.team === t ? g.away.team : g.home.team, home: g.home.team === t, fin: !!g.final } : null; };
       const dashCols = [
         { key: 'name', label: 'Player', stick: true, sort: false, html: r => NFLE.ui.player({ name: r.name, pos: r.pos, team: r.team, photo: r.photo, espn: r.espn,
-            subHtml: NFLE.ui.tm(r.team), badges: NFLE.injTag ? NFLE.injTag(r.status) : '' }, TEAMS) },
+            subHtml: NFLE.ui.tm(r.team), badges: NFLE.injTag ? NFLE.injTag(r.status, r.inactive, r.pid) : '' }, TEAMS) },
         { key: 'play', label: 'Play%', num: true, sort: false, title: 'Our chance he plays this week',
           html: r => `<span class="in-pct" style="--p:${Math.round(100 * r.inactive)}">${NFLE.fmt.toPlay(r.inactive)}</span>` },
         { key: 'proj', label: 'Proj', num: true, sort: false, cls: 'projc', title: 'Projected points if he plays', html: r => `<b>${r.proj.toFixed(1)}</b>` },

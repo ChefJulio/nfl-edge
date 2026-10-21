@@ -48,18 +48,31 @@ def report_rows(d) -> pd.DataFrame:
 
 
 def hurt_notes(d, cache) -> set:
-  """(gsis, season, week) with an in-game injury note (nfledge/ingame.py), for the loaded seasons."""
+  """(gsis, season, week) with an in-game injury note (nfledge/ingame.py), for the loaded seasons. The current
+  season's notes refresh once they're 6 hours old (2026-10-21: read with stale=False they only refreshed in the later
+  player-logs step, so a Tuesday build's model missed the weekend's newest in-game injuries)."""
   import nflreadpy as nfl
   from . import ingame
   out = set()
   seasons = sorted(set(d.snaps.season.dropna().astype(int)))
+  cur = int(d.current_season)
   for s in seasons:
     rs = cache.get("rosters", s, lambda: nfl.load_rosters_weekly([s]), stale=False)
-    n = ingame.load(cache, nfl, s, rs, stale=False) if rs is not None and len(rs) else None
+    n = ingame.load(cache, nfl, s, rs, stale=s == cur and cache.age_hours("ingame", s) > 6) if rs is not None and len(rs) else None
     if n is not None and len(n):
+      n = ingame.hurt_rows(n)
       n = n[(n.season_type == "REG") & n.gsis_id.notna()]
       out |= set(zip(n.gsis_id, n.season.astype(int), n.week.astype(int)))
   return out
+
+
+def hurt_not_back(d, cache, season: int) -> set:
+  """(gsis, season, week) hurt in a game this season and not back in it (the injury tag's in-game rule)."""
+  import nflreadpy as nfl
+  from . import ingame
+  rs = cache.get("rosters", season, lambda: nfl.load_rosters_weekly([season]), stale=False)
+  n = ingame.load(cache, nfl, season, rs, stale=cache.age_hours("ingame", season) > 6) if rs is not None and len(rs) else None
+  return ingame.not_back(n[n.season_type == "REG"]) if n is not None and len(n) else set()
 
 
 def _days(x) -> str:

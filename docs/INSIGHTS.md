@@ -3497,3 +3497,23 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   (CI below 0 but a tenth of the 0.01 bar); QB / RB / WR / TE all "no difference"; seasons -0.000 / +0.000 / -0.000 /
   -0.003 / -0.001; start/sit +0.004 points per pair [-0.001, +0.009] (WR +0.007 [+0.002, +0.013]). Vegas implied totals
   already carry injuries for nearly every game; the efficiency terms barely move. experiments.lineup_epa_scale stays 0.
+- **Official injury tags (owner 2026-10-21: "we should use the official tags"; reverts the 2026-10-20 in-house Q / D /
+  O bands for the tag only; our chance to play is unchanged).** InjuryModel.designations / tag_map (every rostered
+  player, byes included) + gamecast.js tagOf. Rules: reserve list code; game-day inactive -> O, active -> none; the
+  final report's designation; before it, Q if he missed his last game on its report (not rest / personal) or was hurt
+  in it and not back (play-by-play notes, "has returned to the game" kept by nfledge/ingame.py since this change), held
+  while he's on the week's practice reports; O early only with ESPN's return date past the game; live, Q for a board
+  player hurt and not back in this week's games (ESPN play text). Audit tools/tag_audit.py 2022-25, QB/RB/WR/TE:
+  missed last game hurt n 1,565 played next game 47.0% (90% on the next report); hurt and not back (2024-25 only:
+  nflverse has no return notes before 2024) n 127 played 46.5% -> Q, not O; hurt and back n 223 played 87%; final
+  report with no designation n 3,252 played 93.1% (any DNP 90.7%); Out 1.7%, Doubtful 1.6%, Questionable 67.1%.
+  Not on the next report after missing hurt (n 157, played 47%): active roster 97 (played 73%: dressed backups), game-
+  day inactive 45 (0%: unlisted, so not injured by the NFL's rule; game day makes them O), roster moves 15. Rest /
+  personal (n 36, 42%): mostly roster churn (trades, cuts, inactives), small; kept out of the Tuesday Q.
+- **Gotcha fixed 2026-10-21: the Tuesday model's current-season in-game notes never refreshed in run.py**
+  (tuesday.hurt_notes read the 'ingame' cache with stale=False; only the later player-logs step refreshed it), so a
+  Tuesday build's model ran one build behind on the weekend's in-game injuries. Now refreshed when 6+ hours old.
+- **Gotcha fixed 2026-10-21 (Tyler Warren): "not listed = practiced fully" filled days whose report hadn't reached us.**
+  The health tile took the clock's deadline as "report in" (and a 6-day window took last Friday's entry as this
+  week's); the build counted a day once ANY team had filed it. Now per team: the week data's `filed` (report dates in
+  our practice data); a day past its deadline that isn't there reads "not in yet".

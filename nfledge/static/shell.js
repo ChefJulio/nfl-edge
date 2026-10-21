@@ -1033,7 +1033,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       const row = (e, teams) => e.isTeam
         ? `<div class="fnd-r tm-open" role="option" data-tm="${esc(e.team)}">${NFLE.ui.team(e.team, teams, esc(e.team))}<span class="fnd-v">${right(e, opts)}</span></div>`
         : `<div class="fnd-r" role="option" data-open-pid="${esc(e.pid)}">${NFLE.ui.player({ name: e.name, team: e.team, pos: e.pos, photo: e.photo, espn: e.espn, pid: e.pid,
-            badges: e.hof ? `<span class="hof-b" title="Pro Football Hall of Fame, class of ${e.hof}">HOF</span>` : e.status && NFLE.injTag ? NFLE.injTag(e.status, e.inactive) : '' }, teams)}<span class="fnd-v">${right(e, opts)}</span></div>`;
+            badges: e.hof ? `<span class="hof-b" title="Pro Football Hall of Fame, class of ${e.hof}">HOF</span>` : NFLE.injTag && !e.past ? NFLE.injTag(e.status || '', e.inactive, e.pid) : '' }, teams)}<span class="fnd-v">${right(e, opts)}</span></div>`;
       // current players first, then past ones once their list is in (a second paint, same keystroke)
       const paint = (cur, old, teams, done) => {
         if (my !== seq) return;  // a newer keystroke

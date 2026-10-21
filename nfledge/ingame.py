@@ -14,19 +14,40 @@ import pandas as pd
 from . import data as D
 
 NOTE = re.compile(r"\b([A-Z]{2,3})-(\d{1,2})-([A-Z][A-Za-z.'\- ]+?) was injured during the play", re.S)
+# (owner 2026-10-21) his return: "** Injury Update: NO-12-C.Olave has returned to the game." (2025: 689 of these vs
+# 954 injury notes). Files cached before this have injury notes only (no 'kind' column: all "hurt").
+BACK = re.compile(r"\b([A-Z]{2,3})-(\d{1,2})-([A-Z][A-Za-z.'\- ]+?) has returned to the game", re.S)
 ROSTER_TEAM = {"LAR": "LA", "ARZ": "ARI", "BLT": "BAL", "CLV": "CLE", "HST": "HOU", "SL": "LA"}
 
 
 def notes(pbp: pd.DataFrame) -> pd.DataFrame:
-  """Every injury note: game_id, play_id, season, week, qtr, time, team, jersey, name (one row per player noted)."""
-  p = pbp[pbp.desc.str.contains("was injured during the play", na=False)]
+  """Every injury note and return: game_id, play_id, season, week, qtr, time, team, jersey, name, kind ("hurt" /
+  "back"; one row per player noted)."""
+  p = pbp[pbp.desc.str.contains("was injured during the play|has returned to the game", na=False)]
   rows = []
   for r in p.itertuples(index=False):
-    for team, num, name in NOTE.findall(r.desc):
-      rows.append((r.game_id, r.play_id, int(r.season), int(r.week), r.season_type, r.qtr, r.time,
-                   D.RELOCATED.get(team, ROSTER_TEAM.get(team, team)), int(num), name.strip()))
+    for kind, rx in (("hurt", NOTE), ("back", BACK)):
+      for team, num, name in rx.findall(r.desc):
+        rows.append((r.game_id, r.play_id, int(r.season), int(r.week), r.season_type, r.qtr, r.time,
+                     D.RELOCATED.get(team, ROSTER_TEAM.get(team, team)), int(num), name.strip(), kind))
   return pd.DataFrame(rows, columns=["game_id", "play_id", "season", "week", "season_type", "qtr", "time", "team",
-                                     "jersey", "name"])
+                                     "jersey", "name", "kind"])
+
+
+def hurt_rows(n: pd.DataFrame) -> pd.DataFrame:
+  """The injury notes alone (files cached before returns were kept have no 'kind': all injury notes)."""
+  return n[n.kind == "hurt"] if "kind" in n.columns else n
+
+
+def not_back(n: pd.DataFrame) -> set:
+  """(gsis, season, week) hurt in a game and not noted back in it after the injury (the later of his notes decides:
+  hurt, back, hurt again = not back). Only meaningful for files with returns ('kind')."""
+  if n is None or not len(n) or "kind" not in n.columns:
+    return set()
+  x = n.dropna(subset=["gsis_id"]).sort_values(["game_id", "play_id"])
+  last = x.drop_duplicates(["game_id", "gsis_id"], keep="last")
+  last = last[last.kind == "hurt"]
+  return set(zip(last.gsis_id, last.season.astype(int), last.week.astype(int)))
 
 
 def link(n: pd.DataFrame, rosters: pd.DataFrame) -> pd.DataFrame:
@@ -48,7 +69,7 @@ def link(n: pd.DataFrame, rosters: pd.DataFrame) -> pd.DataFrame:
 
 
 def load(cache, nfl, season: int, rosters: pd.DataFrame, stale: bool = False) -> pd.DataFrame | None:
-  """Cached per season (cache name 'ingame'): linked notes."""
+  """Cached per season (cache name 'ingame'): linked notes (callers wanting injuries alone: hurt_rows)."""
   def fetch():
     pbp = nfl.load_pbp([season]).select(["game_id", "play_id", "season", "week", "season_type", "qtr", "time", "desc"]).to_pandas()
     return link(notes(pbp), rosters[rosters.season == season] if "season" in rosters else rosters)

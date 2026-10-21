@@ -590,7 +590,7 @@ def week_data(ctx: dict) -> str:
         "proj": round(float(r["proj"]), 3), "q": [round(float(r[k]), 3) for k in ("p10", "p25", "p50", "p75", "p90")],
         "rank": r["rank"],
         "tier": r["tier"], "slot": r["slot"], "ecr": None if pd.isna(r["ecr"]) else r["ecr"],
-        "status": r["status"] or "", "inactive": r["inactive"], "inactive_why": r["inactive_why"],
+        "status": r["status"] or "", "tag": r.get("tag"), "inactive": r["inactive"], "inactive_why": r["inactive_why"],
         "scratch": r["scratch"], "play": r["play"], "play_why": r["play_why"],
         "boost": r["boost"], "boost_from": r["boost_from"], "cond": r.get("cond"), "cond2": r.get("cond2"), "low_sample": r["low_sample"], "conf": r["conf"],
         "mu": r["mu"], "mu_hi": r["mu_hi"], "mu_c": r["mu_c"],
@@ -629,7 +629,7 @@ def week_data(ctx: dict) -> str:
   out = {"season": ctx["season"], "week": ctx["week"], "generated": ctx["generated"], "archive": ctx["archive"],
          "power": power, "teams": ctx.get("teams", {}),
          "lookahead": ctx["lookahead"], "tossup_pct": ctx["tossup_pct"], "espn_team": ESPN_TEAM,
-         "score": json.loads(ctx["score_cfg"]), "players": players, "games": games, "rk": rk,
+         "score": json.loads(ctx["score_cfg"]), "players": players, "tags": ctx.get("tags") or {}, "filed": ctx.get("filed") or {}, "games": games, "rk": rk,
          # v3 (Phase 6): everything the page used to render on the server - Roles, the Power column scale, the header
          "roles": [{k: r.get(k) for k in ("pid", "name", "pos", "team", "week", "snap_now", "snap_prev", "opp_now",
                                           "opp_prev", "touches", "takeaway")} for r in ctx.get("roles") or []],
@@ -718,7 +718,8 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
         "imp": float(r.implied_pts) if pd.notna(getattr(r, "implied_pts", np.nan)) else None,
         # (AY3) inactive = injury only (Health, injury tags); scratch = healthy-scratch risk; play = takes the field
         # (injury x scratch x the backup-QB rule): expected points and "likely out" projections
-        "status": r.status, "avail": r.avail, "inactive": 1 - float(getattr(r, "inj_avail", r.avail)),
+        # tag: the official injury designation the row shows (InjuryModel.designations); None on look-ahead weeks
+        "status": r.status, "tag": getattr(r, "tag", None), "avail": r.avail, "inactive": 1 - float(getattr(r, "inj_avail", r.avail)),
         "scratch": round(float(getattr(r, "scratch", 0.0)), 3), "play": round(float(r.avail), 3), "play_why": play_why(r),
         "inactive_why": inactive_why(r), "boost": r.injury_boost, "boost_from": r.boost_from or "",
         # two worlds for a teammate of an uncertain player: [name, pid, P(he sits), proj if he plays, proj if he sits]

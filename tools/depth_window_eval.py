@@ -57,6 +57,7 @@ def main():
     reserve = set(zip(res.gsis_id, res.week))
     hurt = listed | reserve
     nt = ingame.load(c, nfl, season, ros)
+    nt = ingame.hurt_rows(nt) if nt is not None else nt  # injuries, not returns
     noted = set(zip(nt.gsis_id, nt.week)) if nt is not None and len(nt) else set()
     for team, ts in sn.groupby("team"):
       weeks = sorted(ts.week.unique())

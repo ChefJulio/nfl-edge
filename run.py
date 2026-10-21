@@ -196,6 +196,10 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
     "generated": time.strftime("%Y-%m-%d %H:%M"), "injury_report": injury_report,
     "clock": Clock(data.schedules).to_json(season, week),
     "players": rp.player_rankings(eng, proj, season, week, cfg),
+    # every rostered player's official injury tag (InjuryModel.tag_map; owner 2026-10-21): byes and deep backups too
+    "tags": (eng.injury_model.tag_map(season, week, proj) if eng.injury_model is not None and not (archive or lookahead) else {}),
+    # team -> this week's report dates in our data (the health tile's "not listed = full" only on those days)
+    "filed": (eng.injury_model.filed_dates(season, week) if eng.injury_model is not None and not (archive or lookahead) else {}),
     "games": with_weather(rp.matchups(eng, season, week, cfg, proj, power), wk, live=not (archive or lookahead)),
     # the current week's games the ratings already count (Power's "through Sunday" label; playoff_odds' Elo)
     "refit": ({"through": sorted(eng.tm.live[2]), "pending": sorted(eng.tm.live[3])}
