@@ -3184,3 +3184,25 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   Our ranks and the market's agree only .76-.80 (Spearman) at the same accuracy: different information. Lead, not a
   result: a blend of our ratings and the spread-fit market ratings (pre-register before testing). The ceiling's edge
   comes from lines set later (injuries and form known by then), not a fair comparison.
+- **PRE-REGISTERED 2026-10-20 (owner: "worth testing more"): (BL) future-game win chances: our ranks vs market ranks
+  vs both.** (BK) tied on season win totals, where luck swamps the signal; this scores every future game instead. For
+  each season 2021-25 and as-of week w = 3..17 (before week w's games): our Power rank basis (net from this week's
+  lineup, as the playoff simulation uses) and the market rank (tools/market_wins_eval.market_ratings: ridge fit to the
+  season's closing spreads through week w). Rows = every regular-season game in weeks w+1 .. 18 (its own line not yet
+  posted), label = home won (ties dropped). Arms, each a logistic regression fit walk-forward on seasons before (scored
+  2022-25): OURS = home + our rank gap + Elo gap (production's future-game form, refit); MARKET = home + market rank
+  gap + Elo gap; BLEND = home + both rank gaps + Elo gap. Also reported: each without Elo, and by horizon (1-4, 5-8, 9+
+  weeks ahead). CI = 2,000 resamples of games (a game's rows from every as-of week move together). GATE for BLEND to
+  replace OURS in the playoff odds / Power: Brier lower, CI upper < 0, improvement >= 0.002, lower in >= 3 of 4
+  seasons; CONFIRM 2026 (games played so far) same direction. Because BLEND makes the market an input to our model,
+  a pass goes to the owner before shipping. OURS vs MARKET: reported, not gated.
+- **RESULT {#market-games} (BL) future-game win chances, our ranks vs market ranks vs both: FAIL (tie).**
+  tools/market_games_eval.py, 2022-25, 893 games / 7,233 game x as-of rows. Brier ours .2314, market .2307, blend .2309;
+  BLEND - OURS -0.0005 [-0.0024, +0.0014] (gate needs CI upper < 0 and <= -0.002): FAIL; better 3 of 4 seasons;
+  CONFIRM 2026 (42 games) +0.0015, the wrong way. MARKET - OURS -0.0007 [-0.0042, +0.0028]: a tie. Without Elo: ours
+  .2341, market .2325, blend .2314 (BLEND - OURS -0.0028 [-0.0054, +0.0001]): the ranks alone carry different
+  information, but Elo already supplies most of what the market adds. By horizon (ours / market / blend): 1-4 weeks
+  ahead .2279 / .2250 / .2262 (market ahead: spreads know current injuries and news); 5-8 .2314 / .2307 / .2304; 9+
+  .2377 / .2410 / .2401 (ours ahead: the market over-reacts to the present). Blend weights (2022-25, reading only):
+  our rank gap .0113, market .0168, Elo .263 per 100. Lead, not a result: the horizon split suggests the market's edge
+  is short-term news that our injury handling (Power rank C, returns) partly covers already.
