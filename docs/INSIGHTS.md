@@ -3246,3 +3246,14 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   win chance by ~.006 in weeks 1-4, ~.02 in 5-8 and ~.014 from week 9 (lines carry this week's injuries, weather and
   news). Lead, not a result: a one-weight version (gap x [weeks 1-8]) fit on more seasons once the engine backtests
   before 2021; the win totals for 2016-20 are on file.
+- **Gap split (descriptive, 2026-10-20; tools/gap_split.py): the whole gap to Vegas is game-specific, none of it is
+  team strength.** 1,021 games 2022-25, weeks 2-18, walk-forward. Brier: ours .2257; MARKET SEASON VIEW (ratings fit
+  to every closing spread through last week, so the market's opinion of the teams with nothing about this game) .2281,
+  + Elo .2262; Vegas's line for this game .2099. Market season view - ours +0.0024 [-0.0033, +0.0082] (we judge team
+  strength as well as the market does); line - market season view -0.0182 [-0.0248, -0.0117]: all of the .0158 gap is
+  what the line knows about THIS game beyond season-long strength (injuries beyond the QB, rest, weather, motivation,
+  matchup, news). By weeks, ours / season view / line: 2-6 .2464 / .2431 / .2288; 7-12 .2159 / .2190 / .2040; 13-18
+  .2176 / .2240 / .1997 (largest late: resting starters, playoff stakes). Caveat: the season view lags one week of
+  results (lines through last week were set before last week's games); adding Elo (which has them) barely moves it.
+  Direction: stop guessing at team-strength signals; the missing piece is game-specific, and the win formula's only
+  game-specific input today is the starting QB (non-QB absences don't reach it at all).
