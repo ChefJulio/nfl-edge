@@ -38,7 +38,9 @@
       sec.classList.remove('soon');
       let IX = null, Q = null, busy = 0, paint = null, maxN = 0, csvRows = null;  // csvRows: the shown table as [[cell...]]
       const defaults = E.defaults;
-      const fromUrl = () => { try { const t = new URLSearchParams(location.search).get('t'); return t ? JSON.parse(decodeURIComponent(escape(atob(t)))) : null; } catch (e) { return null; } };
+      // a shared link: ?t= (the page's own, base64) or ?q= (plain JSON, easy to write by hand or by an LLM: llms.txt)
+      const fromUrl = () => { try { const u = new URLSearchParams(location.search), q = u.get('q'), t = u.get('t');
+        return q ? JSON.parse(q) : t ? JSON.parse(decodeURIComponent(escape(atob(t)))) : null; } catch (e) { return null; } };
       const saved = () => { try { return JSON.parse(localStorage.getItem(LS) || 'null'); } catch (e) { return null; } };
       sec.innerHTML = `<div class="sec-head"><div><h2>Trends</h2><p>Ask the play-by-play anything: every run and pass since 1999, with charting (personnel, coverage, routes, pressure, play action...) where it exists. Tap a row to change it.</p></div></div>
         <div class="dt-card tr-card"><div class="tr-q"></div></div>
@@ -725,10 +727,11 @@
       });
       E.init().then(ix => {
         IX = ix;
-        Q = E.normalize(Object.assign({}, saved() || {}, fromUrl() || {}));
+        // a link is a whole query (its fields over the defaults), never mixed with what was open here before
+        Q = E.normalize(fromUrl() || saved() || {});
         // a shared link seeds the query once; drop ?t= so later edits (saved locally) survive a reload
-        if (location.search.includes('t=')) history.replaceState(null, '', location.pathname + location.hash);
-        update();
+        if (/[?&][tq]=/.test(location.search)) history.replaceState(null, '', location.pathname + location.hash);
+        E.resolveNames(Q, { pickRecent: true }).then(() => update(), () => update());
       }).catch(() => { sec.querySelector('.tr-base').textContent = 'Play data is not available on this page.'; });
     },
   };

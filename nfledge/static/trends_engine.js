@@ -641,6 +641,34 @@
     [...coaches].forEach(c => opts.push([`${c} (head coach)`, `C:${c}`, c]));
     return opts.sort((a, b) => a[0].localeCompare(b[0]));
   });
+  // names where a query wants ids (owner 2026-10-22: links written by LLMs): "who": "P:Aaron Jones" and player filter
+  // values ("qb", "with", "wo", "onw", "onx") given as names are looked up among the seasons in range (an exact name
+  // first, else a partial match). Unique: replaced by the id. Several: { pickRecent } takes the most recent player,
+  // else the name stays and is reported in problems with the candidates.
+  const GSIS = /^\d\d-\d{7}$/, PLAYER_FILTERS = ['qb', 'with', 'wo', 'onw', 'onx'];
+  const resolveNames = (Q, { pickRecent = false } = {}) => {
+    const named = v => !GSIS.test(String(v).split('|')[0]);
+    const want = (/^P:/.test(Q.who) && named(Q.who.slice(2))) || PLAYER_FILTERS.some(k => vals(Q, k).some(named));
+    if (!want) return Promise.resolve({ Q, problems: [] });
+    return people(Q).then(list => {
+      const ps = list.filter(o => o[1].startsWith('P:')).map(o => ({ o, s: +((o[0].match(/\((\d{4})\)$/) || [])[1] || 0) }));
+      const problems = [];
+      const pick = name => {
+        const t = String(name).toLowerCase().trim(), ex = ps.filter(x => x.o[2].toLowerCase() === t);
+        const c = (ex.length ? ex : ps.filter(x => x.o[2].toLowerCase().includes(t))).sort((a, b) => b.s - a.s);
+        if (c.length === 1 || (c.length && pickRecent)) return c[0].o;
+        problems.push({ name, candidates: c.slice(0, 10).map(x => ({ label: x.o[0], who: x.o[1] })) });
+        return null;
+      };
+      if (/^P:/.test(Q.who) && named(Q.who.slice(2))) { const c = pick(Q.who.slice(2)); if (c) { Q.who = c[1]; Q.wn = c[2]; } }
+      PLAYER_FILTERS.forEach(k => {
+        if (!(k in Q.f)) return;
+        const out = vals(Q, k).map(v => { if (!named(v)) return v; const c = pick(v); return c ? `${c[1].slice(2)}|${c[2]}` : null; }).filter(Boolean);
+        setF(Q, k, out, isNot(Q, k));
+      });
+      return { Q, problems };
+    });
+  };
   // a team's players over the seasons in range, most plays first: role 'fam' (the measure's player), 'qb'
   // (dropbacks), 'any' (rushes + dropbacks + targets)
   const countPlayers = (Q, t, role) => Promise.all(spanSeasons(Q).map(s => loadSeason(s, false, FAM[Q.fam].st))).then(list => {
@@ -867,6 +895,6 @@
     defaults, normalize, famMetric, needs, covers, spanSeasons, vals, isNot, setF, optLabel, whoLabel, seasonsTxt, byTxt, gameTxt, markTxt,
     defMin, summaryParts, describe, UNITS, ST_TXT, cap, POSW, posKey, posSel,
     // data and counting
-    init, ix: () => IX, bio, loadBio, people, countPlayers, teamOfPlayer, compute, tableRows, gameRows, gameLabel, gameOrd, keepRows, answer, schema,
+    init, ix: () => IX, bio, loadBio, people, resolveNames, countPlayers, teamOfPlayer, compute, tableRows, gameRows, gameLabel, gameOrd, keepRows, answer, schema,
   };
 });

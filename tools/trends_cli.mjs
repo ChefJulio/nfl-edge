@@ -31,34 +31,18 @@ const load = /^https?:/.test(data)
 const E = createEngine(load);
 const out = x => process.stdout.write(`${typeof x === 'string' ? x : JSON.stringify(x, null, 1)}\n`);
 const fail = msg => { process.stderr.write(`${msg}\n`); process.exit(1); };
-const GSIS = /^\d\d-\d{7}$/;
-const PLAYER_FILTERS = ['qb', 'with', 'wo', 'onw', 'onx'];
 
-// a name -> [label, value, name] candidates among the seasons in range (exact name first)
+// a name -> [label, value, name] candidates among the seasons in range (exact name first), for --find
 const findPeople = (Q, name) => E.people(Q).then(list => {
   const t = name.toLowerCase().trim(), exact = list.filter(o => o[2].toLowerCase() === t);
   return exact.length ? exact : list.filter(o => o[2].toLowerCase().includes(t));
 });
 const resolve = async Q => {
-  if (/^P:/.test(Q.who) && !GSIS.test(Q.who.slice(2))) {
-    const c = (await findPeople(Q, Q.who.slice(2))).filter(o => o[1].startsWith('P:'));
-    if (c.length !== 1) fail(c.length ? `"${Q.who.slice(2)}" matches several players: ${c.slice(0, 10).map(o => `${o[0]} = ${o[1]}`).join('; ')}` : `no player "${Q.who.slice(2)}" in ${Q.from}-${Q.to}`);
-    Q.who = c[0][1]; Q.wn = c[0][2];
-  }
-  for (const k of PLAYER_FILTERS) {
-    if (!(k in Q.f)) continue;
-    const list = Array.isArray(Q.f[k]) ? Q.f[k] : [Q.f[k]], done = [];
-    for (const v of list) {
-      if (GSIS.test(String(v).split('|')[0])) { done.push(v); continue; }
-      const c = (await findPeople(Q, v)).filter(o => o[1].startsWith('P:'));
-      if (c.length !== 1) fail(c.length ? `filter ${k}: "${v}" matches several players: ${c.slice(0, 10).map(o => `${o[0]} = ${o[1]}`).join('; ')}` : `filter ${k}: no player "${v}"`);
-      done.push(`${c[0][1].slice(2)}|${c[0][2]}`);
-    }
-    Q.f[k] = done.length === 1 ? done[0] : done;
-  }
+  const { problems } = await E.resolveNames(Q);
+  if (problems.length) fail(problems.map(p => (p.candidates.length ? `"${p.name}" matches several players: ${p.candidates.map(c => `${c.label} = ${c.who}`).join('; ')}` : `no player "${p.name}" in ${Q.from}-${Q.to}`)).join('\n'));
   return Q;
 };
-const link = Q => `${SITE}?t=${encodeURIComponent(Buffer.from(JSON.stringify(Q), 'utf8').toString('base64'))}#players/trends`;
+const link = Q => `${SITE}?q=${encodeURIComponent(JSON.stringify(Q))}#players/trends`;
 const csv = rows => {
   if (!rows.length) return '';
   const head = Object.keys(rows[0]), cell = v => { const s = v == null ? '' : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };

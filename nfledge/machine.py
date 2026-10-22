@@ -21,6 +21,7 @@ import html
 import json
 import math
 import re
+import urllib.parse
 from pathlib import Path
 
 import markdown
@@ -232,6 +233,42 @@ def _kb(n: int) -> str:
   return f"{max(1, round(n / 1024))} KB"
 
 
+def trends_link(base: str, q: dict) -> str:
+  """A Trends query as a link (?q= plain JSON; the page fills defaults and looks up player names)."""
+  return f"{base}?q={urllib.parse.quote(json.dumps(q, separators=(',', ':')))}#players/trends"
+
+
+def trends_md(base: str) -> str:
+  """llms.txt section (owner 2026-10-22): how an assistant answers play-by-play questions with a Trends link."""
+  ex = [("Aaron Jones's rushing against the Packers while with the Vikings, by season",
+         {"fam": "rush", "met": "ypc", "who": "P:Aaron Jones", "f": {"vs": "GB", "tm": "MIN"}, "by": "season", "from": 2024, "to": 2025}),
+        ("Receiving yards per route run, tight ends, 2025",
+         {"fam": "route", "met": "yprr", "f": {"rpos": "TE"}, "from": 2025, "to": 2025}),
+        ("Rushing yards per carry on 3rd and 1-3, every team, last 3 seasons",
+         {"fam": "rush", "met": "ypc", "by": "team", "f": {"down": "3", "dist": "R:1~3"}}),
+        ("Most 100-yard rushing games in 2025, with the longest streak",
+         {"fam": "rush", "met": "yds", "by": "pmark", "gt": 100, "from": 2025, "to": 2025})]
+  exs = "\n".join(f"  - {t}: {trends_link(base, q)}" for t, q in ex)
+  return f"""## Ask the play-by-play (Trends)
+
+Trends answers questions over every run and pass play since 1999 (charting: personnel, coverage, routes, pressure
+2016 on; play action, motion 2022 on): leaderboards against the league in the same situation, splits, 2-D grids,
+game logs, streaks and best stretches. Its rushing / receiving / passing totals match nflverse's official season
+stats (audit: https://github.com/ChefJulio/nfl-edge/blob/main/docs/trends_audit.md).
+
+To answer a question with it, give the person a link: {base}?q=<URL-encoded JSON query>#players/trends. The page
+opens with the answer. The query, and every measure, filter (allowed values, ranges, presets), breakdown and which
+seasons have which charting: [{base}data/plays/schema.json]({base}data/plays/schema.json). Unset fields take
+defaults (rushing YPC, every player, regular season, last 3 seasons); players can be named ("who": "P:Aaron Jones",
+"f": {{"wo": "Justin Jefferson"}}), the page looks them up. Ranges are "R:lo~hi"; several values of one filter are a
+list (any of); "fn": {{"<filter>": 1}} excludes. Examples:
+{exs}
+
+To compute answers yourself (no browser): the same engine runs from the command line,
+`node tools/trends_cli.mjs '<query JSON>' --data={base}` in the source repo (https://github.com/ChefJulio/nfl-edge).
+"""
+
+
 def llms_txt(base: str, season: int, week: int, generated: str, area_files: list[tuple[str, str, int]],
              sizes: dict[str, int]) -> str:
   ar = "\n".join(f"  - [{t}]({base}model/{s}.md) ({_kb(n)})" for t, s, n in area_files)
@@ -264,6 +301,7 @@ are the same content in plain text and JSON.
   the result (also on GitHub: https://github.com/ChefJulio/nfl-edge/blob/main/docs/INSIGHTS.md)
 - [Source code](https://github.com/ChefJulio/nfl-edge)
 
+{trends_md(base)}
 ## Data (JSON)
 
 - [{base}index.json]({base}index.json): this week: players (projection, stat line, range quantiles; `play` = chance

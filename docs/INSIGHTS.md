@@ -4060,4 +4060,9 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
     position (nflverse's current listing, used for every season: a player who switched is counted at his current one).
     Position filter (QB / RB / WR / TE; Routes keeps its on-field position) as chips in the Who sheet, read into the
     subject ("Every running back", "BUF wide receivers"), plus a Position breakdown.
+  - **LLM links (owner: "we have [an llms.txt] already don't we?").** llms.txt gains "Ask the play-by-play (Trends)": the
+    `?q=<URL-encoded JSON>` link form (plain JSON, unlike the page's base64 `?t=`, so an assistant can write it), the
+    schema, defaults, named players, four worked example links (each opened and checked). Player names are looked up
+    by the engine (`resolveNames`; the page takes the most recent player on a tie, the CLI lists the candidates). Fixed:
+    a link's query was merged with the viewer's last query; a link is now the whole query.
 
