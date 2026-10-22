@@ -3666,3 +3666,17 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   ~0.6-1.4 under projection at every defense level (the known top-tier over-projection, {#median-calibration}).
   Surtain 2024 (PFR coverage): 65 targets, 40-405-3, 4 INT; in the Jeudy 9-235-1 game 4 targets, 3-25-1 (production
   moved to the receivers he wasn't on). Not pursued.
+- **PRE-REGISTERED 2026-10-21 (before the list is built or any outcome is looked at): (CF) shadow corners** (owner's
+  friend: "prime surtain was famously a shadow corner"; "make it hyper specific to shadow corners and their fantasy
+  impact"; owner: "where does it stop ... at what point does he fall off"). Denver 2021-25 ranked 1st of 32 in opposing
+  WR1 points vs their own averages (-1.78/game, SE 0.90; WR2 -0.50), but one team can't validate a model term.
+  LIST (built from published reporting only, without fantasy outcomes): data/history/shadow_corners.csv, season x
+  corner, 2016-25, criterion fixed now: reporting (PFF, beat writers, team sites) that he followed the opponent's top
+  receiver in most of his games that season (a published shadow rate >= 50%, or shadowed in >= 6 games), with source
+  URLs. TEST (tools/shadow_eval.py): opposing WR1s (top WR by targets before the game, 3+ games) facing a listed
+  corner's team in a game he played (PFR coverage row that week) vs all other WR1-games: (a) actual minus season
+  average (descriptive), (b) the model's miss (actual - projected, cached baselines 2021-25). GATE for a model term:
+  (b) for listed games below 0 with a 95% CI (season-week bootstrap) excluding 0, the effect present in >= 2/3 of
+  listed corners with 3+ such games, and stable split by season halves (2021-23 vs 2024-25, same sign). If it passes,
+  a pre-registered term: listed corner active -> opposing WR1 shifted by the fitted amount, scaled by his
+  season-to-date coverage yards per target allowed vs the listed group's (aging / form fades it). Else closed.
