@@ -3,6 +3,10 @@
 Weekly opponent-adjusted NFL analytics (fantasy QB/RB/WR/TE projections + team ratings) built in Python, rendered
 to one static HTML page, deployed to GitHub Pages: https://chefjulio.github.io/nfl-edge/ (repo ChefJulio/nfl-edge).
 
+**What the site is** (README "What's on the site"): a free NFL tracking site for fantasy players: player and team
+lookup (cards, career game logs, health, contracts, depth charts), live gamecasts, league import, historical stats,
+plus the tested projection and chance-to-play models. The models are one part; don't treat it as a report generator.
+
 **Read `docs/INSIGHTS.md` before changing the model or the page** (section 9 = current open threads and pending
 owner decisions). It records every data quirk, every backtest
 result (including ideas that were tested and rejected, with numbers), and the owner's preferences. Do not re-try

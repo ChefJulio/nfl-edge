@@ -1,31 +1,44 @@
 # nfl-edge
 
-**[This week's report (live)](https://chefjulio.github.io/nfl-edge/)** - rebuilt on every push and daily.
+**[Live site](https://chefjulio.github.io/nfl-edge/)** - rebuilt on every push, on a schedule, and whenever news
+breaks (injury statuses, practice reports, inactives, line moves: `tools/news_watch.py`).
 
-Weekly opponent-adjusted NFL analytics for fantasy football (QB/RB/WR/TE) and team matchups. One command, one
-static mobile-friendly HTML report.
+A free, mobile-first site for following the NFL as a fantasy player: one place to look up any player or team,
+follow games live, and get honest, tested projections and chance-to-play numbers. Built solo in October 2026.
+The prediction models are one part; most of the site is reference and tracking that otherwise takes Spotrac,
+OverTheCap, ESPN / CBS and a fantasy app together.
 
-```
-python -m venv .venv && .venv\Scripts\pip install -r requirements.txt
-.venv\Scripts\python run.py            # auto-detects the next week to project
-.venv\Scripts\python run.py --week 7   # project a specific week (uses only data before it)
-.venv\Scripts\python run.py --open     # open the report when done
-```
+## What's on the site
+- **Player search** (header, every page): any current or past player (prefix or partial name), active players
+  first. A **player card** has: this week's projection with its range, matchup and stat line; **health** (official
+  tag, chance to play, practice participation day by day against his team's report calendar, injury history and
+  timeline); recent form; career **game logs** (dense, scannable, every game since his debut); bio, draft,
+  **contract**; a news log; the **Edge grade** (a 0-99 percentile of production for his position: has he been
+  succeeding in the NFL, not a prediction). Historical players included (Hall of Fame badge, era-correct teams).
+- **Teams**: every team's page (power ranking, record, next matchup, schedule, playoff history, depth chart by
+  recent snaps and as officially reported); league-wide Power rankings (points per game vs average, by unit),
+  Standings, Playoff odds (10,000 simulated seasons), team Stats, the Draft (every pick, searchable).
+- **Players**: Rankings (this week and rest of season, re-scored to your league's settings), Stats, Roles (snap
+  and opportunity shifts), Injuries (every listed player, sorted by relevance), Moves (transactions incl.
+  practice-squad elevations), Trends (filterable play-level stats since 1999).
+- **Games**: matchups with model vs Vegas lines, and a **gamecast** for every game: field view with play gains,
+  parsed play text (penalties, who did what), fantasy points by play, every play sortable by win-probability
+  swing and scrubbable, team and player box scores, highlight links; live games refresh every 30 seconds.
+- **Fantasy**: import a Sleeper league (username or league id; public ESPN leagues by id, not yet tested on a real
+  league); lineup, matchup, live scoring, rosters, waivers and trade views, rankings re-scored to its scoring.
+- **Model**: how every number is made, the fitted formulas, and the walk-forward track record (`MODEL.md`).
 
-Output: `report/nfl_edge_week{N}.html`. The first run downloads ~4 seasons of data plus practice history from
-2018 (a few minutes); later runs only refetch what changed.
-
-## Report sections
-1. **Player rankings** by position: projection (half PPR, if active) with a calibrated floor/ceiling range bar,
-   Inactive% (injury + healthy-scratch risk), team-colored matchup with grade and points vs an average defense,
-   season FP/G, league tier (QB1/RB2/WR3...), expert rank, stat line with TD odds (1 / 2 / 3+), bold takeaway. Tap a row for
-   season stats, weekly points and schedule-adjusted FP/G; bye-week players listed under each table.
-2. **Matchups**: model line/total vs Vegas with plain-language edges, and a tug-of-war per battle (each
-   offense's passing and running vs the other defense) in points this game.
-3. **Power rankings**: points per game by unit (7 ranks), rank range, strength of schedule played/left, trend.
-4. **Role-change alerts**: snap / opportunity share spikes (waiver targets). Alerts only, not model inputs.
-5. **Model**: how every number is calculated, the exact fitted formulas and weights, and the walk-forward
-   track record (model vs FantasyPros experts vs Vegas-scaled vs raw stats), all from `MODEL.md` with live values.
+## How good the numbers are (measured, walk-forward 2021-25; details in the Model tab and `docs/INSIGHTS.md`)
+- **Chance to play**: better than every reading of the official report (final-report Brier 0.086 vs 0.105 for
+  "game status + Friday practice", 0.126 for "Questionable = 50/50"), calibrated within about a point in every
+  probability band, from Tuesday (before any report) through game day; it knows the report calendar, flags
+  overdue reports, and reads in-game injuries and returns. We aren't aware of another free source publishing
+  tested, calibrated play probabilities (most publish only Q / D / O tags); not benchmarked against paid ones.
+- **Projections**: start / sit picks about on par with the FantasyPros expert consensus and well ahead of season
+  averages (fantasy MAE ~5.2 half-PPR points on fantasy-relevant players vs 5.6 for "season average so far").
+  The value is mostly the player model: without Vegas lines and team ratings accuracy drops under 1%.
+- Every model change is pre-registered and gated on out-of-sample tests; rejected ideas are kept with their
+  numbers (`docs/INSIGHTS.md`), so the record of what didn't work is as complete as what did.
 
 ## For contributors and agents
 Start with `CLAUDE.md` (layout, commands, rules) and `docs/INSIGHTS.md` (data quirks, every backtest result
@@ -53,9 +66,11 @@ including rejected ideas, owner preferences, open threads).
 - `exclusions.csv`: drop injury-shortened games from a player's usage/efficiency (`player,season,week,reason`).
 
 ## Data sources (all free)
-nflverse via `nflreadpy` (play-by-play, schedules + Vegas lines, rosters, snaps, injuries, depth charts, draft,
-participation), FantasyPros ECR via nflverse, Open-Meteo wind forecasts, and NFL.com's injury API for daily
-practice participation. That last one uses the public key nfl.com's own site uses: unofficial, may break or
+nflverse via `nflreadpy` (play-by-play, schedules + Vegas lines, rosters, snaps, injury history, depth charts,
+draft, contracts, Next Gen Stats, PFR advanced stats), FantasyPros ECR via nflverse, ESPN's public APIs (injury
+news, game feeds, transactions), ProFootballRumors (practice-squad elevations), Sleeper projections (reference),
+Open-Meteo wind forecasts, and NFL.com's injury API: the single source for the current week's injury report
+(practice days with dates, game statuses). That last one uses the public key nfl.com's own site uses: unofficial, may break or
 conflict with NFL terms. Turn it off with `nfl_api_practice = false` (falls back to final practice status).
 Each run also archives the live injury report so a local daily-practice history accumulates regardless.
 
