@@ -3845,6 +3845,23 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   S29 Sunday team Saturday 10 a.m. with Friday missing, S30 a travel week's extra report day: 28 of 30 pass (S06, S11).
   Check (scratch/chrono_bt.py): the 2025 backtest run twice in one process, chronology on vs off: all 7,668 rows
   identical (chance to play, projection, status). Past weeks are kicked off, so the change is live-only by design.
+- **RESULT {#ps-stage1} (CE) stage 1, P(plays) for practice-squad players: FAIL.** tools/ps_eval.py, nfledge/
+  practice_squad.py (logistic with the pre-registered inputs + two products: elevated last week x room absences, room
+  absences x experience). Pool 2020-26: 19,515 player-weeks, played 1.8% (the earlier 4.3% read the next week's
+  roster); played when elevated 57.4%, never otherwise, so P(plays) = P(elevated) x ~57%. 2022-25 Brier base 0.0155 ->
+  0.0152, -0.0002 [-0.0006, +0.0001]; 2026 -0.0006. Calibration: predicted 35-50% played 5.3% (n 19). Stage 2 not run.
+- **PRE-REGISTERED 2026-10-22, a second attempt after seeing {#ps-stage1} (weaker evidence, recorded as such):
+  (CE2) room size and the team's next man.** Missing inputs: how many healthy players his position room has LEFT (last
+  week's active players at the position minus this week's Out / Doubtful / new reserve), by position; and whether he
+  is his team's first practice-squad option at the position that week (most elevations used, then most experience).
+  Same pool, label, walk-forward and gate as stage 1. If it fails, (CE) closes: the live site keeps adding elevated
+  players once announced (nfledge/elevations.py, Saturdays).
+- **RESULT {#ps-stage1-v2} (CE2): FAIL; (CE) CLOSED.** Same numbers as stage 1: 2022-25 -0.0002 [-0.0006, +0.0001],
+  2026 -0.0007; 35-50% band played 5.6% (n 18). Room size and "first option" add nothing: before Saturday there isn't
+  enough public signal to say which practice-squad player gets elevated better than a flat rate (1.8% play). The site
+  keeps adding elevated players once announced. Owner 2026-10-22: the Marks case was really Marks / Ogunbowale (an
+  active back, handled by {#rb-split-wow}: Ogunbowale 2.1 -> 5.3); Jordan was reverted and put on the practice-squad
+  injured list (0%).
 - **DESCRIPTIVE 2026-10-21 (owner's friend: "Pat Surtain's OPRK for WR1 is #1 hardest ... shadow CB can nuke WRs"):
   WR1 suppression is not a lasting defensive trait.** tools/wr1_suppression.py, play-by-play 2016-25, 4,212 team-games:
   WR1 / WR2 = an offense's top two WRs by targets before the game; result = half-PPR points minus his own average over

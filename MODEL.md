@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 3f2ad015efe80242
+documented_code_hash: 19db839cd52290fd
 ---
 # How the model works
 
@@ -525,6 +525,7 @@ Durability is games missed injured per 1,000 snaps on the field since 2013 (offe
 - **Rejected** - Should the before-the-report chance to play learn elapsed time (treating a bye as two weeks of healing, taught with examples of the game two weeks after an injury)? - No: worse after byes, because without a bye the player usually plays a game in between that carries its own injury risk; a bye isn't the same as two calendar weeks (2026-10). <!-- tried:time-rows -->
 - **Rejected** - Less shrinkage for team defense ratings (pushing defenses away from average)? - No: game margin predictions got slightly worse at half and a third of the shared shrinkage, as they did at triple; the shared setting is the best of those tried (2026-10). <!-- tried:def-shrink-2 -->
 - **Rejected** - Do days between games, or days since an injury started, help the chance-to-play models on their own? - Barely: a tiny gain before the report in past seasons that reversed in 2026, and none mid-week; the practice line and weeks on the report already carry the timing (2026-10). <!-- tried:days-alone -->
+- **Rejected** - Can we give practice-squad players a chance to play before their elevation is announced (Saturday), from their position room's injuries, their elevations so far and experience? - No: no better than a flat 1.8%; the site adds them once the elevation is announced (2026-10). <!-- tried:ps-stage1 --> <!-- tried:ps-stage1-v2 -->
 
 ## Rule changes and scoring eras
 
