@@ -3680,3 +3680,13 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   listed corners with 3+ such games, and stable split by season halves (2021-23 vs 2024-25, same sign). If it passes,
   a pre-registered term: listed corner active -> opposing WR1 shifted by the fitted amount, scaled by his
   season-to-date coverage yards per target allowed vs the listed group's (aging / form fades it). Else closed.
+- **RESULT {#shadow-corners} FAIL 2026-10-21: (CF) shadow corners.** List: 69 corner-seasons 2016-25 at high / medium
+  confidence (145 rows incl. low; two research passes per era merged, kept if either pass sourced it high / medium;
+  Charvarius Ward 2022 demoted to low: only a per-snap rate, contradicted). Deviation from the registration: "played that
+  week" = nflverse snap counts (defense snaps > 0), not a PFR coverage row; fixed before outcomes were seen. 786
+  shadowed WR1-games of 4308. (a) WR1 vs his own average: shadowed -0.71 [-1.15, -0.25], others +0.07 -- real, but
+  mostly already in the model's team pass-defense term. (b) model miss 2021-25: shadowed -0.50 [-1.20, +0.25] (n 297),
+  others +0.11 -- CI includes 0, gate fails. Per corner 13 of 18 negative (passes); 2021-23 -0.60, 2024-25 -0.41
+  (passes). Surtain -0.17 over 49 games (the model already prices Denver). Widest per corner: Sneed -3.90 (19), Turner
+  -2.95 (13); C. Ward +3.33, Forbes +1.54, Bradberry +1.48. Closed: no corner term. A ~0.5-point WR1 residual is
+  plausible but not separable from noise with ~300 games; revisit only with a larger charted list.
