@@ -369,7 +369,7 @@
     mount(sec) {
       NFLE.week().then(D => { if (D && D.teams) { TEAMS = D.teams; if (paint) paint(); } });
       sec.classList.remove('soon');
-      let IX = null, Q = null, busy = 0, paint = null, maxN = 0;
+      let IX = null, Q = null, busy = 0, paint = null, maxN = 0, csvRows = null;  // csvRows: the shown table as [[cell...]]
       const base = {}, extra = {}, merged = {};
       const defaults = () => ({ fam: 'rush', met: 'ypc', who: 'L', wn: '', by: 'player', by2: '', st: 'reg', from: null, to: null, f: {}, fn: {}, min: null });
       const fromUrl = () => { try { const t = new URLSearchParams(location.search).get('t'); return t ? JSON.parse(decodeURIComponent(escape(atob(t)))) : null; } catch (e) { return null; } };
@@ -480,7 +480,7 @@
             ${row('by', 'Break down', esc(byTxt()))}
             <div class="tq-row tq-mrow"><span class="tq-k">Minimum</span><span class="tq-v tr-min"><button type="button" class="tr-step" data-step="-1" aria-label="One fewer">&minus;</button><input type="range" min="0" max="${Math.max(maxN, Q.min ?? fam.min, fam.min * 2)}" step="1" value="${Q.min ?? fam.min}" aria-label="Minimum sample"><button type="button" class="tr-step" data-step="1" aria-label="One more">+</button> <b>${Q.min ?? fam.min}</b><span class="tr-w">${esc(fam.unit)}</span></span></div>
           </div>
-          <div class="tq-acts"><button type="button" class="tq-act" data-pick="examples">Examples</button><button type="button" class="tq-act tr-share">Copy link</button><button type="button" class="tq-act tq-reset">Reset</button></div>`;
+          <div class="tq-acts"><button type="button" class="tq-act" data-pick="examples">Examples</button><button type="button" class="tq-act tr-share">Copy link</button><button type="button" class="tq-act tq-csv" data-csv="1">Download CSV</button><button type="button" class="tq-act tq-reset">Reset</button></div>`;
       };
       const setFam = k => {
         Q.fam = k; Q.met = FIRST[k]; Q.min = null;
@@ -993,6 +993,8 @@
                 return `<td style="${shade(x)}" title="${esc(rowLab(r))} / ${esc(colLab(c))}: ${fmt(x.v, m[2])} ${esc(m[0])} on ${fmt(x.n)} ${esc(unit.toLowerCase())}"><b>${fmt(x.v, m[2])}</b><i>${fmt(x.n)}</i></td>`;
               }).join('')}${allCell(r)}</tr>`).join('');
               const capped = (R.length < rowsK.length ? ` Showing the ${R.length} ${esc(by[0])} rows with the most ${esc(fam.unit)}.` : '') + (C.length < colsK.length ? ` Showing ${C.length} of ${colsK.length} columns.` : '');
+              csvRows = [[`${by[0]} / ${by2[0]}`, ...C.map(colLab), 'All'], ...R.map(r => [rowLab(r), ...C.map(c => { const x = at.get(`${r}||${c}`); return x && x.n >= min && isFinite(x.v) ? +x.v.toFixed(m[2]) : ''; }),
+                (() => { const a = allR.get(r), v = m[1](a); return den(a) >= min && isFinite(v) ? +v.toFixed(m[2]) : ''; })()])];
               tb.innerHTML = `<p class="tr-gnote muted">${count ? 'Darker = more.' : `Green = better than the league (${fmt(lg, m[2])}), red = worse.`} Small number = ${esc(unit.toLowerCase())}.${hidden ? ` ${hidden} cell${hidden === 1 ? '' : 's'} under ${min} hidden (&middot;).` : ''}${capped}</p>
                 <div class="tr-gwrap"><table class="tr-grid"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
             };
@@ -1031,7 +1033,7 @@
               value: r => { const v = mm[1](r.a); return isFinite(v) ? v : null; }, html: r => fmt(mm[1](r.a), mm[2]) })),
           ];
           const tb = sec.querySelector('.tr-tbl');
-          if (!rows.length) { tb.innerHTML = '<p class="muted">No plays match.</p>'; paint = null; return; }
+          if (!rows.length) { tb.innerHTML = '<p class="muted">No plays match.</p>'; paint = null; csvRows = null; return; }
           const sort = by[3] === 'v' ? { key: 'v', dir: 'desc' } : { key: 'label', dir: by[3] === 'kd' ? 'desc' : 'asc' };
           // player / team rows are team-colored tiles like every other list (NFLE.ui); other groupings stay plain
           const tiled = Q.by === 'player' || isTeam, tm = r => Q.by === 'player' ? r.team : r.key;
@@ -1041,8 +1043,12 @@
           paint = () => {
             const min = Q.min ?? fam.min, keep = rows.filter(r => r.n >= min), hid = rows.length - keep.length;
             tb.innerHTML = '';
-            if (!keep.length) { tb.innerHTML = `<p class="muted">All ${rows.length} rows have fewer than ${min} ${esc(unit.toLowerCase())}. Lower the minimum to see them.</p>`; return; }
+            if (!keep.length) { csvRows = null; tb.innerHTML = `<p class="muted">All ${rows.length} rows have fewer than ${min} ${esc(unit.toLowerCase())}. Lower the minimum to see them.</p>`; return; }
             NFLE.Table(tb, Object.assign(o, { rows: keep }));
+            const num = (v, d) => (v == null || !isFinite(v) ? '' : +(+v).toFixed(d));
+            csvRows = [[cols[0].label, ...(Q.by === 'player' ? ['Team'] : []), unit, m[0], m[2] === 0 ? 'Share of league %' : 'vs league', ...extras.map(([, mm]) => mm[0])],
+              ...keep.slice().sort(by[3] === 'v' ? (x, y) => (LOWER.has(Q.met) ? -1 : 1) * ((y.v || 0) - (x.v || 0)) : (x, y) => (by[3] === 'kd' ? -1 : 1) * (x.key > y.key ? 1 : x.key < y.key ? -1 : 0)).map(r => [r.label, ...(Q.by === 'player' ? [r.team || ''] : []), r.n, num(r.v, m[2]),
+                m[2] === 0 ? (lg > 0 ? num((100 * r.v) / lg, 1) : '') : num(r.v - lg, m[2]), ...extras.map(([, mm]) => num(mm[1](r.a), mm[2]))])];
             if (hid) tb.insertAdjacentHTML('beforeend', `<p class="tr-hid muted">${hid} ${hid === 1 ? 'row' : 'rows'} under ${min} ${esc(unit.toLowerCase())} hidden.</p>`);
           };
           paint();
@@ -1075,6 +1081,18 @@
           const last = IX.seasons[IX.seasons.length - 1];
           Q = Object.assign(defaults(), { from: Math.max(IX.seasons[0], last - 2), to: last });
           update();
+          return;
+        }
+        if (e.target.closest('[data-csv]')) {
+          if (!csvRows) { e.target.closest('[data-csv]').textContent = 'Nothing to export'; setTimeout(() => { const b = qbox.querySelector('[data-csv]'); if (b) b.textContent = 'Download CSV'; }, 1600); return; }
+          const cell = v => { const t = String(v ?? ''); return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
+          const title = qbox.querySelector('.tq-sum').textContent.replace(/\s+/g, ' ').trim();
+          const text = [[title], ...csvRows].map(r => r.map(cell).join(',')).join('\r\n');
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(new Blob(['﻿' + text], { type: 'text/csv;charset=utf-8' }));
+          a.download = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80) || 'trends'}.csv`;
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(() => URL.revokeObjectURL(a.href), 4000);
           return;
         }
         if (e.target.closest('.tr-share')) {
