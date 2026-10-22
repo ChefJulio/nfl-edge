@@ -7,7 +7,9 @@ columnar and compact: teams, games, players and coaches are indexed lists, play 
 <season>.json   nflverse play-by-play (1999 on). Missing values: ay / yc -99; cp / xy / temp / wind -999; xp -1;
                 pl / rl / gp 0. ty: 0 designed run, 1 dropback (pass or sack), 2 QB scramble (counts as a rush, as in
                 nflverse's rushing stats). wp is the offense's win probability x100; wa is WPA x1000; cp is CPOE x10;
-                xp is xpass x100 (for pass rate over expected); xy is expected YAC x10.
+                xp is xpass x100 (for pass rate over expected); xy is expected YAC x10. y is the play's yards; yru / yre /
+                ypa are the rushing / receiving / passing yards credited (official-stat rules, laterals split); tdr / tdv
+                the rusher / receiver scored it, tdq a passing TD, tdo the offense scored.
                 games: [game_id, week, is_post, home team idx, indoor 0/1, turf 0/1/-1, temp F, wind mph, division 0/1,
                 spread x10 (home favored > 0), total x10, home coach idx, away coach idx].
 <season>_x.json charting, same play order, loaded only when a query uses it. NGS participation (2016-2025: formation,
@@ -37,7 +39,7 @@ import pandas as pd  # noqa: E402
 from nfledge import data as D  # noqa: E402
 from nfledge.config import load_config  # noqa: E402
 
-V = 5
+V = 6  # 6: credited yards / touchdowns (yru, yre, ypa, tdr, tdv, tdq, tdo) and lateral credit (lv, lvy, lu, luy, ltd)
 FIRST = 1999
 COVERED = 0.9
 COLS = ["game_id", "play_id", "season", "week", "season_type", "posteam", "defteam", "home_team", "play_type", "qtr", "down",
@@ -47,7 +49,9 @@ COLS = ["game_id", "play_id", "season", "week", "season_type", "posteam", "defte
         "rusher_player_name", "passer_player_id", "passer_player_name", "receiver_player_id", "receiver_player_name",
         "qb_kneel", "qb_spike", "two_point_attempt", "fumble_lost", "wp", "wpa", "cpoe", "xpass", "qb_hit",
         "tackled_for_loss", "xyac_mean_yardage", "roof", "surface", "temp", "wind", "div_game", "spread_line", "total_line",
-        "home_coach", "away_coach", "away_team",
+        "home_coach", "away_coach", "away_team", "rushing_yards", "receiving_yards", "passing_yards", "rush_touchdown",
+        "pass_touchdown", "td_team", "td_player_id", "lateral_receiver_player_id", "lateral_receiver_player_name",
+        "lateral_receiving_yards", "lateral_rusher_player_id", "lateral_rusher_player_name", "lateral_rushing_yards",
         # special teams (<season>_st.json)
         "kicker_player_id", "kicker_player_name", "punter_player_id", "punter_player_name", "kickoff_returner_player_id",
         "kickoff_returner_player_name", "punt_returner_player_id", "punt_returner_player_name", "kick_distance",
@@ -103,7 +107,7 @@ def dbs(s):
 def build(pbp: pd.DataFrame, season: int, full: dict) -> dict:
   p = pbp[pbp.play_type.isin(["run", "pass"]) & (pbp.qb_kneel != 1) & (pbp.qb_spike != 1) & (pbp.two_point_attempt != 1)
           & pbp.posteam.notna() & pbp.defteam.notna()].copy()
-  for c in ("posteam", "defteam", "home_team", "away_team"):
+  for c in ("posteam", "defteam", "home_team", "away_team", "td_team"):
     p[c] = p[c].replace(D.RELOCATED)
   teams = sorted(set(p.posteam) | set(p.defteam))
   ti = {t: i for i, t in enumerate(teams)}
@@ -113,7 +117,8 @@ def build(pbp: pd.DataFrame, season: int, full: dict) -> dict:
   gi = {gid: i for i, gid in enumerate(g.game_id)}
   ids = {}
   for idc, nmc in (("rusher_player_id", "rusher_player_name"), ("passer_player_id", "passer_player_name"),
-                   ("receiver_player_id", "receiver_player_name")):
+                   ("receiver_player_id", "receiver_player_name"), ("lateral_receiver_player_id", "lateral_receiver_player_name"),
+                   ("lateral_rusher_player_id", "lateral_rusher_player_name")):
     for gid, n in zip(p[idc], p[nmc]):
       if isinstance(gid, str) and gid not in ids:
         ids[gid] = full.get(gid) or (n if isinstance(n, str) else gid)  # full name from the players table
@@ -139,6 +144,19 @@ def build(pbp: pd.DataFrame, season: int, full: dict) -> dict:
     "wp": scale("wp", 100, -1), "wa": scale("wpa", 1000, 0), "cp": scale("cpoe", 10, -999), "xp": scale("xpass", 100, -1),
     "xy": scale("xyac_mean_yardage", 10, -999),
     "ru": pid("rusher_player_id"), "pp": pid("passer_player_id"), "re": pid("receiver_player_id"),
+    # credited, as in the official stats (owner 2026-10-22 audit): yards split at a lateral, and a touchdown only for the
+    # player who scored it (not a fumble / interception returned by the defense, not a teammate after a lateral)
+    "yru": num("rushing_yards").astype(int).tolist(), "yre": num("receiving_yards").astype(int).tolist(),
+    "ypa": num("passing_yards").astype(int).tolist(),
+    "tdr": ((num("rush_touchdown") == 1) & (p.td_player_id == p.rusher_player_id)).astype(int).tolist(),
+    "tdv": ((num("pass_touchdown") == 1) & (p.td_player_id == p.receiver_player_id)).astype(int).tolist(),
+    "tdq": (num("pass_touchdown") == 1).astype(int).tolist(),
+    "tdo": ((num("touchdown") == 1) & (p.td_team == p.posteam)).astype(int).tolist(),
+    # after a lateral: the player who took it (on a pass play: lr = receiving, else lu = rushing), his credited yards,
+    # and whether he scored (official stats credit those to him, not to the original receiver / rusher)
+    "lv": pid("lateral_receiver_player_id"), "lvy": num("lateral_receiving_yards").astype(int).tolist(),
+    "lu": pid("lateral_rusher_player_id"), "luy": num("lateral_rushing_yards").astype(int).tolist(),
+    "ltd": [int(isinstance(t, str) and (t == a or t == b)) for t, a, b in zip(p.td_player_id, p.lateral_receiver_player_id, p.lateral_rusher_player_id)],
   }
   fin = lambda v, k=1: int(round(float(v) * k)) if pd.notna(v) else -999  # noqa: E731
   games = [[r.game_id, int(r.week), 1 if r.season_type == "POST" else 0, ti.get(r.home_team, -1),

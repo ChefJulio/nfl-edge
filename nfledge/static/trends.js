@@ -18,16 +18,19 @@
     cr: 'created receptions', bl: 'blitzers', bf: 'backfield', rd: 'reads' };
   const FLAGS = ['tl', 'qh', 'pz', 'iw', 'ta', 'oo', 'px', 'mo', 'dr', 'cb', 'ct', 'cr', 'sg', 'nh', 'sc', 'rp'];
   // ---- metrics: [label, value from the sums, decimals, columns needed]
+  // yards and touchdowns are the credited ones where the season file has them (v6: yru / yre / ypa, tdr / tdv / tdq /
+  // tdo; official-stat rules), else the play's (older files)
   const rate = c => a => 100 * a[c + 'n'] / a[c + 'd'];
   const FAM = {
     rush: { label: 'Rushing', unit: 'rushes', min: 20, play: (P, j) => P.ty[j] !== 1, actor: (P, j) => P.ru[j],
-      add: (a, P, j) => { a.y += P.y[j]; a.td += P.td[j]; a.fd += P.fd[j]; a.x += P.y[j] >= 10; a.fl += P.fl[j]; },
+      add: (a, P, j) => { const y = P.yru ? P.yru[j] : P.y[j]; a.y += y; a.td += P.tdr ? P.tdr[j] : P.td[j]; a.fd += P.fd[j]; a.x += y >= 10; a.fl += P.fl[j]; },
+      lat: (P, j) => (P.lu ? P.lu[j] : -1), latAdd: (a, P, j) => { a.y += P.luy[j]; a.td += P.ltd[j]; },
       met: { ypc: ['YPC', a => a.y / a.n, 2], yds: ['Yards', a => a.y, 0], att: ['Rushes', a => a.n, 0], td: ['TDs', a => a.td, 0],
              epa: ['EPA / rush', a => a.e / 100 / a.n, 3], sr: ['Success %', a => 100 * a.s / a.n, 1], fd: ['1st down %', a => 100 * a.fd / a.n, 1],
              x: ['10+ yd %', a => 100 * a.x / a.n, 1], stuff: ['Stuffed %', rate('tl'), 1], fl: ['Fumbles lost', a => a.fl, 0],
              wpa: ['WPA', a => a.wa / 1000, 2, ['wa']] } },
     pass: { label: 'Passing', unit: 'dropbacks', min: 50, play: (P, j) => P.ty[j] === 1, actor: (P, j) => P.pp[j],
-      add: (a, P, j) => { const sk = P.sk[j], att = P.pa[j] && !sk; a.att += att; a.c += P.c[j]; a.y += sk ? 0 : P.y[j]; a.td += P.td[j] && P.c[j];
+      add: (a, P, j) => { const sk = P.sk[j], att = P.pa[j] && !sk; a.att += att; a.c += P.c[j]; a.y += sk ? 0 : P.ypa ? P.ypa[j] : P.y[j]; a.td += P.tdq ? P.tdq[j] : P.td[j] && P.c[j];
         a.int += P.in[j]; a.sk += sk; if (att && P.ay[j] > -99) { a.ay += P.ay[j]; a.ayn++; } if (att && P.cp[j] > -999) { a.cp += P.cp[j]; a.cpn++; }
         if (P.tt && P.tt[j] >= 0) { a.tt += P.tt[j]; a.ttn++; } },
       met: { ypa: ['Yds / att', a => a.y / a.att, 2], cmp: ['Comp %', a => 100 * a.c / a.att, 1], yds: ['Yards', a => a.y, 0], td: ['TDs', a => a.td, 0],
@@ -37,7 +40,8 @@
              qh: ['QB hit %', rate('qh'), 1], iw: ['INT-worthy %', rate('iw'), 1, ['iw']], ta: ['Throwaway %', rate('ta'), 1, ['ta']],
              oo: ['Out of pocket %', rate('oo'), 1, ['oo']], px: ['Play action %', rate('px'), 1, ['px']], wpa: ['WPA', a => a.wa / 1000, 2, ['wa']] } },
     rec: { label: 'Receiving', unit: 'targets', min: 15, play: (P, j) => P.ty[j] === 1 && P.re[j] >= 0, actor: (P, j) => P.re[j],
-      add: (a, P, j) => { const c = P.c[j]; a.c += c; a.y += c ? P.y[j] : 0; a.td += P.td[j] && c;
+      lat: (P, j) => (P.lv ? P.lv[j] : -1), latAdd: (a, P, j) => { a.y += P.lvy[j]; a.td += P.ltd[j]; },
+      add: (a, P, j) => { const c = P.c[j]; a.c += c; a.y += c ? (P.yre ? P.yre[j] : P.y[j]) : 0; a.td += P.tdv ? P.tdv[j] : P.td[j] && c;
         if (c && P.yc[j] > -99) { a.yac += P.yc[j]; a.ycn++; if (P.xy[j] > -999) { a.yo += P.yc[j] - P.xy[j] / 10; a.yon++; } }
         if (P.ay[j] > -99) { a.ay += P.ay[j]; a.ayn++; } if (P.cp[j] > -999) { a.cp += P.cp[j]; a.cpn++; }
         if (P.ct && P.ct[j] === 1) { a.ctt++; a.ctc += c; } },
@@ -54,11 +58,11 @@
     route: { label: 'Routes', unit: 'routes', min: 50, on: true, multi: true, play: (P, j) => P.ty[j] !== 0, actor: (P, j) => P.re[j],
       actors: (P, j, D) => (D.on.rr[j] || []),
       add: (a, P, j, act, D) => { if (act == null) return; const t = P.re[j] >= 0 && D.players[P.re[j]][0] === D.on.pl[act][0];
-        if (t) { a.tg = (a.tg || 0) + 1; const c = P.c[j]; a.c += c; a.y += c ? P.y[j] : 0; a.td += P.td[j] && c; } },
+        if (t) { a.tg = (a.tg || 0) + 1; const c = P.c[j]; a.c += c; a.y += c ? (P.yre ? P.yre[j] : P.y[j]) : 0; a.td += P.tdv ? P.tdv[j] : P.td[j] && c; } },
       met: { yprr: ['Yds / route', a => a.y / a.n, 2], tprr: ['Targets / route %', a => (100 * (a.tg || 0)) / a.n, 1], rr: ['Routes', a => a.n, 0],
              tgt: ['Targets', a => a.tg || 0, 0], yds: ['Yards', a => a.y, 0], rec: ['Catches', a => a.c, 0], td: ['TDs', a => a.td, 0] } },
     team: { label: 'Team offense', unit: 'plays', min: 50, play: () => true, actor: (P, j) => P.o[j], teamActor: true,
-      add: (a, P, j) => { const db = P.ty[j] !== 0; a.y += P.y[j]; a.db += db; a.td += P.td[j]; a.fd += P.fd[j];
+      add: (a, P, j) => { const db = P.ty[j] !== 0; a.y += P.y[j]; a.db += db; a.td += P.tdo ? P.tdo[j] : P.td[j]; a.fd += P.fd[j];
         if (P.xp[j] >= 0) { a.xo += db - P.xp[j] / 100; a.xon++; } },
       met: { epa: ['EPA / play', a => a.e / 100 / a.n, 3], ypp: ['Yds / play', a => a.y / a.n, 2], sr: ['Success %', a => 100 * a.s / a.n, 1],
              pr: ['Dropback %', a => 100 * a.db / a.n, 1], proe: ['Pass rate over exp.', a => 100 * a.xo / a.xon, 1, ['xp']],
@@ -201,7 +205,7 @@
       ['r', 'run expected', (P, j) => P.xp[j] >= 0 && P.xp[j] <= 30, 'a pass 30% or less'],
       ['m', 'toss-up play call', (P, j) => P.xp[j] > 30 && P.xp[j] < 70, 'a pass 30-70%']] },
     out: { label: 'Play result', group: 'Result', opts: [['10', 'gained 10+ yards', (P, j) => P.y[j] >= 10], ['20', 'gained 20+ yards', (P, j) => P.y[j] >= 20],
-      ['40', 'gained 40+ yards', (P, j) => P.y[j] >= 40], ['fd', 'first downs', eq('fd', 1)], ['td', 'touchdowns', eq('td', 1)],
+      ['40', 'gained 40+ yards', (P, j) => P.y[j] >= 40], ['fd', 'first downs', eq('fd', 1)], ['td', 'touchdowns (by the offense)', (P, j) => (P.tdo ? P.tdo[j] : P.td[j]) === 1],
       ['neg', 'no gain or a loss', (P, j) => P.y[j] <= 0], ['to', 'turnovers', (P, j) => P.in[j] === 1 || P.fl[j] === 1]] },
     res: { label: 'Game result', group: 'Game', g: true, known: (P, j, G, V, D) => margin(P, j, G, D) != null, opts: [['w', 'in wins', (P, j, G, V, D) => margin(P, j, G, D) > 0],
       ['l', 'in losses', (P, j, G, V, D) => { const m = margin(P, j, G, D); return m != null && m < 0; }],
@@ -1077,12 +1081,14 @@
               let ok = true;
               for (let k = 0; k < tests.length; k++) if (!tests[k](P, j, G, V, D)) { ok = false; break; }
               if (!ok) continue;
-              const acts = fam.multi ? fam.actors(P, j, D) : [fam.actor(P, j)];
+              // actors: the play's player(s), plus whoever took a lateral (credited yards / TD only, no carry or target)
+              const acts = fam.multi ? fam.actors(P, j, D).map(x => [x, 0]) : [[fam.actor(P, j), 0]];
+              if (fam.lat) { const L = fam.lat(P, j); if (L >= 0) acts.push([L, 1]); }
               for (let q = 0; q < acts.length; q++) {
-                const act = acts[q];
+                const [act, lat] = acts[q];
                 if (act < 0 && !fam.teamActor) continue;
                 if (posSet && !posSet.has(POSG[PL[act][2]] || PL[act][2])) continue;
-                common(league, P, j); fam.add(league, P, j, act, D);
+                if (lat) fam.latAdd(league, P, j); else { common(league, P, j); fam.add(league, P, j, act, D); }
                 if (wk === 'T' && P.o[j] !== wt) continue;
                 if (wk === 'V' && P.d[j] !== wt) continue;
                 if (wk === 'P' && act !== wp) continue;
@@ -1097,10 +1103,10 @@
                 if (key == null) continue;
                 let k2 = null;
                 if (by2) { k2 = by2[1](P, j, G, D, V); if (k2 == null) continue; }
-                plays++;
+                if (!lat) plays++;
                 const gk = by2 ? `${key}||${k2}` : key;
                 let a = groups.get(gk); if (!a) { a = blank(); a._k = [key, k2]; groups.set(gk, a); }
-                common(a, P, j); fam.add(a, P, j, act, D);
+                if (lat) fam.latAdd(a, P, j); else { common(a, P, j); fam.add(a, P, j, act, D); }
               }
             }
           });
@@ -1167,6 +1173,7 @@
               sortKey = 'v';
               note = `The best ${N} games in a row, among games with a matching play.`;
             }
+            if (!isT) { const h = csvHead, f = csvRow; csvHead = [...h, 'Player ID']; csvRow = r => [...f(r), r.ent]; }
             const CAP = 500;
             paint = () => {
               const min = Q.min ?? defMin();
@@ -1285,9 +1292,9 @@
             if (!keep.length) { csvRows = null; tb.innerHTML = `<p class="muted">All ${rows.length} rows have fewer than ${min} ${esc(unit.toLowerCase())}. Lower the minimum to see them.</p>`; return; }
             NFLE.Table(tb, Object.assign(o, { rows: keep }));
             const num = (v, d) => (v == null || !isFinite(v) ? '' : +(+v).toFixed(d));
-            csvRows = [[cols[0].label, ...(Q.by === 'player' ? ['Team'] : []), unit, m[0], m[2] === 0 ? 'Share of league %' : 'vs league', ...extras.map(([, mm]) => mm[0])],
+            csvRows = [[cols[0].label, ...(Q.by === 'player' ? ['Team'] : []), unit, m[0], m[2] === 0 ? 'Share of league %' : 'vs league', ...extras.map(([, mm]) => mm[0]), ...(Q.by === 'player' ? ['Player ID'] : [])],
               ...keep.slice().sort(by[3] === 'v' ? (x, y) => (LOWER.has(Q.met) ? -1 : 1) * ((y.v || 0) - (x.v || 0)) : (x, y) => (by[3] === 'kd' ? -1 : 1) * (x.key > y.key ? 1 : x.key < y.key ? -1 : 0)).map(r => [r.label, ...(Q.by === 'player' ? [r.team || ''] : []), r.n, num(r.v, m[2]),
-                m[2] === 0 ? (lg > 0 ? num((100 * r.v) / lg, 1) : '') : num(r.v - lg, m[2]), ...extras.map(([, mm]) => num(mm[1](r.a), mm[2]))])];
+                m[2] === 0 ? (lg > 0 ? num((100 * r.v) / lg, 1) : '') : num(r.v - lg, m[2]), ...extras.map(([, mm]) => num(mm[1](r.a), mm[2])), ...(Q.by === 'player' ? [r.key] : [])])];
             if (hid) tb.insertAdjacentHTML('beforeend', `<p class="tr-hid muted">${hid} ${hid === 1 ? 'row' : 'rows'} under ${min} ${esc(unit.toLowerCase())} hidden.</p>`);
           };
           paint();
