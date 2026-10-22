@@ -411,6 +411,9 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
   """gsis -> this season's practice days and games in date order (owner 2026-10-17: "the date the report was out,
   show the last 6, include games in that timeline, dates near each"). Events: ["p", date, D/L/F, game status on the
   week's last day or "", 1 when inferred], ["g", date, opponent, "vs"/"@", snap share or "out" or "" (upcoming), week].
+  His TEAM's calendar, whatever his status (owner 2026-10-21, Jordan Mason on IR showed his week-1 practices as his
+  latest): on a reserve list a day is ["p", date, "R", "IR" / "PUP" / "NFI" / "Res"] and a game's result is that tag;
+  on the practice squad ["p", date, "S", "PS"] and "PS".
   Every report day of the season (owner 2026-10-18: "rows for every day we know there's practice. full participation
   if they're healthy that day and not listed"): his listing that day if he was on the report, else full participation
   while he's on the 53-man roster (ACT / INA that week; reserve lists, practice squad and free agents get no row).
@@ -427,9 +430,13 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
   for g in sch.itertuples():
     for t, o, h in ((g.home_team, g.away_team, "vs"), (g.away_team, g.home_team, "@")):
       games[(D.RELOCATED.get(t, t), int(g.week))] = (str(g.gameday)[:10], D.RELOCATED.get(o, o), h, bool(pd.notna(g.home_score)), g.game_id)
-  rc = ros[(ros.season == cur) & ros.gsis_id.notna()][["gsis_id", "week", "team", "status"]]
+  rc = ros[(ros.season == cur) & ros.gsis_id.notna()]
+  rc = rc[["gsis_id", "week", "team", "status"] + (["status_description_abbr"] if "status_description_abbr" in rc else [])]
   team_wk = {(r.gsis_id, int(r.week)): ROSTER_TEAM.get(r.team, r.team) for r in rc.itertuples()}
   st_wk = {(r.gsis_id, int(r.week)): r.status for r in rc.itertuples()}
+  # his reserve list that week (IR / PUP / NFI), for the days and games he spent on it
+  res_wk = {(r.gsis_id, int(r.week)): roster_tag("RES", getattr(r, "status_description_abbr", None))
+            for r in rc.itertuples() if r.status == "RES"}
   st_exact = st_wk  # that week's own roster row (no carry-forward)
   ina_posted = {(ROSTER_TEAM.get(t, t), int(w)) for t, w in zip(rc[rc.status == "INA"].team, rc[rc.status == "INA"].week)}  # game-day list out
   ros_weeks = sorted({int(w) for w in rc.week})
@@ -474,19 +481,30 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
           ev.append(["p", d, c, gs])
         elif st in ("ACT", "INA"):
           ev.append(["p", d, "F", "", 1])  # 1 = inferred: on the roster, not on that day's report
+        elif st == "RES":
+          ev.append(["p", d, "R", at(res_wk, gid, w) or "Res"])  # on a reserve list that day
+        elif st == "DEV":
+          ev.append(["p", d, "S", "PS"])  # on the practice squad
     if not ev:
       continue
     for w in range(1, last_w + 2):  # his games through the week after the latest report week (the next one)
       t = at(team_wk, gid, w)
       gm = t and games.get((t, w))
-      if not gm or (w <= max(ros_weeks, default=0) and at(st_wk, gid, w) not in ("ACT", "INA")):
+      stw = at(st_wk, gid, w)
+      if not gm or (w <= max(ros_weeks, default=0) and stw not in ("ACT", "INA", "RES", "DEV")):
+        continue
+      if stw in ("RES", "DEV") and (gid, w) not in team_wk and not any((gid, k) in team_wk for k in range(w, 0, -1)):
         continue
       s_ = snap.get((gid, w))
       # a final game: inactive (game-day list, ESPN's ruling, or a reserve list) = "out"; his snap share once
       # posted and over 0; else a stat line = "p" (played, share not out yet); else on the active list = "a" (dressed,
       # no snap or none posted yet: available, not a missed game). Snaps alone never make it "out" (owner 2026-10-18).
       res = ""
-      if gm[3]:
+      if gm[3] and stw == "RES":
+        res = at(res_wk, gid, w) or "Res"  # missed it on a reserve list
+      elif gm[3] and stw == "DEV" and not ((gid, cur, w) in (stat_played or set()) or (snap.get((gid, w)) or 0) > 0):
+        res = "PS"  # on the practice squad, not elevated
+      elif gm[3]:
         rs = st_exact.get((gid, w))
         posted = (t, w) in ina_posted
         if (cur, w) in (ina or {}).get(gid, {}) or (posted and rs in ("INA", "RES")):

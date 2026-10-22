@@ -1219,6 +1219,9 @@
   // timeline"): his latest six practice days and games this season plus his next game (career log prac,
   // tools/player_logs.py practice_timeline)
   const PR_WORD = { D: 'Did not practice', L: 'Limited', F: 'Full' };
+  // his team's practice days and games whatever his status (tools/player_logs.py practice_timeline; owner 2026-10-21,
+  // Jordan Mason on IR showed his week-1 rows as his latest): a reserve list or the practice squad is its own row
+  const RES_WORD = { IR: 'On injured reserve', PUP: 'On the PUP list', NFI: 'On the NFI list', Res: 'On a reserve list', PS: 'On the practice squad' };
   const QN = { 1: '1st', 2: '2nd', 3: '3rd', 4: '4th', 5: 'overtime' };
   const practiceTl = L => {
     const ev = (L && L.prac) || [];
@@ -1229,11 +1232,14 @@
     const from = pr6.length ? pr6[0][1] : '';
     const past = done.filter(e => e[1] >= from), next = ev.find(e => e[1] > today && e[0] === 'g');
     const day = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
-    const row = e => e[0] === 'p'
+    const row = e => e[0] === 'p' && (e[2] === 'R' || e[2] === 'S')
+      ? `<div class="pt-row"><span class="pt-d">${day(e[1])}</span><span class="pr-chip pr-${e[2] === 'R' ? 'D' : 'n'}">${esc(e[3])}</span><span>${RES_WORD[e[3]] || esc(e[3])}</span></div>`
+      : e[0] === 'p'
       ? `<div class="pt-row"><span class="pt-d">${day(e[1])}</span><span class="pr-chip pr-${e[2]}">${e[2] === 'D' ? 'DNP' : e[2] + 'P'}</span><span>${PR_WORD[e[2]] || ''}${e[4] ? ' <span class="muted">· not on the report</span>' : ''}${e[3] ? ` · <b>${esc(e[3])}</b>` : ''}</span></div>`
       : (() => {
         // colored by what happened (owner 2026-10-18): played green, missed red, hurt during it orange (the
         // play-by-play injury notes or a news blurb, the episodes' ig = [week, quarter])
+        if (RES_WORD[e[4]]) return `<div class="pt-row pt-g pt-miss"><span class="pt-d">${day(e[1])}</span><span class="pt-gm">${esc(e[3])} ${tmL(e[2])}</span><span><b>did not play</b> · ${esc(e[4] === 'PS' ? 'practice squad' : `on ${e[4]}`)}</span></div>`;
         const ig = e[4] !== '' && e[4] !== 'out' && e[4] !== 'a' && ((L && L.inj) || []).map(x => x.s === L.cur && x.ig && x.ig[0] === e[5] ? x.ig : null).find(Boolean);
         const cls = e[4] === '' ? '' : e[4] === 'out' ? ' pt-miss' : ig ? ' pt-hurt' : ' pt-ok';
         const res = e[4] === '' ? (e[1] < today ? '<span class="muted">result pending</span>' : e[1] === today ? '<b>today</b>' : '<b>next game</b>')
