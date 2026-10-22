@@ -299,11 +299,10 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
     # had filed; the fetch is a few seconds, ~5 pages)
     pr = [cache.get("practice", s, lambda: fetch_practice_days(s), stale=(s == current) and
                     cache.age_hours("practice", s) > PRACTICE_TTL_HOURS) for s in seasons]
-    # An entry with no practice days isn't a weekly report row: NFL.com also files in-game rulings ("out for the rest of
-    # the game", "questionable to return") under that game's week (2026-10-22: 674 such entries in 2024, 329 in 2022,
-    # 15-49 in other seasons; DeVonta Smith, concussed in 2024 week 3, read "Out" for week 3 itself and the backtest
-    # scored him 0% for a game he played). Real report entries always carry their practice days.
-    pr = [p[p.days.fillna("") != ""] for p in pr if p is not None and len(p)]
+    if pr and pr[-1] is not None and "team_name" not in pr[-1]:  # cached before the report columns existed
+      pr[-1] = cache.get("practice", current, lambda: fetch_practice_days(current), stale=True)
+    # In-game rulings filed under the game's week (no practice days) out once the game is final (drop_ingame)
+    pr = [drop_ingame(p, cache.get("teams", "all", lambda: nfl.load_teams(), stale=False), sched) for p in pr if p is not None and len(p)]
     practice = pd.concat(pr, ignore_index=True) if pr else None
     # Longer labelled history (practice week -> did he play) for the availability model.
     first = int(cfg["data"].get("practice_history_start", 2018))
@@ -323,6 +322,14 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
     cache.meta.setdefault("final_games", {})[str(current)] = n_final
   cache.save_meta()
 
+  # The current season's report: NFL.com alone (injuries_from_nflcom); nflverse's copy only if NFL.com's is missing
+  if practice is not None and "team_name" in practice:
+    cur_pr = practice[practice.season == current]
+    if len(cur_pr):
+      frames["injuries"] = [f for f in frames["injuries"] if f is None or not len(f) or int(f.season.max()) != current]
+      frames["injuries"].append(injuries_from_nflcom(cur_pr, teams, sched))
+  elif cfg["data"].get("nfl_api_practice", False):
+    _log(f"WARNING: NFL.com's {current} report unavailable; using nflverse's injury table (it lags NFL.com by up to a day)")
   cat = lambda k: pd.concat([f for f in frames[k] if f is not None and len(f)], ignore_index=True)
   pbp = prepare_pbp(cat("pbp"))
   pbp = pbp.merge(sched[["game_id", "div_game"]], on="game_id", how="left")
@@ -428,7 +435,11 @@ def fetch_practice_days(season: int) -> pd.DataFrame:
                    "position": i.get("position"), "game_status": i.get("injuryStatus") or "None",
                    "days": "".join(_DAY.get(x.get("status"), "?") for x in days),
                    # each day's date, for the player card's practice timeline (owner 2026-10-17)
-                   "dates": ",".join(str(x.get("date") or "")[:10] for x in days)})
+                   "dates": ",".join(str(x.get("date") or "")[:10] for x in days),
+                   # the rest of the official report (2026-10-22: NFL.com is the single source for the current
+                   # week, see injuries_from_nflcom)
+                   "team_name": (i.get("team") or {}).get("fullName"), "full_name": (i.get("person") or {}).get("displayName"),
+                   "report_injuries": "|".join(i.get("injuries") or []), "practice_injuries": "|".join(i.get("practices") or [])})
     nxt = (d.get("pagination") or {}).get("token")
     if not inj or not nxt or nxt == page:
       break
@@ -475,6 +486,76 @@ def qb_career_before(nfl, first_season: int, start: int = 2006) -> pd.DataFrame:
     ["player_id", "season_type", "attempts"]))
   st = st[st.season_type == "REG"]
   return st.groupby("player_id").attempts.sum().rename_axis("gsis_id").reset_index()
+
+
+_STATUS = {"OUT": "Out", "DOUBTFUL": "Doubtful", "QUESTIONABLE": "Questionable"}
+_PRACTICE = {"D": "Did Not Participate In Practice", "L": "Limited Participation in Practice",
+             "F": "Full Participation in Practice"}
+
+
+def team_names(teams: pd.DataFrame | None) -> dict:
+  """NFL.com's full team name -> our abbreviation (the teams table lists the Rams under LA and LAR: LA)."""
+  if teams is None or not len(teams):
+    return {}
+  out = {}
+  for n, a in zip(teams.team_name, teams.team_abbr):
+    out.setdefault(str(n), {"LAR": "LA"}.get(str(a), str(a)))
+  return out
+
+
+def drop_ingame(pr: pd.DataFrame, teams: pd.DataFrame | None, sched: pd.DataFrame | None) -> pd.DataFrame:
+  """NFL.com also files in-game rulings ("out for the rest of the game", "questionable to return") under that game's
+  week, as entries with no practice days (2024: 674; leaked into backtests until 2026-10-22). Drop an entry with no
+  practice days once his team's game that week is final; before it, it's a late addition (a Saturday Questionable,
+  e.g. Pat Freiermuth 2026 wk 6) and stays. Without a team (seasons cached before team_name), every such entry
+  goes (their games are all final)."""
+  empty = pr.days.fillna("") == ""
+  if not empty.any():
+    return pr
+  if "team_name" not in pr or sched is None:
+    return pr[~empty]
+  team = pr.team_name.map(team_names(teams))
+  s = sched[sched.home_score.notna()]
+  final = set(zip(s.season, s.week, s.home_team)) | set(zip(s.season, s.week, s.away_team))
+  done = pd.Series([(a, b, c) in final for a, b, c in zip(pr.season, pr.week, team)], index=pr.index)
+  return pr[~(empty & (done | team.isna()))]
+
+
+def injuries_from_nflcom(pr: pd.DataFrame, teams: pd.DataFrame | None, sched: pd.DataFrame | None = None) -> pd.DataFrame:
+  """The current season's injury table from NFL.com's report (the practice feed, refreshed every PRACTICE_TTL_HOURS),
+  in nflverse's load_injuries layout, so every reader sees one source (owner 2026-10-22: "make nfl.com the single
+  source for the current week's report ... it might fix a class of bugs i never want to deal with again": Tyler
+  Shough's full Wednesday was on the card while the chance to play waited a day for nflverse's copy). Entries with no
+  practice days are dropped once his team's game is final (in-game rulings), kept before it (a late addition)."""
+  x = drop_ingame(pr, teams, sched).copy()
+  team = x.team_name.map(team_names(teams))
+  first = lambda col, k: x[col].fillna("").str.split("|").str[k].replace("", None)  # noqa: E731
+  nm = x.full_name.fillna("")
+  out = pd.DataFrame({
+    "season": x.season.astype(int), "season_type": "REG", "game_type": "REG", "team": team, "week": x.week.astype(int),
+    "gsis_id": x.gsis_id, "position": x.position, "full_name": nm, "first_name": nm.str.split(" ").str[0],
+    "last_name": nm.str.split(" ").str[1:].str.join(" "),
+    "report_primary_injury": first("report_injuries", 0), "report_secondary_injury": first("report_injuries", 1),
+    "report_status": x.game_status.astype(str).str.upper().map(_STATUS),
+    "practice_primary_injury": first("practice_injuries", 0), "practice_secondary_injury": first("practice_injuries", 1),
+    "practice_status": x.days.str[-1].map(_PRACTICE)})
+  return out.dropna(subset=["team", "gsis_id"]).reset_index(drop=True)
+
+
+def season_injuries(cache, nfl, season: int) -> pd.DataFrame | None:
+  """One season's injury table for tools that don't run load_all: the current season from NFL.com's report (the same
+  table load_all builds), earlier seasons nflverse's."""
+  current = int(nfl.get_current_season())
+  if season == current:
+    pr = cache.get("practice", season, lambda: fetch_practice_days(season),
+                   stale=cache.age_hours("practice", season) > PRACTICE_TTL_HOURS)
+    if pr is not None and len(pr) and "team_name" in pr:
+      teams = cache.get("teams", "all", lambda: nfl.load_teams(), stale=False)
+      sched = cache.get("schedules", "all", lambda: nfl.load_schedules([season]), stale=False)
+      return injuries_from_nflcom(pr, teams, sched)
+    _log(f"WARNING: NFL.com's {season} report unavailable; using nflverse's injury table (it lags NFL.com by up to a day)")
+  return cache.get("injuries", season, lambda: nfl.load_injuries([season]),
+                   stale=season == current and cache.age_hours("injuries", season) > LIVE_TTL_HOURS)
 
 
 def availability_history(nfl, season: int) -> pd.DataFrame:

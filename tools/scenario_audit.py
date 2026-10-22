@@ -50,7 +50,6 @@ class Scenario:
   traded: bool = False                # on another team through last week (his games there); this team only now
   espn: tuple | None = None           # (status, return date offset in days from his game or None) as ESPN news since his last game
   gameday: str | None = None          # "ACT" / "INA"
-  nflverse_lag: bool = True           # nflverse hasn't got this week's report (the usual mid-week state)
   expect_tag: str | None = None       # the tag the rules give
   expect_path: str | None = None      # which part of the code spoke: tuesday / practice / final / espn / gameday / none
   expect_avail: tuple | None = None   # (low, high) for the chance to play
@@ -210,47 +209,41 @@ class World:
       r["offense_pct"], r["defense_pct"], r["offense_snaps"], r["defense_snaps"], r["st_snaps"] = share, 0.0, round(65 * share), 0, 0
       sn.append(r)
     d.snaps = pd.concat([self.data.snaps, pd.DataFrame(sn)], ignore_index=True) if sn else self.data.snaps
-    # report rows: his last game's (nflverse + NFL.com, dated) and this week's so far
-    inj, pr = [], []
+    # report rows, as NFL.com files them (production builds the current season's injury table from these:
+    # data.injuries_from_nflcom); his last game's and this week's so far
+    full = {a: n for n, a in D.team_names(self.data.teams).items()}
+    pr = []
+
+    def row(wk, tm, days_, dates_, gs_, why_):
+      return {"season": s, "week": wk, "gsis_id": GID, "position": "WR", "game_status": gs_, "days": days_,
+              "dates": dates_, "team_name": full.get(tm, tm), "full_name": "Scenario Player",
+              "report_injuries": why_ if gs_ != "None" else "", "practice_injuries": why_}
     last = games[-1] if games else None
     if sc.last_report and last is not None:
       days_, gs_, why_ = sc.last_report
-      r = self.tpl_inj.copy()
-      r["gsis_id"], r["team"], r["season"], r["week"], r["game_type"], r["full_name"] = GID, team, s, last, "REG", "Scenario Player"
-      r["report_status"] = None if gs_ == "None" else gs_
-      r["practice_status"] = DAYCODE[days_[-1]]
-      r["report_primary_injury"] = r["practice_primary_injury"] = why_.title()
-      r["report_secondary_injury"] = r["practice_secondary_injury"] = None
-      inj.append(r)
-      pr.append({"season": s, "week": last, "gsis_id": GID, "position": "WR", "game_status": gs_.upper() if gs_ != "None" else "None",
-                 "days": days_, "dates": ""})
+      gd0 = self.sch[((self.sch.home_team == (old or team)) | (self.sch.away_team == (old or team))) & (self.sch.week == last)].gameday
+      d_ = pd.Timestamp(gd0.iloc[0]) if len(gd0) else None
+      dl = ",".join(str((d_ - pd.Timedelta(days=4 - k)).date()) for k in range(len(days_))) if d_ is not None else ""
+      pr.append(row(last, old or team, days_, dl, gs_.upper() if gs_ != "None" else "None", why_.title()))
     dates = self.report_dates(team, sc.team_days)
-    filler = []
     if dates:
       mine = [(dt, c) for dt, c in zip(dates, sc.week_days) if c != "-"]
       if mine:
-        pr.append({"season": s, "week": w, "gsis_id": GID, "position": "WR",
-                   "game_status": sc.game_status.upper() if sc.final and sc.game_status != "None" else "None",
-                   "days": "".join(c for _, c in mine), "dates": ",".join(dt for dt, _ in mine)})
-        if not sc.nflverse_lag or sc.final:
-          r = self.tpl_inj.copy()
-          r["gsis_id"], r["team"], r["season"], r["week"], r["game_type"], r["full_name"] = GID, team, s, w, "REG", "Scenario Player"
-          r["report_status"] = None if sc.game_status == "None" else sc.game_status
-          r["practice_status"] = DAYCODE[mine[-1][1]]
-          r["report_primary_injury"] = r["practice_primary_injury"] = sc.why.title()
-          r["report_secondary_injury"] = r["practice_secondary_injury"] = None
-          inj.append(r)
+        pr.append(row(w, team, "".join(c for _, c in mine), ",".join(dt for dt, _ in mine),
+                      sc.game_status.upper() if sc.final and sc.game_status != "None" else "None", sc.why.title()))
       # the rest of his team's report: a teammate listed every filed day, so the team's days count as filed
       ro_t = self.data.rosters[(self.data.rosters.season == s) & (self.data.rosters.team == team) & (self.data.rosters.status == "ACT")]
       mate = ro_t[ro_t.position == "OL"].gsis_id.iloc[0] if (ro_t.position == "OL").any() else ro_t.gsis_id.iloc[0]
-      filler.append({"season": s, "week": w, "gsis_id": mate, "position": "OL", "game_status": "None",
-                     "days": "F" * len(dates), "dates": ",".join(dates)})
+      pr.append({**row(w, team, "F" * len(dates), ",".join(dates), "None", "Knee"), "gsis_id": mate, "position": "OL"})
+    mine_team = set(self.data.rosters[(self.data.rosters.season == s) & (self.data.rosters.team == team)].gsis_id)
     base_pr = self.data.practice
-    base_pr = base_pr[~((base_pr.season == s) & (base_pr.week == w) & base_pr.gsis_id.isin(set(self.data.rosters[(self.data.rosters.season == s) & (self.data.rosters.team == team)].gsis_id)))]
-    d.practice = pd.concat([base_pr, pd.DataFrame(pr + filler)], ignore_index=True) if pr or filler else base_pr
+    base_pr = base_pr[~((base_pr.season == s) & (base_pr.week == w) & base_pr.gsis_id.isin(mine_team))]
+    new_pr = pd.DataFrame(pr)
+    d.practice = pd.concat([base_pr, new_pr], ignore_index=True) if len(new_pr) else base_pr
     base_inj = self.data.injuries
     base_inj = base_inj[~((base_inj.season == s) & (base_inj.week == w) & (base_inj.team == team))]  # this week: our script decides
-    d.injuries = pd.concat([base_inj, pd.DataFrame(inj)], ignore_index=True) if inj else base_inj
+    add = D.injuries_from_nflcom(new_pr, self.data.teams, self.data.schedules) if len(new_pr) else None
+    d.injuries = pd.concat([base_inj, add], ignore_index=True) if add is not None and len(add) else base_inj
     # in-game notes
     hurt = T.HurtSet(self.hurt0)
     hurt.back, hurt.ret_seasons = set(self.hurt0.back), set(self.hurt0.ret_seasons)

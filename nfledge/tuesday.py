@@ -117,6 +117,9 @@ WEEK_CALIB = _setting("week_calib", "prev")
 STAGE_FROM = _setting("stage_from", "own")
 # (CN) the Tuesday model learns elapsed time: a gap_days input + training rows for the game ~2 weeks after
 TIME_ROWS = _flag("time_rows")
+# (CN2) days as inputs alone: Tuesday model gap_days (a); week model onset_days, days from the start of this injury (b)
+TUE_DAYS = _flag("tue_days")
+ONSET_DAYS = _flag("onset_days")
 OOF_FOLDS = 3
 
 
@@ -284,7 +287,7 @@ def features(x: pd.DataFrame) -> pd.DataFrame:
   f = x[FEATS].astype(float).copy()
   if HURT_BACK and "hurt_back" in x.columns:
     f["hurt_back"] = x.hurt_back.astype(float).to_numpy()
-  if TIME_ROWS and "gap_days" in x.columns:  # (CN)
+  if (TIME_ROWS or TUE_DAYS) and "gap_days" in x.columns:  # (CN) / (CN2a)
     f["gap_days"] = x.gap_days.astype(float).to_numpy()
   for st in STATUS:
     f[f"st_{st}"] = (x.status == st).astype(float)
@@ -356,7 +359,8 @@ def week_rows(d, rep_rows: pd.DataFrame, hurt: set, reserve: bool = False) -> pd
         continue  # (BE) only once his window is visible at this stage
       extra = {"own_seen": cal["own"][st], "own_on": cal["own_on"][st]} if cal is not None else {}
       lis = seen.replace("X", "")
-      rows.append({**base, **extra, "stage": st, "on_now": on_now, "days_now": seen,
+      onset = _onset(ctx, g, s, team, k, w, st) if ONSET_DAYS else np.nan
+      rows.append({**base, **extra, "onset_days": onset, "stage": st, "on_now": on_now, "days_now": seen,
                    "wn_D": seen.count("D"), "wn_L": seen.count("L"), "wn_F": seen.count("F"),
                    **({"wn_X": seen.count("X")} if cal is not None else {}),
                    "w_first": SCORE.get(lis[0], np.nan) if lis else np.nan,
@@ -450,6 +454,8 @@ def add_stakes(x: pd.DataFrame, odds: pd.DataFrame) -> pd.DataFrame:
 def week_features(x: pd.DataFrame) -> pd.DataFrame:
   from .injuries import InjuryModel
   f = features(x).drop(columns=["gap_days"], errors="ignore")  # (CN) tested for the Tuesday model only
+  if ONSET_DAYS and "onset_days" in x.columns:  # (CN2b)
+    f["onset_days"] = x.onset_days.astype(float).to_numpy()
   if "team_q" in x.columns:  # (J)
     f["team_q"] = x.team_q.astype(float).to_numpy()
   for c in ("wk", "final_week", "own_qn", "own_q", "depth_prev", "st_po", "st_div", "st_bye"):  # (K), (L)
@@ -526,6 +532,32 @@ def week_predict(model, x: pd.DataFrame) -> np.ndarray:
   # isotonic steps can reach exactly 0 or 1 (every calibration-season player in that band sat / played); certainty is
   # for the game status Out rule only (Lamar, DNP Wed + Thu after missing: raw 2%, calibrated 0%; history 1.2%)
   return np.clip(p, 0.01, 0.99)
+
+
+def _onset(ctx: _Ctx, g, s: int, team: str, k, w: int, st: int) -> float:
+  """(CN2b) days from the start of his current injury to game w, as known at stage st: the first listed day of his
+  unbroken run on the reports before this week; else the game he was hurt in (k, an in-game note); else his first
+  listed day this week by stage st. NaN when none applies (not hurt, not listed yet)."""
+  gd = ctx.gday.get((s, team, w))
+  if gd is None:
+    return np.nan
+  start = None
+  prev = [x for x in ctx.tw.get((s, team), []) if k is not None and x <= k]
+  for x in reversed(prev):  # his unbroken run on earlier reports
+    e = ctx.rep.get((g, s, x))
+    if e is None:
+      break
+    ds = [d for d in str(e.dates or "").split(",") if d]
+    start = min(ds) if ds else start
+  if start is None and k is not None and (g, s, k) in ctx.hurt:
+    start = str(ctx.gday[(s, team, k)].date())
+  if start is None:
+    now = ctx.rep.get((g, s, w))
+    days = ctx.team_days.get((s, w, team)) or []
+    upto = set(days if st == 3 else days[:st]) if st else set()
+    ds = sorted(d for d in str(now.dates or "").split(",") if d in upto) if now is not None else []
+    start = ds[0] if ds else None
+  return float((gd - pd.Timestamp(start)).days) if start else np.nan
 
 
 def calendar_view(ctx: _Ctx, g, s: int, w: int, team: str) -> dict | None:

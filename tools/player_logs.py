@@ -904,7 +904,7 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
   reserve list if any, the worst game status."""
   inj = []
   for s in range(2009, cur + 1):
-    x = cache.get("injuries", s, lambda: nfl.load_injuries([s]), stale=s == cur and cache.age_hours("injuries", s) > 6)
+    x = D.season_injuries(cache, nfl, s)  # current season: NFL.com's report (one source)
     if x is not None and len(x):
       inj.append(x[x.game_type == "REG"][["season", "week", "gsis_id", "report_primary_injury", "practice_primary_injury", "report_status"]])
   inj = pd.concat(inj, ignore_index=True).dropna(subset=["gsis_id"])

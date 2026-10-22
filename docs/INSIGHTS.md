@@ -3797,6 +3797,40 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   between, the two matched: 65.3% vs 64.8%). Production stays. Remaining, small: players hurt in their last game with
   a bye next played 77.5%, base predicts 69.8% (n 249); hurt-not-back + bye 60% played vs ~21% predicted (n 15, too
   few). tuesday.TIME_ROWS off; scenario S06 stays a known miss.
+- **PRE-REGISTERED 2026-10-22 (owner: "if it makes game predictions worse, doesn't it stand to reason the cross
+  validation is wrong somehow and we should test pushing defense away from average?"): (CM2) less shrinkage for
+  defense, fixed.** The CV loss (next week's team-game EPA/play) chose MORE defense shrinkage while game margins got
+  worse with it, so the CV target may not match game outcomes. Variants, no CV on the ratio: def_alpha_ratios = [0.5]
+  and [0.33] (one value = fixed; the unit penalty still CV-tuned). tools/game_eval.py 2021-25, paired per game. GATE
+  (either variant): margin MAE lower with the 95% season-week CI excluding 0, total MAE not worse (CI upper < +0.05);
+  if both pass, the larger gain; then the fantasy MAE guard (experiments.py, CI upper < +0.003).
+- **PRE-REGISTERED 2026-10-22 (owner: "have we flat tested if tracking days between injury and game day help?"):
+  (CN2) days as an input alone.** CN changed two things (a days input and two-week training rows); the rows failed.
+  Variants: (a) Tuesday model + gap_days (days from his last team game to the game predicted), no extra rows;
+  (b) week model + onset_days (days from the start of this injury, the first report day of his current run on the
+  report or the game he was hurt in, to game day), known at each stage. TEST tools/days_eval.py, walk-forward 2021-25
+  + 2026. GATE each: Brier lower with the 95% season-week CI excluding 0 (a: all Tuesday rows; b: stages 1-3 on-report
+  rows), not worse on 2026; reported: bye rows (a), by onset bucket (b).
+- **RESULT {#def-shrink-2} (CM2) less shrinkage for defense: FAIL.** Paired margin MAE vs production, 1,279 games
+  2021-25: x0.5 +0.015 [-0.032, +0.062] (total +0.035 [+0.001, +0.070]); x0.33 +0.038 [-0.020, +0.096]; (CM) x3 +0.057
+  [+0.021, +0.092]. Worse both ways: the shared penalty sits at the minimum for game margins, though the CV target
+  (team-game EPA/play) alone would have picked x3, so the owner's suspicion about the CV target holds, while its
+  choice of the shared value happens to be right.
+- **RESULT {#days-alone} (CN2) days as inputs alone: FAIL (both).** (a) Tuesday model + gap_days: 2021-25 -0.0002
+  [-0.0004, -0.0001] (4 of 5 seasons), 2026 +0.0003 (n 1,653): fails "not worse on 2026"; bye rows -0.0003, short
+  weeks -0.0009. (b) week model + onset_days: -0.0000 [-0.0007, +0.0006]. Timing adds ~nothing beyond the practice
+  line, status and weeks on the report, which already carry it. tuesday.TUE_DAYS / ONSET_DAYS off.
+- **SHIPPED 2026-10-22 (owner: "make nfl.com the single source for the current week's report ... a class of bugs i
+  never want to deal with again"): one source for the current season's report.** data.injuries_from_nflcom builds the
+  current season's injury table (game status, practice days with dates, injury type, team) from NFL.com's feed (the
+  15-minute practice fetch, now keeping team, name and injury fields) in nflverse's layout; load_all uses it instead
+  of nflverse's copy, and tools/depth_build.py / player_logs.py read it through data.season_injuries. nflverse stays
+  for past seasons. Check, 2026 weeks 1-6: 1,785 shared rows, game status, practice status and injury type identical
+  on every one (the 4 nflverse-only rows are no-practice late additions, now kept: data.drop_ingame drops entries
+  with no practice days only once his team's game is final, i.e. the in-game rulings). Week 7 at build: NFL.com 271
+  rows, nflverse 23. Rams map to LA. NFL.com unreachable: a logged WARNING and nflverse's table (never a mix).
+  injuries.published_teams / listed_now back to one table. tools/scenario_audit.py now builds its report rows the
+  same way: 25 of 27 pass (S06, S11 the known model gaps).
 - **DESCRIPTIVE 2026-10-21 (owner's friend: "Pat Surtain's OPRK for WR1 is #1 hardest ... shadow CB can nuke WRs"):
   WR1 suppression is not a lasting defensive trait.** tools/wr1_suppression.py, play-by-play 2016-25, 4,212 team-games:
   WR1 / WR2 = an offense's top two WRs by targets before the game; result = half-PPR points minus his own average over

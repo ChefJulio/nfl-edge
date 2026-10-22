@@ -294,8 +294,7 @@ def main():
             for nxt in range(int(w) + 1, int(d.week.max()) + 1):
               tags.setdefault((g, nxt), ROSTER_TAG[c])
     if season >= 2009:
-      inj = cache.get("injuries", season, lambda: nfl.load_injuries([season]),
-                      stale=live and cache.age_hours("injuries", season) > 6)
+      inj = D.season_injuries(cache, nfl, season)  # current season: NFL.com's report (one source)
       if inj is not None and len(inj):
         i = inj[inj.report_status.isin(GAME_TAG)]
         for g, w, st in zip(i.gsis_id, i.week, i.report_status):

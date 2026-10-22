@@ -1,5 +1,5 @@
 ---
-documented_code_hash: ffcd8f0e0baeb2a8
+documented_code_hash: f9d0e134f0c45e9f
 ---
 # How the model works
 
@@ -523,6 +523,8 @@ Durability is games missed injured per 1,000 snaps on the field since 2013 (offe
 - **Adopted (owner's design call)** - The mid-week chance to play reads each player's practice line by his team's report calendar (a day he wasn't listed marked as such) instead of counting his own listed days. Slightly better (Brier -0.0006) and clearly better for players added to the report mid-week, but too small to prove on its own; it gets a season-end check (2026-10). <!-- tried:stage-calendar -->
 - **Rejected** - Should team defense ratings get their own amount of shrinkage instead of sharing offense's? - No: the tuning wanted defense pulled in even harder (defense is about half as predictable week to week as offense), and game score predictions got worse (margin error +0.06 points, 2021-25) (2026-10). <!-- tried:def-shrink -->
 - **Rejected** - Should the before-the-report chance to play learn elapsed time (treating a bye as two weeks of healing, taught with examples of the game two weeks after an injury)? - No: worse after byes, because without a bye the player usually plays a game in between that carries its own injury risk; a bye isn't the same as two calendar weeks (2026-10). <!-- tried:time-rows -->
+- **Rejected** - Less shrinkage for team defense ratings (pushing defenses away from average)? - No: game margin predictions got slightly worse at half and a third of the shared shrinkage, as they did at triple; the shared setting is the best of those tried (2026-10). <!-- tried:def-shrink-2 -->
+- **Rejected** - Do days between games, or days since an injury started, help the chance-to-play models on their own? - Barely: a tiny gain before the report in past seasons that reversed in 2026, and none mid-week; the practice line and weeks on the report already carry the timing (2026-10). <!-- tried:days-alone -->
 
 ## Rule changes and scoring eras
 

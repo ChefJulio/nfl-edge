@@ -62,23 +62,17 @@ def filed_dates(data, season: int, week: int) -> dict:
 
 
 def published_teams(data, season: int, week: int) -> set:
-  """Teams whose report for this week is out in EITHER source: nflverse's injury table or NFL.com's practice feed
-  (2026-10-22, Tyler Shough: the practice feed, refreshed every 15 minutes, had every Sunday team's Wednesday report
-  while nflverse still had only the Thursday teams, so availability, tags and the ESPN bridge all acted as if no
-  report were out; his full Wednesday practice showed on the card while the Tuesday model set his 93%)."""
-  inj = data.injuries
-  out = set(inj[(inj.season == season) & (inj.week == week) & (inj.game_type == "REG")].team.replace({"LAR": "LA"}))
-  return out | set(filed_dates(data, season, week))
+  """Teams whose report for this week is out. The current season's injury table is built from NFL.com's report
+  (data.injuries_from_nflcom, owner 2026-10-22: one source), so this, the practice lines and the filed days can't
+  disagree (Tyler Shough: nflverse's copy lagged a day while NFL.com's Wednesday report showed on his card)."""
+  inj = data.injuries  # the current season's table IS NFL.com's report (data.injuries_from_nflcom): one source
+  return set(inj[(inj.season == season) & (inj.week == week) & (inj.game_type == "REG")].team.replace({"LAR": "LA"}))
 
 
 def listed_now(data, season: int, week: int) -> set:
   """gsis ids on this week's report in either source (see published_teams)."""
   inj = data.injuries
-  out = set(inj[(inj.season == season) & (inj.week == week) & (inj.game_type == "REG")].gsis_id.dropna())
-  pr = data.practice
-  if pr is not None and len(pr):
-    out |= set(pr[(pr.season == season) & (pr.week == week)].gsis_id.dropna())
-  return out
+  return set(inj[(inj.season == season) & (inj.week == week) & (inj.game_type == "REG")].gsis_id.dropna())
 
 
 def practice_features(df: pd.DataFrame) -> pd.DataFrame:
