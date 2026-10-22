@@ -99,13 +99,15 @@ button:active:not(:disabled), a.mt:active, .chip:active, .sbtn:active, [data-ope
 .tm-open:not(tr):active { filter: brightness(1.4); }
 @media (prefers-reduced-motion: reduce) { button:active, a.mt:active, .chip:active, .sbtn:active { transform: none; } }
 /* "New numbers - Refresh" (shell.js stale check): floats above the bottom bar, one tap reloads */
-.stale-pill { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--bbh, 0px) + 14px); z-index: 50;
+/* centered by margins, not translateX (owner 2026-10-22: "when i tap it it like moves off to the side"): the shared
+   button:active press scale replaces the whole transform, so a translate-centered pill jumped half its width */
+.stale-pill { position: fixed; left: 0; right: 0; width: max-content; max-width: calc(100% - 32px); margin: 0 auto;
+  bottom: calc(var(--bbh, 0px) + 14px); z-index: 50;
   display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: 999px; font: inherit; font-size: var(--fs-md);
   color: var(--ink); background: var(--panel2); border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--line));
   box-shadow: var(--e3); cursor: pointer; }
 .stale-pill b { color: var(--accent); }
 .stale-pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
-.stale-pill:active { transform: translateX(-50%) scale(.96); }
 
 /* Loading placeholders (owner 2026-10-16): an empty .skel-zone shows faint shimmering rows at about the height of what
    loads into it, so the page doesn't jump when the data lands; anything rendered into it replaces them (:empty). */
