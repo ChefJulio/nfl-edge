@@ -1223,11 +1223,9 @@
   // Jordan Mason on IR showed his week-1 rows as his latest): a reserve list or the practice squad is its own row
   const RES_WORD = { IR: 'On injured reserve', PUP: 'On the PUP list', NFI: 'On the NFI list', Res: 'On a reserve list', PS: 'On the practice squad' };
   const QN = { 1: '1st', 2: '2nd', 3: '3rd', 4: '4th', 5: 'overtime' };
-  const practiceTl = L => {
-    const ev0 = (L && L.prac) || [];
-    if (!ev0.length) return '';
-    // the bye (owner 2026-10-21: "add a bye week row ... teams don't report practice participation during bye week so just
-    // the 1 row is fine"): two of his team's games two weeks apart have the bye between them, one row on that Sunday
+  // a season's events with one bye row between two games two weeks apart (owner 2026-10-21: "add a bye week row ...
+  // teams don't report practice participation during bye week so just the 1 row is fine")
+  const withByes = ev0 => {
     const ev = [];
     let lastG = null;
     ev0.forEach(e => {
@@ -1238,30 +1236,63 @@
       if (e[0] === 'g') lastG = e;
       ev.push(e);
     });
+    return ev;
+  };
+  const ptDay = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+  // one practice / game / bye row (season: the events' season, for the in-game injury marks)
+  const ptRow = (L, e, today, season) => e[0] === 'b'
+    ? `<div class="pt-row pt-bye"><span class="pt-d">${ptDay(e[1])}</span><span class="pt-gm">Bye</span><span class="muted">week ${e[2]} · no game, no practice report</span></div>`
+    : e[0] === 'p' && (e[2] === 'R' || e[2] === 'S')
+    ? `<div class="pt-row"><span class="pt-d">${ptDay(e[1])}</span><span class="pr-chip pr-${e[2] === 'R' ? 'D' : 'n'}">${esc(e[3])}</span><span>${RES_WORD[e[3]] || esc(e[3])}</span></div>`
+    : e[0] === 'p'
+    ? `<div class="pt-row"><span class="pt-d">${ptDay(e[1])}</span><span class="pr-chip pr-${e[2]}">${e[2] === 'D' ? 'DNP' : e[2] + 'P'}</span><span>${PR_WORD[e[2]] || ''}${e[4] ? ' <span class="muted">· not on the report</span>' : ''}${e[3] ? ` · <b>${esc(e[3])}</b>` : ''}</span></div>`
+    : (() => {
+      // colored by what happened (owner 2026-10-18): played green, missed red, hurt during it orange (the
+      // play-by-play injury notes or a news blurb, the episodes' ig = [week, quarter])
+      if (RES_WORD[e[4]]) return `<div class="pt-row pt-g pt-miss"><span class="pt-d">${ptDay(e[1])}</span><span class="pt-gm">${esc(e[3])} ${tmL(e[2])}</span><span><b>did not play</b> · ${esc(e[4] === 'PS' ? 'practice squad' : `on ${e[4]}`)}</span></div>`;
+      const ig = e[4] !== '' && e[4] !== 'out' && e[4] !== 'a' && ((L && L.inj) || []).map(x => x.s === season && x.ig && x.ig[0] === e[5] ? x.ig : null).find(Boolean);
+      const cls = e[4] === '' ? '' : e[4] === 'out' ? ' pt-miss' : ig ? ' pt-hurt' : ' pt-ok';
+      const res = e[4] === '' ? (e[1] < today ? '<span class="muted">result pending</span>' : e[1] === today ? '<b>today</b>' : '<b>next game</b>')
+        : e[4] === 'out' ? '<b>did not play</b>' : e[4] === 'a' ? 'active · no snaps' : `played${e[4] === 'p' ? '' : ` · ${esc(e[4])}% of snaps`}${ig ? ` · <b>hurt${ig[1] ? ` ${ig[1] >= 5 ? 'OT' : `Q${ig[1]}`}` : ''}</b>` : ''}`;
+      return `<div class="pt-row pt-g${cls}"><span class="pt-d">${ptDay(e[1])}</span><span class="pt-gm">${esc(e[3])} ${tmL(e[2])}</span><span>${res}</span></div>`;
+    })();
+  // every season with a practice timeline: this one (prac) and earlier ones with dated reports (prac_hist, 2018 on)
+  const pracSeasons = L => [...(L && L.prac && L.prac.length ? [L.cur] : []), ...Object.keys((L && L.prac_hist) || {}).map(Number)]
+    .filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => b - a);
+  const pracOf = (L, season) => withByes(+season === +L.cur ? (L.prac || []) : ((L.prac_hist || {})[season] || []));
+  // the whole season, newest first (owner 2026-10-21: "a show more button that pulls up another slide ... ALL practices
+  // participation for the selected season (default current season)")
+  const pracAllList = (L, season) => {
+    const today = NFLE.clock.today(), ev = pracOf(L, season);
+    const nP = ev.filter(e => e[0] === 'p'), cnt = c => nP.filter(e => e[2] === c).length;
+    const sum = nP.length ? `${nP.length} practice days: ${cnt('F')} full, ${cnt('L')} limited, ${cnt('D')} did not practice${cnt('R') ? `, ${cnt('R')} on a reserve list` : ''}${cnt('S') ? `, ${cnt('S')} on the practice squad` : ''}` : 'No practice days on file';
+    return `<p class="pc-sub">${esc(sum)}</p><div class="pt-list">${ev.slice().reverse().map(e => ptRow(L, e, today, +season)).join('')}</div>`;
+  };
+  const pracAllSheet = (pid, L) => {
+    const ss = pracSeasons(L);
+    if (!ss.length) return '';
+    return `<div class="pc-box pt-all" data-pt-pid="${esc(pid)}"><div class="pt-all-h"><label class="pc-k">Season
+        <select class="dt-select" data-pt-season>${ss.map(s_ => `<option value="${s_}">${s_}</option>`).join('')}</select></label></div>
+      <div class="pt-all-body">${pracAllList(L, ss[0])}</div></div>`;
+  };
+  document.addEventListener('change', e => {
+    const sel = e.target.closest && e.target.closest('[data-pt-season]');
+    if (!sel) return;
+    const box = sel.closest('.pt-all'), L = box && LOGS[box.dataset.ptPid];
+    if (L) box.querySelector('.pt-all-body').innerHTML = pracAllList(L, +sel.value);
+  });
+  const practiceTl = (L, pid) => {
+    const ev0 = (L && L.prac) || [];
+    if (!ev0.length && !pracSeasons(L).length) return '';
+    const ev = withByes(ev0);
     const today = NFLE.clock.today();  // Eastern date (UTC rolled over at 8 pm ET: tonight's game read as past)
     // the last six practice days (owner 2026-10-19: games had been taking slots) and the games between them and today
     const done = ev.filter(e => e[1] <= today), pr6 = done.filter(e => e[0] === 'p').slice(-6);
     const from = pr6.length ? pr6[0][1] : '';
     const past = done.filter(e => e[1] >= from), next = ev.find(e => e[1] > today && e[0] === 'g');
-    const day = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
-    const row = e => e[0] === 'b'
-      ? `<div class="pt-row pt-bye"><span class="pt-d">${day(e[1])}</span><span class="pt-gm">Bye</span><span class="muted">week ${e[2]} · no game, no practice report</span></div>`
-      : e[0] === 'p' && (e[2] === 'R' || e[2] === 'S')
-      ? `<div class="pt-row"><span class="pt-d">${day(e[1])}</span><span class="pr-chip pr-${e[2] === 'R' ? 'D' : 'n'}">${esc(e[3])}</span><span>${RES_WORD[e[3]] || esc(e[3])}</span></div>`
-      : e[0] === 'p'
-      ? `<div class="pt-row"><span class="pt-d">${day(e[1])}</span><span class="pr-chip pr-${e[2]}">${e[2] === 'D' ? 'DNP' : e[2] + 'P'}</span><span>${PR_WORD[e[2]] || ''}${e[4] ? ' <span class="muted">· not on the report</span>' : ''}${e[3] ? ` · <b>${esc(e[3])}</b>` : ''}</span></div>`
-      : (() => {
-        // colored by what happened (owner 2026-10-18): played green, missed red, hurt during it orange (the
-        // play-by-play injury notes or a news blurb, the episodes' ig = [week, quarter])
-        if (RES_WORD[e[4]]) return `<div class="pt-row pt-g pt-miss"><span class="pt-d">${day(e[1])}</span><span class="pt-gm">${esc(e[3])} ${tmL(e[2])}</span><span><b>did not play</b> · ${esc(e[4] === 'PS' ? 'practice squad' : `on ${e[4]}`)}</span></div>`;
-        const ig = e[4] !== '' && e[4] !== 'out' && e[4] !== 'a' && ((L && L.inj) || []).map(x => x.s === L.cur && x.ig && x.ig[0] === e[5] ? x.ig : null).find(Boolean);
-        const cls = e[4] === '' ? '' : e[4] === 'out' ? ' pt-miss' : ig ? ' pt-hurt' : ' pt-ok';
-        const res = e[4] === '' ? (e[1] < today ? '<span class="muted">result pending</span>' : e[1] === today ? '<b>today</b>' : '<b>next game</b>')
-          : e[4] === 'out' ? '<b>did not play</b>' : e[4] === 'a' ? 'active · no snaps' : `played${e[4] === 'p' ? '' : ` · ${esc(e[4])}% of snaps`}${ig ? ` · <b>hurt${ig[1] ? ` ${ig[1] >= 5 ? 'OT' : `Q${ig[1]}`}` : ''}</b>` : ''}`;
-        return `<div class="pt-row pt-g${cls}"><span class="pt-d">${day(e[1])}</span><span class="pt-gm">${esc(e[3])} ${tmL(e[2])}</span><span>${res}</span></div>`;
-      })();
+    const all = pid ? `<div class="pc-tap pt-more" role="button" tabindex="0" aria-haspopup="dialog" data-sheet="All practices"><div class="pc-k">Show all practices</div><template>${pracAllSheet(pid, L)}</template></div>` : '';
     // newest first (owner 2026-10-17): the next game on top, then the latest six going back
-    return `<div class="pc-box"><div class="pc-k">Practice and games</div><div class="pt-list">${next ? row(next) : ''}${past.slice().reverse().map(row).join('')}</div></div>`;
+    return `<div class="pc-box"><div class="pc-k">Practice and games</div><div class="pt-list">${next ? ptRow(L, next, today, L.cur) : ''}${past.slice().reverse().map(e => ptRow(L, e, today, L.cur)).join('')}</div>${all}</div>`;
   };
   // the briefing: this week, the timeline (since when, games missed, return estimates), the latest news, then history
   const injuryBrief = (pid, p, L, espn, h) => {
@@ -1355,7 +1386,7 @@
     const timeline = h.inj && (tl.length || (now && now.comment)) ? `<div class="pc-box"><div class="pc-k">Timeline</div>${tl.map(t => `<div class="ij-line">${t}</div>`).join('')}
         ${now && now.comment ? `<p class="pc-sub">${esc(now.comment)}</p>` : ''}</div>` : '';
     const news = espn ? `<div class="pc-box"><div class="pc-k">Latest news</div><div class="pc-news" data-espn="${esc(espn)}" data-n="2"></div></div>` : '';
-    return thisWeek + practiceTl(L) + timeline + news + (L && (L.inj || L.dur) ? injuryTab(L, espn, true) : '');
+    return thisWeek + practiceTl(L, pid) + timeline + news + (L && (L.inj || L.dur) ? injuryTab(L, espn, true) : '');
   };
   // Grade tile (owner 2026-10-16: OVR moved here from the header, then the Grade tab folded into its sheet): his OVR;
   // the sheet holds the whole grade (gradeTab) from his history shard (GRH, loaded with the page)

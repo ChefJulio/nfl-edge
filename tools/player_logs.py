@@ -249,6 +249,17 @@ def main():
   stat_played = set(zip(data.stats.player_id, data.stats.season.astype(int), data.stats.week.astype(int)))
   played |= stat_played
   prac = practice_timeline(data.practice, allsched, sn, all_ros, data.current_season, gameday_ina(site), stat_played)
+  # every earlier season with dated practice reports (2018 on; owner 2026-10-21: "shows ALL practices participation for
+  # the selected season"): the same team-calendar timeline, gsis -> {season: events}, for the card's full-season sheet
+  prac_hist = {}
+  for s_ in range(2018, data.current_season):
+    fp = cache.path("practice_dated", s_)
+    if not fp.exists():
+      continue
+    tl = practice_timeline(pd.read_parquet(fp), allsched, sn, all_ros, s_, None, stat_played)
+    for g_, ev in tl.items():
+      prac_hist.setdefault(g_, {})[str(s_)] = ev
+  print(f"[logs] practice timelines for past seasons: {len(prac_hist)} players", flush=True)
   sn13 = sn[sn.season >= 2013]
   unit_snaps = {"off": sn13.groupby("gsis_id").offense_snaps.sum().to_dict(), "def": sn13.groupby("gsis_id").defense_snaps.sum().to_dict()}
   injuries = injury_history(cache, nfl, data.current_season, all_ros, allsched, played, unit_snaps,
@@ -355,6 +366,8 @@ def main():
       doc["dur"] = injuries[pid].get("dur")
     if pid in prac:
       doc["prac"] = prac[pid]
+    if pid in prac_hist:
+      doc["prac_hist"] = prac_hist[pid]
     if pos == "QB" and pid in scr:
       doc["scr"] = scr[pid]  # {season: [scrambles, dropbacks]}
     (out_dir / f"{pid}.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
@@ -362,7 +375,7 @@ def main():
   size = sum(f.stat().st_size for f in out_dir.glob("*.json"))
   print(f"[logs] wrote {n} player game logs ({size / 1e6:.1f} MB) to {out_dir}", flush=True)
   other_logs(site, cache, nfl, data.current_season, allsched, pinfo, all_ros, sn, bios, written=set(everyone), injuries=injuries,
-             post_snaps=sn_post, round_of=round_of, prac=prac)
+             post_snaps=sn_post, round_of=round_of, prac=prac, prac_hist=prac_hist)
   team_logs(site, cfg, data, cache, nfl, allsched, postsched)
   qb_throws(site, cache, nfl, data.pbp, data.current_season)
   dst_logs(site, cache, nfl, data, allsched)
@@ -648,7 +661,8 @@ def rows_by(df: pd.DataFrame | None, key: str) -> dict:
 
 def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: pd.DataFrame, ros: pd.DataFrame,
                snaps: pd.DataFrame, bios: dict, written: set, injuries: dict | None = None,
-               post_snaps: pd.DataFrame | None = None, round_of: dict | None = None, prac: dict | None = None):
+               post_snaps: pd.DataFrame | None = None, round_of: dict | None = None, prac: dict | None = None,
+               prac_hist: dict | None = None):
   """<site>/data/players/<gsis>.json for everyone the fantasy pass didn't write: every player in nflverse's weekly
   stats (1999 on), on a weekly roster (2002 on) or in the snap counts (2012 on). Per game: his kind's stat line
   ("d", in "keys" order), returns ("r") when he had any, his unit's snap share ("sn"). Plus "ros": per season, his
@@ -831,6 +845,8 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
       doc["dur"] = injuries[pid].get("dur")
     if prac and pid in prac:
       doc["prac"] = prac[pid]
+    if prac_hist and pid in prac_hist:
+      doc["prac_hist"] = prac_hist[pid]
     (out_dir / f"{pid}.json").write_text(json.dumps(_json_safe(doc), separators=(",", ":"), allow_nan=False), encoding="utf-8")
     n += 1
   print(f"[logs] wrote {n} other player pages (defense, line, specialists, players without fantasy stats)", flush=True)
