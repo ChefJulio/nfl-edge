@@ -3718,3 +3718,18 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   0 with a 95% week-bootstrap CI excluding 0, at least 1.0 point below 0 (a size worth a model term), and negative in
   both weeks 1-9 and 10-18. Comparison reported: the same receivers' miss in their non-shadowed games. A pass needs
   replication on 2026 (a forward log) before any term ships.
+- **RESULT {#shadow-games} PASS 2026-10-21 (pending replication): (CH) game-level shadow matchups 2025.** List: 81
+  corner-receiver games from Clay's ESPN Playbook after-the-fact recaps (two blind research passes, weeks 1-9 / 10-18;
+  one inferred row dropped before scoring: Turner-Odunze wk9). 66 scored (weeks 1-2 have no projection). Named
+  receiver's miss -1.68 [-3.33, -0.32], median -1.50; same receivers' other games -0.19 (n 337). Weeks 1-9 -0.90
+  (n 45), 10-18 -3.36 (n 21). GATE PASS. Sensitivity (not the gate): full shadows only (16 "partial" rows out) -2.05
+  [-3.85, -0.62] n 54, i.e. stronger, as dilution predicts. Per corner (small n): Surtain -4.85 (6), Turner -4.60
+  (8), Gardner -3.08 (6), Benford -1.30 (9); Mitchell +4.71 (4), Gonzalez +2.74 (4). Consistent with (CF)/(CG)
+  failing from season-level dilution. Caveats: one season; reporting could favor recapping shadows that went well
+  (Clay's running counts, e.g. "the seven receivers he has shadowed", limit this); a model term would need to know
+  BEFORE kickoff who shadows whom (Clay's pre-game projections), a different, noisier input than these recaps.
+  tools/shadow_games.py.
+- **PRE-REGISTERED 2026-10-21 (before any 2026 list or outcome is looked at): (CI) replication on 2026 weeks 1-6.**
+  Same rules, list data/history/shadow_games_2026.csv (after-the-fact recaps only), live 2026 baseline. PASS: 2026
+  point estimate <= -1.0 AND pooled 2025+2026 95% week-bootstrap CI excluding 0. Then a second test of the usable
+  input: Clay's PRE-GAME shadow projections as the predictor (what a model term would actually see).
