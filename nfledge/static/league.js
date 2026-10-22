@@ -147,7 +147,7 @@
       };
     },
   };
-  // ESPN public leagues (UNTESTED until a public league id is supplied: built from ESPN's documented-by-use v3 API)
+  // ESPN public leagues (ESPN's documented-by-use v3 API; owner confirmed working 2026-10-22)
   const espn = {
     async load(id, season) {
       const v = ['mTeam', 'mRoster', 'mSettings', 'mMatchupScore'].map(x => `view=${x}`).join('&');

@@ -24,8 +24,8 @@ OverTheCap, ESPN / CBS and a fantasy app together.
 - **Games**: matchups with model vs Vegas lines, and a **gamecast** for every game: field view with play gains,
   parsed play text (penalties, who did what), fantasy points by play, every play sortable by win-probability
   swing and scrubbable, team and player box scores, highlight links; live games refresh every 30 seconds.
-- **Fantasy**: import a Sleeper league (username or league id; public ESPN leagues by id, not yet tested on a real
-  league); lineup, matchup, live scoring, rosters, waivers and trade views, rankings re-scored to its scoring.
+- **Fantasy**: import a Sleeper league (username or league id) or a public ESPN league (league id); lineup,
+  matchup, live scoring, rosters, waivers and trade views, rankings re-scored to its scoring settings.
 - **Model**: how every number is made, the fitted formulas, and the walk-forward track record (`MODEL.md`).
 
 ## How good the numbers are (measured, walk-forward 2021-25; details in the Model tab and `docs/INSIGHTS.md`)
