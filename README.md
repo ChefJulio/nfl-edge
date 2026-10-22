@@ -37,6 +37,10 @@ OverTheCap, ESPN / CBS and a fantasy app together.
 - **Projections**: start / sit picks about on par with the FantasyPros expert consensus and well ahead of season
   averages (fantasy MAE ~5.2 half-PPR points on fantasy-relevant players vs 5.6 for "season average so far").
   The value is mostly the player model: without Vegas lines and team ratings accuracy drops under 1%.
+- **Published record** (Model tab; `data/records/` on the site and the `archive` branch): every finished week, what
+  the site showed before each game (chance to play at five checkpoints, projections; from the per-build snapshots,
+  never recomputed) next to what happened, with the week's scorecard. Anyone can score us (format and rules on the
+  Model tab); misses stay in.
 - Every model change is pre-registered and gated on out-of-sample tests; rejected ideas are kept with their
   numbers (`docs/INSIGHTS.md`), so the record of what didn't work is as complete as what did.
 

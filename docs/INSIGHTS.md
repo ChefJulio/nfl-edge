@@ -3924,6 +3924,19 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   now also builds on: a game's spread or total moving 1+ point in nflverse's schedule file (the source the build reads;
   first dry run caught LA @ LV -4.5 -> -3.5), and a relevant player (8+ projected) gaining or losing ESPN Questionable /
   Day-To-Day. The 30-minute cooldown still applies.
+- **SHIPPED 2026-10-22 (owner: "would someone else trying to compare to us be able to get results?" / "should we start
+  publishing a finalized report of all our projection records at the end of a week?"): the published record.**
+  tools/forecast_record.py (CI step "Forecast record", committed to the archive branch): once a week's games are final
+  and nflverse has its stats and snap counts, every player the site projected with what it published before his game
+  (data/live_inputs snapshots: never recomputed) at five checkpoints on his team's calendar (before its first report
+  deadline, before the second, before the third, before inactives, before kickoff, each with the build time), the
+  outcome (snap or stat line; half-PPR points), and the week's scorecard: chance-to-play Brier and calibration bands per
+  checkpoint (players under 97%), projection MAE / bias by position (top 24 / 48 / 60 / 24 by published projection),
+  the 10 biggest misses. data/records/<season>_wkNN.json + .csv + index.json; Model tab area "Published record" with
+  the how-to-score rules. Append-only. Week 6 (snapshots from Friday Oct 16): 424 players; projections MAE 4.88, bias
+  -0.40 (156 players); chance to play before inactives Brier 0.107 (224), before kickoff 0.072 (208). E.g. Tyler Warren:
+  84% before inactives, inactive (Footballguys had him "Projecting Inactive"). Competitor comparison (FantasyPros "Are
+  They Playing?", Footballguys labels) would be forward logs only: none publishes a scorable history.
 - **DESCRIPTIVE 2026-10-21 (owner's friend: "Pat Surtain's OPRK for WR1 is #1 hardest ... shadow CB can nuke WRs"):
   WR1 suppression is not a lasting defensive trait.** tools/wr1_suppression.py, play-by-play 2016-25, 4,212 team-games:
   WR1 / WR2 = an offense's top two WRs by targets before the game; result = half-PPR points minus his own average over

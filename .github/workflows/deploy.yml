@@ -144,6 +144,11 @@ jobs:
       # for the early-week ECR forward test (tools/ecr_snapshot.py; INSIGHTS sec. 9).
       - name: Snapshot expert rankings
         run: python tools/ecr_snapshot.py --out=site/data/ecr_snapshots || true
+      # The weekly forecast record (tools/forecast_record.py): once a week's games are final and nflverse has its stats and
+      # snap counts, what the site published before each game (from data/live_inputs), what happened, and the week's
+      # scorecard -> data/records/ (append-only; committed below). Failures never fail the build.
+      - name: Forecast record
+        run: python tools/forecast_record.py --out=site/data/records --inputs=site/data/live_inputs || true
       - name: Commit new archive pages
         working-directory: site
         run: |
