@@ -141,7 +141,7 @@
       ['t', 'tied', eq('sd', 0)], ['b', 'trailing by 1-8', (P, j) => P.sd[j] <= -1 && P.sd[j] >= -8], ['b9', 'trailing by 9+', (P, j) => P.sd[j] <= -9],
       ['one', 'one-score game', (P, j) => Math.abs(P.sd[j]) <= 8]] },
     time: { label: 'Clock', group: 'Situation', opts: [['2m', 'last 2 minutes of a half', (P, j) => P.hs[j] <= 12], ['5m', 'last 5 minutes of a half', (P, j) => P.hs[j] <= 30]] },
-    wp: { label: 'Win probability', group: 'Situation', need: ['wp'], opts: [['ng', 'no garbage time (10-90%)', (P, j) => P.wp[j] >= 10 && P.wp[j] <= 90],
+    wp: { label: 'Win probability', group: 'Situation', need: ['wp'], known: (P, j) => P.wp[j] >= 0, opts: [['ng', 'no garbage time (10-90%)', (P, j) => P.wp[j] >= 10 && P.wp[j] <= 90],
       ['close', 'competitive (25-75%)', (P, j) => P.wp[j] >= 25 && P.wp[j] <= 75], ['ahead', 'game in hand (90%+)', (P, j) => P.wp[j] > 90],
       ['behind', 'long shot (under 10%)', (P, j) => P.wp[j] >= 0 && P.wp[j] < 10]] },
     // owner 2026-10-22 ("i can pick vikings, what if i want only when playing packers"): the options are the teams,
@@ -154,18 +154,18 @@
         '1st-2nd down, 20-80% win chance, not the last 2 minutes of a half'],
       ['early', 'early downs (1st-2nd)', (P, j) => P.dn[j] === 1 || P.dn[j] === 2],
       ['pd', 'passing downs', (P, j) => (P.dn[j] === 2 && P.tg[j] >= 8) || (P.dn[j] >= 3 && P.tg[j] >= 5), '2nd & 8+, 3rd or 4th & 5+']] },
-    xpc: { label: 'Expected play call', group: 'Situation', need: ['xp'], opts: [
+    xpc: { label: 'Expected play call', group: 'Situation', need: ['xp'], known: (P, j) => P.xp[j] >= 0, opts: [
       ['p', 'pass expected', (P, j) => P.xp[j] >= 70, "nflverse's model gives a pass 70%+"],
       ['r', 'run expected', (P, j) => P.xp[j] >= 0 && P.xp[j] <= 30, 'a pass 30% or less'],
       ['m', 'toss-up play call', (P, j) => P.xp[j] > 30 && P.xp[j] < 70, 'a pass 30-70%']] },
     out: { label: 'Play result', group: 'Result', opts: [['10', 'gained 10+ yards', (P, j) => P.y[j] >= 10], ['20', 'gained 20+ yards', (P, j) => P.y[j] >= 20],
       ['40', 'gained 40+ yards', (P, j) => P.y[j] >= 40], ['fd', 'first downs', eq('fd', 1)], ['td', 'touchdowns', eq('td', 1)],
       ['neg', 'no gain or a loss', (P, j) => P.y[j] <= 0], ['to', 'turnovers', (P, j) => P.in[j] === 1 || P.fl[j] === 1]] },
-    res: { label: 'Game result', group: 'Game', g: true, opts: [['w', 'in wins', (P, j, G, V, D) => margin(P, j, G, D) > 0],
+    res: { label: 'Game result', group: 'Game', g: true, known: (P, j, G, V, D) => margin(P, j, G, D) != null, opts: [['w', 'in wins', (P, j, G, V, D) => margin(P, j, G, D) > 0],
       ['l', 'in losses', (P, j, G, V, D) => { const m = margin(P, j, G, D); return m != null && m < 0; }],
       ['one', 'one-score games (8 or less)', (P, j, G, V, D) => { const m = margin(P, j, G, D); return m != null && Math.abs(m) <= 8; }],
       ['bw', 'won by 17+', (P, j, G, V, D) => margin(P, j, G, D) >= 17], ['bl', 'lost by 17+', (P, j, G, V, D) => { const m = margin(P, j, G, D); return m != null && m <= -17; }]] },
-    sched: { label: 'Schedule', group: 'Game', g: true, opts: [
+    sched: { label: 'Schedule', group: 'Game', g: true, known: (P, j, G, V, D) => !!D.gx && gx(P, j, D, 5) >= 0, opts: [
       ['bye', 'off a bye', (P, j, G, V, D) => rest(P, j, G, D, 0) >= 13], ['obye', 'opponent off a bye', (P, j, G, V, D) => rest(P, j, G, D, 1) >= 13],
       ['short', 'short week (5 days or less)', (P, j, G, V, D) => { const r = rest(P, j, G, D, 0); return r >= 0 && r <= 5; }],
       ['xr', 'extra rest (8-12 days)', (P, j, G, V, D) => { const r = rest(P, j, G, D, 0); return r >= 8 && r <= 12; }],
@@ -175,15 +175,15 @@
       ['sun1', 'Sunday early (1 p.m. ET)', (P, j, G, V, D) => gx(P, j, D, 4) === 0 && gx(P, j, D, 5) >= 0 && gx(P, j, D, 5) < 900],
       ['sun4', 'Sunday late afternoon', (P, j, G, V, D) => gx(P, j, D, 4) === 0 && gx(P, j, D, 5) >= 900 && gx(P, j, D, 5) < 1140],
       ['intl', 'neutral site / international', (P, j, G, V, D) => gx(P, j, D, 6) === 1 && !G[P.g[j]][2]]] },
-    qb: { label: 'Thrown by', group: 'Pass', only: PASSY, param: 'qb', hint: 'one quarterback', opts: [],
+    qb: { label: 'Thrown by', group: 'Pass', only: PASSY, param: 'qb', hint: 'one quarterback', opts: [], known: (P, j) => P.pp[j] >= 0,
       fmt: v => `thrown by ${v.split('|')[1] || 'a QB'}`, test: v => { const id = v.split('|')[0]; return (P, j, G, V, D) => { const k = P.pp[j]; return k >= 0 && D.players[k][0] === id; }; } },
-    with: { label: 'With a teammate', group: 'Teammates', g: true, param: 'mate', opts: [], hint: 'only games the teammate played',
+    with: { label: 'With a teammate', group: 'Teammates', g: true, param: 'mate', opts: [], noNot: true, hint: 'only games the teammate played',
       fmt: v => `with ${v.split('|')[1] || 'teammate'}`, test: v => { const id = v.split('|')[0]; return (P, j, G, V, D) => mate(P, j, G, D, id) === true; } },
-    wo: { label: 'Without a teammate', group: 'Teammates', g: true, param: 'mate', opts: [], hint: "only games the teammate was on the roster but didn't play",
+    wo: { label: 'Without a teammate', group: 'Teammates', g: true, param: 'mate', opts: [], noNot: true, hint: "only games the teammate was on the roster but didn't play",
       fmt: v => `without ${v.split('|')[1] || 'teammate'}`, test: v => { const id = v.split('|')[0]; return (P, j, G, V, D) => mate(P, j, G, D, id) === false; } },
     // owner 2026-10-22 ("how bout college, plays that went to u of florida"): the measured player's school or its
     // conference (today's conference: nflverse lists the school's current one)
-    col: { label: 'College', group: 'Player',  only: ['rush', 'pass', 'rec'], param: 'college', bio: true, opts: [], hint: 'a school or conference',
+    col: { label: 'College', group: 'Player',  only: ['rush', 'pass', 'rec'], param: 'college', bio: true, opts: [], known: (P, j, G, V, D) => { const b = bioOf(P, j, D); return !!b && b[0] >= 0; }, hint: 'a school or conference',
       fmt: v => `from ${v.slice(2)}`, test: v => {
         const k = v[0] === 'c' ? 1 : 0, idx = (k ? BIO.confs : BIO.schools).indexOf(v.slice(2)), actor = FAM[BIO.fam].actor;
         return (P, j, G, V, D) => { const a = actor(P, j); if (a < 0) return false; const c = BIO.p.get(D.players[a][0]); return !!c && c[k] === idx; };
@@ -371,7 +371,7 @@
       sec.classList.remove('soon');
       let IX = null, Q = null, busy = 0, paint = null, maxN = 0;
       const base = {}, extra = {}, merged = {};
-      const defaults = () => ({ fam: 'rush', met: 'ypc', who: 'L', wn: '', by: 'player', by2: '', st: 'reg', from: null, to: null, f: {}, min: null });
+      const defaults = () => ({ fam: 'rush', met: 'ypc', who: 'L', wn: '', by: 'player', by2: '', st: 'reg', from: null, to: null, f: {}, fn: {}, min: null });
       const fromUrl = () => { try { const t = new URLSearchParams(location.search).get('t'); return t ? JSON.parse(decodeURIComponent(escape(atob(t)))) : null; } catch (e) { return null; } };
       const saved = () => { try { return JSON.parse(localStorage.getItem(LS) || 'null'); } catch (e) { return null; } };
       sec.innerHTML = `<div class="sec-head"><div><h2>Trends</h2><p>Ask the play-by-play anything: every run and pass since 1999, with charting (personnel, coverage, routes, pressure, play action...) where it exists. Tap a row to change it.</p></div></div>
@@ -419,11 +419,41 @@
         return Q.who[0] === 'C' ? `${Q.wn}'s offense` : Q.wn || 'Whole league';
       };
       const isR = (F, v) => F.range && typeof v === 'string' && v.startsWith('R:');
-      const optLabel = k => { const F = FILTERS[k], v = Q.f[k]; return isR(F, v) ? F.range.say(...parseR(F, v)) : F.fmt ? F.fmt(v) : (F.opts.find(o => o[0] === v) || ['', ''])[1]; };
+      const vals = k => (Array.isArray(Q.f[k]) ? Q.f[k] : k in Q.f ? [Q.f[k]] : []);
+      const isNot = k => !!(Q.fn && Q.fn[k]);
+      const setF = (k, list, neg) => {
+        if (!list.length) { delete Q.f[k]; delete Q.fn[k]; return; }
+        Q.f[k] = list.length === 1 ? list[0] : list;
+        if (neg) Q.fn[k] = 1; else delete Q.fn[k];
+      };
+      const optLabel = k => {
+        const F = FILTERS[k], one = v => (isR(F, v) ? F.range.say(...parseR(F, v)) : F.fmt ? F.fmt(v) : (F.opts.find(o => o[0] === v) || ['', ''])[1]);
+        // "against GB or CHI", not "against GB or against CHI": shared leading words said once
+        const ls = vals(k).map(one), w = ls.map(l => l.split(' '));
+        let n = 0;
+        while (ls.length > 1 && w.every(x => x.length > n + 1 && x[n] === w[0][n])) n++;
+        return `${isNot(k) ? 'not ' : ''}${n ? `${w[0].slice(0, n).join(' ')} ${w.map(x => x.slice(n).join(' ')).join(' or ')}` : ls.join(' or ')}`;
+      };
       const testOf = (k, v) => {
         const F = FILTERS[k];
         if (isR(F, v)) { const [lo, hi] = parseR(F, v), get = F.range.get; return (P, j, G, V, D) => { const x = get(P, j, G, V, D); return x != null && x >= lo && x <= hi; }; }
         return F.test ? F.test(v) : (F.opts.find(o => o[0] === v) || [])[2];
+      };
+      // "is not" keeps only plays where the filter's value is known: a play with no charting (or no contract on record)
+      // is neither play action nor not play action
+      const MISS = { ay: -99, yc: -99, cp: -999, xy: -999, fm: 0, op: 0, rt: 0, cv: 0, mz: 0, rd: 0, pl: 0, rl: 0, gp: 0 };
+      const knownOf = F => {
+        const need = F.need || [], get = F.range ? F.range.get : null, own = F.known;
+        return (P, j, G, V, D) => (!get || get(P, j, G, V, D) != null) && (!own || own(P, j, G, V, D))
+          && need.every(c => P[c] && P[c][j] !== (c in MISS ? MISS[c] : -1));
+      };
+      const filterTest = k => {
+        const ts = vals(k).map(v => testOf(k, v)).filter(Boolean);
+        if (!ts.length) return null;
+        const any = ts.length === 1 ? ts[0] : (P, j, G, V, D) => { for (let i = 0; i < ts.length; i++) if (ts[i](P, j, G, V, D)) return true; return false; };
+        if (!isNot(k)) return any;
+        const known = knownOf(FILTERS[k]);
+        return (P, j, G, V, D) => known(P, j, G, V, D) && !any(P, j, G, V, D);
       };
       const ST_TXT = { reg: 'regular season', post: 'playoffs', both: 'regular season + playoffs' };
       const seasonsTxt = () => `${Q.from === Q.to ? Q.from : `${Q.from}–${Q.to}`} · ${cap(ST_TXT[Q.st])}`;
@@ -439,7 +469,7 @@
       };
       const render = () => {
         const fam = FAM[Q.fam], [, m] = famMetric();
-        const chips = Object.keys(Q.f).map(k => `<span class="tq-chip"><button type="button" data-fx="${k}" title="${esc(FILTERS[k].label)}">${esc(optLabel(k))}</button><button type="button" class="tq-cx" data-x="${k}" aria-label="Remove ${esc(FILTERS[k].label)}">&times;</button></span>`).join('');
+        const chips = Object.keys(Q.f).map(k => `<span class="tq-chip${isNot(k) ? ' tq-not' : ''}"><button type="button" data-fx="${k}" title="${esc(FILTERS[k].label)}">${esc(optLabel(k))}</button><button type="button" class="tq-cx" data-x="${k}" aria-label="Remove ${esc(FILTERS[k].label)}">&times;</button></span>`).join('');
         const row = (pick, k, v) => `<button type="button" class="tq-row" data-pick="${pick}"><span class="tq-k">${k}</span><span class="tq-v">${v}</span><span class="tq-go" aria-hidden="true">&rsaquo;</span></button>`;
         qbox.innerHTML = `<p class="tq-sum">${summary()}</p>
           <div class="tq-rows">
@@ -581,14 +611,28 @@
       };
       // a player as a filter value (Thrown by, With / Without a teammate): search by name, or a team then its players;
       // opens on the team in question when there is one (Playing for, Who's team, or the chosen player's team)
+      // Is / Is not (owner 2026-10-22: "do we have include and exclude with filters"): every filter but with / without
+      // (each other's opposite); the sheet keeps its choice and commits it with the value
+      const notSeg = (k, neg) => (FILTERS[k].noNot ? '' : `<div class="tq-seg tq-isnot" role="radiogroup" aria-label="Include or exclude">${[[0, 'Is'], [1, 'Is not']].map(([v, l]) => `<button type="button" data-not="${v}" class="${+neg === v ? 'on' : ''}">${l}</button>`).join('')}</div>`);
+      const flipNot = (el, e) => { const b = e.target.closest('[data-not]'); if (!b) return null; el.querySelectorAll('[data-not]').forEach(x => x.classList.toggle('on', x === b)); return b.dataset.not === '1'; };
+      const rmBtn = k => (k in Q.f ? '<button type="button" class="tq-act tq-rm" data-rm="1">Remove this filter</button>' : '');
+      // multi-select sheets: tap to toggle, Apply commits ("any of these")
+      const applyBar = n => `<div class="tq-applybar"><button type="button" class="tq-act tq-done" data-apply="1"${n ? '' : ' disabled'}>${n > 1 ? `Apply (any of ${n})` : 'Apply'}</button></div>`;
+      const toggleSel = (el, sel, b) => {
+        const v = b.dataset.fv;
+        if (sel.has(v)) sel.delete(v); else sel.add(v);
+        el.querySelectorAll('[data-fv]').forEach(x => x.classList.toggle('on', sel.has(x.dataset.fv)));
+        const a = el.querySelector('.tq-applybar'); if (a) a.outerHTML = applyBar(sel.size);
+      };
       const pickPerson = (k, opener) => {
         const F = FILTERS[k], el = panel(), role = F.param === 'qb' ? 'qb' : 'any';
-        const set = (gid, nm) => { Q.f[k] = `${gid}|${nm}`; done(); };
-        const rm = k in Q.f ? '<button type="button" class="tq-act tq-rm" data-rm="1">Remove this filter</button>' : '';
+        let neg = isNot(k);
+        const set = (gid, nm) => { setF(k, [`${gid}|${nm}`], neg); done(); };
+        const head = () => notSeg(k, neg);
         const main = () => {
-          el.innerHTML = `<input class="dt-search tq-find" type="search" placeholder="Type a name" aria-label="Find a player" autocomplete="off">
+          el.innerHTML = `${head()}<input class="dt-search tq-find" type="search" placeholder="Type a name" aria-label="Find a player" autocomplete="off">
             <div class="tq-list tq-found"></div><h4 class="tq-h">Or pick a team</h4>
-            <div class="tq-teams">${IX.teams.map(t => `<button type="button" data-team="${t}">${esc(t)}</button>`).join('')}</div>${rm}`;
+            <div class="tq-teams">${IX.teams.map(t => `<button type="button" data-team="${t}">${esc(t)}</button>`).join('')}</div>${rmBtn(k)}`;
           const inp = el.querySelector('.tq-find'), out = el.querySelector('.tq-found');
           const find = () => {
             const t = inp.value.trim().toLowerCase();
@@ -603,38 +647,40 @@
           el.innerHTML = '<p class="muted tq-help">Counting plays&hellip;</p>';
           countPlayers(t, role).then(all => {
             const rows = all.slice(0, 60), unit = role === 'qb' ? 'dropbacks' : 'plays';
-            el.innerHTML = `<button type="button" class="tq-act tq-back" data-back="1">&lsaquo; Search or another team</button>
+            el.innerHTML = `${head()}<button type="button" class="tq-act tq-back" data-back="1">&lsaquo; Search or another team</button>
               <h4 class="tq-h">${esc(t)} ${role === 'qb' ? 'passers' : 'players'}</h4>
-              <div class="tq-list">${rows.map(([gid, [nm, c]]) => `<button type="button" class="tq-opt${(Q.f[k] || '').startsWith(gid + '|') ? ' on' : ''}" data-pid="${esc(gid)}" data-wn="${esc(nm)}"><span>${esc(nm)}</span><small class="tq-r">${c} ${unit}</small></button>`).join('')}</div>
-              ${rows.length ? '' : '<p class="muted tq-help">No plays for this team in these seasons.</p>'}${rm}`;
+              <div class="tq-list">${rows.map(([gid, [nm, c]]) => `<button type="button" class="tq-opt${vals(k).some(v => v.startsWith(gid + '|')) ? ' on' : ''}" data-pid="${esc(gid)}" data-wn="${esc(nm)}"><span>${esc(nm)}</span><small class="tq-r">${c} ${unit}</small></button>`).join('')}</div>
+              ${rows.length ? '' : '<p class="muted tq-help">No plays for this team in these seasons.</p>'}${rmBtn(k)}`;
           });
         };
         el.addEventListener('click', e => {
+          const n = flipNot(el, e); if (n != null) { neg = n; if (k in Q.f) { setF(k, vals(k), neg); update(); } return; }
           const pp = e.target.closest('[data-pid]'); if (pp) { set(pp.dataset.pid, pp.dataset.wn); return; }
           const tb = e.target.closest('[data-team]'); if (tb) { team(tb.dataset.team); return; }
           if (e.target.closest('[data-back]')) { main(); return; }
-          if (e.target.closest('[data-rm]')) { delete Q.f[k]; done(); }
+          if (e.target.closest('[data-rm]')) { setF(k, []); done(); }
         });
-        const t0 = Q.f.tm || (/^T:/.test(Q.who) ? Q.who.slice(2) : null);
+        const t0 = vals('tm')[0] || (/^T:/.test(Q.who) ? Q.who.slice(2) : null);
         if (t0) team(t0);
         else if (/^P:/.test(Q.who)) { el.innerHTML = '<p class="muted tq-help">Finding the team&hellip;</p>'; teamOfPlayer(Q.who.slice(2)).then(t => (t ? team(t) : main())); }
         else main();
         NFLE.sheet(F.label, el, opener);
       };
       const pickCollege = (k, opener) => {
-        const el = panel();
+        const el = panel(), sel = new Set(vals(k));
+        let neg = isNot(k);
         el.innerHTML = '<p class="muted tq-help">Loading schools&hellip;</p>';
         loadBio().then(() => {
           const n = [new Map(), new Map()];
           BIO.p.forEach(([si, ci]) => { if (si >= 0) n[0].set(si, (n[0].get(si) || 0) + 1); if (ci >= 0) n[1].set(ci, (n[1].get(ci) || 0) + 1); });
           const top = (m, names) => [...m].sort((a, b) => b[1] - a[1]).map(([i, c]) => [names[i], c]);
           const schools = top(n[0], BIO.schools), confs = top(n[1], BIO.confs).filter(([c]) => c !== 'NO FOOTBALL').slice(0, 12);
-          const row = (t, [nm, c]) => `<button type="button" class="tq-opt${Q.f[k] === `${t}:${nm}` ? ' on' : ''}" data-fv="${t}:${esc(nm)}"><span>${esc(nm)}</span><small class="tq-r">${c} players</small></button>`;
-          el.innerHTML = `<input class="dt-search tq-find" type="search" placeholder="Search schools: Florida, Alabama&hellip;" aria-label="Search schools" autocomplete="off">
+          const row = (t, [nm, c]) => `<button type="button" class="tq-opt${sel.has(`${t}:${nm}`) ? ' on' : ''}" data-fv="${t}:${esc(nm)}"><span>${esc(nm)}</span><small class="tq-r">${c} players</small></button>`;
+          el.innerHTML = `${notSeg(k, neg)}<input class="dt-search tq-find" type="search" placeholder="Search schools: Florida, Alabama&hellip;" aria-label="Search schools" autocomplete="off">
             <div class="tq-list tq-found"></div>
-            <h4 class="tq-h">Conference <span class="muted">(today's)</span></h4><div class="tq-chipset">${confs.map(([c]) => `<button type="button" class="${Q.f[k] === `c:${c}` ? 'on' : ''}" data-fv="c:${esc(c)}">${esc(c.replace(/ Conference$/, ''))}</button>`).join('')}</div>
+            <h4 class="tq-h">Conference <span class="muted">(today's)</span></h4><div class="tq-chipset">${confs.map(([c]) => `<button type="button" class="${sel.has(`c:${c}`) ? 'on' : ''}" data-fv="c:${esc(c)}">${esc(c.replace(/ Conference$/, ''))}</button>`).join('')}</div>
             <h4 class="tq-h">Most NFL players</h4><div class="tq-list">${schools.slice(0, 25).map(x => row('s', x)).join('')}</div>
-            ${k in Q.f ? '<button type="button" class="tq-act tq-rm" data-rm="1">Remove this filter</button>' : ''}`;
+            ${rmBtn(k)}${applyBar(sel.size)}`;
           const inp = el.querySelector('.tq-find'), out = el.querySelector('.tq-found');
           inp.addEventListener('input', () => {
             const t = inp.value.trim().toLowerCase();
@@ -643,37 +689,48 @@
           });
         });
         el.addEventListener('click', e => {
-          const b = e.target.closest('[data-fv]'); if (b) { Q.f[k] = b.dataset.fv; done(); return; }
-          if (e.target.closest('[data-rm]')) { delete Q.f[k]; done(); }
+          const n = flipNot(el, e); if (n != null) { neg = n; return; }
+          const b = e.target.closest('[data-fv]'); if (b) { toggleSel(el, sel, b); return; }
+          if (e.target.closest('[data-apply]')) { setF(k, [...sel], neg); done(); return; }
+          if (e.target.closest('[data-rm]')) { setF(k, []); done(); }
         });
         NFLE.sheet('College', el, opener);
       };
       const pickRange = (k, opener) => {
         const F = FILTERS[k], r = F.range, el = panel(), step = r.step || 1, tick = r.tick || (x => `${x}`);
+        let neg = isNot(k), moved = false;
         let [lo, hi] = isR(F, Q.f[k]) ? Q.f[k].slice(2).split('~').map(Number) : [r.min, r.max];
         const chips = [...F.opts.filter(o => !r.chips || r.chips.includes(o[0])).map(o => [o[1], o[0]]), ...(r.presets || []).map(([l, a, b]) => [l, `R:${a}~${b}`])];
-        el.innerHTML = `<p class="tq-rv"></p>
+        el.innerHTML = `${notSeg(k, neg)}<p class="tq-rv"></p>
           <div class="tq-range"><i class="tq-rtrack"><i class="tq-rfill"></i></i>
             <input type="range" class="tq-lo" min="${r.min}" max="${r.max}" step="${step}" value="${lo}" aria-label="From">
             <input type="range" class="tq-hi" min="${r.min}" max="${r.max}" step="${step}" value="${hi}" aria-label="To"></div>
           <div class="tq-rends"><span>${esc(tick(r.min))}${r.openLo ? ' or less' : ''}</span>${r.unit ? `<span class="muted">${esc(r.unit)}</span>` : ''}<span>${esc(tick(r.max))}${r.openHi ? '+' : ''}</span></div>
           <button type="button" class="tq-act tq-done" data-apply="1">Apply</button>
           ${chips.length ? `<h4 class="tq-h">Quick picks</h4><div class="tq-chipset">${chips.map(([l, v]) => `<button type="button" class="${Q.f[k] === v ? 'on' : ''}" data-fv="${esc(v)}">${esc(l)}</button>`).join('')}</div>` : ''}
-          ${k in Q.f ? '<button type="button" class="tq-act tq-rm" data-rm="1">Remove this filter</button>' : ''}`;
+          ${rmBtn(k)}`;
         const L = el.querySelector('.tq-lo'), H = el.querySelector('.tq-hi'), fill = el.querySelector('.tq-rfill'), out = el.querySelector('.tq-rv');
         const draw = () => {
           const pct = x => (100 * (x - r.min)) / (r.max - r.min);
           fill.style.left = `${pct(lo)}%`; fill.style.right = `${100 - pct(hi)}%`;
-          out.textContent = lo <= r.min && hi >= r.max ? 'Any (drag the ends)' : cap(r.say(...parseR(F, `R:${lo}~${hi}`)));
+          const any = lo <= r.min && hi >= r.max;
+          // a preset value (not a range) shows by name until a handle moves
+          out.textContent = !moved && k in Q.f && !isR(F, Q.f[k]) ? cap(optLabel(k).replace(/^not /, '')) : any ? 'Any (drag the ends)' : cap(r.say(...parseR(F, `R:${lo}~${hi}`)));
           L.style.zIndex = lo >= r.max - step ? 3 : 2;  // a handle pushed to the far end stays grabbable
         };
-        L.addEventListener('input', () => { lo = Math.min(+L.value, hi); L.value = lo; draw(); });
-        H.addEventListener('input', () => { hi = Math.max(+H.value, lo); H.value = hi; draw(); });
+        L.addEventListener('input', () => { lo = Math.min(+L.value, hi); L.value = lo; moved = true; draw(); });
+        H.addEventListener('input', () => { hi = Math.max(+H.value, lo); H.value = hi; moved = true; draw(); });
         draw();
         el.addEventListener('click', e => {
-          if (e.target.closest('[data-apply]')) { if (lo <= r.min && hi >= r.max) delete Q.f[k]; else Q.f[k] = `R:${lo}~${hi}`; done(); return; }
-          const b = e.target.closest('[data-fv]'); if (b) { Q.f[k] = b.dataset.fv; done(); return; }
-          if (e.target.closest('[data-rm]')) { delete Q.f[k]; done(); }
+          const n = flipNot(el, e); if (n != null) { neg = n; return; }
+          if (e.target.closest('[data-apply]')) {
+            if (!moved && k in Q.f) setF(k, vals(k), neg);  // only Is / Is not changed
+            else if (lo <= r.min && hi >= r.max) setF(k, []);
+            else setF(k, [`R:${lo}~${hi}`], neg);
+            done(); return;
+          }
+          const b = e.target.closest('[data-fv]'); if (b) { setF(k, [b.dataset.fv], neg); done(); return; }
+          if (e.target.closest('[data-rm]')) { setF(k, []); done(); }
         });
         NFLE.sheet(F.label, el, opener);
       };
@@ -681,17 +738,20 @@
         if (FILTERS[k].range) { pickRange(k, opener); return; }
         if (FILTERS[k].param === 'college') { pickCollege(k, opener); return; }
         if (FILTERS[k].param) { pickPerson(k, opener); return; }
-        const F = FILTERS[k], el = panel();
+        const F = FILTERS[k], el = panel(), sel = new Set(vals(k));
+        let neg = isNot(k);
         // team filters: conferences and divisions (Opponent) as chips, teams as a grid
-        const pick = (cls, os) => `<div class="${cls}">${os.map(o => `<button type="button" class="${Q.f[k] === o[0] ? 'on' : ''}" data-fv="${esc(o[0])}">${esc(o[0])}</button>`).join('')}</div>`;
+        const pick = (cls, os) => `<div class="${cls}">${os.map(o => `<button type="button" class="${sel.has(o[0]) ? 'on' : ''}" data-fv="${esc(o[0])}">${esc(o[0])}</button>`).join('')}</div>`;
         const isTeam = o => IX.teams.includes(o[0]);
-        el.innerHTML = `${k === 'vs' || k === 'tm' ? (k === 'vs' ? `<h4 class="tq-h">Conference</h4>${pick('tq-chipset', F.opts.filter(o => o[0].length === 3 && !isTeam(o)))}
+        el.innerHTML = `${notSeg(k, neg)}${k === 'vs' || k === 'tm' ? (k === 'vs' ? `<h4 class="tq-h">Conference</h4>${pick('tq-chipset', F.opts.filter(o => o[0].length === 3 && !isTeam(o)))}
             <h4 class="tq-h">Division</h4>${pick('tq-chipset', F.opts.filter(o => o[0].includes(' ')))}<h4 class="tq-h">Team</h4>` : '') + pick('tq-teams', F.opts.filter(isTeam))
-          : `<div class="tq-list">${F.opts.map(o => `<button type="button" class="tq-opt${Q.f[k] === o[0] ? ' on' : ''}" data-fv="${esc(o[0])}"><span>${esc(cap(o[1]))}</span>${o[3] ? `<small>${esc(o[3])}</small>` : ''}</button>`).join('')}</div>`}
-          ${k in Q.f ? '<button type="button" class="tq-act tq-rm" data-rm="1">Remove this filter</button>' : ''}`;
+          : `<div class="tq-list">${F.opts.map(o => `<button type="button" class="tq-opt${sel.has(o[0]) ? ' on' : ''}" data-fv="${esc(o[0])}"><span>${esc(cap(o[1]))}</span>${o[3] ? `<small>${esc(o[3])}</small>` : ''}</button>`).join('')}</div>`}
+          ${rmBtn(k)}${applyBar(sel.size)}`;
         el.addEventListener('click', e => {
-          const b = e.target.closest('[data-fv]'); if (b) { Q.f[k] = b.dataset.fv; done(); return; }
-          if (e.target.closest('[data-rm]')) { delete Q.f[k]; done(); }
+          const n = flipNot(el, e); if (n != null) { neg = n; return; }
+          const b = e.target.closest('[data-fv]'); if (b) { toggleSel(el, sel, b); return; }
+          if (e.target.closest('[data-apply]')) { setF(k, F.opts.map(o => o[0]).filter(v => sel.has(v)), neg); done(); return; }
+          if (e.target.closest('[data-rm]')) { setF(k, []); done(); }
         });
         NFLE.sheet(F.label, el, opener);
       };
@@ -849,7 +909,7 @@
             if (miss.length) covEl.insertAdjacentHTML('beforeend', `<p class="tr-covnote">Game details (scores, rest, who played) aren't available for ${esc(ranges(miss))} yet, so ${miss.length > 1 ? 'those seasons are' : 'that season is'} left out.</p>`);
           }
           const [fam, m] = famMetric();
-          const tests = Object.entries(Q.f).map(([k, v]) => testOf(k, v)).filter(Boolean);
+          const tests = Object.keys(Q.f).map(filterTest).filter(Boolean);
           const [wk, ...rest] = Q.who === 'L' ? ['L'] : Q.who.split(':'), wv = rest.join(':');
           const by = BY[Q.by], by2 = Q.by2 && BY[Q.by2] ? BY[Q.by2] : null, groups = new Map(), league = blank(), names = {}, teamOf = {};
           let plays = 0;
@@ -988,7 +1048,7 @@
           paint();
         }).catch(e => { sec.querySelector('.tr-base').textContent = `Couldn't load plays (${e.message}).`; });
       };
-      const update = () => { save(); render(); run(); };
+      const update = () => { Object.keys(Q.fn).forEach(k => { if (!(k in Q.f)) delete Q.fn[k]; }); save(); render(); run(); };
 
       // ---- events (delegated: the builder redraws on every change)
       qbox.addEventListener('input', e => {
@@ -1048,6 +1108,7 @@
         if (!FAM[Q.fam].met[Q.met]) Q.met = FIRST[Q.fam];
         if (!BY[Q.by] || !byAllowed(Q.by, Q.fam)) Q.by = 'player';
         if (Q.who === 'S') Q.who = 'L';
+        Q.fn = Q.fn || {};
         if (OUT_MOVED[Q.f.out]) { Q.f.yds = OUT_MOVED[Q.f.out]; delete Q.f.out; }
         Object.keys(Q.f).forEach(k => { if (!FILTERS[k] || !allowed(k, Q.fam)) delete Q.f[k]; });
         update();
