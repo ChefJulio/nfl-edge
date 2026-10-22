@@ -26,6 +26,14 @@
         <p class="st-note muted">Status, injury, estimated return and notes from ESPN's injury feed (updated daily). Play % is ours: the chance he plays this week, from the injury report, practice participation and his history (see the Model tab). Most relevant first: by the Edge grade, then his projection; tap a header to sort the full list another way.</p>`;
       const sub = sec.querySelector('.in-sub'), selT = sec.querySelector('.in-team');
       let scope = 'fan', tab = 'q', all = [], table = null, showSure = false, WK = null, view = 'dash';
+      // one list at a time (owner 2026-10-22: "turn these collapsible lists into a selector that replaces the table")
+      let bucket = 'gt';
+      try { bucket = localStorage.getItem('nfle-in-bucket') || 'gt'; } catch (e) { /* private mode */ }
+      // the linked fantasy team's players first in every list (owner 2026-10-22; league.js writes nfledge-mine.mine)
+      const mineIds = () => { try { const m = JSON.parse(localStorage.getItem('nfledge-mine') || 'null'); return new Set((m && m.mine) || []); } catch (e) { return new Set(); } };
+      let MINE = mineIds();
+      const isMine = r => !!(r.pid && MINE.has(r.pid));
+      const mineTag = r => (isMine(r) ? '<span class="in-mine-tag" title="On your fantasy team">Mine</span>' : '');
       const q = sec.querySelector('.in-q');
       // Most relevant first (owner 2026-10-21: "the most relevant should be at the top, not necessarily the most
       // tossup"): the Edge grade, a percentile within his position, so a QB's bigger projection doesn't outrank a
@@ -36,7 +44,7 @@
       const sure = r => r.inactive != null && r.inactive < 0.015;  // shown as 99% or >99%
       const cols = [
         { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name,
-          html: r => NFLE.ui.player({ name: r.name, pos: r.pos, team: r.abbr, espn: r.espn_id, subHtml: r.abbr ? NFLE.ui.tm(r.abbr) : NFLE.esc(r.team || '') }, TEAMS) },
+          html: r => NFLE.ui.player({ name: r.name, pos: r.pos, team: r.abbr, espn: r.espn_id, subHtml: (r.abbr ? NFLE.ui.tm(r.abbr) : NFLE.esc(r.team || '')) + mineTag(r) }, TEAMS) },
         // Play% first after the name (owner 2026-10-18: "people going there want to see the % they play")
         { key: 'inactive', label: 'Play%', num: true, title: 'Our chance he plays this week', value: r => r.inactive == null ? null : 1 - r.inactive,
           html: r => r.inactive == null ? '<span class="muted">&ndash;</span>' : `<span class="in-pct" style="--p:${Math.round(100 * r.inactive)}">${NFLE.fmt.toPlay(r.inactive)}</span>` },
@@ -72,7 +80,7 @@
         return g ? { txt: short, gone, opp: g.home.team === t ? g.away.team : g.home.team, home: g.home.team === t, fin: !!g.final } : null; };
       const dashCols = [
         { key: 'name', label: 'Player', stick: true, sort: false, html: r => NFLE.ui.player({ name: r.name, pos: r.pos, team: r.team, photo: r.photo, espn: r.espn,
-            subHtml: NFLE.ui.tm(r.team), badges: NFLE.injTag ? NFLE.injTag(r.status, r.inactive, r.pid) : '' }, TEAMS) },
+            subHtml: NFLE.ui.tm(r.team) + mineTag(r), badges: NFLE.injTag ? NFLE.injTag(r.status, r.inactive, r.pid) : '' }, TEAMS) },
         { key: 'play', label: 'Play%', num: true, sort: false, title: 'Our chance he plays this week',
           html: r => `<span class="in-pct" style="--p:${Math.round(100 * r.inactive)}">${NFLE.fmt.toPlay(r.inactive)}</span>` },
         { key: 'proj', label: 'Proj', num: true, sort: false, cls: 'projc', title: 'Projected points if he plays', html: r => `<b>${r.proj.toFixed(1)}</b>` },
@@ -93,14 +101,24 @@
             status: p.status, inactive: p.inactive || 0, proj: +(p.proj || 0), k: kick(p.team) }))
           .filter(r => listed(r) && (!t || r.name.toLowerCase().includes(t) || r.team.toLowerCase() === t));
         box.innerHTML = '';
-        BUCKETS.forEach(([k, label, note, inB]) => {
-          const rs = ps.filter(r => inB(1 - r.inactive)).sort((a, b) => (!!(a.k && a.k.gone) - !!(b.k && b.k.gone)) || byRelevance(a, b));
-          if (!rs.length) return;
-          const open = k !== 'likely' || !!t;
-          box.insertAdjacentHTML('beforeend', `<details class="in-b in-b-${k}"${open ? ' open' : ''}><summary><b>${label}</b> <span class="in-n">${rs.length}</span> <span class="muted">${note}</span></summary><div class="in-bt"></div></details>`);
-          NFLE.Table(box.lastElementChild.querySelector('.in-bt'), { columns: dashCols, rows: rs, cls: 'tiles in-dt',
-            rowClass: r => `teamrow${r.k && r.k.gone ? ' in-gone' : ''}`, rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.team)} data-open-pid="${esc(r.pid)}"` });
-        });
+        // yours first, then the games still to come, then the most relevant
+        const order = (a, b) => (isMine(b) - isMine(a)) || (!!(a.k && a.k.gone) - !!(b.k && b.k.gone)) || byRelevance(a, b);
+        const lists = Object.fromEntries(BUCKETS.map(([k, , , inB]) => [k, ps.filter(r => inB(1 - r.inactive)).sort(order)]));
+        const put = rs => {
+          box.insertAdjacentHTML('beforeend', '<div class="in-bt"></div>');
+          NFLE.Table(box.lastElementChild, { columns: dashCols, rows: rs, cls: 'tiles in-dt',
+            rowClass: r => `teamrow${r.k && r.k.gone ? ' in-gone' : ''}${isMine(r) ? ' in-mine' : ''}`, rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.team)} data-open-pid="${esc(r.pid)}"` });
+        };
+        if (t) {  // a search finds him in whichever list (the selector is set aside while there's text)
+          const rs = ps.slice().sort(order);
+          if (rs.length) put(rs);
+        } else if (ps.length) {
+          if (!lists[bucket] || !lists[bucket].length) bucket = (BUCKETS.find(([k]) => lists[k].length) || BUCKETS[0])[0];
+          const seg = BUCKETS.map(([k, label]) => { const n = lists[k].length, my = lists[k].filter(isMine).length;
+            return `<button type="button" data-b="${k}" class="in-bk-${k}${k === bucket ? ' on' : ''}"${n ? '' : ' disabled'}><b>${label}</b> <span class="in-n">${n}</span>${my ? ` <span class="in-mine-n" title="Yours">${my} yours</span>` : ''}</button>`; }).join('');
+          box.insertAdjacentHTML('beforeend', `<div class="seg in-bk" role="tablist">${seg}</div><p class="muted in-bk-note">${esc((BUCKETS.find(([k]) => k === bucket) || [])[2] || '')}</p>`);
+          put(lists[bucket]);
+        }
         // a search for someone who isn't hurt says so (owner: find specific guys quickly)
         const healthy = t ? Object.values(WK.players || {}).filter(p => !listed(p) && p.name.toLowerCase().includes(t)).slice(0, 5) : [];
         if (healthy.length) box.insertAdjacentHTML('beforeend', `<p class="muted in-none">${healthy.map(p => `<b>${esc(p.name)}</b>`).join(', ')}: not on the injury list, expected to play.</p>`);
@@ -109,6 +127,13 @@
       const setView = v => { view = v; sec.querySelectorAll('.in-view button').forEach(b => b.classList.toggle('on', b.dataset.w === v));
         sec.querySelector('.in-dash').hidden = v !== 'dash'; sec.querySelector('.in-full').hidden = v !== 'full'; if (v === 'dash') drawDash(); else draw(); };
       sec.querySelector('.in-view').addEventListener('click', e => { const b = e.target.closest('[data-w]'); if (b) setView(b.dataset.w); });
+      sec.querySelector('.in-dash').addEventListener('click', e => {
+        const b = e.target.closest('.in-bk [data-b]'); if (!b) return;
+        bucket = b.dataset.b;
+        try { localStorage.setItem('nfle-in-bucket', bucket); } catch (err) { /* private mode */ }
+        drawDash();
+      });
+      document.addEventListener('nfle-mine', () => { MINE = mineIds(); if (view === 'dash') drawDash(); else if (table) table.update(rows()); });
       q.addEventListener('input', () => { if (view === 'dash') drawDash(); else draw(); });
       const inTab = () => base().filter(r => term() || tabOf(r.status) === tab);
       const rows = () => inTab().filter(r => term() || showSure || !sure(r));
@@ -119,7 +144,7 @@
         sec.querySelector('.in-tabs').innerHTML = TABS.map(([k, l]) => `<button type="button" role="tab" data-t="${k}" class="${tab === k && !t ? 'on' : ''}"${t ? ' disabled' : ''}>${l} <span class="in-n">${b0.filter(r => tabOf(r.status) === k && (t || showSure || !sure(r))).length}</span></button>`).join('');
         selT.disabled = !!t; sec.querySelectorAll('.in-scope button').forEach(b => { b.disabled = !!t; });
         if (!table) table = NFLE.Table(sec.querySelector('.in-tbl'), { howto: true, columns: cols, rows: rows(), sort: { key: 'grd', dir: 'desc' },
-          cls: 'tiles', rowClass: () => 'teamrow', rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.abbr)}${r.pid ? ` data-open-pid="${esc(r.pid)}"` : ''}` });
+          pinned: isMine, cls: 'tiles', rowClass: r => `teamrow${isMine(r) ? ' in-mine' : ''}`, rowAttrs: r => `${NFLE.ui.tileStyle(TEAMS, r.abbr)}${r.pid ? ` data-open-pid="${esc(r.pid)}"` : ''}` });
         else table.update(rows());
         const n = t ? 0 : inTab().filter(sure).length, more = sec.querySelector('.in-more');
         more.hidden = !n;

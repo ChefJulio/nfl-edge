@@ -14,13 +14,6 @@ table.dt td.in-note { max-width: 420px; white-space: normal; font-size: var(--fs
 /* This week dashboard (injuries.js drawDash) */
 .in-top { display: flex; gap: 8px; align-items: center; margin: 4px 0 12px; flex-wrap: wrap; }
 .in-top .in-q { flex: 1 1 180px; min-width: 0; }
-.in-b { margin-bottom: 14px; } .in-b > summary { cursor: pointer; padding: 6px 2px; font-size: var(--fs-md); list-style: none; }
-.in-b > summary::-webkit-details-marker { display: none; }
-.in-b > summary::before { content: '\25B8'; display: inline-block; width: 1em; color: var(--muted); transition: transform .15s; }
-.in-b[open] > summary::before { transform: rotate(90deg); }
-.in-b .in-n { font-weight: 700; color: var(--muted); margin: 0 4px; } .in-b summary .muted { font-size: var(--fs-sm); }
-.in-b-gt > summary b { color: #f1d391; } .in-b-out > summary b { color: #ff8f84; } .in-b-likely > summary b { color: #9fd9ae; }
-td.in-when { white-space: nowrap; font-size: var(--fs-xs); }
 .in-none { margin: 12px 4px; }
 .in-top .in-q { padding: 9px 12px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--panel2); color: var(--ink); font: inherit; }
 /* dashboard rows: the injury / practice tags on their own line under the name, so Play%, Proj and Game fit a phone */
@@ -30,3 +23,12 @@ td.in-when { white-space: nowrap; font-size: var(--fs-xs); }
 .in-when .in-g, .in-when .in-o { display: block; } .in-when .in-g { color: var(--muted); } .in-when .in-o { color: var(--ink); font-weight: 600; margin-top: 2px; }
 /* his game has kicked off or ended: dimmed, last in its group */
 .in-dt tr.in-gone > td { opacity: .42; }
+
+/* This week: one list at a time (owner 2026-10-22), the linked fantasy team first */
+.in-bk { margin: 4px 0 6px; flex-wrap: wrap; } .in-bk button { white-space: nowrap; }
+.in-bk .in-n { font-weight: 700; color: var(--muted); margin-left: 3px; }
+.in-bk .in-bk-gt b { color: #f1d391; } .in-bk .in-bk-out b { color: #ff8f84; } .in-bk .in-bk-likely b { color: #9fd9ae; }
+.in-bk-note { margin: 0 2px 8px; font-size: var(--fs-sm); }
+.in-mine-n { font-size: var(--fs-xs, 11px); color: var(--good); font-weight: 600; }
+.in-mine-tag { margin-left: 6px; padding: 0 5px; border-radius: 4px; font-size: var(--fs-xs, 11px); font-weight: 700;
+  background: color-mix(in srgb, var(--good) 25%, transparent); color: var(--good); }

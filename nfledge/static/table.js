@@ -8,7 +8,8 @@
 //     columns: [{ key, label, headHtml? (header HTML instead of the label), title?, num?, stick?, first? ('asc' | 'desc'), sort? (false = not sortable), cls?, w? (px),
 //                 value?: row => sortable value, html?: row => cell HTML (escape it yourself) }],
 //     rows, sort: { key, dir }, rowAttrs?: row => 'data-open-pid="..."', rowClass?: row => 'teamrow', cls?: 'tiles',
-//     onSort?: sort => {} (after a header click)
+//     onSort?: sort => {} (after a header click),
+//     pinned?: row => bool (those rows stay on top whatever the sort, in sorted order; e.g. your fantasy team)
 //   });
 //   t.update(rows); t.setColumns(columns); t.setSort({ key, dir });
 (() => {
@@ -86,6 +87,7 @@
           }).map(x => x[2]);
         }
       }
+      if (opt.pinned) rs = [...rs.filter(r => opt.pinned(r)), ...rs.filter(r => !opt.pinned(r))];
       // The rows that fill the screen first, the rest in batches after it paints (owner 2026-10-16: "lazy load so the
       // important stuff gets drawn more quickly"; the landing QB table drew 31 rows of ~70 elements for 5 in view).
       // A newer draw (sort, filter, new data) cancels the batches of an older one.
