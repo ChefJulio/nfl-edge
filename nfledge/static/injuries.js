@@ -124,11 +124,11 @@
         } else if (ps.length) {
           if (!lists[bucket] || !lists[bucket].length) bucket = (BUCKETS.find(([k]) => lists[k].length) || BUCKETS[0])[0];
           const seg = BUCKETS.map(([k, label]) => { const n = lists[k].length, my = lists[k].filter(isMine).length;
-            return `<button type="button" data-b="${k}" class="in-bk-${k}${k === bucket ? ' on' : ''}"${n ? '' : ' disabled'}><b>${label}</b> <span class="in-n">${n}</span>${my ? ` <span class="in-mine-n" title="Yours">${my} yours</span>` : ''}</button>`; }).join('');
-          box.insertAdjacentHTML('beforeend', `<div class="seg in-bk" role="tablist">${seg}</div><p class="muted in-bk-note">${esc((BUCKETS.find(([k]) => k === bucket) || [])[2] || '')}</p>`);
+            return `<button type="button" role="tab" data-b="${k}" class="in-bk-${k}${k === bucket ? ' on' : ''}"${n ? '' : ' disabled'} aria-selected="${k === bucket}"><span class="in-n">${n}</span><b>${label}</b>${my ? `<span class="in-mine-n" title="On your fantasy team">${my} yours</span>` : ''}</button>`; }).join('');
+          box.insertAdjacentHTML('beforeend', `<div class="in-ctl"><div class="in-bk" role="tablist">${seg}</div><p class="muted in-bk-note">${esc((BUCKETS.find(([k]) => k === bucket) || [])[2] || '')}</p></div>`);
           // the position row: each chip counts the players at that position in the chosen tag
           const inB = (BUCKETS.find(([k]) => k === bucket) || [])[3] || (() => true), inTag = ps.filter(r => inB(1 - r.inactive));
-          if (have.length > 1) box.insertAdjacentHTML('beforeend', `<div class="in-pos" role="tablist" aria-label="Position">${['', ...have].map(x => {
+          if (have.length > 1) box.querySelector('.in-ctl').insertAdjacentHTML('beforeend', `<div class="in-pos" role="tablist" aria-label="Position">${['', ...have].map(x => {
             const n = inTag.filter(r => !x || posOf(r) === x).length;
             return `<button type="button" data-pos="${x}" class="${posSel === x ? 'on' : ''}"${n || !x ? '' : ' disabled'}>${x || 'All'} <span class="in-n">${n}</span></button>`; }).join('')}</div>`);
           put(lists[bucket]);
