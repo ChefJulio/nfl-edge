@@ -393,16 +393,21 @@ SKILL = {"QB", "RB", "FB", "WR", "TE"}
 ON_FIRST = 2016
 
 
-def build_on(keys: pd.DataFrame, part: pd.DataFrame | None, full: dict, season: int) -> dict | None:
+def build_on(keys: pd.DataFrame, part: pd.DataFrame | None, full: dict, season: int, pos_of: dict) -> dict | None:
   """<season>_on.json (owner 2026-10-22: snap-level with / without, routes run): the offense's skill players on the field
   (QB, RB, FB, WR, TE) for every play in the season file's order, from NGS participation (2016 on; not published for
-  the current season). pl: [[gsis, name, position]]; p: per play a sorted list of pl idx, or null without participation."""
+  the current season). pl: [[gsis, name, position]]; p: per play a sorted list of pl idx, or null without participation.
+  Positions come with the participation from 2023; before that only the player ids do, so the players table's
+  position stands in (pos_of)."""
   if part is None or not len(part):
     return None
   k = keys.copy()
   k["play_id"] = pd.to_numeric(k.play_id, errors="coerce")
   pt = part.rename(columns={"nflverse_game_id": "game_id"}).drop_duplicates(["game_id", "play_id"])
   pt["play_id"] = pd.to_numeric(pt.play_id, errors="coerce")
+  for c in ("offense_positions", "offense_names"):
+    if c not in pt:
+      pt[c] = None
   m = k.merge(pt[["game_id", "play_id", "offense_players", "offense_positions", "offense_names"]], on=["game_id", "play_id"], how="left")
   pl, pi, plays = [], {}, []
   for ids, pos, nms in zip(m.offense_players, m.offense_positions, m.offense_names):
@@ -413,7 +418,7 @@ def build_on(keys: pd.DataFrame, part: pd.DataFrame | None, full: dict, season: 
     nms = nms.split(";") if isinstance(nms, str) else []
     row = []
     for i, g in enumerate(ids):
-      ps = pos[i] if i < len(pos) else ""
+      ps = pos[i] if i < len(pos) else pos_of.get(g, "")
       if ps not in SKILL or not g:
         continue
       if g not in pi:
@@ -461,9 +466,10 @@ def main():
   out.mkdir(parents=True, exist_ok=True)
   kept = ROOT / cfg["data"]["cache_dir"] / "plays_site" / f"v{V}"
   kept.mkdir(parents=True, exist_ok=True)
-  players = nfl.load_players().select(["gsis_id", "display_name", "pfr_id", "college_name", "college_conference", "draft_round", "draft_pick", "birth_date", "rookie_season"]).to_pandas()
+  players = nfl.load_players().select(["gsis_id", "display_name", "pfr_id", "college_name", "college_conference", "draft_round", "draft_pick", "birth_date", "rookie_season", "position"]).to_pandas()
   full = {g: n for g, n in zip(players.gsis_id, players.display_name) if isinstance(g, str) and isinstance(n, str)}
   pfr = {p: g for p, g in zip(players.pfr_id, players.gsis_id) if isinstance(p, str) and isinstance(g, str)}
+  pos_of = {g: ("RB" if p == "FB" else p) for g, p in zip(players.gsis_id, players.position) if isinstance(g, str) and isinstance(p, str)}
   ixf = out / "index.json"
   cov = json.loads(ixf.read_text(encoding="utf-8")).get("cov", {}) if ixf.exists() else {}
   for s in range(int(a), int(b or a) + 1):
@@ -499,7 +505,7 @@ def main():
     st = build_st(pbp, doc, full)
     for nm, d in ((names[0], doc), (names[1], x), (names[2], cv), (names[3], st)):
       (out / nm).write_text(json.dumps(d, separators=(",", ":"), allow_nan=False), encoding="utf-8")
-    on = build_on(keys, part, full, s) if s >= ON_FIRST else None
+    on = build_on(keys, part, full, s, pos_of) if s >= ON_FIRST else None
     if on:
       (out / on_nm).write_text(json.dumps(on, separators=(",", ":")), encoding="utf-8")
       if s < current:
