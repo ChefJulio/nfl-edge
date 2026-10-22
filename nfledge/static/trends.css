@@ -87,3 +87,4 @@ table.tr-grid td b { display: block; font-size: var(--fs-md); color: var(--ink);
 table.tr-grid td i { display: block; font-style: normal; font-size: var(--fs-2xs); color: var(--muted); }
 table.tr-grid td.tr-ge { color: var(--muted); background: none; }
 table.tr-grid .tr-gall { border-left: 2px solid var(--line); } table.tr-grid th.tr-gall { color: var(--ink); }
+.tq-back { margin: 0 0 4px; }
