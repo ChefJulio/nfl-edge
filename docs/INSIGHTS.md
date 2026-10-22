@@ -3919,6 +3919,11 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   5.160 (+0.001: redundant with Vegas); neither 5.203 (+0.044); no expert blend AND no calibration step 5.129
   (-0.030, WR 4.977 -> 4.891); naive season FP/G 5.586. Value is mostly the player model; Vegas a small real edge;
   the blend's worth needs a 5-season re-check with calibration separated (queued).
+- **SHIPPED 2026-10-22 (owner: hours between builds; "is that worth it?"): event triggers, not a tighter clock.** A build
+  every 2 hours would mostly rebuild an unchanged site; the gaps were events the watcher didn't watch. tools/news_watch.py
+  now also builds on: a game's spread or total moving 1+ point in nflverse's schedule file (the source the build reads;
+  first dry run caught LA @ LV -4.5 -> -3.5), and a relevant player (8+ projected) gaining or losing ESPN Questionable /
+  Day-To-Day. The 30-minute cooldown still applies.
 - **DESCRIPTIVE 2026-10-21 (owner's friend: "Pat Surtain's OPRK for WR1 is #1 hardest ... shadow CB can nuke WRs"):
   WR1 suppression is not a lasting defensive trait.** tools/wr1_suppression.py, play-by-play 2016-25, 4,212 team-games:
   WR1 / WR2 = an offense's top two WRs by targets before the game; result = half-PPR points minus his own average over

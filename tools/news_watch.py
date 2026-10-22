@@ -22,6 +22,10 @@ SITE = os.environ.get("SITE_URL", "https://chefjulio.github.io/nfl-edge/").rstri
 MIN_PROJ = 8.0
 MIN_ROS = 5.0  # rest-of-season board: lookahead lines run lower (no Vegas lines yet); ~anyone a manager starts or stashes
 SERIOUS = {"Doubtful", "Out", "Injured Reserve", "Physically Unable to Perform", "Suspension", "Reserve/Suspended"}
+# (owner 2026-10-22) a relevant player gaining or losing Questionable / Day-To-Day also builds: the card's tag and
+# the ESPN Questionable display change, even though the chance to play only moves with the official report
+QUESTION = {"Questionable", "Day-To-Day"}
+LINE_MOVE = 1.0  # points of spread or total since the live site's build that start a build
 QUIET_MIN = 30
 EVERY_MIN = 10   # the relay looks this often
 
@@ -210,6 +214,51 @@ def overdue_arrived(d: dict) -> list:
   return out
 
 
+GAMES = "https://github.com/nflverse/nflverse-data/releases/download/schedules/games.csv"
+
+
+def lines_moved(d: dict) -> list:
+  """Games of the live site's week whose Vegas spread or total (nflverse's schedule file: the source the build reads)
+  moved LINE_MOVE+ points since the site was built (index.json games: vegas_line "CHI -3.0", vegas_total)."""
+  import csv
+  import io
+  games = {g.get("id"): g for g in d.get("games") or [] if not g.get("final")}
+  if not games:
+    return []
+  try:
+    with urllib.request.urlopen(urllib.request.Request(GAMES, headers={"User-Agent": "nfl-edge-site/1.0"}), timeout=60) as r:
+      rows = list(csv.DictReader(io.StringIO(r.read().decode("utf-8"))))
+  except Exception as e:  # can't tell: the scheduled builds pick it up
+    print(f"[watch] couldn't read nflverse's schedule file ({e})")
+    return []
+  out = []
+  for row in rows:
+    g = games.get(row.get("game_id"))
+    if g is None or not row.get("spread_line"):
+      continue
+    try:
+      new_sp, new_tot = float(row["spread_line"]), float(row["total_line"]) if row.get("total_line") else None
+    except ValueError:
+      continue
+    old_sp = None
+    vl = str(g.get("vegas_line") or "").split()
+    if len(vl) == 2:  # "CHI -3.0": the favorite and its spread; the schedule's spread_line is the home team's edge
+      try:
+        x = -float(vl[1])
+        old_sp = x if vl[0] == row["home_team"] else -x if vl[0] == row["away_team"] else None
+      except ValueError:
+        old_sp = None
+    old_tot = g.get("vegas_total")
+    moved = []
+    if old_sp is None or abs(new_sp - old_sp) >= LINE_MOVE:
+      moved.append(f"spread {old_sp if old_sp is not None else 'none'} -> {new_sp:+g} (home)")
+    if new_tot is not None and (old_tot is None or abs(new_tot - float(old_tot)) >= LINE_MOVE):
+      moved.append(f"total {old_tot if old_tot is not None else 'none'} -> {new_tot:g}")
+    if moved:
+      out.append(f"{row['away_team']} @ {row['home_team']}: " + ", ".join(moved))
+  return out
+
+
 def recent_build() -> str | None:
   """Why not to start a build now (one running, queued or just started), else None."""
   try:
@@ -239,11 +288,11 @@ def check(dry: bool) -> None:
   for eid, label in who.items():
     a, ra = then.get(eid, ("", ""))
     b, rb = now.get(eid, ("", "", ""))[0], now.get(eid, ("", "", ""))[2]
-    if a != b and (a in SERIOUS or b in SERIOUS):
+    if a != b and (a in SERIOUS or b in SERIOUS or a in QUESTION or b in QUESTION):
       changes.append(f"{label}: {a or 'healthy'} -> {b or 'healthy'}")
     elif (a in SERIOUS or b in SERIOUS) and date_moved(ra, rb):
       changes.append(f"{label}: {b} return date {ra or 'none'} -> {rb or 'none'}")
-  due = due_events(INDEX.get("d", {}).get("clock") or {}, datetime.now(timezone.utc)) + sunday_pbp_due(INDEX.get("d", {}))     + overdue_arrived(INDEX.get("d", {}))
+  due = due_events(INDEX.get("d", {}).get("clock") or {}, datetime.now(timezone.utc)) + sunday_pbp_due(INDEX.get("d", {}))     + overdue_arrived(INDEX.get("d", {})) + lines_moved(INDEX.get("d", {}))
   if due:
     print("[watch] week clock: " + "; ".join(due))
   if not changes and not due:
