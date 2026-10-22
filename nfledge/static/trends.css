@@ -43,6 +43,8 @@ button.tq-row { cursor: pointer; } button.tq-row:hover { background: color-mix(i
 .tq-opt > span:first-child { flex: 1; min-width: 0; }
 .tq-opt small { flex-basis: 100%; order: 3; color: var(--muted); font-size: var(--fs-xs); margin-top: -2px; }
 .tq-opt .tq-go { margin-left: auto; }
+.tq-opt small.tq-r { flex-basis: auto; order: 0; margin: 0 0 0 auto; font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.tq-note { display: block; font-style: normal; font-size: var(--fs-xs); color: var(--muted); font-weight: 400; }
 .tq-opt.on { background: color-mix(in srgb, var(--accent) 16%, var(--panel2)); font-weight: 700; box-shadow: inset 3px 0 0 var(--accent); }
 .tq-opt:hover { background: color-mix(in srgb, var(--accent) 9%, var(--panel2)); }
 .tq-since { font-size: var(--fs-2xs, 10px); font-weight: 700; color: #e0b34a; border: 1px solid color-mix(in srgb, #e0b34a 45%, transparent); border-radius: var(--r-pill);

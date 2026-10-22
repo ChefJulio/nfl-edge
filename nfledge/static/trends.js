@@ -429,10 +429,15 @@
       const pickSeasons = opener => {
         const el = panel(), S = IX.seasons, first = S[0], last = S[S.length - 1];
         const charted = S.find(y => covers(y, ['pz'])) || first;
-        const presets = [['Last season', last, last], ['Last 3 seasons', last - 2, last], ['Last 5 seasons', last - 4, last],
-          [`Charting era (${charted} on)`, charted, last], [`Every season (${first} on)`, first, last]];
+        // the newest season in the data is "this season" while it's the site's current one (owner 2026-10-22: "shouldn't
+        // that read this season?"); every preset shows its years
+        const CFG = window.NFLE_CFG || {}, now = CFG.current && CFG.season === last;
+        const presets = (now ? [['This season', last, last], ['Last season', last - 1, last - 1]] : [['Last season', last, last]])
+          .concat([['Last 3 seasons', last - 2, last], ['Last 5 seasons', last - 4, last], ['Charting era', charted, last], ['Every season', first, last]])
+          .filter(([, a, b]) => b >= first).map(([l, a, b]) => [l, Math.max(first, a), b]);
+        const yrs = (a, b) => (a === b ? `${a}` : `${a}–${b}`);
         const draw = () => {
-          el.innerHTML = `<div class="tq-list">${presets.map(([l, a, b]) => `<button type="button" class="tq-opt${Q.from === Math.max(first, a) && Q.to === b ? ' on' : ''}" data-span="${Math.max(first, a)}-${b}"><span>${esc(l)}</span></button>`).join('')}</div>
+          el.innerHTML = `<div class="tq-list">${presets.map(([l, a, b]) => `<button type="button" class="tq-opt${Q.from === a && Q.to === b ? ' on' : ''}" data-span="${a}-${b}"><span>${esc(l)}${l === 'Charting era' ? ' <i class="tq-note">personnel, coverage, routes&hellip;</i>' : ''}</span><small class="tq-r">${yrs(a, b)}</small></button>`).join('')}</div>
             <h4 class="tq-h">Custom range</h4>
             <div class="tq-span"><select class="dt-select" data-yr="from" aria-label="From">${S.map(y => opt(y, y, Q.from)).join('')}</select><span class="muted">to</span><select class="dt-select" data-yr="to" aria-label="To">${S.map(y => opt(y, y, Q.to)).join('')}</select></div>
             <h4 class="tq-h">Games</h4>
