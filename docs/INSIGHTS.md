@@ -3862,6 +3862,63 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   keeps adding elevated players once announced. Owner 2026-10-22: the Marks case was really Marks / Ogunbowale (an
   active back, handled by {#rb-split-wow}: Ogunbowale 2.1 -> 5.3); Jordan was reverted and put on the practice-squad
   injured list (0%).
+- **PRE-REGISTERED 2026-10-22 (owner: Kenneth Walker RB10 at 14.3, 26.2 FP/G, RB3 by the experts: "who gives a damn what
+  he did on seattle ... and if we do why are we ignoring his playoff performances?"): two tests.**
+  (CO) usage shares from his current team only: once a player has a game for his current team this season, his usage
+  shares (recent and long-run windows) count only games with that team; per-play rates (yards per carry, catch rate,
+  TD rates) keep his whole history (skill travels, role doesn't). experiments.share_team. Walker: recent carry share
+  74% (KC) vs long-run 58% (mostly Seattle).
+  (CP) playoff games in a player's history: his postseason games count toward his rates and shares as part of that
+  season (today the ledger joins regular-season games only). experiments.playoff_hist.
+  TEST each: tools/experiments.py baseline vs variant, 2021-25. GATE: fantasy MAE on the rows the variant changes (proj
+  moves > 0.05) lower with the 95% season-week CI excluding 0; all relevant rows not worse (CI upper < +0.003); no
+  position significantly worse.
+- **PRE-REGISTERED 2026-10-22 (owner: "should we test discounting what happened last year faster once a new season
+  starts? seattle k9 feels irrelevant"): (CQ) last season fades as this season's games accumulate.** Today the
+  efficiency / long-share weights are fixed by season age (1.0 / 0.6 / 0.3; fixed alternatives were insensitive,
+  {#robustness}). Variant: the weight of earlier seasons x exp(-g / k), g = the player's games this season before the
+  target week (week 1: unchanged). k = 4 (fast: 6 games -> x0.22) and k = 8 (x0.47). experiments.prior_fade_k. TEST:
+  tools/experiments.py 2021-25. GATE (either k): all relevant rows fantasy MAE lower with the 95% season-week CI
+  excluding 0; no position significantly worse; if both pass, the larger gain.
+- **PRE-REGISTERED 2026-10-22 (owner: "doesn't what happens in week 15-17 give us better indication than weeks 1-3 last
+  year? can we treat the offseason as a gate players pass through that dulls the gravity of what happened before it?
+  why are we treating the entire season combined as one thing that decays?"): (CR) one game-by-game clock for the
+  efficiency / long-share weights.** Today: flat by season (1.0 / 0.6 / 0.3), every game of a season equal (usage
+  shares already decay per game, half-life 3 weeks, with a small prior-season block gone by week 8). Variant
+  (experiments.eff_clock): weight = 0.5 ^ (age / H), age in weeks before the target week, regular-season weeks
+  counted as played (week 18 caps a season) and the offseason a gate of G = 8 weeks between seasons. H = 16 (at
+  week 7: last season's week 17 ~0.52, week 1 ~0.26) and H = 32 (~0.72, ~0.51). TEST and GATE as (CQ).
+- **PRE-REGISTERED 2026-10-22 (owner, after Walker's NGS numbers: "yards over expected and missed tackles. are those
+  stats we can scrape for free?" ... "yes"): (CS) NGS rushing yards over expected per carry as a rushing-yards input.**
+  Prior evidence, recorded up front: {#charting-ab} found catches / YAC / completions over expected null (|d MAE| <=
+  0.001). NGS weekly lists a back's games with 10+ carries only (~74% of RB carries, 2025). Variant (experiments.ryoe):
+  ryoe = his yards over expected per NGS carry (efficiency weights), shrunk toward the league mean like croe (method of
+  moments on training seasons), an input to the rush_yd regression. TEST tools/experiments.py 2021-25. GATE: RB
+  fantasy MAE lower with the 95% season-week CI excluding 0; all relevant rows not worse (CI upper < +0.003).
+  Expected fantasy points (nflverse ff_opportunity): a testing yardstick only, not displayed (owner).
+- **PRE-REGISTERED 2026-10-22 (owner: "the ftn stuff sounds worth testing"): (CT) FTN charting target quality for
+  receivers.** FTN charts every play from 2022: per target, catchable / contested / screen / created reception.
+  Variant (experiments.ftn_targets): a receiver's catchable-target rate and screen-target share (efficiency weights,
+  shrunk toward the position means) as inputs to the reception and receiving-yards regressions. Seasons: FTN starts
+  2022 and training uses the two seasons before, so the test is 2024-25 (+ 2026 to date reported). GATE: WR / TE / RB
+  fantasy MAE on receiving rows lower with the 95% season-week CI excluding 0; all relevant rows not worse.
+- **RESULT {#share-team} (CO) current-team usage shares: FAIL.** tools/experiments.py 2021-25, 12,480 relevant rows,
+  paired from the cached runs: -0.0005 [-0.0036, +0.0029]; changed rows (4,188) -0.0017 [-0.0112, +0.0081].
+- **RESULT {#playoff-hist} (CP) playoff games in a player's history: FAIL (slightly worse).** +0.0010 [+0.0002,
+  +0.0018]; changed rows (1,826) +0.0062 [+0.0007, +0.0117].
+- **RESULT {#prior-fade} (CQ) last season fades with this season's games: FAIL.** k=4 +0.0020 [-0.0014, +0.0053];
+  k=8 +0.0001 [-0.0023, +0.0023].
+- **RESULT {#eff-clock} (CR) one game-by-game clock: PASS, SHIPPED (owner's idea).** H=32: -0.0070 [-0.0134, -0.0005],
+  changed rows (10,607) -0.0079 [-0.0154, -0.0003], better at every position (QB -0.0040, RB -0.0083, WR -0.0048, TE
+  -0.0127), seasons 2021 -0.019, 2022 -0.004, 2023 -0.012, 2024 -0.002, 2025 +0.003; start / sit +0.050 [+0.026,
+  +0.076]. H=16: -0.0071 [-0.0142, +0.0000] (borderline). Per the gate the larger clean gain: H=32. config
+  experiments.eff_clock. Walker barely moves (14.3 -> 14.2): his shrunk rate is already 4.5 yd/carry (7th of 69 RBs);
+  what holds him at 14 this week is KC's implied 20 points (rush_yd regression: +0.077 yd/carry per implied point).
+- **ABLATION 2026-10-22 (owner: "does our model become dogshit when we shed those crutches?"),** 2025, 2,496 relevant
+  rows, fantasy MAE (scratch/ablation.py): shipped 5.159; no Vegas lines 5.189 (+0.030; RB +0.073); no EPA team ratings
+  5.160 (+0.001: redundant with Vegas); neither 5.203 (+0.044); no expert blend AND no calibration step 5.129
+  (-0.030, WR 4.977 -> 4.891); naive season FP/G 5.586. Value is mostly the player model; Vegas a small real edge;
+  the blend's worth needs a 5-season re-check with calibration separated (queued).
 - **DESCRIPTIVE 2026-10-21 (owner's friend: "Pat Surtain's OPRK for WR1 is #1 hardest ... shadow CB can nuke WRs"):
   WR1 suppression is not a lasting defensive trait.** tools/wr1_suppression.py, play-by-play 2016-25, 4,212 team-games:
   WR1 / WR2 = an offense's top two WRs by targets before the game; result = half-PPR points minus his own average over

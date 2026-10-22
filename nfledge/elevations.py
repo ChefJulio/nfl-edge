@@ -42,11 +42,11 @@ def _tb():
   return importlib.import_module("transactions_build")
 
 
-def _get(url: str, tries: int = 3) -> str | None:
+def _get(url: str, tries: int = 3, timeout: float = 30) -> str | None:
   import time
   for k in range(tries):
     try:
-      return urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30).read().decode("utf-8", "ignore")
+      return urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=timeout).read().decode("utf-8", "ignore")
     except urllib.error.HTTPError as e:
       if e.code == 404:
         return None
@@ -81,7 +81,9 @@ def pfr_lines(day: date, fetch: bool = True) -> list[tuple[str, str, str, str]]:
   try:
     if _DOWN or not fetch:
       raise ConnectionError("source unreachable earlier in this run")
-    s = _get(PFR.format(y=day.year, m=day.month, d=day.day, yy=day.year % 100))
+    # short timeout, one retry: when the site throttles us every attempt hangs to its timeout (2026-10-22 profile:
+    # ~66 s of a build waiting on refused connections before the circuit breaker stopped it)
+    s = _get(PFR.format(y=day.year, m=day.month, d=day.day, yy=day.year % 100), tries=2, timeout=10)
   except Exception:
     _DOWN = True  # one failure: no more tries this run (each costs ~1.5 min of retries)
     return [tuple(x) for x in json.loads(path.read_text(encoding="utf-8"))] if path.exists() else []

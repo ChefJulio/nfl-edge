@@ -170,6 +170,10 @@ class Data:
   teams: pd.DataFrame | None = None  # team names + colors
   qb_career: pd.Series | None = None  # career pass attempts before the loaded window, by gsis_id
   pfr_def: pd.DataFrame | None = None  # PFR weekly advanced defensive stats (pressures, coverage, tackling)
+  pbp_post: pd.DataFrame | None = None  # postseason plays (prepared like pbp); only (CP) playoff_hist reads them
+  snaps_post: pd.DataFrame | None = None  # postseason snap counts, for the same
+  ngs_rush: pd.DataFrame | None = None  # NGS rushing (yards over expected), weekly, 2016 on; (CS)
+  ftn: pd.DataFrame | None = None  # FTN charting per play, 2022 on; (CT)
   depth_per_team: bool = False  # EXPERIMENT (AR, experiments.depth_per_team): each team's depth chart as of its own game
 
   def __post_init__(self):
@@ -331,14 +335,20 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
   elif cfg["data"].get("nfl_api_practice", False):
     _log(f"WARNING: NFL.com's {current} report unavailable; using nflverse's injury table (it lags NFL.com by up to a day)")
   cat = lambda k: pd.concat([f for f in frames[k] if f is not None and len(f)], ignore_index=True)
-  pbp = prepare_pbp(cat("pbp"))
+  raw_pbp = cat("pbp")
+  pbp = prepare_pbp(raw_pbp)
+  pbp_post = prepare_pbp(raw_pbp, "POST") if (raw_pbp.season_type == "POST").any() else None
+  del raw_pbp
   pbp = pbp.merge(sched[["game_id", "div_game"]], on="game_id", how="left")
   pbp["div"] = pbp.div_game.fillna(0).astype(int)
+  if pbp_post is not None:  # (CP) the same columns on postseason plays (division games don't apply)
+    pbp_post["div"] = 0
   # Respect --week: drop anything at or after the target week of the current season.
   cutoff = lambda df, wk="week": df[~((df.season == current) & (df[wk] > latest))]
   stats = cutoff(cat("stats"))
   stats = stats[stats.season_type == "REG"].copy()
   snaps = cutoff(cat("snaps"))
+  snaps_post = snaps[snaps.game_type != "REG"].copy()
   snaps = snaps[snaps.game_type == "REG"].copy()
   rosters = cat("rosters")
   pid = rosters.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
@@ -349,6 +359,7 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
   players = cache.get("players", "all", lambda: nfl.load_players(), stale=cache.age_hours("players", "all") > 24 * 7)
   ppid = players.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
   snaps["gsis_id"] = snaps.gsis_id_roster.fillna(snaps.pfr_player_id.map(ppid))
+  snaps_post["gsis_id"] = snaps_post.pfr_player_id.map(pid).fillna(snaps_post.pfr_player_id.map(ppid))
   routes = frames["routes"]
   routes = pd.concat([r for r in routes if r is not None], ignore_index=True) if any(
     r is not None for r in routes) else None
@@ -356,15 +367,19 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
   data = Data(current_season=current, latest_week=latest, seasons=seasons, pbp=cutoff(pbp), schedules=sched,
               stats=stats, rosters=rosters, snaps=snaps, injuries=cat("injuries"), depth=depth, draft=draft,
               routes=routes, exclusions=load_exclusions(rosters), pending_games=pending, practice=practice,
-              avail_hist=avail_hist, ecr=ecr, teams=teams,
+              avail_hist=avail_hist, ecr=ecr, teams=teams, pbp_post=pbp_post, snaps_post=snaps_post,
+              ngs_rush=cache.get("ngsrush", "all", lambda: nfl.load_nextgen_stats(seasons=[x for x in seasons if x >= 2016], stat_type="rushing"),
+                                 stale=cache.age_hours("ngsrush", "all") > LIVE_TTL_HOURS),
+              ftn=cache.get("ftn", "all", lambda: nfl.load_ftn_charting(seasons=[x for x in seasons if x >= 2022]),
+                            stale=cache.age_hours("ftn", "all") > 24),
               qb_career=qb_career, pfr_def=cutoff(cat("pfr_def")))
   _log(f"seasons {seasons}; current {current}, data through week {latest}"
        f"{f' ({pending} game(s) pending)' if pending else ''}; {len(data.pbp):,} plays, {len(stats):,} player-games")
   return data
 
 
-def prepare_pbp(pbp: pd.DataFrame) -> pd.DataFrame:
-  pbp = pbp[pbp.season_type == "REG"].copy()
+def prepare_pbp(pbp: pd.DataFrame, season_type: str = "REG") -> pd.DataFrame:
+  pbp = pbp[pbp.season_type == season_type].copy()
   pbp["neutral"] = pbp.location.eq("Neutral")
   pbp["home"] = np.where(pbp.neutral, 0, np.where(pbp.posteam == pbp.home_team, 1, -1))
   # Game-level wind: column when present, else parse the weather string; indoor = 0.

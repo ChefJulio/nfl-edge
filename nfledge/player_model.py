@@ -63,6 +63,10 @@ def EFF_FEATURES(comp: str, opp: str, unit: str, exp: dict | None = None, group:
     cols.append("yacoe")
   if exp.get("cpoe") and comp == "pass_yd":
     cols.append("cpoe")
+  if exp.get("ryoe") and comp == "rush_yd":  # (CS) NGS rushing yards over expected per carry, shrunk
+    cols.append("ryoe")
+  if exp.get("ftn_targets") and comp in ("reception", "rec_yd"):  # (CT) FTN target quality, shrunk
+    cols += ["ftn_catchable", "ftn_screen"]
   # EXPERIMENT (owner, 2026-10-14): age. Walk-forward error drifts with age (WR -0.10 pts per year [-0.16, -0.04],
   # RB -0.08): the multi-season rate history lags improving young players and declining older ones.
   cols += age_cols(exp, group)
@@ -358,6 +362,35 @@ def build_ledger(pbp: pd.DataFrame, xtd: XTD, team_ledger: pd.DataFrame, snaps: 
   return led.dropna(subset=["team_db"]).reset_index(drop=True)
 
 
+def add_ftn(led: pd.DataFrame, pbp: pd.DataFrame, ftn: pd.DataFrame | None) -> pd.DataFrame:
+  """(CT) FTN charting per target (2022 on): ftn_n = his charted targets, ftn_catch = catchable ones, ftn_screen = screen
+  passes; 0 where FTN has no chart."""
+  z = led.assign(ftn_n=0.0, ftn_catch=0.0, ftn_screen=0.0)
+  if ftn is None or not len(ftn):
+    return z
+  t = pbp[(pbp.pass_attempt == 1) & (pbp.sack == 0) & pbp.receiver_player_id.notna()][["game_id", "play_id", "receiver_player_id"]]
+  f = ftn[["nflverse_game_id", "nflverse_play_id", "is_catchable_ball", "is_screen_pass"]].rename(
+    columns={"nflverse_game_id": "game_id", "nflverse_play_id": "play_id"})
+  m = t.merge(f, on=["game_id", "play_id"], how="inner")
+  g = m.groupby(["game_id", "receiver_player_id"]).agg(ftn_n=("play_id", "size"), ftn_catch=("is_catchable_ball", "sum"),
+                                                       ftn_screen=("is_screen_pass", "sum")).reset_index()
+  g = g.rename(columns={"receiver_player_id": "gsis_id"}).astype({"ftn_catch": float, "ftn_screen": float, "ftn_n": float})
+  z = led.merge(g, on=["game_id", "gsis_id"], how="left")
+  return z.assign(ftn_n=z.ftn_n.fillna(0.0), ftn_catch=z.ftn_catch.fillna(0.0), ftn_screen=z.ftn_screen.fillna(0.0))
+
+
+def add_ryoe(led: pd.DataFrame, ngs: pd.DataFrame | None) -> pd.DataFrame:
+  """(CS) NGS rushing yards over expected for each player-game (NGS lists games with 10+ carries: ~74% of RB
+  carries): ryo = yards over expected, ryo_n = those carries; 0 where NGS has no row."""
+  if ngs is None or not len(ngs):
+    return led.assign(ryo=0.0, ryo_n=0.0)
+  g = ngs[ngs.week > 0][["season", "week", "player_gsis_id", "rush_yards_over_expected", "rush_attempts"]]
+  g = g.rename(columns={"player_gsis_id": "gsis_id", "rush_yards_over_expected": "ryo", "rush_attempts": "ryo_n"})
+  g = g.groupby(["season", "week", "gsis_id"], as_index=False)[["ryo", "ryo_n"]].sum()
+  led = led.drop(columns=["ryo", "ryo_n"], errors="ignore").merge(g, on=["season", "week", "gsis_id"], how="left")
+  return led.assign(ryo=led.ryo.fillna(0.0), ryo_n=led.ryo_n.fillna(0.0))
+
+
 # ----------------------------------------------------------------------------------------------------------------
 # Player model
 # ----------------------------------------------------------------------------------------------------------------
@@ -418,12 +451,28 @@ class PlayerModel:
     pbp = self.data.pbp
     self._feat_cache = {}
     self.xtd = XTD().fit(pbp[pbp.season.isin(train_seasons)])
-    self.ledger = build_ledger(pbp, self.xtd, self.team_ledger, self.data.snaps, self.data.routes,
-                               self.data.exclusions)
+    self.ledger = add_ryoe(build_ledger(pbp, self.xtd, self.team_ledger, self.data.snaps, self.data.routes,
+                                        self.data.exclusions), getattr(self.data, "ngs_rush", None))
+    if self.exp.get("ftn_targets"):
+      self.ledger = add_ftn(self.ledger, pbp, getattr(self.data, "ftn", None))
     pos = self.info.position.reindex(self.ledger.gsis_id).to_numpy()
     self.ledger["pos"] = pos
     self.ledger["tier"] = self.info.tier.reindex(self.ledger.gsis_id).fillna("UDFA").to_numpy()
     self.ledger = self.ledger[self.ledger.pos.isin(["QB", "RB", "WR", "TE"])].reset_index(drop=True)
+    self.ledger_hist = self.ledger
+    post = getattr(self.data, "pbp_post", None)
+    if self.exp.get("playoff_hist") and post is not None and len(post):
+      # (CP) the inputs' history also counts postseason games (training rows and targets stay regular season)
+      from .team_model import team_game_ledger
+      tl = pd.concat([self.team_ledger, team_game_ledger(post, self.data.schedules)], ignore_index=True)
+      sn = pd.concat([self.data.snaps, getattr(self.data, "snaps_post", None)], ignore_index=True)
+      h = add_ryoe(build_ledger(pd.concat([pbp, post], ignore_index=True), self.xtd, tl, sn, self.data.routes,
+                                self.data.exclusions), getattr(self.data, "ngs_rush", None))
+      if self.exp.get("ftn_targets"):
+        h = add_ftn(h, pd.concat([pbp, post], ignore_index=True), getattr(self.data, "ftn", None))
+      h["pos"] = self.info.position.reindex(h.gsis_id).to_numpy()
+      h["tier"] = self.info.tier.reindex(h.gsis_id).fillna("UDFA").to_numpy()
+      self.ledger_hist = h[h.pos.isin(["QB", "RB", "WR", "TE"])].reset_index(drop=True)
     self.coach_a = coach_aggression(pbp, self.data.schedules) if self.exp.get("coach_aggr") else {}
     return self
 
@@ -535,7 +584,8 @@ class PlayerModel:
   # Fixed defaults (mean, strength in pseudo-opportunities) for the small rates; minor_priors = "fitted" replaces
   # them with method-of-moments estimates from the training seasons.
   MINOR_DEFAULTS = {"scr_rate": (0.04, 40.0), "fum_rate": (0.005, 150.0), "adot": (7.0, 30.0), "tprr": (0.17, 60.0),
-                    "croe": (0.0, 200.0), "yacoe": (0.0, 100.0), "cpoe": (0.0, 300.0)}
+                    "croe": (0.0, 200.0), "yacoe": (0.0, 100.0), "cpoe": (0.0, 300.0), "ryoe": (0.0, 100.0),
+                    "ftn_catchable": (0.85, 100.0), "ftn_screen": (0.08, 100.0)}
 
   def _fit_minor_priors(self, L: pd.DataFrame):
     self.minor_prior = dict(self.MINOR_DEFAULTS)
@@ -554,6 +604,11 @@ class PlayerModel:
              "croe": (L[L.pos.isin(["WR", "TE", "RB"])], "cro", "cro_n"),
              "yacoe": (L[L.pos.isin(["WR", "TE", "RB"])], "yco", "yco_n"),
              "cpoe": (L[L.pos == "QB"], "cpo", "cpo_n")}
+    if "ryo_n" in L:  # (CS)
+      specs["ryoe"] = (L[(L.pos == "RB") & (L.ryo_n > 0)], "ryo", "ryo_n")
+    if "ftn_n" in L:  # (CT)
+      specs["ftn_catchable"] = (L[L.ftn_n > 0], "ftn_catch", "ftn_n")
+      specs["ftn_screen"] = (L[L.ftn_n > 0], "ftn_screen", "ftn_n")
     for name, (g, num, den) in specs.items():
       est = mom_prior(g, num, den)
       if est is not None:
@@ -647,7 +702,7 @@ class PlayerModel:
     return out
 
   def _features(self, season: int, week: int, ratings) -> pd.DataFrame:
-    L = self.ledger
+    L = getattr(self, "ledger_hist", self.ledger)
     L = L[(L.season < season) | (L.week < week)]
     L = L[(L.season >= season - 2) & ~L.excluded]
     # Usage weights: recency within season + decaying prior season (as team model, but share half-life).
@@ -665,6 +720,20 @@ class PlayerModel:
     # Efficiency weights: flat by season age.
     w_eff = np.select([L.season == season, L.season == season - 1, L.season == season - 2],
                       list(self.pcfg.get("eff_season_weights", EFF_SEASON_WEIGHTS)), 0.0)
+    ck = self.exp.get("eff_clock")
+    if ck:
+      # (CR) one game-by-game clock: age in weeks before the target week, a season = 18 weeks (later postseason weeks
+      # count as its last), the offseason a gate of ck["gate"] weeks; weight 0.5 ^ (age / half-life)
+      H, G = float(ck.get("half", 16)), float(ck.get("gate", 8))
+      wk_ = np.minimum(L.week.to_numpy(float), 18.0)
+      ds = (season - L.season.to_numpy()).astype(float)
+      age = np.where(ds == 0, (week - 1) - wk_, (week - 1) + (18.0 - wk_) + G + (ds - 1) * (18.0 + G))
+      w_eff = np.where(L.season.to_numpy() >= season - 2, 0.5 ** (np.clip(age, 0, None) / H), 0.0)
+    fk = self.exp.get("prior_fade_k")
+    if fk:
+      # (CQ) earlier seasons fade as this season's games accumulate: x exp(-games this season so far / k)
+      g_now = (L.season == season).groupby(L.gsis_id).transform("sum").to_numpy(float)
+      w_eff = np.where(L.season < season, w_eff * np.exp(-g_now / float(fk)), w_eff)
     L = L.assign(w_use=w_use, w_eff=w_eff)
     # Players are factorized once and every weighted sum is one bincount (this runs ~40 sums per week, every week
     # of every backtest; a pandas groupby per sum re-factorized the ids each time and dominated training time).
@@ -677,11 +746,24 @@ class PlayerModel:
       return pd.Series(np.bincount(codes, weights=v, minlength=len(ids)), index=ids)
 
     # Usage shares (games played only; exclusions removed).
+    Lw = L
+    if self.exp.get("share_team"):
+      # (CO) a player with a game for his current team this season: his usage shares count only games with that team
+      # (his role there); per-play rates below keep every team (skill travels)
+      lt = L.sort_values(["season", "week"]).groupby("gsis_id").team.transform("last").reindex(L.index)
+      cur = (L.season == season) & (L.team == lt)
+      has_cur = cur.groupby(L.gsis_id).transform("any")
+      keep = (L.team == lt) | ~has_cur
+      Lw = L.assign(w_use=L.w_use.where(keep, 0.0), w_eff=L.w_eff.where(keep, 0.0))
+
+    def wsum_s(col, wcol):
+      v = np.nan_to_num(Lw[col].to_numpy(float) * Lw[wcol].to_numpy(float))
+      return pd.Series(np.bincount(codes, weights=v, minlength=len(ids)), index=ids)
     for name, num, den in (("db_share", "db", "team_db"), ("carry_share", "carries", "team_rush"),
                            ("tgt_share", "tgt", "team_db"), ("route_share", "dropbacks_on_field", "team_db"),
                            ("ay_share", "air_yd", "team_ay"), ("i10_share", "carries_i10", "team_rush_i10")):
-      f[name] = wsum(num, "w_use") / wsum(den, "w_use").replace(0, np.nan)
-      f[name + "_long"] = wsum(num, "w_eff") / wsum(den, "w_eff").replace(0, np.nan)
+      f[name] = wsum_s(num, "w_use") / wsum_s(den, "w_use").replace(0, np.nan)
+      f[name + "_long"] = wsum_s(num, "w_eff") / wsum_s(den, "w_eff").replace(0, np.nan)
     if self.exp.get("rb_wow"):
       self._rb_wow(f, L)
     # Goal-line role (experiments.gl_struct): his share of the team's inside-10 carries relative to his overall carry
@@ -785,7 +867,9 @@ class PlayerModel:
     m, k = mp["tprr"]
     f["tprr"] = (wsum("tgt", "w_eff") + k * m) / (tprr_den.replace(0, np.nan) + k)
     # Over-expected rates (experiments croe / yacoe / cpoe), shrunk toward the league like the other minor rates.
-    for name, num, den in (("croe", "cro", "cro_n"), ("yacoe", "yco", "yco_n"), ("cpoe", "cpo", "cpo_n")):
+    for name, num, den in (("croe", "cro", "cro_n"), ("yacoe", "yco", "yco_n"), ("cpoe", "cpo", "cpo_n"),
+                           *((("ryoe", "ryo", "ryo_n"),) if "ryo" in L else ()),
+                           *((("ftn_catchable", "ftn_catch", "ftn_n"), ("ftn_screen", "ftn_screen", "ftn_n")) if "ftn_n" in L else ())):
       m, k = mp.get(name, self.MINOR_DEFAULTS[name])
       f[name] = (wsum(num, "w_eff") + k * m) / (wsum(den, "w_eff") + k)
     # EXPERIMENT (experiments.age_input): age at this week, centered at 27 (unknown birth date: 0 = typical). The

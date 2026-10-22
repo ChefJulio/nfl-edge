@@ -195,6 +195,9 @@ week_calib = "none"
 # team's report days ("X" = a day he wasn't listed), stage from the calendar. Gate not met (-0.0006 [-0.0015,
 # +0.0003], 4/5 seasons, 2026 -0.0019); season-end confirmation (CL) can switch it off.
 stage_from = "calendar"
+# (CR) one game-by-game clock for efficiency / long-share weights (owner's idea): 0.5^(age/32 weeks), the offseason
+# an 8-week gate. Gate passed 2026-10-22: MAE -0.0070 [-0.0134, -0.0005] 2021-25, start/sit +0.050 [+0.026, +0.076].
+eff_clock = { half = 32, gate = 8 }
 share_normalize_tgt = 0.3
 # A RB / WR / TE in his first game for a team (no snap for it before) gets half his projected targets and carries; the
 # rest goes to same-position teammates who play. Mid-season movers' first games came in at ~40% of projection.

@@ -123,6 +123,14 @@ VARIANTS = {
   "rb_split": variant(experiments__rb_split=True),  # INSIGHTS (CC) 2026-10-21
   "rb_wow": variant(experiments__rb_wow=True),  # INSIGHTS (CA) 2026-10-21
   "rb_split_wow": variant(experiments__rb_split=True, experiments__rb_wow=True),  # INSIGHTS (CA)
+  "share_team": variant(experiments__share_team=True),  # INSIGHTS (CO) 2026-10-22
+  "playoff_hist": variant(experiments__playoff_hist=True),  # INSIGHTS (CP) 2026-10-22
+  "prior_fade4": variant(experiments__prior_fade_k=4),  # INSIGHTS (CQ) 2026-10-22
+  "prior_fade8": variant(experiments__prior_fade_k=8),
+  "eff_clock16": variant(experiments__eff_clock={"half": 16, "gate": 8}),  # INSIGHTS (CR) 2026-10-22
+  "eff_clock32": variant(experiments__eff_clock={"half": 32, "gate": 8}),
+  "ryoe": variant(experiments__ryoe=True),  # INSIGHTS (CS) 2026-10-22
+  "ftn_targets": variant(experiments__ftn_targets=True),  # INSIGHTS (CT) 2026-10-22
   # INSIGHTS (Z): the TD blend k (weight on actual TDs = n / (n + k)); 1e9 = expected TDs only
   **{f"td_k_{k}": variant(player_model__td_blend_k=k) for k in (25, 50, 100, 300, 600)},
   "td_k_xtd": variant(player_model__td_blend_k=1e9),

@@ -457,6 +457,12 @@ class Engine:
     if wind is None:  # historical games: realized wind from play-by-play
       wind = self.team_ledger.drop_duplicates("game_id").set_index("game_id").wind
     p = self.pm.project(f, cands, tp, r_game, wind)
+    # plain Python strings for the row-by-row injury steps: pandas' Arrow-backed "str" columns cost ~0.1 s per row
+    # loop in _redistribute / availability (2026-10-22 profile: 26.7M Arrow element reads, ~4 of a build's 7 minutes);
+    # values are unchanged
+    sc = [c for c in p.columns if pd.api.types.is_string_dtype(p[c].dtype) and p[c].dtype != object]
+    if sc:
+      p[sc] = p[sc].astype(object)
     p["proj_no_inj"] = p.proj
     p["avail"] = 1.0
     p["injury_boost"] = 0.0
