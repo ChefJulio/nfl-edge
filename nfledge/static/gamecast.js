@@ -2591,7 +2591,8 @@
     const top = rk ? Object.entries(rk).filter(([pid, r]) => r.team === abbr && teamGrade(pid))
       .sort((a, b) => { const x = teamGrade(a[0]), y = teamGrade(b[0]); return (x.uq - y.uq) || y.v - x.v; }).slice(0, 3) : [];
     const face = ([pid, r]) => { const ph = r.photo || NFLE.ui.headshot(r.espn);
-      return `<div class="tm-tp" data-open-pid="${esc(pid)}"><span class="tm-tpi">${ph ? `<img src="${esc(ph)}" alt="" width="30" height="30" loading="lazy">` : ''}</span><span class="tm-tpn">${esc(NFLE.fmt.short(r.name))}</span>${r.hurt ? '<span class="tm-tph" title="Under 50% to play his next game">inj</span>' : ''}<span class="tm-tpr">${esc(r.pos)} ${gradeChip(teamGrade(pid))}</span></div>`; };
+      // not links (owner 2026-10-21): a tap anywhere on the tile opens the players list, where each name opens his card
+      return `<div class="tm-tp"><span class="tm-tpi">${ph ? `<img src="${esc(ph)}" alt="" width="30" height="30" loading="lazy">` : ''}</span><span class="tm-tpn">${esc(NFLE.fmt.short(r.name))}</span>${r.hurt ? '<span class="tm-tph" title="Under 50% to play his next game">inj</span>' : ''}<span class="tm-tpr">${esc(r.pos)} ${gradeChip(teamGrade(pid))}</span></div>`; };
     const wkRows = teamPlayerRows(abbr, d);
     tiles.push(tapTile('Players', top.length ? `<div class="tm-tps">${top.map(face).join('')}</div>` : '<div class="pc-tapsub">Loading&hellip;</div>', 'Players',
       `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
