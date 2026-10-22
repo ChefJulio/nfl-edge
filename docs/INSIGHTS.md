@@ -3649,3 +3649,11 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   on past seasons (elevated last week, his position room's absences, depth), projected from their own history.
   GATE: Brier of P(plays) on practice-squad rows vs today's implicit 0, walk-forward 2022-25, CI excluding 0; and the
   fantasy MAE guards. Not built yet.
+- **DESCRIPTIVE 2026-10-21 (owner's friend: "Pat Surtain's OPRK for WR1 is #1 hardest ... shadow CB can nuke WRs"):
+  WR1 suppression is not a lasting defensive trait.** tools/wr1_suppression.py, play-by-play 2016-25, 4,212 team-games:
+  WR1 / WR2 = an offense's top two WRs by targets before the game; result = half-PPR points minus his own average over
+  his other games. Persistence across 320 defense-seasons, odd vs even weeks / season to season: vs WR1s r +0.04 /
+  +0.12, vs WR2s +0.06 / +0.08, WR1 minus WR2 (shadow signature) +0.05 / +0.05 (a real 1-pt effect would show ~0.2-0.3:
+  anything there is under ~0.5 pts). Denver with Surtain: WR1s vs their averages 2021 -3.6, 2022 -1.1, 2023 -1.1, 2024
+  +1.5 (his DPOY year), 2025 -4.5. Limits: WR1 by targets, not by who the shadow covered (free data has no coverage
+  assignments; PFF does). Slot vs outside: no free history of alignment. Not pursued.
