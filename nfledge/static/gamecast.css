@@ -1588,3 +1588,10 @@ a.pc-chip.c-clip, a.pc-chip.c-clip:visited { display: inline-flex; align-items: 
 .mg-at .mg-st { display: flex; flex-direction: column; align-items: center; gap: 1px; font-size: 9.5px; line-height: 1.1; white-space: nowrap; overflow: visible; color: var(--ink); opacity: .85; }
 .mg.fin .mg-at .mg-st { text-transform: uppercase; letter-spacing: .04em; }
 @media (min-height: 760px) { .mg-t .mg-lg { --mgl: 30px; } .mg-t b { font-size: 13.5px; } .mg-t .mg-n { font-size: 18px; } .mg-t .mg-n.pct { font-size: 12px; } }
+/* each kickoff window outlined (owner 2026-10-22: "a thin border around grouped start times"), its heading set into
+   the top edge like a label */
+.mgrid { row-gap: 12px; padding-top: 6px; }
+.mg-grp { position: relative; border: 1px solid color-mix(in srgb, var(--line) 85%, var(--muted)); border-radius: 12px; padding: 9px 4px 4px; }
+.mg-grp .mg-h { position: absolute; top: -7px; left: 9px; max-width: calc(100% - 18px); margin: 0; padding: 0 5px; line-height: 13px; background: var(--bg); }
+.mg-grp .mg-g { gap: 4px; }
+.mg-grp.one .mg-h { left: 6px; max-width: calc(100% - 12px); padding: 0 4px; letter-spacing: .02em; }

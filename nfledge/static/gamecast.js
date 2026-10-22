@@ -2946,6 +2946,10 @@
     const groups = new Map();
     DATA.games.forEach(g => { const w = windowOf(g); if (!groups.has(w.key)) groups.set(w.key, { lab: w.lab, games: [], first: null });
       const G = groups.get(w.key), k = kickMs(g); G.games.push(g); if (k != null && (G.first == null || k < G.first)) G.first = k; });
+    // a one-game window is one tile wide: its heading keeps the weekday ("Mon · 7:15 PM"; each day comes once in a week,
+    // and the full date is the heading's title)
+    const shortDay = ms => new Date(ms).toLocaleDateString([], { weekday: 'short' });
+    groups.forEach(G => { if (G.first != null) G.short = `${shortDay(G.first)} · ${localTime(G.first)}`; });
     groups.forEach(G => { if (G.first != null) G.lab = `${localDay(G.first)} · ${localTime(G.first)}${G.lab.includes('morning') || G.games.some(g => g.site) ? ` · ${G.games.find(g => g.site) ? G.games.find(g => g.site).site : ''}` : ''}`.replace(/ · $/, ''); });
     const order = [...groups.keys()].sort();
     const elapsedOf = g => { const st = LIVE.byGame[g.id]; if (!st || st.state !== 'in') return null;
@@ -2955,7 +2959,7 @@
     box.innerHTML = order.map(k => { const G = groups.get(k);
       const gs = G.games.map((g, i) => [g, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(x => x[0]);
       // a window spans as many of the three columns as it has games, so small windows share a row in time order
-      return `<div class="mg-grp" style="--span:${Math.min(3, gs.length)}"><div class="mg-h">${esc(G.lab)}</div><div class="mg-g">${gs.map(g => miniTile(g, G.first)).join('')}</div></div>`; }).join('');
+      return `<div class="mg-grp${gs.length === 1 ? ' one' : ''}" style="--span:${Math.min(3, gs.length)}"><div class="mg-h" title="${esc(G.lab)}">${esc(gs.length === 1 && G.short ? G.short : G.lab)}</div><div class="mg-g">${gs.map(g => miniTile(g, G.first)).join('')}</div></div>`; }).join('');
     fitMini(box);
   };
   // rows sized so every group fits between the grid's top and the bottom bar (as All teams does)
