@@ -3694,6 +3694,28 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   Too optimistic where a player isn't practicing: Q no practice all week played 24.3% vs predicted 33.8 (n 111),
   Doubtful 3.4 vs 8.9 (n 236), Wednesday DNP after missing his last game 10.1 vs 16.5 (n 685). 2026 weeks 1-6: Brier
   0.100; 30-50% band played 46.2 vs 38.1 (n 171). Candidate next test: calibration by practice pattern.
+- **PRE-REGISTERED 2026-10-22: (CK) the week model's calibration step** (owner: "find out what's up with the no
+  practice situations"). Found while breaking down the misses (scratch/nopractice.py, walk-forward 2021-25): the
+  uncalibrated model is closer in every no-practice spot (Q no practice all week played 24.3 / raw 29.6 / shipped
+  33.8; Doubtful 3.4 / 7.0 / 8.9; Wednesday DNP after a missed game 10.1 / 12.9 / 16.5), and pooled Brier is lower
+  raw at every stage (Wednesday 0.1335 vs 0.1357, Thursday 0.1040 vs 0.1053, final 0.0860 vs 0.0861). Final report,
+  raw 0-5% band: played 1.5, raw 1.9, calibrated 3.4; 5-10%: 8.0 / 7.6 / 12.3. Cause in the code: week_model's
+  isotonic maps are fit on season-1 predictions of a DIFFERENT model (trained on seasons before season-1), then
+  applied to the current one. (I2) compared old model vs new model + calibration; the calibration was never tested
+  alone. Variants (tuesday.WEEK_CALIB): "prev" (shipped), "none", "oof" (isotonic per stage on out-of-fold
+  predictions of the same configuration: leave-one-season-out over the training seasons). DISCLOSED: "none" on
+  2021-25 has been seen (above). TEST (tools/week_calib_eval.py): 2021-25 walk-forward + the untouched 2026 weeks 1-6.
+  GATE: pooled stages 1-3 Brier lower than "prev" with the 95% season-week CI excluding 0 on 2021-25, and not worse on
+  2026 wks 1-6 (point estimate); "oof" replaces "none" only if it beats "none" with the CI excluding 0 (else the
+  simpler one). Tuesday model (stage 0) has no calibration step; unchanged.
+- **RESULT {#week-calib} PASS, SHIPPED 2026-10-22: (CK) no calibration step.** tools/week_calib_eval.py, stages 1-3
+  on-report rows: "none" vs "prev" 2021-25 -0.0012 [-0.0018, -0.0006] (n 18,554; stage 1 -0.0022, 2 -0.0013, 3
+  -0.0001; 4 of 5 seasons, 2021 +0.0008), 2026 wks 1-6 -0.0009 (n 1,251). "oof" vs "prev" -0.0011 [-0.0016, -0.0006];
+  "oof" vs "none" +0.0001 [-0.0004, +0.0005], so the simpler "none". Spots (played / prev / none): Q no practice all
+  week 0.243 / 0.338 / 0.296; Doubtful 0.034 / 0.089 / 0.071; Wednesday DNP after a missed game 0.101 / 0.165 / 0.129.
+  Owner's question (does the schedule explain it, Thursday games vs practice days?): no; by game day the no-practice
+  gaps are as large on Sundays (Q DDD +10 pts, n 90) and not larger on Thursdays (n 9-63). Remaining: the raw model is
+  still 3-5 points high in those spots (small groups). config experiments.week_calib = "none".
 - **DESCRIPTIVE 2026-10-21 (owner's friend: "Pat Surtain's OPRK for WR1 is #1 hardest ... shadow CB can nuke WRs"):
   WR1 suppression is not a lasting defensive trait.** tools/wr1_suppression.py, play-by-play 2016-25, 4,212 team-games:
   WR1 / WR2 = an offense's top two WRs by targets before the game; result = half-PPR points minus his own average over

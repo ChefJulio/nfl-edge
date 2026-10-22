@@ -97,6 +97,20 @@ def _flag(name: str) -> bool:
 HURT_BACK = _flag("hurt_back")
 
 
+def _setting(name: str, default: str) -> str:
+  try:
+    from .config import load_config
+    return str(load_config().get("experiments", {}).get(name, default))
+  except Exception:
+    return default
+
+
+# (CK) the week model's per-stage calibration: "prev" (maps fit on season-1 predictions of a model trained on seasons
+# before season-1), "none", or "oof" (maps fit on out-of-fold predictions of the same configuration)
+WEEK_CALIB = _setting("week_calib", "prev")
+OOF_FOLDS = 3
+
+
 def hurt_not_back(d, cache, season: int) -> set:
   """(gsis, season, week) hurt in a game this season and not back in it (the injury tag's in-game rule)."""
   import nflreadpy as nfl
@@ -428,9 +442,24 @@ def week_model(rows: pd.DataFrame, season: int):
   from sklearn.isotonic import IsotonicRegression
   m = week_fit(rows[rows.season < season])
   cal = {}
+  if WEEK_CALIB == "none":
+    return m, cal
   prev, tr0 = rows[(rows.season == season - 1)].dropna(subset=["y"]), rows[rows.season < season - 1].dropna(subset=["y"])
+  if WEEK_CALIB == "oof":
+    # (CK) out-of-fold predictions of this same configuration: each of the last OOF_FOLDS training seasons predicted by
+    # a model fit on the other training seasons; the maps then describe the model they're applied to
+    tr = rows[rows.season < season].dropna(subset=["y"])
+    folds = sorted(tr.season.unique())[-OOF_FOLDS:]
+    parts = []
+    for f_ in folds:
+      held = tr[tr.season == f_]
+      parts.append(held.assign(_pp=week_fit(tr[tr.season != f_]).predict_proba(week_features(held))[:, 1]))
+    prev = pd.concat(parts)
+    pp = prev._pp.to_numpy()
+    tr0 = tr
   if len(prev) and len(tr0) > 1000:
-    pp = week_fit(tr0).predict_proba(week_features(prev))[:, 1]
+    if WEEK_CALIB != "oof":
+      pp = week_fit(tr0).predict_proba(week_features(prev))[:, 1]
     iso = lambda m: IsotonicRegression(out_of_bounds="clip", y_min=0.0, y_max=1.0).fit(pp[m], prev.y.to_numpy()[m])  # noqa: E731
     res = (prev.res_prev == 1).to_numpy() if "res_prev" in prev.columns else None
     for st in STAGES:

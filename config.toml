@@ -188,6 +188,9 @@ rb_wow = true
 # (CJ) Tuesday + week availability models: "hurt in the game, then returned" as an input (gamebooks log returns
 # from 2024). Gate passed 2026-10-21 (tools/hurt_back_eval.py): injury-note rows Brier -0.028 Tuesday, -0.017 week.
 hurt_back = true
+# (CK) week availability model: no per-stage calibration (the maps were fit on a different model's predictions).
+# Gate passed 2026-10-22 (tools/week_calib_eval.py): Brier -0.0012 [-0.0018, -0.0006] 2021-25, -0.0009 on 2026.
+week_calib = "none"
 share_normalize_tgt = 0.3
 # A RB / WR / TE in his first game for a team (no snap for it before) gets half his projected targets and carries; the
 # rest goes to same-position teammates who play. Mid-season movers' first games came in at ~40% of projection.
