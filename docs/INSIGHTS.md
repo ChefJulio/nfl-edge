@@ -3690,3 +3690,17 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   (passes). Surtain -0.17 over 49 games (the model already prices Denver). Widest per corner: Sneed -3.90 (19), Turner
   -2.95 (13); C. Ward +3.33, Forbes +1.54, Bradberry +1.48. Closed: no corner term. A ~0.5-point WR1 residual is
   plausible but not separable from noise with ~300 games; revisit only with a larger charted list.
+- **PRE-REGISTERED 2026-10-21 (after (CF) failed; before any quality split is looked at): (CG) elite shadow corners
+  only** (owner's friend: shadow corners who aren't elite dilute it, "taking bottom half and top half"). Same list,
+  games and miss as (CF), 2021-25. Quality = the corner's season-to-date yards allowed per target in coverage from
+  games BEFORE that one (nflverse PFR weekly advanced defense; 15+ targets so far, else last season's full rate; no
+  rate -> dropped). Split shadowed games at the median quality into better / worse halves. GATE: better half's miss
+  below 0 with a 95% season-week bootstrap CI excluding 0, at least 0.5 points below the worse half, and negative in
+  both 2021-23 and 2024-25. This is a second look at the same games, so a pass needs replication on 2026 before a
+  term ships. Splitting by the outcomes themselves is circular and not allowed.
+- **RESULT {#shadow-elite} FAIL 2026-10-21: (CG) elite shadow corners.** 285 of 297 shadowed games had a prior
+  coverage rate (median 7.07 yds/target). Better half (3.0-7.1): miss -0.61 [-1.64, +0.45] n 143; worse half: -0.33
+  [-1.33, +0.78] n 142; gap -0.28 (needed -0.5). Better half 2021-23 -0.84, 2024-25 -0.45. No gradient: the miss by
+  sixth of corner quality runs -1.4, +0.5, -0.9, -0.4, +0.8, -1.4 (flat; scratch chart). Surtain 48 games at 6.0
+  yds/target, miss -0.03. Closed with (CF): elite or not, a shadow corner adds nothing measurable beyond the team
+  pass-defense rating. tools/shadow_quality.py.
