@@ -1,5 +1,5 @@
 ---
-documented_code_hash: a969e91b44276935
+documented_code_hash: fb0c34a7b2de824b
 ---
 # How the model works
 
@@ -513,6 +513,7 @@ Durability is games missed injured per 1,000 snaps on the field since 2013 (offe
 - **Rejected** - League scoring shifts year to year (about 3%; up to 5% off in our projections in 2024, the first dynamic-kickoff year). Should projections be scaled by how this season's scoring is running against them so far? - It fixed the level (2024: 5.5% low became 2.0%) but didn't make individual projections more accurate: a single game varies far more than the season's level, and it was worse on 2024-25 by the average miss (2026-10). <!-- tried:season-calibration -->
 - **Rejected** - When a running back sits, should his carries be split between the back left in the rotation and the next man up, as teams actually do (about half each in a two-back committee), instead of mostly going to the remaining lead? - It fixed the carry counts on average but didn't make the projections measurably more accurate (2021-25), and the lead backs it trimmed had already been scoring above their projections (2026-10). <!-- tried:rb-split -->
 - **Rejected** - Should a running back's usual workload be measured only from games his committee partner played, so a role he earned while the partner was hurt isn't counted again when the partner's carries are handed out? - It pointed the right way (and, with the rotation / next-man-up split, made carry counts measurably more accurate) but didn't make the points projections measurably more accurate (2021-25) (2026-10). <!-- tried:rb-wow -->
+- **Adopted (owner's design call)** - When a running back sits, his carries now split between the back left in the rotation and the next man up as teams actually do, and each back's usual workload comes from games his committee partner played. Separately neither proved more accurate; together they made carry counts measurably more accurate and points no worse (2021-25). It gets a full-season check after 2026 (2026-10). <!-- tried:rb-split-wow -->
 
 ## Rule changes and scoring eras
 

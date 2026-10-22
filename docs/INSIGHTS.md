@@ -3634,3 +3634,18 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   announced (Tuesday-Saturday), the chance of one isn't modeled (history: nflverse weekly rosters show past
   elevations as one-week ACT rows); the Moves page could switch to the same source (owner asked; recommended for
   the current season, ESPN kept for history).
+- **RESULT {#rb-split-wow} SHIPPED AS OWNER-DESIGN 2026-10-21: (CC) + (CA) together** (experiments.rb_split, rb_wow; owner: "i refuse to be
+  content assuming marks gets 100% of all texans RB carries this weekend"; "should we just assume a next man up will
+  emerge?"). Neither passed its gate alone; together (2021-25) carries MAE -0.036 [-0.072, -0.001], affected-row points
+  MAE -0.011 [-0.024, +0.001], start / sit RB +0.017 [-0.007, +0.044]. Week 7: Woody Marks 15.3 -> 14.3 (18.7 -> 17.1
+  carries), Dare Ogunbowale 2.1 -> 5.3 (1.7 -> 6.6), Braelon Allen 10.6 -> 9.8, Isaiah Davis 4.1 -> 5.5.
+  **PRE-REGISTERED (CD) season-end confirmation:** 2026 weeks 7-18, RB rows whose projection the pair moves > 0.05
+  (live archive vs a switches-off rebuild): MAE not worse (CI upper < +0.05) and carries MAE lower; else switch off.
+  REMAINING: the "if X plays / sits" pairings still come from the old redistribution.
+- **PRE-REGISTERED 2026-10-21 (before building): (CE) practice-squad players as roster players with a chance to play**
+  (owner: "can we just track and treat practice squad players normally?"). Precedent (scratch/elev_prec2.py,
+  2020-25): skill players elevated and playing, the next week: RB 58% played (n 212), TE 61% (163), WR 57% (353); all
+  re-activated ones played. Variant: healthy practice-squad QB/RB/WR/TE on the board with P(plays) from a model fit
+  on past seasons (elevated last week, his position room's absences, depth), projected from their own history.
+  GATE: Brier of P(plays) on practice-squad rows vs today's implicit 0, walk-forward 2022-25, CI excluding 0; and the
+  fantasy MAE guards. Not built yet.

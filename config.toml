@@ -179,6 +179,12 @@ ecr_blend_positions = ["RB", "WR", "TE"]
 # targets 0.3 = -0.017 MAE overall (CI excludes 0), RB -0.043 and RB rank correlation .507 -> .525; carries alone
 # carry most of it (targets alone within noise); full strength over-corrects.
 share_normalize_carries = 0.7
+# (CC) + (CA) OWNER-DESIGN 2026-10-21 ("i refuse to be content assuming marks gets 100% of all texans RB carries"):
+# a sitting back's carries split rotation / next man up as measured, and a back's base carry share from games his
+# committee partner played. Both failed their gates alone (INSIGHTS {#rb-split}, {#rb-wow}); together carries MAE
+# -0.036 [-0.072, -0.001], points -0.011 [-0.024, +0.001]. Season-end confirmation pre-registered (INSIGHTS (CD)).
+rb_split = true
+rb_wow = true
 share_normalize_tgt = 0.3
 # A RB / WR / TE in his first game for a team (no snap for it before) gets half his projected targets and carries; the
 # rest goes to same-position teammates who play. Mid-season movers' first games came in at ~40% of projection.
