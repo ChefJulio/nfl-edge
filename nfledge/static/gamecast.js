@@ -2915,7 +2915,10 @@
   const localTime = ms => ms == null ? '' : new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).replace(':00', '');
   // the window's day and date, local (owner 2026-10-18: "we should have dates on this page"): "Thu Oct 15"
   const localDay = ms => ms == null ? '' : new Date(ms).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }).replace(',', '');
-  const miniTile = g => {
+  // two columns (owner 2026-10-22: logos bigger and above the code, teams left / right with @ between, no kickoff time
+  // repeated from the window's heading): a tile's own time only when it differs from the heading's, under the @ with
+  // the live clock or Final, so every tile keeps one shape
+  const miniTile = (g, groupMs) => {
     const st = LIVE.byGame[g.id], live = st && st.state === 'in', fin = g.final || (st && st.state === 'post');
     const sit = live ? (st.sit || (LIVE.sums[st.id] && sitFromPlays(LIVE.sums[st.id]))) : null;
     const sp = sit ? spot(sit, st) : null;
@@ -2925,17 +2928,17 @@
     const dd = sit && sit.shortDownDistanceText ? String(sit.shortDownDistanceText).replace(/Goal/i, 'G') : '';
     const status = live ? `<span><span class="live-dot"></span>${esc(`${periodName(st.period)} ${st.clock || ''}`.trim())}</span>${dd ? `<span class="mg-dd">${esc(dd).replace(/ &amp; /, '&#8239;&amp;&#8239;')}</span>` : ''}`
       : fin ? (st && /OT/i.test(st.detail || '') || (g.final && g.final.ot) ? 'Final/OT' : 'Final')
-      : esc(localTime(kickMs(g)));
-    const row = (s, k, n, other) => {
+      : kickMs(g) != null && kickMs(g) !== groupMs ? esc(localTime(kickMs(g)).replace(/\s?[AP]M$/i, '')) : '';  // the heading has the AM / PM
+    const side = (s, k, n, other) => {
       const lost = fin && n != null && other != null && n < other, ball = sp && sp.offense.team === s.team;
       const num = n != null ? esc(n) : f[`p_${k}`] != null ? `${esc(f[`p_${k}`])}<small>%</small>` : '';
-      return `<span class="mg-r${lost ? ' lost' : ''}"><span class="mg-lg"><img src="${esc(NFLE.fmt.logoSrc(s.logo_url, 22))}" alt="" loading="lazy"></span>
-        <b>${esc(s.team)}</b>${ball ? '<i class="mg-ball" title="Has the ball"></i>' : ''}<span class="mg-n${n == null ? ' pct' : ''}">${num}</span></span>`;
+      return `<span class="mg-t${lost ? ' lost' : ''}"><span class="mg-lg"><img src="${esc(NFLE.fmt.logoSrc(s.logo_url, 48))}" alt="" loading="lazy"></span>
+        <b>${esc(s.team)}${ball ? '<i class="mg-ball" title="Has the ball"></i>' : ''}</b><span class="mg-n${n == null ? ' pct' : ''}">${num}</span></span>`;
     };
     const c = g.colors || {};
     return `<a class="mg${live ? ' live' : ''}${sp && sp.red ? ' rz' : ''}${fin ? ' fin' : ''}" data-gid="${esc(g.id)}" href="${esc(gameHref(g))}"
-      style="--ta:${esc(c[g.away.team] || '#444')};--th:${esc(c[g.home.team] || '#444')}"><span class="mg-st">${status}</span>
-      ${row(g.away, 'away', as, hs)}${row(g.home, 'home', hs, as)}</a>`;
+      style="--ta:${esc(c[g.away.team] || '#444')};--th:${esc(c[g.home.team] || '#444')}">
+      <span class="mg-vs">${side(g.away, 'away', as, hs)}<span class="mg-at">${g.neutral ? 'vs' : '@'}${status ? `<span class="mg-st">${status}</span>` : ''}</span>${side(g.home, 'home', hs, as)}</span></a>`;
   };
   const paintMini = () => {
     const box = document.querySelector('.mgrid');
@@ -2952,19 +2955,19 @@
     box.innerHTML = order.map(k => { const G = groups.get(k);
       const gs = G.games.map((g, i) => [g, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(x => x[0]);
       // a window spans as many of the three columns as it has games, so small windows share a row in time order
-      return `<div class="mg-grp" style="--span:${Math.min(3, gs.length)}"><div class="mg-h">${esc(G.lab)}</div><div class="mg-g">${gs.map(miniTile).join('')}</div></div>`; }).join('');
+      return `<div class="mg-grp" style="--span:${Math.min(3, gs.length)}"><div class="mg-h">${esc(G.lab)}</div><div class="mg-g">${gs.map(g => miniTile(g, G.first)).join('')}</div></div>`; }).join('');
     fitMini(box);
   };
   // rows sized so every group fits between the grid's top and the bottom bar (as All teams does)
   const fitMini = box => {
     if (!matchMedia('(max-width: 600px)').matches || !box.offsetParent) { box.style.removeProperty('--mgh'); return; }
     const bar = document.querySelector('.botbar'), bottom = bar && bar.getClientRects().length ? bar.getBoundingClientRect().top : innerHeight;
-    box.style.setProperty('--mgh', '52px');
+    box.style.setProperty('--mgh', '72px');
     const top = box.getBoundingClientRect().top + scrollY - (scrollY > 0 ? scrollY : 0);
     // tile rows: tiles laid out in different rows (getClientRects tops), counted once
     const rows = new Set([...box.querySelectorAll('.mg')].map(t => Math.round(t.getBoundingClientRect().top))).size;
     const extra = bottom - 8 - box.getBoundingClientRect().top - box.getBoundingClientRect().height;
-    box.style.setProperty('--mgh', `${Math.max(44, Math.min(78, 52 + extra / Math.max(1, rows)))}px`);
+    box.style.setProperty('--mgh', `${Math.max(64, Math.min(104, 72 + extra / Math.max(1, rows)))}px`);
     // the header above can still change (the live pill arrives after the first poll): check once more next frame
     if (!box._refit) { box._refit = 1; requestAnimationFrame(() => { box._refit = 0;
       const over = box.getBoundingClientRect().bottom - (bottom - 8);

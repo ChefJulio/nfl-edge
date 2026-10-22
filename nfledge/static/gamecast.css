@@ -1573,3 +1573,18 @@ a.pc-chip.c-clip, a.pc-chip.c-clip:visited { display: inline-flex; align-items: 
 .hof-b { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 11px; font-weight: 800; letter-spacing: .04em;
   color: #1a1405; background: linear-gradient(135deg, #f5d77a, #c99a2e); vertical-align: middle; }
 .pc-meta .hof-b { margin-right: 6px; }
+/* matchup mini tiles, two columns (owner 2026-10-22): logo over code over win chance / score, "@" between; the status
+   line (a time unlike the heading's, the live clock, Final) only when there is one */
+.mg { display: flex; flex-direction: column; padding: 4px 6px 5px; }
+.mg-st { flex: none; text-align: center; justify-content: center; }
+.mg-vs { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; }
+.mg-t { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; line-height: 1; }
+.mg-t.lost { opacity: .45; }
+.mg-t .mg-lg { width: var(--mgl, 26px); height: var(--mgl, 26px); }
+.mg-t .mg-lg img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+.mg-t b { display: inline-flex; align-items: center; gap: 3px; font-size: 12.5px; font-weight: 800; letter-spacing: .02em; }
+.mg-t .mg-n { margin: 0; font-size: 16px; } .mg-t .mg-n.pct { font-size: 11px; }
+.mg-at { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0 2px; font-size: 11px; font-weight: 700; color: var(--muted); align-self: center; }
+.mg-at .mg-st { display: flex; flex-direction: column; align-items: center; gap: 1px; font-size: 9.5px; line-height: 1.1; white-space: nowrap; overflow: visible; color: var(--ink); opacity: .85; }
+.mg.fin .mg-at .mg-st { text-transform: uppercase; letter-spacing: .04em; }
+@media (min-height: 760px) { .mg-t .mg-lg { --mgl: 30px; } .mg-t b { font-size: 13.5px; } .mg-t .mg-n { font-size: 18px; } .mg-t .mg-n.pct { font-size: 12px; } }
