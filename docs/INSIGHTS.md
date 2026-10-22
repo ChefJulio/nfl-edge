@@ -4056,4 +4056,8 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
     gained successful / unsuccessful plays, incompletions, sacks, interceptions, fumbles lost; the by-season chart's
     range is the seasons' own (a count's league TOTAL had flattened it) with labeled ends, and the season in progress is
     a hollow point.
+  - **Position (owner: "can we sort by positions too? maybe as part of the who filter").** bio.json gains each player's
+    position (nflverse's current listing, used for every season: a player who switched is counted at his current one).
+    Position filter (QB / RB / WR / TE; Routes keeps its on-field position) as chips in the Who sheet, read into the
+    subject ("Every running back", "BUF wide receivers"), plus a Position breakdown.
 

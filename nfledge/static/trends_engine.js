@@ -160,6 +160,9 @@
   const defRank = (P, j, D) => { const c = seasonCtx(D), side = RUNFAM === 'rush' ? c.run : RUNFAM === 'pass' || RUNFAM === 'rec' ? c.pass : c.all, r = side[P.d[j]]; return r > 0 ? r : null; };
   // career (bio birth date YYYYMMDD, rookie season): age on Sept. 1 of the season, and his season count from the rookie year
   const ageOf = (b, s) => (!b || !(b[5] > 0) ? null : s - Math.floor(b[5] / 10000) - (b[5] % 10000 > 901 ? 1 : 0));
+  // position (owner 2026-10-22: "can we sort by positions too?"): nflverse's current listing, the same for every season
+  const POSW = { QB: 'quarterback', RB: 'running back', WR: 'wide receiver', TE: 'tight end' };
+  const posOf = b => (b && b[7]) || null;
   const yearOf = (b, s) => (!b || !(b[6] > 0) || s < b[6] ? null : s - b[6] + 1);
   const home = (P, j, G) => P.o[j] === G[P.g[j]][3];
   const gx = (P, j, D, k) => (D.gx ? D.gx.x[P.g[j]][k] : -1);
@@ -313,6 +316,7 @@
     rnd: ['draft round', (P, j, G, D) => { const b = bioOf(P, j, D); return b ? b[2] : null; }, [], 'k'],
     // game by game (owner 2026-10-22, "game logs, streaks, spans"): built from player-game totals in run(), not a key function
     pgame: ['game (game log)', null, [], 'v'], pmark: ['games reaching a mark', null, [], 'v'], pspan: ['best stretch of games', null, [], 'v'],
+    pos: ['position', (P, j, G, D) => posOf(bioOf(P, j, D)), [], 'v'],
     age: ['age', (P, j, G, D) => ageOf(bioOf(P, j, D), D.season), [], 'k'], cyr: ['career year', (P, j, G, D) => yearOf(bioOf(P, j, D), D.season), [], 'k'], season: ['season', (P, j, G, D) => D.season, [], 'kd'],
     // playoff weeks on the 2021+ numbering (wild card = 19), so each round groups and labels the same in every season:
     // before 2021 the regular season had 17 weeks and the wild card was week 18
@@ -333,6 +337,7 @@
   };
   const BYLABEL = {
     week: k => k > 100 ? ['', 'Wild Card', 'Divisional', 'Conference', 'Super Bowl'][Math.min(4, k - 118)] || `Playoffs wk ${k - 100}` : `Week ${k}`,
+    pos: k => (POSW[k] ? `${POSW[k][0].toUpperCase()}${POSW[k].slice(1)}s` : k),
     rnd: k => (k >= 8 ? 'Undrafted' : k >= 7 ? 'Round 7+' : `Round ${k}`), age: k => `Age ${k}`, cyr: k => (k === 1 ? 'Rookie year' : `Year ${k}`),
     qtr: k => k === 5 ? 'OT' : `Q${k}`, down: k => `${k}${['', 'st', 'nd', 'rd', 'th'][k]} down`, dist: k => k >= 15 ? '15+ to go' : `${k} to go`,
     zone: k => k < 5 ? `Own ${k * 10}-${k * 10 + 9}` : `Opp ${100 - k * 10}-${91 - k * 10}`.replace('Opp 0-', 'Opp 1-'),
@@ -398,6 +403,9 @@
       range: { get: (P, j, G, V, D) => defRank(P, j, D), min: 1, max: 32, unit: '1 = best defense that season', tick: ordn,
         presets: [['top 5', 1, 5], ['top 10', 1, 10], ['bottom 10', 23, 32]],
         say: (lo, hi) => (lo <= 1 ? `vs top-${hi} defenses` : hi >= 32 ? `vs defenses ranked ${ordn(lo)} or worse` : `vs defenses ranked ${ordn(lo)}-${ordn(hi)}`) } },
+    pos: { label: 'Position', group: 'Player', bio: true, only: ['rush', 'pass', 'rec'], hint: "listed position (nflverse's current one, every season)",
+      known: (P, j, G, V, D) => !!posOf(bioOf(P, j, D)),
+      opts: Object.keys(POSW).map(k => [k, `${POSW[k]}s`, (P, j, G, V, D) => posOf(bioOf(P, j, D)) === k]) },
     age: { label: 'Age', group: 'Player', bio: true, only: ['rush', 'pass', 'rec'], opts: [], range: { get: (P, j, G, V, D) => ageOf(bioOf(P, j, D), D.season),
       min: 20, max: 40, openLo: true, openHi: true, unit: 'age on Sept. 1 of the season', presets: [['25 or younger', 20, 25], ['26-29', 26, 29], ['30+', 30, 40]],
       say: (lo, hi) => `age ${span(lo, hi)}` } },
@@ -444,7 +452,7 @@
     const F = FILTERS[k], only = !F.only || F.only.includes(fam);
     return FAM[fam].st ? (ST_FILTERS.has(k) || (F.stOnly && only)) : !F.stOnly && only;
   };
-  const byAllowed = (k, fam) => GAMEBY.has(k) ? !FAM[fam].st : ['college', 'rnd', 'age', 'cyr'].includes(k) ? ['rush', 'pass', 'rec'].includes(fam) : FAM[fam].st ? ST_BY.has(k) : k !== 'kdist';
+  const byAllowed = (k, fam) => GAMEBY.has(k) ? !FAM[fam].st : ['college', 'rnd', 'age', 'cyr', 'pos'].includes(k) ? ['rush', 'pass', 'rec'].includes(fam) : FAM[fam].st ? ST_BY.has(k) : k !== 'kdist';
   // Two-way grids (owner 2026-10-14): a second grouping makes the answer a shaded rows x columns grid. Groupings with
   // dozens of values (players, teams, coaches) work as rows only; columns must fit a phone (capped, scrolls past that).
   const GRID_ROW_ONLY = new Set(['player', 'team', 'opp', 'coach', 'college', 'pgame', 'pmark', 'pspan']);
@@ -479,10 +487,13 @@
   // Who names the subject: the scope (Q.who) plus, for the league or one team, its unit (players, or the team as one:
   // owner 2026-10-22 "who: add teams themselves maybe?"). A team as itself is that team, a row per season.
   const UNITS = { player: 'Every player', team: 'Every team', opp: 'Every defense', coach: 'Every head coach' };
+  const posKey = Q => (Q.fam === 'route' ? 'rpos' : 'pos');
+  const posSel = Q => { const k = posKey(Q), v = Q.f[k]; return typeof v === 'string' && !(Q.fn && Q.fn[k]) && POSW[v] ? v : null; };
+  const posInWho = Q => !!posSel(Q) && Q.by === 'player' && (Q.who === 'L' || /^T:/.test(Q.who));
   const whoLabel = Q => {
-    const t = Q.who.slice(2);
-    if (Q.who === 'L') return UNITS[Q.by] || 'Whole league';
-    if (/^T:/.test(Q.who)) return Q.fam === 'team' ? `${t} offense` : Q.by === 'player' ? `${t} players` : `${t} as a team`;
+    const t = Q.who.slice(2), pw = posInWho(Q) ? POSW[posSel(Q)] : null;
+    if (Q.who === 'L') return pw ? `Every ${pw}` : UNITS[Q.by] || 'Whole league';
+    if (/^T:/.test(Q.who)) return Q.fam === 'team' ? `${t} offense` : Q.by === 'player' ? `${t} ${pw ? `${pw}s` : 'players'}` : `${t} as a team`;
     if (/^V:/.test(Q.who)) return Q.by === 'player' ? `Players against ${t}` : `${t} defense`;
     return Q.who[0] === 'C' ? `${Q.wn}'s offense` : Q.wn || 'Whole league';
   };
@@ -537,7 +548,7 @@
     const [fam, m] = famMetric(Q);
     const who = Q.who === 'L' && !UNITS[Q.by] ? 'The league' : whoLabel(Q);
     const unit = (Q.who === 'L' && UNITS[Q.by]) || Q.by === 'player';  // the breakdown is already in the subject
-    const when = Object.keys(Q.f).map(k => optLabel(Q, k)).filter(Boolean);
+    const when = Object.keys(Q.f).filter(k => !(posInWho(Q) && k === posKey(Q))).map(k => optLabel(Q, k)).filter(Boolean);
     const by = GAMEBY.has(Q.by) ? `, ${gameTxt(Q).toLowerCase()}` : Q.by2 && BY[Q.by2] ? `, as a grid of ${BY[Q.by][0]} by ${BY[Q.by2][0]}` : unit ? '' : `, by ${BY[Q.by][0]}`;
     return { who, fam: fam.label.toLowerCase(), metric: m[0], when, years: Q.from === Q.to ? `${Q.from}` : `${Q.from}–${Q.to}`, st: ST_TXT[Q.st], by };
   };
@@ -671,7 +682,7 @@
     if (!seasons.length) return Promise.resolve(Object.assign(res, { empty: 'seasons' }));
     const wantG = Object.keys(Q.f).some(k => FILTERS[k].g);
     const wantOn = !!FAM[Q.fam].on || Object.keys(Q.f).some(k => FILTERS[k].on);
-    const wantC = Object.keys(Q.f).some(k => FILTERS[k].bio) || ['college', 'rnd', 'age', 'cyr'].some(k => Q.by === k || Q.by2 === k);
+    const wantC = Object.keys(Q.f).some(k => FILTERS[k].bio) || ['college', 'rnd', 'age', 'cyr', 'pos'].some(k => Q.by === k || Q.by2 === k);
     return Promise.all([...seasons.map(s => loadSeason(s, wantX, FAM[Q.fam].st, wantG, wantOn)), wantC ? loadBio() : null]).then(list => {
       list = list.slice(0, seasons.length);
       if (BIO) BIO.fam = Q.fam;
@@ -854,7 +865,7 @@
     blank, fmt, ranges, numKey, mergeAcc, allowed, byAllowed, parseR, isR, ordn, span,
     // the query
     defaults, normalize, famMetric, needs, covers, spanSeasons, vals, isNot, setF, optLabel, whoLabel, seasonsTxt, byTxt, gameTxt, markTxt,
-    defMin, summaryParts, describe, UNITS, ST_TXT, cap,
+    defMin, summaryParts, describe, UNITS, ST_TXT, cap, POSW, posKey, posSel,
     // data and counting
     init, ix: () => IX, bio, loadBio, people, countPlayers, teamOfPlayer, compute, tableRows, gameRows, gameLabel, gameOrd, keepRows, answer, schema,
   };

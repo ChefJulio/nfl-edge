@@ -55,7 +55,7 @@
       // easier to use and understand"): one labeled row per part of the question (Measure, Who, Only when, Seasons, Break
       // down, Minimum), each opening a sheet of grouped, searchable choices, and the question in plain English on top.
       // The query state Q, the links and run() are unchanged.
-      const BY_GROUPS = [['People', ['player', 'team', 'opp', 'coach', 'college', 'rnd', 'age', 'cyr']], ['Game by game', ['pgame', 'pmark', 'pspan']], ['Time', ['season', 'week', 'qtr']],
+      const BY_GROUPS = [['People', ['player', 'team', 'opp', 'coach', 'pos', 'college', 'rnd', 'age', 'cyr']], ['Game by game', ['pgame', 'pmark', 'pspan']], ['Time', ['season', 'week', 'qtr']],
         ['Situation', ['down', 'dist', 'zone', 'score']], ['Offense', ['align', 'pers', 'pa', 'mo']],
         ['Defense', ['box', 'rushers', 'dbs', 'mz', 'cov']], ['Passing', ['depth', 'loc', 'route', 'read', 'press']],
         ['Running', ['dir', 'gap']], ['Kicking', ['kdist']], ['Game', ['roof', 'surf']]];
@@ -137,8 +137,13 @@
         const tgrid = pre => `<div class="tq-teams">${teams.map(t => `<button type="button" data-who="${pre}:${t}" class="${lit(pre, t) ? 'on' : ''}">${esc(t)}</button>`).join('')}</div>`;
         const SEG = { T: ['As a team', 'Its players'], V: ['Their defense', 'Players facing them'] };
         const seg = pre => team ? '' : `<div class="tq-seg">${[1, 0].map((v, i) => `<button type="button" data-solo="${v}" data-pre="${pre}" class="${+solo[pre] === v ? 'on' : ''}">${SEG[pre][i]}</button>`).join('')}</div>`;
+        // position (owner 2026-10-22: "can we sort by positions too? maybe as part of the who filter"): sets the Position
+        // filter (Routes: the route runner's on-field position) and stays open, so a team can be picked next
+        const pk = E.posKey(Q), POSO = (FILTERS[pk] && allowed(pk, Q.fam)) ? FILTERS[pk].opts.map(o => o[0]) : [];
+        const posRow = () => (POSO.length ? `<h4 class="tq-h">Position</h4><div class="tq-chipset tq-posrow">${['', ...POSO].map(v => `<button type="button" data-pos="${v}" class="${(E.posSel(Q) || '') === v && !(v === '' && pk in Q.f) ? 'on' : ''}">${v || 'All'}</button>`).join('')}</div>` : '');
         const main = () => {
           el.innerHTML = `<div class="tq-list">${Object.entries(UNITS).filter(([k]) => ok(k)).map(([k, l]) => `<button type="button" class="tq-opt${Q.who === 'L' && Q.by === k ? ' on' : ''}" data-who="L" data-unit="${k}"><span>${l}</span><small>${{ player: 'a row per player', team: team ? 'a row per offense' : 'a row per team: its players combined', opp: 'a row per defense: what offenses did against it', coach: 'a row per head coach: the offenses they ran' }[k]}</small></button>`).join('')}</div>
+            ${posRow()}
             <h4 class="tq-h">${team ? 'A head coach' : 'A player or head coach'}</h4>
             <input class="dt-search tq-find" type="search" placeholder="Type a name" aria-label="Find a ${team ? 'head coach' : 'player or head coach'}" autocomplete="off">
             <div class="tq-list tq-found"></div>
@@ -169,6 +174,12 @@
           });
         };
         main();
+        el.addEventListener('click', e => {
+          const ps = e.target.closest('[data-pos]'); if (!ps) return;
+          E.setF(Q, pk, ps.dataset.pos ? [ps.dataset.pos] : [], false);
+          el.querySelectorAll('[data-pos]').forEach(x => x.classList.toggle('on', x === ps));
+          update();
+        });
         el.addEventListener('click', e => {
           const sv = e.target.closest('[data-solo]');
           if (sv) {  // flip that grid's choice, and its highlighted team with it
