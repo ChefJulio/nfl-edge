@@ -1224,15 +1224,29 @@
   const RES_WORD = { IR: 'On injured reserve', PUP: 'On the PUP list', NFI: 'On the NFI list', Res: 'On a reserve list', PS: 'On the practice squad' };
   const QN = { 1: '1st', 2: '2nd', 3: '3rd', 4: '4th', 5: 'overtime' };
   const practiceTl = L => {
-    const ev = (L && L.prac) || [];
-    if (!ev.length) return '';
+    const ev0 = (L && L.prac) || [];
+    if (!ev0.length) return '';
+    // the bye (owner 2026-10-21: "add a bye week row ... teams don't report practice participation during bye week so just
+    // the 1 row is fine"): two of his team's games two weeks apart have the bye between them, one row on that Sunday
+    const ev = [];
+    let lastG = null;
+    ev0.forEach(e => {
+      if (e[0] === 'g' && lastG && e[5] - lastG[5] === 2) {
+        const d = new Date(lastG[1] + 'T12:00:00'); d.setDate(d.getDate() + 7);
+        ev.push(['b', d.toISOString().slice(0, 10), lastG[5] + 1]);
+      }
+      if (e[0] === 'g') lastG = e;
+      ev.push(e);
+    });
     const today = NFLE.clock.today();  // Eastern date (UTC rolled over at 8 pm ET: tonight's game read as past)
     // the last six practice days (owner 2026-10-19: games had been taking slots) and the games between them and today
     const done = ev.filter(e => e[1] <= today), pr6 = done.filter(e => e[0] === 'p').slice(-6);
     const from = pr6.length ? pr6[0][1] : '';
     const past = done.filter(e => e[1] >= from), next = ev.find(e => e[1] > today && e[0] === 'g');
     const day = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
-    const row = e => e[0] === 'p' && (e[2] === 'R' || e[2] === 'S')
+    const row = e => e[0] === 'b'
+      ? `<div class="pt-row pt-bye"><span class="pt-d">${day(e[1])}</span><span class="pt-gm">Bye</span><span class="muted">week ${e[2]} · no game, no practice report</span></div>`
+      : e[0] === 'p' && (e[2] === 'R' || e[2] === 'S')
       ? `<div class="pt-row"><span class="pt-d">${day(e[1])}</span><span class="pr-chip pr-${e[2] === 'R' ? 'D' : 'n'}">${esc(e[3])}</span><span>${RES_WORD[e[3]] || esc(e[3])}</span></div>`
       : e[0] === 'p'
       ? `<div class="pt-row"><span class="pt-d">${day(e[1])}</span><span class="pr-chip pr-${e[2]}">${e[2] === 'D' ? 'DNP' : e[2] + 'P'}</span><span>${PR_WORD[e[2]] || ''}${e[4] ? ' <span class="muted">· not on the report</span>' : ''}${e[3] ? ` · <b>${esc(e[3])}</b>` : ''}</span></div>`
