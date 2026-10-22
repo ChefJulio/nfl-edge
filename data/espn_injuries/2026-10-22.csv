@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685350,Trevor Etienne,Carolina Panthers,Active,2026-10-18T16:16Z,,,,,,"Etienne (ankle) is active for Sunday's game against the Eagles, Darin Gantt of the Panthers' official site reports."
 4678008,Jonathon Brooks,Carolina Panthers,Injured Reserve,2026-10-15T18:28Z,Abdomen,Surgery,Not Specified,2026-11-08,IR,"Brooks (core) was seen jogging at practice Thursday, Sheena Quick of Fox Sports Radio 1340 reports."
 4687513,Cam Jackson,Carolina Panthers,Injured Reserve,2026-10-14T01:16Z,Shoulder,Surgery,Not Specified,2027-02-15,IR,"The Panthers placed Jackson (shoulder) on injured reserve Tuesday, Darin Gantt of the team's official site reports."
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-22T17:00Z,Undisclosed,,,2026-10-18,IR,ir
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-22T18:04Z,Undisclosed,,,2026-10-18,IR,ir
 3930040,Jonah Jackson,Chicago Bears,Active,2026-10-22T01:35Z,,,,,,Jackson (hip/quadricep) does not have any injury designation ahead of Thursday night's game against the Patriots.
 4372576,Jack Sanborn,Chicago Bears,Out,2026-10-22T01:31Z,Concussion,Concussion,Not Specified,2026-11-02,OUT,Sanborn (concussion) is officially listed as out for Thursday's game versus the Patriots.
 4426374,Tyrique Stevenson Sr.,Chicago Bears,Questionable,2026-10-21T23:40Z,Hip,Not Specified,Not Specified,2026-10-22,QUESTIONABLE,Stevenson (hip) is questionable to play Thursday night versus the Patriots.
@@ -278,7 +278,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4701936,Matthew Golden,Green Bay Packers,Questionable,2026-10-22T16:33Z,Shoulder,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"Head coach Matt LaFleur said Thursday that the Packers have no concern regarding Golden's (shoulder) availability for Sunday's game against the Lions, Rob Demovsky of ESPN.com reports."
 4248528,Christian Watson,Green Bay Packers,Questionable,2026-10-22T16:26Z,Ankle,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"Head coach Matt LaFleur said Thursday that the team has no concern regarding Watson's (ankle) availability for Sunday's game against the Lions, Rob Demovsky of ESPN.com reports."
 5076652,Brandon Cisse,Green Bay Packers,Questionable,2026-10-22T00:10Z,Shoulder,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"Cisse (shoulder) was a limited participant in Wednesday's walkthrough session, Matt Schneidman of The Athletic reports."
-4259305,Bo Melton,Green Bay Packers,Questionable,2026-10-22T00:06Z,Back,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"Melton (back) was a limited participant in Wednesday's walkthrough practice, Matt Schneidman of The Athletic reports."
+4259305,Bo Melton,Green Bay Packers,Questionable,2026-10-22T00:06Z,Back,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"Melton (back) was a non-participant participant in Wednesday's walkthrough practice, Matt Schneidman of The Athletic reports."
 4431487,Savion Williams,Green Bay Packers,Questionable,2026-10-21T21:54Z,Ankle,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"Williams (ankle) was listed as a limited participant on Wednesday's estimated injury report, Matt Schneidman of The Athletic reports."
 4036378,Jordan Love,Green Bay Packers,Questionable,2026-10-21T20:13Z,Back,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"Love was listed as a limited participant on Wednesday's practice estimate due to a back injury, Matt Schneidman of The Athletic reports."
 4887255,Anthony Campbell,Green Bay Packers,Questionable,2026-10-21T20:11Z,Ankle,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
@@ -299,6 +299,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4259493,Keisean Nixon,Green Bay Packers,Active,2026-10-17T02:10Z,,,,,,"Nixon (groin) does not carry an injury designation into Sunday's game against the Cowboys, Wes Hodkiewicz of the Packers' official site reports."
 4361791,Devonte Wyatt,Green Bay Packers,Active,2026-10-16T20:51Z,,,,,,
 4240677,Jordon Riley,Green Bay Packers,Out,2026-10-15T01:53Z,Achilles,Not Specified,Not Specified,2026-10-25,PUP-R,"Riley (Achilles) had his 21-day practice window opened by the Packers on Wednesday, Mike Spofford of the team's official site reports."
+4035538,David Montgomery,Houston Texans,Questionable,2026-10-22T17:45Z,Groin,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"Montgomery (groin) isn't practicing Thursday, Aaron Wilson of KPRC 2 Houston reports."
 3117256,Dalton Schultz,Houston Texans,Questionable,2026-10-22T16:38Z,Quadriceps,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"Schultz (qaudriceps) returned to practice Thursday, Aaron Wilson of KPRC 2 Houston reports."
 3919117,Azeez Al-Shaair,Houston Texans,Questionable,2026-10-22T00:39Z,Knee,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,Al-Shaair (knee) did not participate in Wednesday's practice.
 4241223,Jalen Pitre,Houston Texans,Questionable,2026-10-21T23:49Z,Shoulder - AC Joint,Sprain,Left,2026-10-25,QUESTIONABLE,"Pitre (shoulder) did not participate at the Texans' practice Wednesday, Aaron Wilson of KPRC 2 Houston reports."
@@ -307,7 +308,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360189,Logan Hall,Houston Texans,Questionable,2026-10-21T21:25Z,Knee,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 16734,Jadeveon Clowney,Houston Texans,Questionable,2026-10-21T21:25Z,Knee,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 3043109,Trent Brown,Houston Texans,Questionable,2026-10-21T21:24Z,Wrist,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
-4035538,David Montgomery,Houston Texans,Questionable,2026-10-21T18:11Z,Groin,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"Montgomery (groin) isn't practicing Wednesday, Aaron Wilson of KPRC 2 Houston reports."
 4431517,Calen Bullock,Houston Texans,Active,2026-10-21T02:05Z,,,,,,Bullock tallied five tackles (three solo) and an interception during Houston's win over the Jaguars on Sunday.
 4241250,Jake Hummel,Houston Texans,Injured Reserve,2026-10-21T00:04Z,Groin,Surgery,Not Specified,2026-11-08,IR,"Hummel isn't expected to resume practicing this week while he continues to recover from groin surgery, Aaron Wilson of KPRC 2 Houston reports."
 4686422,Xavier Hutchinson,Houston Texans,Active,2026-10-20T02:48Z,,,,,,Hutchinson caught two of three passes for 10 yards and returned two kickoffs for 52 yards during the Texans' 34-31 win over the Jaguars on Sunday in London.
@@ -705,10 +705,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4592823,Beau Stephens,Seattle Seahawks,Questionable,2026-10-21T23:08Z,Knee,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4605491,Connor O'Toole,Seattle Seahawks,Questionable,2026-10-21T23:07Z,Hamstring,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4686540,Tyrice Knight,Seattle Seahawks,Questionable,2026-10-21T23:06Z,Oblique,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
-4426385,Zach Charbonnet,Seattle Seahawks,Out,2026-10-21T23:01Z,Knee - ACL,Surgery,Left,2026-10-25,PUP-R,"Charbonnet (knee) was a full participant at Wednesday's practice, Corbin K. Smith of EmeraldCitySpectrum.com reports."
+4426385,Zach Charbonnet,Seattle Seahawks,Questionable,2026-10-21T23:01Z,Knee - ACL,Surgery,Left,2026-10-25,QUESTIONABLE,"Charbonnet (knee) was a full participant at Wednesday's practice, Corbin K. Smith of EmeraldCitySpectrum.com reports."
 4037521,Chazz Surratt,Seattle Seahawks,Questionable,2026-10-20T16:10Z,Calf,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4429211,Anthony Bradford,Seattle Seahawks,Injured Reserve,2026-10-20T00:34Z,Knee,Not Specified,Not Specified,2026-10-25,IR-R,"Bradford (knee) was designated to return from injured reserve by the Seahawks on Monday, John Boyle of the team's official website reports."
-4678006,Elijah Arroyo,Seattle Seahawks,Out,2026-10-19T23:21Z,Shoulder,Not Specified,Not Specified,2026-11-02,OUT,"Head coach Mike Macdonald confirmed with reporters Monday that Arroyo will miss ""significant time"" due to a shoulder injury that he picked up during Thursday's 17-14 overtime loss to the Broncos, John Boyle of the Seahawks' official site reports."
+4678006,Elijah Arroyo,Seattle Seahawks,Out,2026-10-19T23:21Z,Shoulder,Surgery,Not Specified,2027-02-15,IR,"Head coach Mike Macdonald confirmed with reporters Monday that Arroyo will miss ""significant time"" due to a shoulder injury that he picked up during Thursday's 17-14 overtime loss to the Broncos, John Boyle of the Seahawks' official site reports."
 5151317,Robert Henry Jr.,Seattle Seahawks,Active,2026-10-19T17:16Z,,,,,,
 4432734,Jalen Milroe,Seattle Seahawks,Active,2026-10-19T17:16Z,,,,,,
 5082331,Avery Smith,Seattle Seahawks,Active,2026-10-19T17:16Z,,,,,,
