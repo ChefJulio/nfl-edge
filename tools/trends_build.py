@@ -39,7 +39,7 @@ import pandas as pd  # noqa: E402
 from nfledge import data as D  # noqa: E402
 from nfledge.config import load_config  # noqa: E402
 
-V = 7  # 7: blank-type 1999 plays kept; 6: credited yards / touchdowns (yru, yre, ypa, tdr, tdv, tdq, tdo) and lateral credit (lv, lvy, lu, luy, ltd)
+V = 8  # 8: a scramble-then-throw is a pass; 7: blank-type 1999 plays kept; 6: credited yards / touchdowns (yru, yre, ypa, tdr, tdv, tdq, tdo) and lateral credit (lv, lvy, lu, luy, ltd)
 FIRST = 1999
 COVERED = 0.9
 COLS = ["game_id", "play_id", "season", "week", "season_type", "posteam", "defteam", "home_team", "play_type", "qtr", "down",
@@ -131,8 +131,9 @@ def build(pbp: pd.DataFrame, season: int, full: dict) -> dict:
   pi = {gid: i for i, (gid, _) in enumerate(plist)}
   num = lambda c, d=0: pd.to_numeric(p[c], errors="coerce").fillna(d)  # noqa: E731
   scale = lambda c, k, d: np.where(pd.to_numeric(p[c], errors="coerce").isna(), d, (pd.to_numeric(p[c], errors="coerce") * k).round()).astype(int).tolist()  # noqa: E501,E731
-  # nflverse files scrambles under play_type "run": qb_scramble decides first
-  typ = np.where(num("qb_scramble").astype(int) == 1, 2, np.where(p.play_type == "run", 0, 1))
+  # nflverse files scrambles under play_type "run" (a scramble then a throw is a pass that keeps the qb_scramble flag:
+  # owner 2026-10-22 audit, Flacco to S.Smith 80 yds in 2014): a scramble is a run play with the flag
+  typ = np.where((num("qb_scramble").astype(int) == 1) & (p.play_type == "run"), 2, np.where(p.play_type == "run", 0, 1))
   pid = lambda c: [pi.get(x, -1) if isinstance(x, str) else -1 for x in p[c]]  # noqa: E731
   cols = {
     "g": [gi[x] for x in p.game_id], "o": [ti[t] for t in p.posteam], "d": [ti[t] for t in p.defteam], "ty": typ.tolist(),
