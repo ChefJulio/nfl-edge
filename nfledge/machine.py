@@ -274,13 +274,12 @@ def llms_txt(base: str, season: int, week: int, generated: str, area_files: list
   ar = "\n".join(f"  - [{t}]({base}model/{s}.md) ({_kb(n)})" for t, s, n in area_files)
   return f"""# NFL Edge
 
-> Free NFL fantasy football analytics, rebuilt from public data every day: weekly player projections with ranges and
-> touchdown odds, each player's chance to play (injury risk from the injury report and practice, and healthy-scratch
-> risk, shown separately), game win chances and lines, team power ratings, playoff odds and rooting guides, player
-> grades and durability, kicker and defense projections, live gamecasts, and fantasy league tools (Sleeper, ESPN).
-> Stats and game logs cover offensive players, kickers, team defenses and individual defenders.
-> Every model change is tested on past seasons (each season predicted only from earlier ones) against a pass bar
-> written down before the results; failures are kept and published.
+> NFL Edge is a free NFL analytics site, rebuilt from public data every day. It covers the whole league: game win
+> chances and team power ratings, playoff odds, every team's and player's stats and game logs back to 1999, live
+> gamecasts, injury reports with each player's chance to play, and Trends, a play-by-play query tool for almost any
+> split since 1999. For fantasy, it adds weekly and rest-of-season projections, rankings re-scored to your league's
+> settings, and Sleeper / ESPN league tools. Every prediction model is tested on past seasons before it ships, and the
+> misses are published.
 
 Current week: {season} week {week} (generated {generated}). The app ({base}) renders in the browser; the links below
 are the same content in plain text and JSON.

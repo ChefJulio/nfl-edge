@@ -3,10 +3,13 @@
 **[Live site](https://chefjulio.github.io/nfl-edge/)** - rebuilt on every push, on a schedule, and whenever news
 breaks (injury statuses, practice reports, inactives, line moves: `tools/news_watch.py`).
 
-A free, mobile-first site for following the NFL as a fantasy player: one place to look up any player or team,
-follow games live, and get honest, tested projections and chance-to-play numbers. Built solo in October 2026.
-The prediction models are one part; most of the site is reference and tracking that otherwise takes Spotrac,
-OverTheCap, ESPN / CBS and a fantasy app together.
+NFL Edge is a free NFL analytics site, rebuilt from public data every day. It covers the whole league: game win
+chances and team power ratings, playoff odds, every team's and player's stats and game logs back to 1999, live
+gamecasts, injury reports with each player's chance to play, and Trends, a play-by-play query tool for almost any
+split since 1999. For fantasy, it adds weekly and rest-of-season projections, rankings re-scored to your league's
+settings, and Sleeper / ESPN league tools. Every prediction model is tested on past seasons before it ships, and the
+misses are published. Mobile-first; built solo in October 2026. Most of it is reference and tracking that otherwise
+takes Spotrac, OverTheCap, ESPN / CBS and a fantasy app together.
 
 ## What's on the site
 - **Player search** (header, every page): any current or past player (prefix or partial name), active players
