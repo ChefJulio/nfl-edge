@@ -3657,3 +3657,12 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   anything there is under ~0.5 pts). Denver with Surtain: WR1s vs their averages 2021 -3.6, 2022 -1.1, 2023 -1.1, 2024
   +1.5 (his DPOY year), 2025 -4.5. Limits: WR1 by targets, not by who the shadow covered (free data has no coverage
   assignments; PFF does). Slot vs outside: no free history of alignment. Not pursued.
+- **DESCRIPTIVE 2026-10-21 (owner's friend: outliers aren't equal; do elite pass defenses take more from star WRs?):
+  no tier x defense interaction; OPRK barely predicts.** tools/tier_x_defense.py + tools/tier_x_oprk.py, cached
+  baselines 2021-25, WRs weeks 4+ (4,408 rows). WR outcome vs his season FP/G by opposing defense third: by fantasy
+  points allowed to WRs so far (OPRK) tough -0.66 / middle -0.60 / soft -0.59; by the model's pass-defense rating -0.76
+  / -0.60 / -0.50. Model miss by tier (top 12 / 13-36 / 37+ by FP/G rank) x defense third: interaction (stars'
+  tough-minus-soft miss beyond everyone else's) OPRK -0.47 [-1.94, +1.00], rating +0.41 [-1.02, +1.75]. Top-12 WRs run
+  ~0.6-1.4 under projection at every defense level (the known top-tier over-projection, {#median-calibration}).
+  Surtain 2024 (PFR coverage): 65 targets, 40-405-3, 4 INT; in the Jeudy 9-235-1 game 4 targets, 3-25-1 (production
+  moved to the receivers he wasn't on). Not pursued.
