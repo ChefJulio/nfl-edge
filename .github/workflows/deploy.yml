@@ -227,7 +227,10 @@ jobs:
         run: python tools/reference_build.py --out site/data/reference.json || true
       # Players > Trends: compact play-by-play per season since 1999 (finished seasons cached), queried in the browser.
       - name: Trends
-        run: python tools/trends_build.py --site=site
+        run: |
+          python tools/trends_build.py --site=site
+          # the query catalog for LLMs / scripts (measures, filters, breakdowns, charted seasons), from the page's engine
+          node tools/trends_cli.mjs --schema --data=site > site/data/plays/schema.json || echo "[trends] schema skipped"
       # Player pages: NFL Edge grade (production percentile, 2018 on; tools/grade_build.py).
       - name: Edge grades
         run: python tools/grade_build.py --site=site

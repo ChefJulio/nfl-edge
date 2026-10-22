@@ -42,7 +42,8 @@ OverTheCap, ESPN / CBS and a fantasy app together.
 - **Trends** (Players > Trends): its counting matches nflverse's official season stats, 1999-2025: of ~64,000
   player-season rushing / receiving / passing totals, 83 differ, and the ones traced are corrections that only
   nflverse's season table has (its own play-by-play agrees with Trends). Report and tool: `docs/trends_audit.md`,
-  `tools/trends_audit.py`.
+  `tools/trends_audit.py`. The same engine runs from the command line for scripts and LLMs (`tools/trends_cli.mjs`;
+  catalog of every measure / filter / breakdown at `data/plays/schema.json` on the site).
 - **Published record** (Model tab; `data/records/` on the site and the `archive` branch): every finished week, what
   the site showed before each game (chance to play at five checkpoints, projections; from the per-build snapshots,
   never recomputed) next to what happened, with the week's scorecard. Anyone can score us (format and rules on the

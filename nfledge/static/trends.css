@@ -122,3 +122,5 @@ table.tr-grid .tr-gall { border-left: 2px solid var(--line); } table.tr-grid th.
 .tq-gp label { display: flex; align-items: center; gap: 8px; font-weight: 700; }
 .tq-gp input { width: 5.5em; font: inherit; font-size: 16px; font-weight: 700; color: var(--ink); color-scheme: dark; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 6px 8px; }
 .tq-gp .muted { font-size: var(--fs-sm); }
+.tr-ax { fill: var(--muted); font-size: 9px; text-anchor: end; font-variant-numeric: tabular-nums; }
+.tr-pt-now { fill: var(--bg, #0d0f13); stroke: var(--accent); stroke-width: 2; }  /* the season in progress: hollow */

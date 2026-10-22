@@ -4048,4 +4048,12 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
     83 of ~64,000 player-season stats differ; traced ones are nflverse season-table corrections (its play-by-play
     matches Trends). nflverse's season table has impossible pre-2009 targets (Welker 2008: 0 targets, 111 catches);
     skipped, counted. Not audited: filters / charting / routes (spot-checked only), playoffs, special teams.
+  - **Engine split + CLI (owner: "making the tool usable for llms").** Definitions, loading and counting moved to
+    `static/trends_engine.js` (no DOM; `createEngine(load)`); the page keeps only UI. `tools/trends_cli.mjs` runs the
+    same engine on a local build or the live site (`--schema`, `--find`, names resolved to ids, share link in every
+    answer); CI publishes the schema as `data/plays/schema.json`. Verified after the split: every earlier check
+    reproduced, a full UI smoke test (`scratch/ui_smoke.py` pattern) clean, audit 2024-25 identical. Also: Play result
+    gained successful / unsuccessful plays, incompletions, sacks, interceptions, fumbles lost; the by-season chart's
+    range is the seasons' own (a count's league TOTAL had flattened it) with labeled ends, and the season in progress is
+    a hollow point.
 
