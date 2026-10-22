@@ -16,7 +16,7 @@
   },
   {
    "label": "Ours",
-   "brier": 0.0862,
+   "brier": 0.0861,
    "ours": true
   }
  ],
@@ -24,23 +24,23 @@
   {
    "label": "Tuesday (before any report)",
    "n": 9277,
-   "brier": 0.1356,
-   "wrong": 19.1,
+   "brier": 0.135,
+   "wrong": 19.0,
    "predicted": 75.8,
    "played": 75.5
   },
   {
    "label": "Wednesday",
    "n": 6132,
-   "brier": 0.1358,
-   "wrong": 18.6,
+   "brier": 0.1357,
+   "wrong": 18.5,
    "predicted": 65.4,
    "played": 65.4
   },
   {
    "label": "Thursday",
    "n": 6132,
-   "brier": 0.1051,
+   "brier": 0.1053,
    "wrong": 15.0,
    "predicted": 65.3,
    "played": 65.4
@@ -48,8 +48,8 @@
   {
    "label": "Final report",
    "n": 6290,
-   "brier": 0.0862,
-   "wrong": 11.5,
+   "brier": 0.0861,
+   "wrong": 11.4,
    "predicted": 82.3,
    "played": 82.2
   }
@@ -57,39 +57,39 @@
  "calib": [
   {
    "band": "0-10%",
-   "n": 1450,
-   "predicted": 4.4,
+   "n": 1440,
+   "predicted": 4.5,
    "played": 5.6
   },
   {
    "band": "10-30%",
-   "n": 2074,
+   "n": 2102,
    "predicted": 20.4,
    "played": 20.1
   },
   {
    "band": "30-50%",
-   "n": 2456,
-   "predicted": 39.4,
-   "played": 38.8
+   "n": 2455,
+   "predicted": 39.5,
+   "played": 38.5
   },
   {
    "band": "50-70%",
-   "n": 3488,
+   "n": 3483,
    "predicted": 62.1,
-   "played": 61.4
+   "played": 61.7
   },
   {
    "band": "70-90%",
-   "n": 6937,
-   "predicted": 81.8,
-   "played": 82.0
+   "n": 6841,
+   "predicted": 81.9,
+   "played": 82.1
   },
   {
    "band": "90-100%",
-   "n": 11426,
-   "predicted": 95.6,
-   "played": 95.6
+   "n": 11510,
+   "predicted": 95.5,
+   "played": 95.5
   }
  ],
  "spots": [
@@ -105,7 +105,7 @@
    "label": "Questionable, full practice Friday",
    "n": 350,
    "played": 86.0,
-   "predicted": 89.4
+   "predicted": 89.5
   },
   {
    "when": "Final report",
@@ -126,7 +126,7 @@
    "label": "Questionable, no practice all week",
    "n": 111,
    "played": 24.3,
-   "predicted": 33.6
+   "predicted": 33.8
   },
   {
    "when": "Final report",
@@ -147,7 +147,7 @@
    "label": "Full practice",
    "n": 1164,
    "played": 91.2,
-   "predicted": 89.9
+   "predicted": 89.8
   },
   {
    "when": "Wednesday",
@@ -168,7 +168,7 @@
    "label": "No practice, missed his last game",
    "n": 685,
    "played": 10.1,
-   "predicted": 16.3
+   "predicted": 16.5
   },
   {
    "when": "Tuesday",
@@ -189,51 +189,51 @@
    "label": "Hurt in his last game, not on that report",
    "n": 2131,
    "played": 74.5,
-   "predicted": 74.2
+   "predicted": 74.4
   }
  ],
  "now": {
   "season": 2026,
   "weeks": "1-6",
-  "n": 1367,
+  "n": 1727,
   "calib": [
    {
     "band": "0-10%",
-    "n": 117,
-    "predicted": 4.4,
-    "played": 7.7
+    "n": 151,
+    "predicted": 4.0,
+    "played": 7.3
    },
    {
     "band": "10-30%",
-    "n": 122,
-    "predicted": 20.4,
-    "played": 18.0
+    "n": 143,
+    "predicted": 20.0,
+    "played": 17.5
    },
    {
     "band": "30-50%",
-    "n": 160,
-    "predicted": 39.2,
-    "played": 45.6
+    "n": 171,
+    "predicted": 38.1,
+    "played": 46.2
    },
    {
     "band": "50-70%",
-    "n": 92,
-    "predicted": 63.4,
-    "played": 66.3
+    "n": 120,
+    "predicted": 60.9,
+    "played": 62.5
    },
    {
     "band": "70-90%",
-    "n": 305,
-    "predicted": 82.6,
-    "played": 85.6
+    "n": 408,
+    "predicted": 82.8,
+    "played": 85.0
    },
    {
     "band": "90-100%",
-    "n": 571,
-    "predicted": 95.6,
-    "played": 96.8
+    "n": 734,
+    "predicted": 95.9,
+    "played": 97.1
    }
   ],
-  "brier": 0.1024
+  "brier": 0.1001
  }
 }

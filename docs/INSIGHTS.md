@@ -3678,6 +3678,22 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   [-0.0051, -0.0028]. Week model: injury-note rows 0.1173 -> 0.1007, -0.0166 [-0.0212, -0.0119] (n 3,128); all rows
   -0.0018 [-0.0024, -0.0011]. Returned: played 0.887, predicted 0.753 -> 0.874 (Tuesday); no return: played 0.295,
   predicted 0.478 -> 0.389. experiments.hurt_back = true. The explanation says "injured during it, then returned".
+- **FIXED 2026-10-22 (data leak in backtests): NFL.com's practice feed also files in-game rulings** ("out for the
+  rest of the game", "questionable to return") under that game's week, as entries with no practice days: 674 in 2024
+  (294 Out, 318 Questionable), 329 in 2022, 15-49 in other seasons, 4 in 2026. Backtests read them as the pre-game
+  report for the game they happened in (DeVonta Smith, concussed 2024 wk 3, scored 0% for wk 3; also Nabers wk 4,
+  Collins wk 5). data.load_all now drops practice entries with no practice days (real report entries always carry
+  them). Effect, cached baselines 2021-25 rebuilt: 2024 injury-report Brier 0.1233 -> 0.0903 (60 "Out" players who
+  played -> 0), fantasy MAE 5.231 -> 5.240 (the leak flattered it slightly: a player hurt early scores little);
+  other seasons within +-0.001 Brier. Live unaffected (2026 had no such Out entries). Training mostly unaffected (past
+  seasons' report rows come from nflverse's injury reports, which don't have them).
+- **DESCRIPTIVE 2026-10-22 (owner: "test injury model as it is now against history"): tools/avail_track.py rerun**
+  (2021-25 walk-forward, 27,831 player-games; data/history/availability_track.json). Final report Brier: Q = 50/50
+  0.126, official status rates 0.111, status + Friday practice 0.105, ours 0.086. By stage: Tuesday 0.135 (lean wrong
+  19.0%), Wednesday 0.136 (18.5%), Thursday 0.105 (15.0%), final 0.086 (11.4%); calibration bands within ~1 point.
+  Too optimistic where a player isn't practicing: Q no practice all week played 24.3% vs predicted 33.8 (n 111),
+  Doubtful 3.4 vs 8.9 (n 236), Wednesday DNP after missing his last game 10.1 vs 16.5 (n 685). 2026 weeks 1-6: Brier
+  0.100; 30-50% band played 46.2 vs 38.1 (n 171). Candidate next test: calibration by practice pattern.
 - **DESCRIPTIVE 2026-10-21 (owner's friend: "Pat Surtain's OPRK for WR1 is #1 hardest ... shadow CB can nuke WRs"):
   WR1 suppression is not a lasting defensive trait.** tools/wr1_suppression.py, play-by-play 2016-25, 4,212 team-games:
   WR1 / WR2 = an offense's top two WRs by targets before the game; result = half-PPR points minus his own average over

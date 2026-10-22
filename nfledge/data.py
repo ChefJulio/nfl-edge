@@ -299,7 +299,11 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
     # had filed; the fetch is a few seconds, ~5 pages)
     pr = [cache.get("practice", s, lambda: fetch_practice_days(s), stale=(s == current) and
                     cache.age_hours("practice", s) > PRACTICE_TTL_HOURS) for s in seasons]
-    pr = [p for p in pr if p is not None and len(p)]
+    # An entry with no practice days isn't a weekly report row: NFL.com also files in-game rulings ("out for the rest of
+    # the game", "questionable to return") under that game's week (2026-10-22: 674 such entries in 2024, 329 in 2022,
+    # 15-49 in other seasons; DeVonta Smith, concussed in 2024 week 3, read "Out" for week 3 itself and the backtest
+    # scored him 0% for a game he played). Real report entries always carry their practice days.
+    pr = [p[p.days.fillna("") != ""] for p in pr if p is not None and len(p)]
     practice = pd.concat(pr, ignore_index=True) if pr else None
     # Longer labelled history (practice week -> did he play) for the availability model.
     first = int(cfg["data"].get("practice_history_start", 2018))
