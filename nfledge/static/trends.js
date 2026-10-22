@@ -292,18 +292,26 @@
         const s = IX.seasons.find(y => covers(y, cols));
         return s && s > IX.seasons[0] ? `<span class="tq-since">${s}+</span>` : '';
       };
-      const whoLabel = () => Q.who === 'L' ? 'Whole league' : /^T:/.test(Q.who) ? `${Q.who.slice(2)} ${Q.fam === 'team' ? 'offense' : 'players'}`
-        : /^V:/.test(Q.who) ? `Against ${Q.who.slice(2)}` : Q.who[0] === 'C' ? `${Q.wn}'s offense` : Q.wn || 'Whole league';
+      // Who names the subject: the scope (Q.who) plus, for the league or one team, its unit (players, or the team as one:
+      // owner 2026-10-22 "who: add teams themselves maybe?"). A team as itself is that team, a row per season.
+      const UNITS = { player: 'Every player', team: 'Every team', opp: 'Every defense', coach: 'Every head coach' };
+      const whoLabel = () => {
+        const t = Q.who.slice(2);
+        if (Q.who === 'L') return UNITS[Q.by] || 'Whole league';
+        if (/^T:/.test(Q.who)) return Q.fam === 'team' ? `${t} offense` : Q.by === 'player' ? `${t} players` : `${t} as a team`;
+        if (/^V:/.test(Q.who)) return Q.by === 'player' ? `Players against ${t}` : `${t} defense`;
+        return Q.who[0] === 'C' ? `${Q.wn}'s offense` : Q.wn || 'Whole league';
+      };
       const optLabel = k => (FILTERS[k].opts.find(o => o[0] === Q.f[k]) || ['', ''])[1];
       const ST_TXT = { reg: 'regular season', post: 'playoffs', both: 'regular season + playoffs' };
       const seasonsTxt = () => `${Q.from === Q.to ? Q.from : `${Q.from}–${Q.to}`} · ${cap(ST_TXT[Q.st])}`;
       const byTxt = () => (Q.by2 && BY[Q.by2] ? `${cap(BY[Q.by][0])}, then ${BY[Q.by2][0]} (grid)` : `One row per ${BY[Q.by][0]}`);
       const summary = () => {
         const [fam, m] = famMetric();
-        const who = Q.who === 'L' ? (Q.by === 'player' ? 'Every player' : 'The league') : /^T:/.test(Q.who) ? `${Q.who.slice(2)} ${Q.fam === 'team' ? 'offense' : 'players'}`
-          : /^V:/.test(Q.who) ? `Everyone against ${Q.who.slice(2)}` : Q.who[0] === 'C' ? `${Q.wn}'s offense` : Q.wn;
+        const who = Q.who === 'L' && !UNITS[Q.by] ? 'The league' : whoLabel();
+        const unit = (Q.who === 'L' && UNITS[Q.by]) || Q.by === 'player';  // the breakdown is already in the subject
         const when = Object.keys(Q.f).map(optLabel).filter(Boolean);
-        const by = Q.by2 && BY[Q.by2] ? `, as a grid of ${BY[Q.by][0]} by ${BY[Q.by2][0]}` : Q.by === 'player' ? '' : `, by ${BY[Q.by][0]}`;
+        const by = Q.by2 && BY[Q.by2] ? `, as a grid of ${BY[Q.by][0]} by ${BY[Q.by2][0]}` : unit ? '' : `, by ${BY[Q.by][0]}`;
         const yrs = Q.from === Q.to ? `${Q.from}` : `${Q.from}–${Q.to}`;
         return `<b>${esc(who)}</b> &middot; ${esc(fam.label.toLowerCase())} <b>${esc(m[0])}</b>${when.length ? ` when ${esc(when.join(', '))}` : ''} &middot; ${esc(yrs)} ${esc(ST_TXT[Q.st])}${esc(by)}`;
       };
@@ -353,13 +361,21 @@
       };
       const pickWho = opener => {
         const el = panel(), teams = IX.teams, team = Q.fam === 'team';
-        const tgrid = pre => `<div class="tq-teams">${teams.map(t => `<button type="button" data-who="${pre}:${t}" class="${Q.who === `${pre}:${t}` ? 'on' : ''}">${esc(t)}</button>`).join('')}</div>`;
-        el.innerHTML = `<div class="tq-list"><button type="button" class="tq-opt${Q.who === 'L' ? ' on' : ''}" data-who="L"><span>Whole league</span></button></div>
+        const ok = k => BY[k] && byAllowed(k, Q.fam) && !(k === 'player' && team);
+        // one team: as a unit (a row per season, or whatever it's broken down by) or its players
+        // each grid keeps its own choice; it starts on the current one, else on the team as a unit
+        const solo = { T: true, V: true };
+        if (/^[TV]:/.test(Q.who)) solo[Q.who[0]] = team || Q.by !== 'player';
+        const lit = (pre, t) => Q.who === `${pre}:${t}` && solo[pre] === (team || Q.by !== 'player');
+        const tgrid = pre => `<div class="tq-teams">${teams.map(t => `<button type="button" data-who="${pre}:${t}" class="${lit(pre, t) ? 'on' : ''}">${esc(t)}</button>`).join('')}</div>`;
+        const SEG = { T: ['As a team', 'Its players'], V: ['Their defense', 'Players facing them'] };
+        const seg = pre => team ? '' : `<div class="tq-seg">${[1, 0].map((v, i) => `<button type="button" data-solo="${v}" data-pre="${pre}" class="${+solo[pre] === v ? 'on' : ''}">${SEG[pre][i]}</button>`).join('')}</div>`;
+        el.innerHTML = `<div class="tq-list">${Object.entries(UNITS).filter(([k]) => ok(k)).map(([k, l]) => `<button type="button" class="tq-opt${Q.who === 'L' && Q.by === k ? ' on' : ''}" data-who="L" data-unit="${k}"><span>${l}</span><small>${{ player: 'a row per player', team: team ? 'a row per offense' : 'a row per team: its players combined', opp: 'a row per defense: what offenses did against it', coach: 'a row per head coach: the offenses they ran' }[k]}</small></button>`).join('')}</div>
           <h4 class="tq-h">${team ? 'A head coach' : 'A player or head coach'}</h4>
           <input class="dt-search tq-find" type="search" placeholder="Type a name" aria-label="Find a ${team ? 'head coach' : 'player or head coach'}" autocomplete="off">
           <div class="tq-list tq-found"></div>
-          <h4 class="tq-h">A team's ${team ? 'offense' : 'players'}</h4>${tgrid('T')}
-          <h4 class="tq-h">Against a team</h4>${tgrid('V')}`;
+          <h4 class="tq-h">One team${team ? "'s offense" : ''}</h4><div class="tq-solo">${seg('T')}${tgrid('T')}</div>
+          <h4 class="tq-h">${team ? "One team's defense" : 'Against one team'}</h4><div class="tq-solo">${seg('V')}${tgrid('V')}</div>`;
         const inp = el.querySelector('.tq-find'), out = el.querySelector('.tq-found');
         const find = () => {
           const t = inp.value.trim().toLowerCase();
@@ -369,7 +385,22 @@
         };
         inp.addEventListener('input', find);
         fillFind().then(() => { if (inp.value) find(); });  // names load per season: search again once they're in
-        el.addEventListener('click', e => { const b = e.target.closest('[data-who]'); if (!b) return; setWho(b.dataset.who, b.dataset.wn); done(); });
+        el.addEventListener('click', e => {
+          const sv = e.target.closest('[data-solo]');
+          if (sv) {  // flip that grid's choice, and its highlighted team with it
+            const pre = sv.dataset.pre, box = sv.closest('.tq-solo');
+            solo[pre] = sv.dataset.solo === '1';
+            box.querySelectorAll('[data-solo]').forEach(x => x.classList.toggle('on', x === sv));
+            box.querySelectorAll('.tq-teams [data-who]').forEach(x => x.classList.toggle('on', lit(pre, x.dataset.who.slice(2))));
+            return;
+          }
+          const b = e.target.closest('[data-who]'); if (!b) return;
+          setWho(b.dataset.who, b.dataset.wn);
+          if (b.dataset.unit) Q.by = b.dataset.unit;
+          else if (/^[TV]:/.test(Q.who)) Q.by = solo[Q.who[0]] ? (UNITS[Q.by] ? 'season' : Q.by) : 'player';
+          if (Q.by2 === Q.by) Q.by2 = '';
+          done();
+        });
         NFLE.sheet('Who', el, opener);
       };
       const pickFilter = (k, opener) => {
