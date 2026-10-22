@@ -27,7 +27,6 @@
 <link rel="stylesheet" href="%ROOT%assets/table.css?v=%V%">
 </head>
 <body>
-<noscript><p>NFL Edge is an app that needs JavaScript. Plain-text versions for AI assistants and crawlers: <a href="%ROOT%llms.txt">llms.txt</a> (start here), <a href="%ROOT%players.md">players</a> (one page each: chance to play, projection, practice, game log), <a href="%ROOT%injuries.md">injuries</a>, <a href="%ROOT%rankings.md">rankings</a>, <a href="%ROOT%games.md">games</a>, <a href="%ROOT%power.md">power rankings</a>, <a href="%ROOT%model.md">how the model works</a>.</p></noscript>
 <script>/* which frame to draw (shell.js picks the same tab: the hash, else the last tab you used) */
 (() => { const get = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
   const r = location.hash.slice(1) || get('nfledge-tab') || 'home', sub = get('nfledge-sub-players') || 'rankings';
@@ -51,7 +50,7 @@
   <p class="archived" id="wkNote" hidden></p>
 </div></header>
 <nav class="tabs"></nav>
-<noscript><p class="wrap">This app needs JavaScript. Plain-text versions: <a href="%ROOT%llms.txt">llms.txt</a> (start here),
+<noscript><p class="wrap">This app needs JavaScript. Plain-text versions: <a href="%ROOT%llms.txt">llms.txt</a> (start here), <a href="%ROOT%players.md">players</a> (one page each: chance to play, projection, practice, game log), <a href="%ROOT%injuries.md">injuries</a>,
 <a href="%ROOT%model/">how the model works</a>, <a href="%ROOT%rankings.md">this week's rankings</a>,
 <a href="%ROOT%power.md">power rankings</a>, <a href="%ROOT%games.md">this week's games</a>.</p></noscript>
 <main><div class="wrap">
