@@ -3733,3 +3733,12 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   Same rules, list data/history/shadow_games_2026.csv (after-the-fact recaps only), live 2026 baseline. PASS: 2026
   point estimate <= -1.0 AND pooled 2025+2026 95% week-bootstrap CI excluding 0. Then a second test of the usable
   input: Clay's PRE-GAME shadow projections as the predictor (what a model term would actually see).
+- **RESULT {#shadow-2026} FAIL 2026-10-21: (CI) replication, 2026 weeks 1-6.** Clay's 2026 playbooks named few
+  shadows; 15 recaps (mostly FantasyPros / team sites), only 8 scorable (weeks 1-2 have no projection). As delivered:
+  2026 miss +0.11 (n 8; needed <= -1.0), pooled 2025+2026 -1.49 [-3.11, -0.03]. FAIL. Disclosed fork: the research
+  pass flagged two Benford week-5 rows (Nacua, Adams: "covered on more than 67% of routes", no shadow verb) as
+  borderline; without them 2026 is -2.73 (n 6) and pooled -1.77 [-3.36, -0.41], a PASS. Both runs were looked at
+  together, so the drop can't be adopted after the fact (Surtain-Adams wk3, "90 percent of his routes", is the same
+  kind of row and was not flagged). Honest read: 6-8 games decide nothing either way. Not adopted. FORWARD LOG: keep
+  adding 2026 recaps weekly (rule fixed now: a route share >= 50% on the named receiver counts as a shadow, same as
+  PFF's definition; all such rows stay) and re-run at season end, plus the pre-game projection test.

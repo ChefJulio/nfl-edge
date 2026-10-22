@@ -517,6 +517,7 @@ Durability is games missed injured per 1,000 snaps on the field since 2013 (offe
 - **Not adopted** - Shadow cornerbacks (a top corner who follows the opposing No. 1 receiver all game): those receivers do score about 0.7 points below their own average, but our projections already account for most of that through the defense's overall pass rating, and the remaining half point isn't distinguishable from noise (2021-25, 69 corner-seasons on a list built from published reporting) (2026-10). <!-- tried:shadow-corners -->
 - **Not adopted** - Only the best shadow corners (ranked by how well they had covered before each game): their shadowed receivers came in no further below our projections than against the weaker half (2021-25) (2026-10). <!-- tried:shadow-elite -->
 - **Promising, not adopted yet** - Counting only the specific games where a corner was reported to have followed a receiver (2025), those receivers finished about 1.7 points below our projections, a clear effect the season-level tests had watered down. It must repeat on 2026 before it changes projections (2026-10). <!-- tried:shadow-games -->
+- **Not adopted yet** - The first six weeks of 2026 had too few reported shadow games (8) to confirm the 2025 shadow-corner finding; it's re-checked at the end of 2026 (2026-10). <!-- tried:shadow-2026 -->
 
 ## Rule changes and scoring eras
 
