@@ -277,11 +277,11 @@ def window_open(data, week: int) -> pd.DataFrame:
   r = r[(r.status == "RES") & r.position.isin(["QB", "RB", "WR", "TE", "FB", "HB"])]
   inj = data.injuries
   inj = inj[(inj.season == season) & (inj.game_type == "REG") & inj.gsis_id.notna()]
-  now = inj[inj.week == week]
-  published = set(now.team.replace({"LAR": "LA"}))
+  from .injuries import listed_now, published_teams
+  published = published_teams(data, season, week)
   # this week's report decides once his team's is out (not on it = not practicing); before that, last week's
   last = inj[inj.week == week - 1]
-  on = set(now.gsis_id) | set(last[~last.team.replace({"LAR": "LA"}).isin(published)].gsis_id)
+  on = listed_now(data, season, week) | set(last[~last.team.replace({"LAR": "LA"}).isin(published)].gsis_id)
   r = r[r.gsis_id.isin(on)].drop_duplicates("gsis_id", keep="last")
   return pd.DataFrame({"gsis_id": r.gsis_id.to_numpy(), "team": r.team.replace({"LAR": "LA"}).to_numpy(),
                        "pos": r.position.replace({"FB": "RB", "HB": "RB"}).to_numpy(), "full_name": r.full_name.to_numpy(),

@@ -3716,6 +3716,39 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   Owner's question (does the schedule explain it, Thursday games vs practice days?): no; by game day the no-practice
   gaps are as large on Sundays (Q DDD +10 pts, n 90) and not larger on Thursdays (n 9-63). Remaining: the raw model is
   still 3-5 points high in those spots (small groups). config experiments.week_calib = "none".
+- **FIXED 2026-10-22 (live timing): a team's report counted as out only once nflverse had it.** Tyler Shough (NO)
+  93% "On report last wk" with a full Wednesday practice on his card: NFL.com's practice feed (15-minute refresh) had
+  every Sunday team's Wednesday report while nflverse's injury table had only CHI / NE (the Thursday game), so
+  availability, tags, the ESPN bridge and the reserve-window check all ran as if no report were out (Tuesday model).
+  Interim fix: injuries.published_teams / listed_now = either source. PLANNED (owner: "why are we taking reports from
+  more than one source?"): NFL.com as the single source for the current week (out or not, days, game status, injury
+  type), nflverse for history only.
+- **DATA 2026-10-22: practice history refetched with dates.** NFL.com practice entries 2018-25 refetched with each
+  day's date (old caches had the order only): rows and day strings identical every season; 99.98% of 108,932 dated
+  entries fall on the team's report days counted back from its game (Sunday game: 2-4 days before; Thursday: 1-3).
+- **PRE-REGISTERED 2026-10-22 (owner: "yes do AS next"; queued 2026-10-18): (AS) the week model's stage from the
+  calendar.** Today a player's stage is his own listed-day count and his line is only the days he was listed: first
+  listed Thursday ("DD" on a Sunday week) he is read at "Wednesday" with Thursday's DNP (training and live alike),
+  and a full Wednesday (not listed = practiced fully) is lost. Variant (tuesday.STAGE_FROM = "calendar"): the team's
+  report days (dates of every player listed for that team-week; fallback the practice calendar); stage k = its first
+  k days; his line = his entry on each of those days, "F" where he isn't listed (the {#off-report} rule); on the
+  report at stage k = listed on any of them; the model retrained on that construction. TEST (tools/stage_eval.py),
+  walk-forward 2021-25 + 2026 to date, rows = players listed by calendar day k (k = 1, 2, final), each arm fed what
+  it would see live by that day: today's arm his listed days so far with stage = his own count (no fill, no later
+  days), the variant as above. GATE: pooled stages 1-3 Brier lower with the 95% season-week CI excluding 0 on
+  2021-25, not worse on 2026; reported: players first listed after day 1.
+  AMENDED 2026-10-22 before anything ran: {#off-report} (AO) already showed padding unlisted days with "F" makes the
+  final-report model worse (+0.0019 Brier; off the report before his first listing played 83.9% vs listed FFF 92.0%,
+  after his last 70.8%), so the variant marks a day he isn't listed "X" (off the report), not "F": wn_X = days off so
+  far, w_first / w_last from listed days only. The calendar stage (the part AO didn't test: AO was the final-report
+  model only) is unchanged. Tool: tools/stage_cal_eval.py (tools/stage_eval.py is (AP)'s).
+- **RESULT {#stage-calendar} (AS) the week model's stage from the calendar: FAIL (not shipped).**
+  tools/stage_cal_eval.py, 2021-25 rows on the report by calendar day k, each arm fed its live view: Brier 0.1082 ->
+  0.1077, -0.0006 [-0.0015, +0.0003]; 2026 -0.0019 (n 1,308). Stage 1 -0.0001, stage 2 -0.0014 (rows with a day off
+  the report -0.0074, n 880: played 77.5%, own 80.8%, calendar 78.6%), final -0.0001 (with a day off -0.0024, n
+  1,249); seasons 4 of 5 better (2025 +0.0007). Helps where it aims, too rare to clear the gate. No-practice spots
+  unchanged (Q no practice all week 0.296 -> 0.300, played 0.243). tuesday.STAGE_FROM stays "own"; the "calendar"
+  construction is kept for a season-end recheck with 2026 added.
 - **DESCRIPTIVE 2026-10-21 (owner's friend: "Pat Surtain's OPRK for WR1 is #1 hardest ... shadow CB can nuke WRs"):
   WR1 suppression is not a lasting defensive trait.** tools/wr1_suppression.py, play-by-play 2016-25, 4,212 team-games:
   WR1 / WR2 = an offense's top two WRs by targets before the game; result = half-PPR points minus his own average over

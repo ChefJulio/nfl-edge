@@ -24,7 +24,7 @@ STATUS = ["Out", "Doubtful", "Questionable", "None"]
 SCORE = {"D": 0.0, "L": 0.5, "F": 1.0}
 from collections import namedtuple  # noqa: E402
 
-Rep = namedtuple("Rep", "days game_status")  # one final report row
+Rep = namedtuple("Rep", "days game_status dates")  # one final report row (dates: each listed day, comma-joined)
 FEATS = ["n_D", "n_L", "n_F", "last_day", "played_last", "last_pct", "usual_pct", "left_early", "hurt_in_game",
          "missed_run", "ep_weeks", "ep_D", "ep_L", "ep_F", "bye", "age"]
 
@@ -33,7 +33,10 @@ def report_rows(d) -> pd.DataFrame:
   """Every final weekly report row with practice days: completed seasons (avail_hist) + this season so far (the
   practice table; team from the injury report)."""
   ah = d.avail_hist.copy() if d.avail_hist is not None else pd.DataFrame()
-  parts = [ah[["season", "week", "gsis_id", "position", "game_status", "days", "team"]]] if len(ah) else []
+  cols = ["season", "week", "gsis_id", "position", "game_status", "days", "team", "dates"]
+  if len(ah) and "dates" not in ah:
+    ah = ah.assign(dates="")
+  parts = [ah[cols]] if len(ah) else []
   pr = d.practice
   if pr is not None and len(pr):
     done = set(ah.season.astype(int)) if len(ah) else set()
@@ -42,7 +45,8 @@ def report_rows(d) -> pd.DataFrame:
       inj = d.injuries.dropna(subset=["gsis_id"])
       team = {(int(s), int(w), g): t for s, w, g, t in zip(inj.season, inj.week, inj.gsis_id, inj.team)}
       cur["team"] = [team.get((int(s), int(w), g)) for s, w, g in zip(cur.season, cur.week, cur.gsis_id)]
-      parts.append(cur.dropna(subset=["team"])[["season", "week", "gsis_id", "position", "game_status", "days", "team"]])
+      cur = cur.assign(dates=cur.dates if "dates" in cur else "")
+      parts.append(cur.dropna(subset=["team"])[cols])
   out = pd.concat(parts, ignore_index=True) if parts else pd.DataFrame()
   return out.assign(season=out.season.astype(int), week=out.week.astype(int)) if len(out) else out
 
@@ -108,6 +112,9 @@ def _setting(name: str, default: str) -> str:
 # (CK) the week model's per-stage calibration: "prev" (maps fit on season-1 predictions of a model trained on seasons
 # before season-1), "none", or "oof" (maps fit on out-of-fold predictions of the same configuration)
 WEEK_CALIB = _setting("week_calib", "prev")
+# (AS) how a player's report line and stage are read mid-week: "own" (his listed days; stage = his own day count) or
+# "calendar" (the team's report days; days he isn't listed read as full practice)
+STAGE_FROM = _setting("stage_from", "own")
 OOF_FOLDS = 3
 
 
@@ -167,7 +174,15 @@ class _Ctx:
     self.born = pd.to_datetime(last.birth_date, errors="coerce")
     self.pos_of = last.position.replace({"FB": "RB", "HB": "RB"}).to_dict()  # (I2) rows with no position recorded
     # plain records (pandas' row tuples can't be pickled, and the engine is cached with pickle)
-    self.rep = {(r.gsis_id, r.season, r.week): Rep(r.days, r.game_status) for r in rep_rows.itertuples()}
+    self.rep = {(r.gsis_id, r.season, r.week): Rep(r.days, r.game_status, getattr(r, "dates", "") or "")
+                for r in rep_rows.itertuples()}
+    # (AS) each team-week's report days: every date anyone on its report was listed
+    td = {}
+    for r in rep_rows.itertuples():
+      ds = str(getattr(r, "dates", "") or "")
+      if ds:
+        td.setdefault((int(r.season), int(r.week), {"LAR": "LA"}.get(r.team, r.team)), set()).update(d for d in ds.split(",") if d)
+    self.team_days = {k: sorted(v) for k, v in td.items()}
     self.hurt = hurt
     self.back, self.ret_seasons = getattr(hurt, "back", set()), getattr(hurt, "ret_seasons", set())
 
@@ -310,17 +325,26 @@ def week_rows(d, rep_rows: pd.DataFrame, hurt: set, reserve: bool = False) -> pd
       continue  # window not visibly open at any stage
     days_now, gs_now = (_days(now.days), _gs(now.game_status)) if now is not None else ("", "None")
     why_now = ctx.why.get((s, w, g), "none") if now is not None else "none"
+    cal = calendar_view(ctx, g, s, w, team) if STAGE_FROM == "calendar" else None
     for st in STAGES:
-      if 0 < st < 3 and len(days_now) < 3:
-        continue  # a short report week (Thursday game) has no separate Wednesday / Thursday stage
+      if cal is not None:
+        if 0 < st < 3 and cal["n"] < 3:
+          continue  # a short report week has no separate Wednesday / Thursday stage
+        seen, on_now = cal["seen"][st], cal["on"][st]
+      else:
+        if 0 < st < 3 and len(days_now) < 3:
+          continue  # a short report week (Thursday game) has no separate Wednesday / Thursday stage
+        seen = days_now if st == 3 else days_now[:st] if st else ""
+        on_now = float(now is not None and st > 0)
       if on_res and (now is None if st > 0 else (g, s, k) not in ctx.rep):
         continue  # (BE) only once his window is visible at this stage
-      seen = days_now if st == 3 else days_now[:st] if st else ""
-      on_now = float(now is not None and st > 0)
-      rows.append({**base, "stage": st, "on_now": on_now, "days_now": seen,
+      extra = {"own_seen": cal["own"][st], "own_on": cal["own_on"][st]} if cal is not None else {}
+      lis = seen.replace("X", "")
+      rows.append({**base, **extra, "stage": st, "on_now": on_now, "days_now": seen,
                    "wn_D": seen.count("D"), "wn_L": seen.count("L"), "wn_F": seen.count("F"),
-                   "w_first": SCORE.get(seen[0], np.nan) if seen else np.nan,
-                   "w_last": SCORE.get(seen[-1], np.nan) if seen else np.nan,
+                   **({"wn_X": seen.count("X")} if cal is not None else {}),
+                   "w_first": SCORE.get(lis[0], np.nan) if lis else np.nan,
+                   "w_last": SCORE.get(lis[-1], np.nan) if lis else np.nan,
                    "gs_now": gs_now if st == 3 and on_now else "None",
                    "why_now": why_now if on_now else "none"})
   return pd.DataFrame(rows)
@@ -417,6 +441,8 @@ def week_features(x: pd.DataFrame) -> pd.DataFrame:
       f[c] = x[c].astype(float).to_numpy()
   for c in ("on_now", "wn_D", "wn_L", "wn_F", "w_first", "w_last"):
     f[c] = x[c].astype(float).to_numpy()
+  if STAGE_FROM == "calendar":  # (AS) days off the report so far
+    f["wn_X"] = (x.wn_X if "wn_X" in x.columns else x.days_now.astype(str).str.count("X")).astype(float).to_numpy()
   if "res_prev" in x.columns:  # (BE) reserve-list inputs (rows built with reserve=True)
     for c in ("res_prev", "res_code", "res_weeks"):
       f[c] = x[c].astype(float).to_numpy()
@@ -486,6 +512,35 @@ def week_predict(model, x: pd.DataFrame) -> np.ndarray:
   return np.clip(p, 0.01, 0.99)
 
 
+def calendar_view(ctx: _Ctx, g, s: int, w: int, team: str) -> dict | None:
+  """(AS) his report line by calendar stage: the team's report days (ctx.team_days), stage k = its first k days (3 =
+  all), his entry each day or "X" where he isn't listed (off the report: not the same as listed full, {#off-report});
+  on the report at stage k =
+  listed on any of them. Also what the own-count construction would see live by that day ("own": his listed days so
+  far, no fill). None without dates (falls back to the own-count construction)."""
+  r = ctx.rep.get((g, s, w))
+  days = ctx.team_days.get((s, w, team))
+  if r is None:
+    n = len(days) if days else 3
+    e = {st: "" for st in STAGES}
+    return {"n": n, "seen": e, "on": {st: 0.0 for st in STAGES}, "own": e, "own_on": {st: 0.0 for st in STAGES}}
+  ds = [d for d in str(r.dates or "").split(",") if d]
+  dd = _days(r.days)
+  if not days or len(ds) != len(dd):
+    return None
+  his = dict(zip(ds, dd))
+  n = len(days)
+  seen, on, own, own_on = {0: ""}, {0: 0.0}, {0: ""}, {0: 0.0}
+  for st in (1, 2, 3):
+    upto = days if st == 3 else days[:st]
+    listed = [d for d in upto if d in his]
+    on[st] = float(bool(listed))
+    seen[st] = "".join(his.get(d, "X") for d in upto) if listed else ""
+    own[st] = "".join(his[d] for d in listed)
+    own_on[st] = float(bool(listed))
+  return {"n": n, "seen": seen, "on": on, "own": own, "own_on": own_on}
+
+
 def week_now_rows(ctx: _Ctx, items: list, reserve: bool = False) -> pd.DataFrame:
   """Rows for prediction (live, or a backtest week): items = (gsis, season, week, team, pos, days so far, game status
   or "None", stage 1-3). The Tuesday block from his previous team game + this week's report as it stands."""
@@ -495,11 +550,12 @@ def week_now_rows(ctx: _Ctx, items: list, reserve: bool = False) -> pd.DataFrame
     prev = [x for x in ctx.tw.get((s, team), []) if x < w]
     k = prev[-1] if prev else None
     seen = _days(days)
+    lis = seen.replace("X", "")  # (AS) "X" = a team report day he wasn't listed
     rows.append({"season": s, "week": w, "gsis_id": g, "team": team, "pos": pos or ctx.pos_of.get(g, ""),
                  **ctx.block(g, s, team, k, w), "y": np.nan, "stage": st, "on_now": float(st > 0), "days_now": seen,
-                 "wn_D": seen.count("D"), "wn_L": seen.count("L"), "wn_F": seen.count("F"),
-                 "w_first": SCORE.get(seen[0], np.nan) if seen else np.nan,
-                 "w_last": SCORE.get(seen[-1], np.nan) if seen else np.nan,
+                 "wn_D": seen.count("D"), "wn_L": seen.count("L"), "wn_F": seen.count("F"), "wn_X": seen.count("X"),
+                 "w_first": SCORE.get(lis[0], np.nan) if lis else np.nan,
+                 "w_last": SCORE.get(lis[-1], np.nan) if lis else np.nan,
                  "gs_now": _gs(gs) if st == 3 else "None", "why_now": ctx.why.get((s, w, g), "none"),
                  **(ctx.reserve(g, s, team, k) if reserve else {})})
   return pd.DataFrame(rows)

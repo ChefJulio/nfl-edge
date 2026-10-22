@@ -39,6 +39,45 @@ GAME_STATUSES = ("None", "QUESTIONABLE", "DOUBTFUL")
 GAMEDAY_ACTIVE = {"questionable": 0.974, "doubtful": 0.286}  # (AU) played rate once declared active, 2019-25 skill players
 
 
+def filed_dates(data, season: int, week: int) -> dict:
+  """team -> sorted report dates of this week whose report is in our practice data (anyone on it listed that day).
+  A day not here hasn't reached us yet, even past its deadline: "not listed = practiced fully" only holds on a day
+  the team's report is in. Only the live season's practice data carries dates (older caches: {})."""
+  pr = data.practice
+  if pr is None or "dates" not in pr:
+    return {}
+  x = pr[(pr.season == season) & (pr.week == week)].dropna(subset=["dates"])
+  ro = data.rosters
+  ro = ro[(ro.season == season) & (ro.week <= week) & ro.gsis_id.notna()].sort_values("week").drop_duplicates("gsis_id", keep="last")
+  team = dict(zip(ro.gsis_id, ro.team.replace({"LAR": "LA"})))
+  out = {}
+  for g, ds in zip(x.gsis_id, x.dates):
+    t = team.get(g)
+    if t:
+      out.setdefault(t, set()).update(d for d in str(ds).split(",") if d)
+  return {t: sorted(v) for t, v in out.items()}
+
+
+def published_teams(data, season: int, week: int) -> set:
+  """Teams whose report for this week is out in EITHER source: nflverse's injury table or NFL.com's practice feed
+  (2026-10-22, Tyler Shough: the practice feed, refreshed every 15 minutes, had every Sunday team's Wednesday report
+  while nflverse still had only the Thursday teams, so availability, tags and the ESPN bridge all acted as if no
+  report were out; his full Wednesday practice showed on the card while the Tuesday model set his 93%)."""
+  inj = data.injuries
+  out = set(inj[(inj.season == season) & (inj.week == week) & (inj.game_type == "REG")].team.replace({"LAR": "LA"}))
+  return out | set(filed_dates(data, season, week))
+
+
+def listed_now(data, season: int, week: int) -> set:
+  """gsis ids on this week's report in either source (see published_teams)."""
+  inj = data.injuries
+  out = set(inj[(inj.season == season) & (inj.week == week) & (inj.game_type == "REG")].gsis_id.dropna())
+  pr = data.practice
+  if pr is not None and len(pr):
+    out |= set(pr[(pr.season == season) & (pr.week == week)].gsis_id.dropna())
+  return out
+
+
 def practice_features(df: pd.DataFrame) -> pd.DataFrame:
   """Encode a practice week ('DDL' = DNP, DNP, Limited) + game status for the availability model."""
   days = df.days.fillna("").str.replace("?", "", regex=False)
@@ -841,7 +880,7 @@ class InjuryModel:
     inj = inj[(inj.season == season) & (inj.game_type == "REG")].dropna(subset=["gsis_id"])
     cur = inj[inj.week == week]
     prev = inj[inj.week == week - 1]
-    published = set(cur.team)
+    published = published_teams(self.data, season, week)
     p = p.copy()
     p["avail"], p["status"], p["partial_week"], p["on_report"] = 1.0, "", False, False
     p["tuesday"] = ""  # report.inactive_why: why the Tuesday model says what it says
@@ -962,22 +1001,7 @@ class InjuryModel:
     return p
 
   def filed_dates(self, season: int, week: int) -> dict:
-    """team -> sorted report dates of this week whose report is in our practice data (anyone on it listed that day).
-    A day not here hasn't reached us yet, even past its deadline: "not listed = practiced fully" only holds on a day
-    the team's report is in."""
-    pr = self.data.practice
-    if pr is None or "dates" not in pr:
-      return {}
-    x = pr[(pr.season == season) & (pr.week == week)].dropna(subset=["dates"])
-    ro = self.data.rosters
-    ro = ro[(ro.season == season) & (ro.week <= week) & ro.gsis_id.notna()].sort_values("week").drop_duplicates("gsis_id", keep="last")
-    team = dict(zip(ro.gsis_id, ro.team.replace({"LAR": "LA"})))
-    out = {}
-    for g, ds in zip(x.gsis_id, x.dates):
-      t = team.get(g)
-      if t:
-        out.setdefault(t, set()).update(d for d in str(ds).split(",") if d)
-    return {t: sorted(v) for t, v in out.items()}
+    return filed_dates(self.data, season, week)
 
   def tag_map(self, season: int, week: int, board: pd.DataFrame | None = None) -> dict:
     """gsis -> designation for every QB / RB / WR / TE / K on a roster (active, game-day inactive or a reserve list),
@@ -1013,8 +1037,7 @@ class InjuryModel:
     report, so a Tuesday Q holds through the bye until his team's first report of the week it plays again.
     p: rows with gsis_id and team."""
     out = [""] * len(p)
-    inj = self.data.injuries
-    published = set(inj[(inj.season == season) & (inj.week == week) & (inj.game_type == "REG")].team)
+    published = published_teams(self.data, season, week)
     pr, days, final = self.data.practice, None, set()
     if pr is not None:
       days = pr[(pr.season == season) & (pr.week == week)].drop_duplicates("gsis_id", keep="last").set_index("gsis_id")
@@ -1097,7 +1120,7 @@ class InjuryModel:
     if feed is None or feed.empty:
       return {}
     inj = data.injuries
-    published = set(inj[(inj.season == season) & (inj.week == week)].team.replace({"LAR": "LA"}))
+    published = published_teams(data, season, week)
     r = data.rosters[(data.rosters.season == season) & data.rosters.espn_id.notna() & data.rosters.gsis_id.notna()]
     r = r.sort_values("week").drop_duplicates("gsis_id", keep="last")
     by_espn = {str(e).split(".")[0]: (g, t if t != "LAR" else "LA") for e, g, t in zip(r.espn_id, r.gsis_id, r.team)}
