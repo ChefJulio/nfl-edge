@@ -88,3 +88,17 @@ table.tr-grid td i { display: block; font-style: normal; font-size: var(--fs-2xs
 table.tr-grid td.tr-ge { color: var(--muted); background: none; }
 table.tr-grid .tr-gall { border-left: 2px solid var(--line); } table.tr-grid th.tr-gall { color: var(--ink); }
 .tq-back { margin: 0 0 4px; }
+/* range filters (pickRange): live label, two handles on one track, quick picks */
+.tq-rv { margin: 4px 0 6px; font-size: var(--fs-lg); font-weight: 700; color: var(--ink); min-height: 1.4em; }
+.tq-range { position: relative; height: 44px; margin: 0 4px; }
+.tq-rtrack { position: absolute; left: 0; right: 0; top: 50%; height: 6px; margin-top: -3px; border-radius: 3px; background: var(--panel2); border: 1px solid var(--line); }
+.tq-rfill { position: absolute; top: -1px; bottom: -1px; border-radius: 3px; background: var(--accent); }
+.tq-range input { position: absolute; left: 0; top: 0; width: 100%; height: 44px; margin: 0; background: none; pointer-events: none;
+  -webkit-appearance: none; appearance: none; z-index: 2; }
+.tq-range input::-webkit-slider-runnable-track { background: none; height: 44px; }
+.tq-range input::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 28px; height: 28px; margin-top: 8px; border-radius: 50%;
+  background: var(--ink); border: 3px solid var(--accent); box-shadow: 0 1px 4px rgba(0,0,0,.5); cursor: grab; }
+.tq-range input::-moz-range-track { background: none; }
+.tq-range input::-moz-range-thumb { pointer-events: auto; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); border: 3px solid var(--accent); cursor: grab; }
+.tq-rends { display: flex; justify-content: space-between; gap: 8px; margin: 0 2px; font-size: var(--fs-xs); color: var(--muted); font-variant-numeric: tabular-nums; }
+.tq-rends .muted { text-align: center; }

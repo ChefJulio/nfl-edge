@@ -335,22 +335,35 @@ def school(s) -> str | None:
   return next((x for x in parts if not JUCO.search(x)), parts[0] if parts else None)
 
 
-def colleges(players: pd.DataFrame, out: Path) -> None:
-  """colleges.json: {schools: [...], confs: [...], p: {gsis: [school idx, conf idx (-1 none)]}} for every player in
-  the season files under out."""
+def bio(players: pd.DataFrame, contracts: pd.DataFrame | None, out: Path) -> None:
+  """bio.json, player facts for the Player filters / breakdowns, for every player in the season files under out:
+  {schools: [...], confs: [...], p: {gsis: [school idx (-1), conf idx (-1), draft round (1-7, 7 = 7th or later, 8 undrafted),
+  overall pick (-1), contracts [[year signed, years, APY in $10k, APY as % of the cap x 10], ...]]}}.
+  College / draft from nflverse's players table; contracts from its OverTheCap table (the page uses, for a play, the
+  latest contract signed by that season and still running)."""
   want = set()
   for f in out.glob("[0-9][0-9][0-9][0-9]*.json"):
     if re.fullmatch(r"\d{4}(_st)?\.json", f.name):
       want |= {g for g, _ in json.loads(f.read_text(encoding="utf-8"))["players"]}
-  pl = players[players.gsis_id.isin(want)]
-  rows = [(g, school(c), cf if isinstance(cf, str) and cf.strip() else None)
-          for g, c, cf in zip(pl.gsis_id, pl.college_name, pl.college_conference)]
-  rows = [r for r in rows if r[1]]
-  schools, confs = sorted({r[1] for r in rows}), sorted({r[2] for r in rows if r[2]})
-  si, ci = {s: i for i, s in enumerate(schools)}, {c: i for i, c in enumerate(confs)}
-  doc = {"v": 1, "schools": schools, "confs": confs, "p": {g: [si[s], ci.get(c, -1)] for g, s, c in rows}}
-  (out / "colleges.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
-  print(f"[plays] colleges: {len(rows)} players, {len(schools)} schools, {len(confs)} conferences", flush=True)
+  pl = players[players.gsis_id.isin(want)].drop_duplicates("gsis_id")
+  deals = {}
+  if contracts is not None and len(contracts):
+    c = contracts[contracts.gsis_id.isin(want) & (pd.to_numeric(contracts.year_signed, errors="coerce") > 1900)]
+    for g, ys, yrs, apy, cap in zip(c.gsis_id, c.year_signed, c.years, c.apy, c.apy_cap_pct):
+      if pd.notna(apy):
+        deals.setdefault(g, []).append([int(ys), int(yrs) if pd.notna(yrs) and yrs > 0 else 1, int(round(float(apy) * 100)),
+                                        int(round(float(cap) * 1000)) if pd.notna(cap) else -1])
+  rows = []
+  for g, col, cf, rnd, pick in zip(pl.gsis_id, pl.college_name, pl.college_conference, pl.draft_round, pl.draft_pick):
+    rows.append((g, school(col), cf if isinstance(cf, str) and cf.strip() else None,
+                 min(int(rnd), 7) if pd.notna(rnd) else 8, int(pick) if pd.notna(pick) else -1))  # 7 = 7th or later (pre-1994 drafts ran to 12)
+  schools, confs = sorted({r[1] for r in rows if r[1]}), sorted({r[2] for r in rows if r[2]})
+  si, ci = {x: i for i, x in enumerate(schools)}, {x: i for i, x in enumerate(confs)}
+  doc = {"v": 1, "schools": schools, "confs": confs,
+         "p": {g: [si.get(sc, -1), ci.get(cf, -1), rnd, pick, sorted(deals.get(g, []))] for g, sc, cf, rnd, pick in rows}}
+  (out / "bio.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
+  (out / "colleges.json").unlink(missing_ok=True)
+  print(f"[plays] bio: {len(rows)} players, {len(schools)} schools, {sum(1 for g in deals)} with contracts", flush=True)
 
 
 def coverage(doc: dict, x: dict) -> list:
@@ -388,7 +401,7 @@ def main():
   out.mkdir(parents=True, exist_ok=True)
   kept = ROOT / cfg["data"]["cache_dir"] / "plays_site" / f"v{V}"
   kept.mkdir(parents=True, exist_ok=True)
-  players = nfl.load_players().select(["gsis_id", "display_name", "pfr_id", "college_name", "college_conference"]).to_pandas()
+  players = nfl.load_players().select(["gsis_id", "display_name", "pfr_id", "college_name", "college_conference", "draft_round", "draft_pick"]).to_pandas()
   full = {g: n for g, n in zip(players.gsis_id, players.display_name) if isinstance(g, str) and isinstance(n, str)}
   pfr = {p: g for p, g in zip(players.pfr_id, players.gsis_id) if isinstance(p, str) and isinstance(g, str)}
   ixf = out / "index.json"
@@ -454,9 +467,14 @@ def main():
     if s < current:
       shutil.copyfile(out / nm, kept / f"{s}_g{GV}.json")
     print(f"[plays] {s}: game context for {len(gd['x'])} games", flush=True)
-  # colleges (owner 2026-10-22: "plays that went to u of florida"): school + conference for every player in the play
-  # files, from nflverse's players table; one small file, loaded only by a college filter / breakdown
-  colleges(players, out)
+  # player facts (owner 2026-10-22: "plays that went to u of florida", "contract aav? draft round? draft position?"):
+  # college, draft, contracts for every player in the play files; one file, loaded only by those filters / breakdowns
+  try:
+    contracts = nfl.load_contracts().to_pandas()
+  except Exception as e:
+    contracts = None
+    print(f"[plays] no contracts ({e})", flush=True)
+  bio(players, contracts, out)
   seasons = sorted(int(p.stem) for p in out.glob("[0-9][0-9][0-9][0-9].json"))
   ixf.write_text(json.dumps({"v": V, "seasons": seasons, "current": current, "tracked": sorted(APPLIES),
                              "cov": {str(s): cov.get(str(s), []) for s in seasons}}, separators=(",", ":")), encoding="utf-8")
