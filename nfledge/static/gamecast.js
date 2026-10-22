@@ -1181,7 +1181,7 @@
     return t < roll ? C.week : C.week + 1 + Math.floor((t - roll) / (7 * 864e5));
   };
   const espnDate = d => new Date(d + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
-  const healthOf = (pid, p, L, espn) => {
+  const healthOf = (pid, p, L, espn, wkSel = null) => {
     loadInj(); loadRos();
     const now = espn && DINJ && DINJ[espn];
     const wk = DATA ? +DATA.week : null;
@@ -1197,18 +1197,19 @@
     // off the board: the return model, at his next game week (a bye week has no game, so its chance reads 0)
     const ups = (L && L.up) || [], byeAt = w => ups.some(u => u.w === w && u.bye);
     const rws = !p && RJ.d && RJ.d.players[pid] ? RJ.d.players[pid].w : null;
-    const rw = rws && rws.find(z => z[0] >= RJ.d.from && !byeAt(z[0]));
+    // a chosen later week: that week's chance (none on its bye); else his next game week's
+    const rw = rws && (wkSel ? rws.find(z => z[0] === wkSel && !byeAt(z[0])) : rws.find(z => z[0] >= RJ.d.from && !byeAt(z[0])));
     const play = p && p.inactive != null ? 1 - p.inactive : rw ? rw[1] : null;
     const what = [...new Set([now && now.type, now && now.detail && now.detail !== 'Not Specified' ? now.detail : '', now && now.side && now.side !== 'Not Specified' ? now.side : '']
       .filter(Boolean))].join(' · ') || (ep && ep.part) || '';  // ESPN often repeats the type as the detail
     return { inj, play, what, now, ep, back: backWeek(pid), wk };
   };
-  const healthTile = (pid, p, L, espn, wkTag = '') => {
-    const h = healthOf(pid, p, L, espn);
+  const healthTile = (pid, p, L, espn, wkTag = '', wkSel = null, bye = false) => {
+    const h = healthOf(pid, p, L, espn, wkSel);
     const ret = h.back && h.back !== 'no' ? `back ~wk ${h.back}` : h.now && h.now.return_date ? `est. ${espnDate(h.now.return_date)}` : '';
     // game day (owner 2026-10-18): once inactives are posted the tile says Active or Inactive, not a chance
     const gd = p && injCode(p.status), ina = gd === 'INA', act = gd === 'ACT';
-    const big = ina ? '<div class="pc-big bad">Inactive</div>' : act ? '<div class="pc-big good">Active</div>' : !h.inj ? '<div class="pc-big good">Healthy</div>'
+    const big = bye ? '<div class="pc-big">Bye week</div>' : ina ? '<div class="pc-big bad">Inactive</div>' : act ? '<div class="pc-big good">Active</div>' : !h.inj ? '<div class="pc-big good">Healthy</div>'
       : h.play != null && h.play > 0.01 ? `<div class="pc-big ${h.play >= 0.75 ? '' : 'bad'}">${Math.round(h.play * 100)}% <small>to play</small></div>`
       : h.play != null ? '<div class="pc-big bad">Out</div>'
       : '<div class="pc-big bad">Injured</div>';  // listed but no chance on file: don't claim more than we know
@@ -1568,12 +1569,15 @@
     const ups = (L && L.up) || [], wk = +d.week;
     const bye = ups.some(u => u.w === wk && u.bye) || ((S && S.m) || []).some(m => m.w === wk && m.bye);
     const nxt = ups.find(u => u.w > wk && !u.bye);
-    const h = d === DATA && L && L.pid ? healthOf(L.pid, null, L, L.espn) : null;
+    // a later week this season too (owner 2026-10-22: "health disappears after ~3 weeks forward?": his bye, or a week
+    // he isn't listed): his injury now and expected return; on a non-bye week that week's chance (rest-of-season model)
+    const fut = !!(DATA && +d.season === +DATA.season && wk > +DATA.week);
+    const h = (d === DATA || fut) && L && L.pid ? healthOf(L.pid, null, L, L.espn, fut ? wk : null) : null;
     const projBody = bye ? `<div class="pc-big">Bye</div><div class="pc-tapsub">${nxt ? `back week ${nxt.w} ${nxt.h === 0 ? '@' : 'vs'} ${esc(nxt.o)}` : 'no game this week'}</div>`
       : `<div class="pc-big">–</div><div class="pc-tapsub">${h && h.inj ? 'out this week' : 'not projected this week'}</div>`;
     const projTile = goTile('Projection', projBody, 'log', 'g');
     const cur = S ? S.g : [], fpg = cur.length ? cur.reduce((t, x) => t + pts(x.c, weights(), pos), 0) / cur.length : null;
-    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '')}${h ? healthTile(L.pid, null, L, L.espn) : ''}${GRADED[pos] ? gradeTile(L.pid, L) : ''}</div>` : '';
+    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '')}${h ? healthTile(L.pid, null, L, L.espn, fut ? ` · wk ${wk}` : '', fut ? wk : null, bye) : ''}${GRADED[pos] ? gradeTile(L.pid, L) : ''}</div>` : '';
     return `${played}${tiles}${bye ? '' : `<div class="pc-box"><p class="pc-sub">Not on our ${esc(wkLabel(d).toLowerCase())} board: ruled out, not on a roster yet, or projected too low to list.</p></div>`}`;
   };
   // Header extras from the career log doc (tools/player_logs.py): photo, jersey number, bio, recent snap share and,
