@@ -304,6 +304,8 @@
     coach: ['head coach', offCoach, [], 'v'],
     college: ['college', (P, j, G, D) => { const a = FAM[BIO.fam].actor(P, j), c = a >= 0 ? BIO.p.get(D.players[a][0]) : null; return c && c[0] >= 0 ? BIO.schools[c[0]] : null; }, [], 'v'],
     rnd: ['draft round', (P, j, G, D) => { const b = bioOf(P, j, D); return b ? b[2] : null; }, [], 'k'],
+    // game by game (owner 2026-10-22, "game logs, streaks, spans"): built from player-game totals in run(), not a key function
+    pgame: ['game (game log)', null, [], 'v'], pmark: ['games reaching a mark', null, [], 'v'], pspan: ['best stretch of games', null, [], 'v'],
     age: ['age', (P, j, G, D) => ageOf(bioOf(P, j, D), D.season), [], 'k'], cyr: ['career year', (P, j, G, D) => yearOf(bioOf(P, j, D), D.season), [], 'k'], season: ['season', (P, j, G, D) => D.season, [], 'kd'],
     // playoff weeks on the 2021+ numbering (wild card = 19), so each round groups and labels the same in every season:
     // before 2021 the regular season had 17 weeks and the wild card was week 18
@@ -436,10 +438,15 @@
     const F = FILTERS[k], only = !F.only || F.only.includes(fam);
     return FAM[fam].st ? (ST_FILTERS.has(k) || (F.stOnly && only)) : !F.stOnly && only;
   };
-  const byAllowed = (k, fam) => ['college', 'rnd', 'age', 'cyr'].includes(k) ? ['rush', 'pass', 'rec'].includes(fam) : FAM[fam].st ? ST_BY.has(k) : k !== 'kdist';
+  const byAllowed = (k, fam) => GAMEBY.has(k) ? !FAM[fam].st : ['college', 'rnd', 'age', 'cyr'].includes(k) ? ['rush', 'pass', 'rec'].includes(fam) : FAM[fam].st ? ST_BY.has(k) : k !== 'kdist';
   // Two-way grids (owner 2026-10-14): a second grouping makes the answer a shaded rows x columns grid. Groupings with
   // dozens of values (players, teams, coaches) work as rows only; columns must fit a phone (capped, scrolls past that).
-  const GRID_ROW_ONLY = new Set(['player', 'team', 'opp', 'coach', 'college']);
+  const GRID_ROW_ONLY = new Set(['player', 'team', 'opp', 'coach', 'college', 'pgame', 'pmark', 'pspan']);
+  const GAMEBY = new Set(['pgame', 'pmark', 'pspan']);
+  // a game row's minimum sample, and a mark's starting value for counting stats (rates start at the league average)
+  const GMIN = { rush: 5, pass: 10, rec: 2, route: 10, team: 20 };
+  const MARK = { yds: f => (f === 'pass' ? 300 : 100), td: f => (f === 'pass' ? 2 : 1), rec: () => 8, tgt: () => 10, att: () => 20, rr: () => 30 };
+  const mergeAcc = (t, a) => { Object.keys(a).forEach(k => { if (k !== '_k') t[k] = k === 'lg' ? Math.max(t[k] || 0, a[k]) : (t[k] || 0) + a[k]; }); return t; };
   const GRID_MAX_ROWS = 40, GRID_MAX_COLS = 24;
   // metrics where a lower number is the good one (the grid shades those the other way)
   const LOWER = new Set(['skr', 'int', 'stuff', 'fl', 'drop', 'iw', 'ta', 'pz', 'qh', 'rya', 'bk', 'miss']);
@@ -452,7 +459,7 @@
       sec.classList.remove('soon');
       let IX = null, Q = null, busy = 0, paint = null, maxN = 0, csvRows = null;  // csvRows: the shown table as [[cell...]]
       const base = {}, extra = {}, merged = {};
-      const defaults = () => ({ fam: 'rush', met: 'ypc', who: 'L', wn: '', by: 'player', by2: '', st: 'reg', from: null, to: null, f: {}, fn: {}, min: null });
+      const defaults = () => ({ fam: 'rush', met: 'ypc', who: 'L', wn: '', by: 'player', by2: '', st: 'reg', from: null, to: null, f: {}, fn: {}, min: null, gt: null, gn: 4 });
       const fromUrl = () => { try { const t = new URLSearchParams(location.search).get('t'); return t ? JSON.parse(decodeURIComponent(escape(atob(t)))) : null; } catch (e) { return null; } };
       const saved = () => { try { return JSON.parse(localStorage.getItem(LS) || 'null'); } catch (e) { return null; } };
       sec.innerHTML = `<div class="sec-head"><div><h2>Trends</h2><p>Ask the play-by-play anything: every run and pass since 1999, with charting (personnel, coverage, routes, pressure, play action...) where it exists. Tap a row to change it.</p></div></div>
@@ -478,7 +485,7 @@
       // easier to use and understand"): one labeled row per part of the question (Measure, Who, Only when, Seasons, Break
       // down, Minimum), each opening a sheet of grouped, searchable choices, and the question in plain English on top.
       // The query state Q, the links and run() are unchanged.
-      const BY_GROUPS = [['People', ['player', 'team', 'opp', 'coach', 'college', 'rnd', 'age', 'cyr']], ['Time', ['season', 'week', 'qtr']],
+      const BY_GROUPS = [['People', ['player', 'team', 'opp', 'coach', 'college', 'rnd', 'age', 'cyr']], ['Game by game', ['pgame', 'pmark', 'pspan']], ['Time', ['season', 'week', 'qtr']],
         ['Situation', ['down', 'dist', 'zone', 'score']], ['Offense', ['align', 'pers', 'pa', 'mo']],
         ['Defense', ['box', 'rushers', 'dbs', 'mz', 'cov']], ['Passing', ['depth', 'loc', 'route', 'read', 'press']],
         ['Running', ['dir', 'gap']], ['Kicking', ['kdist']], ['Game', ['roof', 'surf']]];
@@ -539,13 +546,18 @@
       };
       const ST_TXT = { reg: 'regular season', post: 'playoffs', both: 'regular season + playoffs' };
       const seasonsTxt = () => `${Q.from === Q.to ? Q.from : `${Q.from}–${Q.to}`} · ${cap(ST_TXT[Q.st])}`;
-      const byTxt = () => (Q.by2 && BY[Q.by2] ? `${cap(BY[Q.by][0])}, then ${BY[Q.by2][0]} (grid)` : `One row per ${BY[Q.by][0]}`);
+      // the minimum sample by default: per game in a game log, else the measure's own
+      const defMin = () => (Q.by === 'pgame' ? GMIN[Q.fam] || 1 : FAM[Q.fam].min);
+      const markTxt = () => { const [, m] = famMetric(), mk = Q.gt != null ? Q.gt : MARK[Q.met] ? MARK[Q.met](Q.fam) : null;
+        return mk == null ? `${m[0]} above the league average` : `${fmt(mk, m[2])}${LOWER.has(Q.met) ? ' or less' : '+'} ${m[0].toLowerCase()}`; };
+      const gameTxt = () => (Q.by === 'pgame' ? 'Each game (game log)' : Q.by === 'pmark' ? `Games with ${markTxt()}` : `Best ${Q.gn}-game stretch`);
+      const byTxt = () => GAMEBY.has(Q.by) ? gameTxt() : (Q.by2 && BY[Q.by2] ? `${cap(BY[Q.by][0])}, then ${BY[Q.by2][0]} (grid)` : `One row per ${BY[Q.by][0]}`);
       const summary = () => {
         const [fam, m] = famMetric();
         const who = Q.who === 'L' && !UNITS[Q.by] ? 'The league' : whoLabel();
         const unit = (Q.who === 'L' && UNITS[Q.by]) || Q.by === 'player';  // the breakdown is already in the subject
         const when = Object.keys(Q.f).map(optLabel).filter(Boolean);
-        const by = Q.by2 && BY[Q.by2] ? `, as a grid of ${BY[Q.by][0]} by ${BY[Q.by2][0]}` : unit ? '' : `, by ${BY[Q.by][0]}`;
+        const by = GAMEBY.has(Q.by) ? `, ${gameTxt().toLowerCase()}` : Q.by2 && BY[Q.by2] ? `, as a grid of ${BY[Q.by][0]} by ${BY[Q.by2][0]}` : unit ? '' : `, by ${BY[Q.by][0]}`;
         const yrs = Q.from === Q.to ? `${Q.from}` : `${Q.from}–${Q.to}`;
         return `<b>${esc(who)}</b> &middot; ${esc(fam.label.toLowerCase())} <b>${esc(m[0])}</b>${when.length ? ` when ${esc(when.join(', '))}` : ''} &middot; ${esc(yrs)} ${esc(ST_TXT[Q.st])}${esc(by)}`;
       };
@@ -560,7 +572,7 @@
             <div class="tq-row tq-frow"><span class="tq-k">Only when</span><span class="tq-v tq-chips">${chips}<button type="button" class="tq-add" data-pick="add">+ Add</button></span></div>
             ${row('seasons', 'Seasons', esc(seasonsTxt()))}
             ${row('by', 'Break down', esc(byTxt()))}
-            <div class="tq-row tq-mrow"><span class="tq-k">Minimum</span><span class="tq-v tr-min"><button type="button" class="tr-step" data-step="-1" aria-label="One fewer">&minus;</button><input class="tq-mrange" type="range" min="0" max="${Math.max(maxN, Q.min ?? fam.min, fam.min * 2)}" step="1" value="${Q.min ?? fam.min}" aria-label="Minimum sample"><button type="button" class="tr-step" data-step="1" aria-label="One more">+</button> <input class="tq-mnum" type="number" inputmode="numeric" min="0" step="1" value="${Q.min ?? fam.min}" aria-label="Minimum ${esc(fam.unit)}"><span class="tr-w">${esc(fam.unit)}</span></span></div>
+            <div class="tq-row tq-mrow"><span class="tq-k">Minimum</span><span class="tq-v tr-min"><button type="button" class="tr-step" data-step="-1" aria-label="One fewer">&minus;</button><input class="tq-mrange" type="range" min="0" max="${Math.max(maxN, Q.min ?? defMin(), fam.min * 2)}" step="1" value="${Q.min ?? defMin()}" aria-label="Minimum sample"><button type="button" class="tr-step" data-step="1" aria-label="One more">+</button> <input class="tq-mnum" type="number" inputmode="numeric" min="0" step="1" value="${Q.min ?? defMin()}" aria-label="Minimum ${esc(fam.unit)}"><span class="tr-w">${esc(fam.unit)}</span></span></div>
           </div>
           <div class="tq-acts"><button type="button" class="tq-act" data-pick="examples">Examples</button><button type="button" class="tq-act tr-share">Copy link</button><button type="button" class="tq-act tq-csv" data-csv="1">Download CSV</button><button type="button" class="tq-act tq-reset">Reset</button></div>`;
       };
@@ -913,24 +925,36 @@
       const pickBy = opener => {
         const el = panel();
         const ok = k => BY[k] && byAllowed(k, Q.fam) && !(k === 'player' && (Q.fam === 'team' || /^P:/.test(Q.who)));
-        const set = (cur, attr, filt) => BY_GROUPS.map(([g, ks]) => {
+        const set = (cur, attr, filt, after = {}) => BY_GROUPS.map(([g, ks]) => {
           const hit = ks.filter(filt);
-          return hit.length ? `<h4 class="tq-h">${g}</h4><div class="tq-chipset">${hit.map(k => `<button type="button" data-${attr}="${k}" class="${cur === k ? 'on' : ''}">${esc(cap(BY[k][0]))}${sinceTag(BY[k][2])}</button>`).join('')}</div>` : '';
+          return hit.length ? `<h4 class="tq-h">${g}</h4><div class="tq-chipset">${hit.map(k => `<button type="button" data-${attr}="${k}" class="${cur === k ? 'on' : ''}">${esc(cap(BY[k][0]))}${sinceTag(BY[k][2])}</button>`).join('')}</div>${after[g] || ''}` : '';
         }).join('');
         let grid = !!Q.by2;  // the second split (a grid) stays folded away until it's set or asked for
+        const gameOpts = () => {
+          const [, m] = famMetric();
+          if (Q.by === 'pmark') return `<div class="tq-gp"><label>Mark <input type="number" inputmode="decimal" step="any" data-gt value="${Q.gt ?? ''}" placeholder="${MARK[Q.met] ? MARK[Q.met](Q.fam) : 'league avg'}"></label>
+            <span class="muted">${esc(m[0].toLowerCase())} in a game${LOWER.has(Q.met) ? ' (or less)' : ' (or more)'}</span></div>`;
+          if (Q.by === 'pspan') return `<div class="tq-gp"><label>Games in a row <input type="number" inputmode="numeric" min="2" max="20" step="1" data-gn value="${Q.gn}"></label>
+            <span class="muted">best ${esc(m[0].toLowerCase())} over that many straight games with a matching play</span></div>`;
+          return '';
+        };
         const draw = () => {
-          el.innerHTML = `<p class="tq-help muted">One row per&hellip;</p>${set(Q.by, 'by', ok)}
-            <div class="tq-then">${grid ? `<h4 class="tq-h">Then by <span class="muted">(columns of a grid)</span></h4>
+          el.innerHTML = `<p class="tq-help muted">One row per&hellip;</p>${set(Q.by, 'by', ok, { 'Game by game': gameOpts() })}
+            <div class="tq-then">${GAMEBY.has(Q.by) ? '' : grid ? `<h4 class="tq-h">Then by <span class="muted">(columns of a grid)</span></h4>
             <div class="tq-chipset"><button type="button" data-by2="" class="${!Q.by2 ? 'on' : ''}">No grid</button></div>
             ${set(Q.by2, 'by2', k => ok(k) && k !== Q.by && !GRID_ROW_ONLY.has(k))}` : '<button type="button" class="tq-act tq-grid" data-grid="1">+ Split again into a grid</button>'}</div>
             <button type="button" class="tq-act tq-done" data-done="1">Done</button>`;
         };
         draw();
         el.addEventListener('click', e => {
-          const a = e.target.closest('[data-by]'); if (a) { Q.by = a.dataset.by; if (Q.by2 === Q.by) Q.by2 = ''; update(); draw(); return; }
+          const a = e.target.closest('[data-by]'); if (a) { Q.by = a.dataset.by; if (Q.by2 === Q.by || GAMEBY.has(Q.by)) Q.by2 = ''; update(); draw(); return; }
           const b = e.target.closest('[data-by2]'); if (b) { Q.by2 = b.dataset.by2; update(); draw(); return; }
           if (e.target.closest('[data-grid]')) { grid = true; draw(); return; }
           if (e.target.closest('[data-done]')) NFLE.sheetClose();
+        });
+        el.addEventListener('change', e => {
+          if (e.target.matches('[data-gt]')) { Q.gt = e.target.value === '' ? null : +e.target.value; update(); }
+          if (e.target.matches('[data-gn]')) { Q.gn = Math.max(2, Math.min(20, Math.round(+e.target.value || 4))); e.target.value = Q.gn; update(); }
         });
         NFLE.sheet('Break down', el, opener);
       };
@@ -1037,7 +1061,8 @@
           const [wk, ...rest] = Q.who === 'L' ? ['L'] : Q.who.split(':'), wv = rest.join(':');
           // the route runner's position (an actor-level filter): FB counts as RB
           const posSet = fam.multi && Q.f.rpos ? new Set(vals('rpos')) : null, POSG = { FB: 'RB' };
-          const by = BY[Q.by], by2 = Q.by2 && BY[Q.by2] ? BY[Q.by2] : null, groups = new Map(), league = blank(), names = {}, teamOf = {};
+          const GMODE = GAMEBY.has(Q.by), gmeta = new Map();
+          const by = BY[Q.by], by2 = !GMODE && Q.by2 && BY[Q.by2] ? BY[Q.by2] : null, groups = new Map(), league = blank(), names = {}, teamOf = {};
           let plays = 0;
           list.forEach(({ D, P, V, PL, n }) => {
             const G = D.games, T = D.teams;
@@ -1063,7 +1088,12 @@
                 if (wk === 'P' && act !== wp) continue;
                 if (wk === 'C' && offCoach(P, j, G, D) !== wv) continue;
                 let key;
-                if (Q.by === 'player') { key = PL[act][0]; teamOf[key] = T[P.o[j]]; } else key = by[1](P, j, G, D, V);
+                if (GMODE) {  // one group per player (team, for team offense) per game
+                  const ent = Q.fam === 'team' ? T[P.o[j]] : PL[act][0], g = G[P.g[j]];
+                  key = `${ent}|${D.season}|${P.g[j]}`;
+                  if (!gmeta.has(key)) gmeta.set(key, { ent, s: +D.season, w: g[1], post: g[2], opp: T[P.d[j]], home: P.o[j] === g[3], team: T[P.o[j]] });
+                  if (Q.fam !== 'team') teamOf[ent] = T[P.o[j]];
+                } else if (Q.by === 'player') { key = PL[act][0]; teamOf[key] = T[P.o[j]]; } else key = by[1](P, j, G, D, V);
                 if (key == null) continue;
                 let k2 = null;
                 if (by2) { k2 = by2[1](P, j, G, D, V); if (k2 == null) continue; }
@@ -1076,6 +1106,85 @@
           });
           const lg = m[1](league), lab = BYLABEL[Q.by];
           const den = m[4] ? m[4][1] : (a => a.n), unit = m[4] ? m[4][0] : fam.unit[0].toUpperCase() + fam.unit.slice(1);
+          if (GMODE) {
+            sec.querySelector('.tr-base').innerHTML = `League, same situation: <b>${fmt(lg, m[2])}</b> ${esc(m[0])} on ${fmt(league.n)} ${esc(fam.unit)}`;
+            sec.querySelector('.tr-trend').innerHTML = '';
+            const tb = sec.querySelector('.tr-tbl'), low = LOWER.has(Q.met), isT = Q.fam === 'team';
+            const nameOf = e => (isT ? e : names[e] || e);
+            const gl = g => `${g.s} ${g.post ? 'playoffs' : `wk ${g.w}`} ${g.home ? 'vs' : '@'} ${g.opp}`;
+            const ord = g => g.s * 100 + (g.post ? 50 : 0) + g.w;
+            const better = (x, y) => (low ? x < y : x > y);
+            const items = [...groups.entries()].map(([k, a]) => ({ a, n: den(a), v: m[1](a), g: gmeta.get(k) }));
+            const byEnt = new Map();
+            items.forEach(x => { if (!byEnt.has(x.g.ent)) byEnt.set(x.g.ent, []); byEnt.get(x.g.ent).push(x); });
+            byEnt.forEach(l => l.sort((x, y) => ord(x.g) - ord(y.g)));
+            const mark = Q.gt != null ? Q.gt : MARK[Q.met] ? MARK[Q.met](Q.fam) : +lg.toFixed(m[2]);
+            const hits = v => isFinite(v) && (low ? v <= mark : v >= mark);
+            const who = { key: 'who', label: isT ? 'Team' : 'Player', stick: true, first: 'asc', value: r => nameOf(r.ent),
+              html: r => (isT ? NFLE.ui.team(r.ent, TEAMS) : NFLE.ui.player({ name: nameOf(r.ent), team: teamOf[r.ent] }, TEAMS)) };
+            const rowAttrs = r => `${NFLE.ui.tileStyle(TEAMS, isT ? r.ent : teamOf[r.ent])}${!isT && /^\d\d-\d{7}$/.test(r.ent) ? ` data-open-pid="${esc(r.ent)}"` : ''}`;
+            let rows2, cols2, csvHead, csvRow, sortKey, note = '';
+            if (Q.by === 'pgame') {
+              rows2 = items.map(x => ({ ent: x.g.ent, g: x.g, n: x.n, v: x.v, a: x.a }));
+              cols2 = [who, { key: 'game', label: 'Game', value: r => ord(r.g), html: r => esc(gl(r.g)) },
+                { key: 'n', label: unit, num: true, value: r => r.n, html: r => fmt(r.n) },
+                { key: 'v', label: m[0], num: true, cls: 'tr-main', value: r => (isFinite(r.v) ? r.v : null), html: r => `<b>${fmt(r.v, m[2])}</b>` }];
+              csvHead = [isT ? 'Team' : 'Player', 'Team', 'Season', 'Week', 'Opponent', unit, m[0]];
+              csvRow = r => [nameOf(r.ent), r.g.team, r.g.s, r.g.post ? `post ${r.g.w}` : r.g.w, `${r.g.home ? 'vs' : '@'} ${r.g.opp}`, r.n, +(+r.v).toFixed(m[2])];
+              sortKey = 'v';
+            } else if (Q.by === 'pmark') {
+              rows2 = [...byEnt.entries()].map(([ent, l]) => {
+                let run2 = 0, best = 0, last = null, n = 0, reach = 0;
+                l.forEach(x => { n += x.n; if (hits(x.v)) { reach++; run2++; best = Math.max(best, run2); last = x.g; } else run2 = 0; });
+                return { ent, n, v: reach, games: l.length, pct: (100 * reach) / l.length, streak: best, last };
+              }).filter(r => r.v > 0);
+              cols2 = [who, { key: 'v', label: 'Games', num: true, cls: 'tr-main', value: r => r.v, html: r => `<b>${r.v}</b>` },
+                { key: 'games', label: 'Of', num: true, value: r => r.games, html: r => fmt(r.games) },
+                { key: 'pct', label: '%', num: true, value: r => r.pct, html: r => `${r.pct.toFixed(0)}%` },
+                { key: 'streak', label: 'Longest streak', num: true, value: r => r.streak, html: r => fmt(r.streak) },
+                { key: 'last', label: 'Most recent', value: r => (r.last ? ord(r.last) : 0), html: r => (r.last ? esc(gl(r.last)) : '') }];
+              csvHead = [isT ? 'Team' : 'Player', 'Games reaching the mark', 'Games', '%', 'Longest streak', 'Most recent'];
+              csvRow = r => [nameOf(r.ent), r.v, r.games, +r.pct.toFixed(1), r.streak, r.last ? gl(r.last) : ''];
+              sortKey = 'v';
+              note = `A game counts when its ${esc(m[0])} is ${fmt(mark, m[2])}${low ? ' or less' : ' or more'}. Games = games with a matching play; a streak is games in a row among those.`;
+            } else {
+              const N = Q.gn;
+              rows2 = [];
+              byEnt.forEach((l, ent) => {
+                let best = null;
+                for (let i = 0; i + N <= l.length; i++) {
+                  const t = blank(); for (let q = i; q < i + N; q++) mergeAcc(t, l[q].a);
+                  const v = m[1](t);
+                  if (isFinite(v) && (!best || better(v, best.v))) best = { v, n: den(t), from: l[i].g, to: l[i + N - 1].g };
+                }
+                if (best) rows2.push({ ent, ...best });
+              });
+              cols2 = [who, { key: 'v', label: `${m[0]}, best ${N} games`, num: true, cls: 'tr-main', value: r => r.v, html: r => `<b>${fmt(r.v, m[2])}</b>` },
+                { key: 'n', label: unit, num: true, value: r => r.n, html: r => fmt(r.n) },
+                { key: 'span', label: 'Games', value: r => ord(r.from), html: r => `${esc(gl(r.from))} to ${esc(gl(r.to))}` }];
+              csvHead = [isT ? 'Team' : 'Player', `${m[0]} (best ${N} games)`, unit, 'From', 'To'];
+              csvRow = r => [nameOf(r.ent), +(+r.v).toFixed(m[2]), r.n, gl(r.from), gl(r.to)];
+              sortKey = 'v';
+              note = `The best ${N} games in a row, among games with a matching play.`;
+            }
+            const CAP = 500;
+            paint = () => {
+              const min = Q.min ?? defMin();
+              let keep = rows2.filter(r => r.n >= min);
+              keep.sort((x, y) => (Q.by === 'pmark' ? y.v - x.v || y.pct - x.pct : low ? x.v - y.v : y.v - x.v));
+              const total = keep.length;
+              keep = keep.slice(0, CAP);
+              tb.innerHTML = '';
+              if (!keep.length) { csvRows = null; tb.innerHTML = `<p class="muted">Nothing reaches it${min > 1 ? ` with at least ${min} ${esc(unit.toLowerCase())}` : ''}.</p>`; return; }
+              NFLE.Table(tb, { columns: cols2, rows: keep, sort: { key: sortKey, dir: Q.by !== 'pmark' && low ? 'asc' : 'desc' }, cls: 'tiles', rowClass: () => 'teamrow', rowAttrs });
+              tb.insertAdjacentHTML('beforeend', `<p class="tr-hid muted">${note}${total > CAP ? ` Showing the top ${CAP} of ${fmt(total)}.` : ''} Minimum: ${min} ${esc(unit.toLowerCase())}${Q.by === 'pgame' ? ' in the game' : Q.by === 'pspan' ? ' over the stretch' : ''}.</p>`);
+              csvRows = [csvHead, ...keep.map(csvRow)];
+            };
+            maxN = rows2.reduce((mx, r) => Math.max(mx, r.n), 0);
+            const sl = qbox.querySelector('.tq-mrange'); if (sl) sl.max = Math.max(maxN, Q.min ?? 0, 10);
+            paint();
+            return;
+          }
           const rows = [...groups.entries()].map(([k, a]) => ({ key: k, a, n: den(a), v: m[1](a),
             label: Q.by === 'player' ? names[k] || k : lab ? lab(k) : String(k), team: Q.by === 'player' ? teamOf[k] : '' }));
           maxN = rows.reduce((mx, r) => Math.max(mx, r.n), 0);
@@ -1204,7 +1313,7 @@
       qbox.addEventListener('click', e => {
         const stp = e.target.closest('.tr-step');
         if (stp) {
-          setMin((Q.min ?? FAM[Q.fam].min) + +stp.dataset.step);
+          setMin((Q.min ?? defMin()) + +stp.dataset.step);
           return;
         }
         const x = e.target.closest('[data-x]');

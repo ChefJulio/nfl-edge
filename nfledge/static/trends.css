@@ -117,3 +117,8 @@ table.tr-grid .tr-gall { border-left: 2px solid var(--line); } table.tr-grid th.
   background: var(--panel2); border: 1px solid var(--line); border-radius: var(--r-md); padding: 8px 10px; font-variant-numeric: tabular-nums; }
 .tq-mnum { width: 4.6em; flex: none; padding: 6px 8px; text-align: center; }
 .tq-rnums input:focus, .tq-mnum:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* game-by-game options in the Break down sheet (mark, stretch length) */
+.tq-gp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 12px 0 4px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel2); }
+.tq-gp label { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.tq-gp input { width: 5.5em; font: inherit; font-size: 16px; font-weight: 700; color: var(--ink); color-scheme: dark; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 6px 8px; }
+.tq-gp .muted { font-size: var(--fs-sm); }
