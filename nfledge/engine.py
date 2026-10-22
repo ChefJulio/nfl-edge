@@ -154,6 +154,55 @@ class Engine:
         p["rush"] = p.rush + p.carries * (1 - 1 / factor)  # rush = carries + scrambles; scale the carry part
     return self.pm.stats_from_volume(p, wind)
 
+  # EXPERIMENT (experiments.rb_split; INSIGHTS (CC), pre-registered 2026-10-21): a sitting back's carries split between
+  # the backs left in the rotation and the next man up, as measured (tools/committee_split.py, 2016-20 only): with one
+  # rotation back (predicted share >= ROT_MIN) the rotation takes RB_ROT[1] of the vacated share, with two or more
+  # RB_ROT[2], the rest goes to the other remaining backs on the board (none: a call-up we don't project). Replaces the
+  # redistribution + normalization for those backs' carries (Woody Marks 2026 wk 7: 91% of Houston's RB carries; backs
+  # projected 80%+ after a sitter got 70%, n 43).
+  RB_SIT_MIN, ROT_MIN, RB_ROT = 0.30, 0.15, {1: 0.50, 2: 0.63}
+
+  def _rb_split(self, p: pd.DataFrame, wind) -> pd.DataFrame:
+    if "carry_share_hat" not in p or p.empty:
+      return p
+    p = p.copy()
+    sits = p.get("sits", pd.Series(False, index=p.index)).astype(bool)
+    rb = p.pos == "RB"
+    # each player's predicted share, normalized as _normalize_shares does but with the sitters counted (the team total
+    # corrected for over-subscription without refilling the absence: the split below hands that out)
+    a = float(self.cfg.get("experiments", {}).get("share_normalize_carries", self.cfg.get("experiments", {}).get("share_normalize", 0.0)))
+    raw = p.carry_share_hat.fillna(0.0).where(p.pos.isin(["QB", "RB", "WR", "TE"]), 0.0)
+    tot = (getattr(self, "share_totals", None) or {}).get("carries", 1.0)
+    fac = (1 + a * (tot / raw.groupby(p.team).transform("sum").replace(0, np.nan) - 1)).fillna(1.0).clip(0.6, 1.6)
+    own = raw * fac
+    changed = False
+    for team, g in p[rb].groupby("team"):
+      gone = g[sits[g.index] & (own[g.index] >= self.RB_SIT_MIN)]
+      if not len(gone):
+        continue
+      vac = float(own[gone.index].sum())
+      left = g[~sits[g.index]]
+      if not len(left):
+        continue
+      rot = left[own[left.index] >= self.ROT_MIN]
+      dep = left.drop(rot.index)
+      f_rot = 0.0 if not len(rot) else self.RB_ROT[min(len(rot), 2)]
+      if not len(dep):  # nobody behind the rotation on the board: the depth part goes to a call-up we don't project
+        pass
+      new = own[left.index].copy()
+      if len(rot):
+        w = own[rot.index] / own[rot.index].sum()
+        new[rot.index] += vac * f_rot * w
+      if len(dep):
+        wd = own[dep.index] + 0.02
+        new[dep.index] += vac * (1 - f_rot) * wd / wd.sum()
+      car = new * p.loc[left.index, "team_rush"]
+      old = p.loc[left.index, "carries"]
+      p.loc[left.index, "rush"] = p.loc[left.index, "rush"] + (car - old)
+      p.loc[left.index, "carries"] = car
+      changed = True
+    return self.pm.stats_from_volume(p, wind) if changed else p
+
   # -- projection ------------------------------------------------------------------------------------------------
   def _fit_quantiles(self, d: pd.DataFrame):
     """Empirical outcome ranges: per position, bin train-season projections and take quantiles of what actually
@@ -343,6 +392,13 @@ class Engine:
     # A player traded while a team was on bye can sit on two teams' latest rosters: keep his most recent one.
     c = (r[r.team.isin(playing)].sort_values("week", ascending=False)[["gsis_id", "team", "pos", "full_name"]]
          .drop_duplicates("gsis_id"))
+    # practice-squad players elevated for this week's game (live builds: nfledge/elevations.py; the weekly roster lists
+    # them as practice squad until after the game, so the board never had them: Jawhar Jordan, Houston, 2026)
+    el = getattr(self.data, "elevated", None)
+    if el is not None and len(el):
+      el = el.assign(team=team_name_fix(el.team), pos=el.pos.replace({"FB": "RB", "HB": "RB"}))
+      el = el[el.team.isin(playing) & el.pos.isin(self.positions) & ~el.gsis_id.isin(c.gsis_id)]
+      c = pd.concat([c, el[["gsis_id", "team", "pos", "full_name"]]], ignore_index=True)
     dc = depth_for_week(self.data, season, week)
     dc["team"] = team_name_fix(dc.team)
     # One depth slot per player on his current team (charts can list a player twice: two slots, or a stale team).
@@ -386,6 +442,8 @@ class Engine:
     if nf < 1.0:  # EXPERIMENT (experiments.newcomer_scale): first game for a new team, after who sits is settled
       p = self._newcomers(p, nf, wind, season, week)
     p = self._normalize_shares(p, wind)
+    if self.cfg.get("experiments", {}).get("rb_split"):
+      p = self._rb_split(p, wind)
     p["proj_neutral"] = self.pm.stats_from_volume(p, wind, neutral=True).proj
     p["matchup_pct"] = p.proj / p.proj_neutral.clip(lower=0.5) - 1
     p["matchup_pts"] = p.proj - p.proj_neutral

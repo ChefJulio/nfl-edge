@@ -69,6 +69,9 @@ def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict |
     bridge_key += "_m" + hashlib.sha1(json.dumps(sorted(espn_midweek.items())).encode()).hexdigest()[:8]
   if espn_gameday:  # (AU) game-day actives / inactives
     bridge_key += "_g" + hashlib.sha1(json.dumps(sorted((k, v[0]) for k, v in espn_gameday.items())).encode()).hexdigest()[:8]
+  el = getattr(data, "elevated", None)
+  if el is not None and len(el):  # practice-squad elevations for this week (nfledge/elevations.py): new ones re-project
+    bridge_key += "_e" + hashlib.sha1(json.dumps(sorted(el.gsis_id)).encode()).hexdigest()[:8]
   if espn_questionable:  # display only, but it's in the cached projections' status column
     bridge_key += "_q" + hashlib.sha1(json.dumps(sorted(espn_questionable)).encode()).hexdigest()[:8]
   path = cache_dir / f"model_{state_key(data, cfg, scoring, season, week)}{bridge_key}.pkl"
@@ -283,6 +286,11 @@ def main():
     quest = InjuryModel.build_espn_bridge(data, season, week, feed, questionable=True)  # display only
     if midweek:
       print(f"[run] ESPN midweek Out / Doubtful / IR rulings for {len(midweek)} players (report out, no final status yet)", flush=True)
+  if not args.week:  # practice-squad elevations announced for this week's games (live only; Engine.candidates)
+    from nfledge.elevations import this_week
+    data.elevated = this_week(data, season, week)
+    if len(data.elevated):
+      print(f"[run] elevated from the practice squad: {', '.join(f'{r.full_name} ({r.team})' for r in data.elevated.itertuples())}", flush=True)
   out_path = Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week)
   eng, proj = cached_model(data, cfg, scoring, season, week, espn_bridge=bridge,
                            espn_hist=out_path.parent / "data" / "espn_injuries", espn_midweek=midweek,

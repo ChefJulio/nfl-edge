@@ -120,6 +120,9 @@ VARIANTS = {
   "rb_scale_65": variant(injuries__redistribution_scale={"RB": 0.65, "default": 0.5}),
   "rb_scale_80": variant(injuries__redistribution_scale={"RB": 0.8, "default": 0.5}),
   "rb_scale_100": variant(injuries__redistribution_scale={"RB": 1.0, "default": 0.5}),
+  "rb_split": variant(experiments__rb_split=True),  # INSIGHTS (CC) 2026-10-21
+  "rb_wow": variant(experiments__rb_wow=True),  # INSIGHTS (CA) 2026-10-21
+  "rb_split_wow": variant(experiments__rb_split=True, experiments__rb_wow=True),  # INSIGHTS (CA)
   # INSIGHTS (Z): the TD blend k (weight on actual TDs = n / (n + k)); 1e9 = expected TDs only
   **{f"td_k_{k}": variant(player_model__td_blend_k=k) for k in (25, 50, 100, 300, 600)},
   "td_k_xtd": variant(player_model__td_blend_k=1e9),

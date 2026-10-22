@@ -3563,3 +3563,74 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   6.001 (5.934). Start / sit RB 0.691 -> 0.691, WR 0.642 -> 0.645. Weaker than this week's ECR everywhere; as a midweek
   stand-in (when this week's isn't out) it would add a little at QB / WR, nothing at RB. Fold into the early-week ECR
   test (sec. 9) as a fallback variant rather than test alone.
+- **PRE-REGISTERED 2026-10-21 (before building): (CC) a sitting back's carries split between the rotation and the next
+  man up** (owner: "nfl teams don't run a 2 headed RB attack, then skip splitting carries to the next man up").
+  Found: when the model gives the remaining lead back 80%+ of his team's RB carries (Woody Marks 91%: Montgomery 32% to
+  play, the rest of the room has no history) he got 70% (n 43, 2021-25); no universal ceiling (lead backs 80%+ in 32% of
+  team-games 2016-25; James Robinson 2020 95.6% of JAX RB carries over the season). Measured split (tools/
+  committee_split.py, nflverse weekly stats; one RB with 30%+ of the last 3 games' RB carries sits): one back left in
+  the rotation (15%+): rotation +47-54% of the vacated share, depth / next man up the rest (2016-25 n 254 committee,
+  142 bellcow); two left: rotation 63-68%; none: depth all; team RB carries unchanged (1.025x). Variant
+  experiments.rb_split: in a team-week where an RB with predicted carry share (carry_share_hat) >= 0.30 sits, every
+  remaining RB's carries = (his own predicted share + his part of the vacated share) x team rushes, the vacated share
+  split rotation (remaining RBs with predicted share >= 0.15, by share) 0.50 with one rotation back / 0.63 with two or
+  more, the rest to the other remaining RBs on the board (by share + 0.02 each); none on the board: unassigned (a
+  call-up we don't project). Replaces redistribution + normalization for those RBs' carries only (targets unchanged).
+  Constants from 2016-20 only. Walk-forward 2021-25 (`tools/experiments.py baseline,rb_split 2021-2025`). GATE: on RB
+  rows whose projection moves > 0.05 pts, MAE lower with a 95% season-week CI excluding 0; carries MAE on those rows
+  reported (must not be worse); guards: all rows MAE CI upper < +0.003, no position significantly worse, start / sit
+  not significantly worse. Remaining work if it passes: the "if X plays / sits" worlds (injuries.apply cond pairs) still
+  come from the old redistribution.
+- **PRE-REGISTERED 2026-10-21 (before building): (CA) with-or-without carry shares** (owner: Woody Marks "hasn't pushed
+  past 11 all season even in a game where monty was gone"). Historical comparables (scratch/marks_like.py, 2021-25):
+  committee backs (30%+ of carries) averaging <= 10, best game <= 13.5, partner out, team favored: n 12, projected 9.2,
+  scored 9.4 (median 8.9; 4 of 12 scored 15+); across 108 looser matches the model never projected one above 11.1 -
+  Marks' 15.3 is outside its history. Cause: his blended carry share (0.48 of team rushes) leans on weeks 5-6 with
+  Montgomery hurt (71-75% of HOU RB carries; weeks 1-4 with him ~37%), and the sitter's vacated share is then added on
+  top: the absence counted twice. Variant experiments.rb_wow (with rb_split on): for an RB whose teammate RB with
+  predicted carry share >= 0.30 missed some of his recent games, his base carry share = his share over the games
+  that teammate played (usage weights as carry_share), shrunk toward his blended share with k = 1 game of weight:
+  (W_with x share_with + 1 x blended) / (W_with + 1); used in both worlds (teammate plays: as is; sits: rb_split adds
+  the vacated share once). Teammate played all recent games: unchanged. Carries only, RBs only (targets later if it
+  passes). Variants: baseline, rb_split, rb_split + rb_wow. GATE (rb_split + rb_wow vs baseline, and vs rb_split
+  alone): affected RB rows (projection moves > 0.05) MAE lower with a 95% season-week CI excluding 0; carries MAE on
+  those rows not worse; guards as (CC). Walk-forward 2021-25; k fixed in advance (no grid).
+- **RESULT {#rb-split} (CC) a sitting back's carries split between the rotation and the next man up: FAIL (not
+  significant), not shipped.** tools/experiments.py baseline,rb_split 2021-2025 + tools/affected_eval.py. Affected RB
+  rows (n 198): MAE 5.481 -> 5.437, -0.045 [-0.188, +0.101]; carries MAE 4.76 -> 4.66 (-0.10 [-0.35, +0.16]), carries
+  bias +1.02 -> -0.01 (fixed); points bias +1.71 -> +1.27. The lead backs it trimmed (n 37) were already UNDER-projected
+  (+1.98 -> +2.39): the old concentration was wrong in carries but those leads out-scored their projections anyway.
+  Overall RB -0.002 [-0.010, +0.005], start / sit RB +0.010 [-0.004, +0.023]: no difference. Switch stays off; (CA)
+  next as pre-registered (its "with rb_split" arm is still run for the record).
+- **AMENDMENT to (CA), 2026-10-21, before any (CA) results:** (CC) failed, so the decision arm is rb_wow ALONE vs
+  baseline (same gate); rb_split + rb_wow is reported for the record. Implementation note: the qualifying teammate is
+  chosen by his blended carry share (the input, available where shares are built: player_model._rb_wow), not the
+  predicted share named above.
+- **DESCRIPTIVE 2026-10-21 (owner: "how much does each qb latch onto 1 wr ... rb dump offs and whether that follows the
+  rb or the qb"): target tendencies belong to the team, not the QB.** tools/qb_tendency.py, 340 QB-team-seasons (200+
+  targeted throws) 2016-25, year-to-year correlation same QB+team / QB moved teams (n 33) / same team new QB (n 137):
+  top target's share 0.29 / -0.16 / 0.27; top-2 0.26 / -0.09 / 0.28; concentration 0.25 / 0.01 / 0.36; TE share 0.46 /
+  -0.08 / 0.33; RB share 0.56 / 0.07 / 0.22. Aaron Rodgers: top-target share percentile 94-97 with prime Davante Adams
+  (2018, 2020-21), 12th in 2022 after Adams left, 15th in 2025 with DK Metcalf; career 25% vs league median 24%. The
+  receiver drives it; current target shares already carry it. Not pursued; a faster share update for a receiver who
+  just broke out is the open (testable) version.
+- **RESULT {#rb-wow} (CA) with-or-without carry shares: FAIL (not significant), not shipped.** tools/experiments.py
+  baseline,rb_wow,rb_split_wow 2021-2025 + tools/affected_eval.py. Decision arm rb_wow alone, affected RB rows (n 2,581):
+  MAE 5.146 -> 5.139, -0.007 [-0.020, +0.006]; carries MAE -0.019 [-0.047, +0.011]; backs it trimmed (n 1,120) MAE
+  5.219 -> 5.174, backs it raised (n 1,461) 5.090 -> 5.112. Overall RB -0.004 [-0.012, +0.004], start / sit RB +0.005
+  [-0.018, +0.032]. For the record, rb_split + rb_wow: affected RB rows (n 2,590) MAE -0.011 [-0.024, +0.001], carries
+  MAE -0.036 [-0.072, -0.001] (significant), RB overall -0.007 [-0.015, +0.001], start / sit RB +0.017 [-0.007, +0.044].
+  Both fixes point the same way and fix the carries; neither clears the points gate. Owner's design call pending.
+- **Shipped 2026-10-21: practice-squad elevations on the board (nfledge/elevations.py; owner: Jawhar Jordan, elevated
+  by Houston for week 6, "seems like a huge gap").** nflverse rosters show an elevated player as practice squad until
+  after the game, so call-ups were never projected. Sources researched: ESPN's transactions feed logs few elevations
+  (2 league-wide for week 6, 2026; not Jordan's); NFL.com's transactions pages list none and paginate only with the
+  site's script; api.nfl.com rosters are a current snapshot (elevated players stay DEV); Spotrac is paywalled.
+  ProFootballRumors' daily "Minor NFL Transactions" post lists every team's elevations (2026-10-17: 35, 12 at skill
+  positions, Jordan among them): the main source, ESPN a supplement. Parsed days cached (cache/pfr_transactions;
+  the site refused connections for hours on 2026-10-21); one failure stops further tries that run. Elevations dated
+  after a team's previous game and by this week's game day join Engine.candidates (live builds only; in the cache
+  key). Check: week 6's 12 elevations replayed into week 7's board add all 12. REMAINING: before an elevation is
+  announced (Tuesday-Saturday), the chance of one isn't modeled (history: nflverse weekly rosters show past
+  elevations as one-week ACT rows); the Moves page could switch to the same source (owner asked; recommended for
+  the current season, ESPN kept for history).

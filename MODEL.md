@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 4bf6da8e835ae171
+documented_code_hash: a969e91b44276935
 ---
 # How the model works
 
@@ -511,6 +511,8 @@ Durability is games missed injured per 1,000 snaps on the field since 2013 (offe
 - **Rejected** - For efficiency stats where players barely differ from one another (a running back's yards per carry, a tight end's touchdown rate), how much should a player's own history count (a cap of 2,000 pseudo-plays on the pull toward the average)? - Caps from 500 to 100,000 were within noise on 2021-23; the best (500, more weight on his own rate) helped in 2024 and hurt in 2025, so 2,000 stays (2026-10). <!-- tried:shrink-cap -->
 - **Rejected** - Should a receiver's yards per target (how explosive he is) raise his projected touchdowns, since explosive receivers tend to beat their touchdown projections? - It didn't change the average miss for receivers (2021-26); it did pick the better of two similar receivers slightly more often, which will get its own test on the full 2026 season (2026-10). <!-- tried:wr-td-explosive -->
 - **Rejected** - League scoring shifts year to year (about 3%; up to 5% off in our projections in 2024, the first dynamic-kickoff year). Should projections be scaled by how this season's scoring is running against them so far? - It fixed the level (2024: 5.5% low became 2.0%) but didn't make individual projections more accurate: a single game varies far more than the season's level, and it was worse on 2024-25 by the average miss (2026-10). <!-- tried:season-calibration -->
+- **Rejected** - When a running back sits, should his carries be split between the back left in the rotation and the next man up, as teams actually do (about half each in a two-back committee), instead of mostly going to the remaining lead? - It fixed the carry counts on average but didn't make the projections measurably more accurate (2021-25), and the lead backs it trimmed had already been scoring above their projections (2026-10). <!-- tried:rb-split -->
+- **Rejected** - Should a running back's usual workload be measured only from games his committee partner played, so a role he earned while the partner was hurt isn't counted again when the partner's carries are handed out? - It pointed the right way (and, with the rotation / next-man-up split, made carry counts measurably more accurate) but didn't make the points projections measurably more accurate (2021-25) (2026-10). <!-- tried:rb-wow -->
 
 ## Rule changes and scoring eras
 

@@ -682,6 +682,8 @@ class PlayerModel:
                            ("ay_share", "air_yd", "team_ay"), ("i10_share", "carries_i10", "team_rush_i10")):
       f[name] = wsum(num, "w_use") / wsum(den, "w_use").replace(0, np.nan)
       f[name + "_long"] = wsum(num, "w_eff") / wsum(den, "w_eff").replace(0, np.nan)
+    if self.exp.get("rb_wow"):
+      self._rb_wow(f, L)
     # Goal-line role (experiments.gl_struct): his share of the team's inside-10 carries relative to his overall carry
     # share, shrunk toward 1 (no special role) with GL_RATIO_K pseudo team goal-line carries, so a couple of
     # goal-line totes don't make a "vulture". Capped to keep a tiny overall share from exploding the ratio.
@@ -794,6 +796,44 @@ class PlayerModel:
     f["age_sq"] = f.age_c ** 2
     f.attrs["when"] = when
     return f
+
+  WOW_MIN, WOW_K = 0.30, 1.0
+
+  def _rb_wow(self, f: pd.DataFrame, L: pd.DataFrame):
+    """EXPERIMENT (experiments.rb_wow; INSIGHTS (CA), pre-registered 2026-10-21): with-or-without carry shares, in
+    place. An RB whose teammate RB (blended carry share >= WOW_MIN) missed some of his recent games gets his share over
+    the games that teammate played, shrunk toward his blended share with WOW_K games of weight (the most recent game
+    weighs 1): a role earned while the teammate was out is not his role when the teammate plays, and when the teammate
+    sits the vacated share is added once (Woody Marks 2026: 48% blended, built on weeks with David Montgomery hurt).
+    The teammate counts as out of a game only in seasons he played for that team."""
+    rb = L[(L.pos == "RB") & (L.w_use > 0)]
+    if rb.empty or "carry_share" not in f:
+      return
+    present = set(zip(rb.gsis_id, rb.season, rb.week, rb.team))
+    cur = rb.sort_values(["season", "week"]).groupby("gsis_id").team.last()
+    seasons_of = rb.groupby(["gsis_id", "team"]).season.agg(lambda x: set(x)).to_dict()
+    cs = f["carry_share"]
+    for team, ids in cur.groupby(cur):
+      ids = [g for g in ids.index if g in cs.index]
+      big = [g for g in ids if (cs.get(g) or 0) >= self.WOW_MIN]
+      if not big:
+        continue
+      for i in ids:
+        js = [j for j in big if j != i]
+        if not js:
+          continue
+        j = max(js, key=lambda g: cs[g])
+        li = rb[(rb.gsis_id == i) & (rb.team == team)]
+        rel = li.season.isin(seasons_of.get((j, team), set())).to_numpy()
+        with_j = np.array([(j, s_, w_, team) in present for s_, w_ in zip(li.season, li.week)])
+        if not (rel & ~with_j).any():
+          continue  # the teammate played every relevant game: nothing to separate
+        w = li.w_use.to_numpy(float) * with_j
+        W, den = w.sum(), (li.team_rush.to_numpy(float) * w).sum()
+        if W <= 0 or den <= 0:
+          continue
+        s_with = (li.carries.to_numpy(float) * w).sum() / den
+        f.at[i, "carry_share"] = (W * s_with + self.WOW_K * cs[i]) / (W + self.WOW_K)
 
   def _mu(self, opp, grp, tier, comp):
     m = self.prior.mu.get((opp, grp, tier)) or self.prior.mu_pos.get((opp, grp)) or {}
