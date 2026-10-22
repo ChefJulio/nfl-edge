@@ -891,6 +891,15 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     addEventListener('scroll', soon, { passive: true });
     // the keyboard just closed: nudge WebKit to re-measure the viewport (a same-position scroll), then re-check
     document.addEventListener('focusout', () => setTimeout(() => { scrollTo(scrollX, scrollY); fix(); }, 350));
+    // back from another app (owner 2026-10-22, screenshot: the bar mid-screen again after switching apps): the swipe up
+    // from the bottom edge that opens the app switcher starts as a touch here and ends outside, so no touchend came and
+    // "touching" stayed true, which blocked every later fix; and nothing re-checked on return. On return: forget the
+    // touch, nudge WebKit to re-measure, and re-check as the viewport settles (it does in steps after a resume).
+    const resumed = () => { touching = false; [60, 350, 900].forEach(t => setTimeout(() => { scrollTo(scrollX, scrollY); fix(); }, t)); };
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) resumed(); });
+    addEventListener('pageshow', resumed);
+    addEventListener('focus', resumed);
+    addEventListener('orientationchange', resumed);
     NFLE.fixBar = fix;
   }
   // (2) Pull down to refresh (owner 2026-10-20: "where the browser doesn't already handle it"): from the top of the
