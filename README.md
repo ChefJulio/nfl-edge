@@ -20,7 +20,9 @@ OverTheCap, ESPN / CBS and a fantasy app together.
   Standings, Playoff odds (10,000 simulated seasons), team Stats, the Draft (every pick, searchable).
 - **Players**: Rankings (this week and rest of season, re-scored to your league's settings), Stats, Roles (snap
   and opportunity shifts), Injuries (every listed player, sorted by relevance), Moves (transactions incl.
-  practice-squad elevations), Trends (filterable play-level stats since 1999).
+  practice-squad elevations), Trends (a play-level query builder since 1999: situation, game, opponent strength,
+  charting, teammate on/off, college / draft / contract / age filters with include-exclude and sliders; routes run
+  and YPRR from 2016; game logs, streaks and best stretches; CSV export).
 - **Games**: matchups with model vs Vegas lines, and a **gamecast** for every game: field view with play gains,
   parsed play text (penalties, who did what), fantasy points by play, every play sortable by win-probability
   swing and scrubbable, team and player box scores, highlight links; live games refresh every 30 seconds.
