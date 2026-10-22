@@ -191,6 +191,10 @@ hurt_back = true
 # (CK) week availability model: no per-stage calibration (the maps were fit on a different model's predictions).
 # Gate passed 2026-10-22 (tools/week_calib_eval.py): Brier -0.0012 [-0.0018, -0.0006] 2021-25, -0.0009 on 2026.
 week_calib = "none"
+# (AS) OWNER'S DESIGN CALL 2026-10-22 ("we need to use dates"): the week model reads each player's line over his
+# team's report days ("X" = a day he wasn't listed), stage from the calendar. Gate not met (-0.0006 [-0.0015,
+# +0.0003], 4/5 seasons, 2026 -0.0019); season-end confirmation (CL) can switch it off.
+stage_from = "calendar"
 share_normalize_tgt = 0.3
 # A RB / WR / TE in his first game for a team (no snap for it before) gets half his projected targets and carries; the
 # rest goes to same-position teammates who play. Mid-season movers' first games came in at ~40% of projection.

@@ -3749,6 +3749,11 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   1,249); seasons 4 of 5 better (2025 +0.0007). Helps where it aims, too rare to clear the gate. No-practice spots
   unchanged (Q no practice all week 0.296 -> 0.300, played 0.243). tuesday.STAGE_FROM stays "own"; the "calendar"
   construction is kept for a season-end recheck with 2026 added.
+  SHIPPED AS OWNER'S DESIGN CALL 2026-10-22 (owner: "we need to use dates"): the calendar construction removes the
+  within-week leak (Thursday's practice trained as Wednesday's) and reads late additions correctly; not worse in any
+  measured slice beyond 2025's +0.0007. config experiments.stage_from = "calendar"; live availability builds the same
+  line from the team's filed report days. **PRE-REGISTERED (CL) season-end confirmation:** 2026 weeks 7-18, stages
+  1-3 rows on the report, live archive vs an "own" rebuild: Brier not worse (CI upper < +0.0005), else switch off.
 - **DESCRIPTIVE 2026-10-21 (owner's friend: "Pat Surtain's OPRK for WR1 is #1 hardest ... shadow CB can nuke WRs"):
   WR1 suppression is not a lasting defensive trait.** tools/wr1_suppression.py, play-by-play 2016-25, 4,212 team-games:
   WR1 / WR2 = an offense's top two WRs by targets before the game; result = half-PPR points minus his own average over

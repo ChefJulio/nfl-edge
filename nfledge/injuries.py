@@ -903,7 +903,7 @@ class InjuryModel:
     # display only (owner 2026-10-18: Tyler Warren showed one "LP" labelled Wednesday): each team's report days from the
     # calendar (practice_calendar: fixed by game day, plus any extra day it filed), so a player first listed Friday reads
     # "FFL" (off the report before then = practiced fully); days not reached yet are left off. The model reads x.days.
-    team_dates = {}
+    team_dates, filed = {}, {}
     if use_days and "dates" in days:
       from .practice_calendar import team_report_days
       filed = {t: set(v) for t, v in self.filed_dates(season, week).items()}
@@ -930,6 +930,15 @@ class InjuryModel:
           # (I2) the one model: the Tuesday picture + this week's practice so far (stage 1-2) or the final report (3)
           dd = str(x.days.iloc[0] or "").replace("?", "")
           st = 3 if row.team in final else max(1, min(2, len(dd)))
+          from . import tuesday as T
+          tdays = sorted(filed.get(row.team, set())) if T.STAGE_FROM == "calendar" else []
+          ds = [d for d in str(x.dates.iloc[0] or "").split(",") if d] if "dates" in x else []
+          if tdays and len(ds) == len(dd):
+            # (AS, owner's design call 2026-10-22: "we need to use dates") his line over his team's report days so far,
+            # "X" on a day he wasn't listed; stage = how many of the team's report days are in (tuesday.calendar_view)
+            on = dict(zip(ds, dd))
+            dd = "".join(on.get(d, "X") for d in tdays)
+            st = 3 if row.team in final else max(1, min(2, len(tdays)))
           v = self.week_prob([(row.gsis_id, season, week, row.team, row.pos, dd, x.game_status.iloc[0], st)])[0]
           if v == v:
             p.at[i, "avail"] = float(v)
