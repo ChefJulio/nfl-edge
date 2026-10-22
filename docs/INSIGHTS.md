@@ -4030,3 +4030,22 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   kind of row and was not flagged). Honest read: 6-8 games decide nothing either way. Not adopted. FORWARD LOG: keep
   adding 2026 recaps weekly (rule fixed now: a route share >= 50% on the named receiver counts as a shadow, same as
   PFF's definition; all such rows stay) and re-run at season end, plus the pre-game projection test.
+
+- **Trends overhaul + audit (owner, 2026-10-22).** Builder rebuilt as labeled rows + bottom-sheet pickers ("be more
+  deliberate and elegant"); then, from a Stathead / Fantasy Points comparison, added: situation type, expected play
+  call, play result, yards gained, schedule (bye, rest, prime time, international), game result, opponent (team /
+  division / conference), opponent record / playoff team / defense rank, thrown by, with / without a teammate (game
+  level: on the roster that week but no snap) and on / off the field (play level, 2016-2025 participation), college,
+  draft round / pick, contract AAV and % of cap (OverTheCap), age, career year, weather / kickoff sliders; Is / Is not
+  and any-of on every filter; sliders with linked number boxes; Routes measure (YPRR, TPRR; a route = a dropback on the
+  field as WR / TE / RB, so blocking snaps count: TE / RB rates run low); game logs, marks with streaks, best N-game
+  stretches; CSV export with player IDs. Not possible with free data: plays before 1999, current-season on-field data,
+  true route charting.
+  - **Audit** (`tools/trends_audit.py`, `docs/trends_audit.md`): page CSV vs nflverse season totals, 1999-2025. Found
+    and fixed five counting bugs: TDs credited on defensive returns / after laterals; yards after a lateral given to
+    the original carrier; 1999-2000 plays with a post-play penalty filed under a blank play type (~400 a season)
+    dropped; a scramble-then-throw counted as a run; plays recorded as attempts but labeled otherwise dropped. After:
+    83 of ~64,000 player-season stats differ; traced ones are nflverse season-table corrections (its play-by-play
+    matches Trends). nflverse's season table has impossible pre-2009 targets (Welker 2008: 0 targets, 111 catches);
+    skipped, counted. Not audited: filters / charting / routes (spot-checked only), playoffs, special teams.
+

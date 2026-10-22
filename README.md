@@ -39,6 +39,10 @@ OverTheCap, ESPN / CBS and a fantasy app together.
 - **Projections**: start / sit picks about on par with the FantasyPros expert consensus and well ahead of season
   averages (fantasy MAE ~5.2 half-PPR points on fantasy-relevant players vs 5.6 for "season average so far").
   The value is mostly the player model: without Vegas lines and team ratings accuracy drops under 1%.
+- **Trends** (Players > Trends): its counting matches nflverse's official season stats, 1999-2025: of ~64,000
+  player-season rushing / receiving / passing totals, 83 differ, and the ones traced are corrections that only
+  nflverse's season table has (its own play-by-play agrees with Trends). Report and tool: `docs/trends_audit.md`,
+  `tools/trends_audit.py`.
 - **Published record** (Model tab; `data/records/` on the site and the `archive` branch): every finished week, what
   the site showed before each game (chance to play at five checkpoints, projections; from the per-build snapshots,
   never recomputed) next to what happened, with the week's scorecard. Anyone can score us (format and rules on the

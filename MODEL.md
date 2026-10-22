@@ -76,7 +76,7 @@ Every page and tab on NFL Edge: what it shows, where its numbers come from, and 
 
 **Moves**: every signing, release, practice-squad move, injury-list move and trade from ESPN's transactions log since 2002, filterable by team, type, position and date.
 
-**Trends**: a situation explorer over every play since 1999. Build a sentence from tappable pieces (a player, team or the whole league; a stat such as yards per carry, EPA, success rate, completion over expected or pressure rate; filters such as down, distance, field position, score, quarter, personnel or coverage; grouping by player, team, season and more) and get a leaderboard against the league baseline, or a trend over seasons. Charting-based filters only exist for the seasons that have the charting, and the page says which seasons it left out. Every query has a shareable link.
+**Trends**: a situation explorer over every play since 1999. Pick a measure (rushing, passing, receiving, routes run, team offense, kicking and returns), who (players, teams, defenses, coaches, one player or a team's roster), any filters (situation, game and schedule, opponent strength, charting such as personnel or coverage, teammate on or off the field, college, draft, contract, age; each can be excluded or take several values; numbers take a range) and a breakdown (by player, team, season and dozens more, a 2-D grid, or game by game: game logs, games reaching a mark with streaks, best stretches), and get a leaderboard against the league baseline. Its totals match nflverse's official season stats (audit: `docs/trends_audit.md`). Charting-based filters only exist for the seasons that have the charting, and the page says which seasons it left out. Every query has a shareable link.
 
 ### Teams
 

@@ -1,8 +1,12 @@
-// Players > Trends: a play-level query builder over every run and pass play since 1999 (data/plays/<season>.json +
-// <season>_x.json charting, tools/trends_build.py). The query reads as a sentence of tappable chips ("Rushing YPC for
-// BAL players, 4th quarter, 2022-2024, by player"); the answer is a leaderboard against the league in the same
-// situation, with a minimum sample (smaller samples hidden), a trend line when grouped by season, and a
-// shareable link (?t=..., read once then dropped). Everything is counted in the browser from the season files.
+// Players > Trends: a play-level query builder over every run and pass play since 1999 (tools/trends_build.py:
+// data/plays/<season>.json plays, _x charting, _g game context + who played, _on players on the field 2016-2025,
+// bio.json college / draft / contracts / age). The query Q (fam, met, who, f filters + fn excluded, by / by2, seasons,
+// min, gt / gn for game-by-game) is edited through labeled rows (Measure, Who, Only when, Seasons, Break down,
+// Minimum), each a bottom-sheet picker; a plain-English summary sits on top. Filters: options (several = any of),
+// Is / Is not, sliders (R:lo~hi) with linked boxes, players (gsis|Name). The answer: a leaderboard against the league
+// in the same situation, a 2-D grid, or game logs / marks with streaks / best stretches; CSV export; share link (?t=,
+// read once then dropped). Everything is counted in the browser from the season files. Audited against nflverse's
+// season totals by tools/trends_audit.py (docs/trends_audit.md).
 // Coverage: every filter / metric / grouping names the columns it needs; index.json lists, per season, the columns
 // charted on >= 90% of the plays they apply to, and a query only counts seasons that have all it needs (and says
 // which it left out), so a charting gap never reads as a zero.
