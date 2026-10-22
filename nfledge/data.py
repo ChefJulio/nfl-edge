@@ -26,6 +26,7 @@ import pyarrow.parquet as pq
 from .config import ROOT
 
 LIVE_TTL_HOURS = 6
+PRACTICE_TTL_HOURS = 0.25  # NFL.com practice reports: teams post through the late afternoon
 LAG_RETRY_HOURS = 1  # how often to retry while a final game is still missing from nflverse's published data
 POSITIONS = ("QB", "RB", "WR", "TE")
 
@@ -293,8 +294,11 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
     depth[s] = cache.get("depth", s, lambda: nfl.load_depth_charts([s]), stale=live_stale)
   practice = avail_hist = None
   if cfg["data"].get("nfl_api_practice", False):
+    # this season's reports refetch after PRACTICE_TTL_HOURS, not the 6-hour live TTL (2026-10-21, Quinshon Judkins:
+    # Cleveland's Wednesday report was on NFL.com for hours while every build reused a copy fetched before most teams
+    # had filed; the fetch is a few seconds, ~5 pages)
     pr = [cache.get("practice", s, lambda: fetch_practice_days(s), stale=(s == current) and
-                    cache.age_hours("practice", s) > LIVE_TTL_HOURS) for s in seasons]
+                    cache.age_hours("practice", s) > PRACTICE_TTL_HOURS) for s in seasons]
     pr = [p for p in pr if p is not None and len(p)]
     practice = pd.concat(pr, ignore_index=True) if pr else None
     # Longer labelled history (practice week -> did he play) for the availability model.
