@@ -479,6 +479,14 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
     if t:
       filed.setdefault(int(r.week), {}).setdefault(t, set()).update(ds)
   seen = max((d for f in filed.values() for v in f.values() for d in v), default="")  # the latest day reached
+  # each team's own latest filed day (owner 2026-10-22, Rashee Rice read "Full, not on the report" on a Thursday KC had
+  # not filed yet: another team's Thursday report had made the day "reached" for everyone). A day counts for a team once
+  # it has filed that day or a later one; until then an unlisted player's day is unknown, not "full".
+  team_seen = {}
+  for f in filed.values():
+    for t_, v in f.items():
+      if v:
+        team_seen[t_] = max(team_seen.get(t_, ""), max(v))
   cal = {w: team_report_days(allsched, cur, w, filed.get(w)) for w in sorted(filed)}
   last_w = max(cal) if cal else 0
   out = {}
@@ -487,7 +495,7 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
     for w, tdays in cal.items():
       t, st = at(team_wk, gid, w), at(st_wk, gid, w)
       for d in tdays.get(t, []) if t else []:
-        if d > seen:
+        if d > seen or d > team_seen.get(t, ""):
           continue
         if (gid, d) in listed:
           c, gs = listed[(gid, d)]

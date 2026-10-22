@@ -1237,7 +1237,8 @@
       if (e[0] === 'g') lastG = e;
       ev.push(e);
     });
-    return ev;
+    // in date order (owner 2026-10-22: the bye sat among the next week's practices, which come before the next game)
+    return ev.sort((a, b) => (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0));
   };
   const ptDay = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
   // one practice / game / bye row (season: the events' season, for the in-game injury marks)
