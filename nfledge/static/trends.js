@@ -116,6 +116,39 @@
   // the measured player's bio row, and the contract running in a season (the latest signed that still covers it)
   const bioOf = (P, j, D) => { if (!BIO) return null; const a = FAM[BIO.fam].actor(P, j); return a >= 0 ? BIO.p.get(D.players[a][0]) || null : null; };
   const deal = (b, season) => { if (!b) return null; let d = null; for (const c of b[4]) if (c[0] <= season && season < c[0] + c[1]) d = c; return d; };
+  // opponent strength (owner 2026-10-22): per season, each defense's rank by EPA allowed per play (regular season; run =
+  // designed runs, pass = dropbacks incl. scrambles), who reached the playoffs, and (with the game file) each team's
+  // regular-season win % (to date in the current season). RUNFAM: the query's family, for which defense rank applies.
+  let RUNFAM = 'rush';
+  const seasonCtx = D => {
+    if (D.ctx) return D.ctx;
+    const P = D.cols, G = D.games, nT = D.teams.length, z = () => new Float64Array(nT);
+    const eR = z(), nR = z(), eP = z(), nP = z(), post = new Uint8Array(nT), pair = [];
+    for (let j = 0; j < D.n; j++) {
+      const g = P.g[j], d = P.d[j];
+      if (!pair[g]) pair[g] = [P.o[j], d];
+      if (G[g][2]) { post[P.o[j]] = 1; post[d] = 1; continue; }
+      if (P.ty[j] === 0) { eR[d] += P.e[j]; nR[d]++; } else { eP[d] += P.e[j]; nP[d]++; }
+    }
+    const rank = (e, n) => { const r = new Int16Array(nT).fill(-1); [...Array(nT).keys()].filter(t => n[t] > 0).sort((a, b) => e[a] / n[a] - e[b] / n[b]).forEach((t, i) => { r[t] = i + 1; }); return r; };
+    return (D.ctx = { run: rank(eR, nR), pass: rank(eP, nP), all: rank(eR.map((x, i) => x + eP[i]), nR.map((x, i) => x + nP[i])), post, pair });
+  };
+  const winPct = D => {
+    if (D.wpct) return D.wpct;
+    if (!D.gx) return null;
+    const c = seasonCtx(D), nT = D.teams.length, w = new Float64Array(nT), g = new Float64Array(nT);
+    D.games.forEach((G0, gi) => {
+      const x = D.gx.x[gi], pr = c.pair[gi];
+      if (G0[2] || x[0] < 0 || !pr) return;
+      const h = G0[3], a = pr[0] === h ? pr[1] : pr[0], r = x[0] > x[1] ? 1 : x[0] < x[1] ? 0 : 0.5;
+      w[h] += r; w[a] += 1 - r; g[h]++; g[a]++;
+    });
+    return (D.wpct = Array.from(w, (v, i) => (g[i] ? (100 * v) / g[i] : null)));
+  };
+  const defRank = (P, j, D) => { const c = seasonCtx(D), side = RUNFAM === 'rush' ? c.run : RUNFAM === 'pass' || RUNFAM === 'rec' ? c.pass : c.all, r = side[P.d[j]]; return r > 0 ? r : null; };
+  // career (bio birth date YYYYMMDD, rookie season): age on Sept. 1 of the season, and his season count from the rookie year
+  const ageOf = (b, s) => (!b || !(b[5] > 0) ? null : s - Math.floor(b[5] / 10000) - (b[5] % 10000 > 901 ? 1 : 0));
+  const yearOf = (b, s) => (!b || !(b[6] > 0) || s < b[6] ? null : s - b[6] + 1);
   const home = (P, j, G) => P.o[j] === G[P.g[j]][3];
   const gx = (P, j, D, k) => (D.gx ? D.gx.x[P.g[j]][k] : -1);
   const margin = (P, j, G, D) => { if (!D.gx) return null; const x = D.gx.x[P.g[j]]; if (x[0] < 0) return null; return home(P, j, G) ? x[0] - x[1] : x[1] - x[0]; };
@@ -261,7 +294,8 @@
     player: ['player', null, [], 'v'], team: ['team', (P, j, G, D) => D.teams[P.o[j]], [], 'v'], opp: ['opponent', (P, j, G, D) => D.teams[P.d[j]], [], 'v'],
     coach: ['head coach', offCoach, [], 'v'],
     college: ['college', (P, j, G, D) => { const a = FAM[BIO.fam].actor(P, j), c = a >= 0 ? BIO.p.get(D.players[a][0]) : null; return c && c[0] >= 0 ? BIO.schools[c[0]] : null; }, [], 'v'],
-    rnd: ['draft round', (P, j, G, D) => { const b = bioOf(P, j, D); return b ? b[2] : null; }, [], 'k'], season: ['season', (P, j, G, D) => D.season, [], 'kd'],
+    rnd: ['draft round', (P, j, G, D) => { const b = bioOf(P, j, D); return b ? b[2] : null; }, [], 'k'],
+    age: ['age', (P, j, G, D) => ageOf(bioOf(P, j, D), D.season), [], 'k'], cyr: ['career year', (P, j, G, D) => yearOf(bioOf(P, j, D), D.season), [], 'k'], season: ['season', (P, j, G, D) => D.season, [], 'kd'],
     // playoff weeks on the 2021+ numbering (wild card = 19), so each round groups and labels the same in every season:
     // before 2021 the regular season had 17 weeks and the wild card was week 18
     week: ['week', (P, j, G, D) => { const g = G[P.g[j]]; return g[2] ? 100 + g[1] + (+D.season < 2021 ? 1 : 0) : g[1]; }, [], 'kd'],  // newest first, like season (owner 2026-10-18)
@@ -281,7 +315,7 @@
   };
   const BYLABEL = {
     week: k => k > 100 ? ['', 'Wild Card', 'Divisional', 'Conference', 'Super Bowl'][Math.min(4, k - 118)] || `Playoffs wk ${k - 100}` : `Week ${k}`,
-    rnd: k => (k >= 8 ? 'Undrafted' : k >= 7 ? 'Round 7+' : `Round ${k}`),
+    rnd: k => (k >= 8 ? 'Undrafted' : k >= 7 ? 'Round 7+' : `Round ${k}`), age: k => `Age ${k}`, cyr: k => (k === 1 ? 'Rookie year' : `Year ${k}`),
     qtr: k => k === 5 ? 'OT' : `Q${k}`, down: k => `${k}${['', 'st', 'nd', 'rd', 'th'][k]} down`, dist: k => k >= 15 ? '15+ to go' : `${k} to go`,
     zone: k => k < 5 ? `Own ${k * 10}-${k * 10 + 9}` : `Opp ${100 - k * 10}-${91 - k * 10}`.replace('Opp 0-', 'Opp 1-'),
     score: k => ['Down 17+', 'Down 9-16', 'Down 1-8', 'Tied', 'Up 1-8', 'Up 9-16', 'Up 17+'][k + 3], box: k => `${k} in the box`,
@@ -328,6 +362,22 @@
   const outdoor = (P, j, G, c) => { const g = gm(P, j, G); return g[4] || g[c] <= -999 ? null : g[c]; };
   const RNDL = x => (x >= 8 ? 'undrafted' : x >= 7 ? '7th+' : ordn(x));
   Object.assign(FILTERS, {
+    owp: { label: "Opponent's record", group: 'Game', g: true, opts: [], range: { get: (P, j, G, V, D) => { const w = winPct(D); return w ? w[P.d[j]] : null; },
+      min: 0, max: 100, unit: "opponent's regular-season win % (to date this season)", tick: x => `${x}%`,
+      presets: [['winning teams', 51, 100], ['.600 or better', 60, 100], ['losing teams', 0, 49]],
+      say: (lo, hi) => (hi >= 100 ? `vs teams winning ${lo}%+` : lo <= 0 ? `vs teams winning ${hi}% or less` : `vs teams winning ${lo}-${hi}%`) } },
+    opo: { label: 'Opponent made the playoffs', group: 'Game', hint: 'that season (none yet for the current one)',
+      opts: [['y', 'vs playoff teams', (P, j, G, V, D) => seasonCtx(D).post[P.d[j]] === 1], ['n', 'vs non-playoff teams', (P, j, G, V, D) => seasonCtx(D).post[P.d[j]] === 0]] },
+    odr: { label: 'Opponent defense rank', group: 'Game', opts: [], hint: 'by EPA allowed that season: run D for rushing, pass D for passing',
+      range: { get: (P, j, G, V, D) => defRank(P, j, D), min: 1, max: 32, unit: '1 = best defense that season', tick: ordn,
+        presets: [['top 5', 1, 5], ['top 10', 1, 10], ['bottom 10', 23, 32]],
+        say: (lo, hi) => (lo <= 1 ? `vs top-${hi} defenses` : hi >= 32 ? `vs defenses ranked ${ordn(lo)} or worse` : `vs defenses ranked ${ordn(lo)}-${ordn(hi)}`) } },
+    age: { label: 'Age', group: 'Player', bio: true, only: ['rush', 'pass', 'rec'], opts: [], range: { get: (P, j, G, V, D) => ageOf(bioOf(P, j, D), D.season),
+      min: 20, max: 40, openLo: true, openHi: true, unit: 'age on Sept. 1 of the season', presets: [['25 or younger', 20, 25], ['26-29', 26, 29], ['30+', 30, 40]],
+      say: (lo, hi) => `age ${span(lo, hi)}` } },
+    cyr: { label: 'Career year', group: 'Player', bio: true, only: ['rush', 'pass', 'rec'], opts: [], range: { get: (P, j, G, V, D) => yearOf(bioOf(P, j, D), D.season),
+      min: 1, max: 15, openHi: true, unit: 'season number, rookie year = 1', presets: [['rookies', 1, 1], ['2nd year', 2, 2], ['3rd-5th year', 3, 5], ['10th year+', 10, 15]],
+      say: (lo, hi) => (lo === hi ? (lo === 1 ? 'rookies' : `${ordn(lo)}-year players`) : `career years ${span(lo, hi)}`) } },
     // owner 2026-10-22 ("exact temperature and kickoff time"): outdoor games only for weather (domes have none)
     temp: { label: 'Temperature', group: 'Game', opts: [], range: { get: (P, j, G) => outdoor(P, j, G, 6), min: 0, max: 100, openLo: true, openHi: true,
       unit: 'degrees F at kickoff (outdoor games)', tick: x => `${x} F`, presets: [['freezing (32 or below)', 0, 32], ['cold (40 or below)', 0, 40], ['hot (80+)', 80, 100]],
@@ -368,7 +418,7 @@
     const F = FILTERS[k], only = !F.only || F.only.includes(fam);
     return FAM[fam].st ? (ST_FILTERS.has(k) || (F.stOnly && only)) : !F.stOnly && only;
   };
-  const byAllowed = (k, fam) => k === 'college' || k === 'rnd' ? ['rush', 'pass', 'rec'].includes(fam) : FAM[fam].st ? ST_BY.has(k) : k !== 'kdist';
+  const byAllowed = (k, fam) => ['college', 'rnd', 'age', 'cyr'].includes(k) ? ['rush', 'pass', 'rec'].includes(fam) : FAM[fam].st ? ST_BY.has(k) : k !== 'kdist';
   // Two-way grids (owner 2026-10-14): a second grouping makes the answer a shaded rows x columns grid. Groupings with
   // dozens of values (players, teams, coaches) work as rows only; columns must fit a phone (capped, scrolls past that).
   const GRID_ROW_ONLY = new Set(['player', 'team', 'opp', 'coach', 'college']);
@@ -410,7 +460,7 @@
       // easier to use and understand"): one labeled row per part of the question (Measure, Who, Only when, Seasons, Break
       // down, Minimum), each opening a sheet of grouped, searchable choices, and the question in plain English on top.
       // The query state Q, the links and run() are unchanged.
-      const BY_GROUPS = [['People', ['player', 'team', 'opp', 'coach', 'college', 'rnd']], ['Time', ['season', 'week', 'qtr']],
+      const BY_GROUPS = [['People', ['player', 'team', 'opp', 'coach', 'college', 'rnd', 'age', 'cyr']], ['Time', ['season', 'week', 'qtr']],
         ['Situation', ['down', 'dist', 'zone', 'score']], ['Offense', ['align', 'pers', 'pa', 'mo']],
         ['Defense', ['box', 'rushers', 'dbs', 'mz', 'cov']], ['Passing', ['depth', 'loc', 'route', 'read', 'press']],
         ['Running', ['dir', 'gap']], ['Kicking', ['kdist']], ['Game', ['roof', 'surf']]];
@@ -938,10 +988,11 @@
         if (!seasons.length) { sec.querySelector('.tr-base').textContent = ''; sec.querySelector('.tr-trend').innerHTML = ''; sec.querySelector('.tr-tbl').innerHTML = ''; paint = null; return; }
         sec.querySelector('.tr-base').textContent = 'Counting plays…';
         const wantG = Object.keys(Q.f).some(k => FILTERS[k].g);
-        const wantC = Object.keys(Q.f).some(k => FILTERS[k].bio) || ['college', 'rnd'].some(k => Q.by === k || Q.by2 === k);
+        const wantC = Object.keys(Q.f).some(k => FILTERS[k].bio) || ['college', 'rnd', 'age', 'cyr'].some(k => Q.by === k || Q.by2 === k);
         Promise.all([...seasons.map(s => loadSeason(s, wantX, FAM[Q.fam].st, wantG)), wantC ? loadBio() : null]).then(list => {
           list = list.slice(0, seasons.length);
           if (BIO) BIO.fam = Q.fam;
+          RUNFAM = Q.fam;
           if (me !== busy) return;
           if (wantG) {  // a season without its game file (not built yet) is left out, and said so
             const miss = list.filter(m => !m.D.gx).map(m => m.D.season);

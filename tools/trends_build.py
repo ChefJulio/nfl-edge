@@ -338,7 +338,8 @@ def school(s) -> str | None:
 def bio(players: pd.DataFrame, contracts: pd.DataFrame | None, out: Path) -> None:
   """bio.json, player facts for the Player filters / breakdowns, for every player in the season files under out:
   {schools: [...], confs: [...], p: {gsis: [school idx (-1), conf idx (-1), draft round (1-7, 7 = 7th or later, 8 undrafted),
-  overall pick (-1), contracts [[year signed, years, APY in $10k, APY as % of the cap x 10], ...]]}}.
+  overall pick (-1), contracts [[year signed, years, APY in $10k, APY as % of the cap x 10], ...], birth date YYYYMMDD (-1),
+  rookie season (-1)]}}.
   College / draft from nflverse's players table; contracts from its OverTheCap table (the page uses, for a play, the
   latest contract signed by that season and still running)."""
   want = set()
@@ -354,13 +355,15 @@ def bio(players: pd.DataFrame, contracts: pd.DataFrame | None, out: Path) -> Non
         deals.setdefault(g, []).append([int(ys), int(yrs) if pd.notna(yrs) and yrs > 0 else 1, int(round(float(apy) * 100)),
                                         int(round(float(cap) * 1000)) if pd.notna(cap) else -1])
   rows = []
-  for g, col, cf, rnd, pick in zip(pl.gsis_id, pl.college_name, pl.college_conference, pl.draft_round, pl.draft_pick):
-    rows.append((g, school(col), cf if isinstance(cf, str) and cf.strip() else None,
+  born = lambda b: int(str(b)[:10].replace("-", "")) if isinstance(b, str) and len(b) >= 10 else -1  # noqa: E731
+  for g, col, cf, rnd, pick, bd, rk in zip(pl.gsis_id, pl.college_name, pl.college_conference, pl.draft_round, pl.draft_pick,
+                                         pl.birth_date, pl.rookie_season):
+    rows.append((g, school(col), cf if isinstance(cf, str) and cf.strip() else None, born(bd), int(rk) if pd.notna(rk) else -1,
                  min(int(rnd), 7) if pd.notna(rnd) else 8, int(pick) if pd.notna(pick) else -1))  # 7 = 7th or later (pre-1994 drafts ran to 12)
   schools, confs = sorted({r[1] for r in rows if r[1]}), sorted({r[2] for r in rows if r[2]})
   si, ci = {x: i for i, x in enumerate(schools)}, {x: i for i, x in enumerate(confs)}
   doc = {"v": 1, "schools": schools, "confs": confs,
-         "p": {g: [si.get(sc, -1), ci.get(cf, -1), rnd, pick, sorted(deals.get(g, []))] for g, sc, cf, rnd, pick in rows}}
+         "p": {g: [si.get(sc, -1), ci.get(cf, -1), rnd, pick, sorted(deals.get(g, [])), bd, rk] for g, sc, cf, bd, rk, rnd, pick in rows}}
   (out / "bio.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
   (out / "colleges.json").unlink(missing_ok=True)
   print(f"[plays] bio: {len(rows)} players, {len(schools)} schools, {sum(1 for g in deals)} with contracts", flush=True)
@@ -401,7 +404,7 @@ def main():
   out.mkdir(parents=True, exist_ok=True)
   kept = ROOT / cfg["data"]["cache_dir"] / "plays_site" / f"v{V}"
   kept.mkdir(parents=True, exist_ok=True)
-  players = nfl.load_players().select(["gsis_id", "display_name", "pfr_id", "college_name", "college_conference", "draft_round", "draft_pick"]).to_pandas()
+  players = nfl.load_players().select(["gsis_id", "display_name", "pfr_id", "college_name", "college_conference", "draft_round", "draft_pick", "birth_date", "rookie_season"]).to_pandas()
   full = {g: n for g, n in zip(players.gsis_id, players.display_name) if isinstance(g, str) and isinstance(n, str)}
   pfr = {p: g for p, g in zip(players.pfr_id, players.gsis_id) if isinstance(p, str) and isinstance(g, str)}
   ixf = out / "index.json"
