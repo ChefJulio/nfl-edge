@@ -175,33 +175,61 @@ class Engine:
     tot = (getattr(self, "share_totals", None) or {}).get("carries", 1.0)
     fac = (1 + a * (tot / raw.groupby(p.team).transform("sum").replace(0, np.nan) - 1)).fillna(1.0).clip(0.6, 1.6)
     own = raw * fac
-    changed = False
-    for team, g in p[rb].groupby("team"):
-      gone = g[sits[g.index] & (own[g.index] >= self.RB_SIT_MIN)]
-      if not len(gone):
-        continue
-      vac = float(own[gone.index].sum())
-      left = g[~sits[g.index]]
-      if not len(left):
-        continue
+
+    def split(g: pd.DataFrame, out: pd.Series) -> pd.Series | None:
+      """The remaining backs' carry shares when the backs in `out` (index labels) sit: own share + their part of the
+      vacated share (rotation / depth as measured). None when no qualifying back sits."""
+      gone = [i for i in out if own[i] >= self.RB_SIT_MIN]
+      left = g.drop(out)
+      if not gone or not len(left):
+        return None
+      vac = float(own[gone].sum())
       rot = left[own[left.index] >= self.ROT_MIN]
-      dep = left.drop(rot.index)
+      dep = left.drop(rot.index)  # none on the board: the depth part goes to a call-up we don't project
       f_rot = 0.0 if not len(rot) else self.RB_ROT[min(len(rot), 2)]
-      if not len(dep):  # nobody behind the rotation on the board: the depth part goes to a call-up we don't project
-        pass
       new = own[left.index].copy()
       if len(rot):
-        w = own[rot.index] / own[rot.index].sum()
-        new[rot.index] += vac * f_rot * w
+        new[rot.index] += vac * f_rot * own[rot.index] / own[rot.index].sum()
       if len(dep):
         wd = own[dep.index] + 0.02
         new[dep.index] += vac * (1 - f_rot) * wd / wd.sum()
-      car = new * p.loc[left.index, "team_rush"]
-      old = p.loc[left.index, "carries"]
-      p.loc[left.index, "rush"] = p.loc[left.index, "rush"] + (car - old)
-      p.loc[left.index, "carries"] = car
-      changed = True
-    return self.pm.stats_from_volume(p, wind) if changed else p
+      return new
+
+    def with_carries(q: pd.DataFrame, shares: pd.Series) -> pd.DataFrame:
+      q = q.copy()
+      car = shares * q.loc[shares.index, "team_rush"]
+      q.loc[shares.index, "rush"] = q.loc[shares.index, "rush"] + (car - q.loc[shares.index, "carries"])
+      q.loc[shares.index, "carries"] = car
+      return q
+
+    changed, worlds = False, []
+    for team, g in p[rb].groupby("team"):
+      out = [i for i in g.index if sits[i]]
+      new = split(g, out)
+      if new is not None:
+        p = with_carries(p, new)
+        changed = True
+      # the "if he plays / if he sits" worlds of an uncertain back (5-95% to play), under the same rules, so the
+      # teammates' pairings show this split, not the old redistribution's (injuries.apply measured those)
+      av = p.get("avail", pd.Series(1.0, index=p.index))
+      for j in g.index:
+        if not (0.05 <= float(av[j]) <= 0.95) or own[j] < self.RB_SIT_MIN:
+          continue
+        o_sit, o_play = sorted(set(out) | {j}), [i for i in out if i != j]
+        sh_sit, sh_play = split(g, o_sit), split(g, o_play)
+        sh_play = sh_play if sh_play is not None else own[g.drop(o_play).index]
+        if sh_sit is None:
+          continue
+        worlds.append((p.at[j, "gsis_id"], team, sh_sit, sh_play))
+    p = self.pm.stats_from_volume(p, wind) if changed else p
+    for pid, team, sh_sit, sh_play in worlds:
+      a_ = self.pm.stats_from_volume(with_carries(p, sh_sit), wind).proj
+      b_ = self.pm.stats_from_volume(with_carries(p, sh_play), wind).proj
+      for i in sh_sit.index.intersection(sh_play.index):
+        for k in ("cond", "cond2"):
+          if f"{k}_pid" in p and p.at[i, f"{k}_pid"] == pid:
+            p.at[i, f"{k}_sits"], p.at[i, f"{k}_plays"] = float(a_[i]), float(b_[i])
+    return p
 
   # -- projection ------------------------------------------------------------------------------------------------
   def _fit_quantiles(self, d: pd.DataFrame):
