@@ -15,6 +15,7 @@ columnar and compact: teams, games, players and coaches are indexed lists, play 
                 charting (2022 on, CC-BY-SA: motion, play action, screen, RPO, blitzers, pocket, drops, catchable,
                 contested, interception-worthy, throwaways, read). Box / rushers / alignment fall back to FTN when
                 participation is missing (the current season). Missing: -1 for numbers and flags, 0 for vocab codes.
+<season>_on.json skill players on the field per play (2016 on, participation); build_on.
 <season>_g.json  game context (score, rest, kickoff, site) and who was on each roster / played, per game; build_g.
 <season>_st.json special teams (kickoffs, punts, field goals, extra points), kicking team's side; build_st.
 index.json      seasons + cov: {season: [columns with values on >= 90% of the plays they apply to]}. Trends.js only
@@ -369,6 +370,44 @@ def bio(players: pd.DataFrame, contracts: pd.DataFrame | None, out: Path) -> Non
   print(f"[plays] bio: {len(rows)} players, {len(schools)} schools, {sum(1 for g in deals)} with contracts", flush=True)
 
 
+OV = 1
+SKILL = {"QB", "RB", "FB", "WR", "TE"}
+ON_FIRST = 2016
+
+
+def build_on(keys: pd.DataFrame, part: pd.DataFrame | None, full: dict, season: int) -> dict | None:
+  """<season>_on.json (owner 2026-10-22: snap-level with / without, routes run): the offense's skill players on the field
+  (QB, RB, FB, WR, TE) for every play in the season file's order, from NGS participation (2016 on; not published for
+  the current season). pl: [[gsis, name, position]]; p: per play a sorted list of pl idx, or null without participation."""
+  if part is None or not len(part):
+    return None
+  k = keys.copy()
+  k["play_id"] = pd.to_numeric(k.play_id, errors="coerce")
+  pt = part.rename(columns={"nflverse_game_id": "game_id"}).drop_duplicates(["game_id", "play_id"])
+  pt["play_id"] = pd.to_numeric(pt.play_id, errors="coerce")
+  m = k.merge(pt[["game_id", "play_id", "offense_players", "offense_positions", "offense_names"]], on=["game_id", "play_id"], how="left")
+  pl, pi, plays = [], {}, []
+  for ids, pos, nms in zip(m.offense_players, m.offense_positions, m.offense_names):
+    if not isinstance(ids, str) or not ids:
+      plays.append(None)
+      continue
+    ids, pos = ids.split(";"), (pos.split(";") if isinstance(pos, str) else [])
+    nms = nms.split(";") if isinstance(nms, str) else []
+    row = []
+    for i, g in enumerate(ids):
+      ps = pos[i] if i < len(pos) else ""
+      if ps not in SKILL or not g:
+        continue
+      if g not in pi:
+        pi[g] = len(pl)
+        pl.append([g, full.get(g) or (nms[i] if i < len(nms) else g), ps])
+      row.append(pi[g])
+    plays.append(sorted(row))
+  if sum(r is not None for r in plays) < 0.5 * len(plays):
+    return None
+  return {"v": OV, "season": season, "pl": pl, "p": plays}
+
+
 def coverage(doc: dict, x: dict) -> list:
   """Columns with values on >= COVERED of the plays they apply to (APPLIES), for index.json."""
   c = doc["cols"]
@@ -411,9 +450,13 @@ def main():
   cov = json.loads(ixf.read_text(encoding="utf-8")).get("cov", {}) if ixf.exists() else {}
   for s in range(int(a), int(b or a) + 1):
     names = (f"{s}.json", f"{s}_x.json", f"{s}_cov.json", f"{s}_st.json")
-    if s < current and all((kept / nm).exists() for nm in names):  # finished seasons never change
+    on_nm = f"{s}_on.json"
+    want_on = ON_FIRST <= s < current
+    if s < current and all((kept / nm).exists() for nm in names) and (not want_on or (kept / f"{s}_on{OV}.json").exists()):
       for nm in (names[0], names[1], names[3]):
         shutil.copyfile(kept / nm, out / nm)
+      if want_on:
+        shutil.copyfile(kept / f"{s}_on{OV}.json", out / on_nm)
       cov[str(s)] = json.loads((kept / names[2]).read_text(encoding="utf-8"))
       continue
     try:
@@ -438,6 +481,11 @@ def main():
     st = build_st(pbp, doc, full)
     for nm, d in ((names[0], doc), (names[1], x), (names[2], cv), (names[3], st)):
       (out / nm).write_text(json.dumps(d, separators=(",", ":"), allow_nan=False), encoding="utf-8")
+    on = build_on(keys, part, full, s) if s >= ON_FIRST else None
+    if on:
+      (out / on_nm).write_text(json.dumps(on, separators=(",", ":")), encoding="utf-8")
+      if s < current:
+        shutil.copyfile(out / on_nm, kept / f"{s}_on{OV}.json")
     if s < current:
       for nm in names:
         shutil.copyfile(out / nm, kept / nm)

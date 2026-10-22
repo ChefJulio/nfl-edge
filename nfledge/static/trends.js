@@ -48,6 +48,15 @@
              drop: ['Drop %', rate('dr'), 1, ['dr']], cb: ['Catchable %', rate('cb'), 1, ['cb']], ctr: ['Contested %', rate('ct'), 1, ['ct']],
              ctc: ['Contested catch %', a => 100 * a.ctc / a.ctt, 1, ['ct'], ['Contested targets', a => a.ctt]], crt: ['Created catch %', rate('cr'), 1, ['cr']],
              wpa: ['WPA', a => a.wa / 1000, 2, ['wa']] } },
+    // owner 2026-10-22 ("snap-level with/without and per-route stats"): needs <season>_on.json (participation, 2016-2025).
+    // A route = a dropback (incl. sacks, scrambles) with the player on the field as a WR / TE / RB / FB: blocking snaps
+    // can't be told apart, so TE and RB routes run high. multi: actors() gives every route runner; PL is the on-field list.
+    route: { label: 'Routes', unit: 'routes', min: 50, on: true, multi: true, play: (P, j) => P.ty[j] !== 0, actor: (P, j) => P.re[j],
+      actors: (P, j, D) => (D.on.rr[j] || []),
+      add: (a, P, j, act, D) => { if (act == null) return; const t = P.re[j] >= 0 && D.players[P.re[j]][0] === D.on.pl[act][0];
+        if (t) { a.tg = (a.tg || 0) + 1; const c = P.c[j]; a.c += c; a.y += c ? P.y[j] : 0; a.td += P.td[j] && c; } },
+      met: { yprr: ['Yds / route', a => a.y / a.n, 2], tprr: ['Targets / route %', a => (100 * (a.tg || 0)) / a.n, 1], rr: ['Routes', a => a.n, 0],
+             tgt: ['Targets', a => a.tg || 0, 0], yds: ['Yards', a => a.y, 0], rec: ['Catches', a => a.c, 0], td: ['TDs', a => a.td, 0] } },
     team: { label: 'Team offense', unit: 'plays', min: 50, play: () => true, actor: (P, j) => P.o[j], teamActor: true,
       add: (a, P, j) => { const db = P.ty[j] !== 0; a.y += P.y[j]; a.db += db; a.td += P.td[j]; a.fd += P.fd[j];
         if (P.xp[j] >= 0) { a.xo += db - P.xp[j] / 100; a.xon++; } },
@@ -85,8 +94,8 @@
     kr: { label: 'Kick returns', unit: 'returns', min: 8, st: 'r', play: (P, j) => P.t[j] === 0 && P.rt[j] === 1, actor: (P, j) => P.rp[j], add: retAdd, met: retMet },
     pr: { label: 'Punt returns', unit: 'returns', min: 8, st: 'r', play: (P, j) => P.t[j] === 1 && P.rt[j] === 1, actor: (P, j) => P.rp[j], add: retAdd, met: retMet },
   });
-  const FIRST = { rush: 'ypc', pass: 'epa', rec: 'ypt', team: 'epa', fg: 'pct', xp: 'pct', punt: 'net', ko: 'tbr', kr: 'avg', pr: 'avg' };
-  const COUNT = { att: 1, tgt: 1, plays: 1, punts: 1, kicks: 1, ret: 1 };  // metrics equal to the sample column: not repeated as extras
+  const FIRST = { rush: 'ypc', pass: 'epa', rec: 'ypt', route: 'yprr', team: 'epa', fg: 'pct', xp: 'pct', punt: 'net', ko: 'tbr', kr: 'avg', pr: 'avg' };
+  const COUNT = { att: 1, tgt: 1, plays: 1, punts: 1, kicks: 1, ret: 1, rr: 1 };  // metrics equal to the sample column: not repeated as extras
   const blank = () => { const a = { n: 0, y: 0, td: 0, e: 0, s: 0, fd: 0, x: 0, fl: 0, att: 0, c: 0, int: 0, sk: 0, ay: 0, ayn: 0, yac: 0, ycn: 0, db: 0,
     cp: 0, cpn: 0, tt: 0, ttn: 0, yo: 0, yon: 0, xo: 0, xon: 0, ctt: 0, ctc: 0, wa: 0, mk: 0, kd: 0, lg: 0, f50: 0, m50: 0, net: 0, i20: 0,
     tb: 0, fc: 0, rt: 0, ry: 0, x40: 0, bk: 0 }; FLAGS.forEach(c => { a[c + 'n'] = 0; a[c + 'd'] = 0; }); return a; };
@@ -361,7 +370,16 @@
   const clock = m => { const h = Math.floor(m / 60), mm = String(m % 60).padStart(2, '0'); return `${((h + 11) % 12) + 1}:${mm} ${h < 12 ? 'a.m.' : 'p.m.'}`; };
   const outdoor = (P, j, G, c) => { const g = gm(P, j, G); return g[4] || g[c] <= -999 ? null : g[c]; };
   const RNDL = x => (x >= 8 ? 'undrafted' : x >= 7 ? '7th+' : ordn(x));
+  // on the field for that play (participation): with = he was out there; off = he played in the game for this offense
+  // but sat this play out
+  const onField = (P, j, D, id) => { if (!D.on) return undefined; const r = D.on.p[j]; if (!r) return undefined; const i = D.on.ix.get(id); return i != null && r.includes(i); };
   Object.assign(FILTERS, {
+    onw: { label: 'On the field with', group: 'Teammates', on: true, param: 'mate', noNot: true, opts: [], hint: 'plays a teammate was on the field (2016-2025)',
+      fmt: v => `with ${v.split('|')[1] || 'teammate'} on the field`, test: v => { const id = v.split('|')[0]; return (P, j, G, V, D) => onField(P, j, D, id) === true; } },
+    onx: { label: 'Off the field', group: 'Teammates', on: true, g: true, param: 'mate', noNot: true, opts: [], hint: "plays a teammate who played that game sat out (2016-2025)",
+      fmt: v => `${v.split('|')[1] || 'teammate'} off the field`, test: v => { const id = v.split('|')[0]; return (P, j, G, V, D) => mate(P, j, G, D, id) === true && onField(P, j, D, id) === false; } },
+    rpos: { label: 'Position', group: 'Player', only: ['route'], actorLevel: true, hint: 'the route runner: WR, TE or RB',
+      opts: [['WR', 'wide receivers'], ['TE', 'tight ends'], ['RB', 'running backs (incl. FB)']] },
     owp: { label: "Opponent's record", group: 'Game', g: true, opts: [], range: { get: (P, j, G, V, D) => { const w = winPct(D); return w ? w[P.d[j]] : null; },
       min: 0, max: 100, unit: "opponent's regular-season win % (to date this season)", tick: x => `${x}%`,
       presets: [['winning teams', 51, 100], ['.600 or better', 60, 100], ['losing teams', 0, 49]],
@@ -500,6 +518,7 @@
       const testOf = (k, v) => {
         const F = FILTERS[k];
         if (isR(F, v)) { const [lo, hi] = parseR(F, v), get = F.range.get; return (P, j, G, V, D) => { const x = get(P, j, G, V, D); return x != null && x >= lo && x <= hi; }; }
+        if (F.actorLevel) return null;
         return F.test ? F.test(v) : (F.opts.find(o => o[0] === v) || [])[2];
       };
       // "is not" keeps only plays where the filter's value is known: a play with no charting (or no contract on record)
@@ -940,7 +959,13 @@
         const ids = D.players.map(p => p[0]);
         D.gx = { x: raw.x, r: raw.r.map(sides => sides.map(list => new Map(list.map(v => [ids[Math.abs(v) - 1], v > 0])))) };
       }).catch(() => { D.gx = null; }));
-      const loadSeason = (s, wantX, side, wantG) => loadSeason0(s, wantX, side).then(m => (wantG ? loadG(s, m.D).then(() => m) : m));
+      const onfile = {};
+      const loadOn = (s, D) => onfile[s] || (onfile[s] = NFLE.load(`data/plays/${s}_on.json`).then(raw => {
+        const runs = raw.pl.map(x => x[2] !== 'QB');
+        D.on = { pl: raw.pl, p: raw.p, ix: new Map(raw.pl.map((x, i) => [x[0], i])), rr: raw.p.map(r => (r ? r.filter(i => runs[i]) : null)) };
+      }).catch(() => { D.on = null; }));
+      const loadSeason = (s, wantX, side, wantG, wantOn) => loadSeason0(s, wantX, side)
+        .then(m => Promise.all([wantG ? loadG(s, m.D) : null, wantOn ? loadOn(s, m.D) : null]).then(() => m));
       const loadSeason0 = (s, wantX, side) => {
         const b = base[s] || (base[s] = NFLE.load(`data/plays/${s}.json`));
         if (side) {
@@ -988,8 +1013,9 @@
         if (!seasons.length) { sec.querySelector('.tr-base').textContent = ''; sec.querySelector('.tr-trend').innerHTML = ''; sec.querySelector('.tr-tbl').innerHTML = ''; paint = null; return; }
         sec.querySelector('.tr-base').textContent = 'Counting plays…';
         const wantG = Object.keys(Q.f).some(k => FILTERS[k].g);
+        const wantOn = !!FAM[Q.fam].on || Object.keys(Q.f).some(k => FILTERS[k].on);
         const wantC = Object.keys(Q.f).some(k => FILTERS[k].bio) || ['college', 'rnd', 'age', 'cyr'].some(k => Q.by === k || Q.by2 === k);
-        Promise.all([...seasons.map(s => loadSeason(s, wantX, FAM[Q.fam].st, wantG)), wantC ? loadBio() : null]).then(list => {
+        Promise.all([...seasons.map(s => loadSeason(s, wantX, FAM[Q.fam].st, wantG, wantOn)), wantC ? loadBio() : null]).then(list => {
           list = list.slice(0, seasons.length);
           if (BIO) BIO.fam = Q.fam;
           RUNFAM = Q.fam;
@@ -999,9 +1025,18 @@
             list = list.filter(m => m.D.gx);
             if (miss.length) covEl.insertAdjacentHTML('beforeend', `<p class="tr-covnote">Game details (scores, rest, who played) aren't available for ${esc(ranges(miss))} yet, so ${miss.length > 1 ? 'those seasons are' : 'that season is'} left out.</p>`);
           }
+          if (wantOn) {  // on-field data: NFL participation, 2016-2025 (not published for the current season)
+            const miss = list.filter(m => !m.D.on).map(m => m.D.season);
+            list = list.filter(m => m.D.on);
+            if (miss.length) covEl.insertAdjacentHTML('beforeend', `<p class="tr-covnote">Who was on the field is only published for 2016-2025, so ${esc(ranges(miss))} ${miss.length > 1 ? 'are' : 'is'} left out.</p>`);
+            if (!list.length) { sec.querySelector('.tr-base').textContent = ''; sec.querySelector('.tr-trend').innerHTML = ''; sec.querySelector('.tr-tbl').innerHTML = '<p class="muted">Pick seasons from 2016 to 2025 for on-field stats.</p>'; paint = null; csvRows = null; return; }
+          }
+          if (FAM[Q.fam].multi) list = list.map(m => Object.assign({}, m, { PL: m.D.on.pl }));
           const [fam, m] = famMetric();
           const tests = Object.keys(Q.f).map(filterTest).filter(Boolean);
           const [wk, ...rest] = Q.who === 'L' ? ['L'] : Q.who.split(':'), wv = rest.join(':');
+          // the route runner's position (an actor-level filter): FB counts as RB
+          const posSet = fam.multi && Q.f.rpos ? new Set(vals('rpos')) : null, POSG = { FB: 'RB' };
           const by = BY[Q.by], by2 = Q.by2 && BY[Q.by2] ? BY[Q.by2] : null, groups = new Map(), league = blank(), names = {}, teamOf = {};
           let plays = 0;
           list.forEach(({ D, P, V, PL, n }) => {
@@ -1017,22 +1052,26 @@
               let ok = true;
               for (let k = 0; k < tests.length; k++) if (!tests[k](P, j, G, V, D)) { ok = false; break; }
               if (!ok) continue;
-              const act = fam.actor(P, j);
-              if (act < 0 && !fam.teamActor) continue;
-              common(league, P, j); fam.add(league, P, j);
-              if (wk === 'T' && P.o[j] !== wt) continue;
-              if (wk === 'V' && P.d[j] !== wt) continue;
-              if (wk === 'P' && act !== wp) continue;
-              if (wk === 'C' && offCoach(P, j, G, D) !== wv) continue;
-              let key;
-              if (Q.by === 'player') { key = PL[act][0]; teamOf[key] = T[P.o[j]]; } else key = by[1](P, j, G, D, V);
-              if (key == null) continue;
-              let k2 = null;
-              if (by2) { k2 = by2[1](P, j, G, D, V); if (k2 == null) continue; }
-              plays++;
-              const gk = by2 ? `${key}||${k2}` : key;
-              let a = groups.get(gk); if (!a) { a = blank(); a._k = [key, k2]; groups.set(gk, a); }
-              common(a, P, j); fam.add(a, P, j);
+              const acts = fam.multi ? fam.actors(P, j, D) : [fam.actor(P, j)];
+              for (let q = 0; q < acts.length; q++) {
+                const act = acts[q];
+                if (act < 0 && !fam.teamActor) continue;
+                if (posSet && !posSet.has(POSG[PL[act][2]] || PL[act][2])) continue;
+                common(league, P, j); fam.add(league, P, j, act, D);
+                if (wk === 'T' && P.o[j] !== wt) continue;
+                if (wk === 'V' && P.d[j] !== wt) continue;
+                if (wk === 'P' && act !== wp) continue;
+                if (wk === 'C' && offCoach(P, j, G, D) !== wv) continue;
+                let key;
+                if (Q.by === 'player') { key = PL[act][0]; teamOf[key] = T[P.o[j]]; } else key = by[1](P, j, G, D, V);
+                if (key == null) continue;
+                let k2 = null;
+                if (by2) { k2 = by2[1](P, j, G, D, V); if (k2 == null) continue; }
+                plays++;
+                const gk = by2 ? `${key}||${k2}` : key;
+                let a = groups.get(gk); if (!a) { a = blank(); a._k = [key, k2]; groups.set(gk, a); }
+                common(a, P, j); fam.add(a, P, j, act, D);
+              }
             }
           });
           const lg = m[1](league), lab = BYLABEL[Q.by];
