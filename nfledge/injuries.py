@@ -854,6 +854,8 @@ class InjuryModel:
       return {}
     train = r[r.y.notna() & ((r.season < season) | ((r.season == season) & (r.week < week)))]
     now = r[(r.season == season) & (r.week == week) & r.y.isna()]
+    if "aug" in now.columns:
+      now = now[now.aug == 0]  # (CN) the 2-week rows only train
     if len(train) < 1000 or not len(now):
       return {}
     pr_ = T.fit(train).predict_proba(T.features(now))[:, 1]

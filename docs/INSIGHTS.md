@@ -3789,6 +3789,14 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   (the real next game). TEST (tools/time_rows_eval.py): walk-forward, test 2021-25 + 2026 to date, real rows only.
   GATE: Brier on rows whose next game follows a bye lower with the 95% season-week CI excluding 0; all rows not worse
   (CI upper < +0.0005). Reported: calibration on bye rows, hurt-not-back bye rows.
+- **RESULT {#time-rows} (CN) the Tuesday model learns elapsed time: FAIL (worse).** tools/time_rows_eval.py, 37,492
+  real rows + 25,261 two-week training rows. Bye rows 2021-25 (n 1,774): +0.0022 [-0.0005, +0.0046] (played 0.825,
+  base 0.806, time 0.785); all rows +0.0003 [-0.0002, +0.0008]. Why: the two-week rows played 78.5%, bye rows 82.5%:
+  without a bye the player usually plays the game in between, and that game carries its own new-injury risk, so "a
+  bye = 14 days" is wrong for the general Tuesday population (for players hurt in a game, who mostly sit the game in
+  between, the two matched: 65.3% vs 64.8%). Production stays. Remaining, small: players hurt in their last game with
+  a bye next played 77.5%, base predicts 69.8% (n 249); hurt-not-back + bye 60% played vs ~21% predicted (n 15, too
+  few). tuesday.TIME_ROWS off; scenario S06 stays a known miss.
 - **DESCRIPTIVE 2026-10-21 (owner's friend: "Pat Surtain's OPRK for WR1 is #1 hardest ... shadow CB can nuke WRs"):
   WR1 suppression is not a lasting defensive trait.** tools/wr1_suppression.py, play-by-play 2016-25, 4,212 team-games:
   WR1 / WR2 = an offense's top two WRs by targets before the game; result = half-PPR points minus his own average over

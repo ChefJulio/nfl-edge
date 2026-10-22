@@ -115,6 +115,8 @@ WEEK_CALIB = _setting("week_calib", "prev")
 # (AS) how a player's report line and stage are read mid-week: "own" (his listed days; stage = his own day count) or
 # "calendar" (the team's report days; days he isn't listed read as full practice)
 STAGE_FROM = _setting("stage_from", "own")
+# (CN) the Tuesday model learns elapsed time: a gap_days input + training rows for the game ~2 weeks after
+TIME_ROWS = _flag("time_rows")
 OOF_FOLDS = 3
 
 
@@ -150,13 +152,14 @@ class _Ctx:
     self.on = {k for k, x in snap.on.items() if x}
     self.snap_seasons = set(snap.index.get_level_values(1))
     sch = d.schedules[d.schedules.game_type == "REG"]
-    tw, final = {}, set()
+    tw, final, gday = {}, set(), {}
     for g in sch.itertuples():
       for t in (g.home_team, g.away_team):
         tw.setdefault((int(g.season), t), []).append(int(g.week))
+        gday[(int(g.season), t, int(g.week))] = pd.Timestamp(g.gameday)
         if pd.notna(g.home_score):
           final.add((int(g.season), int(g.week), t))
-    self.tw, self.final = {k: sorted(x) for k, x in tw.items()}, final
+    self.tw, self.final, self.gday = {k: sorted(x) for k, x in tw.items()}, final, gday
     inj = d.injuries.dropna(subset=["gsis_id"]).drop_duplicates(["season", "week", "gsis_id"], keep="last")
     inj = inj.assign(season=inj.season.astype(int), week=inj.week.astype(int))
     pr = inj.practice_primary_injury.where(inj.practice_primary_injury.notna(), inj.report_primary_injury)
@@ -212,7 +215,8 @@ class _Ctx:
     hurt = k is not None and (g, s, k) in self.hurt
     # (CJ) noted back in the game after the injury: 1; no return noted: 0 (seasons that log returns); unknown before
     back = (1.0 if (g, s, k) in self.back else 0.0 if s in self.ret_seasons else np.nan) if hurt else 0.0
-    return {"hurt_back": back,"status": _gs(r.game_status) if r is not None else "None",
+    d0, d1 = self.gday.get((s, team, k)) if k is not None else None, self.gday.get((s, team, k1))
+    return {"hurt_back": back, "gap_days": float((d1 - d0).days) if d0 is not None and d1 is not None else np.nan,"status": _gs(r.game_status) if r is not None else "None",
             "n_D": days.count("D"), "n_L": days.count("L"), "n_F": days.count("F"),
             "last_day": SCORE.get(days[-1], np.nan) if days else np.nan,
             "played_last": float(played_k) if k is not None else np.nan, "last_pct": lp, "usual_pct": usual,
@@ -261,7 +265,17 @@ def build_rows(d, rep_rows: pd.DataFrame, hurt: set) -> pd.DataFrame:
       continue
     k1 = nxt[0]
     rows.append({"season": s, "week": k1, "from_week": k, "gsis_id": g, "team": team, "pos": r.position, "pop": r.pop,
-                 **ctx.block(g, s, team, k, k1), "y": ctx.label(g, s, team, k1)})
+                 **ctx.block(g, s, team, k, k1), "y": ctx.label(g, s, team, k1), "aug": 0})
+    if TIME_ROWS:
+      # (CN) the same post-game-k picture, asked about his team's first game 12-16 days after k (training only: these
+      # rows teach what time does; a bye is then just a long gap)
+      d0 = ctx.gday.get((s, team, k))
+      if d0 is None or (ctx.gday[(s, team, k1)] - d0).days >= 12:
+        continue
+      k2 = next((x for x in nxt[1:] if 12 <= (ctx.gday[(s, team, x)] - d0).days <= 16), None)
+      if k2 is not None and (s, k2, team) in ctx.final:
+        rows.append({"season": s, "week": k2, "from_week": k, "gsis_id": g, "team": team, "pos": r.position, "pop": r.pop,
+                     **ctx.block(g, s, team, k, k2), "y": ctx.label(g, s, team, k2), "aug": 1})
   return pd.DataFrame(rows)
 
 
@@ -270,6 +284,8 @@ def features(x: pd.DataFrame) -> pd.DataFrame:
   f = x[FEATS].astype(float).copy()
   if HURT_BACK and "hurt_back" in x.columns:
     f["hurt_back"] = x.hurt_back.astype(float).to_numpy()
+  if TIME_ROWS and "gap_days" in x.columns:  # (CN)
+    f["gap_days"] = x.gap_days.astype(float).to_numpy()
   for st in STATUS:
     f[f"st_{st}"] = (x.status == st).astype(float)
   for p in ("QB", "RB", "WR", "TE"):
@@ -433,7 +449,7 @@ def add_stakes(x: pd.DataFrame, odds: pd.DataFrame) -> pd.DataFrame:
 
 def week_features(x: pd.DataFrame) -> pd.DataFrame:
   from .injuries import InjuryModel
-  f = features(x)
+  f = features(x).drop(columns=["gap_days"], errors="ignore")  # (CN) tested for the Tuesday model only
   if "team_q" in x.columns:  # (J)
     f["team_q"] = x.team_q.astype(float).to_numpy()
   for c in ("wk", "final_week", "own_qn", "own_q", "depth_prev", "st_po", "st_div", "st_bye"):  # (K), (L)
