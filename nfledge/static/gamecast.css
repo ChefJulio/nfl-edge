@@ -891,7 +891,10 @@ table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; tex
 /* the detail sheet: a bottom sheet on phones, a centered panel on wide screens */
 .sheet-ov { position: fixed; inset: 0; z-index: 210; display: flex; align-items: flex-end; justify-content: center;
   background: rgba(5,7,10,.66); animation: sheet-fade var(--dur) var(--ease); }
-.sheet { width: 100%; max-height: 86vh; overflow: auto; overscroll-behavior: contain; background: var(--panel);
+/* vertical only (owner 2026-10-22: "why am i able to move this sideways"): an edge-to-edge table scroller (.lg-scroll's
+   bleed) left the content a few px wider than the sheet, and iOS then pans the whole sheet sideways on diagonal swipes;
+   wide tables still scroll sideways inside their own .lg-scroll */
+.sheet { width: 100%; max-height: 86vh; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; background: var(--panel);
   border: 1px solid var(--line); border-bottom: 0; border-radius: var(--r-lg) var(--r-lg) 0 0; box-shadow: var(--e3);
   padding: 0 16px calc(16px + env(safe-area-inset-bottom)); animation: sheet-up .22s var(--ease); }
 .sheet-h { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 10px;
