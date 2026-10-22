@@ -1,0 +1,32 @@
+{
+"00-0028986": {
+"name": "Case Keenum",
+"team": "CHI",
+"pos": "QB",
+"pre": 0.1865,
+"ruling": "INA",
+"at": "2026-10-22T22:48:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040236": {
+"name": "Kyle Monangai",
+"team": "CHI",
+"pos": "RB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-10-22T22:48:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0041123": {
+"name": "Behren Morton",
+"team": "NE",
+"pos": "QB",
+"pre": 0.0979,
+"ruling": "INA",
+"at": "2026-10-22T22:48:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+}
+}
