@@ -29,6 +29,12 @@
       // one list at a time (owner 2026-10-22: "turn these collapsible lists into a selector that replaces the table")
       let bucket = 'gt';
       try { bucket = localStorage.getItem('nfle-in-bucket') || 'gt'; } catch (e) { /* private mode */ }
+      // and one position at a time if wanted (owner 2026-10-22: "further sort injury tag by position group"): the tags'
+      // counts follow it; a search ignores it, as it does the tags
+      const POS_ORDER = ['QB', 'RB', 'WR', 'TE', 'K'], POSG = { FB: 'RB', HB: 'RB', PK: 'K' };
+      const posOf = r => POSG[r.pos] || r.pos;
+      let posSel = '';
+      try { posSel = localStorage.getItem('nfle-in-pos') || ''; } catch (e) { /* private mode */ }
       // the linked fantasy team's players first in every list (owner 2026-10-22; league.js writes nfledge-mine.mine)
       const mineIds = () => { try { const m = JSON.parse(localStorage.getItem('nfledge-mine') || 'null'); return new Set((m && m.mine) || []); } catch (e) { return new Set(); } };
       let MINE = mineIds();
@@ -103,7 +109,10 @@
         box.innerHTML = '';
         // yours first, then the games still to come, then the most relevant
         const order = (a, b) => (isMine(b) - isMine(a)) || (!!(a.k && a.k.gone) - !!(b.k && b.k.gone)) || byRelevance(a, b);
-        const lists = Object.fromEntries(BUCKETS.map(([k, , , inB]) => [k, ps.filter(r => inB(1 - r.inactive)).sort(order)]));
+        const have = POS_ORDER.filter(x => ps.some(r => posOf(r) === x));
+        if (posSel && !have.includes(posSel)) posSel = '';
+        const atPos = r => !posSel || posOf(r) === posSel;
+        const lists = Object.fromEntries(BUCKETS.map(([k, , , inB]) => [k, ps.filter(r => atPos(r) && inB(1 - r.inactive)).sort(order)]));
         const put = rs => {
           box.insertAdjacentHTML('beforeend', '<div class="in-bt"></div>');
           NFLE.Table(box.lastElementChild, { columns: dashCols, rows: rs, cls: 'tiles in-dt',
@@ -117,6 +126,11 @@
           const seg = BUCKETS.map(([k, label]) => { const n = lists[k].length, my = lists[k].filter(isMine).length;
             return `<button type="button" data-b="${k}" class="in-bk-${k}${k === bucket ? ' on' : ''}"${n ? '' : ' disabled'}><b>${label}</b> <span class="in-n">${n}</span>${my ? ` <span class="in-mine-n" title="Yours">${my} yours</span>` : ''}</button>`; }).join('');
           box.insertAdjacentHTML('beforeend', `<div class="seg in-bk" role="tablist">${seg}</div><p class="muted in-bk-note">${esc((BUCKETS.find(([k]) => k === bucket) || [])[2] || '')}</p>`);
+          // the position row: each chip counts the players at that position in the chosen tag
+          const inB = (BUCKETS.find(([k]) => k === bucket) || [])[3] || (() => true), inTag = ps.filter(r => inB(1 - r.inactive));
+          if (have.length > 1) box.insertAdjacentHTML('beforeend', `<div class="in-pos" role="tablist" aria-label="Position">${['', ...have].map(x => {
+            const n = inTag.filter(r => !x || posOf(r) === x).length;
+            return `<button type="button" data-pos="${x}" class="${posSel === x ? 'on' : ''}"${n || !x ? '' : ' disabled'}>${x || 'All'} <span class="in-n">${n}</span></button>`; }).join('')}</div>`);
           put(lists[bucket]);
         }
         // a search for someone who isn't hurt says so (owner: find specific guys quickly)
@@ -128,6 +142,8 @@
         sec.querySelector('.in-dash').hidden = v !== 'dash'; sec.querySelector('.in-full').hidden = v !== 'full'; if (v === 'dash') drawDash(); else draw(); };
       sec.querySelector('.in-view').addEventListener('click', e => { const b = e.target.closest('[data-w]'); if (b) setView(b.dataset.w); });
       sec.querySelector('.in-dash').addEventListener('click', e => {
+        const ps2 = e.target.closest('.in-pos [data-pos]');
+        if (ps2) { posSel = ps2.dataset.pos; try { localStorage.setItem('nfle-in-pos', posSel); } catch (err) { /* private mode */ } drawDash(); return; }
         const b = e.target.closest('.in-bk [data-b]'); if (!b) return;
         bucket = b.dataset.b;
         try { localStorage.setItem('nfle-in-bucket', bucket); } catch (err) { /* private mode */ }

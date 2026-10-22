@@ -32,3 +32,10 @@ table.dt td.in-note { max-width: 420px; white-space: normal; font-size: var(--fs
 .in-mine-n { font-size: var(--fs-xs, 11px); color: var(--good); font-weight: 600; }
 .in-mine-tag { margin-left: 6px; padding: 0 5px; border-radius: 4px; font-size: var(--fs-xs, 11px); font-weight: 700;
   background: color-mix(in srgb, var(--good) 25%, transparent); color: var(--good); }
+/* position chips under the tags (owner 2026-10-22) */
+.in-pos { display: flex; flex-wrap: wrap; gap: 6px; margin: -2px 0 10px; }
+.in-pos button { font: inherit; font-size: var(--fs-sm); font-weight: 700; color: var(--ink); background: var(--panel2); border: 1px solid var(--line);
+  border-radius: var(--r-pill); padding: 5px 11px; cursor: pointer; }
+.in-pos button.on { background: color-mix(in srgb, var(--accent) 22%, var(--panel2)); border-color: var(--accent); }
+.in-pos button:disabled { opacity: .4; cursor: default; }
+.in-pos .in-n { font-weight: 600; color: var(--muted); margin-left: 2px; }
