@@ -4065,4 +4065,11 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
     schema, defaults, named players, four worked example links (each opened and checked). Player names are looked up
     by the engine (`resolveNames`; the page takes the most recent player on a tie, the CLI lists the candidates). Fixed:
     a link's query was merged with the viewer's last query; a link is now the whole query.
+- **Site readable by visiting assistants (owner, 2026-10-22, "option 2").** An assistant that fetches a URL reads text and
+  runs no JavaScript, so the app is an empty frame to it. Added plain-text pages (tools/machine_pages.py, nfledge/machine.py
+  write_pages): a page per player on the week page (chance to play with its reasons, status, projection + range + stat
+  line, practice and games day by day, recent injuries, durability, game logs this season and last, bio), a page per
+  team, injuries.md (ESPN's list with our chance to play), players.md (directory); llms.txt lists them; the app shell
+  points to them (head links, <noscript>, footer "For AI assistants"). Option 1 (a hosted query endpoint so an assistant
+  can run Trends itself, free on Vercel / Netlify) and precomputed per-player splits pages were offered and declined.
 

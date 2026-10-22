@@ -296,6 +296,13 @@ are the same content in plain text and JSON.
   its injury and healthy-scratch parts; kickers and team defenses
 - [Power rankings (Markdown)]({base}power.md): every team's rest-of-season and this-week rating, units, rank range
 - [This week's games (Markdown)]({base}games.md): kickoff, QBs, Vegas line and total, market and model chances, finals
+- [Every player (Markdown)]({base}players.md): name, position, team, and a page per player at
+  {base}players/<gsis_id>.md: this week's chance to play and why, injury status, projection with range and expected
+  stat line, practice and games this season day by day, recent injuries, durability, game logs (this season and
+  last), bio and contract
+- [Injuries (Markdown)]({base}injuries.md): every player on an injury report or list, by team, with our chance to play
+- Teams, one page each: {base}teams/<TEAM>.md (e.g. {base}teams/BUF.md): record, power rank, results with lines,
+  upcoming games with our win chance, this week's injuries, depth chart, players
 - [Lab notebook (Markdown)]({base}notebook.md) ({_kb(sizes.get('notebook.md', 0))}, too big for some fetchers in one
   go; the per-area model files above summarize each test): every test as it happened, with its pass bar written before
   the result (also on GitHub: https://github.com/ChefJulio/nfl-edge/blob/main/docs/INSIGHTS.md)
@@ -350,3 +357,215 @@ def write(root: Path, body_md: str, avail: dict | None, track: dict | None, week
   sizes = {n: (root / n).stat().st_size for n in ("model.md", "notebook.md", "index.json") if (root / n).exists()}
   (root / "llms.txt").write_text(llms_txt(base, int(week["season"]), int(week["week"]), generated, area_files, sizes),
                                  encoding="utf-8")
+
+
+# ---- per-player / per-team pages (owner 2026-10-22: "make the entire site more autonomously usable by visiting llms",
+# option 2): what an assistant gets asked ("is X playing Sunday?", "how has he been doing?") answered in one small
+# fetch each, from the same files the app reads. Written by tools/machine_pages.py after the game-log and depth steps.
+PRAC_WORD = {"F": "full", "L": "limited", "D": "did not practice", "-": "not on the report", "R": "reserve list", "S": "practice squad"}
+STAT_COLS = {  # (label, key in the log's "keys", or x index: completions, attempts, carries, targets)
+  "QB": [("Cmp", 0), ("Att", 1), ("Pass yd", "pass_yd"), ("Pass TD", "pass_td"), ("INT", "interception"), ("Car", 2), ("Rush yd", "rush_yd"), ("Rush TD", "rush_td")],
+  "RB": [("Car", 2), ("Rush yd", "rush_yd"), ("Rush TD", "rush_td"), ("Tgt", 3), ("Rec", "reception"), ("Rec yd", "rec_yd"), ("Rec TD", "rec_td")],
+  "WR": [("Tgt", 3), ("Rec", "reception"), ("Rec yd", "rec_yd"), ("Rec TD", "rec_td"), ("Car", 2), ("Rush yd", "rush_yd")],
+  "TE": [("Tgt", 3), ("Rec", "reception"), ("Rec yd", "rec_yd"), ("Rec TD", "rec_td")],
+}
+
+
+def _status(p: dict) -> str:
+  """The status in words: "Questionable (ESPN) (LF)" stays, a bare "(LF)" (on the report, no game status) is spelled out."""
+  st = (p.get("status") or "").replace("|", "/").strip()
+  m = re.fullmatch(r"\(([FLD-]+)\)", st)
+  return f"on the report, practiced: {', '.join(PRAC_WORD.get(c, c) for c in m.group(1))}" if m else st
+
+
+def _num(v) -> str:
+  return "" if v is None else (f"{v:.0f}" if float(v).is_integer() else f"{v:.1f}")
+
+
+def _head(title: str, base: str, generated: str, app: str) -> list[str]:
+  return [f"# {title}", "", f"<!-- NFL Edge, generated {generated}. In the app: {app} . Everything: {base}llms.txt -->", ""]
+
+
+def _logline(g: dict, keys: list, cols: list) -> list[str]:
+  c, x = dict(zip(keys, g.get("c") or [])), g.get("x") or []
+  return [_num(x[k] if k < len(x) else None) if isinstance(k, int) else _num(c.get(k)) for _, k in cols]
+
+
+def player_md(p: dict, log: dict | None, week: dict, base: str, games: dict) -> str:
+  pid, pos = p["pid"], p.get("pos", "")
+  title = f"{p['name']} ({pos}, {p.get('team', '')}): {week['season']} week {week['week']}"
+  out = _head(title, base, week.get("generated", ""), f"{base}#player/{pid}")
+  pl = _play(p)
+  opp = f"{'vs' if p.get('home') else '@'} {p['opp']}" if p.get("opp") else "bye week"
+  g = games.get(p.get("team"))
+  out += ["## This week", "", f"- Game: {g if g and p.get('opp') else opp}"]
+  if p.get("opp"):
+    why = "; ".join(x for x in (p.get("play_why"), p.get("inactive_why")) if x)
+    out.append(f"- Chance to play: {_pct(pl)} (injury: {_pct(p.get('inactive') or 0)} chance to sit injured; healthy scratch: "
+               f"{_pct(p.get('scratch') or 0)}){f'. Why: {why}' if why else ''}")
+    if _status(p):
+      out.append(f"- Injury status: {_status(p)}")
+    q = p.get("q") or []
+    rng = f", range {q[0]:.1f} to {q[-1]:.1f} (10th-90th percentile)" if len(q) >= 5 and q[0] is not None else ""
+    out.append(f"- Projection (half PPR, if he plays): {p['proj']:.1f} points{rng}" + (f"; {p.get('tier')}, rank {p['rank']} at {pos}" if p.get("rank") else ""))
+    if p.get("proj_line"):
+      out.append("- Expected stat line: " + ", ".join(f"{k.replace('_', ' ')} {v:.1f}" for k, v in p["proj_line"].items() if v))
+    for k in ("vol", "td"):
+      if (p.get(k) or {}).get("d"):
+        out.append(f"- {p[k]['d']}")
+  if p.get("fpg") is not None:
+    out.append(f"- This season: {p['fpg']:.1f} fantasy points per game" + (f", last 3 games {p['last3']:.1f}" if p.get("last3") is not None else ""))
+  out += ["", f"Method: {base}model/chance-to-play.md and {base}model/projections.md", ""]
+  if not log:
+    return "\n".join(out) + "\n"
+  prac = [e for e in (log.get("prac") or []) if e[0] in ("p", "g")][-24:]
+  if prac:
+    out += ["## Practice and games, this season (latest last)", ""]
+    for e in prac:
+      if e[0] == "p":
+        out.append(f"- {e[1]}: practice, {PRAC_WORD.get(e[2], e[2])}{f' ({e[3]})' if len(e) > 3 and e[3] else ''}")
+      else:
+        played = f", {e[4]}% of snaps" if len(e) > 4 and e[4] not in ("", None) else (" (upcoming)" if len(e) > 4 and e[4] == "" else "")
+        out.append(f"- {e[1]}: game {e[3]} {e[2]}{played}")
+    out.append("")
+  inj = [i for i in (log.get("inj") or []) if i.get("s", 0) >= int(week["season"]) - 1][:8]
+  if inj:
+    out += ["## Recent injuries", ""]
+    for i in inj:
+      span = f"week {i['w0']}" + (f"-{i['w1']}" if i.get("w1") != i.get("w0") else "")
+      out.append(f"- {i['s']} {span}: {i.get('part', 'injury')}" + (f", {i['list']}" if i.get("list") else "")
+                 + (f", worst status {i['worst']}" if i.get("worst") else "") + f"; missed {i.get('missed', 0)}, played {i.get('played', 0)}")
+    out.append("")
+  d = log.get("dur") or {}
+  if d.get("games"):
+    out += [f"Durability: played {d['games'] - d.get('missed', 0)} of {d['games']} games he could have ({_pct(d.get('avail', 0))})"
+            + (f", {d['per1k']:.1f} injuries per 1,000 snaps" if d.get("per1k") is not None else "") + ".", ""]
+  cols = STAT_COLS.get(pos, STAT_COLS["WR"])
+  keys = log.get("keys") or []
+  for sea in sorted((s for s in log.get("seasons") or [] if s.get("s", 0) >= int(week["season"]) - 1), key=lambda s: -s["s"]):
+    rows = [(r["w"], r) for r in sea.get("g") or []] + [(r["w"], r) for r in sea.get("m") or []]
+    if not rows:
+      continue
+    out += [f"## Game log {sea['s']} (regular season)", "", "| Week | Opp | " + " | ".join(c for c, _ in cols) + " | Snaps |",
+            "|---|---|" + "---|" * len(cols) + "---|"]
+    for w, r in sorted(rows, key=lambda t: t[0]):
+      if r.get("bye"):
+        out.append(f"| {w} | bye |" + " |" * len(cols) + " |")
+      elif "miss" in r:
+        out.append(f"| {w} | {'vs' if r.get('h') else '@'} {r.get('o', '')} | did not play ({r['miss']}) |" + " |" * len(cols))
+      else:
+        out.append(f"| {w} | {'vs' if r.get('h') else '@'} {r.get('o', '')} | " + " | ".join(_logline(r, keys, cols)) + f" | {_num(r.get('sn'))}{'%' if r.get('sn') is not None else ''} |")
+    out.append("")
+  b = log.get("bio") or {}
+  if b:
+    dr = b.get("draft") or {}
+    deal = b.get("deal") or {}
+    bits = [f"born {b['born']}" if b.get("born") else "", f"college {b['college']}" if b.get("college") else "",
+            f"drafted {dr['y']} round {dr['r']}, pick {dr['o']}" if dr else "undrafted" if b.get("exp") else "",
+            f"contract ${deal['apy']:.2f}M a year through {deal.get('fa', '?') - 1 if isinstance(deal.get('fa'), int) else '?'}" if deal.get("apy") else ""]
+    out += ["## Bio", "", "; ".join(x for x in bits if x) + ".", ""]
+  out.append(f"Splits of any kind (by opponent, down, coverage, with or without a teammate...): {base}llms.txt, section Trends.")
+  return "\n".join(out) + "\n"
+
+
+def team_md(team: str, week: dict, tlog: dict | None, depth: dict | None, base: str, games: dict) -> str:
+  t = (week.get("teams") or {}).get(team) or {}
+  out = _head(f"{t.get('name', team)} ({team}): {week['season']} week {week['week']}", base, week.get("generated", ""), f"{base}#team/{team}")
+  pw = next((r for r in week.get("power") or [] if r.get("team") == team), None)
+  if pw:
+    out += [f"Record {pw.get('record', '')}, {t.get('division', '')}. Power rank {pw['rank']} (net {pw.get('net', 0):+.1f} points per game vs an "
+            f"average team; offense rank {pw.get('off_rk')}, defense rank {pw.get('def_rk')}). This week: {games.get(team, 'bye')}.", ""]
+  sea = next((s for s in (tlog or {}).get("seasons") or [] if s.get("s") == int(week["season"])), None)
+  if sea:
+    out += [f"## {week['season']} results", "", "| Week | Opp | Result | Score | Line | ATS | Total |", "|---|---|---|---|---|---|---|"]
+    for g in sea.get("g") or []:
+      out.append(f"| {g['w']} | {'vs' if g.get('h') else '@'} {g.get('o', '')} | {g.get('r', '')} | {g.get('ps', '')}-{g.get('pa', '')} | "
+                 f"{_num(g.get('ln'))} | {g.get('ats', '')} | {_num(g.get('tot'))} |")
+    out.append("")
+  up = [u for u in (tlog or {}).get("up") or [] if not u.get("bye")]
+  if up:
+    out += ["## Coming up", "", "| Week | Opp | Our win chance | Opponent power rank |", "|---|---|---|---|"]
+    out += [f"| {u['w']} | {'vs' if u.get('h') else '@'} {u.get('o', '')} | {u.get('mc', '')}% | {u.get('opr', '')} |" for u in up]
+    out.append("")
+  hurt = sorted((p for p in (week.get("players") or {}).values() if p.get("team") == team and (p.get("status") or _play(p) < 0.95)), key=_play)
+  if hurt:
+    out += ["## Injuries this week (fantasy-relevant players)", "", "| Player | Pos | Status | Chance to play |", "|---|---|---|---|"]
+    out += [f"| [{p['name']}]({base}players/{p['pid']}.md) | {p.get('pos', '')} | {_status(p)} | {_pct(_play(p))} |" for p in hurt]
+    out.append("")
+  if depth and depth.get("weeks"):
+    wk = max(depth["weeks"], key=int)
+    names = depth.get("players") or []
+    out += [f"## Depth chart (week {wk}, offense)", ""]
+    for code, label, slots in depth["weeks"][wk].get("off") or []:
+      people = [f"{names[i][0]}{f' ({tag})' if tag else ''}" for i, _, tag in slots if i < len(names)]
+      out.append(f"- {label}: {', '.join(people)}")
+    out.append("")
+  ps = sorted((p for p in (week.get("players") or {}).values() if p.get("team") == team), key=lambda p: (p.get("pos", ""), -(p.get("proj") or 0)))
+  if ps:
+    out += ["## Players", ""] + [f"- [{p['name']}]({base}players/{p['pid']}.md) ({p.get('pos', '')})" for p in ps] + [""]
+  return "\n".join(out) + "\n"
+
+
+def injuries_md(week: dict, espn: dict | None, base: str) -> str:
+  ps = list((week.get("players") or {}).values())
+  by_espn = {str(p.get("espn")): p for p in ps if p.get("espn")}
+  out = _head(f"NFL Edge injuries: {week['season']} week {week['week']}", base, week.get("generated", ""), f"{base}#players/injuries")
+  out += ["Chance to play = ours (injury report, practice, history; method: " f"{base}model/chance-to-play.md); status and details "
+          f"from ESPN (fetched {(espn or {}).get('fetched', '')}).", ""]
+  rows = [r for r in (espn or {}).get("rows") or [] if r.get("status") and r["status"] != "Active"]
+  teams = week.get("teams") or {}
+  abbr = {v.get("name"): k for k, v in teams.items()}
+  for name in sorted({r.get("team") for r in rows if r.get("team")}):
+    tr = sorted((r for r in rows if r.get("team") == name), key=lambda r: r.get("status", ""))
+    out += [f"## {name}", "", "| Player | Status | Injury | Return | Our chance to play |", "|---|---|---|---|---|"]
+    for r in tr:
+      p = by_espn.get(str(r.get("espn_id")))
+      who = f"[{r['name']}]({base}players/{p['pid']}.md)" if p else r.get("name", "")
+      parts = [x for x in (r.get("side"), r.get("type"), r.get("detail")) if x and x != "Not Specified"]
+      inj = " ".join(dict.fromkeys(parts))  # "Concussion Concussion" once
+      out.append(f"| {who} | {r['status']} | {inj} | {r.get('return_date') or ''} | {_pct(_play(p)) if p and p.get('opp') else ''} |")
+    out.append("")
+  if abbr:
+    out.append(f"Team pages: {', '.join(f'[{k}]({base}teams/{k}.md)' for k in sorted(teams))}")
+  return "\n".join(out) + "\n"
+
+
+def players_index_md(week: dict, base: str) -> str:
+  ps = sorted((week.get("players") or {}).values(), key=lambda p: p["name"])
+  out = _head(f"NFL Edge players: {week['season']} week {week['week']}", base, week.get("generated", ""), base)
+  out += ["Every player on this week's page, with his own page (chance to play and why, projection, practice, game log, "
+          f"bio). Teams: {', '.join(f'[{k}]({base}teams/{k}.md)' for k in sorted(week.get('teams') or {}))}.", "",
+          "| Player | Pos | Team | Page |", "|---|---|---|---|"]
+  out += [f"| {p['name']} | {p.get('pos', '')} | {p.get('team', '')} | {base}players/{p['pid']}.md |" for p in ps]
+  return "\n".join(out) + "\n"
+
+
+def write_pages(root: Path, base: str) -> None:
+  """players.md, players/<gsis>.md, teams/<TEAM>.md, injuries.md from the built site's own files."""
+  wp = root / "index.json"
+  if not wp.exists():
+    return
+  week = json.loads(wp.read_text(encoding="utf-8"))
+  for pid, p in (week.get("players") or {}).items():
+    p.setdefault("pid", pid)
+  games = {}
+  for g in week.get("games") or []:
+    a, h = g["away"]["team"], g["home"]["team"]
+    k = g.get("kickoff", "")
+    games[a] = f"@ {h}{f', {k}' if k else ''}"
+    games[h] = f"vs {a}{f', {k}' if k else ''}"
+  load = lambda f: json.loads(f.read_text(encoding="utf-8")) if f.exists() else None  # noqa: E731
+  pd_ = root / "players"
+  pd_.mkdir(exist_ok=True)
+  for f in pd_.glob("*.md"):  # players no longer on the page leave no stale file
+    f.unlink()
+  for pid, p in week["players"].items():
+    (pd_ / f"{pid}.md").write_text(player_md(p, load(root / "data" / "players" / f"{pid}.json"), week, base, games), encoding="utf-8")
+  td = root / "teams"
+  td.mkdir(exist_ok=True)
+  for team in week.get("teams") or {}:
+    (td / f"{team}.md").write_text(team_md(team, week, load(root / "data" / "teams" / f"{team}.json"),
+                                           load(root / "data" / "depth" / str(week["season"]) / f"{team}.json"), base, games), encoding="utf-8")
+  (root / "injuries.md").write_text(injuries_md(week, load(root / "data" / "espn_injuries" / "latest.json"), base), encoding="utf-8")
+  (root / "players.md").write_text(players_index_md(week, base), encoding="utf-8")
+  print(f"[machine] pages: {len(week['players'])} players, {len(week.get('teams') or {})} teams, injuries.md, players.md", flush=True)

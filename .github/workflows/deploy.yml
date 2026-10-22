@@ -221,6 +221,10 @@ jobs:
       # Team page > Depth: every team's latest depth chart (ESPN's, via nflverse; after Player game logs, which it links to).
       - name: Depth charts
         run: python tools/depth_build.py --site=site
+      # Plain-text pages for assistants and crawlers: players.md, players/<id>.md, teams/<TEAM>.md, injuries.md (after the
+      # game logs, depth charts and injuries they read; tools/machine_pages.py).
+      - name: Machine pages
+        run: python tools/machine_pages.py --site=site || echo "[machine] pages skipped"
       # Model > Reference: league-wide rates by down / distance, kicks, drives, leads (tools/reference_build.py; finished
       # seasons cached, the current one refetched).
       - name: Reference tables
