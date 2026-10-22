@@ -32,13 +32,48 @@ def frame_hash(df) -> int:
   return 0 if df is None else int(pd.util.hash_pandas_object(df, index=False).sum() % (2 ** 61))
 
 
-def state_key(data, cfg, scoring, *extra) -> str:
+def state_key(data, cfg, scoring, *extra, completed_only: bool = False) -> str:
   """Changes whenever the inputs that matter change: config, scoring, final games, injury report / practice
-  updates, expert rankings, rosters, or model code."""
-  inj = data.injuries[data.injuries.season == data.current_season]
+  updates, expert rankings, rosters, or model code. completed_only (the backtest, which scores finished weeks):
+  this season's report rows count only through the last completed week, so a new practice report doesn't rerun it."""
+  def done(df):
+    if df is None or not completed_only or "week" not in df:
+      return df
+    return df[(df.season < data.current_season) | (df.week <= data.latest_week)]
+  inj = done(data.injuries[data.injuries.season == data.current_season])
   parts = [docs.model_config(cfg), scoring.weights, data.latest_week, data.pending_games, len(data.pbp), frame_hash(inj),
-           frame_hash(data.practice), frame_hash(data.ecr), len(data.rosters), model_code(), *extra]
+           frame_hash(done(data.practice)), frame_hash(done(data.ecr)), len(data.rosters), model_code(), *extra]
   return hashlib.sha1(json.dumps(parts, sort_keys=True, default=str).encode()).hexdigest()[:12]
+
+
+def train_key(data, cfg, scoring, season: int) -> str:
+  """The trained engine's inputs: everything state_key has except this season's injury reports, practice and expert
+  ranks, which training never reads (it fits on earlier seasons; scratch/train_cache_equiv.py checked an engine
+  trained without the newest report week, practice week, ECR week and roster week projects identically). Final
+  games (len(pbp), latest_week) stay in: the engine carries the team model's play history."""
+  parts = [docs.model_config(cfg), scoring.weights, data.latest_week, data.pending_games, len(data.pbp),
+           len(data.rosters), model_code(), season]
+  return hashlib.sha1(json.dumps(parts, sort_keys=True, default=str).encode()).hexdigest()[:12]
+
+
+def trained_engine(data, cfg, scoring, season: int):
+  """Engine.train, cached on train_key: an injury / practice / ECR update re-projects in seconds instead of
+  retraining (~4-5 min of the build)."""
+  cache_dir = ROOT / cfg["data"]["cache_dir"]
+  path = cache_dir / f"engine_{train_key(data, cfg, scoring, season)}.pkl"
+  if path.exists():
+    with open(path, "rb") as f:
+      eng = pickle.load(f)
+    attach_data(eng, data)
+    print("[run] reusing the trained engine (final games, config and model code unchanged)", flush=True)
+    return eng
+  eng = Engine(data, cfg, scoring, POSITIONS).train(season)
+  attach_data(eng, None)
+  with open(path, "wb") as f:
+    pickle.dump(eng, f, protocol=pickle.HIGHEST_PROTOCOL)
+  attach_data(eng, data)
+  prune(cache_dir, "engine_*.pkl")
+  return eng
 
 
 def prune(cache_dir: Path, pattern: str, keep: int = 2):
@@ -81,7 +116,7 @@ def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict |
     attach_data(eng, data)
     print("[run] reusing cached model + projections (inputs and model code unchanged)", flush=True)
     return eng, proj
-  eng = Engine(data, cfg, scoring, POSITIONS).train(season)
+  eng = trained_engine(data, cfg, scoring, season)
   if espn_midweek and eng.injury_model is not None:
     eng.injury_model.espn_midweek = espn_midweek
   if espn_questionable and eng.injury_model is not None:
@@ -120,7 +155,7 @@ def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict |
 def cached_backtest(data, cfg, scoring) -> tuple[pd.DataFrame | None, list[int]]:
   """Walk-forward backtest over last season + this season so far; cached per data/config/model-code state."""
   seasons = [data.current_season - 1, data.current_season]
-  path = ROOT / cfg["data"]["cache_dir"] / f"backtest_{state_key(data, cfg, scoring, 'bt')}.parquet"
+  path = ROOT / cfg["data"]["cache_dir"] / f"backtest_{state_key(data, cfg, scoring, 'bt', completed_only=True)}.parquet"
   if path.exists():
     return pd.read_parquet(path), seasons
   print("[run] backtesting (cached after the first run for this data/config)...", flush=True)

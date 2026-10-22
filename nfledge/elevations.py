@@ -60,20 +60,26 @@ def _get(url: str, tries: int = 3) -> str | None:
 
 
 _DOWN = False
-CACHE = ROOT / "cache" / "pfr_transactions"  # one parsed day per file; days 2+ back are final and never refetched
+CACHE = ROOT / "cache" / "pfr_minor"  # one parsed day per file (every move); days 2+ back are final, never refetched
 
 
-def pfr_day(day: date) -> list[tuple[str, str, str]]:
-  """(team full name, position, player name) for each elevation in that day's ProFootballRumors post. Parsed days are
-  cached (the site can be unreachable: 2026-10-21 it refused connections for hours); the last two days are refetched
-  (a post grows during its day). Unreachable and uncached: [] (the caller notes it)."""
+def pfr_cached(day: date) -> bool:
+  """Whether that day is cached for good (2+ days old): pfr_lines returns it without a request."""
+  return (CACHE / f"{day.isoformat()}.json").exists() and (date.today() - day).days >= 2
+
+
+def pfr_lines(day: date, fetch: bool = True) -> list[tuple[str, str, str, str]]:
+  """(team full name, move label, position, player name) for every move in that day's ProFootballRumors post
+  ("Elevated: RB Jawhar Jordan" -> label "Elevated"); also the Moves page's source (tools/transactions_build.py).
+  Parsed days are cached (the site can be unreachable: 2026-10-21 it refused connections for hours); the last two
+  days are refetched (a post grows during its day). Unreachable and uncached: [] (the caller notes it)."""
   CACHE.mkdir(parents=True, exist_ok=True)
   path = CACHE / f"{day.isoformat()}.json"
   if path.exists() and (date.today() - day).days >= 2:
     return [tuple(x) for x in json.loads(path.read_text(encoding="utf-8"))]
   global _DOWN
   try:
-    if _DOWN:
+    if _DOWN or not fetch:
       raise ConnectionError("source unreachable earlier in this run")
     s = _get(PFR.format(y=day.year, m=day.month, d=day.day, yy=day.year % 100))
   except Exception:
@@ -84,15 +90,19 @@ def pfr_day(day: date) -> list[tuple[str, str, str]]:
   return out
 
 
-def parse_post(s: str) -> list[tuple[str, str, str]]:
+def pfr_day(day: date) -> list[tuple[str, str, str]]:
+  """(team full name, position, player name) for each elevation in that day's post."""
+  return [(t, pos, name) for t, label, pos, name in pfr_lines(day) if re.match(r"Elevated\b", label, re.I)]
+
+
+def parse_post(s: str) -> list[tuple[str, str, str, str]]:
   out = []
   for team, block in re.findall(r"<p><strong>([^<]+)</strong></p>\s*<ul>(.*?)</ul>", s, re.S):
     for li in re.findall(r"<li>(.*?)</li>", block, re.S):
-      text = html.unescape(re.sub(r"<[^>]+>", "", li)).strip()
-      if not re.match(r"Elevated\b", text, re.I):
-        continue
-      for pos, name in ONE.findall(text.split(":", 1)[-1].strip()):
-        out.append((html.unescape(team).strip(), pos, name.strip()))
+      label, _, rest = html.unescape(re.sub(r"<[^>]+>", "", li)).strip().partition(":")
+      rest = re.sub(r"\s*\([^)]*\)", "", rest).replace("’", "'").strip()  # "(story)", "(one-year deal)"; curly '
+      for pos, name in ONE.findall(rest):
+        out.append((html.unescape(team).strip(), label.strip(), pos, name.strip()))
   return out
 
 

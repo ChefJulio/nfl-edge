@@ -39,7 +39,8 @@ TYPES = [
   ("staff", r"\b(?:hired|fired|coordinator|head coach|coach|general manager|scout|trainer)\b"),
   ("option", r"\boption"), ("tendered", r"\btender"), ("extended", r"\bextension\b|\bextend"),
   ("free_agent", r"\bdeclared free agent"), ("retired", r"\bretire"), ("suspended", r"\bsuspend"), ("reinstated", r"\breinstat"),
-  ("ps_elevated", r"\belevat"), ("promoted", r"\bpromot"), ("ps_signed", r"\bsign\w*\b.*\bpractice squad"),
+  ("ps_elevated", r"\belevat"), ("promoted", r"\bpromot|\bsign\w*\b.*\bfrom\b.*\bpractice squad"),
+  ("ps_signed", r"\bsign\w*\b.*\bpractice squad"),
   ("ps_released", r"\b(?:releas|waiv)\w*\b.*\bpractice squad"),
   ("designated", r"\bdesignated\b.*\breturn"), ("activated", r"\bactivat"),  # "Activated X off the PUP list"
   ("ir", r"\binjured reserve\b|\bIR\b"), ("pup", r"\bPUP\b|physically unable"), ("nfi", r"\bNFI\b|non-football"),
@@ -166,6 +167,51 @@ class Linker:
     return next(iter(c)) if len(c) == 1 else None
 
 
+PFR_BUDGET, PFR_PAUSE = 25, 3.0
+# Moves that are the same event when ESPN and ProFootballRumors both log them (kinds differ by wording)
+FAMILY = {**{k: "sign" for k in ("signed", "re_signed", "ps_signed", "promoted", "claimed", "acquired")},
+          **{k: "out" for k in ("waived", "released", "ps_released")}, **{k: "res" for k in ("ir", "pup", "nfi", "reserve")}}
+
+
+def pfr_moves(season: int, link, names: dict, have: list) -> list:
+  """This season's moves from ProFootballRumors' daily "Minor NFL Transactions" posts (nfledge/elevations.pfr_lines;
+  league year from Mar 1 to today), minus the ones ESPN already logged (same team, player and move family within
+  3 days). ESPN's feed misses most practice-squad elevations (2 league-wide for week 6, 2026); these posts list them.
+  The site throttles bursts (2026-10-21: timeouts after 6 quick requests), so each run fetches at most PFR_BUDGET
+  uncached days, newest first, PFR_PAUSE seconds apart; the season backfills over a few runs, and days already
+  cached are final."""
+  from datetime import date, timedelta
+  from nfledge import elevations as E
+  seen = {}
+  for r in have:
+    if r[4]:
+      seen.setdefault((r[1], r[5] or norm(r[4]), FAMILY.get(r[2], r[2])), []).append(date.fromisoformat(r[0]))
+  first, last = date(season, 3, 1), min(date.today(), date(season + 1, 2, 28))
+  days = [first + timedelta(days=i) for i in range((last - first).days + 1)]
+  todo = [d for d in reversed(days) if not E.pfr_cached(d)][:PFR_BUDGET]
+  for i, d in enumerate(todo):
+    if i:
+      time.sleep(PFR_PAUSE)
+    E.pfr_lines(d)
+  missing = sum(not E.pfr_cached(d) for d in days if (date.today() - d).days >= 2)
+  if missing:
+    print(f"[moves] ProFootballRumors: {missing} days not fetched yet (next runs)", flush=True)
+  out = []
+  for day in days:
+    for team_name, label, pos, name in E.pfr_lines(day, fetch=False):
+      team = names.get(team_name)
+      if not team:
+        continue
+      kind = next(k for k, rx in TYPES if re.search(rx, label, 0 if k in CASED else re.I))
+      pid = link(name, team, pos)
+      k = (team, pid or norm(name), FAMILY.get(kind, kind))
+      if any(abs((day - d).days) <= 3 for d in seen.get(k, [])):
+        continue
+      seen.setdefault(k, []).append(day)
+      out.append([day.isoformat(), team, kind, pos, name, pid, f"{label}: {pos} {name}", "pfr"])
+  return out
+
+
 def main():
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
   site = Path(opt.get("site", "site"))
@@ -179,6 +225,8 @@ def main():
   out.mkdir(parents=True, exist_ok=True)
   players = cache.get("players", "all", lambda: nfl.load_players(), stale=cache.age_hours("players", "all") > 24 * 7)
   ros = {}
+  t = cache.get("teams", "all", lambda: nfl.load_teams(), stale=False).drop_duplicates("team_abbr").set_index("team_abbr")
+  full = {str(n): ROSTER_TEAM.get(a, ESPN_TEAM.get(a, a)) for a, n in zip(t.index, t.team_name)}
 
   def roster(s):
     if s not in ros:
@@ -213,20 +261,23 @@ def main():
         prev = kind if kind != "other" else prev
         n_parsed += kind != "other" and (bool(found) or kind == "staff")
         if not found:
-          moves.append([day, team, kind, "", "", None, sent])
+          moves.append([day, team, kind, "", "", None, sent, "espn"])
           continue
         for pos, name in found:
           pid = link(name, team, pos)
           n_players += 1
           n_linked += pid is not None
-          moves.append([day, team, kind, pos, name, pid, sent])
+          moves.append([day, team, kind, pos, name, pid, sent, "espn"])
+    if s == current:
+      extra = pfr_moves(s, link, full, moves)
+      print(f"[moves] {s}: +{len(extra)} from ProFootballRumors", flush=True)
+      moves = sorted(moves + extra, key=lambda r: r[0], reverse=True)
     cov = {"sentences": n_sent, "parsed": n_parsed, "players": n_players, "linked": n_linked}
-    doc = {"v": V, "season": s, "cols": ["date", "team", "type", "pos", "name", "pid", "text"], "rows": moves, "coverage": cov}
+    doc = {"v": V, "season": s, "cols": ["date", "team", "type", "pos", "name", "pid", "text", "src"], "rows": moves, "coverage": cov}
     (out / f"{s}.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
     print(f"[moves] {s}: {len(raw)} entries, {n_sent} moves, parsed {n_parsed / max(n_sent, 1):.0%}, "
           f"players linked {n_linked / max(n_players, 1):.0%}", flush=True)
   done = sorted(int(p.stem) for p in out.glob("[0-9][0-9][0-9][0-9].json"))
-  t = cache.get("teams", "all", lambda: nfl.load_teams(), stale=False).drop_duplicates("team_abbr").set_index("team_abbr")
   teams = {a: {"nick": t.at[a, "team_nick"], "logo": t.at[a, "team_logo_espn"], "color": t.at[a, "team_color"]}
            for a in t.index if a not in ESPN_TEAM}
   (out / "index.json").write_text(json.dumps({"v": V, "seasons": done, "current": current, "teams": teams}), encoding="utf-8")

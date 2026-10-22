@@ -828,7 +828,8 @@ class InjuryModel:
                     + (f" (practice {', '.join(words[c] for c in 'DLF' for _ in range(int(getattr(x, 'n_' + c))))})" if x.n_D + x.n_L + x.n_F else ""))
       if x.played_last:
         sh = f"played last game, {round(100 * x.last_pct)}% of snaps" + (f" vs his usual {round(100 * x.usual_pct)}%" if x.usual_pct == x.usual_pct else "")
-        bits.append(sh + (", injury noted during it" if x.hurt_in_game else ""))
+        bits.append(sh + ((", injured during it, then returned" if getattr(x, "hurt_back", 0) == 1 else ", injury noted during it")
+                          if x.hurt_in_game else ""))
       else:
         bits.append(f"missed his last {int(x.missed_run)} game{'s' if x.missed_run > 1 else ''}" if x.missed_run else "did not play last game")
       out[x.gsis_id] = (float(v), lab, "Before this week's first injury report: " + "; ".join(bits)

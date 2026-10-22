@@ -185,6 +185,9 @@ share_normalize_carries = 0.7
 # -0.036 [-0.072, -0.001], points -0.011 [-0.024, +0.001]. Season-end confirmation pre-registered (INSIGHTS (CD)).
 rb_split = true
 rb_wow = true
+# (CJ) Tuesday + week availability models: "hurt in the game, then returned" as an input (gamebooks log returns
+# from 2024). Gate passed 2026-10-21 (tools/hurt_back_eval.py): injury-note rows Brier -0.028 Tuesday, -0.017 week.
+hurt_back = true
 share_normalize_tgt = 0.3
 # A RB / WR / TE in his first game for a team (no snap for it before) gets half his projected targets and carries; the
 # rest goes to same-position teammates who play. Mid-season movers' first games came in at ~40% of projection.

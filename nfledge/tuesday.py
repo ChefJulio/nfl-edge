@@ -47,23 +47,54 @@ def report_rows(d) -> pd.DataFrame:
   return out.assign(season=out.season.astype(int), week=out.week.astype(int)) if len(out) else out
 
 
-def hurt_notes(d, cache) -> set:
+class HurtSet(set):
+  """(gsis, season, week) with an in-game injury note, plus .back: the ones noted back in that game after it ("has
+  returned to the game"), and .ret_seasons: seasons whose gamebooks log returns (2024 on)."""
+
+  def __init__(self, *a):
+    super().__init__(*a)
+    self.back, self.ret_seasons = set(), set()
+
+
+def hurt_notes(d, cache) -> HurtSet:
   """(gsis, season, week) with an in-game injury note (nfledge/ingame.py), for the loaded seasons. The current
   season's notes refresh once they're 6 hours old (2026-10-21: read with stale=False they only refreshed in the later
-  player-logs step, so a Tuesday build's model missed the weekend's newest in-game injuries)."""
+  player-logs step, so a Tuesday build's model missed the weekend's newest in-game injuries). A season cached before
+  returns were kept (no 'kind' column) is re-read once."""
   import nflreadpy as nfl
   from . import ingame
-  out = set()
+  out = HurtSet()
   seasons = sorted(set(d.snaps.season.dropna().astype(int)))
   cur = int(d.current_season)
   for s in seasons:
     rs = cache.get("rosters", s, lambda: nfl.load_rosters_weekly([s]), stale=False)
-    n = ingame.load(cache, nfl, s, rs, stale=s == cur and cache.age_hours("ingame", s) > 6) if rs is not None and len(rs) else None
+    if rs is None or not len(rs):
+      continue
+    n = ingame.load(cache, nfl, s, rs, stale=s == cur and cache.age_hours("ingame", s) > 6)
+    if n is not None and len(n) and "kind" not in n.columns:
+      n = ingame.load(cache, nfl, s, rs, stale=True)
     if n is not None and len(n):
-      n = ingame.hurt_rows(n)
       n = n[(n.season_type == "REG") & n.gsis_id.notna()]
-      out |= set(zip(n.gsis_id, n.season.astype(int), n.week.astype(int)))
+      h = ingame.hurt_rows(n)
+      hurt = set(zip(h.gsis_id, h.season.astype(int), h.week.astype(int)))
+      out |= hurt
+      if "kind" in n.columns and (n.kind == "back").any():
+        out.ret_seasons.add(s)
+        out.back |= hurt - ingame.not_back(n)
   return out
+
+
+def _flag(name: str) -> bool:
+  try:
+    from .config import load_config
+    return bool(load_config().get("experiments", {}).get(name, False))
+  except Exception:
+    return False
+
+
+# (CJ) the "returned to the game" input, from config.toml [experiments] hurt_back when this module loads (the same
+# value at fit and predict time, cached engines included; tools/hurt_back_eval.py flips it directly)
+HURT_BACK = _flag("hurt_back")
 
 
 def hurt_not_back(d, cache, season: int) -> set:
@@ -124,6 +155,7 @@ class _Ctx:
     # plain records (pandas' row tuples can't be pickled, and the engine is cached with pickle)
     self.rep = {(r.gsis_id, r.season, r.week): Rep(r.days, r.game_status) for r in rep_rows.itertuples()}
     self.hurt = hurt
+    self.back, self.ret_seasons = getattr(hurt, "back", set()), getattr(hurt, "ret_seasons", set())
 
   def block(self, g, s: int, team: str, k: int | None, k1: int) -> dict:
     """The Tuesday block for game k1: what is known from his previous team game k (None: no earlier game)."""
@@ -148,7 +180,10 @@ class _Ctx:
       ep_days = _days(e.days) + ep_days
     bd = self.born.get(g)
     lp = self.pct.get((g, s, k), 0.0) if played_k else 0.0
-    return {"status": _gs(r.game_status) if r is not None else "None",
+    hurt = k is not None and (g, s, k) in self.hurt
+    # (CJ) noted back in the game after the injury: 1; no return noted: 0 (seasons that log returns); unknown before
+    back = (1.0 if (g, s, k) in self.back else 0.0 if s in self.ret_seasons else np.nan) if hurt else 0.0
+    return {"hurt_back": back,"status": _gs(r.game_status) if r is not None else "None",
             "n_D": days.count("D"), "n_L": days.count("L"), "n_F": days.count("F"),
             "last_day": SCORE.get(days[-1], np.nan) if days else np.nan,
             "played_last": float(played_k) if k is not None else np.nan, "last_pct": lp, "usual_pct": usual,
@@ -204,6 +239,8 @@ def build_rows(d, rep_rows: pd.DataFrame, hurt: set) -> pd.DataFrame:
 def features(x: pd.DataFrame) -> pd.DataFrame:
   from .injuries import InjuryModel
   f = x[FEATS].astype(float).copy()
+  if HURT_BACK and "hurt_back" in x.columns:
+    f["hurt_back"] = x.hurt_back.astype(float).to_numpy()
   for st in STATUS:
     f[f"st_{st}"] = (x.status == st).astype(float)
   for p in ("QB", "RB", "WR", "TE"):

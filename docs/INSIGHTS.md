@@ -3649,6 +3649,35 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   on past seasons (elevated last week, his position room's absences, depth), projected from their own history.
   GATE: Brier of P(plays) on practice-squad rows vs today's implicit 0, walk-forward 2022-25, CI excluding 0; and the
   fantasy MAE guards. Not built yet.
+  AMENDED 2026-10-21 (before building or any outcome is looked at). (1) Leak found: nflverse's weekly rosters show an
+  elevated player ACT in his elevation week, so backtests already know every elevation, while the live site sees him
+  as practice squad until Saturday. Both arms therefore use the live information set: a week-w ACT row that is an
+  elevation (DEV at w-1 and again DEV at w+1; w+1 is used only to reconstruct what the live site saw, never as a
+  feature) counts as practice squad. (2) The pool: that week's practice-squad QB / RB / WR / TE (DEV at w, or
+  elevated at w). Features, all known before Saturday: position, elevations used this season (3 is the league
+  limit), elevated last week, his position room's absences on this week's injury report (Out / Doubtful / IR among
+  last week's ACT players at the position), prior NFL offensive games. Logistic, refit walk-forward on earlier
+  seasons. Label: offensive snaps > 0. Descriptive base rate (2020-25): 4.3% play the next week. (3) GATE, replacing
+  "vs implicit 0" (any rate beats 0 when 96% don't play): Brier better than a per-position constant base rate (earlier
+  seasons) with the 95% season-week CI excluding 0; teammates whose projection the variant moves > 0.05 (RB / WR /
+  TE): points MAE not worse (CI upper < +0.05); all relevant rows not worse.
+- **PRE-REGISTERED 2026-10-21 (before building): (CJ) "hurt in the game, then returned" in the Tuesday and week
+  models** (owner: Dontayvion Wicks 54% to play: "shouldn't our model downplay 'injured in game, returned'?"). Wicks:
+  injury note wk6 Q4 13:02, "has returned to the game" Q4 9:32; on last week's report (L D F, no game status); 62% of
+  snaps vs his usual 88%. The models' hurt_in_game counts every injury note, returned or not. Descriptive
+  (scratch/hurt_back.py, skill players, REG): next game played after a note with a return 0.859 (n 220, 2024-25), with
+  no return 0.517 (n 783; 2024 0.275, 2025 0.365). Gamebooks log returns only from 2024, so earlier notes can't be
+  split. Variant (experiments.hurt_back): add hurt_back = 1 returned / 0 no return (2024 on) / missing (a note in a
+  season without return logging) / 0 no note; nothing else changes. TEST (tools/hurt_back_eval.py): walk-forward
+  (train on seasons before), Tuesday model and week model, test seasons 2025 and 2026 to date (2024's models train on
+  seasons without returns). GATE: Brier on rows with an injury note lower with the 95% season-week CI excluding 0;
+  all rows not worse (CI upper < +0.0005).
+- **RESULT {#hurt-back} PASS, SHIPPED 2026-10-21: (CJ) "hurt in the game, then returned".** 6,269 injury notes
+  2016-26, 1,155 with a return (logged 2024 on). Walk-forward, test 2025 + 2026 to date. Tuesday model: injury-note
+  rows Brier 0.1662 -> 0.1382, -0.0280 [-0.0345, -0.0214] (n 1,048; 2025 -0.0255, 2026 -0.0365); all rows -0.0040
+  [-0.0051, -0.0028]. Week model: injury-note rows 0.1173 -> 0.1007, -0.0166 [-0.0212, -0.0119] (n 3,128); all rows
+  -0.0018 [-0.0024, -0.0011]. Returned: played 0.887, predicted 0.753 -> 0.874 (Tuesday); no return: played 0.295,
+  predicted 0.478 -> 0.389. experiments.hurt_back = true. The explanation says "injured during it, then returned".
 - **DESCRIPTIVE 2026-10-21 (owner's friend: "Pat Surtain's OPRK for WR1 is #1 hardest ... shadow CB can nuke WRs"):
   WR1 suppression is not a lasting defensive trait.** tools/wr1_suppression.py, play-by-play 2016-25, 4,212 team-games:
   WR1 / WR2 = an offense's top two WRs by targets before the game; result = half-PPR points minus his own average over
