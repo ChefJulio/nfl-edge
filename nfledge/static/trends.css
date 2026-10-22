@@ -110,3 +110,10 @@ table.tr-grid .tr-gall { border-left: 2px solid var(--line); } table.tr-grid th.
 .tq-applybar .tq-done { margin-top: 0; }
 .tq-act:disabled { opacity: .45; cursor: default; }
 .tq-chip.tq-not { border-color: color-mix(in srgb, #ff8f84 60%, var(--line)); background: color-mix(in srgb, #ff8f84 12%, var(--panel)); }
+/* linked number boxes under a range slider, and beside the Minimum slider */
+.tq-rnums { display: flex; align-items: center; gap: 10px; margin: 12px 0 0; }
+.tq-rnums label { flex: 1; display: flex; align-items: center; gap: 8px; font-size: var(--fs-sm); color: var(--muted); }
+.tq-rnums input, .tq-mnum { min-width: 0; width: 100%; box-sizing: border-box; font: inherit; font-size: 16px; font-weight: 700; color: var(--ink); color-scheme: dark;
+  background: var(--panel2); border: 1px solid var(--line); border-radius: var(--r-md); padding: 8px 10px; font-variant-numeric: tabular-nums; }
+.tq-mnum { width: 4.6em; flex: none; padding: 6px 8px; text-align: center; }
+.tq-rnums input:focus, .tq-mnum:focus { outline: 2px solid var(--accent); outline-offset: 1px; }

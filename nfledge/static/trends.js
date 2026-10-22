@@ -324,8 +324,21 @@
     fgd: { get: (P, j) => (P.kd[j] < 0 ? null : P.kd[j]), min: 18, max: 65, openLo: true, openHi: true, say: (lo, hi) => `${span(lo, hi)} yd kicks` },
   };
   Object.entries(RANGES).forEach(([k, r]) => { FILTERS[k].range = r; });
+  const clock = m => { const h = Math.floor(m / 60), mm = String(m % 60).padStart(2, '0'); return `${((h + 11) % 12) + 1}:${mm} ${h < 12 ? 'a.m.' : 'p.m.'}`; };
+  const outdoor = (P, j, G, c) => { const g = gm(P, j, G); return g[4] || g[c] <= -999 ? null : g[c]; };
   const RNDL = x => (x >= 8 ? 'undrafted' : x >= 7 ? '7th+' : ordn(x));
   Object.assign(FILTERS, {
+    // owner 2026-10-22 ("exact temperature and kickoff time"): outdoor games only for weather (domes have none)
+    temp: { label: 'Temperature', group: 'Game', opts: [], range: { get: (P, j, G) => outdoor(P, j, G, 6), min: 0, max: 100, openLo: true, openHi: true,
+      unit: 'degrees F at kickoff (outdoor games)', tick: x => `${x} F`, presets: [['freezing (32 or below)', 0, 32], ['cold (40 or below)', 0, 40], ['hot (80+)', 80, 100]],
+      say: (lo, hi) => `${span(lo, hi, x => `${x} F`)} outdoors` } },
+    wind: { label: 'Wind', group: 'Game', opts: [], range: { get: (P, j, G) => outdoor(P, j, G, 7), min: 0, max: 30, openHi: true,
+      unit: 'mph at kickoff (outdoor games)', tick: x => `${x} mph`, presets: [['calm (under 5)', 0, 4], ['windy (15+)', 15, 30], ['very windy (20+)', 20, 30]],
+      say: (lo, hi) => `wind ${span(lo, hi, x => `${x} mph`)}` } },
+    kick: { label: 'Kickoff time', group: 'Game', g: true, opts: [], range: { get: (P, j, G, V, D) => { const m = gx(P, j, D, 5); return m >= 0 ? m : null; },
+      min: 540, max: 1260, step: 5, openLo: true, openHi: true, input: 'time', unit: 'Eastern time', tick: clock,
+      presets: [['morning (overseas)', 540, 690], ['1 p.m. window', 780, 840], ['late afternoon', 900, 1020], ['night (7 p.m. or later)', 1140, 1260]],
+      say: (lo, hi) => `kickoff ${span(lo, hi, clock, ' or later', ' or earlier')} ET` } },
     yds: { label: 'Yards gained', group: 'Result', opts: [], range: { get: (P, j) => P.y[j], min: -10, max: 50, openLo: true, openHi: true,
       presets: [['10+ yards', 10, 50], ['20+', 20, 50], ['40+', 40, 50], ['no gain or a loss', -10, 0]],
       say: (lo, hi) => (lo >= 1 ? `gained ${span(lo, hi)} yards` : hi === 0 && lo === -Infinity ? 'no gain or a loss' : `${span(lo, hi)} yards`) } },
@@ -478,7 +491,7 @@
             <div class="tq-row tq-frow"><span class="tq-k">Only when</span><span class="tq-v tq-chips">${chips}<button type="button" class="tq-add" data-pick="add">+ Add</button></span></div>
             ${row('seasons', 'Seasons', esc(seasonsTxt()))}
             ${row('by', 'Break down', esc(byTxt()))}
-            <div class="tq-row tq-mrow"><span class="tq-k">Minimum</span><span class="tq-v tr-min"><button type="button" class="tr-step" data-step="-1" aria-label="One fewer">&minus;</button><input type="range" min="0" max="${Math.max(maxN, Q.min ?? fam.min, fam.min * 2)}" step="1" value="${Q.min ?? fam.min}" aria-label="Minimum sample"><button type="button" class="tr-step" data-step="1" aria-label="One more">+</button> <b>${Q.min ?? fam.min}</b><span class="tr-w">${esc(fam.unit)}</span></span></div>
+            <div class="tq-row tq-mrow"><span class="tq-k">Minimum</span><span class="tq-v tr-min"><button type="button" class="tr-step" data-step="-1" aria-label="One fewer">&minus;</button><input class="tq-mrange" type="range" min="0" max="${Math.max(maxN, Q.min ?? fam.min, fam.min * 2)}" step="1" value="${Q.min ?? fam.min}" aria-label="Minimum sample"><button type="button" class="tr-step" data-step="1" aria-label="One more">+</button> <input class="tq-mnum" type="number" inputmode="numeric" min="0" step="1" value="${Q.min ?? fam.min}" aria-label="Minimum ${esc(fam.unit)}"><span class="tr-w">${esc(fam.unit)}</span></span></div>
           </div>
           <div class="tq-acts"><button type="button" class="tq-act" data-pick="examples">Examples</button><button type="button" class="tq-act tr-share">Copy link</button><button type="button" class="tq-act tq-csv" data-csv="1">Download CSV</button><button type="button" class="tq-act tq-reset">Reset</button></div>`;
       };
@@ -699,17 +712,26 @@
       const pickRange = (k, opener) => {
         const F = FILTERS[k], r = F.range, el = panel(), step = r.step || 1, tick = r.tick || (x => `${x}`);
         let neg = isNot(k), moved = false;
+        // the number boxes (owner 2026-10-22: "text input fields that are linked to the slider"): a time picker for clock
+        // values; typing moves the handle, dragging rewrites the box
+        const isTime = r.input === 'time';
+        const box = isTime ? `type="time" step="${step * 60}"` : `type="number" inputmode="decimal" step="${step}" min="${r.min}" max="${r.max}"`;
+        const toBox = v => (isTime ? `${String(Math.floor(v / 60)).padStart(2, '0')}:${String(v % 60).padStart(2, '0')}` : `${v}`);
+        const fromBox = t => { if (isTime) { const [h, mm] = t.split(':').map(Number); return h * 60 + mm; } return parseFloat(t); };
+        const snap = v => Math.min(r.max, Math.max(r.min, Math.round((v - r.min) / step) * step + r.min));
         let [lo, hi] = isR(F, Q.f[k]) ? Q.f[k].slice(2).split('~').map(Number) : [r.min, r.max];
         const chips = [...F.opts.filter(o => !r.chips || r.chips.includes(o[0])).map(o => [o[1], o[0]]), ...(r.presets || []).map(([l, a, b]) => [l, `R:${a}~${b}`])];
         el.innerHTML = `${notSeg(k, neg)}<p class="tq-rv"></p>
           <div class="tq-range"><i class="tq-rtrack"><i class="tq-rfill"></i></i>
             <input type="range" class="tq-lo" min="${r.min}" max="${r.max}" step="${step}" value="${lo}" aria-label="From">
             <input type="range" class="tq-hi" min="${r.min}" max="${r.max}" step="${step}" value="${hi}" aria-label="To"></div>
-          <div class="tq-rends"><span>${esc(tick(r.min))}${r.openLo ? ' or less' : ''}</span>${r.unit ? `<span class="muted">${esc(r.unit)}</span>` : ''}<span>${esc(tick(r.max))}${r.openHi ? '+' : ''}</span></div>
+          <div class="tq-rends"><span>${esc(tick(r.min))}${r.openLo ? (isTime ? ' or earlier' : ' or less') : ''}</span>${r.unit ? `<span class="muted">${esc(r.unit)}</span>` : ''}<span>${esc(tick(r.max))}${r.openHi ? (isTime ? ' or later' : '+') : ''}</span></div>
+          <div class="tq-rnums"><label>From <input class="tq-nlo" ${box}></label><label>To <input class="tq-nhi" ${box}></label></div>
           <button type="button" class="tq-act tq-done" data-apply="1">Apply</button>
           ${chips.length ? `<h4 class="tq-h">Quick picks</h4><div class="tq-chipset">${chips.map(([l, v]) => `<button type="button" class="${Q.f[k] === v ? 'on' : ''}" data-fv="${esc(v)}">${esc(l)}</button>`).join('')}</div>` : ''}
           ${rmBtn(k)}`;
         const L = el.querySelector('.tq-lo'), H = el.querySelector('.tq-hi'), fill = el.querySelector('.tq-rfill'), out = el.querySelector('.tq-rv');
+        const NL = el.querySelector('.tq-nlo'), NH = el.querySelector('.tq-nhi');
         const draw = () => {
           const pct = x => (100 * (x - r.min)) / (r.max - r.min);
           fill.style.left = `${pct(lo)}%`; fill.style.right = `${100 - pct(hi)}%`;
@@ -717,9 +739,27 @@
           // a preset value (not a range) shows by name until a handle moves
           out.textContent = !moved && k in Q.f && !isR(F, Q.f[k]) ? cap(optLabel(k).replace(/^not /, '')) : any ? 'Any (drag the ends)' : cap(r.say(...parseR(F, `R:${lo}~${hi}`)));
           L.style.zIndex = lo >= r.max - step ? 3 : 2;  // a handle pushed to the far end stays grabbable
+          if (document.activeElement !== NL) NL.value = toBox(lo);
+          if (document.activeElement !== NH) NH.value = toBox(hi);
         };
         L.addEventListener('input', () => { lo = Math.min(+L.value, hi); L.value = lo; moved = true; draw(); });
         H.addEventListener('input', () => { hi = Math.max(+H.value, lo); H.value = hi; moved = true; draw(); });
+        // typing: move the handle as soon as the number makes sense; settle (order, bounds) when the box is left
+        const typed = (box2, isLo, settle) => {
+          const v = fromBox(box2.value);
+          if (!isFinite(v)) { if (settle) draw(); return; }
+          const x = snap(v);
+          if (isLo) lo = settle ? Math.min(x, hi) : x; else hi = settle ? Math.max(x, lo) : x;
+          if (lo > hi) { if (isLo) hi = lo; else lo = hi; }
+          L.value = lo; H.value = hi; moved = true;
+          if (settle) box2.value = toBox(isLo ? lo : hi);
+          draw();
+        };
+        [[NL, true], [NH, false]].forEach(([b2, isLo]) => {
+          b2.addEventListener('input', () => typed(b2, isLo, false));
+          b2.addEventListener('change', () => typed(b2, isLo, true));
+          b2.addEventListener('keydown', e => { if (e.key === 'Enter') { typed(b2, isLo, true); b2.blur(); } });
+        });
         draw();
         el.addEventListener('click', e => {
           const n = flipNot(el, e); if (n != null) { neg = n; return; }
@@ -1057,18 +1097,24 @@
       const update = () => { Object.keys(Q.fn).forEach(k => { if (!(k in Q.f)) delete Q.fn[k]; }); save(); render(); run(); };
 
       // ---- events (delegated: the builder redraws on every change)
+      // the minimum: slider, number box and -/+ all set it; re-filter only (the counts don't depend on it)
+      const setMin = (v, from) => {
+        Q.min = Math.max(0, Math.round(v));
+        const R = qbox.querySelector('.tq-mrange'), N = qbox.querySelector('.tq-mnum');
+        if (R) { if (Q.min > +R.max) R.max = Q.min; if (from !== R) R.value = Q.min; }
+        if (N && from !== N) N.value = Q.min;
+        save();
+        if (paint) paint();
+      };
       qbox.addEventListener('input', e => {
-        if (!e.target.matches('.tr-min input')) return;
-        Q.min = +e.target.value; qbox.querySelector('.tr-min b').textContent = Q.min; save();
-        if (paint) paint();  // re-filter only: the counts don't depend on the minimum
+        if (e.target.matches('.tq-mrange')) setMin(+e.target.value, e.target);
+        else if (e.target.matches('.tq-mnum') && e.target.value !== '' && isFinite(+e.target.value)) setMin(+e.target.value, e.target);
       });
+      qbox.addEventListener('change', e => { if (e.target.matches('.tq-mnum')) setMin(+e.target.value || 0); });
       qbox.addEventListener('click', e => {
         const stp = e.target.closest('.tr-step');
         if (stp) {
-          const inp = qbox.querySelector('.tr-min input'), cur = Q.min ?? FAM[Q.fam].min;
-          Q.min = Math.max(0, Math.min(+inp.max, cur + +stp.dataset.step));
-          inp.value = Q.min; qbox.querySelector('.tr-min b').textContent = Q.min; save();
-          if (paint) paint();
+          setMin((Q.min ?? FAM[Q.fam].min) + +stp.dataset.step);
           return;
         }
         const x = e.target.closest('[data-x]');
@@ -1089,7 +1135,7 @@
           const title = qbox.querySelector('.tq-sum').textContent.replace(/\s+/g, ' ').trim();
           const text = [[title], ...csvRows].map(r => r.map(cell).join(',')).join('\r\n');
           const a = document.createElement('a');
-          a.href = URL.createObjectURL(new Blob(['﻿' + text], { type: 'text/csv;charset=utf-8' }));
+          a.href = URL.createObjectURL(new Blob(['\ufeff' + text], { type: 'text/csv;charset=utf-8' }));
           a.download = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80) || 'trends'}.csv`;
           document.body.appendChild(a); a.click(); a.remove();
           setTimeout(() => URL.revokeObjectURL(a.href), 4000);
