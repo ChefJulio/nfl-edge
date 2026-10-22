@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 22cea0365bfd533c
+documented_code_hash: 8082607fb7f1c9a1
 ---
 # How the model works
 
@@ -521,6 +521,7 @@ Durability is games missed injured per 1,000 snaps on the field since 2013 (offe
 - **Adopted** - Before a team's practice reports, a player hurt during his last game who came back into it is now treated very differently from one who didn't: those who returned played the next game 89% of the time, those who didn't 30%. Midweek availability predictions for players with an in-game injury got clearly more accurate (2025-26) (2026-10). <!-- tried:hurt-back -->
 - **Removed** - The in-week chance-to-play model's calibration step (a correction learned from a previous model's mistakes): without it the chances were more accurate (error lower 2021-25 and on 2026 games it never saw), mainly because it had pushed low chances up for players not practicing (2026-10). <!-- tried:week-calib -->
 - **Adopted (owner's design call)** - The mid-week chance to play reads each player's practice line by his team's report calendar (a day he wasn't listed marked as such) instead of counting his own listed days. Slightly better (Brier -0.0006) and clearly better for players added to the report mid-week, but too small to prove on its own; it gets a season-end check (2026-10). <!-- tried:stage-calendar -->
+- **Rejected** - Should team defense ratings get their own amount of shrinkage instead of sharing offense's? - No: the tuning wanted defense pulled in even harder (defense is about half as predictable week to week as offense), and game score predictions got worse (margin error +0.06 points, 2021-25) (2026-10). <!-- tried:def-shrink -->
 
 ## Rule changes and scoring eras
 

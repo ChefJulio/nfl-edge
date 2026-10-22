@@ -39,6 +39,9 @@ GAME_STATUSES = ("None", "QUESTIONABLE", "DOUBTFUL")
 GAMEDAY_ACTIVE = {"questionable": 0.974, "doubtful": 0.286}  # (AU) played rate once declared active, 2019-25 skill players
 
 
+OUT_RET_PRIOR = 0.018  # ESPN Out with a return date past the game: 1.8% played early in the week (n 652, {#tags})
+
+
 def filed_dates(data, season: int, week: int) -> dict:
   """team -> sorted report dates of this week whose report is in our practice data (anyone on it listed that day).
   A day not here hasn't reached us yet, even past its deadline: "not listed = practiced fully" only holds on a day
@@ -970,7 +973,11 @@ class InjuryModel:
         b = self.espn_bridge[row.gsis_id]
         rate = (self.espn_rates or {}).get(b)
         base = "Out" if b == "Out+ret" else b
-        p.at[i, "avail"] = 0.0 if b == "IR" else float(rate["p"] if rate else self.p_next.get(base, 1.0))
+        # Out with a return date past this game: its own measured rate when there are no learned outcomes yet (1.8%,
+        # n 652, {#tags}); the plain-Out carry-forward (~33%) contradicted the O tag this bucket gets (2026-10-22,
+        # tools/scenario_audit.py S15)
+        fallback = OUT_RET_PRIOR if b == "Out+ret" else self.p_next.get(base, 1.0)
+        p.at[i, "avail"] = 0.0 if b == "IR" else float(rate["p"] if rate else fallback)
         p.at[i, "status"] = "Out (ESPN; return date after this game)" if b == "Out+ret" else f"{b} (ESPN)"
       elif self.cfg.get("injuries", {}).get("tuesday") and row.gsis_id in (tues if tues is not None else (tues := self.tuesday_probs(season, week))):
         # Before his team's first report: the Tuesday model (nfledge/tuesday.py; INSIGHTS (G) / (G2))

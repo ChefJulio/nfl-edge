@@ -282,6 +282,8 @@ class Design:
                         np.full(len(plays), 2 + 2 * n)])
     self.base_p = 2 * n + 3
     self.inexp_alpha = 1.0
+    self.n_teams = n
+    self.def_ratio = 1.0  # (CM) the defense penalty as a multiple of the unit's penalty (1 = shared, production)
     self.qbs = []
     self.i_inexp = self.i_new = None
     if qbs and "qb" in plays:
@@ -322,6 +324,9 @@ class Design:
     the penalty alpha_qb x (beta - mu)^2 moves alpha_qb x mu to the right-hand side."""
     pen = np.full(self.p, alpha)
     pen[0] = 0.0
+    if getattr(self, "def_ratio", 1.0) != 1.0:
+      n = self.n_teams
+      pen[1 + n:1 + 2 * n] = alpha * self.def_ratio
     if self.qbs:
       pen[self.base_p:self.base_p + len(self.qbs)] = alpha_qb
       pen[self.i_inexp] = self.inexp_alpha  # inexperienced-QB indicator: lightly penalized league-level effect
@@ -559,11 +564,13 @@ class TeamModel:
     """Time-split CV: for each (season, week) fold, fit on everything before that week, predict that week's
     team-game offensive EPA/play, score weighted MSE. Never random CV."""
     grid = self.cfg["team_model"]["alpha_grid"]
+    # (CM) EXPERIMENT team_model.def_alpha_ratios: the defense penalty as a multiple of the unit's, tuned jointly
+    ratios = [float(r) for r in self.cfg["team_model"].get("def_alpha_ratios", [1.0])]
     best = {}
     for u in self.units:
       p = self.plays[u]
       d = self.designs[u]
-      losses = np.zeros(len(grid))
+      losses = np.zeros((len(ratios), len(grid)))
       for season, week in folds:
         test = ((p.season == season) & (p.week == week)).to_numpy()
         if not test.any():
@@ -572,15 +579,21 @@ class TeamModel:
         tg = p[test].groupby(["game_id", "posteam"]).agg(epa=("epa", "mean"), n=("epa", "size"))
         Xt = d.X[test]
         A, b = d.normal(w)
-        for i, a in enumerate(grid):
-          pred = Xt @ d.solve_normal(A, b, a)
-          pg = pd.Series(pred).groupby([p.game_id[test].to_numpy(), p.posteam[test].to_numpy()]).mean()
-          pg.index.names = ["game_id", "posteam"]
-          err = tg.epa - pg.reindex(tg.index)
-          losses[i] += float(np.sum(tg.n * err ** 2))
+        for j, r_ in enumerate(ratios):
+          d.def_ratio = r_
+          for i, a in enumerate(grid):
+            pred = Xt @ d.solve_normal(A, b, a)
+            pg = pd.Series(pred).groupby([p.game_id[test].to_numpy(), p.posteam[test].to_numpy()]).mean()
+            pg.index.names = ["game_id", "posteam"]
+            err = tg.epa - pg.reindex(tg.index)
+            losses[j, i] += float(np.sum(tg.n * err ** 2))
+      j, i = np.unravel_index(int(np.argmin(losses)), losses.shape)
+      d.def_ratio = ratios[j]
       # alpha_scale (BU): a multiplier on the CV choice, to test shrinkage tuned on game outcomes; 1 = as tuned
-      best[u] = float(grid[int(np.argmin(losses))]) * float(self.cfg["team_model"].get("alpha_scale", 1.0))
-      self.cv_loss[u] = float(np.min(losses))
+      best[u] = float(grid[i]) * float(self.cfg["team_model"].get("alpha_scale", 1.0))
+      self.cv_loss[u] = float(losses[j, i])
+      if len(ratios) > 1:
+        print(f"[team model] (CM) {u}: penalty {grid[i]}, defense x{ratios[j]}", flush=True)
     self.alphas = best
     if self.use_qb:
       self._tune_qb_alpha(folds)

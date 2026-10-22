@@ -3754,6 +3754,41 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   measured slice beyond 2025's +0.0007. config experiments.stage_from = "calendar"; live availability builds the same
   line from the team's filed report days. **PRE-REGISTERED (CL) season-end confirmation:** 2026 weeks 7-18, stages
   1-3 rows on the report, live archive vs an "own" rebuild: Brier not worse (CI upper < +0.0005), else switch off.
+- **PRE-REGISTERED 2026-10-22 (owner: "our model seems to weight offense more strongly than defense ... why?"):
+  (CM) a separate shrinkage for defense.** Descriptive first: this week's power ratings spread (SD, pts/game) offense
+  3.23 (pass 3.11, run 0.33), defense 0.89 (pass 0.81, run 0.19). Play-by-play 2016-25, team EPA/play: odd vs even
+  weeks r offense 0.59, defense 0.28; season to season 0.42 vs 0.28; SD across team-seasons 0.087 vs 0.068. So
+  defense is noisier and the same penalty pulls it in harder; reliability-corrected true spread ~1.8x for offense,
+  the ratings show 3.6x (part of the gap: pass offense carries the QB term). Today one ridge penalty per unit covers
+  offense and defense alike. Variant (team_model.def_alpha_ratios = [0.33, 1, 3]): the defense penalty a multiple of
+  the unit's, tuned jointly in the same time-split CV. TEST: tools/game_eval.py 2021-25 --only=fitted, paired per game
+  (--save), model-only margin MAE and total MAE; then tools/experiments.py fantasy MAE. GATE: margin MAE lower with
+  the 95% season-week CI excluding 0, total MAE not worse (CI upper < +0.05), fantasy MAE all rows not worse (CI upper
+  < +0.003). Reported: the multiplier CV picks per unit and season.
+- **RESULT {#def-shrink} (CM) a separate shrinkage for defense: FAIL (worse).** CV chose defense x3 (MORE
+  shrinkage) for pass and rush in every season and never x0.33. tools/game_eval.py 2021-25, 1,279 games, paired:
+  margin MAE 10.289 -> 10.346, +0.057 [+0.021, +0.092] (worse every season); total MAE +0.013 [-0.023, +0.048].
+  Fantasy step not run (game gate failed). Answer to the owner: defense ratings are smaller because defense is less
+  predictable (odd/even-week r 0.28 vs 0.59), and freeing its shrinkage made game predictions worse, not better; the
+  shared penalty stays. team_model.def_alpha_ratios defaults to [1.0] (off).
+- **TOOL 2026-10-22 (owner: "scenarios for hypothetical players that would trip up our model ... have we covered
+  them all?"): tools/scenario_audit.py,** 27 synthetic players planted in the live season's data (real teams and
+  schedules), each with a scripted history and week state, run through production (availability, designations,
+  tag_map) against the owner's rules. First run: 25 pass after harness fixes. Found: (1) ESPN Out with a return date
+  past the game showed O but 33% to play when learned ESPN rates were missing (fallback was plain Out's carry-forward):
+  FIXED, fallback = the bucket's measured 1.8% (injuries.OUT_RET_PRIOR). (2) S06 hurt, not back, then a bye: 21%
+  (same as without the bye). Owner's fair comparison (scratch/bye_fair.py): played the game ~2 weeks after an in-game
+  injury, all notes 2016-25: after a bye 65.3% (n 118) vs no bye, two games later 64.8% (n 1,221): the bye is only
+  time. The Tuesday model doesn't know time (next game is next game). (3) S11 Q, no practice all week, after a normal
+  game: 51% vs 35.4% played for that profile (n 48, 2021-25; model then 45-49%). Not covered yet: Monday-night timing
+  and extra report days (both follow the real clock; the harness needs a "now").
+- **PRE-REGISTERED 2026-10-22 (owner: "teach it time"): (CN) the Tuesday model learns elapsed time.** Variant
+  (tuesday.TIME_ROWS): input days = days from his last team game to the game predicted; training also gets, for every
+  Tuesday row whose next team game is under 12 days away, a second row from the same post-game-k information
+  predicting his team's first game 12-16 days after k (label: played it), with its days. Prediction rows unchanged
+  (the real next game). TEST (tools/time_rows_eval.py): walk-forward, test 2021-25 + 2026 to date, real rows only.
+  GATE: Brier on rows whose next game follows a bye lower with the 95% season-week CI excluding 0; all rows not worse
+  (CI upper < +0.0005). Reported: calibration on bye rows, hurt-not-back bye rows.
 - **DESCRIPTIVE 2026-10-21 (owner's friend: "Pat Surtain's OPRK for WR1 is #1 hardest ... shadow CB can nuke WRs"):
   WR1 suppression is not a lasting defensive trait.** tools/wr1_suppression.py, play-by-play 2016-25, 4,212 team-games:
   WR1 / WR2 = an offense's top two WRs by targets before the game; result = half-PPR points minus his own average over
