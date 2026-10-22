@@ -3831,6 +3831,18 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   rows, nflverse 23. Rams map to LA. NFL.com unreachable: a logged WARNING and nflverse's table (never a mix).
   injuries.published_teams / listed_now back to one table. tools/scenario_audit.py now builds its report rows the
   same way: 25 of 27 pass (S06, S11 the known model gaps).
+- **SHIPPED 2026-10-22 (owner: "if we use a calendar date timeline we can be precise about timing at every point ...
+  if anything is missing it's not silent"): the injury chronology,** nfledge/chronology.py. For each team's game at a
+  moment `now`: its report days (practice_calendar + any extra day filed) with 4 p.m. ET deadlines, each upcoming /
+  due / overdue (deadline + 75 min, not on NFL.com) / filed; stage = filed days; final = every day filed, a game status
+  posted, or kickoff. CHANGED RULE: (AP)'s "final once the third deadline passes" made a missing final report read as
+  "no game status" (silent); now it's OVERDUE and the team stays at its filed stage. injuries.chrono feeds
+  published_teams, final_report_teams (availability, tags, ESPN bridge, reserve windows); InjuryModel.now (default
+  the real time) sets the moment. Loud: run.py logs a WARNING per overdue team, index.json "overdue", the health tile
+  shows the day as "Overdue" (not "Not in yet"), tools/news_watch.py builds as soon as an overdue report appears on
+  NFL.com. Seasons without dated reports (before 2018) keep the old rule. tools/scenario_audit.py takes a moment per
+  scenario (hours from kickoff): S28 Monday team Sunday 9 p.m. with Saturday missing (stage 2, overdue, not final),
+  S29 Sunday team Saturday 10 a.m. with Friday missing, S30 a travel week's extra report day: 28 of 30 pass (S06, S11).
 - **DESCRIPTIVE 2026-10-21 (owner's friend: "Pat Surtain's OPRK for WR1 is #1 hardest ... shadow CB can nuke WRs"):
   WR1 suppression is not a lasting defensive trait.** tools/wr1_suppression.py, play-by-play 2016-25, 4,212 team-games:
   WR1 / WR2 = an offense's top two WRs by targets before the game; result = half-PPR points minus his own average over

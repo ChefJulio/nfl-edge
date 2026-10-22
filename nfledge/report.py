@@ -629,7 +629,7 @@ def week_data(ctx: dict) -> str:
   out = {"season": ctx["season"], "week": ctx["week"], "generated": ctx["generated"], "archive": ctx["archive"],
          "power": power, "teams": ctx.get("teams", {}),
          "lookahead": ctx["lookahead"], "tossup_pct": ctx["tossup_pct"], "espn_team": ESPN_TEAM,
-         "score": json.loads(ctx["score_cfg"]), "players": players, "tags": ctx.get("tags") or {}, "filed": ctx.get("filed") or {}, "games": games, "rk": rk,
+         "score": json.loads(ctx["score_cfg"]), "players": players, "tags": ctx.get("tags") or {}, "filed": ctx.get("filed") or {}, "overdue": ctx.get("overdue") or {}, "games": games, "rk": rk,
          # v3 (Phase 6): everything the page used to render on the server - Roles, the Power column scale, the header
          "roles": [{k: r.get(k) for k in ("pid", "name", "pos", "team", "week", "snap_now", "snap_prev", "opp_now",
                                           "opp_prev", "touches", "takeaway")} for r in ctx.get("roles") or []],

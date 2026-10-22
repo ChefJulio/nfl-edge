@@ -61,11 +61,26 @@ def filed_dates(data, season: int, week: int) -> dict:
   return {t: sorted(v) for t, v in out.items()}
 
 
-def published_teams(data, season: int, week: int) -> set:
-  """Teams whose report for this week is out. The current season's injury table is built from NFL.com's report
-  (data.injuries_from_nflcom, owner 2026-10-22: one source), so this, the practice lines and the filed days can't
-  disagree (Tyler Shough: nflverse's copy lagged a day while NFL.com's Wednesday report showed on his card)."""
-  inj = data.injuries  # the current season's table IS NFL.com's report (data.injuries_from_nflcom): one source
+def chrono(data, season: int, week: int, now=None):
+  """The week's injury chronology (nfledge/chronology.py) at `now` (None: the real time), or None for a season
+  without dated practice reports (before 2018), where the injury table alone decides."""
+  pr = data.practice
+  if pr is None or "dates" not in pr:
+    return None
+  x = pr[pr.season == season]
+  if not len(x) or not x.dates.fillna("").ne("").any():
+    return None
+  from .chronology import Chronology
+  return Chronology(data, season, week, now)
+
+
+def published_teams(data, season: int, week: int, now=None) -> set:
+  """Teams whose report for this week is out: from the chronology (a team's dated report days on NFL.com's report,
+  owner 2026-10-22: one source, expected vs filed by the calendar); seasons without dated reports: the injury table."""
+  c = chrono(data, season, week, now)
+  if c is not None:
+    return c.published_teams()
+  inj = data.injuries
   return set(inj[(inj.season == season) & (inj.week == week) & (inj.game_type == "REG")].team.replace({"LAR": "LA"}))
 
 
@@ -397,8 +412,13 @@ class InjuryModel:
     return np.where(rows.game_status.to_numpy() == "OUT", 0.0, p)
 
   def final_report_teams(self, days: pd.DataFrame, season: int, week: int) -> set:
-    """Teams whose final report for the week is out: someone on it has a game status, or it has 3 practice days.
-    days: this week's practice rows indexed by gsis_id."""
+    """Teams whose final report for the week is out. With dated reports: the chronology (every report day filed, a
+    game status posted, or the game kicked off; a final day past its deadline and not filed is OVERDUE, not final:
+    owner 2026-10-22, "if anything is missing it's not silent"). Without (before 2018): someone on it has a game
+    status, or it has 3 practice days, or the third report day's deadline passed. days: this week's practice rows."""
+    c = chrono(self.data, season, week, getattr(self, "now", None))
+    if c is not None:
+      return c.final_teams()
     r = self.data.rosters
     r = r[(r.season == season) & (r.week <= week)].sort_values("week").drop_duplicates("gsis_id", keep="last")
     team = days.index.map(dict(zip(r.gsis_id, r.team)))
@@ -410,7 +430,7 @@ class InjuryModel:
     # deadline has passed (nfledge/week_clock.py, per team; Thursday / Monday / Saturday games included). The rule
     # above was sometimes late (nobody listed all week), never early: Brier 0.173 -> 0.108 on those rows, 2021-25.
     from .week_clock import Clock
-    fin |= Clock(self.data.schedules).final_report_teams(season, week)
+    fin |= Clock(self.data.schedules, getattr(self, "now", None)).final_report_teams(season, week)
     return fin
 
   def prob(self, rep: str, prac: str) -> float:
@@ -879,7 +899,7 @@ class InjuryModel:
     inj = inj[(inj.season == season) & (inj.game_type == "REG")].dropna(subset=["gsis_id"])
     cur = inj[inj.week == week]
     prev = inj[inj.week == week - 1]
-    published = published_teams(self.data, season, week)
+    published = published_teams(self.data, season, week, getattr(self, "now", None))
     p = p.copy()
     p["avail"], p["status"], p["partial_week"], p["on_report"] = 1.0, "", False, False
     p["tuesday"] = ""  # report.inactive_why: why the Tuesday model says what it says
@@ -1049,7 +1069,7 @@ class InjuryModel:
     report, so a Tuesday Q holds through the bye until his team's first report of the week it plays again.
     p: rows with gsis_id and team."""
     out = [""] * len(p)
-    published = published_teams(self.data, season, week)
+    published = published_teams(self.data, season, week, getattr(self, "now", None))
     pr, days, final = self.data.practice, None, set()
     if pr is not None:
       days = pr[(pr.season == season) & (pr.week == week)].drop_duplicates("gsis_id", keep="last").set_index("gsis_id")

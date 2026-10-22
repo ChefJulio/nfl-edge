@@ -166,6 +166,15 @@ def cached_backtest(data, cfg, scoring) -> tuple[pd.DataFrame | None, list[int]]
   return res, seasons
 
 
+def overdue_reports(data, season: int, week: int) -> dict:
+  from nfledge.injuries import chrono
+  c = chrono(data, season, week)
+  od = c.overdue() if c is not None else {}
+  for t, ds in sorted(od.items()):
+    print(f"[run] WARNING: {t}'s practice report for {', '.join(ds)} is overdue (past the 4 p.m. ET deadline, not on NFL.com)", flush=True)
+  return od
+
+
 def display_week(data, now: pd.Timestamp | None = None) -> int:
   """The week the page shows (nfledge/week_clock.py): the week being played until 06:00 ET on the Tuesday after its
   last game (a Monday night game is still 'this week'; a game not final holds it), then the next week."""
@@ -238,6 +247,9 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
     "tags": (eng.injury_model.tag_map(season, week, proj) if eng.injury_model is not None and not (archive or lookahead) else {}),
     # team -> this week's report dates in our data (the health tile's "not listed = full" only on those days)
     "filed": (eng.injury_model.filed_dates(season, week) if eng.injury_model is not None and not (archive or lookahead) else {}),
+    # team -> report dates past their deadline (+ grace) and not in our data (nfledge/chronology.py): shown, never
+    # read as "practiced fully" (owner 2026-10-22: "if anything is missing it's not silent")
+    "overdue": (overdue_reports(data, season, week) if not (archive or lookahead) else {}),
     "games": with_weather(rp.matchups(eng, season, week, cfg, proj, power), wk, live=not (archive or lookahead)),
     # the current week's games the ratings already count (Power's "through Sunday" label; playoff_odds' Elo)
     "refit": ({"through": sorted(eng.tm.live[2]), "pending": sorted(eng.tm.live[3])}

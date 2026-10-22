@@ -48,6 +48,10 @@ class Scenario:
   reserve: str | None = None          # reserve code on the latest roster week (R01 IR, R48 designated to return, ...)
   reserve_prev: str | None = None     # reserve code on every earlier week (then active now: activated this week)
   traded: bool = False                # on another team through last week (his games there); this team only now
+  at_hours: float | None = None       # the moment checked, in hours from his team's kickoff (None: the real time)
+  extra_day: bool = False             # his team filed an extra report day before its first calendar day (travel week)
+  expect_overdue: bool | None = None  # the chronology flags one of his team's report days as overdue
+  expect_final: bool | None = None    # the chronology calls his team's final report in
   espn: tuple | None = None           # (status, return date offset in days from his game or None) as ESPN news since his last game
   gameday: str | None = None          # "ACT" / "INA"
   expect_tag: str | None = None       # the tag the rules give
@@ -115,6 +119,15 @@ S = [
   Scenario("S27", "Activated from IR this week: full final report, no status", reserve_prev="R48",
            games={-1: 0.0, -2: 0.0, -3: 0.0, -4: 0.0}, team_days=3, week_days="LLF", final=True, expect_tag="",
            expect_path="final", expect_avail=(0.7, 1.0)),
+  Scenario("S28", "Monday-night team, Sunday 9 p.m.: Thursday and Friday in, Saturday's final report missing",
+           team_rule="monday", at_hours=-23.25, team_days=2, week_days="DL", expect_tag="", expect_path="practice",
+           expect_overdue=True, expect_final=False, note="the missing final report is flagged, not read as 'no status'"),
+  Scenario("S29", "Sunday team, Saturday 10 a.m.: Wednesday and Thursday in (DNP, DNP), Friday's final report missing",
+           at_hours=-27.0, team_days=2, week_days="DD", expect_tag="", expect_path="practice", expect_overdue=True,
+           expect_final=False, expect_avail=(0.05, 0.7)),
+  Scenario("S30", "Travel week: an extra report day filed, then all three calendar days (final)", extra_day=True,
+           at_hours=-40.0, team_days=3, week_days="LLLF", final=True, game_status="Questionable", expect_tag="Q",
+           expect_path="final", expect_overdue=False, expect_final=True),
   Scenario("S25", "Designated to return from IR, practicing (window open)", reserve="R48", team_days=2, week_days="LL",
            games={-1: 0.0, -2: 0.0, -3: 0.0}, expect_tag="IR", expect_path="practice", expect_avail=(0.3, 0.95),
            note="reserve-list rows: the week model with the reserve inputs"),
@@ -152,7 +165,9 @@ class World:
     plays_now = set(wk.home_team) | set(wk.away_team)
     played_prev = set(prev.home_team) | set(prev.away_team)
     day = {t: pd.Timestamp(g).day_name() for t, g in [*zip(wk.home_team, wk.gameday), *zip(wk.away_team, wk.gameday)]}
-    if rule == "bye_now":
+    if rule == "monday":
+      c = sorted(t for t in plays_now & played_prev if day[t] == "Monday")
+    elif rule == "bye_now":
       c = sorted(set(self.sch.home_team) - plays_now)
     elif rule == "bye_last":
       c = sorted(t for t in plays_now - played_prev if day[t] == "Sunday")
@@ -226,6 +241,8 @@ class World:
       dl = ",".join(str((d_ - pd.Timedelta(days=4 - k)).date()) for k in range(len(days_))) if d_ is not None else ""
       pr.append(row(last, old or team, days_, dl, gs_.upper() if gs_ != "None" else "None", why_.title()))
     dates = self.report_dates(team, sc.team_days)
+    if sc.extra_day and dates:
+      dates = [str((pd.Timestamp(dates[0]) - pd.Timedelta(days=1)).date())] + dates
     if dates:
       mine = [(dt, c) for dt, c in zip(dates, sc.week_days) if c != "-"]
       if mine:
@@ -280,6 +297,10 @@ class World:
         im.espn_bridge = {GID: b}
     if sc.gameday:
       im.espn_gameday = {GID: (sc.gameday, "")}
+    from nfledge.week_clock import kickoff
+    g0 = games_now[(games_now.home_team == team) | (games_now.away_team == team)]
+    kick = kickoff(g0.gameday.iloc[0], g0.gametime.iloc[0]) if len(g0) else None
+    im.now = kick + pd.Timedelta(hours=sc.at_hours) if (sc.at_hours is not None and kick is not None) else None
     try:
       p = pd.DataFrame([{"gsis_id": GID, "team": team, "pos": "WR", "full_name": "Scenario Player"}])
       out = {"team": team}
@@ -297,9 +318,16 @@ class World:
                 "tuesday" if str(r.get("tuesday", "") or "") else "practice" if bool(r.get("partial_week")) and bool(r.get("on_report"))
                 else "final" if bool(r.get("on_report")) else "none")
         out.update(tag=tag or "", avail=float(r.avail), status=st_, why=str(r.get("tuesday", "") or ""), path=path)
+      from nfledge.injuries import chrono
+      c = chrono(d, self.season, self.week, im.now)
+      tc = c.team(team) if c is not None else None
+      out["overdue"] = bool(tc and tc.overdue)
+      out["final"] = bool(tc and tc.final)
+      out["stage"] = tc.stage if tc else None
       return out
     finally:
       T.hurt_not_back = real_nb
+      im.now = None
 
 
 def check(sc: Scenario, o: dict) -> list[str]:
@@ -308,6 +336,10 @@ def check(sc: Scenario, o: dict) -> list[str]:
     bad.append(f"tag {o['tag'] or '-'} (expected {sc.expect_tag or '-'})")
   if sc.expect_path and o.get("path") != sc.expect_path:
     bad.append(f"model {o.get('path')} (expected {sc.expect_path})")
+  if sc.expect_overdue is not None and o.get("overdue") != sc.expect_overdue:
+    bad.append(f"overdue {o.get('overdue')} (expected {sc.expect_overdue})")
+  if sc.expect_final is not None and o.get("final") != sc.expect_final:
+    bad.append(f"final report {o.get('final')} (expected {sc.expect_final})")
   if sc.expect_avail and o["avail"] == o["avail"] and not (sc.expect_avail[0] - 1e-9 <= o["avail"] <= sc.expect_avail[1] + 1e-9):
     bad.append(f"chance {o['avail']:.0%} (expected {sc.expect_avail[0]:.0%}-{sc.expect_avail[1]:.0%})")
   return bad
@@ -330,7 +362,7 @@ def main():
     fails += bool(bad)
     av = f"{o['avail']:.0%}" if o["avail"] == o["avail"] else "-"
     print(f"{'FAIL' if bad else 'ok  '} {sc.sid} {sc.title} [{o['team']}]")
-    print(f"       tag {o['tag'] or '-'} | chance {av} | {o.get('path', '?')} | {o['status'] or '-'}" + (f" | {o['why'][:110]}" if o["why"] else ""))
+    print(f"       tag {o['tag'] or '-'} | chance {av} | {o.get('path', '?')} | stage {o.get('stage')} final {o.get('final')} overdue {o.get('overdue')} | {o['status'] or '-'}" + (f" | {o['why'][:110]}" if o["why"] else ""))
     for b in bad:
       print(f"       -> {b}")
     if sc.note:

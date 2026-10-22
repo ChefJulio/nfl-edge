@@ -161,6 +161,55 @@ def sunday_pbp_due(d: dict) -> list:
   return []
 
 
+# Overdue reports (owner 2026-10-22, nfledge/chronology.py): the live site lists report days past their deadline (+
+# grace) that weren't on NFL.com when it was built (index.json "overdue"). Each look asks NFL.com whether one has
+# arrived since, and builds the moment it has. Same public client as nfledge/data.py (stdlib only here: the watcher
+# runs from a sparse checkout without the package).
+NFL_CLIENT = {"clientKey": "4cFUW6DmwJpzT9L7LrG3qRAcABG5s04g", "clientSecret": "CZuvCL49d9OwfGsR"}
+
+
+def _nfl(url: str, body: dict | None = None, token: str | None = None) -> dict:
+  h = {"User-Agent": "nfl-edge-site/1.0", "Content-Type": "application/json"}
+  if token:
+    h["Authorization"] = "Bearer " + token
+  req = urllib.request.Request(url, data=json.dumps(body).encode() if body else None, headers=h)
+  with urllib.request.urlopen(req, timeout=30) as r:
+    return json.load(r)
+
+
+def overdue_arrived(d: dict) -> list:
+  """Overdue report days on the live site that NFL.com has now: [label]."""
+  od = d.get("overdue") or {}
+  if not od:
+    return []
+  import uuid
+  try:
+    tok = _nfl("https://api.nfl.com/identity/v3/token", {**NFL_CLIENT, "deviceId": str(uuid.uuid4()), "deviceInfo": "",
+                                                          "networkType": "other", "nflClaims": None})["accessToken"]
+    url = f"https://api.nfl.com/football/v2/injuries?limit=500&season={int(d['season'])}&seasonType=REG"
+    seen, page = {}, None
+    for _ in range(20):
+      r = _nfl(url + (f"&pageToken={page}" if page else ""), token=tok)
+      for i in r.get("injuries") or []:
+        if i.get("week") == d.get("week"):
+          name = (i.get("team") or {}).get("fullName")
+          seen.setdefault(name, set()).update(str(x.get("date") or "")[:10] for x in i.get("practiceDays") or [])
+      nxt = (r.get("pagination") or {}).get("token")
+      if not r.get("injuries") or not nxt or nxt == page:
+        break
+      page = nxt
+  except Exception as e:  # can't tell: the scheduled builds pick it up
+    print(f"[watch] couldn't read NFL.com's report ({e})")
+    return []
+  names = {t: (x or {}).get("name") for t, x in (d.get("teams") or {}).items()}
+  out = []
+  for t, ds in od.items():
+    got = [x for x in ds if x in seen.get(names.get(t), set())]
+    if got:
+      out.append(f"{t}'s overdue report for {', '.join(got)} is on NFL.com now")
+  return out
+
+
 def recent_build() -> str | None:
   """Why not to start a build now (one running, queued or just started), else None."""
   try:
@@ -194,7 +243,7 @@ def check(dry: bool) -> None:
       changes.append(f"{label}: {a or 'healthy'} -> {b or 'healthy'}")
     elif (a in SERIOUS or b in SERIOUS) and date_moved(ra, rb):
       changes.append(f"{label}: {b} return date {ra or 'none'} -> {rb or 'none'}")
-  due = due_events(INDEX.get("d", {}).get("clock") or {}, datetime.now(timezone.utc)) + sunday_pbp_due(INDEX.get("d", {}))
+  due = due_events(INDEX.get("d", {}).get("clock") or {}, datetime.now(timezone.utc)) + sunday_pbp_due(INDEX.get("d", {}))     + overdue_arrived(INDEX.get("d", {}))
   if due:
     print("[watch] week clock: " + "; ".join(due))
   if not changes and not due:
