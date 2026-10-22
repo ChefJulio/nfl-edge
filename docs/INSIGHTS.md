@@ -3704,3 +3704,17 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   sixth of corner quality runs -1.4, +0.5, -0.9, -0.4, +0.8, -1.4 (flat; scratch chart). Surtain 48 games at 6.0
   yds/target, miss -0.03. Closed with (CF): elite or not, a shadow corner adds nothing measurable beyond the team
   pass-defense rating. tools/shadow_quality.py.
+  CORRECTION same day: "beyond the team pass-defense rating" overstates it. The model's efficiency matchup term vs
+  DEN is ~0 (matchup_pts +0.03); the markdown comes through volume / Vegas implied totals: WR1s vs DEN projected
+  0.9 (2024) and 1.1 (2025) points below their season FP/G relative to league. Prime Surtain (2024-25) WR1 miss: 2024
+  +1.27 (n 13), 2025 -2.38 (n 14). Owner's friend's valid objection: the list is season-level, so in a season where a
+  corner shadowed ~half his games the other half dilute the effect toward 0 (a true -1.0 would read about -0.5).
+- **PRE-REGISTERED 2026-10-21 (before the game list is built or any outcome is looked at): (CH) game-level shadow
+  matchups 2025.** LIST: data/history/shadow_games_2025.csv (season, week, defteam, corner, receiver, offteam,
+  source_url), built only from after-the-fact reporting that a named corner shadowed / traveled with a named receiver
+  in a named 2025 regular-season game (Mike Clay's ESPN Playbook shadow reports, free; PFF / beat as support).
+  Pre-game projections of shadows ("expect X to shadow Y") do NOT count. TEST (tools/shadow_games.py): the named
+  receiver's miss (actual - projected, the cached 2025 baseline, relevant rows) in those games. GATE: mean miss below
+  0 with a 95% week-bootstrap CI excluding 0, at least 1.0 point below 0 (a size worth a model term), and negative in
+  both weeks 1-9 and 10-18. Comparison reported: the same receivers' miss in their non-shadowed games. A pass needs
+  replication on 2026 (a forward log) before any term ships.
