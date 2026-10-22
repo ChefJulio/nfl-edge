@@ -39,7 +39,7 @@ import pandas as pd  # noqa: E402
 from nfledge import data as D  # noqa: E402
 from nfledge.config import load_config  # noqa: E402
 
-V = 8  # 8: a scramble-then-throw is a pass; 7: blank-type 1999 plays kept; 6: credited yards / touchdowns (yru, yre, ypa, tdr, tdv, tdq, tdo) and lateral credit (lv, lvy, lu, luy, ltd)
+V = 9  # 9: any rush / pass attempt is a run / pass play; 8: a scramble-then-throw is a pass; 7: blank-type 1999 plays kept; 6: credited yards / touchdowns (yru, yre, ypa, tdr, tdv, tdq, tdo) and lateral credit (lv, lvy, lu, luy, ltd)
 FIRST = 1999
 COVERED = 0.9
 COLS = ["game_id", "play_id", "season", "week", "season_type", "posteam", "defteam", "home_team", "play_type", "qtr", "down",
@@ -105,10 +105,11 @@ def dbs(s):
 
 
 def build(pbp: pd.DataFrame, season: int, full: dict) -> dict:
-  # 1999 files plays with a post-play penalty under a blank play type (owner 2026-10-22 audit: 388 plays, e.g. 88 of
-  # Peyton Manning's passing yards): a pass or rush attempt says what it was
+  # a pass or rush attempt is a pass or run play whatever its label, as in the official stats (owner 2026-10-22 audit):
+  # 1999-2000 file plays with a post-play penalty under a blank play type (388 in 1999, e.g. 88 of Peyton Manning's
+  # passing yards), and the odd run is labeled a kickoff (Mark Ingram, 2011 week 13)
   pbp = pbp.copy()
-  blank = pbp.play_type.isna() & ((pbp.pass_attempt == 1) | (pbp.rush_attempt == 1))
+  blank = ~pbp.play_type.isin(["run", "pass", "no_play"]) & ((pbp.pass_attempt == 1) | (pbp.rush_attempt == 1))
   pbp.loc[blank, "play_type"] = np.where(pbp.loc[blank, "pass_attempt"] == 1, "pass", "run")
   p = pbp[pbp.play_type.isin(["run", "pass"]) & (pbp.qb_kneel != 1) & (pbp.qb_spike != 1) & (pbp.two_point_attempt != 1)
           & pbp.posteam.notna() & pbp.defteam.notna()].copy()

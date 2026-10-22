@@ -7,6 +7,8 @@ column). Compares with nflverse player stats (summary_level="reg"), after the do
   - QB kneels (play type qb_kneel) are carries in the official stats; Trends leaves them out: carries / rushing yards
     are compared net of each player's kneels.
   - Spikes (qb_spike) are pass attempts in the official stats; Trends leaves them out: attempts net of spikes.
+  - nflverse's season table has impossible target counts in older seasons (Wes Welker 2008: 0 targets in games with
+    6-12 catches; its play-by-play has 113): a target count below the catch count is skipped and counted, not compared.
 Everything else should match exactly; any difference is listed.
 
   python tools/trends_audit.py [--url=http://127.0.0.1:8765/] [--seasons=1999-2025] [--out=scratch/trends_audit.md]
@@ -68,7 +70,7 @@ def main():
   out = Path(opt.get("out", ROOT / "scratch" / "trends_audit.md"))
   off = nfl.load_player_stats(seasons, summary_level="reg").to_pandas()
   names = dict(zip(off.player_id, off.player_display_name))
-  results, worst, missing = {}, [], []
+  results, worst, missing, skipped = {}, [], [], {}
   with sync_playwright() as pw:
     br = pw.webkit.launch()
     pg = br.new_context(accept_downloads=True).new_page()
@@ -90,8 +92,13 @@ def main():
           missing.append((s, fam, pid, names.get(pid, t.Player.get(pid, pid) if pid in t.index else pid), side))
         both = want.index.intersection(t.index)
         for oc, tc in cols.items():
-          exp = want.loc[both, oc].fillna(0).astype(float)
-          got = pd.to_numeric(t.loc[both, tc].astype(str).str.replace(",", ""), errors="coerce").fillna(0)
+          ok = both
+          if oc == "targets":  # the official count is impossible: below the catches
+            bad = want.loc[both, "targets"].fillna(0) < want.loc[both, "receptions"].fillna(0)
+            skipped[s] = skipped.get(s, 0) + int(bad.sum())
+            ok = both[~bad.to_numpy()]
+          exp = want.loc[ok, oc].fillna(0).astype(float)
+          got = pd.to_numeric(t.loc[ok, tc].astype(str).str.replace(",", ""), errors="coerce").fillna(0)
           d = got - exp
           r = results.setdefault((fam, tc), {"n": 0, "exact": 0, "within1": 0, "sum_off": 0.0, "sum_trends": 0.0})
           r["n"] += len(d); r["exact"] += int((d == 0).sum()); r["within1"] += int((d.abs() <= 1).sum())
@@ -105,6 +112,9 @@ def main():
            "| Family | Stat | Player-seasons | Exact | Within 1 | Official total | Trends total |", "|---|---|---|---|---|---|---|"]
   for (fam, tc), r in results.items():
     lines.append(f"| {fam} | {tc} | {r['n']:,} | {100 * r['exact'] / max(1, r['n']):.2f}% | {100 * r['within1'] / max(1, r['n']):.2f}% | {r['sum_off']:,.0f} | {r['sum_trends']:,.0f} |")
+  if skipped:
+    lines += ["", f"Targets not compared where nflverse's season table has fewer targets than catches: {sum(skipped.values()):,} player-seasons "
+              f"({', '.join(f'{k}: {v}' for k, v in sorted(skipped.items()) if v)})."]
   lines += ["", f"## Largest differences ({len(worst)} player-season-stats differ)", "",
             "| Season | Family | Stat | Player | Trends | Official (adj.) |", "|---|---|---|---|---|---|"]
   lines += [f"| {s} | {fam} | {tc} | {nm} ({pid}) | {g:,.0f} | {e:,.0f} |" for _, s, fam, tc, pid, nm, g, e in worst[:40]]
