@@ -250,6 +250,9 @@ table.tm-pl td { white-space: normal; }
   background-repeat: no-repeat; background-position: right 11px center; }.pc-wkstep { width: 36px; height: 36px; flex: none; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--panel2); color: var(--ink);
   font-size: var(--fs-xl); line-height: 1; cursor: pointer; }
 .pc-wkstep:disabled { opacity: .35; cursor: default; }
+/* the card's week bar spans the card (owner 2026-10-22: "the week selector doesn't stretch the full width"): the select takes
+   the room between the arrows; other .pc-wkpick selects (throws, depth chart) keep their own width */
+.pc-wkbar .pc-wkpick { flex: 1 1 0; max-width: none; height: 36px; }
 .pc-wkback { font: inherit; font-size: var(--fs-sm); color: var(--accent); background: none; border: 0; padding: 4px 2px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .pc-wkmeta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: var(--fs-md); margin: 0 0 10px; }
 .pc-wkmeta .pc-flags { margin-top: 0; }
