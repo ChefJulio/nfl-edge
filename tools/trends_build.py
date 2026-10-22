@@ -15,6 +15,7 @@ columnar and compact: teams, games, players and coaches are indexed lists, play 
                 charting (2022 on, CC-BY-SA: motion, play action, screen, RPO, blitzers, pocket, drops, catchable,
                 contested, interception-worthy, throwaways, read). Box / rushers / alignment fall back to FTN when
                 participation is missing (the current season). Missing: -1 for numbers and flags, 0 for vocab codes.
+<season>_g.json  game context (score, rest, kickoff, site) and who was on each roster / played, per game; build_g.
 <season>_st.json special teams (kickoffs, punts, field goals, extra points), kicking team's side; build_st.
 index.json      seasons + cov: {season: [columns with values on >= 90% of the plays they apply to]}. Trends.js only
                 uses a column in covered seasons and says which seasons it dropped, so a charting gap is never a zero.
@@ -265,6 +266,93 @@ def charting(keys: pd.DataFrame, part: pd.DataFrame | None, ftn: pd.DataFrame | 
   return {"cols": cols, "vocab": voc}
 
 
+GV = 1
+DAYS = {"Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6}
+GONE = {"CUT", "RET", "TRD"}  # weekly-roster statuses that mean he wasn't the team's that week
+
+
+def build_g(doc: dict, sched: pd.DataFrame, snaps: pd.DataFrame | None, rost: pd.DataFrame | None, pfr: dict) -> dict:
+  """<season>_g.json, game context for the Game / teammate filters, aligned to doc["games"]:
+  x: [home score, away score, home rest days, away rest days, weekday 0 = Sunday, kickoff minutes after midnight ET,
+     neutral site 0/1] (-1 missing), from nflverse schedules.
+  r: [home, away] per game: the season's ball-carriers / passers / targets (doc player idx i) on that team that week,
+     +(i+1) if he played, -(i+1) if he was on the roster (any weekly status but cut / retired / traded) and didn't.
+     Played = an offensive snap (snap counts, 2012 on) or a play in the data; on the roster = nflverse weekly
+     rosters (2002 on), before that the team's players with a play that season."""
+  pi = {g: i for i, (g, _) in enumerate(doc["players"])}
+  T, cols, G = doc["teams"], doc["cols"], doc["games"]
+  ti = {t: i for i, t in enumerate(T)}
+  # who touched the ball, per game and team, and per team over the season
+  touched, season_team = {}, {}
+  for g, o, *who in zip(cols["g"], cols["o"], cols["ru"], cols["pp"], cols["re"]):
+    for p in who:
+      if p >= 0:
+        touched.setdefault((g, o), set()).add(p)
+        season_team.setdefault(o, set()).add(p)
+  sc = sched.set_index("game_id")
+  gidx = {g[0]: i for i, g in enumerate(G)}
+  played = {}
+  if snaps is not None and len(snaps):
+    s = snaps[(snaps.offense_snaps.fillna(0) > 0) & snaps.game_id.isin(gidx)]
+    for gid, team, pid in zip(s.game_id, s.team.replace(D.RELOCATED), s.pfr_player_id):
+      i = pi.get(pfr.get(pid))
+      if i is not None and team in ti:
+        played.setdefault((gidx[gid], ti[team]), set()).add(i)
+  on = {}
+  if rost is not None and len(rost):
+    r = rost[~rost.status.isin(GONE) & rost.gsis_id.notna()]
+    for wk, team, gs in zip(r.week, r.team.replace(D.RELOCATED), r.gsis_id):
+      i = pi.get(gs)
+      if i is not None and team in ti:
+        on.setdefault((int(wk), ti[team]), set()).add(i)
+  x, rr = [], []
+  for gi, g in enumerate(G):
+    row = sc.loc[g[0]] if g[0] in sc.index else None
+    num = lambda c: int(row[c]) if row is not None and pd.notna(row[c]) else -1  # noqa: E731
+    hm = str(row.gametime) if row is not None and isinstance(row.gametime, str) and ":" in row.gametime else ""
+    x.append([num("home_score"), num("away_score"), num("home_rest"), num("away_rest"),
+              DAYS.get(row.weekday, -1) if row is not None else -1,
+              int(hm[:2]) * 60 + int(hm[3:5]) if hm else -1, 1 if row is not None and row.location == "Neutral" else 0])
+    home = g[3]
+    away = ti.get(D.RELOCATED.get(row.away_team, row.away_team), -1) if row is not None else -1
+    sides = []
+    for t in (home, away):
+      pl = touched.get((gi, t), set()) | played.get((gi, t), set())
+      roster = on.get((g[1], t)) if on else season_team.get(t, set())
+      sides.append(sorted([i + 1 for i in pl] + [-(i + 1) for i in (roster or set()) - pl]))
+    rr.append(sides)
+  return {"v": GV, "season": doc["season"], "x": x, "r": rr}
+
+
+JUCO = re.compile(r"\b(JC|CC|J\.C\.|Junior College|Community College)\b", re.I)
+
+
+def school(s) -> str | None:
+  """'Florida State; Jones County JC' -> 'Florida State' (the four-year school; else the first listed)."""
+  if not isinstance(s, str) or not s.strip():
+    return None
+  parts = [x.strip() for x in s.split(";") if x.strip()]
+  return next((x for x in parts if not JUCO.search(x)), parts[0] if parts else None)
+
+
+def colleges(players: pd.DataFrame, out: Path) -> None:
+  """colleges.json: {schools: [...], confs: [...], p: {gsis: [school idx, conf idx (-1 none)]}} for every player in
+  the season files under out."""
+  want = set()
+  for f in out.glob("[0-9][0-9][0-9][0-9]*.json"):
+    if re.fullmatch(r"\d{4}(_st)?\.json", f.name):
+      want |= {g for g, _ in json.loads(f.read_text(encoding="utf-8"))["players"]}
+  pl = players[players.gsis_id.isin(want)]
+  rows = [(g, school(c), cf if isinstance(cf, str) and cf.strip() else None)
+          for g, c, cf in zip(pl.gsis_id, pl.college_name, pl.college_conference)]
+  rows = [r for r in rows if r[1]]
+  schools, confs = sorted({r[1] for r in rows}), sorted({r[2] for r in rows if r[2]})
+  si, ci = {s: i for i, s in enumerate(schools)}, {c: i for i, c in enumerate(confs)}
+  doc = {"v": 1, "schools": schools, "confs": confs, "p": {g: [si[s], ci.get(c, -1)] for g, s, c in rows}}
+  (out / "colleges.json").write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
+  print(f"[plays] colleges: {len(rows)} players, {len(schools)} schools, {len(confs)} conferences", flush=True)
+
+
 def coverage(doc: dict, x: dict) -> list:
   """Columns with values on >= COVERED of the plays they apply to (APPLIES), for index.json."""
   c = doc["cols"]
@@ -300,7 +388,9 @@ def main():
   out.mkdir(parents=True, exist_ok=True)
   kept = ROOT / cfg["data"]["cache_dir"] / "plays_site" / f"v{V}"
   kept.mkdir(parents=True, exist_ok=True)
-  full = {g: n for g, n in nfl.load_players().select(["gsis_id", "display_name"]).iter_rows() if g and n}
+  players = nfl.load_players().select(["gsis_id", "display_name", "pfr_id", "college_name", "college_conference"]).to_pandas()
+  full = {g: n for g, n in zip(players.gsis_id, players.display_name) if isinstance(g, str) and isinstance(n, str)}
+  pfr = {p: g for p, g in zip(players.pfr_id, players.gsis_id) if isinstance(p, str) and isinstance(g, str)}
   ixf = out / "index.json"
   cov = json.loads(ixf.read_text(encoding="utf-8")).get("cov", {}) if ixf.exists() else {}
   for s in range(int(a), int(b or a) + 1):
@@ -339,6 +429,34 @@ def main():
     print(f"[plays] {s}: {doc['n']} plays, {len(doc['players'])} players, {len(x['cols'])} charting cols, "
           f"{(out / names[0]).stat().st_size / 1e6:.1f} + {(out / names[1]).stat().st_size / 1e6:.1f} MB, "
           f"{st['n']} special-teams plays", flush=True)
+  # game context + who played (<season>_g.json), from the season files just written; finished seasons cached
+  sched = None
+  for s in range(int(a), int(b or a) + 1):
+    nm, src = f"{s}_g.json", out / f"{s}.json"
+    if not src.exists():
+      continue
+    if s < current and (kept / f"{s}_g{GV}.json").exists():
+      shutil.copyfile(kept / f"{s}_g{GV}.json", out / nm)
+      continue
+    if sched is None:
+      sched = nfl.load_schedules().to_pandas()
+    snaps = rost = None
+    try:
+      snaps = nfl.load_snap_counts([s]).to_pandas() if s >= 2012 else None
+    except Exception as e:
+      print(f"[plays] {s}: no snap counts ({e})", flush=True)
+    try:
+      rost = nfl.load_rosters_weekly([s]).to_pandas() if s >= 2002 else None
+    except Exception as e:
+      print(f"[plays] {s}: no weekly rosters ({e})", flush=True)
+    gd = build_g(json.loads(src.read_text(encoding="utf-8")), sched[sched.season == s], snaps, rost, pfr)
+    (out / nm).write_text(json.dumps(gd, separators=(",", ":")), encoding="utf-8")
+    if s < current:
+      shutil.copyfile(out / nm, kept / f"{s}_g{GV}.json")
+    print(f"[plays] {s}: game context for {len(gd['x'])} games", flush=True)
+  # colleges (owner 2026-10-22: "plays that went to u of florida"): school + conference for every player in the play
+  # files, from nflverse's players table; one small file, loaded only by a college filter / breakdown
+  colleges(players, out)
   seasons = sorted(int(p.stem) for p in out.glob("[0-9][0-9][0-9][0-9].json"))
   ixf.write_text(json.dumps({"v": V, "seasons": seasons, "current": current, "tracked": sorted(APPLIES),
                              "cov": {str(s): cov.get(str(s), []) for s in seasons}}, separators=(",", ":")), encoding="utf-8")

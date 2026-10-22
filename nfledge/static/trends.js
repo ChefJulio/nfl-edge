@@ -102,6 +102,15 @@
   const gm = (P, j, G) => G[P.g[j]];
   const offFav = (P, j, G) => { const g = gm(P, j, G); return g[9] === -999 ? null : (g[3] === P.o[j] ? g[9] : -g[9]); };
   const PASSY = ['pass', 'rec', 'team'], RUNNY = ['rush', 'team'];
+  // game context (<season>_g.json, attached as D.gx by loadSeason): x row [home pts, away pts, home rest, away rest,
+  // weekday, kickoff min ET, neutral]; r[game] = [home Map, away Map] gsis -> played (true) / on the roster, out (false)
+  let COLL = null;  // colleges.json, as { schools, confs, p: Map gsis -> [school, conf] , fam: the query's family }
+  const home = (P, j, G) => P.o[j] === G[P.g[j]][3];
+  const gx = (P, j, D, k) => (D.gx ? D.gx.x[P.g[j]][k] : -1);
+  const margin = (P, j, G, D) => { if (!D.gx) return null; const x = D.gx.x[P.g[j]]; if (x[0] < 0) return null; return home(P, j, G) ? x[0] - x[1] : x[1] - x[0]; };
+  // a team's days of rest (opp: its opponent's); week 1 has no previous game
+  const rest = (P, j, G, D, opp) => { if (!D.gx || G[P.g[j]][1] === 1) return -1; const x = D.gx.x[P.g[j]]; return home(P, j, G) !== !!opp ? x[2] : x[3]; };
+  const mate = (P, j, G, D, id) => (D.gx ? D.gx.r[P.g[j]][home(P, j, G) ? 0 : 1].get(id) : undefined);
   // today's divisions (fixed since 2002; earlier seasons are grouped by them too)
   const DIVS = { 'AFC East': ['BUF', 'MIA', 'NE', 'NYJ'], 'AFC North': ['BAL', 'CIN', 'CLE', 'PIT'], 'AFC South': ['HOU', 'IND', 'JAX', 'TEN'],
     'AFC West': ['DEN', 'KC', 'LAC', 'LV'], 'NFC East': ['DAL', 'NYG', 'PHI', 'WAS'], 'NFC North': ['CHI', 'DET', 'GB', 'MIN'],
@@ -126,8 +135,50 @@
       ['behind', 'long shot (under 10%)', (P, j) => P.wp[j] >= 0 && P.wp[j] < 10]] },
     // owner 2026-10-22 ("i can pick vikings, what if i want only when playing packers"): the options are the teams,
     // filled in once the team list loads; the data keeps today's codes in every season (shell.js franchise)
-    vs: { label: 'Opponent', group: 'Game', opts: [] },
-    tm: { label: 'Playing for', group: 'Game', opts: [] },
+    // owner 2026-10-22 ("good ideas, all 5" + "20+ yard plays isn't a filter we can use already?"): situation type, play
+    // result, schedule, game result, thrown by, with / without a teammate. g: needs <season>_g.json (game context and
+    // who played); param: the value is a player ("gsis|Name"), picked in pickPerson
+    sit: { label: 'Situation type', group: 'Situation', opts: [
+      ['neu', 'neutral situations', (P, j) => P.dn[j] <= 2 && P.q[j] <= 4 && P.hs[j] > 12 && P.wp[j] >= 20 && P.wp[j] <= 80,
+        '1st-2nd down, 20-80% win chance, not the last 2 minutes of a half'],
+      ['early', 'early downs (1st-2nd)', (P, j) => P.dn[j] === 1 || P.dn[j] === 2],
+      ['pd', 'passing downs', (P, j) => (P.dn[j] === 2 && P.tg[j] >= 8) || (P.dn[j] >= 3 && P.tg[j] >= 5), '2nd & 8+, 3rd or 4th & 5+']] },
+    xpc: { label: 'Expected play call', group: 'Situation', need: ['xp'], opts: [
+      ['p', 'pass expected', (P, j) => P.xp[j] >= 70, "nflverse's model gives a pass 70%+"],
+      ['r', 'run expected', (P, j) => P.xp[j] >= 0 && P.xp[j] <= 30, 'a pass 30% or less'],
+      ['m', 'toss-up play call', (P, j) => P.xp[j] > 30 && P.xp[j] < 70, 'a pass 30-70%']] },
+    out: { label: 'Play result', group: 'Result', opts: [['10', 'gained 10+ yards', (P, j) => P.y[j] >= 10], ['20', 'gained 20+ yards', (P, j) => P.y[j] >= 20],
+      ['40', 'gained 40+ yards', (P, j) => P.y[j] >= 40], ['fd', 'first downs', eq('fd', 1)], ['td', 'touchdowns', eq('td', 1)],
+      ['neg', 'no gain or a loss', (P, j) => P.y[j] <= 0], ['to', 'turnovers', (P, j) => P.in[j] === 1 || P.fl[j] === 1]] },
+    res: { label: 'Game result', group: 'Game', g: true, opts: [['w', 'in wins', (P, j, G, V, D) => margin(P, j, G, D) > 0],
+      ['l', 'in losses', (P, j, G, V, D) => { const m = margin(P, j, G, D); return m != null && m < 0; }],
+      ['one', 'one-score games (8 or less)', (P, j, G, V, D) => { const m = margin(P, j, G, D); return m != null && Math.abs(m) <= 8; }],
+      ['bw', 'won by 17+', (P, j, G, V, D) => margin(P, j, G, D) >= 17], ['bl', 'lost by 17+', (P, j, G, V, D) => { const m = margin(P, j, G, D); return m != null && m <= -17; }]] },
+    sched: { label: 'Schedule', group: 'Game', g: true, opts: [
+      ['bye', 'off a bye', (P, j, G, V, D) => rest(P, j, G, D, 0) >= 13], ['obye', 'opponent off a bye', (P, j, G, V, D) => rest(P, j, G, D, 1) >= 13],
+      ['short', 'short week (5 days or less)', (P, j, G, V, D) => { const r = rest(P, j, G, D, 0); return r >= 0 && r <= 5; }],
+      ['xr', 'extra rest (8-12 days)', (P, j, G, V, D) => { const r = rest(P, j, G, D, 0); return r >= 8 && r <= 12; }],
+      ['prime', 'primetime (7 p.m. ET or later)', (P, j, G, V, D) => gx(P, j, D, 5) >= 1140],
+      ['thu', 'Thursday games', (P, j, G, V, D) => gx(P, j, D, 4) === 4], ['snf', 'Sunday night', (P, j, G, V, D) => gx(P, j, D, 4) === 0 && gx(P, j, D, 5) >= 1140],
+      ['mon', 'Monday games', (P, j, G, V, D) => gx(P, j, D, 4) === 1],
+      ['sun1', 'Sunday early (1 p.m. ET)', (P, j, G, V, D) => gx(P, j, D, 4) === 0 && gx(P, j, D, 5) >= 0 && gx(P, j, D, 5) < 900],
+      ['sun4', 'Sunday late afternoon', (P, j, G, V, D) => gx(P, j, D, 4) === 0 && gx(P, j, D, 5) >= 900 && gx(P, j, D, 5) < 1140],
+      ['intl', 'neutral site / international', (P, j, G, V, D) => gx(P, j, D, 6) === 1 && !G[P.g[j]][2]]] },
+    qb: { label: 'Thrown by', group: 'Pass', only: PASSY, param: 'qb', hint: 'one quarterback', opts: [],
+      fmt: v => `thrown by ${v.split('|')[1] || 'a QB'}`, test: v => { const id = v.split('|')[0]; return (P, j, G, V, D) => { const k = P.pp[j]; return k >= 0 && D.players[k][0] === id; }; } },
+    with: { label: 'With a teammate', group: 'Teammates', g: true, param: 'mate', opts: [], hint: 'only games the teammate played',
+      fmt: v => `with ${v.split('|')[1] || 'teammate'}`, test: v => { const id = v.split('|')[0]; return (P, j, G, V, D) => mate(P, j, G, D, id) === true; } },
+    wo: { label: 'Without a teammate', group: 'Teammates', g: true, param: 'mate', opts: [], hint: "only games the teammate was on the roster but didn't play",
+      fmt: v => `without ${v.split('|')[1] || 'teammate'}`, test: v => { const id = v.split('|')[0]; return (P, j, G, V, D) => mate(P, j, G, D, id) === false; } },
+    // owner 2026-10-22 ("how bout college, plays that went to u of florida"): the measured player's school or its
+    // conference (today's conference: nflverse lists the school's current one)
+    col: { label: 'College', group: 'Player',  only: ['rush', 'pass', 'rec'], param: 'college', coll: true, opts: [], hint: 'a school or conference',
+      fmt: v => `from ${v.slice(2)}`, test: v => {
+        const k = v[0] === 'c' ? 1 : 0, idx = (k ? COLL.confs : COLL.schools).indexOf(v.slice(2)), actor = FAM[COLL.fam].actor;
+        return (P, j, G, V, D) => { const a = actor(P, j); if (a < 0) return false; const c = COLL.p.get(D.players[a][0]); return !!c && c[k] === idx; };
+      } },
+    vs: { label: 'Opponent', group: 'Game', hint: 'a team, division or conference', opts: [] },
+    tm: { label: 'Playing for', group: 'Game', hint: 'only plays for one team (for players who moved)', opts: [] },
     site: { label: 'Home / away', group: 'Game', opts: [['h', 'at home', (P, j, G) => gm(P, j, G)[3] === P.o[j]], ['a', 'on the road', (P, j, G) => gm(P, j, G)[3] !== P.o[j]]] },
     week: { label: 'Weeks', group: 'Game', opts: [['e', 'weeks 1-4', (P, j, G) => gm(P, j, G)[1] <= 4 && !gm(P, j, G)[2]],
       ['m', 'weeks 5-9', (P, j, G) => { const w = gm(P, j, G)[1]; return w >= 5 && w <= 9 && !gm(P, j, G)[2]; }],
@@ -197,7 +248,8 @@
   const offCoach = (P, j, G, D) => { const g = G[P.g[j]], i = g[3] === P.o[j] ? g[11] : g[12]; return i >= 0 ? D.coaches[i] : null; };
   const BY = {
     player: ['player', null, [], 'v'], team: ['team', (P, j, G, D) => D.teams[P.o[j]], [], 'v'], opp: ['opponent', (P, j, G, D) => D.teams[P.d[j]], [], 'v'],
-    coach: ['head coach', offCoach, [], 'v'], season: ['season', (P, j, G, D) => D.season, [], 'kd'],
+    coach: ['head coach', offCoach, [], 'v'],
+    college: ['college', (P, j, G, D) => { const a = FAM[COLL.fam].actor(P, j), c = a >= 0 ? COLL.p.get(D.players[a][0]) : null; return c ? COLL.schools[c[0]] : null; }, [], 'v'], season: ['season', (P, j, G, D) => D.season, [], 'kd'],
     // playoff weeks on the 2021+ numbering (wild card = 19), so each round groups and labels the same in every season:
     // before 2021 the regular season had 17 weeks and the wild card was week 18
     week: ['week', (P, j, G, D) => { const g = G[P.g[j]]; return g[2] ? 100 + g[1] + (+D.season < 2021 ? 1 : 0) : g[1]; }, [], 'kd'],  // newest first, like season (owner 2026-10-18)
@@ -241,16 +293,16 @@
   const ranges = ys => { const out = []; ys.forEach(y => { const r = out[out.length - 1]; if (r && r[1] === y - 1) r[1] = y; else out.push([y, y]); });
     return out.map(([a, b]) => a === b ? `${a}` : `${a}-${b}`).join(', '); };
   // special teams take the game / situation filters (and their own); offense filters don't apply to kicks
-  const ST_FILTERS = new Set(['vs', 'tm', 'qtr', 'score', 'time', 'wp', 'site', 'week', 'roof', 'surf', 'wx', 'div', 'line', 'total']);
+  const ST_FILTERS = new Set(['vs', 'tm', 'res', 'sched', 'with', 'wo', 'qtr', 'score', 'time', 'wp', 'site', 'week', 'roof', 'surf', 'wx', 'div', 'line', 'total']);
   const ST_BY = new Set(['player', 'team', 'opp', 'coach', 'season', 'week', 'qtr', 'score', 'roof', 'surf', 'kdist']);
   const allowed = (k, fam) => {
     const F = FILTERS[k], only = !F.only || F.only.includes(fam);
     return FAM[fam].st ? (ST_FILTERS.has(k) || (F.stOnly && only)) : !F.stOnly && only;
   };
-  const byAllowed = (k, fam) => FAM[fam].st ? ST_BY.has(k) : k !== 'kdist';
+  const byAllowed = (k, fam) => k === 'college' ? ['rush', 'pass', 'rec'].includes(fam) : FAM[fam].st ? ST_BY.has(k) : k !== 'kdist';
   // Two-way grids (owner 2026-10-14): a second grouping makes the answer a shaded rows x columns grid. Groupings with
   // dozens of values (players, teams, coaches) work as rows only; columns must fit a phone (capped, scrolls past that).
-  const GRID_ROW_ONLY = new Set(['player', 'team', 'opp', 'coach']);
+  const GRID_ROW_ONLY = new Set(['player', 'team', 'opp', 'coach', 'college']);
   const GRID_MAX_ROWS = 40, GRID_MAX_COLS = 24;
   // metrics where a lower number is the good one (the grid shades those the other way)
   const LOWER = new Set(['skr', 'int', 'stuff', 'fl', 'drop', 'iw', 'ta', 'pz', 'qh', 'rya', 'bk', 'miss']);
@@ -289,7 +341,7 @@
       // easier to use and understand"): one labeled row per part of the question (Measure, Who, Only when, Seasons, Break
       // down, Minimum), each opening a sheet of grouped, searchable choices, and the question in plain English on top.
       // The query state Q, the links and run() are unchanged.
-      const BY_GROUPS = [['People', ['player', 'team', 'opp', 'coach']], ['Time', ['season', 'week', 'qtr']],
+      const BY_GROUPS = [['People', ['player', 'team', 'opp', 'coach', 'college']], ['Time', ['season', 'week', 'qtr']],
         ['Situation', ['down', 'dist', 'zone', 'score']], ['Offense', ['align', 'pers', 'pa', 'mo']],
         ['Defense', ['box', 'rushers', 'dbs', 'mz', 'cov']], ['Passing', ['depth', 'loc', 'route', 'read', 'press']],
         ['Running', ['dir', 'gap']], ['Kicking', ['kdist']], ['Game', ['roof', 'surf']]];
@@ -310,7 +362,8 @@
         if (/^V:/.test(Q.who)) return Q.by === 'player' ? `Players against ${t}` : `${t} defense`;
         return Q.who[0] === 'C' ? `${Q.wn}'s offense` : Q.wn || 'Whole league';
       };
-      const optLabel = k => (FILTERS[k].opts.find(o => o[0] === Q.f[k]) || ['', ''])[1];
+      const optLabel = k => FILTERS[k].fmt ? FILTERS[k].fmt(Q.f[k]) : (FILTERS[k].opts.find(o => o[0] === Q.f[k]) || ['', ''])[1];
+      const testOf = (k, v) => FILTERS[k].test ? FILTERS[k].test(v) : (FILTERS[k].opts.find(o => o[0] === v) || [])[2];
       const ST_TXT = { reg: 'regular season', post: 'playoffs', both: 'regular season + playoffs' };
       const seasonsTxt = () => `${Q.from === Q.to ? Q.from : `${Q.from}–${Q.to}`} · ${cap(ST_TXT[Q.st])}`;
       const byTxt = () => (Q.by2 && BY[Q.by2] ? `${cap(BY[Q.by][0])}, then ${BY[Q.by2][0]} (grid)` : `One row per ${BY[Q.by][0]}`);
@@ -367,6 +420,35 @@
         });
         NFLE.sheet('What to measure', el, opener);
       };
+      // a team's players over the seasons in range, most plays first: role 'fam' (the measure's player), 'qb'
+      // (dropbacks), 'any' (rushes + dropbacks + targets)
+      const countPlayers = (t, role) => Promise.all(spanSeasons().map(s => loadSeason(s, false, FAM[Q.fam].st))).then(list => {
+        const fam = FAM[Q.fam], cnt = new Map(), bump = (PL, a) => { if (a < 0) return; const [gid, nm] = PL[a], c = cnt.get(gid); if (c) c[1]++; else cnt.set(gid, [nm, 1]); };
+        list.forEach(({ D, P, PL, n }) => {
+          const ti = D.teams.indexOf(t), G = D.games, base = role !== 'fam' || !fam.st;
+          if (ti < 0) return;
+          const Pb = base ? D.cols : P, PLb = base ? D.players : PL, nb = base ? D.n : n;
+          for (let j = 0; j < nb; j++) {
+            if (Pb.o[j] !== ti) continue;
+            const post = G[Pb.g[j]][2];
+            if ((Q.st === 'reg' && post) || (Q.st === 'post' && !post)) continue;
+            if (role === 'fam') { if (fam.play(Pb, j)) bump(PLb, fam.actor(Pb, j)); }
+            else if (role === 'qb') { if (Pb.ty[j] === 1) bump(PLb, Pb.pp[j]); }
+            else { bump(PLb, Pb.ru[j]); bump(PLb, Pb.pp[j]); bump(PLb, Pb.re[j]); }
+          }
+        });
+        return [...cnt].sort((a, b) => b[1][1] - a[1][1]);
+      });
+      // the team a player had the most plays for in range (to open a teammate list on his team)
+      const teamOfPlayer = gid => Promise.all(spanSeasons().map(s => loadSeason(s, false, false))).then(list => {
+        const c = {};
+        list.forEach(({ D }) => {
+          const k = D.players.findIndex(p => p[0] === gid), P = D.cols;
+          if (k < 0) return;
+          for (let j = 0; j < D.n; j++) if (P.ru[j] === k || P.pp[j] === k || P.re[j] === k) c[D.teams[P.o[j]]] = (c[D.teams[P.o[j]]] || 0) + 1;
+        });
+        return Object.keys(c).sort((a, b) => c[b] - c[a])[0] || null;
+      });
       const pickWho = opener => {
         const el = panel(), teams = IX.teams, team = Q.fam === 'team', fam = FAM[Q.fam];
         const ok = k => BY[k] && byAllowed(k, Q.fam) && !(k === 'player' && team);
@@ -399,22 +481,8 @@
         // it in these seasons, most plays first; picking one is that player while playing for that team
         const roster = t => {
           el.innerHTML = '<p class="muted tq-help">Counting plays&hellip;</p>';
-          Promise.all(spanSeasons().map(s => loadSeason(s, false, fam.st))).then(list => {
-            const cnt = new Map();
-            list.forEach(({ D, P, PL, n }) => {
-              const ti = D.teams.indexOf(t), G = D.games;
-              if (ti < 0) return;
-              for (let j = 0; j < n; j++) {
-                if (P.o[j] !== ti || !fam.play(P, j)) continue;
-                const post = G[P.g[j]][2];
-                if ((Q.st === 'reg' && post) || (Q.st === 'post' && !post)) continue;
-                const a = fam.actor(P, j);
-                if (a < 0) continue;
-                const [gid, nm] = PL[a], c = cnt.get(gid);
-                if (c) c[1]++; else cnt.set(gid, [nm, 1]);
-              }
-            });
-            const rows = [...cnt].sort((a, b) => b[1][1] - a[1][1]).slice(0, 60);
+          countPlayers(t, 'fam').then(all => {
+            const rows = all.slice(0, 60);
             el.innerHTML = `<button type="button" class="tq-act tq-back" data-back="1">&lsaquo; All teams</button>
               <h4 class="tq-h">${esc(t)} &middot; ${esc(fam.label.toLowerCase())}</h4>
               <div class="tq-list"><button type="button" class="tq-opt${Q.who === `T:${t}` && Q.by === 'player' ? ' on' : ''}" data-all="${esc(t)}"><span>Every ${esc(t)} player</span><small class="tq-r">a row each</small></button>
@@ -450,14 +518,85 @@
         });
         NFLE.sheet('Who', el, opener);
       };
+      // a player as a filter value (Thrown by, With / Without a teammate): search by name, or a team then its players;
+      // opens on the team in question when there is one (Playing for, Who's team, or the chosen player's team)
+      const pickPerson = (k, opener) => {
+        const F = FILTERS[k], el = panel(), role = F.param === 'qb' ? 'qb' : 'any';
+        const set = (gid, nm) => { Q.f[k] = `${gid}|${nm}`; done(); };
+        const rm = k in Q.f ? '<button type="button" class="tq-act tq-rm" data-rm="1">Remove this filter</button>' : '';
+        const main = () => {
+          el.innerHTML = `<input class="dt-search tq-find" type="search" placeholder="Type a name" aria-label="Find a player" autocomplete="off">
+            <div class="tq-list tq-found"></div><h4 class="tq-h">Or pick a team</h4>
+            <div class="tq-teams">${IX.teams.map(t => `<button type="button" data-team="${t}">${esc(t)}</button>`).join('')}</div>${rm}`;
+          const inp = el.querySelector('.tq-find'), out = el.querySelector('.tq-found');
+          const find = () => {
+            const t = inp.value.trim().toLowerCase();
+            out.innerHTML = t.length < 2 ? '' : [...findMap.values()].filter(o => o[1][0] === 'P' && o[0].toLowerCase().includes(t)).slice(0, 30)
+              .map(o => `<button type="button" class="tq-opt" data-pid="${esc(o[1].slice(2))}" data-wn="${esc(o[2])}"><span>${esc(o[0])}</span></button>`).join('')
+              || '<p class="muted tq-help">No one by that name in these seasons.</p>';
+          };
+          inp.addEventListener('input', find);
+          fillFind().then(() => { if (inp.value) find(); });
+        };
+        const team = t => {
+          el.innerHTML = '<p class="muted tq-help">Counting plays&hellip;</p>';
+          countPlayers(t, role).then(all => {
+            const rows = all.slice(0, 60), unit = role === 'qb' ? 'dropbacks' : 'plays';
+            el.innerHTML = `<button type="button" class="tq-act tq-back" data-back="1">&lsaquo; Search or another team</button>
+              <h4 class="tq-h">${esc(t)} ${role === 'qb' ? 'passers' : 'players'}</h4>
+              <div class="tq-list">${rows.map(([gid, [nm, c]]) => `<button type="button" class="tq-opt${(Q.f[k] || '').startsWith(gid + '|') ? ' on' : ''}" data-pid="${esc(gid)}" data-wn="${esc(nm)}"><span>${esc(nm)}</span><small class="tq-r">${c} ${unit}</small></button>`).join('')}</div>
+              ${rows.length ? '' : '<p class="muted tq-help">No plays for this team in these seasons.</p>'}${rm}`;
+          });
+        };
+        el.addEventListener('click', e => {
+          const pp = e.target.closest('[data-pid]'); if (pp) { set(pp.dataset.pid, pp.dataset.wn); return; }
+          const tb = e.target.closest('[data-team]'); if (tb) { team(tb.dataset.team); return; }
+          if (e.target.closest('[data-back]')) { main(); return; }
+          if (e.target.closest('[data-rm]')) { delete Q.f[k]; done(); }
+        });
+        const t0 = Q.f.tm || (/^T:/.test(Q.who) ? Q.who.slice(2) : null);
+        if (t0) team(t0);
+        else if (/^P:/.test(Q.who)) { el.innerHTML = '<p class="muted tq-help">Finding the team&hellip;</p>'; teamOfPlayer(Q.who.slice(2)).then(t => (t ? team(t) : main())); }
+        else main();
+        NFLE.sheet(F.label, el, opener);
+      };
+      const pickCollege = (k, opener) => {
+        const el = panel();
+        el.innerHTML = '<p class="muted tq-help">Loading schools&hellip;</p>';
+        loadColleges().then(() => {
+          const n = [new Map(), new Map()];
+          COLL.p.forEach(([si, ci]) => { n[0].set(si, (n[0].get(si) || 0) + 1); if (ci >= 0) n[1].set(ci, (n[1].get(ci) || 0) + 1); });
+          const top = (m, names) => [...m].sort((a, b) => b[1] - a[1]).map(([i, c]) => [names[i], c]);
+          const schools = top(n[0], COLL.schools), confs = top(n[1], COLL.confs).filter(([c]) => c !== 'NO FOOTBALL').slice(0, 12);
+          const row = (t, [nm, c]) => `<button type="button" class="tq-opt${Q.f[k] === `${t}:${nm}` ? ' on' : ''}" data-fv="${t}:${esc(nm)}"><span>${esc(nm)}</span><small class="tq-r">${c} players</small></button>`;
+          el.innerHTML = `<input class="dt-search tq-find" type="search" placeholder="Search schools: Florida, Alabama&hellip;" aria-label="Search schools" autocomplete="off">
+            <div class="tq-list tq-found"></div>
+            <h4 class="tq-h">Conference <span class="muted">(today's)</span></h4><div class="tq-chipset">${confs.map(([c]) => `<button type="button" class="${Q.f[k] === `c:${c}` ? 'on' : ''}" data-fv="c:${esc(c)}">${esc(c.replace(/ Conference$/, ''))}</button>`).join('')}</div>
+            <h4 class="tq-h">Most NFL players</h4><div class="tq-list">${schools.slice(0, 25).map(x => row('s', x)).join('')}</div>
+            ${k in Q.f ? '<button type="button" class="tq-act tq-rm" data-rm="1">Remove this filter</button>' : ''}`;
+          const inp = el.querySelector('.tq-find'), out = el.querySelector('.tq-found');
+          inp.addEventListener('input', () => {
+            const t = inp.value.trim().toLowerCase();
+            out.innerHTML = t.length < 2 ? '' : schools.filter(([nm]) => nm.toLowerCase().includes(t)).slice(0, 30).map(x => row('s', x)).join('')
+              || '<p class="muted tq-help">No school by that name.</p>';
+          });
+        });
+        el.addEventListener('click', e => {
+          const b = e.target.closest('[data-fv]'); if (b) { Q.f[k] = b.dataset.fv; done(); return; }
+          if (e.target.closest('[data-rm]')) { delete Q.f[k]; done(); }
+        });
+        NFLE.sheet('College', el, opener);
+      };
       const pickFilter = (k, opener) => {
+        if (FILTERS[k].param === 'college') { pickCollege(k, opener); return; }
+        if (FILTERS[k].param) { pickPerson(k, opener); return; }
         const F = FILTERS[k], el = panel();
         // team filters: conferences and divisions (Opponent) as chips, teams as a grid
         const pick = (cls, os) => `<div class="${cls}">${os.map(o => `<button type="button" class="${Q.f[k] === o[0] ? 'on' : ''}" data-fv="${esc(o[0])}">${esc(o[0])}</button>`).join('')}</div>`;
         const isTeam = o => IX.teams.includes(o[0]);
         el.innerHTML = `${k === 'vs' || k === 'tm' ? (k === 'vs' ? `<h4 class="tq-h">Conference</h4>${pick('tq-chipset', F.opts.filter(o => o[0].length === 3 && !isTeam(o)))}
             <h4 class="tq-h">Division</h4>${pick('tq-chipset', F.opts.filter(o => o[0].includes(' ')))}<h4 class="tq-h">Team</h4>` : '') + pick('tq-teams', F.opts.filter(isTeam))
-          : `<div class="tq-list">${F.opts.map(o => `<button type="button" class="tq-opt${Q.f[k] === o[0] ? ' on' : ''}" data-fv="${esc(o[0])}"><span>${esc(cap(o[1]))}</span></button>`).join('')}</div>`}
+          : `<div class="tq-list">${F.opts.map(o => `<button type="button" class="tq-opt${Q.f[k] === o[0] ? ' on' : ''}" data-fv="${esc(o[0])}"><span>${esc(cap(o[1]))}</span>${o[3] ? `<small>${esc(o[3])}</small>` : ''}</button>`).join('')}</div>`}
           ${k in Q.f ? '<button type="button" class="tq-act tq-rm" data-rm="1">Remove this filter</button>' : ''}`;
         el.addEventListener('click', e => {
           const b = e.target.closest('[data-fv]'); if (b) { Q.f[k] = b.dataset.fv; done(); return; }
@@ -470,7 +609,7 @@
         Object.entries(FILTERS).filter(([k]) => !(k in Q.f) && allowed(k, Q.fam) && !(k === 'vs' && /^V:/.test(Q.who)) && !(k === 'tm' && /^T:/.test(Q.who))).forEach(([k, f]) => { (groups[f.group] = groups[f.group] || []).push([k, f]); });
         const list = t => Object.entries(groups).map(([g, fs]) => {
           const hit = fs.filter(([, f]) => !t || f.label.toLowerCase().includes(t) || f.opts.some(o => o[1].toLowerCase().includes(t)));
-          return hit.length ? `<h4 class="tq-h">${esc(g)}</h4><div class="tq-list">${hit.map(([k, f]) => `<button type="button" class="tq-opt" data-fk="${k}"><span>${esc(f.label)}</span><small>${k === 'vs' ? 'a team, division or conference' : k === 'tm' ? 'only plays for one team (for players who moved)' : `${esc(f.opts.slice(0, 3).map(o => o[1]).join(', '))}${f.opts.length > 3 ? '&hellip;' : ''}`}</small>${sinceTag(f.need)}<span class="tq-go">&rsaquo;</span></button>`).join('')}</div>` : '';
+          return hit.length ? `<h4 class="tq-h">${esc(g)}</h4><div class="tq-list">${hit.map(([k, f]) => `<button type="button" class="tq-opt" data-fk="${k}"><span>${esc(f.label)}</span><small>${f.hint ? esc(f.hint) : `${esc(f.opts.slice(0, 3).map(o => o[1]).join(', '))}${f.opts.length > 3 ? '&hellip;' : ''}`}</small>${sinceTag(f.need)}<span class="tq-go">&rsaquo;</span></button>`).join('')}</div>` : '';
         }).join('') || '<p class="muted tq-help">No filter matches.</p>';
         el.innerHTML = `<input class="dt-search tq-find" type="search" placeholder="Search: blitz, red zone, 3rd down, cold&hellip;" aria-label="Search filters" autocomplete="off"><div class="tq-fl">${list('')}</div>`;
         const inp = el.querySelector('.tq-find');
@@ -550,7 +689,18 @@
 
       // ---- loading: base file per season; charting file only when the query needs a charting column
       const stv = {};
-      const loadSeason = (s, wantX, side) => {
+      let collP = null;
+      const loadColleges = () => collP || (collP = NFLE.load('data/plays/colleges.json').then(c => {
+        COLL = { schools: c.schools, confs: c.confs, p: new Map(Object.entries(c.p)), fam: Q.fam };
+      }));
+      // game context: gsis ids per game side (the file holds the season's player idx, signed: + played, - out)
+      const gfile = {};
+      const loadG = (s, D) => gfile[s] || (gfile[s] = NFLE.load(`data/plays/${s}_g.json`).then(raw => {
+        const ids = D.players.map(p => p[0]);
+        D.gx = { x: raw.x, r: raw.r.map(sides => sides.map(list => new Map(list.map(v => [ids[Math.abs(v) - 1], v > 0])))) };
+      }).catch(() => { D.gx = null; }));
+      const loadSeason = (s, wantX, side, wantG) => loadSeason0(s, wantX, side).then(m => (wantG ? loadG(s, m.D).then(() => m) : m));
+      const loadSeason0 = (s, wantX, side) => {
         const b = base[s] || (base[s] = NFLE.load(`data/plays/${s}.json`));
         if (side) {
           const st = stv[s] || (stv[s] = NFLE.load(`data/plays/${s}_st.json`));
@@ -596,10 +746,19 @@
         if (Q.who === 'S') return;
         if (!seasons.length) { sec.querySelector('.tr-base').textContent = ''; sec.querySelector('.tr-trend').innerHTML = ''; sec.querySelector('.tr-tbl').innerHTML = ''; paint = null; return; }
         sec.querySelector('.tr-base').textContent = 'Counting plays…';
-        Promise.all(seasons.map(s => loadSeason(s, wantX, FAM[Q.fam].st))).then(list => {
+        const wantG = Object.keys(Q.f).some(k => FILTERS[k].g);
+        const wantC = Object.keys(Q.f).some(k => FILTERS[k].coll) || Q.by === 'college' || Q.by2 === 'college';
+        Promise.all([...seasons.map(s => loadSeason(s, wantX, FAM[Q.fam].st, wantG)), wantC ? loadColleges() : null]).then(list => {
+          list = list.slice(0, seasons.length);
+          if (COLL) COLL.fam = Q.fam;
           if (me !== busy) return;
+          if (wantG) {  // a season without its game file (not built yet) is left out, and said so
+            const miss = list.filter(m => !m.D.gx).map(m => m.D.season);
+            list = list.filter(m => m.D.gx);
+            if (miss.length) covEl.insertAdjacentHTML('beforeend', `<p class="tr-covnote">Game details (scores, rest, who played) aren't available for ${esc(ranges(miss))} yet, so ${miss.length > 1 ? 'those seasons are' : 'that season is'} left out.</p>`);
+          }
           const [fam, m] = famMetric();
-          const tests = Object.entries(Q.f).map(([k, v]) => (FILTERS[k].opts.find(o => o[0] === v) || [])[2]).filter(Boolean);
+          const tests = Object.entries(Q.f).map(([k, v]) => testOf(k, v)).filter(Boolean);
           const [wk, ...rest] = Q.who === 'L' ? ['L'] : Q.who.split(':'), wv = rest.join(':');
           const by = BY[Q.by], by2 = Q.by2 && BY[Q.by2] ? BY[Q.by2] : null, groups = new Map(), league = blank(), names = {}, teamOf = {};
           let plays = 0;
