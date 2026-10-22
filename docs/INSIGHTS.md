@@ -3843,6 +3843,8 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   NFL.com. Seasons without dated reports (before 2018) keep the old rule. tools/scenario_audit.py takes a moment per
   scenario (hours from kickoff): S28 Monday team Sunday 9 p.m. with Saturday missing (stage 2, overdue, not final),
   S29 Sunday team Saturday 10 a.m. with Friday missing, S30 a travel week's extra report day: 28 of 30 pass (S06, S11).
+  Check (scratch/chrono_bt.py): the 2025 backtest run twice in one process, chronology on vs off: all 7,668 rows
+  identical (chance to play, projection, status). Past weeks are kicked off, so the change is live-only by design.
 - **DESCRIPTIVE 2026-10-21 (owner's friend: "Pat Surtain's OPRK for WR1 is #1 hardest ... shadow CB can nuke WRs"):
   WR1 suppression is not a lasting defensive trait.** tools/wr1_suppression.py, play-by-play 2016-25, 4,212 team-games:
   WR1 / WR2 = an offense's top two WRs by targets before the game; result = half-PPR points minus his own average over
