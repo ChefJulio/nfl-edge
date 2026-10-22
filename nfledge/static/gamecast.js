@@ -1203,7 +1203,7 @@
       .filter(Boolean))].join(' · ') || (ep && ep.part) || '';  // ESPN often repeats the type as the detail
     return { inj, play, what, now, ep, back: backWeek(pid), wk };
   };
-  const healthTile = (pid, p, L, espn) => {
+  const healthTile = (pid, p, L, espn, wkTag = '') => {
     const h = healthOf(pid, p, L, espn);
     const ret = h.back && h.back !== 'no' ? `back ~wk ${h.back}` : h.now && h.now.return_date ? `est. ${espnDate(h.now.return_date)}` : '';
     // game day (owner 2026-10-18): once inactives are posted the tile says Active or Inactive, not a chance
@@ -1213,7 +1213,7 @@
       : h.play != null ? '<div class="pc-big bad">Out</div>'
       : '<div class="pc-big bad">Injured</div>';  // listed but no chance on file: don't claim more than we know
     const sub = ina || act ? [`${ina ? 'ruled out' : 'declared active'} for wk ${h.wk}`, h.what].filter(Boolean).join(' · ') : !h.inj ? 'no injury listed' : [h.what, ret].filter(Boolean).join(' · ') || 'on the injury report';
-    return tapTile('Health', `${big}<div class="pc-tapsub">${esc(sub)}</div>`, 'Health', injuryBrief(pid, p, L, espn, h));
+    return tapTile(`Health${wkTag}`, `${big}<div class="pc-tapsub">${esc(sub)}</div>`, `Health${wkTag}`, injuryBrief(pid, p, L, espn, h));
   };
   // Practice and games, dated (owner 2026-10-17: "the date the report was out, show the last 6, include games in that
   // timeline"): his latest six practice days and games this season plus his next game (career log prac,
@@ -1548,7 +1548,10 @@
         ${tapTile(actV != null ? 'Points' : 'Projection', projBig, `${wkLabel(d)} ${actV != null ? 'points' : 'projection'}`,
             now + projDetail.replace(rangeSvg(s.q, s.proj), rangeSvg(s.q, s.proj, actV)) + muDetail.replace('<div class="pc-box">', '<div class="pc-box"><div class="pc-k">Matchup effect</div>'))}
         ${formTile(L, p.pos, fpg, e.games || p.sc.g, `${d.season} season before week ${d.week}`, `<div class="pc-box pc-season">${seasonHtml(p, d, L)}</div>`)}
-        ${d === DATA ? healthTile(pid, p, L, p.espn) : ''}
+        ${d === DATA ? healthTile(pid, p, L, p.espn)
+          // a later week this season (owner 2026-10-22: "how come health tile disappears in future weeks?"): that week's own
+          // chance to play (as its projection tile), his injury as of now and the expected return; past weeks: the game log
+          : DATA && +d.season === +DATA.season && +d.week > +DATA.week ? healthTile(pid, p, L, p.espn, ` · wk ${d.week}`) : ''}
         ${GRADED[p.pos] ? gradeTile(pid, L) : ''}
       </div>
       ${g ? `<div class="pc-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>` : ''}`;
