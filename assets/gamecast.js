@@ -1323,13 +1323,17 @@
     // order; the career log can be a build older): matched to the filed days when the counts agree
     const fd = filed ? [...filed].sort() : [];
     if (code && fd.length === code.length) fd.forEach((d, i) => { on[d] = code[i]; });
-    const days = reps.length && (pr.length || filed) ? reps.map(r => [r.weekday, on[r.date] || (!filed || filed.has(r.date) ? 'F' : '?')])
+    // past its deadline + grace and still missing (nfledge/chronology.py, owner 2026-10-22): "overdue" ('!'), not "not in yet"
+    const late = new Set((DATA && DATA.overdue && p && DATA.overdue[p.team]) || []);
+    const days = reps.length && (pr.length || filed) ? reps.map(r => [r.weekday, on[r.date] || (!filed || filed.has(r.date) ? 'F' : late.has(r.date) ? '!' : '?')])
       : pr.length ? pr.map(e => [wd(e[1]), e[2]])
       : [...code].map((c, i) => [rdays[i] || ['Wed', 'Thu', 'Fri'][i], c]);
-    const WORD = { D: 'did not practice', L: 'limited', F: 'full', '-': 'not on the report' }, TAG = { D: 'Missed', L: 'Limited', F: 'Full', '-': 'Not listed', '?': 'Not in yet' };
+    const WORD = { D: 'did not practice', L: 'limited', F: 'full', '-': 'not on the report' }, TAG = { D: 'Missed', L: 'Limited', F: 'Full', '-': 'Not listed', '?': 'Not in yet', '!': 'Overdue' };
     const prSentence = (() => {
-      const wait = days.filter(x => x[1] === '?').map(x => x[0]), known = days.filter(x => x[1] !== '?');
-      const tail = wait.length ? `${known.length ? '. ' : ''}${wait.join(' and ')}'s report isn't in our data yet` : '';
+      const wait = days.filter(x => x[1] === '?').map(x => x[0]), over = days.filter(x => x[1] === '!').map(x => x[0]);
+      const known = days.filter(x => x[1] !== '?' && x[1] !== '!');
+      const tail = (wait.length ? `${known.length ? '. ' : ''}${wait.join(' and ')}'s report isn't in our data yet` : '')
+        + (over.length ? `${known.length || wait.length ? '. ' : ''}${over.join(' and ')}'s report is overdue: past its 4 p.m. ET deadline and not on NFL.com yet` : '');
       return known.length ? said(known, !!wait.length) + tail : tail;
     })();
     function said(days, partial) {  // partial: a day still to come in, so no "all week"
@@ -1344,7 +1348,7 @@
       const trend = d1 > d0 ? ' (trending up)' : d1 < d0 ? ' (trending down)' : '';
       return txt.charAt(0).toUpperCase() + txt.slice(1) + trend;
     }
-    const prStrip = days.length ? `<div class="pr-strip">${days.map(([dname, c]) => `<div class="pr-day pr-${c === '?' ? 'n' : c}"><small>${esc(dname)}</small><b>${TAG[c] || c}</b></div>`).join('')}</div>
+    const prStrip = days.length ? `<div class="pr-strip">${days.map(([dname, c]) => `<div class="pr-day pr-${c === '?' || c === '!' ? 'n' : c}"><small>${esc(dname)}</small><b>${TAG[c] || c}</b></div>`).join('')}</div>
         <p class="pr-say">${esc(prSentence)}</p>` : '';
     // when he got hurt, as a date (owner 2026-10-17: "rather than trying to decipher it"): the in-game note's week, dated
     // from his games in the timeline; else the day he first appeared on the report
