@@ -39,11 +39,11 @@ import pandas as pd  # noqa: E402
 from nfledge import data as D  # noqa: E402
 from nfledge.config import load_config  # noqa: E402
 
-V = 6  # 6: credited yards / touchdowns (yru, yre, ypa, tdr, tdv, tdq, tdo) and lateral credit (lv, lvy, lu, luy, ltd)
+V = 7  # 7: blank-type 1999 plays kept; 6: credited yards / touchdowns (yru, yre, ypa, tdr, tdv, tdq, tdo) and lateral credit (lv, lvy, lu, luy, ltd)
 FIRST = 1999
 COVERED = 0.9
 COLS = ["game_id", "play_id", "season", "week", "season_type", "posteam", "defteam", "home_team", "play_type", "qtr", "down",
-        "ydstogo", "yardline_100", "score_differential", "half_seconds_remaining", "yards_gained", "epa", "success",
+        "ydstogo", "yardline_100", "rush_attempt", "score_differential", "half_seconds_remaining", "yards_gained", "epa", "success",
         "touchdown", "first_down", "shotgun", "no_huddle", "sack", "interception", "complete_pass", "pass_attempt",
         "qb_scramble", "air_yards", "yards_after_catch", "pass_location", "run_location", "run_gap", "rusher_player_id",
         "rusher_player_name", "passer_player_id", "passer_player_name", "receiver_player_id", "receiver_player_name",
@@ -105,6 +105,11 @@ def dbs(s):
 
 
 def build(pbp: pd.DataFrame, season: int, full: dict) -> dict:
+  # 1999 files plays with a post-play penalty under a blank play type (owner 2026-10-22 audit: 388 plays, e.g. 88 of
+  # Peyton Manning's passing yards): a pass or rush attempt says what it was
+  pbp = pbp.copy()
+  blank = pbp.play_type.isna() & ((pbp.pass_attempt == 1) | (pbp.rush_attempt == 1))
+  pbp.loc[blank, "play_type"] = np.where(pbp.loc[blank, "pass_attempt"] == 1, "pass", "run")
   p = pbp[pbp.play_type.isin(["run", "pass"]) & (pbp.qb_kneel != 1) & (pbp.qb_spike != 1) & (pbp.two_point_attempt != 1)
           & pbp.posteam.notna() & pbp.defteam.notna()].copy()
   for c in ("posteam", "defteam", "home_team", "away_team", "td_team"):
