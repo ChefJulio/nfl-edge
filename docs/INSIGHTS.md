@@ -4305,3 +4305,31 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   27.7% (+5.7); down 1, the extra point ahead (39.1 vs 38.5); down 2 at 1:30 +11.8; down 5 at 4:00 two +3.3 (the chart's
   answer). (CJ) check (1) rerun with it: PASS (go 35.2 vs 34.6 won, field goal 56.4 vs 55.6, punt 47.3 vs 47.2; Brier
   0.1532); same recommendation as nfl4th 79.2%.
+- **PRE-REGISTERED 2026-10-23 (owner: "if it's 19-20 and then they score a touchdown/xp the score is then 27-19, that's
+  a one score game with a td and 2 pt conversion. if you had gone for 2 earlier and missed it, the score would be 18-27
+  ... the time left matters a lot" ... "yes"): (CL) a possessions model for the 4th quarter.** The general model
+  prices points smoothly at any clock: at 12:00 with the ball at its own 25 it reads down 1 45.4% vs down 2 37.6% (too
+  far apart) and down 8 13.8% vs down 9 12.3% (too close: one score vs two), so key numbers can't come from it.
+  nfledge/possessions.py: the win chance of a 4th-quarter state = the remaining possessions played out, alternating:
+  (a) the current drive ends in a touchdown / field goal / nothing at rates measured by field position band, down and
+  distance bucket (every drive 2012 on, shrunk to the band when a cell is thin); (b) each later drive at league per-drive
+  rates for a drive after a kickoff or punt, scaled by its team's Vegas implied total (capped); a touchdown = 7 with the
+  measured extra-point rate, else 6; (c) how many possessions remain after the current one: the measured distribution
+  given the clock (30-second bins) and whether the team with the ball leads (every 4th-quarter snap 2012 on); (d) at the
+  end the score decides, a tie is overtime at 50%. Fit on 2006-18 (drives 2012-18), tested on 2019-25 4th-quarter 1st
+  downs. Gate (both): (1) mean absolute calibration gap over lead (-9..+9) x time (0:00-3:00 / 3:00-6:00 / 6:00-10:00
+  / 10:00-15:00) cells of 40+ lower than the general model's; (2) Brier on all those snaps no worse than the general
+  model's + 0.002. If it passes it replaces the general model in the 4th quarter and the 1-2 rule (CK2) goes; (CJ)
+  check (1) is rerun. The try at 18-20 is reported at 12:00, 8:00 and 4:00 as it comes out, no gate on the answer.
+- **RESULT {#possessions} (CL) the possessions model: FAIL; not shipped. What it showed fixed (CK2).** tools/poss_eval.py,
+  23,604 4th-quarter 1st downs 2019-25 (fit 2006-18): mean calibration gap over 76 lead x time cells 0.043 vs the
+  general model's 0.033; Brier 0.1212 vs 0.1205 (nflfastR 0.1192). A plain possession chain (the current drive by field
+  position, later drives at league rates scaled by Vegas totals, the measured number of possessions left by clock and
+  lead, the better try after each touchdown) misses how teams play late: up 1 with the ball read 81% vs 68% actual with
+  3:00-6:00 left; down 1 with the ball 49% vs 63% (it plays for a field goal and the clock). The same table settled the
+  owner's point that time decides whether a 1- and a 2-point lead differ: team with the ball, up 1 vs up 2 won 59.5% vs
+  72.8% (n 158 / 184) with 10:00-15:00 left, 64.7 vs 78.1 with 6:00-10:00, but 67.9 vs 63.2 with 3:00-6:00 and 94.4 vs
+  90.4 inside 3:00. CK2 is now time-faded (the owner's call): the two are one state in full inside 6:00, fading to none
+  at 8:00; above that the general model's pricing, which matches those games. The try at 18-20: kick at 12:00 (-1.3,
+  inside the toss-up band's edge), 10:00 (-1.8), 8:00 (-1.4); go for two at 7:00 (+3.0), 4:00 (+5.8), 1:30 (+11.6).
+  (CJ) check (1) rerun: PASS (Brier 0.1532), 79.3% agreement with nfl4th.

@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 020ec373c01e0a1c
+documented_code_hash: f2cbffe216800d5f
 ---
 # How the model works
 
@@ -425,7 +425,7 @@ Our own model of the chance that the team with the ball wins, from the score, th
 - *Kickoffs:* the 2025 rules' starting spots. *Onside kicks:* 8% recovered. *Tries:* 95% of extra points, 48% of two-point tries.
 - *Timeouts:* a timeout saves the time a running clock would lose before the next snap, which depends on the offense's pace there (39 seconds between snaps normally, about 21 when hurrying at a half's end, 44 for a 4th-quarter leader in the last two minutes), stopped at the two-minute warning. Judged only for the clock and only in a half's last five minutes: a timeout can be right for other reasons.
 - *After a conversion late:* if the team that keeps the ball leads and the other side can't stop the clock, the game is over.
-- *Key numbers:* in the 4th quarter a 1-point and a 2-point lead count as the same state (a field goal beats both). The model on its own priced each point about equally, so kicking an extra point to be down 1 looked much better than staying down 2, and it missed that going for two to tie is right when down 2 late.
+- *Key numbers:* inside the last 6 minutes a 1-point and a 2-point lead count as the same state (a field goal beats both), fading out by 8:00. With more time left they really do differ, because later scores can make it 6 vs 7 or 8 vs 9: in real games the team with the ball up 2 won 72.8% with 10-15 minutes left against 59.5% up 1, but inside 6 minutes the two were even. So down 2 after a touchdown, the calculator kicks the extra point early in the 4th quarter (barely) and goes for two from about 7 minutes on.
 
 ### Reading the numbers
 
@@ -441,6 +441,7 @@ How we know it's right: on 15,440 real 4th downs from 2022-25, each judged by a 
 - **Shipped** - Do team strength, roof, wind and the full punt outcome (what nfl4th and the NYT 4th Down Bot use) improve the inputs? - Yes, with a caveat: the conversion model beat the old one on every distance (Brier 0.2249 vs 0.2336) but still reads below the 4th-down tries teams chose to make; field goals with roof and wind came within 3 points from 20 to 59 yards and within 4 in winds of 15+ mph (2026-10). <!-- tried:calc-inputs-v2 -->
 - **Shipped** - Are the calculator's recommendations right, not just its parts? - On 15,440 real 4th downs (2022-25, each season unseen), its forecast for the option chosen matched the result within 1 point for going, kicking and punting, as accurate as nfl4th; agreeing with nfl4th 79% of the time; comparing the two found two bugs, both fixed: a play that ran out a half didn't end it, and the leader's kneel-out was missed after a punt (2026-10). <!-- tried:calc-decisions -->
 - **Rejected** - Do inputs for what the score means in football terms (up 1-2, up 3, up 4-6, 7, 8) teach the model that late a 1- and 2-point lead are the same? - No: late-game accuracy unchanged (gap 0.042 vs 0.043); too few late games per score. Instead the calculator treats a 1- and 2-point lead as one state in the 4th quarter (owner's call), which gets the two-point try right: down 2 after a touchdown with 4:00 left, going for two is worth 5.7 points more (2026-10). <!-- tried:key-numbers -->
+- **Rejected** - Does valuing the 4th quarter as the possessions left (each a touchdown, field goal or nothing; the measured number of drives left by clock and lead) beat the general model? - No: calibration across lead and time 0.043 vs 0.033 on 2019-25. It missed how teams play late (a team down 1 with the ball plays for a field goal and the clock: it won 63%, the chain said 49%). Its test did show when a 1- and 2-point lead differ: with 6+ minutes left, being up 2 is worth about 13 points more; inside 6 minutes, nothing (2026-10). <!-- tried:possessions -->
 
 ## Playoffs
 
