@@ -147,7 +147,7 @@
       };
     },
   };
-  // ESPN public leagues (UNTESTED until a public league id is supplied: built from ESPN's documented-by-use v3 API)
+  // ESPN public leagues (ESPN's documented-by-use v3 API; owner confirmed working 2026-10-22)
   const espn = {
     async load(id, season) {
       const v = ['mTeam', 'mRoster', 'mSettings', 'mMatchupScore'].map(x => `view=${x}`).join('&');
@@ -290,7 +290,7 @@
       // two worlds for a teammate of an uncertain player, in this league's scoring: up to two such teammates, biggest
       // swing first (owner 2026-10-16: Coleman's projection assumes DJ Moore sits, not just Palmer)
       const conds = [p.cond, p.cond2].filter(Boolean).map(c => ({ name: c[0], pid: c[1], pSit: c[2], plays: c[3] * r, sits: c[4] * r }));
-      return { ext: x, pid: g, name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, status: p.status, opp: p.opp, home: p.home,
+      return { ext: x, pid: g, name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, status: p.status, days: p.days, tag: p.tag, opp: p.opp, home: p.home,
                proj, pa, exp: proj * pa, sd, inactive: p.inactive || 0, conds, locked: started(p.team) };
     };
 
@@ -298,9 +298,10 @@
     const last = n => { const w = String(n || '').split(' ').filter(x => !/^(jr\.?|sr\.?|ii|iii|iv|v)$/i.test(x)); return w[w.length - 1] || n; };
 
     // "Questionable (ESPN) (DL)" -> "Questionable per ESPN; practice: DNP, limited"
-    const statusWords = st => {
-      const m = String(st || '').match(/^(.*?)\s*\(([DLF-]+)\)\s*$/), des = (m ? m[1] : String(st || '')).trim().replace(/\s*\(ESPN\)/, ' per ESPN');
-      const days = m ? [...m[2]].map(c => ({ D: 'DNP', L: 'limited', F: 'full', '-': 'not listed' })[c]).join(', ') : '';
+    // his status in words (health.label / health.days: the week data's fields, not a parse of the status text)
+    const statusWords = p => {
+      const des = NFLE.health.label(p).replace(/\s*\(ESPN\)/, ' per ESPN');
+      const days = [...NFLE.health.days(p)].map(c => ({ D: 'DNP', L: 'limited', F: 'full', '-': 'not listed' })[c]).join(', ');
       return [des, days && `practice: ${days}`].filter(Boolean).join('; ') || 'injury report';
     };
     // ---- best lineup: fixed slots first (scarcest eligibility), then flex / superflex, by expected points -----------
@@ -349,8 +350,8 @@
     // chance to play is a chip ("65% to play"; owner 2026-10-17: one way everywhere), and the position chip shows only where the slot doesn't already say it
     // (FLEX, bench) or there is no slot (waivers sit under a position heading, so none there either).
     const badgesOf = (p, o = {}) => {
-      const out = p.proj != null && p.inactive >= 0.05 && p.inactive < 0.99 ?  // ruled out: the O chip says it
-        `<span class="lg-out${p.inactive >= 0.5 ? ' hi' : ''}" title="Chance he plays">${NFLE.fmt.toPlay(p.inactive)} to play</span>` : '';
+      const out = p.proj != null && 1 - p.inactive < NFLE.health.AVAIL.CONCERN && 1 - p.inactive >= NFLE.health.AVAIL.NIL ?  // ruled out: the O chip says it
+        `<span class="lg-out${1 - p.inactive < NFLE.health.AVAIL.EVEN ? ' hi' : ''}" title="Chance he plays">${NFLE.fmt.toPlay(p.inactive)} to play</span>` : '';
       const lock = p.locked && !o.noLock ? '<span class="lg-lock" title="His game has kicked off: his spot is set">locked</span>' : '';
       // no "+0.5 if X plays" badge (owner 2026-10-20: the in-depth detail is on the player's page)
       const inner = lock + NFLE.injTag(p.status || '', p.proj != null ? p.inactive : null, p.pid || null) + out;
@@ -423,11 +424,12 @@
     };
     // IR (owner 2026-10-17: "no mention of IR slots"): listed under the bench with when he's likely back (the first week
     // the return model gives him at least an even chance to play); never in the lineup
+    // (health.back, the player card's rule: his injury-only chance)
     const backWeek = x => { const g = gsisOf(x), r = ROS && g && ROS.players[g];
       if (!ROS) return ''; if (!r) return 'not projected back this season';
-      const e = r.w.find(z => z[1] >= 0.5); return e ? `likely back week ${e[0]}` : 'not projected back this season'; };
+      const w = NFLE.health.back(r); return w ? `likely back week ${w}` : w === 0 ? 'not projected back this season' : `likely back week ${ROS.from}`; };
     const irSection = () => { const ir = (mine.ir || []).filter(x => mine.ext.includes(x));
-      const ready = ir.filter(x => { const p = player(x); return p.proj != null && p.inactive < 0.5; });
+      const ready = ir.filter(x => { const p = player(x); return p.proj != null && 1 - p.inactive >= NFLE.health.AVAIL.EVEN; });
       return ir.length ? `<h3 class="lg-h">IR</h3>${table(ir.map(x => { const p = player(x);
         // projected to play this week (owner 2026-10-17: an IR player can have a projection): starting him means
         // activating him first, which takes a roster spot
@@ -452,13 +454,13 @@
       // Only when he'd start if he plays: a player who projects below the weakest fill-in even when active is simply
       // benched (Palmer 4.4 vs Coleman 7.6, 2026-10-16), not a game-time call.
       const minFill = benchIn.length ? Math.min(...benchIn.map(q => q.proj ?? 0)) : 0;
-      const unsure = benchOut.filter(p => p.exp != null && p.inactive >= 0.15 && p.inactive <= 0.85 && p.proj > minFill);
+      const unsure = benchOut.filter(p => p.exp != null && 1 - p.inactive < NFLE.health.AVAIL.OK && 1 - p.inactive >= NFLE.health.AVAIL.OUT && p.proj > minFill);
       const sure = benchOut.filter(p => !unsure.includes(p));
       const fill = benchIn.slice().sort((a, b) => b.exp - a.exp);
       // Readable moves (owner 2026-10-16): who comes in, who goes out and why, then one card per game-time call with
       // its two outcomes on their own lines.
       const why = p => p.exp == null ? 'not projected (bye, IR or out)'
-        : p.inactive >= 0.15 ? `${NFLE.fmt.toPlay(p.inactive)} to play · ${f1(p.proj)} if he plays · ${esc(statusWords(p.status))}`
+        : 1 - p.inactive < NFLE.health.AVAIL.OK ? `${NFLE.fmt.toPlay(p.inactive)} to play · ${f1(p.proj)} if he plays · ${esc(statusWords(p))}`
         : `projects ${f1(p.exp)}`;
       // names open their player (owner 2026-10-20: "make player names clickable ... wherever else they show up")
       const nm = p => p && p.pid ? `<button type="button" class="nm-link" data-open-pid="${esc(p.pid)}"><b>${esc(p.name)}</b></button>` : `<b>${esc(p ? p.name : '')}</b>`;
@@ -479,7 +481,7 @@
           : other ? `start ${nm(other)} <b>${f1(other.proj)}</b>${cuff ? ` <span class="muted">(your ${esc(cuff.name)} only rises to ${f1(cc.sits)})</span>` : ''}` : 'pick up a fill-in';
         return `<div class="lg-mv gt">
             <div class="lg-mv-h">${nm(p)} <span class="lg-mv-tag">game-time call</span></div>
-            <div class="muted lg-mv-s">${NFLE.fmt.toPlay(p.inactive)} to play · ${esc(statusWords(p.status))}</div>
+            <div class="muted lg-mv-s">${NFLE.fmt.toPlay(p.inactive)} to play · ${esc(statusWords(p))}</div>
             <div class="lg-mv-row"><span class="lg-mv-k good">Plays</span><div>start him <b>${f1(p.proj)}</b></div></div>
             <div class="lg-mv-row"><span class="lg-mv-k bad">Out</span><div>${out}</div></div>
           </div>`;

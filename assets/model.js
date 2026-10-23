@@ -82,6 +82,29 @@
         const place = (re, html) => { if (html) (areas.find(a => re.test(a.dataset.title)) || areas[areas.length - 1]).insertAdjacentHTML('beforeend', html); };
         place(/chance to play|inactive|availability/i, avail(m.avail));
         place(/^games|game lines/i, track(m.track));
+        // Published record (owner 2026-10-22: "a finalized report of all our projection records at the end of a week"):
+        // what the site showed before each game, unedited, with what happened (tools/forecast_record.py)
+        const rec = document.createElement('div');
+        rec.className = 'md-area';
+        rec.dataset.title = 'Published record';
+        rec.innerHTML = '<h2>Our published record</h2><p class="muted">Loading&hellip;</p>';
+        art.appendChild(rec);
+        areas.push(rec);
+        NFLE.load('data/records/index.json').then(ix => {
+          const f2 = v => (v == null ? '&ndash;' : v.toFixed(2)), f3 = v => (v == null ? '&ndash;' : v.toFixed(3));
+          const rows = (ix.weeks || []).slice().reverse().map(w => {
+            const pr = w.projections || {}, cf = (w.chance_to_play || {}).final || {}, ck = (w.chance_to_play || {}).prekick || {};
+            return `<tr><td>Wk ${esc(w.week)}<br><small><a href="data/records/${esc(w.file)}">JSON</a> &middot; <a href="data/records/${esc(w.csv)}">CSV</a></small></td>
+              <td class="num">${f2(pr.mae)}<br><small>${pr.n || 0} players</small></td><td class="num">${pr.bias > 0 ? '+' : ''}${f2(pr.bias)}</td>
+              <td class="num">${f3(cf.brier)}<br><small>${cf.n || 0} players</small></td><td class="num">${f3(ck.brier)}<br><small>${ck.n || 0} players</small></td></tr>`;
+          }).join('');
+          rec.innerHTML = `<h2>Our published record</h2>
+            <p>Every finished week, the numbers this site showed before each game, exactly as published (saved at every build, never recomputed), next to what happened. Nothing is removed or edited afterwards: misses stay in.</p>
+            <table class="trk"><thead><tr><th>Week</th><th class="num">Proj.<br>error</th><th class="num">Bias</th><th class="num">Play error<br><small>pre-inactives</small></th><th class="num">Play error<br><small>pre-kickoff</small></th></tr></thead>
+            <tbody>${rows || '<tr><td colspan="5" class="muted">The first week publishes once its games are final and the stats are in.</td></tr>'}</tbody></table>
+            <h3>How to score us</h3>
+            <p>Each player's row has our chance to play and projection at five moments on his team's calendar: before its first practice report, after the first and second reports, before inactives (the final report in) and before kickoff, each with the build time it was published. Use only numbers stamped before kickoff. Projection error is the average miss in half-PPR points for the fantasy-relevant players who played (top 24 QB, 48 RB, 60 WR, 24 TE by our projection); bias is actual minus projected. Chance to play is scored with the Brier score (the average squared miss; lower is better) over players we gave any risk (under 97%). The files are on this site and in the public repository's archive branch.</p>`;
+        }).catch(() => { rec.innerHTML = '<h2>Our published record</h2><p class="muted">The first week publishes once its games are final and the stats are in.</p>'; });
         let saved = null;
         try { saved = sessionStorage.getItem('nfle-model-area'); } catch (e) { /* private mode */ }
         const show = title => {

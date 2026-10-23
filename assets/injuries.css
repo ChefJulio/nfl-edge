@@ -14,13 +14,6 @@ table.dt td.in-note { max-width: 420px; white-space: normal; font-size: var(--fs
 /* This week dashboard (injuries.js drawDash) */
 .in-top { display: flex; gap: 8px; align-items: center; margin: 4px 0 12px; flex-wrap: wrap; }
 .in-top .in-q { flex: 1 1 180px; min-width: 0; }
-.in-b { margin-bottom: 14px; } .in-b > summary { cursor: pointer; padding: 6px 2px; font-size: var(--fs-md); list-style: none; }
-.in-b > summary::-webkit-details-marker { display: none; }
-.in-b > summary::before { content: '\25B8'; display: inline-block; width: 1em; color: var(--muted); transition: transform .15s; }
-.in-b[open] > summary::before { transform: rotate(90deg); }
-.in-b .in-n { font-weight: 700; color: var(--muted); margin: 0 4px; } .in-b summary .muted { font-size: var(--fs-sm); }
-.in-b-gt > summary b { color: #f1d391; } .in-b-out > summary b { color: #ff8f84; } .in-b-likely > summary b { color: #9fd9ae; }
-td.in-when { white-space: nowrap; font-size: var(--fs-xs); }
 .in-none { margin: 12px 4px; }
 .in-top .in-q { padding: 9px 12px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--panel2); color: var(--ink); font: inherit; }
 /* dashboard rows: the injury / practice tags on their own line under the name, so Play%, Proj and Game fit a phone */
@@ -30,3 +23,30 @@ td.in-when { white-space: nowrap; font-size: var(--fs-xs); }
 .in-when .in-g, .in-when .in-o { display: block; } .in-when .in-g { color: var(--muted); } .in-when .in-o { color: var(--ink); font-weight: 600; margin-top: 2px; }
 /* his game has kicked off or ended: dimmed, last in its group */
 .in-dt tr.in-gone > td { opacity: .42; }
+
+/* This week: one list at a time (owner 2026-10-22), the linked fantasy team first. The controls as one panel
+   (owner: "make that area look better"): three equal tags, the count big in its tag's color over the label; the tag's
+   note; then the positions as one segmented bar */
+.in-ctl { margin: 4px 0 12px; padding: 6px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--panel); }
+.in-bk { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.in-bk button { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; padding: 8px 4px 7px;
+  font: inherit; color: var(--muted); background: var(--panel2); border: 1px solid transparent; border-radius: var(--r-md); cursor: pointer; }
+.in-bk .in-n { font-size: 24px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.in-bk b { font-size: var(--fs-xs, 11px); font-weight: 700; letter-spacing: .02em; text-align: center; line-height: 1.2; }
+.in-bk .in-bk-gt .in-n { color: #f1d391; } .in-bk .in-bk-out .in-n { color: #ff8f84; } .in-bk .in-bk-likely .in-n { color: #9fd9ae; }
+.in-bk button.on { color: var(--ink); background: color-mix(in srgb, var(--accent) 12%, var(--panel2)); border-color: color-mix(in srgb, var(--accent) 70%, var(--line)); }
+.in-bk button.in-bk-gt.on { border-color: #f1d391; background: color-mix(in srgb, #f1d391 12%, var(--panel2)); }
+.in-bk button.in-bk-out.on { border-color: #ff8f84; background: color-mix(in srgb, #ff8f84 12%, var(--panel2)); }
+.in-bk button.in-bk-likely.on { border-color: #9fd9ae; background: color-mix(in srgb, #9fd9ae 12%, var(--panel2)); }
+.in-bk button:disabled { opacity: .4; cursor: default; }
+.in-mine-n { margin-top: 1px; padding: 0 6px; border-radius: var(--r-pill); font-size: 10px; font-weight: 700; line-height: 15px;
+  color: var(--good); background: color-mix(in srgb, var(--good) 18%, transparent); }
+.in-bk-note { margin: 6px 4px 6px; font-size: var(--fs-sm); text-align: center; }
+.in-mine-tag { margin-left: 6px; padding: 0 5px; border-radius: 4px; font-size: var(--fs-xs, 11px); font-weight: 700;
+  background: color-mix(in srgb, var(--good) 25%, transparent); color: var(--good); }
+.in-pos { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; padding: 3px; border-radius: var(--r-md); background: var(--panel2); }
+.in-pos button { display: flex; align-items: baseline; justify-content: center; gap: 4px; min-width: 0; padding: 6px 2px; font: inherit; font-size: var(--fs-sm); font-weight: 700;
+  color: var(--muted); background: none; border: 0; border-radius: calc(var(--r-md) - 2px); cursor: pointer; }
+.in-pos button.on { color: var(--ink); background: var(--panel); box-shadow: 0 1px 3px rgba(0,0,0,.4); }
+.in-pos button:disabled { opacity: .35; cursor: default; }
+.in-pos .in-n { font-size: var(--fs-xs, 11px); font-weight: 600; color: var(--muted); }

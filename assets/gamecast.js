@@ -37,82 +37,41 @@
   // Plain GETs only: a cache-mode option makes Chromium add Cache-Control / Pragma request headers, which turns the
   // request into a CORS preflight that ESPN's feed does not answer (WebKit is fine either way). ESPN's own
   // max-age is 1-9 s, so the browser cache never holds live data for long.
-  // Injury status as a compact tag: Q / D / O / IR / SSPD / PUP / NFI, the full status (incl. practice days, ESPN or
-  // last-week notes) on hover. One look everywhere a status shows (rankings, cards, team pages, gamecast).
-  const injCode = st => {
-    const t = String(st || '').trim();
-    return /^(ir\b|injured reserve)/i.test(t) ? 'IR' : /^(susp|sspd)/i.test(t) ? 'SSPD' : /^(pup|physically)/i.test(t) ? 'PUP'
-      : /^(nfi|non-football)/i.test(t) ? 'NFI' : /^inactive/i.test(t) ? 'INA' : /^active/i.test(t) ? 'ACT' : /^out/i.test(t) ? 'O' : /^doubt/i.test(t) ? 'D' : /^question/i.test(t) ? 'Q' : t.split(/\s/)[0].toUpperCase();
-  };
-  // status = "<game designation> (<practice days>)", e.g. "Questionable (DLF)" or just " (D)" midweek: the designation
-  // is a colored tag, each practice day its own chip in the NFL's report terms (FP green, LP amber, DNP red), so a
-  // Wednesday DNP never reads as "Doubtful"
-  const PRAC = { D: 'Did not practice', L: 'Limited', F: 'Full', '-': 'not on the report' }, PRAB = { D: 'DNP', L: 'LP', F: 'FP', '-': '&ndash;' }, DAYS = ['Wed', 'Thu', 'Fri'];
-  // ina (owner 2026-10-20: "simplify all those to just Q D O IR SSPD ... in line with our projection for them in that
-  // week"): his injury chance to sit this week from the model, the latest data before his game; the tag then names our
-  // projection in the NFL's words, not whatever label is current (the official designation and practice days stay in
-  // the tip / chips). Bands = halfway between how often players with each final official status played (2019-25, QB /
-  // RB / WR / TE on the report): none 83%, Questionable 62%, Doubtful 3%, Out ~0; the no-tag line (owner 2026-10-20:
-  // "bump the threshold for Q ... 90%+ish") is halfway between a regular NOT on the next week's report (played 92.8%,
-  // 33,856 player-weeks) and one on it with no designation (83%) -> no tag at 88%+, Q from 32%, D from 3%, O below. A
-  // reserve list (IR, PUP, NFI, SSPD) keeps its own code while we have him under 32%.
-  const TAG_BANDS = [[0.88, ''], [0.32, 'Q'], [0.03, 'D'], [-1, 'O']];
-  // The tag is the official designation (owner 2026-10-21: "we should use the official tags"; this reverts the
-  // 2026-10-20 bands below for the tag; our chance to play stays beside it): the week data's per-player tag
-  // (InjuryModel.designations: reserve list, game-day actives, the final report, the Tuesday Q) or its map of every
-  // rostered player (DATA.tags), and Q live for a player hurt in this week's game who hasn't returned (HURT). Pages
-  // built before then: the designation in the status text, official codes only.
-  const OFFICIAL = new Set(['Q', 'D', 'O', 'IR', 'PUP', 'NFI', 'SSPD']), FIRM = new Set(['O', 'IR', 'PUP', 'NFI', 'SSPD']);
-  const TAG_WORD = { Q: 'Questionable', D: 'Doubtful', O: 'Out', IR: 'Injured reserve', PUP: 'Physically unable to perform', NFI: 'Non-football injury list', SSPD: 'Suspended' };
+  // Injury status as a compact tag: the official designation (Q / D / O / IR / SSPD / PUP / NFI), the full status
+  // (practice days, ESPN or last-week notes) on hover. One reading everywhere a status shows (rankings, cards, team
+  // pages, gamecast, Injuries, the fantasy tab): NFLE.health (health.js, owner 2026-10-22 audit).
+  const H = NFLE.health;
+  const PRAB = { D: 'DNP', L: 'LP', F: 'FP', '-': '&ndash;' };
   const HURT = {};  // pid -> true: hurt in this week's game and not back (hurtScan)
-  const tagOf = (pid, st) => {
-    const P = pid && DATA && DATA.players && DATA.players[pid];
-    let t;
-    if (P && P.tag != null) t = P.tag;
-    else if (pid && DATA && DATA.tags) t = DATA.tags[pid] || '';
-    else { const c = injCode(String(st || '').split('(')[0].trim()); t = c === 'INA' ? 'O' : OFFICIAL.has(c) ? c : ''; }
-    return pid && HURT[pid] && !FIRM.has(t) ? 'Q' : t;
+  // wd: the week data the row comes from (default the live week; 2026-10-22, a past week's team page showed today's tags)
+  const playerIn = (pid, wd) => (pid && wd && wd.players && wd.players[pid]) || null;
+  const tagOf = (pid, st, wd = DATA) => H.tag(playerIn(pid, wd) || { status: st }, pid, wd && wd.tags, !!(pid && HURT[pid] && wd === DATA));
+  // his practice letters with their days: his team's filed report dates (the week's chronology) when they line up
+  // (2026-10-22: the tip assumed Wed / Thu / Fri, wrong for Thursday, Monday and travel weeks)
+  const pracWords = (P, wd) => {
+    const d = H.days(P);
+    if (!d) return '';
+    const ch = P && wd && wd.chrono && wd.chrono[P.team];
+    const fd = ch ? ch.days.filter(x => x[1] === 'filed').map(x => x[0]) : [];
+    const wday = x => new Date(x + 'T12:00:00').toLocaleDateString([], { weekday: 'short' });
+    return [...d].map((c, i) => `${fd.length === d.length ? `${wday(fd[i])} ` : ''}${PRAB[c] || c}`).join(', ');
   };
-  const injTag = (st, ina, pid) => {
-    const m = String(st || '').match(/^(.*?)\s*\(([DLF-]+)\)\s*$/), des = (m ? m[1] : String(st || '')).trim(), pr = m ? m[2] : '';
-    if (pid !== undefined) {
-      const c = tagOf(pid, st);
-      if (!c) return '';
-      const tip = `${TAG_WORD[c] || c}${pid && HURT[pid] && !FIRM.has(c) ? ': hurt in this week\'s game, not back' : ''}`
-        + (ina != null && ina === ina ? ` · our chance he plays: ${Math.round(100 * (1 - ina))}%` : '')
-        + (pr ? ` · practice: ${[...pr].map((x, i) => `${DAYS[i] || ''} ${PRAB[x]}`).join(', ')}` : '');
-      return `<span class="dc-tag dt-${c === 'Q' ? 'q' : c === 'D' ? 'd' : 'out'}" title="${esc(tip)}">${esc(c)}</span>`;
-    }
-    if (ina != null && ina === ina) {
-      const off = des ? injCode(des) : '', p = 1 - ina, band = TAG_BANDS.find(([lo]) => p >= lo)[1];
-      const res = ['IR', 'PUP', 'NFI', 'SSPD'].includes(off);
-      const c = res && (band === 'D' || band === 'O') ? off : band;
-      // no practice-day chips in rows (owner 2026-10-20: "keep that info in the health tile"): in the tip only
-      const tip = `${Math.round(100 * p)}% to play by our projection${des ? ` · status: ${des}` : ''}`
-        + (pr ? ` · practice: ${[...pr].map((x, i) => `${DAYS[i] || ''} ${PRAB[x]}`).join(', ')}` : '');
-      return c ? `<span class="dc-tag dt-${c === 'Q' ? 'q' : c === 'D' ? 'd' : 'out'}" title="${esc(tip)}">${esc(c)}</span>` : '';
-    }
-    if (!st) return '';
-    // only a real designation makes a tag: a note ("On report last wk", "Left last game early") read as "ON" / "LEFT"
-    const c0 = des ? injCode(des) : '', c = ['IR', 'SSPD', 'PUP', 'NFI', 'INA', 'ACT', 'O', 'D', 'Q'].includes(c0) ? c0 : '';
-    // game day (AU): INA = declared inactive, ACT = a listed player who dressed (game-day rulings, espn.gameday_rulings)
-    const tip = c === 'INA' ? 'Declared inactive for this game' : c === 'ACT' ? 'Was questionable; declared active for this game' : des;
-    const tag = c ? `<span class="dc-tag dt-${c === 'Q' ? 'q' : c === 'D' ? 'd' : c === 'ACT' ? 'act' : 'out'}" title="${esc(tip)}">${esc(c)}</span>` : '';
-    const days = pr ? `<span class="pr-days" title="Practice: ${esc([...pr].map((x, i) => `${DAYS[i] || ''} ${PRAC[x]}`).join(', '))}">${[...pr].map(x => `<i class="pr-${x === '-' ? 'n' : x}">${PRAB[x]}</i>`).join('')}</span>` : '';
-    return tag + days;
+  const injTag = (st, ina, pid, wd = DATA) => {
+    const P = playerIn(pid, wd) || { status: st }, c = tagOf(pid, st, wd);
+    if (!c) return '';
+    const pr = pracWords(P, wd);
+    const tip = `${H.TAG_WORD[c] || c}${pid && HURT[pid] && wd === DATA && !H.FIRM.has(c) ? ': hurt in this week\'s game, not back' : ''}`
+      + (ina != null && ina === ina ? ` · our chance he plays: ${Math.round(100 * (1 - ina))}%` : '')
+      + (pr ? ` · practice: ${pr}` : '');
+    return `<span class="dc-tag dt-${c === 'Q' ? 'q' : c === 'D' ? 'd' : 'out'}" title="${esc(tip)}">${esc(c)}</span>`;
   };
   // This week's game status as a header pill (owner 2026-10-18, Tyler Warren ruled inactive Sunday morning: "it's just
   // not apparent on our site he's out"; Sleeper leads its card with OUT). From the live week's board, whatever week
-  // the card's picker shows.
+  // the card's picker shows; the same tag as the badge (health.pill).
   const statusPill = pid => {
     const q = DATA && DATA.players && DATA.players[pid]; if (!q) return '';
-    const c = injCode(q.status), ia = q.inactive || 0, wk = `wk ${DATA.week}`;
-    const [k, txt, tip] = c === 'INA' ? ['out', 'Inactive', `Declared inactive for week ${DATA.week}`]
-      : c === 'IR' ? ['out', 'Injured reserve', 'On injured reserve'] : c === 'PUP' || c === 'NFI' ? ['out', c, q.status]
-      : c === 'SSPD' ? ['out', 'Suspended', q.status] : c === 'O' || ia >= 0.95 ? ['out', 'Out', q.inactive_why || 'Out']
-      : c === 'D' ? ['d', 'Doubtful', q.inactive_why || ''] : c === 'Q' ? ['q', 'Questionable', q.inactive_why || '']
-      : c === 'ACT' ? ['act', 'Active', `Was questionable; declared active for week ${DATA.week}`] : [];
-    return k ? `<span class="pc-st st-${k}" title="${esc(tip || '')}"><i></i>${esc(txt)}<small>${wk}</small></span>` : '';
+    const k = H.pill(q, tagOf(pid, q.status), DATA.week);
+    return k ? `<span class="pc-st st-${k[0]}" title="${esc(k[2] || '')}"><i></i>${esc(k[1])}<small>wk ${DATA.week}</small></span>` : '';
   };
   const getJSON = async (url, ms = 12000) => {
     const c = new AbortController(), t = setTimeout(() => c.abort(), ms);
@@ -839,7 +798,7 @@
         if (gm && (gm.final || (st && st.state !== 'pre'))) {
           const home = gm.home.team === p.team, u = { w: +DATA.week, o: home ? gm.away.team : gm.home.team, h: home ? 1 : 0 };
           if (ln) rows.push({ w: u.w, u: Object.assign(u, { live: ln, fin: !!(gm.final || (st && st.state === 'post')) }) });
-          else rows.push({ w: u.w, u: Object.assign(u, { miss: /inactive/i.test(p.status || '') ? 'INA' : /^out/i.test(p.status || '') ? 'Out' : 'DNP' }) });
+          else rows.push({ w: u.w, u: Object.assign(u, { miss: H.gameday(p) === 'INA' ? 'INA' : H.tag(p) === 'O' ? 'Out' : 'DNP' }) });
         }
       }
       rows.sort((a, b) => b.w - a.w);  // newest first: scrolling down goes back in time (owner, 2026-10-14)
@@ -1169,9 +1128,9 @@
     NFLE.load('data/ros.json').then(j => { RJ.d = j; rerenderCard(); }).catch(() => {}); };
   // a week only when our return model is following him: every later week at 100% means no injury on record (e.g.
   // hurt in the game before his bye, before any report lists him), not a return estimate; ESPN's date fills in then
-  const backWeek = pid => { const r = RJ.d && RJ.d.players[pid];
-    if (!r || !r.w.some(z => z[1] < 0.995)) return null;
-    const e = r.w.find(z => z[1] >= 0.5); return e && e[0] > RJ.d.from ? e[0] : e ? null : 'no'; };
+  // (health.back: his injury-only chance, so a healthy backup QB's scratch risk isn't read as "not back this season")
+  const backWeek = pid => { const w = H.back(RJ.d && RJ.d.players[pid]);
+    return w == null ? null : w === 0 ? 'no' : w > RJ.d.from ? w : null; };
   // the NFL week a date falls in, from the week clock: this week until its rollover (Tuesday 06:00 ET after its last
   // game), then a week per 7 days (owner 2026-10-18; it assumed every week opened on a Thursday)
   const weekOfDate = d => {
@@ -1181,7 +1140,7 @@
     return t < roll ? C.week : C.week + 1 + Math.floor((t - roll) / (7 * 864e5));
   };
   const espnDate = d => new Date(d + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
-  const healthOf = (pid, p, L, espn) => {
+  const healthOf = (pid, p, L, espn, wkSel = null) => {
     loadInj(); loadRos();
     const now = espn && DINJ && DINJ[espn];
     const wk = DATA ? +DATA.week : null;
@@ -1190,30 +1149,32 @@
     // roster row to close it)
     const playedWk = e => ((L && L.seasons) || []).some(x => x.s === e.s && (x.g || []).some(g => g.w === e.w1));
     const ep = (L && L.inj || []).find(e => L && e.s === L.cur && wk && e.w1 >= wk - 1 && !playedWk(e));
-    const des = p && /^\s*(Questionable|Doubtful|Out|IR|PUP|NFI)/i.test(p.status || '');
+    // his official tag (2026-10-22: a status regex missed "Hurt last game" and the Tuesday Q, so the tile read Healthy)
+    const des = p && !!tagOf(pid, p.status);
     // ESPN's current feed says Active: an older listing isn't an injury now (our own projection, p, still rules)
     const espnActive = now && now.status === 'Active';
-    const inj = (p && p.inactive >= 0.05) || des || (now && now.status && !espnActive) || (!p && ep && !espnActive);
+    const inj = (p && 1 - p.inactive < H.AVAIL.CONCERN) || des || (now && now.status && !espnActive) || (!p && ep && !espnActive);
     // off the board: the return model, at his next game week (a bye week has no game, so its chance reads 0)
     const ups = (L && L.up) || [], byeAt = w => ups.some(u => u.w === w && u.bye);
     const rws = !p && RJ.d && RJ.d.players[pid] ? RJ.d.players[pid].w : null;
-    const rw = rws && rws.find(z => z[0] >= RJ.d.from && !byeAt(z[0]));
-    const play = p && p.inactive != null ? 1 - p.inactive : rw ? rw[1] : null;
+    // a chosen later week: that week's chance (none on its bye); else his next game week's
+    const rw = rws && (wkSel ? rws.find(z => z[0] === wkSel && !byeAt(z[0])) : rws.find(z => z[0] >= RJ.d.from && !byeAt(z[0])));
+    const play = p && p.inactive != null ? 1 - p.inactive : rw ? H.rosChance(rw) : null;  // injury only, as the board's
     const what = [...new Set([now && now.type, now && now.detail && now.detail !== 'Not Specified' ? now.detail : '', now && now.side && now.side !== 'Not Specified' ? now.side : '']
       .filter(Boolean))].join(' · ') || (ep && ep.part) || '';  // ESPN often repeats the type as the detail
     return { inj, play, what, now, ep, back: backWeek(pid), wk };
   };
-  const healthTile = (pid, p, L, espn) => {
-    const h = healthOf(pid, p, L, espn);
+  const healthTile = (pid, p, L, espn, wkTag = '', wkSel = null, bye = false) => {
+    const h = healthOf(pid, p, L, espn, wkSel);
     const ret = h.back && h.back !== 'no' ? `back ~wk ${h.back}` : h.now && h.now.return_date ? `est. ${espnDate(h.now.return_date)}` : '';
     // game day (owner 2026-10-18): once inactives are posted the tile says Active or Inactive, not a chance
-    const gd = p && injCode(p.status), ina = gd === 'INA', act = gd === 'ACT';
-    const big = ina ? '<div class="pc-big bad">Inactive</div>' : act ? '<div class="pc-big good">Active</div>' : !h.inj ? '<div class="pc-big good">Healthy</div>'
-      : h.play != null && h.play > 0.01 ? `<div class="pc-big ${h.play >= 0.75 ? '' : 'bad'}">${Math.round(h.play * 100)}% <small>to play</small></div>`
+    const gd = H.gameday(p), ina = gd === 'INA', act = gd === 'ACT';
+    const big = bye ? '<div class="pc-big">Bye week</div>' : ina ? '<div class="pc-big bad">Inactive</div>' : act ? '<div class="pc-big good">Active</div>' : !h.inj ? '<div class="pc-big good">Healthy</div>'
+      : h.play != null && h.play >= H.AVAIL.NIL ? `<div class="pc-big ${H.level(h.play) === 'bad' ? 'bad' : ''}">${Math.round(h.play * 100)}% <small>to play</small></div>`
       : h.play != null ? '<div class="pc-big bad">Out</div>'
       : '<div class="pc-big bad">Injured</div>';  // listed but no chance on file: don't claim more than we know
-    const sub = ina || act ? [`${ina ? 'ruled out' : 'declared active'} for wk ${h.wk}`, h.what].filter(Boolean).join(' · ') : !h.inj ? 'no injury listed' : [h.what, ret].filter(Boolean).join(' · ') || 'on the injury report';
-    return tapTile('Health', `${big}<div class="pc-tapsub">${esc(sub)}</div>`, 'Health', injuryBrief(pid, p, L, espn, h));
+    const sub = ina || act ? [`${ina ? 'ruled out' : 'declared active'} for wk ${h.wk}`, h.what].filter(Boolean).join(' · ') : !h.inj ? (H.listed(p) ? 'on the injury report · expected to play' : 'no injury listed') : [h.what, ret].filter(Boolean).join(' · ') || 'on the injury report';
+    return tapTile(`Health${wkTag}`, `${big}<div class="pc-tapsub">${esc(sub)}</div>`, `Health${wkTag}`, injuryBrief(pid, p, L, espn, h));
   };
   // Practice and games, dated (owner 2026-10-17: "the date the report was out, show the last 6, include games in that
   // timeline"): his latest six practice days and games this season plus his next game (career log prac,
@@ -1221,7 +1182,7 @@
   const PR_WORD = { D: 'Did not practice', L: 'Limited', F: 'Full' };
   // his team's practice days and games whatever his status (tools/player_logs.py practice_timeline; owner 2026-10-21,
   // Jordan Mason on IR showed his week-1 rows as his latest): a reserve list or the practice squad is its own row
-  const RES_WORD = { IR: 'On injured reserve', PUP: 'On the PUP list', NFI: 'On the NFI list', Res: 'On a reserve list', PS: 'On the practice squad' };
+  const RES_WORD = { IR: 'On injured reserve', PUP: 'On the PUP list', NFI: 'On the NFI list', SSPD: 'Suspended', Res: 'On a reserve list', PS: 'On the practice squad' };
   const QN = { 1: '1st', 2: '2nd', 3: '3rd', 4: '4th', 5: 'overtime' };
   // a season's events with one bye row between two games two weeks apart (owner 2026-10-21: "add a bye week row ...
   // teams don't report practice participation during bye week so just the 1 row is fine")
@@ -1236,7 +1197,8 @@
       if (e[0] === 'g') lastG = e;
       ev.push(e);
     });
-    return ev;
+    // in date order (owner 2026-10-22: the bye sat among the next week's practices, which come before the next game)
+    return ev.sort((a, b) => (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0));
   };
   const ptDay = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
   // one practice / game / bye row (season: the events' season, for the in-game injury marks)
@@ -1308,23 +1270,31 @@
     // This week's practice as a strip (owner 2026-10-17: "Questionable (FFF)" was unreadable): a tile per day, colored
     // full / limited / did not practice, and one plain sentence. Days from the dated report when it's in the data,
     // else the letters in his status / the model's note, Wed-Fri (Mon-Wed before a Thursday game).
-    const code = (((p && (p.status || '') + ' ' + (p.inactive_why || '')) || '').match(/\(([DLF-]{1,3})\)/) || [])[1] || '';
+    // his letters this week: the week data's "days" (InjuryModel.availability); pages before it (2026-10-22): the status
+    const code = p && typeof p.days === 'string' ? p.days
+      : (((p && (p.status || '') + ' ' + (p.inactive_why || '')) || '').match(/\(([DLF-]{1,3})\)/) || [])[1] || '';
     const wd = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short' });
     // report days from the week clock (Thursday, Monday and Saturday games included); the status letters follow them
     const rdays = p ? NFLE.clock.reports(p.team).map(r => r.weekday) : [];
-    // every report day this week (the clock), listed or not: unlisted = full participation (owner 2026-10-18), before
-    // his first listing and after he drops off alike; days still ahead are left off. Only on a day whose report is IN
-    // OUR DATA for his team (DATA.filed; 2026-10-21, Tyler Warren read "Full" Wednesday before Indianapolis' report had
-    // arrived: he hadn't practiced): a day past its deadline that hasn't reached us is "not in yet" ('?')
-    const filed = DATA && DATA.filed && p ? new Set(DATA.filed[p.team] || []) : null;
-    const reps = p ? NFLE.clock.reports(p.team).filter(r => r.in) : [];
+    // every report day this week, listed or not: unlisted = full participation (owner 2026-10-18), before his first
+    // listing and after he drops off alike; days still ahead are left off. From the week's injury chronology
+    // (DATA.chrono, nfledge/chronology.py: the one report calendar, travel-week extra days included): "full" only on a
+    // day whose report is IN for his team (2026-10-21, Tyler Warren read "Full" Wednesday before Indianapolis' report
+    // had arrived); a day past its deadline and still missing is "overdue" ('!'), one due or never filed "not in" ('?').
+    // Pages built before "chrono" (2026-10-22): DATA.filed / DATA.overdue and the clock's days.
+    const ch = DATA && DATA.chrono && p ? DATA.chrono[p.team] : null;
+    const st = ch ? Object.fromEntries(ch.days) : null;
+    const filed = st ? new Set(ch.days.filter(x => x[1] === 'filed').map(x => x[0]))
+      : DATA && DATA.filed && p ? new Set(DATA.filed[p.team] || []) : null;
+    const late = st ? new Set(ch.days.filter(x => x[1] === 'overdue').map(x => x[0]))
+      : new Set((DATA && DATA.overdue && p && DATA.overdue[p.team]) || []);
+    const reps = st ? ch.days.filter(x => x[1] !== 'upcoming').map(x => ({ date: x[0], weekday: wd(x[0]) }))
+      : p ? NFLE.clock.reports(p.team).filter(r => r.in) : [];
     const on = Object.fromEntries(pr.map(e => [e[1], e[2]]));
     // the week data's own letters win for this week (InjuryModel.availability: one per day his team's report is in, in
     // order; the career log can be a build older): matched to the filed days when the counts agree
     const fd = filed ? [...filed].sort() : [];
     if (code && fd.length === code.length) fd.forEach((d, i) => { on[d] = code[i]; });
-    // past its deadline + grace and still missing (nfledge/chronology.py, owner 2026-10-22): "overdue" ('!'), not "not in yet"
-    const late = new Set((DATA && DATA.overdue && p && DATA.overdue[p.team]) || []);
     const days = reps.length && (pr.length || filed) ? reps.map(r => [r.weekday, on[r.date] || (!filed || filed.has(r.date) ? 'F' : late.has(r.date) ? '!' : '?')])
       : pr.length ? pr.map(e => [wd(e[1]), e[2]])
       : [...code].map((c, i) => [rdays[i] || ['Wed', 'Thu', 'Fri'][i], c]);
@@ -1369,10 +1339,10 @@
     const ourG = h.back && h.back !== 'no' ? games.find(e => e[5] === h.back) || upG(h.back) : null;
     // our return model's chance he plays that game (owner 2026-10-17: the play % beside "Expected back")
     const backRow = ourG && RJ.d && RJ.d.players[pid] && RJ.d.players[pid].w.find(z => z[0] === h.back);
-    const backP = backRow ? `${NFLE.fmt.toPlay(1 - backRow[1])} to play` : 'our return model';
+    const backP = backRow ? `${NFLE.fmt.toPlay(1 - H.rosChance(backRow))} to play` : 'our return model';
     const espnG = now && now.return_date ? games.find(e => e[1] >= now.return_date) || upG(weekOfDate(now.return_date)) : null;
     const onBye = ((L && L.up) || []).some(x => x.w === h.wk && x.bye);  // no game this week: nothing to play
-    const out = h.inj && (h.play == null || h.play < 0.5);
+    const out = h.inj && (h.play == null || h.play < H.AVAIL.EVEN);
     const third = out
       ? (ourG || espnG || h.back === 'no' ? `<div><small>Expected back</small><b>${esc(ourG ? gameTxt(ourG) : h.back === 'no' ? 'Not this season' : gameTxt(espnG))}</b>
           <span class="muted">${ourG ? backP + (espnG && espnG[5] !== ourG[5] ? `<br>ESPN: ${esc(gameTxt(espnG).toLowerCase())}` : '') : h.back === 'no' ? 'our return model' : 'ESPN estimate'}</span></div>` : '')
@@ -1380,7 +1350,7 @@
     const thisWeek = `<div class="pc-box"><div class="pc-k">This week</div>
         <div class="ij-hero">
           <div><small>Status</small><b class="ij-st ij-${desCls}">${esc(des)}</b></div>
-          <div><small>Chance to play</small><b class="ij-big ${!h.inj || (h.play != null && h.play >= 0.75) ? 'good' : h.play != null && h.play < 0.5 ? 'bad' : ''}">${h.play != null ? NFLE.fmt.toPlay(1 - h.play) : onBye ? '<span class="muted">Bye</span>' : h.inj ? '&ndash;' : '&gt;99%'}</b></div>
+          <div><small>Chance to play</small><b class="ij-big ${!h.inj || H.level(h.play) === 'ok' ? 'good' : H.level(h.play) === 'bad' ? 'bad' : ''}">${h.play != null ? NFLE.fmt.toPlay(1 - h.play) : onBye ? '<span class="muted">Bye</span>' : h.inj ? '&ndash;' : '&gt;99%'}</b></div>
           ${third}
         </div>
         ${hurt ? `<div class="ij-what">${esc(hurt)}</div>` : ''}
@@ -1506,13 +1476,13 @@
         <div class="pc-sub">${ln ? `${esc(statLineText(ln, p.pos))}${isLive ? '' : ' · '}` : ''}${isLive ? '' : (v > s.q[3] ? '<b class="good">above his likely range</b>' : v < s.q[1] ? '<b class="bad">below his likely range</b>' : 'within his likely range')}${actPct != null ? ` · game grade <b>${ovr(actPct)}</b>` : ''}</div></div>`;
     }
     // Availability rides on the projection: a chip always, the reason spelled out once there's real risk.
-    const ia = p.inactive || 0, av = ia >= 0.5 ? 'av-out' : ia >= 0.05 ? 'av-q' : 'av-ok';
+    const ia = p.inactive || 0, av = 1 - ia < H.AVAIL.EVEN ? 'av-out' : 1 - ia < H.AVAIL.CONCERN ? 'av-q' : 'av-ok';
     const avChip = `<span class="pc-av ${av}" title="${esc(p.inactive_why || '')}">${NFLE.fmt.toPlay(ia)} to play</span>`;
     const isLive = st && st.state === 'in';
     // One rank pill (our rank at his position), colored by roster tier: starter / flex range / bench.
     const slotTxt = { start: 'starter', flex: 'flex range', bench: 'bench depth' }[p.slot] || '';
     const rankPill = `<span class="pc-rk t-${esc(p.slot)}" title="Our #${p.rank} ${esc(p.pos)} for ${esc(wkLabel(d).toLowerCase())} · ${esc(p.tier)} tier${slotTxt ? ` (${slotTxt})` : ''}">${esc(p.pos)} #${p.rank}</span>`;
-    const flags = [injTag(p.status, p.inactive, pid),
+    const flags = [injTag(p.status, p.inactive, pid, d),
                    p.boost >= 1 ? `<span class="flag f-up" title="Raised by volume vacated by ${esc(p.boost_from)}">+${f1(p.boost)} from injuries</span>` : '',
                    p.low_sample ? '<span class="flag" title="Few games to learn from: a wider range">low data</span>' : ''].join('');
     const exp = expectedCells(p);
@@ -1535,7 +1505,7 @@
     const actTone = actV == null ? '' : actV > s.q[3] ? 'good' : !actLive && actV < s.q[1] ? 'bad' : '';
     const projBig = actV != null
       ? `<div class="pc-big ${actTone}"><span class="pv-tag">${actLive ? '<span class="live-dot"></span>live' : 'final'}</span>${f1(actV)} <small>pts</small></div><div class="pc-tapsub">proj <b class="pv-pj">${f1(s.proj)}</b> ${rankPill}</div>`
-      : live && injCode(p.status) === 'INA'
+      : live && H.gameday(p) === 'INA'
       ? `<div class="pc-big">0.0 <small>pts</small></div><div class="pc-tapsub">was ${f1(s.proj)} if active</div>`  // the header pill and Health tile say Inactive (owner)
       : ia < 0.5 && (p.scratch || 0) >= 0.5  // (AY3) healthy and likely inactive anyway: a scratch, not an injury
       ? `<div class="pc-big">Likely inactive</div><div class="pc-tapsub">${Math.round(100 * p.scratch)}% healthy-scratch risk · ${f1(s.proj)} if dressed</div>`
@@ -1548,7 +1518,10 @@
         ${tapTile(actV != null ? 'Points' : 'Projection', projBig, `${wkLabel(d)} ${actV != null ? 'points' : 'projection'}`,
             now + projDetail.replace(rangeSvg(s.q, s.proj), rangeSvg(s.q, s.proj, actV)) + muDetail.replace('<div class="pc-box">', '<div class="pc-box"><div class="pc-k">Matchup effect</div>'))}
         ${formTile(L, p.pos, fpg, e.games || p.sc.g, `${d.season} season before week ${d.week}`, `<div class="pc-box pc-season">${seasonHtml(p, d, L)}</div>`)}
-        ${d === DATA ? healthTile(pid, p, L, p.espn) : ''}
+        ${d === DATA ? healthTile(pid, p, L, p.espn)
+          // a later week this season (owner 2026-10-22: "how come health tile disappears in future weeks?"): that week's own
+          // chance to play (as its projection tile), his injury as of now and the expected return; past weeks: the game log
+          : DATA && +d.season === +DATA.season && +d.week > +DATA.week ? healthTile(pid, p, L, p.espn, ` · wk ${d.week}`) : ''}
         ${GRADED[p.pos] ? gradeTile(pid, L) : ''}
       </div>
       ${g ? `<div class="pc-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>` : ''}`;
@@ -1565,12 +1538,15 @@
     const ups = (L && L.up) || [], wk = +d.week;
     const bye = ups.some(u => u.w === wk && u.bye) || ((S && S.m) || []).some(m => m.w === wk && m.bye);
     const nxt = ups.find(u => u.w > wk && !u.bye);
-    const h = d === DATA && L && L.pid ? healthOf(L.pid, null, L, L.espn) : null;
+    // a later week this season too (owner 2026-10-22: "health disappears after ~3 weeks forward?": his bye, or a week
+    // he isn't listed): his injury now and expected return; on a non-bye week that week's chance (rest-of-season model)
+    const fut = !!(DATA && +d.season === +DATA.season && wk > +DATA.week);
+    const h = (d === DATA || fut) && L && L.pid ? healthOf(L.pid, null, L, L.espn, fut ? wk : null) : null;
     const projBody = bye ? `<div class="pc-big">Bye</div><div class="pc-tapsub">${nxt ? `back week ${nxt.w} ${nxt.h === 0 ? '@' : 'vs'} ${esc(nxt.o)}` : 'no game this week'}</div>`
       : `<div class="pc-big">–</div><div class="pc-tapsub">${h && h.inj ? 'out this week' : 'not projected this week'}</div>`;
     const projTile = goTile('Projection', projBody, 'log', 'g');
     const cur = S ? S.g : [], fpg = cur.length ? cur.reduce((t, x) => t + pts(x.c, weights(), pos), 0) / cur.length : null;
-    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '')}${h ? healthTile(L.pid, null, L, L.espn) : ''}${GRADED[pos] ? gradeTile(L.pid, L) : ''}</div>` : '';
+    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '')}${h ? healthTile(L.pid, null, L, L.espn, fut ? ` · wk ${wk}` : '', fut ? wk : null, bye) : ''}${GRADED[pos] ? gradeTile(L.pid, L) : ''}</div>` : '';
     return `${played}${tiles}${bye ? '' : `<div class="pc-box"><p class="pc-sub">Not on our ${esc(wkLabel(d).toLowerCase())} board: ruled out, not on a roster yet, or projected too low to list.</p></div>`}`;
   };
   // Header extras from the career log doc (tools/player_logs.py): photo, jersey number, bio, recent snap share and,
@@ -1715,7 +1691,9 @@
   const defWeek = (L, d) => {
     const wk = +d.week, S = L.seasons.find(x => +x.s === +d.season), w = weights();
     const g = S && S.g.find(x => x.w === wk), m = S && (S.m || []).find(x => x.w === wk);
-    const h = d === DATA ? healthOf(L.pid, null, L, L.espn) : null;
+    // this week and later weeks this season (2026-10-22 audit: as the offense card; a defender's later week had none)
+    const fut = !!(DATA && +d.season === +DATA.season && wk > +DATA.week);
+    const h = d === DATA || fut ? healthOf(L.pid, null, L, L.espn, fut ? wk : null) : null;
     const team = (g && g.t) || L.team, game = team ? teamGame(team, d) : null;
     let ptsTile;
     if (g) {
@@ -1730,7 +1708,7 @@
           : st && st.state === 'in' ? '<div class="pc-big"><span class="live-dot"></span>Live</div><div class="pc-tapsub">IDP points once the game is final</div>'
             // the game is over but his line isn't in the log yet (rebuilt from nflverse after the games)
             : game && (game.final || (st && st.state === 'post')) ? '<div class="pc-big">Final</div><div class="pc-tapsub">his IDP points appear after the next stats update</div>'
-            : h && h.inj && h.play != null && h.play < 0.5 ? `<div class="pc-big bad">Out</div><div class="pc-tapsub">${esc(h.what || 'injured')}</div>`
+            : h && h.inj && h.play != null && h.play < H.AVAIL.EVEN ? `<div class="pc-big bad">Out</div><div class="pc-tapsub">${esc(h.what || 'injured')}</div>`
               : `<div class="pc-big">&ndash;</div><div class="pc-tapsub">${game ? `${game.home.team === team ? 'vs' : '@'} ${esc(game.home.team === team ? game.away.team : game.home.team)} · not played yet` : 'no game'}</div>`;
       ptsTile = goTile('Points', body, 'log', 'g');
     }
@@ -1745,7 +1723,7 @@
     const bars = slots.length ? `<div class="pc-tapbars">${miniBars(slots, { slotW: 22, H: 40, cls: 'mb-pts mb-sm' })}</div>` : '';
     const formSheet = sofar.length ? `<div class="pc-box"><div class="pc-k">${esc(d.season)} through week ${wk}</div>${kindGrid(L, kindTotals(L, sofar))}${advGrid(L, sofar)}</div>` : '';
     const form = formSheet ? tapTile('Form', formBody + bars, `${d.season} season`, formSheet) : goTile('Form', formBody + bars, 'log', 'g');
-    return `<div class="pc-tiles">${ptsTile}${form}${h ? healthTile(L.pid, null, L, L.espn) : ''}${gradeTile(L.pid, L)}</div>
+    return `<div class="pc-tiles">${ptsTile}${form}${h ? healthTile(L.pid, null, L, L.espn, fut ? ` · wk ${wk}` : '', fut ? wk : null, !!(m && m.bye)) : ''}${gradeTile(L.pid, L)}</div>
       ${game ? `<div class="pc-mt">${NFLE.ui.matchTile(game, gameHref(game, d))}</div>` : ''}`;
   };
   // this season's games under the tiles (as the offense card's), Show more = the full log
@@ -1865,7 +1843,7 @@
   const loadInj = () => {
     if (DINJ !== null || loadInj.busy) return;
     loadInj.busy = 1;
-    getJSON(`${siteRoot()}data/espn_injuries/latest.json`).then(x => { DINJ = {}; x.rows.forEach(r => { DINJ[String(r.espn_id)] = r; }); rerenderCard(); }).catch(() => {});
+    espnInj().then(d => { if (d) rerenderCard(); });
   };
   const injuryTab = (L, espn, brief = false) => {
     const eps = L.inj || [], d = L.dur;
@@ -2193,24 +2171,39 @@
   // Depth tab: a team's depth chart for any week since 2001 (data/depth/<season>/<TEAM>.json, tools/depth_build.py;
   // nflverse: team charts through 2024, ESPN's daily charts after), its own season / week pickers starting on the
   // page's week. Each player's tag is that week's official one (injury report O / D / Q, or a reserve list: IR, PUP,
-  // NFI, SUSP, HOLD); the latest week of the current season shows ESPN's live injury list instead (it moves daily).
+  // NFI, SSPD, HOLD); the latest week of the current season shows ESPN's live injury list instead (it moves daily).
   let DIDX, DINJ = null;
+  // ESPN's live injury list (data/espn_injuries/latest.json, refreshed daily), espn id -> row, fetched once for the
+  // card, the depth charts and the game page alike (2026-10-22 audit: three copies of this fetch); null if it failed
+  let INJ_P = null;
+  const espnInj = () => INJ_P || (INJ_P = getJSON(`${siteRoot()}data/espn_injuries/latest.json`)
+    .then(x => { DINJ = {}; x.rows.forEach(r => { DINJ[String(r.espn_id)] = r; }); return DINJ; }, () => null));
   const DFILES = {}, dSel = {};  // dSel[team] = { s, w }
   let dMode = 'use';  // 'use' = by playing time (default when the week has it), 'list' = the listed chart
   const GRP_NAME = { QB: 'Quarterback', RB: 'Running backs', WR: 'Wide receivers', TE: 'Tight ends', OL: 'Offensive line',
                      DL: 'Defensive line', LB: 'Linebackers', CB: 'Cornerbacks', S: 'Safeties' };
-  const TAG_TONE = { Q: 'q', D: 'd' };  // everything else (O, IR, PUP, NFI, SUSP, HOLD) = out
-  const ESPN_TAG = { 'Out': 'O', 'Injured Reserve': 'IR', 'Doubtful': 'D', 'Questionable': 'Q', 'Suspension': 'SUSP',
+  const TAG_TONE = { Q: 'q', D: 'd' };  // everything else (O, IR, PUP, NFI, SSPD, HOLD) = out
+  // suspended = SSPD, as on every other page (nfledge/codes.py, 2026-10-22); depth files built before then say SUSP
+  const dTag = t => (t === 'SUSP' ? 'SSPD' : t);
+  // the current chart's tag (2026-10-22 audit): a player the week data covers (on the board, or in its every-rostered-
+  // player tag map) gets the tag every other page shows (tagOf: the official designation); anyone else (defenders,
+  // linemen) ESPN's live list, which also keeps a "Questionable" on players who played through something
+  const liveTag = (pid, espn) => {
+    if (pid && DATA && ((DATA.players && DATA.players[pid]) || (DATA.tags && DATA.tags[pid]))) return tagOf(pid) || null;
+    const li = espn && DINJ ? DINJ[espn] : null;
+    return li ? ESPN_TAG[li.status] || null : null;
+  };
+  const ESPN_TAG = { 'Out': 'O', 'Injured Reserve': 'IR', 'Doubtful': 'D', 'Questionable': 'Q', 'Suspension': 'SSPD',
                      'Physically Unable to Perform': 'PUP' };
   const TAG_NAME = { O: 'Out', D: 'Doubtful', Q: 'Questionable', IR: 'Injured reserve', PUP: 'Physically unable to perform list',
-                     NFI: 'Non-football injury list', SUSP: 'Suspended', HOLD: 'Did not report' };
+                     NFI: 'Non-football injury list', SSPD: 'Suspended', HOLD: 'Did not report' };
   const dKey = (s, t) => `${s}/${t}`;
   const loadDepth = (s, abbr) => {
     const again = () => { if (cardTeam === abbr) depthHtml(abbr); refreshDepth(abbr); };  // depthHtml asks for the team's file
     if (DIDX === undefined) {
       DIDX = null;
       getJSON(`${siteRoot()}data/depth/index.json`).then(x => { DIDX = x; again(); }).catch(() => { DIDX = false; again(); });
-      getJSON(`${siteRoot()}data/espn_injuries/latest.json`).then(x => { DINJ = {}; x.rows.forEach(r => { DINJ[String(r.espn_id)] = r; }); again(); }).catch(() => {});
+      espnInj().then(d => { if (d) again(); });
     }
     const k = dKey(s, abbr);
     if (s && DFILES[k] === undefined) {
@@ -2239,7 +2232,7 @@
     const who = ([pi, rank, tag], i, pct = null, starter = null, hurt = false) => {
       const [name, pid0, espn] = f.players[pi], pid = pid0 || (espn ? byEspn()[String(espn)] : null);  // every player with a card
       const live = liveWk && espn && DINJ && DINJ[espn];
-      const t = liveWk && DINJ ? (live ? ESPN_TAG[live.status] : null) : tag;
+      const t = liveWk ? liveTag(pid, espn) : dTag(tag);
       const title = live ? `${live.status}${live.type ? ` (${live.type})` : ''}` : TAG_NAME[t] || t;
       // our player page (any player with an ESPN id on file), else his ESPN page
       const nm = pid ? `<button type="button" class="bx-n dc-n" data-open-pid="${esc(pid)}">${esc(name)}</button>`
@@ -2258,7 +2251,7 @@
           return `<div class="dc-row"><span class="dc-pos" title="${esc(GRP_NAME[g] || g)}">${esc(g)}</span><span class="dc-pl">${up.map(([pi, pct, tag], i) => who([pi, 0, tag], i, pct, i < n)).join('')}${hurt.map(([pi, pct, tag], i) => who([pi, 0, tag], i, pct, false, true)).join('')}</span></div>`; }).join('')}</div>` : '';
     };
     const seg = W.u ? `<div class="seg dc-mode" role="tablist"><button type="button" role="tab" data-dm="use" class="${mode === 'use' ? 'on' : ''}">Playing time</button><button type="button" role="tab" data-dm="list" class="${mode === 'list' ? 'on' : ''}">Listed chart</button></div>` : '';
-    const tags = liveWk ? "ESPN's injury list, updated daily" : "that week's injury report (O / D / Q) or reserve list (IR, PUP, NFI, SUSP, HOLD = did not report)";
+    const tags = liveWk ? "ESPN's injury list, updated daily" : "that week's injury report (O / D / Q) or reserve list (IR, PUP, NFI, SSPD, HOLD = did not report)";
     const listedName = sel.s >= 2025 ? "ESPN's depth chart" : "The team's depth chart";
     const body = mode === 'use'
       ? `${ubox('Offense', ['QB', 'RB', 'WR', 'TE', 'OL'])}${ubox('Defense', ['DL', 'LB', 'CB', 'S'])}${box('Special teams (listed chart)', W.st)}
@@ -2561,7 +2554,7 @@
     if (RJ.rk && RJ.rkW === weights()) return RJ.rk;
     const w = weights(), tot = {};
     Object.entries(RJ.d.players).forEach(([pid, x]) => { tot[pid] = { pos: x.pos, team: x.team, name: x.name, photo: x.photo, espn: x.espn,
-      v: x.w.length ? x.w.reduce((t, z) => t + pts(z[5], w, x.pos), 0) / x.w.length : 0, hurt: !!(x.w[0] && x.w[0][1] < 0.5) }; });
+      v: x.w.length ? x.w.reduce((t, z) => t + pts(z[5], w, x.pos), 0) / x.w.length : 0, hurt: !!(x.w[0] && H.rosChance(x.w[0]) < H.AVAIL.EVEN) }; });
     const byPos = {};
     Object.entries(tot).forEach(([pid, r]) => (byPos[r.pos] = byPos[r.pos] || []).push([pid, r]));
     Object.values(byPos).forEach(a => a.sort((x, y) => y[1].v - x[1].v).forEach(([, r], i) => { r.rk = i + 1; }));
@@ -2726,7 +2719,7 @@
     .map(([pid, p]) => [pid, p, teamGrade(pid)])
     .sort((a, b) => (b[2] ? 1 : 0) - (a[2] ? 1 : 0) || (a[2] && b[2] ? (a[2].uq - b[2].uq) || b[2].v - a[2].v : 0) || b[1].proj - a[1].proj)
     .map(([pid, p, gr]) => { const s = scaled(p, d);
-    return `<tr class="teamrow" style="${NFLE.fmt.rowStyle(d.teams, p.team)}" data-open-pid="${esc(pid)}"><td>${NFLE.ui.player({ name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, badges: injTag(p.status, p.inactive, pid) }, d.teams)}</td>
+    return `<tr class="teamrow" style="${NFLE.fmt.rowStyle(d.teams, p.team)}" data-open-pid="${esc(pid)}"><td>${NFLE.ui.player({ name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, badges: injTag(p.status, p.inactive, pid, d) }, d.teams)}</td>
       <td class="num"><b>${f1(s.proj)}</b></td><td class="num">${gradeChip(gr)}</td><td class="num muted">${p.fpg != null ? f1(p.fpg) : ''}</td></tr>`; }).join('');
   // the Power ranking box (the Power tile's sheet)
   const teamPowerBox = pw => {
@@ -2908,7 +2901,10 @@
   const localTime = ms => ms == null ? '' : new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }).replace(':00', '');
   // the window's day and date, local (owner 2026-10-18: "we should have dates on this page"): "Thu Oct 15"
   const localDay = ms => ms == null ? '' : new Date(ms).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }).replace(',', '');
-  const miniTile = g => {
+  // two columns (owner 2026-10-22: logos bigger and above the code, teams left / right with @ between, no kickoff time
+  // repeated from the window's heading): a tile's own time only when it differs from the heading's, under the @ with
+  // the live clock or Final, so every tile keeps one shape
+  const miniTile = (g, groupMs) => {
     const st = LIVE.byGame[g.id], live = st && st.state === 'in', fin = g.final || (st && st.state === 'post');
     const sit = live ? (st.sit || (LIVE.sums[st.id] && sitFromPlays(LIVE.sums[st.id]))) : null;
     const sp = sit ? spot(sit, st) : null;
@@ -2918,17 +2914,17 @@
     const dd = sit && sit.shortDownDistanceText ? String(sit.shortDownDistanceText).replace(/Goal/i, 'G') : '';
     const status = live ? `<span><span class="live-dot"></span>${esc(`${periodName(st.period)} ${st.clock || ''}`.trim())}</span>${dd ? `<span class="mg-dd">${esc(dd).replace(/ &amp; /, '&#8239;&amp;&#8239;')}</span>` : ''}`
       : fin ? (st && /OT/i.test(st.detail || '') || (g.final && g.final.ot) ? 'Final/OT' : 'Final')
-      : esc(localTime(kickMs(g)));
-    const row = (s, k, n, other) => {
+      : kickMs(g) != null && kickMs(g) !== groupMs ? esc(localTime(kickMs(g)).replace(/\s?[AP]M$/i, '')) : '';  // the heading has the AM / PM
+    const side = (s, k, n, other) => {
       const lost = fin && n != null && other != null && n < other, ball = sp && sp.offense.team === s.team;
       const num = n != null ? esc(n) : f[`p_${k}`] != null ? `${esc(f[`p_${k}`])}<small>%</small>` : '';
-      return `<span class="mg-r${lost ? ' lost' : ''}"><span class="mg-lg"><img src="${esc(NFLE.fmt.logoSrc(s.logo_url, 22))}" alt="" loading="lazy"></span>
-        <b>${esc(s.team)}</b>${ball ? '<i class="mg-ball" title="Has the ball"></i>' : ''}<span class="mg-n${n == null ? ' pct' : ''}">${num}</span></span>`;
+      return `<span class="mg-t${lost ? ' lost' : ''}"><span class="mg-lg"><img src="${esc(NFLE.fmt.logoSrc(s.logo_url, 48))}" alt="" loading="lazy"></span>
+        <b>${esc(s.team)}${ball ? '<i class="mg-ball" title="Has the ball"></i>' : ''}</b><span class="mg-n${n == null ? ' pct' : ''}">${num}</span></span>`;
     };
     const c = g.colors || {};
     return `<a class="mg${live ? ' live' : ''}${sp && sp.red ? ' rz' : ''}${fin ? ' fin' : ''}" data-gid="${esc(g.id)}" href="${esc(gameHref(g))}"
-      style="--ta:${esc(c[g.away.team] || '#444')};--th:${esc(c[g.home.team] || '#444')}"><span class="mg-st">${status}</span>
-      ${row(g.away, 'away', as, hs)}${row(g.home, 'home', hs, as)}</a>`;
+      style="--ta:${esc(c[g.away.team] || '#444')};--th:${esc(c[g.home.team] || '#444')}">
+      <span class="mg-vs">${side(g.away, 'away', as, hs)}<span class="mg-at">${g.neutral ? 'vs' : '@'}${status ? `<span class="mg-st">${status}</span>` : ''}</span>${side(g.home, 'home', hs, as)}</span></a>`;
   };
   const paintMini = () => {
     const box = document.querySelector('.mgrid');
@@ -2936,6 +2932,10 @@
     const groups = new Map();
     DATA.games.forEach(g => { const w = windowOf(g); if (!groups.has(w.key)) groups.set(w.key, { lab: w.lab, games: [], first: null });
       const G = groups.get(w.key), k = kickMs(g); G.games.push(g); if (k != null && (G.first == null || k < G.first)) G.first = k; });
+    // a one-game window is one tile wide: its heading keeps the weekday ("Mon · 7:15 PM"; each day comes once in a week,
+    // and the full date is the heading's title)
+    const shortDay = ms => new Date(ms).toLocaleDateString([], { weekday: 'short' });
+    groups.forEach(G => { if (G.first != null) G.short = `${shortDay(G.first)} · ${localTime(G.first)}`; });
     groups.forEach(G => { if (G.first != null) G.lab = `${localDay(G.first)} · ${localTime(G.first)}${G.lab.includes('morning') || G.games.some(g => g.site) ? ` · ${G.games.find(g => g.site) ? G.games.find(g => g.site).site : ''}` : ''}`.replace(/ · $/, ''); });
     const order = [...groups.keys()].sort();
     const elapsedOf = g => { const st = LIVE.byGame[g.id]; if (!st || st.state !== 'in') return null;
@@ -2945,19 +2945,19 @@
     box.innerHTML = order.map(k => { const G = groups.get(k);
       const gs = G.games.map((g, i) => [g, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(x => x[0]);
       // a window spans as many of the three columns as it has games, so small windows share a row in time order
-      return `<div class="mg-grp" style="--span:${Math.min(3, gs.length)}"><div class="mg-h">${esc(G.lab)}</div><div class="mg-g">${gs.map(miniTile).join('')}</div></div>`; }).join('');
+      return `<div class="mg-grp${gs.length === 1 ? ' one' : ''}" style="--span:${Math.min(3, gs.length)}"><div class="mg-h" title="${esc(G.lab)}">${esc(gs.length === 1 && G.short ? G.short : G.lab)}</div><div class="mg-g">${gs.map(g => miniTile(g, G.first)).join('')}</div></div>`; }).join('');
     fitMini(box);
   };
   // rows sized so every group fits between the grid's top and the bottom bar (as All teams does)
   const fitMini = box => {
     if (!matchMedia('(max-width: 600px)').matches || !box.offsetParent) { box.style.removeProperty('--mgh'); return; }
     const bar = document.querySelector('.botbar'), bottom = bar && bar.getClientRects().length ? bar.getBoundingClientRect().top : innerHeight;
-    box.style.setProperty('--mgh', '52px');
+    box.style.setProperty('--mgh', '72px');
     const top = box.getBoundingClientRect().top + scrollY - (scrollY > 0 ? scrollY : 0);
     // tile rows: tiles laid out in different rows (getClientRects tops), counted once
     const rows = new Set([...box.querySelectorAll('.mg')].map(t => Math.round(t.getBoundingClientRect().top))).size;
     const extra = bottom - 8 - box.getBoundingClientRect().top - box.getBoundingClientRect().height;
-    box.style.setProperty('--mgh', `${Math.max(44, Math.min(78, 52 + extra / Math.max(1, rows)))}px`);
+    box.style.setProperty('--mgh', `${Math.max(64, Math.min(104, 72 + extra / Math.max(1, rows)))}px`);
     // the header above can still change (the live pill arrives after the first poll): check once more next frame
     if (!box._refit) { box._refit = 1; requestAnimationFrame(() => { box._refit = 0;
       const over = box.getBoundingClientRect().bottom - (bottom - 8);
@@ -3319,7 +3319,7 @@
     });
     if (DINJ === null && !preDepth.inj) {  // the current week's tags come from ESPN's live list (daily)
       preDepth.inj = 1;
-      getJSON(`${siteRoot()}data/espn_injuries/latest.json`).then(x => { DINJ = {}; x.rows.forEach(r => { DINJ[String(r.espn_id)] = r; }); renderGame(); }).catch(() => {});
+      espnInj().then(d => { if (d) renderGame(); });
     }
     const team = t => {
       const f = DFILES[dKey(season, t)];
@@ -3328,7 +3328,7 @@
       const W = f.weeks[wk], live = wk === wks[wks.length - 1] && !(g.final);  // the latest chart of a game not played yet
       const chip = ([pi, pct, ftag], bold) => {
         const [name, pid0, espn] = f.players[pi], pid = pid0 || (espn ? byEspn()[String(espn)] : null);
-        const li = live && DINJ && espn ? DINJ[espn] : null, tag = live && DINJ ? (li ? ESPN_TAG[li.status] : null) : ftag;
+        const li = live && DINJ && espn ? DINJ[espn] : null, tag = live ? liveTag(pid, espn) : dTag(ftag);
         const nm = pid ? `<button type="button" class="bx-n dc-n" data-open-pid="${esc(pid)}">${esc(name)}</button>` : `<span class="dc-n">${esc(name)}</span>`;
         return `<span class="dc-p${bold ? ' first' : ''}">${nm}${pct != null ? `<span class="dc-pct">${pct}%</span>` : ''}${tag ? `<span class="dc-tag dt-${tag === 'Q' ? 'q' : tag === 'D' ? 'd' : 'out'}" title="${esc(TAG_NAME[tag] || tag)}">${esc(tag)}</span>` : ''}</span>`;
       };

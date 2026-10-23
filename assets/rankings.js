@@ -12,12 +12,12 @@
   // ALL (owner 2026-10-20: "make an all positions tab"): QB / RB / WR / TE under your scoring, ranked together (K and
   // D/ST keep their own tabs: they're scored with standard ESPN rules, not yours, so their points don't compare)
   const POS = ['QB', 'RB', 'WR', 'TE', 'FLEX', 'ALL', 'K', 'DST'];
-  const OUT_LINE = 0.9;
+  const AV = NFLE.health.AVAIL, OUT_LINE = 1 - AV.ZERO;  // his chance to sit at which he projects 0
   // Two worlds in one cell (owner 2026-10-20, Lamar Jackson / Tyler Huntley): when a player is 20-80% to play, he and
   // the teammate whose role hangs on him show both projections: the likelier world as the number (it sorts), the other
   // dimmed beneath. 20-80%: the other world is at least a 1-in-5 chance (the Q tag's 32-88% would add it for an 85%
   // starter's backup, an outcome that rarely happens).
-  const TWO_LO = 0.2, TWO_HI = 0.8;  // inactive chance at which a player projects 0 (owner 2026-10-16: under 10% to play)
+  const TWO_LO = 0.2, TWO_HI = 0.8;  // chance to play: a teammate shows two worlds when this player is 20-80% to play
   const KDP = ['K', 'DST'];  // kickers / team defenses: data/kdst.json, standard ESPN scoring (owner 2026-10-15)
   const POS_LABEL = { DST: 'D/ST', ALL: 'All' };
   const ALL_DEPTH = 220;  // every relevant QB / RB / WR / TE
@@ -142,13 +142,16 @@
         const ratio = base > 0.3 ? now / base : 1;
         r._proj = base > 0.3 ? r.proj * ratio : now;
         // Near-certain outs (owner 2026-10-16: under 10% to play) project 0 and sink below the active players; the
-        // line if he does play stays beside it. 10-50% keep their if-active line (owner's call).
+        // line if he does play stays beside it. 10-50%: two worlds, 0 as the number, the if-active line dimmed beneath
+        // (owner 2026-10-20); 50-80%: his line, "if he sits" beneath.
         r._ifact = r._proj;
         r._likelyOut = (r.play != null ? 1 - r.play : r.inactive) >= OUT_LINE;  // (AY3) out or a near-certain healthy scratch
         if (r._likelyOut) r._proj = 0;
-        const pl = 1 - (r.inactive || 0), lastNm = n => String(n || '').split(' ').slice(1).join(' ') || n;
+        // the same chance as _likelyOut (takes the field), and the band reaches down to the zero line (2026-10-22 audit:
+        // 10-20% to play fell between the two and showed his full if-active line, sorted as a starter)
+        const pl = r.play != null ? r.play : 1 - (r.inactive || 0), lastNm = n => String(n || '').split(' ').slice(1).join(' ') || n;
         r._two = null;
-        if (!r._likelyOut && pl >= TWO_LO && pl <= TWO_HI) {  // his own two worlds: plays / sits (0)
+        if (!r._likelyOut && pl <= TWO_HI) {  // his own two worlds: plays / sits (0), from the zero line up to TWO_HI
           r._two = pl >= 0.5 ? { alt: 0, txt: 'if he sits' } : { alt: r._proj, txt: 'if he plays', dim: true };
           if (pl < 0.5) r._proj = 0;
         } else if (cnd(r)) {  // a teammate's: the other world
@@ -207,7 +210,8 @@
     const nameCell = (r, flex) => {
       // his chance to play rides on the injury badge when it's in doubt (owner 2026-10-17: the Play% column read >99%
       // for nearly everyone)
-      const pct = r.inactive >= 0.05 ? `<span class="flag fl-play ${r.inactive >= 0.5 ? 'fl-bad' : r.inactive >= 0.15 ? 'fl-warn' : ''}" title="${esc(r.inactive_why || '')}">${NFLE.fmt.toPlay(r.inactive)}</span>` : '';
+      const lv = NFLE.health.level(1 - r.inactive);
+      const pct = 1 - r.inactive < AV.CONCERN ? `<span class="flag fl-play ${lv === 'bad' ? 'fl-bad' : lv === 'warn' ? 'fl-warn' : ''}" title="${esc(r.inactive_why || '')}">${NFLE.fmt.toPlay(r.inactive)}</span>` : '';
       // (AY3) healthy-scratch risk is its own chip, never the injury one: "Scratch 30%" (chance he's inactive without an injury)
       const scr = (r.scratch || 0) >= 0.1 ? `<span class="flag fl-scr${r.scratch >= 0.5 ? ' fl-bad' : ''}" title="${esc(r.play_why || 'Healthy-scratch risk')}">Scratch ${Math.round(100 * r.scratch)}%</span>` : '';
       // no "+X inj" flag or highlight in the list (owner 2026-10-20): the teammate-injury boost is in the projection;
@@ -369,7 +373,7 @@
     // the landing rise-in (pages/week.html adds html.land-anim) belongs to the first draw's rows only: rows rebuilt
     // while it plays (grades, live scores arriving) appear in place instead of fading in again (the load flicker)
     let landing = document.documentElement.classList.contains('land-anim');
-    const rowClass = r => `main teamrow${r.inactive >= 0.5 ? ' out' : ''}${landing ? ' rise' : ''}`;
+    const rowClass = r => `main teamrow${1 - r.inactive < AV.EVEN ? ' out' : ''}${landing ? ' rise' : ''}`;
     const byesHtml = p => {
       const list = (RK.byes || {})[p] || [];
       return list.length ? `<div class="byes"><span>On bye</span>${list.map(b => `<span class="bye"><span class="tm-open" data-tm="${esc(b.team)}">${logo(b.team, 16)}</span><button type="button" class="nm-link" data-open-pid="${esc(b.pid)}">${esc(b.name)}</button> <span class="muted">${f1(b.sc && b.sc.g ? pts(b.sc.ss, state.w, p) / b.sc.g : b.fpg)} FP/G</span></span>`).join('')}</div>` : '';
@@ -442,7 +446,7 @@
       rosDerive();
       const box = sec.querySelector(`.posview[data-pos="${pos}"] .ros-tbl`);
       const opts = { columns: rosColumns(mixOf(pos)), rows: rosRows(pos), cls: 'sortable ranks tiles ros', sort: { key: 'tot', dir: 'desc' }, rowAttrs,
-                     rowClass: r => `main teamrow${(D.players[r.pid] || {}).inactive >= 0.5 ? ' out' : ''}` };
+                     rowClass: r => `main teamrow${1 - ((D.players[r.pid] || {}).inactive || 0) < AV.EVEN ? ' out' : ''}` };
       if (!rosTables[pos]) rosTables[pos] = NFLE.Table(box, opts);
       else { rosTables[pos].setColumns(opts.columns); rosTables[pos].update(opts.rows); if (resort) rosTables[pos].setSort({ key: 'tot', dir: 'desc' }); }
     };

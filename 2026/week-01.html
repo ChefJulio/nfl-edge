@@ -4,13 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>NFL Edge · 2026 Week 1</title>
-<meta name="description" content="NFL fantasy projections, rankings, injury odds, rooting guides and live gamecasts, built from free public data and tested walk-forward.">
+<meta name="description" content="Free NFL analytics: win chances, power ratings, playoff odds, injury chance-to-play, stats and play-by-play splits since 1999, live gamecasts, fantasy tools.">
+<meta property="og:site_name" content="NFL Edge">
+<meta property="og:title" content="NFL Edge · 2026 Week 1">
+<meta property="og:description" content="Free NFL analytics: win chances, power ratings, playoff odds, injury chance-to-play, stats and play-by-play splits since 1999, live gamecasts, fantasy tools.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#0d0f13">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cellipse cx='16' cy='16' rx='14' ry='9' transform='rotate(-35 16 16)' fill='%236d9eff'/%3E%3Cpath d='M11 21l10-10M13 15l2 2M15 13l2 2M17 11l2 2' stroke='%230d0f13' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E">
 <!-- plain-text copies for crawlers and LLMs (nfledge/machine.py) -->
 <link rel="alternate" type="text/plain" title="llms.txt" href="../llms.txt">
 <link rel="alternate" type="text/markdown" title="How the model works" href="../model.md">
 <link rel="alternate" type="text/markdown" title="This week's rankings" href="../rankings.md">
+<link rel="alternate" type="text/markdown" title="Every player (one page each)" href="../players.md">
+<link rel="alternate" type="text/markdown" title="Injuries this week" href="../injuries.md">
 <link rel="preload" href="../assets/titillium-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../assets/titillium-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://site.web.api.espn.com" crossorigin>
@@ -18,11 +25,11 @@
 <link rel="preconnect" href="https://static.www.nfl.com">
 <!-- Every week page (current, lookahead, archived) is this same shell: report.render fills the %TOKENS%; the week's
      numbers are in the JSON next to it and every tab renders in the browser (assets/*.js). -->
-<link rel="stylesheet" href="../assets/site.css?v=32c700b1fa">
-<link rel="stylesheet" href="../assets/ui.css?v=32c700b1fa">
-<link rel="stylesheet" href="../assets/gamecast.css?v=32c700b1fa">
-<link rel="stylesheet" href="../assets/shell.css?v=32c700b1fa">
-<link rel="stylesheet" href="../assets/table.css?v=32c700b1fa">
+<link rel="stylesheet" href="../assets/site.css?v=f159953d71">
+<link rel="stylesheet" href="../assets/ui.css?v=f159953d71">
+<link rel="stylesheet" href="../assets/gamecast.css?v=f159953d71">
+<link rel="stylesheet" href="../assets/shell.css?v=f159953d71">
+<link rel="stylesheet" href="../assets/table.css?v=f159953d71">
 </head>
 <body>
 <script>/* which frame to draw (shell.js picks the same tab: the hash, else the last tab you used) */
@@ -48,7 +55,7 @@
   <p class="archived" id="wkNote" hidden></p>
 </div></header>
 <nav class="tabs"></nav>
-<noscript><p class="wrap">This app needs JavaScript. Plain-text versions: <a href="../llms.txt">llms.txt</a> (start here),
+<noscript><p class="wrap">This app needs JavaScript. Plain-text versions: <a href="../llms.txt">llms.txt</a> (start here), <a href="../players.md">players</a> (one page each: chance to play, projection, practice, game log), <a href="../injuries.md">injuries</a>,
 <a href="../model/">how the model works</a>, <a href="../rankings.md">this week's rankings</a>,
 <a href="../power.md">power rankings</a>, <a href="../games.md">this week's games</a>.</p></noscript>
 <main><div class="wrap">
@@ -77,11 +84,11 @@
 <section id="tab-roles"></section>
 <section id="tab-model"></section>
 </div></main>
-<footer><div class="wrap">nfl-edge &middot; nflverse, NFL.com practice reports, FantasyPros, ESPN, Open-Meteo &middot; for entertainment, not betting advice &middot; <a class="foot-bmc" href="https://buymeacoffee.com/hunter.graves" target="_blank" rel="noopener">Buy me a coffee</a></div></footer>
+<footer><div class="wrap">nfl-edge &middot; nflverse, NFL.com practice reports, FantasyPros, ESPN, Open-Meteo &middot; for entertainment, not betting advice &middot; <a class="foot-bmc" href="https://buymeacoffee.com/hunter.graves" target="_blank" rel="noopener">Buy me a coffee</a> &middot; <a href="../llms.txt">For AI assistants</a></div></footer>
 <div class="botbar" aria-hidden="true"><div class="wrap nav-sub fr-rk"><button type="button" class="chip on">Rankings</button><button type="button" class="chip">Stats</button><button type="button" class="chip">Roles</button><button type="button" class="chip">Injuries</button><button type="button" class="chip">Moves</button><button type="button" class="chip">Trends</button></div><nav class="bb-row"><button type="button" class="fr-on"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.6 7-5.6s6.2 2 7 5.6"/></svg><span>Players</span></button><button type="button" class=""><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3l7 3v5c0 4.4-3 8-7 10-4-2-7-5.6-7-10V6z"/></svg><span>Teams</span></button><button type="button" class=""><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Games</span></button><button type="button" class=""><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.5 3.5M17 6h2.5A2.5 2.5 0 0 1 17 9.5M12 13v4M8.5 20h7"/></svg><span>Fantasy</span></button><button type="button" class=""><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-6"/></svg><span>Model</span></button></nav></div>
 <script>window.NFLE_CFG = {"page":"week","root":"../","data":"2026/week-01.json","season":2026,"week":1,"current":false,"archive":true,"lookahead":0};</script>
-<script src="../assets/shell.js?v=32c700b1fa" defer></script>
-<script src="../assets/table.js?v=32c700b1fa" defer></script>
-<script src="../assets/gamecast.js?v=32c700b1fa" defer></script>
+<script src="../assets/shell.js?v=f159953d71" defer></script>
+<script src="../assets/table.js?v=f159953d71" defer></script>
+<script src="../assets/gamecast.js?v=f159953d71" defer></script>
 </body>
 </html>
