@@ -1401,26 +1401,32 @@
       : DATA && DATA.filed && p ? new Set(DATA.filed[p.team] || []) : null;
     const late = st ? new Set(ch.days.filter(x => x[1] === 'overdue').map(x => x[0]))
       : new Set((DATA && DATA.overdue && p && DATA.overdue[p.team]) || []);
-    const reps = st ? ch.days.filter(x => x[1] !== 'upcoming').map(x => ({ date: x[0], weekday: wd(x[0]) }))
+    // every report day of his team's week, upcoming ones too (owner 2026-10-23, Barkley: a Monday game reports Thu /
+    // Fri / Sat, and the strip showing only Thu and Fri hid that Saturday's is the final one)
+    const soon = st ? new Set(ch.days.filter(x => x[1] === 'upcoming').map(x => x[0])) : new Set();
+    const reps = st ? ch.days.map(x => ({ date: x[0], weekday: wd(x[0]) }))
       : p ? NFLE.clock.reports(p.team).filter(r => r.in) : [];
     const on = Object.fromEntries(pr.map(e => [e[1], e[2]]));
     // the week data's own letters win for this week (InjuryModel.availability: one per day his team's report is in, in
     // order; the career log can be a build older): matched to the filed days when the counts agree
     const fd = filed ? [...filed].sort() : [];
     if (code && fd.length === code.length) fd.forEach((d, i) => { on[d] = code[i]; });
-    const days = reps.length && (pr.length || filed) ? reps.map(r => [r.weekday, on[r.date] || (!filed || filed.has(r.date) ? 'F' : late.has(r.date) ? '!' : '?')])
+    const days = reps.length && (pr.length || filed) ? reps.map(r => [r.weekday, on[r.date] || (soon.has(r.date) ? 'u' : !filed || filed.has(r.date) ? 'F' : late.has(r.date) ? '!' : '?')])
       : pr.length ? pr.map(e => [wd(e[1]), e[2]])
       : [...code].map((c, i) => [rdays[i] || ['Wed', 'Thu', 'Fri'][i], c]);
-    const WORD = { D: 'did not practice', L: 'limited', F: 'full', '-': 'not on the report' }, TAG = { D: 'Missed', L: 'Limited', F: 'Full', '-': 'Not listed', '?': 'Not in yet', '!': 'Overdue' };
+    const WORD = { D: 'did not practice', L: 'limited', F: 'full', '-': 'not on the report' }, TAG = { D: 'Missed', L: 'Limited', F: 'Full', '-': 'Not listed', '?': 'Not in yet', '!': 'Overdue', u: 'Upcoming' };
     const prSentence = (() => {
       const wait = days.filter(x => x[1] === '?').map(x => x[0]), over = days.filter(x => x[1] === '!').map(x => x[0]);
-      const known = days.filter(x => x[1] !== '?' && x[1] !== '!');
+      const ahead = days.filter(x => x[1] === 'u').map(x => x[0]);
+      const known = days.filter(x => x[1] !== '?' && x[1] !== '!' && x[1] !== 'u');
       const tail = (wait.length ? `${known.length ? '. ' : ''}${wait.join(' and ')}'s report isn't in our data yet` : '')
         + (over.length ? `${known.length || wait.length ? '. ' : ''}${over.join(' and ')}'s report is overdue: past its 4 p.m. ET deadline and not on NFL.com yet` : '');
-      return known.length ? said(known, !!wait.length) + tail : tail;
+      const next = ahead.length ? `${known.length || wait.length || over.length ? '. ' : ''}${ahead.join(' and ')}'s report still to come${ahead.length === 1 && days[days.length - 1][0] === ahead[0] ? ' (the final one)' : ''}` : '';
+      return (known.length ? said(known, !!(wait.length || over.length || ahead.length)) + tail : tail) + next;
     })();
     function said(days, partial) {  // partial: a day still to come in, so no "all week"
       const cs = days.map(x => x[1]);
+      if (cs.length === 1) return `${WORD[cs[0]].charAt(0).toUpperCase()}${WORD[cs[0]].slice(1)} ${days[0][0]}`;  // one day is not "every day"
       if (!partial && cs.every(c => c === 'F')) return 'Full practice every day';
       if (!partial && cs.every(c => c === 'D')) return 'Did not practice all week';
       if (!partial && cs.every(c => c === 'L')) return 'Limited every day';
@@ -1431,7 +1437,7 @@
       const trend = d1 > d0 ? ' (trending up)' : d1 < d0 ? ' (trending down)' : '';
       return txt.charAt(0).toUpperCase() + txt.slice(1) + trend;
     }
-    const prStrip = days.length ? `<div class="pr-strip">${days.map(([dname, c]) => `<div class="pr-day pr-${c === '?' || c === '!' ? 'n' : c}"><small>${esc(dname)}</small><b>${TAG[c] || c}</b></div>`).join('')}</div>
+    const prStrip = days.length ? `<div class="pr-strip">${days.map(([dname, c]) => `<div class="pr-day pr-${c === '?' || c === '!' || c === 'u' ? 'n' : c}"><small>${esc(dname)}</small><b>${TAG[c] || c}</b></div>`).join('')}</div>
         <p class="pr-say">${esc(prSentence)}</p>` : '';
     // when he got hurt, as a date (owner 2026-10-17: "rather than trying to decipher it"): the in-game note's week, dated
     // from his games in the timeline; else the day he first appeared on the report
