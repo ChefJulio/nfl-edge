@@ -1,4 +1,4 @@
-// Games > Calc's engine (owner 2026-10-23: "a calculator where you input down, distance, score, team timeouts left and
+// Model > Calc's engine (owner 2026-10-23: "a calculator where you input down, distance, score, team timeouts left and
 // game clock ... to make decisions, like whether to take a time out, whether to go for it on fourth down / punt / fg
 // attempt, whether to onside kick, and whether to accept or decline a penalty"; (CG) in docs/INSIGHTS.md). Pure: the
 // model file (data/calc/model.json: win probability trees from nfledge/winprob.py, decision inputs from
@@ -31,8 +31,28 @@
       return z;
     };
     const raw = x => trees(W, x);
-    // the clock can be run out: the team that has the ball and leads, the other side short of timeouts (nfl4th's rule)
-    const kneel = (sec, defTo) => (defTo === 0 && sec < 120) || (defTo === 1 && sec < 80) || (defTo === 2 && sec < 40);
+    // (CN2, owner 2026-10-23, ATL tied at its own 45 with 0:08 and no timeouts: "the realistic likelihood you will get
+    // into fg range from there and be able to kick without a timeout must be tiny") the last snap as football rules: a
+    // field goal or a heave for a touchdown, whichever is better (a leader kneels), then the score decides and a tie
+    // is overtime at 50%. On 493 real final snaps (2019-25) it beat the model, Brier 0.0880 vs 0.1014 (tied near
+    // midfield: won 50%, this 51%, the model 66.5%). Heave touchdown rates: half-ending passes with 0:06 or less.
+    const FINAL = d => (d > 0 ? 1 : d < 0 ? 0 : 0.5);
+    const HEAVE = yl => (yl <= 20 ? 0.30 : yl <= 50 ? 0.03 : yl <= 60 ? 0.015 : 0.003);
+    let fgPRef = null;  // set once fgP exists (defined below)
+    const lastSnap = s => {
+      if (s.diff > 0) return 1;
+      let best = FINAL(s.diff);
+      if (fgPRef && s.yl + 18 <= 70) { const p = fgPRef(s.yl, s); best = Math.max(best, p * FINAL(s.diff + 3) + (1 - p) * FINAL(s.diff)); }
+      const h = HEAVE(s.yl);
+      return Math.max(best, h * FINAL(s.diff + 7) + (1 - h) * FINAL(s.diff));
+    };
+    const SNAP_GAP = 10, LAST = 12, OOB = 0.136;  // a spike or snap needs ~10 s; 13.6% of late conversions end out of bounds
+    // the clock can be run out: the team that has the ball and leads, the other side short of timeouts. Each down left
+    // after this snap lets ~40 s run off; each defensive timeout takes one of those back. On 1st down this is nfl4th's
+    // rule (0 timeouts: 2:00, 1: 1:20, 2: 0:40); (owner 2026-10-23: "does our engine know the difference between a team
+    // winning with 1:59 left, defense has 3 timeouts vs 0?") it had ignored the down, so 3rd & 10 at 1:59 against no
+    // timeouts read a sure win when only ~0:40 can be run off before a punt.
+    const kneel = (sec, defTo, down = 1) => sec < 40 * Math.max(0, 4 - (down || 1) - defTo);
     const featuresOf = s => {
       const sec = clamp(s.sec, 0, 3600), half = sec > 1800 ? sec - 1800 : sec, line = s.line || 0;
       const x = new Array(F.length);
@@ -58,7 +78,8 @@
         return s.rec2h ? wp(k) : 1 - wp({ ...flip(k), sec: 1800, down: 1, togo: 10, yl: I.kickoff.rec[5] });
       }
       if (s.sec <= 0) return s.diff > 0 ? 1 : s.diff < 0 ? 0 : 0.5;  // time's up (overtime: a coin flip here)
-      if (s.diff > 0 && s.sec <= 120 && kneel(s.sec, s.oppTo)) return 1;  // the leader kneels it out
+      if (s.diff > 0 && s.sec <= 120 && kneel(s.sec, s.oppTo, s.down)) return 1;  // the leader kneels it out
+      if (s.sec <= 6) return lastSnap(s);  // (CN2) the 4th quarter's last snap
       // (CK2, the owner's call 2026-10-23: "can we treat 1 and 2 point leads as the same thing?") late, a 1- and a
       // 2-point lead are one state (a field goal beats both): their average. Only late (owner: "the time left matters a
       // lot": with time for more scoring, 1 vs 2 decides 6 vs 7 and 8 vs 9 later). Real games, team with the ball
@@ -75,7 +96,12 @@
     // the other team's side of the same moment
     const flip = s => ({ ...s, diff: -s.diff, to: s.oppTo, oppTo: s.to, line: -(s.line || 0), home: s.home ? 0 : 1, rec2h: s.rec2h ? 0 : 1 });
     // a new possession for the OTHER team: 1st & 10 at `yl` (its yards to the end zone), the clock run by `t`
-    const theirBall = (s, yl, t, pts = 0) => { const o = flip({ ...s, diff: s.diff + pts }); return 1 - wp(later({ ...o, down: 1, togo: Math.min(10, yl), yl }, t)); };
+    const theirBall = (s, yl, t, pts = 0) => {
+      const o = later({ ...flip({ ...s, diff: s.diff + pts }), down: 1, togo: Math.min(10, yl), yl }, t);
+      // (CN2) a change of possession stops the clock: with 0:12 or less left they get one snap
+      if (!o.over && o.sec <= LAST && o.sec > 0) return 1 - lastSnap(o);
+      return 1 - wp(o);
+    };
     const PLAY = I.clock.play_len;  // a snap's own length
     // after we score: they receive the kickoff (its measured landing spots: the 2025 rules)
     const afterScore = (s, pts, t = PLAY) => mean(I.kickoff.rec.map(yl => theirBall(s, yl, t + 5, pts)));
@@ -96,7 +122,7 @@
     };
     const fgDist = yl => yl + I.fg.offset;
     // make rate: the recent table, shifted for roof and wind (outdoors; unknown wind = a typical 8 mph)
-    const fgP = (yl, s = {}) => {
+    const fgP = (yl, s = {}) => {  // (lastSnap reads it through fgPRef)
       const f = I.fg, d = Math.round(fgDist(yl));
       if (d > f.from + f.rate.length - 1) return 0;
       const p = clamp(d < f.from ? f.rate[0] : f.rate[d - f.from], 1e-4, 1 - 1e-4), rw = f.roof_wind;
@@ -106,6 +132,7 @@
       const o = roofOf(s).outdoors, ow = o * (s.wind != null && s.wind !== '' ? +s.wind : 8);
       return taper * sig(Math.log(p / (1 - p)) + rw.outdoors * (o - rw.mean_out) + rw.wind_out * (ow - rw.mean_ow));
     };
+    fgPRef = fgP;
     const gainsAt = (togo, yl) => { const b = bucket(I.gains.buckets, togo); return b.bands.find(x => yl > x.lo && yl <= x.hi) || b.bands[b.bands.length - 1]; };
 
     // ---- 4th down: go / field goal / punt
@@ -115,7 +142,13 @@
       const succ = g.succ_over.map(o => {
         const gain = s.togo + Math.max(0, o);
         if (gain >= s.yl) return afterTD(s);
-        return wp(later({ ...s, down: 1, yl: s.yl - gain, togo: Math.min(10, s.yl - gain) }, PLAY));
+        const n = later({ ...s, down: 1, yl: s.yl - gain, togo: Math.min(10, s.yl - gain) }, opts.convSec ?? PLAY);  // (CO2) convSec: the diagnostic's clock
+        if (!n.over && n.sec <= LAST && n.sec > 0) {
+          // (CN2) a timeout (or a spike, with time for one) buys one snap; else only if the play ended out of bounds
+          if (n.to > 0 || n.sec >= SNAP_GAP) return lastSnap(n);
+          return OOB * lastSnap(n) + (1 - OOB) * FINAL(n.diff);
+        }
+        return opts.convSec != null || n.over ? wp(n) : nextSnap(n);
       });
       // failed: their ball at the spot
       const fail = g.fail.map(f => theirBall(s, clamp(100 - (s.yl - Math.min(f, s.togo - 1)), 1, 99), PLAY));
@@ -172,6 +205,23 @@
       const lose = Math.max(0, pace - I.clock.play_len);
       return half > 120 && half - lose < 120 ? half - 120 : Math.min(lose, half);
     };
+    // (CO3, owner 2026-10-23: "time outs, 5 seconds would be accurate ... hurry up offense isn't letting 40 seconds
+    // burn") after a converted 4th down the clock runs to the next snap at the offense's pace (runOff), not 5 s (the
+    // real median was 37). Out of bounds (13.6%) stops it only in a half's late window (the 1st half's last 2:00, the
+    // game's last 5:00) and only for a team not ahead (a leader stays in bounds); there a team not ahead with a
+    // timeout takes the better of calling it and letting the clock run (and a defense behind, the better for it).
+    const nextSnap = n => {
+      const first = n.sec > 1800, half = first ? n.sec - 1800 : n.sec;
+      const run = wp(later(n, runOff(n))), late = half <= (first ? 120 : 300);
+      // (CO3 amended) a defense behind late stops that run with a timeout when it helps it
+      if (late && n.diff > 0) return n.oppTo > 0 ? Math.min(run, wp({ ...n, oppTo: n.oppTo - 1 })) : run;
+      if (!(late && n.diff <= 0)) return run;
+      // (found 2026-10-23 comparing with nfl4th: IND down 1 at the SEA 38 with 0:22 and no timeouts read "if it works"
+      // 10.6%, the clock running out the game) or it spikes the ball: a down for ~10 s
+      const spike = wp(later({ ...n, down: n.down + 1 }, SNAP_GAP));
+      const inb = Math.max(run, spike, n.to > 0 ? wp({ ...n, to: n.to - 1 }) : 0);
+      return OOB * wp(n) + (1 - OOB) * inb;
+    };
     function timeout(s, who = 'offense') {
       const off = who === 'offense';
       const callS = off ? { ...s, to: s.to - 1 } : { ...s, oppTo: s.oppTo - 1 };
@@ -201,7 +251,7 @@
     function grade(kind, s, choice, opts = {}) {
       let o;
       if (kind === 'try') { const t = tries(s); o = { xp: t.xp.wp, two: t.two.wp }; }
-      else { const f = fourth(s, opts); o = { go: f.go.wp }; if (f.fg) o.fg = f.fg.wp; if (f.punt) o.punt = f.punt.wp; o._p = { go: f.go.p, fg: f.fg && f.fg.p }; }
+      else { const f = fourth(s, opts); o = { go: f.go.wp }; if (f.fg) o.fg = f.fg.wp; if (f.punt) o.punt = f.punt.wp; o._p = { go: f.go.p, fg: f.fg && f.fg.p, goMade: f.go.ifMade, goMissed: f.go.ifMissed, fgMade: f.fg && f.fg.ifMade, fgMissed: f.fg && f.fg.ifMissed }; }
       const p = o._p; delete o._p;
       const ranked = Object.entries(o).sort((x, y) => y[1] - x[1]);
       const best = ranked[0], chosen = o[choice];

@@ -60,7 +60,8 @@
   // The card's status pill for the week: the official tag and game day, the same as the badge (2026-10-22: the pill
   // read the status text, so ESPN's "Out" showed an Out pill beside a Q badge). [kind, text, tip] or null.
   const pill = (P, t, week) => {
-    const gd = gameday(P), why = (P && P.inactive_why) || '';
+    // (owner 2026-10-23) before the final report a Q / D / O can be ours: the tag he most likely gets on it
+    const gd = gameday(P), why = (P && P.tx ? 'Expected Friday tag, from his practices so far' : '') || (P && P.inactive_why) || '';
     return gd === 'INA' ? ['out', 'Inactive', `Declared inactive for week ${week}`]
       : t === 'IR' ? ['out', 'Injured reserve', 'On injured reserve'] : t === 'PUP' || t === 'NFI' ? ['out', t, TAG_WORD[t]]
       : t === 'SSPD' ? ['out', 'Suspended', TAG_WORD.SSPD] : t === 'O' ? ['out', 'Out', why || 'Out']
@@ -443,13 +444,13 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const NAV = [
     { key: 'players', label: 'Players', subs: [['rankings', 'Rankings', 'tab-players'], ['stats', 'Stats'], ['roles', 'Roles', 'tab-roles'], ['injuries', 'Injuries'], ['moves', 'Moves'], ['trends', 'Trends']] },
     { key: 'teams', label: 'Teams', subs: [['all', 'All teams'], ['power', 'Power', 'tab-power'], ['standings', 'Standings'], ['playoffs', 'Playoffs'], ['stats', 'Stats'], ['draft', 'Draft']] },
-    { key: 'games', label: 'Games', subs: [['matchups', 'Matchups', 'tab-games'], ['calc', 'Calc']] },  // Calc: decisions (owner 2026-10-23)
+    { key: 'games', label: 'Games', subs: [['matchups', 'Matchups', 'tab-games']] },  // one view, no sub-tab row (owner 2026-10-23: space)
     // your own fantasy league (Sleeper / public ESPN import; owner 2026-10-15)
     // tab named Fantasy (owner 2026-10-16); its views are the site's sub-tabs (owner 2026-10-18: "uniform with the rest of the
     // site"), all one section (league.js switches views on nfle-route)
     { key: 'league', label: 'Fantasy', subs: [['lineup', 'Lineup', 'tab-league'], ['matchup', 'Matchup', 'tab-league'], ['live', 'Live', 'tab-league'],
                                               ['teams', 'Teams', 'tab-league'], ['waivers', 'Waivers', 'tab-league'], ['trade', 'Trade', 'tab-league']] },
-    { key: 'model', label: 'Model', subs: [['model', 'Model', 'tab-model'], ['reference', 'Reference']] },  // Reference: league rates (owner 2026-10-18)
+    { key: 'model', label: 'Model', subs: [['model', 'Model', 'tab-model'], ['reference', 'Reference'], ['calc', 'Calc']] },  // Reference: league rates (owner 2026-10-18); Calc: decisions (owner 2026-10-23)
     // Home (owner 2026-10-20: a landing page, "I want to..." tiles): not in the tab bars; the logo opens it, and it is
     // where a first visit lands (a returning visitor still gets the last tab used)
     { key: 'home', label: 'Home', subs: [['home', 'Home', 'tab-home']], hidden: true },
@@ -461,7 +462,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
                   'tab-teams-playoffs': 'playoffs', 'tab-players-moves': 'moves', 'tab-power': 'power',
                   'tab-games': 'matchups', 'tab-roles': 'roles', 'tab-model': 'model',
                   'tab-players-trends': 'trends', 'tab-league': 'league', 'tab-model-reference': 'reference', 'tab-home': 'home',
-                  'tab-games-calc': 'calc' };
+                  'tab-model-calc': 'calc' };
   const ver = (document.currentScript && new URL(document.currentScript.src).search) || '';
   const loaded = {};
   const NFLE = window.NFLE = window.NFLE || {};
@@ -481,7 +482,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     loaded[area].then(go, e => sec.insertAdjacentHTML('beforeend', `<p class="muted">Couldn't load this tab (${e.message}).</p>`));
   };
   const OLD = { players: 'players/rankings', roles: 'players/roles', power: 'teams/power', games: 'games', model: 'model',
-               playoffs: 'teams/playoffs', draft: 'teams/draft', transactions: 'players/moves' };
+               playoffs: 'teams/playoffs', draft: 'teams/draft', transactions: 'players/moves', 'games/calc': 'model/calc' };
   const CARD = /^g-/;  // old matchup-tile links: gamecast.js turns them into gamecast links
   const PAGE = /^(player|team)\/(.+)$/;  // player / team cards (rendered by gamecast.js into #pcOv)
   // The card stack lives in the URL (owner 2026-10-20: "make the nested navigation part of the url? so if i share a url
@@ -754,15 +755,14 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const onNav = e => {
     const pb = e.target.closest('[data-par]'), sb = e.target.closest('[data-sub]');
     if (bot && e.target.closest('[data-more]')) { const sh = bot.querySelector('.bb-sheet'); sh.hidden = !sh.hidden; return; }
-    if (pb) {  // a parent tab reopens the sub-tab you last used there
+    if (pb) {  // a parent tab always opens its first sub-tab (owner 2026-10-23: "not to remember the sub tab you were
+      // last on. default to rankings, all teams, lineup, and model")
       const p = parent(pb.dataset.par);
-      let last = null; try { last = localStorage.getItem(`nfledge-sub-${p.key}`); } catch (e) { /* ignore */ }
-      show({ p, s: p.subs.find(x => x[0] === last) || p.subs[0] }, true);
+      show({ p, s: p.subs[0] }, true);
       window.scrollTo({ top: 0 });
     } else if (sb) {
       const p = parent(nav.querySelector('[data-par].on').dataset.par);
       const s = p.subs.find(x => x[0] === sb.dataset.sub);
-      try { localStorage.setItem(`nfledge-sub-${p.key}`, s[0]); } catch (e) { /* ignore */ }
       show({ p, s }, true);
     }
   };
@@ -960,10 +960,13 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       raf = 0;
       if (touching || overscrolled()) return;
       const drift = vv.offsetTop + vv.height - html.clientHeight;
+      // the bar's BOTTOM edge goes to the visible bottom, never its top (2026-10-23, owner: after switching apps the
+      // bar sat in the home-indicator area): right after a resume iOS reports the safe area as 0 for a moment, so a
+      // top computed from the bar's height then was too low once the safe-area padding came back and the bar grew
       if (Math.abs(drift) > 40 && !html.classList.contains('kb-open')) {
-        bot.style.top = `${Math.round(vv.offsetTop + vv.height - bot.offsetHeight)}px`;
-        bot.style.bottom = 'auto';
-      } else if (bot.style.top) {
+        bot.style.bottom = `${Math.round(-drift)}px`;
+        bot.style.top = 'auto';
+      } else if (bot.style.bottom || bot.style.top) {
         bot.style.top = ''; bot.style.bottom = '';
       }
     };

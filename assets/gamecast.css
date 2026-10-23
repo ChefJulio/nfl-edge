@@ -1576,6 +1576,9 @@ a.pc-chip.c-clip, a.pc-chip.c-clip:visited { display: inline-flex; align-items: 
 /* matchup mini tiles, two columns (owner 2026-10-22): logo over code over win chance / score, "@" between; the status
    line (a time unlike the heading's, the live clock, Final) only when there is one */
 .mg { display: flex; flex-direction: column; padding: 4px 6px 5px; }
+/* the fitted height (fitMini: the whole week on one screen) is a floor, never a cap: a tile grows to its content
+   rather than cutting off a final score (owner 2026-10-23, "no clipping") */
+.mg { height: auto; min-height: var(--mgh, 52px); }
 .mg-st { flex: none; text-align: center; justify-content: center; }
 .mg-vs { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; }
 .mg-t { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; line-height: 1; }
@@ -1613,3 +1616,6 @@ a.pc-chip.c-clip, a.pc-chip.c-clip:visited { display: inline-flex; align-items: 
 .dcs-o.chose { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; } .dcs-o.best b { color: var(--good); }
 .dcs-why { font-size: 13px; margin-top: 4px; }
 .dcs-r { font-size: 12px; margin-top: 4px; }
+.dcs-ctx { font-size: 12.5px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+.dcs-br { font-size: 12.5px; color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
