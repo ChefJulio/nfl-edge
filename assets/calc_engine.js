@@ -59,6 +59,17 @@
       }
       if (s.sec <= 0) return s.diff > 0 ? 1 : s.diff < 0 ? 0 : 0.5;  // time's up (overtime: a coin flip here)
       if (s.diff > 0 && s.sec <= 120 && kneel(s.sec, s.oppTo)) return 1;  // the leader kneels it out
+      // (CK2, the owner's call 2026-10-23: "can we treat 1 and 2 point leads as the same thing?") late, a 1- and a
+      // 2-point lead are one state (a field goal beats both): their average. Only late (owner: "the time left matters a
+      // lot": with time for more scoring, 1 vs 2 decides 6 vs 7 and 8 vs 9 later). Real games, team with the ball
+      // (2019-25): up 1 vs up 2 won 59.5% vs 72.8% with 10:00-15:00 left and 64.7 vs 78.1 with 6:00-10:00, but 67.9 vs
+      // 63.2 with 3:00-6:00 and 94.4 vs 90.4 inside 3:00 ((CL), tools/poss_eval.py). So: in full inside 6:00, fading
+      // to nothing at 8:00; above that the model's own pricing, which matches those games
+      const a = Math.abs(s.diff), w = clamp((480 - s.sec) / 120, 0, 1);
+      if (w > 0 && (a === 1 || a === 2) && !s.eq) {
+        const g = Math.sign(s.diff), own = wp({ ...s, eq: 1 });
+        return w * (wp({ ...s, diff: g, eq: 1 }) + wp({ ...s, diff: 2 * g, eq: 1 })) / 2 + (1 - w) * own;
+      }
       return sig(raw(featuresOf(s)));
     };
     // the other team's side of the same moment
