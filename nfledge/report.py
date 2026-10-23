@@ -1013,12 +1013,13 @@ def schedule_faced(eng, season: int, week: int, r, starters: dict, qb_eff: dict 
   tl = eng.team_ledger
   cur = tl[(tl.season == season) & (tl.week < week)]
   games = cur.groupby("team").size()
-  off_faced = -(P.defteam.map(r.dfn["pass"]).groupby(P.posteam).sum()
-                + R.defteam.map(r.dfn["rush"]).groupby(R.posteam).sum())
+  # .astype(float): with no plays yet (week 1), pandas 3.1 types an empty .map() result as str (2026-10-23 CI)
+  off_faced = -(P.defteam.map(r.dfn["pass"]).astype(float).groupby(P.posteam).sum()
+                + R.defteam.map(r.dfn["rush"]).astype(float).groupby(R.posteam).sum())
   qv = (lambda q, t: qb_value(r, q, t, w, vol)) if w and vol else r.qb_term  # noqa: E731
   qbt = pd.Series([qv(q, t) for q, t in zip(P.qb, P.posteam)], index=P.index, dtype=float)  # float even when no games are played yet (week 1)
-  def_faced = ((P.posteam.map(r.off["pass"]) + qbt).groupby(P.defteam).sum()
-               + R.posteam.map(r.off["rush"]).groupby(R.defteam).sum())
+  def_faced = ((P.posteam.map(r.off["pass"]).astype(float) + qbt).groupby(P.defteam).sum()
+               + R.posteam.map(r.off["rush"]).astype(float).groupby(R.defteam).sum())
   out = pd.DataFrame({"off_past": off_faced / games, "def_past": def_faced / games})
   # remaining schedule at each team's own average volume
   db_pg, ru_pg = cur.groupby("team").dropbacks.mean(), cur.groupby("team").rushes.mean()
