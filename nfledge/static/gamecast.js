@@ -4421,7 +4421,6 @@
     ov.querySelector('.sheet').setAttribute('aria-label', title);
     const body = ov.querySelector('.sheet-b');
     if (typeof content === 'string') body.innerHTML = content; else body.appendChild(content);
-    document.dispatchEvent(new CustomEvent('nfle-sheet', { detail: ov.querySelector('.sheet-b') }));
     ov.addEventListener('click', e => {
       if (e.target === ov || e.target.closest('.sheet-x')) { close(); return; }
       // a player or team opens a card over the sheet, which the card stack sets aside and brings back (shell.js);
@@ -4431,6 +4430,8 @@
     });
     document.addEventListener('keydown', onKey);
     document.body.appendChild(ov);
+    // once it's on the page (2026-10-23: news already fetched filled synchronously, into a box not yet attached: empty)
+    document.dispatchEvent(new CustomEvent('nfle-sheet', { detail: ov.querySelector('.sheet-b') }));
     ov.querySelector('.sheet-x').focus();
     // tables inside stick their heads just under the sheet's title row, not on top of it (owner 2026-10-17)
     ov.querySelector('.sheet').style.setProperty('--sheeth', `${ov.querySelector('.sheet-h').offsetHeight}px`);
