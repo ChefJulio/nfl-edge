@@ -823,6 +823,9 @@ def inactive_why(r) -> str:
             else "Listed Doubtful after practice started (ESPN, since his last game); Doubtful players almost never play"
             if des == "Doubtful" else "Ruled out after practice started (ESPN, since his last game)")
     return what + (f"; practice: {prac}" if prac else "")
+  if src == "espn_act":  # InjuryModel.cleared_rate
+    return ("ESPN marked him Active after his team's latest practice report: no designation expected on the final one. "
+            f"How players with no designation in his spot played{f' (practice: {prac})' if prac else ''}")
   if src == "report" and not des and days and getattr(r, "partial_week", False):  # midweek: partial-week model
     return f"Practice so far: {prac}. How players with that start to the week played, before the final report"
   if r.status:

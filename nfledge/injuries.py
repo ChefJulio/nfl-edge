@@ -59,6 +59,7 @@ STATUS_SRC = {  # InjuryModel.availability's "src": which part of the code spoke
   "": "nothing injury-related (healthy-scratch risk only)",
   "report": "this week's practice report (so far, or the final one)",
   "espn_mid": "ESPN's Out / IR / Doubtful since his team's report started (midweek_ruling)",
+  "espn_act": "ESPN's Active after his team's latest practice report: no designation coming (cleared_rate)",
   "table": "this week's injury table (seasons without dated practice reports)",
   "window": "IR, practice window open, before his team's first report (week model, stage 0)",
   "espn": "ESPN news since his last game, before his team's first report (espn_bridge)",
@@ -75,21 +76,41 @@ def expected_tag(missed: bool, days: str) -> str:
   tag "realistic, in line with how ESPN might list them"), from his practice days so far (D / L / F) and whether he
   missed his last game: data/history/tag_odds.json (tools/tag_odds_build.py, 2018 on), the likeliest tag when it is
   at least an even bet, else Q. A sequence too rare there falls back to its first day."""
+  odds = _tag_odds().get("odds", {})
+  seq = "".join(c for c in days if c in "DLF")[:2]
+  for k in range(len(seq), 0, -1):
+    v = odds.get(f"{'missed' if missed else 'played'}:{seq[:k]}")
+    if v:
+      return v["tag"]
+  return "Q" if missed else ""
+
+
+def _tag_odds() -> dict:
   global _TAG_ODDS
   if _TAG_ODDS is None:
     import json
     from pathlib import Path
     try:
       _TAG_ODDS = json.loads((Path(__file__).resolve().parent.parent / "data" / "history" / "tag_odds.json")
-                             .read_text(encoding="utf-8"))["odds"]
-    except (OSError, ValueError, KeyError):
+                             .read_text(encoding="utf-8"))
+    except (OSError, ValueError):
       _TAG_ODDS = {}
+  return _TAG_ODDS
+
+
+def cleared_rate(missed: bool, days: str) -> float | None:
+  """(owner 2026-10-23: "can we fix it") P(plays) for a player ESPN marks Active after his team's latest practice report,
+  before the final one: no designation coming, so the play rate of players with NO designation on the final report
+  in the same spot (missed his last game or not, practice days so far; 2018 on, tag_odds.json "cleared"). Missed his
+  last game, LL: 92.0% (n 564); played it, LL: 98.5%. Measured rates; kept only if the prospective audit holds
+  (tools/espn_active_audit.py)."""
+  cl = _tag_odds().get("cleared", {})
   seq = "".join(c for c in days if c in "DLF")[:2]
-  for k in range(len(seq), 0, -1):
-    v = _TAG_ODDS.get(f"{'missed' if missed else 'played'}:{seq[:k]}")
+  for k in range(len(seq), -1, -1):
+    v = cl.get(f"{'missed' if missed else 'played'}:{seq[:k]}")
     if v:
-      return v["tag"]
-  return "Q" if missed else ""
+      return float(v["played"])
+  return None
 
 
 def status_label(r) -> str:
@@ -105,6 +126,8 @@ def status_label(r) -> str:
     return des + dd
   if src == "espn_mid":
     return f"{des} (ESPN)" + dd
+  if src == "espn_act":
+    return "No designation expected (ESPN)" + dd
   if src == "window":
     return "IR (practice window open)"
   if src == "espn":
@@ -1075,8 +1098,20 @@ class InjuryModel:
     eq = set(self.espn_questionable or {})
     p["espn_q"] = p.gsis_id.isin(eq) & (p.gd == "") & (((p.des == "") & p.src.isin(["", "report", "table"]))
                                                              | (p.src == "last_wk"))
+    tags = self.designations(p, season, week)
+    # ESPN's Active after his team's latest practice report, before the final one (designations found them): no
+    # designation coming, so the measured play rate of cleared players in his spot (cleared_rate). pre_cleared keeps
+    # the model's chance for the prospective audit (tools/espn_active_audit.py)
+    if self.espn_cleared:
+      p["pre_cleared"] = np.nan
+      for i, row in p.iterrows():
+        c_ = self.espn_cleared.get(row.gsis_id)
+        r_ = cleared_rate(*c_) if c_ else None
+        if r_ is None or p.at[i, "gd"]:
+          continue
+        p.at[i, "pre_cleared"], p.at[i, "avail"], p.at[i, "src"], p.at[i, "des"] = p.at[i, "avail"], r_, "espn_act", ""
     p["status"] = [status_label(r) for r in p.itertuples()]
-    p["tag"] = self.designations(p, season, week)
+    p["tag"] = tags
     p["tag_x"] = self.tag_expected
     return p
 
@@ -1118,6 +1153,7 @@ class InjuryModel:
     p: rows with gsis_id and team."""
     out = [""] * len(p)
     self.tag_expected = [False] * len(p)  # parallel to out: the tag is our expected Friday tag, not ESPN's / the team's
+    self.espn_cleared = {}  # gsis -> (missed his last game, practice days so far): ESPN Active after the latest report
     published = published_teams(self.data, season, week, getattr(self, "now", None))
     pr, days, final = self.data.practice, None, set()
     if pr is not None:
@@ -1224,7 +1260,10 @@ class InjuryModel:
       if team in published:
         # on this week's report, before the final one: ESPN's fresh Active clears him; else the tag he most likely
         # gets on it, from his practice days so far and whether he missed his last game (expected_tag)
-        out[j] = "" if espn_cleared(g, team) else expected_tag(bool(missed_last(g, team)), so_far(g, team))
+        m_, s_ = bool(missed_last(g, team)), so_far(g, team)
+        if espn_cleared(g, team):
+          self.espn_cleared[g] = (m_, s_)
+        out[j] = "" if g in self.espn_cleared else expected_tag(m_, s_)
         self.tag_expected[j] = bool(out[j])
         continue
       out[j] = "Q" if tuesday_q(g, team) else ""

@@ -380,6 +380,15 @@ def main():
           e.update(ruling=gameday[x.gsis_id][0], at=gameday[x.gsis_id][1], post=round(float(x.avail), 4), status=x.status)
       gf.write_text(json.dumps(log, indent=0), encoding="utf-8")
       print(f"[run] game-day overrides archived: {len(log)} -> {gf.name}", flush=True)
+    if "pre_cleared" in proj and proj.pre_cleared.notna().any():  # ESPN Active before the final report, for its audit
+      af = out.parent / "data" / "live_inputs" / f"espnactive_{season}_{week:02d}.json"
+      log = json.loads(af.read_text(encoding="utf-8")) if af.exists() else {}
+      for x in proj[proj.pre_cleared.notna()].itertuples():
+        log.setdefault(x.gsis_id, {"name": x.full_name, "team": x.team, "pos": x.pos, "days": x.days,
+                                   "pre": round(float(x.pre_cleared), 4), "post": round(float(x.avail), 4),
+                                   "at": (active or {}).get(x.gsis_id)})  # the first sighting stands
+      af.write_text(json.dumps(log, indent=0), encoding="utf-8")
+      print(f"[run] ESPN-Active overrides archived: {len(log)} -> {af.name}", flush=True)
   if args.lookahead and plan is not None:
     build_lookahead(eng, data, cfg, scoring, season, week, out.parent, plan)
   print(f"[run] wrote {out} in {time.time() - t0:.0f}s")

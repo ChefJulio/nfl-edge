@@ -235,5 +235,83 @@
     "D": 0.036
    }
   }
+ },
+ "cleared": {
+  "played:": {
+   "n": 9945,
+   "played": 0.9779
+  },
+  "missed:": {
+   "n": 2144,
+   "played": 0.889
+  },
+  "played:D": {
+   "n": 2468,
+   "played": 0.9716
+  },
+  "played:F": {
+   "n": 3235,
+   "played": 0.974
+  },
+  "played:L": {
+   "n": 4242,
+   "played": 0.9844
+  },
+  "missed:D": {
+   "n": 91,
+   "played": 0.8462
+  },
+  "missed:F": {
+   "n": 1026,
+   "played": 0.8606
+  },
+  "missed:L": {
+   "n": 1027,
+   "played": 0.9211
+  },
+  "played:DD": {
+   "n": 336,
+   "played": 0.9226
+  },
+  "played:DF": {
+   "n": 1276,
+   "played": 0.9765
+  },
+  "played:DL": {
+   "n": 856,
+   "played": 0.9836
+  },
+  "played:FF": {
+   "n": 3123,
+   "played": 0.9737
+  },
+  "played:FL": {
+   "n": 66,
+   "played": 0.9848
+  },
+  "played:LD": {
+   "n": 130,
+   "played": 0.9769
+  },
+  "played:LF": {
+   "n": 1691,
+   "played": 0.984
+  },
+  "played:LL": {
+   "n": 2421,
+   "played": 0.9851
+  },
+  "missed:FF": {
+   "n": 1016,
+   "played": 0.8593
+  },
+  "missed:LF": {
+   "n": 457,
+   "played": 0.9212
+  },
+  "missed:LL": {
+   "n": 564,
+   "played": 0.9202
+  }
  }
 }

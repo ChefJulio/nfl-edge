@@ -22,7 +22,7 @@ TAG = {"none": "", "QUESTIONABLE": "Q", "DOUBTFUL": "D", "OUT": "O"}
 def main():
   fr = [pd.read_parquet(p) for p in sorted((ROOT / "cache").glob("availhist_*.parquet"))]
   a = pd.concat(fr, ignore_index=True).sort_values(["gsis_id", "season", "week"])
-  a["gs"] = a.game_status.fillna("").str.upper().replace({"NONE": "", "": "none"})
+  a["gs"] = a.game_status.fillna("").str.upper().replace({"NONE": ""}).replace({"": "none"})
   prev = a.groupby(["gsis_id", "season"]).shift(1)
   a["missed"] = ((a.week - prev.week) <= 2) & (prev.played == False)  # noqa: E712 (NaN-safe)
   a = a[a.days.str.len() == 3]
@@ -38,10 +38,20 @@ def main():
       out["odds"][f"{'missed' if m else 'played'}:{seq}"] = {
         "tag": tag, "n": int(len(g)), "played": round(float(g.played.mean()), 3),
         "share": {TAG.get(s, s) or "none": round(float(v), 3) for s, v in share.items()}}
+  # (owner 2026-10-23, "can we fix it") the play rate of a player with NO designation on the final report, by the
+  # same keys: what ESPN's "Active" before the report stands for (InjuryModel: espn_active, cleared_rate)
+  out["cleared"] = {}
+  c = a[a.gs == "none"]
+  for k in (0, 1, 2):
+    for (m, seq), g in c.assign(seq=c.days.str[:k]).groupby(["missed", "seq"]):
+      if len(g) >= MIN_N and "?" not in seq:
+        out["cleared"][f"{'missed' if m else 'played'}:{seq}"] = {"n": int(len(g)), "played": round(float(g.played.mean()), 4)}
   dst = ROOT / "data" / "history" / "tag_odds.json"
   dst.write_text(json.dumps(out, indent=1), encoding="utf-8")
   for key, v in out["odds"].items():
     print(f"  {key:10s} n {v['n']:5d}  tag {v['tag'] or '-':2s} played {v['played']:.2f}  {v['share']}")
+  for key, v in out["cleared"].items():
+    print(f"  cleared {key:10s} n {v['n']:5d}  played {v['played']:.3f}")
   print(f"[tags] wrote {dst.relative_to(ROOT)}")
 
 

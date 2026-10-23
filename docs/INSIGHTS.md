@@ -4558,3 +4558,17 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   player who played his last game. ESPN's midweek Active as a chance-to-play input is NOT shipped: past ESPN captures
   (the public page) never list Active players, and our own archive with it starts 2026-10-13; it needs a
   prospective check first.
+- **PRE-REGISTERED 2026-10-23, SHIPPED PROVISIONALLY (owner: "can we fix it"): {#espn-active} ESPN's Active before
+  the final report moves the chance to play.** A player on his team's practice report whom ESPN marks Active after
+  the team's latest report (ESPN update at or after 4 p.m. ET of that report's day; fresh: after his last game,
+  before kickoff), while the final report is not out and no game-day ruling stands: P(plays) = the play rate of
+  players with NO designation on the final report in his spot (missed his last game while on its report or not,
+  practice days so far, a day before he was added counted as full; 2018-25, tag_odds.json "cleared", the longest
+  matching start with 50+): missed last game, LL 92.0% (n 564), LF 92.1%, FF 85.9%; played it, LL 98.5%. Measured
+  rates, nothing fitted. It can't be backtested (past ESPN captures never list Active players; our archive with it
+  starts 2026-10-13), so it is judged going forward: run.py archives each override (data/live_inputs/
+  espnactive_<season>_<week>.json: the model's chance before it, the rate set, the ESPN time) and
+  tools/espn_active_audit.py scores them against snap counts. GATE once 40+ player-weeks are in: the played rate's
+  95% Wilson interval includes the mean rate the rule set, AND the rule's Brier is below the model's pre-override
+  Brier on the same players. Fail -> the rule comes out of availability (the tag clearing stays: display only).
+  Live: Judkins (CLE, missed week 6, LL, ESPN Active 2:28 pm ET Friday) 77% -> 92%.
