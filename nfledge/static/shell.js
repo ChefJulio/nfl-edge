@@ -669,15 +669,14 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const onNav = e => {
     const pb = e.target.closest('[data-par]'), sb = e.target.closest('[data-sub]');
     if (bot && e.target.closest('[data-more]')) { const sh = bot.querySelector('.bb-sheet'); sh.hidden = !sh.hidden; return; }
-    if (pb) {  // a parent tab reopens the sub-tab you last used there
+    if (pb) {  // a parent tab always opens its first sub-tab (owner 2026-10-23: "not to remember the sub tab you were
+      // last on. default to rankings, all teams, lineup, and model")
       const p = parent(pb.dataset.par);
-      let last = null; try { last = localStorage.getItem(`nfledge-sub-${p.key}`); } catch (e) { /* ignore */ }
-      show({ p, s: p.subs.find(x => x[0] === last) || p.subs[0] }, true);
+      show({ p, s: p.subs[0] }, true);
       window.scrollTo({ top: 0 });
     } else if (sb) {
       const p = parent(nav.querySelector('[data-par].on').dataset.par);
       const s = p.subs.find(x => x[0] === sb.dataset.sub);
-      try { localStorage.setItem(`nfledge-sub-${p.key}`, s[0]); } catch (e) { /* ignore */ }
       show({ p, s }, true);
     }
   };
