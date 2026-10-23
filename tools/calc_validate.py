@@ -15,38 +15,22 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tools"))
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 OUT = ROOT / "scratch" / "calc_val"
 TESTS = [2022, 2023, 2024, 2025]
-ROOF = {"outdoors": "outdoors", "open": "outdoors", "dome": "dome", "closed": "retractable"}
 
 
 def export(nfl4th_path: str):
   import pyreadr
   n4 = list(pyreadr.read_r(nfl4th_path).values())[0]
   n4["play_id"] = n4.play_id.astype(float)
+  from calc_build import fourth_rows
   for s in TESTS:
-    d = pd.read_parquet(ROOT / "cache" / f"pbp_calc_{s}.parquet")
-    d = d[d.season_type == "REG"]
-    ko = d[(d.kickoff_attempt == 1) & (d.qtr == 1) & d.posteam.notna()].sort_values(["game_id", "play_id"])
-    first_rec = ko.drop_duplicates("game_id").set_index("game_id").posteam
-    x = d[(d.down == 4) & (d.qtr <= 4) & d.play_type.isin(["run", "pass", "punt", "field_goal"]) & d.result.notna()
-          & d.ydstogo.notna() & d.yardline_100.notna() & (d.qb_kneel != 1) & (d.qb_spike != 1)]
-    x = x[x.result != 0]
-    home = x.posteam == x.home_team
-    rows = pd.DataFrame({
-      "game_id": x.game_id, "play_id": x.play_id.astype(float), "qtr": x.qtr, "desc": x.desc.str.slice(0, 140),
-      "diff": x.score_differential.fillna(0), "sec": x.game_seconds_remaining, "togo": x.ydstogo, "yl": x.yardline_100,
-      "to": x.posteam_timeouts_remaining.fillna(3), "oppTo": x.defteam_timeouts_remaining.fillna(3),
-      "line": np.where(home, x.spread_line, -x.spread_line), "total": x.total_line.fillna(45), "home": home.astype(int),
-      "rec2h": (x.game_id.map(first_rec) != x.posteam).astype(int), "roof": x.roof.map(ROOF).fillna("outdoors"),
-      "wind": x.wind, "choice": x.play_type.map({"run": "go", "pass": "go", "punt": "punt", "field_goal": "fg"}),
-      "won": np.where(home, x.result > 0, x.result < 0).astype(int), "team": x.posteam,
-      # (CO) which branch happened: a try converted (first down or the offense's touchdown), a field goal made
-      "conv": ((x.fourth_down_converted == 1) | ((x.touchdown == 1) & (x.td_team == x.posteam))).astype(int),
-      "fgm": (x.field_goal_result == "made").astype(int)})
+    rows = fourth_rows(pd.read_parquet(ROOT / "cache" / f"pbp_calc_{s}.parquet"))
+    rows = rows[rows.result != 0]  # ties out
     rows = rows.merge(n4, on=["game_id", "play_id"], how="left")
     rows = rows.replace({np.nan: None})
     (OUT / f"rows_{s}.json").write_text(json.dumps(rows.to_dict("records")), encoding="utf-8")

@@ -88,6 +88,8 @@ jobs:
         run: |
           mkdir site && tar -xf last/artifact.tar -C site
           python3 tools/assets_deploy.py --site=site
+          # Model > Calc > Graded calls follow the engine: regrade with the new calc_engine.js (inputs from the last build)
+          node tools/calc_grade.mjs --site=site || echo "[grade] skipped"
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -172,7 +174,10 @@ jobs:
       # Games > Calc and the gamecast's Decisions: the in-game win probability model + decision inputs
       # (data/calc/model.json; retrained when its code changes or a week completes, cached in cache/calc_<key>.json).
       - name: Calculator
-        run: python tools/calc_build.py --site=site || echo "[calc] skipped"
+        run: |
+          python tools/calc_build.py --site=site || echo "[calc] skipped"
+          # Model > Calc > Graded calls: every 4th down 2022 on, graded by the browser engine (tools/calc_grade.mjs)
+          node tools/calc_grade.mjs --site=site || echo "[grade] skipped"
       # League tab: kicker (and team-defense) projections, this week through 17 (reads the week pages above).
       - name: Kickers and defenses
         run: python tools/kdst_build.py --site=site

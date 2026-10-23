@@ -196,6 +196,100 @@
     engine().then(e => { eng = e; draw(false); }, err => { outBox.innerHTML = `<p class="muted">The calculator's model isn't available (${esc(err.message)}).</p>`; });
   }
 
+  // ---- Graded calls (owner 2026-10-23: "default it to sort by most controversial (worst compared to our model) and
+  // group the tables by week and season"): every 4th down from 2022 on, graded at build time by tools/calc_grade.mjs
+  // with this engine and a model fit only on earlier seasons (data/calc/graded_<season>.json)
+  const QUESTION = 0.03;  // the engine's "questionable" line (3 points)
+  const CALL = { go: 'Went for it', fg: 'Field goal', punt: 'Punted' }, OPT = { go: 'going for it', fg: 'a field goal', punt: 'a punt' };
+  const OPTS = { go: 'Going for it', fg: 'A field goal', punt: 'A punt' };
+  const OPTL = { go: 'Go for it', fg: 'Field goal', punt: 'Punt' };
+  const clockAt = sec => { const q = sec > 2700 ? 1 : sec > 1800 ? 2 : sec > 900 ? 3 : 4, r = Math.round(sec - (4 - q) * 900);
+    return { q, clock: `${Math.floor(r / 60)}:${String(r % 60).padStart(2, '0')}` }; };
+  const scoreTxt = d => (d > 0 ? `up ${d}` : d < 0 ? `down ${-d}` : 'tied');
+  const spotTxt = yl => (yl > 50 ? `own ${100 - yl}` : yl === 50 ? 'midfield' : `opp ${yl}`);
+  const gradedState = r => { const { q, clock } = clockAt(r.s), off = r.sc ? r.sc[0] : Math.max(0, 20 + r.d);
+    return { ...DEF, mode: 'play', a: r.t, b: r.o, off, def: off - r.d, qtr: q, clock, down: 4, togo: r.tg, side: r.yl > 50 ? 'own' : 'opp',
+      yard: r.yl > 50 ? 100 - r.yl : r.yl, to: r.to, oppTo: r.ot, line: r.ln || 0, total: r.tt || 45, roof: r.rf || 'outdoors',
+      wind: r.wd == null ? '' : r.wd, home: r.h, rec2h: r.r2 }; };
+
+  function gradedRow(r, i) {
+    const { q, clock } = clockAt(r.s), bad = r.x >= QUESTION, close = r.x < TOSS;
+    const verdict = r.b === r.c ? '<span class="gc-ok">Right call</span>'
+      : close ? `<span class="muted">Toss-up with ${OPT[r.b]}</span>`
+      : `<span class="${bad ? 'gc-bad' : 'gc-meh'}">${OPTS[r.b]} was better by ${(100 * r.x).toFixed(1)} pts</span>`;
+    const res = r.res > 0 ? '<b class="gc-w">W</b>' : r.res < 0 ? '<b class="gc-l">L</b>' : '<b>T</b>';
+    const opts = Object.entries(r.op).filter(([, v]) => v != null).sort((a, b) => b[1] - a[1]);
+    const br = [r.pc != null ? `Go: ${pc(r.pc)} to convert, then ${pc(r.gm)} to win; ${pc(r.gf)} if it fails` : '',
+      r.pf != null && r.op.fg != null ? `Field goal: ${pc(r.pf)} to make, then ${pc(r.fm)}; ${pc(r.ff)} if missed` : ''].filter(Boolean).join('<br>');
+    const happened = r.c === 'go' ? (r.cv ? 'converted' : 'failed') : r.c === 'fg' ? (r.cv ? 'good' : 'missed') : '';
+    return `<details class="gc-row${bad && r.b !== r.c ? ' bad' : ''}"><summary>
+        <span class="gc-who"><b>${esc(r.t)}</b> ${r.h ? 'vs' : '@'} ${esc(r.o)}</span><span class="gc-res">${res}</span>
+        <span class="gc-sit">Q${q} ${clock} · ${scoreTxt(r.d)} · 4th &amp; ${r.tg}, ${spotTxt(r.yl)} · TOs ${r.to}-${r.ot}</span>
+        <span class="gc-v">${esc(CALL[r.c])}${happened ? ` (${happened})` : ''} · ${verdict}</span></summary>
+      <div class="gc-more">
+        ${opts.map(([k, v]) => `<div class="cx-opt${k === r.b ? ' best' : ''}"><span class="cx-on">${esc(OPTL[k])}${k === r.c ? ' (their call)' : ''}</span>
+          <span class="cx-bar"><i style="width:${(100 * v).toFixed(1)}%"></i></span><b>${pc(v)}</b></div>`).join('')}
+        ${br ? `<p class="cx-foot">${br}</p>` : ''}
+        <p class="gc-desc">${esc(r.ds || '')}</p>
+        <button type="button" class="gc-btn gc-open" data-i="${i}">Open in the calculator</button>
+      </div></details>`;
+  }
+
+  function mountGraded(box) {
+    const st = { season: null, sort: 'worst', team: '', open: {} };
+    let idx = null, data = null, rows = [];
+    box.innerHTML = '<p class="muted">Loading graded calls&hellip;</p>';
+    const draw = () => {
+      if (!idx) return;
+      const seasons = idx.seasons.map(x => x.season).sort((a, b) => b - a);
+      const meta = idx.seasons.find(x => x.season === st.season) || {};
+      const teams = data ? [...new Set(data.rows.map(r => r.t))].sort() : [];
+      rows = data ? data.rows.filter(r => !st.team || r.t === st.team) : [];
+      const byWeek = {};
+      rows.forEach((r, i) => { (byWeek[r.w] = byWeek[r.w] || []).push(i); });
+      const order = st.sort === 'worst' ? (a, b) => rows[b].x - rows[a].x || rows[a].s - rows[b].s
+        : (a, b) => (rows[a].g < rows[b].g ? -1 : rows[a].g > rows[b].g ? 1 : rows[b].s - rows[a].s);
+      const weeks = Object.keys(byWeek).map(Number).sort((a, b) => b - a);
+      const SHOW = 5;
+      const body = !data ? '<p class="muted">Loading&hellip;</p>' : !rows.length ? '<p class="muted">No 4th downs for this pick.</p>'
+        : weeks.map(w => {
+          const ix = byWeek[w].sort(order), nq = ix.filter(i => rows[i].x >= QUESTION && rows[i].b !== rows[i].c).length;
+          const all = st.open[w] || st.team, shown = all ? ix : ix.slice(0, SHOW);
+          return `<section class="gc-week"><h3>Week ${w} <span class="muted">${ix.length} fourth down${ix.length === 1 ? '' : 's'}${nq ? ` · <b class="gc-bad">${nq} questionable</b>` : ''}</span></h3>
+            ${shown.map(i => gradedRow(rows[i], i)).join('')}
+            ${!all && ix.length > SHOW ? `<button type="button" class="gc-btn gc-all" data-w="${w}">Show all ${ix.length}</button>` : ''}</section>`;
+        }).join('');
+      box.innerHTML = `<div class="gc-ctl">
+          ${seg('season', seasons.map(s => [s, String(s)]), st.season)}
+          ${seg('sort', [['worst', 'Most controversial'], ['game', 'Game order']], st.sort)}
+          <select class="gc-team" aria-label="Team"><option value="">All teams</option>${teams.map(t => `<option${t === st.team ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>
+        </div>
+        <p class="cx-src muted">${meta.n ? `${meta.n.toLocaleString()} fourth downs, ${meta.flagged} questionable (${100 * QUESTION}+ pts of win chance worse than the best). ` : ''}Graded by a model trained only on seasons before ${st.season}. A right call can still lose.</p>
+        ${body}`;
+    };
+    const loadSeason = s => {
+      st.season = s; st.open = {}; data = null; draw();
+      NFLE.load(`data/calc/graded_${s}.json`).then(d => { if (st.season === s) { data = d; draw(); } },
+        () => { box.insertAdjacentHTML('beforeend', `<p class="muted">Couldn't load ${s}.</p>`); });
+    };
+    box.addEventListener('click', e => {
+      const b = e.target.closest('.cx-seg button');
+      if (b) { const k = b.closest('.cx-seg').dataset.k;
+        if (k === 'season') loadSeason(+b.dataset.v); else { st.sort = b.dataset.v; draw(); }
+        return; }
+      const a = e.target.closest('.gc-all');
+      if (a) { st.open[a.dataset.w] = 1; draw(); return; }
+      const o = e.target.closest('.gc-open');
+      if (o) { const r = rows[+o.dataset.i]; if (r) NFLE.calcUI.sheet(gradedState(r), `${r.t} ${r.h ? 'vs' : '@'} ${r.o}, week ${r.w}`); }
+    });
+    box.addEventListener('change', e => { if (e.target.matches('.gc-team')) { st.team = e.target.value; draw(); } });
+    NFLE.load('data/calc/graded.json').then(j => {
+      idx = j;
+      const s = Math.max(...j.seasons.map(x => x.season));
+      loadSeason(s);
+    }, () => { box.innerHTML = '<p class="muted">The graded calls aren\'t available yet.</p>'; });
+  }
+
   NFLE.calcUI = {
     engine,  // the engine + model, loaded once (the gamecast's Decisions pane grades with it)
     // a sheet over the gamecast, prefilled from a live situation
@@ -208,8 +302,20 @@
   NFLE.areas.calc = {
     mount(sec) {
       sec.classList.remove('soon');
-      sec.innerHTML = '<div class="sec-head"><div><h2>Calc</h2><p>Set the situation; see each choice\'s chance to win: 4th down, timeouts, penalties, the try after a touchdown, onside kicks.</p></div></div><div class="cx-host"></div>';
-      mountInto(sec.querySelector('.cx-host'), saved());
+      // two views (owner 2026-10-23): every real 4th down graded (the default) and the calculator
+      sec.innerHTML = `<div class="sec-head"><div><h2>Calc</h2><p>Every 4th down graded by our win probability model, or set your own situation.</p></div></div>
+        ${seg('view', [['graded', 'Graded calls'], ['calc', 'Calculator']], 'graded')}<div class="gc-host"></div><div class="cx-host" hidden></div>`;
+      const g = sec.querySelector('.gc-host'), c = sec.querySelector('.cx-host'), tabs = sec.querySelector('.cx-seg[data-k="view"]');
+      let calcOn = false;
+      mountGraded(g);
+      tabs.addEventListener('click', e => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        tabs.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+        const calc = b.dataset.v === 'calc';
+        g.hidden = calc; c.hidden = !calc;
+        if (calc && !calcOn) { calcOn = true; mountInto(c, saved()); }
+      });
     },
   };
 })();

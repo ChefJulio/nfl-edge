@@ -58,6 +58,59 @@ def make(done: pd.DataFrame) -> dict:
   return out
 
 
+ROOF = {"outdoors": "outdoors", "open": "outdoors", "dome": "dome", "closed": "retractable"}
+GRADED_FROM = 2022  # Model > Calc > Graded calls covers these seasons on (owner 2026-10-23: "2022 to now")
+
+
+def fourth_rows(d: pd.DataFrame) -> pd.DataFrame:
+  """Every regulation 4th down of finished regular-season games that was a go / field goal / punt (kneels, spikes and
+  penalty no-plays out): the engine's state, the choice and what happened. Shared by the site's graded calls and the
+  validation tools (tools/calc_validate.py)."""
+  d = d[d.season_type == "REG"]
+  ko = d[(d.kickoff_attempt == 1) & (d.qtr == 1) & d.posteam.notna()].sort_values(["game_id", "play_id"])
+  first_rec = ko.drop_duplicates("game_id").set_index("game_id").posteam
+  x = d[(d.down == 4) & (d.qtr <= 4) & d.play_type.isin(["run", "pass", "punt", "field_goal"]) & d.result.notna()
+        & d.ydstogo.notna() & d.yardline_100.notna() & (d.qb_kneel != 1) & (d.qb_spike != 1)]
+  home = x.posteam == x.home_team
+  return pd.DataFrame({
+    "game_id": x.game_id, "play_id": x.play_id.astype(float), "season": x.season.astype(int), "week": x.week.astype(int),
+    "qtr": x.qtr, "desc": x.desc.str.slice(0, 140), "diff": x.score_differential.fillna(0), "sec": x.game_seconds_remaining,
+    "togo": x.ydstogo, "yl": x.yardline_100, "to": x.posteam_timeouts_remaining.fillna(3),
+    "oppTo": x.defteam_timeouts_remaining.fillna(3), "line": np.where(home, x.spread_line, -x.spread_line),
+    "total": x.total_line.fillna(45), "home": home.astype(int), "rec2h": (x.game_id.map(first_rec) != x.posteam).astype(int),
+    "roof": x.roof.map(ROOF).fillna("outdoors"), "wind": x.wind,
+    "choice": x.play_type.map({"run": "go", "pass": "go", "punt": "punt", "field_goal": "fg"}),
+    "result": np.where(home, x.result, -x.result), "won": np.where(home, x.result > 0, x.result < 0).astype(int),
+    "team": x.posteam, "opp": x.defteam, "pts": x.posteam_score.fillna(0).astype(int), "opp_pts": x.defteam_score.fillna(0).astype(int),
+    # (CO) which branch happened: a try converted (first down or the offense's touchdown), a field goal made
+    "conv": ((x.fourth_down_converted == 1) | ((x.touchdown == 1) & (x.td_team == x.posteam))).astype(int),
+    "fgm": (x.field_goal_result == "made").astype(int)})
+
+
+def graded_inputs(d: pd.DataFrame, cur: int, code: bytes, dst: Path) -> None:
+  """Model > Calc > Graded calls: each season's 4th downs (data/calc/plays_<season>.json) and the model each is graded
+  with, fit only on the seasons before it (data/calc/wf/through_<year>.json; cached by code and year: past seasons'
+  data doesn't change). tools/calc_grade.mjs grades them with the browser engine, in the full build and in the UI-only
+  path (so an engine change regrades)."""
+  (dst / "wf").mkdir(parents=True, exist_ok=True)
+  done = d[d.result.notna()]
+  seasons = []
+  for s in range(GRADED_FROM, cur + 1):
+    rows = fourth_rows(done[done.season == s])
+    if rows.empty:
+      continue
+    yr = s - 1
+    key = hashlib.sha1(code + f"through:{yr}".encode()).hexdigest()[:12]
+    cp = ROOT / "cache" / f"calc_wf_{yr}_{key}.json"
+    if not cp.exists():
+      cp.write_text(json.dumps(make(done[done.season <= yr]), separators=(",", ":")), encoding="utf-8")
+    (dst / "wf" / f"through_{yr}.json").write_bytes(cp.read_bytes())
+    rows = rows.replace({np.nan: None})
+    (dst / f"plays_{s}.json").write_text(json.dumps(rows.to_dict("records"), separators=(",", ":")), encoding="utf-8")
+    seasons.append(s)
+  print(f"[calc] graded-calls inputs: {seasons}", flush=True)
+
+
 def resample_games(done: pd.DataFrame, seed: int) -> pd.DataFrame:
   """A bootstrap copy: games drawn with replacement (each draw keeps all its plays, under its own game id)."""
   rng = np.random.default_rng(seed)
@@ -103,6 +156,7 @@ def main():
   dst.mkdir(parents=True, exist_ok=True)
   (dst / "model.json").write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
   print(f"[calc] wrote data/calc/model.json ({(dst / 'model.json').stat().st_size / 1024:.0f} KB)", flush=True)
+  graded_inputs(d, int(cur), code, dst)
 
 
 if __name__ == "__main__":
