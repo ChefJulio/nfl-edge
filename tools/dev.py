@@ -13,10 +13,26 @@ from functools import partial
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from nfledge.site_assets import BUNDLE, asset_bytes  # noqa: E402
+
 STATIC = ROOT / "nfledge" / "static"
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
+  def do_GET(self):
+    clean = self.path.split("?", 1)[0].split("#", 1)[0]
+    rel = clean[len("/assets/"):] if clean.startswith("/assets/") else ""
+    if rel in BUNDLE:  # assembled as the build writes it (site_assets.BUNDLE: health.js + shell.js)
+      body = asset_bytes(rel)
+      self.send_response(200)
+      self.send_header("Content-Type", "text/javascript; charset=utf-8")
+      self.send_header("Content-Length", str(len(body)))
+      self.end_headers()
+      self.wfile.write(body)
+      return
+    super().do_GET()
+
   def translate_path(self, path):
     clean = path.split("?", 1)[0].split("#", 1)[0]
     if clean.startswith("/assets/"):

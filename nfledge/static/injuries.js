@@ -47,7 +47,8 @@
       const grade = r => { const g = r.pid && NFLE.gradeOf && NFLE.gradeOf(r.pid); return g ? g.v : -1; };
       const byRelevance = (a, b) => grade(b) - grade(a) || (b.proj || 0) - (a.proj || 0);
       // listed but all but certain to play (our 99%+: full practice, cleared): hidden unless asked for (owner 2026-10-18)
-      const sure = r => r.inactive != null && r.inactive < 0.015;  // shown as 99% or >99%
+      const A = NFLE.health.AVAIL;
+      const sure = r => r.inactive != null && 1 - r.inactive >= A.SURE;  // shown as 99% or >99%
       const cols = [
         { key: 'name', label: 'Player', stick: true, first: 'asc', value: r => r.name,
           html: r => NFLE.ui.player({ name: r.name, pos: r.pos, team: r.abbr, espn: r.espn_id, subHtml: (r.abbr ? NFLE.ui.tm(r.abbr) : NFLE.esc(r.team || '')) + mineTag(r) }, TEAMS) },
@@ -74,9 +75,9 @@
       // This week (owner 2026-10-18: "a quick look at the guys actually dealing with injury ... the most practical
       // version"): players on our board this week with any chance of sitting, in three buckets by our chance he plays,
       // biggest projection first; the search box finds anyone. Our numbers, so it's as fresh as the last build.
-      const BUCKETS = [['gt', 'Game-time calls', 'a real chance either way', p => p >= 0.15 && p < 0.85],
-                       ['out', 'Expected out', 'plan around him', p => p < 0.15],
-                       ['likely', 'Probably playing', 'listed, but expect him', p => p >= 0.85]];
+      const BUCKETS = [['gt', 'Game-time calls', 'a real chance either way', p => p >= A.OUT && p < A.OK],
+                       ['out', 'Expected out', 'plan around him', p => p < A.OUT],
+                       ['likely', 'Probably playing', 'listed, but expect him', p => p >= A.OK]];
       const kick = t => { const g = ((WK && WK.games) || []).find(x => x.away.team === t || x.home.team === t);
         // short: "Sun 1:00p" (the date is this week's anyway)
         const short = g && g.gameday ? (() => { const [h, m] = String(g.gametime || '13:00').split(':').map(Number);
@@ -98,13 +99,14 @@
       // ~1.5% baseline scratch risk, so that alone isn't an injury
       // (2026-10-18: a ">= 5% chance of sitting" clause pulled in healthy backup QBs, whose chance is the healthy-scratch
       // model's chance of taking a snap, not an injury)
-      const listed = p => !!String(p.status || '').split('(')[0].trim();
+      // (health.listed: anything injury-related, a midweek "(D)" with no game status yet included; 2026-10-22)
+      const listed = p => NFLE.health.listed(p);
       const drawDash = () => {
         const box = sec.querySelector('.in-dash');
         if (!WK) return;
         const t = q.value.trim().toLowerCase();
         const ps = Object.entries(WK.players || {}).map(([pid, p]) => ({ pid, name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn,
-            status: p.status, inactive: p.inactive || 0, proj: +(p.proj || 0), k: kick(p.team) }))
+            status: p.status, tag: p.tag, inactive: p.inactive || 0, proj: +(p.proj || 0), k: kick(p.team) }))
           .filter(r => listed(r) && (!t || r.name.toLowerCase().includes(t) || r.team.toLowerCase() === t));
         box.innerHTML = '';
         // yours first, then the games still to come, then the most relevant

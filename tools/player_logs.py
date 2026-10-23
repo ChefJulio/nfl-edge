@@ -21,6 +21,7 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from nfledge import data as D  # noqa: E402
+from nfledge.codes import INJURY_LISTS, RESERVE as RESERVE_CODES, reserve as reserve_code  # noqa: E402
 from nfledge.config import load_config, load_scoring  # noqa: E402
 from nfledge.report import ROSTER_TEAM, SCORE_KEYS, _json_safe, headshot_url  # noqa: E402
 
@@ -248,7 +249,7 @@ def main():
   # until then a listed player who played read as a missed game. Same rule as returns.played_set.
   stat_played = set(zip(data.stats.player_id, data.stats.season.astype(int), data.stats.week.astype(int)))
   played |= stat_played
-  prac = practice_timeline(data.practice, allsched, sn, all_ros, data.current_season, gameday_ina(site), stat_played)
+  prac = practice_timeline(data.practice, allsched, sn, all_ros, data.current_season, gameday_ina(site), stat_played, data.teams)
   # every earlier season with dated practice reports (2018 on; owner 2026-10-21: "shows ALL practices participation for
   # the selected season"): the same team-calendar timeline, gsis -> {season: events}, for the card's full-season sheet
   prac_hist = {}
@@ -256,7 +257,7 @@ def main():
     fp = cache.path("practice_dated", s_)
     if not fp.exists():
       continue
-    tl = practice_timeline(pd.read_parquet(fp), allsched, sn, all_ros, s_, None, stat_played)
+    tl = practice_timeline(pd.read_parquet(fp), allsched, sn, all_ros, s_, None, stat_played, data.teams)
     for g_, ev in tl.items():
       prac_hist.setdefault(g_, {})[str(s_)] = ev
   print(f"[logs] practice timelines for past seasons: {len(prac_hist)} players", flush=True)
@@ -420,7 +421,8 @@ INA_FROM = 2019  # first season the weekly rosters mark game-day inactives (INA)
 
 
 def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: pd.DataFrame, cur: int,
-                      ina: dict | None = None, stat_played: set | None = None) -> dict:
+                      ina: dict | None = None, stat_played: set | None = None, teams: pd.DataFrame | None = None,
+                      now: pd.Timestamp | None = None) -> dict:
   """gsis -> this season's practice days and games in date order (owner 2026-10-17: "the date the report was out,
   show the last 6, include games in that timeline, dates near each"). Events: ["p", date, D/L/F, game status on the
   week's last day or "", 1 when inferred], ["g", date, opponent, "vs"/"@", snap share or "out" or "" (upcoming), week].
@@ -430,11 +432,15 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
   Every report day of the season (owner 2026-10-18: "rows for every day we know there's practice. full participation
   if they're healthy that day and not listed"): his listing that day if he was on the report, else full participation
   while he's on the 53-man roster (ACT / INA that week; reserve lists, practice squad and free agents get no row).
-  Report days: each team's calendar (practice_calendar: fixed by game day, plus any day it filed), through the latest
-  day any team has filed. Every rostered player this season; the card shows the latest few."""
+  Report days: each team's days in the injury chronology (nfledge/chronology.py: the calendar fixed by game day, plus
+  any day it filed), and only the ones whose report is in ("filed"). A day not filed yet, late, or never filed is
+  unknown, not "full" (owner 2026-10-22, Rashee Rice read "Full, not on the report" on a Thursday KC hadn't filed: the
+  timeline had its own notion of "the latest day reached"). Every rostered player this season; the card shows the
+  latest few. now: the moment (None: the real time; tools/scenario_audit.py sets it)."""
   if practice is None or "dates" not in practice:
     return {}
-  from nfledge.practice_calendar import team_report_days
+  from types import SimpleNamespace
+  from nfledge.chronology import Chronology
   pr = practice[(practice.season == cur) & practice.gsis_id.notna()]
   if not len(pr):
     return {}
@@ -466,8 +472,8 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
         return v
     return None
 
-  # what each listed player's report said, by date; and the days each team filed, by week
-  listed, filed = {}, {}
+  # what each listed player's report said, by date
+  listed = {}
   for r in pr.sort_values("week").itertuples():
     ds = [d for d in str(r.dates or "").split(",") if d]
     if len(ds) != len(str(r.days)):
@@ -475,27 +481,17 @@ def practice_timeline(practice, allsched: pd.DataFrame, sn: pd.DataFrame, ros: p
     gs = "" if r.game_status in (None, "None") else str(r.game_status).capitalize()
     for i, (d, c) in enumerate(zip(ds, str(r.days))):
       listed[(r.gsis_id, d)] = (c, gs if i == len(ds) - 1 else "")
-    t = at(team_wk, r.gsis_id, int(r.week))
-    if t:
-      filed.setdefault(int(r.week), {}).setdefault(t, set()).update(ds)
-  seen = max((d for f in filed.values() for v in f.values() for d in v), default="")  # the latest day reached
-  # each team's own latest filed day (owner 2026-10-22, Rashee Rice read "Full, not on the report" on a Thursday KC had
-  # not filed yet: another team's Thursday report had made the day "reached" for everyone). A day counts for a team once
-  # it has filed that day or a later one; until then an unlisted player's day is unknown, not "full".
-  team_seen = {}
-  for f in filed.values():
-    for t_, v in f.items():
-      if v:
-        team_seen[t_] = max(team_seen.get(t_, ""), max(v))
-  cal = {w: team_report_days(allsched, cur, w, filed.get(w)) for w in sorted(filed)}
+  # each week's report days and their state, from the chronology (the one report calendar)
+  src = SimpleNamespace(schedules=allsched, practice=pr, rosters=ros, teams=teams)
+  cal = {w: Chronology(src, cur, w, now).day_states() for w in sorted({int(w) for w in pr.week})}
   last_w = max(cal) if cal else 0
   out = {}
   for gid in {g for g, _ in team_wk} | {g for g, _ in listed}:
     ev = []
     for w, tdays in cal.items():
       t, st = at(team_wk, gid, w), at(st_wk, gid, w)
-      for d in tdays.get(t, []) if t else []:
-        if d > seen or d > team_seen.get(t, ""):
+      for d, state in (tdays.get(t) or {}).items() if t else ():
+        if state != "filed":  # not in (yet): unknown
           continue
         if (gid, d) in listed:
           c, gs = listed[(gid, d)]
@@ -548,7 +544,7 @@ def roster_tag(status, abbr) -> str:
   if status == "INA":
     return "INA"  # declared inactive on game day (rosters mark it from 2019; before that he reads DNP)
   if status == "RES":
-    return "PUP" if abbr == "R04" else "IR" if abbr in ("R01", "R48") else "Res"
+    return reserve_code(abbr)  # nfledge/codes.py: IR / PUP / NFI / SSPD, else "Res"
   return {"DEV": "PS", "CUT": "Cut", "RET": "Ret"}.get(status, "DNP")
 
 
@@ -863,7 +859,7 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
 # ---------------------------------------------------------------------------------------------------------------
 # Injury history for the player page's Injuries tab: episodes built from every official injury report (2009 on:
 # body part, game status) and the weekly rosters (2002 on: active / inactive / reserve lists), team game weeks only.
-RESERVE = {"R01": "IR", "R48": "IR", "R04": "PUP", "R05": "NFI"}
+RESERVE = {k: v for k, v in RESERVE_CODES.items() if v in INJURY_LISTS}  # nfledge/codes.py: the injury lists
 NOT_INJURY = re.compile(r"not injury|rest|personal|resting|coach", re.I)
 SEVERITY = {"Questionable": 1, "Doubtful": 2, "Out": 3}
 
@@ -922,6 +918,8 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
             zip(inj.gsis_id, inj.season, inj.week, inj.part, inj.report_status)}
   games = set()
   for x in allsched.itertuples():
+    if pd.isna(x.home_score):  # played games only (2026-10-22 audit: this week's roster row counted his game as played
+      continue                 # or missed before kickoff, in the episode, the games total and durability)
     for t in (x.home_team, x.away_team):
       games.add((int(x.season), int(x.week), ROSTER_TEAM.get(t, t)))
   r = ros.dropna(subset=["gsis_id"])[["gsis_id", "season", "week", "team", "status", "status_description_abbr"]].copy()

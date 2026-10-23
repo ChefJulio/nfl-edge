@@ -20,6 +20,7 @@ import numpy as np
 import pandas as pd  # noqa: E402
 
 from nfledge import data as D  # noqa: E402
+from nfledge.codes import RESERVE  # noqa: E402
 from nfledge.config import load_config  # noqa: E402
 from nfledge.report import ROSTER_TEAM  # noqa: E402
 
@@ -34,7 +35,7 @@ ORDER = {
           "WIL ROLB LB LCB CB NCB NB NKL NICK RCB DB SS FS S").split(),
   "st": "K PK KO P H LS KR KOR PR".split(),
 }
-ROSTER_TAG = {"R01": "IR", "R48": "IR", "R04": "PUP", "R05": "NFI", "R40": "SUSP", "R03": "HOLD"}
+ROSTER_TAG = {**RESERVE, "R03": "HOLD"}  # nfledge/codes.py, plus R03: reserve / did not report (holdout)
 GAME_TAG = {"Out": "O", "Doubtful": "D", "Questionable": "Q"}
 
 
@@ -221,7 +222,7 @@ DIR_STATUS = {"ACT": "", "DEV": "PS"}  # PS = practice squad; RES = a reserve li
 
 def roster_directory(site: Path, cache, nfl, current: int, espn_of: dict):
   """<site>/data/roster.json: {"v", "season", "cols": [pid, name, pos, team, tag, espn], "rows"} (tag: "" active,
-  "PS", "IR", "PUP", "NFI", "SUSP", "HOLD" or "RES"). Released, traded or retired rows are left out."""
+  "PS", "IR", "PUP", "NFI", "SSPD", "HOLD" or "RES"). Released, traded or retired rows are left out."""
   ros = cache.get("rosters", current, lambda: nfl.load_rosters_weekly([current]), stale=cache.age_hours("rosters", current) > 24)
   if ros is None or not len(ros):
     return
@@ -302,7 +303,7 @@ def main():
     # depth by playing time (2013 on: snap counts; nflverse has none for 2012)
     sn = season_snaps(cache, nfl, season, pfr, live)
     out_set = {k for k, v in tags.items() if v == "O"}
-    reserve = {k for k, v in tags.items() if v in ("IR", "PUP", "NFI", "SUSP", "HOLD")}
+    reserve = {k for k, v in tags.items() if v in ("IR", "PUP", "NFI", "SSPD", "HOLD")}
     if live and live_out:
       last_wk = int(d.week.max())
       out_set |= {(g, last_wk) for g in live_out}

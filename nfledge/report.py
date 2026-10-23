@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from . import elo
+from .codes import TEAM as TEAM_CODES
 from . import lineup as LU
 from .config import ROOT
 from .team_model import UNITS, game_lines, team_volume_features
@@ -576,7 +577,7 @@ def team_info(teams: pd.DataFrame | None) -> dict:
 ESPN_TEAM = {"LA": "LAR", "WAS": "WSH"}
 # Weekly rosters before ~2016 use legacy club codes (BLT, CLV, HST, ARZ, SL) besides the relocated ones: -> today's
 # codes (player pages, transactions linking). Kept here, not in data.py (model code), since only pages use it.
-ROSTER_TEAM = {"BLT": "BAL", "CLV": "CLE", "HST": "HOU", "ARZ": "ARI", "SL": "LA", "STL": "LA", "OAK": "LV", "SD": "LAC", "LAR": "LA"}
+ROSTER_TEAM = TEAM_CODES  # nfledge/codes.py
 
 
 def week_data(ctx: dict) -> str:
@@ -590,7 +591,7 @@ def week_data(ctx: dict) -> str:
         "proj": round(float(r["proj"]), 3), "q": [round(float(r[k]), 3) for k in ("p10", "p25", "p50", "p75", "p90")],
         "rank": r["rank"],
         "tier": r["tier"], "slot": r["slot"], "ecr": None if pd.isna(r["ecr"]) else r["ecr"],
-        "status": r["status"] or "", "tag": r.get("tag"), "inactive": r["inactive"], "inactive_why": r["inactive_why"],
+        "status": r["status"] or "", "src": r.get("src") or "", "days": r.get("days") or "", "gd": r.get("gd") or "", "tag": r.get("tag"), "inactive": r["inactive"], "inactive_why": r["inactive_why"],
         "scratch": r["scratch"], "play": r["play"], "play_why": r["play_why"],
         "boost": r["boost"], "boost_from": r["boost_from"], "cond": r.get("cond"), "cond2": r.get("cond2"), "low_sample": r["low_sample"], "conf": r["conf"],
         "mu": r["mu"], "mu_hi": r["mu_hi"], "mu_c": r["mu_c"],
@@ -629,7 +630,7 @@ def week_data(ctx: dict) -> str:
   out = {"season": ctx["season"], "week": ctx["week"], "generated": ctx["generated"], "archive": ctx["archive"],
          "power": power, "teams": ctx.get("teams", {}),
          "lookahead": ctx["lookahead"], "tossup_pct": ctx["tossup_pct"], "espn_team": ESPN_TEAM,
-         "score": json.loads(ctx["score_cfg"]), "players": players, "tags": ctx.get("tags") or {}, "filed": ctx.get("filed") or {}, "overdue": ctx.get("overdue") or {}, "games": games, "rk": rk,
+         "score": json.loads(ctx["score_cfg"]), "players": players, "tags": ctx.get("tags") or {}, "chrono": ctx.get("chrono") or {}, "games": games, "rk": rk,
          # v3 (Phase 6): everything the page used to render on the server - Roles, the Power column scale, the header
          "roles": [{k: r.get(k) for k in ("pid", "name", "pos", "team", "week", "snap_now", "snap_prev", "opp_now",
                                           "opp_prev", "touches", "takeaway")} for r in ctx.get("roles") or []],
@@ -719,7 +720,8 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
         # (AY3) inactive = injury only (Health, injury tags); scratch = healthy-scratch risk; play = takes the field
         # (injury x scratch x the backup-QB rule): expected points and "likely out" projections
         # tag: the official injury designation the row shows (InjuryModel.designations); None on look-ahead weeks
-        "status": r.status, "tag": getattr(r, "tag", None), "avail": r.avail, "inactive": 1 - float(getattr(r, "inj_avail", r.avail)),
+        "status": r.status, "src": getattr(r, "src", "") or "", "days": getattr(r, "days", "") or "", "gd": getattr(r, "gd", "") or "",
+        "tag": getattr(r, "tag", None), "avail": r.avail, "inactive": 1 - float(getattr(r, "inj_avail", r.avail)),
         "scratch": round(float(getattr(r, "scratch", 0.0)), 3), "play": round(float(r.avail), 3), "play_why": play_why(r),
         "inactive_why": inactive_why(r), "boost": r.injury_boost, "boost_from": r.boost_from or "",
         # two worlds for a teammate of an uncertain player: [name, pid, P(he sits), proj if he plays, proj if he sits]
@@ -797,29 +799,31 @@ def play_why(r) -> str:
   return ""
 
 
+PRAC_WORDS = {"D": "DNP", "L": "limited", "F": "full"}
+
+
 def inactive_why(r) -> str:
+  """Why his injury chance is what it is, from what spoke (InjuryModel.availability's src / des / days; owner
+  2026-10-22 audit: this used to parse the status string)."""
   if getattr(r, "tuesday", ""):  # InjuryModel.tuesday_probs: before the team's first report of the week
     return r.tuesday
-  if r.status and r.status.startswith("Questionable (ESPN)"):  # display only (InjuryModel.espn_questionable)
-    days = r.status[len("Questionable (ESPN)"):].strip(" ()")
-    words = {"D": "DNP", "L": "limited", "F": "full"}
-    prac = ", ".join(words.get(c, c) for c in days if c in words)
+  src, des, days = getattr(r, "src", "") or "", getattr(r, "des", "") or "", getattr(r, "days", "") or ""
+  prac = ", ".join(PRAC_WORDS[c] for c in days if c in PRAC_WORDS)
+  if getattr(r, "gd", ""):
+    return "Injury report + practice pattern: " + r.status
+  if getattr(r, "espn_q", False):  # display only (InjuryModel.espn_questionable)
     return ("ESPN lists him Questionable (not the official tag yet). "
-            + (f"The chance comes from practice so far: {prac}" if prac else "No practice report yet; ESPN's Questionable alone doesn't change the chance"))
-  if r.status and r.status.endswith("(ESPN)"):
+            + (f"The chance comes from practice so far: {prac}" if prac and src == "report" else
+               "No practice report yet; ESPN's Questionable alone doesn't change the chance"))
+  if src == "espn":
     return ("ESPN injury news since his last game (this week's official report isn't out yet): "
-            + r.status.replace(" (ESPN)", ""))
-  if r.status and "(ESPN)" in r.status:  # midweek ruling (InjuryModel.midweek_ruling): "Out (ESPN) (DF)"
-    days = r.status.rsplit("(", 1)[1].rstrip(")") if r.status.endswith(")") else ""
-    words = {"D": "DNP", "L": "limited", "F": "full"}
-    prac = ", ".join(words.get(c, c) for c in days if c in words)
-    what = ("On injured reserve but practicing: designated to return, not yet activated (ESPN)" if r.status.startswith("IR")
+            + ("Out; return date after this game" if des == "Out+ret" else des))
+  if src == "espn_mid":  # InjuryModel.midweek_ruling
+    what = ("On injured reserve but practicing: designated to return, not yet activated (ESPN)" if des == "IR"
             else "Listed Doubtful after practice started (ESPN, since his last game); Doubtful players almost never play"
-            if r.status.startswith("Doubtful") else "Ruled out after practice started (ESPN, since his last game)")
+            if des == "Doubtful" else "Ruled out after practice started (ESPN, since his last game)")
     return what + (f"; practice: {prac}" if prac else "")
-  if r.status and r.status.startswith(" (") and getattr(r, "partial_week", False):  # midweek: partial-week model
-    words = {"D": "DNP", "L": "limited", "F": "full"}
-    prac = ", ".join(words.get(c, c) for c in r.status.strip(" ()") if c in words)
+  if src == "report" and not des and days and getattr(r, "partial_week", False):  # midweek: partial-week model
     return f"Practice so far: {prac}. How players with that start to the week played, before the final report"
   if r.status:
     return "Injury report + practice pattern: " + r.status
@@ -1390,7 +1394,8 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
       eng._lineups = (LU.Lineups(LU.shares(eng.data.snaps)), LU.Values())
     lus, vals = eng._lineups
     for t in set(games.home_team) | set(games.away_team):
-      avail = LU.report_available(eng.data.rosters, eng.data.injuries, season, week, t)
+      fin = eng.final_teams(season, week)
+      avail = LU.report_available(eng.data.rosters, eng.data.injuries, season, week, t, None if fin is None else t in fin)
       lineups[t] = LU.team_term(lus.regulars(t, season, week), avail, lambda p, g: vals(season, p, g))
   pname = dict(zip(eng.data.rosters.gsis_id, eng.data.rosters.full_name)) if lineups else {}
 

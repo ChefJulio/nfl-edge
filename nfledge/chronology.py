@@ -23,6 +23,7 @@ from dataclasses import dataclass, field
 
 import pandas as pd
 
+from .codes import team as team_code
 from .week_clock import ET, Clock
 
 GRACE_MIN = 75  # NFL.com's copy usually lands within the hour after the 4 p.m. deadline (news_watch checks at +45)
@@ -61,9 +62,9 @@ class TeamChrono:
 
   @property
   def final(self) -> bool:
-    """The final report is in: every report day filed, or a game status posted, or the game has kicked off (its
-    reports are what they are)."""
-    return bool(self.days) and (len(self.filed_days) == len(self.days) or self.has_status or self.kicked_off)
+    """The final report is in: the last report day is filed (an earlier day that never came doesn't hold it back;
+    scenario S31), or a game status posted, or the game has kicked off (its reports are what they are)."""
+    return bool(self.days) and (self.days[-1].state == "filed" or self.has_status or self.kicked_off)
 
   @property
   def published(self) -> bool:
@@ -89,7 +90,7 @@ class Chronology:
       x = pr[(pr.season == season) & (pr.week == week)]
       ro = data.rosters
       ro = ro[(ro.season == season) & (ro.week <= week) & ro.gsis_id.notna()].sort_values("week").drop_duplicates("gsis_id", keep="last")
-      team_of = dict(zip(ro.gsis_id, ro.team.replace({"LAR": "LA"})))
+      team_of = dict(zip(ro.gsis_id, ro.team.map(team_code)))
       if "team_name" in x:  # NFL.com's own team for the row (the roster can lag a trade)
         from .data import team_names
         names = team_names(getattr(data, "teams", None))
@@ -128,7 +129,7 @@ class Chronology:
       self.teams[t] = TeamChrono(t, tw.kick, tw.final, rds, t in status, self.now)
 
   def team(self, t: str) -> TeamChrono | None:
-    return self.teams.get({"LAR": "LA"}.get(t, t))
+    return self.teams.get(team_code(t))
 
   def published_teams(self) -> set:
     return {t for t, c in self.teams.items() if c.published}
@@ -140,7 +141,12 @@ class Chronology:
     """team -> [overdue report dates] (for the build log, the page and the news watcher)."""
     return {t: c.overdue for t, c in self.teams.items() if c.overdue}
 
+  def day_states(self) -> dict:
+    """team -> {report date: state} (the practice timeline's one rule: a day counts once it is filed)."""
+    return {t: {d.date: d.state for d in c.days} for t, c in self.teams.items()}
+
   def to_json(self) -> dict:
-    return {t: {"stage": c.stage, "final": c.final, "filed": c.filed_days,
-                "days": [{"date": d.date, "due": d.due.isoformat(), "state": d.state} for d in c.days]}
+    """The week data's "chrono": team -> {stage, final, days: [[date, state], ...]} (the page's practice strip, the
+    news watcher's overdue check)."""
+    return {t: {"stage": c.stage, "final": c.final, "days": [[d.date, d.state] for d in c.days]}
             for t, c in sorted(self.teams.items())}

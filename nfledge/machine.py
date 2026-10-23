@@ -371,10 +371,10 @@ STAT_COLS = {  # (label, key in the log's "keys", or x index: completions, attem
 
 
 def _status(p: dict) -> str:
-  """The status in words: "Questionable (ESPN) (LF)" stays, a bare "(LF)" (on the report, no game status) is spelled out."""
-  st = (p.get("status") or "").replace("|", "/").strip()
-  m = re.fullmatch(r"\(([FLD-]+)\)", st)
-  return f"on the report, practiced: {', '.join(PRAC_WORD.get(c, c) for c in m.group(1))}" if m else st
+  """The status in words: "Questionable (ESPN) (LF)" stays; on the report with no game status (src "report", the
+  status is just his practice letters) it's spelled out."""
+  st, d = (p.get("status") or "").replace("|", "/").strip(), p.get("days") or ""
+  return f"on the report, practiced: {', '.join(PRAC_WORD.get(c, c) for c in d)}" if p.get("src") == "report" and d and st == f"({d})" else st
 
 
 def _num(v) -> str:
@@ -422,7 +422,9 @@ def player_md(p: dict, log: dict | None, week: dict, base: str, games: dict) -> 
     out += ["## Practice and games, this season (latest last)", ""]
     for e in prac:
       if e[0] == "p":
-        out.append(f"- {e[1]}: practice, {PRAC_WORD.get(e[2], e[2])}{f' ({e[3]})' if len(e) > 3 and e[3] else ''}")
+        # e[4] = 1: inferred (on the roster, not on his team's filed report that day: the league's "not listed = full")
+        how = "full (not on the report)" if len(e) > 4 and e[4] else PRAC_WORD.get(e[2], e[2])
+        out.append(f"- {e[1]}: practice, {how}{f' ({e[3]})' if len(e) > 3 and e[3] else ''}")
       else:
         played = f", {e[4]}% of snaps" if len(e) > 4 and e[4] not in ("", None) else (" (upcoming)" if len(e) > 4 and e[4] == "" else "")
         out.append(f"- {e[1]}: game {e[3]} {e[2]}{played}")

@@ -508,6 +508,13 @@ _PRACTICE = {"D": "Did Not Participate In Practice", "L": "Limited Participation
              "F": "Full Participation in Practice"}
 
 
+def espn_gsis(rosters: pd.DataFrame) -> dict:
+  """ESPN player id (as text) -> gsis id, through the weekly rosters' espn_id (one map for the ESPN feeds' readers:
+  espn.gameday_rulings, returns.espn_ir; 2026-10-22 audit)."""
+  r = rosters[rosters.espn_id.notna() & rosters.gsis_id.notna()]
+  return dict(zip(r.espn_id.astype(str).str.replace(r"\.0$", "", regex=True), r.gsis_id))
+
+
 def team_names(teams: pd.DataFrame | None) -> dict:
   """NFL.com's full team name -> our abbreviation (the teams table lists the Rams under LA and LAR: LA)."""
   if teams is None or not len(teams):

@@ -323,8 +323,8 @@ def espn_ir(data, feed: pd.DataFrame | None) -> dict:
   if feed is None or not len(feed) or "status" not in feed:
     return {}
   f = feed[feed.status == "Injured Reserve"].dropna(subset=["espn_id"])
-  r = data.rosters[data.rosters.espn_id.notna()]
-  m = dict(zip(r.espn_id.astype(str).str.replace(r"\.0$", "", regex=True), r.gsis_id))
+  from .data import espn_gsis
+  m = espn_gsis(data.rosters)
   ret = pd.to_datetime(f.get("return_date"), errors="coerce", utc=True).dt.tz_convert(None) if "return_date" in f else pd.Series(pd.NaT, index=f.index)
   return {m[i]: (None if pd.isna(d) else d) for i, d in zip(f.espn_id.astype(str), ret) if i in m and isinstance(m[i], str)}
 

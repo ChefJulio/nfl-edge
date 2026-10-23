@@ -23,7 +23,7 @@ URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries"
 # so those wait for the official report.
 # Injured reserve is a roster rule, not a designation: a player placed on IR misses at least four games, so it maps
 # to "IR" = certainly inactive this week (not to Out's carry-forward rate, under which a third of players return).
-STATUS_MAP = {"Out": "Out", "Injured Reserve": "IR", "Doubtful": "Doubtful"}
+from .codes import ESPN_STATUS as STATUS_MAP  # noqa: E402 (nfledge/codes.py)
 
 
 def gameday_rulings(data, feed: pd.DataFrame | None, now=None, saved: dict | None = None) -> dict:
@@ -47,8 +47,8 @@ def gameday_rulings(data, feed: pd.DataFrame | None, now=None, saved: dict | Non
   ab = {}  # ESPN team display name -> our code
   if getattr(data, "teams", None) is not None and "team_name" in data.teams:
     ab = dict(zip(data.teams.team_name, data.teams.team_abbr))
-  r = data.rosters[data.rosters.espn_id.notna()]
-  gs = dict(zip(r.espn_id.astype(str).str.replace(r"\.0$", "", regex=True), r.gsis_id))
+  from .data import espn_gsis
+  gs = espn_gsis(data.rosters)
   for x in feed.dropna(subset=["espn_id"]).itertuples():
     t = D_RELOC(ab.get(x.team, ""))
     tw = teams.get(t)

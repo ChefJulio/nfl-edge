@@ -503,13 +503,22 @@ class Engine:
     self.last_team_preds = tp
     return p
 
+  def final_teams(self, season: int, week: int) -> set | None:
+    """Teams whose final injury report for the week is in (the chronology, at the injury model's moment); None for a
+    season without dated reports ((CF): the report-availability term then counts any row this week)."""
+    from .injuries import chrono
+    c = chrono(self.data, season, week, getattr(self.injury_model, "now", None))
+    return None if c is None else c.final_teams()
+
   def _lineup_adjust(self, r, season: int, week: int, scale: float):
     """(BZ) each offense's pass and rush EPA moved by its lineup sum (nfledge/lineup.py, report availability)."""
     from . import lineup as LU
     if getattr(self, "_lineups", None) is None:
       self._lineups = (LU.Lineups(LU.shares(self.data.snaps)), LU.Values())
     lus, vals = self._lineups
-    d = {t: LU.team_term(lus.regulars(t, season, week), LU.report_available(self.data.rosters, self.data.injuries, season, week, t),
+    fin = self.final_teams(season, week)
+    d = {t: LU.team_term(lus.regulars(t, season, week), LU.report_available(self.data.rosters, self.data.injuries, season, week, t,
+                                                                            None if fin is None else t in fin),
                          lambda p, g: vals(season, p, g))["off"] for t in r.off.index}
     r2 = copy.copy(r)
     r2.off = r.off.copy()

@@ -962,7 +962,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
 (() => {
   const NFLE = window.NFLE, esc = NFLE.esc;
   const norm = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[.'’]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
-  const TAG = { PS: 'Practice squad', IR: 'IR', PUP: 'PUP', NFI: 'NFI', SUSP: 'Suspended', HOLD: 'Holdout', RES: 'Reserve list' };
+  const TAG = { PS: 'Practice squad', IR: 'IR', PUP: 'PUP', NFI: 'NFI', SSPD: 'Suspended', SUSP: 'Suspended', HOLD: 'Holdout', RES: 'Reserve list' };  // SUSP: files before 2026-10-22
   let IDX = null;
   const index = () => IDX || (IDX = Promise.all([NFLE.week(), NFLE.load('data/roster.json').catch(() => null), NFLE.ui.ready]).then(([D, R]) => {
     const out = [], seen = new Set(), teams = (D && D.teams) || {};

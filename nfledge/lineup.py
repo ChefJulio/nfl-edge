@@ -134,14 +134,19 @@ def team_term(regs: list, available, value) -> dict:
   return {"off": off, "def": dfn, "parts": parts}
 
 
-def report_available(rosters: pd.DataFrame, injuries: pd.DataFrame, season: int, week: int, team: str):
+def report_available(rosters: pd.DataFrame, injuries: pd.DataFrame, season: int, week: int, team: str,
+                     final: bool | None = None):
   """(BP) availability as of the injury report: on the team's roster that week (active or game-day inactive) and not
-  Out / Doubtful on its report for the week. Before the team's report for the week is out (it comes Wednesday to
-  Friday), its latest earlier report this season stands in, so a player out last week isn't counted as back on
-  Tuesday (the backtest only ever saw final reports). Before the week's roster exists, the roster check is skipped."""
+  Out / Doubtful on its report for the week. Before the team's FINAL report for the week is in, its latest earlier
+  report this season stands in, so a player out last week isn't counted as back on Tuesday (the backtest only ever saw
+  final reports). final: the chronology's word on that (injuries.chrono; (CF) 2026-10-22: a Wednesday report has no
+  Out / Doubtful yet, so "a row exists" counted last week's outs as back until Friday); None (seasons without dated
+  reports): a row this week counts. Before the week's roster exists, the roster check is skipped."""
   ro = rosters[(rosters.season == season) & (rosters.week == week) & (rosters.team == team)]
   st = dict(zip(ro.gsis_id, ro.status))
   rep = injuries[(injuries.season == season) & (injuries.team == team) & (injuries.week <= week)]
+  if final is False:
+    rep = rep[rep.week < week]
   if len(rep):
     rep = rep[rep.week == rep.week.max()]
   out = set(rep[rep.report_status.isin(["Out", "Doubtful"])].gsis_id)

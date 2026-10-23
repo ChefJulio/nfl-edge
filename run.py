@@ -166,13 +166,15 @@ def cached_backtest(data, cfg, scoring) -> tuple[pd.DataFrame | None, list[int]]
   return res, seasons
 
 
-def overdue_reports(data, season: int, week: int) -> dict:
+def week_chrono(data, season: int, week: int) -> dict:
+  """The week's injury chronology for the page (nfledge/chronology.py to_json): per team, each report day's state."""
   from nfledge.injuries import chrono
   c = chrono(data, season, week)
-  od = c.overdue() if c is not None else {}
-  for t, ds in sorted(od.items()):
+  if c is None:
+    return {}
+  for t, ds in sorted(c.overdue().items()):
     print(f"[run] WARNING: {t}'s practice report for {', '.join(ds)} is overdue (past the 4 p.m. ET deadline, not on NFL.com)", flush=True)
-  return od
+  return c.to_json()
 
 
 def display_week(data, now: pd.Timestamp | None = None) -> int:
@@ -245,11 +247,10 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
     "players": rp.player_rankings(eng, proj, season, week, cfg),
     # every rostered player's official injury tag (InjuryModel.tag_map; owner 2026-10-21): byes and deep backups too
     "tags": (eng.injury_model.tag_map(season, week, proj) if eng.injury_model is not None and not (archive or lookahead) else {}),
-    # team -> this week's report dates in our data (the health tile's "not listed = full" only on those days)
-    "filed": (eng.injury_model.filed_dates(season, week) if eng.injury_model is not None and not (archive or lookahead) else {}),
-    # team -> report dates past their deadline (+ grace) and not in our data (nfledge/chronology.py): shown, never
-    # read as "practiced fully" (owner 2026-10-22: "if anything is missing it's not silent")
-    "overdue": (overdue_reports(data, season, week) if not (archive or lookahead) else {}),
+    # team -> this week's report days and their state (nfledge/chronology.py; the one report calendar): "not listed =
+    # full" only on a filed day; one past its deadline (+ grace) and not in is overdue, shown, never read as "practiced
+    # fully" (owner 2026-10-22: "if anything is missing it's not silent")
+    "chrono": (week_chrono(data, season, week) if not (archive or lookahead) else {}),
     "games": with_weather(rp.matchups(eng, season, week, cfg, proj, power), wk, live=not (archive or lookahead)),
     # the current week's games the ratings already count (Power's "through Sunday" label; playoff_odds' Elo)
     "refit": ({"through": sorted(eng.tm.live[2]), "pending": sorted(eng.tm.live[3])}

@@ -18,6 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tools"))
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
@@ -50,6 +51,7 @@ class Scenario:
   traded: bool = False                # on another team through last week (his games there); this team only now
   at_hours: float | None = None       # the moment checked, in hours from his team's kickoff (None: the real time)
   extra_day: bool = False             # his team filed an extra report day before its first calendar day (travel week)
+  skip_day: int | None = None         # this calendar report day (index) never came in, the later ones did
   expect_overdue: bool | None = None  # the chronology flags one of his team's report days as overdue
   expect_final: bool | None = None    # the chronology calls his team's final report in
   espn: tuple | None = None           # (status, return date offset in days from his game or None) as ESPN news since his last game
@@ -128,6 +130,12 @@ S = [
   Scenario("S30", "Travel week: an extra report day filed, then all three calendar days (final)", extra_day=True,
            at_hours=-40.0, team_days=3, week_days="LLLF", final=True, game_status="Questionable", expect_tag="Q",
            expect_path="final", expect_overdue=False, expect_final=True),
+  Scenario("S31", "Sunday team, Saturday 10 a.m.: Wednesday and Friday filed, Thursday's never came (not listed)",
+           at_hours=-27.0, team_days=3, skip_day=1, week_days="---", final=True, expect_tag="", expect_overdue=True,
+           expect_final=True, note="Thursday is unknown, not 'full': the timeline shows Wed and Fri only (the Rice case)"),
+  Scenario("S32", "Sunday team, Thursday 8 p.m.: Wednesday filed (not listed), Thursday's report late",
+           at_hours=-65.0, team_days=1, week_days="-", expect_tag="", expect_overdue=True, expect_final=False,
+           note="Thursday shows nothing until it's in"),
   Scenario("S25", "Designated to return from IR, practicing (window open)", reserve="R48", team_days=2, week_days="LL",
            games={-1: 0.0, -2: 0.0, -3: 0.0}, expect_tag="IR", expect_path="practice", expect_avail=(0.3, 0.95),
            note="reserve-list rows: the week model with the reserve inputs"),
@@ -243,6 +251,8 @@ class World:
     dates = self.report_dates(team, sc.team_days)
     if sc.extra_day and dates:
       dates = [str((pd.Timestamp(dates[0]) - pd.Timedelta(days=1)).date())] + dates
+    if sc.skip_day is not None and sc.skip_day < len(dates):
+      dates = [dt for i, dt in enumerate(dates) if i != sc.skip_day]
     if dates:
       mine = [(dt, c) for dt, c in zip(dates, sc.week_days) if c != "-"]
       if mine:
@@ -313,9 +323,9 @@ class World:
         tag = r.get("tag", "")
         if sc.reserve and not tag:
           tag = im.tag_map(self.season, self.week).get(GID, "")
-        st_ = str(r.status)
-        path = ("gameday" if st_.startswith(("Inactive", "Active")) else "espn" if "ESPN" in st_ else
-                "tuesday" if str(r.get("tuesday", "") or "") else "practice" if bool(r.get("partial_week")) and bool(r.get("on_report"))
+        st_, src = str(r.status), r.src  # InjuryModel.availability: which part of the code spoke
+        path = ("gameday" if r.gd else "espn" if src in ("espn", "espn_mid") or r.espn_q else
+                "tuesday" if src == "tuesday" else "practice" if bool(r.get("partial_week")) and bool(r.get("on_report"))
                 else "final" if bool(r.get("on_report")) else "none")
         out.update(tag=tag or "", avail=float(r.avail), status=st_, why=str(r.get("tuesday", "") or ""), path=path)
       from nfledge.injuries import chrono
@@ -324,14 +334,49 @@ class World:
       out["overdue"] = bool(tc and tc.overdue)
       out["final"] = bool(tc and tc.final)
       out["stage"] = tc.stage if tc else None
+      out["timeline"] = self.timeline(d, im.now, tc)
+      out["chrono"] = tc
       return out
     finally:
       T.hurt_not_back = real_nb
       im.now = None
 
 
-def check(sc: Scenario, o: dict) -> list[str]:
+  def timeline(self, d, now, tc) -> list:
+    """His practice timeline as the player card gets it (tools/player_logs.py practice_timeline): this week's days."""
+    import player_logs as PL
+    days = {x.date for x in tc.days} if tc else set()
+    # his team's rows only (its calendar depends on nothing else; the whole league takes a minute a scenario)
+    ro = d.rosters[d.rosters.season == self.season]
+    ids = set(ro[ro.team.isin({tc.team} if tc else set())].gsis_id) | {GID}
+    pr = d.practice[(d.practice.season == self.season) & d.practice.gsis_id.isin(ids)]
+    ev = PL.practice_timeline(pr, d.schedules, d.snaps[d.snaps.gsis_id.isin(ids)], ro[ro.gsis_id.isin(ids)], self.season,
+                              teams=d.teams, now=now).get(GID, [])
+    return [e for e in ev if e[0] == "p" and e[1] in days]
+
+
+def check_timeline(sc: Scenario, o: dict) -> list[str]:
+  """The card's practice timeline agrees with the chronology: a row exactly on each filed day, none on any other
+  (an inferred 'full' on a day that isn't in is the Rashee Rice bug), his own listing where he was listed."""
+  tc, ev = o.get("chrono"), o.get("timeline")
+  if tc is None or ev is None or sc.reserve or sc.team_rule == "bye_now":
+    return []
   bad = []
+  state = {x.date: x.state for x in tc.days}
+  got = {e[1]: e for e in ev if e[1] in state}
+  for dt, st in state.items():
+    if st == "filed" and dt not in got:
+      bad.append(f"timeline: no row on filed day {dt}")
+    if st != "filed" and dt in got:
+      bad.append(f"timeline: row {got[dt][2]}{' (inferred)' if len(got[dt]) > 4 else ''} on {dt}, a day that is {st}")
+  for dt, e in got.items():
+    if state.get(dt) == "filed" and len(e) > 4 and e[2] != "F":
+      bad.append(f"timeline: inferred {e[2]} on {dt}")
+  return bad
+
+
+def check(sc: Scenario, o: dict) -> list[str]:
+  bad = check_timeline(sc, o)
   if sc.expect_tag is not None and o["tag"] != sc.expect_tag:
     bad.append(f"tag {o['tag'] or '-'} (expected {sc.expect_tag or '-'})")
   if sc.expect_path and o.get("path") != sc.expect_path:
@@ -362,6 +407,8 @@ def main():
     fails += bool(bad)
     av = f"{o['avail']:.0%}" if o["avail"] == o["avail"] else "-"
     print(f"{'FAIL' if bad else 'ok  '} {sc.sid} {sc.title} [{o['team']}]")
+    if o.get("timeline") is not None and not (sc.reserve or sc.team_rule == "bye_now"):
+      print("       timeline " + (" ".join(f"{e[1][5:]}:{e[2]}{'*' if len(e) > 4 else ''}" for e in o["timeline"]) or "-"))
     print(f"       tag {o['tag'] or '-'} | chance {av} | {o.get('path', '?')} | stage {o.get('stage')} final {o.get('final')} overdue {o.get('overdue')} | {o['status'] or '-'}" + (f" | {o['why'][:110]}" if o["why"] else ""))
     for b in bad:
       print(f"       -> {b}")

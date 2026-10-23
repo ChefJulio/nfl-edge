@@ -42,25 +42,6 @@ GAMEDAY_ACTIVE = {"questionable": 0.974, "doubtful": 0.286}  # (AU) played rate 
 OUT_RET_PRIOR = 0.018  # ESPN Out with a return date past the game: 1.8% played early in the week (n 652, {#tags})
 
 
-def filed_dates(data, season: int, week: int) -> dict:
-  """team -> sorted report dates of this week whose report is in our practice data (anyone on it listed that day).
-  A day not here hasn't reached us yet, even past its deadline: "not listed = practiced fully" only holds on a day
-  the team's report is in. Only the live season's practice data carries dates (older caches: {})."""
-  pr = data.practice
-  if pr is None or "dates" not in pr:
-    return {}
-  x = pr[(pr.season == season) & (pr.week == week)].dropna(subset=["dates"])
-  ro = data.rosters
-  ro = ro[(ro.season == season) & (ro.week <= week) & ro.gsis_id.notna()].sort_values("week").drop_duplicates("gsis_id", keep="last")
-  team = dict(zip(ro.gsis_id, ro.team.replace({"LAR": "LA"})))
-  out = {}
-  for g, ds in zip(x.gsis_id, x.dates):
-    t = team.get(g)
-    if t:
-      out.setdefault(t, set()).update(d for d in str(ds).split(",") if d)
-  return {t: sorted(v) for t, v in out.items()}
-
-
 def chrono(data, season: int, week: int, now=None):
   """The week's injury chronology (nfledge/chronology.py) at `now` (None: the real time), or None for a season
   without dated practice reports (before 2018), where the injury table alone decides."""
@@ -72,6 +53,43 @@ def chrono(data, season: int, week: int, now=None):
     return None
   from .chronology import Chronology
   return Chronology(data, season, week, now)
+
+
+STATUS_SRC = {  # InjuryModel.availability's "src": which part of the code spoke
+  "": "nothing injury-related (healthy-scratch risk only)",
+  "report": "this week's practice report (so far, or the final one)",
+  "espn_mid": "ESPN's Out / IR / Doubtful since his team's report started (midweek_ruling)",
+  "table": "this week's injury table (seasons without dated practice reports)",
+  "window": "IR, practice window open, before his team's first report (week model, stage 0)",
+  "espn": "ESPN news since his last game, before his team's first report (espn_bridge)",
+  "tuesday": "the Tuesday model, before his team's first report",
+  "last_wk": "last week's designation carried (no Tuesday model row)",
+  "return": "the return-timing model (lookahead weeks)",
+}
+
+
+def status_label(r) -> str:
+  """The status words for a row of InjuryModel.availability, the one place they're built (owner 2026-10-22 audit:
+  consumers read the structured fields, never parse these). r: src, des, days, gd (game-day ruling), espn_q, tlab."""
+  src, des, days = r.src, str(r.des or ""), str(r.days or "")
+  dd = f" ({days})" if days else ""
+  if r.gd:
+    return ("Inactive" if r.gd == "INA" else "Active") + dd
+  if r.espn_q:
+    return "Questionable (ESPN)" + (dd if src == "report" else "")
+  if src == "report":
+    return des + dd
+  if src == "espn_mid":
+    return f"{des} (ESPN)" + dd
+  if src == "window":
+    return "IR (practice window open)"
+  if src == "espn":
+    return "Out (ESPN; return date after this game)" if des == "Out+ret" else f"{des} (ESPN)"
+  if src == "tuesday":
+    return str(r.tlab or "")
+  if src == "last_wk":
+    return f"{des} last wk"
+  return des
 
 
 def published_teams(data, season: int, week: int, now=None) -> set:
@@ -607,6 +625,13 @@ class InjuryModel:
     # Weeks whose report is not out yet (early in the week): carry last week's Out/Doubtful forward, as the
     # availability model does, so a backup is not scored as a scratch risk when the starter is likely out.
     reported = set(zip(d.injuries[d.injuries.season == season].week, d.injuries[d.injuries.season == season].team))
+    # (CF, 2026-10-22) a week still being played counts as reported only once the team's FINAL report is in (the
+    # chronology): a Wednesday row has no Out / Doubtful yet, and "a row exists" stopped the carry two days early
+    for w_ in sorted({w for w, f in zip(tg.week, tg.final) if not f} & {w for w, _ in reported}):
+      c = chrono(d, season, int(w_), getattr(self, "now", None))
+      if c is not None:
+        fin = c.final_teams()
+        reported = {(w, t) for w, t in reported if w != w_ or t in fin}
     carry = od.assign(week=od.week + 1)
     carry = carry[[(w, t) not in reported for w, t in zip(carry.week, carry.team.replace({"LAR": "LA"}))]]
     od = pd.concat([od, carry])
@@ -856,7 +881,7 @@ class InjuryModel:
     b = (self.espn_midweek or {}).get(gsis_id)
     if b is None or b not in MIDWEEK or str(game_status) not in ("None", "", "nan"):
       return None
-    return float(MIDWEEK[b]["p"]), {"IR": "IR (ESPN)", "Doubtful": "Doubtful (ESPN)"}.get(b, "Out (ESPN)")
+    return float(MIDWEEK[b]["p"]), b if b in ("IR", "Doubtful") else "Out"
 
   def tuesday_probs(self, season: int, week: int) -> dict:
     """gsis -> (P(plays), status label, plain-English why) from the Tuesday model, for players whose team's game this
@@ -901,7 +926,10 @@ class InjuryModel:
     prev = inj[inj.week == week - 1]
     published = published_teams(self.data, season, week, getattr(self, "now", None))
     p = p.copy()
-    p["avail"], p["status"], p["partial_week"], p["on_report"] = 1.0, "", False, False
+    p["avail"], p["partial_week"], p["on_report"] = 1.0, False, False
+    # what spoke, as data (owner 2026-10-22 audit: the status string used to be parsed back apart in six places); the
+    # words come from status_label() alone. src: see STATUS_SRC; des: the designation it gave; days: practice letters
+    p["src"], p["des"], p["days"], p["gd"], p["espn_q"], p["tlab"] = "", "", "", "", False, ""
     p["tuesday"] = ""  # report.inactive_why: why the Tuesday model says what it says
     tues = None
     # (BE2) reserve-list players whose practice window is open (returns.window_open): rated by the week model, which
@@ -919,21 +947,18 @@ class InjuryModel:
       final = self.final_report_teams(days, season, week)
     scratch = self.scratch_prob(season, week)
     p["scratch_avail"] = p.gsis_id.map(scratch).fillna(1.0)
-    # display only (owner 2026-10-18: Tyler Warren showed one "LP" labelled Wednesday): each team's report days from the
-    # calendar (practice_calendar: fixed by game day, plus any extra day it filed), so a player first listed Friday reads
-    # "FFL" (off the report before then = practiced fully); days not reached yet are left off. The model reads x.days.
-    team_dates, filed = {}, {}
+    # display only (owner 2026-10-18: Tyler Warren showed one "LP" labelled Wednesday): each team's FILED report days
+    # from the chronology (the one report calendar), so a player first listed Friday reads "FFL" (off the report before
+    # then = practiced fully); a day not in (upcoming, late, never filed) is left off: 2026-10-21, Tyler Warren read
+    # "full" on Indianapolis' Wednesday before it arrived. The model reads x.days.
+    filed = {}
     if use_days and "dates" in days:
-      from .practice_calendar import team_report_days
-      filed = {t: set(v) for t, v in self.filed_dates(season, week).items()}
-      cal = team_report_days(self.data.schedules, season, week, filed)
-      # a day counts once HIS TEAM's report for it is in our data (2026-10-21, Tyler Warren: any team's report used to
-      # count, so Indianapolis' Wednesday read "full" for everyone before it arrived; he had not practiced)
-      team_dates = {t: [d for d in ds if d in filed.get(t, set())] for t, ds in cal.items()}
+      c = chrono(self.data, season, week, getattr(self, "now", None))
+      filed = {t: tc.filed_days for t, tc in c.teams.items()} if c is not None else {}
 
     def shown(x, team) -> str:
       dd, ds = str(x.days.iloc[0] or "").replace("?", ""), [d for d in str(x.dates.iloc[0] or "").split(",") if d] if "dates" in x else []
-      allds = list(team_dates.get(team, []))
+      allds = list(filed.get(team, []))
       if not dd or len(ds) != len(dd) or not allds:
         return dd
       on = dict(zip(ds, dd))
@@ -950,7 +975,7 @@ class InjuryModel:
           dd = str(x.days.iloc[0] or "").replace("?", "")
           st = 3 if row.team in final else max(1, min(2, len(dd)))
           from . import tuesday as T
-          tdays = sorted(filed.get(row.team, set())) if T.STAGE_FROM == "calendar" else []
+          tdays = list(filed.get(row.team, [])) if T.STAGE_FROM == "calendar" else []
           ds = [d for d in str(x.dates.iloc[0] or "").split(",") if d] if "dates" in x else []
           if tdays and len(ds) == len(dd):
             # (AS, owner's design call 2026-10-22: "we need to use dates") his line over his team's report days so far,
@@ -964,24 +989,24 @@ class InjuryModel:
         p.at[i, "partial_week"] = row.team not in final  # report.inactive_why: "practice so far"
         p.at[i, "on_report"] = True  # returns.lookahead_availability starts its chain from this week's chance
         gs = x.game_status.iloc[0]
-        label = gs.title() if gs != "None" else ""
+        p.at[i, "src"], p.at[i, "des"] = "report", gs.title() if gs != "None" else ""
         ruled = self.midweek_ruling(row.gsis_id, gs)
-        if ruled and not (row.gsis_id in wo and ruled[1].startswith("IR")):
-          p.at[i, "avail"], label = ruled
-        sd = shown(x, row.team)
-        p.at[i, "status"] = label + (f" ({sd})" if sd else "")
+        if ruled and not (row.gsis_id in wo and ruled[1] == "IR"):
+          p.at[i, "avail"], p.at[i, "des"] = ruled
+          p.at[i, "src"] = "espn_mid"
+        p.at[i, "days"] = shown(x, row.team)
         continue
       if row.team in published:
         if row.gsis_id in cur_map.index:
           x = cur_map.loc[[row.gsis_id]].iloc[0]
           rep, prac = _report(x.report_status), _practice(x.practice_status)
           p.at[i, "avail"] = self.prob(rep, prac)
-          p.at[i, "status"] = rep if rep != "None" else ""
+          p.at[i, "src"], p.at[i, "des"] = "table", rep if rep != "None" else ""
       elif row.gsis_id in wo:
         # (BE2) window open, before his team's first report of the week: the week model at stage 0
         v = self.week_prob([(row.gsis_id, season, week, row.team, row.pos, "", "None", 0)])[0]
         if v == v:
-          p.at[i, "avail"], p.at[i, "status"] = float(v), "IR (practice window open)"
+          p.at[i, "avail"], p.at[i, "src"], p.at[i, "des"] = float(v), "window", "IR"
       elif self.espn_bridge and row.gsis_id in self.espn_bridge:
         # This week's report isn't out, but ESPN has injury news from after his last game: its bucket's P(active),
         # learned from how earlier early-week ESPN statuses turned out (espn_calib.py); before any outcomes, the
@@ -994,16 +1019,16 @@ class InjuryModel:
         # tools/scenario_audit.py S15)
         fallback = OUT_RET_PRIOR if b == "Out+ret" else self.p_next.get(base, 1.0)
         p.at[i, "avail"] = 0.0 if b == "IR" else float(rate["p"] if rate else fallback)
-        p.at[i, "status"] = "Out (ESPN; return date after this game)" if b == "Out+ret" else f"{b} (ESPN)"
+        p.at[i, "src"], p.at[i, "des"] = "espn", b
       elif self.cfg.get("injuries", {}).get("tuesday") and row.gsis_id in (tues if tues is not None else (tues := self.tuesday_probs(season, week))):
         # Before his team's first report: the Tuesday model (nfledge/tuesday.py; INSIGHTS (G) / (G2))
         pr_, lab, why_ = tues[row.gsis_id]
-        p.at[i, "avail"], p.at[i, "status"], p.at[i, "tuesday"] = pr_, lab, why_
+        p.at[i, "avail"], p.at[i, "src"], p.at[i, "tlab"], p.at[i, "tuesday"] = pr_, "tuesday", lab, why_
       elif row.gsis_id in prev_map.index:
         rep = _report(prev_map.at[row.gsis_id, "report_status"])
         if rep != "None":
           p.at[i, "avail"] = float(self.p_next.get(rep, 1.0))
-          p.at[i, "status"] = f"{rep} last wk"
+          p.at[i, "src"], p.at[i, "des"] = "last_wk", rep
     # (AU, {#gameday}) game-day actives / inactives, once a team's are posted (espn.gameday_rulings, week clock): a
     # declared inactive doesn't play (0 of 3,000+ skill players 2019-25); a Questionable player who dresses played 97.4%
     # (n 1,992), a Doubtful one 28.6% (n 14). Measured rates, nothing fitted. pre_gameday keeps the model's chance for
@@ -1015,25 +1040,19 @@ class InjuryModel:
         r_ = gd.get(row.gsis_id)
         if not r_:
           continue
-        st = str(p.at[i, "status"] or "")
-        des = st.split("(")[0].strip().lower()
+        des = str(p.at[i, "des"]).lower() if p.at[i, "src"] in ("report", "table", "espn", "espn_mid") else ""
         if r_[0] == "INA":
-          p.at[i, "pre_gameday"], p.at[i, "avail"] = p.at[i, "avail"], 0.0
-          p.at[i, "status"] = "Inactive" + (f" ({st.split('(', 1)[1]}" if "(" in st else "")
+          p.at[i, "pre_gameday"], p.at[i, "avail"], p.at[i, "gd"] = p.at[i, "avail"], 0.0, "INA"
         elif r_[0] == "ACT" and des in ("questionable", "doubtful"):
-          p.at[i, "pre_gameday"], p.at[i, "avail"] = p.at[i, "avail"], GAMEDAY_ACTIVE[des]
-          p.at[i, "status"] = "Active" + (f" ({st.split('(', 1)[1]}" if "(" in st else "")
+          p.at[i, "pre_gameday"], p.at[i, "avail"], p.at[i, "gd"] = p.at[i, "avail"], GAMEDAY_ACTIVE[des], "ACT"
     # ESPN's Questionable, shown but not used (owner 2026-10-15: rows showed ESPN's O / D but never its Q): only where
     # there's no designation yet ("" or practice days only) or just last week's; the chance to play is unchanged
-    for i, row in p.iterrows():
-      st = p.at[i, "status"]
-      if row.gsis_id in (self.espn_questionable or {}) and (st == "" or st.startswith(" (") or st.endswith("last wk")):
-        p.at[i, "status"] = "Questionable (ESPN)" + (st if st.startswith(" (") else "")
+    eq = set(self.espn_questionable or {})
+    p["espn_q"] = p.gsis_id.isin(eq) & (p.gd == "") & (((p.des == "") & p.src.isin(["", "report", "table"]))
+                                                             | (p.src == "last_wk"))
+    p["status"] = [status_label(r) for r in p.itertuples()]
     p["tag"] = self.designations(p, season, week)
     return p
-
-  def filed_dates(self, season: int, week: int) -> dict:
-    return filed_dates(self.data, season, week)
 
   def tag_map(self, season: int, week: int, board: pd.DataFrame | None = None) -> dict:
     """gsis -> designation for every QB / RB / WR / TE / K on a roster (active, game-day inactive or a reserve list),
@@ -1051,7 +1070,7 @@ class InjuryModel:
           out.pop(g, None)
     return out
 
-  RESERVE_TAG = {"R01": "IR", "R48": "IR", "R04": "PUP", "R05": "NFI", "R40": "SSPD"}
+  from .codes import RESERVE as RESERVE_TAG  # nfledge/codes.py
 
   def designations(self, p: pd.DataFrame, season: int, week: int) -> list:
     """The injury tag a row shows (owner 2026-10-21: "we should use the official tags"), apart from our chance to play:
@@ -1227,6 +1246,7 @@ class InjuryModel:
       p["avail"] = p.gsis_id.map(avail_override).fillna(1.0)
       p["status"] = p.gsis_id.map(status_override or {}).fillna("")
       p["scratch_avail"] = 1.0
+      p["src"], p["gd"] = np.where(p.avail < 1.0, "return", ""), ""  # the return-timing model spoke
     f = self.pm.features(season, week, self.pm.tm.fit(season, week))
     cont = self.contributors(f, season, week)
     on_team = set(zip(p.gsis_id, p.team))
@@ -1239,7 +1259,7 @@ class InjuryModel:
     # availability with healthy scratches at all"): where only the scratch model spoke (avail is its number), he is
     # healthy (inj_avail 1) with that scratch risk; else the injury models' number, no scratch part. avail itself
     # stays "takes the field" (injury x scratch, the backup-QB rule below): sits, redistribution, starter picks.
-    only_scratch = np.isclose(p.avail.astype(float), p.scratch_avail.astype(float)) & ~p.status.fillna("").astype(str).str.startswith("Inactive")
+    only_scratch = (p.src == "") & (p.gd != "INA")  # no injury source spoke (availability's src)
     p["inj_avail"] = np.where(only_scratch, 1.0, p.avail.astype(float))
     p["scratch"] = np.where(only_scratch, 1.0 - p.scratch_avail.astype(float), 0.0)
     r2 = self.cfg.get("injuries", {}).get("qb2_play_rate")

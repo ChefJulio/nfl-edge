@@ -45,7 +45,7 @@ RET_DAYS = int(PRIORS.get("ret_days", 7))  # a return date this many days past t
 PRIOR_CAP = 50  # past seasons count as at most this many cases, so this season's outcomes can still move a rate
 
 PRIOR_WEIGHT = 5.0  # the prior counts as this many past cases (small: outcomes take over within a couple of weeks)
-STATUS = {"Out": "Out", "Doubtful": "Doubtful", "Injured Reserve": "IR"}
+from .codes import ESPN_STATUS as STATUS  # noqa: E402 (nfledge/codes.py)
 EARLY_DAYS = 3  # a snapshot counts as early-week when taken at least this many days before the game (report day)
 
 

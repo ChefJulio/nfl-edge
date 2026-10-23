@@ -166,8 +166,8 @@ def sunday_pbp_due(d: dict) -> list:
 
 
 # Overdue reports (owner 2026-10-22, nfledge/chronology.py): the live site lists report days past their deadline (+
-# grace) that weren't on NFL.com when it was built (index.json "overdue"). Each look asks NFL.com whether one has
-# arrived since, and builds the moment it has. Same public client as nfledge/data.py (stdlib only here: the watcher
+# grace) that weren't on NFL.com when it was built (index.json "chrono": days whose state is "overdue"). Each look
+# asks NFL.com whether one has arrived since, and builds the moment it has. Same public client as nfledge/data.py (stdlib only here: the watcher
 # runs from a sparse checkout without the package).
 NFL_CLIENT = {"clientKey": "4cFUW6DmwJpzT9L7LrG3qRAcABG5s04g", "clientSecret": "CZuvCL49d9OwfGsR"}
 
@@ -183,7 +183,8 @@ def _nfl(url: str, body: dict | None = None, token: str | None = None) -> dict:
 
 def overdue_arrived(d: dict) -> list:
   """Overdue report days on the live site that NFL.com has now: [label]."""
-  od = d.get("overdue") or {}
+  od = {t: [x for x, st in c.get("days", []) if st == "overdue"] for t, c in (d.get("chrono") or {}).items()}
+  od = {t: v for t, v in od.items() if v} or d.get("overdue") or {}  # (a page built before "chrono": its "overdue")
   if not od:
     return []
   import uuid

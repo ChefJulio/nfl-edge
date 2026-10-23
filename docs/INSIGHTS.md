@@ -4073,3 +4073,49 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   points to them (head links, <noscript>, footer "For AI assistants"). Option 1 (a hosted query endpoint so an assistant
   can run Trends itself, free on Vercel / Netlify) and precomputed per-player splits pages were offered and declined.
 
+- **PRE-REGISTERED 2026-10-22 (owner: "audit our entire injury model again ... all of it"): (CF) "final report in"
+  from the chronology, not "a row exists", in two more places.** (1) lineup.report_available (BP, the lineup term in the
+  win chance) switches to this week's report as soon as the team has ANY row this week; Out / Doubtful only come with
+  the final report, so on Wednesday and Thursday a player ruled out last week counts as back and the team's lineup term
+  swings up, then down again on Friday. (2) InjuryModel.scratch_table carries last week's Out / Doubtful forward only
+  for (week, team) pairs with no row yet: same flaw, a backup is scored as a scratch risk midweek while his starter is
+  likely out. Change: both use this week's report only once the chronology calls the team's final report in
+  (injuries.chrono final_teams); else the latest earlier week's report stands in, as on Tuesday. Seasons without dated
+  reports (before 2018) keep "a row exists". Gate: every past team-week is final (kicked off), so the change must be
+  live-only: (a) the chronology calls every 2018-25 team-week with a game final (check, all weeks), and (b) the 2025
+  backtest rows are identical before and after (chance to play, projection). If either fails, it doesn't ship.
+- **SHIPPED 2026-10-22 (owner: "audit our entire injury model again ... identify and consolidate any systems that could
+  be combined ... less surface for bugs"): one calendar, one status record, one browser reading.**
+  * One report calendar: nfledge/chronology.py now also drives the practice timeline (tools/player_logs.py: "full, not
+    on the report" only on a day the team's report is IN, per team and date; the Rashee Rice bug, and a gap the first
+    fix left: a team's skipped day before a later filed one) and the model's filed days (injuries.filed_dates removed:
+    it credited Dallas week 4 with another team's Monday / Tuesday through a lagging roster). The week JSON carries
+    "chrono" (per team: stage, final, [date, state] per day) in place of "filed" / "overdue"; the practice strip, its
+    day names and news_watch read it. Real-data effect on the timelines: only removals, every one a calendar day the
+    team never filed (2026: 324 rows, 2025: 233, 2019: 217; e.g. week 1's Monday). CHANGED RULE: final = the LAST report
+    day filed (or a status, or kickoff), not every day filed (scenario S31: Thursday never came, Friday's final did).
+  * One status record: InjuryModel.availability writes what spoke as fields (src / des / days / gd / espn_q) and
+    status_label() alone writes the words; report.inactive_why, machine pages, the scenario audit and inj_avail (was
+    np.isclose(avail, scratch_avail)) read the fields. Check: every rostered QB / RB / WR / TE, weeks 6 and 7: chance,
+    status, tag and why identical for all 1,009 rows before / after.
+  * One browser reading: nfledge/static/health.js (NFLE.health): official tag, game day, listed, practice letters,
+    the status pill, ros.json's return week and one threshold table (AVAIL). Fixed on the way: the pill read the status
+    text (ESPN "Out" showed an Out pill beside a Q badge); the Health tile's regex missed "Hurt last game" and the Tuesday
+    Q (read Healthy); "back ~wk N" read the takes-the-field chance (a healthy backup QB read "not back this season"; ros.json
+    w[6] = injury only); the Injuries page left off a midweek "(D)" with no game status; a past week's team page showed
+    today's tags; the badge tip assumed Wed / Thu / Fri; defenders had no Health tile in later weeks; rankings 10-20% to
+    play showed the full if-active line (neither projected 0 nor two worlds); depth charts' live week used ESPN's raw
+    list (Q on players who played through) where every other page shows the official tag. tools/health_check.mjs checks
+    a built week for agreement.
+  * One code table: nfledge/codes.py (team codes; reserve lists IR / PUP / NFI / SSPD, depth charts said SUSP and the
+    timeline "Res" for NFI / suspended; ESPN statuses); one ESPN id map (data.espn_gsis); one ESPN injury fetch in the
+    browser. injury_history no longer counts this week's unplayed game (played / missed, games total, durability).
+  * Kept: practice_prob / partial_models (the older practice model) still give an Out row its 0 and the fallback when
+    the week model has no answer, and report_avail feeds the personnel adjustment (switched OFF, kept switchable).
+    Retiring them changes a model path: a candidate for its own pre-registered test, not a cleanup.
+- **RESULT {#final-in-cf} (CF) "final report in" from the chronology for the lineup term and the scratch carry: PASS,
+  shipped (live-only by design).** (a) The chronology calls every completed team-week final: 2019-25 all 3,742, 2026
+  so far 186 (the loaded data starts at 2019, not 2018 as written above). (b) The cached backtest (2025-26, 9,634
+  rows x 150 columns) before and after the change: identical (every numeric column; text columns differ only as
+  missing-value markers). Live effect: from a team's first report of the week until its final one, last week's Out /
+  Doubtful players stay out of the lineup term and keep their backups' scratch risk low, instead of reading as back.

@@ -12,6 +12,16 @@ from pathlib import Path
 PAGES_DIR = Path(__file__).resolve().parent / "pages"  # page shells (plain HTML with %TOKENS%, filled by render)
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 VERSION_RX = re.compile(r"\?v=[0-9a-f]{10}\b")  # the ?v= every page puts on its asset links
+# Served assets made of several source files, in order (owner 2026-10-22 injury audit): health.js (NFLE.health, the one
+# reading of injury status) rides in front of shell.js, the first script every page has loaded since the first build.
+# Archived week pages are never rewritten, so a new <script> tag would never reach them; health.js stays its own file
+# for Node (tools/health_check.mjs).
+BUNDLE = {"shell.js": ["health.js", "shell.js"]}
+
+
+def asset_bytes(rel: str) -> bytes:
+  """The served bytes of assets/<rel> (posix path under nfledge/static/): the file, or its BUNDLE."""
+  return b"\n".join((STATIC_DIR / x).read_bytes() for x in BUNDLE.get(rel, [rel]))
 
 
 def page_html(name: str, **tokens) -> str:
@@ -42,7 +52,7 @@ def write_site_assets(root_dir: Path) -> None:
     if f.is_file():
       dst = root_dir / "assets" / f.relative_to(STATIC_DIR)
       dst.parent.mkdir(parents=True, exist_ok=True)
-      dst.write_bytes(f.read_bytes())
+      dst.write_bytes(asset_bytes(f.relative_to(STATIC_DIR).as_posix()))
   (root_dir / "game.html").write_text(page_html("game.html", V=asset_version()), encoding="utf-8")
 
 
