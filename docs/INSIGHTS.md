@@ -4448,3 +4448,28 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   ahead with the ball could stop the clock; a defense behind could not, so its timeouts let ~40 s run. Now a defense
   behind takes the better (for it) of calling one and letting it run. Converted branch -0.89 (Brier 0.13804); (CJ)
   check (1) PASS, same recommendation as nfl4th 79.0%.
+- **PRE-REGISTERED 2026-10-23 (owner: "should we be focusing on the winprobability model itself rather than this
+  decision calculator? ... the calculator would benefit if we can calibrate the win probability engine better" ...
+  "ya"): (CP) a situational audit of the win model.** The general fit is near nflfastR (CG) and three general changes
+  failed (CK, CL, CN); what moves decisions is error in particular states the calculator values, so each is checked on
+  its own. Model: the browser engine's wp() (the win model plus its rules: kneel-out, last snap, the late 1-2 rule)
+  with a model file fit through 2018 (tools/calc_build.py --through=2018); rows: regular-season snaps 2019-25 (runs,
+  passes, kneels, spikes), the team with the ball's win chance vs whether it won. Slices (a state can be in several):
+  the next snap after a converted 4th down (same team); the other team's first snap after a failed 4th down, a punt, a
+  missed field goal, an interception or lost fumble; a drive's first snap after a kickoff; the 4th quarter's last 5:00
+  with the score within 8, split by who has the ball (leading / not) x the other side's timeouts (0-3); the same by the
+  offense's own timeouts; the 4th quarter 2:01-2:40 and 1:20-2:00 (either side of the warning); all snaps (reference).
+  A slice is FLAGGED only if won minus forecast has the same sign in 2019-21 and 2022-25, the 95% interval (games
+  resampled) excludes zero in both, and the pooled gap is 1.5 points or more. Only flagged slices get a fix, each its
+  own pre-registered test (football rules first, as CN2); nothing ships from the audit itself. Slices of fewer than
+  300 snaps per period are reported but cannot be flagged.
+- **RESULT {#wp-audit} (CP) the situational audit: nothing flagged.** tools/wp_audit.py / .mjs, 233,334 snaps 2019-25,
+  the engine's wp() with a model fit through 2018 (that file's try rates are placeholders, 0.94 / 0.48: the tries
+  table uses only recent seasons and wp() does not read it). Won minus forecast, 2019-21 | 2022-25 | pooled: all snaps
+  +0.2 | +0.1 | +0.1; after a converted 4th down -0.3 | -1.0 | -0.7; the other team after a failed 4th down +0.8 | -0.7
+  | -0.1; after a punt +0.8 | +0.1 | +0.4; after a missed field goal (the receiving side) +1.4 | +2.6 | +2.0 (n 409 /
+  546: (CO)'s over-read of the kicking side, same direction, intervals include zero in both periods); after a turnover
+  -0.1 | +0.8 | +0.4; after a kickoff +0.3 | +0.5 | +0.4. Late (last 5:00, within 8) by either side's timeouts: no cell
+  consistent across the periods (signs flip in most, cells of 120-2,500 snaps); 2:01-2:40 -1.3 | +0.1, 1:20-2:00 -1.7 |
+  +1.0. The win model's errors in the states the calculator values are within what seven seasons can detect; (CO)'s
+  over-reads were mostly noise (converted) or small (the missed kick, ~2 points, not established). No fix is proposed.
