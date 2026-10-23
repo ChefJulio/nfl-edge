@@ -652,6 +652,108 @@
   // Opponent colored by OUR pregame matchup rank that week (2021 on); rank = his position finish that week.
   const LOGS = {};
   const siteRoot = () => CFG.page === 'game' ? '' : (CFG.root || '');
+  // ---- "What should they do?" (owner 2026-10-23: the calculator "with integration in our gamecast"): Games > Calc's
+  // sheet (calc.js, loaded on the first tap) prefilled from ESPN's live situation and our week data's Vegas line
+  const ASSET_V = (() => { const sc = [...document.scripts].find(x => /assets\/gamecast\.js/.test(x.src)); return sc ? new URL(sc.src).search : ''; })();
+  const calcLoad = () => calcLoad.p || (calcLoad.p = new Promise((ok, bad) => {
+    if (NFLE.calcUI) { ok(); return; }
+    const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = `${siteRoot()}assets/calc.css${ASSET_V}`; document.head.appendChild(css);
+    const js = document.createElement('script'); js.src = `${siteRoot()}assets/calc.js${ASSET_V}`; js.onload = ok; js.onerror = () => bad(new Error('calc.js'));
+    document.head.appendChild(js);
+  }));
+  const calcState = (info, sit) => {
+    const sp = sit && spot(sit, info);
+    if (!sp || !sit.down || sit.down < 1) return null;
+    const off = sp.offense, def = off === info.home ? info.away : info.home;
+    const yl = sp.dir === 1 ? 100 - sp.x : sp.x;  // yards to the end zone
+    const g = DATA && (DATA.games || []).find(x => x.home.team === info.home.team && x.away.team === info.away.team);
+    const m = g && String(g.vegas_line || '').match(/^([A-Z]{2,3})\s+-?([\d.]+)/);
+    const line = m ? (ourCode(m[1]) === off.team ? +m[2] : -m[2]) : 0;
+    const home = off === info.home, tos = home ? [sit.homeTimeouts, sit.awayTimeouts] : [sit.awayTimeouts, sit.homeTimeouts];
+    return { mode: 'play', a: off.team, b: def.team, off: off.score, def: def.score, qtr: Math.min(4, info.period || 1), clock: info.clock || '15:00',
+             down: sit.down, togo: Math.max(1, sit.distance || 10), side: yl > 50 ? 'own' : 'opp', yard: yl > 50 ? 100 - yl : yl,
+             to: tos[0] != null ? tos[0] : 3, oppTo: tos[1] != null ? tos[1] : 3, line, total: (g && +g.vegas_total) || 45, home: home ? 1 : 0, rec2h: 0 };
+  };
+  // the Vegas line and total for a game, from the offense's side (our week data)
+  const vegasFor = (info, team) => {
+    const g = DATA && (DATA.games || []).find(x => x.home.team === info.home.team && x.away.team === info.away.team);
+    const m = g && String(g.vegas_line || '').match(/^([A-Z]{2,3})\s+-?([\d.]+)/);
+    return { line: m ? (ourCode(m[1]) === team ? +m[2] : -m[2]) : 0, total: (g && +g.vegas_total) || 45 };
+  };
+  // ---- Decisions (owner 2026-10-23: "identify questionable decisions made in games ... point out the bad ones in
+  // hindsight"): every regulation 4th down (go / field goal / punt) and try after a touchdown, graded before the snap
+  // by the calculator (calc_engine.js grade). Timeouts are not graded (owner: "there's lots of reasons to call
+  // timeouts beyond clock management").
+  const callList = (sum, info, E) => {
+    const plays = allPlays(sum).flatMap(d => d.plays || []);
+    const used = {}, out = [];
+    let ph = 0, pa = 0;
+    plays.forEach(p => {
+      const per = (p.period || {}).number || 1, half = per <= 2 ? 1 : 2, t = `${pType(p)} ${p.text || ''}`;
+      const before = { home: ph, away: pa };
+      if (p.homeScore != null) { ph = p.homeScore; pa = p.awayScore; }
+      if (/timeout/i.test(pType(p))) {
+        const m = String(p.text || '').match(/by ([A-Z]{2,3})/), tm = m && ourCode(m[1]);
+        if (tm) { used[half] = used[half] || {}; used[half][tm] = (used[half][tm] || 0) + 1; }
+        return;
+      }
+      if (per > 4 || nonPlay(p) || /no play/i.test(String(p.text || ''))) return;
+      const tid = (pType(p).match(/^(xp|try2)$/) || [])[0] || (p.type && p.type.id);
+      const isTry = tid === 'xp' || tid === 'try2';
+      const s0 = p.start || {};
+      if (!isTry && s0.down !== 4) return;
+      if (!isTry && /kneel|spike/i.test(t)) return;
+      const sp = spot(s0, info);
+      if (!sp || sp.x == null) return;
+      const off = sp.offense, def = off === info.home ? info.away : info.home;
+      const sc = isTry ? { home: p.homeScore, away: p.awayScore } : before;  // a try's own scores are before it
+      const offPts = off === info.home ? sc.home : sc.away, defPts = off === info.home ? sc.away : sc.home;
+      const v = vegasFor(info, off.team), u = (used[half] || {});
+      const s = { diff: offPts - defPts, sec: E.gameSec(per, (p.clock || {}).displayValue || '15:00'), down: 4, togo: Math.max(1, s0.distance || 1),
+                  yl: sp.dir === 1 ? 100 - sp.x : sp.x, to: Math.max(0, 3 - (u[off.team] || 0)), oppTo: Math.max(0, 3 - (u[def.team] || 0)),
+                  line: v.line, total: v.total, home: off === info.home ? 1 : 0, rec2h: 0 };
+      const choice = isTry ? (tid === 'try2' ? 'two' : 'xp') : /punt/i.test(t) ? 'punt' : /field goal/i.test(t) ? 'fg' : 'go';
+      out.push({ p, per, kind: isTry ? 'try' : 'fourth', s, choice, team: off.team, opp: def.team });
+    });
+    return out;
+  };
+  const CALLS = {};  // game id -> { n: plays seen, html }
+  const callsPane = (sum, info) => {
+    const box = `<section class="gcs" id="gcCalls"><h3>Decisions</h3><p class="gcs-note">Every 4th down and try after a touchdown, judged before the snap by <a href="${siteRoot()}#games/calc">our calculator</a> (not by how it turned out): the chance to win after each option. Questionable = gave up 3+ points of win chance; debatable = 1.5-3; inside 1.5 is the model's noise. The conversion rate is an average offense's; a team that knows its short-yardage game is better can be right to go. Timeouts aren't graded.</p><div class="dcs-body">`;
+    if (!sum) return `${box}<p class="muted">Decisions appear once the game starts.</p></div></section>`;
+    const n = allPlays(sum).reduce((t, d) => t + (d.plays || []).length, 0), hit = CALLS[info.id];
+    if (hit && hit.n === n) return `${box}${hit.html}</div></section>`;
+    const pending = `${box}<p class="muted">Grading&hellip;</p></div></section>`;
+    calcLoad().then(() => NFLE.calcUI.engine()).then(({ E, C }) => {
+      const rows = callList(sum, info, E).map(d => ({ ...d, g: C.grade(d.kind, d.s, d.choice) })).filter(d => d.g);
+      const pct = v => `${(100 * v).toFixed(1)}%`, pts = v => (100 * v).toFixed(1);
+      const VERB = { go: 'went for it', fg: 'kicked a field goal', punt: 'punted', xp: 'kicked the extra point', two: 'went for two' };
+      const VC = { fine: ['dcv-ok', 'Right call'], debatable: ['dcv-q', 'Debatable'], questionable: ['dcv-bad', 'Questionable'] };
+      const bad = rows.filter(d => d.g.verdict === 'questionable');
+      const sumLine = rows.length ? `<p class="dcs-sum">${rows.length} decisions: <b>${bad.length}</b> questionable${bad.length ? ` (${[...new Set(bad.map(d => d.team))].map(t => `${esc(t)} ${bad.filter(d => d.team === t).length}`).join(', ')})` : ''}, ${rows.filter(d => d.g.verdict === 'debatable').length} debatable.</p>` : '<p class="muted">No 4th downs or tries yet.</p>';
+      const card = d => {
+        const g = d.g, [cls, lab] = VC[g.verdict], half = d.s.sec > 1800 ? d.s.sec - 1800 : d.s.sec;
+        const what = d.kind === 'try' ? 'after a touchdown' : `4th &amp; ${d.s.togo} ${d.s.yl <= 50 ? `at ${esc(d.opp)} ${d.s.yl}` : `at own ${100 - d.s.yl}`}`;
+        const opts = g.options.map(o => `<span class="dcs-o${o.key === d.choice ? ' chose' : ''}${o.key === g.best ? ' best' : ''}">${esc(o.label)} <b>${pct(o.wp)}</b></span>`).join('');
+        return `<li class="dcs-i ${cls}"><div class="dcs-h"><span class="dcs-t">Q${d.per} ${esc((d.p.clock || {}).displayValue || '')}</span>
+          <b>${tmL(d.team)}</b> ${what}: ${VERB[d.choice]}<span class="dcv ${cls}">${lab}${g.verdict !== 'fine' ? ` &minus;${pts(g.cost)}` : ''}</span></div>
+          <div class="dcs-opts">${opts}</div>
+          ${g.verdict !== 'fine' ? `<div class="dcs-why">${esc(g.options[0].label)} was worth ${pts(g.cost)} more points of win chance${d.kind === 'fourth' && g.p ? ` (${pct(g.p.go)} to convert${g.p.fg != null ? `, ${pct(g.p.fg)} field goal` : ''})` : ''}.${half <= 180 ? ' Last 3:00 of a half: our numbers are rough here.' : ''}</div>` : ''}
+          <div class="dcs-r muted">${esc(String(d.p.text || '').slice(0, 160))}</div></li>`;
+      };
+      const html = `${sumLine}<ol class="dcs">${rows.slice().reverse().map(card).join('')}</ol>`;
+      CALLS[info.id] = { n, html };
+      const b = document.querySelector('#gcCalls .dcs-body');
+      if (b) b.innerHTML = html;
+    }, () => { const b = document.querySelector('#gcCalls .dcs-body'); if (b) b.innerHTML = '<p class="muted">The calculator isn\'t available right now.</p>'; });
+    return pending;
+  };
+  document.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('[data-calc]');
+    if (!b || !GP.calcState) return;
+    const S = GP.calcState;
+    calcLoad().then(() => NFLE.calcUI.sheet(S, `${S.a} ball: what should they do?`), () => {});
+  });
   const league = () => {
     try { const s = JSON.parse(localStorage.getItem('nfledge-scoring') || 'null'); if (s && s.lg) return s.lg; } catch (e) { /* default */ }
     return { teams: 10, QB: 1, RB: 2, WR: 2, TE: 1 };
@@ -3852,6 +3954,9 @@
   // play went along it"): the offense always drives left to right, its end zone on the left in its color and the
   // opponent's on the right; a dot where the ball was snapped, a bar to where it ended (green gain, red loss, amber on a
   // flag, gray for kicks, red to where a turnover left it); a touchdown runs into the end zone. 120 yards wide.
+  // "X kicks 60 yards from NE 35 to CHI 5." / "punts 44 yards to DAL 12" (a punt: from the line of scrimmage) /
+  // "kicks 65 yards from KC 35 to end zone": [, yards, from side, from yard line, to side, to yard line, end zone]
+  const KICK_RX = / (?:kicks|punts)(?: onside)? (\d+) yards?(?: from ([A-Z]{2,3}) (\d{1,2}))?(?: to (?:the )?(?:([A-Z]{2,3}) )?(\d{1,2})| to (?:the )?(end zone)|, (end zone))?/;
   const fieldStrip = (p, info) => {
     const a = spot(p.start, info);
     if (!a || a.x == null || nonPlay(p)) return '';
@@ -3862,7 +3967,7 @@
     let e = b && b.x != null ? rel(b.x) : s0;
     // a flag enforced on top of a play that counts: the play's own yards from the text before "PENALTY"
     let mid = null;
-    if (!td && /PENALTY on/.test(String(p.text || '')) && !/no play/i.test(t) && !p.isTurnover) {
+    if (!td && /PENALTY on/.test(String(p.text || '')) && !/no play/i.test(t) && !p.isTurnover && !stPlay(p)) {
       const pre = String(p.text).split('PENALTY')[0], m = pre.match(/for (-?\d+) yards?/);
       const own = /no gain/.test(pre) ? 0 : m ? +m[1] : null;
       if (own != null && Math.abs(s0 + own - e) >= 1) mid = s0 + own;
@@ -3876,12 +3981,39 @@
     const off = a.offense, opp = off.team === info.away.team ? info.home : info.away;
     const seg = (x0, x1, c) => { const lo = Math.min(x0, x1), hi = Math.max(x0, x1);
       return hi - lo >= 0.5 ? `<i class="fs-seg fs-${c}" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%"></i>` : ''; };
+    // a flag's yards from where the play itself ended (m): past it plain yellow; back over the play's own yards
+    // (from s), striped
+    const flag = (s, m, e) => { const back = (e - m) * (m - s) < 0, over = back ? (Math.abs(e - m) <= Math.abs(m - s) ? e : s) : m;
+      return back ? seg(m, over, 'pen fs-stripe') + seg(over, e, 'pen') : seg(m, e, 'pen'); };
+    // Kickoffs and punts (owner 2026-10-23: "a line from where the kick was caught ... then show the return yardage from
+    // there"; "the penalty was an extra 5 on the end of the return"): drawn for the RECEIVING team, its end zone on the
+    // left: a thin line for the kick to where it came down, the return from there, then a flag's yards from the end of
+    // the return. A touchback: the kick into the end zone, the dot where the ball was put. The plain strip when the text
+    // doesn't say where the kick came down or the kicking team kept the ball (onside, a muff it recovered).
+    const km = kick && String(p.text || '').match(KICK_RX);
+    if (km && b && b.x != null && b.offense.team !== a.offense.team) {
+      const raw = String(p.text || ''), R = b.offense, K = a.offense, rHome = R.team === info.home.team;
+      const abs = (side, n) => { const c = side ? ourCode(side) : null; return n === 50 || !c ? 50 : (c === info.home.team ? 100 - n : n); };
+      const r = x => (rHome ? 100 - x : x);  // the receiving team's yards from its own goal line
+      const tb = /touchback/i.test(raw), land = km[6] || km[7] || tb ? -5 : km[5] != null ? r(abs(km[4], +km[5])) : null;
+      // a punt's text has no "from": its yards run from the line of scrimmage (ESPN's start team can be either side)
+      const from = km[3] != null ? r(abs(km[2], +km[3])) : land != null && land >= 0 ? land + +km[1] : r(a.x);
+      if (land != null) {
+        const end = r(b.x), catchAt = Math.max(0, land);
+        const rm = raw.slice(raw.search(/ (?:kicks|punts) /)).split('PENALTY')[0].match(/ for (-?\d+) yards?| for no gain/);
+        const ret = tb || !rm ? null : rm[1] != null ? +rm[1] : 0, retEnd = ret == null ? null : catchAt + ret;
+        let kb = seg(from, land, 'kick');
+        if (retEnd != null) {
+          kb += seg(catchAt, retEnd, retEnd >= catchAt ? 'gain' : 'loss');
+          if (/PENALTY on/.test(raw) && Math.abs(end - retEnd) >= 1) kb += flag(catchAt, retEnd, end);
+        } else if (!tb && /PENALTY on/.test(raw) && Math.abs(end - catchAt) >= 1) kb += seg(catchAt, end, 'pen');
+        return `<span class="fs" aria-hidden="true" style="--oc:${esc(R.color || '#888')};--dc:${esc(K.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
+          + `${kb}<i class="fs-dot" style="left:${pc(tb ? end : catchAt)}%"></i></span>`;
+      }
+    }
     let bars;
     if (mid != null) {
-      const play = seg(s0, mid, mid > s0 ? 'gain' : mid < s0 ? 'loss' : 'zero');
-      // the penalty from where the play ended: past it, plain yellow; back over the play's own yards, striped
-      const back = (e - mid) * (mid - s0) < 0, over = back ? (Math.abs(e - mid) <= Math.abs(mid - s0) ? e : s0) : mid;
-      bars = play + (back ? seg(mid, over, 'pen fs-stripe') + seg(over, e, 'pen') : seg(mid, e, 'pen'));
+      bars = seg(s0, mid, mid > s0 ? 'gain' : mid < s0 ? 'loss' : 'zero') + flag(s0, mid, e);
     } else bars = seg(s0, e, cls);
     return `<span class="fs" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
       + `${bars}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
@@ -4079,7 +4211,7 @@
   // Live tab: one pane at a time, picked here (owner 2026-10-15: "if i pick stats i see stats"); box score first
   // one pane (owner 2026-10-18: "condense ... so we're not duplicating the displays"): the game's flow (win chance and
   // every drive), the plays, the box score (with its Fantasy tab) and the team stats
-  const GPANES = [['flow', 'Game flow'], ['plays', 'Plays'], ['box', 'Box score'], ['team', 'Team stats']];
+  const GPANES = [['flow', 'Game flow'], ['plays', 'Plays'], ['calls', 'Decisions'], ['box', 'Box score'], ['team', 'Team stats']];
   // Live updates re-render the page; keep what the viewer is reading where it is (owner 2026-10-18: "when i'm
   // scrolled down, live updates shift stuff"): the keyed element nearest the top of the screen is measured before and
   // the page scrolled by however far it moved after.
@@ -4141,11 +4273,12 @@
             <div id="lgBody">${!sum ? '<p class="muted">Plays appear once the game starts.</p>'
               : !allPlays(sum).length && info.state === 'post' ? '<p class="muted">ESPN has no play-by-play for this game (games before about 2005 only have box scores).</p>'
               : gameLog(sum, info, ser, upto)}</div></section>`
+      : GP.pane === 'calls' ? callsPane(sum, info)
       : GP.pane === 'team' ? `<section class="gcs" id="gcTeam"><h3>Team stats</h3>${st.replay ? '<p class="gcs-note">As of this play, counted from the play-by-play.</p>' : ''}${sum ? teamStats(sum, info, null, st.replay ? st.tstats : null) || '<p class="muted">Not available yet.</p>' : ''}</section>`
       : playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: st.replay ? 'As of this play, counted from the play-by-play.' : '', lines: st.replay ? st.lines : null, plays: st.replay ? st.plays : null, secs: st.secs, empty: 'The box score fills in once the game starts.' })}`;
     root.innerHTML = `
       <section class="sb" style="--ac:${esc(info.away.color)};--hc:${esc(info.home.color)}">${side(info.away, false)}<div class="sb-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<b>${esc(status)}</b>${!nx && sp && sit && sit.shortDownDistanceText
-        ? `<span class="sb-dd">${esc(sit.shortDownDistanceText)}${sit.possessionText ? ` · ${esc(sit.possessionText)}` : ''}</span>` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}</section>
+        ? `<span class="sb-dd">${esc(sit.shortDownDistanceText)}${sit.possessionText ? ` · ${esc(sit.possessionText)}` : ''}</span>${info.state === 'in' && (GP.calcState = calcState(info, sit)) ? '<button type="button" class="sb-calc" data-calc>What should they do?</button>' : ''}` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}</section>
       <div class="seg gc-tabs" role="tablist">${GTABS.map(([k, l]) => `<button type="button" role="tab" data-gtab="${k}" class="${tab === k ? 'on' : ''}">${k === 'live' && info.state === 'in' ? '<span class="live-dot"></span>' : ''}${k === 'live' && info.state === 'post' && !rp ? 'Final' : l}</button>`).join('')}</div>
       ${tab === 'pre' ? preTab(g) : live()}`;
     wireGame();
@@ -4391,7 +4524,6 @@
     ov.querySelector('.sheet').setAttribute('aria-label', title);
     const body = ov.querySelector('.sheet-b');
     if (typeof content === 'string') body.innerHTML = content; else body.appendChild(content);
-    document.dispatchEvent(new CustomEvent('nfle-sheet', { detail: ov.querySelector('.sheet-b') }));
     ov.addEventListener('click', e => {
       if (e.target === ov || e.target.closest('.sheet-x')) { close(); return; }
       // a player or team opens a card over the sheet, which the card stack sets aside and brings back (shell.js);
@@ -4401,6 +4533,8 @@
     });
     document.addEventListener('keydown', onKey);
     document.body.appendChild(ov);
+    // once it's on the page (2026-10-23: news already fetched filled synchronously, into a box not yet attached: empty)
+    document.dispatchEvent(new CustomEvent('nfle-sheet', { detail: ov.querySelector('.sheet-b') }));
     ov.querySelector('.sheet-x').focus();
     // tables inside stick their heads just under the sheet's title row, not on top of it (owner 2026-10-17)
     ov.querySelector('.sheet').style.setProperty('--sheeth', `${ov.querySelector('.sheet-h').offsetHeight}px`);

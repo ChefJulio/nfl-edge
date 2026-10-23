@@ -1595,3 +1595,21 @@ a.pc-chip.c-clip, a.pc-chip.c-clip:visited { display: inline-flex; align-items: 
 .mg-grp .mg-h { position: absolute; top: -7px; left: 9px; max-width: calc(100% - 18px); margin: 0; padding: 0 5px; line-height: 13px; background: var(--bg); }
 .mg-grp .mg-g { gap: 4px; }
 .mg-grp.one .mg-h { left: 6px; max-width: calc(100% - 12px); padding: 0 4px; letter-spacing: .02em; }
+/* a kick's flight in the field strip (kickoffs, punts): a thin line under the return */
+.fs .fs-kick { top: 2px; bottom: 2px; background: color-mix(in srgb, var(--ink) 35%, transparent); }
+/* the live scoreboard's "What should they do?" (Games > Calc's sheet, owner 2026-10-23) */
+.sb-calc { margin-top: 4px; font: inherit; font-size: 12px; font-weight: 700; color: var(--ink); background: var(--panel2);
+  border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; cursor: pointer; }
+/* the gamecast's Decisions pane (owner 2026-10-23): every 4th down and try, graded by the calculator */
+.dcs-sum { margin: 6px 0 10px; }
+.dcs { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.dcs-i { border: 1px solid var(--line); border-left: 3px solid var(--line); border-radius: var(--r-md); padding: 8px 10px; background: var(--panel); }
+.dcs-i.dcv-ok { border-left-color: var(--good); } .dcs-i.dcv-q { border-left-color: #f0b545; } .dcs-i.dcv-bad { border-left-color: var(--bad); }
+.dcs-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.dcs-t { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.dcv { margin-left: auto; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--panel2); }
+.dcv.dcv-ok { color: var(--good); } .dcv.dcv-q { color: #f0b545; } .dcv.dcv-bad { color: var(--bad); }
+.dcs-opts { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.dcs-o.chose { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; } .dcs-o.best b { color: var(--good); }
+.dcs-why { font-size: 13px; margin-top: 4px; }
+.dcs-r { font-size: 12px; margin-top: 4px; }
