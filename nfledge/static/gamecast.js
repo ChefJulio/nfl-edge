@@ -3852,6 +3852,9 @@
   // play went along it"): the offense always drives left to right, its end zone on the left in its color and the
   // opponent's on the right; a dot where the ball was snapped, a bar to where it ended (green gain, red loss, amber on a
   // flag, gray for kicks, red to where a turnover left it); a touchdown runs into the end zone. 120 yards wide.
+  // "X kicks 60 yards from NE 35 to CHI 5." / "punts 44 yards to DAL 12" (a punt: from the line of scrimmage) /
+  // "kicks 65 yards from KC 35 to end zone": [, yards, from side, from yard line, to side, to yard line, end zone]
+  const KICK_RX = / (?:kicks|punts)(?: onside)? (\d+) yards?(?: from ([A-Z]{2,3}) (\d{1,2}))?(?: to (?:the )?(?:([A-Z]{2,3}) )?(\d{1,2})| to (?:the )?(end zone)|, (end zone))?/;
   const fieldStrip = (p, info) => {
     const a = spot(p.start, info);
     if (!a || a.x == null || nonPlay(p)) return '';
@@ -3862,7 +3865,7 @@
     let e = b && b.x != null ? rel(b.x) : s0;
     // a flag enforced on top of a play that counts: the play's own yards from the text before "PENALTY"
     let mid = null;
-    if (!td && /PENALTY on/.test(String(p.text || '')) && !/no play/i.test(t) && !p.isTurnover) {
+    if (!td && /PENALTY on/.test(String(p.text || '')) && !/no play/i.test(t) && !p.isTurnover && !stPlay(p)) {
       const pre = String(p.text).split('PENALTY')[0], m = pre.match(/for (-?\d+) yards?/);
       const own = /no gain/.test(pre) ? 0 : m ? +m[1] : null;
       if (own != null && Math.abs(s0 + own - e) >= 1) mid = s0 + own;
@@ -3876,12 +3879,39 @@
     const off = a.offense, opp = off.team === info.away.team ? info.home : info.away;
     const seg = (x0, x1, c) => { const lo = Math.min(x0, x1), hi = Math.max(x0, x1);
       return hi - lo >= 0.5 ? `<i class="fs-seg fs-${c}" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%"></i>` : ''; };
+    // a flag's yards from where the play itself ended (m): past it plain yellow; back over the play's own yards
+    // (from s), striped
+    const flag = (s, m, e) => { const back = (e - m) * (m - s) < 0, over = back ? (Math.abs(e - m) <= Math.abs(m - s) ? e : s) : m;
+      return back ? seg(m, over, 'pen fs-stripe') + seg(over, e, 'pen') : seg(m, e, 'pen'); };
+    // Kickoffs and punts (owner 2026-10-23: "a line from where the kick was caught ... then show the return yardage from
+    // there"; "the penalty was an extra 5 on the end of the return"): drawn for the RECEIVING team, its end zone on the
+    // left: a thin line for the kick to where it came down, the return from there, then a flag's yards from the end of
+    // the return. A touchback: the kick into the end zone, the dot where the ball was put. The plain strip when the text
+    // doesn't say where the kick came down or the kicking team kept the ball (onside, a muff it recovered).
+    const km = kick && String(p.text || '').match(KICK_RX);
+    if (km && b && b.x != null && b.offense.team !== a.offense.team) {
+      const raw = String(p.text || ''), R = b.offense, K = a.offense, rHome = R.team === info.home.team;
+      const abs = (side, n) => { const c = side ? ourCode(side) : null; return n === 50 || !c ? 50 : (c === info.home.team ? 100 - n : n); };
+      const r = x => (rHome ? 100 - x : x);  // the receiving team's yards from its own goal line
+      const tb = /touchback/i.test(raw), land = km[6] || km[7] || tb ? -5 : km[5] != null ? r(abs(km[4], +km[5])) : null;
+      // a punt's text has no "from": its yards run from the line of scrimmage (ESPN's start team can be either side)
+      const from = km[3] != null ? r(abs(km[2], +km[3])) : land != null && land >= 0 ? land + +km[1] : r(a.x);
+      if (land != null) {
+        const end = r(b.x), catchAt = Math.max(0, land);
+        const rm = raw.slice(raw.search(/ (?:kicks|punts) /)).split('PENALTY')[0].match(/ for (-?\d+) yards?| for no gain/);
+        const ret = tb || !rm ? null : rm[1] != null ? +rm[1] : 0, retEnd = ret == null ? null : catchAt + ret;
+        let kb = seg(from, land, 'kick');
+        if (retEnd != null) {
+          kb += seg(catchAt, retEnd, retEnd >= catchAt ? 'gain' : 'loss');
+          if (/PENALTY on/.test(raw) && Math.abs(end - retEnd) >= 1) kb += flag(catchAt, retEnd, end);
+        } else if (!tb && /PENALTY on/.test(raw) && Math.abs(end - catchAt) >= 1) kb += seg(catchAt, end, 'pen');
+        return `<span class="fs" aria-hidden="true" style="--oc:${esc(R.color || '#888')};--dc:${esc(K.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
+          + `${kb}<i class="fs-dot" style="left:${pc(tb ? end : catchAt)}%"></i></span>`;
+      }
+    }
     let bars;
     if (mid != null) {
-      const play = seg(s0, mid, mid > s0 ? 'gain' : mid < s0 ? 'loss' : 'zero');
-      // the penalty from where the play ended: past it, plain yellow; back over the play's own yards, striped
-      const back = (e - mid) * (mid - s0) < 0, over = back ? (Math.abs(e - mid) <= Math.abs(mid - s0) ? e : s0) : mid;
-      bars = play + (back ? seg(mid, over, 'pen fs-stripe') + seg(over, e, 'pen') : seg(mid, e, 'pen'));
+      bars = seg(s0, mid, mid > s0 ? 'gain' : mid < s0 ? 'loss' : 'zero') + flag(s0, mid, e);
     } else bars = seg(s0, e, cls);
     return `<span class="fs" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
       + `${bars}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;

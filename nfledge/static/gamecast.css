@@ -1595,3 +1595,5 @@ a.pc-chip.c-clip, a.pc-chip.c-clip:visited { display: inline-flex; align-items: 
 .mg-grp .mg-h { position: absolute; top: -7px; left: 9px; max-width: calc(100% - 18px); margin: 0; padding: 0 5px; line-height: 13px; background: var(--bg); }
 .mg-grp .mg-g { gap: 4px; }
 .mg-grp.one .mg-h { left: 6px; max-width: calc(100% - 12px); padding: 0 4px; letter-spacing: .02em; }
+/* a kick's flight in the field strip (kickoffs, punts): a thin line under the return */
+.fs .fs-kick { top: 2px; bottom: 2px; background: color-mix(in srgb, var(--ink) 35%, transparent); }
