@@ -719,7 +719,7 @@
   };
   const CALLS = {};  // game id -> { n: plays seen, html }
   const callsPane = (sum, info) => {
-    const box = `<section class="gcs" id="gcCalls"><h3>Decisions</h3><p class="gcs-note">Every 4th down and try after a touchdown, judged before the snap by <a href="${siteRoot()}#games/calc">our calculator</a> (not by how it turned out): the chance to win after each option. Questionable = gave up 3+ points of win chance; debatable = 1.5-3; inside 1.5 is the model's noise. The conversion rate is an average offense's; a team that knows its short-yardage game is better can be right to go. Timeouts aren't graded.</p><div class="dcs-body">`;
+    const box = `<section class="gcs" id="gcCalls"><h3>Decisions</h3><p class="gcs-note">Every 4th down and try after a touchdown, judged before the snap by <a href="${siteRoot()}#games/calc">our calculator</a> (not by how it turned out): the chance to win after each option. Questionable = gave up 3+ points of win chance; debatable = 1.25-3; inside 1.25 is the model's noise (measured: below it, refitting the model on resampled games flips the call more than 1 time in 5). The conversion rate is an average offense's; a team that knows its short-yardage game is better can be right to go. Timeouts aren't graded.</p><div class="dcs-body">`;
     if (!sum) return `${box}<p class="muted">Decisions appear once the game starts.</p></div></section>`;
     const n = allPlays(sum).reduce((t, d) => t + (d.plays || []).length, 0), hit = CALLS[info.id];
     if (hit && hit.n === n) return `${box}${hit.html}</div></section>`;
@@ -3014,7 +3014,9 @@
     const as = score('away'), hs = score('home'), f = g.fc || {};
     // live: the clock, and the down on the right (owner 2026-10-18; "Goal" as "G" so the widest, "OT 10:00 3rd & G", fits)
     const dd = sit && sit.shortDownDistanceText ? String(sit.shortDownDistanceText).replace(/Goal/i, 'G') : '';
-    const status = live ? `<span><span class="live-dot"></span>${esc(`${periodName(st.period)} ${st.clock || ''}`.trim())}</span>${dd ? `<span class="mg-dd">${esc(dd).replace(/ &amp; /, '&#8239;&amp;&#8239;')}</span>` : ''}`
+    // stacked in the middle column, one short line each (2026-10-23: "Q4 9:40" on one line widened the column until the
+    // home team's code ran under it); the red border says live, so no dot here
+    const status = live ? `<span>${esc(periodName(st.period))}</span>${st.clock ? `<span>${esc(st.clock)}</span>` : ''}${dd ? `<span class="mg-dd">${esc(dd).replace(/ &amp; /, '&#8239;&amp;&#8239;')}</span>` : ''}`
       : fin ? (st && /OT/i.test(st.detail || '') || (g.final && g.final.ot) ? 'Final/OT' : 'Final')
       : kickMs(g) != null && kickMs(g) !== groupMs ? esc(localTime(kickMs(g)).replace(/\s?[AP]M$/i, '')) : '';  // the heading has the AM / PM
     const side = (s, k, n, other) => {
@@ -3026,7 +3028,7 @@
     const c = g.colors || {};
     return `<a class="mg${live ? ' live' : ''}${sp && sp.red ? ' rz' : ''}${fin ? ' fin' : ''}" data-gid="${esc(g.id)}" href="${esc(gameHref(g))}"
       style="--ta:${esc(c[g.away.team] || '#444')};--th:${esc(c[g.home.team] || '#444')}">
-      <span class="mg-vs">${side(g.away, 'away', as, hs)}<span class="mg-at">${g.neutral ? 'vs' : '@'}${status ? `<span class="mg-st">${status}</span>` : ''}</span>${side(g.home, 'home', hs, as)}</span></a>`;
+      <span class="mg-vs">${side(g.away, 'away', as, hs)}<span class="mg-at">${live ? '' : g.neutral ? 'vs' : '@'}${status ? `<span class="mg-st">${status}</span>` : ''}</span>${side(g.home, 'home', hs, as)}</span></a>`;
   };
   const paintMini = () => {
     const box = document.querySelector('.mgrid');
