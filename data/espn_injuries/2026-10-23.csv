@@ -374,8 +374,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4608929,Emmanuel Pregnon,Jacksonville Jaguars,Active,2026-10-16T18:44Z,,,,,,
 4426448,Jarrian Jones,Jacksonville Jaguars,Active,2026-10-16T18:44Z,,,,,,
 3045207,Jourdan Lewis,Jacksonville Jaguars,Active,2026-10-16T18:44Z,,,,,,
+4428331,Rashee Rice,Kansas City Chiefs,Out,2026-10-23T18:23Z,Hamstring,Not Specified,Not Specified,2026-11-01,OUT,"Rice (hamstring) will be out for Sunday's game at Seattle, Sam McDowell of The Kansas City Star reports."
 4596602,Brashard Smith,Kansas City Chiefs,Questionable,2026-10-23T17:40Z,Hamstring,,,2026-10-25,QUESTIONABLE,questionable
-4428331,Rashee Rice,Kansas City Chiefs,Out,2026-10-23T17:04Z,Hamstring,Not Specified,Not Specified,2026-11-01,OUT,"Rice (hamstring/knee) was not present during the portion of Friday's practice open to the media, Pete Sweeney of The Kansas City Star reports."
 15847,Travis Kelce,Kansas City Chiefs,Questionable,2026-10-22T20:56Z,Ankle,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,Kelce (ankle) was listed as a limited participant in Thursday's practice.
 4569659,Josh Simmons,Kansas City Chiefs,Injured Reserve,2026-10-22T18:25Z,Back,Not Specified,Not Specified,2026-11-22,IR,The Chiefs placed Simmons (lower back) on injured reserve Thursday.
 4040432,L'Jarius Sneed,Kansas City Chiefs,Questionable,2026-10-21T23:04Z,Knee,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
@@ -449,9 +449,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4567138,Justin Eboigbe,Los Angeles Chargers,Active,2026-10-16T20:15Z,,,,,,
 3917668,Alec Ingold,Los Angeles Chargers,Injured Reserve,2026-10-15T20:06Z,Shoulder,Not Specified,Not Specified,2026-11-22,IR,The Chargers placed Ingold on injured reserve Thursday due to a shoulder injury.
 2579621,Denzel Perryman,Los Angeles Chargers,Injured Reserve,2026-10-15T01:08Z,Undisclosed,Not Specified,Not Specified,2026-11-01,IR,"Chargers head coach Jim Harbaugh said Wednesday that Perryman (undisclosed) won't be reinstated from injured reserve ahead of Sunday's game against the Chiefs, Alex Insdorf of BoltBeat.com reports."
-4426515,Puka Nacua,Los Angeles Rams,Questionable,2026-10-23T12:48Z,Calf,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"The calf injury Nacua sustained Thursday is believed to be ""more minor than anything else"" and ""not significant,"" Ian Rapoport of NFL Network reports."
+4243181,Nate Landman,Los Angeles Rams,Out,2026-10-23T18:29Z,Concussion,Concussion,Not Specified,2026-11-01,OUT,out
+4426515,Puka Nacua,Los Angeles Rams,Questionable,2026-10-23T18:25Z,Calf,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"Nacua (calf) won't practice Friday and will be listed as questionable for Sunday's game at Las Vegas, Sarah Barshop of ESPN.com reports."
 4426405,Trent McDuffie,Los Angeles Rams,Questionable,2026-10-22T00:31Z,Groin,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"McDuffie (groin) did not participate in Wednesday's practice, Adam Grosbard of The Orange County Register reports."
-4243181,Nate Landman,Los Angeles Rams,Questionable,2026-10-22T00:21Z,Concussion,Concussion,Not Specified,2026-10-25,QUESTIONABLE,"Landman (concussion) did not participate in Wednesday's practice, Adam Grosbard of The Orange County Register reports."
 4250621,Kobie Turner,Los Angeles Rams,Injured Reserve,2026-10-21T23:27Z,Groin,Strain,Not Specified,2026-11-25,IR,The Rams placed Turner (groin) on injured reserve Wednesday.
 4242154,Kam Curl,Los Angeles Rams,Active,2026-10-21T03:00Z,,,,,,Curl finished Sunday's 18-16 loss to the Cardinals with eight tackles (three solo).
 4249128,Quentin Lake,Los Angeles Rams,Active,2026-10-21T02:42Z,,,,,,Lake registered seven tackles (six solo) and an interception during the Rams' 18-16 loss to the Cardinals on Sunday.
@@ -499,9 +499,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685637,Jackson Woodard,Miami Dolphins,Active,2026-10-11T16:53Z,,,,,,Woodard (ankle) is listed as active for Sunday's game against the Bengals.
 4894654,Kenneth Grant,Miami Dolphins,Active,2026-10-11T00:31Z,,,,,,The Dolphins activated Grant (toe) from injured reserve Saturday.
 4431664,Dante Trader Jr.,Miami Dolphins,Active,2026-10-10T00:11Z,,,,,,"Trader (shin) does not have an injury designation against the Bengals on Sunday, Paul Dehner Jr. of The Athletic reports."
+4360569,Jordan Mason,Minnesota Vikings,Injured Reserve,2026-10-23T18:21Z,Thumb,Surgery,Not Specified,2026-10-25,IR-R,"Head coach Kevin O'Connell said Friday that Mason (thumb) is listed as questionable for Sunday's game against the Colts after practicing fully all week, Alec Lewis of The Athletic reports."
 4361985,Christian Darrisaw,Minnesota Vikings,Questionable,2026-10-23T01:56Z,Concussion,Concussion,Not Specified,2026-10-25,QUESTIONABLE,Darrisaw (concussion) was a full participant at the Vikings practice Thursday.
 4036133,T.J. Hockenson,Minnesota Vikings,Questionable,2026-10-22T22:26Z,Concussion,Concussion,Not Specified,2026-10-25,QUESTIONABLE,Hockenson (concussion) was listed as a full participant Thursday.
-4360569,Jordan Mason,Minnesota Vikings,Injured Reserve,2026-10-22T22:12Z,Thumb,Surgery,Not Specified,2026-10-25,IR-R,Mason (thumb) practiced fully Thursday.
 4262921,Justin Jefferson,Minnesota Vikings,Active,2026-10-22T21:54Z,,,,,,"Jefferson (ankle) practiced in full Thursday, Adam Caplan of SiriusXM NFL Radio reports."
 4259252,James Pierre,Minnesota Vikings,Active,2026-10-22T21:51Z,,,,,,
 3123954,Brian O'Neill,Minnesota Vikings,Active,2026-10-22T21:51Z,,,,,,
