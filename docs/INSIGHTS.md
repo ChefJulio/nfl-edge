@@ -4511,3 +4511,15 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   are within ~1.5 points of the share won (inside the 30: tries won 43.6% / 40.1%, ours 44.9 / 40.3, nfl4th 44.5 /
   39.5), and nfl4th's Brier is a little lower in most zones (significant only on punts from the own 1-25: +0.0027),
   with its numbers fitted on these seasons and ours walk-forward. The red-zone lean is under the toss-up band (1.25).
+- **FINDING 2026-10-23 (owner: "how often does our model disagree with a decision that ends up in a loss for the
+  deciding team?"): (CS) teams that defied the calculator.** tools/calc_defied.py, 15,440 4th downs 2022-25 (walk-
+  forward). We disagreed with 34.3% of the decisions by teams that lost and 35.2% by teams that won (by 3+ points:
+  4.5% vs 4.9%): one 4th down moves a game a few points, so losing says little about the call. Teams we disagreed
+  with by 3+ lost 51.3% against the 57.0% our numbers gave their choice. When we said go by 3+: teams that went won
+  41.0% vs our go forecast 40.6% (+0.4 [-2.6, +3.6]); teams that kicked won 48.6% vs our kick forecast 42.7%: +5.9
+  [+2.8, +9.0] (punts +4.8, field goals +7.4; 2022 +7.9, 2023 +7.7, 2024 +5.9, 2025 +1.4); nfl4th's kick numbers are off
+  the same way (+5.4 [+2.1, +8.7]). Two readings, not separable here: coaches who kick in those spots know something
+  neither model sees (their own team, injuries, weather, the matchup), which would also make "go" worse for them than
+  the forecast; or both models underrate the kick where they most favor going. Either way our largest "go" margins
+  are likely overstated by up to several points for the teams that chose to kick. Not tested against a gate; a
+  shrinkage of the go-minus-kick edge (fit 2022-23, tested 2024-25) is the obvious next test.
