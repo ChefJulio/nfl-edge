@@ -748,6 +748,7 @@
           <div class="dcs-ctx">${ctx(d)}</div>
           <div class="dcs-opts">${opts}</div>
           ${g.early ? '<div class="dcs-why muted">Before the 4th quarter a kick and a two-point try are worth the same on average (95% for 1, 48% for 2): not graded.</div>' : ''}
+          ${d.kind === 'fourth' && g.p && g.p.goMade != null ? `<div class="dcs-br">Go: ${pct(g.p.go)} to convert, then ${pct(g.p.goMade)} to win; ${pct(g.p.goMissed)} if it fails${g.p.fg != null ? ` · Field goal: ${pct(g.p.fg)} to make, then ${pct(g.p.fgMade)}; ${pct(g.p.fgMissed)} if missed` : ''}</div>` : ''}
           ${g.verdict !== 'fine' ? `<div class="dcs-why">${esc(g.options[0].label)} was worth ${pts(g.cost)} more points of win chance${d.kind === 'fourth' && g.p ? ` (${pct(g.p.go)} to convert${g.p.fg != null ? `, ${pct(g.p.fg)} field goal` : ''})` : ''}.${half <= 180 ? ' Last 3:00 of a half: our numbers are rough here.' : ''}</div>` : ''}
           <div class="dcs-r muted">${esc(String(d.p.text || '').slice(0, 160))}</div></li>`;
       };

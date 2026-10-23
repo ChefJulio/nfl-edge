@@ -117,8 +117,8 @@
         const opt = { conv: S.conv !== '' ? +S.conv / 100 : null, fg: S.fg !== '' ? +S.fg / 100 : null };
         const f = C.fourth(s, opt);
         out.push(decision('4th down', [
-          ['Go for it', f.go.wp, `${pc(f.go.p)} to convert`],
-          f.fg ? ['Field goal', f.fg.wp, `${f.fg.dist} yd, ${pc(f.fg.p)} to make${f.fg.rare ? ' (few kicks this long on record)' : ''}`] : null,
+          ['Go for it', f.go.wp, `${pc(f.go.p)} to convert: ${pc(f.go.ifMade)} to win if it works, ${pc(f.go.ifMissed)} if it fails`],
+          f.fg ? ['Field goal', f.fg.wp, `${f.fg.dist} yd, ${pc(f.fg.p)} to make: ${pc(f.fg.ifMade)} to win if good, ${pc(f.fg.ifMissed)} if missed${f.fg.rare ? ' (few kicks this long on record)' : ''}`] : null,
           f.punt ? ['Punt', f.punt.wp, `their ball near their ${Math.round(100 - f.punt.net)}`] : null,
         ], `<div class="cx-edit"><label>Convert %<input type="tel" data-k="conv" inputmode="decimal" placeholder="${(100 * f.go.p).toFixed(0)}" value="${esc(S.conv)}"></label>
           ${f.fg ? `<label>Field goal %<input type="tel" data-k="fg" inputmode="decimal" placeholder="${(100 * f.fg.p).toFixed(0)}" value="${esc(S.fg)}"></label>` : ''}

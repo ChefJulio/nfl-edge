@@ -201,7 +201,7 @@
     function grade(kind, s, choice, opts = {}) {
       let o;
       if (kind === 'try') { const t = tries(s); o = { xp: t.xp.wp, two: t.two.wp }; }
-      else { const f = fourth(s, opts); o = { go: f.go.wp }; if (f.fg) o.fg = f.fg.wp; if (f.punt) o.punt = f.punt.wp; o._p = { go: f.go.p, fg: f.fg && f.fg.p }; }
+      else { const f = fourth(s, opts); o = { go: f.go.wp }; if (f.fg) o.fg = f.fg.wp; if (f.punt) o.punt = f.punt.wp; o._p = { go: f.go.p, fg: f.fg && f.fg.p, goMade: f.go.ifMade, goMissed: f.go.ifMissed, fgMade: f.fg && f.fg.ifMade, fgMissed: f.fg && f.fg.ifMissed }; }
       const p = o._p; delete o._p;
       const ranked = Object.entries(o).sort((x, y) => y[1] - x[1]);
       const best = ranked[0], chosen = o[choice];
