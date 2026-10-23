@@ -4306,9 +4306,13 @@
   const TIP_HINT = '<span class="muted">Tap or drag on the chart for any moment of the game</span>';
   const wireGame = () => {
     const root = document.getElementById('gc');
-    root.querySelectorAll('[data-gtab]').forEach(b => b.onclick = () => { GP.tab = b.dataset.gtab; renderGame(); });
+    // (owner 2026-10-23: "our scroll position doesn't get cleared") a new tab starts at its top: scrolled past the tab
+    // row, come back up to it (on iOS, a shorter tab under an old scroll position showed blank space below the footer)
+    const toBar = sel => { const e = document.querySelector(sel), pv = e && e.previousElementSibling;
+      const y = pv ? pv.getBoundingClientRect().bottom + scrollY : 0; if (scrollY > y) scrollTo({ top: y }); };
+    root.querySelectorAll('[data-gtab]').forEach(b => b.onclick = () => { GP.tab = b.dataset.gtab; renderGame(); toBar('.gc-tabs'); });
     // Box score opens on its Fantasy tab (owner 2026-10-18); a team picked there sticks while you stay on Box score
-    root.querySelectorAll('[data-pane]').forEach(b => b.onclick = () => { if (b.dataset.pane === 'box' && GP.pane !== 'box') GP.pst = '__fp'; GP.pane = b.dataset.pane; GP.paneSet = true; renderGame(); });
+    root.querySelectorAll('[data-pane]').forEach(b => b.onclick = () => { if (b.dataset.pane === 'box' && GP.pane !== 'box') GP.pst = '__fp'; GP.pane = b.dataset.pane; GP.paneSet = true; renderGame(); toBar('.gc-panes'); });
     root.querySelectorAll('[data-plsub]').forEach(b => b.onclick = () => { GP.plSub = b.dataset.plsub; renderGame(); });
     const toPane = (k, sel) => { GP.pane = k; renderGame(); const e = document.querySelector(sel || '.gc-panes'); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     root.querySelectorAll('[data-pane-go]').forEach(b => b.onclick = () => toPane(b.dataset.paneGo));
