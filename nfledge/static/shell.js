@@ -875,10 +875,13 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       raf = 0;
       if (touching || overscrolled()) return;
       const drift = vv.offsetTop + vv.height - html.clientHeight;
+      // the bar's BOTTOM edge goes to the visible bottom, never its top (2026-10-23, owner: after switching apps the
+      // bar sat in the home-indicator area): right after a resume iOS reports the safe area as 0 for a moment, so a
+      // top computed from the bar's height then was too low once the safe-area padding came back and the bar grew
       if (Math.abs(drift) > 40 && !html.classList.contains('kb-open')) {
-        bot.style.top = `${Math.round(vv.offsetTop + vv.height - bot.offsetHeight)}px`;
-        bot.style.bottom = 'auto';
-      } else if (bot.style.top) {
+        bot.style.bottom = `${Math.round(-drift)}px`;
+        bot.style.top = 'auto';
+      } else if (bot.style.bottom || bot.style.top) {
         bot.style.top = ''; bot.style.bottom = '';
       }
     };
