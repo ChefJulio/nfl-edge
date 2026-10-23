@@ -19,7 +19,10 @@ const gradeAll = (C, rows) => rows.map(r => {
   const w = Object.fromEntries(g.options.map(o => [o.key, o.wp]));
   const second = g.options[1] ? g.options[1].wp : g.options[0].wp;
   return { ...r, f_chosen: w[r.choice], best: g.best, gap: g.options[0].wp - second, w_go: w.go ?? null, w_fg: w.fg ?? null, w_punt: w.punt ?? null,
-           p_conv: g.p && g.p.go };
+           p_conv: g.p && g.p.go,
+           // (CO) the branches of the chosen option (if it works / if it fails)
+           f_made: g.p ? (r.choice === 'go' ? g.p.goMade : r.choice === 'fg' ? g.p.fgMade : null) ?? null : null,
+           f_missed: g.p ? (r.choice === 'go' ? g.p.goMissed : r.choice === 'fg' ? g.p.fgMissed : null) ?? null : null };
 }).filter(Boolean);
 
 if (process.argv.includes('--boot')) {

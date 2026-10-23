@@ -4391,3 +4391,27 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   else only if the play ended out of bounds (13.6%). The owner's play (ATL, tied, own 45, 0:08, no timeouts): go now
   40.9% (converts 47.3% -> 53.4%, fails -> 29.8%) vs the punt's 49.7%: the punt is the right call (it read go +5.8).
   (CJ) check (1) rerun: PASS (Brier 0.1533), 79.2% agreement with nfl4th.
+- **PRE-REGISTERED 2026-10-23 (owner, on the top-20 list: "lots of them, if you fail the conversion your win chance
+  tanks to very low, and if you play conservative ... you retain a reasonable chance to win. it's like teams favor
+  prolonging their substantial chance to win over going for the throat" ... "ya"): (CO) the branches as forecasts.**
+  (CJ) checked the blended number of the chosen option; a model too kind to failure could still pass there if it were
+  also too harsh on success. Here each branch is checked on its own: the same 2022-25 regulation 4th downs and walk-
+  forward model files as (CJ), each graded with the current engine; for tries, the play's actual result (converted:
+  fourth_down_converted or the offense's touchdown; else failed) picks the branch, and the forecast for that branch
+  (win chance if it works / if it fails, as the page shows) is compared with the share of those games won; the same
+  for field goals (made / missed). Gate (all): per branch (go-converted, go-failed, fg-made, fg-missed) the mean
+  forecast within 3 points of the share won, and no decile of 50+ off by more than 6 (as (CJ)). Reported, no gate:
+  the fail branch on the 4th quarter alone and on tries from the own side of the field (the list's typical spot).
+  Penalty plays (no_play) are out, as in (CJ). If the fail branch reads high (too kind), the engine's "after a failed
+  4th down" state is examined before anything ships.
+- **RESULT {#branch-calib} (CO) the branches as forecasts: FAIL (deciles); the fail branch is NOT too kind.**
+  tools/calc_validate.py branches, 2022-25 (3,151 tries, 53.9% converted; 3,923 field goals, 85.8% made). Won minus
+  forecast, 95% interval by games: go failed +0.5 [-0.9, +2.2] (1,452; 4th quarter +0.1, 4th quarter on the own side
+  +1.7 of 283): the owner's worry, that losing the ball on downs is worse than the page says, does not show. Go
+  converted -1.0 [-2.8, +0.7] (1,699) but mid-range reads high: forecasts 40-80% -4.6 [-9.2, -0.3] (519; deciles 0.5
+  -6.0, 0.7 -8.2): after a conversion the page is too generous by about 4-5 points there, which inflates "go" by
+  roughly p x that (2-3 points) on plays like the top-20 list's own-side punts. Field goal missed -3.3 [-6.4, -0.5]
+  (558; 20-70% forecasts -6.4): the state after a miss reads too kindly. Field goal made passes (-0.7). Deciles off by
+  more than 6 with 50+: go converted 1, go failed 1 (0.6: -11.7 of 64), field goal missed 3. Not shipped (no change was
+  proposed); the two over-reads are the next things to examine (the state the engine uses after a conversion: the
+  average gain and its clock; after a missed kick: the spot and the clock).

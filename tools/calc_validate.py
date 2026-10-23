@@ -6,6 +6,7 @@ accurate model? what data shows we're right?").
   node tools/calc_validate.mjs                                               grades them with each season's walk-forward model
   python tools/calc_validate.py analyze                                      (1) calibration of the chosen option, (3) agreement with nfl4th
   python tools/calc_validate.py boot                                         (2) the noise band from the bootstrap refits
+  python tools/calc_validate.py branches                                     (CO) each branch (if it works / if it fails) as a forecast
 Model files: tools/calc_build.py --through=<season before> --out=scratch/calc_val/through_<y>.json (and --boot=<seed>).
 """
 import json
@@ -42,7 +43,10 @@ def export(nfl4th_path: str):
       "line": np.where(home, x.spread_line, -x.spread_line), "total": x.total_line.fillna(45), "home": home.astype(int),
       "rec2h": (x.game_id.map(first_rec) != x.posteam).astype(int), "roof": x.roof.map(ROOF).fillna("outdoors"),
       "wind": x.wind, "choice": x.play_type.map({"run": "go", "pass": "go", "punt": "punt", "field_goal": "fg"}),
-      "won": np.where(home, x.result > 0, x.result < 0).astype(int), "team": x.posteam})
+      "won": np.where(home, x.result > 0, x.result < 0).astype(int), "team": x.posteam,
+      # (CO) which branch happened: a try converted (first down or the offense's touchdown), a field goal made
+      "conv": ((x.fourth_down_converted == 1) | ((x.touchdown == 1) & (x.td_team == x.posteam))).astype(int),
+      "fgm": (x.field_goal_result == "made").astype(int)})
     rows = rows.merge(n4, on=["game_id", "play_id"], how="left")
     rows = rows.replace({np.nan: None})
     (OUT / f"rows_{s}.json").write_text(json.dumps(rows.to_dict("records")), encoding="utf-8")
@@ -130,8 +134,37 @@ def boot():
       break
 
 
+def branches():
+  """(CO) each branch as a forecast: the branch that happened picks the forecast, against the share of games won."""
+  g = _load("graded")
+  go, fg = g[g.choice == "go"], g[g.choice == "fg"]
+  sets = {"go converted": (go[go.conv == 1], "f_made"), "go failed": (go[go.conv == 0], "f_missed"),
+          "fg made": (fg[fg.fgm == 1], "f_made"), "fg missed": (fg[fg.fgm == 0], "f_missed")}
+  ok = True
+  print(f"[val] (CO) {len(go):,} tries ({go.conv.mean():.1%} converted), {len(fg):,} field goals ({fg.fgm.mean():.1%} made), 2022-25")
+  for lab, (x, col) in sets.items():
+    x = x[x[col].notna()]
+    gap = x.won.mean() - x[col].mean()
+    dec = np.minimum((x[col] * 10).astype(int), 9)
+    cal = x.groupby(dec).agg(n=("won", "size"), forecast=(col, "mean"), won=("won", "mean"))
+    cal["gap"] = cal.won - cal.forecast
+    bad = cal[(cal.n >= 50) & (cal.gap.abs() > 0.06)]
+    good = abs(gap) <= 0.03 and bad.empty
+    ok &= good
+    print(f"\n  {'ok ' if good else 'BAD'} {lab:13s} n {len(x):5d}  forecast {x[col].mean():.3f}  won {x.won.mean():.3f} ({gap:+.3f})"
+          f"  Brier {np.mean((x[col] - x.won) ** 2):.4f}")
+    print("  " + cal.round(3).to_string().replace("\n", "\n  "))
+  print(f"\n[val] (CO) gate: {'PASS' if ok else 'FAIL'}")
+  f = go[go.conv == 0]
+  for lab, x in (("4th quarter", f[f.qtr == 4]), ("own side (51+ yards out)", f[f.yl > 50]),
+                 ("4th quarter, own side", f[(f.qtr == 4) & (f.yl > 50)])):
+    print(f"  failed tries, {lab}: n {len(x)}  forecast {x.f_missed.mean():.3f}  won {x.won.mean():.3f} ({x.won.mean() - x.f_missed.mean():+.3f})")
+  # what a punt would have kept, on the same failed tries (the owner's comparison)
+  print(f"  failed tries: the punt's forecast at the snap {f.w_punt.mean():.3f} (n {f.w_punt.notna().sum()}), going's {f.w_go.mean():.3f}")
+
+
 if __name__ == "__main__":
   cmd = sys.argv[1] if len(sys.argv) > 1 else "analyze"
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
   OUT.mkdir(parents=True, exist_ok=True)
-  {"export": lambda: export(opt["nfl4th"]), "analyze": analyze, "boot": boot}[cmd]()
+  {"export": lambda: export(opt["nfl4th"]), "analyze": analyze, "boot": boot, "branches": branches}[cmd]()
