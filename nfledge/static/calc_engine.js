@@ -31,6 +31,22 @@
       return z;
     };
     const raw = x => trees(W, x);
+    // (CN2, owner 2026-10-23, ATL tied at its own 45 with 0:08 and no timeouts: "the realistic likelihood you will get
+    // into fg range from there and be able to kick without a timeout must be tiny") the last snap as football rules: a
+    // field goal or a heave for a touchdown, whichever is better (a leader kneels), then the score decides and a tie
+    // is overtime at 50%. On 493 real final snaps (2019-25) it beat the model, Brier 0.0880 vs 0.1014 (tied near
+    // midfield: won 50%, this 51%, the model 66.5%). Heave touchdown rates: half-ending passes with 0:06 or less.
+    const FINAL = d => (d > 0 ? 1 : d < 0 ? 0 : 0.5);
+    const HEAVE = yl => (yl <= 20 ? 0.30 : yl <= 50 ? 0.03 : yl <= 60 ? 0.015 : 0.003);
+    let fgPRef = null;  // set once fgP exists (defined below)
+    const lastSnap = s => {
+      if (s.diff > 0) return 1;
+      let best = FINAL(s.diff);
+      if (fgPRef && s.yl + 18 <= 70) { const p = fgPRef(s.yl, s); best = Math.max(best, p * FINAL(s.diff + 3) + (1 - p) * FINAL(s.diff)); }
+      const h = HEAVE(s.yl);
+      return Math.max(best, h * FINAL(s.diff + 7) + (1 - h) * FINAL(s.diff));
+    };
+    const SNAP_GAP = 10, LAST = 12, OOB = 0.136;  // a spike or snap needs ~10 s; 13.6% of late conversions end out of bounds
     // the clock can be run out: the team that has the ball and leads, the other side short of timeouts (nfl4th's rule)
     const kneel = (sec, defTo) => (defTo === 0 && sec < 120) || (defTo === 1 && sec < 80) || (defTo === 2 && sec < 40);
     const featuresOf = s => {
@@ -59,6 +75,7 @@
       }
       if (s.sec <= 0) return s.diff > 0 ? 1 : s.diff < 0 ? 0 : 0.5;  // time's up (overtime: a coin flip here)
       if (s.diff > 0 && s.sec <= 120 && kneel(s.sec, s.oppTo)) return 1;  // the leader kneels it out
+      if (s.sec <= 6) return lastSnap(s);  // (CN2) the 4th quarter's last snap
       // (CK2, the owner's call 2026-10-23: "can we treat 1 and 2 point leads as the same thing?") late, a 1- and a
       // 2-point lead are one state (a field goal beats both): their average. Only late (owner: "the time left matters a
       // lot": with time for more scoring, 1 vs 2 decides 6 vs 7 and 8 vs 9 later). Real games, team with the ball
@@ -75,7 +92,12 @@
     // the other team's side of the same moment
     const flip = s => ({ ...s, diff: -s.diff, to: s.oppTo, oppTo: s.to, line: -(s.line || 0), home: s.home ? 0 : 1, rec2h: s.rec2h ? 0 : 1 });
     // a new possession for the OTHER team: 1st & 10 at `yl` (its yards to the end zone), the clock run by `t`
-    const theirBall = (s, yl, t, pts = 0) => { const o = flip({ ...s, diff: s.diff + pts }); return 1 - wp(later({ ...o, down: 1, togo: Math.min(10, yl), yl }, t)); };
+    const theirBall = (s, yl, t, pts = 0) => {
+      const o = later({ ...flip({ ...s, diff: s.diff + pts }), down: 1, togo: Math.min(10, yl), yl }, t);
+      // (CN2) a change of possession stops the clock: with 0:12 or less left they get one snap
+      if (!o.over && o.sec <= LAST && o.sec > 0) return 1 - lastSnap(o);
+      return 1 - wp(o);
+    };
     const PLAY = I.clock.play_len;  // a snap's own length
     // after we score: they receive the kickoff (its measured landing spots: the 2025 rules)
     const afterScore = (s, pts, t = PLAY) => mean(I.kickoff.rec.map(yl => theirBall(s, yl, t + 5, pts)));
@@ -96,7 +118,7 @@
     };
     const fgDist = yl => yl + I.fg.offset;
     // make rate: the recent table, shifted for roof and wind (outdoors; unknown wind = a typical 8 mph)
-    const fgP = (yl, s = {}) => {
+    const fgP = (yl, s = {}) => {  // (lastSnap reads it through fgPRef)
       const f = I.fg, d = Math.round(fgDist(yl));
       if (d > f.from + f.rate.length - 1) return 0;
       const p = clamp(d < f.from ? f.rate[0] : f.rate[d - f.from], 1e-4, 1 - 1e-4), rw = f.roof_wind;
@@ -106,6 +128,7 @@
       const o = roofOf(s).outdoors, ow = o * (s.wind != null && s.wind !== '' ? +s.wind : 8);
       return taper * sig(Math.log(p / (1 - p)) + rw.outdoors * (o - rw.mean_out) + rw.wind_out * (ow - rw.mean_ow));
     };
+    fgPRef = fgP;
     const gainsAt = (togo, yl) => { const b = bucket(I.gains.buckets, togo); return b.bands.find(x => yl > x.lo && yl <= x.hi) || b.bands[b.bands.length - 1]; };
 
     // ---- 4th down: go / field goal / punt
@@ -115,7 +138,13 @@
       const succ = g.succ_over.map(o => {
         const gain = s.togo + Math.max(0, o);
         if (gain >= s.yl) return afterTD(s);
-        return wp(later({ ...s, down: 1, yl: s.yl - gain, togo: Math.min(10, s.yl - gain) }, PLAY));
+        const n = later({ ...s, down: 1, yl: s.yl - gain, togo: Math.min(10, s.yl - gain) }, PLAY);
+        if (!n.over && n.sec <= LAST && n.sec > 0) {
+          // (CN2) a timeout (or a spike, with time for one) buys one snap; else only if the play ended out of bounds
+          if (n.to > 0 || n.sec >= SNAP_GAP) return lastSnap(n);
+          return OOB * lastSnap(n) + (1 - OOB) * FINAL(n.diff);
+        }
+        return wp(n);
       });
       // failed: their ball at the spot
       const fail = g.fail.map(f => theirBall(s, clamp(100 - (s.yl - Math.min(f, s.togo - 1)), 1, 99), PLAY));

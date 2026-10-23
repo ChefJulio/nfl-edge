@@ -4359,3 +4359,35 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   3rd and 4th downs (14,860): Brier 0.2142 -> 0.2141, -0.00006 [-0.00016, +0.00003]: FAIL. Conversion does rise with
   this game's form (worst to best fifth, 4th downs: 50% -> 63%) but the model already follows it (52% -> 61%) through
   field position and the Vegas line (which prices the season); the form terms add nothing.
+- **PRE-REGISTERED 2026-10-23 (owner, on ATL tied at its own 45 with 0:08 and no timeouts: "you very clearly want to go
+  for overtime here ... the realistic likelihood you will get into fg range from there and be able to kick without a
+  timeout must be tiny"): (CN) a last-seconds table.** The calculator said go (55.5% vs the punt's 49.7%) because the
+  win model read ATL after a conversion (1st & 10 near midfield, 0:03, tied) at 85%. Real games, 4th quarter, 0:12 or
+  less, tied, ball 45-60 yards from the end zone: won 48.5% (33, with a timeout) and 50.0% (40, without); the model
+  (fit 2006-18) 65.0% / 62.5%. Change: for 4th-quarter states with 12 seconds or less and the score within 3, the
+  win chance is the measured rate for (behind 1-3 / tied / ahead 1-3) x field position (inside the opponent's 25,
+  25-35, 35-45, 45-60, own side) x the offense has a timeout, shrunk toward the model by 20 states. Gate: fit on
+  2006-18, on 2019-25 such states Brier lower than the model's; if it passes it goes into the engine and (CJ)
+  check (1) is rerun.
+- **RESULT {#lastsec-table} (CN) the last-seconds table: FAIL.** 2019-25, 549 4th-quarter states with 0:12 or less,
+  score within 3: Brier 0.1393 vs the model's 0.1380 (cells of 10-40 games are as noisy as the model). In the owner's
+  cell (tied, ball 45-60 yards out) the games did read 45-58% won vs the model's 59-68%.
+- **PRE-REGISTERED 2026-10-23: (CN2) the last snap as football rules, not a fit.** When a 4th-quarter state leaves one
+  snap (or none), the win chance comes from what that snap can do: a field goal (the page's make rate; the kick
+  distance up to 70) or a heave for a touchdown (measured on half-ending passes with 0:06 or less, 2006-25: inside 20
+  yards 30%, 20-50 yards 3%, 50-60 1.5%, beyond 0.3%), whichever is better for the team with the ball (a leader takes
+  a knee); then the score decides, a tie is overtime at 50%. The number of snaps left: after a change of possession
+  (a failed 4th down, a punt, a kick) the clock stops, one snap if 0:12 or less remain; after a conversion in bounds
+  with no timeout the clock runs, and a spike or another snap needs about 10 seconds (the measured spike gap), so
+  under 0:10 the game ends unless the play went out of bounds (13.6% of late 4th-down conversions); with a timeout,
+  one snap. Test: 2019-25 4th-quarter snaps with 0:06 or less and the score within 8 (the last snap): the rule's win
+  chance vs the model's (fit 2006-18). Gate: Brier lower than the model's. If it passes it goes into the engine and
+  (CJ) check (1) is rerun.
+- **RESULT {#last-snap} (CN2) the last snap as football rules: PASS, shipped.** 2019-25, 493 4th-quarter snaps with
+  0:06 or less, score within 8: Brier 0.0880 vs the model's 0.1014 (fit 2006-18). Tied, ball 45-60 yards out: won
+  50%, rule 51%, model 66.5%; behind 1-3 inside the opponent's 25: won 51.6%, rule 53.4%, model 40.0%. In the engine:
+  wp() of a 4th-quarter state with 0:06 or less is its last snap; after a change of possession with 0:12 or less the
+  other team gets one snap; after a conversion with 0:12 or less, one snap with a timeout or 10+ seconds (a spike),
+  else only if the play ended out of bounds (13.6%). The owner's play (ATL, tied, own 45, 0:08, no timeouts): go now
+  40.9% (converts 47.3% -> 53.4%, fails -> 29.8%) vs the punt's 49.7%: the punt is the right call (it read go +5.8).
+  (CJ) check (1) rerun: PASS (Brier 0.1533), 79.2% agreement with nfl4th.
