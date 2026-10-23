@@ -326,6 +326,18 @@ def others_running() -> bool:
   return any(r["status"] in ("in_progress", "queued") and str(r["databaseId"]) != me for r in runs)
 
 
+def code_sha() -> str | None:
+  """This script's blob sha on main (GitHub's contents API), or None if it can't be read."""
+  repo = os.environ.get("GITHUB_REPOSITORY")
+  if not repo:
+    return None
+  try:
+    return subprocess.run(["gh", "api", f"repos/{repo}/contents/tools/news_watch.py?ref=main", "-q", ".sha"],
+                          capture_output=True, text=True, check=True).stdout.strip() or None
+  except Exception:
+    return None
+
+
 def main():
   """--loop=MINUTES (owner 2026-10-18: GitHub's scheduler ran the 30-minute check twice in a day): look every
   EVERY_MIN minutes for MINUTES, then start the next watcher run (a relay; a running job isn't subject to the
@@ -335,12 +347,25 @@ def main():
   if not loop:
     check(dry)
     return
-  if others_running():
-    print("[watch] a watcher is already running; this one stops")
-    return
   import time
+  # a relay handing off (below) may still be finishing its last step: give it a moment before deferring to it
+  for i in range(3):
+    if not others_running():
+      break
+    if i == 2:
+      print("[watch] a watcher is already running; this one stops")
+      return
+    time.sleep(45)
   end = time.time() + loop * 60
+  sha0 = code_sha()
   while True:
+    # (2026-10-23) a relay runs ~5.5 hours on the code it started with, so a fix pushed meanwhile (the Friday reports
+    # that landed while "due" never triggered a build) waited hours: when this script changes on main, hand off now
+    sha = code_sha()
+    if sha0 and sha and sha != sha0 and not dry:
+      subprocess.run(["gh", "workflow", "run", "news-watch.yml"], check=False)
+      print("[watch] relay: this script changed on main; started a watcher on the new code")
+      return
     try:
       check(dry)
     except Exception as e:  # one bad look never ends the relay
