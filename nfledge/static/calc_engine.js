@@ -14,6 +14,8 @@
   else { root.NFLE = root.NFLE || {}; root.NFLE.calcEngine = E; }
 })(typeof self !== 'undefined' ? self : this, () => {
   const sig = z => 1 / (1 + Math.exp(-z));
+  const KEYS = [['k_up12', 1, 2], ['k_up3', 3, 3], ['k_up46', 4, 6], ['k_up7', 7, 7], ['k_up8', 8, 8],
+                ['k_dn12', -2, -1], ['k_dn3', -3, -3], ['k_dn46', -6, -4], ['k_dn7', -7, -7], ['k_dn8', -8, -8]];  // nfledge/winprob.py KEYS
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   const mean = a => a.reduce((t, v) => t + v, 0) / a.length;
 
@@ -41,6 +43,8 @@
       x[idx.own_to] = s.to; x[idx.opp_to] = s.oppTo; x[idx.exp_margin] = line;
       x[idx.spread_time] = line * Math.exp(-4 * (1 - sec / 3600)); x[idx.home] = s.home ? 1 : 0;
       x[idx.receive_2h] = sec > 1800 ? (s.rec2h ? 1 : 0) : 0; x[idx.diff_time] = s.diff / Math.sqrt(sec + 1);
+      // (CK) the score's football meaning: up 1-2 (a field goal beats it), 3 (ties), 4-6, 7, 8, and the same trailing
+      for (const [k, lo, hi] of KEYS) if (idx[k] != null) x[idx[k]] = s.diff >= lo && s.diff <= hi ? 1 : 0;
       return x;
     };
     // (CJ, 2026-10-23, found by comparing with nfl4th) the half can end: a play that takes the rest of a half ends it

@@ -20,6 +20,14 @@
 
   const DEF = { mode: 'play', a: 'Offense', b: 'Defense', off: 17, def: 20, qtr: 4, clock: '4:00', down: 4, togo: 3, side: 'opp', yard: 38,
     to: 2, oppTo: 3, line: 0, total: 45, roof: 'outdoors', wind: '', home: 1, rec2h: 0, conv: '', fg: '', pen: { on: 'def', yds: 5, auto: 0, lod: 0, gain: 2 } };
+  // the clock as typed: "2:00", or digits only (phones' number pad has no colon), read like a microwave: the last two
+  // are seconds ("200" = 2:00, "45" = 0:45, "1500" = 15:00). null if it isn't a quarter's clock.
+  const clockOf = v => {
+    const t = String(v || '').trim(), m = t.match(/^(\d{1,2}):(\d{2})$/) || (/^\d{1,4}$/.test(t) ? [t, t.slice(0, -2) || '0', t.slice(-2).padStart(2, '0')] : null);
+    if (!m) return null;
+    const mm = +m[1], ss = +m[2];
+    return ss < 60 && mm * 60 + ss <= 900 ? `${mm}:${String(ss).padStart(2, '0')}` : null;
+  };
   const saved = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } };
   const save = S => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* private mode */ } };
 
@@ -50,7 +58,7 @@
         <label>${names[1]}${step('def', S.def, 0, 99, names[1] + ' points')}</label>
       </div>
       ${row('Quarter', seg('qtr', [[1, '1st'], [2, '2nd'], [3, '3rd'], [4, '4th']], S.qtr))}
-      ${row('Clock', `<input type="tel" class="cx-clock" data-k="clock" value="${esc(S.clock)}" inputmode="numeric" aria-label="Clock (m:ss)">`)}
+      ${row('Clock', `<input type="tel" class="cx-clock" data-k="clock" value="${esc(S.clock)}" inputmode="numeric" aria-label="Clock (m:ss, or digits: 200 = 2:00)" placeholder="m:ss">`)}
       ${play ? row('Down', seg('down', [[1, '1st'], [2, '2nd'], [3, '3rd'], [4, '4th']], S.down)) : ''}
       ${play ? row('To go', step('togo', S.togo, 1, 99, 'Yards to go')) : ''}
       ${play ? row('Ball on', `${seg('side', [['own', 'Own'], ['opp', 'Their']], S.side)}${step('yard', S.yard, 1, 50, 'Yard line')}`) : ''}
@@ -173,9 +181,10 @@
       const i = e.target;
       if (i.closest('.cx-out')) return;  // fields in the results update on change (a redraw would drop the focus)
       if (i.matches('.cx-step input')) { const w = i.closest('.cx-step'); if (i.value !== '' && !isNaN(+i.value)) { set(w.dataset.k, Math.max(+w.dataset.lo, Math.min(+w.dataset.hi, +i.value))); draw(false); } }
-      else if (i.dataset.k === 'clock') { if (/^\d{1,2}:\d{2}$/.test(i.value)) { set('clock', i.value); draw(false); } }
+      else if (i.dataset.k === 'clock') { const c = clockOf(i.value); if (c) { set('clock', c); draw(false); } }
       else if (i.dataset.k === 'conv' || i.dataset.k === 'fg') { set(i.dataset.k, i.value === '' || isNaN(+i.value) ? '' : Math.max(0, Math.min(100, +i.value))); draw(false); }
     });
+    inBox.addEventListener('change', e => { if (e.target.dataset && e.target.dataset.k === 'clock') e.target.value = S.clock; });
     // fields in the results (rates, the penalty's yards): on change, then redraw the results
     outBox.addEventListener('change', e => {
       const i = e.target;
