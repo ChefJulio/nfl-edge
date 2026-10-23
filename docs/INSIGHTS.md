@@ -4523,3 +4523,21 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   the forecast; or both models underrate the kick where they most favor going. Either way our largest "go" margins
   are likely overstated by up to several points for the teams that chose to kick. Not tested against a gate; a
   shrinkage of the go-minus-kick edge (fit 2022-23, tested 2024-25) is the obvious next test.
+- **PRE-REGISTERED 2026-10-23 (owner: "sure"): (CT) shrinking the calculator's margin toward the team's choice.**
+  From (CS): where the calculator prefers one option, teams that chose the other did better than its forecast. Model:
+  the chosen-against option's value moves toward the preferred one by a share of the gap: kick' = kick + a x max(0,
+  go - best kick) and go' = go + b x max(0, best kick - go), a and b fit by least squares (through zero) on 2022-23 on
+  the plays where the team chose that option (won minus forecast against the gap). Test on 2024-25: (1) on the plays
+  where teams chose against the calculator (either way), the Brier of the adjusted forecast lower than the unadjusted
+  one with a 95% interval (games resampled, paired) that excludes zero; (2) (CJ) check (1) still passes with the
+  adjusted numbers. A pass would shrink every displayed margin by the fitted shares and the toss-up band and
+  "questionable" line would be re-derived; the page would say the margin is "for a team like this one that has chosen
+  otherwise" only if the shares come out materially different (caveat: the fit can only see teams that chose, so it
+  cannot separate coaches' private knowledge from a shared blind spot of the models).
+- **RESULT {#margin-shrink} (CT) shrinking the margin toward the team's choice: FAIL; not shipped.**
+  tools/calc_shrink_eval.py. Fit 2022-23: a = 1.19 (a kick chosen against "go" moved more than the whole gap toward
+  go, on 2,367 plays), b = 0.77 (222 tries against "kick"). On 2024-25's 2,536 plays against the calculator the Brier
+  got worse, 0.13977 -> 0.14015 (+0.00038 [-0.00036, +0.00106]); teams that kicked when it preferred going won 46.0%
+  against its forecast of 46.1%: no shortfall at all in those seasons (any margin; (CS)'s +5.9 was at 3+ points and
+  mostly 2022-24). (2) also fails (field goals 57.2% adjusted vs 55.6% won). (CS) reads as mostly 2022-23 and noise,
+  not a stable bias; the margins stay as computed.
