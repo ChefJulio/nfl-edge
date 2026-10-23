@@ -27,6 +27,7 @@ SERIOUS = {"Doubtful", "Out", "Injured Reserve", "Physically Unable to Perform",
 QUESTION = {"Questionable", "Day-To-Day"}
 LINE_MOVE = 1.0  # points of spread or total since the live site's build that start a build
 QUIET_MIN = 30
+NEWS_QUIET_MIN = 10  # the news lane (deploy.yml "news", ~6-8 minutes) can follow sooner
 EVERY_MIN = 10   # the relay looks this often
 
 
@@ -263,8 +264,8 @@ def lines_moved(d: dict) -> list:
   return out
 
 
-def recent_build() -> str | None:
-  """Why not to start a build now (one running, queued or just started), else None."""
+def recent_build(quiet: int = QUIET_MIN) -> str | None:
+  """Why not to start a build now (one running, queued or started in the last `quiet` minutes), else None."""
   try:
     runs = json.loads(subprocess.run(["gh", "run", "list", "--workflow", "deploy.yml", "--limit", "5",
                                       "--json", "status,createdAt"], capture_output=True, text=True, check=True).stdout)
@@ -275,7 +276,7 @@ def recent_build() -> str | None:
   for r in runs:
     if r["status"] in ("in_progress", "queued", "waiting", "pending"):
       return f"a build is {r['status']}"
-    if now - datetime.fromisoformat(r["createdAt"].replace("Z", "+00:00")) < timedelta(minutes=QUIET_MIN):
+    if now - datetime.fromisoformat(r["createdAt"].replace("Z", "+00:00")) < timedelta(minutes=quiet):
       return f"a build started at {r['createdAt']}"
   return None
 
@@ -304,15 +305,18 @@ def check(dry: bool) -> None:
     return
   if changes:
     print("[watch] since the last build:\n  " + "\n  ".join(changes))
-  why = recent_build()
+  # (owner 2026-10-23: "i hate how we feel 3 hours+ behind") news takes the news lane: this week's page over the last
+  # deployed site. The rollover and Sunday's play-by-play (ratings refit) need the full build.
+  mode = "full" if any("rolls over" in x or "play-by-play" in x for x in due) else "news"
+  why = recent_build(QUIET_MIN if mode == "full" else NEWS_QUIET_MIN)
   if why:
     print(f"[watch] not starting a build: {why}")
     return
   if dry:
-    print("[watch] --dry-run: would start a build")
+    print(f"[watch] --dry-run: would start a {mode} build")
     return
-  subprocess.run(["gh", "workflow", "run", "deploy.yml"], check=True)
-  print("[watch] started a full build")
+  subprocess.run(["gh", "workflow", "run", "deploy.yml", "-f", f"mode={mode}"], check=True)
+  print(f"[watch] started a {mode} build")
 
 
 def others_running() -> bool:

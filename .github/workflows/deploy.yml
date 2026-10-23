@@ -21,6 +21,14 @@ on:
     - cron: "0 21 * * 6"
     - cron: "45 16 * * 0"
   workflow_dispatch:
+    inputs:
+      mode:
+        # news (owner 2026-10-23: "i hate how we feel 3 hours+ behind sometimes"): the watcher's lane for injury news,
+        # reports, inactives and line moves: this week's page only, over the last deployed site, in ~6-8 minutes
+        description: "full (everything) or news (this week's page over the last site)"
+        default: full
+        type: choice
+        options: [full, news]
 
 permissions:
   contents: write   # commits newly finished weeks to the archive branch
@@ -40,6 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       fast: ${{ steps.diff.outputs.fast }}
+      news: ${{ steps.diff.outputs.news }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -56,6 +65,10 @@ jobs:
           fi
           echo "fast=$fast" >> "$GITHUB_OUTPUT"
           echo "UI-only fast path: $fast"
+          news=false
+          if [ "${{ github.event_name }}" = workflow_dispatch ] && [ "${{ inputs.mode }}" = news ]; then news=true; fi
+          echo "news=$news" >> "$GITHUB_OUTPUT"
+          echo "news lane: $news"
 
   fast:
     needs: plan
@@ -98,9 +111,85 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 
+  # News lane (owner 2026-10-23): the full build takes 15-20 minutes plus any queue, mostly steps injury news doesn't
+  # touch (trends, stats, logs, depth charts). The watcher (tools/news_watch.py) starts this instead for news: the last
+  # deployed site, this week's page rebuilt (run.py: fresh reports, ESPN, lines; the model reused unless a week
+  # completed), Rest of season, the ESPN snapshot the watcher compares against, and what the audits need committed
+  # to the archive branch (live inputs, ESPN snapshots). Falls back to the full build if it fails.
+  news:
+    needs: plan
+    if: needs.plan.outputs.news == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find the last deployed site
+        id: last
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          id=$(gh api "repos/${{ github.repository }}/actions/artifacts?name=github-pages&per_page=100" -q '[.artifacts[] | select(.expired | not)] | sort_by(.created_at) | last | .workflow_run.id // empty')
+          test -n "$id"
+          echo "last site: run $id"
+          echo "run=$id" >> "$GITHUB_OUTPUT"
+      - uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: last
+          run-id: ${{ steps.last.outputs.run }}
+          github-token: ${{ github.token }}
+      - run: mkdir site && tar -xf last/artifact.tar -C site
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - uses: actions/cache@v4
+        with:
+          path: cache
+          key: nfl-cache-${{ github.run_id }}
+          restore-keys: nfl-cache-
+      - name: Snapshot ESPN injury feed
+        run: python tools/espn_snapshot.py --out=site/data/espn_injuries || true
+      - run: python run.py --out site/index.html
+      - name: Rest of season
+        run: python tools/ros_build.py --site=site || echo "[ros] skipped"
+      - name: Current assets
+        run: python tools/assets_deploy.py --site=site
+      - uses: actions/configure-pages@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+          retention-days: 7
+      - id: deployment
+        uses: actions/deploy-pages@v4
+      # what the audits read (game-day / ESPN-Active overrides, live inputs, ESPN snapshots): the full build rebuilds
+      # the site from the archive branch, so anything only in this run's site would be lost
+      - name: Keep live inputs and ESPN snapshots
+        run: |
+          git clone --depth 1 --branch archive --filter=blob:none --sparse "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" arch
+          cd arch
+          git sparse-checkout set data/live_inputs data/espn_injuries
+          mkdir -p data/live_inputs data/espn_injuries
+          cp -r ../site/data/live_inputs/. data/live_inputs/ 2>/dev/null || true
+          cp -r ../site/data/espn_injuries/. data/espn_injuries/ 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/live_inputs data/espn_injuries
+          if ! git diff --cached --quiet; then
+            git commit -m "News build: live inputs and ESPN snapshots ($(date -u +%Y-%m-%dT%H:%MZ))"
+            for i in 1 2 3; do
+              git push origin HEAD:archive && break
+              git pull --rebase -X theirs origin archive
+            done
+          fi
+
   deploy:
-    needs: [plan, fast]
-    if: always() && (needs.plan.outputs.fast != 'true' || needs.fast.result == 'failure')
+    needs: [plan, fast, news]
+    if: always() && ((needs.plan.outputs.fast != 'true' && needs.plan.outputs.news != 'true') || needs.fast.result == 'failure' || needs.news.result == 'failure')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     environment:
