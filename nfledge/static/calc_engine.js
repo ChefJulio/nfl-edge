@@ -216,7 +216,10 @@
       // (CO3 amended) a defense behind late stops that run with a timeout when it helps it
       if (late && n.diff > 0) return n.oppTo > 0 ? Math.min(run, wp({ ...n, oppTo: n.oppTo - 1 })) : run;
       if (!(late && n.diff <= 0)) return run;
-      const inb = n.to > 0 ? Math.max(run, wp({ ...n, to: n.to - 1 })) : run;
+      // (found 2026-10-23 comparing with nfl4th: IND down 1 at the SEA 38 with 0:22 and no timeouts read "if it works"
+      // 10.6%, the clock running out the game) or it spikes the ball: a down for ~10 s
+      const spike = wp(later({ ...n, down: n.down + 1 }, SNAP_GAP));
+      const inb = Math.max(run, spike, n.to > 0 ? wp({ ...n, to: n.to - 1 }) : 0);
       return OOB * wp(n) + (1 - OOB) * inb;
     };
     function timeout(s, who = 'offense') {

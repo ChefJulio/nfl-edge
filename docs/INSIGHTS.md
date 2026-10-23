@@ -4496,3 +4496,18 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   86.0 / 86.3 / 85.2; up 3 with 4:00 left 79.4 / 80.0 / 77.0. The shootout effect is real in football terms but small
   (a few points, only at high totals) and the data can't confirm it. The punt-vs-go scenario was not computed: no
   variant reached the engine. The conversion model already uses the total (CI).
+- **FINDING + FIX 2026-10-23 (owner: "let's investigate the biggest differences between nfl4th and our model"): (CR)
+  where we and nfl4th disagree.** The 25 largest gaps (calc_validate.py analyze) were nearly all in the last 0:35 or
+  trailing 1-3 in field goal range inside 3:00. (a) A bug from (CO3): a team behind with no timeouts that converted
+  with ~0:15-0:25 left let the clock run at its pace (~21 s) and lost the game; it can spike (a down for ~10 s). Fixed
+  (nextSnap takes the best of running, spiking, a timeout). IND down 1 at the SEA 38 with 0:22 and no timeouts: "if it
+  works" 10.6% -> 68.5%; JAX down 3 at the LV 30 with 0:20: 8.0 -> 47.7. (CJ) check (1) PASS; same recommendation 79.0%,
+  gap correlation 0.871 (was 0.863); (CO3)'s converted branch -0.92 (Brier 0.13811). (b) Trailing 1-3 in field goal
+  range inside 3:00 (e.g. down 2 at the 4 with 2:42: ours go +7.7, nfl4th field goal +9.1): the zone (CH) found every
+  model misreads; real games 2006-25 hold 14-28 per timeouts cell (down 1 with the ball, 1:20-3:00, own 20-40: won 14%
+  with no timeouts, 54-57% with 2-3), too few to settle it. (c) Where the go-vs-kick gaps differ by situation (15,342
+  plays 2022-25): inside the opponent's 30 our "go" reads ~0.8-0.9 points above nfl4th's with the kicks equal; by score,
+  down 1-8 +0.5; elsewhere a few tenths. Outcomes cannot settle it: on the plays teams chose, by zone, both forecasts
+  are within ~1.5 points of the share won (inside the 30: tries won 43.6% / 40.1%, ours 44.9 / 40.3, nfl4th 44.5 /
+  39.5), and nfl4th's Brier is a little lower in most zones (significant only on punts from the own 1-25: +0.0027),
+  with its numbers fitted on these seasons and ours walk-forward. The red-zone lean is under the toss-up band (1.25).
