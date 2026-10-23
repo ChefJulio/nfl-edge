@@ -209,11 +209,13 @@
     // burn") after a converted 4th down the clock runs to the next snap at the offense's pace (runOff), not 5 s (the
     // real median was 37). Out of bounds (13.6%) stops it only in a half's late window (the 1st half's last 2:00, the
     // game's last 5:00) and only for a team not ahead (a leader stays in bounds); there a team not ahead with a
-    // timeout takes the better of calling it and letting the clock run.
+    // timeout takes the better of calling it and letting the clock run (and a defense behind, the better for it).
     const nextSnap = n => {
       const first = n.sec > 1800, half = first ? n.sec - 1800 : n.sec;
-      const run = wp(later(n, runOff(n)));
-      if (!(half <= (first ? 120 : 300) && n.diff <= 0)) return run;
+      const run = wp(later(n, runOff(n))), late = half <= (first ? 120 : 300);
+      // (CO3 amended) a defense behind late stops that run with a timeout when it helps it
+      if (late && n.diff > 0) return n.oppTo > 0 ? Math.min(run, wp({ ...n, oppTo: n.oppTo - 1 })) : run;
+      if (!(late && n.diff <= 0)) return run;
       const inb = n.to > 0 ? Math.max(run, wp({ ...n, to: n.to - 1 })) : run;
       return OOB * wp(n) + (1 - OOB) * inb;
     };

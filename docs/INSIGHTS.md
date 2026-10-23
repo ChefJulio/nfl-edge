@@ -4444,3 +4444,7 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   the own 30, no defensive timeouts read 100%, now 84.1%. (CJ) check (1) above includes it. The model itself barely
   separates the defense's 3 timeouts from 1 (90.6% vs 90.9%, up 3, 1st & 10 at the own 30, 1:59); 2022-25 games are
   too few to say it should (12-110 per cell, no clear gradient short of 0).
+- **AMENDED 2026-10-23: (CO3) the defense's timeout.** As shipped, after a conversion late in a half only the team not
+  ahead with the ball could stop the clock; a defense behind could not, so its timeouts let ~40 s run. Now a defense
+  behind takes the better (for it) of calling one and letting it run. Converted branch -0.89 (Brier 0.13804); (CJ)
+  check (1) PASS, same recommendation as nfl4th 79.0%.
