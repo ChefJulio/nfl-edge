@@ -181,9 +181,12 @@ def _nfl(url: str, body: dict | None = None, token: str | None = None) -> dict:
     return json.load(r)
 
 
-def overdue_arrived(d: dict) -> list:
-  """Overdue report days on the live site that NFL.com has now: [label]."""
-  od = {t: [x for x, st in c.get("days", []) if st == "overdue"] for t, c in (d.get("chrono") or {}).items()}
+def missing_arrived(d: dict) -> list:
+  """Report days the live site doesn't have (past their deadline: "due" or "overdue") that NFL.com has now: [label].
+  "due" too (2026-10-23, owner: Judkins's Friday shown "not in yet" hours after it was filed): the deadline build at
+  +45 min often finds NFL.com's copy not yet posted, and a day still "due" then never triggered a rebuild when it
+  landed, so the site waited for the next scheduled build."""
+  od = {t: [x for x, st in c.get("days", []) if st in ("due", "overdue")] for t, c in (d.get("chrono") or {}).items()}
   od = {t: v for t, v in od.items() if v} or d.get("overdue") or {}  # (a page built before "chrono": its "overdue")
   if not od:
     return []
@@ -211,7 +214,7 @@ def overdue_arrived(d: dict) -> list:
   for t, ds in od.items():
     got = [x for x in ds if x in seen.get(names.get(t), set())]
     if got:
-      out.append(f"{t}'s overdue report for {', '.join(got)} is on NFL.com now")
+      out.append(f"{t}'s report for {', '.join(got)} is on NFL.com now")
   return out
 
 
@@ -293,7 +296,7 @@ def check(dry: bool) -> None:
       changes.append(f"{label}: {a or 'healthy'} -> {b or 'healthy'}")
     elif (a in SERIOUS or b in SERIOUS) and date_moved(ra, rb):
       changes.append(f"{label}: {b} return date {ra or 'none'} -> {rb or 'none'}")
-  due = due_events(INDEX.get("d", {}).get("clock") or {}, datetime.now(timezone.utc)) + sunday_pbp_due(INDEX.get("d", {}))     + overdue_arrived(INDEX.get("d", {})) + lines_moved(INDEX.get("d", {}))
+  due = due_events(INDEX.get("d", {}).get("clock") or {}, datetime.now(timezone.utc)) + sunday_pbp_due(INDEX.get("d", {}))     + missing_arrived(INDEX.get("d", {})) + lines_moved(INDEX.get("d", {}))
   if due:
     print("[watch] week clock: " + "; ".join(due))
   if not changes and not due:
