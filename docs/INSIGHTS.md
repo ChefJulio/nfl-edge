@@ -4333,3 +4333,29 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   at 8:00; above that the general model's pricing, which matches those games. The try at 18-20: kick at 12:00 (-1.3,
   inside the toss-up band's edge), 10:00 (-1.8), 8:00 (-1.4); go for two at 7:00 (+3.0), 4:00 (+5.8), 1:30 (+11.6).
   (CJ) check (1) rerun: PASS (Brier 0.1532), 79.3% agreement with nfl4th.
+- **PRE-REGISTERED 2026-10-23 (owner: "worth checking why" [4th & 6+ conversion read 30.0% vs 26.9%] ... "are we
+  factoring offensive production from that team during that game/season? teams that have proven to themselves they
+  can move the ball better are more confident and i assume more successful" ... "is there a certain distance where
+  going for it on 4th down tendency drops off hard?"): (CM).** (a) Diagnosis, no gate: 4th-down tries vs 3rd downs vs
+  the model (asked at down 3) by distance, and 4th & 6+ split by situation (4th quarter, last 5:00 and behind =
+  desperation, vs the rest). (b) Descriptive, no gate: the share of 4th downs where teams go for it, by distance
+  (2022-25, excluding the last 5:00 and the 1st half's last 2:00). (c) Offense form, gated: does the offense's yards per
+  play so far in this game (its runs and passes before the snap) and so far this season (games before this one,
+  shrunk to the league by 200 plays) predict 3rd / 4th-down conversion beyond the current model? Logistic on the
+  model's log-odds (offset-style input) + the two form terms, fit 2018-23, tested 2024-25 on 3rd and 4th downs. Gate:
+  Brier lower than the model alone by a 95% bootstrap interval (games resampled) that excludes zero; if it passes,
+  the form terms join the conversion model with its own check rerun.
+- **RESULT {#conv-form} (CM): (a) the long-try "overestimate" was the check, (b) the go rate by distance, (c) offense
+  form: FAIL.** tools/conv_form_eval.py. (a) The model counts a defensive penalty that gives a first down as a
+  conversion (nfl4th's coding); the (CJ) follow-up check dropped those plays (play_type no_play), and on long 4th
+  downs they are a real share of conversions. Counting them (2022-25): 4th & 6+ in desperation (4th quarter, last
+  5:00, behind) converted 29.1% (351) vs the model's 27.6%; the other long tries 42.1% (309) vs 33.3%: teams choose
+  those (the selection effect, as at short distance). By distance, 3rd downs / 4th-down tries / model: 1-2 65.2 /
+  68.1 / 65.2; 3-5 50.1 / 57.8 / 50.8; 6-7 42.1 / 44.1 / 41.1; 8-10 33.8 / 34.5 / 33.2; 11+ 18.3 / 27.9 / 17.8.
+  (b) Teams going for it, 2022-25 (not the last 5:00 or the 1st half's last 2:00): 4th & 1 69.5%, 2 36.6%, 3 25.6%,
+  4 17.7%, 5 11.5%, 6 7.2%, 7 6.2%, 8 4.5%, 9 2.5%, 12+ 1.8% (in the opponent's half 89 / 58 / 43 / 29 / 18 / 12 / 10
+  / 8 / 4%): the steep drop is after 4th & 1, and from 4th & 6 it is the exception. (c) This game's yards per play
+  before the snap (shrunk by 20 plays) and the season's (by 200) on top of the model's log-odds, fit 2018-23, 2024-25
+  3rd and 4th downs (14,860): Brier 0.2142 -> 0.2141, -0.00006 [-0.00016, +0.00003]: FAIL. Conversion does rise with
+  this game's form (worst to best fifth, 4th downs: 50% -> 63%) but the model already follows it (52% -> 61%) through
+  field position and the Vegas line (which prices the season); the form terms add nothing.
