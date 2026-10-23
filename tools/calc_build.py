@@ -33,8 +33,56 @@ def load(cur: int) -> pd.DataFrame:
   return pd.concat(fr, ignore_index=True)
 
 
+def make(done: pd.DataFrame) -> dict:
+  """The model file from completed games' play-by-play: win probability trees, decision inputs, conversion trees, the
+  browser's self-check rows (and the export's own check against the fitted model)."""
+  r = W.rows(done)
+  m = W.fit(r)
+  out = {"v": 1, "built": pd.Timestamp.now().strftime("%Y-%m-%d"), "seasons": [FIRST, int(done.season.max())],
+         "rows": int(len(r)), "wp": W.export(m), "inputs": C.build(done)}
+  cm = C.conversion_gb(done)
+  out["conv"] = W.export(cm, C.CONV_FEATURES)
+  g = C._gain_rows(done).sample(20, random_state=0)
+  out["conv_check"] = [{"x": [float(v) for v in row], "p": float(p_)} for row, p_ in
+                       zip(C.conv_features(g).to_numpy(float), cm.predict_proba(C.conv_features(g))[:, 1])]
+  # the export evaluates as the model does (a sample of rows)
+  smp = r.sample(min(2000, len(r)), random_state=0)
+  diff = np.abs(W.predict_exported(out["wp"], W.features(smp)) - m.predict_proba(W.features(smp))[:, 1]).max()
+  if diff > 1e-4:
+    raise SystemExit(f"[calc] exported trees disagree with the model by {diff:.6f}")
+  # a few rows for the browser engine's self-check (tools/calc_cli.mjs --check): features and the model's P
+  chk = smp.head(20)
+  out["check"] = [{"x": [float(v) for v in row], "p": float(p)} for row, p in
+                  zip(W.features(chk).to_numpy(float), m.predict_proba(W.features(chk))[:, 1])]
+  print(f"[calc] trained on {len(r):,} plays ({out['seasons'][0]}-{out['seasons'][1]}); export check max diff {diff:.2e}", flush=True)
+  return out
+
+
+def resample_games(done: pd.DataFrame, seed: int) -> pd.DataFrame:
+  """A bootstrap copy: games drawn with replacement (each draw keeps all its plays, under its own game id)."""
+  rng = np.random.default_rng(seed)
+  ids = done.game_id.unique()
+  pick = rng.choice(ids, size=len(ids), replace=True)
+  by = dict(tuple(done.groupby("game_id")))
+  return pd.concat([by[g].assign(game_id=f"{g}#{k}") for k, g in enumerate(pick)], ignore_index=True)
+
+
 def main():
+  """--site=DIR: the live model file into DIR/data/calc/model.json (cached by code and completed weeks).
+  --through=YEAR --out=FILE [--boot=SEED]: a validation copy fit only on seasons up to YEAR, optionally on games
+  resampled with replacement (tools/calc_validate.py; (CJ) in docs/INSIGHTS.md)."""
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
+  if "through" in opt:
+    yr = int(opt["through"])
+    d = load(yr)
+    done = d[d.result.notna() & (d.season <= yr)]
+    if "boot" in opt:
+      done = resample_games(done, int(opt["boot"]))
+    out = make(done)
+    Path(opt["out"]).parent.mkdir(parents=True, exist_ok=True)
+    Path(opt["out"]).write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
+    print(f"[calc] wrote {opt['out']}", flush=True)
+    return
   site = ROOT / opt.get("site", "site")
   cur = json.loads((site / "index.json").read_text(encoding="utf-8"))["season"] if (site / "index.json").exists() else 2026
   d = load(int(cur))
@@ -49,26 +97,8 @@ def main():
     out = json.loads(cp.read_text(encoding="utf-8"))
     print(f"[calc] cached model {key}", flush=True)
   else:
-    r = W.rows(done)
-    m = W.fit(r)
-    out = {"v": 1, "built": pd.Timestamp.now().strftime("%Y-%m-%d"), "seasons": [FIRST, int(done.season.max())],
-           "rows": int(len(r)), "wp": W.export(m), "inputs": C.build(done)}
-    cm = C.conversion_gb(done)
-    out["conv"] = W.export(cm, C.CONV_FEATURES)
-    g = C._gain_rows(done).sample(20, random_state=0)
-    out["conv_check"] = [{"x": [float(v) for v in row], "p": float(p_)} for row, p_ in
-                         zip(C.conv_features(g).to_numpy(float), cm.predict_proba(C.conv_features(g))[:, 1])]
-    # the export evaluates as the model does (a sample of rows)
-    smp = r.sample(min(2000, len(r)), random_state=0)
-    diff = np.abs(W.predict_exported(out["wp"], W.features(smp)) - m.predict_proba(W.features(smp))[:, 1]).max()
-    if diff > 1e-4:
-      raise SystemExit(f"[calc] exported trees disagree with the model by {diff:.6f}")
-    # a few rows for the browser engine's self-check (tools/calc_cli.mjs --check): features and the model's P
-    chk = smp.head(20)
-    out["check"] = [{"x": [float(v) for v in row], "p": float(p)} for row, p in
-                    zip(W.features(chk).to_numpy(float), m.predict_proba(W.features(chk))[:, 1])]
+    out = make(done)
     cp.write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
-    print(f"[calc] trained on {len(r):,} plays ({out['seasons'][0]}-{out['seasons'][1]}); export check max diff {diff:.2e}", flush=True)
   dst = site / "data" / "calc"
   dst.mkdir(parents=True, exist_ok=True)
   (dst / "model.json").write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")

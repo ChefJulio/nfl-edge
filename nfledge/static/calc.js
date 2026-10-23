@@ -6,7 +6,7 @@
   const NFLE = window.NFLE, esc = NFLE.esc;
   const ver = (document.currentScript && new URL(document.currentScript.src).search) || '';
   const KEY = 'nfle-calc';
-  const TOSS = 0.015;  // a gap under 1.5 points is inside the model's noise: a toss-up
+  const TOSS = 0.0125;  // a gap under 1.25 points is inside the model's noise: a toss-up ((CJ): 20 bootstrap refits)
   const pc = v => `${(100 * v).toFixed(1)}%`;
   const pts = v => `${v >= 0 ? '+' : '−'}${(100 * Math.abs(v)).toFixed(1)}`;
   let ENG = null;
@@ -81,23 +81,23 @@
   }
 
   // the state after accepting / declining a penalty (s: the offense's state before the snap)
-  function penaltyStates(s, P) {
+  function penaltyStates(s, P, later) {
     const yds = +P.yds, gain = +P.gain;
     let acc;
     if (P.on === 'def') {  // half the distance to the goal at most
       const y = Math.min(yds, Math.floor(s.yl / 2) || 1), yl = s.yl - y, first = P.auto || y >= s.togo;
-      acc = { ...s, sec: s.sec - 5, yl, down: first ? 1 : s.down, togo: first ? Math.min(10, yl) : s.togo - y };
+      acc = later({ ...s, yl, down: first ? 1 : s.down, togo: first ? Math.min(10, yl) : s.togo - y }, 5);
     } else {
       const y = Math.min(yds, Math.floor((100 - s.yl) / 2) || 1), yl = s.yl + y;
-      acc = { ...s, sec: s.sec - 5, yl, down: Math.min(4, s.down + (P.lod ? 1 : 0)), togo: s.togo + y };
+      acc = later({ ...s, yl, down: Math.min(4, s.down + (P.lod ? 1 : 0)), togo: s.togo + y }, 5);
     }
     // declined: the play stands
     const yl = s.yl - gain;
     let dec;
     if (gain >= s.yl) dec = { td: true };
-    else if (gain >= s.togo) dec = { ...s, sec: s.sec - 5, yl, down: 1, togo: Math.min(10, yl) };
+    else if (gain >= s.togo) dec = later({ ...s, yl, down: 1, togo: Math.min(10, yl) }, 5);
     else if (s.down === 4) dec = { downs: true, yl: Math.min(99, Math.max(1, 100 - yl)) };
-    else dec = { ...s, sec: s.sec - 5, yl, down: s.down + 1, togo: s.togo - gain };
+    else dec = later({ ...s, yl, down: s.down + 1, togo: s.togo - gain }, 5);
     return { acc, dec };
   }
 
@@ -126,9 +126,9 @@
         out.push(decision(`Timeout for the clock (${S.b && S.b !== 'Defense' ? S.b : 'defense'})`, dt.can ? [['Call it', dt.call.wp], [`Let ${Math.round(dt.run.seconds)} s run`, dt.run.wp]] : [['No timeouts left', null]]));
       } else out.push('<div class="cx-dec cx-quiet"><h3>Timeouts</h3><p class="cx-foot">More than 5:00 left in the half: a timeout is worth almost nothing for the clock here; teams call them for personnel, the play clock or a challenge. No verdict.</p></div>');
       // penalty
-      const P = S.pen, st = penaltyStates(s, P);
+      const P = S.pen, st = penaltyStates(s, P, C.later);
       const chooser = P.on === 'def' ? 'offense' : 'defense', mine = v => (chooser === 'offense' ? v : 1 - v);
-      const wpOf = x => (x.td ? null : x.downs ? 1 - C.wp({ ...C.flip(s), sec: s.sec - 5, down: 1, togo: 10, yl: x.yl }) : C.wp(x));
+      const wpOf = x => (x.td ? null : x.downs ? 1 - C.wp(C.later({ ...C.flip(s), down: 1, togo: 10, yl: x.yl }, 5)) : C.wp(x));
       const tdWp = () => { const t = C.tries({ ...s, diff: s.diff + 6, sec: s.sec - 5 }); return Math.max(t.xp.wp, t.two.wp); };
       const acc = mine(wpOf(st.acc)), dec = st.dec.td ? mine(tdWp()) : mine(wpOf(st.dec));
       out.push(decision(`Penalty: ${chooser === 'offense' ? 'offense' : 'defense'} chooses`, [['Accept', acc], ['Decline', dec]],

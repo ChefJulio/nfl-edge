@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 7b9c38ac57340d21
+documented_code_hash: 020ec373c01e0a1c
 ---
 # How the model works
 
@@ -428,7 +428,9 @@ Our own model of the chance that the team with the ball wins, from the score, th
 
 ### Reading the numbers
 
-Choices within 1.5 points of each other are a toss-up: that's the model's noise. The rates you can change on the page (converting, the field goal) are an average team's; yours may be better or worse. In a half's last three minutes the numbers are rough: in tied games with the ball late, every model we checked (ours, nflfastR's, and a two-minute-drill model we built) reads about 10 points low.
+Choices within 1.25 points of each other are a toss-up: refitting the whole calculator on resampled games (20 times) flips a call that close more than one time in five; past 3 points it flips 4% of the time, past 5 under 1%.
+
+How we know it's right: on 15,440 real 4th downs from 2022-25, each judged by a calculator that had never seen that season, the win chance it gave the option the team chose matched how often they won (went for it: 35.2% forecast, 34.6% won; field goal 56.4% vs 55.6%; punt 47.3% vs 47.2%), as accurate as nfl4th's own numbers on the same plays. It recommends the same choice as nfl4th 79% of the time; it is a little more aggressive about going for it, and the two disagree most late in close 4th quarters. The rates you can change on the page (converting, the field goal) are an average team's; yours may be better or worse. In a half's last three minutes the numbers are rough: in tied games with the ball late, every model we checked (ours, nflfastR's, and a two-minute-drill model we built) reads about 10 points low.
 
 ### What we tried
 
@@ -436,6 +438,7 @@ Choices within 1.5 points of each other are a toss-up: that's the model's noise.
 - **Shipped** - Do the decision inputs from older seasons hold up? - No: field goals from 50-59 yards were made 9.8 points more often in 2024-25 than a 2018-23 fit said, and 4th downs converted more too. The field goal rate now comes from the last two seasons (within 3 points from 20 to 59 yards); 4th downs from recent tries (2026-10). <!-- tried:calc-inputs -->
 - **Rejected** - Does a model of the drive itself (how it ends and how much clock is left) beat the general model in the last two minutes? - No: Brier 0.1292 vs 0.1282 on 2022-25, no better calibrated. Both, and nflfastR, read tied games with the ball late about 10 points low (2026-10). <!-- tried:endgame-drive -->
 - **Shipped** - Do team strength, roof, wind and the full punt outcome (what nfl4th and the NYT 4th Down Bot use) improve the inputs? - Yes, with a caveat: the conversion model beat the old one on every distance (Brier 0.2249 vs 0.2336) but still reads below the 4th-down tries teams chose to make; field goals with roof and wind came within 3 points from 20 to 59 yards and within 4 in winds of 15+ mph (2026-10). <!-- tried:calc-inputs-v2 -->
+- **Shipped** - Are the calculator's recommendations right, not just its parts? - On 15,440 real 4th downs (2022-25, each season unseen), its forecast for the option chosen matched the result within 1 point for going, kicking and punting, as accurate as nfl4th; agreeing with nfl4th 79% of the time; comparing the two found two bugs, both fixed: a play that ran out a half didn't end it, and the leader's kneel-out was missed after a punt (2026-10). <!-- tried:calc-decisions -->
 
 ## Playoffs
 

@@ -4242,3 +4242,40 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   The page asks the conversion model at down 3 (an average team in that spot; owner's call delegated): 4th-down tries
   are chosen, so at down 4 the trees answer for teams that chose to go (own 20-45, 4th & 10: 3rd downs 31.5% of 1,287,
   4th-down tries 36% of 61, trees at down 4 42%; at down 3 33%). The rate is editable for a team that knows better.
+- **PRE-REGISTERED 2026-10-23 (owner: "how confident are we that this is an accurate model? what data shows we're
+  right?" ... "do all 3"): (CJ) validating the calculator's decisions, not just its parts.** Rows: every regulation 4th
+  down 2022-2025 that was a go / field goal / punt (kneels, spikes, no-plays out), graded by the browser engine
+  (static/calc_engine.js grade) with each season's own walk-forward model file (tools/calc_build.py --through=<season
+  before>: win probability and inputs fit only on earlier seasons). nfl4th's own per-play numbers (go_wp / fg_wp /
+  punt_wp, nflverse/nfl4th release "nfl4th_infrastructure", pre_computed_go_boost.rds) for the same plays.
+  (1) The chosen option's win chance is a forecast of the game: per choice (go / field goal / punt), mean forecast vs
+  the share won, and calibration by decile; the same for nfl4th's number for the chosen option. Gate: per choice, the
+  mean within 3 points of the actual win rate, and no decile (50+ plays) off by more than 6. A "go" that runs low is
+  the selection effect (CI) showing up; that is reported, not explained away.
+  (2) Noise: 20 bootstrap refits (games resampled with replacement, 2006 through the season before the test) of the
+  win probability model, the conversion trees and the field goal table; for 2025's 4th downs, the spread of the
+  best-minus-second gap and how often the recommendation flips. The toss-up band becomes the gap below which the
+  recommendation flips in more than 1 refit in 5 (the page used 1.5 points by judgment). No gate: it sets the band.
+  (3) Agreement with nfl4th on the same plays: how often the recommended option matches, the correlation of the go-vs-
+  best-alternative gap, and the 25 biggest disagreements read one by one. No gate: it shows where to look.
+- **RESULT {#calc-decisions} (CJ) (1) the chosen option's forecast: PASS; (3) vs nfl4th: 79% agreement, two bugs found
+  and fixed.** tools/calc_validate.py / .mjs, 15,440 regulation 4th downs 2022-25, each graded by the browser engine with
+  that season's walk-forward model file. (1) The win chance of the option the team chose, against the share of games it
+  won: go 35.2% vs 34.6% (3,151), field goal 56.4% vs 55.6% (3,923), punt 47.3% vs 47.2% (8,366); no decile of 50+ off
+  by more than 5.4 points. nfl4th's own numbers on the same plays: 35.0 / 56.1 / 46.9; Brier ours 0.1533 vs nfl4th
+  0.1525 (theirs fitted on these seasons). The feared "go reads low" (the conversion asked at down 3, CI) did not show.
+  (3) Same recommendation as nfl4th on 78.7% of 15,342 plays, go-minus-best-kick gaps correlated 0.857; the biggest
+  disagreements showed two engine bugs: a play that takes the rest of a half didn't end it (4th & 1 at the 22 with
+  0:03 before halftime read "go": a conversion just ends the half), and the kneel-out rule applied only after a failed
+  4th down (punting while trailing late read too kindly). Fixed in the engine (later() marks the half over; wp() treats
+  a leader with the ball who can kneel as a win), after the check: 79.3% agreement, correlation 0.878, (1) unchanged
+  (PASS). What remains: late in the 4th quarter, trailing by 1-3 in field goal range, we lean "go" where nfl4th says
+  kick for the lead (e.g. down 2, 2:42, 4th & 2 at the 4: ours go +7.4, nfl4th field goal +9.1), the late-game zone
+  every model we tested misreads (CH); and we are more aggressive overall (go by 3+ points on 1,575 plays vs nfl4th's
+  1,188; teams went on 58% of ours, 71% of theirs).
+  (2) Noise: 20 bootstrap refits (games resampled, fit through 2024) of the win probability model, conversion trees and
+  field goal table, graded on 2025's 3,765 4th downs: the best-minus-second gap moves by a median 1.02 points (sd; 90th
+  percentile 2.0). How often the recommendation flips by the gap: under 0.5 pt 30%, 0.5-1 25%, 1-1.5 19%, 1.5-2 15%, 2-3
+  10%, 3-5 4%, over 5 0.6%. The pre-registered rule sets the toss-up band at 1.25 points (was 1.5 by judgment); the
+  "questionable" line (3 points) holds in 96% of refits. This is data noise only: the late-game zone's shared blind spot
+  (CH) is not in it, so the page keeps its "rough" label there.

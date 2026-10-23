@@ -149,7 +149,7 @@ def onside(d: pd.DataFrame) -> dict:
   m = m.merge(k[["game_id", "play_id", "own_kickoff_recovery"]], on=["game_id", "play_id"])
   kept = m[(m.own_kickoff_recovery == 1) & (m.posteam != m.rec_team)]  # the kicking team (not the listed receiver) snaps next
   lost = m[(m.own_kickoff_recovery != 1) & (m.posteam == m.rec_team)]
-  return {"p": p, "p_new": float(new.own_kickoff_recovery.mean()), "n_new": int(len(new)), "p_old": p_old, "n_old": int(len(old)),
+  return {"p": p, "p_new": float(new.own_kickoff_recovery.mean()) if len(new) else None, "n_new": int(len(new)), "p_old": p_old, "n_old": int(len(old)),
           "kept_yl": float(kept.yardline_100.median()), "lost_yl": float(lost.yardline_100.median())}
 
 
