@@ -4415,3 +4415,32 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   more than 6 with 50+: go converted 1, go failed 1 (0.6: -11.7 of 64), field goal missed 3. Not shipped (no change was
   proposed); the two over-reads are the next things to examine (the state the engine uses after a conversion: the
   average gain and its clock; after a missed kick: the spot and the clock).
+- **FINDING 2026-10-23: (CO2) where the two over-reads come from.** tools/branch_eval.py / .mjs: for converted tries
+  and missed field goals 2022-25, the real next snap (its clock, spot, score, timeouts) scored with the same engine
+  wp(), beside the branch. Won minus forecast: converted (1,376 with a next snap in the quarter) branch -1.2 [-3.2,
+  +0.8], real next state -1.0 [-3.0, +0.9] (forecast 40-80%: -5.1 vs -4.7); missed field goal (532) -3.3 vs -3.2
+  (40-80%: -8.5 vs -8.3). The engine's assumed next state is not the cause: the win model itself reads these states
+  high (the team after its conversion, the team whose kick missed). The 40-80% slices were picked after seeing the
+  deciles, so their intervals overstate the evidence; the missed kick's -3.3 overall is the firmer one. One real
+  assumption error did show: after a conversion the engine runs 5 seconds; the real median is 37 (the clock runs
+  after an in-bounds play). With 39 s the converted branch reads -0.5 overall, 4th quarter +0.5.
+- **PRE-REGISTERED 2026-10-23 (owner: "time outs, 5 seconds would be accurate. spiking also 9-12 or whatever. hurry up
+  offense isn't letting 40 seconds burn"): (CO3) the clock after a conversion.** After a converted 4th down (not a
+  touchdown) the next snap comes at the offense's measured pace for the situation (runOff: half, time band, leading or
+  not; 39 s normally, ~21 trailing inside 2:00, stopping at the two-minute warning), unless the clock stops: an out-of-
+  bounds play (13.6%) stops it only where the rules do (a half's last 2:00 in the 1st half, the last 5:00 of the 4th
+  quarter) and only for a team not ahead (a leader stays in bounds); in those same windows a team not ahead with a
+  timeout takes the better of calling it (the clock at the whistle, one timeout fewer) and letting it run. The last-
+  seconds rule (CN2) is unchanged. Gate (both): (1) on the (CO) rows, the converted branch's |won minus forecast| below
+  the current 1.0 points and its Brier no worse; (2) (CJ) check (1) still passes. Nothing changes for the win model's
+  own over-read (CO2); that needs its own test.
+- **RESULT {#conv-clock} (CO3) the clock after a conversion: PASS (narrow), shipped.** On the (CO) rows the converted
+  branch's won minus forecast -1.00 -> -0.90 points, Brier 0.13851 -> 0.13810 (1,699 tries, 2022-25); (CJ) check (1)
+  PASS (go 35.1 vs 34.6 won, field goal 56.5 vs 55.6, punt 47.3 vs 47.2), same recommendation as nfl4th 78.9%. The win
+  model's own over-read of these states (CO2) stays.
+  Also fixed (a bug, owner 2026-10-23: "does our engine know the difference between a team winning with 1:59 left,
+  defense has 3 timeouts vs 0?"): the kneel-out rule ignored the down. Now each down left after the snap runs ~40 s
+  off and each defensive timeout takes one back (1st down: nfl4th's 2:00 / 1:20 / 0:40); up 3 at 1:59, 3rd & 10 at
+  the own 30, no defensive timeouts read 100%, now 84.1%. (CJ) check (1) above includes it. The model itself barely
+  separates the defense's 3 timeouts from 1 (90.6% vs 90.9%, up 3, 1st & 10 at the own 30, 1:59); 2022-25 games are
+  too few to say it should (12-110 per cell, no clear gradient short of 0).

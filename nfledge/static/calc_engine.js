@@ -47,8 +47,12 @@
       return Math.max(best, h * FINAL(s.diff + 7) + (1 - h) * FINAL(s.diff));
     };
     const SNAP_GAP = 10, LAST = 12, OOB = 0.136;  // a spike or snap needs ~10 s; 13.6% of late conversions end out of bounds
-    // the clock can be run out: the team that has the ball and leads, the other side short of timeouts (nfl4th's rule)
-    const kneel = (sec, defTo) => (defTo === 0 && sec < 120) || (defTo === 1 && sec < 80) || (defTo === 2 && sec < 40);
+    // the clock can be run out: the team that has the ball and leads, the other side short of timeouts. Each down left
+    // after this snap lets ~40 s run off; each defensive timeout takes one of those back. On 1st down this is nfl4th's
+    // rule (0 timeouts: 2:00, 1: 1:20, 2: 0:40); (owner 2026-10-23: "does our engine know the difference between a team
+    // winning with 1:59 left, defense has 3 timeouts vs 0?") it had ignored the down, so 3rd & 10 at 1:59 against no
+    // timeouts read a sure win when only ~0:40 can be run off before a punt.
+    const kneel = (sec, defTo, down = 1) => sec < 40 * Math.max(0, 4 - (down || 1) - defTo);
     const featuresOf = s => {
       const sec = clamp(s.sec, 0, 3600), half = sec > 1800 ? sec - 1800 : sec, line = s.line || 0;
       const x = new Array(F.length);
@@ -74,7 +78,7 @@
         return s.rec2h ? wp(k) : 1 - wp({ ...flip(k), sec: 1800, down: 1, togo: 10, yl: I.kickoff.rec[5] });
       }
       if (s.sec <= 0) return s.diff > 0 ? 1 : s.diff < 0 ? 0 : 0.5;  // time's up (overtime: a coin flip here)
-      if (s.diff > 0 && s.sec <= 120 && kneel(s.sec, s.oppTo)) return 1;  // the leader kneels it out
+      if (s.diff > 0 && s.sec <= 120 && kneel(s.sec, s.oppTo, s.down)) return 1;  // the leader kneels it out
       if (s.sec <= 6) return lastSnap(s);  // (CN2) the 4th quarter's last snap
       // (CK2, the owner's call 2026-10-23: "can we treat 1 and 2 point leads as the same thing?") late, a 1- and a
       // 2-point lead are one state (a field goal beats both): their average. Only late (owner: "the time left matters a
@@ -138,13 +142,13 @@
       const succ = g.succ_over.map(o => {
         const gain = s.togo + Math.max(0, o);
         if (gain >= s.yl) return afterTD(s);
-        const n = later({ ...s, down: 1, yl: s.yl - gain, togo: Math.min(10, s.yl - gain) }, PLAY);
+        const n = later({ ...s, down: 1, yl: s.yl - gain, togo: Math.min(10, s.yl - gain) }, opts.convSec ?? PLAY);  // (CO2) convSec: the diagnostic's clock
         if (!n.over && n.sec <= LAST && n.sec > 0) {
           // (CN2) a timeout (or a spike, with time for one) buys one snap; else only if the play ended out of bounds
           if (n.to > 0 || n.sec >= SNAP_GAP) return lastSnap(n);
           return OOB * lastSnap(n) + (1 - OOB) * FINAL(n.diff);
         }
-        return wp(n);
+        return opts.convSec != null || n.over ? wp(n) : nextSnap(n);
       });
       // failed: their ball at the spot
       const fail = g.fail.map(f => theirBall(s, clamp(100 - (s.yl - Math.min(f, s.togo - 1)), 1, 99), PLAY));
@@ -200,6 +204,18 @@
       const pace = I.clock.pace[`${first ? 2 : 4}:${band}:${s.diff > 0 ? 'lead' : 'trail'}`] || I.clock.normal;
       const lose = Math.max(0, pace - I.clock.play_len);
       return half > 120 && half - lose < 120 ? half - 120 : Math.min(lose, half);
+    };
+    // (CO3, owner 2026-10-23: "time outs, 5 seconds would be accurate ... hurry up offense isn't letting 40 seconds
+    // burn") after a converted 4th down the clock runs to the next snap at the offense's pace (runOff), not 5 s (the
+    // real median was 37). Out of bounds (13.6%) stops it only in a half's late window (the 1st half's last 2:00, the
+    // game's last 5:00) and only for a team not ahead (a leader stays in bounds); there a team not ahead with a
+    // timeout takes the better of calling it and letting the clock run.
+    const nextSnap = n => {
+      const first = n.sec > 1800, half = first ? n.sec - 1800 : n.sec;
+      const run = wp(later(n, runOff(n)));
+      if (!(half <= (first ? 120 : 300) && n.diff <= 0)) return run;
+      const inb = n.to > 0 ? Math.max(run, wp({ ...n, to: n.to - 1 })) : run;
+      return OOB * wp(n) + (1 - OOB) * inb;
     };
     function timeout(s, who = 'offense') {
       const off = who === 'offense';
