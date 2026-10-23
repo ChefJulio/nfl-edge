@@ -358,13 +358,13 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const NAV = [
     { key: 'players', label: 'Players', subs: [['rankings', 'Rankings', 'tab-players'], ['stats', 'Stats'], ['roles', 'Roles', 'tab-roles'], ['injuries', 'Injuries'], ['moves', 'Moves'], ['trends', 'Trends']] },
     { key: 'teams', label: 'Teams', subs: [['all', 'All teams'], ['power', 'Power', 'tab-power'], ['standings', 'Standings'], ['playoffs', 'Playoffs'], ['stats', 'Stats'], ['draft', 'Draft']] },
-    { key: 'games', label: 'Games', subs: [['matchups', 'Matchups', 'tab-games'], ['calc', 'Calc']] },  // Calc: decisions (owner 2026-10-23)
+    { key: 'games', label: 'Games', subs: [['matchups', 'Matchups', 'tab-games']] },  // one view, no sub-tab row (owner 2026-10-23: space)
     // your own fantasy league (Sleeper / public ESPN import; owner 2026-10-15)
     // tab named Fantasy (owner 2026-10-16); its views are the site's sub-tabs (owner 2026-10-18: "uniform with the rest of the
     // site"), all one section (league.js switches views on nfle-route)
     { key: 'league', label: 'Fantasy', subs: [['lineup', 'Lineup', 'tab-league'], ['matchup', 'Matchup', 'tab-league'], ['live', 'Live', 'tab-league'],
                                               ['teams', 'Teams', 'tab-league'], ['waivers', 'Waivers', 'tab-league'], ['trade', 'Trade', 'tab-league']] },
-    { key: 'model', label: 'Model', subs: [['model', 'Model', 'tab-model'], ['reference', 'Reference']] },  // Reference: league rates (owner 2026-10-18)
+    { key: 'model', label: 'Model', subs: [['model', 'Model', 'tab-model'], ['reference', 'Reference'], ['calc', 'Calc']] },  // Reference: league rates (owner 2026-10-18); Calc: decisions (owner 2026-10-23)
     // Home (owner 2026-10-20: a landing page, "I want to..." tiles): not in the tab bars; the logo opens it, and it is
     // where a first visit lands (a returning visitor still gets the last tab used)
     { key: 'home', label: 'Home', subs: [['home', 'Home', 'tab-home']], hidden: true },
@@ -376,7 +376,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
                   'tab-teams-playoffs': 'playoffs', 'tab-players-moves': 'moves', 'tab-power': 'power',
                   'tab-games': 'matchups', 'tab-roles': 'roles', 'tab-model': 'model',
                   'tab-players-trends': 'trends', 'tab-league': 'league', 'tab-model-reference': 'reference', 'tab-home': 'home',
-                  'tab-games-calc': 'calc' };
+                  'tab-model-calc': 'calc' };
   const ver = (document.currentScript && new URL(document.currentScript.src).search) || '';
   const loaded = {};
   const NFLE = window.NFLE = window.NFLE || {};
@@ -396,7 +396,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     loaded[area].then(go, e => sec.insertAdjacentHTML('beforeend', `<p class="muted">Couldn't load this tab (${e.message}).</p>`));
   };
   const OLD = { players: 'players/rankings', roles: 'players/roles', power: 'teams/power', games: 'games', model: 'model',
-               playoffs: 'teams/playoffs', draft: 'teams/draft', transactions: 'players/moves' };
+               playoffs: 'teams/playoffs', draft: 'teams/draft', transactions: 'players/moves', 'games/calc': 'model/calc' };
   const CARD = /^g-/;  // old matchup-tile links: gamecast.js turns them into gamecast links
   const PAGE = /^(player|team)\/(.+)$/;  // player / team cards (rendered by gamecast.js into #pcOv)
   // The card stack lives in the URL (owner 2026-10-20: "make the nested navigation part of the url? so if i share a url

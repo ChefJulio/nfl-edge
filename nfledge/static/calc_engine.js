@@ -1,4 +1,4 @@
-// Games > Calc's engine (owner 2026-10-23: "a calculator where you input down, distance, score, team timeouts left and
+// Model > Calc's engine (owner 2026-10-23: "a calculator where you input down, distance, score, team timeouts left and
 // game clock ... to make decisions, like whether to take a time out, whether to go for it on fourth down / punt / fg
 // attempt, whether to onside kick, and whether to accept or decline a penalty"; (CG) in docs/INSIGHTS.md). Pure: the
 // model file (data/calc/model.json: win probability trees from nfledge/winprob.py, decision inputs from

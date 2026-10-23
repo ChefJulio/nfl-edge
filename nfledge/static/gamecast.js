@@ -306,15 +306,15 @@
     const offAway = posTeamId != null && String(posTeamId) === String(info.away.id);
     if (!offHome && !offAway) return null;
     const dir = offAway ? 1 : -1;
+    // the spot from its words ("SF 30") first: ESPN's yardsToEndzone is sometimes the bare yard line (2026-10-23, WAS @
+    // SF week 6: every SF snap from its own half read "30 yards to go" at SF 30, so a punt from SF 30 was drawn and
+    // graded as one from WAS 30); the number only when there are no words
     let x = null;
-    if (s.yardsToEndzone != null) x = offAway ? 100 - s.yardsToEndzone : s.yardsToEndzone;
-    else {
-      const m = String(s.possessionText || s.downDistanceText || '').match(/([A-Z]{2,3})?\s*(\d{1,2})\s*$/);
-      if (m) {
-        const n = +m[2], side = m[1] ? ourCode(m[1]) : null;
-        x = n === 50 || !side ? 50 : (side === info.home.team ? 100 - n : n);
-      }
-    }
+    const m = String(s.possessionText || s.downDistanceText || '').match(/([A-Z]{2,3})?\s*(\d{1,2})\s*$/);
+    if (m && (m[1] || +m[2] === 50)) {
+      const n = +m[2], side = m[1] ? ourCode(m[1]) : null;
+      x = n === 50 || !side ? 50 : (side === info.home.team ? 100 - n : n);
+    } else if (s.yardsToEndzone != null) x = offAway ? 100 - s.yardsToEndzone : s.yardsToEndzone;
     if (x == null) return null;
     const goal = /goal/i.test(s.downDistanceText || s.shortDownDistanceText || '');
     const toGo = s.distance && !goal ? Math.min(100, Math.max(0, x + dir * s.distance)) : (dir === 1 ? 100 : 0);
@@ -719,7 +719,7 @@
   };
   const CALLS = {};  // game id -> { n: plays seen, html }
   const callsPane = (sum, info) => {
-    const box = `<section class="gcs" id="gcCalls"><h3>Decisions</h3><p class="gcs-note">Every 4th down and try after a touchdown, judged before the snap by <a href="${siteRoot()}#games/calc">our calculator</a> (not by how it turned out): the chance to win after each option. Questionable = gave up 3+ points of win chance; debatable = 1.25-3; inside 1.25 is the model's noise (measured: below it, refitting the model on resampled games flips the call more than 1 time in 5). The conversion rate is an average offense's; a team that knows its short-yardage game is better can be right to go. Timeouts aren't graded.</p><div class="dcs-body">`;
+    const box = `<section class="gcs" id="gcCalls"><h3>Decisions</h3><p class="gcs-note">Every 4th down and try after a touchdown, judged before the snap by <a href="${siteRoot()}#model/calc">our calculator</a> (not by how it turned out): the chance to win after each option. Questionable = gave up 3+ points of win chance; debatable = 1.25-3; inside 1.25 is the model's noise (measured: below it, refitting the model on resampled games flips the call more than 1 time in 5). The conversion rate is an average offense's; a team that knows its short-yardage game is better can be right to go. Timeouts aren't graded.</p><div class="dcs-body">`;
     if (!sum) return `${box}<p class="muted">Decisions appear once the game starts.</p></div></section>`;
     const n = allPlays(sum).reduce((t, d) => t + (d.plays || []).length, 0), hit = CALLS[info.id];
     if (hit && hit.n === n) return `${box}${hit.html}</div></section>`;

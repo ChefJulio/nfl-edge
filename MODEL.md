@@ -98,8 +98,6 @@ Every page and tab on NFL Edge: what it shows, where its numbers come from, and 
 
 ### Games
 
-**Calc**: set a situation (score, quarter and clock, down, distance, field position, both teams' timeouts; the Vegas line, over/under, roof and wind if you know them) and see each choice's chance to win: go for it, kick, or punt on 4th down; a timeout for the clock; accepting or declining a penalty; the extra point or two; an onside kick. See Decisions below.
-
 **Matchups**: this week's games as tiles. Before kickoff each side shows its win chance (from the Vegas line, or our model before a line posts, with our model's own number underneath); during the game the score, clock, possession and red zone, live from ESPN; after it the final and how the favorite fared. Live games sort to the top. On phones a compact grid fits the whole week on one screen, grouped by kickoff window. The games with the most playoff odds riding on them are flagged. Tap a tile for its game page.
 
 **The game page (gamecast)**: everything about one game, two tabs.
@@ -156,6 +154,8 @@ Connect a Sleeper league (your username, then pick the league) or a public ESPN 
 **Model** (this page): how every number is made, what was tested and kept or rejected, and track records for the chance to play and for how often favorites win. A note at the top warns if the description may be behind the code.
 
 **Reference**: how often things happen in the NFL, from every regular-season play since 2001: conversions by down and distance, fourth downs, short yardage, turnovers, explosive plays, pass rate, touchdown chance by yard line, drives by starting spot, expected points, win chance by score and time, how often leads hold, field goals by distance, punts, kicks, penalties and replay. Every table says what a cell is; the window picker chooses all seasons, the last ten or three, or since the relevant rule change. History, not our model.
+
+**Calc**: set a situation (score, quarter and clock, down, distance, field position, both teams' timeouts; the Vegas line, over/under, roof and wind if you know them) and see each choice's chance to win: go for it, kick, or punt on 4th down; a timeout for the clock; accepting or declining a penalty; the extra point or two; an onside kick. See Decisions below.
 
 ## Projections
 
@@ -409,7 +409,7 @@ Ideas that sounded right but did not improve out-of-sample accuracy are switched
 - **Defensive and offensive-line absences.** Stat-weighted defender values overfit. Counting only absences knowable before kickoff, no position group (cornerbacks included) or offensive line showed a reliable effect beyond the team rating.
 - **Time of possession / pace and drive sustainability in the volume model.** Neutral-situation seconds per play and expected EPA per play (offense vs this defense, both ways) did not improve out-of-sample team play counts (plays MAE 6.88 -> 6.87-6.92 on 2025, 6.75 -> 6.78-6.80 on 2026). Drive outcomes are already inside EPA, and time of possession mostly reflects game script, which the Vegas spread captures.
 
-## Decisions (Games > Calc)
+## Decisions (Model > Calc)
 
 Every choice is the same sum: the chance of each thing that can happen, times the chance to win after it.
 

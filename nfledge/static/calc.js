@@ -1,4 +1,4 @@
-// Games > Calc (owner 2026-10-23: "a calculator where you input down, distance, score, team timeouts left and game
+// Model > Calc (owner 2026-10-23: "a calculator where you input down, distance, score, team timeouts left and game
 // clock, and you can use it and compare it with win probability to make decisions"): the situation in, every choice's
 // chance to win out (static/calc_engine.js over data/calc/model.json; (CG) in docs/INSIGHTS.md). Also the gamecast's
 // "What should they do?" sheet (NFLE.calcUI.sheet, prefilled from the live situation).
