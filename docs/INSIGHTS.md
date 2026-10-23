@@ -4473,3 +4473,26 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   consistent across the periods (signs flip in most, cells of 120-2,500 snaps); 2:01-2:40 -1.3 | +0.1, 1:20-2:00 -1.7 |
   +1.0. The win model's errors in the states the calculator values are within what seven seasons can detect; (CO)'s
   over-reads were mostly noise (converted) or small (the missed kick, ~2 points, not established). No fix is proposed.
+- **PRE-REGISTERED 2026-10-23 (owner: "do we get more accurate if we factor in our power rankings ... what if it was
+  aware that a teams offensive matchup is much better than defense? E.G. punting during a shootout looks worse than
+  going for it on 4th in midfield" ... "try it"): (CQ) the game's scoring level in the win model.** Not our power
+  rankings: the game model does not beat the lines (above), and the win model already has the spread. What it lacks is
+  the over/under: it values a 7-point lead with 8:00 left the same in a 38 and a 54 total game. Variants of the (CG)
+  model, same settings and rows: (A) + the total (over/under, 45 if missing) and the points expected in the time left
+  (total x game seconds left / 3600); (B) = (A) + this game's pace: points scored so far minus the total's share for
+  the time played. Walk-forward, each of 2022-25 fit on 2006 through the season before. Gate per variant: (1) pooled
+  2022-25 Brier lower than the comparison (A vs the current model; B vs A) with a 95% interval (games resampled,
+  paired) that excludes zero; (2) the late-and-close Brier (4th quarter, within 8) no worse than the comparison's +
+  0.001; (3) no calibration decile off by more than 3 points. A passing variant goes into the engine (the page and the
+  gamecast supply the total, and for B the score), then (CJ) check (1) is rerun. Reported, no gate: the calculator's
+  punt-vs-go at midfield (tied, 4th & 2, own 45, 8:00 in the 4th) at totals 38 and 54.
+- **RESULT {#wp-total} (CQ) the game's scoring level in the win model: FAIL (both); not shipped.**
+  tools/wp_total_eval.py, 167,680 rows 2022-25 walk-forward. Brier all / late-and-close: current 0.15544 / 0.17137,
+  (A) + total and points expected in the time left 0.15477 / 0.17098, (B) + this game's pace 0.15496 / 0.17202
+  (nflfastR 0.15431). (A) vs current -0.00067 [-0.00201, +0.00078]: the right direction, inside the noise (late-and-
+  close and deciles pass). (B) vs (A) +0.00019 [-0.00035, +0.00075], late-and-close worse (+0.00105), a decile off 3.1:
+  the game's scoring so far adds nothing beyond the total (as (CM) found for conversion). What the total does in (A):
+  pick'em, ball at the own 25, 4th quarter: up 3 with 8:00 left 71.2% at a 38 total, 71.3% at 46, 66.7% at 54; up 7
+  86.0 / 86.3 / 85.2; up 3 with 4:00 left 79.4 / 80.0 / 77.0. The shootout effect is real in football terms but small
+  (a few points, only at high totals) and the data can't confirm it. The punt-vs-go scenario was not computed: no
+  variant reached the engine. The conversion model already uses the total (CI).
