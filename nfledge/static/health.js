@@ -60,7 +60,8 @@
   // The card's status pill for the week: the official tag and game day, the same as the badge (2026-10-22: the pill
   // read the status text, so ESPN's "Out" showed an Out pill beside a Q badge). [kind, text, tip] or null.
   const pill = (P, t, week) => {
-    const gd = gameday(P), why = (P && P.inactive_why) || '';
+    // (owner 2026-10-23) before the final report a Q / D / O can be ours: the tag he most likely gets on it
+    const gd = gameday(P), why = (P && P.tx ? 'Expected Friday tag, from his practices so far' : '') || (P && P.inactive_why) || '';
     return gd === 'INA' ? ['out', 'Inactive', `Declared inactive for week ${week}`]
       : t === 'IR' ? ['out', 'Injured reserve', 'On injured reserve'] : t === 'PUP' || t === 'NFI' ? ['out', t, TAG_WORD[t]]
       : t === 'SSPD' ? ['out', 'Suspended', TAG_WORD.SSPD] : t === 'O' ? ['out', 'Out', why || 'Out']

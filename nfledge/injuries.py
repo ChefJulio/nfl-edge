@@ -67,6 +67,30 @@ STATUS_SRC = {  # InjuryModel.availability's "src": which part of the code spoke
   "return": "the return-timing model (lookahead weeks)",
 }
 
+_TAG_ODDS: dict | None = None
+
+
+def expected_tag(missed: bool, days: str) -> str:
+  """The designation a player on this week's practice report most likely gets on the final one (owner 2026-10-23: the
+  tag "realistic, in line with how ESPN might list them"), from his practice days so far (D / L / F) and whether he
+  missed his last game: data/history/tag_odds.json (tools/tag_odds_build.py, 2018 on), the likeliest tag when it is
+  at least an even bet, else Q. A sequence too rare there falls back to its first day."""
+  global _TAG_ODDS
+  if _TAG_ODDS is None:
+    import json
+    from pathlib import Path
+    try:
+      _TAG_ODDS = json.loads((Path(__file__).resolve().parent.parent / "data" / "history" / "tag_odds.json")
+                             .read_text(encoding="utf-8"))["odds"]
+    except (OSError, ValueError, KeyError):
+      _TAG_ODDS = {}
+  seq = "".join(c for c in days if c in "DLF")[:2]
+  for k in range(len(seq), 0, -1):
+    v = _TAG_ODDS.get(f"{'missed' if missed else 'played'}:{seq[:k]}")
+    if v:
+      return v["tag"]
+  return "Q" if missed else ""
+
 
 def status_label(r) -> str:
   """The status words for a row of InjuryModel.availability, the one place they're built (owner 2026-10-22 audit:
@@ -873,6 +897,7 @@ class InjuryModel:
   espn_midweek: dict | None = None  # gsis_id -> ESPN bucket ruled after his team's report started (build_espn_bridge)
   espn_questionable: dict | None = None  # gsis_id -> "Questionable": fresh ESPN Q, display only (availability)
   espn_gameday: dict | None = None  # (AU) gsis_id -> ("INA" | "ACT", time): game-day rulings (espn.gameday_rulings)
+  espn_active: dict | None = None  # gsis_id -> ESPN update time: fresh ESPN "Active" (build_espn_bridge(active=True)), tags only
 
   def midweek_ruling(self, gsis_id: str, game_status) -> tuple[float, str] | None:
     """A fresh ESPN Out / IR for a player on this week's practice report, before his final game status: its measured
@@ -1052,6 +1077,7 @@ class InjuryModel:
                                                              | (p.src == "last_wk"))
     p["status"] = [status_label(r) for r in p.itertuples()]
     p["tag"] = self.designations(p, season, week)
+    p["tag_x"] = self.tag_expected
     return p
 
   def tag_map(self, season: int, week: int, board: pd.DataFrame | None = None) -> dict:
@@ -1077,17 +1103,21 @@ class InjuryModel:
       - a reserve list (IR, PUP, NFI, SSPD): its code;
       - game day, once his team's actives / inactives are out (90 min before kickoff): inactive -> O, active -> none;
       - his team's final report: its designation (Q / D / O; listed without one, or not listed -> none);
-      - before it (Tuesday -> the final report): Q if he missed his last game hurt (on its report, no snap; not when
-        its listed reason was rest or personal) or was hurt in it and not back (the play-by-play's injury note with no
-        "has returned to the game" after it; ingame.not_back); once his team's practice reports start, that Q holds
-        only while he's on them;
-      - O before the final report only when we're confident he sits: ESPN's Out with a return date past this game
-        (1.8% played early in the week, n 652; 0 of 43 midweek). A plain ESPN Out (34% played) or Doubtful isn't O.
+      - before it (Tuesday -> the first practice report): Q if he missed his last game hurt (on its report, no snap;
+        not when its listed reason was rest or personal) or was hurt in it and not back (the play-by-play's injury
+        note with no "has returned to the game" after it; ingame.not_back);
+      - once his team's practice reports start (owner 2026-10-23): off them -> none; on them -> the tag he most likely
+        gets on the final report (expected_tag: practice days so far, missed last game), unless ESPN marked him
+        Active after the latest report (espn_active: no designation coming);
+      - before the final report, ESPN's tag where it is firm: Out with a return date past this game (1.8% played early
+        in the week, n 652); once practice reports are out, ESPN's fresh Out / Doubtful too (on the report midweek:
+        9.6% / 3% played). Before the reports a plain ESPN Out (34% played) isn't O.
     Hurt during a game being played now: the page marks him Q live from ESPN's play text (gamecast.js).
     Byes (owner 2026-10-21): "his last game" is his team's last game, wherever the bye fell, and a bye week files no
     report, so a Tuesday Q holds through the bye until his team's first report of the week it plays again.
     p: rows with gsis_id and team."""
     out = [""] * len(p)
+    self.tag_expected = [False] * len(p)  # parallel to out: the tag is our expected Friday tag, not ESPN's / the team's
     published = published_teams(self.data, season, week, getattr(self, "now", None))
     pr, days, final = self.data.practice, None, set()
     if pr is not None:
@@ -1122,16 +1152,52 @@ class InjuryModel:
           nb.append(set())
       return nb[0]
 
-    def tuesday_q(g, team) -> bool:
+    def missed_last(g, team) -> bool | None:
+      """Missed his team's last game while on its report, for an injury; None: no earlier game / no context."""
       if ctx is None:
-        return False
+        return None
       prev = [x for x in ctx.tw.get((season, team), []) if x < week]
       if not prev:
-        return False
+        return None
       k = prev[-1]
-      if (g, season, k) not in ctx.on:  # missed it while on its injury report, for an injury
-        return (g, season, k) in ctx.rep and ctx.why.get((season, k, g), "none") not in ("rest", "personal")
-      return (g, season, k) in not_back()  # hurt in it and not back
+      return ((g, season, k) not in ctx.on and (g, season, k) in ctx.rep
+              and ctx.why.get((season, k, g), "none") not in ("rest", "personal"))
+
+    def tuesday_q(g, team) -> bool:
+      m = missed_last(g, team)
+      if m is None:
+        return False
+      if m:
+        return True
+      k = [x for x in ctx.tw.get((season, team), []) if x < week][-1]
+      return (g, season, k) in ctx.on and (g, season, k) in not_back()  # hurt in it and not back
+
+    # (owner 2026-10-23) ESPN's "Active" posted after his team's latest practice report: no designation coming
+    # (Judkins, LL after missing week 6, ESPN Active at 2:28 pm ET Friday, hours before the final report). Display only.
+    act = self.espn_active or {}
+    last_rep, n_rep = {}, {}  # team -> its latest report date / how many report days are out
+    if days is not None and "dates" in days.columns:
+      tm = dict(zip(ro.gsis_id, ro.team.replace({"LAR": "LA"})))
+      for g_, ds in days.dates.items():
+        dd = [x for x in str(ds or "").split(",") if x]
+        t_ = tm.get(g_)
+        if t_ and dd:
+          last_rep[t_] = max(last_rep.get(t_, ""), max(dd))
+          n_rep[t_] = max(n_rep.get(t_, 0), len(dd))
+
+    def so_far(g, team) -> str:
+      """His practice days so far, a day before he was added to the report counted as full (as the card shows it:
+      Godwin, added Thursday with a DNP, is "FD", not "D")."""
+      s_ = "".join(c for c in str(days.days.loc[g] or "") if c in "DLF")
+      return "F" * max(0, n_rep.get(team, 0) - len(s_)) + s_
+
+    def espn_cleared(g, team) -> bool:
+      u = act.get(g)
+      if not u or team not in last_rep:
+        return False
+      # a day's report is published around 4 p.m. ET: ESPN's Active must come after the latest one
+      return (pd.Timestamp(u).tz_convert("America/New_York")
+              >= pd.Timestamp(last_rep[team]).tz_localize("America/New_York") + pd.Timedelta(hours=16))
 
     for j, (i, row) in enumerate(p.iterrows()):
       g, team = row.gsis_id, row.team
@@ -1148,24 +1214,35 @@ class InjuryModel:
         out[j] = {"OUT": "O", "DOUBTFUL": "D", "QUESTIONABLE": "Q"}.get(gs, "")
         continue
       bucket = (self.espn_midweek or {}).get(g) if team in published else (self.espn_bridge or {}).get(g)
-      if bucket == "Out+ret":
-        out[j] = "O"
+      if bucket == "Out+ret" or (team in published and bucket in ("Out", "Doubtful")):
+        # (owner 2026-10-23: "we trust espn") once practice reports are out, ESPN's fresh Out / Doubtful is the tag
+        # (on the report, midweek Out played 9.6%, Doubtful 3%); before them only Out with a return date past the game
+        out[j] = "D" if bucket == "Doubtful" else "O"
         continue
       if team in published and not listed:
         continue  # practice reports out and he isn't on them: practicing fully
+      if team in published:
+        # on this week's report, before the final one: ESPN's fresh Active clears him; else the tag he most likely
+        # gets on it, from his practice days so far and whether he missed his last game (expected_tag)
+        out[j] = "" if espn_cleared(g, team) else expected_tag(bool(missed_last(g, team)), so_far(g, team))
+        self.tag_expected[j] = bool(out[j])
+        continue
       out[j] = "Q" if tuesday_q(g, team) else ""
+      self.tag_expected[j] = bool(out[j])
     return out
 
   @staticmethod
   def build_espn_bridge(data, season: int, week: int, feed: pd.DataFrame, midweek: bool = False,
-                        questionable: bool = False) -> dict:
+                        questionable: bool = False, active: bool = False) -> dict:
     """Early-week bridge (see espn.py): gsis_id -> ESPN bucket (espn_calib.bucket: Out / Out+ret / Doubtful / IR)
     for players with an ESPN injury status updated on or after their team's last completed game day, for teams
     whose report for `week` is not out. Empty when there is no feed, or once every report for the week is out.
     midweek=True: the same, for teams whose report IS out, Out / Out+ret / IR only (espn_calib.MIDWEEK): a ruling
     made after practice started, applied to players on the report until their final game status (availability).
     questionable=True: ESPN Questionable, any team, same freshness filter: DISPLAY only (espn_questionable), since
-    it adds nothing to the practice days (INSIGHTS sec. 9: played 63%, practice model 58%)."""
+    it adds nothing to the practice days (INSIGHTS sec. 9: played 63%, practice model 58%).
+    active=True: ESPN "Active" (cleared), any team, same freshness filter -> its update time (ISO): TAGS only
+    (designations clears a practice-report player's expected tag when it came after his team's latest report)."""
     from .espn import STATUS_MAP
     from .espn_calib import MIDWEEK_BUCKETS, bucket
     if feed is None or feed.empty:
@@ -1185,12 +1262,13 @@ class InjuryModel:
     kick = {t: kickoff(d, tm) for t, d, tm in [*zip(w.home_team, w.gameday, w.gametime), *zip(w.away_team, w.gameday, w.gametime)]}
     out = {}
     for x in feed.itertuples():
-      rep = ("Questionable" if str(x.status) == "Questionable" else None) if questionable else STATUS_MAP.get(str(x.status))
+      rep = (("Questionable" if str(x.status) == "Questionable" else None) if questionable
+             else ("Active" if str(x.status) == "Active" else None) if active else STATUS_MAP.get(str(x.status)))
       hit = by_espn.get(str(x.espn_id))
       if rep is None or hit is None:
         continue
       gsis, team = hit
-      if (not questionable and (team in published) != midweek) or team not in last_day.index:
+      if (not questionable and not active and (team in published) != midweek) or team not in last_day.index:
         continue
       upd = pd.to_datetime(x.updated, utc=True, errors="coerce")
       if pd.isna(upd) or upd.tz_convert("America/New_York").date() < pd.Timestamp(last_day[team]).date():
@@ -1199,6 +1277,9 @@ class InjuryModel:
         continue  # posted after this week's kickoff: about his next game (Terry McLaurin, hurt in 2026 week 6's MNF)
       if questionable:
         out[gsis] = rep
+        continue
+      if active:
+        out[gsis] = upd.isoformat()
         continue
       b = bucket(x.status, getattr(x, "return_date", None), game_day.get(team)) or rep
       if midweek and b not in MIDWEEK_BUCKETS:

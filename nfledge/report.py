@@ -591,7 +591,7 @@ def week_data(ctx: dict) -> str:
         "proj": round(float(r["proj"]), 3), "q": [round(float(r[k]), 3) for k in ("p10", "p25", "p50", "p75", "p90")],
         "rank": r["rank"],
         "tier": r["tier"], "slot": r["slot"], "ecr": None if pd.isna(r["ecr"]) else r["ecr"],
-        "status": r["status"] or "", "src": r.get("src") or "", "days": r.get("days") or "", "gd": r.get("gd") or "", "tag": r.get("tag"), "inactive": r["inactive"], "inactive_why": r["inactive_why"],
+        "status": r["status"] or "", "src": r.get("src") or "", "days": r.get("days") or "", "gd": r.get("gd") or "", "tag": r.get("tag"), "tx": 1 if r.get("tag_x") else 0, "inactive": r["inactive"], "inactive_why": r["inactive_why"],
         "scratch": r["scratch"], "play": r["play"], "play_why": r["play_why"],
         "boost": r["boost"], "boost_from": r["boost_from"], "cond": r.get("cond"), "cond2": r.get("cond2"), "low_sample": r["low_sample"], "conf": r["conf"],
         "mu": r["mu"], "mu_hi": r["mu_hi"], "mu_c": r["mu_c"],
@@ -721,7 +721,7 @@ def player_rankings(eng, p: pd.DataFrame, season: int, week: int, cfg: dict) -> 
         # (injury x scratch x the backup-QB rule): expected points and "likely out" projections
         # tag: the official injury designation the row shows (InjuryModel.designations); None on look-ahead weeks
         "status": r.status, "src": getattr(r, "src", "") or "", "days": getattr(r, "days", "") or "", "gd": getattr(r, "gd", "") or "",
-        "tag": getattr(r, "tag", None), "avail": r.avail, "inactive": 1 - float(getattr(r, "inj_avail", r.avail)),
+        "tag": getattr(r, "tag", None), "tag_x": bool(getattr(r, "tag_x", False)), "avail": r.avail, "inactive": 1 - float(getattr(r, "inj_avail", r.avail)),
         "scratch": round(float(getattr(r, "scratch", 0.0)), 3), "play": round(float(r.avail), 3), "play_why": play_why(r),
         "inactive_why": inactive_why(r), "boost": r.injury_boost, "boost_from": r.boost_from or "",
         # two worlds for a teammate of an uncertain player: [name, pid, P(he sits), proj if he plays, proj if he sits]

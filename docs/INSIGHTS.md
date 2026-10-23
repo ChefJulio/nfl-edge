@@ -4541,3 +4541,20 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   against its forecast of 46.1%: no shortfall at all in those seasons (any margin; (CS)'s +5.9 was at 3+ points and
   mostly 2022-24). (2) also fails (field goals 57.2% adjusted vs 55.6% won). (CS) reads as mostly 2022-23 and noise,
   not a stable bias; the margins stay as computed.
+- **SHIPPED 2026-10-23 (owner: "the tag is just an aesthetic ... i just want it to be realistic, in line with how ESPN
+  might list them"): the expected Friday tag (display only; no chance to play changes).** Before a team's final
+  report, a player on its practice report shows the designation he most likely gets on it, from 2018-25 3-day report
+  weeks (tools/tag_odds_build.py -> data/history/tag_odds.json): keyed by whether he missed his last game while on
+  its report and his practice days so far (a day before he was added counted as full), the likeliest official tag
+  when it is at least an even bet, else Q. E.g. missed last game, LL: Q (60.5% Q / 25% none / 11% Out, played 61%);
+  played last game, F: none (89.5%); missed, DD: O (84%); played, D: Q (mixed: O 35 / none 34 / Q 26). Overrides, in
+  order: reserve lists, game-day actives / inactives, the final report, ESPN's fresh Out / Doubtful once reports are
+  out (and Out with a return date past the game before them), ESPN's "Active" posted after the team's latest report
+  (no designation coming: Judkins, LL after missing week 6, ESPN Active 2:28 pm ET Friday; build_espn_bridge(active)).
+  Before the first report the old rule holds (Q if he missed his last game hurt or was hurt in it and not back).
+  Our own tags carry tx = 1 in the week data; the card's pill tip says "Expected Friday tag". Measured alongside
+  (owner: "how often do players miss last week, get marked active on friday ... and don't actually play"): missed
+  his last game, no designation on the final report: played 88.9% (n 2,144; LL 91.7%, LLF 92.3%) vs 98.8% for a
+  player who played his last game. ESPN's midweek Active as a chance-to-play input is NOT shipped: past ESPN captures
+  (the public page) never list Active players, and our own archive with it starts 2026-10-13; it needs a
+  prospective check first.
