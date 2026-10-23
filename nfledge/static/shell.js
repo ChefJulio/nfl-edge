@@ -358,7 +358,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const NAV = [
     { key: 'players', label: 'Players', subs: [['rankings', 'Rankings', 'tab-players'], ['stats', 'Stats'], ['roles', 'Roles', 'tab-roles'], ['injuries', 'Injuries'], ['moves', 'Moves'], ['trends', 'Trends']] },
     { key: 'teams', label: 'Teams', subs: [['all', 'All teams'], ['power', 'Power', 'tab-power'], ['standings', 'Standings'], ['playoffs', 'Playoffs'], ['stats', 'Stats'], ['draft', 'Draft']] },
-    { key: 'games', label: 'Games', subs: [['matchups', 'Matchups', 'tab-games']] },
+    { key: 'games', label: 'Games', subs: [['matchups', 'Matchups', 'tab-games'], ['calc', 'Calc']] },  // Calc: decisions (owner 2026-10-23)
     // your own fantasy league (Sleeper / public ESPN import; owner 2026-10-15)
     // tab named Fantasy (owner 2026-10-16); its views are the site's sub-tabs (owner 2026-10-18: "uniform with the rest of the
     // site"), all one section (league.js switches views on nfle-route)
@@ -375,7 +375,8 @@ document.addEventListener('touchstart', () => {}, { passive: true });
                   'tab-players-injuries': 'injuries', 'tab-players': 'rankings', 'tab-teams-draft': 'draft',
                   'tab-teams-playoffs': 'playoffs', 'tab-players-moves': 'moves', 'tab-power': 'power',
                   'tab-games': 'matchups', 'tab-roles': 'roles', 'tab-model': 'model',
-                  'tab-players-trends': 'trends', 'tab-league': 'league', 'tab-model-reference': 'reference', 'tab-home': 'home' };
+                  'tab-players-trends': 'trends', 'tab-league': 'league', 'tab-model-reference': 'reference', 'tab-home': 'home',
+                  'tab-games-calc': 'calc' };
   const ver = (document.currentScript && new URL(document.currentScript.src).search) || '';
   const loaded = {};
   const NFLE = window.NFLE = window.NFLE || {};

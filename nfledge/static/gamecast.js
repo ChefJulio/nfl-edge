@@ -652,6 +652,108 @@
   // Opponent colored by OUR pregame matchup rank that week (2021 on); rank = his position finish that week.
   const LOGS = {};
   const siteRoot = () => CFG.page === 'game' ? '' : (CFG.root || '');
+  // ---- "What should they do?" (owner 2026-10-23: the calculator "with integration in our gamecast"): Games > Calc's
+  // sheet (calc.js, loaded on the first tap) prefilled from ESPN's live situation and our week data's Vegas line
+  const ASSET_V = (() => { const sc = [...document.scripts].find(x => /assets\/gamecast\.js/.test(x.src)); return sc ? new URL(sc.src).search : ''; })();
+  const calcLoad = () => calcLoad.p || (calcLoad.p = new Promise((ok, bad) => {
+    if (NFLE.calcUI) { ok(); return; }
+    const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = `${siteRoot()}assets/calc.css${ASSET_V}`; document.head.appendChild(css);
+    const js = document.createElement('script'); js.src = `${siteRoot()}assets/calc.js${ASSET_V}`; js.onload = ok; js.onerror = () => bad(new Error('calc.js'));
+    document.head.appendChild(js);
+  }));
+  const calcState = (info, sit) => {
+    const sp = sit && spot(sit, info);
+    if (!sp || !sit.down || sit.down < 1) return null;
+    const off = sp.offense, def = off === info.home ? info.away : info.home;
+    const yl = sp.dir === 1 ? 100 - sp.x : sp.x;  // yards to the end zone
+    const g = DATA && (DATA.games || []).find(x => x.home.team === info.home.team && x.away.team === info.away.team);
+    const m = g && String(g.vegas_line || '').match(/^([A-Z]{2,3})\s+-?([\d.]+)/);
+    const line = m ? (ourCode(m[1]) === off.team ? +m[2] : -m[2]) : 0;
+    const home = off === info.home, tos = home ? [sit.homeTimeouts, sit.awayTimeouts] : [sit.awayTimeouts, sit.homeTimeouts];
+    return { mode: 'play', a: off.team, b: def.team, off: off.score, def: def.score, qtr: Math.min(4, info.period || 1), clock: info.clock || '15:00',
+             down: sit.down, togo: Math.max(1, sit.distance || 10), side: yl > 50 ? 'own' : 'opp', yard: yl > 50 ? 100 - yl : yl,
+             to: tos[0] != null ? tos[0] : 3, oppTo: tos[1] != null ? tos[1] : 3, line, total: (g && +g.vegas_total) || 45, home: home ? 1 : 0, rec2h: 0 };
+  };
+  // the Vegas line and total for a game, from the offense's side (our week data)
+  const vegasFor = (info, team) => {
+    const g = DATA && (DATA.games || []).find(x => x.home.team === info.home.team && x.away.team === info.away.team);
+    const m = g && String(g.vegas_line || '').match(/^([A-Z]{2,3})\s+-?([\d.]+)/);
+    return { line: m ? (ourCode(m[1]) === team ? +m[2] : -m[2]) : 0, total: (g && +g.vegas_total) || 45 };
+  };
+  // ---- Decisions (owner 2026-10-23: "identify questionable decisions made in games ... point out the bad ones in
+  // hindsight"): every regulation 4th down (go / field goal / punt) and try after a touchdown, graded before the snap
+  // by the calculator (calc_engine.js grade). Timeouts are not graded (owner: "there's lots of reasons to call
+  // timeouts beyond clock management").
+  const callList = (sum, info, E) => {
+    const plays = allPlays(sum).flatMap(d => d.plays || []);
+    const used = {}, out = [];
+    let ph = 0, pa = 0;
+    plays.forEach(p => {
+      const per = (p.period || {}).number || 1, half = per <= 2 ? 1 : 2, t = `${pType(p)} ${p.text || ''}`;
+      const before = { home: ph, away: pa };
+      if (p.homeScore != null) { ph = p.homeScore; pa = p.awayScore; }
+      if (/timeout/i.test(pType(p))) {
+        const m = String(p.text || '').match(/by ([A-Z]{2,3})/), tm = m && ourCode(m[1]);
+        if (tm) { used[half] = used[half] || {}; used[half][tm] = (used[half][tm] || 0) + 1; }
+        return;
+      }
+      if (per > 4 || nonPlay(p) || /no play/i.test(String(p.text || ''))) return;
+      const tid = (pType(p).match(/^(xp|try2)$/) || [])[0] || (p.type && p.type.id);
+      const isTry = tid === 'xp' || tid === 'try2';
+      const s0 = p.start || {};
+      if (!isTry && s0.down !== 4) return;
+      if (!isTry && /kneel|spike/i.test(t)) return;
+      const sp = spot(s0, info);
+      if (!sp || sp.x == null) return;
+      const off = sp.offense, def = off === info.home ? info.away : info.home;
+      const sc = isTry ? { home: p.homeScore, away: p.awayScore } : before;  // a try's own scores are before it
+      const offPts = off === info.home ? sc.home : sc.away, defPts = off === info.home ? sc.away : sc.home;
+      const v = vegasFor(info, off.team), u = (used[half] || {});
+      const s = { diff: offPts - defPts, sec: E.gameSec(per, (p.clock || {}).displayValue || '15:00'), down: 4, togo: Math.max(1, s0.distance || 1),
+                  yl: sp.dir === 1 ? 100 - sp.x : sp.x, to: Math.max(0, 3 - (u[off.team] || 0)), oppTo: Math.max(0, 3 - (u[def.team] || 0)),
+                  line: v.line, total: v.total, home: off === info.home ? 1 : 0, rec2h: 0 };
+      const choice = isTry ? (tid === 'try2' ? 'two' : 'xp') : /punt/i.test(t) ? 'punt' : /field goal/i.test(t) ? 'fg' : 'go';
+      out.push({ p, per, kind: isTry ? 'try' : 'fourth', s, choice, team: off.team, opp: def.team });
+    });
+    return out;
+  };
+  const CALLS = {};  // game id -> { n: plays seen, html }
+  const callsPane = (sum, info) => {
+    const box = `<section class="gcs" id="gcCalls"><h3>Decisions</h3><p class="gcs-note">Every 4th down and try after a touchdown, judged before the snap by <a href="${siteRoot()}#games/calc">our calculator</a> (not by how it turned out): the chance to win after each option. Questionable = gave up 3+ points of win chance; debatable = 1.5-3; inside 1.5 is the model's noise. The conversion rate is an average offense's; a team that knows its short-yardage game is better can be right to go. Timeouts aren't graded.</p><div class="dcs-body">`;
+    if (!sum) return `${box}<p class="muted">Decisions appear once the game starts.</p></div></section>`;
+    const n = allPlays(sum).reduce((t, d) => t + (d.plays || []).length, 0), hit = CALLS[info.id];
+    if (hit && hit.n === n) return `${box}${hit.html}</div></section>`;
+    const pending = `${box}<p class="muted">Grading&hellip;</p></div></section>`;
+    calcLoad().then(() => NFLE.calcUI.engine()).then(({ E, C }) => {
+      const rows = callList(sum, info, E).map(d => ({ ...d, g: C.grade(d.kind, d.s, d.choice) })).filter(d => d.g);
+      const pct = v => `${(100 * v).toFixed(1)}%`, pts = v => (100 * v).toFixed(1);
+      const VERB = { go: 'went for it', fg: 'kicked a field goal', punt: 'punted', xp: 'kicked the extra point', two: 'went for two' };
+      const VC = { fine: ['dcv-ok', 'Right call'], debatable: ['dcv-q', 'Debatable'], questionable: ['dcv-bad', 'Questionable'] };
+      const bad = rows.filter(d => d.g.verdict === 'questionable');
+      const sumLine = rows.length ? `<p class="dcs-sum">${rows.length} decisions: <b>${bad.length}</b> questionable${bad.length ? ` (${[...new Set(bad.map(d => d.team))].map(t => `${esc(t)} ${bad.filter(d => d.team === t).length}`).join(', ')})` : ''}, ${rows.filter(d => d.g.verdict === 'debatable').length} debatable.</p>` : '<p class="muted">No 4th downs or tries yet.</p>';
+      const card = d => {
+        const g = d.g, [cls, lab] = VC[g.verdict], half = d.s.sec > 1800 ? d.s.sec - 1800 : d.s.sec;
+        const what = d.kind === 'try' ? 'after a touchdown' : `4th &amp; ${d.s.togo} ${d.s.yl <= 50 ? `at ${esc(d.opp)} ${d.s.yl}` : `at own ${100 - d.s.yl}`}`;
+        const opts = g.options.map(o => `<span class="dcs-o${o.key === d.choice ? ' chose' : ''}${o.key === g.best ? ' best' : ''}">${esc(o.label)} <b>${pct(o.wp)}</b></span>`).join('');
+        return `<li class="dcs-i ${cls}"><div class="dcs-h"><span class="dcs-t">Q${d.per} ${esc((d.p.clock || {}).displayValue || '')}</span>
+          <b>${tmL(d.team)}</b> ${what}: ${VERB[d.choice]}<span class="dcv ${cls}">${lab}${g.verdict !== 'fine' ? ` &minus;${pts(g.cost)}` : ''}</span></div>
+          <div class="dcs-opts">${opts}</div>
+          ${g.verdict !== 'fine' ? `<div class="dcs-why">${esc(g.options[0].label)} was worth ${pts(g.cost)} more points of win chance${d.kind === 'fourth' && g.p ? ` (${pct(g.p.go)} to convert${g.p.fg != null ? `, ${pct(g.p.fg)} field goal` : ''})` : ''}.${half <= 180 ? ' Last 3:00 of a half: our numbers are rough here.' : ''}</div>` : ''}
+          <div class="dcs-r muted">${esc(String(d.p.text || '').slice(0, 160))}</div></li>`;
+      };
+      const html = `${sumLine}<ol class="dcs">${rows.slice().reverse().map(card).join('')}</ol>`;
+      CALLS[info.id] = { n, html };
+      const b = document.querySelector('#gcCalls .dcs-body');
+      if (b) b.innerHTML = html;
+    }, () => { const b = document.querySelector('#gcCalls .dcs-body'); if (b) b.innerHTML = '<p class="muted">The calculator isn\'t available right now.</p>'; });
+    return pending;
+  };
+  document.addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('[data-calc]');
+    if (!b || !GP.calcState) return;
+    const S = GP.calcState;
+    calcLoad().then(() => NFLE.calcUI.sheet(S, `${S.a} ball: what should they do?`), () => {});
+  });
   const league = () => {
     try { const s = JSON.parse(localStorage.getItem('nfledge-scoring') || 'null'); if (s && s.lg) return s.lg; } catch (e) { /* default */ }
     return { teams: 10, QB: 1, RB: 2, WR: 2, TE: 1 };
@@ -4109,7 +4211,7 @@
   // Live tab: one pane at a time, picked here (owner 2026-10-15: "if i pick stats i see stats"); box score first
   // one pane (owner 2026-10-18: "condense ... so we're not duplicating the displays"): the game's flow (win chance and
   // every drive), the plays, the box score (with its Fantasy tab) and the team stats
-  const GPANES = [['flow', 'Game flow'], ['plays', 'Plays'], ['box', 'Box score'], ['team', 'Team stats']];
+  const GPANES = [['flow', 'Game flow'], ['plays', 'Plays'], ['calls', 'Decisions'], ['box', 'Box score'], ['team', 'Team stats']];
   // Live updates re-render the page; keep what the viewer is reading where it is (owner 2026-10-18: "when i'm
   // scrolled down, live updates shift stuff"): the keyed element nearest the top of the screen is measured before and
   // the page scrolled by however far it moved after.
@@ -4171,11 +4273,12 @@
             <div id="lgBody">${!sum ? '<p class="muted">Plays appear once the game starts.</p>'
               : !allPlays(sum).length && info.state === 'post' ? '<p class="muted">ESPN has no play-by-play for this game (games before about 2005 only have box scores).</p>'
               : gameLog(sum, info, ser, upto)}</div></section>`
+      : GP.pane === 'calls' ? callsPane(sum, info)
       : GP.pane === 'team' ? `<section class="gcs" id="gcTeam"><h3>Team stats</h3>${st.replay ? '<p class="gcs-note">As of this play, counted from the play-by-play.</p>' : ''}${sum ? teamStats(sum, info, null, st.replay ? st.tstats : null) || '<p class="muted">Not available yet.</p>' : ''}</section>`
       : playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: st.replay ? 'As of this play, counted from the play-by-play.' : '', lines: st.replay ? st.lines : null, plays: st.replay ? st.plays : null, secs: st.secs, empty: 'The box score fills in once the game starts.' })}`;
     root.innerHTML = `
       <section class="sb" style="--ac:${esc(info.away.color)};--hc:${esc(info.home.color)}">${side(info.away, false)}<div class="sb-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<b>${esc(status)}</b>${!nx && sp && sit && sit.shortDownDistanceText
-        ? `<span class="sb-dd">${esc(sit.shortDownDistanceText)}${sit.possessionText ? ` · ${esc(sit.possessionText)}` : ''}</span>` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}</section>
+        ? `<span class="sb-dd">${esc(sit.shortDownDistanceText)}${sit.possessionText ? ` · ${esc(sit.possessionText)}` : ''}</span>${info.state === 'in' && (GP.calcState = calcState(info, sit)) ? '<button type="button" class="sb-calc" data-calc>What should they do?</button>' : ''}` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}</section>
       <div class="seg gc-tabs" role="tablist">${GTABS.map(([k, l]) => `<button type="button" role="tab" data-gtab="${k}" class="${tab === k ? 'on' : ''}">${k === 'live' && info.state === 'in' ? '<span class="live-dot"></span>' : ''}${k === 'live' && info.state === 'post' && !rp ? 'Final' : l}</button>`).join('')}</div>
       ${tab === 'pre' ? preTab(g) : live()}`;
     wireGame();

@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 82faa72765344312
+documented_code_hash: 7b9c38ac57340d21
 ---
 # How the model works
 
@@ -98,6 +98,8 @@ Every page and tab on NFL Edge: what it shows, where its numbers come from, and 
 
 ### Games
 
+**Calc**: set a situation (score, quarter and clock, down, distance, field position, both teams' timeouts; the Vegas line, over/under, roof and wind if you know them) and see each choice's chance to win: go for it, kick, or punt on 4th down; a timeout for the clock; accepting or declining a penalty; the extra point or two; an onside kick. See Decisions below.
+
 **Matchups**: this week's games as tiles. Before kickoff each side shows its win chance (from the Vegas line, or our model before a line posts, with our model's own number underneath); during the game the score, clock, possession and red zone, live from ESPN; after it the final and how the favorite fared. Live games sort to the top. On phones a compact grid fits the whole week on one screen, grouped by kickoff window. The games with the most playoff odds riding on them are flagged. Tap a tile for its game page.
 
 **The game page (gamecast)**: everything about one game, two tabs.
@@ -108,6 +110,8 @@ Every page and tab on NFL Edge: what it shows, where its numbers come from, and 
   - Plays: Recent (the current and previous drive, newest first, with an "Awaiting result" line before the next snap) and Game log (every play by drive or one list, sortable by the biggest swings, filters for scoring, turnovers and penalties, a search). Each play shows down and distance and the ball's spot before and after.
   - Box score: each team's full box, and Fantasy (both teams side by side by position, kickers and defenses included, each player's points against his projection, your players marked if a league is connected).
   - Team stats: yards, downs, turnovers, possession and the rest, side by side.
+  - Decisions: every 4th down and try after a touchdown, graded before the snap by the calculator (below): the chance to win after each option, and whether the call gave up win chance. Timeouts aren't graded.
+- **What should they do?**: during a live game, a button under the down and distance opens the calculator filled in with the situation.
 - **Replay**: a finished game can be replayed play by play (play, pause, step, three speeds, a slider); the score, field, drive, win chance and box score are rebuilt as of each play.
 
 ### Fantasy
@@ -404,6 +408,34 @@ Ideas that sounded right but did not improve out-of-sample accuracy are switched
 - **Team-specific home field.** Team home edges do not persist year to year (correlation -0.02 over 567 team-seasons from 2005-25; Seattle's edge was +5.7 points in 2005-12 and about zero since 2019). Travel distance and time zones showed no effect. A division-game term made cross-validation worse.
 - **Defensive and offensive-line absences.** Stat-weighted defender values overfit. Counting only absences knowable before kickoff, no position group (cornerbacks included) or offensive line showed a reliable effect beyond the team rating.
 - **Time of possession / pace and drive sustainability in the volume model.** Neutral-situation seconds per play and expected EPA per play (offense vs this defense, both ways) did not improve out-of-sample team play counts (plays MAE 6.88 -> 6.87-6.92 on 2025, 6.75 -> 6.78-6.80 on 2026). Drive outcomes are already inside EPA, and time of possession mostly reflects game script, which the Vegas spread captures.
+
+## Decisions (Games > Calc)
+
+Every choice is the same sum: the chance of each thing that can happen, times the chance to win after it.
+
+### Win probability
+
+Our own model of the chance that the team with the ball wins, from the score, the time left (in the game and the half), down, distance, field position, both teams' timeouts, the Vegas line (its weight fading as the game goes on), home field and who gets the second-half kickoff. It is trained on every regulation play since 2006 and built so that more points, more of your own timeouts or a better Vegas line never lower the chance. Tested season by season on 2022-25 (each season predicted only from the ones before), it was as accurate as the public nflfastR model, whose numbers come from fitting those same seasons: Brier 0.1548 vs 0.1540 on all plays, 0.1699 vs 0.1697 in close 4th quarters. Overtime is left out (its rules changed in 2022 and 2025).
+
+### What each choice can lead to
+
+- *Going for it:* the chance to convert is for an average offense in that spot, from 3rd and 4th downs since 2014 with recent seasons counting most, the offense's Vegas line, the over/under and the roof. It is read as of 3rd down: teams choose which 4th downs to try, so 4th-down tries convert more than an average team would (from their own 20-45, 4th & 10: 36% of 61 tries; 3rd & 10: 31.5% of 1,287). A defensive penalty that gives a first down counts as converting. The yards gained, on success and on failure, depend on the distance and the field position.
+- *Field goals:* the make rate by distance from the last two seasons (today's kickers make far more long ones: 71% from 50-59 yards in 2024-25), shifted for roof and wind. Past 64 yards only strong kickers try, so the rate tapers to zero at 70.
+- *Punts:* where the other team starts, by field position, including blocks, muffs lost and returns for touchdowns (2018 on).
+- *Kickoffs:* the 2025 rules' starting spots. *Onside kicks:* 8% recovered. *Tries:* 95% of extra points, 48% of two-point tries.
+- *Timeouts:* a timeout saves the time a running clock would lose before the next snap, which depends on the offense's pace there (39 seconds between snaps normally, about 21 when hurrying at a half's end, 44 for a 4th-quarter leader in the last two minutes), stopped at the two-minute warning. Judged only for the clock and only in a half's last five minutes: a timeout can be right for other reasons.
+- *After a conversion late:* if the team that keeps the ball leads and the other side can't stop the clock, the game is over.
+
+### Reading the numbers
+
+Choices within 1.5 points of each other are a toss-up: that's the model's noise. The rates you can change on the page (converting, the field goal) are an average team's; yours may be better or worse. In a half's last three minutes the numbers are rough: in tied games with the ball late, every model we checked (ours, nflfastR's, and a two-minute-drill model we built) reads about 10 points low.
+
+### What we tried
+
+- **Shipped** - Can our own win probability model match the public one? - Yes: Brier 0.1548 vs nflfastR's 0.1540 on 2022-25 (theirs fitted on those seasons), 0.1699 vs 0.1697 in close 4th quarters, every tenth of the range within 2 points. One pre-set sanity check missed, but the expectation was wrong, not the model: down 3 at the opponent's 20 with 5 seconds left, teams won 27.7% (the model said 29%). A version that made more time never help the leading team was smoother but missed the last seconds (29% vs 43% actual) and was dropped (2026-10). <!-- tried:wp-model -->
+- **Shipped** - Do the decision inputs from older seasons hold up? - No: field goals from 50-59 yards were made 9.8 points more often in 2024-25 than a 2018-23 fit said, and 4th downs converted more too. The field goal rate now comes from the last two seasons (within 3 points from 20 to 59 yards); 4th downs from recent tries (2026-10). <!-- tried:calc-inputs -->
+- **Rejected** - Does a model of the drive itself (how it ends and how much clock is left) beat the general model in the last two minutes? - No: Brier 0.1292 vs 0.1282 on 2022-25, no better calibrated. Both, and nflfastR, read tied games with the ball late about 10 points low (2026-10). <!-- tried:endgame-drive -->
+- **Shipped** - Do team strength, roof, wind and the full punt outcome (what nfl4th and the NYT 4th Down Bot use) improve the inputs? - Yes, with a caveat: the conversion model beat the old one on every distance (Brier 0.2249 vs 0.2336) but still reads below the 4th-down tries teams chose to make; field goals with roof and wind came within 3 points from 20 to 59 yards and within 4 in winds of 15+ mph (2026-10). <!-- tried:calc-inputs-v2 -->
 
 ## Playoffs
 

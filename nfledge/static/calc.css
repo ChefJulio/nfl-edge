@@ -1,0 +1,46 @@
+/* Games > Calc (owner 2026-10-23): the situation in, each choice's chance to win out (calc.js) */
+.cx { display: grid; gap: 14px; max-width: 760px; }
+@media (min-width: 900px) { .cx { grid-template-columns: 340px minmax(0, 1fr); align-items: start; max-width: 1100px; } }
+.cx-form { display: grid; gap: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg, 12px); padding: 12px; }
+.cx-form > .cx-seg { width: 100%; }
+.cx-seg { display: inline-flex; flex-wrap: nowrap; }
+.cx-seg button { padding: 6px 11px; white-space: nowrap; }
+.cx-form > .cx-seg button { flex: 1 1 0; }
+.cx-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.cx-l { font-size: 13px; color: var(--muted); font-weight: 600; }
+.cx-score { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cx-score label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); font-weight: 600; }
+.cx-step { display: inline-flex; align-items: stretch; border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; background: var(--panel2); }
+.cx-step button { width: 36px; border: 0; background: none; color: var(--ink); font-size: 18px; font-weight: 700; cursor: pointer; }
+.cx-step button:active { background: var(--panel); }
+.cx-step input { width: 48px; text-align: center; border: 0; background: none; color: var(--ink); font: inherit; font-weight: 700;
+  font-size: 16px; font-variant-numeric: tabular-nums; padding: 6px 0; }
+.cx-score .cx-step { width: 100%; } .cx-score .cx-step input { flex: 1; }
+.cx-clock { width: 88px; text-align: center; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--panel2);
+  color: var(--ink); font: inherit; font-weight: 700; font-size: 16px; padding: 6px 8px; font-variant-numeric: tabular-nums; }
+.cx-more summary { cursor: pointer; font-size: 13px; color: var(--muted); font-weight: 600; padding: 4px 0; }
+.cx-more[open] { display: grid; gap: 8px; }
+.cx-out { display: grid; gap: 12px; }
+.cx-now { display: flex; align-items: baseline; justify-content: space-between; background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--r-lg, 12px); padding: 10px 12px; }
+.cx-now span { color: var(--muted); font-size: 13px; font-weight: 600; } .cx-now b { font-size: 26px; font-variant-numeric: tabular-nums; }
+.cx-dec { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg, 12px); padding: 10px 12px; }
+.cx-dec h3 { margin: 0 0 4px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.cx-pick { margin: 0 0 8px; font-size: 16px; }
+.cx-gain { color: var(--good); font-weight: 700; font-variant-numeric: tabular-nums; }
+.cx-opt { display: grid; grid-template-columns: minmax(84px, auto) minmax(0, 1fr) 58px; align-items: center; gap: 8px; padding: 5px 0;
+  border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.cx-opt b { text-align: right; }
+.cx-on { font-weight: 600; font-size: 14px; }
+.cx-bar { height: 8px; border-radius: 4px; background: var(--panel2); overflow: hidden; }
+.cx-bar i { display: block; height: 100%; background: color-mix(in srgb, var(--muted) 55%, transparent); border-radius: 4px; }
+.cx-opt.best .cx-bar i { background: var(--good); } .cx-opt.best .cx-on { color: var(--good); }
+.cx-note { grid-column: 1 / -1; font-size: 12px; color: var(--muted); margin-top: -2px; }
+.cx-edit { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 8px; font-size: 12.5px; }
+.cx-edit label { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-weight: 600; }
+.cx-edit input { width: 56px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--panel2); color: var(--ink);
+  font: inherit; padding: 4px 6px; text-align: center; }
+.cx-pen { display: grid; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
+.cx-foot, .cx-src { font-size: 12px; color: var(--muted); margin: 6px 0 0; }
+.cx-rough { font-size: 12px; color: var(--warn, #f0b545); margin: 0 0 6px; }
+.cx-opt.best b { color: var(--good); }

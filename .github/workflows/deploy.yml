@@ -169,6 +169,10 @@ jobs:
       # Players > Rankings > Rest of season: this week + the lookahead weeks summed per player through week 17.
       - name: Rest of season
         run: python tools/ros_build.py --site=site
+      # Games > Calc and the gamecast's Decisions: the in-game win probability model + decision inputs
+      # (data/calc/model.json; retrained when its code changes or a week completes, cached in cache/calc_<key>.json).
+      - name: Calculator
+        run: python tools/calc_build.py --site=site || echo "[calc] skipped"
       # League tab: kicker (and team-defense) projections, this week through 17 (reads the week pages above).
       - name: Kickers and defenses
         run: python tools/kdst_build.py --site=site

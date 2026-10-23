@@ -4119,3 +4119,126 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   rows x 150 columns) before and after the change: identical (every numeric column; text columns differ only as
   missing-value markers). Live effect: from a team's first report of the week until its final one, last week's Out /
   Doubtful players stay out of the lineup term and keep their backups' scratch risk low, instead of reading as back.
+- **PRE-REGISTERED 2026-10-23 (owner: "a calculator where you input down, distance, score, team timeouts left and game
+  clock ... to make decisions, like whether to take a time out, whether to go for it on fourth down / punt / fg attempt,
+  whether to onside kick, and whether to accept or decline a penalty"; "test in-house of course"): (CG) our own
+  in-game win probability model, the base of Games > Calc and the gamecast's "what should they do?".** References only
+  (not used): nfl4th (Baldwin; 4th downs, 2-pt) and nflfastR's WP model, whose per-play `vegas_wp` in nflverse
+  play-by-play is the benchmark.
+  * Model: HistGradientBoostingClassifier, P(the team with the ball wins), regulation plays only (overtime rules
+    changed 2022 / 2025: out of scope, the page says so), ties dropped. Inputs, from the possession team's side: score
+    differential, game seconds left, half seconds left, half, down, yards to go, yards to the end zone, own and
+    opponent timeouts, its Vegas expected margin (spread_line signed), spread x share of the game left, home, receives
+    the second-half kickoff, score differential / (game seconds left + 1) ratio. Monotonic: score differential +,
+    own timeouts +, opponent timeouts -, expected margin +, yards to the end zone -, yards to go -. Fixed settings, no
+    tuning on test seasons: learning_rate 0.05, max_iter 400, max_leaf_nodes 31, min_samples_leaf 200,
+    l2_regularization 1.0, no early stopping. Rows: every regulation play with a possession team and a down or a
+    kickoff, state at the snap.
+  * Test: walk-forward, each of 2022, 2023, 2024, 2025 trained on 2006 through the season before. Brier and log loss
+    on all rows and on the late-and-close subset (4th quarter, score within 8); calibration by decile of predicted WP.
+  * Gate (all four to ship): (1) pooled 2022-25 Brier within +0.003 of nflfastR's vegas_wp on the same rows (theirs is
+    fitted on seasons that include these, an in-sample edge, so "close" is the bar, not "better"); (2) late-and-close
+    Brier within +0.005 of it; (3) every calibration decile within 3 points; (4) scenario sanity: leading by 3 with the
+    ball, 0:30 left, opponent out of timeouts > 97%; down 3 with the ball at the opponent's 20, 0:05 left: between
+    the FG make rate's neighborhood (40-60%); 1st & 10 own 25, tied, 15:00 of the 1st quarter, pick'em: 48-55%.
+  * The decisions built on it (each a weighted sum of WP over outcomes; their inputs measured, then checked):
+    4th down go (conversion probability: logistic on yards to go and field position, 3rd and 4th down runs / passes
+    2014 on; gain given success / failure: empirical by distance), field goal (make rate: logistic on distance, 2018
+    on), punt (empirical net result by field position, 2021 on: touchbacks, fair catches, returns; blocks and return
+    TDs left out, as nfl4th does), 2-pt vs XP (league rates, 2021 on), onside vs kickoff (recovery rate under the
+    2024+ kickoff rules, shrunk toward 2018-23), timeout (clock saved = measured run-off to the next snap when the clock
+    runs, stopped at the two-minute warning), penalty (WP of the two states the user enters). Each input is checked
+    walk-forward on 2024-25 for calibration (conversion within 4 points per distance bucket 1 / 2 / 3 / 4-5 / 6-10;
+    FG make within 4 points per 10-yard band) before the page uses it.
+- **RESULT {#wp-model} (CG) the win probability model: gates (1)-(3) PASS, (4) FAIL as written; SHIPPED as the
+  owner's call ("up to you", 2026-10-23).** tools/wp_eval.py, 2022-25 walk-forward, 175,720 rows: Brier 0.1548 vs
+  nflfastR's vegas_wp 0.1540 (+0.0008; theirs is fitted on these seasons), late-and-close 0.1699 vs 0.1697 (+0.0002),
+  every calibration decile within 2 points (the ends lean: 3.3% predicted, 5.2% actual; 96.7% / 95.6%). Scenario (4)
+  "down 3 at the opponent's 20, 0:05: 40-60%" read 32%; the expectation was wrong, not the model: in 274 such plays
+  (0:15 or less, inside the opponent's 35) the team won 27.7% (model 29.3%, nflfastR 30.2%); over 186 games, 42% reached
+  overtime and the tying team won 42% of those. A v2 (time monotone by the score, after seeing that the free clock
+  wobbles ~2 points between nearby seconds) was REJECTED: it smoothed the clock but underfit the last seconds (down
+  1-3 inside the opponent's 35, 0:15 or less: 29% vs 43% actual; tied: 76% vs 86%). Instead the timeout comparison
+  averages over nearby clocks and the page calls a gap under 1.5 points a toss-up.
+- **RESULT {#calc-inputs} (CG) the calculator's inputs: FAIL as pre-registered; shipped recent-season versions as the
+  owner's call ("up to you").** tools/calc_check.py, fit before 2024, test 2024-25. Field goals: a 2018-23 logistic
+  missed 50-59 yd by 9.8 points (62% vs 71%); a 1-season half-life still 6.7; recent seasons fixed it but a logistic's
+  shape didn't (40s high, 50s low): shipped an isotonic table on the last 2 seasons + 3 earlier at quarter weight,
+  within 3.7 points from 20 to 59 yd; 60-69 yd (36 kicks) 16 points low (44% made in 2024-25). Fourth-down conversion:
+  every version under-reads 2024-25 at 2-5 yards (4th & 4-5: 41% vs 55%, n 220; 4th & 2: 56% vs 62%) while 1 and
+  6-10 yards are within 2 points: conversion rose again in 2024-25. Shipped: 4th-down tries of the last 3 seasons (the
+  live fit includes 2024-25). Both rates are shown and editable on the page. Measured as they are (no gate): timeout
+  run-off by the offense's situation (39 s between snaps normally, ~21 at a half's end, 44 for a 4th-quarter leader in
+  the last two minutes; a play 5 s), punts (2021 on), kickoffs (2025 rules: touchbacks 21%, median start the 30),
+  onside 8.1% (2024-25 7.8% of 102, shrunk to 2018-23's 8.5%), XP 95.1%, two-point 47.6% (660).
+- **FINDING 2026-10-23 (owner: "research what the end of half drives actually look like ... it's all passes, get out
+  of bounds, you can make a lot happen with 30 seconds ... don't use these brainless averages"): the two-minute
+  drill.** Offense in a half's last 2:00 (2nd quarter, or 4th quarter tied / behind), 2015-25, 38,849 snaps: 80% passes,
+  28% incomplete, 14% out of bounds: the clock stops on its own after 42% of plays. After an in-bounds play the clock is
+  stopped by the offense's timeout (median 7 s after the snap: called at once), a spike (15 s, costs a down) or a
+  hurried snap (21 s, middle half 11-28; with no timeouts 17-24). Drives starting in a half's last 2:00 (2012-25, 5,977)
+  score often: from midfield with 0:31-0:45 left 57% (TD or FG), own 30-39 36%, own 20-29 23%; inside the opponent's 40
+  ~75% at any time. Both general WP models miss these moments, out of sample (fit 2006-18, 2019-25 4th-quarter snaps
+  in the last 2:00): tied inside the opponent's 35 with 0:30 or less, won 96.7%, ours 88.7%, nflfastR 83.6%; down 1-2
+  between the opponent's 35 and own 40, 0:30 or less, won 51%, ours 35%, nflfastR 39% (cells of 100-150 snaps).
+- **PRE-REGISTERED 2026-10-23 (owner: "Yes, build it first"): (CH) an end-of-half drive model for the calculator's
+  last 3:00 of each half.** nfledge/endgame.py. From every scrimmage snap with 3:00 or less in a half (regular season,
+  2012 on): (a) how the drive ends: touchdown / field goal good / field goal missed / no score (HistGradientBoosting,
+  multiclass; inputs: half seconds left, yards to the end zone, down, distance, both teams' timeouts, 4th quarter, the
+  score differential in the 4th quarter clipped to +-9, seasons weighted 0.5 ** (years before the latest / 3) for
+  today's kickers); (b) the seconds left when it ends (quantile regressions 25 / 50 / 75 on the same inputs plus the
+  ending). Win probability at such a snap = sum over endings of P(ending) x the win chance after it: in the 4th quarter,
+  with no time left the final score decides (a tie: overtime at its measured rate), else the other team's possession
+  with the time left (the drive model again, then the general model); in the 2nd quarter the general model at the
+  second-half kickoff (whoever receives it). Clock choices in a drill use the measured costs (a spike: a down and its
+  measured seconds; a hurried snap: the measured gap by timeouts left; a timeout: one timeout). Test: walk-forward
+  2022-2025, each season fit on 2012 through the season before; rows = 4th-quarter snaps with 2:00 or less, score
+  within 8. Gate (both): (1) pooled Brier lower than the general model's (CG) on the same rows; (2) the mean absolute
+  calibration gap over the time (0:30 / 1:00 / 2:00) x field position (inside the opponent's 35 / to own 40 / deeper)
+  cells, tied and behind 1-3 and behind 4-8 separately (cells with 30+ snaps), lower than the general model's. If it
+  fails, the calculator's late-game answers say "rough" and use the general model.
+- **PRE-REGISTERED 2026-10-23 (owner: "do they detail any parts of their formulas we're ignoring?" ... "your choice"):
+  (CI) the calculator's inputs, upgraded with what nfl4th (nflverse/nfl4th source, read 2026-10-23) and the NYT 4th
+  Down Bot account for.** (1) Go for it: one model of the yards gained on a 3rd / 4th-down run or pass (classes -10 to
+  +40, 40+ pooled; HistGradientBoosting multiclass), inputs down, yards to go, yards to the end zone, the offense's
+  Vegas spread, the total, its implied team total, roof (outdoors / dome / retractable), seasons 2014 on weighted
+  0.5 ** (years before the latest / 3); a defensive penalty that gives a first down counts as a conversion (gain =
+  the distance, or the penalty yards if more, as nfl4th codes it). P(convert) = P(gain >= distance) and the gains after
+  success / failure both come from it, so they depend on field position. Check (2024-25, fit before 2024): 4th-down
+  P(convert) within 4 points per distance bucket 1 / 2 / 3 / 4-5 / 6-10 (the old model failed 2-5), within 4 points for
+  favorites and underdogs separately (spread +-3 or more), and 4th-down Brier lower than the current logistic's. (2) Field
+  goal: make rate by distance, roof and wind (outdoors), with the long-range selection correction (only teams that
+  trust their kicker try the long ones: where the attempt rate falls below 80% of its plateau the rate blends, in
+  log-odds, toward a curve fitted where everyone kicks; it may only lower it; tapered to 0 past 70 yd). Check: 20-59 yd
+  within 4 points per 10-yard band on 2024-25, and outdoors with wind 15+ mph within 6 points. (3) Punts: the full
+  outcome (blocked, muffed and lost, returned for a touchdown, else the receiving team's spot) by 5-yard band, 2018 on
+  (no gate; counts recorded). (4) Kneel-out: after a non-scoring conversion, the game is over if the defense can't stop
+  the clock (0 timeouts under 2:00, 1 under 1:20, 2 under 0:40; nfl4th's rule) - and symmetrically after a turnover on
+  downs. (5) Field-position-dependent gains: from (1). If a check fails, that piece keeps the current version.
+- **RESULT {#endgame-drive} (CH) the end-of-half drive model: FAIL; not shipped (the calculator's late-game answers
+  use the general model, marked rough).** tools/endgame_eval.py, 2022-25, 5,508 4th-quarter snaps with 2:00 or less,
+  score within 8: Brier 0.1292 vs the general model's 0.1282 (nflfastR 0.1285); mean calibration gap over 27 cells
+  0.052 vs 0.051. By season it won 2023 (0.1154 vs 0.1243) and lost 2022 (0.1500 vs 0.1399). The misses all models
+  share sit in TIED games with the ball late: inside the opponent's 35 with 0:30 or less, won 98.8% (n 84), drive model
+  88.5%, general 88.4%, nflfastR 83.7%; opponent's 35 to own 40 with 0:31-1:00, won 88.9% (n 63), all ~71%. Likely
+  today's kickers (a made field goal ends it) against the 2012+ history; (CI)'s field goal model is the next step.
+  * (CI) amended before any result: the yards-gained multiclass would ship ~10,000 trees to the browser (51 classes x
+    200 iterations). Instead (1) is a binary HistGradientBoosting P(convert) on the same inputs and coding (max_iter
+    150, max_leaf_nodes 15) plus gain tables after success / failure by distance bucket x field-position band (5).
+    The checks are unchanged.
+- **RESULT {#calc-inputs-v2} (CI) the upgraded inputs: conversion FAIL as written, shipped as the owner's call ("your
+  choice") because it beats the current model everywhere; field goals PASS on a v3; punts and kneel-out in.**
+  tools/calc_check2.py, fit before 2024, 2024-25 4th-down tries. Conversion (HistGradientBoosting on 3rd + 4th downs
+  with the spread, total, team total, roof; penalty first downs counted): Brier 0.2249 vs the current logistic's 0.2336;
+  every distance bucket closer (4th & 2: 59.7% vs 55.7%, actual 66.5%; 4th & 4-5: 52.2% vs 41.4%, actual 61.7%;
+  4th & 6-10: 42.0% vs 31.7%, actual 39.2%), underdogs within 1 point, favorites 6 low. The check was my error in
+  part: 4th-down tries are chosen (teams go when they expect to make it; the gap leans to favorites), while the model
+  learns from 3rd downs too, where nobody chooses: nfl4th trains on both for that reason. Field goals: a logistic in
+  distance with roof / wind and nfl4th's long-range selection correction ran 6.8 points low at 50-59 yd with either
+  attempt-rate window (the shape, not the correction); v3 = the recent isotonic table (fg) shifted in log-odds by the
+  logistic's roof and wind effects: 20-59 yd within 3 points per band, outdoors with wind 15+ (110 kicks) within 4;
+  60-69 yd 15 points low (36 kicks by trusted kickers, no gate). Punts 2018-25 (16,676): blocked, muffed-and-lost and
+  returned-for-a-touchdown rates by band (from the own 30: 0.6%, 1.1%, 0.6%). Kneel-out (nfl4th's rule) in the engine.
+  The page asks the conversion model at down 3 (an average team in that spot; owner's call delegated): 4th-down tries
+  are chosen, so at down 4 the trees answer for teams that chose to go (own 20-45, 4th & 10: 3rd downs 31.5% of 1,287,
+  4th-down tries 36% of 61, trees at down 4 42%; at down 3 33%). The rate is editable for a team that knows better.
