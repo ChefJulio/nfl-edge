@@ -4279,3 +4279,29 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   10%, 3-5 4%, over 5 0.6%. The pre-registered rule sets the toss-up band at 1.25 points (was 1.5 by judgment); the
   "questionable" line (3 points) holds in 96% of refits. This is data noise only: the late-game zone's shared blind spot
   (CH) is not in it, so the page keeps its "rough" label there.
+- **FINDING + PRE-REGISTERED 2026-10-23 (owner, the try screen at 18-20 with 4:00 left: "go for 2 every time here
+  right? ... why would you score a td to get within 2 and then kick an xp to get within 1"): (CK) key-number features
+  for the win probability model.** The calculator read XP 31.2% vs two 31.5% (a toss-up) because the model prices points
+  almost linearly late: with the ball at its own 30 and 3:55 left it read up 1 61.7%, up 2 71.4%, up 3 80.9%. Real
+  games (Q4, 3:00-5:00, 1st & 10 at own 20-40, 2006-25): up 1 won 58.5% (n 41), up 2 58.4% (n 77), tied 52.1% (194),
+  up 3 77.8% (171): late, a 1- and a 2-point lead are the same (a field goal beats both) and 3 is different (it only
+  ties); nflfastR smooths it the same way (68% / 75%). Change: add indicators of the score's football meaning from
+  the side of the team with the ball - lead 1-2 (a field goal beats it), 3 (ties), 4-6 (a touchdown beats it), 7
+  (ties), 8 (a touchdown and two ties), and the same five trailing - unconstrained (the score differential stays
+  monotone), same settings otherwise. Gate (all to ship): (1)-(3) of (CG) still pass (pooled 2022-25 Brier within
+  +0.003 of nflfastR, late-and-close within +0.005, every decile within 3 points); (4) on 2019-25 4th-quarter 1st downs
+  in the last 8:00 (fit 2006-18), the mean absolute gap between predicted and actual win rate across leads -3..+4 x
+  time bands (1:00-3:00 / 3:00-5:00 / 5:00-8:00, cells of 40+) lower than the current model's; (5) the try, down 2
+  after a touchdown with 4:00 left (pick'em, receiving team at its own 30 after the kickoff): going for two ahead of the
+  extra point by 3+ points; down 1 after a touchdown, same clock: the extra point ahead. (CJ)'s check (1) is rerun on
+  the new walk-forward files before shipping.
+- **RESULT {#key-numbers} (CK) key-number features: FAIL (4); not shipped. (CK2) instead, the owner's call: in the 4th
+  quarter a 1- and a 2-point lead are one state.** tools/wp_keys_eval.py: with the ten indicators the late cells moved
+  nowhere (mean absolute gap 0.042 -> 0.043 over 23 cells; 2019-25, fit 2006-18): the late leads' cells hold 40-100
+  games and are noisy themselves (5:00-8:00 up 1 won 56.9% of 51, below tied). (1)-(3) of (CG) still held (Brier 0.1551
+  vs 0.1540) but nothing gained. The owner asked "can we treat 1 and 2 point leads as the same thing?": yes, as football
+  (a field goal beats both late), not as something the data can teach: the engine's wp() averages the two in the 4th
+  quarter (static/calc_engine.js). Check (5): down 2 after a touchdown with 4:00 left, two 33.5% vs the extra point
+  27.7% (+5.7); down 1, the extra point ahead (39.1 vs 38.5); down 2 at 1:30 +11.8; down 5 at 4:00 two +3.3 (the chart's
+  answer). (CJ) check (1) rerun with it: PASS (go 35.2 vs 34.6 won, field goal 56.4 vs 55.6, punt 47.3 vs 47.2; Brier
+  0.1532); same recommendation as nfl4th 79.2%.

@@ -14,8 +14,6 @@
   else { root.NFLE = root.NFLE || {}; root.NFLE.calcEngine = E; }
 })(typeof self !== 'undefined' ? self : this, () => {
   const sig = z => 1 / (1 + Math.exp(-z));
-  const KEYS = [['k_up12', 1, 2], ['k_up3', 3, 3], ['k_up46', 4, 6], ['k_up7', 7, 7], ['k_up8', 8, 8],
-                ['k_dn12', -2, -1], ['k_dn3', -3, -3], ['k_dn46', -6, -4], ['k_dn7', -7, -7], ['k_dn8', -8, -8]];  // nfledge/winprob.py KEYS
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   const mean = a => a.reduce((t, v) => t + v, 0) / a.length;
 
@@ -43,8 +41,6 @@
       x[idx.own_to] = s.to; x[idx.opp_to] = s.oppTo; x[idx.exp_margin] = line;
       x[idx.spread_time] = line * Math.exp(-4 * (1 - sec / 3600)); x[idx.home] = s.home ? 1 : 0;
       x[idx.receive_2h] = sec > 1800 ? (s.rec2h ? 1 : 0) : 0; x[idx.diff_time] = s.diff / Math.sqrt(sec + 1);
-      // (CK) the score's football meaning: up 1-2 (a field goal beats it), 3 (ties), 4-6, 7, 8, and the same trailing
-      for (const [k, lo, hi] of KEYS) if (idx[k] != null) x[idx[k]] = s.diff >= lo && s.diff <= hi ? 1 : 0;
       return x;
     };
     // (CJ, 2026-10-23, found by comparing with nfl4th) the half can end: a play that takes the rest of a half ends it
@@ -63,6 +59,15 @@
       }
       if (s.sec <= 0) return s.diff > 0 ? 1 : s.diff < 0 ? 0 : 0.5;  // time's up (overtime: a coin flip here)
       if (s.diff > 0 && s.sec <= 120 && kneel(s.sec, s.oppTo)) return 1;  // the leader kneels it out
+      // (CK2, the owner's call 2026-10-23: "can we treat 1 and 2 point leads as the same thing?") in the 4th quarter a
+      // 1- and a 2-point lead are one state, a field goal beats both: their average. The model priced points almost
+      // linearly (with the ball, 3:55 left: up 1 61.7%, up 2 71.4%) and key-number inputs didn't teach it otherwise
+      // (CK: too few late games), so kicking to "down 1" looked far better than "down 2" and hid the two-point try
+      const a = Math.abs(s.diff);
+      if (s.sec <= 900 && (a === 1 || a === 2) && !s.eq) {
+        const g = Math.sign(s.diff);
+        return (wp({ ...s, diff: g, eq: 1 }) + wp({ ...s, diff: 2 * g, eq: 1 })) / 2;
+      }
       return sig(raw(featuresOf(s)));
     };
     // the other team's side of the same moment
