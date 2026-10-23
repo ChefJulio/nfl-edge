@@ -713,7 +713,7 @@
                   yl: sp.dir === 1 ? 100 - sp.x : sp.x, to: Math.max(0, 3 - (u[off.team] || 0)), oppTo: Math.max(0, 3 - (u[def.team] || 0)),
                   line: v.line, total: v.total, home: off === info.home ? 1 : 0, rec2h: 0 };
       const choice = isTry ? (tid === 'try2' ? 'two' : 'xp') : /punt/i.test(t) ? 'punt' : /field goal/i.test(t) ? 'fg' : 'go';
-      out.push({ p, per, kind: isTry ? 'try' : 'fourth', s, choice, team: off.team, opp: def.team });
+      out.push({ p, per, kind: isTry ? 'try' : 'fourth', s, choice, team: off.team, opp: def.team, pts: [offPts, defPts] });
     });
     return out;
   };
@@ -725,10 +725,18 @@
     if (hit && hit.n === n) return `${box}${hit.html}</div></section>`;
     const pending = `${box}<p class="muted">Grading&hellip;</p></div></section>`;
     calcLoad().then(() => NFLE.calcUI.engine()).then(({ E, C }) => {
-      const rows = callList(sum, info, E).map(d => ({ ...d, g: C.grade(d.kind, d.s, d.choice) })).filter(d => d.g);
+      // a try before the 4th quarter isn't graded (2026-10-23: early, the kick and two are worth the same on average,
+      // 95% x 1 vs 48% x 2; what the model leans on there is how it prices early scores, e.g. up 6 in the 1st quarter
+      // it favored two by 3.3 points across 20 refits, which is not football): shown, not judged
+      const rows = callList(sum, info, E).map(d => ({ ...d, g: C.grade(d.kind, d.s, d.choice) })).filter(d => d.g)
+        .map(d => (d.kind === 'try' && d.per < 4 ? { ...d, g: { ...d.g, verdict: 'fine', early: true } } : d));
       const pct = v => `${(100 * v).toFixed(1)}%`, pts = v => (100 * v).toFixed(1);
       const VERB = { go: 'went for it', fg: 'kicked a field goal', punt: 'punted', xp: 'kicked the extra point', two: 'went for two' };
       const VC = { fine: ['dcv-ok', 'Right call'], debatable: ['dcv-q', 'Debatable'], questionable: ['dcv-bad', 'Questionable'] };
+      // the situation in words, from the deciding team's side (owner 2026-10-23: "we don't even know the score from the
+      // entry"): the score (for a try, with the touchdown's six), timeouts
+      const ctx = d => { const [a, b] = d.pts, sc = a > b ? `${esc(d.team)} up ${a}-${b}` : a < b ? `${esc(d.team)} down ${a}-${b}` : `tied ${a}-${b}`;
+        return `${sc}${d.kind === 'try' ? ' after the touchdown' : ''} · timeouts ${d.s.to}-${d.s.oppTo}`; };
       const bad = rows.filter(d => d.g.verdict === 'questionable');
       const sumLine = rows.length ? `<p class="dcs-sum">${rows.length} decisions: <b>${bad.length}</b> questionable${bad.length ? ` (${[...new Set(bad.map(d => d.team))].map(t => `${esc(t)} ${bad.filter(d => d.team === t).length}`).join(', ')})` : ''}, ${rows.filter(d => d.g.verdict === 'debatable').length} debatable.</p>` : '<p class="muted">No 4th downs or tries yet.</p>';
       const card = d => {
@@ -736,8 +744,10 @@
         const what = d.kind === 'try' ? 'after a touchdown' : `4th &amp; ${d.s.togo} ${d.s.yl <= 50 ? `at ${esc(d.opp)} ${d.s.yl}` : `at own ${100 - d.s.yl}`}`;
         const opts = g.options.map(o => `<span class="dcs-o${o.key === d.choice ? ' chose' : ''}${o.key === g.best ? ' best' : ''}">${esc(o.label)} <b>${pct(o.wp)}</b></span>`).join('');
         return `<li class="dcs-i ${cls}"><div class="dcs-h"><span class="dcs-t">Q${d.per} ${esc((d.p.clock || {}).displayValue || '')}</span>
-          <b>${tmL(d.team)}</b> ${what}: ${VERB[d.choice]}<span class="dcv ${cls}">${lab}${g.verdict !== 'fine' ? ` &minus;${pts(g.cost)}` : ''}</span></div>
+          <b>${tmL(d.team)}</b> ${what}: ${VERB[d.choice]}<span class="dcv ${cls}">${g.early ? 'No grade' : lab}${g.verdict !== 'fine' ? ` &minus;${pts(g.cost)}` : ''}</span></div>
+          <div class="dcs-ctx">${ctx(d)}</div>
           <div class="dcs-opts">${opts}</div>
+          ${g.early ? '<div class="dcs-why muted">Before the 4th quarter a kick and a two-point try are worth the same on average (95% for 1, 48% for 2): not graded.</div>' : ''}
           ${g.verdict !== 'fine' ? `<div class="dcs-why">${esc(g.options[0].label)} was worth ${pts(g.cost)} more points of win chance${d.kind === 'fourth' && g.p ? ` (${pct(g.p.go)} to convert${g.p.fg != null ? `, ${pct(g.p.fg)} field goal` : ''})` : ''}.${half <= 180 ? ' Last 3:00 of a half: our numbers are rough here.' : ''}</div>` : ''}
           <div class="dcs-r muted">${esc(String(d.p.text || '').slice(0, 160))}</div></li>`;
       };
