@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685350,Trevor Etienne,Carolina Panthers,Active,2026-10-18T16:16Z,,,,,,"Etienne (ankle) is active for Sunday's game against the Eagles, Darin Gantt of the Panthers' official site reports."
 4678008,Jonathon Brooks,Carolina Panthers,Injured Reserve,2026-10-15T18:28Z,Abdomen,Surgery,Not Specified,2026-11-08,IR,"Brooks (core) was seen jogging at practice Thursday, Sheena Quick of Fox Sports Radio 1340 reports."
 4687513,Cam Jackson,Carolina Panthers,Injured Reserve,2026-10-14T01:16Z,Shoulder,Surgery,Not Specified,2027-02-15,IR,"The Panthers placed Jackson (shoulder) on injured reserve Tuesday, Darin Gantt of the team's official site reports."
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-24T19:02Z,Undisclosed,,,2026-10-18,IR,ir
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-24T19:33Z,Undisclosed,,,2026-10-18,IR,ir
 4685504,Sam Roush,Chicago Bears,Active,2026-10-24T04:13Z,,,,,,Roush is expected to get more work on offense after Cole Kmet (knee) landed on injured reserve Friday.
 2973405,Kalif Raymond,Chicago Bears,Active,2026-10-24T03:43Z,,,,,,Raymond did not catch either of his two targets and returned one punt for seven yards Thursday in a 30-24 win over New England.
 4426386,Roschon Johnson,Chicago Bears,Active,2026-10-24T02:30Z,,,,,,Johnson rushed twice for 13 yards in the Bears' 30-24 victory over the Patriots on Thursday.
@@ -599,7 +599,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5144942,CJ Okoye,New York Giants,Active,2026-10-19T17:10Z,,,,,,
 4243322,Jake Haener,New York Giants,Active,2026-10-19T17:10Z,,,,,,
 4361050,Isaiah Likely,New York Giants,Active,2026-10-19T01:35Z,,,,,,Likely caught six of 11 targets for 99 yards and a touchdown in Sunday's 34-27 loss to the Saints.
-4700136,Kiko Mauigoa,New York Jets,Injured Reserve,2026-10-24T18:01Z,Quadriceps,Not Specified,Not Specified,2026-11-22,IR,ir
+4700136,Kiko Mauigoa,New York Jets,Injured Reserve,2026-10-24T19:22Z,Quadriceps,Not Specified,Not Specified,2026-11-22,IR,"The Jets placed Mauigoa (quadriceps) on injured reserve Saturday, Zack Rosenblatt of The Athletic reports."
 4373656,Max Mitchell,New York Jets,Out,2026-10-24T01:28Z,Concussion,Concussion,Not Specified,2026-11-01,OUT,"Mitchell (concussion) has been ruled out for Sunday's game against the Dolphins, Rich Cimini of ESPN.com reports."
 4723820,Omar Cooper Jr.,New York Jets,Active,2026-10-24T00:36Z,,,,,,"Cooper may get fewer looks in the passing game Sunday versus Miami with Adonai Mitchell cleared to return from a finger injury, Amanda Vogt of the Jets' official site reports."
 4685247,Braelon Allen,New York Jets,Active,2026-10-24T00:18Z,,,,,,"Allen's workload and role Sunday against Miami is unclear given that Breece Hall (quadriceps) is officially questionable to play, per Amanda Vogt of the Jets' official site."
@@ -749,6 +749,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4243331,Cade Otton,Tampa Bay Buccaneers,Active,2026-10-19T03:31Z,,,,,,Otton caught one of two targets for four yards in Sunday's 26-19 overtime loss to the Steelers.
 3116165,Chris Godwin Jr.,Tampa Bay Buccaneers,Active,2026-10-19T02:49Z,,,,,,Godwin caught four of eight targets for 37 yards in Sunday's 26-19 overtime loss to the Steelers.
 4371733,Kenny Gainwell,Tampa Bay Buccaneers,Active,2026-10-19T02:06Z,,,,,,Gainwell rushed two times for 17 yards in Sunday's 26-19 overtime loss to the Steelers. He caught his only target for seven yards.
+4045701,Timmy Horne,Tennessee Titans,Active,2026-10-24T19:19Z,,,,,,"The Titans signed Horne from the practice squad to the active roster Saturday, Jim Wyatt of the team's official site reports."
 3916566,K.J. Osborn,Tennessee Titans,Active,2026-10-24T17:53Z,,,,,,"The Titans elevated Osborn from the practice squad to the active roster Saturday, Jim Wyatt of the team's official site reports."
 4429121,Kalel Mullings,Tennessee Titans,Active,2026-10-24T17:51Z,,,,,,"The Titans elevated Mullings from the practice squad to the active roster Saturday, Jim Wyatt of the team's official site reports."
 4240532,Tony Adams,Tennessee Titans,Questionable,2026-10-24T01:46Z,Ankle,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"Adams (ankle) is questionable for Sunday's game against the Browns, Jim Wyatt of the Titans' official site reports."
@@ -773,7 +774,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360978,David Martin-Robinson,Tennessee Titans,Active,2026-10-17T01:55Z,,,,,,Martin-Robinson (hamstring) does not have any injury designation ahead of Sunday's game against the Colts.
 4570469,Marcus Harris,Tennessee Titans,Active,2026-10-16T20:38Z,,,,,,
 4429607,Cor'Dale Flott,Tennessee Titans,Active,2026-10-14T23:12Z,,,,,,Flott (chest) was a full participant in Wednesday's practice session.
-4883647,Elic Ayomanor,Tennessee Titans,Active,2026-10-14T02:41Z,,,,,,Ayomanor caught one of two passes for 17 yards during the Titans' 26-3 loss to the Texans on Sunday. He also added a tackle on special teams.
 4602667,Jaylin Lane,Washington Commanders,Injured Reserve,2026-10-22T00:47Z,Ankle,Surgery,Left,2027-02-15,IR,"Lane underwent surgery Oct. 9 to repair his fractured and dislocated ankle, and he is expected to be cleared for activities before OTAs, Tashan Reed of The Washington Post reports."
 5081807,Sonny Styles,Washington Commanders,Active,2026-10-21T01:40Z,,,,,,Styles finished Monday's 23-17 loss to the 49ers with 13 tackles (seven solo) and one pass defense.
 5081335,Drew Stevens,Washington Commanders,Active,2026-10-21T01:26Z,,,,,,Stevens made his only field-goal try and converted both of his extra-point attempts during Monday's 23-17 loss at San Francisco.
