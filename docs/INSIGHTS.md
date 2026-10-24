@@ -4650,3 +4650,11 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   Wednesday 0.163 vs 0.135, Thursday 0.128 vs 0.110, final 0.111 vs 0.088. The model already reads the run (games
   missed in a row, the practice totals since the injury) with role, injury and the rest; the exact-key rate is a
   noisier copy of it.
+- **RESULT {#rest-est} (CX) rest and estimated reports: FAIL; not shipped.** tools/cx_rest_eval.py (branch test/cx;
+  flag experiments.rest_est, off). 75,489 on-report rows 2019-26; 5,024 short-week (rest <= 5), 11,075 with est > 0.
+  Final report 0.0875 -> 0.0879, +0.0004 [-0.0000, +0.0008], better 2 of 5 seasons, worst decile 5.1 points;
+  Wednesday +0.0003, Thursday +0.0004; no position significantly worse; 2026 weeks 1-6 better at every stage
+  (-0.0007 / -0.0011 / -0.0013). Short-week rows (3,849 scored): 0.0979 -> 0.0979, +0.0000 [-0.0019, +0.0020] (no
+  gain); ECE 0.0157 -> 0.0149. (AQ)'s short-week gain (-0.0068 on the old practice model) is gone under the one week
+  model, which already reads the calendar stages and days off the report. 2026's improvement is worth a season-end
+  recheck; nothing ships on it.
