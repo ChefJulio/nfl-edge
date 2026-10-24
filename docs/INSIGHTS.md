@@ -4572,3 +4572,57 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   95% Wilson interval includes the mean rate the rule set, AND the rule's Brier is below the model's pre-override
   Brier on the same players. Fail -> the rule comes out of availability (the tag clearing stays: display only).
   Live: Judkins (CLE, missed week 6, LL, ESPN Active 2:28 pm ET Friday) 77% -> 92%.
+- **PRE-REGISTERED 2026-10-24 (owner: "shouldn't every guy dealing with injury be comparing his record, the practice/
+  game participation of the last 2 weeks AND this week, or maybe even total practice record since the injury ...
+  also considering espn return date?" ... "yes"): two inputs for the one week model (I2), tested separately against
+  it as shipped, same rows, labels, settings and per-stage calibration (tools/week_avail_eval.py harness).**
+  (CU) ESPN's estimated return date: ret_gap = days from ESPN's return date to this game (negative: the date is before
+  the game; positive: after), and ret_out = ESPN's status bucket (Out / Doubtful / Questionable / IR / none), both as
+  known at the row's stage (the latest ESPN capture before that stage's cut: Tuesday 23:59 ET, Wednesday / Thursday
+  report day 22:00 UTC, final report day 22:00 UTC; captures from cache/espn_injury_history + espn_injury_midweek
+  (Wayback, 2022-24) and the live archive (2025-26)); NaN where no capture exists. Rows without any capture keep NaN
+  (the trees route them as missing). Today ESPN reaches availability only through fixed rules on top of the model
+  (midweek Out / Doubtful rates, Out with a return date past the game, the early-week bridge, game day, Active);
+  a return date ON or BEFORE the game is used nowhere. Test seasons: those with captures for both training and test
+  (walk-forward 2023-25 if 2025's archive covers it; else 2023-24, stated).
+  (CV) week by week since the injury: last week's practice counts (D / L / F) and his final tag there, and the week
+  before's, as separate inputs (the model now sees last week's counts and one total over the whole run, so order
+  across weeks - improving vs worsening - is lost except last week's last day). ep_* totals stay.
+  GATE (each, as (J)): final-report Brier lower with the 95% interval over season-weeks excluding 0; Wednesday and
+  Thursday interval upper < +0.002; no position significantly worse; calibration deciles within 4 points; the same
+  direction on the untouched 2026 weeks 1-6. A pass ships into the week model; (CU) also replaces the fixed ESPN
+  rules it covers only if a follow-up shows the rules add nothing on top of it.
+- **PRE-REGISTERED 2026-10-24 (owner: "take a player who was dnp dnp dnp missed game lp lp full, find all players who
+  had that exact pattern, take the historical rate they played and use it as a base weight for the model"): (CW) the
+  exact-pattern prior.** Each row's pattern = his run on the reports since it began (consecutive report weeks, a bye
+  bridged): every past week's practice letters + whether he played that week's game, then this week's letters so far
+  (at the row's stage; game status not part of the key). Measured first (2023-25 rows vs 2018-22 history): the whole
+  run has 50+ exact matches for 47% of rows and none for 27%; last week + this week has 50+ for 71% (the owner's
+  example DDDM|DLLM|LLF: 4 matches 2018-25, 3 played). Input pat_rate: the played rate of the longest key with 50+
+  matches among (whole run, last two weeks + this week, last week + this week, this week + games missed in a row),
+  each level shrunk toward the next shorter one by 20 pseudo-cases; computed for season s from seasons before s only.
+  Added to the one week model (I2) as shipped, same rows / labels / settings / calibration. Same GATE as (CU) / (CV).
+  Also reported, no gate: pat_rate alone (no model) vs the model, by stage.
+- **PRE-REGISTERED 2026-10-24 (owner: "considering differing practice schedules before thursday/monday games we need a
+  way to normalize those schedules right?" ... "whatever you think"): (CX) rest and estimated reports in the week
+  model.** The calendar stages (AS) already align report 1 / 2 / final across Thursday, Sunday and Monday games; what
+  they don't carry: (a) rest = days from his team's previous game to this one (bye weeks capped at 14); (b) est = the
+  share of this week's report days so far that came within 2 days after his team's previous game (a Thursday team's
+  Monday / Tuesday entries are typically estimates of a walkthrough, not a practice; NFL.com's feed has no estimated
+  flag, so the timing is the proxy). (AQ)'s short-week flag gained accuracy (short-week rows -0.0068 [-0.0099, -0.0034])
+  but couldn't rule out a 2-point calibration loss on 1,079 rows; this is the continuous version with 2026's short
+  weeks added. Added to the one week model (I2) as shipped; same GATE as (CU) / (CV) / (CW), plus on short-week rows
+  (rest <= 5): Brier lower with the CI excluding 0 and calibration error (10-bin ECE) not worse than the shipped
+  model's by more than 0.01.
+- **INCIDENT + FIX 2026-10-24 (owner: Saquon Barkley "match up with what you think?"): the live injury model had
+  drifted from a local build of the same code.** Barkley (missed 2 games, LL) 32.6% live vs 65.2% local (history:
+  missed 2+ then LL played 60.5%, n 1,121); ~20 report players off by 3-25 points (Lamar Jackson QLLL 15% vs 37%,
+  Baker Mayfield QFFF 60% vs 84%). Cause: the history tables the engine trains on are cached per season and never
+  refetched; the live cache's 2018-25 practice tables had different practice DATES (the letters and outcomes were
+  identical), and since the calendar stage construction (AS, shipped 2026-10-22) places each day on its team's report
+  calendar by date, the live engine trained on a different week layout than it was fed. The engine's cache key held
+  only row counts, so nothing noticed (likely since 2026-10-22). Fixed: the history refetched (undated seasons now
+  refetch automatically, data.py), live numbers identical to local; the engine key now includes a fingerprint of the
+  training history (run.training_data), and every build stops if that fingerprint differs from the committed lock
+  (data/history/training_fingerprint.json; tools/training_lock.py --bless to accept a deliberate change). Every
+  build also prints the history column by column (tools/cache_fingerprint.py).

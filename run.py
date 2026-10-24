@@ -56,6 +56,23 @@ def training_data(data) -> dict:
           "practice": frame_hash(past(data.practice)), "snaps": frame_hash(past(getattr(data, "snaps", None)))}
 
 
+LOCK = ROOT / "data" / "history" / "training_fingerprint.json"
+
+
+def check_training_lock(data) -> None:
+  """Stop the build when the training history differs from the locked fingerprint (tools/training_lock.py): the same
+  code must train the same model everywhere; a change to that history is a decision (--bless), never silent."""
+  if not LOCK.exists():
+    return
+  want = json.loads(LOCK.read_text(encoding="utf-8")).get("tables", {})
+  have = {k: f"{v:x}" for k, v in training_data(data).items()}
+  bad = [k for k in want if have.get(k) != want[k]]
+  if bad:
+    raise SystemExit(f"[run] STOP: the training history differs from the locked fingerprint in {', '.join(bad)} "
+                     f"(this cache {', '.join(have[k] for k in bad)}; locked {', '.join(want[k] for k in bad)}). "
+                     "Find out why (new season, nflverse revision, refetch), then: python tools/training_lock.py --bless")
+
+
 def train_key(data, cfg, scoring, season: int) -> str:
   """The trained engine's inputs: everything state_key has except this season's injury reports, practice and expert
   ranks, which training never reads (it fits on earlier seasons; scratch/train_cache_equiv.py checked an engine
@@ -71,6 +88,7 @@ def trained_engine(data, cfg, scoring, season: int):
   retraining (~4-5 min of the build)."""
   cache_dir = ROOT / cfg["data"]["cache_dir"]
   path = cache_dir / f"engine_{train_key(data, cfg, scoring, season)}.pkl"
+  check_training_lock(data)
   td = training_data(data)
   print("[run] training data: " + " ".join(f"{k} {v:x}" for k, v in td.items())
         + (f" ({len(data.avail_hist):,} practice weeks, seasons {int(data.avail_hist.season.min())}-{int(data.avail_hist.season.max())})"
