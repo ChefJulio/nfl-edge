@@ -256,6 +256,9 @@ jobs:
             done
           fi
       # Current week (index.html) and the rest of the season (lookahead pages, rebuilt every run, never committed).
+      # the training history's fingerprint, column by column (2026-10-24: live and local trained different injury models)
+      - name: Training cache fingerprint
+        run: python tools/cache_fingerprint.py || true
       - run: python run.py --out site/index.html --lookahead
       # Players > Rankings > Rest of season: this week + the lookahead weeks summed per player through week 17.
       - name: Rest of season
