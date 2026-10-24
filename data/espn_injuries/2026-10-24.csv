@@ -49,12 +49,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4569511,Drake Jackson,Atlanta Falcons,Active,2026-10-19T16:20Z,,,,,,
 4567099,Christian Harris,Atlanta Falcons,Active,2026-10-19T16:20Z,,,,,,
 4360423,Michael Penix Jr.,Atlanta Falcons,Active,2026-10-19T09:26Z,,,,,,Penix completed 19 of 33 passes for 225 yards and three touchdowns with no interceptions while rushing once for one yard in the Falcons' 31-23 loss to the Bears on Sunday. He also threw two two-point conversion passes.
+3916387,Lamar Jackson,Baltimore Ravens,Out,2026-10-24T19:35Z,Ankle,Sprain,Left,2026-11-01,OUT,Jackson (ankle) has been downgraded to out for Sunday's game against the Bengals.
 4361178,Cam Jurgens,Baltimore Ravens,Active,2026-10-24T01:48Z,,,,,,Jurgens (concussion) does not have any injury designation ahead of Sunday's game against the Bengals.
 3915837,Broderick Washington Jr.,Baltimore Ravens,Questionable,2026-10-23T23:51Z,Ankle,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,Washington (ankle) is listed as questionable for Sunday's game against the Bengals.
 4035671,Tyler Huntley,Baltimore Ravens,Active,2026-10-23T23:25Z,,,,,,"Huntley will start Sunday's Week 7 matchup against Cincinnati if Lamar Jackson (ankle) is unable to play, Ryan Mink of the Ravens' official site reports."
 3858276,Jaylinn Hawkins,Baltimore Ravens,Out,2026-10-23T22:51Z,Knee,Not Specified,Not Specified,2026-11-01,OUT,"Hawkins (knee) has been ruled out for Sunday's game against the Bengals, Cordell Woodland of 105.7 The Fan Baltimore reports."
 4690179,Tavius Robinson,Baltimore Ravens,Out,2026-10-23T22:46Z,Pectoral,Not Specified,Not Specified,2027-02-15,OUT,"Head coach Jesse Minter said Friday that Robinson will be sidelined for the rest of the 2026 season due to a pectoral injury, Cordell Woodland of 105.7 The Fan Baltimore reports."
-3916387,Lamar Jackson,Baltimore Ravens,Questionable,2026-10-23T19:49Z,Ankle,Sprain,Left,2026-10-25,QUESTIONABLE,Jackson (ankle) was a limited participant in Friday's practice and is listed as questionable for Sunday's game against the Bengals.
 4243220,Andrew Vorhees,Baltimore Ravens,Active,2026-10-23T01:37Z,,,,,,Vorhees (foot) was a full participant at the Ravens' practice Thursday.
 4432260,Matt Hibner,Baltimore Ravens,Active,2026-10-23T00:03Z,,,,,,Hibner (hand) was a full participant at practice Thursday.
 4360939,Rashod Bateman,Baltimore Ravens,Active,2026-10-22T20:45Z,,,,,,Bateman (shoulder) was a full participant in Thursday's practice.
@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4876132,Josh Cuevas,Baltimore Ravens,Active,2026-10-19T01:04Z,,,,,,Cuevas caught four of five targets for 44 yards and a touchdown during Sunday's 13-10 loss to Cleveland.
 4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-10-18T15:33Z,,,,,,
 4698244,Teddye Buchanan,Baltimore Ravens,Active,2026-10-16T20:28Z,,,,,,
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-24T19:02Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-24T19:33Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus
 4044133,Sam Franklin Jr.,Buffalo Bills,Active,2026-10-24T01:44Z,,,,,,"The NFL reduced Franklin's discipline from a one-game suspension to a fine of $14,926, Adam Schefter of ESPN reports."
 4568624,Dorian Williams,Buffalo Bills,Active,2026-10-22T01:58Z,,,,,,Williams logged five tackles (three solo) and one pass defensed for an interception in the Bills' 33-30 win over the Raiders on Sunday.
 4832035,Davison Igbinosun,Buffalo Bills,Active,2026-10-22T01:37Z,,,,,,"Defensive coordinator Jim Leonhard praised Igbinosun's play earlier this week and plans to keep giving the rookie a good amount of playing time, Alec White of the Bills' official site reports. Said Leonard, ""I think what he's done the last couple weeks, he's definitely earned a high majority of the "
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2575788,Zach Wood,New Orleans Saints,Active,2026-10-18T16:32Z,,,,,,Wood (calf) is active for Sunday's game against the Giants.
 4433938,Jeremiah Wright,New Orleans Saints,Active,2026-10-18T16:31Z,,,,,,Wright (concussion) is active for Sunday's game against the Giants.
 4432768,Lorenzo Styles Jr.,New Orleans Saints,Active,2026-10-18T15:46Z,,,,,,
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-24T19:02Z,Calf,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-24T19:33Z,Calf,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4429148,Theo Johnson,New York Giants,Out,2026-10-24T17:37Z,Neck,Not Specified,Not Specified,2026-11-08,OUT,"Johnson (neck) has been ruled out ahead of Sunday's game against the Texans, Mike Garafolo of NFL Network reports."
 4373809,Jevon Holland,New York Giants,Out,2026-10-24T17:31Z,Concussion,Concussion,Not Specified,2026-11-08,OUT,"Holland (concussion) has been ruled out ahead of Sunday's game against the Texans, Mike Garafolo of NFL Network reports."
 4259566,Andrew Thomas,New York Giants,Active,2026-10-24T02:04Z,,,,,,Thomas (groin) does not have an injury designation against the Texans on Sunday.
