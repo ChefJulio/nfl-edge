@@ -301,8 +301,20 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
     # this season's reports refetch after PRACTICE_TTL_HOURS, not the 6-hour live TTL (2026-10-21, Quinshon Judkins:
     # Cleveland's Wednesday report was on NFL.com for hours while every build reused a copy fetched before most teams
     # had filed; the fetch is a few seconds, ~5 pages)
-    pr = [cache.get("practice", s, lambda: fetch_practice_days(s), stale=(s == current) and
-                    cache.age_hours("practice", s) > PRACTICE_TTL_HOURS) for s in seasons]
+    # (2026-10-24) a season cached before practice days carried their dates (2026-10-17) is refetched: past seasons
+    # are otherwise read forever, and the live build's undated copies trained a different injury model than a fresh
+    # cache (the week model places each day on its team's report calendar by date)
+    def undated(name, s_):
+      p_ = cache.path(name, s_)
+      if s_ < 2018 or not p_.exists():
+        return False
+      try:
+        dts = pd.read_parquet(p_, columns=["dates"]).dates
+      except Exception:
+        return True
+      return bool(dts.fillna("").astype(str).eq("").mean() > 0.5)
+    pr = [cache.get("practice", s, lambda: fetch_practice_days(s), stale=((s == current) and
+                    cache.age_hours("practice", s) > PRACTICE_TTL_HOURS) or undated("practice", s)) for s in seasons]
     if pr and pr[-1] is not None and "team_name" not in pr[-1]:  # cached before the report columns existed
       pr[-1] = cache.get("practice", current, lambda: fetch_practice_days(current), stale=True)
     # In-game rulings filed under the game's week (no practice days) out once the game is final (drop_ingame)
@@ -310,7 +322,7 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
     practice = pd.concat(pr, ignore_index=True) if pr else None
     # Longer labelled history (practice week -> did he play) for the availability model.
     first = int(cfg["data"].get("practice_history_start", 2018))
-    ah = [cache.get("availhist", s, lambda: availability_history(nfl, s), stale=False) for s in range(first, current)]
+    ah = [cache.get("availhist", s, lambda: availability_history(nfl, s), stale=undated("availhist", s)) for s in range(first, current)]
     ah = [a for a in ah if a is not None and len(a)]
     avail_hist = pd.concat(ah, ignore_index=True) if ah else None
   ecr_path = cache.path("ecr", "all")

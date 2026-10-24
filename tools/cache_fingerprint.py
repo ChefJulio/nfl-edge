@@ -25,7 +25,9 @@ def main():
       ds = d.days.fillna("").astype(str) if "days" in d else pd.Series([], dtype=str)
       mix = {c: int(ds.str.count(re.escape(c)).sum()) for c in "DLF?X-"}
       lens = ds.str.len().value_counts().sort_index().to_dict()
+      dt = d.dates.fillna("").astype(str) if "dates" in d else pd.Series([], dtype=str)
       print(f"[fp] {p.stem}: rows {len(d)} | {cols} | days chars {mix} lens {lens}")
+      print(f"[fpd] {p.stem}: dates empty {dt.eq('').mean():.3f} sample {dt[dt.ne('')].head(3).tolist()}")
 
 
 if __name__ == "__main__":
