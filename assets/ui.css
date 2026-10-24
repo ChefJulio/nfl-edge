@@ -189,3 +189,6 @@ input:is([type="search"], [type="text"], :not([type])):not(:placeholder-shown):n
 input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; display: none; }
 /* filters set aside while a search runs (Draft, Moves, Injuries): dimmed */
 .dt-tools select:disabled, .dt-tools input:disabled, .dt-select:disabled, .in-scope button:disabled, .in-tabs button:disabled { opacity: .4; cursor: default; }
+/* (owner 2026-10-23: "why can i scroll left and right on mobile on that page") no page pans sideways: anything wider
+   scrolls inside its own box. clip, not hidden: hidden would make the page a scroll container and break sticky bars */
+html, body { overflow-x: clip; }

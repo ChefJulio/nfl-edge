@@ -723,7 +723,10 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .ts-bye { width: 8px; height: 2px; margin: 8px 0 6px; border-radius: 1px; background: var(--faint); }
 
 /* Live tab pane picker (one pane visible at a time) */
-.gc-panes { position: sticky; top: 0; z-index: 5; display: flex; width: 100%; margin: 8px 0 10px; background: var(--panel); }
+.gc-panes { position: sticky; top: 0; z-index: 5; display: flex; width: 100%; margin: 8px 0 10px; background: var(--panel);
+  overflow-x: auto; scrollbar-width: none; }  /* five unwrappable labels ran past a phone's edge: the row scrolls, not the page */
+.gc-panes::-webkit-scrollbar { display: none; }
+@media (max-width: 400px) { .gc-panes button { padding-left: 4px; padding-right: 4px; } }
 .gc-panes button { flex: 1 1 0; white-space: nowrap; padding-left: 6px; padding-right: 6px; }
 /* Box score: the name wraps inside its sticky column instead of running into the first stat (owner 2026-10-15) */
 table.pst-tbl td.pst-who { width: 9.5em; max-width: 9.5em; overflow: hidden; }

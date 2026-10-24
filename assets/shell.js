@@ -749,7 +749,10 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     if (NFLE.placeBar) NFLE.placeBar();  // the chip row comes and goes with the parent: re-measure the bar
     lastRoute = r; onPage = false;
     mountArea(id);
-    if (scrolls[id] != null) requestAnimationFrame(() => window.scrollTo({ top: scrolls[id] }));  // back from a page
+    // a tab picked starts at its top (owner 2026-10-23: "our scroll position doesn't get cleared when navigating");
+    // the back button (hashchange, push false) returns to where that view was left
+    if (!push && scrolls[id] != null) requestAnimationFrame(() => window.scrollTo({ top: scrolls[id] }));
+    else if (push) window.scrollTo({ top: 0 });
     document.dispatchEvent(new CustomEvent('nfle-route', { detail: { parent: r.p.key, sub: r.s[0], section: id } }));
   };
   const onNav = e => {

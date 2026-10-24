@@ -212,25 +212,39 @@
       yard: r.yl > 50 ? 100 - r.yl : r.yl, to: r.to, oppTo: r.ot, line: r.ln || 0, total: r.tt || 45, roof: r.rf || 'outdoors',
       wind: r.wd == null ? '' : r.wd, home: r.h, rec2h: r.r2 }; };
 
+  // the week data's teams map (logos, colors), loaded once for the cards; rows render without it until it comes
+  let TEAMS = null;
+  const BETTER = { go: 'going for it', fg: 'a field goal', punt: 'punting' }, SHORT = { go: 'Go', fg: 'FG', punt: 'Punt' };
+  const pp = v => `${(100 * v).toFixed(1)}%`;  // a difference in win chance (owner: "better by 2% seems more clear")
+  // (owner 2026-10-23: "can we make this presentation a little nicer") a card per call: who and the verdict up top, the
+  // situation as chips, the cost as a badge; opened, each option's chance and what going (or kicking) led to
   function gradedRow(r, i) {
-    const { q, clock } = clockAt(r.s), bad = r.x >= QUESTION, close = r.x < TOSS;
-    const verdict = r.b === r.c ? '<span class="gc-ok">Right call</span>'
-      : close ? `<span class="muted">Toss-up with ${OPT[r.b]}</span>`
-      : `<span class="${bad ? 'gc-bad' : 'gc-meh'}">${OPTS[r.b]} was better by ${(100 * r.x).toFixed(1)} pts</span>`;
-    const res = r.res > 0 ? '<b class="gc-w">W</b>' : r.res < 0 ? '<b class="gc-l">L</b>' : '<b>T</b>';
-    const opts = Object.entries(r.op).filter(([, v]) => v != null).sort((a, b) => b[1] - a[1]);
-    const br = [r.pc != null ? `Go: ${pc(r.pc)} to convert, then ${pc(r.gm)} to win; ${pc(r.gf)} if it fails` : '',
-      r.pf != null && r.op.fg != null ? `Field goal: ${pc(r.pf)} to make, then ${pc(r.fm)}; ${pc(r.ff)} if missed` : ''].filter(Boolean).join('<br>');
+    const { q, clock } = clockAt(r.s), right = r.b === r.c, close = !right && r.x < TOSS;
+    const lvl = right ? 'ok' : close ? 'toss' : r.x >= QUESTION ? 'bad' : 'meh';
+    const badge = right ? '<span class="gc-badge ok">Right call</span>' : close ? '<span class="gc-badge toss">Toss-up</span>'
+      : `<span class="gc-badge ${lvl}"><small>${SHORT[r.b]}</small><b>+${pp(r.x)}</b></span>`;
+    const res = r.res > 0 ? `<span class="gc-res w">Won by ${r.res}</span>` : r.res < 0 ? `<span class="gc-res l">Lost by ${-r.res}</span>` : '<span class="gc-res">Tied</span>';
     const happened = r.c === 'go' ? (r.cv ? 'converted' : 'failed') : r.c === 'fg' ? (r.cv ? 'good' : 'missed') : '';
-    return `<details class="gc-row${bad && r.b !== r.c ? ' bad' : ''}"><summary>
-        <span class="gc-who"><b>${esc(r.t)}</b> ${r.h ? 'vs' : '@'} ${esc(r.o)}</span><span class="gc-res">${res}</span>
-        <span class="gc-sit">Q${q} ${clock} · ${scoreTxt(r.d)} · 4th &amp; ${r.tg}, ${spotTxt(r.yl)} · TOs ${r.to}-${r.ot}</span>
-        <span class="gc-v">${esc(CALL[r.c])}${happened ? ` (${happened})` : ''} · ${verdict}</span></summary>
+    const logo = TEAMS && NFLE.fmt && NFLE.fmt.logo ? NFLE.fmt.logo(TEAMS, r.t, 22) : '';
+    const tc = TEAMS && TEAMS[r.t] && TEAMS[r.t].color;
+    const opts = Object.entries(r.op).filter(([, v]) => v != null).sort((a, b) => b[1] - a[1]);
+    // each fork: how likely it is, then the win chance it leaves (owner: "show win percentage for the fork of going for
+    // it and converting or not")
+    const stat = (k, p_, w, cls) => `<div class="gc-st ${cls}"><small>${k} &middot; ${pc(p_)}</small><b>${pc(w)}</b><span>to win</span></div>`;
+    const go = r.pc != null ? `<div class="gc-brs"><h4>Going for it: ${pc(r.op.go)} to win</h4><div class="gc-br">
+        ${stat('Converts', r.pc, r.gm, 'up')}${stat('Fails', 1 - r.pc, r.gf, 'down')}</div></div>` : '';
+    const fg = r.pf != null && r.op.fg != null ? `<div class="gc-brs"><h4>Field goal: ${pc(r.op.fg)} to win</h4><div class="gc-br">
+        ${stat('Good', r.pf, r.fm, 'up')}${stat('Missed', 1 - r.pf, r.ff, 'down')}</div></div>` : '';
+    return `<details class="gc-row ${lvl}"${tc ? ` style="--tcol:${esc(tc)}"` : ''}><summary>
+        <div class="gc-top"><span class="gc-who">${logo}<b>${esc(r.t)}</b><span class="muted">${r.h ? 'vs' : '@'} ${esc(r.o)}</span></span>${badge}</div>
+        <div class="gc-chips"><span>Q${q} ${clock}</span><span>${scoreTxt(r.d)}</span><span>4th &amp; ${r.tg} &middot; ${spotTxt(r.yl)}</span><span>TOs ${r.to}-${r.ot}</span></div>
+        <div class="gc-v"><span><b>${esc(CALL[r.c])}</b>${happened ? ` (${happened})` : ''}${right || close ? '' : ` &middot; <span class="gc-${lvl}">${BETTER[r.b]} was ${pp(r.x)} better</span>`}</span>${res}</div>
+      </summary>
       <div class="gc-more">
-        ${opts.map(([k, v]) => `<div class="cx-opt${k === r.b ? ' best' : ''}"><span class="cx-on">${esc(OPTL[k])}${k === r.c ? ' (their call)' : ''}</span>
-          <span class="cx-bar"><i style="width:${(100 * v).toFixed(1)}%"></i></span><b>${pc(v)}</b></div>`).join('')}
-        ${br ? `<p class="cx-foot">${br}</p>` : ''}
-        <p class="gc-desc">${esc(r.ds || '')}</p>
+        <div class="gc-opts">${opts.map(([k, v]) => `<div class="cx-opt${k === r.b ? ' best' : ''}"><span class="cx-on">${esc(OPTL[k])}${k === r.c ? ' <em>their call</em>' : ''}</span>
+          <span class="cx-bar"><i style="width:${(100 * v).toFixed(1)}%"></i></span><b>${pc(v)}</b></div>`).join('')}</div>
+        ${go}${fg}
+        <blockquote class="gc-desc">${esc(r.ds || '')}</blockquote>
         <button type="button" class="gc-btn gc-open" data-i="${i}">Open in the calculator</button>
       </div></details>`;
   }
@@ -283,6 +297,7 @@
       if (o) { const r = rows[+o.dataset.i]; if (r) NFLE.calcUI.sheet(gradedState(r), `${r.t} ${r.h ? 'vs' : '@'} ${r.o}, week ${r.w}`); }
     });
     box.addEventListener('change', e => { if (e.target.matches('.gc-team')) { st.team = e.target.value; draw(); } });
+    if (NFLE.week) NFLE.week().then(wk => { TEAMS = (wk && wk.teams) || null; if (TEAMS) draw(); }, () => {});
     NFLE.load('data/calc/graded.json').then(j => {
       idx = j;
       const s = Math.max(...j.seasons.map(x => x.season));
