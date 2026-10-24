@@ -46,13 +46,23 @@ def state_key(data, cfg, scoring, *extra, completed_only: bool = False) -> str:
   return hashlib.sha1(json.dumps(parts, sort_keys=True, default=str).encode()).hexdigest()[:12]
 
 
+def training_data(data) -> dict:
+  """(2026-10-24, owner: Barkley 33% live vs 65% on a local build of the same code and week) a fingerprint of the
+  history the engine trains on. The engine key had only row counts, and the history tables are cached per season
+  and never refetched, so two caches built at different times trained different injury models under one key."""
+  cur = data.current_season
+  past = lambda df: None if df is None else df[df.season < cur] if "season" in df else df  # noqa: E731
+  return {"avail_hist": frame_hash(data.avail_hist), "injuries": frame_hash(past(data.injuries)),
+          "practice": frame_hash(past(data.practice)), "snaps": frame_hash(past(getattr(data, "snaps", None)))}
+
+
 def train_key(data, cfg, scoring, season: int) -> str:
   """The trained engine's inputs: everything state_key has except this season's injury reports, practice and expert
   ranks, which training never reads (it fits on earlier seasons; scratch/train_cache_equiv.py checked an engine
   trained without the newest report week, practice week, ECR week and roster week projects identically). Final
   games (len(pbp), latest_week) stay in: the engine carries the team model's play history."""
   parts = [docs.model_config(cfg), scoring.weights, data.latest_week, data.pending_games, len(data.pbp),
-           len(data.rosters), model_code(), season]
+           len(data.rosters), model_code(), season, training_data(data)]
   return hashlib.sha1(json.dumps(parts, sort_keys=True, default=str).encode()).hexdigest()[:12]
 
 
@@ -61,6 +71,13 @@ def trained_engine(data, cfg, scoring, season: int):
   retraining (~4-5 min of the build)."""
   cache_dir = ROOT / cfg["data"]["cache_dir"]
   path = cache_dir / f"engine_{train_key(data, cfg, scoring, season)}.pkl"
+  td = training_data(data)
+  print("[run] training data: " + " ".join(f"{k} {v:x}" for k, v in td.items())
+        + (f" ({len(data.avail_hist):,} practice weeks, seasons {int(data.avail_hist.season.min())}-{int(data.avail_hist.season.max())})"
+           if data.avail_hist is not None else ""), flush=True)
+  if data.avail_hist is not None:
+    by = data.avail_hist.groupby("season").played.agg(["size", "mean"])
+    print("[run] practice weeks by season: " + ", ".join(f"{int(k)} {int(v['size'])}/{v['mean']:.3f}" for k, v in by.iterrows()), flush=True)
   if path.exists():
     with open(path, "rb") as f:
       eng = pickle.load(f)
