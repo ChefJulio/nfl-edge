@@ -260,6 +260,10 @@ jobs:
       - name: Training cache fingerprint
         run: python tools/cache_fingerprint.py || true
       - run: python run.py --out site/index.html --lookahead
+      # (owner 2026-10-24) the availability model vs history, exact practice pattern by pattern: a pattern off by more
+      # than chance allows stops the build before anything deploys (tools/avail_check.py)
+      - name: Availability check
+        run: python tools/avail_check.py
       # Players > Rankings > Rest of season: this week + the lookahead weeks summed per player through week 17.
       - name: Rest of season
         run: python tools/ros_build.py --site=site

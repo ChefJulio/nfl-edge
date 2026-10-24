@@ -4626,3 +4626,11 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   training history (run.training_data), and every build stops if that fingerprint differs from the committed lock
   (data/history/training_fingerprint.json; tools/training_lock.py --bless to accept a deliberate change). Every
   build also prints the history column by column (tools/cache_fingerprint.py).
+- **SHIPPED 2026-10-24 (owner: "can't we just compare exact matches to practice participation patterns?"): the
+  availability check in every full build.** tools/avail_check.py: the one week model as the site builds it, trained on
+  seasons before the last complete one, predicts that season's rows; each exact pattern (stage x game status x report
+  line so far) with 100+ rows must sit within 3.29 standard errors (99.9%) + 3 points of the share who played, else
+  the build stops before deploying. First run (2025 rows, 29,042): 22 patterns, all pass; overall 77.0% predicted vs
+  76.3% played; widest gaps stage-1 D +3.8 (allowed 6.9) and stage-2 DD +4.6 (allowed 6.3). Deterministic for a given
+  history. It checks the model; the training-data lock checks the data (the 2026-10-24 drift was a data problem the
+  model check alone would not have seen: training and test rows were built the same wrong way).
