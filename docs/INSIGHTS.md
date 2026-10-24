@@ -4696,3 +4696,16 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   sample): w on the model 0.74 (2021), 0.83, 0.93, 0.91, 0.95, 1.00 (2026); final report -0.0001 [-0.0004, +0.0002]
   (not lower), Thursday -0.0005 [-0.0008, -0.0002], 2026 unchanged (w = 1). Expectation stated before running held:
   three framings (input, starting point, blend), none adds to the one week model.
+- **FINDING + PRE-REGISTERED 2026-10-24, SHIPPED PROVISIONALLY (owner: "go look at dylan sampson"): {#activated}
+  activated off a reserve list.** Sampson (CLE RB) was activated from IR Saturday (ESPN: Active, "activated from
+  injured reserve Saturday", 16:52Z), final report Questionable LLF; the page showed tag IR (weekly rosters still list
+  him RES) and 44% (the week model's reserve-row inputs: an IR player practicing in his window plays ~38%).
+  Measured (weekly rosters RES at the previous game -> ACT for this one, QB/RB/WR/TE 2019-25, played = any snap):
+  played 88.9% of 521; final status none 100% (61), Questionable 97.0% (101; LLF 6 of 6, LLL 96%, FFF 95%), not on
+  the report 84.7% (359). Rule: a player our rosters list on a reserve list whom ESPN marks Active after his last game
+  (build_espn_bridge active, the freshness filter) is activated: his tag is his official one (not the reserve code);
+  once his team's final report is out, his chance is the measured rate for his final status (none 0.99 capped,
+  Questionable 0.97); Doubtful / Out on the final report and game-day rulings keep theirs; before the final report the
+  week model's chance stands (tag only). Each override archived (data/live_inputs/activated_<season>_<week>.json:
+  the chance before it, the rate set) and scored by tools/activated_audit.py. GATE once 30+ player-weeks: the played
+  rate's 95% Wilson interval includes the mean rate set, and the overrides' Brier below the pre-override chances'.

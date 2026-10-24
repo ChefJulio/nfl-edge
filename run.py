@@ -420,6 +420,15 @@ def main():
           e.update(ruling=gameday[x.gsis_id][0], at=gameday[x.gsis_id][1], post=round(float(x.avail), 4), status=x.status)
       gf.write_text(json.dumps(log, indent=0), encoding="utf-8")
       print(f"[run] game-day overrides archived: {len(log)} -> {gf.name}", flush=True)
+    if "pre_act" in proj and proj.pre_act.notna().any():  # {#activated}, for its audit
+      af = out.parent / "data" / "live_inputs" / f"activated_{season}_{week:02d}.json"
+      log = json.loads(af.read_text(encoding="utf-8")) if af.exists() else {}
+      for x in proj[proj.pre_act.notna()].itertuples():
+        log.setdefault(x.gsis_id, {"name": x.full_name, "team": x.team, "pos": x.pos, "status": x.status,
+                                   "pre": round(float(x.pre_act), 4), "post": round(float(x.avail), 4),
+                                   "at": (active or {}).get(x.gsis_id)})
+      af.write_text(json.dumps(log, indent=0), encoding="utf-8")
+      print(f"[run] activation overrides archived: {len(log)} -> {af.name}", flush=True)
     if "pre_late" in proj and proj.pre_late.notna().any():  # {#late-downgrade}, for its audit
       lf = out.parent / "data" / "live_inputs" / f"espnlate_{season}_{week:02d}.json"
       log = json.loads(lf.read_text(encoding="utf-8")) if lf.exists() else {}

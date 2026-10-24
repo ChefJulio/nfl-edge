@@ -61,6 +61,7 @@ STATUS_SRC = {  # InjuryModel.availability's "src": which part of the code spoke
   "espn_mid": "ESPN's Out / IR / Doubtful since his team's report started (midweek_ruling)",
   "espn_act": "ESPN's Active after his team's latest practice report: no designation coming (cleared_rate)",
   "espn_late": "ESPN's Out / Doubtful after his team's final report: a late downgrade ({#late-downgrade})",
+  "activated": "activated off a reserve list (ESPN Active after his last game): the measured rate ({#activated})",
   "table": "this week's injury table (seasons without dated practice reports)",
   "window": "IR, practice window open, before his team's first report (week model, stage 0)",
   "espn": "ESPN news since his last game, before his team's first report (espn_bridge)",
@@ -131,6 +132,8 @@ def status_label(r) -> str:
     return "No designation expected (ESPN)" + dd
   if src == "espn_late":
     return f"{des} (ESPN, after the final report)" + dd
+  if src == "activated":
+    return ("Activated" + (f" · {des}" if des else "")) + dd
   if src == "window":
     return "IR (practice window open)"
   if src == "espn":
@@ -926,6 +929,7 @@ class InjuryModel:
   espn_active: dict | None = None  # gsis_id -> ESPN update time: fresh ESPN "Active" (build_espn_bridge(active=True)), tags only
   espn_late: dict | None = None  # gsis_id -> (Out | Doubtful, ESPN update time): {#late-downgrade} (build_espn_bridge(late=True))
   LATE_RATE = {"Out": 0.0, "Doubtful": 0.028}  # {#late-downgrade}: ruled out by his team; the midweek Doubtful rate
+  ACT_RATE = {"NONE": 0.99, "QUESTIONABLE": 0.97}  # {#activated}: final status after activation off a reserve list
 
   def midweek_ruling(self, gsis_id: str, game_status) -> tuple[float, str] | None:
     """A fresh ESPN Out / IR for a player on this week's practice report, before his final game status: its measured
@@ -1122,6 +1126,28 @@ class InjuryModel:
         p.at[i, "pre_late"], p.at[i, "avail"] = p.at[i, "avail"], self.LATE_RATE[v[0]]
         p.at[i, "src"], p.at[i, "des"] = "espn_late", v[0]
         self._late_applied[row.gsis_id] = v[0]
+    # {#activated} (owner 2026-10-24, Dylan Sampson: activated from IR Saturday, page read IR / 44%): a player the rosters
+    # still list on a reserve list whom ESPN marks Active after his last game was activated. His tag is his official one
+    # (designations); once the final report is out his chance is the measured rate for his final status (activated +
+    # Questionable played 97% of 101, 2019-25). Doubtful / Out and game-day rulings keep theirs. pre_act for the audit.
+    self._activated = set()
+    act = self.espn_active or {}
+    if act:
+      ro_ = self.data.rosters
+      ro_ = ro_[(ro_.season == season) & (ro_.week <= week) & ro_.gsis_id.notna()].sort_values("week").drop_duplicates("gsis_id", keep="last")
+      res_ids = set(ro_.gsis_id[ro_.status == "RES"])
+      self._activated = {g for g in act if g in res_ids}
+      if self._activated and use_days:
+        p["pre_act"] = np.nan
+        for i, row in p.iterrows():
+          if row.gsis_id not in self._activated or p.at[i, "gd"] or p.at[i, "src"] == "espn_late" or row.team not in final:
+            continue
+          off = str(days.game_status.get(row.gsis_id, "None")).upper() if row.gsis_id in days.index else "NONE"
+          r_ = self.ACT_RATE.get(off)
+          if r_ is None:
+            continue  # Doubtful / Out on the final report: his team's word stands
+          p.at[i, "pre_act"], p.at[i, "avail"], p.at[i, "src"] = p.at[i, "avail"], r_, "activated"
+          p.at[i, "des"] = off.title() if off != "NONE" else ""
     # ESPN's Questionable, shown but not used (owner 2026-10-15: rows showed ESPN's O / D but never its Q): only where
     # there's no designation yet ("" or practice days only) or just last week's; the chance to play is unchanged
     eq = set(self.espn_questionable or {})
@@ -1266,7 +1292,7 @@ class InjuryModel:
 
     for j, (i, row) in enumerate(p.iterrows()):
       g, team = row.gsis_id, row.team
-      if g in res:
+      if g in res and g not in getattr(self, "_activated", set()):  # {#activated}: off the list, his own tag below
         out[j] = res[g]
         continue
       r_ = gd.get(g)
