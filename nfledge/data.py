@@ -310,9 +310,13 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
         return False
       try:
         dts = pd.read_parquet(p_, columns=["dates"]).dates
-      except Exception:
+      except Exception as e:  # no dates column: cached before it existed
+        _log(f"{name} {s_}: refetching, cached without practice dates ({type(e).__name__})")
         return True
-      return bool(dts.fillna("").astype(str).eq("").mean() > 0.5)
+      empty = float(dts.fillna("").astype(str).eq("").mean())
+      if empty > 0.5:
+        _log(f"{name} {s_}: refetching, {empty:.0%} of cached rows have no practice dates")
+      return empty > 0.5
     pr = [cache.get("practice", s, lambda: fetch_practice_days(s), stale=((s == current) and
                     cache.age_hours("practice", s) > PRACTICE_TTL_HOURS) or undated("practice", s)) for s in seasons]
     if pr and pr[-1] is not None and "team_name" not in pr[-1]:  # cached before the report columns existed
