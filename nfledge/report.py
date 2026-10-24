@@ -823,6 +823,9 @@ def inactive_why(r) -> str:
             else "Listed Doubtful after practice started (ESPN, since his last game); Doubtful players almost never play"
             if des == "Doubtful" else "Ruled out after practice started (ESPN, since his last game)")
     return what + (f"; practice: {prac}" if prac else "")
+  if src == "espn_late":  # {#late-downgrade}
+    return (f"Downgraded to {des.lower()} after his team's final report (ESPN). "
+            + ("Ruled out by his team" if des == "Out" else "Doubtful players almost never play"))
   if src == "espn_act":  # InjuryModel.cleared_rate
     return ("ESPN marked him Active after his team's latest practice report: no designation expected on the final one. "
             f"How players with no designation in his spot played{f' (practice: {prac})' if prac else ''}")

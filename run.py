@@ -125,7 +125,7 @@ def attach_data(eng, data):
 
 def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict | None = None, espn_hist: Path | None = None,
                  espn_midweek: dict | None = None, espn_questionable: dict | None = None, espn_gameday: dict | None = None,
-                 espn_active: dict | None = None):
+                 espn_active: dict | None = None, espn_late: dict | None = None):
   """Trained engine + this week's projections, cached on disk. Presentation-only changes (report.py, the
   template) reuse it, so a re-render takes seconds instead of minutes. espn_bridge (live week only): early-week
   ESPN injury statuses (InjuryModel.build_espn_bridge); part of the cache key, so new ESPN news re-projects.
@@ -145,6 +145,8 @@ def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict |
     bridge_key += "_e" + hashlib.sha1(json.dumps(sorted(el.gsis_id)).encode()).hexdigest()[:8]
   if espn_questionable:  # display only, but it's in the cached projections' status column
     bridge_key += "_q" + hashlib.sha1(json.dumps(sorted(espn_questionable)).encode()).hexdigest()[:8]
+  if espn_late:  # {#late-downgrade}
+    bridge_key += "_l" + hashlib.sha1(json.dumps(sorted((k, list(v)) for k, v in espn_late.items())).encode()).hexdigest()[:8]
   if espn_active:  # tags only, but they're in the cached projections
     bridge_key += "_a" + hashlib.sha1(json.dumps(sorted(espn_active.items())).encode()).hexdigest()[:8]
   path = cache_dir / f"model_{state_key(data, cfg, scoring, season, week)}{bridge_key}.pkl"
@@ -161,6 +163,8 @@ def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict |
     eng.injury_model.espn_questionable = espn_questionable
   if espn_active and eng.injury_model is not None:
     eng.injury_model.espn_active = espn_active
+  if espn_late and eng.injury_model is not None:
+    eng.injury_model.espn_late = espn_late
   if espn_gameday and eng.injury_model is not None:
     eng.injury_model.espn_gameday = espn_gameday
   if espn_bridge and eng.injury_model is not None:
@@ -354,7 +358,7 @@ def main():
   print(f"[run] projecting {season} week {week}", flush=True)
 
   # Early-week bridge (nfledge/espn.py, espn_calib.py): the live week only, never --week rebuilds or backtests.
-  bridge, midweek, quest, feed, gameday, active = {}, {}, {}, None, {}, {}
+  bridge, midweek, quest, feed, gameday, active, late = {}, {}, {}, None, {}, {}, {}
   if not args.week:
     from nfledge.espn import fetch_injuries
     from nfledge.injuries import InjuryModel
@@ -373,6 +377,7 @@ def main():
     midweek = InjuryModel.build_espn_bridge(data, season, week, feed, midweek=True)
     quest = InjuryModel.build_espn_bridge(data, season, week, feed, questionable=True)  # display only
     active = InjuryModel.build_espn_bridge(data, season, week, feed, active=True)  # tags only
+    late = InjuryModel.build_espn_bridge(data, season, week, feed, late=True)  # {#late-downgrade}
     if midweek:
       print(f"[run] ESPN midweek Out / Doubtful / IR rulings for {len(midweek)} players (report out, no final status yet)", flush=True)
   if not args.week:  # practice-squad elevations announced for this week's games (live only; Engine.candidates)
@@ -383,7 +388,7 @@ def main():
   out_path = Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week)
   eng, proj = cached_model(data, cfg, scoring, season, week, espn_bridge=bridge,
                            espn_hist=out_path.parent / "data" / "espn_injuries", espn_midweek=midweek,
-                           espn_questionable=quest, espn_gameday=gameday, espn_active=active)
+                           espn_questionable=quest, espn_gameday=gameday, espn_active=active, espn_late=late)
 
   ev, bt_seasons, res = None, [], None
   if not args.no_backtest:
@@ -415,6 +420,15 @@ def main():
           e.update(ruling=gameday[x.gsis_id][0], at=gameday[x.gsis_id][1], post=round(float(x.avail), 4), status=x.status)
       gf.write_text(json.dumps(log, indent=0), encoding="utf-8")
       print(f"[run] game-day overrides archived: {len(log)} -> {gf.name}", flush=True)
+    if "pre_late" in proj and proj.pre_late.notna().any():  # {#late-downgrade}, for its audit
+      lf = out.parent / "data" / "live_inputs" / f"espnlate_{season}_{week:02d}.json"
+      log = json.loads(lf.read_text(encoding="utf-8")) if lf.exists() else {}
+      for x in proj[proj.pre_late.notna()].itertuples():
+        r_ = (late or {}).get(x.gsis_id, ("", ""))
+        log.setdefault(x.gsis_id, {"name": x.full_name, "team": x.team, "pos": x.pos, "ruling": r_[0],
+                                   "pre": round(float(x.pre_late), 4), "post": round(float(x.avail), 4), "at": r_[1]})
+      lf.write_text(json.dumps(log, indent=0), encoding="utf-8")
+      print(f"[run] late-downgrade overrides archived: {len(log)} -> {lf.name}", flush=True)
     if "pre_cleared" in proj and proj.pre_cleared.notna().any():  # ESPN Active before the final report, for its audit
       af = out.parent / "data" / "live_inputs" / f"espnactive_{season}_{week:02d}.json"
       log = json.loads(af.read_text(encoding="utf-8")) if af.exists() else {}

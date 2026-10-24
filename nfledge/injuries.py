@@ -60,6 +60,7 @@ STATUS_SRC = {  # InjuryModel.availability's "src": which part of the code spoke
   "report": "this week's practice report (so far, or the final one)",
   "espn_mid": "ESPN's Out / IR / Doubtful since his team's report started (midweek_ruling)",
   "espn_act": "ESPN's Active after his team's latest practice report: no designation coming (cleared_rate)",
+  "espn_late": "ESPN's Out / Doubtful after his team's final report: a late downgrade ({#late-downgrade})",
   "table": "this week's injury table (seasons without dated practice reports)",
   "window": "IR, practice window open, before his team's first report (week model, stage 0)",
   "espn": "ESPN news since his last game, before his team's first report (espn_bridge)",
@@ -128,6 +129,8 @@ def status_label(r) -> str:
     return f"{des} (ESPN)" + dd
   if src == "espn_act":
     return "No designation expected (ESPN)" + dd
+  if src == "espn_late":
+    return f"{des} (ESPN, after the final report)" + dd
   if src == "window":
     return "IR (practice window open)"
   if src == "espn":
@@ -921,6 +924,8 @@ class InjuryModel:
   espn_questionable: dict | None = None  # gsis_id -> "Questionable": fresh ESPN Q, display only (availability)
   espn_gameday: dict | None = None  # (AU) gsis_id -> ("INA" | "ACT", time): game-day rulings (espn.gameday_rulings)
   espn_active: dict | None = None  # gsis_id -> ESPN update time: fresh ESPN "Active" (build_espn_bridge(active=True)), tags only
+  espn_late: dict | None = None  # gsis_id -> (Out | Doubtful, ESPN update time): {#late-downgrade} (build_espn_bridge(late=True))
+  LATE_RATE = {"Out": 0.0, "Doubtful": 0.028}  # {#late-downgrade}: ruled out by his team; the midweek Doubtful rate
 
   def midweek_ruling(self, gsis_id: str, game_status) -> tuple[float, str] | None:
     """A fresh ESPN Out / IR for a player on this week's practice report, before his final game status: its measured
@@ -1093,6 +1098,30 @@ class InjuryModel:
           p.at[i, "pre_gameday"], p.at[i, "avail"], p.at[i, "gd"] = p.at[i, "avail"], 0.0, "INA"
         elif r_[0] == "ACT" and des in ("questionable", "doubtful"):
           p.at[i, "pre_gameday"], p.at[i, "avail"], p.at[i, "gd"] = p.at[i, "avail"], GAMEDAY_ACTIVE[des], "ACT"
+    # {#late-downgrade} (owner 2026-10-24, Lamar Jackson downgraded to out on Saturday while the page kept his Friday Q):
+    # once a team's final report is out it outranks ESPN until game day, except ESPN's Out / Doubtful posted after it
+    # (4 p.m. ET of the final report's day or later): his team ruled on him since. Game-day rulings still win.
+    # pre_late keeps the chance before it for the prospective audit (tools/espn_late_audit.py).
+    self._late_applied = {}
+    late = self.espn_late or {}
+    if late and use_days and filed:
+      p["pre_late"] = np.nan
+      for i, row in p.iterrows():
+        v = late.get(row.gsis_id)
+        fd = max(filed.get(row.team, []) or [""])
+        if not v or not fd or row.team not in final or p.at[i, "gd"]:
+          continue
+        if pd.Timestamp(v[1]).tz_convert("America/New_York") < pd.Timestamp(fd).tz_localize("America/New_York") + pd.Timedelta(hours=16):
+          continue  # posted before the final report: the report already answers it
+        # a DOWNgrade only: ESPN more severe than his final status (ESPN echoing Friday's Out is not news and would pad the
+        # audit with overrides that changed nothing: 6 of 8 on 2026-10-24)
+        rank = {"OUT": 3, "DOUBTFUL": 2}
+        off = str(days.game_status.get(row.gsis_id, "None")).upper() if row.gsis_id in days.index else "NONE"
+        if rank.get(v[0].upper(), 0) <= rank.get(off, 0):
+          continue
+        p.at[i, "pre_late"], p.at[i, "avail"] = p.at[i, "avail"], self.LATE_RATE[v[0]]
+        p.at[i, "src"], p.at[i, "des"] = "espn_late", v[0]
+        self._late_applied[row.gsis_id] = v[0]
     # ESPN's Questionable, shown but not used (owner 2026-10-15: rows showed ESPN's O / D but never its Q): only where
     # there's no designation yet ("" or practice days only) or just last week's; the chance to play is unchanged
     eq = set(self.espn_questionable or {})
@@ -1245,6 +1274,9 @@ class InjuryModel:
         out[j] = "O" if r_[0] == "INA" else ""
         continue
       listed = days is not None and team in published and g in days.index
+      if g in getattr(self, "_late_applied", {}):  # {#late-downgrade}: ESPN's Out / Doubtful after the final report
+        out[j] = "D" if self._late_applied[g] == "Doubtful" else "O"
+        continue
       if team in final:
         gs = str(days.game_status.loc[g]).upper() if listed else "NONE"
         out[j] = {"OUT": "O", "DOUBTFUL": "D", "QUESTIONABLE": "Q"}.get(gs, "")
@@ -1272,7 +1304,7 @@ class InjuryModel:
 
   @staticmethod
   def build_espn_bridge(data, season: int, week: int, feed: pd.DataFrame, midweek: bool = False,
-                        questionable: bool = False, active: bool = False) -> dict:
+                        questionable: bool = False, active: bool = False, late: bool = False) -> dict:
     """Early-week bridge (see espn.py): gsis_id -> ESPN bucket (espn_calib.bucket: Out / Out+ret / Doubtful / IR)
     for players with an ESPN injury status updated on or after their team's last completed game day, for teams
     whose report for `week` is not out. Empty when there is no feed, or once every report for the week is out.
@@ -1280,6 +1312,8 @@ class InjuryModel:
     made after practice started, applied to players on the report until their final game status (availability).
     questionable=True: ESPN Questionable, any team, same freshness filter: DISPLAY only (espn_questionable), since
     it adds nothing to the practice days (INSIGHTS sec. 9: played 63%, practice model 58%).
+    late=True: ESPN Out / Doubtful, any team, same freshness filter -> (status, update time ISO): {#late-downgrade}
+    (availability applies it only to teams whose final report is out, when ESPN's update came after it).
     active=True: ESPN "Active" (cleared), any team, same freshness filter -> its update time (ISO): TAGS only
     (designations clears a practice-report player's expected tag when it came after his team's latest report)."""
     from .espn import STATUS_MAP
@@ -1302,12 +1336,13 @@ class InjuryModel:
     out = {}
     for x in feed.itertuples():
       rep = (("Questionable" if str(x.status) == "Questionable" else None) if questionable
-             else ("Active" if str(x.status) == "Active" else None) if active else STATUS_MAP.get(str(x.status)))
+             else ("Active" if str(x.status) == "Active" else None) if active
+             else (str(x.status) if str(x.status) in ("Out", "Doubtful") else None) if late else STATUS_MAP.get(str(x.status)))
       hit = by_espn.get(str(x.espn_id))
       if rep is None or hit is None:
         continue
       gsis, team = hit
-      if (not questionable and not active and (team in published) != midweek) or team not in last_day.index:
+      if (not questionable and not active and not late and (team in published) != midweek) or team not in last_day.index:
         continue
       upd = pd.to_datetime(x.updated, utc=True, errors="coerce")
       if pd.isna(upd) or upd.tz_convert("America/New_York").date() < pd.Timestamp(last_day[team]).date():
@@ -1319,6 +1354,9 @@ class InjuryModel:
         continue
       if active:
         out[gsis] = upd.isoformat()
+        continue
+      if late:
+        out[gsis] = (rep, upd.isoformat())
         continue
       b = bucket(x.status, getattr(x, "return_date", None), game_day.get(team)) or rep
       if midweek and b not in MIDWEEK_BUCKETS:

@@ -274,8 +274,15 @@ def recent_build(quiet: int = QUIET_MIN) -> str | None:
     return None
   now = datetime.now(timezone.utc)
   for r in runs:
-    if r["status"] in ("in_progress", "queued", "waiting", "pending"):
-      return f"a build is {r['status']}"
+    started = now - datetime.fromisoformat(r["createdAt"].replace("Z", "+00:00"))
+    if r["status"] in ("queued", "waiting", "pending"):
+      return f"a build is {r['status']}"  # it starts after the running one and reads the news then
+    # (owner 2026-10-24: Lamar Jackson's downgrade waited 31 minutes behind two builds) a build running for 3+ minutes
+    # fetched its data before this look: queue the news build behind it rather than wait for it to finish
+    if r["status"] == "in_progress" and started < timedelta(minutes=3):
+      return "a build just started (it reads the news)"
+    if r["status"] == "in_progress":
+      continue
     if now - datetime.fromisoformat(r["createdAt"].replace("Z", "+00:00")) < timedelta(minutes=quiet):
       return f"a build started at {r['createdAt']}"
   return None
@@ -307,8 +314,8 @@ def check(dry: bool) -> None:
     print("[watch] since the last build:\n  " + "\n  ".join(changes))
   # (owner 2026-10-23: "i hate how we feel 3 hours+ behind") news takes the news lane: this week's page over the last
   # deployed site. The rollover and Sunday's play-by-play (ratings refit) need the full build.
-  mode = "full" if any("rolls over" in x or "play-by-play" in x for x in due) else "news"
-  why = recent_build(QUIET_MIN if mode == "full" else NEWS_QUIET_MIN)
+  mode = "complete" if any("rolls over" in x or "play-by-play" in x for x in due) else "news"
+  why = recent_build(QUIET_MIN if mode == "complete" else NEWS_QUIET_MIN)
   if why:
     print(f"[watch] not starting a build: {why}")
     return

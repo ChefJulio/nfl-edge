@@ -4667,3 +4667,32 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   2026 weeks 1-6 worse at every stage (+0.0012 / +0.0002 / +0.0007). The right direction 2023-24 but inside the
   noise with two ESPN training seasons. RETEST when the live archive holds a full season (2027), with ESPN's live
   feed wired into the model's live rows (not wired in the test branch).
+- **FINDING + PRE-REGISTERED 2026-10-24, SHIPPED PROVISIONALLY (owner: "lamar just got downgraded. don't fix, let's
+  test our auto system" ... "you call"): {#late-downgrade} ESPN's downgrades after the final report.** The watcher test
+  worked end to end (ESPN Out 19:35Z; a news build started by the watcher at 20:06Z after two queued full builds, live
+  20:12Z with the site's ESPN copy reading "downgraded to out"), but the page kept Lamar Jackson at Q / 37%: once a
+  team's final report is filed it outranks ESPN until game day, so a Saturday downgrade was ignored. Rule: a player on
+  a team whose final report is out, whom ESPN lists Out or Doubtful with an update at or after 4 p.m. ET of that
+  final report's day (and before kickoff), takes ESPN's tag and the measured rate: Out 0 (official Out 0.4% played,
+  n 2,417 after missing his last game; the team has ruled him out), Doubtful 2.8% (the midweek Doubtful rate,
+  espn_midweek.json). Game-day rulings still win. Each override is archived (data/live_inputs/espnlate_<season>_<week>
+  .json: the chance before it, the rate set, ESPN's time) and tools/espn_late_audit.py scores them against snap counts.
+  GATE once 30+ player-weeks are in: no Out override played more than 1 time in 30 (else the rule comes out), and the
+  overrides' Brier below the pre-override chances' on the same players.
+- **PRE-REGISTERED 2026-10-24 (owner: "those tests i wonder if we framed them correctly, as parts of the model itself
+  rather than a replacement of the entire model?" ... "you call"): (CW2) the exact-pattern rate as the model's starting
+  point, (CW3) as a blend.** (CW) gave pat_rate to the one week model as an input; the owner's "base weight" reads as a
+  starting point. (CW2): the gradient boosting starts from logit(pat_rate) per row (an offset: the trees learn only
+  the correction from it); (CW3): final = w x model + (1 - w) x pat_rate, w fit by least squares on the season before
+  each test season's out-of-fold predictions. pat_rate exactly as (CW) built it (branch test/cw). Same rows, labels,
+  walk-forward and GATE as (CW). Expectation stated before running: pat_rate alone is far weaker (final report Brier
+  0.111 vs 0.088), so (CW2) likely does worse and (CW3)'s w likely near 1.
+- **RESULT {#pattern-prior-2} (CW2) pattern rate as the starting point: FAIL; (CW3) as a blend: FAIL.** tools/cw2_eval.py
+  (branch test/cw, untracked). (CW2): sklearn GradientBoostingClassifier with a per-row init = pat_rate (xgboost /
+  lightgbm not installed; HistGradientBoosting has no per-row start). Final report 0.0875 -> 0.0891, +0.0016 [+0.0006,
+  +0.0026], 1 of 5 seasons better, worst decile 4.2 points, 2026 worse at all stages (+0.0028 / +0.0025 / +0.0029).
+  An ungated control (same booster, constant start) split it: the booster swap +0.0008 [-0.0001, +0.0017], the
+  starting point a further +0.0008 [+0.0002, +0.0015]. (CW3): least-squares blend fit on the season before (out of
+  sample): w on the model 0.74 (2021), 0.83, 0.93, 0.91, 0.95, 1.00 (2026); final report -0.0001 [-0.0004, +0.0002]
+  (not lower), Thursday -0.0005 [-0.0008, -0.0002], 2026 unchanged (w = 1). Expectation stated before running held:
+  three framings (input, starting point, blend), none adds to the one week model.
