@@ -4641,3 +4641,12 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   seasons; Wednesday +0.00022, Thursday +0.00044 [-0.00002, +0.00091]; worst final decile 4.0 points (over the gate);
   TE significantly worse Wednesday and Thursday; 2026 weeks 1-6 worse at every stage (+0.00019 / +0.00001 / +0.00005).
   Last week + the totals since the injury already carry what the earlier weeks add.
+- **RESULT {#pattern-prior} (CW) the exact-pattern prior: FAIL; not shipped.** tools/cw_pattern_eval.py (branch test/cw;
+  flag experiments.pat_prior, off). Coverage 2021-25 (level used: whole run / last 2 weeks / last week / missed run /
+  none with 50+): Tuesday 69 / 10 / 17 / 4 / 0%, final report 45 / 5 / 14 / 27 / 9%. One week model + pat_rate vs as
+  shipped: final report 0.0875 -> 0.0882, +0.0007 [+0.0001, +0.0014] (significantly worse), better 2 of 5 seasons,
+  worst decile 4.9 points; Wednesday +0.0001, Thursday +0.0001; no position significantly worse; 2026 weeks 1-6
+  Thursday +0.0003 (wrong way), Wednesday / final better. pat_rate alone vs the model (Brier): Tuesday 0.163 vs 0.142,
+  Wednesday 0.163 vs 0.135, Thursday 0.128 vs 0.110, final 0.111 vs 0.088. The model already reads the run (games
+  missed in a row, the practice totals since the injury) with role, injury and the rest; the exact-key rate is a
+  noisier copy of it.
