@@ -4634,3 +4634,10 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   76.3% played; widest gaps stage-1 D +3.8 (allowed 6.9) and stage-2 DD +4.6 (allowed 6.3). Deterministic for a given
   history. It checks the model; the training-data lock checks the data (the 2026-10-24 drift was a data problem the
   model check alone would not have seen: training and test rows were built the same wrong way).
+- **RESULT {#weekly-history} (CV) week by week since the injury: FAIL; not shipped.** tools/cv_weekly_eval.py (branch
+  test/cv; flag tuesday.CV_WEEKS, off): the one week model + the week before last's practice counts and final tag
+  (last week's were already inputs: n_D/n_L/n_F, status), walk-forward 2021-25, 75,489 on-report rows (38.5% also on
+  the report the week before last). Final report 0.08749 -> 0.08789, +0.00040 [-0.00006, +0.00090], better 1 of 5
+  seasons; Wednesday +0.00022, Thursday +0.00044 [-0.00002, +0.00091]; worst final decile 4.0 points (over the gate);
+  TE significantly worse Wednesday and Thursday; 2026 weeks 1-6 worse at every stage (+0.00019 / +0.00001 / +0.00005).
+  Last week + the totals since the injury already carry what the earlier weeks add.
