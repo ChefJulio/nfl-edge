@@ -4658,3 +4658,12 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   gain); ECE 0.0157 -> 0.0149. (AQ)'s short-week gain (-0.0068 on the old practice model) is gone under the one week
   model, which already reads the calendar stages and days off the report. 2026's improvement is worth a season-end
   recheck; nothing ships on it.
+- **RESULT {#espn-return} (CU) ESPN's return date in the week model: FAIL (data-limited); not shipped.**
+  tools/cu_espn_return_eval.py (branch test/cu; flag experiments.espn_ret, off). Captures: Wayback 2022-24 (rows with a
+  capture within 7 days of the stage cut: 2022-23 100%, 2024 93-94%), 2025 only 4 captures (9-13%), 2026 from the
+  live archive from week 6 on; seasons before 2022 none. So walk-forward 2023-24 only, trained on 2022(-23) ESPN rows.
+  Final report 0.0898 -> 0.0891, -0.0006 [-0.0016, +0.0003]; Wednesday -0.0015 [-0.0033, +0.0003]; Thursday -0.0006;
+  deciles 4.2 / 4.7 points over the 4-point gate; QB -0.0060 [-0.0143, +0.0015]; Questionable rows slightly worse;
+  2026 weeks 1-6 worse at every stage (+0.0012 / +0.0002 / +0.0007). The right direction 2023-24 but inside the
+  noise with two ESPN training seasons. RETEST when the live archive holds a full season (2027), with ESPN's live
+  feed wired into the model's live rows (not wired in the test branch).
