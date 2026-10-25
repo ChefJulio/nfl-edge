@@ -797,6 +797,7 @@
     const sc = tbl.closest('.lg-scroll'), box = sc && sc.parentElement;
     if (!box) return;
     box.querySelectorAll(':scope > .lg-fh').forEach(x => x.remove());
+    tbl.querySelectorAll('tr.lg-tot-pinned').forEach(x => x.classList.remove('lg-tot-pinned'));
     if (!tbl.offsetParent) return;
     if (getComputedStyle(box).position === 'static') box.style.position = 'relative';
     const b0 = box.getBoundingClientRect().top, s0 = sc.getBoundingClientRect(), top = stickTop();
@@ -818,6 +819,11 @@
       const seasonRow = ch.parentElement.querySelector('tr.lg-season'), yr = seasonRow && seasonRow.querySelector('b');
       const leadHtml = lead.map(r => r.classList.contains('lg-sub') && !lead.some(x => x.classList.contains('lg-season')) && yr
         ? r.outerHTML.replace('<span class="lg-pin">', `<span class="lg-pin">${esc(yr.textContent)} &middot; `) : r.outerHTML).join('');
+      // the season total right under the heads rides along too (owner 2026-10-24: "can we get the season total row to
+      // stick on the game log until it hits the bottom of that season?")
+      const totRow = ch.nextElementSibling && ch.nextElementSibling.classList.contains('lg-tot') ? ch.nextElementSibling : null;
+      const tot = totRow ? totRow.outerHTML : '';
+      if (totRow) totRow.classList.add('lg-tot-pinned');  // the copy covers its place: hide the original (no ghost edge)
       const widths = [...ch.cells].map(c => c.getBoundingClientRect().width);
       const lay = document.createElement('div');
       lay.className = 'lg-fh';
@@ -825,7 +831,7 @@
       lay.style.cssText = `top:${r0 - b0}px;height:${Math.max(0, end - r0)}px;left:${s0.left - box.getBoundingClientRect().left}px;width:${s0.width}px`;
       lay.innerHTML = `<div class="lg-fh-in" style="top:${top}px"><div class="lg-fh-x" style="padding:0 ${cs.paddingRight} 0 ${cs.paddingLeft}">
         <table class="${tbl.className}" style="width:${tbl.getBoundingClientRect().width}px"><colgroup>${widths.map(w => `<col style="width:${w}px">`).join('')}</colgroup>
-        <tbody>${leadHtml}${ch.outerHTML}</tbody></table></div></div>`;
+        <tbody>${leadHtml}${ch.outerHTML}${tot}</tbody></table></div></div>`;
       box.appendChild(lay);
       lay.querySelector('.lg-fh-x').scrollLeft = sc.scrollLeft;
     });
