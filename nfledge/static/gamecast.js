@@ -3568,13 +3568,35 @@
   // distance and extra points per kicker; per defense sacks, interceptions, fumble recoveries, defensive / return TDs,
   // safeties, blocked kicks, and the points and yards it allowed. Scored with the league's kicker / D/ST rules, else
   // standard ESPN scoring (NFLE.kdst).
-  const kdstLines = (plays, info, sum) => {
+  const kdstLines = (plays, info, sum, opt0 = {}) => {
     let lg = null; try { lg = JSON.parse(localStorage.getItem('nfledge-mine') || 'null'); } catch (e) { /* none */ }
     const kw = (lg && lg.kw) || NFLE.kdst.STD_K, dw = (lg && lg.dw) || NFLE.kdst.STD_D;
+    // a league that scores no kicking (no K slot, every kicking setting 0: owner 2026-10-25) shows no kickers
+    const kScored = Object.values(kw).some(v => +v);
     const nm = {}, names = fullNames(sum, nm), teams = [info.away.team, info.home.team];
     const other = t => t === teams[0] ? teams[1] : teams[0];
     const band = y => y < 20 ? '0_19' : y < 30 ? '20_29' : y < 40 ? '30_39' : y < 50 ? '40_49' : y < 60 ? '50_59' : '60_';
-    const K = {}, D = {}; teams.forEach(t => { D[t] = { sack: 0, int: 0, fum_rec: 0, def_td: 0, st_td: 0, safe: 0, blk: 0, ya: 0 }; });
+    const K = {}, D = {}; teams.forEach(t => { D[t] = { sack: 0, int: 0, fum_rec: 0, def_td: 0, st_td: 0, safe: 0, blk: 0, ya: 0, ff: 0,
+      tkl_loss: 0, pass_def: 0, forced_punts: 0, three_out: 0, fourth_stop: 0, st_ff: 0, st_fum_rec: 0 }; });
+    // (owner 2026-10-25: "league specific defense scoring seems wrong": a Sleeper league scoring 3-and-outs, 4th-down
+    // stops, forced punts, tackles for loss, passes defended and forced fumbles read none of them) from the drives: a
+    // punt is a forced punt for the other side, a punt after 3 plays or fewer a 3-and-out, a turnover on downs a 4th-down
+    // stop (finished drives whose last play is in `plays`, so a replay counts only what has happened); tackles for loss
+    // and passes defended are ESPN's box-score team totals (a replay leaves them out: no running count)
+    const seen = new Set(plays.map(p => String(p.id)));
+    ((sum && sum.drives && sum.drives.previous) || []).forEach(dr => {
+      const pl = dr.plays || [], last = pl[pl.length - 1], off = dr.team && TEAM_ID[String(dr.team.id)];
+      if (!last || !seen.has(String(last.id)) || !off || !D[off]) return;
+      const def = other(off), r = String(dr.displayResult || dr.result || '');
+      if (/punt/i.test(r)) { D[def].forced_punts++; if ((dr.offensivePlays || pl.length) <= 3) D[def].three_out++; }
+      if (/downs/i.test(r)) D[def].fourth_stop++;
+    });
+    if (!opt0.replay) ((sum && sum.boxscore && sum.boxscore.players) || []).forEach(t => {
+      const tm = TEAM_ID[String(t.team && t.team.id)], c = (t.statistics || []).find(s => s.name === 'defensive');
+      if (!tm || !D[tm] || !c || !c.totals) return;
+      const at = l => +(c.totals[c.labels.indexOf(l)] || 0);
+      D[tm].tkl_loss = at('TFL'); D[tm].pass_def = at('PD');
+    });
     let ph = 0, pa = 0;
     plays.forEach(p => {
       if (nonPlay(p)) return;
@@ -3597,6 +3619,10 @@
       if (/sack/i.test(ty)) D[def].sack++;
       if (/interception/i.test(ty) || /INTERCEPTED/.test(txt)) D[def].int++;
       if (/FUMBLES/.test(txt) && end && end !== off && !/punt|kick/i.test(ty)) D[end].fum_rec++;
+      // forced fumbles: ESPN names the forcer in parentheses ("FUMBLES (J.Smith)"); on a kick the kicking team's
+      // forced fumble / recovery is its special teams' (Sleeper def_st_ff / def_st_fum_rec)
+      if (/FUMBLES \(/.test(txt)) { if (/punt|kick/i.test(ty)) { if (D[off]) D[off].st_ff++; } else D[def].ff++; }
+      if (/FUMBLES/.test(txt) && /punt|kick/i.test(ty) && end && end === off && D[off]) D[off].st_fum_rec++;
       if (scorer && /touchdown/i.test(`${ty} ${txt}`) && p.scoringPlay && scorer !== off) D[scorer][/punt|kick/i.test(`${ty}`) ? 'st_td' : 'def_td']++;
       if (/safety/i.test(`${ty} ${txt}`) && scorer && scorer !== off) D[scorer].safe++;
       if (p.start.down && !stPlay(p) && !/No Play/i.test(txt)) D[def].ya += +p.statYardage || 0;
@@ -3606,9 +3632,15 @@
     const finalPts = { [info.home.team]: ph, [info.away.team]: pa };
     const dRows = teams.map(t => { const x = D[t], allowed = finalPts[other(t)];
       const ln = Object.assign({}, x, { pa_mu: allowed, pa_sd: 0.01, ya_mu: x.ya, ya_sd: 0.01 });
-      const bits = [x.sack && `${x.sack} sk`, x.int && `${x.int} INT`, x.fum_rec && `${x.fum_rec} FR`, (x.def_td + x.st_td) && `${x.def_td + x.st_td} TD`, `${allowed} pts allowed`].filter(Boolean);
+      // the stats this league scores, in its terms (a stat it gives no points isn't listed)
+      const sc = k => +(dw[k] || 0) !== 0;
+      const bits = [x.sack && `${x.sack} sk`, x.int && `${x.int} INT`, x.fum_rec && `${x.fum_rec} FR`, sc('ff') && x.ff && `${x.ff} FF`,
+        (x.def_td + x.st_td) && `${x.def_td + x.st_td} TD`, sc('three_out') && x.three_out && `${x.three_out} 3&out`,
+        sc('fourth_stop') && x.fourth_stop && `${x.fourth_stop} 4th stop`, sc('forced_punts') && x.forced_punts && `${x.forced_punts} punts`,
+        sc('tkl_loss') && x.tkl_loss && `${x.tkl_loss} TFL`, sc('pass_def') && x.pass_def && `${x.pass_def} PD`,
+        `${allowed} pts allowed`, sc('yds_allow') && `${x.ya} yds`].filter(Boolean);
       return { team: t, dst: true, name: `${((DATA && DATA.teams && DATA.teams[t]) || {}).nick || t} D/ST`, fp: NFLE.kdst.dstScore(ln, dw), sub: bits.join(' · ') }; });
-    return { K: kRows, DST: dRows };
+    return { K: kScored ? kRows : [], DST: dRows };
   };
   const playerStats = (sum, info, opt = {}) => {
     const P = sum && sum.boxscore && sum.boxscore.players;
@@ -3676,7 +3708,7 @@
       const lg = leagueName();
       return `<div class="pst-team" data-pst="__fp"${pick === '__fp' ? '' : ' hidden'}><div class="ff-head">${sides.map(x => `<span>${logo(x.logo, '#111', 18, x.team)} ${esc(x.team)}</span>`).join('')}</div>
         ${['QB', 'RB', 'WR', 'TE'].filter(k => by[k]).map(k => `<div class="ff-pos"><div class="ff-k">${k}</div><div class="ff-cols"><div>${col(by[k][sides[0].team])}</div><div>${col(by[k][sides[1].team])}</div></div></div>`).join('') || '<p class="muted">No fantasy points yet.</p>'}
-        ${(() => { const kd = kdstLines(opt.plays || allPlays(sum).flatMap(d => d.plays || []), info, sum);
+        ${(() => { const kd = kdstLines(opt.plays || allPlays(sum).flatMap(d => d.plays || []), info, sum, { replay: !!opt.plays });
           const kcol = (rows, t) => rows.filter(r => r.team === t).sort((a, b) => b.fp - a.fp).map(r => { const kp = r.dst ? `DST-${r.team}` : r.id ? byEspn()[String(r.id)] : null;  // kicker / D/ST cards
             return `<div class="ff-r" title="${esc(r.sub)}"${kp ? ` data-open-pid="${esc(kp)}"` : ''}>${r.dst ? logo((sides.find(x => x.team === r.team) || {}).logo, '#111', 20, r.team) : `<img class="pi-hs" src="${esc(r.id && NFLE.ui ? NFLE.ui.headshot(r.id) : '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`}
             <span class="ff-n">${esc(r.name)}<small class="ff-sub">${esc(r.sub)}</small></span><span class="ff-pp"><b class="ff-p ${r.fp >= 10 ? 'hi' : r.fp < 3 ? 'lo' : ''}">${f1(r.fp)}</b></span></div>`; }).join('') || '<div class="ff-r muted">-</div>';

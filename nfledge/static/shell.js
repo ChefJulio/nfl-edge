@@ -833,11 +833,25 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   document.addEventListener('click', e => { closeAll(e.target.closest && e.target.closest('details.howto')); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(null); });
 })();
+// The page never sits scrolled past its own end (owner 2026-10-25, screenshot: Box score > Fantasy with half a screen of
+// blank space under the footer). When content shrinks under the reader (a sub-tab that hides long tables, a live
+// re-render with a shorter pane), iOS keeps the old scroll position and paints empty space below the page until the
+// next touch; whenever the body shrinks, snap back to the real bottom.
+(() => {
+  if (!window.ResizeObserver) return;
+  let raf = 0;
+  const clamp = () => { raf = 0; const max = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+    if (scrollY > max + 1) scrollTo({ top: max }); };
+  const start = () => new ResizeObserver(() => { if (!raf) raf = requestAnimationFrame(clamp); }).observe(document.body);
+  if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+})();
 // Kicker and D/ST scoring from data/kdst.json lines (tools/kdst_build.py): shared by Rankings and the Fantasy tab.
 // STD = standard ESPN scoring, the rules both models were tested on (nfledge/kickers.py STANDARD, defenses.py ESPN_STD).
 (() => {
   const NFLE = window.NFLE = window.NFLE || {};
-  const DSTAT = ['sack', 'int', 'fum_rec', 'ff', 'def_td', 'st_td', 'safe', 'blk', 'pass_def', 'tkl_loss', 'forced_punts', 'def_2pt'];
+  // (2026-10-25) + 3-and-outs, 4th-down stops, special-teams forced fumbles / recoveries (Sleeper scores them)
+  const DSTAT = ['sack', 'int', 'fum_rec', 'ff', 'def_td', 'st_td', 'safe', 'blk', 'pass_def', 'tkl_loss', 'forced_punts', 'def_2pt',
+                 'three_out', 'fourth_stop', 'st_ff', 'st_fum_rec'];
   const erf = x => { const t = 1 / (1 + 0.3275911 * Math.abs(x)), y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x); return x >= 0 ? y : -y; };
   const Phi = z => 0.5 * (1 + erf(z / Math.SQRT2));
   // P(lo <= X <= hi) for an integer outcome of normal(mu, sd); below 0 counts as 0
