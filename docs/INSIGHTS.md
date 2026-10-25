@@ -4901,3 +4901,48 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   sized to its interval (a re-run of this exact test after seeing it is the forking path; a new pre-registration must
   say so); value every penalty branch the same way (step 2 of the penalty grading); the raw 4th-down value near the
   goal line. The engine keeps reading both file shapes (no `home`; W.sym) so tools/di_grid.mjs reproduces this.
+- **FINDING (PA) 2026-10-25: penalty census (owner: "do we grade those? can we fold them into our graded calls
+  list?").** tools/penalty_census.py, regular seasons 2022-25, 3,740 plays a season with a foul in the text (nflfastR's
+  `penalty` flag misses most declined fouls: 76 of 511 in 2025). Per season: 2,244 single fouls during a run or pass
+  (declined 357; accepted, play wiped 1,411; accepted, play stands + yards 442; after the play 34), 932 pre-snap (no
+  real choice; but Delay of Game was declined 39 times in four seasons), 413 on kicking plays, 151 with two or more
+  fouls (43% offsetting). 16% of declines had a turnover or score on the play; 396 a season come late in a half.
+  Declines by down: 1st 336, 2nd 416, 3rd 615, 4th 60 (four seasons).
+- **PRE-REGISTERED 2026-10-25 (owner: "penalty step 2 now?"): (PB) the penalty rules table, checked against real
+  plays.** A choice has two branches; a game shows only one. The table (nfledge/penalties.py, from the 2026 rulebook,
+  scratch/rulebook/review.md) must rebuild the other: (A) the PENALTY branch (for a declined foul): from the snap's
+  down, distance and spot, the foul (type, side) and the play (pass incomplete / complete / sack / run, yards), where
+  it is enforced (previous spot; end of a run for the defense's fouls past the line; better of previous spot and end
+  of play for the defense's personal fouls after a completion; half the distance), automatic first down, loss of down,
+  replay of the down, a turnover on downs. A foul whose spot the play text can't give (pass interference: the spot of
+  the foul; the offense's holding on a run that gained: three-and-one) is out of scope, not a miss. Checked on
+  ACCEPTED fouls, whose next snap is the truth. (B) the PLAY branch (for an accepted foul): the play's own result from
+  its text (yards; first down; down + 1; turnover on downs). Checked on DECLINED fouls, whose next snap is the truth.
+  Scope: single fouls during a run or pass; no turnover or score on the play; not at a half's end. A match: same team
+  with the ball, same down, yards to the end zone and yards to go within 1 (half-the-distance rounding). Rules are
+  built and tuned on 2022-23 (every change after a first look logged in the tool); the GATE is on 2024-25 only, untouched
+  until then: (A) units (foul x side x play kind) with 20+ accepted fouls in 2024-25 that match 95%+ are in scope; PASS
+  if they cover 70%+ of 2024-25's declined fouls in scope; (B) 95%+ of 2024-25's declined fouls match. Pass -> step 3
+  (both branches valued the same way, through the engine; the clock per 4-3-2(e) and runoffs), then the graded list.
+  Fail -> recorded; the failing units are named.
+  AMENDMENT 2026-10-25, before 2024-25 was read (development only had been run): the units change to foul x side x HOW
+  it's enforced (from the previous spot, the play wiped / from the end of the play, which stands). Why: by play kind,
+  a foul the other side almost always declines can never gather 20 accepted cases to be checked, though its rule is
+  the same as a checked one (the offense's holding on a sack: 39 declines in 2022-23, 6 accepts; enforced from the
+  previous spot exactly as holding on an incomplete pass, which matched 86 of 86). What is verified is the rule path, so
+  the path is the unit. Development (2022-23, rules frozen after 8 logged changes in tools/penalty_check.py): (A)
+  0.967 match over 1,995 accepted; pre-registered units cover 0.648 of declines, amended 0.814; (B) 0.996 of 560. The
+  gate run reports both; the amended units decide.
+- **RESULT {#penalty-rules} (PB) the penalty rules table: PASS on the amended units (FAIL on the pre-registered ones).**
+  tools/penalty_check.py --gate, 2024-25 (first read after the rules were frozen): 3,550 accepted and 621 declined
+  single scrimmage fouls. (A) the penalty branch matched the next snap on 0.971 of 2,163 accepted fouls whose spot the
+  text gives (1,387 can't: pass interference, the offense's fouls after a catch or on a run that gained); amended
+  units: 19 in scope, covering 0.889 of declines (PASS); pre-registered units: 28 in scope, 0.573 (FAIL: the declined
+  fouls sit in units the other side rarely accepts, e.g. holding on a sack 37 declines). Every in-scope unit matched
+  96-100%. Out of scope: Intentional Grounding (0.57: enforced from the spot of the pass when the passer is 10+ yards
+  back, not in the text), the offense's Unnecessary Roughness after the play (0.86), and units under 20 accepts. (B)
+  the play branch matched 0.998 of 621 declines (PASS). What can be graded: a declined foul in an in-scope unit (89%
+  of declines), and every accepted foul (its play branch, 99.8%); declined pass interference and the offense's holding
+  on a run that gained stay out (the spot of the foul). Spot rounding: a 5-yard foul against 3rd & 5 is rebuilt both
+  ways and graded only when both agree. Next: step 3 (both branches valued the same way, the clock), then the list.
+
