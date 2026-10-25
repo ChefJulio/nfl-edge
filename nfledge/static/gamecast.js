@@ -4088,13 +4088,20 @@
         const end = r(b.x), catchAt = Math.max(0, land);
         const rm = raw.slice(raw.search(/ (?:kicks|punts) /)).split('PENALTY')[0].match(/ for (-?\d+) yards?| for no gain/);
         const ret = tb || !rm ? null : rm[1] != null ? +rm[1] : 0, retEnd = ret == null ? null : catchAt + ret;
-        let kb = seg(from, land, 'kick');
+        // a punt ends the offense's drive (owner 2026-10-25: "mark the start of the play as if the offense ran it ... so
+        // the white tick mark lines up with where the play was snapped for the offense"): drawn for the PUNTING team,
+        // its end zone on the left, the dot at the snap, the kick out to where it came down and the return coming back
+        // (still green: the return's yards). Kickoffs stay the receiving team's (the drive they start is theirs).
+        const punt = /punt/i.test(pType(p)) || / punts /.test(raw), v = punt ? x => 100 - x : x => x;
+        const sg = (x0, x1, c) => seg(v(x0), v(x1), c), fl = (s, m, e2) => flag(v(s), v(m), v(e2));
+        let kb = sg(from, land, 'kick');
         if (retEnd != null) {
-          kb += seg(catchAt, retEnd, retEnd >= catchAt ? 'gain' : 'loss');
-          if (/PENALTY on/.test(raw) && Math.abs(end - retEnd) >= 1) kb += flag(catchAt, retEnd, end);
-        } else if (!tb && /PENALTY on/.test(raw) && Math.abs(end - catchAt) >= 1) kb += seg(catchAt, end, 'pen');
-        return `<span class="fs" aria-hidden="true" style="--oc:${esc(R.color || '#888')};--dc:${esc(K.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
-          + `${kb}<i class="fs-dot" style="left:${pc(tb ? end : catchAt)}%"></i></span>`;
+          kb += sg(catchAt, retEnd, retEnd >= catchAt ? 'gain' : 'loss');
+          if (/PENALTY on/.test(raw) && Math.abs(end - retEnd) >= 1) kb += fl(catchAt, retEnd, end);
+        } else if (!tb && /PENALTY on/.test(raw) && Math.abs(end - catchAt) >= 1) kb += sg(catchAt, end, 'pen');
+        const L = punt ? K : R, Rt = punt ? R : K, dot = punt ? v(from) : tb ? end : catchAt;
+        return `<span class="fs" aria-hidden="true" style="--oc:${esc(L.color || '#888')};--dc:${esc(Rt.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
+          + `${kb}<i class="fs-dot" style="left:${pc(dot)}%"></i></span>`;
       }
     }
     let bars;
@@ -4143,7 +4150,8 @@
     const a = spot(p.start, info), b = spot(p.end, info), txt = String(p.text || '');
     if (!a || !b || a.offense.team !== b.offense.team || p.scoringPlay || /No Play/i.test(txt) || stPlay(p) || !(p.start && p.start.down) || /incomplete/i.test(txt)) return '';
     const net = Math.round((b.x - a.x) * a.dir);
-    return `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)}</span>`;
+    // (owner 2026-10-25: "align that as a chip to the right side" ... "add yd") "+9 yd", right-aligned (.pt)
+    return `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}" title="Yards gained">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)} yd</span>`;
   };
   // lead / tail: a view's own items in the line (a card's clock and score)
   const playMeta = (p, lead = '', tail = '', cls = 'pm') => { const pp = playPairs(p); return `<div class="${cls}">${lead}${playTags(p)}${pp.downs}${pp.spots}${tail}</div>`; };
