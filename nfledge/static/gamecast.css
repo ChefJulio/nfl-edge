@@ -1638,8 +1638,8 @@ tr.lg-tot.lg-tot-pinned { visibility: hidden; }  /* its pinned copy (.lg-fh) sho
 .sb-top > span { display: flex; min-width: 0; overflow: visible; }  /* a football wider than its half overflows outward: the dot stays centered */
 .sb-top .live-dot { margin: 0; vertical-align: 0; }
 .sb-top .sb-bl { justify-self: end; } .sb-top .sb-br { justify-self: start; }
-.sb-top .fb-chip { position: static; margin: 0; width: 22px; height: 14px; background: rgba(13,15,19,.6); border: 0; box-shadow: none; }
-.sb-top .fb-chip .sb-fb { width: 15px; height: 9px; }
+.sb-arr { display: block; width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+.sb-arr.l { border-right: 8px solid var(--ink); } .sb-arr.r { border-left: 8px solid var(--ink); }
 .sb-mid .sb-dd { line-height: 1.2; } .sb-dd > span { white-space: nowrap; } .sb-dd .sb-at::before { content: " · "; }
 @media (max-width: 640px) { .sb-dd > span { display: block; } .sb-dd .sb-at::before { content: none; } }  /* down, then spot */
 @media (max-width: 350px) { .sb-t .nl, .sb-t .sb-lg { display: none; } }  /* the smallest phones: codes and scores first */

@@ -918,7 +918,9 @@
         }
       }
       rows.sort((a, b) => b.w - a.w);  // newest first: scrolling down goes back in time (owner, 2026-10-14)
-      const fps = S.g.map(g => pts(g.c, w, pos)), fpg = fps.length ? fps.reduce((a, b) => a + b, 0) / fps.length : 0;
+      // this week's live / final game counts in the season line and the totals (it isn't in S.g until the rebuild)
+      const lr = rows.find(r => r.u && r.u.live), gsAll = lr ? [...S.g, liveG(lr.u.live)] : S.g;
+      const fps = gsAll.map(g => pts(g.c, w, pos)), fpg = fps.length ? fps.reduce((a, b) => a + b, 0) / fps.length : 0;
       const team = S.g.length ? S.g[S.g.length - 1].t : '';
       const played = (g, label) => { const v = pts(g.c, w, pos), pj = projOf(g);
         return `<tr${tileAttrs(g)}><td>${esc(label)}</td>${opp(g)}<td class="num lg-fp">${g.r ? chip(f1(v), g.rk) : f1(v)}</td>
@@ -943,9 +945,8 @@
           <td class="num">${avgSn == null ? '–' : rk ? `<span class="sc ${snapTone(avgSn)}">${avgSn}</span>` : avgSn}</td>${stat.map(([, fn, ri, ex], i) => { const v = fn(T); return `<td class="num${gcl(i)}">${offRole(v, ex) ?? tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null)}</td>`; }).join('')}</tr>
           <tr class="lg-gap"><td colspan="${7 + stat.length}"></td></tr>`;
       };
-      // the season total counts this week's live / final game too (its finish chips wait for the rebuilt log)
-      const lr = rows.find(r => r.u && r.u.live);
-      const trs = (lr ? totRow([...S.g, liveG(lr.u.live)], null) : totRow(S.g, S.tr ? S : null)) + rows.map(r => {
+      // (its finish chips wait for the rebuilt log)
+      const trs = (lr ? totRow(gsAll, null) : totRow(S.g, S.tr ? S : null)) + rows.map(r => {
         if (r.u && r.u.bye) return byeRow(r.w, 5 + stat.length);
         // (owner 2026-10-25: "i want game log tables to update in real time") this week's live / final game on the
         // log's own columns, from the polled box score (redrawn each poll); rank, grade and snaps once the log is rebuilt
@@ -959,7 +960,7 @@
         }
         return played(r.g, r.g.w);
       }).join('');
-      const sum = opts.last ? '' : ` · ${S.g.length} game${S.g.length === 1 ? '' : 's'}${S.g.length ? ` · ${f1(fpg)} FP/G` : ''}`;
+      const sum = opts.last ? '' : ` · ${gsAll.length} game${gsAll.length === 1 ? '' : 's'}${gsAll.length ? ` · ${f1(fpg)} FP/G` : ''}`;
       // playoffs first (as Sleeper does), their own block: not in the regular-season totals, finishes or FP/G
       const pg = opts.last || opts.season ? [] : (S.pg || []);
       const sub = (label, gs) => `<tr class="lg-sub"><td colspan="${7 + stat.length}"><span class="lg-pin">${label}${gs ? ` · ${gs.length} game${gs.length === 1 ? '' : 's'} · ${f1(gs.reduce((t, g) => t + pts(g.c, w, pos), 0) / gs.length)} FP/G` : ''}</span></td></tr>`;
@@ -4308,7 +4309,6 @@
       <div class="ds-k">Plays</div><ol class="ds-ps">${rows}</ol></div>`;
     return { title: `${tm.team} drive${lab ? ` · ${lab}` : ''}`, html };
   };
-  const FOOTBALL = `<span class="fb-chip" title="Has the ball"><svg class="sb-fb" viewBox="0 0 32 20" role="img" aria-label="Has the ball">${FB_BODY}</svg></span>`;
   // two tabs: Pregame, and the game itself ("Live" while it's on, "Final" after)
   const GTABS = [['pre', 'Pregame'], ['live', 'Live']];
   // Live tab: one pane at a time, picked here (owner 2026-10-15: "if i pick stats i see stats"); box score first
@@ -4384,7 +4384,10 @@
         // (owner 2026-10-25: "center the live red dot thing, and place the possession marker on either side of it on
         // that row") the dot centered, the football beside it on the side of the team with the ball
         const dot = info.state === 'in' && !rp ? '<span class="live-dot"></span>' : '';
-        const has = k => sp && !sp.kick && sp.offense.team === info[k].team ? FOOTBALL : '';
+        // a plain triangle pointing at the team with the ball (owner 2026-10-25: "a simple triangle arrow ... rather
+        // than the football icon")
+        const has = k => sp && !sp.kick && sp.offense.team === info[k].team
+          ? `<i class="sb-arr ${k === 'away' ? 'l' : 'r'}" title="${esc(info[k].team)} ball" aria-label="${esc(info[k].team)} has the ball"></i>` : '';
         return dot || has('away') || has('home') ? `<span class="sb-top"><span class="sb-bl">${has('away')}</span>${dot}<span class="sb-br">${has('home')}</span></span>` : '';
       })()}<b>${esc(status)}</b>${!nx && sp && sit && sit.shortDownDistanceText
         ? `<span class="sb-dd"><span>${esc(sit.shortDownDistanceText)}</span>${sit.possessionText ? `<span class="sb-at">${esc(sit.possessionText)}</span>` : ''}</span>` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}</section>

@@ -290,8 +290,19 @@ def finals_new(d: dict) -> list:
       continue
     side = {x["homeAway"]: ESPN_CODE.get(x["team"]["abbreviation"], x["team"]["abbreviation"]) for x in c["competitors"]}
     gid = f"{season}_{int((ev.get('week') or {}).get('number', 0)):02d}_{side['away']}_{side['home']}"
-    if gid not in have:
-      out.append(f"final not in standings: {side['away']} @ {side['home']}")
+    if gid in have:
+      continue
+    # never a build loop: a final still missing from a site built well after the game ended (start + 4.5 h) means its
+    # id doesn't match (a team code, say): reported, not rebuilt every look
+    try:
+      built = datetime.fromisoformat((d.get("clock") or {}).get("built"))
+      start = datetime.fromisoformat(str(ev.get("date")).replace("Z", "+00:00"))
+      if built.astimezone(timezone.utc) > start + timedelta(hours=4.5):
+        print(f"[watch] {gid} is final on ESPN but not in a site built after it ended: check its game id (no build)")
+        continue
+    except (TypeError, ValueError):
+      pass
+    out.append(f"final not in standings: {side['away']} @ {side['home']}")
   return out
 
 
