@@ -49,6 +49,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4683194,Ethan Onianwa,Atlanta Falcons,Active,2026-10-19T16:20Z,,,,,,
 4569511,Drake Jackson,Atlanta Falcons,Active,2026-10-19T16:20Z,,,,,,
 4567099,Christian Harris,Atlanta Falcons,Active,2026-10-19T16:20Z,,,,,,
+3915189,Roquan Smith,Baltimore Ravens,Questionable,2026-10-25T19:23Z,,,,,,questionable
 4832793,Olaivavega Ioane,Baltimore Ravens,Questionable,2026-10-25T18:45Z,Knee,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Ioane (knee) has been ruled out for the remainder of Sunday's game against the Bengals.
 3915837,Broderick Washington Jr.,Baltimore Ravens,Out,2026-10-25T15:37Z,Ankle,Not Specified,Not Specified,2026-11-01,INACTIVE,Washington (ankle) is inactive for Sunday's game against the Bengals.
 5088338,Elijah Sarratt,Baltimore Ravens,Out,2026-10-25T15:35Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,Sarratt (coach's decision) is inactive for Sunday's game against the Bengals.
@@ -63,7 +64,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035479,John Simpson,Baltimore Ravens,Active,2026-10-22T20:34Z,,,,,,
 4575483,T.J. Tampa,Baltimore Ravens,Injured Reserve,2026-10-22T01:17Z,Knee,Not Specified,Not Specified,2026-11-01,IR-R,The Ravens designated Tampa (toe/ankle) to return from injured reserve Wednesday.
 4575517,Kyle Hamilton,Baltimore Ravens,Active,2026-10-21T01:58Z,,,,,,Hamilton finished Sunday's 13-10 loss to the Browns with seven tackles (six solo).
-3915189,Roquan Smith,Baltimore Ravens,Active,2026-10-21T01:55Z,Knee,Not Specified,,2026-10-25,QUESTIONABLE,"Smith logged five tackles (three solo), including 1.0 sacks, during Sunday's 13-10 loss to the Browns."
 4038441,Justice Hill,Baltimore Ravens,Active,2026-10-21T00:47Z,,,,,,Hill caught all three of his targets for nine yards during the Ravens' 13-10 loss to the Browns on Sunday.
 4697745,Tyler Loop,Baltimore Ravens,Active,2026-10-20T01:12Z,,,,,,Loop converted one his two field-goal attempts and his lone extra-point try during Baltimore's loss to Cleveland on Sunday.
 3116365,Mark Andrews,Baltimore Ravens,Active,2026-10-19T23:38Z,,,,,,Andrews caught one of three targets for four yards during the Ravens' 13-10 loss to the Browns on Sunday.
@@ -449,9 +449,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4567138,Justin Eboigbe,Los Angeles Chargers,Active,2026-10-16T20:15Z,,,,,,
 3917668,Alec Ingold,Los Angeles Chargers,Injured Reserve,2026-10-15T20:06Z,Shoulder,Not Specified,Not Specified,2026-11-22,IR,The Chargers placed Ingold on injured reserve Thursday due to a shoulder injury.
 2579621,Denzel Perryman,Los Angeles Chargers,Injured Reserve,2026-10-15T01:08Z,Undisclosed,Not Specified,Not Specified,2026-11-01,IR,"Chargers head coach Jim Harbaugh said Wednesday that Perryman (undisclosed) won't be reinstated from injured reserve ahead of Sunday's game against the Chiefs, Alex Insdorf of BoltBeat.com reports."
+4685522,Ty Simpson,Los Angeles Rams,Out,2026-10-25T19:27Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,"Simpson (coach's decision) is inactive but will serve as the Rams' emergency third quarterback against the Raiders on Sunday, Sarah Barshop of ESPN.com reports."
 4575003,Keagen Trost,Los Angeles Rams,Out,2026-10-25T19:05Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive
 3912189,Bill Murray,Los Angeles Rams,Out,2026-10-25T19:05Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive
-4685522,Ty Simpson,Los Angeles Rams,Out,2026-10-25T19:05Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive
 4833029,Max Klare,Los Angeles Rams,Out,2026-10-25T19:05Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive
 4243181,Nate Landman,Los Angeles Rams,Out,2026-10-25T19:05Z,Concussion,Concussion,Not Specified,2026-11-01,INACTIVE,inactive
 4426405,Trent McDuffie,Los Angeles Rams,Out,2026-10-25T19:05Z,Groin,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive
@@ -474,6 +474,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4240123,Larrell Murchison,Los Angeles Rams,Active,2026-10-19T16:53Z,,,,,,
 12483,Matthew Stafford,Los Angeles Rams,Active,2026-10-19T01:10Z,,,,,,"Stafford was 25-for-33 passing for 222 yards, two touchdowns and no interceptions during Sunday's 18-16 defeat against the Cardinals."
 4242557,Colby Parkinson,Los Angeles Rams,Active,2026-10-19T01:03Z,,,,,,Parkinson caught five of six targets for 31 yards and a touchdown in Sunday's 18-16 loss to the Cardinals.
+4360488,JuJu Brents,Miami Dolphins,Active,2026-10-25T19:29Z,,,,,,
 4431664,Dante Trader Jr.,Miami Dolphins,Questionable,2026-10-25T18:59Z,Shoulder,,,2026-10-25,QUESTIONABLE,Trader (shoulder) is questionable to return to Sunday's contest against the Jets.
 4259558,Robert Beal Jr.,Miami Dolphins,Out,2026-10-25T16:12Z,Hamstring,Not Specified,Not Specified,2026-11-01,INACTIVE,Beal (hamstring) is inactive for Sunday's game against the Jets.
 4685246,Kaytron Allen,Miami Dolphins,Active,2026-10-25T16:07Z,,,,,,Allen is active for Sunday's game against the Jets.
@@ -490,7 +491,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4869645,Caleb Douglas,Miami Dolphins,Active,2026-10-23T15:15Z,,,,,,"Dolphins coach Jeff Hafley said Friday that Douglas (ankle) will play Sunday against the Jets, C. Isaiah Smalls II of the Miami Herald reports."
 4880236,Will Kacmarek,Miami Dolphins,Active,2026-10-22T23:55Z,,,,,,"Kacmarek (hamstring) was limited in Thursday's practice, but he said he expects to play Sunday versus the Jets, Joe Schad of The Palm Beach Post reports."
 4819257,Jonah Savaiinaea,Miami Dolphins,Active,2026-10-22T01:45Z,,,,,,"Savaiinaea (ankle) was a full participant in Wednesday's practice, David Furones of the South Florida Sun Sentinel reports."
-4360488,JuJu Brents,Miami Dolphins,Active,2026-10-22T00:39Z,,,,,,"Brents (neck) was a full participant at the Dolphins' practice Wednesday, David Furones of the South Florida Sun Sentinel reports."
 4912052,Justin Joly,Miami Dolphins,Active,2026-10-22T00:25Z,,,,,,"Joly (concussion) did not appear on the Dolphins' injury report Wednesday, David Furones of the South Florida Sun Sentinel reports."
 4880346,Michael Taaffe,Miami Dolphins,Active,2026-10-22T00:18Z,,,,,,"Taaffe (chest) did not appear on the Dolphins' injury report Wednesday, David Furones of the South Florida Sun Sentinel reports."
 4242512,Malik Willis,Miami Dolphins,Active,2026-10-21T20:52Z,,,,,,"Willis was a full participant in Wednesday's practice after being listed on the Dolphins' injury report with a right thumb issue,  David Furones of the South Florida Sun Sentinel reports."
@@ -499,6 +499,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685307,Kevin Coleman Jr.,Miami Dolphins,Active,2026-10-12T02:15Z,,,,,,Coleman caught three of seven targets for 30 yards and a touchdown during Sunday's 31-24 loss to the Bengals.
 4569603,Malik Washington,Miami Dolphins,Active,2026-10-11T23:54Z,,,,,,"Washington secured six of eight targets for 43 yards, rushed once for 18 yards, returned two kickoffs for 45 yards and ran back one punt for 28 yards in the Dolphins' 31-24 loss to the Bengals on Sunday."
 4711533,Ollie Gordon II,Miami Dolphins,Active,2026-10-11T23:06Z,,,,,,Gordon rushed 18 times for 88 yards and a touchdown in the Dolphins' 31-24 loss to the Bengals on Sunday.
+3042519,Aaron Jones Sr.,Minnesota Vikings,Questionable,2026-10-25T19:25Z,Knee,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Jones (undisclosed) exited Sunday's game against the Colts, Kevin Seifert of ESPN.com reports."
 4430656,Myles Price,Minnesota Vikings,Active,2026-10-25T17:49Z,,,,,,"Price (head) was back on the field for the second quarter of Sunday's game against the Colts, Ben Goessling of The Minnesota Star Tribune reports."
 4573398,Max Brosmer,Minnesota Vikings,Out,2026-10-25T15:38Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,Brosmer (coach's decision) is listed as inactive but will serve as the Vikings' third quarterback for Sunday's games versus the Colts.
 4832846,Demond Claiborne,Minnesota Vikings,Out,2026-10-25T15:37Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,Claiborne (coach's decision) is inactive for Sunday's game against the Colts.
@@ -509,7 +510,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4240631,DeeJay Dallas,Minnesota Vikings,Active,2026-10-24T23:04Z,,,,,,The Vikings signed Dallas to the practice squad and elevated him to the active roster Saturday.
 4360569,Jordan Mason,Minnesota Vikings,Active,2026-10-24T20:34Z,,,,,,"The Vikings activated Mason (thumb) from injured reserve Saturday, and he does not carry an injury designation into Sunday's game against the Colts."
 4361985,Christian Darrisaw,Minnesota Vikings,Active,2026-10-24T01:54Z,,,,,,"Darrisaw (concussion) does not have any injury designation ahead of Sunday's game against the Colts, Craig Peters of the Vikings' official site reports."
-3042519,Aaron Jones Sr.,Minnesota Vikings,Active,2026-10-24T00:02Z,,,,,,"Jones may log fewer touches in Week 7 against Indianapolis on Sunday, as fellow RB Jordan Mason (thumb) is questionable to suit up, Craig Peters of the Vikings' official site reports."
 4036133,T.J. Hockenson,Minnesota Vikings,Active,2026-10-23T20:07Z,,,,,,"Hockenson (concussion) practiced fully Friday and doesn't have a designation for Sunday's game versus the Colts, Adam Caplan of SiriusXM NFL Radio reports."
 4262921,Justin Jefferson,Minnesota Vikings,Active,2026-10-22T21:54Z,,,,,,"Jefferson (ankle) practiced in full Thursday, Adam Caplan of SiriusXM NFL Radio reports."
 4259252,James Pierre,Minnesota Vikings,Active,2026-10-22T21:51Z,,,,,,
