@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4876132,Josh Cuevas,Baltimore Ravens,Active,2026-10-19T01:04Z,,,,,,Cuevas caught four of five targets for 44 yards and a touchdown during Sunday's 13-10 loss to Cleveland.
 4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-10-18T15:33Z,,,,,,
 4698244,Teddye Buchanan,Baltimore Ravens,Active,2026-10-16T20:28Z,,,,,,
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-25T12:15Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-25T12:44Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus
 4044133,Sam Franklin Jr.,Buffalo Bills,Active,2026-10-24T01:44Z,,,,,,"The NFL reduced Franklin's discipline from a one-game suspension to a fine of $14,926, Adam Schefter of ESPN reports."
 4568624,Dorian Williams,Buffalo Bills,Active,2026-10-22T01:58Z,,,,,,Williams logged five tackles (three solo) and one pass defensed for an interception in the Bills' 33-30 win over the Raiders on Sunday.
 4832035,Davison Igbinosun,Buffalo Bills,Active,2026-10-22T01:37Z,,,,,,"Defensive coordinator Jim Leonhard praised Igbinosun's play earlier this week and plans to keep giving the rookie a good amount of playing time, Alec White of the Bills' official site reports. Said Leonard, ""I think what he's done the last couple weeks, he's definitely earned a high majority of the "
@@ -228,7 +228,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362748,Tyler Badie,Denver Broncos,Injured Reserve,2026-10-24T23:25Z,Thumb,Fracture,Not Specified,2026-11-27,IR,"The Broncos placed Badie (thumb) on injured reserve Saturday, Aric DiLalla of the team's official site reports."
 4687592,Jonah Elliss,Denver Broncos,Injured Reserve,2026-10-24T23:23Z,Ankle,Not Specified,Not Specified,2026-11-27,IR,"The Broncos placed Elliss (ankle) on injured reserve Saturday, Aric DiLalla of the team's official site reports."
 4040608,Jonathon Cooper,Denver Broncos,Active,2026-10-24T23:19Z,,,,,,"Cooper had his roster exemption removed by the Broncos on Saturday and is available for Sunday's road game against the Cardinals, Aric DiLalla of the Broncos' official site reports."
-4702555,Jonah Coleman,Denver Broncos,Questionable,2026-10-24T20:48Z,Ankle,Sprain,Not Specified,2026-10-25,QUESTIONABLE,"The Broncos activated Coleman (ankle) from injured reserve Saturday, Jeremy Fowler of ESPN.com reports."
+4702555,Jonah Coleman,Denver Broncos,Questionable,2026-10-24T20:48Z,Ankle,Sprain,Not Specified,2026-10-25,QUESTIONABLE,"The Broncos activated Coleman (ankle) from injured reserve Saturday but continue to list him as questionable for Sunday's game against the Cardinals, Aric DiLalla of the team's official site reports."
 4360853,Talanoa Hufanga,Denver Broncos,Out,2026-10-24T00:44Z,Ankle,Not Specified,Not Specified,2026-11-01,OUT,Hufanga (ankle) has been ruled out for Sunday's game against the Cardinals.
 4372016,Jaylen Waddle,Denver Broncos,Active,2026-10-23T21:27Z,,,,,,Waddle (chest) doesn't have an injury designation for Sunday's game at Arizona.
 5159802,Dallen Bentley,Denver Broncos,Active,2026-10-19T16:33Z,,,,,,
@@ -549,13 +549,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362890,Ben Brown,New England Patriots,Out,2026-10-22T01:33Z,Knee,Not Specified,Not Specified,2026-11-01,INACTIVE,Brown (knee) has been ruled out for Thursday's game against the Bears.
 3916923,Carlton Davis III,New England Patriots,Out,2026-10-21T23:27Z,Neck,Not Specified,Not Specified,2026-11-01,INACTIVE,Davis (neck) has been ruled out ahead of Thursday night's game against the Bears.
 4565293,Marcus Bryant,New England Patriots,Injured Reserve,2026-10-21T00:30Z,Ankle,Not Specified,Not Specified,2026-11-01,IR-R,Bryant (ankle) was a full participant at the Patriots' practice Tuesday.
+4430684,Treyton Welch,New Orleans Saints,Out,2026-10-25T12:35Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,"Welch (coach's decision) is inactive for Sunday's game against the Steelers in Paris, Ross Jackson of WWL Louisiana reports."
+4076951,Nathan Shepherd,New Orleans Saints,Out,2026-10-25T12:31Z,Illness,Not Specified,Not Specified,2026-11-08,INACTIVE,"Shepherd (illness) is inactive for Sunday's game against the Steelers in Paris, Ross Jackson of WWL Louisiana reports."
 4258199,Cesar Ruiz,New Orleans Saints,Out,2026-10-25T12:23Z,Knee,Not Specified,Not Specified,2026-11-08,INACTIVE,"Ruiz (knee) is inactive for Sunday's game against the Steelers in Paris, Ross Jackson of WWL Louisiana reports."
 4372533,Tyree Wilson,New Orleans Saints,Out,2026-10-25T12:04Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive
 4361259,Zach Wilson,New Orleans Saints,Out,2026-10-25T12:04Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive
 4775268,Mike Reid,New Orleans Saints,Out,2026-10-25T12:04Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive
 4248047,John Ridgeway III,New Orleans Saints,Out,2026-10-25T12:04Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive
-4076951,Nathan Shepherd,New Orleans Saints,Out,2026-10-25T12:04Z,Illness,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive
-4430684,Treyton Welch,New Orleans Saints,Out,2026-10-25T12:04Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive
 4369863,Cedric Tillman,New Orleans Saints,Active,2026-10-24T17:17Z,,,,,,The Saints elevated Tillman from the practice squad to the active roster Saturday ahead of Sunday's game against the Steelers.
 3925350,Anfernee Jennings,New Orleans Saints,Active,2026-10-24T01:27Z,,,,,,Jennings (knee) does not have any injury designation ahead of Sunday's game against the Steelers.
 3124890,Kaden Elliss,New Orleans Saints,Active,2026-10-23T15:47Z,,,,,,Elliss (calf) doesn't carry an injury designation into Sunday's game against the Steelers.
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360689,Tyler Shough,New Orleans Saints,Active,2026-10-19T00:37Z,,,,,,Shough completed 16 of 30 passes for 144 yards and three touchdowns in Sunday's 34-27 win over the Giants. He added 32 yards and a TD on five carries.
 4361370,Chris Olave,New Orleans Saints,Active,2026-10-19T00:26Z,,,,,,Olave caught four of seven targets for 43 yards and a touchdown in Sunday's 34-27 win over the Giants.
 2575788,Zach Wood,New Orleans Saints,Active,2026-10-18T16:32Z,,,,,,Wood (calf) is active for Sunday's game against the Giants.
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-25T12:15Z,Calf,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-10-25T12:44Z,Calf,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,questionable
 4696981,Cam Skattebo,New York Giants,Active,2026-10-25T11:18Z,,,,,,"Skattebo is expected to resume his role as the Giants' lead running back in Sunday's game at Houston, Ian Rapoport of NFL Network reports."
 4692590,Jalin Hyatt,New York Giants,Active,2026-10-24T23:33Z,,,,,,"The Giants elevated Hyatt from the practice squad to the active roster Saturday, Dan Duggan of The Athletic reports."
 4242547,Paulson Adebo,New York Giants,Questionable,2026-10-24T23:30Z,Knee,Not Specified,Not Specified,2026-10-25,QUESTIONABLE,"The Giants activated Adebo (knee) from injured reserve Saturday, Dan Duggan of The Athletic reports."
@@ -651,10 +651,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685201,Tanner McKee,Philadelphia Eagles,Active,2026-10-19T09:45Z,,,,,,McKee completed 26 of 45 passes for 215 yards with a touchdown and no interceptions while adding one carry for no gain in the Eagles' 25-14 loss to the Panthers on Sunday. He also recovered a fumble.
 3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-10-25T12:26Z,,,,,,"Rudolph is active for Sunday's game against the Saints in Paris, Teresa Varley of the Steelers' official site reports."
 4035656,Ben Skowronek,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Calf,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive
-4360935,Terell Smith,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Coach's Decision,,,,INACTIVE,inactive
-5081508,Eli Heidenreich,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Coach's Decision,,,,INACTIVE,inactive
-4429955,Will Howard,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Coach's Decision,,,,INACTIVE,inactive
-4714771,Drew Allar,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Coach's Decision,,,,INACTIVE,inactive
+4360935,Terell Smith,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive
+5081508,Eli Heidenreich,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive
+4429955,Will Howard,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive
+4714771,Drew Allar,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive
 4567979,Brandin Echols,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Hamstring,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive
 3929846,DeShon Elliott,Pittsburgh Steelers,Active,2026-10-25T12:15Z,,,,,,
 4038815,Rico Dowdle,Pittsburgh Steelers,Active,2026-10-25T12:13Z,,,,,,"Dowdle (knee) is active for Sunday's game against the Saints in Paris, Nick Farabaugh of PennLive.com reports."
