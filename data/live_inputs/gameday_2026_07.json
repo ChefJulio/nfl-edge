@@ -588,5 +588,35 @@
 "at": "2026-10-25T22:52:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0038489": {
+"name": "Ben VanSumeren",
+"team": "KC",
+"pos": "RB",
+"pre": 0.9397,
+"ruling": "INA",
+"at": "2026-10-25T23:04:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0039067": {
+"name": "Rashee Rice",
+"team": "KC",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-10-25T23:04:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0040906": {
+"name": "Garrett Nussmeier",
+"team": "KC",
+"pos": "QB",
+"pre": 0.0965,
+"ruling": "INA",
+"at": "2026-10-25T23:10:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
