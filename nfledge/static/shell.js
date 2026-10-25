@@ -578,6 +578,10 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   cardBox.addEventListener('touchstart', e => {
     if (e.touches.length !== 1 || !matchMedia('(max-width: 640px)').matches) { dmode = 'off'; return; }
     dy0 = dlast = e.touches[0].clientY; dx0 = e.touches[0].clientX; dlastT = e.timeStamp; dv = 0;
+    // (owner 2026-10-25: "it grabs the table and doesn't let you scroll right") a touch that starts in a table that
+    // scrolls sideways belongs to the table: never a close-drag (a push right that drifted down had closed or frozen it)
+    const sx = e.target.closest('.lg-scroll, .scroll, .bx-t, .rf-scroll');
+    if (sx && sx.scrollWidth > sx.clientWidth + 1) { dmode = 'no'; return; }
     dmode = e.target.closest('.pc-head') && cardBox.scrollTop <= 0 ? 'maybe' : null;
   }, { passive: true });
   cardBox.addEventListener('touchmove', e => {

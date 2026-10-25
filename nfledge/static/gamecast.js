@@ -897,6 +897,8 @@
       const g = x ? (x[6] ?? x[0]) : null;
       return g == null ? '' : `<span class="lg-rk ${x[9] ? 'rk-mid' : g >= 80 ? 'rk-good' : g <= 30 ? 'rk-bad' : 'rk-mid'}" title="His ${s} grade (that season only), the grade sheet's OVR">${ovr(g)}${uqMark(x)}</span>`; };
     const grdCell = g => g.gr != null ? `<span class="lg-rk ${g.gr >= 80 ? 'rk-good' : g.gr <= 30 ? 'rk-bad' : 'rk-mid'}">${ovr(g.gr)}</span>` : '–';
+    // a live box-score line (boxLines) as a log game: c = the scoring-key stat line, x = completions, attempts, carries, targets
+    const liveG = ln => ({ c: ln.line, x: [ln.comp || 0, ln.att || 0, ln.car || 0, ln.tgt || 0] });
     const head = `${grpHead(7)}
       <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num" title="Game grade, on the OVR's 50-99 scale: his fantasy output that game against every game by qualified players at his position that season (early in a season, last season's games fill the weeks not played yet)">Grd</th><th class="num">Snap</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
     const blank = stat.map((c, i) => `<td class="num${gcl(i)}">–</td>`).join('');
@@ -941,10 +943,15 @@
           <td class="num">${avgSn == null ? '–' : rk ? `<span class="sc ${snapTone(avgSn)}">${avgSn}</span>` : avgSn}</td>${stat.map(([, fn, ri, ex], i) => { const v = fn(T); return `<td class="num${gcl(i)}">${offRole(v, ex) ?? tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null)}</td>`; }).join('')}</tr>
           <tr class="lg-gap"><td colspan="${7 + stat.length}"></td></tr>`;
       };
-      const trs = totRow(S.g, S.tr ? S : null) + rows.map(r => {
+      // the season total counts this week's live / final game too (its finish chips wait for the rebuilt log)
+      const lr = rows.find(r => r.u && r.u.live);
+      const trs = (lr ? totRow([...S.g, liveG(lr.u.live)], null) : totRow(S.g, S.tr ? S : null)) + rows.map(r => {
         if (r.u && r.u.bye) return byeRow(r.w, 5 + stat.length);
-        if (r.u && r.u.live) { const v = pts(r.u.live.line, w, pos), pj = p && p.proj != null ? scaled(p).proj : null;
-          return `<tr class="lg-pend" title="${r.u.fin ? 'Final' : 'Live'}: ${esc(statLineText(r.u.live, pos))} (full line once the game's snap counts are published)"><td>${r.w}</td>${opp(r.u)}<td class="num lg-fp"><b>${f1(v)}</b></td><td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td><td class="num muted" colspan="${3 + stat.length}">${r.u.fin ? 'final' : 'live'} · ${esc(statLineText(r.u.live, pos))}</td></tr>`; }
+        // (owner 2026-10-25: "i want game log tables to update in real time") this week's live / final game on the
+        // log's own columns, from the polled box score (redrawn each poll); rank, grade and snaps once the log is rebuilt
+        if (r.u && r.u.live) { const lg = liveG(r.u.live), v = pts(lg.c, w, pos), pj = p && p.proj != null ? scaled(p).proj : null;
+          return `<tr class="lg-pend" title="${r.u.fin ? 'Final' : 'Live'} (rank, grade and snaps once the game's data is published)"><td>${r.u.fin ? r.w : `<span class="live-dot"></span>${r.w}`}</td>${opp(r.u)}<td class="num lg-fp"><b>${f1(v)}</b></td><td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td><td class="num muted">${r.u.fin ? 'final' : 'live'}</td><td class="num muted">–</td><td class="num muted">–</td>
+            ${stat.map(([, fn, , ex], i) => { const x = fn(lg); return `<td class="num${gcl(i)}">${offRole(x, ex) ?? x}</td>`; }).join('')}</tr>`; }
         if (r.u && r.u.miss != null) return `<tr class="lg-miss"${tileAttrs(r.u)}><td>${r.w}</td>${r.u.o ? opp(r.u) : '<td class="lg-opp">&ndash;</td>'}<td class="num">${missTag(r.u)}</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">${r.u.sn != null ? r.u.sn : '&ndash;'}</td>${blank}</tr>`;
         if (r.u) {
           const pj = projOf(r.u);
@@ -1169,7 +1176,29 @@
     const v = WEEKS[cardWk];
     return v instanceof Promise ? undefined : v;
   };
-  const rerenderCard = () => { if (cardPid) renderCard(cardPid); else if (cardTeam) renderTeam(cardTeam); };
+  // every redraw of an open card keeps each table's sideways scroll (a redraw replaces the tables: they started over at
+  // their first column)
+  const keepX = (root, fn) => {
+    const SX = '.lg-scroll, .scroll, .bx-t, .rf-scroll', xs = root ? [...root.querySelectorAll(SX)].map(e => e.scrollLeft) : [];
+    fn();
+    if (root && xs.some(Boolean)) [...root.querySelectorAll(SX)].forEach((e, i) => { if (xs[i]) e.scrollLeft = xs[i]; });  };
+  const rerenderCard = () => keepX(document.getElementById('pcOv'), () => { if (cardPid) renderCard(cardPid); else if (cardTeam) renderTeam(cardTeam); });
+  // Live redraws of an open card (owner 2026-10-25: "it grabs the table and doesn't let you scroll right"; and "i want
+  // game log tables to update in real time"): the polls redraw the card every 20-30 s while games are on, which replaced
+  // the game log mid-swipe (the touch died, the table jumped back to its first column). Now never during a touch or
+  // while anything is still scrolling (it waits until both settle), and every table keeps its sideways position.
+  let touchOn = false, lastScroll = 0, rrTimer = 0;
+  addEventListener('touchstart', () => { touchOn = true; }, { passive: true, capture: true });
+  addEventListener('touchend', () => { touchOn = false; }, { passive: true, capture: true });
+  addEventListener('touchcancel', () => { touchOn = false; }, { passive: true, capture: true });
+  document.addEventListener('scroll', () => { lastScroll = Date.now(); }, { passive: true, capture: true });
+  const SIDEWAYS = '.lg-scroll, .scroll, .bx-t, .rf-scroll';
+  const liveRerender = () => {
+    if (!cardPid && !cardTeam) return;
+    clearTimeout(rrTimer);
+    if (touchOn || Date.now() - lastScroll < 700) { rrTimer = setTimeout(liveRerender, 800); return; }
+    rerenderCard();  // keeps the tables' sideways scroll (keepX)
+  };
   // Kick off anything the card is still missing; re-render once it lands (if the same card and week are still up).
   const cardNeeds = () => {
     const pid = cardPid, tm = cardTeam, wk = cardWk;
@@ -2191,7 +2220,7 @@
     // Identity is current: the career log's roster team / position, else the page's row, else the week's row.
     const row = (DATA && DATA.players[pid]) || p || Object.values(WEEKS).map(x => x && x.players && x.players[pid]).find(Boolean) || {};
     const name = row.name || (L && L.name), pos = (L && L.pos) || row.pos, team = (L && L.team) || row.team, espn = row.espn || (L && L.espn);
-    if (!LOGS[pid]) ensureLog(pid).then(() => { if (cardPid === pid) renderCard(pid); });
+    if (!LOGS[pid]) ensureLog(pid).then(() => { if (cardPid === pid) rerenderCard(); });
     cardNeeds();
     // warm the news the News tab and the Health sheet show (cached 5 minutes, one request in flight per player)
     { const e = (DATA && DATA.players[pid] && DATA.players[pid].espn) || (LOGS[pid] && LOGS[pid].espn);
@@ -2210,11 +2239,11 @@
       GRH[pid] = null;
       NFLE.load(`data/grades/players/${pid.slice(-2)}.json`).catch(() => null).then(sh => {
         GRH[pid] = ((sh || {})[pid] || []).map(([season, basis, rec, labels, nq]) => ({ season, basis, players: { [pid]: rec }, stats: { [rec[1]]: labels }, qualified: { [rec[1]]: nq } }));
-        if (cardPid === pid) renderCard(pid);
+        if (cardPid === pid) rerenderCard();
       });
     }
     // the current season's grades drive the header chip; the Grade tab loads every season on first open
-    if (graded && GR.cur === undefined) { GR.cur = null; grIndex().then(ix => ix && grSeason(ix.current)).then(d => { GR.cur = d || null; if (cardPid === pid) renderCard(pid); }); }
+    if (graded && GR.cur === undefined) { GR.cur = null; grIndex().then(ix => ix && grSeason(ix.current)).then(d => { GR.cur = d || null; if (cardPid === pid) rerenderCard(); }); }
     const isKind = !!(L && L.kind);  // a non-fantasy page (defense, line, specialists): no week projections
     // retired / off every roster this season and not on the picked week's board: a career overview, no week picker
     const lastPlayed = L ? (L.seasons.find(S => S.g.length) || {}).s : null;
@@ -2911,8 +2940,9 @@
     else if (pid !== cardPid || ov.hidden || (window.NFLE && NFLE.freshPage)) cardTab = 'ov';
     if (ov.hidden || !cardWk || (window.NFLE && NFLE.freshPage)) cardWk = pageKey();
     if (String(pid).startsWith('DST-') && pid !== cardPid) dstTab = 'ov';
+    const same = pid === cardPid && !ov.hidden;  // the open card shown again (a route re-run): keep its tables' scroll
     cardPid = pid; cardTeam = null;
-    renderCard(pid);
+    if (same) keepX(ov, () => renderCard(pid)); else renderCard(pid);
     ov.hidden = false;
     document.documentElement.classList.add('pc-open');
     if (!pageMode()) { try { history.replaceState(null, '', location.pathname + location.search + '#player/' + pid); } catch (e) { /* ignore */ } }
@@ -3136,7 +3166,7 @@
     // client-rendered tables (Rankings) read the live box scores and game states and redraw themselves
     window.NFLE.live = { lines: LIVE.lines, byGame: LIVE.byGame };
     document.dispatchEvent(new Event('nfle-live'));
-    if (cardPid) renderCard(cardPid); else if (cardTeam) renderTeam(cardTeam);
+    liveRerender();
     const sts = Object.values(LIVE.byGame);
     const soon = sts.some(s => s.state === 'pre' && new Date(s.date).getTime() - now < 30 * 60000);
     const live = sts.some(s => s.state === 'in');
@@ -4480,7 +4510,15 @@
       if (GP.sum) Object.assign(LIVE.lines, boxLines(GP.sum));
       if (GP.g) LIVE.byGame[GP.g.id] = GP.info;
       GP.canReplay = GP.info.realState === 'post' && GP.sum && allPlays(GP.sum).length > 0;
-      if (!GP.replay) renderGame();
+      if (!GP.replay) {
+        // the poll's redraw waits out a touch or a scroll and keeps each table's sideways position (as liveRerender)
+        const draw = () => { if (touchOn || Date.now() - lastScroll < 700) { clearTimeout(GP.drawT); GP.drawT = setTimeout(draw, 800); return; }
+          const root = document.getElementById('gc'), xs = root ? [...root.querySelectorAll(SIDEWAYS)].map(e => e.scrollLeft) : [];
+          renderGame();
+          if (root) [...root.querySelectorAll(SIDEWAYS)].forEach((e, i) => { if (xs[i]) e.scrollLeft = xs[i]; }); };
+        if (first) renderGame(); else draw();
+      }
+      if (!first) liveRerender();  // a card opened from this page follows the game too
     } catch (e) {
       // ESPN down: the game still shows from our own week file (Pregame, plus the final score if we have it).
       if (!GP.info && GP.g) { GP.info = infoFromG(GP.g); renderGame(); }
@@ -4526,7 +4564,7 @@
       const g = DATA.games.find(x => x.id === location.hash.slice(3));
       if (g) { location.replace(gameHref(g)); return; }
     }
-    document.addEventListener('nfle-scoring', () => { paintRows(); if (cardPid) renderCard(cardPid); else if (cardTeam) renderTeam(cardTeam); });
+    document.addEventListener('nfle-scoring', () => { paintRows(); rerenderCard(); });
     if (CFG.current || SIM) startLive();
   };
   // One click rule for the whole site: the innermost clickable thing wins - a player name or player row opens his
