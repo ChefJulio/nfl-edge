@@ -4808,3 +4808,22 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   with the ball TIED late is under-read (midfield +0.088, n 273 snaps; inside the opponent's 35 +0.081, n 264; own
   territory -0.054, n 349), and behind 1-3 at midfield +0.069 (n 578). The calculator's "rough" note in the last 3:00
   is broader than the evidence; the targeted fix is a tied / behind-1-3-with-the-ball correction (to be pre-registered).
+- **PRE-REGISTERED 2026-10-25 (owner: "yes"): (DG) a late correction for the team with the ball tied or behind 1-3.**
+  From (DF): the one consistent late signal is the team with the ball tied (midfield +8.8, inside the opponent's 35
+  +8.1) or behind 1-3 (midfield +6.9) winning more than wp() says. Rows: the 4th quarter's last 3:00, team with the
+  ball tied or behind 1-3. Cells: margin (tied / behind 1-3) x time (0:30 / 1:00 / 2:00 / 3:00) x field zone (inside
+  the opponent's 35 / to the own 40 / deeper). Correction per cell = the mean of (won - wp()) on 2006-18 rows scored
+  by the model fit on 2006-18, in log-odds, shrunk toward 0 by 30 games (the cell's games / (games + 30)); applied in
+  wp() to those states only. Test once on 2019-25 (model fit on 2006-18): GATE (all): (1) on the targeted rows, Brier
+  lower with a 95% bootstrap interval over games excluding 0; (2) the targeted cells' mean calibration gap lower;
+  (3) all late rows (last 3:00, within 8) Brier not worse (interval upper < +0.0005). Pass -> wp() applies it (fit on
+  every season through the latest), the "rough" note narrows; (CJ) check (1) rerun.
+- **RESULT {#late-corr} (DG) the late tied / behind-1-3 correction: FAIL; not shipped.** tools/late_corr_eval.py / .mjs
+  (29,138 late snaps 2006-25). 2019-25 targeted rows (3,972, 496 games): Brier 0.1929 -> 0.1934, +0.0006 [-0.0008,
+  +0.0019]; targeted cells' calibration gap 0.0605 -> 0.0617; all late rows +0.0002 [-0.0003, +0.0007]. The 2006-18
+  corrections were near 0 or negative where 2019-25 is under-read (tied, midfield: 2:00 raw -0.22 in 2006-18 vs 2019-25
+  actual 0.803 / model 0.705; 1:00 -0.03 vs 0.840 / 0.717): the tied-with-the-ball under-read is a RECENT pattern the
+  2006-18 rows could not teach. Design flaw stated: the corrections were measured on the rows the model was fit on
+  (in-sample residuals shrink toward 0); held-out residuals were the right design. Leads: field goal range has moved
+  with kickers (a tied team at midfield is ~20 yards from a makeable kick now); a recent-era correction (fit on 2019-22
+  residuals of the 2006-18 model, tested on 2023-25) or kicker-aware range in the model.
