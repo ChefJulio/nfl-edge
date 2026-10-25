@@ -4945,4 +4945,39 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   of declines), and every accepted foul (its play branch, 99.8%); declined pass interference and the offense's holding
   on a run that gained stay out (the spot of the foul). Spot rounding: a 5-yard foul against 3rd & 5 is rebuilt both
   ways and graded only when both agree. Next: step 3 (both branches valued the same way, the clock), then the list.
+- **PRE-REGISTERED 2026-10-25 (owner: "ya" to valuing both branches with the raw model, behind a calibration check):
+  (PC) grading accept / decline calls.** Each in-scope choice (PB) gets two states at the next snap: the branch taken
+  (the real next snap) and the one rebuilt (nfledge/penalties.py). Clock and timeouts: the real next snap's for both
+  (4-3-2(e): after a penalty is enforced or declined the clock runs as if there had been no foul; inside the last 5:00
+  and after the 2:00 warning it starts on the snap either way); score: unchanged (plays with a score or turnover are
+  out). Value: the browser engine's win chance of each state (the same model and overrides for both: never a 4th
+  down's best option against a raw value, (DI)'s lesson), from the side of the team that chose (the one that didn't
+  foul); a turnover-on-downs branch is valued from the new team's side and flipped. Each season graded with the model
+  fit on the seasons before it (as Graded calls). Verdicts as the 4th-down grades (fine under 1.25 points, debatable
+  under 3, questionable past). Spot-rounding cases (two rebuilt states): graded only when both give the same best.
+  GATE (all, 2022-25): (1) TRUST: the engine's win chance on every real snap 2022-25 (walk-forward), by down (1-4) x
+  zone (opponent's 30 and in / 31-70 / own 30 and back), cells of 500+ snaps: a cell is trusted if |won - model| <= 2
+  points; a choice is graded only if both branch states sit in trusted cells; (2) SANITY: accepted defensive fouls with
+  an automatic first down on an incomplete pass (accepting is plainly right) come out "accept" in 99%+ of graded cases;
+  (3) SANITY: declined defensive offside on a play that gained a first down by 6+ yards past the line to gain come out
+  "decline" in 99%+. Pass -> Graded calls gets a 4th downs / Penalties toggle (the same week grouping and sort).
+  Reported either way: graded count by season, the share questionable, the 25 costliest calls.
+- **RESULT {#penalty-grade} (PC) grading accept / decline calls: FAIL (3); not shipped. And a deeper problem the gate
+  didn't test.** tools/pc_check.py + .mjs, 2022-25: 7,809 choices (963 declined); (1) all 12 down x zone cells
+  trusted (|won - model| 0.2-1.5 points; worst 4th down inside the opponent's 30, -1.50); graded 7,804 (5 left out:
+  spot rounding changes the answer); (2) accept on the defense's automatic-first-down fouls on incomplete passes 99.4%
+  of 1,749 (PASS; the misses are lopsided games, 0.1-0.4 apart); (3) decline on defensive offside when the play gained a
+  first down by 6+: 97.2% of 72 (FAIL: 2 misses, both exact ties, 2.2 / 2.2 and 40.9 / 40.9: the gate counted "best",
+  not "within the noise"; a design flaw, but the gate stands). Reported: questionable (3+ points) 6 / 0 / 6 / 5 a season,
+  11 of 1,010 declines and 6 of 6,794 accepts. The costliest list is the real finding: the top declines are "decline
+  the offense's holding on 3rd down, force 4th" called wrong by 4-7.5 points (e.g. LA 2024 wk 15, SF 3rd & 9 at its
+  31, Q1: decline 47.5 vs accept 55.0). The model's value of 4th & 9 at the own 31 (52.5) vs 3rd & 19 at the own 21
+  (45.0), Q1 tied, is a 7.5-point gap. nflfastR's model has these about level (real snaps 2019-25, Q1-2, within 3, line
+  within 4: 3rd & 15-22 at own 16-26 45.2%, 4th & 7-11 at own 26-36 44.5%); real outcomes side with ours (41.2% of 85 vs
+  49.7% of 187) but carry in-game evidence: an offense at 3rd & 19 got there through a sack, loss or penalty and is
+  having a worse day. In an accept / decline choice the same offense is on the same drive either way, so a raw value
+  that learned that evidence overstates the gap between the two states: the trust cells (calibration by cell) can't
+  see it. Lead (its own pre-registration): value both branches forward to the next change of possession, where states
+  are fresh (the 4th-down engine already works this way): a 3rd-down branch by measured 3rd-down play outcomes (first
+  down, yards, turnover) then the engine's 4th-down options, so neither branch reads raw mid-drive evidence.
 

@@ -6,6 +6,7 @@ snap shows only the branch taken. This module rebuilds either one from the snap'
   parse(desc)                      - the foul (type, team, declined?) and the play (kind, yards) from nflfastR's text
   penalty_branch(st, foul, play)   - the state after the penalty is enforced (None: the text can't give the spot)
   play_branch(st, play)            - the state after the play, as if no foul
+  choice_rows(pbp)                 - (PC) every gradeable choice: the team that chose, both branches as engine states
 States are from the side of the team with the ball at the snap: {down, togo, yl (yards to the end zone)}; a branch
 also says who has the ball next ("same" / "other": a turnover on downs, the new team's yl).
 
@@ -16,6 +17,8 @@ plays; kicking plays, pre-snap fouls, multiple fouls, turnovers and scores on th
 from __future__ import annotations
 
 import re
+
+import pandas as pd
 
 # foul -> (yards, category). Categories:
 #   snap5    5 yards from the previous spot, no automatic first down (fouls at the snap: offside, encroachment, ...)
@@ -204,3 +207,74 @@ def penalty_branches(st: dict, foul: str, side: str, play: dict) -> list:
     return [b] if b else []
   short = {"down": st["down"], "togo": max(st["togo"] - FOULS[foul][0], 1), "yl": b["yl"], "ball": "same"}
   return [b, short] if b["down"] == 1 else [b, _first_down(b["yl"])]
+
+
+# (PB, {#penalty-rules}) the rebuild paths that matched 95%+ on 20+ accepted fouls in 2024-25 (tools/penalty_check.py
+# --gate, amended units): a DECLINED foul is graded only on one of these (an accepted one needs only the play branch)
+IN_SCOPE = {
+  "Defensive Offside | defense | previous", "Defensive Holding | defense | previous",
+  "Unnecessary Roughness | defense | end", "Offensive Holding | offense | previous",
+  "Illegal Formation | offense | previous", "Illegal Contact | defense | previous",
+  "Offensive Pass Interference | offense | previous", "Ineligible Downfield Pass | offense | previous",
+  "Defensive Holding | defense | end", "Roughing the Passer | defense | previous", "Illegal Shift | offense | previous",
+  "Face Mask | defense | end", "Roughing the Passer | defense | end", "Illegal Use of Hands | defense | previous",
+  "Face Mask | defense | previous", "Illegal Use of Hands | defense | end",
+  "Defensive Too Many Men on Field | defense | previous", "Offensive Offside | offense | previous",
+  "Illegal Motion | offense | previous"}
+EVENT = r"INTERCEPTED|FUMBLES|TOUCHDOWN|SAFETY|BLOCKED|recovered"
+
+
+def choice_rows(pbp: pd.DataFrame) -> pd.DataFrame:
+  """(PC) every gradeable accept / decline choice in regular-season play-by-play: single fouls on runs and passes, no
+  score or turnover on the play, not at a half's end, a declined foul on an IN_SCOPE path. Both branches are engine
+  states at the NEXT snap's clock and timeouts (4-3-2(e): the clock runs as if there had been no foul), from the side
+  of the team with the ball at the snap; own = False: the other team has it (a turnover on downs), the state is from
+  its side. `took` is the real next snap; `alt` the rebuilt branch (two states when the spot rounding is ambiguous)."""
+  d = pbp[pbp.season_type == "REG"].sort_values(["game_id", "play_id"]).reset_index(drop=True)
+  ko = d[(d.kickoff_attempt == 1) & (d.qtr == 1) & d.posteam.notna()].drop_duplicates("game_id").set_index("game_id").posteam
+  snap = d[d.down.notna() & d.posteam.notna() & (d.timeout != 1)].copy()
+  cols = ["posteam", "down", "ydstogo", "yardline_100", "qtr", "game_seconds_remaining", "posteam_timeouts_remaining",
+          "defteam_timeouts_remaining"]
+  snap = snap.join(snap.groupby("game_id")[cols].shift(-1).add_prefix("n_"))
+  x = snap[snap.desc.str.contains(r"(?i)penalty on", na=False) & ~snap.desc.str.contains(EVENT, na=False)
+           & (snap.qtr <= 4) & snap.n_down.notna() & ~((snap.n_qtr != snap.qtr) & snap.qtr.isin([2, 4]))]
+  out = []
+  for r in x.itertuples():
+    p = parse(r.desc)
+    if not p or p["kind"] is None or p["foul"] not in FOULS:
+      continue
+    side = "offense" if p["team"] == r.posteam else "defense" if p["team"] == r.defteam else None
+    if side is None:
+      continue
+    st, play = {"down": int(r.down), "togo": float(r.ydstogo), "yl": float(r.yardline_100)}, {"kind": p["kind"], "gain": p["gain"]}
+    if p["declined"]:
+      if path_unit(st, p["foul"], side, play) not in IN_SCOPE:
+        continue
+      alt = penalty_branches(st, p["foul"], side, play)
+    else:
+      alt = [play_branch(st, play)]
+    if not alt:
+      continue
+    same = r.n_posteam == r.posteam
+    to, opp_to = ((r.n_posteam_timeouts_remaining, r.n_defteam_timeouts_remaining) if same
+                  else (r.n_defteam_timeouts_remaining, r.n_posteam_timeouts_remaining))
+    home = int(r.posteam == r.home_team)
+    line = float(r.spread_line if home else -r.spread_line) if pd.notna(r.spread_line) else 0.0
+    base = {"diff": float(r.score_differential or 0), "sec": float(r.n_game_seconds_remaining),
+            "to": float(to), "oppTo": float(opp_to), "line": line, "home": home,
+            "rec2h": int(ko.get(r.game_id) != r.posteam)}
+
+    def state(b):
+      s = {**base, "down": b["down"], "togo": b["togo"], "yl": b["yl"], "own": b["ball"] == "same"}
+      if not s["own"]:
+        s.update(diff=-base["diff"], to=base["oppTo"], oppTo=base["to"], line=-line, home=1 - home, rec2h=1 - base["rec2h"])
+      return s
+    took = state({"down": int(r.n_down), "togo": float(r.n_ydstogo), "yl": float(r.n_yardline_100), "ball": "same" if same else "other"})
+    decider = r.defteam if side == "offense" else r.posteam
+    out.append({"game_id": r.game_id, "play_id": float(r.play_id), "season": int(r.season), "week": int(r.week),
+                "qtr": int(r.qtr), "sec": float(r.game_seconds_remaining), "team": decider,
+                "opp": r.posteam if side == "offense" else r.defteam, "chooser": "defense" if side == "offense" else "offense",
+                "foul": p["foul"], "fouler": side, "kind": p["kind"], "choice": "decline" if p["declined"] else "accept",
+                "down": st["down"], "togo": st["togo"], "yl": st["yl"], "diff": base["diff"],
+                "took": took, "alt": [state(b) for b in alt], "desc": r.desc[:200]})
+  return pd.DataFrame(out)

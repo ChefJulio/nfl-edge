@@ -245,10 +245,12 @@
       return { call: { wp: mine(callS) }, run: { wp: mine(runS), seconds: runOff(s) }, can: off ? s.to > 0 : s.oppTo > 0 };
     }
 
-    // ---- a penalty: the choosing team's chance after accepting vs declining. accept / decline: states from the side of
-    // the team with the ball then; chooser: 'offense' | 'defense'
+    // ---- a penalty: the choosing team's chance after accepting vs declining. accept / decline: the next snap's state
+    // under each, from the side of the team with the ball at the foul's snap, or (own: false, a turnover on downs) from
+    // the other team's; chooser: 'offense' | 'defense' (of that snap). (PC) both valued the same way, by wp()
     function penalty(accept, decline, chooser = 'offense') {
-      const mine = st => (chooser === 'offense' ? wp(st) : 1 - wp(st));
+      const offense = st => (st.own === false ? 1 - wp(st) : wp(st));
+      const mine = st => (chooser === 'offense' ? offense(st) : 1 - offense(st));
       return { accept: { wp: mine(accept) }, decline: { wp: mine(decline) } };
     }
 
@@ -259,10 +261,12 @@
     // TOSS: (CJ) 20 bootstrap refits, 2025's 3,765 4th downs: under 1.25 points the recommendation flips in more than 1
     // refit in 5 (was 1.5 by judgment); past 3 points it flips in 4%, past 5 under 1%
     const TOSS = 0.0125, QUESTION = 0.03;
-    const LABEL = { go: 'Go for it', fg: 'Field goal', punt: 'Punt', xp: 'Extra point', two: 'Go for two' };
+    const LABEL = { go: 'Go for it', fg: 'Field goal', punt: 'Punt', xp: 'Extra point', two: 'Go for two', accept: 'Accept', decline: 'Decline' };
+    // kind 'penalty' (PC): s = { accept, decline, chooser } (penalty()'s arguments), choice accept / decline
     function grade(kind, s, choice, opts = {}) {
       let o;
       if (kind === 'try') { const t = tries(s); o = { xp: t.xp.wp, two: t.two.wp }; }
+      else if (kind === 'penalty') { const p = penalty(s.accept, s.decline, s.chooser); o = { accept: p.accept.wp, decline: p.decline.wp }; }
       else { const f = fourth(s, opts); o = { go: f.go.wp }; if (f.fg) o.fg = f.fg.wp; if (f.punt) o.punt = f.punt.wp; o._p = { go: f.go.p, fg: f.fg && f.fg.p, goMade: f.go.ifMade, goMissed: f.go.ifMissed, fgMade: f.fg && f.fg.ifMade, fgMissed: f.fg && f.fg.ifMissed }; }
       const p = o._p; delete o._p;
       const ranked = Object.entries(o).sort((x, y) => y[1] - x[1]);
