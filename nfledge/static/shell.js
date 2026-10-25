@@ -983,6 +983,50 @@ html.app-shell .ptr.busy svg { animation: ptr-spin .8s linear infinite; }
   window.scrollBy = (a, b) => { if (a && typeof a === 'object') sc.scrollBy(a); else sc.scrollBy(+a || 0, +b || 0); };
   sc.addEventListener('scroll', () => dispatchEvent(new Event('scroll')), { passive: true });
   NFLE.scroller = sc;
+  // (0c) Layout readout (owner 2026-10-25: the bar still cut off after two fixes built on guesses about which iOS number
+  // was wrong): 5 quick taps on the page header toggle a small panel of every height iOS reports and where the column
+  // and the bar actually are; it stays on (across reloads and app switches) until toggled off, so a screenshot taken
+  // when the bar is wrong shows which measure was off.
+  const KEY = 'nfle-layout-debug';
+  let dbg = null, dbgT = 0, taps = [];
+  const px = v => Math.round(v * 10) / 10;
+  const measure = css => { const d = document.createElement('div'); d.style.cssText = `position:fixed;top:0;left:0;width:0;visibility:hidden;height:${css}`;
+    document.body.appendChild(d); const h = d.getBoundingClientRect().height; d.remove(); return px(h); };
+  const drawDbg = () => {
+    if (!dbg) return;
+    const vv = window.visualViewport, b = bar && bar.getBoundingClientRect(), s = sc.getBoundingClientRect(), bd = document.body.getBoundingClientRect();
+    const v = ([...document.scripts].find(x => /shell\.js/.test(x.src)) || {}).src || '';
+    dbg.textContent = [
+      `v ${(v.match(/v=([^&]+)/) || [])[1] || '?'}  shell ${html.classList.contains('app-shell')}  ${innerWidth > innerHeight ? 'landscape' : 'portrait'}`,
+      `screen ${screen.width}x${screen.height} dpr ${devicePixelRatio}  --app-h ${html.style.getPropertyValue('--app-h') || '(none)'}`,
+      `inner ${innerWidth}x${innerHeight}  docEl ${document.documentElement.clientHeight}`,
+      vv ? `vv ${px(vv.width)}x${px(vv.height)} top ${px(vv.offsetTop)} scale ${px(vv.scale)}` : 'vv none',
+      `100vh ${measure('100vh')} lvh ${measure('100lvh')} svh ${measure('100svh')} dvh ${measure('100dvh')}`,
+      `safe top ${measure('env(safe-area-inset-top)')} bottom ${measure('env(safe-area-inset-bottom)')}  --sat ${html.style.getPropertyValue('--sat') || '-'}`,
+      `body ${px(bd.top)}..${px(bd.bottom)} (h ${px(bd.height)})  scroller ${px(s.top)}..${px(s.bottom)}`,
+      b ? `bar ${px(b.top)}..${px(b.bottom)} (h ${px(b.height)})` : 'bar none',
+      `doc scroll ${document.scrollingElement.scrollTop}  content scroll ${Math.round(sc.scrollTop)}`,
+    ].join('\n');
+  };
+  const toggleDbg = on => {
+    try { if (on) localStorage.setItem(KEY, '1'); else localStorage.removeItem(KEY); } catch (e) { /* ignore */ }
+    if (on && !dbg) {
+      dbg = document.createElement('pre');
+      dbg.style.cssText = 'position:fixed;left:6px;right:6px;top:calc(var(--sat, 0px) + 4px);z-index:400;margin:0;padding:6px 8px;border-radius:8px;'
+        + 'background:rgba(0,0,0,.82);color:#9fe870;font:10.5px/1.35 ui-monospace,Menlo,monospace;white-space:pre-wrap;pointer-events:none;';
+      document.body.appendChild(dbg);
+      dbgT = setInterval(drawDbg, 500); drawDbg();
+    } else if (!on && dbg) { clearInterval(dbgT); dbg.remove(); dbg = null; }
+  };
+  // the taps are counted across reloads (the title is the home link: each tap reloads the page)
+  document.addEventListener('click', e => {
+    if (!e.target.closest || !e.target.closest('header')) return;
+    try { taps = JSON.parse(sessionStorage.getItem('nfle-dbg-taps') || '[]'); } catch (x) { /* keep the in-memory list */ }
+    const now = Date.now(); taps = taps.filter(t => now - t < 12000); taps.push(now);
+    if (taps.length >= 5) { taps = []; toggleDbg(!dbg); }
+    try { sessionStorage.setItem('nfle-dbg-taps', JSON.stringify(taps)); } catch (x) { /* ignore */ }
+  }, true);
+  try { if (localStorage.getItem(KEY)) toggleDbg(true); } catch (e) { /* ignore */ }
   // (1) Bottom bar drift (owner 2026-10-20, screenshot: the bar rides up to mid-screen). WebKit bug in standalone mode
   // (bugs.webkit.org 297779, Apple forums 800154): after the keyboard closes the layout viewport keeps its keyboard-
   // shrunk height, and position: fixed anchors to it. When the visual viewport's bottom and the layout viewport's

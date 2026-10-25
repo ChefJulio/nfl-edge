@@ -4115,13 +4115,19 @@
     // line, "deep" ~20) and ends in an x (red when picked off). Runs, sacks and spikes stay on the ground.
     const raw0 = String(p.text || '').split('PENALTY')[0];
     const pass = !/spike|sacked|kneel/i.test(raw0) && (/pass|intercept/i.test(pType(p)) || / pass /.test(raw0));
+    // (owner 2026-10-25: "can we not draw the arc for no gain plays, and instead of ALSO drawing an arc can we just arc
+    // the green bar itself?") a completed pass that gained: the gain bar itself arches (no flat bar under it); a catch
+    // for no gain or a loss stays flat
     let arc = '';
     if (pass && !(p.isPenalty && /no play/i.test(t))) {
-      const inc = /incomplete/i.test(raw0), pick = /intercept/i.test(t);
-      const to = inc || pick ? Math.min(108, s0 + (/ deep /i.test(raw0) ? 20 : 6)) : (Math.abs(e - s0) < 2 ? s0 + 2 : e);
-      const lo = Math.min(s0, to), hi = Math.max(s0, to), ht = Math.max(4, Math.min(14, 3 + 0.45 * (hi - lo)));  // a longer throw flies higher
-      arc = `<svg class="fs-arc${inc ? ' miss' : pick ? ' int' : ''}" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%;height:${ht.toFixed(1)}px" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M0,12 Q50,-10 100,12"/></svg>`
-        + (inc || pick ? `<i class="fs-x${pick ? ' int' : ''}" style="left:${pc(to)}%"></i>` : '');
+      const inc = /incomplete/i.test(raw0), pick = /intercept/i.test(t), caught = !inc && !pick && mid == null && e - s0 >= 1;
+      if (inc || pick || caught) {
+        const to = caught ? e : Math.min(108, s0 + (/ deep /i.test(raw0) ? 20 : 6));
+        const lo = Math.min(s0, to), hi = Math.max(s0, to), ht = Math.max(4, Math.min(14, 3 + 0.45 * (hi - lo)));  // a longer throw flies higher
+        if (caught) bars = '';  // the arc is the gain bar
+        arc = `<svg class="fs-arc${inc ? ' miss' : pick ? ' int' : ' gain'}" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%;height:${ht.toFixed(1)}px" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M0,12 Q50,-10 100,12"/></svg>`
+          + (inc || pick ? `<i class="fs-x${pick ? ' int' : ''}" style="left:${pc(to)}%"></i>` : '');
+      }
     }
     return `<span class="fs${arc ? ' fs-pass' : ''}" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
       + `${bars}${arc}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
