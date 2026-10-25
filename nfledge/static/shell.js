@@ -919,8 +919,8 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   // (0b) App shell (owner 2026-10-25, after the bottom bar rode up to mid-screen on a return to the app once more:
   // "any rearchitecture worth considering?" ... "i want it working correctly and less bugs to squash"). iOS anchors
   // position: fixed to a layout viewport that can be stale after the keyboard or an app switch, and every fix so far
-  // re-measured and nudged the bar on timers. Here the page itself never scrolls: the body is one screen tall (100lvh,
-  // which the keyboard and app switches don't change), the content scrolls in #appScroll, and the bar is the column's
+  // re-measured and nudged the bar on timers. Here the page itself never scrolls: the body is one screen tall (the
+  // device's screen size on an iPhone, --app-h below), the content scrolls in #appScroll, and the bar is the column's
   // last row, so there is nothing to drift. Window scrolling (scrollY, pageYOffset, scrollTo / scroll / scrollBy, the
   // window's scroll event) is redirected to #appScroll so the rest of the site works unchanged. Overlays (cards,
   // sheets), scripts and the pull-to-refresh stay direct children of the body. Lost: iOS's tap-the-clock-to-top, which
@@ -936,7 +936,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   // content scrolling from under the status bar (an opaque cover over it; sticky offsets keep their --sat), the bar in
   // the flow
   const st = document.createElement('style');
-  st.textContent = `html.app-shell, html.app-shell body { height: 100lvh; overflow: hidden; overscroll-behavior: none; }
+  st.textContent = `html.app-shell, html.app-shell body { height: var(--app-h, 100dvh); overflow: hidden; overscroll-behavior: none; }
 html.app-shell body { display: flex; flex-direction: column; margin: 0; padding-top: 0 !important; padding-bottom: 0 !important; }
 html.app-shell #appScroll { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain; padding-top: var(--sat, 0px); }
@@ -954,6 +954,28 @@ html.app-shell .ptr.busy svg { animation: ptr-spin .8s linear infinite; }
 @keyframes ptr-spin { to { transform: rotate(360deg); } }`;
   document.head.appendChild(st);
   html.classList.add('app-shell');
+  // The column's height (owner 2026-10-25, screenshot: the bottom bar's icons cut off below the screen; "aren't we
+  // drawing a main viewport that stays in the safe area?"): 100lvh came out taller than the screen on the owner's
+  // iPhone, and every viewport measure (innerHeight, the layout viewport, visualViewport) can be stale after the
+  // keyboard or an app switch. A home-screen app on an iPhone covers the whole screen (viewport-fit=cover), so the
+  // column is the screen itself: screen.width / height are the device's fixed size (portrait numbers, whichever way
+  // it's held). Elsewhere (an iPad can split the screen) the CSS fallback, 100dvh.
+  const iphone = /iPhone|iPod/.test(navigator.userAgent);
+  const setAppH = () => {
+    if (!iphone) return;
+    const land = (screen.orientation && /landscape/.test(screen.orientation.type)) || Math.abs(window.orientation || 0) === 90;
+    const h = land ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height);
+    if (h > 0) html.style.setProperty('--app-h', `${h}px`);
+  };
+  setAppH();
+  addEventListener('orientationchange', () => [0, 300, 800].forEach(t => setTimeout(setAppH, t)));
+  if (screen.orientation) screen.orientation.addEventListener('change', setAppH);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) setAppH(); });
+  // the document itself never scrolls here: iOS still scrolls an overflow: hidden page to bring a focused field or a
+  // link target into view, which would slide the whole column (the bar with it) off the screen
+  const pin = () => { const se = document.scrollingElement; if (se && se.scrollTop) se.scrollTop = 0; };
+  document.addEventListener('scroll', e => { if (e.target === document) pin(); }, { passive: true, capture: true });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) [0, 300, 1000].forEach(t => setTimeout(pin, t)); });
   Object.defineProperty(window, 'scrollY', { configurable: true, get: () => sc.scrollTop });
   Object.defineProperty(window, 'pageYOffset', { configurable: true, get: () => sc.scrollTop });
   const to = (a, b) => { if (a && typeof a === 'object') sc.scrollTo(a); else sc.scrollTo(+a || 0, +b || 0); };

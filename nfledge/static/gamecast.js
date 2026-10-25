@@ -4171,6 +4171,12 @@
     if (/fumble/i.test(t) && a && b && a.offense.team !== b.offense.team && !stPlay(p)) return resChip('Fumble', 'loss', 'Fumble lost');
     if (stPlay(p)) {  // punts and kickoffs: how the kick ended
       if (/blocked/i.test(t)) return resChip('Blocked', 'loss', 'Kick blocked');
+      // (owner 2026-10-25: "i want Punt for punts that don't result in a turnover or score") a punt the receiving
+      // team keeps is just "Punt"; one it fumbles back to the punting team is the turnover
+      if (/punt/i.test(t)) {
+        const kept = a && b && b.offense.team === a.offense.team;
+        return kept && /fumble|muff/i.test(t) ? resChip('Fumble', 'gain', 'The receiving team lost the ball') : resChip('Punt', 'zero', 'Punt');
+      }
       if (/touchback/i.test(t)) return resChip('Touchback', 'zero', 'Touchback');
       if (/fair catch/i.test(t)) return resChip('Fair catch', 'zero', 'Fair catch');
       if (/downed/i.test(t)) return resChip('Downed', 'zero', 'Downed');
