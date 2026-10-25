@@ -4126,7 +4126,8 @@
         const lo = Math.min(s0, to), hi = Math.max(s0, to), ht = Math.max(4, Math.min(14, 3 + 0.45 * (hi - lo)));  // a longer throw flies higher
         if (caught) bars = '';  // the arc is the gain bar
         arc = `<svg class="fs-arc${inc ? ' miss' : pick ? ' int' : ' gain'}" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%;height:${ht.toFixed(1)}px" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M0,12 Q50,-10 100,12"/></svg>`
-          + (inc || pick ? `<i class="fs-x${pick ? ' int' : ''}" style="left:${pc(to)}%"></i>` : '');
+          + (inc || pick ? `<i class="fs-x${pick ? ' int' : ''}" style="left:${pc(to)}%"></i>`
+            : `<i class="fs-catch" style="left:${pc(to)}%"></i>`);  // where it landed (owner 2026-10-25: "a little green dot where the arc ends")
       }
     }
     return `<span class="fs${arc ? ' fs-pass' : ''}" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`

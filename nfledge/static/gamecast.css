@@ -1571,6 +1571,8 @@ span.nm-link { display: inline; }
 .fs-arc { position: absolute; bottom: 3px; height: 14px; overflow: visible; pointer-events: none; }
 .fs-arc path { fill: none; stroke: #6fdc8c; stroke-width: 1.5; stroke-linecap: round; vector-effect: non-scaling-stroke; opacity: .9; }
 .fs-arc.gain path { stroke: var(--good); stroke-width: 4; stroke-linecap: butt; opacity: 1; }  /* the gain bar itself, arched */
+.fs-catch { position: absolute; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--good);
+  box-shadow: 0 0 0 1.5px var(--panel); pointer-events: none; }  /* where a completed pass's arc lands */
 .fs-arc.miss path { stroke: var(--muted); stroke-dasharray: 2 3; opacity: .85; }
 .fs-arc.int path { stroke: #ff8f84; stroke-dasharray: 2 3; }
 .fs-x { position: absolute; top: -1px; width: 8px; height: 8px; margin-left: -4px; pointer-events: none; }
