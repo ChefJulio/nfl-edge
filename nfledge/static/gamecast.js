@@ -465,7 +465,8 @@
     // incomplete..."), and without the 2-point try that follows a touchdown
     let raw = full;
     if (/REVERSED\./.test(raw)) raw = raw.slice(raw.lastIndexOf('REVERSED.') + 9).trim().replace(lead_, '');
-    raw = raw.replace(/\s*TWO-POINT CONVERSION ATTEMPT\..*$/, '');
+    // (2026-10-25: every two-point try read "no good") a try's own row starts with that text: only a touchdown's tail goes
+    if (!/^TWO-POINT CONVERSION ATTEMPT/.test(raw)) raw = raw.replace(/\s*TWO-POINT CONVERSION ATTEMPT\..*$/, '');
     // headlines name players by first initial (owner 2026-10-20: "use first name initials, shorten a bit"): "T. McKee"
     const nm = x => x ? shortName(names[x.replace(/\s+/g, '')] || x) : '';
     const g = (k, i = 1) => { const m = raw.match(RX[k]); return m ? m[i] : null; };
@@ -4146,12 +4147,43 @@
     return chips.map(([c, k]) => `<span class="pc-chip ${k}" title="${TAG_TIP[c] || ''}">${c}</span>`).join('');
   };
   // the yards a scrimmage play gained (none for kicks, scores, wiped plays, incompletions)
+  // The row's result, right-aligned (.pt) so it scans down the list (owner 2026-10-25: "align that as a chip to the
+  // right side" ... "add yd" ... "add 'Inc.' ... i basically want that space to be the easily scannable result of the
+  // play"): yards for a run, catch or sack, else what happened (Inc., TD, INT, Fumble, Good / No good, a kick's end)
+  const resChip = (label, cls, tip) => `<span class="rp-yd ${cls}" title="${esc(tip)}">${label}</span>`;
   const yardChip = (p, info) => {
-    const a = spot(p.start, info), b = spot(p.end, info), txt = String(p.text || '');
-    if (!a || !b || a.offense.team !== b.offense.team || p.scoringPlay || /No Play/i.test(txt) || stPlay(p) || !(p.start && p.start.down) || /incomplete/i.test(txt)) return '';
+    if (nonPlay(p)) return '';
+    const a = spot(p.start, info), b = spot(p.end, info), txt = String(p.text || ''), t = `${pType(p)} ${txt}`;
+    if (/No Play/i.test(txt) && /penalty/i.test(t)) return resChip('Flag', 'pen', 'Penalty: the play didn\'t count');
+    // kicks and tries (owner 2026-10-25: "FGG/FGNG"): FGG / FGNG, XPG / XPNG, 2PT / 2PT NG; a blocked kick says so
+    if (/defensive (?:pat|two-point|2pt)/i.test(t)) return resChip('Def 2PT', 'loss', 'The defense returned the try for 2 points');
+    if (isTry(p)) {
+      const two = /two-point/i.test(t), ok = two ? /ATTEMPT SUCCEEDS/i.test(txt) : /extra point is GOOD/i.test(txt);
+      if (!two && /block/i.test(txt)) return resChip('Blocked', 'loss', 'Extra point blocked');
+      return two ? resChip(ok ? '2PT' : '2PT NG', ok ? 'gain' : 'loss', ok ? 'Two-point try good' : 'Two-point try failed')
+        : resChip(ok ? 'XPG' : 'XPNG', ok ? 'gain' : 'loss', ok ? 'Extra point good' : 'Extra point no good');
+    }
+    if (/field goal/i.test(t)) return p.scoringPlay ? resChip('FGG', 'gain', 'Field goal good')
+      : resChip(/blocked/i.test(t) ? 'Blocked' : 'FGNG', 'loss', /blocked/i.test(t) ? 'Field goal blocked' : 'Field goal no good');
+    if (p.scoringPlay && /touchdown/i.test(t)) return resChip('TD', 'gain', 'Touchdown');
+    if (/safety/i.test(t) && p.scoringPlay) return resChip('Safety', 'loss', 'Safety');
+    if (/intercept/i.test(t)) return resChip('INT', 'loss', 'Intercepted');
+    if (/fumble/i.test(t) && a && b && a.offense.team !== b.offense.team && !stPlay(p)) return resChip('Fumble', 'loss', 'Fumble lost');
+    if (stPlay(p)) {  // punts and kickoffs: how the kick ended
+      if (/blocked/i.test(t)) return resChip('Blocked', 'loss', 'Kick blocked');
+      if (/touchback/i.test(t)) return resChip('Touchback', 'zero', 'Touchback');
+      if (/fair catch/i.test(t)) return resChip('Fair catch', 'zero', 'Fair catch');
+      if (/downed/i.test(t)) return resChip('Downed', 'zero', 'Downed');
+      if (/out of bounds/i.test(t) && !/ for /.test(txt.split(/punts|kicks/)[1] || '')) return resChip('Out of bounds', 'zero', 'Kicked out of bounds');
+      const r = (txt.split('PENALTY')[0].split(/ (?:punts|kicks) /)[1] || '').match(/ for (-?\d+) yards?| for no gain/);
+      return r ? resChip(`Ret ${r[1] != null ? r[1] : 0} yd`, 'zero', 'Return yards') : '';
+    }
+    if (/spike/i.test(t)) return resChip('Spike', 'zero', 'Spiked to stop the clock');
+    if (/kneel/i.test(t)) return resChip('Kneel', 'zero', 'Kneel down');
+    if (/incomplete/i.test(txt)) return resChip('Inc.', 'zero', 'Incomplete pass');
+    if (!a || !b || a.offense.team !== b.offense.team || !(p.start && p.start.down)) return '';
     const net = Math.round((b.x - a.x) * a.dir);
-    // (owner 2026-10-25: "align that as a chip to the right side" ... "add yd") "+9 yd", right-aligned (.pt)
-    return `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}" title="Yards gained">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)} yd</span>`;
+    return resChip(`${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)} yd`, net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero', 'Yards gained');
   };
   // lead / tail: a view's own items in the line (a card's clock and score)
   const playMeta = (p, lead = '', tail = '', cls = 'pm') => { const pp = playPairs(p); return `<div class="${cls}">${lead}${playTags(p)}${pp.downs}${pp.spots}${tail}</div>`; };

@@ -1563,7 +1563,8 @@ span.nm-link { display: inline; }
 .pm .rp-d, .pm .pp { font-size: 12px; }
 .lpf-h.pm { margin-bottom: 0; } .lpf-h.pm .lpf-sc { margin-left: auto; }
 .pt { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
-.pt .rp-yd { font-size: 11px; margin-left: auto; align-self: center; }  /* the yards chip on the right (2026-10-25) */
+.pt .rp-yd { font-size: 11px; margin-left: auto; align-self: center; }  /* the result chip on the right (2026-10-25) */
+.rp-yd.pen { color: #f0b545; background: rgba(240,181,69,.15); }
 .ds-p { grid-template-columns: 62px minmax(0, 1fr); }
 .ds-b { min-width: 0; } .ds-b .ds-h { font-weight: 600; }
 /* video links: a game's highlights (Result card) and a play's clip when ESPN has one */
