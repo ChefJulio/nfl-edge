@@ -3040,13 +3040,15 @@
     // stacked in the middle column, one short line each (2026-10-23: "Q4 9:40" on one line widened the column until the
     // home team's code ran under it); the red border says live, so no dot here
     const status = live ? `<span>${esc(periodName(st.period))}</span>${st.clock ? `<span>${esc(st.clock)}</span>` : ''}${dd ? `<span class="mg-dd">${esc(dd).replace(/ &amp; /, '&#8239;&amp;&#8239;')}</span>` : ''}`
-      : fin ? (st && /OT/i.test(st.detail || '') || (g.final && g.final.ot) ? 'Final/OT' : 'Final')
+      : fin ? (st && /OT/i.test(st.detail || '') || (g.final && g.final.ot) ? '<span>Final</span><span>OT</span>' : 'Final')  // stacked: "FINAL/OT" was the widest middle
       : kickMs(g) != null && kickMs(g) !== groupMs ? esc(localTime(kickMs(g)).replace(/\s?[AP]M$/i, '')) : '';  // the heading has the AM / PM
     const side = (s, k, n, other) => {
       const lost = fin && n != null && other != null && n < other, ball = sp && sp.offense.team === s.team;
       const num = n != null ? esc(n) : f[`p_${k}`] != null ? `${esc(f[`p_${k}`])}<small>%</small>` : '';
-      return `<span class="mg-t${lost ? ' lost' : ''}"><span class="mg-lg"><img src="${esc(NFLE.fmt.logoSrc(s.logo_url, 48))}" alt="" loading="lazy"></span>
-        <b>${esc(s.team)}${ball ? '<i class="mg-ball" title="Has the ball"></i>' : ''}</b><span class="mg-n${n == null ? ' pct' : ''}">${num}</span></span>`;
+      // the ball rides on the logo's inner corner, out of the flow (owner 2026-10-25: "make the possession indicator not
+      // shift the layout"; it sat after the code and pushed it off center)
+      return `<span class="mg-t ${k}${lost ? ' lost' : ''}"><span class="mg-lg"><img src="${esc(NFLE.fmt.logoSrc(s.logo_url, 48))}" alt="" loading="lazy">${ball ? '<i class="mg-ball" title="Has the ball"></i>' : ''}</span>
+        <b>${esc(s.team)}</b><span class="mg-n${n == null ? ' pct' : ''}">${num}</span></span>`;
     };
     const c = g.colors || {};
     return `<a class="mg${live ? ' live' : ''}${sp && sp.red ? ' rz' : ''}${fin ? ' fin' : ''}" data-gid="${esc(g.id)}" href="${esc(gameHref(g))}"
