@@ -29,8 +29,53 @@ COMP = {
   "tkl_loss": ("def_tackles_for_loss", None, K_COMMON),
   "forced_punts": ("forced_punts", "pt_att", K_COMMON),
   "def_2pt": ("def_2pt_made", None, K_RARE),
+  # (DK, 2026-10-25) from play-by-play (pbp_counts): a league scoring 3-and-outs, 4th-down stops and special-teams
+  # fumbles (Sleeper def_3_and_out, def_4_and_stop, def_st_ff, def_st_fum_rec). The opponent offense's rate allowed is
+  # the same count from its side (o_three_out: the 3-and-outs it went in that game)
+  "three_out": ("three_out", "three_out", K_COMMON),
+  "fourth_stop": ("fourth_stop", "fourth_stop", K_COMMON),
+  "st_ff": ("st_ff", None, K_RARE),
+  "st_fum_rec": ("st_fum_rec", None, K_RARE),
 }
+PBP_STATS = ["three_out", "fourth_stop", "st_ff", "st_fum_rec"]
+
+
+def pbp_counts(pbp: pd.DataFrame) -> pd.DataFrame:
+  """(DK) per (season, week, team as the DEFENSE): three_out = opponent drives of 3 or fewer runs / passes that end
+  in a punt; fourth_stop = opponent 4th-down tries that failed; st_ff / st_fum_rec = kick plays (kickoff, punt) with
+  a lost fumble the kicking team recovered (the recovery counted as both: its forced fumble and its recovery)."""
+  p = pbp[(pbp.season_type == "REG") & pbp.posteam.notna() & pbp.defteam.notna()]
+  key = ["season", "week", "game_id", "posteam", "defteam", "drive"]
+  d = p[p.drive.notna()].groupby(key).agg(n=("play_type", lambda s: int(s.isin(["run", "pass"]).sum())),
+                                          punt=("punt_attempt", "max")).reset_index()
+  last = p[p.drive.notna()].sort_values("play_id").groupby(key).tail(1).set_index(key).punt_attempt
+  d["ends_punt"] = d.set_index(key).index.map(last).fillna(0).to_numpy() == 1
+  t3 = d[(d.n <= 3) & d.ends_punt].groupby(["season", "week", "defteam"]).size().rename("three_out")
+  f4 = p[p.fourth_down_failed == 1].groupby(["season", "week", "defteam"]).size().rename("fourth_stop")
+  k = p[((p.kickoff_attempt == 1) | (p.punt_attempt == 1)) & (p.fumble_lost == 1)].copy()
+  k["kicker"] = np.where(k.punt_attempt == 1, k.posteam, k.defteam)  # a kickoff's posteam is the receiving team
+  k = k[k.fumble_recovery_1_team == k.kicker]
+  st = k.groupby(["season", "week", "kicker"]).size()
+  out = pd.concat([t3, f4], axis=1)
+  out.index = out.index.set_names(["season", "week", "team"])
+  st.index = st.index.set_names(["season", "week", "team"])
+  out = out.join(st.rename("st_ff"), how="outer")
+  out["st_fum_rec"] = out.st_ff
+  return out.fillna(0).reset_index()
 LINE = list(COMP) + ["pa_mu", "pa_sd", "ya_mu", "ya_sd"]
+
+
+def load_pbp_counts(cache, seasons: list[int]) -> pd.DataFrame:
+  """(DK) pbp_counts for the seasons, from the calculator's play-by-play cache (pbp_calc_<season>: the same
+  columns, fetched and kept by tools/calc_build.py; fetched here if missing)."""
+  import nflreadpy as nfl
+  from .winprob import PBP_COLS
+  fr = []
+  for s in seasons:
+    d = cache.get("pbp_calc", s, lambda s=s: nfl.load_pbp([s]).select(PBP_COLS), stale=False)
+    if d is not None:
+      fr.append(pbp_counts(d.to_pandas() if hasattr(d, "to_pandas") else d))
+  return pd.concat(fr, ignore_index=True) if fr else pd.DataFrame(columns=["season", "week", "team"] + PBP_STATS)
 
 
 def load_games(cache, seasons: list[int], schedules: pd.DataFrame) -> pd.DataFrame:
@@ -54,6 +99,12 @@ def load_games(cache, seasons: list[int], schedules: pd.DataFrame) -> pd.DataFra
   g = t.merge(opp.rename(columns={"o_team": "opponent_team"}), on=["season", "week", "opponent_team"], how="left")
   g["forced_punts"] = g.o_pt_att
   g["ya"] = g.o_yards_off
+  # (DK) the play-by-play counts; o_* = the same game's count from the opposing offense's side
+  pc = load_pbp_counts(cache, seasons)
+  g = g.merge(pc, on=["season", "week", "team"], how="left")
+  for c in PBP_STATS:
+    g[c] = g[c].fillna(0.0)
+  g["o_three_out"], g["o_fourth_stop"] = g.three_out, g.fourth_stop
   sc = schedules[schedules.game_type == "REG"]
   pa = pd.concat([pd.DataFrame({"season": sc.season, "week": sc.week, "team": sc.home_team, "pa": sc.away_score}),
                   pd.DataFrame({"season": sc.season, "week": sc.week, "team": sc.away_team, "pa": sc.home_score})])

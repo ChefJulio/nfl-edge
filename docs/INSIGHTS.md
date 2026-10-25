@@ -5036,6 +5036,25 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   left in a half, cells whose kernel holds 300+ gaps, not across the two-minute warning (2:00 -> 2:15) and not across
   tied -> leading by 1 (the switch from hurrying to milking), both real breaks; (4) (CJ) check (1) with the engine on the
   curve. A small sample: if (1)'s interval straddles 0 the result is "not shown", not a pass.
+- **PRE-REGISTERED 2026-10-25 (owner: "dst: yes do it"): (DK) D/ST projections for 3-and-outs, 4th-down stops and
+  special-teams fumbles.** A Sleeper league (the owner's) scores def_3_and_out, def_4_and_stop, def_st_ff and
+  def_st_fum_rec; the D/ST model (nfledge/defenses.py) projected none of them (0), and the league import never read
+  them (fixed 2026-10-25). Change: four components from play-by-play (pbp_calc): three_out = opponent drives of 3 or
+  fewer runs / passes ending in a punt; fourth_stop = opponent 4th-down tries that failed; st_ff / st_fum_rec = kick
+  plays (kickoff, punt) with a lost fumble recovered by the kicking team. Same form as the others: the defense's
+  rate x the opponent offense's rate allowed (three_out, fourth_stop; K_COMMON) or the defense's rate alone (st_*;
+  K_RARE), over its last 16 games shrunk to the league. Test: tools/dk_eval.py, walk-forward 2023-25 (each week fit
+  on the games before it), every defense-game. GATE per new stat: (1) calibrated: mean projection within 10% of the
+  mean actual; (2) its MAE lower than the league rate's (a constant: what team and opponent add). A stat that fails
+  (2) ships as the league rate. (3) Overall, the owner's league scoring: D/ST points MAE with the new stats lower than
+  without (0). Pass (3) -> the build's kdst.json carries them (rankings, the Fantasy tab).
+- **RESULT {#dst-pbp-stats} (DK) D/ST 3-and-outs, 4th-down stops, special-teams fumbles: PASS, shipped.**
+  tools/dk_eval.py, 1,440 defense-games 2023-25 weeks 3+. Per game (2021-25): 3-and-outs 2.23, 4th-down stops 0.68,
+  special-teams forced fumbles / recoveries 0.059. (1) calibrated: actual vs projected 2.210 / 2.290, 0.692 / 0.666,
+  0.058 / 0.060 (both st); (2) MAE vs the league rate: 1.1628 vs 1.1704, 0.7241 vs 0.7355, 0.1108 vs 0.1115 (st: corr
+  -0.03, so in effect the league rate). (3) the owner's scoring: MAE 4.935 -> 4.922, -0.014 [-0.088, +0.058]; the real
+  gain is the bias: projected 5.66 vs actual 7.22 per game before (1.6 points low every week in a league that scores
+  these), 7.25 after. kdst.json d_keys carry them; the site reads lines by key (no page change).
 - **RESULT {#pace-curve-3} (DJ3): FAIL (3) a third time; not shipped. Accuracy wins again.** tools/dj_eval.py --dj3,
   2026 to date (94 games, 6,334 gaps): (1) last 5:00 MAE 6.236 -> 5.213, -1.022 [-1.305, -0.764] (PASS; 2:00 and in 7.40
   -> 6.00, 2:01-5:00 5.61 -> 4.79); (2) all 4.592 -> 4.349, -0.243 [-0.295, -0.194] (PASS); (3) a 15.7 s step (FAIL) at
