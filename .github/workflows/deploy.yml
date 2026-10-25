@@ -179,6 +179,10 @@ jobs:
       - run: python run.py --out site/index.html
       - name: Rest of season
         run: python tools/ros_build.py --site=site || echo "[ros] skipped"
+      # (owner 2026-10-25: "standings page not updating after the game results?") the watcher builds this lane when a
+      # game goes final; ESPN's finals fill in where nflverse hasn't posted them yet (~10 s)
+      - name: Standings
+        run: python tools/standings_build.py --site=site --seasons=$(python -c "import nflreadpy as n; print(n.get_current_season())") || echo "[standings] skipped"
       - name: Current assets
         run: python tools/assets_deploy.py --site=site
       - uses: actions/configure-pages@v4

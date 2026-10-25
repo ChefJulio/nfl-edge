@@ -64,7 +64,47 @@ def season_doc(sched, teams, season: int) -> dict:
   final = reg.home_score.notna()
   return {"v": V, "season": season, "playoff_teams": n_playoff,
           "through_week": int(reg[final].week.max()) if final.any() else 0, "complete": bool(final.all()),
+          # the games counted (tools/news_watch.py builds when ESPN has a final that isn't here)
+          "finals": sorted(reg[final].game_id.astype(str)),
           "teams": rows}
+
+
+ESPN_SB = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?seasontype=2&week={w}&dates={s}"
+ESPN_CODE = {"LAR": "LA", "WSH": "WAS"}
+
+
+def espn_fill(sched: pd.DataFrame, season: int) -> pd.DataFrame:
+  """(owner 2026-10-25: "standings page not updating after the game results?") nflverse's schedule file posts a result
+  some time after the game, and the cached copy is refreshed every 6 hours: this season's games already played with
+  no result take ESPN's final score (its scoreboard for that week). Only finals; a game in progress stays open."""
+  import urllib.request
+  reg = (sched.season == season) & (sched.game_type == "REG")
+  todo = sched[reg & sched.home_score.isna() & (pd.to_datetime(sched.gameday) <= pd.Timestamp.now().normalize())]
+  if todo.empty:
+    return sched
+  sched = sched.copy()
+  n = 0
+  for w in sorted(todo.week.unique()):
+    try:
+      with urllib.request.urlopen(urllib.request.Request(ESPN_SB.format(w=int(w), s=season), headers={"User-Agent": "nfl-edge/1.0"}),
+                                  timeout=30) as r:
+        evs = json.load(r).get("events", [])
+    except Exception as e:  # nflverse's results stand
+      print(f"[standings] ESPN week {w} unavailable ({e})", flush=True)
+      continue
+    for ev in evs:
+      c = ev["competitions"][0]
+      if not c.get("status", ev.get("status", {})).get("type", {}).get("completed"):
+        continue
+      side = {x["homeAway"]: x for x in c["competitors"]}
+      code = lambda x: ESPN_CODE.get(x["team"]["abbreviation"], x["team"]["abbreviation"])  # noqa: E731
+      m = reg & (sched.week == w) & (sched.home_team == code(side["home"])) & (sched.away_team == code(side["away"])) & sched.home_score.isna()
+      if m.any():
+        sched.loc[m, ["home_score", "away_score"]] = [float(side["home"]["score"]), float(side["away"]["score"])]
+        n += 1
+  if n:
+    print(f"[standings] {n} final(s) from ESPN ahead of nflverse's schedule file", flush=True)
+  return sched
 
 
 def main():
@@ -78,6 +118,7 @@ def main():
                     stale=cache.age_hours("schedules", "since1999") > 6)
   teams = cache.get("teams", "all", lambda: nfl.load_teams(), stale=False)
   cache.save_meta()
+  sched = espn_fill(sched, current)
   a, _, b = opt.get("seasons", f"{FIRST}-{current}").partition("-")
   out = site / "data" / "standings"
   out.mkdir(parents=True, exist_ok=True)

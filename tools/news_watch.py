@@ -264,6 +264,37 @@ def lines_moved(d: dict) -> list:
   return out
 
 
+ESPN_SB = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
+ESPN_CODE = {"LAR": "LA", "WSH": "WAS"}
+
+
+def finals_new(d: dict) -> list:
+  """(owner 2026-10-25: "standings page not updating after the game results?") games ESPN has final this week that
+  the live site's standings don't count yet (data/standings/<season>.json "finals", tools/standings_build.py): the
+  news lane recomputes standings with them."""
+  try:
+    season = int(d.get("season"))
+    have = set(get(f"{SITE}data/standings/{season}.json?nocache={int(datetime.now().timestamp())}").get("finals") or [])
+    sb = get(ESPN_SB)
+  except Exception as e:  # can't tell: the scheduled builds pick it up
+    print(f"[watch] couldn't compare finals ({e})")
+    return []
+  if not have:
+    return []  # a site built before "finals": the next build adds them
+  out = []
+  for ev in sb.get("events") or []:
+    c = ev["competitions"][0]
+    if not (c.get("status") or ev.get("status") or {}).get("type", {}).get("completed"):
+      continue
+    if int((ev.get("season") or {}).get("year", season)) != season or (ev.get("season") or {}).get("type") != 2:
+      continue
+    side = {x["homeAway"]: ESPN_CODE.get(x["team"]["abbreviation"], x["team"]["abbreviation"]) for x in c["competitors"]}
+    gid = f"{season}_{int((ev.get('week') or {}).get('number', 0)):02d}_{side['away']}_{side['home']}"
+    if gid not in have:
+      out.append(f"final not in standings: {side['away']} @ {side['home']}")
+  return out
+
+
 def recent_build(quiet: int = QUIET_MIN) -> str | None:
   """Why not to start a build now (one running, queued or started in the last `quiet` minutes), else None."""
   try:
@@ -304,7 +335,7 @@ def check(dry: bool) -> None:
       changes.append(f"{label}: {a or 'healthy'} -> {b or 'healthy'}")
     elif (a in SERIOUS or b in SERIOUS) and date_moved(ra, rb):
       changes.append(f"{label}: {b} return date {ra or 'none'} -> {rb or 'none'}")
-  due = due_events(INDEX.get("d", {}).get("clock") or {}, datetime.now(timezone.utc)) + sunday_pbp_due(INDEX.get("d", {}))     + missing_arrived(INDEX.get("d", {})) + lines_moved(INDEX.get("d", {}))
+  due = due_events(INDEX.get("d", {}).get("clock") or {}, datetime.now(timezone.utc)) + sunday_pbp_due(INDEX.get("d", {}))     + missing_arrived(INDEX.get("d", {})) + lines_moved(INDEX.get("d", {})) + finals_new(INDEX.get("d", {}))
   if due:
     print("[watch] week clock: " + "; ".join(due))
   if not changes and not due:
