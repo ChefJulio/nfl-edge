@@ -4753,3 +4753,15 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   (CH) and wp(): late tied / close teams with the ball win more than any average-behavior model expects. Sensitivity
   (out of bounds stops the clock inside 5:00): identical. A DE2 would model hurry-up play-calling finely (spike / hurry
   / timeout by seconds x timeouts x margin); not pre-registered.
+- **PRE-REGISTERED 2026-10-24 (owner: "de2"): (DE2) the endgame with hurry-up play-calling.** (DE)'s plays matched
+  real two-minute plays; its coarse empirical policy lacked urgency (spikes 28% vs 40%, slower hurry, clock ran out 34%
+  vs 18%; from 1:00 it scored 14% vs 21%). Change ONLY the policy and the pre-snap runoff: both measured in hurry-up
+  cells, seconds left (0:10 / 0:20 / 0:30 / 0:45 / 1:00 / 1:30 / 2:00 / 3:00) x the offense's timeouts (0 / 1 / 2 / 3) x
+  margin (behind 4-8 / behind 1-3 / tied / ahead) x clock running or stopped x field zone (3), for: spike, timeout
+  (offense), the play mix (run / short / deep / field goal / kneel / punt), and the seconds before the snap; thin cells
+  shrink toward the same cell without field zone, then without timeouts (k = 30). Everything else as (DE). Tuning is
+  allowed ONLY against the 2006-18 pre-check (drives from the own 20-30 at 2:00 and 1:00 left, within 8: seconds used
+  and score rate within 10% each, and clock-run-out share within 5 points of real); the 2019-25 test runs ONCE, after
+  the pre-check passes, with (DE)'s GATE unchanged (Brier lower with a 95% interval over games excluding 0; mean
+  calibration gap over (CH)'s cells lower than wp()'s). If the pre-check can't be passed, DE2 stops there (FAIL)
+  without touching the test.
