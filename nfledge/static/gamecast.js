@@ -675,19 +675,6 @@
     const js = document.createElement('script'); js.src = `${siteRoot()}assets/calc.js${ASSET_V}`; js.onload = ok; js.onerror = () => bad(new Error('calc.js'));
     document.head.appendChild(js);
   }));
-  const calcState = (info, sit) => {
-    const sp = sit && spot(sit, info);
-    if (!sp || !sit.down || sit.down < 1) return null;
-    const off = sp.offense, def = off === info.home ? info.away : info.home;
-    const yl = sp.dir === 1 ? 100 - sp.x : sp.x;  // yards to the end zone
-    const g = DATA && (DATA.games || []).find(x => x.home.team === info.home.team && x.away.team === info.away.team);
-    const m = g && String(g.vegas_line || '').match(/^([A-Z]{2,3})\s+-?([\d.]+)/);
-    const line = m ? (ourCode(m[1]) === off.team ? +m[2] : -m[2]) : 0;
-    const home = off === info.home, tos = home ? [sit.homeTimeouts, sit.awayTimeouts] : [sit.awayTimeouts, sit.homeTimeouts];
-    return { mode: 'play', a: off.team, b: def.team, off: off.score, def: def.score, qtr: Math.min(4, info.period || 1), clock: info.clock || '15:00',
-             down: sit.down, togo: Math.max(1, sit.distance || 10), side: yl > 50 ? 'own' : 'opp', yard: yl > 50 ? 100 - yl : yl,
-             to: tos[0] != null ? tos[0] : 3, oppTo: tos[1] != null ? tos[1] : 3, line, total: (g && +g.vegas_total) || 45, home: home ? 1 : 0, rec2h: 0 };
-  };
   // the Vegas line and total for a game, from the offense's side (our week data)
   const vegasFor = (info, team) => {
     const g = DATA && (DATA.games || []).find(x => x.home.team === info.home.team && x.away.team === info.away.team);
@@ -773,12 +760,6 @@
     }, () => { const b = document.querySelector('#gcCalls .dcs-body'); if (b) b.innerHTML = '<p class="muted">The calculator isn\'t available right now.</p>'; });
     return pending;
   };
-  document.addEventListener('click', e => {
-    const b = e.target.closest && e.target.closest('[data-calc]');
-    if (!b || !GP.calcState) return;
-    const S = GP.calcState;
-    calcLoad().then(() => NFLE.calcUI.sheet(S, `${S.a} ball: what should they do?`), () => {});
-  });
   const league = () => {
     try { const s = JSON.parse(localStorage.getItem('nfledge-scoring') || 'null'); if (s && s.lg) return s.lg; } catch (e) { /* default */ }
     return { teams: 10, QB: 1, RB: 2, WR: 2, TE: 1 };
@@ -4370,8 +4351,7 @@
       : playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: st.replay ? 'As of this play, counted from the play-by-play.' : '', lines: st.replay ? st.lines : null, plays: st.replay ? st.plays : null, secs: st.secs, empty: 'The box score fills in once the game starts.' })}`;
     root.innerHTML = `
       <section class="sb" style="--ac:${esc(info.away.color)};--hc:${esc(info.home.color)}">${side(info.away, false)}<div class="sb-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<b>${esc(status)}</b>${!nx && sp && sit && sit.shortDownDistanceText
-        ? `<span class="sb-dd"><span>${esc(sit.shortDownDistanceText)}</span>${sit.possessionText ? `<span class="sb-at">${esc(sit.possessionText)}</span>` : ''}</span>` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}${/* (owner 2026-10-25: "13 AL") the button on its own row under the scoreboard, so it never squeezes a team's column */
-        !nx && sp && sit && sit.shortDownDistanceText && info.state === 'in' && (GP.calcState = calcState(info, sit)) ? '<button type="button" class="sb-calc" data-calc>What should they do?</button>' : ''}</section>
+        ? `<span class="sb-dd"><span>${esc(sit.shortDownDistanceText)}</span>${sit.possessionText ? `<span class="sb-at">${esc(sit.possessionText)}</span>` : ''}</span>` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}</section>
       <div class="seg gc-tabs" role="tablist">${GTABS.map(([k, l]) => `<button type="button" role="tab" data-gtab="${k}" class="${tab === k ? 'on' : ''}">${k === 'live' && info.state === 'in' ? '<span class="live-dot"></span>' : ''}${k === 'live' && info.state === 'post' && !rp ? 'Final' : l}</button>`).join('')}</div>
       ${tab === 'pre' ? preTab(g) : live()}`;
     wireGame();

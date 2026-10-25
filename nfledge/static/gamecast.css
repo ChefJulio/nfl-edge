@@ -1603,9 +1603,6 @@ a.pc-chip.c-clip, a.pc-chip.c-clip:visited { display: inline-flex; align-items: 
 .mg-grp.one .mg-h { left: 6px; max-width: calc(100% - 12px); padding: 0 4px; letter-spacing: .02em; }
 /* a kick's flight in the field strip (kickoffs, punts): a thin line under the return */
 .fs .fs-kick { top: 2px; bottom: 2px; background: color-mix(in srgb, var(--ink) 35%, transparent); }
-/* the live scoreboard's "What should they do?" (Games > Calc's sheet, owner 2026-10-23) */
-.sb-calc { margin-top: 4px; font: inherit; font-size: 12px; font-weight: 700; color: var(--ink); background: var(--panel2);
-  border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; cursor: pointer; }
 /* the gamecast's Decisions pane (owner 2026-10-23): every 4th down and try, graded by the calculator */
 .dcs-sum { margin: 6px 0 10px; }
 .dcs { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
@@ -1635,7 +1632,6 @@ tr.lg-tot.lg-tot-pinned { visibility: hidden; }  /* its pinned copy (.lg-fh) sho
 .sb { grid-template-columns: minmax(max-content, 1fr) minmax(0, auto) minmax(max-content, 1fr); }
 .sb-mid { min-width: 0; }
 .sb-mid > * { min-width: 0; }
-.sb > .sb-calc { grid-column: 1 / -1; justify-self: center; margin: -4px 0 10px; }
 .sb-mid .sb-dd { line-height: 1.2; } .sb-dd > span { white-space: nowrap; } .sb-dd .sb-at::before { content: " · "; }
 @media (max-width: 640px) { .sb-dd > span { display: block; } .sb-dd .sb-at::before { content: none; } }  /* down, then spot */
 @media (max-width: 350px) { .sb-t .nl, .sb-t .sb-lg { display: none; } }  /* the smallest phones: codes and scores first */
