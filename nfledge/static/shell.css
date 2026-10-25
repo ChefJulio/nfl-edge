@@ -96,6 +96,7 @@ html.standalone body { padding-top: var(--sat); }
 html.standalone body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: var(--sat); background: var(--bg); z-index: 95; }
 html.standalone nav.tabs, html.standalone nav.gc-tabs, html.standalone .gc-jump, html.standalone .gc-panes { top: var(--sat); }
 html.standalone .ptr { top: calc(var(--sat) + 8px); }
+/* (the app shell's own rules are injected by shell.js (0b): game.html doesn't load this file) */
 
 /* player finder (shell.js NFLE.finder): matches drop down under the search box; the page's list stays put */
 .fnd-host { position: relative; }
