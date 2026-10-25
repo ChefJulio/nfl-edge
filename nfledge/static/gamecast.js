@@ -4122,12 +4122,19 @@
     if (pass && !(p.isPenalty && /no play/i.test(t))) {
       const inc = /incomplete/i.test(raw0), pick = /intercept/i.test(t), caught = !inc && !pick && mid == null && e - s0 >= 1;
       if (inc || pick || caught) {
-        const to = caught ? e : Math.min(108, s0 + (/ deep /i.test(raw0) ? 20 : 6));
+        // (owner 2026-10-25: "yes do the rac thing with the arcs") ESPN's play carries yardsAfterCatch: the arc is the
+        // ball in the air, snap to the catch; the run after it is the flat green bar on to where the play ended
+        // (a touchdown's run ends at the goal line, the strip's bar then into the end zone)
+        const yac = caught && Number.isFinite(+p.yardsAfterCatch) ? Math.max(0, +p.yardsAfterCatch) : 0;
+        const endReal = td ? 100 : e, catchAt = yac > 0 ? endReal - yac : e;
+        const flyTo = yac > 0 ? (Math.abs(catchAt - s0) < 1.5 ? s0 + 1.5 : catchAt) : e;
+        if (caught && yac > 0) bars = seg(flyTo, e, 'gain');
+        const to = caught ? flyTo : Math.min(108, s0 + (/ deep /i.test(raw0) ? 20 : 6));
         const lo = Math.min(s0, to), hi = Math.max(s0, to), ht = Math.max(4, Math.min(14, 3 + 0.45 * (hi - lo)));  // a longer throw flies higher
-        if (caught) bars = '';  // the arc is the gain bar
+        if (caught && yac <= 0) bars = '';  // no run after the catch: the arc is the whole gain
         arc = `<svg class="fs-arc${inc ? ' miss' : pick ? ' int' : ' gain'}" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%;height:${ht.toFixed(1)}px" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M0,12 Q50,-10 100,12"/></svg>`
           + (inc || pick ? `<i class="fs-x${pick ? ' int' : ''}" style="left:${pc(to)}%"></i>`
-            : `<i class="fs-catch" style="left:${pc(to)}%"></i>`);  // where it landed (owner 2026-10-25: "a little green dot where the arc ends")
+            : `<i class="fs-catch" style="left:${pc(e)}%"></i>`);  // where the play ended (owner 2026-10-25: "a little green dot where the arc ends")
       }
     }
     return `<span class="fs${arc ? ' fs-pass' : ''}" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
