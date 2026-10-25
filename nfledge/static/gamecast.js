@@ -3069,17 +3069,18 @@
       : fin ? (st && /OT/i.test(st.detail || '') || (g.final && g.final.ot) ? '<span>Final</span><span>OT</span>' : 'Final')  // stacked: "FINAL/OT" was the widest middle
       : kickMs(g) != null && kickMs(g) !== groupMs ? esc(localTime(kickMs(g)).replace(/\s?[AP]M$/i, '')) : '';  // the heading has the AM / PM
     const side = (s, k, n, other) => {
-      const lost = fin && n != null && other != null && n < other, ball = sp && sp.offense.team === s.team;
+      const lost = fin && n != null && other != null && n < other;
       const num = n != null ? esc(n) : f[`p_${k}`] != null ? `${esc(f[`p_${k}`])}<small>%</small>` : '';
-      // the ball rides on the logo's inner corner, out of the flow (owner 2026-10-25: "make the possession indicator not
-      // shift the layout"; it sat after the code and pushed it off center)
-      return `<span class="mg-t ${k}${lost ? ' lost' : ''}"><span class="mg-lg"><img src="${esc(NFLE.fmt.logoSrc(s.logo_url, 48))}" alt="" loading="lazy">${ball ? '<i class="mg-ball" title="Has the ball"></i>' : ''}</span>
+      return `<span class="mg-t ${k}${lost ? ' lost' : ''}"><span class="mg-lg"><img src="${esc(NFLE.fmt.logoSrc(s.logo_url, 48))}" alt="" loading="lazy"></span>
         <b>${esc(s.team)}</b><span class="mg-n${n == null ? ' pct' : ''}">${num}</span></span>`;
     };
     const c = g.colors || {};
+    // possession as the scoreboard shows it (owner 2026-10-25: "make it consistent"): a triangle where the "@" sits,
+    // pointing at the team with the ball
+    const arrow = sp && !sp.kick && sp.offense ? `<i class="mg-arr ${sp.offense.team === g.away.team ? 'l' : 'r'}" title="${esc(sp.offense.team)} ball"></i>` : '';
     return `<a class="mg${live ? ' live' : ''}${sp && sp.red ? ' rz' : ''}${fin ? ' fin' : ''}" data-gid="${esc(g.id)}" href="${esc(gameHref(g))}"
       style="--ta:${esc(c[g.away.team] || '#444')};--th:${esc(c[g.home.team] || '#444')}">
-      <span class="mg-vs">${side(g.away, 'away', as, hs)}<span class="mg-at">${live ? '' : g.neutral ? 'vs' : '@'}${status ? `<span class="mg-st">${status}</span>` : ''}</span>${side(g.home, 'home', hs, as)}</span></a>`;
+      <span class="mg-vs">${side(g.away, 'away', as, hs)}<span class="mg-at">${live ? arrow : g.neutral ? 'vs' : '@'}${status ? `<span class="mg-st">${status}</span>` : ''}</span>${side(g.home, 'home', hs, as)}</span></a>`;
   };
   const paintMini = () => {
     const box = document.querySelector('.mgrid');
