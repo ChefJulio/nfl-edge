@@ -161,6 +161,101 @@ def tries(d: pd.DataFrame) -> dict:
           "two": float((tp.two_point_conv_result == "success").mean()), "n_two": int(len(tp))}
 
 
+def _gaps(d: pd.DataFrame, drop_timeouts: bool = False):
+  """Snaps 2018 on with the seconds to the next snap: (rows, gap, running-clock mask, stopped-clock mask). Running:
+  an in-bounds run or completed pass, same quarter and team next, no penalty, score, spike or timeout, not across the
+  two-minute warning; stopped: an incomplete pass (a play's own length). drop_timeouts ((DJ2)): also not when either
+  team's timeouts remaining fell before the next snap (a timeout the rows don't show)."""
+  x = _reg(d[d.season >= 2018])
+  x = x[x.down.notna() | (x.timeout == 1)].sort_values(["game_id", "play_id"]).reset_index(drop=True)
+  nxt = x.groupby("game_id").shift(-1)
+  inc = x.desc.str.contains("incomplete", case=False, na=False)
+  base = (nxt.qtr == x.qtr) & (nxt.posteam == x.posteam) & (x.penalty != 1) & (x.touchdown != 1) & (nxt.timeout != 1) \
+    & nxt.down.notna() & (x.qb_spike != 1) & (x.timeout != 1)
+  gap = x.game_seconds_remaining - nxt.game_seconds_remaining
+  cross = (x.half_seconds_remaining > 120) & (nxt.half_seconds_remaining <= 120)
+  if drop_timeouts:
+    base &= ~((nxt.posteam_timeouts_remaining < x.posteam_timeouts_remaining)
+              | (nxt.defteam_timeouts_remaining < x.defteam_timeouts_remaining))
+  runs = base & x.play_type.isin(["run", "pass"]) & (x.out_of_bounds != 1) & ~inc & ~cross & (gap > 0) & (gap < 60)
+  stops = base & (x.play_type == "pass") & inc & (gap > 0) & (gap < 20)
+  return x, gap, runs, stops
+
+
+def pace_rows(d: pd.DataFrame, drop_timeouts: bool = False) -> pd.DataFrame:
+  """(DJ) the running-clock gaps clock() measures, one row each: season, game, half (2 / 4), seconds left in the half,
+  the offense's margin, the gap."""
+  x, gap, runs, _ = _gaps(d, drop_timeouts)
+  return pd.DataFrame({"season": x.season, "game_id": x.game_id, "half": np.where(x.qtr <= 2, 2, 4),
+                       "t": x.half_seconds_remaining, "m": x.score_differential, "gap": gap})[runs].reset_index(drop=True)
+
+
+CURVE_STEP, CURVE_M, CURVE_T = 15, 21, 1800  # (DJ) cells: 15 s x 1 point; margin clamped to +-21; a half's 30:00
+
+
+ADAPT_T, ADAPT_MIN = (10, 20, 40, 80, 160), 300  # (DJ2) time bandwidths tried per cell until it holds 300+ gaps
+
+
+def clock_curve(r: pd.DataFrame, sd_t: float | None, sd_m: float) -> dict:
+  """(DJ) pace(half, seconds left in the half, margin): per 15 s x 1 point cell, the median of a histogram of gaps
+  smoothed with a Gaussian kernel (sd_t seconds, sd_m points) over neighbouring cells; the engine interpolates between
+  cells. Returns {step, m, q2, q4}: q2 / q4 rows by time cell (0, 15, ... 1800 s), each a list over margins -m..m.
+  (DJ2) sd_t None: per cell the narrowest of ADAPT_T whose kernel holds ADAPT_MIN+ gaps; snaps 2:00-3:00 before the
+  two-minute warning are not fit (only gaps short of the warning are seen there), their cells borrow from both sides."""
+  from scipy.ndimage import gaussian_filter1d
+  nt, nm = CURVE_T // CURVE_STEP + 1, 2 * CURVE_M + 1
+  if sd_t is None:
+    r = r[~((r.t > 120) & (r.t <= 180))]
+  ti = np.clip(np.rint(r.t.to_numpy(float) / CURVE_STEP).astype(int), 0, nt - 1)
+  mi = np.clip(r.m.to_numpy(float), -CURVE_M, CURVE_M).astype(int) + CURVE_M
+  gi = np.clip(np.rint(r.gap.to_numpy(float)).astype(int), 0, 59)
+  out = {"step": CURVE_STEP, "m": CURVE_M}
+  for h in (2, 4):
+    k = r.half.to_numpy() == h
+    raw = np.zeros((nt, nm, 60))
+    np.add.at(raw, (ti[k], mi[k], gi[k]), 1.0)
+    raw = gaussian_filter1d(raw, sd_m, axis=1, mode="nearest")
+    if sd_t is not None:
+      hist = gaussian_filter1d(raw, sd_t / CURVE_STEP, axis=0, mode="nearest")
+    else:
+      hist = None
+      for s in ADAPT_T:
+        sc = s / CURVE_STEP
+        h_s = gaussian_filter1d(raw, sc, axis=0, mode="nearest")
+        # the kernel's count (peak weight 1): the smoothed mass x the kernel's width; sd_m's spread likewise
+        n_eff = h_s.sum(axis=2) * np.sqrt(2 * np.pi) * max(sc, 1.0) * np.sqrt(2 * np.pi) * max(sd_m, 1.0)
+        if hist is None:
+          hist, done = h_s.copy(), n_eff >= ADAPT_MIN
+        else:
+          take = ~done & ((n_eff >= ADAPT_MIN) | (s == ADAPT_T[-1]))
+          hist[take] = h_s[take]
+          done |= take
+    cdf = np.cumsum(hist, axis=2)
+    half_mass = cdf[:, :, -1:] / 2
+    j = np.clip((cdf < half_mass).sum(axis=2), 1, 59)  # first bin reaching half the mass
+    lo = np.take_along_axis(cdf, (j - 1)[..., None], 2)[..., 0]
+    hi = np.take_along_axis(cdf, j[..., None], 2)[..., 0]
+    med = (j - 1) + (half_mass[..., 0] - lo) / np.maximum(hi - lo, 1e-9) + 0.5  # within the bin, linearly
+    out[f"q{h}"] = np.round(med, 1).tolist()
+  return out
+
+
+def curve_pace(c: dict, half: np.ndarray, t: np.ndarray, m: np.ndarray) -> np.ndarray:
+  """(DJ) the curve's pace at (half, seconds left, margin), bilinear between cells (as static/calc_engine.js)."""
+  ft = np.clip(np.asarray(t, float) / c["step"], 0, len(c["q2"]) - 1)
+  fm = np.clip(np.asarray(m, float), -c["m"], c["m"]) + c["m"]
+  t0, m0 = np.minimum(ft.astype(int), len(c["q2"]) - 2), np.minimum(fm.astype(int), 2 * c["m"] - 1)
+  at, am = ft - t0, fm - m0
+  out = np.empty(len(ft))
+  for h in (2, 4):
+    k = np.asarray(half) == h
+    g = np.asarray(c[f"q{h}"])
+    a, b = t0[k], m0[k]
+    out[k] = ((1 - at[k]) * (1 - am[k]) * g[a, b] + at[k] * (1 - am[k]) * g[a + 1, b]
+              + (1 - at[k]) * am[k] * g[a, b + 1] + at[k] * am[k] * g[a + 1, b + 1])
+  return out
+
+
 def clock(d: pd.DataFrame) -> dict:
   """What a timeout saves: the seconds between snaps when the clock keeps running (after an in-bounds run or completed
   pass; no penalty, score, spike or timeout; not across the two-minute warning) minus a play's own length (the gap
@@ -168,15 +263,7 @@ def clock(d: pd.DataFrame) -> dict:
   (2026-10-23: 39 s between snaps normally, 21-24 in a half's last two minutes, 43 for a 4th-quarter leader between 5:00
   and 2:00): medians by half (2 / 4), time left in it (two = 2:00 or less, five = 2:01-5:00, else normal) and whether
   the offense leads. 2018 on."""
-  x = _reg(d[d.season >= 2018])
-  x = x[x.down.notna() | (x.timeout == 1)].sort_values(["game_id", "play_id"]).reset_index(drop=True)
-  nxt = x.groupby("game_id").shift(-1)
-  inc = x.desc.str.contains("incomplete", case=False, na=False)
-  base = (nxt.qtr == x.qtr) & (nxt.posteam == x.posteam) & (x.penalty != 1) & (x.touchdown != 1) & (nxt.timeout != 1)          & nxt.down.notna() & (x.qb_spike != 1) & (x.timeout != 1)
-  gap = x.game_seconds_remaining - nxt.game_seconds_remaining
-  cross = (x.half_seconds_remaining > 120) & (nxt.half_seconds_remaining <= 120)
-  runs = base & x.play_type.isin(["run", "pass"]) & (x.out_of_bounds != 1) & ~inc & ~cross & (gap > 0) & (gap < 60)
-  stops = base & (x.play_type == "pass") & inc & (gap > 0) & (gap < 20)
+  x, gap, runs, stops = _gaps(d)
   play_len = float(gap[stops].median())
   half = np.where(x.qtr <= 2, 2, 4)
   band = np.where(x.half_seconds_remaining <= 120, "two", np.where(x.half_seconds_remaining <= 300, "five", "normal"))

@@ -4980,4 +4980,52 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   see it. Lead (its own pre-registration): value both branches forward to the next change of possession, where states
   are fresh (the 4th-down engine already works this way): a 3rd-down branch by measured 3rd-down play outcomes (first
   down, yards, turnover) then the engine's 4th-down options, so neither branch reads raw mid-drive evidence.
+- **FINDING + PRE-REGISTERED 2026-10-25 (owner: "these thresholds of 0-2:00 and 2:00-5:00 seem so crude, isn't it more
+  like an exponential slope ... something we can pin to a line as defined by plotted data?" ... "your call"): (DJ) the
+  clock's pace as a curve.** The engine's pace (seconds between snaps on a running clock; what a timeout saves and what
+  a play costs) is a step table: half x (last 2:00 / 2:00-5:00 / earlier) x lead or not. Measured 2018-25 (median, 30 s
+  bins): a plateau then a ramp whose start depends on the margin: Q4 trailing by 9+ slows from ~10:00 (38 s -> 27 at
+  3:00), by 4-8 from ~3:30, by 1-3 from ~3:00, tied from ~2:30, leaders 43 s throughout; Q2 everyone from ~2:30 (37 ->
+  30 -> 24 -> 21 -> 16 -> ~8 in the last 30 s). The table's 5:00 edge matches nothing, one median covers 2:00 -> 0:00,
+  and trailing by 2 = trailing by 14. Change: a smoothed surface, pace(half, seconds left in the half, margin): the
+  median of a Gaussian-kernel-weighted histogram of gaps over 15-second x 1-point cells (margin clamped to +-21), the
+  engine interpolating between cells (bilinear). Bandwidths picked on 2022-23 from (10, 20, 40 s) x (1, 2, 4 points),
+  fit on 2018-21; then refit on 2018-23. Test: 2024-25, running-clock gaps as calc_inputs.clock() selects them; the
+  table refit on 2018-23 as the baseline. GATE (all): (1) inside the last 5:00 of either half, mean absolute error
+  lower, the 95% interval over games of the difference below 0; (2) all gaps: not worse (upper < +0.1 s); (3) no
+  cliffs: no step of more than 4 s between neighbouring cells (time 15 s apart or margin 1 apart) within the last
+  10:00; (4) the engine on the curve passes (CJ) check (1). Pass -> the live engine's runOff reads the curve (the
+  table stays as the fallback). Next candidates, each its own test: yards gained by distance bucket x field band,
+  the 40 s-per-down run-out rule, the 1-2 point lead ramp.
+- **RESULT {#pace-curve} (DJ) the clock's pace as a curve: FAIL (3), not shipped.** tools/dj_eval.py: 150,669 gaps
+  2018-25. Bandwidth picked 10 s x 4 points (the smallest time bandwidth offered: an edge of the grid). Test 2024-25:
+  (1) last 5:00 MAE 9.687 -> 8.156 s, -1.531 [-1.650, -1.401] (PASS); 2:00 and in 11.22 -> 9.21, 2:01-5:00 8.32 ->
+  7.22; (2) all 5.479 -> 5.125, -0.354 [-0.383, -0.326] (PASS); (3) a 37.2 s cliff (FAIL): Q4 leaders at 2:30 read 6-12
+  s, at 2:00 43. Cause: the cells hold few gaps (62 in Q4 2:05-2:50 leading by 4-10) and many are the trailing
+  defense's timeouts that the play-by-play has no row for ("(2:18) ... (2:15)"), so the clock stopped, not the pace;
+  the table hides them in a band median, the narrow kernel shows them. Shape as measured: Q4 trailing by 14 slows
+  from ~10:00 (36 s) to 26 by 3:00; tied / within 3 hold ~40 to 3:00 then ~23 inside 2:30; leaders 42-44.
+- **PRE-REGISTERED 2026-10-25 (re-test of (DJ) after reading its test seasons: the forking path, stated): (DJ2) the
+  pace curve with timeout gaps removed and a minimum mass per cell.** Two changes, both from (DJ)'s diagnosis, not
+  tuning: (a) a gap is dropped when either team's timeouts remaining fell before the next snap (a timeout the rows
+  don't show), for the table AND the curve; (b) each cell's time bandwidth widens (10, 20, 40, 80, 160 s) until the
+  kernel holds 300+ gaps (so sparse cells borrow from neighbours, dense ones stay sharp); margin bandwidth picked on
+  2022-23 (fit 2018-21) from (1, 2, 4); (c) snaps between 2:00 and 3:00 left in a half are not fit (found before
+  this run, reading (DJ)'s cliff: the data drops gaps that cross the two-minute warning, so a 2:10 snap is seen only
+  if the next came within 10 s: those cells are biased short, the table's 2:01-5:00 band too); their cells borrow from
+  both sides through (b) (the engine stops the clock at 2:00 there anyway, so the value matters little). GATE as (DJ): (1) last 5:00 MAE lower, interval < 0; (2) all: upper < +0.1 s;
+  (3) no step over 4 s between neighbouring cells within a half's last 10:00, EXCEPT across the two-minute warning
+  (2:00, where the clock stops by rule); (4) (CJ) check (1). The exception in (3) is new and stated: the rule makes a
+  real break at 2:00 (a 2:05 snap's gap can't cross it, the data excludes those), so a step there is the rule's.
+- **RESULT {#pace-curve-2} (DJ2): FAIL (3) again; not shipped.** tools/dj_eval.py --dj2: 146,299 gaps (4,370 timeout
+  gaps dropped). Margin bandwidth 4 points. Test 2024-25 (timeout gaps out of both): (1) last 5:00 MAE 6.283 -> 5.506,
+  -0.777 [-0.882, -0.679] (PASS); 2:00 and in 7.29 -> 6.29, 2:01-5:00 5.69 -> 5.05, 5:01-10:00 4.92 -> 4.59; (2) all
+  4.789 -> 4.584, -0.205 [-0.228, -0.181] (PASS); (3) a 17.3 s step (FAIL), all in a half's last 75 s: Q4 leading by
+  2-4 (e.g. +2 -> +3 at 0:00 17.3, +3 -> +4 at 1:15 14.2: a leader with the ball that late mostly kneels, kneels are
+  not running-clock snaps, so the few left are odd ones) and Q2's last 15 s (a gap there can't exceed the time left).
+  The 2:30 cliff of (DJ) is gone: the timeout and warning fixes worked. The curve now (Q4): trailing by 14 36 s at
+  10:00 -> 27 at 3:00 -> 23 at 1:00; trailing by 3 40 -> 37 -> 21; tied 40 -> 40 -> 22; leading by 7+ 41-44 throughout.
+  Two fails on 2024-25: a third try there would be fitting the test. Lead: (DJ3) on unseen data (2026 to date, fit
+  2018-25), the cliff check defined where pace means something (60+ s left; margin steps across 0 -> +1, lead vs not,
+  exempt as the 2:00 one is; cells holding 300+ gaps).
 
