@@ -67,18 +67,41 @@ jobs:
           # docs/ only (the lab notebook: no build reads it) -> no build; UI files only -> fast; MODEL.md (the Model tab,
           # rendered with the week's page) with only docs / UI besides -> news; anything else -> full.
           fast=false; news=false; skip=false
-          if [ "${{ github.event_name }}" = push ] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+          # (owner 2026-10-25: "are we losing any changes because they overwrite eachother?") a newer run replaces a
+          # waiting one in the pages queue, so lanes go by what the LIVE site was built from, not the previous push:
+          # data/full_build.json (the commit of the last full build) and data/deployed.json (the last deploy of any lane).
+          # Anything but docs / UI / MODEL.md changed since the last full build -> full, whatever this push touched (a
+          # UI-only push that replaced a waiting full build used to take the fast lane and skip the data it needed).
+          site="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          full_sha=$(curl -sf "$site/data/full_build.json?x=$(date +%s)" | python3 -c "import json,sys; print(json.load(sys.stdin).get('sha',''))" 2>/dev/null || true)
+          dep_sha=$(curl -sf "$site/data/deployed.json?x=$(date +%s)" | python3 -c "import json,sys; print(json.load(sys.stdin).get('sha',''))" 2>/dev/null || true)
+          echo "live site: last full build ${full_sha:-unknown}, last deploy ${dep_sha:-unknown}"
+          if [ -n "$full_sha" ] && git cat-file -e "$full_sha^{commit}" 2>/dev/null; then
+            data=$(git diff --name-only "$full_sha" "${{ github.sha }}" | grep -vE '^(docs/|nfledge/static/|MODEL\.md$)' || true)
+            ref="$dep_sha"; git cat-file -e "$ref^{commit}" 2>/dev/null || ref="$full_sha"
+            files=$(git diff --name-only "$ref" "${{ github.sha }}")
+            echo "since the last full build (data): ${data:-none}"; echo "since the last deploy:"; echo "$files"
+            if [ "${{ github.event_name }}" = push ] || { [ "${{ github.event_name }}" = workflow_dispatch ] && [ "${{ inputs.mode }}" = news ]; }; then
+              if [ -n "$data" ]; then :  # full (a dispatched news build too: the data it would skip comes first)
+              elif [ "${{ github.event_name }}" = workflow_dispatch ]; then news=true
+              elif [ -z "$files" ] || ! echo "$files" | grep -qv '^docs/'; then skip=true
+              elif ! echo "$files" | grep -qv '^nfledge/static/'; then fast=true
+              else news=true  # MODEL.md (with docs / UI): the news lane renders it and copies the assets
+              fi
+            fi
+          elif [ "${{ github.event_name }}" = push ] && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            # no stamp on the live site yet (the first build after this change): the old rule, this push only
             files=$(git diff --name-only "$BEFORE" "${{ github.sha }}")
             echo "$files"
             if [ -n "$files" ] && ! echo "$files" | grep -qv '^docs/'; then skip=true
             elif [ -n "$files" ] && ! echo "$files" | grep -qv '^nfledge/static/'; then fast=true
             elif [ -n "$files" ] && ! echo "$files" | grep -qvE '^(docs/|nfledge/static/|MODEL\.md$)'; then news=true
             fi
+          elif [ "${{ github.event_name }}" = workflow_dispatch ] && [ "${{ inputs.mode }}" = news ]; then news=true
           fi
           echo "fast=$fast" >> "$GITHUB_OUTPUT"
           echo "skip=$skip" >> "$GITHUB_OUTPUT"
           echo "UI-only fast path: $fast; docs only, no build: $skip"
-          if [ "${{ github.event_name }}" = workflow_dispatch ] && [ "${{ inputs.mode }}" = news ]; then news=true; fi
           # the nightly complete build (2 a.m. Central) rebuilds everything, the slow data too; the other UTC hour of the
           # pair is skipped. A dispatched "complete" (the watcher's rollover / Sunday play-by-play) does the same.
           complete=false
@@ -125,6 +148,8 @@ jobs:
           python3 tools/assets_deploy.py --site=site
           # Model > Calc > Graded calls follow the engine: regrade with the new calc_engine.js (inputs from the last build)
           node tools/calc_grade.mjs --site=site || echo "[grade] skipped"
+      - name: Stamp the deploy  # the plan reads it (lanes by what the live site was built from)
+        run: echo "{\"sha\":\"${{ github.sha }}\",\"lane\":\"fast\"}" > site/data/deployed.json
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -185,6 +210,8 @@ jobs:
         run: python tools/standings_build.py --site=site --seasons=$(python -c "import nflreadpy as n; print(n.get_current_season())") || echo "[standings] skipped"
       - name: Current assets
         run: python tools/assets_deploy.py --site=site
+      - name: Stamp the deploy  # the plan reads it (lanes by what the live site was built from)
+        run: echo "{\"sha\":\"${{ github.sha }}\",\"lane\":\"news\"}" > site/data/deployed.json
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -405,6 +432,10 @@ jobs:
       - name: Penalties
         if: needs.plan.outputs.complete == 'true' || steps.carry.outputs.carried != 'true'
         run: python tools/penalties_build.py --site=site
+      - name: Stamp the deploy  # the plan reads both (lanes by what the live site was built from)
+        run: |
+          echo "{\"sha\":\"${{ github.sha }}\",\"lane\":\"full\"}" > site/data/deployed.json
+          echo "{\"sha\":\"${{ github.sha }}\"}" > site/data/full_build.json
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:
