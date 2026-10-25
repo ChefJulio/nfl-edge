@@ -4109,8 +4109,22 @@
     if (mid != null) {
       bars = seg(s0, mid, mid > s0 ? 'gain' : mid < s0 ? 'loss' : 'zero') + flag(s0, mid, e);
     } else bars = seg(s0, e, cls);
-    return `<span class="fs" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
-      + `${bars}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
+    // A pass flies (owner 2026-10-25: "can we elegantly visually distinguish passes from rushes": the arc): an arc over
+    // the strip from the snap to where the catch ended (the whole gain: ESPN gives no air yards), the bar under it as
+    // for any gain; an incompletion or interception arcs dotted to its depth from the text ("short" ~6 yards past the
+    // line, "deep" ~20) and ends in an x (red when picked off). Runs, sacks and spikes stay on the ground.
+    const raw0 = String(p.text || '').split('PENALTY')[0];
+    const pass = !/spike|sacked|kneel/i.test(raw0) && (/pass|intercept/i.test(pType(p)) || / pass /.test(raw0));
+    let arc = '';
+    if (pass && !(p.isPenalty && /no play/i.test(t))) {
+      const inc = /incomplete/i.test(raw0), pick = /intercept/i.test(t);
+      const to = inc || pick ? Math.min(108, s0 + (/ deep /i.test(raw0) ? 20 : 6)) : (Math.abs(e - s0) < 2 ? s0 + 2 : e);
+      const lo = Math.min(s0, to), hi = Math.max(s0, to), ht = Math.max(4, Math.min(14, 3 + 0.45 * (hi - lo)));  // a longer throw flies higher
+      arc = `<svg class="fs-arc${inc ? ' miss' : pick ? ' int' : ''}" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%;height:${ht.toFixed(1)}px" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M0,12 Q50,-10 100,12"/></svg>`
+        + (inc || pick ? `<i class="fs-x${pick ? ' int' : ''}" style="left:${pc(to)}%"></i>` : '');
+    }
+    return `<span class="fs${arc ? ' fs-pass' : ''}" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
+      + `${bars}${arc}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
   };
   // ---- One anatomy for a play, everywhere (owner 2026-10-20: "are the play rows uniform everywhere they show up? don't
   // want inconsistency"): a meta line (event tags, down -> down, spot -> spot), the headline with its yards chip, the
@@ -4186,6 +4200,8 @@
     }
     if (/spike/i.test(t)) return resChip('Spike', 'zero', 'Spiked to stop the clock');
     if (/kneel/i.test(t)) return resChip('Kneel', 'zero', 'Kneel down');
+    // a 4th down that changed hands without a kick or a turnover: the defense's ball on downs
+    if (a && b && a.offense.team !== b.offense.team && p.start && p.start.down === 4) return resChip('Downs', 'loss', 'Turnover on downs');
     if (/incomplete/i.test(txt)) return resChip('Inc.', 'zero', 'Incomplete pass');
     if (!a || !b || a.offense.team !== b.offense.team || !(p.start && p.start.down)) return '';
     const net = Math.round((b.x - a.x) * a.dir);
