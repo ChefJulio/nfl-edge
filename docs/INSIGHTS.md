@@ -4776,3 +4776,14 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   chosen 87%): the measured late pass outcomes mix in-bounds completions that run the clock with the end-zone /
   sideline throws teams actually make there. The outcome model, not the play-calling, is what's missing; DE2 could
   not change it. The calculator keeps the general model with its "rough" note in the last 3:00.
+- **PRE-REGISTERED 2026-10-24 (owner: "de3"): (DE3) the endgame with hurry-up play outcomes.** (DE2) traced the 1:00 miss
+  to the outcome tables: late passes by a team not ahead are end-zone / sideline throws (stop the clock or score),
+  not the average late pass. DE3 = (DE2)'s policy as its pre-check-tuned iteration 8 + outcome tables for HURRY
+  plays: snaps in the 4th quarter's last 2:00 by an offense not ahead (margin -8..0), measured 2006-18 per play type
+  (run / short / deep) x time band (0:30 or less / 0:31-1:00 / 1:01-2:00) x field zone ((CH)'s three): yards, completion,
+  sack, turnover, out of bounds, touchdown, seconds; each cell shrunk toward (DE)'s general late table for the same play
+  type and zone by k = 50 pseudo-plays (cell sizes reported). Other snaps keep (DE)'s tables. Tuning ONLY against the
+  2006-18 pre-check ((DE2)'s three conditions at 2:00 and 1:00, plus the start-state check: from real 2006-18 snaps
+  behind 1-3 inside the opponent's 20 with 0:15 or less, simulated score rate within 10 points of real); only the
+  shrinkage weight and the band edges may be tuned. The 2019-25 test runs ONCE if the pre-check passes, (DE)'s GATE
+  unchanged. Pre-check not passed -> FAIL, test untouched.
