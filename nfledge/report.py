@@ -823,6 +823,9 @@ def inactive_why(r) -> str:
             else "Listed Doubtful after practice started (ESPN, since his last game); Doubtful players almost never play"
             if des == "Doubtful" else "Ruled out after practice started (ESPN, since his last game)")
     return what + (f"; practice: {prac}" if prac else "")
+  if src == "espn_up":  # {#late-upgrade}
+    return ("His team removed his designation after the final report (ESPN). How players with no designation in his spot "
+            "played" + (f" (practice: {prac})" if prac else ""))
   if src == "activated":  # {#activated}
     return ("Activated off injured reserve (ESPN) for this week's game"
             + (f", listed {des.lower()} on the final report" if des else "")

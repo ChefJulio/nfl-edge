@@ -4709,3 +4709,34 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   week model's chance stands (tag only). Each override archived (data/live_inputs/activated_<season>_<week>.json:
   the chance before it, the rate set) and scored by tools/activated_audit.py. GATE once 30+ player-weeks: the played
   rate's 95% Wilson interval includes the mean rate set, and the overrides' Brier below the pre-override chances'.
+- **PRE-REGISTERED 2026-10-24, SHIPPED PROVISIONALLY (owner: "what reasons do we have to not lean more heavily on espn?"
+  ... "ya"): {#late-upgrade} ESPN's Active after the final report: the designation removed.** Mirror of {#late-downgrade}.
+  Christian Kirk, Jordan Mason, Tank Dell: "activated ... and removed his questionable designation" (ESPN, Saturday)
+  while NFL.com's copy still read Questionable. Rule: a player Questionable or Doubtful on his team's final report whom
+  ESPN marks Active at or after 4 p.m. ET of the final report's day (before kickoff) has had the designation removed:
+  no tag, and the measured play rate of players with no designation on the final report in his spot (cleared_rate:
+  missed his last game or not x practice days; 85.9-98.5%); if he was also activated off a reserve list
+  ({#activated}), activated with no designation: 0.99. Game-day rulings still win. Archived
+  (data/live_inputs/upgraded_<season>_<week>.json) and scored by tools/upgraded_audit.py; GATE once 30+ player-weeks:
+  the played rate's 95% Wilson interval includes the mean rate set, and the overrides' Brier below the pre-override
+  chances'.
+- **PRE-REGISTERED 2026-10-24 (owner, on the calculator's weakest zone, the last 3:00 trailing 1-3 in field goal range:
+  "worth investigating further, agreed. ideas?" ... "looks good i think"): (DE) an endgame solved from football rules
+  and measured play outcomes.** (CH)'s learned drive model failed; (CN2), rules + measured pieces for the last snap,
+  passed (Brier 0.0880 vs 0.1014). DE extends that to the 4th quarter's last 3:00. State (team with the ball): seconds
+  left 0-180, margin -8..+8, field position (5-yard bands), down, distance (6 buckets), both teams' timeouts, clock
+  running or stopped. Offense actions: run, short pass, deep pass, spike, kneel, field goal, punt, each optionally after
+  a timeout. Outcomes per action from 2006-18 play-by-play in like situations (yards, completion, sack, turnover, out of
+  bounds, seconds the play takes, the clock after it: incompletions / out of bounds stop it, out of bounds only inside
+  2:00, the 2:00 warning, a spike costs a down); field goals by the calculator's make-rate table; a touchdown takes the
+  try (extra point / two at their measured rates; the better per the same table); a change of possession or score
+  continues from the other team's side (kickoff spots as the calculator's). Values by backward induction from 0:00
+  (score decides, tie = overtime 0.5). Policy: the EMPIRICAL mix of actions teams chose in like states (for the win
+  chance; best actions reported separately for decisions). Check before the test: simulated drives from the own 25
+  with 2:00 and with 1:00 left match real drives' seconds used and score rates within 10% each. Test: 2019-25 4th-
+  quarter snaps with 3:00 or less, score within 8, vs the engine's wp() (the general model + kneel-out + last-snap +
+  late 1-2 rule), model fit on 2006-18. GATE (both): (1) Brier lower with a 95% bootstrap interval over games excluding
+  0; (2) mean absolute calibration gap over (CH)'s cells (time 0:30 / 1:00 / 2:00 / 3:00 x field position inside the
+  opponent's 35 / to own 40 / deeper x tied, behind 1-3, behind 4-8, ahead 1-3, ahead 4-8; cells of 30+) lower than
+  wp()'s. Pass -> wp() uses it inside the last 3:00 of the 4th quarter, the "rough" note goes, the Decisions pane grades
+  two-minute choices; (CJ) check (1) is rerun.

@@ -62,6 +62,7 @@ STATUS_SRC = {  # InjuryModel.availability's "src": which part of the code spoke
   "espn_act": "ESPN's Active after his team's latest practice report: no designation coming (cleared_rate)",
   "espn_late": "ESPN's Out / Doubtful after his team's final report: a late downgrade ({#late-downgrade})",
   "activated": "activated off a reserve list (ESPN Active after his last game): the measured rate ({#activated})",
+  "espn_up": "ESPN's Active after his team's final report: the designation removed ({#late-upgrade})",
   "table": "this week's injury table (seasons without dated practice reports)",
   "window": "IR, practice window open, before his team's first report (week model, stage 0)",
   "espn": "ESPN news since his last game, before his team's first report (espn_bridge)",
@@ -134,6 +135,8 @@ def status_label(r) -> str:
     return f"{des} (ESPN, after the final report)" + dd
   if src == "activated":
     return ("Activated" + (f" · {des}" if des else "")) + dd
+  if src == "espn_up":
+    return "Designation removed (ESPN)" + dd
   if src == "window":
     return "IR (practice window open)"
   if src == "espn":
@@ -928,6 +931,7 @@ class InjuryModel:
   espn_gameday: dict | None = None  # (AU) gsis_id -> ("INA" | "ACT", time): game-day rulings (espn.gameday_rulings)
   espn_active: dict | None = None  # gsis_id -> ESPN update time: fresh ESPN "Active" (build_espn_bridge(active=True)), tags only
   espn_late: dict | None = None  # gsis_id -> (Out | Doubtful, ESPN update time): {#late-downgrade} (build_espn_bridge(late=True))
+  espn_active_note: dict | None = None  # gsis_id -> ESPN's note on a fresh Active entry (build_espn_bridge(active, notes))
   LATE_RATE = {"Out": 0.0, "Doubtful": 0.028}  # {#late-downgrade}: ruled out by his team; the midweek Doubtful rate
   ACT_RATE = {"NONE": 0.99, "QUESTIONABLE": 0.97}  # {#activated}: final status after activation off a reserve list
 
@@ -1126,6 +1130,39 @@ class InjuryModel:
         p.at[i, "pre_late"], p.at[i, "avail"] = p.at[i, "avail"], self.LATE_RATE[v[0]]
         p.at[i, "src"], p.at[i, "des"] = "espn_late", v[0]
         self._late_applied[row.gsis_id] = v[0]
+    # {#late-upgrade} (owner 2026-10-24: Kirk / Mason / Dell "activated ... and removed his questionable designation"
+    # on Saturday while NFL.com's copy still read Q): ESPN's Active posted after a team's final report, for a player
+    # Questionable / Doubtful on it, is the designation removed: no tag, and the play rate of players with no
+    # designation on the final report in his spot (cleared_rate). Activated players get theirs below. pre_up for the audit.
+    self._upgraded = set()
+    act = self.espn_active or {}
+    if act and use_days and filed:
+      ro_u = self.data.rosters
+      ro_u = ro_u[(ro_u.season == season) & (ro_u.week <= week) & ro_u.gsis_id.notna()].sort_values("week").drop_duplicates("gsis_id", keep="last")
+      on_res = set(ro_u.gsis_id[ro_u.status == "RES"])
+      notes = self.espn_active_note or {}
+      for g, u in act.items():
+        if g not in days.index:
+          continue
+        if g in on_res and "designation" not in str(notes.get(g, "")).lower():
+          continue  # coming off a reserve list ESPN's Active is the activation itself (Sampson): removal only if his note says so
+        off = str(days.game_status.get(g, "None")).upper()
+        tm = p.loc[p.gsis_id == g, "team"]
+        team = tm.iloc[0] if len(tm) else None
+        fd = max(filed.get(team, []) or [""]) if team else ""
+        if off not in ("QUESTIONABLE", "DOUBTFUL") or not fd or team not in final:
+          continue
+        if pd.Timestamp(u).tz_convert("America/New_York") >= pd.Timestamp(fd).tz_localize("America/New_York") + pd.Timedelta(hours=16):
+          self._upgraded.add(g)
+      if self._upgraded:
+        p["pre_up"] = np.nan
+        for i, row in p.iterrows():
+          if row.gsis_id not in self._upgraded or p.at[i, "gd"] or p.at[i, "src"] == "espn_late":
+            continue
+          r_ = cleared_rate(bool(self._missed_last_game(row.gsis_id, row.team, season, week)), str(days.days.get(row.gsis_id, "") or ""))
+          if r_ is None:
+            continue
+          p.at[i, "pre_up"], p.at[i, "avail"], p.at[i, "src"], p.at[i, "des"] = p.at[i, "avail"], r_, "espn_up", ""
     # {#activated} (owner 2026-10-24, Dylan Sampson: activated from IR Saturday, page read IR / 44%): a player the rosters
     # still list on a reserve list whom ESPN marks Active after his last game was activated. His tag is his official one
     # (designations); once the final report is out his chance is the measured rate for his final status (activated +
@@ -1143,6 +1180,8 @@ class InjuryModel:
           if row.gsis_id not in self._activated or p.at[i, "gd"] or p.at[i, "src"] == "espn_late" or row.team not in final:
             continue
           off = str(days.game_status.get(row.gsis_id, "None")).upper() if row.gsis_id in days.index else "NONE"
+          if row.gsis_id in self._upgraded:
+            off = "NONE"  # {#late-upgrade}: activated and the designation removed
           r_ = self.ACT_RATE.get(off)
           if r_ is None:
             continue  # Doubtful / Out on the final report: his team's word stands
@@ -1169,6 +1208,22 @@ class InjuryModel:
     p["tag"] = tags
     p["tag_x"] = self.tag_expected
     return p
+
+  def _missed_last_game(self, g, team, season: int, week: int) -> bool:
+    """Missed his team's last game while on its report, for an injury (designations' missed_last; False unknown)."""
+    try:
+      if not hasattr(self, "_week_ctx"):
+        from . import tuesday as T
+        self._week_ctx = T._Ctx(self.data, *self._tues_inputs())
+      ctx = self._week_ctx
+    except Exception:
+      return False
+    prev = [x for x in ctx.tw.get((season, team), []) if x < week]
+    if not prev:
+      return False
+    k = prev[-1]
+    return ((g, season, k) not in ctx.on and (g, season, k) in ctx.rep
+            and ctx.why.get((season, k, g), "none") not in ("rest", "personal"))
 
   def tag_map(self, season: int, week: int, board: pd.DataFrame | None = None) -> dict:
     """gsis -> designation for every QB / RB / WR / TE / K on a roster (active, game-day inactive or a reserve list),
@@ -1303,6 +1358,8 @@ class InjuryModel:
       if g in getattr(self, "_late_applied", {}):  # {#late-downgrade}: ESPN's Out / Doubtful after the final report
         out[j] = "D" if self._late_applied[g] == "Doubtful" else "O"
         continue
+      if g in getattr(self, "_upgraded", set()):  # {#late-upgrade}: the designation removed after the final report
+        continue
       if team in final:
         gs = str(days.game_status.loc[g]).upper() if listed else "NONE"
         out[j] = {"OUT": "O", "DOUBTFUL": "D", "QUESTIONABLE": "Q"}.get(gs, "")
@@ -1330,7 +1387,7 @@ class InjuryModel:
 
   @staticmethod
   def build_espn_bridge(data, season: int, week: int, feed: pd.DataFrame, midweek: bool = False,
-                        questionable: bool = False, active: bool = False, late: bool = False) -> dict:
+                        questionable: bool = False, active: bool = False, late: bool = False, notes: bool = False) -> dict:
     """Early-week bridge (see espn.py): gsis_id -> ESPN bucket (espn_calib.bucket: Out / Out+ret / Doubtful / IR)
     for players with an ESPN injury status updated on or after their team's last completed game day, for teams
     whose report for `week` is not out. Empty when there is no feed, or once every report for the week is out.
@@ -1379,7 +1436,7 @@ class InjuryModel:
         out[gsis] = rep
         continue
       if active:
-        out[gsis] = upd.isoformat()
+        out[gsis] = str(getattr(x, "comment", "") or "") if notes else upd.isoformat()
         continue
       if late:
         out[gsis] = (rep, upd.isoformat())
