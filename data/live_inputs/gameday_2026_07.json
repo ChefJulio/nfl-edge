@@ -378,5 +378,35 @@
 "at": "2026-10-25T15:31:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0031408": {
+"name": "Mike Evans",
+"team": "SF",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-10-25T15:45:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0035719": {
+"name": "Deebo Samuel Sr.",
+"team": "SF",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-10-25T15:45:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0040589": {
+"name": "Kurtis Rourke",
+"team": "SF",
+"pos": "QB",
+"pre": 0.0923,
+"ruling": "INA",
+"at": "2026-10-25T15:45:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
