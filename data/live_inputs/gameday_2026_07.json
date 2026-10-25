@@ -418,5 +418,55 @@
 "at": "2026-10-25T16:05:00+00:00",
 "post": 0.974,
 "status": "Active (FFF)"
+},
+"00-0036879": {
+"name": "Sam Ehlinger",
+"team": "DEN",
+"pos": "QB",
+"pre": 0.0923,
+"ruling": "INA",
+"at": "2026-10-25T18:44:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041027": {
+"name": "Jeremiyah Love",
+"team": "ARI",
+"pos": "RB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-10-25T18:42:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0041133": {
+"name": "Dallen Bentley",
+"team": "DEN",
+"pos": "TE",
+"pre": 0.1466,
+"ruling": "INA",
+"at": "2026-10-25T18:44:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041496": {
+"name": "Jonah Coleman",
+"team": "DEN",
+"pos": "RB",
+"pre": 0.7782,
+"ruling": "ACT",
+"at": "2026-10-25T18:38:00+00:00",
+"post": 0.974,
+"status": "Active (FFF)"
+},
+"00-0041561": {
+"name": "Carson Beck",
+"team": "ARI",
+"pos": "QB",
+"pre": 0.0593,
+"ruling": "INA",
+"at": "2026-10-25T18:44:00+00:00",
+"post": 0.0,
+"status": "Inactive (LDD)"
 }
 }
