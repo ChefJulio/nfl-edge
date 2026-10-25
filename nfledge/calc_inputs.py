@@ -230,6 +230,9 @@ def clock_curve(r: pd.DataFrame, sd_t: float | None, sd_m: float) -> dict:
           take = ~done & ((n_eff >= ADAPT_MIN) | (s == ADAPT_T[-1]))
           hist[take] = h_s[take]
           done |= take
+        if s == ADAPT_T[-2]:
+          full = done.copy()  # (DJ3) cells that reached ADAPT_MIN gaps before the last, forced width
+      out[f"_full{h}"] = full.tolist()  # not for the engine (tools/dj_eval.py strips it)
     cdf = np.cumsum(hist, axis=2)
     half_mass = cdf[:, :, -1:] / 2
     j = np.clip((cdf < half_mass).sum(axis=2), 1, 59)  # first bin reaching half the mass

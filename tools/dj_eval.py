@@ -44,10 +44,16 @@ def boot(a: np.ndarray, games: np.ndarray, rng, reps: int = 2000):
 def main():
   d = pd.concat([pd.read_parquet(ROOT / "cache" / f"pbp_calc_{s}.parquet", columns=W.PBP_COLS) for s in range(2018, 2026)],
                 ignore_index=True)
-  dj2 = "--dj2" in sys.argv  # (DJ2): timeout gaps dropped (table and curve), adaptive time bandwidth, 2:00-3:00 not fit
+  dj3 = "--dj3" in sys.argv  # (DJ3): (DJ2)'s curve fit on 2018-25, tested on 2026 to date; the cliff check restated
+  dj2 = "--dj2" in sys.argv or dj3  # (DJ2): timeout gaps dropped (table and curve), adaptive time bandwidth, 2:00-3:00 not fit
   r = C.pace_rows(d, drop_timeouts=dj2)
   late = lambda x: x.t <= 300  # noqa: E731
-  print(f"[dj] {'DJ2' if dj2 else 'DJ'}: {len(r):,} running-clock gaps 2018-25 ({late(r).sum():,} in a half's last 5:00)")
+  print(f"[dj] {'DJ3' if dj3 else 'DJ2' if dj2 else 'DJ'}: {len(r):,} running-clock gaps 2018-25 ({late(r).sum():,} in a half's last 5:00)")
+  if dj3:
+    d26 = pd.read_parquet(ROOT / "cache" / "pbp_calc_2026.parquet", columns=W.PBP_COLS)
+    te = C.pace_rows(d26[d26.result.notna()], drop_timeouts=True)
+    print(f"[dj] 2026 to date: {len(te):,} gaps, {te.game_id.nunique()} games")
+    return gate(r, te, None, 4, late, dj3=True)
   # bandwidths on 2022-23, fit 2018-21
   f1, v1 = r[r.season <= 2021], r[r.season.between(2022, 2023)]
   vl = v1[late(v1)]
@@ -62,11 +68,15 @@ def main():
         best = (mae, st, sm)
   _, st, sm = best
   print(f"[dj] chosen: {st} s x {sm} pt")
-  fit, te = r[r.season <= 2023], r[r.season >= 2024]
-  c = C.clock_curve(fit, st, sm)
   OUT.mkdir(parents=True, exist_ok=True)
-  (OUT / ("curve2.json" if dj2 else "curve.json")).write_text(json.dumps({**c, "sd_t": st, "sd_m": sm}), encoding="utf-8")
   (OUT / ("curve2_live.json" if dj2 else "curve_live.json")).write_text(json.dumps({**C.clock_curve(r, st, sm), "sd_t": st, "sd_m": sm}), encoding="utf-8")
+  gate(r[r.season <= 2023], r[r.season >= 2024], st, sm, late, dj2=dj2)
+
+
+def gate(fit, te, st, sm, late, dj2=False, dj3=False):
+  c = C.clock_curve(fit, st, sm)
+  name = "curve3.json" if dj3 else "curve2.json" if dj2 else "curve.json"
+  (OUT / name).write_text(json.dumps({**{k: v for k, v in c.items() if not k.startswith("_")}, "sd_t": st, "sd_m": sm}), encoding="utf-8")
   pt, pc = table(fit)(te), C.curve_pace(c, te.half, te.t, te.m)
   et, ec = np.abs(pt - te.gap.to_numpy()), np.abs(pc - te.gap.to_numpy())
   rng = np.random.default_rng(0)
@@ -81,16 +91,29 @@ def main():
                   ("earlier", te.t > 600)]:
     kk = kk.to_numpy()
     print(f"    {lab:12s} n {kk.sum():6,}  table {et[kk].mean():.2f}  curve {ec[kk].mean():.2f}")
-  worst = 0.0
+  worst, where = 0.0, ""
   for h in (2, 4):
     g = np.asarray(c[f"q{h}"])[: 600 // C.CURVE_STEP + 1]
-    dt = np.abs(np.diff(g, axis=0))
+    dt, dm = np.abs(np.diff(g, axis=0)), np.abs(np.diff(g, axis=1))
     if dj2:  # (DJ2) the step across the two-minute warning (cells 2:00 -> 2:15) is the rule's
       dt[120 // C.CURVE_STEP] = 0
-    worst = max(worst, dt.max(), np.abs(np.diff(g, axis=1)).max())
+    if dj3:  # (DJ3) 1:00-10:00 only, cells holding 300+ gaps (both ends), not across tied -> leading by 1
+      full = np.asarray(c[f"_full{h}"])[: 600 // C.CURVE_STEP + 1]
+      lo = 60 // C.CURVE_STEP
+      dt[:lo] = 0
+      dm[:lo] = 0
+      dt[~(full[:-1] & full[1:])] = 0
+      dm[~(full[:, :-1] & full[:, 1:])] = 0
+      dm[:, C.CURVE_M] = 0  # margin 0 -> +1
+    for lab, a in (("time", dt), ("margin", dm)):
+      if a.max() > worst:
+        i, j = np.unravel_index(a.argmax(), a.shape)
+        worst, where = float(a.max()), f"Q{h} {lab} step at {i * C.CURVE_STEP} s, margin {j - C.CURVE_M:+d}"
   g3 = worst <= 4
-  print(f"[dj] (3) largest step between neighbouring cells in a half's last 10:00: {worst:.1f} s -> {g3}")
-  print("\n[dj] the curve (2018-23 fit), Q4 seconds between snaps, by time left x margin:")
+  print(f"[dj] (3) largest step between neighbouring cells{' (DJ3 rules)' if dj3 else ''}: {worst:.1f} s ({where}) -> {g3}")
+  if dj3 and hi1 > 0 > lo1:
+    print("[dj] (1)'s interval straddles 0: NOT SHOWN (as pre-registered)")
+  print(f"\n[dj] the curve ({'2018-25' if dj3 else '2018-23'} fit), Q4 seconds between snaps, by time left x margin:")
   ms = [-14, -7, -3, 0, 3, 7, 14]
   for t in (600, 420, 300, 240, 180, 150, 120, 90, 60, 30, 0):
     print(f"  {t // 60}:{t % 60:02d}  " + "  ".join(f"{m:+d} {C.curve_pace(c, [4], [t], [m])[0]:4.1f}" for m in ms))

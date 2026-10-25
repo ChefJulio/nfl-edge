@@ -5028,4 +5028,28 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   Two fails on 2024-25: a third try there would be fitting the test. Lead: (DJ3) on unseen data (2026 to date, fit
   2018-25), the cliff check defined where pace means something (60+ s left; margin steps across 0 -> +1, lead vs not,
   exempt as the 2:00 one is; cells holding 300+ gaps).
+- **PRE-REGISTERED 2026-10-25 (owner: "ya"): (DJ3) the pace curve on unseen games.** (DJ2)'s curve exactly (timeout
+  gaps dropped, adaptive time bandwidth, 2:00-3:00 not fit, margin bandwidth 4 as (DJ2) picked), fit on 2018-25; the
+  table refit on 2018-25 with the same timeout filter. Test: 2026's completed regular-season games to date (weeks 1-7;
+  no pace test has read them). GATE (all): (1) last 5:00 of either half: MAE lower, 95% interval over games < 0; (2)
+  all gaps: upper < +0.1 s; (3) no step over 4 s between neighbouring cells where pace means something: 1:00 to 10:00
+  left in a half, cells whose kernel holds 300+ gaps, not across the two-minute warning (2:00 -> 2:15) and not across
+  tied -> leading by 1 (the switch from hurrying to milking), both real breaks; (4) (CJ) check (1) with the engine on the
+  curve. A small sample: if (1)'s interval straddles 0 the result is "not shown", not a pass.
+- **RESULT {#pace-curve-3} (DJ3): FAIL (3) a third time; not shipped. Accuracy wins again.** tools/dj_eval.py --dj3,
+  2026 to date (94 games, 6,334 gaps): (1) last 5:00 MAE 6.236 -> 5.213, -1.022 [-1.305, -0.764] (PASS; 2:00 and in 7.40
+  -> 6.00, 2:01-5:00 5.61 -> 4.79); (2) all 4.592 -> 4.349, -0.243 [-0.295, -0.194] (PASS); (3) a 15.7 s step (FAIL) at
+  Q4 1:00 between leading by 4 (~24 s) and by 5 (~40), in cells holding 300+ gaps. Three test sets (2024-25 twice,
+  2026) agree the curve predicts the clock better everywhere, most in the last 5:00; each time the smoothness rule
+  failed in the late cells of a team leading with the ball, at a different place. That rule was an assumption (pace is
+  smooth in time and margin); where leaders are concerned the data says otherwise (a 4-point and a 5-point lead late
+  are different situations), or those cells are too thin to tell. Not settled by a fourth try: next is a look at what
+  those snaps are (descriptive, no gate), then the owner's call on what the check should be.
+  The look (same day, descriptive): Q4 snaps with 0:30-1:40 left, 2018-25, running clock, timeout gaps out: leading by
+  1-3 n 24, median gap 45 s; by 4 n 8, 44; by 5-8 n 31, 44; by 9+ n 98, 44. Leaders MILK at every margin. The curve's
+  ~23 s for +1..+4 is the margin kernel (sd 4 points) borrowing the dense tied / trailing cells (hurrying, ~21 s)
+  across 0 into near-empty small-lead cells; past ~+5 the leaders' own data wins: the cliff. So the check caught a real
+  flaw (a curve that thinks a team up 3 with 1:00 left snaps every 23 s would misprice the trailing team's timeouts),
+  and the 0 -> +1 exemption in (DJ3) would have hidden its cause. Fix for a (DJ4): no smoothing across the lead / no-lead
+  boundary (each side's kernel reflects at it). Its test needs games no pace test has read: 2026 weeks 8 on.
 
