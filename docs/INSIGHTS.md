@@ -4798,3 +4798,13 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   (the outcome tables) does not hold; the 1:00 drive miss is unexplained by policy, runoff or outcomes. Untested:
   the play seconds and the clock rules (fixed under (DE)-(DE3)). The calculator keeps the general model with its
   "rough" note in the last 3:00; the endgame work rests until the season-end recheck.
+- **FINDING 2026-10-25 (owner: "i want this calculator to be something we're proud of ... what else you got?" ... "yes"):
+  (DF) the late-game blind spot is mostly noise, and not era drift.** tools/late_era_check.py / .mjs: 2022-25 4th-
+  quarter snaps with 3:00 or less, score within 8 (6,771 snaps, 640 games), the engine's wp() fit on 2006-18 (as every
+  late test so far) vs walk-forward (fit through the season before): Brier 0.1375 vs 0.1382 (+0.0007 [-0.0009,
+  +0.0022]); calibration gap over 56 cells of 30+ 0.0420 vs 0.0405. So recency doesn't help. And that 0.0405 is close
+  to what binomial noise alone gives with these cells (games as the unit): 0.0364. By field zone overall the model is
+  right (own territory -0.001, midfield +0.028, inside the opponent's 35 +0.001). The one consistent signal: the team
+  with the ball TIED late is under-read (midfield +0.088, n 273 snaps; inside the opponent's 35 +0.081, n 264; own
+  territory -0.054, n 349), and behind 1-3 at midfield +0.069 (n 578). The calculator's "rough" note in the last 3:00
+  is broader than the evidence; the targeted fix is a tied / behind-1-3-with-the-ball correction (to be pre-registered).
