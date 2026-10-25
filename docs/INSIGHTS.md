@@ -4840,3 +4840,19 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   (4th quarter, within 8) Brier lower; (3) calibration deciles within 3 points; (4) late (last 3:00) team with the ball
   tied or behind 1-3: the mean calibration gap over (CH)'s cells lower, and the 55-64 yd band's gap smaller. Pass ->
   the live model gets fgp; (CJ) check (1) rerun; the calculator's last-3:00 "rough" note is re-judged on (DF)'s cells.
+- **RESULT {#fg-input} (DH) the field goal's make chance as a win model input: PASS (all four, small); shipped.**
+  tools/dh_eval.py (walk-forward 2022-25, 175,720 rows, 1,136 games; 2003-05 attempts fetched for the first curves).
+  Curves (make % at 40 / 50 / 55 / 60 yd): 2006 (fit 2003-05) 79 / 57 / 44 / 31; 2014 85 / 69 / 58 / 47; 2022 87 / 68 /
+  55 / 41; 2025 (fit 2022-24) 89 / 74 / 63 / 51. (1) pooled Brier 0.15478 -> 0.15480, +0.00002 [-0.00008, +0.00012]
+  (not worse); (2) late-and-close 0.16991 -> 0.16980, -0.00011 [-0.00045, +0.00023] (lower, inside the noise); (3) worst
+  decile 2.01 -> 2.04 points; (4) late, team with the ball tied or behind 1-3 (2,816 snaps, 332 games, 24 cells): mean
+  gap 0.0581 -> 0.0532 (tied 0.0731 -> 0.0685, behind 1-3 0.0431 -> 0.0378); 55-64 yd band +0.099 -> +0.070, 45-54
+  +0.037 -> +0.007. Kickoffs get no fgp (missing); fgp monotone +1. Tied teams late are still under-read, less. In the
+  model file as wp_fg (the curve of the season it serves); calc_engine.js computes fgp from it. Also fixed with it:
+  calc_build's model cache key now includes calc_build.py (a change to make() alone had reused a stale model).
+  (CJ) check (1) on the rebuilt walk-forward files (2026-10-25): PASS. Chosen option vs won: go 35.2 vs 34.6, field
+  goal 56.2 vs 55.6, punt 47.1 vs 47.2; no decile of 50+ off by more than 6 points (worst fg 0.65 decile, 4.6). Brier
+  0.1534 (nfl4th 0.1525). Same recommendation as nfl4th 78.2% (was 79.0% after the clock fixes), gap correlation 0.867
+  (was 0.857 at (CJ)). The rebuild first failed: a split separating kickoffs (fgp missing) from the rest carries an
+  infinite threshold, which JSON can't hold; export now writes the largest finite double (same routing), and
+  calc_build writes model files with allow_nan=False (fails at build, not in the browser).

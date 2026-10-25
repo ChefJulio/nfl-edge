@@ -33,13 +33,32 @@ def load(cur: int) -> pd.DataFrame:
   return pd.concat(fr, ignore_index=True)
 
 
-def make(done: pd.DataFrame) -> dict:
+def early_fg() -> pd.DataFrame:
+  """Field goal attempts of the FG_LAG seasons before FIRST (the first seasons' make curves need them; (DH))."""
+  import nflreadpy as nfl
+  cache = Cache(ROOT / "cache")
+  fr = []
+  for s in range(FIRST - W.FG_LAG, FIRST):
+    d = cache.get("fg_attempts", s, lambda s=s: nfl.load_pbp([s]).select(
+      ["season", "field_goal_attempt", "kick_distance", "field_goal_result"]), stale=False)
+    if d is not None:
+      fr.append(W.fg_attempts(d))
+  return pd.concat(fr, ignore_index=True) if fr else pd.DataFrame(columns=["season", "dist", "made"])
+
+
+def make(done: pd.DataFrame, curve_season: int | None = None) -> dict:
   """The model file from completed games' play-by-play: win probability trees, decision inputs, conversion trees, the
-  browser's self-check rows (and the export's own check against the fitted model)."""
-  r = W.rows(done)
-  m = W.fit(r)
+  browser's self-check rows (and the export's own check against the fitted model). (DH, {#fg-input}) the win model
+  reads each row's field goal make chance from the spot (its season's lagged curve); the file carries the curve of
+  `curve_season`, the season it is used for (default: the one after its data, as walk-forward copies are)."""
+  fg = pd.concat([early_fg(), W.fg_attempts(done)], ignore_index=True)
+  r, _ = W.add_fgp(W.rows(done), fg)
+  m = W.fit(r, fgp=True)
+  cs = int(curve_season if curve_season is not None else done.season.max() + 1)
   out = {"v": 1, "built": pd.Timestamp.now().strftime("%Y-%m-%d"), "seasons": [FIRST, int(done.season.max())],
-         "rows": int(len(r)), "wp": W.export(m), "inputs": C.build(done)}
+         "rows": int(len(r)), "wp": W.export(m, W.FEATURES_FGP), "wp_fg": {**W.fg_curve(fg, cs), "season": cs,
+                                                                         "snap": W.FG_SNAP},
+         "inputs": C.build(done)}
   cm = C.conversion_gb(done)
   out["conv"] = W.export(cm, C.CONV_FEATURES)
   g = C._gain_rows(done).sample(20, random_state=0)
@@ -47,13 +66,13 @@ def make(done: pd.DataFrame) -> dict:
                        zip(C.conv_features(g).to_numpy(float), cm.predict_proba(C.conv_features(g))[:, 1])]
   # the export evaluates as the model does (a sample of rows)
   smp = r.sample(min(2000, len(r)), random_state=0)
-  diff = np.abs(W.predict_exported(out["wp"], W.features(smp)) - m.predict_proba(W.features(smp))[:, 1]).max()
+  diff = np.abs(W.predict_exported(out["wp"], W.features(smp, True)) - m.predict_proba(W.features(smp, True))[:, 1]).max()
   if diff > 1e-4:
     raise SystemExit(f"[calc] exported trees disagree with the model by {diff:.6f}")
   # a few rows for the browser engine's self-check (tools/calc_cli.mjs --check): features and the model's P
-  chk = smp.head(20)
+  chk = smp[smp.fgp.notna()].head(20)  # (DH) kickoffs carry no fgp (NaN), which JSON can't hold
   out["check"] = [{"x": [float(v) for v in row], "p": float(p)} for row, p in
-                  zip(W.features(chk).to_numpy(float), m.predict_proba(W.features(chk))[:, 1])]
+                  zip(W.features(chk, True).to_numpy(float), m.predict_proba(W.features(chk, True))[:, 1])]
   print(f"[calc] trained on {len(r):,} plays ({out['seasons'][0]}-{out['seasons'][1]}); export check max diff {diff:.2e}", flush=True)
   return out
 
@@ -103,7 +122,7 @@ def graded_inputs(d: pd.DataFrame, cur: int, code: bytes, dst: Path) -> None:
     key = hashlib.sha1(code + f"through:{yr}".encode()).hexdigest()[:12]
     cp = ROOT / "cache" / f"calc_wf_{yr}_{key}.json"
     if not cp.exists():
-      cp.write_text(json.dumps(make(done[done.season <= yr]), separators=(",", ":")), encoding="utf-8")
+      cp.write_text(json.dumps(make(done[done.season <= yr]), separators=(",", ":"), allow_nan=False), encoding="utf-8")
     (dst / "wf" / f"through_{yr}.json").write_bytes(cp.read_bytes())
     rows = rows.replace({np.nan: None})
     (dst / f"plays_{s}.json").write_text(json.dumps(rows.to_dict("records"), separators=(",", ":")), encoding="utf-8")
@@ -133,14 +152,15 @@ def main():
       done = resample_games(done, int(opt["boot"]))
     out = make(done)
     Path(opt["out"]).parent.mkdir(parents=True, exist_ok=True)
-    Path(opt["out"]).write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
+    Path(opt["out"]).write_text(json.dumps(out, separators=(",", ":"), allow_nan=False), encoding="utf-8")
     print(f"[calc] wrote {opt['out']}", flush=True)
     return
   site = ROOT / opt.get("site", "site")
   cur = json.loads((site / "index.json").read_text(encoding="utf-8"))["season"] if (site / "index.json").exists() else 2026
   d = load(int(cur))
   done = d[d.result.notna()]
-  code = b"".join((ROOT / "nfledge" / f).read_bytes() for f in ("winprob.py", "calc_inputs.py"))
+  # this file too (2026-10-25: make() itself shapes the model; a change here alone reused a stale cached one)
+  code = b"".join((ROOT / "nfledge" / f).read_bytes() for f in ("winprob.py", "calc_inputs.py")) + Path(__file__).read_bytes()
   # retrained when the code changes or a week is complete (not after every game of a Sunday)
   last = done[done.season == done.season.max()]
   wk_done = int(last.groupby("week").game_id.nunique().pipe(lambda g: g[g >= 13].index.max() if (g >= 13).any() else 0))
@@ -150,8 +170,9 @@ def main():
     out = json.loads(cp.read_text(encoding="utf-8"))
     print(f"[calc] cached model {key}", flush=True)
   else:
-    out = make(done)
-    cp.write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")
+    out = make(done, curve_season=int(cur))  # (DH) the live season's make curve
+    # (DH) NaN/Infinity is invalid JSON: fail here, not in the browser
+    cp.write_text(json.dumps(out, separators=(",", ":"), allow_nan=False), encoding="utf-8")
   dst = site / "data" / "calc"
   dst.mkdir(parents=True, exist_ok=True)
   (dst / "model.json").write_text(json.dumps(out, separators=(",", ":")), encoding="utf-8")

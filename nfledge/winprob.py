@@ -7,6 +7,8 @@ vegas_wp (tools/wp_eval.py); exported as trees the browser evaluates (static/cal
   features(df)      - the model inputs from state columns (shared by training and the export's checks)
   fit(rows)         - the model (fixed settings, PARAMS)
   export(model)     - {features, baseline, trees: [[feature, threshold, left, right, value, missing_left], ...]}
+  fg_curve(fg, s)   - (DH, shipped 2026-10-25) the field goal make curve for season s, fit on the three seasons before
+  add_fgp(r, fg)    - (DH) rows + fgp = P(make) of a kick from the spot, by the row season's lagged curve
 
 Regulation only: overtime's rules changed in 2022 (playoffs) and 2025 (regular season), too few plays under each.
 """
@@ -38,13 +40,22 @@ FEATURES = ["score_diff", "game_sec", "half_sec", "second_half", "down", "ydstog
 # averages over nearby clocks instead (static/calc_engine.js)
 MONOTONIC = {"score_diff": 1, "own_to": 1, "opp_to": -1, "exp_margin": 1, "yardline_100": -1, "ydstogo": -1,
              "diff_time": 1}
+# (DH, {#fg-input}, shipped 2026-10-25) + the field goal's make chance from the spot, from the make curve of the three
+# seasons before the row's (kickers' range grew: 55-59 yd 46% -> 61%; the late under-read sat where it mattered).
+# fgp is +1: a more makeable kick from the same state never hurts the team with the ball. FEATURES stays the base list
+# (wp_eval and older tools); the calculator's model is fit with fgp=True.
+FEATURES_FGP = FEATURES + ["fgp"]
+MONOTONIC_FGP = {**MONOTONIC, "fgp": 1}
+FG_LAG = 3  # seasons before the row's season the curve is fit on
+FG_SNAP = 17  # distance = yards to the end zone + 17 (end zone depth 10 + the hold about 7)
 PARAMS = dict(learning_rate=0.05, max_iter=400, max_leaf_nodes=31, min_samples_leaf=200, l2_regularization=1.0,
               early_stopping=False, random_state=0)
 
 
-def features(df: pd.DataFrame) -> pd.DataFrame:
+def features(df: pd.DataFrame, fgp: bool = False) -> pd.DataFrame:
   """Model inputs from state columns: score_diff, game_sec, half_sec, down (0 = a kickoff), ydstogo, yardline_100,
-  own_to, opp_to, exp_margin (the team with the ball's Vegas expected margin), home (0 / 1), receive_2h (0 / 1)."""
+  own_to, opp_to, exp_margin (the team with the ball's Vegas expected margin), home (0 / 1), receive_2h (0 / 1);
+  with fgp=True also fgp (a column of df, from add_fgp)."""
   x = pd.DataFrame(index=df.index)
   x["score_diff"] = df.score_diff.astype(float)
   sec = df.game_sec.astype(float)
@@ -63,6 +74,9 @@ def features(df: pd.DataFrame) -> pd.DataFrame:
   # only matters in the first half (who gets the ball after halftime)
   x["receive_2h"] = np.where(df.game_sec > 1800, df.receive_2h.astype(float), 0.0)
   x["diff_time"] = x.score_diff / np.sqrt(sec + 1)  # a lead is worth more the less time is left
+  if fgp:
+    x["fgp"] = df.fgp.astype(float)
+    return x[FEATURES_FGP]
   return x[FEATURES]
 
 
@@ -94,10 +108,55 @@ def rows(pbp: pd.DataFrame) -> pd.DataFrame:
   return out.dropna(subset=["y"])
 
 
-def fit(r: pd.DataFrame):
+def fit(r: pd.DataFrame, fgp: bool = False):
   from sklearn.ensemble import HistGradientBoostingClassifier
-  cst = [MONOTONIC.get(f, 0) for f in FEATURES]
-  return HistGradientBoostingClassifier(monotonic_cst=cst, **PARAMS).fit(features(r), r.y.astype(int))
+  feats, mono = (FEATURES_FGP, MONOTONIC_FGP) if fgp else (FEATURES, MONOTONIC)
+  cst = [mono.get(f, 0) for f in feats]
+  return HistGradientBoostingClassifier(monotonic_cst=cst, **PARAMS).fit(features(r, fgp), r.y.astype(int))
+
+
+def fg_attempts(pbp: pd.DataFrame) -> pd.DataFrame:
+  """Field goal attempts: season, distance, made (0 / 1; a block is a miss)."""
+  f = pbp[(pbp.field_goal_attempt == 1) & pbp.kick_distance.notna() & pbp.field_goal_result.notna()]
+  return pd.DataFrame({"season": f.season.astype(int), "dist": f.kick_distance.astype(float),
+                       "made": (f.field_goal_result == "made").astype(int)})
+
+
+def fg_curve(fg: pd.DataFrame, season: int) -> dict:
+  """(DH) P(make) = sigmoid(a + b * distance), fit (unpenalized logistic) on the FG_LAG seasons before `season` (all
+  known before it starts; the live season uses the three before it). fg: fg_attempts() rows, or play-by-play with the
+  field goal columns. Returns {a, b, seasons, n}: the export for the browser engine."""
+  if "dist" not in fg.columns:
+    fg = fg_attempts(fg)
+  use = list(range(season - FG_LAG, season))
+  f = fg[fg.season.isin(use)]
+  if f.empty:
+    raise ValueError(f"no field goal attempts in {use[0]}-{use[-1]} for the {season} curve")
+  from sklearn.linear_model import LogisticRegression
+  m = LogisticRegression(C=np.inf, max_iter=1000).fit(f[["dist"]].to_numpy(), f.made.to_numpy())
+  return {"a": round(float(m.intercept_[0]), 6), "b": round(float(m.coef_[0][0]), 6),
+          "seasons": [int(f.season.min()), int(f.season.max())], "n": int(len(f))}
+
+
+def fg_make(curve: dict, yardline_100) -> np.ndarray:
+  """P(make) of a kick from the spot: distance = yardline_100 + FG_SNAP."""
+  d = np.asarray(yardline_100, dtype=float) + FG_SNAP
+  return 1 / (1 + np.exp(-(curve["a"] + curve["b"] * d)))
+
+
+def add_fgp(r: pd.DataFrame, fg: pd.DataFrame, curves: dict | None = None) -> tuple[pd.DataFrame, dict]:
+  """rows() + fgp by each row's season's lagged curve; kickoffs (no down) get NaN (no kick from that spot; the trees
+  route missing values). Returns (rows, {season: curve})."""
+  curves = dict(curves or {})
+  for s in sorted(r.season.unique()):
+    if int(s) not in curves:
+      curves[int(s)] = fg_curve(fg, int(s))
+  out = r.copy()
+  a = out.season.map(lambda s: curves[int(s)]["a"]).to_numpy(float)
+  b = out.season.map(lambda s: curves[int(s)]["b"]).to_numpy(float)
+  d = out.yardline_100.to_numpy(float) + FG_SNAP
+  out["fgp"] = np.where(out.down.notna(), 1 / (1 + np.exp(-(a + b * d))), np.nan)
+  return out, curves
 
 
 def export(model, features: list | None = None) -> dict:
@@ -112,8 +171,10 @@ def export(model, features: list | None = None) -> dict:
       if n["is_leaf"]:
         t.append([-1, 0, 0, 0, round(float(n["value"]), 8), 0])
       else:
-        t.append([int(n["feature_idx"]), float(n["num_threshold"]), int(n["left"]), int(n["right"]), 0,
-                  int(n["missing_go_to_left"])])
+        # (DH) a missing-vs-present split (fgp: kickoffs) has threshold inf, which JSON can't hold; the largest
+        # finite double routes every value the same way
+        thr = float(np.clip(n["num_threshold"], -np.finfo(float).max, np.finfo(float).max))
+        t.append([int(n["feature_idx"]), thr, int(n["left"]), int(n["right"]), 0, int(n["missing_go_to_left"])])
     trees.append(t)
   return {"features": features or FEATURES, "baseline": float(np.ravel(model._baseline_prediction)[0]), "trees": trees}
 

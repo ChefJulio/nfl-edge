@@ -18,7 +18,7 @@
   const mean = a => a.reduce((t, v) => t + v, 0) / a.length;
 
   function createCalc(M) {
-    const W = M.wp, I = M.inputs, F = W.features;
+    const W = M.wp, I = M.inputs, F = W.features, FGC = M.wp_fg || null;  // (DH) make curve for the win model's fgp
     const idx = Object.fromEntries(F.map((f, i) => [f, i]));
     // ---- tree models (win probability, conversion), exactly as sklearn evaluates them: left when x <= threshold
     const trees = (T, x) => {
@@ -61,6 +61,9 @@
       x[idx.own_to] = s.to; x[idx.opp_to] = s.oppTo; x[idx.exp_margin] = line;
       x[idx.spread_time] = line * Math.exp(-4 * (1 - sec / 3600)); x[idx.home] = s.home ? 1 : 0;
       x[idx.receive_2h] = sec > 1800 ? (s.rec2h ? 1 : 0) : 0; x[idx.diff_time] = s.diff / Math.sqrt(sec + 1);
+      // (DH, {#fg-input}) the field goal's make chance from the spot, by the season's curve (fit on the three seasons
+      // before it); a kickoff (no down) has none, as in training
+      if (idx.fgp != null) x[idx.fgp] = s.down && FGC ? sig(FGC.a + FGC.b * (clamp(s.yl, 1, 99) + (FGC.snap || 17))) : NaN;
       return x;
     };
     // (CJ, 2026-10-23, found by comparing with nfl4th) the half can end: a play that takes the rest of a half ends it
