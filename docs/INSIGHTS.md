@@ -4740,3 +4740,16 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   opponent's 35 / to own 40 / deeper x tied, behind 1-3, behind 4-8, ahead 1-3, ahead 4-8; cells of 30+) lower than
   wp()'s. Pass -> wp() uses it inside the last 3:00 of the 4th quarter, the "rough" note goes, the Decisions pane grades
   two-minute choices; (CJ) check (1) is rerun.
+- **RESULT {#endgame-dp} (DE) the endgame solved from rules and measured plays: FAIL (pre-check and both gates); not
+  shipped.** Branch test/de (untracked: nfledge/endgame_dp.py, tools/de_eval.py, tools/de_wp.mjs), runtime ~80 s.
+  Pre-check (2006-18 drives from the own 20-30, within 8, 200 simulations per start): 2:00 seconds used 73.4 vs 70.6
+  real (+4%), score rate 0.222 vs 0.197 (+13%); 1:00 seconds 48.4 vs 51.1 (-5%), score rate 0.141 vs 0.210 (-33%):
+  FAIL. Per-play outcomes matched real drill plays (completion, interception, sack, touchdown rates); the coarse
+  empirical policy lacked urgency (spikes 28% vs 40% with no timeouts, slower hurry-up, stray calls), so simulated
+  drives ran out of clock 34% vs 18%. Test 2019-25 (12,318 snaps, 1,117 games): Brier 0.1312 vs wp() 0.1317 (nflfastR
+  0.1300), -0.0005 [-0.0041, +0.0034], better 2 of 7 seasons; calibration gap over 59 cells 0.0392 vs 0.0344 (worse).
+  Largest cells (actual / DE / wp()): tied, 0:31-1:00, opponent's 35 to own 40: 0.835 / 0.679 / 0.716; tied 1:01-2:00
+  same field: 0.821 / 0.676 / 0.709; behind 1-3, 0:30 or less, same field: 0.431 / 0.220 / 0.236. Same blind spot as
+  (CH) and wp(): late tied / close teams with the ball win more than any average-behavior model expects. Sensitivity
+  (out of bounds stops the clock inside 5:00): identical. A DE2 would model hurry-up play-calling finely (spike / hurry
+  / timeout by seconds x timeouts x margin); not pre-registered.
