@@ -165,6 +165,19 @@
     [a, h].forEach(x => { if (luma(x.color) < 40 && x.alt && luma(x.alt) > luma(x.color) && cdist(x.alt, (x === a ? h : a).color) >= 90) x.color = x.alt; });
   };
   const TEAM_ID = {};
+  // the NFL's official play text uses its own codes for four teams (owner 2026-10-25: "Penalty, HST: Encroachment")
+  const GSIS = { ARZ: 'ARI', BLT: 'BAL', CLV: 'CLE', HST: 'HOU' };
+  // (owner 2026-10-25) a missed field goal from beyond the 20 gives the defense the ball at the spot of the kick (the
+  // 20 if it was inside it), not the line of scrimmage, which is where ESPN leaves the play's end: from the kick's
+  // distance (spot = distance - 10 yards to the end zone), in the receiving team's terms
+  const missedFgSpot = (p, off, def) => {
+    const t = `${(p.type || {}).text || ''} ${p.text || ''}`;
+    if (p.scoringPlay || !/field goal/i.test(t) || /block/i.test(t) || !/no good|missed/i.test(t)) return null;
+    const m = String(p.text || '').match(/(\d+)[- ](?:yards?|yds?)\.? field goal/i);
+    if (!m || !off || !def) return null;
+    const k = +m[1] - 10;
+    return k <= 20 ? `${def} 20` : k < 50 ? `${def} ${k}` : k === 50 ? '50' : `${off} ${100 - k}`;
+  };
   // where a play started and ended (owner 2026-10-18): "LAC 16 → LAC 20"; a touchdown ends in the end zone; when the
   // other team has it after the play, its name leads the end spot ("KC ball at LAC 41")
   // a play's downs and spots as two pairs (owner 2026-10-18): "1st & 10 → 2nd & 5" and "NE 47 → DAL 48"; a new set
@@ -177,14 +190,15 @@
     const swap = t0 && t1 && t0 !== t1;
     const d1 = td || isTry(p) ? '' : swap ? `${t1} ball` : e0.down ? (e0.shortDownDistanceText || e0.downDistanceText || '') : '';
     const downs = d0 ? `<span class="pp"><span class="rp-d ${DOWN_CLS(d0)}">${esc(d0)}</span>${d1 && (d1 !== d0 || (e0.possessionText && e0.possessionText !== s0.possessionText)) ? ` <span class="rp-ar">&rarr;</span> <span class="rp-d ${swap ? 'chg' : /^1st/.test(d1) ? 'd1' : DOWN_CLS(d1)}">${esc(d1)}</span>` : ''}</span>` : '';
-    const a = s0.possessionText, b = td ? 'end zone' : e0.possessionText;
+    const a = s0.possessionText, b = td ? 'end zone' : (swap && missedFgSpot(p, t0, t1)) || e0.possessionText;
     const spots = a ? `<span class="pp muted">${esc(a)}${b && b !== a ? ` <span class="rp-ar">&rarr;</span> ${esc(b)}` : ''}</span>` : '';
     return { downs, spots };
   };
   const spotLine = p => {
-    const a = p.start && p.start.possessionText, b = p.end && p.end.possessionText;
+    const a = p.start && p.start.possessionText;
     if (!a) return '';
     const t0 = p.start.team && TEAM_ID[String(p.start.team.id)], t1 = p.end && p.end.team && TEAM_ID[String(p.end.team.id)];
+    const b = (t1 && t0 && t1 !== t0 && missedFgSpot(p, t0, t1)) || (p.end && p.end.possessionText);
     const td = p.scoringPlay && /touchdown/i.test(`${(p.type || {}).text || ''} ${p.text || ''}`);
     const end = td ? 'end zone' : b ? (t1 && t0 && t1 !== t0 ? `${t1} ball at ${b}` : b) : '';
     return end && end !== a ? `${esc(a)} &rarr; ${esc(end)}` : `at ${esc(a)}`;
@@ -524,7 +538,7 @@
       const r = ACT.test(inner) ? action(inner) : null;
       h = `Two-point try${r ? `: ${r.h.replace(/, (?:\d+ yards?|no gain|loss of \d+)$/, '')}` : ''}, ${ok ? 'good' : 'no good'}`; cls = ok ? '' : 'bad'; }
     else if (/field goal/i.test(t)) { const r = g('fg', 2); h = `${g('fg') || ''}-yard field goal, ${/good/i.test(r || t) && !/no good/i.test(r || '') ? 'good' : r && /block/i.test(r) ? 'blocked' : 'no good'}`; cls = /good/i.test(t) ? 'good' : 'bad'; }
-    else if (/penalty/i.test(t)) { const m = raw.match(RX.pen); h = m ? `Penalty, ${m[1]}: ${m[2]}, ${m[3]} yards` : 'Penalty'; cls = 'pen'; }  // not 'flag': site.css .flag is a white badge
+    else if (/penalty/i.test(t)) { const m = raw.match(RX.pen); h = m ? `Penalty, ${GSIS[m[1]] || m[1]}: ${m[2]}, ${m[3]} yards` : 'Penalty'; cls = 'pen'; }  // not 'flag': site.css .flag is a white badge
     else h = t || raw.split('. ')[0];
     if (td) { h += ' · Touchdown'; cls = 'td'; }
     if (pl.isTurnover && cls !== 'bad') cls = 'bad';
@@ -4145,9 +4159,28 @@
     const next = nx ? `<ol class="ds-ps"><li class="ds-p ps-next"><span class="ds-w">${esc(`${periodName(info.period)} ${info.clock || ''}`.trim())}</span><span class="ds-h">${nx.head}
       <span class="ds-sp"><span class="live-dot"></span>Awaiting the ${/try/i.test(nx.head) ? 'try' : 'kick'}&hellip;</span></span></li></ol>` : '';
     const lastReal = [...st.plays].reverse().find(p => !nonPlay(p));
-    return next + ds.map(d => {
-      const tm = teamOf(d.team && d.team.id) || {}, isCur = !nx && st.cur && String(st.cur.id) === String(d.id) && (st.live || st.replay);
+    // (owner 2026-10-25: NYG's missed field goal, HOU's 1st & 10 listed under "NYG drive · Now") after a change of
+    // possession ESPN keeps the old drive current until the new team's first snap: the team with the ball leads under
+    // its own header, and the old drive shows how it ended
+    const sit = st.sit || {}, posId = String(sit.possession || (sit.team && sit.team.id) || '');
+    const flip = !!(st.live && !nx && st.cur && posId && st.cur.team && String(st.cur.team.id) !== posId && teamOf(posId));
+    const fresh = flip ? (() => { const tm = teamOf(posId);
+      return `<div class="rc-d" style="--tc:${esc(tm.color || '#666')}"><div class="rc-h">${tm.logo ? logo(tm.logo, '#111', 18, tm.team) : ''}<b>${esc(tm.team)} drive</b>
+        <span class="rc-now"><span class="live-dot"></span>Now</span>${sit.possessionText ? `<span class="muted rc-m">Starts at ${esc(sit.possessionText)}</span>` : ''}</div>
+        <ol class="ds-ps">${presnap(st, info)}</ol></div>`; })() : '';
+    const endedBy = (p, tm) => {
+      const t = `${pType(p)} ${p.text || ''}`, opp = tm.team === info.home.team ? info.away.team : info.home.team;
+      if (/field goal/i.test(t)) return { text: /block/i.test(t) ? `Field goal blocked by ${opp}` : 'Missed field goal', cls: 'bad' };
+      if (/punt/i.test(t)) return { text: 'Punt', cls: '' };
+      if (/intercept/i.test(t)) return { text: `Intercepted by ${opp}`, cls: 'bad' };
+      if (/fumble/i.test(t)) return { text: `Fumble lost to ${opp}`, cls: 'bad' };
+      if (p.start && p.start.down === 4) return { text: 'Turnover on downs', cls: 'bad' };
+      return { text: 'Ended', cls: '' };
+    };
+    return next + fresh + ds.map(d => {
+      const tm = teamOf(d.team && d.team.id) || {}, isCur = !nx && !flip && st.cur && String(st.cur.id) === String(d.id) && (st.live || st.replay);
       let res = driveResult(d, tm, info, !!isCur);
+      if (flip && !res.text && lastReal && (d.plays || []).includes(lastReal)) res = endedBy(lastReal, tm);
       if (nx && !res.text && lastReal && (d.plays || []).includes(lastReal)) {
         const t = `${pType(lastReal)} ${lastReal.text || ''}`;
         res = { text: lastReal.scoringPlay ? (/field goal/i.test(t) ? 'Field goal' : isTry(lastReal) ? 'Touchdown' : /safety/i.test(t) ? 'Safety' : 'Touchdown') : 'Ended', cls: lastReal.scoringPlay ? 'good' : '' };

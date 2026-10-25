@@ -863,6 +863,43 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     || /[?&]standalone=1\b/.test(location.search);
   if (!standalone) return;
   html.classList.add('standalone');
+  // (0) The top safe area, measured (owner 2026-10-25, screenshot: "NFL Edge" under the status bar after switching back;
+  // "when switching back to the app can we have a strict check every single time to reposition the view accounting for
+  // safe areas"). iOS reports env(safe-area-inset-top) as 0 for a moment after a resume and WebKit doesn't always
+  // re-apply env() afterwards, so the page's top padding and the status-bar cover collapsed. A probe sized by env() is
+  // measured instead, the last good value kept per orientation (a 0 read in portrait right after a resume never replaces
+  // a known inset; landscape's 0 is real), and set as --sat, which the top padding, the cover and every sticky offset
+  // read (shell.css). Re-checked on every return, in steps as the viewport settles, with the rest of the measured layout.
+  const probe = document.createElement('div');
+  probe.setAttribute('aria-hidden', 'true');
+  probe.style.cssText = 'position:fixed;top:0;left:0;width:0;visibility:hidden;pointer-events:none';
+  document.body.appendChild(probe);
+  const known = {};
+  try { Object.assign(known, JSON.parse(localStorage.getItem('nfle-sat') || '{}')); } catch (e) { /* private mode */ }
+  const setSat = () => {
+    probe.style.height = '0px'; void probe.offsetHeight;  // force WebKit to re-resolve env() rather than reuse a stale value
+    probe.style.height = 'env(safe-area-inset-top)';
+    const m = probe.offsetHeight, o = innerWidth > innerHeight ? 'l' : 'p';
+    if (m > 0 && m !== known[o]) { known[o] = m; try { localStorage.setItem('nfle-sat', JSON.stringify(known)); } catch (e) { /* ignore */ } }
+    const v = m > 0 ? m : (known[o] || 0);
+    if (html.style.getPropertyValue('--sat') !== `${v}px`) html.style.setProperty('--sat', `${v}px`);
+  };
+  setSat();
+  // every measured offset after the safe area: the top bar's height and the sticky rows (resize listeners), the bottom
+  // bar (fixBar), the matchup tiles' fit (paintMini)
+  const relayout = () => {
+    setSat();
+    dispatchEvent(new Event('resize'));
+    if (NFLE.fixBar) NFLE.fixBar();
+    if (NFLE.paintMini && document.querySelector('.mgrid') && document.querySelector('.mgrid').offsetParent) NFLE.paintMini();
+  };
+  const settleTop = () => [0, 60, 250, 600, 1200, 2000].forEach(t => setTimeout(relayout, t));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) settleTop(); });
+  addEventListener('pageshow', settleTop);
+  addEventListener('focus', settleTop);
+  addEventListener('orientationchange', settleTop);
+  if (window.visualViewport) visualViewport.addEventListener('resize', setSat);
+  NFLE.relayout = relayout;
   // (1) Bottom bar drift (owner 2026-10-20, screenshot: the bar rides up to mid-screen). WebKit bug in standalone mode
   // (bugs.webkit.org 297779, Apple forums 800154): after the keyboard closes the layout viewport keeps its keyboard-
   // shrunk height, and position: fixed anchors to it. When the visual viewport's bottom and the layout viewport's

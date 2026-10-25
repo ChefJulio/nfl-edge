@@ -89,10 +89,13 @@ html.land-anim #tab-players .scroll tbody tr.rise:nth-child(n+13) { animation-de
 /* Home-screen app (html.standalone, shell.js): the page runs edge to edge under the status bar (viewport-fit=cover),
    so content scrolled up under the clock (owner 2026-10-20). An opaque strip behind the status bar, the page starts
    below it, and everything that sticks to the top sits below it (--sat, added to each sticky offset). */
+/* (2026-10-25) --sat is measured by shell.js (an inline value on <html>, re-checked on every return to the app: iOS's
+   env() reads 0 for a moment after a resume); env() is only the first-paint fallback */
 html.standalone { --sat: env(safe-area-inset-top); }
-html.standalone body { padding-top: env(safe-area-inset-top); }
-html.standalone body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: env(safe-area-inset-top); background: var(--bg); z-index: 95; }
-html.standalone nav.tabs, html.standalone nav.gc-tabs, html.standalone .gc-jump, html.standalone .gc-panes { top: env(safe-area-inset-top); }
+html.standalone body { padding-top: var(--sat); }
+html.standalone body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: var(--sat); background: var(--bg); z-index: 95; }
+html.standalone nav.tabs, html.standalone nav.gc-tabs, html.standalone .gc-jump, html.standalone .gc-panes { top: var(--sat); }
+html.standalone .ptr { top: calc(var(--sat) + 8px); }
 
 /* player finder (shell.js NFLE.finder): matches drop down under the search box; the page's list stays put */
 .fnd-host { position: relative; }
