@@ -4787,3 +4787,14 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   behind 1-3 inside the opponent's 20 with 0:15 or less, simulated score rate within 10 points of real); only the
   shrinkage weight and the band edges may be tuned. The 2019-25 test runs ONCE if the pre-check passes, (DE)'s GATE
   unchanged. Pre-check not passed -> FAIL, test untouched.
+- **RESULT {#endgame-dp3} (DE3) the endgame with hurry-up play outcomes: FAIL at the pre-check; test not run. Also a
+  CORRECTION to (DE2)'s diagnosis.** Hurry tables 8,256 plays 2006-18 (cells: runs 13-454, short 282-1,064, deep
+  116-339). Real: 2:00 70.6 s / 0.197 / run-out 0.091; 1:00 51.1 / 0.210 / 0.269; start state (behind 1-3 inside the 20,
+  0:15 or less) 0.960 (99 snaps). Iterations (k 1-200, band edges): 2:00 ~70.4 s / 0.185 / 0.149 (run-out +5.8 points
+  over the 5-point limit), 1:00 ~49.1 s / 0.107 / 0.43 (fails), start state 0.773 -> 0.868 after a SIMULATOR BUG fix:
+  a real snap with a running clock was simulated as if before the snap, charging the runoff twice (the solved values
+  were not affected). With it fixed, (DE2)'s "96% vs 73%" start-state gap was mostly that bug (corrected: 96% vs
+  ~87%), and the hurry outcome tables move nothing (k and band edges barely change any number). So (DE2)'s diagnosis
+  (the outcome tables) does not hold; the 1:00 drive miss is unexplained by policy, runoff or outcomes. Untested:
+  the play seconds and the clock rules (fixed under (DE)-(DE3)). The calculator keeps the general model with its
+  "rough" note in the last 3:00; the endgame work rests until the season-end recheck.
