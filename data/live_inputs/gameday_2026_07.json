@@ -28,5 +28,75 @@
 "at": "2026-10-22T22:48:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0036139": {
+"name": "Rico Dowdle",
+"team": "PIT",
+"pos": "RB",
+"pre": 0.7955,
+"ruling": "ACT",
+"at": "2026-10-25T12:13:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0036862": {
+"name": "Ben Skowronek",
+"team": "PIT",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-10-25T12:15:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0037013": {
+"name": "Zach Wilson",
+"team": "NO",
+"pos": "QB",
+"pre": 0.1009,
+"ruling": "INA",
+"at": "2026-10-25T12:04:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0039518": {
+"name": "Treyton Welch",
+"team": "NO",
+"pos": "TE",
+"pre": 0.7958,
+"ruling": "INA",
+"at": "2026-10-25T12:04:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040203": {
+"name": "Will Howard",
+"team": "PIT",
+"pos": "QB",
+"pre": 0.1009,
+"ruling": "INA",
+"at": "2026-10-25T12:15:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041490": {
+"name": "Eli Heidenreich",
+"team": "PIT",
+"pos": "RB",
+"pre": 0.1969,
+"ruling": "INA",
+"at": "2026-10-25T12:15:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041565": {
+"name": "Drew Allar",
+"team": "PIT",
+"pos": "QB",
+"pre": 0.1003,
+"ruling": "INA",
+"at": "2026-10-25T12:15:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
