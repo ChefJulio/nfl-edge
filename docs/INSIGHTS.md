@@ -4856,3 +4856,48 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   (was 0.857 at (CJ)). The rebuild first failed: a split separating kickoffs (fgp missing) from the rest carries an
   infinite threshold, which JSON can't hold; export now writes the largest finite double (same routing), and
   calc_build writes model files with allow_nan=False (fails at build, not in the browser).
+- **FINDING + PRE-REGISTERED 2026-10-25 (owner: "yes"): (DI) the win model's home / possession skew.** Found grading a
+  penalty choice: a home team tied in the 2nd quarter (8:00) at 4th & 5 on the opponent's 15, line 0, reads 56.3%; a
+  MADE field goal (97%) leaves it 47.1%, below the moment before it, and the engine's best option (go, 51.3%) is far
+  below the model's value of the moment. Cause: with an even line the model rates the team with the ball much better
+  away than at home: Q2 7:55, tied, 1st & 10 at its own 30: home 51.6% vs away 60.1% (DH model; pre-DH 49.2 / 58.3, so
+  not DH); widest for lines -3..+3 (line +7: 72.5 / 69.9). Real games agree in direction, not size: |line| <= 1.5,
+  2006-24, 583 games, the away team won 52.8% (the line already carries home field; in pick'em games the away team is
+  the better one); in the cell above (n ~250 per side) away with the ball won 55.0% vs home 51.6%. Every change of
+  possession in a close-line game is priced through this, so home teams are nudged toward go and away teams toward
+  kicks; (CJ)'s overall calibration hid it (the two sides cancel). Candidates (the owner approved both): (a) drop
+  `home` (exp_margin already carries home field); (b) possession-symmetric training: every row also from the defense's
+  side (score, timeouts, line, home and second-half receiver flipped, y = 1 - y, ball = 0; the ball team's yards to
+  the end zone, yards to go and fgp entered negated on those rows, so the monotone directions hold for both), and the
+  engine reads wp = (f(ball side) + 1 - f(defense side)) / 2, so the two teams' chances at one moment sum to 1 exactly.
+  Both keep DH's fgp. Test: tools/di_eval.py, walk-forward 2022-25 as (DH), current vs (a) vs (b) on the same rows.
+  GATE per candidate (all): (1) pooled Brier not worse (95% interval over games, upper < +0.0005); (2) calibration
+  deciles within 3 points; (3) home split: team with the ball at home / away x |line| <= 3 / > 3 (four groups), the
+  worst |actual - model| lower than current's and every group within 2 points; (4) the field goal check, engine on each
+  variant's through-2024 model file, 480 states where kicking is the standard play (Q1 10:00, Q2 8:00, Q3 8:00, Q4
+  10:00; score -3 / 0 / +3; line -7 / -3 / 0 / +3 / +7; home / away; 4th & 8 at the 5 / 10 / 15 / 20): a made field goal
+  worth more than 1 point less than the moment before it on at most 1% of them (4) and on fewer than current. (Owner,
+  2026-10-25: "FGs can realistically lower win chance?" Yes, against a better option, e.g. down 7 late or handing back
+  time; this grid excludes those: short kicks, not late, within 3.) Both pass -> the one with fewer (4) cases, then the
+  lower pooled Brier. Pass -> the live model changes; (CJ) check (1) rerun before shipping. Fail -> recorded either way.
+- **RESULT {#home-skew} (DI) the home / possession skew: FAIL, both candidates; nothing ships. Gate (4) was mis-aimed.**
+  tools/di_eval.py + tools/di_grid.mjs, walk-forward 2022-25, 175,720 rows, 1,136 games. Current model, home split
+  (actual - model): away |line| <= 3 -1.81, > 3 -1.39; home <= 3 +1.50, > 3 +0.80 (the skew is real in held-out games:
+  away teams with the ball read ~1.5 points too high, home ~1.5 too low, in close-line games). (a) no `home`: (1)
+  Brier 0.15480 -> 0.15484, +0.00005 [-0.00079, +0.00088]: FAIL (upper over +0.0005; the interval is 8x DH's: dropping
+  an input moves many predictions); (2) worst decile 2.10 (PASS); (3) home split worst 1.81 -> 0.59, all four groups
+  within 0.6 (PASS); (4) FAIL. (b) symmetric: (1) +0.00025 [+0.00001, +0.00048] (PASS, barely; worse in all four
+  seasons); (2) 2.53 (PASS); (3) 1.81 -> 2.34 (FAIL: away <= 3 got worse); (4) FAIL. (4): a made field goal worth 1+
+  point less than the moment before on cur 330 / a 369 / b 360 of 480 states (worst 12.6 / 12.3 / 17.8). That check
+  never measured the home skew: (a) reads home and away identically (the original example: 61.0 / 61.0 now, 54.0 made)
+  and still shows a ~7 point drop. Where the drop comes from (measured after, not gated): real made field goals inside
+  the 20, Q1-Q3, within 3, 2022-25 (687): the model before the kick 58.7%, at the kickoff after it 57.1%, actually won
+  55.5%: the model's value of a 4th down near the goal line is high (~3 points over the results, ~1.6 over its own
+  after-kick value); the engine's after-kick state adds 2025 kickoff spots (opponent at its 29.3 on average vs 25:
+  ~0.7 of the 4.6 points in one probed state) and the snap's clock. Consequences: the engine's decisions compare
+  options with each other (all after-states), so they are not hit; anything that compares the RAW value of a moment
+  with option values is (the page's "now" next to the options; the penalty demo of 2026-10-25, which valued a 3rd down
+  raw against a 4th down's best option and so leaned to "decline"). Leads, each its own test: (a) again with a gate
+  sized to its interval (a re-run of this exact test after seeing it is the forking path; a new pre-registration must
+  say so); value every penalty branch the same way (step 2 of the penalty grading); the raw 4th-down value near the
+  goal line. The engine keeps reading both file shapes (no `home`; W.sym) so tools/di_grid.mjs reproduces this.

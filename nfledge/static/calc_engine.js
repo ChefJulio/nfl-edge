@@ -53,19 +53,28 @@
     // winning with 1:59 left, defense has 3 timeouts vs 0?") it had ignored the down, so 3rd & 10 at 1:59 against no
     // timeouts read a sure win when only ~0:40 can be run off before a punt.
     const kneel = (sec, defTo, down = 1) => sec < 40 * Math.max(0, 4 - (down || 1) - defTo);
-    const featuresOf = s => {
-      const sec = clamp(s.sec, 0, 3600), half = sec > 1800 ? sec - 1800 : sec, line = s.line || 0;
+    // (DI, {#home-skew}: failed; the live file has neither shape, kept so tools/di_grid.mjs reproduces the result)
+    // side 0: the same moment from the defense's side (a possession-symmetric model file, W.sym): its score,
+    // timeouts, line, home and second-half receiver; the ball team's yards to the end zone, yards to go and fgp negated
+    const featuresOf = (s, side = 1) => {
+      const d = side ? s : { ...s, diff: -s.diff, to: s.oppTo, oppTo: s.to, line: -(s.line || 0), home: s.home ? 0 : 1, rec2h: s.rec2h ? 0 : 1 };
+      const sg = side ? 1 : -1;
+      const sec = clamp(d.sec, 0, 3600), half = sec > 1800 ? sec - 1800 : sec, line = d.line || 0;
       const x = new Array(F.length);
-      x[idx.score_diff] = s.diff; x[idx.game_sec] = sec; x[idx.half_sec] = half; x[idx.second_half] = sec <= 1800 ? 1 : 0;
-      x[idx.down] = s.down || 0; x[idx.ydstogo] = s.togo; x[idx.yardline_100] = clamp(s.yl, 1, 99);
-      x[idx.own_to] = s.to; x[idx.opp_to] = s.oppTo; x[idx.exp_margin] = line;
-      x[idx.spread_time] = line * Math.exp(-4 * (1 - sec / 3600)); x[idx.home] = s.home ? 1 : 0;
-      x[idx.receive_2h] = sec > 1800 ? (s.rec2h ? 1 : 0) : 0; x[idx.diff_time] = s.diff / Math.sqrt(sec + 1);
+      x[idx.score_diff] = d.diff; x[idx.game_sec] = sec; x[idx.half_sec] = half; x[idx.second_half] = sec <= 1800 ? 1 : 0;
+      x[idx.down] = d.down || 0; x[idx.ydstogo] = sg * d.togo; x[idx.yardline_100] = sg * clamp(d.yl, 1, 99);
+      x[idx.own_to] = d.to; x[idx.opp_to] = d.oppTo; x[idx.exp_margin] = line;
+      x[idx.spread_time] = line * Math.exp(-4 * (1 - sec / 3600));
+      if (idx.home != null) x[idx.home] = d.home ? 1 : 0;  // (DI a) a model file may not carry it
+      x[idx.receive_2h] = sec > 1800 ? (d.rec2h ? 1 : 0) : 0; x[idx.diff_time] = d.diff / Math.sqrt(sec + 1);
       // (DH, {#fg-input}) the field goal's make chance from the spot, by the season's curve (fit on the three seasons
       // before it); a kickoff (no down) has none, as in training
-      if (idx.fgp != null) x[idx.fgp] = s.down && FGC ? sig(FGC.a + FGC.b * (clamp(s.yl, 1, 99) + (FGC.snap || 17))) : NaN;
+      if (idx.fgp != null) x[idx.fgp] = d.down && FGC ? sg * sig(FGC.a + FGC.b * (clamp(d.yl, 1, 99) + (FGC.snap || 17))) : NaN;
+      if (idx.ball != null) x[idx.ball] = side;
       return x;
     };
+    // (DI b) a symmetric file: the ball side's chance and 1 - the defense side's, averaged (the two teams sum to 1)
+    const modelWp = s => W.sym ? (sig(raw(featuresOf(s, 1))) + 1 - sig(raw(featuresOf(s, 0)))) / 2 : sig(raw(featuresOf(s)));
     // (CJ, 2026-10-23, found by comparing with nfl4th) the half can end: a play that takes the rest of a half ends it
     // (later() marks the state "over"), so a non-scoring conversion with 0:03 left before halftime is worth the
     // halftime score, not a new set of downs; and a leader with the ball who can kneel it out has won, whatever led
@@ -94,7 +103,7 @@
         const g = Math.sign(s.diff), own = wp({ ...s, eq: 1 });
         return w * (wp({ ...s, diff: g, eq: 1 }) + wp({ ...s, diff: 2 * g, eq: 1 })) / 2 + (1 - w) * own;
       }
-      return sig(raw(featuresOf(s)));
+      return modelWp(s);
     };
     // the other team's side of the same moment
     const flip = s => ({ ...s, diff: -s.diff, to: s.oppTo, oppTo: s.to, line: -(s.line || 0), home: s.home ? 0 : 1, rec2h: s.rec2h ? 0 : 1 });
