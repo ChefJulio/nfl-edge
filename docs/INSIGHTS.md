@@ -4765,3 +4765,14 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   the pre-check passes, with (DE)'s GATE unchanged (Brier lower with a 95% interval over games excluding 0; mean
   calibration gap over (CH)'s cells lower than wp()'s). If the pre-check can't be passed, DE2 stops there (FAIL)
   without touching the test.
+- **RESULT {#endgame-dp2} (DE2) the endgame with hurry-up play-calling: FAIL at the pre-check; the 2019-25 test was
+  not run.** Branch test/de (untracked; tools/de2_eval.py refuses the test unless the pre-check passes; iterations in
+  scratch/de/de2_iterations.log). Real 2006-18: 2:00 70.6 s / score 0.197 / clock ran out 0.091 (132 drives); 1:00
+  51.1 s / 0.210 / 0.269 (119). Iteration 1 (as pre-registered): 2:00 65.0 / 0.160 / 0.143, 1:00 44.9 / 0.086 / 0.381.
+  Best (8: down as a dimension, behind 9+ left out of the measurement, shrink order changed): 2:00 71.4 / 0.188 /
+  0.154 (passes seconds and score, run-out 1.3 points over), 1:00 48.6 / 0.101 / 0.430 (fails). No combination of
+  policy and runoff moved the 1:00 score rate past 0.10-0.15. Diagnosis: from real 2006-18 snap states the simulator
+  under-scores everywhere late (behind 1-3 inside the 20 with 0:07-0:15: real 96%, simulated 73%, with field goals
+  chosen 87%): the measured late pass outcomes mix in-bounds completions that run the clock with the end-zone /
+  sideline throws teams actually make there. The outcome model, not the play-calling, is what's missing; DE2 could
+  not change it. The calculator keeps the general model with its "rough" note in the last 3:00.
