@@ -468,5 +468,85 @@
 "at": "2026-10-25T18:44:00+00:00",
 "post": 0.0,
 "status": "Inactive (LDD)"
+},
+"00-0037091": {
+"name": "Bo Melton",
+"team": "GB",
+"pos": "WR",
+"pre": 0.7053,
+"ruling": "ACT",
+"at": "2026-10-25T18:58:00+00:00",
+"post": 0.974,
+"status": "Active (DDL)"
+},
+"00-0038579": {
+"name": "Aidan O'Connell",
+"team": "LV",
+"pos": "QB",
+"pre": 0.0965,
+"ruling": "INA",
+"at": "2026-10-25T19:05:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0039075": {
+"name": "Puka Nacua",
+"team": "LA",
+"pos": "WR",
+"pre": 0.6249,
+"ruling": "ACT",
+"at": "2026-10-25T19:00:00+00:00",
+"post": 0.974,
+"status": "Active (FLD)"
+},
+"00-0040142": {
+"name": "Kaleb Johnson",
+"team": "GB",
+"pos": "RB",
+"pre": 0.941,
+"ruling": "INA",
+"at": "2026-10-25T18:58:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040390": {
+"name": "Jackson Meeks",
+"team": "DET",
+"pos": "TE",
+"pre": 0.2928,
+"ruling": "INA",
+"at": "2026-10-25T18:59:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040878": {
+"name": "Mike Washington Jr.",
+"team": "LV",
+"pos": "RB",
+"pre": 0.3522,
+"ruling": "ACT",
+"at": "2026-10-25T19:01:00+00:00",
+"post": 0.974,
+"status": "Active (LDD)"
+},
+"00-0041510": {
+"name": "Max Klare",
+"team": "LA",
+"pos": "TE",
+"pre": 0.8345,
+"ruling": "INA",
+"at": "2026-10-25T19:05:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041568": {
+"name": "Ty Simpson",
+"team": "LA",
+"pos": "QB",
+"pre": 0.1409,
+"ruling": "INA",
+"at": "2026-10-25T19:05:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
