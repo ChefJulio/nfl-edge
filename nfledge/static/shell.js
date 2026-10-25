@@ -574,15 +574,11 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   // or from anywhere once it is scrolled to the top; far or fast enough slides it away and closes it (as the close
   // button does, so Back stays in step), else it springs back. Sideways swipes (a game log scrolling) are left alone.
   const cardWrap = cardOv.querySelector('.pc-wrap');
-  let dy0 = 0, dx0 = 0, dmode = null, dlast = 0, dlastT = 0, dv = 0, dsteep = 1;
+  let dy0 = 0, dx0 = 0, dmode = null, dlast = 0, dlastT = 0, dv = 0;
   cardBox.addEventListener('touchstart', e => {
     if (e.touches.length !== 1 || !matchMedia('(max-width: 640px)').matches) { dmode = 'off'; return; }
     dy0 = dlast = e.touches[0].clientY; dx0 = e.touches[0].clientX; dlastT = e.timeStamp; dv = 0;
-    // (owner 2026-10-25: "it grabs the table and doesn't let you scroll right" ... "i still wanna be able to close the
-    // slide by swiping down even on the game log") in a table that scrolls sideways, a close-drag needs a clearly
-    // downward swipe (1.5x more down than sideways); anything flatter stays the table's scroll
-    const sx = e.target.closest('.lg-scroll, .scroll, .bx-t, .rf-scroll');
-    dsteep = sx && sx.scrollWidth > sx.clientWidth + 1 ? 1.5 : 1;
+    // tables scroll sideways only, so up / down is always the card's, on a table too (owner 2026-10-25): one rule
     dmode = e.target.closest('.pc-head') && cardBox.scrollTop <= 0 ? 'maybe' : null;
   }, { passive: true });
   cardBox.addEventListener('touchmove', e => {
@@ -591,7 +587,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     if (e.timeStamp > dlastT) { dv = (y - dlast) / (e.timeStamp - dlastT); dlast = y; dlastT = e.timeStamp; }
     if (dmode !== 'drag') {
       if (Math.abs(dy) < 6 && Math.abs(dx) < 6) return;
-      dmode = dy > 0 && Math.abs(dy) > dsteep * Math.abs(dx) && cardBox.scrollTop <= 0 ? 'drag' : 'no';
+      dmode = dy > 0 && Math.abs(dy) > Math.abs(dx) && cardBox.scrollTop <= 0 ? 'drag' : 'no';
       if (dmode !== 'drag') return;
     }
     e.preventDefault();
