@@ -1629,6 +1629,18 @@ tr.lg-tot.lg-tot-pinned { visibility: hidden; }  /* its pinned copy (.lg-fh) sho
 .mg-lg .mg-ball { position: absolute; bottom: -1px; width: 16px; height: 11px; border-radius: 999px;
   background-color: rgba(13,15,19,.72); background-size: 12px 8px; box-shadow: 0 0 0 1px rgba(255,255,255,.18); }
 .mg-t.away .mg-ball { right: -1px; } .mg-t.home .mg-ball { left: -1px; }
+/* the scoreboard: each team's column never narrower than its logo, code and score (owner 2026-10-25: "13 AL" for
+   "13 BAL": the middle's "What should they do?" took its full width and the home side's code was cut on the left);
+   the middle gives way instead, its lines and the button wrapping */
+.sb { grid-template-columns: minmax(max-content, 1fr) minmax(0, auto) minmax(max-content, 1fr); }
+.sb-mid { min-width: 0; }
+.sb-mid > * { min-width: 0; }
+.sb > .sb-calc { grid-column: 1 / -1; justify-self: center; margin: -4px 0 10px; }
+.sb-mid .sb-dd { line-height: 1.2; } .sb-dd > span { white-space: nowrap; } .sb-dd .sb-at::before { content: " · "; }
+@media (max-width: 640px) { .sb-dd > span { display: block; } .sb-dd .sb-at::before { content: none; } }  /* down, then spot */
+@media (max-width: 350px) { .sb-t .nl, .sb-t .sb-lg { display: none; } }  /* the smallest phones: codes and scores first */
+@media (max-width: 380px) { .sb-t { gap: 4px; padding-left: 6px; padding-right: 6px; } .sb-t .nl { width: 30px !important; height: 30px !important; }
+  .sb-t .nl img { width: 23px; height: 23px; } .sb-s { font-size: 27px; } }
 /* sized to the tile's own width (owner 2026-10-25: "test these matchup tiles with max potential width values, make sure
    they don't clip"; scratch/mg_test.py: WAS / WAS, 52-48, OT 10:00 4th & 25 overlapped the middle at 375 px and below):
    full size on a wide tile, scaled down on narrow ones, never past the column */
