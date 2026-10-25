@@ -4128,13 +4128,39 @@
         const yac = caught && Number.isFinite(+p.yardsAfterCatch) ? Math.max(0, +p.yardsAfterCatch) : 0;
         const endReal = td ? 100 : e, catchAt = yac > 0 ? endReal - yac : e;
         const flyTo = yac > 0 ? (Math.abs(catchAt - s0) < 1.5 ? s0 + 1.5 : catchAt) : e;
-        if (caught && yac > 0) bars = seg(flyTo, e, 'gain');
-        const to = caught ? flyTo : Math.min(108, s0 + (/ deep /i.test(raw0) ? 20 : 6));
-        const lo = Math.min(s0, to), hi = Math.max(s0, to), ht = Math.max(4, Math.min(14, 3 + 0.45 * (hi - lo)));  // a longer throw flies higher
-        if (caught && yac <= 0) bars = '';  // no run after the catch: the arc is the whole gain
-        arc = `<svg class="fs-arc${inc ? ' miss' : pick ? ' int' : ' gain'}" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%;height:${ht.toFixed(1)}px" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M0,12 Q50,-10 100,12"/></svg>`
-          + (inc || pick ? `<i class="fs-x${pick ? ' int' : ''}" style="left:${pc(to)}%"></i>`
-            : `<i class="fs-catch" style="left:${pc(e)}%"></i>`);  // where the play ended (owner 2026-10-25: "a little green dot where the arc ends")
+        if (caught) {
+          // one continuous line (owner 2026-10-25: "they should join smoothly at the point of catch"): the flight rises
+          // from the snap and levels off INTO the catch point (horizontal there), then runs straight along the bar to
+          // where the play ended; drawn in yards across, px up, so the line keeps the bar's thickness all the way
+          bars = '';
+          // (owner: "make them both tangential to a cleaner angle") a symmetric flight: it leaves the bar and lands back
+          // on it at the same angle (ANG; flatter for long throws, capped at MAXH px high), a round join into the run.
+          // Drawn in px at the strip's typical scale (K px a yard: a ~300 px strip over 120 yards) so the angles hold
+          const K = 2.6, ANG = Math.tan(38 * Math.PI / 180), MAXH = 13;
+          // (owner 2026-10-25: "any ideas to make it look nicer when the catch is at/around the LOS?") under 3 yards in
+          // the air there's no flight to draw: the pass line runs flat from the catch (a hollow ring) to the end, with a
+          // faint dashed line back to the snap when the catch was behind it
+          const air = catchAt - s0;
+          if (yac > 0 && air < 3) {  // caught under 3 yards downfield, behind the line included
+            const lo2 = Math.min(s0, catchAt, e), hi2 = Math.max(s0, catchAt, e), W2 = Math.max(0.5, hi2 - lo2) * K, x2 = v => ((v - lo2) * K).toFixed(1);
+            const start = air < -0.5 ? catchAt : s0;
+            arc = `<svg class="fs-arc gain" style="left:${pc(lo2)}%;width:${(pc(hi2) - pc(lo2)).toFixed(2)}%;height:2px" viewBox="0 0 ${W2.toFixed(1)} 2" preserveAspectRatio="none">`
+              + (air < -0.5 ? `<path class="back" d="M${x2(s0)},2 L${x2(catchAt)},2"/>` : '') + `<path d="M${x2(start)},2 L${x2(e)},2"/></svg>`
+              + `<i class="fs-ring" style="left:${pc(catchAt)}%"></i><i class="fs-catch" style="left:${pc(e)}%"></i>`;
+            return `<span class="fs" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
+              + `${arc}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
+          }
+          const A = flyTo - s0, peak = Math.max(2.5, Math.min(MAXH, Math.abs(A) * K / 4 * ANG)), ht = peak + 2;
+          const lo = Math.min(s0, flyTo, e), hi = Math.max(s0, flyTo, e), W = Math.max(0.5, hi - lo) * K, x = v => ((v - lo) * K).toFixed(1);
+          const d = `M${x(s0)},${ht} Q${x(s0 + A / 2)},${(ht - 2 * peak).toFixed(1)} ${x(flyTo)},${ht}` + (Math.abs(e - flyTo) >= 0.5 ? ` L${x(e)},${ht}` : '');
+          arc = `<svg class="fs-arc gain" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%;height:${ht.toFixed(1)}px" viewBox="0 0 ${W.toFixed(1)} ${ht.toFixed(1)}" preserveAspectRatio="none"><path d="${d}"/></svg>`
+            + `<i class="fs-catch" style="left:${pc(e)}%"></i>`;  // where the play ended (owner: "a little green dot where the arc ends")
+        } else {
+          const to = Math.min(108, s0 + (/ deep /i.test(raw0) ? 20 : 6));
+          const lo = Math.min(s0, to), hi = Math.max(s0, to), ht = Math.max(4, Math.min(14, 3 + 0.45 * (hi - lo)));
+          arc = `<svg class="fs-arc${inc ? ' miss' : ' int'}" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%;height:${ht.toFixed(1)}px" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M0,12 Q50,-10 100,12"/></svg>`
+            + `<i class="fs-x${pick ? ' int' : ''}" style="left:${pc(to)}%"></i>`;
+        }
       }
     }
     return `<span class="fs${arc ? ' fs-pass' : ''}" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
