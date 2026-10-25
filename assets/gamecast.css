@@ -1623,3 +1623,19 @@ a.pc-chip.c-clip, a.pc-chip.c-clip:visited { display: inline-flex; align-items: 
 
 .dcs-br { font-size: 12.5px; color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
 tr.lg-tot.lg-tot-pinned { visibility: hidden; }  /* its pinned copy (.lg-fh) shows it (owner 2026-10-24) */
+/* matchup mini tiles: the team with the ball as a badge on its logo's inner bottom corner (owner 2026-10-25: "make the
+   possession indicator not shift the layout"), inside the logo's box so it can't push or overlap anything */
+.mg-t .mg-lg { position: relative; }
+.mg-lg .mg-ball { position: absolute; bottom: -1px; width: 16px; height: 11px; border-radius: 999px;
+  background-color: rgba(13,15,19,.72); background-size: 12px 8px; box-shadow: 0 0 0 1px rgba(255,255,255,.18); }
+.mg-t.away .mg-ball { right: -1px; } .mg-t.home .mg-ball { left: -1px; }
+/* sized to the tile's own width (owner 2026-10-25: "test these matchup tiles with max potential width values, make sure
+   they don't clip"; scratch/mg_test.py: WAS / WAS, 52-48, OT 10:00 4th & 25 overlapped the middle at 375 px and below):
+   full size on a wide tile, scaled down on narrow ones, never past the column */
+.mg { container-type: inline-size; }
+.mg-t b { font-size: clamp(10px, 12.4cqi, 13.5px); }
+.mg-t .mg-n { font-size: clamp(13px, 16.5cqi, 18px); } .mg-t .mg-n.pct { font-size: clamp(10px, 11cqi, 12px); }
+.mg-t .mg-lg { width: clamp(20px, 26cqi, var(--mgl, 26px)); height: clamp(20px, 26cqi, var(--mgl, 26px)); }
+.mg-at .mg-st { font-size: clamp(8px, 9.4cqi, 9.5px); letter-spacing: -.01em; }
+.mg-at { padding: 0 1px; }
+@media (max-width: 380px) { .mg { padding-left: 4px; padding-right: 4px; } }
