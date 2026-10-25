@@ -919,8 +919,8 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   // (0b) App shell (owner 2026-10-25, after the bottom bar rode up to mid-screen on a return to the app once more:
   // "any rearchitecture worth considering?" ... "i want it working correctly and less bugs to squash"). iOS anchors
   // position: fixed to a layout viewport that can be stale after the keyboard or an app switch, and every fix so far
-  // re-measured and nudged the bar on timers. Here the page itself never scrolls: the body is one screen tall (the
-  // device's screen size on an iPhone, --app-h below), the content scrolls in #appScroll, and the bar is the column's
+  // re-measured and nudged the bar on timers. Here the page itself never scrolls: the body is the drawn area (fixed,
+  // inset 0: see "The column's size" below), the content scrolls in #appScroll, and the bar is the column's
   // last row, so there is nothing to drift. Window scrolling (scrollY, pageYOffset, scrollTo / scroll / scrollBy, the
   // window's scroll event) is redirected to #appScroll so the rest of the site works unchanged. Overlays (cards,
   // sheets), scripts and the pull-to-refresh stay direct children of the body. Lost: iOS's tap-the-clock-to-top, which
@@ -936,8 +936,11 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   // content scrolling from under the status bar (an opaque cover over it; sticky offsets keep their --sat), the bar in
   // the flow
   const st = document.createElement('style');
-  st.textContent = `html.app-shell, html.app-shell body { height: var(--app-h, 100dvh); overflow: hidden; overscroll-behavior: none; }
-html.app-shell body { display: flex; flex-direction: column; margin: 0; padding-top: 0 !important; padding-bottom: 0 !important; }
+  // (2026-10-25, after research: see the comment below st) the column is pinned to the area WebKit draws (fixed,
+  // inset 0), never sized from lvh / vh / screen
+  st.textContent = `html.app-shell { height: 100%; overflow: hidden; overscroll-behavior: none; }
+html.app-shell body { position: fixed; inset: 0; display: flex; flex-direction: column; overflow: hidden; overscroll-behavior: none;
+  margin: 0; padding-top: 0 !important; padding-bottom: 0 !important; }
 html.app-shell #appScroll { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain; padding-top: var(--sat, 0px); }
 html.app-shell body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: var(--sat, 0px); background: var(--bg); z-index: 95; }
@@ -954,23 +957,32 @@ html.app-shell .ptr.busy svg { animation: ptr-spin .8s linear infinite; }
 @keyframes ptr-spin { to { transform: rotate(360deg); } }`;
   document.head.appendChild(st);
   html.classList.add('app-shell');
-  // The column's height (owner 2026-10-25, screenshot: the bottom bar's icons cut off below the screen; "aren't we
-  // drawing a main viewport that stays in the safe area?"): 100lvh came out taller than the screen on the owner's
-  // iPhone, and every viewport measure (innerHeight, the layout viewport, visualViewport) can be stale after the
-  // keyboard or an app switch. A home-screen app on an iPhone covers the whole screen (viewport-fit=cover), so the
-  // column is the screen itself: screen.width / height are the device's fixed size (portrait numbers, whichever way
-  // it's held). Elsewhere (an iPad can split the screen) the CSS fallback, 100dvh.
-  const iphone = /iPhone|iPod/.test(navigator.userAgent);
-  const setAppH = () => {
-    if (!iphone) return;
-    const land = (screen.orientation && /landscape/.test(screen.orientation.type)) || Math.abs(window.orientation || 0) === 90;
-    const h = land ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height);
-    if (h > 0) html.style.setProperty('--app-h', `${h}px`);
+  // The column's size (owner 2026-10-25: the bottom bar's icons cut off below the screen, twice; "instead of more
+  // guesses, research"). Findings (sources in docs/INSIGHTS.md (DL)): the site has no apple-mobile-web-app-status-bar-
+  // style, so the installed app has iOS's default opaque status bar: WebKit draws the page BELOW it, innerHeight =
+  // screen - status bar (~873 on a Pro Max), while 100vh / 100lvh and screen.height report the full screen (932; WebKit
+  // 316008, "Incorrect 100vh and -lvh in standalone web apps without apple-mobile-web-app-status-bar-style"). A column
+  // sized from either lost its bottom ~59 px: the bar's icons. So: fixed, inset 0 (the area WebKit actually draws).
+  // Separately, in standalone the keyboard (and sometimes a return to the app) leaves innerHeight short by a status bar
+  // and it doesn't come back by itself (WebKit 254868 family; cederhook, lifekit reports): heal() below.
+  // heal(): the tallest innerHeight seen at this width; when the current one is short by more than a few px with no
+  // keyboard up, hide and show the column, which makes WebKit re-measure the viewport (the cederhook pattern), keeping
+  // the content's scroll
+  let maxH = innerHeight, lastW = innerWidth;
+  const heal = () => {
+    if (innerWidth !== lastW) { lastW = innerWidth; maxH = innerHeight; return; }
+    maxH = Math.max(maxH, innerHeight);
+    if (maxH - innerHeight <= 4 || html.classList.contains('kb-open')) return;
+    const top = sc.scrollTop;
+    document.body.style.display = 'none'; void document.body.offsetHeight; document.body.style.display = '';
+    sc.scrollTop = top;
+    maxH = Math.max(innerHeight, maxH);
   };
-  setAppH();
-  addEventListener('orientationchange', () => [0, 300, 800].forEach(t => setTimeout(setAppH, t)));
-  if (screen.orientation) screen.orientation.addEventListener('change', setAppH);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) setAppH(); });
+  document.addEventListener('focusout', e => { if (e.target.matches && e.target.matches('input, textarea, [contenteditable]')) [150, 500].forEach(t => setTimeout(heal, t)); });
+  addEventListener('pageshow', () => setTimeout(heal, 300));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) [300, 1000].forEach(t => setTimeout(heal, t)); });
+  addEventListener('orientationchange', () => setTimeout(() => { lastW = -1; heal(); }, 500));
+  if (window.visualViewport) visualViewport.addEventListener('resize', () => { if (innerWidth === lastW) maxH = Math.max(maxH, innerHeight); });
   // the document itself never scrolls here: iOS still scrolls an overflow: hidden page to bring a focused field or a
   // link target into view, which would slide the whole column (the bar with it) off the screen
   const pin = () => { const se = document.scrollingElement; if (se && se.scrollTop) se.scrollTop = 0; };
@@ -996,10 +1008,12 @@ html.app-shell .ptr.busy svg { animation: ptr-spin .8s linear infinite; }
     if (!dbg) return;
     const vv = window.visualViewport, b = bar && bar.getBoundingClientRect(), s = sc.getBoundingClientRect(), bd = document.body.getBoundingClientRect();
     const v = ([...document.scripts].find(x => /shell\.js/.test(x.src)) || {}).src || '';
+    const ios = (navigator.userAgent.match(/OS (\d+[_\d]*) like Mac/) || [])[1];
     dbg.textContent = [
-      `v ${(v.match(/v=([^&]+)/) || [])[1] || '?'}  shell ${html.classList.contains('app-shell')}  ${innerWidth > innerHeight ? 'landscape' : 'portrait'}`,
-      `screen ${screen.width}x${screen.height} dpr ${devicePixelRatio}  --app-h ${html.style.getPropertyValue('--app-h') || '(none)'}`,
-      `inner ${innerWidth}x${innerHeight}  docEl ${document.documentElement.clientHeight}`,
+      `v ${(v.match(/v=([^&]+)/) || [])[1] || '?'}  iOS ${ios ? ios.replace(/_/g, '.') : '?'}  shell ${html.classList.contains('app-shell')}  ${innerWidth > innerHeight ? 'landscape' : 'portrait'}`,
+      `standalone ${navigator.standalone} display-mode ${matchMedia('(display-mode: standalone)').matches}  kb ${html.classList.contains('kb-open')}`,
+      `screen ${screen.width}x${screen.height} dpr ${devicePixelRatio}  max inner seen ${maxH}`,
+      `inner ${innerWidth}x${innerHeight}  docEl ${document.documentElement.clientHeight}  100% ${measure('100%')}`,
       vv ? `vv ${px(vv.width)}x${px(vv.height)} top ${px(vv.offsetTop)} scale ${px(vv.scale)}` : 'vv none',
       `100vh ${measure('100vh')} lvh ${measure('100lvh')} svh ${measure('100svh')} dvh ${measure('100dvh')}`,
       `safe top ${measure('env(safe-area-inset-top)')} bottom ${measure('env(safe-area-inset-bottom)')}  --sat ${html.style.getPropertyValue('--sat') || '-'}`,

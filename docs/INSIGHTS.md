@@ -5055,6 +5055,23 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   -0.03, so in effect the league rate). (3) the owner's scoring: MAE 4.935 -> 4.922, -0.014 [-0.088, +0.058]; the real
   gain is the bias: projected 5.66 vs actual 7.22 per game before (1.6 points low every week in a league that scores
   these), 7.25 after. kdst.json d_keys carry them; the site reads lines by key (no page change).
+- **FINDING (DL) 2026-10-25: the home-screen app's height on iOS (owner: "instead of more guesses, research").** The
+  bottom bar's icons were cut off below the screen after the app shell sized its column from 100lvh, then from
+  screen.height. Research (sources): the site sets no apple-mobile-web-app-status-bar-style, so the installed app has
+  the default opaque status bar; WebKit draws the page below it (innerHeight = screen - status bar, ~873 on a Pro
+  Max), while 100vh / 100lvh and screen.height report the full screen: WebKit 316008 "Incorrect 100vh and -lvh in
+  standalone web apps without apple-mobile-web-app-status-bar-style" (https://bugs.webkit.org/show_bug.cgi?id=316008);
+  frappe-ui https://github.com/frappe/frappe-ui/pull/1284, /1289 (a 100lvh shell clipped: "WebKit stops drawing fixed
+  content at the short edge"); WebKit 301994 comment 12 (screen.height 874 vs innerHeight / dvh 812). With
+  black-translucent the drawn area is also short until the document is taller (WebKit 301108, open, iOS 26). In
+  standalone the keyboard can leave innerHeight short by a status bar for good (WebKit 254868; dev.to/cederhook
+  "Fixing the iOS standalone PWA keyboard bug"; lifekit-hq/lifekit-common #215); a fixed bar drifting after a long
+  background (developer.apple.com/forums/thread/744327, no fix). The status-bar style is fixed at install time
+  (WebKit 260508). Change (shell.js (0b)): the column is fixed, inset 0 (the drawn area), never sized from lvh / vh /
+  screen; heal() re-measures (hide / show the column) when innerHeight is short of the tallest seen with no keyboard
+  up, after a field loses focus, on pageshow and on return. A readout (5 taps on the header) shows the device's
+  measures. Source quality: the iOS 26 evidence is mostly 2026 GitHub reports, several simulator-only; the WebKit
+  bugs are firmer.
 - **RESULT {#pace-curve-3} (DJ3): FAIL (3) a third time; not shipped. Accuracy wins again.** tools/dj_eval.py --dj3,
   2026 to date (94 games, 6,334 gaps): (1) last 5:00 MAE 6.236 -> 5.213, -1.022 [-1.305, -0.764] (PASS; 2:00 and in 7.40
   -> 6.00, 2:01-5:00 5.61 -> 4.79); (2) all 4.592 -> 4.349, -0.243 [-0.295, -0.194] (PASS); (3) a 15.7 s step (FAIL) at
