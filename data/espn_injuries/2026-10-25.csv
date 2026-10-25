@@ -549,11 +549,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362890,Ben Brown,New England Patriots,Out,2026-10-22T01:33Z,Knee,Not Specified,Not Specified,2026-11-01,INACTIVE,Brown (knee) has been ruled out for Thursday's game against the Bears.
 3916923,Carlton Davis III,New England Patriots,Out,2026-10-21T23:27Z,Neck,Not Specified,Not Specified,2026-11-01,INACTIVE,Davis (neck) has been ruled out ahead of Thursday night's game against the Bears.
 4565293,Marcus Bryant,New England Patriots,Injured Reserve,2026-10-21T00:30Z,Ankle,Not Specified,Not Specified,2026-11-01,IR-R,Bryant (ankle) was a full participant at the Patriots' practice Tuesday.
+4258199,Cesar Ruiz,New Orleans Saints,Out,2026-10-25T12:23Z,Knee,Not Specified,Not Specified,2026-11-08,INACTIVE,"Ruiz (knee) is inactive for Sunday's game against the Steelers in Paris, Ross Jackson of WWL Louisiana reports."
 4372533,Tyree Wilson,New Orleans Saints,Out,2026-10-25T12:04Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive
 4361259,Zach Wilson,New Orleans Saints,Out,2026-10-25T12:04Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive
 4775268,Mike Reid,New Orleans Saints,Out,2026-10-25T12:04Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive
 4248047,John Ridgeway III,New Orleans Saints,Out,2026-10-25T12:04Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive
-4258199,Cesar Ruiz,New Orleans Saints,Out,2026-10-25T12:04Z,Knee,Not Specified,Not Specified,2026-10-25,INACTIVE,inactive
 4076951,Nathan Shepherd,New Orleans Saints,Out,2026-10-25T12:04Z,Illness,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive
 4430684,Treyton Welch,New Orleans Saints,Out,2026-10-25T12:04Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive
 4369863,Cedric Tillman,New Orleans Saints,Active,2026-10-24T17:17Z,,,,,,The Saints elevated Tillman from the practice squad to the active roster Saturday ahead of Sunday's game against the Steelers.
@@ -649,6 +649,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360698,Joe Milton,Philadelphia Eagles,Active,2026-10-19T17:14Z,,,,,,
 4040715,Jalen Hurts,Philadelphia Eagles,Injured Reserve,2026-10-19T14:18Z,Calf,Not Specified,Left,2027-02-15,IR,"Hurts (calf) is expected to be held out of football activities for multiple months and miss the rest of the season after new imaging over the weekend revealed several blood clots in his lungs, Tom Pelissero of Netflix reports."
 4685201,Tanner McKee,Philadelphia Eagles,Active,2026-10-19T09:45Z,,,,,,McKee completed 26 of 45 passes for 215 yards with a touchdown and no interceptions while adding one carry for no gain in the Eagles' 25-14 loss to the Panthers on Sunday. He also recovered a fumble.
+3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-10-25T12:26Z,,,,,,"Rudolph is active for Sunday's game against the Saints in Paris, Teresa Varley of the Steelers' official site reports."
 4035656,Ben Skowronek,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Calf,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive
 4360935,Terell Smith,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Coach's Decision,,,,INACTIVE,inactive
 5081508,Eli Heidenreich,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Coach's Decision,,,,INACTIVE,inactive
@@ -673,7 +674,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4047650,DK Metcalf,Pittsburgh Steelers,Active,2026-10-19T02:15Z,,,,,,Metcalf caught 11 of 15 targets for 93 yards in Sunday's 26-19 overtime win over the Buccaneers.
 4569987,Jaylen Warren,Pittsburgh Steelers,Active,2026-10-19T02:07Z,,,,,,Warren carried the ball 14 times for 50 yards and caught two of four targets for 28 yards in Sunday's 26-19 overtime win over the Buccaneers.
 8439,Aaron Rodgers,Pittsburgh Steelers,Active,2026-10-19T01:57Z,,,,,,Rodgers completed 33 of 49 passes for 253 yards and two touchdowns with one interception in Sunday's 26-19 overtime win over the Buccaneers.
-4430802,Darnell Washington,Pittsburgh Steelers,Active,2026-10-19T01:10Z,,,,,,Washington caught four of six targets for 25 yards and a touchdown in Sunday's 26-19 overtime win over the Bucs.
 3895856,Christian Kirk,San Francisco 49ers,Active,2026-10-24T20:46Z,,,,,,The 49ers activated Kirk (calf) from injured reserve and removed his questionable designation for Sunday's game in Atlanta.
 4241807,Garret Wallow,San Francisco 49ers,Out,2026-10-24T02:27Z,Hamstring,Strain,Not Specified,2026-11-08,OUT,Wallow (hamstring) has been ruled out for Sunday's game against Atlanta.
 3116097,Luke Gifford,San Francisco 49ers,Out,2026-10-24T02:20Z,Groin,Not Specified,Not Specified,2026-11-08,OUT,Gifford (groin) has been ruled out for Sunday's game against the Falcons.
