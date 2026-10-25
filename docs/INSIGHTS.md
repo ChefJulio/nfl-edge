@@ -4827,3 +4827,16 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   (in-sample residuals shrink toward 0); held-out residuals were the right design. Leads: field goal range has moved
   with kickers (a tied team at midfield is ~20 yards from a makeable kick now); a recent-era correction (fit on 2019-22
   residuals of the 2006-18 model, tested on 2023-25) or kicker-aware range in the model.
+- **FINDING + PRE-REGISTERED 2026-10-25 (owner: "ya" ... "yes"): (DH) the field goal's make chance from the spot as a
+  win model input.** Measured: make rates rose most at long range (50-54 yd 60% in 2006-12 -> 72% in 2019-25; 55-59
+  46% -> 61% on 4x the attempts; 60+ 24% -> 41%), and the late under-read for a team with the ball tied or behind 1-3
+  sits where that matters: by field goal distance from the spot, actual minus model (fit 2006-18): 55-64 yd -2.3 in
+  2006-18 vs +6.4 in 2019-25 (n 461); 45-54 -1.7 vs +1.8; under 35 +3.2 vs +1.6. The model learned old ranges. Change:
+  input fgp = P(make) of a kick from this spot (distance = yards to the end zone + 17), from a logistic curve in
+  distance fit on the THREE seasons BEFORE the row's season (known before it starts; no leakage of its own kicks; the
+  live season uses the three before it); the browser engine gets the current curve in the model file. Everything else
+  as the (CG) model. Test: walk-forward 2022-25 (each season fit on 2006 through the season before), current model vs
+  + fgp, same rows. GATE (all): (1) pooled Brier not worse (95% interval over games, upper < +0.0005); (2) late-and-close
+  (4th quarter, within 8) Brier lower; (3) calibration deciles within 3 points; (4) late (last 3:00) team with the ball
+  tied or behind 1-3: the mean calibration gap over (CH)'s cells lower, and the 55-64 yd band's gap smaller. Pass ->
+  the live model gets fgp; (CJ) check (1) rerun; the calculator's last-3:00 "rough" note is re-judged on (DF)'s cells.
