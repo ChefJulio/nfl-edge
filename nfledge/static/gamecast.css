@@ -1632,6 +1632,14 @@ tr.lg-tot.lg-tot-pinned { visibility: hidden; }  /* its pinned copy (.lg-fh) sho
 .sb { grid-template-columns: minmax(max-content, 1fr) minmax(0, auto) minmax(max-content, 1fr); }
 .sb-mid { min-width: 0; }
 .sb-mid > * { min-width: 0; }
+/* the top row of the scoreboard's middle (owner 2026-10-25): the live dot centered, the football on the side of the
+   team with the ball */
+.sb-top { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 6px; height: 14px; margin-bottom: 3px; }
+.sb-top > span { display: flex; min-width: 0; overflow: visible; }  /* a football wider than its half overflows outward: the dot stays centered */
+.sb-top .live-dot { margin: 0; vertical-align: 0; }
+.sb-top .sb-bl { justify-self: end; } .sb-top .sb-br { justify-self: start; }
+.sb-top .fb-chip { position: static; margin: 0; width: 22px; height: 14px; background: rgba(13,15,19,.6); border: 0; box-shadow: none; }
+.sb-top .fb-chip .sb-fb { width: 15px; height: 9px; }
 .sb-mid .sb-dd { line-height: 1.2; } .sb-dd > span { white-space: nowrap; } .sb-dd .sb-at::before { content: " · "; }
 @media (max-width: 640px) { .sb-dd > span { display: block; } .sb-dd .sb-at::before { content: none; } }  /* down, then spot */
 @media (max-width: 350px) { .sb-t .nl, .sb-t .sb-lg { display: none; } }  /* the smallest phones: codes and scores first */
