@@ -1563,7 +1563,7 @@ span.nm-link { display: inline; }
 .pm .rp-d, .pm .pp { font-size: 12px; }
 .lpf-h.pm { margin-bottom: 0; } .lpf-h.pm .lpf-sc { margin-left: auto; }
 .pt { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
-.pt .rp-yd { font-size: 11px; }
+.pt .rp-yd { font-size: 11px; margin-left: auto; align-self: center; }  /* the yards chip on the right (2026-10-25) */
 .ds-p { grid-template-columns: 62px minmax(0, 1fr); }
 .ds-b { min-width: 0; } .ds-b .ds-h { font-weight: 600; }
 /* video links: a game's highlights (Result card) and a play's clip when ESPN has one */
@@ -1603,9 +1603,6 @@ a.pc-chip.c-clip, a.pc-chip.c-clip:visited { display: inline-flex; align-items: 
 .mg-grp.one .mg-h { left: 6px; max-width: calc(100% - 12px); padding: 0 4px; letter-spacing: .02em; }
 /* a kick's flight in the field strip (kickoffs, punts): a thin line under the return */
 .fs .fs-kick { top: 2px; bottom: 2px; background: color-mix(in srgb, var(--ink) 35%, transparent); }
-/* the live scoreboard's "What should they do?" (Games > Calc's sheet, owner 2026-10-23) */
-.sb-calc { margin-top: 4px; font: inherit; font-size: 12px; font-weight: 700; color: var(--ink); background: var(--panel2);
-  border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; cursor: pointer; }
 /* the gamecast's Decisions pane (owner 2026-10-23): every 4th down and try, graded by the calculator */
 .dcs-sum { margin: 6px 0 10px; }
 .dcs { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
@@ -1629,6 +1626,28 @@ tr.lg-tot.lg-tot-pinned { visibility: hidden; }  /* its pinned copy (.lg-fh) sho
 .mg-lg .mg-ball { position: absolute; bottom: -1px; width: 16px; height: 11px; border-radius: 999px;
   background-color: rgba(13,15,19,.72); background-size: 12px 8px; box-shadow: 0 0 0 1px rgba(255,255,255,.18); }
 .mg-t.away .mg-ball { right: -1px; } .mg-t.home .mg-ball { left: -1px; }
+/* the scoreboard: each team's column never narrower than its logo, code and score (owner 2026-10-25: "13 AL" for
+   "13 BAL": the middle's "What should they do?" took its full width and the home side's code was cut on the left);
+   the middle gives way instead, its lines and the button wrapping */
+.sb { grid-template-columns: minmax(max-content, 1fr) minmax(0, auto) minmax(max-content, 1fr); }
+.sb-mid { min-width: 0; }
+.sb-mid > * { min-width: 0; }
+/* the top row of the scoreboard's middle (owner 2026-10-25): the live dot centered, the football on the side of the
+   team with the ball */
+.sb-top { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 6px; height: 14px; margin-bottom: 3px; }
+.sb-top > span { display: flex; min-width: 0; overflow: visible; }  /* a football wider than its half overflows outward: the dot stays centered */
+.sb-top .live-dot { margin: 0; vertical-align: 0; }
+.sb-top .sb-bl { justify-self: end; } .sb-top .sb-br { justify-self: start; }
+.sb-arr { display: block; width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+.sb-arr.l { border-right: 8px solid var(--ink); } .sb-arr.r { border-left: 8px solid var(--ink); }
+/* the matchup tiles' possession, the same triangle where the "@" sits (2026-10-25) */
+.mg-arr { display: block; width: 0; height: 0; margin: 1px 0 3px; border-top: 4px solid transparent; border-bottom: 4px solid transparent; }
+.mg-arr.l { border-right: 7px solid var(--ink); } .mg-arr.r { border-left: 7px solid var(--ink); }
+.sb-mid .sb-dd { line-height: 1.2; } .sb-dd > span { white-space: nowrap; } .sb-dd .sb-at::before { content: " · "; }
+@media (max-width: 640px) { .sb-dd > span { display: block; } .sb-dd .sb-at::before { content: none; } }  /* down, then spot */
+@media (max-width: 350px) { .sb-t .nl, .sb-t .sb-lg { display: none; } }  /* the smallest phones: codes and scores first */
+@media (max-width: 380px) { .sb-t { gap: 4px; padding-left: 6px; padding-right: 6px; } .sb-t .nl { width: 30px !important; height: 30px !important; }
+  .sb-t .nl img { width: 23px; height: 23px; } .sb-s { font-size: 27px; } }
 /* sized to the tile's own width (owner 2026-10-25: "test these matchup tiles with max potential width values, make sure
    they don't clip"; scratch/mg_test.py: WAS / WAS, 52-48, OT 10:00 4th & 25 overlapped the middle at 375 px and below):
    full size on a wide tile, scaled down on narrow ones, never past the column */

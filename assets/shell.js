@@ -664,6 +664,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   cardBox.addEventListener('touchstart', e => {
     if (e.touches.length !== 1 || !matchMedia('(max-width: 640px)').matches) { dmode = 'off'; return; }
     dy0 = dlast = e.touches[0].clientY; dx0 = e.touches[0].clientX; dlastT = e.timeStamp; dv = 0;
+    // tables scroll sideways only, so up / down is always the card's, on a table too (owner 2026-10-25): one rule
     dmode = e.target.closest('.pc-head') && cardBox.scrollTop <= 0 ? 'maybe' : null;
   }, { passive: true });
   cardBox.addEventListener('touchmove', e => {
@@ -919,11 +920,26 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   document.addEventListener('click', e => { closeAll(e.target.closest && e.target.closest('details.howto')); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(null); });
 })();
+// The page never sits scrolled past its own end (owner 2026-10-25, screenshot: Box score > Fantasy with half a screen of
+// blank space under the footer). When content shrinks under the reader (a sub-tab that hides long tables, a live
+// re-render with a shorter pane), iOS keeps the old scroll position and paints empty space below the page until the
+// next touch; whenever the body shrinks, snap back to the real bottom.
+(() => {
+  if (!window.ResizeObserver) return;
+  let raf = 0;
+  const clamp = () => { raf = 0; if (window.NFLE && NFLE.scroller) return;  // an inner scroller clamps itself (the app shell)
+    const max = Math.max(0, document.documentElement.scrollHeight - innerHeight);
+    if (scrollY > max + 1) scrollTo({ top: max }); };
+  const start = () => new ResizeObserver(() => { if (!raf) raf = requestAnimationFrame(clamp); }).observe(document.body);
+  if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+})();
 // Kicker and D/ST scoring from data/kdst.json lines (tools/kdst_build.py): shared by Rankings and the Fantasy tab.
 // STD = standard ESPN scoring, the rules both models were tested on (nfledge/kickers.py STANDARD, defenses.py ESPN_STD).
 (() => {
   const NFLE = window.NFLE = window.NFLE || {};
-  const DSTAT = ['sack', 'int', 'fum_rec', 'ff', 'def_td', 'st_td', 'safe', 'blk', 'pass_def', 'tkl_loss', 'forced_punts', 'def_2pt'];
+  // (2026-10-25) + 3-and-outs, 4th-down stops, special-teams forced fumbles / recoveries (Sleeper scores them)
+  const DSTAT = ['sack', 'int', 'fum_rec', 'ff', 'def_td', 'st_td', 'safe', 'blk', 'pass_def', 'tkl_loss', 'forced_punts', 'def_2pt',
+                 'three_out', 'fourth_stop', 'st_ff', 'st_fum_rec'];
   const erf = x => { const t = 1 / (1 + 0.3275911 * Math.abs(x)), y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x); return x >= 0 ? y : -y; };
   const Phi = z => 0.5 * (1 + erf(z / Math.SQRT2));
   // P(lo <= X <= hi) for an integer outcome of normal(mu, sd); below 0 counts as 0
@@ -949,12 +965,94 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     || /[?&]standalone=1\b/.test(location.search);
   if (!standalone) return;
   html.classList.add('standalone');
+  // (0) The top safe area, measured (owner 2026-10-25, screenshot: "NFL Edge" under the status bar after switching back;
+  // "when switching back to the app can we have a strict check every single time to reposition the view accounting for
+  // safe areas"). iOS reports env(safe-area-inset-top) as 0 for a moment after a resume and WebKit doesn't always
+  // re-apply env() afterwards, so the page's top padding and the status-bar cover collapsed. A probe sized by env() is
+  // measured instead, the last good value kept per orientation (a 0 read in portrait right after a resume never replaces
+  // a known inset; landscape's 0 is real), and set as --sat, which the top padding, the cover and every sticky offset
+  // read (shell.css). Re-checked on every return, in steps as the viewport settles, with the rest of the measured layout.
+  const probe = document.createElement('div');
+  probe.setAttribute('aria-hidden', 'true');
+  probe.style.cssText = 'position:fixed;top:0;left:0;width:0;visibility:hidden;pointer-events:none';
+  document.body.appendChild(probe);
+  const known = {};
+  try { Object.assign(known, JSON.parse(localStorage.getItem('nfle-sat') || '{}')); } catch (e) { /* private mode */ }
+  const setSat = () => {
+    probe.style.height = '0px'; void probe.offsetHeight;  // force WebKit to re-resolve env() rather than reuse a stale value
+    probe.style.height = 'env(safe-area-inset-top)';
+    const m = probe.offsetHeight, o = innerWidth > innerHeight ? 'l' : 'p';
+    if (m > 0 && m !== known[o]) { known[o] = m; try { localStorage.setItem('nfle-sat', JSON.stringify(known)); } catch (e) { /* ignore */ } }
+    const v = m > 0 ? m : (known[o] || 0);
+    if (html.style.getPropertyValue('--sat') !== `${v}px`) html.style.setProperty('--sat', `${v}px`);
+  };
+  setSat();
+  // every measured offset after the safe area: the top bar's height and the sticky rows (resize listeners), the bottom
+  // bar (fixBar), the matchup tiles' fit (paintMini)
+  const relayout = () => {
+    setSat();
+    dispatchEvent(new Event('resize'));
+    if (NFLE.fixBar) NFLE.fixBar();
+    if (NFLE.paintMini && document.querySelector('.mgrid') && document.querySelector('.mgrid').offsetParent) NFLE.paintMini();
+  };
+  const settleTop = () => [0, 60, 250, 600, 1200, 2000].forEach(t => setTimeout(relayout, t));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) settleTop(); });
+  addEventListener('pageshow', settleTop);
+  addEventListener('focus', settleTop);
+  addEventListener('orientationchange', settleTop);
+  if (window.visualViewport) visualViewport.addEventListener('resize', setSat);
+  NFLE.relayout = relayout;
+  // (0b) App shell (owner 2026-10-25, after the bottom bar rode up to mid-screen on a return to the app once more:
+  // "any rearchitecture worth considering?" ... "i want it working correctly and less bugs to squash"). iOS anchors
+  // position: fixed to a layout viewport that can be stale after the keyboard or an app switch, and every fix so far
+  // re-measured and nudged the bar on timers. Here the page itself never scrolls: the body is one screen tall (100lvh,
+  // which the keyboard and app switches don't change), the content scrolls in #appScroll, and the bar is the column's
+  // last row, so there is nothing to drift. Window scrolling (scrollY, pageYOffset, scrollTo / scroll / scrollBy, the
+  // window's scroll event) is redirected to #appScroll so the rest of the site works unchanged. Overlays (cards,
+  // sheets), scripts and the pull-to-refresh stay direct children of the body. Lost: iOS's tap-the-clock-to-top, which
+  // only scrolls the page itself.
+  const bar = document.querySelector('body > .botbar, body > nav.gc-bot');
+  const sc = document.createElement('div');
+  sc.id = 'appScroll';
+  const stays = el => el === bar || el === probe || /^(SCRIPT|STYLE|LINK|TEMPLATE)$/.test(el.tagName)
+    || el.matches('.pc-ov, .sheet-ov, .ptr') || getComputedStyle(el).position === 'fixed';
+  [...document.body.children].forEach(el => { if (!stays(el)) sc.appendChild(el); });
+  document.body.insertBefore(sc, bar || document.body.firstChild);
+  // its rules travel with it (game.html loads ui.css and gamecast.css, not shell.css): one screen-tall column, the
+  // content scrolling from under the status bar (an opaque cover over it; sticky offsets keep their --sat), the bar in
+  // the flow
+  const st = document.createElement('style');
+  st.textContent = `html.app-shell, html.app-shell body { height: 100lvh; overflow: hidden; overscroll-behavior: none; }
+html.app-shell body { display: flex; flex-direction: column; margin: 0; padding-top: 0 !important; padding-bottom: 0 !important; }
+html.app-shell #appScroll { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain; padding-top: var(--sat, 0px); }
+html.app-shell body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: var(--sat, 0px); background: var(--bg); z-index: 95; }
+html.app-shell body > .botbar, html.app-shell body > nav.gc-bot { position: relative !important; top: auto !important; bottom: auto !important;
+  left: auto !important; right: auto !important; flex: none; }
+html.app-shell nav.tabs, html.app-shell nav.gc-tabs, html.app-shell .gc-jump, html.app-shell .gc-panes { top: var(--sat, 0px); }
+html.app-shell.pc-open #appScroll { overflow: hidden; }
+html.app-shell .ptr { position: fixed; left: 50%; top: calc(var(--sat, 0px) + 8px); z-index: 80; width: 38px; height: 38px; margin-left: -19px;
+  border-radius: 50%; background: var(--panel2); border: 1px solid var(--line); display: grid; place-items: center;
+  opacity: 0; transform: translateY(-44px) scale(.6); pointer-events: none; }
+html.app-shell .ptr svg { width: 19px; height: 19px; fill: none; stroke: var(--muted); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+html.app-shell .ptr.ready svg, html.app-shell .ptr.busy svg { stroke: var(--accent); }
+html.app-shell .ptr.busy svg { animation: ptr-spin .8s linear infinite; }
+@keyframes ptr-spin { to { transform: rotate(360deg); } }`;
+  document.head.appendChild(st);
+  html.classList.add('app-shell');
+  Object.defineProperty(window, 'scrollY', { configurable: true, get: () => sc.scrollTop });
+  Object.defineProperty(window, 'pageYOffset', { configurable: true, get: () => sc.scrollTop });
+  const to = (a, b) => { if (a && typeof a === 'object') sc.scrollTo(a); else sc.scrollTo(+a || 0, +b || 0); };
+  window.scrollTo = to; window.scroll = to;
+  window.scrollBy = (a, b) => { if (a && typeof a === 'object') sc.scrollBy(a); else sc.scrollBy(+a || 0, +b || 0); };
+  sc.addEventListener('scroll', () => dispatchEvent(new Event('scroll')), { passive: true });
+  NFLE.scroller = sc;
   // (1) Bottom bar drift (owner 2026-10-20, screenshot: the bar rides up to mid-screen). WebKit bug in standalone mode
   // (bugs.webkit.org 297779, Apple forums 800154): after the keyboard closes the layout viewport keeps its keyboard-
   // shrunk height, and position: fixed anchors to it. When the visual viewport's bottom and the layout viewport's
   // bottom disagree by more than a toolbar's worth, pin the bar to the visual bottom; otherwise plain CSS (bottom: 0).
   const bot = document.querySelector('body > .botbar'), vv = window.visualViewport;
-  if (bot && vv) {
+  if (bot && vv && !NFLE.scroller) {  // (0b) the app shell has no fixed bar to drift: this fallback never runs there
     let raf = 0, touching = false;
     // never during a gesture or a rubber-band bounce (owner 2026-10-20: pulling to refresh slid the bar up): the
     // visual viewport moves then by design; the keyboard drift is a steady state, re-checked once the page settles

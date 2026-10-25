@@ -65,6 +65,8 @@
     return { sack: g('sack'), int: g('int'), fum_rec: g('fum_rec'), ff: g('ff'), def_td: g('def_td'), st_td: g('def_st_td') || g('st_td'),
              safe: g('safe'), blk: g('blk_kick'), pass_def: g('def_pass_def'), tkl_loss: g('tkl_loss'), forced_punts: g('def_forced_punts'),
              def_2pt: g('def_2pt'), pts_allow: g('pts_allow'), yds_allow: g('yds_allow'),
+             // (2026-10-25) were never read: a league scoring them lost those points everywhere
+             three_out: g('def_3_and_out'), fourth_stop: g('def_4_and_stop'), st_ff: g('def_st_ff'), st_fum_rec: g('def_st_fum_rec'),
              pa_tiers: pa.filter(t => g(t[2])).map(([lo, hi, k]) => [lo, hi, g(k)]), ya_tiers: ya.filter(t => g(t[2])).map(([lo, hi, k]) => [lo, hi, g(k)]) };
   };
   // ESPN D/ST stat ids (values usually set as overrides for the D/ST slot, '16'): 99 sack, 95 INT, 96 fumble recovered,
@@ -88,7 +90,7 @@
   const SLEEPER_USED = new Set([...Object.keys(SLEEPER_SCORE), ...SLEEPER_IDP, 'fgm', 'fgmiss', 'fgm_yds', 'fgm_yds_over_30', 'xpm', 'xpmiss',
     'fgm_0_19', 'fgm_20_29', 'fgm_30_39', 'fgm_40_49', 'fgm_50p', 'fgm_50_59', 'fgm_60p', 'fgmiss_0_19', 'fgmiss_20_29', 'fgmiss_30_39',
     'fgmiss_40_49', 'fgmiss_50p', 'sack', 'int', 'fum_rec', 'ff', 'def_td', 'def_st_td', 'st_td', 'safe', 'blk_kick', 'def_pass_def', 'tkl_loss',
-    'def_forced_punts', 'def_2pt', 'pts_allow', 'yds_allow', 'pts_allow_0', 'pts_allow_1_6', 'pts_allow_7_13', 'pts_allow_14_20',
+    'def_forced_punts', 'def_2pt', 'pts_allow', 'yds_allow', 'def_3_and_out', 'def_4_and_stop', 'def_st_ff', 'def_st_fum_rec', 'pts_allow_0', 'pts_allow_1_6', 'pts_allow_7_13', 'pts_allow_14_20',
     'pts_allow_21_27', 'pts_allow_28_34', 'pts_allow_35p', 'yds_allow_0_100', 'yds_allow_100_199', 'yds_allow_200_299', 'yds_allow_300_349',
     'yds_allow_350_399', 'yds_allow_400_449', 'yds_allow_450_499', 'yds_allow_500_549', 'yds_allow_550p']);
   const ESPN_USED = new Set([3, 4, 20, 24, 25, 53, 42, 43, 72, 74, 77, 80, 85, 86, 88, 198, 201, 99, 95, 96, 106, 97, 98, 113, 103, 104, 101, 102, 93,

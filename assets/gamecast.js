@@ -165,6 +165,19 @@
     [a, h].forEach(x => { if (luma(x.color) < 40 && x.alt && luma(x.alt) > luma(x.color) && cdist(x.alt, (x === a ? h : a).color) >= 90) x.color = x.alt; });
   };
   const TEAM_ID = {};
+  // the NFL's official play text uses its own codes for four teams (owner 2026-10-25: "Penalty, HST: Encroachment")
+  const GSIS = { ARZ: 'ARI', BLT: 'BAL', CLV: 'CLE', HST: 'HOU' };
+  // (owner 2026-10-25) a missed field goal from beyond the 20 gives the defense the ball at the spot of the kick (the
+  // 20 if it was inside it), not the line of scrimmage, which is where ESPN leaves the play's end: from the kick's
+  // distance (spot = distance - 10 yards to the end zone), in the receiving team's terms
+  const missedFgSpot = (p, off, def) => {
+    const t = `${(p.type || {}).text || ''} ${p.text || ''}`;
+    if (p.scoringPlay || !/field goal/i.test(t) || /block/i.test(t) || !/no good|missed/i.test(t)) return null;
+    const m = String(p.text || '').match(/(\d+)[- ](?:yards?|yds?)\.? field goal/i);
+    if (!m || !off || !def) return null;
+    const k = +m[1] - 10;
+    return k <= 20 ? `${def} 20` : k < 50 ? `${def} ${k}` : k === 50 ? '50' : `${off} ${100 - k}`;
+  };
   // where a play started and ended (owner 2026-10-18): "LAC 16 → LAC 20"; a touchdown ends in the end zone; when the
   // other team has it after the play, its name leads the end spot ("KC ball at LAC 41")
   // a play's downs and spots as two pairs (owner 2026-10-18): "1st & 10 → 2nd & 5" and "NE 47 → DAL 48"; a new set
@@ -177,14 +190,15 @@
     const swap = t0 && t1 && t0 !== t1;
     const d1 = td || isTry(p) ? '' : swap ? `${t1} ball` : e0.down ? (e0.shortDownDistanceText || e0.downDistanceText || '') : '';
     const downs = d0 ? `<span class="pp"><span class="rp-d ${DOWN_CLS(d0)}">${esc(d0)}</span>${d1 && (d1 !== d0 || (e0.possessionText && e0.possessionText !== s0.possessionText)) ? ` <span class="rp-ar">&rarr;</span> <span class="rp-d ${swap ? 'chg' : /^1st/.test(d1) ? 'd1' : DOWN_CLS(d1)}">${esc(d1)}</span>` : ''}</span>` : '';
-    const a = s0.possessionText, b = td ? 'end zone' : e0.possessionText;
+    const a = s0.possessionText, b = td ? 'end zone' : (swap && missedFgSpot(p, t0, t1)) || e0.possessionText;
     const spots = a ? `<span class="pp muted">${esc(a)}${b && b !== a ? ` <span class="rp-ar">&rarr;</span> ${esc(b)}` : ''}</span>` : '';
     return { downs, spots };
   };
   const spotLine = p => {
-    const a = p.start && p.start.possessionText, b = p.end && p.end.possessionText;
+    const a = p.start && p.start.possessionText;
     if (!a) return '';
     const t0 = p.start.team && TEAM_ID[String(p.start.team.id)], t1 = p.end && p.end.team && TEAM_ID[String(p.end.team.id)];
+    const b = (t1 && t0 && t1 !== t0 && missedFgSpot(p, t0, t1)) || (p.end && p.end.possessionText);
     const td = p.scoringPlay && /touchdown/i.test(`${(p.type || {}).text || ''} ${p.text || ''}`);
     const end = td ? 'end zone' : b ? (t1 && t0 && t1 !== t0 ? `${t1} ball at ${b}` : b) : '';
     return end && end !== a ? `${esc(a)} &rarr; ${esc(end)}` : `at ${esc(a)}`;
@@ -524,7 +538,7 @@
       const r = ACT.test(inner) ? action(inner) : null;
       h = `Two-point try${r ? `: ${r.h.replace(/, (?:\d+ yards?|no gain|loss of \d+)$/, '')}` : ''}, ${ok ? 'good' : 'no good'}`; cls = ok ? '' : 'bad'; }
     else if (/field goal/i.test(t)) { const r = g('fg', 2); h = `${g('fg') || ''}-yard field goal, ${/good/i.test(r || t) && !/no good/i.test(r || '') ? 'good' : r && /block/i.test(r) ? 'blocked' : 'no good'}`; cls = /good/i.test(t) ? 'good' : 'bad'; }
-    else if (/penalty/i.test(t)) { const m = raw.match(RX.pen); h = m ? `Penalty, ${m[1]}: ${m[2]}, ${m[3]} yards` : 'Penalty'; cls = 'pen'; }  // not 'flag': site.css .flag is a white badge
+    else if (/penalty/i.test(t)) { const m = raw.match(RX.pen); h = m ? `Penalty, ${GSIS[m[1]] || m[1]}: ${m[2]}, ${m[3]} yards` : 'Penalty'; cls = 'pen'; }  // not 'flag': site.css .flag is a white badge
     else h = t || raw.split('. ')[0];
     if (td) { h += ' · Touchdown'; cls = 'td'; }
     if (pl.isTurnover && cls !== 'bad') cls = 'bad';
@@ -661,19 +675,6 @@
     const js = document.createElement('script'); js.src = `${siteRoot()}assets/calc.js${ASSET_V}`; js.onload = ok; js.onerror = () => bad(new Error('calc.js'));
     document.head.appendChild(js);
   }));
-  const calcState = (info, sit) => {
-    const sp = sit && spot(sit, info);
-    if (!sp || !sit.down || sit.down < 1) return null;
-    const off = sp.offense, def = off === info.home ? info.away : info.home;
-    const yl = sp.dir === 1 ? 100 - sp.x : sp.x;  // yards to the end zone
-    const g = DATA && (DATA.games || []).find(x => x.home.team === info.home.team && x.away.team === info.away.team);
-    const m = g && String(g.vegas_line || '').match(/^([A-Z]{2,3})\s+-?([\d.]+)/);
-    const line = m ? (ourCode(m[1]) === off.team ? +m[2] : -m[2]) : 0;
-    const home = off === info.home, tos = home ? [sit.homeTimeouts, sit.awayTimeouts] : [sit.awayTimeouts, sit.homeTimeouts];
-    return { mode: 'play', a: off.team, b: def.team, off: off.score, def: def.score, qtr: Math.min(4, info.period || 1), clock: info.clock || '15:00',
-             down: sit.down, togo: Math.max(1, sit.distance || 10), side: yl > 50 ? 'own' : 'opp', yard: yl > 50 ? 100 - yl : yl,
-             to: tos[0] != null ? tos[0] : 3, oppTo: tos[1] != null ? tos[1] : 3, line, total: (g && +g.vegas_total) || 45, home: home ? 1 : 0, rec2h: 0 };
-  };
   // the Vegas line and total for a game, from the offense's side (our week data)
   const vegasFor = (info, team) => {
     const g = DATA && (DATA.games || []).find(x => x.home.team === info.home.team && x.away.team === info.away.team);
@@ -759,12 +760,6 @@
     }, () => { const b = document.querySelector('#gcCalls .dcs-body'); if (b) b.innerHTML = '<p class="muted">The calculator isn\'t available right now.</p>'; });
     return pending;
   };
-  document.addEventListener('click', e => {
-    const b = e.target.closest && e.target.closest('[data-calc]');
-    if (!b || !GP.calcState) return;
-    const S = GP.calcState;
-    calcLoad().then(() => NFLE.calcUI.sheet(S, `${S.a} ball: what should they do?`), () => {});
-  });
   const league = () => {
     try { const s = JSON.parse(localStorage.getItem('nfledge-scoring') || 'null'); if (s && s.lg) return s.lg; } catch (e) { /* default */ }
     return { teams: 10, QB: 1, RB: 2, WR: 2, TE: 1 };
@@ -902,6 +897,8 @@
       const g = x ? (x[6] ?? x[0]) : null;
       return g == null ? '' : `<span class="lg-rk ${x[9] ? 'rk-mid' : g >= 80 ? 'rk-good' : g <= 30 ? 'rk-bad' : 'rk-mid'}" title="His ${s} grade (that season only), the grade sheet's OVR">${ovr(g)}${uqMark(x)}</span>`; };
     const grdCell = g => g.gr != null ? `<span class="lg-rk ${g.gr >= 80 ? 'rk-good' : g.gr <= 30 ? 'rk-bad' : 'rk-mid'}">${ovr(g.gr)}</span>` : '–';
+    // a live box-score line (boxLines) as a log game: c = the scoring-key stat line, x = completions, attempts, carries, targets
+    const liveG = ln => ({ c: ln.line, x: [ln.comp || 0, ln.att || 0, ln.car || 0, ln.tgt || 0] });
     const head = `${grpHead(7)}
       <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num" title="Game grade, on the OVR's 50-99 scale: his fantasy output that game against every game by qualified players at his position that season (early in a season, last season's games fill the weeks not played yet)">Grd</th><th class="num">Snap</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
     const blank = stat.map((c, i) => `<td class="num${gcl(i)}">–</td>`).join('');
@@ -921,7 +918,9 @@
         }
       }
       rows.sort((a, b) => b.w - a.w);  // newest first: scrolling down goes back in time (owner, 2026-10-14)
-      const fps = S.g.map(g => pts(g.c, w, pos)), fpg = fps.length ? fps.reduce((a, b) => a + b, 0) / fps.length : 0;
+      // this week's live / final game counts in the season line and the totals (it isn't in S.g until the rebuild)
+      const lr = rows.find(r => r.u && r.u.live), gsAll = lr ? [...S.g, liveG(lr.u.live)] : S.g;
+      const fps = gsAll.map(g => pts(g.c, w, pos)), fpg = fps.length ? fps.reduce((a, b) => a + b, 0) / fps.length : 0;
       const team = S.g.length ? S.g[S.g.length - 1].t : '';
       const played = (g, label) => { const v = pts(g.c, w, pos), pj = projOf(g);
         return `<tr${tileAttrs(g)}><td>${esc(label)}</td>${opp(g)}<td class="num lg-fp">${g.r ? chip(f1(v), g.rk) : f1(v)}</td>
@@ -946,10 +945,14 @@
           <td class="num">${avgSn == null ? '–' : rk ? `<span class="sc ${snapTone(avgSn)}">${avgSn}</span>` : avgSn}</td>${stat.map(([, fn, ri, ex], i) => { const v = fn(T); return `<td class="num${gcl(i)}">${offRole(v, ex) ?? tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null)}</td>`; }).join('')}</tr>
           <tr class="lg-gap"><td colspan="${7 + stat.length}"></td></tr>`;
       };
-      const trs = totRow(S.g, S.tr ? S : null) + rows.map(r => {
+      // (its finish chips wait for the rebuilt log)
+      const trs = (lr ? totRow(gsAll, null) : totRow(S.g, S.tr ? S : null)) + rows.map(r => {
         if (r.u && r.u.bye) return byeRow(r.w, 5 + stat.length);
-        if (r.u && r.u.live) { const v = pts(r.u.live.line, w, pos), pj = p && p.proj != null ? scaled(p).proj : null;
-          return `<tr class="lg-pend" title="${r.u.fin ? 'Final' : 'Live'}: ${esc(statLineText(r.u.live, pos))} (full line once the game's snap counts are published)"><td>${r.w}</td>${opp(r.u)}<td class="num lg-fp"><b>${f1(v)}</b></td><td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td><td class="num muted" colspan="${3 + stat.length}">${r.u.fin ? 'final' : 'live'} · ${esc(statLineText(r.u.live, pos))}</td></tr>`; }
+        // (owner 2026-10-25: "i want game log tables to update in real time") this week's live / final game on the
+        // log's own columns, from the polled box score (redrawn each poll); rank, grade and snaps once the log is rebuilt
+        if (r.u && r.u.live) { const lg = liveG(r.u.live), v = pts(lg.c, w, pos), pj = p && p.proj != null ? scaled(p).proj : null;
+          return `<tr class="lg-pend" title="${r.u.fin ? 'Final' : 'Live'} (rank, grade and snaps once the game's data is published)"><td>${r.u.fin ? r.w : `<span class="live-dot"></span>${r.w}`}</td>${opp(r.u)}<td class="num lg-fp"><b>${f1(v)}</b></td><td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td><td class="num muted">${r.u.fin ? 'final' : 'live'}</td><td class="num muted">–</td><td class="num muted">–</td>
+            ${stat.map(([, fn, , ex], i) => { const x = fn(lg); return `<td class="num${gcl(i)}">${offRole(x, ex) ?? x}</td>`; }).join('')}</tr>`; }
         if (r.u && r.u.miss != null) return `<tr class="lg-miss"${tileAttrs(r.u)}><td>${r.w}</td>${r.u.o ? opp(r.u) : '<td class="lg-opp">&ndash;</td>'}<td class="num">${missTag(r.u)}</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">${r.u.sn != null ? r.u.sn : '&ndash;'}</td>${blank}</tr>`;
         if (r.u) {
           const pj = projOf(r.u);
@@ -957,7 +960,7 @@
         }
         return played(r.g, r.g.w);
       }).join('');
-      const sum = opts.last ? '' : ` · ${S.g.length} game${S.g.length === 1 ? '' : 's'}${S.g.length ? ` · ${f1(fpg)} FP/G` : ''}`;
+      const sum = opts.last ? '' : ` · ${gsAll.length} game${gsAll.length === 1 ? '' : 's'}${gsAll.length ? ` · ${f1(fpg)} FP/G` : ''}`;
       // playoffs first (as Sleeper does), their own block: not in the regular-season totals, finishes or FP/G
       const pg = opts.last || opts.season ? [] : (S.pg || []);
       const sub = (label, gs) => `<tr class="lg-sub"><td colspan="${7 + stat.length}"><span class="lg-pin">${label}${gs ? ` · ${gs.length} game${gs.length === 1 ? '' : 's'} · ${f1(gs.reduce((t, g) => t + pts(g.c, w, pos), 0) / gs.length)} FP/G` : ''}</span></td></tr>`;
@@ -1174,7 +1177,29 @@
     const v = WEEKS[cardWk];
     return v instanceof Promise ? undefined : v;
   };
-  const rerenderCard = () => { if (cardPid) renderCard(cardPid); else if (cardTeam) renderTeam(cardTeam); };
+  // every redraw of an open card keeps each table's sideways scroll (a redraw replaces the tables: they started over at
+  // their first column)
+  const keepX = (root, fn) => {
+    const SX = '.lg-scroll, .scroll, .bx-t, .rf-scroll', xs = root ? [...root.querySelectorAll(SX)].map(e => e.scrollLeft) : [];
+    fn();
+    if (root && xs.some(Boolean)) [...root.querySelectorAll(SX)].forEach((e, i) => { if (xs[i]) e.scrollLeft = xs[i]; });  };
+  const rerenderCard = () => keepX(document.getElementById('pcOv'), () => { if (cardPid) renderCard(cardPid); else if (cardTeam) renderTeam(cardTeam); });
+  // Live redraws of an open card (owner 2026-10-25: "it grabs the table and doesn't let you scroll right"; and "i want
+  // game log tables to update in real time"): the polls redraw the card every 20-30 s while games are on, which replaced
+  // the game log mid-swipe (the touch died, the table jumped back to its first column). Now never during a touch or
+  // while anything is still scrolling (it waits until both settle), and every table keeps its sideways position.
+  let touchOn = false, lastScroll = 0, rrTimer = 0;
+  addEventListener('touchstart', () => { touchOn = true; }, { passive: true, capture: true });
+  addEventListener('touchend', () => { touchOn = false; }, { passive: true, capture: true });
+  addEventListener('touchcancel', () => { touchOn = false; }, { passive: true, capture: true });
+  document.addEventListener('scroll', () => { lastScroll = Date.now(); }, { passive: true, capture: true });
+  const SIDEWAYS = '.lg-scroll, .scroll, .bx-t, .rf-scroll';
+  const liveRerender = () => {
+    if (!cardPid && !cardTeam) return;
+    clearTimeout(rrTimer);
+    if (touchOn || Date.now() - lastScroll < 700) { rrTimer = setTimeout(liveRerender, 800); return; }
+    rerenderCard();  // keeps the tables' sideways scroll (keepX)
+  };
   // Kick off anything the card is still missing; re-render once it lands (if the same card and week are still up).
   const cardNeeds = () => {
     const pid = cardPid, tm = cardTeam, wk = cardWk;
@@ -2196,7 +2221,7 @@
     // Identity is current: the career log's roster team / position, else the page's row, else the week's row.
     const row = (DATA && DATA.players[pid]) || p || Object.values(WEEKS).map(x => x && x.players && x.players[pid]).find(Boolean) || {};
     const name = row.name || (L && L.name), pos = (L && L.pos) || row.pos, team = (L && L.team) || row.team, espn = row.espn || (L && L.espn);
-    if (!LOGS[pid]) ensureLog(pid).then(() => { if (cardPid === pid) renderCard(pid); });
+    if (!LOGS[pid]) ensureLog(pid).then(() => { if (cardPid === pid) rerenderCard(); });
     cardNeeds();
     // warm the news the News tab and the Health sheet show (cached 5 minutes, one request in flight per player)
     { const e = (DATA && DATA.players[pid] && DATA.players[pid].espn) || (LOGS[pid] && LOGS[pid].espn);
@@ -2215,11 +2240,11 @@
       GRH[pid] = null;
       NFLE.load(`data/grades/players/${pid.slice(-2)}.json`).catch(() => null).then(sh => {
         GRH[pid] = ((sh || {})[pid] || []).map(([season, basis, rec, labels, nq]) => ({ season, basis, players: { [pid]: rec }, stats: { [rec[1]]: labels }, qualified: { [rec[1]]: nq } }));
-        if (cardPid === pid) renderCard(pid);
+        if (cardPid === pid) rerenderCard();
       });
     }
     // the current season's grades drive the header chip; the Grade tab loads every season on first open
-    if (graded && GR.cur === undefined) { GR.cur = null; grIndex().then(ix => ix && grSeason(ix.current)).then(d => { GR.cur = d || null; if (cardPid === pid) renderCard(pid); }); }
+    if (graded && GR.cur === undefined) { GR.cur = null; grIndex().then(ix => ix && grSeason(ix.current)).then(d => { GR.cur = d || null; if (cardPid === pid) rerenderCard(); }); }
     const isKind = !!(L && L.kind);  // a non-fantasy page (defense, line, specialists): no week projections
     // retired / off every roster this season and not on the picked week's board: a career overview, no week picker
     const lastPlayed = L ? (L.seasons.find(S => S.g.length) || {}).s : null;
@@ -2916,8 +2941,9 @@
     else if (pid !== cardPid || ov.hidden || (window.NFLE && NFLE.freshPage)) cardTab = 'ov';
     if (ov.hidden || !cardWk || (window.NFLE && NFLE.freshPage)) cardWk = pageKey();
     if (String(pid).startsWith('DST-') && pid !== cardPid) dstTab = 'ov';
+    const same = pid === cardPid && !ov.hidden;  // the open card shown again (a route re-run): keep its tables' scroll
     cardPid = pid; cardTeam = null;
-    renderCard(pid);
+    if (same) keepX(ov, () => renderCard(pid)); else renderCard(pid);
     ov.hidden = false;
     document.documentElement.classList.add('pc-open');
     if (!pageMode()) { try { history.replaceState(null, '', location.pathname + location.search + '#player/' + pid); } catch (e) { /* ignore */ } }
@@ -3043,17 +3069,18 @@
       : fin ? (st && /OT/i.test(st.detail || '') || (g.final && g.final.ot) ? '<span>Final</span><span>OT</span>' : 'Final')  // stacked: "FINAL/OT" was the widest middle
       : kickMs(g) != null && kickMs(g) !== groupMs ? esc(localTime(kickMs(g)).replace(/\s?[AP]M$/i, '')) : '';  // the heading has the AM / PM
     const side = (s, k, n, other) => {
-      const lost = fin && n != null && other != null && n < other, ball = sp && sp.offense.team === s.team;
+      const lost = fin && n != null && other != null && n < other;
       const num = n != null ? esc(n) : f[`p_${k}`] != null ? `${esc(f[`p_${k}`])}<small>%</small>` : '';
-      // the ball rides on the logo's inner corner, out of the flow (owner 2026-10-25: "make the possession indicator not
-      // shift the layout"; it sat after the code and pushed it off center)
-      return `<span class="mg-t ${k}${lost ? ' lost' : ''}"><span class="mg-lg"><img src="${esc(NFLE.fmt.logoSrc(s.logo_url, 48))}" alt="" loading="lazy">${ball ? '<i class="mg-ball" title="Has the ball"></i>' : ''}</span>
+      return `<span class="mg-t ${k}${lost ? ' lost' : ''}"><span class="mg-lg"><img src="${esc(NFLE.fmt.logoSrc(s.logo_url, 48))}" alt="" loading="lazy"></span>
         <b>${esc(s.team)}</b><span class="mg-n${n == null ? ' pct' : ''}">${num}</span></span>`;
     };
     const c = g.colors || {};
+    // possession as the scoreboard shows it (owner 2026-10-25: "make it consistent"): a triangle where the "@" sits,
+    // pointing at the team with the ball
+    const arrow = sp && !sp.kick && sp.offense ? `<i class="mg-arr ${sp.offense.team === g.away.team ? 'l' : 'r'}" title="${esc(sp.offense.team)} ball"></i>` : '';
     return `<a class="mg${live ? ' live' : ''}${sp && sp.red ? ' rz' : ''}${fin ? ' fin' : ''}" data-gid="${esc(g.id)}" href="${esc(gameHref(g))}"
       style="--ta:${esc(c[g.away.team] || '#444')};--th:${esc(c[g.home.team] || '#444')}">
-      <span class="mg-vs">${side(g.away, 'away', as, hs)}<span class="mg-at">${live ? '' : g.neutral ? 'vs' : '@'}${status ? `<span class="mg-st">${status}</span>` : ''}</span>${side(g.home, 'home', hs, as)}</span></a>`;
+      <span class="mg-vs">${side(g.away, 'away', as, hs)}<span class="mg-at">${live ? arrow : g.neutral ? 'vs' : '@'}${status ? `<span class="mg-st">${status}</span>` : ''}</span>${side(g.home, 'home', hs, as)}</span></a>`;
   };
   const paintMini = () => {
     const box = document.querySelector('.mgrid');
@@ -3141,7 +3168,7 @@
     // client-rendered tables (Rankings) read the live box scores and game states and redraw themselves
     window.NFLE.live = { lines: LIVE.lines, byGame: LIVE.byGame };
     document.dispatchEvent(new Event('nfle-live'));
-    if (cardPid) renderCard(cardPid); else if (cardTeam) renderTeam(cardTeam);
+    liveRerender();
     const sts = Object.values(LIVE.byGame);
     const soon = sts.some(s => s.state === 'pre' && new Date(s.date).getTime() - now < 30 * 60000);
     const live = sts.some(s => s.state === 'in');
@@ -3554,13 +3581,35 @@
   // distance and extra points per kicker; per defense sacks, interceptions, fumble recoveries, defensive / return TDs,
   // safeties, blocked kicks, and the points and yards it allowed. Scored with the league's kicker / D/ST rules, else
   // standard ESPN scoring (NFLE.kdst).
-  const kdstLines = (plays, info, sum) => {
+  const kdstLines = (plays, info, sum, opt0 = {}) => {
     let lg = null; try { lg = JSON.parse(localStorage.getItem('nfledge-mine') || 'null'); } catch (e) { /* none */ }
     const kw = (lg && lg.kw) || NFLE.kdst.STD_K, dw = (lg && lg.dw) || NFLE.kdst.STD_D;
+    // a league that scores no kicking (no K slot, every kicking setting 0: owner 2026-10-25) shows no kickers
+    const kScored = Object.values(kw).some(v => +v);
     const nm = {}, names = fullNames(sum, nm), teams = [info.away.team, info.home.team];
     const other = t => t === teams[0] ? teams[1] : teams[0];
     const band = y => y < 20 ? '0_19' : y < 30 ? '20_29' : y < 40 ? '30_39' : y < 50 ? '40_49' : y < 60 ? '50_59' : '60_';
-    const K = {}, D = {}; teams.forEach(t => { D[t] = { sack: 0, int: 0, fum_rec: 0, def_td: 0, st_td: 0, safe: 0, blk: 0, ya: 0 }; });
+    const K = {}, D = {}; teams.forEach(t => { D[t] = { sack: 0, int: 0, fum_rec: 0, def_td: 0, st_td: 0, safe: 0, blk: 0, ya: 0, ff: 0,
+      tkl_loss: 0, pass_def: 0, forced_punts: 0, three_out: 0, fourth_stop: 0, st_ff: 0, st_fum_rec: 0 }; });
+    // (owner 2026-10-25: "league specific defense scoring seems wrong": a Sleeper league scoring 3-and-outs, 4th-down
+    // stops, forced punts, tackles for loss, passes defended and forced fumbles read none of them) from the drives: a
+    // punt is a forced punt for the other side, a punt after 3 plays or fewer a 3-and-out, a turnover on downs a 4th-down
+    // stop (finished drives whose last play is in `plays`, so a replay counts only what has happened); tackles for loss
+    // and passes defended are ESPN's box-score team totals (a replay leaves them out: no running count)
+    const seen = new Set(plays.map(p => String(p.id)));
+    ((sum && sum.drives && sum.drives.previous) || []).forEach(dr => {
+      const pl = dr.plays || [], last = pl[pl.length - 1], off = dr.team && TEAM_ID[String(dr.team.id)];
+      if (!last || !seen.has(String(last.id)) || !off || !D[off]) return;
+      const def = other(off), r = String(dr.displayResult || dr.result || '');
+      if (/punt/i.test(r)) { D[def].forced_punts++; if ((dr.offensivePlays || pl.length) <= 3) D[def].three_out++; }
+      if (/downs/i.test(r)) D[def].fourth_stop++;
+    });
+    if (!opt0.replay) ((sum && sum.boxscore && sum.boxscore.players) || []).forEach(t => {
+      const tm = TEAM_ID[String(t.team && t.team.id)], c = (t.statistics || []).find(s => s.name === 'defensive');
+      if (!tm || !D[tm] || !c || !c.totals) return;
+      const at = l => +(c.totals[c.labels.indexOf(l)] || 0);
+      D[tm].tkl_loss = at('TFL'); D[tm].pass_def = at('PD');
+    });
     let ph = 0, pa = 0;
     plays.forEach(p => {
       if (nonPlay(p)) return;
@@ -3583,6 +3632,10 @@
       if (/sack/i.test(ty)) D[def].sack++;
       if (/interception/i.test(ty) || /INTERCEPTED/.test(txt)) D[def].int++;
       if (/FUMBLES/.test(txt) && end && end !== off && !/punt|kick/i.test(ty)) D[end].fum_rec++;
+      // forced fumbles: ESPN names the forcer in parentheses ("FUMBLES (J.Smith)"); on a kick the kicking team's
+      // forced fumble / recovery is its special teams' (Sleeper def_st_ff / def_st_fum_rec)
+      if (/FUMBLES \(/.test(txt)) { if (/punt|kick/i.test(ty)) { if (D[off]) D[off].st_ff++; } else D[def].ff++; }
+      if (/FUMBLES/.test(txt) && /punt|kick/i.test(ty) && end && end === off && D[off]) D[off].st_fum_rec++;
       if (scorer && /touchdown/i.test(`${ty} ${txt}`) && p.scoringPlay && scorer !== off) D[scorer][/punt|kick/i.test(`${ty}`) ? 'st_td' : 'def_td']++;
       if (/safety/i.test(`${ty} ${txt}`) && scorer && scorer !== off) D[scorer].safe++;
       if (p.start.down && !stPlay(p) && !/No Play/i.test(txt)) D[def].ya += +p.statYardage || 0;
@@ -3592,9 +3645,15 @@
     const finalPts = { [info.home.team]: ph, [info.away.team]: pa };
     const dRows = teams.map(t => { const x = D[t], allowed = finalPts[other(t)];
       const ln = Object.assign({}, x, { pa_mu: allowed, pa_sd: 0.01, ya_mu: x.ya, ya_sd: 0.01 });
-      const bits = [x.sack && `${x.sack} sk`, x.int && `${x.int} INT`, x.fum_rec && `${x.fum_rec} FR`, (x.def_td + x.st_td) && `${x.def_td + x.st_td} TD`, `${allowed} pts allowed`].filter(Boolean);
+      // the stats this league scores, in its terms (a stat it gives no points isn't listed)
+      const sc = k => +(dw[k] || 0) !== 0;
+      const bits = [x.sack && `${x.sack} sk`, x.int && `${x.int} INT`, x.fum_rec && `${x.fum_rec} FR`, sc('ff') && x.ff && `${x.ff} FF`,
+        (x.def_td + x.st_td) && `${x.def_td + x.st_td} TD`, sc('three_out') && x.three_out && `${x.three_out} 3&out`,
+        sc('fourth_stop') && x.fourth_stop && `${x.fourth_stop} 4th stop`, sc('forced_punts') && x.forced_punts && `${x.forced_punts} punts`,
+        sc('tkl_loss') && x.tkl_loss && `${x.tkl_loss} TFL`, sc('pass_def') && x.pass_def && `${x.pass_def} PD`,
+        `${allowed} pts allowed`, sc('yds_allow') && `${x.ya} yds`].filter(Boolean);
       return { team: t, dst: true, name: `${((DATA && DATA.teams && DATA.teams[t]) || {}).nick || t} D/ST`, fp: NFLE.kdst.dstScore(ln, dw), sub: bits.join(' · ') }; });
-    return { K: kRows, DST: dRows };
+    return { K: kScored ? kRows : [], DST: dRows };
   };
   const playerStats = (sum, info, opt = {}) => {
     const P = sum && sum.boxscore && sum.boxscore.players;
@@ -3662,7 +3721,7 @@
       const lg = leagueName();
       return `<div class="pst-team" data-pst="__fp"${pick === '__fp' ? '' : ' hidden'}><div class="ff-head">${sides.map(x => `<span>${logo(x.logo, '#111', 18, x.team)} ${esc(x.team)}</span>`).join('')}</div>
         ${['QB', 'RB', 'WR', 'TE'].filter(k => by[k]).map(k => `<div class="ff-pos"><div class="ff-k">${k}</div><div class="ff-cols"><div>${col(by[k][sides[0].team])}</div><div>${col(by[k][sides[1].team])}</div></div></div>`).join('') || '<p class="muted">No fantasy points yet.</p>'}
-        ${(() => { const kd = kdstLines(opt.plays || allPlays(sum).flatMap(d => d.plays || []), info, sum);
+        ${(() => { const kd = kdstLines(opt.plays || allPlays(sum).flatMap(d => d.plays || []), info, sum, { replay: !!opt.plays });
           const kcol = (rows, t) => rows.filter(r => r.team === t).sort((a, b) => b.fp - a.fp).map(r => { const kp = r.dst ? `DST-${r.team}` : r.id ? byEspn()[String(r.id)] : null;  // kicker / D/ST cards
             return `<div class="ff-r" title="${esc(r.sub)}"${kp ? ` data-open-pid="${esc(kp)}"` : ''}>${r.dst ? logo((sides.find(x => x.team === r.team) || {}).logo, '#111', 20, r.team) : `<img class="pi-hs" src="${esc(r.id && NFLE.ui ? NFLE.ui.headshot(r.id) : '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">`}
             <span class="ff-n">${esc(r.name)}<small class="ff-sub">${esc(r.sub)}</small></span><span class="ff-pp"><b class="ff-p ${r.fp >= 10 ? 'hi' : r.fp < 3 ? 'lo' : ''}">${f1(r.fp)}</b></span></div>`; }).join('') || '<div class="ff-r muted">-</div>';
@@ -4029,13 +4088,20 @@
         const end = r(b.x), catchAt = Math.max(0, land);
         const rm = raw.slice(raw.search(/ (?:kicks|punts) /)).split('PENALTY')[0].match(/ for (-?\d+) yards?| for no gain/);
         const ret = tb || !rm ? null : rm[1] != null ? +rm[1] : 0, retEnd = ret == null ? null : catchAt + ret;
-        let kb = seg(from, land, 'kick');
+        // a punt ends the offense's drive (owner 2026-10-25: "mark the start of the play as if the offense ran it ... so
+        // the white tick mark lines up with where the play was snapped for the offense"): drawn for the PUNTING team,
+        // its end zone on the left, the dot at the snap, the kick out to where it came down and the return coming back
+        // (still green: the return's yards). Kickoffs stay the receiving team's (the drive they start is theirs).
+        const punt = /punt/i.test(pType(p)) || / punts /.test(raw), v = punt ? x => 100 - x : x => x;
+        const sg = (x0, x1, c) => seg(v(x0), v(x1), c), fl = (s, m, e2) => flag(v(s), v(m), v(e2));
+        let kb = sg(from, land, 'kick');
         if (retEnd != null) {
-          kb += seg(catchAt, retEnd, retEnd >= catchAt ? 'gain' : 'loss');
-          if (/PENALTY on/.test(raw) && Math.abs(end - retEnd) >= 1) kb += flag(catchAt, retEnd, end);
-        } else if (!tb && /PENALTY on/.test(raw) && Math.abs(end - catchAt) >= 1) kb += seg(catchAt, end, 'pen');
-        return `<span class="fs" aria-hidden="true" style="--oc:${esc(R.color || '#888')};--dc:${esc(K.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
-          + `${kb}<i class="fs-dot" style="left:${pc(tb ? end : catchAt)}%"></i></span>`;
+          kb += sg(catchAt, retEnd, retEnd >= catchAt ? 'gain' : 'loss');
+          if (/PENALTY on/.test(raw) && Math.abs(end - retEnd) >= 1) kb += fl(catchAt, retEnd, end);
+        } else if (!tb && /PENALTY on/.test(raw) && Math.abs(end - catchAt) >= 1) kb += sg(catchAt, end, 'pen');
+        const L = punt ? K : R, Rt = punt ? R : K, dot = punt ? v(from) : tb ? end : catchAt;
+        return `<span class="fs" aria-hidden="true" style="--oc:${esc(L.color || '#888')};--dc:${esc(Rt.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
+          + `${kb}<i class="fs-dot" style="left:${pc(dot)}%"></i></span>`;
       }
     }
     let bars;
@@ -4084,7 +4150,8 @@
     const a = spot(p.start, info), b = spot(p.end, info), txt = String(p.text || '');
     if (!a || !b || a.offense.team !== b.offense.team || p.scoringPlay || /No Play/i.test(txt) || stPlay(p) || !(p.start && p.start.down) || /incomplete/i.test(txt)) return '';
     const net = Math.round((b.x - a.x) * a.dir);
-    return `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)}</span>`;
+    // (owner 2026-10-25: "align that as a chip to the right side" ... "add yd") "+9 yd", right-aligned (.pt)
+    return `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}" title="Yards gained">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)} yd</span>`;
   };
   // lead / tail: a view's own items in the line (a card's clock and score)
   const playMeta = (p, lead = '', tail = '', cls = 'pm') => { const pp = playPairs(p); return `<div class="${cls}">${lead}${playTags(p)}${pp.downs}${pp.spots}${tail}</div>`; };
@@ -4145,9 +4212,28 @@
     const next = nx ? `<ol class="ds-ps"><li class="ds-p ps-next"><span class="ds-w">${esc(`${periodName(info.period)} ${info.clock || ''}`.trim())}</span><span class="ds-h">${nx.head}
       <span class="ds-sp"><span class="live-dot"></span>Awaiting the ${/try/i.test(nx.head) ? 'try' : 'kick'}&hellip;</span></span></li></ol>` : '';
     const lastReal = [...st.plays].reverse().find(p => !nonPlay(p));
-    return next + ds.map(d => {
-      const tm = teamOf(d.team && d.team.id) || {}, isCur = !nx && st.cur && String(st.cur.id) === String(d.id) && (st.live || st.replay);
+    // (owner 2026-10-25: NYG's missed field goal, HOU's 1st & 10 listed under "NYG drive · Now") after a change of
+    // possession ESPN keeps the old drive current until the new team's first snap: the team with the ball leads under
+    // its own header, and the old drive shows how it ended
+    const sit = st.sit || {}, posId = String(sit.possession || (sit.team && sit.team.id) || '');
+    const flip = !!(st.live && !nx && st.cur && posId && st.cur.team && String(st.cur.team.id) !== posId && teamOf(posId));
+    const fresh = flip ? (() => { const tm = teamOf(posId);
+      return `<div class="rc-d" style="--tc:${esc(tm.color || '#666')}"><div class="rc-h">${tm.logo ? logo(tm.logo, '#111', 18, tm.team) : ''}<b>${esc(tm.team)} drive</b>
+        <span class="rc-now"><span class="live-dot"></span>Now</span>${sit.possessionText ? `<span class="muted rc-m">Starts at ${esc(sit.possessionText)}</span>` : ''}</div>
+        <ol class="ds-ps">${presnap(st, info)}</ol></div>`; })() : '';
+    const endedBy = (p, tm) => {
+      const t = `${pType(p)} ${p.text || ''}`, opp = tm.team === info.home.team ? info.away.team : info.home.team;
+      if (/field goal/i.test(t)) return { text: /block/i.test(t) ? `Field goal blocked by ${opp}` : 'Missed field goal', cls: 'bad' };
+      if (/punt/i.test(t)) return { text: 'Punt', cls: '' };
+      if (/intercept/i.test(t)) return { text: `Intercepted by ${opp}`, cls: 'bad' };
+      if (/fumble/i.test(t)) return { text: `Fumble lost to ${opp}`, cls: 'bad' };
+      if (p.start && p.start.down === 4) return { text: 'Turnover on downs', cls: 'bad' };
+      return { text: 'Ended', cls: '' };
+    };
+    return next + fresh + ds.map(d => {
+      const tm = teamOf(d.team && d.team.id) || {}, isCur = !nx && !flip && st.cur && String(st.cur.id) === String(d.id) && (st.live || st.replay);
       let res = driveResult(d, tm, info, !!isCur);
+      if (flip && !res.text && lastReal && (d.plays || []).includes(lastReal)) res = endedBy(lastReal, tm);
       if (nx && !res.text && lastReal && (d.plays || []).includes(lastReal)) {
         const t = `${pType(lastReal)} ${lastReal.text || ''}`;
         res = { text: lastReal.scoringPlay ? (/field goal/i.test(t) ? 'Field goal' : isTry(lastReal) ? 'Touchdown' : /safety/i.test(t) ? 'Safety' : 'Touchdown') : 'Ended', cls: lastReal.scoringPlay ? 'good' : '' };
@@ -4232,7 +4318,6 @@
       <div class="ds-k">Plays</div><ol class="ds-ps">${rows}</ol></div>`;
     return { title: `${tm.team} drive${lab ? ` · ${lab}` : ''}`, html };
   };
-  const FOOTBALL = `<span class="fb-chip" title="Has the ball"><svg class="sb-fb" viewBox="0 0 32 20" role="img" aria-label="Has the ball">${FB_BODY}</svg></span>`;
   // two tabs: Pregame, and the game itself ("Live" while it's on, "Final" after)
   const GTABS = [['pre', 'Pregame'], ['live', 'Live']];
   // Live tab: one pane at a time, picked here (owner 2026-10-15: "if i pick stats i see stats"); box score first
@@ -4275,7 +4360,7 @@
     }
     const side = (s, isHome) => {
       const to = (st.live || st.replay) && st.tos ? st.tos[isHome ? 'home' : 'away'] : null;
-      return `<div class="sb-t tm-open${isHome ? ' home' : ''}" data-tm="${esc(s.team)}" style="--tc:${esc(s.color)}"><span class="sb-lg">${logo(s.logo, '#111', 40, s.team)}${sp && !sp.kick && sp.offense.team === s.team ? FOOTBALL : ''}</span>
+      return `<div class="sb-t tm-open${isHome ? ' home' : ''}" data-tm="${esc(s.team)}" style="--tc:${esc(s.color)}"><span class="sb-lg">${logo(s.logo, '#111', 40, s.team)}</span>
       <div class="sb-id"><div class="sb-n"><span class="sb-full">${esc((g && (isHome ? g.home.nick : g.away.nick)) || s.team)}</span><span class="sb-ab">${esc(s.team)}</span></div><div class="sb-r">${NFLE.recSpan(s.team, s.record || '')}</div>${to != null
         ? `<div class="sb-to" title="Timeouts left">${[0, 1, 2].map(i => `<i class="${i < to ? 'on' : ''}"></i>`).join('')}</div>` : ''}</div>
       <div class="sb-s">${isHome ? hs : as}</div></div>`;
@@ -4304,8 +4389,17 @@
       : GP.pane === 'team' ? `<section class="gcs" id="gcTeam"><h3>Team stats</h3>${st.replay ? '<p class="gcs-note">As of this play, counted from the play-by-play.</p>' : ''}${sum ? teamStats(sum, info, null, st.replay ? st.tstats : null) || '<p class="muted">Not available yet.</p>' : ''}</section>`
       : playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: st.replay ? 'As of this play, counted from the play-by-play.' : '', lines: st.replay ? st.lines : null, plays: st.replay ? st.plays : null, secs: st.secs, empty: 'The box score fills in once the game starts.' })}`;
     root.innerHTML = `
-      <section class="sb" style="--ac:${esc(info.away.color)};--hc:${esc(info.home.color)}">${side(info.away, false)}<div class="sb-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<b>${esc(status)}</b>${!nx && sp && sit && sit.shortDownDistanceText
-        ? `<span class="sb-dd">${esc(sit.shortDownDistanceText)}${sit.possessionText ? ` · ${esc(sit.possessionText)}` : ''}</span>${info.state === 'in' && (GP.calcState = calcState(info, sit)) ? '<button type="button" class="sb-calc" data-calc>What should they do?</button>' : ''}` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}</section>
+      <section class="sb" style="--ac:${esc(info.away.color)};--hc:${esc(info.home.color)}">${side(info.away, false)}<div class="sb-mid">${(() => {
+        // (owner 2026-10-25: "center the live red dot thing, and place the possession marker on either side of it on
+        // that row") the dot centered, the football beside it on the side of the team with the ball
+        const dot = info.state === 'in' && !rp ? '<span class="live-dot"></span>' : '';
+        // a plain triangle pointing at the team with the ball (owner 2026-10-25: "a simple triangle arrow ... rather
+        // than the football icon")
+        const has = k => sp && !sp.kick && sp.offense.team === info[k].team
+          ? `<i class="sb-arr ${k === 'away' ? 'l' : 'r'}" title="${esc(info[k].team)} ball" aria-label="${esc(info[k].team)} has the ball"></i>` : '';
+        return dot || has('away') || has('home') ? `<span class="sb-top"><span class="sb-bl">${has('away')}</span>${dot}<span class="sb-br">${has('home')}</span></span>` : '';
+      })()}<b>${esc(status)}</b>${!nx && sp && sit && sit.shortDownDistanceText
+        ? `<span class="sb-dd"><span>${esc(sit.shortDownDistanceText)}</span>${sit.possessionText ? `<span class="sb-at">${esc(sit.possessionText)}</span>` : ''}</span>` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}</section>
       <div class="seg gc-tabs" role="tablist">${GTABS.map(([k, l]) => `<button type="button" role="tab" data-gtab="${k}" class="${tab === k ? 'on' : ''}">${k === 'live' && info.state === 'in' ? '<span class="live-dot"></span>' : ''}${k === 'live' && info.state === 'post' && !rp ? 'Final' : l}</button>`).join('')}</div>
       ${tab === 'pre' ? preTab(g) : live()}`;
     wireGame();
@@ -4434,7 +4528,15 @@
       if (GP.sum) Object.assign(LIVE.lines, boxLines(GP.sum));
       if (GP.g) LIVE.byGame[GP.g.id] = GP.info;
       GP.canReplay = GP.info.realState === 'post' && GP.sum && allPlays(GP.sum).length > 0;
-      if (!GP.replay) renderGame();
+      if (!GP.replay) {
+        // the poll's redraw waits out a touch or a scroll and keeps each table's sideways position (as liveRerender)
+        const draw = () => { if (touchOn || Date.now() - lastScroll < 700) { clearTimeout(GP.drawT); GP.drawT = setTimeout(draw, 800); return; }
+          const root = document.getElementById('gc'), xs = root ? [...root.querySelectorAll(SIDEWAYS)].map(e => e.scrollLeft) : [];
+          renderGame();
+          if (root) [...root.querySelectorAll(SIDEWAYS)].forEach((e, i) => { if (xs[i]) e.scrollLeft = xs[i]; }); };
+        if (first) renderGame(); else draw();
+      }
+      if (!first) liveRerender();  // a card opened from this page follows the game too
     } catch (e) {
       // ESPN down: the game still shows from our own week file (Pregame, plus the final score if we have it).
       if (!GP.info && GP.g) { GP.info = infoFromG(GP.g); renderGame(); }
@@ -4480,7 +4582,7 @@
       const g = DATA.games.find(x => x.id === location.hash.slice(3));
       if (g) { location.replace(gameHref(g)); return; }
     }
-    document.addEventListener('nfle-scoring', () => { paintRows(); if (cardPid) renderCard(cardPid); else if (cardTeam) renderTeam(cardTeam); });
+    document.addEventListener('nfle-scoring', () => { paintRows(); rerenderCard(); });
     if (CFG.current || SIM) startLive();
   };
   // One click rule for the whole site: the innermost clickable thing wins - a player name or player row opens his
