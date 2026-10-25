@@ -558,5 +558,35 @@
 "at": "2026-10-25T22:11:00+00:00",
 "post": 0.974,
 "status": "Active (FFF)"
+},
+"00-0035704": {
+"name": "Drew Lock",
+"team": "SEA",
+"pos": "QB",
+"pre": 0.1935,
+"ruling": "INA",
+"at": "2026-10-25T22:52:00+00:00",
+"post": 0.0,
+"status": "Inactive (LLL)"
+},
+"00-0039165": {
+"name": "Zach Charbonnet",
+"team": "SEA",
+"pos": "RB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-10-25T22:52:00+00:00",
+"post": 0.0,
+"status": "Inactive (FFF)"
+},
+"00-0041178": {
+"name": "Robert Henry Jr.",
+"team": "SEA",
+"pos": "RB",
+"pre": 0.629,
+"ruling": "INA",
+"at": "2026-10-25T22:52:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
