@@ -345,6 +345,47 @@ def build_lookahead(eng, data, cfg, scoring, season: int, week: int, site: Path,
   print(f"[run] lookahead weeks {week + 1}-{last} in {time.time() - t0:.0f}s", flush=True)
 
 
+def all_positions_file(eng, data, plan: dict, season: int, week: int, path: Path) -> int:
+  """(DM, owner decision 2026-10-26) data/injuries_all.json for the team pages' Injuries tile: the players the board
+  doesn't cover (defenders, linemen, punters, long snappers) on this week's report or out injured, with this week's
+  chance to play (InjuryModel.all_positions: once the team's final report is out) and the return week from the build's
+  availability plan (the return chain already runs for every position). rows: [gsis, espn, pos, team, p, back];
+  p null = no number yet; back = first later week at an even chance or better, 0 = not this season, null = unknown."""
+  im = getattr(eng, "injury_model", None)
+  rep = im.all_positions(season, week) if im is not None and hasattr(im, "all_positions") else pd.DataFrame()
+  pt = data.players_table
+  espn = dict(zip(pt.gsis_id, pt.espn_id)) if pt is not None and "espn_id" in pt else {}
+  pos = dict(zip(pt.gsis_id, pt.position)) if pt is not None and "position" in pt else {}
+  r = data.rosters
+  r = r[r.season == season].sort_values("week").drop_duplicates("gsis_id", keep="last")
+  team = dict(zip(r.gsis_id, r.team))
+  later = sorted(w for w in plan["avail"] if w > week)
+  chain = {g for w in later for g in plan["avail"][w]}
+  from nfledge.injuries import FANTASY_POS
+
+  def back(g):
+    if g not in chain:
+      return None
+    seen = [w for w in later if g in plan["avail"][w]]
+    hit = next((w for w in seen if plan["avail"][w][g] >= 0.5), None)
+    return hit if hit is not None else (0 if seen and seen[-1] == later[-1] else None)
+  rows, done = [], set()
+  for x in rep.itertuples() if len(rep) else []:
+    done.add(x.gsis_id)
+    rows.append([x.gsis_id, str(espn.get(x.gsis_id) or ""), x.position, x.team or team.get(x.gsis_id),
+                 None if x.p != x.p else round(float(x.p), 3), back(x.gsis_id)])
+  for g in sorted(chain - done):  # out injured, not on this week's report (IR, a reserve list, missed games)
+    if pos.get(g) in FANTASY_POS or g not in team:
+      continue
+    rows.append([g, str(espn.get(g) or ""), pos.get(g), team[g], None, back(g)])
+  if not rows:
+    return 0
+  path.parent.mkdir(parents=True, exist_ok=True)
+  path.write_text(json.dumps({"v": 1, "season": season, "week": week, "cols": ["gsis", "espn", "pos", "team", "p", "back"],
+                              "rows": rows}, separators=(",", ":"), allow_nan=False), encoding="utf-8")
+  return len(rows)
+
+
 def main():
   ap = argparse.ArgumentParser(description=__doc__)
   ap.add_argument("--week", type=int, help="week to show (default: the week being played, until Tuesday 06:00 ET)")
@@ -411,6 +452,10 @@ def main():
     print("[run] warning: MODEL.md is out of date (model code/config changed); see tools/model_doc.py", flush=True)
   out = rp.render(ctx, Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week))
   check_script(out)
+  if not args.week and plan is not None:  # (DM) the team pages' Injuries tile: every non-fantasy player on the report
+    f = all_positions_file(eng, data, plan, season, week, out.parent / "data" / "injuries_all.json")
+    if f:
+      print(f"[run] non-fantasy injury report: {f} players -> injuries_all.json", flush=True)
   if not args.week:  # what this live build fed the model (lines, wind, ECR scrape, projections), for live-vs-backtest checks
     from nfledge import live_inputs
     f = live_inputs.write(out.parent, data, eng.games(season, week), proj, season, week)

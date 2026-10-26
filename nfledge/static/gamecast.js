@@ -2909,9 +2909,17 @@
   const INJ_GRP = (() => { const m = {}; [['QB'], ['RB', 'FB'], ['WR'], ['TE'], ['OL', 'OT', 'T', 'OG', 'G', 'C'], ['DL', 'DE', 'DT', 'NT'],
     ['LB', 'OLB', 'ILB', 'MLB'], ['DB', 'CB', 'S', 'FS', 'SS'], ['K', 'PK'], ['P'], ['LS']].forEach((g, i) => g.forEach(p => { m[p] = i; })); return m; })();
   const injWhat = r => r ? [...new Set([r.type, r.detail !== 'Not Specified' ? r.detail : '', r.side !== 'Not Specified' ? r.side : ''].filter(Boolean))].join(' · ') : '';
+  // (DM, owner 2026-10-26) the players our board doesn't cover (defenders, linemen, punters, snappers): this week's
+  // chance once the team's final report is out, and the return week (data/injuries_all.json, run.py
+  // all_positions_file), by ESPN id and our id
+  const IA = { d: undefined };
+  const loadAll = () => { if (IA.d !== undefined) return; IA.d = null;
+    NFLE.load('data/injuries_all.json').then(j => { const by = {};
+      j.rows.forEach(r => { const o = {}; j.cols.forEach((c, i) => { o[c] = r[i]; }); if (o.espn) by[`e${o.espn}`] = o; by[`g${o.gsis}`] = o; });
+      IA.d = by; rerenderCard(); }).catch(() => { IA.d = false; }); };
   // [{pid, espn, name, pos, photo, tag, what, back, play, prac}] by position group, worst first; null until ESPN's list is in
   const teamInjuries = abbr => {
-    loadInj(); loadRos(); loadRoster();
+    loadInj(); loadRos(); loadRoster(); loadAll();
     if (!DINJ || !DATA) return null;
     const full = NFLE.fmt.teamOf(DATA.teams, abbr).name, seen = new Set(), seenE = new Set(), out = [];
     // ESPN id -> our id: the card map, plus the roster for depth players it lacks (a player once, however he's found)
@@ -2927,11 +2935,15 @@
       // the expected return week: our return model (the first week he's more likely than not to play), else ESPN's
       // estimated date as its NFL week, only while it's ahead (a passed one is stale: the list hasn't caught up)
       // (an ESPN date past the regular season reads "Season": the week clock would call January week 20+)
-      const bw = pid && backWeek(pid), ew0 = r && r.return_date && r.return_date >= today ? weekOfDate(r.return_date) : null;
+      // off our board: the all-positions file (by ESPN id, else our id)
+      const ia = !p && IA.d ? (espn && IA.d[`e${espn}`]) || (pid && IA.d[`g${pid}`]) : null;
+      // (likely to play this week: nothing to come back from)
+      const bwa = ia && ia.back != null && !(ia.p != null && ia.p >= H.AVAIL.EVEN) ? (ia.back === 0 ? 'no' : ia.back > +DATA.week ? ia.back : null) : null;
+      const bw = (pid && backWeek(pid)) || bwa, ew0 = r && r.return_date && r.return_date >= today ? weekOfDate(r.return_date) : null;
       const ew = ew0 && ew0 > (+DATA.season >= 2021 ? 18 : 17) ? 'no' : ew0;
-      const play = p && p.inactive != null ? 1 - p.inactive : null;
+      const play = p && p.inactive != null ? 1 - p.inactive : ia && ia.p != null ? ia.p : null;
       out.push({ pid, espn, tag, name: (p && p.name) || (r && r.name) || (ro && ro.name) || '', pos: (p && p.pos) || (ro && ro.pos) || (r && r.pos) || '',
-        photo: p && p.photo, what: injWhat(r), prac: p ? pracWords(p, DATA) : '', play,
+        photo: p && p.photo, what: injWhat(r), prac: p ? pracWords(p, DATA) : '', play, onReport: !!(ia && ia.p == null && !INJ_LONG.has(tag)),
         back: bw === 'no' || (!bw && ew === 'no') ? 'season' : bw ? `wk ${bw}` : play != null && play >= H.AVAIL.EVEN ? '' : ew ? `wk ${ew}` : r && r.return_date >= today ? espnDate(r.return_date) : '',
         backWhy: bw ? 'our return model: the first week he is more likely than not to play' : ew ? `ESPN's estimated return, ${espnDate(r.return_date)}` : '' });
     };
@@ -2954,9 +2966,11 @@
     const face = wk.length ? `<div class="pc-big">${wk.length} <small>on the report</small></div><div class="pc-tapsub">${esc(counts)}</div>`
       : '<div class="pc-big good">Healthy</div><div class="pc-tapsub">no one on this week\'s report</div>';
     const sub2 = lt.length ? `<div class="pc-tapsub">${lt.length} on IR or reserve</div>` : '';
-    // our chance he plays where we model him (fantasy positions); ruled out reads Out; anyone else a dash, not a guess
+    // our chance he plays (every position, (DM)); ruled out reads Out; before his team's final report a defender or
+    // lineman has no number yet (the model behind theirs is tested on final reports only)
     const playCell = x => x.play != null ? `<td class="num">${NFLE.fmt.toPlay(1 - x.play)}</td>`
-      : x.tag === 'O' ? '<td class="num muted">Out</td>' : '<td class="num muted" title="We only model fantasy positions">&ndash;</td>';
+      : x.tag === 'O' ? '<td class="num muted">Out</td>'
+      : `<td class="num muted" title="${x.onReport ? 'After his team\'s final injury report' : 'No chance on file for him yet'}">&ndash;</td>`;
     const backCell = x => `<td class="num${x.back ? '' : ' muted'}"${x.backWhy ? ` title="${esc(x.backWhy)}"` : ''}>${x.back === 'season' ? 'Season' : esc(x.back) || '&ndash;'}</td>`;
     // the injury and practice days on their own wrapping line under the name (in the name's sub line they pushed the
     // numbers off a phone screen)
@@ -2972,7 +2986,7 @@
     const ltBox = lt.length ? `<div class="pc-box"><div class="pc-k">Long term · IR, PUP, NFI, suspended</div>
       <table class="bx tm-pl tiles"><thead><tr><th>Player</th>${BACK_H}</tr></thead><tbody>${
         lt.map(x => row(x, backCell(x))).join('')}</tbody></table></div>` : '';
-    const src = `<p class="pc-sub muted">ESPN's injury list (updated daily) with our chance to play and return model.</p>`;
+    const src = `<p class="pc-sub muted">ESPN's injury list (updated daily) with our chance to play and return model. Defenders' and linemen's chances come from a newer model, shown from the team's final report.</p>`;
     return tapTile('Injuries', face + sub2, 'Injuries', wkBox + ltBox + src);
   };
   // ---- Coaches tile (owner 2026-10-26): the head coach, the coordinators and what each one's units did, this season's

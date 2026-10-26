@@ -619,10 +619,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/return model needs to be pristine").
 
 **Running / next up**
-0. (DM, pre-registered 2026-10-26) chance to play and return week for every position, by position group (team page
-   Injuries tile shows a dash for non-fantasy players until it passes). First: offensive linemen missing from avail_hist.
-   Also (owner "kk", 2026-10-26): Brashard Smith (KC, hamstring, practiced F/L/DNP) reads "not back this season" from
-   the return model (health.back -> 0): find why before trusting "Season" on the tile.
+0. (DM / DM2 / DM3, 2026-10-26) all FAIL on the strict calibration bar; owner decision: non-fantasy players shown at
+   the shipped fantasy numbers' standard (A1 position-group model on final reports, return weeks from the plan's chain;
+   run.py all_positions_file -> data/injuries_all.json). The board's models are unchanged. Brashard Smith's "Season":
+   a display bug (ros weeks stop early), fixed in health.back.
+   Pending (owner: "later", 2026-10-26): QBs' chance to play runs high, 0.776 predicted vs 0.709 played on final
+   reports 2021-25 (worst decile 21 points; QBs listed Questionable played 45%). Pre-register a QB-specific look
+   (starter vs backup, a QB role input) before season end.
 1. SHIPPED 2026-10-20 as (BE2) (owner); history kept: (owner delegated 2026-10-19, after Tank Dell: IR to return since the opener, full practices in week 6,
    coach naming week 7, on no page at all): reserve-list players whose practice window is open (on this week's report;
    before his team's first report of the week, last week's) join the board and get a return state. Built on branch

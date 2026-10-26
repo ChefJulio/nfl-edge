@@ -166,6 +166,10 @@ class Data:
   pending_games: int = 0
   practice: pd.DataFrame | None = None  # daily practice participation (NFL.com API), where enabled
   avail_hist: pd.DataFrame | None = None  # labelled practice weeks (did he play?) for completed seasons
+  # the same with every position's snaps mapped ((DM): linemen were missing): only the non-fantasy players' chance to
+  # play reads it (InjuryModel.all_positions, owner 2026-10-26); the board's model keeps avail_hist
+  avail_hist_all: pd.DataFrame | None = None
+  players_table: pd.DataFrame | None = None  # nflverse's players table (gsis / pfr / espn ids for everyone)
   ecr: pd.DataFrame | None = None  # FantasyPros weekly positional expert consensus ranks (pre-game only)
   teams: pd.DataFrame | None = None  # team names + colors
   qb_career: pd.Series | None = None  # career pass attempts before the loaded window, by gsis_id
@@ -376,6 +380,13 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
   ppid = players.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
   snaps["gsis_id"] = snaps.gsis_id_roster.fillna(snaps.pfr_player_id.map(ppid))
   snaps_post["gsis_id"] = snaps_post.pfr_player_id.map(pid).fillna(snaps_post.pfr_player_id.map(ppid))
+  # (DM, owner 2026-10-26) the practice history with the player-table id map: every position (past seasons fetched once)
+  avail_hist_all = None
+  if avail_hist is not None:
+    first = int(cfg["data"].get("practice_history_start", 2018))
+    aa = [cache.get("availhist_all", s, lambda s=s: availability_history(nfl, s, players), stale=False) for s in range(first, current)]
+    aa = [a for a in aa if a is not None and len(a)]
+    avail_hist_all = pd.concat(aa, ignore_index=True) if aa else None
   routes = frames["routes"]
   routes = pd.concat([r for r in routes if r is not None], ignore_index=True) if any(
     r is not None for r in routes) else None
@@ -383,7 +394,8 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
   data = Data(current_season=current, latest_week=latest, seasons=seasons, pbp=cutoff(pbp), schedules=sched,
               stats=stats, rosters=rosters, snaps=snaps, injuries=cat("injuries"), depth=depth, draft=draft,
               routes=routes, exclusions=load_exclusions(rosters), pending_games=pending, practice=practice,
-              avail_hist=avail_hist, ecr=ecr, teams=teams, pbp_post=pbp_post, snaps_post=snaps_post,
+              avail_hist=avail_hist, avail_hist_all=avail_hist_all, players_table=players,
+              ecr=ecr, teams=teams, pbp_post=pbp_post, snaps_post=snaps_post,
               ngs_rush=cache.get("ngsrush", "all", lambda: nfl.load_nextgen_stats(seasons=[x for x in seasons if x >= 2016], stat_type="rushing"),
                                  stale=cache.age_hours("ngsrush", "all") > LIVE_TTL_HOURS),
               ftn=cache.get("ftn", "all", lambda: nfl.load_ftn_charting(seasons=[x for x in seasons if x >= 2022]),

@@ -184,6 +184,21 @@ def practice_features(df: pd.DataFrame) -> pd.DataFrame:
   return f.astype(float)
 
 
+FANTASY_POS = {"QB", "RB", "FB", "HB", "WR", "TE", "K"}
+POS_GROUPS = ["QB", "RB", "WR", "TE", "OL", "DL", "LB", "DB", "ST"]
+
+
+def group_features(X: pd.DataFrame, rows: pd.DataFrame) -> pd.DataFrame:
+  """(DM) the practice inputs with the position group (QB RB WR TE OL DL LB DB ST) in place of the skill flag."""
+  from .returns import POS_GROUP
+  grp = dict(POS_GROUP, OT="OL", OG="OL", HB="RB", PK="ST")
+  x = X.drop(columns=[c for c in ("skill", "skill_q") if c in X.columns]).copy()
+  g = rows.position.map(grp).fillna("other").to_numpy()
+  for k in POS_GROUPS:
+    x[f"g_{k}"] = (g == k).astype(float)
+  return x
+
+
 def _practice(s) -> str:
   if not isinstance(s, str):
     return "NA"
@@ -275,6 +290,18 @@ class InjuryModel:
     # reads "no game status yet" as "cleared" (1 day published: 86% predicted vs 65% played). One model per k = 1, 2
     # published days, trained on 3-day report weeks cut to their first k days, every outcome: walk-forward 2021-25
     # Brier 0.203 -> 0.160 (5/5 seasons), calibrated within 1.2 points. Used until the team's final report is out.
+    # (DM, owner decision 2026-10-26) every other position: the same inputs with the position group in place of the
+    # skill flag, on the history with every position's snaps mapped (linemen were missing). Better than the board's
+    # model on non-fantasy players (Brier 0.1035 -> 0.1026, 2021-25), fantasy players unchanged; it misses the strict
+    # per-group calibration bar as the shipped fantasy numbers do, shown at their standard by owner decision. Final
+    # reports only (it was tested there); the board never reads it.
+    self.practice_model_all = None
+    aa = getattr(self.data, "avail_hist_all", None)
+    if aa is not None and len(aa):
+      da = aa[(aa.season < max(seasons) + 1) & (aa.game_status != "OUT")]
+      Xa = group_features(self._with_rest(self._with_role(practice_features(da), da), da), da)
+      self.practice_cols_all = list(Xa.columns)
+      self.practice_model_all = HistGradientBoostingClassifier(**self._gb_params(), random_state=0).fit(Xa, da.played)
     self.partial_models = {}
     full3 = ah[(ah.season < max(seasons) + 1) & (ah.days.fillna("").str.len() == 3)]
     for k in (1, 2):
@@ -484,6 +511,29 @@ class InjuryModel:
         if (n == k).any():
           p = np.where(n == k, m.predict_proba(X)[:, 1], p)
     return np.where(rows.game_status.to_numpy() == "OUT", 0.0, p)
+
+  def all_positions(self, season: int, week: int) -> pd.DataFrame:
+    """(DM) this week's report for the players the board doesn't cover (defenders, linemen, specialists other than
+    kickers): gsis_id, position, game_status, p (P(plays) once his team's final report is out, Out = 0; NaN before
+    it: the model was tested on final reports only)."""
+    pr = self.data.practice
+    if pr is None or getattr(self, "practice_model_all", None) is None:
+      return pd.DataFrame()
+    rows = pr[(pr.season == season) & (pr.week == week) & ~pr.position.isin(FANTASY_POS)].drop_duplicates("gsis_id", keep="last")
+    if not len(rows):
+      return pd.DataFrame()
+    rows = rows.copy()
+    rows["days"] = rows.days.fillna("")
+    rows["game_status"] = rows.game_status.fillna("None").astype(str).str.upper().replace({"NONE": "None", "NAN": "None", "": "None"})
+    fin = self.final_report_teams(rows.set_index("gsis_id"), season, week)
+    r = self.data.rosters
+    r = r[(r.season == season) & (r.week <= week)].sort_values("week").drop_duplicates("gsis_id", keep="last")
+    rows["team"] = rows.gsis_id.map(dict(zip(r.gsis_id, r.team)))
+    X = group_features(self._with_rest(self._with_role(practice_features(rows), rows), rows), rows)[self.practice_cols_all]
+    p = self.practice_model_all.predict_proba(X)[:, 1]
+    p = np.where(rows.game_status.to_numpy() == "OUT", 0.0, p)
+    rows["p"] = np.where(rows.team.isin(fin).to_numpy() | (rows.game_status.to_numpy() == "OUT"), p, np.nan)
+    return rows[["gsis_id", "position", "team", "game_status", "days", "p"]].reset_index(drop=True)
 
   def final_report_teams(self, days: pd.DataFrame, season: int, week: int) -> set:
     """Teams whose final report for the week is out. With dated reports: the chronology (every report day filed, a
