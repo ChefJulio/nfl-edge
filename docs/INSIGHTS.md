@@ -5150,3 +5150,19 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   on 2021-25; plus the untouched check on 2026 weeks 1-7: Brier no worse than A0 for fantasy positions. Pass: the
   board's practice model becomes A1 + calibration (the QB fix rides on it), and every group that passes (2) gets its
   chance to play on the team page.
+- **RESULT {#return-no-covid} (DM2) return model without the COVID reserve stints: FAIL; the model stays as is.**
+  tools/dm2_eval.py, scored 2022-25 (11,754 states) + 2026 weeks 2-7. Dropping 1,261 reserve_other states of 2020-21
+  made it worse: Brier 0.1131 -> 0.1149 (+0.0018 [+0.0003, +0.0035]); fantasy groups +0.0013. CORRECTION to (DM)'s
+  reading: with 2021 out of the scoring the model as is is calibrated within 3 points for DB, OL, QB, RB, WR, ST;
+  DL (.174 vs .200), LB (.180 / .206), TE (.198 / .234) run low; and 2026 so far runs HIGH (.234 predicted vs .184
+  back, n 850). The (DM) pessimism was mostly 2021 (COVID list); what is left drifts by season in both directions:
+  no stable bias to correct. Return weeks for defenders / linemen: DB, OL pass (4) on 2022-25; DL, LB do not.
+- **RESULT {#play-group-calib} (DM3) practice model + per-group isotonic calibration: FAIL; nothing shipped.**
+  tools/dm3_eval.py, 2021-25 + 2026 weeks 1-7. Brier fantasy / rest: A0 0.1034 / 0.1035, A1 0.1034 / 0.1026, A1c
+  0.1046 / 0.1031: the calibration made both worse ((1) +0.0012 [+0.0002, +0.0023] FAIL; (3) -0.0004, interval
+  straddles 0); 2026 fantasy 0.0705 -> 0.0709. (2) only OL calibrated. Group-level misses change from season to season
+  (as the return model's did, (DM2)), so a map learned on past seasons does not carry. WORTH NOTING for any rerun: the
+  (DM) calibration bar (every decile within 5 points, every group) is stricter than what the shipped fantasy numbers
+  meet (A0 fails it for QB, RB, TE). Owner's call (2026-10-26, asked): hold non-fantasy positions to the shipped
+  model's standard (A1: discrimination better than A0, fantasy guard passed) and show their chance, or keep the dash.
+  Separately, QBs: A0 predicts .776 vs .709 played (2021-25): a QB-specific look before season end.
