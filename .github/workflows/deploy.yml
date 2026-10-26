@@ -433,9 +433,9 @@ jobs:
         if: needs.plan.outputs.complete == 'true' || steps.carry.outputs.carried != 'true'
         run: python tools/penalties_build.py --site=site
       # Team pages > Coaches: staffs (Wikipedia), records, unit ranks, tendencies, fourth downs (tools/coaches_build.py;
-      # after Season stats and the Calculator, which it reads). Nightly, or whenever the carried site lacks it.
+      # after Season stats and the Calculator, which it reads). Every full build: under a minute (coaches' pages cached in
+      # the file for two weeks), and staff changes show the same day.
       - name: Coaches
-        if: needs.plan.outputs.complete == 'true' || steps.carry.outputs.carried != 'true' || hashFiles('site/data/coaches.json') == ''
         run: python tools/coaches_build.py --site=site || echo "[coaches] skipped"
       - name: Stamp the deploy  # the plan reads both (lanes by what the live site was built from)
         run: |
