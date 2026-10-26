@@ -3002,9 +3002,9 @@
   // ball (side: 'oc' offense / 'dc' defense)
   const jobRows = (jobs, side) => (jobs || []).slice().reverse().map(([role, t, a, b, rk]) => {
     const u = role === 'hc' ? side : role;
-    const chips = u !== 'oc' && u !== 'dc' ? '' : rk.map((r, i) => {
+    const chips = u !== 'oc' && u !== 'dc' ? '' : `<span class="co-rkl">${u === 'oc' ? 'Off' : 'Def'}</span>` + rk.map((r, i) => {
       const v = Array.isArray(r) ? r[u === 'oc' ? 0 : 1] : r;
-      return rkChip(v, `${a + i} ${u === 'oc' ? 'offense' : 'defense'}: EPA per play rank`); }).join('');
+      return rkYear(v, a + i, u === 'oc' ? 'offense' : 'defense'); }).join('');
     return `<tr><td>${tLogo(t, 16)} <b>${esc(t)}</b></td><td class="muted">${esc(ROLE[role] || role)}</td><td class="num">${yrs(a, b)}</td><td class="co-rk">${chips}</td></tr>`;
   }).join('');
   // a coach's own page (owner 2026-10-26: "it doesn't show coaching history ... doesn't list them as former players";
@@ -3012,19 +3012,23 @@
   // 'dc' picks the head-coach years' side; none in the head coach's own list, his seasons table has both), the newest
   // six shown and the rest behind "Earlier"
   const SHOW_JOBS = 6;
+  // a unit's rank in a season, the season on the chip (owner 2026-10-26: bare "23rd / 8th" chips didn't say what they
+  // were): "'20 23rd"
+  const rkYear = (r, s, what) => r ? `<span class="rk-b co-rky ${r <= 8 ? 'rk1' : r <= 16 ? 'rk2' : r <= 24 ? 'rk3' : 'rk4'}" title="${esc(`${s} ${what}: ${ord(r)} of 32 in EPA per play (1st = best)`)}"><i>&rsquo;${String(s).slice(-2)}</i>${ord(r)}</span>` : '';
+  const RANK_NOTE = '<p class="pc-sub co-note">Chips: the unit he ran, its league rank each season by EPA per play (1st = best of 32).</p>';
   const careerHtml = (b, side) => {
     const rows = (b.coached || []).slice().reverse().map(([team, code, a, z, role, rk]) => {
       let chips = '';
       if (rk) {
-        const [kind, s0, ranks] = rk, u = kind === 'hc' ? side : kind;
-        if (u === 'oc' || u === 'dc') chips = ranks.map((x, i) => rkChip(Array.isArray(x) ? x[u === 'oc' ? 0 : 1] : x, `${s0 + i} ${u === 'oc' ? 'offense' : 'defense'}: EPA per play rank`)).join('');
+        const [kind, s0, ranks] = rk, u = kind === 'hc' ? side : kind, what = u === 'oc' ? 'offense' : 'defense';
+        if (u === 'oc' || u === 'dc') chips = `<span class="co-rkl">${u === 'oc' ? 'Off' : 'Def'}</span>` + ranks.map((x, i) => rkYear(Array.isArray(x) ? x[u === 'oc' ? 0 : 1] : x, s0 + i, what)).join('');
       }
       const tm = code ? era(code, a) : team;
       return `<tr><td class="num co-yr">${z == null ? `${a}&ndash;` : yrs(a, z)}</td><td>${code ? `${tLogo(code, 16)} ` : ''}<b>${esc(tm)}</b></td><td class="muted co-role">${esc(role || '')}</td><td class="co-rk">${chips}</td></tr>`;
     });
     if (!rows.length) return '';
     const head = rows.slice(0, SHOW_JOBS).join(''), more = rows.slice(SHOW_JOBS);
-    return `<table class="bx co-tbl co-car"><tbody>${head}</tbody></table>${more.length ? `<details class="co-more"><summary>Earlier (${more.length})</summary><table class="bx co-tbl co-car"><tbody>${more.join('')}</tbody></table></details>` : ''}`;
+    return `${side && (b.coached || []).some(c => c[5]) ? RANK_NOTE : ''}<table class="bx co-tbl co-car"><tbody>${head}</tbody></table>${more.length ? `<details class="co-more"><summary>Earlier (${more.length})</summary><table class="bx co-tbl co-car"><tbody>${more.join('')}</tbody></table></details>` : ''}`;
   };
   // his playing days: NFL clubs and years (a player card when he played in our data's years), else where he played
   const playedHtml = b => {
