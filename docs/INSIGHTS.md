@@ -5119,3 +5119,34 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   simpler. Groups passing (4) get "Back wk N" on the Injuries tile for every player, not only fantasy ones.
   Ship: the Injuries tile reads the new per-player numbers (a team file: every listed player's chance and return week);
   the board's fantasy numbers change only if the adopted arm passes (1).
+- **RESULT {#all-positions-play} (DM) game week, every position by position group: FAIL (calibration), nothing shipped.**
+  tools/dm_eval.py, walk-forward 2021-25, 23,000+ final-report rows (game status Out excluded). The lineman fix works:
+  avail_hist with the players-table id map, 2018-25: OL 10 -> 7,946 rows, ST 278 -> 623, DB 7,231 -> 8,956 (the old
+  map missed some of every group). Brier fantasy / rest: A0 0.1034 / 0.1035, A0f (fixed rows only) 0.1035 / 0.1031,
+  A1 (group input) 0.1034 / 0.1026, A2 (+ group x Q / D) 0.1032 / 0.1025. (1) fantasy guard: all arms ok (A1 +0.0000
+  [-0.0006, +0.0007]); (3) the rest vs A0: A1 -0.0009 [-0.0013, -0.0006], A2 -0.0010: position helps. (2) calibration
+  by group (mean within 3, every decile within 5 points): FAIL in every arm. A1: DL predicted .840 vs played .862
+  (worst decile 9.4), LB .821 / .848 (8.3), QB .746 / .709 (18.5), ST .850 / .874 (22.3, n 334), WR / TE deciles 5.0-5.1;
+  OL, RB, DB pass. TODAY'S MODEL on QBs (A0f): .776 predicted vs .709 played, worst decile 21 points: the board
+  overstates quarterbacks' chance to play. Played when Questionable: QB .45, OL .67, DB .67, RB .69, TE .71, WR .73,
+  ST .75, DL .75, LB .75 (2021-25).
+- **RESULT {#all-positions-return} (DM) return model, every position by group: FAIL (calibration).**
+  tools/dm_return_eval.py, walk-forward 2021-25, 16,793 injured-out player-weeks (all positions; this model already
+  trains on them). (5) position input: no difference overall (Brier 0.1283 both; per group mixed, small). Within an
+  injury, return rates barely differ by group (back after one missed game, ankle 27-37%, knee 30-37% across groups;
+  concussion DB 67 vs OL 59%). (4) calibration: R0 too LOW in 8 of 9 groups (predicted .17-.20 vs back .20-.25; QB the
+  exception). Where: by season 2021 -10.6 points (the COVID reserve list: desig reserve_other -37 points), 2022-25
+  -0.4 to -2.8; by designation active roster -5.6, inactive -16.2, IR +0.9; after 1 missed game -7.1, 2 -5.7. The
+  shipped model's "back wk N" for fantasy players inherits this.
+- **PRE-REGISTERED 2026-10-26 (owner: "continue as you would if you were in charge"): (DM2) return model without
+  the COVID reserve stints, and (DM3) the practice model calibrated per position group.** Both from (DM)'s failures.
+  DM2: train ReturnModel without 2020-21 reserve_other states (the COVID-19 list: quick returns no feature can see).
+  Test 2022-25 walk-forward (2021 excluded from scoring: its COVID states are not what the model faces now) + 2026 so
+  far as the untouched check. GATE: (a) Brier vs the model as is, upper 95% < 0 OR no worse (upper < +0.0005) with
+  (b) every group of 300+ states calibrated within 3 points; (c) fantasy groups' (QB RB WR TE) Brier no worse (upper
+  < +0.0005). If the active-roster bias remains (b fails), it is reported, not tuned away inside this test.
+  DM3: (DM)'s A1 (fixed history, group input) plus a per-group isotonic calibration fit on out-of-fold predictions of
+  the training seasons only (leave-one-season-out within 2018 .. s-1), applied to season s. Same gates as (DM) (1)-(3)
+  on 2021-25; plus the untouched check on 2026 weeks 1-7: Brier no worse than A0 for fantasy positions. Pass: the
+  board's practice model becomes A1 + calibration (the QB fix rides on it), and every group that passes (2) gets its
+  chance to play on the team page.

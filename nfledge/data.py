@@ -596,14 +596,21 @@ def season_injuries(cache, nfl, season: int) -> pd.DataFrame | None:
                    stale=season == current and cache.age_hours("injuries", season) > LIVE_TTL_HOURS)
 
 
-def availability_history(nfl, season: int) -> pd.DataFrame:
+def availability_history(nfl, season: int, players: pd.DataFrame | None = None) -> pd.DataFrame:
   """Practice weeks labelled with whether the player played (any snaps) that week. Only players whose snap
-  counts map to a gsis id, and only weeks their team played (byes excluded)."""
+  counts map to a gsis id, and only weeks their team played (byes excluded).
+  players (EXPERIMENT (DM), 2026-10-26): nflverse's players table as a second pfr -> gsis map. The weekly rosters carry
+  no pfr_id for any offensive lineman (2024: T / G / C 0.0% mapped; K / P / LS about half), so without it the history
+  has no linemen (10 of 31,034 rows, 2018-25). load_all's snap map already falls back to it (line ~376); production
+  history is unchanged until (DM) passes, since the practice model would train on new rows."""
   pr = fetch_practice_days(season)
   sn = _to_pd(nfl.load_snap_counts([season]))
   ro = _to_pd(nfl.load_rosters_weekly([season]))
   pid = ro.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
   sn["gsis_id"] = sn.pfr_player_id.map(pid)
+  if players is not None:
+    ppid = players.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
+    sn["gsis_id"] = sn.gsis_id.fillna(sn.pfr_player_id.map(ppid))
   sn = sn[sn.game_type == "REG"]
   tot = sn.offense_snaps.fillna(0) + sn.defense_snaps.fillna(0) + sn.st_snaps.fillna(0)
   played = set(map(tuple, sn.loc[tot > 0, ["week", "gsis_id"]].dropna().itertuples(index=False)))
