@@ -156,6 +156,10 @@ def bio(text: str) -> dict:
   if dy.isdigit():
     out["draft"] = [int(dy), int(dr) if dr.isdigit() else None, int(dp) if dp.isdigit() else None]
   out["pfr"] = _plain(_field(text, "pfr"))
+  # his photo: the infobox's file, served by Special:FilePath (commons or local); coordinators have no ESPN headshot
+  img = re.sub(r"<!--.*?-->", "", _field(text, "image"), flags=re.S).strip()
+  img = re.sub(r"^\[\[(?:File|Image):([^|\]]+).*", r"\1", img).strip()
+  out["img"] = img if re.search(r"\.(jpe?g|png|webp|gif)$", img, re.I) else ""
   for line in _field(text, "pastteams").splitlines():
     if not line.strip().startswith("*"): continue
     t = _plain(line).rstrip("*").strip()
@@ -183,10 +187,37 @@ def bio(text: str) -> dict:
   return out
 
 
-def current_links(team: str) -> tuple[dict, dict]:
-  """(today's staff, role -> page title)."""
+def staff_full(text: str) -> list:
+  """The whole coaching staff as listed, [[group, role, name]] in order (owner 2026-10-26: "another full list ... of
+  the team's entire coaching staff"): the template's ";Offensive coaches" headings (or "|Offensive Coaches=") group
+  the bullets; the front office is left out."""
+  out, group = [], ""
+  for line in text.splitlines():
+    s = line.strip()
+    h = re.match(r"^;\s*(.+)$", s) or re.match(r"^\|\s*([A-Za-z &/]+?)\s*=\s*$", s)
+    if h:
+      group = _clean(h.group(1))
+      continue
+    m = re.match(r"^\*\s*(.+?)\s+[–—-]\s+(.+)$", s)
+    if not m or re.search(r"front office|executive|personnel|scouting|ownership", group, re.I):
+      continue
+    role, who = _clean(m.group(1)), clean_name(_clean(m.group(2)))
+    # a template without headings (Minnesota) lists the front office too: its roles are dropped by title, unless the
+    # job coaches ("Director of football research" goes, "Assistant head coach" stays)
+    if re.search(r"owner|chairman|president|general manager|chief|personnel|scout|advisor|administration|counsel|salary|"
+                 r"\bdirector\b|operations|executive|business|communications|cap\b", role, re.I) \
+       and not re.search(r"coach|coordinator|strength|conditioning|quality control", role, re.I):
+      continue
+    if who and len(who) <= 60:
+      out.append([group or "Staff", role, who])
+  return out
+
+
+def current_links(team: str) -> tuple[dict, dict, list]:
+  """(today's staff, role -> page title, the whole coaching staff)."""
   links = {}
-  return staff(raw(f"Template:{NAME[team]} staff"), links), links
+  text = raw(f"Template:{NAME[team]} staff")
+  return staff(text, links), links, staff_full(text)
 
 
 ESPN_CODE = {"LAR": "LA", "WSH": "WAS"}

@@ -213,6 +213,7 @@ def player_card(b: dict, name: str, pfr: dict, P: pd.DataFrame, last_season: dic
 
 
 BIO_DAYS = 14  # a coach's page is refetched after this many days (careers change between seasons, rarely within)
+BIO_V = 2  # what C.bio reads (2: the photo); a cached page from an older version is refetched
 SIDE = {"oc": 0, "dc": 1}
 
 
@@ -226,12 +227,13 @@ def bios(links: dict, cur_hc: dict, now: dict, last: dict, players: pd.DataFrame
   P = players if players is not None and "pfr_id" in players else pd.DataFrame(columns=["pfr_id", "gsis_id", "display_name", "rookie_season", "last_season"])
   pfr = dict(zip(P.pfr_id, P.gsis_id))
   last_season = dict(zip(P.gsis_id, pd.to_numeric(P.last_season, errors="coerce")))
+  head = {g: u for g, u in zip(P.gsis_id, P.headshot) if isinstance(u, str) and u.startswith("http")} if "headshot" in P else {}
   name_of = {links[t][r]: now[t].get(r) for t in links for r in links[t] if now.get(t, {}).get(r)}
   out = {}
   titles = sorted({v for t in links for v in links[t].values() if v})
   for title in titles:
     c = cached.get(title)
-    fresh = c and (today - datetime.fromisoformat(c.get("f", "2000-01-01")).date()).days < BIO_DAYS
+    fresh = c and c.get("bv") == BIO_V and (today - datetime.fromisoformat(c.get("f", "2000-01-01")).date()).days < BIO_DAYS
     if fresh:
       out[title] = c
       continue
@@ -241,7 +243,7 @@ def bios(links: dict, cur_hc: dict, now: dict, last: dict, players: pd.DataFrame
       print(f"[coaches] {title}: page unavailable ({e}); keeping the cached one", flush=True)
       out[title] = c
       continue
-    b["f"] = today.isoformat()
+    b["f"], b["bv"] = today.isoformat(), BIO_V
     out[title] = b
   for title, b in out.items():
     if not b:
@@ -249,6 +251,9 @@ def bios(links: dict, cur_hc: dict, now: dict, last: dict, players: pd.DataFrame
     # a team that reads like a job came from a mis-filed infobox line (Mike Rutenberg: "Player personnel intern")
     b["played"] = [p for p in b.get("played", []) if not re.search(r"\b(intern|coach|assistant|scout)\b", p[0], re.I)]
     b["pid"] = player_card(b, name_of.get(title) or title, pfr, P, last_season)
+    # his playing-days headshot (nflverse), the last photo choice after ESPN's and his Wikipedia page's (2026-10-26:
+    # half the coordinators have neither; ESPN keeps coach headshots for a dozen long-time head coaches only)
+    b["pimg"] = (head.get(b["pid"]) or None) if b["pid"] else None
     for row in b.get("coached", []):
       del row[5:]  # ranks are recomputed each build (this season's move)
       team, code, a, z, role = row[:5]
@@ -284,13 +289,13 @@ def main() -> None:
 
   # staffs: every past season (committed), today's from the templates (else the last site's)
   hist = json.loads(HIST.read_text(encoding="utf-8"))["staff"] if HIST.exists() else {}
-  now, links = {}, {}
+  now, links, full = {}, {}, {}
   for t in C.NAME:
-    try: now[t], links[t] = C.current_links(t)
+    try: now[t], links[t], full[t] = C.current_links(t)
     except Exception as e:
       print(f"[coaches] {t} staff unavailable ({e}); keeping the last one", flush=True)
       lt = (last.get("teams") or {}).get(t) or {}
-      now[t], links[t] = lt.get("staff") or {}, lt.get("links") or {}
+      now[t], links[t], full[t] = lt.get("staff") or {}, lt.get("links") or {}, lt.get("all") or []
   staff = dict(hist); staff[str(current)] = now
 
   U = units(site, range(FIRST, current + 1))
@@ -327,7 +332,9 @@ def main() -> None:
     hc["bio"] = hc_link if B.get(hc_link) else None
     for r in co:
       co[r]["bio"] = links[t].get(r) if B.get(links[t].get(r)) else None
-    teams[t] = {"hc": hc, **co, "staff": now[t], "links": links[t], "hc_jobs": ST.get(now[t].get("hc") or "", []),
+    teams[t] = {"hc": hc, **co, "staff": now[t], "links": links[t], "all": full[t],
+                "unit": list(U.get(current, {}).get(t, [None] * 4)[2:]),  # this season's [offense, defense] rank
+                "hc_jobs": ST.get(now[t].get("hc") or "", []),
                 "tend": T.get(t, {}), "fourth": F4.get(t, {}), "calls": PC.get(t)}
   doc = {"v": V, "season": current, "built": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
          "src": {"staff": "Wikipedia staff templates, season articles and coaches' pages (CC BY-SA)", "head": "nflverse schedules, ESPN"},

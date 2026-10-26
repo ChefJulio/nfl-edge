@@ -258,6 +258,46 @@ table.tm-pl { width: 100%; } table.tm-pl td.ij-who { width: 100%; max-width: 0; 
 .co-card { font: inherit; font-weight: 700; color: var(--accent, #6d9eff); background: none; border: 0; padding: 0 2px; cursor: pointer; white-space: nowrap; }
 .co-car td.co-yr { width: 1%; white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
 .co-car td.co-role { white-space: normal; font-size: var(--fs-xs); line-height: 1.3; }
+/* the Coaches sheet: a tile per job (2 x 2 on a phone) picking whose panel shows */
+.co-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
+@media (min-width: 700px) { .co-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.co-tile { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto auto auto; column-gap: 10px; row-gap: 1px;
+  align-items: center; text-align: left; font: inherit; color: inherit; cursor: pointer; padding: 10px; min-width: 0;
+  border: 1px solid var(--line); border-radius: var(--r-lg); background: color-mix(in srgb, var(--fg) 3%, transparent);
+  transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease); }
+.co-tile .co-pic { grid-row: 1 / span 3; align-self: start; }
+.co-tile.on { border-color: color-mix(in srgb, var(--accent, #6d9eff) 70%, var(--line)); background: color-mix(in srgb, var(--accent, #6d9eff) 10%, transparent); }
+.co-tile.co-none { cursor: default; opacity: .75; grid-template-columns: minmax(0, 1fr); }
+.co-tr { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.co-tn { font-weight: 800; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.co-ts { font-size: var(--fs-xs); color: var(--muted); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.co-tc { grid-column: 1 / -1; justify-self: start; margin-top: 5px; font-size: 10.5px; font-weight: 700; padding: 2px 7px;
+  border-radius: var(--r-pill); background: color-mix(in srgb, var(--accent, #6d9eff) 18%, transparent); color: var(--accent, #6d9eff); }
+/* a career as a list: years | logo | team, role, then the unit's chips on their own line */
+.co-jobs { list-style: none; margin: 4px 0 0; padding: 0; }
+.co-job { display: grid; grid-template-columns: 52px 22px minmax(0, 1fr); gap: 8px; align-items: start; padding: 7px 0;
+  border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
+.co-job:first-child { border-top: 0; }
+.co-jy { font-size: var(--fs-sm); color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 1px; }
+.co-jl .nl { margin: 0; }
+.co-jb { display: flex; flex-direction: column; min-width: 0; }
+.co-jb b { line-height: 1.2; }
+.co-jr { font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; }
+.co-jc { display: flex; flex-wrap: wrap; align-items: center; gap: 3px; margin-top: 4px; }
+.co-jc .rk-b { margin: 0; }
+/* the whole staff */
+.co-all > summary { cursor: pointer; list-style: none; display: flex; align-items: baseline; gap: 6px; }
+.co-all > summary::-webkit-details-marker { display: none; }
+.co-all > summary::after { content: "\203A"; margin-left: auto; color: var(--muted); transition: transform var(--dur-fast) var(--ease); }
+.co-all[open] > summary::after { transform: rotate(90deg); }
+.co-grp { margin-top: 10px; }
+.co-gh { font-size: var(--fs-xs); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.co-grp ul { list-style: none; margin: 0; padding: 0; }
+.co-grp li { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; font-size: var(--fs-sm);
+  border-top: 1px solid color-mix(in srgb, var(--line) 50%, transparent); }
+.co-grp li:first-child { border-top: 0; }
+.co-sr { color: var(--muted); min-width: 0; }
+.co-grp li b { text-align: right; flex: none; max-width: 55%; }
 /* rank chips with their season ("'20 23rd") and the unit's label (Off / Def) */
 .co-rky i { font-style: normal; font-weight: 600; opacity: .7; margin-right: 3px; }
 .co-rkl { display: inline-block; font-size: var(--fs-xs); font-weight: 700; color: var(--muted); margin-right: 4px; letter-spacing: .02em; }
