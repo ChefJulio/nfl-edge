@@ -213,7 +213,7 @@ def player_card(b: dict, name: str, pfr: dict, P: pd.DataFrame, last_season: dic
 
 
 BIO_DAYS = 14  # a coach's page is refetched after this many days (careers change between seasons, rarely within)
-BIO_V = 2  # what C.bio reads (2: the photo); a cached page from an older version is refetched
+BIO_V = 4  # what C.bio reads (2: the photo; 3: the executive career; 4: combined club names); older pages are refetched
 SIDE = {"oc": 0, "dc": 1}
 
 
@@ -250,6 +250,10 @@ def bios(links: dict, cur_hc: dict, now: dict, last: dict, players: pd.DataFrame
       continue
     # a team that reads like a job came from a mis-filed infobox line (Mike Rutenberg: "Player personnel intern")
     b["played"] = [p for p in b.get("played", []) if not re.search(r"\b(intern|coach|assistant|scout)\b", p[0], re.I)]
+    # a page without a playing position gives its job title instead (Eliot Wolf: "Executive vice president of player
+    # personnel", read as "Played ... at Miami"): only a playing position stays
+    if re.search(r"coach|manager|president|executive|director|coordinator|scout|owner|personnel|analyst", b.get("pos") or "", re.I):
+      b["pos"] = ""
     b["pid"] = player_card(b, name_of.get(title) or title, pfr, P, last_season)
     # his playing-days headshot (nflverse), the last photo choice after ESPN's and his Wikipedia page's (2026-10-26:
     # half the coordinators have neither; ESPN keeps coach headshots for a dozen long-time head coaches only)
@@ -289,9 +293,14 @@ def main() -> None:
 
   # staffs: every past season (committed), today's from the templates (else the last site's)
   hist = json.loads(HIST.read_text(encoding="utf-8"))["staff"] if HIST.exists() else {}
-  now, links, full = {}, {}, {}
+  now, links, full, ops = {}, {}, {}, {}
   for t in C.NAME:
-    try: now[t], links[t], full[t] = C.current_links(t)
+    try:
+      now[t], links[t], full[t] = C.current_links(t)
+      o = now[t].pop("_ops", None)  # a club without a GM: its top personnel executive (rank, name, title, page)
+      if o and "gm" not in now[t]:
+        ops[t] = {"name": o[1], "title": o[2]}
+        if o[3]: links[t]["gm"] = o[3]
     except Exception as e:
       print(f"[coaches] {t} staff unavailable ({e}); keeping the last one", flush=True)
       lt = (last.get("teams") or {}).get(t) or {}
@@ -332,6 +341,21 @@ def main() -> None:
     hc["bio"] = hc_link if B.get(hc_link) else None
     for r in co:
       co[r]["bio"] = links[t].get(r) if B.get(links[t].get(r)) else None
+    # the general manager (owner 2026-10-26: "a specially important role"): since = his latest general-manager row
+    # with this club on his page; the club's record since then (regular season, playoffs)
+    # a club without the title (New England, Cincinnati): its top personnel executive, with his title
+    gm_name, gm_title = now[t].get("gm") or (ops.get(t) or {}).get("name"), (ops.get(t) or {}).get("title")
+    if gm_name and gm_name.lower() != "vacant":
+      gb = B.get(links[t].get("gm")) or {}
+      key = "general manager" if not gm_title else "player personnel|football operations"
+      runs = [x for x in gb.get("exec", []) + gb.get("coached", []) if x[1] == t and re.search(key, x[4] or "", re.I)
+              and not re.search(r"assistant", x[4] or "", re.I)]
+      since = max((x[2] for x in runs), default=None)
+      g = G[(G.team == t) & (G.season >= since)] if since else G.iloc[0:0]
+      co["gm"] = {"name": gm_name, "title": gm_title, "since": since, "bio": links[t].get("gm") if gb else None,
+                  "rec": {"reg": wlt(g[g.type == "REG"].margin), "po": wlt(g[g.type != "REG"].margin)[:2]} if since else None}
+    elif gm_name:
+      co["gm"] = {"name": None, "vacant": True}
     teams[t] = {"hc": hc, **co, "staff": now[t], "links": links[t], "all": full[t],
                 "unit": list(U.get(current, {}).get(t, [None] * 4)[2:]),  # this season's [offense, defense] rank
                 "hc_jobs": ST.get(now[t].get("hc") or "", []),

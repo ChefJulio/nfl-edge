@@ -87,6 +87,15 @@ def staff(text: str, links: dict | None = None) -> dict:
     found = []
     # one line can hold two jobs ("Interim head coach/offensive coordinator", Darrell Bevell, Detroit 2020), so each
     # role is matched on its own; "Head coach/executive vice president" (Pete Carroll) is the head coach
+    # the general manager (owner 2026-10-26: "a specially important role"): "General manager", "Senior vice president &
+    # general manager" (Joe Schoen), "Executive vice president/general manager"; not an assistant GM
+    if re.search(r"(^|/|&|\s)general manager\b", role) and not re.search(r"assistant(\s+\w+)?\s+general manager", role):
+      found.append("gm")
+    # a club without one (New England, Cincinnati): its top player-personnel / football-operations executive
+    elif links is not None and re.search(r"player personnel|football operations", role) and "assistant" not in role:
+      rk = 0 if "executive vice president" in role else 1 if "vice president" in role else 2 if "director" in role else 3
+      if rk < 3 and ("_ops" not in out or rk < out["_ops"][0]):
+        out["_ops"] = (rk, who, m.group(1).strip(), lk.group(1).strip() if lk else None)
     if re.search(r"(^|/)(interim )?head coach\b", role) and "assistant head coach" not in role: found.append("hc")
     if not ("assistant" in bare or "senior" in bare):
       found += [r for r, k in (("oc", "offensive coordinator"), ("dc", "defensive coordinator"), ("st", "special teams coordinator")) if k in role]
@@ -104,6 +113,11 @@ CODE_OF = {v: k for k, v in NAME.items()} | {"Oakland Raiders": "LV", "San Diego
                                              "Los Angeles Raiders": "LV", "Houston Oilers": "TEN", "Tennessee Oilers": "TEN",
                                              "Phoenix Cardinals": "ARI", "St. Louis Cardinals": "ARI", "Baltimore Colts": "IND",
                                              "Los Angeles Rams (1946–1994)": "LA", "Boston Patriots": "NE"}
+def code_of(team: str) -> str:
+  """Our code for an NFL club name, a combined one ("St. Louis / Los Angeles Rams") by its last name."""
+  return CODE_OF.get(team) or CODE_OF.get(team.split("/")[-1].strip(), "")
+
+
 _YEAR_T = re.compile(r"\{\{\s*(?:nfly|nfl year|nfl season|cfby|cfb year|cfb season|cfl year|afl year|ufl year|year|nflyr)\s*\|\s*(\d{4})(?:\s*\|\s*(\d{2,4}))?[^{}]*\}\}", re.I)
 
 
@@ -165,26 +179,33 @@ def bio(text: str) -> dict:
     t = _plain(line).rstrip("*").strip()
     a, b, team = _span(t)
     team = team.split(" | ")[0].strip()
-    if team and a: out["played"].append([team, CODE_OF.get(team, ""), a, b])
-  last = None
-  for line in _field(text, "pastcoaching").splitlines():
+    if team and a: out["played"].append([team, code_of(team), a, b])
+  out["coached"] = _career(_field(text, "pastcoaching"))
+  out["exec"] = _career(_field(text, "pastexecutive"))
+  return out
+
+
+def _career(field: str) -> list:
+  """[[team, code, from, to, role]] from an infobox career list (pastcoaching / pastexecutive): "* Team (years)<br/>Role",
+  nested "** Role (years)" lines belonging to the team above."""
+  rows, last = [], None
+  for line in field.splitlines():
     s = line.strip()
     if not s.startswith("*"): continue
     nested = s.startswith("**")
     t = _plain(s)
     if nested and last:
       a, b, role = _span(t)
-      if role: out["coached"].append([last[0], last[1], a or last[2], b if a else last[3], role])
+      if role: rows.append([last[0], last[1], a or last[2], b if a else last[3], role])
       continue
     parts = [p.strip() for p in t.split(" | ")]
     a, b, team = _span(parts[0])
     team = team.strip()
-    last = [team, CODE_OF.get(team, ""), a, b]
+    last = [team, code_of(team), a, b]
     role = " / ".join(p for p in parts[1:] if p)
-    if team and a: out["coached"].append([team, last[1], a, b, role])
+    if team and a: rows.append([team, last[1], a, b, role])
   # a team line whose roles are on its nested lines carries no role itself: dropped when a nested role covers it
-  out["coached"] = [c for c in out["coached"] if c[4] or not any(d is not c and d[0] == c[0] and d[4] and d[2] >= c[2] and (d[3] or 9999) <= (c[3] or 9999) for d in out["coached"])]
-  return out
+  return [c for c in rows if c[4] or not any(d is not c and d[0] == c[0] and d[4] and d[2] >= c[2] and (d[3] or 9999) <= (c[3] or 9999) for d in rows)]
 
 
 def staff_full(text: str) -> list:
