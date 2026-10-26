@@ -622,6 +622,24 @@
     const last = pl[pl.length - 1];
     return last ? Object.assign({}, last.end || {}, { lastPlay: { text: last.text } }) : null;
   };
+  // One snapshot for the plays and the state above them (owner 2026-10-25: "the plays and state keep falling out of
+  // sync"): the scoreboard and the summary are separate feeds, each behind its own few-second cache, so the score,
+  // clock and down could run a play ahead of the list or behind it. Live, the summary is the truth: score, quarter and
+  // clock from its header; ESPN's situation only when its last play is the list's last play, else where that play left
+  // the ball (the timeouts kept). Returns true when the scoreboard is ahead (the next poll comes sooner).
+  const syncInfo = (info, sum) => {
+    const h = sum && sum.header && sum.header.competitions && sum.header.competitions[0];
+    if (!h || info.state !== 'in') return false;
+    const hs = h.status || {};
+    if (hs.period) { info.period = hs.period; info.clock = hs.displayClock; }
+    (h.competitors || []).forEach(x => { if (info[x.homeAway] && x.score != null) info[x.homeAway].score = +x.score || 0; });
+    const pl = allPlays(sum).flatMap(d => d.plays || []), last = pl[pl.length - 1];
+    const lp = info.sit && info.sit.lastPlay && info.sit.lastPlay.id, lid = last && String(last.id).replace(/-try$/, '');  // splitTries' try row
+    if (!last || !info.sit || String(lp) === lid) return false;
+    const ahead = +lp > +lid;
+    info.sit = Object.assign(sitFromPlays(sum), { homeTimeouts: info.sit.homeTimeouts, awayTimeouts: info.sit.awayTimeouts });
+    return ahead;
+  };
 
   // ------------------------------------------------------------------------------------------------ player news
   // RotoWire's player blurbs (what happened + why it matters), as ESPN's fantasy app shows them. One request per
@@ -4605,7 +4623,11 @@
   };
   const pollGame = async () => {
     clearTimeout(GP.timer);
+    let behind = false;
     try {
+      // both feeds at once once the game's id is known, so they come from the same few seconds
+      const sumP = GP.info && GP.info.realState === 'in' ? getJSON(ESPN.sum + GP.info.id) : null;
+      if (sumP) sumP.catch(() => {});
       const evs = await weekEvents(GP.season, GP.week);
       const ev = evs.find(e => evKey(e) === gKey(GP.away, GP.home));
       if (!ev) throw new Error('game not found on ESPN');
@@ -4617,7 +4639,7 @@
       if (GP.g && GP.g.colors) { GP.info.away.color = GP.g.colors[GP.away] || GP.info.away.color; GP.info.home.color = GP.g.colors[GP.home] || GP.info.home.color; }
       else distinctColors(GP.info);  // a link without the week file: ESPN's colors, made distinct here
       // the box score links players to our pages through the id map (NFLE.ui.ready, fetched on first use)
-      if (GP.info.realState !== 'pre') { [GP.sum] = await Promise.all([getJSON(ESPN.sum + ev.id), NFLE.ui && NFLE.ui.ready]); splitTries(GP.sum); }
+      if (GP.info.realState !== 'pre') { [GP.sum] = await Promise.all([sumP && GP.info.id === ev.id ? sumP : getJSON(ESPN.sum + ev.id), NFLE.ui && NFLE.ui.ready]); splitTries(GP.sum); behind = syncInfo(GP.info, GP.sum); }
       // Player cards opened from this page show the live / final line too.
       if (GP.sum) Object.assign(LIVE.lines, boxLines(GP.sum));
       if (GP.g) LIVE.byGame[GP.g.id] = GP.info;
@@ -4639,7 +4661,7 @@
     // live: every 15 s; before kickoff: every 5 minutes, then every minute from 30 minutes out, so a page opened early
     // turns live by itself (it had needed a reload)
     if (GP.info && !document.hidden) {
-      if (GP.info.realState === 'in') GP.timer = setTimeout(pollGame, 15000);
+      if (GP.info.realState === 'in') GP.timer = setTimeout(pollGame, behind ? 3000 : 15000);
       else if (GP.info.realState === 'pre') {
         const to = Date.parse(GP.info.date) - Date.now();
         GP.timer = setTimeout(pollGame, !(to > 30 * 60000) ? 60000 : Math.min(5 * 60000, to - 30 * 60000 + 1000));
