@@ -194,6 +194,78 @@ def fourth(site: Path, season: int) -> dict:
   return out
 
 
+def player_card(b: dict, name: str, pfr: dict, P: pd.DataFrame, last_season: dict) -> str | None:
+  """His player card's id (gsis), if he played in the NFL in our data's years (1999 on): the page's PFR id ("OConKe00";
+  some pages write "L/LeviAn00"), else one player of that exact name whose career overlaps the page's NFL years."""
+  nfl_years = [y for p in b.get("played", []) if p[1] for y in (p[2], p[3] or p[2])]
+  if not nfl_years:
+    return None
+  g = pfr.get(re.sub(r"^[A-Z]/", "", b.get("pfr") or ""))
+  if not g:
+    base = re.sub(r"\s+(Sr\.|Jr\.|II|III|IV)$", "", name).strip()
+    c = P[(P.display_name == base) | (P.display_name == name)]
+    if len(c):
+      ro = pd.to_numeric(c.rookie_season, errors="coerce").fillna(0)
+      la = pd.to_numeric(c.last_season, errors="coerce").fillna(9999)
+      c = c[(ro <= max(nfl_years) + 1) & (la >= min(nfl_years) - 1)]
+    g = c.gsis_id.iloc[0] if len(c) == 1 else None
+  return g if g and (last_season.get(g) or 0) >= FIRST else None
+
+
+BIO_DAYS = 14  # a coach's page is refetched after this many days (careers change between seasons, rarely within)
+SIDE = {"oc": 0, "dc": 1}
+
+
+def bios(links: dict, cur_hc: dict, now: dict, last: dict, players: pd.DataFrame | None, U: dict, current: int) -> dict:
+  """page title -> {pos, college, draft, pfr, pid, played, coached} for today's head coaches and coordinators
+  (Wikipedia infoboxes, C.bio). Cached in the site's coaches.json (bio_cache) and refetched after BIO_DAYS. pid: his
+  player card (PFR id -> gsis id, nflverse's players table). Each coaching row ends with his unit's rank per season
+  where the job ran one (offensive / defensive coordinator: that side; head coach: [offense, defense]), from 1999."""
+  today = datetime.now(timezone.utc).date()
+  cached = last.get("bios") or {}
+  P = players if players is not None and "pfr_id" in players else pd.DataFrame(columns=["pfr_id", "gsis_id", "display_name", "rookie_season", "last_season"])
+  pfr = dict(zip(P.pfr_id, P.gsis_id))
+  last_season = dict(zip(P.gsis_id, pd.to_numeric(P.last_season, errors="coerce")))
+  name_of = {links[t][r]: now[t].get(r) for t in links for r in links[t] if now.get(t, {}).get(r)}
+  out = {}
+  titles = sorted({v for t in links for v in links[t].values() if v})
+  for title in titles:
+    c = cached.get(title)
+    fresh = c and (today - datetime.fromisoformat(c.get("f", "2000-01-01")).date()).days < BIO_DAYS
+    if fresh:
+      out[title] = c
+      continue
+    try:
+      b = C.bio(C.raw(title))
+    except Exception as e:
+      print(f"[coaches] {title}: page unavailable ({e}); keeping the cached one", flush=True)
+      out[title] = c
+      continue
+    b["f"] = today.isoformat()
+    out[title] = b
+  for title, b in out.items():
+    if not b:
+      continue
+    # a team that reads like a job came from a mis-filed infobox line (Mike Rutenberg: "Player personnel intern")
+    b["played"] = [p for p in b.get("played", []) if not re.search(r"\b(intern|coach|assistant|scout)\b", p[0], re.I)]
+    b["pid"] = player_card(b, name_of.get(title) or title, pfr, P, last_season)
+    for row in b.get("coached", []):
+      del row[5:]  # ranks are recomputed each build (this season's move)
+      team, code, a, z, role = row[:5]
+      rl = (role or "").lower()
+      kind = "oc" if "offensive coordinator" in rl else "dc" if "defensive coordinator" in rl else \
+        "hc" if re.search(r"(^|[^t] )head coach", rl) and "assistant head coach" not in rl else None
+      if not code or not kind or not a:
+        continue
+      rk = []
+      for s in range(max(a, FIRST), (z or current) + 1):
+        u = U.get(s, {}).get(code)
+        rk.append(None if not u else [u[2], u[3]] if kind == "hc" else u[2 + SIDE[kind]])
+      if any(x is not None for x in rk):
+        row.append([kind, max(a, FIRST), rk])
+  return out
+
+
 def main() -> None:
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
   site = Path(opt.get("site", "site"))
@@ -212,12 +284,13 @@ def main() -> None:
 
   # staffs: every past season (committed), today's from the templates (else the last site's)
   hist = json.loads(HIST.read_text(encoding="utf-8"))["staff"] if HIST.exists() else {}
-  now = {}
+  now, links = {}, {}
   for t in C.NAME:
-    try: now[t] = C.current(t)
+    try: now[t], links[t] = C.current_links(t)
     except Exception as e:
       print(f"[coaches] {t} staff unavailable ({e}); keeping the last one", flush=True)
-      now[t] = ((last.get("teams") or {}).get(t) or {}).get("staff") or {}
+      lt = (last.get("teams") or {}).get(t) or {}
+      now[t], links[t] = lt.get("staff") or {}, lt.get("links") or {}
   staff = dict(hist); staff[str(current)] = now
 
   U = units(site, range(FIRST, current + 1))
@@ -232,6 +305,8 @@ def main() -> None:
   PC, stale = play_callers(now, cur_hc)
   if stale:  # a GitHub Actions warning on the run, and the tile says "to recheck" instead of a name
     print(f"::warning::Play-callers to recheck (staff changed since data/playcallers.json was researched): {' | '.join(stale)}", flush=True)
+  players = cache.get("players", "all", lambda: nfl.load_players(), stale=cache.age_hours("players", "all") > 24 * 7)
+  B = bios(links, cur_hc, now, last, players, U, current)
   teams = {}
   for t in C.NAME:
     # the head coach today (ESPN, else Wikipedia); his record from every game nflverse credits to him (+ this season's)
@@ -246,11 +321,17 @@ def main() -> None:
       runs = ST.get(who, [])
       here = [x for x in runs if x[0] == r and x[1] == t and x[3] == current]
       co[r] = {"name": who, "since": here[0][2] if here else current, "jobs": runs}
-    teams[t] = {"hc": hc, **co, "staff": now[t], "hc_jobs": ST.get(now[t].get("hc") or "", []),
+    # each one's own page (coaching and playing careers), by the staff list's link; the head coach's when the list's
+    # head coach is ESPN's
+    hc_link = links[t].get("hc") if now[t].get("hc") == nm else None
+    hc["bio"] = hc_link if B.get(hc_link) else None
+    for r in co:
+      co[r]["bio"] = links[t].get(r) if B.get(links[t].get(r)) else None
+    teams[t] = {"hc": hc, **co, "staff": now[t], "links": links[t], "hc_jobs": ST.get(now[t].get("hc") or "", []),
                 "tend": T.get(t, {}), "fourth": F4.get(t, {}), "calls": PC.get(t)}
   doc = {"v": V, "season": current, "built": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
-         "src": {"staff": "Wikipedia staff templates and season articles (CC BY-SA)", "head": "nflverse schedules, ESPN"},
-         "teams": teams}
+         "src": {"staff": "Wikipedia staff templates, season articles and coaches' pages (CC BY-SA)", "head": "nflverse schedules, ESPN"},
+         "teams": teams, "bios": {k: v for k, v in B.items() if v}}  # by page title; teams name theirs (bio)
   out_f.parent.mkdir(parents=True, exist_ok=True)
   out_f.write_text(json.dumps(doc, separators=(",", ":"), allow_nan=False), encoding="utf-8")
   print(f"[coaches] wrote {out_f} ({out_f.stat().st_size // 1024} KB); play-callers: {len(PC)} teams, {len(stale)} to recheck", flush=True)

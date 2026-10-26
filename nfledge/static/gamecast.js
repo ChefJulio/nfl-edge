@@ -3007,20 +3007,55 @@
       return rkChip(v, `${a + i} ${u === 'oc' ? 'offense' : 'defense'}: EPA per play rank`); }).join('');
     return `<tr><td>${tLogo(t, 16)} <b>${esc(t)}</b></td><td class="muted">${esc(ROLE[role] || role)}</td><td class="num">${yrs(a, b)}</td><td class="co-rk">${chips}</td></tr>`;
   }).join('');
+  // a coach's own page (owner 2026-10-26: "it doesn't show coaching history ... doesn't list them as former players";
+  // CO.d.bios, Wikipedia infoboxes): every coaching job newest first, rank chips where the job ran a unit (side 'oc' /
+  // 'dc' picks the head-coach years' side; none in the head coach's own list, his seasons table has both), the newest
+  // six shown and the rest behind "Earlier"
+  const SHOW_JOBS = 6;
+  const careerHtml = (b, side) => {
+    const rows = (b.coached || []).slice().reverse().map(([team, code, a, z, role, rk]) => {
+      let chips = '';
+      if (rk) {
+        const [kind, s0, ranks] = rk, u = kind === 'hc' ? side : kind;
+        if (u === 'oc' || u === 'dc') chips = ranks.map((x, i) => rkChip(Array.isArray(x) ? x[u === 'oc' ? 0 : 1] : x, `${s0 + i} ${u === 'oc' ? 'offense' : 'defense'}: EPA per play rank`)).join('');
+      }
+      const tm = code ? era(code, a) : team;
+      return `<tr><td class="num co-yr">${z == null ? `${a}&ndash;` : yrs(a, z)}</td><td>${code ? `${tLogo(code, 16)} ` : ''}<b>${esc(tm)}</b></td><td class="muted co-role">${esc(role || '')}</td><td class="co-rk">${chips}</td></tr>`;
+    });
+    if (!rows.length) return '';
+    const head = rows.slice(0, SHOW_JOBS).join(''), more = rows.slice(SHOW_JOBS);
+    return `<table class="bx co-tbl co-car"><tbody>${head}</tbody></table>${more.length ? `<details class="co-more"><summary>Earlier (${more.length})</summary><table class="bx co-tbl co-car"><tbody>${more.join('')}</tbody></table></details>` : ''}`;
+  };
+  // his playing days: NFL clubs and years (a player card when he played in our data's years), else where he played
+  const playedHtml = b => {
+    const nfl = (b.played || []).filter(p => p[1]), any = (b.played || []).length;
+    const dr = b.draft ? ` · drafted ${b.draft[0]}${b.draft[1] ? ` round ${b.draft[1]}` : ''}` : '';
+    let txt;
+    if (nfl.length) {
+      const codes = [...new Set(nfl.map(p => era(p[1], p[2])))], a = Math.min(...nfl.map(p => p[2])), z = Math.max(...nfl.map(p => p[3] || p[2]));
+      txt = `Played ${esc(b.pos || '')} in the NFL · ${esc(codes.join(', '))} · ${yrs(a, z)}${b.college ? ` · ${esc(b.college)}` : ''}${dr}`;
+    } else if (any) txt = `Played ${esc(b.pos || '')} · ${esc(b.played.map(p => p[0]).filter((x, i, s) => s.indexOf(x) === i).join(', '))}${b.college ? ` · ${esc(b.college)}` : ''}`;
+    else if (b.pos && b.college) txt = `Played ${esc(b.pos)} at ${esc(b.college)}`;
+    if (!txt) return '';
+    return `<div class="co-played">${txt}${b.pid ? ` <button type="button" class="co-card" data-open-pid="${esc(b.pid)}">Player card &rsaquo;</button>` : ''}</div>`;
+  };
   const coachesTile = abbr => {
     loadCoaches();
     if (!CO.d) return tapTile('Coaches', `<div class="pc-tapsub">${CO.d === false ? 'Not available' : 'Loading&hellip;'}</div>`, 'Coaches', '<p class="pc-sub">Loading&hellip;</p>');
     const T = CO.d.teams[abbr]; if (!T) return '';
     const h = T.hc || {}, r = h.rec || {}, yr = h.since ? CO.d.season - h.since + 1 : null;
+    const bioOf = x => (x && x.bio && CO.d.bios && CO.d.bios[x.bio]) || null, hb = bioOf(h);
     const face = `<div class="co-face">${coachPic(h.photo, h.name, 34)}<div><div class="co-nm">${esc(h.name || '')}</div>
       <div class="pc-tapsub">${yr ? `yr ${yr}` : ''}${r.here ? ` · ${wl(r.here)}` : ''}</div></div></div>`;
     const cell = (v, lab, tip = '') => `<div class="tm-st"${tip ? ` title="${esc(tip)}"` : ''}><div class="pc-k">${lab}</div><div class="tm-stv">${v}</div></div>`;
     const hcBox = `<div class="pc-box"><div class="co-head">${coachPic(h.photo, h.name, 52)}<div><div class="co-nm big">${esc(h.name || '')}</div>
         <div class="pc-sub">Head coach${h.since ? ` since ${h.since}` : ''}${h.exp ? ` · ${h.exp} years in the NFL` : ''}</div></div></div>
+      ${hb ? playedHtml(hb) : ''}
       <div class="tm-stats">${cell(wl(r.here), `With ${esc(abbr)}`, 'Regular season')}${cell(wl(r.car), 'Career', 'Regular season, every club')}
         ${cell(r.po ? wl(r.po) : '', 'Playoffs')}${cell(wl(r.fav), 'Favored', 'Every game he was favored in (closing line)')}
         ${cell(wl(r.dog), 'Underdog')}${cell(wl(r.ats), 'vs spread', 'Covered - failed - push, every game with a line')}</div>
-      ${(h.stops || []).length > 1 ? `<div class="pc-k co-sub">Head coaching stops</div><div class="co-stops">${h.stops.map(([t, a, b, w, l, ti]) => `<span>${tLogo(t, 16)} ${esc(t)} ${yrs(a, b)} <b>${wl([w, l, ti])}</b></span>`).join('')}</div>` : ''}</div>`;
+      ${(h.stops || []).length > 1 ? `<div class="pc-k co-sub">Head coaching stops</div><div class="co-stops">${h.stops.map(([t, a, b, w, l, ti]) => `<span>${tLogo(t, 16)} ${esc(t)} ${yrs(a, b)} <b>${wl([w, l, ti])}</b></span>`).join('')}</div>` : ''}
+      ${hb && (hb.coached || []).length ? `<div class="pc-k co-sub">Coaching history</div>${careerHtml(hb, null)}` : ''}</div>`;
     // his seasons here, last in the sheet (a long tenure pushed the coordinators off the first screen)
     const seasonsBox = (h.seasons || []).length ? `<div class="pc-box"><div class="pc-k">${esc(h.name || '')}'s seasons with ${esc(abbr)}</div><table class="bx co-tbl"><thead><tr><th>Season</th><th class="num">Record</th><th class="num" title="Offense, EPA per play">Off</th><th class="num" title="Defense, EPA per play allowed">Def</th></tr></thead><tbody>${
         h.seasons.slice().reverse().map(([s, w, l, t, o, dd]) => `<tr><td>${s}</td><td class="num">${wl([w, l, t])}</td><td class="num">${rkChip(o)}</td><td class="num">${rkChip(dd)}</td></tr>`).join('')}</tbody></table></div>` : '';
@@ -3034,8 +3069,11 @@
       return `<div class="co-calls" title="${esc(tip)}">Calls plays: <b>${esc(e.name)}</b>${e.role && ROLE[e.role] ? ` <span class="muted">(${esc(ROLE[e.role].toLowerCase())})</span>` : ''}</div>`; };
     const coBox = (role, label) => { const c = T[role], side = role === 'oc' ? 'off' : role === 'dc' ? 'def' : null;
       if (!c) return `<div class="pc-box co-c"><div class="pc-k">${label}</div>${side ? calls(side) : ''}<p class="pc-sub">No ${label.toLowerCase()} coordinator: ${esc(h.name || 'the head coach')} runs it.</p></div>`;
+      // his own page's full career when we have it; else the staff lists' coordinator / head-coach jobs (1999 on)
+      const b = bioOf(c), car = b && (b.coached || []).length ? careerHtml(b, role) : '';
       return `<div class="pc-box co-c"><div class="pc-k">${label} · ${esc(c.name)}${c.since ? ` · since ${c.since}` : ''}</div>${side ? calls(side) : ''}
-        ${(c.jobs || []).length ? `<table class="bx co-tbl"><tbody>${jobRows(c.jobs, role)}</tbody></table>` : ''}</div>`; };
+        ${b ? playedHtml(b) : ''}
+        ${car || ((c.jobs || []).length ? `<table class="bx co-tbl"><tbody>${jobRows(c.jobs, role)}</tbody></table>` : '')}</div>`; };
     const tn = T.tend || {}, tc = (k, lab, f, tip) => tn[k] ? `<div class="tm-st" title="${esc(tip)}"><div class="pc-k">${lab}</div><div class="tm-stv">${f(tn[k][0])}</div>${rkChip(tn[k][1])}</div>` : '';
     const pct = v => `${Math.round(v * 100)}%`;
     const tendBox = Object.keys(tn).length ? `<div class="pc-box"><div class="pc-k">Tendencies · ${CO.d.season}</div><div class="tm-stats">

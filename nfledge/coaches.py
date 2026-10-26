@@ -73,23 +73,120 @@ def clean_name(who: str) -> str:
   return re.sub(r"\s+(fired|resigned|left|promoted|demoted|reassigned|dismissed)\b.*$", "", who, flags=re.I).strip(" ,;")
 
 
-def staff(text: str) -> dict:
+def staff(text: str, links: dict | None = None) -> dict:
   """{hc, oc, dc, st} from a staff list; the first listed holder of each role (an interim later in a season page
-  is the second line)."""
+  is the second line). links (optional, filled): role -> the person's page title ("Kevin O'Connell (American
+  football)": the plain name is often a disambiguation page)."""
   out = {}
   for m in re.finditer(r"^\*\s*(.+?)\s+[–—-]\s+(.+)$", text, re.M):
     role, who = _clean(m.group(1)).lower(), _clean(m.group(2))
     who = clean_name(who)
     if not who or len(who) > 40: continue
+    lk = re.search(r"\[\[([^|\]#]+)", m.group(2))
     bare = role.replace("assistant head coach", "")
+    found = []
     # one line can hold two jobs ("Interim head coach/offensive coordinator", Darrell Bevell, Detroit 2020), so each
     # role is matched on its own; "Head coach/executive vice president" (Pete Carroll) is the head coach
-    if re.search(r"(^|/)(interim )?head coach\b", role) and "assistant head coach" not in role: out.setdefault("hc", who)
-    if "assistant" in bare or "senior" in bare: continue
-    if "offensive coordinator" in role: out.setdefault("oc", who)
-    if "defensive coordinator" in role: out.setdefault("dc", who)
-    if "special teams coordinator" in role: out.setdefault("st", who)
+    if re.search(r"(^|/)(interim )?head coach\b", role) and "assistant head coach" not in role: found.append("hc")
+    if not ("assistant" in bare or "senior" in bare):
+      found += [r for r, k in (("oc", "offensive coordinator"), ("dc", "defensive coordinator"), ("st", "special teams coordinator")) if k in role]
+    for r in found:
+      if r not in out:
+        out[r] = who
+        if links is not None and lk: links[r] = lk.group(1).strip()
   return out
+
+
+# ---- a coach's own page: the infobox's coaching and playing careers (owner 2026-10-26: "it doesn't show coaching
+# history, like o'connell was with the rams as a qb coach ... doesn't list them as former players") ----
+CODE_OF = {v: k for k, v in NAME.items()} | {"Oakland Raiders": "LV", "San Diego Chargers": "LAC", "St. Louis Rams": "LA",
+                                             "Washington Redskins": "WAS", "Washington Football Team": "WAS",
+                                             "Los Angeles Raiders": "LV", "Houston Oilers": "TEN", "Tennessee Oilers": "TEN",
+                                             "Phoenix Cardinals": "ARI", "St. Louis Cardinals": "ARI", "Baltimore Colts": "IND",
+                                             "Los Angeles Rams (1946–1994)": "LA", "Boston Patriots": "NE"}
+_YEAR_T = re.compile(r"\{\{\s*(?:nfly|nfl year|nfl season|cfby|cfb year|cfb season|cfl year|afl year|ufl year|year|nflyr)\s*\|\s*(\d{4})(?:\s*\|\s*(\d{2,4}))?[^{}]*\}\}", re.I)
+
+
+def _years_text(s: str) -> str:
+  """Year templates to plain text: {{nfly|2017|2019}} -> 2017–2019, {{NFL Year|2009}} -> 2009."""
+  def y(m):
+    a, b = m.group(1), m.group(2)
+    if b and len(b) == 2: b = a[:2] + b
+    return f"{a}–{b}" if b else a
+  return _YEAR_T.sub(y, s)
+
+
+def _plain(s: str) -> str:
+  s = _years_text(s)
+  s = re.sub(r"\{\{\s*(?:ubl|unbulleted list|plainlist|nowrap)\s*\|", "", s, flags=re.I)
+  s = re.sub(r"\[\[(?:[^|\]]*\|)?([^\]]*)\]\]", r"\1", s)
+  s = re.sub(r"\{\{[^{}]*\}\}", "", s).replace("}}", "").replace("{{", "")
+  s = re.sub(r"<br\s*/?>", " | ", s, flags=re.I)
+  s = re.sub(r"<[^>]+>", "", s)
+  s = re.sub(r"'{2,}", "", s)
+  return re.sub(r"\s+", " ", s).strip(" *-,")
+
+
+_SPAN = re.compile(r"\((\d{4})(?:\s*[–—-]\s*(\d{4}|present))?\)")
+
+
+def _span(s: str):
+  m = _SPAN.search(s)
+  if not m: return None, None, s
+  a = int(m.group(1)); b = m.group(2)
+  return a, (None if b == "present" else int(b) if b else a), (s[:m.start()] + s[m.end():]).strip()
+
+
+def _field(text: str, key: str) -> str:
+  """An infobox parameter's raw value (to the next top-level "| key =" line)."""
+  m = re.search(rf"^\s*\|\s*{key}\s*=(.*?)(?=^\s*\|\s*[a-z_0-9]+\s*=|^\}}\}})", text, re.M | re.S | re.I)
+  return m.group(1).strip() if m else ""
+
+
+def bio(text: str) -> dict:
+  """{pos, college, draft, pfr, played: [[team, code, from, to]], coached: [[team, code, from, to, role]]} from an
+  "Infobox NFL biography" (to is None while it lasts). Nested lines (** role (years)) belong to the team above."""
+  out = {"pos": "", "college": "", "draft": None, "pfr": "", "played": [], "coached": []}
+  if "Infobox" not in text:
+    return out
+  pos = _field(text, "career_position") or re.sub(r"<!--.*?-->", "", _field(text, "position"), flags=re.S)
+  out["pos"] = _plain(pos).upper() if len(_plain(pos)) <= 3 else _plain(pos)
+  out["college"] = re.sub(r"\s*\(.*", "", _plain(_field(text, "college")))
+  dy, dr, dp = (_plain(_field(text, k)) for k in ("draftyear", "draftround", "draftpick"))
+  if dy.isdigit():
+    out["draft"] = [int(dy), int(dr) if dr.isdigit() else None, int(dp) if dp.isdigit() else None]
+  out["pfr"] = _plain(_field(text, "pfr"))
+  for line in _field(text, "pastteams").splitlines():
+    if not line.strip().startswith("*"): continue
+    t = _plain(line).rstrip("*").strip()
+    a, b, team = _span(t)
+    team = team.split(" | ")[0].strip()
+    if team and a: out["played"].append([team, CODE_OF.get(team, ""), a, b])
+  last = None
+  for line in _field(text, "pastcoaching").splitlines():
+    s = line.strip()
+    if not s.startswith("*"): continue
+    nested = s.startswith("**")
+    t = _plain(s)
+    if nested and last:
+      a, b, role = _span(t)
+      if role: out["coached"].append([last[0], last[1], a or last[2], b if a else last[3], role])
+      continue
+    parts = [p.strip() for p in t.split(" | ")]
+    a, b, team = _span(parts[0])
+    team = team.strip()
+    last = [team, CODE_OF.get(team, ""), a, b]
+    role = " / ".join(p for p in parts[1:] if p)
+    if team and a: out["coached"].append([team, last[1], a, b, role])
+  # a team line whose roles are on its nested lines carries no role itself: dropped when a nested role covers it
+  out["coached"] = [c for c in out["coached"] if c[4] or not any(d is not c and d[0] == c[0] and d[4] and d[2] >= c[2] and (d[3] or 9999) <= (c[3] or 9999) for d in out["coached"])]
+  return out
+
+
+def current_links(team: str) -> tuple[dict, dict]:
+  """(today's staff, role -> page title)."""
+  links = {}
+  return staff(raw(f"Template:{NAME[team]} staff"), links), links
 
 
 ESPN_CODE = {"LAR": "LA", "WSH": "WAS"}
