@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362647,Damien Lewis,Carolina Panthers,Active,2026-10-18T16:42Z,,,,,,"Lewis (elbow) is active for Sunday's game against the Eagles, Darin Gantt of the Panthers' official site reports."
 4058925,Tershawn Wharton,Carolina Panthers,Active,2026-10-18T16:21Z,,,,,,"Wharton (neck) is active for Sunday's game against the Eagles, Darin Gantt of the Panthers' official site reports."
 4685350,Trevor Etienne,Carolina Panthers,Active,2026-10-18T16:16Z,,,,,,"Etienne (ankle) is active for Sunday's game against the Eagles, Darin Gantt of the Panthers' official site reports."
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-26T03:28Z,Undisclosed,,,2026-10-18,IR,ir
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-26T03:29Z,Undisclosed,,,2026-10-18,IR,ir
 4361093,Kyler Gordon,Chicago Bears,Active,2026-10-25T02:51Z,,,,,,"Gordon recorded five tackles (three solo), including 1.0 sacks, in Thursday's 30-24 win over the Patriots."
 4954445,Dillon Thieneman,Chicago Bears,Active,2026-10-25T02:43Z,,,,,,"Thieneman tallied eight tackles (three solo), including 0.5 sacks, in a 30-24 victory versus the Patriots on Thursday."
 4241007,D'Marco Jackson,Chicago Bears,Active,2026-10-25T02:38Z,,,,,,Jackson finished with six tackles (three solo) and an interception Thursday in a 30-24 victory over New England.
@@ -226,7 +226,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4259546,Ameer Speed,Dallas Cowboys,Active,2026-10-18T22:55Z,,,,,,
 3128429,Courtland Sutton,Denver Broncos,Active,2026-10-26T02:02Z,,,,,,Sutton caught three of five targets for 45 yards during Sunday's 30-16 win over Arizona.
 4702555,Jonah Coleman,Denver Broncos,Active,2026-10-26T00:34Z,,,,,,Coleman (ankle) rushed nine times for 54 yards and caught both of his targets for 15 yards in Sunday's 30-16 win over the Cardinals.
-4241985,J.K. Dobbins,Denver Broncos,Active,2026-10-26T00:32Z,,,,,,Dobbins rushed six times for 23 yards and a touchdown but wasn't targeted in Sunday's 30-16 win over the Cardinals.
+4241985,J.K. Dobbins,Denver Broncos,Active,2026-10-26T00:32Z,,,,,,Dobbins rushed six times for 23 yards and a touchdown and wasn't targeted in Sunday's 30-16 win over the Cardinals.
 4568490,RJ Harvey,Denver Broncos,Active,2026-10-26T00:31Z,,,,,,Harvey rushed three times for six yards while catching both of his targets for 54 yards and a touchdown in Sunday's 30-16 win over the Cardinals.
 4426338,Bo Nix,Denver Broncos,Active,2026-10-26T00:29Z,,,,,,Nix completed 15 of 29 passes for 222 yards and a touchdown while rushing seven times for 73 yards and a touchdown in Sunday's 30-16 win over the Cardinals.
 2985659,Wil Lutz,Denver Broncos,Active,2026-10-26T00:05Z,,,,,,Lutz went 3-for-3 on field-goal tries and made all three of his PATs during Sunday's 30-16 win over Arizona.
@@ -701,7 +701,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4691556,Enrique Cruz Jr.,San Francisco 49ers,Active,2026-10-20T16:04Z,,,,,,
 4426376,Charles Cross,Seattle Seahawks,Questionable,2026-10-26T03:18Z,Ankle,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,Cross exited Sunday night's game against the Chiefs with an ankle injury and did not return.
 4035693,Velus Jones Jr.,Seattle Seahawks,Questionable,2026-10-26T02:57Z,Hamstring,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,Jones (hamstring) has been ruled out for the remainder of Sunday night's contest against the Chiefs.
-4032473,Rashid Shaheed,Seattle Seahawks,Out,2026-10-26T02:50Z,Knee,,,2026-11-02,OUT,Shaheed (knee) won't return to Sunday's game against the Chiefs.
+4032473,Rashid Shaheed,Seattle Seahawks,Questionable,2026-10-26T02:50Z,Knee,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,Shaheed (knee) won't return to Sunday's game against the Chiefs.
 3120358,Uchenna Nwosu,Seattle Seahawks,Active,2026-10-25T23:12Z,,,,,,Nwosu (hip) is active for Sunday Night Football versus Kansas City.
 4869523,Nick Emmanwori,Seattle Seahawks,Active,2026-10-25T23:08Z,,,,,,Emmanwori (hip) is active for Sunday night's contest against the Chiefs.
 4605491,Connor O'Toole,Seattle Seahawks,Out,2026-10-25T23:05Z,Hamstring,Not Specified,Not Specified,2026-11-02,INACTIVE,O'Toole (hamstring) is inactive for Sunday night's game against the Chiefs.
