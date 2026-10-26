@@ -82,7 +82,8 @@
         season = y;
         rows = d.rows.map(v => Object.fromEntries(d.cols.map((c, i) => [c, v[i]])));
         rows.forEach(r => { if (r.team) r.team = NFLE.fmt.era(r.team, season); });  // the club as it was (shell.js fmt.era)
-        fill(selT, [...new Set(rows.map(r => r.team).filter(Boolean))].sort().map(a => [a, NFLE.fmt.teamOf(teams, a).nick || a]));
+        // by the name shown, not the code (as Draft)
+        fill(selT, [...new Set(rows.map(r => r.team).filter(Boolean))].map(a => [a, NFLE.fmt.teamOf(teams, a).nick || a]).sort((x, y) => x[1].localeCompare(y[1])));
         fill(selP, [...new Set(rows.map(r => r.pos).filter(Boolean))].sort().map(p => [p, p]));
         from.value = to.value = '';
         nset();

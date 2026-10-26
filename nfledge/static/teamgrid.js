@@ -59,9 +59,14 @@
         body.classList.remove('skel-zone');
         body.innerHTML = Object.keys(teams).length ? `<div class="tg-confs">${conf('AFC')}${conf('NFC')}</div>` : '<p class="muted">Team data is not available on this page.</p>';
         fit(sec);
+        // re-fit whenever the space itself changes, not only on resize events (owner 2026-10-26: tiles short and bunched
+        // at the top after reopening the app and switching to this tab; iOS reports a shorter viewport on resume and the
+        // app shell's repair (shell.js heal) fires no resize): the scroll area, the bottom bar, and this section showing
         if (!sec._tgFit) { sec._tgFit = 1; const re = () => requestAnimationFrame(() => fit(sec));
           addEventListener('resize', re); PHONE.addEventListener('change', re);
-          new MutationObserver(re).observe(sec, { attributes: true, attributeFilter: ['hidden', 'class'] }); }
+          new MutationObserver(re).observe(sec, { attributes: true, attributeFilter: ['hidden', 'class'] });
+          if (window.ResizeObserver) { const ro = new ResizeObserver(re);
+            [document.getElementById('appScroll') || document.documentElement, document.querySelector('.botbar'), sec].forEach(e => e && ro.observe(e, { box: 'border-box' })); } }
       });
     },
   };
