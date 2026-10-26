@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4876132,Josh Cuevas,Baltimore Ravens,Active,2026-10-19T01:04Z,,,,,,Cuevas caught four of five targets for 44 yards and a touchdown during Sunday's 13-10 loss to Cleveland.,TE
 4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-10-18T15:33Z,,,,,,,OT
 4698244,Teddye Buchanan,Baltimore Ravens,Active,2026-10-16T20:28Z,,,,,,,LB
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-26T18:44Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-26T19:01Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4044133,Sam Franklin Jr.,Buffalo Bills,Active,2026-10-24T01:44Z,,,,,,"The NFL reduced Franklin's discipline from a one-game suspension to a fine of $14,926, Adam Schefter of ESPN reports.",S
 4568624,Dorian Williams,Buffalo Bills,Active,2026-10-22T01:58Z,,,,,,Williams logged five tackles (three solo) and one pass defensed for an interception in the Bills' 33-30 win over the Raiders on Sunday.,LB
 4832035,Davison Igbinosun,Buffalo Bills,Active,2026-10-22T01:37Z,,,,,,"Defensive coordinator Jim Leonhard praised Igbinosun's play earlier this week and plans to keep giving the rookie a good amount of playing time, Alec White of the Bills' official site reports. Said Leonard, ""I think what he's done the last couple weeks, he's definitely earned a high majority of the ",CB
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362647,Damien Lewis,Carolina Panthers,Active,2026-10-18T16:42Z,,,,,,"Lewis (elbow) is active for Sunday's game against the Eagles, Darin Gantt of the Panthers' official site reports.",G
 4058925,Tershawn Wharton,Carolina Panthers,Active,2026-10-18T16:21Z,,,,,,"Wharton (neck) is active for Sunday's game against the Eagles, Darin Gantt of the Panthers' official site reports.",DT
 4685350,Trevor Etienne,Carolina Panthers,Active,2026-10-18T16:16Z,,,,,,"Etienne (ankle) is active for Sunday's game against the Eagles, Darin Gantt of the Panthers' official site reports.",RB
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-26T18:44Z,Undisclosed,,,2026-10-18,IR,ir,S
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-26T19:01Z,Undisclosed,,,2026-10-18,IR,ir,S
 4372576,Jack Sanborn,Chicago Bears,Out,2026-10-26T17:55Z,Concussion,Concussion,Not Specified,2026-11-02,QUESTIONABLE,out,LB
 4608686,Kyle Monangai,Chicago Bears,Out,2026-10-26T17:55Z,Toe,Sprain,Not Specified,2026-11-02,QUESTIONABLE,out,RB
 3121544,T.J. Edwards,Chicago Bears,Out,2026-10-26T17:55Z,Hamstring,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,out,LB
@@ -574,6 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241993,Pete Werner,New Orleans Saints,Active,2026-10-21T02:26Z,,,,,,"Werner recorded 11 total tackles (five solo), including 1.0 sacks, while also adding a pass defensed during Sunday's 34-27 win over the Giants.",LB
 4429568,Martin Emerson Jr.,New Orleans Saints,Active,2026-10-21T02:19Z,,,,,,"Emerson recorded seven solo tackles and four passes defensed, including two interceptions, during Sunday's 34-27 win over the Giants.",CB
 4879276,Bryce Lance,New Orleans Saints,Active,2026-10-19T23:50Z,,,,,,Lance caught two of four passes for nine yards and a touchdown during the Saints' 34-27 win over the Giants on Sunday.,WR
+5082424,Dominic Zvada,New York Giants,Active,2026-10-26T19:04Z,,,,,,"Head coach John Harbaugh reiterated Monday that he's confident in Zvada and said that the Giants have no plans to work out other kickers, Pat Leonard of the New York Daily News reports.",PK
 4686362,Marcus Mbow,New York Giants,Out,2026-10-26T18:42Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,out,OT
 4361266,Greg Newsome II,New York Giants,Out,2026-10-26T18:42Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,out,CB
 4373809,Jevon Holland,New York Giants,Out,2026-10-26T18:42Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,out,S
@@ -584,7 +585,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360516,Tyrone Tracy Jr.,New York Giants,Questionable,2026-10-26T15:12Z,Hamstring,Not Specified,Left,2026-11-08,QUESTIONABLE,"Tracy (hamstring) didn't return to Sunday's 27-21 overtime win over the Texans after exiting with 5:29 remaining in the second quarter, Pat Leonard of the New York Daily News reports.",RB
 4696981,Cam Skattebo,New York Giants,Questionable,2026-10-26T14:09Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Skattebo is expected to ""OK"" after tweaking his hamstring on a 42-yard run in overtime during Sunday's 27-21 win over the Texans, Mike Garafolo of NFL Network reports.",RB
 4361050,Isaiah Likely,New York Giants,Active,2026-10-26T02:03Z,,,,,,Likely caught two of four targets for 12 yards in Sunday's 27-21 overtime win over the Texans.,TE
-5082424,Dominic Zvada,New York Giants,Active,2026-10-26T01:06Z,,,,,,Zvada missed both of his field-goal attempts and 3-for-3 on extra-point tries during Sunday's 27-21 overtime win against Houston.,PK
 4682648,Malachi Fields,New York Giants,Active,2026-10-26T00:00Z,,,,,,Fields caught four of five targets for 83 yards in Sunday's 27-21 overtime win over Houston.,WR
 4040761,Devin Singletary,New York Giants,Active,2026-10-25T23:56Z,,,,,,Singletary carried the ball five times for 41 yards and a touchdown and caught all three of his targets for 14 yards in Sunday's 27-24 overtime win over the Texans.,RB
 4433970,J.J. McCarthy,New York Giants,Active,2026-10-25T23:50Z,,,,,,McCarthy completed 20 of 28 passes for 252 yards and no touchdowns or interceptions in Sunday's 27-21 overtime win over the Texans. He added one yard on his only carry.,QB
@@ -649,6 +649,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360698,Joe Milton,Philadelphia Eagles,Active,2026-10-19T17:14Z,,,,,,,QB
 4040715,Jalen Hurts,Philadelphia Eagles,Injured Reserve,2026-10-19T14:18Z,Calf,Not Specified,Left,2027-02-15,IR,"Hurts (calf) is expected to be held out of football activities for multiple months and miss the rest of the season after new imaging over the weekend revealed several blood clots in his lungs, Tom Pelissero of Netflix reports.",QB
 4685201,Tanner McKee,Philadelphia Eagles,Active,2026-10-19T09:45Z,,,,,,McKee completed 26 of 45 passes for 215 yards with a touchdown and no interceptions while adding one carry for no gain in the Eagles' 25-14 loss to the Panthers on Sunday. He also recovered a fumble.,QB
+4035656,Ben Skowronek,Pittsburgh Steelers,Out,2026-10-26T18:54Z,Calf,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,out,WR
+4567979,Brandin Echols,Pittsburgh Steelers,Out,2026-10-26T18:54Z,Hamstring,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,out,CB
+4429955,Will Howard,Pittsburgh Steelers,Active,2026-10-26T18:54Z,,,,,,,QB
+4714771,Drew Allar,Pittsburgh Steelers,Active,2026-10-26T18:54Z,,,,,,,QB
+5081508,Eli Heidenreich,Pittsburgh Steelers,Active,2026-10-26T18:54Z,,,,,,,RB
+4360935,Terell Smith,Pittsburgh Steelers,Active,2026-10-26T18:54Z,,,,,,,CB
 4361411,Pat Freiermuth,Pittsburgh Steelers,Active,2026-10-26T02:58Z,,,,,,Freiermuth caught two of four targets for 20 yards in Sunday's 16-10 win over the Saints.,TE
 17372,Chris Boswell,Pittsburgh Steelers,Active,2026-10-25T18:26Z,,,,,,Boswell made each of his three field-goal attempts and his lone extra-point try in a 16-10 victory over the Saints on Sunday in Paris.,PK
 4047650,DK Metcalf,Pittsburgh Steelers,Active,2026-10-25T18:04Z,,,,,,Metcalf two of six targets for 56 yards in Sunday's 16-10 win over the Saints.,WR
@@ -657,12 +663,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4569987,Jaylen Warren,Pittsburgh Steelers,Active,2026-10-25T17:45Z,,,,,,Warren carried the ball 18 times for 101 yards and caught three of four targets for 36 yards in Sunday's 16-10 win over the Saints.,RB
 3929846,DeShon Elliott,Pittsburgh Steelers,Active,2026-10-25T12:43Z,,,,,,Elliott (knee) is active for Sunday's game against the Saints in Paris.,S
 3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-10-25T12:26Z,,,,,,"Rudolph is active for Sunday's game against the Saints in Paris, Teresa Varley of the Steelers' official site reports.",QB
-4035656,Ben Skowronek,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Calf,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive,WR
-4360935,Terell Smith,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive,CB
-5081508,Eli Heidenreich,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive,RB
-4429955,Will Howard,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive,QB
-4714771,Drew Allar,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive,QB
-4567979,Brandin Echols,Pittsburgh Steelers,Out,2026-10-25T12:15Z,Hamstring,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive,CB
 4035198,Brandon Johnson,Pittsburgh Steelers,Active,2026-10-24T17:09Z,,,,,,The Steelers elevated Johnson from the practice squad Saturday ahead of Sunday's game against the Saints.,WR
 4240577,Brandon Smith,Pittsburgh Steelers,Active,2026-10-24T17:05Z,,,,,,The Steelers elevated Smith from the practice squad Saturday ahead of Sunday's game against the Saints.,WR
 3045282,T.J. Watt,Pittsburgh Steelers,Active,2026-10-23T15:41Z,,,,,,Watt (calf) practiced fully Friday and doesn't carry an injury designation into Sunday's game against the Saints.,LB
