@@ -3005,7 +3005,8 @@
     NFLE.load('data/coaches.json').then(j => { CO.d = j; rerenderCard(); }).catch(() => { CO.d = false; }); };
   const ROLE = { hc: 'Head coach', oc: 'Off. coordinator', dc: 'Def. coordinator', st: 'ST coordinator' };
   const wl = r => r ? `${r[0]}-${r[1]}${r[2] ? `-${r[2]}` : ''}` : '';
-  const yrs = (a, b) => a === b ? String(a) : `${a}&ndash;${String(b).slice(-2)}`;
+  // 2017-19; a span across centuries in full (1987-2001, not 1987-01)
+  const yrs = (a, b) => a === b ? String(a) : `${a}&ndash;${String(a).slice(0, 2) === String(b).slice(0, 2) ? String(b).slice(-2) : b}`;
   const coachPic = (url, name, size = 44) => `<span class="co-pic" style="width:${size}px;height:${size}px">${url ? `<img src="${esc(url)}" alt="" loading="lazy" onerror="this.remove()">` : ''}<i>${esc(String(name || '').split(' ').map(w => w[0]).join('').slice(0, 2))}</i></span>`;
   // ---- the Coaches sheet (owner 2026-10-26: "a clean, maybe tiles presentation for each team's coach / coordinator
   // positions ... and a full list ... of the team's entire coaching staff"): a tile per job (head coach, offensive /
@@ -3043,16 +3044,25 @@
   const playedHtml = b0 => {
     // "QB" stays; "Running back, wide receiver" reads in lower case after "Played"
     const b = Object.assign({}, b0, { pos: b0.pos && b0.pos.length > 3 ? b0.pos.toLowerCase() : b0.pos });
-    const nfl = (b.played || []).filter(p => p[1]), any = (b.played || []).length;
+    // active-roster clubs; offseason / practice-squad stints (the page's "*") said apart (owner 2026-10-26: O'Connell
+    // "played for several different teams" but his card shows one season: DET, MIA, SD were practice squad / offseason)
+    const nfl = (b.played || []).filter(p => p[1] && !p[4]), ps = (b.played || []).filter(p => p[1] && p[4]), any = (b.played || []).length;
     const dr = b.draft ? ` · drafted ${b.draft[0]}${b.draft[1] ? ` round ${b.draft[1]}` : ''}` : '';
+    const psTxt = ps.length ? ` · also ${esc([...new Set(ps.map(p => era(p[1], p[2])))].join(', '))} (offseason / practice squad)` : '';
     let txt;
     if (nfl.length) {
       const codes = [...new Set(nfl.map(p => era(p[1], p[2])))], a = Math.min(...nfl.map(p => p[2])), z = Math.max(...nfl.map(p => p[3] || p[2]));
-      txt = `Played ${esc(b.pos || '')} in the NFL · ${esc(codes.join(', '))} · ${yrs(a, z)}${b.college ? ` · ${esc(b.college)}` : ''}${dr}`;
-    } else if (any) txt = `Played ${esc(b.pos || '')} · ${esc(b.played.map(p => p[0]).filter((x, i, s) => s.indexOf(x) === i).join(', '))}${b.college ? ` · ${esc(b.college)}` : ''}`;
+      txt = `Played ${esc(b.pos || '')} in the NFL · ${esc(codes.join(', '))} · ${yrs(a, z)}${psTxt}${b.college ? ` · ${esc(b.college)}` : ''}${dr}`;
+    } else if (ps.length) txt = `${esc(b.pos ? `${b.pos} · ` : '')}NFL offseason / practice squad · ${esc([...new Set(ps.map(p => era(p[1], p[2])))].join(', '))}${b.college ? ` · played at ${esc(b.college)}` : ''}`;
+    else if (any) txt = `Played ${esc(b.pos || '')} · ${esc(b.played.map(p => p[0]).filter((x, i, s) => s.indexOf(x) === i).join(', '))}${b.college ? ` · ${esc(b.college)}` : ''}`;
     else if (b.pos && b.college) txt = `Played ${esc(b.pos)} at ${esc(b.college)}`;
     if (!txt) return '';
-    return `<div class="co-played">${txt}${b.pid ? ` <button type="button" class="co-card" data-open-pid="${esc(b.pid)}">Player card &rsaquo;</button>` : ''}</div>`;
+    // the card says what's behind it: his games with stats (our logs list games with a stat line)
+    const g = (b.log || []).reduce((t, x) => t + x[1], 0);
+    const early = nfl.some(p => p[2] < 1999);  // our game logs start in 1999 (Jim Harbaugh, 1987-2000: 21 games)
+    const cardLbl = g ? `Player card · ${g} game${g === 1 ? '' : 's'}${early ? ' since 1999' : ''}` : 'Player card';
+    const cardTip = (b.log || []).length ? `Games with stats: ${b.log.map(x => `${x[0]} (${x[1]})`).join(', ')}` : '';
+    return `<div class="co-played">${txt}${b.pid ? ` <button type="button" class="co-card" data-open-pid="${esc(b.pid)}"${cardTip ? ` title="${esc(cardTip)}"` : ''}>${cardLbl} &rsaquo;</button>` : ''}</div>`;
   };
   // the whole staff, grouped as the club lists it
   const staffHtml = all => {

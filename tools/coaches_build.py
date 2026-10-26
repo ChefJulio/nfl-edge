@@ -213,7 +213,7 @@ def player_card(b: dict, name: str, pfr: dict, P: pd.DataFrame, last_season: dic
 
 
 BIO_DAYS = 14  # a coach's page is refetched after this many days (careers change between seasons, rarely within)
-BIO_V = 4  # what C.bio reads (2: the photo; 3: the executive career; 4: combined club names); older pages are refetched
+BIO_V = 5  # what C.bio reads (2: photo; 3: executive career; 4: combined club names; 5: practice-squad stints); refetched
 SIDE = {"oc": 0, "dc": 1}
 
 
@@ -321,6 +321,16 @@ def main() -> None:
     print(f"::warning::Play-callers to recheck (staff changed since data/playcallers.json was researched): {' | '.join(stale)}", flush=True)
   players = cache.get("players", "all", lambda: nfl.load_players(), stale=cache.age_hours("players", "all") > 24 * 7)
   B = bios(links, cur_hc, now, last, players, U, current)
+  # his games with stats behind the player-card link (owner 2026-10-26: O'Connell's card "only shows like one season":
+  # 2 games in 2008, the rest of his years inactive or on practice squads): [[season, games]] from his game log file
+  for b in B.values():
+    lf = site / "data" / "players" / f"{b.get('pid')}.json" if b and b.get("pid") else None
+    if lf and lf.exists():
+      try:
+        lg = json.loads(lf.read_text(encoding="utf-8"))
+        b["log"] = [[x["s"], len(x.get("g", []))] for x in lg.get("seasons", []) if x.get("g")]
+      except ValueError:
+        pass
   # the clubs' own headshots (their staff pages), read at most once a day; a club whose pages fail keeps its last map.
   # The whole map is the builder's cache (data/club_photos.json, not read by pages); coaches.json carries each coach's.
   cp_f = site / "data" / "club_photos.json"

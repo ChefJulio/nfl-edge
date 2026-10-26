@@ -176,10 +176,12 @@ def bio(text: str) -> dict:
   out["img"] = img if re.search(r"\.(jpe?g|png|webp|gif)$", img, re.I) else ""
   for line in _field(text, "pastteams").splitlines():
     if not line.strip().startswith("*"): continue
+    # a trailing "*": offseason and / or practice squad only (Kevin O'Connell: Detroit 2009, Miami 2011, San Diego 2012)
+    ps = bool(re.search(r"\)\s*'*\*\s*(<ref|$)", line.strip()))
     t = _plain(line).rstrip("*").strip()
     a, b, team = _span(t)
     team = team.split(" | ")[0].strip()
-    if team and a: out["played"].append([team, code_of(team), a, b])
+    if team and a: out["played"].append([team, code_of(team), a, b, ps])
   out["coached"] = _career(_field(text, "pastcoaching"))
   out["exec"] = _career(_field(text, "pastexecutive"))
   return out
