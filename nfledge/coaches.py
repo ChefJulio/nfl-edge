@@ -241,6 +241,79 @@ def current_links(team: str) -> tuple[dict, dict, list]:
   return staff(text, links), links, staff_full(text)
 
 
+# ---- the clubs' own staff pages (owner 2026-10-26: photos; "it's your call"): every club site runs the NFL's one
+# platform, each coach a card with his official headshot on static.clubs.nfl.com. Linked from there (not copied), read
+# once a day by the builder. Coaches page, front office page (the GM's photo; some clubs have none).
+CLUB_SITE = {"ARI": "azcardinals.com", "ATL": "atlantafalcons.com", "BAL": "baltimoreravens.com", "BUF": "buffalobills.com",
+             "CAR": "panthers.com", "CHI": "chicagobears.com", "CIN": "bengals.com", "CLE": "clevelandbrowns.com",
+             "DAL": "dallascowboys.com", "DEN": "denverbroncos.com", "DET": "detroitlions.com", "GB": "packers.com",
+             "HOU": "houstontexans.com", "IND": "colts.com", "JAX": "jaguars.com", "KC": "chiefs.com", "LA": "therams.com",
+             "LAC": "chargers.com", "LV": "raiders.com", "MIA": "miamidolphins.com", "MIN": "vikings.com", "NE": "patriots.com",
+             "NO": "neworleanssaints.com", "NYG": "giants.com", "NYJ": "newyorkjets.com", "PHI": "philadelphiaeagles.com",
+             "PIT": "steelers.com", "SEA": "seahawks.com", "SF": "49ers.com", "TB": "buccaneers.com", "TEN": "tennesseetitans.com",
+             "WAS": "commanders.com"}
+CLUB_PATHS = {"CHI": ("team/coaches/", "team/front-office/")}
+_CLUB_IMG = re.compile(r'(?:data-src|src)="(https://static\.clubs\.nfl\.com/image/(private|upload)/[^"]*?/(?:v\d+/)?'
+                       r'([a-z0-9]+/[a-z0-9_-]+\.(?:jpg|jpeg|png)))"', re.I)
+_CLUB_NAME = re.compile(r'd3-o-media-object__title">\s*([^<]+?)\s*</h3>')
+
+
+def club_people(page: str) -> dict:
+  """name -> square headshot URL from a club staff page: each card's name heading and the image just before it."""
+  import html as H
+  out = {}
+  for m in _CLUB_NAME.finditer(page):
+    name = H.unescape(m.group(1)).strip()
+    before = page[max(0, m.start() - 6000):m.start()]
+    prev = before.rfind("d3-o-media-object__title")  # the card's own image comes after the previous card's name
+    imgs = [x for x in _CLUB_IMG.finditer(before) if x.start() > prev]
+    if imgs and len(name) <= 40:
+      x = imgs[-1]
+      out.setdefault(name, f"https://static.clubs.nfl.com/image/{x.group(2)}/t_headshot_desktop/f_auto/{x.group(3)}")
+  return out
+
+
+def club_photos(team: str) -> dict:
+  """name -> headshot for a club's coaches and front office ({} when its pages can't be read)."""
+  out = {}
+  for path in CLUB_PATHS.get(team, ("team/coaches-roster/", "team/front-office-roster/")):
+    try:
+      req = urllib.request.Request(f"https://www.{CLUB_SITE[team]}/{path}",
+                                   headers={"User-Agent": f"Mozilla/5.0 (compatible; {UA})"})
+      with urllib.request.urlopen(req, timeout=20) as r:
+        page = r.read().decode("utf-8", "ignore")
+    except Exception:
+      continue
+    for k, v in club_people(page).items():
+      out.setdefault(k, v)
+    time.sleep(0.3)
+  return out
+
+
+def _norm(name: str) -> str:
+  import unicodedata
+  s = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode().lower()
+  s = re.sub(r"\b(jr|sr|ii|iii|iv)\b\.?", "", s)
+  return " ".join(re.sub(r"[^a-z ]", "", s).split())
+
+
+def photo_for(name: str, people: dict) -> str | None:
+  """His photo from a club's people: the same name, else the same last name and first initial (Nate / Nathan
+  Scheelhaase), else the only one with that last name."""
+  if not name or not people:
+    return None
+  n = _norm(name)
+  byn = {_norm(k): v for k, v in people.items()}
+  if n in byn:
+    return byn[n]
+  parts = n.split()
+  if not parts:
+    return None
+  same = [(k, v) for k, v in byn.items() if k.split() and k.split()[-1] == parts[-1]]
+  init = [v for k, v in same if k[0] == parts[0][0]]
+  return init[0] if len(init) == 1 else same[0][1] if len(same) == 1 else None
+
+
 ESPN_CODE = {"LAR": "LA", "WSH": "WAS"}
 
 

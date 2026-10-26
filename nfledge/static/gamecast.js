@@ -3064,9 +3064,9 @@
     const T = CO.d.teams[abbr]; if (!T) return '';
     const h = T.hc || {}, r = h.rec || {}, yr = h.since ? CO.d.season - h.since + 1 : null, S = CO.d.season;
     const bioOf = x => (x && x.bio && CO.d.bios && CO.d.bios[x.bio]) || null;
-    // his photo: ESPN's headshot (head coaches), else his Wikipedia page's (Special:FilePath serves it, commons or
-    // local), else his playing-days headshot (former NFL players)
-    const photoOf = x => (x && x.photo) || ((b => !b ? null : b.img ? `https://en.wikipedia.org/wiki/Special:FilePath/${encodeURIComponent(b.img)}?width=120` : b.pimg || null)(bioOf(x)));
+    // his photo: his club's official headshot (its staff page), else ESPN's (head coaches), else his Wikipedia page's
+    // (Special:FilePath serves it, commons or local), else his playing-days headshot (former NFL players)
+    const photoOf = x => (x && (x.club || x.photo)) || ((b => !b ? null : b.img ? `https://en.wikipedia.org/wiki/Special:FilePath/${encodeURIComponent(b.img)}?width=120` : b.pimg || null)(bioOf(x)));
     const face = `<div class="co-face">${coachPic(photoOf(h), h.name, 34)}<div><div class="co-nm">${esc(h.name || '')}</div>
       <div class="pc-tapsub">${yr ? `yr ${yr}` : ''}${r.here ? ` · ${wl(r.here)}` : ''}</div></div></div>`;
     const cell = (v, lab, tip = '') => `<div class="tm-st"${tip ? ` title="${esc(tip)}"` : ''}><div class="pc-k">${lab}</div><div class="tm-stv">${v}</div></div>`;

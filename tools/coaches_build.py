@@ -321,6 +321,19 @@ def main() -> None:
     print(f"::warning::Play-callers to recheck (staff changed since data/playcallers.json was researched): {' | '.join(stale)}", flush=True)
   players = cache.get("players", "all", lambda: nfl.load_players(), stale=cache.age_hours("players", "all") > 24 * 7)
   B = bios(links, cur_hc, now, last, players, U, current)
+  # the clubs' own headshots (their staff pages), read at most once a day; a club whose pages fail keeps its last map.
+  # The whole map is the builder's cache (data/club_photos.json, not read by pages); coaches.json carries each coach's.
+  cp_f = site / "data" / "club_photos.json"
+  lp = json.loads(cp_f.read_text(encoding="utf-8")) if cp_f.exists() else {}
+  fresh = lp.get("f") == datetime.now(timezone.utc).date().isoformat()
+  CP = {}
+  for t in C.NAME:
+    got = (lp.get("teams") or {}).get(t) if fresh else None
+    if got is None:
+      got = C.club_photos(t) or (lp.get("teams") or {}).get(t) or {}
+    CP[t] = got
+  print(f"[coaches] club photos: {sum(1 for v in CP.values() if v)} clubs, {sum(len(v) for v in CP.values())} people"
+        f"{' (cached today)' if fresh else ''}", flush=True)
   teams = {}
   for t in C.NAME:
     # the head coach today (ESPN, else Wikipedia); his record from every game nflverse credits to him (+ this season's)
@@ -356,6 +369,10 @@ def main() -> None:
                   "rec": {"reg": wlt(g[g.type == "REG"].margin), "po": wlt(g[g.type != "REG"].margin)[:2]} if since else None}
     elif gm_name:
       co["gm"] = {"name": None, "vacant": True}
+    # each one's club headshot (the club's official photo: first choice on the page)
+    for x in [hc, *co.values()]:
+      if x.get("name"):
+        x["club"] = C.photo_for(x["name"], CP.get(t))
     teams[t] = {"hc": hc, **co, "staff": now[t], "links": links[t], "all": full[t],
                 "unit": list(U.get(current, {}).get(t, [None] * 4)[2:]),  # this season's [offense, defense] rank
                 "hc_jobs": ST.get(now[t].get("hc") or "", []),
@@ -363,6 +380,9 @@ def main() -> None:
   doc = {"v": V, "season": current, "built": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
          "src": {"staff": "Wikipedia staff templates, season articles and coaches' pages (CC BY-SA)", "head": "nflverse schedules, ESPN"},
          "teams": teams, "bios": {k: v for k, v in B.items() if v}}  # by page title; teams name theirs (bio)
+  cp_f.parent.mkdir(parents=True, exist_ok=True)
+  cp_f.write_text(json.dumps({"f": lp.get("f") if fresh else datetime.now(timezone.utc).date().isoformat(), "teams": CP},
+                             separators=(",", ":")), encoding="utf-8")
   out_f.parent.mkdir(parents=True, exist_ok=True)
   out_f.write_text(json.dumps(doc, separators=(",", ":"), allow_nan=False), encoding="utf-8")
   print(f"[coaches] wrote {out_f} ({out_f.stat().st_size // 1024} KB); play-callers: {len(PC)} teams, {len(stale)} to recheck", flush=True)
