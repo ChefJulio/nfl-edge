@@ -102,7 +102,7 @@
       };
       const load = y => NFLE.load(`data/draft/${y}.json`).then(d => {
         rows = rowsOf(d, y);
-        fill(selT, [...new Set(rows.map(r => r.fr))].sort().map(a => [a, NFLE.fmt.teamOf(teams, a).nick || a]));
+        fill(selT, NFLE.fmt.teamOpts(teams, rows.map(r => r.fr)));
         fill(selP, [...new Set(rows.map(r => r.category).filter(Boolean))].sort().map(c => [c, c]));
         fill(selR, [...new Set(rows.map(r => r.round))].sort((a, b) => a - b).map(r => [r, `Round ${r}`]));
         yearSub = `${y} NFL Draft: ${rows.length} picks`;

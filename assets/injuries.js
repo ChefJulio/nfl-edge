@@ -183,7 +183,7 @@
             proj: hit && hit[1].proj != null ? +hit[1].proj : null });
         });
         sub.textContent = `Who might sit this week, by our chance he plays · full ESPN list: ${all.length} players, fetched ${ago(d.fetched)}`;
-        [...new Set(all.map(r => r.abbr).filter(Boolean))].sort().forEach(a => selT.insertAdjacentHTML('beforeend', `<option>${esc(a)}</option>`));
+        selT.insertAdjacentHTML('beforeend', NFLE.fmt.teamOptHtml(wk && wk.teams, all.map(r => r.abbr)));
         drawDash();
       }).catch(() => { sub.textContent = 'The injury list is not available right now.'; });
       selT.onchange = draw;

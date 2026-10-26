@@ -465,7 +465,8 @@
     // incomplete..."), and without the 2-point try that follows a touchdown
     let raw = full;
     if (/REVERSED\./.test(raw)) raw = raw.slice(raw.lastIndexOf('REVERSED.') + 9).trim().replace(lead_, '');
-    raw = raw.replace(/\s*TWO-POINT CONVERSION ATTEMPT\..*$/, '');
+    // (2026-10-25: every two-point try read "no good") a try's own row starts with that text: only a touchdown's tail goes
+    if (!/^TWO-POINT CONVERSION ATTEMPT/.test(raw)) raw = raw.replace(/\s*TWO-POINT CONVERSION ATTEMPT\..*$/, '');
     // headlines name players by first initial (owner 2026-10-20: "use first name initials, shorten a bit"): "T. McKee"
     const nm = x => x ? shortName(names[x.replace(/\s+/g, '')] || x) : '';
     const g = (k, i = 1) => { const m = raw.match(RX[k]); return m ? m[i] : null; };
@@ -620,6 +621,24 @@
     const pl = allPlays(sum).flatMap(d => d.plays || []);
     const last = pl[pl.length - 1];
     return last ? Object.assign({}, last.end || {}, { lastPlay: { text: last.text } }) : null;
+  };
+  // One snapshot for the plays and the state above them (owner 2026-10-25: "the plays and state keep falling out of
+  // sync"): the scoreboard and the summary are separate feeds, each behind its own few-second cache, so the score,
+  // clock and down could run a play ahead of the list or behind it. Live, the summary is the truth: score, quarter and
+  // clock from its header; ESPN's situation only when its last play is the list's last play, else where that play left
+  // the ball (the timeouts kept). Returns true when the scoreboard is ahead (the next poll comes sooner).
+  const syncInfo = (info, sum) => {
+    const h = sum && sum.header && sum.header.competitions && sum.header.competitions[0];
+    if (!h || info.state !== 'in') return false;
+    const hs = h.status || {};
+    if (hs.period) { info.period = hs.period; info.clock = hs.displayClock; }
+    (h.competitors || []).forEach(x => { if (info[x.homeAway] && x.score != null) info[x.homeAway].score = +x.score || 0; });
+    const pl = allPlays(sum).flatMap(d => d.plays || []), last = pl[pl.length - 1];
+    const lp = info.sit && info.sit.lastPlay && info.sit.lastPlay.id, lid = last && String(last.id).replace(/-try$/, '');  // splitTries' try row
+    if (!last || !info.sit || String(lp) === lid) return false;
+    const ahead = +lp > +lid;
+    info.sit = Object.assign(sitFromPlays(sum), { homeTimeouts: info.sit.homeTimeouts, awayTimeouts: info.sit.awayTimeouts });
+    return ahead;
   };
 
   // ------------------------------------------------------------------------------------------------ player news
@@ -2440,7 +2459,7 @@
   };
   const teamLogHtml = (L, abbr) => {
     const opps = [...new Set(L.seasons.flatMap(s => s.g.map(g => g.o)))].sort();
-    const sel = `<label class="tm-filter">Opponent <select data-topp><option value="">All teams</option>${opps.map(o => `<option value="${esc(o)}"${o === teamOpp ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select></label>`;
+    const sel = `<label class="tm-filter">Opponent <select data-topp><option value="">All teams</option>${NFLE.fmt.teamOptHtml(DATA && DATA.teams, opps, teamOpp)}</select></label>`;
     let h2h = '';
     if (teamOpp) {
       const gs = L.seasons.flatMap(s => s.g).filter(g => g.o === teamOpp);
@@ -2776,6 +2795,8 @@
       `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
         ${wkRows ? `<table class="bx tm-pl tiles"><thead><tr><th>Player</th><th class="num">Proj</th><th class="num" title="Edge grade; sorted by it (ungraded players last, by projection)">Grd</th><th class="num">FP/G</th></tr></thead><tbody>${wkRows}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>
        <div class="pc-k tm-dck">Depth chart</div><div class="dc-wrap" data-dc="${esc(abbr)}"></div>`));
+    // Injuries: the live list, so only on this season's page
+    if (DATA && +d.season === +DATA.season) tiles.push(injuriesTile(abbr, d));
     // Playoffs (owner 2026-10-20, replacing the Schedule tile now that the schedule row shows every week): the chance to
     // make it, the division, the move since last week; opens the Playoffs tab. A past season's page has no odds: the
     // Schedule tile stays there.
@@ -2871,6 +2892,71 @@
     .map(([pid, p, gr]) => { const s = scaled(p, d);
     return `<tr class="teamrow" style="${NFLE.fmt.rowStyle(d.teams, p.team)}" data-open-pid="${esc(pid)}"><td>${NFLE.ui.player({ name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, badges: injTag(p.status, p.inactive, pid, d) }, d.teams)}</td>
       <td class="num"><b>${f1(s.proj)}</b></td><td class="num">${gradeChip(gr)}</td><td class="num muted">${p.fpg != null ? f1(p.fpg) : ''}</td></tr>`; }).join('');
+  // ---- Injuries tile (owner 2026-10-26): the team's report this week and its long-term list in one place. ESPN's live
+  // list (every player, refreshed daily) joined to our board (chance he plays, practice days, projection), the roster
+  // (data/roster.json: position, and reserve tags for anyone ESPN leaves off) and the return model (backWeek).
+  const RO = { d: undefined };
+  const loadRoster = () => { if (RO.d !== undefined) return; RO.d = null;
+    NFLE.load('data/roster.json').then(j => { const m = {};
+      j.rows.forEach(r => { const o = {}; j.cols.forEach((c, i) => { o[c] = r[i]; }); m[o.pid] = o; }); RO.d = m; rerenderCard(); }).catch(() => {}); };
+  const INJ_SEV = { O: 0, D: 1, Q: 2, IR: 3, PUP: 4, NFI: 5, SSPD: 6, RES: 7 };
+  const INJ_LONG = new Set(['IR', 'PUP', 'NFI', 'SSPD', 'RES']);
+  const injWhat = r => r ? [...new Set([r.type, r.detail !== 'Not Specified' ? r.detail : '', r.side !== 'Not Specified' ? r.side : ''].filter(Boolean))].join(' · ') : '';
+  // [{pid, espn, name, pos, photo, tag, what, back, play, prac, risk}], worst first; null until ESPN's list is in
+  const teamInjuries = abbr => {
+    loadInj(); loadRos(); loadRoster();
+    if (!DINJ || !DATA) return null;
+    const full = NFLE.fmt.teamOf(DATA.teams, abbr).name, seen = new Set(), seenE = new Set(), out = [];
+    // ESPN id -> our id: the card map, plus the roster for depth players it lacks (a player once, however he's found)
+    const be = Object.assign({}, RO.d ? Object.fromEntries(Object.values(RO.d).filter(o => o.espn).map(o => [String(o.espn), o.pid])) : {}, byEspn());
+    const today = new Date().toISOString().slice(0, 10);
+    const add = (pid, espn, r) => {
+      if ((pid && seen.has(pid)) || (espn && seenE.has(String(espn)))) return;
+      const p = pid && DATA.players[pid], ro = pid && RO.d && RO.d[pid];
+      const tag = (p && tagOf(pid, p.status)) || (r && ESPN_TAG[r.status]) || (pid && DATA.tags && DATA.tags[pid]) || (ro && INJ_LONG.has(ro.tag) ? ro.tag : '');
+      if (!tag || !(tag in INJ_SEV)) return;
+      if (pid) seen.add(pid);
+      if (espn) seenE.add(String(espn));
+      const bw = pid && backWeek(pid);
+      out.push({ pid, espn, tag, name: (p && p.name) || (r && r.name) || (ro && ro.name) || '', pos: (p && p.pos) || (ro && ro.pos) || (r && r.pos) || '',
+        photo: p && p.photo, what: injWhat(r), prac: p ? pracWords(p, DATA) : '',
+        // ESPN's date only while it's ahead (a passed one is stale: the list hasn't caught up)
+        back: bw === 'no' ? 'not this season' : bw ? `~wk ${bw}` : r && r.return_date && r.return_date >= today ? `est. ${espnDate(r.return_date)}` : '',
+        play: p && p.inactive != null ? 1 - p.inactive : null, risk: p && p.inactive ? scaled(p, DATA).proj * p.inactive : 0 });
+    };
+    Object.values(DINJ).forEach(r => { if (r.team === full && r.status !== 'Active') add(be[String(r.espn_id)], String(r.espn_id), r); });
+    // on our board with a tag ESPN hasn't caught up to; on a reserve list ESPN leaves off
+    Object.entries(DATA.players).forEach(([pid, p]) => { if (p.team === abbr && !seen.has(pid)) add(pid, p.espn, null); });
+    if (RO.d) Object.values(RO.d).forEach(o => { if (o.team === abbr && !seen.has(o.pid) && INJ_LONG.has(o.tag)) add(o.pid, o.espn, null); });
+    return out.sort((a, b) => INJ_SEV[a.tag] - INJ_SEV[b.tag] || b.risk - a.risk || a.name.localeCompare(b.name));
+  };
+  const injuriesTile = (abbr, d) => {
+    const L = teamInjuries(abbr);
+    if (!L) return tapTile('Injuries', '<div class="pc-tapsub">Loading&hellip;</div>', 'Injuries', '<p class="pc-sub">Loading&hellip;</p>');
+    const wk = L.filter(x => !INJ_LONG.has(x.tag)), lt = L.filter(x => INJ_LONG.has(x.tag));
+    const n = t => wk.filter(x => x.tag === t).length, risk = wk.reduce((s, x) => s + x.risk, 0);
+    const counts = [[n('O'), 'out'], [n('D'), 'doubtful'], [n('Q'), 'questionable']].filter(c => c[0]).map(c => c.join(' ')).join(' · ');
+    const top = wk.filter(x => x.risk >= 1).sort((a, b) => b.risk - a.risk)[0];
+    const face = wk.length ? `<div class="pc-big">${wk.length} <small>on the report</small></div><div class="pc-tapsub">${esc(counts)}</div>`
+      : '<div class="pc-big good">Healthy</div><div class="pc-tapsub">no one on this week\'s report</div>';
+    const sub2 = top ? `<div class="pc-tapsub">biggest: ${esc(NFLE.fmt.short(top.name))} &minus;${f1(top.risk)} pts</div>`
+      : lt.length ? `<div class="pc-tapsub">${lt.length} on IR or reserve</div>` : '';
+    // the injury and practice days on their own wrapping line under the name (in the name's sub line they pushed the
+    // numbers off a phone screen)
+    const who = x => NFLE.ui.player({ name: x.name, pos: x.pos, team: abbr, photo: x.photo, espn: x.espn,
+      badges: `<span class="dc-tag dt-${TAG_TONE[x.tag] || 'out'}" title="${esc(TAG_NAME[x.tag] || x.tag)}">${esc(x.tag)}</span>` }, DATA.teams)
+      + `<div class="ij-d">${esc([x.what, x.prac].filter(Boolean).join(' · ') || TAG_NAME[x.tag] || x.tag)}</div>`;
+    const row = (x, cells) => `<tr class="teamrow" style="${NFLE.fmt.rowStyle(DATA.teams, abbr)}"${x.pid ? ` data-open-pid="${esc(x.pid)}"` : ''}><td class="ij-who">${who(x)}</td>${cells}</tr>`;
+    const wkBox = `<div class="pc-box"><div class="pc-k">This week · wk ${esc(DATA.week)}${risk >= 0.5 ? ` · ${f1(risk)} fantasy pts at risk` : ''}</div>
+      ${wk.length ? `<table class="bx tm-pl tiles"><thead><tr><th>Player</th><th class="num" title="Our chance he plays">Play</th><th class="num" title="His projection times his chance to sit">At risk</th></tr></thead><tbody>${
+        wk.map(x => row(x, `<td class="num">${x.play != null ? NFLE.fmt.toPlay(1 - x.play) : ''}</td><td class="num">${x.risk >= 0.05 ? `&minus;${f1(x.risk)}` : ''}</td>`)).join('')}</tbody></table>`
+        : '<p class="pc-sub">No one on this week\'s injury report.</p>'}</div>`;
+    const ltBox = lt.length ? `<div class="pc-box"><div class="pc-k">Long term · IR, PUP, NFI, suspended</div>
+      <table class="bx tm-pl tiles"><thead><tr><th>Player</th><th class="num">Back</th></tr></thead><tbody>${
+        lt.map(x => row(x, `<td class="num muted">${esc(x.back)}</td>`)).join('')}</tbody></table></div>` : '';
+    const src = `<p class="pc-sub muted">ESPN's injury list (updated daily), our chance to play and projections.</p>`;
+    return tapTile('Injuries', face + sub2, 'Injuries', wkBox + ltBox + src);
+  };
   // the Power ranking box (the Power tile's sheet)
   const teamPowerBox = pw => {
     const unit = (label, v, rk, pp, total) => `<div class="tm-u${total ? ' tm-tot' : ''}"><span class="tm-ul">${label}</span><span class="tm-uv">${sgn(v)}</span>${rkChip(rk)}
@@ -4108,8 +4194,62 @@
     if (mid != null) {
       bars = seg(s0, mid, mid > s0 ? 'gain' : mid < s0 ? 'loss' : 'zero') + flag(s0, mid, e);
     } else bars = seg(s0, e, cls);
-    return `<span class="fs" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
-      + `${bars}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
+    // A pass flies (owner 2026-10-25: "can we elegantly visually distinguish passes from rushes": the arc): an arc over
+    // the strip from the snap to where the catch ended (the whole gain: ESPN gives no air yards), the bar under it as
+    // for any gain; an incompletion or interception arcs dotted to its depth from the text ("short" ~6 yards past the
+    // line, "deep" ~20) and ends in an x (red when picked off). Runs, sacks and spikes stay on the ground.
+    const raw0 = String(p.text || '').split('PENALTY')[0];
+    const pass = !/spike|sacked|kneel/i.test(raw0) && (/pass|intercept/i.test(pType(p)) || / pass /.test(raw0));
+    // (owner 2026-10-25: "can we not draw the arc for no gain plays, and instead of ALSO drawing an arc can we just arc
+    // the green bar itself?") a completed pass that gained: the gain bar itself arches (no flat bar under it); a catch
+    // for no gain or a loss stays flat
+    let arc = '';
+    if (pass && !(p.isPenalty && /no play/i.test(t))) {
+      const inc = /incomplete/i.test(raw0), pick = /intercept/i.test(t), caught = !inc && !pick && mid == null && e - s0 >= 1;
+      if (inc || pick || caught) {
+        // (owner 2026-10-25: "yes do the rac thing with the arcs") ESPN's play carries yardsAfterCatch: the arc is the
+        // ball in the air, snap to the catch; the run after it is the flat green bar on to where the play ended
+        // (a touchdown's run ends at the goal line, the strip's bar then into the end zone)
+        const yac = caught && Number.isFinite(+p.yardsAfterCatch) ? Math.max(0, +p.yardsAfterCatch) : 0;
+        const endReal = td ? 100 : e, catchAt = yac > 0 ? endReal - yac : e;
+        const flyTo = yac > 0 ? (Math.abs(catchAt - s0) < 1.5 ? s0 + 1.5 : catchAt) : e;
+        if (caught) {
+          // one continuous line (owner 2026-10-25: "they should join smoothly at the point of catch"): the flight rises
+          // from the snap and levels off INTO the catch point (horizontal there), then runs straight along the bar to
+          // where the play ended; drawn in yards across, px up, so the line keeps the bar's thickness all the way
+          bars = '';
+          // (owner: "make them both tangential to a cleaner angle") a symmetric flight: it leaves the bar and lands back
+          // on it at the same angle (ANG; flatter for long throws, capped at MAXH px high), a round join into the run.
+          // Drawn in px at the strip's typical scale (K px a yard: a ~300 px strip over 120 yards) so the angles hold
+          const K = 2.6, ANG = Math.tan(38 * Math.PI / 180), MAXH = 13;
+          // (owner 2026-10-25: "any ideas to make it look nicer when the catch is at/around the LOS?") under 3 yards in
+          // the air there's no flight to draw: the pass line runs flat from the catch (a hollow ring) to the end, with a
+          // faint dashed line back to the snap when the catch was behind it
+          const air = catchAt - s0;
+          if (yac > 0 && air < 3) {  // caught under 3 yards downfield, behind the line included
+            const lo2 = Math.min(s0, catchAt, e), hi2 = Math.max(s0, catchAt, e), W2 = Math.max(0.5, hi2 - lo2) * K, x2 = v => ((v - lo2) * K).toFixed(1);
+            const start = air < -0.5 ? catchAt : s0;
+            arc = `<svg class="fs-arc gain" style="left:${pc(lo2)}%;width:${(pc(hi2) - pc(lo2)).toFixed(2)}%;height:2px" viewBox="0 0 ${W2.toFixed(1)} 2" preserveAspectRatio="none">`
+              + (air < -0.5 ? `<path class="back" d="M${x2(s0)},2 L${x2(catchAt)},2"/>` : '') + `<path d="M${x2(start)},2 L${x2(e)},2"/></svg>`
+              + `<i class="fs-ring" style="left:${pc(catchAt)}%"></i><i class="fs-catch" style="left:${pc(e)}%"></i>`;
+            return `<span class="fs" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
+              + `${arc}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
+          }
+          const A = flyTo - s0, peak = Math.max(2.5, Math.min(MAXH, Math.abs(A) * K / 4 * ANG)), ht = peak + 2;
+          const lo = Math.min(s0, flyTo, e), hi = Math.max(s0, flyTo, e), W = Math.max(0.5, hi - lo) * K, x = v => ((v - lo) * K).toFixed(1);
+          const d = `M${x(s0)},${ht} Q${x(s0 + A / 2)},${(ht - 2 * peak).toFixed(1)} ${x(flyTo)},${ht}` + (Math.abs(e - flyTo) >= 0.5 ? ` L${x(e)},${ht}` : '');
+          arc = `<svg class="fs-arc gain" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%;height:${ht.toFixed(1)}px" viewBox="0 0 ${W.toFixed(1)} ${ht.toFixed(1)}" preserveAspectRatio="none"><path d="${d}"/></svg>`
+            + `<i class="fs-catch" style="left:${pc(e)}%"></i>`;  // where the play ended (owner: "a little green dot where the arc ends")
+        } else {
+          const to = Math.min(108, s0 + (/ deep /i.test(raw0) ? 20 : 6));
+          const lo = Math.min(s0, to), hi = Math.max(s0, to), ht = Math.max(4, Math.min(14, 3 + 0.45 * (hi - lo)));
+          arc = `<svg class="fs-arc${inc ? ' miss' : ' int'}" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%;height:${ht.toFixed(1)}px" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M0,12 Q50,-10 100,12"/></svg>`
+            + `<i class="fs-x${pick ? ' int' : ''}" style="left:${pc(to)}%"></i>`;
+        }
+      }
+    }
+    return `<span class="fs${arc ? ' fs-pass' : ''}" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
+      + `${bars}${arc}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
   };
   // ---- One anatomy for a play, everywhere (owner 2026-10-20: "are the play rows uniform everywhere they show up? don't
   // want inconsistency"): a meta line (event tags, down -> down, spot -> spot), the headline with its yards chip, the
@@ -4146,12 +4286,51 @@
     return chips.map(([c, k]) => `<span class="pc-chip ${k}" title="${TAG_TIP[c] || ''}">${c}</span>`).join('');
   };
   // the yards a scrimmage play gained (none for kicks, scores, wiped plays, incompletions)
+  // The row's result, right-aligned (.pt) so it scans down the list (owner 2026-10-25: "align that as a chip to the
+  // right side" ... "add yd" ... "add 'Inc.' ... i basically want that space to be the easily scannable result of the
+  // play"): yards for a run, catch or sack, else what happened (Inc., TD, INT, Fumble, Good / No good, a kick's end)
+  const resChip = (label, cls, tip) => `<span class="rp-yd ${cls}" title="${esc(tip)}">${label}</span>`;
   const yardChip = (p, info) => {
-    const a = spot(p.start, info), b = spot(p.end, info), txt = String(p.text || '');
-    if (!a || !b || a.offense.team !== b.offense.team || p.scoringPlay || /No Play/i.test(txt) || stPlay(p) || !(p.start && p.start.down) || /incomplete/i.test(txt)) return '';
+    if (nonPlay(p)) return '';
+    const a = spot(p.start, info), b = spot(p.end, info), txt = String(p.text || ''), t = `${pType(p)} ${txt}`;
+    if (/No Play/i.test(txt) && /penalty/i.test(t)) return resChip('Flag', 'pen', 'Penalty: the play didn\'t count');
+    // kicks and tries (owner 2026-10-25: "FGG/FGNG"): FGG / FGNG, XPG / XPNG, 2PT / 2PT NG; a blocked kick says so
+    if (/defensive (?:pat|two-point|2pt)/i.test(t)) return resChip('Def 2PT', 'loss', 'The defense returned the try for 2 points');
+    if (isTry(p)) {
+      const two = /two-point/i.test(t), ok = two ? /ATTEMPT SUCCEEDS/i.test(txt) : /extra point is GOOD/i.test(txt);
+      if (!two && /block/i.test(txt)) return resChip('Blocked', 'loss', 'Extra point blocked');
+      return two ? resChip(ok ? '2PT' : '2PT NG', ok ? 'gain' : 'loss', ok ? 'Two-point try good' : 'Two-point try failed')
+        : resChip(ok ? 'XPG' : 'XPNG', ok ? 'gain' : 'loss', ok ? 'Extra point good' : 'Extra point no good');
+    }
+    if (/field goal/i.test(t)) return p.scoringPlay ? resChip('FGG', 'gain', 'Field goal good')
+      : resChip(/blocked/i.test(t) ? 'Blocked' : 'FGNG', 'loss', /blocked/i.test(t) ? 'Field goal blocked' : 'Field goal no good');
+    if (p.scoringPlay && /touchdown/i.test(t)) return resChip('TD', 'gain', 'Touchdown');
+    if (/safety/i.test(t) && p.scoringPlay) return resChip('Safety', 'loss', 'Safety');
+    if (/intercept/i.test(t)) return resChip('INT', 'loss', 'Intercepted');
+    if (/fumble/i.test(t) && a && b && a.offense.team !== b.offense.team && !stPlay(p)) return resChip('Fumble', 'loss', 'Fumble lost');
+    if (stPlay(p)) {  // punts and kickoffs: how the kick ended
+      if (/blocked/i.test(t)) return resChip('Blocked', 'loss', 'Kick blocked');
+      // (owner 2026-10-25: "i want Punt for punts that don't result in a turnover or score") a punt the receiving
+      // team keeps is just "Punt"; one it fumbles back to the punting team is the turnover
+      if (/punt/i.test(t)) {
+        const kept = a && b && b.offense.team === a.offense.team;
+        return kept && /fumble|muff/i.test(t) ? resChip('Fumble', 'gain', 'The receiving team lost the ball') : resChip('Punt', 'zero', 'Punt');
+      }
+      if (/touchback/i.test(t)) return resChip('Touchback', 'zero', 'Touchback');
+      if (/fair catch/i.test(t)) return resChip('Fair catch', 'zero', 'Fair catch');
+      if (/downed/i.test(t)) return resChip('Downed', 'zero', 'Downed');
+      if (/out of bounds/i.test(t) && !/ for /.test(txt.split(/punts|kicks/)[1] || '')) return resChip('Out of bounds', 'zero', 'Kicked out of bounds');
+      const r = (txt.split('PENALTY')[0].split(/ (?:punts|kicks) /)[1] || '').match(/ for (-?\d+) yards?| for no gain/);
+      return r ? resChip(`Ret ${r[1] != null ? r[1] : 0} yd`, 'zero', 'Return yards') : '';
+    }
+    if (/spike/i.test(t)) return resChip('Spike', 'zero', 'Spiked to stop the clock');
+    if (/kneel/i.test(t)) return resChip('Kneel', 'zero', 'Kneel down');
+    // a 4th down that changed hands without a kick or a turnover: the defense's ball on downs
+    if (a && b && a.offense.team !== b.offense.team && p.start && p.start.down === 4) return resChip('Downs', 'loss', 'Turnover on downs');
+    if (/incomplete/i.test(txt)) return resChip('Inc.', 'zero', 'Incomplete pass');
+    if (!a || !b || a.offense.team !== b.offense.team || !(p.start && p.start.down)) return '';
     const net = Math.round((b.x - a.x) * a.dir);
-    // (owner 2026-10-25: "align that as a chip to the right side" ... "add yd") "+9 yd", right-aligned (.pt)
-    return `<span class="rp-yd ${net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero'}" title="Yards gained">${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)} yd</span>`;
+    return resChip(`${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)} yd`, net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero', 'Yards gained');
   };
   // lead / tail: a view's own items in the line (a card's clock and score)
   const playMeta = (p, lead = '', tail = '', cls = 'pm') => { const pp = playPairs(p); return `<div class="${cls}">${lead}${playTags(p)}${pp.downs}${pp.spots}${tail}</div>`; };
@@ -4511,7 +4690,11 @@
   };
   const pollGame = async () => {
     clearTimeout(GP.timer);
+    let behind = false;
     try {
+      // both feeds at once once the game's id is known, so they come from the same few seconds
+      const sumP = GP.info && GP.info.realState === 'in' ? getJSON(ESPN.sum + GP.info.id) : null;
+      if (sumP) sumP.catch(() => {});
       const evs = await weekEvents(GP.season, GP.week);
       const ev = evs.find(e => evKey(e) === gKey(GP.away, GP.home));
       if (!ev) throw new Error('game not found on ESPN');
@@ -4523,7 +4706,7 @@
       if (GP.g && GP.g.colors) { GP.info.away.color = GP.g.colors[GP.away] || GP.info.away.color; GP.info.home.color = GP.g.colors[GP.home] || GP.info.home.color; }
       else distinctColors(GP.info);  // a link without the week file: ESPN's colors, made distinct here
       // the box score links players to our pages through the id map (NFLE.ui.ready, fetched on first use)
-      if (GP.info.realState !== 'pre') { [GP.sum] = await Promise.all([getJSON(ESPN.sum + ev.id), NFLE.ui && NFLE.ui.ready]); splitTries(GP.sum); }
+      if (GP.info.realState !== 'pre') { [GP.sum] = await Promise.all([sumP && GP.info.id === ev.id ? sumP : getJSON(ESPN.sum + ev.id), NFLE.ui && NFLE.ui.ready]); splitTries(GP.sum); behind = syncInfo(GP.info, GP.sum); }
       // Player cards opened from this page show the live / final line too.
       if (GP.sum) Object.assign(LIVE.lines, boxLines(GP.sum));
       if (GP.g) LIVE.byGame[GP.g.id] = GP.info;
@@ -4545,7 +4728,7 @@
     // live: every 15 s; before kickoff: every 5 minutes, then every minute from 30 minutes out, so a page opened early
     // turns live by itself (it had needed a reload)
     if (GP.info && !document.hidden) {
-      if (GP.info.realState === 'in') GP.timer = setTimeout(pollGame, 15000);
+      if (GP.info.realState === 'in') GP.timer = setTimeout(pollGame, behind ? 3000 : 15000);
       else if (GP.info.realState === 'pre') {
         const to = Date.parse(GP.info.date) - Date.now();
         GP.timer = setTimeout(pollGame, !(to > 30 * 60000) ? 60000 : Math.min(5 * 60000, to - 30 * 60000 + 1000));

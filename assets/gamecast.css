@@ -238,6 +238,9 @@ svg.tm-trend { display: block; margin-top: 4px; } .tm-tr-mid { stroke: var(--lin
 .ats-W { color: #45c26b !important; } .ats-L { color: var(--muted); }
 .tm-gc { font-weight: 700; font-size: var(--fs-lg); text-decoration: none; padding: 0 4px; }
 table.tm-pl td { white-space: normal; }
+/* team Injuries sheet: the injury and practice line wraps under the name, the numbers stay in view */
+table.tm-pl { width: 100%; } table.tm-pl td.ij-who { width: 100%; max-width: 0; }
+.ij-d { font-size: var(--fs-xs); line-height: 1.3; color: var(--muted); margin: 3px 0 0; white-space: normal; overflow-wrap: anywhere; }
 .pc .pc-tabs { display: flex; margin: 0 0 10px; overflow-x: auto; scrollbar-width: none; } .pc .pc-tabs::-webkit-scrollbar { display: none; }
 .pc .pc-tabs button { flex: 1 0 auto; font-size: var(--fs-md); padding: 7px 10px; white-space: nowrap; }
 @media (max-width: 420px) { .pc .pc-tabs button { padding: 7px 8px; } }
@@ -1563,7 +1566,31 @@ span.nm-link { display: inline; }
 .pm .rp-d, .pm .pp { font-size: 12px; }
 .lpf-h.pm { margin-bottom: 0; } .lpf-h.pm .lpf-sc { margin-left: auto; }
 .pt { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
-.pt .rp-yd { font-size: 11px; margin-left: auto; align-self: center; }  /* the yards chip on the right (2026-10-25) */
+.pt .rp-yd { font-size: 11px; margin-left: auto; align-self: center; }  /* the result chip on the right (2026-10-25) */
+.rp-yd.pen { color: #f0b545; background: rgba(240,181,69,.15); }
+/* a pass's flight over the field strip (2026-10-25): the arc rises from the strip's middle at the snap and lands where
+   the catch ended; dotted with an x when it fell incomplete (red when intercepted) */
+.fs.fs-pass { margin-top: 15px; }
+.fs-arc { position: absolute; bottom: 3px; height: 14px; overflow: visible; pointer-events: none; }
+.fs-arc path { fill: none; stroke: #6fdc8c; stroke-width: 1.5; stroke-linecap: round; vector-effect: non-scaling-stroke; opacity: .9; }
+/* a completed pass: one line, the flight then the run after the catch (a slimmer line than a run's bar) */
+.fs-arc.gain path { stroke: var(--good); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; opacity: 1; }
+/* where a completed pass's arc lands, centered on the bar (.fs i pins every piece to the strip's top and bottom:
+   this overrides it) */
+.fs .fs-catch { position: absolute; top: 50%; bottom: auto; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%;
+  background: var(--good); box-shadow: 0 0 0 1.5px var(--panel); pointer-events: none; }
+.fs .fs-x { top: 50%; bottom: auto; margin-top: -4px; }
+/* a catch at or behind the line (under 3 yards in the air): the catch point as a hollow ring on the pass line, a faint
+   dashed line back to the snap when it was behind it */
+.fs .fs-ring { position: absolute; top: 50%; bottom: auto; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%;
+  border: 2px solid var(--good); background: var(--panel); box-sizing: border-box; pointer-events: none; }
+.fs-arc.gain path.back { stroke-width: 2; stroke-dasharray: 2 3; stroke-linecap: butt; opacity: .75; }
+.fs-arc.miss path { stroke: var(--muted); stroke-dasharray: 2 3; opacity: .85; }
+.fs-arc.int path { stroke: #ff8f84; stroke-dasharray: 2 3; }
+.fs-x { position: absolute; top: -1px; width: 8px; height: 8px; margin-left: -4px; pointer-events: none; }
+.fs-x::before, .fs-x::after { content: ""; position: absolute; left: 3px; top: 0; width: 1.6px; height: 8px; border-radius: 1px; background: var(--muted); }
+.fs-x::before { transform: rotate(45deg); } .fs-x::after { transform: rotate(-45deg); }
+.fs-x.int::before, .fs-x.int::after { background: #ff8f84; }
 .ds-p { grid-template-columns: 62px minmax(0, 1fr); }
 .ds-b { min-width: 0; } .ds-b .ds-h { font-weight: 600; }
 /* video links: a game's highlights (Result card) and a play's clip when ESPN has one */

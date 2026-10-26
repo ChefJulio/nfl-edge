@@ -161,6 +161,16 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     era: (t, season) => { const e = ERA[t]; return e && season && +season < e.until ? e.code : t; },
     franchise: t => (OLD[t] ? OLD[t].of : t),
     teamOf: (teams, t) => (teams || {})[t] || oldTeam(teams, t) || {},
+    // One rule for every team picker (owner 2026-10-26): the nickname, sorted by the name shown (sorting by code read as
+    // random: Cardinals, Falcons, Ravens...); two clubs with one nickname (LV and OAK, Raiders) add their code.
+    // teamOpts -> [[code, label]]; teamOptHtml -> the <option>s, cur selected. Tables and tiles keep the code.
+    teamOpts: (teams, codes) => {
+      const rows = [...new Set(codes.filter(Boolean))].map(t => [t, NFLE.fmt.teamOf(teams, t).nick || t]), n = {};
+      rows.forEach(r => { n[r[1]] = (n[r[1]] || 0) + 1; });
+      return rows.map(([t, l]) => [t, n[l] > 1 ? `${l} (${t})` : l]).sort((a, b) => a[1].localeCompare(b[1]));
+    },
+    teamOptHtml: (teams, codes, cur) => NFLE.fmt.teamOpts(teams, codes)
+      .map(([t, l]) => `<option value="${esc(t)}"${t === cur ? ' selected' : ''}>${esc(l)}</option>`).join(''),
     // team logo on its picked background, and a row's team trim (--tc / --tc2), from the week data's teams map
     logo: (teams, t, size = 18) => { const i = NFLE.fmt.teamOf(teams, t); return i.logo ? `<span class="logo" style="background:${esc(i.logo_bg || '#333')}"><img src="${esc(logoSrc(i.logo, size))}" alt="${esc(t)}" width="${size}" height="${size}" loading="lazy"></span>` : ''; },
     rowStyle: (teams, t) => { const i = NFLE.fmt.teamOf(teams, t); return `--tc:${i.color || '#666'};--tc2:${i.color2 || '#999'};--tfg:#ffffff`; },
@@ -1005,8 +1015,8 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   // (0b) App shell (owner 2026-10-25, after the bottom bar rode up to mid-screen on a return to the app once more:
   // "any rearchitecture worth considering?" ... "i want it working correctly and less bugs to squash"). iOS anchors
   // position: fixed to a layout viewport that can be stale after the keyboard or an app switch, and every fix so far
-  // re-measured and nudged the bar on timers. Here the page itself never scrolls: the body is one screen tall (100lvh,
-  // which the keyboard and app switches don't change), the content scrolls in #appScroll, and the bar is the column's
+  // re-measured and nudged the bar on timers. Here the page itself never scrolls: the body is the drawn area (fixed,
+  // inset 0: see "The column's size" below), the content scrolls in #appScroll, and the bar is the column's
   // last row, so there is nothing to drift. Window scrolling (scrollY, pageYOffset, scrollTo / scroll / scrollBy, the
   // window's scroll event) is redirected to #appScroll so the rest of the site works unchanged. Overlays (cards,
   // sheets), scripts and the pull-to-refresh stay direct children of the body. Lost: iOS's tap-the-clock-to-top, which
@@ -1022,8 +1032,11 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   // content scrolling from under the status bar (an opaque cover over it; sticky offsets keep their --sat), the bar in
   // the flow
   const st = document.createElement('style');
-  st.textContent = `html.app-shell, html.app-shell body { height: 100lvh; overflow: hidden; overscroll-behavior: none; }
-html.app-shell body { display: flex; flex-direction: column; margin: 0; padding-top: 0 !important; padding-bottom: 0 !important; }
+  // (2026-10-25, after research: see the comment below st) the column is pinned to the area WebKit draws (fixed,
+  // inset 0), never sized from lvh / vh / screen
+  st.textContent = `html.app-shell { height: 100%; overflow: hidden; overscroll-behavior: none; }
+html.app-shell body { position: fixed; inset: 0; display: flex; flex-direction: column; overflow: hidden; overscroll-behavior: none;
+  margin: 0; padding-top: 0 !important; padding-bottom: 0 !important; }
 html.app-shell #appScroll { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain; padding-top: var(--sat, 0px); }
 html.app-shell body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: var(--sat, 0px); background: var(--bg); z-index: 95; }
@@ -1040,6 +1053,37 @@ html.app-shell .ptr.busy svg { animation: ptr-spin .8s linear infinite; }
 @keyframes ptr-spin { to { transform: rotate(360deg); } }`;
   document.head.appendChild(st);
   html.classList.add('app-shell');
+  // The column's size (owner 2026-10-25: the bottom bar's icons cut off below the screen, twice; "instead of more
+  // guesses, research"). Findings (sources in docs/INSIGHTS.md (DL)): the site has no apple-mobile-web-app-status-bar-
+  // style, so the installed app has iOS's default opaque status bar: WebKit draws the page BELOW it, innerHeight =
+  // screen - status bar (~873 on a Pro Max), while 100vh / 100lvh and screen.height report the full screen (932; WebKit
+  // 316008, "Incorrect 100vh and -lvh in standalone web apps without apple-mobile-web-app-status-bar-style"). A column
+  // sized from either lost its bottom ~59 px: the bar's icons. So: fixed, inset 0 (the area WebKit actually draws).
+  // Separately, in standalone the keyboard (and sometimes a return to the app) leaves innerHeight short by a status bar
+  // and it doesn't come back by itself (WebKit 254868 family; cederhook, lifekit reports): heal() below.
+  // heal(): the tallest innerHeight seen at this width; when the current one is short by more than a few px with no
+  // keyboard up, hide and show the column, which makes WebKit re-measure the viewport (the cederhook pattern), keeping
+  // the content's scroll
+  let maxH = innerHeight, lastW = innerWidth;
+  const heal = () => {
+    if (innerWidth !== lastW) { lastW = innerWidth; maxH = innerHeight; return; }
+    maxH = Math.max(maxH, innerHeight);
+    if (maxH - innerHeight <= 4 || html.classList.contains('kb-open')) return;
+    const top = sc.scrollTop;
+    document.body.style.display = 'none'; void document.body.offsetHeight; document.body.style.display = '';
+    sc.scrollTop = top;
+    maxH = Math.max(innerHeight, maxH);
+  };
+  document.addEventListener('focusout', e => { if (e.target.matches && e.target.matches('input, textarea, [contenteditable]')) [150, 500].forEach(t => setTimeout(heal, t)); });
+  addEventListener('pageshow', () => setTimeout(heal, 300));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) [300, 1000].forEach(t => setTimeout(heal, t)); });
+  addEventListener('orientationchange', () => setTimeout(() => { lastW = -1; heal(); }, 500));
+  if (window.visualViewport) visualViewport.addEventListener('resize', () => { if (innerWidth === lastW) maxH = Math.max(maxH, innerHeight); });
+  // the document itself never scrolls here: iOS still scrolls an overflow: hidden page to bring a focused field or a
+  // link target into view, which would slide the whole column (the bar with it) off the screen
+  const pin = () => { const se = document.scrollingElement; if (se && se.scrollTop) se.scrollTop = 0; };
+  document.addEventListener('scroll', e => { if (e.target === document) pin(); }, { passive: true, capture: true });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) [0, 300, 1000].forEach(t => setTimeout(pin, t)); });
   Object.defineProperty(window, 'scrollY', { configurable: true, get: () => sc.scrollTop });
   Object.defineProperty(window, 'pageYOffset', { configurable: true, get: () => sc.scrollTop });
   const to = (a, b) => { if (a && typeof a === 'object') sc.scrollTo(a); else sc.scrollTo(+a || 0, +b || 0); };
@@ -1047,6 +1091,52 @@ html.app-shell .ptr.busy svg { animation: ptr-spin .8s linear infinite; }
   window.scrollBy = (a, b) => { if (a && typeof a === 'object') sc.scrollBy(a); else sc.scrollBy(+a || 0, +b || 0); };
   sc.addEventListener('scroll', () => dispatchEvent(new Event('scroll')), { passive: true });
   NFLE.scroller = sc;
+  // (0c) Layout readout (owner 2026-10-25: the bar still cut off after two fixes built on guesses about which iOS number
+  // was wrong): 5 quick taps on the page header toggle a small panel of every height iOS reports and where the column
+  // and the bar actually are; it stays on (across reloads and app switches) until toggled off, so a screenshot taken
+  // when the bar is wrong shows which measure was off.
+  const KEY = 'nfle-layout-debug';
+  let dbg = null, dbgT = 0, taps = [];
+  const px = v => Math.round(v * 10) / 10;
+  const measure = css => { const d = document.createElement('div'); d.style.cssText = `position:fixed;top:0;left:0;width:0;visibility:hidden;height:${css}`;
+    document.body.appendChild(d); const h = d.getBoundingClientRect().height; d.remove(); return px(h); };
+  const drawDbg = () => {
+    if (!dbg) return;
+    const vv = window.visualViewport, b = bar && bar.getBoundingClientRect(), s = sc.getBoundingClientRect(), bd = document.body.getBoundingClientRect();
+    const v = ([...document.scripts].find(x => /shell\.js/.test(x.src)) || {}).src || '';
+    const ios = (navigator.userAgent.match(/OS (\d+[_\d]*) like Mac/) || [])[1];
+    dbg.textContent = [
+      `v ${(v.match(/v=([^&]+)/) || [])[1] || '?'}  iOS ${ios ? ios.replace(/_/g, '.') : '?'}  shell ${html.classList.contains('app-shell')}  ${innerWidth > innerHeight ? 'landscape' : 'portrait'}`,
+      `standalone ${navigator.standalone} display-mode ${matchMedia('(display-mode: standalone)').matches}  kb ${html.classList.contains('kb-open')}`,
+      `screen ${screen.width}x${screen.height} dpr ${devicePixelRatio}  max inner seen ${maxH}`,
+      `inner ${innerWidth}x${innerHeight}  docEl ${document.documentElement.clientHeight}  100% ${measure('100%')}`,
+      vv ? `vv ${px(vv.width)}x${px(vv.height)} top ${px(vv.offsetTop)} scale ${px(vv.scale)}` : 'vv none',
+      `100vh ${measure('100vh')} lvh ${measure('100lvh')} svh ${measure('100svh')} dvh ${measure('100dvh')}`,
+      `safe top ${measure('env(safe-area-inset-top)')} bottom ${measure('env(safe-area-inset-bottom)')}  --sat ${html.style.getPropertyValue('--sat') || '-'}`,
+      `body ${px(bd.top)}..${px(bd.bottom)} (h ${px(bd.height)})  scroller ${px(s.top)}..${px(s.bottom)}`,
+      b ? `bar ${px(b.top)}..${px(b.bottom)} (h ${px(b.height)})` : 'bar none',
+      `doc scroll ${document.scrollingElement.scrollTop}  content scroll ${Math.round(sc.scrollTop)}`,
+    ].join('\n');
+  };
+  const toggleDbg = on => {
+    try { if (on) localStorage.setItem(KEY, '1'); else localStorage.removeItem(KEY); } catch (e) { /* ignore */ }
+    if (on && !dbg) {
+      dbg = document.createElement('pre');
+      dbg.style.cssText = 'position:fixed;left:6px;right:6px;top:calc(var(--sat, 0px) + 4px);z-index:400;margin:0;padding:6px 8px;border-radius:8px;'
+        + 'background:rgba(0,0,0,.82);color:#9fe870;font:10.5px/1.35 ui-monospace,Menlo,monospace;white-space:pre-wrap;pointer-events:none;';
+      document.body.appendChild(dbg);
+      dbgT = setInterval(drawDbg, 500); drawDbg();
+    } else if (!on && dbg) { clearInterval(dbgT); dbg.remove(); dbg = null; }
+  };
+  // the taps are counted across reloads (the title is the home link: each tap reloads the page)
+  document.addEventListener('click', e => {
+    if (!e.target.closest || !e.target.closest('header')) return;
+    try { taps = JSON.parse(sessionStorage.getItem('nfle-dbg-taps') || '[]'); } catch (x) { /* keep the in-memory list */ }
+    const now = Date.now(); taps = taps.filter(t => now - t < 12000); taps.push(now);
+    if (taps.length >= 5) { taps = []; toggleDbg(!dbg); }
+    try { sessionStorage.setItem('nfle-dbg-taps', JSON.stringify(taps)); } catch (x) { /* ignore */ }
+  }, true);
+  try { if (localStorage.getItem(KEY)) toggleDbg(true); } catch (e) { /* ignore */ }
   // (1) Bottom bar drift (owner 2026-10-20, screenshot: the bar rides up to mid-screen). WebKit bug in standalone mode
   // (bugs.webkit.org 297779, Apple forums 800154): after the keyboard closes the layout viewport keeps its keyboard-
   // shrunk height, and position: fixed anchors to it. When the visual viewport's bottom and the layout viewport's
