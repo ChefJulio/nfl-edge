@@ -154,7 +154,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116389,Samaje Perine,Cincinnati Bengals,Active,2026-10-26T01:29Z,,,,,,Perine rushed four times for 16 yards and a touchdown in Sunday's 35-13 win over the Ravens.
 3127310,Drew Sample,Cincinnati Bengals,Active,2026-10-26T01:25Z,,,,,,Sample caught both of his targets for 24 yards and a touchdown in Sunday's 35-13 win over the Ravens.
 4362238,Chase Brown,Cincinnati Bengals,Active,2026-10-25T23:48Z,,,,,,Brown rushed 11 times for 39 yards and brought in four of five targets for 19 yards in the Bengals' 35-13 win over the Ravens on Sunday.
-4360234,Evan McPherson,Cincinnati Bengals,Active,2026-10-25T22:46Z,,,,,,McPherson did not attempt a field goal and he made all five of his PATs in Sunday's 35-13 win over Baltimore.
+4360234,Evan McPherson,Cincinnati Bengals,Active,2026-10-25T22:46Z,,,,,,McPherson did not attempt a field goal and made all five of his PATs in Sunday's 35-13 win over Baltimore.
 3915511,Joe Burrow,Cincinnati Bengals,Active,2026-10-25T21:45Z,,,,,,Burrow completed 22 of 30 passes for 292 yards with four touchdowns and no interceptions while adding two rushes for 12 yards in the Bengals' 35-13 win over the Ravens on Sunday.
 4239993,Tee Higgins,Cincinnati Bengals,Active,2026-10-25T21:30Z,,,,,,Higgins secured six of seven targets for 148 yards and a touchdown in the Bengals' 35-13 win over the Ravens on Sunday.
 4401811,Kyle Dugger,Cincinnati Bengals,Questionable,2026-10-25T19:37Z,Quadriceps,Not Specified,Left,2026-11-01,QUESTIONABLE,Dugger (quadriceps) has been ruled out for the remainder of Sunday's game against the Ravens.
@@ -174,6 +174,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116748,B.J. Hill,Cincinnati Bengals,Active,2026-10-09T20:32Z,,,,,,
 3125082,Dalton Risner,Cincinnati Bengals,Active,2026-10-09T20:32Z,,,,,,
 4035483,Dexter Lawrence II,Cincinnati Bengals,Active,2026-10-09T20:32Z,,,,,,
+4832800,Denzel Boston,Cleveland Browns,Active,2026-10-26T02:23Z,,,,,,Boston caught just three of eight targets for 27 yards in Sunday's 24-21 win over the Titans.
 5083076,Harold Fannin Jr.,Cleveland Browns,Active,2026-10-25T23:18Z,,,,,,Fannin caught six of nine targets for 91 yards in Sunday's 27-24 win over the Titans.
 5081397,Dylan Sampson,Cleveland Browns,Active,2026-10-25T23:10Z,,,,,,Sampson carried the ball six times for 45 yards and caught all three of his targets for 32 yards in Sunday's 27-24 win over the Titans.
 3122840,Deshaun Watson,Cleveland Browns,Active,2026-10-25T22:46Z,,,,,,Watson completed 25 of 36 passes for 308 yards with an interception in Sunday's 27-24 win over the Titans. He added 19 yards and a touchdown on three carries.
@@ -198,7 +199,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4427238,Dillon Gabriel,Cleveland Browns,Injured Reserve,2026-10-23T23:45Z,Back,Not Specified,Not Specified,2026-11-01,IR-R,"Gabriel (back) has been ruled out ahead of Sunday's game against the Titans, Zac Jackson of The Athletic reports."
 4873232,Mason Graham,Cleveland Browns,Active,2026-10-23T23:39Z,,,,,,"Graham (knee/ankle) does not have any injury designation ahead of Sunday's game against the Titans, Zac Jackson of The Athletic reports."
 4243541,Kalia Davis,Cleveland Browns,Injured Reserve,2026-10-23T23:28Z,Quadriceps,Not Specified,Not Specified,2026-11-01,IR-R,"Davis (quadriceps) has been ruled out for Sunday's game against the Titans, Zac Jackson of The Athletic reports."
-4832800,Denzel Boston,Cleveland Browns,Active,2026-10-23T17:54Z,,,,,,"Boston (foot) doesn't have an injury designation for Sunday's game against the Titans, Zac Jackson of The Athletic reports."
 3929850,P.J. Locke,Dallas Cowboys,Injured Reserve,2026-10-25T18:33Z,Foot,Plantar Fasciitis,Right,2026-11-01,IR-R,Locke (foot) has been downgraded from questionable to out for Monday's game against the Eagles.
 4427816,Marist Liufau,Dallas Cowboys,Injured Reserve,2026-10-25T18:30Z,Forearm,Fracture,Left,2026-11-01,IR-R,Liufau (forearm) has been downgraded from questionable to out ahead of Monday night's game against the Eagles.
 4685554,Drew Shelton,Dallas Cowboys,Out,2026-10-25T00:36Z,Hamstring,Not Specified,Not Specified,2026-11-01,OUT,"Shelton (hamstring) has been ruled out for Monday's game against Philadelphia, Adam Caplan of SiriusXM NFL Radio reports."
@@ -249,6 +249,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4567462,Ja'Quan McMillian,Denver Broncos,Active,2026-10-17T05:04Z,,,,,,"McMillian recorded five tackles (five solo), including 1.0 sacks, and a pair of pass breakups, including an interception, in Thursday night's 17-14 overtime win over the Seahawks."
 3051876,Evan Engram,Denver Broncos,Active,2026-10-17T00:43Z,,,,,,Engram caught both targets for 13 yards in Denver's 17-14 overtime win over the Seahawks on Thursday night.
 4382401,Riley Moss,Denver Broncos,Active,2026-10-15T23:13Z,,,,,,"Moss (ribs) is available for Thursday's game against the Seahawks, Aric DiLalla of the team's official site reports."
+4430027,Sam LaPorta,Detroit Lions,Active,2026-10-26T02:14Z,,,,,,LaPorta caught one of two targets for 18 yards in Sunday's 20-17 win over the Packers.
+4426388,Jameson Williams,Detroit Lions,Active,2026-10-26T02:10Z,,,,,,Williams caught five of nine targets for 91 yards and two touchdowns in Sunday's 20-17 win over Green Bay.
 3046779,Jared Goff,Detroit Lions,Active,2026-10-26T02:06Z,,,,,,Goff completed 22 of 32 passes for 303 yards and two touchdowns in Sunday's 20-17 win over the Packers.
 4374302,Amon-Ra St. Brown,Detroit Lions,Active,2026-10-26T02:03Z,,,,,,St. Brown caught nine of 11 targets for 153 yards in Sunday's 20-17 win over the Packers.
 4429795,Jahmyr Gibbs,Detroit Lions,Active,2026-10-26T01:59Z,,,,,,Gibbs carried the ball 29 times for 116 yards and caught five of six targets for 27 yards in Sunday's 20-17 win over Green Bay.
@@ -268,8 +270,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035434,Devin White,Detroit Lions,Injured Reserve,2026-10-17T02:00Z,Forearm,Surgery,Not Specified,2026-11-22,IR,The Lions placed White (forearm) on injured reserve Friday.
 3126997,Tom Kennedy,Detroit Lions,Injured Reserve,2026-10-17T01:51Z,Knee - MCL,Surgery,Right,2027-02-15,IR,The Lions placed Kennedy (knee) on injured reserve Friday.
 5123663,Isaac TeSlaa,Detroit Lions,Active,2026-10-14T02:28Z,,,,,,TeSlaa failed to haul in either of his two targets during the Lions' 45-21 win over the Cardinals on Sunday.
-4430027,Sam LaPorta,Detroit Lions,Active,2026-10-12T01:08Z,,,,,,LaPorta brought in all five of his targets for 88 yards and a touchdown in the Lions' 45-21 win over the Cardinals on Sunday.
-4426388,Jameson Williams,Detroit Lions,Active,2026-10-12T00:49Z,,,,,,Williams brought in two of four targets for 47 yards and two touchdowns in the Lions' 45-21 win over the Cardinals on Sunday.
 4431615,Tyleik Williams,Detroit Lions,Active,2026-10-11T19:22Z,,,,,,Williams (foot) is active for Sunday's game against the Cardinals.
 4038849,DJ Wonnum,Detroit Lions,Active,2026-10-09T21:36Z,,,,,,
 4372459,Christian Izien,Detroit Lions,Active,2026-10-07T01:42Z,,,,,,Izien recorded 11 tackles (seven solo) including 1.0 sacks during Sunday's 32-26 loss at Carolina.
@@ -749,6 +749,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4870998,Josiah Trotter,Tampa Bay Buccaneers,Active,2026-10-21T02:41Z,,,,,,Trotter recorded 12 total tackles (five solo) and a pass defensed during Sunday's 26-19 overtime loss to the Steelers.
 5085355,David Walker,Tampa Bay Buccaneers,Active,2026-10-21T02:36Z,,,,,,"Walker recorded seven total tackles (four solo), including 2.0 sacks, during Sunday's 26-19 overtime loss to Pittsburgh."
 4686884,Luke Haggard,Tampa Bay Buccaneers,Active,2026-10-19T17:18Z,,,,,,
+4686728,Gunnar Helm,Tennessee Titans,Active,2026-10-26T02:29Z,,,,,,Helm caught three of four targets for 24 yards in Sunday's 27-24 loss to the Browns.
 4871023,Carnell Tate,Tennessee Titans,Active,2026-10-25T23:35Z,,,,,,Tate caught five of seven targets for 69 yards in Sunday's 27-24 loss to the Browns.
 4688380,Cam Ward,Tennessee Titans,Active,2026-10-25T23:30Z,,,,,,Ward completed 20 of 31 passes for 181 yards with an interception in Sunday's 27-24 loss to Cleveland. He added five yards on two carries.
 3916148,Tony Pollard,Tennessee Titans,Active,2026-10-25T23:27Z,,,,,,Pollard carried the ball 25 times for 129 yards and three touchdowns in Sunday's 27-24 loss to the Browns. He also caught all three of his targets for 26 yards.
@@ -769,7 +770,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4573318,Dorian Mausi,Tennessee Titans,Injured Reserve,2026-10-22T01:35Z,Foot,Not Specified,Not Specified,2026-11-01,IR-R,"The Titans opened Mausi's 21-day practice window Wednesday, Jim Wyatt of the team's official website reports."
 4035369,Jeffery Simmons,Tennessee Titans,Active,2026-10-21T02:13Z,,,,,,"Simmons logged six tackles (three solo), including 2.0 sacks, one forced fumble and one fumble recovery during the Titans' 26-20 win over the Colts on Sunday."
 4036134,Amani Hooker,Tennessee Titans,Active,2026-10-21T02:04Z,,,,,,Hooker logged 13 tackles (seven solo) and one interception during the Titans' 26-20 win over the Colts on Sunday.
-4686728,Gunnar Helm,Tennessee Titans,Active,2026-10-20T02:24Z,,,,,,Helm was on the field for 33 of 46 offensive snaps (71.7 percent) but didn't show up on the box score otherwise during the Titans' 26-20 win over the Colts on Sunday.
 4369835,Alontae Taylor,Tennessee Titans,Active,2026-10-19T17:18Z,,,,,,
 4569587,Wan'Dale Robinson,Tennessee Titans,Active,2026-10-19T02:16Z,,,,,,Robinson caught three of seven targets for 22 yards during Sunday's 26-20 win over the Colts.
 4917635,Joshua Williams,Tennessee Titans,Active,2026-10-18T02:44Z,,,,,,The Titans activated Williams (pectoral) from reserve/PUP on Saturday.
