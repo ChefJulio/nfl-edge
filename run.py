@@ -345,17 +345,64 @@ def build_lookahead(eng, data, cfg, scoring, season: int, week: int, site: Path,
   print(f"[run] lookahead weeks {week + 1}-{last} in {time.time() - t0:.0f}s", flush=True)
 
 
-def all_positions_file(eng, data, plan: dict, season: int, week: int, path: Path) -> int:
+def ingame_latest(data, cfg, season: int, week: int) -> dict:
+  """(owner 2026-10-26: "how bout those who were injured in game") gsis -> [week, quarter, clock, returned, covered] for
+  every player noted hurt in his team's latest finished game (the official play-by-play's "was injured during the play",
+  nfledge/ingame.py; every position, matched by team and jersey). covered: his team has filed an injury report for a
+  later week since (left off it = cleared; Jordan Davis, PHI week 6, then 94% on week 7's report). {} when the notes
+  can't be read."""
+  try:
+    import nflreadpy as nfl
+    from nfledge import data as D, ingame
+    cache = D.Cache(ROOT / cfg["data"]["cache_dir"])
+    n = ingame.load(cache, nfl, season, data.rosters, stale=cache.age_hours("ingame", season) > 6)
+  except Exception as e:
+    print(f"[run] in-game injury notes unavailable: {e}", flush=True)
+    return {}
+  if n is None or not len(n):
+    return {}
+  n = n[(n.season_type == "REG") & n.gsis_id.notna()]
+  s = data.schedules
+  fin = s[(s.season == season) & (s.game_type == "REG") & s.home_score.notna() & (s.week <= week)]
+  last = {}
+  for x in fin.itertuples():
+    for t in (x.home_team, x.away_team):
+      last[t] = max(last.get(t, 0), int(x.week))
+  out_ = ingame.not_back(n)
+  h = ingame.hurt_rows(n).sort_values(["game_id", "play_id"])
+  h = h[h.week.astype(int) == h.team.map(last)]
+  # each team's latest week with an injury report filed (practice rows; team from the roster)
+  rep = {}
+  pr = data.practice
+  if pr is not None and len(pr):
+    r = data.rosters[data.rosters.season == season].sort_values("week").drop_duplicates("gsis_id", keep="last")
+    tm = dict(zip(r.gsis_id, r.team))
+    for g, w in zip(pr[pr.season == season].gsis_id, pr[pr.season == season].week):
+      t = tm.get(g)
+      if t: rep[t] = max(rep.get(t, 0), int(w))
+  out = {}
+  for x in h.itertuples():
+    if x.gsis_id not in out:  # his first injury note of that game
+      out[x.gsis_id] = [int(x.week), int(x.qtr) if x.qtr == x.qtr else None, str(x.time or ""),
+                        (x.gsis_id, season, int(x.week)) not in out_, rep.get(x.team, 0) > int(x.week)]
+  return out
+
+
+def all_positions_file(eng, data, cfg, plan: dict, season: int, week: int, path: Path) -> int:
   """(DM, owner decision 2026-10-26) data/injuries_all.json for the team pages' Injuries tile: the players the board
   doesn't cover (defenders, linemen, punters, long snappers) on this week's report or out injured, with this week's
   chance to play (InjuryModel.all_positions: once the team's final report is out) and the return week from the build's
-  availability plan (the return chain already runs for every position). rows: [gsis, espn, pos, team, p, back];
-  p null = no number yet; back = first later week at an even chance or better, 0 = not this season, null = unknown."""
+  availability plan (the return chain already runs for every position). rows: [gsis, espn, pos, team, p, back, name];
+  p null = no number yet; back = first later week at an even chance or better, 0 = not this season, null = unknown.
+  hurt: gsis -> [week, quarter, clock, returned], everyone hurt in his team's latest game (fantasy players too); one hurt
+  in it and on no list yet gets a row as well."""
   im = getattr(eng, "injury_model", None)
   rep = im.all_positions(season, week) if im is not None and hasattr(im, "all_positions") else pd.DataFrame()
   pt = data.players_table
   espn = dict(zip(pt.gsis_id, pt.espn_id)) if pt is not None and "espn_id" in pt else {}
   pos = dict(zip(pt.gsis_id, pt.position)) if pt is not None and "position" in pt else {}
+  name = dict(zip(pt.gsis_id, pt.display_name)) if pt is not None and "display_name" in pt else {}
+  hurt = ingame_latest(data, cfg, season, week)
   r = data.rosters
   r = r[r.season == season].sort_values("week").drop_duplicates("gsis_id", keep="last")
   team = dict(zip(r.gsis_id, r.team))
@@ -373,16 +420,18 @@ def all_positions_file(eng, data, plan: dict, season: int, week: int, path: Path
   for x in rep.itertuples() if len(rep) else []:
     done.add(x.gsis_id)
     rows.append([x.gsis_id, str(espn.get(x.gsis_id) or ""), x.position, x.team or team.get(x.gsis_id),
-                 None if x.p != x.p else round(float(x.p), 3), back(x.gsis_id)])
-  for g in sorted(chain - done):  # out injured, not on this week's report (IR, a reserve list, missed games)
+                 None if x.p != x.p else round(float(x.p), 3), back(x.gsis_id), name.get(x.gsis_id)])
+  # out injured, not on this week's report (IR, a reserve list, missed games); hurt in his last game, on no list yet
+  for g in sorted((chain | set(hurt)) - done):
     if pos.get(g) in FANTASY_POS or g not in team:
       continue
-    rows.append([g, str(espn.get(g) or ""), pos.get(g), team[g], None, back(g)])
-  if not rows:
+    rows.append([g, str(espn.get(g) or ""), pos.get(g), team[g], None, back(g), name.get(g)])
+  if not rows and not hurt:
     return 0
   path.parent.mkdir(parents=True, exist_ok=True)
-  path.write_text(json.dumps({"v": 1, "season": season, "week": week, "cols": ["gsis", "espn", "pos", "team", "p", "back"],
-                              "rows": rows}, separators=(",", ":"), allow_nan=False), encoding="utf-8")
+  path.write_text(json.dumps({"v": 2, "season": season, "week": week, "cols": ["gsis", "espn", "pos", "team", "p", "back", "name"],
+                              "rows": rows, "hurt": hurt, "hurt_espn": {str(espn[g]): g for g in hurt if espn.get(g)}},
+                             separators=(",", ":"), allow_nan=False), encoding="utf-8")
   return len(rows)
 
 
@@ -453,7 +502,7 @@ def main():
   out = rp.render(ctx, Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week))
   check_script(out)
   if not args.week and plan is not None:  # (DM) the team pages' Injuries tile: every non-fantasy player on the report
-    f = all_positions_file(eng, data, plan, season, week, out.parent / "data" / "injuries_all.json")
+    f = all_positions_file(eng, data, cfg, plan, season, week, out.parent / "data" / "injuries_all.json")
     if f:
       print(f"[run] non-fantasy injury report: {f} players -> injuries_all.json", flush=True)
   if not args.week:  # what this live build fed the model (lines, wind, ECR scrape, projections), for live-vs-backtest checks

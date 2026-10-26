@@ -2351,7 +2351,7 @@
   let dMode = 'use';  // 'use' = by playing time (default when the week has it), 'list' = the listed chart
   const GRP_NAME = { QB: 'Quarterback', RB: 'Running backs', WR: 'Wide receivers', TE: 'Tight ends', OL: 'Offensive line',
                      DL: 'Defensive line', LB: 'Linebackers', CB: 'Cornerbacks', S: 'Safeties' };
-  const TAG_TONE = { Q: 'q', D: 'd' };  // everything else (O, IR, PUP, NFI, SSPD, HOLD) = out
+  const TAG_TONE = { Q: 'q', D: 'd', H: 'q' };  // everything else (O, IR, PUP, NFI, SSPD, HOLD) = out
   // suspended = SSPD, as on every other page (nfledge/codes.py, 2026-10-22); depth files built before then say SUSP
   const dTag = t => (t === 'SUSP' ? 'SSPD' : t);
   // the current chart's tag (2026-10-22 audit): a player the week data covers (on the board, or in its every-rostered-
@@ -2364,7 +2364,7 @@
   };
   const ESPN_TAG = { 'Out': 'O', 'Injured Reserve': 'IR', 'Doubtful': 'D', 'Questionable': 'Q', 'Suspension': 'SSPD',
                      'Physically Unable to Perform': 'PUP' };
-  const TAG_NAME = { O: 'Out', D: 'Doubtful', Q: 'Questionable', IR: 'Injured reserve', PUP: 'Physically unable to perform list',
+  const TAG_NAME = { O: 'Out', D: 'Doubtful', Q: 'Questionable', H: 'Hurt in his last game, on no list yet', IR: 'Injured reserve', PUP: 'Physically unable to perform list',
                      NFI: 'Non-football injury list', SSPD: 'Suspended', HOLD: 'Did not report' };
   const dKey = (s, t) => `${s}/${t}`;
   const loadDepth = (s, abbr) => {
@@ -2903,7 +2903,7 @@
   const loadRoster = () => { if (RO.d !== undefined) return; RO.d = null;
     NFLE.load('data/roster.json').then(j => { const m = {};
       j.rows.forEach(r => { const o = {}; j.cols.forEach((c, i) => { o[c] = r[i]; }); m[o.pid] = o; }); RO.d = m; rerenderCard(); }).catch(() => {}); };
-  const INJ_SEV = { O: 0, D: 1, Q: 2, IR: 3, PUP: 4, NFI: 5, SSPD: 6, RES: 7 };
+  const INJ_SEV = { O: 0, D: 1, Q: 2, H: 2.5, IR: 3, PUP: 4, NFI: 5, SSPD: 6, RES: 7 };  // H: hurt in his last game, on no list yet
   const INJ_LONG = new Set(['IR', 'PUP', 'NFI', 'SSPD', 'RES']);
   // by position group (owner 2026-10-26), offense then defense then specialists
   const INJ_GRP = (() => { const m = {}; [['QB'], ['RB', 'FB'], ['WR'], ['TE'], ['OL', 'OT', 'T', 'OG', 'G', 'C'], ['DL', 'DE', 'DT', 'NT'],
@@ -2916,7 +2916,11 @@
   const loadAll = () => { if (IA.d !== undefined) return; IA.d = null;
     NFLE.load('data/injuries_all.json').then(j => { const by = {};
       j.rows.forEach(r => { const o = {}; j.cols.forEach((c, i) => { o[c] = r[i]; }); if (o.espn) by[`e${o.espn}`] = o; by[`g${o.gsis}`] = o; });
+      // (owner 2026-10-26: "how bout those who were injured in game") hurt in his team's latest game: gsis -> [week,
+      // quarter, clock, returned], every position (the official play-by-play's injury notes)
+      by.hurt = j.hurt || {}; by.hurtE = j.hurt_espn || {};
       IA.d = by; rerenderCard(); }).catch(() => { IA.d = false; }); };
+  const hurtText = h => h ? `hurt in game${h[1] ? ` · Q${h[1] > 4 ? 'OT' : h[1]} ${String(h[2] || '').replace(/^0/, '')}` : ''} · ${h[3] ? 'returned' : 'did not return'}` : '';
   // [{pid, espn, name, pos, photo, tag, what, back, play, prac}] by position group, worst first; null until ESPN's list is in
   const teamInjuries = abbr => {
     loadInj(); loadRos(); loadRoster(); loadAll();
@@ -2928,7 +2932,9 @@
     const add = (pid, espn, r) => {
       if ((pid && seen.has(pid)) || (espn && seenE.has(String(espn)))) return;
       const p = pid && DATA.players[pid], ro = pid && RO.d && RO.d[pid];
-      const tag = (p && tagOf(pid, p.status)) || (r && ESPN_TAG[r.status]) || (pid && DATA.tags && DATA.tags[pid]) || (ro && INJ_LONG.has(ro.tag) ? ro.tag : '');
+      const hg = IA.d ? (pid && IA.d.hurt[pid] ? pid : espn && IA.d.hurtE[String(espn)]) : null, hu = hg ? IA.d.hurt[hg] : null;
+      const tag = (p && tagOf(pid, p.status)) || (r && ESPN_TAG[r.status]) || (pid && DATA.tags && DATA.tags[pid]) || (ro && INJ_LONG.has(ro.tag) ? ro.tag : '')
+        || (hu && !hu[3] && !hu[4] ? 'H' : '');  // not once his team has filed a report since (hu[4]: left off it = cleared)
       if (!tag || !(tag in INJ_SEV)) return;
       if (pid) seen.add(pid);
       if (espn) seenE.add(String(espn));
@@ -2942,8 +2948,8 @@
       const bw = (pid && backWeek(pid)) || bwa, ew0 = r && r.return_date && r.return_date >= today ? weekOfDate(r.return_date) : null;
       const ew = ew0 && ew0 > (+DATA.season >= 2021 ? 18 : 17) ? 'no' : ew0;
       const play = p && p.inactive != null ? 1 - p.inactive : ia && ia.p != null ? ia.p : null;
-      out.push({ pid, espn, tag, name: (p && p.name) || (r && r.name) || (ro && ro.name) || '', pos: (p && p.pos) || (ro && ro.pos) || (r && r.pos) || '',
-        photo: p && p.photo, what: injWhat(r), prac: p ? pracWords(p, DATA) : '', play, onReport: !!(ia && ia.p == null && !INJ_LONG.has(tag)),
+      out.push({ pid, espn, tag, name: (p && p.name) || (r && r.name) || (ro && ro.name) || (ia && ia.name) || '', pos: (p && p.pos) || (ro && ro.pos) || (r && r.pos) || (ia && ia.pos) || '',
+        photo: p && p.photo, what: [injWhat(r), hurtText(hu)].filter(Boolean).join(' · '), prac: p ? pracWords(p, DATA) : '', play, onReport: !!(ia && ia.p == null && !INJ_LONG.has(tag)),
         back: bw === 'no' || (!bw && ew === 'no') ? 'season' : bw ? `wk ${bw}` : play != null && play >= H.AVAIL.EVEN ? '' : ew ? `wk ${ew}` : r && r.return_date >= today ? espnDate(r.return_date) : '',
         backWhy: bw ? 'our return model: the first week he is more likely than not to play' : ew ? `ESPN's estimated return, ${espnDate(r.return_date)}` : '' });
     };
@@ -2954,6 +2960,9 @@
     // on our board with a tag ESPN hasn't caught up to; on a reserve list ESPN leaves off
     Object.entries(DATA.players).forEach(([pid, p]) => { if (p.team === abbr && !seen.has(pid)) add(pid, p.espn, null); });
     if (RO.d) Object.values(RO.d).forEach(o => { if (o.team === abbr && !seen.has(o.pid) && INJ_LONG.has(o.tag)) add(o.pid, o.espn, null); });
+    // hurt in his team's last game and on no list yet (a defender hurt Sunday, before ESPN or a report has him)
+    if (IA.d) Object.keys(IA.d.hurt).forEach(g => { const o = IA.d[`g${g}`], bp = DATA.players[g];
+      if ((o && o.team === abbr) || (bp && bp.team === abbr)) add(g, (o && o.espn) || (bp && bp.espn) || null, null); });
     const grp = x => INJ_GRP[x.pos] ?? 99;
     return out.sort((a, b) => grp(a) - grp(b) || INJ_SEV[a.tag] - INJ_SEV[b.tag] || a.name.localeCompare(b.name));
   };
@@ -2962,7 +2971,7 @@
     if (!L) return tapTile('Injuries', '<div class="pc-tapsub">Loading&hellip;</div>', 'Injuries', '<p class="pc-sub">Loading&hellip;</p>');
     const wk = L.filter(x => !INJ_LONG.has(x.tag)), lt = L.filter(x => INJ_LONG.has(x.tag));
     const n = t => wk.filter(x => x.tag === t).length;
-    const counts = [[n('O'), 'out'], [n('D'), 'doubtful'], [n('Q'), 'questionable']].filter(c => c[0]).map(c => c.join(' ')).join(' · ');
+    const counts = [[n('O'), 'out'], [n('D'), 'doubtful'], [n('Q'), 'questionable'], [n('H'), 'hurt in game']].filter(c => c[0]).map(c => c.join(' ')).join(' · ');
     const face = wk.length ? `<div class="pc-big">${wk.length} <small>on the report</small></div><div class="pc-tapsub">${esc(counts)}</div>`
       : '<div class="pc-big good">Healthy</div><div class="pc-tapsub">no one on this week\'s report</div>';
     const sub2 = lt.length ? `<div class="pc-tapsub">${lt.length} on IR or reserve</div>` : '';
