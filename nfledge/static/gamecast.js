@@ -2795,6 +2795,8 @@
       `<div class="pc-box"><div class="pc-k">Fantasy players · ${esc(wkLabel(d).toLowerCase())}</div>
         ${wkRows ? `<table class="bx tm-pl tiles"><thead><tr><th>Player</th><th class="num">Proj</th><th class="num" title="Edge grade; sorted by it (ungraded players last, by projection)">Grd</th><th class="num">FP/G</th></tr></thead><tbody>${wkRows}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>
        <div class="pc-k tm-dck">Depth chart</div><div class="dc-wrap" data-dc="${esc(abbr)}"></div>`));
+    // Injuries: the live list, so only on this season's page
+    if (DATA && +d.season === +DATA.season) tiles.push(injuriesTile(abbr, d));
     // Playoffs (owner 2026-10-20, replacing the Schedule tile now that the schedule row shows every week): the chance to
     // make it, the division, the move since last week; opens the Playoffs tab. A past season's page has no odds: the
     // Schedule tile stays there.
@@ -2890,6 +2892,71 @@
     .map(([pid, p, gr]) => { const s = scaled(p, d);
     return `<tr class="teamrow" style="${NFLE.fmt.rowStyle(d.teams, p.team)}" data-open-pid="${esc(pid)}"><td>${NFLE.ui.player({ name: p.name, pos: p.pos, team: p.team, photo: p.photo, espn: p.espn, badges: injTag(p.status, p.inactive, pid, d) }, d.teams)}</td>
       <td class="num"><b>${f1(s.proj)}</b></td><td class="num">${gradeChip(gr)}</td><td class="num muted">${p.fpg != null ? f1(p.fpg) : ''}</td></tr>`; }).join('');
+  // ---- Injuries tile (owner 2026-10-26): the team's report this week and its long-term list in one place. ESPN's live
+  // list (every player, refreshed daily) joined to our board (chance he plays, practice days, projection), the roster
+  // (data/roster.json: position, and reserve tags for anyone ESPN leaves off) and the return model (backWeek).
+  const RO = { d: undefined };
+  const loadRoster = () => { if (RO.d !== undefined) return; RO.d = null;
+    NFLE.load('data/roster.json').then(j => { const m = {};
+      j.rows.forEach(r => { const o = {}; j.cols.forEach((c, i) => { o[c] = r[i]; }); m[o.pid] = o; }); RO.d = m; rerenderCard(); }).catch(() => {}); };
+  const INJ_SEV = { O: 0, D: 1, Q: 2, IR: 3, PUP: 4, NFI: 5, SSPD: 6, RES: 7 };
+  const INJ_LONG = new Set(['IR', 'PUP', 'NFI', 'SSPD', 'RES']);
+  const injWhat = r => r ? [...new Set([r.type, r.detail !== 'Not Specified' ? r.detail : '', r.side !== 'Not Specified' ? r.side : ''].filter(Boolean))].join(' · ') : '';
+  // [{pid, espn, name, pos, photo, tag, what, back, play, prac, risk}], worst first; null until ESPN's list is in
+  const teamInjuries = abbr => {
+    loadInj(); loadRos(); loadRoster();
+    if (!DINJ || !DATA) return null;
+    const full = NFLE.fmt.teamOf(DATA.teams, abbr).name, seen = new Set(), seenE = new Set(), out = [];
+    // ESPN id -> our id: the card map, plus the roster for depth players it lacks (a player once, however he's found)
+    const be = Object.assign({}, RO.d ? Object.fromEntries(Object.values(RO.d).filter(o => o.espn).map(o => [String(o.espn), o.pid])) : {}, byEspn());
+    const today = new Date().toISOString().slice(0, 10);
+    const add = (pid, espn, r) => {
+      if ((pid && seen.has(pid)) || (espn && seenE.has(String(espn)))) return;
+      const p = pid && DATA.players[pid], ro = pid && RO.d && RO.d[pid];
+      const tag = (p && tagOf(pid, p.status)) || (r && ESPN_TAG[r.status]) || (pid && DATA.tags && DATA.tags[pid]) || (ro && INJ_LONG.has(ro.tag) ? ro.tag : '');
+      if (!tag || !(tag in INJ_SEV)) return;
+      if (pid) seen.add(pid);
+      if (espn) seenE.add(String(espn));
+      const bw = pid && backWeek(pid);
+      out.push({ pid, espn, tag, name: (p && p.name) || (r && r.name) || (ro && ro.name) || '', pos: (p && p.pos) || (ro && ro.pos) || (r && r.pos) || '',
+        photo: p && p.photo, what: injWhat(r), prac: p ? pracWords(p, DATA) : '',
+        // ESPN's date only while it's ahead (a passed one is stale: the list hasn't caught up)
+        back: bw === 'no' ? 'not this season' : bw ? `~wk ${bw}` : r && r.return_date && r.return_date >= today ? `est. ${espnDate(r.return_date)}` : '',
+        play: p && p.inactive != null ? 1 - p.inactive : null, risk: p && p.inactive ? scaled(p, DATA).proj * p.inactive : 0 });
+    };
+    Object.values(DINJ).forEach(r => { if (r.team === full && r.status !== 'Active') add(be[String(r.espn_id)], String(r.espn_id), r); });
+    // on our board with a tag ESPN hasn't caught up to; on a reserve list ESPN leaves off
+    Object.entries(DATA.players).forEach(([pid, p]) => { if (p.team === abbr && !seen.has(pid)) add(pid, p.espn, null); });
+    if (RO.d) Object.values(RO.d).forEach(o => { if (o.team === abbr && !seen.has(o.pid) && INJ_LONG.has(o.tag)) add(o.pid, o.espn, null); });
+    return out.sort((a, b) => INJ_SEV[a.tag] - INJ_SEV[b.tag] || b.risk - a.risk || a.name.localeCompare(b.name));
+  };
+  const injuriesTile = (abbr, d) => {
+    const L = teamInjuries(abbr);
+    if (!L) return tapTile('Injuries', '<div class="pc-tapsub">Loading&hellip;</div>', 'Injuries', '<p class="pc-sub">Loading&hellip;</p>');
+    const wk = L.filter(x => !INJ_LONG.has(x.tag)), lt = L.filter(x => INJ_LONG.has(x.tag));
+    const n = t => wk.filter(x => x.tag === t).length, risk = wk.reduce((s, x) => s + x.risk, 0);
+    const counts = [[n('O'), 'out'], [n('D'), 'doubtful'], [n('Q'), 'questionable']].filter(c => c[0]).map(c => c.join(' ')).join(' · ');
+    const top = wk.filter(x => x.risk >= 1).sort((a, b) => b.risk - a.risk)[0];
+    const face = wk.length ? `<div class="pc-big">${wk.length} <small>on the report</small></div><div class="pc-tapsub">${esc(counts)}</div>`
+      : '<div class="pc-big good">Healthy</div><div class="pc-tapsub">no one on this week\'s report</div>';
+    const sub2 = top ? `<div class="pc-tapsub">biggest: ${esc(NFLE.fmt.short(top.name))} &minus;${f1(top.risk)} pts</div>`
+      : lt.length ? `<div class="pc-tapsub">${lt.length} on IR or reserve</div>` : '';
+    // the injury and practice days on their own wrapping line under the name (in the name's sub line they pushed the
+    // numbers off a phone screen)
+    const who = x => NFLE.ui.player({ name: x.name, pos: x.pos, team: abbr, photo: x.photo, espn: x.espn,
+      badges: `<span class="dc-tag dt-${TAG_TONE[x.tag] || 'out'}" title="${esc(TAG_NAME[x.tag] || x.tag)}">${esc(x.tag)}</span>` }, DATA.teams)
+      + `<div class="ij-d">${esc([x.what, x.prac].filter(Boolean).join(' · ') || TAG_NAME[x.tag] || x.tag)}</div>`;
+    const row = (x, cells) => `<tr class="teamrow" style="${NFLE.fmt.rowStyle(DATA.teams, abbr)}"${x.pid ? ` data-open-pid="${esc(x.pid)}"` : ''}><td class="ij-who">${who(x)}</td>${cells}</tr>`;
+    const wkBox = `<div class="pc-box"><div class="pc-k">This week · wk ${esc(DATA.week)}${risk >= 0.5 ? ` · ${f1(risk)} fantasy pts at risk` : ''}</div>
+      ${wk.length ? `<table class="bx tm-pl tiles"><thead><tr><th>Player</th><th class="num" title="Our chance he plays">Play</th><th class="num" title="His projection times his chance to sit">At risk</th></tr></thead><tbody>${
+        wk.map(x => row(x, `<td class="num">${x.play != null ? NFLE.fmt.toPlay(1 - x.play) : ''}</td><td class="num">${x.risk >= 0.05 ? `&minus;${f1(x.risk)}` : ''}</td>`)).join('')}</tbody></table>`
+        : '<p class="pc-sub">No one on this week\'s injury report.</p>'}</div>`;
+    const ltBox = lt.length ? `<div class="pc-box"><div class="pc-k">Long term · IR, PUP, NFI, suspended</div>
+      <table class="bx tm-pl tiles"><thead><tr><th>Player</th><th class="num">Back</th></tr></thead><tbody>${
+        lt.map(x => row(x, `<td class="num muted">${esc(x.back)}</td>`)).join('')}</tbody></table></div>` : '';
+    const src = `<p class="pc-sub muted">ESPN's injury list (updated daily), our chance to play and projections.</p>`;
+    return tapTile('Injuries', face + sub2, 'Injuries', wkBox + ltBox + src);
+  };
   // the Power ranking box (the Power tile's sheet)
   const teamPowerBox = pw => {
     const unit = (label, v, rk, pp, total) => `<div class="tm-u${total ? ' tm-tot' : ''}"><span class="tm-ul">${label}</span><span class="tm-uv">${sgn(v)}</span>${rkChip(rk)}

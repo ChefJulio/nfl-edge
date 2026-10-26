@@ -238,6 +238,9 @@ svg.tm-trend { display: block; margin-top: 4px; } .tm-tr-mid { stroke: var(--lin
 .ats-W { color: #45c26b !important; } .ats-L { color: var(--muted); }
 .tm-gc { font-weight: 700; font-size: var(--fs-lg); text-decoration: none; padding: 0 4px; }
 table.tm-pl td { white-space: normal; }
+/* team Injuries sheet: the injury and practice line wraps under the name, the numbers stay in view */
+table.tm-pl { width: 100%; } table.tm-pl td.ij-who { width: 100%; max-width: 0; }
+.ij-d { font-size: var(--fs-xs); line-height: 1.3; color: var(--muted); margin: 3px 0 0; white-space: normal; overflow-wrap: anywhere; }
 .pc .pc-tabs { display: flex; margin: 0 0 10px; overflow-x: auto; scrollbar-width: none; } .pc .pc-tabs::-webkit-scrollbar { display: none; }
 .pc .pc-tabs button { flex: 1 0 auto; font-size: var(--fs-md); padding: 7px 10px; white-space: nowrap; }
 @media (max-width: 420px) { .pc .pc-tabs button { padding: 7px 8px; } }

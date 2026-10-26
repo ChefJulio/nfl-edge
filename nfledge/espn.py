@@ -90,5 +90,8 @@ def fetch_injuries(timeout: int = 30) -> pd.DataFrame:
                    "status": i.get("status"), "updated": i.get("date"), "type": det.get("type"),
                    "detail": det.get("detail"), "side": det.get("side"), "return_date": det.get("returnDate"),
                    "fantasy_status": (det.get("fantasyStatus") or {}).get("abbreviation"),
-                   "comment": (i.get("shortComment") or "")[:300]})
+                   "comment": (i.get("shortComment") or "")[:300],
+                   # last, so older snapshots' columns keep their places (2026-10-26: the team Injuries tile shows it for
+                   # defenders and linemen, who aren't in roster.json)
+                   "pos": (a.get("position") or {}).get("abbreviation")})
   return pd.DataFrame(rows)
