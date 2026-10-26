@@ -75,6 +75,16 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     era: (t, season) => { const e = ERA[t]; return e && season && +season < e.until ? e.code : t; },
     franchise: t => (OLD[t] ? OLD[t].of : t),
     teamOf: (teams, t) => (teams || {})[t] || oldTeam(teams, t) || {},
+    // One rule for every team picker (owner 2026-10-26): the nickname, sorted by the name shown (sorting by code read as
+    // random: Cardinals, Falcons, Ravens...); two clubs with one nickname (LV and OAK, Raiders) add their code.
+    // teamOpts -> [[code, label]]; teamOptHtml -> the <option>s, cur selected. Tables and tiles keep the code.
+    teamOpts: (teams, codes) => {
+      const rows = [...new Set(codes.filter(Boolean))].map(t => [t, NFLE.fmt.teamOf(teams, t).nick || t]), n = {};
+      rows.forEach(r => { n[r[1]] = (n[r[1]] || 0) + 1; });
+      return rows.map(([t, l]) => [t, n[l] > 1 ? `${l} (${t})` : l]).sort((a, b) => a[1].localeCompare(b[1]));
+    },
+    teamOptHtml: (teams, codes, cur) => NFLE.fmt.teamOpts(teams, codes)
+      .map(([t, l]) => `<option value="${esc(t)}"${t === cur ? ' selected' : ''}>${esc(l)}</option>`).join(''),
     // team logo on its picked background, and a row's team trim (--tc / --tc2), from the week data's teams map
     logo: (teams, t, size = 18) => { const i = NFLE.fmt.teamOf(teams, t); return i.logo ? `<span class="logo" style="background:${esc(i.logo_bg || '#333')}"><img src="${esc(logoSrc(i.logo, size))}" alt="${esc(t)}" width="${size}" height="${size}" loading="lazy"></span>` : ''; },
     rowStyle: (teams, t) => { const i = NFLE.fmt.teamOf(teams, t); return `--tc:${i.color || '#666'};--tc2:${i.color2 || '#999'};--tfg:#ffffff`; },

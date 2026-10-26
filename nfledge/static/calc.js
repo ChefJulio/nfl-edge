@@ -276,7 +276,7 @@
       box.innerHTML = `<div class="gc-ctl">
           ${seg('season', seasons.map(s => [s, String(s)]), st.season)}
           ${seg('sort', [['worst', 'Most controversial'], ['game', 'Game order']], st.sort)}
-          <select class="gc-team" aria-label="Team"><option value="">All teams</option>${teams.map(t => `<option${t === st.team ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>
+          <select class="gc-team" aria-label="Team"><option value="">All teams</option>${NFLE.fmt.teamOptHtml(TEAMS, teams, st.team)}</select>
         </div>
         <p class="cx-src muted">${meta.n ? `${meta.n.toLocaleString()} fourth downs, ${meta.flagged} questionable (${100 * QUESTION}+ pts of win chance worse than the best). ` : ''}Graded by a model trained only on seasons before ${st.season}. A right call can still lose.</p>
         ${body}`;

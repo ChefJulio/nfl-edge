@@ -2459,7 +2459,7 @@
   };
   const teamLogHtml = (L, abbr) => {
     const opps = [...new Set(L.seasons.flatMap(s => s.g.map(g => g.o)))].sort();
-    const sel = `<label class="tm-filter">Opponent <select data-topp><option value="">All teams</option>${opps.map(o => `<option value="${esc(o)}"${o === teamOpp ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select></label>`;
+    const sel = `<label class="tm-filter">Opponent <select data-topp><option value="">All teams</option>${NFLE.fmt.teamOptHtml(DATA && DATA.teams, opps, teamOpp)}</select></label>`;
     let h2h = '';
     if (teamOpp) {
       const gs = L.seasons.flatMap(s => s.g).filter(g => g.o === teamOpp);
