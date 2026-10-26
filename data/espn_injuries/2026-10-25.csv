@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4876132,Josh Cuevas,Baltimore Ravens,Active,2026-10-19T01:04Z,,,,,,Cuevas caught four of five targets for 44 yards and a touchdown during Sunday's 13-10 loss to Cleveland.
 4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-10-18T15:33Z,,,,,,
 4698244,Teddye Buchanan,Baltimore Ravens,Active,2026-10-16T20:28Z,,,,,,
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-26T03:14Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-26T03:29Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus
 4044133,Sam Franklin Jr.,Buffalo Bills,Active,2026-10-24T01:44Z,,,,,,"The NFL reduced Franklin's discipline from a one-game suspension to a fine of $14,926, Adam Schefter of ESPN reports."
 4568624,Dorian Williams,Buffalo Bills,Active,2026-10-22T01:58Z,,,,,,Williams logged five tackles (three solo) and one pass defensed for an interception in the Bills' 33-30 win over the Raiders on Sunday.
 4832035,Davison Igbinosun,Buffalo Bills,Active,2026-10-22T01:37Z,,,,,,"Defensive coordinator Jim Leonhard praised Igbinosun's play earlier this week and plans to keep giving the rookie a good amount of playing time, Alec White of the Bills' official site reports. Said Leonard, ""I think what he's done the last couple weeks, he's definitely earned a high majority of the "
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362647,Damien Lewis,Carolina Panthers,Active,2026-10-18T16:42Z,,,,,,"Lewis (elbow) is active for Sunday's game against the Eagles, Darin Gantt of the Panthers' official site reports."
 4058925,Tershawn Wharton,Carolina Panthers,Active,2026-10-18T16:21Z,,,,,,"Wharton (neck) is active for Sunday's game against the Eagles, Darin Gantt of the Panthers' official site reports."
 4685350,Trevor Etienne,Carolina Panthers,Active,2026-10-18T16:16Z,,,,,,"Etienne (ankle) is active for Sunday's game against the Eagles, Darin Gantt of the Panthers' official site reports."
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-26T03:00Z,Undisclosed,,,2026-10-18,IR,ir
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-26T03:28Z,Undisclosed,,,2026-10-18,IR,ir
 4361093,Kyler Gordon,Chicago Bears,Active,2026-10-25T02:51Z,,,,,,"Gordon recorded five tackles (three solo), including 1.0 sacks, in Thursday's 30-24 win over the Patriots."
 4954445,Dillon Thieneman,Chicago Bears,Active,2026-10-25T02:43Z,,,,,,"Thieneman tallied eight tackles (three solo), including 0.5 sacks, in a 30-24 victory versus the Patriots on Thursday."
 4241007,D'Marco Jackson,Chicago Bears,Active,2026-10-25T02:38Z,,,,,,Jackson finished with six tackles (three solo) and an interception Thursday in a 30-24 victory over New England.
@@ -678,7 +678,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 16002,Kyle Juszczyk,San Francisco 49ers,Active,2026-10-26T01:38Z,,,,,,Juszczyk caught all three of his targets for 11 yards and a touchdown during Sunday's 29-20 loss to Atlanta.
 4034949,Eddy Pineiro,San Francisco 49ers,Active,2026-10-26T00:52Z,,,,,,Pineiro did not attempt a field goal while going 2-for-3 on PATs in Sunday's 26-20 loss to the Falcons.
 4431466,Jordan Watkins,San Francisco 49ers,Active,2026-10-26T00:35Z,,,,,,Watkins brought in three of six targets for 56 yards in the 49ers' 29-20 loss to the Falcons on Sunday.
-4696044,Kaelon Black,San Francisco 49ers,Active,2026-10-26T00:29Z,,,,,,Black rushed 12 times for 63 yards and a touchdown and brought in one of three targets for minus-4 yards in the 49ers' 29-20 loss to the Falcons on Sunday. He also returned one kickoff for 34 yards.
+4696044,Kaelon Black,San Francisco 49ers,Active,2026-10-26T00:29Z,,,,,,Black rushed 12 times for 63 yards and a touchdown and brought in one of three targets for minus-4 yards in the 49ers' 29-20 loss to the Falcons on Sunday. He also lost a fumble and returned one kickoff for 34 yards.
 3040151,George Kittle,San Francisco 49ers,Active,2026-10-25T22:55Z,,,,,,Kittle brought in eight of 10 targets for 88 yards and lost a fumble in the 49ers' 29-20 loss to the Falcons on Sunday.
 3117251,Christian McCaffrey,San Francisco 49ers,Active,2026-10-25T22:03Z,,,,,,McCaffrey rushed seven times for 39 yards and a touchdown and brought in six of seven targets for 61 yards in the 49ers' 29-20 loss to the Falcons on Sunday.
 4565200,Upton Stout,San Francisco 49ers,Active,2026-10-25T15:56Z,,,,,,"Stout (shoulder) is active for Sunday's game against the Falcons, Brooke Evans of the 49ers' official site reports."
@@ -699,8 +699,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3916903,Dre Greenlaw,San Francisco 49ers,Active,2026-10-20T23:41Z,,,,,,"Greenlaw was reinstated by the NFL on Tuesday after he served a one-game suspension in Week 6, David Lombardi of SFStandard.com reports."
 4575665,Jacob Cowing,San Francisco 49ers,Active,2026-10-20T21:56Z,,,,,,Cowing accrued zero targets during Monday's 23-17 win against Washington.
 4691556,Enrique Cruz Jr.,San Francisco 49ers,Active,2026-10-20T16:04Z,,,,,,
-4426376,Charles Cross,Seattle Seahawks,Out,2026-10-26T03:14Z,Ankle,,,2026-11-02,OUT,out
-4035693,Velus Jones Jr.,Seattle Seahawks,Out,2026-10-26T02:57Z,Hamstring,Not Specified,Not Specified,2026-11-02,OUT,Jones (hamstring) has been ruled out for the remainder of Sunday night's contest against the Chiefs.
+4426376,Charles Cross,Seattle Seahawks,Questionable,2026-10-26T03:18Z,Ankle,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,Cross exited Sunday night's game against the Chiefs with an ankle injury and did not return.
+4035693,Velus Jones Jr.,Seattle Seahawks,Questionable,2026-10-26T02:57Z,Hamstring,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,Jones (hamstring) has been ruled out for the remainder of Sunday night's contest against the Chiefs.
 4032473,Rashid Shaheed,Seattle Seahawks,Out,2026-10-26T02:50Z,Knee,,,2026-11-02,OUT,Shaheed (knee) won't return to Sunday's game against the Chiefs.
 3120358,Uchenna Nwosu,Seattle Seahawks,Active,2026-10-25T23:12Z,,,,,,Nwosu (hip) is active for Sunday Night Football versus Kansas City.
 4869523,Nick Emmanwori,Seattle Seahawks,Active,2026-10-25T23:08Z,,,,,,Emmanwori (hip) is active for Sunday night's contest against the Chiefs.
