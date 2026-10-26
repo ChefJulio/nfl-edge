@@ -92,6 +92,61 @@ def staff(text: str) -> dict:
   return out
 
 
+ESPN_CODE = {"LAR": "LA", "WSH": "WAS"}
+
+
+def _get_json(url: str):
+  import json
+  with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=20) as r:
+    return json.load(r)
+
+
+def espn_heads(season: int) -> dict:
+  """team -> {name, photo, exp}: the head coaches ESPN lists this season ({} on failure)."""
+  out = {}
+  try:
+    ids = {str(t["team"]["id"]): ESPN_CODE.get(t["team"]["abbreviation"], t["team"]["abbreviation"])
+           for t in _get_json("https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams")["sports"][0]["leagues"][0]["teams"]}
+    refs = _get_json(f"https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/{season}/coaches?limit=100")["items"]
+    for r in refs:
+      c = _get_json(r["$ref"].replace("http://", "https://"))
+      tid = re.search(r"/teams/(\d+)", (c.get("team") or {}).get("$ref", ""))
+      t = tid and ids.get(tid.group(1))
+      if t:
+        out[t] = {"name": f"{c.get('firstName', '')} {c.get('lastName', '')}".strip(),
+                  "photo": (c.get("headshot") or {}).get("href"), "exp": c.get("experience")}
+  except Exception as e:
+    print(f"[coaches] ESPN head coaches unavailable: {e}", flush=True)
+  return out
+
+
+def head_coaches(season: int, heads: dict | None = None) -> dict:
+  """team -> today's head coach: ESPN's, else Wikipedia's staff template (team left out if neither answers)."""
+  heads = espn_heads(season) if heads is None else heads
+  out = {t: v["name"] for t, v in heads.items() if v.get("name")}
+  for t in NAME:
+    if t not in out:
+      try:
+        hc = current(t).get("hc")
+        if hc: out[t] = hc
+      except Exception:
+        pass
+  return out
+
+
+def fix_current(df, season: int, current_season: int, hc: dict, relocated: dict | None = None):
+  """nflverse's home_coach / away_coach run a season behind for the current one (2026-10-26: Jonathan Gannon still
+  Arizona's head coach though he is Green Bay's DC; "Klint Kubliak"): this season's rows get today's head coach.
+  Limitation: a mid-season change credits the whole season to today's coach (no per-game source names him)."""
+  if season != current_season or not hc:
+    return df
+  df = df.copy()
+  for side in ("home", "away"):
+    team = df[f"{side}_team"].replace(relocated or {})
+    df[f"{side}_coach"] = team.map(hc).fillna(df[f"{side}_coach"])
+  return df
+
+
 def current(team: str) -> dict:
   return staff(raw(f"Template:{NAME[team]} staff"))
 

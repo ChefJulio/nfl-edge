@@ -15,13 +15,11 @@ A failed source leaves its part out; today's staffs fall back to the last site's
 import json
 import re
 import sys
-import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from nfledge import coaches as C  # noqa: E402
@@ -31,7 +29,6 @@ from nfledge.standings import RELOCATED  # noqa: E402
 
 V = 1
 FIRST = 1999
-ESPN_CODE = {"LAR": "LA", "WSH": "WAS"}
 HIST = ROOT / "data" / "history" / "coach_staff.json"
 # Who calls the plays (owner 2026-10-26): no feed has it, so a researched table (each entry sourced and dated) with the
 # staff it was researched against; when a club's staff changes, its entry is flagged to recheck until someone (a Claude
@@ -51,30 +48,6 @@ def play_callers(now: dict, cur_hc: dict) -> tuple[dict, list]:
     if changed: stale.append(f"{t}: {'; '.join(changed)}")
     out[t] = {"off": e.get("off"), "def": e.get("def"), "as_of": e.get("as_of") or doc.get("as_of"), "stale": bool(changed)}
   return out, stale
-
-
-def get_json(url: str):
-  with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": C.UA}), timeout=20) as r:
-    return json.load(r)
-
-
-def espn_heads(season: int) -> dict:
-  """team -> {name, photo, exp} for the head coaches ESPN lists this season ({} on failure)."""
-  out = {}
-  try:
-    ids = {str(t["team"]["id"]): ESPN_CODE.get(t["team"]["abbreviation"], t["team"]["abbreviation"])
-           for t in get_json("https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams")["sports"][0]["leagues"][0]["teams"]}
-    refs = get_json(f"https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/{season}/coaches?limit=100")["items"]
-    for r in refs:
-      c = get_json(r["$ref"].replace("http://", "https://"))
-      tid = re.search(r"/teams/(\d+)", (c.get("team") or {}).get("$ref", ""))
-      t = tid and ids.get(tid.group(1))
-      if t:
-        out[t] = {"name": f"{c.get('firstName', '')} {c.get('lastName', '')}".strip(),
-                  "photo": (c.get("headshot") or {}).get("href"), "exp": c.get("experience")}
-  except Exception as e:
-    print(f"[coaches] ESPN head coaches unavailable: {e}", flush=True)
-  return out
 
 
 def units(site: Path, seasons) -> dict:
@@ -248,14 +221,11 @@ def main() -> None:
   staff = dict(hist); staff[str(current)] = now
 
   U = units(site, range(FIRST, current + 1))
-  G = team_games(sched)
-  heads = espn_heads(current)
-  # nflverse's coach column runs a season behind for the current one (2026-10-26: Gannon still Arizona's head coach,
-  # though he is Green Bay's DC; "Klint Kubliak"): this season's games go to ESPN's head coach, else Wikipedia's.
-  # Limitation: a mid-season change credits the whole season to today's coach (no per-game source names him).
+  heads = C.espn_heads(current)
+  # this season's games go to today's head coach (C.fix_current: nflverse's column runs a season behind)
   cur_hc = {t: (heads.get(t) or {}).get("name") or now[t].get("hc") for t in C.NAME}
-  m = G.season == current
-  G.loc[m, "coach"] = G.loc[m, "team"].map(cur_hc).fillna(G.loc[m, "coach"])
+  sched = pd.concat([sched[sched.season != current], C.fix_current(sched[sched.season == current], current, current, cur_hc, RELOCATED)])
+  G = team_games(sched)
   T = tendencies(pbp, current) if pbp is not None else {}
   F4 = fourth(site, current)
   ST = stints(staff, U)

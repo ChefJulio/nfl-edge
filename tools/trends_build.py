@@ -497,6 +497,9 @@ def main():
     except Exception as e:
       print(f"[plays] {s}: unavailable ({e})", flush=True)
       continue
+    if s == current:  # nflverse's coach columns run a season behind for the current one (nfledge/coaches.fix_current)
+      from nfledge import coaches as C
+      pbp = C.fix_current(pbp, s, current, C.head_coaches(current), D.RELOCATED)
     doc, keys = build(pbp, s, full)
     part = ftn = None
     try:
