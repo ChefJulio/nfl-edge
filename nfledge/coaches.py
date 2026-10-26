@@ -300,8 +300,9 @@ def _norm(name: str) -> str:
 
 
 def photo_for(name: str, people: dict) -> str | None:
-  """His photo from a club's people: the same name, else the same last name and first initial (Nate / Nathan
-  Scheelhaase), else the only one with that last name."""
+  """His photo from a club's people: the same name, else the same last name with a first name sharing its first three
+  letters (Nate / Nathan Scheelhaase). Not a first initial alone: the 49ers' GM John Lynch got staffer Jake Lynch's
+  photo (owner 2026-10-26, "is that his picture?")."""
   if not name or not people:
     return None
   n = _norm(name)
@@ -309,11 +310,10 @@ def photo_for(name: str, people: dict) -> str | None:
   if n in byn:
     return byn[n]
   parts = n.split()
-  if not parts:
+  if len(parts) < 2:
     return None
-  same = [(k, v) for k, v in byn.items() if k.split() and k.split()[-1] == parts[-1]]
-  init = [v for k, v in same if k[0] == parts[0][0]]
-  return init[0] if len(init) == 1 else same[0][1] if len(same) == 1 else None
+  near = [v for k, v in byn.items() if len(k.split()) >= 2 and k.split()[-1] == parts[-1] and k.split()[0][:3] == parts[0][:3]]
+  return near[0] if len(near) == 1 else None
 
 
 ESPN_CODE = {"LAR": "LA", "WSH": "WAS"}
