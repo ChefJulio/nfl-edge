@@ -618,5 +618,35 @@
 "at": "2026-10-25T23:10:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0034844": {
+"name": "Saquon Barkley",
+"team": "PHI",
+"pos": "RB",
+"pre": 0.8636,
+"ruling": "ACT",
+"at": "2026-10-26T22:48:00+00:00",
+"post": 0.974,
+"status": "Active (LLF)"
+},
+"00-0037086": {
+"name": "Grant Calcaterra",
+"team": "PHI",
+"pos": "TE",
+"pre": 0.6823,
+"ruling": "ACT",
+"at": "2026-10-26T21:17:00+00:00",
+"post": 0.974,
+"status": "Active (FFF)"
+},
+"00-0041483": {
+"name": "Eli Stowers",
+"team": "PHI",
+"pos": "TE",
+"pre": 0.6329,
+"ruling": "ACT",
+"at": "2026-10-26T20:26:00+00:00",
+"post": 0.974,
+"status": "Active (FFF)"
 }
 }
