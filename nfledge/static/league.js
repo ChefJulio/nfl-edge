@@ -429,7 +429,7 @@
     // (health.back, the player card's rule: his injury-only chance)
     const backWeek = x => { const g = gsisOf(x), r = ROS && g && ROS.players[g];
       if (!ROS) return ''; if (!r) return 'not projected back this season';
-      const w = NFLE.health.back(r); return w ? `likely back week ${w}` : w === 0 ? 'not projected back this season' : `likely back week ${ROS.from}`; };
+      const w = NFLE.health.back(r, ROS.through); return w === '?' ? '' : w ? `likely back week ${w}` : w === 0 ? 'not projected back this season' : `likely back week ${ROS.from}`; };
     const irSection = () => { const ir = (mine.ir || []).filter(x => mine.ext.includes(x));
       const ready = ir.filter(x => { const p = player(x); return p.proj != null && 1 - p.inactive >= NFLE.health.AVAIL.EVEN; });
       return ir.length ? `<h3 class="lg-h">IR</h3>${table(ir.map(x => { const p = player(x);

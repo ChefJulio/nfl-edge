@@ -1,0 +1,657 @@
+{
+ "about": "Who calls the plays (no data feed has it): researched entries, each sourced and dated. 'staff' = the club's head coach / OC / DC when the entry was researched; tools/coaches_build.py flags a club to recheck when its staff no longer matches. Update the entry (and its staff) after researching again.",
+ "as_of": "2026-10-26",
+ "teams": {
+  "ARI": {
+   "off": {
+    "name": "Mike LaFleur",
+    "role": "hc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03",
+    "note": "After 1-4 start LaFleur said no play-caller changes (rotoballer.com/?p=1964770, mid-Oct 2026)"
+   },
+   "def": {
+    "name": "Nick Rallis",
+    "role": "dc",
+    "src": "https://www.rotoballer.com/?p=1964770",
+    "src_date": "2026-10-12",
+    "note": "Retained from Gannon staff; LaFleur confirmed Rallis keeps defensive calls after 1-4 start. src_date approximate (week after Week 5)"
+   },
+   "staff": {
+    "hc": "Mike LaFleur",
+    "oc": "Nathaniel Hackett",
+    "dc": "Nick Rallis"
+   }
+  },
+  "ATL": {
+   "off": {
+    "name": "Tommy Rees",
+    "role": "oc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03",
+    "note": "HC Kevin Stefanski does not call plays"
+   },
+   "def": {
+    "name": "Jeff Ulbrich",
+    "role": "dc",
+    "src": "https://www.fantasynerds.com/news/story/2026/09/11/falcons-week-1-outlook-offense-relies-on-run-game-defense-blitzes-heavily-1620625",
+    "src_date": "2026-09-11",
+    "note": "Medium confidence: confirmed caller in 2025, retained under Stefanski, 2026 coverage attributes calls to him; no explicit 2026 'will call plays' statement found. Missed part of camp after wife's death (July)"
+   },
+   "staff": {
+    "hc": "Kevin Stefanski",
+    "oc": "Tommy Rees",
+    "dc": "Jeff Ulbrich"
+   }
+  },
+  "BAL": {
+   "off": {
+    "name": "Declan Doyle",
+    "role": "oc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03",
+    "note": "First-time NFL play-caller"
+   },
+   "def": {
+    "name": "Jesse Minter",
+    "role": "hc",
+    "src": "https://www.cbssports.com/nfl/news/top-10-offensive-and-defensive-play-callers/",
+    "src_date": "2026-08-05",
+    "note": "Minter said at intro presser he calls defense; DC Anthony Weaver does not call"
+   },
+   "staff": {
+    "hc": "Jesse Minter",
+    "oc": "Declan Doyle",
+    "dc": "Anthony Weaver"
+   }
+  },
+  "BUF": {
+   "off": {
+    "name": "Joe Brady",
+    "role": "hc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03",
+    "note": "OC Pete Carmichael does not call"
+   },
+   "def": {
+    "name": "Jim Leonhard",
+    "role": "dc",
+    "src": "https://spectrumlocalnews.com/nys/buffalo/news/2026/09/11/jim-leonhard-bringing-aggressive-approach-in-transforming-the-buffalo-bills-defense",
+    "src_date": "2026-09-11",
+    "note": "Hired with play-calling; Brady: 'I'm not calling the plays' on defense"
+   },
+   "staff": {
+    "hc": "Joe Brady",
+    "oc": "Pete Carmichael",
+    "dc": "Jim Leonhard"
+   }
+  },
+  "CAR": {
+   "off": {
+    "name": "Brad Idzik",
+    "role": "oc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03",
+    "note": "Canales handed play-calling to Idzik in Feb 2026"
+   },
+   "def": {
+    "name": "Ejiro Evero",
+    "role": "dc",
+    "src": "https://heavy.com/sports/nfl/carolina-panthers/dave-canales-defensive-collapse/",
+    "src_date": "2026-10-25",
+    "note": "Canales backed Evero's calls after Week 7. Jonathan Cooley called defense in preseason HOF game only"
+   },
+   "staff": {
+    "hc": "Dave Canales",
+    "oc": "Brad Idzik",
+    "dc": "Ejiro Evero"
+   }
+  },
+  "CHI": {
+   "off": {
+    "name": "Ben Johnson",
+    "role": "hc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03"
+   },
+   "def": {
+    "name": "Dennis Allen",
+    "role": "dc",
+    "src": "https://www.bleachernation.com/bears/2026/10/19/is-bears-dc-evil-genius/",
+    "src_date": "2026-10-19",
+    "note": "Second year as Bears DC/play-caller; no change found"
+   },
+   "staff": {
+    "hc": "Ben Johnson",
+    "oc": "Press Taylor",
+    "dc": "Dennis Allen"
+   }
+  },
+  "CIN": {
+   "off": {
+    "name": "Zac Taylor",
+    "role": "hc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03"
+   },
+   "def": {
+    "name": "Al Golden",
+    "role": "dc",
+    "src": "https://www.fox19.com/2026/09/22/al-golden-cooked/",
+    "src_date": "2026-09-22"
+   },
+   "staff": {
+    "hc": "Zac Taylor",
+    "oc": "Dan Pitcher",
+    "dc": "Al Golden"
+   }
+  },
+  "CLE": {
+   "off": {
+    "name": "Todd Monken",
+    "role": "hc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03",
+    "note": "OC Travis Switzer does not call"
+   },
+   "def": {
+    "name": "Mike Rutenberg",
+    "role": "dc",
+    "src": "https://wtop.com/baltimore-ravens/2026/02/browns-tab-travis-switzer-as-oc-mike-rutenberg-as-dc-and-byron-storer-as-special-teams-coordinator/",
+    "src_date": "2026-02-20",
+    "note": "First-time play-caller replacing Jim Schwartz; Monken calls offense. Medium confidence: no explicit in-season statement found, no change reported"
+   },
+   "staff": {
+    "hc": "Todd Monken",
+    "oc": "Travis Switzer",
+    "dc": "Mike Rutenberg"
+   }
+  },
+  "DAL": {
+   "off": {
+    "name": "Brian Schottenheimer",
+    "role": "hc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03",
+    "note": "OC Klayton Adams does not call"
+   },
+   "def": {
+    "name": "Christian Parker",
+    "role": "dc",
+    "src": "https://www.dallascowboys.com/news/christian-parker-moving-from-sidelines-to-coaches-booth-to-call-cowboys-defense",
+    "src_date": "2026-10-13",
+    "note": "Still the caller; Jerry Jones said he'd move to the booth after 2-3 start, Parker said he'd likely stay on the field. src_date approximate"
+   },
+   "staff": {
+    "hc": "Brian Schottenheimer",
+    "oc": "Klayton Adams",
+    "dc": "Christian Parker"
+   }
+  },
+  "DEN": {
+   "off": {
+    "name": "Sean Payton",
+    "role": "hc",
+    "src": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/sean-payton-will-resume-calling-offensive-plays-for-broncos",
+    "src_date": "2026-10-08",
+    "note": "IN-SEASON CHANGE: OC Davis Webb called Weeks 1-4 (2-2 start); Payton took over from Week 5 (at LAC). Webb reportedly still communicates with QB"
+   },
+   "def": {
+    "name": "Vance Joseph",
+    "role": "dc",
+    "src": "https://www.cbssports.com/nfl/news/top-10-offensive-and-defensive-play-callers/",
+    "src_date": "2026-08-05"
+   },
+   "staff": {
+    "hc": "Sean Payton",
+    "oc": "Davis Webb",
+    "dc": "Vance Joseph"
+   }
+  },
+  "DET": {
+   "off": {
+    "name": "Drew Petzing",
+    "role": "oc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03"
+   },
+   "def": {
+    "name": "Kelvin Sheppard",
+    "role": "dc",
+    "src": "https://sports.yahoo.com/articles/lions-seriously-consider-taking-defensive-124500764.html",
+    "src_date": "2026-10-05",
+    "note": "Under pressure after Week 4; Campbell left door open but no change found through Week 7"
+   },
+   "staff": {
+    "hc": "Dan Campbell",
+    "oc": "Drew Petzing",
+    "dc": "Kelvin Sheppard"
+   }
+  },
+  "GB": {
+   "off": {
+    "name": "Matt LaFleur",
+    "role": "hc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03"
+   },
+   "def": {
+    "name": "Jonathan Gannon",
+    "role": "dc",
+    "src": "https://www.beloitdailynews.com/sports/green-bay-packers-reportedly-will-hire-former-arizona-cardinal-coach-jonathan-gannon-as-dc/article_4e9b0034-c002-4c02-86b1-5512e3c86ec2.html",
+    "src_date": "2026-01-25",
+    "note": "Hired as play-calling DC (did not call in ARI as HC). In-season game plan credited to him: packers.com Inbox 2026-10-19. src_date approximate"
+   },
+   "staff": {
+    "hc": "Matt LaFleur",
+    "oc": "Adam Stenavich",
+    "dc": "Jonathan Gannon"
+   }
+  },
+  "HOU": {
+   "off": {
+    "name": "Nick Caley",
+    "role": "oc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03"
+   },
+   "def": {
+    "name": "DeMeco Ryans",
+    "role": "hc",
+    "src": "https://www.foxsports.com/articles/nfl/demeco-ryans-takes-over-defensive-playcalling-for-the-04-texans",
+    "src_date": "2026-10-07",
+    "note": "IN-SEASON CHANGE: DC Matt Burke called Weeks 1-4 (0-4 start); Ryans took over from Week 5"
+   },
+   "staff": {
+    "hc": "DeMeco Ryans",
+    "oc": "Nick Caley",
+    "dc": "Matt Burke"
+   }
+  },
+  "IND": {
+   "off": {
+    "name": "Shane Steichen",
+    "role": "hc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03",
+    "note": "OC Jim Bob Cooter does not call"
+   },
+   "def": {
+    "name": "Lou Anarumo",
+    "role": "dc",
+    "src": "https://www.tsn.ca/nfl/article/colts-hope-to-clean-up-defensive-communication-with-davis-gaither-relaying-play-calls/",
+    "src_date": "2026-09-16",
+    "note": "GM Ballard fired 2026-10-19; no coordinator/play-calling change found"
+   },
+   "staff": {
+    "hc": "Shane Steichen",
+    "oc": "Jim Bob Cooter",
+    "dc": "Lou Anarumo"
+   }
+  },
+  "JAX": {
+   "off": {
+    "name": "Liam Coen",
+    "role": "hc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03",
+    "note": "OC Grant Udinski does not call"
+   },
+   "def": {
+    "name": "Anthony Campanile",
+    "role": "dc",
+    "src": "https://www.cbssports.com/nfl/news/top-10-offensive-and-defensive-play-callers/",
+    "src_date": "2026-08-05"
+   },
+   "staff": {
+    "hc": "Liam Coen",
+    "oc": "Grant Udinski",
+    "dc": "Anthony Campanile"
+   }
+  },
+  "KC": {
+   "off": {
+    "name": "Andy Reid",
+    "role": "hc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03",
+    "note": "OC Eric Bieniemy does not call"
+   },
+   "def": {
+    "name": "Steve Spagnuolo",
+    "role": "dc",
+    "src": "https://www.cbssports.com/nfl/news/top-10-offensive-and-defensive-play-callers/",
+    "src_date": "2026-08-05"
+   },
+   "staff": {
+    "hc": "Andy Reid",
+    "oc": "Eric Bieniemy",
+    "dc": "Steve Spagnuolo"
+   }
+  },
+  "LA": {
+   "off": {
+    "name": "Sean McVay",
+    "role": "hc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03",
+    "note": "OC Nate Scheelhaase does not call"
+   },
+   "def": {
+    "name": "Chris Shula",
+    "role": "dc",
+    "src": "https://www.cbssports.com/nfl/news/top-10-offensive-and-defensive-play-callers/",
+    "src_date": "2026-08-05"
+   },
+   "staff": {
+    "hc": "Sean McVay",
+    "oc": "Nathan Scheelhaase",
+    "dc": "Chris Shula"
+   }
+  },
+  "LAC": {
+   "off": {
+    "name": "Mike McDaniel",
+    "role": "oc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03"
+   },
+   "def": {
+    "name": "Chris O'Leary",
+    "role": "dc",
+    "src": "https://www.lanacion.com.ar/usa/chargers-defense-struggles-in-first-outing-under-new-coordinator-chris-oleary-nid14092026/",
+    "src_date": "2026-09-14",
+    "note": "Replaced Jesse Minter; first NFL play-calling season"
+   },
+   "staff": {
+    "hc": "Jim Harbaugh",
+    "oc": "Mike McDaniel",
+    "dc": "Chris O'Leary"
+   }
+  },
+  "LV": {
+   "off": {
+    "name": "Klint Kubiak",
+    "role": "hc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03",
+    "note": "OC Andrew Janocko does not call"
+   },
+   "def": {
+    "name": "Rob Leonard",
+    "role": "dc",
+    "src": "https://abc7.com/post/first-impressions-raiders-defense-rob-leonard/19849228/",
+    "src_date": "2026-09-14",
+    "note": "src_date approximate (after Week 1)"
+   },
+   "staff": {
+    "hc": "Klint Kubiak",
+    "oc": "Andrew Janocko",
+    "dc": "Rob Leonard"
+   }
+  },
+  "MIA": {
+   "off": {
+    "name": "Bobby Slowik",
+    "role": "oc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03"
+   },
+   "def": {
+    "name": "Jeff Hafley",
+    "role": "hc",
+    "src": "https://africa.espn.com/nfl/story/_/id/47800410/sources-dolphins-hiring-sean-duggan-defensive-coordinator",
+    "src_date": "2026-01-28",
+    "note": "Hafley said he will call defense; DC Sean Duggan does not call. Preseason statements; no in-season change found. src_date approximate"
+   },
+   "staff": {
+    "hc": "Jeff Hafley",
+    "oc": "Bobby Slowik",
+    "dc": "Sean Duggan"
+   }
+  },
+  "MIN": {
+   "off": {
+    "name": "Kevin O'Connell",
+    "role": "hc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03",
+    "note": "OC Wes Phillips does not call"
+   },
+   "def": {
+    "name": "Brian Flores",
+    "role": "dc",
+    "src": "https://www.cbssports.com/nfl/news/top-10-offensive-and-defensive-play-callers/",
+    "src_date": "2026-08-05"
+   },
+   "staff": {
+    "hc": "Kevin O'Connell",
+    "oc": "Wes Phillips",
+    "dc": "Brian Flores"
+   }
+  },
+  "NE": {
+   "off": {
+    "name": "Josh McDaniels",
+    "role": "oc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03"
+   },
+   "def": {
+    "name": "Zak Kuhr",
+    "role": "dc",
+    "src": "https://www.nashuatelegraph.com/sports/local-sports/2026/02/18/tag-removed-kuhr-no-longer-an-interim-as-pats-dc/",
+    "src_date": "2026-02-18",
+    "note": "Called defense from Week 2 2025 onward; promoted to full DC for 2026. Medium confidence: no explicit 2026 in-season statement found"
+   },
+   "staff": {
+    "hc": "Mike Vrabel",
+    "oc": "Josh McDaniels",
+    "dc": "Zak Kuhr"
+   }
+  },
+  "NO": {
+   "off": {
+    "name": "Kellen Moore",
+    "role": "hc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03",
+    "note": "OC Doug Nussmeier does not call"
+   },
+   "def": {
+    "name": "Brandon Staley",
+    "role": "dc",
+    "src": "https://bleacherreport.com/articles/25508260-brandon-staley-calls-out-troy-aikman-after-not-true-comments-about-saints-dc-during-mnf-loss",
+    "src_date": "2026-10-06",
+    "note": "Staley: 'I'm calling the defense' after Week 5 MNF loss"
+   },
+   "staff": {
+    "hc": "Kellen Moore",
+    "oc": "Doug Nussmeier",
+    "dc": "Brandon Staley"
+   }
+  },
+  "NYG": {
+   "off": {
+    "name": "Matt Nagy",
+    "role": "oc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03"
+   },
+   "def": {
+    "name": "Dennard Wilson",
+    "role": "dc",
+    "src": "https://www.amny.com/sports/giants-aggressive-defense-saints-pre-10-14-26/",
+    "src_date": "2026-10-14",
+    "note": "Described as the play-caller whose blitz rate rose after Week 3; no explicit role announcement found"
+   },
+   "staff": {
+    "hc": "John Harbaugh",
+    "oc": "Matt Nagy",
+    "dc": "Dennard Wilson"
+   }
+  },
+  "NYJ": {
+   "off": {
+    "name": "Frank Reich",
+    "role": "oc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03"
+   },
+   "def": {
+    "name": "Aaron Glenn",
+    "role": "hc",
+    "src": "https://www.newyorkjets.com/news/2026-combine-aaron-glenn-will-call-defensive-plays-this-season-02-24-2026",
+    "src_date": "2026-02-24",
+    "note": "DC Brian Duker does not call"
+   },
+   "staff": {
+    "hc": "Aaron Glenn",
+    "oc": "Frank Reich",
+    "dc": "Brian Duker"
+   }
+  },
+  "PHI": {
+   "off": {
+    "name": "Sean Mannion",
+    "role": "oc",
+    "src": "https://www.newsweek.com/sports/nfl/eagles-hc-nick-sirianni-makes-decision-on-oc-sean-mannion-after-week-6-loss-12590702",
+    "src_date": "2026-10-13",
+    "note": "Sirianni confirmed Mannion keeps calling after Week 6 loss (2-4) but said 'everything's on the table'; watch for change. src_date approximate"
+   },
+   "def": {
+    "name": "Vic Fangio",
+    "role": "dc",
+    "src": "https://www.cbssports.com/nfl/news/top-10-offensive-and-defensive-play-callers/",
+    "src_date": "2026-08-05"
+   },
+   "staff": {
+    "hc": "Nick Sirianni",
+    "oc": "Sean Mannion",
+    "dc": "Vic Fangio"
+   }
+  },
+  "PIT": {
+   "off": {
+    "name": "Mike McCarthy",
+    "role": "hc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03",
+    "note": "OC Brian Angelichio does not call. QB Aaron Rodgers reportedly called some plays during one comeback win (Yardbarker); not a formal change"
+   },
+   "def": {
+    "name": "Patrick Graham",
+    "role": "dc",
+    "src": "https://atozsports.com/nfl/cincinnati-bengals-news/patrick-graham-steelers-defensive-coordinator-al-golden-zac-taylor/",
+    "src_date": "2026-01-30",
+    "note": "Hired as play-calling DC because McCarthy calls offense. Medium confidence: no explicit in-season statement found. src_date approximate"
+   },
+   "staff": {
+    "hc": "Mike McCarthy",
+    "oc": "Brian Angelichio",
+    "dc": "Patrick Graham"
+   }
+  },
+  "SEA": {
+   "off": {
+    "name": "Brian Fleury",
+    "role": "oc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03"
+   },
+   "def": {
+    "name": "Mike Macdonald",
+    "role": "hc",
+    "src": "https://www.cbssports.com/nfl/news/top-10-offensive-and-defensive-play-callers/",
+    "src_date": "2026-08-05",
+    "note": "DC Aden Durde does not call"
+   },
+   "staff": {
+    "hc": "Mike Macdonald",
+    "oc": "Brian Fleury",
+    "dc": "Aden Durde"
+   }
+  },
+  "SF": {
+   "off": {
+    "name": "Kyle Shanahan",
+    "role": "hc",
+    "src": "https://www.49erswebzone.com/news/203228-kyle-shanahan-calling-plays-evans/",
+    "src_date": "2026-09-11",
+    "note": "Klay Kubiak called preseason while Shanahan recovered from July car crash; Shanahan calling since Week 1"
+   },
+   "def": {
+    "name": "Raheem Morris",
+    "role": "dc",
+    "src": "https://sfstandard.com/2026/09/11/raheem-morris-sean-mcvay-whisperer-49ers-needed/",
+    "src_date": "2026-09-11"
+   },
+   "staff": {
+    "hc": "Kyle Shanahan",
+    "oc": "Klay Kubiak",
+    "dc": "Raheem Morris"
+   }
+  },
+  "TB": {
+   "off": {
+    "name": "Zac Robinson",
+    "role": "oc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03"
+   },
+   "def": {
+    "name": "Todd Bowles",
+    "role": "hc",
+    "src": "https://www.essentiallysports.com/nfl-active-news-nfl-defensive-playcaller-rankings-the-ten-best-defensive-minds-in-2026/",
+    "src_date": "2026-06-30",
+    "note": "No DC on staff; Bowles confirmed he keeps defensive calls (tampabay.com 2026-02-25)"
+   },
+   "staff": {
+    "hc": "Todd Bowles",
+    "oc": "Zac Robinson",
+    "dc": null
+   }
+  },
+  "TEN": {
+   "off": {
+    "name": "Brian Daboll",
+    "role": "oc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03"
+   },
+   "def": {
+    "name": "Robert Saleh",
+    "role": "hc",
+    "src": "https://www.wsmv.com/2026/02/18/titans-coordinators-speak-new-role-with-tennessee/",
+    "src_date": "2026-02-18",
+    "note": "DC Gus Bradley does not call (same split as 2025 SF)"
+   },
+   "staff": {
+    "hc": "Robert Saleh",
+    "oc": "Brian Daboll",
+    "dc": "Gus Bradley"
+   }
+  },
+  "WAS": {
+   "off": {
+    "name": "David Blough",
+    "role": "oc",
+    "src": "https://www.espn.com/nfl/story/_/id/49711157/nfl-playcallers-32-teams-mike-mcdaniel-sean-mcvay-mike-mccarthy",
+    "src_date": "2026-09-03",
+    "note": "First-time play-caller"
+   },
+   "def": {
+    "name": "Daronte Jones",
+    "role": "dc",
+    "src": "https://heavy.com/sports/nfl/washington-commanders/daronte-jones-commanders-problem-25-times/",
+    "src_date": "2026-09-24",
+    "note": "Quinn called defense late 2025 and hinted he might keep it; 2026 reporting says Jones calls and Quinn does not. Steve Wilks added as non-calling help"
+   },
+   "staff": {
+    "hc": "Dan Quinn",
+    "oc": "David Blough",
+    "dc": "Daronte Jones"
+   }
+  }
+ }
+}

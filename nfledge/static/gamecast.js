@@ -1292,8 +1292,8 @@
   // a week only when our return model is following him: every later week at 100% means no injury on record (e.g.
   // hurt in the game before his bye, before any report lists him), not a return estimate; ESPN's date fills in then
   // (health.back: his injury-only chance, so a healthy backup QB's scratch risk isn't read as "not back this season")
-  const backWeek = pid => { const w = H.back(RJ.d && RJ.d.players[pid]);
-    return w == null ? null : w === 0 ? 'no' : w > RJ.d.from ? w : null; };
+  const backWeek = pid => { const w = H.back(RJ.d && RJ.d.players[pid], RJ.d && RJ.d.through);
+    return w == null || w === '?' ? null : w === 0 ? 'no' : w > RJ.d.from ? w : null; };
   // the NFL week a date falls in, from the week clock: this week until its rollover (Tuesday 06:00 ET after its last
   // game), then a week per 7 days (owner 2026-10-18; it assumed every week opened on a Thursday)
   const weekOfDate = d => {
@@ -2796,7 +2796,7 @@
         ${wkRows ? `<table class="bx tm-pl tiles"><thead><tr><th>Player</th><th class="num">Proj</th><th class="num" title="Edge grade; sorted by it (ungraded players last, by projection)">Grd</th><th class="num">FP/G</th></tr></thead><tbody>${wkRows}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>
        <div class="pc-k tm-dck">Depth chart</div><div class="dc-wrap" data-dc="${esc(abbr)}"></div>`));
     // Injuries: the live list, so only on this season's page
-    if (DATA && +d.season === +DATA.season) tiles.push(injuriesTile(abbr, d));
+    if (DATA && +d.season === +DATA.season) tiles.push(injuriesTile(abbr, d), coachesTile(abbr));
     // Playoffs (owner 2026-10-20, replacing the Schedule tile now that the schedule row shows every week): the chance to
     // make it, the division, the move since last week; opens the Playoffs tab. A past season's page has no odds: the
     // Schedule tile stays there.
@@ -2835,10 +2835,14 @@
     cardNeeds();
     // Header, season box and game log are current; the Week tab (matchup, Power, players) follows the picker.
     const wk = d ? teamWeek(abbr, d) : { html: wkWait(d), players: '' };
+    // the record as the Season tile reads it (2026-10-26: the header said 5-0 beside the tile's 5-1; the game log file
+    // is rebuilt nightly, the standings after every final): standings, else the game log, live scores on top (recSpan)
+    const srH = DATA && standingsRow(DATA.season, abbr), Ls = L && L.seasons.find(s => s.s === L.cur);
+    const recH = (srH && `${srH.w}-${srH.l}${srH.t ? `-${srH.t}` : ''}`) || (Ls && Ls.rec) || '';
     body.innerHTML = `
       <div class="pc-head" style="--tc:${esc(info.color || '#666')}"><span class="pc-logo-z" data-zoom="${esc(info.logo ? logoSrc(info.logo, 500) : '')}" role="button" tabindex="0" aria-label="Show a bigger logo">${tLogo(abbr, 34)}</span>
         <div class="pc-id"><h3 id="pcName">${esc(info.name || abbr)}</h3>
-          <div class="pc-meta"><b>${esc((L && (L.seasons.find(s => s.s === L.cur) || {}).rec) || '')}</b>${info.division ? ` <span class="muted pc-div">${NFLE.ui.conf(info.division, 14)}</span>` : ''}</div></div></div>
+          <div class="pc-meta"><b>${recH ? NFLE.recSpan(abbr, recH) : ''}</b>${info.division ? ` <span class="muted pc-div">${NFLE.ui.conf(info.division, 14)}</span>` : ''}</div></div></div>
       <div class="seg pc-tabs" role="tablist">${[['ov', 'Summary'], ['log', 'Game log'], ['po', 'Playoffs']].map(([k, l]) => `<button type="button" role="tab" data-tt="${k}" class="${teamTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       <div class="pc-tab" data-tt="ov"${teamTab === 'ov' ? '' : ' hidden'}>${pickerHtml()}${wk.html}</div>
       <div class="pc-tab" data-tt="log"${teamTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every game since 1999</div><div class="tm-log">${L ? teamLogHtml(L, abbr) : '<p class="pc-sub">Loading game log&hellip;</p>'}</div></div></div>
@@ -2970,6 +2974,68 @@
         lt.map(x => row(x, backCell(x))).join('')}</tbody></table></div>` : '';
     const src = `<p class="pc-sub muted">ESPN's injury list (updated daily) with our chance to play and return model.</p>`;
     return tapTile('Injuries', face + sub2, 'Injuries', wkBox + ltBox + src);
+  };
+  // ---- Coaches tile (owner 2026-10-26): the head coach, the coordinators and what each one's units did, this season's
+  // tendencies and fourth-down calls (data/coaches.json, tools/coaches_build.py). This season's page only.
+  const CO = { d: undefined };
+  const loadCoaches = () => { if (CO.d !== undefined) return; CO.d = null;
+    NFLE.load('data/coaches.json').then(j => { CO.d = j; rerenderCard(); }).catch(() => { CO.d = false; }); };
+  const ROLE = { hc: 'Head coach', oc: 'Off. coordinator', dc: 'Def. coordinator', st: 'ST coordinator' };
+  const wl = r => r ? `${r[0]}-${r[1]}${r[2] ? `-${r[2]}` : ''}` : '';
+  const yrs = (a, b) => a === b ? String(a) : `${a}&ndash;${String(b).slice(-2)}`;
+  const coachPic = (url, name, size = 44) => `<span class="co-pic" style="width:${size}px;height:${size}px">${url ? `<img src="${esc(url)}" alt="" loading="lazy" onerror="this.remove()">` : ''}<i>${esc(String(name || '').split(' ').map(w => w[0]).join('').slice(0, 2))}</i></span>`;
+  // a coordinator's jobs: club, role, years and his unit's rank each season; a head-coaching job shows his side of the
+  // ball (side: 'oc' offense / 'dc' defense)
+  const jobRows = (jobs, side) => (jobs || []).slice().reverse().map(([role, t, a, b, rk]) => {
+    const u = role === 'hc' ? side : role;
+    const chips = u !== 'oc' && u !== 'dc' ? '' : rk.map((r, i) => {
+      const v = Array.isArray(r) ? r[u === 'oc' ? 0 : 1] : r;
+      return rkChip(v, `${a + i} ${u === 'oc' ? 'offense' : 'defense'}: EPA per play rank`); }).join('');
+    return `<tr><td>${tLogo(t, 16)} <b>${esc(t)}</b></td><td class="muted">${esc(ROLE[role] || role)}</td><td class="num">${yrs(a, b)}</td><td class="co-rk">${chips}</td></tr>`;
+  }).join('');
+  const coachesTile = abbr => {
+    loadCoaches();
+    if (!CO.d) return tapTile('Coaches', `<div class="pc-tapsub">${CO.d === false ? 'Not available' : 'Loading&hellip;'}</div>`, 'Coaches', '<p class="pc-sub">Loading&hellip;</p>');
+    const T = CO.d.teams[abbr]; if (!T) return '';
+    const h = T.hc || {}, r = h.rec || {}, yr = h.since ? CO.d.season - h.since + 1 : null;
+    const face = `<div class="co-face">${coachPic(h.photo, h.name, 34)}<div><div class="co-nm">${esc(h.name || '')}</div>
+      <div class="pc-tapsub">${yr ? `yr ${yr}` : ''}${r.here ? ` · ${wl(r.here)}` : ''}</div></div></div>`;
+    const cell = (v, lab, tip = '') => `<div class="tm-st"${tip ? ` title="${esc(tip)}"` : ''}><div class="pc-k">${lab}</div><div class="tm-stv">${v}</div></div>`;
+    const hcBox = `<div class="pc-box"><div class="co-head">${coachPic(h.photo, h.name, 52)}<div><div class="co-nm big">${esc(h.name || '')}</div>
+        <div class="pc-sub">Head coach${h.since ? ` since ${h.since}` : ''}${h.exp ? ` · ${h.exp} years in the NFL` : ''}</div></div></div>
+      <div class="tm-stats">${cell(wl(r.here), `With ${esc(abbr)}`, 'Regular season')}${cell(wl(r.car), 'Career', 'Regular season, every club')}
+        ${cell(r.po ? wl(r.po) : '', 'Playoffs')}${cell(wl(r.fav), 'Favored', 'Every game he was favored in (closing line)')}
+        ${cell(wl(r.dog), 'Underdog')}${cell(wl(r.ats), 'vs spread', 'Covered - failed - push, every game with a line')}</div>
+      ${(h.stops || []).length > 1 ? `<div class="pc-k co-sub">Head coaching stops</div><div class="co-stops">${h.stops.map(([t, a, b, w, l, ti]) => `<span>${tLogo(t, 16)} ${esc(t)} ${yrs(a, b)} <b>${wl([w, l, ti])}</b></span>`).join('')}</div>` : ''}</div>`;
+    // his seasons here, last in the sheet (a long tenure pushed the coordinators off the first screen)
+    const seasonsBox = (h.seasons || []).length ? `<div class="pc-box"><div class="pc-k">${esc(h.name || '')}'s seasons with ${esc(abbr)}</div><table class="bx co-tbl"><thead><tr><th>Season</th><th class="num">Record</th><th class="num" title="Offense, EPA per play">Off</th><th class="num" title="Defense, EPA per play allowed">Def</th></tr></thead><tbody>${
+        h.seasons.slice().reverse().map(([s, w, l, t, o, dd]) => `<tr><td>${s}</td><td class="num">${wl([w, l, t])}</td><td class="num">${rkChip(o)}</td><td class="num">${rkChip(dd)}</td></tr>`).join('')}</tbody></table></div>` : '';
+    // who calls the plays (data/playcallers.json, researched and sourced): a name, or "to recheck" once the staff it
+    // was researched against has changed; nothing when the table has no entry
+    const calls = side => { const P = T.calls, e = P && P[side];
+      if (!P) return '';
+      if (P.stale) return '<div class="co-calls muted">Play-caller: to recheck (the staff changed since we last confirmed it)</div>';
+      if (!e || !e.name) return '';
+      const tip = [e.note, e.src_date ? `confirmed ${e.src_date}` : '', e.src].filter(Boolean).join(' · ');
+      return `<div class="co-calls" title="${esc(tip)}">Calls plays: <b>${esc(e.name)}</b>${e.role && ROLE[e.role] ? ` <span class="muted">(${esc(ROLE[e.role].toLowerCase())})</span>` : ''}</div>`; };
+    const coBox = (role, label) => { const c = T[role], side = role === 'oc' ? 'off' : role === 'dc' ? 'def' : null;
+      if (!c) return `<div class="pc-box co-c"><div class="pc-k">${label}</div>${side ? calls(side) : ''}<p class="pc-sub">No ${label.toLowerCase()} coordinator: ${esc(h.name || 'the head coach')} runs it.</p></div>`;
+      return `<div class="pc-box co-c"><div class="pc-k">${label} · ${esc(c.name)}${c.since ? ` · since ${c.since}` : ''}</div>${side ? calls(side) : ''}
+        ${(c.jobs || []).length ? `<table class="bx co-tbl"><tbody>${jobRows(c.jobs, role)}</tbody></table>` : ''}</div>`; };
+    const tn = T.tend || {}, tc = (k, lab, f, tip) => tn[k] ? `<div class="tm-st" title="${esc(tip)}"><div class="pc-k">${lab}</div><div class="tm-stv">${f(tn[k][0])}</div>${rkChip(tn[k][1])}</div>` : '';
+    const pct = v => `${Math.round(v * 100)}%`;
+    const tendBox = Object.keys(tn).length ? `<div class="pc-box"><div class="pc-k">Tendencies · ${CO.d.season}</div><div class="tm-stats">
+        ${tc('pass_rate', 'Early-down pass', pct, 'Dropbacks on 1st and 2nd down with the game close (win chance 20-80%, quarters 1-3); 1st = passes most')}
+        ${tc('pace', 'Sec / snap', v => v.toFixed(0), 'Median seconds between snaps within a drive, game close; 1st = fastest')}
+        ${tc('no_huddle', 'No-huddle', pct, 'Share of snaps; 1st = most')}${tc('two_pt', '2-pt tries', pct, 'Two-point tries after touchdowns; 1st = most')}
+        ${tn.chal ? cell(`${tn.chal[1]}/${tn.chal[0]}`, 'Challenges won') : ''}</div></div>` : '';
+    const f4 = T.fourth || {};
+    const f4Box = f4.n ? `<div class="pc-box"><div class="pc-k">Fourth downs vs our model · ${CO.d.season}</div><div class="tm-stats">
+        ${cell(`${f4.go}`, 'Went for it', `Of ${f4.n} fourth downs`)}${cell(`${f4.model_go}`, 'Model said go')}
+        ${cell(`${Math.round(100 * f4.agree / f4.n)}%`, 'Agreed', 'Same call as our model')}${cell(`${f4.bad}`, 'Questionable', '3+ points of win chance worse than the best call')}
+        <div class="tm-st" title="Times he went for it minus the times our model said go; ranked per fourth down, 1st = boldest"><div class="pc-k">Go vs model</div><div class="tm-stv">${f4.go - f4.model_go > 0 ? '+' : ''}${f4.go - f4.model_go}</div>${rkChip(f4.aggr_rk)}</div></div></div>` : '';
+    const src = '<p class="pc-sub muted">Staffs: Wikipedia (CC BY-SA). Records: nflverse; this season\'s head coach: ESPN. Unit ranks: EPA per play.</p>';
+    return tapTile('Coaches', face, 'Coaches', hcBox + coBox('oc', 'Offense') + coBox('dc', 'Defense') + (T.st ? coBox('st', 'Special teams') : '') + tendBox + f4Box + seasonsBox + src);
   };
   // the Power ranking box (the Power tile's sheet)
   const teamPowerBox = pw => {

@@ -74,11 +74,15 @@
   // healthy-scratch risk and the backup-QB rule (a healthy backup QB read "not back this season")
   const rosChance = z => (z[6] != null ? z[6] : z[1]);
   // the first week our return model gives him at least an even chance: that week; 0 = not this season; null = no row,
-  // or no injury on record (every week 99.5%+: e.g. hurt before his bye, before any report lists him)
-  const back = row => {
+  // or no injury on record (every week 99.5%+: e.g. hurt before his bye, before any report lists him); '?' = his weeks
+  // stop before the season's last (through) with none at even: unknown, not "not back" (2026-10-26, Brashard Smith:
+  // dropped from the later weeks' boards, one week at 48.5%, read "not back this season")
+  const back = (row, through) => {
     if (!row || !row.w.some(z => rosChance(z) < 0.995)) return null;
     const e = row.w.find(z => rosChance(z) >= AVAIL.EVEN);
-    return e ? e[0] : 0;
+    if (e) return e[0];
+    const last = row.w.length ? row.w[row.w.length - 1][0] : 0;
+    return through != null && last < through ? '?' : 0;
   };
 
   return { AVAIL, level, RESERVE, OFFICIAL, FIRM, TAG_WORD, code, tag, gameday, listed, days, label, pill, rosChance, back };

@@ -240,6 +240,22 @@ svg.tm-trend { display: block; margin-top: 4px; } .tm-tr-mid { stroke: var(--lin
 table.tm-pl td { white-space: normal; }
 /* team Injuries sheet: the injury and practice line wraps under the name, the numbers stay in view */
 table.tm-pl { width: 100%; } table.tm-pl td.ij-who { width: 100%; max-width: 0; }
+/* team Coaches tile and sheet */
+.co-pic { position: relative; flex: none; display: inline-grid; place-items: center; border-radius: 50%; overflow: hidden;
+  background: color-mix(in srgb, var(--fg) 12%, transparent); }
+.co-pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.co-pic i { font-style: normal; font-weight: 700; font-size: 12px; color: var(--muted); }
+.co-face { display: flex; align-items: center; gap: 8px; min-width: 0; margin-top: 2px; }
+.co-face > div { min-width: 0; }
+.co-nm { font-weight: 800; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.co-nm.big { font-size: var(--fs-lg); white-space: normal; }
+.co-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.co-tbl { width: 100%; margin-top: 8px; } .co-tbl td { white-space: nowrap; }
+.co-rk { white-space: normal !important; } .co-rk .rk-b { margin: 1px 2px 1px 0; }
+.co-sub { margin-top: 10px; }
+.co-calls { margin: 4px 0 2px; font-size: var(--fs-sm); }
+.co-stops { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: var(--fs-sm); }
+.co-stops span { display: inline-flex; align-items: center; gap: 4px; }
 .ij-d { font-size: var(--fs-xs); line-height: 1.3; color: var(--muted); margin: 3px 0 0; white-space: normal; overflow-wrap: anywhere; }
 .pc .pc-tabs { display: flex; margin: 0 0 10px; overflow-x: auto; scrollbar-width: none; } .pc .pc-tabs::-webkit-scrollbar { display: none; }
 .pc .pc-tabs button { flex: 1 0 auto; font-size: var(--fs-md); padding: 7px 10px; white-space: nowrap; }

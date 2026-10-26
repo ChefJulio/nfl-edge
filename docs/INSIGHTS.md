@@ -616,9 +616,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 ## 9. Open threads / next steps
 
 ### STATUS BOARD (keep current: edit this list whenever an item opens, ships or closes; the log below is history)
-Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/return model needs to be pristine").
+Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/return model needs to be pristine").
 
 **Running / next up**
+0. (DM, pre-registered 2026-10-26) chance to play and return week for every position, by position group (team page
+   Injuries tile shows a dash for non-fantasy players until it passes). First: offensive linemen missing from avail_hist.
+   Also (owner "kk", 2026-10-26): Brashard Smith (KC, hamstring, practiced F/L/DNP) reads "not back this season" from
+   the return model (health.back -> 0): find why before trusting "Season" on the tile.
 1. SHIPPED 2026-10-20 as (BE2) (owner); history kept: (owner delegated 2026-10-19, after Tank Dell: IR to return since the opener, full practices in week 6,
    coach naming week 7, on no page at all): reserve-list players whose practice window is open (on this week's report;
    before his team's first report of the week, last week's) join the board and get a return state. Built on branch
@@ -5089,3 +5093,29 @@ Updated 2026-10-19. Injury / return items first (owner 2026-10-18: "the injury/r
   and the 0 -> +1 exemption in (DJ3) would have hidden its cause. Fix for a (DJ4): no smoothing across the lead / no-lead
   boundary (each side's kernel reflects at it). Its test needs games no pace test has read: 2026 weeks 8 on.
 
+- **PRE-REGISTERED 2026-10-26 (owner: "yes but i suspect some position groups deal with injuries/vary recovery times
+  by position group a bit"): (DM) chance to play and return week for every position, by position group.** The team
+  page's Injuries tile (2026-10-26) lists every player on the report, but our numbers cover fantasy positions only:
+  the board is QB/RB/WR/TE/K, the status table (InjuryModel._fit_status) is fit on QB/RB/WR/TE, and the return model
+  is applied only to fantasy players (returns.py lines 80, 257, 277). What the code already has: the practice model
+  (_fit_practice) trains on avail_hist, which is NOT position-filtered (2018-25: 31,034 rows, DB 7,231, DL 6,149,
+  LB 4,796, WR 5,508, RB 3,104, TE 2,546, QB 1,400, ST 278), with only a skill yes/no input; the return model
+  (ReturnModel) trains on every rostered position with a position-group input (pos_code, POS_GROUP). DATA GAP found
+  doing this: offensive linemen are 10 rows of avail_hist (practice / snap / roster join drops them); fixed and
+  re-counted first, or OL is reported as not covered. A first look (descriptive, no gate): Questionable, share who
+  played, 2018-25: QB .49 (n 270), DB .65 (2,122), RB .66 (894), TE .71 (618), WR .72 (1,544), DL .74 (1,512), LB .74
+  (1,248), ST .82 (92); raw, before practice is accounted for.
+  Arms, walk-forward 2021-25 (each test season fit on 2018 through the season before), every final-report row:
+  game week: A0 = today's model as is (skill flag); A1 = the skill flag replaced by the position group (QB, RB, WR, TE,
+  OL, DL, LB, DB, ST); A2 = A1 plus group x game status. Return: R0 = the return model as is (pos_code in);
+  R1 = without pos_code (does position carry anything?).
+  GATE, game week (all): (1) fantasy positions: Brier of the adopted arm no worse than A0 (difference upper 95% bound
+  < +0.001), the guard: the board's numbers must not get worse; (2) every group with 300+ test rows: calibrated, mean
+  predicted within 3 points of the share who played, and in each predicted-decile within 5 points; (3) A1 or A2 beats
+  A0 on Brier for the non-fantasy groups pooled (upper bound < 0); the simplest arm that passes is adopted. If (2)
+  fails for a group, that group shows a dash on the site, not a number.
+  GATE, return: (4) per group with 300+ states, P(back next game) calibrated within 3 points; (5) report R0 vs R1 log
+  loss per group (the owner's question: does position change recovery?); R0 stays unless R1 is no worse, then the
+  simpler. Groups passing (4) get "Back wk N" on the Injuries tile for every player, not only fantasy ones.
+  Ship: the Injuries tile reads the new per-player numbers (a team file: every listed player's chance and return week);
+  the board's fantasy numbers change only if the adopted arm passes (1).
