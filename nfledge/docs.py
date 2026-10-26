@@ -19,7 +19,8 @@ import pandas as pd
 from .config import ROOT
 
 DOC = ROOT / "MODEL.md"
-PRESENTATION = {"report.py", "docs.py", "standings.py", "machine.py", "powerc.py", "live_inputs.py", "site_assets.py"}  # changes here never change model outputs (standings: site data)
+PRESENTATION = {"report.py", "docs.py", "standings.py", "machine.py", "powerc.py", "live_inputs.py", "site_assets.py",
+                "coaches.py"}  # changes here never change model outputs (standings, coaches: site data)
 PRESENTATION_CFG = {"tiers", "report"}  # config sections only the page reads
 
 
