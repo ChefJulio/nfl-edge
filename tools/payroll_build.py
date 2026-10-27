@@ -24,7 +24,7 @@ import pandas as pd  # noqa: E402
 from nfledge import coaches as C  # noqa: E402
 from nfledge import data as D  # noqa: E402
 
-V = 1
+V = 2  # what parse() reads (2: each list's TOTAL row; next season's projected cap); a new V refetches every team
 URL = "https://overthecap.com/salary-cap/{slug}"
 UA = {"User-Agent": "Mozilla/5.0 (nfl-edge; https://github.com/ChefJulio/nfl-edge)"}
 FRESH_H = 20  # hours before a team's page is fetched again
@@ -115,7 +115,7 @@ def build(site: Path) -> None:
   teams = {}
   for t, name in sorted(C.NAME.items()):
     prev = (last.get("teams") or {}).get(t)
-    if prev and last.get("season") == current and (now - datetime.fromisoformat(prev["f"])).total_seconds() < FRESH_H * 3600:
+    if prev and last.get("season") == current and last.get("v") == V and (now - datetime.fromisoformat(prev["f"])).total_seconds() < FRESH_H * 3600:
       teams[t] = prev
       continue
     try:
