@@ -199,6 +199,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4038457,Teven Jenkins,Cleveland Browns,Injured Reserve,2026-10-24T18:50Z,Back,Not Specified,Not Specified,2026-11-29,IR,The Browns placed Jenkins (back) on injured reserve Saturday.,G
 4242208,Grant Delpit,Cleveland Browns,Active,2026-10-24T17:26Z,,,,,,Delpit (concussion) does not have any injury designation ahead of Sunday's game against the Titans.,S
 4873232,Mason Graham,Cleveland Browns,Active,2026-10-23T23:39Z,,,,,,"Graham (knee/ankle) does not have any injury designation ahead of Sunday's game against the Titans, Zac Jackson of The Athletic reports.",DT
+4361579,Javonte Williams,Dallas Cowboys,Active,2026-10-27T03:53Z,,,,,,Williams rushed 25 times for 155 yards and a touchdown in the Cowboys' 38-21 win over the Eagles on Monday night.,RB
+2577417,Dak Prescott,Dallas Cowboys,Active,2026-10-27T03:45Z,,,,,,Prescott completed 15 of 27 passes for 212 yards with three touchdowns and no interceptions while adding two rushes for eight yards in the Cowboys' 38-21 win over the Eagles on Monday night. He also had a two-point conversion run.,QB
+4241389,CeeDee Lamb,Dallas Cowboys,Active,2026-10-27T03:39Z,,,,,,Lamb brought in five of 12 targets for 74 yards and two touchdowns in the Cowboys' 38-21 win over the Eagles on Monday night.,WR
 4362478,Emari Demercado,Dallas Cowboys,Out,2026-10-26T22:55Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,"Demercado (coach's decision) is inactive for Monday night's game against the Eagles, Patrik Walker of the Cowboys' official site reports.",RB
 4428914,Dee Winters,Dallas Cowboys,Out,2026-10-26T22:53Z,Calf,Strain,Not Specified,2026-11-01,INACTIVE,inactive,LB
 4685554,Drew Shelton,Dallas Cowboys,Out,2026-10-26T22:53Z,Hamstring,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive,OT
@@ -217,11 +220,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4240608,James Houston,Dallas Cowboys,Active,2026-10-19T16:31Z,,,,,,,LB
 4595352,Alijah Clark,Dallas Cowboys,Active,2026-10-19T16:31Z,,,,,,,S
 4808759,Camden Brown,Dallas Cowboys,Active,2026-10-19T16:31Z,,,,,,,WR
-4361579,Javonte Williams,Dallas Cowboys,Active,2026-10-19T04:23Z,,,,,,Williams rushed 11 times for 41 yards and a touchdown while catching both of his targets for nine yards in Sunday's 23-13 loss to the Packers.,RB
-2577417,Dak Prescott,Dallas Cowboys,Active,2026-10-19T04:22Z,,,,,,"Prescott completed 34 of 54 passes for 258 yards, one touchdown and two interceptions in Sunday's 23-13 loss to the Packers. He also rushed twice for seven yards.",QB
 5083754,Ryan Flournoy,Dallas Cowboys,Active,2026-10-19T04:20Z,,,,,,Flournoy caught seven of nine targets for 40 yards and a touchdown in Sunday night's 23-13 loss to the Packers.,WR
 4242355,Jake Ferguson,Dallas Cowboys,Active,2026-10-19T04:15Z,,,,,,Ferguson caught two of three targets for 13 yards during Sunday night's 23-13 loss to the Packers.,TE
-4241389,CeeDee Lamb,Dallas Cowboys,Active,2026-10-19T03:55Z,,,,,,Lamb caught nine of 18 targets for 70 yards in Sunday's 23-13 loss to the Packers.,WR
 4426506,Joey Porter Jr.,Dallas Cowboys,Active,2026-10-18T23:09Z,,,,,,"Porter (ankle) is active for Sunday night's contest against Green Bay, Patrik Walker of the Cowboys' official site reports.",CB
 4870960,LT Overton,Dallas Cowboys,Active,2026-10-18T22:55Z,,,,,,,DT
 3051876,Evan Engram,Denver Broncos,Active,2026-10-27T00:31Z,,,,,,Engram caught one of three targets for two yards during Sunday's 30-16 win over the Cardinals.,TE
