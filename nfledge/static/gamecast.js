@@ -3165,10 +3165,12 @@
     // answer) read as a lean; clear calls as which way he parted from the model, never right / wrong (owner: "stick
     // strictly to more or less aggressive")
     // against an average coach in the same spots: z = (went - expected) in standard deviations of chance; the bar's middle
-    // is the average coach, a lean is named only past 1.5 (owner 2026-10-27: a 0-99 "45/99 reads like he went for it on
-    // 4th almost half the time"; ranks on a play or two were noise)
-    const lean = (label, z, did, n, exp, tip) => `<div class="co-row" title="${esc(tip)} The middle of the bar is the average coach; a lean is named only when the gap is bigger than chance on this many plays.">
-        <div class="co-rowh"><span>${label}</span><b>${z >= 1.5 ? 'Leans aggressive' : z <= -1.5 ? 'Leans conservative' : 'Like most coaches'}</b></div>
+    // is the average coach; past 1 SD "leans", past 2 the lean outright, else "Average" (owner 2026-10-27: a 0-99 "45/99
+    // reads like he went for it on 4th almost half the time"; ranks on a play or two were noise; then "shrink the like
+    // most coaches threshold a little and maybe don't use that wording": 1.5 -> 1)
+    const lean = (label, z, did, n, exp, tip) => `<div class="co-row" title="${esc(tip)} The middle of the bar is the average coach; the further the dot, the less the gap looks like chance on this many plays.">
+
+        <div class="co-rowh"><span>${label}</span><b>${z >= 2 ? 'Aggressive' : z >= 1 ? 'Leans aggressive' : z <= -2 ? 'Conservative' : z <= -1 ? 'Leans conservative' : 'Average'}</b></div>
         <div class="co-rowb co-mid"><i style="left:${(50 + 20 * Math.max(-2.5, Math.min(2.5, z))).toFixed(1)}%"></i></div><div class="co-rowe"><span>Conservative</span><span>Aggressive</span></div>
         <div class="co-rows">${did} ${n}; ${exp < 0.5 ? 'an average coach would almost never go in these spots either' : `an average coach would have about ${Math.round(exp)}`}</div></div>`;
     const f4row = !f4.n || f4.z == null ? '' : `${lean('Fourth downs', f4.z, `Went for it ${f4.go} times on`, `${f4.n} fourth downs`, f4.exp_go,
