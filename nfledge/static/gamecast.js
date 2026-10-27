@@ -3164,7 +3164,13 @@
     };
     const tr = (k, label, f, ends, hi, lo, tip) => tn[k] ? trow(label, f(tn[k][0]), k, tn[k][0], tn[k][1], ends, word(tn[k][1], hi, lo), tip) : '';
     // (owner 2026-10-27: pace and no-huddle rows dropped, "not informative in line with the rest")
-    const offRows = [tr('pass_rate', 'Passes on early downs', pct, ['Run', 'Pass'], 'pass-leaning', 'run-leaning', 'Dropbacks on 1st and 2nd down with the game close (win chance 20-80%, quarters 1-3)')].join('');
+    // pass rate over expected (owner 2026-10-27): dropbacks against what an average team calls in the same spot; the
+    // bar's middle is expected, +/-10 points at the ends; the raw early-down share when it isn't available
+    const pe = tn.proe, offRows = pe ? `<div class="co-row" title="How often he calls a pass compared with an average NFL team in the same down, distance, field position, score and time (nflverse's expected pass rate), with the game in doubt and outside the last 2:00 of a half">
+        <div class="co-rowh"><span>Passes vs expected</span><b>${pe[0] > 0 ? '+' : pe[0] < 0 ? '&minus;' : ''}${Math.abs(pe[0]).toFixed(1)}%</b></div>
+        <div class="co-rowb co-mid"><i style="left:${Math.max(0, Math.min(100, 50 + 5 * pe[0])).toFixed(1)}%"></i></div><div class="co-rowe"><span>Run</span><span>Pass</span></div>
+        <div class="co-rows">${ord(pe[1])} of 32 &middot; ${word(pe[1], 'pass-leaning', 'run-leaning')}</div></div>`
+      : tr('pass_rate', 'Passes on early downs', pct, ['Run', 'Pass'], 'pass-leaning', 'run-leaning', 'Dropbacks on 1st and 2nd down with the game close (win chance 20-80%, quarters 1-3)');
     const offSec = offRows ? `<div class="co-sec"><div class="pc-k">How the offense plays &middot; ${S}</div>${offRows}</div>` : '';
     // 4th downs (owner 2026-10-26: "how bout a 0-99 aggressiveness rating"): against other coaches in the same spots
     // (a typical-coach model), not our calculator; then the calculator's split (owner 2026-10-27): toss-ups (no right
@@ -3196,7 +3202,12 @@
     const tp = T.two, twoRow = tp && tp.n ? lean('Two-point tries', tp.z, `Went for two ${tp.go} of`, `${tp.n} times`, tp.exp,
         'Tries after a touchdown, against an average coach with the same score and time left: down 2 late almost everyone goes for two, early in a game almost no one does.')
       : tr('two_pt', 'Two-point tries', pct, ['Rarely', 'Often'], 'goes for two often', 'rarely goes for two', 'Share of tries after a touchdown');
-    const gmRows = [f4row, twoRow,
+    // clock management (owner 2026-10-27): 2nd-half timeouts before the last 2:00, per game against the league
+    const et = tn.early_to, toRow = et && et.g ? `<div class="co-row" title="Timeouts called in the 3rd and 4th quarters before the last 2:00, when they're worth the least: usually to dodge a delay of game or fix the personnel. Spending them there leaves fewer for the end of the game. The middle of the bar is the league average">
+        <div class="co-rowh"><span>Early 2nd-half timeouts</span><b>${et.z >= 2 ? 'Spends them' : et.z >= 1 ? 'Leans spending' : et.z <= -2 ? 'Saves them' : et.z <= -1 ? 'Leans saving' : 'Average'}</b></div>
+        <div class="co-rowb co-mid"><i style="left:${(50 + 20 * Math.max(-2.5, Math.min(2.5, et.z))).toFixed(1)}%"></i></div><div class="co-rowe"><span>Saves them</span><span>Spends them</span></div>
+        <div class="co-rows">${et.n} in ${et.g} game${et.g === 1 ? '' : 's'} (${(et.n / et.g).toFixed(1)} a game); league ${et.lg.toFixed(1)}</div></div>` : '';
+    const gmRows = [f4row, twoRow, toRow,
       tn.chal ? `<div class="co-row"><div class="co-rowh"><span>Challenges won</span><b>${tn.chal[1]} of ${tn.chal[0]}</b></div></div>` : ''].join('');
     const gmSec = gmRows ? `<div class="co-sec"><div class="pc-k">Game management &middot; ${S}</div>${gmRows}</div>` : '';
     // whoever calls the offense gets its habits (the head coach when he does: Andy Reid, Kevin O'Connell)

@@ -149,6 +149,18 @@ def tendencies(pbp: pd.DataFrame, season: int) -> dict:
   ed = p[neutral & p.down.isin([1, 2])]
   m["pass_rate"] = dropback[ed.index].groupby(ed.posteam).mean()
   # (owner 2026-10-27) pace and no-huddle dropped from the tile, so not computed
+  # timeouts used in the 2nd half before the last 2:00 (owner 2026-10-27, clock management): per game against the
+  # league's rate, z in standard deviations of chance (Poisson). A coach's habit: same head coach, season to season r
+  # 0.49 (2014-25, 273 pairs; 0.33 across a coaching change)
+  # (timeout rows carry no posteam: read from the unfiltered season)
+  q0 = pbp[pbp.season_type == "REG"]
+  to = q0[(q0.timeout == 1) & q0.qtr.isin([3, 4]) & (q0.game_seconds_remaining > 120) & q0.timeout_team.notna()]
+  ng = pd.concat([p[["game_id", "home_team"]].set_axis(["g", "t"], axis=1), p[["game_id", "away_team"]].set_axis(["g", "t"], axis=1)])
+  ng = ng.assign(t=ng.t.replace(RELOCATED)).drop_duplicates().groupby("t").size()
+  nto = to.timeout_team.replace(RELOCATED).value_counts().reindex(ng.index, fill_value=0)
+  lg_rate = float(nto.sum() / max(1, ng.sum()))
+  early_to = {t: {"n": int(nto[t]), "g": int(ng[t]), "lg": round(lg_rate, 2),
+                  "z": round(float((nto[t] - ng[t] * lg_rate) / max(0.5, (ng[t] * lg_rate) ** 0.5)), 2)} for t in ng.index}
   tries = p[(p.two_point_attempt == 1) | p.extra_point_result.notna()]
   m["two_pt"] = (tries.two_point_attempt == 1).groupby(tries.posteam).mean()
   # challenges: "Carolina challenged ... REVERSED" / "Upheld"; the challenger is whichever side's city leads the phrase
@@ -169,6 +181,8 @@ def tendencies(pbp: pd.DataFrame, season: int) -> dict:
       out.setdefault(t, {})[k] = [round(float(v), 3), i]
   for t, x in chal.groupby("team"):
     out.setdefault(t, {})["chal"] = [int(len(x)), int(x.won.sum())]
+  for t, v in early_to.items():
+    out.setdefault(t, {})["early_to"] = v
   # the league's spread of each, for the sheet's bars (owner 2026-10-26: where a team sits, not a good / bad chip)
   league = {k: [round(float(ser.min()), 3), round(float(ser.max()), 3)] for k, ser in m.items() if len(ser.dropna())}
   return out, league
@@ -185,6 +199,19 @@ def power_ranks(site: Path, last: dict) -> dict:
   if not played:
     return {t: v.get("pw") for t, v in (last.get("teams") or {}).items() if v.get("pw")}
   return {r["team"]: [int(d["season"]), r.get("rank"), r.get("off_rk"), r.get("def_rk"), r.get("st_rk")] for r in d["power"]}
+
+
+PROE_COLS = ["season_type", "posteam", "play_type", "qb_kneel", "qb_spike", "wp", "half_seconds_remaining", "xpass", "pass"]
+
+
+def proe(pbp: pd.DataFrame) -> dict:
+  """team -> pass rate over expected (points of percentage) and its rank (1 = most pass-heavy) (owner 2026-10-27): each
+  snap's dropback against nflverse's expected pass chance (down, distance, field position, score, time, ...), with the
+  game in doubt (win chance 10-90%) and outside a half's last 2:00."""
+  p = pbp[(pbp.season_type == "REG") & pbp.posteam.notna() & pbp.xpass.notna() & pbp.play_type.isin(["pass", "run"])
+          & (pbp.qb_kneel != 1) & (pbp.qb_spike != 1) & pbp.wp.between(0.1, 0.9) & (pbp.half_seconds_remaining > 120)]
+  oe = (100 * (p["pass"] - p.xpass)).groupby(p.posteam.replace(RELOCATED)).mean().sort_values(ascending=False)
+  return {t: [round(float(v), 1), i] for i, (t, v) in enumerate(oe.items(), 1)}
 
 
 TWO_FROM = 2022  # the typical-coach two-point model's first season (as the 4th-down one: graded seasons 2022 on)
@@ -392,6 +419,13 @@ def main() -> None:
   T, TL = tendencies(pbp, current) if pbp is not None else ({}, {})
   F4, F4L = fourth(site, current)
   PW = power_ranks(site, last)
+  # pass rate over expected: the calculator's play-by-play cache leaves out xpass, so its own (small) copy
+  try:
+    px = cache.get("pbp_proe", current, lambda: nfl.load_pbp([current]).select(PROE_COLS), stale=cache.age_hours("pbp_proe", current) > 6)
+    for t, v in proe(px).items():
+      T.setdefault(t, {})["proe"] = v
+  except Exception as e:
+    print(f"[coaches] pass rate over expected unavailable ({e})", flush=True)
   # finished seasons are read once (the calculator's build caches the same files)
   hist2 = [cache.get("pbp_calc", s, lambda s=s: nfl.load_pbp([s]).select(W.PBP_COLS), stale=False) for s in range(TWO_FROM, current)]
   TP = two_point(pd.concat([h for h in hist2 if h is not None] + [pbp], ignore_index=True), current) if pbp is not None else {}

@@ -5258,4 +5258,10 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   half the time"): two-point tries and the 4th-down rating use the same centered bar, each against its typical-coach
   model (two-point: score after the touchdown, time, quarter, line, every try 2022 on). Raw two-point share ranked LV
   1st (26%); against the spots it went 5 vs 4.4 expected. 2026 week 7: 6 teams lean on 4th downs past 1.5 SD (NE, PHI,
-  DET, CHI aggressive; DEN, HOU conservative), none on two-point tries.
+  DET, CHI aggressive; DEN, HOU conservative), none on two-point tries. Then pace and no-huddle rows dropped; added
+  pass rate over expected (nflverse xpass, win chance 10-90%, outside a half's last 2:00; replaces the raw early-down
+  share) and early 2nd-half timeouts (3rd / 4th quarter before the last 2:00, per game vs the league, Poisson z).
+  Checked first, 2014-25: a team's rate predicts its next season's under the same head coach (r 0.49, 273 pairs) more
+  than across a coaching change (0.33, 76): a coach's habit. Rejected for clock management: timeouts left at the end
+  of one-score losses (most ended on kneels nothing could stop) and letting the clock run on defense late with
+  timeouts in hand (under one case per team-season, 2022-25).
