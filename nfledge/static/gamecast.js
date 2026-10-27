@@ -2813,7 +2813,7 @@
     const prow = (name, gs, extra, cap) => `<tr${gs ? ` data-open-pid="${esc(gs)}" class="py-tap"` : ''}><td>${esc(name)}${extra ? ` <span class="muted">${esc(extra)}</span>` : ''}</td><td class="num">${usd(cap)}</td></tr>`;
     const top = `<div class="pc-box"><div class="pc-k">Biggest cap numbers</div><table class="bx"><tbody>${T.top.map(([n, gs, pos, cap]) => prow(n, gs, pos, cap)).join('')}</tbody></table></div>`;
     const dead = T.dead_top && T.dead_top.length ? `<div class="pc-box"><div class="pc-k">Dead money &middot; ${usd(T.dead)}</div><table class="bx"><tbody>${T.dead_top.map(([n, gs, cap]) => prow(n, gs, '', cap)).join('')}</tbody></table></div>` : '';
-    const nx = T.next ? `<div class="pc-box"><div class="pc-k">${P.season + 1}</div><div class="tm-stats">${cell('Cap space', usd(T.next.space), 'As of today: before next year\'s signings, cuts and carryover')}${cell('Committed', usd(T.next.liab))}${cell('Dead money', usd(T.next.dead))}</div></div>` : '';
+    const nx = T.next ? `<div class="pc-box"><div class="pc-k">${P.season + 1}${T.next.cap ? ` &middot; projected cap ${usd(T.next.cap)}` : ''}</div><div class="tm-stats">${cell('Cap space', usd(T.next.space), 'Against the projected cap, as of today: before next year\'s signings, cuts and carryover of unused space')}${cell('Committed', usd(T.next.liab))}${cell('Dead money', usd(T.next.dead))}</div></div>` : '';
     const src = `<p class="pc-sub muted">From OverTheCap's team pages (updated daily); positions from nflverse. Cap numbers in millions.</p>`;
     return tapTile('Payroll', face, 'Payroll', sum + grp + top + dead + nx + src);
   };

@@ -66,19 +66,28 @@ def parse(html: str, season: int) -> dict:
         "ps" if h.startswith("practice squad") else "res" if h else None
       if not kind:
         continue
+      listed = 0.0
       for tr in t.findall(".//tr"):
         tds = tr.findall("td")
         if not tds:
           continue
         a = tr.xpath(".//a[contains(@href, '/player/')]")
         name = (a[0].text_content() if a else tds[0].text_content()).strip()
-        if not name or name.upper() == "TOTAL":
+        if name.upper() == "TOTAL":
+          # the list's own total, not the sum of its rows: dead money's total carries charges the rows don't itemize
+          # (2026-10-27 check: every team's rows came to $0.4-1.4M under it, e.g. MIN $54.14M listed vs $55.56M total,
+          # and the totals are what add up to Total Cap Liabilities)
+          e[kind] += money(next((c.text_content() for c in reversed(tds) if "$" in c.text_content()), "$0")) - listed
+          listed = 0.0
+          continue
+        if not name:
           continue
         oid = re.search(r"/player/[^/]+/(\d+)", a[0].get("href")).group(1) if a else None
         # the cap number: the 12th cell on the active / reserve layout, the last money cell on the two-column lists
         cells = [c.text_content().strip() for c in tds]
         cap = money(cells[11]) if len(cells) > 12 else money(next((c for c in reversed(cells) if "$" in c), "$0"))
         e[kind] += cap
+        listed += cap
         e["players"].append([oid, name, round(cap, 3), kind])
     for k in ("act", "dead", "ps", "res"):
       e[k] = round(e[k], 3)
@@ -134,7 +143,10 @@ def build(site: Path) -> None:
     teams[t] = {"f": now.isoformat(timespec="seconds"), "liab": cur["liab"], "space": cur["space"], "act": cur["act"],
                 "dead": cur["dead"], "ps": cur["ps"], "res": cur["res"], "grp": {g: round(v, 3) for g, v in grp.items()},
                 "top": top, "dead_top": [[nm, ids.get(oid or "", (None,))[0], cap] for oid, nm, cap, _ in dead],
-                "next": {"liab": nxt["liab"], "space": nxt["space"], "dead": nxt["dead"]} if nxt else None}
+                # next season's space is against OverTheCap's projected cap (2026-10-27: liab + space = $327.0M for
+                # every team, no carryover yet), kept as "cap" so the sheet can say so
+                "next": {"liab": nxt["liab"], "space": nxt["space"], "dead": nxt["dead"],
+                         "cap": round(nxt["liab"] + nxt["space"], 1) if nxt["liab"] is not None and nxt["space"] is not None else None} if nxt else None}
   # league ranks: cap space (1 = most), dead money (1 = most), each group's spending (1 = most)
   def rank(key, get):
     vals = {t: get(v) for t, v in teams.items() if get(v) is not None}
