@@ -5217,3 +5217,21 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   Stage 2 candidates, to pre-register one at a time: (A) field goal make probability with a season trend / recency
   weight; (B) 4th & 1 conversion (the disputed-region read is borderline: re-check on 2026 weeks 8+ before fixing);
   (C) the win model's post-conversion and post-miss over-reads (CO2).
+- **FINDING 2026-10-26 (owner: "why are we saying go for it on 4th and 8 so much more often than everyone else? ... is
+  the probability you convert on 4th and 8 that we're working with real? does the context matter?"): (DO) where coaches
+  and nfl4th part ways with us, tools/do_disagree.py (19,083 4th downs 2022-25).** Go rate ours / nfl4th / coaches by
+  distance: 1 yd 91 / 93 / 71; 2 83 / 81 / 40; 3 74 / 67 / 30; 4-5 64 / 51 / 18; 6-7 52 / 35 / 10; 8-10 35 / 21 / 8;
+  11+ 15 / 6 / 6. Coaches part with both models at 4th & 2-3 in their own 21-40 and at midfield (models 60-85% go,
+  coaches 4-19%); with us alone at 4th & 4-5 inside the opponent's 35 (61% vs nfl4th 41-43%). Of the 2,885 plays where
+  we go and nfl4th kicks, 66% are 4+ yards and 74% are within 1.25 points; the widest split is a 9+ point lead before
+  the last 10:00 (43% vs 22%; both put go and punt within a point, ~90%). 4th & 7-9: ours 40%, nfl4th 25%, coaches 7%;
+  of our go calls there 44% lead by under 0.5 points, 61% under 1, 80% under 2. (a) The conversion odds hold up: a
+  first pass compared them with tries that leave out defensive penalties giving a first down (the graded rows' conv)
+  and read 3-6 points high at 8-10 yards; counted as the model counts them (calc_inputs._gain_rows, as (CM) found),
+  2022-25 3rd & 8-10 converted 33.8% (5,787) and 4th & 8-10 34.5% (229) vs the model's ~34; 6-7 yards 42.1 / 44.1 vs
+  ~42. No conversion fix. (b) Context: 3rd & 8-10 converts 30-32% in every score and time cell (penalties out) except
+  protecting a late lead (24-26%); it moves the value of going, which the win model carries, not the odds. (c) The
+  split at 4th & 7-9 where we go and nfl4th kicks (744): our go +0.9 points over nfl4th's, our punt -1.0, field goal
+  -0.9; on the 446 punts there won 54.3%, ours 54.9, nfl4th 55.8 (ours closer). So the gap is a ~1.5-point lean on
+  toss-ups from the win model's branches (stage 1: converted branch -1.5 disputed, 50+ yd field goals +3.3), not the
+  conversion odds. Next: stage 2 (A) field goals, (C) the converted branch; a "toss-up" label under ~1 point.
