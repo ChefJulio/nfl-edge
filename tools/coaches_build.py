@@ -303,7 +303,10 @@ def main() -> None:
         if o[3]: links[t]["gm"] = o[3]
       w = now[t].pop("_own", None)  # the owner (owner 2026-10-26): (rank, name, title, page)
       if w:
-        own[t] = {"name": w[1], "title": w[2]}
+        # co-owners who share a name read "Jimmy & Dee Haslam" (the list's "Jimmy Haslam, Dee Haslam" didn't fit a tile)
+        ps = [x.strip().split() for x in w[1].split(",") if x.strip()]
+        nm = (" & ".join(" ".join(x[:-1]) for x in ps) + " " + ps[0][-1]) if len(ps) > 1 and all(len(x) > 1 and x[-1] == ps[0][-1] for x in ps) else w[1]
+        own[t] = {"name": nm, "title": w[2]}
         if w[3]: links[t]["own"] = w[3]
     except Exception as e:
       print(f"[coaches] {t} staff unavailable ({e}); keeping the last one", flush=True)
