@@ -5235,3 +5235,15 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   -0.9; on the 446 punts there won 54.3%, ours 54.9, nfl4th 55.8 (ours closer). So the gap is a ~1.5-point lean on
   toss-ups from the win model's branches (stage 1: converted branch -1.5 disputed, 50+ yd field goals +3.3), not the
   conversion odds. Next: stage 2 (A) field goals, (C) the converted branch; a "toss-up" label under ~1 point.
+- **SHIPPED 2026-10-27 (owner: "tame our own aggression a little bit by deferring very close decisions"; then, shown
+  the cost: "neutral toss up, but we want to track coach decisions within that band"): toss-ups have no best call.**
+  Deferring close calls to the kick was measured first and dropped: deferring under 1.5 points takes our go rate
+  50% -> 22% (nfl4th 40%, coaches 21%) and 4th & 1 91% -> 63% (below coaches' 71%); even 0.25 points takes 4th & 1 to
+  82%, and agreement with nfl4th falls at every threshold (79.4 -> 78.9 at 0.25, 75.1 at 1.5). Early-game edges are
+  small in win-chance terms, so a deferral flips short-yardage calls as much as long ones. Shipped instead: under the
+  engine's TOSS (1.25 points, (CJ)) between the top two options, grade() returns toss, nothing is marked best, and
+  either call reads "Toss-up" (calculator, graded calls, gamecast decisions). Staff tile: "On toss-ups" (went for it vs
+  the typical-coach model in the band: leans aggressive / conservative / down the middle) and "Wrong on clear calls"
+  (the share of non-toss-ups where the coach chose another option). 2022-25: 46.2% of 4th downs are toss-ups; there
+  coaches went 20.9% while go was narrowly on top in 55.4%; on clear calls coaches chose otherwise 27.0%, 93.8% of
+  those kicking when going was clearly better; our clear-call go rate 45.3%.

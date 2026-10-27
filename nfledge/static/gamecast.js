@@ -771,9 +771,11 @@
       const bad = rows.filter(d => d.g.verdict === 'questionable');
       const sumLine = rows.length ? `<p class="dcs-sum">${rows.length} decisions: <b>${bad.length}</b> questionable${bad.length ? ` (${[...new Set(bad.map(d => d.team))].map(t => `${esc(t)} ${bad.filter(d => d.team === t).length}`).join(', ')})` : ''}, ${rows.filter(d => d.g.verdict === 'debatable').length} debatable.</p>` : '<p class="muted">No 4th downs or tries yet.</p>';
       const card = d => {
-        const g = d.g, [cls, lab] = VC[g.verdict], half = d.s.sec > 1800 ? d.s.sec - 1800 : d.s.sec;
+        const g = d.g, half = d.s.sec > 1800 ? d.s.sec - 1800 : d.s.sec;
+        // a toss-up (top two within the model's noise): neither option is marked best, either call reads "Toss-up"
+        const [cls, lab] = g.toss && g.verdict === 'fine' ? ['dcv-ok', 'Toss-up'] : VC[g.verdict];
         const what = d.kind === 'try' ? 'after a touchdown' : `4th &amp; ${d.s.togo} ${d.s.yl <= 50 ? `at ${esc(d.opp)} ${d.s.yl}` : `at own ${100 - d.s.yl}`}`;
-        const opts = g.options.map(o => `<span class="dcs-o${o.key === d.choice ? ' chose' : ''}${o.key === g.best ? ' best' : ''}">${esc(o.label)} <b>${pct(o.wp)}</b></span>`).join('');
+        const opts = g.options.map(o => `<span class="dcs-o${o.key === d.choice ? ' chose' : ''}${o.key === g.best && !g.toss ? ' best' : ''}">${esc(o.label)} <b>${pct(o.wp)}</b></span>`).join('');
         return `<li class="dcs-i ${cls}"><div class="dcs-h"><span class="dcs-t">Q${d.per} ${esc((d.p.clock || {}).displayValue || '')}</span>
           <b>${tmL(d.team)}</b> ${what}: ${VERB[d.choice]}<span class="dcv ${cls}">${g.early ? 'No grade' : lab}${g.verdict !== 'fine' ? ` &minus;${pts(g.cost)}` : ''}</span></div>
           <div class="dcs-ctx">${ctx(d)}</div>
@@ -3159,14 +3161,18 @@
       tr('no_huddle', 'No-huddle snaps', pct, ['Rarely', 'Often'], 'uses it often', 'rarely uses it', 'Share of snaps')].join('');
     const offSec = offRows ? `<div class="co-sec"><div class="pc-k">How the offense plays &middot; ${S}</div>${offRows}</div>` : '';
     // 4th downs (owner 2026-10-26: "how bout a 0-99 aggressiveness rating"): against other coaches in the same spots
-    // (a typical-coach model), not our calculator, which leans bolder than the league's public model (DO pending); the
-    // calculator comparison follows as its own line
+    // (a typical-coach model), not our calculator; then the calculator's split (owner 2026-10-27): toss-ups (no right
+    // answer) read as a lean, clear calls as how often he was wrong
     const f4row = !f4.n ? '' : `<div class="co-row" title="How often he goes for it on 4th down compared with an average NFL coach in the same spots (field position, distance, score, time, timeouts, the line), ranked across the league: 0 = most cautious, 99 = boldest">
         <div class="co-rowh"><span>Fourth-down aggressiveness</span><b>${f4.agg99}<small class="muted"> / 99</small></b></div>
         <div class="co-rowb"><i style="left:${(100 * f4.agg99 / 99).toFixed(1)}%"></i></div><div class="co-rowe"><span>Cautious</span><span>Bold</span></div>
         <div class="co-rows">Went for it ${f4.go} times on ${f4.n} fourth downs; an average coach would have about ${Math.round(f4.exp_go)}.</div></div>
-      <div class="co-row"><div class="co-rowh"><span>Same call as our calculator</span><b>${Math.round(100 * f4.agree / f4.n)}%</b></div>
-        <div class="co-rows">${f4.bad ? `${f4.bad} questionable (3+ points of win chance worse than the best call)` : 'No questionable calls'}</div></div>`;
+      ${f4.tn ? `<div class="co-row" title="Toss-ups: the top two options within 1.25 points of win chance, inside our model's noise, so neither is wrong. Which way he leans, against an average coach in the same spots">
+        <div class="co-rowh"><span>On toss-ups</span><b>${f4.t_go - f4.t_exp >= 1 ? 'Leans aggressive' : f4.t_exp - f4.t_go >= 1 ? 'Leans conservative' : 'Down the middle'}</b></div>
+        <div class="co-rows">Went for it ${f4.t_go} of ${f4.tn} times; an average coach would have about ${Math.round(f4.t_exp)}.</div></div>` : ''}
+      ${f4.clear ? `<div class="co-row" title="Clear calls: one option beat the next by 1.25+ points of win chance. Wrong: he chose another option">
+        <div class="co-rowh"><span>Wrong on clear calls</span><b>${Math.round(100 * (f4.clear - f4.agree) / f4.clear)}%</b></div>
+        <div class="co-rows">${f4.clear - f4.agree} of ${f4.clear}${f4.bad ? `; ${f4.bad} cost 3+ points of win chance` : ''}.</div></div>` : ''}`;
     const gmRows = [f4row, tr('two_pt', 'Two-point tries', pct, ['Rarely', 'Often'], 'goes for two often', 'rarely goes for two', 'Share of tries after a touchdown'),
       tn.chal ? `<div class="co-row"><div class="co-rowh"><span>Challenges won</span><b>${tn.chal[1]} of ${tn.chal[0]}</b></div></div>` : ''].join('');
     const gmSec = gmRows ? `<div class="co-sec"><div class="pc-k">Game management &middot; ${S}</div>${gmRows}</div>` : '';

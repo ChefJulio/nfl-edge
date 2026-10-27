@@ -273,7 +273,9 @@
       const best = ranked[0], chosen = o[choice];
       if (chosen == null) return null;
       const cost = best[1] - chosen;
-      return { options: ranked.map(([k, v]) => ({ key: k, label: LABEL[k], wp: v })), best: best[0], choice, cost, p,
+      // toss: the top two within TOSS, so no option is "best" (owner 2026-10-27: a neutral toss-up, no lean either way)
+      const toss = ranked.length > 1 && best[1] - ranked[1][1] < TOSS;
+      return { options: ranked.map(([k, v]) => ({ key: k, label: LABEL[k], wp: v })), best: best[0], toss, choice, cost, p,
                verdict: cost < TOSS ? 'fine' : cost < QUESTION ? 'debatable' : 'questionable' };
     }
 

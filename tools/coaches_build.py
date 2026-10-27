@@ -34,6 +34,7 @@ HIST = ROOT / "data" / "history" / "coach_staff.json"
 # staff it was researched against; when a club's staff changes, its entry is flagged to recheck until someone (a Claude
 # session) researches it again and updates the file.
 CALLS = ROOT / "data" / "playcallers.json"
+TOSS = 0.0125  # the calculator's toss-up band (static/calc_engine.js TOSS)
 
 
 def play_callers(now: dict, cur_hc: dict) -> tuple[dict, list]:
@@ -197,11 +198,18 @@ def fourth(site: Path, season: int) -> dict:
   X = lambda r: r[feats].apply(pd.to_numeric, errors="coerce")  # noqa: E731
   coach = HistGradientBoostingClassifier(max_iter=200, learning_rate=0.05, max_depth=4, random_state=0).fit(X(allr), allr.c == "go")
   rows["exp_go"] = coach.predict_proba(X(rows))[:, 1]
+  # toss-ups (owner 2026-10-27: "neutral toss up, but we want to track coach decisions within that band still so we can
+  # see if they lean aggressive or conservative"): the top two options within TOSS have no best call, so "same call as
+  # our calculator" counts clear calls only, and the band is read against the typical coach (went vs expected)
+  top2 = rows.op.apply(lambda o: sorted((v for v in o.values() if v is not None), reverse=True)[:2])
+  rows["tu"] = top2.apply(lambda v: len(v) > 1 and v[0] - v[1] < TOSS)
   out = {}
   for t, x in rows.groupby("t"):
+    cl, tb = x[~x.tu], x[x.tu]
     out[t] = {"n": int(len(x)), "go": int((x.c == "go").sum()), "exp_go": round(float(x.exp_go.sum()), 1),
-              "model_go": int((x.b == "go").sum()), "agree": int((x.b == x.c).sum()), "bad": int((x.x >= 0.03).sum()),
-              "wp_lost": round(float(x.x.sum()), 3)}
+              "clear": int(len(cl)), "model_go": int((cl.b == "go").sum()), "agree": int((cl.b == cl.c).sum()),
+              "bad": int((x.x >= 0.03).sum()), "wp_lost": round(float(x.x.sum()), 3),
+              "tn": int(len(tb)), "t_go": int((tb.c == "go").sum()), "t_exp": round(float(tb.exp_go.sum()), 1)}
   ag = {t: (v["go"] - v["exp_go"]) / max(1, v["n"]) for t, v in out.items()}
   order = sorted(ag, key=lambda t: ag[t])  # most cautious first
   for i, t in enumerate(order):
