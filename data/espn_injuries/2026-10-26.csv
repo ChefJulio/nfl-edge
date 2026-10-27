@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035463,K'Von Wallace,Baltimore Ravens,Active,2026-10-19T16:22Z,,,,,,,CB
 4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-10-18T15:33Z,,,,,,,OT
 4698244,Teddye Buchanan,Baltimore Ravens,Active,2026-10-16T20:28Z,,,,,,,LB
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-27T02:01Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-27T02:43Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4044133,Sam Franklin Jr.,Buffalo Bills,Active,2026-10-24T01:44Z,,,,,,"The NFL reduced Franklin's discipline from a one-game suspension to a fine of $14,926, Adam Schefter of ESPN reports.",S
 4568624,Dorian Williams,Buffalo Bills,Active,2026-10-22T01:58Z,,,,,,Williams logged five tackles (three solo) and one pass defensed for an interception in the Bills' 33-30 win over the Raiders on Sunday.,LB
 4832035,Davison Igbinosun,Buffalo Bills,Active,2026-10-22T01:37Z,,,,,,"Defensive coordinator Jim Leonhard praised Igbinosun's play earlier this week and plans to keep giving the rookie a good amount of playing time, Alec White of the Bills' official site reports. Said Leonard, ""I think what he's done the last couple weeks, he's definitely earned a high majority of the ",CB
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-25T22:31Z,,,,,,McMillan secured four of six targets for 40 yards in the Panthers' 43-13 loss to the Buccaneers on Sunday.,WR
 4870694,Monroe Freeling,Carolina Panthers,Active,2026-10-25T16:16Z,,,,,,"Freeling (knee) is listed as active for Sunday's game against Tampa Bay, Darin Gantt of the Panthers' official site reports.",OT
 4880613,Bam Martin-Scott,Carolina Panthers,Active,2026-10-24T23:55Z,,,,,,"The Panthers activated Martin-Scott (hamstring) from injured reserve Saturday, and he no longer carries an injury designation into Sunday's game against the Buccaneers, Darin Gantt of the Panthers' official site reports.",LB
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-27T02:01Z,Undisclosed,,,2026-10-18,IR,ir,S
+4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-27T03:00Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out,S
 4372576,Jack Sanborn,Chicago Bears,Out,2026-10-26T17:55Z,Concussion,Concussion,Not Specified,2026-11-02,QUESTIONABLE,out,LB
 4608686,Kyle Monangai,Chicago Bears,Out,2026-10-26T17:55Z,Toe,Sprain,Not Specified,2026-11-02,QUESTIONABLE,out,RB
 3121544,T.J. Edwards,Chicago Bears,Out,2026-10-26T17:55Z,Hamstring,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,out,LB
@@ -624,6 +624,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4570470,Nahshon Wright,New York Jets,Active,2026-10-19T17:12Z,,,,,,,CB
 4569371,Isaiah Williams,New York Jets,Active,2026-10-17T00:22Z,,,,,,Williams should continue to serve as the No. 3 wide receiver behind Garrett Wilson and Tim Patrick for Sunday's game against the Patriots due to the absence of Adonai Mitchell (finger).,WR
 4574142,Nate Lynn,New York Jets,Active,2026-10-12T19:32Z,,,,,,,DE
+3929630,Saquon Barkley,Philadelphia Eagles,Questionable,2026-10-27T02:50Z,Back,,,2026-10-26,QUESTIONABLE,Barkley is questionable to return to Monday's game against the Cowboys due to a back injury.,RB
 3926231,Britain Covey,Philadelphia Eagles,Out,2026-10-27T00:59Z,Knee,,,2026-11-01,OUT,Covey (knee) has been ruled out for the remainder of Monday's contest versus the Cowboys.,WR
 4686911,Jakorian Bennett,Philadelphia Eagles,Injured Reserve,2026-10-26T23:13Z,Knee,Not Specified,Not Specified,2026-11-01,IR-R,Bennett (knee) will remain on injured reserve and is inactive for Monday night's matchup with Dallas.,CB
 4035624,Landon Dickerson,Philadelphia Eagles,Active,2026-10-26T23:11Z,,,,,,Dickerson (knee) was activated from injured reserve ahead of Monday night's matchup with the Cowboys.,G
@@ -637,7 +638,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426331,Nolan Smith Jr.,Philadelphia Eagles,Out,2026-10-26T22:50Z,Concussion,Concussion,Not Specified,2026-11-01,INACTIVE,inactive,LB
 4430814,Jake Majors,Philadelphia Eagles,Out,2026-10-26T22:50Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive,C
 4240456,Michael Carter II,Philadelphia Eagles,Out,2026-10-26T22:50Z,Abdomen,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive,CB
-3929630,Saquon Barkley,Philadelphia Eagles,Active,2026-10-26T22:48Z,,,,,,Barkley (hamstring) is listed as active Monday against the Cowboys.,RB
 4241555,Elijah Mitchell,Philadelphia Eagles,Active,2026-10-26T21:19Z,,,,,,The Eagles elevated Mitchell from the practice squad ahead of Monday night's game against Dallas.,RB
 4241374,Grant Calcaterra,Philadelphia Eagles,Active,2026-10-26T21:17Z,,,,,,The Eagles activated Calcaterra (back) from injured reserve Monday.,TE
 4431574,Eli Stowers,Philadelphia Eagles,Active,2026-10-26T20:26Z,,,,,,The Eagles reinstated Stowers (quadriceps/hamstring) from injured reserve ahead of Monday's game against the Cowboys.,TE
