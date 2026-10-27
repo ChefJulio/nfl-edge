@@ -3158,10 +3158,16 @@
       tr('pace', 'Seconds between snaps', v => `${v.toFixed(0)} s`, ['Fast', 'Slow'], 'fast', 'slow', 'Median time from snap to snap within a drive, game close'),
       tr('no_huddle', 'No-huddle snaps', pct, ['Rarely', 'Often'], 'uses it often', 'rarely uses it', 'Share of snaps')].join('');
     const offSec = offRows ? `<div class="co-sec"><div class="pc-k">How the offense plays &middot; ${S}</div>${offRows}</div>` : '';
-    const gmRows = [f4.n ? trow('Went for it on 4th down', `${f4.go} of ${f4.n}`, 'aggr', f4.aggr, f4.aggr_rk, ['Cautious', 'Bold'],
-        `our model said go ${f4.model_go} times; next to that, ${word(f4.aggr_rk, 'bolder than most teams', 'more cautious than most teams').replace('about average', 'about average')} (every team goes for it less than the model). Same call as the model ${Math.round(100 * f4.agree / f4.n)}%${f4.bad ? `, ${f4.bad} questionable` : ''}`,
-        'Every 4th down vs our calculator: went for it minus the model\'s go calls, per 4th down. Every team goes for it less than the model would; the bar ranks them against each other. Questionable = 3+ points of win chance worse than the best call')
-      : '', tr('two_pt', 'Two-point tries', pct, ['Rarely', 'Often'], 'goes for two often', 'rarely goes for two', 'Share of tries after a touchdown'),
+    // 4th downs (owner 2026-10-26: "how bout a 0-99 aggressiveness rating"): against other coaches in the same spots
+    // (a typical-coach model), not our calculator, which leans bolder than the league's public model (DO pending); the
+    // calculator comparison follows as its own line
+    const f4row = !f4.n ? '' : `<div class="co-row" title="How often he goes for it on 4th down compared with an average NFL coach in the same spots (field position, distance, score, time, timeouts, the line), ranked across the league: 0 = most cautious, 99 = boldest">
+        <div class="co-rowh"><span>Fourth-down aggressiveness</span><b>${f4.agg99}<small class="muted"> / 99</small></b></div>
+        <div class="co-rowb"><i style="left:${(100 * f4.agg99 / 99).toFixed(1)}%"></i></div><div class="co-rowe"><span>Cautious</span><span>Bold</span></div>
+        <div class="co-rows">Went for it ${f4.go} times on ${f4.n} fourth downs; an average coach would have about ${Math.round(f4.exp_go)}.</div></div>
+      <div class="co-row"><div class="co-rowh"><span>Same call as our calculator</span><b>${Math.round(100 * f4.agree / f4.n)}%</b></div>
+        <div class="co-rows">${f4.bad ? `${f4.bad} questionable (3+ points of win chance worse than the best call)` : 'No questionable calls'}</div></div>`;
+    const gmRows = [f4row, tr('two_pt', 'Two-point tries', pct, ['Rarely', 'Often'], 'goes for two often', 'rarely goes for two', 'Share of tries after a touchdown'),
       tn.chal ? `<div class="co-row"><div class="co-rowh"><span>Challenges won</span><b>${tn.chal[1]} of ${tn.chal[0]}</b></div></div>` : ''].join('');
     const gmSec = gmRows ? `<div class="co-sec"><div class="pc-k">Game management &middot; ${S}</div>${gmRows}</div>` : '';
     // whoever calls the offense gets its habits (the head coach when he does: Andy Reid, Kevin O'Connell)

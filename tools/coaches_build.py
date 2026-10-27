@@ -185,15 +185,30 @@ def fourth(site: Path, season: int) -> dict:
   rows = pd.DataFrame(json.loads(f.read_text(encoding="utf-8"))["rows"])
   if rows.empty: return {}, None
   rows["t"] = rows.t.replace(RELOCATED)
+  # aggressiveness 0-99 against other coaches, not our calculator (owner 2026-10-26: "how bout a 0-99 aggressiveness
+  # rating instead?" ... "i'm suspect of our calc / win prob models if every single coach is less aggressive than us"):
+  # a typical-coach model (P(goes for it) from field position, distance, score, time, quarter, timeouts and the line, fit
+  # on every graded 4th down 2022 on) gives each decision an expected go; a team's (went - expected) per 4th down, ranked
+  # across the league, scaled 0 (most cautious) to 99 (boldest)
+  from sklearn.ensemble import HistGradientBoostingClassifier
+  hist = [pd.DataFrame(json.loads(g.read_text(encoding="utf-8"))["rows"]) for g in sorted((site / "data" / "calc").glob("graded_*.json"))]
+  allr = pd.concat([h for h in hist if len(h)], ignore_index=True)
+  feats = ["yl", "tg", "d", "s", "q", "to", "ot", "ln"]
+  X = lambda r: r[feats].apply(pd.to_numeric, errors="coerce")  # noqa: E731
+  coach = HistGradientBoostingClassifier(max_iter=200, learning_rate=0.05, max_depth=4, random_state=0).fit(X(allr), allr.c == "go")
+  rows["exp_go"] = coach.predict_proba(X(rows))[:, 1]
   out = {}
   for t, x in rows.groupby("t"):
-    out[t] = {"n": int(len(x)), "go": int((x.c == "go").sum()), "model_go": int((x.b == "go").sum()),
-              "agree": int((x.b == x.c).sum()), "bad": int((x.x >= 0.03).sum()), "wp_lost": round(float(x.x.sum()), 3)}
-  # aggressiveness against the model: went for it minus the model's go calls, per decision; 1 = boldest
-  ag = {t: (v["go"] - v["model_go"]) / max(1, v["n"]) for t, v in out.items()}
-  for i, t in enumerate(sorted(ag, key=lambda t: -ag[t]), 1):
-    out[t]["aggr"] = round(ag[t], 3); out[t]["aggr_rk"] = i
-  return out, ([round(min(ag.values()), 3), round(max(ag.values()), 3)] if ag else None)
+    out[t] = {"n": int(len(x)), "go": int((x.c == "go").sum()), "exp_go": round(float(x.exp_go.sum()), 1),
+              "model_go": int((x.b == "go").sum()), "agree": int((x.b == x.c).sum()), "bad": int((x.x >= 0.03).sum()),
+              "wp_lost": round(float(x.x.sum()), 3)}
+  ag = {t: (v["go"] - v["exp_go"]) / max(1, v["n"]) for t, v in out.items()}
+  order = sorted(ag, key=lambda t: ag[t])  # most cautious first
+  for i, t in enumerate(order):
+    out[t]["aggr"] = round(ag[t], 3)
+    out[t]["agg99"] = round(99 * i / max(1, len(order) - 1))
+    out[t]["aggr_rk"] = len(order) - i
+  return out, None
 
 
 def player_card(b: dict, name: str, pfr: dict, P: pd.DataFrame, last_season: dict) -> str | None:
