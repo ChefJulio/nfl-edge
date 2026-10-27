@@ -5190,3 +5190,30 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   team_model.sunday_refit takes the week in groups (the games before Sunday once all are in, then the weekend through
   its last Sunday, then a Monday game as soon as it lands); tools/news_watch.py builds when a group completes (not on
   a partial Sunday); Power reads "Week N in progress · X of Y games in" / "After week N" / "Going into week N".
+- **PRE-REGISTERED 2026-10-26 (owner: "i'm suspect of our calc / win prob models if every single coach is less
+  aggressive than us"): (DO) why the calculator says "go" more than nfl4th.** Measured first (scratch/calc_val rows,
+  2022-25, 19,083 4th downs with both models): we recommend going for it on 50.0%, nfl4th 40.4%, coaches went 20.8%
+  (own side 42.6 / 31.5 / 8.1). On the 2,885 plays where we say go and nfl4th kicks, both forecast the chosen option
+  within a point of the share won (went: ours 34.1, nfl4th 33.3, won 33.3; kicked: ours 52.4, nfl4th 53.4, won 53.0;
+  Brier ours 0.0863 / 0.1312, nfl4th 0.0848 / 0.1308): close calls (our go edge there +0.9 points, nfl4th's -0.8), where
+  we sit ~0.8 points higher on go and 0.6-1.1 lower on the kicks. Overall levels match (go +0.4, punt +0.1, fg -0.2).
+  Stage 1 (diagnostic, no gate; tools/do_eval.py): each part of the decision against what happened, 2022-26 walk-
+  forward graded rows (site data/calc/graded_<season>.json, each season graded with a model fit on earlier ones),
+  overall and on the disputed region (our best go, our go edge 0 to 3 points): (a) P(convert) on tries by distance and
+  field zone; (b) P(field goal good) by distance; (c) each branch's win chance (converted, failed, made, missed) and the
+  punt's, won minus forecast with 95% intervals by games; (d) which parts, moved to match their outcomes, close the gap
+  to nfl4th's recommendation rate. Stage 2 (pre-registered after stage 1, from what it finds): a fix for any part off
+  by 2+ points where it matters, gated on (CJ) check (1) still passing and the disputed plays' chosen-option Brier no
+  worse. The Staff tile's 0-99 aggressiveness (2026-10-26) compares coaches with a typical-coach model, not with the
+  calculator, so it does not wait on this.
+- **FINDING 2026-10-26: (DO) stage 1, tools/do_eval.py (16,804 graded 4th downs 2022-26, walk-forward).** No single part
+  is far off; three small ones all lean "go" on close calls. Actual minus forecast, 95% by games: field goals of 50+
+  yards +3.3 [+0.1, +6.5] (811; kickers make more long ones than the model expects: kicking undervalued); 4th & 1
+  conversions -1.5 [-4.2, +1.1] overall, -3.6 [-7.4, +0.0] in the disputed region (our go edge 0-3 points: going
+  overvalued); the converted branch's win chance -0.7 overall, -1.5 [-3.5, +0.5] disputed ((CO2): going overvalued). The
+  other way: missed field goal -2.8 [-6.0, +0.2] ((CO2): kicking overvalued). Punts -0.3, failed tries +0.2, made field
+  goals -0.7, conversions by zone within 2. Each 1-3 points, together enough to flip coin-flip calls (our go rate 50% vs
+  nfl4th's 40%). Firmest: long field goals (kicking improves season by season; the field goal model weighs 2006 on).
+  Stage 2 candidates, to pre-register one at a time: (A) field goal make probability with a season trend / recency
+  weight; (B) 4th & 1 conversion (the disputed-region read is borderline: re-check on 2026 weeks 8+ before fixing);
+  (C) the win model's post-conversion and post-miss over-reads (CO2).
