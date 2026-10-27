@@ -2837,10 +2837,20 @@
     // by player, the lists show each entry once (owner 2026-10-27 screenshot: every such line twice)
     const once = rows => { const seen = new Set(); return rows.filter(r => { const k = `${r[ix.date]}|${r[ix.text]}`; if (seen.has(k)) return false; seen.add(k); return true; }); };
     const trades = once(mine.filter(r => r[ix.type] === 'traded' || r[ix.type] === 'acquired'));
-    const nIn = mine.filter(r => MOVE_IN.has(r[ix.type])).length, nOut = mine.length - nIn;
+    // released or waived, then back with the team within a week (practice squad, a new contract): a roster shuffle,
+    // not a departure (owner 2026-10-27: DeeJay Dallas, released Oct 23 and on MIN's practice squad Oct 24, read as gone)
+    const BACK = new Set(['ps_signed', 'signed', 're_signed', 'claimed', 'ps_elevated']);
+    const backOf = r => { if (!r[ix.pid] || !(r[ix.type] === 'released' || r[ix.type] === 'waived')) return null;
+      const t0 = Date.parse(r[ix.date]);
+      return M.t.rows.find(q => q[ix.team] === abbr && q[ix.pid] === r[ix.pid] && BACK.has(q[ix.type])
+        && Date.parse(q[ix.date]) >= t0 && Date.parse(q[ix.date]) - t0 <= 7 * 864e5 && q !== r) || null; };
+    const nIn = mine.filter(r => MOVE_IN.has(r[ix.type])).length, nOut = mine.filter(r => MOVE_OUT.has(r[ix.type]) && !backOf(r)).length;
     const last = mine[0], shown = once(mine);
     const face = `<div class="pc-big">${trades.length} <small>trade${trades.length === 1 ? '' : 's'}</small></div><div class="pc-tapsub">${last ? `${esc(mdate(last[ix.date]))}: ${esc(String(last[ix.text]).split(/[,.;(]/)[0])}` : `${nIn} in · ${nOut} out`}</div>`;
-    const li = r => `<li${r[ix.pid] ? ` data-open-pid="${esc(r[ix.pid])}" class="py-tap"` : ''}><span class="mv-d">${esc(mdate(r[ix.date]))}</span> ${esc(r[ix.text])}</li>`;
+    // his name only when the entry names several players
+    const li = r => { const b = backOf(r), who = b && b[ix.name] && /\sand\s|,\s/.test(r[ix.text]) ? `${b[ix.name]} ` : '';
+      return `<li${r[ix.pid] ? ` data-open-pid="${esc(r[ix.pid])}" class="py-tap"` : ''}><span class="mv-d">${esc(mdate(r[ix.date]))}</span> ${esc(r[ix.text])}${
+        b ? ` <span class="muted">&middot; ${esc(who)}back ${b[ix.type].startsWith('ps_') ? 'on the practice squad' : 'on the roster'} ${esc(mdate(b[ix.date]))}</span>` : ''}</li>`; };
     const trBox = `<div class="pc-box"><div class="pc-k">Trades &middot; ${season}</div>${trades.length ? `<ul class="mv-l">${trades.map(li).join('')}</ul>` : '<p class="pc-sub">No trades this season.</p>'}</div>`;
     let drBox = '';
     if (M.dr && M.dr.rows) { const dx = Object.fromEntries(M.dr.cols.map((c, i) => [c, i])), fr = dx.fr != null ? dx.fr : dx.team;
