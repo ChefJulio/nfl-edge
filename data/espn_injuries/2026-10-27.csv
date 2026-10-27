@@ -624,6 +624,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4570470,Nahshon Wright,New York Jets,Active,2026-10-19T17:12Z,,,,,,,CB
 4569371,Isaiah Williams,New York Jets,Active,2026-10-17T00:22Z,,,,,,Williams should continue to serve as the No. 3 wide receiver behind Garrett Wilson and Tim Patrick for Sunday's game against the Patriots due to the absence of Adonai Mitchell (finger).,WR
 4574142,Nate Lynn,New York Jets,Active,2026-10-12T19:32Z,,,,,,,DE
+4360238,Dameon Pierce,Philadelphia Eagles,Active,2026-10-27T04:26Z,,,,,,Pierce rushed 14 times for 47 yards and a touchdown and brought in his only target for one yard in the Eagles' 38-21 loss to the Cowboys on Monday night. He also returned two kickoffs for 37 yards.,RB
+4241372,Hollywood Brown,Philadelphia Eagles,Active,2026-10-27T04:22Z,,,,,,Brown secured two of five targets for 30 yards in the Eagles' 38-21 loss to the Cowboys on Monday night.,WR
+3121023,Dallas Goedert,Philadelphia Eagles,Active,2026-10-27T04:15Z,,,,,,Goedert secured five of seven targets for 48 yards in the Eagles' 38-21 loss to the Cowboys on Monday night.,TE
 4870795,Makai Lemon,Philadelphia Eagles,Active,2026-10-27T04:11Z,,,,,,Lemon brought in seven of eight targets for 67 yards and a touchdown in the Eagles' 38-21 loss to the Cowboys on Monday night.,WR
 3929630,Saquon Barkley,Philadelphia Eagles,Questionable,2026-10-27T04:09Z,Back,,,2026-10-26,QUESTIONABLE,"Barkley said Monday that his back injury was compensatory after he tweaked his hamstring on his first run of the game and tried to play through it, EJ Smith of The Philadelphia Inquirer reports.",RB
 4685201,Tanner McKee,Philadelphia Eagles,Active,2026-10-27T04:06Z,,,,,,McKee completed 23 of 35 passes for 211 yards with one touchdown and one interception and added one rush for one yard in the Eagles' 38-21 loss to the Cowboys on Monday night.,QB
@@ -633,7 +636,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4571162,Jalyx Hunt,Philadelphia Eagles,Active,2026-10-26T23:08Z,,,,,,Hunt (ankle/knee) is available for Monday's game versus Dallas.,LB
 3916409,Jonathan Greenard,Philadelphia Eagles,Active,2026-10-26T23:03Z,,,,,,Greenard (ankle) is available for Monday's game against the Cowboys.,LB
 4879250,Cole Payton,Philadelphia Eagles,Out,2026-10-26T23:00Z,Coach's Decision,Not Specified,Not Specified,2026-11-01,INACTIVE,Payton (coach's decision) is inactive for Monday's game against the Cowboys but will serve as the team's emergency quarterback.,QB
-4360238,Dameon Pierce,Philadelphia Eagles,Active,2026-10-26T22:55Z,,,,,,Pierce is welcoming back Barkley (hamstring) to the Eagles backfield in Week 7 due to the latter being active Monday versus the Cowboys.,RB
 15797,Lane Johnson,Philadelphia Eagles,Out,2026-10-26T22:53Z,Personal,Not Specified,Not Specified,2027-02-15,OUT,out,OT
 4428850,Dontayvion Wicks,Philadelphia Eagles,Out,2026-10-26T22:50Z,Ankle,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive,WR
 4241478,DeVonta Smith,Philadelphia Eagles,Out,2026-10-26T22:50Z,Hamstring,Not Specified,Not Specified,2026-11-01,INACTIVE,inactive,WR
@@ -647,8 +649,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362805,Tyler Steen,Philadelphia Eagles,Active,2026-10-25T00:24Z,,,,,,Steen (shoulder) does not have an injury designation for Monday's game against the Cowboys.,G
 4240585,AJ Epenesa,Philadelphia Eagles,Active,2026-10-25T00:19Z,,,,,,Epenesa (back) does not carry an injury designation into Monday's game against Dallas.,DE
 3915106,Fred Johnson,Philadelphia Eagles,Active,2026-10-24T20:23Z,,,,,,,OT
-4362116,Moro Ojomo,Philadelphia Eagles,Active,2026-10-24T20:23Z,,,,,,,DT
-3121023,Dallas Goedert,Philadelphia Eagles,Active,2026-10-24T19:57Z,,,,,,Goedert (knee) was a full participant in Saturday's practice and does not carry an injury designation into Monday's game against the Cowboys.,TE
 4685261,Germie Bernard,Pittsburgh Steelers,Active,2026-10-26T23:49Z,,,,,,Bernard caught three of five targets for 27 yards in Sunday's 16-10 win over the Saints.,WR
 4240577,Brandon Smith,Pittsburgh Steelers,Active,2026-10-26T23:48Z,,,,,,"Smith reverted to the Steelers' practice squad Monday, per the NFL's transaction log.",WR
 4430802,Darnell Washington,Pittsburgh Steelers,Active,2026-10-26T23:47Z,,,,,,Washington caught his lone target for a four-yard touchdown in Sunday's 16-10 win over the Saints in Paris.,TE
