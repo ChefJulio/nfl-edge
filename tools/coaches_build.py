@@ -20,6 +20,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from nfledge import coaches as C  # noqa: E402
@@ -177,6 +178,32 @@ def tendencies(pbp: pd.DataFrame, season: int) -> dict:
   # the league's spread of each, for the sheet's bars (owner 2026-10-26: where a team sits, not a good / bad chip)
   league = {k: [round(float(ser.min()), 3), round(float(ser.max()), 3)] for k, ser in m.items() if len(ser.dropna())}
   return out, league
+
+
+TWO_FROM = 2022  # the typical-coach two-point model's first season (as the 4th-down one: graded seasons 2022 on)
+
+
+def two_point(pbp: pd.DataFrame, season: int) -> dict:
+  """team -> {n, go, exp, z}: this season's tries after a touchdown against a typical coach in the same spot (owner
+  2026-10-27: "you just scored a td to make it 24-26 with 30 seconds left. DUH you're going for 2 ... 16-0 early in
+  the second quarter ... more whatever"). P(goes for two) from the score after the touchdown, the time left, the quarter
+  and the line, fit on every try TWO_FROM on; z: (went - expected) in standard deviations of chance."""
+  from sklearn.ensemble import HistGradientBoostingClassifier
+  p = pbp[(pbp.season_type == "REG") & pbp.posteam.notna() & (pbp.qtr <= 4)
+          & ((pbp.two_point_attempt == 1) | pbp.extra_point_result.notna())].copy()
+  p["posteam"] = p.posteam.replace(RELOCATED)
+  p["ln"] = np.where(p.posteam == p.home_team, p.spread_line, -p.spread_line)
+  feats = ["score_differential", "game_seconds_remaining", "qtr", "ln"]
+  y = p.two_point_attempt == 1
+  m = HistGradientBoostingClassifier(max_iter=200, learning_rate=0.05, max_depth=3, min_samples_leaf=40, random_state=0)
+  m.fit(p[feats], y)
+  x = p[p.season == season].assign(e=lambda v: m.predict_proba(v[feats])[:, 1], go=y)
+  out = {}
+  for t, g in x.groupby("posteam"):
+    sd = max(0.5, float((g.e * (1 - g.e)).sum()) ** 0.5)
+    out[t] = {"n": int(len(g)), "go": int(g.go.sum()), "exp": round(float(g.e.sum()), 1),
+              "z": round(float((g.go.sum() - g.e.sum()) / sd), 2)}
+  return out
 
 
 def fourth(site: Path, season: int) -> dict:
@@ -354,6 +381,9 @@ def main() -> None:
   G = team_games(sched)
   T, TL = tendencies(pbp, current) if pbp is not None else ({}, {})
   F4, F4L = fourth(site, current)
+  # finished seasons are read once (the calculator's build caches the same files)
+  hist2 = [cache.get("pbp_calc", s, lambda s=s: nfl.load_pbp([s]).select(W.PBP_COLS), stale=False) for s in range(TWO_FROM, current)]
+  TP = two_point(pd.concat([h for h in hist2 if h is not None] + [pbp], ignore_index=True), current) if pbp is not None else {}
   ST = stints(staff, U)
   PC, stale = play_callers(now, cur_hc)
   if stale:  # a GitHub Actions warning on the run, and the tile says "to recheck" instead of a name
@@ -428,7 +458,7 @@ def main() -> None:
     teams[t] = {"hc": hc, **co, "staff": now[t], "links": links[t], "all": full[t],
                 "unit": list(U.get(current, {}).get(t, [None] * 4)[2:]),  # this season's [offense, defense] rank
                 "hc_jobs": ST.get(now[t].get("hc") or "", []),
-                "tend": T.get(t, {}), "fourth": F4.get(t, {}), "calls": PC.get(t)}
+                "tend": T.get(t, {}), "fourth": F4.get(t, {}), "two": TP.get(t), "calls": PC.get(t)}
   doc = {"v": V, "season": current, "built": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
          "src": {"staff": "Wikipedia staff templates, season articles and coaches' pages (CC BY-SA)", "head": "nflverse schedules, ESPN"},
          "teams": teams, "bios": {k: v for k, v in B.items() if v},  # by page title; teams name theirs (bio)

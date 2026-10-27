@@ -3180,7 +3180,14 @@
         <div class="co-rowh"><span>Against our model</span><b>${net >= 2 ? 'Bolder' : net <= -2 ? 'More conservative' : 'In step'}</b></div>
         <div class="co-rowb co-mid"><i style="left:${Math.max(0, Math.min(100, 50 + 100 * net / f4.clear)).toFixed(1)}%"></i></div><div class="co-rowe"><span>Conservative</span><span>Aggressive</span></div>
         <div class="co-rows">Of ${f4.clear} clear call${f4.clear === 1 ? '' : 's'}: kicked when it said go ${f4.c_cons}, went when it said kick ${f4.c_bold}</div></div>`; })() : ''}`;
-    const gmRows = [f4row, tr('two_pt', 'Two-point tries', pct, ['Rarely', 'Often'], 'goes for two often', 'rarely goes for two', 'Share of tries after a touchdown'),
+    // two-point tries against a typical coach in the same spot (owner 2026-10-27: down 2 with 0:30 left "DUH you're going
+    // for 2"; up 16 in the 2nd quarter is "whatever"), centered like the toss-ups; the raw share without it misread both
+    const tp = T.two, twoRow = tp && tp.n ? `<div class="co-row" title="Tries after a touchdown, against an average coach with the same score and time left: down 2 late almost everyone goes for two, early in a game almost no one does. The middle of the bar is the average coach; a lean is named only when the gap is bigger than chance on this many tries">
+        <div class="co-rowh"><span>Two-point tries</span><b>${tp.z >= 1.5 ? 'Leans aggressive' : tp.z <= -1.5 ? 'Leans conservative' : 'Like most coaches'}</b></div>
+        <div class="co-rowb co-mid"><i style="left:${(50 + 20 * Math.max(-2.5, Math.min(2.5, tp.z))).toFixed(1)}%"></i></div><div class="co-rowe"><span>Conservative</span><span>Aggressive</span></div>
+        <div class="co-rows">Went for two ${tp.go} of ${tp.n} times; ${tp.exp < 0.5 ? 'an average coach would almost never go in these spots either' : `an average coach would have about ${Math.round(tp.exp)}`}</div></div>`
+      : tr('two_pt', 'Two-point tries', pct, ['Rarely', 'Often'], 'goes for two often', 'rarely goes for two', 'Share of tries after a touchdown');
+    const gmRows = [f4row, twoRow,
       tn.chal ? `<div class="co-row"><div class="co-rowh"><span>Challenges won</span><b>${tn.chal[1]} of ${tn.chal[0]}</b></div></div>` : ''].join('');
     const gmSec = gmRows ? `<div class="co-sec"><div class="pc-k">Game management &middot; ${S}</div>${gmRows}</div>` : '';
     // whoever calls the offense gets its habits (the head coach when he does: Andy Reid, Kevin O'Connell)
