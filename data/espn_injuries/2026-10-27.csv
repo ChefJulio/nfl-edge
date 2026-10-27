@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035463,K'Von Wallace,Baltimore Ravens,Active,2026-10-19T16:22Z,,,,,,,CB
 4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-10-18T15:33Z,,,,,,,OT
 4698244,Teddye Buchanan,Baltimore Ravens,Active,2026-10-16T20:28Z,,,,,,,LB
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-27T22:00Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-27T23:00Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4044133,Sam Franklin Jr.,Buffalo Bills,Active,2026-10-24T01:44Z,,,,,,"The NFL reduced Franklin's discipline from a one-game suspension to a fine of $14,926, Adam Schefter of ESPN reports.",S
 4568624,Dorian Williams,Buffalo Bills,Active,2026-10-22T01:58Z,,,,,,Williams logged five tackles (three solo) and one pass defensed for an interception in the Bills' 33-30 win over the Raiders on Sunday.,LB
 4832035,Davison Igbinosun,Buffalo Bills,Active,2026-10-22T01:37Z,,,,,,"Defensive coordinator Jim Leonhard praised Igbinosun's play earlier this week and plans to keep giving the rookie a good amount of playing time, Alec White of the Bills' official site reports. Said Leonard, ""I think what he's done the last couple weeks, he's definitely earned a high majority of the ",CB
@@ -124,7 +124,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-25T22:31Z,,,,,,McMillan secured four of six targets for 40 yards in the Panthers' 43-13 loss to the Buccaneers on Sunday.,WR
 4870694,Monroe Freeling,Carolina Panthers,Active,2026-10-25T16:16Z,,,,,,"Freeling (knee) is listed as active for Sunday's game against Tampa Bay, Darin Gantt of the Panthers' official site reports.",OT
 4880613,Bam Martin-Scott,Carolina Panthers,Active,2026-10-24T23:55Z,,,,,,"The Panthers activated Martin-Scott (hamstring) from injured reserve Saturday, and he no longer carries an injury designation into Sunday's game against the Buccaneers, Darin Gantt of the Panthers' official site reports.",LB
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-27T22:00Z,Undisclosed,,,2026-10-18,IR,ir,S
+4257364,Zavier Scott,Chicago Bears,Active,2026-10-27T23:08Z,,,,,,Chicago signed Scott from the practice squad to the active roster Tuesday.,RB
+4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-27T23:00Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out,S
 4372576,Jack Sanborn,Chicago Bears,Questionable,2026-10-27T13:11Z,Concussion,Concussion,Not Specified,2026-11-02,QUESTIONABLE,questionable,LB
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-27T13:11Z,Toe,Sprain,Not Specified,2026-11-02,QUESTIONABLE,questionable,RB
 3121544,T.J. Edwards,Chicago Bears,Questionable,2026-10-27T13:11Z,Hamstring,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,questionable,LB
@@ -148,7 +149,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4870953,Malik Muhammad II,Chicago Bears,Questionable,2026-10-23T02:42Z,Toe,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,Muhammad (toe) is doubtful to return to Thursday night's contest against the Patriots.,CB
 4426374,Tyrique Stevenson Sr.,Chicago Bears,Active,2026-10-22T23:21Z,,,,,,Stevenson (hip) is active for Thursday night's contest against New England.,CB
 3930040,Jonah Jackson,Chicago Bears,Active,2026-10-22T01:35Z,,,,,,Jackson (hip/quadricep) does not have any injury designation ahead of Thursday night's game against the Patriots.,G
-4911952,Keyshaun Elliott,Chicago Bears,Active,2026-10-20T00:50Z,,,,,,Elliott (quadriceps) was estimated as a full participant on the Bears' official injury report Monday.,LB
 4427834,Erick All Jr.,Cincinnati Bengals,Injured Reserve,2026-10-27T18:33Z,Knee - ACL,Surgery,Right,2027-02-15,IR,The Bengals placed All (knee) on injured reserve Tuesday.,TE
 4819215,Josh Kattus,Cincinnati Bengals,Out,2026-10-27T18:25Z,Undisclosed,Not Specified,Not Specified,2026-11-29,OUT,out,TE
 4384852,Dohnte Meyers,Cincinnati Bengals,Active,2026-10-27T01:58Z,,,,,,Meyers failed to catch either of his two targets in Sunday's 35-13 win over the Ravens.,WR
@@ -624,6 +624,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4570470,Nahshon Wright,New York Jets,Active,2026-10-19T17:12Z,,,,,,,CB
 4569371,Isaiah Williams,New York Jets,Active,2026-10-17T00:22Z,,,,,,Williams should continue to serve as the No. 3 wide receiver behind Garrett Wilson and Tim Patrick for Sunday's game against the Patriots due to the absence of Adonai Mitchell (finger).,WR
 4574142,Nate Lynn,New York Jets,Active,2026-10-12T19:32Z,,,,,,,DE
+4715355,Darius Cooper,Philadelphia Eagles,Active,2026-10-27T23:06Z,,,,,,Cooper caught one of three passes for 17 yards during the Eagles' 38-21 loss to the Cowboys on Monday.,WR
 3929630,Saquon Barkley,Philadelphia Eagles,Questionable,2026-10-27T15:38Z,Back,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Barkley said after Monday's 38-21 loss to the Cowboys that his ""hamstring came out great,"" and noted that the back issue that kept him out for the entire fourth quarter isn't anything that he expects to prevent him from playing Sunday against the Commanders, Tim McManus of ESPN.com reports.",RB
 4360238,Dameon Pierce,Philadelphia Eagles,Questionable,2026-10-27T14:28Z,Undisclosed,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Pierce didn't take the field for either of the Eagles' final two possessions of Monday's 38-21 loss to the Cowboys after sustaining an undisclosed injury with 8:38 remaining in the fourth quarter, Dave Zangaro of NBC Sports Philadelphia reports.",RB
 4428850,Dontayvion Wicks,Philadelphia Eagles,Questionable,2026-10-27T13:11Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,WR
@@ -648,7 +649,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4582836,Willie Lampkin,Philadelphia Eagles,Active,2026-10-25T00:27Z,,,,,,Lampkin (illness) does not have an injury designation against the Cowboys on Monday.,C
 4362805,Tyler Steen,Philadelphia Eagles,Active,2026-10-25T00:24Z,,,,,,Steen (shoulder) does not have an injury designation for Monday's game against the Cowboys.,G
 4240585,AJ Epenesa,Philadelphia Eagles,Active,2026-10-25T00:19Z,,,,,,Epenesa (back) does not carry an injury designation into Monday's game against Dallas.,DE
-3915106,Fred Johnson,Philadelphia Eagles,Active,2026-10-24T20:23Z,,,,,,,OT
 4035656,Ben Skowronek,Pittsburgh Steelers,Questionable,2026-10-27T13:11Z,Calf,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,WR
 4567979,Brandin Echols,Pittsburgh Steelers,Questionable,2026-10-27T13:11Z,Hamstring,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,CB
 4685261,Germie Bernard,Pittsburgh Steelers,Active,2026-10-26T23:49Z,,,,,,Bernard caught three of five targets for 27 yards in Sunday's 16-10 win over the Saints.,WR
@@ -704,7 +704,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3924327,Drew Lock,Seattle Seahawks,Questionable,2026-10-27T13:11Z,Elbow,Not Specified,Right,2026-11-02,QUESTIONABLE,questionable,QB
 4605491,Connor O'Toole,Seattle Seahawks,Questionable,2026-10-27T13:11Z,Hamstring,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,questionable,LB
 4426385,Zach Charbonnet,Seattle Seahawks,Questionable,2026-10-27T13:11Z,Knee - ACL,Surgery,Left,2026-11-02,QUESTIONABLE,questionable,RB
-4429835,George Holani,Seattle Seahawks,Active,2026-10-27T01:00Z,,,,,,Holani turned five carries into 11 yards and caught one of two passes for 12 yards during the Seahawks' 20-3 win over the Chiefs on Sunday.,RB
+4429835,George Holani,Seattle Seahawks,Active,2026-10-27T01:00Z,,,,,,Holani turned five carries into 11 yards and caught one of two targets for 12 yards during the Seahawks' 20-3 win over the Chiefs on Sunday.,RB
 2977187,Cooper Kupp,Seattle Seahawks,Active,2026-10-27T00:48Z,,,,,,Kupp caught both of his targets for 20 yards in a 20-3 win over the Chiefs on Sunday.,WR
 4597703,Tory Horton,Seattle Seahawks,Active,2026-10-27T00:41Z,,,,,,Horton failed to haul in his lone target and returned two kickoffs for 60 yards during the Seahawks' 20-3 win over the Chiefs on Sunday.,WR
 4426376,Charles Cross,Seattle Seahawks,Doubtful,2026-10-26T21:41Z,Ankle,Sprain,Not Specified,2026-11-02,DOUBTFUL,"Cross underwent an MRI and was diagnosed with a high ankle sprain, Ian Rapoport of NFL Network reports.",OT
