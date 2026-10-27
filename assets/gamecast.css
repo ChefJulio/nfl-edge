@@ -260,8 +260,8 @@ table.tm-pl { width: 100%; } table.tm-pl td.ij-who { width: 100%; max-width: 0; 
 .co-car td.co-role { white-space: normal; font-size: var(--fs-xs); line-height: 1.3; }
 /* the Coaches sheet: a tile per job (2 x 2 on a phone) picking whose panel shows */
 .co-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
-.co-tiles > :last-child:nth-child(odd) { grid-column: 1 / -1; }  /* five jobs: special teams across the bottom row */
-@media (min-width: 700px) { .co-tiles { grid-template-columns: repeat(5, minmax(0, 1fr)); } .co-tiles > :last-child:nth-child(odd) { grid-column: auto; } }
+.co-tiles > :last-child:nth-child(odd) { grid-column: 1 / -1; }  /* an odd count (a job missing): the last one across the row */
+@media (min-width: 700px) { .co-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } .co-tiles > :last-child:nth-child(odd) { grid-column: auto; } }
 .co-tile { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto auto auto; column-gap: 10px; row-gap: 1px;
   align-items: center; text-align: left; font: inherit; color: inherit; cursor: pointer; padding: 10px; min-width: 0;
   border: 1px solid var(--line); border-radius: var(--r-lg); background: color-mix(in srgb, var(--fg) 3%, transparent);
@@ -299,6 +299,24 @@ table.tm-pl { width: 100%; } table.tm-pl td.ij-who { width: 100%; max-width: 0; 
 .co-grp li:first-child { border-top: 0; }
 .co-sr { color: var(--muted); min-width: 0; }
 .co-grp li b { text-align: right; flex: none; max-width: 55%; }
+/* a coach's habits this season (owner 2026-10-26): a row per stat, the value, a dot on the league's spread between two
+   labelled ends, the rank in words; neutral (a style stat isn't good or bad) */
+.co-sec { margin-top: 14px; }
+.co-sec > .pc-k { margin-bottom: 4px; }
+.co-row { padding: 8px 0; border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
+.co-sec > .pc-k + .co-row { border-top: 0; }
+.co-rowh { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.co-rowh span { font-size: var(--fs-sm); }
+.co-rowh b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.co-rowb { position: relative; height: 4px; margin: 8px 5px 2px; border-radius: 2px;
+  background: var(--line); }
+.co-rowb i { position: absolute; top: 50%; width: 10px; height: 10px; margin-left: -5px; transform: translateY(-50%); border-radius: 50%;
+  background: var(--accent, #6d9eff); box-shadow: 0 0 0 2px var(--panel, #15181d); }
+/* a bar centered on the average coach: a tick marks the middle */
+.co-rowb.co-mid::before { content: ''; position: absolute; left: 50%; top: -3px; width: 2px; height: 10px; margin-left: -1px;
+  border-radius: 1px; background: var(--muted); opacity: .6; }
+.co-rowe { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--muted); letter-spacing: .02em; }
+.co-rows { margin-top: 3px; font-size: var(--fs-xs); color: var(--muted); line-height: 1.35; }
 /* rank chips with their season ("'20 23rd") and the unit's label (Off / Def) */
 .co-rky i { font-style: normal; font-weight: 600; opacity: .7; margin-right: 3px; }
 .co-rkl { display: inline-block; font-size: var(--fs-xs); font-weight: 700; color: var(--muted); margin-right: 4px; letter-spacing: .02em; }
@@ -779,6 +797,12 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .pc-tap.ts-head::after { right: 2px; font-size: 18px; }
 @media (hover: hover) { .pc-tap.ts-head:hover { background: none; } .pc-tap.ts-head:hover .pc-k { color: var(--accent); } }
 .ts-grid { display: grid; gap: 1px; margin-top: 6px; }
+/* the schedule strip as one tile (owner 2026-10-26): the tiles' frame, its chevron beside the heading */
+.pc-tap.ts-tap { display: block; margin: 8px 0 0; padding: 10px 12px 8px; }
+.pc-tap.ts-tap::after { top: 8px; transform: none; line-height: 22px; }
+.pc-tap.ts-tap .pc-k { padding-right: 16px; }
+.pc-page .pc-tap.ts-tap { margin: 0 0 8px; }
+.ts-tap .ts-c .nl { pointer-events: none; }
 .ts-c { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 2px 0 3px; border-radius: 6px; min-width: 0; }
 /* a timeline: past games full color with their result bar, this week's opponent ringed in the accent with a dot
    until it's final, later games dimmed */

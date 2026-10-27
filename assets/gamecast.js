@@ -771,9 +771,11 @@
       const bad = rows.filter(d => d.g.verdict === 'questionable');
       const sumLine = rows.length ? `<p class="dcs-sum">${rows.length} decisions: <b>${bad.length}</b> questionable${bad.length ? ` (${[...new Set(bad.map(d => d.team))].map(t => `${esc(t)} ${bad.filter(d => d.team === t).length}`).join(', ')})` : ''}, ${rows.filter(d => d.g.verdict === 'debatable').length} debatable.</p>` : '<p class="muted">No 4th downs or tries yet.</p>';
       const card = d => {
-        const g = d.g, [cls, lab] = VC[g.verdict], half = d.s.sec > 1800 ? d.s.sec - 1800 : d.s.sec;
+        const g = d.g, half = d.s.sec > 1800 ? d.s.sec - 1800 : d.s.sec;
+        // a toss-up (top two within the model's noise): neither option is marked best, either call reads "Toss-up"
+        const [cls, lab] = g.toss && g.verdict === 'fine' ? ['dcv-ok', 'Toss-up'] : VC[g.verdict];
         const what = d.kind === 'try' ? 'after a touchdown' : `4th &amp; ${d.s.togo} ${d.s.yl <= 50 ? `at ${esc(d.opp)} ${d.s.yl}` : `at own ${100 - d.s.yl}`}`;
-        const opts = g.options.map(o => `<span class="dcs-o${o.key === d.choice ? ' chose' : ''}${o.key === g.best ? ' best' : ''}">${esc(o.label)} <b>${pct(o.wp)}</b></span>`).join('');
+        const opts = g.options.map(o => `<span class="dcs-o${o.key === d.choice ? ' chose' : ''}${o.key === g.best && !g.toss ? ' best' : ''}">${esc(o.label)} <b>${pct(o.wp)}</b></span>`).join('');
         return `<li class="dcs-i ${cls}"><div class="dcs-h"><span class="dcs-t">Q${d.per} ${esc((d.p.clock || {}).displayValue || '')}</span>
           <b>${tmL(d.team)}</b> ${what}: ${VERB[d.choice]}<span class="dcv ${cls}">${g.early ? 'No grade' : lab}${g.verdict !== 'fine' ? ` &minus;${pts(g.cost)}` : ''}</span></div>
           <div class="dcs-ctx">${ctx(d)}</div>
@@ -2623,12 +2625,15 @@
       const [, o, home, pf, pa, day] = g, done = pf != null && pa != null;
       const res = done ? (pf > pa ? 'W' : pf < pa ? 'L' : 'T') : '';
       const tip = `Week ${w} · ${day || ''} · ${home ? 'vs' : '@'} ${(rtTeam(O, o).nick || o)}${done ? ` · ${res} ${pf}-${pa}` : ''}`;
-      return `<div class="ts-c${cur}" title="${esc(tip)}">${tmL(o, tLogo(o, 18))}<span class="ts-r ${res === 'W' ? 'w' : res === 'L' ? 'l' : res ? 't' : ''}"></span></div>`;
+      return `<div class="ts-c${cur}" title="${esc(tip)}">${tLogo(o, 18)}<span class="ts-r ${res === 'W' ? 'w' : res === 'L' ? 'l' : res ? 't' : ''}"></span></div>`;
     }).join('');
-    // the header names how hard the rest of it is and opens the schedule sheet (the logos open their teams)
-    const head = pw ? `<div class="pc-tap ts-head" role="button" tabindex="0" aria-haspopup="dialog" data-sheet="Schedule"><div class="pc-k">${esc(d.season)} schedule · ${ord(pw.sos_next_rk)} hardest left</div><template>${schedSheet(abbr, d, pw)}</template></div>`
-      : `<div class="pc-k">${esc(d.season)} schedule</div>`;
-    return `<div class="pc-box ts-box">${head}<div class="ts-grid" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${cells}</div></div>`;
+    // one tile (owner 2026-10-26: "make this schedule area a clickable tile ... remove all the individual clickable
+    // teams / matchups and make the whole tile pull up the schedule slide"): the logos are pictures, the tile opens the
+    // schedule sheet
+    const k = `<div class="pc-k">${esc(d.season)} schedule${pw ? ` · ${ord(pw.sos_next_rk)} hardest left` : ''}</div>`;
+    const grid = `<div class="ts-grid" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${cells}</div>`;
+    return pw ? `<div class="pc-tap ts-box ts-tap" role="button" tabindex="0" aria-haspopup="dialog" data-sheet="Schedule">${k}${grid}<template>${schedSheet(abbr, d, pw)}</template></div>`
+      : `<div class="pc-box ts-box">${k}${grid}</div>`;
   };
   // odds by week: lines going into each week, dashed to next week's best / worst case; schedule along the bottom
   const oddsChart = (abbr, O) => {
@@ -3090,7 +3095,7 @@
   })));
   const coachesTile = abbr => {
     loadCoaches();
-    if (!CO.d) return tapTile('Coaches', `<div class="pc-tapsub">${CO.d === false ? 'Not available' : 'Loading&hellip;'}</div>`, 'Coaches', '<p class="pc-sub">Loading&hellip;</p>');
+    if (!CO.d) return tapTile('Staff', `<div class="pc-tapsub">${CO.d === false ? 'Not available' : 'Loading&hellip;'}</div>`, 'Staff', '<p class="pc-sub">Loading&hellip;</p>');
     const T = CO.d.teams[abbr]; if (!T) return '';
     const h = T.hc || {}, r = h.rec || {}, yr = h.since ? CO.d.season - h.since + 1 : null, S = CO.d.season;
     const bioOf = x => (x && x.bio && CO.d.bios && CO.d.bios[x.bio]) || null;
@@ -3110,17 +3115,27 @@
       const tip = [e.note, e.src_date ? `confirmed ${e.src_date}` : '', e.src].filter(Boolean).join(' · ');
       return `<div class="co-calls" title="${esc(tip)}">Calls the ${side === 'off' ? 'offense' : 'defense'}: <b>${esc(e.name)}</b>${e.role && ROLE[e.role] ? ` <span class="muted">(${esc(ROLE[e.role].toLowerCase())})</span>` : ''}</div>`; };
     // the tiles: one per job
-    const unit = T.unit || [], badge = name => { const c = callsOf(name);
+    const badge = name => { const c = callsOf(name);
       return c.length ? `<span class="co-tc">${c.length === 2 ? 'Calls both sides' : c[0] === 'off' ? 'Calls the offense' : 'Calls the defense'}</span>` : ''; };
-    const JOBS = [['hc', 'Head coach'], ['gm', 'General manager'], ['oc', 'Offense'], ['dc', 'Defense'], ['st', 'Special teams']];
+    // (owner 2026-10-26: "let's add owners ... change the tile to staff") owner and GM, the head coach, the coordinators
+    const JOBS = [['own', 'Owner'], ['gm', 'General manager'], ['hc', 'Head coach'], ['oc', 'Offense'], ['dc', 'Defense'], ['st', 'Special teams']];
+    // each coach's power rank on the tile, no year (owner 2026-10-27: overall for the head coach, then offense, defense,
+    // special teams; "update it after week 1 of next year"): the live week's power table once its season has a game
+    // played, else the build's snapshot (T.pw: last season's final ranks through the offseason)
+    const live = DATA && (DATA.power || []).some(x => /[1-9]/.test(String(x.record || ''))) ? (DATA.power || []).find(x => x.team === abbr) : null;
+    const pwr = live ? [+DATA.season, live.rank, live.off_rk, live.def_rk, live.st_rk] : T.pw || [];
+    const PWK = { hc: 1, oc: 2, dc: 3, st: 4 }, PWN = { hc: 'overall', oc: 'offense', dc: 'defense', st: 'special teams' };
+    const pwChip = (r, what) => r ? `<span class="rk-b co-rky ${r <= 8 ? 'rk1' : r <= 16 ? 'rk2' : r <= 24 ? 'rk3' : 'rk4'}" title="${esc(`Power rankings, ${pwr[0]}: ${ord(r)} of 32 ${what} (1st = best)`)}">${ord(r)}</span>` : '';
     const tile = ([k, label]) => {
       const x = k === 'hc' ? h : T[k];
+      if (k === 'own' && (!x || !x.name)) return '';
       if (k === 'gm' && (!x || !x.name)) return `<div class="co-tile co-none"><span class="co-tr">${label}</span><b class="co-tn">${x && x.vacant ? 'Vacant' : 'None listed'}</b><span class="co-ts">${x && x.vacant ? 'the job is open' : ''}</span></div>`;
       if (!x || !x.name) return `<div class="co-tile co-none"><span class="co-tr">${label}</span><b class="co-tn">No coordinator</b><span class="co-ts">${esc(h.name || 'The head coach')} runs it</span>${badge(h.name)}</div>`;
       const sub = k === 'hc' ? [x.since ? `since ${x.since}` : '', r.here ? wl(r.here) : ''].filter(Boolean).join(' · ')
         : k === 'gm' ? [x.since ? `since ${x.since}` : '', x.rec ? wl(x.rec.reg) : ''].filter(Boolean).join(' · ') || esc(x.title || '')
+        : k === 'own' ? esc(x.title || '')
         : x.since ? `since ${x.since}` : '';
-      const rk = k === 'oc' ? rkYear(unit[0], S, 'offense') : k === 'dc' ? rkYear(unit[1], S, 'defense') : '';
+      const rk = PWK[k] != null ? pwChip(pwr[PWK[k]], PWN[k]) : '';
       return `<button type="button" class="co-tile${k === 'hc' ? ' on' : ''}" data-co="${k}" role="tab" aria-selected="${k === 'hc'}">
         ${coachPic(photoOf(x), x.name, 36)}<span class="co-tr">${label}</span><b class="co-tn">${esc(x.name)}</b>
         <span class="co-ts">${sub}${rk ? ` ${rk}` : ''}</span>${badge(x.name)}</button>`;
@@ -3134,6 +3149,70 @@
       ${gm.rec ? `<div class="tm-stats">${cell(wl(gm.rec.reg), `${esc(abbr)} since ${gm.since}`, 'Regular season, his seasons in charge')}${cell(wl(gm.rec.po), 'Playoffs')}</div>` : ''}
       ${gmb && (gmb.exec || []).length ? `<div class="pc-k co-sub">Front office career</div>${careerHtml({ coached: gmb.exec }, null)}` : ''}
       ${gmb && (gmb.coached || []).length ? `<div class="pc-k co-sub">Coaching career</div>${careerHtml(gmb, null)}` : ''}</div>` : '';
+    // ---- how they coach this season, in the panel of the one responsible (owner 2026-10-26: below the coaches' panels
+    // it read as the selected coach's, and style ranks read as good / bad): the offense's habits with whoever calls the
+    // offense, game management (4th downs, 2-point tries, challenges) with the head coach. Each a row: the value, where
+    // it sits in the league's spread (a bar between labelled ends), the rank in words; neutral colors.
+    const LG = CO.d.league || {}, tn = T.tend || {}, f4 = T.fourth || {};
+    const pct = v => `${Math.round(v * 100)}%`;
+    const word = (rk, hi, lo) => rk <= 8 ? hi : rk >= 25 ? lo : 'about average';
+    const trow = (label, val, k, v, rk, ends, desc, tip) => {
+      const lr = LG[k], pos = lr && lr[1] > lr[0] && v != null ? Math.max(0, Math.min(100, 100 * (v - lr[0]) / (lr[1] - lr[0]))) : null;
+      return `<div class="co-row"${tip ? ` title="${esc(tip)}"` : ''}><div class="co-rowh"><span>${label}</span><b>${val}</b></div>
+        ${pos != null ? `<div class="co-rowb"><i style="left:${pos.toFixed(1)}%"></i></div><div class="co-rowe"><span>${ends[0]}</span><span>${ends[1]}</span></div>` : ''}
+        <div class="co-rows">${rk ? `${ord(rk)} of 32 &middot; ` : ''}${desc}</div></div>`;
+    };
+    const tr = (k, label, f, ends, hi, lo, tip) => tn[k] ? trow(label, f(tn[k][0]), k, tn[k][0], tn[k][1], ends, word(tn[k][1], hi, lo), tip) : '';
+    // (owner 2026-10-27: pace and no-huddle rows dropped, "not informative in line with the rest")
+    // pass rate over expected (owner 2026-10-27): dropbacks against what an average team calls in the same spot; the
+    // bar's middle is expected, +/-10 points at the ends; the raw early-down share when it isn't available
+    const pe = tn.proe, offRows = pe ? `<div class="co-row" title="How often he calls a pass compared with an average NFL team in the same down, distance, field position, score and time (nflverse's expected pass rate), with the game in doubt and outside the last 2:00 of a half">
+        <div class="co-rowh"><span>Passes vs expected</span><b>${pe[0] > 0 ? '+' : pe[0] < 0 ? '&minus;' : ''}${Math.abs(pe[0]).toFixed(1)}%</b></div>
+        <div class="co-rowb co-mid"><i style="left:${Math.max(0, Math.min(100, 50 + 5 * pe[0])).toFixed(1)}%"></i></div><div class="co-rowe"><span>Run</span><span>Pass</span></div>
+        <div class="co-rows">${ord(pe[1])} of 32 &middot; ${word(pe[1], 'pass-leaning', 'run-leaning')}</div></div>`
+      : tr('pass_rate', 'Passes on early downs', pct, ['Run', 'Pass'], 'pass-leaning', 'run-leaning', 'Dropbacks on 1st and 2nd down with the game close (win chance 20-80%, quarters 1-3)');
+    const offSec = offRows ? `<div class="co-sec"><div class="pc-k">How the offense plays &middot; ${S}</div>${offRows}</div>` : '';
+    // 4th downs (owner 2026-10-26: "how bout a 0-99 aggressiveness rating"): against other coaches in the same spots
+    // (a typical-coach model), not our calculator; then the calculator's split (owner 2026-10-27): toss-ups (no right
+    // answer) read as a lean; clear calls as which way he parted from the model, never right / wrong (owner: "stick
+    // strictly to more or less aggressive")
+    // against an average coach in the same spots: z = (went - expected) in standard deviations of chance; the bar's middle
+    // is the average coach; past 1 SD "leans", past 2 the lean outright, else "Average" (owner 2026-10-27: a 0-99 "45/99
+    // reads like he went for it on 4th almost half the time"; ranks on a play or two were noise; then "shrink the like
+    // most coaches threshold a little and maybe don't use that wording": 1.5 -> 1)
+    const lean = (label, z, did, n, exp, tip) => `<div class="co-row" title="${esc(tip)} The middle of the bar is the average coach; the further the dot, the less the gap looks like chance on this many plays.">
+
+        <div class="co-rowh"><span>${label}</span><b>${z >= 2 ? 'Aggressive' : z >= 1 ? 'Leans aggressive' : z <= -2 ? 'Conservative' : z <= -1 ? 'Leans conservative' : 'Average'}</b></div>
+        <div class="co-rowb co-mid"><i style="left:${(50 + 20 * Math.max(-2.5, Math.min(2.5, z))).toFixed(1)}%"></i></div><div class="co-rowe"><span>Conservative</span><span>Aggressive</span></div>
+        <div class="co-rows">${did} ${n}; ${exp < 0.5 ? 'an average coach would almost never go in these spots either' : `an average coach would have about ${Math.round(exp)}`}</div></div>`;
+    const f4row = !f4.n || f4.z == null ? '' : `${lean('Fourth downs', f4.z, `Went for it ${f4.go} times on`, `${f4.n} fourth downs`, f4.exp_go,
+        'How often he goes for it on 4th down compared with an average NFL coach in the same spots (field position, distance, score, time, timeouts, the line).')}
+      ${f4.tn && f4.t_z != null ? lean('On toss-ups', f4.t_z, `Went for it ${f4.t_go} of`, `${f4.tn} times`, f4.t_exp,
+        "Fourth downs where our model's top two options were within 1.25 points of win chance: too close to call. How often he went for it there, against an average coach in the same spots.") : ''}
+      ${f4.clear && f4.c_bold != null ? (() => {
+        // against the model itself, not ranked against the league (the whole league kicks more than it says: MIN, 0 bolder
+        // and 6 more conservative, ranked 4th boldest): the middle is in step with the model
+        const net = f4.c_bold - f4.c_cons;
+        return `<div class="co-row" title="Fourth downs where our model saw one option ahead by 1.25+ points of win chance, and which way he went when he chose differently. The middle of the bar is in step with the model. A direction, not a verdict: coaches know things a model doesn't">
+        <div class="co-rowh"><span>Against our model</span><b>${net >= 2 ? 'Bolder' : net <= -2 ? 'More conservative' : 'In step'}</b></div>
+        <div class="co-rowb co-mid"><i style="left:${Math.max(0, Math.min(100, 50 + 100 * net / f4.clear)).toFixed(1)}%"></i></div><div class="co-rowe"><span>Conservative</span><span>Aggressive</span></div>
+        <div class="co-rows">Of ${f4.clear} clear call${f4.clear === 1 ? '' : 's'}: kicked when it said go ${f4.c_cons}, went when it said kick ${f4.c_bold}</div></div>`; })() : ''}`;
+    // two-point tries against a typical coach in the same spot (owner 2026-10-27: down 2 with 0:30 left "DUH you're going
+    // for 2"; up 16 in the 2nd quarter is "whatever"), centered like the toss-ups; the raw share without it misread both
+    const tp = T.two, twoRow = tp && tp.n ? lean('Two-point tries', tp.z, `Went for two ${tp.go} of`, `${tp.n} times`, tp.exp,
+        'Tries after a touchdown, against an average coach with the same score and time left: down 2 late almost everyone goes for two, early in a game almost no one does.')
+      : tr('two_pt', 'Two-point tries', pct, ['Rarely', 'Often'], 'goes for two often', 'rarely goes for two', 'Share of tries after a touchdown');
+    // clock management (owner 2026-10-27): 2nd-half timeouts before the last 2:00, per game against the league
+    const et = tn.early_to, toRow = et && et.g ? `<div class="co-row" title="Timeouts called in the 3rd and 4th quarters before the last 2:00, when they're worth the least: usually to dodge a delay of game or fix the personnel. Spending them there leaves fewer for the end of the game. The middle of the bar is the league average">
+        <div class="co-rowh"><span>Early 2nd-half timeouts</span><b>${et.z >= 2 ? 'Spends them' : et.z >= 1 ? 'Leans spending' : et.z <= -2 ? 'Saves them' : et.z <= -1 ? 'Leans saving' : 'Average'}</b></div>
+        <div class="co-rowb co-mid"><i style="left:${(50 + 20 * Math.max(-2.5, Math.min(2.5, et.z))).toFixed(1)}%"></i></div><div class="co-rowe"><span>Saves them</span><span>Spends them</span></div>
+        <div class="co-rows">${et.n} in ${et.g} game${et.g === 1 ? '' : 's'} (${(et.n / et.g).toFixed(1)} a game); league ${et.lg.toFixed(1)}</div></div>` : '';
+    const gmRows = [f4row, twoRow, toRow,
+      tn.chal ? `<div class="co-row"><div class="co-rowh"><span>Challenges won</span><b>${tn.chal[1]} of ${tn.chal[0]}</b></div></div>` : ''].join('');
+    const gmSec = gmRows ? `<div class="co-sec"><div class="pc-k">Game management &middot; ${S}</div>${gmRows}</div>` : '';
+    // whoever calls the offense gets its habits (the head coach when he does: Andy Reid, Kevin O'Connell)
+    const offCaller = P && !P.stale && P.off && P.off.name;
+    const hcCalls = offCaller && offCaller === h.name;
     // the head coach's panel
     const hb = bioOf(h);
     const seasons = (h.seasons || []).length ? `<details class="co-more"><summary>Seasons with ${esc(abbr)} (${h.seasons.length})</summary><table class="bx co-tbl"><thead><tr><th>Season</th><th class="num">Record</th><th class="num" title="Offense, EPA per play">Off</th><th class="num" title="Defense, EPA per play allowed">Def</th></tr></thead><tbody>${
@@ -3144,30 +3223,23 @@
       <div class="tm-stats">${cell(wl(r.here), `With ${esc(abbr)}`, 'Regular season')}${cell(wl(r.car), 'Career', 'Regular season, every club')}
         ${cell(r.po ? wl(r.po) : '', 'Playoffs')}${cell(wl(r.fav), 'Favored', 'Every game he was favored in (closing line)')}
         ${cell(wl(r.dog), 'Underdog')}${cell(wl(r.ats), 'vs spread', 'Covered - failed - push, every game with a line')}</div>
+      ${gmSec}${hcCalls ? offSec : ''}
       ${(h.stops || []).length > 1 ? `<div class="pc-k co-sub">Head coaching stops</div><div class="co-stops">${h.stops.map(([t, a, b, w, l, ti]) => `<span>${tLogo(t, 16)} ${esc(t)} ${yrs(a, b)} <b>${wl([w, l, ti])}</b></span>`).join('')}</div>` : ''}
       ${seasons}
       ${hb && (hb.coached || []).length ? `<div class="pc-k co-sub">Coaching history</div>${careerHtml(hb, null)}` : ''}</div>`;
-    // a coordinator's panel
+    // a coordinator's panel (the offensive coordinator carries the offense's habits unless the head coach calls it)
     const coPanel = ([k, label]) => { const c = T[k], side = k === 'oc' ? 'off' : k === 'dc' ? 'def' : null;
       if (!c) return '';
       const b = bioOf(c), car = b && (b.coached || []).length ? careerHtml(b, k) : jobsHtml(c.jobs, k);
       return `<div class="pc-box co-panel" data-co="${k}" hidden><div class="co-head">${coachPic(photoOf(c), c.name, 52)}<div><div class="co-nm big">${esc(c.name)}</div>
           <div class="pc-sub">${({ oc: 'Offensive', dc: 'Defensive', st: 'Special teams' })[k]} coordinator${c.since ? ` since ${c.since}` : ''}</div></div></div>
-        ${side ? callsLine(side) : ''}${b ? playedHtml(b) : ''}${car ? `<div class="pc-k co-sub">Coaching history</div>${car}` : ''}</div>`; };
-    const tn = T.tend || {}, tc = (k, lab, f, tip) => tn[k] ? `<div class="tm-st" title="${esc(tip)}"><div class="pc-k">${lab}</div><div class="tm-stv">${f(tn[k][0])}</div>${rkChip(tn[k][1])}</div>` : '';
-    const pct = v => `${Math.round(v * 100)}%`;
-    const tendBox = Object.keys(tn).length ? `<div class="pc-box"><div class="pc-k">Tendencies · ${S}</div><div class="tm-stats">
-        ${tc('pass_rate', 'Early-down pass', pct, 'Dropbacks on 1st and 2nd down with the game close (win chance 20-80%, quarters 1-3); 1st = passes most')}
-        ${tc('pace', 'Sec / snap', v => v.toFixed(0), 'Median seconds between snaps within a drive, game close; 1st = fastest')}
-        ${tc('no_huddle', 'No-huddle', pct, 'Share of snaps; 1st = most')}${tc('two_pt', '2-pt tries', pct, 'Two-point tries after touchdowns; 1st = most')}
-        ${tn.chal ? cell(`${tn.chal[1]}/${tn.chal[0]}`, 'Challenges won') : ''}</div></div>` : '';
-    const f4 = T.fourth || {};
-    const f4Box = f4.n ? `<div class="pc-box"><div class="pc-k">Fourth downs vs our model · ${S}</div><div class="tm-stats">
-        ${cell(`${f4.go}`, 'Went for it', `Of ${f4.n} fourth downs`)}${cell(`${f4.model_go}`, 'Model said go')}
-        ${cell(`${Math.round(100 * f4.agree / f4.n)}%`, 'Agreed', 'Same call as our model')}${cell(`${f4.bad}`, 'Questionable', '3+ points of win chance worse than the best call')}
-        <div class="tm-st" title="Times he went for it minus the times our model said go; ranked per fourth down, 1st = boldest"><div class="pc-k">Go vs model</div><div class="tm-stv">${f4.go - f4.model_go > 0 ? '+' : ''}${f4.go - f4.model_go}</div>${rkChip(f4.aggr_rk)}</div></div></div>` : '';
+        ${side ? callsLine(side) : ''}${b ? playedHtml(b) : ''}${k === 'oc' && !hcCalls ? offSec : ''}${car ? `<div class="pc-k co-sub">Coaching history</div>${car}` : ''}</div>`; };
     const src = '<p class="pc-sub muted">Staffs and careers: Wikipedia (CC BY-SA). Records: nflverse; this season\'s head coach: ESPN. Unit ranks: EPA per play.</p>';
-    return tapTile('Coaches', face, 'Coaches', tiles + hcPanel + gmPanel + JOBS.slice(2).map(coPanel).join('') + tendBox + f4Box + staffHtml(T.all) + src);
+    const ow = T.own || {}, owb = bioOf(ow);
+    const ownPanel = ow.name ? `<div class="pc-box co-panel" data-co="own" hidden><div class="co-head">${coachPic(photoOf(ow), ow.name, 52)}<div><div class="co-nm big">${esc(ow.name)}</div>
+        <div class="pc-sub">${esc(ow.title || 'Owner')}</div></div></div>${owb ? playedHtml(owb) : ''}
+      ${owb && (owb.exec || []).length ? `<div class="pc-k co-sub">Front office career</div>${careerHtml({ coached: owb.exec }, null)}` : ''}</div>` : '';
+    return tapTile('Staff', face, 'Staff', tiles + hcPanel + gmPanel + ownPanel + JOBS.filter(j => ['oc', 'dc', 'st'].includes(j[0])).map(coPanel).join('') + staffHtml(T.all) + src);
   };
   // the Power ranking box (the Power tile's sheet)
   const teamPowerBox = pw => {

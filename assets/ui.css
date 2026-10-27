@@ -194,3 +194,7 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; a
 /* (owner 2026-10-23: "why can i scroll left and right on mobile on that page") no page pans sideways: anything wider
    scrolls inside its own box. clip, not hidden: hidden would make the page a scroll container and break sticky bars */
 html, body { overflow-x: clip; }
+
+/* visually hidden, still read by screen readers and by fetchers that don't run the page (week.html #about-site) */
+.vh { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap; border: 0; }

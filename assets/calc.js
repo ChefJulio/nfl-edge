@@ -219,7 +219,9 @@
   // (owner 2026-10-23: "can we make this presentation a little nicer") a card per call: who and the verdict up top, the
   // situation as chips, the cost as a badge; opened, each option's chance and what going (or kicking) led to
   function gradedRow(r, i) {
-    const { q, clock } = clockAt(r.s), right = r.b === r.c, close = !right && r.x < TOSS;
+    // a toss-up (the top two options within TOSS): no best call, and either of the two reads "Toss-up" (owner 2026-10-27)
+    const top = Object.values(r.op).filter(v => v != null).sort((a, b) => b - a), tu = top.length > 1 && top[0] - top[1] < TOSS;
+    const { q, clock } = clockAt(r.s), right = r.b === r.c && !tu, close = !right && r.x < TOSS;
     const lvl = right ? 'ok' : close ? 'toss' : r.x >= QUESTION ? 'bad' : 'meh';
     const badge = right ? '<span class="gc-badge ok">Right call</span>' : close ? '<span class="gc-badge toss">Toss-up</span>'
       : `<span class="gc-badge ${lvl}"><small>${SHORT[r.b]}</small><b>+${pp(r.x)}</b></span>`;
@@ -241,7 +243,7 @@
         <div class="gc-v"><span><b>${esc(CALL[r.c])}</b>${happened ? ` (${happened})` : ''}${right || close ? '' : ` &middot; <span class="gc-${lvl}">${BETTER[r.b]} was ${pp(r.x)} better</span>`}</span>${res}</div>
       </summary>
       <div class="gc-more">
-        <div class="gc-opts">${opts.map(([k, v]) => `<div class="cx-opt${k === r.b ? ' best' : ''}"><span class="cx-on">${esc(OPTL[k])}${k === r.c ? ' <em>their call</em>' : ''}</span>
+        <div class="gc-opts">${opts.map(([k, v]) => `<div class="cx-opt${k === r.b && !tu ? ' best' : ''}"><span class="cx-on">${esc(OPTL[k])}${k === r.c ? ' <em>their call</em>' : ''}</span>
           <span class="cx-bar"><i style="width:${(100 * v).toFixed(1)}%"></i></span><b>${pc(v)}</b></div>`).join('')}</div>
         ${go}${fg}
         <blockquote class="gc-desc">${esc(r.ds || '')}</blockquote>
