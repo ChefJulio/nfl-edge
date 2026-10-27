@@ -3140,6 +3140,33 @@
       ${gm.rec ? `<div class="tm-stats">${cell(wl(gm.rec.reg), `${esc(abbr)} since ${gm.since}`, 'Regular season, his seasons in charge')}${cell(wl(gm.rec.po), 'Playoffs')}</div>` : ''}
       ${gmb && (gmb.exec || []).length ? `<div class="pc-k co-sub">Front office career</div>${careerHtml({ coached: gmb.exec }, null)}` : ''}
       ${gmb && (gmb.coached || []).length ? `<div class="pc-k co-sub">Coaching career</div>${careerHtml(gmb, null)}` : ''}</div>` : '';
+    // ---- how they coach this season, in the panel of the one responsible (owner 2026-10-26: below the coaches' panels
+    // it read as the selected coach's, and style ranks read as good / bad): the offense's habits with whoever calls the
+    // offense, game management (4th downs, 2-point tries, challenges) with the head coach. Each a row: the value, where
+    // it sits in the league's spread (a bar between labelled ends), the rank in words; neutral colors.
+    const LG = CO.d.league || {}, tn = T.tend || {}, f4 = T.fourth || {};
+    const pct = v => `${Math.round(v * 100)}%`;
+    const word = (rk, hi, lo) => rk <= 8 ? hi : rk >= 25 ? lo : 'about average';
+    const trow = (label, val, k, v, rk, ends, desc, tip) => {
+      const lr = LG[k], pos = lr && lr[1] > lr[0] && v != null ? Math.max(0, Math.min(100, 100 * (v - lr[0]) / (lr[1] - lr[0]))) : null;
+      return `<div class="co-row"${tip ? ` title="${esc(tip)}"` : ''}><div class="co-rowh"><span>${label}</span><b>${val}</b></div>
+        ${pos != null ? `<div class="co-rowb"><i style="left:${pos.toFixed(1)}%"></i></div><div class="co-rowe"><span>${ends[0]}</span><span>${ends[1]}</span></div>` : ''}
+        <div class="co-rows">${rk ? `${ord(rk)} of 32 &middot; ` : ''}${desc}</div></div>`;
+    };
+    const tr = (k, label, f, ends, hi, lo, tip) => tn[k] ? trow(label, f(tn[k][0]), k, tn[k][0], tn[k][1], ends, word(tn[k][1], hi, lo), tip) : '';
+    const offRows = [tr('pass_rate', 'Passes on early downs', pct, ['Run', 'Pass'], 'pass-leaning', 'run-leaning', 'Dropbacks on 1st and 2nd down with the game close (win chance 20-80%, quarters 1-3)'),
+      tr('pace', 'Seconds between snaps', v => `${v.toFixed(0)} s`, ['Fast', 'Slow'], 'fast', 'slow', 'Median time from snap to snap within a drive, game close'),
+      tr('no_huddle', 'No-huddle snaps', pct, ['Rarely', 'Often'], 'uses it often', 'rarely uses it', 'Share of snaps')].join('');
+    const offSec = offRows ? `<div class="co-sec"><div class="pc-k">How the offense plays &middot; ${S}</div>${offRows}</div>` : '';
+    const gmRows = [f4.n ? trow('Went for it on 4th down', `${f4.go} of ${f4.n}`, 'aggr', f4.aggr, f4.aggr_rk, ['Cautious', 'Bold'],
+        `our model said go ${f4.model_go} times; next to that, ${word(f4.aggr_rk, 'bolder than most teams', 'more cautious than most teams').replace('about average', 'about average')} (every team goes for it less than the model). Same call as the model ${Math.round(100 * f4.agree / f4.n)}%${f4.bad ? `, ${f4.bad} questionable` : ''}`,
+        'Every 4th down vs our calculator: went for it minus the model\'s go calls, per 4th down. Every team goes for it less than the model would; the bar ranks them against each other. Questionable = 3+ points of win chance worse than the best call')
+      : '', tr('two_pt', 'Two-point tries', pct, ['Rarely', 'Often'], 'goes for two often', 'rarely goes for two', 'Share of tries after a touchdown'),
+      tn.chal ? `<div class="co-row"><div class="co-rowh"><span>Challenges won</span><b>${tn.chal[1]} of ${tn.chal[0]}</b></div></div>` : ''].join('');
+    const gmSec = gmRows ? `<div class="co-sec"><div class="pc-k">Game management &middot; ${S}</div>${gmRows}</div>` : '';
+    // whoever calls the offense gets its habits (the head coach when he does: Andy Reid, Kevin O'Connell)
+    const offCaller = P && !P.stale && P.off && P.off.name;
+    const hcCalls = offCaller && offCaller === h.name;
     // the head coach's panel
     const hb = bioOf(h);
     const seasons = (h.seasons || []).length ? `<details class="co-more"><summary>Seasons with ${esc(abbr)} (${h.seasons.length})</summary><table class="bx co-tbl"><thead><tr><th>Season</th><th class="num">Record</th><th class="num" title="Offense, EPA per play">Off</th><th class="num" title="Defense, EPA per play allowed">Def</th></tr></thead><tbody>${
@@ -3150,34 +3177,23 @@
       <div class="tm-stats">${cell(wl(r.here), `With ${esc(abbr)}`, 'Regular season')}${cell(wl(r.car), 'Career', 'Regular season, every club')}
         ${cell(r.po ? wl(r.po) : '', 'Playoffs')}${cell(wl(r.fav), 'Favored', 'Every game he was favored in (closing line)')}
         ${cell(wl(r.dog), 'Underdog')}${cell(wl(r.ats), 'vs spread', 'Covered - failed - push, every game with a line')}</div>
+      ${gmSec}${hcCalls ? offSec : ''}
       ${(h.stops || []).length > 1 ? `<div class="pc-k co-sub">Head coaching stops</div><div class="co-stops">${h.stops.map(([t, a, b, w, l, ti]) => `<span>${tLogo(t, 16)} ${esc(t)} ${yrs(a, b)} <b>${wl([w, l, ti])}</b></span>`).join('')}</div>` : ''}
       ${seasons}
       ${hb && (hb.coached || []).length ? `<div class="pc-k co-sub">Coaching history</div>${careerHtml(hb, null)}` : ''}</div>`;
-    // a coordinator's panel
+    // a coordinator's panel (the offensive coordinator carries the offense's habits unless the head coach calls it)
     const coPanel = ([k, label]) => { const c = T[k], side = k === 'oc' ? 'off' : k === 'dc' ? 'def' : null;
       if (!c) return '';
       const b = bioOf(c), car = b && (b.coached || []).length ? careerHtml(b, k) : jobsHtml(c.jobs, k);
       return `<div class="pc-box co-panel" data-co="${k}" hidden><div class="co-head">${coachPic(photoOf(c), c.name, 52)}<div><div class="co-nm big">${esc(c.name)}</div>
           <div class="pc-sub">${({ oc: 'Offensive', dc: 'Defensive', st: 'Special teams' })[k]} coordinator${c.since ? ` since ${c.since}` : ''}</div></div></div>
-        ${side ? callsLine(side) : ''}${b ? playedHtml(b) : ''}${car ? `<div class="pc-k co-sub">Coaching history</div>${car}` : ''}</div>`; };
-    const tn = T.tend || {}, tc = (k, lab, f, tip) => tn[k] ? `<div class="tm-st" title="${esc(tip)}"><div class="pc-k">${lab}</div><div class="tm-stv">${f(tn[k][0])}</div>${rkChip(tn[k][1])}</div>` : '';
-    const pct = v => `${Math.round(v * 100)}%`;
-    const tendBox = Object.keys(tn).length ? `<div class="pc-box"><div class="pc-k">Tendencies · ${S}</div><div class="tm-stats">
-        ${tc('pass_rate', 'Early-down pass', pct, 'Dropbacks on 1st and 2nd down with the game close (win chance 20-80%, quarters 1-3); 1st = passes most')}
-        ${tc('pace', 'Sec / snap', v => v.toFixed(0), 'Median seconds between snaps within a drive, game close; 1st = fastest')}
-        ${tc('no_huddle', 'No-huddle', pct, 'Share of snaps; 1st = most')}${tc('two_pt', '2-pt tries', pct, 'Two-point tries after touchdowns; 1st = most')}
-        ${tn.chal ? cell(`${tn.chal[1]}/${tn.chal[0]}`, 'Challenges won') : ''}</div></div>` : '';
-    const f4 = T.fourth || {};
-    const f4Box = f4.n ? `<div class="pc-box"><div class="pc-k">Fourth downs vs our model · ${S}</div><div class="tm-stats">
-        ${cell(`${f4.go}`, 'Went for it', `Of ${f4.n} fourth downs`)}${cell(`${f4.model_go}`, 'Model said go')}
-        ${cell(`${Math.round(100 * f4.agree / f4.n)}%`, 'Agreed', 'Same call as our model')}${cell(`${f4.bad}`, 'Questionable', '3+ points of win chance worse than the best call')}
-        <div class="tm-st" title="Times he went for it minus the times our model said go; ranked per fourth down, 1st = boldest"><div class="pc-k">Go vs model</div><div class="tm-stv">${f4.go - f4.model_go > 0 ? '+' : ''}${f4.go - f4.model_go}</div>${rkChip(f4.aggr_rk)}</div></div></div>` : '';
+        ${side ? callsLine(side) : ''}${b ? playedHtml(b) : ''}${k === 'oc' && !hcCalls ? offSec : ''}${car ? `<div class="pc-k co-sub">Coaching history</div>${car}` : ''}</div>`; };
     const src = '<p class="pc-sub muted">Staffs and careers: Wikipedia (CC BY-SA). Records: nflverse; this season\'s head coach: ESPN. Unit ranks: EPA per play.</p>';
     const ow = T.own || {}, owb = bioOf(ow);
     const ownPanel = ow.name ? `<div class="pc-box co-panel" data-co="own" hidden><div class="co-head">${coachPic(photoOf(ow), ow.name, 52)}<div><div class="co-nm big">${esc(ow.name)}</div>
         <div class="pc-sub">${esc(ow.title || 'Owner')}</div></div></div>${owb ? playedHtml(owb) : ''}
       ${owb && (owb.exec || []).length ? `<div class="pc-k co-sub">Front office career</div>${careerHtml({ coached: owb.exec }, null)}` : ''}</div>` : '';
-    return tapTile('Staff', face, 'Staff', tiles + hcPanel + gmPanel + ownPanel + JOBS.filter(j => ['oc', 'dc', 'st'].includes(j[0])).map(coPanel).join('') + tendBox + f4Box + staffHtml(T.all) + src);
+    return tapTile('Staff', face, 'Staff', tiles + hcPanel + gmPanel + ownPanel + JOBS.filter(j => ['oc', 'dc', 'st'].includes(j[0])).map(coPanel).join('') + staffHtml(T.all) + src);
   };
   // the Power ranking box (the Power tile's sheet)
   const teamPowerBox = pw => {

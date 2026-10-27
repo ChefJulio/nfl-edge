@@ -173,15 +173,17 @@ def tendencies(pbp: pd.DataFrame, season: int) -> dict:
       out.setdefault(t, {})[k] = [round(float(v), 3), i]
   for t, x in chal.groupby("team"):
     out.setdefault(t, {})["chal"] = [int(len(x)), int(x.won.sum())]
-  return out
+  # the league's spread of each, for the sheet's bars (owner 2026-10-26: where a team sits, not a good / bad chip)
+  league = {k: [round(float(ser.min()), 3), round(float(ser.max()), 3)] for k, ser in m.items() if len(ser.dropna())}
+  return out, league
 
 
 def fourth(site: Path, season: int) -> dict:
   """team -> {n, go, model_go, agree, bad, wp_lost, aggr_rk}: this season's graded fourth downs (calc_grade.mjs)."""
   f = site / "data" / "calc" / f"graded_{season}.json"
-  if not f.exists(): return {}
+  if not f.exists(): return {}, None
   rows = pd.DataFrame(json.loads(f.read_text(encoding="utf-8"))["rows"])
-  if rows.empty: return {}
+  if rows.empty: return {}, None
   rows["t"] = rows.t.replace(RELOCATED)
   out = {}
   for t, x in rows.groupby("t"):
@@ -191,7 +193,7 @@ def fourth(site: Path, season: int) -> dict:
   ag = {t: (v["go"] - v["model_go"]) / max(1, v["n"]) for t, v in out.items()}
   for i, t in enumerate(sorted(ag, key=lambda t: -ag[t]), 1):
     out[t]["aggr"] = round(ag[t], 3); out[t]["aggr_rk"] = i
-  return out
+  return out, ([round(min(ag.values()), 3), round(max(ag.values()), 3)] if ag else None)
 
 
 def player_card(b: dict, name: str, pfr: dict, P: pd.DataFrame, last_season: dict) -> str | None:
@@ -321,8 +323,8 @@ def main() -> None:
   cur_hc = {t: (heads.get(t) or {}).get("name") or now[t].get("hc") for t in C.NAME}
   sched = pd.concat([sched[sched.season != current], C.fix_current(sched[sched.season == current], current, current, cur_hc, RELOCATED)])
   G = team_games(sched)
-  T = tendencies(pbp, current) if pbp is not None else {}
-  F4 = fourth(site, current)
+  T, TL = tendencies(pbp, current) if pbp is not None else ({}, {})
+  F4, F4L = fourth(site, current)
   ST = stints(staff, U)
   PC, stale = play_callers(now, cur_hc)
   if stale:  # a GitHub Actions warning on the run, and the tile says "to recheck" instead of a name
@@ -400,7 +402,8 @@ def main() -> None:
                 "tend": T.get(t, {}), "fourth": F4.get(t, {}), "calls": PC.get(t)}
   doc = {"v": V, "season": current, "built": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
          "src": {"staff": "Wikipedia staff templates, season articles and coaches' pages (CC BY-SA)", "head": "nflverse schedules, ESPN"},
-         "teams": teams, "bios": {k: v for k, v in B.items() if v}}  # by page title; teams name theirs (bio)
+         "teams": teams, "bios": {k: v for k, v in B.items() if v},  # by page title; teams name theirs (bio)
+         "league": {**TL, **({"aggr": F4L} if F4L else {})}}  # each tendency's league [min, max]
   cp_f.parent.mkdir(parents=True, exist_ok=True)
   cp_f.write_text(json.dumps({"f": lp.get("f") if fresh else datetime.now(timezone.utc).date().isoformat(), "teams": CP},
                              separators=(",", ":")), encoding="utf-8")

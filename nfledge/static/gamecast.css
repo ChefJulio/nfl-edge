@@ -299,6 +299,21 @@ table.tm-pl { width: 100%; } table.tm-pl td.ij-who { width: 100%; max-width: 0; 
 .co-grp li:first-child { border-top: 0; }
 .co-sr { color: var(--muted); min-width: 0; }
 .co-grp li b { text-align: right; flex: none; max-width: 55%; }
+/* a coach's habits this season (owner 2026-10-26): a row per stat, the value, a dot on the league's spread between two
+   labelled ends, the rank in words; neutral (a style stat isn't good or bad) */
+.co-sec { margin-top: 14px; }
+.co-sec > .pc-k { margin-bottom: 4px; }
+.co-row { padding: 8px 0; border-top: 1px solid color-mix(in srgb, var(--line) 60%, transparent); }
+.co-sec > .pc-k + .co-row { border-top: 0; }
+.co-rowh { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.co-rowh span { font-size: var(--fs-sm); }
+.co-rowh b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.co-rowb { position: relative; height: 4px; margin: 8px 5px 2px; border-radius: 2px;
+  background: var(--line); }
+.co-rowb i { position: absolute; top: 50%; width: 10px; height: 10px; margin-left: -5px; transform: translateY(-50%); border-radius: 50%;
+  background: var(--accent, #6d9eff); box-shadow: 0 0 0 2px var(--panel, #15181d); }
+.co-rowe { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--muted); letter-spacing: .02em; }
+.co-rows { margin-top: 3px; font-size: var(--fs-xs); color: var(--muted); line-height: 1.35; }
 /* rank chips with their season ("'20 23rd") and the unit's label (Off / Def) */
 .co-rky i { font-style: normal; font-weight: 600; opacity: .7; margin-right: 3px; }
 .co-rkl { display: inline-block; font-size: var(--fs-xs); font-weight: 700; color: var(--muted); margin-right: 4px; letter-spacing: .02em; }
