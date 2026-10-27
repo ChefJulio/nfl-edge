@@ -3115,10 +3115,17 @@
       const tip = [e.note, e.src_date ? `confirmed ${e.src_date}` : '', e.src].filter(Boolean).join(' · ');
       return `<div class="co-calls" title="${esc(tip)}">Calls the ${side === 'off' ? 'offense' : 'defense'}: <b>${esc(e.name)}</b>${e.role && ROLE[e.role] ? ` <span class="muted">(${esc(ROLE[e.role].toLowerCase())})</span>` : ''}</div>`; };
     // the tiles: one per job
-    const unit = T.unit || [], badge = name => { const c = callsOf(name);
+    const badge = name => { const c = callsOf(name);
       return c.length ? `<span class="co-tc">${c.length === 2 ? 'Calls both sides' : c[0] === 'off' ? 'Calls the offense' : 'Calls the defense'}</span>` : ''; };
     // (owner 2026-10-26: "let's add owners ... change the tile to staff") owner and GM, the head coach, the coordinators
     const JOBS = [['own', 'Owner'], ['gm', 'General manager'], ['hc', 'Head coach'], ['oc', 'Offense'], ['dc', 'Defense'], ['st', 'Special teams']];
+    // each coach's power rank on the tile, no year (owner 2026-10-27: overall for the head coach, then offense, defense,
+    // special teams; "update it after week 1 of next year"): the live week's power table once its season has a game
+    // played, else the build's snapshot (T.pw: last season's final ranks through the offseason)
+    const live = DATA && (DATA.power || []).some(x => /[1-9]/.test(String(x.record || ''))) ? (DATA.power || []).find(x => x.team === abbr) : null;
+    const pwr = live ? [+DATA.season, live.rank, live.off_rk, live.def_rk, live.st_rk] : T.pw || [];
+    const PWK = { hc: 1, oc: 2, dc: 3, st: 4 }, PWN = { hc: 'overall', oc: 'offense', dc: 'defense', st: 'special teams' };
+    const pwChip = (r, what) => r ? `<span class="rk-b co-rky ${r <= 8 ? 'rk1' : r <= 16 ? 'rk2' : r <= 24 ? 'rk3' : 'rk4'}" title="${esc(`Power rankings, ${pwr[0]}: ${ord(r)} of 32 ${what} (1st = best)`)}">${ord(r)}</span>` : '';
     const tile = ([k, label]) => {
       const x = k === 'hc' ? h : T[k];
       if (k === 'own' && (!x || !x.name)) return '';
@@ -3128,7 +3135,7 @@
         : k === 'gm' ? [x.since ? `since ${x.since}` : '', x.rec ? wl(x.rec.reg) : ''].filter(Boolean).join(' · ') || esc(x.title || '')
         : k === 'own' ? esc(x.title || '')
         : x.since ? `since ${x.since}` : '';
-      const rk = k === 'oc' ? rkYear(unit[0], S, 'offense') : k === 'dc' ? rkYear(unit[1], S, 'defense') : '';
+      const rk = PWK[k] != null ? pwChip(pwr[PWK[k]], PWN[k]) : '';
       return `<button type="button" class="co-tile${k === 'hc' ? ' on' : ''}" data-co="${k}" role="tab" aria-selected="${k === 'hc'}">
         ${coachPic(photoOf(x), x.name, 36)}<span class="co-tr">${label}</span><b class="co-tn">${esc(x.name)}</b>
         <span class="co-ts">${sub}${rk ? ` ${rk}` : ''}</span>${badge(x.name)}</button>`;

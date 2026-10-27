@@ -180,6 +180,19 @@ def tendencies(pbp: pd.DataFrame, season: int) -> dict:
   return out, league
 
 
+def power_ranks(site: Path, last: dict) -> dict:
+  """team -> [season, overall, offense, defense, special teams] power ranks: the Staff tiles' fallback until the live
+  season has a game played (owner 2026-10-27: "update it after week 1 of next year"); the tiles read the live week's
+  power table once it does. Taken from the site's week (index.json) once its season has games, else kept from the
+  last build (last season's final ranks through the offseason and a new season's preseason)."""
+  f = site / "index.json"
+  d = json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
+  played = any(sum(int(v) for v in re.findall(r"\d+", r.get("record") or "")) > 0 for r in d.get("power") or [])
+  if not played:
+    return {t: v.get("pw") for t, v in (last.get("teams") or {}).items() if v.get("pw")}
+  return {r["team"]: [int(d["season"]), r.get("rank"), r.get("off_rk"), r.get("def_rk"), r.get("st_rk")] for r in d["power"]}
+
+
 TWO_FROM = 2022  # the typical-coach two-point model's first season (as the 4th-down one: graded seasons 2022 on)
 
 
@@ -384,6 +397,7 @@ def main() -> None:
   G = team_games(sched)
   T, TL = tendencies(pbp, current) if pbp is not None else ({}, {})
   F4, F4L = fourth(site, current)
+  PW = power_ranks(site, last)
   # finished seasons are read once (the calculator's build caches the same files)
   hist2 = [cache.get("pbp_calc", s, lambda s=s: nfl.load_pbp([s]).select(W.PBP_COLS), stale=False) for s in range(TWO_FROM, current)]
   TP = two_point(pd.concat([h for h in hist2 if h is not None] + [pbp], ignore_index=True), current) if pbp is not None else {}
@@ -461,7 +475,7 @@ def main() -> None:
     teams[t] = {"hc": hc, **co, "staff": now[t], "links": links[t], "all": full[t],
                 "unit": list(U.get(current, {}).get(t, [None] * 4)[2:]),  # this season's [offense, defense] rank
                 "hc_jobs": ST.get(now[t].get("hc") or "", []),
-                "tend": T.get(t, {}), "fourth": F4.get(t, {}), "two": TP.get(t), "calls": PC.get(t)}
+                "tend": T.get(t, {}), "fourth": F4.get(t, {}), "two": TP.get(t), "pw": PW.get(t), "calls": PC.get(t)}
   doc = {"v": V, "season": current, "built": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
          "src": {"staff": "Wikipedia staff templates, season articles and coaches' pages (CC BY-SA)", "head": "nflverse schedules, ESPN"},
          "teams": teams, "bios": {k: v for k, v in B.items() if v},  # by page title; teams name theirs (bio)
