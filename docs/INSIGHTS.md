@@ -5246,4 +5246,8 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   the typical-coach model in the band: leans aggressive / conservative / down the middle) and "Wrong on clear calls"
   (the share of non-toss-ups where the coach chose another option). 2022-25: 46.2% of 4th downs are toss-ups; there
   coaches went 20.9% while go was narrowly on top in 55.4%; on clear calls coaches chose otherwise 27.0%, 93.8% of
-  those kicking when going was clearly better; our clear-call go rate 45.3%.
+  those kicking when going was clearly better; our clear-call go rate 45.3%. Same day (owner: "veer away from right
+  and wrong and stick strictly to more or less aggressive ... what's wrong is losing"): the Staff tile shows no
+  verdicts. "On toss-ups" and "Against our model" (on clear calls: went when it said kick vs kicked when it said go) are
+  league bars, conservative to aggressive, ranked like the aggressiveness rating. 2026 so far: 8 bolder, 241 more
+  conservative than the model league-wide.

@@ -3155,6 +3155,10 @@
         ${pos != null ? `<div class="co-rowb"><i style="left:${pos.toFixed(1)}%"></i></div><div class="co-rowe"><span>${ends[0]}</span><span>${ends[1]}</span></div>` : ''}
         <div class="co-rows">${rk ? `${ord(rk)} of 32 &middot; ` : ''}${desc}</div></div>`;
     };
+    // a 4th-down lean: placed 0-99 across the league (conservative to aggressive), ranked 1 = boldest
+    const lean = (label, val, p99, rk, desc, tip) => `<div class="co-row" title="${esc(tip)}"><div class="co-rowh"><span>${label}</span><b>${val}</b></div>
+        <div class="co-rowb"><i style="left:${(100 * p99 / 99).toFixed(1)}%"></i></div><div class="co-rowe"><span>Conservative</span><span>Aggressive</span></div>
+        <div class="co-rows">${ord(rk)} of 32 &middot; ${word(rk, 'leans aggressive', 'leans conservative')} &middot; ${desc}</div></div>`;
     const tr = (k, label, f, ends, hi, lo, tip) => tn[k] ? trow(label, f(tn[k][0]), k, tn[k][0], tn[k][1], ends, word(tn[k][1], hi, lo), tip) : '';
     const offRows = [tr('pass_rate', 'Passes on early downs', pct, ['Run', 'Pass'], 'pass-leaning', 'run-leaning', 'Dropbacks on 1st and 2nd down with the game close (win chance 20-80%, quarters 1-3)'),
       tr('pace', 'Seconds between snaps', v => `${v.toFixed(0)} s`, ['Fast', 'Slow'], 'fast', 'slow', 'Median time from snap to snap within a drive, game close'),
@@ -3162,17 +3166,18 @@
     const offSec = offRows ? `<div class="co-sec"><div class="pc-k">How the offense plays &middot; ${S}</div>${offRows}</div>` : '';
     // 4th downs (owner 2026-10-26: "how bout a 0-99 aggressiveness rating"): against other coaches in the same spots
     // (a typical-coach model), not our calculator; then the calculator's split (owner 2026-10-27): toss-ups (no right
-    // answer) read as a lean, clear calls as how often he was wrong
+    // answer) read as a lean; clear calls as which way he parted from the model, never right / wrong (owner: "stick
+    // strictly to more or less aggressive")
     const f4row = !f4.n ? '' : `<div class="co-row" title="How often he goes for it on 4th down compared with an average NFL coach in the same spots (field position, distance, score, time, timeouts, the line), ranked across the league: 0 = most cautious, 99 = boldest">
         <div class="co-rowh"><span>Fourth-down aggressiveness</span><b>${f4.agg99}<small class="muted"> / 99</small></b></div>
-        <div class="co-rowb"><i style="left:${(100 * f4.agg99 / 99).toFixed(1)}%"></i></div><div class="co-rowe"><span>Cautious</span><span>Bold</span></div>
+        <div class="co-rowb"><i style="left:${(100 * f4.agg99 / 99).toFixed(1)}%"></i></div><div class="co-rowe"><span>Conservative</span><span>Aggressive</span></div>
         <div class="co-rows">Went for it ${f4.go} times on ${f4.n} fourth downs; an average coach would have about ${Math.round(f4.exp_go)}.</div></div>
-      ${f4.tn ? `<div class="co-row" title="Toss-ups: the top two options within 1.25 points of win chance, inside our model's noise, so neither is wrong. Which way he leans, against an average coach in the same spots">
-        <div class="co-rowh"><span>On toss-ups</span><b>${f4.t_go - f4.t_exp >= 1 ? 'Leans aggressive' : f4.t_exp - f4.t_go >= 1 ? 'Leans conservative' : 'Down the middle'}</b></div>
-        <div class="co-rows">Went for it ${f4.t_go} of ${f4.tn} times; an average coach would have about ${Math.round(f4.t_exp)}.</div></div>` : ''}
-      ${f4.clear ? `<div class="co-row" title="Clear calls: one option beat the next by 1.25+ points of win chance. Wrong: he chose another option">
-        <div class="co-rowh"><span>Wrong on clear calls</span><b>${Math.round(100 * (f4.clear - f4.agree) / f4.clear)}%</b></div>
-        <div class="co-rows">${f4.clear - f4.agree} of ${f4.clear}${f4.bad ? `; ${f4.bad} cost 3+ points of win chance` : ''}.</div></div>` : ''}`;
+      ${f4.tn && f4.t99 != null ? lean('On toss-ups', `${f4.t_go} of ${f4.tn}`, f4.t99, f4.t_rk,
+        `went for it; an average coach about ${Math.round(f4.t_exp)}`,
+        "Fourth downs where our model's top two options were within 1.25 points of win chance: too close to call. How often he went for it there, against an average coach in the same spots") : ''}
+      ${f4.clear && f4.m99 != null ? lean('Against our model', `${f4.c_bold + f4.c_cons} of ${f4.clear}`, f4.m99, f4.m_rk,
+        `went when it said kick ${f4.c_bold}, kicked when it said go ${f4.c_cons}`,
+        "Fourth downs where our model saw one option ahead by 1.25+ points of win chance, and which way he went when he chose differently. A direction, not a verdict: coaches know things a model doesn't") : ''}`;
     const gmRows = [f4row, tr('two_pt', 'Two-point tries', pct, ['Rarely', 'Often'], 'goes for two often', 'rarely goes for two', 'Share of tries after a touchdown'),
       tn.chal ? `<div class="co-row"><div class="co-rowh"><span>Challenges won</span><b>${tn.chal[1]} of ${tn.chal[0]}</b></div></div>` : ''].join('');
     const gmSec = gmRows ? `<div class="co-sec"><div class="pc-k">Game management &middot; ${S}</div>${gmRows}</div>` : '';
