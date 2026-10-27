@@ -142,35 +142,33 @@ PBP = "https://api.github.com/repos/nflverse/nflverse-data/releases/tags/pbp"
 
 
 def sunday_pbp_due(d: dict) -> list:
-  """Monday refit (owner 2026-10-19, nfledge/team_model.py sunday_refit): once every game of the week through its
-  last Sunday is final and nflverse has republished the season's play-by-play since the live site was built, a build
-  takes Sunday's games into the ratings. Quiet once the site has them (index.json "refit") or before Sunday is over."""
+  """Ratings refits as the week's games land (nfledge/team_model.py sunday_refit; (BA) owner 2026-10-19, (DN) and
+  Monday night 2026-10-26: "if we have the game data we shouldn't wait"): the games before the week's Sunday once all
+  are final, then the weekend through its last Sunday, then a Monday game. A group not yet in the ratings (index.json
+  "refit") whose games are all final, once nflverse has republished the play-by-play since the site was built, starts a
+  build. A partial group (a Sunday afternoon with the night game to come) waits: the model takes groups whole."""
   c = d.get("clock") or {}
   if not c.get("built"):
     return []
-  rf = d.get("refit")
-  if rf:
-    # (owner 2026-10-26) a Monday game the ratings left out joins once it is final and the play-by-play is republished
-    pend = rf.get("pending") or []
-    teams = c.get("teams") or {}
-    done = [g for g in pend if all((teams.get(t) or {}).get("final") for t in g.split("_")[2:4])]
-    if not done:
-      return []
-    try:
-      season = int(d.get("season"))
-      up = [a["updated_at"] for a in get(PBP).get("assets", []) if a.get("name") == f"play_by_play_{season}.parquet"]
-    except Exception as e:
-      print(f"[watch] couldn't read nflverse's play-by-play release ({e})")
-      return []
-    if up and datetime.fromisoformat(up[0].replace("Z", "+00:00")) > datetime.fromisoformat(c["built"]):
-      return [f"nflverse play-by-play updated {up[0]} ({', '.join(done)} into the ratings)"]
+  teams = c.get("teams") or {}
+  kick = {t: datetime.fromisoformat(x["kick"]) for t, x in teams.items() if x.get("kick")}
+  if not kick:
     return []
-  kicks = [(x["kick"], bool(x.get("final"))) for x in (c.get("teams") or {}).values() if x.get("kick")]
-  suns = [k for k, _ in kicks if datetime.fromisoformat(k).weekday() == 6]
+  final = {t: bool(teams[t].get("final")) for t in kick}
+  suns = [k.date() for k in kick.values() if k.weekday() == 6]
   if not suns:
     return []
-  last_sun = max(datetime.fromisoformat(k).date() for k in suns)
-  if not all(f for k, f in kicks if datetime.fromisoformat(k).date() <= last_sun):
+  first, last = min(suns), max(suns)
+  group = lambda k: 0 if k.date() < first else 1 if k.date() <= last else 2  # noqa: E731  pre / weekend / Monday
+  rf = d.get("refit") or {}
+  inn = {t for g in rf.get("through") or [] for t in g.split("_")[2:4]}
+  todo = [t for t in kick if t not in inn]
+  if not todo:
+    return []
+  # the earliest group not in yet: due when all its teams' games are final (Monday games each on their own)
+  g0 = min(group(kick[t]) for t in todo)
+  need = [t for t in kick if group(kick[t]) <= g0 and t not in inn] if g0 < 2 else [t for t in todo if group(kick[t]) == 2 and final[t]]
+  if not need or not all(final[t] for t in need):
     return []
   try:
     season = int(d.get("season"))
@@ -179,7 +177,8 @@ def sunday_pbp_due(d: dict) -> list:
     print(f"[watch] couldn't read nflverse's play-by-play release ({e})")
     return []
   if up and datetime.fromisoformat(up[0].replace("Z", "+00:00")) > datetime.fromisoformat(c["built"]):
-    return [f"nflverse play-by-play updated {up[0]} (Sunday's games into the ratings)"]
+    what = ("the games before Sunday", "the weekend's games", "Monday night's game")[g0]
+    return [f"nflverse play-by-play updated {up[0]} ({what} into the ratings)"]
   return []
 
 

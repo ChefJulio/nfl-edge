@@ -5169,3 +5169,24 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   meet (A0 fails it for QB, RB, TE). Owner's call (2026-10-26, asked): hold non-fantasy positions to the shipped
   model's standard (A1: discrimination better than A0, fantasy guard passed) and show their chance, or keep the dash.
   Separately, QBs: A0 predicts .776 vs .709 played (2021-25): a QB-specific look before season end.
+- **PRE-REGISTERED 2026-10-26 (owner: "if we have the game data we shouldn't wait to factor it in"): (DN) refit the
+  team ratings after Thursday's (and any Friday / Saturday) games instead of waiting for Sunday's.** Today a week's
+  early games enter the ratings only with Sunday's (team_model.sunday_refit, all or nothing), because refitting midweek
+  moves the weekend's win chances and projections before lineups lock, never tested. Test (tools/thursday_refit_eval.py,
+  walk-forward 2021-25, weeks 2-17 with early games): arms on identical rows, stale = games before week N (what the site
+  has Friday today), early = also week N's games before its Sunday, Elo the same way; the model-only win chance as in
+  (BA). Scored: week N's Sunday and Monday games (the games the change moves before they're played). Brier, paired by
+  game, 95% CI from a bootstrap over season-weeks. GATE (owner-design rule, as (BA)): early - stale, CI upper < +0.005
+  (no measurable harm). Reported, not gated: the mean difference (gain), games involving a Thursday team vs not,
+  week N+1. Ship if PASS: sunday_refit also takes a week's early games once they are final with their plays in;
+  the news watcher builds when they land; Power's label reads "Week N in progress · X of Y games in".
+- **RESULT {#thursday-refit} (DN) refit after a week's Thursday (Friday / Saturday) games: PASS, shipped.**
+  tools/thursday_refit_eval.py, walk-forward 2021-25, 1,052 Sunday / Monday games of weeks with early games. Brier stale
+  0.2204 -> early 0.2186, -0.0018 [-0.0024, -0.0012]; every season better (2021 -0.0022, 2022 -0.0020, 2023 -0.0022,
+  2024 -0.0011, 2025 -0.0014); win chances on those games move 0.8 points on average. Week N+1 (reported): -0.0003
+  [-0.0014, +0.0007]. A first run read league play volume at week N+1 (it counted the masked Sunday games' plays); the
+  rerun with week N's volume in both arms gives the same answer (above). Thursday teams play no second game that week,
+  so the gain comes through their opponents' opponent-adjusted ratings and Elo, league-wide. Shipped:
+  team_model.sunday_refit takes the week in groups (the games before Sunday once all are in, then the weekend through
+  its last Sunday, then a Monday game as soon as it lands); tools/news_watch.py builds when a group completes (not on
+  a partial Sunday); Power reads "Week N in progress · X of Y games in" / "After week N" / "Going into week N".

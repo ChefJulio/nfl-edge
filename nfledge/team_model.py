@@ -237,23 +237,31 @@ def asof_weights(season_col: pd.Series, week_col: pd.Series, season: int, target
 
 
 def sunday_refit(schedules: pd.DataFrame, plays: pd.DataFrame, season: int, week: int) -> tuple | None:
-  """(through, exclude) game_id sets once every game of `week` through its last Sunday is final with its plays in
-  (TeamModel.set_live), else None: Thursday through Sunday count together, never a Thursday game alone mid-week;
-  exclude = the week's games after that Sunday not yet in. All or nothing: a Sunday game whose plays haven't landed
-  holds the whole refit. A Monday game joins as soon as it is final with its plays in (owner 2026-10-26: "if we have
-  the game data we shouldn't wait to factor it in"), not at the Tuesday rollover: (BA) found leaving it out vs in no
-  different in accuracy, so this is the full fit a few hours sooner."""
+  """(through, exclude) game_id sets of `week`'s games the ratings take in (TeamModel.set_live), else None; exclude = the
+  week's games not in yet. Owner 2026-10-26: "if we have the game data we shouldn't wait to factor it in". In groups,
+  each all or nothing (a game whose plays haven't landed holds its group): the games before the week's Sunday
+  (Thursday, Friday / Saturday) once all are in ((DN): the weekend's win chances got better); then the weekend through
+  its last Sunday with them; a Monday game as soon as it is final with its plays in ((BA): no different from the
+  Tuesday rollover in accuracy, just sooner)."""
   g = schedules[(schedules.season == season) & (schedules.week == week) & (schedules.game_type == "REG")]
   day = pd.to_datetime(g.gameday)
   sun = day[day.dt.weekday == 6]
   if g.empty or sun.empty:
     return None
-  early, late = g[day <= sun.max()], g[day > sun.max()]
   have = set(plays.game_id[plays.season == season])
-  if early.home_score.isna().any() or not set(early.game_id) <= have:
+  ok = lambda x: not x.home_score.isna().any() and set(x.game_id) <= have  # noqa: E731
+  pre, wkend, late = g[day < sun.min()], g[(day >= sun.min()) & (day <= sun.max())], g[day > sun.max()]
+  allg = frozenset(g.game_id)
+  if ok(pre) and ok(wkend):
+    done = late[late.home_score.notna() & late.game_id.isin(have)]
+    through = frozenset(pre.game_id) | frozenset(wkend.game_id) | frozenset(done.game_id)
+  elif len(pre) and ok(pre):
+    # (DN, PASS 2026-10-26) the week's games before its Sunday (Thursday, and Friday / Saturday when there are any) as
+    # soon as they are all in: the weekend's win chances improved, 0.2204 -> 0.2186 Brier, better in 5 of 5 seasons
+    through = frozenset(pre.game_id)
+  else:
     return None
-  done = late[late.home_score.notna() & late.game_id.isin(have)]
-  return frozenset(early.game_id) | frozenset(done.game_id), frozenset(late.game_id) - frozenset(done.game_id)
+  return through, allg - through
 
 
 # ----------------------------------------------------------------------------------------------------------------
