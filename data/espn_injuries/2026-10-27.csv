@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035463,K'Von Wallace,Baltimore Ravens,Active,2026-10-19T16:22Z,,,,,,,CB
 4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-10-18T15:33Z,,,,,,,OT
 4698244,Teddye Buchanan,Baltimore Ravens,Active,2026-10-16T20:28Z,,,,,,,LB
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-27T18:42Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-27T19:14Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4044133,Sam Franklin Jr.,Buffalo Bills,Active,2026-10-24T01:44Z,,,,,,"The NFL reduced Franklin's discipline from a one-game suspension to a fine of $14,926, Adam Schefter of ESPN reports.",S
 4568624,Dorian Williams,Buffalo Bills,Active,2026-10-22T01:58Z,,,,,,Williams logged five tackles (three solo) and one pass defensed for an interception in the Bills' 33-30 win over the Raiders on Sunday.,LB
 4832035,Davison Igbinosun,Buffalo Bills,Active,2026-10-22T01:37Z,,,,,,"Defensive coordinator Jim Leonhard praised Igbinosun's play earlier this week and plans to keep giving the rookie a good amount of playing time, Alec White of the Bills' official site reports. Said Leonard, ""I think what he's done the last couple weeks, he's definitely earned a high majority of the ",CB
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-25T22:31Z,,,,,,McMillan secured four of six targets for 40 yards in the Panthers' 43-13 loss to the Buccaneers on Sunday.,WR
 4870694,Monroe Freeling,Carolina Panthers,Active,2026-10-25T16:16Z,,,,,,"Freeling (knee) is listed as active for Sunday's game against Tampa Bay, Darin Gantt of the Panthers' official site reports.",OT
 4880613,Bam Martin-Scott,Carolina Panthers,Active,2026-10-24T23:55Z,,,,,,"The Panthers activated Martin-Scott (hamstring) from injured reserve Saturday, and he no longer carries an injury designation into Sunday's game against the Buccaneers, Darin Gantt of the Panthers' official site reports.",LB
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-27T18:42Z,Undisclosed,,,2026-10-18,IR,ir,S
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-27T19:10Z,Undisclosed,,,2026-10-18,IR,ir,S
 4372576,Jack Sanborn,Chicago Bears,Questionable,2026-10-27T13:11Z,Concussion,Concussion,Not Specified,2026-11-02,QUESTIONABLE,questionable,LB
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-27T13:11Z,Toe,Sprain,Not Specified,2026-11-02,QUESTIONABLE,questionable,RB
 3121544,T.J. Edwards,Chicago Bears,Questionable,2026-10-27T13:11Z,Hamstring,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,questionable,LB
@@ -403,7 +403,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4837248,Fernando Mendoza,Las Vegas Raiders,Active,2026-10-27T00:26Z,,,,,,Mendoza did not appear in Sunday's 35-21 loss to the Rams.,QB
 4382466,Jalen Nailor,Las Vegas Raiders,Active,2026-10-27T00:20Z,,,,,,Nailor caught two of five targets for 14 yards during Sunday's 35-21 loss to the Rams.,WR
 4603186,Jack Bech,Las Vegas Raiders,Injured Reserve,2026-10-26T20:19Z,Forearm,Fracture,Left,2026-11-01,IR-R,The Raiders designated Bech (forearm) for return from injured reserve Monday.,WR
-14880,Kirk Cousins,Las Vegas Raiders,Active,2026-10-26T19:53Z,,,,,,"Head coach Klint Kubiak said that Cousins will remain the Raiders' starting quarterback heading into Sunday's game against the Jets, Paul Gutierrez of ESPN reports. ""There is no controversy,"" Kubiak said. ""He is playing at a very high level.""",QB
+14880,Kirk Cousins,Las Vegas Raiders,Active,2026-10-26T19:53Z,,,,,,"Head coach Klint Kubiak said that Cousins will remain the Raiders' starting quarterback heading into Sunday's game against the Jets, Paul Gutierrez of the team's official site reports. ""There is no controversy,"" Kubiak said. ""He is playing at a very high level.""",QB
 4373956,Jonah Laulu,Las Vegas Raiders,Active,2026-10-26T18:36Z,,,,,,,DT
 4360749,Thomas Booker IV,Las Vegas Raiders,Active,2026-10-26T18:36Z,,,,,,,DT
 4682488,Dalton Johnson,Las Vegas Raiders,Active,2026-10-26T18:36Z,,,,,,,S
