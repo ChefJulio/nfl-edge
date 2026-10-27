@@ -2833,9 +2833,12 @@
     const ix = Object.fromEntries(M.t.cols.map((c, i) => [c, i]));
     const mine = M.t.rows.filter(r => r[ix.team] === abbr && (MOVE_IN.has(r[ix.type]) || MOVE_OUT.has(r[ix.type])))
       .sort((a, b) => (a[ix.date] < b[ix.date] ? 1 : a[ix.date] > b[ix.date] ? -1 : 0));
-    const trades = mine.filter(r => r[ix.type] === 'traded' || r[ix.type] === 'acquired');
+    // one entry naming two players ("Signed TE Matt Lauter and DL Jonathan Harris") is a row per player: the counts go
+    // by player, the lists show each entry once (owner 2026-10-27 screenshot: every such line twice)
+    const once = rows => { const seen = new Set(); return rows.filter(r => { const k = `${r[ix.date]}|${r[ix.text]}`; if (seen.has(k)) return false; seen.add(k); return true; }); };
+    const trades = once(mine.filter(r => r[ix.type] === 'traded' || r[ix.type] === 'acquired'));
     const nIn = mine.filter(r => MOVE_IN.has(r[ix.type])).length, nOut = mine.length - nIn;
-    const last = mine[0];
+    const last = mine[0], shown = once(mine);
     const face = `<div class="pc-big">${trades.length} <small>trade${trades.length === 1 ? '' : 's'}</small></div><div class="pc-tapsub">${last ? `${esc(mdate(last[ix.date]))}: ${esc(String(last[ix.text]).split(/[,.;(]/)[0])}` : `${nIn} in · ${nOut} out`}</div>`;
     const li = r => `<li${r[ix.pid] ? ` data-open-pid="${esc(r[ix.pid])}" class="py-tap"` : ''}><span class="mv-d">${esc(mdate(r[ix.date]))}</span> ${esc(r[ix.text])}</li>`;
     const trBox = `<div class="pc-box"><div class="pc-k">Trades &middot; ${season}</div>${trades.length ? `<ul class="mv-l">${trades.map(li).join('')}</ul>` : '<p class="pc-sub">No trades this season.</p>'}</div>`;
@@ -2843,7 +2846,7 @@
     if (M.dr && M.dr.rows) { const dx = Object.fromEntries(M.dr.cols.map((c, i) => [c, i])), fr = dx.fr != null ? dx.fr : dx.team;
       const picks = M.dr.rows.filter(r => r[fr] === abbr);
       drBox = `<div class="pc-box"><div class="pc-k">Draft class &middot; ${season}</div>${picks.length ? `<table class="bx"><tbody>${picks.map(r => `<tr${r[dx.gsis_id] ? ` data-open-pid="${esc(r[dx.gsis_id])}" class="py-tap"` : ''}><td class="muted" title="Round ${r[dx.round]}, pick ${r[dx.pick]} overall">R${r[dx.round]} &middot; #${r[dx.pick]}</td><td>${esc(r[dx.pfr_player_name])} <span class="muted">${esc(r[dx.position])}</span></td><td class="muted">${esc(r[dx.college] || '')}</td></tr>`).join('')}</tbody></table>` : '<p class="pc-sub">No picks this year.</p>'}</div>`; }
-    const allBox = `<div class="pc-box"><div class="pc-k">Signings and departures &middot; ${nIn} in, ${nOut} out</div><ul class="mv-l">${mine.slice(0, 40).map(li).join('')}</ul>${mine.length > 40 ? `<p class="pc-sub muted">The latest 40; every move is on Players &rsaquo; Moves.</p>` : ''}</div>`;
+    const allBox = `<div class="pc-box"><div class="pc-k">Signings and departures &middot; ${nIn} in, ${nOut} out</div><ul class="mv-l">${shown.slice(0, 40).map(li).join('')}</ul>${shown.length > 40 ? `<p class="pc-sub muted">The latest 40; every move is on Players &rsaquo; Moves.</p>` : ''}</div>`;
     const src = `<p class="pc-sub muted">ESPN's transactions log. Practice-squad and injury-list moves are left out.</p>`;
     return tapTile('Moves', face, 'Moves', trBox + drBox + allBox + src);
   };
