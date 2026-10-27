@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035463,K'Von Wallace,Baltimore Ravens,Active,2026-10-19T16:22Z,,,,,,,CB
 4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-10-18T15:33Z,,,,,,,OT
 4698244,Teddye Buchanan,Baltimore Ravens,Active,2026-10-16T20:28Z,,,,,,,LB
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-27T13:11Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-27T14:22Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4044133,Sam Franklin Jr.,Buffalo Bills,Active,2026-10-24T01:44Z,,,,,,"The NFL reduced Franklin's discipline from a one-game suspension to a fine of $14,926, Adam Schefter of ESPN reports.",S
 4568624,Dorian Williams,Buffalo Bills,Active,2026-10-22T01:58Z,,,,,,Williams logged five tackles (three solo) and one pass defensed for an interception in the Bills' 33-30 win over the Raiders on Sunday.,LB
 4832035,Davison Igbinosun,Buffalo Bills,Active,2026-10-22T01:37Z,,,,,,"Defensive coordinator Jim Leonhard praised Igbinosun's play earlier this week and plans to keep giving the rookie a good amount of playing time, Alec White of the Bills' official site reports. Said Leonard, ""I think what he's done the last couple weeks, he's definitely earned a high majority of the ",CB
@@ -124,8 +124,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-25T22:31Z,,,,,,McMillan secured four of six targets for 40 yards in the Panthers' 43-13 loss to the Buccaneers on Sunday.,WR
 4870694,Monroe Freeling,Carolina Panthers,Active,2026-10-25T16:16Z,,,,,,"Freeling (knee) is listed as active for Sunday's game against Tampa Bay, Darin Gantt of the Panthers' official site reports.",OT
 4880613,Bam Martin-Scott,Carolina Panthers,Active,2026-10-24T23:55Z,,,,,,"The Panthers activated Martin-Scott (hamstring) from injured reserve Saturday, and he no longer carries an injury designation into Sunday's game against the Buccaneers, Darin Gantt of the Panthers' official site reports.",LB
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-27T14:22Z,Undisclosed,,,2026-10-18,IR,ir,S
 4372576,Jack Sanborn,Chicago Bears,Questionable,2026-10-27T13:11Z,Concussion,Concussion,Not Specified,2026-11-02,QUESTIONABLE,questionable,LB
-4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-27T13:11Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out,S
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-27T13:11Z,Toe,Sprain,Not Specified,2026-11-02,QUESTIONABLE,questionable,RB
 3121544,T.J. Edwards,Chicago Bears,Questionable,2026-10-27T13:11Z,Hamstring,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,questionable,LB
 4036169,Nick McCloud,Chicago Bears,Active,2026-10-26T17:55Z,,,,,,,CB
@@ -633,7 +633,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241372,Hollywood Brown,Philadelphia Eagles,Active,2026-10-27T04:22Z,,,,,,Brown secured two of five targets for 30 yards in the Eagles' 38-21 loss to the Cowboys on Monday night.,WR
 3121023,Dallas Goedert,Philadelphia Eagles,Active,2026-10-27T04:15Z,,,,,,Goedert secured five of seven targets for 48 yards in the Eagles' 38-21 loss to the Cowboys on Monday night.,TE
 4870795,Makai Lemon,Philadelphia Eagles,Active,2026-10-27T04:11Z,,,,,,Lemon brought in seven of eight targets for 67 yards and a touchdown in the Eagles' 38-21 loss to the Cowboys on Monday night.,WR
-3929630,Saquon Barkley,Philadelphia Eagles,Questionable,2026-10-27T04:09Z,Back,,,2026-11-01,QUESTIONABLE,"Barkley said Monday that his back injury was compensatory after he tweaked his hamstring on his first run of the game and tried to play through it, EJ Smith of The Philadelphia Inquirer reports.",RB
+3929630,Saquon Barkley,Philadelphia Eagles,Questionable,2026-10-27T04:09Z,Back,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Barkley said Monday that his back injury was compensatory after he tweaked his hamstring on his first run of the game and tried to play through it, EJ Smith of The Philadelphia Inquirer reports.",RB
 4685201,Tanner McKee,Philadelphia Eagles,Active,2026-10-27T04:06Z,,,,,,McKee completed 23 of 35 passes for 211 yards with one touchdown and one interception and added one rush for one yard in the Eagles' 38-21 loss to the Cowboys on Monday night.,QB
 3926231,Britain Covey,Philadelphia Eagles,Questionable,2026-10-27T00:59Z,Knee,,,2026-11-01,QUESTIONABLE,Covey (knee) has been ruled out for the remainder of Monday's contest versus the Cowboys.,WR
 4686911,Jakorian Bennett,Philadelphia Eagles,Injured Reserve,2026-10-26T23:13Z,Knee,Not Specified,Not Specified,2026-11-01,IR-R,Bennett (knee) will remain on injured reserve and is inactive for Monday night's matchup with Dallas.,CB
