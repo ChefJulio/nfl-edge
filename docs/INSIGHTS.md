@@ -5249,5 +5249,8 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   those kicking when going was clearly better; our clear-call go rate 45.3%. Same day (owner: "veer away from right
   and wrong and stick strictly to more or less aggressive ... what's wrong is losing"): the Staff tile shows no
   verdicts. "On toss-ups" and "Against our model" (on clear calls: went when it said kick vs kicked when it said go) are
-  league bars, conservative to aggressive, ranked like the aggressiveness rating. 2026 so far: 8 bolder, 241 more
-  conservative than the model league-wide.
+  bars centered on a reference, not league ranks: a team has ~15-25 toss-ups where the typical coach goes ~4 times
+  (MIN: 0 of 15, typical 0.4), so a rank there is noise; the toss-up dot is (went - typical) in SDs of chance, named a
+  lean only past 1.5 (4 teams in 2026); the model row's middle is in step with the model (ranked against a league that
+  kicks more than the model says, MIN with 0 bolder and 6 more conservative read 4th boldest). 2026 so far: 8 bolder,
+  241 more conservative than the model league-wide.

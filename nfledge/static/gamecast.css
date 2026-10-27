@@ -312,6 +312,9 @@ table.tm-pl { width: 100%; } table.tm-pl td.ij-who { width: 100%; max-width: 0; 
   background: var(--line); }
 .co-rowb i { position: absolute; top: 50%; width: 10px; height: 10px; margin-left: -5px; transform: translateY(-50%); border-radius: 50%;
   background: var(--accent, #6d9eff); box-shadow: 0 0 0 2px var(--panel, #15181d); }
+/* a bar centered on the average coach: a tick marks the middle */
+.co-rowb.co-mid::before { content: ''; position: absolute; left: 50%; top: -3px; width: 2px; height: 10px; margin-left: -1px;
+  border-radius: 1px; background: var(--muted); opacity: .6; }
 .co-rowe { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--muted); letter-spacing: .02em; }
 .co-rows { margin-top: 3px; font-size: var(--fs-xs); color: var(--muted); line-height: 1.35; }
 /* rank chips with their season ("'20 23rd") and the unit's label (Off / Def) */

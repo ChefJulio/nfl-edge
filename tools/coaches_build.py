@@ -212,20 +212,16 @@ def fourth(site: Path, season: int) -> dict:
               # clear calls, which way he parted from the calculator: went when it said kick / kicked when it said go
               "c_bold": int(((cl.c == "go") & (cl.b != "go")).sum()), "c_cons": int(((cl.c != "go") & (cl.b == "go")).sum()),
               "bad": int((x.x >= 0.03).sum()), "wp_lost": round(float(x.x.sum()), 3),
-              "tn": int(len(tb)), "t_go": int((tb.c == "go").sum()), "t_exp": round(float(tb.exp_go.sum()), 1)}
+              "tn": int(len(tb)), "t_go": int((tb.c == "go").sum()), "t_exp": round(float(tb.exp_go.sum()), 1),
+              # how far from the typical coach in standard deviations of chance (a team has ~15-25 toss-ups and the
+              # typical coach goes on ~4; a rank on a play or two is noise: owner 2026-10-27 screenshot, MIN 0 of 15)
+              "t_z": round(float(((tb.c == "go").sum() - tb.exp_go.sum()) / max(0.5, (tb.exp_go * (1 - tb.exp_go)).sum() ** 0.5)), 2)}
   ag = {t: (v["go"] - v["exp_go"]) / max(1, v["n"]) for t, v in out.items()}
   order = sorted(ag, key=lambda t: ag[t])  # most cautious first
   for i, t in enumerate(order):
     out[t]["aggr"] = round(ag[t], 3)
     out[t]["agg99"] = round(99 * i / max(1, len(order) - 1))
     out[t]["aggr_rk"] = len(order) - i
-  # the toss-up lean (went - typical coach, per toss-up) and the lean against the calculator on clear calls ((went when
-  # it said kick - kicked when it said go) per clear call), each placed 0-99 and ranked like agg99 (1 = boldest)
-  for key, num, den in (("t", lambda v: v["t_go"] - v["t_exp"], "tn"), ("m", lambda v: v["c_bold"] - v["c_cons"], "clear")):
-    lean = {t: num(v) / v[den] for t, v in out.items() if v[den]}
-    order = sorted(lean, key=lambda t: lean[t])
-    for i, t in enumerate(order):
-      out[t][f"{key}99"], out[t][f"{key}_rk"] = round(99 * i / max(1, len(order) - 1)), len(order) - i
   return out, None
 
 

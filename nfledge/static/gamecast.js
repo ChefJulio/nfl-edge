@@ -3155,10 +3155,6 @@
         ${pos != null ? `<div class="co-rowb"><i style="left:${pos.toFixed(1)}%"></i></div><div class="co-rowe"><span>${ends[0]}</span><span>${ends[1]}</span></div>` : ''}
         <div class="co-rows">${rk ? `${ord(rk)} of 32 &middot; ` : ''}${desc}</div></div>`;
     };
-    // a 4th-down lean: placed 0-99 across the league (conservative to aggressive), ranked 1 = boldest
-    const lean = (label, val, p99, rk, desc, tip) => `<div class="co-row" title="${esc(tip)}"><div class="co-rowh"><span>${label}</span><b>${val}</b></div>
-        <div class="co-rowb"><i style="left:${(100 * p99 / 99).toFixed(1)}%"></i></div><div class="co-rowe"><span>Conservative</span><span>Aggressive</span></div>
-        <div class="co-rows">${ord(rk)} of 32 &middot; ${word(rk, 'leans aggressive', 'leans conservative')} &middot; ${desc}</div></div>`;
     const tr = (k, label, f, ends, hi, lo, tip) => tn[k] ? trow(label, f(tn[k][0]), k, tn[k][0], tn[k][1], ends, word(tn[k][1], hi, lo), tip) : '';
     const offRows = [tr('pass_rate', 'Passes on early downs', pct, ['Run', 'Pass'], 'pass-leaning', 'run-leaning', 'Dropbacks on 1st and 2nd down with the game close (win chance 20-80%, quarters 1-3)'),
       tr('pace', 'Seconds between snaps', v => `${v.toFixed(0)} s`, ['Fast', 'Slow'], 'fast', 'slow', 'Median time from snap to snap within a drive, game close'),
@@ -3172,12 +3168,18 @@
         <div class="co-rowh"><span>Fourth-down aggressiveness</span><b>${f4.agg99}<small class="muted"> / 99</small></b></div>
         <div class="co-rowb"><i style="left:${(100 * f4.agg99 / 99).toFixed(1)}%"></i></div><div class="co-rowe"><span>Conservative</span><span>Aggressive</span></div>
         <div class="co-rows">Went for it ${f4.go} times on ${f4.n} fourth downs; an average coach would have about ${Math.round(f4.exp_go)}.</div></div>
-      ${f4.tn && f4.t99 != null ? lean('On toss-ups', `${f4.t_go} of ${f4.tn}`, f4.t99, f4.t_rk,
-        `went for it; an average coach about ${Math.round(f4.t_exp)}`,
-        "Fourth downs where our model's top two options were within 1.25 points of win chance: too close to call. How often he went for it there, against an average coach in the same spots") : ''}
-      ${f4.clear && f4.m99 != null ? lean('Against our model', `${f4.c_bold + f4.c_cons} of ${f4.clear}`, f4.m99, f4.m_rk,
-        `went when it said kick ${f4.c_bold}, kicked when it said go ${f4.c_cons}`,
-        "Fourth downs where our model saw one option ahead by 1.25+ points of win chance, and which way he went when he chose differently. A direction, not a verdict: coaches know things a model doesn't") : ''}`;
+      ${f4.tn && f4.t_z != null ? `<div class="co-row" title="Fourth downs where our model's top two options were within 1.25 points of win chance: too close to call. How often he went for it there, against an average coach in the same spots. The middle of the bar is the average coach; a lean is named only when the gap is bigger than chance on this many plays">
+        <div class="co-rowh"><span>On toss-ups</span><b>${f4.t_z >= 1.5 ? 'Leans aggressive' : f4.t_z <= -1.5 ? 'Leans conservative' : 'Like most coaches'}</b></div>
+        <div class="co-rowb co-mid"><i style="left:${(50 + 20 * Math.max(-2.5, Math.min(2.5, f4.t_z))).toFixed(1)}%"></i></div><div class="co-rowe"><span>Conservative</span><span>Aggressive</span></div>
+        <div class="co-rows">Went for it ${f4.t_go} of ${f4.tn} times; ${f4.t_exp < 0.5 ? 'an average coach would almost never go in these spots either' : `an average coach would have about ${Math.round(f4.t_exp)}`}</div></div>` : ''}
+      ${f4.clear && f4.c_bold != null ? (() => {
+        // against the model itself, not ranked against the league (the whole league kicks more than it says: MIN, 0 bolder
+        // and 6 more conservative, ranked 4th boldest): the middle is in step with the model
+        const net = f4.c_bold - f4.c_cons;
+        return `<div class="co-row" title="Fourth downs where our model saw one option ahead by 1.25+ points of win chance, and which way he went when he chose differently. The middle of the bar is in step with the model. A direction, not a verdict: coaches know things a model doesn't">
+        <div class="co-rowh"><span>Against our model</span><b>${net >= 2 ? 'Bolder' : net <= -2 ? 'More conservative' : 'In step'}</b></div>
+        <div class="co-rowb co-mid"><i style="left:${Math.max(0, Math.min(100, 50 + 100 * net / f4.clear)).toFixed(1)}%"></i></div><div class="co-rowe"><span>Conservative</span><span>Aggressive</span></div>
+        <div class="co-rows">Of ${f4.clear} clear call${f4.clear === 1 ? '' : 's'}: kicked when it said go ${f4.c_cons}, went when it said kick ${f4.c_bold}</div></div>`; })() : ''}`;
     const gmRows = [f4row, tr('two_pt', 'Two-point tries', pct, ['Rarely', 'Often'], 'goes for two often', 'rarely goes for two', 'Share of tries after a touchdown'),
       tn.chal ? `<div class="co-row"><div class="co-rowh"><span>Challenges won</span><b>${tn.chal[1]} of ${tn.chal[0]}</b></div></div>` : ''].join('');
     const gmSec = gmRows ? `<div class="co-sec"><div class="pc-k">Game management &middot; ${S}</div>${gmRows}</div>` : '';
