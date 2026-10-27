@@ -141,11 +141,13 @@ Connect a Sleeper league (your username, then pick the league) or a public ESPN 
 
 ### Team card
 
-- **Summary**, for any week: that week's game, the games this team should root for, and four tiles:
+- **Summary**, for any week: that week's game, the games this team should root for, and its tiles:
   - Power: rank and points per game versus average; the sheet has every unit's rating, strength of schedule and rank by week.
   - Season: record and division place; the sheet has the standings line, per-game stats with league ranks, and penalties.
   - Players: its top players by Edge grade; the sheet has every fantasy player's projection and grade and the depth chart (by playing time or as listed, any week since 2001).
-  - Schedule: how hard its remaining schedule is and the next three opponents; the sheet has the whole season.
+  - Injuries: everyone on its report, by position group, with each player's chance to play and expected return, the long-term lists, and players hurt during the last game.
+  - Staff: the owner, general manager, head coach and coordinators (who calls the plays, each one's power rank this season); each one's record, coaching and playing career; the whole coaching staff. Game management against an average coach in the same spots (4th downs, toss-ups, how often he parts from our calculator and which way, two-point tries, early 2nd-half timeouts, challenges) and how the offense plays (pass rate over expected): directions, not verdicts.
+  - Playoff odds (Schedule when there are none): its chances, and the schedule sheet with the whole season.
 - **Game log**: every game since 1999 with the line and whether it covered, win chances, Power rank and box numbers, filterable by opponent (with the head-to-head record).
 - **Playoffs**: its chances to make it, win the division and get the top seed, how they have moved week by week, the rooting guide (every game this week and how much it moves each of its three chances, each found by simulating the season with only that game flipped), and its postseason history.
 
