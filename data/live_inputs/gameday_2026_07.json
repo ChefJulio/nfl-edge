@@ -648,5 +648,55 @@
 "at": "2026-10-26T20:26:00+00:00",
 "post": 0.974,
 "status": "Active (FFF)"
+},
+"00-0036912": {
+"name": "DeVonta Smith",
+"team": "PHI",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-10-26T22:50:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0037801": {
+"name": "KaVontae Turpin",
+"team": "DAL",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-10-26T22:53:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0038393": {
+"name": "Dontayvion Wicks",
+"team": "PHI",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-10-26T22:50:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0038705": {
+"name": "Emari Demercado",
+"team": "DAL",
+"pos": "RB",
+"pre": 0.2163,
+"ruling": "INA",
+"at": "2026-10-26T22:55:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040891": {
+"name": "Cole Payton",
+"team": "PHI",
+"pos": "QB",
+"pre": 0.8869,
+"ruling": "INA",
+"at": "2026-10-26T23:00:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
