@@ -150,7 +150,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426374,Tyrique Stevenson Sr.,Chicago Bears,Active,2026-10-22T23:21Z,,,,,,Stevenson (hip) is active for Thursday night's contest against New England.,CB
 3930040,Jonah Jackson,Chicago Bears,Active,2026-10-22T01:35Z,,,,,,Jackson (hip/quadricep) does not have any injury designation ahead of Thursday night's game against the Patriots.,G
 4427834,Erick All Jr.,Cincinnati Bengals,Injured Reserve,2026-10-27T18:33Z,Knee - ACL,Surgery,Right,2027-02-15,IR,The Bengals placed All (knee) on injured reserve Tuesday.,TE
-4819215,Josh Kattus,Cincinnati Bengals,Out,2026-10-27T18:25Z,Undisclosed,Not Specified,Not Specified,2026-11-29,OUT,out,TE
 4384852,Dohnte Meyers,Cincinnati Bengals,Active,2026-10-27T01:58Z,,,,,,Meyers failed to catch either of his two targets in Sunday's 35-13 win over the Ravens.,WR
 4401811,Kyle Dugger,Cincinnati Bengals,Out,2026-10-26T21:53Z,Quadriceps,Not Specified,Left,2026-11-08,OUT,"Dugger (quadriceps) won't play in Sunday's game against the Titans, Paul Dehner Jr. of The Athletic reports.",S
 4700712,Cam Grandy,Cincinnati Bengals,Active,2026-10-26T21:14Z,,,,,,"The Bengals signed Grandy off the Vikings' practice squad Monday, Aaron Wilson of KPRC 2 Houston reports.",TE
@@ -174,6 +173,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4247726,Bryan Cook,Cincinnati Bengals,Active,2026-10-11T16:47Z,,,,,,Cook (ankle) is active for Sunday's game against Miami.,S
 3116748,B.J. Hill,Cincinnati Bengals,Active,2026-10-09T20:32Z,,,,,,,DT
 3125082,Dalton Risner,Cincinnati Bengals,Active,2026-10-09T20:32Z,,,,,,,G
+4035483,Dexter Lawrence II,Cincinnati Bengals,Active,2026-10-09T20:32Z,,,,,,,DT
 4600415,Mike Hall Jr.,Cleveland Browns,Questionable,2026-10-27T13:11Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,DT
 4722893,Jaleel McLaughlin,Cleveland Browns,Active,2026-10-27T01:10Z,,,,,,McLaughlin turned five kickoff returns into 117 yards during the Browns' 27-24 win over the Titans on Sunday.,RB
 4241463,Jerry Jeudy,Cleveland Browns,Active,2026-10-27T00:24Z,,,,,,Jeudy caught all four of his targets for 21 yards during Sunday's 27-24 win at Tennessee.,WR
@@ -199,6 +199,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4038457,Teven Jenkins,Cleveland Browns,Injured Reserve,2026-10-24T18:50Z,Back,Not Specified,Not Specified,2026-11-29,IR,The Browns placed Jenkins (back) on injured reserve Saturday.,G
 4242208,Grant Delpit,Cleveland Browns,Active,2026-10-24T17:26Z,,,,,,Delpit (concussion) does not have any injury designation ahead of Sunday's game against the Titans.,S
 4873232,Mason Graham,Cleveland Browns,Active,2026-10-23T23:39Z,,,,,,"Graham (knee/ankle) does not have any injury designation ahead of Sunday's game against the Titans, Zac Jackson of The Athletic reports.",DT
+4429676,Tyler Goodson,Dallas Cowboys,Active,2026-10-27T23:28Z,,,,,,Goodson turned 10 carries into 38 yards and returned two kickoffs for 42 yards during the Cowboys' 38-21 win over the Eagles on Monday.,RB
 4710711,DJ Rogers,Dallas Cowboys,Questionable,2026-10-27T21:24Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,TE
 4372096,Luke Schoonmaker,Dallas Cowboys,Active,2026-10-27T14:56Z,,,,,,Schoonmaker went without a target while playing 11 of the Cowboys' 68 offensive snaps in Monday's 38-21 win over the Eagles.,TE
 4360967,Brevyn Spann-Ford,Dallas Cowboys,Active,2026-10-27T14:48Z,,,,,,Spann-Ford finished with two catches for 11 yards on two targets in Monday's 38-21 win over the Eagles.,TE
@@ -223,7 +224,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3953687,Brandon Aubrey,Dallas Cowboys,Active,2026-10-20T01:16Z,,,,,,Aubrey did not attempt any field goals but converted his only extra-point try during Sunday's 23-13 loss at Green Bay.,PK
 4240608,James Houston,Dallas Cowboys,Active,2026-10-19T16:31Z,,,,,,,LB
 4595352,Alijah Clark,Dallas Cowboys,Active,2026-10-19T16:31Z,,,,,,,S
-4808759,Camden Brown,Dallas Cowboys,Active,2026-10-19T16:31Z,,,,,,,WR
 4372012,Pat Surtain II,Denver Broncos,Questionable,2026-10-27T13:11Z,Ankle,Sprain,Not Specified,2026-11-01,QUESTIONABLE,questionable,CB
 4360853,Talanoa Hufanga,Denver Broncos,Questionable,2026-10-27T13:11Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,S
 3051876,Evan Engram,Denver Broncos,Active,2026-10-27T00:31Z,,,,,,Engram caught one of three targets for two yards during Sunday's 30-16 win over the Cardinals.,TE
@@ -624,6 +624,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4570470,Nahshon Wright,New York Jets,Active,2026-10-19T17:12Z,,,,,,,CB
 4569371,Isaiah Williams,New York Jets,Active,2026-10-17T00:22Z,,,,,,Williams should continue to serve as the No. 3 wide receiver behind Garrett Wilson and Tim Patrick for Sunday's game against the Patriots due to the absence of Adonai Mitchell (finger).,WR
 4574142,Nate Lynn,New York Jets,Active,2026-10-12T19:32Z,,,,,,,DE
+4372414,Elijah Moore,Philadelphia Eagles,Active,2026-10-27T23:21Z,,,,,,Moore caught both of his targets for 16 yards during Monday's 38-21 loss to the Cowboys.,WR
+4431574,Eli Stowers,Philadelphia Eagles,Active,2026-10-27T23:12Z,,,,,,Stowers failed to haul in his lone target during Monday's 38-21 loss to Dallas.,TE
 4715355,Darius Cooper,Philadelphia Eagles,Active,2026-10-27T23:06Z,,,,,,Cooper caught one of three passes for 17 yards during the Eagles' 38-21 loss to the Cowboys on Monday.,WR
 3929630,Saquon Barkley,Philadelphia Eagles,Questionable,2026-10-27T15:38Z,Back,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Barkley said after Monday's 38-21 loss to the Cowboys that his ""hamstring came out great,"" and noted that the back issue that kept him out for the entire fourth quarter isn't anything that he expects to prevent him from playing Sunday against the Commanders, Tim McManus of ESPN.com reports.",RB
 4360238,Dameon Pierce,Philadelphia Eagles,Questionable,2026-10-27T14:28Z,Undisclosed,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Pierce didn't take the field for either of the Eagles' final two possessions of Monday's 38-21 loss to the Cowboys after sustaining an undisclosed injury with 8:38 remaining in the fourth quarter, Dave Zangaro of NBC Sports Philadelphia reports.",RB
@@ -645,10 +647,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 15797,Lane Johnson,Philadelphia Eagles,Out,2026-10-26T22:53Z,Personal,Not Specified,Not Specified,2027-02-15,OUT,out,OT
 4241555,Elijah Mitchell,Philadelphia Eagles,Active,2026-10-26T21:19Z,,,,,,The Eagles elevated Mitchell from the practice squad ahead of Monday night's game against Dallas.,RB
 4241374,Grant Calcaterra,Philadelphia Eagles,Active,2026-10-26T21:17Z,,,,,,The Eagles activated Calcaterra (back) from injured reserve Monday.,TE
-4431574,Eli Stowers,Philadelphia Eagles,Active,2026-10-26T20:26Z,,,,,,The Eagles reinstated Stowers (quadriceps/hamstring) from injured reserve ahead of Monday's game against the Cowboys.,TE
 4582836,Willie Lampkin,Philadelphia Eagles,Active,2026-10-25T00:27Z,,,,,,Lampkin (illness) does not have an injury designation against the Cowboys on Monday.,C
 4362805,Tyler Steen,Philadelphia Eagles,Active,2026-10-25T00:24Z,,,,,,Steen (shoulder) does not have an injury designation for Monday's game against the Cowboys.,G
-4240585,AJ Epenesa,Philadelphia Eagles,Active,2026-10-25T00:19Z,,,,,,Epenesa (back) does not carry an injury designation into Monday's game against Dallas.,DE
 4035656,Ben Skowronek,Pittsburgh Steelers,Questionable,2026-10-27T13:11Z,Calf,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,WR
 4567979,Brandin Echols,Pittsburgh Steelers,Questionable,2026-10-27T13:11Z,Hamstring,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,CB
 4685261,Germie Bernard,Pittsburgh Steelers,Active,2026-10-26T23:49Z,,,,,,Bernard caught three of five targets for 27 yards in Sunday's 16-10 win over the Saints.,WR
