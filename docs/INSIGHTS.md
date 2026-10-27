@@ -5253,4 +5253,9 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   (MIN: 0 of 15, typical 0.4), so a rank there is noise; the toss-up dot is (went - typical) in SDs of chance, named a
   lean only past 1.5 (4 teams in 2026); the model row's middle is in step with the model (ranked against a league that
   kicks more than the model says, MIN with 0 bolder and 6 more conservative read 4th boldest). 2026 so far: 8 bolder,
-  241 more conservative than the model league-wide.
+  241 more conservative than the model league-wide. Then (owner: two-point rates "without game situation in the
+  formula ... 24-26 with 30 seconds left. DUH you're going for 2"; and "45/99 reads like he went for it on 4th almost
+  half the time"): two-point tries and the 4th-down rating use the same centered bar, each against its typical-coach
+  model (two-point: score after the touchdown, time, quarter, line, every try 2022 on). Raw two-point share ranked LV
+  1st (26%); against the spots it went 5 vs 4.4 expected. 2026 week 7: 6 teams lean on 4th downs past 1.5 SD (NE, PHI,
+  DET, CHI aggressive; DEN, HOU conservative), none on two-point tries.

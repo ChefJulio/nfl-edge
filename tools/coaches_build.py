@@ -234,6 +234,9 @@ def fourth(site: Path, season: int) -> dict:
   for t, x in rows.groupby("t"):
     cl, tb = x[~x.tu], x[x.tu]
     out[t] = {"n": int(len(x)), "go": int((x.c == "go").sum()), "exp_go": round(float(x.exp_go.sum()), 1),
+              # (owner 2026-10-27: "45/99 reads like he went for it on 4th almost half the time") the tile shows this,
+              # (went - expected) in standard deviations of chance, centered on the typical coach; agg99 stays in the data
+              "z": round(float(((x.c == "go").sum() - x.exp_go.sum()) / max(0.5, (x.exp_go * (1 - x.exp_go)).sum() ** 0.5)), 2),
               "clear": int(len(cl)), "model_go": int((cl.b == "go").sum()), "agree": int((cl.b == cl.c).sum()),
               # (owner 2026-10-27: "veer away from right and wrong and stick strictly to more or less aggressive") on
               # clear calls, which way he parted from the calculator: went when it said kick / kicked when it said go

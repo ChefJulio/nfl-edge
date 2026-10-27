@@ -3164,14 +3164,17 @@
     // (a typical-coach model), not our calculator; then the calculator's split (owner 2026-10-27): toss-ups (no right
     // answer) read as a lean; clear calls as which way he parted from the model, never right / wrong (owner: "stick
     // strictly to more or less aggressive")
-    const f4row = !f4.n ? '' : `<div class="co-row" title="How often he goes for it on 4th down compared with an average NFL coach in the same spots (field position, distance, score, time, timeouts, the line), ranked across the league: 0 = most cautious, 99 = boldest">
-        <div class="co-rowh"><span>Fourth-down aggressiveness</span><b>${f4.agg99}<small class="muted"> / 99</small></b></div>
-        <div class="co-rowb"><i style="left:${(100 * f4.agg99 / 99).toFixed(1)}%"></i></div><div class="co-rowe"><span>Conservative</span><span>Aggressive</span></div>
-        <div class="co-rows">Went for it ${f4.go} times on ${f4.n} fourth downs; an average coach would have about ${Math.round(f4.exp_go)}.</div></div>
-      ${f4.tn && f4.t_z != null ? `<div class="co-row" title="Fourth downs where our model's top two options were within 1.25 points of win chance: too close to call. How often he went for it there, against an average coach in the same spots. The middle of the bar is the average coach; a lean is named only when the gap is bigger than chance on this many plays">
-        <div class="co-rowh"><span>On toss-ups</span><b>${f4.t_z >= 1.5 ? 'Leans aggressive' : f4.t_z <= -1.5 ? 'Leans conservative' : 'Like most coaches'}</b></div>
-        <div class="co-rowb co-mid"><i style="left:${(50 + 20 * Math.max(-2.5, Math.min(2.5, f4.t_z))).toFixed(1)}%"></i></div><div class="co-rowe"><span>Conservative</span><span>Aggressive</span></div>
-        <div class="co-rows">Went for it ${f4.t_go} of ${f4.tn} times; ${f4.t_exp < 0.5 ? 'an average coach would almost never go in these spots either' : `an average coach would have about ${Math.round(f4.t_exp)}`}</div></div>` : ''}
+    // against an average coach in the same spots: z = (went - expected) in standard deviations of chance; the bar's middle
+    // is the average coach, a lean is named only past 1.5 (owner 2026-10-27: a 0-99 "45/99 reads like he went for it on
+    // 4th almost half the time"; ranks on a play or two were noise)
+    const lean = (label, z, did, n, exp, tip) => `<div class="co-row" title="${esc(tip)} The middle of the bar is the average coach; a lean is named only when the gap is bigger than chance on this many plays.">
+        <div class="co-rowh"><span>${label}</span><b>${z >= 1.5 ? 'Leans aggressive' : z <= -1.5 ? 'Leans conservative' : 'Like most coaches'}</b></div>
+        <div class="co-rowb co-mid"><i style="left:${(50 + 20 * Math.max(-2.5, Math.min(2.5, z))).toFixed(1)}%"></i></div><div class="co-rowe"><span>Conservative</span><span>Aggressive</span></div>
+        <div class="co-rows">${did} ${n}; ${exp < 0.5 ? 'an average coach would almost never go in these spots either' : `an average coach would have about ${Math.round(exp)}`}</div></div>`;
+    const f4row = !f4.n || f4.z == null ? '' : `${lean('Fourth downs', f4.z, `Went for it ${f4.go} times on`, `${f4.n} fourth downs`, f4.exp_go,
+        'How often he goes for it on 4th down compared with an average NFL coach in the same spots (field position, distance, score, time, timeouts, the line).')}
+      ${f4.tn && f4.t_z != null ? lean('On toss-ups', f4.t_z, `Went for it ${f4.t_go} of`, `${f4.tn} times`, f4.t_exp,
+        "Fourth downs where our model's top two options were within 1.25 points of win chance: too close to call. How often he went for it there, against an average coach in the same spots.") : ''}
       ${f4.clear && f4.c_bold != null ? (() => {
         // against the model itself, not ranked against the league (the whole league kicks more than it says: MIN, 0 bolder
         // and 6 more conservative, ranked 4th boldest): the middle is in step with the model
@@ -3182,10 +3185,8 @@
         <div class="co-rows">Of ${f4.clear} clear call${f4.clear === 1 ? '' : 's'}: kicked when it said go ${f4.c_cons}, went when it said kick ${f4.c_bold}</div></div>`; })() : ''}`;
     // two-point tries against a typical coach in the same spot (owner 2026-10-27: down 2 with 0:30 left "DUH you're going
     // for 2"; up 16 in the 2nd quarter is "whatever"), centered like the toss-ups; the raw share without it misread both
-    const tp = T.two, twoRow = tp && tp.n ? `<div class="co-row" title="Tries after a touchdown, against an average coach with the same score and time left: down 2 late almost everyone goes for two, early in a game almost no one does. The middle of the bar is the average coach; a lean is named only when the gap is bigger than chance on this many tries">
-        <div class="co-rowh"><span>Two-point tries</span><b>${tp.z >= 1.5 ? 'Leans aggressive' : tp.z <= -1.5 ? 'Leans conservative' : 'Like most coaches'}</b></div>
-        <div class="co-rowb co-mid"><i style="left:${(50 + 20 * Math.max(-2.5, Math.min(2.5, tp.z))).toFixed(1)}%"></i></div><div class="co-rowe"><span>Conservative</span><span>Aggressive</span></div>
-        <div class="co-rows">Went for two ${tp.go} of ${tp.n} times; ${tp.exp < 0.5 ? 'an average coach would almost never go in these spots either' : `an average coach would have about ${Math.round(tp.exp)}`}</div></div>`
+    const tp = T.two, twoRow = tp && tp.n ? lean('Two-point tries', tp.z, `Went for two ${tp.go} of`, `${tp.n} times`, tp.exp,
+        'Tries after a touchdown, against an average coach with the same score and time left: down 2 late almost everyone goes for two, early in a game almost no one does.')
       : tr('two_pt', 'Two-point tries', pct, ['Rarely', 'Often'], 'goes for two often', 'rarely goes for two', 'Share of tries after a touchdown');
     const gmRows = [f4row, twoRow,
       tn.chal ? `<div class="co-row"><div class="co-rowh"><span>Challenges won</span><b>${tn.chal[1]} of ${tn.chal[0]}</b></div></div>` : ''].join('');
