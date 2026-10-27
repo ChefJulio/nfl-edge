@@ -2623,12 +2623,15 @@
       const [, o, home, pf, pa, day] = g, done = pf != null && pa != null;
       const res = done ? (pf > pa ? 'W' : pf < pa ? 'L' : 'T') : '';
       const tip = `Week ${w} · ${day || ''} · ${home ? 'vs' : '@'} ${(rtTeam(O, o).nick || o)}${done ? ` · ${res} ${pf}-${pa}` : ''}`;
-      return `<div class="ts-c${cur}" title="${esc(tip)}">${tmL(o, tLogo(o, 18))}<span class="ts-r ${res === 'W' ? 'w' : res === 'L' ? 'l' : res ? 't' : ''}"></span></div>`;
+      return `<div class="ts-c${cur}" title="${esc(tip)}">${tLogo(o, 18)}<span class="ts-r ${res === 'W' ? 'w' : res === 'L' ? 'l' : res ? 't' : ''}"></span></div>`;
     }).join('');
-    // the header names how hard the rest of it is and opens the schedule sheet (the logos open their teams)
-    const head = pw ? `<div class="pc-tap ts-head" role="button" tabindex="0" aria-haspopup="dialog" data-sheet="Schedule"><div class="pc-k">${esc(d.season)} schedule · ${ord(pw.sos_next_rk)} hardest left</div><template>${schedSheet(abbr, d, pw)}</template></div>`
-      : `<div class="pc-k">${esc(d.season)} schedule</div>`;
-    return `<div class="pc-box ts-box">${head}<div class="ts-grid" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${cells}</div></div>`;
+    // one tile (owner 2026-10-26: "make this schedule area a clickable tile ... remove all the individual clickable
+    // teams / matchups and make the whole tile pull up the schedule slide"): the logos are pictures, the tile opens the
+    // schedule sheet
+    const k = `<div class="pc-k">${esc(d.season)} schedule${pw ? ` · ${ord(pw.sos_next_rk)} hardest left` : ''}</div>`;
+    const grid = `<div class="ts-grid" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${cells}</div>`;
+    return pw ? `<div class="pc-tap ts-box ts-tap" role="button" tabindex="0" aria-haspopup="dialog" data-sheet="Schedule">${k}${grid}<template>${schedSheet(abbr, d, pw)}</template></div>`
+      : `<div class="pc-box ts-box">${k}${grid}</div>`;
   };
   // odds by week: lines going into each week, dashed to next week's best / worst case; schedule along the bottom
   const oddsChart = (abbr, O) => {

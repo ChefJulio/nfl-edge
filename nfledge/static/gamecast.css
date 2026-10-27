@@ -779,6 +779,12 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .pc-tap.ts-head::after { right: 2px; font-size: 18px; }
 @media (hover: hover) { .pc-tap.ts-head:hover { background: none; } .pc-tap.ts-head:hover .pc-k { color: var(--accent); } }
 .ts-grid { display: grid; gap: 1px; margin-top: 6px; }
+/* the schedule strip as one tile (owner 2026-10-26): the tiles' frame, its chevron beside the heading */
+.pc-tap.ts-tap { display: block; margin: 8px 0 0; padding: 10px 12px 8px; }
+.pc-tap.ts-tap::after { top: 8px; transform: none; line-height: 22px; }
+.pc-tap.ts-tap .pc-k { padding-right: 16px; }
+.pc-page .pc-tap.ts-tap { margin: 0 0 8px; }
+.ts-tap .ts-c .nl { pointer-events: none; }
 .ts-c { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 2px 0 3px; border-radius: 6px; min-width: 0; }
 /* a timeline: past games full color with their result bar, this week's opponent ringed in the accent with a dot
    until it's final, later games dimmed */
