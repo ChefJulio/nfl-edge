@@ -68,7 +68,12 @@
         // a finished game of an earlier week whose play-by-play hasn't landed (a Monday night game, often Tuesday
         // afternoon) is named rather than claimed
         const miss = (D.ratings_missing || []).map(([, a, h]) => `${esc(nick(a))} and ${esc(nick(h))}`);
-        const asof = rf ? `After week ${wk} &middot; ${late.length ? `${nIn} of ${nAll} games in; ${late.map(g => `${esc(nick(g.away.team))} and ${esc(nick(g.home.team))}`).join(', ')} after Monday night` : 'every game in'}`
+        // (DN) Thursday's games are in from Friday: until the weekend's are, the week is in progress
+        const wd = g => new Date(`${g.gameday}T12:00:00`).getDay();
+        const allG = (D.games || []), lastSun = allG.filter(g => wd(g) === 0).map(g => g.gameday).sort().pop();
+        const onlyMon = late.length && late.every(g => lastSun && g.gameday > lastSun);
+        const asof = rf && late.length && !onlyMon ? `Week ${wk} in progress &middot; ${nIn} of ${nAll} games in`
+          : rf ? `After week ${wk} &middot; ${late.length ? `${nIn} of ${nAll} games in; ${late.map(g => `${esc(nick(g.away.team))} and ${esc(nick(g.home.team))}`).join(', ')} after Monday night` : 'every game in'}`
           : `Going into week ${wk} &middot; through week ${wk - 1}'s games${miss.length ? `, except ${miss.join(', ')} (its play-by-play isn't out yet)` : ''}`;
         const fresh = `<p class="pw-fresh">${asof}</p>`;
         sec.innerHTML = `<div class="sec-head"><div><h2>Power rankings</h2><p>How good each team is from here on, in points per game vs an average team.</p>${fresh}</div></div>

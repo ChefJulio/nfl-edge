@@ -489,6 +489,17 @@
       return playHead({ text: txt, type: { text: ty }, statYardage: sy, isTurnover: ty === 'Interception', inner: true }, names, ctx);
     };
     let h, cls = '';
+    // a penalty that wiped the play out ("T.McKee FUMBLES ... RECOVERED by DAL ... PENALTY on DAL-Q.Williams, Defensive
+    // Offside, 5 yards ... - No Play."; owner 2026-10-26: "fumble lost to dallas doesn't have an explanation"): the flag
+    // leads, then what it erased, never the erased play as if it counted
+    const npen = !pl.inner && /No Play/i.test(raw) ? raw.match(RX.pen) : null;
+    if (npen) {
+      const pre = raw.slice(0, raw.search(/PENALTY on/)).trim();
+      const erased = /FUMBLES/.test(pre) ? 'a fumble' : /INTERCEPTED/.test(pre) ? 'an interception' : /TOUCHDOWN/.test(pre) ? 'a touchdown'
+        : /sacked/.test(pre) ? 'a sack' : ACT.test(pre) ? (action(pre.replace(/\.$/, '')) || {}).h : '';
+      return { h: `Penalty, ${GSIS[npen[1]] || ourCode(npen[1])}: ${npen[2]}, ${npen[3]} yards${erased ? ` · wipes out ${erased}` : ''}`,
+               cls: 'pen', raw: full, eff: raw };
+    }
     // fumbles (owner 2026-10-15: "Fumble" alone misleads): say what the play was and who ended up with the ball. Kept
     // by the offense and the play went on ("FUMBLES, and recovers ... D.Maye pass ... to H.Henry for 20 yards") -> that
     // play, recovered; otherwise the action before the fumble, then lost to / recovered by the team that got it.
