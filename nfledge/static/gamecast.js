@@ -2811,7 +2811,14 @@
           return `<tr><td>${esc(PAY_GRP[g] || g)}</td><td class="num">${usd(v)}</td><td class="py-bar"><span><i style="width:${(100 * v / gmax).toFixed(1)}%"></i><b style="left:${(100 * a / gmax).toFixed(1)}%"></b></span></td><td class="num muted">${usd(a)}</td><td class="num">${ord(rk[g])}</td></tr>`; }).join('')}</tbody></table>
       <p class="pc-sub muted">The bar is what this team spends; the tick, the league average.</p></div>`;
     const prow = (name, gs, extra, cap) => `<tr${gs ? ` data-open-pid="${esc(gs)}" class="py-tap"` : ''}><td>${esc(name)}${extra ? ` <span class="muted">${esc(extra)}</span>` : ''}</td><td class="num">${usd(cap)}</td></tr>`;
-    const top = `<div class="pc-box"><div class="pc-k">Biggest cap numbers</div><table class="bx"><tbody>${T.top.map(([n, gs, pos, cap]) => prow(n, gs, pos, cap)).join('')}</tbody></table></div>`;
+    // the ten biggest, then everyone (owner 2026-10-27: "a show more expand that shows everyone on the roster"): the
+    // whole active roster, then the reserve lists and the practice squad, each biggest first
+    const R = T.roster || (T.top || []).map(x => [...x, 'a']), act = R.filter(x => x[4] === 'a');
+    const LIST = { a: 'Active roster', r: 'Reserve lists', p: 'Practice squad' };
+    const rest = ['a', 'r', 'p'].map(k => { const xs = k === 'a' ? act.slice(10) : R.filter(x => x[4] === k);
+      return xs.length ? `<tr class="py-sec"><td colspan="2">${LIST[k]}${k === 'a' ? ' &middot; the rest' : ''}</td></tr>${xs.map(([n, gs, pos, cap]) => prow(n, gs, pos, cap)).join('')}` : ''; }).join('');
+    const top = `<div class="pc-box"><div class="pc-k">Biggest cap numbers</div><table class="bx"><tbody>${act.slice(0, 10).map(([n, gs, pos, cap]) => prow(n, gs, pos, cap)).join('')}</tbody></table>
+      ${rest ? `<details class="py-more"><summary>Show everyone (${R.length})</summary><table class="bx"><tbody>${rest}</tbody></table></details>` : ''}</div>`;
     const dead = T.dead_top && T.dead_top.length ? `<div class="pc-box"><div class="pc-k">Dead money &middot; ${usd(T.dead)}</div><table class="bx"><tbody>${T.dead_top.map(([n, gs, cap]) => prow(n, gs, '', cap)).join('')}</tbody></table></div>` : '';
     const nx = T.next ? `<div class="pc-box"><div class="pc-k">${P.season + 1}${T.next.cap ? ` &middot; projected cap ${usd(T.next.cap)}` : ''}</div><div class="tm-stats">${cell('Cap space', usd(T.next.space), 'Against the projected cap, as of today: before next year\'s signings, cuts and carryover of unused space')}${cell('Committed', usd(T.next.liab))}${cell('Dead money', usd(T.next.dead))}</div></div>` : '';
     const src = `<p class="pc-sub muted">From OverTheCap's team pages (updated daily); positions from nflverse. Cap numbers in millions.</p>`;

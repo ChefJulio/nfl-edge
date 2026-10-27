@@ -24,7 +24,8 @@ import pandas as pd  # noqa: E402
 from nfledge import coaches as C  # noqa: E402
 from nfledge import data as D  # noqa: E402
 
-V = 2  # what parse() reads (2: each list's TOTAL row; next season's projected cap); a new V refetches every team
+V = 3  # what each team's entry holds (2: each list's TOTAL row; next season's projected cap; 3: the whole roster);
+# a new V refetches every team
 URL = "https://overthecap.com/salary-cap/{slug}"
 UA = {"User-Agent": "Mozilla/5.0 (nfl-edge; https://github.com/ChefJulio/nfl-edge)"}
 FRESH_H = 20  # hours before a team's page is fetched again
@@ -32,7 +33,6 @@ FRESH_H = 20  # hours before a team's page is fetched again
 GROUP = {"QB": "QB", "RB": "RB", "FB": "RB", "WR": "WR", "TE": "TE", "LT": "OL", "RT": "OL", "LG": "OL", "RG": "OL", "C": "OL",
          "IDL": "DL", "ED": "EDGE", "LB": "LB", "CB": "CB", "S": "S", "K": "ST", "P": "ST", "LS": "ST"}
 GROUPS = ["QB", "RB", "WR", "TE", "OL", "DL", "EDGE", "LB", "CB", "S", "ST"]
-TOP = 10  # the biggest cap numbers kept per team
 
 
 def money(s: str) -> float:
@@ -131,18 +131,18 @@ def build(site: Path) -> None:
     cur, nxt = p[current], p.get(current + 1)
     act = [x for x in cur["players"] if x[3] == "act"]
     grp = {g: 0.0 for g in GROUPS}
-    top = []
-    for oid, nm, cap, _ in sorted(act, key=lambda x: -x[2]):
-      gs, pos = ids.get(oid or "", (None, None))
-      g = GROUP.get(pos or "")
+    for oid, nm, cap, _ in act:
+      g = GROUP.get(ids.get(oid or "", (None, None))[1] or "")
       if g:
         grp[g] += cap
-      if len(top) < TOP:
-        top.append([nm, gs, pos, cap])
+    # everyone carrying a cap number this season, biggest first (owner 2026-10-27: "a show more expand that shows
+    # everyone on the roster"): [name, gsis, position, cap, list] with list a = active roster, r = reserve, p = practice squad
+    roster = [[nm, *ids.get(oid or "", (None, None)), cap, {"act": "a", "res": "r", "ps": "p"}[k]]
+              for oid, nm, cap, k in sorted((x for x in cur["players"] if x[3] in ("act", "res", "ps")), key=lambda x: -x[2])]
     dead = sorted([x for x in cur["players"] if x[3] == "dead"], key=lambda x: -x[2])[:5]
     teams[t] = {"f": now.isoformat(timespec="seconds"), "liab": cur["liab"], "space": cur["space"], "act": cur["act"],
                 "dead": cur["dead"], "ps": cur["ps"], "res": cur["res"], "grp": {g: round(v, 3) for g, v in grp.items()},
-                "top": top, "dead_top": [[nm, ids.get(oid or "", (None,))[0], cap] for oid, nm, cap, _ in dead],
+                "roster": roster, "dead_top": [[nm, ids.get(oid or "", (None,))[0], cap] for oid, nm, cap, _ in dead],
                 # next season's space is against OverTheCap's projected cap (2026-10-27: liab + space = $327.0M for
                 # every team, no carryover yet), kept as "cap" so the sheet can say so
                 "next": {"liab": nxt["liab"], "space": nxt["space"], "dead": nxt["dead"],
