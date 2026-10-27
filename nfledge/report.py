@@ -637,6 +637,8 @@ def week_data(ctx: dict) -> str:
          "power_vol": ctx.get("power_vol"),
          # this week's games the ratings already count (TeamModel.set_live): {"through": [game_id], "pending": [...]}
          "refit": ctx.get("refit"),
+         # finished earlier games the ratings don't count yet ([[game_id, away, home]]: play-by-play not out yet)
+         "ratings_missing": ctx.get("ratings_missing") or [],
          # the week clock (nfledge/week_clock.py): kickoffs, report deadlines, rollover; the browser applies the time
          "clock": ctx.get("clock"),
          "head": {"data_week": ctx["data_week"], "n_final": ctx["n_final"], "n_games": ctx["n_games"],

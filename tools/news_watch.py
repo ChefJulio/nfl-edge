@@ -146,7 +146,24 @@ def sunday_pbp_due(d: dict) -> list:
   last Sunday is final and nflverse has republished the season's play-by-play since the live site was built, a build
   takes Sunday's games into the ratings. Quiet once the site has them (index.json "refit") or before Sunday is over."""
   c = d.get("clock") or {}
-  if d.get("refit") or not c.get("built"):
+  if not c.get("built"):
+    return []
+  rf = d.get("refit")
+  if rf:
+    # (owner 2026-10-26) a Monday game the ratings left out joins once it is final and the play-by-play is republished
+    pend = rf.get("pending") or []
+    teams = c.get("teams") or {}
+    done = [g for g in pend if all((teams.get(t) or {}).get("final") for t in g.split("_")[2:4])]
+    if not done:
+      return []
+    try:
+      season = int(d.get("season"))
+      up = [a["updated_at"] for a in get(PBP).get("assets", []) if a.get("name") == f"play_by_play_{season}.parquet"]
+    except Exception as e:
+      print(f"[watch] couldn't read nflverse's play-by-play release ({e})")
+      return []
+    if up and datetime.fromisoformat(up[0].replace("Z", "+00:00")) > datetime.fromisoformat(c["built"]):
+      return [f"nflverse play-by-play updated {up[0]} ({', '.join(done)} into the ratings)"]
     return []
   kicks = [(x["kick"], bool(x.get("final"))) for x in (c.get("teams") or {}).values() if x.get("kick")]
   suns = [k for k, _ in kicks if datetime.fromisoformat(k).weekday() == 6]

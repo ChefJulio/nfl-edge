@@ -303,6 +303,9 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
     # the current week's games the ratings already count (Power's "through Sunday" label; playoff_odds' Elo)
     "refit": ({"through": sorted(eng.tm.live[2]), "pending": sorted(eng.tm.live[3])}
               if eng.tm.live and eng.tm.live[:2] == (season, week) and not (archive or lookahead) else None),
+    # finished games of earlier weeks the ratings don't count yet: their play-by-play hasn't landed (a Monday night
+    # game, often Tuesday afternoon, after the rollover); Power names them (owner 2026-10-26, honest "as of" labels)
+    "ratings_missing": (unplayed_in_ratings(data, eng, season, week) if not (archive or lookahead) else []),
     "power": power, "teams": rp.team_info(data.teams), "power_vol": rp.league_volume(eng, season, week, eng.tm.fit(season, week)),
     "roles": rp.role_changes(eng, season, week, cfg), "backtest": rp.backtest_summary(ev),
     "bt_seasons": " and ".join(map(str, bt_seasons)) or "n/a", "bt_takeaway": backtest_takeaway(ev),
@@ -343,6 +346,14 @@ def build_lookahead(eng, data, cfg, scoring, season: int, week: int, site: Path,
                      nav=week_nav(data, season, w, week, prefix="../"), lookahead=w - week, plan=plan)
     check_script(rp.render(ctx, site / str(season) / f"week-{w:02d}.html"))
   print(f"[run] lookahead weeks {week + 1}-{last} in {time.time() - t0:.0f}s", flush=True)
+
+
+def unplayed_in_ratings(data, eng, season: int, week: int) -> list:
+  """Final regular-season games of this season before `week` whose plays the team ratings don't have yet."""
+  s = data.schedules
+  fin = s[(s.season == season) & (s.game_type == "REG") & (s.week < week) & s.home_score.notna()]
+  have = set(eng.tm.plays["pass"].game_id[eng.tm.plays["pass"].season == season])
+  return [[g, a, h] for g, a, h in zip(fin.game_id, fin.away_team, fin.home_team) if g not in have]
 
 
 def ingame_latest(data, cfg, season: int, week: int) -> dict:

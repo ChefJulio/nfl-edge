@@ -239,8 +239,10 @@ def asof_weights(season_col: pd.Series, week_col: pd.Series, season: int, target
 def sunday_refit(schedules: pd.DataFrame, plays: pd.DataFrame, season: int, week: int) -> tuple | None:
   """(through, exclude) game_id sets once every game of `week` through its last Sunday is final with its plays in
   (TeamModel.set_live), else None: Thursday through Sunday count together, never a Thursday game alone mid-week;
-  exclude = the week's games after that Sunday (Monday night). All or nothing: a Sunday game whose plays haven't
-  landed holds the whole refit."""
+  exclude = the week's games after that Sunday not yet in. All or nothing: a Sunday game whose plays haven't landed
+  holds the whole refit. A Monday game joins as soon as it is final with its plays in (owner 2026-10-26: "if we have
+  the game data we shouldn't wait to factor it in"), not at the Tuesday rollover: (BA) found leaving it out vs in no
+  different in accuracy, so this is the full fit a few hours sooner."""
   g = schedules[(schedules.season == season) & (schedules.week == week) & (schedules.game_type == "REG")]
   day = pd.to_datetime(g.gameday)
   sun = day[day.dt.weekday == 6]
@@ -250,7 +252,8 @@ def sunday_refit(schedules: pd.DataFrame, plays: pd.DataFrame, season: int, week
   have = set(plays.game_id[plays.season == season])
   if early.home_score.isna().any() or not set(early.game_id) <= have:
     return None
-  return frozenset(early.game_id), frozenset(late.game_id)
+  done = late[late.home_score.notna() & late.game_id.isin(have)]
+  return frozenset(early.game_id) | frozenset(done.game_id), frozenset(late.game_id) - frozenset(done.game_id)
 
 
 # ----------------------------------------------------------------------------------------------------------------

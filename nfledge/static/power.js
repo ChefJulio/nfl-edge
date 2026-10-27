@@ -59,10 +59,18 @@
       NFLE.week().then(D => {
         if (!D || !D.power || !D.power.length || !('net_hist' in D.power[0])) return;  // older week file: keep the page's table
         const v = D.power_vol || {}, n = (x, d) => x ? Math.round(x) : d;
-        // Monday (owner 2026-10-19): the ratings already count this week's games through Sunday (report "refit")
-        const rf = D.refit, nick = t => ((D.teams || {})[t] || {}).nick || t;
+        // which games the ratings count, said plainly (owner 2026-10-26: "kinda misleading to show updates for sundays
+        // games and call it 'week 7 power rankings'"): after the week's games are in (report "refit": Sunday's from
+        // Monday morning, Monday night's once its play-by-play lands), "After week N"; before, "Going into week N"
+        const rf = D.refit, nick = t => ((D.teams || {})[t] || {}).nick || t, wk = +D.week;
         const late = rf ? (rf.pending || []).map(id => (D.games || []).find(g => g.id === id)).filter(Boolean) : [];
-        const fresh = rf ? `<p class="pw-fresh">Updated with this week's games through Sunday.${late.length ? ` ${late.map(g => `${esc(nick(g.away.team))} and ${esc(nick(g.home.team))}`).join(', ')} update after Monday night.` : ''}</p>` : '';
+        const nIn = rf ? (rf.through || []).length : 0, nAll = nIn + late.length;
+        // a finished game of an earlier week whose play-by-play hasn't landed (a Monday night game, often Tuesday
+        // afternoon) is named rather than claimed
+        const miss = (D.ratings_missing || []).map(([, a, h]) => `${esc(nick(a))} and ${esc(nick(h))}`);
+        const asof = rf ? `After week ${wk} &middot; ${late.length ? `${nIn} of ${nAll} games in; ${late.map(g => `${esc(nick(g.away.team))} and ${esc(nick(g.home.team))}`).join(', ')} after Monday night` : 'every game in'}`
+          : `Going into week ${wk} &middot; through week ${wk - 1}'s games${miss.length ? `, except ${miss.join(', ')} (its play-by-play isn't out yet)` : ''}`;
+        const fresh = `<p class="pw-fresh">${asof}</p>`;
         sec.innerHTML = `<div class="sec-head"><div><h2>Power rankings</h2><p>How good each team is from here on, in points per game vs an average team.</p>${fresh}</div></div>
           <details class="howto"><summary>How to read</summary><div>
             <dl class="ht">

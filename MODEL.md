@@ -1,5 +1,5 @@
 ---
-documented_code_hash: fef3546edf3eeaf6
+documented_code_hash: 59530d8f2d6a3ead
 ---
 # How the model works
 
@@ -637,7 +637,7 @@ Team ratings use this season's completed games plus a fading share of last seaso
 Seasons loaded: **{{ L.seasons }}**.
 - **Refresh.** Completed seasons are downloaded once and cached (and downloaded again if the model starts reading a column the cached copy lacks). The current season's play-by-play (with snap counts and player stats) is refetched when a new game goes final, and again every hour while a final game is still missing from nflverse's published data (a Monday night game usually lands Tuesday afternoon). Kicker and team stats and the Stats tab's player stats retry hourly the same way. Schedules (scores, lines) are refetched every run. Injury reports, practice data, rosters, depth charts and expert ranks are refreshed when they are more than 6 hours old.
 - **Rebuilds.** The site rebuilds on every code push and on a schedule: every morning, early Tuesday after the week rolls over, Wednesday to Friday evenings after practice reports, Saturday afternoon and Sunday after the early games' inactives. Between those, a watcher checks every 10 minutes and starts a build when a player who matters changes injury status, when a practice-report deadline, a game's inactives time or the Tuesday rollover has passed since the last build, or when Sunday's play-by-play is published.
-- **Monday.** Once every game of the week through Sunday is final and its play-by-play is in (usually Monday around midday), the team ratings and Elo take those games in, and so do everything built on them (Power, win chances, projections, playoff odds); the page stays on the current week. The Monday-night game joins at the Tuesday rollover. A Thursday game waits for Sunday's: refitting in midweek would move that weekend's projections and win chances right before lineups lock, which was never tested. Records always count every finished game.
+- **Monday.** Once every game of the week through Sunday is final and its play-by-play is in (usually Monday around midday), the team ratings and Elo take those games in, and so do everything built on them (Power, win chances, projections, playoff odds); the page stays on the current week. The Monday-night game joins as soon as it is final with its play-by-play in (often Tuesday afternoon, after the rollover; it is then part of the next week's ratings either way), and Power names any finished game its ratings don't count yet. A Thursday game waits for Sunday's: refitting in midweek would move that weekend's projections and win chances right before lineups lock, which was never tested. Records always count every finished game.
 - **Model cache.** The trained model is reused only while every input is unchanged: final games, injury and practice reports, expert ranks, rosters, configuration and model code. In season that usually means a retrain every day. The wind forecast is fetched at retrain time.
 
 ### Validation
