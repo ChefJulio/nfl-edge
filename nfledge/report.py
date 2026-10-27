@@ -1738,7 +1738,8 @@ def render(ctx: dict, out_path: Path) -> Path:
   cfg = {"page": "week", "root": root, "data": data_rel, "season": ctx["season"], "week": ctx["week"],
          "current": bool(nav["is_current"] and not ctx["lookahead"] and not ctx["archive"]),
          "archive": bool(ctx["archive"]), "lookahead": int(ctx["lookahead"] or 0)}
-  out_path.write_text(page_html("week.html", TITLE=f"NFL Edge · {ctx['season']} Week {ctx['week']}", ROOT=root,
+  # the scope in the title (owner 2026-10-27: an LLM given the home page called it "a fantasy projections site")
+  out_path.write_text(page_html("week.html", TITLE=f"NFL Edge · NFL analytics: win chances, power ratings, playoff odds, fantasy · {ctx['season']} Week {ctx['week']}", ROOT=root,
                                 WK=f"{ctx['season']} · Wk {ctx['week']}",
                                 V=asset_version(), CFG=json.dumps(cfg, separators=(",", ":"))), encoding="utf-8")
   out_path.with_suffix(".json").write_text(week_data(ctx), encoding="utf-8")

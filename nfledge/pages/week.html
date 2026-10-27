@@ -55,10 +55,23 @@
   <p class="archived" id="wkNote" hidden></p>
 </div></header>
 <nav class="tabs"></nav>
-<noscript><p class="wrap"><b>Free NFL analytics for the whole league:</b> win chances and live gamecasts, power ratings, playoff odds,
-a 4th-down and win-probability calculator, coaching staffs and tendencies, injury chance-to-play, stats and play-by-play
-splits since 1999, and fantasy rankings and tools.</p>
-<p class="wrap">This app needs JavaScript. Plain-text versions: <a href="%ROOT%llms.txt">llms.txt</a> (start here), <a href="%ROOT%games.md">this week's games</a>,
+<!-- What the site is, in the page itself (owner 2026-10-27: an LLM given the home page called it "a fantasy projections
+     site": fetchers read this HTML without running it, and the first content they met was the rankings' loading frame).
+     Visually hidden, read by screen readers and crawlers alike. -->
+<div class="vh" id="about-site">
+  <h2>NFL Edge: free analytics for the whole NFL</h2>
+  <p>Every game, team and player in the league, updated through each week and live on game days:</p>
+  <ul>
+    <li>Games: win chances from our own model alongside the betting line, live gamecasts with play-by-play and live win probability, every 4th-down and two-point decision graded.</li>
+    <li>Teams: opponent-adjusted power ratings unit by unit, playoff and division odds, standings, schedules, coaching staffs and their tendencies, injury reports with each player's chance to play.</li>
+    <li>Calculator: 4th down, two-point tries, timeouts and penalties, the win chance of every option.</li>
+    <li>Stats: team and player stats and play-by-play splits back to 1999, player pages with game logs.</li>
+    <li>Fantasy: weekly and rest-of-season rankings and projections with ranges, chance to play, trends, and your connected league's best lineup.</li>
+    <li>The model: how every number is made, what we tested, and what failed.</li>
+  </ul>
+  <p>Plain-text versions for assistants: <a href="%ROOT%llms.txt">llms.txt</a>.</p>
+</div>
+<noscript><p class="wrap">This app needs JavaScript. Plain-text versions: <a href="%ROOT%llms.txt">llms.txt</a> (start here), <a href="%ROOT%games.md">this week's games</a>,
 <a href="%ROOT%power.md">power rankings</a>, <a href="%ROOT%injuries.md">injuries</a>, <a href="%ROOT%players.md">players</a> (one page each: chance to play, projection, practice, game log),
 <a href="%ROOT%rankings.md">this week's fantasy rankings</a>, <a href="%ROOT%model/">how the model works</a>.</p></noscript>
 <main><div class="wrap">
