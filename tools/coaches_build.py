@@ -148,13 +148,7 @@ def tendencies(pbp: pd.DataFrame, season: int) -> dict:
   m = {}
   ed = p[neutral & p.down.isin([1, 2])]
   m["pass_rate"] = dropback[ed.index].groupby(ed.posteam).mean()
-  # seconds from one snap to the next within a drive, neutral situations (the clock runs between them)
-  q = p[real].sort_values(["game_id", "play_id"])
-  nxt = q.groupby(["game_id", "drive"]).game_seconds_remaining.shift(-1)
-  gap = (q.game_seconds_remaining - nxt).where(neutral[q.index])
-  gap = gap[(gap > 0) & (gap <= 60)]
-  m["pace"] = gap.groupby(q.posteam[gap.index]).median()
-  m["no_huddle"] = desc[real].str.contains("No Huddle").groupby(p.posteam[real]).mean()
+  # (owner 2026-10-27) pace and no-huddle dropped from the tile, so not computed
   tries = p[(p.two_point_attempt == 1) | p.extra_point_result.notna()]
   m["two_pt"] = (tries.two_point_attempt == 1).groupby(tries.posteam).mean()
   # challenges: "Carolina challenged ... REVERSED" / "Upheld"; the challenger is whichever side's city leads the phrase
@@ -167,7 +161,7 @@ def tendencies(pbp: pd.DataFrame, season: int) -> dict:
       who.append(c[0]); won.append("REVERSED" in r.desc.upper().split("CHALLENGED", 1)[1][:160])
   chal = pd.DataFrame({"team": who, "won": won})
   out = {}
-  higher_better = {"pass_rate": True, "pace": False, "no_huddle": True, "two_pt": True}
+  higher_better = {"pass_rate": True, "two_pt": True}
   for k, ser in m.items():
     ser = ser.dropna()
     order = ser.sort_values(ascending=not higher_better[k])

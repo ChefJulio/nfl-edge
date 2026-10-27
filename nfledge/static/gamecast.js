@@ -3163,9 +3163,8 @@
         <div class="co-rows">${rk ? `${ord(rk)} of 32 &middot; ` : ''}${desc}</div></div>`;
     };
     const tr = (k, label, f, ends, hi, lo, tip) => tn[k] ? trow(label, f(tn[k][0]), k, tn[k][0], tn[k][1], ends, word(tn[k][1], hi, lo), tip) : '';
-    const offRows = [tr('pass_rate', 'Passes on early downs', pct, ['Run', 'Pass'], 'pass-leaning', 'run-leaning', 'Dropbacks on 1st and 2nd down with the game close (win chance 20-80%, quarters 1-3)'),
-      tr('pace', 'Seconds between snaps', v => `${v.toFixed(0)} s`, ['Fast', 'Slow'], 'fast', 'slow', 'Median time from snap to snap within a drive, game close'),
-      tr('no_huddle', 'No-huddle snaps', pct, ['Rarely', 'Often'], 'uses it often', 'rarely uses it', 'Share of snaps')].join('');
+    // (owner 2026-10-27: pace and no-huddle rows dropped, "not informative in line with the rest")
+    const offRows = [tr('pass_rate', 'Passes on early downs', pct, ['Run', 'Pass'], 'pass-leaning', 'run-leaning', 'Dropbacks on 1st and 2nd down with the game close (win chance 20-80%, quarters 1-3)')].join('');
     const offSec = offRows ? `<div class="co-sec"><div class="pc-k">How the offense plays &middot; ${S}</div>${offRows}</div>` : '';
     // 4th downs (owner 2026-10-26: "how bout a 0-99 aggressiveness rating"): against other coaches in the same spots
     // (a typical-coach model), not our calculator; then the calculator's split (owner 2026-10-27): toss-ups (no right
