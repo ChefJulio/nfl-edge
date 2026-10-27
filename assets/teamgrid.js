@@ -26,7 +26,7 @@
   // the matchup tiles' look (owner 2026-10-17: "the logo blown up within the background"): the logo large, bleeding
   // off the right edge and fading toward the text; team-color gradient, darker under the text
   const tile = (t, i, p) => `<button type="button" class="tg-tile tm-open" data-tm="${esc(t)}" style="--tc:${esc(vivid(PRIMARY[t] || i.logo_bg || i.color) || '#555')};--tc2:${esc(i.color2 || i.color || '#555')}">
-      <img class="tg-lg" src="${esc(NFLE.fmt.logoSrc(i.logo, 224))}" alt="" loading="lazy">
+      <img class="tg-lg" src="${esc(NFLE.fmt.logoSrc(i.logo, 224))}" alt="" loading="lazy" onerror="if (!this.dataset.r) { this.dataset.r = 1; this.src = '${esc(i.logo || '')}'; }">
       <span class="tg-txt"><span class="tg-nm"><img class="tg-wm" src="${esc(NFLE.root || '')}assets/wordmarks/${esc(t)}.png" alt="${esc(i.nick || t)}"
         onerror="this.parentNode.textContent = this.alt"></span>
         <span class="tg-meta"><b>${NFLE.recSpan(t, p.record || '0-0')}</b>${p.rank ? `<span class="tg-rk" title="Our Power rank">Power #${p.rank}</span>` : ''}</span></span>
@@ -40,9 +40,13 @@
     if (!PHONE.matches || !sec.offsetParent) { g.style.removeProperty('--tgr'); return; }
     const bar = document.querySelector('.botbar'), bottom = bar && bar.getClientRects().length ? bar.getBoundingClientRect().top : innerHeight;
     const top = g.getBoundingClientRect().top + scrollY;  // as laid out at the top of the page
+    const was = g.style.getPropertyValue('--tgr');
     g.style.setProperty('--tgr', '50px');
     const extra = bottom - 8 - top - g.getBoundingClientRect().height;
-    g.style.setProperty('--tgr', `${Math.max(32, Math.min(84, 50 + extra / 8))}px`);
+    // a whole pixel, set only when it changes (owner 2026-10-26, flicker on load: each fit nudged the grid's size by a
+    // fraction, the resize watcher fit again, 66.22 -> 66.26 px, and the page shuffled a few times)
+    const px = `${Math.round(Math.max(32, Math.min(84, 50 + extra / 8)))}px`;
+    g.style.setProperty('--tgr', px === was ? was : px);
   };
   NFLE.areas.teamgrid = {
     mount(sec) {

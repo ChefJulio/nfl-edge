@@ -135,7 +135,9 @@ button:active:not(:disabled), a.mt:active, .chip:active, .sbtn:active, [data-ope
 @media (prefers-reduced-motion: no-preference) {
   @media (hover: hover) { a.mt { transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
     a.mt:hover { transform: translateY(-2px); box-shadow: var(--e2); } }
-  main section.on { animation: sec-in .18s var(--ease); }
+  /* on a tab switch only, not the page's first paint (owner 2026-10-26, "position flickering when i load this page":
+     the rise played while the page filled in and sized itself); shell.js marks the section it switches to */
+  main section.on.enter { animation: sec-in .18s var(--ease); }
   @keyframes sec-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 }
 

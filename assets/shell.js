@@ -757,7 +757,10 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     subBar.hidden = r.p.subs.length < 2;
     subBar.innerHTML = r.p.subs.length < 2 ? '' : r.p.subs.map(s => `<button type="button" class="chip${s === r.s ? ' on' : ''}" data-sub="${s[0]}">${s[1]}</button>`).join('');
     const id = sectionId(r.p, r.s);
-    main.querySelectorAll(':scope > section').forEach(x => x.classList.toggle('on', x.id === id));
+    // the rise-in (ui.css section.enter) on a switch to another section only, not the page's first paint (owner
+    // 2026-10-26: the page "flickering" as it loaded, the rise playing while it filled in)
+    const switching = !!lastRoute && sectionId(lastRoute.p, lastRoute.s) !== id;
+    main.querySelectorAll(':scope > section').forEach(x => { x.classList.toggle('on', x.id === id); x.classList.toggle('enter', switching && x.id === id); });
     const route = r.p.subs.length < 2 ? r.p.key : `${r.p.key}/${r.s[0]}`;
     try { localStorage.setItem('nfledge-tab', route); } catch (e) { /* private mode */ }
     if (push && location.hash.slice(1) !== route) { try { history.replaceState(null, '', '#' + route); } catch (e) { /* file:// */ } }
