@@ -2784,6 +2784,69 @@
     return `<div class="pc-box"><div class="pc-k">${esc(d.season)} season</div>${weeks.length ? `<div class="tm-sched">${weeks.map(schRow).join('')}</div>` : '<p class="pc-sub">Loading schedule&hellip;</p>'}
       ${pw ? `<p class="pc-sub">Strength of schedule, by the opponents' Power ratings: so far ${ord(pw.sos_past_rk)} hardest, the rest of the way ${ord(pw.sos_next_rk)} hardest (1st = toughest).</p>` : ''}</div>`;
   };
+  // ---- Payroll (owner 2026-10-27: "i want a payroll tile for teams"): this season's salary cap and next (OverTheCap's
+  // team pages, data/payroll.json, tools/payroll_build.py). This season's page only.
+  const PY = { d: undefined };
+  const loadPayroll = () => { if (PY.d !== undefined) return; PY.d = null;
+    NFLE.load('data/payroll.json').then(j => { PY.d = j; rerenderCard(); }).catch(() => { PY.d = false; }); };
+  const usd = v => v == null ? '&ndash;' : `${v < 0 ? '&minus;' : ''}$${Math.abs(v) >= 100 ? Math.abs(v).toFixed(0) : Math.abs(v).toFixed(1)}M`;
+  const PAY_GRP = { QB: 'Quarterback', RB: 'Running back', WR: 'Receiver', TE: 'Tight end', OL: 'Offensive line', DL: 'Interior D-line', EDGE: 'Edge rusher', LB: 'Linebacker', CB: 'Cornerback', S: 'Safety', ST: 'Specialists' };
+  const payrollTile = abbr => {
+    loadPayroll();
+    const P = PY.d, T = P && P.teams && P.teams[abbr];
+    if (!T) return P === false || (P && !T) ? '' : tapTile('Payroll', '<div class="pc-tapsub">Loading&hellip;</div>', 'Payroll', '<p class="pc-sub">Loading&hellip;</p>');
+    const rk = T.rk || {}, lg = P.league || {};
+    const face = `<div class="pc-big${T.space < 0 ? ' bad' : ''}">${usd(T.space)} <small>cap space</small></div><div class="pc-tapsub">${ord(rk.space)} of 32 &middot; ${usd(T.dead)} dead money</div>`;
+    const cell = (k, v, tip = '') => `<div class="tm-st"${tip ? ` title="${esc(tip)}"` : ''}><div class="pc-k">${k}</div><div class="tm-stv">${v}</div></div>`;
+    const sum = `<div class="pc-box"><div class="pc-k">${P.season} salary cap</div><div class="tm-stats">
+        ${cell('Cap space', `${usd(T.space)} <small class="muted">${ord(rk.space)}</small>`, 'Room under the salary cap after every charge, with carryover from last year (1st = most room)')}
+        ${cell('Committed', usd(T.liab), 'Every cap charge this season: the roster, dead money, practice squad and reserve lists')}
+        ${cell('Active roster', usd(T.act))}${cell('Dead money', `${usd(T.dead)} <small class="muted">${ord(rk.dead)}</small>`, 'Cap charges for players no longer on the team (released or traded); 1st = most')}
+        ${cell('Reserve lists', usd(T.res), 'Injured reserve, PUP and the other reserve lists')}${cell('Practice squad', usd(T.ps))}</div></div>`;
+    // spending by position group against the league average; the bar is this team's share of the most any team spends
+    const gmax = Math.max(...P.groups.map(g => Math.max(T.grp[g] || 0, lg[g] || 0)), 1);
+    const grp = `<div class="pc-box"><div class="pc-k">Where the money goes &middot; active roster</div>
+      <table class="bx py-g"><thead><tr><th>Group</th><th class="num">Spent</th><th></th><th class="num" title="League average">Avg</th><th class="num" title="Rank in spending, 1st = most">Rk</th></tr></thead><tbody>${
+        P.groups.map(g => { const v = T.grp[g] || 0, a = lg[g] || 0;
+          return `<tr><td>${esc(PAY_GRP[g] || g)}</td><td class="num">${usd(v)}</td><td class="py-bar"><span><i style="width:${(100 * v / gmax).toFixed(1)}%"></i><b style="left:${(100 * a / gmax).toFixed(1)}%"></b></span></td><td class="num muted">${usd(a)}</td><td class="num">${ord(rk[g])}</td></tr>`; }).join('')}</tbody></table>
+      <p class="pc-sub muted">The bar is what this team spends; the tick, the league average.</p></div>`;
+    const prow = (name, gs, extra, cap) => `<tr${gs ? ` data-open-pid="${esc(gs)}" class="py-tap"` : ''}><td>${esc(name)}${extra ? ` <span class="muted">${esc(extra)}</span>` : ''}</td><td class="num">${usd(cap)}</td></tr>`;
+    const top = `<div class="pc-box"><div class="pc-k">Biggest cap numbers</div><table class="bx"><tbody>${T.top.map(([n, gs, pos, cap]) => prow(n, gs, pos, cap)).join('')}</tbody></table></div>`;
+    const dead = T.dead_top && T.dead_top.length ? `<div class="pc-box"><div class="pc-k">Dead money &middot; ${usd(T.dead)}</div><table class="bx"><tbody>${T.dead_top.map(([n, gs, cap]) => prow(n, gs, '', cap)).join('')}</tbody></table></div>` : '';
+    const nx = T.next ? `<div class="pc-box"><div class="pc-k">${P.season + 1}</div><div class="tm-stats">${cell('Cap space', usd(T.next.space), 'As of today: before next year\'s signings, cuts and carryover')}${cell('Committed', usd(T.next.liab))}${cell('Dead money', usd(T.next.dead))}</div></div>` : '';
+    const src = `<p class="pc-sub muted">From OverTheCap's team pages (updated daily); positions from nflverse. Cap numbers in millions.</p>`;
+    return tapTile('Payroll', face, 'Payroll', sum + grp + top + dead + nx + src);
+  };
+  // ---- Moves (owner 2026-10-27, with Payroll): this season's trades, draft class and roster moves (data/transactions
+  // and data/draft, the Players > Moves and Teams > Draft files). Practice-squad and injury-list moves left out.
+  const MV = { d: undefined };
+  const loadMoves = season => { if (MV.d !== undefined) return; MV.d = null;
+    Promise.all([NFLE.load(`data/transactions/${season}.json`), NFLE.load(`data/draft/${season}.json`).catch(() => null)])
+      .then(([t, dr]) => { MV.d = { t, dr }; rerenderCard(); }).catch(() => { MV.d = false; }); };
+  const MOVE_IN = new Set(['signed', 're_signed', 'extended', 'claimed', 'acquired', 'tendered', 'option']);
+  const MOVE_OUT = new Set(['released', 'waived', 'traded', 'retired']);
+  const mdate = s => { const [, m, dd] = String(s).split('-').map(Number); return `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][m - 1]} ${dd}`; };
+  const movesTile = (abbr, season) => {
+    loadMoves(season);
+    const M = MV.d;
+    if (!M) return M === false ? '' : tapTile('Moves', '<div class="pc-tapsub">Loading&hellip;</div>', 'Moves', '<p class="pc-sub">Loading&hellip;</p>');
+    const ix = Object.fromEntries(M.t.cols.map((c, i) => [c, i]));
+    const mine = M.t.rows.filter(r => r[ix.team] === abbr && (MOVE_IN.has(r[ix.type]) || MOVE_OUT.has(r[ix.type])))
+      .sort((a, b) => (a[ix.date] < b[ix.date] ? 1 : a[ix.date] > b[ix.date] ? -1 : 0));
+    const trades = mine.filter(r => r[ix.type] === 'traded' || r[ix.type] === 'acquired');
+    const nIn = mine.filter(r => MOVE_IN.has(r[ix.type])).length, nOut = mine.length - nIn;
+    const last = mine[0];
+    const face = `<div class="pc-big">${trades.length} <small>trade${trades.length === 1 ? '' : 's'}</small></div><div class="pc-tapsub">${last ? `${esc(mdate(last[ix.date]))}: ${esc(String(last[ix.text]).split(/[,.;(]/)[0])}` : `${nIn} in · ${nOut} out`}</div>`;
+    const li = r => `<li${r[ix.pid] ? ` data-open-pid="${esc(r[ix.pid])}" class="py-tap"` : ''}><span class="mv-d">${esc(mdate(r[ix.date]))}</span> ${esc(r[ix.text])}</li>`;
+    const trBox = `<div class="pc-box"><div class="pc-k">Trades &middot; ${season}</div>${trades.length ? `<ul class="mv-l">${trades.map(li).join('')}</ul>` : '<p class="pc-sub">No trades this season.</p>'}</div>`;
+    let drBox = '';
+    if (M.dr && M.dr.rows) { const dx = Object.fromEntries(M.dr.cols.map((c, i) => [c, i])), fr = dx.fr != null ? dx.fr : dx.team;
+      const picks = M.dr.rows.filter(r => r[fr] === abbr);
+      drBox = `<div class="pc-box"><div class="pc-k">Draft class &middot; ${season}</div>${picks.length ? `<table class="bx"><tbody>${picks.map(r => `<tr${r[dx.gsis_id] ? ` data-open-pid="${esc(r[dx.gsis_id])}" class="py-tap"` : ''}><td class="muted" title="Round ${r[dx.round]}, pick ${r[dx.pick]} overall">R${r[dx.round]} &middot; #${r[dx.pick]}</td><td>${esc(r[dx.pfr_player_name])} <span class="muted">${esc(r[dx.position])}</span></td><td class="muted">${esc(r[dx.college] || '')}</td></tr>`).join('')}</tbody></table>` : '<p class="pc-sub">No picks this year.</p>'}</div>`; }
+    const allBox = `<div class="pc-box"><div class="pc-k">Signings and departures &middot; ${nIn} in, ${nOut} out</div><ul class="mv-l">${mine.slice(0, 40).map(li).join('')}</ul>${mine.length > 40 ? `<p class="pc-sub muted">The latest 40; every move is on Players &rsaquo; Moves.</p>` : ''}</div>`;
+    const src = `<p class="pc-sub muted">ESPN's transactions log. Practice-squad and injury-list moves are left out.</p>`;
+    return tapTile('Moves', face, 'Moves', trBox + drBox + allBox + src);
+  };
   const teamTiles = (abbr, d, L, pw) => {
     const tiles = [];
     // Power
@@ -2812,7 +2875,8 @@
         ${wkRows ? `<table class="bx tm-pl tiles"><thead><tr><th>Player</th><th class="num">Proj</th><th class="num" title="Edge grade; sorted by it (ungraded players last, by projection)">Grd</th><th class="num">FP/G</th></tr></thead><tbody>${wkRows}</tbody></table>` : '<p class="pc-sub">No fantasy-relevant players listed that week.</p>'}</div>
        <div class="pc-k tm-dck">Depth chart</div><div class="dc-wrap" data-dc="${esc(abbr)}"></div>`));
     // Injuries: the live list, so only on this season's page
-    if (DATA && +d.season === +DATA.season) tiles.push(injuriesTile(abbr, d), coachesTile(abbr));
+    // ... the staff, then payroll and moves (owner 2026-10-27: a payroll tile, with Moves to keep the grid even)
+    if (DATA && +d.season === +DATA.season) tiles.push(injuriesTile(abbr, d), coachesTile(abbr), payrollTile(abbr), movesTile(abbr, +d.season));
     // Playoffs (owner 2026-10-20, replacing the Schedule tile now that the schedule row shows every week): the chance to
     // make it, the division, the move since last week; opens the Playoffs tab. A past season's page has no odds: the
     // Schedule tile stays there.

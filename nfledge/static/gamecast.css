@@ -1033,7 +1033,18 @@ table.lg tr.lg-car td:first-child b { font-weight: 700; }
 @media (max-width: 699px) { .sheet-h { padding-top: 20px; } }  /* room for the grab bar */
 /* stat groups divided (owner 2026-10-17): a hairline and a little room where rushing / receiving / passing start */
 table.lg td.lg-gs, table.lg th.lg-gs { box-shadow: inset 1px 0 0 color-mix(in srgb, var(--ink) 22%, transparent); padding-left: 6px !important; }
-.ij-line { margin: 4px 0; } .pc-tap .pc-big.good { color: #6fdc8c; }
+.ij-line { margin: 4px 0; } .pc-tap .pc-big.good { color: #6fdc8c; } .pc-tap .pc-big.bad { color: #ff8f84; }
+/* Payroll and Moves sheets (team card, owner 2026-10-27) */
+.py-g td { vertical-align: middle; }
+.py-bar { width: 38%; }
+.py-bar span { position: relative; display: block; height: 6px; border-radius: 3px; background: var(--line); }
+.py-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: var(--accent, #6d9eff); }
+.py-bar b { position: absolute; top: -3px; width: 2px; height: 12px; margin-left: -1px; background: var(--text, #e8eaee); opacity: .7; }
+.py-tap { cursor: pointer; }
+.mv-l { list-style: none; margin: 0; padding: 0; font-size: var(--fs-sm); }
+.mv-l li { padding: 6px 0; border-top: 1px solid var(--line); line-height: 1.35; }
+.mv-l li:first-child { border-top: 0; }
+.mv-d { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 4px; }
 /* practice and games timeline in the Health sheet (owner 2026-10-17) */
 .pt-list { display: grid; gap: 2px; }
 .pt-row { display: grid; grid-template-columns: 7.5em 3.2em 1fr; align-items: center; gap: 8px; padding: 5px 0; border-top: 1px solid var(--line); font-size: var(--fs-md); }

@@ -437,6 +437,8 @@ jobs:
       # the file for two weeks), and staff changes show the same day.
       - name: Coaches
         run: python tools/coaches_build.py --site=site || echo "[coaches] skipped"
+      - name: Payroll  # the team card's Payroll tile (OverTheCap, once a day per team)
+        run: python tools/payroll_build.py --site=site || echo "[payroll] skipped"
       - name: Stamp the deploy  # the plan reads both (lanes by what the live site was built from)
         run: |
           echo "{\"sha\":\"${{ github.sha }}\",\"lane\":\"full\"}" > site/data/deployed.json
