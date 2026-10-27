@@ -260,8 +260,8 @@ table.tm-pl { width: 100%; } table.tm-pl td.ij-who { width: 100%; max-width: 0; 
 .co-car td.co-role { white-space: normal; font-size: var(--fs-xs); line-height: 1.3; }
 /* the Coaches sheet: a tile per job (2 x 2 on a phone) picking whose panel shows */
 .co-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
-.co-tiles > :last-child:nth-child(odd) { grid-column: 1 / -1; }  /* five jobs: special teams across the bottom row */
-@media (min-width: 700px) { .co-tiles { grid-template-columns: repeat(5, minmax(0, 1fr)); } .co-tiles > :last-child:nth-child(odd) { grid-column: auto; } }
+.co-tiles > :last-child:nth-child(odd) { grid-column: 1 / -1; }  /* an odd count (a job missing): the last one across the row */
+@media (min-width: 700px) { .co-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } .co-tiles > :last-child:nth-child(odd) { grid-column: auto; } }
 .co-tile { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto auto auto; column-gap: 10px; row-gap: 1px;
   align-items: center; text-align: left; font: inherit; color: inherit; cursor: pointer; padding: 10px; min-width: 0;
   border: 1px solid var(--line); border-radius: var(--r-lg); background: color-mix(in srgb, var(--fg) 3%, transparent);

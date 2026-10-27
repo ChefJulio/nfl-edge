@@ -293,7 +293,7 @@ def main() -> None:
 
   # staffs: every past season (committed), today's from the templates (else the last site's)
   hist = json.loads(HIST.read_text(encoding="utf-8"))["staff"] if HIST.exists() else {}
-  now, links, full, ops = {}, {}, {}, {}
+  now, links, full, ops, own = {}, {}, {}, {}, {}
   for t in C.NAME:
     try:
       now[t], links[t], full[t] = C.current_links(t)
@@ -301,10 +301,15 @@ def main() -> None:
       if o and "gm" not in now[t]:
         ops[t] = {"name": o[1], "title": o[2]}
         if o[3]: links[t]["gm"] = o[3]
+      w = now[t].pop("_own", None)  # the owner (owner 2026-10-26): (rank, name, title, page)
+      if w:
+        own[t] = {"name": w[1], "title": w[2]}
+        if w[3]: links[t]["own"] = w[3]
     except Exception as e:
       print(f"[coaches] {t} staff unavailable ({e}); keeping the last one", flush=True)
       lt = (last.get("teams") or {}).get(t) or {}
       now[t], links[t], full[t] = lt.get("staff") or {}, lt.get("links") or {}, lt.get("all") or []
+      if lt.get("own"): own[t] = {"name": lt["own"].get("name"), "title": lt["own"].get("title")}
   staff = dict(hist); staff[str(current)] = now
 
   U = units(site, range(FIRST, current + 1))
@@ -379,6 +384,9 @@ def main() -> None:
                   "rec": {"reg": wlt(g[g.type == "REG"].margin), "po": wlt(g[g.type != "REG"].margin)[:2]} if since else None}
     elif gm_name:
       co["gm"] = {"name": None, "vacant": True}
+    # the owner: name and title as the club lists them; his page (a photo when it has one)
+    if own.get(t):
+      co["own"] = {**own[t], "bio": links[t].get("own") if B.get(links[t].get("own")) else None}
     # each one's club headshot (the club's official photo: first choice on the page)
     for x in [hc, *co.values()]:
       if x.get("name"):

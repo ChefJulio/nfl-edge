@@ -96,6 +96,16 @@ def staff(text: str, links: dict | None = None) -> dict:
       rk = 0 if "executive vice president" in role else 1 if "vice president" in role else 2 if "director" in role else 3
       if rk < 3 and ("_ops" not in out or rk < out["_ops"][0]):
         out["_ops"] = (rk, who, m.group(1).strip(), lk.group(1).strip() if lk else None)
+    # the owner (owner 2026-10-26: "let's add owners"): the front office's principal owner. Strongest claim first: a
+    # controlling / principal owner or partner, a managing partner (Amy Adams Strunk over "Owner - KSA Industries"; the
+    # Haslams; Josh Harris); then "owner"; then a chairman or a president / CEO when no owner is named (John Mara; Green
+    # Bay is publicly held: its president). Never a vice chairman, limited partner, or owner emeritus / in memoriam.
+    if links is not None and re.search(r"owner|chairman|partner|president", role) \
+       and not re.search(r"vice[ -]chair|limited|emerit|memoriam|founder|\b19\d\d|partner/", role):
+      rk = -1 if re.search(r"controlling owner|principal (owner|partner)|managing partner", role) else 0 if "owner" in role \
+        else 1 if "chairman" in role or ("president" in role and "ceo" in role) else None
+      if rk is not None and ("_own" not in out or rk < out["_own"][0]):
+        out["_own"] = (rk, who, m.group(1).strip(), lk.group(1).strip() if lk else None)
     if re.search(r"(^|/)(interim )?head coach\b", role) and "assistant head coach" not in role: found.append("hc")
     if not ("assistant" in bare or "senior" in bare):
       found += [r for r, k in (("oc", "offensive coordinator"), ("dc", "defensive coordinator"), ("st", "special teams coordinator")) if k in role]

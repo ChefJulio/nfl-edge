@@ -3090,7 +3090,7 @@
   })));
   const coachesTile = abbr => {
     loadCoaches();
-    if (!CO.d) return tapTile('Coaches', `<div class="pc-tapsub">${CO.d === false ? 'Not available' : 'Loading&hellip;'}</div>`, 'Coaches', '<p class="pc-sub">Loading&hellip;</p>');
+    if (!CO.d) return tapTile('Staff', `<div class="pc-tapsub">${CO.d === false ? 'Not available' : 'Loading&hellip;'}</div>`, 'Staff', '<p class="pc-sub">Loading&hellip;</p>');
     const T = CO.d.teams[abbr]; if (!T) return '';
     const h = T.hc || {}, r = h.rec || {}, yr = h.since ? CO.d.season - h.since + 1 : null, S = CO.d.season;
     const bioOf = x => (x && x.bio && CO.d.bios && CO.d.bios[x.bio]) || null;
@@ -3112,13 +3112,16 @@
     // the tiles: one per job
     const unit = T.unit || [], badge = name => { const c = callsOf(name);
       return c.length ? `<span class="co-tc">${c.length === 2 ? 'Calls both sides' : c[0] === 'off' ? 'Calls the offense' : 'Calls the defense'}</span>` : ''; };
-    const JOBS = [['hc', 'Head coach'], ['gm', 'General manager'], ['oc', 'Offense'], ['dc', 'Defense'], ['st', 'Special teams']];
+    // (owner 2026-10-26: "let's add owners ... change the tile to staff") owner and GM, the head coach, the coordinators
+    const JOBS = [['own', 'Owner'], ['gm', 'General manager'], ['hc', 'Head coach'], ['oc', 'Offense'], ['dc', 'Defense'], ['st', 'Special teams']];
     const tile = ([k, label]) => {
       const x = k === 'hc' ? h : T[k];
+      if (k === 'own' && (!x || !x.name)) return '';
       if (k === 'gm' && (!x || !x.name)) return `<div class="co-tile co-none"><span class="co-tr">${label}</span><b class="co-tn">${x && x.vacant ? 'Vacant' : 'None listed'}</b><span class="co-ts">${x && x.vacant ? 'the job is open' : ''}</span></div>`;
       if (!x || !x.name) return `<div class="co-tile co-none"><span class="co-tr">${label}</span><b class="co-tn">No coordinator</b><span class="co-ts">${esc(h.name || 'The head coach')} runs it</span>${badge(h.name)}</div>`;
       const sub = k === 'hc' ? [x.since ? `since ${x.since}` : '', r.here ? wl(r.here) : ''].filter(Boolean).join(' · ')
         : k === 'gm' ? [x.since ? `since ${x.since}` : '', x.rec ? wl(x.rec.reg) : ''].filter(Boolean).join(' · ') || esc(x.title || '')
+        : k === 'own' ? esc(x.title || '')
         : x.since ? `since ${x.since}` : '';
       const rk = k === 'oc' ? rkYear(unit[0], S, 'offense') : k === 'dc' ? rkYear(unit[1], S, 'defense') : '';
       return `<button type="button" class="co-tile${k === 'hc' ? ' on' : ''}" data-co="${k}" role="tab" aria-selected="${k === 'hc'}">
@@ -3167,7 +3170,11 @@
         ${cell(`${Math.round(100 * f4.agree / f4.n)}%`, 'Agreed', 'Same call as our model')}${cell(`${f4.bad}`, 'Questionable', '3+ points of win chance worse than the best call')}
         <div class="tm-st" title="Times he went for it minus the times our model said go; ranked per fourth down, 1st = boldest"><div class="pc-k">Go vs model</div><div class="tm-stv">${f4.go - f4.model_go > 0 ? '+' : ''}${f4.go - f4.model_go}</div>${rkChip(f4.aggr_rk)}</div></div></div>` : '';
     const src = '<p class="pc-sub muted">Staffs and careers: Wikipedia (CC BY-SA). Records: nflverse; this season\'s head coach: ESPN. Unit ranks: EPA per play.</p>';
-    return tapTile('Coaches', face, 'Coaches', tiles + hcPanel + gmPanel + JOBS.slice(2).map(coPanel).join('') + tendBox + f4Box + staffHtml(T.all) + src);
+    const ow = T.own || {}, owb = bioOf(ow);
+    const ownPanel = ow.name ? `<div class="pc-box co-panel" data-co="own" hidden><div class="co-head">${coachPic(photoOf(ow), ow.name, 52)}<div><div class="co-nm big">${esc(ow.name)}</div>
+        <div class="pc-sub">${esc(ow.title || 'Owner')}</div></div></div>${owb ? playedHtml(owb) : ''}
+      ${owb && (owb.exec || []).length ? `<div class="pc-k co-sub">Front office career</div>${careerHtml({ coached: owb.exec }, null)}` : ''}</div>` : '';
+    return tapTile('Staff', face, 'Staff', tiles + hcPanel + gmPanel + ownPanel + JOBS.filter(j => ['oc', 'dc', 'st'].includes(j[0])).map(coPanel).join('') + tendBox + f4Box + staffHtml(T.all) + src);
   };
   // the Power ranking box (the Power tile's sheet)
   const teamPowerBox = pw => {
