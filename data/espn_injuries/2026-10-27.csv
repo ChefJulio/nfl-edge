@@ -1,6 +1,6 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
+4692835,Jalen Brooks,Arizona Cardinals,Injured Reserve,2026-10-27T21:53Z,Wrist,Surgery,Not Specified,2027-02-15,IR,The Cardinals placed Brooks (wrist) on injured reserve Tuesday.,WR
 4588298,Jameson Geers,Arizona Cardinals,Questionable,2026-10-27T21:23Z,Undisclosed,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,TE
-4692835,Jalen Brooks,Arizona Cardinals,Injured Reserve,2026-10-27T21:12Z,Wrist,Surgery,Not Specified,2027-02-15,IR,ir,WR
 3918331,Andrew Wingard,Arizona Cardinals,Questionable,2026-10-27T13:11Z,Knee,Bruise,Not Specified,2026-11-01,QUESTIONABLE,questionable,S
 4698113,Max Melton,Arizona Cardinals,Questionable,2026-10-27T13:11Z,Knee,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,CB
 4685503,Walter Nolen III,Arizona Cardinals,Questionable,2026-10-27T13:11Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,DT
@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035463,K'Von Wallace,Baltimore Ravens,Active,2026-10-19T16:22Z,,,,,,,CB
 4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-10-18T15:33Z,,,,,,,OT
 4698244,Teddye Buchanan,Baltimore Ravens,Active,2026-10-16T20:28Z,,,,,,,LB
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-27T21:25Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-27T22:00Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4044133,Sam Franklin Jr.,Buffalo Bills,Active,2026-10-24T01:44Z,,,,,,"The NFL reduced Franklin's discipline from a one-game suspension to a fine of $14,926, Adam Schefter of ESPN reports.",S
 4568624,Dorian Williams,Buffalo Bills,Active,2026-10-22T01:58Z,,,,,,Williams logged five tackles (three solo) and one pass defensed for an interception in the Bills' 33-30 win over the Raiders on Sunday.,LB
 4832035,Davison Igbinosun,Buffalo Bills,Active,2026-10-22T01:37Z,,,,,,"Defensive coordinator Jim Leonhard praised Igbinosun's play earlier this week and plans to keep giving the rookie a good amount of playing time, Alec White of the Bills' official site reports. Said Leonard, ""I think what he's done the last couple weeks, he's definitely earned a high majority of the ",CB
@@ -104,7 +104,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4567096,John Metchie III,Carolina Panthers,Active,2026-10-27T00:44Z,,,,,,Metchie caught two passes for 20 yards during Sunday's 43-13 defeat versus the Buccaneers.,WR
 4683243,Mitchell Evans,Carolina Panthers,Active,2026-10-27T00:38Z,,,,,,Evans gathered in both targets for 39 yards during Sunday's 43-13 loss versus Tampa Bay.,TE
 4685350,Trevor Etienne,Carolina Panthers,Active,2026-10-27T00:33Z,,,,,,"Etienne posted six carries for eight yards, reeled in both targets for 17 yards and compiled 69 kickoff-return yards during Sunday's 43-13 defeat to the Buccaneers.",RB
-4372780,Tommy Tremble,Carolina Panthers,Active,2026-10-27T00:24Z,,,,,,Tremble hauled in one catch for eight yards during Sunday's 43-13 loss to the Buccaneers.,TE
+4372780,Tommy Tremble,Carolina Panthers,Active,2026-10-27T00:24Z,,,,,,Tremble hauled in one of two targets for eight yards during Sunday's 43-13 loss to the Buccaneers.,TE
 2973051,Taylor Moton,Carolina Panthers,Injured Reserve,2026-10-26T23:15Z,Lower Leg,Fracture,Left,2027-02-15,IR,The Panthers placed Moton (lower leg) on injured reserve Monday.,OT
 4242975,Jaelan Phillips,Carolina Panthers,Questionable,2026-10-26T22:17Z,Hamstring,Not Specified,Not Specified,2026-10-29,QUESTIONABLE,Phillips (hamstring) was listed as a non-participant on Monday's practice estimate.,LB
 4244607,Akayleb Evans,Carolina Panthers,Questionable,2026-10-26T22:10Z,Triceps,Not Specified,Not Specified,2026-10-29,QUESTIONABLE,Evans (triceps/knee) was listed as a non-participant on Monday's practice estimate.,CB
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-25T22:31Z,,,,,,McMillan secured four of six targets for 40 yards in the Panthers' 43-13 loss to the Buccaneers on Sunday.,WR
 4870694,Monroe Freeling,Carolina Panthers,Active,2026-10-25T16:16Z,,,,,,"Freeling (knee) is listed as active for Sunday's game against Tampa Bay, Darin Gantt of the Panthers' official site reports.",OT
 4880613,Bam Martin-Scott,Carolina Panthers,Active,2026-10-24T23:55Z,,,,,,"The Panthers activated Martin-Scott (hamstring) from injured reserve Saturday, and he no longer carries an injury designation into Sunday's game against the Buccaneers, Darin Gantt of the Panthers' official site reports.",LB
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-27T21:25Z,Undisclosed,,,2026-10-18,IR,ir,S
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-27T22:00Z,Undisclosed,,,2026-10-18,IR,ir,S
 4372576,Jack Sanborn,Chicago Bears,Questionable,2026-10-27T13:11Z,Concussion,Concussion,Not Specified,2026-11-02,QUESTIONABLE,questionable,LB
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-27T13:11Z,Toe,Sprain,Not Specified,2026-11-02,QUESTIONABLE,questionable,RB
 3121544,T.J. Edwards,Chicago Bears,Questionable,2026-10-27T13:11Z,Hamstring,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,questionable,LB
@@ -274,6 +274,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4038849,DJ Wonnum,Detroit Lions,Active,2026-10-09T21:36Z,,,,,,,LB
 4372459,Christian Izien,Detroit Lions,Active,2026-10-07T01:42Z,,,,,,Izien recorded 11 tackles (seven solo) including 1.0 sacks during Sunday's 32-26 loss at Carolina.,S
 4569465,Jack Campbell,Detroit Lions,Active,2026-10-07T01:33Z,,,,,,Campbell recorded 14 tackles (six solo) during Sunday's 32-26 loss at Carolina.,LB
+4426411,Sean Rhyan,Green Bay Packers,Out,2026-10-27T21:34Z,Ankle,Sprain,Not Specified,2026-11-25,OUT,"Rhyan was diagnosed with a high ankle sprain and is expected to miss at least one month, Matt Zenitz of CBSSports.com reports.",G
 4361776,Brenton Cox Jr.,Green Bay Packers,Questionable,2026-10-27T20:26Z,Quadriceps,Not Specified,Not Specified,2026-10-29,QUESTIONABLE,questionable,DE
 4701936,Matthew Golden,Green Bay Packers,Questionable,2026-10-27T20:21Z,Shoulder,Not Specified,Not Specified,2026-10-29,QUESTIONABLE,Golden (shoulder/foot) didn't participate in Tuesday's walkthrough practice.,WR
 4259305,Bo Melton,Green Bay Packers,Active,2026-10-27T01:50Z,,,,,,Melton caught one of his two targets for four yards and logged a 24-yard kickoff return in the Packers' 20-17 loss to the Lions on Sunday.,WR
@@ -284,7 +285,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361904,Travis Glover,Green Bay Packers,Questionable,2026-10-26T21:53Z,Knee,Not Specified,Not Specified,2026-10-29,QUESTIONABLE,questionable,OT
 4887255,Anthony Campbell,Green Bay Packers,Questionable,2026-10-26T21:52Z,Ankle,Not Specified,Not Specified,2026-10-29,QUESTIONABLE,questionable,DT
 4428037,Jacob Monk,Green Bay Packers,Injured Reserve,2026-10-26T21:52Z,Quadriceps,Not Specified,Not Specified,2026-12-06,IR,The Packers placed Monk (quadriceps) on injured reserve Monday.,C
-4426411,Sean Rhyan,Green Bay Packers,Out,2026-10-26T21:50Z,Ankle,Sprain,Not Specified,2026-11-25,OUT,"Rhyan (ankle) is expected to miss multiple weeks after being injured in Sunday's loss to the Lions, Ian Rapoport of NFL Network reports.",G
 3124005,Zaire Franklin,Green Bay Packers,Doubtful,2026-10-26T21:03Z,Shin,Fracture,Not Specified,2026-10-29,DOUBTFUL,"Franklin suffered a hairline fracture in his shin during last Thursday's practice, Rob Demovsky of ESPN.com reports.",LB
 4569661,Jager Burton,Green Bay Packers,Active,2026-10-26T18:28Z,,,,,,,C
 4360887,Donovan Jennings,Green Bay Packers,Active,2026-10-26T18:28Z,,,,,,,G
