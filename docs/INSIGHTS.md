@@ -5427,4 +5427,8 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   Dawkins .96 -> .99; Polamalu .96 -> .95); final fit: Harrison Smith .03 -> .19, Rodney Harrison .03 -> .18 (both
   move inside the top 25: Smith 27th by interceptions, 7th in interceptions + sacks). Six DBs' rank flags change; 17
   DB inductees are too few to separate it from chance. Recorded as untested-but-plausible: if more seasons of 35 / 20
-  DBs come through the ballot it can be re-run.
+  DBs come through the ballot it can be re-run. **SHIPPED ON THE OWNER'S CALL 2026-10-28** ("we're working with a small
+  sample size in general here. clear improvement besides that, i think we should add it"): the export ranks DBs on
+  rk2 (tools/hof_eval.py keeps rk_int, DP2's rank, so the test reproduces). The refit moves other DBs too: Smith .03
+  -> .19, Rodney Harrison .18, Ramsey .92 -> .62, Darren Woodson .82 -> .52, Mathieu .41, Budda Baker .42 -> .11, Earl
+  Thomas .88 (interception-only cases count for a little less now that the rank rewards the combined profile).

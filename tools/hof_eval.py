@@ -178,6 +178,10 @@ def frame(nfl, last: int) -> pd.DataFrame:
   m = d.g == "DB"
   both = (pd.to_numeric(d.loc[m, "def_ints"], errors="coerce").fillna(0) + pd.to_numeric(d.loc[m, "def_sacks"], errors="coerce").fillna(0))
   d.loc[m, "rk2"] = np.minimum(d.loc[m, "rk"], both.rank(ascending=False, method="min"))
+  # (DP4, FAIL on the gate (inconclusive), shipped by the owner's call 2026-10-28: "clear improvement besides [sample
+  # size], i think we should add it") the shipped rank is rk2; rk_int keeps DP2's interceptions-only rank for the test
+  d["rk_int"] = d.rk
+  d["rk"] = d.rk2
   d["fb"] = (d.position == "FB").astype(int)
   # ballots so far: classes he has been eligible for through the coming one (last + 1), capped
   d["ye"] = (last + 1 - (d.to + 6) + 1).clip(lower=0, upper=30)
@@ -309,6 +313,8 @@ def dp4(d: pd.DataFrame) -> None:
   tr = d[d.to <= 2015].reset_index(drop=True)
   y, groups = tr.hof.to_numpy(int), tr.season.to_numpy()
   allc = [c for v in FEATS.values() for c in v]
+  # (as run before shipping: today's = DP2's interceptions-only rank for DBs)
+  tr = tr.assign(rk=tr.rk_int)
   pb = oof(tr, allc, groups)
   t2 = tr.assign(rk=tr.rk2)
   pn = oof(t2, allc, groups)
@@ -327,8 +333,7 @@ def dp4(d: pd.DataFrame) -> None:
     X = design(frame_)[allc].to_numpy(float)
     fm = LogisticRegressionCV(Cs=[0.03, 0.1, 0.3, 1, 3, 10], cv=list(GroupKFold(5).split(X, y, groups)), scoring="neg_log_loss", max_iter=5000).fit(X, y)
     q = d[d.pfr_player_name.isin(["Harrison Smith", "Rodney Harrison"])].copy()
-    if lab == "with sacks":
-      q["rk"] = q.rk2
+    q["rk"] = q.rk2 if lab == "with sacks" else q.rk_int
     print(f"  {lab}: " + ", ".join(f"{n} {p:.2f}" for n, p in zip(q.pfr_player_name, fm.predict_proba(design(q)[allc].to_numpy(float))[:, 1])))
 
 
