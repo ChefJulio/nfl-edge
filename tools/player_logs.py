@@ -990,6 +990,8 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
         e["ig"] = [wk, qs[0] if qs else None]
     out[gid] = {"eps": [{k: v for k, v in e.items() if v not in ("", None)} for e in reversed(eps)],
                 "games": int((g.season >= SNAPS_FROM).sum()), "missed": sum(e["missed"] or 0 for e in eps),
+                # (S3) injuries that cost him a game, from SNAPS_FROM: the durability events (not games missed)
+                "inj": sum(1 for e in eps if (e["missed"] or 0) > 0 and e["s"] >= SNAPS_FROM),
                 # team games per season on the roster (not written to the pages; tools/durability_eval.py)
                 "gs": {int(k): int(v) for k, v in g.season[g.season >= SNAPS_FROM].value_counts().items()},
                 "wk": wk_out}
@@ -1004,7 +1006,10 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
   # injured per 1,000 snaps of his unit (offense / defense), shrunk toward the group's rate by K snaps (250; TE 2000),
   # percentile among the group's players with 1,000+ snaps. Judged by snaps survived before the next missed game it
   # beat the per-game share every season 2020-25. Kickers, punters, long snappers: the per-game share as before.
-  df = pd.DataFrame([(g, v["games"], v["missed"]) for g, v in out.items()], columns=["gsis_id", "games", "missed"])
+  # (S3, {#durability-episodes}; owner 2026-10-28: Josh Allen, one 2018 injury that cost 4 games, ranked below
+  # one-season backups with none) the per-snap score counts injuries that cost a game, not games missed (one injury,
+  # one event), shrunk 2,000 snaps (chosen 2014-19): better at predicting snaps survived in 5 of 6 seasons 2020-25
+  df = pd.DataFrame([(g, v["games"], v["missed"], v.get("inj", 0)) for g, v in out.items()], columns=["gsis_id", "games", "missed", "inj"])
   df["grp"] = [grp.get(str(pos_of.get(g)), str(pos_of.get(g))) for g in df.gsis_id]
   prior = df[df.games >= 17].groupby("grp").apply(lambda x: 1 - x.missed.sum() / x.games.sum()).to_dict()
   df["avail"] = 1 - df.missed / df.games.where(df.games > 0, 1)
@@ -1014,10 +1019,10 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
   df["snaps"] = [float(us.get(("off" if gp in OFFG else "def"), {}).get(g, 0.0)) if gp in OFFG | DEFG else np.nan
                  for g, gp in zip(df.gsis_id, df.grp)]
   per_snap = df.grp.isin(OFFG | DEFG) & bool(us)
-  r0 = {gp: x.missed.sum() / max(1.0, x.snaps.sum()) * 1000 for gp, x in df[per_snap].groupby("grp")}
-  kk = {gp: (2000 if gp == "TE" else 250) for gp in OFFG | DEFG}
+  r0 = {gp: x.inj.sum() / max(1.0, x.snaps.sum()) * 1000 for gp, x in df[per_snap].groupby("grp")}
+  kk = {gp: 2000 for gp in OFFG | DEFG}
   df.loc[per_snap, "shrunk"] = [-((m + r0[gp] * kk[gp] / 1000) / ((sn + kk[gp]) / 1000))
-                                for m, sn, gp in zip(df[per_snap].missed, df[per_snap].snaps, df[per_snap].grp)]
+                                for m, sn, gp in zip(df[per_snap].inj, df[per_snap].snaps, df[per_snap].grp)]
   qual = np.where(per_snap, df.snaps >= 1000, df.games >= 17)
   qs = pd.Series(qual, index=df.index)
   peers = {gp: np.sort(df.shrunk[(df.grp == gp) & qs].to_numpy(dtype=float)) for gp in df.grp.unique()}
@@ -1028,7 +1033,8 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
     out[x.gsis_id]["dur"] = {"games": int(x.games), "missed": int(x.missed), "avail": round(float(x.avail), 3),
                              # under 1,000 snaps: too little time on the field to rank either way (no percentile)
                              "pct": None if pct is None or (ps and not q) else round(pct, 3), "grp": x.grp, "small": not bool(q),
-                             **({"snaps": int(x.snaps), "per1k": round(float(x.missed / max(x.snaps, 1.0) * 1000), 2)} if ps else {})}
+                             **({"snaps": int(x.snaps), "inj": int(x.inj),
+                                 "per1k": round(float(x.inj / max(x.snaps, 1.0) * 1000), 2)} if ps else {})}
   return out
 
 

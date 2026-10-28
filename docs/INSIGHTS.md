@@ -5385,3 +5385,27 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   ballot's other crowd (seniors, pre-1980 careers, undrafted players) is outside the data. Long waits stay mostly
   unexplained beyond the chance itself (Davis, Grimm, Z. Thomas): voters' case-by-case judgment. Also shipped (owner):
   the off-field asterisk.
+- **PRE-REGISTERED 2026-10-28 (owner: "something seems off about our player durability percentiles ... josh allen ...
+  missed 4 games in like his rookie year, then became iron man ... 85th percentile somehow seems low"): (S3)
+  durability, counted by episodes, re-shrunk, recency-weighted.** Measured first: Allen 4 games missed (one episode,
+  2018 elbow) in 8,481 snaps, 0.47 per 1,000, 15th of 94 QBs; ranked above him: Cam Ward 1,343 snaps, Cooper Rush
+  1,336, Ridder 1,253, Cassel 1,216, Mills 2,015, all 0 missed. Three causes: games missed are the events (one injury
+  that costs four games counts four times); (S)'s shrink, 250 snaps (about four QB games), was never re-chosen for
+  (S2)'s target; every past season counts the same. Candidates on (S2)'s harness (tools/durability_snaps_eval.py:
+  player-seasons 2014-25, target snaps survived before the first game missed injured, C-index within group, weighted
+  by rows), each against today's B: (E) injury episodes that cost a game instead of games missed; (K) the shrink
+  re-chosen on 2014-19 from 250 / 500 / 1,000 / 2,000 / 4,000 snaps (one value for all groups but TE, kept at 2,000
+  unless the grid says otherwise); (R) each past season weighted 0.5^(age / h), h chosen on 2014-19 from 2 / 3 / 5
+  seasons (snaps and events alike). The combinations of those that pass are tested together. GATE (2020-25): C-index
+  better than B, 95% player-cluster bootstrap interval excluding 0, better in 4+ of 6 seasons. Ships to the card's
+  durability (tools/player_logs.py) if it passes; reported: where Allen and the 1,000-1,500-snap zeros land.
+- **RESULT {#durability-episodes} (S3) durability by episodes, re-shrunk, recency-weighted: episodes PASS, shipped;
+  re-shrink and recency FAIL.** tools/durability_s3_eval.py. Chosen on 2014-19 (mean C-index): episodes best at K
+  2,000 (0.5958; games at K 250 0.5877), games best at K 250 (re-shrinking games changes nothing), recency best at h 3
+  (games, 0.5890). 2020-25 against today's B: (E) episodes, K 2,000 +0.0068 [+0.0017, +0.0116], better 5 of 6 PASS;
+  (K) +0.0000, 0 of 6 FAIL; (R) h 3 +0.0010 [-0.0012, +0.0034], 4 of 6 FAIL (a first run's interval read 0: its
+  bootstrap compared the weighted history with itself; fixed, the old score now from the unweighted rows). Shipped
+  (tools/player_logs.py): injuries that cost a game, from 2013, per 1,000 unit snaps, shrunk 2,000 snaps for every
+  group; the card shows injuries per 1,000 snaps. QBs, 94 ranked: Allen 15th (85th pct) -> 4th (97th), behind Brady,
+  Rivers, Eli Manning (no injury-missed games in 6,539-10,879 snaps); the one-season zeros fall from 11th-14th to
+  26th-30th (Ward, Rush, Ridder, Cassel, ~70th pct); Mahomes 25th, Burrow 40th, Lamar Jackson 54th.
