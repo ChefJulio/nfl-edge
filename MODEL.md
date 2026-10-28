@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 6e0e4a7e7d76a38e
+documented_code_hash: e7f4f29435a33b98
 ---
 # How the model works
 
@@ -187,7 +187,7 @@ The team's projected dropbacks and rushes then turn shares into opportunities.
 
 **Weather.** Wind above **{{ L.wind_thr }}** mph cuts passing efficiency (pass yards and TDs, catches, receiving yards and TDs) by **{{ L.wind_pen }}** per mph, capped at **{{ L.wind_cap }}**. Domes, closed roofs and neutral sites count as calm. The live week uses the forecast; backtests and archived weeks use the measured game-day wind.
 
-**Expert blend.** Once the FantasyPros consensus is published (Fridays), RB/WR/TE projections blend it in with learned weights. QBs stay model-only because blending made QB projections worse. Only rankings scraped before game day are used, so players in Thursday games get no Friday rank. Current blends (plus a small fitted intercept, shown in formula 10.5 under Under the hood): {{ L.blend }}.
+**Expert blend.** RB/WR/TE projections blend in the FantasyPros consensus with learned weights. QBs stay model-only because blending made QB projections worse. The weights were fit on each week's Friday rankings; since 2026-10-27 the blend also uses the consensus as it stands earlier in the week (re-scraped twice a day, from Tuesday), so projections move a little each day instead of jumping on Friday. Early-week rankings come from fewer experts, and whether they help is still being tested (it shipped ahead of that test, at the owner's call). Only rankings scraped before a player's game day are used. Current blends (plus a small fitted intercept, shown in formula 10.5 under Under the hood): {{ L.blend }}.
 
 ### Ranges and touchdown odds
 
@@ -632,7 +632,7 @@ Team ratings use this season's completed games plus a fading share of last seaso
 | nflverse schedules | Results (also for Elo), Vegas spread and total, roof, kickoff time |
 | nflverse rosters, snap counts, injury reports, depth charts, draft picks, participation, weekly player stats | Who is on the team, who played, who dressed (the weekly rosters' game-day active / inactive marks, 2019 on: the healthy-scratch model, and played or missed on player cards' health timeline and durability), roles, statuses, draft capital, routes, actual points, QB career history. Snap counts are matched to players through nflverse's player table as well as the rosters (the rosters alone missed about 8% of skill players' games in 2020-24; fixing it lowered projection error slightly, walk-forward 2021-25) |
 | NFL.com injury API | Day-by-day Wed/Thu/Fri practice participation |
-| FantasyPros expert consensus (via nflverse) | Weekly positional ranks, published Fridays |
+| FantasyPros expert consensus (via nflverse) | Weekly positional ranks: the Friday history, and the current week's twice-daily scrape from Tuesday |
 | Sleeper projections API (RotoWire's numbers) | Not used in projections. Saved before kickoff every run for a forward test of blending them in (their API's past weeks are edited after games, so they can't be backtested cleanly) |
 | PFR advanced defensive stats | Individual defenders' stat chips and game logs from 2018 (pressures, coverage allowed, missed tackles). Not a projection or team-rating input: tested for defender absences in the team ratings and dropped (see What we tried under Games) |
 | ESPN's public injury feed | Early-week injury news, midweek rulings and game-day active / inactive rulings (see Chance to play) |

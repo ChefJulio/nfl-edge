@@ -517,9 +517,42 @@ def load_ecr(nfl, sched: pd.DataFrame) -> pd.DataFrame:
       continue
     season, week = int(cand.iloc[0].season), int(cand.iloc[0].week)
     out.append(grp.assign(season=season, week=week))
-  e = pd.concat(out, ignore_index=True)
+  e = pd.concat(out + [_ecr_live(nfl, ids, g)], ignore_index=True)
   e = e.sort_values("scrape_date").drop_duplicates(["season", "week", "gsis_id"], keep="last")
   return e[["season", "week", "gsis_id", "pos", "ecr", "ecr_flex", "sd", "scrape_date"]]
+
+
+# the live scrape's positional pages (the same PPR pages nflverse's history keeps for wp)
+_LIVE_PAGES = {"qb": "QB", "ppr-rb": "RB", "ppr-wr": "WR", "ppr-te": "TE"}
+
+
+def _ecr_live(nfl, ids: pd.DataFrame, games: pd.DataFrame) -> pd.DataFrame:
+  """This week's ECR before Friday (owner 2026-10-27: "waiting til friday causes a jarring 3-5pt swing ... all at once";
+  shipped ahead of the pre-registered early-week ECR test, docs/INSIGHTS.md): nflverse's history keeps one scrape a
+  week (Fridays), DynastyProcess re-scrapes FantasyPros twice a day (load_ff_rankings(type="week")). Each row is tied
+  to its week by its own game's kickoff (player_game_kickoff_ts), not the scrape date, so an early-Tuesday scrape
+  still holding last week's ranks can't be read as this week's; a game already kicked off at the scrape is dropped,
+  and Engine.attach_ecr's per-player guard (scraped before his kickoff) still applies. A newer Friday scrape for the
+  same week wins (latest scrape_date). No flex rank here (display only; it fills in with Friday's)."""
+  try:
+    w = _to_pd(nfl.load_ff_rankings(type="week"))
+  except Exception as ex:  # the live scrape is a bonus: Friday's history still stands
+    _log(f"live ECR scrape unavailable ({ex})")
+    return pd.DataFrame()
+  w = w[w.page.isin(_LIVE_PAGES)].copy()
+  if w.empty:
+    return w
+  w["pos"] = w.page.map(_LIVE_PAGES)
+  w["id"] = w.fantasypros_id.astype(str)
+  w["scrape_date"] = pd.to_datetime(w.scrape_date)
+  # kickoff (UTC seconds) -> its US date (Eastern: a Monday 8:15 pm kickoff is Tuesday in UTC) -> the week holding it
+  ko = pd.to_datetime(pd.to_numeric(w.player_game_kickoff_ts, errors="coerce"), unit="s", utc=True)
+  w["day"] = ko.dt.tz_convert("America/New_York").dt.tz_localize(None).dt.normalize()
+  w = w[w.day.notna() & (w.day >= w.scrape_date)]
+  wk = games.drop_duplicates(["season", "week", "gameday"])[["season", "week", "gameday"]].rename(columns={"gameday": "day"})
+  w = w.merge(wk, on="day", how="inner").merge(ids, left_on="id", right_on="fantasypros_id")
+  _log(f"live ECR scrape {w.scrape_date.max().date() if len(w) else '-'}: {len(w)} players")
+  return w.assign(ecr_flex=np.nan)[["season", "week", "gsis_id", "pos", "ecr", "ecr_flex", "sd", "scrape_date"]]
 
 
 def qb_career_before(nfl, first_season: int, start: int = 2006) -> pd.DataFrame:

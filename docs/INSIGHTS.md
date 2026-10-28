@@ -1425,6 +1425,14 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   ECR using the CURRENT Friday-fit blend weights, vs as published (no ECR). Relevant RB / WR / TE rows. GATE:
   MAE better with the 95% CI over team-weeks excluding 0 on the Tue-Thu rows, no position worse; then early-week
   ECR goes live (the same pre-kickoff guard).
+  **SHIPPED AHEAD OF THE TEST 2026-10-27 (owner: "can we ask for forgiveness instead of permission ... our testing shows
+  our projections are better when we incorporate ecr ... waiting til friday causes a jarring 3-5pt swing for some
+  players all at once").** data.load_ecr adds the current week's live scrape (load_ff_rankings(type="week"); the same
+  PPR positional pages as the history) to the Friday history; each row is tied to its week by its own game's kickoff,
+  not the scrape date (an early-Tuesday scrape holding last week's ranks can't land on this week), and the
+  per-player pre-kickoff guard stands. Training reads past seasons' ECR only, so nothing retrains. Tuesday's pool is
+  thinner (2026-10-27: 264 players vs ~450-500 by Friday). The test above still runs as registered: if early-week
+  ECR fails it, the live scrape comes back out.
 - **Rankings: K and D/ST tabs (owner 2026-10-15).** From data/kdst.json (this week through 17), standard ESPN scoring
   (the rules both models' gates used); weekly (proj, matchup, team pts / FG att / XP for kickers; opp pts / sacks /
   takeaways for defenses, tiers) and rest of season (this week's game drops once it kicks off). Scoring helpers moved
