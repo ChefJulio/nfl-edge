@@ -5524,4 +5524,6 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   QBs read passing + rushing yards and TDs for both (one model); snubs re-exported (193 seasons, 155 players; Allen
   none: picked every season 2020-25). (DP7, tools/hof_eval.py --dp7=1) +0.00023 [-0.00009, +0.00070]; QBs alone
   0.0178 -> 0.0177 (level, unlike DP6's separate rushing rank, which made them worse): Allen .06 -> .10, Newton .10
-  -> .17, Lamar Jackson .46 -> .48, Hurts and Vick unchanged.
+  -> .17, Lamar Jackson .46 -> .48, Hurts and Vick unchanged. **DP7 SHIPPED ON THE OWNER'S CALL 2026-10-28** ("yes",
+  after "no accuracy cost, more sensible on its face"): the export ranks QBs on total yards / TDs (rk_pass keeps the
+  passing-only rank the tests ran against). Allen .10, Lamar Jackson .48.

@@ -195,6 +195,10 @@ def frame(nfl, last: int) -> pd.DataFrame:
   d["rk_t"] = d.rk
   d.loc[mq, "rk_t"] = np.minimum((num("pass_yards") + num("rush_yards")).rank(ascending=False, method="min"),
                                  (num("pass_tds") + num("rush_tds")).rank(ascending=False, method="min"))
+  # (DP7, neutral on the gate, shipped by the owner's call 2026-10-28: "yes") QBs ranked on total yards / TDs; rk_pass
+  # keeps the passing-only rank DP6 / DP7 tested against
+  d["rk_pass"] = d.rk
+  d.loc[mq, "rk"] = d.loc[mq, "rk_t"]
   d["rk_q"] = d.rk
   d.loc[mq, "rk_q"] = np.minimum(d.loc[mq, "rk"], pd.to_numeric(d.loc[mq, "rush_tds"], errors="coerce").fillna(0).rank(ascending=False, method="min"))
   # (DP4 candidate) a DB's rank: the better of interceptions and interceptions + sacks
@@ -342,6 +346,7 @@ def dp6(d: pd.DataFrame, col: str = "rk_q", lab6: str = "(DP6) QB rushing in the
   """(DP6) QBs ranked on the better of pass yards and rushing TDs (DBs as shipped); (DP7, col rk_t) on passing +
   rushing yards and TDs."""
   tr = d[d.to <= 2015].reset_index(drop=True)
+  tr = tr.assign(rk=np.where(tr.g == "QB", tr.rk_pass, tr.rk))  # the baseline as tested: QBs on passing alone
   y, groups = tr.hof.to_numpy(int), tr.season.to_numpy()
   allc = [c for v in FEATS.values() for c in v]
   t2 = tr.assign(rk=np.where(tr.g == "QB", tr[col], tr.rk))
@@ -357,8 +362,7 @@ def dp6(d: pd.DataFrame, col: str = "rk_q", lab6: str = "(DP6) QB rushing in the
     X = design(f)[allc].to_numpy(float)
     fm = LogisticRegressionCV(Cs=[0.03, 0.1, 0.3, 1, 3, 10], cv=list(GroupKFold(5).split(X, y, groups)), scoring="neg_log_loss", max_iter=5000).fit(X, y)
     qq = d[d.pfr_player_name.isin(names) & (d.g == "QB")].copy()
-    if lab == "with rushing":
-      qq["rk"] = qq[col]
+    qq["rk"] = qq[col] if lab == "with rushing" else qq.rk_pass
     print(f"  {lab}: " + ", ".join(f"{n} {p:.2f}" for n, p in zip(qq.pfr_player_name, fm.predict_proba(design(qq)[allc].to_numpy(float))[:, 1])))
 
 
