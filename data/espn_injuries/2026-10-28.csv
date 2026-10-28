@@ -299,6 +299,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4869461,Trey Smack,Green Bay Packers,Active,2026-10-26T00:31Z,,,,,,Smack went 1-for-3 on field-goal tries and converted both of his PATs during Sunday's 20-17 loss to the Lions.,PK
 4240677,Jordon Riley,Green Bay Packers,Active,2026-10-25T19:16Z,,,,,,Riley is active for Sunday's game against the Lions.,DT
 4819231,Kaleb Johnson,Green Bay Packers,Active,2026-10-25T19:10Z,,,,,,Johnson (coach's decision) is inactive for Sunday's game against the Lions.,RB
+3919117,Azeez Al-Shaair,Houston Texans,Active,2026-10-28T04:10Z,,,,,,Al-Shaair recorded nine tackles (two solo) in a Week 7 overtime loss to the Giants on Sunday.,LB
 4426350,Henry To'oTo'o,Houston Texans,Active,2026-10-28T04:04Z,,,,,,"To'oTo'o notched 10 tackles (three solo), including 0.5 sacks, in Sunday's Week 7 overtime loss to the Giants.",LB
 3116679,M.J. Stewart,Houston Texans,Active,2026-10-28T03:59Z,,,,,,"Stewart finished with 12 tackles (five solo), including 0.5 sacks, and a defensed pass in Sunday's overtime loss to the Giants.",S
 4241223,Jalen Pitre,Houston Texans,Questionable,2026-10-27T13:11Z,Shoulder - AC Joint,Sprain,Left,2026-11-08,QUESTIONABLE,questionable,S
@@ -321,7 +322,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4258173,Nico Collins,Houston Texans,Active,2026-10-25T21:20Z,,,,,,Collins caught two of five targets for six yards in Sunday's 27-21 overtime loss to the Giants.,WR
 4586312,Jaylin Noel,Houston Texans,Questionable,2026-10-25T21:01Z,Toe,Sprain,Not Specified,2026-11-08,QUESTIONABLE,"Noel (toe) was seen in a walking boot after Sunday's 27-21 overtime loss to the Giants, DJ Bien-Aime of ESPN.com reports.",WR
 4362504,Brevin Jordan,Houston Texans,Active,2026-10-24T00:15Z,,,,,,"Jordan (foot) does not have any injury designation ahead of Sunday's game against the Giants, Adam Caplan of SiriusXM NFL Radio reports.",TE
-3919117,Azeez Al-Shaair,Houston Texans,Active,2026-10-24T00:10Z,,,,,,"Al-Shaair (knee) does not have any injury designation for Sunday's game against the Giants, Adam Caplan of SiriusXM NFL Radio reports.",LB
 4360189,Logan Hall,Houston Texans,Active,2026-10-22T20:47Z,,,,,,,DE
 16734,Jadeveon Clowney,Houston Texans,Active,2026-10-22T20:47Z,,,,,,,DE
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Active,2026-10-28T02:42Z,,,,,,Davis-Gaither recorded seven tackles (three solo) in Sunday's loss to Minnesota.,LB
@@ -549,6 +549,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2574056,Kevin Byard,New England Patriots,Active,2026-10-22T23:05Z,,,,,,Byard (chest) is officially active for Thursday's game at Chicago.,S
 4686772,Christian Gonzalez,New England Patriots,Active,2026-10-22T22:51Z,,,,,,Gonzalez (illness) is listed as active for Thursday night's game against the Bears.,CB
 4565293,Marcus Bryant,New England Patriots,Injured Reserve,2026-10-21T00:30Z,Ankle,Not Specified,Not Specified,2026-11-01,IR-R,Bryant (ankle) was a full participant at the Patriots' practice Tuesday.,OT
+4683813,Jonas Sanker,New Orleans Saints,Active,2026-10-28T04:36Z,,,,,,Sanker posted nine tackles (seven solo) in Sunday's Week 7 loss to Pittsburgh.,S
 4258199,Cesar Ruiz,New Orleans Saints,Questionable,2026-10-27T13:11Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,G
 4076951,Nathan Shepherd,New Orleans Saints,Questionable,2026-10-27T13:11Z,Illness,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,DT
 4036131,Noah Fant,New Orleans Saints,Active,2026-10-27T00:11Z,,,,,,Fant gathered in all two targets for 11 yards during Sunday's 16-10 defeat against Pittsburgh.,TE
@@ -573,7 +574,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3124890,Kaden Elliss,New Orleans Saints,Active,2026-10-23T15:47Z,,,,,,Elliss (calf) doesn't carry an injury designation into Sunday's game against the Steelers.,LB
 4428350,Quincy Riley,New Orleans Saints,Active,2026-10-22T19:21Z,,,,,,Riley (neck) was a full participant in practice Wednesday.,CB
 4433975,Kool-Aid McKinstry,New Orleans Saints,Active,2026-10-22T00:48Z,,,,,,"McKinstry (illness) was a full participant at the Saints' practice Wednesday, Mike Triplett of NewOrleans.Football reports.",CB
-4880281,Jordyn Tyson,New Orleans Saints,Injured Reserve,2026-10-21T13:31Z,Hamstring,Strain,Right,2026-11-08,IR-R,"Saints general manager Mickey Loomis said Tuesday that Tyson (hamstring) is ""getting closer"" but won't practice this week, Ross Jackson of WWL Louisiana reports.",WR
+4950400,Arvell Reese,New York Giants,Active,2026-10-28T04:32Z,,,,,,"Reese posted seven tackles (five solo), including 0.5 sacks, in Sunday's 27-21 overtime victory against the Texans.",LB
+4371961,Micah McFadden,New York Giants,Active,2026-10-28T04:16Z,,,,,,McFadden notched 10 tackles (all solo) in Sunday's 27-21 overtime win against the Texans.,LB
 4360516,Tyrone Tracy Jr.,New York Giants,Injured Reserve,2026-10-27T21:04Z,Hamstring,Strain,Not Specified,2026-12-06,IR,"The Giants placed Tracy (hamstring) on injured reserve Tuesday, Dan Salomone of the team's official site reports.",RB
 4429148,Theo Johnson,New York Giants,Questionable,2026-10-27T13:11Z,Neck,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,TE
 4686362,Marcus Mbow,New York Giants,Questionable,2026-10-27T13:11Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
@@ -597,8 +599,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3929950,Tremaine Edmunds,New York Giants,Injured Reserve,2026-10-24T23:28Z,Chest,Not Specified,Left,2027-02-15,IR,"Edmunds (chest) was placed on injured reserve Saturday, Dan Duggan of The Athletic reports.",LB
 4259566,Andrew Thomas,New York Giants,Active,2026-10-24T02:04Z,,,,,,Thomas (groin) does not have an injury designation against the Texans on Sunday.,OT
 4257188,Charlie Jones,New York Giants,Active,2026-10-23T20:50Z,,,,,,,WR
-2531358,Chris Manhertz,New York Giants,Active,2026-10-23T20:50Z,,,,,,,TE
-4921249,Colton Hood,New York Giants,Active,2026-10-23T00:29Z,,,,,,Hood (concussion) was a full participant at practice Thursday.,CB
 14958,Demario Davis,New York Jets,Active,2026-10-28T03:09Z,,,,,,Davis finished Sunday's Week 7 loss to Miami with three tackles (two solo) and one defensed pass.,LB
 4361331,Jamien Sherwood,New York Jets,Active,2026-10-28T02:58Z,,,,,,Sherwood totaled eight tackles (four solo) and two defensed passes Sunday in a loss to Miami.,LB
 4426686,Dane Belton,New York Jets,Active,2026-10-28T02:53Z,,,,,,Belton registered nine tackles (six solo) in Sunday's loss to the Dolphins.,S
