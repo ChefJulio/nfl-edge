@@ -85,7 +85,8 @@ def wiki(title: str, hops: int = 2) -> str | None:
 
 def norm(n: str) -> str:
   import unicodedata
-  n = unicodedata.normalize("NFKD", n or "").encode("ascii", "ignore").decode()  # Tré -> Tre, Gramática -> Gramatica
+  n = n if isinstance(n, str) else ""  # a roster row with no name (NaN)
+  n = unicodedata.normalize("NFKD", n).encode("ascii", "ignore").decode()  # Tré -> Tre, Gramática -> Gramatica
   n = re.sub(r"\(.*?\)", "", n).lower()
   n = re.sub(r"\b(jr|sr|ii|iii|iv|v)\b\.?", "", n)
   return re.sub(r"[^a-z]", "", n)
@@ -105,52 +106,89 @@ ENTRY = re.compile(r"(?:'{2,3})?(?:\{\{[Ss]mall\|[^}]*\}\}\s*)?(?:'{2,3})?\[\[(?
 
 
 def entries(block: str):
-  """'[[Name]], [[Team]]' / '[[Name]], Team' pairs in a wikitext block -> [(name, team code, rest of the item)]."""
+  """'[[Name]], [[Team]]' / '[[Name]], Team' pairs in a wikitext block -> [(name, team code, rest of the item, the
+  link's target: its disambiguation, "(wide receiver, born 1993)", tells two players of one name apart)]."""
   out = []
   for item in re.split(r"<br\s*/?>|\n", block):
     # the drafted-teams years (2014-16 games): "{{NFLplayer|12| Andrew Luck |([[Indianapolis Colts]])}}"
     for m in re.finditer(r"\{\{NFLplayer\|[^|]*\|\s*([^|]+?)\s*\|\s*\(([^)]*)\)", item):
-      out.append((m.group(1), team_of(m.group(2)), item[m.end():]))
+      out.append((m.group(1), team_of(m.group(2)), item[m.end():], None))
     for m in ENTRY.finditer(item):
-      name = m.group(2)
-      out.append((name, team_of(m.group(3)), item[m.end():]))
+      # a position where the team goes ("[[Kyle Fuller]], [[Cornerback]]", 2018's second table) serves as the hint
+      tm = team_of(m.group(3))
+      out.append((m.group(2), tm, item[m.end():], m.group(1) or (None if tm else m.group(3))))
     # an unlinked repeat ("LaDainian Tomlinson, San Diego Chargers (AP-2)") on All-Pro pages
     if not ENTRY.search(item):
       m = re.match(r"\s*\|?\s*([A-Z][A-Za-z.'\- ]+?),\s*([A-Z][A-Za-z. ]+?)\s*(\(.*)$", item)
       if m and team_of(m.group(2)):
-        out.append((m.group(1), team_of(m.group(2)), m.group(3)))
+        out.append((m.group(1), team_of(m.group(2)), m.group(3), None))
   return out
 
 
+# Wikipedia's name -> the rosters' (normalized), where neither the full, first or football name matches (2026-10-27
+# audit of every miss, 1999-2025); and one-off fixes by (season, name, team)
+ALIAS = {"andresborregales": "andyborregales", "anthonyhargrove": "tonyhargrove", "bamknight": "zonovanknight",
+         "bertrandberry": "bertberry", "chadjohnson": "chadochocinco", "foyesadeoluokun": "foyeoluokun",
+         "gregoryrousseau": "gregrousseau", "iketaylor": "ivantaylor", "jeffwilson": "jefferywilson",
+         "johnhekker": "johnnyhekker", "jonweeks": "jonathanweeks", "joshcribbs": "joshuacribbs",
+         "mattmcgloin": "matthewmcgloin", "matthewjudon": "mattjudon", "matthewslater": "mattslater",
+         "michaelbadgley": "mikebadgley", "nnamdimadubuike": "justinmadubuike", "patricksurtain": "patsurtain",
+         "rodcoleman": "roderickcoleman", "saucegardner": "ahmadgardner", "shaquilleleonard": "dariusleonard",
+         "stevenhauschka": "stephenhauschka"}
+FIX = {(2003, "brennan", "PIT"): "00-0005058",  # 2004 Pro Bowl page: #66 Pittsburgh guard Alan Faneca, mislabeled
+       # 2018 All-Pro's teamless table: two Chris Joneses on defensive lines (SF, KC); "(born 1994)" is Kansas City's
+       (2018, "chrisjones", None): "00-0032762"}
+# a link's disambiguation ("Chris Jones (defensive tackle, born 1994)") -> roster positions, for a shared name
+POS_HINT = {"quarterback": {"QB"}, "running back": {"RB", "FB", "HB"}, "fullback": {"FB", "RB"}, "wide receiver": {"WR"},
+            "tight end": {"TE"}, "defensive end": {"DE", "DL", "OLB", "EDGE"}, "defensive tackle": {"DT", "DL", "NT"},
+            "linebacker": {"LB", "OLB", "ILB", "MLB"}, "cornerback": {"CB", "DB"}, "safety": {"S", "SS", "FS", "DB"},
+            "defensive back": {"CB", "S", "SS", "FS", "DB"}, "offensive tackle": {"T", "OT", "OL"},
+            "guard": {"G", "OG", "OL"}, "center": {"C", "OL"}, "kicker": {"K"}, "punter": {"P"}, "long snapper": {"LS"}}
+
+
 class Names:
-  """(season, name) -> gsis, through that season's rosters; a shared name settles on the team."""
+  """(season, name) -> gsis, through that season's rosters (full name, first + last, football name + last); a shared
+  name settles on the team, then on the link's position hint."""
   def __init__(self, rosters: pd.DataFrame):
-    r = rosters.dropna(subset=["gsis_id", "full_name"]).copy()
+    r = rosters.dropna(subset=["gsis_id"]).copy()
     r["team"] = r.team.replace(CODE_ALIAS)
-    r["k"] = r.full_name.map(norm)
-    self.by = {}
-    for s, k, t, g in zip(r.season, r.k, r.team, r.gsis_id):
-      self.by.setdefault((int(s), k), {}).setdefault(g, set()).add(t)
+    self.by, self.pos = {}, {}
+    cols = [c for c in ("full_name", "first_name", "football_name", "last_name") if c in r]
+    for row in r[["season", "team", "gsis_id", "position", *cols]].itertuples(index=False):
+      d = row._asdict()
+      keys = {norm(d.get("full_name") or "")}
+      for f in ("first_name", "football_name"):
+        if isinstance(d.get(f), str) and isinstance(d.get("last_name"), str):
+          keys.add(norm(f"{d[f]} {d['last_name']}"))
+      for k in keys - {""}:
+        self.by.setdefault((int(d["season"]), k), {}).setdefault(d["gsis_id"], set()).add(d["team"])
+      self.pos.setdefault(d["gsis_id"], set()).add(d.get("position"))
     self.miss = []
 
-  def __call__(self, season: int, name: str, team: str | None) -> str | None:
-    c = self.by.get((season, norm(name))) or {}
+  def __call__(self, season: int, name: str, team: str | None, hint: str | None = None) -> str | None:
+    k = norm(name)
+    if (season, k, team) in FIX:
+      return FIX[(season, k, team)]
+    c = self.by.get((season, k)) or self.by.get((season, ALIAS.get(k, ""))) or {}
     if len(c) > 1 and team:
       c = {g: t for g, t in c.items() if team in t} or c
+    if len(c) > 1 and hint:
+      want = set().union(*(v for w, v in POS_HINT.items() if w in hint.lower())) if any(w in hint.lower() for w in POS_HINT) else set()
+      c = {g: t for g, t in c.items() if self.pos.get(g, set()) & want} or c
     if len(c) == 1:
       return next(iter(c))
     self.miss.append((season, name, team, len(c)))
     return None
 
 
-def build(site: Path) -> None:
+def build(site: Path, refetch: bool = False) -> None:
   import nflreadpy as nfl
   current = int(nfl.get_current_season())
   out_f = site / "data" / "honors.json"
   # finished seasons (their Super Bowl played) never change: kept in the repo (owner 2026-10-27: "most of this data we
   # just need to get once and we can store it in the repo"), so a build fetches only the season under way
   hist = json.loads(HIST.read_text(encoding="utf-8")) if HIST.exists() else {}
-  keep = hist.get("seasons") if hist.get("v") == V else {}
+  keep = hist.get("seasons") if hist.get("v") == V and not refetch else {}  # --refetch=1: every season again
   keep = keep or {}
   seasons = list(range(FIRST, current + 1))
   sched = nfl.load_schedules(seasons).to_pandas()
@@ -184,12 +222,12 @@ def build(site: Path) -> None:
     # All-Pro (AP first / second team)
     ap = wiki(f"{s} All-Pro Team")
     if ap:
-      for name, team, rest in entries(ap):
+      for name, team, rest, hint in entries(ap):
         tags = re.search(r"\(([^)]*)\)", rest or "")
         tags = [t.strip() for t in tags.group(1).split(",")] if tags else []
         code = "AP1" if "AP" in tags else "AP2" if "AP-2" in tags else None
         if code:
-          g = names(s, name, team)
+          g = names(s, name, team, hint)
           if g:
             rows.append([code, g])
     # Players of the Week / Month (owner 2026-10-27, pointing at Wikipedia when told there was no source): the season
@@ -225,10 +263,14 @@ def build(site: Path) -> None:
             if month:
               code = code.replace("POW", "POM")  # a month's row: Player of the Month
             t = re.sub(r"\{\{[^}]*\}\}|<ref.*?(</ref>|/>)", "", c)
-            t = re.sub(r"^\s*(?:'{2,3})?[A-Z]{1,4}\s+(?=\[\[|[A-Z][a-z])", "", t)  # a leading position ("QB [[...")
-            m = re.match(r"\s*(?:'{2,3})?(?:\[\[(?:[^\]|]+\|)?([^\]]+)\]\]|([A-Z][A-Za-z.'\- ]+?))(?=(?:'{2,3})?\s*(?:,|<br|\s[A-Z]{1,4}\b|$))", t)
+            # a leading position ("QB [[...", "WR-PR Jacoby Jones")
+            t = re.sub(r"^\s*(?:'{2,3})?[A-Z]{1,4}(?:[-/][A-Z]{1,4})?\s+(?=\[\[|[A-Z][a-z])", "", t)
+            # the name: a link, else plain text up to its position, a comma or the line break ("A. J. Brown WR<br />":
+            # the position must end its token, so "J." isn't read as one)
+            m = re.match(r"\s*(?:'{2,3})?(?:\[\[(?:([^\]|]+)\|)?([^\]]+)\]\]|([A-Z][A-Za-z.'\- ]+?))"
+                         r"(?=(?:'{2,3})?\s*(?:,|<br|\s[A-Z]{1,4}(?:[-/][A-Z]{1,4})?\s*(?:<br|\(|$)|$))", t)
             if m:
-              g = names(s, m.group(1) or m.group(2), team_of(t[m.end():]))
+              g = names(s, m.group(2) or m.group(3), team_of(t[m.end():]), m.group(1))
               if g:
                 rows.append([code, g, wk])
     # Pro Bowl: the rosters named for that season (the game is played the next calendar year)
@@ -238,8 +280,8 @@ def build(site: Path) -> None:
       blk = pb[i.start():] if i else ""
       j = re.search(r"^==\s*(Number of selections|Selections per team|References|Notes|See also|External links|Broadcast)", blk, re.M | re.I)
       blk = blk[:j.start()] if j else blk
-      for name, team, _ in entries(blk):
-        g = names(s, name, team)
+      for name, team, _, hint in entries(blk):
+        g = names(s, name, team, hint)
         if g:
           rows.append(["PB", g])
     # Super Bowl champion: the winner's game-day roster
@@ -280,6 +322,15 @@ def build(site: Path) -> None:
     p[g] = [list(x) for x in sorted({tuple(x) for x in p[g]}, key=lambda x: (x[1], x[0], str(x[2:])))]
   if names.miss:
     print(f"[honors] {len(names.miss)} names not matched to a roster, e.g. {names.miss[:5]}", flush=True)
+    # every miss with that season's roster candidates (same team and last name), for the ALIAS list
+    (ROOT / "scratch").mkdir(exist_ok=True)
+    rk = ros.dropna(subset=["full_name"]).assign(team=lambda r: r.team.replace(CODE_ALIAS))
+    with open(ROOT / "scratch" / "honors_miss.txt", "w", encoding="utf-8") as f:
+      for s, n, t, k in sorted(set(names.miss), key=lambda x: (x[1], x[0])):
+        last = norm(n.split()[-1]) if n.split() else ""
+        c = rk[(rk.season == s) & ((rk.team == t) if t else True)]
+        c = c[c.full_name.map(lambda x: norm(x.split()[-1]) == last if x.split() else False)]
+        f.write(f"{s}\t{n}\t{t}\t{k}\t{' | '.join(f'{a} {b}' for a, b in zip(c.full_name, c.gsis_id))}\n")
   new = {str(s): by[s] for s in todo if s in done}
   if new:  # a season just finished (or a new V): into the repo's history (committed from a local run)
     HIST.parent.mkdir(parents=True, exist_ok=True)
@@ -293,4 +344,4 @@ def build(site: Path) -> None:
 
 if __name__ == "__main__":
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
-  build(ROOT / opt.get("site", "site"))
+  build(ROOT / opt.get("site", "site"), refetch=opt.get("refetch") == "1")

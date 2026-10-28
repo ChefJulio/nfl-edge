@@ -102,6 +102,29 @@ def fetch(url: str) -> str:
     return r.read().decode("utf-8", errors="ignore")
 
 
+def earnings(nfl, cache, site: Path) -> None:
+  """Career earnings (owner 2026-10-27: "including total player earnings if that's possible"): what each player earned
+  on every contract, OverTheCap via nflverse's contract history (each deal once), by our id -> data/earnings.json
+  {gsis: $M}. Checked: Peyton Manning 247.7 (reported ~248), Tom Brady 317.6."""
+  k = cache.get("contracts_hist", "all", lambda: nfl.load_contracts().select(["gsis_id", "contract_history"]),
+                stale=cache.age_hours("contracts_hist", "all") > 24)
+  out = {}
+  for g, h in zip(k.gsis_id, k.contract_history):
+    if not isinstance(g, str) or h is None:
+      continue
+    seen, t = set(), 0.0
+    for x in h:
+      key = (x.get("team"), x.get("year_signed"), x.get("contract_type"), x.get("total"))
+      if key not in seen:
+        seen.add(key)
+        t += x.get("amount_earned") or 0
+    out[g] = max(out.get(g, 0.0), round(t, 2))  # a player's rows repeat his history: the fullest
+  out = {g: v for g, v in out.items() if v >= 0.01}
+  (site / "data" / "earnings.json").write_text(json.dumps({"v": 1, "src": "OverTheCap via nflverse", "e": out},
+                                                          separators=(",", ":")), encoding="utf-8")
+  print(f"[payroll] wrote data/earnings.json ({len(out)} players)", flush=True)
+
+
 def build(site: Path) -> None:
   import nflreadpy as nfl
   current = int(nfl.get_current_season())
@@ -177,6 +200,10 @@ def build(site: Path) -> None:
   out_f.parent.mkdir(parents=True, exist_ok=True)
   out_f.write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
   print(f"[payroll] wrote {out_f} ({len(teams)} teams)", flush=True)
+  try:
+    earnings(nfl, cache, site)
+  except Exception as e:
+    print(f"[payroll] earnings unavailable ({e})", flush=True)
 
 
 if __name__ == "__main__":

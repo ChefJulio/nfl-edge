@@ -1815,23 +1815,36 @@
   };
   // Draft & contract: the deal on the tile, the whole profile in the sheet, with his cap number by season when his team's
   // payroll lists him (data/payroll.json)
+  // career earnings: data/earnings.json (tools/payroll_build.py), what he earned on every deal
+  const ER = { d: undefined };
+  const loadEarnings = () => { if (ER.d !== undefined) return; ER.d = null;
+    NFLE.load('data/earnings.json').then(j => { ER.d = j.e || {}; rerenderCard(); }).catch(() => { ER.d = false; }); };
+  // (owner 2026-10-27: "make it show this years cap hit + free agent year ... the rest of the details in the tile
+  // including AAV ... total player earnings") the tile: this season's cap number and the year he hits free agency; the
+  // sheet: career earnings, the deal (yearly average, total, guaranteed, share of the cap, signed, free agent), the cap
+  // number in every season of it, then the draft
   const contractTile = (pid, L) => {
-    const box = profileBox(L), k = L && L.bio && L.bio.deal, dr = L && L.bio && L.bio.draft;
-    loadPayroll();
+    const k = L && L.bio && L.bio.deal, dr = L && L.bio && L.bio.draft;
+    loadPayroll(); loadEarnings();
     const P = PY.d, row = P && P.teams && Object.values(P.teams).reduce((f, t) => f || (t.roster || []).find(r => r[1] === pid), null);
     const caps = row ? [[P.season, row[3]], ...(row[5] || []).map((v, i) => [P.season + 1 + i, v])] : [];
+    const earned = ER.d && ER.d[pid];
     const capBox = caps.length ? `<div class="pc-box"><div class="pc-k">Cap number by season</div><table class="bx"><tbody>${caps.map(([s, v]) => `<tr><td>${s}</td><td class="num">${v ? usd(v) : '&ndash;'}</td></tr>`).join('')}</tbody></table>
       <p class="pc-sub muted">What his deal counts against the salary cap each season (OverTheCap). Signing bonuses are spread over the deal, so early seasons often sit under the yearly average.</p></div>` : '';
-    const face = k ? `<div class="pc-big">${money(k.apy)} <small>/ yr</small></div><div class="pc-tapsub">${k.fa ? `free agent ${esc(k.fa)}` : k.yrs ? `${esc(k.yrs)}-year deal` : `signed ${esc(k.from)}`}</div>`
-      : dr ? `<div class="pc-big">${dr.u ? 'UDFA' : `R${dr.r}:${dr.p}`}</div><div class="pc-tapsub">${dr.u ? 'undrafted' : `${dr.y} draft`}</div>`
+    const earnBox = earned || row ? `<div class="pc-box"><div class="tm-stats">${earned ? cell(money(earned), 'Career earnings', 'Everything he has earned on his NFL contracts so far (OverTheCap via nflverse)') : ''}${row ? cell(usd(row[3]), `${P.season} cap hit`, 'What his deal counts against the salary cap this season') : ''}</div></div>` : '';
+    const fa = k && k.fa ? `free agent ${esc(k.fa)}` : k && k.yrs ? `${esc(k.yrs)}-year deal` : k ? `signed ${esc(k.from)}` : '';
+    const face = row ? `<div class="pc-big">${usd(row[3])} <small>cap hit</small></div><div class="pc-tapsub">${fa || `${P.season} season`}</div>`
+      : k ? `<div class="pc-big">${money(k.apy)} <small>/ yr</small></div><div class="pc-tapsub">${fa}</div>`
+      : dr ? `<div class="pc-big">${dr.u ? 'UDFA' : `R${dr.r}:${dr.p}`}</div><div class="pc-tapsub">${earned ? `${money(earned)} career earnings` : dr.u ? 'undrafted' : `${dr.y} draft`}</div>`
       : '<div class="pc-big muted">&ndash;</div><div class="pc-tapsub">No deal on file</div>';
-    return tapTile(k ? 'Contract' : 'Draft', face, 'Draft & contract', (box || '<p class="pc-sub">No draft or contract on file.</p>') + capBox);
+    return tapTile(k || row ? 'Contract' : 'Draft', face, 'Draft & contract', earnBox + (profileBox(L, true) || '<p class="pc-sub">No draft or contract on file.</p>') + capBox);
   };
   // the two join the card's summary grid (CARD_X, set per render: every week layout's grid ends with it); the career
   // overviews (retired, linemen and specialists) get them as their own row
   let CARD_X = '';
   const moreTiles = (pid, L) => L ? `<div class="pc-tiles">${honorsTile(pid, L)}${contractTile(pid, L)}</div>` : '';
-  const profileBox = L => {
+  // bare: inside the Draft & contract sheet, which already carries that title
+  const profileBox = (L, bare = false) => {
     if (!L || !L.bio) return '';
     const b = L.bio, bio = [];
     const dr = b.draft;
@@ -1841,13 +1854,13 @@
     if (b.college) bio.push(cell(esc(b.college.split(';')[0].trim()), 'College', b.college));
     // Free agent = the season after the last one he's paid (void years excluded); older log files lack it and show
     // the deal's length instead.
-    const k = b.deal, deal = k ? [cell(money(k.apy), 'Per year'), k.val != null ? cell(money(k.val), 'Total', k.yrs ? `${k.yrs}-year deal as signed (an extension counts only its added years)` : '') : '',
+    const k = b.deal, deal = k ? [cell(money(k.apy), 'AAV', 'Average annual value: the deal\'s total over its years'), k.val != null ? cell(money(k.val), 'Total', k.yrs ? `${k.yrs}-year deal as signed (an extension counts only its added years)` : '') : '',
       k.gtd != null ? cell(money(k.gtd), 'Guaranteed') : '', k.cap != null ? cell(`${(k.cap * 100).toFixed(1)}%`, 'Of cap', 'Per-year value as a share of the salary cap when signed') : '',
       cell(esc(k.from), 'Signed'),
       k.fa ? cell(esc(k.fa), 'Free agent', `Hits free agency in ${k.fa} if not extended (paid through ${k.fa - 1}; void years excluded)`)
         : k.yrs ? cell(esc(k.yrs), 'Years') : ''] : [];
     if (!bio.length && !deal.length) return '';
-    return `<div class="pc-box pc-profile"><div class="pc-k">Draft & contract</div>${sg([bio.length ? sgRow(null, bio) : '', deal.length ? sgRow(null, deal) : ''], 6, { labels: false, cls: 'sg-prof' })}</div>`;
+    return `<div class="pc-box pc-profile">${bare ? '' : '<div class="pc-k">Draft & contract</div>'}${sg([bio.length ? sgRow(null, bio) : '', deal.length ? sgRow(null, deal) : ''], 6, { labels: false, cls: 'sg-prof' })}</div>`;
   };
   // Week tab, below the weekly section: his three latest news items and this season's games (his last five before
   // his first game of the season), each with a way into the full tab. Both are current, whatever week is picked.
