@@ -276,7 +276,7 @@
         const txt = String(p.text || ''), m = /TOUCHDOWN(?! NULLIFIED)/.test(txt) && p.scoringPlay ? txt.match(TRY_RX) : null;
         if (!m || /extra point|two-point/i.test(String((p.type || {}).text || ''))) { out.push(p); prev = p; return; }
         const tryText = m[1].trim(), tdText = txt.slice(0, txt.length - m[0].length).trim().replace(/[^.]$/, c => `${c}.`);
-        const two = /TWO-POINT/.test(tryText);
+        const two = /TWO-POINT CONVERSION ATTEMPT/.test(tryText);  // not a blocked kick's "DEFENSIVE TWO-POINT ATTEMPT" (2026-10-28 audit)
         const pts = two ? (/ATTEMPT SUCCEEDS/i.test(offTry(tryText)) ? 2 : 0) : (/extra point is GOOD/i.test(tryText) ? 1 : 0);
         // the scoring side: whose score went up on the play
         const ph = prev ? prev.homeScore : 0, pa = prev ? prev.awayScore : 0, home = p.homeScore - ph >= p.awayScore - pa;
@@ -562,6 +562,10 @@
     const npen = !pl.inner && /No Play/i.test(raw) ? raw.match(RX.pen) : null;
     // offsetting flags replay the down (2026-10-28 audit: a wiped-out 15-yard catch read "no gain")
     const offset = !pl.inner && !npen && /No Play/i.test(raw) && /offsetting/i.test(raw);
+    // a foul in the offense's own end zone is a safety, not a replayed down (2026-10-28 audit: "Penalty, SF: Offensive
+    // Holding, 6 yards · wipes out a sack" for 2 points)
+    if (npen && /enforced in End Zone, SAFETY/i.test(raw))
+      return { h: `Penalty, ${txtCode(npen[1])}: ${npen[2]} in the end zone · Safety`, cls: 'bad', raw: full, eff: raw };
     if (npen || offset) {
       const pre = raw.slice(0, raw.search(/PENALTY on/i)).trim();
       // a kick too (2026-10-28 audit: "Penalty, LV: Offensive Offside" said nothing of the field goal it took away)
@@ -630,6 +634,15 @@
     else if (!pl.inner && /spiked the ball/i.test(raw)) h = `${nm((raw.match(new RegExp(`^(${NM}) spiked`)) || [])[1])} spikes it`;
     else if (/interception/i.test(t)) { h =`${nm(g('lead'))} intercepted${g('picked') ? ` by ${nm(g('picked'))}` : ''}`; cls = 'bad'; }
     else if (/sack/i.test(t)) { h = `${nm(g('lead'))} sacked, ${yds(y)}${penTail}`; cls = 'bad'; }
+    // an illegal forward pass (2026-10-28 audit: "P. Mahomes run, loss of 10" for an incompletion thrown past the line):
+    // what happened, then the flag; a scramble past the line and then a throw reads that way
+    else if (!pl.inner && penM && /Illegal Forward Pass/i.test(penM[2]) && ACT.test(raw)) {
+      const segs = raw.split(/PENALTY/)[0].split(/\. (?=[A-Z][a-z]?\.)/).map(x => x.trim().replace(/\.$/, '')).filter(x => ACT.test(x));
+      const a = action(segs[0]);
+      h = segs.length > 1 ? `${a.h}, then a throw past the line: illegal forward pass, ${penYds(penM[3])}` : `${a.h}${penTail}`; cls = 'pen';
+    }
+    // a quarterback catching his own deflected pass ("S.Rattler pass short right to S.Rattler")
+    else if (/pass reception|passing touchdown/i.test(t) && g('lead') && g('lead') === g('to')) h = `${nm(g('lead'))} catches his own deflected pass, ${yds(y)}${penTail}`;
     else if (/pass reception|passing touchdown/i.test(t)) h = `${nm(g('lead'))} ${g('to') ? `to ${nm(g('to'))}` : 'pass'}, ${yds(y)}${penTail}`;
     else if (/pass incompletion/i.test(t)) h = `${nm(g('lead'))} incomplete${g('to') ? ` to ${nm(g('to'))}` : ''}`;
     else if (/^rush|rushing touchdown/i.test(t)) h = (y > 0 ? `${nm(g('lead'))} ${y}-yard run` : `${nm(g('lead'))} run, ${yds(y)}`) + penTail;
@@ -638,7 +651,8 @@
     // a blocked punt (2026-10-28 audit: it read "punts yards"), and how an unreturned punt ended
     else if (/punt/i.test(t)) {
       const bp = raw.match(new RegExp(`^(${NM}) punt is BLOCKED by (${NM})(?=,| \\(|\\.)`)), rec = (raw.match(/(?:RECOVERED|recovered) by ([A-Z]{2,3})-/) || [])[1], mf = muff();
-      h = bp ? `${nm(bp[1])}'s punt blocked by ${nm(bp[2])}${rec ? `, ${txtCode(rec)} recovers` : ''}${kickFlag()}`
+      const rt = raw.match(new RegExp(`\\. (${NM}) for (\\d+) yards?, TOUCHDOWN`));
+      h = bp ? `${nm(bp[1])}'s punt blocked by ${nm(bp[2])}${rt ? `, ${nm(rt[1])} returns it ${penYds(rt[2])}` : rec ? `, ${txtCode(rec)} recovers` : ''}${kickFlag()}`
         : `${nm(g('lead'))} punts ${g('punt') || ''} yards${/Touchback/i.test(raw) ? ', touchback' : mf ? `, ${mf}` : g('ret') ? `, ${nm(g('ret'))} returns ${retYds(raw, pl)}`
           : /fair catch/i.test(raw) ? ', fair catch' : /downed/i.test(raw) ? ', downed' : /out of bounds/i.test(raw) ? ', out of bounds' : ''}${kickFlag()}`;
     }
@@ -656,8 +670,9 @@
         : g('ret') ? `${K}: ${nm(g('ret'))} returns it ${penYds(ry)}${kickFlag()}`
         : /out of bounds/i.test(raw) ? `${K} out of bounds${kickFlag()}` : `${K}${kickFlag()}`;
     }
-    else if (/extra point/i.test(t)) { const k = (raw.match(new RegExp(`^(${NM}) extra point`)) || [])[1], ok = /is GOOD/i.test(raw);
-      h = `${k ? `${nm(k)} e` : 'E'}xtra point ${ok ? 'good' : /block/i.test(raw) ? 'blocked' : 'no good'}`; cls = ok ? '' : 'bad'; }
+    else if (/extra point/i.test(t)) { const k = (raw.match(new RegExp(`^(${NM}) extra point`)) || [])[1], ok = /is GOOD/i.test(raw), di = raw.search(/DEFENSIVE TWO-POINT/i);
+      h = `${k ? `${nm(k)} e` : 'E'}xtra point ${ok ? 'good' : /block/i.test(raw) ? 'blocked' : 'no good'}`
+        + (di >= 0 ? (/ATTEMPT SUCCEEDS/i.test(raw.slice(di)) ? ', returned by the defense for 2' : ", the defense's return stopped") : ''); cls = ok ? '' : 'bad'; }
     // "D.Prescott rushes left guard" is a run (2026-10-28 audit: it read "D. rushes run")
     // "M.Stafford is sacked" too; the defense's return after a failed try is its own outcome (2026-10-28 audit)
     else if (/two-point/i.test(t)) { const own = offTry(raw), ok = /ATTEMPT SUCCEEDS/i.test(own);
@@ -667,17 +682,26 @@
         + (dTry ? (/ATTEMPT SUCCEEDS/i.test(raw.slice(raw.search(/DEFENSIVE TWO-POINT/i))) ? ', returned by the defense for 2' : ", the defense's return stopped") : '');
       cls = ok ? '' : 'bad'; }
     else if (/field goal/i.test(t)) { const r = g('fg', 2), rec = (raw.match(/(?:RECOVERED|recovered) by ([A-Z]{2,3})-/) || [])[1];
-      h = `${g('fg') || ''}-yard field goal, ${/good/i.test(r || t) && !/no good/i.test(r || '') ? 'good' : r && /block/i.test(r) ? `blocked${rec ? `, ${txtCode(rec)} recovers` : ''}` : 'no good'}`; cls = /good/i.test(t) ? 'good' : 'bad'; }
+      const rt = raw.match(new RegExp(`\\. (${NM}) for (\\d+) yards?, TOUCHDOWN`));  // run back for a score: who and how far
+      h = `${g('fg') || ''}-yard field goal, ${/good/i.test(r || t) && !/no good/i.test(r || '') ? 'good' : r && /block/i.test(r) ? `blocked${rt ? `, ${nm(rt[1])} returns it ${penYds(rt[2])}` : rec ? `, ${txtCode(rec)} recovers` : ''}` : 'no good'}`;
+      cls = /BLOCKED/i.test(raw) ? 'bad' : /good/i.test(t) ? 'good' : 'bad'; }
     // ESPN types a play with an accepted flag as "Penalty" at times: the play first, then its flag (2026-10-28 audit: an
     // 8-yard scramble plus 5 for holding read just "Penalty, LAC: Defensive Holding")
     else if (/penalty/i.test(t)) { const m = raw.match(RX.pen), a = penM && ACT.test(raw) ? action(raw.split(/PENALTY/)[0].trim().replace(/\.$/, '')) : null;
       h = a ? `${a.h}${penTail}` : m ? `Penalty, ${txtCode(m[1])}: ${m[2]}, ${penYds(m[3])}` : 'Penalty'; cls = a ? a.cls : 'pen'; }  // not 'flag': site.css .flag is a white badge
+    // a safety says how (2026-10-28 audit: the bare word "Safety"): sacked or tackled in the end zone, or grounding there
+    else if (/safety/i.test(t)) {
+      const sk = raw.match(new RegExp(`^(${NM}) sacked in End Zone`)), gr = /Intentional Grounding/i.test(raw) ? (raw.match(new RegExp(`^(${NM}) pass`)) || [])[1] : null;
+      const tk = raw.match(new RegExp(`(${NM}) tackled in End Zone`)), a = !sk && !gr && ACT.test(raw) ? action(raw.split(/, SAFETY|\. /)[0]) : null;
+      h = `${sk ? `${nm(sk[1])} sacked in the end zone` : gr ? `${nm(gr)} intentional grounding in the end zone` : tk ? `${nm(tk[1])} tackled in the end zone` : a ? a.h : 'Safety'}${sk || gr || tk || a ? ' · Safety' : ''}`;
+      cls = 'bad';
+    }
     else h = t || raw.split('. ')[0];
     // a touchdown called back by a foul enforced at its spot: the play stands short of the end zone (2026-10-28 audit)
     if (!pl.inner && /TOUCHDOWN NULLIFIED/.test(raw) && !/No Play/i.test(raw)) h += ' · TD called back';
     // a lateral names who finished the play (2026-10-28 audit: Golden's 1-yard catch, lateral to Lloyd for 5 more)
     const lat = !pl.inner && raw.match(new RegExp(`[Ll]ateral to (${NM})(?= [a-z]| \\(|\\.|,|$)`));
-    if (lat) h += `, lateral to ${nm(lat[1])}`;
+    if (lat) h = h.replace(/(, flag on .*)?$/, m => `, lateral to ${nm(lat[1])}${m}`);  // before the flag, which came after it
     if (td) { h += ' · Touchdown'; cls = 'td'; }
     if (pl.isTurnover && cls !== 'bad') cls = 'bad';
     return { h: h.replace(/\s+,/g, ',').replace(/\s{2,}/g, ' ').trim(), cls, raw: full, eff: raw };
@@ -4922,6 +4946,7 @@
   const yardChip = (p, info) => {
     if (nonPlay(p)) return '';
     const a = spot(p.start, info), b = spot(p.end, info), txt = effText(p), t = `${pType(p)} ${txt}`;
+    if (p.scoringPlay && /SAFETY/.test(txt) && !/SAFETY NULLIFIED/.test(txt)) return resChip('Safety', 'loss', 'Safety: 2 points for the defense');
     if (/No Play/i.test(txt) && /penalty/i.test(t)) return resChip('Flag', 'pen', 'Penalty: the play didn\'t count');
     // kicks and tries (owner 2026-10-25: "FGG/FGNG"): FGG / FGNG, XPG / XPNG, 2PT / 2PT NG; a blocked kick says so
     // only when the defense's return scored (2026-10-28 audit: a stopped return after a failed try read "Def 2PT")
@@ -4931,11 +4956,13 @@
     // a short kickoff (the receiving team takes it at its 40)
     if (/short of landing zone/i.test(t)) return resChip('Short', 'zero', 'Kickoff short of the landing zone: ball placed at the 40');
     if (isTry(p)) {
-      const two = /two-point/i.test(t), ok = two ? /ATTEMPT SUCCEEDS/i.test(offTry(txt)) : /extra point is GOOD/i.test(txt);
+      const two = /two-point/i.test(pType(p)) || /^TWO-POINT CONVERSION/.test(txt), ok = two ? /ATTEMPT SUCCEEDS/i.test(offTry(txt)) : /extra point is GOOD/i.test(txt);
       if (!two && /block/i.test(txt)) return resChip('Blocked', 'loss', 'Extra point blocked');
       return two ? resChip(ok ? '2PT' : '2PT NG', ok ? 'gain' : 'loss', ok ? 'Two-point try good' : 'Two-point try failed')
         : resChip(ok ? 'XPG' : 'XPNG', ok ? 'gain' : 'loss', ok ? 'Extra point good' : 'Extra point no good');
     }
+    // a blocked kick the defense ran back for a touchdown scores, but not for the kicking team (2026-10-28 audit: "FGG")
+    if (/field goal/i.test(t) && p.scoringPlay && /BLOCKED/i.test(txt) && /TOUCHDOWN/.test(txt)) return resChip('Block TD', 'loss', 'Blocked and returned for a touchdown');
     if (/field goal/i.test(t)) return p.scoringPlay ? resChip('FGG', 'gain', 'Field goal good')
       : resChip(/blocked/i.test(t) ? 'Blocked' : 'FGNG', 'loss', /blocked/i.test(t) ? 'Field goal blocked' : 'Field goal no good');
     if (p.scoringPlay && /touchdown/i.test(t)) return resChip('TD', 'gain', 'Touchdown');
@@ -4951,6 +4978,9 @@
         return kept && /fumble|muff/i.test(t) ? resChip('Fumble', 'gain', 'The receiving team lost the ball') : resChip('Punt', 'zero', 'Punt');
       }
       if (/touchback/i.test(t)) return resChip('Touchback', 'zero', 'Touchback');
+      // an onside kick the kicking team fell on (2026-10-28 audit: no chip)
+      const ok0 = / kicks onside /.test(` ${txt}`) && (txt.match(/RECOVERED by ([A-Z]{2,3})-/) || [])[1];
+      if (ok0) return txtCode(ok0) === kickerOf(p) ? resChip('Recovered', 'gain', 'The kicking team recovered its onside kick') : resChip('Onside', 'zero', 'The receiving team recovered');
       if (/fair catch/i.test(t)) return resChip('Fair catch', 'zero', 'Fair catch');
       if (/downed/i.test(t)) return resChip('Downed', 'zero', 'Downed');
       if (/out of bounds/i.test(t) && !/ for /.test(txt.split(/punts|kicks/)[1] || '')) return resChip('Out of bounds', 'zero', 'Kicked out of bounds');
