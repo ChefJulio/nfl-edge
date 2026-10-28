@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035463,K'Von Wallace,Baltimore Ravens,Active,2026-10-19T16:22Z,,,,,,,CB
 4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-10-18T15:33Z,,,,,,,OT
 4698244,Teddye Buchanan,Baltimore Ravens,Active,2026-10-16T20:28Z,,,,,,,LB
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-28T16:29Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-28T16:36Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4044133,Sam Franklin Jr.,Buffalo Bills,Active,2026-10-24T01:44Z,,,,,,"The NFL reduced Franklin's discipline from a one-game suspension to a fine of $14,926, Adam Schefter of ESPN reports.",S
 4568624,Dorian Williams,Buffalo Bills,Active,2026-10-22T01:58Z,,,,,,Williams logged five tackles (three solo) and one pass defensed for an interception in the Bills' 33-30 win over the Raiders on Sunday.,LB
 4832035,Davison Igbinosun,Buffalo Bills,Active,2026-10-22T01:37Z,,,,,,"Defensive coordinator Jim Leonhard praised Igbinosun's play earlier this week and plans to keep giving the rookie a good amount of playing time, Alec White of the Bills' official site reports. Said Leonard, ""I think what he's done the last couple weeks, he's definitely earned a high majority of the ",CB
@@ -599,6 +599,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242547,Paulson Adebo,New York Giants,Active,2026-10-25T15:37Z,,,,,,"Adebo (knee) is active Week 7 against the Texans, Dan Salomone of the Giants' official site reports.",CB
 3929950,Tremaine Edmunds,New York Giants,Injured Reserve,2026-10-24T23:28Z,Chest,Not Specified,Left,2027-02-15,IR,"Edmunds (chest) was placed on injured reserve Saturday, Dan Duggan of The Athletic reports.",LB
 4259566,Andrew Thomas,New York Giants,Active,2026-10-24T02:04Z,,,,,,Thomas (groin) does not have an injury designation against the Texans on Sunday.,OT
+4685247,Braelon Allen,New York Jets,Questionable,2026-10-28T16:38Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Jets head coach Aaron Glenn said that Allen will be a limited participant in Wednesday's practice due to ankle injury, Zack Rosenblatt of The Athletic reports.",RB
+4427366,Breece Hall,New York Jets,Questionable,2026-10-28T16:35Z,Quadriceps,Not Specified,Right,2026-11-01,QUESTIONABLE,"Jets head coach Aaron Glenn said that Hall (quadriceps) will be limited participant in Wednesday's practice, Zack Rosenblatt of The Athletic reports.",RB
 4362094,Joseph Ossai,New York Jets,Doubtful,2026-10-28T16:23Z,Ankle,Not Specified,Not Specified,2026-11-01,DOUBTFUL,doubtful,DE
 4428617,T'Vondre Sweat,New York Jets,Doubtful,2026-10-28T16:22Z,Knee,Not Specified,Not Specified,2026-11-01,DOUBTFUL,doubtful,DT
 4685248,David Bailey,New York Jets,Questionable,2026-10-28T16:19Z,Groin,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,LB
@@ -609,7 +611,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4243375,Dylan Parham,New York Jets,Questionable,2026-10-27T13:11Z,Knee,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,G
 4373656,Max Mitchell,New York Jets,Questionable,2026-10-27T13:11Z,Concussion,Concussion,Not Specified,2026-11-01,QUESTIONABLE,questionable,OT
 4035537,Kene Nwangwu,New York Jets,Questionable,2026-10-27T13:11Z,Knee,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,RB
-4427366,Breece Hall,New York Jets,Questionable,2026-10-27T13:11Z,Quadriceps,Not Specified,Right,2026-11-01,QUESTIONABLE,questionable,RB
 3134353,Tim Patrick,New York Jets,Active,2026-10-27T02:09Z,,,,,,Patrick did not garner a target during Sunday's 28-25 loss to the Dolphins.,WR
 4597500,Adonai Mitchell,New York Jets,Active,2026-10-27T00:24Z,,,,,,Mitchell failed to haul in any of his three targets during the Jets' 28-25 loss to the Dolphins on Sunday.,WR
 4695404,Isaiah Davis,New York Jets,Active,2026-10-27T00:14Z,,,,,,Davis logged a five-yard carry and caught all three of his targets for 49 yards during Sunday's 28-25 loss to Miami. He also added a tackle on special teams.,RB
@@ -621,7 +622,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 15864,Geno Smith,New York Jets,Active,2026-10-25T20:58Z,,,,,,"Smith completed 23 of 30 passes for 287 yards, three touchdowns and one interception in Sunday's 28-25 loss to the Dolphins. He also rushed twice for no gain and threw a successful two-point conversion.",QB
 4569618,Garrett Wilson,New York Jets,Active,2026-10-25T20:47Z,,,,,,Wilson caught two of three targets for 26 yards in Sunday's 28-25 loss to the Dolphins.,WR
 4723820,Omar Cooper Jr.,New York Jets,Active,2026-10-25T20:34Z,,,,,,Cooper caught all five of his targets for 115 yards and a touchdown in Sunday's 28-25 loss to the Dolphins.,WR
-4685247,Braelon Allen,New York Jets,Active,2026-10-25T20:29Z,,,,,,Allen rushed 17 times for 104 yards and caught six of seven targets for 30 yards in Sunday's 28-25 loss to the Dolphins.,RB
 4700136,Kiko Mauigoa,New York Jets,Injured Reserve,2026-10-24T19:22Z,Quadriceps,Not Specified,Not Specified,2026-11-22,IR,"The Jets placed Mauigoa (quadriceps) on injured reserve Saturday, Zack Rosenblatt of The Athletic reports.",LB
 4361767,Will McDonald IV,New York Jets,Active,2026-10-23T20:11Z,,,,,,,DE
 4682618,Cooper DeJean,Philadelphia Eagles,Active,2026-10-28T01:25Z,,,,,,DeJean recorded seven tackles (three solo) during Monday's 38-21 loss versus the Cowboys.,CB
@@ -774,7 +774,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4369835,Alontae Taylor,Tennessee Titans,Active,2026-10-19T17:18Z,,,,,,,CB
 4917635,Joshua Williams,Tennessee Titans,Active,2026-10-18T02:44Z,,,,,,The Titans activated Williams (pectoral) from reserve/PUP on Saturday.,CB
 4360978,David Martin-Robinson,Tennessee Titans,Active,2026-10-17T01:55Z,,,,,,Martin-Robinson (hamstring) does not have any injury designation ahead of Sunday's game against the Colts.,TE
-3121422,Terry McLaurin,Washington Commanders,Injured Reserve,2026-10-28T16:28Z,Knee,Surgery,Left,2027-02-15,IR,ir,WR
+3121422,Terry McLaurin,Washington Commanders,Injured Reserve,2026-10-28T16:43Z,Knee,Surgery,Left,2027-02-15,IR,"The Commanders placed McLaurin (knee) on injured reserve Wednesday, Zach Selby of the team's official site reports.",WR
 5081432,Antonio Williams,Washington Commanders,Active,2026-10-26T17:41Z,,,,,,"Coach Dan Quinn noted Monday that with Terry McLaurin (knee) out for the season, Stefon Diggs' workload isn't expected to change much, however others, notably Williams, should see added opportunities in McLaurin's looming absence, Nicki Jhabvala of The Athletic reports.",WR
 2576980,Marcus Mariota,Washington Commanders,Questionable,2026-10-26T17:23Z,Knee - MCL,Sprain,Right,2026-11-01,QUESTIONABLE,"Commanders head coach Dan Quinn said Monday that Mariota (knee) is on track to return to practice this week, Nicki Jhabvala of The Athletic reports.",QB
 4602667,Jaylin Lane,Washington Commanders,Injured Reserve,2026-10-22T00:47Z,Ankle,Surgery,Left,2027-02-15,IR,"Lane underwent surgery Oct. 9 to repair his fractured and dislocated ankle, and he is expected to be cleared for activities before OTAs, Tashan Reed of The Washington Post reports.",WR
