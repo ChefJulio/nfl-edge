@@ -1799,19 +1799,40 @@
     return out;
   };
   const hChip = h => `<span class="hn-chip hn-${h.c.startsWith('L_') ? 'lead' : h.c.startsWith('PO') || ['AIR', 'GROUND', 'ROTW'].includes(h.c) ? 'wk' : 'big'}">${h.n > 1 ? `${h.n}&times; ` : ''}${esc(h.chip)}</span>`;
+  // Hall of Fame chance ((DP), owner 2026-10-28: "can we create a hall of fame calculator?"): data/hof_chance.json
+  // (tools/hof_eval.py --export), for drafted players not in the Hall; an active player's reads "if his career ended today"
+  const HF = { d: undefined };
+  const loadHof = () => { if (HF.d !== undefined) return; HF.d = null;
+    NFLE.load('data/hof_chance.json').then(j => { HF.d = j; rerenderCard(); }).catch(() => { HF.d = false; }); };
+  const hofPct = v => v >= 0.995 ? '>99%' : v < 0.01 ? '<1%' : `${Math.round(100 * v)}%`;
+  const hofBox = (pid, L) => {
+    loadHof();
+    if (L && L.bio && L.bio.hof) return '';
+    const H = HF.d, c = H && H.c && H.c[pid];
+    const watch = H && H.c ? (() => {
+      const rows = Object.entries(H.c), top = el => rows.filter(([, v]) => v[1] === el).sort((a, b) => b[1][0] - a[1][0]).slice(0, 20);
+      const li = ([g, v]) => `<tr data-open-pid="${esc(g)}" class="py-tap"><td>${esc(v[2])} <span class="muted">${esc(v[3])}</span></td><td class="num">${hofPct(v[0])}</td></tr>`;
+      return `<details class="py-more"><summary>Hall of Fame watch list</summary>
+        <div class="pc-k co-sub">Eligible, not in yet</div><table class="bx"><tbody>${top(1).map(li).join('')}</tbody></table>
+        <div class="pc-k co-sub">Active or retired under 5 years (if their careers ended today)</div><table class="bx"><tbody>${top(0).map(li).join('')}</tbody></table></details>`; })() : '';
+    const line = !H ? '' : c ? `<div class="pc-big">${hofPct(c[0])}</div><div class="pc-sub">${c[1] ? 'Eligible, not in yet' : 'If his career ended today'}</div>`
+      : `<div class="pc-big muted">&lt;1%</div><div class="pc-sub">${L && L.bio && L.bio.draft && L.bio.draft.u ? 'Undrafted: outside the model\'s data' : 'Nowhere near the line so far'}</div>`;
+    return `<div class="pc-box"><div class="pc-k">Hall of Fame chance</div>${line}
+      <p class="pc-sub muted">From every drafted player since 1980 whose career ended by 2015: first-team All-Pros, Pro Bowls, career value and years as a starter carry it, then MVP / Player of the Year awards, Super Bowl titles and position. On the field only: voters weigh more. Tested on held-out draft classes.</p>${watch}</div>`;
+  };
   const honorsTile = (pid, L) => {
     loadHonors();
     if (!HN.d) return tapTile('Honors', `<div class="pc-tapsub">${HN.d === false ? 'Not available' : 'Loading&hellip;'}</div>`, 'Honors', '<p class="pc-sub">Loading&hellip;</p>');
     const H = honorsOf(pid, L);
     if (!H.length) return tapTile('Honors', '<div class="pc-big muted">&ndash;</div><div class="pc-tapsub">None yet</div>', 'Honors',
-      `<p class="pc-sub">No awards, All-Pro or Pro Bowl selections, league-leading seasons or Super Bowl titles on record (${HN.d.from} on).</p>`);
+      `<p class="pc-sub">No awards, All-Pro or Pro Bowl selections, league-leading seasons or Super Bowl titles on record (${HN.d.from} on).</p>${hofBox(pid, L)}`);
     const face = `<div class="hn-face">${H.slice(0, 3).map(hChip).join('')}${H.length > 3 ? `<span class="hn-more">+${H.length - 3} more</span>` : ''}</div>`;
     // the years: '18 '19; weekly honors as week numbers within the season, months by name
     const yrs = w => { const g = {}; w.forEach(([s, x]) => { (g[s] = g[s] || []).push(x); });
       return Object.keys(g).sort().map(s => g[s][0] == null ? `&rsquo;${String(s).slice(-2)}` : `&rsquo;${String(s).slice(-2)} <span class="muted">${g[s].map(x => (typeof x === 'number' ? `wk ${x}` : esc(x))).join(', ')}</span>`).join(' &middot; '); };
     const table = `<table class="bx hn-t"><thead><tr><th>Honor</th><th class="num">#</th><th>Seasons</th></tr></thead><tbody>${H.map(h => `<tr><td>${esc(h.name)}</td><td class="num">${h.n}</td><td>${yrs(h.when)}</td></tr>`).join('')}</tbody></table>`;
     const src = `<p class="pc-sub muted">${HN.d.from} on. Awards from ESPN; All-Pro (AP), Pro Bowl (every player named, replacements included) and Players of the Week / Month from Wikipedia (weekly honors from about 2008); league leaders and Super Bowl rosters from nflverse.</p>`;
-    return tapTile('Honors', face, 'Honors', `<div class="pc-box"><div class="hn-face">${H.map(hChip).join('')}</div></div><div class="pc-box">${table}</div>${src}`);
+    return tapTile('Honors', face, 'Honors', `<div class="pc-box"><div class="hn-face">${H.map(hChip).join('')}</div></div>${hofBox(pid, L)}<div class="pc-box">${table}</div>${src}`);
   };
   // Draft & contract: the deal on the tile, the whole profile in the sheet, with his cap number by season when his team's
   // payroll lists him (data/payroll.json)

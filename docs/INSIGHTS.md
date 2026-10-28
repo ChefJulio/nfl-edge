@@ -5273,3 +5273,44 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   than across a coaching change (0.33, 76): a coach's habit. Rejected for clock management: timeouts left at the end
   of one-score losses (most ended on kneels nothing could stop) and letting the clock run on defense late with
   timeouts in hand (under one case per team-season, 2022-25).
+- **PRE-REGISTERED 2026-10-28 (owner: "among the players that are in the HOF, what are trends among them? ... can we
+  test that categorically? ... can we create a hall of fame calculator? what's the recipe as defined by history for
+  getting in?"): (DP) a Hall of Fame model.** Descriptive first (nflverse draft picks, Pro Football Reference's career
+  columns): of 8,032 players drafted 1980 on whose careers ended by 2020, 102 are in. By first-team All-Pros: 0 ->
+  0.1%, 1 -> 6%, 2 -> 25%, 3 -> 69%, 4 -> 89%, 5+ -> 93%; Pro Bowls 0-2 -> ~0%, 3-4 5%, 5-6 25%, 7-8 67%, 9+ 93%;
+  a typical inductee 3 AP1, 7 PB, 12 seasons as a starter, ~100 career AV; QBs get in on volume (median 1 AP1, 9 PB,
+  AV 145). Rows: drafted 1980 on, career over by 2015 (6+ ballots by the 2026 class); outcome PFR's hof flag (current
+  through the 2026 class). Undrafted inductees (Warner, Gates, Randle) are outside the data. Inputs: first-team
+  All-Pros, Pro Bowls, career AV (w_av), seasons started, games; major awards (MVP, OPOY, DPOY, Super Bowl MVP: ESPN's
+  award history, 1980 on, matched by name); Super Bowl titles (on a champion's season roster: nflverse rosters, 1980
+  on, matched to the draft rows by name and team); position group; and the position's main career stat as a
+  percentile among that group's players (QB pass yards, RB rush yards, WR / TE receiving yards, DL / LB sacks, DB
+  interceptions; OL / K / P none). Models: (A) first-team All-Pro count alone (logistic on its bins); (B) a ridge
+  logistic on everything above, the penalty chosen inside the folds. TEST: 5-fold cross-validation grouped by draft
+  class; mean log loss per player, out of fold; 95% bootstrap interval over players. GATE: B ships if its log loss is
+  lower than A's with the interval excluding 0; else the calculator is A's table. Reported either way: each input's
+  worth (B's out-of-fold log loss with that input group dropped, minus B's, with interval: "does a ring matter once
+  the All-Pros are known?"); calibration by decile; the recipe by position (what the median inductee had); and, held
+  out, players whose careers ended 2016-20 (most still on the ballot: their predictions next to the classes to come).
+  Ships as: a Hall of Fame chance on each player card's Honors sheet ("if his career ended today" for active players)
+  and a Hall of Fame watch list.
+- **RESULT {#hof-model} (DP) a Hall of Fame model: PASS, shipped.** tools/hof_eval.py, 7,011 careers over by 2015 (92
+  inductees), 5 folds by draft class. Log loss A (first-team All-Pro count) 0.0212, B (full) 0.0117, B - A -0.0095
+  [-0.0148, -0.0050]; AUC 0.952 vs 0.998. Calibration (B, out of fold): top 25 predicted 24.8 / actual 25; 26-50 23.6
+  / 24; 51-100 28.3 / 28; 101-300 13.1 / 14; the other 6,711 2.1 / 1. Each input's worth (dropped from B, log loss
+  up by): All-Pro +0.0027 [+0.0004, +0.0054], Pro Bowl +0.0024 [+0.0006, +0.0046], career (AV, starts, games) +0.0008
+  [+0.0001, +0.0015]; awards +0.0004 [-0.0000, +0.0009], rings +0.0003 [-0.0006, +0.0012], position and the career
+  stat percentile ~0. So the recipe is All-Pros and Pro Bowls, then a long career as a starter; MVP / Player of the
+  Year awards and rings add a little at the margin (positive in the fit: OPOY +0.81, SB MVP +0.85, rings +0.52, MVP
+  +0.20 per award) but nothing the selections don't mostly carry already. By position (inductees' median AP1 / PB /
+  starter seasons / AV): QB 2 / 9 / 16 / 142, OL 4 / 9 / 12 / 100, LB 5 / 8 / 12 / 117, DB 3 / 8 / 13 / 103, DL 3 / 7 /
+  12 / 100, WR 3 / 6 / 13 / 104, RB 2 / 6 / 10 / 107, TE 5 / 11 / 14 / 88. Inductees it missed (lowest out of fold):
+  Jimbo Covert (2 AP1, 2 PB, 57 AV), Steve McMichael, Isaac Bruce, Edgerrin James, Rickey Jackson, Andre Tippett; not
+  in, rated highest: Kevin Williams .92, Darren Woodson .90, Mike Alstott .83, Torry Holt .71, Steve Wisniewski .69.
+  Held out, careers over 2016-20 (1,021): 10 in so far, 19.6 predicted (most still on the ballot); its top 20 hold
+  all 10 (Brees, Peppers, Ware, Joe Thomas, Revis, Freeney, Kuechly, Fitzgerald, Andre Johnson, ...) and next Earl
+  Thomas .88, Shane Lechler .83 (specialists: one inductee in training, so a punter with 6 AP1 reads high), Jahri
+  Evans .80, Witten .79. Limits: drafted players only (Warner, Gates, Randle outside); on-field resume only (Antonio
+  Brown reads .96). Shipped: tools/hof_eval.py --export (CI step "Hall of Fame") -> data/hof_chance.json; the
+  Honors sheet's Hall of Fame chance and watch list. Awards and champion rosters through 2025 committed
+  (data/history/hof_inputs.json).
