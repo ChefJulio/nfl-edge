@@ -974,7 +974,18 @@ table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; tex
    so they read as tappable; two across on phones, four on wide screens. */
 .pc-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0 0 12px; }
 .pc-tiles .pc-pen { display: contents; }
-@media (min-width: 1100px) { .pc-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .pc-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  /* six tiles (with Honors and Draft & contract): two rows of three, not four and two */
+  .pc-tiles:has(> :nth-child(6):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* Honors (player card, owner 2026-10-27): summary chips on the tile and atop the sheet, a table of years below */
+.hn-face { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.hn-chip { display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: var(--fs-xs); font-weight: 700; line-height: 1.5;
+  background: rgba(255,255,255,.07); color: var(--text, #e8eaee); white-space: nowrap; }
+.hn-chip.hn-big { background: rgba(240,196,80,.16); color: #f2cf6b; }
+.hn-chip.hn-lead { background: rgba(109,158,255,.14); color: #9dbcff; }
+.hn-more { font-size: var(--fs-xs); color: var(--muted); align-self: center; }
+.hn-t td:last-child { line-height: 1.5; white-space: normal; overflow-wrap: anywhere; }
+.hn-t td:first-child { white-space: normal; }
 .pc-tap { position: relative; min-width: 0; padding: 10px 26px 10px 12px; border: 1px solid var(--line); border-radius: var(--r-md);
   background: color-mix(in srgb, var(--ink) 4%, var(--panel)); cursor: pointer; -webkit-tap-highlight-color: transparent;
   transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), transform var(--dur) var(--ease); }
