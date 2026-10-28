@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035463,K'Von Wallace,Baltimore Ravens,Active,2026-10-19T16:22Z,,,,,,,CB
 4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-10-18T15:33Z,,,,,,,OT
 4698244,Teddye Buchanan,Baltimore Ravens,Active,2026-10-16T20:28Z,,,,,,,LB
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-28T07:00Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-28T14:33Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4044133,Sam Franklin Jr.,Buffalo Bills,Active,2026-10-24T01:44Z,,,,,,"The NFL reduced Franklin's discipline from a one-game suspension to a fine of $14,926, Adam Schefter of ESPN reports.",S
 4568624,Dorian Williams,Buffalo Bills,Active,2026-10-22T01:58Z,,,,,,Williams logged five tackles (three solo) and one pass defensed for an interception in the Bills' 33-30 win over the Raiders on Sunday.,LB
 4832035,Davison Igbinosun,Buffalo Bills,Active,2026-10-22T01:37Z,,,,,,"Defensive coordinator Jim Leonhard praised Igbinosun's play earlier this week and plans to keep giving the rookie a good amount of playing time, Alec White of the Bills' official site reports. Said Leonard, ""I think what he's done the last couple weeks, he's definitely earned a high majority of the ",CB
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685720,Bryce Young,Carolina Panthers,Active,2026-10-26T00:07Z,,,,,,Young completed 14 of 27 passes for 163 yards with one touchdown and two interceptions and added one carry for nine yards in the Panthers' 43-13 loss to the Buccaneers on Sunday.,QB
 4241416,Chuba Hubbard,Carolina Panthers,Active,2026-10-25T22:41Z,,,,,,Hubbard rushed seven times for 33 yards and brought in four of five targets for 27 yards in the Panthers' 43-13 loss to the Buccaneers on Sunday.,RB
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-25T22:31Z,,,,,,McMillan secured four of six targets for 40 yards in the Panthers' 43-13 loss to the Buccaneers on Sunday.,WR
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-28T06:00Z,Undisclosed,,,2026-10-18,IR,ir,S
+4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-28T14:30Z,Undisclosed,Not Specified,Not Specified,2026-10-18,OUT,out,S
 4257364,Zavier Scott,Chicago Bears,Active,2026-10-27T23:08Z,,,,,,Chicago signed Scott from the practice squad to the active roster Tuesday.,RB
 4372576,Jack Sanborn,Chicago Bears,Questionable,2026-10-27T13:11Z,Concussion,Concussion,Not Specified,2026-11-02,QUESTIONABLE,questionable,LB
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-27T13:11Z,Toe,Sprain,Not Specified,2026-11-02,QUESTIONABLE,questionable,RB
@@ -224,6 +224,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4240608,James Houston,Dallas Cowboys,Active,2026-10-19T16:31Z,,,,,,,LB
 4595352,Alijah Clark,Dallas Cowboys,Active,2026-10-19T16:31Z,,,,,,,S
 4808759,Camden Brown,Dallas Cowboys,Active,2026-10-19T16:31Z,,,,,,,WR
+4372016,Jaylen Waddle,Denver Broncos,Questionable,2026-10-28T14:08Z,Chest,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Waddle aggravated a previous chest injury during last week's 30-16 win over the Cardinals, and his status for Sunday's game against the Chiefs will be determined based on how he fares in practice this week, Ian Rapoport of NFL Network reports.",WR
 4039059,Brandon Jones,Denver Broncos,Active,2026-10-28T00:45Z,,,,,,Jones recorded nine tackles (five solo) and a pass defensed during Sunday's 30-16 win at Arizona.,S
 2612151,Alex Singleton,Denver Broncos,Active,2026-10-28T00:40Z,,,,,,Singleton recorded 19 tackles (12 solo) including 1.0 sacks during Sunday's 30-16 win at Arizona.,LB
 4372012,Pat Surtain II,Denver Broncos,Questionable,2026-10-27T13:11Z,Ankle,Sprain,Not Specified,2026-11-01,QUESTIONABLE,questionable,CB
@@ -241,7 +242,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4568490,RJ Harvey,Denver Broncos,Active,2026-10-26T00:31Z,,,,,,Harvey rushed three times for six yards while catching both of his targets for 54 yards and a touchdown in Sunday's 30-16 win over the Cardinals.,RB
 4426338,Bo Nix,Denver Broncos,Active,2026-10-26T00:29Z,,,,,,Nix completed 15 of 29 passes for 222 yards and a touchdown while rushing seven times for 73 yards and a touchdown in Sunday's 30-16 win over the Cardinals.,QB
 2985659,Wil Lutz,Denver Broncos,Active,2026-10-26T00:05Z,,,,,,Lutz went 3-for-3 on field-goal tries and made all three of his PATs during Sunday's 30-16 win over Arizona.,PK
-4372016,Jaylen Waddle,Denver Broncos,Questionable,2026-10-25T23:46Z,Chest,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Waddle didn't return to Sunday's 30-16 win over the Cardinals due to a chest injury, Parker Gabriel of the Denver Post reports.",WR
 3915282,Zach Allen,Denver Broncos,Questionable,2026-10-25T23:45Z,Hamstring,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Allen suffered a hamstring injury in Sunday's 30-16 win over the Cardinals, Zac Stevens of TheDNVR.com reports.",DE
 4241820,Sam Ehlinger,Denver Broncos,Active,2026-10-25T18:57Z,,,,,,"Ehlinger (coach's decision) is inactive but will serve as the emergency third quarterback in Sunday's game against the Cardinals, Aric DiLalla of the Broncos' official site reports.",QB
 4362748,Tyler Badie,Denver Broncos,Injured Reserve,2026-10-24T23:25Z,Thumb,Fracture,Not Specified,2026-11-27,IR,"The Broncos placed Badie (thumb) on injured reserve Saturday, Aric DiLalla of the team's official site reports.",RB
@@ -624,7 +624,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4700136,Kiko Mauigoa,New York Jets,Injured Reserve,2026-10-24T19:22Z,Quadriceps,Not Specified,Not Specified,2026-11-22,IR,"The Jets placed Mauigoa (quadriceps) on injured reserve Saturday, Zack Rosenblatt of The Athletic reports.",LB
 4361767,Will McDonald IV,New York Jets,Active,2026-10-23T20:11Z,,,,,,,DE
 4570470,Nahshon Wright,New York Jets,Active,2026-10-19T17:12Z,,,,,,,CB
-4682618,Cooper DeJean,Philadelphia Eagles,Active,2026-10-28T01:25Z,,,,,,Dejean recorded seven tackles (three solo) during Monday's 38-21 loss versus the Cowboys.,CB
+4682618,Cooper DeJean,Philadelphia Eagles,Active,2026-10-28T01:25Z,,,,,,DeJean recorded seven tackles (three solo) during Monday's 38-21 loss versus the Cowboys.,CB
 3917657,Zack Baun,Philadelphia Eagles,Active,2026-10-28T01:21Z,,,,,,Baun recorded nine tackles (two solo) and a pass defensed during Monday's 38-21 loss versus the Cowboys.,LB
 4372414,Elijah Moore,Philadelphia Eagles,Active,2026-10-27T23:21Z,,,,,,Moore caught both of his targets for 16 yards during Monday's 38-21 loss to the Cowboys.,WR
 4431574,Eli Stowers,Philadelphia Eagles,Active,2026-10-27T23:12Z,,,,,,Stowers failed to haul in his lone target during Monday's 38-21 loss to Dallas.,TE
