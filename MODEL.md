@@ -126,12 +126,14 @@ Connect a Sleeper league (your username, then pick the league) or a public ESPN 
 ### Player card
 
 - **Header**: photo, number, position, team (tap for the team card), this week's game status (Inactive, Out, IR, Doubtful, Questionable, or Active for a questionable player who dressed), and age, height, weight and experience.
-- **Summary**, for any week (the week picker on the card): four tiles, each opening a sheet with the detail.
+- **Summary**, for any week (the week picker on the card): six tiles, each opening a sheet with the detail.
   - Projection (Points once his game has started): our projection and position rank; the sheet has his range, floor and ceiling, the expected stat line, his chance to play and why, and the matchup. Ruled out: 0.0. After the game: his points, his game grade and whether he finished inside his likely range.
   - Form: fantasy points per game this season and his last five games against our projections; the sheet has his season box, usage and weekly charts.
   - Health (this week): Healthy, his chance to play, or his status; the sheet has what he hurt and when, this week's practice days, his practice days and games lately (played, missed, active without a snap, hurt during a game), the injury timeline, news, his injury history and his durability (games missed injured per 1,000 snaps, ranked among players with 1,000+ snaps).
   - Grade: his Edge grade (50-99, how his fantasy output ranks at his position over three seasons, weighted to the latest); the sheet has every game's grade this season, the stats behind it and every season.
-  - Below: the game tile for that week, this season's games, news, his draft and contract, and his penalties.
+  - Honors: his biggest honors as chips; the sheet has every one with its seasons: Hall of Fame, Super Bowl titles (on the winner's game-day roster), MVP, Super Bowl MVP, Offensive / Defensive Player and Rookie of the Year, Comeback Player, Walter Payton Man of the Year, AP All-Pro (first and second team), Pro Bowl (every player named, replacements included), seasons leading the league (passing, rushing, receiving, sacks, interceptions), Players of the Month and Week (from about 2008), FedEx Air / Ground and Rookie of the Week (1999 on; ESPN, Wikipedia, nflverse).
+  - Contract (Draft for a player without a deal on file): his deal's yearly value and free-agency year; the sheet has his draft slot, college and contract, and his cap number in each season of the deal while his team's payroll lists him.
+  - Below: the game tile for that week, this season's games, news and his penalties. Retired players, linemen and specialists get Honors and Draft & contract above their career view.
 - **Game log**: every career game with fantasy points, our projection, his position finish, game grade, snaps and stats; playoffs apart; missed games say why (inactive, IR, bye); a season view with career totals.
 - **Throws** (quarterbacks): every pass on a field by depth and side, for one game or a season, with completion, depth and direction splits.
 - **News**: ESPN fantasy news from the last 60 days.
