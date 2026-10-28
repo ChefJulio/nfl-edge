@@ -5352,3 +5352,36 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   learn from); the card says so. Shipped: export fits B (with All-Decade and rank) for drafted players and C for
   everyone else; inputs committed (data/history/hof_inputs.json: awards, champion rosters, All-Decade, 1980-98
   selections).
+- **SHIPPED 2026-10-28 (owner: "add the threshold summary"): the wait by chance band** on the Honors sheet (inductees
+  whose careers ended by 2015, out-of-fold chance, years past first eligibility: 95%+ 69% first ballot, median 0;
+  80-95% median 4 (1-6); 60-80% 2.5 (1-7); 40-60% 8 (6-13); 20-40% 8 (3-9); 5-20% 9 (6-14); wait ~ 13.5 - 11.9 x
+  chance), with the year on the ballot for eligible players and "waiting longer than most" past the band's range.
+  High-chance inductees who waited 4+ years: Terrell Davis .98 (10 years: four great seasons), Russ Grimm .86 (13),
+  Zach Thomas .93 (9), Doleman, Dawson, Kennedy, Faneca, Tim Brown, Barber; linemen, front seven, position logjams,
+  short careers. Also (owner): an asterisk and "on the field only; off-field matters can weigh on the vote" for a
+  short hand-kept list (Sharper, Antonio Brown), no specifics.
+- **PRE-REGISTERED 2026-10-28 (owner: "you can test backlogs too can't you? ... i hypothesize the backlog matters less
+  when our model gives a certain percentage"): (DP3) what sets the wait.** Rows: every eligible ballot year of every
+  drafted player (careers over by 2015) with a DP2 out-of-fold chance of 2%+, from his first class (last season + 6)
+  until he is inducted or through 2026; outcome: inducted that year. A discrete-time hazard (logistic per ballot
+  year). Base: logit(chance) and log(1 + years already waited). Candidates: (1) backlog: the sum of the chances of
+  the other players at his position group still waiting that year (eligible, not in), standardized; (2) the owner's
+  hypothesis: backlog x logit(chance), backlog mattering less the higher the chance; (3) career length: log of his
+  seasons in the league. TEST: 5 folds grouped by player, out-of-fold log loss over ballot rows, 95% bootstrap over
+  players. GATES: (1) base + backlog beats base (interval below 0) and its coefficient is negative (a crowd slows
+  him); (2) adding the interaction beats base + backlog, and the fitted interaction is positive (bootstrap interval
+  above 0: at high chance the backlog's drag shrinks); (3) base + career length beats base. Reported: the backlog's
+  effect at chance 50% / 80% / 95% (the wait it adds); limits: inductees and candidates from before 1980 crowd ballots
+  too and aren't in the data. If any pass, the Honors sheet's wait line uses the fitted hazard (expected wait given
+  his chance and today's backlog at his position) instead of the band table.
+- **RESULT {#hof-wait} (DP3) what sets the wait: backlog FAIL, backlog x chance FAIL, career length FAIL; the band
+  table stays.** tools/hof_wait_eval.py: 199 players, 2,326 ballot years, 91 inductions. New - old, out-of-fold log
+  loss per ballot year: + backlog +0.00115 [+0.00038, +0.00203] (worse); + backlog x chance +0.00079 [-0.00054,
+  +0.00243]; + career length -0.00022 [-0.00183, +0.00132]. The fitted directions are the expected ones but small:
+  backlog -0.11 per SD (a crowd slows him), interaction +0.05 [-0.05, +0.14] (the owner's hypothesis: less drag at
+  high chance), career length +0.98 per log-season (longer careers in sooner). In years: at a 50% chance a light vs
+  heavy backlog (-1 / +1 SD) waits 8.3 vs 8.5 years, at 80% 6.6 vs 6.7, at 95% 3.6 vs 3.2. So the backlog as we can
+  measure it doesn't move the wait: position groups are coarse (LB and DL apart, but every OL together), and the
+  ballot's other crowd (seniors, pre-1980 careers, undrafted players) is outside the data. Long waits stay mostly
+  unexplained beyond the chance itself (Davis, Grimm, Z. Thomas): voters' case-by-case judgment. Also shipped (owner):
+  the off-field asterisk.
