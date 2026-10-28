@@ -1812,6 +1812,10 @@
     [0.8, 'Likely in, usually after a wait of 1-6 years', 6], [0.6, 'Better than even; those who made it waited 1-7 years', 7],
     [0.4, 'A toss-up; those who made it waited 6-13 years', 13], [0.2, 'A long shot; those who made it waited 3-9 years', 9],
     [0.05, 'A long shot; those who made it waited 6-14 years, often as seniors', 14]];
+  // (owner 2026-10-28: "for players we confidently suspect would be affected by the concept of legal trouble we can put
+  // an asterisk and the little disclaimer note by the percentage", no specifics) a short, deliberately kept list: a
+  // documented legal record serious enough that voters have historically held it against a player
+  const HOF_OFFFIELD = new Set(['00-0014724', '00-0027793']);  // Darren Sharper, Antonio Brown
   const hofWait = (v, waited = 0) => { const b = HOF_WAIT.find(([lo]) => v >= lo);
     return !b ? '' : waited > b[2] ? 'Waiting longer than most at this level: cases like this are often settled late, some by the seniors committee' : b[1]; };
   const hofBox = (pid, L) => {
@@ -1820,15 +1824,17 @@
     const H = HF.d, c = H && H.c && H.c[pid];
     const watch = H && H.c ? (() => {
       const rows = Object.entries(H.c), top = el => rows.filter(([, v]) => v[1] === el).sort((a, b) => b[1][0] - a[1][0]).slice(0, 20);
-      const li = ([g, v]) => `<tr data-open-pid="${esc(g)}" class="py-tap"><td>${esc(v[2])} <span class="muted">${esc(v[3])}</span></td><td class="num">${hofPct(v[0])}</td></tr>`;
+      const li = ([g, v]) => `<tr data-open-pid="${esc(g)}" class="py-tap"><td>${esc(v[2])} <span class="muted">${esc(v[3])}</span></td><td class="num">${hofPct(v[0])}${HOF_OFFFIELD.has(g) ? '*' : ''}</td></tr>`;
       return `<details class="py-more"><summary>Hall of Fame watch list</summary>
         <div class="pc-k co-sub">Eligible, not in yet</div><table class="bx"><tbody>${top(1).map(li).join('')}</tbody></table>
-        <div class="pc-k co-sub">Active or retired under 5 years (if their careers ended today)</div><table class="bx"><tbody>${top(0).map(li).join('')}</tbody></table></details>`; })() : '';
+        <div class="pc-k co-sub">Active or retired under 5 years (if their careers ended today)</div><table class="bx"><tbody>${top(0).map(li).join('')}</tbody></table>
+        <p class="pc-sub muted">* On the field only. Off-field matters can weigh on the vote, and likely will for these players.</p></details>`; })() : '';
     // kickers and punters: a handful ever inducted, so the model has little to go on and reads them high
     const st = c && c[3] === 'ST' ? ' <span class="muted">(kickers and punters: only a few ever inducted, so read this one loosely)</span>' : '';
     // an eligible player: which ballot this is (his first class: the sixth after his last season)
     const nth = c && c[1] && H.eligible_through ? H.eligible_through + 6 - (c[4] + 6) + 1 : null;
-    const line = !H ? '' : c ? `<div class="pc-big">${hofPct(c[0])}</div><div class="pc-sub">${c[1] ? `Eligible, not in yet${nth > 0 ? ` &middot; ${ord(nth)} year on the ballot` : ''}` : 'If his career ended today'}${st}</div>${hofWait(c[0], nth ? nth - 1 : 0) ? `<div class="pc-sub"><b>${esc(hofWait(c[0], nth ? nth - 1 : 0))}</b></div>` : ''}`
+    const off = HOF_OFFFIELD.has(pid);
+    const line = !H ? '' : c ? `<div class="pc-big">${hofPct(c[0])}${off ? '<small>*</small>' : ''}</div>${off ? '<div class="pc-sub muted">* On the field only. Off-field matters can weigh on the vote, and likely will here.</div>' : ''}<div class="pc-sub">${c[1] ? `Eligible, not in yet${nth > 0 ? ` &middot; ${ord(nth)} year on the ballot` : ''}` : 'If his career ended today'}${st}</div>${hofWait(c[0], nth ? nth - 1 : 0) ? `<div class="pc-sub"><b>${esc(hofWait(c[0], nth ? nth - 1 : 0))}</b></div>` : ''}`
       : '<div class="pc-big muted">&lt;1%</div><div class="pc-sub">Nowhere near the line so far</div>';
     return `<div class="pc-box"><div class="pc-k">Hall of Fame chance</div>${line}
       <p class="pc-sub muted">Learned from every player since 1980 whose career ended by 2015: first-team All-Pros and Pro Bowls carry it, then All-Decade teams, an all-time top-25 rank at the position and a long career as a starter, then MVP / Player of the Year awards and Super Bowl titles. Undrafted players are scored without career value. On the field only: voters weigh more. Tested on held-out draft classes.</p>${watch}</div>`;
