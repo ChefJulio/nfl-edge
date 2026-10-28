@@ -439,6 +439,8 @@ jobs:
         run: python tools/coaches_build.py --site=site || echo "[coaches] skipped"
       - name: Payroll  # the team card's Payroll tile (OverTheCap, once a day per team)
         run: python tools/payroll_build.py --site=site || echo "[payroll] skipped"
+      - name: Honors  # the player card's Honors tile (finished seasons from data/history/honors.json; this one fetched)
+        run: python tools/honors_build.py --site=site || echo "[honors] skipped"
       - name: Stamp the deploy  # the plan reads both (lanes by what the live site was built from)
         run: |
           echo "{\"sha\":\"${{ github.sha }}\",\"lane\":\"full\"}" > site/data/deployed.json

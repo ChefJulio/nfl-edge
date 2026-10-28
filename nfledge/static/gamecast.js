@@ -1704,7 +1704,7 @@
           // a later week this season (owner 2026-10-22: "how come health tile disappears in future weeks?"): that week's own
           // chance to play (as its projection tile), his injury as of now and the expected return; past weeks: the game log
           : DATA && +d.season === +DATA.season && +d.week > +DATA.week ? healthTile(pid, p, L, p.espn, ` · wk ${d.week}`) : ''}
-        ${GRADED[p.pos] ? gradeTile(pid, L) : ''}
+        ${GRADED[p.pos] ? gradeTile(pid, L) : ''}${CARD_X}
       </div>
       ${g ? `<div class="pc-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>` : ''}`;
     return html;
@@ -1728,7 +1728,7 @@
       : `<div class="pc-big">–</div><div class="pc-tapsub">${h && h.inj ? 'out this week' : 'not projected this week'}</div>`;
     const projTile = goTile('Projection', projBody, 'log', 'g');
     const cur = S ? S.g : [], fpg = cur.length ? cur.reduce((t, x) => t + pts(x.c, weights(), pos), 0) / cur.length : null;
-    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '')}${h ? healthTile(L.pid, null, L, L.espn, fut ? ` · wk ${wk}` : '', fut ? wk : null, bye) : ''}${GRADED[pos] ? gradeTile(L.pid, L) : ''}</div>` : '';
+    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '')}${h ? healthTile(L.pid, null, L, L.espn, fut ? ` · wk ${wk}` : '', fut ? wk : null, bye) : ''}${GRADED[pos] ? gradeTile(L.pid, L) : ''}${CARD_X}</div>` : '';
     return `${played}${tiles}${bye ? '' : `<div class="pc-box"><p class="pc-sub">Not on our ${esc(wkLabel(d).toLowerCase())} board: ruled out, not on a roster yet, or projected too low to list.</p></div>`}`;
   };
   // Header extras from the career log doc (tools/player_logs.py): photo, jersey number, bio, recent snap share and,
@@ -1769,6 +1769,68 @@
     if (b.exp != null) it.push(b.exp === 0 && b.exp_s === L.cur ? item('Rookie', 'Exp') : item(esc(b.exp), 'Exp', b.exp_s === L.cur ? 'NFL seasons' : `NFL seasons, as of ${b.exp_s}`));
     return it.length ? `<div class="pc-bio${cls}">${it.join('')}</div>` : '';
   };
+  // ---- Honors and Draft & contract tiles (owner 2026-10-27: "a tile instead, with summaries (3x all pro) in chips at
+  // the top and details including year rewarded for each separate award in a table below" ... "move contracts to its
+  // own tile to keep the number of tiles on a player card even"). data/honors.json (tools/honors_build.py, 1999 on)
+  const HN = { d: undefined };
+  const loadHonors = () => { if (HN.d !== undefined) return; HN.d = null;
+    NFLE.load('data/honors.json').then(j => { HN.d = j; rerenderCard(); }).catch(() => { HN.d = false; }); };
+  // most prestigious first: [code, chip (plural-aware), full name]
+  const HONOR = [['SB', 'Super Bowl champ', 'Super Bowl champion'], ['MVP', 'MVP', 'MVP'], ['SBMVP', 'Super Bowl MVP', 'Super Bowl MVP'],
+    ['OPOY', 'Off. Player of the Year', 'Offensive Player of the Year'], ['DPOY', 'Def. Player of the Year', 'Defensive Player of the Year'],
+    ['OROY', 'Off. Rookie of the Year', 'Offensive Rookie of the Year'], ['DROY', 'Def. Rookie of the Year', 'Defensive Rookie of the Year'],
+    ['CPOY', 'Comeback Player', 'Comeback Player of the Year'], ['WPMOY', 'Man of the Year', 'Walter Payton Man of the Year'],
+    ['AP1', 'All-Pro', 'First-team All-Pro (AP)'], ['AP2', '2nd-team All-Pro', 'Second-team All-Pro (AP)'], ['PB', 'Pro Bowl', 'Pro Bowl'],
+    ['L_pass_yds', 'passing yards leader', 'Led the league in passing yards'], ['L_pass_td', 'passing TD leader', 'Led the league in passing TDs'],
+    ['L_rush_yds', 'rushing leader', 'Led the league in rushing yards'], ['L_rush_td', 'rushing TD leader', 'Led the league in rushing TDs'],
+    ['L_rec', 'receptions leader', 'Led the league in receptions'], ['L_rec_yds', 'receiving leader', 'Led the league in receiving yards'],
+    ['L_rec_td', 'receiving TD leader', 'Led the league in receiving TDs'], ['L_sacks', 'sacks leader', 'Led the league in sacks'],
+    ['L_int', 'interceptions leader', 'Led the league in interceptions'],
+    ['POM_O', 'Off. Player of the Month', 'Offensive Player of the Month'], ['POM_D', 'Def. Player of the Month', 'Defensive Player of the Month'],
+    ['POM_S', 'ST Player of the Month', 'Special Teams Player of the Month'],
+    ['POW_O', 'Off. Player of the Week', 'Offensive Player of the Week'], ['POW_D', 'Def. Player of the Week', 'Defensive Player of the Week'],
+    ['POW_S', 'ST Player of the Week', 'Special Teams Player of the Week'], ['AIR', 'FedEx Air', 'FedEx Air Player of the Week'],
+    ['GROUND', 'FedEx Ground', 'FedEx Ground Player of the Week'], ['ROTW', 'Rookie of the Week', 'Rookie of the Week']];
+  const honorsOf = (pid, L) => {
+    const rows = (HN.d && HN.d.p && HN.d.p[pid]) || [], by = {};
+    rows.forEach(([c, s, w]) => { (by[c] = by[c] || []).push(w != null ? [s, w] : [s]); });
+    const out = HONOR.filter(([c]) => by[c]).map(([c, chip, name]) => ({ c, chip, name, n: by[c].length, when: by[c] }));
+    if (L && L.bio && L.bio.hof) out.unshift({ c: 'HOF', chip: 'Hall of Fame', name: 'Pro Football Hall of Fame', n: 1, when: [[+L.bio.hof]] });
+    return out;
+  };
+  const hChip = h => `<span class="hn-chip hn-${h.c.startsWith('L_') ? 'lead' : h.c.startsWith('PO') || ['AIR', 'GROUND', 'ROTW'].includes(h.c) ? 'wk' : 'big'}">${h.n > 1 ? `${h.n}&times; ` : ''}${esc(h.chip)}</span>`;
+  const honorsTile = (pid, L) => {
+    loadHonors();
+    if (!HN.d) return tapTile('Honors', `<div class="pc-tapsub">${HN.d === false ? 'Not available' : 'Loading&hellip;'}</div>`, 'Honors', '<p class="pc-sub">Loading&hellip;</p>');
+    const H = honorsOf(pid, L);
+    if (!H.length) return tapTile('Honors', '<div class="pc-big muted">&ndash;</div><div class="pc-tapsub">None yet</div>', 'Honors',
+      `<p class="pc-sub">No awards, All-Pro or Pro Bowl selections, league-leading seasons or Super Bowl titles on record (${HN.d.from} on).</p>`);
+    const face = `<div class="hn-face">${H.slice(0, 3).map(hChip).join('')}${H.length > 3 ? `<span class="hn-more">+${H.length - 3} more</span>` : ''}</div>`;
+    // the years: '18 '19; weekly honors as week numbers within the season, months by name
+    const yrs = w => { const g = {}; w.forEach(([s, x]) => { (g[s] = g[s] || []).push(x); });
+      return Object.keys(g).sort().map(s => g[s][0] == null ? `&rsquo;${String(s).slice(-2)}` : `&rsquo;${String(s).slice(-2)} <span class="muted">${g[s].map(x => (typeof x === 'number' ? `wk ${x}` : esc(x))).join(', ')}</span>`).join(' &middot; '); };
+    const table = `<table class="bx hn-t"><thead><tr><th>Honor</th><th class="num">#</th><th>Seasons</th></tr></thead><tbody>${H.map(h => `<tr><td>${esc(h.name)}</td><td class="num">${h.n}</td><td>${yrs(h.when)}</td></tr>`).join('')}</tbody></table>`;
+    const src = `<p class="pc-sub muted">${HN.d.from} on. Awards from ESPN; All-Pro (AP), Pro Bowl (every player named, replacements included) and Players of the Week / Month from Wikipedia (weekly honors from about 2008); league leaders and Super Bowl rosters from nflverse.</p>`;
+    return tapTile('Honors', face, 'Honors', `<div class="pc-box"><div class="hn-face">${H.map(hChip).join('')}</div></div><div class="pc-box">${table}</div>${src}`);
+  };
+  // Draft & contract: the deal on the tile, the whole profile in the sheet, with his cap number by season when his team's
+  // payroll lists him (data/payroll.json)
+  const contractTile = (pid, L) => {
+    const box = profileBox(L), k = L && L.bio && L.bio.deal, dr = L && L.bio && L.bio.draft;
+    loadPayroll();
+    const P = PY.d, row = P && P.teams && Object.values(P.teams).reduce((f, t) => f || (t.roster || []).find(r => r[1] === pid), null);
+    const caps = row ? [[P.season, row[3]], ...(row[5] || []).map((v, i) => [P.season + 1 + i, v])] : [];
+    const capBox = caps.length ? `<div class="pc-box"><div class="pc-k">Cap number by season</div><table class="bx"><tbody>${caps.map(([s, v]) => `<tr><td>${s}</td><td class="num">${v ? usd(v) : '&ndash;'}</td></tr>`).join('')}</tbody></table>
+      <p class="pc-sub muted">What his deal counts against the salary cap each season (OverTheCap). Signing bonuses are spread over the deal, so early seasons often sit under the yearly average.</p></div>` : '';
+    const face = k ? `<div class="pc-big">${money(k.apy)} <small>/ yr</small></div><div class="pc-tapsub">${k.fa ? `free agent ${esc(k.fa)}` : k.yrs ? `${esc(k.yrs)}-year deal` : `signed ${esc(k.from)}`}</div>`
+      : dr ? `<div class="pc-big">${dr.u ? 'UDFA' : `R${dr.r}:${dr.p}`}</div><div class="pc-tapsub">${dr.u ? 'undrafted' : `${dr.y} draft`}</div>`
+      : '<div class="pc-big muted">&ndash;</div><div class="pc-tapsub">No deal on file</div>';
+    return tapTile(k ? 'Contract' : 'Draft', face, 'Draft & contract', (box || '<p class="pc-sub">No draft or contract on file.</p>') + capBox);
+  };
+  // the two join the card's summary grid (CARD_X, set per render: every week layout's grid ends with it); the career
+  // overviews (retired, linemen and specialists) get them as their own row
+  let CARD_X = '';
+  const moreTiles = (pid, L) => L ? `<div class="pc-tiles">${honorsTile(pid, L)}${contractTile(pid, L)}</div>` : '';
   const profileBox = L => {
     if (!L || !L.bio) return '';
     const b = L.bio, bio = [];
@@ -1860,7 +1922,7 @@
         : a.n && a.tgt
           ? tapTile('Coverage', `<div class="pc-big">${f1(ratingAllowed(a.cmp, a.tgt, a.yda, a.tda, t.int))} <small>rating allowed</small></div><div class="pc-tapsub">${f0(a.tgt)} targets · ${f1(a.yda / a.tgt)} yds/tgt</div>`, 'Coverage', `<div class="pc-box">${advGrid(L, S.g)}</div>`)
           : tapTile('Ball skills', `<div class="pc-big">${f0((t.int || 0) + (t.pd || 0))} <small>INT + PD</small></div><div class="pc-tapsub">${f0(t.int || 0)} interceptions</div>`, 'Ball skills', `<div class="pc-box">${kindGrid(L, t)}</div>`);
-    return `<div class="pc-tiles">${form}${role}${L.team ? healthTile(L.pid, null, L, espn) : ''}${gradeTile(L.pid, L)}</div>`;
+    return `<div class="pc-tiles">${form}${role}${L.team ? healthTile(L.pid, null, L, espn) : ''}${gradeTile(L.pid, L)}${CARD_X}</div>`;
   };
   // A roster defender's week (owner 2026-10-18: "give them the same tiles ... offensive players have"): the offense
   // card's layout and tiles. Points = that week's IDP points with its game grade (or why there's no game: bye, out,
@@ -1905,7 +1967,7 @@
     const bars = slots.length ? `<div class="pc-tapbars">${miniBars(slots, { slotW: 22, H: 40, cls: 'mb-pts mb-sm' })}</div>` : '';
     const formSheet = sofar.length ? `<div class="pc-box"><div class="pc-k">${esc(d.season)} through week ${wk}</div>${kindGrid(L, kindTotals(L, sofar))}${advGrid(L, sofar)}</div>` : '';
     const form = formSheet ? tapTile('Form', formBody + bars, `${d.season} season`, formSheet) : goTile('Form', formBody + bars, 'log', 'g');
-    return `<div class="pc-tiles">${ptsTile}${form}${h ? healthTile(L.pid, null, L, L.espn, fut ? ` · wk ${wk}` : '', fut ? wk : null, !!(m && m.bye)) : ''}${gradeTile(L.pid, L)}</div>
+    return `<div class="pc-tiles">${ptsTile}${form}${h ? healthTile(L.pid, null, L, L.espn, fut ? ` · wk ${wk}` : '', fut ? wk : null, !!(m && m.bye)) : ''}${gradeTile(L.pid, L)}${CARD_X}</div>
       ${game ? `<div class="pc-mt">${NFLE.ui.matchTile(game, gameHref(game, d))}</div>` : ''}`;
   };
   // this season's games under the tiles (as the offense card's), Show more = the full log
@@ -2285,14 +2347,17 @@
     // keep the career overview
     const defCard = !!(L && L.kind === 'def' && L.team);
     const overview = (isKind && !defCard) || retired;
+    // Honors and Draft & contract (owner 2026-10-27): in the week layouts' summary grid (CARD_X), a row of their own on
+    // the career overviews
+    CARD_X = overview ? '' : `${honorsTile(pid, L)}${contractTile(pid, L)}`;
     const week = defCard ? `<div class="pc-cols"><div class="pc-col">${d === undefined || d === null ? wkWait(d) : defWeek(L, d)}${defMini(L)}</div>
-         <div class="pc-col">${newsMini(espn)}${profileBox(L)}<div class="pc-pen"></div></div></div>`
-      : isKind ? kindOverview(L, espn) + profileBox(L)
-      : retired ? weekExtras(pid, L, row, espn) + (offCareer(L) ? `<div class="pc-box"><div class="pc-k">By season (regular season)</div>${offCareer(L)}</div>` : '') + profileBox(L)
+         <div class="pc-col">${newsMini(espn)}<div class="pc-pen"></div></div></div>`
+      : isKind ? moreTiles(pid, L) + kindOverview(L, espn)
+      : retired ? moreTiles(pid, L) + weekExtras(pid, L, row, espn) + (offCareer(L) ? `<div class="pc-box"><div class="pc-k">By season (regular season)</div>${offCareer(L)}</div>` : '')
       // two columns on wide screens (owner 2026-10-16): the summary tiles, game and this season's games on the left;
-      // news and draft & contract on the right. Fixed sides (owner).
+      // news on the right. Fixed sides (owner).
       : `<div class="pc-cols"><div class="pc-col">${d === undefined || d === null ? wkWait(d) : p ? playerWeek(pid, p, d, L) : playerOff(L, d)}${logMini(pid, L, p || row)}</div>
-         <div class="pc-col">${newsMini(espn)}${profileBox(L)}<div class="pc-pen"></div></div></div>`;
+         <div class="pc-col">${newsMini(espn)}<div class="pc-pen"></div></div></div>`;
     body.innerHTML = `
       <div class="pc-head pc-head-hero" style="--tc:${esc(info.color || '#666')};--tc2:${esc(info.color2 || info.color || '#999')}${info.logo ? `;--tlogo:url('${esc(logoSrc(info.logo, 300))}')` : ''}">
         ${photo ? `<div class="pc-pic" data-zoom="${esc(uncrop(photoBig(L, espn) || photo))}" role="button" tabindex="0" aria-label="Show a bigger photo"><img src="${esc(photo)}"${photoAlt(L, espn) ? ` data-alt="${esc(photoAlt(L, espn))}"` : ''} alt="" width="72" height="72" loading="lazy" onerror="if(this.dataset.alt){this.src=this.dataset.alt;this.dataset.alt=''}else this.parentNode.classList.add('nopic')">${team ? `<span class="pc-pic-tm">${tLogo(team, 16)}</span>` : ''}</div>`

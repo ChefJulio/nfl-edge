@@ -333,10 +333,11 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
     ah = [cache.get("availhist", s, lambda: availability_history(nfl, s), stale=undated("availhist", s)) for s in range(first, current)]
     ah = [a for a in ah if a is not None and len(a)]
     avail_hist = pd.concat(ah, ignore_index=True) if ah else None
-  ecr_path = cache.path("ecr", "all")
+  # "live": the frame with this week's live scrape (2026-10-27); a new name so a copy cached before it isn't reused
+  ecr_path = cache.path("ecr", "live")
   ecr_old = ecr_path.exists() and "ecr_flex" not in pq.read_schema(ecr_path).names  # cached before ecr_flex existed
-  ecr = cache.get("ecr", "all", lambda: load_ecr(nfl, sched),
-                  stale=ecr_old or cache.age_hours("ecr", "all") > LIVE_TTL_HOURS)
+  ecr = cache.get("ecr", "live", lambda: load_ecr(nfl, sched),
+                  stale=ecr_old or cache.age_hours("ecr", "live") > LIVE_TTL_HOURS)
   teams = cache.get("teams", "all", lambda: nfl.load_teams(), stale=cache.age_hours("teams", "all") > 24 * 90)
   first = seasons[0]
   qbc = cache.get("qbcareer", first, lambda: qb_career_before(nfl, first), stale=False)
