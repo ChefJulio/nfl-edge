@@ -262,6 +262,7 @@
   // text and a score without the try; the try follows it (id "<id>-try", the same clock, the score after it, the same
   // win-probability entry). Already-separate tries and TOUCHDOWN NULLIFIED plays are left alone.
   const TRY_RX = /(?:^|\.\s+)((?:[A-Z][a-z]?\.[A-Za-z'\-]+(?:\s(?:Jr\.|Sr\.|II|III|IV))?\s+extra point|TWO-POINT CONVERSION ATTEMPT)[\s\S]*)$/;
+  const TRY_RX_SUM = /\s((?:[A-Z][a-z]?\.[A-Za-z'\-]+(?:\s(?:Jr\.|Sr\.|II|III|IV))?\s+extra point|TWO-POINT CONVERSION ATTEMPT)[\s\S]*)$/;  // "... for 70 Yds B.Narveson extra point"
   const splitTries = sum => {
     if (!sum || !sum.drives || sum._split) return sum;
     sum._split = true;
@@ -273,7 +274,10 @@
       if (seen.has(d)) return; seen.add(d);
       const out = [];
       (d.plays || []).forEach(p => {
-        const txt = String(p.text || ''), m = /TOUCHDOWN(?! NULLIFIED)/.test(txt) && p.scoringPlay ? txt.match(TRY_RX) : null;
+        // ESPN's older summary text carries the try too, with no "TOUCHDOWN" ("Jayden Reed Pass From Jordan Love for 70
+        // Yds B.Narveson extra point is GOOD"; 2024): split those as well
+        const txt = String(p.text || ''), sumTd = p.scoringPlay && / \d+ Yds?\b/.test(txt) && !/field goal/i.test(txt.split(/extra point|TWO-POINT/)[0]);
+        const m = (/TOUCHDOWN(?! NULLIFIED)/.test(txt) || sumTd) && p.scoringPlay ? (txt.match(TRY_RX) || (sumTd ? txt.match(TRY_RX_SUM) : null)) : null;
         if (!m || /extra point|two-point/i.test(String((p.type || {}).text || ''))) { out.push(p); prev = p; return; }
         const tryText = m[1].trim(), tdText = txt.slice(0, txt.length - m[0].length).trim().replace(/[^.]$/, c => `${c}.`);
         const two = /TWO-POINT CONVERSION ATTEMPT/.test(tryText);  // not a blocked kick's "DEFENSIVE TWO-POINT ATTEMPT" (2026-10-28 audit)
@@ -333,9 +337,11 @@
     // SF week 6: every SF snap from its own half read "30 yards to go" at SF 30, so a punt from SF 30 was drawn and
     // graded as one from WAS 30); the number only when there are no words
     let x = null;
+    // (2024 audit) CLE @ LV's feed mislabels sides in both the words and the number, the official text alone right;
+    // no rule over the two fixes it without breaking good games (a "trust the number" rule flipped KC's punt from LAC 48)
     const m = String(s.possessionText || s.downDistanceText || '').match(/([A-Z]{2,3})?\s*(\d{1,2})\s*$/);
     if (m && (m[1] || +m[2] === 50)) {
-      const n = +m[2], side = m[1] ? ourCode(m[1]) : null;
+      const n = +m[2], side = m[1] ? txtCode(m[1]) : null;  // the official text's codes too ("CLV 36": 2024 CLE @ LV, every chip off)
       x = n === 50 || !side ? 50 : (side === info.home.team ? 100 - n : n);
     } else if (s.yardsToEndzone != null) x = offAway ? 100 - s.yardsToEndzone : s.yardsToEndzone;
     if (x == null) return null;
@@ -498,7 +504,8 @@
   const playHead = (pl, names, ctx = {}) => {
     // the official text leads with formation and eligibility notes: "(Shotgun) C.Lomu reported in as eligible. D.Maye ..."
     // also "Direct snap to C.Heyward." (a wildcat snap note) and ESPN's stray leading space (" R.Stevenson up the middle")
-    const lead_ = new RegExp(`^(?:(?:\\([^)]*\\)|${NM} reported in as eligible\\.|Direct snap to ${NM}\\.)\\s*)+`);
+    // and a quarterback change ("19-S.Thompson in at QB."; 2024 audit)
+    const lead_ = new RegExp(`^(?:(?:\\([^)]*\\)|${NM} reported in as eligible\\.|Direct snap to ${NM}\\.|(?:[A-Z]{2,3} )?#?\\d+-\\S+ in at QB\\.)\\s*)+`);  // "ARZ #15-Tune in at QB." too
     const full = String(pl.text || '').trim().replace(lead_, '');  // shown under the card
     // what's parsed: after a replay reversal only the ruling that stands ("...the play was REVERSED.D.Maye pass
     // incomplete..."), and without the 2-point try that follows a touchdown
@@ -511,7 +518,10 @@
     // rest ("M.Brown" -> "M. Brown"; 2026-10-28 audit)
     const nm = x => x ? shortName(names[x.replace(/\s+/g, '')] || x.replace(/^([A-Z][a-z]?)\.(?=[A-Z])/, '$1. ')) : '';
     const g = (k, i = 1) => { const m = raw.match(RX[k]); return m ? m[i] : null; };
-    const t = (pl.type && pl.type.text) || '';
+    // a kick ESPN types by what followed it ("Fumble Recovery (Opponent)" for a muffed kickoff; 2024 audit): the text names it
+    const t0 = (pl.type && pl.type.text) || '';
+    const t = /kickoff|punt|field goal|extra point|two-point/i.test(t0) ? t0 : / kicks (?:onside )?\d+ yards? from /.test(` ${raw}`) ? 'Kickoff'
+      : new RegExp(`^${NM} punts \\d+ yards`).test(raw) ? 'Punt' : t0;
     // ESPN sometimes swaps a play's text for its scoring summary ("Darren Waller 50 Yd pass from Bryce Young (Ryan
     // Fitzgerald PAT blocked)", "Zyon McCollum Defensive PAT Conversion") or, after a reversal, plain words ("Goff
     // Incomplete Pass, Intended For Sam LaPorta"): full names there (2026-10-28 audit)
@@ -519,8 +529,13 @@
       const sn = n => shortName(n.trim()), out = (h0, c0) => ({ h: h0, cls: c0, raw: full, eff: raw });
       let m = raw.match(/^([A-Z][\w.'-]+(?: [\w.'-]+)+) (\d+) Yd pass from ([A-Z][\w.'-]+(?: [\w.'-]+)+?)(?: \(.*\))?$/);
       if (m) return out(`${sn(m[3])} to ${sn(m[1])}, ${penYds(m[2])} · Touchdown`, 'td');
-      m = raw.match(/^([A-Z][\w.'-]+(?: [\w.'-]+)+?) (\d+) Yd (Run|Interception Return|Fumble Return|Punt Return|Kickoff Return)(?: \(.*\))?$/i);
-      if (m) return out(`${sn(m[1])} ${m[2]}-yard ${m[3].toLowerCase()} · Touchdown`, 'td');
+      // the older form ("Jayden Reed Pass From Jordan Love for 70 Yds"; 2024), and any "N Yd <kind>" score
+      m = raw.match(/^([A-Z][\w.'-]+(?: [\w.'-]+)+?) Pass From ([A-Z][\w.'-]+(?: [\w.'-]+)+?) for (\d+) Yds?\.?$/i);
+      if (m) return out(`${sn(m[2])} to ${sn(m[1])}, ${penYds(m[3])} · Touchdown`, 'td');
+      m = raw.match(/^([A-Z][\w.'-]+(?: [\w.'-]+)+?) (\d+) Yds? ([A-Za-z ]+?)(?: \(.*\))?\.?$/);
+      if (m) return out(`${sn(m[1])} ${m[2]}-yard ${m[3].toLowerCase().replace(/^rush$/, 'run')} · Touchdown`, 'td');
+      m = raw.match(/^([A-Z][\w.'-]+(?: [\w.'-]+)*?) Safety\.?$/);  // "Alex Wright Safety", "Team Safety"
+      if (m) return out(m[1] === 'Team' ? 'Team safety · Safety' : `${sn(m[1])} makes the tackle · Safety`, 'bad');
       m = raw.match(/^([A-Z][\w.'-]+(?: [\w.'-]+)+?) Defensive (?:PAT|Two-Point|2pt) Conversion/i);
       if (m) return out(`Defensive conversion: ${sn(m[1])} returns the try for 2`, 'bad');
       m = raw.match(/^([A-Z][\w'-]+) Incomplete Pass(?:, Intended For (.+))?$/);
@@ -668,7 +683,7 @@
         : /short of landing zone/i.test(raw) ? `${K} short of the landing zone${kickFlag()}`
         : mf ? `${K}: ${mf}${kickFlag()}`
         : g('ret') ? `${K}: ${nm(g('ret'))} returns it ${penYds(ry)}${kickFlag()}`
-        : /out of bounds/i.test(raw) ? `${K} out of bounds${kickFlag()}` : `${K}${kickFlag()}`;
+        : /out of bounds/i.test(raw) ? `${K} out of bounds${kickFlag()}` : /declared dead/i.test(raw) ? `${K}, ball declared dead${kickFlag()}` : `${K}${kickFlag()}`;
     }
     else if (/extra point/i.test(t)) { const k = (raw.match(new RegExp(`^(${NM}) extra point`)) || [])[1], ok = /is GOOD/i.test(raw), di = raw.search(/DEFENSIVE TWO-POINT/i);
       h = `${k ? `${nm(k)} e` : 'E'}xtra point ${ok ? 'good' : /block/i.test(raw) ? 'blocked' : 'no good'}`
@@ -688,7 +703,9 @@
     // ESPN types a play with an accepted flag as "Penalty" at times: the play first, then its flag (2026-10-28 audit: an
     // 8-yard scramble plus 5 for holding read just "Penalty, LAC: Defensive Holding")
     else if (/penalty/i.test(t)) { const m = raw.match(RX.pen), a = penM && ACT.test(raw) ? action(raw.split(/PENALTY/)[0].trim().replace(/\.$/, '')) : null;
-      h = a ? `${a.h}${penTail}` : m ? `Penalty, ${txtCode(m[1])}: ${m[2]}, ${penYds(m[3])}` : 'Penalty'; cls = a ? a.cls : 'pen'; }  // not 'flag': site.css .flag is a white badge
+      // a flag the other side declined, alone ("Penalty on CAR, Delay of Game, declined."; 2024 audit)
+      const dc = !m && raw.match(/^Penalty on ([A-Z]{2,3})(?:-[^,]*)?, ([^,]+), declined/i);
+      h = a ? `${a.h}${penTail}` : m ? `Penalty, ${txtCode(m[1])}: ${m[2]}, ${penYds(m[3])}` : dc ? `Penalty, ${txtCode(dc[1])}: ${dc[2]}, declined` : 'Penalty'; cls = a ? a.cls : 'pen'; }  // not 'flag': site.css .flag is a white badge
     // a safety says how (2026-10-28 audit: the bare word "Safety"): sacked or tackled in the end zone, or grounding there
     else if (/safety/i.test(t)) {
       const sk = raw.match(new RegExp(`^(${NM}) sacked in End Zone`)), gr = /Intentional Grounding/i.test(raw) ? (raw.match(new RegExp(`^(${NM}) pass`)) || [])[1] : null;
@@ -4523,7 +4540,9 @@
   // ESPN's situation, box score and team stats; a replay rebuilds them from the plays so far (the official text:
   // playStats), so a replayed moment shows the drive, the stats and the fantasy points as they stood.
   const mmss = t => `${Math.floor(t / 60)}:${String(Math.round(t % 60)).padStart(2, '0')}`;
-  const isTry = p => /extra point|two-point|2pt|conversion/i.test(`${pType(p)} ${p.text || ''}`);
+  // a summary's parenthetical try is the touchdown's, not a try row ("Tyler Huntley 1 Yd Run (Two-Point Pass Conversion
+  // Failed)"; 2024 audit)
+  const isTry = p => /extra point|two-point|2pt|conversion/i.test(`${pType(p)} ${String(p.text || '').replace(/\([^)]*\)/g, '')}`);
   const drvNums = d => {  // plays / yards / time from ESPN's "8 plays, 75 yards, 4:12"
     const m = String(d.description || '').match(/(\d+) plays?, (-?\d+) yards?, (\d+:\d{2})/);
     return m ? { n: +m[1], yd: +m[2], t: m[3] } : null;
@@ -4947,6 +4966,11 @@
     if (nonPlay(p)) return '';
     const a = spot(p.start, info), b = spot(p.end, info), txt = effText(p), t = `${pType(p)} ${txt}`;
     if (p.scoringPlay && /SAFETY/.test(txt) && !/SAFETY NULLIFIED/.test(txt)) return resChip('Safety', 'loss', 'Safety: 2 points for the defense');
+    if (/^(?:\([^)]*\)\s*)*Penalty on [^,]+, [^,]+, declined\.?$/i.test(txt.trim())) return resChip('Declined', 'zero', 'Penalty declined: nothing changed');
+    if (/ball declared dead/i.test(txt)) return resChip('Dead ball', 'zero', 'Kick declared dead where it stopped');
+    // a muffed kick the kicking team fell on (ESPN may type it "Fumble Recovery (Opponent)"; 2024 audit)
+    const mrec = /MUFFS/.test(txt) ? [...txt.matchAll(/(?:RECOVERED|recovered) by ([A-Z]{2,3})-/g)].pop() : null;
+    if (mrec && kickerOf(p) && txtCode(mrec[1]) === kickerOf(p)) return resChip('Muff', 'gain', 'The receiving team muffed it; the kicking team recovered');
     if (/No Play/i.test(txt) && /penalty/i.test(t)) return resChip('Flag', 'pen', 'Penalty: the play didn\'t count');
     // kicks and tries (owner 2026-10-25: "FGG/FGNG"): FGG / FGNG, XPG / XPNG, 2PT / 2PT NG; a blocked kick says so
     // only when the defense's return scored (2026-10-28 audit: a stopped return after a failed try read "Def 2PT")
