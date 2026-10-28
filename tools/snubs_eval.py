@@ -17,7 +17,9 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 FIRST, LAST = 2004, 2025
-STATS = {"QB": {"passing_yards": 1, "passing_tds": 1, "passing_epa": 1, "passing_interceptions": -1},
+# QBs (DQ3, 2026-10-28: owner "the rushing TDs and yardage being completely passed over is a bit tone deaf"): passing +
+# rushing yards and TDs in place of passing alone (first-team All-Pro PASS; Pro Bowl the same direction)
+STATS = {"QB": {"tot_yds": 1, "tot_tds": 1, "passing_epa": 1, "passing_interceptions": -1},
          "RB": {"rushing_yards": 1, "rushing_tds": 1, "receiving_yards": 1},
          "WR": {"receptions": 1, "receiving_yards": 1, "receiving_tds": 1},
          "TE": {"receptions": 1, "receiving_yards": 1, "receiving_tds": 1},
@@ -42,6 +44,7 @@ def frame() -> pd.DataFrame:
   s = s.reset_index()
   s["tackles"] = s.def_tackles_solo + s.def_tackle_assists
   s["ballhawk"] = s.def_interceptions + s.def_pass_defended
+  s["tot_yds"], s["tot_tds"] = s.passing_yards + s.rushing_yards, s.passing_tds + s.rushing_tds
   # team win share
   sch = nfl.load_schedules(list(range(FIRST - 5, LAST + 1))).to_pandas()
   sch = sch[(sch.game_type == "REG") & sch.result.notna()]
@@ -169,6 +172,25 @@ def export() -> None:
   print(f"[snubs] wrote {HIST} ({len(out)} players, {sum(len(v) for v in out.values())} snubbed seasons)", flush=True)
 
 
+def dq3() -> None:
+  """(DQ3) QB pass yards and pass TDs replaced by passing + rushing yards and TDs."""
+  s = frame()
+  m = s.grp == "QB"
+  for c in ("passing_yards", "passing_tds"):  # the passing-only setup DQ3 tested against (shipped: the totals)
+    s.loc[m, f"q_{c}"] = s.loc[m, c].groupby(s.loc[m, "season"]).rank(pct=True)
+  shipped = dict(STATS["QB"])
+  q = m.to_numpy()
+  for target in ("pb", "ap"):
+    y = s[target].to_numpy(int)
+    STATS["QB"] = {"passing_yards": 1, "passing_tds": 1, "passing_epa": 1, "passing_interceptions": -1}
+    p0 = oof(s, target)
+    STATS["QB"] = {"tot_yds": 1, "tot_tds": 1, "passing_epa": 1, "passing_interceptions": -1}
+    p1 = oof(s, target)
+    STATS["QB"] = shipped
+    mm, lo, hi = ci_by(s[q].reset_index(drop=True), ll(y[q], p1[q]) - ll(y[q], p0[q]))
+    print(f"(DQ3) {target}: QB rows {q.sum()}, totals - passing only {mm:+.5f} [{lo:+.5f}, {hi:+.5f}]  {'PASS' if hi < 0 else 'FAIL'}")
+
+
 def dq2() -> None:
   """(DQ2) QB rushing (yards, TDs as percentiles within season) added to the QB selection model, Pro Bowl and All-Pro."""
   s = frame()
@@ -191,7 +213,9 @@ def dq2() -> None:
 
 if __name__ == "__main__":
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
-  if opt.get("dq2") == "1":
+  if opt.get("dq3") == "1":
+    dq3()
+  elif opt.get("dq2") == "1":
     dq2()
   elif opt.get("export") == "1":
     export()

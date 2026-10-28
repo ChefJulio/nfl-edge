@@ -190,6 +190,11 @@ def frame(nfl, last: int) -> pd.DataFrame:
       d.loc[m, "rk"] = np.minimum(d.loc[m, "rk"], v.rank(ascending=False, method="min"))
   # (DP6 candidate) a QB's rank: the better of pass yards and rushing TDs
   mq = d.g == "QB"
+  # (DP7 candidate) a QB's rank on passing + rushing: the better of total yards and total TDs
+  num = lambda c: pd.to_numeric(d.loc[mq, c], errors="coerce").fillna(0)  # noqa: E731
+  d["rk_t"] = d.rk
+  d.loc[mq, "rk_t"] = np.minimum((num("pass_yards") + num("rush_yards")).rank(ascending=False, method="min"),
+                                 (num("pass_tds") + num("rush_tds")).rank(ascending=False, method="min"))
   d["rk_q"] = d.rk
   d.loc[mq, "rk_q"] = np.minimum(d.loc[mq, "rk"], pd.to_numeric(d.loc[mq, "rush_tds"], errors="coerce").fillna(0).rank(ascending=False, method="min"))
   # (DP4 candidate) a DB's rank: the better of interceptions and interceptions + sacks
@@ -333,16 +338,16 @@ def dp2_c(nfl, d: pd.DataFrame, last: int) -> None:
   print("Inductees:", u[u.hof][["display_name", "allpro", "probowls", "p"]].round(2).values.tolist())
 
 
-def dp6(d: pd.DataFrame) -> None:
-  """(DP6) QBs ranked on the better of pass yards and rushing TDs (DBs as shipped)."""
-  from sklearn.metrics import roc_auc_score
+def dp6(d: pd.DataFrame, col: str = "rk_q", lab6: str = "(DP6) QB rushing in the rank") -> None:
+  """(DP6) QBs ranked on the better of pass yards and rushing TDs (DBs as shipped); (DP7, col rk_t) on passing +
+  rushing yards and TDs."""
   tr = d[d.to <= 2015].reset_index(drop=True)
   y, groups = tr.hof.to_numpy(int), tr.season.to_numpy()
   allc = [c for v in FEATS.values() for c in v]
-  t2 = tr.assign(rk=np.where(tr.g == "QB", tr.rk_q, tr.rk))
+  t2 = tr.assign(rk=np.where(tr.g == "QB", tr[col], tr.rk))
   pb, pn = oof(tr, allc, groups), oof(t2, allc, groups)
   m, lo, hi = ci(ll(y, pn) - ll(y, pb))
-  print(f"\n(DP6) QB rushing in the rank: {m:+.5f} [{lo:+.5f}, {hi:+.5f}]  {'PASS' if hi < 0 else 'FAIL'}")
+  print(f"\n{lab6}: {m:+.5f} [{lo:+.5f}, {hi:+.5f}]  {'PASS' if hi < 0 else 'FAIL'}")
   q = (tr.g == "QB").to_numpy()
   print(f"  QBs alone ({q.sum()}, {y[q].sum()} in): log loss {ll(y[q], pb[q]).mean():.4f} -> {ll(y[q], pn[q]).mean():.4f}")
   from sklearn.linear_model import LogisticRegressionCV
@@ -353,7 +358,7 @@ def dp6(d: pd.DataFrame) -> None:
     fm = LogisticRegressionCV(Cs=[0.03, 0.1, 0.3, 1, 3, 10], cv=list(GroupKFold(5).split(X, y, groups)), scoring="neg_log_loss", max_iter=5000).fit(X, y)
     qq = d[d.pfr_player_name.isin(names) & (d.g == "QB")].copy()
     if lab == "with rushing":
-      qq["rk"] = qq.rk_q
+      qq["rk"] = qq[col]
     print(f"  {lab}: " + ", ".join(f"{n} {p:.2f}" for n, p in zip(qq.pfr_player_name, fm.predict_proba(design(qq)[allc].to_numpy(float))[:, 1])))
 
 
@@ -547,6 +552,9 @@ if __name__ == "__main__":
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
   if "export" in opt:
     export(ROOT / opt["export"])
+  elif opt.get("dp7") == "1":
+    import nflreadpy as nfl
+    dp6(frame(nfl, int(nfl.get_current_season()) - 1), "rk_t", "(DP7) QBs on passing + rushing yards and TDs")
   elif opt.get("dp6") == "1":
     import nflreadpy as nfl
     dp6(frame(nfl, int(nfl.get_current_season()) - 1))

@@ -5509,3 +5509,19 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   voters will treat this era's rushing QBs differently. (DQ2, tools/snubs_eval.py --dq2=1) Pro Bowl -0.00487
   [-0.01289, +0.00259] (QB rows 784; the right direction: Allen's chances up every season, 2020-25 .55-.90 ->
   .65-.94, all of them picks); first-team All-Pro +0.00024 [-0.00173, +0.00221].
+- **PRE-REGISTERED 2026-10-28 (owner: "the rushing TDs and yardage being completely passed over is a bit tone deaf ...
+  what if we added them as total yards / tds, indistinguishable from passing yards and tds? if anything rushing stats
+  in a vacuum are worth more pound for pound"): (DP7 / DQ3) quarterbacks on total yards and touchdowns.** Measured
+  first (nflverse player stats, QBs, 2018-25): EPA per 100 yards passing 0.52, rushing 1.72; per play 0.037 per pass
+  attempt vs 0.075 per QB carry (RBs -0.066 per carry): a QB's run is worth about twice a pass, per play (part of the
+  per-yard gap is sacks and interceptions, which passing EPA carries and yards don't). (DP7) Hall of Fame: a QB's
+  all-time rank = the better of his rank in passing + rushing yards and in passing + rushing TDs (in place of pass
+  yards alone); (DQ3) selection: the QB group's pass yards and pass TDs replaced by passing + rushing yards and TDs
+  (EPA and interceptions as before). DP's / DQ's rows, folds and gates.
+- **RESULT {#qb-totals} (DP7 / DQ3) quarterbacks on total yards and TDs: DQ3 first-team All-Pro PASS, shipped (Pro Bowl
+  too, same direction); DP7 Hall of Fame neutral, not shipped.** (DQ3, tools/snubs_eval.py --dq3=1, QB rows 784)
+  All-Pro -0.00262 [-0.00558, -0.00030] PASS; Pro Bowl -0.00308 [-0.00918, +0.00286]. Shipped: the selection model's
+  QBs read passing + rushing yards and TDs for both (one model); snubs re-exported (193 seasons, 155 players; Allen
+  none: picked every season 2020-25). (DP7, tools/hof_eval.py --dp7=1) +0.00023 [-0.00009, +0.00070]; QBs alone
+  0.0178 -> 0.0177 (level, unlike DP6's separate rushing rank, which made them worse): Allen .06 -> .10, Newton .10
+  -> .17, Lamar Jackson .46 -> .48, Hurts and Vick unchanged.
