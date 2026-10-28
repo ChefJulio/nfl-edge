@@ -1025,14 +1025,22 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
                                 for m, sn, gp in zip(df[per_snap].inj, df[per_snap].snaps, df[per_snap].grp)]
   qual = np.where(per_snap, df.snaps >= 1000, df.games >= 17)
   qs = pd.Series(qual, index=df.index)
-  peers = {gp: np.sort(df.shrunk[(df.grp == gp) & qs].to_numpy(dtype=float)) for gp in df.grp.unique()}
+  # (owner 2026-10-28: "so it's comparing vs historical players? mehh") an active player (on a roster this season) is
+  # ranked among the active players at his position; a retired one among everyone since 2013
+  act = pd.Series([out[g]["gs"].get(cur, 0) > 0 for g in df.gsis_id], index=df.index)
+  peers = {(gp, a): np.sort(df.shrunk[(df.grp == gp) & qs & (act if a else True)].to_numpy(dtype=float))
+           for gp in df.grp.unique() for a in (True, False)}
   for x, q in zip(df.itertuples(), qual):
-    pr = peers.get(x.grp)
+    a = bool(act.loc[x.Index])
+    pr = peers.get((x.grp, a))
     pct = float(np.searchsorted(pr, x.shrunk, side="right") / len(pr)) if pr is not None and len(pr) else None
+    rank = int(len(pr) - np.searchsorted(pr, x.shrunk, side="right") + 1) if pr is not None and len(pr) else None
     ps = bool(per_snap.loc[x.Index])
+    ok = not (pct is None or (ps and not q))
     out[x.gsis_id]["dur"] = {"games": int(x.games), "missed": int(x.missed), "avail": round(float(x.avail), 3),
                              # under 1,000 snaps: too little time on the field to rank either way (no percentile)
-                             "pct": None if pct is None or (ps and not q) else round(pct, 3), "grp": x.grp, "small": not bool(q),
+                             "pct": round(pct, 3) if ok else None, "grp": x.grp, "small": not bool(q),
+                             "pool": "active" if a else "all", **({"rank": rank, "n": int(len(pr))} if ok else {}),
                              **({"snaps": int(x.snaps), "inj": int(x.inj),
                                  "per1k": round(float(x.inj / max(x.snaps, 1.0) * 1000), 2)} if ps else {})}
   return out
