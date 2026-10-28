@@ -182,6 +182,11 @@ def frame(nfl, last: int) -> pd.DataFrame:
   # size], i think we should add it") the shipped rank is rk2; rk_int keeps DP2's interceptions-only rank for the test
   d["rk_int"] = d.rk
   d["rk"] = d.rk2
+  # (DP5 candidate) snubbed seasons (tools/snubs_eval.py, 2004 on)
+  snf = ROOT / "data" / "history" / "snubs.json"
+  sn = json.loads(snf.read_text(encoding="utf-8")).get("s", {}) if snf.exists() else {}
+  d["sn_pb"] = [sum(1 for x in sn.get(g, []) if x[1] == "PB") if isinstance(g, str) else 0 for g in d.gsis_id]
+  d["sn_ap"] = [sum(1 for x in sn.get(g, []) if x[1] == "AP") if isinstance(g, str) else 0 for g in d.gsis_id]
   d["fb"] = (d.position == "FB").astype(int)
   # ballots so far: classes he has been eligible for through the coming one (last + 1), capped
   d["ye"] = (last + 1 - (d.to + 6) + 1).clip(lower=0, upper=30)
@@ -213,6 +218,8 @@ def design(d: pd.DataFrame) -> pd.DataFrame:
     x["rk5"], x["rk10"], x["rk25"] = (d.rk <= 5).astype(float), (d.rk <= 10).astype(float), (d.rk <= 25).astype(float)
     x["ye"] = np.log1p(d.ye)
     x["fb"] = d.fb.astype(float)
+  if "sn_pb" in d:
+    x["sn_pb"], x["sn_ap"] = np.log1p(d.sn_pb), np.log1p(d.sn_ap)
   return x
 
 
@@ -305,6 +312,23 @@ def dp2_c(nfl, d: pd.DataFrame, last: int) -> None:
         f"{len(e):,}, {int(e.hof.sum())} in, predicted {e.p.sum():.1f}, AUC {roc_auc_score(e.hof, e.p) if e.hof.any() else float('nan'):.3f}")
   print(u.sort_values("p", ascending=False).head(15)[["display_name", "g", "allpro", "probowls", "rings", "decade", "to", "hof", "p"]].round(2).to_string(index=False))
   print("Inductees:", u[u.hof][["display_name", "allpro", "probowls", "p"]].round(2).values.tolist())
+
+
+def dp5(d: pd.DataFrame) -> None:
+  """(DP5) snubs added to the shipped model."""
+  tr = d[d.to <= 2015].reset_index(drop=True)
+  y, groups = tr.hof.to_numpy(int), tr.season.to_numpy()
+  allc = [c for v in FEATS.values() for c in v]
+  pb, pn = oof(tr, allc, groups), oof(tr, allc + ["sn_pb", "sn_ap"], groups)
+  m, lo, hi = ci(ll(y, pn) - ll(y, pb))
+  print(f"\n(DP5) snubs added: {m:+.5f} [{lo:+.5f}, {hi:+.5f}]  {'PASS' if hi < 0 else 'FAIL'}")
+  w = tr[(tr.sn_pb + tr.sn_ap) > 0].assign(old=pb[(tr.sn_pb + tr.sn_ap).to_numpy() > 0], new=pn[(tr.sn_pb + tr.sn_ap).to_numpy() > 0])
+  print(f"  training players with a snub: {len(w)} ({int(w.hof.sum())} in)")
+  print(w.sort_values("new", ascending=False)[["pfr_player_name", "g", "allpro", "probowls", "sn_pb", "sn_ap", "hof", "old", "new"]].round(2).head(15).to_string(index=False))
+  # do voters correct snubs? among players with 5-8 Pro Bowls, Hall rate with and without a snub
+  b = tr[tr.probowls.between(5, 8)]
+  for lab, m_ in (("with a snub", (b.sn_pb + b.sn_ap) > 0), ("without", (b.sn_pb + b.sn_ap) == 0)):
+    print(f"  5-8 Pro Bowls, {lab}: {int(m_.sum())} players, {100 * b[m_].hof.mean() if m_.any() else float('nan'):.0f}% in")
 
 
 def dp4(d: pd.DataFrame) -> None:
@@ -480,6 +504,9 @@ if __name__ == "__main__":
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
   if "export" in opt:
     export(ROOT / opt["export"])
+  elif opt.get("dp5") == "1":
+    import nflreadpy as nfl
+    dp5(frame(nfl, int(nfl.get_current_season()) - 1))
   elif opt.get("dp4") == "1":
     import nflreadpy as nfl
     dp4(frame(nfl, int(nfl.get_current_season()) - 1))

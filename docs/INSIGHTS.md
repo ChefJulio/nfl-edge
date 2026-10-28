@@ -5460,3 +5460,17 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   "Reputation picks" (15% or less, picked, earlier Pro Bowls and a real role) are mostly what the stats can't see:
   run-stuffing nose tackles (Wilfork, Hampton, Henderson, K. Jenkins) and special-teamers (Izzo, Ayanbadejo, Hester):
   not shown on the site. Next: snubs on the Honors sheet; then the Hall of Fame test with deserved selections.
+  SHIPPED (owner: "yes"): the Honors sheet's "Snubbed: Pro Bowl / first-team All-Pro" rows (seasons and chance;
+  data/history/snubs.json from tools/snubs_eval.py --export=1, 186 seasons, 145 players, rerun once a year).
+- **PRE-REGISTERED 2026-10-28: (DP5) snubs in the Hall of Fame model.** Do seasons a player should have been picked
+  (DQ's snubs, 2004-25) add to the Hall of Fame model? Candidate: log(1 + Pro Bowl snubs) and log(1 + All-Pro snubs)
+  added to the shipped model (B with DP2 and DP4), DP's rows and folds (careers over by 2015, 5 folds by draft class,
+  out-of-fold log loss, 95% bootstrap over players). GATE: lower with the interval excluding 0. Expected inconclusive:
+  snubs cover 2004 on, so only careers that ran into 2004-15 carry any (the training rows end in 2015). Reported:
+  inductees and non-inductees with snubs, and whether voters seem to correct snubs (inductees' snub counts vs
+  non-inductees' at the same selection counts).
+- **RESULT {#hof-snubs} (DP5) snubs in the Hall of Fame model: FAIL (inconclusive); not shipped.** tools/hof_eval.py
+  --dp5=1. -0.00007 [-0.00020, +0.00005]. 43 training players carry a snub (13 in); the fitted effect leans slightly
+  negative (Jared Allen .83 -> .73, Urlacher .94 -> .91, John Abraham .37 -> .28), against the descriptive hint the
+  other way: among players with 5-8 Pro Bowls, 7 of 12 with a snub are in (58%) vs 42 of 101 without (42%). Too few
+  either way; re-run once careers with snub data (2004 on) fill the training rows (careers over by 2015 now).
