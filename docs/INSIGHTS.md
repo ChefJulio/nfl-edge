@@ -5432,3 +5432,31 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   rk2 (tools/hof_eval.py keeps rk_int, DP2's rank, so the test reproduces). The refit moves other DBs too: Smith .03
   -> .19, Rodney Harrison .18, Ramsey .92 -> .62, Darren Woodson .82 -> .52, Mathieu .41, Budda Baker .42 -> .11, Earl
   Thomas .88 (interception-only cases count for a little less now that the rank rewards the combined profile).
+- **PRE-REGISTERED 2026-10-28 (owner: "how about analyzing years where a player got snubbed for pro bowl / all pro?"):
+  (DQ) Pro Bowl and All-Pro selection, and snubs.** Rows: player-seasons 2004-25 (five seasons of selection history
+  first; selections from data/history/honors.json, 1999 on), regular season, QB / RB / WR / TE / DL / LB / DB with 8+
+  games (OL, K, P: no performance measure in the data, left out). Per position group, a logistic of selection on the
+  season: its main stats as percentiles within that season and group (QB pass yards, TDs, EPA, INT; RB rush yards,
+  rush TDs, receiving yards; WR / TE receptions, yards, TDs; DL sacks, QB hits, tackles for loss; LB tackles, sacks,
+  TFL, INT + passes defended; DB INT, passes defended, tackles), games, his team's win share; plus reputation: Pro
+  Bowls and first-team All-Pros before the season (log), and selected the season before. Targets: Pro Bowl; first-team
+  All-Pro. TEST: 5 folds grouped by season, out-of-fold log loss, 95% bootstrap over players. Questions, each with
+  that gate (lower with the interval excluding 0): (1) does reputation predict selection beyond the season's
+  numbers (with vs without the reputation inputs); (2) does the team's record. Reported: reputation's effect as odds
+  (a previous Pro Bowler vs not, the same season otherwise); calibration; snubs (out-of-fold chance 60%+, not
+  selected) and reputation picks (15% or less, selected), by season and over careers; snubs by team and position.
+  Then (separately, if worth it): does adding "deserved" selections (selections + snubs) improve the Hall of Fame
+  model. No site change until this reads sensibly.
+- **RESULT {#selection-snubs} (DQ) Pro Bowl / All-Pro selection: reputation PASS, team record PASS.**
+  tools/snubs_eval.py, 22,031 player-seasons 2004-25 (1,807 Pro Bowls, 441 first-team All-Pros). Pro Bowl: AUC 0.929,
+  well calibrated (top 100 predicted 93.3 / actual 90; 101-300 172 / 179; 301-1,000 468 / 467). Reputation (with -
+  without): Pro Bowl -0.0275 [-0.0328, -0.0227], All-Pro -0.0070 [-0.0092, -0.0050]; team record -0.0036 [-0.0046,
+  -0.0027] and -0.0025 [-0.0032, -0.0018]. A Pro Bowler the season before, same numbers otherwise, is x3-7 as likely
+  to be picked again (DL x7.0, DB x5.8, LB x5.6, WR x5.3, TE x4.4, RB x3.1) except QBs (x1.0: QBs are picked on their
+  numbers). Snubs (out-of-fold Pro Bowl chance 60%+, not picked): 174; most per career: Ronde Barber, Harrison Smith
+  (2020 .89, 2022 .93, 2024 .73), Julius Peppers, Tom Brady 3; Rodgers, Wagner, Dak Prescott, Chandler Jones 2. Top:
+  Bobby Wagner 2022 (.96; second-team All-Pro that year) and 2025, Danielle Hunter 2025, Urlacher 2007, Tony Gonzalez
+  2013. Snub rate among 60%+ seasons: DB .33, DL .26, LB / RB .21, QB .17, WR .15, TE .13 (defense overlooked most).
+  "Reputation picks" (15% or less, picked, earlier Pro Bowls and a real role) are mostly what the stats can't see:
+  run-stuffing nose tackles (Wilfork, Hampton, Henderson, K. Jenkins) and special-teamers (Izzo, Ayanbadejo, Hester):
+  not shown on the site. Next: snubs on the Honors sheet; then the Hall of Fame test with deserved selections.
