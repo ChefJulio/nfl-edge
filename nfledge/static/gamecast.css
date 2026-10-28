@@ -986,6 +986,7 @@ table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; tex
 .hn-more { font-size: var(--fs-xs); color: var(--muted); align-self: center; }
 .hn-t td:last-child { line-height: 1.5; white-space: normal; overflow-wrap: anywhere; }
 .hn-t td:first-child { white-space: normal; }
+.hn-t tr.hn-sn td { color: var(--muted); font-style: italic; }
 .pc-tap { position: relative; min-width: 0; padding: 10px 26px 10px 12px; border: 1px solid var(--line); border-radius: var(--r-md);
   background: color-mix(in srgb, var(--ink) 4%, var(--panel)); cursor: pointer; -webkit-tap-highlight-color: transparent;
   transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), transform var(--dur) var(--ease); }

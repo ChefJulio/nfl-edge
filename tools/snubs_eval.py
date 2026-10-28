@@ -149,5 +149,29 @@ def main():
   s.to_pickle(ROOT / "scratch" / "snubs.pkl")
 
 
+HIST = ROOT / "data" / "history" / "snubs.json"
+
+
+def export() -> None:
+  """data/history/snubs.json (committed; rerun once a year when the new selections are in): {"v", "through",
+  "s": {gsis: [[season, kind, chance]]}}, kind PB / AP: a season the out-of-fold chance put at 60%+ and he wasn't picked
+  (DQ's definition). The site copies it to data/snubs.json."""
+  s = frame()
+  out = {}
+  for target, kind in (("pb", "PB"), ("ap", "AP")):
+    s[f"p_{target}"] = oof(s, target)
+    x = s[(s[f"p_{target}"] >= 0.6) & (s[target] == 0)]
+    for g, yr, p in zip(x.player_id, x.season, x[f"p_{target}"]):
+      out.setdefault(g, []).append([int(yr), kind, round(float(p), 2)])
+  for g in out:
+    out[g].sort()
+  HIST.write_text(json.dumps({"v": 1, "through": LAST, "s": out}, separators=(",", ":")), encoding="utf-8")
+  print(f"[snubs] wrote {HIST} ({len(out)} players, {sum(len(v) for v in out.values())} snubbed seasons)", flush=True)
+
+
 if __name__ == "__main__":
-  main()
+  opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
+  if opt.get("export") == "1":
+    export()
+  else:
+    main()

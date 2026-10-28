@@ -337,6 +337,11 @@ def build(site: Path, refetch: bool = False) -> None:
     HIST.write_text(json.dumps({"v": V, "seasons": {**keep, **new}}, separators=(",", ":")), encoding="utf-8")
     print(f"[honors] history: added {sorted(new)}", flush=True)
   doc = {"v": V, "built": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"), "from": FIRST, "p": p}
+  # (DQ) seasons the numbers said he'd be picked and he wasn't (tools/snubs_eval.py --export=1, committed history)
+  sn = ROOT / "data" / "history" / "snubs.json"
+  if sn.exists():
+    j = json.loads(sn.read_text(encoding="utf-8"))
+    doc["sn"], doc["sn_through"] = j.get("s", {}), j.get("through")
   out_f.parent.mkdir(parents=True, exist_ok=True)
   out_f.write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
   print(f"[honors] wrote {out_f} ({len(p)} players, {sum(len(v) for v in p.values())} honors)", flush=True)

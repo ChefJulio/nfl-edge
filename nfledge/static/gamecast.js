@@ -1842,14 +1842,19 @@
   const honorsTile = (pid, L) => {
     loadHonors();
     if (!HN.d) return tapTile('Honors', `<div class="pc-tapsub">${HN.d === false ? 'Not available' : 'Loading&hellip;'}</div>`, 'Honors', '<p class="pc-sub">Loading&hellip;</p>');
-    const H = honorsOf(pid, L);
-    if (!H.length) return tapTile('Honors', '<div class="pc-big muted">&ndash;</div><div class="pc-tapsub">None yet</div>', 'Honors',
+    const H = honorsOf(pid, L), SN0 = (HN.d.sn && HN.d.sn[pid]) || [];
+    if (!H.length && !SN0.length) return tapTile('Honors', '<div class="pc-big muted">&ndash;</div><div class="pc-tapsub">None yet</div>', 'Honors',
       `<p class="pc-sub">No awards, All-Pro or Pro Bowl selections, league-leading seasons or Super Bowl titles on record (${HN.d.from} on).</p>${hofBox(pid, L)}`);
-    const face = `<div class="hn-face">${H.slice(0, 3).map(hChip).join('')}${H.length > 3 ? `<span class="hn-more">+${H.length - 3} more</span>` : ''}</div>`;
+    const face = H.length ? `<div class="hn-face">${H.slice(0, 3).map(hChip).join('')}${H.length > 3 ? `<span class="hn-more">+${H.length - 3} more</span>` : ''}</div>`
+      : `<div class="pc-big muted">&ndash;</div><div class="pc-tapsub">${SN0.length} snub${SN0.length === 1 ? '' : 's'}</div>`;
     // the years: '18 '19; weekly honors as week numbers within the season, months by name
     const yrs = w => { const g = {}; w.forEach(([s, x]) => { (g[s] = g[s] || []).push(x); });
       return Object.keys(g).sort().map(s => g[s][0] == null ? `&rsquo;${String(s).slice(-2)}` : `&rsquo;${String(s).slice(-2)} <span class="muted">${g[s].map(x => (typeof x === 'number' ? `wk ${x}` : esc(x))).join(', ')}</span>`).join(' &middot; '); };
-    const table = `<table class="bx hn-t"><thead><tr><th>Honor</th><th class="num">#</th><th>Seasons</th></tr></thead><tbody>${H.map(h => `<tr><td>${esc(h.name)}</td><td class="num">${h.n}</td><td>${yrs(h.when)}</td></tr>`).join('')}</tbody></table>`;
+    // snubs ((DQ), owner 2026-10-28): seasons his numbers made him a likely pick (60%+, by the selection model) and he
+    // wasn't picked; a row below the honors, quieter
+    const SN = SN0;
+    const snRow = k => { const w = SN.filter(x => x[1] === k); return w.length ? `<tr class="hn-sn" title="Seasons his numbers made him a likely ${k === 'PB' ? 'Pro Bowl' : 'first-team All-Pro'} pick (60%+ by our selection model) and he wasn't picked"><td>Snubbed: ${k === 'PB' ? 'Pro Bowl' : 'first-team All-Pro'}</td><td class="num">${w.length}</td><td>${w.map(x => `&rsquo;${String(x[0]).slice(-2)} <span class="muted">${Math.round(100 * x[2])}%</span>`).join(' &middot; ')}</td></tr>` : ''; };
+    const table = `<table class="bx hn-t"><thead><tr><th>Honor</th><th class="num">#</th><th>Seasons</th></tr></thead><tbody>${H.map(h => `<tr><td>${esc(h.name)}</td><td class="num">${h.n}</td><td>${yrs(h.when)}</td></tr>`).join('')}${snRow('AP')}${snRow('PB')}</tbody></table>`;
     const src = `<p class="pc-sub muted">${HN.d.from} on. Awards from ESPN; All-Pro (AP), Pro Bowl (every player named, replacements included) and Players of the Week / Month from Wikipedia (weekly honors from about 2008); league leaders and Super Bowl rosters from nflverse.</p>`;
     return tapTile('Honors', face, 'Honors', `<div class="pc-box"><div class="hn-face">${H.map(hChip).join('')}</div></div>${hofBox(pid, L)}<div class="pc-box">${table}</div>${src}`);
   };
