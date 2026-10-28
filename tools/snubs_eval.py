@@ -169,9 +169,31 @@ def export() -> None:
   print(f"[snubs] wrote {HIST} ({len(out)} players, {sum(len(v) for v in out.values())} snubbed seasons)", flush=True)
 
 
+def dq2() -> None:
+  """(DQ2) QB rushing (yards, TDs as percentiles within season) added to the QB selection model, Pro Bowl and All-Pro."""
+  s = frame()
+  m = s.grp == "QB"
+  for c in ("rushing_yards", "rushing_tds"):
+    s.loc[m, f"q_{c}"] = s.loc[m, c].groupby(s.loc[m, "season"]).rank(pct=True)
+  base = dict(STATS["QB"])
+  for target in ("pb", "ap"):
+    y = s[target].to_numpy(int)
+    p0 = oof(s, target)
+    STATS["QB"] = {**base, "rushing_yards": 1, "rushing_tds": 1}
+    p1 = oof(s, target)
+    STATS["QB"] = base
+    q = m.to_numpy()
+    mm, lo, hi = ci_by(s[q].reset_index(drop=True), ll(y[q], p1[q]) - ll(y[q], p0[q]))
+    print(f"(DQ2) {target}: QB rows {q.sum()}, with rushing - without {mm:+.5f} [{lo:+.5f}, {hi:+.5f}]  {'PASS' if hi < 0 else 'FAIL'}")
+    a = s[q & (s.name == "Josh Allen")].assign(old=p0[q & (s.name == "Josh Allen").to_numpy()], new=p1[q & (s.name == "Josh Allen").to_numpy()])
+    print("  Josh Allen:", a[["season", target, "old", "new"]].round(2).values.tolist())
+
+
 if __name__ == "__main__":
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
-  if opt.get("export") == "1":
+  if opt.get("dq2") == "1":
+    dq2()
+  elif opt.get("export") == "1":
     export()
   else:
     main()

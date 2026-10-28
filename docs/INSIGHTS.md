@@ -5490,3 +5490,22 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   DQ's gates unchanged (Pro Bowl AUC 0.930; reputation -0.0286 [-0.0338, -0.0237]); 192 snubbed seasons, 154 players;
   career Pro Bowl gap: Lavonte David 3.8 expected / 1 (gap 2.8), Matt Ryan 6.1 / 4 (was 5.8 / 3 with 2014 missing),
   Mathieu, Moss, Mason, Barber; Tony Gonzalez 2013 off the snub list (that Pro Bowl was missing).
+- **FIX 2026-10-28 (owner, on Josh Allen: "he's got a loooot of rush yards ... 87(!) rushing TDs, i'm assuming the model
+  is missing qb rushing stats?"): the Hall of Fame model's selection counts.** Its Pro Bowl / All-Pro counts came from
+  Pro Football Reference's draft table, which lags on active players (Allen 4 Pro Bowls there, 6 in fact; 22 players
+  drafted 1999 on and active since 2022 short a first-team All-Pro; on the training careers the two agree but for 2
+  players each way). For players drafted 1999 on the export now reads our audited counts. Allen .03 -> .06.
+- **PRE-REGISTERED 2026-10-28 (same): (DP6 / DQ2) quarterback rushing.** Both models read QBs on passing alone.
+  (DP6) Hall of Fame: a QB's all-time rank = the better of his pass-yards rank and his rushing-TD rank among QBs in the
+  data (Allen 87 rushing TDs, the most by a QB in it); DP's rows and folds, out-of-fold log loss, 95% bootstrap over
+  players, gate: lower with the interval excluding 0. Few QB inductees (7 in the training rows), so expected
+  inconclusive; reported: QBs alone, and Allen, Newton, Lamar Jackson, Hurts under each. (DQ2) Pro Bowl / All-Pro
+  selection: the QB group's stats plus rushing yards and rushing TDs (percentiles within season); DQ's rows and folds;
+  gate: lower out-of-fold log loss with the interval excluding 0, for Pro Bowl and for All-Pro separately.
+- **RESULT {#qb-rushing} (DP6 / DQ2) quarterback rushing: FAIL in both; not shipped.** (DP6, tools/hof_eval.py
+  --dp6=1) +0.00007 [-0.00013, +0.00027]; QBs alone (287, 6 in) worse, 0.0178 -> 0.0205: history's rushing QBs with
+  finished careers (Vick) aren't in, so rushing hasn't been a path for QBs so far. It would move Allen .06 -> .32,
+  Lamar Jackson .46 -> .79, Cam Newton .10 -> .46, Hurts .04 -> .24, Vick .02 -> .08: the model can't know whether
+  voters will treat this era's rushing QBs differently. (DQ2, tools/snubs_eval.py --dq2=1) Pro Bowl -0.00487
+  [-0.01289, +0.00259] (QB rows 784; the right direction: Allen's chances up every season, 2020-25 .55-.90 ->
+  .65-.94, all of them picks); first-team All-Pro +0.00024 [-0.00173, +0.00221].

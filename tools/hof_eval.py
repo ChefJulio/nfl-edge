@@ -127,6 +127,21 @@ def frame(nfl, last: int) -> pd.DataFrame:
   d["g"] = d.position.map(GROUP).fillna("ST")
   for c in ("allpro", "probowls", "seasons_started", "w_av", "games", "pass_yards", "rush_yards", "rec_yards", "def_sacks", "def_ints"):
     d[c] = pd.to_numeric(d[c], errors="coerce").fillna(0)
+  # (2026-10-28, owner on Josh Allen) Pro Football Reference's draft table lags on active players' selections (Allen 4
+  # Pro Bowls there, 6 in fact; 22 active players short a first-team All-Pro): for players drafted 1999 on, our
+  # audited counts (data/history/honors.json, tools/honors_audit.py) replace them. On the training careers (over by
+  # 2015) the two agree but for 2 players each way, so the fit is the same
+  hj = json.loads((ROOT / "data" / "history" / "honors.json").read_text(encoding="utf-8"))["seasons"]
+  pbo, apo = {}, {}
+  for _s, rows in hj.items():
+    for code, g, *_ in rows:
+      if code == "PB":
+        pbo[g] = pbo.get(g, 0) + 1
+      elif code == "AP1":
+        apo[g] = apo.get(g, 0) + 1
+  m99 = (d.season >= 1999) & d.gsis_id.notna()
+  d.loc[m99, "probowls"] = d.loc[m99, "gsis_id"].map(pbo).fillna(0).to_numpy()
+  d.loc[m99, "allpro"] = d.loc[m99, "gsis_id"].map(apo).fillna(0).to_numpy()
   d["k"] = d.pfr_player_name.map(norm)
   DRAFT_NAMES.update(k=list(d.k), s=[int(x) for x in d.season])
   I = inputs(nfl, last)
@@ -173,6 +188,10 @@ def frame(nfl, last: int) -> pd.DataFrame:
     for col in cols:
       v = pd.to_numeric(d.loc[m, col], errors="coerce").fillna(0)
       d.loc[m, "rk"] = np.minimum(d.loc[m, "rk"], v.rank(ascending=False, method="min"))
+  # (DP6 candidate) a QB's rank: the better of pass yards and rushing TDs
+  mq = d.g == "QB"
+  d["rk_q"] = d.rk
+  d.loc[mq, "rk_q"] = np.minimum(d.loc[mq, "rk"], pd.to_numeric(d.loc[mq, "rush_tds"], errors="coerce").fillna(0).rank(ascending=False, method="min"))
   # (DP4 candidate) a DB's rank: the better of interceptions and interceptions + sacks
   d["rk2"] = d.rk
   m = d.g == "DB"
@@ -312,6 +331,30 @@ def dp2_c(nfl, d: pd.DataFrame, last: int) -> None:
         f"{len(e):,}, {int(e.hof.sum())} in, predicted {e.p.sum():.1f}, AUC {roc_auc_score(e.hof, e.p) if e.hof.any() else float('nan'):.3f}")
   print(u.sort_values("p", ascending=False).head(15)[["display_name", "g", "allpro", "probowls", "rings", "decade", "to", "hof", "p"]].round(2).to_string(index=False))
   print("Inductees:", u[u.hof][["display_name", "allpro", "probowls", "p"]].round(2).values.tolist())
+
+
+def dp6(d: pd.DataFrame) -> None:
+  """(DP6) QBs ranked on the better of pass yards and rushing TDs (DBs as shipped)."""
+  from sklearn.metrics import roc_auc_score
+  tr = d[d.to <= 2015].reset_index(drop=True)
+  y, groups = tr.hof.to_numpy(int), tr.season.to_numpy()
+  allc = [c for v in FEATS.values() for c in v]
+  t2 = tr.assign(rk=np.where(tr.g == "QB", tr.rk_q, tr.rk))
+  pb, pn = oof(tr, allc, groups), oof(t2, allc, groups)
+  m, lo, hi = ci(ll(y, pn) - ll(y, pb))
+  print(f"\n(DP6) QB rushing in the rank: {m:+.5f} [{lo:+.5f}, {hi:+.5f}]  {'PASS' if hi < 0 else 'FAIL'}")
+  q = (tr.g == "QB").to_numpy()
+  print(f"  QBs alone ({q.sum()}, {y[q].sum()} in): log loss {ll(y[q], pb[q]).mean():.4f} -> {ll(y[q], pn[q]).mean():.4f}")
+  from sklearn.linear_model import LogisticRegressionCV
+  from sklearn.model_selection import GroupKFold
+  names = ["Josh Allen", "Cam Newton", "Lamar Jackson", "Jalen Hurts", "Steve Young", "Michael Vick"]
+  for lab, f in (("today", tr), ("with rushing", t2)):
+    X = design(f)[allc].to_numpy(float)
+    fm = LogisticRegressionCV(Cs=[0.03, 0.1, 0.3, 1, 3, 10], cv=list(GroupKFold(5).split(X, y, groups)), scoring="neg_log_loss", max_iter=5000).fit(X, y)
+    qq = d[d.pfr_player_name.isin(names) & (d.g == "QB")].copy()
+    if lab == "with rushing":
+      qq["rk"] = qq.rk_q
+    print(f"  {lab}: " + ", ".join(f"{n} {p:.2f}" for n, p in zip(qq.pfr_player_name, fm.predict_proba(design(qq)[allc].to_numpy(float))[:, 1])))
 
 
 def dp5(d: pd.DataFrame) -> None:
@@ -504,6 +547,9 @@ if __name__ == "__main__":
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
   if "export" in opt:
     export(ROOT / opt["export"])
+  elif opt.get("dp6") == "1":
+    import nflreadpy as nfl
+    dp6(frame(nfl, int(nfl.get_current_season()) - 1))
   elif opt.get("dp5") == "1":
     import nflreadpy as nfl
     dp5(frame(nfl, int(nfl.get_current_season()) - 1))
