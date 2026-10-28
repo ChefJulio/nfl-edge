@@ -415,12 +415,12 @@
   const pType = p => String((p.type && p.type.text) || '');
   const nonPlay = p => /timeout|end period|end of|two-minute|end game|official|end quarter/i.test(pType(p))
     || /^(END (GAME|QUARTER|OF)|Timeout|Two-Minute)/i.test(String(p.text || ''));
-  // timeouts, warnings and period ends in words, not ESPN's capitals ("TIMEOUT #1 BY LAC AT 01:53." -> "LAC timeout (1st)")
-  const ORD = ['', '1st', '2nd', '3rd'];
+  // timeouts, warnings and period ends in words, not ESPN's capitals ("TIMEOUT #1 BY LAC AT 01:53." -> "LAC timeout, 2 left")
   const PBP_CODE = { ARZ: 'ARI', BLT: 'BAL', CLV: 'CLE', HST: 'HOU', LA: 'LA', LAR: 'LA', WSH: 'WAS' };  // the official text's own team codes
   const nonPlayText = p => {
     const t = String(p.text || ''), m = t.match(/TIMEOUT #(\d) BY ([A-Z]{2,3})/i);
-    if (m) return `${PBP_CODE[m[2].toUpperCase()] || ourCode(m[2].toUpperCase())} timeout (${ORD[+m[1]] || `#${m[1]}`})`;
+    // what's left reads better than which one it was (#1 of the half = 2 left, of overtime 1 left; owner 2026-10-28)
+    if (m) { const left = (((p.period || {}).number || 1) >= 5 ? 2 : 3) - +m[1]; return `${PBP_CODE[m[2].toUpperCase()] || ourCode(m[2].toUpperCase())} timeout, ${left > 0 ? `${left} left` : 'none left'}`; }
     if (/OFFICIAL TIMEOUT|TV TIMEOUT/i.test(t)) return 'Official timeout';
     if (/TWO-MINUTE/i.test(t)) return 'Two-minute warning';
     const q = t.match(/END (?:OF )?(?:QUARTER|PERIOD) (\d)/i);
@@ -4073,7 +4073,14 @@
       const swing = Math.round(Math.abs(d) * 100) >= 1 ? swingChip(Math.round(d * 100), info.home.team, info) : '';  // as on the cards
       const when = `${p.period ? periodName(p.period.number) : ''} ${esc(p.clock ? p.clock.displayValue : '')}`;
       // Not plays (timeouts, two-minute warning, end of quarter / game): thin muted divider rows.
-      if (isNonPlay(p)) return `<li class="pl pl-np"><div class="pl-when">${when}</div><div class="pl-what"><div class="pl-txt">${esc(nonPlayText(p))}</div></div><div></div></li>`;
+      // three weights (owner 2026-10-28: TV timeouts "present them a little different"): a TV break is a faint centered
+      // hairline; a team's timeout a row in its color; a quarter's end and the two-minute warning a chapter break
+      if (isNonPlay(p)) {
+        const tx = nonPlayText(p), tm = (tx.match(/^([A-Z]{2,3}) timeout/) || [])[1], tmS = tm === info.home.team ? info.home : tm === info.away.team ? info.away : null;
+        if (/^Official timeout/.test(tx)) return `<li class="pl pl-np pl-tv"><span>TV timeout · ${when.trim()}</span></li>`;
+        const k = tmS ? ' pl-to' : /^End|Two-minute/.test(tx) ? ' pl-brk' : '';
+        return `<li class="pl pl-np${k}"${tmS ? ` style="--pt:${esc(tmS.color)}"` : ''}><div class="pl-when">${when}</div><div class="pl-what"><div class="pl-txt">${esc(tx)}</div></div><div></div></li>`;
+      }
       // the play as a headline (owner 2026-10-18: "beautify this area too"), the yards it gained, the official text below
       const a0 = spot(p.start, info);
       const hd = playHead(p, LOGN, a0 ? { off: a0.offense.team, other: a0.offense.team === info.away.team ? info.home.team : info.away.team } : {});
@@ -4929,7 +4936,9 @@
   const playTitle = (cls, hd, html, p, info) => `<div class="${cls} pt ${hd.cls}"><span class="pt-t">${html}</span>${yardChip(p, info)}${clipChip(p)}</div>`;
   const playRows = (plays, info, names, key = null) => plays.map(p => {
     const when = q => `${periodName((q.period || {}).number || 1)} ${esc((q.clock || {}).displayValue || '')}`;
-    if (nonPlay(p)) return `<li class="ds-p np"><span class="ds-w">${when(p)}</span><span class="ds-h muted">${esc(nonPlayText(p))}</span></li>`;
+    if (nonPlay(p)) { const tx = nonPlayText(p);  // a TV break as a hairline here too (the game log's .pl-tv)
+      return /^Official timeout/.test(tx) ? `<li class="ds-p np ds-tv"><span>TV timeout · ${when(p)}</span></li>`
+        : `<li class="ds-p np"><span class="ds-w">${when(p)}</span><span class="ds-h muted">${esc(tx)}</span></li>`; }
     const a = spot(p.start, info);
     const hd = playHead(p, names, a ? { off: a.offense.team, other: a.offense.team === info.away.team ? info.home.team : info.away.team } : {});
     return `<li class="ds-p${p === key ? ' key' : ''}"><span class="ds-w">${when(p)}</span><div class="ds-b">${playMeta(p)}`

@@ -1547,6 +1547,15 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .lg-bar input { order: 0; flex: 1 1 90px; min-width: 90px; flex-basis: auto; padding: 4px 9px; font-size: 13px; }
 .mt-sit { display: inline-flex; align-items: center; gap: 7px; } .mt-sit b { color: var(--ink); } .mt-sit .rp-d { font-size: inherit; }
 .pl-np .pl-txt { text-transform: none; letter-spacing: 0; font-size: 12px; font-style: italic; }
+/* non-plays in three weights (owner 2026-10-28): a TV break, a faint centered hairline; a team's timeout, a row in its
+   color (gamecast.js .pl[style*="--pt"]); a quarter's end / the two-minute warning, a chapter break */
+.pl.pl-tv, .ds-p.ds-tv { display: flex; align-items: center; gap: 10px; padding: 2px 4px; border-bottom: 0;
+  font-size: 10.5px; color: var(--faint); letter-spacing: .03em; white-space: nowrap; }
+:is(.pl-tv, .ds-tv)::before, :is(.pl-tv, .ds-tv)::after { content: ''; flex: 1; border-top: 1px dashed var(--line); }
+.pl-to .pl-txt { font-style: normal; font-weight: 600; color: var(--muted); }
+.pl-brk { border-bottom: 0; border-top: 1px solid var(--muted); margin-top: 2px; }
+.pl-brk .pl-txt { font-style: normal; font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: .06em; font-size: 11px; }
+.pl-brk .pl-when { color: var(--muted); }
 /* first downs on the drive chart: a short first-down line at the arrowhead, "1st" after the yards */
 :is(.now, .ds) .fl-fd { stroke: #ffd43b; stroke-width: 1.6; stroke-linecap: round; }
 :is(.now, .ds) .fl-1st { fill: #ffd43b; font-size: 8px; font-weight: 800; }
