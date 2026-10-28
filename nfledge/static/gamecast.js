@@ -1805,6 +1805,15 @@
   const loadHof = () => { if (HF.d !== undefined) return; HF.d = null;
     NFLE.load('data/hof_chance.json').then(j => { HF.d = j; rerenderCard(); }).catch(() => { HF.d = false; }); };
   const hofPct = v => v >= 0.995 ? '>99%' : v < 0.01 ? '<1%' : `${Math.round(100 * v)}%`;
+  // what history says about the wait at each level (owner 2026-10-28: "add the threshold summary"): inductees since 1980
+  // by the model's out-of-fold chance, years past first eligibility (middle half); docs/INSIGHTS.md (DP2) follow-up
+  // [floor, the line, the band's longest usual wait (its middle half's top)]; a player already waiting past it reads so
+  const HOF_WAIT = [[0.95, 'First-ballot territory: 2 of 3 at this level went straight in', 1],
+    [0.8, 'Likely in, usually after a wait of 1-6 years', 6], [0.6, 'Better than even; those who made it waited 1-7 years', 7],
+    [0.4, 'A toss-up; those who made it waited 6-13 years', 13], [0.2, 'A long shot; those who made it waited 3-9 years', 9],
+    [0.05, 'A long shot; those who made it waited 6-14 years, often as seniors', 14]];
+  const hofWait = (v, waited = 0) => { const b = HOF_WAIT.find(([lo]) => v >= lo);
+    return !b ? '' : waited > b[2] ? 'Waiting longer than most at this level: cases like this are often settled late, some by the seniors committee' : b[1]; };
   const hofBox = (pid, L) => {
     loadHof();
     if (L && L.bio && L.bio.hof) return '';
@@ -1817,7 +1826,9 @@
         <div class="pc-k co-sub">Active or retired under 5 years (if their careers ended today)</div><table class="bx"><tbody>${top(0).map(li).join('')}</tbody></table></details>`; })() : '';
     // kickers and punters: a handful ever inducted, so the model has little to go on and reads them high
     const st = c && c[3] === 'ST' ? ' <span class="muted">(kickers and punters: only a few ever inducted, so read this one loosely)</span>' : '';
-    const line = !H ? '' : c ? `<div class="pc-big">${hofPct(c[0])}</div><div class="pc-sub">${c[1] ? 'Eligible, not in yet' : 'If his career ended today'}${st}</div>`
+    // an eligible player: which ballot this is (his first class: the sixth after his last season)
+    const nth = c && c[1] && H.eligible_through ? H.eligible_through + 6 - (c[4] + 6) + 1 : null;
+    const line = !H ? '' : c ? `<div class="pc-big">${hofPct(c[0])}</div><div class="pc-sub">${c[1] ? `Eligible, not in yet${nth > 0 ? ` &middot; ${ord(nth)} year on the ballot` : ''}` : 'If his career ended today'}${st}</div>${hofWait(c[0], nth ? nth - 1 : 0) ? `<div class="pc-sub"><b>${esc(hofWait(c[0], nth ? nth - 1 : 0))}</b></div>` : ''}`
       : '<div class="pc-big muted">&lt;1%</div><div class="pc-sub">Nowhere near the line so far</div>';
     return `<div class="pc-box"><div class="pc-k">Hall of Fame chance</div>${line}
       <p class="pc-sub muted">Learned from every player since 1980 whose career ended by 2015: first-team All-Pros and Pro Bowls carry it, then All-Decade teams, an all-time top-25 rank at the position and a long career as a starter, then MVP / Player of the Year awards and Super Bowl titles. Undrafted players are scored without career value. On the field only: voters weigh more. Tested on held-out draft classes.</p>${watch}</div>`;
