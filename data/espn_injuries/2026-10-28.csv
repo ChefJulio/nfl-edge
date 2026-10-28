@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685720,Bryce Young,Carolina Panthers,Active,2026-10-26T00:07Z,,,,,,Young completed 14 of 27 passes for 163 yards with one touchdown and two interceptions and added one carry for nine yards in the Panthers' 43-13 loss to the Buccaneers on Sunday.,QB
 4241416,Chuba Hubbard,Carolina Panthers,Active,2026-10-25T22:41Z,,,,,,Hubbard rushed seven times for 33 yards and brought in four of five targets for 27 yards in the Panthers' 43-13 loss to the Buccaneers on Sunday.,RB
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-25T22:31Z,,,,,,McMillan secured four of six targets for 40 yards in the Panthers' 43-13 loss to the Buccaneers on Sunday.,WR
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-28T20:14Z,Undisclosed,,,2026-10-18,IR,ir,S
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-28T20:31Z,Undisclosed,,,2026-10-18,IR,ir,S
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-28T20:07Z,Toe,Sprain,Not Specified,2026-11-02,QUESTIONABLE,"Monangai (thumb/toe) was on a stationary bike during warmups but wasn't on the field during the open portion of Wednesday's practice, Adam Jahns of AllCHGO.com reports.",RB
 4257364,Zavier Scott,Chicago Bears,Active,2026-10-27T23:08Z,,,,,,Chicago signed Scott from the practice squad to the active roster Tuesday.,RB
 4372576,Jack Sanborn,Chicago Bears,Questionable,2026-10-27T13:11Z,Concussion,Concussion,Not Specified,2026-11-02,QUESTIONABLE,questionable,LB
@@ -524,10 +524,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362010,Michael Jurgens,Minnesota Vikings,Active,2026-10-11T16:56Z,,,,,,"Jurgens (elbow) is active for Sunday's game against the Saints, Craig Peters of the Vikings' official site reports.",C
 4433959,Ben Yurosek,Minnesota Vikings,Active,2026-10-11T16:20Z,,,,,,"Yurosek (ankle) is listed as active for Sunday's game against the Saints, Craig Peters of the Vikings' official site reports.",TE
 4799994,Brett Thorson,Minnesota Vikings,Active,2026-10-09T01:10Z,,,,,,Thorson (hamstring) was a full participant in practice Wednesday and Thursday.,P
-4606666,Karon Prunty,New England Patriots,Questionable,2026-10-27T13:11Z,Hamstring,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,CB
+4047646,A.J. Brown,New England Patriots,Questionable,2026-10-28T20:28Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Brown (ankle) was a limited participant in Wednesday's practice.,WR
+16771,Morgan Moses,New England Patriots,Questionable,2026-10-28T20:26Z,Foot,,,2026-11-01,QUESTIONABLE,questionable,OT
+16910,DaQuan Jones,New England Patriots,Questionable,2026-10-28T20:26Z,Back,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,DT
+4606666,Karon Prunty,New England Patriots,Active,2026-10-28T20:26Z,,,,,,,CB
+3916923,Carlton Davis III,New England Patriots,Active,2026-10-28T20:26Z,,,,,,,CB
+4688779,Channing Canada,New England Patriots,Active,2026-10-28T20:25Z,,,,,,,CB
 4362890,Ben Brown,New England Patriots,Questionable,2026-10-27T13:11Z,Knee,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,C
-4688779,Channing Canada,New England Patriots,Questionable,2026-10-27T13:11Z,Hamstring,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,CB
-3916923,Carlton Davis III,New England Patriots,Questionable,2026-10-27T13:11Z,Neck,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,CB
 4611993,Joshua Farmer,New England Patriots,Active,2026-10-26T18:40Z,,,,,,,DT
 4431465,Behren Morton,New England Patriots,Active,2026-10-26T18:40Z,,,,,,,QB
 4241720,Marcus Jones,New England Patriots,Active,2026-10-25T02:25Z,,,,,,"Jones registered nine tackles (five solo), including 1.0 sacks, and returned one punt for 19 yards in Thursday's loss to the Bears.",CB
@@ -540,15 +543,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4432710,TreVeyon Henderson,New England Patriots,Active,2026-10-23T04:59Z,,,,,,Henderson rushed three times for nine yards and secured both targets for 14 yards in the Patriots' 30-24 loss to the Bears on Thursday.,RB
 3046439,Hunter Henry,New England Patriots,Active,2026-10-23T04:53Z,,,,,,Henry secured all seven targets for 71 yards in the Patriots' 30-24 loss to the Bears on Thursday.,TE
 4569923,Andy Borregales,New England Patriots,Active,2026-10-23T04:34Z,,,,,,Borregales made his only field-goal attempt and was successful on all three extra-point tries Thursday in a Week 7 loss to the Bears.,PK
-4047646,A.J. Brown,New England Patriots,Active,2026-10-23T04:19Z,,,,,,Brown brought in three of six targets for 48 yards in the Patriots' 30-24 loss to the Bears on Thursday.,WR
 4569173,Rhamondre Stevenson,New England Patriots,Active,2026-10-23T04:04Z,,,,,,Stevenson rushed six times for 22 yards and brought in all five targets for 93 yards and a touchdown in the Patriots' 30-24 loss to the Bears on Thursday.,RB
 4431452,Drake Maye,New England Patriots,Active,2026-10-23T03:42Z,,,,,,Maye completed 24 of 31 passes for 321 yards with two touchdowns and one interception while adding four rushes for 26 yards and another score in the Patriots' 30-24 loss to the Bears on Thursday.,QB
 4259646,Alijah Vera-Tucker,New England Patriots,Injured Reserve,2026-10-22T23:37Z,Hamstring,Not Specified,Not Specified,2026-11-29,IR,Vera-Tucker (hamstring) was placed on injured reserve by the Patriots on Thursday.,G
-16771,Morgan Moses,New England Patriots,Active,2026-10-22T23:21Z,,,,,,Moses (foot) is officially active for Thursday's game at Chicago.,OT
 4428930,Craig Woodson,New England Patriots,Active,2026-10-22T23:14Z,,,,,,Woodson (shoulder) is officially active for Thursday's game against the Bears.,S
 2574056,Kevin Byard,New England Patriots,Active,2026-10-22T23:05Z,,,,,,Byard (chest) is officially active for Thursday's game at Chicago.,S
 4686772,Christian Gonzalez,New England Patriots,Active,2026-10-22T22:51Z,,,,,,Gonzalez (illness) is listed as active for Thursday night's game against the Bears.,CB
-4565293,Marcus Bryant,New England Patriots,Injured Reserve,2026-10-21T00:30Z,Ankle,Not Specified,Not Specified,2026-11-01,IR-R,Bryant (ankle) was a full participant at the Patriots' practice Tuesday.,OT
 3918310,Carl Granderson,New Orleans Saints,Active,2026-10-28T04:47Z,,,,,,"Granderson totaled four tackles, including 1.5 sacks, in Sunday's Week 7 loss to Pittsburgh.",DE
 4241993,Pete Werner,New Orleans Saints,Active,2026-10-28T04:42Z,,,,,,Werner finished Sunday's loss to the Steelers with eight tackles (three solo).,LB
 4683813,Jonas Sanker,New Orleans Saints,Active,2026-10-28T04:36Z,,,,,,Sanker posted nine tackles (seven solo) in Sunday's Week 7 loss to Pittsburgh.,S
@@ -728,8 +728,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4034790,Antoine Winfield Jr.,Tampa Bay Buccaneers,Active,2026-10-28T20:21Z,,,,,,,S
 4567750,Emeka Egbuka,Tampa Bay Buccaneers,Questionable,2026-10-28T17:38Z,Concussion,Concussion,Not Specified,2026-11-01,QUESTIONABLE,"Head coach Todd Bowles said Egbuka (concussion/foot) took part in individual drills Wednesday, but the wide receiver will need to do more Thursday to progress toward a return to action, Scott Smith of the Buccaneers' official site reports.",WR
 4428522,Tykee Smith,Tampa Bay Buccaneers,Active,2026-10-28T02:11Z,,,,,,"Smith posted seven tackles (one solo), an interception and a blocked extra-point attempt Sunday in a 43-13 Week 7 win against Carolina.",S
-4686334,Yaya Diaby,Tampa Bay Buccaneers,Active,2026-10-28T02:05Z,,,,,,"Diaby made three tackles, all of which were sacks, in Sunday's 43-13 win against Carolina.",LB
-4870998,Josiah Trotter,Tampa Bay Buccaneers,Active,2026-10-28T01:47Z,,,,,,Trotter logged 10 tackles and a defensed pass in Sunday's 43-13 win over Carolina.,LB
+4686334,Yaya Diaby,Tampa Bay Buccaneers,Questionable,2026-10-28T02:05Z,Illness,,,2026-11-01,QUESTIONABLE,"Diaby made three tackles, all of which were sacks, in Sunday's 43-13 win against Carolina.",LB
+4870998,Josiah Trotter,Tampa Bay Buccaneers,Questionable,2026-10-28T01:47Z,Illness,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Trotter logged 10 tackles and a defensed pass in Sunday's 43-13 win over Carolina.,LB
 4380507,Luke Goedeke,Tampa Bay Buccaneers,Questionable,2026-10-27T13:11Z,Calf,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,OT
 5220680,Ted Hurst III,Tampa Bay Buccaneers,Active,2026-10-27T01:53Z,,,,,,Hurst didn't record a catch on one target in Sunday's 43-13 win over the Panthers.,WR
 4596472,Jalon Daniels,Tampa Bay Buccaneers,Active,2026-10-27T01:25Z,,,,,,Daniels was back in his primary reserve role behind Baker Mayfield in Sunday's 43-13 win over the Panthers.,QB
