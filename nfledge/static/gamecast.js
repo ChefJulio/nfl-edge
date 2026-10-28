@@ -167,6 +167,12 @@
   const TEAM_ID = {};
   // the NFL's official play text uses its own codes for four teams (owner 2026-10-25: "Penalty, HST: Encroachment")
   const GSIS = { ARZ: 'ARI', BLT: 'BAL', CLV: 'CLE', HST: 'HOU' };
+  // a team code from the official text ("RECOVERED by HST-W.Marks") as ours (2026-10-28 audit: HOU recovering its own
+  // fumble read "fumble lost to HST")
+  const txtCode = c => GSIS[c] || ourCode(c);
+  // the official text that stands: after a replay reversal, only the ruling after "REVERSED." (2026-10-28 audit: an
+  // overturned interception kept its INT chip)
+  const effText = p => { const s = String(p.text || ''), i = s.lastIndexOf('REVERSED.'); return i >= 0 ? s.slice(i + 9).trim() : s; };
   // (owner 2026-10-25) a missed field goal from beyond the 20 gives the defense the ball at the spot of the kick (the
   // 20 if it was inside it), not the line of scrimmage, which is where ESPN leaves the play's end: from the kick's
   // distance (spot = distance - 10 yards to the end zone), in the receiving team's terms
@@ -429,26 +435,55 @@
   // "-> 2nd & 2", and the play drawn on the mini field (line of scrimmage, first-down line, an arrow from start to
   // finish: green gain, red loss, neutral kick / change of possession). Headlines come from ESPN's play type, the
   // yardage and the official text's names, made full names through the box score ("J.Williams" -> Javonte Williams).
-  const NM = "[A-Z][a-z]?\\.[A-Za-z'.\\- ]+?";
+  // "A.St. Brown" whole (2026-10-28 audit: his catches read "to A.St", the period ending the name)
+  const NM = "[A-Z][a-z]?\\.(?:St\\. )?[A-Za-z'.\\- ]+?";
   const RX = {
     lead: new RegExp(`^(${NM})\\s+(?:left|right|up the middle|middle|scrambles|kneels|pass|sacked|punts|kicks|spiked|\\d+ yard field goal|extra point|FUMBLES|Aborted)`),
     // a name ends at punctuation or a lowercase word ("to D.Moore ran ob at NE 49", "to J.Williams to DAL 38")
     to: new RegExp(` to (${NM})(?= [a-z]| \\(|\\.|,|$)`),
     picked: new RegExp(`INTERCEPTED by (${NM})(?= [a-z]| \\(|\\.|,)`),
     punt: /punts (\d+) yards/, kick: /kicks (\d+) yards/, fg: /(\d+) yard field goal is (GOOD|No Good|BLOCKED)/i,
-    ret: new RegExp(`\\. (${NM}) (?:to|pushed|ran|for|MUFFS)`), pen: /PENALTY on ([A-Z]{2,4})(?:-[^,]*)?, ([^,]+), (\d+) yards/,
+    // "1 yard" too (2026-10-28 audit: a 1-yard pass interference read just "Penalty")
+    ret: new RegExp(`\\. (${NM}) (?:to|pushed|ran|for|MUFFS)`), pen: /PENALTY on ([A-Z]{2,4})(?:-[^,]*)?, ([^,]+), (\d+) yards?/,
+  };
+  const penYds = n => `${n} yard${+n === 1 ? '' : 's'}`;
+  // the official text writes "D.Prescott", or "Ja.Chase" to tell apart a teammate with the same initial
+  const nameKeys = A => {
+    const fn = String(A.firstName || ''), ln = String(A.lastName || '').replace(/\s+/g, '');
+    const keys = [String(A.shortName || '').replace(/\s+/g, ''), fn && ln ? `${fn[0]}.${ln}` : '', fn.length > 1 && ln ? `${fn.slice(0, 2)}.${ln}` : ''];
+    const bare = ln.replace(/(Jr|Sr|II|III|IV|V)\.?$/, '');  // "Godwin Jr." is "C.Godwin" in the text
+    if (fn && bare !== ln) keys.push(`${fn[0]}.${bare}`, fn.length > 1 ? `${fn.slice(0, 2)}.${bare}` : '');
+    return keys.filter(Boolean);
   };
   const fullNames = (sum, ids = null) => {  // ids (optional): filled with the same keys -> ESPN athlete id
     const m = {};
-    // the official text writes "D.Prescott", or "Ja.Chase" to tell apart a teammate with the same initial
     ((sum && sum.boxscore && sum.boxscore.players) || []).forEach(tp => (tp.statistics || []).forEach(c => (c.athletes || []).forEach(a => {
-      const A = a.athlete, fn = String(A.firstName || ''), ln = String(A.lastName || '').replace(/\s+/g, '');
-      const keys = [String(A.shortName || '').replace(/\s+/g, ''), fn && ln ? `${fn[0]}.${ln}` : '', fn.length > 1 && ln ? `${fn.slice(0, 2)}.${ln}` : ''];
-      const bare = ln.replace(/(Jr|Sr|II|III|IV|V)\.?$/, '');  // "Godwin Jr." is "C.Godwin" in the text
-      if (fn && bare !== ln) keys.push(`${fn[0]}.${bare}`, fn.length > 1 ? `${fn.slice(0, 2)}.${bare}` : '');
-      keys.forEach(k => { if (k && !m[k]) { m[k] = A.displayName; if (ids) ids[k] = String(A.id); } });
+      const A = a.athlete;
+      nameKeys(A).forEach(k => { if (!m[k]) { m[k] = A.displayName; if (ids) ids[k] = String(A.id); } });
     })));
     return m;
+  };
+  // Which team kicked (2026-10-28 audit): ESPN's team with the ball on a kick is sometimes the kicking side and sometimes
+  // the receiving one (DEN's kickoff to SEA listed DEN; KC's punt to LAC listed LAC), so a fumbled return named the wrong
+  // team. A kickoff's text names its side ("kicks 60 yards from DEN 35"); a punter is looked up in the box score.
+  const PUNTERS = new WeakMap();
+  const kickerOf = p => {
+    const raw = effText(p), fr = raw.match(/ kicks (?:onside )?\d+ yards? from ([A-Z]{2,3}) \d/);
+    if (fr) return txtCode(fr[1]);
+    const pn = (raw.match(new RegExp(`(${NM}) punts `)) || [])[1];
+    if (!pn) return null;
+    for (const sm of [GP.sum, ...Object.values(LIVE.sums || {})]) {
+      if (!sm || !sm.boxscore) continue;
+      if (!PUNTERS.has(sm)) {
+        const m = {};
+        (sm.boxscore.players || []).forEach(tp => (tp.statistics || []).filter(c => c.name === 'punting')
+          .forEach(c => (c.athletes || []).forEach(a => nameKeys(a.athlete).forEach(k => { m[k] = ourCode(tp.team.abbreviation); }))));
+        PUNTERS.set(sm, m);
+      }
+      const t = PUNTERS.get(sm)[pn.replace(/\s+/g, '')];
+      if (t) return t;
+    }
+    return null;
   };
   // ctx: { off, other } our team codes for the offense at the snap and its opponent (who lost a fumble)
   const ACT = new RegExp(`^${NM} (?:pass|scrambles|sacked|left|right|up the middle|middle|kneels)\\b`);
@@ -468,7 +503,9 @@
     // (2026-10-25: every two-point try read "no good") a try's own row starts with that text: only a touchdown's tail goes
     if (!/^TWO-POINT CONVERSION ATTEMPT/.test(raw)) raw = raw.replace(/\s*TWO-POINT CONVERSION ATTEMPT\..*$/, '');
     // headlines name players by first initial (owner 2026-10-20: "use first name initials, shorten a bit"): "T. McKee"
-    const nm = x => x ? shortName(names[x.replace(/\s+/g, '')] || x) : '';
+    // a player the box score doesn't list (an incomplete pass's only target) keeps the text's name, spaced like the
+    // rest ("M.Brown" -> "M. Brown"; 2026-10-28 audit)
+    const nm = x => x ? shortName(names[x.replace(/\s+/g, '')] || x.replace(/^([A-Z][a-z]?)\.(?=[A-Z])/, '$1. ')) : '';
     const g = (k, i = 1) => { const m = raw.match(RX[k]); return m ? m[i] : null; };
     const t = (pl.type && pl.type.text) || '';
     // a flag on a play that counts ("... to GB 12 for 11 yards ... PENALTY on DAL-T.Booker, Unnecessary Roughness, 15
@@ -477,8 +514,12 @@
     const penM = !pl.inner && !/No Play/i.test(raw) && /PENALTY on/.test(raw) ? raw.match(RX.pen) : null;
     const ownY = penM ? (/no gain/.test(raw.split('PENALTY')[0]) ? 0 : (raw.split('PENALTY')[0].match(/for (-?\d+) yards?/) || [])[1]) : null;
     const y = ownY != null ? +ownY : (pl.statYardage || 0);
-    const penTail = penM ? `, flag on ${ourCode(penM[1])}: ${penM[2]}, ${penM[3]} yards` : '';
-    const td = /touchdown/i.test(t) || /TOUCHDOWN/.test(raw);
+    const penTail = penM ? `, flag on ${txtCode(penM[1])}: ${penM[2]}, ${penYds(penM[3])}` : '';
+    // a touchdown a flag took away is none (2026-10-28 audit: "31-yard run, flag on WAS ... · Touchdown")
+    const td = !/TOUCHDOWN NULLIFIED/.test(raw) && (/touchdown/i.test(t) || /TOUCHDOWN/.test(raw));
+    // a kick's flag by name (the kick's own "out of bounds" flag is the headline already; a declined one doesn't matter)
+    const kickFlag = () => { const m = raw.match(RX.pen);
+      return m ? `, flag on ${txtCode(m[1])}: ${m[2]}` : pl.isPenalty && !/declined|offsetting|Kickoff Out of Bounds/i.test(raw) ? ', flag on the play' : ''; };
     const yds = n => n === 0 ? 'no gain' : n < 0 ? `loss of ${-n}` : `${n} yard${n === 1 ? '' : 's'}`;
     // a scrimmage action read from the text alone (ESPN's play type names the fumble, not what led to it)
     const action = txt => {
@@ -493,11 +534,13 @@
     // Offside, 5 yards ... - No Play."; owner 2026-10-26: "fumble lost to dallas doesn't have an explanation"): the flag
     // leads, then what it erased, never the erased play as if it counted
     const npen = !pl.inner && /No Play/i.test(raw) ? raw.match(RX.pen) : null;
-    if (npen) {
-      const pre = raw.slice(0, raw.search(/PENALTY on/)).trim();
+    // offsetting flags replay the down (2026-10-28 audit: a wiped-out 15-yard catch read "no gain")
+    const offset = !pl.inner && !npen && /No Play/i.test(raw) && /offsetting/i.test(raw);
+    if (npen || offset) {
+      const pre = raw.slice(0, raw.search(/PENALTY on/i)).trim();
       const erased = /FUMBLES/.test(pre) ? 'a fumble' : /INTERCEPTED/.test(pre) ? 'an interception' : /TOUCHDOWN/.test(pre) ? 'a touchdown'
         : /sacked/.test(pre) ? 'a sack' : ACT.test(pre) ? (action(pre.replace(/\.$/, '')) || {}).h : '';
-      return { h: `Penalty, ${GSIS[npen[1]] || ourCode(npen[1])}: ${npen[2]}, ${npen[3]} yards${erased ? ` · wipes out ${erased}` : ''}`,
+      return { h: `${npen ? `Penalty, ${txtCode(npen[1])}: ${npen[2]}, ${penYds(npen[3])}` : 'Offsetting penalties'}${erased ? ` · wipes out ${erased}` : ''}`,
                cls: 'pen', raw: full, eff: raw };
     }
     // fumbles (owner 2026-10-15: "Fumble" alone misleads): say what the play was and who ended up with the ball. Kept
@@ -508,16 +551,21 @@
     // the returner's fumble, and who has it after the play (ESPN's possession at its end, which follows a review; the
     // text can still say the overturned recovery)
     const after = pl.end && pl.end.team && TEAM_ID[String(pl.end.team.id)];
-    const kickRx = / punts \d+ yards| kicks \d+ yards/;  // the play type can be just "Fumble Recovery (Opponent)"
+    const kickRx = / punts \d+ yards| kicks (?:onside )?\d+ yards/;  // the play type can be just "Fumble Recovery (Opponent)"
     if (fi >= 0 && !pl.inner && (/punt|kickoff/i.test(t) || kickRx.test(` ${raw.slice(0, fi)}`)) && after && ctx.off) {
-      const kick = playHead(Object.assign({}, pl, { text: raw.slice(0, fi).trim(), type: { text: / kicks \d+ yards/.test(` ${raw}`) ? 'Kickoff' : 'Punt' }, inner: true }), names, ctx).h;
+      const isKo = / kicks (?:onside )?\d+ yards/.test(` ${raw}`);
+      const kick = playHead(Object.assign({}, pl, { text: raw.slice(0, fi).trim(), type: { text: isKo ? 'Kickoff' : 'Punt' }, inner: true }), names, ctx).h;
       const fumbler = (raw.slice(0, fi).match(RX.ret) || [])[1];
-      const kicker = /kickoff/i.test(t) || / kicks \d+ yards/.test(` ${raw}`) ? ctx.other : ctx.off;  // a kickoff's play lists the receiving team as the offense
-      return { h: `${kick.replace(/, [^,]* returns .*$/, '')}, ${fumbler ? `${nm(fumbler)} fumbles the return` : 'return fumbled'}, ${after === kicker ? `${after} recovers` : `${after} keeps it`}`,
+      // the kicking team from the kick itself; ESPN's offense only when the text can't tell
+      const kicker = kickerOf(pl) || (isKo ? ctx.other : ctx.off);
+      const base = kick.replace(/, [^,]* returns .*$/, ''), fn = fumbler ? nm(fumbler) : '';
+      const fum = !fn ? 'return fumbled' : base.includes(fn) ? 'fumbles' : `${fn} fumbles the return`;
+      const oob = /ball out of bounds/i.test(raw.slice(fi)) ? ', out of bounds' : '';
+      return { h: `${base}, ${fum}${oob}, ${after === kicker ? `${after} recovers` : `${after} keeps it`}`,
                cls: after === kicker ? 'good' : '', raw: full, eff: raw, lost: false };
     }
     if (fi >= 0 && !pl.inner) {
-      const recs = [...raw.matchAll(/(?:RECOVERED|recovered) by ([A-Z]{2,4})-/g)], rec = recs.length ? ourCode(recs[recs.length - 1][1]) : '';
+      const recs = [...raw.matchAll(/(?:RECOVERED|recovered) by ([A-Z]{2,4})-/g)], rec = recs.length ? txtCode(recs[recs.length - 1][1]) : '';
       const ret = /kickoff|punt/i.test(t), loser = ret ? ctx.other : ctx.off;  // on a kick the returner's team fumbles
       const lost = rec ? (loser ? rec !== loser : !!pl.isTurnover) : false;
       if (!lost) {
@@ -531,27 +579,47 @@
       const head = ret ? raw.slice(0, fi).trim() : segs.reverse().find(x => ACT.test(x));
       const base = ret ? playHead(Object.assign({}, pl, { text: head, inner: true }), names, ctx).h : head ? action(head).h : '';
       const tdD = lost && /TOUCHDOWN/.test(raw.slice(lf));
+      // a fumbled snap names no runner (2026-10-28 audit: "D.Prescott Aborted. C.Beebe FUMBLES" read "D. Prescott fumbles")
       h = base ? `${base}, ${lost ? `fumble lost to ${rec}` : 'fumble recovered'}`
+        : /Aborted/.test(raw.slice(0, lf + 30)) ? `Botched snap, ${lost ? `lost to ${rec}` : `${rec || 'offense'} recovers`}`
         : `${who ? nm(who) : 'Ball'} fumbles, ${lost ? `lost to ${rec}` : 'offense recovers'}`;
       return { h: `${h}${tdD ? `, ${rec} TD` : ''}`.replace(/\s{2,}/g, ' '), cls: lost ? 'bad' : '', raw: full, eff: raw, lost };
     }
-    if (/interception/i.test(t)) { h = `${nm(g('lead'))} intercepted${g('picked') ? ` by ${nm(g('picked'))}` : ''}`; cls = 'bad'; }
+    // ESPN types a kneel as a run and a spike as an incompletion (2026-10-28 audit: "J. Love run, loss of 1" under a
+    // Kneel chip)
+    if (!pl.inner && /^(?:[A-Z][a-z]?\.\S+) kneels\b/.test(raw)) h = `${nm(g('lead'))} kneels`;
+    else if (!pl.inner && /spiked the ball/i.test(raw)) h = `${nm((raw.match(new RegExp(`^(${NM}) spiked`)) || [])[1])} spikes it`;
+    else if (/interception/i.test(t)) { h =`${nm(g('lead'))} intercepted${g('picked') ? ` by ${nm(g('picked'))}` : ''}`; cls = 'bad'; }
     else if (/sack/i.test(t)) { h = `${nm(g('lead'))} sacked, ${yds(y)}${penTail}`; cls = 'bad'; }
     else if (/pass reception|passing touchdown/i.test(t)) h = `${nm(g('lead'))} ${g('to') ? `to ${nm(g('to'))}` : 'pass'}, ${yds(y)}${penTail}`;
     else if (/pass incompletion/i.test(t)) h = `${nm(g('lead'))} incomplete${g('to') ? ` to ${nm(g('to'))}` : ''}`;
     else if (/^rush|rushing touchdown/i.test(t)) h = (y > 0 ? `${nm(g('lead'))} ${y}-yard run` : `${nm(g('lead'))} run, ${yds(y)}`) + penTail;
     // the return's own yards from the text ("... to LAC 9. K.Mitchell to LAC 14 for 5 yards"): ESPN's net yardage
     // includes a penalty on the play (owner 2026-10-18: "returns it -5 yards")
-    else if (/punt/i.test(t)) h = `${nm(g('lead'))} punts ${g('punt') || ''} yards${/Touchback/i.test(raw) ? ', touchback' : g('ret') ? `, ${nm(g('ret'))} returns ${retYds(raw, pl)}` : ''}${pl.isPenalty ? ', flag on the play' : ''}`;
-    else if (/kickoff/i.test(t)) h = /Touchback/i.test(raw) ? 'Kickoff, touchback' : `Kickoff: ${nm(g('ret'))} returns it ${retYds(raw, pl)} yard${retYds(raw, pl) === 1 ? '' : 's'}${pl.isPenalty ? ', flag on the play' : ''}`;
+    else if (/punt/i.test(t)) h = `${nm(g('lead'))} punts ${g('punt') || ''} yards${/Touchback/i.test(raw) ? ', touchback' : g('ret') ? `, ${nm(g('ret'))} returns ${retYds(raw, pl)}` : ''}${kickFlag()}`;
+    else if (/kickoff/i.test(t)) {
+      // a kick nobody returned (2026-10-28 audit: an onside kick out of bounds read "Kickoff: returns it 21 yards")
+      const ons = / kicks onside /.test(` ${raw}`), K = ons ? 'Onside kick' : 'Kickoff', rec = (raw.match(/RECOVERED by ([A-Z]{2,3})-/i) || [])[1];
+      // or the receiving side falling on it ("R.Odunze (didn't try to advance) to NE 47 for no gain")
+      const onWho = ons && !rec ? (raw.match(new RegExp(`\\. (${NM})(?= \\(| to | for | pushed| ran)`)) || [])[1] : null, ry = retYds(raw, pl);
+      h = /Touchback/i.test(raw) ? `${K}, touchback`
+        : ons && rec ? `Onside kick, recovered by ${txtCode(rec)}`
+        : onWho ? `Onside kick, ${nm(onWho)} recovers${ry > 0 ? `, returns it ${penYds(ry)}` : ''}${kickFlag()}`
+        : g('ret') ? `${K}: ${nm(g('ret'))} returns it ${penYds(ry)}${kickFlag()}`
+        : /out of bounds/i.test(raw) ? `${K} out of bounds${kickFlag()}` : `${K}${kickFlag()}`;
+    }
     else if (/extra point/i.test(t)) { const k = (raw.match(new RegExp(`^(${NM}) extra point`)) || [])[1], ok = /is GOOD/i.test(raw);
       h = `${k ? `${nm(k)} e` : 'E'}xtra point ${ok ? 'good' : /block/i.test(raw) ? 'blocked' : 'no good'}`; cls = ok ? '' : 'bad'; }
-    else if (/two-point/i.test(t)) { const ok = /ATTEMPT SUCCEEDS/i.test(raw), inner = raw.replace(/^TWO-POINT CONVERSION ATTEMPT\.\s*/, '').split('. ATTEMPT')[0];
+    // "D.Prescott rushes left guard" is a run (2026-10-28 audit: it read "D. rushes run")
+    else if (/two-point/i.test(t)) { const ok = /ATTEMPT SUCCEEDS/i.test(raw), inner = raw.replace(/^TWO-POINT CONVERSION ATTEMPT\.\s*/, '').split('. ATTEMPT')[0].replace(/^(\S+) rushes\b/, '$1');
       const r = ACT.test(inner) ? action(inner) : null;
       h = `Two-point try${r ? `: ${r.h.replace(/, (?:\d+ yards?|no gain|loss of \d+)$/, '')}` : ''}, ${ok ? 'good' : 'no good'}`; cls = ok ? '' : 'bad'; }
     else if (/field goal/i.test(t)) { const r = g('fg', 2); h = `${g('fg') || ''}-yard field goal, ${/good/i.test(r || t) && !/no good/i.test(r || '') ? 'good' : r && /block/i.test(r) ? 'blocked' : 'no good'}`; cls = /good/i.test(t) ? 'good' : 'bad'; }
-    else if (/penalty/i.test(t)) { const m = raw.match(RX.pen); h = m ? `Penalty, ${GSIS[m[1]] || m[1]}: ${m[2]}, ${m[3]} yards` : 'Penalty'; cls = 'pen'; }  // not 'flag': site.css .flag is a white badge
+    else if (/penalty/i.test(t)) { const m = raw.match(RX.pen); h = m ? `Penalty, ${txtCode(m[1])}: ${m[2]}, ${penYds(m[3])}` : 'Penalty'; cls = 'pen'; }  // not 'flag': site.css .flag is a white badge
     else h = t || raw.split('. ')[0];
+    // a lateral names who finished the play (2026-10-28 audit: Golden's 1-yard catch, lateral to Lloyd for 5 more)
+    const lat = !pl.inner && raw.match(new RegExp(`[Ll]ateral to (${NM})(?= [a-z]| \\(|\\.|,|$)`));
+    if (lat) h += `, lateral to ${nm(lat[1])}`;
     if (td) { h += ' · Touchdown'; cls = 'td'; }
     if (pl.isTurnover && cls !== 'bad') cls = 'bad';
     return { h: h.replace(/\s+,/g, ',').replace(/\s{2,}/g, ' ').trim(), cls, raw: full, eff: raw };
@@ -4763,17 +4831,18 @@
     return !(s0.down === 1 && !(p.statYardage >= (s0.distance || 10)));
   };
   const playTags = p => {
-    const st = stPlay(p), t = pType(p), txt = String(p.text || ''), chips = [];
+    const st = stPlay(p), t = pType(p), txt = effText(p), chips = [];
     const fail = (isTry(p) || /field goal/i.test(t + txt)) && /no good|blocked|missed/i.test(t + txt);
     // a touchdown's text carries its extra point ("... TOUCHDOWN. X extra point is GOOD"): TD first
     if (p.scoringPlay) chips.push(/touchdown/i.test(t + txt) ? ['TD', 'c-sc'] : /field goal/i.test(t + txt) ? ['FG', 'c-sc'] : /two-point/i.test(t) ? ['2PT', 'c-sc']
       : /extra point/i.test(t) ? ['XP', 'c-sc'] : /safety/i.test(t + txt) ? ['SAFETY', 'c-sc'] : ['TD', 'c-sc']);
     else if (fail) chips.push(['NO GOOD', 'c-to']);
     else if (st) chips.push([/extra point|two-point/i.test(t) ? (/two-point/i.test(t) ? '2PT' : 'XP') : /kickoff|kicks/i.test(t + txt) ? 'KICKOFF' : /punt/i.test(t + txt) ? 'PUNT' : /field goal/i.test(t + txt) ? 'FG' : 'ST', 'c-st']);
-    // ESPN doesn't flag lost fumbles on kickoffs / punts as turnovers: the kicking team recovering is one
-    const kicker = st && (txt.match(/(?:kicks|punts)\b.*?\bfrom ([A-Z]{2,3}) \d/) || [])[1];
-    const recBy = (txt.match(/RECOVERED by ([A-Z]{2,3})-/) || [])[1];
-    const stLost = st && /FUMBLES/.test(txt) && kicker && recBy && ourCode(recBy) === ourCode(kicker);
+    // ESPN doesn't flag lost fumbles on kickoffs / punts as turnovers: the kicking team recovering is one (the last
+    // recovery: a ball can change hands twice)
+    const kicker = st && kickerOf(p);
+    const recs = [...txt.matchAll(/(?:RECOVERED|recovered) by ([A-Z]{2,3})-/g)], recBy = recs.length ? recs[recs.length - 1][1] : null;
+    const stLost = st && /FUMBLES|MUFFS/.test(txt) && kicker && recBy && txtCode(recBy) === kicker;
     if (p.isTurnover || stLost) chips.push([/intercept/i.test(t + txt) ? 'INT' : /fumble/i.test(t + txt) ? 'FUM' : 'TO', 'c-to']);
     if (/sack/i.test(t)) chips.push(['SACK', 'c-sk']);
     if (p.isPenalty) chips.push(['FLAG', 'c-pen']);
@@ -4787,7 +4856,7 @@
   const resChip = (label, cls, tip) => `<span class="rp-yd ${cls}" title="${esc(tip)}">${label}</span>`;
   const yardChip = (p, info) => {
     if (nonPlay(p)) return '';
-    const a = spot(p.start, info), b = spot(p.end, info), txt = String(p.text || ''), t = `${pType(p)} ${txt}`;
+    const a = spot(p.start, info), b = spot(p.end, info), txt = effText(p), t = `${pType(p)} ${txt}`;
     if (/No Play/i.test(txt) && /penalty/i.test(t)) return resChip('Flag', 'pen', 'Penalty: the play didn\'t count');
     // kicks and tries (owner 2026-10-25: "FGG/FGNG"): FGG / FGNG, XPG / XPNG, 2PT / 2PT NG; a blocked kick says so
     if (/defensive (?:pat|two-point|2pt)/i.test(t)) return resChip('Def 2PT', 'loss', 'The defense returned the try for 2 points');
@@ -4808,7 +4877,7 @@
       // (owner 2026-10-25: "i want Punt for punts that don't result in a turnover or score") a punt the receiving
       // team keeps is just "Punt"; one it fumbles back to the punting team is the turnover
       if (/punt/i.test(t)) {
-        const kept = a && b && b.offense.team === a.offense.team;
+        const kt = kickerOf(p), kept = kt ? b && b.offense.team === kt : a && b && b.offense.team === a.offense.team;
         return kept && /fumble|muff/i.test(t) ? resChip('Fumble', 'gain', 'The receiving team lost the ball') : resChip('Punt', 'zero', 'Punt');
       }
       if (/touchback/i.test(t)) return resChip('Touchback', 'zero', 'Touchback');
