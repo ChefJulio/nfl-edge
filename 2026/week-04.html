@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>NFL Edge · 2026 Week 4</title>
-<meta name="description" content="Free NFL analytics: win chances, power ratings, playoff odds, injury chance-to-play, stats and play-by-play splits since 1999, live gamecasts, fantasy tools.">
+<title>NFL Edge · NFL analytics: games, teams, play-by-play, fantasy · 2026 Week 4</title>
+<meta name="description" content="Free analytics for the whole NFL: win chances, live gamecasts and replays, power ratings, playoff odds, a 4th-down calculator, coaching staffs, injury chance-to-play, a play-by-play query tool since 1999, and fantasy tools.">
 <meta property="og:site_name" content="NFL Edge">
-<meta property="og:title" content="NFL Edge · 2026 Week 4">
-<meta property="og:description" content="Free NFL analytics: win chances, power ratings, playoff odds, injury chance-to-play, stats and play-by-play splits since 1999, live gamecasts, fantasy tools.">
+<meta property="og:title" content="NFL Edge · NFL analytics: games, teams, play-by-play, fantasy · 2026 Week 4">
+<meta property="og:description" content="Free analytics for the whole NFL: win chances, live gamecasts and replays, power ratings, playoff odds, a 4th-down calculator, coaching staffs, injury chance-to-play, a play-by-play query tool since 1999, and fantasy tools.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="theme-color" content="#0d0f13">
@@ -25,11 +25,11 @@
 <link rel="preconnect" href="https://static.www.nfl.com">
 <!-- Every week page (current, lookahead, archived) is this same shell: report.render fills the %TOKENS%; the week's
      numbers are in the JSON next to it and every tab renders in the browser (assets/*.js). -->
-<link rel="stylesheet" href="../assets/site.css?v=746b4872f1">
-<link rel="stylesheet" href="../assets/ui.css?v=746b4872f1">
-<link rel="stylesheet" href="../assets/gamecast.css?v=746b4872f1">
-<link rel="stylesheet" href="../assets/shell.css?v=746b4872f1">
-<link rel="stylesheet" href="../assets/table.css?v=746b4872f1">
+<link rel="stylesheet" href="../assets/site.css?v=68fbdf9410">
+<link rel="stylesheet" href="../assets/ui.css?v=68fbdf9410">
+<link rel="stylesheet" href="../assets/gamecast.css?v=68fbdf9410">
+<link rel="stylesheet" href="../assets/shell.css?v=68fbdf9410">
+<link rel="stylesheet" href="../assets/table.css?v=68fbdf9410">
 </head>
 <body>
 <script>/* which frame to draw (shell.js picks the same tab: the hash, else the last tab you used) */
@@ -55,9 +55,28 @@
   <p class="archived" id="wkNote" hidden></p>
 </div></header>
 <nav class="tabs"></nav>
-<noscript><p class="wrap">This app needs JavaScript. Plain-text versions: <a href="../llms.txt">llms.txt</a> (start here), <a href="../players.md">players</a> (one page each: chance to play, projection, practice, game log), <a href="../injuries.md">injuries</a>,
-<a href="../model/">how the model works</a>, <a href="../rankings.md">this week's rankings</a>,
-<a href="../power.md">power rankings</a>, <a href="../games.md">this week's games</a>.</p></noscript>
+<!-- What the site is, in the page itself (owner 2026-10-27: an LLM given the home page called it "a fantasy projections
+     site": fetchers read this HTML without running it, and the first content they met was the rankings' loading frame).
+     Visually hidden, read by screen readers and crawlers alike. -->
+<div class="vh" id="about-site">
+  <h2>NFL Edge: free analytics for the whole NFL</h2>
+  <p>Every game, team and player in the league, rebuilt from public data several times a day and live during games.
+    Fantasy is one part of it. Every prediction is tested on past seasons before it ships, and the misses are published.</p>
+  <ul>
+    <li>Games: win chances from our model next to the Vegas line; live gamecasts with play-by-play, live win probability and the biggest turning points; full replays of finished games; every 4th down and two-point try graded by our win-probability calculator.</li>
+    <li>Teams: opponent-adjusted power ratings by unit; playoff, division and Super Bowl odds from 10,000 simulated seasons, with each team's rooting guide; standings since 2002; every postseason since 1920; coaching staffs with who calls the plays and how each coach decides; payrolls and salary cap space; trades, signings and draft classes; injury reports with each player's chance to play and expected return.</li>
+    <li>Trends: a query tool over every run and pass since 1999 (personnel, coverage and pressure charting from 2016): leaderboards against the league, splits, grids, game logs and streaks, each with a shareable link.</li>
+    <li>Players: a card for everyone since 1999 with career game logs, practice and injury history, durability, grades and quarterbacks' throw charts; stats for any season or career; roster moves since 2002; every draft pick since 1980 and how the career turned out.</li>
+    <li>Calculator: the win chance of every option on 4th down, two-point tries, timeouts, penalties and onside kicks.</li>
+    <li>Reference: how often things happen in the NFL, from every play since 2001: conversions, field goals, expected points, how often leads hold.</li>
+    <li>Fantasy: weekly and rest-of-season projections with ranges and chance to play, rankings re-scored to your league's settings, and Sleeper and ESPN league tools (best lineup, matchup win chance, waivers, trades).</li>
+    <li>The model: how every number is made, every test with its pass bar set beforehand, and published track records.</li>
+  </ul>
+  <p>Plain-text versions for assistants: <a href="../llms.txt">llms.txt</a>.</p>
+</div>
+<noscript><p class="wrap">This app needs JavaScript. Plain-text versions: <a href="../llms.txt">llms.txt</a> (start here), <a href="../games.md">this week's games</a>,
+<a href="../power.md">power rankings</a>, <a href="../injuries.md">injuries</a>, <a href="../players.md">players</a> (one page each: chance to play, projection, practice, game log),
+<a href="../rankings.md">this week's fantasy rankings</a>, <a href="../model/">how the model works</a>.</p></noscript>
 <main><div class="wrap">
 <section id="tab-players" class="on">
 <!-- First-paint frame (owner 2026-10-16: draw the page's frame before the data arrives). rankings.js replaces this
@@ -87,8 +106,8 @@
 <footer><div class="wrap">nfl-edge &middot; nflverse, NFL.com practice reports, FantasyPros, ESPN, Open-Meteo &middot; for entertainment, not betting advice &middot; <a class="foot-bmc" href="https://buymeacoffee.com/hunter.graves" target="_blank" rel="noopener">Buy me a coffee</a> &middot; <a href="../llms.txt">For AI assistants</a></div></footer>
 <div class="botbar" aria-hidden="true"><div class="wrap nav-sub fr-rk"><button type="button" class="chip on">Rankings</button><button type="button" class="chip">Stats</button><button type="button" class="chip">Roles</button><button type="button" class="chip">Injuries</button><button type="button" class="chip">Moves</button><button type="button" class="chip">Trends</button></div><nav class="bb-row"><button type="button" class="fr-on"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.6 7-5.6s6.2 2 7 5.6"/></svg><span>Players</span></button><button type="button" class=""><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3l7 3v5c0 4.4-3 8-7 10-4-2-7-5.6-7-10V6z"/></svg><span>Teams</span></button><button type="button" class=""><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Games</span></button><button type="button" class=""><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.5 3.5M17 6h2.5A2.5 2.5 0 0 1 17 9.5M12 13v4M8.5 20h7"/></svg><span>Fantasy</span></button><button type="button" class=""><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-6"/></svg><span>Model</span></button></nav></div>
 <script>window.NFLE_CFG = {"page":"week","root":"../","data":"2026/week-04.json","season":2026,"week":4,"current":false,"archive":true,"lookahead":0};</script>
-<script src="../assets/shell.js?v=746b4872f1" defer></script>
-<script src="../assets/table.js?v=746b4872f1" defer></script>
-<script src="../assets/gamecast.js?v=746b4872f1" defer></script>
+<script src="../assets/shell.js?v=68fbdf9410" defer></script>
+<script src="../assets/table.js?v=68fbdf9410" defer></script>
+<script src="../assets/gamecast.js?v=68fbdf9410" defer></script>
 </body>
 </html>
