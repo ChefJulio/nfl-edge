@@ -81,13 +81,13 @@ def selections_old() -> list:
   """(DP2) [[season, AP1 / AP2 / PB, name, team]] for 1980-98 from Wikipedia's yearly All-Pro and Pro Bowl pages (1999 on:
   data/history/honors.json, by our id), the same parsing as tools/honors_build.py."""
   sys.path.insert(0, str(ROOT / "tools"))
-  from honors_build import entries, wiki
+  from honors_build import ap_code, entries, wiki
   out = []
   for s in range(1980, 1999):
     for name, team, rest, _ in entries(wiki(f"{s} All-Pro Team") or ""):
       tags = re.search(r"\(([^)]*)\)", rest or "")
       tags = [t.strip() for t in tags.group(1).split(",")] if tags else []
-      code = "AP1" if "AP" in tags else "AP2" if "AP-2" in tags else None
+      code = ap_code(tags)
       if code:
         out.append([s, code, name, team])
     pb = wiki(f"{s + 1} Pro Bowl") or ""

@@ -105,14 +105,32 @@ ENTRY = re.compile(r"(?:'{2,3})?(?:\{\{[Ss]mall\|[^}]*\}\}\s*)?(?:'{2,3})?\[\[(?
                    r"(\[\[[^\]]+\]\]|[A-Z][A-Za-z. ]+)")
 
 
+def ap_code(tags: list) -> str | None:
+  """An All-Pro row's selector tags -> AP1 / AP2 / None. AP's first team is "AP", a tie for a spot "AP-t" (2026-10-28
+  audit: Willie Roaf 2004, "(AP-t, PFWA)", read as nothing), a footnoted pick "AP*"; its second team "AP-2"."""
+  t = [re.sub(r"[*†‡]+$", "", x.strip()) for x in tags]
+  if any(x in ("AP", "AP-t", "AP-T") for x in t):
+    return "AP1"
+  if any(x.startswith("AP-2") for x in t):
+    return "AP2"
+  return None
+
+
 def entries(block: str):
   """'[[Name]], [[Team]]' / '[[Name]], Team' pairs in a wikitext block -> [(name, team code, rest of the item, the
   link's target: its disambiguation, "(wide receiver, born 1993)", tells two players of one name apart)]."""
   out = []
   for item in re.split(r"<br\s*/?>|\n", block):
     # the drafted-teams years (2014-16 games): "{{NFLplayer|12| Andrew Luck |([[Indianapolis Colts]])}}"
-    for m in re.finditer(r"\{\{NFLplayer\|[^|]*\|\s*([^|]+?)\s*\|\s*\(([^)]*)\)", item):
-      out.append((m.group(1), team_of(m.group(2)), item[m.end():], None))
+    # (2026-10-28 audit: "{{NFLplayer|29|Earl Thomas|d=defensive back|([[Seattle Seahawks]])}}", a named field
+    # between name and team, dropped every such player: 2013-15 Pro Bowls short ~20) the name is the 2nd field, the team
+    # the field in parentheses
+    for m in re.finditer(r"\{\{NFLplayer\|([^{}]*(?:\{\{[^{}]*\}\}[^{}]*)*)\}\}", item):
+      parts = [p.strip() for p in re.split(r"\|(?![^\[]*\]\])", m.group(1))]
+      name = parts[1] if len(parts) > 1 else ""
+      team = next((p for p in parts[2:] if p.startswith("(")), "")
+      if name and "=" not in name:
+        out.append((name, team_of(team), item[m.end():], None))
     for m in ENTRY.finditer(item):
       # a position where the team goes ("[[Kyle Fuller]], [[Cornerback]]", 2018's second table) serves as the hint
       tm = team_of(m.group(3))
@@ -225,7 +243,7 @@ def build(site: Path, refetch: bool = False) -> None:
       for name, team, rest, hint in entries(ap):
         tags = re.search(r"\(([^)]*)\)", rest or "")
         tags = [t.strip() for t in tags.group(1).split(",")] if tags else []
-        code = "AP1" if "AP" in tags else "AP2" if "AP-2" in tags else None
+        code = ap_code(tags)
         if code:
           g = names(s, name, team, hint)
           if g:
@@ -314,6 +332,28 @@ def build(site: Path, refetch: bool = False) -> None:
       if top and top > 0:
         by.setdefault(int(s), [])
         by[int(s)] += [[f"L_{code}", pid] for pid in g[g[col] == top].player_id]
+  # (2026-10-28 audit) Pro Bowl replacements some roster pages leave out (Josh Allen 2021, Matt Ryan 2014): each
+  # selected player's own infobox lists every season he was named. Only when finished seasons are (re)fetched: a
+  # one-time pass, committed with the history
+  fin = [s for s in todo if s in done]
+  if len(fin) > 1:
+    from honors_audit import infobox, years
+    nm = dict(zip(players.gsis_id, players.display_name))
+    sel = sorted({g for s in fin for code, g, *_ in by[s] if code in ("PB", "AP1")})
+    added = 0
+    for g in sel:
+      ib = infobox(nm.get(g)) if isinstance(nm.get(g), str) else None
+      if not ib:
+        continue
+      yrs = set()
+      for ln in ib.split("\n"):
+        if "Pro Bowl" in ln and not re.search(r"MVP", ln):
+          yrs |= years(ln)
+      have = {s for s in fin for code, x, *_ in by[s] if code == "PB" and x == g}
+      for y in sorted(yrs & set(fin) - have):
+        by[y].append(["PB", g])
+        added += 1
+    print(f"[honors] Pro Bowls added from players' infoboxes: {added} (of {len(sel)} players checked)", flush=True)
   p = {}
   for s, rows in by.items():
     for code, g, *wk in rows:

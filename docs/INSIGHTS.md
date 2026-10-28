@@ -5474,3 +5474,19 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   negative (Jared Allen .83 -> .73, Urlacher .94 -> .91, John Abraham .37 -> .28), against the descriptive hint the
   other way: among players with 5-8 Pro Bowls, 7 of 12 with a snub are in (58%) vs 42 of 101 without (42%). Too few
   either way; re-run once careers with snub data (2004 on) fill the training rows (careers over by 2015 now).
+- **AUDIT 2026-10-28 (owner: "can you verify our numbers are all accurate"): Pro Bowl and All-Pro selections against
+  each player's Wikipedia infobox** (tools/honors_audit.py; 1999-2025; every player with 3+ Pro Bowls or a first-team
+  All-Pro in our data, ~550 with an infobox). Before: Pro Bowls 32 missing of 2,091 (1.5%), mostly 2013-15 (the
+  drafted-teams rosters' "{{NFLplayer|29|Earl Thomas|d=defensive back|(...)}}" form, a named field before the team,
+  dropped every such player: Earl Thomas, Sherman, A. Brown, Quinn) and replacements the roster pages leave out (Matt
+  Ryan 2014, Josh Allen 2021, Micah Parsons 2021); first-team All-Pro: AP ties ("AP-t": Willie Roaf 2004) read as
+  nothing. Fixed (tools/honors_build.py: the template's fields parsed by name; each selected player's infobox adds the
+  Pro Bowl seasons the rosters missed, a one-time pass on refetch; ap_code reads AP-t; the same reader in
+  tools/hof_eval.py's 1980-98 selections), every season refetched. After: Pro Bowls 0 missing of 2,132; 8 ours only:
+  6 are the audit's own misread (infoboxes writing ranges with a minus sign: Trent Williams, Myles Garrett), 2 where
+  Wikipedia disagrees with itself (John Kuhn 2009, Gronkowski 2013: on the roster pages, not in their infoboxes; the
+  rosters kept). First-team All-Pro: 30 infobox-only seasons, all other selectors' first teams (PFWA / SN) or AP
+  second team (Birk 2003, Porter 2008, Jenkins 2008, E. James 2004): ours is the AP's. Re-run on the corrected data:
+  DQ's gates unchanged (Pro Bowl AUC 0.930; reputation -0.0286 [-0.0338, -0.0237]); 192 snubbed seasons, 154 players;
+  career Pro Bowl gap: Lavonte David 3.8 expected / 1 (gap 2.8), Matt Ryan 6.1 / 4 (was 5.8 / 3 with 2014 missing),
+  Mathieu, Moss, Mason, Barber; Tony Gonzalez 2013 off the snub list (that Pro Bowl was missing).
