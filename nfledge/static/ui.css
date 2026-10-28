@@ -198,3 +198,6 @@ html, body { overflow-x: clip; }
 /* visually hidden, still read by screen readers and by fetchers that don't run the page (week.html #about-site) */
 .vh { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0);
   white-space: nowrap; border: 0; }
+
+/* a search box lifted above the phone keyboard (shell.js) stops below the sticky tabs, not under them */
+input[type="search"] { scroll-margin-top: calc(var(--navh, 45px) + var(--sat, 0px) + 8px); }

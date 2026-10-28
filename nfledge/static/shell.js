@@ -1276,6 +1276,25 @@ html.app-shell .ptr.busy svg { animation: ptr-spin .8s linear infinite; }
   };
 })();
 
+// A search box lifts to the top of what's visible when the keyboard opens (owner 2026-10-28: "when i tap the search bar
+// to search a player (wherever that shows up) can we scroll down so the list is visible rather than hidden behind the
+// keyboard"): every type="search" box, on touch screens; whatever scrolls around it (the page, a sheet) scrolls so the
+// box sits under the header (ui.css scroll-margin-top) and its list or filtered table shows below it. Waits for the
+// keyboard (the visual viewport shrinks), with a timer for browsers that don't report it.
+(() => {
+  if (!('ontouchstart' in window) && !(navigator.maxTouchPoints > 0)) return;
+  let timer = null;
+  const lift = el => { if (document.activeElement === el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); };
+  document.addEventListener('focusin', e => {
+    const el = e.target;
+    if (!el.matches || !el.matches('input[type="search"]')) return;
+    clearTimeout(timer);
+    const go = () => { clearTimeout(timer); timer = setTimeout(() => lift(el), 50); };
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', go, { once: true });
+    timer = setTimeout(() => lift(el), 400);
+  });
+})();
+
 // A clear X in every text box (owner 2026-10-21: "a little X to display inline on the right to clear the input easily
 // rather than forcing user to backspace the whole thing"): drawn by ui.css in the box's right padding whenever it has
 // text (its placeholder is hidden; a box without one gets a blank one), so no markup changes anywhere. A tap on it
