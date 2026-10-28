@@ -5409,3 +5409,22 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   group; the card shows injuries per 1,000 snaps. QBs, 94 ranked: Allen 15th (85th pct) -> 4th (97th), behind Brady,
   Rivers, Eli Manning (no injury-missed games in 6,539-10,879 snaps); the one-season zeros fall from 11th-14th to
   26th-30th (Ward, Rush, Ridder, Cassel, ~70th pct); Mahomes 25th, Burrow 40th, Lamar Jackson 54th.
+  Then (owner: "so it's comparing vs historical players? mehh"): an active player is ranked among this season's players
+  at his position (Allen 1st of 54 active QBs); a retired one among everyone since 2013.
+- **PRE-REGISTERED 2026-10-28 (owner, on Harrison Smith, 40 INT / 22 sacks: "factoring in sacks for defensive players
+  doesn't improve the model?"): (DP4) defensive backs' sacks in the all-time rank.** Measured first: among DBs drafted
+  1980 on, 35+ INT and 20+ sacks: Woodson, Barber, Butler, Dawkins (all in) and Smith (active); Rodney Harrison 34 / 30.5
+  is out. DP2's all-time rank reads DBs on interceptions alone (Smith 27th, outside the top 25; his sacks 7th among DBs,
+  unread). Candidate: a DB's rank = the better of his interception rank and his rank in interceptions + sacks (both
+  among every DB in the data); DL / LB / offense unchanged. TEST: DP2's rows and folds (careers over by 2015, 5 folds by
+  draft class), out-of-fold log loss, the shipped model with the candidate rank in place of the current one, 95%
+  bootstrap over players. GATE: lower with the interval excluding 0. Expected small or inconclusive (the club is five
+  players, four of them already rated high on All-Pros). Reported either way: DBs alone, and Smith's and Harrison's
+  chances under each.
+- **RESULT {#hof-db-sacks} (DP4) defensive backs' sacks in the all-time rank: FAIL (inconclusive); not shipped.**
+  tools/hof_eval.py --dp4=1. Overall -0.00019 [-0.00061, +0.00012]. Every sign points the expected way: DBs alone
+  (1,317, 17 in) log loss 0.0091 -> 0.0082; inductees whose rank moves gain (Butler .70 -> .93, Barber .88 -> .99,
+  Dawkins .96 -> .99; Polamalu .96 -> .95); final fit: Harrison Smith .03 -> .19, Rodney Harrison .03 -> .18 (both
+  move inside the top 25: Smith 27th by interceptions, 7th in interceptions + sacks). Six DBs' rank flags change; 17
+  DB inductees are too few to separate it from chance. Recorded as untested-but-plausible: if more seasons of 35 / 20
+  DBs come through the ballot it can be re-run.

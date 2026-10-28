@@ -173,6 +173,11 @@ def frame(nfl, last: int) -> pd.DataFrame:
     for col in cols:
       v = pd.to_numeric(d.loc[m, col], errors="coerce").fillna(0)
       d.loc[m, "rk"] = np.minimum(d.loc[m, "rk"], v.rank(ascending=False, method="min"))
+  # (DP4 candidate) a DB's rank: the better of interceptions and interceptions + sacks
+  d["rk2"] = d.rk
+  m = d.g == "DB"
+  both = (pd.to_numeric(d.loc[m, "def_ints"], errors="coerce").fillna(0) + pd.to_numeric(d.loc[m, "def_sacks"], errors="coerce").fillna(0))
+  d.loc[m, "rk2"] = np.minimum(d.loc[m, "rk"], both.rank(ascending=False, method="min"))
   d["fb"] = (d.position == "FB").astype(int)
   # ballots so far: classes he has been eligible for through the coming one (last + 1), capped
   d["ye"] = (last + 1 - (d.to + 6) + 1).clip(lower=0, upper=30)
@@ -296,6 +301,35 @@ def dp2_c(nfl, d: pd.DataFrame, last: int) -> None:
         f"{len(e):,}, {int(e.hof.sum())} in, predicted {e.p.sum():.1f}, AUC {roc_auc_score(e.hof, e.p) if e.hof.any() else float('nan'):.3f}")
   print(u.sort_values("p", ascending=False).head(15)[["display_name", "g", "allpro", "probowls", "rings", "decade", "to", "hof", "p"]].round(2).to_string(index=False))
   print("Inductees:", u[u.hof][["display_name", "allpro", "probowls", "p"]].round(2).values.tolist())
+
+
+def dp4(d: pd.DataFrame) -> None:
+  """(DP4) the shipped model with DBs ranked on the better of interceptions and interceptions + sacks."""
+  from sklearn.metrics import roc_auc_score
+  tr = d[d.to <= 2015].reset_index(drop=True)
+  y, groups = tr.hof.to_numpy(int), tr.season.to_numpy()
+  allc = [c for v in FEATS.values() for c in v]
+  pb = oof(tr, allc, groups)
+  t2 = tr.assign(rk=tr.rk2)
+  pn = oof(t2, allc, groups)
+  m, lo, hi = ci(ll(y, pn) - ll(y, pb))
+  print(f"\n(DP4) DB rank with sacks vs today's: {m:+.5f} [{lo:+.5f}, {hi:+.5f}]  {'PASS' if hi < 0 else 'FAIL'}")
+  db = (tr.g == "DB").to_numpy()
+  print(f"  DBs alone ({db.sum()}, {y[db].sum()} in): log loss {ll(y[db], pb[db]).mean():.4f} -> {ll(y[db], pn[db]).mean():.4f}; "
+        f"AUC {roc_auc_score(y[db], pb[db]):.3f} -> {roc_auc_score(y[db], pn[db]):.3f}")
+  changed = tr[(tr.rk != tr.rk2)]
+  print(f"  DBs whose rank flags change: {int(((tr.rk <= 25) != (tr.rk2 <= 25)).sum())}; e.g.",
+        changed.assign(old=pb[changed.index], new=pn[changed.index]).sort_values("new", ascending=False).head(8)[["pfr_player_name", "def_ints", "def_sacks", "rk", "rk2", "hof", "old", "new"]].round(3).values.tolist())
+  # Smith (active) and Harrison: the final fit each way
+  from sklearn.linear_model import LogisticRegressionCV
+  from sklearn.model_selection import GroupKFold
+  for lab, frame_ in (("today", tr), ("with sacks", t2)):
+    X = design(frame_)[allc].to_numpy(float)
+    fm = LogisticRegressionCV(Cs=[0.03, 0.1, 0.3, 1, 3, 10], cv=list(GroupKFold(5).split(X, y, groups)), scoring="neg_log_loss", max_iter=5000).fit(X, y)
+    q = d[d.pfr_player_name.isin(["Harrison Smith", "Rodney Harrison"])].copy()
+    if lab == "with sacks":
+      q["rk"] = q.rk2
+    print(f"  {lab}: " + ", ".join(f"{n} {p:.2f}" for n, p in zip(q.pfr_player_name, fm.predict_proba(design(q)[allc].to_numpy(float))[:, 1])))
 
 
 # as tested in DP2 (all-decade and all-time rank passed and joined FEATS; this list is the test as it ran)
@@ -441,6 +475,9 @@ if __name__ == "__main__":
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
   if "export" in opt:
     export(ROOT / opt["export"])
+  elif opt.get("dp4") == "1":
+    import nflreadpy as nfl
+    dp4(frame(nfl, int(nfl.get_current_season()) - 1))
   elif opt.get("dp2") == "1":
     import nflreadpy as nfl
     d = frame(nfl, int(nfl.get_current_season()) - 1)
