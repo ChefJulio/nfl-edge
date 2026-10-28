@@ -5314,3 +5314,41 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   Brown reads .96). Shipped: tools/hof_eval.py --export (CI step "Hall of Fame") -> data/hof_chance.json; the
   Honors sheet's Hall of Fame chance and watch list. Awards and champion rosters through 2025 committed
   (data/history/hof_inputs.json).
+- **PRE-REGISTERED 2026-10-28 (owner: "i don't see why we're ignoring undrafted players ... any other way to get our
+  main model more accurate? what other trends are there among guys who got in? among guys who didn't that we thought
+  should?"): (DP2) the Hall of Fame model, extended.** Measured first (out of fold, DP's B): among players with 3+ Pro
+  Bowls (300, 90 in) AUC 0.961, 89.7% right at 50%, 69 of 90 inductees called in, 10 called in who aren't; with 5+
+  (146, 81 in) 0.927, 82.9%. Inductees it rated under 50% (23) waited a median 9 years past eligibility (those over 90%:
+  1), many as seniors; they cluster as receivers with few All-Pros but big career totals (Bruce, Tim Brown, Reed,
+  Monk, Irvin), All-Decade selections (Covert, Stephenson, Easley, Boselli) and dynasty rings (Aikman, Irvin, Haley).
+  Rated over 50% and not in: still-eligible receivers and linemen (Holt, Wayne, K. Williams, Woodson), a fullback
+  (Alstott: All-Pro as a fullback), 80s-90s linemen and linebackers (Wisniewski, Mecklenburg, L. Brown). Candidate
+  inputs, each tested on DP's rows and folds (careers over by 2015, 5 folds by draft class, out-of-fold log loss,
+  95% bootstrap over players): (1) All-Decade team, first or second (Wikipedia's NFL 1980s / 1990s / 2000s / 2010s
+  All-Decade Team pages); (2) all-time career rank at the position among every player in the data (QB pass yards, RB
+  rush yards, WR / TE receiving yards and receptions, DL / LB sacks, DB interceptions), as top-5 / top-10 / top-25
+  flags replacing DP's percentile; (3) years eligible (the class year minus the first eligible class; censoring: a
+  non-inductee eligible 3 years is not a non-inductee eligible 20), with predictions read at 20 years eligible as the
+  eventual chance; (4) fullback as its own position. GATE per input: added to B, out-of-fold log loss lower with the
+  interval excluding 0; the inputs that pass ship together (and the set refit and re-checked against B). Separately,
+  (5) undrafted players: a model C without the career-value inputs (AV, starts, games: Pro Football Reference's,
+  drafted players only), All-Pro and Pro Bowl counts from Wikipedia's yearly pages (extended back to 1980), checked on
+  the drafted rows' folds against A (All-Pro count alone); GATE: C's log loss lower than A's with the interval
+  excluding 0; then C scores every undrafted player since 1980 (outcome from data/history/hof.csv).
+- **RESULT {#hof-model-2} (DP2) the Hall of Fame model, extended: All-Decade and all-time rank PASS; years eligible and
+  fullback FAIL; model C PASS. Shipped.** tools/hof_eval.py --dp2=1. Added to B (log loss 0.0117), new - B, 95%:
+  All-Decade -0.0012 [-0.0023, -0.0001] PASS; all-time rank at the position (top 5 / 10 / 25) -0.0010 [-0.0019,
+  -0.0001] PASS; years eligible -0.0004 [-0.0008, +0.0001] FAIL; fullback +0.0000 FAIL. The two together -0.0020
+  [-0.0035, -0.0004]; among players with 3+ Pro Bowls AUC 0.961 -> 0.975, right at 50% 89.7% -> 91.3%. C (B without
+  career value, starts, games, the stat percentile and rank; with All-Decade) vs A on the drafted rows: -0.0097
+  [-0.0150, -0.0053] PASS (C 0.0116, about B's). Outside the draft table (players since 1980 not in nflverse's draft
+  picks: undrafted and the 1984 / 1987 supplemental drafts; 11 of 112 inductees whose careers began 1980 on): All-Pro
+  and Pro Bowl counts from Wikipedia's yearly pages 1980-98 (three layouts: "Name, Team", "Name – SF", AFC / NFC lists)
+  and our honors data 1999 on; careers over by 2015: 9 in, 12.9 predicted, AUC 0.998. Inductees: Reggie White 1.00,
+  Steve Young 1.00, Randle .97, Zimmerman .95, Gates .89, Cris Carter .87, Vinatieri .79, Warner .55, Moon .39 (a QB
+  with no AP1: his case was volume, which C can't see), Sam Mills .07 (a seniors pick). With the new inputs, Harrison
+  Smith .13 -> .03 (no All-Decade, outside the top 25 in interceptions); Darren Sharper .90 (All-Decade, interceptions:
+  his convictions are off the field). Specialists still read high (Lechler .95, Landeta .85: one or two inducted to
+  learn from); the card says so. Shipped: export fits B (with All-Decade and rank) for drafted players and C for
+  everyone else; inputs committed (data/history/hof_inputs.json: awards, champion rosters, All-Decade, 1980-98
+  selections).

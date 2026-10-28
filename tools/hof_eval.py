@@ -20,7 +20,8 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 CACHE = ROOT / "data" / "history" / "hof_inputs.json"  # finished seasons' awards and champion rosters, committed
-ALIAS = {"patsurtain": "patricksurtain"}  # ESPN's name -> the draft row's (normalized)
+ALIAS = {"patsurtain": "patricksurtain", "jimcovert": "jimbocovert"}  # another source's name -> the draft row's (normalized)
+DRAFT_NAMES = {}  # frame() fills it: the draft rows' normalized names and draft years, for outside()'s duplicates
 AWARD = {477: "mvp", 478: "opoy", 479: "dpoy", 317: "sbmvp"}
 # Super Bowl champions before nflverse's schedules (1999): season -> roster team code (nflverse's old rosters)
 SB_OLD = {1980: "OAK", 1981: "SF", 1982: "WAS", 1983: "RAI", 1984: "SF", 1985: "CHI", 1986: "NYG", 1987: "WAS", 1988: "SF",
@@ -45,9 +46,15 @@ def get(url):
 
 
 def inputs(nfl, last: int) -> dict:
-  """{"awards": [[season, code, name]], "rings": [[season, name, team]]}, cached (history doesn't change)."""
+  """{"awards": [[season, code, name]], "rings": [[season, name, team]], "decade": [[decade, name]]}, cached (history
+  doesn't change)."""
   if CACHE.exists():
-    return json.loads(CACHE.read_text(encoding="utf-8"))
+    j = json.loads(CACHE.read_text(encoding="utf-8"))
+    if "decade" not in j or "sel_old" not in j:  # (DP2) added to a file cached before them
+      j.setdefault("decade", all_decade())
+      j.setdefault("sel_old", selections_old())
+      CACHE.write_text(json.dumps(j), encoding="utf-8")
+    return j
   aw = []
   for s in range(1980, last + 1):
     lst = get(f"https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/{s}/awards?limit=100")
@@ -64,9 +71,52 @@ def inputs(nfl, last: int) -> dict:
   champ.update({int(r.season): (r.home_team if r.result > 0 else r.away_team) for r in sb.itertuples()})
   ros = nfl.load_rosters(sorted(champ)).to_pandas()
   rings = [[int(s), n, t] for s, n, t in zip(ros.season, ros.full_name, ros.team) if champ.get(int(s)) == t and isinstance(n, str)]
-  out = {"awards": aw, "rings": rings}
+  out = {"awards": aw, "rings": rings, "decade": all_decade()}
   CACHE.parent.mkdir(exist_ok=True)
   CACHE.write_text(json.dumps(out), encoding="utf-8")
+  return out
+
+
+def selections_old() -> list:
+  """(DP2) [[season, AP1 / AP2 / PB, name, team]] for 1980-98 from Wikipedia's yearly All-Pro and Pro Bowl pages (1999 on:
+  data/history/honors.json, by our id), the same parsing as tools/honors_build.py."""
+  sys.path.insert(0, str(ROOT / "tools"))
+  from honors_build import entries, wiki
+  out = []
+  for s in range(1980, 1999):
+    for name, team, rest, _ in entries(wiki(f"{s} All-Pro Team") or ""):
+      tags = re.search(r"\(([^)]*)\)", rest or "")
+      tags = [t.strip() for t in tags.group(1).split(",")] if tags else []
+      code = "AP1" if "AP" in tags else "AP2" if "AP-2" in tags else None
+      if code:
+        out.append([s, code, name, team])
+    pb = wiki(f"{s + 1} Pro Bowl") or ""
+    i = re.search(r"^==\s*(AFC roster|Rosters?|Roster|AFC rosters?|AFC|Selections)\s*==", pb, re.M | re.I)
+    blk = pb[i.start():] if i else ""
+    j = re.search(r"^==\s*(Number of selections|References|Notes|See also|External links|Broadcast)", blk, re.M | re.I)
+    blk = blk[:j.start()] if j else blk
+    out += [[s, "PB", name, team] for name, team, _, _ in entries(blk)]
+    # the mid-90s pages: "[[Steve Young]] – SF", "*[[John Elway]] – [[Denver Broncos]]" (a dash, not a comma)
+    dash = re.findall(r"\[\[(?:[^\]|]+\|)?([^\]]+)\]\]'*\s*[–—-]\s*(\[\[[^\]]+\]\]|[A-Z][A-Za-z. ]*)", blk)
+    seen = {r[2] for r in out if r[0] == s and r[1] == "PB"}
+    out += [[s, "PB", n.strip(), t] for n, t in dash if n.strip() not in seen]
+  return out
+
+
+def all_decade() -> list:
+  """(DP2) [[first season of the decade, name]]: the NFL's All-Decade teams, 1980s-2010s (Wikipedia; every player cell
+  is "[[Name]] <small>(teams)</small>", first and second teams alike)."""
+  out = []
+  for dec in (1980, 1990, 2000, 2010):
+    req = urllib.request.Request(f"https://en.wikipedia.org/w/index.php?title=NFL_{dec}s_All-Decade_Team&action=raw",
+                                 headers={"User-Agent": "nfl-edge/1.0"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+      t = r.read().decode("utf-8", errors="ignore")
+    for ln in t.split("\n"):
+      if ln.startswith("|") and "<small" in ln:
+        m = re.search(r"\[\[(?:[^\]|]+\|)?([^\]]+)\]\][^<]*<small", ln)
+        if m:
+          out.append([dec, m.group(1).strip()])
   return out
 
 
@@ -78,6 +128,7 @@ def frame(nfl, last: int) -> pd.DataFrame:
   for c in ("allpro", "probowls", "seasons_started", "w_av", "games", "pass_yards", "rush_yards", "rec_yards", "def_sacks", "def_ints"):
     d[c] = pd.to_numeric(d[c], errors="coerce").fillna(0)
   d["k"] = d.pfr_player_name.map(norm)
+  DRAFT_NAMES.update(k=list(d.k), s=[int(x) for x in d.season])
   I = inputs(nfl, last)
   # a name within a career window, one draft row: the honor is his
   by = {}
@@ -108,13 +159,32 @@ def frame(nfl, last: int) -> pd.DataFrame:
   for g, col in STAT.items():
     m = d.g == g
     d.loc[m, "stat"] = d.loc[m, col].rank(pct=True)
+  # (DP2) candidates. All-Decade selections (first or second team), matched by name within the decade
+  d["decade"] = 0
+  for dec, name in I.get("decade", []):
+    c = [i for i, a, z in by.get(ALIAS.get(norm(name), norm(name)), []) if a <= dec + 9 and z >= dec]
+    if len(c) == 1:
+      d.loc[c[0], "decade"] += 1
+  # all-time rank at the position (every draft row in the data): the best of its stats (receivers: yards or catches)
+  d["rk"] = 999
+  for g, cols in {"QB": ["pass_yards"], "RB": ["rush_yards"], "WR": ["rec_yards", "receptions"], "TE": ["rec_yards", "receptions"],
+                  "DL": ["def_sacks"], "LB": ["def_sacks"], "DB": ["def_ints"]}.items():
+    m = d.g == g
+    for col in cols:
+      v = pd.to_numeric(d.loc[m, col], errors="coerce").fillna(0)
+      d.loc[m, "rk"] = np.minimum(d.loc[m, "rk"], v.rank(ascending=False, method="min"))
+  d["fb"] = (d.position == "FB").astype(int)
+  # ballots so far: classes he has been eligible for through the coming one (last + 1), capped
+  d["ye"] = (last + 1 - (d.to + 6) + 1).clip(lower=0, upper=30)
   print(f"[hof] {len(I['awards'])} awards ({miss['awards']} not matched), {len(I['rings'])} champion roster rows", flush=True)
   return d
 
 
 FEATS = {"allpro": ["ap1", "ap1_3", "ap1_5"], "probowl": ["pb", "pb_7"], "career": ["av", "starts", "games"],
          "awards": ["mvp", "opoy", "dpoy", "sbmvp"], "rings": ["rings"], "position": ["p_QB", "p_RB", "p_WR", "p_TE", "p_OL", "p_DL", "p_LB", "p_DB", "p_ST"],
-         "stat": ["stat"]}
+         "stat": ["stat"],
+         # (DP2, PASS 2026-10-28) All-Decade selections; all-time rank at the position (top 5 / 10 / 25)
+         "decade": ["decade"], "rank": ["rk5", "rk10", "rk25"]}
 
 
 def design(d: pd.DataFrame) -> pd.DataFrame:
@@ -128,7 +198,129 @@ def design(d: pd.DataFrame) -> pd.DataFrame:
   for g in ("QB", "RB", "WR", "TE", "OL", "DL", "LB", "DB", "ST"):
     x[f"p_{g}"] = (d.g == g).astype(float)
   x["stat"] = d.stat
+  # (DP2) candidates
+  if "decade" in d:
+    x["decade"] = d.decade.clip(upper=2)
+    x["rk5"], x["rk10"], x["rk25"] = (d.rk <= 5).astype(float), (d.rk <= 10).astype(float), (d.rk <= 25).astype(float)
+    x["ye"] = np.log1p(d.ye)
+    x["fb"] = d.fb.astype(float)
   return x
+
+
+# (DP2) model C, for players outside the draft table (undrafted, the 1984 / 1987 supplemental drafts): B's inputs that
+# exist for everyone. No career value, starts, games or stats: Pro Football Reference's, drafted rows only
+FEATS_C = ["ap1", "ap1_3", "ap1_5", "pb", "pb_7", "mvp", "opoy", "dpoy", "sbmvp", "rings",
+           "p_QB", "p_RB", "p_WR", "p_TE", "p_OL", "p_DL", "p_LB", "p_DB", "p_ST", "decade"]
+
+
+def outside(nfl, last: int, drafted: set) -> pd.DataFrame:
+  """(DP2) every player outside the draft table whose career began 1980 on (nflverse players: id, name, years,
+  position), with the draft rows' columns model C reads: first-team All-Pros and Pro Bowls (1999 on: our honors data by
+  id; before: Wikipedia's yearly pages by name within his years), awards, rings and All-Decade selections (by name),
+  hof from data/history/hof.csv."""
+  pl = nfl.load_players().to_pandas()
+  u = pl[pl.gsis_id.notna() & ~pl.gsis_id.isin(drafted) & (pd.to_numeric(pl.rookie_season, errors="coerce") >= 1980)
+         & pl.last_season.notna()].copy()
+  # a drafted player under a second id (Jim / Jimbo Covert): his draft row stands
+  dk = set(zip(DRAFT_NAMES.get("k", []), DRAFT_NAMES.get("s", [])))
+  key = lambda n: ALIAS.get(norm(n), norm(n))  # noqa: E731
+  u = u[[(key(n), int(s)) not in dk and (key(n), int(s) - 1) not in dk for n, s in zip(u.display_name, pd.to_numeric(u.rookie_season))]]
+  u["season"], u["to"] = pd.to_numeric(u.rookie_season).astype(int), pd.to_numeric(u.last_season).astype(int)
+  u["pfr_player_name"] = u.display_name
+  u["g"] = u.position.map(GROUP).fillna(u.position.map({"ILB": "LB", "MLB": "LB", "SS": "DB", "FS": "DB", "OT": "OL", "OG": "OL"})).fillna("ST")
+  u = u.reset_index(drop=True)
+  by = {}
+  for i, n, f, l, a, z in zip(u.index, u.display_name, u.football_name, u.last_name, u.season, u.to):
+    for k in {norm(n), norm(f"{f} {l}") if isinstance(f, str) and isinstance(l, str) else ""} - {""}:
+      by.setdefault(k, []).append((i, a, z))
+  def who(name, s):
+    k = norm(name)
+    c = {i for i, a, z in by.get(ALIAS.get(k, k), []) if a <= s <= z + 1}
+    return next(iter(c)) if len(c) == 1 else None
+  for c in ("allpro", "ap2", "probowls", "mvp", "opoy", "dpoy", "sbmvp", "rings", "decade"):
+    u[c] = 0
+  I = inputs(nfl, last)
+  col = {"AP1": "allpro", "AP2": "ap2", "PB": "probowls"}
+  for s, code, name, _ in I.get("sel_old", []):
+    i = who(name, s)
+    if i is not None:
+      u.loc[i, col[code]] += 1
+  ix = {g: i for i, g in zip(u.index, u.gsis_id)}
+  hist = json.loads((ROOT / "data" / "history" / "honors.json").read_text(encoding="utf-8"))["seasons"]
+  for s, rows in hist.items():
+    for code, g, *_ in rows:
+      if code in col and g in ix:
+        u.loc[ix[g], col[code]] += 1
+  for s, code, name in I["awards"]:
+    i = who(name, s)
+    if i is not None:
+      u.loc[i, code] += 1
+  for s, name, _ in I["rings"]:
+    i = who(name, s)
+    if i is not None:
+      u.loc[i, "rings"] += 1
+  for dec, name in I.get("decade", []):
+    c = {i for i, a, z in by.get(ALIAS.get(norm(name), norm(name)), []) if a <= dec + 9 and z >= dec}
+    if len(c) == 1:
+      u.loc[next(iter(c)), "decade"] += 1
+  hof = set(pd.read_csv(ROOT / "data" / "history" / "hof.csv").gsis_id)
+  u["hof"] = u.gsis_id.isin(hof)
+  # the draft-only columns design() builds (C reads none of them)
+  for c in ("w_av", "seasons_started", "games", "fb", "ye"):
+    u[c] = 0
+  u["stat"], u["rk"] = 0.5, 999
+  return u
+
+
+def dp2_c(nfl, d: pd.DataFrame, last: int) -> None:
+  """(DP2) model C on the drafted rows' folds against A; then fit on them and scored on everyone outside the table."""
+  tr = d[d.to <= 2015].reset_index(drop=True)
+  y, groups = tr.hof.to_numpy(int), tr.season.to_numpy()
+  bins = pd.get_dummies(pd.cut(tr.allpro, [-1, 0, 1, 2, 3, 4, 99]), dtype=float)
+  from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
+  from sklearn.model_selection import GroupKFold
+  from sklearn.metrics import roc_auc_score
+  pa = np.zeros(len(tr))
+  for a, b in GroupKFold(5).split(bins, y, groups):
+    pa[b] = LogisticRegression(C=1e6, max_iter=2000).fit(bins.iloc[a], y[a]).predict_proba(bins.iloc[b])[:, 1]
+  pc = oof(tr, FEATS_C, groups)
+  m, lo, hi = ci(ll(y, pc) - ll(y, np.clip(pa, 1e-4, 1 - 1e-4)))
+  print(f"\n(DP2) C (no career value) vs A on drafted rows: {m:+.4f} [{lo:+.4f}, {hi:+.4f}]  {'PASS' if hi < 0 else 'FAIL'}"
+        f"; C log loss {ll(y, pc).mean():.4f}, AUC {roc_auc_score(y, pc):.3f}")
+  X = design(tr)[FEATS_C].to_numpy(float)
+  fm = LogisticRegressionCV(Cs=[0.03, 0.1, 0.3, 1, 3, 10], cv=list(GroupKFold(5).split(X, y, groups)), scoring="neg_log_loss", max_iter=5000).fit(X, y)
+  u = outside(nfl, last, set(d.gsis_id.dropna()))
+  u["p"] = fm.predict_proba(design(u)[FEATS_C].to_numpy(float))[:, 1]
+  e = u[u.to <= 2015]
+  print(f"Outside the draft table: {len(u):,} players since 1980 ({int(u.hof.sum())} inductees); careers over by 2015: "
+        f"{len(e):,}, {int(e.hof.sum())} in, predicted {e.p.sum():.1f}, AUC {roc_auc_score(e.hof, e.p) if e.hof.any() else float('nan'):.3f}")
+  print(u.sort_values("p", ascending=False).head(15)[["display_name", "g", "allpro", "probowls", "rings", "decade", "to", "hof", "p"]].round(2).to_string(index=False))
+  print("Inductees:", u[u.hof][["display_name", "allpro", "probowls", "p"]].round(2).values.tolist())
+
+
+# as tested in DP2 (all-decade and all-time rank passed and joined FEATS; this list is the test as it ran)
+CAND = {"all-decade": ["decade"], "all-time rank": ["rk5", "rk10", "rk25"], "years eligible": ["ye"], "fullback": ["fb"]}
+
+
+def dp2(tr: pd.DataFrame) -> None:
+  """(DP2) each candidate input added to B: out-of-fold log loss, with interval (gate: lower, the interval below 0)."""
+  y, groups = tr.hof.to_numpy(int), tr.season.to_numpy()
+  base = [c for v in FEATS.values() for c in v]
+  lb = ll(y, oof(tr, base, groups))
+  print(f"\n(DP2) B {lb.mean():.4f}; each candidate added (new - B; gate: interval below 0):")
+  keep = []
+  for name, cols in CAND.items():
+    m, lo, hi = ci(ll(y, oof(tr, base + cols, groups)) - lb)
+    ok = hi < 0
+    keep += cols if ok else []
+    print(f"  {name:14s} {m:+.4f} [{lo:+.4f}, {hi:+.4f}]  {'PASS' if ok else 'FAIL'}")
+  if keep:
+    p = oof(tr, base + keep, groups)
+    m, lo, hi = ci(ll(y, p) - lb)
+    from sklearn.metrics import roc_auc_score
+    s = tr.probowls.to_numpy() >= 3
+    print(f"  together {keep}: {m:+.4f} [{lo:+.4f}, {hi:+.4f}]; 3+ Pro Bowls AUC {roc_auc_score(y[s], p[s]):.3f}, "
+          f"right at 50% {100 * ((p[s] >= 0.5) == y[s]).mean():.1f}%")
 
 
 def oof(d, cols, groups, model="ridge"):
@@ -209,8 +401,9 @@ def main():
 
 
 def export(site: Path) -> None:
-  """data/hof_chance.json: the shipped model (B, fit on every career over by 2015) applied to every drafted player not
-  in the Hall, his career columns as they stand (an active player: "if his career ended today"). {"v", "built",
+  """data/hof_chance.json: the shipped model (B with DP2's All-Decade and all-time rank, fit on every career over by
+  2015) applied to every drafted player not in the Hall, and model C to everyone outside the draft table (undrafted,
+  the 1984 / 1987 supplemental drafts), each career as it stands (an active player: "if his career ended today"). {"v", "built",
   "c": {gsis: [chance, eligible, name, group, last season]}}; eligible = retired 5+ seasons. Under 1% left out."""
   import nflreadpy as nfl
   from datetime import datetime, timezone
@@ -225,6 +418,14 @@ def export(site: Path) -> None:
                             scoring="neg_log_loss", max_iter=5000).fit(X, y)
   out = d[~d.hof & d.gsis_id.notna()].copy()
   out["p"] = fm.predict_proba(design(out)[allc].to_numpy(float))[:, 1]
+  # (DP2) everyone outside the draft table (undrafted, supplemental drafts): model C, on the same training rows
+  Xc = design(tr)[FEATS_C].to_numpy(float)
+  fc = LogisticRegressionCV(Cs=[0.03, 0.1, 0.3, 1, 3, 10], cv=list(GroupKFold(5).split(Xc, y, tr.season.to_numpy())),
+                            scoring="neg_log_loss", max_iter=5000).fit(Xc, y)
+  u = outside(nfl, cur - 1, set(d.gsis_id.dropna()))
+  u = u[~u.hof].copy()
+  u["p"] = fc.predict_proba(design(u)[FEATS_C].to_numpy(float))[:, 1]
+  out = pd.concat([out, u[["gsis_id", "p", "to", "pfr_player_name", "g"]]], ignore_index=True)
   out = out[out.p >= 0.01]
   # [chance, eligible, name, position group, last season] (names for the watch list)
   doc = {"v": 1, "built": datetime.now(timezone.utc).strftime("%Y-%m-%d"), "eligible_through": cur - 6,
@@ -240,5 +441,12 @@ if __name__ == "__main__":
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
   if "export" in opt:
     export(ROOT / opt["export"])
+  elif opt.get("dp2") == "1":
+    import nflreadpy as nfl
+    d = frame(nfl, int(nfl.get_current_season()) - 1)
+    print(f"[hof] All-Decade selections matched: {int(d.decade.sum())}; top-10 all-time ranks: {int((d.rk <= 10).sum())}", flush=True)
+    if opt.get("only") != "c":
+      dp2(d[d.to <= 2015].reset_index(drop=True))
+    dp2_c(nfl, d, int(nfl.get_current_season()) - 1)
   else:
     main()

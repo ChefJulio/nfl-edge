@@ -1815,10 +1815,12 @@
       return `<details class="py-more"><summary>Hall of Fame watch list</summary>
         <div class="pc-k co-sub">Eligible, not in yet</div><table class="bx"><tbody>${top(1).map(li).join('')}</tbody></table>
         <div class="pc-k co-sub">Active or retired under 5 years (if their careers ended today)</div><table class="bx"><tbody>${top(0).map(li).join('')}</tbody></table></details>`; })() : '';
-    const line = !H ? '' : c ? `<div class="pc-big">${hofPct(c[0])}</div><div class="pc-sub">${c[1] ? 'Eligible, not in yet' : 'If his career ended today'}</div>`
-      : `<div class="pc-big muted">&lt;1%</div><div class="pc-sub">${L && L.bio && L.bio.draft && L.bio.draft.u ? 'Undrafted: outside the model\'s data' : 'Nowhere near the line so far'}</div>`;
+    // kickers and punters: a handful ever inducted, so the model has little to go on and reads them high
+    const st = c && c[3] === 'ST' ? ' <span class="muted">(kickers and punters: only a few ever inducted, so read this one loosely)</span>' : '';
+    const line = !H ? '' : c ? `<div class="pc-big">${hofPct(c[0])}</div><div class="pc-sub">${c[1] ? 'Eligible, not in yet' : 'If his career ended today'}${st}</div>`
+      : '<div class="pc-big muted">&lt;1%</div><div class="pc-sub">Nowhere near the line so far</div>';
     return `<div class="pc-box"><div class="pc-k">Hall of Fame chance</div>${line}
-      <p class="pc-sub muted">From every drafted player since 1980 whose career ended by 2015: first-team All-Pros, Pro Bowls, career value and years as a starter carry it, then MVP / Player of the Year awards, Super Bowl titles and position. On the field only: voters weigh more. Tested on held-out draft classes.</p>${watch}</div>`;
+      <p class="pc-sub muted">Learned from every player since 1980 whose career ended by 2015: first-team All-Pros and Pro Bowls carry it, then All-Decade teams, an all-time top-25 rank at the position and a long career as a starter, then MVP / Player of the Year awards and Super Bowl titles. Undrafted players are scored without career value. On the field only: voters weigh more. Tested on held-out draft classes.</p>${watch}</div>`;
   };
   const honorsTile = (pid, L) => {
     loadHonors();
