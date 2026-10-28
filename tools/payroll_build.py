@@ -24,8 +24,9 @@ import pandas as pd  # noqa: E402
 from nfledge import coaches as C  # noqa: E402
 from nfledge import data as D  # noqa: E402
 
-V = 3  # what each team's entry holds (2: each list's TOTAL row; next season's projected cap; 3: the whole roster);
-# a new V refetches every team
+V = 4  # what each team's entry holds (2: each list's TOTAL row; next season's projected cap; 3: the whole roster;
+# 4: each player's later seasons); a new V refetches every team
+FUTURE = 5  # later seasons read per page (OverTheCap lists up to ~5)
 URL = "https://overthecap.com/salary-cap/{slug}"
 UA = {"User-Agent": "Mozilla/5.0 (nfl-edge; https://github.com/ChefJulio/nfl-edge)"}
 FRESH_H = 20  # hours before a team's page is fetched again
@@ -44,12 +45,12 @@ def money(s: str) -> float:
 
 
 def parse(html: str, season: int) -> dict:
-  """One team page -> {season: {liab, space, act, dead, ps, res, players: [[otc_id, name, cap, list]]}} for the
-  season and the next (each season's block is div#y<season>; its tables follow their headings)."""
+  """One team page -> {season: {liab, space, act, dead, ps, res, players: [[otc_id, name, cap, list]]}} for this
+  season and every later one the page lists (each season's block is div#y<season>; its tables follow their headings)."""
   import lxml.html as L
   doc = L.fromstring(html)
   out = {}
-  for s in (season, season + 1):
+  for s in range(season, season + FUTURE + 1):
     box = doc.xpath(f'//div[@id="y{s}"]')
     if not box:
       continue
@@ -137,7 +138,21 @@ def build(site: Path) -> None:
         grp[g] += cap
     # everyone carrying a cap number this season, biggest first (owner 2026-10-27: "a show more expand that shows
     # everyone on the roster"): [name, gsis, position, cap, list] with list a = active roster, r = reserve, p = practice squad
-    roster = [[nm, *ids.get(oid or "", (None, None)), cap, {"act": "a", "res": "r", "ps": "p"}[k]]
+    # ... and each one's cap number in every later season his deal runs (owner 2026-10-27: "individual players cap hit
+    # on their remaining contract by season"): from the page's later seasons' active-roster lists (void years aren't on
+    # them: those charges land as dead money), aligned to current + 1, current + 2, ...; trailing empty seasons dropped
+    later = {}
+    for s in range(current + 1, current + FUTURE + 1):
+      for oid, _, cap, k in (p.get(s) or {}).get("players", []):
+        if k == "act" and oid and cap > 0:
+          later.setdefault(oid, {})[s] = cap
+    def fut(oid):
+      f = later.get(oid) or {}
+      xs = [round(f.get(s, 0), 3) for s in range(current + 1, current + FUTURE + 1)]
+      while xs and not xs[-1]:
+        xs.pop()
+      return xs
+    roster = [[nm, *ids.get(oid or "", (None, None)), cap, {"act": "a", "res": "r", "ps": "p"}[k], fut(oid)]
               for oid, nm, cap, k in sorted((x for x in cur["players"] if x[3] in ("act", "res", "ps")), key=lambda x: -x[2])]
     dead = sorted([x for x in cur["players"] if x[3] == "dead"], key=lambda x: -x[2])[:5]
     teams[t] = {"f": now.isoformat(timespec="seconds"), "liab": cur["liab"], "space": cur["space"], "act": cur["act"],
