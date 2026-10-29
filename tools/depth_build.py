@@ -220,12 +220,13 @@ DIR_POS = ("QB", "RB", "FB", "WR", "TE", "K")
 DIR_STATUS = {"ACT": "", "DEV": "PS"}  # PS = practice squad; RES = a reserve list (its ROSTER_TAG, else "RES")
 
 
-def roster_directory(site: Path, cache, nfl, current: int, espn_of: dict):
+def roster_directory(site: Path, cache, nfl, current: int, espn_of: dict, live_ros=lambda r, s: r):
   """<site>/data/roster.json: {"v", "season", "cols": [pid, name, pos, team, tag, espn], "rows"} (tag: "" active,
   "PS", "IR", "PUP", "NFI", "SSPD", "HOLD" or "RES"). Released, traded or retired rows are left out."""
   ros = cache.get("rosters", current, lambda: nfl.load_rosters_weekly([current]), stale=cache.age_hours("rosters", current) > 24)
   if ros is None or not len(ros):
     return
+  ros = live_ros(ros, current)  # ESPN's reserve-list moves this week (nfledge/status.py)
   ros = ros.dropna(subset=["gsis_id"]).copy()
   ros["team"] = ros.team.replace({**FRANCHISE, **ROSTER_TEAM})
   ros = ros[ros.week == ros.groupby("team").week.transform("max")]
@@ -252,6 +253,12 @@ def main():
                     stale=cache.age_hours("schedules", "since1999") > 6)
   players = cache.get("players", "all", lambda: nfl.load_players(), stale=cache.age_hours("players", "all") > 24 * 7)
   espn_of = {g: str(e) for g, e in zip(players.gsis_id, players.espn_id) if isinstance(g, str) and pd.notna(e) and str(e)}
+  from nfledge.espn import fetch_injuries
+  from nfledge.status import live_overlay
+  feed = fetch_injuries()  # one feed for the depth charts and the directory
+
+  def live_ros(r, s):
+    return live_overlay(r, sched, s, players, feed)
   pages = {f.stem for f in (site / "data" / "players").glob("*.json")}
   pfr = players.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
   pos_of = players.dropna(subset=["gsis_id"]).drop_duplicates("gsis_id").set_index("gsis_id").position.to_dict()
@@ -283,6 +290,8 @@ def main():
     if season >= 2002:
       ros = cache.get("rosters", season, lambda: nfl.load_rosters_weekly([season]),
                       stale=live and cache.age_hours("rosters", season) > 24)
+      if live and ros is not None and len(ros):
+        ros = live_ros(ros, season)  # ESPN's reserve-list moves this week (nfledge/status.py)
       if ros is not None and len(ros):
         r = ros[ros.status_description_abbr.isin(ROSTER_TAG)]
         tags.update({(g, int(w)): ROSTER_TAG[c] for g, w, c in zip(r.gsis_id, r.week, r.status_description_abbr) if isinstance(g, str)})
@@ -346,7 +355,7 @@ def main():
   seasons = sorted(int(p.name) for p in out_root.glob("[0-9][0-9][0-9][0-9]") if p.is_dir())
   (out_root / "index.json").write_text(json.dumps({"v": V, "seasons": seasons, "current": current}), encoding="utf-8")
   (out_root / "latest.json").unlink(missing_ok=True)  # the v1 single snapshot
-  roster_directory(site, cache, nfl, current, espn_of)
+  roster_directory(site, cache, nfl, current, espn_of, live_ros)
 
 
 if __name__ == "__main__":

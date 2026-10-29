@@ -151,6 +151,9 @@ def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict |
     bridge_key += "_l" + hashlib.sha1(json.dumps(sorted((k, list(v)) for k, v in espn_late.items())).encode()).hexdigest()[:8]
   if espn_active:  # tags only, but they're in the cached projections
     bridge_key += "_a" + hashlib.sha1(json.dumps(sorted(espn_active.items())).encode()).hexdigest()[:8]
+  moved = getattr(data, "status_overlay", None)
+  if moved:  # ESPN's reserve-list moves over the rosters (nfledge/status.py): every list reader sees them
+    bridge_key += "_r" + hashlib.sha1(json.dumps(sorted((c["gsis"], c["to"]) for c in moved)).encode()).hexdigest()[:8]
   path = cache_dir / f"model_{state_key(data, cfg, scoring, season, week)}{bridge_key}.pkl"
   if path.exists():
     with open(path, "rb") as f:
@@ -469,6 +472,13 @@ def main():
     from nfledge.injuries import InjuryModel
     feed = fetch_injuries()
     data.espn_feed = feed  # read by Power's QB availability (powerc._newly: ESPN's IR list)
+    # this week's reserve-list moves from ESPN over the weekly rosters, which trail them a day or more (nfledge/status.py):
+    # every reader of a player's list (tags, reserve players' 0%, return model, scratch, lineup) sees the move at once
+    from nfledge.status import apply_espn_reserve
+    moved = apply_espn_reserve(data, feed, week)
+    if moved:
+      print("[run] ESPN reserve-list moves the rosters don't show yet: "
+            + ", ".join(f"{c['name']} ({c['team']}) {c['from']} -> {c['to']}" for c in moved), flush=True)
     from nfledge.espn import gameday_rulings
     gf = ((Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week)).parent
           / "data" / "live_inputs" / f"gameday_{season}_{week:02d}.json")  # this week's rulings so far (written below)

@@ -69,6 +69,10 @@ def main():
   site = Path(opt.get("site", "site"))
   cfg, scoring = load_config(), load_scoring()
   data = D.load_all(cfg)
+  # this week's reserve-list moves from ESPN over the weekly rosters (nfledge/status.py): the cards' list tags and
+  # practice timelines read them as the board does
+  from nfledge.status import live_overlay
+  data.rosters = live_overlay(data.rosters, data.schedules, data.current_season, getattr(data, "players_table", None))
   import nflreadpy as nfl
   cache = D.Cache(ROOT / cfg["data"]["cache_dir"])
   first_loaded = min(data.seasons)

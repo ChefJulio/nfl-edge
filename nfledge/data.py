@@ -296,9 +296,10 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
     frames["routes"].append(cache.get("routes", s, lambda: _routes_from_participation(nfl, s),
                                       stale=pbp_stale and s <= 2025))
     frames["rosters"].append(cache.get("rosters", s, lambda: nfl.load_rosters_weekly([s]), stale=live_stale))
+    # the current season's copy is only the fallback for NFL.com's report (below); its old daily archive is gone
+    # (2026-10-28 sweep: it saved nflverse's copy, not the NFL.com report the build uses, and nothing read it; NFL.com's
+    # API carries the dated practice days it was meant to collect)
     frames["injuries"].append(cache.get("injuries", s, lambda: nfl.load_injuries([s]), stale=live_stale))
-    if is_cur and live_stale and frames["injuries"][-1] is not None:
-      archive_injury_snapshot(cache.dir, frames["injuries"][-1])
     depth[s] = cache.get("depth", s, lambda: nfl.load_depth_charts([s]), stale=live_stale)
   practice = avail_hist = None
   if cfg["data"].get("nfl_api_practice", False):
@@ -667,29 +668,6 @@ def availability_history(nfl, season: int, players: pd.DataFrame | None = None) 
   pr = pr[[(w, t) in team_weeks for w, t in zip(pr.week, pr.team)]].copy()
   pr["played"] = [(w, g) in played for w, g in zip(pr.week, pr.gsis_id)]
   return pr
-
-
-def archive_injury_snapshot(cache_dir: Path, inj: pd.DataFrame):
-  """Save a dated copy of the current week's injury report whenever it changes.
-
-  nflverse publishes only the latest practice status per player-week, and no free source has historical
-  Wed/Thu/Fri participation. The live file updates after each practice, so archiving every change builds our
-  own daily history (e.g. DNP/DNP/LP vs LP/LP/FP) for a future practice-sequence availability model."""
-  if inj is None or inj.empty:
-    return
-  wk = int(inj.week.max())
-  cur = inj[inj.week == wk][["season", "week", "team", "gsis_id", "full_name", "position", "report_status",
-                             "practice_status", "report_primary_injury"]]
-  d = cache_dir / "injury_snapshots"
-  d.mkdir(exist_ok=True)
-  season = int(cur.season.iloc[0])
-  prev = sorted(d.glob(f"inj_{season}_w{wk:02d}_*.parquet"))
-  if prev:
-    last = pd.read_parquet(prev[-1])
-    if last.drop(columns=["snapshot_ts"]).reset_index(drop=True).equals(cur.reset_index(drop=True)):
-      return
-  ts = time.strftime("%Y%m%d_%H%M")
-  cur.assign(snapshot_ts=ts).to_parquet(d / f"inj_{season}_w{wk:02d}_{ts}.parquet", index=False)
 
 
 def load_exclusions(rosters: pd.DataFrame) -> pd.DataFrame:
