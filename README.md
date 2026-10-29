@@ -86,7 +86,7 @@ news, game feeds, transactions), ProFootballRumors (practice-squad elevations), 
 Open-Meteo wind forecasts, and NFL.com's injury API: the single source for the current week's injury report
 (practice days with dates, game statuses). That last one uses the public key nfl.com's own site uses: unofficial, may break or
 conflict with NFL terms. Turn it off with `nfl_api_practice = false` (falls back to final practice status).
-Each run also archives the live injury report so a local daily-practice history accumulates regardless.
+Reserve-list moves (IR, PUP, suspensions) are read from ESPN over the weekly rosters, which trail them by a day or more.
 
 ## Model documentation (Model tab)
 `MODEL.md` is rendered into the site's Model tab, with live values (tuned parameters, learned coefficients,

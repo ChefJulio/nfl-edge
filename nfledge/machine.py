@@ -311,6 +311,14 @@ are the same content in plain text and JSON.
 - [Source code](https://github.com/ChefJulio/nfl-edge)
 
 {trends_md(base)}
+## Linking into the app
+
+- A player's card: {base}#player/<gsis_id>; a tab after "/" (log, throws, news) and a season of the game log after
+  "@": {base}#player/00-0033280/log@2024. A team: {base}#team/<TEAM>, tabs log, playoffs.
+- A game: {base}game.html?g=<game_id>&d=<season>/week-<NN>.json, plus &pane=plays|box|calls|team|flow; one play:
+  &play=<ESPN play id> (opens the game log on it).
+- A 4th-down situation in the calculator: {base}index.html?c=<code>#model/calc (made by its Share button).
+
 ## Data (JSON)
 
 - [{base}index.json]({base}index.json): this week: players (projection, stat line, range quantiles; `play` = chance

@@ -76,9 +76,19 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 - **Participation (routes) only through 2025**; route features unusable live.
 - **Schedules `spread_line` > 0 = home favored.** Wind null for domes/closed roofs (= 0); upcoming games use
   Open-Meteo at kickoff (`data.forecast_wind`), historical games the realized wind.
-- **Injury reports (nflverse):** one row per player-week, final practice status, body part only ("Knee", never "torn
-  ACL"). Daily Wed/Thu/Fri participation: NFL.com API (`api.nfl.com/football/v2/injuries`, public web client key),
-  2016+, unofficial; toggle `nfl_api_practice`. Live report archived to `cache/injury_snapshots/`.
+- **Injury reports:** past seasons from nflverse, one row per player-week, final practice status, body part only
+  ("Knee", never "torn ACL"). The CURRENT season comes from NFL.com's API alone (`api.nfl.com/football/v2/injuries`,
+  public web client key, unofficial; daily Wed/Thu/Fri participation with dates, 2016+; toggle `nfl_api_practice`);
+  nflverse's copy only as a logged fallback. (The old nflverse snapshot archive, `cache/injury_snapshots/`, was
+  removed 2026-10-28: it saved nflverse's copy, nothing read it, NFL.com carries the dated days.)
+- **Reserve lists lag:** who is on IR / PUP / NFI / suspended comes from nflverse's weekly rosters, a day or more
+  behind the moves. Each live build lays ESPN's feed over this week's roster rows (`nfledge/status.py`; run.py and the
+  player / depth tools), carrying a team's whole latest roster forward when its week isn't posted, so readers that take
+  "the team's latest roster week" keep every player. Past weeks keep nflverse's record.
+- **Injuries the reports never name:** a player on a reserve list is off the weekly report, so an IR stint has no body
+  part there (93% of reserve-list weeks, 2021-25). Names come from Wikipedia (via Wikidata's PFR ids) and ESPN's player
+  news (~2 seasons deep) in `data/history/ir_names.json` (`tools/injury_names_build.py`); Pro Football Reference and
+  Prosportstransactions block automated access. For the cards only: not model inputs ({#return-reserve-injury}).
 - **ESPN injury feed** (`site.api.espn.com/apis/site/v2/sports/football/nfl/injuries`, public, unofficial): ~800
   players with status, diagnosis detail ("Surgery", "Bruise"), side, and an estimated `returnDate` (after the
   season = effectively season-ending). **Current season only, no history** (core API per-athlete/season endpoints
