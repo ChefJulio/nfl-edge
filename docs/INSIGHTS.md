@@ -5527,3 +5527,28 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   -> .17, Lamar Jackson .46 -> .48, Hurts and Vick unchanged. **DP7 SHIPPED ON THE OWNER'S CALL 2026-10-28** ("yes",
   after "no accuracy cost, more sensible on its face"): the export ranks QBs on total yards / TDs (rk_pass keeps the
   passing-only rank the tests ran against). Allen .10, Lamar Jackson .48.
+- **PRE-REGISTERED 2026-10-28 (owner: "didn't we do some testing relating to injury types in our injury projection
+  model? did we use incomplete data then?" ... "don't we know season ending when it happens? ... yes do what you think
+  is right and test it"): (DR) the return model's injury for players on a reserve list.** Measured first: the return
+  model (nfledge/returns.py, states / active_after) reads the injury from THAT week's report, and a player on a reserve
+  list is off the report: 2021-25, 6.9% of reserve-list player-weeks carry a body part (inactive 41.0%, active 13.7%).
+  So for ~93% of IR / PUP weeks the injury input is "unknown" (the same live as in training: no skew, just a wasted
+  input). The (DM) finding "same part again doesn't mean more time" was built on listed episodes and is limited the
+  same way. Arms, every injured-out state, injury known at the time only: R0 = as is; R1 = when the week's report has
+  no body part, his last report listing in the same season from the start of this absence (weeks since his last game
+  played + 2 before it); R2 = R1, then when still none, ESPN news naming the injury at the reserve-list move
+  (data/history/ir_names.json, src "espn"; 2023 on), published after his last game played and on or before the
+  state's game day. NOT Wikipedia: written after the fact (not dated to when it was known), and its coverage leans to
+  injuries that ended seasons, a leak of the label. Walk-forward, each season trained on every earlier loaded season;
+  scored 2022-25 (2021 left out as in (DM2): the COVID list), 2026 weeks so far the untouched check.
+  GATE: (a) Brier vs R0 on every scored state, upper 95% (season-week clusters) < 0; (b) fantasy groups (QB RB WR TE)
+  no worse, upper < +0.0005; (c) 2026 no worse than R0 (point estimate, reported with its interval). The simplest arm
+  that passes ships (R1 before R2); reported: reserve-list states alone, and the share of them with a body part per arm.
+- **RESULT {#return-reserve-injury} (DR) the injury for reserve-list players: FAIL; the return model stays as is.**
+  tools/dr_eval.py, scored 2022-25 (12,754 states, 7,940 on a reserve list) + 2026 (857). Coverage of a body part on
+  reserve-list states: R0 6.8%, R1 47.1%, R2 61.9%. Brier vs R0 (0.1131): R1 -0.0001 [-0.0004, +0.0001] (a FAIL);
+  R2 -0.0003 [-0.0006, -0.0000] (a PASS), fantasy -0.0005 [-0.0010, +0.0001] (b PASS), 2026 +0.0001 [-0.0009, +0.0011]
+  (c FAIL). Reserve-list states alone: R1 +0.0001, R2 -0.0001, both straddling 0. Calibration on them unchanged (.059
+  predicted vs .050 back). Reading: for a player already on IR the next-game question is nearly always "no" (5% back),
+  and what decides it is already in: the designation, games missed, ESPN's return date (season-ending reaches the
+  model through it). The missing body part was a gap in the data, not a cost in accuracy: earlier return results hold.
