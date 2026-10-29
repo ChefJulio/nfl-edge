@@ -447,7 +447,8 @@
   // "A.St. Brown" whole (2026-10-28 audit: his catches read "to A.St", the period ending the name)
   const NM = "[A-Z][a-z]?\\.(?:St\\. )?[A-Za-z'.\\- ]+?";
   const RX = {
-    lead: new RegExp(`^(${NM})\\s+(?:left|right|up the middle|middle|scrambles|kneels|pass|sacked|punts|kicks|spiked|\\d+ yard field goal|extra point|FUMBLES|Aborted)`),
+    // a run with no direction too ("J.Gibbs to DET 28 for no gain"; 2024 audit)
+    lead: new RegExp(`^(${NM})\\s+(?:left|right|up the middle|middle|scrambles|kneels|pass|sacked|punts|kicks|spiked|\\d+ yard field goal|extra point|FUMBLES|Aborted|to (?:[A-Z]{2,3} )?\\d|for (?:-?\\d|no gain))`),
     // a name ends at punctuation or a lowercase word ("to D.Moore ran ob at NE 49", "to J.Williams to DAL 38")
     // or at a bracketed pressure credit ("to M.Mims [K.White]", "INTERCEPTED by J.Trotter [V.Vea]"; 2026-10-28 audit)
     to: new RegExp(` to (${NM})(?= [a-z]| \\(| \\[|\\.|,|$)`),
@@ -505,7 +506,7 @@
     // the official text leads with formation and eligibility notes: "(Shotgun) C.Lomu reported in as eligible. D.Maye ..."
     // also "Direct snap to C.Heyward." (a wildcat snap note) and ESPN's stray leading space (" R.Stevenson up the middle")
     // and a quarterback change ("19-S.Thompson in at QB."; 2024 audit)
-    const lead_ = new RegExp(`^(?:(?:\\([^)]*\\)|${NM} reported in as eligible\\.|Direct snap to ${NM}\\.|(?:[A-Z]{2,3} )?#?\\d+-\\S+ in at QB\\.)\\s*)+`);  // "ARZ #15-Tune in at QB." too
+    const lead_ = new RegExp(`^(?:(?:\\([^)]*\\)|${NM} reported in as eligible\\.|Direct snap to ${NM}\\.|.{0,60}?\\bat QB\\.|.{0,90}? reported in as eligible\\.)\\s*)+`);  // QB changes in any spelling ("HST 10-D. Mills now at QB.", "#2 - D.Lock - Back in at QB."), several eligible at once
     const full = String(pl.text || '').trim().replace(lead_, '');  // shown under the card
     // what's parsed: after a replay reversal only the ruling that stands ("...the play was REVERSED.D.Maye pass
     // incomplete..."), and without the 2-point try that follows a touchdown
@@ -4971,6 +4972,7 @@
     // a muffed kick the kicking team fell on (ESPN may type it "Fumble Recovery (Opponent)"; 2024 audit)
     const mrec = /MUFFS/.test(txt) ? [...txt.matchAll(/(?:RECOVERED|recovered) by ([A-Z]{2,3})-/g)].pop() : null;
     if (mrec && kickerOf(p) && txtCode(mrec[1]) === kickerOf(p)) return resChip('Muff', 'gain', 'The receiving team muffed it; the kicking team recovered');
+    if (/MUFFS catch, and recovers at [^.]*\.?$/.test(txt.trim())) return resChip('Muff', 'zero', 'Muffed, and the returner fell on it');
     if (/No Play/i.test(txt) && /penalty/i.test(t)) return resChip('Flag', 'pen', 'Penalty: the play didn\'t count');
     // kicks and tries (owner 2026-10-25: "FGG/FGNG"): FGG / FGNG, XPG / XPNG, 2PT / 2PT NG; a blocked kick says so
     // only when the defense's return scored (2026-10-28 audit: a stopped return after a failed try read "Def 2PT")
