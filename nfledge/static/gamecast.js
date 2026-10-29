@@ -5750,6 +5750,28 @@
     if (last && last.isConnected) last.focus();
   };
   const open = tile => show(tile.dataset.sheet, tile.querySelector('template').content.cloneNode(true), tile);
+  // whose sheet it is (owner 2026-10-29: the grade sheet covered the card's name): the opener's card head, as one line
+  // in the dimmed band above the sheet. Player: name, position, team; team / defense cards: the name and its line.
+  const whoOf = opener => {
+    let c = opener && opener.closest && opener.closest('#pcOv') ? opener : null;
+    while (c && !c.querySelector('.pc-head')) c = c.parentElement;
+    const h = c && c.querySelector('.pc-head'), nm = h && h.querySelector('h3');
+    if (!nm) return null;
+    const name = [...nm.childNodes].filter(n => !(n.classList && n.classList.contains('pc-num'))).map(n => n.textContent).join('').trim();
+    const pos = h.querySelector('.pc-meta .posb'), tm = h.querySelector('.pc-meta .pc-tlink');
+    const rest = pos || tm ? [pos && pos.textContent, tm && tm.textContent].filter(Boolean).join(' · ')
+      : ((h.querySelector('.pc-meta') || {}).textContent || '').replace(/\s+/g, ' ').trim();
+    const el = document.createElement('div');
+    el.className = 'sheet-who';
+    el.setAttribute('aria-hidden', 'true');  // the dialog's label carries it
+    // his team's logo as the card shows it (the photo's corner badge, else the head's logo)
+    const logo = h.querySelector('.pc-pic-tm img, .pc-head > .tm-open img, .pc-logo-z img');
+    el.innerHTML = '<b></b><span></span>';
+    if (logo) { const i = logo.cloneNode(); i.removeAttribute('id'); i.width = i.height = 18; i.alt = ''; el.insertBefore(i, el.firstChild); }
+    el.querySelector('b').textContent = name;
+    el.querySelector('span').textContent = rest;
+    return { el, label: [name, rest].filter(Boolean).join(', ') };
+  };
   // any content (NFLE.sheet: the gamecast's drive sheets build theirs on tap)
   const show = (title, content, opener) => {
     close(); last = opener || null;
@@ -5759,7 +5781,9 @@
     if (opener && opener.closest && opener.closest('#pcOv') && NFLE.sheetMark) { ov.dataset.card = '1'; NFLE.sheetMark(NFLE.slug(title)); }
     ov.innerHTML = '<div class="sheet" role="dialog" aria-modal="true"><div class="sheet-h"><i class="sheet-grab" aria-hidden="true"></i><b></b><button type="button" class="sheet-x" aria-label="Close">&times;</button></div><div class="sheet-b"></div></div>';
     ov.querySelector('.sheet-h b').textContent = title;
-    ov.querySelector('.sheet').setAttribute('aria-label', title);
+    const who = whoOf(opener);
+    if (who) ov.insertBefore(who.el, ov.firstChild);
+    ov.querySelector('.sheet').setAttribute('aria-label', who ? `${title}: ${who.label}` : title);
     const body = ov.querySelector('.sheet-b');
     if (typeof content === 'string') body.innerHTML = content; else body.appendChild(content);
     ov.addEventListener('click', e => {
@@ -5788,6 +5812,7 @@
   const FULL = 0.92;
   const drag = (ov, sh) => {
     sh.style.maxHeight = `${Math.round(FULL * innerHeight)}px`;
+    const who = ov.querySelector('.sheet-who');
     let y0 = 0, mode = null, lastY = 0, lastT = 0, v = 0;
     sh.addEventListener('touchstart', e => {
       if (e.touches.length !== 1) return;
@@ -5802,19 +5827,23 @@
       e.preventDefault();
       sh.classList.remove('sheet-anim');
       sh.style.transform = `translateY(${Math.max(0, dy)}px)`;
+      if (who) { who.classList.remove('sheet-anim'); who.style.transform = sh.style.transform; }
     }, { passive: false });
     sh.addEventListener('touchend', () => {
       if (mode !== 'drag') { mode = null; return; }
       mode = null;
       const dy = lastY - y0;
       sh.classList.add('sheet-anim');
+      if (who) who.classList.add('sheet-anim');
       if (dy > 0.25 * sh.offsetHeight || v > 0.6) {  // away
         sh.style.transform = `translateY(${sh.offsetHeight + 40}px)`;
+        if (who) who.style.transform = sh.style.transform;
         ov.classList.add('sheet-out');
         setTimeout(close, 200);
         return;
       }
       sh.style.transform = '';  // not far enough: spring back
+      if (who) who.style.transform = '';
     });
   };
   window.NFLE = window.NFLE || {};
