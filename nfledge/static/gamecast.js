@@ -1063,6 +1063,10 @@
   const moveRow = (m, cols) => `<tr class="lg-mv"><td colspan="${cols}"><span class="lg-pin">${MV_ICON}<b>${MV_VERB[m.k] || 'Joined'}</b>${tmL(m.t)}<span>from ${tmL(m.f)}${m.d ? ` &middot; ${mvDate(m.d)}` : ''}</span></span></td></tr>`;
   // Week tab preview, no legend and no upcoming weeks: opts.season = this season's games so far with its byes;
   // opts.last = N = his N most recent games (the fallback before his first game this season, no season totals).
+  // a season's grade on its own (the grade sheet's "By season" OVR), from his grade history: the totals rows' Grd
+  const seasonGrdOf = (pid, s) => { const d = (GRH[pid] || []).find(x => x && x.season === s), x = d && d.players[pid];
+    const g = x ? (x[6] ?? x[0]) : null;
+    return g == null ? '' : `<span class="lg-rk ${x[9] ? 'rk-mid' : g >= 80 ? 'rk-good' : g <= 30 ? 'rk-bad' : 'rk-mid'}" title="His ${s} grade (that season only), the grade sheet's OVR">${ovr(g)}${uqMark(x)}</span>`; };
   const logHtml = (L, p, opts = {}) => {
     const w = weights(), built = (DATA && DATA.score && DATA.score.built) || HALF, pos = L.pos || (p && p.pos);
     let seasons = L.seasons, up = L.up || [];
@@ -1103,9 +1107,7 @@
     // (0-99; this season's unplayed weeks filled from last season's; tools/player_logs.py), where Rk is that week only
     // one grade, two time scales (owner 2026-10-17): shown on the OVR's own 50-99 scale and colors
     // the totals row's Grd: that season's grade on its own (the grade sheet's "By season" OVR), from his grade history
-    const seasonGrd = s => { const d = (GRH[L.pid] || []).find(x => x && x.season === s), x = d && d.players[L.pid];
-      const g = x ? (x[6] ?? x[0]) : null;
-      return g == null ? '' : `<span class="lg-rk ${x[9] ? 'rk-mid' : g >= 80 ? 'rk-good' : g <= 30 ? 'rk-bad' : 'rk-mid'}" title="His ${s} grade (that season only), the grade sheet's OVR">${ovr(g)}${uqMark(x)}</span>`; };
+    const seasonGrd = s => seasonGrdOf(L.pid, s);
     const grdCell = g => g.gr != null ? `<span class="lg-rk ${g.gr >= 80 ? 'rk-good' : g.gr <= 30 ? 'rk-bad' : 'rk-mid'}">${ovr(g.gr)}</span>` : '–';
     // a live box-score line (boxLines) as a log game: c = the scoring-key stat line, x = completions, attempts, carries, targets
     const liveG = ln => ({ c: ln.line, x: [ln.comp || 0, ln.att || 0, ln.car || 0, ln.tgt || 0] });
@@ -2336,17 +2338,18 @@
       const t = kindTotals(L, S.g), team = S.g.length ? S.g[S.g.length - 1].t : '';
       const row = (g, label) => `<tr${tileAttrs(g)}><td>${esc(label)}</td><td class="lg-opp tm-opp"><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>
         <td class="num">${g.sn != null ? g.sn : '–'}</td>${ptsCell(g)}${keys.map(k => `<td class="num">${nfmt((g.d || [])[(L.keys || []).indexOf(k)])}</td>`).join('')}${advCells(g)}${rk.map((k, i) => `<td class="num">${g.r ? nfmt(g.r[i]) : '–'}</td>`).join('')}</tr>`;
-      // season totals under the column heads (owner 2026-10-16), as in the fantasy log: sums, snap share averaged
-      const tot = gs => {
-        if (gs.length < 2 || opts.compact) return '';
+      // season totals under the column heads (owner 2026-10-16), as in the fantasy log: sums, snap share averaged;
+      // the card's preview too (owner 2026-10-29, as the fantasy preview has it)
+      const tot = (gs, grd = '') => {
+        if (gs.length < 2) return '';
         const sum = (g2, i) => gs.reduce((a, g) => a + (+((g[g2] || [])[i]) || 0), 0), sn = gs.filter(g => g.sn != null);
         const at = idp ? advTotals(L, gs) : null;
-        return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num">${sn.length ? Math.round(sn.reduce((a, g) => a + g.sn, 0) / sn.length) : '–'}</td>${idp ? `<td class="num"><b>${f1(gs.reduce((x, g) => x + idpPts(L, g, w), 0))}</b></td><td></td>` : ''}${keys.map(k => `<td class="num">${nfmt(sum('d', (L.keys || []).indexOf(k)))}</td>`).join('')}${ak.map(k => `<td class="num lg-adv">${at.n ? nfmt(at[k] || 0) : '–'}</td>`).join('')}${rk.map((k, i) => `<td class="num">${nfmt(sum('r', i))}</td>`).join('')}</tr>
+        return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num">${sn.length ? Math.round(sn.reduce((a, g) => a + g.sn, 0) / sn.length) : '–'}</td>${idp ? `<td class="num"><b>${f1(gs.reduce((x, g) => x + idpPts(L, g, w), 0))}</b></td><td class="num">${grd}</td>` : ''}${keys.map(k => `<td class="num">${nfmt(sum('d', (L.keys || []).indexOf(k)))}</td>`).join('')}${ak.map(k => `<td class="num lg-adv">${at.n ? nfmt(at[k] || 0) : '–'}</td>`).join('')}${rk.map((k, i) => `<td class="num">${nfmt(sum('r', i))}</td>`).join('')}</tr>
           <tr class="lg-gap"><td colspan="${n}"></td></tr>`;
       };
       const miss = g => `<tr class="lg-miss"${tileAttrs(g)}><td>${g.w}</td>${g.o ? `<td class="lg-opp tm-opp"><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>` : '<td class="lg-opp">&ndash;</td>'}
         <td class="num">${g.sn != null ? g.sn : missTag(g)}</td>${'<td class="num">&ndash;</td>'.repeat(n - 3)}</tr>`;
-      const trs = tot(S.g) + [...S.g, ...(opts.compact ? [] : (S.m || []))].sort((a, b) => b.w - a.w)  // newest first, every week
+      const trs = tot(S.g, idp ? seasonGrdOf(L.pid, S.s) : '') + [...S.g, ...(opts.compact ? [] : (S.m || []))].sort((a, b) => b.w - a.w)  // newest first, every week
         .map(g => g.bye ? byeRow(g.w, n - 2) : g.miss != null ? miss(g) : row(g, g.w)).join('');
       const sum = opts.compact ? '' : ` · ${t.g} game${t.g === 1 ? '' : 's'}${keys.length ? ` · ${keys.slice(0, 4).map(k => `${nfmt(t[k] || 0)} ${cols[k][0]}`).join(', ')}` : ''}`;
       // playoffs first, their own block (not in the season totals above)
