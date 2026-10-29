@@ -5552,3 +5552,34 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   predicted vs .050 back). Reading: for a player already on IR the next-game question is nearly always "no" (5% back),
   and what decides it is already in: the designation, games missed, ESPN's return date (season-ending reaches the
   model through it). The missing body part was a gap in the data, not a cost in accuracy: earlier return results hold.
+- **PRE-REGISTERED 2026-10-29 (owner: "9 cases, that's all we have?" ... "yes"; Zach Charbonnet, RB23 in 2025, out all
+  of 2026 so far, projected ~2 points in a return game): (BH2) a role for returning starters, defined by games led.**
+  (BH) failed on width (9 rows) and its rank rule tagged one-game QBs (McCarron, Webb, Brandon Allen). Variant
+  (experiments.return_role = "starters_gs"): (BF)'s fill (long-window shares x the walk-forward first-game-back factor
+  by position) only for a player with 8+ games in the long window (this and the two previous seasons) as his team's
+  lead at his position group in that game: most carries among its RBs, top 3 in targets among its WR / TE, most
+  dropbacks among its QBs (with at least one). Data no return-role test has used: 2012-2019 (snap counts begin 2012),
+  history from 2010 (tools/experiments.py baseline,return_starters_gs 2012-2019 --history=16;
+  tools/return_role_eval.py --variant=return_starters_gs --seasons=2012,...,2019).
+  GATE, as (BH): (1) touched rows that played, MAE lower, 95% CI over season-weeks upper < 0, improvement >= 0.5
+  points; (2) all relevant rows not worse (CI upper < +0.003); (3) touched rows' mean projection within 1.5 points of
+  the mean actual. Reported: n, by position, the touched players by name, and what it would project for Charbonnet now.
+- **RESULT {#return-starters-2} (BH2) returning starters, measured directly instead of by backtest (owner: "wth we
+  need to compute for multiple hours to check how players returning did?"): the old role x a position factor wins
+  clearly; the model-backtest gate (2) (teammates not worse) was not run.** From game stats, 2010-2025: a starter
+  (led his position group in 8+ of his last 16 games: QB most attempts, WR / TE top 3 in targets, RB see below) back
+  with the SAME team after missing 4+ of its games (306 of them across a season break), first game back, half PPR,
+  factor fit leaving that season out. 658 returns: today's ~0 misses by 7.12 points on average, old role x factor by
+  5.14, -1.98 [-2.46, -1.51] (bootstrap over returns); mean prediction 7.04 vs actual 7.04. Factor (first game back
+  over his pre-absence average): QB 0.61, RB 0.65, TE 0.65, WR 0.74. RBs score 0-2 points in 26% of returns, 5+ in
+  59%, 10+ in 32%. RB definitions: top 1 by touches 112 returns, 8.32 -> 4.87 (-3.45 [-4.61, -2.33]); top 2 by
+  touches (committees) 247, 6.55 -> 4.50 (-2.05 [-2.71, -1.38]), factor 0.71, mean 6.51 vs 6.53. Zach Charbonnet:
+  top-2 SEA back in 16 of 16 games of 2025 (10.7 ppg): ~7.6 projected in a return game vs ~2 today. Different cohort
+  from (BF) (403 returns, mostly depth players back to small roles, where ~0 wins on MAE): the starter rule is what
+  separates them. By position, each on its own (owner: "position group separation might be pertinent"; TE now
+  ranked among TEs, top 1, not pooled with WRs): QB 241, factor .61, 7.54 -> 6.40 (-1.15 [-2.04, -0.30]); RB (top 2 by
+  touches) 247, .71, 6.55 -> 4.50 (-2.05 [-2.71, -1.38]); TE 120, .67, 4.63 -> 3.34 (-1.29 [-1.94, -0.61]); WR 312, .72,
+  5.57 -> 3.88 (-1.69 [-2.20, -1.16]); all 920, 6.23 -> 4.64 (-1.59 [-1.95, -1.24]); every group's mean prediction within
+  .02 of its actual. Games 2-3 run higher than the first (6.64 vs 6.17): returners ramp up. Owner decision pending: ship
+  experiments.return_role = "starters_gs" (these position rules) on this measurement, or run the model backtest's
+  gate (2) first.

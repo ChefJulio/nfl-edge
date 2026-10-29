@@ -809,6 +809,19 @@ class PlayerModel:
         rk = key.groupby([f.last_team, grp]).rank(ascending=False, method="first")
         top = grp.map({"R": 3, "B": 1, "Q": 1})
         back = back & (rk <= top).fillna(False)
+      elif self.cfg["experiments"].get("return_role") == "starters_gs":
+        # EXPERIMENT (BH2, {#return-starters-2}): a starter = 8+ games in the long window as one of his team's leads at
+        # his position in that game, each position on its own (owner: "position group separation might be
+        # pertinent"): QB most dropbacks, RB top 2 by touches (committees), WR top 3 by targets among WRs, TE top 1 by
+        # targets among TEs; not a window rank ((BH) caught one-game QBs)
+        gl = L.pos.map({"WR": "R", "TE": "T", "RB": "B", "QB": "Q"})
+        val = pd.Series(np.select([gl == "R", gl == "T", gl == "B", gl == "Q"], [L.tgt, L.tgt, L.carries + L.tgt, L.db], np.nan),
+                        index=L.index)
+        Lg = L.assign(grp=gl, val=val)
+        Lg = Lg[Lg.grp.notna() & (Lg.w_eff > 0) & (Lg.val > 0)]
+        rk = Lg.groupby(["game_id", "team", "grp"]).val.rank(ascending=False, method="first")
+        led = Lg[rk <= Lg.grp.map({"R": 3, "T": 1, "B": 2, "Q": 1})].groupby("gsis_id").size()
+        back = back & (led.reindex(f.index).fillna(0) >= 8)
       if back.any():
         ratio = self._return_ratio(season)
         fac = f.pos.map(ratio).fillna(ratio.get("all", 1.0))
