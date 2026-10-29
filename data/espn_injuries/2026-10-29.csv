@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361178,Cam Jurgens,Baltimore Ravens,Active,2026-10-24T01:48Z,,,,,,Jurgens (concussion) does not have any injury designation ahead of Sunday's game against the Bengals.,C
 4432260,Matt Hibner,Baltimore Ravens,Active,2026-10-23T00:03Z,,,,,,Hibner (hand) was a full participant at practice Thursday.,TE
 4575483,T.J. Tampa,Baltimore Ravens,Injured Reserve,2026-10-22T01:17Z,Knee,Not Specified,Not Specified,2026-11-01,IR-R,The Ravens designated Tampa (toe/ankle) to return from injured reserve Wednesday.,CB
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-29T20:13Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-29T20:26Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4429501,Ray Davis,Buffalo Bills,Questionable,2026-10-29T18:49Z,Illness,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Davis didn't participate in Thursday's practice due to an illness, Matt Parrino of The Syracuse Post-Standard reports.",RB
 4385690,Dalton Kincaid,Buffalo Bills,Questionable,2026-10-29T18:49Z,Chest,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Kincaid (chest) remained in a red non-contact jersey for a second straight day Thursday, Jay Skurski of the Buffalo News reports.",TE
 3915416,DJ Moore,Buffalo Bills,Questionable,2026-10-29T18:42Z,Shoulder - AC Joint,Sprain,Not Specified,2026-11-01,QUESTIONABLE,"Moore (shoulder) was in a red non-contact jersey for a second straight day Thursday, Jay Skurski of the Buffalo News reports.",WR
@@ -101,7 +101,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4379399,James Cook III,Buffalo Bills,Active,2026-10-19T07:39Z,,,,,,Cook rushed 22 times for 95 yards and a touchdown and brought in all three targets for 58 yards in the Bills' 33-30 win over the Raiders on Sunday.,RB
 4696902,Torricelli Simpkins III,Carolina Panthers,Out,2026-10-29T01:32Z,Ankle,Not Specified,Left,2026-11-08,OUT,Simpkins (ankle) has been ruled out for Thursday's game against the Packers.,G
 4362647,Damien Lewis,Carolina Panthers,Out,2026-10-29T01:30Z,Knee,Not Specified,Not Specified,2026-11-08,OUT,Lewis (knee) has been ruled out for Thursday's game against the Packers.,G
-4244607,Akayleb Evans,Carolina Panthers,Active,2026-10-28T23:47Z,,,,,,Evans (triceps) has been ruled out ahead of Thursday night's game against the Packers.,CB
+4244607,Akayleb Evans,Carolina Panthers,Active,2026-10-28T23:47Z,Triceps,Not Specified,Not Specified,2026-11-30,IR,Evans (triceps) has been ruled out ahead of Thursday night's game against the Packers.,CB
 4242975,Jaelan Phillips,Carolina Panthers,Out,2026-10-28T23:41Z,Hamstring,Not Specified,Not Specified,2026-11-08,OUT,Phillips (hamstring) has been ruled out ahead of Thursday night's game against the Packers.,LB
 4372518,Bobby Brown III,Carolina Panthers,Questionable,2026-10-28T18:00Z,Hand,Not Specified,Not Specified,2026-10-29,QUESTIONABLE,questionable,DT
 4243256,Devin Lloyd,Carolina Panthers,Active,2026-10-28T00:46Z,,,,,,Lloyd posted four tackles in Sunday's loss to the Buccaneers.,LB
@@ -525,7 +525,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4799994,Brett Thorson,Minnesota Vikings,Active,2026-10-09T01:10Z,,,,,,Thorson (hamstring) was a full participant in practice Wednesday and Thursday.,P
 4431553,Donovan Jackson,Minnesota Vikings,Injured Reserve,2026-10-07T00:34Z,Knee - Meniscus,Surgery,Not Specified,2027-01-17,IR,Jackson (knee) was placed on injured reserve by the Vikings on Tuesday.,G
 4047646,A.J. Brown,New England Patriots,Questionable,2026-10-29T18:55Z,Knee,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Brown (knee/ankle) is sidelined Thursday by a knee issue that flared up, and the wide receiver's status for Sunday against the Dolphins is up in the air, Ian Rapoport of NFL Network reports.",WR
-4432710,TreVeyon Henderson,New England Patriots,Questionable,2026-10-29T18:39Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Henderson wasn't on the field for Thursday's practice due to an ankle injury, Doug Kyed of the Boston Herald reports.",RB
+4432710,TreVeyon Henderson,New England Patriots,Questionable,2026-10-29T18:39Z,Illness,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Henderson (undisclosed) wasn't on the field for Thursday's practice, Doug Kyed of the Boston Herald reports.",RB
 4688779,Channing Canada,New England Patriots,Active,2026-10-29T01:43Z,,,,,,Canada (hamstring) was a full participant in Wednesday's practice.,CB
 4606666,Karon Prunty,New England Patriots,Active,2026-10-29T01:38Z,,,,,,Prunty (hamstring) was a full participant in Wednesday's practice.,CB
 3916923,Carlton Davis III,New England Patriots,Active,2026-10-29T00:19Z,,,,,,Davis (neck) was a full participant in Wednesday's practice.,CB
@@ -599,12 +599,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242547,Paulson Adebo,New York Giants,Active,2026-10-25T15:37Z,,,,,,"Adebo (knee) is active Week 7 against the Texans, Dan Salomone of the Giants' official site reports.",CB
 3929950,Tremaine Edmunds,New York Giants,Injured Reserve,2026-10-24T23:28Z,Chest,Not Specified,Left,2027-02-15,IR,"Edmunds (chest) was placed on injured reserve Saturday, Dan Duggan of The Athletic reports.",LB
 4259566,Andrew Thomas,New York Giants,Active,2026-10-24T02:04Z,,,,,,Thomas (groin) does not have an injury designation against the Texans on Sunday.,OT
+4685247,Braelon Allen,New York Jets,Active,2026-10-29T20:27Z,,,,,,,RB
 4362094,Joseph Ossai,New York Jets,Doubtful,2026-10-29T01:27Z,Ankle,Not Specified,Not Specified,2026-11-01,DOUBTFUL,"Ossai (ankle) didn't participate in the Jets' practice Wednesday, Rich Cimini of ESPN.com reports.",DE
 4035537,Kene Nwangwu,New York Jets,Active,2026-10-29T00:29Z,,,,,,Nwangwu was a full participant in Wednesday's practice.,RB
 4685248,David Bailey,New York Jets,Questionable,2026-10-28T23:28Z,Groin,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Bailey didn't practice Wednesday due to a groin injury.,LB
 4428617,T'Vondre Sweat,New York Jets,Doubtful,2026-10-28T23:24Z,Knee,Not Specified,Not Specified,2026-11-01,DOUBTFUL,"Sweat (knee) is week-to-week and is unlikely to suit up for Sunday's game against the Raiders, Rich Cimini of ESPN.com reported Wednesday.",DT
 4569618,Garrett Wilson,New York Jets,Active,2026-10-28T19:40Z,,,,,,"Wilson said Wednesday that he won't ask to be traded from the Jets, Zack Rosenblatt of The Athletic reports.",WR
-4685247,Braelon Allen,New York Jets,Questionable,2026-10-28T16:38Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Jets head coach Aaron Glenn said that Allen will be a limited participant in Wednesday's practice due to ankle injury, Zack Rosenblatt of The Athletic reports.",RB
 4427366,Breece Hall,New York Jets,Questionable,2026-10-28T16:35Z,Quadriceps,Not Specified,Right,2026-11-01,QUESTIONABLE,"Jets head coach Aaron Glenn said that Hall (quadriceps) will be limited participant in Wednesday's practice, Zack Rosenblatt of The Athletic reports.",RB
 14958,Demario Davis,New York Jets,Active,2026-10-28T03:09Z,,,,,,Davis finished Sunday's Week 7 loss to Miami with three tackles (two solo) and one defensed pass.,LB
 4361331,Jamien Sherwood,New York Jets,Active,2026-10-28T02:58Z,,,,,,Sherwood totaled eight tackles (four solo) and two defensed passes Sunday in a loss to Miami.,LB
