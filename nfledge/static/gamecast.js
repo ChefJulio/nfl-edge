@@ -1675,8 +1675,12 @@
     const gEv = w => ((L && L.prac) || []).find(e => e[0] === 'g' && e[5] === w);
     const longDay = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
     const firstListed = ep && ((L && L.prac) || []).find(e => e[0] === 'p' && !e[4] && e[1] >= (gEv(ep.w0 - 1) || [0, ''])[1]);
-    const hurtWhen = ep && ep.ig ? (g => g ? `Hurt ${longDay(g[1])} ${g[3]} ${g[2]}${ep.ig[1] ? ` (${QN[ep.ig[1]] || `Q${ep.ig[1]}`}${ep.ig[1] < 5 ? ' quarter' : ''})` : ''}`
-        : `Hurt in the week ${ep.ig[0]} game`)(gEv(ep.ig[0]))
+    // the in-game note: the episode's, else his latest this season when it's from his last game or the one before
+    // (owner 2026-10-28, Dameon Pierce: hurt Monday, on IR Wednesday, before any episode existed to carry it)
+    const igc = L && L.igc && h.wk && L.igc[0] >= h.wk - 2 ? L.igc : null;
+    const ig = ep && ep.ig ? ep.ig : igc;
+    const hurtWhen = ig ? (g => g ? `Hurt ${longDay(g[1])} ${g[3]} ${g[2]}${ig[1] ? ` (${QN[ig[1]] || `Q${ig[1]}`}${ig[1] < 5 ? ' quarter' : ''})` : ''}`
+        : `Hurt in the week ${ig[0]} game`)(gEv(ig[0]))
       : ep && firstListed ? `First listed ${longDay(firstListed[1])}` : '';
     const hurt = [h.what, hurtWhen].filter(Boolean).join(' · ');
     // third cell (owner 2026-10-17: "expected back being a date seems weak"): a game, not a date. Likely to play this
@@ -1697,6 +1701,10 @@
       ? (ourG || espnG || h.back === 'no' ? `<div><small>Expected back</small><b>${esc(ourG ? gameTxt(ourG) : h.back === 'no' ? 'Not this season' : gameTxt(espnG))}</b>
           <span class="muted">${ourG ? backP + (espnG && espnG[5] !== ourG[5] ? `<br>ESPN: ${esc(gameTxt(espnG).toLowerCase())}` : '') : h.back === 'no' ? 'our return model' : 'ESPN estimate'}</span></div>` : '')
       : nextG ? `<div><small>Next game</small><b>${esc(new Date(nextG[1] + 'T12:00:00').toLocaleDateString([], { weekday: 'short' }))} ${esc(nextG[3])} ${esc(nextG[2])}</b><span class="muted">week ${nextG[5]}</span></div>` : '';
+    // on a reserve list his team's practice days aren't his (owner 2026-10-28: Pierce on IR read "Wed overdue, Thu
+    // upcoming"): no strip, the list said plainly; a return window opened puts him back on the report and the strip
+    const resList = /^(IR|Injured Reserve)\b/i.test(des) && !pr.length ? 'On injured reserve' : /^PUP\b/i.test(des) && !pr.length ? 'On the PUP list'
+      : /^NFI\b/i.test(des) && !pr.length ? 'On the non-football injury list' : '';
     const thisWeek = `<div class="pc-box"><div class="pc-k">This week</div>
         <div class="ij-hero">
           <div><small>Status</small><b class="ij-st ij-${desCls}">${esc(des)}</b></div>
@@ -1704,7 +1712,8 @@
           ${third}
         </div>
         ${hurt ? `<div class="ij-what">${esc(hurt)}</div>` : ''}
-        ${h.inj ? (prStrip ? `<div class="pc-k pr-k">Practice this week</div>${prStrip}` : '<p class="pc-sub">On the injury report.</p>') : '<p class="pc-sub">Not on the injury report and practicing fully.</p>'}</div>`;
+        ${resList ? `<p class="pc-sub">${esc(resList)}: off the practice report until his team opens his return window.</p>`
+          : h.inj ? (prStrip ? `<div class="pc-k pr-k">Practice this week</div>${prStrip}` : '<p class="pc-sub">On the injury report.</p>') : '<p class="pc-sub">Not on the injury report and practicing fully.</p>'}</div>`;
     const tl = [];
     if (ep) tl.push(`Listed since week ${ep.w0}${ep.missed ? `, ${ep.missed} game${ep.missed === 1 ? '' : 's'} missed` : ''}${ep.list ? ` · on ${esc(ep.list)}` : ''}`);
     const timeline = h.inj && (tl.length || (now && now.comment)) ? `<div class="pc-box"><div class="pc-k">Timeline</div>${tl.map(t => `<div class="ij-line">${t}</div>`).join('')}

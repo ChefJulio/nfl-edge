@@ -365,6 +365,8 @@ def main():
     if pid in injuries:
       doc["inj"] = injuries[pid]["eps"]
       doc["dur"] = injuries[pid].get("dur")
+      if injuries[pid].get("igc"):
+        doc["igc"] = injuries[pid]["igc"]
     if pid in prac:
       doc["prac"] = prac[pid]
     if pid in prac_hist:
@@ -847,6 +849,8 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
     if injuries and pid in injuries:
       doc["inj"] = injuries[pid]["eps"]
       doc["dur"] = injuries[pid].get("dur")
+      if injuries[pid].get("igc"):
+        doc["igc"] = injuries[pid]["igc"]
     if prac and pid in prac:
       doc["prac"] = prac[pid]
     if prac_hist and pid in prac_hist:
@@ -1071,6 +1075,12 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
                 # team games per season on the roster (not written to the pages; tools/durability_eval.py)
                 "gs": {int(k): int(v) for k, v in g.season[g.season >= SNAPS_FROM].value_counts().items()},
                 "wk": wk_out}
+    # his latest in-game injury this season, [week, quarter] (owner 2026-10-28, Dameon Pierce: hurt in Monday's 4th
+    # quarter, on IR Wednesday, and the Health sheet said nothing of it: the episode isn't in the rosters until the
+    # move, and only an episode carried the in-game note)
+    evc = sorted((x for x in (ig or {}).get((gid, cur), [])), key=lambda x: (x[0], x[1] or 0))
+    if evc:
+      out[gid]["igc"] = [evc[-1][0], evc[-1][1]]
   # Durability: share of his team's games he was available for (games missed inside injury episodes count against
   # him; healthy scratches and suspensions don't), shrunk toward his position's average by one season of games
   # (17), then his percentile among everyone at the position with a season or more of games.

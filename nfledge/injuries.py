@@ -1400,6 +1400,11 @@ class InjuryModel:
       if g in res and g not in getattr(self, "_activated", set()):  # {#activated}: off the list, his own tag below
         out[j] = res[g]
         continue
+      # ESPN's IR since his last game is the tag until the weekly rosters catch up (owner 2026-10-28, Dameon Pierce:
+      # placed on IR Wednesday night, the row read IR (ESPN) at 0% and the tag Q from "hurt last game, not back")
+      if "IR" in ((self.espn_midweek or {}).get(g), (self.espn_bridge or {}).get(g)):
+        out[j] = "IR"
+        continue
       r_ = gd.get(g)
       if r_:
         out[j] = "O" if r_[0] == "INA" else ""
