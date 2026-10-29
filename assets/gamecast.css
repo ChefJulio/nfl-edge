@@ -652,6 +652,8 @@ td.pen-top { color: var(--muted); font-size: var(--fs-sm); }
 .eg-chip.eg-uq { background: transparent; box-shadow: inset 0 0 0 1px var(--line); } .eg-chip.eg-uq b { color: var(--muted); }
 .dc-p.dc-hurt { opacity: .55; } .dc-p.dc-hurt .dc-n { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 70%, transparent); }
 .ij-ig { display: block; font-size: var(--fs-xs); color: var(--muted); margin-top: 2px; }
+/* an injury named from Wikipedia / ESPN news / a nearby listing, not the report itself: a dotted underline, the source on hover */
+.ij-src { text-decoration: underline dotted; text-decoration-color: var(--faint); text-underline-offset: 3px; cursor: help; }
 /* the Games tab's matchup tile on player / team pages */
 .pc-mt { margin: 0 0 12px; } .pc-mt .mt { margin: 0; } .pc-mtk { margin: 2px 2px 6px; }
 /* team page Players tab: tile rows with the same 3px gap as the list tabs */
@@ -986,6 +988,7 @@ table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; tex
 .hn-more { font-size: var(--fs-xs); color: var(--muted); align-self: center; }
 .hn-t td:last-child { line-height: 1.5; white-space: normal; overflow-wrap: anywhere; }
 .hn-t td:first-child { white-space: normal; }
+.hn-t tr.hn-sn td { color: var(--muted); font-style: italic; }
 .pc-tap { position: relative; min-width: 0; padding: 10px 26px 10px 12px; border: 1px solid var(--line); border-radius: var(--r-md);
   background: color-mix(in srgb, var(--ink) 4%, var(--panel)); cursor: pointer; -webkit-tap-highlight-color: transparent;
   transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), transform var(--dur) var(--ease); }
@@ -1546,6 +1549,15 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .lg-bar input { order: 0; flex: 1 1 90px; min-width: 90px; flex-basis: auto; padding: 4px 9px; font-size: 13px; }
 .mt-sit { display: inline-flex; align-items: center; gap: 7px; } .mt-sit b { color: var(--ink); } .mt-sit .rp-d { font-size: inherit; }
 .pl-np .pl-txt { text-transform: none; letter-spacing: 0; font-size: 12px; font-style: italic; }
+/* non-plays in three weights (owner 2026-10-28): a TV break, a faint centered hairline; a team's timeout, a row in its
+   color (gamecast.js .pl[style*="--pt"]); a quarter's end / the two-minute warning, a chapter break */
+.pl.pl-tv, .ds-p.ds-tv { display: flex; align-items: center; gap: 10px; padding: 2px 4px; border-bottom: 0;
+  font-size: 10.5px; color: var(--faint); letter-spacing: .03em; white-space: nowrap; }
+:is(.pl-tv, .ds-tv)::before, :is(.pl-tv, .ds-tv)::after { content: ''; flex: 1; border-top: 1px dashed var(--line); }
+.pl-to .pl-txt { font-style: normal; font-weight: 600; color: var(--muted); }
+.pl-brk { border-bottom: 0; border-top: 1px solid var(--muted); margin-top: 2px; }
+.pl-brk .pl-txt { font-style: normal; font-weight: 700; color: var(--ink); text-transform: uppercase; letter-spacing: .06em; font-size: 11px; }
+.pl-brk .pl-when { color: var(--muted); }
 /* first downs on the drive chart: a short first-down line at the arrowhead, "1st" after the yards */
 :is(.now, .ds) .fl-fd { stroke: #ffd43b; stroke-width: 1.6; stroke-linecap: round; }
 :is(.now, .ds) .fl-1st { fill: #ffd43b; font-size: 8px; font-weight: 800; }

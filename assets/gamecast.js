@@ -167,6 +167,15 @@
   const TEAM_ID = {};
   // the NFL's official play text uses its own codes for four teams (owner 2026-10-25: "Penalty, HST: Encroachment")
   const GSIS = { ARZ: 'ARI', BLT: 'BAL', CLV: 'CLE', HST: 'HOU' };
+  // a team code from the official text ("RECOVERED by HST-W.Marks") as ours (2026-10-28 audit: HOU recovering its own
+  // fumble read "fumble lost to HST")
+  const txtCode = c => GSIS[c] || ourCode(c);
+  // the official text that stands: after a replay reversal, only the ruling after "REVERSED." (2026-10-28 audit: an
+  // overturned interception kept its INT chip)
+  // a two-point try's own outcome, without the defense's return after it ("ATTEMPT FAILS. DEFENSIVE TWO-POINT ATTEMPT
+  // ... ATTEMPT SUCCEEDS" is the defense's 2, not the offense's)
+  const offTry = s => String(s || '').split(/DEFENSIVE TWO-POINT/i)[0];
+  const effText = p => { const s = String(p.text || ''), i = s.lastIndexOf('REVERSED.'); return i >= 0 ? s.slice(i + 9).trim() : s; };
   // (owner 2026-10-25) a missed field goal from beyond the 20 gives the defense the ball at the spot of the kick (the
   // 20 if it was inside it), not the line of scrimmage, which is where ESPN leaves the play's end: from the kick's
   // distance (spot = distance - 10 yards to the end zone), in the receiving team's terms
@@ -253,6 +262,7 @@
   // text and a score without the try; the try follows it (id "<id>-try", the same clock, the score after it, the same
   // win-probability entry). Already-separate tries and TOUCHDOWN NULLIFIED plays are left alone.
   const TRY_RX = /(?:^|\.\s+)((?:[A-Z][a-z]?\.[A-Za-z'\-]+(?:\s(?:Jr\.|Sr\.|II|III|IV))?\s+extra point|TWO-POINT CONVERSION ATTEMPT)[\s\S]*)$/;
+  const TRY_RX_SUM = /\s((?:[A-Z][a-z]?\.[A-Za-z'\-]+(?:\s(?:Jr\.|Sr\.|II|III|IV))?\s+extra point|TWO-POINT CONVERSION ATTEMPT)[\s\S]*)$/;  // "... for 70 Yds B.Narveson extra point"
   const splitTries = sum => {
     if (!sum || !sum.drives || sum._split) return sum;
     sum._split = true;
@@ -264,11 +274,14 @@
       if (seen.has(d)) return; seen.add(d);
       const out = [];
       (d.plays || []).forEach(p => {
-        const txt = String(p.text || ''), m = /TOUCHDOWN(?! NULLIFIED)/.test(txt) && p.scoringPlay ? txt.match(TRY_RX) : null;
+        // ESPN's older summary text carries the try too, with no "TOUCHDOWN" ("Jayden Reed Pass From Jordan Love for 70
+        // Yds B.Narveson extra point is GOOD"; 2024): split those as well
+        const txt = String(p.text || ''), sumTd = p.scoringPlay && / \d+ Yds?\b/.test(txt) && !/field goal/i.test(txt.split(/extra point|TWO-POINT/)[0]);
+        const m = (/TOUCHDOWN(?! NULLIFIED)/.test(txt) || sumTd) && p.scoringPlay ? (txt.match(TRY_RX) || (sumTd ? txt.match(TRY_RX_SUM) : null)) : null;
         if (!m || /extra point|two-point/i.test(String((p.type || {}).text || ''))) { out.push(p); prev = p; return; }
         const tryText = m[1].trim(), tdText = txt.slice(0, txt.length - m[0].length).trim().replace(/[^.]$/, c => `${c}.`);
-        const two = /TWO-POINT/.test(tryText);
-        const pts = two ? (/ATTEMPT SUCCEEDS/i.test(tryText) ? 2 : 0) : (/extra point is GOOD/i.test(tryText) ? 1 : 0);
+        const two = /TWO-POINT CONVERSION ATTEMPT/.test(tryText);  // not a blocked kick's "DEFENSIVE TWO-POINT ATTEMPT" (2026-10-28 audit)
+        const pts = two ? (/ATTEMPT SUCCEEDS/i.test(offTry(tryText)) ? 2 : 0) : (/extra point is GOOD/i.test(tryText) ? 1 : 0);
         // the scoring side: whose score went up on the play
         const ph = prev ? prev.homeScore : 0, pa = prev ? prev.awayScore : 0, home = p.homeScore - ph >= p.awayScore - pa;
         const td = Object.assign({}, p, { text: tdText, scoreValue: 6,
@@ -324,9 +337,11 @@
     // SF week 6: every SF snap from its own half read "30 yards to go" at SF 30, so a punt from SF 30 was drawn and
     // graded as one from WAS 30); the number only when there are no words
     let x = null;
+    // (2024 audit) CLE @ LV's feed mislabels sides in both the words and the number, the official text alone right;
+    // no rule over the two fixes it without breaking good games (a "trust the number" rule flipped KC's punt from LAC 48)
     const m = String(s.possessionText || s.downDistanceText || '').match(/([A-Z]{2,3})?\s*(\d{1,2})\s*$/);
     if (m && (m[1] || +m[2] === 50)) {
-      const n = +m[2], side = m[1] ? ourCode(m[1]) : null;
+      const n = +m[2], side = m[1] ? txtCode(m[1]) : null;  // the official text's codes too ("CLV 36": 2024 CLE @ LV, every chip off)
       x = n === 50 || !side ? 50 : (side === info.home.team ? 100 - n : n);
     } else if (s.yardsToEndzone != null) x = offAway ? 100 - s.yardsToEndzone : s.yardsToEndzone;
     if (x == null) return null;
@@ -409,12 +424,12 @@
   const pType = p => String((p.type && p.type.text) || '');
   const nonPlay = p => /timeout|end period|end of|two-minute|end game|official|end quarter/i.test(pType(p))
     || /^(END (GAME|QUARTER|OF)|Timeout|Two-Minute)/i.test(String(p.text || ''));
-  // timeouts, warnings and period ends in words, not ESPN's capitals ("TIMEOUT #1 BY LAC AT 01:53." -> "LAC timeout (1st)")
-  const ORD = ['', '1st', '2nd', '3rd'];
+  // timeouts, warnings and period ends in words, not ESPN's capitals ("TIMEOUT #1 BY LAC AT 01:53." -> "LAC timeout, 2 left")
   const PBP_CODE = { ARZ: 'ARI', BLT: 'BAL', CLV: 'CLE', HST: 'HOU', LA: 'LA', LAR: 'LA', WSH: 'WAS' };  // the official text's own team codes
   const nonPlayText = p => {
     const t = String(p.text || ''), m = t.match(/TIMEOUT #(\d) BY ([A-Z]{2,3})/i);
-    if (m) return `${PBP_CODE[m[2].toUpperCase()] || ourCode(m[2].toUpperCase())} timeout (${ORD[+m[1]] || `#${m[1]}`})`;
+    // what's left reads better than which one it was (#1 of the half = 2 left, of overtime 1 left; owner 2026-10-28)
+    if (m) { const left = (((p.period || {}).number || 1) >= 5 ? 2 : 3) - +m[1]; return `${PBP_CODE[m[2].toUpperCase()] || ourCode(m[2].toUpperCase())} timeout, ${left > 0 ? `${left} left` : 'none left'}`; }
     if (/OFFICIAL TIMEOUT|TV TIMEOUT/i.test(t)) return 'Official timeout';
     if (/TWO-MINUTE/i.test(t)) return 'Two-minute warning';
     const q = t.match(/END (?:OF )?(?:QUARTER|PERIOD) (\d)/i);
@@ -429,26 +444,57 @@
   // "-> 2nd & 2", and the play drawn on the mini field (line of scrimmage, first-down line, an arrow from start to
   // finish: green gain, red loss, neutral kick / change of possession). Headlines come from ESPN's play type, the
   // yardage and the official text's names, made full names through the box score ("J.Williams" -> Javonte Williams).
-  const NM = "[A-Z][a-z]?\\.[A-Za-z'.\\- ]+?";
+  // "A.St. Brown" whole (2026-10-28 audit: his catches read "to A.St", the period ending the name)
+  const NM = "[A-Z][a-z]?\\.(?:St\\. )?[A-Za-z'.\\- ]+?";
   const RX = {
-    lead: new RegExp(`^(${NM})\\s+(?:left|right|up the middle|middle|scrambles|kneels|pass|sacked|punts|kicks|spiked|\\d+ yard field goal|extra point|FUMBLES|Aborted)`),
+    // a run with no direction too ("J.Gibbs to DET 28 for no gain"; 2024 audit)
+    lead: new RegExp(`^(${NM})\\s+(?:left|right|up the middle|middle|scrambles|kneels|pass|sacked|punts|kicks|spiked|\\d+ yard field goal|extra point|FUMBLES|Aborted|to (?:[A-Z]{2,3} )?\\d|for (?:-?\\d|no gain))`),
     // a name ends at punctuation or a lowercase word ("to D.Moore ran ob at NE 49", "to J.Williams to DAL 38")
-    to: new RegExp(` to (${NM})(?= [a-z]| \\(|\\.|,|$)`),
-    picked: new RegExp(`INTERCEPTED by (${NM})(?= [a-z]| \\(|\\.|,)`),
+    // or at a bracketed pressure credit ("to M.Mims [K.White]", "INTERCEPTED by J.Trotter [V.Vea]"; 2026-10-28 audit)
+    to: new RegExp(` to (${NM})(?= [a-z]| \\(| \\[|\\.|,|$)`),
+    picked: new RegExp(`INTERCEPTED by (${NM})(?= [a-z]| \\(| \\[|\\.|,)`),
     punt: /punts (\d+) yards/, kick: /kicks (\d+) yards/, fg: /(\d+) yard field goal is (GOOD|No Good|BLOCKED)/i,
-    ret: new RegExp(`\\. (${NM}) (?:to|pushed|ran|for|MUFFS)`), pen: /PENALTY on ([A-Z]{2,4})(?:-[^,]*)?, ([^,]+), (\d+) yards/,
+    // "1 yard" too (2026-10-28 audit: a 1-yard pass interference read just "Penalty")
+    ret: new RegExp(`\\. (${NM}) (?:to|pushed|ran|for|MUFFS)`), pen: /PENALTY on ([A-Z]{2,4})(?:-[^,]*)?, ([^,]+), (\d+) yards?/,
+  };
+  const penYds = n => `${n} yard${+n === 1 ? '' : 's'}`;
+  // the official text writes "D.Prescott", or "Ja.Chase" to tell apart a teammate with the same initial
+  const nameKeys = A => {
+    const fn = String(A.firstName || ''), ln = String(A.lastName || '').replace(/\s+/g, '');
+    const keys = [String(A.shortName || '').replace(/\s+/g, ''), fn && ln ? `${fn[0]}.${ln}` : '', fn.length > 1 && ln ? `${fn.slice(0, 2)}.${ln}` : ''];
+    const bare = ln.replace(/(Jr|Sr|II|III|IV|V)\.?$/, '');  // "Godwin Jr." is "C.Godwin" in the text
+    if (fn && bare !== ln) keys.push(`${fn[0]}.${bare}`, fn.length > 1 ? `${fn.slice(0, 2)}.${bare}` : '');
+    return keys.filter(Boolean);
   };
   const fullNames = (sum, ids = null) => {  // ids (optional): filled with the same keys -> ESPN athlete id
     const m = {};
-    // the official text writes "D.Prescott", or "Ja.Chase" to tell apart a teammate with the same initial
     ((sum && sum.boxscore && sum.boxscore.players) || []).forEach(tp => (tp.statistics || []).forEach(c => (c.athletes || []).forEach(a => {
-      const A = a.athlete, fn = String(A.firstName || ''), ln = String(A.lastName || '').replace(/\s+/g, '');
-      const keys = [String(A.shortName || '').replace(/\s+/g, ''), fn && ln ? `${fn[0]}.${ln}` : '', fn.length > 1 && ln ? `${fn.slice(0, 2)}.${ln}` : ''];
-      const bare = ln.replace(/(Jr|Sr|II|III|IV|V)\.?$/, '');  // "Godwin Jr." is "C.Godwin" in the text
-      if (fn && bare !== ln) keys.push(`${fn[0]}.${bare}`, fn.length > 1 ? `${fn.slice(0, 2)}.${bare}` : '');
-      keys.forEach(k => { if (k && !m[k]) { m[k] = A.displayName; if (ids) ids[k] = String(A.id); } });
+      const A = a.athlete;
+      nameKeys(A).forEach(k => { if (!m[k]) { m[k] = A.displayName; if (ids) ids[k] = String(A.id); } });
     })));
     return m;
+  };
+  // Which team kicked (2026-10-28 audit): ESPN's team with the ball on a kick is sometimes the kicking side and sometimes
+  // the receiving one (DEN's kickoff to SEA listed DEN; KC's punt to LAC listed LAC), so a fumbled return named the wrong
+  // team. A kickoff's text names its side ("kicks 60 yards from DEN 35"); a punter is looked up in the box score.
+  const PUNTERS = new WeakMap();
+  const kickerOf = p => {
+    const raw = effText(p), fr = raw.match(/ kicks (?:onside )?\d+ yards? from ([A-Z]{2,3}) \d/);
+    if (fr) return txtCode(fr[1]);
+    const pn = (raw.match(new RegExp(`(${NM}) punts `)) || [])[1];
+    if (!pn) return null;
+    for (const sm of [GP.sum, ...Object.values(LIVE.sums || {})]) {
+      if (!sm || !sm.boxscore) continue;
+      if (!PUNTERS.has(sm)) {
+        const m = {};
+        (sm.boxscore.players || []).forEach(tp => (tp.statistics || []).filter(c => c.name === 'punting')
+          .forEach(c => (c.athletes || []).forEach(a => nameKeys(a.athlete).forEach(k => { m[k] = ourCode(tp.team.abbreviation); }))));
+        PUNTERS.set(sm, m);
+      }
+      const t = PUNTERS.get(sm)[pn.replace(/\s+/g, '')];
+      if (t) return t;
+    }
+    return null;
   };
   // ctx: { off, other } our team codes for the offense at the snap and its opponent (who lost a fumble)
   const ACT = new RegExp(`^${NM} (?:pass|scrambles|sacked|left|right|up the middle|middle|kneels)\\b`);
@@ -459,7 +505,8 @@
   const playHead = (pl, names, ctx = {}) => {
     // the official text leads with formation and eligibility notes: "(Shotgun) C.Lomu reported in as eligible. D.Maye ..."
     // also "Direct snap to C.Heyward." (a wildcat snap note) and ESPN's stray leading space (" R.Stevenson up the middle")
-    const lead_ = new RegExp(`^(?:(?:\\([^)]*\\)|${NM} reported in as eligible\\.|Direct snap to ${NM}\\.)\\s*)+`);
+    // and a quarterback change ("19-S.Thompson in at QB."; 2024 audit)
+    const lead_ = new RegExp(`^(?:(?:\\([^)]*\\)|${NM} reported in as eligible\\.|Direct snap to ${NM}\\.|.{0,60}?\\bat QB\\.|.{0,90}? reported in as eligible\\.)\\s*)+`);  // QB changes in any spelling ("HST 10-D. Mills now at QB.", "#2 - D.Lock - Back in at QB."), several eligible at once
     const full = String(pl.text || '').trim().replace(lead_, '');  // shown under the card
     // what's parsed: after a replay reversal only the ruling that stands ("...the play was REVERSED.D.Maye pass
     // incomplete..."), and without the 2-point try that follows a touchdown
@@ -468,17 +515,53 @@
     // (2026-10-25: every two-point try read "no good") a try's own row starts with that text: only a touchdown's tail goes
     if (!/^TWO-POINT CONVERSION ATTEMPT/.test(raw)) raw = raw.replace(/\s*TWO-POINT CONVERSION ATTEMPT\..*$/, '');
     // headlines name players by first initial (owner 2026-10-20: "use first name initials, shorten a bit"): "T. McKee"
-    const nm = x => x ? shortName(names[x.replace(/\s+/g, '')] || x) : '';
+    // a player the box score doesn't list (an incomplete pass's only target) keeps the text's name, spaced like the
+    // rest ("M.Brown" -> "M. Brown"; 2026-10-28 audit)
+    const nm = x => x ? shortName(names[x.replace(/\s+/g, '')] || x.replace(/^([A-Z][a-z]?)\.(?=[A-Z])/, '$1. ')) : '';
     const g = (k, i = 1) => { const m = raw.match(RX[k]); return m ? m[i] : null; };
-    const t = (pl.type && pl.type.text) || '';
+    // a kick ESPN types by what followed it ("Fumble Recovery (Opponent)" for a muffed kickoff; 2024 audit): the text names it
+    const t0 = (pl.type && pl.type.text) || '';
+    const t = /kickoff|punt|field goal|extra point|two-point/i.test(t0) ? t0 : / kicks (?:onside )?\d+ yards? from /.test(` ${raw}`) ? 'Kickoff'
+      : new RegExp(`^${NM} punts \\d+ yards`).test(raw) ? 'Punt' : t0;
+    // ESPN sometimes swaps a play's text for its scoring summary ("Darren Waller 50 Yd pass from Bryce Young (Ryan
+    // Fitzgerald PAT blocked)", "Zyon McCollum Defensive PAT Conversion") or, after a reversal, plain words ("Goff
+    // Incomplete Pass, Intended For Sam LaPorta"): full names there (2026-10-28 audit)
+    if (!pl.inner) {
+      const sn = n => shortName(n.trim()), out = (h0, c0) => ({ h: h0, cls: c0, raw: full, eff: raw });
+      let m = raw.match(/^([A-Z][\w.'-]+(?: [\w.'-]+)+) (\d+) Yd pass from ([A-Z][\w.'-]+(?: [\w.'-]+)+?)(?: \(.*\))?$/);
+      if (m) return out(`${sn(m[3])} to ${sn(m[1])}, ${penYds(m[2])} · Touchdown`, 'td');
+      // the older form ("Jayden Reed Pass From Jordan Love for 70 Yds"; 2024), and any "N Yd <kind>" score
+      m = raw.match(/^([A-Z][\w.'-]+(?: [\w.'-]+)+?) Pass From ([A-Z][\w.'-]+(?: [\w.'-]+)+?) for (\d+) Yds?\.?$/i);
+      if (m) return out(`${sn(m[2])} to ${sn(m[1])}, ${penYds(m[3])} · Touchdown`, 'td');
+      m = raw.match(/^([A-Z][\w.'-]+(?: [\w.'-]+)+?) (\d+) Yds? ([A-Za-z ]+?)(?: \(.*\))?\.?$/);
+      if (m) return out(`${sn(m[1])} ${m[2]}-yard ${m[3].toLowerCase().replace(/^rush$/, 'run')} · Touchdown`, 'td');
+      m = raw.match(/^([A-Z][\w.'-]+(?: [\w.'-]+)*?) Safety\.?$/);  // "Alex Wright Safety", "Team Safety"
+      if (m) return out(m[1] === 'Team' ? 'Team safety · Safety' : `${sn(m[1])} makes the tackle · Safety`, 'bad');
+      m = raw.match(/^([A-Z][\w.'-]+(?: [\w.'-]+)+?) Defensive (?:PAT|Two-Point|2pt) Conversion/i);
+      if (m) return out(`Defensive conversion: ${sn(m[1])} returns the try for 2`, 'bad');
+      m = raw.match(/^([A-Z][\w'-]+) Incomplete Pass(?:, Intended For (.+))?$/);
+      if (m) { const qb = Object.values(names).find(v => v.split(' ').pop() === m[1]);
+        return out(`${qb ? shortName(qb) : m[1]} incomplete${m[2] ? ` to ${sn(m[2])}` : ''}`, ''); }
+    }
     // a flag on a play that counts ("... to GB 12 for 11 yards ... PENALTY on DAL-T.Booker, Unnecessary Roughness, 15
     // yards, enforced at GB 12."): ESPN's statYardage folds the penalty in (-19 there; owner 2026-10-18: "flournoy 19
     // yard loss?"), so the play's own yards come from the text and the flag is named after it
     const penM = !pl.inner && !/No Play/i.test(raw) && /PENALTY on/.test(raw) ? raw.match(RX.pen) : null;
     const ownY = penM ? (/no gain/.test(raw.split('PENALTY')[0]) ? 0 : (raw.split('PENALTY')[0].match(/for (-?\d+) yards?/) || [])[1]) : null;
     const y = ownY != null ? +ownY : (pl.statYardage || 0);
-    const penTail = penM ? `, flag on ${ourCode(penM[1])}: ${penM[2]}, ${penM[3]} yards` : '';
-    const td = /touchdown/i.test(t) || /TOUCHDOWN/.test(raw);
+    const penTail = penM ? `, flag on ${txtCode(penM[1])}: ${penM[2]}, ${penYds(penM[3])}` : '';
+    // a touchdown a flag took away is none (2026-10-28 audit: "31-yard run, flag on WAS ... · Touchdown")
+    const td = !/TOUCHDOWN NULLIFIED/.test(raw) && (/touchdown/i.test(t) || /TOUCHDOWN/.test(raw));
+    // a kick's flag by name (the kick's own "out of bounds" flag is the headline already; a declined one doesn't matter)
+    const kickFlag = () => { const m = raw.match(RX.pen);
+      return m ? `, flag on ${txtCode(m[1])}: ${m[2]}` : pl.isPenalty && !/declined|offsetting|Kickoff Out of Bounds|Short of Landing Zone/i.test(raw) ? ', flag on the play' : ''; };
+    // a muffed kick (2026-10-28 audit: "J. Horn Jr. returns 0" when CHI fell on his muff): who muffed it, who has it
+    const muff = () => {
+      const m = raw.match(new RegExp(`(?:^|\\. )(${NM}) MUFFS catch,? ?(.*)$`)); if (!m) return '';  // a sentence's start: not "Center-B.Gardner. Ji.Horn"
+      const rest = m[2], r = (rest.match(/(?:RECOVERED|recovered) by ([A-Z]{2,3})-/) || [])[1], ry = (rest.match(/ for (-?\d+) yards?/) || [])[1];
+      return `${nm(m[1])} muffs it${/^and recovers/.test(rest) ? (ry && +ry ? `, recovers and returns it ${penYds(ry)}` : ' and recovers')
+        : r ? `, ${txtCode(r)} recovers` : /out of bounds/.test(rest) ? ', out of bounds' : ''}`;
+    };
     const yds = n => n === 0 ? 'no gain' : n < 0 ? `loss of ${-n}` : `${n} yard${n === 1 ? '' : 's'}`;
     // a scrimmage action read from the text alone (ESPN's play type names the fumble, not what led to it)
     const action = txt => {
@@ -493,31 +576,55 @@
     // Offside, 5 yards ... - No Play."; owner 2026-10-26: "fumble lost to dallas doesn't have an explanation"): the flag
     // leads, then what it erased, never the erased play as if it counted
     const npen = !pl.inner && /No Play/i.test(raw) ? raw.match(RX.pen) : null;
-    if (npen) {
-      const pre = raw.slice(0, raw.search(/PENALTY on/)).trim();
+    // offsetting flags replay the down (2026-10-28 audit: a wiped-out 15-yard catch read "no gain")
+    const offset = !pl.inner && !npen && /No Play/i.test(raw) && /offsetting/i.test(raw);
+    // a foul in the offense's own end zone is a safety, not a replayed down (2026-10-28 audit: "Penalty, SF: Offensive
+    // Holding, 6 yards · wipes out a sack" for 2 points)
+    if (npen && /enforced in End Zone, SAFETY/i.test(raw))
+      return { h: `Penalty, ${txtCode(npen[1])}: ${npen[2]} in the end zone · Safety`, cls: 'bad', raw: full, eff: raw };
+    if (npen || offset) {
+      const pre = raw.slice(0, raw.search(/PENALTY on/i)).trim();
+      // a kick too (2026-10-28 audit: "Penalty, LV: Offensive Offside" said nothing of the field goal it took away)
       const erased = /FUMBLES/.test(pre) ? 'a fumble' : /INTERCEPTED/.test(pre) ? 'an interception' : /TOUCHDOWN/.test(pre) ? 'a touchdown'
+        : /field goal is GOOD/i.test(pre) ? 'a field goal' : /field goal is BLOCKED/i.test(pre) ? 'a blocked field goal'
+        : /field goal is No Good/i.test(pre) ? 'a missed field goal' : / punts \d+ yards/.test(` ${pre}`) ? 'a punt'
+        : / kicks (?:onside )?\d+ yards/.test(` ${pre}`) ? 'the kickoff'
         : /sacked/.test(pre) ? 'a sack' : ACT.test(pre) ? (action(pre.replace(/\.$/, '')) || {}).h : '';
-      return { h: `Penalty, ${GSIS[npen[1]] || ourCode(npen[1])}: ${npen[2]}, ${npen[3]} yards${erased ? ` · wipes out ${erased}` : ''}`,
+      return { h: `${npen ? `Penalty, ${txtCode(npen[1])}: ${npen[2]}, ${penYds(npen[3])}` : 'Offsetting penalties'}${erased ? ` · wipes out ${erased}` : ''}`,
                cls: 'pen', raw: full, eff: raw };
     }
     // fumbles (owner 2026-10-15: "Fumble" alone misleads): say what the play was and who ended up with the ball. Kept
     // by the offense and the play went on ("FUMBLES, and recovers ... D.Maye pass ... to H.Henry for 20 yards") -> that
     // play, recovered; otherwise the action before the fumble, then lost to / recovered by the team that got it.
-    const fi = raw.search(/FUMBLES/);
+    // a fumble after a blocked kick's return is the kick's story, told by the kick's own line below (2026-10-28 audit:
+    // a blocked field goal DEN returned and fumbled read "E. Pineiro fumbles, lost to DEN")
+    const fi0 = raw.search(/FUMBLES/), fi = fi0 >= 0 && /field goal|extra point|punt is BLOCKED/i.test(raw.slice(0, fi0)) ? -1 : fi0;
     // a kick whose return is fumbled (owner 2026-10-18: "JK Scott fumbles, offense recovers" said nothing): the kick,
     // the returner's fumble, and who has it after the play (ESPN's possession at its end, which follows a review; the
     // text can still say the overturned recovery)
     const after = pl.end && pl.end.team && TEAM_ID[String(pl.end.team.id)];
-    const kickRx = / punts \d+ yards| kicks \d+ yards/;  // the play type can be just "Fumble Recovery (Opponent)"
+    const kickRx = / punts \d+ yards| kicks (?:onside )?\d+ yards/;  // the play type can be just "Fumble Recovery (Opponent)"
     if (fi >= 0 && !pl.inner && (/punt|kickoff/i.test(t) || kickRx.test(` ${raw.slice(0, fi)}`)) && after && ctx.off) {
-      const kick = playHead(Object.assign({}, pl, { text: raw.slice(0, fi).trim(), type: { text: / kicks \d+ yards/.test(` ${raw}`) ? 'Kickoff' : 'Punt' }, inner: true }), names, ctx).h;
+      const isKo = / kicks (?:onside )?\d+ yards/.test(` ${raw}`);
+      const kick = playHead(Object.assign({}, pl, { text: raw.slice(0, fi).trim(), type: { text: isKo ? 'Kickoff' : 'Punt' }, inner: true }), names, ctx).h;
       const fumbler = (raw.slice(0, fi).match(RX.ret) || [])[1];
-      const kicker = /kickoff/i.test(t) || / kicks \d+ yards/.test(` ${raw}`) ? ctx.other : ctx.off;  // a kickoff's play lists the receiving team as the offense
-      return { h: `${kick.replace(/, [^,]* returns .*$/, '')}, ${fumbler ? `${nm(fumbler)} fumbles the return` : 'return fumbled'}, ${after === kicker ? `${after} recovers` : `${after} keeps it`}`,
+      // the kicking team from the kick itself; ESPN's offense only when the text can't tell
+      const kicker = kickerOf(pl) || (isKo ? ctx.other : ctx.off);
+      const base = kick.replace(/, [^,]* returns .*$/, ''), fn = fumbler ? nm(fumbler) : '';
+      const fum = !fn ? 'return fumbled' : base.includes(fn) ? 'fumbles' : `${fn} fumbles the return`;
+      const oob = /ball out of bounds/i.test(raw.slice(fi)) ? ', out of bounds' : '';
+      return { h: `${base}, ${fum}${oob}, ${after === kicker ? `${after} recovers` : `${after} keeps it`}`,
                cls: after === kicker ? 'good' : '', raw: full, eff: raw, lost: false };
     }
     if (fi >= 0 && !pl.inner) {
-      const recs = [...raw.matchAll(/(?:RECOVERED|recovered) by ([A-Z]{2,4})-/g)], rec = recs.length ? ourCode(recs[recs.length - 1][1]) : '';
+      const recs = [...raw.matchAll(/(?:RECOVERED|recovered) by ([A-Z]{2,4})-/g)], rec = recs.length ? txtCode(recs[recs.length - 1][1]) : '';
+      // the interceptor fumbling on the return (2026-10-28 audit: LV's pick, fumbled and recovered by LV, read "fumble
+      // lost to LV"): the pick stands unless the passing team got the ball back
+      if (/INTERCEPTED/.test(raw.slice(0, fi))) {
+        const qb = (raw.match(new RegExp(`^(${NM}) pass`)) || [])[1], pk = g('picked'), back = !!rec && rec === ctx.off;
+        return { h: `${nm(qb)} intercepted${pk ? ` by ${nm(pk)}` : ''}, fumbled on the return, ${back ? `${rec} gets it back` : `${rec || ctx.other || 'defense'} keeps it`}`,
+                 cls: back ? '' : 'bad', raw: full, eff: raw, lost: false };
+      }
       const ret = /kickoff|punt/i.test(t), loser = ret ? ctx.other : ctx.off;  // on a kick the returner's team fumbles
       const lost = rec ? (loser ? rec !== loser : !!pl.isTurnover) : false;
       if (!lost) {
@@ -531,27 +638,88 @@
       const head = ret ? raw.slice(0, fi).trim() : segs.reverse().find(x => ACT.test(x));
       const base = ret ? playHead(Object.assign({}, pl, { text: head, inner: true }), names, ctx).h : head ? action(head).h : '';
       const tdD = lost && /TOUCHDOWN/.test(raw.slice(lf));
+      // a fumbled snap names no runner (2026-10-28 audit: "D.Prescott Aborted. C.Beebe FUMBLES" read "D. Prescott fumbles")
       h = base ? `${base}, ${lost ? `fumble lost to ${rec}` : 'fumble recovered'}`
+        : /Aborted/.test(raw.slice(0, lf + 30)) ? `Botched snap, ${lost ? `lost to ${rec}` : `${rec || 'offense'} recovers`}`
         : `${who ? nm(who) : 'Ball'} fumbles, ${lost ? `lost to ${rec}` : 'offense recovers'}`;
       return { h: `${h}${tdD ? `, ${rec} TD` : ''}`.replace(/\s{2,}/g, ' '), cls: lost ? 'bad' : '', raw: full, eff: raw, lost };
     }
-    if (/interception/i.test(t)) { h = `${nm(g('lead'))} intercepted${g('picked') ? ` by ${nm(g('picked'))}` : ''}`; cls = 'bad'; }
+    // ESPN types a kneel as a run and a spike as an incompletion (2026-10-28 audit: "J. Love run, loss of 1" under a
+    // Kneel chip)
+    if (!pl.inner && /^(?:[A-Z][a-z]?\.\S+) kneels\b/.test(raw)) h = `${nm(g('lead'))} kneels`;
+    else if (!pl.inner && /spiked the ball/i.test(raw)) h = `${nm((raw.match(new RegExp(`^(${NM}) spiked`)) || [])[1])} spikes it`;
+    else if (/interception/i.test(t)) { h =`${nm(g('lead'))} intercepted${g('picked') ? ` by ${nm(g('picked'))}` : ''}`; cls = 'bad'; }
     else if (/sack/i.test(t)) { h = `${nm(g('lead'))} sacked, ${yds(y)}${penTail}`; cls = 'bad'; }
+    // an illegal forward pass (2026-10-28 audit: "P. Mahomes run, loss of 10" for an incompletion thrown past the line):
+    // what happened, then the flag; a scramble past the line and then a throw reads that way
+    else if (!pl.inner && penM && /Illegal Forward Pass/i.test(penM[2]) && ACT.test(raw)) {
+      const segs = raw.split(/PENALTY/)[0].split(/\. (?=[A-Z][a-z]?\.)/).map(x => x.trim().replace(/\.$/, '')).filter(x => ACT.test(x));
+      const a = action(segs[0]);
+      h = segs.length > 1 ? `${a.h}, then a throw past the line: illegal forward pass, ${penYds(penM[3])}` : `${a.h}${penTail}`; cls = 'pen';
+    }
+    // a quarterback catching his own deflected pass ("S.Rattler pass short right to S.Rattler")
+    else if (/pass reception|passing touchdown/i.test(t) && g('lead') && g('lead') === g('to')) h = `${nm(g('lead'))} catches his own deflected pass, ${yds(y)}${penTail}`;
     else if (/pass reception|passing touchdown/i.test(t)) h = `${nm(g('lead'))} ${g('to') ? `to ${nm(g('to'))}` : 'pass'}, ${yds(y)}${penTail}`;
     else if (/pass incompletion/i.test(t)) h = `${nm(g('lead'))} incomplete${g('to') ? ` to ${nm(g('to'))}` : ''}`;
     else if (/^rush|rushing touchdown/i.test(t)) h = (y > 0 ? `${nm(g('lead'))} ${y}-yard run` : `${nm(g('lead'))} run, ${yds(y)}`) + penTail;
     // the return's own yards from the text ("... to LAC 9. K.Mitchell to LAC 14 for 5 yards"): ESPN's net yardage
     // includes a penalty on the play (owner 2026-10-18: "returns it -5 yards")
-    else if (/punt/i.test(t)) h = `${nm(g('lead'))} punts ${g('punt') || ''} yards${/Touchback/i.test(raw) ? ', touchback' : g('ret') ? `, ${nm(g('ret'))} returns ${retYds(raw, pl)}` : ''}${pl.isPenalty ? ', flag on the play' : ''}`;
-    else if (/kickoff/i.test(t)) h = /Touchback/i.test(raw) ? 'Kickoff, touchback' : `Kickoff: ${nm(g('ret'))} returns it ${retYds(raw, pl)} yard${retYds(raw, pl) === 1 ? '' : 's'}${pl.isPenalty ? ', flag on the play' : ''}`;
-    else if (/extra point/i.test(t)) { const k = (raw.match(new RegExp(`^(${NM}) extra point`)) || [])[1], ok = /is GOOD/i.test(raw);
-      h = `${k ? `${nm(k)} e` : 'E'}xtra point ${ok ? 'good' : /block/i.test(raw) ? 'blocked' : 'no good'}`; cls = ok ? '' : 'bad'; }
-    else if (/two-point/i.test(t)) { const ok = /ATTEMPT SUCCEEDS/i.test(raw), inner = raw.replace(/^TWO-POINT CONVERSION ATTEMPT\.\s*/, '').split('. ATTEMPT')[0];
-      const r = ACT.test(inner) ? action(inner) : null;
-      h = `Two-point try${r ? `: ${r.h.replace(/, (?:\d+ yards?|no gain|loss of \d+)$/, '')}` : ''}, ${ok ? 'good' : 'no good'}`; cls = ok ? '' : 'bad'; }
-    else if (/field goal/i.test(t)) { const r = g('fg', 2); h = `${g('fg') || ''}-yard field goal, ${/good/i.test(r || t) && !/no good/i.test(r || '') ? 'good' : r && /block/i.test(r) ? 'blocked' : 'no good'}`; cls = /good/i.test(t) ? 'good' : 'bad'; }
-    else if (/penalty/i.test(t)) { const m = raw.match(RX.pen); h = m ? `Penalty, ${GSIS[m[1]] || m[1]}: ${m[2]}, ${m[3]} yards` : 'Penalty'; cls = 'pen'; }  // not 'flag': site.css .flag is a white badge
+    // a blocked punt (2026-10-28 audit: it read "punts yards"), and how an unreturned punt ended
+    else if (/punt/i.test(t)) {
+      const bp = raw.match(new RegExp(`^(${NM}) punt is BLOCKED by (${NM})(?=,| \\(|\\.)`)), rec = (raw.match(/(?:RECOVERED|recovered) by ([A-Z]{2,3})-/) || [])[1], mf = muff();
+      const rt = raw.match(new RegExp(`\\. (${NM}) for (\\d+) yards?, TOUCHDOWN`));
+      h = bp ? `${nm(bp[1])}'s punt blocked by ${nm(bp[2])}${rt ? `, ${nm(rt[1])} returns it ${penYds(rt[2])}` : rec ? `, ${txtCode(rec)} recovers` : ''}${kickFlag()}`
+        : `${nm(g('lead'))} punts ${g('punt') || ''} yards${/Touchback/i.test(raw) ? ', touchback' : mf ? `, ${mf}` : g('ret') ? `, ${nm(g('ret'))} returns ${retYds(raw, pl)}`
+          : /fair catch/i.test(raw) ? ', fair catch' : /downed/i.test(raw) ? ', downed' : /out of bounds/i.test(raw) ? ', out of bounds' : ''}${kickFlag()}`;
+    }
+    else if (/kickoff/i.test(t)) {
+      // a kick nobody returned (2026-10-28 audit: an onside kick out of bounds read "Kickoff: returns it 21 yards")
+      const ons = / kicks onside /.test(` ${raw}`), K = ons ? 'Onside kick' : 'Kickoff', rec = (raw.match(/RECOVERED by ([A-Z]{2,3})-/i) || [])[1];
+      // or the receiving side falling on it ("R.Odunze (didn't try to advance) to NE 47 for no gain")
+      const onWho = ons && !rec ? (raw.match(new RegExp(`\\. (${NM})(?= \\(| to | for | pushed| ran)`)) || [])[1] : null, ry = retYds(raw, pl), mf = muff();
+      h = /Touchback/i.test(raw) ? `${K}, touchback`
+        : ons && rec ? `Onside kick, recovered by ${txtCode(rec)}`
+        : onWho ? `Onside kick, ${nm(onWho)} recovers${ry > 0 ? `, returns it ${penYds(ry)}` : ''}${kickFlag()}`
+        // the new kickoff's landing zone: short of it, the receiving team takes the ball at its 40
+        : /short of landing zone/i.test(raw) ? `${K} short of the landing zone${kickFlag()}`
+        : mf ? `${K}: ${mf}${kickFlag()}`
+        : g('ret') ? `${K}: ${nm(g('ret'))} returns it ${penYds(ry)}${kickFlag()}`
+        : /out of bounds/i.test(raw) ? `${K} out of bounds${kickFlag()}` : /declared dead/i.test(raw) ? `${K}, ball declared dead${kickFlag()}` : `${K}${kickFlag()}`;
+    }
+    else if (/extra point/i.test(t)) { const k = (raw.match(new RegExp(`^(${NM}) extra point`)) || [])[1], ok = /is GOOD/i.test(raw), di = raw.search(/DEFENSIVE TWO-POINT/i);
+      h = `${k ? `${nm(k)} e` : 'E'}xtra point ${ok ? 'good' : /block/i.test(raw) ? 'blocked' : 'no good'}`
+        + (di >= 0 ? (/ATTEMPT SUCCEEDS/i.test(raw.slice(di)) ? ', returned by the defense for 2' : ", the defense's return stopped") : ''); cls = ok ? '' : 'bad'; }
+    // "D.Prescott rushes left guard" is a run (2026-10-28 audit: it read "D. rushes run")
+    // "M.Stafford is sacked" too; the defense's return after a failed try is its own outcome (2026-10-28 audit)
+    else if (/two-point/i.test(t)) { const own = offTry(raw), ok = /ATTEMPT SUCCEEDS/i.test(own);
+      const inner = own.replace(/^TWO-POINT CONVERSION ATTEMPT\.\s*/, '').split('. ATTEMPT')[0].replace(/^(\S+) rushes\b/, '$1').replace(/^(\S+) is sacked\b/, '$1 sacked');
+      const r = ACT.test(inner) ? action(inner) : null, dTry = /DEFENSIVE TWO-POINT ATTEMPT/i.test(raw);
+      h = `Two-point try${r ? `: ${r.h.replace(/, (?:\d+ yards?|no gain|loss of \d+)$/, '')}` : ''}, ${ok ? 'good' : 'no good'}`
+        + (dTry ? (/ATTEMPT SUCCEEDS/i.test(raw.slice(raw.search(/DEFENSIVE TWO-POINT/i))) ? ', returned by the defense for 2' : ", the defense's return stopped") : '');
+      cls = ok ? '' : 'bad'; }
+    else if (/field goal/i.test(t)) { const r = g('fg', 2), rec = (raw.match(/(?:RECOVERED|recovered) by ([A-Z]{2,3})-/) || [])[1];
+      const rt = raw.match(new RegExp(`\\. (${NM}) for (\\d+) yards?, TOUCHDOWN`));  // run back for a score: who and how far
+      h = `${g('fg') || ''}-yard field goal, ${/good/i.test(r || t) && !/no good/i.test(r || '') ? 'good' : r && /block/i.test(r) ? `blocked${rt ? `, ${nm(rt[1])} returns it ${penYds(rt[2])}` : rec ? `, ${txtCode(rec)} recovers` : ''}` : 'no good'}`;
+      cls = /BLOCKED/i.test(raw) ? 'bad' : /good/i.test(t) ? 'good' : 'bad'; }
+    // ESPN types a play with an accepted flag as "Penalty" at times: the play first, then its flag (2026-10-28 audit: an
+    // 8-yard scramble plus 5 for holding read just "Penalty, LAC: Defensive Holding")
+    else if (/penalty/i.test(t)) { const m = raw.match(RX.pen), a = penM && ACT.test(raw) ? action(raw.split(/PENALTY/)[0].trim().replace(/\.$/, '')) : null;
+      // a flag the other side declined, alone ("Penalty on CAR, Delay of Game, declined."; 2024 audit)
+      const dc = !m && raw.match(/^Penalty on ([A-Z]{2,3})(?:-[^,]*)?, ([^,]+), declined/i);
+      h = a ? `${a.h}${penTail}` : m ? `Penalty, ${txtCode(m[1])}: ${m[2]}, ${penYds(m[3])}` : dc ? `Penalty, ${txtCode(dc[1])}: ${dc[2]}, declined` : 'Penalty'; cls = a ? a.cls : 'pen'; }  // not 'flag': site.css .flag is a white badge
+    // a safety says how (2026-10-28 audit: the bare word "Safety"): sacked or tackled in the end zone, or grounding there
+    else if (/safety/i.test(t)) {
+      const sk = raw.match(new RegExp(`^(${NM}) sacked in End Zone`)), gr = /Intentional Grounding/i.test(raw) ? (raw.match(new RegExp(`^(${NM}) pass`)) || [])[1] : null;
+      const tk = raw.match(new RegExp(`(${NM}) tackled in End Zone`)), a = !sk && !gr && ACT.test(raw) ? action(raw.split(/, SAFETY|\. /)[0]) : null;
+      h = `${sk ? `${nm(sk[1])} sacked in the end zone` : gr ? `${nm(gr)} intentional grounding in the end zone` : tk ? `${nm(tk[1])} tackled in the end zone` : a ? a.h : 'Safety'}${sk || gr || tk || a ? ' · Safety' : ''}`;
+      cls = 'bad';
+    }
     else h = t || raw.split('. ')[0];
+    // a touchdown called back by a foul enforced at its spot: the play stands short of the end zone (2026-10-28 audit)
+    if (!pl.inner && /TOUCHDOWN NULLIFIED/.test(raw) && !/No Play/i.test(raw)) h += ' · TD called back';
+    // a lateral names who finished the play (2026-10-28 audit: Golden's 1-yard catch, lateral to Lloyd for 5 more)
+    const lat = !pl.inner && raw.match(new RegExp(`[Ll]ateral to (${NM})(?= [a-z]| \\(|\\.|,|$)`));
+    if (lat) h = h.replace(/(, flag on .*)?$/, m => `, lateral to ${nm(lat[1])}${m}`);  // before the flag, which came after it
     if (td) { h += ' · Touchdown'; cls = 'td'; }
     if (pl.isTurnover && cls !== 'bad') cls = 'bad';
     return { h: h.replace(/\s+,/g, ',').replace(/\s{2,}/g, ' ').trim(), cls, raw: full, eff: raw };
@@ -1507,8 +1675,12 @@
     const gEv = w => ((L && L.prac) || []).find(e => e[0] === 'g' && e[5] === w);
     const longDay = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
     const firstListed = ep && ((L && L.prac) || []).find(e => e[0] === 'p' && !e[4] && e[1] >= (gEv(ep.w0 - 1) || [0, ''])[1]);
-    const hurtWhen = ep && ep.ig ? (g => g ? `Hurt ${longDay(g[1])} ${g[3]} ${g[2]}${ep.ig[1] ? ` (${QN[ep.ig[1]] || `Q${ep.ig[1]}`}${ep.ig[1] < 5 ? ' quarter' : ''})` : ''}`
-        : `Hurt in the week ${ep.ig[0]} game`)(gEv(ep.ig[0]))
+    // the in-game note: the episode's, else his latest this season when it's from his last game or the one before
+    // (owner 2026-10-28, Dameon Pierce: hurt Monday, on IR Wednesday, before any episode existed to carry it)
+    const igc = L && L.igc && h.wk && L.igc[0] >= h.wk - 2 ? L.igc : null;
+    const ig = ep && ep.ig ? ep.ig : igc;
+    const hurtWhen = ig ? (g => g ? `Hurt ${longDay(g[1])} ${g[3]} ${g[2]}${ig[1] ? ` (${QN[ig[1]] || `Q${ig[1]}`}${ig[1] < 5 ? ' quarter' : ''})` : ''}`
+        : `Hurt in the week ${ig[0]} game`)(gEv(ig[0]))
       : ep && firstListed ? `First listed ${longDay(firstListed[1])}` : '';
     const hurt = [h.what, hurtWhen].filter(Boolean).join(' · ');
     // third cell (owner 2026-10-17: "expected back being a date seems weak"): a game, not a date. Likely to play this
@@ -1529,6 +1701,10 @@
       ? (ourG || espnG || h.back === 'no' ? `<div><small>Expected back</small><b>${esc(ourG ? gameTxt(ourG) : h.back === 'no' ? 'Not this season' : gameTxt(espnG))}</b>
           <span class="muted">${ourG ? backP + (espnG && espnG[5] !== ourG[5] ? `<br>ESPN: ${esc(gameTxt(espnG).toLowerCase())}` : '') : h.back === 'no' ? 'our return model' : 'ESPN estimate'}</span></div>` : '')
       : nextG ? `<div><small>Next game</small><b>${esc(new Date(nextG[1] + 'T12:00:00').toLocaleDateString([], { weekday: 'short' }))} ${esc(nextG[3])} ${esc(nextG[2])}</b><span class="muted">week ${nextG[5]}</span></div>` : '';
+    // on a reserve list his team's practice days aren't his (owner 2026-10-28: Pierce on IR read "Wed overdue, Thu
+    // upcoming"): no strip, the list said plainly; a return window opened puts him back on the report and the strip
+    const resList = /^(IR|Injured Reserve)\b/i.test(des) && !pr.length ? 'On injured reserve' : /^PUP\b/i.test(des) && !pr.length ? 'On the PUP list'
+      : /^NFI\b/i.test(des) && !pr.length ? 'On the non-football injury list' : '';
     const thisWeek = `<div class="pc-box"><div class="pc-k">This week</div>
         <div class="ij-hero">
           <div><small>Status</small><b class="ij-st ij-${desCls}">${esc(des)}</b></div>
@@ -1536,7 +1712,8 @@
           ${third}
         </div>
         ${hurt ? `<div class="ij-what">${esc(hurt)}</div>` : ''}
-        ${h.inj ? (prStrip ? `<div class="pc-k pr-k">Practice this week</div>${prStrip}` : '<p class="pc-sub">On the injury report.</p>') : '<p class="pc-sub">Not on the injury report and practicing fully.</p>'}</div>`;
+        ${resList ? `<p class="pc-sub">${esc(resList)}: off the practice report until his team opens his return window.</p>`
+          : h.inj ? (prStrip ? `<div class="pc-k pr-k">Practice this week</div>${prStrip}` : '<p class="pc-sub">On the injury report.</p>') : '<p class="pc-sub">Not on the injury report and practicing fully.</p>'}</div>`;
     const tl = [];
     if (ep) tl.push(`Listed since week ${ep.w0}${ep.missed ? `, ${ep.missed} game${ep.missed === 1 ? '' : 's'} missed` : ''}${ep.list ? ` · on ${esc(ep.list)}` : ''}`);
     const timeline = h.inj && (tl.length || (now && now.comment)) ? `<div class="pc-box"><div class="pc-k">Timeline</div>${tl.map(t => `<div class="ij-line">${t}</div>`).join('')}
@@ -1799,39 +1976,97 @@
     return out;
   };
   const hChip = h => `<span class="hn-chip hn-${h.c.startsWith('L_') ? 'lead' : h.c.startsWith('PO') || ['AIR', 'GROUND', 'ROTW'].includes(h.c) ? 'wk' : 'big'}">${h.n > 1 ? `${h.n}&times; ` : ''}${esc(h.chip)}</span>`;
+  // Hall of Fame chance ((DP), owner 2026-10-28: "can we create a hall of fame calculator?"): data/hof_chance.json
+  // (tools/hof_eval.py --export), for drafted players not in the Hall; an active player's reads "if his career ended today"
+  const HF = { d: undefined };
+  const loadHof = () => { if (HF.d !== undefined) return; HF.d = null;
+    NFLE.load('data/hof_chance.json').then(j => { HF.d = j; rerenderCard(); }).catch(() => { HF.d = false; }); };
+  const hofPct = v => v >= 0.995 ? '>99%' : v < 0.01 ? '<1%' : `${Math.round(100 * v)}%`;
+  // what history says about the wait at each level (owner 2026-10-28: "add the threshold summary"): inductees since 1980
+  // by the model's out-of-fold chance, years past first eligibility (middle half); docs/INSIGHTS.md (DP2) follow-up
+  // [floor, the line, the band's longest usual wait (its middle half's top)]; a player already waiting past it reads so
+  const HOF_WAIT = [[0.95, 'First-ballot territory: 2 of 3 at this level went straight in', 1],
+    [0.8, 'Likely in, usually after a wait of 1-6 years', 6], [0.6, 'Better than even; those who made it waited 1-7 years', 7],
+    [0.4, 'A toss-up; those who made it waited 6-13 years', 13], [0.2, 'A long shot; those who made it waited 3-9 years', 9],
+    [0.05, 'A long shot; those who made it waited 6-14 years, often as seniors', 14]];
+  // (owner 2026-10-28: "for players we confidently suspect would be affected by the concept of legal trouble we can put
+  // an asterisk and the little disclaimer note by the percentage", no specifics) a short, deliberately kept list: a
+  // documented legal record serious enough that voters have historically held it against a player
+  const HOF_OFFFIELD = new Set(['00-0014724', '00-0027793']);  // Darren Sharper, Antonio Brown
+  const hofWait = (v, waited = 0) => { const b = HOF_WAIT.find(([lo]) => v >= lo);
+    return !b ? '' : waited > b[2] ? 'Waiting longer than most at this level: cases like this are often settled late, some by the seniors committee' : b[1]; };
+  const hofBox = (pid, L) => {
+    loadHof();
+    if (L && L.bio && L.bio.hof) return '';
+    const H = HF.d, c = H && H.c && H.c[pid];
+    const watch = H && H.c ? (() => {
+      const rows = Object.entries(H.c), top = el => rows.filter(([, v]) => v[1] === el).sort((a, b) => b[1][0] - a[1][0]).slice(0, 20);
+      const li = ([g, v]) => `<tr data-open-pid="${esc(g)}" class="py-tap"><td>${esc(v[2])} <span class="muted">${esc(v[3])}</span></td><td class="num">${hofPct(v[0])}${HOF_OFFFIELD.has(g) ? '*' : ''}</td></tr>`;
+      return `<details class="py-more"><summary>Hall of Fame watch list</summary>
+        <div class="pc-k co-sub">Eligible, not in yet</div><table class="bx"><tbody>${top(1).map(li).join('')}</tbody></table>
+        <div class="pc-k co-sub">Active or retired under 5 years (if their careers ended today)</div><table class="bx"><tbody>${top(0).map(li).join('')}</tbody></table>
+        <p class="pc-sub muted">* On the field only. Off-field matters can weigh on the vote, and likely will for these players.</p></details>`; })() : '';
+    // kickers and punters: a handful ever inducted, so the model has little to go on and reads them high
+    const st = c && c[3] === 'ST' ? ' <span class="muted">(kickers and punters: only a few ever inducted, so read this one loosely)</span>' : '';
+    // an eligible player: which ballot this is (his first class: the sixth after his last season)
+    const nth = c && c[1] && H.eligible_through ? H.eligible_through + 6 - (c[4] + 6) + 1 : null;
+    const off = HOF_OFFFIELD.has(pid);
+    const line = !H ? '' : c ? `<div class="pc-big">${hofPct(c[0])}${off ? '<small>*</small>' : ''}</div>${off ? '<div class="pc-sub muted">* On the field only. Off-field matters can weigh on the vote, and likely will here.</div>' : ''}<div class="pc-sub">${c[1] ? `Eligible, not in yet${nth > 0 ? ` &middot; ${ord(nth)} year on the ballot` : ''}` : 'If his career ended today'}${st}</div>${hofWait(c[0], nth ? nth - 1 : 0) ? `<div class="pc-sub"><b>${esc(hofWait(c[0], nth ? nth - 1 : 0))}</b></div>` : ''}`
+      : '<div class="pc-big muted">&lt;1%</div><div class="pc-sub">Nowhere near the line so far</div>';
+    return `<div class="pc-box"><div class="pc-k">Hall of Fame chance</div>${line}
+      <p class="pc-sub muted">Learned from every player since 1980 whose career ended by 2015: first-team All-Pros and Pro Bowls carry it, then All-Decade teams, an all-time top-25 rank at the position and a long career as a starter, then MVP / Player of the Year awards and Super Bowl titles. Undrafted players are scored without career value. On the field only: voters weigh more. Tested on held-out draft classes.</p>${watch}</div>`;
+  };
   const honorsTile = (pid, L) => {
     loadHonors();
     if (!HN.d) return tapTile('Honors', `<div class="pc-tapsub">${HN.d === false ? 'Not available' : 'Loading&hellip;'}</div>`, 'Honors', '<p class="pc-sub">Loading&hellip;</p>');
-    const H = honorsOf(pid, L);
-    if (!H.length) return tapTile('Honors', '<div class="pc-big muted">&ndash;</div><div class="pc-tapsub">None yet</div>', 'Honors',
-      `<p class="pc-sub">No awards, All-Pro or Pro Bowl selections, league-leading seasons or Super Bowl titles on record (${HN.d.from} on).</p>`);
-    const face = `<div class="hn-face">${H.slice(0, 3).map(hChip).join('')}${H.length > 3 ? `<span class="hn-more">+${H.length - 3} more</span>` : ''}</div>`;
+    const H = honorsOf(pid, L), SN0 = (HN.d.sn && HN.d.sn[pid]) || [];
+    if (!H.length && !SN0.length) return tapTile('Honors', '<div class="pc-big muted">&ndash;</div><div class="pc-tapsub">None yet</div>', 'Honors',
+      `<p class="pc-sub">No awards, All-Pro or Pro Bowl selections, league-leading seasons or Super Bowl titles on record (${HN.d.from} on).</p>${hofBox(pid, L)}`);
+    const face = H.length ? `<div class="hn-face">${H.slice(0, 3).map(hChip).join('')}${H.length > 3 ? `<span class="hn-more">+${H.length - 3} more</span>` : ''}</div>`
+      : `<div class="pc-big muted">&ndash;</div><div class="pc-tapsub">${SN0.length} snub${SN0.length === 1 ? '' : 's'}</div>`;
     // the years: '18 '19; weekly honors as week numbers within the season, months by name
     const yrs = w => { const g = {}; w.forEach(([s, x]) => { (g[s] = g[s] || []).push(x); });
       return Object.keys(g).sort().map(s => g[s][0] == null ? `&rsquo;${String(s).slice(-2)}` : `&rsquo;${String(s).slice(-2)} <span class="muted">${g[s].map(x => (typeof x === 'number' ? `wk ${x}` : esc(x))).join(', ')}</span>`).join(' &middot; '); };
-    const table = `<table class="bx hn-t"><thead><tr><th>Honor</th><th class="num">#</th><th>Seasons</th></tr></thead><tbody>${H.map(h => `<tr><td>${esc(h.name)}</td><td class="num">${h.n}</td><td>${yrs(h.when)}</td></tr>`).join('')}</tbody></table>`;
+    // snubs ((DQ), owner 2026-10-28): seasons his numbers made him a likely pick (60%+, by the selection model) and he
+    // wasn't picked; a row below the honors, quieter
+    const SN = SN0;
+    const snRow = k => { const w = SN.filter(x => x[1] === k); return w.length ? `<tr class="hn-sn" title="Seasons his numbers made him a likely ${k === 'PB' ? 'Pro Bowl' : 'first-team All-Pro'} pick (60%+ by our selection model) and he wasn't picked"><td>Snubbed: ${k === 'PB' ? 'Pro Bowl' : 'first-team All-Pro'}</td><td class="num">${w.length}</td><td>${w.map(x => `&rsquo;${String(x[0]).slice(-2)} <span class="muted">${Math.round(100 * x[2])}%</span>`).join(' &middot; ')}</td></tr>` : ''; };
+    const table = `<table class="bx hn-t"><thead><tr><th>Honor</th><th class="num">#</th><th>Seasons</th></tr></thead><tbody>${H.map(h => `<tr><td>${esc(h.name)}</td><td class="num">${h.n}</td><td>${yrs(h.when)}</td></tr>`).join('')}${snRow('AP')}${snRow('PB')}</tbody></table>`;
     const src = `<p class="pc-sub muted">${HN.d.from} on. Awards from ESPN; All-Pro (AP), Pro Bowl (every player named, replacements included) and Players of the Week / Month from Wikipedia (weekly honors from about 2008); league leaders and Super Bowl rosters from nflverse.</p>`;
-    return tapTile('Honors', face, 'Honors', `<div class="pc-box"><div class="hn-face">${H.map(hChip).join('')}</div></div><div class="pc-box">${table}</div>${src}`);
+    return tapTile('Honors', face, 'Honors', `<div class="pc-box"><div class="hn-face">${H.map(hChip).join('')}</div></div>${hofBox(pid, L)}<div class="pc-box">${table}</div>${src}`);
   };
   // Draft & contract: the deal on the tile, the whole profile in the sheet, with his cap number by season when his team's
   // payroll lists him (data/payroll.json)
+  // career earnings: data/earnings.json (tools/payroll_build.py), what he earned on every deal
+  const ER = { d: undefined };
+  const loadEarnings = () => { if (ER.d !== undefined) return; ER.d = null;
+    NFLE.load('data/earnings.json').then(j => { ER.d = j.e || {}; rerenderCard(); }).catch(() => { ER.d = false; }); };
+  // (owner 2026-10-27: "make it show this years cap hit + free agent year ... the rest of the details in the tile
+  // including AAV ... total player earnings") the tile: this season's cap number and the year he hits free agency; the
+  // sheet: career earnings, the deal (yearly average, total, guaranteed, share of the cap, signed, free agent), the cap
+  // number in every season of it, then the draft
   const contractTile = (pid, L) => {
-    const box = profileBox(L), k = L && L.bio && L.bio.deal, dr = L && L.bio && L.bio.draft;
-    loadPayroll();
+    const k = L && L.bio && L.bio.deal, dr = L && L.bio && L.bio.draft;
+    loadPayroll(); loadEarnings();
     const P = PY.d, row = P && P.teams && Object.values(P.teams).reduce((f, t) => f || (t.roster || []).find(r => r[1] === pid), null);
     const caps = row ? [[P.season, row[3]], ...(row[5] || []).map((v, i) => [P.season + 1 + i, v])] : [];
+    const earned = ER.d && ER.d[pid];
     const capBox = caps.length ? `<div class="pc-box"><div class="pc-k">Cap number by season</div><table class="bx"><tbody>${caps.map(([s, v]) => `<tr><td>${s}</td><td class="num">${v ? usd(v) : '&ndash;'}</td></tr>`).join('')}</tbody></table>
       <p class="pc-sub muted">What his deal counts against the salary cap each season (OverTheCap). Signing bonuses are spread over the deal, so early seasons often sit under the yearly average.</p></div>` : '';
-    const face = k ? `<div class="pc-big">${money(k.apy)} <small>/ yr</small></div><div class="pc-tapsub">${k.fa ? `free agent ${esc(k.fa)}` : k.yrs ? `${esc(k.yrs)}-year deal` : `signed ${esc(k.from)}`}</div>`
-      : dr ? `<div class="pc-big">${dr.u ? 'UDFA' : `R${dr.r}:${dr.p}`}</div><div class="pc-tapsub">${dr.u ? 'undrafted' : `${dr.y} draft`}</div>`
+    const earnBox = earned || row ? `<div class="pc-box"><div class="tm-stats">${earned ? cell(money(earned), 'Career earnings', 'Everything he has earned on his NFL contracts so far (OverTheCap via nflverse)') : ''}${row ? cell(usd(row[3]), `${P.season} cap hit`, 'What his deal counts against the salary cap this season') : ''}</div></div>` : '';
+    const fa = k && k.fa ? `free agent ${esc(k.fa)}` : k && k.yrs ? `${esc(k.yrs)}-year deal` : k ? `signed ${esc(k.from)}` : '';
+    const face = row ? `<div class="pc-big">${usd(row[3])} <small>cap hit</small></div><div class="pc-tapsub">${fa || `${P.season} season`}</div>`
+      : k ? `<div class="pc-big">${money(k.apy)} <small>/ yr</small></div><div class="pc-tapsub">${fa}</div>`
+      : dr ? `<div class="pc-big">${dr.u ? 'UDFA' : `R${dr.r}:${dr.p}`}</div><div class="pc-tapsub">${earned ? `${money(earned)} career earnings` : dr.u ? 'undrafted' : `${dr.y} draft`}</div>`
       : '<div class="pc-big muted">&ndash;</div><div class="pc-tapsub">No deal on file</div>';
-    return tapTile(k ? 'Contract' : 'Draft', face, 'Draft & contract', (box || '<p class="pc-sub">No draft or contract on file.</p>') + capBox);
+    return tapTile(k || row ? 'Contract' : 'Draft', face, 'Draft & contract', earnBox + (profileBox(L, true) || '<p class="pc-sub">No draft or contract on file.</p>') + capBox);
   };
   // the two join the card's summary grid (CARD_X, set per render: every week layout's grid ends with it); the career
   // overviews (retired, linemen and specialists) get them as their own row
   let CARD_X = '';
   const moreTiles = (pid, L) => L ? `<div class="pc-tiles">${honorsTile(pid, L)}${contractTile(pid, L)}</div>` : '';
-  const profileBox = L => {
+  // bare: inside the Draft & contract sheet, which already carries that title
+  const profileBox = (L, bare = false) => {
     if (!L || !L.bio) return '';
     const b = L.bio, bio = [];
     const dr = b.draft;
@@ -1841,13 +2076,13 @@
     if (b.college) bio.push(cell(esc(b.college.split(';')[0].trim()), 'College', b.college));
     // Free agent = the season after the last one he's paid (void years excluded); older log files lack it and show
     // the deal's length instead.
-    const k = b.deal, deal = k ? [cell(money(k.apy), 'Per year'), k.val != null ? cell(money(k.val), 'Total', k.yrs ? `${k.yrs}-year deal as signed (an extension counts only its added years)` : '') : '',
+    const k = b.deal, deal = k ? [cell(money(k.apy), 'AAV', 'Average annual value: the deal\'s total over its years'), k.val != null ? cell(money(k.val), 'Total', k.yrs ? `${k.yrs}-year deal as signed (an extension counts only its added years)` : '') : '',
       k.gtd != null ? cell(money(k.gtd), 'Guaranteed') : '', k.cap != null ? cell(`${(k.cap * 100).toFixed(1)}%`, 'Of cap', 'Per-year value as a share of the salary cap when signed') : '',
       cell(esc(k.from), 'Signed'),
       k.fa ? cell(esc(k.fa), 'Free agent', `Hits free agency in ${k.fa} if not extended (paid through ${k.fa - 1}; void years excluded)`)
         : k.yrs ? cell(esc(k.yrs), 'Years') : ''] : [];
     if (!bio.length && !deal.length) return '';
-    return `<div class="pc-box pc-profile"><div class="pc-k">Draft & contract</div>${sg([bio.length ? sgRow(null, bio) : '', deal.length ? sgRow(null, deal) : ''], 6, { labels: false, cls: 'sg-prof' })}</div>`;
+    return `<div class="pc-box pc-profile">${bare ? '' : '<div class="pc-k">Draft & contract</div>'}${sg([bio.length ? sgRow(null, bio) : '', deal.length ? sgRow(null, deal) : ''], 6, { labels: false, cls: 'sg-prof' })}</div>`;
   };
   // Week tab, below the weekly section: his three latest news items and this season's games (his last five before
   // his first game of the season), each with a way into the full tab. Both are current, whatever week is picked.
@@ -2103,23 +2338,31 @@
       const pct = d.pct != null ? Math.round(d.pct * 100) : null, tone = pct == null ? '' : pct >= 67 ? 'good' : pct <= 33 ? 'bad' : '';
       dur = `<div class="pc-box"><div class="pc-k">Durability · since 2013</div>
         <div class="ij-dur"><div class="pc-big ${tone}">${pct != null ? `${ord(pct)} <small>percentile</small>` : d.snaps != null ? '<span class="muted">Not ranked</span>' : '– <small>percentile</small>'}</div>
-          <div class="pc-sub">${pct != null ? `More durable than ${pct}% of ${esc(GRP_LABEL[d.grp] || d.grp)} with ${d.snaps != null ? '1,000 or more snaps' : 'a season or more of games'}${d.small && d.snaps == null ? ' (few games yet: pulled toward the position average)' : ''}.` : d.snaps != null ? `Too little time on the field to rank (${Math.round(d.snaps).toLocaleString()} snaps; 1,000 needed).` : ''}</div></div>
+          <div class="pc-sub">${pct != null ? `${d.rank && d.n ? `${ord(d.rank)} of ${d.n} ` : ''}${d.pool === 'active' ? 'active ' : d.pool === 'all' ? '' : ''}${esc(GRP_LABEL[d.grp] || d.grp)}${d.pool === 'all' ? ' since 2013' : ''} with ${d.snaps != null ? '1,000 or more snaps' : 'a season or more of games'}${d.small && d.snaps == null ? ' (few games yet: pulled toward the position average)' : ''}.` : d.snaps != null ? `Too little time on the field to rank (${Math.round(d.snaps).toLocaleString()} snaps; 1,000 needed).` : ''}</div></div>
         ${d.snaps != null
-          // (S2) per snap on the field (owner 2026-10-19): games missed injured per 1,000 snaps
-          ? sg([sgRow(null, [cell(d.per1k.toFixed(1), 'Missed / 1k snaps', 'Games missed injured per 1,000 snaps he played'), cell(Math.round(d.snaps).toLocaleString(), 'Snaps', d.grp === 'DL' || d.grp === 'LB' || d.grp === 'DB' ? 'Defensive snaps since 2013' : 'Offensive snaps since 2013'), cell(f0(d.missed), 'Missed', 'Games missed injured'), cell(f0(eps.length), 'Injuries', 'Injury episodes listed')])], 4, { labels: false, cls: 'sg-tight' })
+          // (S2) per snap on the field (owner 2026-10-19); (S3, 2026-10-28) injuries that cost a game, not games missed
+          ? sg([sgRow(null, [cell(d.per1k.toFixed(2), 'Injuries / 1k snaps', 'Injuries that cost him a game, per 1,000 snaps he played'), cell(Math.round(d.snaps).toLocaleString(), 'Snaps', d.grp === 'DL' || d.grp === 'LB' || d.grp === 'DB' ? 'Defensive snaps since 2013' : 'Offensive snaps since 2013'), cell(f0(d.missed), 'Missed', 'Games missed injured'), cell(f0(eps.length), 'Injuries', 'Injury episodes listed')])], 4, { labels: false, cls: 'sg-tight' })
           : sg([sgRow(null, [cell(`${Math.round(d.avail * 100)}%`, 'Available', 'Share of his team\'s games he was not out injured'), cell(f0(d.games), 'Team games'), cell(f0(d.missed), 'Missed', 'Games missed injured'), cell(f0(eps.length), 'Injuries', 'Injury episodes listed')])], 4, { labels: false, cls: 'sg-tight' })}
         <p class="pc-sub">${d.snaps != null
-          ? 'Games missed while on the injury report or an injury reserve list (healthy scratches and suspensions don\'t count), per 1,000 snaps he was on the field, from 2013: a backup who rarely plays isn\'t called durable for staying healthy on the sideline. Little time on the field is pulled toward the position average; ranked among players with 1,000+ snaps.'
+          ? 'Injuries that cost him at least one game (each counts once, however many games it took; healthy scratches and suspensions don\'t count), per 1,000 snaps he was on the field, from 2013: a backup who rarely plays isn\'t called durable for staying healthy on the sideline. A short career is pulled toward the position average (by about two seasons of a starter\'s snaps); ranked among players with 1,000+ snaps.'
           : 'Counts his team\'s games while he was on the roster, from 2013; games missed inside an injury episode count against him (healthy scratches and suspensions don\'t). Ranked after pulling short careers toward the position average by one season of games.'}</p></div>`;
     }
     if (!eps.length) return cur + dur + '<div class="pc-box"><p class="pc-sub">No injuries on the official reports since 2009.</p></div>';
     // recurring body parts: by games missed, then by how often listed
     const parts = {};
-    eps.forEach(e => { const k = e.part || 'Undisclosed'; parts[k] = parts[k] || { n: 0, m: 0 }; parts[k].n++; parts[k].m += e.missed || 0; });
+    eps.filter(e => e.part).forEach(e => { const k = e.part; parts[k] = parts[k] || { n: 0, m: 0 }; parts[k].n++; parts[k].m += e.missed || 0; });
     const top = Object.entries(parts).sort((a, b) => b[1].m - a[1].m || b[1].n - a[1].n).slice(0, 5);
     const rec = `<div class="pc-box"><div class="pc-k">Most often</div><div class="ij-parts">${top.map(([k, v]) => `<span class="ij-part"><b>${esc(k)}</b> ${v.n}x${v.m ? ` · ${v.m} missed` : ''}</span>`).join('')}</div></div>`;
     const wk = e => e.w0 === e.w1 ? `Wk ${e.w0}` : `Wk ${e.w0}-${e.w1}`;
-    const rows = eps.map(e => `<tr${e.missed ? '' : ' class="ij-played"'}><td><b>${e.s}</b></td><td>${wk(e)}</td><td>${esc(e.part || 'Undisclosed')}${e.ig ? `<span class="ij-ig" title="From the play-by-play injury notes or a news blurb">hurt in the week ${e.ig[0]} game${e.ig[1] ? `, Q${e.ig[1]}` : ''}</span>` : ''}</td>
+    // (owner 2026-10-28: "undisclosed" injuries that weren't) a reserve-list stint is off the weekly report: its name
+    // from Wikipedia / ESPN news or his listing around it says where it came from; none found reads "Not reported"
+    const PS = { wiki: 'From his Wikipedia article', espn: 'From ESPN player news', 'espn~': 'From ESPN player news in the weeks before the reserve list', prior: 'From his injury report listing just before the reserve list',
+                 carry: 'Carried over from the injury that ended his season before' };
+    const NR = { IR: 'Placed on injured reserve; the injury never appeared on an official report', PUP: 'On the PUP list; the injury never appeared on an official report',
+                 NFI: 'On the non-football injury list; the injury never appeared on an official report' };
+    const partCell = e => e.part ? (e.ps ? `<span class="ij-src" title="${esc(PS[e.ps] || '')}">${esc(e.part)}</span>` : esc(e.part))
+      : `<span class="muted" title="${esc(NR[e.list] || 'The injury never appeared on an official report')}">Not reported</span>`;
+    const rows = eps.map(e => `<tr${e.missed ? '' : ' class="ij-played"'}><td><b>${e.s}</b></td><td>${wk(e)}</td><td>${partCell(e)}${e.ig ? `<span class="ij-ig" title="From the play-by-play injury notes or a news blurb">hurt in the week ${e.ig[0]} game${e.ig[1] ? `, Q${e.ig[1]}` : ''}</span>` : ''}</td>
       <td class="num">${e.missed == null ? '–' : e.missed ? `<b>${e.missed}</b>` : '0'}</td><td class="num">${e.played == null ? '–' : e.played || 0}</td>
       <td>${e.list ? `<span class="dc-tag dt-out">${esc(e.list)}</span>` : e.worst ? `<span class="dc-tag dt-${e.worst === 'Questionable' ? 'q' : e.worst === 'Doubtful' ? 'd' : 'out'}">${esc(e.worst === 'Questionable' ? 'Q' : e.worst === 'Doubtful' ? 'D' : 'Out')}</span>` : ''}</td></tr>`).join('');
     return `${cur}${dur}${rec}<div class="pc-box pc-logbox"><div class="pc-k">Every injury listed</div>
@@ -3947,7 +4190,14 @@
       const swing = Math.round(Math.abs(d) * 100) >= 1 ? swingChip(Math.round(d * 100), info.home.team, info) : '';  // as on the cards
       const when = `${p.period ? periodName(p.period.number) : ''} ${esc(p.clock ? p.clock.displayValue : '')}`;
       // Not plays (timeouts, two-minute warning, end of quarter / game): thin muted divider rows.
-      if (isNonPlay(p)) return `<li class="pl pl-np"><div class="pl-when">${when}</div><div class="pl-what"><div class="pl-txt">${esc(nonPlayText(p))}</div></div><div></div></li>`;
+      // three weights (owner 2026-10-28: TV timeouts "present them a little different"): a TV break is a faint centered
+      // hairline; a team's timeout a row in its color; a quarter's end and the two-minute warning a chapter break
+      if (isNonPlay(p)) {
+        const tx = nonPlayText(p), tm = (tx.match(/^([A-Z]{2,3}) timeout/) || [])[1], tmS = tm === info.home.team ? info.home : tm === info.away.team ? info.away : null;
+        if (/^Official timeout/.test(tx)) return `<li class="pl pl-np pl-tv"><span>TV timeout · ${when.trim()}</span></li>`;
+        const k = tmS ? ' pl-to' : /^End|Two-minute/.test(tx) ? ' pl-brk' : '';
+        return `<li class="pl pl-np${k}"${tmS ? ` style="--pt:${esc(tmS.color)}"` : ''}><div class="pl-when">${when}</div><div class="pl-what"><div class="pl-txt">${esc(tx)}</div></div><div></div></li>`;
+      }
       // the play as a headline (owner 2026-10-18: "beautify this area too"), the yards it gained, the official text below
       const a0 = spot(p.start, info);
       const hd = playHead(p, LOGN, a0 ? { off: a0.offense.team, other: a0.offense.team === info.away.team ? info.home.team : info.away.team } : {});
@@ -4308,7 +4558,9 @@
   // ESPN's situation, box score and team stats; a replay rebuilds them from the plays so far (the official text:
   // playStats), so a replayed moment shows the drive, the stats and the fantasy points as they stood.
   const mmss = t => `${Math.floor(t / 60)}:${String(Math.round(t % 60)).padStart(2, '0')}`;
-  const isTry = p => /extra point|two-point|2pt|conversion/i.test(`${pType(p)} ${p.text || ''}`);
+  // a summary's parenthetical try is the touchdown's, not a try row ("Tyler Huntley 1 Yd Run (Two-Point Pass Conversion
+  // Failed)"; 2024 audit)
+  const isTry = p => /extra point|two-point|2pt|conversion/i.test(`${pType(p)} ${String(p.text || '').replace(/\([^)]*\)/g, '')}`);
   const drvNums = d => {  // plays / yards / time from ESPN's "8 plays, 75 yards, 4:12"
     const m = String(d.description || '').match(/(\d+) plays?, (-?\d+) yards?, (\d+:\d{2})/);
     return m ? { n: +m[1], yd: +m[2], t: m[3] } : null;
@@ -4705,17 +4957,18 @@
     return !(s0.down === 1 && !(p.statYardage >= (s0.distance || 10)));
   };
   const playTags = p => {
-    const st = stPlay(p), t = pType(p), txt = String(p.text || ''), chips = [];
+    const st = stPlay(p), t = pType(p), txt = effText(p), chips = [];
     const fail = (isTry(p) || /field goal/i.test(t + txt)) && /no good|blocked|missed/i.test(t + txt);
     // a touchdown's text carries its extra point ("... TOUCHDOWN. X extra point is GOOD"): TD first
     if (p.scoringPlay) chips.push(/touchdown/i.test(t + txt) ? ['TD', 'c-sc'] : /field goal/i.test(t + txt) ? ['FG', 'c-sc'] : /two-point/i.test(t) ? ['2PT', 'c-sc']
       : /extra point/i.test(t) ? ['XP', 'c-sc'] : /safety/i.test(t + txt) ? ['SAFETY', 'c-sc'] : ['TD', 'c-sc']);
     else if (fail) chips.push(['NO GOOD', 'c-to']);
     else if (st) chips.push([/extra point|two-point/i.test(t) ? (/two-point/i.test(t) ? '2PT' : 'XP') : /kickoff|kicks/i.test(t + txt) ? 'KICKOFF' : /punt/i.test(t + txt) ? 'PUNT' : /field goal/i.test(t + txt) ? 'FG' : 'ST', 'c-st']);
-    // ESPN doesn't flag lost fumbles on kickoffs / punts as turnovers: the kicking team recovering is one
-    const kicker = st && (txt.match(/(?:kicks|punts)\b.*?\bfrom ([A-Z]{2,3}) \d/) || [])[1];
-    const recBy = (txt.match(/RECOVERED by ([A-Z]{2,3})-/) || [])[1];
-    const stLost = st && /FUMBLES/.test(txt) && kicker && recBy && ourCode(recBy) === ourCode(kicker);
+    // ESPN doesn't flag lost fumbles on kickoffs / punts as turnovers: the kicking team recovering is one (the last
+    // recovery: a ball can change hands twice)
+    const kicker = st && kickerOf(p);
+    const recs = [...txt.matchAll(/(?:RECOVERED|recovered) by ([A-Z]{2,3})-/g)], recBy = recs.length ? recs[recs.length - 1][1] : null;
+    const stLost = st && /FUMBLES|MUFFS/.test(txt) && kicker && recBy && txtCode(recBy) === kicker;
     if (p.isTurnover || stLost) chips.push([/intercept/i.test(t + txt) ? 'INT' : /fumble/i.test(t + txt) ? 'FUM' : 'TO', 'c-to']);
     if (/sack/i.test(t)) chips.push(['SACK', 'c-sk']);
     if (p.isPenalty) chips.push(['FLAG', 'c-pen']);
@@ -4729,16 +4982,30 @@
   const resChip = (label, cls, tip) => `<span class="rp-yd ${cls}" title="${esc(tip)}">${label}</span>`;
   const yardChip = (p, info) => {
     if (nonPlay(p)) return '';
-    const a = spot(p.start, info), b = spot(p.end, info), txt = String(p.text || ''), t = `${pType(p)} ${txt}`;
+    const a = spot(p.start, info), b = spot(p.end, info), txt = effText(p), t = `${pType(p)} ${txt}`;
+    if (p.scoringPlay && /SAFETY/.test(txt) && !/SAFETY NULLIFIED/.test(txt)) return resChip('Safety', 'loss', 'Safety: 2 points for the defense');
+    if (/^(?:\([^)]*\)\s*)*Penalty on [^,]+, [^,]+, declined\.?$/i.test(txt.trim())) return resChip('Declined', 'zero', 'Penalty declined: nothing changed');
+    if (/ball declared dead/i.test(txt)) return resChip('Dead ball', 'zero', 'Kick declared dead where it stopped');
+    // a muffed kick the kicking team fell on (ESPN may type it "Fumble Recovery (Opponent)"; 2024 audit)
+    const mrec = /MUFFS/.test(txt) ? [...txt.matchAll(/(?:RECOVERED|recovered) by ([A-Z]{2,3})-/g)].pop() : null;
+    if (mrec && kickerOf(p) && txtCode(mrec[1]) === kickerOf(p)) return resChip('Muff', 'gain', 'The receiving team muffed it; the kicking team recovered');
+    if (/MUFFS catch, and recovers at [^.]*\.?$/.test(txt.trim())) return resChip('Muff', 'zero', 'Muffed, and the returner fell on it');
     if (/No Play/i.test(txt) && /penalty/i.test(t)) return resChip('Flag', 'pen', 'Penalty: the play didn\'t count');
     // kicks and tries (owner 2026-10-25: "FGG/FGNG"): FGG / FGNG, XPG / XPNG, 2PT / 2PT NG; a blocked kick says so
-    if (/defensive (?:pat|two-point|2pt)/i.test(t)) return resChip('Def 2PT', 'loss', 'The defense returned the try for 2 points');
+    // only when the defense's return scored (2026-10-28 audit: a stopped return after a failed try read "Def 2PT")
+    const dTry = txt.search(/DEFENSIVE TWO-POINT/i);
+    if (/defensive (?:pat|two-point|2pt) conversion/i.test(pType(p)) || /^[A-Z][\w.'-]+(?: [\w.'-]+)+ Defensive (?:PAT|Two-Point|2pt) Conversion/i.test(txt)
+      || (dTry >= 0 && /ATTEMPT SUCCEEDS/i.test(txt.slice(dTry)))) return resChip('Def 2PT', 'loss', 'The defense returned the try for 2 points');
+    // a short kickoff (the receiving team takes it at its 40)
+    if (/short of landing zone/i.test(t)) return resChip('Short', 'zero', 'Kickoff short of the landing zone: ball placed at the 40');
     if (isTry(p)) {
-      const two = /two-point/i.test(t), ok = two ? /ATTEMPT SUCCEEDS/i.test(txt) : /extra point is GOOD/i.test(txt);
+      const two = /two-point/i.test(pType(p)) || /^TWO-POINT CONVERSION/.test(txt), ok = two ? /ATTEMPT SUCCEEDS/i.test(offTry(txt)) : /extra point is GOOD/i.test(txt);
       if (!two && /block/i.test(txt)) return resChip('Blocked', 'loss', 'Extra point blocked');
       return two ? resChip(ok ? '2PT' : '2PT NG', ok ? 'gain' : 'loss', ok ? 'Two-point try good' : 'Two-point try failed')
         : resChip(ok ? 'XPG' : 'XPNG', ok ? 'gain' : 'loss', ok ? 'Extra point good' : 'Extra point no good');
     }
+    // a blocked kick the defense ran back for a touchdown scores, but not for the kicking team (2026-10-28 audit: "FGG")
+    if (/field goal/i.test(t) && p.scoringPlay && /BLOCKED/i.test(txt) && /TOUCHDOWN/.test(txt)) return resChip('Block TD', 'loss', 'Blocked and returned for a touchdown');
     if (/field goal/i.test(t)) return p.scoringPlay ? resChip('FGG', 'gain', 'Field goal good')
       : resChip(/blocked/i.test(t) ? 'Blocked' : 'FGNG', 'loss', /blocked/i.test(t) ? 'Field goal blocked' : 'Field goal no good');
     if (p.scoringPlay && /touchdown/i.test(t)) return resChip('TD', 'gain', 'Touchdown');
@@ -4750,10 +5017,13 @@
       // (owner 2026-10-25: "i want Punt for punts that don't result in a turnover or score") a punt the receiving
       // team keeps is just "Punt"; one it fumbles back to the punting team is the turnover
       if (/punt/i.test(t)) {
-        const kept = a && b && b.offense.team === a.offense.team;
+        const kt = kickerOf(p), kept = kt ? b && b.offense.team === kt : a && b && b.offense.team === a.offense.team;
         return kept && /fumble|muff/i.test(t) ? resChip('Fumble', 'gain', 'The receiving team lost the ball') : resChip('Punt', 'zero', 'Punt');
       }
       if (/touchback/i.test(t)) return resChip('Touchback', 'zero', 'Touchback');
+      // an onside kick the kicking team fell on (2026-10-28 audit: no chip)
+      const ok0 = / kicks onside /.test(` ${txt}`) && (txt.match(/RECOVERED by ([A-Z]{2,3})-/) || [])[1];
+      if (ok0) return txtCode(ok0) === kickerOf(p) ? resChip('Recovered', 'gain', 'The kicking team recovered its onside kick') : resChip('Onside', 'zero', 'The receiving team recovered');
       if (/fair catch/i.test(t)) return resChip('Fair catch', 'zero', 'Fair catch');
       if (/downed/i.test(t)) return resChip('Downed', 'zero', 'Downed');
       if (/out of bounds/i.test(t) && !/ for /.test(txt.split(/punts|kicks/)[1] || '')) return resChip('Out of bounds', 'zero', 'Kicked out of bounds');
@@ -4802,7 +5072,9 @@
   const playTitle = (cls, hd, html, p, info) => `<div class="${cls} pt ${hd.cls}"><span class="pt-t">${html}</span>${yardChip(p, info)}${clipChip(p)}</div>`;
   const playRows = (plays, info, names, key = null) => plays.map(p => {
     const when = q => `${periodName((q.period || {}).number || 1)} ${esc((q.clock || {}).displayValue || '')}`;
-    if (nonPlay(p)) return `<li class="ds-p np"><span class="ds-w">${when(p)}</span><span class="ds-h muted">${esc(nonPlayText(p))}</span></li>`;
+    if (nonPlay(p)) { const tx = nonPlayText(p);  // a TV break as a hairline here too (the game log's .pl-tv)
+      return /^Official timeout/.test(tx) ? `<li class="ds-p np ds-tv"><span>TV timeout · ${when(p)}</span></li>`
+        : `<li class="ds-p np"><span class="ds-w">${when(p)}</span><span class="ds-h muted">${esc(tx)}</span></li>`; }
     const a = spot(p.start, info);
     const hd = playHead(p, names, a ? { off: a.offense.team, other: a.offense.team === info.away.team ? info.home.team : info.away.team } : {});
     return `<li class="ds-p${p === key ? ' key' : ''}"><span class="ds-w">${when(p)}</span><div class="ds-b">${playMeta(p)}`
