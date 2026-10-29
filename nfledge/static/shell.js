@@ -10,6 +10,22 @@
 document.addEventListener('touchstart', () => {}, { passive: true });
 (() => {
   const NFLE = window.NFLE = window.NFLE || {};
+  // One way to share anywhere on the site (owner 2026-10-29: cards, the gamecast, a play, Trends): the phone's share
+  // sheet where there is one, else the link copied with a short note; a failed copy shows the link to copy by hand
+  NFLE.toast = msg => {
+    const t = document.createElement('div');
+    t.className = 'nfle-toast'; t.textContent = msg; t.setAttribute('role', 'status');
+    document.body.appendChild(t);
+    setTimeout(() => t.classList.add('out'), 1400); setTimeout(() => t.remove(), 1800);
+  };
+  NFLE.share = async (url, title = 'NFL Edge') => {
+    try {
+      if (navigator.share && matchMedia('(pointer: coarse)').matches) { await navigator.share({ title, url }); return; }
+      await navigator.clipboard.writeText(url);
+      NFLE.toast('Link copied');
+    } catch (err) { if (!err || err.name !== 'AbortError') { try { window.prompt('Copy this link', url); } catch (x) { /* none */ } } }
+  };
+  NFLE.shareIcon = (w = 18) => `<svg viewBox="0 0 24 24" width="${w}" height="${w}" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const root = new URL('..', document.currentScript ? document.currentScript.src : location.href);
   const cache = new Map();
   NFLE.root = root.href;
@@ -748,18 +764,8 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     top.at = at || '';
     const url = location.origin + location.pathname + location.search + '#' + segStr(top);
     const name = (cardOv.querySelector('#pcName') || {}).textContent || 'NFL Edge';
-    try {
-      if (navigator.share && matchMedia('(pointer: coarse)').matches) { await navigator.share({ title: `${name.trim()} · NFL Edge`, url }); return; }
-      await navigator.clipboard.writeText(url);
-      toast('Link copied');
-    } catch (err) { if (!err || err.name !== 'AbortError') { try { window.prompt('Copy this link', url); } catch (x) { /* none */ } } }
+    NFLE.share(url, `${name.trim()} · NFL Edge`);
   });
-  const toast = msg => {
-    const t = document.createElement('div');
-    t.className = 'pc-toast'; t.textContent = msg; t.setAttribute('role', 'status');
-    cardOv.appendChild(t);
-    setTimeout(() => t.classList.add('out'), 1400); setTimeout(() => t.remove(), 1800);
-  };
   // a sheet opened or closed over the top card: recorded on its segment (same history entry)
   NFLE.sheetMark = slug => { const cur = !cardOv.hidden && segsOf(location.hash); if (!cur) return;
     cur[cur.length - 1].sheet = slug || '';

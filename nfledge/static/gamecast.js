@@ -4251,9 +4251,9 @@
       const st = isST(p);
       // Tint = the team with the ball; special-teams plays stay neutral. Event types are chips, not row colors.
       const off = st ? null : teamOf(p.start && p.start.team && p.start.team.id);
-      const cls = `${p.scoringPlay ? ' pl-score' : ''}${p.isPenalty && !p.scoringPlay ? ' pl-pen' : ''}${st ? ' pl-st' : ''}`;
+      const cls = `${p.scoringPlay ? ' pl-score' : ''}${p.isPenalty && !p.scoringPlay ? ' pl-pen' : ''}${st ? ' pl-st' : ''}${GP.hiPlay && String(p.id) === GP.hiPlay ? ' pl-hi' : ''}`;
       return `<li class="pl${cls}" data-k="p${esc(p.id)}"${off ? ` style="--pt:${esc(off.color)}"` : ''}><div class="pl-when">${when}</div>
-        <div class="pl-what">${playMeta(p)}${playTitle('pl-hl', hd, linkNames(esc(hd.h), teams), p, info)}${fieldStrip(p, info)}<div class="pl-txt pl-raw" title="Tap for the official text">${linkNames(esc(hd.raw), teams)}</div></div>
+        <div class="pl-what">${playMeta(p)}${playTitle('pl-hl', hd, linkNames(esc(hd.h), teams), p, info)}${fieldStrip(p, info)}<div class="pl-txt pl-raw" title="Tap for the official text">${linkNames(esc(hd.raw), teams)}</div><button type="button" class="pl-share" data-play="${esc(p.id)}" aria-label="Share this play">${NFLE.shareIcon(14)}<span>Share play</span></button></div>
         <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${tmL(info.away.team)} ${p.awayScore}–${p.homeScore} ${tmL(info.home.team)}</b>` : ''}${swing}</div></li>`;
     };
     const order = o.sort !== 'old';  // newest first unless asked otherwise
@@ -5522,6 +5522,22 @@
     const id = parseGid(gid);
     if (!id) { document.getElementById('gc').innerHTML = '<p class="gc-loading">No game selected.</p>'; return; }
     Object.assign(GP, id);
+    // a shared link's view (owner 2026-10-29: share the gamecast "as you see it", a play too): pane, the plays' sub-view,
+    // layout, order and filter; play=<id> opens the full game log on that play, highlighted (gcShareUrl writes these)
+    const pick = (k, ok) => { const v = Q.get(k); return v && ok.includes(v) ? v : null; };
+    const pane = pick('pane', GPANES.map(x => x[0])), hi = Q.get('play');
+    if (pane || hi) { GP.pane = hi ? 'plays' : pane; GP.paneSet = true; }
+    if (Q.get('tab') === 'pre') GP.tab = 'pre';
+    GP.plSub = hi ? 'log' : pick('plsub', ['recent', 'log']) || GP.plSub;
+    GP.view = hi ? 'every' : pick('view', ['drive', 'every']) || GP.view;
+    GP.sort = hi ? 'old' : pick('sort', ['new', 'old', 'impact', 'yards']) || GP.sort;
+    GP.filter = hi ? 'all' : pick('filter', ['all', 'score', 'to', 'pen']) || GP.filter;
+    GP.hiPlay = hi || null;
+    const top = document.querySelector('.gc-top .gc-wrap');
+    if (top && !top.querySelector('.gc-share')) {
+      top.insertAdjacentHTML('beforeend', `<button type="button" class="gc-share" aria-label="Share this game">${NFLE.shareIcon(16)}<span>Share</span></button>`);
+      top.querySelector('.gc-share').onclick = () => NFLE.share(gcShareUrl(), `${document.title}`);
+    }
     if (d) {
       try { DATA = await getJSON(d, 12000, false); DATA.__rel = d; } catch (e) { DATA = null; }
       const back = document.getElementById('gcBack');
@@ -5534,6 +5550,36 @@
     document.addEventListener('visibilitychange', () => { if (!document.hidden && GP.info && (GP.info.realState === 'in' || GP.info.realState === 'pre')) pollGame(); });
     document.addEventListener('nfle-scoring', () => renderGame());
     if (Q.get('replay') === '1' && GP.canReplay) replayCmd('on');
+    if (GP.hiPlay) goPlay(GP.hiPlay);
+    // a play's Share, on every row however the log was redrawn (the search box redraws only the rows)
+    document.getElementById('gc').addEventListener('click', e => {
+      const b = e.target.closest('.pl-share');
+      if (b) { e.stopPropagation(); NFLE.share(gcShareUrl(b.dataset.play), document.title); }
+    });
+  };
+  // the gamecast's link as you see it: the game, its pane and (on Plays) sub-view, layout, order and filter; a play's link
+  // opens the full game log on it (initGame reads them)
+  const gcShareUrl = (play = null) => {
+    const u = new URL(location.href), q = u.searchParams;
+    ['pane', 'plsub', 'view', 'sort', 'filter', 'play', 'tab', 'replay', 'sim'].forEach(k => q.delete(k));
+    if (play) q.set('play', play);
+    else {
+      if (GP.tab === 'pre') q.set('tab', 'pre');
+      q.set('pane', GP.pane);
+      if (GP.pane === 'plays') {
+        const sub = GP.plSub || (GP.info && GP.info.state === 'post' ? 'log' : 'recent');
+        q.set('plsub', sub);
+        if (sub === 'log') { q.set('view', GP.view); q.set('sort', GP.sort); if (GP.filter !== 'all') q.set('filter', GP.filter); }
+      }
+    }
+    u.hash = '';
+    return u.toString();
+  };
+  // a shared play: scrolled to the middle of the screen once the log has drawn (the plays load after the page)
+  const goPlay = (id, tries = 0) => {
+    const row = document.querySelector(`#lgBody li.pl[data-k="p${CSS.escape(id)}"]`);
+    if (row) { row.scrollIntoView({ block: 'center' }); const r = row.querySelector('.pl-raw'); if (r) r.classList.add('open'); return; }
+    if (tries < 30) setTimeout(() => goPlay(id, tries + 1), 200);
   };
 
   // ------------------------------------------------------------------------------------------------------ init

@@ -201,3 +201,9 @@ html, body { overflow-x: clip; }
 
 /* a search box lifted above the phone keyboard (shell.js) stops below the sticky tabs, not under them */
 input[type="search"] { scroll-margin-top: calc(var(--navh, 45px) + var(--sat, 0px) + 8px); }
+
+/* the site's share note (shell.js NFLE.toast): "Link copied", above the bottom tab bar on phones */
+.nfle-toast { position: fixed; left: 50%; bottom: calc(84px + var(--sab, 0px)); transform: translateX(-50%); z-index: 200;
+  padding: 8px 16px; border-radius: 999px; background: var(--ink); color: var(--bg); font-size: var(--fs-sm); font-weight: 600;
+  box-shadow: var(--e2); transition: opacity .3s; pointer-events: none; }
+.nfle-toast.out { opacity: 0; }

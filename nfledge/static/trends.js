@@ -95,7 +95,7 @@
             ${row('by', 'Break down', esc(byTxt()))}
             <div class="tq-row tq-mrow"><span class="tq-k">Minimum</span><span class="tq-v tr-min"><button type="button" class="tr-step" data-step="-1" aria-label="One fewer">&minus;</button><input class="tq-mrange" type="range" min="0" max="${Math.max(maxN, Q.min ?? defMin(), fam.min * 2)}" step="1" value="${Q.min ?? defMin()}" aria-label="Minimum sample"><button type="button" class="tr-step" data-step="1" aria-label="One more">+</button> <input class="tq-mnum" type="number" inputmode="numeric" min="0" step="1" value="${Q.min ?? defMin()}" aria-label="Minimum ${esc(fam.unit)}"><span class="tr-w">${esc(fam.unit)}</span></span></div>
           </div>
-          <div class="tq-acts"><button type="button" class="tq-act" data-pick="examples">Examples</button><button type="button" class="tq-act tr-share">Copy link</button><button type="button" class="tq-act tq-csv" data-csv="1">Download CSV</button><button type="button" class="tq-act tq-reset">Reset</button></div>`;
+          <div class="tq-acts"><button type="button" class="tq-act" data-pick="examples">Examples</button><button type="button" class="tq-act tr-share">Share</button><button type="button" class="tq-act tq-csv" data-csv="1">Download CSV</button><button type="button" class="tq-act tq-reset">Reset</button></div>`;
       };
       const setFam = k => {
         Q.fam = k; Q.met = FIRST[k]; Q.min = null;
@@ -719,10 +719,7 @@
         if (e.target.closest('.tr-share')) {
           const t = btoa(unescape(encodeURIComponent(JSON.stringify(Q))));
           const url = `${location.origin}${location.pathname}?t=${encodeURIComponent(t)}#players/trends`;
-          const ok = () => { const b = e.target.closest('.tr-share'); b.textContent = 'Link copied'; setTimeout(() => { b.textContent = 'Copy link'; }, 1600); };
-          if (navigator.share && matchMedia('(pointer: coarse)').matches) navigator.share({ url }).catch(() => {});
-          else if (navigator.clipboard) navigator.clipboard.writeText(url).then(ok, () => prompt('Copy this link', url));
-          else prompt('Copy this link', url);
+          NFLE.share(url, 'Trends · NFL Edge');  // the site's one share (shell.js)
         }
       });
       E.init().then(ix => {
