@@ -29,6 +29,10 @@ LIVE_TTL_HOURS = 6
 PRACTICE_TTL_HOURS = 0.25  # NFL.com practice reports: teams post through the late afternoon
 LAG_RETRY_HOURS = 1  # how often to retry while a final game is still missing from nflverse's published data
 POSITIONS = ("QB", "RB", "WR", "TE")
+# Past seasons' snap-count player ids, frozen (tools/training_lock.py --bless writes it): {"through": last season
+# frozen, "ids": {pfr_id: [roster-map gsis, final gsis]}}. Owner 2026-10-29: matched live, nflverse's weekly player
+# table refresh re-attributed old snap rows, moved the training fingerprint and stopped every build for a morning.
+SNAP_IDS = ROOT / "data" / "history" / "snap_ids.json"
 
 PBP_COLS = [
   "play_id", "game_id", "season", "week", "season_type", "home_team", "away_team", "posteam", "defteam",
@@ -248,6 +252,32 @@ def missing_finals(cache: Cache, season: int, reg: pd.DataFrame) -> set[str]:
   return missing
 
 
+def freeze_snap_ids(snaps: pd.DataFrame) -> None:
+  """Past seasons' snap rows take their ids from SNAP_IDS (in place), so the history the engine trains on changes
+  only by decision (tools/training_lock.py), never by an upstream id-table refresh. Ids the file doesn't know (a season
+  newer than its "through") keep the live map."""
+  if not SNAP_IDS.exists():
+    return
+  fz = json.loads(SNAP_IDS.read_text(encoding="utf-8"))
+  ids = fz.get("ids", {})
+  rows = (snaps.season <= int(fz.get("through", 0))) & snaps.pfr_player_id.isin(ids.keys())
+  if not rows.any():
+    return
+  # unmatched ids left out of the maps: missing, exactly as the live map leaves them
+  for i, col in enumerate(("gsis_id_roster", "gsis_id")):
+    snaps.loc[rows, col] = snaps.loc[rows, "pfr_player_id"].map({k: v[i] for k, v in ids.items() if v[i]})
+
+
+def snap_id_map(snaps: pd.DataFrame, through: int, keep: dict | None = None) -> dict:
+  """{pfr_id: [roster-map gsis, final gsis]} for every snap row through `through` (None = unmatched); `keep`'s
+  entries win (--bless keeps what's frozen and adds only ids it hasn't seen)."""
+  x = snaps[snaps.season <= through].drop_duplicates("pfr_player_id")
+  out = {r.pfr_player_id: [None if pd.isna(r.gsis_id_roster) else r.gsis_id_roster, None if pd.isna(r.gsis_id) else r.gsis_id]
+         for r in x[["pfr_player_id", "gsis_id_roster", "gsis_id"]].itertuples() if isinstance(r.pfr_player_id, str)}
+  out.update(keep or {})
+  return dict(sorted(out.items()))
+
+
 def load_all(cfg: dict, force_week: int | None = None) -> Data:
   import nflreadpy as nfl
 
@@ -381,6 +411,7 @@ def load_all(cfg: dict, force_week: int | None = None) -> Data:
   players = cache.get("players", "all", lambda: nfl.load_players(), stale=cache.age_hours("players", "all") > 24 * 7)
   ppid = players.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
   snaps["gsis_id"] = snaps.gsis_id_roster.fillna(snaps.pfr_player_id.map(ppid))
+  freeze_snap_ids(snaps)
   snaps_post["gsis_id"] = snaps_post.pfr_player_id.map(pid).fillna(snaps_post.pfr_player_id.map(ppid))
   # (DM, owner 2026-10-26) the practice history with the player-table id map: every position (past seasons fetched once)
   avail_hist_all = None

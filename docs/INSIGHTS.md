@@ -4651,6 +4651,14 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   training history (run.training_data), and every build stops if that fingerprint differs from the committed lock
   (data/history/training_fingerprint.json; tools/training_lock.py --bless to accept a deliberate change). Every
   build also prints the history column by column (tools/cache_fingerprint.py).
+  2026-10-29: the lock stopped every build from 09:12 to 14:00 UTC with no history change of ours. Past seasons' snap
+  rows were byte-identical; their PFR -> gsis ids are matched through nflverse's player table (re-downloaded weekly)
+  and this season's rosters (daily), and the weekly refresh re-attributed some old rows. Re-blessed to unblock, then
+  fixed at the root (owner: "yes"): past seasons' matches are frozen in data/history/snap_ids.json (4,677 ids through
+  2025; nfledge/data.py freeze_snap_ids), this season keeps live matching. --bless adds only ids not yet frozen (a
+  season newly past); --bless --refresh-ids adopts nflverse's current matches deliberately. Checked: 300 matches
+  dropped from the player table plus this season's roster ids shuffled leave the fingerprint unchanged (without the
+  freeze the same drift moves it).
 - **SHIPPED 2026-10-24 (owner: "can't we just compare exact matches to practice participation patterns?"): the
   availability check in every full build.** tools/avail_check.py: the one week model as the site builds it, trained on
   seasons before the last complete one, predicts that season's rows; each exact pattern (stage x game status x report
