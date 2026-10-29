@@ -227,6 +227,10 @@
     const VIEWS = ['lineup', 'matchup', 'live', 'teams', 'waivers', 'trade'];
     const fromHash = () => { const m = location.hash.match(/^#league\/(\w+)/); return m && VIEWS.includes(m[1]) ? m[1] : null; };
     let L = null, mine = null, ROS = null, view = fromHash() || 'lineup', feedWho = 'mine';
+    // the Lineup tab's switch (owner 2026-10-29: "the actual roster state of the team ... not the recommended roster.
+    // maybe add a tab to switch between real and suggested"): your lineup as set by default
+    let lineMode = 'real';
+    try { if (localStorage.getItem('nfledge-lineup-mode') === 'suggested') lineMode = 'suggested'; } catch (e) { /* private mode */ }
     const save = () => {
       try { localStorage.setItem(LS, JSON.stringify(saved)); } catch (e) { /* private mode */ }
       // the active entry follows (team picked, names learned); a new one is added and becomes active
@@ -365,7 +369,7 @@
       const pos = o.noSlot || slot === p.pos ? '' : p.pos;
       return `<tr class="teamrow" style="${NFLE.fmt.rowStyle(TEAMS, p.team)}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}>${slotTd}
         <td class="lg-who">${NFLE.ui.player({ name: p.name, pos, team: p.team, photo: p.photo, espn: p.espn, pid: p.pid,
-          subHtml: p.opp ? `${esc(p.home)} ${NFLE.ui.tm(p.opp)}` : p.why ? esc(p.why) : NFLE.ui.tm(p.team), badges: badgesOf(p) }, TEAMS)}</td>
+          subHtml: p.opp ? `${kickTxt(p) ? `${esc(kickTxt(p))} · ` : ''}${esc(p.home)} ${NFLE.ui.tm(p.opp)}` : p.why ? esc(p.why) : NFLE.ui.tm(p.team), badges: badgesOf(p) }, TEAMS)}</td>
         <td class="num"><b>${p.proj != null ? f1(p.proj) : /bye/.test(p.why || '') ? '<span class="muted">Bye</span>' : '—'}</b></td>${extra}</tr>`;
     };
     const table = (body, head = '<th>Slot</th><th>Player</th><th class="num">Proj</th>') =>
@@ -441,11 +445,75 @@
     // and taxi apart) minus the players on it; a free agent fills one without a drop
     const emptyBench = n => { const k = L.size ? Math.max(0, L.size - n) : 0;
       return Array.from({ length: k }, () => `<tr class="lg-empty"><td class="lg-slot">BN</td><td class="muted">Empty <span class="lg-empty-sub">· open roster spot</span></td><td class="num muted">&mdash;</td></tr>`).join(''); };
+    // his game's kickoff (ms) and as the apps show it ("Sun 1:00 PM", "Mon 8:15 PM")
+    const koOf = p => p && p.team ? NFLE.fmt.kickoff(D.games, p.team) : null;
+    const kickTxt = p => { const k = koOf(p); return k == null ? '' : new Date(k).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }); };
+    // Late games in the flex (owner 2026-10-29: "the late game starter rule ... blanket applies to all late games. you
+    // want early wave players in rb/wr/te slots"): the same starters, arranged so each flex-type slot holds the latest
+    // kickoff it can take. A starter ruled out late can then be swapped for anyone still to play at any flex position,
+    // and nothing is lost: only the slots change, never who starts. Locked players (game started) stay put.
+    const FLEXY = new Set(['FLEX', 'WRRB_FLEX', 'REC_FLEX', 'SUPER_FLEX']);
+    const lateArrange = rows => {
+      const out = rows.map(r => ({ slot: r.slot, p: r.p }));
+      const fits = (p, slot) => !!p && (ELIG[slot] || []).includes(p.pos);
+      for (let pass = 0; pass < 4; pass++) {
+        let moved = false;
+        out.forEach((f, fi) => {
+          if (!FLEXY.has(f.slot) || !f.p || f.p.locked) return;
+          let best = -1, bk = koOf(f.p) ?? -Infinity;
+          out.forEach((o, oi) => {
+            if (oi === fi || FLEXY.has(o.slot) || !o.p || o.p.locked) return;
+            const k = koOf(o.p);
+            if (k != null && k > bk && fits(o.p, f.slot) && fits(f.p, o.slot)) { best = oi; bk = k; }
+          });
+          if (best >= 0) { const t = out[best].p; out[best].p = f.p; f.p = t; moved = true; }
+        });
+        if (!moved) break;
+      }
+      return out;
+    };
+    // the slot moves that turn one arrangement into the other (same starters): "Smith to FLEX, Jones to WR"
+    const slotMoves = (from, to) => to.map((r, i) => r.p && from[i] && from[i].p && r.p.ext !== from[i].p.ext ? { p: r.p, slot: r.slot } : null).filter(Boolean);
     const lineupView = () => {
+      const sw = `<div class="seg lg-mode" role="tablist">${[['real', 'Your lineup'], ['suggested', 'Suggested']].map(([k, l]) => `<button type="button" role="tab" data-lmode="${k}" class="${lineMode === k ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+      return sw + (lineMode === 'real' ? realView() : suggestedView());
+    };
+    // Your lineup as set on Sleeper / ESPN (owner 2026-10-29: "the entire page should mostly read like it would if you
+    // were on the native app"): starters in the league's slot order, bench, IR; what needs fixing on top (a starter who
+    // scores 0, an empty slot), the late-game slot order when it differs, and what the suggested lineup would add
+    const realView = () => {
+      // byes and IR return weeks come from the rest-of-season file (as Suggested's waiver card loads it)
+      if (!ROS) NFLE.load('data/ros.json').then(j => { ROS = j; if (view === 'lineup') draw(); }, () => {});
+      const irSet = new Set(mine.ir || []);
+      const ps = mine.ext.filter(x => !irSet.has(x)).map(player);
+      const curRows = L.slots.map((s, i) => ({ slot: s, p: ps.find(p => p.ext === mine.starters[i]) || null }));
+      const cur = new Set(mine.starters);
+      const best = optimize(ps, L.slots, mine.starters.map(x => ps.find(p => p.ext === x))), gain = total(best) - total(curRows);
+      const changes = best.filter(r => r.p && !cur.has(r.p.ext)).length;
+      const nm = p => p.pid ? `<button type="button" class="nm-link" data-open-pid="${esc(p.pid)}"><b>${esc(p.name)}</b></button>` : `<b>${esc(p.name)}</b>`;
+      // starters who score 0 where they sit: on bye, out, not projected (kickers and defenses on bye included)
+      const zero = curRows.filter(r => r.p && !r.p.locked && (r.p.exp == null || (r.p.proj != null && 1 - r.p.inactive < NFLE.health.AVAIL.NIL)));
+      const empty = curRows.filter(r => !r.p);
+      const alerts = [
+        ...zero.map(r => `<div class="lg-alert bad">${nm(r.p)} <span>starts at ${esc(r.slot)} but ${r.p.exp == null ? esc(r.p.why || 'has no projection') : 'is ruled out'}: he scores 0 there.</span></div>`),
+        ...empty.map(r => `<div class="lg-alert bad"><b>${esc(r.slot)}</b> <span>is empty.</span></div>`),
+      ].join('');
+      const late = slotMoves(curRows, lateArrange(curRows));
+      const lateTip = late.length ? `<div class="lg-alert tip"><b>Late games in the flex</b> <span>${late.map(m => `${nm(m.p)} to ${esc(m.slot)}${kickTxt(m.p) ? ` (${esc(kickTxt(m.p))})` : ''}`).join(', ')}: the same starters, with the latest game where any eligible player can replace him if he's ruled out.</span></div>` : '';
+      const sug = gain >= 0.5 ? `<button type="button" class="lg-alert sug" data-lmode="suggested"><b>Suggested lineup: +${f1(gain)}</b> <span>${changes} change${changes === 1 ? '' : 's'} by our projections &rsaquo;</span></button>` : '';
+      const bench = ps.filter(p => !cur.has(p.ext)).sort((a, b) => (b.exp != null) - (a.exp != null) || (b.exp || 0) - (a.exp || 0));
+      return `${alerts}${lateTip}${sug}
+        <h3 class="lg-h">Starters <span class="muted">${f1(total(curRows))} projected</span></h3>
+        ${table(curRows.map(r => row(r.slot, r.p)).join(''))}
+        <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') + emptyBench(ps.length) || '<tr><td colspan="3" class="muted">No bench players.</td></tr>')}
+        ${irSection()}
+        <p class="muted lg-note">Your lineup as set on ${L.platform === 'sleeper' ? 'Sleeper' : 'ESPN'} when this page loaded. Proj = our projection under your league's scoring if he plays; the total weights each starter by his chance to play.</p>`;
+    };
+    const suggestedView = () => {
       const irSet = new Set(mine.ir || []);
       const ps = mine.ext.filter(x => !irSet.has(x)).map(player), cur = new Set(mine.starters);
       const curStart = mine.starters.map(x => ps.find(p => p.ext === x));
-      const best = optimize(ps, L.slots, curStart), bestSet = new Set(best.filter(r => r.p).map(r => r.p.ext));
+      const best = lateArrange(optimize(ps, L.slots, curStart)), bestSet = new Set(best.filter(r => r.p).map(r => r.p.ext));
       const curRows = L.slots.map((s, i) => ({ slot: s, p: ps.find(p => p.ext === mine.starters[i]) || null }));
       const gain = total(best) - total(curRows);
       // replaced starters include ones with no projection (bye, IR, out): they score 0 where they sit
@@ -828,6 +896,8 @@
       NFLE.feedOpen = view === 'live';
       box.innerHTML = view === 'live' ? liveView() : view === 'lineup' ? lineupView() : view === 'matchup' ? matchupView() : view === 'teams' ? teamsView() : view === 'trade' ? tradeView() : waiversView();
       box.querySelectorAll('[data-who]').forEach(b => b.onclick = () => { feedWho = b.dataset.who; draw(); });
+      box.querySelectorAll('[data-lmode]').forEach(b => b.onclick = () => { lineMode = b.dataset.lmode;
+        try { localStorage.setItem('nfledge-lineup-mode', lineMode); } catch (e) { /* private mode */ } draw(); });
       if (view === 'trade') wireTrade(box);
       // the site-wide id map (kickers in the live feed): redraw once when it arrives, never again after
       if (NFLE.ui && NFLE.ui.ready && !NFLE.ui.ids) NFLE.ui.ready.then(() => { if (L && view === 'live') draw(); });
