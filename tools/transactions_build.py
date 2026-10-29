@@ -44,7 +44,8 @@ TYPES = [
   ("ps_released", r"\b(?:releas|waiv)\w*\b.*\bpractice squad"),
   ("designated", r"\bdesignated\b.*\breturn"), ("activated", r"\bactivat"),  # "Activated X off the PUP list"
   ("ir", r"\binjured reserve\b|\bIR\b"), ("pup", r"\bPUP\b|physically unable"), ("nfi", r"\bNFI\b|non-football"),
-  ("traded", r"\btrad"), ("claimed", r"\bclaim|\bawarded\b"), ("re_signed", r"\bre-?sign"), ("signed", r"\bsign|\bagreed to terms"),
+  # "Received QB Joe Flacco and a sixth-round draft pick from Cleveland in exchange for a fifth-round pick" (2025)
+  ("traded", r"\btrad|^received\b|\bin exchange for\b"), ("claimed", r"\bclaim|\bawarded\b"), ("re_signed", r"\bre-?sign"), ("signed", r"\bsign|\bagreed to terms"),
   ("waived", r"\bwaiv"), ("released", r"\breleas|\bcut\b|\bterminat"), ("acquired", r"\bacquir"),
   ("reserve", r"\breserve\b|\bplaced\b"), ("other", r"."),
 ]

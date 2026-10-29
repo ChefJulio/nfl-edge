@@ -355,8 +355,14 @@ table.lg .num { text-align: center; }  /* heads over their chips: values fill th
 table.lg tr > :nth-child(1), table.lg tr > :nth-child(2) { position: sticky; z-index: 1; background: var(--panel2); }
 table.lg tr > :nth-child(1) { left: 0; min-width: 40px; } table.lg tr > :nth-child(2) { left: 40px; min-width: 52px; }  /* 40: fits WC / DIV / CON */
 table.lg tr.lg-season td, table.lg tr.lg-gh th { position: static; }
-table.lg tbody tr:not(.lg-season):not(.lg-gh):not(.lg-ch) td { background: color-mix(in srgb, var(--ink) 4%, var(--panel2)); }
-table.lg tbody tr:not(.lg-season):not(.lg-gh):not(.lg-ch) td:first-child { border-radius: 6px 0 0 6px; }
+table.lg tbody tr:not(.lg-season):not(.lg-gh):not(.lg-ch):not(.lg-mv) td { background: color-mix(in srgb, var(--ink) 4%, var(--panel2)); }
+table.lg tbody tr:not(.lg-season):not(.lg-gh):not(.lg-ch):not(.lg-mv) td:first-child { border-radius: 6px 0 0 6px; }
+/* a mid-season team change between his weeks (traded / claimed / signed; tools/player_logs.py TeamMoves) */
+table.lg tr.lg-mv td { position: static; background: none; padding: 7px 4px; font-size: var(--fs-sm); color: var(--muted); }
+table.lg tr.lg-mv .lg-pin { position: sticky; left: 0; display: inline-flex; align-items: center; gap: 6px; }
+table.lg tr.lg-mv svg { width: 14px; height: 14px; color: #7fb3ff; flex: none; }
+table.lg tr.lg-mv b { color: #7fb3ff; font-weight: 700; }
+table.lg tr.lg-mv .tm-open { color: var(--ink); font-weight: 700; }
 table.lg tr.lg-season td { padding: 14px 2px 2px; font-size: var(--fs-md); color: var(--muted); background: none; }
 table.lg tr.lg-season td b { color: var(--ink); font-size: var(--fs-lg); margin-right: 6px; }
 table.lg tbody:first-child tr.lg-season td { padding-top: 4px; }
@@ -1065,6 +1071,8 @@ table.lg td.lg-gs, table.lg th.lg-gs { box-shadow: inset 1px 0 0 color-mix(in sr
 .pt-list { display: grid; gap: 2px; }
 .pt-row { display: grid; grid-template-columns: 7.5em 3.2em 1fr; align-items: center; gap: 8px; padding: 5px 0; border-top: 1px solid var(--line); font-size: var(--fs-md); }
 .pt-row:first-child { border-top: 0; }
+/* a report day not in yet: a placeholder that fills in when the report lands */
+.pt-row.pt-exp .pt-d { color: var(--muted); } .pt-row.pt-exp .pr-chip { background: none; border: 1px dashed var(--line); color: var(--faint); }
 .pt-row.pt-g { background: color-mix(in srgb, var(--ink) 4%, transparent); border-radius: var(--r-sm); padding-left: 6px; padding-right: 6px; }
 .pt-d { color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; }
 .pt-gm { font-weight: 700; white-space: nowrap; }

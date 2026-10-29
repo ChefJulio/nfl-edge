@@ -106,8 +106,13 @@ jobs:
           # pair is skipped. A dispatched "complete" (the watcher's rollover / Sunday play-by-play) does the same.
           complete=false
           sch="${{ github.event.schedule }}"
+          # Which of the pair is 2 a.m. goes by Chicago's offset (CDT -0500 -> 07:00 UTC, CST -0600 -> 08:00), not the
+          # hour the run starts: GitHub fires these 5-6 hours late (2026-10-27/28 at 12:47-14:44 UTC), so "is it 02 in
+          # Chicago now" skipped both every night and the complete build never ran (owner 2026-10-29: practice
+          # timelines a week stale on the player card).
           if [ "$sch" = "0 7 * * *" ] || [ "$sch" = "0 8 * * *" ]; then
-            if [ "$(TZ=America/Chicago date +%H)" = "02" ]; then complete=true; else skip=true; echo "skip=true" >> "$GITHUB_OUTPUT"; fi
+            want="0 8 * * *"; [ "$(TZ=America/Chicago date +%z)" = "-0500" ] && want="0 7 * * *"
+            if [ "$sch" = "$want" ]; then complete=true; else skip=true; echo "skip=true" >> "$GITHUB_OUTPUT"; fi
           fi
           if [ "${{ github.event_name }}" = workflow_dispatch ] && [ "${{ inputs.mode }}" = complete ]; then complete=true; fi
           echo "complete=$complete" >> "$GITHUB_OUTPUT"
@@ -359,6 +364,11 @@ jobs:
       - name: Injury names
         if: needs.plan.outputs.complete == 'true' || steps.carry.outputs.carried != 'true'
         run: python tools/injury_names_build.py || echo "[irnames] skipped"
+      # Players > Moves: ESPN's transactions log, 2002 on (past seasons fetched once into the cache, this season daily).
+      # Before the game logs, which mark mid-season trades / claims / signings from it.
+      - name: Moves
+        if: needs.plan.outputs.complete == 'true' || steps.carry.outputs.carried != 'true'
+        run: python tools/transactions_build.py --site=site
       # Career game logs for the player card (one JSON per player; reads the week data files built above).
       - name: Player game logs
         if: needs.plan.outputs.complete == 'true' || steps.carry.outputs.carried != 'true'
@@ -404,10 +414,6 @@ jobs:
               git pull --rebase -X theirs origin archive
             done
           fi
-      # Players > Moves: ESPN's transactions log, 2002 on (past seasons fetched once into the cache, this season daily).
-      - name: Moves
-        if: needs.plan.outputs.complete == 'true' || steps.carry.outputs.carried != 'true'
-        run: python tools/transactions_build.py --site=site
       # Team page > Depth: every team's latest depth chart (ESPN's, via nflverse; after Player game logs, which it links to).
       - name: Depth charts
         if: needs.plan.outputs.complete == 'true' || steps.carry.outputs.carried != 'true'

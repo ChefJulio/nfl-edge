@@ -279,6 +279,7 @@ def main():
   post_by = {pid: g for pid, g in post[post.player_id.isin(everyone)].sort_values(["season", "week"]).groupby("player_id")}
   sched_w, n_weeks = team_weeks(allsched)
   ros_w = roster_weeks(all_ros[all_ros.gsis_id.isin(everyone)], gameday_ina(site))
+  moves = TeamMoves(site, allsched)
   n = 0
   for pid in everyone:
     g = by_player.get(pid)
@@ -358,14 +359,18 @@ def main():
     name, espn = NAMES.get(pid, (None, None))
     if name is None and pid in pinfo.index:  # not on any week page of ours: nflverse's player table
       name, espn = pinfo.at[pid, "display_name"], espn_str(pinfo.at[pid, "espn_id"])
+    season_docs = []
+    for s in sorted(set(seasons) | set(playoffs), reverse=True):
+      gs = seasons.get(s, [])
+      # the weeks he has no game in (this season's byes come with "up")
+      m = missed_weeks(s, gs, ros_w.get(pid, {}), sched_w, n_weeks.get(s, 0), gid_of,
+                       byes=s != data.current_season, snap_of=lambda w, s=s: snap.get((s, w, pid)))
+      mv = moves(pid, s, [(e["w"], e.get("t")) for e in gs + m]
+                 + ([(e["w"], team) for e in upcoming if not e.get("bye")] if s == data.current_season else []))
+      season_docs.append({"s": s, "g": gs, **({"pg": playoffs[s]} if s in playoffs else {}), **season_rank.get((s, pid), {}),
+                          "m": m, **({"mv": mv} if mv else {})})
     doc = {"pid": pid, "name": name, "espn": espn, "pos": pos, "keys": SCORE_KEYS, "cur": data.current_season, "team": team,
-           "seasons": [{"s": s, "g": seasons.get(s, []), **({"pg": playoffs[s]} if s in playoffs else {}),
-                        **season_rank.get((s, pid), {}),
-                        # the weeks he has no game in (this season's byes come with "up")
-                        "m": missed_weeks(s, seasons.get(s, []), ros_w.get(pid, {}), sched_w, n_weeks.get(s, 0), gid_of,
-                                          byes=s != data.current_season, snap_of=lambda w, s=s: snap.get((s, w, pid)))}
-                       for s in sorted(set(seasons) | set(playoffs), reverse=True)], "up": upcoming,
-           "bio": bios.get(pid, {})}
+           "seasons": season_docs, "up": upcoming, "bio": bios.get(pid, {})}
     if pid in injuries:
       doc["inj"] = injuries[pid]["eps"]
       doc["dur"] = injuries[pid].get("dur")
@@ -382,7 +387,7 @@ def main():
   size = sum(f.stat().st_size for f in out_dir.glob("*.json"))
   print(f"[logs] wrote {n} player game logs ({size / 1e6:.1f} MB) to {out_dir}", flush=True)
   other_logs(site, cache, nfl, data.current_season, allsched, pinfo, all_ros, sn, bios, written=set(everyone), injuries=injuries,
-             post_snaps=sn_post, round_of=round_of, prac=prac, prac_hist=prac_hist)
+             post_snaps=sn_post, round_of=round_of, prac=prac, prac_hist=prac_hist, moves=moves)
   team_logs(site, cfg, data, cache, nfl, allsched, postsched)
   qb_throws(site, cache, nfl, data.pbp, data.current_season)
   dst_logs(site, cache, nfl, data, allsched)
@@ -653,6 +658,54 @@ def missed_weeks(season: int, games: list, ros_wk: dict, sched: dict, n_weeks: i
   return out
 
 
+MOVE_KIND = {"traded": "trade", "acquired": "trade", "claimed": "claim", "signed": "sign", "re_signed": "sign",
+             "promoted": "sign", "ps_signed": "sign"}
+MOVE_RANK = {"trade": 0, "claim": 1, "sign": 2}
+
+
+class TeamMoves:
+  """His team changes within a season, for the game log's divider rows (owner 2026-10-29: Marvin Harrison Jr.'s trade
+  to Houston): "mv" per season = [{"w": first week with the new team, "f": old team, "t": new team, "k": how, "d":
+  date}]. How (trade / claim / sign) and the date come from ESPN's transactions log (data/transactions/<season>.json,
+  tools/transactions_build.py; built before this step), the move logged between his last week with the old team and
+  his first with the new; none found = k and d left out (the card says "Joined")."""
+
+  def __init__(self, site: Path, allsched: pd.DataFrame):
+    self.dir, self.tx = site / "data" / "transactions", {}
+    gd = allsched.assign(gd=allsched.gameday.astype(str).str[:10]).groupby(["season", "week"]).gd
+    self.lo = {(int(s), int(w)): d for (s, w), d in gd.min().items()}
+    self.hi = {(int(s), int(w)): d for (s, w), d in gd.max().items()}
+
+  def _moves(self, season: int) -> dict:
+    if season not in self.tx:
+      by = {}
+      f = self.dir / f"{season}.json"
+      if f.exists():
+        doc = json.loads(f.read_text(encoding="utf-8"))
+        ci = {k: doc["cols"].index(k) for k in ("date", "type", "pid")}
+        for r in doc["rows"]:
+          k = MOVE_KIND.get(r[ci["type"]])
+          if k and r[ci["pid"]]:
+            by.setdefault(r[ci["pid"]], []).append((r[ci["date"]], k))
+      self.tx[season] = by
+    return self.tx[season]
+
+  def __call__(self, pid: str, season: int, weeks) -> list:
+    """weeks: (week, team) for every week he was on a team (games, missed games, this season's upcoming games)."""
+    seq = sorted((w, D.RELOCATED.get(t, t)) for w, t in weeks if t)
+    out = []
+    for (w0, t0), (w1, t1) in zip(seq, seq[1:]):
+      if t0 == t1:
+        continue
+      e = {"w": w1, "f": t0, "t": t1}
+      lo, hi = self.lo.get((season, w0), ""), self.hi.get((season, w1), "9999")
+      hit = min(((MOVE_RANK[k], d, k) for d, k in self._moves(season).get(pid, []) if lo <= d <= hi), default=None)
+      if hit:
+        e["k"], e["d"] = hit[2], hit[1]
+      out.append(e)
+    return out
+
+
 def espn_str(e):
   if e is None or (isinstance(e, float) and pd.isna(e)):
     return None
@@ -676,7 +729,7 @@ def rows_by(df: pd.DataFrame | None, key: str) -> dict:
 def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: pd.DataFrame, ros: pd.DataFrame,
                snaps: pd.DataFrame, bios: dict, written: set, injuries: dict | None = None,
                post_snaps: pd.DataFrame | None = None, round_of: dict | None = None, prac: dict | None = None,
-               prac_hist: dict | None = None):
+               prac_hist: dict | None = None, moves=None):
   """<site>/data/players/<gsis>.json for everyone the fantasy pass didn't write: every player in nflverse's weekly
   stats (1999 on), on a weekly roster (2002 on) or in the snap counts (2012 on). Per game: his kind's stat line
   ("d", in "keys" order), returns ("r") when he had any, his unit's snap share ("sn"). Plus "ros": per season, his
@@ -851,9 +904,12 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
     doc = {"pid": pid, "name": name, "espn": espn, "pos": pos if isinstance(pos, str) else None, "kind": kind,
            "keys": [k for k, _ in keys], "ret_keys": [k for k, _ in RET], "cur": cur, "team": team,
            **({"adv_keys": [k for k, _ in ADV_DEF]} if kind == "def" else {}),
-           "seasons": [{"s": s, "g": seasons.get(s, []), **({"pg": pg[s]} if s in pg else {}),
-                        "m": missed_weeks(s, seasons.get(s, []), ros_w.get(pid, {}), sched_w, n_weeks.get(s, 0), gid_of)}
-                       for s in sorted(set(seasons) | set(pg), reverse=True)], "ros": rs, "bio": bios.get(pid, {})}
+           "seasons": [], "ros": rs, "bio": bios.get(pid, {})}
+    for s in sorted(set(seasons) | set(pg), reverse=True):
+      gs = seasons.get(s, [])
+      m = missed_weeks(s, gs, ros_w.get(pid, {}), sched_w, n_weeks.get(s, 0), gid_of)
+      mv = moves(pid, s, [(e["w"], e.get("t")) for e in gs + m]) if moves else []
+      doc["seasons"].append({"s": s, "g": gs, **({"pg": pg[s]} if s in pg else {}), "m": m, **({"mv": mv} if mv else {})})
     if injuries and pid in injuries:
       doc["inj"] = injuries[pid]["eps"]
       doc["dur"] = injuries[pid].get("dur")
