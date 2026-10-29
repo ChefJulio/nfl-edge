@@ -88,6 +88,11 @@ Open-Meteo wind forecasts, and NFL.com's injury API: the single source for the c
 conflict with NFL terms. Turn it off with `nfl_api_practice = false` (falls back to final practice status).
 Reserve-list moves (IR, PUP, suspensions) are read from ESPN over the weekly rosters, which trail them by a day or more.
 
+## License
+The code is MIT licensed (`LICENSE`). The license covers this repository's code only, not the data it reads: each
+source above keeps its own terms (nflverse's data is CC-BY 4.0, credited on the Model tab; ESPN, NFL.com,
+FantasyPros and the others are used under theirs).
+
 ## Model documentation (Model tab)
 `MODEL.md` is rendered into the site's Model tab, with live values (tuned parameters, learned coefficients,
 backtest results) filled in at every build. It carries a fingerprint of the model code and `config.toml`; when
