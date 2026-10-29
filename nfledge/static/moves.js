@@ -89,12 +89,24 @@
   };
   const tmLogo = (teams, abbr) => { const t = NFLE.fmt.teamOf(teams, abbr);
     return t.logo ? `<span class="st-logo" style="--tc:${esc(t.color || '#555')}"><img src="${esc(t.logo)}" alt="" width="18" height="18" loading="lazy"></span>` : ''; };
+  // a trade with both sides known: one cell over Team, Move and Player (owner 2026-10-29: "a left and right side for
+  // each team ... lil double arrow in the middle"); each side's club, then what it got, players tappable
+  const twoSided = r => !!(r.grp && r.gets.length === 2);
+  const tradeHtml = (r, teams) => {
+    const item = x => {
+      const p = r.players.find(q => q.name && x.includes(q.name));
+      return p ? `<button type="button" class="nm-link mv-tp"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}>${p.pos ? `<span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>` : ''}${esc(p.name)}</button>`
+        : `<span class="mv-pick">${esc(x)}</span>`;
+    };
+    const side = ([t, xs]) => `<div class="mv-side"><span class="tm-open mv-sh" data-tm="${esc(t)}">${tmLogo(teams, t)}<b>${esc(t)}</b> <span class="muted">gets</span></span>${xs.map(item).join('')}</div>`;
+    return `<div class="mv-trade">${side(r.gets[0])}<span class="mv-x" aria-hidden="true">&#8644;</span>${side(r.gets[1])}</div>`;
+  };
   const getsHtml = r => r.gets.length ? `<span class="mv-gets">${r.gets.map(([t, xs]) => `<span><b>${esc(t)} gets</b> ${esc(xs.join(', '))}</span>`).join('')}</span>`
     : `<span class="mv-note">${esc(r.text)}</span>`;
   const day = d => d ? new Date(d + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }) : '';
   const columns = teams => [
     { key: 'date', label: 'Date', first: 'desc', html: r => `<span class="mv-date">${esc(day(r.date))}</span>` },
-    { key: 'team', label: 'Team', first: 'asc', html: r => r.grp && r.teams.length > 1
+    { key: 'team', label: 'Team', first: 'asc', span: r => (twoSided(r) ? 3 : 1), html: r => twoSided(r) ? tradeHtml(r, teams) : r.grp && r.teams.length > 1
         ? `<span class="mv-tm mv-tm2">${r.teams.map(t => `<span class="tm-open" data-tm="${esc(t)}">${tmLogo(teams, t)}</span>`).join('<span class="mv-swap" aria-hidden="true">&#8644;</span>')}</span>`
         : `<span class="tm-open mv-tm" data-tm="${esc(r.team)}">${tmLogo(teams, r.team)}<span>${esc(r.team || '')}</span></span>` },
     { key: 'type', label: 'Move', first: 'asc', value: r => r.grp ? 'Trade' : LABEL[r.type] || r.type,

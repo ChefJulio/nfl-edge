@@ -69,11 +69,18 @@
     const BATCH = 40;
     let lastKey = null, shown = [];
     const cellHtml = (c, r) => c.html ? c.html(r) : esc(r[c.key] ?? '');
-    const rowHtml = r => `<tr${opt.rowClass ? ` class="${esc(opt.rowClass(r))}"` : ''}${opt.rowAttrs ? ' ' + opt.rowAttrs(r) : ''}>${cols.map(c => {
-      // the sorted column's numbers keep their chip (owner 2026-10-16: chips only on key / sorted columns)
-      const cls = [c.num ? 'num' : '', c.stick ? 'stick' : '', c.cls || '', sort && sort.key === c.key && !c.stick ? 'sorted' : ''].filter(Boolean).join(' ');
-      return `<td${cls ? ` class="${cls}"` : ''}>${cellHtml(c, r)}</td>`;
-    }).join('')}</tr>`;
+    // c.span(r) > 1: that row's cell covers the next columns too (Moves' trades: one two-sided cell, owner 2026-10-29)
+    const rowHtml = r => {
+      let skip = 0;
+      return `<tr${opt.rowClass ? ` class="${esc(opt.rowClass(r))}"` : ''}${opt.rowAttrs ? ' ' + opt.rowAttrs(r) : ''}>${cols.map(c => {
+        if (skip) { skip--; return ''; }
+        const n = c.span ? Math.min(cols.length, Math.max(1, c.span(r) || 1)) : 1;
+        skip = n - 1;
+        // the sorted column's numbers keep their chip (owner 2026-10-16: chips only on key / sorted columns)
+        const cls = [c.num ? 'num' : '', c.stick ? 'stick' : '', c.cls || '', n > 1 ? 'dt-span' : '', sort && sort.key === c.key && !c.stick ? 'sorted' : ''].filter(Boolean).join(' ');
+        return `<td${cls ? ` class="${cls}"` : ''}${n > 1 ? ` colspan="${n}"` : ''}>${cellHtml(c, r)}</td>`;
+      }).join('')}</tr>`;
+    };
     const keyOf = rs => rs.map(rowHtml).join('').replace(/ rise(?=")/g, '');
     const body = () => {
       let rs = rows;
