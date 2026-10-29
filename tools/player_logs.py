@@ -913,6 +913,8 @@ def ir_names(allsched: pd.DataFrame):
     ends[s].sort()
 
   def week_of(s: int, d: str):
+    if d.startswith("wk:"):  # a week the source names ("In Week 7 ... suffered an ankle dislocation")
+      return int(d[3:])
     for w, end in ends.get(int(s), []):
       if d <= end:
         return w
@@ -924,7 +926,8 @@ def name_reserve_stints(eps: list, names: list, week_of) -> None:
   """A reserve-list stint the weekly reports never named (owner 2026-10-28: "a lot of 'undisclosed' injuries ...
   that aren't in fact undisclosed"; a player on IR / PUP / NFI is off the report). Oldest first, in this order:
     1. a source dated inside the stint or the week before it (Wikipedia, ESPN news; tools/injury_names_build.py),
-       or undated in its season when it's the season's only such stint             ps "wiki" / "espn"
+       or undated in its season when it's the season's only such stint             ps "wiki" / "espn"; failing those,
+       an ESPN blurb tagging the injury in the three weeks before the stint ("Smith (knee) won't play")   ps "espn~"
     2. his named listing that ended 1-3 weeks before it, same season (listed, then the reserve list)   ps "prior"
     3. last season's named stint that ran to week 14 or later, into this one's week 1-2 (IR into PUP)  ps "carry"
     4. else no part: the card reads "Not reported" (no team kept it secret; it just wasn't on a report)"""
@@ -946,6 +949,12 @@ def name_reserve_stints(eps: list, names: list, week_of) -> None:
         if w is None or not (min(lo, e["w0"] - 1) <= w <= e["w1"]):
           continue
         gap = abs(w - e["w0"])
+        if src.endswith("~"):  # a blurb tagging the injury, not the move: the three weeks before the stint, last resort
+          if not (e["w0"] - 3 <= w <= e["w0"]):
+            continue
+          gap += 50
+        if part == "Undisclosed":  # a source naming the injury beats one saying the team didn't
+          gap += 30
       elif len(open_) == 1:
         gap = 99
       else:

@@ -2347,7 +2347,7 @@
     const wk = e => e.w0 === e.w1 ? `Wk ${e.w0}` : `Wk ${e.w0}-${e.w1}`;
     // (owner 2026-10-28: "undisclosed" injuries that weren't) a reserve-list stint is off the weekly report: its name
     // from Wikipedia / ESPN news or his listing around it says where it came from; none found reads "Not reported"
-    const PS = { wiki: 'From his Wikipedia article', espn: 'From ESPN player news', prior: 'From his injury report listing just before the reserve list',
+    const PS = { wiki: 'From his Wikipedia article', espn: 'From ESPN player news', 'espn~': 'From ESPN player news in the weeks before the reserve list', prior: 'From his injury report listing just before the reserve list',
                  carry: 'Carried over from the injury that ended his season before' };
     const NR = { IR: 'Placed on injured reserve; the injury never appeared on an official report', PUP: 'On the PUP list; the injury never appeared on an official report',
                  NFI: 'On the non-football injury list; the injury never appeared on an official report' };

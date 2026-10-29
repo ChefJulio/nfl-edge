@@ -63,12 +63,16 @@ PARTS = [
   ("triceps", "Triceps"), ("tricep", "Triceps"), ("elbow", "Elbow"), ("forearm", "Forearm"), ("wrist", "Wrist"),
   ("thumb", "Thumb"), ("finger", "Finger"), ("hand", "Hand"), ("arm", "Arm"), ("jaw", "Jaw"), ("eye", "Eye"),
   ("leg", "Leg"), ("blood clot", "Blood clots"), ("heart", "Heart"), ("illness", "Illness"),
+  ("undisclosed", "Undisclosed"),  # what the team actually said ("placed Perryman (undisclosed) on injured reserve")
 ]
 PART_RX = re.compile(r"\b(?:(" + ADJ + r")\s+)?(?:(?:left|right)\s+)?(" + "|".join(re.escape(p) for p, _ in PARTS) + r")s?\b", re.I)
 PART_OF = {p.lower(): n for p, n in PARTS}
 ADJ_WORD = {"tear": "torn", "tearing": "torn", "break": "broken", "fracture": "fractured", "sprain": "sprained",
             "strain": "strained", "rupture": "ruptured", "dislocation": "dislocated", "pulled": "strained",
             "high ankle": "", "low ankle": "", "injured": "", "damaged": "", "stress": "stress"}
+SEASON_END = re.compile(r"(?:rest|remainder) of the (?:\d{4} )?(?:NFL )?season|ruled out for the (?:rest of the )?season|"
+                        r"season-ending|out for the (?:rest of the |entire )?(?:\d{4} )?(?:NFL )?season|"
+                        r"miss(?:ed|ing)? the (?:entire |rest of the )?(?:\d{4} )?(?:NFL )?season", re.I)
 # a reserve-list move in words
 LIST_RX = re.compile(r"injured reserve|reserve/injured|\bIR\b|physically unable|\bPUP\b|non-football injur|\bNFI\b", re.I)
 
@@ -86,9 +90,14 @@ def get(url: str, as_json: bool = False):
 
 
 def injury_in(text: str) -> str:
-  """The first injury named in a sentence: "a torn ACL" -> "Torn ACL", "his hamstring" -> "Hamstring"."""
+  """The first injury named in a sentence: "a torn ACL" -> "Torn ACL", "his hamstring" -> "Hamstring"; "Undisclosed"
+  only when nothing else in it is named."""
+  undisclosed = False
   for m in PART_RX.finditer(text):
     part = PART_OF.get(m.group(2).lower())
+    if part == "Undisclosed":
+      undisclosed = True
+      continue
     if not part or (part == "Leg" and re.search(r"\blegal\b", text[m.start():m.end() + 2], re.I)):
       continue
     # "back" the body part, not the adverb ("moved back to injured reserve" read as a back injury)
@@ -101,7 +110,7 @@ def injury_in(text: str) -> str:
       adj = ""
     proper = part in ("ACL", "MCL", "PCL", "LCL", "Achilles", "Lisfranc (foot)")
     return f"{adj.capitalize()} {part if proper else part[0].lower() + part[1:]}" if adj else part
-  return ""
+  return "Undisclosed" if undisclosed else ""
 
 
 # ---- Wikipedia --------------------------------------------------------------------------------------------------------
@@ -164,6 +173,24 @@ def wiki_entries(text: str) -> list:
     sents = re.split(r"(?<=[.!?])\s+(?=[A-Z])", line)
     for i, s in enumerate(sents):
       ys = re.findall(r"\b(20[0-3]\d)\b", s)
+      # a season-ending injury told without the list ("confirmed to be an Achilles tear, which forced him to miss the
+      # rest of the 2024 season"; Watson, Godwin, Engram): the injury from this sentence or the two before, the week
+      # from a "Week N" there (else its date), the season named or the section's
+      if not LIST_RX.search(s) and SEASON_END.search(s):
+        ctx = sents[max(0, i - 2):i + 1]
+        part = injury_in(s) or next((injury_in(x) for x in reversed(ctx[:-1]) if injury_in(x)), "")
+        wk = next((m.group(1) for x in reversed(ctx) for m in [re.search(r"\bWeek (\d{1,2})\b", x)] if m), None)
+        sm = re.search(r"\b(20[0-3]\d)(?:\s+NFL)? season\b", s)
+        se = int(sm.group(1)) if sm else (int(ys[-1]) if ys else year)
+        if part and part != "Illness" and se:
+          dm = re.search(r"\b(" + "|".join(MONTHS) + r")\s+(\d{1,2})(?:,\s*(20[0-3]\d))?", s, re.I)
+          d0 = ""
+          if not wk and dm and dm.group(3):
+            try:
+              d0 = date(int(dm.group(3)), MONTHS[dm.group(1).lower()], int(dm.group(2))).isoformat()
+            except ValueError:
+              d0 = ""
+          out.append((se, f"wk:{wk}" if wk else d0, part))
       if not LIST_RX.search(s):
         if ys:
           year = int(ys[-1])
@@ -176,7 +203,12 @@ def wiki_entries(text: str) -> list:
       dm = re.search(r"\b(" + "|".join(MONTHS) + r")\s+(\d{1,2})(?:,\s*(20[0-3]\d))?", s, re.I)
       if dm:
         mo, dy = MONTHS[dm.group(1).lower()], int(dm.group(2))
-        yr = int(dm.group(3)) if dm.group(3) else (year + 1 if year and mo <= 2 else year)
+        # a year-less date beside a dated one ("on December 14, and was activated on January 16, 2023"): that year,
+        # one back when it's the January-February after this date (Hankins read as a 2021 move)
+        other = re.search(r"\b(" + "|".join(MONTHS) + r")\s+\d{1,2},\s*(20[0-3]\d)", s[dm.end():], re.I)
+        yr = (int(dm.group(3)) if dm.group(3)
+              else int(other.group(2)) - (1 if MONTHS[other.group(1).lower()] <= 2 < mo else 0) if other
+              else (year + 1 if year and mo <= 2 else year))
         if not yr:
           continue
         try:
@@ -204,16 +236,26 @@ def espn_entries(espn_id: str) -> list:
     head, story = a.get("headline") or "", a.get("story") or a.get("description") or ""
     txt = f"{head} {story}"
     if not LIST_RX.search(txt) or not re.search(r"placed|moved|transferred|lands? on|headed|heading|going to|reverted|put on|stash", txt, re.I):
+      # any other blurb that tags the injury ("Smith (knee) won't play Sunday"): kept as "espn~", used only for a stint
+      # starting within three weeks of it when no reserve-list item names one (tools/player_logs.py)
+      par = re.search(r"\(([a-z][a-z ]{2,24})\)", head)
+      part = injury_in(par.group(1)) if par else ""
+      pub = (a.get("published") or "")[:10]
+      if part and part != "Illness" and pub:
+        d = date.fromisoformat(pub)
+        out.append((d.year if d.month >= 3 else d.year - 1, pub, part, "espn~"))
       continue
     if re.search(r"activated|designated .* to return|returned from|come off|came off", head, re.I):
       continue
     par = re.search(r"\(([a-z][a-z ]{2,24})\)", head)
-    part = (injury_in(par.group(1)) if par else "") or injury_in(head) or injury_in(story[:300])
+    # a real body part anywhere beats the headline's "(undisclosed)" (the blurb often names it)
+    cands = [injury_in(par.group(1)) if par else "", injury_in(head), injury_in(story[:300])]
+    part = next((c for c in cands if c and c != "Undisclosed"), "Undisclosed" if "Undisclosed" in cands else "")
     pub = (a.get("published") or "")[:10]
     if not part or part == "Illness" or not pub:
       continue
     d = date.fromisoformat(pub)
-    out.append((d.year if d.month >= 3 else d.year - 1, pub, part))
+    out.append((d.year if d.month >= 3 else d.year - 1, pub, part, "espn"))
   return out
 
 
@@ -240,6 +282,10 @@ def build(all_: bool = False) -> None:
   if doc.get("v") != V:
     doc = {"v": V, "p": {}, "done": {"wiki": [], "espn": {}}}
   P, done = doc["p"], doc["done"]
+  if "--espn" in sys.argv:  # re-read every player's news (the feed's shape or the parse changed)
+    done["espn"] = {}
+  if "--wiki" in sys.argv:
+    done["wiki"] = []
   st = reserve_stints(cache, nfl, cur)
   pl = cache.get("players", "all", lambda: nfl.load_players(), stale=False)
   pl = pl.dropna(subset=["gsis_id"]).drop_duplicates("gsis_id").set_index("gsis_id")
@@ -247,8 +293,9 @@ def build(all_: bool = False) -> None:
   print(f"[irnames] {len(who)} players with reserve-list stints since {FIRST}", flush=True)
 
   def put(g, entries, src):
-    keep = [e for e in P.get(g, []) if e[3] != src]
-    P[g] = keep + [[s, d, part, src] for s, d, part in sorted(set(entries))]
+    """entries: (season, date, part) from one source, or (season, date, part, src) carrying their own ("espn~")"""
+    keep = [e for e in P.get(g, []) if not e[3].startswith(src)]
+    P[g] = keep + [[e[0], e[1], e[2], e[3] if len(e) > 3 else src] for e in sorted(set(entries))]
     if not P[g]:
       P.pop(g)
 
@@ -285,7 +332,7 @@ def build(all_: bool = False) -> None:
     if e is None or pd.isna(e):
       continue
     ents = espn_entries(str(e).replace(".0", ""))
-    put(g, [x for x in ents if x[0] >= NEWS_FROM], "espn")
+    put(g, [x for x in ents if x[0] >= NEWS_FROM], "espn")  # "espn" and "espn~" both replaced
     n_news += len(ents)
     done["espn"][g] = today.isoformat()
     time.sleep(0.15)
