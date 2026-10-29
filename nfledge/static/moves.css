@@ -29,34 +29,35 @@ td.mv-who { min-width: 150px; }
   table.dt th.mv-text, table.dt td.mv-text { display: none; }
   .mv-note { display: block; font-size: var(--fs-xs); color: var(--muted); line-height: 1.3; margin-top: 3px; white-space: normal; }
   td.mv-who { min-width: 0; white-space: normal; }
-  .mv-tm .st-logo + span { display: none; }
   .mv-chip { white-space: normal; display: inline-block; line-height: 1.25; text-align: center; }
   .mv-date { font-size: var(--fs-sm); }
 }
-/* one row per trade (moves.js groupTrades): both clubs, its players, what each side got */
-.mv-tm2 { display: inline-flex; align-items: center; gap: 3px; }
-.mv-swap { color: var(--muted); font-size: 13px; }
-.mv-who .mv-gets { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; font-size: var(--fs-sm); color: var(--muted); line-height: 1.3; white-space: normal; }
-.mv-gets b { color: var(--ink); font-weight: 700; margin-right: 4px; }
-.mv-who > .who + .who { margin-top: 6px; }
-@media (max-width: 640px) {  /* two clubs stack (one logo wide) so the player column keeps its room */
-  .mv-tm2 { flex-direction: column; gap: 0; }
-  .mv-swap { transform: rotate(90deg); line-height: 1; font-size: 12px; margin: 1px 0; }
-}
-/* a two-sided trade (moves.js tradeHtml): both clubs' heads on one line at the top, the arrows on that line, each
-   side's players and picks under its club, lined up with the club's code (owner 2026-10-29: "align the team logo to the
-   top, make the layout cleaner") */
+/* every row one card (moves.js card; owner 2026-10-29: "make them all look uniform"): the move's chip and club, the
+   player chips (photo, position, "D. Buckner"), the note on phones; a trade's two sides with the arrows between */
 tr.mv-trow > td { vertical-align: top; }
-tr.mv-trow > td:first-child { padding-top: 14px; }
-.mv-trade { display: grid; grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr); column-gap: 10px; align-items: start; white-space: normal; padding: 4px 0 2px; }
-.mv-side { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-.mv-sh { display: flex; align-items: center; gap: 8px; font-size: var(--fs-md); line-height: 1; min-height: 28px; }
-.mv-sh .st-logo { flex: none; }
-.mv-sh b { font-weight: 700; }
-.mv-sh .muted { font-weight: 500; }
-.mv-side > :not(.mv-sh) { margin-left: 34px; }  /* under the club's code, past its logo */
-.mv-x { color: var(--muted); font-size: 18px; line-height: 28px; text-align: center; }
-.mv-tp { display: block; text-align: left; padding: 0; background: none; border: 0; color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; line-height: 1.3; }
-.mv-tp .posb { margin-right: 6px; vertical-align: 1px; }
-@media (max-width: 640px) { .mv-side > :not(.mv-sh) { margin-left: 0; } }  /* phones: the full side's width for names */
+tr.mv-trow > td:first-child { padding-top: 12px; }
+table.dt td.mv-cardc { white-space: normal; min-width: 260px; }  /* (table.dt td is nowrap) */
+.mv-card { display: flex; flex-direction: column; gap: 7px; padding: 4px 0 2px; }
+.mv-top { display: flex; align-items: center; gap: 8px; min-height: 26px; }
+.mv-club { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-md); line-height: 1; }
+.mv-club b { font-weight: 700; }
+.mv-club .muted { font-weight: 500; }
+.mv-ps { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.mv-p { display: inline-flex; align-items: center; gap: 6px; min-width: 0; padding: 0; background: none; border: 0; color: var(--ink); font: inherit; font-weight: 700; text-align: left; cursor: pointer; }
+.mv-pn .posb { margin-left: 2px; vertical-align: 1px; }
+.mv-pn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mv-ph { flex: none; width: 28px; height: 28px; border-radius: 50%; overflow: hidden; background: var(--pc1, var(--panel2)); box-shadow: 0 0 0 2px var(--pc2, var(--line)); }
+.mv-ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mv-ph.nopic img { display: none; }
+.mv-tr { display: grid; grid-template-columns: minmax(0, 1fr) 22px minmax(0, 1fr); column-gap: 10px; align-items: start; }
+.mv-tr.mv-one { grid-template-columns: minmax(0, 1fr); }
+/* a trade's sides are narrow: names wrap there rather than cut off */
+.mv-side .mv-p { align-items: flex-start; }
+.mv-side .mv-pn { white-space: normal; overflow: visible; line-height: 1.3; padding-top: 4px; }
+.mv-pick { overflow-wrap: anywhere; }
+.mv-card, .mv-side, .mv-tr { min-width: 0; max-width: 100%; }
+.mv-side { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.mv-x { color: var(--muted); font-size: 18px; line-height: 26px; text-align: center; }
 .mv-pick { color: var(--muted); font-size: var(--fs-sm); line-height: 1.3; }
+.mv-card .mv-note { margin-top: 0; }
+@media (max-width: 640px) { table.dt td.mv-cardc { min-width: 0; } }  /* the card spans three columns: no minimum of its own on phones */

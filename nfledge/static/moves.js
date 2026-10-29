@@ -89,33 +89,38 @@
   };
   const tmLogo = (teams, abbr) => { const t = NFLE.fmt.teamOf(teams, abbr);
     return t.logo ? `<span class="st-logo" style="--tc:${esc(t.color || '#555')}"><img src="${esc(t.logo)}" alt="" width="18" height="18" loading="lazy"></span>` : ''; };
-  // a trade with both sides known: one cell over Team, Move and Player (owner 2026-10-29: "a left and right side for
-  // each team ... lil double arrow in the middle"); each side's club, then what it got, players tappable
-  const twoSided = r => !!(r.grp && r.gets.length === 2);
-  const tradeHtml = (r, teams) => {
-    const item = x => {
-      const p = r.players.find(q => q.name && x.includes(q.name));
-      return p ? `<button type="button" class="nm-link mv-tp"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}>${p.pos ? `<span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>` : ''}${esc(p.name)}</button>`
-        : `<span class="mv-pick">${esc(x)}</span>`;
-    };
-    const side = ([t, xs]) => `<div class="mv-side"><span class="tm-open mv-sh" data-tm="${esc(t)}">${tmLogo(teams, t)}<b>${esc(t)}</b> <span class="muted">gets</span></span>${xs.map(item).join('')}</div>`;
-    return `<div class="mv-trade">${side(r.gets[0])}<span class="mv-x" aria-hidden="true">&#8644;</span>${side(r.gets[1])}</div>`;
+  // One card per row, the same shape for every move (owner 2026-10-29: "jumping between ir/suspension/trade layouts ...
+  // make them all look uniform? give player picture to trade players? shorten first names to initials?"): one cell over
+  // Team, Move and Player: the move's chip and club on top, then the player(s) as compact chips (photo in his club's
+  // colors, position, "D. Buckner"), then the note (phones; wide screens have Details). A trade's body is its two sides
+  // ("SF gets" / "IND gets", the arrows between), each side's players as the same chips and its picks as text.
+  const short = name => { const [f, l] = NFLE.fmt.split(name || ''); return !f ? (l || '') : /\./.test(f) ? `${f} ${l}` : `${f[0]}. ${l}`; };
+  const chip = (p, teams, team) => {
+    const photo = NFLE.ui.headshot(p.espn || (p.pid && NFLE.ui.ids[p.pid]));
+    return `<button type="button" class="mv-p"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''} title="${esc(p.name)}"><span class="mv-ph${photo ? '' : ' nopic'}"${NFLE.fmt.picStyle(teams, team)}>${photo ? `<img src="${esc(photo)}" alt="" width="28" height="28" loading="lazy" onerror="this.parentNode.classList.add('nopic')">` : ''}</span><span class="mv-pn">${esc(short(p.name))}${p.pos ? ` <span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>` : ''}</span></button>`;
   };
-  const getsHtml = r => r.gets.length ? `<span class="mv-gets">${r.gets.map(([t, xs]) => `<span><b>${esc(t)} gets</b> ${esc(xs.join(', '))}</span>`).join('')}</span>`
-    : `<span class="mv-note">${esc(r.text)}</span>`;
+  const club = (teams, t, extra = '') => t ? `<span class="tm-open mv-club" data-tm="${esc(t)}">${tmLogo(teams, t)}<b>${esc(t)}</b>${extra}</span>` : '';
+  const sideHtml = (r, teams, [t, xs]) => `<div class="mv-side">${club(teams, t, ' <span class="muted">gets</span>')}${xs.map(x => {
+      const p = r.players.find(q => q.name && x.includes(q.name));
+      return p ? chip(p, teams, t) : `<span class="mv-pick">${esc(x)}</span>`;
+    }).join('')}</div>`;
+  const card = (r, teams) => {
+    const kind = r.grp ? 'Trade' : LABEL[r.type] || r.type;
+    const top = `<div class="mv-top"><span class="mv-chip mv-${GROUP[r.type] || 'misc'}">${esc(kind)}</span>${r.grp ? '' : club(teams, r.team)}</div>`;
+    if (r.grp && r.gets.length) {
+      const sides = r.gets.map(g => sideHtml(r, teams, g));
+      return `<div class="mv-card">${top}<div class="mv-tr${sides.length === 1 ? ' mv-one' : ''}">${sides.join('<span class="mv-x" aria-hidden="true">&#8644;</span>')}</div></div>`;
+    }
+    const ps = (r.grp ? r.players : [r]).filter(p => p.name);
+    return `<div class="mv-card">${top}${ps.length ? `<div class="mv-ps">${ps.map(p => chip(p, teams, r.grp ? p.team : r.team)).join('')}</div>` : ''}<span class="mv-note">${esc(r.text)}</span></div>`;
+  };
   const day = d => d ? new Date(d + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }) : '';
   const columns = teams => [
     { key: 'date', label: 'Date', first: 'desc', html: r => `<span class="mv-date">${esc(day(r.date))}</span>` },
-    { key: 'team', label: 'Team', first: 'asc', span: r => (twoSided(r) ? 3 : 1), html: r => twoSided(r) ? tradeHtml(r, teams) : r.grp && r.teams.length > 1
-        ? `<span class="mv-tm mv-tm2">${r.teams.map(t => `<span class="tm-open" data-tm="${esc(t)}">${tmLogo(teams, t)}</span>`).join('<span class="mv-swap" aria-hidden="true">&#8644;</span>')}</span>`
-        : `<span class="tm-open mv-tm" data-tm="${esc(r.team)}">${tmLogo(teams, r.team)}<span>${esc(r.team || '')}</span></span>` },
-    { key: 'type', label: 'Move', first: 'asc', value: r => r.grp ? 'Trade' : LABEL[r.type] || r.type,
-      html: r => `<span class="mv-chip mv-${GROUP[r.type] || 'misc'}">${esc(r.grp ? 'Trade' : LABEL[r.type] || r.type)}</span>` },
-    // phones fold the note under the name (the Details column is hidden there; the table fits without side-scroll); a
-    // trade shows its players and what each side got
-    { key: 'name', label: 'Player', first: 'asc', value: r => r.name || '~', cls: 'mv-who',
-      html: r => r.grp ? `${r.players.map(p => NFLE.ui.player({ name: p.name, pos: p.pos, team: p.team, pid: p.pid }, teams)).join('')}${getsHtml(r)}`
-        : `${r.name ? NFLE.ui.player({ name: r.name, pos: r.pos, team: r.team, pid: r.pid }, teams) : ''}<span class="mv-note">${esc(r.text)}</span>` },
+    { key: 'team', label: 'Team', first: 'asc', span: () => 3, cls: 'mv-cardc', html: r => card(r, teams) },
+    // (covered by the card; kept for their sort headers)
+    { key: 'type', label: 'Move', first: 'asc', value: r => r.grp ? 'Trade' : LABEL[r.type] || r.type, html: () => '' },
+    { key: 'name', label: 'Player', first: 'asc', value: r => r.name || '~', html: () => '' },
     { key: 'text', label: 'Details', sort: false, cls: 'mv-text', html: r => r.grp ? r.text.split(' / ').map(esc).join('<br>') : esc(r.text) },
   ];
   NFLE.areas.moves = {
@@ -168,7 +173,7 @@
         // the data is newest first: draw it in pages; any other sort needs the whole filtered season in the table
         const page = cur && !(cur.key === 'date' && cur.dir === 'desc') ? all : all.slice(0, shown);
         if (!table) table = NFLE.Table($('.mv-tbl'), { columns: columns(teams), rows: page, sort: { key: 'date', dir: 'desc' },
-          cls: 'tiles', rowClass: r => (twoSided(r) ? 'teamrow mv-trow' : 'teamrow'), rowAttrs: r => `${NFLE.ui.tileStyle(teams, r.team)}${r.pid ? ` data-open-pid="${esc(r.pid)}"` : ''}`, onSort: () => draw(false) });
+          cls: 'tiles', rowClass: () => 'teamrow mv-trow', rowAttrs: r => `${NFLE.ui.tileStyle(teams, r.team)}${r.pid ? ` data-open-pid="${esc(r.pid)}"` : ''}`, onSort: () => draw(false) });
         else table.update(page);
         more.hidden = page.length >= all.length;
         more.textContent = `Show more (${(all.length - page.length).toLocaleString()} left)`;
