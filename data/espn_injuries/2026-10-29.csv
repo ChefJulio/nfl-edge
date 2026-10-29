@@ -54,7 +54,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2980153,Ronnie Stanley,Baltimore Ravens,Active,2026-10-29T20:41Z,,,,,,,OT
 3858276,Jaylinn Hawkins,Baltimore Ravens,Questionable,2026-10-29T19:53Z,Knee,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Hawkins (knee) was a non-participant in Thursday's practice.,S
 4832793,Olaivavega Ioane,Baltimore Ravens,Questionable,2026-10-29T16:50Z,Knee - MCL,Sprain,Right,2026-11-01,QUESTIONABLE,questionable,G
-3916387,Lamar Jackson,Baltimore Ravens,Active,2026-10-29T14:01Z,,,,,,"Jackson (ankle) handled all of the first-team work during Wednesday's practice and is on track to play Sunday against the Bills, Matt Zenitz of CBS Sports reports.",QB
+3916387,Lamar Jackson,Baltimore Ravens,Questionable,2026-10-29T14:01Z,Ankle,Sprain,Left,2026-11-01,QUESTIONABLE,"Jackson (ankle) handled all of the first-team work during Wednesday's practice and is on track to play Sunday against the Bills, Matt Zenitz of CBS Sports reports.",QB
 3915189,Roquan Smith,Baltimore Ravens,Questionable,2026-10-29T01:03Z,Knee,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Smith (knee) did not practice Wednesday.,LB
 4685526,Adam Randall,Baltimore Ravens,Injured Reserve,2026-10-29T01:00Z,Neck,Not Specified,Not Specified,2026-11-01,IR-R,The Ravens opened Randall's (neck) 21-day practice window Wednesday.,RB
 4575517,Kyle Hamilton,Baltimore Ravens,Questionable,2026-10-29T01:00Z,Knee,Not Specified,Right,2026-11-01,QUESTIONABLE,Hamilton (knee) did not practice Wednesday.,S
@@ -149,7 +149,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685278,Luther Burden III,Chicago Bears,Active,2026-10-23T03:59Z,,,,,,Burden brought in all four targets for 130 yards and a touchdown and rushed once for seven yards in the Bears' 30-24 win over the Patriots on Thursday.,WR
 4431611,Caleb Williams,Chicago Bears,Active,2026-10-23T03:50Z,,,,,,Williams completed 22 of 33 passes for 308 yards with two touchdowns and no interceptions while rushing five times for 18 yards in the Bears' 30-24 win over the Patriots on Thursday.,QB
 4870953,Malik Muhammad II,Chicago Bears,Questionable,2026-10-23T02:42Z,Toe,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,Muhammad (toe) is doubtful to return to Thursday night's contest against the Patriots.,CB
-4362628,Ja'Marr Chase,Cincinnati Bengals,Active,2026-10-29T17:50Z,,,,,,"Chase (ankle) is in uniform for Thursday's practice, Charlie Goldsmith of Fox 19 Now Cincinnati reports.",WR
+4362628,Ja'Marr Chase,Cincinnati Bengals,Active,2026-10-29T20:51Z,,,,,,"Chase (ankle) was a full participant in Thursday's practice, Mike Petraglia of CLNSCincy.com reports.",WR
 3917797,Joe Giles-Harris,Cincinnati Bengals,Questionable,2026-10-28T20:20Z,Calf,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,LB
 4567098,Jordan Battle,Cincinnati Bengals,Questionable,2026-10-28T20:19Z,Hamstring,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,S
 4427834,Erick All Jr.,Cincinnati Bengals,Injured Reserve,2026-10-28T19:05Z,Knee - ACL,Surgery,Right,2027-02-15,IR,"Bengals head coach Zac Taylor confirmed Wednesday that All has been diagnosed with a torn ACL in his right knee and will require season-ending surgery, Jay Morrison of SI.com reports.",TE
@@ -374,6 +374,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429168,Antonio Johnson,Jacksonville Jaguars,Questionable,2026-10-18T16:57Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Johnson (ankle) didn't return to second half of Sunday's 34-31 loss to the Texans, Brent Martineau of CBS 47 Jacksonville reports.",S
 2576336,Ameer Abdullah,Jacksonville Jaguars,Active,2026-10-18T16:34Z,,,,,,,RB
 2970716,Eric Murray,Jacksonville Jaguars,Active,2026-10-17T00:55Z,,,,,,Murray (concussion) does not have an injury designation ahead of Sunday's game against the Texans.,S
+15847,Travis Kelce,Kansas City Chiefs,Questionable,2026-10-29T20:46Z,Ankle,,,2026-11-01,QUESTIONABLE,questionable,TE
 4880124,Mansoor Delane,Kansas City Chiefs,Questionable,2026-10-29T18:52Z,Shoulder,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,CB
 4043041,Jaylon Moore,Kansas City Chiefs,Questionable,2026-10-29T01:55Z,Concussion,Concussion,Not Specified,2026-11-01,QUESTIONABLE,Moore (concussion) was a full participant in Wednesday's practice.,OT
 4591008,Omarr Norman-Lott,Kansas City Chiefs,Out,2026-10-29T01:48Z,Knee - ACL,Surgery,Right,2026-11-01,PUP-R,The Chiefs designated Norman-Lott (knee) to return from injured reserve Wednesday.,DT
@@ -392,7 +393,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4837252,Jack Pyburn,Kansas City Chiefs,Active,2026-10-26T18:35Z,,,,,,,LB
 4710706,Jadon Canady,Kansas City Chiefs,Active,2026-10-26T18:35Z,,,,,,,CB
 4683062,Xavier Worthy,Kansas City Chiefs,Active,2026-10-26T04:01Z,,,,,,Worthy caught three of six targets for 11 yards in Sunday's 20-3 loss to the Seahawks.,WR
-15847,Travis Kelce,Kansas City Chiefs,Active,2026-10-26T03:59Z,Ankle,,,2026-11-01,QUESTIONABLE,Kelce caught four of eight targets for 44 yards in Sunday's 20-3 loss to the Seahawks.,TE
 3139477,Patrick Mahomes,Kansas City Chiefs,Active,2026-10-26T03:55Z,,,,,,"Mahomes completed 19 of 33 passes for 165 yards, no touchdowns and one interception in Sunday's 20-3 loss to the Seahawks. He added two rushing attempts for 14 yards.",QB
 4567048,Kenneth Walker III,Kansas City Chiefs,Active,2026-10-26T03:36Z,,,,,,Walker rushed 14 times for 36 yards while catching four of five targets for 21 yards in Sunday's 20-3 loss to the Seahawks.,RB
 4567747,Garrett Nussmeier,Kansas City Chiefs,Active,2026-10-25T23:10Z,,,,,,Nussmeier (coach's decision) is inactive as the emergency third quarterback for Sunday night's game against the Seahawks.,QB
@@ -599,8 +599,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242547,Paulson Adebo,New York Giants,Active,2026-10-25T15:37Z,,,,,,"Adebo (knee) is active Week 7 against the Texans, Dan Salomone of the Giants' official site reports.",CB
 3929950,Tremaine Edmunds,New York Giants,Injured Reserve,2026-10-24T23:28Z,Chest,Not Specified,Left,2027-02-15,IR,"Edmunds (chest) was placed on injured reserve Saturday, Dan Duggan of The Athletic reports.",LB
 4259566,Andrew Thomas,New York Giants,Active,2026-10-24T02:04Z,,,,,,Thomas (groin) does not have an injury designation against the Texans on Sunday.,OT
+4685247,Braelon Allen,New York Jets,Active,2026-10-29T20:48Z,,,,,,Allen (ankle) was a full participant at Thursday's practice.,RB
 4427366,Breece Hall,New York Jets,Questionable,2026-10-29T20:33Z,Quadriceps,Not Specified,Right,2026-11-01,QUESTIONABLE,Hall (quadriceps) remained limited at Thursday's practice.,RB
-4685247,Braelon Allen,New York Jets,Active,2026-10-29T20:27Z,,,,,,,RB
 4362094,Joseph Ossai,New York Jets,Doubtful,2026-10-29T01:27Z,Ankle,Not Specified,Not Specified,2026-11-01,DOUBTFUL,"Ossai (ankle) didn't participate in the Jets' practice Wednesday, Rich Cimini of ESPN.com reports.",DE
 4035537,Kene Nwangwu,New York Jets,Active,2026-10-29T00:29Z,,,,,,Nwangwu was a full participant in Wednesday's practice.,RB
 4685248,David Bailey,New York Jets,Questionable,2026-10-28T23:28Z,Groin,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Bailey didn't practice Wednesday due to a groin injury.,LB
