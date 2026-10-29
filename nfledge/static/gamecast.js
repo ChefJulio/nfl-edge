@@ -4940,6 +4940,44 @@
           + `${kb}<i class="fs-dot" style="left:${pc(dot)}%"></i></span>`;
       }
     }
+    // A fumble (owner 2026-10-29: "something similarish for fumble returns", after the pick returns): the offense's own
+    // yards to where the ball came out (a pass arcs there), a red ring at that spot, then from where it was recovered
+    // the return to the end of the play: red when the other team has it, neutral when the offense fell on it. All
+    // from the text that stands: "... for 6 yards (I.McDuffie). FUMBLES (I.McDuffie), RECOVERED by GB-B.Cox at GB 8".
+    const fx = String(effText(p) || '');
+    if (/FUMBLES/.test(fx) && !kick && !/No Play/i.test(fx) && !/field goal|extra point|punt is BLOCKED/i.test(fx)) {
+      const pre = fx.slice(0, fx.search(/FUMBLES/)), om = pre.match(/ for (-?\d+) yards?| for no gain/g);
+      const own = om ? (/no gain/.test(om[om.length - 1]) ? 0 : +om[om.length - 1].match(/-?\d+/)[0]) : 0;
+      const recs = [...fx.matchAll(/(?:RECOVERED|recovered) by ([A-Z]{2,3})-.*? at (?:([A-Z]{2,3}) )?(-?\d{1,2})\b|and recovers at (?:([A-Z]{2,3}) )?(-?\d{1,2})\b/g)];
+      const last = recs[recs.length - 1];
+      if (last) {
+        const absOf = (side, n) => (n === 50 || !side ? 50 : txtCode(side) === info.home.team ? 100 - n : n);
+        const fumAt = Math.max(-8, Math.min(108, s0 + own));
+        const recAt = last[1] ? rel(absOf(last[2], +last[3])) : rel(absOf(last[4], +last[5]));
+        const lost = last[1] ? txtCode(last[1]) !== off.team : false;
+        const passed = / pass /.test(pre) && !/incomplete|sacked/.test(pre);
+        let gainBits;
+        if (passed && fumAt - s0 >= 3) {  // the catch's flight, as for any completion, landing where the ball came out
+          const K = 2.6, A = fumAt - s0, peak = Math.max(2.5, Math.min(13, Math.abs(A) * K / 4 * Math.tan(38 * Math.PI / 180))), ht = peak + 2;
+          const lo = Math.min(s0, fumAt), hi = Math.max(s0, fumAt), W = Math.max(0.5, hi - lo) * K, x = v => ((v - lo) * K).toFixed(1);
+          gainBits = `<svg class="fs-arc gain" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%;height:${ht.toFixed(1)}px" viewBox="0 0 ${W.toFixed(1)} ${ht.toFixed(1)}" preserveAspectRatio="none">`
+            + `<path d="M${x(s0)},${ht} Q${x(s0 + A / 2)},${(ht - 2 * peak).toFixed(1)} ${x(fumAt)},${ht}"/></svg>`;
+        } else gainBits = seg(s0, fumAt, fumAt > s0 ? 'gain' : fumAt < s0 ? 'loss' : 'zero');
+        // the return back over the offense's own ground gain (owner: "those yardages cross each other right? red and
+        // green?"): that stretch striped red and green so neither hides the other, as a flag's yards back over a play
+        const ground = !gainBits.startsWith('<svg') && fumAt > s0;
+        const gLo = Math.min(s0, fumAt), gHi = Math.max(s0, fumAt), rLo = Math.min(recAt, e), rHi = Math.max(recAt, e);
+        const oLo = Math.max(gLo, rLo), oHi = Math.min(gHi, rHi);
+        let ret;
+        if (lost && ground && oHi - oLo >= 0.5) {
+          ret = seg(oLo, oHi, 'to fs-stripe-to') + seg(rLo, oLo, 'to') + seg(oHi, rHi, 'to');
+        } else ret = seg(recAt, e, lost ? 'to' : 'zero');
+        if (lost && Math.abs(e - recAt) >= 0.5) ret += `<i class="fs-catch fs-ret" style="left:${pc(e)}%"></i>`;
+        if (Math.abs(recAt - fumAt) >= 1) ret = seg(fumAt, recAt, 'loose') + ret;  // the ball loose: where it came out to where it was recovered
+        return `<span class="fs fs-pass" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
+          + `${gainBits}${ret}<i class="fs-fum" style="left:${pc(fumAt)}%"></i><i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
+      }
+    }
     let bars;
     if (mid != null) {
       bars = seg(s0, mid, mid > s0 ? 'gain' : mid < s0 ? 'loss' : 'zero') + flag(s0, mid, e);
