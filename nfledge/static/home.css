@@ -36,3 +36,12 @@
 .hm-dg > summary::-webkit-details-marker { display: none; }
 .hm-dg[open] > summary { margin-bottom: 4px; }
 .hm-dg .hm-l { padding-left: 10px; border-left: 2px solid var(--line); }
+/* Your fantasy team (home.js): league, this week's projected matchup, top projected starters */
+.hm-lg { margin: 0 0 6px; font-weight: 600; color: var(--ink); }
+.hm-vs { display: flex; align-items: flex-end; gap: 14px; margin: 2px 0 8px; }
+.hm-vs > span:not(.hm-vsd) { display: flex; flex-direction: column; min-width: 0; }
+.hm-vs small { color: var(--muted); font-size: var(--fs-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+.hm-vs b { font-size: 26px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.hm-vsd { padding-bottom: 4px; }
+.hm-tag { font-size: var(--fs-xs); font-weight: 700; padding: 0 5px; border-radius: 4px; }
+.hm-tag-Q { background: rgba(240,192,90,.18); color: #f0c05a; } .hm-tag-D, .hm-tag-O { background: rgba(242,120,109,.18); color: #ff9a90; }

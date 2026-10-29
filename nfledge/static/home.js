@@ -40,9 +40,32 @@
     // fantasy: your claimed team, else how to start
     let mine = null;
     try { mine = JSON.parse(localStorage.getItem('nfledge-mine') || 'null'); } catch (e) { /* private mode */ }
-    const fant = mine && mine.league
-      ? `<p class="hm-p">Your team in <b>${esc(mine.league)}</b>${mine.oppName ? ` vs ${esc(mine.oppName)}` : ''}: the best lineup, waiver adds by position and trade checks.</p>`
-      : '<p class="hm-p">Connect your Sleeper or ESPN league: the best lineup each week, waiver adds by position and trade checks, under your league\'s scoring.</p>';
+    // (owner 2026-10-29: "make the fantasy section preview the active team if there is one"): this week's matchup, each
+    // side's best QB-TE lineup from our projections re-scored to the league's settings (as Rankings does), and his top
+    // projected players with their tags
+    const SC = D.score || {}, built = SC.built, keys = SC.keys || [];
+    const sc = (c, w, pos) => (c || []).reduce((t, v, i) => t + (v || 0) * (w[keys[i]] || 0), 0) + (pos === 'TE' ? ((c || [])[5] || 0) * (w.te_bonus || 0) : 0);
+    const lproj = p => { if (p.proj == null) return null; const w = mine && mine.w;
+      if (!w || !built || !p.sc || !p.sc.pj) return p.proj;
+      const base = sc(p.sc.pj, built, p.pos), now = sc(p.sc.pj, w, p.pos); return base > 0.3 ? p.proj * now / base : now; };
+    const lineup = ids => {
+      const lg = (mine && mine.lg) || {}, n = k => +lg[k] || 0;
+      const pool = (ids || []).map(pid => D.players && D.players[pid] ? Object.assign({ pid, lp: lproj(D.players[pid]) }, D.players[pid]) : null)
+        .filter(p => p && p.lp != null && plays(p)).sort((a, b) => b.lp - a.lp);
+      const used = new Set(), take = (ok, k) => { const out = []; for (const p of pool) { if (out.length >= k) break; if (!used.has(p.pid) && ok(p)) { used.add(p.pid); out.push(p); } } return out; };
+      const st = [...take(p => p.pos === 'QB', n('QB') || 1), ...take(p => p.pos === 'RB', n('RB') || 2), ...take(p => p.pos === 'WR', n('WR') || 2),
+                  ...take(p => p.pos === 'TE', n('TE') || 1), ...take(p => ['RB', 'WR', 'TE'].includes(p.pos), n('flex')), ...take(p => ['QB', 'RB', 'WR', 'TE'].includes(p.pos), n('superflex'))];
+      return { total: st.reduce((t, p) => t + p.lp, 0), st };
+    };
+    const tagOf = p => { const s = String(p.status || ''); return /^Out|^IR|Injured Reserve/i.test(s) ? 'O' : /^Doubt/i.test(s) ? 'D' : /^Quest/i.test(s) ? 'Q' : ''; };
+    let fant = '<p class="hm-p">Connect your Sleeper or ESPN league: the best lineup each week, waiver adds by position and trade checks, under your league\'s scoring.</p>';
+    if (mine && mine.league) {
+      const me = lineup(mine.mine), op = mine.opp && mine.opp.length ? lineup(mine.opp) : null;
+      const top = me.st.slice().sort((a, b) => b.lp - a.lp).slice(0, 4);
+      const vs = op && op.st.length ? `<div class="hm-vs"><span><small>You</small><b>${f1(me.total)}</b></span><span class="hm-vsd muted">vs</span><span><small>${esc(mine.oppName || 'Opponent')}</small><b>${f1(op.total)}</b></span></div>` : '';
+      fant = `<p class="hm-p hm-lg">${esc(mine.league)}</p>${vs}${top.length ? `<ul class="hm-l">${top.map(p => `<li><span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>${logo(p.team, 18)}<span class="hm-n"><button type="button" class="nm-link hm-nl" data-open-pid="${esc(p.pid)}">${esc(p.name)}</button>${tagOf(p) ? ` <span class="hm-tag hm-tag-${tagOf(p)}">${tagOf(p)}</span>` : ''}</span><b class="hm-v">${f1(p.lp)}</b></li>`).join('')}</ul>` : ''}
+        <p class="hm-f">Projected starters (QB-TE) in your league's scoring &middot; lineup, waivers and trades in Fantasy</p>`;
+    }
     const wk = D.week ? `Week ${D.week}` : 'This week';
     // a tile opens its tab; a player or team named inside it opens that card instead (a link can't hold links)
     const tile = (href, label, body) => `<div class="hm-t" role="link" tabindex="0" data-href="#${href}"><div class="hm-k">${label}<span class="hm-go" aria-hidden="true">&rsaquo;</span></div>${body}</div>`;
@@ -54,11 +77,11 @@
         <p class="muted">No ads, no sign-up. The Model tab shows how it works, and what we tried that didn't.</p>
       </div></details>
       <div class="hm-grid">
-        <div class="hm-news" hidden></div>
         ${tile('players/rankings', 'See weekly projections', `<ul class="hm-l">${proj}</ul><p class="hm-f">Top projected at each position &middot; all players in Rankings</p>`)}
         ${tile('teams/power', 'See team power rankings', `<ul class="hm-l">${pw}</ul><p class="hm-f">Net points per game vs an average team</p>`)}
         ${tile('games', 'Track live games', `<ul class="hm-l">${games}</ul><p class="hm-f">Live scores, plays and win chances once games start</p>`)}
-        ${tile('league/lineup', 'Get fantasy advice', fant)}
+        ${tile('league/lineup', mine && mine.league ? 'Your fantasy team' : 'Get fantasy advice', fant)}
+        <div class="hm-news" hidden></div>
       </div></div>`;
     NFLE.notable().then(doc => drawNotable(sec.querySelector('.hm-news'), doc, logo));
   };

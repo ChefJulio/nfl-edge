@@ -1569,7 +1569,9 @@
     const play = p && p.inactive != null ? 1 - p.inactive : rw ? H.rosChance(rw) : rws && nextW ? 0 : null;  // injury only, as the board's
     const what = [...new Set([now && now.type, now && now.detail && now.detail !== 'Not Specified' ? now.detail : '', now && now.side && now.side !== 'Not Specified' ? now.side : '']
       .filter(Boolean))].join(' · ') || (ep && ep.part) || '';  // ESPN often repeats the type as the detail
-    return { inj, play, what, now, ep, back: backWeek(pid), wk };
+    // a league suspension rides ESPN's injury feed but isn't an injury (owner 2026-10-29: Gardner-Johnson read "Injured")
+    const susp = !!(now && (/suspen/i.test(now.status || '') || /suspen/i.test(now.type || '') || now.fantasy_status === 'RESERVE-SUS'));
+    return { inj, play, what, now, ep, back: backWeek(pid), wk, susp };
   };
   const healthTile = (pid, p, L, espn, wkTag = '', wkSel = null, bye = false) => {
     const h = healthOf(pid, p, L, espn, wkSel);
@@ -1577,10 +1579,11 @@
     // game day (owner 2026-10-18): once inactives are posted the tile says Active or Inactive, not a chance
     const gd = H.gameday(p), ina = gd === 'INA', act = gd === 'ACT';
     const big = bye ? '<div class="pc-big">Bye week</div>' : ina ? '<div class="pc-big bad">Inactive</div>' : act ? '<div class="pc-big good">Active</div>' : !h.inj ? '<div class="pc-big good">Healthy</div>'
+      : h.susp ? '<div class="pc-big bad">Suspended</div>'
       : h.play != null && h.play >= H.AVAIL.NIL ? `<div class="pc-big ${H.level(h.play) === 'bad' ? 'bad' : ''}">${Math.round(h.play * 100)}% <small>to play</small></div>`
       : h.play != null ? '<div class="pc-big bad">Out</div>'
       : '<div class="pc-big bad">Injured</div>';  // listed but no chance on file: don't claim more than we know
-    const sub = ina || act ? [`${ina ? 'ruled out' : 'declared active'} for wk ${h.wk}`, h.what].filter(Boolean).join(' · ') : !h.inj ? (H.listed(p) ? 'on the injury report · expected to play' : 'no injury listed') : [h.what, ret].filter(Boolean).join(' · ') || 'on the injury report';
+    const sub = ina || act ? [`${ina ? 'ruled out' : 'declared active'} for wk ${h.wk}`, h.what].filter(Boolean).join(' · ') : h.susp ? ret || 'by the league' : !h.inj ? (H.listed(p) ? 'on the injury report · expected to play' : 'no injury listed') : [h.what, ret].filter(Boolean).join(' · ') || 'on the injury report';
     return tapTile(`Health${wkTag}`, `${big}<div class="pc-tapsub">${esc(sub)}</div>`, `Health${wkTag}`, injuryBrief(pid, p, L, espn, h));
   };
   // Practice and games, dated (owner 2026-10-17: "the date the report was out, show the last 6, include games in that
@@ -1690,7 +1693,7 @@
     // and expected return side by side, then what and when he got hurt, then this week's practice in plain words
     const des = ((p && p.status) || '').replace(/\s*\(.*$/, '').replace(/\s*\(ESPN\)/, '').trim()
       || (now && now.status && now.status !== 'Active' ? now.status : '') || (h.inj ? 'Listed' : 'Healthy');
-    const desCls = /^(Out|Inactive|Injured|IR)/i.test(des) ? 'out' : /^Doubt/i.test(des) ? 'd' : /^Quest/i.test(des) ? 'q' : h.inj ? 'q' : 'ok';
+    const desCls = /^(Out|Inactive|Injured|IR|Susp)/i.test(des) || h.susp ? 'out' : /^Doubt/i.test(des) ? 'd' : /^Quest/i.test(des) ? 'q' : h.inj ? 'q' : 'ok';
     // this week's report days only (2026-10-21: a 6-day window took last Friday's entry for this week's)
     // his team's week, whether or not he's on this week's page (owner 2026-10-29: Pierce on IR isn't, and a 6-day
     // window labeled last week's Thu-Sat "Practice this week")
@@ -1820,7 +1823,7 @@
         ? (RES_WORD[(((L && L.prac) || []).filter(e => e[0] === 'p' && wkDates.has(e[1]) && e[2] === 'R').pop() || [])[3]] || 'On a reserve list') : '';
     const thisWeek = `<div class="pc-box"><div class="pc-k">This week</div>
         <div class="ij-hero">
-          <div><small>Status</small><b class="ij-st ij-${resList && des === 'Listed' ? 'out' : desCls}">${esc(resList && des === 'Listed' ? (/injured reserve/i.test(resList) ? 'Injured Reserve' : resList.replace(/^On (the )?/, '')) : des)}</b></div>
+          <div><small>Status</small><b class="ij-st ij-${resList && des === 'Listed' ? 'out' : desCls}">${esc(h.susp ? 'Suspended' : resList && des === 'Listed' ? (/injured reserve/i.test(resList) ? 'Injured Reserve' : resList.replace(/^On (the )?/, '')) : des)}</b></div>
           <div><small>Chance to play</small><b class="ij-big ${!h.inj || H.level(h.play) === 'ok' ? 'good' : H.level(h.play) === 'bad' ? 'bad' : ''}">${h.play != null ? NFLE.fmt.toPlay(1 - h.play) : onBye ? '<span class="muted">Bye</span>' : h.inj ? '&ndash;' : '&gt;99%'}</b></div>
           ${third}
         </div>
