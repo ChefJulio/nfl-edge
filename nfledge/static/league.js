@@ -495,8 +495,25 @@
       // transactions the same way, lineup changes included (owner 2026-10-29: "you can't even switch spots within your
       // roster on sleeper"; widely reported, not in Sleeper's own docs we could find). The fix in order: a bench
       // spot (a drop when the bench is full), him off IR, then any add, before the waiver run
-      res.filter(x => !irOk(x)).forEach(x => { const p = player(x), t = platTag(x), full = benchFull();
-        out.push(`<div class="lg-alert bad">${nm(p)} <span>is in IR but ${platName()} lists him as ${t ? tagWord(t) : 'healthy'}, so ${L.platform === 'sleeper' ? "Sleeper won't allow any other roster move (adds, trades, even lineup changes)" : "ESPN won't process adds and waiver claims can fail"} until he's off IR. Fix it first${L.platform === 'sleeper' ? ', before any game locks your lineup' : ''} and before waivers run (${esc(runText())}): ${full ? `drop someone (lowest rest-of-season value: ${dropPick(x)}), then ` : ''}move him to the bench, then make any other moves.</span></div>`); });
+      // all of them at once (owner 2026-10-29: "if you have a full roster and both your IR guys come back to health in one
+      // week you'd have to drop 2 guys before you could do anything"): the bench spots it takes = ineligible IR players
+      // minus open bench spots, and that many different drops, least rest-of-season value first
+      const bad = res.filter(x => !irOk(x));
+      const list = xs => xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`;
+      if (bad.length) {
+        const need = Math.max(0, bad.length - openBench()), drops = dropPicks(need, bad);
+        const who = list(bad.map(x => nm(player(x)))), tags = [...new Set(bad.map(x => platTag(x) ? tagWord(platTag(x)) : 'healthy'))].join(' / ');
+        out.push(`<div class="lg-alert bad">${who} <span>${bad.length > 1 ? 'are' : 'is'} in IR but ${platName()} lists ${bad.length > 1 ? 'them' : 'him'} as ${esc(tags)}, so ${L.platform === 'sleeper' ? "Sleeper won't allow any other roster move (adds, trades, even lineup changes)" : "ESPN won't process adds and waiver claims can fail"} until ${bad.length > 1 ? "they're" : "he's"} off IR. Fix it first${L.platform === 'sleeper' ? ', before any game locks your lineup' : ''} and before waivers run (${esc(runText())}): ${need ? `drop ${need} (least rest-of-season value: ${esc(list(drops))}), then ` : ''}move ${bad.length > 1 ? 'them' : 'him'} to the bench, then make any other moves.</span></div>`);
+      }
+      // coming back soon (projected to play this week, or likely back next week) with no room for them yet: the drops a
+      // return will force, flagged before the lock hits
+      const soon = res.filter(x => irOk(x) && returning(x));
+      const badNeed = Math.max(0, bad.length - openBench()), room = Math.max(0, openBench() - bad.length);
+      if (soon.length > room) {
+        // the drops after the ones the ineligible players already take
+        const need = soon.length - room, drops = dropPicks(badNeed + need, [...bad, ...soon]).slice(badNeed);
+        out.push(`<div class="lg-alert tip"><b>Room for ${soon.length > 1 ? 'IR returns' : 'an IR return'}</b> <span>${list(soon.map(x => `${nm(player(x))} (${esc(backWeek(x) || 'projects to play')})`))}: once ${soon.length > 1 ? 'they lose' : 'he loses'} the ${platName()} IR tag ${L.platform === 'sleeper' ? 'your roster locks' : 'your adds stop'} until ${soon.length > 1 ? "they're" : "he's"} off IR, and that takes ${need} drop${need > 1 ? 's' : ''} with your bench full (likely: ${esc(list(drops))}). Worth deciding now.</span></div>`);
+      }
       // an open IR slot and an eligible player outside it: a bench spot for free (the one out longest first)
       const open = Math.max(0, (L.reserve.slots || 0) - res.length);
       if (open) {
@@ -508,11 +525,16 @@
       }
       return out.join('');
     };
-    const benchFull = () => L.size && mine.ext.filter(x => !(mine.ir || []).includes(x)).length >= L.size;
-    // the lowest rest-of-season value on the bench (not a starter): the drop that costs least
-    const dropPick = keep => { const st = new Set(mine.starters), irs = new Set(mine.ir || []);
-      const c = mine.ext.filter(x => x !== keep && !st.has(x) && !irs.has(x)).map(x => ({ p: player(x), v: rosValue(x) })).sort((a, b) => a.v - b.v)[0];
-      return c ? `${esc(c.p.name)}` : 'nobody on the bench'; };
+    // open bench spots: the league's roster size (starters + bench) minus the players outside IR / taxi
+    const openBench = () => L.size ? Math.max(0, L.size - mine.ext.filter(x => !(mine.ir || []).includes(x)).length) : 0;
+    // the n bench players (not starters, not in IR) worth least the rest of the season: the drops that cost least
+    const dropPicks = (n, keep = []) => { const st = new Set(mine.starters), irs = new Set(mine.ir || []), k = new Set(keep);
+      return mine.ext.filter(x => !k.has(x) && !st.has(x) && !irs.has(x)).map(x => ({ p: player(x), v: rosValue(x) }))
+        .sort((a, b) => a.v - b.v).slice(0, n).map(c => c.p.name); };
+    // an IR player close to returning: projected to play this week, or our return model's likely week is next week
+    const returning = x => { const p = player(x); if (p.proj != null && 1 - p.inactive >= NFLE.health.AVAIL.EVEN) return true;
+      const g = gsisOf(x), r = ROS && g && ROS.players[g]; if (!r) return false;
+      const w = NFLE.health.back(r, ROS.through); return typeof w === 'number' && w > 0 && w <= ROS.from + 1; };
     const irSection = () => { const ir = (mine.ir || []).filter(x => mine.ext.includes(x));
       const ready = ir.filter(x => { const p = player(x); return p.proj != null && 1 - p.inactive >= NFLE.health.AVAIL.EVEN; });
       const used = (mine.res || ir).filter(x => mine.ext.includes(x)).length, slots = (L.reserve || {}).slots;
