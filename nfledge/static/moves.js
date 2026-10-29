@@ -168,7 +168,7 @@
         // the data is newest first: draw it in pages; any other sort needs the whole filtered season in the table
         const page = cur && !(cur.key === 'date' && cur.dir === 'desc') ? all : all.slice(0, shown);
         if (!table) table = NFLE.Table($('.mv-tbl'), { columns: columns(teams), rows: page, sort: { key: 'date', dir: 'desc' },
-          cls: 'tiles', rowClass: () => 'teamrow', rowAttrs: r => `${NFLE.ui.tileStyle(teams, r.team)}${r.pid ? ` data-open-pid="${esc(r.pid)}"` : ''}`, onSort: () => draw(false) });
+          cls: 'tiles', rowClass: r => (twoSided(r) ? 'teamrow mv-trow' : 'teamrow'), rowAttrs: r => `${NFLE.ui.tileStyle(teams, r.team)}${r.pid ? ` data-open-pid="${esc(r.pid)}"` : ''}`, onSort: () => draw(false) });
         else table.update(page);
         more.hidden = page.length >= all.length;
         more.textContent = `Show more (${(all.length - page.length).toLocaleString()} left)`;
