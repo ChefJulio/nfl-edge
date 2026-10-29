@@ -1533,16 +1533,17 @@
   };
   const espnDate = d => new Date(d + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
   // a return date as the week it falls in (owner 2026-10-29: "wherever we're displaying expected back ... the week of
-  // the season rather than the date"): "wk 11", "after the season" past the regular season; the date only when the
+  // the season rather than the date"): "wk 11", "out for season" past the regular season; the date only when the
   // week clock isn't loaded. Shared with Players > Injuries (NFLE.retWeek).
   const retWeek = d => {
     if (!d) return '';
     const w = weekOfDate(d), last = DATA && +DATA.season < 2021 ? 17 : 18;
-    return w == null ? espnDate(d) : w > last ? 'after the season' : `wk ${w}`;
+    return w == null ? espnDate(d) : w > last ? 'out for season' : `wk ${w}`;
   };
   NFLE.retWeek = retWeek;
   // ESPN's estimate worded like our own ("back ~wk 14"; owner 2026-10-29: "est." read like "established")
-  const backLbl = d => { const w = retWeek(d); return !w ? '' : /^wk /.test(w) ? `back ~${w}` : `back ${w}`; };
+  // "out for season" when confident (owner 2026-10-29): ESPN's date past the regular season, or our model's "no"
+  const backLbl = d => { const w = retWeek(d); return !w ? '' : /^wk /.test(w) ? `back ~${w}` : w; };
   const healthOf = (pid, p, L, espn, wkSel = null) => {
     loadInj(); loadRos();
     const now = espn && DINJ && DINJ[espn];
@@ -1572,7 +1573,7 @@
   };
   const healthTile = (pid, p, L, espn, wkTag = '', wkSel = null, bye = false) => {
     const h = healthOf(pid, p, L, espn, wkSel);
-    const ret = h.back && h.back !== 'no' ? `back ~wk ${h.back}` : h.now && h.now.return_date ? backLbl(h.now.return_date) : '';
+    const ret = h.back === 'no' ? 'out for season' : h.back ? `back ~wk ${h.back}` : h.now && h.now.return_date ? backLbl(h.now.return_date) : '';
     // game day (owner 2026-10-18): once inactives are posted the tile says Active or Inactive, not a chance
     const gd = H.gameday(p), ina = gd === 'INA', act = gd === 'ACT';
     const big = bye ? '<div class="pc-big">Bye week</div>' : ina ? '<div class="pc-big bad">Inactive</div>' : act ? '<div class="pc-big good">Active</div>' : !h.inj ? '<div class="pc-big good">Healthy</div>'
@@ -1804,8 +1805,10 @@
     const espnG = now && now.return_date ? games.find(e => e[1] >= now.return_date) || upG(weekOfDate(now.return_date)) : null;
     const onBye = ((L && L.up) || []).some(x => x.w === h.wk && x.bye);  // no game this week: nothing to play
     const out = h.inj && (h.play == null || h.play < H.AVAIL.EVEN);
+    // ESPN's date past the regular season: out for season by ESPN's estimate (Edmunds read a blank cell)
+    const espnOut = !ourG && h.back !== 'no' && now && now.return_date && retWeek(now.return_date) === 'out for season';
     const third = out
-      ? (ourG || espnG || h.back === 'no' ? `<div><small>Expected back</small><b>${esc(ourG ? gameTxt(ourG) : h.back === 'no' ? 'Not this season' : gameTxt(espnG))}</b>
+      ? (ourG || espnG || espnOut || h.back === 'no' ? `<div><small>Expected back</small><b>${esc(ourG ? gameTxt(ourG) : h.back === 'no' || espnOut ? 'Out for season' : gameTxt(espnG))}</b>
           <span class="muted">${ourG ? backP + (espnG && espnG[5] !== ourG[5] ? `<br>ESPN: ${esc(gameTxt(espnG).toLowerCase())}` : '') : h.back === 'no' ? 'our return model' : 'ESPN estimate'}</span></div>` : '')
       : nextG ? `<div><small>Next game</small><b>${esc(new Date(nextG[1] + 'T12:00:00').toLocaleDateString([], { weekday: 'short' }))} ${esc(nextG[3])} ${esc(nextG[2])}</b><span class="muted">week ${nextG[5]}</span></div>` : '';
     // on a reserve list his team's practice days aren't his (owner 2026-10-28: Pierce on IR read "Wed overdue, Thu
@@ -3518,7 +3521,7 @@
     const playCell = x => x.play != null ? `<td class="num">${NFLE.fmt.toPlay(1 - x.play)}</td>`
       : x.tag === 'O' ? '<td class="num muted">Out</td>'
       : `<td class="num muted" title="${x.onReport ? 'After his team\'s final injury report' : 'No chance on file for him yet'}">&ndash;</td>`;
-    const backCell = x => `<td class="num${x.back ? '' : ' muted'}"${x.backWhy ? ` title="${esc(x.backWhy)}"` : ''}>${x.back === 'season' ? 'Season' : esc(x.back) || '&ndash;'}</td>`;
+    const backCell = x => `<td class="num${x.back ? '' : ' muted'}"${x.backWhy ? ` title="${esc(x.backWhy)}"` : ''}>${x.back === 'season' ? 'Out for season' : esc(x.back) || '&ndash;'}</td>`;
     // the injury and practice days on their own wrapping line under the name (in the name's sub line they pushed the
     // numbers off a phone screen)
     const who = x => NFLE.ui.player({ name: x.name, pos: x.pos, team: abbr, photo: x.photo, espn: x.espn,
