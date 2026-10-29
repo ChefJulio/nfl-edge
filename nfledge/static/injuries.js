@@ -63,9 +63,9 @@
         { key: 'status', label: 'Status', first: 'asc', value: r => ORDER[r.status] || 9, html: r => `<span class="in-st in-${tone(r.status)}">${esc(r.status)}</span>` },
         { key: 'injury', label: 'Injury', first: 'asc', value: r => r.type, html: r => esc([r.type, r.detail && r.detail !== r.type ? r.detail : '', r.side && r.side !== 'Not Specified' ? r.side : ''].filter(Boolean).join(' · ')) },
         // the week it falls in (owner 2026-10-29: weeks, not dates; gamecast.js NFLE.retWeek), the date in the tooltip; sorts by date
-        { key: 'return_date', label: 'Est. return', first: 'asc', value: r => r.return_date, html: r => { if (!r.return_date) return '';
+        { key: 'return_date', label: 'Back', title: "ESPN's estimated return week", first: 'asc', value: r => r.return_date, html: r => { if (!r.return_date) return '';
             const day = new Date(r.return_date + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }), w = NFLE.retWeek ? NFLE.retWeek(r.return_date) : day;
-            return `<span title="ESPN's estimated return: ${esc(day)}">${esc(w.charAt(0).toUpperCase() + w.slice(1))}</span>`; } },
+            return `<span title="ESPN's estimated return: ${esc(day)}">${esc(/^wk /.test(w) ? `~${w.replace('wk', 'Wk')}` : w.charAt(0).toUpperCase() + w.slice(1))}</span>`; } },
         { key: 'updated', label: 'Updated', first: 'desc', value: r => r.updated, html: r => r.updated ? `<span title="${esc(new Date(r.updated).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}">${esc(ago(r.updated))}</span>` : '' },
         { key: 'comment', label: 'Latest', sort: false, cls: 'in-note', html: r => `<span title="${esc(r.comment || '')}">${esc(r.comment || '')}</span>` },
       ];

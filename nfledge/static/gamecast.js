@@ -1541,6 +1541,8 @@
     return w == null ? espnDate(d) : w > last ? 'after the season' : `wk ${w}`;
   };
   NFLE.retWeek = retWeek;
+  // ESPN's estimate worded like our own ("back ~wk 14"; owner 2026-10-29: "est." read like "established")
+  const backLbl = d => { const w = retWeek(d); return !w ? '' : /^wk /.test(w) ? `back ~${w}` : `back ${w}`; };
   const healthOf = (pid, p, L, espn, wkSel = null) => {
     loadInj(); loadRos();
     const now = espn && DINJ && DINJ[espn];
@@ -1570,7 +1572,7 @@
   };
   const healthTile = (pid, p, L, espn, wkTag = '', wkSel = null, bye = false) => {
     const h = healthOf(pid, p, L, espn, wkSel);
-    const ret = h.back && h.back !== 'no' ? `back ~wk ${h.back}` : h.now && h.now.return_date ? `est. ${retWeek(h.now.return_date)}` : '';
+    const ret = h.back && h.back !== 'no' ? `back ~wk ${h.back}` : h.now && h.now.return_date ? backLbl(h.now.return_date) : '';
     // game day (owner 2026-10-18): once inactives are posted the tile says Active or Inactive, not a chance
     const gd = H.gameday(p), ina = gd === 'INA', act = gd === 'ACT';
     const big = bye ? '<div class="pc-big">Bye week</div>' : ina ? '<div class="pc-big bad">Inactive</div>' : act ? '<div class="pc-big good">Active</div>' : !h.inj ? '<div class="pc-big good">Healthy</div>'
@@ -2440,7 +2442,7 @@
     const cur = now && now.status !== 'Active' ? `<div class="pc-box"><div class="pc-k">Right now · ESPN</div>
       <div class="ij-now"><span class="dc-tag dt-${now.status === 'Questionable' ? 'q' : now.status === 'Doubtful' ? 'd' : 'out'}">${esc(now.status)}</span>
         <b>${esc([now.type, now.detail && now.detail !== 'Not Specified' ? now.detail : '', now.side && now.side !== 'Not Specified' ? now.side : ''].filter(Boolean).join(' · '))}</b>
-        ${now.return_date ? `<span class="muted" title="ESPN's estimated return: ${esc(espnDate(now.return_date))}">est. return ${esc(retWeek(now.return_date))}</span>` : ''}</div>
+        ${now.return_date ? `<span class="muted" title="ESPN's estimated return: ${esc(espnDate(now.return_date))}">${esc(backLbl(now.return_date))}</span>` : ''}</div>
       ${now.comment ? `<p class="pc-sub">${esc(now.comment)}</p>` : ''}</div>` : '';
     let dur = '';
     if (d && d.games) {
