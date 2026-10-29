@@ -135,3 +135,11 @@ table.lg-tbl .nm2 .l1 { white-space: normal; }
 .lg-alert.sug { border-left-color: #6fdc8c; cursor: pointer; }
 .lg-alert.sug b { color: #8fe3a8; }
 @media (min-width: 900px) { #tab-league .lg-body > .lg-alert, #tab-league .lg-body > .seg.lg-mode { max-width: 760px; } }
+/* live scores (league.js scoreHead, row): the score big, the expected final and who's left beside it; a player's live
+   points with "proj" (his expected final) or "final" under them */
+.lg-score { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 14px 0 8px; }
+.lg-score > div { display: flex; align-items: baseline; gap: 10px; }
+.lg-score-n { font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; }
+.lg-pts { display: block; font-variant-numeric: tabular-nums; }
+.lg-pts-s { display: block; font-size: var(--fs-xs); color: var(--muted); white-space: nowrap; }
+@media (min-width: 900px) { #tab-league .lg-body > .lg-score { max-width: 760px; } }

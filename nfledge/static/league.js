@@ -116,12 +116,12 @@
       const [lg, users, rosters, state] = await Promise.all([getJSON(`${B}/league/${id}`), getJSON(`${B}/league/${id}/users`),
         getJSON(`${B}/league/${id}/rosters`), getJSON(`${B}/state/nfl`)]);
       const week = state.display_week || state.week;
-      const mu = await getJSON(`${B}/league/${id}/matchups/${week}`).catch(() => []);
+      let mu = await getJSON(`${B}/league/${id}/matchups/${week}`).catch(() => []);
       const uName = Object.fromEntries((users || []).map(u => [u.user_id, (u.metadata && u.metadata.team_name) || u.display_name]));
       const scoring = {};
       Object.entries(SLEEPER_SCORE).forEach(([k, ours]) => { scoring[ours] = +((lg.scoring_settings || {})[k] || 0); });
       if (SLEEPER_IDP.some(k => k in (lg.scoring_settings || {}))) SLEEPER_IDP.forEach(k => { scoring[k] = +((lg.scoring_settings || {})[k] || 0); });
-      const byRoster = Object.fromEntries((mu || []).map(m => [m.roster_id, m]));
+      let byRoster = Object.fromEntries((mu || []).map(m => [m.roster_id, m]));
       const kw = sleeperK(lg.scoring_settings || {}), dw = sleeperD(lg.scoring_settings || {});
       const unmodeled = Object.entries(lg.scoring_settings || {}).filter(([k, v]) => +v && !SLEEPER_USED.has(k)).map(([k]) => NICE[k] || k.replace(/_/g, ' '));
       return {
@@ -146,6 +146,12 @@
                          pp: Object.assign({}, me.players_points || {}, opp.players_points || {}) } : null;  // each player's points, league scoring
         },
         defName: t => t,  // Sleeper team defenses are the team code ("MIN")
+        // live scores (owner 2026-10-29: "live updating for totals when their games start"): this week's matchups
+        // again, each starter's points under the league's own scoring
+        async refresh() {
+          const m2 = await getJSON(`${B}/league/${id}/matchups/${week}`).catch(() => null);
+          if (m2) { mu = m2; byRoster = Object.fromEntries(mu.map(m => [m.roster_id, m])); }
+        },
       };
     },
   };
@@ -153,7 +159,8 @@
   const espn = {
     async load(id, season) {
       const v = ['mTeam', 'mRoster', 'mSettings', 'mMatchupScore'].map(x => `view=${x}`).join('&');
-      const d = await getJSON(`https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${id}?${v}`)
+      const URL_ = `https://lm-api-reads.fantasy.espn.com/apis/v3/games/ffl/seasons/${season}/segments/0/leagues/${id}`;
+      const d = await getJSON(`${URL_}?${v}`)
         .catch(e => { throw new Error(String(e.message) === '401' ? 'That ESPN league is private (ESPN league settings: make it viewable to the public)' : e.message); });
       const st = d.settings || {}, week = d.scoringPeriodId;
       const slots = [];
@@ -181,7 +188,23 @@
                  waiver: t.waiverRank || null, faab: (st.acquisitionSettings || {}).isUsingAcquisitionBudget ? ((st.acquisitionSettings || {}).acquisitionBudget || 0) - ((t.transactionCounter || {}).acquisitionBudgetSpent || 0) : null,
                  record: { w: ov.wins || 0, l: ov.losses || 0, t: ov.ties || 0, pf: ov.pointsFor || 0 } };
       });
-      const games = (d.schedule || []).filter(g => g.matchupPeriodId === week || (g.home && g.home.pointsByScoringPeriod && g.home.pointsByScoringPeriod[week] != null));
+      let games = (d.schedule || []).filter(g => g.matchupPeriodId === week || (g.home && g.home.pointsByScoringPeriod && g.home.pointsByScoringPeriod[week] != null));
+      // each player's points this week, league scoring: the box score view's applied totals (one more request; a league
+      // without it keeps our live box-score scoring)
+      let pp = {};
+      const boxes = async () => {
+        const b = await getJSON(`${URL_}?view=mMatchupScore&view=mBoxscore&scoringPeriodId=${week}`).catch(() => null);
+        if (!b) return;
+        const g2 = (b.schedule || []).filter(g => g.matchupPeriodId === week || (g.home && g.home.pointsByScoringPeriod && g.home.pointsByScoringPeriod[week] != null));
+        if (g2.length) games = g2;
+        const out = {};
+        g2.forEach(g => [g.home, g.away].forEach(side => (((side || {}).rosterForCurrentScoringPeriod || {}).entries || []).forEach(e => {
+          const t = (e.playerPoolEntry || {}).appliedStatTotal;
+          if (t != null) out[String(e.playerId)] = +t;
+        })));
+        pp = out;
+      };
+      await boxes();
       return {
         platform: 'espn', id, name: st.name, season, week, slots, scoring, kw, dw, unmodeled, teams, espnNames: names, waiverDay: 3,
         size: Object.entries((st.rosterSettings || {}).lineupSlotCounts || {}).filter(([sid]) => +sid !== 21).reduce((t, [, n]) => t + n, 0),
@@ -190,9 +213,10 @@
           if (!g) return null;
           const home = String(g.home.teamId), away = String((g.away || {}).teamId), opp = home === teamId ? away : home;
           const pts = s => (s && (s.totalPointsLive ?? (s.pointsByScoringPeriod || {})[week] ?? s.totalPoints)) || 0;
-          return { opp, points: { [home]: pts(g.home), [away]: pts(g.away) }, starters: null };
+          return { opp, points: { [home]: pts(g.home), [away]: pts(g.away) }, starters: null, pp };
         },
         defName: x => (names[x] || {}).name || x,
+        refresh: boxes,
       };
     },
   };
@@ -370,7 +394,8 @@
       return `<tr class="teamrow" style="${NFLE.fmt.rowStyle(TEAMS, p.team)}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}>${slotTd}
         <td class="lg-who">${NFLE.ui.player({ name: p.name, pos, team: p.team, photo: p.photo, espn: p.espn, pid: p.pid,
           subHtml: p.opp ? `${kickTxt(p) ? `${esc(kickTxt(p))} · ` : ''}${esc(p.home)} ${NFLE.ui.tm(p.opp)}` : p.why ? esc(p.why) : NFLE.ui.tm(p.team), badges: badgesOf(p) }, TEAMS)}</td>
-        <td class="num"><b>${p.proj != null ? f1(p.proj) : /bye/.test(p.why || '') ? '<span class="muted">Bye</span>' : '—'}</b></td>${extra}</tr>`;
+        <td class="num">${p.live != null ? `<b class="lg-pts">${f1(p.live)}</b><small class="lg-pts-s">${p.fin ? 'final' : `proj ${f1(p.exp)}`}</small>`
+          : `<b>${p.proj != null ? f1(p.proj) : /bye/.test(p.why || '') ? '<span class="muted">Bye</span>' : '—'}</b>`}</td>${extra}</tr>`;
     };
     const table = (body, head = '<th>Slot</th><th>Player</th><th class="num">Proj</th>') =>
       `<div class="lg-scroll"><table class="bx tiles lg-tbl"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
@@ -488,6 +513,7 @@
       const ps = mine.ext.filter(x => !irSet.has(x)).map(player);
       const curRows = L.slots.map((s, i) => ({ slot: s, p: ps.find(p => p.ext === mine.starters[i]) || null }));
       const cur = new Set(mine.starters);
+      const mm = L.matchup(mine.id), liveRows = curRows.map(r => ({ slot: r.slot, p: inGame(r.p, mm && mm.pp) }));
       const best = optimize(ps, L.slots, mine.starters.map(x => ps.find(p => p.ext === x))), gain = total(best) - total(curRows);
       const changes = best.filter(r => r.p && !cur.has(r.p.ext)).length;
       const nm = p => p.pid ? `<button type="button" class="nm-link" data-open-pid="${esc(p.pid)}"><b>${esc(p.name)}</b></button>` : `<b>${esc(p.name)}</b>`;
@@ -503,8 +529,8 @@
       const sug = gain >= 0.5 ? `<button type="button" class="lg-alert sug" data-lmode="suggested"><b>Suggested lineup: +${f1(gain)}</b> <span>${changes} change${changes === 1 ? '' : 's'} by our projections &rsaquo;</span></button>` : '';
       const bench = ps.filter(p => !cur.has(p.ext)).sort((a, b) => (b.exp != null) - (a.exp != null) || (b.exp || 0) - (a.exp || 0));
       return `${alerts}${lateTip}${sug}
-        <h3 class="lg-h">Starters <span class="muted">${f1(total(curRows))} projected</span></h3>
-        ${table(curRows.map(r => row(r.slot, r.p)).join(''))}
+        ${scoreHead(liveRows, mm && mm.points ? mm.points[mine.id] : null)}
+        ${table(liveRows.map(r => row(r.slot, r.p)).join(''), `<th>Slot</th><th>Player</th><th class="num">${scoreOf(liveRows).started ? 'Pts' : 'Proj'}</th>`)}
         <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') + emptyBench(ps.length) || '<tr><td colspan="3" class="muted">No bench players.</td></tr>')}
         ${irSection()}
         <p class="muted lg-note">Your lineup as set on ${L.platform === 'sleeper' ? 'Sleeper' : 'ESPN'} when this page loaded. Proj = our projection under your league's scoring if he plays; the total weights each starter by his chance to play.</p>`;
@@ -589,11 +615,31 @@
       if (!p || p.exp == null) return p;
       const f = gameDone(p.team);
       if (f == null) return p;
-      const plat = f >= 1 && pp && pp[p.ext] != null ? +pp[p.ext] : null;
+      // the platform's points (refreshed every minute while games are on: the league's exact scoring) once his game
+      // is on; ESPN's 30-second box in between, when it's ahead of the platform's last number
+      const ln0 = p.espn && NFLE.live && NFLE.live.lines && NFLE.live.lines[String(p.espn)];
+      const boxPts = ln0 ? pts(ln0.line, L.scoring, p.pos) : null;
+      const plat0 = pp && pp[p.ext] != null ? +pp[p.ext] : null;
+      const plat = plat0 != null && (f >= 1 || boxPts == null || plat0 >= boxPts - 0.05) ? plat0 : null;
       if (plat == null && ['K', 'DEF'].includes(p.pos)) return p;
       const ln = p.espn && NFLE.live && NFLE.live.lines && NFLE.live.lines[String(p.espn)];
       const now = plat != null ? plat : ln ? pts(ln.line, L.scoring, p.pos) : 0, left = 1 - f;
       return Object.assign({}, p, { live: now, fin: f >= 1, exp: now + p.proj * left, proj: p.proj * left, sd: p.sd * Math.sqrt(left), pa: 1 });
+    };
+    // A team's score as the apps show it (owner 2026-10-29: "consideration of how to handle projected/real totals for
+    // both players and the whole team"): before kickoff, the projected total; once any starter's game is on, the live
+    // score (the platform's own when it has one) big, the expected final under it, and how many starters are yet to play
+    const scoreOf = (rows, platPts) => {
+      const on = rows.filter(r => r.p && r.p.live != null);
+      const live = platPts != null && on.length ? +platPts : on.reduce((t, r) => t + r.p.live, 0);
+      const left = rows.filter(r => r.p && r.p.exp != null && r.p.live == null).length;
+      return { started: on.length > 0, live, proj: total(rows), left };
+    };
+    const scoreHead = (rows, platPts) => {
+      const sc = scoreOf(rows, platPts);
+      return sc.started
+        ? `<div class="lg-score"><div><b class="lg-score-n">${f1(sc.live)}</b><span class="muted">projected ${f1(sc.proj)}</span></div><span class="muted">${sc.left ? `${sc.left} yet to play` : 'all games played'}</span></div>`
+        : `<h3 class="lg-h">Starters <span class="muted">${f1(sc.proj)} projected</span></h3>`;
     };
     const matchupView = () => {
       const m = L.matchup(mine.id);
@@ -617,14 +663,17 @@
         : `<div class="lg-hh-p${right ? ' r' : ''}"${p.pid ? ` data-open-pid="${esc(p.pid)}"` : ''}><b>${esc(short(p.name))}</b>
             <span class="lg-hh-s"><span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span> ${NFLE.ui.tm(p.team)}</span>
             <span class="lg-hh-s muted">${when(p)}</span>${badgesOf(p, { noLock: true })}</div>`;
-      const num = p => !p || p.proj == null ? '–' : p.live != null ? `<span class="lg-hh-lv">${f1(p.live)}<small>${p.fin ? 'final' : 'live'}</small></span>` : f1(p.proj);
+      const num = p => !p || (p.proj == null && p.live == null) ? '–' : p.live != null ? `<span class="lg-hh-lv">${f1(p.live)}<small>${p.fin ? 'final' : `proj ${f1(p.exp)}`}</small></span>` : f1(p.proj);
       const rows = L.slots.map((s, i) => `<div class="lg-hh-row">${cell(a[i].p, false)}<div class="lg-hh-n">${num(a[i].p)}</div>
           <span class="lg-hh-slot posb ${/FLEX|^BN$/.test(s) ? 'lg-slot-any' : `posb-${s}`}">${esc(s === 'SUPER_FLEX' ? 'SF' : s === 'FLEX' ? 'FLX' : s)}</span>
           <div class="lg-hh-n">${num(b[i].p)}</div>${cell(b[i].p, true)}</div>`).join('');
-      const live = id => m.points[id] ? `<div class="muted lg-hh-live">${f1(m.points[id])} so far</div>` : '';
-      return `<div class="lg-hh-top"><div><div class="lg-tn">${esc(mine.name)}</div><div class="lg-big">${f1(ea)}</div>${live(mine.id)}</div>
+      // live: the score big, the expected final and who's left under it; before kickoff: the projection
+      const side = (rows, id) => { const sc = scoreOf(rows, m.points[id]);
+        return sc.started ? `<div class="lg-big">${f1(sc.live)}</div><div class="muted lg-hh-live">proj ${f1(sc.proj)} · ${sc.left ? `${sc.left} to play` : 'done'}</div>`
+          : `<div class="lg-big">${f1(sc.proj)}</div><div class="muted lg-hh-live">projected</div>`; };
+      return `<div class="lg-hh-top"><div><div class="lg-tn">${esc(mine.name)}</div>${side(a, mine.id)}</div>
           <div class="lg-hh-wp"><b>${pct(pw)}</b><span class="muted">to win</span></div>
-          <div class="r"><div class="lg-tn">${esc(opp.name)}</div><div class="lg-big">${f1(eb)}</div>${live(opp.id)}</div></div>
+          <div class="r"><div class="lg-tn">${esc(opp.name)}</div>${side(b, opp.id)}</div></div>
         <div class="lg-bar"><span style="width:${(100 * pw).toFixed(1)}%"></span></div>
         <div class="lg-hh">${rows}</div>
         <p class="muted lg-note">Win chance: each starter's projection and range under your scoring and his chance to play, for both lineups, counting how players in the same game rise and fall together (a QB and his receivers most). Once a game starts, its players count their live points (ESPN, your scoring) plus their projection for the time left, so the chance moves with the games; totals above are those expected finals. "So far" is the platform's own live total.</p>`;
@@ -934,7 +983,14 @@
     };
     document.addEventListener('nfle-route', e => { if (e.detail && e.detail.parent === 'league') setView(e.detail.sub); else NFLE.feedOpen = false; });
     // the feed redraws on every live update while it's showing
-    document.addEventListener('nfle-live', () => { if (L && (view === 'live' || view === 'matchup') && sec.isConnected && !sec.hidden) draw(); });  // the matchup's win chance follows the live scores
+    document.addEventListener('nfle-live', () => { if (L && (view === 'live' || view === 'matchup' || (view === 'lineup' && lineMode === 'real')) && sec.isConnected && !sec.hidden) draw(); });
+    // the platform's own live scores, every minute while any game is on and this tab is open and visible
+    const gameOn = () => (D.games || []).some(g => { const st = NFLE.live && NFLE.live.byGame && NFLE.live.byGame[g.id]; return st && st.state === 'in'; });
+    setInterval(async () => {
+      if (!L || !L.refresh || document.hidden || !sec.isConnected || sec.hidden || !['lineup', 'matchup', 'live'].includes(view) || !gameOn()) return;
+      await L.refresh().catch(() => {});
+      draw();
+    }, 60000);  // the matchup's win chance follows the live scores
     const open = async s => {
       sec.innerHTML = '<p class="muted">Loading your league…</p>';
       try {
