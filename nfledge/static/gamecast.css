@@ -1707,6 +1707,8 @@ span.nm-link { display: inline; }
 .fs .fs-catch { position: absolute; top: 50%; bottom: auto; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%;
   background: var(--good); box-shadow: 0 0 0 1.5px var(--panel); pointer-events: none; }
 .fs .fs-x { top: 50%; bottom: auto; margin-top: -4px; }
+/* where an interception return ended (the pick's x, the red return bar to this dot) */
+.fs .fs-catch.fs-ret { background: var(--bad); }
 /* a catch at or behind the line (under 3 yards in the air): the catch point as a hollow ring on the pass line, a faint
    dashed line back to the snap when it was behind it */
 .fs .fs-ring { position: absolute; top: 50%; bottom: auto; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%;

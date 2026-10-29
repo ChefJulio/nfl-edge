@@ -4039,7 +4039,7 @@
   };
 
   // ------------------------------------------------------------------------------------------------- game page
-  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null, tab: null, pane: 'plays', plSub: 'recent', fpAll: false, drvAll: false };
+  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null, tab: null, pane: 'plays', plSub: null, fpAll: false, drvAll: false };
   const parseGid = gid => { const m = String(gid || '').match(/^(\d{4})_(\d{2})_([A-Z]{2,3})_([A-Z]{2,3})$/); return m ? { season: +m[1], week: +m[2], away: m[3], home: m[4] } : null; };
   const wpSeries = (sum) => {
     const plays = allPlays(sum).flatMap(d => d.plays || []);
@@ -4173,6 +4173,18 @@
       return c.length === 1 ? `<span class="nm-link" role="link" tabindex="0" data-open-pid="${esc(c[0].pid)}">${all}</span>` : all;
     });
   };
+  // The yards a play gained, for the game log's Yards sort (owner 2026-10-29; "consider excluding kickoff returns": every
+  // kickoff would crowd the top): from the official text that stands, before any flag's yards: a run or catch its own
+  // yards (laterals added), a pick / fumble / punt return its return; kickoffs, kicks, tries, kneels, spikes and wiped-out
+  // plays none
+  const playYards = p => {
+    if (nonPlay(p)) return null;
+    const txt = effText(p), t = `${pType(p)} ${txt}`;
+    if (/No Play/i.test(txt) || /kickoff|extra point|two-point|field goal|kneel|spike/i.test(t) || / kicks (?:onside )?\d+ yards/.test(` ${txt}`)) return null;
+    const ys = [...txt.split(/PENALTY/)[0].matchAll(/ for (-?\d+) yards?| for no gain/g)].map(m => m[1] != null ? +m[1] : 0);
+    if (!ys.length) return null;
+    return /[Ll]ateral/.test(txt) ? ys.reduce((a, b) => a + b, 0) : Math.max(...ys);  // a fumble returned: the longer run
+  };
   // opts overrides the Live tab's controls (the Postgame tab asks for just the top few swings).
   const gameLog = (sum, info, ser, upto, opts) => {
     const o = Object.assign({ sort: GP.sort, filter: GP.filter, q: GP.q, view: GP.view, limit: 40, note: true }, opts);
@@ -4212,7 +4224,13 @@
     const order = o.sort !== 'old';  // newest first unless asked otherwise
     const swingOf = p => { const w = wpAfter[p.id]; return w ? Math.abs(w.now - w.prev) : 0; };
     let html = '';
-    if (o.sort === 'impact') {
+    if (o.sort === 'yards') {
+      // Biggest plays by yards (owner 2026-10-29: "sorts the plays by most yards gained in the play"), one flat list
+      const pl = drives.flatMap(d => d.plays || []).filter(keep).map(p => [p, playYards(p)]).filter(x => x[1] != null)
+        .sort((a, b) => b[1] - a[1]).slice(0, o.limit).map(x => x[0]);
+      html = pl.length ? `${o.note ? `<p class="gcs-note">The ${pl.length} plays that gained the most yards (kickoffs left out; returns count).</p>` : ''}<ol class="pls">${pl.map(playRow).join('')}</ol>`
+        : '<p class="muted">No plays match.</p>';
+    } else if (o.sort === 'impact') {
       // Biggest swings in ESPN's live win probability, one flat list (impact order doesn't fit inside drives).
       const pl = drives.flatMap(d => d.plays || []).filter(keep).filter(p => wpAfter[p.id]).sort((a, b) => swingOf(b) - swingOf(a)).slice(0, o.limit);
       html = pl.length ? `${o.note ? `<p class="gcs-note">The ${pl.length} plays that moved ESPN's win probability the most.</p>` : ''}<ol class="pls">${pl.map(playRow).join('')}</ol>`
@@ -4818,6 +4836,14 @@
   // "X kicks 60 yards from NE 35 to CHI 5." / "punts 44 yards to DAL 12" (a punt: from the line of scrimmage) /
   // "kicks 65 yards from KC 35 to end zone": [, yards, from side, from yard line, to side, to yard line, end zone]
   const KICK_RX = / (?:kicks|punts)(?: onside)? (\d+) yards?(?: from ([A-Z]{2,3}) (\d{1,2}))?(?: to (?:the )?(?:([A-Z]{2,3}) )?(\d{1,2})| to (?:the )?(end zone)|, (end zone))?/;
+  // where a pass was picked off, on the field (away goal line 0 -> home 100): "INTERCEPTED by H.Smith at MIN 44" (after
+  // a replay reversal, the ruling that stands); null without a spot
+  const pickSpot = (p, info) => {
+    const m = effText(p).match(/INTERCEPTED by .*? at (?:([A-Z]{2,3}) )?(-?\d{1,2})\b/);
+    if (!m) return null;
+    const n = +m[2], side = m[1] ? txtCode(m[1]) : null;
+    return n === 50 || !side ? 50 : side === info.home.team ? 100 - n : n;
+  };
   const fieldStrip = (p, info) => {
     const a = spot(p.start, info);
     if (!a || a.x == null || nonPlay(p)) return '';
@@ -4930,10 +4956,19 @@
           arc = `<svg class="fs-arc gain" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%;height:${ht.toFixed(1)}px" viewBox="0 0 ${W.toFixed(1)} ${ht.toFixed(1)}" preserveAspectRatio="none"><path d="${d}"/></svg>`
             + `<i class="fs-catch" style="left:${pc(e)}%"></i>`;  // where the play ended (owner: "a little green dot where the arc ends")
         } else {
-          const to = Math.min(108, s0 + (/ deep /i.test(raw0) ? 20 : 6));
+          // an interception (owner 2026-10-29: "illustrate interception return yardage like we do complete passes ...
+          // work backwards from the yardage to show where it was intercepted and how far the return was"): the flight
+          // to the spot of the pick ("INTERCEPTED by H.Smith at MIN 44"), then the return back from it to where the
+          // play ended, red, a red dot at its end; no spot in the text -> the depth guess as before
+          const pa = pick ? pickSpot(p, info) : null;
+          const to = pa != null ? Math.max(-8, Math.min(108, rel(pa))) : Math.min(108, s0 + (/ deep /i.test(raw0) ? 20 : 6));
           const lo = Math.min(s0, to), hi = Math.max(s0, to), ht = Math.max(4, Math.min(14, 3 + 0.45 * (hi - lo)));
           arc = `<svg class="fs-arc${inc ? ' miss' : ' int'}" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%;height:${ht.toFixed(1)}px" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M0,12 Q50,-10 100,12"/></svg>`
             + `<i class="fs-x${pick ? ' int' : ''}" style="left:${pc(to)}%"></i>`;
+          if (pa != null) {  // the return: from the pick to the end of the play (into the offense's end zone on a pick-six)
+            bars = seg(to, e, 'to');
+            if (Math.abs(e - to) >= 0.5) arc += `<i class="fs-catch fs-ret" style="left:${pc(e)}%"></i>`;
+          }
         }
       }
     }
@@ -5231,6 +5266,9 @@
   const renderGame0 = () => {
     const root = document.getElementById('gc'), { sum, info, g } = GP;
     const rp = GP.replay;
+    // Plays opens on the game log once the game is final (owner 2026-10-29: "postgame ... it should open game log, not
+    // recent"), on Recent while it's live or replaying; the viewer's pick sticks
+    const plSub = GP.plSub || (info.state === 'post' && !rp ? 'log' : 'recent');
     const ser = sum ? wpSeries(sum) : [];
     const upto = rp ? rp.t : null;
     // Opens on the tab that fits the game's state; the viewer's pick sticks after that.
@@ -5265,10 +5303,10 @@
       <div class="seg gc-panes" role="tablist">${GPANES.map(([k, l]) => `<button type="button" role="tab" data-pane="${k}" class="${GP.pane === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       ${GP.pane === 'flow' ? (storyCard(st, info) || '<section class="gcs"><p class="muted">The game flow fills in once the game starts.</p></section>')
         + (st.ended && !rp && ser.length >= 2 ? `<section class="gcs"><h3>Turning points</h3><p class="gcs-note">The plays that moved ESPN's win probability the most.</p>${turningCards(sum, info, ser, 6)}</section>` : '')
-      : GP.pane === 'plays' && GP.plSub === 'recent' ? `<section class="gcs" id="gcLog"><div class="seg pl-sub">${[['recent', 'Recent'], ['log', 'Game log']].map(([k, l]) => `<button type="button" data-plsub="${k}" class="${GP.plSub === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      : GP.pane === 'plays' && plSub === 'recent' ? `<section class="gcs" id="gcLog"><div class="seg pl-sub">${[['recent', 'Recent'], ['log', 'Game log']].map(([k, l]) => `<button type="button" data-plsub="${k}" class="${plSub === k ? 'on' : ''}">${l}</button>`).join('')}</div>
             ${sum ? recentView(st, info, sum) : '<p class="muted">Plays appear once the game starts.</p>'}</section>`
-      : GP.pane === 'plays' ? `<section class="gcs" id="gcLog"><div class="seg pl-sub">${[['recent', 'Recent'], ['log', 'Game log']].map(([k, l]) => `<button type="button" data-plsub="${k}" class="${GP.plSub === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-            <div class="lg-bar"><div class="seg">${[['drive', 'By drive'], ['every', 'Every play']].map(([k, l]) => `<button type="button" data-view="${k}" class="${GP.view === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['new', 'Newest'], ['old', 'Oldest'], ['impact', 'Swings']].map(([k, l]) => `<button type="button" data-sort="${k}" class="${GP.sort === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['all', 'All'], ['score', 'Scoring'], ['to', 'Turnovers'], ['pen', 'Penalties']].map(([k, l]) => `<button type="button" data-filter="${k}" class="${GP.filter === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      : GP.pane === 'plays' ? `<section class="gcs" id="gcLog"><div class="seg pl-sub">${[['recent', 'Recent'], ['log', 'Game log']].map(([k, l]) => `<button type="button" data-plsub="${k}" class="${plSub === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+            <div class="lg-bar"><div class="seg">${[['drive', 'By drive'], ['every', 'Every play']].map(([k, l]) => `<button type="button" data-view="${k}" class="${GP.view === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['new', 'Newest'], ['old', 'Oldest'], ['impact', 'Swings'], ['yards', 'Yards']].map(([k, l]) => `<button type="button" data-sort="${k}" class="${GP.sort === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['all', 'All'], ['score', 'Scoring'], ['to', 'Turnovers'], ['pen', 'Penalties']].map(([k, l]) => `<button type="button" data-filter="${k}" class="${GP.filter === k ? 'on' : ''}">${l}</button>`).join('')}</div>
               <input type="search" id="lgQ" placeholder="Player or text" value="${esc(GP.q)}" aria-label="Filter plays"></div>
             <div id="lgBody">${!sum ? '<p class="muted">Plays appear once the game starts.</p>'
               : !allPlays(sum).length && info.state === 'post' ? '<p class="muted">ESPN has no play-by-play for this game (games before about 2005 only have box scores).</p>'
