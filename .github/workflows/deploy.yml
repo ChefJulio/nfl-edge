@@ -220,6 +220,8 @@ jobs:
         run: |
           python tools/transactions_build.py --site=site --seasons=$(python -c "import nflreadpy as n; print(n.get_current_season())") --pfr-budget=0 || echo "[moves] skipped"
           python tools/notable_build.py --site=site || echo "[notable] skipped"
+          # Sleeper's injury tags for the Fantasy tab's IR checks (its player list, once a day after 6 PM ET; cached)
+          python tools/sleeper_tags_build.py --site=site || echo "[sleeper] skipped"
       - name: Current assets
         run: python tools/assets_deploy.py --site=site
       - name: Stamp the deploy  # the plan reads it (lanes by what the live site was built from)
@@ -454,6 +456,8 @@ jobs:
             python tools/transactions_build.py --site=site --seasons=$(python -c "import nflreadpy as n; print(n.get_current_season())") --pfr-budget=0 || echo "[moves] skipped"
           fi
           python tools/notable_build.py --site=site || echo "[notable] skipped"
+          # Sleeper's injury tags for the Fantasy tab's IR checks (its player list, once a day after 6 PM ET; cached)
+          python tools/sleeper_tags_build.py --site=site || echo "[sleeper] skipped"
       # Team / player pages and Teams > Stats: penalties per season since 1999 (tools/penalties_build.py).
       - name: Penalties
         if: needs.plan.outputs.complete == 'true' || steps.carry.outputs.carried != 'true'

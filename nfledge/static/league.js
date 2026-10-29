@@ -129,12 +129,18 @@
         // waivers (owner 2026-10-18, the week clock): the league's run day (JS weekday, Sun = 0) or daily waivers
         waiverDay: lg.settings && lg.settings.daily_waivers ? 'daily' : ((((lg.settings || {}).waiver_day_of_week ?? 2) + 1) % 7),
         slots: (lg.roster_positions || []).filter(s => !['BN', 'IR', 'TAXI'].includes(s)),
+        // IR slots and what they take (owner 2026-10-29: "in some leagues, like mine, you can place D players in the ir
+        // slot"): a player Sleeper tags IR (or PUP) always; Out, Doubtful, Sus, COV, NA, DNR as the league allows
+        reserve: { slots: +((lg.settings || {}).reserve_slots || 0), platform: 'sleeper',
+                   allow: Object.fromEntries([['Out', 'out'], ['Doubtful', 'doubtful'], ['Sus', 'sus'], ['COV', 'cov'], ['NA', 'na'], ['DNR', 'dnr']]
+                     .map(([t, k]) => [t, !!(lg.settings || {})[`reserve_allow_${k}`]])) },
         size: (lg.roster_positions || []).filter(s => !['IR', 'TAXI'].includes(s)).length,  // starters + bench
         scoring,
         teams: (rosters || []).map(r => { const st = r.settings || {};
           return { id: String(r.roster_id), owner: r.owner_id, name: uName[r.owner_id] || `Team ${r.roster_id}`,
                    ext: (r.players || []).map(String), starters: (r.starters || []).map(String),
                    ir: [...(r.reserve || []), ...(r.taxi || [])].map(String),  // not on the bench count
+                   res: (r.reserve || []).map(String), taxi: (r.taxi || []).map(String),
                    waiver: st.waiver_position || null, faab: lg.settings && lg.settings.waiver_type === 2 ? (lg.settings.waiver_budget || 0) - (st.waiver_budget_used || 0) : null,
                    record: { w: st.wins || 0, l: st.losses || 0, t: st.ties || 0, pf: (st.fpts || 0) + (st.fpts_decimal || 0) / 100 } }; }),
         matchup(teamId) {
@@ -178,13 +184,16 @@
       const names = {};
       const teams = (d.teams || []).map(t => {
         const entries = ((t.roster || {}).entries || []);
-        entries.forEach(e => { const p = (e.playerPoolEntry || {}).player || {}; names[String(e.playerId)] = { name: p.fullName, pos: ESPN_POS[p.defaultPositionId] }; });
+        entries.forEach(e => { const p = (e.playerPoolEntry || {}).player || {};
+          names[String(e.playerId)] = { name: p.fullName, pos: ESPN_POS[p.defaultPositionId], inj: p.injuryStatus || null,
+                                        ir: Array.isArray(p.eligibleSlots) ? p.eligibleSlots.includes(21) : null }; });
         // starters in the league's slot order (ESPN lists a roster in no particular order)
         const left = entries.filter(e => ![20, 21].includes(e.lineupSlotId));
         const starters = slots.map(sl => { const i = left.findIndex(e => ESPN_SLOT[e.lineupSlotId] === sl); return i < 0 ? '' : String(left.splice(i, 1)[0].playerId); });
         const ov = ((t.record || {}).overall) || {};
         return { id: String(t.id), owner: (t.owners || [])[0], name: t.name || `${t.location || ''} ${t.nickname || ''}`.trim(),
                  ext: entries.map(e => String(e.playerId)), starters, ir: entries.filter(e => e.lineupSlotId === 21).map(e => String(e.playerId)),
+                 res: entries.filter(e => e.lineupSlotId === 21).map(e => String(e.playerId)), taxi: [],
                  waiver: t.waiverRank || null, faab: (st.acquisitionSettings || {}).isUsingAcquisitionBudget ? ((st.acquisitionSettings || {}).acquisitionBudget || 0) - ((t.transactionCounter || {}).acquisitionBudgetSpent || 0) : null,
                  record: { w: ov.wins || 0, l: ov.losses || 0, t: ov.ties || 0, pf: ov.pointsFor || 0 } };
       });
@@ -207,6 +216,7 @@
       await boxes();
       return {
         platform: 'espn', id, name: st.name, season, week, slots, scoring, kw, dw, unmodeled, teams, espnNames: names, waiverDay: 3,
+        reserve: { slots: +(((st.rosterSettings || {}).lineupSlotCounts || {})['21'] || 0), platform: 'espn' },
         size: Object.entries((st.rosterSettings || {}).lineupSlotCounts || {}).filter(([sid]) => +sid !== 21).reduce((t, [, n]) => t + n, 0),
         matchup(teamId) {
           const g = games.find(x => String((x.home || {}).teamId) === teamId || String((x.away || {}).teamId) === teamId);
@@ -251,6 +261,7 @@
     const VIEWS = ['lineup', 'matchup', 'live', 'teams', 'waivers', 'trade'];
     const fromHash = () => { const m = location.hash.match(/^#league\/(\w+)/); return m && VIEWS.includes(m[1]) ? m[1] : null; };
     let L = null, mine = null, ROS = null, view = fromHash() || 'lineup', feedWho = 'mine';
+    let STAGS = null;  // Sleeper's injury tags (data/sleeper_tags.json), for a Sleeper league's IR checks
     // the Lineup tab's switch (owner 2026-10-29: "the actual roster state of the team ... not the recommended roster.
     // maybe add a tab to switch between real and suggested"): your lineup as set by default
     let lineMode = 'real';
@@ -459,12 +470,58 @@
     const backWeek = x => { const g = gsisOf(x), r = ROS && g && ROS.players[g];
       if (!ROS) return ''; if (!r) return 'not projected back this season';
       const w = NFLE.health.back(r, ROS.through); return w === '?' ? '' : w ? `likely back week ${w}` : w === 0 ? 'not projected back this season' : `likely back week ${ROS.from}`; };
+    // ---- IR on the platform's own terms (owner 2026-10-29) -------------------------------------------------------
+    // Sleeper: its tag (data/sleeper_tags.json, tools/sleeper_tags_build.py, at most 4 hours old) against the league's
+    // switches; ESPN: the player's own eligible slots (IR = 21) from the league data, else its IR status. Ours can lead
+    // or trail the platform's by hours, so these never read ours.
+    const ESPN_TAG = { INJURY_RESERVE: 'IR', OUT: 'Out', DOUBTFUL: 'Doubtful', QUESTIONABLE: 'Questionable', SUSPENSION: 'Sus', ACTIVE: '', NORMAL: '' };
+    const platTag = x => L.platform === 'sleeper' ? ((STAGS && STAGS.tags[x]) || [])[0] || ''
+      : (ESPN_TAG[((L.espnNames || {})[x] || {}).inj] ?? (((L.espnNames || {})[x] || {}).inj || ''));
+    const irOk = x => { const R = L.reserve || {}, t = platTag(x);
+      // ESPN's IR slot takes players tagged Out or IR, not suspended ones (ESPN Fan Support); its own eligible slots first
+      if (L.platform === 'espn') { const e = (L.espnNames || {})[x] || {}; return e.ir != null ? e.ir : t === 'IR' || t === 'Out'; }
+      return t === 'IR' || t === 'PUP' || !!(R.allow || {})[t]; };
+    const platName = () => (L.platform === 'sleeper' ? 'Sleeper' : 'ESPN');
+    const tagWord = t => ({ IR: 'IR', PUP: 'PUP', Out: 'Out', Doubtful: 'Doubtful', Questionable: 'Questionable', Sus: 'suspended', COV: 'COVID', NA: 'not active', DNR: 'did not report' })[t] || t;
+    // a player's rest-of-season value (expected points over the remaining weeks, byes skipped): who to drop
+    const rosValue = x => ROS ? rosWeeks().reduce((t, k) => t + ((weekOf(x, k) || {}).exp || 0), 0) : 0;
+    const irChecks = () => {
+      if (!L.reserve || (L.platform === 'sleeper' && !STAGS)) return '';
+      const nm = p => p.pid ? `<button type="button" class="nm-link" data-open-pid="${esc(p.pid)}"><b>${esc(p.name)}</b></button>` : `<b>${esc(p.name)}</b>`;
+      const res = (mine.res || []).filter(x => mine.ext.includes(x)), taxi = new Set(mine.taxi || []);
+      const out = [];
+      // in IR but not eligible any more (owner 2026-10-29: "you have to move non IR eligible guys out of the IR slot before
+      // making any other roster moves"): ESPN blocks adds and its waiver claims can fail (ESPN Fan Support); Sleeper blocks
+      // transactions the same way, lineup changes included (owner 2026-10-29: "you can't even switch spots within your
+      // roster on sleeper"; widely reported, not in Sleeper's own docs we could find). The fix in order: a bench
+      // spot (a drop when the bench is full), him off IR, then any add, before the waiver run
+      res.filter(x => !irOk(x)).forEach(x => { const p = player(x), t = platTag(x), full = benchFull();
+        out.push(`<div class="lg-alert bad">${nm(p)} <span>is in IR but ${platName()} lists him as ${t ? tagWord(t) : 'healthy'}, so ${L.platform === 'sleeper' ? "Sleeper won't allow any other roster move (adds, trades, even lineup changes)" : "ESPN won't process adds and waiver claims can fail"} until he's off IR. Fix it first${L.platform === 'sleeper' ? ', before any game locks your lineup' : ''} and before waivers run (${esc(runText())}): ${full ? `drop someone (lowest rest-of-season value: ${dropPick(x)}), then ` : ''}move him to the bench, then make any other moves.</span></div>`); });
+      // an open IR slot and an eligible player outside it: a bench spot for free (the one out longest first)
+      const open = Math.max(0, (L.reserve.slots || 0) - res.length);
+      if (open) {
+        // a starter only when he scores 0 anyway (ruled out, no projection): moving a game-time call to IR benches him
+        const st = new Set(mine.starters), dead = q => q.exp == null || (q.proj != null && 1 - q.inactive < NFLE.health.AVAIL.NIL);
+        const can = mine.ext.filter(x => !res.includes(x) && !taxi.has(x) && irOk(x) && (!st.has(x) || dead(player(x)))).map(x => ({ x, p: player(x), t: platTag(x), v: rosValue(x) }))
+          .sort((a, b) => a.v - b.v).slice(0, open);
+        if (can.length) out.push(`<div class="lg-alert tip"><b>Open IR slot${open > 1 ? 's' : ''}</b> <span>${can.map(c => `${nm(c.p)} (${platName()}: ${esc(tagWord(c.t) || 'eligible')})`).join(', ')} can move to IR${L.platform === 'espn' ? ' (ESPN lists him as eligible)' : ''}, freeing ${can.length > 1 ? 'bench spots' : 'a bench spot'} for a pickup.</span></div>`);
+      }
+      return out.join('');
+    };
+    const benchFull = () => L.size && mine.ext.filter(x => !(mine.ir || []).includes(x)).length >= L.size;
+    // the lowest rest-of-season value on the bench (not a starter): the drop that costs least
+    const dropPick = keep => { const st = new Set(mine.starters), irs = new Set(mine.ir || []);
+      const c = mine.ext.filter(x => x !== keep && !st.has(x) && !irs.has(x)).map(x => ({ p: player(x), v: rosValue(x) })).sort((a, b) => a.v - b.v)[0];
+      return c ? `${esc(c.p.name)}` : 'nobody on the bench'; };
     const irSection = () => { const ir = (mine.ir || []).filter(x => mine.ext.includes(x));
       const ready = ir.filter(x => { const p = player(x); return p.proj != null && 1 - p.inactive >= NFLE.health.AVAIL.EVEN; });
-      return ir.length ? `<h3 class="lg-h">IR</h3>${table(ir.map(x => { const p = player(x);
+      const used = (mine.res || ir).filter(x => mine.ext.includes(x)).length, slots = (L.reserve || {}).slots;
+      return ir.length ? `<h3 class="lg-h">IR${slots ? ` <span class="muted">${used} of ${slots} slots used</span>` : ''}</h3>${table(ir.map(x => { const p = player(x), t = platTag(x);
         // projected to play this week (owner 2026-10-17: an IR player can have a projection): starting him means
         // activating him first, which takes a roster spot
-        return row('IR', Object.assign({}, p, ready.includes(x) ? {} : { opp: '', why: backWeek(x) || p.why || 'injured reserve', inactive: 0 })); }).join(''))}
+        const tagNote = (mine.taxi || []).includes(x) ? 'taxi squad' : `${platName()}: ${t ? tagWord(t) : 'no tag'}`;
+        return row((mine.taxi || []).includes(x) ? 'TAXI' : 'IR', Object.assign({}, p, ready.includes(x) ? {} : { opp: '', why: [backWeek(x) || p.why || 'injured reserve', tagNote].join(' · '), inactive: 0 })); }).join(''))}
+        ${L.platform === 'sleeper' && STAGS && STAGS.fetched ? `<p class="muted lg-note">Sleeper's tags as of ${esc(new Date(STAGS.fetched.replace('Z', ':00Z')).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }))} (Sleeper asks for its player list once a day, so we read it each evening after the injury reports).</p>` : ''}
         ${ready.length ? `<p class="muted lg-note">${ready.map(x => { const q = player(x); return q.pid ? `<button type="button" class="nm-link" data-open-pid="${esc(q.pid)}"><b>${esc(q.name)}</b></button>` : `<b>${esc(q.name)}</b>`; }).join(', ')} ${ready.length > 1 ? 'project' : 'projects'} to play this week: starting ${ready.length > 1 ? 'them' : 'him'} means activating off IR first, which takes a roster spot.</p>` : ''}` : ''; };
     // open roster spots (owner 2026-10-20: "display empty bench spots"): the league's roster size (starters + bench, IR
     // and taxi apart) minus the players on it; a free agent fills one without a drop
@@ -528,7 +585,7 @@
       const lateTip = late.length ? `<div class="lg-alert tip"><b>Late games in the flex</b> <span>${late.map(m => `${nm(m.p)} to ${esc(m.slot)}${kickTxt(m.p) ? ` (${esc(kickTxt(m.p))})` : ''}`).join(', ')}: the same starters, with the latest game where any eligible player can replace him if he's ruled out.</span></div>` : '';
       const sug = gain >= 0.5 ? `<button type="button" class="lg-alert sug" data-lmode="suggested"><b>Suggested lineup: +${f1(gain)}</b> <span>${changes} change${changes === 1 ? '' : 's'} by our projections &rsaquo;</span></button>` : '';
       const bench = ps.filter(p => !cur.has(p.ext)).sort((a, b) => (b.exp != null) - (a.exp != null) || (b.exp || 0) - (a.exp || 0));
-      return `${alerts}${lateTip}${sug}
+      return `${alerts}${irChecks()}${lateTip}${sug}
         ${scoreHead(liveRows, mm && mm.points ? mm.points[mine.id] : null)}
         ${table(liveRows.map(r => row(r.slot, r.p)).join(''), `<th>Slot</th><th>Player</th><th class="num">${scoreOf(liveRows).started ? 'Pts' : 'Proj'}</th>`)}
         <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') + emptyBench(ps.length) || '<tr><td colspan="3" class="muted">No bench players.</td></tr>')}
@@ -996,6 +1053,7 @@
       try {
         L = s.platform === 'espn' ? await espn.load(s.league, season) : await sleeper.load(s.league);
         NFLE.leagueDst = L && L.dw ? { w: L.dw, name: L.name } : null;  // D/ST cards score with this league's settings
+        if (L.platform === 'sleeper' && !STAGS) NFLE.load('data/sleeper_tags.json').then(j => { STAGS = j; if (view === 'lineup') draw(); }, () => {});
         mine = L.teams.find(t => t.id === s.team) || L.teams.find(t => s.user && t.owner === s.user) || L.teams[0];
         // an ESPN league has no owner to match: until a team is picked, the first one shows and the switcher says so
         const picked = s.team != null || !!(s.user && L.teams.some(t => t.owner === s.user));
