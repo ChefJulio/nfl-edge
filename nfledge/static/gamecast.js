@@ -1197,6 +1197,34 @@
         <div class="lg-scroll"><table class="lg lg-career"><tbody>${carHead}${carTot}${car}</tbody></table></div></div>
       <div class="lg-v" data-lv="g"${view === 'g' ? '' : ' hidden'}>${games}</div>`;
   };
+  // A place in the open card's game log (owner 2026-10-29: "scroll down to 2024 in mccaffreys game log and wanna direct
+  // my friend to it"): the season at the top of the card's view (Share writes it as @2024), and a shared link's season
+  // scrolled to once the log is drawn (false until then: shell.js retries)
+  const cardLogBox = () => { const ov = document.getElementById('pcOv'); if (!ov || ov.hidden) return null;
+    const tab = [...ov.querySelectorAll('.pc-tab')].find(t => !t.hidden && (t.dataset.pt === 'log' || t.dataset.tt === 'log'));
+    return tab ? tab.querySelector('.pc-log, .tm-log') : null; };
+  // the season at the top of the card's view ('' in the Seasons view or with no log open)
+  NFLE.anchorAt = () => {
+    const box = cardLogBox(), sc = box && box.closest('.pc-card .pc');
+    if (!box || !sc) return '';
+    const games = box.querySelector('.lg-v[data-lv="g"]');
+    if (games && games.hidden) return '';
+    const edge = sc.getBoundingClientRect().top + stickTop() + 8;
+    const tb = [...box.querySelectorAll('tbody[data-season]')].filter(t => t.offsetParent).find(t => t.getBoundingClientRect().bottom > edge);
+    return tb ? tb.dataset.season : '';
+  };
+  NFLE.cardAnchor = () => {  // for Share: the newest season (the log's top) needs no place
+    const at = NFLE.anchorAt(), first = (cardLogBox() || document).querySelector('tbody[data-season]');
+    return at && (!first || first.dataset.season !== at) ? at : '';
+  };
+  NFLE.scrollAnchor = at => {
+    const box = cardLogBox(), tb = box && box.querySelector(`tbody[data-season="${at}"]`);
+    if (!tb) return false;
+    if (box.classList.contains('pc-log')) { showLogView(box, 'g', at); return true; }
+    const sc = tb.closest('.pc-card .pc');
+    if (sc) sc.scrollTo({ top: tb.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - stickTop() });
+    return true;
+  };
   // Game log view: career seasons or every game; kept across re-renders and players for the session
   let logView = 'g';
   const showLogView = (box, v, season) => {
@@ -1231,6 +1259,9 @@
     getJSON(`${siteRoot()}data/players/${encodeURIComponent(pid)}.json`).then(L => (LOGS[pid] = eraLog(L))).catch(() => (LOGS[pid] = { missing: 1, seasons: [] }))));
 
   // ----------------------------------------------------------------------------------------------- player card
+  // card tabs in the URL (owner 2026-10-29: share links "with the active tabs selected"; shell.js segStr): readable names
+  const PTAB_URL = { ov: '', log: 'log', thr: 'throws', news: 'news' }, TTAB_URL = { ov: '', log: 'log', po: 'playoffs' };
+  const tabOfUrl = (m, v) => Object.keys(m).find(k => m[k] === v && v);
   let cardPid = null, cardTab = 'ov';  // the open tab survives live refreshes; a new player starts on Week
   // each team / player page remembers its last tab for the session, so Back from another page lands where you were
   // (owner 2026-10-15); sessionStorage so a full page reload (a game page, the week picker) keeps it too
@@ -2267,7 +2298,7 @@
       const sub = (label, extra = '') => `<tr class="lg-sub"><td colspan="${n}"><span class="lg-pin">${label}${extra}</span></td></tr>`;
       const pt = pg.length ? kindTotals(L, pg) : null;
       const po = pg.length ? `${sub('Playoffs', ` · ${pg.length} game${pg.length === 1 ? '' : 's'}${keys.length ? ` · ${keys.slice(0, 4).map(k => `${nfmt(pt[k] || 0)} ${cols[k][0]}`).join(', ')}` : ''}`)}${head}${tot(pg)}${[...pg].reverse().map(g => row(g, g.po)).join('')}${S.g.length ? sub('Regular season') : ''}` : '';
-      return `<tbody><tr class="lg-season"><td colspan="${n}"><span class="lg-pin"><b>${S.s}</b> ${tmL(team || (pg[0] && pg[0].t) || '')}${sum}</span></td></tr>${po}${S.g.length ? head + trs : ''}</tbody>`;
+      return `<tbody data-season="${S.s}"><tr class="lg-season"><td colspan="${n}"><span class="lg-pin"><b>${S.s}</b> ${tmL(team || (pg[0] && pg[0].t) || '')}${sum}</span></td></tr>${po}${S.g.length ? head + trs : ''}</tbody>`;
     }).join('');
     return `<div class="lg-scroll"><table class="lg">${body}</table></div>`;
   };
@@ -2629,6 +2660,7 @@
     const showTab = k => {
       cardTab = k;
       rememberTab(`p:${pid}`, k);
+      if (NFLE.tabMark) NFLE.tabMark(PTAB_URL[k] || '');
       body.querySelectorAll('.pc-tabs [data-pt]').forEach(x => x.classList.toggle('on', x.dataset.pt === k));
       body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.pt !== cardTab; });
     };
@@ -2824,7 +2856,7 @@
       const pw = pg.filter(g => g.r === 'W').length;
       const po = pg.length ? `${sub(`Playoffs · ${pw}-${pg.length - pw}`)}${head}${[...pg].reverse().map(g => played(g, g.po)).join('')}${rows.length ? sub('Regular season') : ''}` : '';
       const sumBits = [S.rec, av.pf != null ? `${f1(av.pf)} PF/G${rk.pf ? ` (${ord(rk.pf)})` : ''}` : '', av.pa != null ? `${f1(av.pa)} PA/G${rk.pa ? ` (${ord(rk.pa)})` : ''}` : ''].filter(Boolean).join(' · ');
-      return `<tbody><tr class="lg-season"><td colspan="16"><span class="lg-pin"><b>${S.s}</b> ${esc(sumBits)}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
+      return `<tbody data-season="${S.s}"><tr class="lg-season"><td colspan="16"><span class="lg-pin"><b>${S.s}</b> ${esc(sumBits)}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
     }).join('');
     const legend = `<div class="lg-leg"><span>Opponent color = their power rank that week (2021 on):</span><span class="mr-hard">top 8</span><span class="mr-tough">9-16</span><span class="mr-ok">17-24</span><span class="mr-easy">25-32</span>
       <span>· Odds = pregame win chance, Vegas / our model · Line = Vegas spread for ${esc(abbr)} (cov = covered) · Tap a game to open its gamecast</span></div>`;
@@ -3264,6 +3296,7 @@
     body.querySelectorAll('.pc-tabs [data-tt]').forEach(b => b.onclick = () => {
       teamTab = b.dataset.tt;
       rememberTab(`t:${abbr}`, teamTab);
+      if (NFLE.tabMark) NFLE.tabMark(TTAB_URL[teamTab] || '');
       if (teamTab === 'po') body.querySelector('.pc-tab[data-tt="po"]').innerHTML = rootingHtml(abbr) + teamPlayoffs(abbr);
       body.querySelectorAll('.pc-tabs [data-tt]').forEach(x => x.classList.toggle('on', x === b));
       body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.tt !== teamTab; });
@@ -3680,6 +3713,7 @@
     // a team you tap opens on Summary (owner 2026-10-17); one you come back to down the card stack keeps its tab
     if (window.NFLE && NFLE.cardRestore) teamTab = TABS[`t:${abbr}`] || 'ov';
     else if (abbr !== cardTeam || ov.hidden || (window.NFLE && NFLE.freshPage)) teamTab = 'ov';
+    if (window.NFLE && NFLE.wantTab && tabOfUrl(TTAB_URL, NFLE.wantTab)) teamTab = tabOfUrl(TTAB_URL, NFLE.wantTab);  // a shared link's tab
     if (abbr !== cardTeam) teamOpp = '';
     if (teamTab === 'pl' || teamTab === 'dc') teamTab = 'ov';  // Players / Depth became the Players tile's sheet
     // a fresh card starts on the page's week; card-to-card keeps the picked one (page mode: the shell flags fresh)
@@ -3705,6 +3739,7 @@
     // to down the card stack keeps its tab
     if (window.NFLE && NFLE.cardRestore) cardTab = TABS[`p:${pid}`] || 'ov';
     else if (pid !== cardPid || ov.hidden || (window.NFLE && NFLE.freshPage)) cardTab = 'ov';
+    if (window.NFLE && NFLE.wantTab && tabOfUrl(PTAB_URL, NFLE.wantTab)) cardTab = tabOfUrl(PTAB_URL, NFLE.wantTab);  // a shared link's tab
     if (ov.hidden || !cardWk || (window.NFLE && NFLE.freshPage)) cardWk = pageKey();
     if (String(pid).startsWith('DST-') && pid !== cardPid) dstTab = 'ov';
     const same = pid === cardPid && !ov.hidden;  // the open card shown again (a route re-run): keep its tables' scroll
