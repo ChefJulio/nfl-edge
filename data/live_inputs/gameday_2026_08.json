@@ -1,0 +1,62 @@
+{
+"00-0033858": {
+"name": "Jonnu Smith",
+"team": "GB",
+"pos": "TE",
+"pre": 0.9878,
+"ruling": "INA",
+"at": "2026-10-29T22:54:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0036265": {
+"name": "AJ Dillon",
+"team": "CAR",
+"pos": "RB",
+"pre": 0.6617,
+"ruling": "INA",
+"at": "2026-10-29T22:58:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0039356": {
+"name": "Ja'Tavion Sanders",
+"team": "CAR",
+"pos": "TE",
+"pre": 0.1524,
+"ruling": "INA",
+"at": "2026-10-29T22:58:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040142": {
+"name": "Kaleb Johnson",
+"team": "GB",
+"pos": "RB",
+"pre": 0.6482,
+"ruling": "INA",
+"at": "2026-10-29T22:54:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040667": {
+"name": "Matthew Golden",
+"team": "GB",
+"pos": "WR",
+"pre": 0.8051,
+"ruling": "ACT",
+"at": "2026-10-29T22:51:00+00:00",
+"post": 0.974,
+"status": "Active (DDL)"
+},
+"00-0041149": {
+"name": "Haynes King",
+"team": "CAR",
+"pos": "QB",
+"pre": 0.097,
+"ruling": "INA",
+"at": "2026-10-29T22:58:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+}
+}
