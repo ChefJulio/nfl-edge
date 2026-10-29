@@ -623,7 +623,11 @@ def missed_weeks(season: int, games: list, ros_wk: dict, sched: dict, n_weeks: i
       before = [k for k in ros_wk if k[0] == season and k[1] < w]
       after = [k for k in ros_wk if k[0] == season and k[1] > w]
       t0 = ros_wk[max(before)][0] if before else None
-      if t0 is None or not after or ros_wk[min(after)][0] != t0 or ros_wk[max(before)][1] in ("CUT", "RET"):
+      # his team's bye with no later roster posted yet (rosters trail a day or more; owner 2026-10-29: Josh Allen's
+      # week-7 bye also read "FA", a second week-7 row): still his team, a bye
+      off_wk = t0 is not None and not after and sched.get((season, w, D.RELOCATED.get(t0, t0))) is None \
+          and ros_wk[max(before)][1] not in ("CUT", "RET")
+      if not off_wk and (t0 is None or not after or ros_wk[min(after)][0] != t0 or ros_wk[max(before)][1] in ("CUT", "RET")):
         out.append({"w": w, "miss": "FA"})
         continue
       team = t0

@@ -986,7 +986,11 @@
   // when the table's size changes and keeps the copy's sideways scroll in step with the table's.
   const stickTop = () => {
     const h = document.querySelector('#pcOv:not([hidden]) .pc-head'), nav = document.querySelector('nav.tabs');
-    return h ? (parseFloat(getComputedStyle(h).top) || 0) + h.offsetHeight : nav ? nav.offsetHeight : 0;
+    if (!h) return nav ? nav.offsetHeight : 0;
+    // the card's tabs stick right under its header (owner 2026-10-29: "the tabs get swallowed by the sticky rows"):
+    // the log's pinned season / column heads stop below them, not on top of them
+    const t = document.querySelector('#pcOv:not([hidden]) .pc-tabs'), ts = t && t.offsetParent ? getComputedStyle(t) : null;
+    return (parseFloat(getComputedStyle(h).top) || 0) + h.offsetHeight + (ts && ts.position === 'sticky' ? t.offsetHeight : 0);
   };
   const layHeads = tbl => {
     const sc = tbl.closest('.lg-scroll'), box = sc && sc.parentElement;
