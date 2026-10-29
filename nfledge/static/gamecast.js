@@ -1550,8 +1550,11 @@
     const ups = (L && L.up) || [], byeAt = w => ups.some(u => u.w === w && u.bye);
     const rws = !p && RJ.d && RJ.d.players[pid] ? RJ.d.players[pid].w : null;
     // a chosen later week: that week's chance (none on its bye); else his next game week's
-    const rw = rws && (wkSel ? rws.find(z => z[0] === wkSel && !byeAt(z[0])) : rws.find(z => z[0] >= RJ.d.from && !byeAt(z[0])));
-    const play = p && p.inactive != null ? 1 - p.inactive : rw ? H.rosChance(rw) : null;  // injury only, as the board's
+    // his next game week exactly: a week the model leaves out is one he can't play (owner 2026-10-29: Pierce, on IR since
+    // Wednesday, read week 13's 73% as this week's, the first week listed)
+    const nextW = rws ? wkSel || (ups.find(u => !u.bye && u.w >= RJ.d.from) || {}).w || null : null;
+    const rw = rws && nextW ? rws.find(z => z[0] === nextW && !byeAt(z[0])) : null;
+    const play = p && p.inactive != null ? 1 - p.inactive : rw ? H.rosChance(rw) : rws && nextW ? 0 : null;  // injury only, as the board's
     const what = [...new Set([now && now.type, now && now.detail && now.detail !== 'Not Specified' ? now.detail : '', now && now.side && now.side !== 'Not Specified' ? now.side : '']
       .filter(Boolean))].join(' · ') || (ep && ep.part) || '';  // ESPN often repeats the type as the detail
     return { inj, play, what, now, ep, back: backWeek(pid), wk };
@@ -1681,7 +1684,9 @@
     // window labeled last week's Thu-Sat "Practice this week")
     const tmW = (p && p.team) || (L && L.team) || '';
     const wkDates = new Set(tmW ? NFLE.clock.reports(tmW).map(r => r.date) : []);
-    const pr = ((L && L.prac) || []).filter(e => e[0] === 'p' && (wkDates.size ? wkDates.has(e[1]) : !tmW && e[1] >= NFLE.clock.etDate(new Date(Date.now() - 6 * 864e5))));  // a bye: none
+    // his practice days, not his days on a list (R / S rows: the career log's reserve / practice-squad days; De'Von
+    // Achane on reserve, 2026-10-29, read them as practice and the card failed to load)
+    const pr = ((L && L.prac) || []).filter(e => e[0] === 'p' && e[2] !== 'R' && e[2] !== 'S' && (wkDates.size ? wkDates.has(e[1]) : !tmW && e[1] >= NFLE.clock.etDate(new Date(Date.now() - 6 * 864e5))));  // a bye: none
     // This week's practice as a strip (owner 2026-10-17: "Questionable (FFF)" was unreadable): a tile per day, colored
     // full / limited / did not practice, and one plain sentence. Days from the dated report when it's in the data,
     // else the letters in his status / the model's note, Wed-Fri (Mon-Wed before a Thursday game).
@@ -1720,7 +1725,8 @@
     const prSentence = (() => {
       const wait = days.filter(x => x[1] === '?').map(x => x[0]), over = days.filter(x => x[1] === '!').map(x => x[0]);
       const ahead = days.filter(x => x[1] === 'u').map(x => x[0]);
-      const known = days.filter(x => x[1] !== '?' && x[1] !== '!' && x[1] !== 'u');
+      // only letters the sentence has words for (owner 2026-10-29: an R day crashed Achane's whole card)
+      const known = days.filter(x => WORD[x[1]]);
       // "Thu's report is", "Thu and Fri's reports are", "Thu, Fri and Sat's reports are"
       const whose = ds => `${ds.length > 1 ? `${ds.slice(0, -1).join(', ')} and ${ds[ds.length - 1]}` : ds[0]}'s report${ds.length > 1 ? 's' : ''}`;
       const is = ds => ds.length > 1 ? 'are' : 'is';
@@ -1778,7 +1784,8 @@
     const gameTxt = g => g ? `Week ${g[5]} ${g[3]} ${g[2]}` : '';
     // a week's game from the dated timeline, else his schedule in the career log (IR players have no practice report)
     const upG = w => { const u = ((L && L.up) || []).find(x => x.w === w && !x.bye); return u ? ['g', '', u.o, u.h === 0 ? '@' : 'vs', '', u.w] : null; };
-    const nextG = games.find(e => e[1] > today);
+    // tonight's game counts until it's played (owner 2026-10-29: Golden's Thursday game read "Next game Sun @ NE")
+    const nextG = games.find(e => e[1] > today || (e[1] === today && e[4] === ''));
     const ourG = h.back && h.back !== 'no' ? games.find(e => e[5] === h.back) || upG(h.back) : null;
     // our return model's chance he plays that game (owner 2026-10-17: the play % beside "Expected back")
     const backRow = ourG && RJ.d && RJ.d.players[pid] && RJ.d.players[pid].w.find(z => z[0] === h.back);
@@ -1793,10 +1800,13 @@
     // on a reserve list his team's practice days aren't his (owner 2026-10-28: Pierce on IR read "Wed overdue, Thu
     // upcoming"): no strip, the list said plainly; a return window opened puts him back on the report and the strip
     const resList = /^(IR|Injured Reserve)\b/i.test(des) && !pr.length ? 'On injured reserve' : /^PUP\b/i.test(des) && !pr.length ? 'On the PUP list'
-      : /^NFI\b/i.test(des) && !pr.length ? 'On the non-football injury list' : '';
+      : /^NFI\b/i.test(des) && !pr.length ? 'On the non-football injury list'
+      // his status text says otherwise but this week's career-log days have him on a list (Achane: "RES")
+      : !pr.length && ((L && L.prac) || []).some(e => e[0] === 'p' && wkDates.has(e[1]) && e[2] === 'R')
+        ? (RES_WORD[(((L && L.prac) || []).filter(e => e[0] === 'p' && wkDates.has(e[1]) && e[2] === 'R').pop() || [])[3]] || 'On a reserve list') : '';
     const thisWeek = `<div class="pc-box"><div class="pc-k">This week</div>
         <div class="ij-hero">
-          <div><small>Status</small><b class="ij-st ij-${desCls}">${esc(des)}</b></div>
+          <div><small>Status</small><b class="ij-st ij-${resList && des === 'Listed' ? 'out' : desCls}">${esc(resList && des === 'Listed' ? (/injured reserve/i.test(resList) ? 'Injured Reserve' : resList.replace(/^On (the )?/, '')) : des)}</b></div>
           <div><small>Chance to play</small><b class="ij-big ${!h.inj || H.level(h.play) === 'ok' ? 'good' : H.level(h.play) === 'bad' ? 'bad' : ''}">${h.play != null ? NFLE.fmt.toPlay(1 - h.play) : onBye ? '<span class="muted">Bye</span>' : h.inj ? '&ndash;' : '&gt;99%'}</b></div>
           ${third}
         </div>
