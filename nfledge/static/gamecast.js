@@ -1532,6 +1532,15 @@
     return t < roll ? C.week : C.week + 1 + Math.floor((t - roll) / (7 * 864e5));
   };
   const espnDate = d => new Date(d + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
+  // a return date as the week it falls in (owner 2026-10-29: "wherever we're displaying expected back ... the week of
+  // the season rather than the date"): "wk 11", "after the season" past the regular season; the date only when the
+  // week clock isn't loaded. Shared with Players > Injuries (NFLE.retWeek).
+  const retWeek = d => {
+    if (!d) return '';
+    const w = weekOfDate(d), last = DATA && +DATA.season < 2021 ? 17 : 18;
+    return w == null ? espnDate(d) : w > last ? 'after the season' : `wk ${w}`;
+  };
+  NFLE.retWeek = retWeek;
   const healthOf = (pid, p, L, espn, wkSel = null) => {
     loadInj(); loadRos();
     const now = espn && DINJ && DINJ[espn];
@@ -1561,7 +1570,7 @@
   };
   const healthTile = (pid, p, L, espn, wkTag = '', wkSel = null, bye = false) => {
     const h = healthOf(pid, p, L, espn, wkSel);
-    const ret = h.back && h.back !== 'no' ? `back ~wk ${h.back}` : h.now && h.now.return_date ? `est. ${espnDate(h.now.return_date)}` : '';
+    const ret = h.back && h.back !== 'no' ? `back ~wk ${h.back}` : h.now && h.now.return_date ? `est. ${retWeek(h.now.return_date)}` : '';
     // game day (owner 2026-10-18): once inactives are posted the tile says Active or Inactive, not a chance
     const gd = H.gameday(p), ina = gd === 'INA', act = gd === 'ACT';
     const big = bye ? '<div class="pc-big">Bye week</div>' : ina ? '<div class="pc-big bad">Inactive</div>' : act ? '<div class="pc-big good">Active</div>' : !h.inj ? '<div class="pc-big good">Healthy</div>'
@@ -2431,7 +2440,7 @@
     const cur = now && now.status !== 'Active' ? `<div class="pc-box"><div class="pc-k">Right now · ESPN</div>
       <div class="ij-now"><span class="dc-tag dt-${now.status === 'Questionable' ? 'q' : now.status === 'Doubtful' ? 'd' : 'out'}">${esc(now.status)}</span>
         <b>${esc([now.type, now.detail && now.detail !== 'Not Specified' ? now.detail : '', now.side && now.side !== 'Not Specified' ? now.side : ''].filter(Boolean).join(' · '))}</b>
-        ${now.return_date ? `<span class="muted">est. return ${esc(new Date(now.return_date + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }))}</span>` : ''}</div>
+        ${now.return_date ? `<span class="muted" title="ESPN's estimated return: ${esc(espnDate(now.return_date))}">est. return ${esc(retWeek(now.return_date))}</span>` : ''}</div>
       ${now.comment ? `<p class="pc-sub">${esc(now.comment)}</p>` : ''}</div>` : '';
     let dur = '';
     if (d && d.games) {
@@ -3477,7 +3486,7 @@
       const play = p && p.inactive != null ? 1 - p.inactive : ia && ia.p != null ? ia.p : null;
       out.push({ pid, espn, tag, name: (p && p.name) || (r && r.name) || (ro && ro.name) || (ia && ia.name) || '', pos: (p && p.pos) || (ro && ro.pos) || (r && r.pos) || (ia && ia.pos) || '',
         photo: p && p.photo, what: [injWhat(r), hurtText(hu)].filter(Boolean).join(' · '), prac: p ? pracWords(p, DATA) : '', play, onReport: !!(ia && ia.p == null && !INJ_LONG.has(tag)),
-        back: bw === 'no' || (!bw && ew === 'no') ? 'season' : bw ? `wk ${bw}` : play != null && play >= H.AVAIL.EVEN ? '' : ew ? `wk ${ew}` : r && r.return_date >= today ? espnDate(r.return_date) : '',
+        back: bw === 'no' || (!bw && ew === 'no') ? 'season' : bw ? `wk ${bw}` : play != null && play >= H.AVAIL.EVEN ? '' : ew ? `wk ${ew}` : r && r.return_date >= today ? retWeek(r.return_date) : '',
         backWhy: bw ? 'our return model: the first week he is more likely than not to play' : ew ? `ESPN's estimated return, ${espnDate(r.return_date)}` : '' });
     };
     // a coach's decision isn't an injury (ESPN marks healthy scratches Out on Mondays); skipped, not counted
