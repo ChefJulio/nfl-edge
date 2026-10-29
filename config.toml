@@ -150,6 +150,10 @@ final_week_settled = -1.1
 # implied_total won clearly; air_yards and snap_input did not help consistently.
 implied_total = true    # Vegas implied team total as an efficiency input
 depth_per_team = true   # (AR, {#depth-per-team}) each team's depth chart as of its own game, not the week's first
+# (BH2, {#return-starters-2}) a starter back from 4+ missed games: his long-window role x his position's first-game-back
+# factor (QB .61 / RB .71 / TE .67 / WR .72), not ~0. Owner's call 2026-10-29 on a direct measurement (920 returns,
+# 2010-25); the model backtest's teammates check is a pending option, not run
+return_role = "starters_gs"
 air_yards = false       # air-yards share (volume) + aDOT (receiving yards)
 # Wind: "fixed" = the hand-set penalty in [player_model] (wind_threshold_mph etc.); "linear" / "quadratic" = wind
 # (mph; domes 0) as a fitted input to every passing-efficiency regression. Audit: fixed beats both no-wind (TE

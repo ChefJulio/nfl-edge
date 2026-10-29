@@ -5583,3 +5583,10 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   .02 of its actual. Games 2-3 run higher than the first (6.64 vs 6.17): returners ramp up. Owner decision pending: ship
   experiments.return_role = "starters_gs" (these position rules) on this measurement, or run the model backtest's
   gate (2) first.
+- **Owner decision 2026-10-29 on (BH2): SHIPPED** ("ship it now and mark the backtest as a pending option worth considering
+  in the future if something calls for it"). config experiments.return_role = "starters_gs". Live, week 8: Zach
+  Charbonnet 2.2 -> 7.7 projected if active (42% to play); nobody else moved 0.3+ points (the only returning starter
+  that week). PENDING OPTION, not scheduled: the model backtest's gate (2), teammates' projections not worse
+  (tools/experiments.py baseline,return_starters_gs 2012-2019 --history=16 + tools/return_role_eval.py
+  --variant=return_starters_gs; hours of compute). Run it if returners' teammates look off, or at season end with
+  2026's returns.
