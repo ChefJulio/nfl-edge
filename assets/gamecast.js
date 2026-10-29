@@ -986,7 +986,11 @@
   // when the table's size changes and keeps the copy's sideways scroll in step with the table's.
   const stickTop = () => {
     const h = document.querySelector('#pcOv:not([hidden]) .pc-head'), nav = document.querySelector('nav.tabs');
-    return h ? (parseFloat(getComputedStyle(h).top) || 0) + h.offsetHeight : nav ? nav.offsetHeight : 0;
+    if (!h) return nav ? nav.offsetHeight : 0;
+    // the card's tabs stick right under its header (owner 2026-10-29: "the tabs get swallowed by the sticky rows"):
+    // the log's pinned season / column heads stop below them, not on top of them
+    const t = document.querySelector('#pcOv:not([hidden]) .pc-tabs'), ts = t && t.offsetParent ? getComputedStyle(t) : null;
+    return (parseFloat(getComputedStyle(h).top) || 0) + h.offsetHeight + (ts && ts.position === 'sticky' ? t.offsetHeight : 0);
   };
   const layHeads = tbl => {
     const sc = tbl.closest('.lg-scroll'), box = sc && sc.parentElement;
@@ -1051,6 +1055,12 @@
                      PS: 'Practice squad', Cut: 'Released', Ret: 'Retired', FA: 'Not on a roster' };
   const missTag = u => u.miss ? `<span class="lg-tag" title="${esc(MISS_TIP[u.miss] || u.miss)}">${esc(u.miss)}</span>` : '<span class="lg-tag" title="On the field, no stats">0</span>';
   const byeRow = (w, rest) => `<tr class="lg-bye"><td>${w}</td><td>Bye</td><td colspan="${rest}"></td></tr>`;
+  // a mid-season team change, between his last week with the old team and his first with the new (owner 2026-10-29,
+  // Marvin Harrison Jr.'s trade; "mv" from tools/player_logs.py TeamMoves): how (ESPN's transactions log) and when
+  const MV_VERB = { trade: 'Traded to', claim: 'Claimed by', sign: 'Signed by' };
+  const MV_ICON = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h11M10 2l3 3-3 3M14 11H3M6 8l-3 3 3 3"/></svg>';
+  const mvDate = d => d ? new Date(`${d}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+  const moveRow = (m, cols) => `<tr class="lg-mv"><td colspan="${cols}"><span class="lg-pin">${MV_ICON}<b>${MV_VERB[m.k] || 'Joined'}</b>${tmL(m.t)}<span>from ${tmL(m.f)}${m.d ? ` &middot; ${mvDate(m.d)}` : ''}</span></span></td></tr>`;
   // Week tab preview, no legend and no upcoming weeks: opts.season = this season's games so far with its byes;
   // opts.last = N = his N most recent games (the fallback before his first game this season, no season totals).
   const logHtml = (L, p, opts = {}) => {
@@ -1107,6 +1117,8 @@
       if (isCur) up.forEach(u => rows.push({ w: u.w, u }));
       // weeks without a game of his (tools/player_logs.py missed_weeks): byes, and why he sat
       if (!opts.last) (S.m || []).forEach(m => rows.push({ w: m.w, u: m }));
+      // team changes sit just below his first week with the new team
+      if (!opts.last) (S.mv || []).forEach(m => rows.push({ w: m.w - 0.5, mv: m }));
       // this week's game once it has kicked off, before the log's rebuild (snap counts land a day or two later; owner
       // 2026-10-18, Tyler Warren inactive and his week missing): his live / final box-score points, or why he sat
       if (isCur && !opts.last && p && DATA && +DATA.season === S.s && !rows.some(r => r.w === +DATA.week)) {
@@ -1122,6 +1134,8 @@
       const lr = rows.find(r => r.u && r.u.live), gsAll = lr ? [...S.g, liveG(lr.u.live)] : S.g;
       const fps = gsAll.map(g => pts(g.c, w, pos)), fpg = fps.length ? fps.reduce((a, b) => a + b, 0) / fps.length : 0;
       const team = S.g.length ? S.g[S.g.length - 1].t : '';
+      // "2026 ARI > HOU" when he changed teams that season
+      const teams = S.mv && S.mv.length ? [S.mv[0].f, ...S.mv.map(m => m.t)].map(t => tmL(t)).join(' <span class="muted">&rsaquo;</span> ') : tmL(team);
       const played = (g, label) => { const v = pts(g.c, w, pos), pj = projOf(g);
         return `<tr${tileAttrs(g)}><td>${esc(label)}</td>${opp(g)}<td class="num lg-fp">${g.r ? chip(f1(v), g.rk) : f1(v)}</td>
           <td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td>
@@ -1147,6 +1161,7 @@
       };
       // (its finish chips wait for the rebuilt log)
       const trs = (lr ? totRow(gsAll, null) : totRow(S.g, S.tr ? S : null)) + rows.map(r => {
+        if (r.mv) return moveRow(r.mv, 7 + stat.length);
         if (r.u && r.u.bye) return byeRow(r.w, 5 + stat.length);
         // (owner 2026-10-25: "i want game log tables to update in real time") this week's live / final game on the
         // log's own columns, from the polled box score (redrawn each poll); rank, grade and snaps once the log is rebuilt
@@ -1165,7 +1180,7 @@
       const pg = opts.last || opts.season ? [] : (S.pg || []);
       const sub = (label, gs) => `<tr class="lg-sub"><td colspan="${7 + stat.length}"><span class="lg-pin">${label}${gs ? ` · ${gs.length} game${gs.length === 1 ? '' : 's'} · ${f1(gs.reduce((t, g) => t + pts(g.c, w, pos), 0) / gs.length)} FP/G` : ''}</span></td></tr>`;
       const po = pg.length ? `${sub('Playoffs', pg)}${head}${totRow(pg)}${[...pg].reverse().map(g => played(g, g.po)).join('')}${S.g.length || rows.length ? sub('Regular season') : ''}` : '';
-      return `<tbody data-season="${S.s}"><tr class="lg-season"><td colspan="${7 + stat.length}"><span class="lg-pin"><b>${S.s}</b> ${tmL(team)}${sum}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
+      return `<tbody data-season="${S.s}"><tr class="lg-season"><td colspan="${7 + stat.length}"><span class="lg-pin"><b>${S.s}</b> ${teams}${sum}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
     }).join('');
     if (opts.last || opts.season) return `<div class="lg-scroll"><table class="lg">${body}</table></div>`;
     // Career view (owner 2026-10-16, after Sleeper's career table): one row per regular season, its totals on the
@@ -1176,7 +1191,7 @@
     const carS = L.seasons.filter(S => S.g.length);
     const car = carS.map(S => {
       const gs = S.g, T = sumOf(gs), rk = S.tr ? S : null, tc = (v, r) => rk && r != null ? chip(v, r) : v, tot = pts(T.c, w, pos);
-      return `<tr class="lg-car" data-go-season="${S.s}" title="Show his ${S.s} games"><td><b>${S.s}</b></td><td class="lg-opp">${tmL(gs[gs.length - 1].t)}</td>
+      return `<tr class="lg-car" data-go-season="${S.s}" title="Show his ${S.s} games"><td><b>${S.s}</b></td><td class="lg-opp">${S.mv && S.mv.length ? [S.mv[0].f, ...S.mv.map(m => m.t)].map(t => tmL(t)).join('/') : tmL(gs[gs.length - 1].t)}</td>
         <td class="num">${gs.length}</td><td class="num lg-fp">${tc(f1(tot), rk && rk.trk)}</td><td class="num">${f1(tot / gs.length)}</td>
         <td class="num">${rk && rk.trk ? `<span class="lg-rk ${rkClass(rk.trk)}">${rk.trk}</span>` : '–'}</td>
         ${stat.map(([, fn, ri, ex], i) => { const v = fn(T); return `<td class="num${gcl(i)}">${offRole(v, ex) ?? tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null)}</td>`; }).join('')}</tr>`;
@@ -1555,6 +1570,8 @@
   // timeline"): his latest six practice days and games this season plus his next game (career log prac,
   // tools/player_logs.py practice_timeline)
   const PR_WORD = { D: 'Did not practice', L: 'Limited', F: 'Full' };
+  // this week's report days not in yet (withWeek): still to come, due but not in our data, past the 4 p.m. ET deadline
+  const PR_PEND = { u: 'Expected practice report', '?': 'Report due, not in yet', '!': 'Report overdue' };
   // his team's practice days and games whatever his status (tools/player_logs.py practice_timeline; owner 2026-10-21,
   // Jordan Mason on IR showed his week-1 rows as his latest): a reserve list or the practice squad is its own row
   const RES_WORD = { IR: 'On injured reserve', PUP: 'On the PUP list', NFI: 'On the NFI list', SSPD: 'Suspended', Res: 'On a reserve list', PS: 'On the practice squad' };
@@ -1579,6 +1596,8 @@
   // one practice / game / bye row (season: the events' season, for the in-game injury marks)
   const ptRow = (L, e, today, season) => e[0] === 'b'
     ? `<div class="pt-row pt-bye"><span class="pt-d">${ptDay(e[1])}</span><span class="pt-gm">Bye</span><span class="muted">week ${e[2]} · no game, no practice report</span></div>`
+    : e[0] === 'p' && PR_PEND[e[2]]
+    ? `<div class="pt-row pt-exp"><span class="pt-d">${ptDay(e[1])}</span><span class="pr-chip pr-n">&ndash;</span><span class="muted">${PR_PEND[e[2]]}</span></div>`
     : e[0] === 'p' && (e[2] === 'R' || e[2] === 'S')
     ? `<div class="pt-row"><span class="pt-d">${ptDay(e[1])}</span><span class="pr-chip pr-${e[2] === 'R' ? 'D' : 'n'}">${esc(e[3])}</span><span>${RES_WORD[e[3]] || esc(e[3])}</span></div>`
     : e[0] === 'p'
@@ -1589,19 +1608,33 @@
       if (RES_WORD[e[4]]) return `<div class="pt-row pt-g pt-miss"><span class="pt-d">${ptDay(e[1])}</span><span class="pt-gm">${esc(e[3])} ${tmL(e[2])}</span><span><b>did not play</b> · ${esc(e[4] === 'PS' ? 'practice squad' : `on ${e[4]}`)}</span></div>`;
       const ig = e[4] !== '' && e[4] !== 'out' && e[4] !== 'a' && ((L && L.inj) || []).map(x => x.s === season && x.ig && x.ig[0] === e[5] ? x.ig : null).find(Boolean);
       const cls = e[4] === '' ? '' : e[4] === 'out' ? ' pt-miss' : ig ? ' pt-hurt' : ' pt-ok';
-      const res = e[4] === '' ? (e[1] < today ? '<span class="muted">result pending</span>' : e[1] === today ? '<b>today</b>' : '<b>next game</b>')
+      // today's game once it kicks off (owner 2026-10-29: a Thursday night game read "today" through the final)
+      const gNow = e[4] === '' && e[1] === today && L && L.team ? [teamGame(L.team)].find(g => g && g.gameday === e[1]) : null, sNow = gNow && LIVE.byGame[gNow.id];
+      const res = e[4] === '' ? (e[1] < today ? '<span class="muted">result pending</span>'
+          : e[1] === today ? (gNow && (gNow.final || (sNow && sNow.state === 'post')) ? '<b>final</b> <span class="muted">· snaps once the data is in</span>'
+            : sNow && sNow.state === 'in' ? '<span class="live-dot"></span><b>live</b>' : '<b>today</b>') : '<b>next game</b>')
         : e[4] === 'out' ? '<b>did not play</b>' : e[4] === 'a' ? 'active · no snaps' : `played${e[4] === 'p' ? '' : ` · ${esc(e[4])}% of snaps`}${ig ? ` · <b>hurt${ig[1] ? ` ${ig[1] >= 5 ? 'OT' : `Q${ig[1]}`}` : ''}</b>` : ''}`;
       return `<div class="pt-row pt-g${cls}"><span class="pt-d">${ptDay(e[1])}</span><span class="pt-gm">${esc(e[3])} ${tmL(e[2])}</span><span>${res}</span></div>`;
     })();
   // every season with a practice timeline: this one (prac) and earlier ones with dated reports (prac_hist, 2018 on)
   const pracSeasons = L => [...(L && L.prac && L.prac.length ? [L.cur] : []), ...Object.keys((L && L.prac_hist) || {}).map(Number)]
     .filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => b - a);
-  const pracOf = (L, season) => withByes(+season === +L.cur ? (L.prac || []) : ((L.prac_hist || {})[season] || []));
+  // this week's report days from the week page (injuryBrief's strip, L.prWeek = [date, letter, unlisted]) over the
+  // career log's: the log is rebuilt nightly, the week page every few hours (owner 2026-10-29, Matthew Golden: the strip
+  // read Mon-Tue missed, Wed limited, the table stopped at last Friday). Same-day rows give way; his designation stays.
+  const withWeek = (ev0, wk) => {
+    if (!wk || !wk.length) return ev0;
+    const at = new Map(wk.map(x => [x[0], x])), old = new Map(ev0.filter(e => e[0] === 'p').map(e => [e[1], e]));
+    const out = ev0.filter(e => !(e[0] === 'p' && at.has(e[1])));
+    wk.forEach(([d, c, u, ds]) => { const o = old.get(d); out.push(['p', d, c, (o && o[2] === c && o[3]) || ds || '', ...(u ? [1] : [])]); });
+    return out.sort((a, b) => (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0));
+  };
+  const pracOf = (L, season) => withByes(+season === +L.cur ? withWeek(L.prac || [], L.prWeek) : ((L.prac_hist || {})[season] || []));
   // the whole season, newest first (owner 2026-10-21: "a show more button that pulls up another slide ... ALL practices
   // participation for the selected season (default current season)")
   const pracAllList = (L, season) => {
     const today = NFLE.clock.today(), ev = pracOf(L, season);
-    const nP = ev.filter(e => e[0] === 'p'), cnt = c => nP.filter(e => e[2] === c).length;
+    const nP = ev.filter(e => e[0] === 'p' && !PR_PEND[e[2]]), cnt = c => nP.filter(e => e[2] === c).length;
     const sum = nP.length ? `${nP.length} practice days: ${cnt('F')} full, ${cnt('L')} limited, ${cnt('D')} did not practice${cnt('R') ? `, ${cnt('R')} on a reserve list` : ''}${cnt('S') ? `, ${cnt('S')} on the practice squad` : ''}` : 'No practice days on file';
     return `<p class="pc-sub">${esc(sum)}</p><div class="pt-list">${ev.slice().reverse().map(e => ptRow(L, e, today, +season)).join('')}</div>`;
   };
@@ -1621,12 +1654,14 @@
   const practiceTl = (L, pid) => {
     const ev0 = (L && L.prac) || [];
     if (!ev0.length && !pracSeasons(L).length) return '';
-    const ev = withByes(ev0);
+    const ev = pracOf(L, L.cur);
     const today = NFLE.clock.today();  // Eastern date (UTC rolled over at 8 pm ET: tonight's game read as past)
     // the last six practice days (owner 2026-10-19: games had been taking slots) and the games between them and today
-    const done = ev.filter(e => e[1] <= today), pr6 = done.filter(e => e[0] === 'p').slice(-6);
+    const done = ev.filter(e => e[1] <= today), pr6 = done.filter(e => e[0] === 'p' && !PR_PEND[e[2]]).slice(-6);
     const from = pr6.length ? pr6[0][1] : '';
-    const past = done.filter(e => e[1] >= from), next = ev.find(e => e[1] > today && e[0] === 'g');
+    const next = ev.find(e => e[1] > today && e[0] === 'g');
+    // ...and this week's report days still ahead of today, up to the next game (owner 2026-10-29)
+    const past = [...done.filter(e => e[1] >= from), ...ev.filter(e => (e[0] === 'p' || e[0] === 'b') && e[1] > today && (!next || e[1] < next[1]))];
     const all = pid ? `<div class="pc-tap pt-more" role="button" tabindex="0" aria-haspopup="dialog" data-sheet="All practices"><div class="pc-k">Show all practices</div><template>${pracAllSheet(pid, L)}</template></div>` : '';
     // newest first (owner 2026-10-17): the next game on top, then the latest six going back
     return `<div class="pc-box"><div class="pc-k">Practice and games</div><div class="pt-list">${next ? ptRow(L, next, today, L.cur) : ''}${past.slice().reverse().map(e => ptRow(L, e, today, L.cur)).join('')}</div>${all}</div>`;
@@ -1640,8 +1675,11 @@
       || (now && now.status && now.status !== 'Active' ? now.status : '') || (h.inj ? 'Listed' : 'Healthy');
     const desCls = /^(Out|Inactive|Injured|IR)/i.test(des) ? 'out' : /^Doubt/i.test(des) ? 'd' : /^Quest/i.test(des) ? 'q' : h.inj ? 'q' : 'ok';
     // this week's report days only (2026-10-21: a 6-day window took last Friday's entry for this week's)
-    const wkDates = new Set(p ? NFLE.clock.reports(p.team).map(r => r.date) : []);
-    const pr = ((L && L.prac) || []).filter(e => e[0] === 'p' && (wkDates.size ? wkDates.has(e[1]) : e[1] >= NFLE.clock.etDate(new Date(Date.now() - 6 * 864e5))));
+    // his team's week, whether or not he's on this week's page (owner 2026-10-29: Pierce on IR isn't, and a 6-day
+    // window labeled last week's Thu-Sat "Practice this week")
+    const tmW = (p && p.team) || (L && L.team) || '';
+    const wkDates = new Set(tmW ? NFLE.clock.reports(tmW).map(r => r.date) : []);
+    const pr = ((L && L.prac) || []).filter(e => e[0] === 'p' && (wkDates.size ? wkDates.has(e[1]) : !tmW && e[1] >= NFLE.clock.etDate(new Date(Date.now() - 6 * 864e5))));  // a bye: none
     // This week's practice as a strip (owner 2026-10-17: "Questionable (FFF)" was unreadable): a tile per day, colored
     // full / limited / did not practice, and one plain sentence. Days from the dated report when it's in the data,
     // else the letters in his status / the model's note, Wed-Fri (Mon-Wed before a Thursday game).
@@ -1650,24 +1688,24 @@
       : (((p && (p.status || '') + ' ' + (p.inactive_why || '')) || '').match(/\(([DLF-]{1,3})\)/) || [])[1] || '';
     const wd = d => new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short' });
     // report days from the week clock (Thursday, Monday and Saturday games included); the status letters follow them
-    const rdays = p ? NFLE.clock.reports(p.team).map(r => r.weekday) : [];
+    const rdays = tmW ? NFLE.clock.reports(tmW).map(r => r.weekday) : [];
     // every report day this week, listed or not: unlisted = full participation (owner 2026-10-18), before his first
     // listing and after he drops off alike; days still ahead are left off. From the week's injury chronology
     // (DATA.chrono, nfledge/chronology.py: the one report calendar, travel-week extra days included): "full" only on a
     // day whose report is IN for his team (2026-10-21, Tyler Warren read "Full" Wednesday before Indianapolis' report
     // had arrived); a day past its deadline and still missing is "overdue" ('!'), one due or never filed "not in" ('?').
     // Pages built before "chrono" (2026-10-22): DATA.filed / DATA.overdue and the clock's days.
-    const ch = DATA && DATA.chrono && p ? DATA.chrono[p.team] : null;
+    const ch = DATA && DATA.chrono && tmW ? DATA.chrono[tmW] : null;
     const st = ch ? Object.fromEntries(ch.days) : null;
     const filed = st ? new Set(ch.days.filter(x => x[1] === 'filed').map(x => x[0]))
-      : DATA && DATA.filed && p ? new Set(DATA.filed[p.team] || []) : null;
+      : DATA && DATA.filed && tmW ? new Set(DATA.filed[tmW] || []) : null;
     const late = st ? new Set(ch.days.filter(x => x[1] === 'overdue').map(x => x[0]))
-      : new Set((DATA && DATA.overdue && p && DATA.overdue[p.team]) || []);
+      : new Set((DATA && DATA.overdue && tmW && DATA.overdue[tmW]) || []);
     // every report day of his team's week, upcoming ones too (owner 2026-10-23, Barkley: a Monday game reports Thu /
     // Fri / Sat, and the strip showing only Thu and Fri hid that Saturday's is the final one)
     const soon = st ? new Set(ch.days.filter(x => x[1] === 'upcoming').map(x => x[0])) : new Set();
     const reps = st ? ch.days.map(x => ({ date: x[0], weekday: wd(x[0]) }))
-      : p ? NFLE.clock.reports(p.team).filter(r => r.in) : [];
+      : tmW ? NFLE.clock.reports(tmW).filter(r => r.in) : [];
     const on = Object.fromEntries(pr.map(e => [e[1], e[2]]));
     // the week data's own letters win for this week (InjuryModel.availability: one per day his team's report is in, in
     // order; the career log can be a build older): matched to the filed days when the counts agree
@@ -1681,9 +1719,12 @@
       const wait = days.filter(x => x[1] === '?').map(x => x[0]), over = days.filter(x => x[1] === '!').map(x => x[0]);
       const ahead = days.filter(x => x[1] === 'u').map(x => x[0]);
       const known = days.filter(x => x[1] !== '?' && x[1] !== '!' && x[1] !== 'u');
-      const tail = (wait.length ? `${known.length ? '. ' : ''}${wait.join(' and ')}'s report isn't in our data yet` : '')
-        + (over.length ? `${known.length || wait.length ? '. ' : ''}${over.join(' and ')}'s report is overdue: past its 4 p.m. ET deadline and not on NFL.com yet` : '');
-      const next = ahead.length ? `${known.length || wait.length || over.length ? '. ' : ''}${ahead.join(' and ')}'s report still to come${ahead.length === 1 && days[days.length - 1][0] === ahead[0] ? ' (the final one)' : ''}` : '';
+      // "Thu's report is", "Thu and Fri's reports are", "Thu, Fri and Sat's reports are"
+      const whose = ds => `${ds.length > 1 ? `${ds.slice(0, -1).join(', ')} and ${ds[ds.length - 1]}` : ds[0]}'s report${ds.length > 1 ? 's' : ''}`;
+      const is = ds => ds.length > 1 ? 'are' : 'is';
+      const tail = (wait.length ? `${known.length ? '. ' : ''}${whose(wait)} ${wait.length > 1 ? "aren't" : "isn't"} in our data yet` : '')
+        + (over.length ? `${known.length || wait.length ? '. ' : ''}${whose(over)} ${is(over)} overdue: past the 4 p.m. ET deadline and not on NFL.com yet` : '');
+      const next = ahead.length ? `${known.length || wait.length || over.length ? '. ' : ''}${whose(ahead)} still to come${ahead.length === 1 && days[days.length - 1][0] === ahead[0] ? ' (the final one)' : ''}` : '';
       return (known.length ? said(known, !!(wait.length || over.length || ahead.length)) + tail : tail) + next;
     })();
     function said(days, partial) {  // partial: a day still to come in, so no "all week"
@@ -1699,6 +1740,21 @@
       const trend = d1 > d0 ? ' (trending up)' : d1 < d0 ? ' (trending down)' : '';
       return txt.charAt(0).toUpperCase() + txt.slice(1) + trend;
     }
+    // the same days for the dated table (withWeek): reported letters, and "full, not on the report" only on a day his
+    // team's report is in and he isn't on a reserve list or the practice squad (their days aren't his)
+    const unl = new Set(pr.filter(e => e[4]).map(e => e[1]));
+    const lastP = ((L && L.prac) || []).filter(e => e[0] === 'p' && !wkDates.has(e[1]) && !(filed && filed.has(e[1]))).pop();
+    // on a list: his team's filed days read as that list (the career log's R / S rows), from his status, else his
+    // latest row's list
+    const resOf = /^(IR|Injured Reserve)\b/i.test(des) ? ['R', 'IR'] : /^PUP\b/i.test(des) ? ['R', 'PUP'] : /^NFI\b/i.test(des) ? ['R', 'NFI']
+      : /^Susp/i.test(des) ? ['R', 'SSPD'] : /^Practice Squad\b/i.test(des) ? ['S', 'PS'] : lastP && (lastP[2] === 'R' || lastP[2] === 'S') ? [lastP[2], lastP[3]] : null;
+    const offRep = !!resOf;
+    // owner 2026-10-29: "on tuesday they would be 3 rows 'expected practice report' ... and they fill in as they get
+    // reported": a day not in yet is its own row, 'u' still to come, '?' due and not in our data, '!' overdue
+    // the game designation rides on the week's final report day, once it's in (as the career log's rows carry it)
+    const lastRep = reps.length ? reps[reps.length - 1].date : '', desig = /^(Questionable|Doubtful|Out)\b/i.test(des) ? des : '';
+    if (L && tmW) L.prWeek = reps.length && filed ? reps.map(r => on[r.date] ? [r.date, on[r.date], unl.has(r.date) && on[r.date] === 'F' ? 1 : 0, r.date === lastRep && filed.has(r.date) ? desig : '']
+      : offRep ? (filed.has(r.date) ? [r.date, resOf[0], 0, resOf[1]] : null) : filed.has(r.date) ? [r.date, 'F', 1, ''] : [r.date, soon.has(r.date) ? 'u' : late.has(r.date) ? '!' : '?', 0, '']).filter(Boolean) : null;
     const prStrip = days.length ? `<div class="pr-strip">${days.map(([dname, c]) => `<div class="pr-day pr-${c === '?' || c === '!' || c === 'u' ? 'n' : c}"><small>${esc(dname)}</small><b>${TAG[c] || c}</b></div>`).join('')}</div>
         <p class="pr-say">${esc(prSentence)}</p>` : '';
     // when he got hurt, as a date (owner 2026-10-17: "rather than trying to decipher it"): the in-game note's week, dated
@@ -4253,7 +4309,7 @@
       const off = st ? null : teamOf(p.start && p.start.team && p.start.team.id);
       const cls = `${p.scoringPlay ? ' pl-score' : ''}${p.isPenalty && !p.scoringPlay ? ' pl-pen' : ''}${st ? ' pl-st' : ''}${GP.hiPlay && String(p.id) === GP.hiPlay ? ' pl-hi' : ''}`;
       return `<li class="pl${cls}" data-k="p${esc(p.id)}"${off ? ` style="--pt:${esc(off.color)}"` : ''}><div class="pl-when">${when}</div>
-        <div class="pl-what">${playMeta(p)}${playTitle('pl-hl', hd, linkNames(esc(hd.h), teams), p, info)}${fieldStrip(p, info)}<div class="pl-txt pl-raw" title="Tap for the official text">${linkNames(esc(hd.raw), teams)}</div><button type="button" class="pl-share" data-play="${esc(p.id)}" aria-label="Share this play">${NFLE.shareIcon(14)}<span>Share play</span></button></div>
+        <div class="pl-what">${playMeta(p)}${playTitle('pl-hl', hd, linkNames(esc(hd.h), teams), p, info)}${fieldStrip(p, info)}<div class="pl-txt pl-raw">${linkNames(esc(hd.raw), teams)}</div><button type="button" class="pl-share" data-play="${esc(p.id)}" aria-label="Share this play">${NFLE.shareIcon(14)}<span>Share play</span></button></div>
         <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${tmL(info.away.team)} ${p.awayScore}–${p.homeScore} ${tmL(info.home.team)}</b>` : ''}${swing}</div></li>`;
     };
     const order = o.sort !== 'old';  // newest first unless asked otherwise
@@ -4938,6 +4994,44 @@
         const L = punt ? K : R, Rt = punt ? R : K, dot = punt ? v(from) : tb ? end : catchAt;
         return `<span class="fs" aria-hidden="true" style="--oc:${esc(L.color || '#888')};--dc:${esc(Rt.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
           + `${kb}<i class="fs-dot" style="left:${pc(dot)}%"></i></span>`;
+      }
+    }
+    // A fumble (owner 2026-10-29: "something similarish for fumble returns", after the pick returns): the offense's own
+    // yards to where the ball came out (a pass arcs there), a red ring at that spot, then from where it was recovered
+    // the return to the end of the play: red when the other team has it, neutral when the offense fell on it. All
+    // from the text that stands: "... for 6 yards (I.McDuffie). FUMBLES (I.McDuffie), RECOVERED by GB-B.Cox at GB 8".
+    const fx = String(effText(p) || '');
+    if (/FUMBLES/.test(fx) && !kick && !/No Play/i.test(fx) && !/field goal|extra point|punt is BLOCKED/i.test(fx)) {
+      const pre = fx.slice(0, fx.search(/FUMBLES/)), om = pre.match(/ for (-?\d+) yards?| for no gain/g);
+      const own = om ? (/no gain/.test(om[om.length - 1]) ? 0 : +om[om.length - 1].match(/-?\d+/)[0]) : 0;
+      const recs = [...fx.matchAll(/(?:RECOVERED|recovered) by ([A-Z]{2,3})-.*? at (?:([A-Z]{2,3}) )?(-?\d{1,2})\b|and recovers at (?:([A-Z]{2,3}) )?(-?\d{1,2})\b/g)];
+      const last = recs[recs.length - 1];
+      if (last) {
+        const absOf = (side, n) => (n === 50 || !side ? 50 : txtCode(side) === info.home.team ? 100 - n : n);
+        const fumAt = Math.max(-8, Math.min(108, s0 + own));
+        const recAt = last[1] ? rel(absOf(last[2], +last[3])) : rel(absOf(last[4], +last[5]));
+        const lost = last[1] ? txtCode(last[1]) !== off.team : false;
+        const passed = / pass /.test(pre) && !/incomplete|sacked/.test(pre);
+        let gainBits;
+        if (passed && fumAt - s0 >= 3) {  // the catch's flight, as for any completion, landing where the ball came out
+          const K = 2.6, A = fumAt - s0, peak = Math.max(2.5, Math.min(13, Math.abs(A) * K / 4 * Math.tan(38 * Math.PI / 180))), ht = peak + 2;
+          const lo = Math.min(s0, fumAt), hi = Math.max(s0, fumAt), W = Math.max(0.5, hi - lo) * K, x = v => ((v - lo) * K).toFixed(1);
+          gainBits = `<svg class="fs-arc gain" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%;height:${ht.toFixed(1)}px" viewBox="0 0 ${W.toFixed(1)} ${ht.toFixed(1)}" preserveAspectRatio="none">`
+            + `<path d="M${x(s0)},${ht} Q${x(s0 + A / 2)},${(ht - 2 * peak).toFixed(1)} ${x(fumAt)},${ht}"/></svg>`;
+        } else gainBits = seg(s0, fumAt, fumAt > s0 ? 'gain' : fumAt < s0 ? 'loss' : 'zero');
+        // the return back over the offense's own ground gain (owner: "those yardages cross each other right? red and
+        // green?"): that stretch striped red and green so neither hides the other, as a flag's yards back over a play
+        const ground = !gainBits.startsWith('<svg') && fumAt > s0;
+        const gLo = Math.min(s0, fumAt), gHi = Math.max(s0, fumAt), rLo = Math.min(recAt, e), rHi = Math.max(recAt, e);
+        const oLo = Math.max(gLo, rLo), oHi = Math.min(gHi, rHi);
+        let ret;
+        if (lost && ground && oHi - oLo >= 0.5) {
+          ret = seg(oLo, oHi, 'to fs-stripe-to') + seg(rLo, oLo, 'to') + seg(oHi, rHi, 'to');
+        } else ret = seg(recAt, e, lost ? 'to' : 'zero');
+        if (lost && Math.abs(e - recAt) >= 0.5) ret += `<i class="fs-catch fs-ret" style="left:${pc(e)}%"></i>`;
+        if (Math.abs(recAt - fumAt) >= 1) ret = seg(fumAt, recAt, 'loose') + ret;  // the ball loose: where it came out to where it was recovered
+        return `<span class="fs fs-pass" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
+          + `${gainBits}${ret}<i class="fs-fum" style="left:${pc(fumAt)}%"></i><i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
       }
     }
     let bars;
