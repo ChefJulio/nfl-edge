@@ -20,6 +20,19 @@
 
   const DEF = { mode: 'play', a: 'Offense', b: 'Defense', off: 17, def: 20, qtr: 4, clock: '4:00', down: 4, togo: 3, side: 'opp', yard: 38,
     to: 2, oppTo: 3, line: 0, total: 45, roof: 'outdoors', wind: '', home: 1, rec2h: 0, conv: '', fg: '', pen: { on: 'def', yds: 5, auto: 0, lod: 0, gain: 2 } };
+  // A situation as a link (owner 2026-10-29: share "should he have gone for it" with the math): what differs from the
+  // defaults, as base64url JSON in ?c=, opening the Calculator view (mount reads it)
+  const situationCode = S => {
+    const d = {};
+    Object.keys(S).forEach(k => { if (k === 'pen') { const p = {}; Object.keys(S.pen).forEach(j => { if (S.pen[j] !== DEF.pen[j]) p[j] = S.pen[j]; }); if (Object.keys(p).length) d.pen = p; }
+      else if (S[k] !== DEF[k]) d[k] = S[k]; });
+    return btoa(unescape(encodeURIComponent(JSON.stringify(d)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  };
+  const situationOf = code => {
+    try { const j = JSON.parse(decodeURIComponent(escape(atob(code.replace(/-/g, '+').replace(/_/g, '/')))));
+      return j && typeof j === 'object' ? { ...DEF, ...j, pen: { ...DEF.pen, ...(j.pen || {}) } } : null; } catch (e) { return null; }
+  };
+  const situationUrl = S => `${NFLE.root || ''}index.html?c=${situationCode(S)}#model/calc`;
   // the clock as typed: "2:00", or digits only (phones' number pad has no colon), read like a microwave: the last two
   // are seconds ("200" = 2:00, "45" = 0:45, "1500" = 15:00). null if it isn't a quarter's clock.
   const clockOf = v => {
@@ -156,7 +169,7 @@
     // a half's last 3:00: the general model misses the two-minute drill's tied-with-the-ball spots by ~10 points, and a
     // drive model built for it did no better ((CH), docs/INSIGHTS.md)
     const rough = half <= 180 ? '<p class="cx-rough">Last 3:00 of a half: rough. Our model (like the public ones) under-reads late tied games with the ball by about 10 points; a two-minute-drill model we built to fix it did no better.</p>' : '';
-    return `${now}${rough}${out.join('')}<p class="cx-src muted">Our win probability model, trained on every regulation play ${m.seasons[0]}-${m.seasons[1]}; regulation only (overtime's rules changed in 2022 and 2025). Each choice: the chance of each outcome times the win chance after it. Not for betting.</p>`;
+    return `${now}${rough}${out.join('')}<button type="button" class="cx-share">${NFLE.shareIcon ? NFLE.shareIcon(15) : ''}<span>Share this situation</span></button><p class="cx-src muted">Our win probability model, trained on every regulation play ${m.seasons[0]}-${m.seasons[1]}; regulation only (overtime's rules changed in 2022 and 2025). Each choice: the chance of each outcome times the win chance after it. Not for betting.</p>`;
   }
 
   function mountInto(box, S0, opts = {}) {
@@ -171,6 +184,7 @@
       if (!opts.noSave) save(S);
     };
     box.addEventListener('click', e => {
+      if (e.target.closest('.cx-share')) { NFLE.share(situationUrl(S), 'What should they do? · NFL Edge'); return; }
       const b = e.target.closest('.cx-seg button');
       if (b) { set(b.closest('.cx-seg').dataset.k, isNaN(+b.dataset.v) ? b.dataset.v : +b.dataset.v); draw(); return; }
       const d = e.target.closest('.cx-step button');
@@ -325,6 +339,12 @@
       const g = sec.querySelector('.gc-host'), c = sec.querySelector('.cx-host'), tabs = sec.querySelector('.cx-seg[data-k="view"]');
       let calcOn = false;
       mountGraded(g);
+      // a shared situation (?c=): straight to the Calculator with it
+      const shared = (() => { try { const q = new URLSearchParams(location.search).get('c'); return q ? situationOf(q) : null; } catch (e) { return null; } })();
+      if (shared) {
+        tabs.querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.v === 'calc'));
+        g.hidden = true; c.hidden = false; calcOn = true; mountInto(c, shared);
+      }
       tabs.addEventListener('click', e => {
         const b = e.target.closest('button');
         if (!b) return;

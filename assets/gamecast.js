@@ -1197,6 +1197,34 @@
         <div class="lg-scroll"><table class="lg lg-career"><tbody>${carHead}${carTot}${car}</tbody></table></div></div>
       <div class="lg-v" data-lv="g"${view === 'g' ? '' : ' hidden'}>${games}</div>`;
   };
+  // A place in the open card's game log (owner 2026-10-29: "scroll down to 2024 in mccaffreys game log and wanna direct
+  // my friend to it"): the season at the top of the card's view (Share writes it as @2024), and a shared link's season
+  // scrolled to once the log is drawn (false until then: shell.js retries)
+  const cardLogBox = () => { const ov = document.getElementById('pcOv'); if (!ov || ov.hidden) return null;
+    const tab = [...ov.querySelectorAll('.pc-tab')].find(t => !t.hidden && (t.dataset.pt === 'log' || t.dataset.tt === 'log'));
+    return tab ? tab.querySelector('.pc-log, .tm-log') : null; };
+  // the season at the top of the card's view ('' in the Seasons view or with no log open)
+  NFLE.anchorAt = () => {
+    const box = cardLogBox(), sc = box && box.closest('.pc-card .pc');
+    if (!box || !sc) return '';
+    const games = box.querySelector('.lg-v[data-lv="g"]');
+    if (games && games.hidden) return '';
+    const edge = sc.getBoundingClientRect().top + stickTop() + 8;
+    const tb = [...box.querySelectorAll('tbody[data-season]')].filter(t => t.offsetParent).find(t => t.getBoundingClientRect().bottom > edge);
+    return tb ? tb.dataset.season : '';
+  };
+  NFLE.cardAnchor = () => {  // for Share: the newest season (the log's top) needs no place
+    const at = NFLE.anchorAt(), first = (cardLogBox() || document).querySelector('tbody[data-season]');
+    return at && (!first || first.dataset.season !== at) ? at : '';
+  };
+  NFLE.scrollAnchor = at => {
+    const box = cardLogBox(), tb = box && box.querySelector(`tbody[data-season="${at}"]`);
+    if (!tb) return false;
+    if (box.classList.contains('pc-log')) { showLogView(box, 'g', at); return true; }
+    const sc = tb.closest('.pc-card .pc');
+    if (sc) sc.scrollTo({ top: tb.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - stickTop() });
+    return true;
+  };
   // Game log view: career seasons or every game; kept across re-renders and players for the session
   let logView = 'g';
   const showLogView = (box, v, season) => {
@@ -1231,6 +1259,9 @@
     getJSON(`${siteRoot()}data/players/${encodeURIComponent(pid)}.json`).then(L => (LOGS[pid] = eraLog(L))).catch(() => (LOGS[pid] = { missing: 1, seasons: [] }))));
 
   // ----------------------------------------------------------------------------------------------- player card
+  // card tabs in the URL (owner 2026-10-29: share links "with the active tabs selected"; shell.js segStr): readable names
+  const PTAB_URL = { ov: '', log: 'log', thr: 'throws', news: 'news' }, TTAB_URL = { ov: '', log: 'log', po: 'playoffs' };
+  const tabOfUrl = (m, v) => Object.keys(m).find(k => m[k] === v && v);
   let cardPid = null, cardTab = 'ov';  // the open tab survives live refreshes; a new player starts on Week
   // each team / player page remembers its last tab for the session, so Back from another page lands where you were
   // (owner 2026-10-15); sessionStorage so a full page reload (a game page, the week picker) keeps it too
@@ -2267,7 +2298,7 @@
       const sub = (label, extra = '') => `<tr class="lg-sub"><td colspan="${n}"><span class="lg-pin">${label}${extra}</span></td></tr>`;
       const pt = pg.length ? kindTotals(L, pg) : null;
       const po = pg.length ? `${sub('Playoffs', ` · ${pg.length} game${pg.length === 1 ? '' : 's'}${keys.length ? ` · ${keys.slice(0, 4).map(k => `${nfmt(pt[k] || 0)} ${cols[k][0]}`).join(', ')}` : ''}`)}${head}${tot(pg)}${[...pg].reverse().map(g => row(g, g.po)).join('')}${S.g.length ? sub('Regular season') : ''}` : '';
-      return `<tbody><tr class="lg-season"><td colspan="${n}"><span class="lg-pin"><b>${S.s}</b> ${tmL(team || (pg[0] && pg[0].t) || '')}${sum}</span></td></tr>${po}${S.g.length ? head + trs : ''}</tbody>`;
+      return `<tbody data-season="${S.s}"><tr class="lg-season"><td colspan="${n}"><span class="lg-pin"><b>${S.s}</b> ${tmL(team || (pg[0] && pg[0].t) || '')}${sum}</span></td></tr>${po}${S.g.length ? head + trs : ''}</tbody>`;
     }).join('');
     return `<div class="lg-scroll"><table class="lg">${body}</table></div>`;
   };
@@ -2629,6 +2660,7 @@
     const showTab = k => {
       cardTab = k;
       rememberTab(`p:${pid}`, k);
+      if (NFLE.tabMark) NFLE.tabMark(PTAB_URL[k] || '');
       body.querySelectorAll('.pc-tabs [data-pt]').forEach(x => x.classList.toggle('on', x.dataset.pt === k));
       body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.pt !== cardTab; });
     };
@@ -2824,7 +2856,7 @@
       const pw = pg.filter(g => g.r === 'W').length;
       const po = pg.length ? `${sub(`Playoffs · ${pw}-${pg.length - pw}`)}${head}${[...pg].reverse().map(g => played(g, g.po)).join('')}${rows.length ? sub('Regular season') : ''}` : '';
       const sumBits = [S.rec, av.pf != null ? `${f1(av.pf)} PF/G${rk.pf ? ` (${ord(rk.pf)})` : ''}` : '', av.pa != null ? `${f1(av.pa)} PA/G${rk.pa ? ` (${ord(rk.pa)})` : ''}` : ''].filter(Boolean).join(' · ');
-      return `<tbody><tr class="lg-season"><td colspan="16"><span class="lg-pin"><b>${S.s}</b> ${esc(sumBits)}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
+      return `<tbody data-season="${S.s}"><tr class="lg-season"><td colspan="16"><span class="lg-pin"><b>${S.s}</b> ${esc(sumBits)}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
     }).join('');
     const legend = `<div class="lg-leg"><span>Opponent color = their power rank that week (2021 on):</span><span class="mr-hard">top 8</span><span class="mr-tough">9-16</span><span class="mr-ok">17-24</span><span class="mr-easy">25-32</span>
       <span>· Odds = pregame win chance, Vegas / our model · Line = Vegas spread for ${esc(abbr)} (cov = covered) · Tap a game to open its gamecast</span></div>`;
@@ -3264,6 +3296,7 @@
     body.querySelectorAll('.pc-tabs [data-tt]').forEach(b => b.onclick = () => {
       teamTab = b.dataset.tt;
       rememberTab(`t:${abbr}`, teamTab);
+      if (NFLE.tabMark) NFLE.tabMark(TTAB_URL[teamTab] || '');
       if (teamTab === 'po') body.querySelector('.pc-tab[data-tt="po"]').innerHTML = rootingHtml(abbr) + teamPlayoffs(abbr);
       body.querySelectorAll('.pc-tabs [data-tt]').forEach(x => x.classList.toggle('on', x === b));
       body.querySelectorAll('.pc-tab').forEach(t => { t.hidden = t.dataset.tt !== teamTab; });
@@ -3680,6 +3713,7 @@
     // a team you tap opens on Summary (owner 2026-10-17); one you come back to down the card stack keeps its tab
     if (window.NFLE && NFLE.cardRestore) teamTab = TABS[`t:${abbr}`] || 'ov';
     else if (abbr !== cardTeam || ov.hidden || (window.NFLE && NFLE.freshPage)) teamTab = 'ov';
+    if (window.NFLE && NFLE.wantTab && tabOfUrl(TTAB_URL, NFLE.wantTab)) teamTab = tabOfUrl(TTAB_URL, NFLE.wantTab);  // a shared link's tab
     if (abbr !== cardTeam) teamOpp = '';
     if (teamTab === 'pl' || teamTab === 'dc') teamTab = 'ov';  // Players / Depth became the Players tile's sheet
     // a fresh card starts on the page's week; card-to-card keeps the picked one (page mode: the shell flags fresh)
@@ -3705,6 +3739,7 @@
     // to down the card stack keeps its tab
     if (window.NFLE && NFLE.cardRestore) cardTab = TABS[`p:${pid}`] || 'ov';
     else if (pid !== cardPid || ov.hidden || (window.NFLE && NFLE.freshPage)) cardTab = 'ov';
+    if (window.NFLE && NFLE.wantTab && tabOfUrl(PTAB_URL, NFLE.wantTab)) cardTab = tabOfUrl(PTAB_URL, NFLE.wantTab);  // a shared link's tab
     if (ov.hidden || !cardWk || (window.NFLE && NFLE.freshPage)) cardWk = pageKey();
     if (String(pid).startsWith('DST-') && pid !== cardPid) dstTab = 'ov';
     const same = pid === cardPid && !ov.hidden;  // the open card shown again (a route re-run): keep its tables' scroll
@@ -4039,7 +4074,7 @@
   };
 
   // ------------------------------------------------------------------------------------------------- game page
-  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null, tab: null, pane: 'plays', plSub: 'recent', fpAll: false, drvAll: false };
+  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null, tab: null, pane: 'plays', plSub: null, fpAll: false, drvAll: false };
   const parseGid = gid => { const m = String(gid || '').match(/^(\d{4})_(\d{2})_([A-Z]{2,3})_([A-Z]{2,3})$/); return m ? { season: +m[1], week: +m[2], away: m[3], home: m[4] } : null; };
   const wpSeries = (sum) => {
     const plays = allPlays(sum).flatMap(d => d.plays || []);
@@ -4173,6 +4208,18 @@
       return c.length === 1 ? `<span class="nm-link" role="link" tabindex="0" data-open-pid="${esc(c[0].pid)}">${all}</span>` : all;
     });
   };
+  // The yards a play gained, for the game log's Yards sort (owner 2026-10-29; "consider excluding kickoff returns": every
+  // kickoff would crowd the top): from the official text that stands, before any flag's yards: a run or catch its own
+  // yards (laterals added), a pick / fumble / punt return its return; kickoffs, kicks, tries, kneels, spikes and wiped-out
+  // plays none
+  const playYards = p => {
+    if (nonPlay(p)) return null;
+    const txt = effText(p), t = `${pType(p)} ${txt}`;
+    if (/No Play/i.test(txt) || /kickoff|extra point|two-point|field goal|kneel|spike/i.test(t) || / kicks (?:onside )?\d+ yards/.test(` ${txt}`)) return null;
+    const ys = [...txt.split(/PENALTY/)[0].matchAll(/ for (-?\d+) yards?| for no gain/g)].map(m => m[1] != null ? +m[1] : 0);
+    if (!ys.length) return null;
+    return /[Ll]ateral/.test(txt) ? ys.reduce((a, b) => a + b, 0) : Math.max(...ys);  // a fumble returned: the longer run
+  };
   // opts overrides the Live tab's controls (the Postgame tab asks for just the top few swings).
   const gameLog = (sum, info, ser, upto, opts) => {
     const o = Object.assign({ sort: GP.sort, filter: GP.filter, q: GP.q, view: GP.view, limit: 40, note: true }, opts);
@@ -4204,15 +4251,21 @@
       const st = isST(p);
       // Tint = the team with the ball; special-teams plays stay neutral. Event types are chips, not row colors.
       const off = st ? null : teamOf(p.start && p.start.team && p.start.team.id);
-      const cls = `${p.scoringPlay ? ' pl-score' : ''}${p.isPenalty && !p.scoringPlay ? ' pl-pen' : ''}${st ? ' pl-st' : ''}`;
+      const cls = `${p.scoringPlay ? ' pl-score' : ''}${p.isPenalty && !p.scoringPlay ? ' pl-pen' : ''}${st ? ' pl-st' : ''}${GP.hiPlay && String(p.id) === GP.hiPlay ? ' pl-hi' : ''}`;
       return `<li class="pl${cls}" data-k="p${esc(p.id)}"${off ? ` style="--pt:${esc(off.color)}"` : ''}><div class="pl-when">${when}</div>
-        <div class="pl-what">${playMeta(p)}${playTitle('pl-hl', hd, linkNames(esc(hd.h), teams), p, info)}${fieldStrip(p, info)}<div class="pl-txt pl-raw" title="Tap for the official text">${linkNames(esc(hd.raw), teams)}</div></div>
+        <div class="pl-what">${playMeta(p)}${playTitle('pl-hl', hd, linkNames(esc(hd.h), teams), p, info)}${fieldStrip(p, info)}<div class="pl-txt pl-raw" title="Tap for the official text">${linkNames(esc(hd.raw), teams)}</div><button type="button" class="pl-share" data-play="${esc(p.id)}" aria-label="Share this play">${NFLE.shareIcon(14)}<span>Share play</span></button></div>
         <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${tmL(info.away.team)} ${p.awayScore}–${p.homeScore} ${tmL(info.home.team)}</b>` : ''}${swing}</div></li>`;
     };
     const order = o.sort !== 'old';  // newest first unless asked otherwise
     const swingOf = p => { const w = wpAfter[p.id]; return w ? Math.abs(w.now - w.prev) : 0; };
     let html = '';
-    if (o.sort === 'impact') {
+    if (o.sort === 'yards') {
+      // Biggest plays by yards (owner 2026-10-29: "sorts the plays by most yards gained in the play"), one flat list
+      const pl = drives.flatMap(d => d.plays || []).filter(keep).map(p => [p, playYards(p)]).filter(x => x[1] != null)
+        .sort((a, b) => b[1] - a[1]).slice(0, o.limit).map(x => x[0]);
+      html = pl.length ? `${o.note ? `<p class="gcs-note">The ${pl.length} plays that gained the most yards (kickoffs left out; returns count).</p>` : ''}<ol class="pls">${pl.map(playRow).join('')}</ol>`
+        : '<p class="muted">No plays match.</p>';
+    } else if (o.sort === 'impact') {
       // Biggest swings in ESPN's live win probability, one flat list (impact order doesn't fit inside drives).
       const pl = drives.flatMap(d => d.plays || []).filter(keep).filter(p => wpAfter[p.id]).sort((a, b) => swingOf(b) - swingOf(a)).slice(0, o.limit);
       html = pl.length ? `${o.note ? `<p class="gcs-note">The ${pl.length} plays that moved ESPN's win probability the most.</p>` : ''}<ol class="pls">${pl.map(playRow).join('')}</ol>`
@@ -4818,6 +4871,14 @@
   // "X kicks 60 yards from NE 35 to CHI 5." / "punts 44 yards to DAL 12" (a punt: from the line of scrimmage) /
   // "kicks 65 yards from KC 35 to end zone": [, yards, from side, from yard line, to side, to yard line, end zone]
   const KICK_RX = / (?:kicks|punts)(?: onside)? (\d+) yards?(?: from ([A-Z]{2,3}) (\d{1,2}))?(?: to (?:the )?(?:([A-Z]{2,3}) )?(\d{1,2})| to (?:the )?(end zone)|, (end zone))?/;
+  // where a pass was picked off, on the field (away goal line 0 -> home 100): "INTERCEPTED by H.Smith at MIN 44" (after
+  // a replay reversal, the ruling that stands); null without a spot
+  const pickSpot = (p, info) => {
+    const m = effText(p).match(/INTERCEPTED by .*? at (?:([A-Z]{2,3}) )?(-?\d{1,2})\b/);
+    if (!m) return null;
+    const n = +m[2], side = m[1] ? txtCode(m[1]) : null;
+    return n === 50 || !side ? 50 : side === info.home.team ? 100 - n : n;
+  };
   const fieldStrip = (p, info) => {
     const a = spot(p.start, info);
     if (!a || a.x == null || nonPlay(p)) return '';
@@ -4930,10 +4991,19 @@
           arc = `<svg class="fs-arc gain" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%;height:${ht.toFixed(1)}px" viewBox="0 0 ${W.toFixed(1)} ${ht.toFixed(1)}" preserveAspectRatio="none"><path d="${d}"/></svg>`
             + `<i class="fs-catch" style="left:${pc(e)}%"></i>`;  // where the play ended (owner: "a little green dot where the arc ends")
         } else {
-          const to = Math.min(108, s0 + (/ deep /i.test(raw0) ? 20 : 6));
+          // an interception (owner 2026-10-29: "illustrate interception return yardage like we do complete passes ...
+          // work backwards from the yardage to show where it was intercepted and how far the return was"): the flight
+          // to the spot of the pick ("INTERCEPTED by H.Smith at MIN 44"), then the return back from it to where the
+          // play ended, red, a red dot at its end; no spot in the text -> the depth guess as before
+          const pa = pick ? pickSpot(p, info) : null;
+          const to = pa != null ? Math.max(-8, Math.min(108, rel(pa))) : Math.min(108, s0 + (/ deep /i.test(raw0) ? 20 : 6));
           const lo = Math.min(s0, to), hi = Math.max(s0, to), ht = Math.max(4, Math.min(14, 3 + 0.45 * (hi - lo)));
           arc = `<svg class="fs-arc${inc ? ' miss' : ' int'}" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%;height:${ht.toFixed(1)}px" viewBox="0 0 100 12" preserveAspectRatio="none"><path d="M0,12 Q50,-10 100,12"/></svg>`
             + `<i class="fs-x${pick ? ' int' : ''}" style="left:${pc(to)}%"></i>`;
+          if (pa != null) {  // the return: from the pick to the end of the play (into the offense's end zone on a pick-six)
+            bars = seg(to, e, 'to');
+            if (Math.abs(e - to) >= 0.5) arc += `<i class="fs-catch fs-ret" style="left:${pc(e)}%"></i>`;
+          }
         }
       }
     }
@@ -5231,6 +5301,9 @@
   const renderGame0 = () => {
     const root = document.getElementById('gc'), { sum, info, g } = GP;
     const rp = GP.replay;
+    // Plays opens on the game log once the game is final (owner 2026-10-29: "postgame ... it should open game log, not
+    // recent"), on Recent while it's live or replaying; the viewer's pick sticks
+    const plSub = GP.plSub || (info.state === 'post' && !rp ? 'log' : 'recent');
     const ser = sum ? wpSeries(sum) : [];
     const upto = rp ? rp.t : null;
     // Opens on the tab that fits the game's state; the viewer's pick sticks after that.
@@ -5265,10 +5338,10 @@
       <div class="seg gc-panes" role="tablist">${GPANES.map(([k, l]) => `<button type="button" role="tab" data-pane="${k}" class="${GP.pane === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       ${GP.pane === 'flow' ? (storyCard(st, info) || '<section class="gcs"><p class="muted">The game flow fills in once the game starts.</p></section>')
         + (st.ended && !rp && ser.length >= 2 ? `<section class="gcs"><h3>Turning points</h3><p class="gcs-note">The plays that moved ESPN's win probability the most.</p>${turningCards(sum, info, ser, 6)}</section>` : '')
-      : GP.pane === 'plays' && GP.plSub === 'recent' ? `<section class="gcs" id="gcLog"><div class="seg pl-sub">${[['recent', 'Recent'], ['log', 'Game log']].map(([k, l]) => `<button type="button" data-plsub="${k}" class="${GP.plSub === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      : GP.pane === 'plays' && plSub === 'recent' ? `<section class="gcs" id="gcLog"><div class="seg pl-sub">${[['recent', 'Recent'], ['log', 'Game log']].map(([k, l]) => `<button type="button" data-plsub="${k}" class="${plSub === k ? 'on' : ''}">${l}</button>`).join('')}</div>
             ${sum ? recentView(st, info, sum) : '<p class="muted">Plays appear once the game starts.</p>'}</section>`
-      : GP.pane === 'plays' ? `<section class="gcs" id="gcLog"><div class="seg pl-sub">${[['recent', 'Recent'], ['log', 'Game log']].map(([k, l]) => `<button type="button" data-plsub="${k}" class="${GP.plSub === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-            <div class="lg-bar"><div class="seg">${[['drive', 'By drive'], ['every', 'Every play']].map(([k, l]) => `<button type="button" data-view="${k}" class="${GP.view === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['new', 'Newest'], ['old', 'Oldest'], ['impact', 'Swings']].map(([k, l]) => `<button type="button" data-sort="${k}" class="${GP.sort === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['all', 'All'], ['score', 'Scoring'], ['to', 'Turnovers'], ['pen', 'Penalties']].map(([k, l]) => `<button type="button" data-filter="${k}" class="${GP.filter === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      : GP.pane === 'plays' ? `<section class="gcs" id="gcLog"><div class="seg pl-sub">${[['recent', 'Recent'], ['log', 'Game log']].map(([k, l]) => `<button type="button" data-plsub="${k}" class="${plSub === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+            <div class="lg-bar"><div class="seg">${[['drive', 'By drive'], ['every', 'Every play']].map(([k, l]) => `<button type="button" data-view="${k}" class="${GP.view === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['new', 'Newest'], ['old', 'Oldest'], ['impact', 'Swings'], ['yards', 'Yards']].map(([k, l]) => `<button type="button" data-sort="${k}" class="${GP.sort === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['all', 'All'], ['score', 'Scoring'], ['to', 'Turnovers'], ['pen', 'Penalties']].map(([k, l]) => `<button type="button" data-filter="${k}" class="${GP.filter === k ? 'on' : ''}">${l}</button>`).join('')}</div>
               <input type="search" id="lgQ" placeholder="Player or text" value="${esc(GP.q)}" aria-label="Filter plays"></div>
             <div id="lgBody">${!sum ? '<p class="muted">Plays appear once the game starts.</p>'
               : !allPlays(sum).length && info.state === 'post' ? '<p class="muted">ESPN has no play-by-play for this game (games before about 2005 only have box scores).</p>'
@@ -5449,6 +5522,22 @@
     const id = parseGid(gid);
     if (!id) { document.getElementById('gc').innerHTML = '<p class="gc-loading">No game selected.</p>'; return; }
     Object.assign(GP, id);
+    // a shared link's view (owner 2026-10-29: share the gamecast "as you see it", a play too): pane, the plays' sub-view,
+    // layout, order and filter; play=<id> opens the full game log on that play, highlighted (gcShareUrl writes these)
+    const pick = (k, ok) => { const v = Q.get(k); return v && ok.includes(v) ? v : null; };
+    const pane = pick('pane', GPANES.map(x => x[0])), hi = Q.get('play');
+    if (pane || hi) { GP.pane = hi ? 'plays' : pane; GP.paneSet = true; }
+    if (Q.get('tab') === 'pre') GP.tab = 'pre';
+    GP.plSub = hi ? 'log' : pick('plsub', ['recent', 'log']) || GP.plSub;
+    GP.view = hi ? 'every' : pick('view', ['drive', 'every']) || GP.view;
+    GP.sort = hi ? 'old' : pick('sort', ['new', 'old', 'impact', 'yards']) || GP.sort;
+    GP.filter = hi ? 'all' : pick('filter', ['all', 'score', 'to', 'pen']) || GP.filter;
+    GP.hiPlay = hi || null;
+    const top = document.querySelector('.gc-top .gc-wrap');
+    if (top && !top.querySelector('.gc-share')) {
+      top.insertAdjacentHTML('beforeend', `<button type="button" class="gc-share" aria-label="Share this game">${NFLE.shareIcon(16)}<span>Share</span></button>`);
+      top.querySelector('.gc-share').onclick = () => NFLE.share(gcShareUrl(), `${document.title}`);
+    }
     if (d) {
       try { DATA = await getJSON(d, 12000, false); DATA.__rel = d; } catch (e) { DATA = null; }
       const back = document.getElementById('gcBack');
@@ -5461,6 +5550,36 @@
     document.addEventListener('visibilitychange', () => { if (!document.hidden && GP.info && (GP.info.realState === 'in' || GP.info.realState === 'pre')) pollGame(); });
     document.addEventListener('nfle-scoring', () => renderGame());
     if (Q.get('replay') === '1' && GP.canReplay) replayCmd('on');
+    if (GP.hiPlay) goPlay(GP.hiPlay);
+    // a play's Share, on every row however the log was redrawn (the search box redraws only the rows)
+    document.getElementById('gc').addEventListener('click', e => {
+      const b = e.target.closest('.pl-share');
+      if (b) { e.stopPropagation(); NFLE.share(gcShareUrl(b.dataset.play), document.title); }
+    });
+  };
+  // the gamecast's link as you see it: the game, its pane and (on Plays) sub-view, layout, order and filter; a play's link
+  // opens the full game log on it (initGame reads them)
+  const gcShareUrl = (play = null) => {
+    const u = new URL(location.href), q = u.searchParams;
+    ['pane', 'plsub', 'view', 'sort', 'filter', 'play', 'tab', 'replay', 'sim'].forEach(k => q.delete(k));
+    if (play) q.set('play', play);
+    else {
+      if (GP.tab === 'pre') q.set('tab', 'pre');
+      q.set('pane', GP.pane);
+      if (GP.pane === 'plays') {
+        const sub = GP.plSub || (GP.info && GP.info.state === 'post' ? 'log' : 'recent');
+        q.set('plsub', sub);
+        if (sub === 'log') { q.set('view', GP.view); q.set('sort', GP.sort); if (GP.filter !== 'all') q.set('filter', GP.filter); }
+      }
+    }
+    u.hash = '';
+    return u.toString();
+  };
+  // a shared play: scrolled to the middle of the screen once the log has drawn (the plays load after the page)
+  const goPlay = (id, tries = 0) => {
+    const row = document.querySelector(`#lgBody li.pl[data-k="p${CSS.escape(id)}"]`);
+    if (row) { row.scrollIntoView({ block: 'center' }); const r = row.querySelector('.pl-raw'); if (r) r.classList.add('open'); return; }
+    if (tries < 30) setTimeout(() => goPlay(id, tries + 1), 200);
   };
 
   // ------------------------------------------------------------------------------------------------------ init

@@ -98,3 +98,6 @@
 .gc-st.up b { color: var(--good); } .gc-st.down b { color: var(--bad); }
 .gc-brs h4 { text-transform: none; letter-spacing: 0; font-size: 12.5px; }
 .gc-row summary { padding-top: 10px; }
+/* Share this situation (owner 2026-10-29): under the results, as in the gamecast */
+.cx-share { display: inline-flex; align-items: center; gap: 6px; margin: 4px 0 10px; font: inherit; font-size: var(--fs-sm); font-weight: 700;
+  padding: 6px 12px; border-radius: var(--r-pill); border: 1px solid var(--line); background: var(--panel2); color: var(--ink); cursor: pointer; }
