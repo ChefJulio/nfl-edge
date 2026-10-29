@@ -899,6 +899,71 @@ def ingame_events(cache, nfl, cur: int, ros: pd.DataFrame, site: Path) -> dict:
   return out
 
 
+def ir_names(allsched: pd.DataFrame):
+  """Injury names for reserve-list stints (tools/injury_names_build.py: Wikipedia, ESPN news), gsis -> [[season, date,
+  part, src]], and date -> NFL week (the first week whose last regular-season game is on or after it; preseason
+  dates fall in week 1)."""
+  p = ROOT / "data" / "history" / "ir_names.json"
+  names = json.loads(p.read_text(encoding="utf-8")).get("p", {}) if p.exists() else {}
+  ends = {}
+  if "gameday" in allsched.columns:
+    for (s, w), d in allsched.groupby(["season", "week"]).gameday.max().items():
+      ends.setdefault(int(s), []).append((int(w), str(d)[:10]))
+  for s in ends:
+    ends[s].sort()
+
+  def week_of(s: int, d: str):
+    for w, end in ends.get(int(s), []):
+      if d <= end:
+        return w
+    return None
+  return names, week_of
+
+
+def name_reserve_stints(eps: list, names: list, week_of) -> None:
+  """A reserve-list stint the weekly reports never named (owner 2026-10-28: "a lot of 'undisclosed' injuries ...
+  that aren't in fact undisclosed"; a player on IR / PUP / NFI is off the report). Oldest first, in this order:
+    1. a source dated inside the stint or the week before it (Wikipedia, ESPN news; tools/injury_names_build.py),
+       or undated in its season when it's the season's only such stint             ps "wiki" / "espn"
+    2. his named listing that ended 1-3 weeks before it, same season (listed, then the reserve list)   ps "prior"
+    3. last season's named stint that ran to week 14 or later, into this one's week 1-2 (IR into PUP)  ps "carry"
+    4. else no part: the card reads "Not reported" (no team kept it secret; it just wasn't on a report)"""
+  for i, e in enumerate(eps):
+    if e.get("part") != "Undisclosed":
+      continue
+    s, best = e["s"], None
+    open_ = [x for x in eps if x["s"] == s and x.get("part") == "Undisclosed"]
+    # how early a dated source may be: the weekly rosters can start a stint weeks after the placement (Incognito: IR on
+    # September 23, 2020, week 3; his reserve weeks from week 8), so back to the previous episode's start, or its end
+    # when that one was its own reserve stint (a source for that stint isn't this one's); 8 weeks with none before
+    before = [x for x in eps[:i] if x["s"] == s]
+    lo = (before[-1]["w1"] + 1 if before[-1].get("list") else before[-1]["w0"]) if before else e["w0"] - 8
+    for ns, d, part, src in names:
+      if ns != s:
+        continue
+      if d:
+        w = week_of(s, d)
+        if w is None or not (min(lo, e["w0"] - 1) <= w <= e["w1"]):
+          continue
+        gap = abs(w - e["w0"])
+      elif len(open_) == 1:
+        gap = 99
+      else:
+        continue
+      if best is None or gap < best[0]:
+        best = (gap, part, src)
+    prev = eps[i - 1] if i else None
+    named = prev is not None and prev.get("part") not in (None, "", "Undisclosed", "Illness")  # an illness rarely means IR
+    if best:
+      e["part"], e["ps"] = best[1], best[2]
+    elif named and prev["s"] == s and 1 <= e["w0"] - prev["w1"] <= 3:
+      e["part"], e["ps"] = prev["part"], "prior"
+    elif named and prev["s"] == s - 1 and prev.get("list") and prev["w1"] >= 14 and e["w0"] <= 2:
+      e["part"], e["ps"] = prev["part"], "carry"
+    else:
+      e["part"] = ""
+
+
 def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFrame, played: set,
                    unit_snaps: dict | None = None,
                    ig: dict | None = None) -> dict:
@@ -928,6 +993,7 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
   r = r[r.status.isin(["ACT", "INA", "RES"]) & (r.season >= 2009)]  # on the team for that game; 2009 on (official
   # reports; earlier weekly rosters are too sparse to count games: Brady's 2008 has one row)
   pos_of = ros.dropna(subset=["gsis_id"]).sort_values(["season", "week"]).drop_duplicates("gsis_id", keep="last").set_index("gsis_id").position
+  names, week_of = ir_names(allsched)
   r = r.sort_values(["gsis_id", "season", "week"]).drop_duplicates(["gsis_id", "season", "week"], keep="last")
   out = {}
   for gid, g in r.groupby("gsis_id", sort=False):
@@ -980,6 +1046,7 @@ def injury_history(cache, nfl, cur: int, ros: pd.DataFrame, allsched: pd.DataFra
       elif cur_ep:
         close()
     close()
+    name_reserve_stints(eps, names.get(gid, []), week_of)
     # the game it started in: an in-game injury in the episode's first week or the week before it (hurt Sunday,
     # listed from the next report); the earliest such game, pbp note or news blurb
     for e in eps:

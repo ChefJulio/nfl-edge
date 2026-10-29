@@ -652,6 +652,8 @@ td.pen-top { color: var(--muted); font-size: var(--fs-sm); }
 .eg-chip.eg-uq { background: transparent; box-shadow: inset 0 0 0 1px var(--line); } .eg-chip.eg-uq b { color: var(--muted); }
 .dc-p.dc-hurt { opacity: .55; } .dc-p.dc-hurt .dc-n { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 70%, transparent); }
 .ij-ig { display: block; font-size: var(--fs-xs); color: var(--muted); margin-top: 2px; }
+/* an injury named from Wikipedia / ESPN news / a nearby listing, not the report itself: a dotted underline, the source on hover */
+.ij-src { text-decoration: underline dotted; text-decoration-color: var(--faint); text-underline-offset: 3px; cursor: help; }
 /* the Games tab's matchup tile on player / team pages */
 .pc-mt { margin: 0 0 12px; } .pc-mt .mt { margin: 0; } .pc-mtk { margin: 2px 2px 6px; }
 /* team page Players tab: tile rows with the same 3px gap as the list tabs */

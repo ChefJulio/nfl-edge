@@ -354,6 +354,11 @@ jobs:
       - name: Hall of Fame
         if: needs.plan.outputs.complete == 'true' || steps.carry.outputs.carried != 'true'
         run: python tools/hof_build.py || true
+      # Names for reserve-list stints the weekly reports never named (Wikipedia / ESPN news; data/history/ir_names.json
+      # keeps the finished seasons, this run reads only new placements' news). Read by the player logs' injury history.
+      - name: Injury names
+        if: needs.plan.outputs.complete == 'true' || steps.carry.outputs.carried != 'true'
+        run: python tools/injury_names_build.py || echo "[irnames] skipped"
       # Career game logs for the player card (one JSON per player; reads the week data files built above).
       - name: Player game logs
         if: needs.plan.outputs.complete == 'true' || steps.carry.outputs.carried != 'true'

@@ -2341,11 +2341,19 @@
     if (!eps.length) return cur + dur + '<div class="pc-box"><p class="pc-sub">No injuries on the official reports since 2009.</p></div>';
     // recurring body parts: by games missed, then by how often listed
     const parts = {};
-    eps.forEach(e => { const k = e.part || 'Undisclosed'; parts[k] = parts[k] || { n: 0, m: 0 }; parts[k].n++; parts[k].m += e.missed || 0; });
+    eps.filter(e => e.part).forEach(e => { const k = e.part; parts[k] = parts[k] || { n: 0, m: 0 }; parts[k].n++; parts[k].m += e.missed || 0; });
     const top = Object.entries(parts).sort((a, b) => b[1].m - a[1].m || b[1].n - a[1].n).slice(0, 5);
     const rec = `<div class="pc-box"><div class="pc-k">Most often</div><div class="ij-parts">${top.map(([k, v]) => `<span class="ij-part"><b>${esc(k)}</b> ${v.n}x${v.m ? ` · ${v.m} missed` : ''}</span>`).join('')}</div></div>`;
     const wk = e => e.w0 === e.w1 ? `Wk ${e.w0}` : `Wk ${e.w0}-${e.w1}`;
-    const rows = eps.map(e => `<tr${e.missed ? '' : ' class="ij-played"'}><td><b>${e.s}</b></td><td>${wk(e)}</td><td>${esc(e.part || 'Undisclosed')}${e.ig ? `<span class="ij-ig" title="From the play-by-play injury notes or a news blurb">hurt in the week ${e.ig[0]} game${e.ig[1] ? `, Q${e.ig[1]}` : ''}</span>` : ''}</td>
+    // (owner 2026-10-28: "undisclosed" injuries that weren't) a reserve-list stint is off the weekly report: its name
+    // from Wikipedia / ESPN news or his listing around it says where it came from; none found reads "Not reported"
+    const PS = { wiki: 'From his Wikipedia article', espn: 'From ESPN player news', prior: 'From his injury report listing just before the reserve list',
+                 carry: 'Carried over from the injury that ended his season before' };
+    const NR = { IR: 'Placed on injured reserve; the injury never appeared on an official report', PUP: 'On the PUP list; the injury never appeared on an official report',
+                 NFI: 'On the non-football injury list; the injury never appeared on an official report' };
+    const partCell = e => e.part ? (e.ps ? `<span class="ij-src" title="${esc(PS[e.ps] || '')}">${esc(e.part)}</span>` : esc(e.part))
+      : `<span class="muted" title="${esc(NR[e.list] || 'The injury never appeared on an official report')}">Not reported</span>`;
+    const rows = eps.map(e => `<tr${e.missed ? '' : ' class="ij-played"'}><td><b>${e.s}</b></td><td>${wk(e)}</td><td>${partCell(e)}${e.ig ? `<span class="ij-ig" title="From the play-by-play injury notes or a news blurb">hurt in the week ${e.ig[0]} game${e.ig[1] ? `, Q${e.ig[1]}` : ''}</span>` : ''}</td>
       <td class="num">${e.missed == null ? '–' : e.missed ? `<b>${e.missed}</b>` : '0'}</td><td class="num">${e.played == null ? '–' : e.played || 0}</td>
       <td>${e.list ? `<span class="dc-tag dt-out">${esc(e.list)}</span>` : e.worst ? `<span class="dc-tag dt-${e.worst === 'Questionable' ? 'q' : e.worst === 'Doubtful' ? 'd' : 'out'}">${esc(e.worst === 'Questionable' ? 'Q' : e.worst === 'Doubtful' ? 'D' : 'Out')}</span>` : ''}</td></tr>`).join('');
     return `${cur}${dur}${rec}<div class="pc-box pc-logbox"><div class="pc-k">Every injury listed</div>
