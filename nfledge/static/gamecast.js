@@ -2510,6 +2510,18 @@
   // ---- NFL Edge grade (data/grades/<season>.json, tools/grade_build.py): percentile of EPA over replacement per game
   // over his last three seasons (weighted to the latest, shrunk by sample size) among his position's players that season.
   const GR = { ix: null, s: {} };
+  // his notable move of the last two weeks, atop the card's Summary (owner 2026-10-29; shell.js NFLE.notable, the same
+  // wording as Home's strip). NOTABLE: undefined until asked, null while loading.
+  let NOTABLE;
+  const notableBanner = pid => {
+    if (!NOTABLE || !NOTABLE.items) return '';
+    const F = NFLE.notableFmt, now = Date.now();
+    const it = NOTABLE.items.find(i => (now - new Date(i.date + 'T12:00:00')) / 864e5 <= 14 && i.players.some(x => x.pid === pid));
+    if (!it) return '';
+    const p = it.players.find(x => x.pid === pid), why = F.why(it, p);
+    const when = new Date(it.date + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
+    return `<div class="pc-nv nv-${esc(it.kind)}-b"><span><b>${esc(F.verb(it, p))}</b> <span class="muted">&middot; ${esc(when)}${why.length ? ` &middot; ${esc(why.join(', '))}` : ''}</span></span></div>`;
+  };
   const GRH = {};  // pid -> his grade history docs (data/grades/players/<last 2 digits>.json); null while loading
   const grIndex = () => GR.ix || (GR.ix = NFLE.load('data/grades/index.json').catch(() => null));
   const grSeason = s => GR.s[s] || (GR.s[s] = NFLE.load(`data/grades/${s}.json`).catch(() => null));
@@ -2670,6 +2682,7 @@
         if (cardPid === pid) rerenderCard();
       });
     }
+    if (NOTABLE === undefined) { NOTABLE = null; NFLE.notable().then(d => { NOTABLE = d || { items: [] }; if (cardPid && notableBanner(cardPid)) rerenderCard(); }); }
     // the current season's grades drive the header chip; the Grade tab loads every season on first open
     if (graded && GR.cur === undefined) { GR.cur = null; grIndex().then(ix => ix && grSeason(ix.current)).then(d => { GR.cur = d || null; if (cardPid === pid) rerenderCard(); }); }
     const isKind = !!(L && L.kind);  // a non-fantasy page (defense, line, specialists): no week projections
@@ -2703,7 +2716,7 @@
       ${bioStrip(L)}
       <div class="seg pc-tabs" role="tablist">${[['ov', 'Summary'], ['log', 'Game log'], ...(hasThr ? [['thr', 'Throws']] : []), ...(news ? [['news', 'News']] : [])]
         .map(([k, l]) => `<button type="button" role="tab" data-pt="${k}" class="${cardTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-      <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${overview ? '' : pickerHtml()}${week}${overview ? '<div class="pc-pen"></div>' : ''}</div>
+      <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${notableBanner(pid)}${overview ? '' : pickerHtml()}${week}${overview ? '<div class="pc-pen"></div>' : ''}</div>
       <div class="pc-tab" data-pt="log"${cardTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every career game</div><div class="pc-log">${
         !LOGS[pid] ? '<div class="skel-zone"></div>' : !L ? '<p class="pc-sub">Game log unavailable.</p>'
           : isKind ? (L.seasons.length ? kindLog(L, L.seasons) : '<p class="pc-sub">No regular-season games with a recorded stat or snap.</p>')

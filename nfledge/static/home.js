@@ -13,7 +13,8 @@
     },
   };
   const go = e => {
-    if (e.target.closest('[data-open-pid], .tm-open')) return;  // the card opens (the page's click rule)
+    if (e.target.closest('[data-open-pid], .tm-open, .hm-dg > summary')) return;  // the card opens (the page's click rule); a digest folds
+    if (e.target.closest('.hm-news') && (e.type === 'click' || e.key === 'Enter')) NFLE.movesNotable = true;  // Moves opens on Notable
     const t = e.target.closest('.hm-t');
     if (t && (e.type === 'click' || e.key === 'Enter')) location.hash = t.dataset.href;
   };
@@ -53,10 +54,51 @@
         <p class="muted">No ads, no sign-up. The Model tab shows how it works, and what we tried that didn't.</p>
       </div></details>
       <div class="hm-grid">
+        <div class="hm-news" hidden></div>
         ${tile('players/rankings', 'See weekly projections', `<ul class="hm-l">${proj}</ul><p class="hm-f">Top projected at each position &middot; all players in Rankings</p>`)}
         ${tile('teams/power', 'See team power rankings', `<ul class="hm-l">${pw}</ul><p class="hm-f">Net points per game vs an average team</p>`)}
         ${tile('games', 'Track live games', `<ul class="hm-l">${games}</ul><p class="hm-f">Live scores, plays and win chances once games start</p>`)}
         ${tile('league/lineup', 'Get fantasy advice', fant)}
       </div></div>`;
+    NFLE.notable().then(doc => drawNotable(sec.querySelector('.hm-news'), doc, logo));
+  };
+  // Notable moves (owner 2026-10-29): the last three weeks' trades, signings, releases, season-ending injuries and
+  // suspensions of players our numbers care about (tools/notable_build.py), newest first; free agency's bursts (8+
+  // within 3 days) fold into one dated card (owner: "we'll eval it in march")
+  const DAYS = 21, MAX = 6, BURST = 8;  // 8+ in 3 days: free agency, not a trade deadline week
+  const dayOf = d => new Date(d + 'T12:00:00');
+  const short = d => dayOf(d).toLocaleDateString([], { month: 'short', day: 'numeric' });
+  const drawNotable = (box, doc, logo) => {
+    if (!box || !doc || !(doc.items || []).length) return;
+    const F = NFLE.notableFmt, today = new Date();
+    const items = doc.items.filter(i => (today - dayOf(i.date)) / 864e5 <= DAYS);
+    if (!items.length) return;
+    const row = it => {
+      const p = it.players[0], more = it.players.length - 1, why = F.why(it, p);
+      const route = it.kind === 'trade' || it.kind === 'signing' ? `${p.from ? logo(p.from, 16) : ''}<span class="hm-arrow" aria-hidden="true">&rsaquo;</span>${logo(p.to || it.team, 16)}` : logo(it.team || p.from, 16);
+      return `<li class="hm-nv"><div class="hm-nv1"><span class="nv-k nv-${esc(it.kind)}">${esc(F.label(it.kind))}</span>
+          <button type="button" class="nm-link hm-nl" data-open-pid="${esc(p.pid)}">${esc(p.name)}</button>${p.pos ? `<span class="posb posb-${esc(p.pos)}">${esc(p.pos)}</span>` : ''}
+          ${more ? `<span class="hm-m" title="${esc(it.players.slice(1).map(x => x.name).join(', '))}">+${more}</span>` : ''}<span class="hm-route">${route}</span></div>
+        <div class="hm-nv2">${[`<span>${esc(short(it.date))}</span>`, esc(F.detail(it, p)), esc(why.join(', '))].filter(Boolean).join(' &middot; ')}</div></li>`;
+    };
+    // bursts: a run of 5+ moves, each within 3 days of the run's newest one
+    const blocks = [];
+    for (let i = 0; i < items.length;) {
+      let j = i;
+      while (j + 1 < items.length && (dayOf(items[i].date) - dayOf(items[j + 1].date)) / 864e5 <= 3) j++;
+      const run = items.slice(i, j + 1);
+      if (run.length >= BURST) {
+        const top = run.slice().sort((a, b) => (b.players[0].ovr || 0) - (a.players[0].ovr || 0)).slice(0, 3).map(x => x.players[0].name);
+        const fa = run.filter(x => x.kind === 'signing').length > run.length / 2;
+        blocks.push(`<li class="hm-dgw"><details class="hm-dg"><summary><span class="nv-k nv-signing">${fa ? 'Free agency' : 'Busy days'}</span>
+          <b>${run.length} notable moves</b> <span class="muted">${esc(short(run[run.length - 1].date))}&ndash;${esc(short(run[0].date))} &middot; ${esc(top.join(', '))}</span></summary>
+          <ul class="hm-l">${run.map(row).join('')}</ul></details></li>`);
+      } else run.forEach(x => blocks.push(row(x)));
+      i = j + 1;
+    }
+    box.innerHTML = `<div class="hm-t" role="link" tabindex="0" data-href="#players/moves"><div class="hm-k">Notable moves<span class="hm-go" aria-hidden="true">&rsaquo;</span></div>
+      <ul class="hm-l">${blocks.slice(0, MAX).join('')}</ul>
+      <p class="hm-f">Trades, signings, releases and season-ending injuries of players our numbers rate highly &middot; all of them in Moves</p></div>`;
+    box.hidden = false;
   };
 })();

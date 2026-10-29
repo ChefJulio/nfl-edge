@@ -22,3 +22,17 @@
 .hm-p b { color: var(--ink); }
 .hm-t { cursor: pointer; }
 .hm-nl { text-decoration: none; font-weight: 600; }
+/* Notable moves (home.js drawNotable): a full-width tile above the others */
+.hm-news { grid-column: 1 / -1; }
+.hm-nv { display: block !important; }
+.hm-nv1 { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.hm-nv1 .hm-nl { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hm-nv2 { margin-top: 2px; color: var(--muted); font-size: var(--fs-sm); line-height: 1.35; }
+.hm-nv2 > span:first-child { font-variant-numeric: tabular-nums; }
+.hm-route { display: inline-flex; align-items: center; gap: 3px; margin-left: auto; flex: none; }
+.hm-arrow { color: var(--muted); }
+.hm-dgw { display: block !important; }
+.hm-dg > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.hm-dg > summary::-webkit-details-marker { display: none; }
+.hm-dg[open] > summary { margin-bottom: 4px; }
+.hm-dg .hm-l { padding-left: 10px; border-left: 2px solid var(--line); }

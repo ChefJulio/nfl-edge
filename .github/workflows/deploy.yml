@@ -213,6 +213,13 @@ jobs:
       # game goes final; ESPN's finals fill in where nflverse hasn't posted them yet (~10 s)
       - name: Standings
         run: python tools/standings_build.py --site=site --seasons=$(python -c "import nflreadpy as n; print(n.get_current_season())") || echo "[standings] skipped"
+      # Notable moves (Home's strip, Moves' Notable filter, the card banner; tools/notable_build.py): this season's
+      # transactions first (ESPN only, ~15 s; no new ProFootballRumors days), so a trade or a season-ending injury shows
+      # within the hour
+      - name: Notable moves
+        run: |
+          python tools/transactions_build.py --site=site --seasons=$(python -c "import nflreadpy as n; print(n.get_current_season())") --pfr-budget=0 || echo "[moves] skipped"
+          python tools/notable_build.py --site=site || echo "[notable] skipped"
       - name: Current assets
         run: python tools/assets_deploy.py --site=site
       - name: Stamp the deploy  # the plan reads it (lanes by what the live site was built from)
@@ -439,6 +446,14 @@ jobs:
       - name: Edge grades
         if: needs.plan.outputs.complete == 'true' || steps.carry.outputs.carried != 'true'
         run: python tools/grade_build.py --site=site
+      # Notable moves (after the grades and logs it reads; tools/notable_build.py). With the slow data carried, Moves
+      # didn't run: this season's transactions are refreshed here first (ESPN only, ~15 s), so trades show the same day.
+      - name: Notable moves
+        run: |
+          if [ "${{ needs.plan.outputs.complete }}" != "true" ] && [ "${{ steps.carry.outputs.carried }}" = "true" ]; then
+            python tools/transactions_build.py --site=site --seasons=$(python -c "import nflreadpy as n; print(n.get_current_season())") --pfr-budget=0 || echo "[moves] skipped"
+          fi
+          python tools/notable_build.py --site=site || echo "[notable] skipped"
       # Team / player pages and Teams > Stats: penalties per season since 1999 (tools/penalties_build.py).
       - name: Penalties
         if: needs.plan.outputs.complete == 'true' || steps.carry.outputs.carried != 'true'

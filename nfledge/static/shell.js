@@ -37,6 +37,36 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     }
     return cache.get(path);
   };
+  // Notable moves (owner 2026-10-29: trades, releases, signings, season-ending injuries and suspensions of players our
+  // numbers care about; data/notable.json, tools/notable_build.py): one loader and one wording for Home's strip,
+  // Players > Moves' Notable filter and the player card's banner. NFLE.notable() -> the doc, or null.
+  let notableP = null;
+  NFLE.notable = () => notableP || (notableP = NFLE.load('data/notable.json').catch(() => null));
+  const NV = { trade: 'Traded', release: 'Released', signing: 'Signed', extension: 'Extension', season: 'Out for the season', susp: 'Suspended' };
+  NFLE.notableFmt = {
+    // the move in words, per player: "Traded to HOU", "Signs with LV", "$35.3M/yr extension", "Out for the season (knee)"
+    verb: (it, p) => it.kind === 'trade' ? `Traded to ${p.to || '?'}` : it.kind === 'signing' ? `Signed with ${p.to || it.team || '?'}`
+      : it.kind === 'extension' ? (p.deal ? `$${(+p.deal.apy).toFixed(1)}M/yr deal${it.team ? ` with ${it.team}` : ''}` : `New deal${it.team ? ` with ${it.team}` : ''}`)
+      : it.kind === 'release' ? `Released by ${it.team || p.from || '?'}` : it.kind === 'season' ? `Out for the season${p.injury ? ` (${p.injury.toLowerCase()})` : ''}`
+      : it.kind === 'susp' ? `Suspended by the league` : NV[it.kind] || it.kind,
+    label: k => NV[k] || k,
+    // the same without what the kind chip already says (Home's rows): "to HOU", "with LV", "right knee"
+    detail: (it, p) => it.kind === 'trade' ? `to ${p.to || '?'}` : it.kind === 'signing' ? `with ${p.to || it.team || '?'}`
+      : it.kind === 'extension' ? (p.deal ? `$${(+p.deal.apy).toFixed(1)}M/yr${it.team ? ` with ${it.team}` : ''}` : (it.team ? `with ${it.team}` : ''))
+      : it.kind === 'release' ? `by ${it.team || p.from || '?'}` : it.kind === 'season' ? (p.injury || '').toLowerCase() : '',
+    // why it's here, short: his grade and rank, his pedigree, his contract, the trade's price
+    why: (it, p) => {
+      const w = [];
+      if (p.ovr != null) w.push(`${p.ovr} OVR${p.rk && p.of ? ` (${p.rk} of ${p.of} ${p.gpos || ''})` : ''}`.replace(/ \)$/, ')'));
+      (p.why || []).forEach(x => {
+        if (/first-round pick/.test(x)) w.push(p.draft ? `${p.draft[0]} 1st-round pick (#${p.draft[2]})` : '1st-round pick');
+        else if (/market/.test(x) && p.deal) w.push(`$${(+p.deal.apy).toFixed(1)}M/yr, near the top ${p.deal.grp || ''} deal`.replace('  ', ' '));
+        else if (/QB/.test(x) && p.deal) w.push(`$${(+p.deal.apy).toFixed(1)}M/yr: a starter's deal`);
+      });
+      (it.why || []).forEach(x => w.push('a 1st-round pick in the trade'));
+      return [...new Set(w)];
+    },
+  };
   // The page's week data (loaded by gamecast.js): resolves once it is in, or null after 15 s (missing / failed).
   NFLE.week = () => new Promise(ok => {
     const t0 = Date.now();

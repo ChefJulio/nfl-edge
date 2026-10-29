@@ -1851,3 +1851,14 @@ tr.lg-tot.lg-tot-pinned { visibility: hidden; }  /* its pinned copy (.lg-fh) sho
 .fs-stripe-to { background: repeating-linear-gradient(135deg, var(--bad) 0 3px, var(--good) 3px 6px) !important; }
 /* the ball loose on a fumble: from where it came out to where it was recovered, faint and dashed */
 .fs .fs-loose { background: repeating-linear-gradient(90deg, var(--muted) 0 3px, transparent 3px 6px) !important; opacity: .7; height: 2px; top: 50%; bottom: auto; margin-top: -1px; }
+/* the player card's notable-move banner (gamecast.js notableBanner; chip colors as Home's strip) */
+.pc-nv { display: flex; align-items: baseline; gap: 8px; margin: 0 0 12px; padding: 8px 12px; border-radius: var(--r-md, 10px);
+  background: var(--panel2); border: 1px solid var(--line); font-size: var(--fs-md); line-height: 1.35; }
+.nv-k { flex: none; font-size: var(--fs-xs); font-weight: 700; letter-spacing: .02em; padding: 1px 7px; border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 9%, transparent); color: var(--muted); }
+.nv-trade { background: rgba(127,179,255,.16); color: #9cc4ff; }
+.nv-signing, .nv-extension { background: rgba(111,220,140,.14); color: #8fe3a8; }
+.nv-release { background: rgba(240,192,90,.16); color: #f0c05a; }
+.nv-season, .nv-susp { background: rgba(242,120,109,.16); color: #ff9a90; }
+.pc-nv { border-left: 3px solid var(--muted); } .pc-nv.nv-trade-b { border-left-color: #7fb3ff; } .pc-nv.nv-signing-b, .pc-nv.nv-extension-b { border-left-color: #6fdc8c; }
+.pc-nv.nv-release-b { border-left-color: #f0c05a; } .pc-nv.nv-season-b, .pc-nv.nv-susp-b { border-left-color: #f2786d; }

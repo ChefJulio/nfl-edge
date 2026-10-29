@@ -43,7 +43,7 @@
           <input class="mv-q" type="search" placeholder="Find a player or note" aria-label="Find a player or note">
           <button type="button" class="mv-ftog" aria-expanded="false">Filters</button>
           <select class="dt-select mv-team" aria-label="Team"><option value="">All teams</option></select>
-          <select class="dt-select mv-group" aria-label="Move type"><option value="">All moves</option>${GROUPS.map(g => `<option value="${g[0]}">${esc(g[1])}</option>`).join('')}</select>
+          <select class="dt-select mv-group" aria-label="Move type"><option value="">All moves</option><option value="notable">Notable</option>${GROUPS.map(g => `<option value="${g[0]}">${esc(g[1])}</option>`).join('')}</select>
           <select class="dt-select mv-pos" aria-label="Position"><option value="">All positions</option></select>
           <label class="mv-dl">From <input type="date" class="mv-from"></label><label class="mv-dl">To <input type="date" class="mv-to"></label>
         </div><div class="skel-zone mv-tbl"></div><div class="mv-more-wrap"><button type="button" class="mv-more" hidden></button></div></div>
@@ -52,13 +52,23 @@
       const sub = $('.mv-sub'), selS = $('.mv-season'), selT = $('.mv-team'), selG = $('.mv-group'), selP = $('.mv-pos'),
             from = $('.mv-from'), to = $('.mv-to'), qi = $('.mv-q'), more = $('.mv-more');
       let rows = [], table = null, teams = {}, shown = STEP, season = null;
+      // Notable (owner 2026-10-29; data/notable.json, tools/notable_build.py): this league year's moves of players our
+      // numbers rate highly. A row is notable when the feed lists his move of that kind within 3 days of it.
+      const NG = { trade: 'trade', release: 'cut', signing: 'add', extension: 'add', susp: 'misc', season: 'inj' };
+      let notable = null;
+      const isNotable = r => !!(notable && r.pid && (notable[r.pid] || []).some(m => m.g === GROUP[r.type] && Math.abs(new Date(r.date) - new Date(m.d)) <= 3 * 864e5));
+      NFLE.notable().then(doc => {
+        notable = {};
+        ((doc && doc.items) || []).forEach(it => it.players.forEach(p => (notable[p.pid] = notable[p.pid] || []).push({ d: it.date, g: NG[it.kind] })));
+        if (selG.value === 'notable') draw();
+      });
       // a search (owner 2026-10-21: it shouldn't stack on the filters) looks through the whole season: team, type,
       // position and dates are set aside (dimmed) while there's text; the season stays its scope
       const filtered = () => {
         const q = qi.value.trim().toLowerCase();
         [selT, selG, selP, from, to].forEach(x => { x.disabled = !!q; });
         if (q) return rows.filter(r => (r.name || '').toLowerCase().includes(q) || (r.text || '').toLowerCase().includes(q));
-        return rows.filter(r => (!selT.value || r.team === selT.value) && (!selG.value || GROUP[r.type] === selG.value)
+        return rows.filter(r => (!selT.value || r.team === selT.value) && (!selG.value || (selG.value === 'notable' ? isNotable(r) : GROUP[r.type] === selG.value))
           && (!selP.value || r.pos === selP.value) && (!from.value || r.date >= from.value) && (!to.value || r.date <= to.value));
       };
       const draw = (reset = true) => {
@@ -87,6 +97,7 @@
         from.value = to.value = '';
         nset();
         draw();
+        wantNotable();
       }).catch(() => { sub.textContent = 'No moves logged for that season.'; });
       [selT, selG, selP, from, to].forEach(s => { s.onchange = () => draw(); });
       qi.oninput = () => draw();
@@ -96,6 +107,14 @@
       const nset = () => { const n = [selT, selG, selP, from, to].filter(x => x.value).length; ftog.textContent = n ? `Filters (${n})` : 'Filters'; };
       [selT, selG, selP, from, to].forEach(x => x.addEventListener('change', nset));
       more.onclick = () => { shown += STEP * 4; draw(false); };
+      // Home's Notable moves tile opens this tab on its filter (this season)
+      const wantNotable = () => {
+        if (!NFLE.movesNotable || !rows.length) return;
+        NFLE.movesNotable = false;
+        qi.value = ''; selT.value = selP.value = from.value = to.value = ''; selG.value = 'notable';
+        nset(); draw();
+      };
+      addEventListener('hashchange', () => setTimeout(wantNotable, 0));
       Promise.all([NFLE.load('data/transactions/index.json'), NFLE.week(), NFLE.ui.ready]).then(([ix, wk]) => {
         teams = Object.assign({}, ix.teams || {}, (wk && wk.teams) || {});  // the week map has both trim colors
         const ps = pageSeason(), want = ps && ix.seasons.includes(ps) ? ps : ix.seasons[ix.seasons.length - 1];

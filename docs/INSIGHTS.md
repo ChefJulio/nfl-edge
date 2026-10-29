@@ -622,6 +622,24 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
   Super Bowls + NFL championship games won before the Super Bowl (1933-65) + 1920-32 standings champions + AFL
   titles; AAFC titles listed separately (not NFL records). Playoff rate since the 1970 merger (or founding).
   Green Bay checks out: 13 titles, 37-28.
+- **Notable moves (2026-10-29, owner: "we don't really have a 'big news' section").** tools/notable_build.py ->
+  data/notable.json -> Home's Notable moves tile (last 21 days, 6 rows; 8+ moves within 3 days fold into one dated
+  card, owner: "we'll eval it in march"), Players > Moves' Notable filter, the player card's banner (14 days). Rules
+  (backtested on every move March 2024 - Oct 2026, thresholds owner-approved): a trade (OVR 75+ starter, a
+  first-rounder in his first 4 seasons who starts, a market deal, a first-round pick in the trade, or a veteran QB on
+  a starter's deal), release / season-ending injury (85+, young first-rounder, market deal; 4+ weeks left), suspension
+  (80+), signing with a new team (85+, young first-rounder, market deal, QB starter's deal), extension (market deal
+  only). Starter = half his unit's snaps over his last 4 games. OVR = the grade going in (this season's from 4 games,
+  else last season's); "unqualified" grades count (excluding them dropped Hutchinson, Aiyuk, Rice: a season cut short
+  is the injury itself). Market deal = cap share at least 0.75 of the top running deal at his position group (owner:
+  "normalize the raw cap share to positions"; flat 8% favored QBs: a safety record is ~9%). QB starter's deal = 0.16
+  of the top QB deal (~4% of the cap): every veteran QB who joined a new team at that price 2018-26 started week 1 for
+  it; the priciest true backups were Brissett 2023 (3.6%), Bridgewater / Heinicke (3.1%). Volume: ~75 a year, about
+  half in free agency's first week; 1-2 a week in season. Sources: ESPN's transactions (refreshed every build, ESPN
+  only, ~15 s: `--pfr-budget=0`), new contracts first seen in the OverTheCap table (nflverse refreshes it daily; ESPN's
+  log missed Prescott's, Tua's and Josh Allen's extensions), ESPN's injury feed (a season-ending note or a return date
+  past the regular season). Found in passing: "S Dante Trader" in a signing list read as a trade (the type rule now
+  wants the verb), and "Received X ... in exchange for" wasn't a trade (Flacco 2025).
 
 ## 9. Open threads / next steps
 
@@ -629,6 +647,13 @@ player-weeks (12,480 rows: played, >= 2 prior games, top-N by consensus), with 9
 Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/return model needs to be pristine").
 
 **Running / next up**
+- (Notable moves, shipped 2026-10-29; section 8) Remaining, recorded so it isn't lost: (a) each item's line on what it
+  does to OUR numbers (his new role / projection, who inherits a hurt starter's snaps, the team rating change): the
+  owner-agreed point of the feed, v1 shows only why it qualified (grade and rank, pedigree, deal); (b) March: judge the
+  free-agency fold (8+ in 3 days) on real volume; (c) defenders' grade is IDP points, so tackle-heavy players on bad
+  defenses can grade high on small samples: if the feed shows such names, require pedigree or a market deal for
+  defenders; (d) the contract-table path labels every new deal an extension (the table has no team); a new team's
+  deal normally arrives through ESPN's log first.
 0. (DM / DM2 / DM3, 2026-10-26) all FAIL on the strict calibration bar; owner decision: non-fantasy players shown at
    the shipped fantasy numbers' standard (A1 position-group model on final reports, return weeks from the plan's chain;
    run.py all_positions_file -> data/injuries_all.json). The board's models are unchanged. Brashard Smith's "Season":

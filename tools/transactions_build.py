@@ -1,6 +1,6 @@
 """Transactions for Players > Moves: data/transactions/<season>.json (2002 on) + index.json.
 
-Usage: python tools/transactions_build.py [--site=site] [--seasons=2002-2026]   (CI runs it daily)
+Usage: python tools/transactions_build.py [--site=site] [--seasons=2002-2026] [--pfr-budget=N]   (CI runs it daily)
 Source: ESPN's public transactions feed (site.api.espn.com/apis/site/v2/sports/football/nfl/transactions; paginated,
 100 per page; coverage thin before 2003). Raw pages are cached per season (cache/transactions_<season>.json); past
 seasons are fetched once, the current season every run. Each entry is free text that can hold several moves
@@ -44,8 +44,9 @@ TYPES = [
   ("ps_released", r"\b(?:releas|waiv)\w*\b.*\bpractice squad"),
   ("designated", r"\bdesignated\b.*\breturn"), ("activated", r"\bactivat"),  # "Activated X off the PUP list"
   ("ir", r"\binjured reserve\b|\bIR\b"), ("pup", r"\bPUP\b|physically unable"), ("nfi", r"\bNFI\b|non-football"),
-  # "Received QB Joe Flacco and a sixth-round draft pick from Cleveland in exchange for a fifth-round pick" (2025)
-  ("traded", r"\btrad|^received\b|\bin exchange for\b"), ("claimed", r"\bclaim|\bawarded\b"), ("re_signed", r"\bre-?sign"), ("signed", r"\bsign|\bagreed to terms"),
+  # "Received QB Joe Flacco and a sixth-round draft pick from Cleveland in exchange for a fifth-round pick" (2025);
+  # the verb, not any "trad..." word (2025: a rookie signing list with S Dante Trader in it read as a trade)
+  ("traded", r"\btrad(?:e|ed|es|ing)\b|^received\b|\bin exchange for\b"), ("claimed", r"\bclaim|\bawarded\b"), ("re_signed", r"\bre-?sign"), ("signed", r"\bsign|\bagreed to terms"),
   ("waived", r"\bwaiv"), ("released", r"\breleas|\bcut\b|\bterminat"), ("acquired", r"\bacquir"),
   ("reserve", r"\breserve\b|\bplaced\b"), ("other", r"."),
 ]
@@ -221,6 +222,10 @@ def main():
   cache = D.Cache(ROOT / cfg["data"]["cache_dir"])
   current = int(nfl.get_current_season())
   a, _, b = opt.get("seasons", f"2002-{current}").partition("-")
+  # --pfr-budget=0: no new ProFootballRumors days this run (the every-build refresh for notable moves; the cached days
+  # still merge in, and the full builds keep backfilling)
+  global PFR_BUDGET
+  PFR_BUDGET = int(opt.get("pfr-budget", PFR_BUDGET))
   seasons = list(range(int(a), int(b or a) + 1))
   out = site / "data" / "transactions"
   out.mkdir(parents=True, exist_ok=True)
