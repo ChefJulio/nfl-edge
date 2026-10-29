@@ -331,14 +331,16 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const tag = document.getElementById('wkTag');
   const [cls, txt] = CFG.archive ? ['past', 'Past week'] : CFG.lookahead ? ['ahead', 'Upcoming'] : ['now', 'This week'];
   tag.className = `wk-tag ${cls}`; tag.textContent = txt; tag.hidden = false;
-  document.getElementById('wkNow').hidden = !!CFG.current;
-  const note = document.getElementById('wkNote');
-  if (CFG.archive) { note.textContent = 'Projected before kickoff with only the data available then; actual results alongside.'; note.hidden = false; }
-  else if (CFG.lookahead) {
-    note.textContent = `${CFG.lookahead} week${CFG.lookahead > 1 ? 's' : ''} out: projected from games so far, no injury report or weather yet. Less certain the further out.`;
-    note.title = 'Everyone on the active roster is assumed healthy (injured reserve stays out) and weather is neutral; Vegas lines are used once posted.';
-    note.hidden = false;
-  }
+  // One header row on every week (owner 2026-10-29: "more uniform across current / non current weeks? no wrapping"):
+  // a past or upcoming week tints the picker (amber / blue) instead of a badge row, the jump back is a short "Now",
+  // and what kind of week it is moves into the (i) as its first line (tinted the same)
+  const now = document.getElementById('wkNow');
+  now.hidden = !!CFG.current;
+  now.innerHTML = 'Now <span aria-hidden="true">&rsaquo;</span>';
+  now.title = 'Go to the current week';
+  ws.closest('.wk-nav').classList.add(`is-${cls}`);  // not wk-*: .wk-now is the Now button's class
+  const weekNote = CFG.archive ? 'Past week: projected before kickoff with only the data available then; actual results alongside.'
+    : CFG.lookahead ? `${CFG.lookahead} week${CFG.lookahead > 1 ? 's' : ''} out: projected from games so far, no injury report or weather yet (everyone on the active roster healthy, injured reserve out, weather neutral; Vegas lines once posted). Less certain the further out.` : '';
   // Page details: a tooltip on the (i) (hover on desktop, tap on phones); amber while the injury report is pending.
   const hw = document.querySelector('.hinfo-w'), hb = hw.querySelector('.hinfo');
   // injury reports from the week clock (owner 2026-10-18): how many teams' final reports are in, which are next
@@ -356,6 +358,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     const h = D.head, live = !(CFG.archive || CFG.lookahead), pending = live && !h.injury_report && !(D.clock && Object.keys(D.clock.teams || {}).some(t => NFLE.clock.reportsIn(t)));
     const sc = h.scoring === 'half' ? 'Half PPR' : h.scoring === 'ppr' ? 'PPR' : String(h.scoring || '').replace(/^./, c => c.toUpperCase());
     hw.querySelector('.hpop').innerHTML = [
+      weekNote ? `<span class="hp-week ${cls}">${esc(weekNote)}</span>` : '',
       // two different weeks (owner 2026-10-17 read them as one): what the projections are built on, and how far
       // this week's own games have got (a live week's projections use only earlier weeks, as before kickoff)
       `<span>Projections use games through <b>week ${esc(h.data_week)}</b>${CFG.lookahead ? ' (all games played so far)' : ''}</span>`,
@@ -364,6 +367,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       live ? repLine(D) : '',
       `<span>Updated ${esc(D.generated || '')}</span>`].join('');
     hb.classList.toggle('warn', pending);
+    hb.classList.toggle(`is-${cls}`, !!weekNote);
     hw.hidden = false;
   });
   // keep the popup on screen (owner 2026-10-18: on phones the header wraps, the button sits at the left and the popup,

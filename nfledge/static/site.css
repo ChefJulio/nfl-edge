@@ -462,3 +462,21 @@ nav.gc-tabs .gc-wrap, .gc-jump, nav.tabs .nav-par, .nav-sub, .doc table { overfl
 /* footer: the owner's Buy Me a Coffee link */
 footer a.foot-bmc { color: var(--accent); font-weight: 600; text-decoration: none; white-space: nowrap; }
 footer a.foot-bmc:hover { text-decoration: underline; }
+
+/* One header row on every week (owner 2026-10-29: past weeks wrapped onto a second row with a badge, a button and a
+   sentence): the picker tinted for a past (amber) or upcoming (blue) week, a short "Now" back to the current one, the
+   week's note inside the (i), tinted to match. No badge, no note row. */
+.hdr { flex-wrap: nowrap; }
+.wk-tag, p.archived { display: none !important; }
+.wk-nav.is-past { border-color: color-mix(in srgb, var(--warn) 60%, var(--line)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--warn) 25%, transparent); }
+.wk-nav.is-ahead { border-color: color-mix(in srgb, var(--accent) 60%, var(--line)); }
+.wk-now { font-size: var(--fs-sm); padding: 5px 10px; white-space: nowrap; flex: none; }
+.hinfo.is-past { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 55%, var(--line)); }
+.hinfo.is-ahead { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+.hpop .hp-week { font-weight: 600; } .hpop .hp-week.past { color: var(--warn); } .hpop .hp-week.ahead { color: var(--accent); }
+@media (max-width: 420px) {
+  .hdr { gap: 6px; } .brand { margin-right: 0; } .brand h1 { font-size: var(--fs-lg); white-space: nowrap; }
+  .wk-step { width: 26px; } .wk-nav select { padding: 6px 18px 6px 7px; background-position: right 6px center; }
+  .wk-now { padding: 4px 8px; }
+}
+@media (max-width: 350px) { .wk-step { display: none; } }  /* the smallest phones: the dropdown alone, nothing clipped */
