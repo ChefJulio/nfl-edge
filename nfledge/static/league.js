@@ -494,7 +494,7 @@
       // making any other roster moves"): ESPN blocks adds and its waiver claims can fail (ESPN Fan Support); Sleeper blocks
       // transactions the same way, lineup changes included (owner 2026-10-29: "you can't even switch spots within your
       // roster on sleeper"; widely reported, not in Sleeper's own docs we could find). The fix in order: a bench
-      // spot (a drop when the bench is full), him off IR, then any add, before the waiver run
+      // spot (a drop when the bench is full), him off IR, then any add (on Sleeper, once the waiver run is done)
       // all of them at once (owner 2026-10-29: "if you have a full roster and both your IR guys come back to health in one
       // week you'd have to drop 2 guys before you could do anything"): the bench spots it takes = ineligible IR players
       // minus open bench spots, and that many different drops, least rest-of-season value first
@@ -503,7 +503,17 @@
       if (bad.length) {
         const need = Math.max(0, bad.length - openBench()), drops = dropPicks(need, bad);
         const who = list(bad.map(x => nm(player(x)))), tags = [...new Set(bad.map(x => platTag(x) ? tagWord(platTag(x)) : 'healthy'))].join(' / ');
-        out.push(`<div class="lg-alert bad">${who} <span>${bad.length > 1 ? 'are' : 'is'} in IR but ${platName()} lists ${bad.length > 1 ? 'them' : 'him'} as ${esc(tags)}, so ${L.platform === 'sleeper' ? "Sleeper won't allow any other roster move (adds, trades, even lineup changes)" : "ESPN won't process adds and waiver claims can fail"} until ${bad.length > 1 ? "they're" : "he's"} off IR. Fix it first${L.platform === 'sleeper' ? ', before any game locks your lineup' : ''} and before waivers run (${esc(runText())}): ${need ? `drop ${need} (least rest-of-season value: ${esc(list(drops))}), then ` : ''}move ${bad.length > 1 ? 'them' : 'him'} to the bench, then make any other moves.</span></div>`);
+        // Sleeper enforces it only once the week's waivers have processed (owner 2026-10-29: out in week 7, tagged Q on the
+        // Tuesday of week 8, "the barring of roster moves doesn't take effect until wednesday which allows teams to make
+        // waiver claims"): before the run his claims go through and the lock is still ahead; ESPN's claims can fail
+        const fix = `${need ? `drop ${need} (least rest-of-season value: ${esc(list(drops))}), then ` : ''}move ${bad.length > 1 ? 'them' : 'him'} to the bench, then make any other moves`;
+        const them = bad.length > 1, off = `until ${them ? "they're" : "he's"} off IR`;
+        const pre = L.platform === 'sleeper' && L.waiverDay !== 'daily' && waiverRun() != null && claimWindow();
+        const tail = L.platform !== 'sleeper'
+          ? `so ESPN won't process adds and waiver claims can fail ${off}. Fix it before waivers run (${esc(runText())}): ${fix}.`
+          : pre ? `so once waivers process (${esc(runText())}) Sleeper won't allow any other roster move (adds, trades, even lineup changes) ${off}. Your waiver claims still go through; after that: ${fix}, before games lock.`
+          : `so Sleeper won't allow any other roster move (adds, trades, even lineup changes) ${off}. Fix it now, before any game locks your lineup: ${fix}.`;
+        out.push(`<div class="lg-alert bad">${who} <span>${them ? 'are' : 'is'} in IR but ${platName()} lists ${them ? 'them' : 'him'} as ${esc(tags)}, ${tail}</span></div>`);
       }
       // coming back soon (projected to play this week, or likely back next week) with no room for them yet: the drops a
       // return will force, flagged before the lock hits
