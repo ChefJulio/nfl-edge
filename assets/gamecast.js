@@ -1063,6 +1063,10 @@
   const moveRow = (m, cols) => `<tr class="lg-mv"><td colspan="${cols}"><span class="lg-pin">${MV_ICON}<b>${MV_VERB[m.k] || 'Joined'}</b>${tmL(m.t)}<span>from ${tmL(m.f)}${m.d ? ` &middot; ${mvDate(m.d)}` : ''}</span></span></td></tr>`;
   // Week tab preview, no legend and no upcoming weeks: opts.season = this season's games so far with its byes;
   // opts.last = N = his N most recent games (the fallback before his first game this season, no season totals).
+  // a season's grade on its own (the grade sheet's "By season" OVR), from his grade history: the totals rows' Grd
+  const seasonGrdOf = (pid, s) => { const d = (GRH[pid] || []).find(x => x && x.season === s), x = d && d.players[pid];
+    const g = x ? (x[6] ?? x[0]) : null;
+    return g == null ? '' : `<span class="lg-rk ${x[9] ? 'rk-mid' : g >= 80 ? 'rk-good' : g <= 30 ? 'rk-bad' : 'rk-mid'}" title="His ${s} grade (that season only), the grade sheet's OVR">${ovr(g)}${uqMark(x)}</span>`; };
   const logHtml = (L, p, opts = {}) => {
     const w = weights(), built = (DATA && DATA.score && DATA.score.built) || HALF, pos = L.pos || (p && p.pos);
     let seasons = L.seasons, up = L.up || [];
@@ -1103,9 +1107,7 @@
     // (0-99; this season's unplayed weeks filled from last season's; tools/player_logs.py), where Rk is that week only
     // one grade, two time scales (owner 2026-10-17): shown on the OVR's own 50-99 scale and colors
     // the totals row's Grd: that season's grade on its own (the grade sheet's "By season" OVR), from his grade history
-    const seasonGrd = s => { const d = (GRH[L.pid] || []).find(x => x && x.season === s), x = d && d.players[L.pid];
-      const g = x ? (x[6] ?? x[0]) : null;
-      return g == null ? '' : `<span class="lg-rk ${x[9] ? 'rk-mid' : g >= 80 ? 'rk-good' : g <= 30 ? 'rk-bad' : 'rk-mid'}" title="His ${s} grade (that season only), the grade sheet's OVR">${ovr(g)}${uqMark(x)}</span>`; };
+    const seasonGrd = s => seasonGrdOf(L.pid, s);
     const grdCell = g => g.gr != null ? `<span class="lg-rk ${g.gr >= 80 ? 'rk-good' : g.gr <= 30 ? 'rk-bad' : 'rk-mid'}">${ovr(g.gr)}</span>` : '–';
     // a live box-score line (boxLines) as a log game: c = the scoring-key stat line, x = completions, attempts, carries, targets
     const liveG = ln => ({ c: ln.line, x: [ln.comp || 0, ln.att || 0, ln.car || 0, ln.tgt || 0] });
@@ -1530,6 +1532,18 @@
     return t < roll ? C.week : C.week + 1 + Math.floor((t - roll) / (7 * 864e5));
   };
   const espnDate = d => new Date(d + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
+  // a return date as the week it falls in (owner 2026-10-29: "wherever we're displaying expected back ... the week of
+  // the season rather than the date"): "wk 11", "out for season" past the regular season; the date only when the
+  // week clock isn't loaded. Shared with Players > Injuries (NFLE.retWeek).
+  const retWeek = d => {
+    if (!d) return '';
+    const w = weekOfDate(d), last = DATA && +DATA.season < 2021 ? 17 : 18;
+    return w == null ? espnDate(d) : w > last ? 'out for season' : `wk ${w}`;
+  };
+  NFLE.retWeek = retWeek;
+  // ESPN's estimate worded like our own ("back ~wk 14"; owner 2026-10-29: "est." read like "established")
+  // "out for season" when confident (owner 2026-10-29): ESPN's date past the regular season, or our model's "no"
+  const backLbl = d => { const w = retWeek(d); return !w ? '' : /^wk /.test(w) ? `back ~${w}` : w; };
   const healthOf = (pid, p, L, espn, wkSel = null) => {
     loadInj(); loadRos();
     const now = espn && DINJ && DINJ[espn];
@@ -1548,22 +1562,28 @@
     const ups = (L && L.up) || [], byeAt = w => ups.some(u => u.w === w && u.bye);
     const rws = !p && RJ.d && RJ.d.players[pid] ? RJ.d.players[pid].w : null;
     // a chosen later week: that week's chance (none on its bye); else his next game week's
-    const rw = rws && (wkSel ? rws.find(z => z[0] === wkSel && !byeAt(z[0])) : rws.find(z => z[0] >= RJ.d.from && !byeAt(z[0])));
-    const play = p && p.inactive != null ? 1 - p.inactive : rw ? H.rosChance(rw) : null;  // injury only, as the board's
+    // his next game week exactly: a week the model leaves out is one he can't play (owner 2026-10-29: Pierce, on IR since
+    // Wednesday, read week 13's 73% as this week's, the first week listed)
+    const nextW = rws ? wkSel || (ups.find(u => !u.bye && u.w >= RJ.d.from) || {}).w || null : null;
+    const rw = rws && nextW ? rws.find(z => z[0] === nextW && !byeAt(z[0])) : null;
+    const play = p && p.inactive != null ? 1 - p.inactive : rw ? H.rosChance(rw) : rws && nextW ? 0 : null;  // injury only, as the board's
     const what = [...new Set([now && now.type, now && now.detail && now.detail !== 'Not Specified' ? now.detail : '', now && now.side && now.side !== 'Not Specified' ? now.side : '']
       .filter(Boolean))].join(' · ') || (ep && ep.part) || '';  // ESPN often repeats the type as the detail
-    return { inj, play, what, now, ep, back: backWeek(pid), wk };
+    // a league suspension rides ESPN's injury feed but isn't an injury (owner 2026-10-29: Gardner-Johnson read "Injured")
+    const susp = !!(now && (/suspen/i.test(now.status || '') || /suspen/i.test(now.type || '') || now.fantasy_status === 'RESERVE-SUS'));
+    return { inj, play, what, now, ep, back: backWeek(pid), wk, susp };
   };
   const healthTile = (pid, p, L, espn, wkTag = '', wkSel = null, bye = false) => {
     const h = healthOf(pid, p, L, espn, wkSel);
-    const ret = h.back && h.back !== 'no' ? `back ~wk ${h.back}` : h.now && h.now.return_date ? `est. ${espnDate(h.now.return_date)}` : '';
+    const ret = h.back === 'no' ? 'out for season' : h.back ? `back ~wk ${h.back}` : h.now && h.now.return_date ? backLbl(h.now.return_date) : '';
     // game day (owner 2026-10-18): once inactives are posted the tile says Active or Inactive, not a chance
     const gd = H.gameday(p), ina = gd === 'INA', act = gd === 'ACT';
     const big = bye ? '<div class="pc-big">Bye week</div>' : ina ? '<div class="pc-big bad">Inactive</div>' : act ? '<div class="pc-big good">Active</div>' : !h.inj ? '<div class="pc-big good">Healthy</div>'
+      : h.susp ? '<div class="pc-big bad">Suspended</div>'
       : h.play != null && h.play >= H.AVAIL.NIL ? `<div class="pc-big ${H.level(h.play) === 'bad' ? 'bad' : ''}">${Math.round(h.play * 100)}% <small>to play</small></div>`
       : h.play != null ? '<div class="pc-big bad">Out</div>'
       : '<div class="pc-big bad">Injured</div>';  // listed but no chance on file: don't claim more than we know
-    const sub = ina || act ? [`${ina ? 'ruled out' : 'declared active'} for wk ${h.wk}`, h.what].filter(Boolean).join(' · ') : !h.inj ? (H.listed(p) ? 'on the injury report · expected to play' : 'no injury listed') : [h.what, ret].filter(Boolean).join(' · ') || 'on the injury report';
+    const sub = ina || act ? [`${ina ? 'ruled out' : 'declared active'} for wk ${h.wk}`, h.what].filter(Boolean).join(' · ') : h.susp ? ret || 'by the league' : !h.inj ? (H.listed(p) ? 'on the injury report · expected to play' : 'no injury listed') : [h.what, ret].filter(Boolean).join(' · ') || 'on the injury report';
     return tapTile(`Health${wkTag}`, `${big}<div class="pc-tapsub">${esc(sub)}</div>`, `Health${wkTag}`, injuryBrief(pid, p, L, espn, h));
   };
   // Practice and games, dated (owner 2026-10-17: "the date the report was out, show the last 6, include games in that
@@ -1673,13 +1693,15 @@
     // and expected return side by side, then what and when he got hurt, then this week's practice in plain words
     const des = ((p && p.status) || '').replace(/\s*\(.*$/, '').replace(/\s*\(ESPN\)/, '').trim()
       || (now && now.status && now.status !== 'Active' ? now.status : '') || (h.inj ? 'Listed' : 'Healthy');
-    const desCls = /^(Out|Inactive|Injured|IR)/i.test(des) ? 'out' : /^Doubt/i.test(des) ? 'd' : /^Quest/i.test(des) ? 'q' : h.inj ? 'q' : 'ok';
+    const desCls = /^(Out|Inactive|Injured|IR|Susp)/i.test(des) || h.susp ? 'out' : /^Doubt/i.test(des) ? 'd' : /^Quest/i.test(des) ? 'q' : h.inj ? 'q' : 'ok';
     // this week's report days only (2026-10-21: a 6-day window took last Friday's entry for this week's)
     // his team's week, whether or not he's on this week's page (owner 2026-10-29: Pierce on IR isn't, and a 6-day
     // window labeled last week's Thu-Sat "Practice this week")
     const tmW = (p && p.team) || (L && L.team) || '';
     const wkDates = new Set(tmW ? NFLE.clock.reports(tmW).map(r => r.date) : []);
-    const pr = ((L && L.prac) || []).filter(e => e[0] === 'p' && (wkDates.size ? wkDates.has(e[1]) : !tmW && e[1] >= NFLE.clock.etDate(new Date(Date.now() - 6 * 864e5))));  // a bye: none
+    // his practice days, not his days on a list (R / S rows: the career log's reserve / practice-squad days; De'Von
+    // Achane on reserve, 2026-10-29, read them as practice and the card failed to load)
+    const pr = ((L && L.prac) || []).filter(e => e[0] === 'p' && e[2] !== 'R' && e[2] !== 'S' && (wkDates.size ? wkDates.has(e[1]) : !tmW && e[1] >= NFLE.clock.etDate(new Date(Date.now() - 6 * 864e5))));  // a bye: none
     // This week's practice as a strip (owner 2026-10-17: "Questionable (FFF)" was unreadable): a tile per day, colored
     // full / limited / did not practice, and one plain sentence. Days from the dated report when it's in the data,
     // else the letters in his status / the model's note, Wed-Fri (Mon-Wed before a Thursday game).
@@ -1718,7 +1740,8 @@
     const prSentence = (() => {
       const wait = days.filter(x => x[1] === '?').map(x => x[0]), over = days.filter(x => x[1] === '!').map(x => x[0]);
       const ahead = days.filter(x => x[1] === 'u').map(x => x[0]);
-      const known = days.filter(x => x[1] !== '?' && x[1] !== '!' && x[1] !== 'u');
+      // only letters the sentence has words for (owner 2026-10-29: an R day crashed Achane's whole card)
+      const known = days.filter(x => WORD[x[1]]);
       // "Thu's report is", "Thu and Fri's reports are", "Thu, Fri and Sat's reports are"
       const whose = ds => `${ds.length > 1 ? `${ds.slice(0, -1).join(', ')} and ${ds[ds.length - 1]}` : ds[0]}'s report${ds.length > 1 ? 's' : ''}`;
       const is = ds => ds.length > 1 ? 'are' : 'is';
@@ -1776,7 +1799,8 @@
     const gameTxt = g => g ? `Week ${g[5]} ${g[3]} ${g[2]}` : '';
     // a week's game from the dated timeline, else his schedule in the career log (IR players have no practice report)
     const upG = w => { const u = ((L && L.up) || []).find(x => x.w === w && !x.bye); return u ? ['g', '', u.o, u.h === 0 ? '@' : 'vs', '', u.w] : null; };
-    const nextG = games.find(e => e[1] > today);
+    // tonight's game counts until it's played (owner 2026-10-29: Golden's Thursday game read "Next game Sun @ NE")
+    const nextG = games.find(e => e[1] > today || (e[1] === today && e[4] === ''));
     const ourG = h.back && h.back !== 'no' ? games.find(e => e[5] === h.back) || upG(h.back) : null;
     // our return model's chance he plays that game (owner 2026-10-17: the play % beside "Expected back")
     const backRow = ourG && RJ.d && RJ.d.players[pid] && RJ.d.players[pid].w.find(z => z[0] === h.back);
@@ -1784,17 +1808,22 @@
     const espnG = now && now.return_date ? games.find(e => e[1] >= now.return_date) || upG(weekOfDate(now.return_date)) : null;
     const onBye = ((L && L.up) || []).some(x => x.w === h.wk && x.bye);  // no game this week: nothing to play
     const out = h.inj && (h.play == null || h.play < H.AVAIL.EVEN);
+    // ESPN's date past the regular season: out for season by ESPN's estimate (Edmunds read a blank cell)
+    const espnOut = !ourG && h.back !== 'no' && now && now.return_date && retWeek(now.return_date) === 'out for season';
     const third = out
-      ? (ourG || espnG || h.back === 'no' ? `<div><small>Expected back</small><b>${esc(ourG ? gameTxt(ourG) : h.back === 'no' ? 'Not this season' : gameTxt(espnG))}</b>
+      ? (ourG || espnG || espnOut || h.back === 'no' ? `<div><small>Expected back</small><b>${esc(ourG ? gameTxt(ourG) : h.back === 'no' || espnOut ? 'Out for season' : gameTxt(espnG))}</b>
           <span class="muted">${ourG ? backP + (espnG && espnG[5] !== ourG[5] ? `<br>ESPN: ${esc(gameTxt(espnG).toLowerCase())}` : '') : h.back === 'no' ? 'our return model' : 'ESPN estimate'}</span></div>` : '')
       : nextG ? `<div><small>Next game</small><b>${esc(new Date(nextG[1] + 'T12:00:00').toLocaleDateString([], { weekday: 'short' }))} ${esc(nextG[3])} ${esc(nextG[2])}</b><span class="muted">week ${nextG[5]}</span></div>` : '';
     // on a reserve list his team's practice days aren't his (owner 2026-10-28: Pierce on IR read "Wed overdue, Thu
     // upcoming"): no strip, the list said plainly; a return window opened puts him back on the report and the strip
     const resList = /^(IR|Injured Reserve)\b/i.test(des) && !pr.length ? 'On injured reserve' : /^PUP\b/i.test(des) && !pr.length ? 'On the PUP list'
-      : /^NFI\b/i.test(des) && !pr.length ? 'On the non-football injury list' : '';
+      : /^NFI\b/i.test(des) && !pr.length ? 'On the non-football injury list'
+      // his status text says otherwise but this week's career-log days have him on a list (Achane: "RES")
+      : !pr.length && ((L && L.prac) || []).some(e => e[0] === 'p' && wkDates.has(e[1]) && e[2] === 'R')
+        ? (RES_WORD[(((L && L.prac) || []).filter(e => e[0] === 'p' && wkDates.has(e[1]) && e[2] === 'R').pop() || [])[3]] || 'On a reserve list') : '';
     const thisWeek = `<div class="pc-box"><div class="pc-k">This week</div>
         <div class="ij-hero">
-          <div><small>Status</small><b class="ij-st ij-${desCls}">${esc(des)}</b></div>
+          <div><small>Status</small><b class="ij-st ij-${resList && des === 'Listed' ? 'out' : desCls}">${esc(h.susp ? 'Suspended' : resList && des === 'Listed' ? (/injured reserve/i.test(resList) ? 'Injured Reserve' : resList.replace(/^On (the )?/, '')) : des)}</b></div>
           <div><small>Chance to play</small><b class="ij-big ${!h.inj || H.level(h.play) === 'ok' ? 'good' : H.level(h.play) === 'bad' ? 'bad' : ''}">${h.play != null ? NFLE.fmt.toPlay(1 - h.play) : onBye ? '<span class="muted">Bye</span>' : h.inj ? '&ndash;' : '&gt;99%'}</b></div>
           ${third}
         </div>
@@ -2336,17 +2365,18 @@
       const t = kindTotals(L, S.g), team = S.g.length ? S.g[S.g.length - 1].t : '';
       const row = (g, label) => `<tr${tileAttrs(g)}><td>${esc(label)}</td><td class="lg-opp tm-opp"><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>
         <td class="num">${g.sn != null ? g.sn : '–'}</td>${ptsCell(g)}${keys.map(k => `<td class="num">${nfmt((g.d || [])[(L.keys || []).indexOf(k)])}</td>`).join('')}${advCells(g)}${rk.map((k, i) => `<td class="num">${g.r ? nfmt(g.r[i]) : '–'}</td>`).join('')}</tr>`;
-      // season totals under the column heads (owner 2026-10-16), as in the fantasy log: sums, snap share averaged
-      const tot = gs => {
-        if (gs.length < 2 || opts.compact) return '';
+      // season totals under the column heads (owner 2026-10-16), as in the fantasy log: sums, snap share averaged;
+      // the card's preview too (owner 2026-10-29, as the fantasy preview has it)
+      const tot = (gs, grd = '') => {
+        if (gs.length < 2) return '';
         const sum = (g2, i) => gs.reduce((a, g) => a + (+((g[g2] || [])[i]) || 0), 0), sn = gs.filter(g => g.sn != null);
         const at = idp ? advTotals(L, gs) : null;
-        return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num">${sn.length ? Math.round(sn.reduce((a, g) => a + g.sn, 0) / sn.length) : '–'}</td>${idp ? `<td class="num"><b>${f1(gs.reduce((x, g) => x + idpPts(L, g, w), 0))}</b></td><td></td>` : ''}${keys.map(k => `<td class="num">${nfmt(sum('d', (L.keys || []).indexOf(k)))}</td>`).join('')}${ak.map(k => `<td class="num lg-adv">${at.n ? nfmt(at[k] || 0) : '–'}</td>`).join('')}${rk.map((k, i) => `<td class="num">${nfmt(sum('r', i))}</td>`).join('')}</tr>
+        return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num">${sn.length ? Math.round(sn.reduce((a, g) => a + g.sn, 0) / sn.length) : '–'}</td>${idp ? `<td class="num"><b>${f1(gs.reduce((x, g) => x + idpPts(L, g, w), 0))}</b></td><td class="num">${grd}</td>` : ''}${keys.map(k => `<td class="num">${nfmt(sum('d', (L.keys || []).indexOf(k)))}</td>`).join('')}${ak.map(k => `<td class="num lg-adv">${at.n ? nfmt(at[k] || 0) : '–'}</td>`).join('')}${rk.map((k, i) => `<td class="num">${nfmt(sum('r', i))}</td>`).join('')}</tr>
           <tr class="lg-gap"><td colspan="${n}"></td></tr>`;
       };
       const miss = g => `<tr class="lg-miss"${tileAttrs(g)}><td>${g.w}</td>${g.o ? `<td class="lg-opp tm-opp"><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>` : '<td class="lg-opp">&ndash;</td>'}
         <td class="num">${g.sn != null ? g.sn : missTag(g)}</td>${'<td class="num">&ndash;</td>'.repeat(n - 3)}</tr>`;
-      const trs = tot(S.g) + [...S.g, ...(opts.compact ? [] : (S.m || []))].sort((a, b) => b.w - a.w)  // newest first, every week
+      const trs = tot(S.g, idp ? seasonGrdOf(L.pid, S.s) : '') + [...S.g, ...(opts.compact ? [] : (S.m || []))].sort((a, b) => b.w - a.w)  // newest first, every week
         .map(g => g.bye ? byeRow(g.w, n - 2) : g.miss != null ? miss(g) : row(g, g.w)).join('');
       const sum = opts.compact ? '' : ` · ${t.g} game${t.g === 1 ? '' : 's'}${keys.length ? ` · ${keys.slice(0, 4).map(k => `${nfmt(t[k] || 0)} ${cols[k][0]}`).join(', ')}` : ''}`;
       // playoffs first, their own block (not in the season totals above)
@@ -2418,7 +2448,7 @@
     const cur = now && now.status !== 'Active' ? `<div class="pc-box"><div class="pc-k">Right now · ESPN</div>
       <div class="ij-now"><span class="dc-tag dt-${now.status === 'Questionable' ? 'q' : now.status === 'Doubtful' ? 'd' : 'out'}">${esc(now.status)}</span>
         <b>${esc([now.type, now.detail && now.detail !== 'Not Specified' ? now.detail : '', now.side && now.side !== 'Not Specified' ? now.side : ''].filter(Boolean).join(' · '))}</b>
-        ${now.return_date ? `<span class="muted">est. return ${esc(new Date(now.return_date + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' }))}</span>` : ''}</div>
+        ${now.return_date ? `<span class="muted" title="ESPN's estimated return: ${esc(espnDate(now.return_date))}">${esc(backLbl(now.return_date))}</span>` : ''}</div>
       ${now.comment ? `<p class="pc-sub">${esc(now.comment)}</p>` : ''}</div>` : '';
     let dur = '';
     if (d && d.games) {
@@ -2507,6 +2537,18 @@
   // ---- NFL Edge grade (data/grades/<season>.json, tools/grade_build.py): percentile of EPA over replacement per game
   // over his last three seasons (weighted to the latest, shrunk by sample size) among his position's players that season.
   const GR = { ix: null, s: {} };
+  // his notable move of the last two weeks, atop the card's Summary (owner 2026-10-29; shell.js NFLE.notable, the same
+  // wording as Home's strip). NOTABLE: undefined until asked, null while loading.
+  let NOTABLE;
+  const notableBanner = pid => {
+    if (!NOTABLE || !NOTABLE.items) return '';
+    const F = NFLE.notableFmt, now = Date.now();
+    const it = NOTABLE.items.find(i => (now - new Date(i.date + 'T12:00:00')) / 864e5 <= 14 && i.players.some(x => x.pid === pid));
+    if (!it) return '';
+    const p = it.players.find(x => x.pid === pid), why = F.why(it, p);
+    const when = new Date(it.date + 'T12:00:00').toLocaleDateString([], { month: 'short', day: 'numeric' });
+    return `<div class="pc-nv nv-${esc(it.kind)}-b"><span><b>${esc(F.verb(it, p))}</b> <span class="muted">&middot; ${esc(when)}${why.length ? ` &middot; ${esc(why.join(', '))}` : ''}</span></span></div>`;
+  };
   const GRH = {};  // pid -> his grade history docs (data/grades/players/<last 2 digits>.json); null while loading
   const grIndex = () => GR.ix || (GR.ix = NFLE.load('data/grades/index.json').catch(() => null));
   const grSeason = s => GR.s[s] || (GR.s[s] = NFLE.load(`data/grades/${s}.json`).catch(() => null));
@@ -2667,6 +2709,7 @@
         if (cardPid === pid) rerenderCard();
       });
     }
+    if (NOTABLE === undefined) { NOTABLE = null; NFLE.notable().then(d => { NOTABLE = d || { items: [] }; if (cardPid && notableBanner(cardPid)) rerenderCard(); }); }
     // the current season's grades drive the header chip; the Grade tab loads every season on first open
     if (graded && GR.cur === undefined) { GR.cur = null; grIndex().then(ix => ix && grSeason(ix.current)).then(d => { GR.cur = d || null; if (cardPid === pid) rerenderCard(); }); }
     const isKind = !!(L && L.kind);  // a non-fantasy page (defense, line, specialists): no week projections
@@ -2700,7 +2743,7 @@
       ${bioStrip(L)}
       <div class="seg pc-tabs" role="tablist">${[['ov', 'Summary'], ['log', 'Game log'], ...(hasThr ? [['thr', 'Throws']] : []), ...(news ? [['news', 'News']] : [])]
         .map(([k, l]) => `<button type="button" role="tab" data-pt="${k}" class="${cardTab === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-      <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${overview ? '' : pickerHtml()}${week}${overview ? '<div class="pc-pen"></div>' : ''}</div>
+      <div class="pc-tab" data-pt="ov"${cardTab === 'ov' ? '' : ' hidden'}>${notableBanner(pid)}${overview ? '' : pickerHtml()}${week}${overview ? '<div class="pc-pen"></div>' : ''}</div>
       <div class="pc-tab" data-pt="log"${cardTab === 'log' ? '' : ' hidden'}><div class="pc-box pc-logbox"><div class="pc-k">Every career game</div><div class="pc-log">${
         !LOGS[pid] ? '<div class="skel-zone"></div>' : !L ? '<p class="pc-sub">Game log unavailable.</p>'
           : isKind ? (L.seasons.length ? kindLog(L, L.seasons) : '<p class="pc-sub">No regular-season games with a recorded stat or snap.</p>')
@@ -2820,15 +2863,19 @@
     };
     const box = (title, rows) => rows && rows.length ? `<div class="pc-box"><div class="pc-k">${esc(title)}</div>
       ${rows.map(([abb, name, pl]) => `<div class="dc-row"><span class="dc-pos" title="${esc(name)}">${esc(abb)}</span><span class="dc-pl">${pl.map((x, i) => who(x, i)).join('')}</span></div>`).join('')}</div>` : '';
-    // by playing time: snap leaders over the team's last 3 games (from its 2nd game on), starters in bold
-    const mode = W.u ? dMode : 'list';
+    // by playing time: snap leaders over the team's last 3 games (from its 2nd game on), starters in bold; the whole
+    // roster (this season only) as a third view
+    const canRoster = sel.s === DIDX.current;
+    const mode = dMode === 'roster' && canRoster ? 'roster' : W.u ? (dMode === 'roster' ? 'use' : dMode) : 'list';
     const ubox = (title, grps) => {
       const rows = (W.u || []).filter(r => grps.includes(r[0]));
       return rows.length ? `<div class="pc-box"><div class="pc-k">${esc(title)}</div>
         ${rows.map(([g, n, pl]) => { const up = pl.filter(x => !x[3]), hurt = pl.filter(x => x[3]);
           return `<div class="dc-row"><span class="dc-pos" title="${esc(GRP_NAME[g] || g)}">${esc(g)}</span><span class="dc-pl">${up.map(([pi, pct, tag], i) => who([pi, 0, tag], i, pct, i < n)).join('')}${hurt.map(([pi, pct, tag], i) => who([pi, 0, tag], i, pct, false, true)).join('')}</span></div>`; }).join('')}</div>` : '';
     };
-    const seg = W.u ? `<div class="seg dc-mode" role="tablist"><button type="button" role="tab" data-dm="use" class="${mode === 'use' ? 'on' : ''}">Playing time</button><button type="button" role="tab" data-dm="list" class="${mode === 'list' ? 'on' : ''}">Listed chart</button></div>` : '';
+    const modes = [...(W.u ? [['use', 'Playing time']] : []), ['list', 'Listed chart'], ...(canRoster ? [['roster', 'Roster']] : [])];
+    const seg = modes.length > 1 ? `<div class="seg dc-mode" role="tablist">${modes.map(([k, l]) => `<button type="button" role="tab" data-dm="${k}" class="${mode === k ? 'on' : ''}">${l}</button>`).join('')}</div>` : '';
+    if (mode === 'roster') return `<div class="pc-wkbar">${seasonSel}</div>${seg}${rosterHtml(abbr)}`;
     const tags = liveWk ? "ESPN's injury list, updated daily" : "that week's injury report (O / D / Q) or reserve list (IR, PUP, NFI, SSPD, HOLD = did not report)";
     const listedName = sel.s >= 2025 ? "ESPN's depth chart" : "The team's depth chart";
     const body = mode === 'use'
@@ -2837,6 +2884,34 @@
       : `${box(`Offense${W.f ? ` · ${W.f}` : ''}`, W.off)}${box(`Defense${W.d ? ` · ${String(W.d).replace(/ D$/, '')}` : ''}`, W.def)}${box('Special teams', W.st)}
         <p class="pc-sub">${listedName} for that week (starters in bold, backups in order)${W.u ? '' : sel.s >= 2012 ? ". A team's first game shows the listed chart: before it has played, the preseason chart beats last season's playing time (83% vs 71% of starters right in 2025-26)" : ''}. Tags: ${tags}. Team depth charts are labeled "unofficial" and can lag reality.</p>`;
     return `<div class="pc-wkbar">${seasonSel}${weekSel}</div>${seg}${body}`;
+  };
+  // The whole roster (owner 2026-10-29: "a list of the entire team, every single player on the roster, sorted by their
+  // jersey number, include their picture, name, age as integer, position"): data/rosters/<TEAM>.json
+  // (tools/depth_build.py team_rosters), the team's latest roster week: the 53, then reserve lists and the practice squad
+  // tagged, all by number
+  const RSTR = {};
+  const rosterHtml = abbr => {
+    if (RSTR[abbr] === undefined) {
+      RSTR[abbr] = null;
+      NFLE.load(`data/rosters/${encodeURIComponent(abbr)}.json`).then(j => { RSTR[abbr] = j; refreshDepth(abbr); }, () => { RSTR[abbr] = false; refreshDepth(abbr); });
+    }
+    const R = RSTR[abbr];
+    if (!R) return `<div class="pc-box"><p class="pc-sub">${R === false ? 'No roster on file.' : 'Loading roster&hellip;'}</p></div>`;
+    const ix = Object.fromEntries(R.cols.map((c, i) => [c, i])), now = Date.now();
+    const age = b => b ? Math.floor((now - Date.parse(`${b}T12:00:00`)) / (365.25 * 864e5)) : null;
+    // NFL.com's headshot, cropped to the face at thumbnail size (as the player card's photo); else ESPN's
+    const pic = r => { const u = r[ix.photo];
+      return u ? u.replace(/\/image\/upload\/(?:[^/]*,[^/]*\/)?/, '/image/upload/c_thumb,g_face,z_0.75,w_96,h_96,f_auto,q_auto/') : NFLE.ui.headshot(r[ix.espn]); };
+    const TAGT = { PS: 'Practice squad', IR: 'Injured reserve', PUP: 'PUP list', NFI: 'Non-football injury list', SSPD: 'Suspended', HOLD: 'Did not report', RES: 'Reserve list' };
+    const cnt = t => R.rows.filter(r => r[ix.tag] === t).length, res = R.rows.filter(r => r[ix.tag] && r[ix.tag] !== 'PS').length;
+    const rows = R.rows.map(r => { const pid = r[ix.pid], a = age(r[ix.born]), t = r[ix.tag], ph = pic(r);
+      return `<div class="rs-row${t ? ' rs-off' : ''}"${pid ? ` data-open-pid="${esc(pid)}"` : ''}><span class="rs-num">${r[ix.num] != null ? r[ix.num] : '&ndash;'}</span>
+        <span class="rs-ph">${ph ? `<img src="${esc(ph)}" alt="" width="34" height="34" loading="lazy" onerror="this.remove()">` : ''}</span>
+        <span class="rs-nm"><b>${esc(r[ix.name])}</b>${t ? ` <span class="dc-tag dt-${t === 'PS' ? 'q' : 'out'}" title="${esc(TAGT[t] || t)}">${esc(t)}</span>` : ''}</span>
+        <span class="posb posb-${esc(r[ix.pos])}">${esc(r[ix.pos])}</span><span class="rs-age">${a != null ? a : ''}</span></div>`; }).join('');
+    return `<div class="pc-box"><div class="pc-k">Roster &middot; ${cnt('')} active${res ? `, ${res} on reserve lists` : ''}${cnt('PS') ? `, ${cnt('PS')} practice squad` : ''}</div>
+      <div class="rs-head"><span>No.</span><span></span><span>Player</span><span>Pos</span><span>Age</span></div>${rows}
+      <p class="pc-sub">The team's roster as of week ${esc(R.week)} (nflverse's weekly rosters, with this week's reserve-list moves from ESPN), by jersey number. Tagged: practice squad (PS) and reserve lists (IR, PUP, NFI, SSPD).</p></div>`;
   };
   // the depth chart lives in the team card's Players sheet (owner 2026-10-17): a .dc-wrap[data-dc] container, drawn
   // and wired when the sheet opens and again whenever a depth / injury file it waits on arrives
@@ -2876,9 +2951,10 @@
       h2h = `<div class="tm-h2h">${tmL(teamOpp, tLogo(teamOpp, 18))} <b>${esc(abbr)} vs ${tmL(teamOpp)} since 1999: ${w}-${l}${t ? `-${t}` : ''}</b> <span class="muted">(${gs.length} games)</span></div>`;
     }
     const oppCell = (o, h, opr, season) => `<td class="lg-opp tm-opp ${opr ? (opr <= 8 ? 'mr-hard' : opr <= 16 ? 'mr-tough' : opr <= 24 ? 'mr-ok' : 'mr-easy') : ''}"><button type="button" class="tm-open" data-tm="${esc(o)}"${opr ? ` title="Their power rank that week: ${ord(opr)}"` : ''}>${h === 0 ? '@' : h === 2 ? 'vs ' : ''}${esc(era(o, season))}</button></td>`;
-    const pct = (v, m) => v == null && m == null ? '–' : `${v != null ? `${v}%` : '–'}<small> / ${m != null ? `${m}%` : '–'}</small>`;
+    // Vegas's pregame chance; ours only for a game with no line (owner 2026-10-29: the market's number where it exists)
+    const pct = (v, m) => v != null ? `${v}%` : m != null ? `${m}%<small> ours</small>` : '–';
     const head = `<tr class="lg-gh"><th colspan="7"></th><th colspan="5" class="lg-grp">Offense</th><th colspan="3" class="lg-grp">Allowed</th><th></th></tr>
-      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th>Result</th><th class="num">Line</th><th class="num" title="Pregame win chance: Vegas / our model (2021 on)">Odds</th><th class="num" title="Our power rank that week">Pwr</th><th class="num" title="Elo going in">Elo</th>
+      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th>Result</th><th class="num">Line</th><th class="num" title="Pregame win chance: Vegas's (ours only where there was no line; 2021 on)">Odds</th><th class="num" title="Our power rank that week">Pwr</th><th class="num" title="Elo going in">Elo</th>
       <th class="num">Yds</th><th class="num">Pass</th><th class="num">Rush</th><th class="num" title="Yards per play">YPP</th><th class="num" title="Turnovers">TO</th>
       <th class="num">Yds</th><th class="num">YPP</th><th class="num" title="Takeaways">TA</th><th></th></tr>`;
     const body = L.seasons.map(S => {
@@ -2915,7 +2991,7 @@
       return `<tbody data-season="${S.s}"><tr class="lg-season"><td colspan="16"><span class="lg-pin"><b>${S.s}</b> ${esc(sumBits)}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
     }).join('');
     const legend = `<div class="lg-leg"><span>Opponent color = their power rank that week (2021 on):</span><span class="mr-hard">top 8</span><span class="mr-tough">9-16</span><span class="mr-ok">17-24</span><span class="mr-easy">25-32</span>
-      <span>· Odds = pregame win chance, Vegas / our model · Line = Vegas spread for ${esc(abbr)} (cov = covered) · Tap a game to open its gamecast</span></div>`;
+      <span>· Odds = pregame win chance from the Vegas line (ours where there was none) · Line = Vegas spread for ${esc(abbr)} (cov = covered) · Tap a game to open its gamecast</span></div>`;
     return `<div class="tm-bar">${sel}</div>${h2h}${legend}<div class="lg-scroll"><table class="lg tm-lg">${body}</table></div>`;
   };
   const teamSeasonBox = (L) => {
@@ -3169,13 +3245,20 @@
   // The season's schedule sheet (owner 2026-10-17: "not just games yet to be played"): played games with the result,
   // the bye in its week, the rest with the opponent's record and Power rank; strength of schedule below. Opened from
   // the schedule row's header (and the Schedule tile where the Playoffs tile can't show: a past season's page).
+  document.addEventListener('click', e => {  // a schedule sheet's game rows open their gamecast
+    const g = e.target.closest && e.target.closest('.tm-sg.tm-game[data-gid]');
+    if (g) location.href = gcUrl(g.dataset.gid, g.dataset.f || '');
+  });
   const schedSheet = (abbr, d, pw) => {
     const O = oddsData(), sch = O && +O.season === +d.season && O.sched ? O.sched[abbr] : null;
     const pow = Object.fromEntries((d.power || []).map(x => [x.team, x]));
     const weeks = sch ? Array.from({ length: Math.max(18, ...sch.map(g => g[0])) }, (_, i) => sch.find(g => g[0] === i + 1) || i + 1) : [];
     const schRow = g => { if (typeof g === 'number') return `<div class="tm-sg tm-bye"><span class="tm-sw">Wk ${g}</span><span class="muted">Bye</span></div>`;
       const o = pow[g[1]] || {}, done = g[3] != null, r = !done ? '' : g[3] > g[4] ? 'W' : g[3] < g[4] ? 'L' : 'T';
-      return `<div class="tm-sg tm-open${done ? ' tm-done' : ''}" data-tm="${esc(g[1])}"><span class="tm-sw">Wk ${g[0]}</span><span class="tm-sv">${g[2] ? 'vs' : '@'}</span>${tLogo(g[1], 22)}<b>${esc(o.nick || g[1])}</b>`
+      // a row opens that game's gamecast (owner 2026-10-29: "link to the matchup, not the team"): nflverse's game id
+      // (season_week_away_home) and its week file
+      const wk2 = String(g[0]).padStart(2, '0'), gid = `${d.season}_${wk2}_${g[2] ? g[1] : abbr}_${g[2] ? abbr : g[1]}`;
+      return `<div class="tm-sg tm-game${done ? ' tm-done' : ''}" role="link" tabindex="0" data-gid="${esc(gid)}" data-f="${esc(`${d.season}/week-${wk2}.json`)}" title="Open the gamecast"><span class="tm-sw">Wk ${g[0]}</span><span class="tm-sv">${g[2] ? 'vs' : '@'}</span>${tLogo(g[1], 22)}<b>${esc(o.nick || g[1])}</b>`
         + (done ? `<span class="tm-sres r-${r}">${r} ${g[3]}-${g[4]}</span>` : `<span class="muted">${esc(o.record || '')}</span>${rkChip(o.rank, 'Their Power rank')}`) + '</div>'; };
     return `<div class="pc-box"><div class="pc-k">${esc(d.season)} season</div>${weeks.length ? `<div class="tm-sched">${weeks.map(schRow).join('')}</div>` : '<p class="pc-sub">Loading schedule&hellip;</p>'}
       ${pw ? `<p class="pc-sub">Strength of schedule, by the opponents' Power ratings: so far ${ord(pw.sos_past_rk)} hardest, the rest of the way ${ord(pw.sos_next_rk)} hardest (1st = toughest).</p>` : ''}</div>`;
@@ -3451,7 +3534,7 @@
       const play = p && p.inactive != null ? 1 - p.inactive : ia && ia.p != null ? ia.p : null;
       out.push({ pid, espn, tag, name: (p && p.name) || (r && r.name) || (ro && ro.name) || (ia && ia.name) || '', pos: (p && p.pos) || (ro && ro.pos) || (r && r.pos) || (ia && ia.pos) || '',
         photo: p && p.photo, what: [injWhat(r), hurtText(hu)].filter(Boolean).join(' · '), prac: p ? pracWords(p, DATA) : '', play, onReport: !!(ia && ia.p == null && !INJ_LONG.has(tag)),
-        back: bw === 'no' || (!bw && ew === 'no') ? 'season' : bw ? `wk ${bw}` : play != null && play >= H.AVAIL.EVEN ? '' : ew ? `wk ${ew}` : r && r.return_date >= today ? espnDate(r.return_date) : '',
+        back: bw === 'no' || (!bw && ew === 'no') ? 'season' : bw ? `wk ${bw}` : play != null && play >= H.AVAIL.EVEN ? '' : ew ? `wk ${ew}` : r && r.return_date >= today ? retWeek(r.return_date) : '',
         backWhy: bw ? 'our return model: the first week he is more likely than not to play' : ew ? `ESPN's estimated return, ${espnDate(r.return_date)}` : '' });
     };
     // a coach's decision isn't an injury (ESPN marks healthy scratches Out on Mondays); skipped, not counted
@@ -3481,7 +3564,7 @@
     const playCell = x => x.play != null ? `<td class="num">${NFLE.fmt.toPlay(1 - x.play)}</td>`
       : x.tag === 'O' ? '<td class="num muted">Out</td>'
       : `<td class="num muted" title="${x.onReport ? 'After his team\'s final injury report' : 'No chance on file for him yet'}">&ndash;</td>`;
-    const backCell = x => `<td class="num${x.back ? '' : ' muted'}"${x.backWhy ? ` title="${esc(x.backWhy)}"` : ''}>${x.back === 'season' ? 'Season' : esc(x.back) || '&ndash;'}</td>`;
+    const backCell = x => `<td class="num${x.back ? '' : ' muted'}"${x.backWhy ? ` title="${esc(x.backWhy)}"` : ''}>${x.back === 'season' ? 'Out for season' : esc(x.back) || '&ndash;'}</td>`;
     // the injury and practice days on their own wrapping line under the name (in the name's sub line they pushed the
     // numbers off a phone screen)
     const who = x => NFLE.ui.player({ name: x.name, pos: x.pos, team: abbr, photo: x.photo, espn: x.espn,
@@ -4409,9 +4492,8 @@
         <div class="wp-bar" role="img" aria-label="${esc(a.team)} ${f.p_away}%, ${esc(h.team)} ${f.p_home}%"><span class="wp-a" style="width:${f.p_away}%"></span><span class="wp-h"></span>
           <i class="wp-zone" style="left:${100 - tp}%;width:${2 * tp - 100}%"></i></div>
         <div class="wp-ends"><span>${tmL(a.team)} ${f.p_away}%</span><span>${f.p_home}% ${tmL(h.team)}</span></div>
-        ${g.vegas_line ? `<div class="wp-meta"><span>Vegas ${esc(g.vegas_line)}${g.vegas_total ? ` · O/U ${f1(g.vegas_total)}` : ''}</span>
-          <span title="${esc(f.model_why)}">Our model: <b>${f.model_tossup ? 'tossup' : `${tmL(f.model_fav, esc(f.model_nick))} ${f.model_pct}%`}</b>${f.model_tossup ? ` (${tmL(f.model_fav, esc(f.model_nick))} ${f.model_pct}%)` : ''}</span></div>`
-          : `<div class="wp-meta"><span>${esc(f.model_why)}</span></div>`}
+        ${g.vegas_line ? `<div class="wp-meta"><span>Vegas ${esc(g.vegas_line)}${g.vegas_total ? ` · O/U ${f1(g.vegas_total)}` : ''}</span></div>`
+          : f.model_why ? `<div class="wp-meta"><span>${esc(f.model_why)}</span></div>` : ''}
       </div></section>`;
     const battles = `<section class="gcs"><div class="battles" style="${esc(g.bt_style)}">
       <h3>Who wins each battle <span class="bt-unit">EPA per 100 plays</span></h3>
@@ -4639,7 +4721,7 @@
     const a = info.away, h = info.home, winner = a.score > h.score ? a.team : h.score > a.score ? h.team : null;
     const f = g && g.fc;
     const call = f ? `<div class="pg-call">${verdict(f, winner)}
-      <span class="muted">${f.src === 'Vegas' ? `Vegas gave ${f.tossup ? `a tossup (${tmL(f.fav, esc(f.nick))} ${f.pct}%)` : `${tmL(f.fav, esc(f.nick))} ${f.pct}%`}` : 'No Vegas line'} · our model gave ${tmL(f.model_fav, esc(f.model_nick))} ${f.model_pct}%${f.model_tossup ? ' (tossup)' : ''}</span></div>` : '';
+      <span class="muted">${f.src === 'Vegas' ? `Vegas gave ${f.tossup ? `a tossup (${tmL(f.fav, esc(f.nick))} ${f.pct}%)` : `${tmL(f.fav, esc(f.nick))} ${f.pct}%`}` : `No Vegas line · our model gave ${tmL(f.model_fav, esc(f.model_nick))} ${f.model_pct}%${f.model_tossup ? ' (tossup)' : ''}`}</span></div>` : '';
     return `<section class="gcs" data-k="now"><h3>Result</h3><div class="pg-res">
       <span class="tm-open${winner === a.team ? ' won' : ''}" data-tm="${esc(a.team)}">${logo(a.logo, '#111', 26, a.team)}<b>${esc(a.team)}</b> ${a.score}</span><span class="muted">${esc(info.detail || 'Final')}</span>
       <span class="tm-open${winner === h.team ? ' won' : ''}" data-tm="${esc(h.team)}">${h.score} <b>${esc(h.team)}</b>${logo(h.logo, '#111', 26, h.team)}</span></div>${call}
@@ -5750,6 +5832,28 @@
     if (last && last.isConnected) last.focus();
   };
   const open = tile => show(tile.dataset.sheet, tile.querySelector('template').content.cloneNode(true), tile);
+  // whose sheet it is (owner 2026-10-29: the grade sheet covered the card's name): the opener's card head, as one line
+  // in the dimmed band above the sheet. Player: name, position, team; team / defense cards: the name and its line.
+  const whoOf = opener => {
+    let c = opener && opener.closest && opener.closest('#pcOv') ? opener : null;
+    while (c && !c.querySelector('.pc-head')) c = c.parentElement;
+    const h = c && c.querySelector('.pc-head'), nm = h && h.querySelector('h3');
+    if (!nm) return null;
+    const name = [...nm.childNodes].filter(n => !(n.classList && n.classList.contains('pc-num'))).map(n => n.textContent).join('').trim();
+    const pos = h.querySelector('.pc-meta .posb'), tm = h.querySelector('.pc-meta .pc-tlink');
+    const rest = pos || tm ? [pos && pos.textContent, tm && tm.textContent].filter(Boolean).join(' · ')
+      : ((h.querySelector('.pc-meta') || {}).textContent || '').replace(/\s+/g, ' ').trim();
+    const el = document.createElement('div');
+    el.className = 'sheet-who';
+    el.setAttribute('aria-hidden', 'true');  // the dialog's label carries it
+    // his team's logo as the card shows it (the photo's corner badge, else the head's logo)
+    const logo = h.querySelector('.pc-pic-tm img, .pc-head > .tm-open img, .pc-logo-z img');
+    el.innerHTML = '<b></b><span></span>';
+    if (logo) { const i = logo.cloneNode(); i.removeAttribute('id'); i.width = i.height = 18; i.alt = ''; el.insertBefore(i, el.firstChild); }
+    el.querySelector('b').textContent = name;
+    el.querySelector('span').textContent = rest;
+    return { el, label: [name, rest].filter(Boolean).join(', ') };
+  };
   // any content (NFLE.sheet: the gamecast's drive sheets build theirs on tap)
   const show = (title, content, opener) => {
     close(); last = opener || null;
@@ -5759,7 +5863,9 @@
     if (opener && opener.closest && opener.closest('#pcOv') && NFLE.sheetMark) { ov.dataset.card = '1'; NFLE.sheetMark(NFLE.slug(title)); }
     ov.innerHTML = '<div class="sheet" role="dialog" aria-modal="true"><div class="sheet-h"><i class="sheet-grab" aria-hidden="true"></i><b></b><button type="button" class="sheet-x" aria-label="Close">&times;</button></div><div class="sheet-b"></div></div>';
     ov.querySelector('.sheet-h b').textContent = title;
-    ov.querySelector('.sheet').setAttribute('aria-label', title);
+    const who = whoOf(opener);
+    if (who) ov.insertBefore(who.el, ov.firstChild);
+    ov.querySelector('.sheet').setAttribute('aria-label', who ? `${title}: ${who.label}` : title);
     const body = ov.querySelector('.sheet-b');
     if (typeof content === 'string') body.innerHTML = content; else body.appendChild(content);
     ov.addEventListener('click', e => {
@@ -5788,6 +5894,7 @@
   const FULL = 0.92;
   const drag = (ov, sh) => {
     sh.style.maxHeight = `${Math.round(FULL * innerHeight)}px`;
+    const who = ov.querySelector('.sheet-who');
     let y0 = 0, mode = null, lastY = 0, lastT = 0, v = 0;
     sh.addEventListener('touchstart', e => {
       if (e.touches.length !== 1) return;
@@ -5802,19 +5909,23 @@
       e.preventDefault();
       sh.classList.remove('sheet-anim');
       sh.style.transform = `translateY(${Math.max(0, dy)}px)`;
+      if (who) { who.classList.remove('sheet-anim'); who.style.transform = sh.style.transform; }
     }, { passive: false });
     sh.addEventListener('touchend', () => {
       if (mode !== 'drag') { mode = null; return; }
       mode = null;
       const dy = lastY - y0;
       sh.classList.add('sheet-anim');
+      if (who) who.classList.add('sheet-anim');
       if (dy > 0.25 * sh.offsetHeight || v > 0.6) {  // away
         sh.style.transform = `translateY(${sh.offsetHeight + 40}px)`;
+        if (who) who.style.transform = sh.style.transform;
         ov.classList.add('sheet-out');
         setTimeout(close, 200);
         return;
       }
       sh.style.transform = '';  // not far enough: spring back
+      if (who) who.style.transform = '';
     });
   };
   window.NFLE = window.NFLE || {};

@@ -125,3 +125,21 @@ table.lg-tbl tr.lg-empty td { opacity: .65; } .lg-empty-sub { font-size: var(--f
 .lg-tnote { flex-basis: 100%; margin-top: -6px; font-size: var(--fs-xs); }
 /* a long note beside a name wraps instead of widening the table (owner 2026-10-20: Tank Dell's row stretched it) */
 table.lg-tbl .nm2 .l1 { white-space: normal; }
+/* Lineup: your lineup / suggested switch, and what needs fixing on top (league.js realView) */
+.seg.lg-mode { margin: 4px 0 10px; }
+.lg-alert { display: block; width: 100%; text-align: left; font: inherit; color: var(--ink); margin: 0 0 8px; padding: 9px 12px; border-radius: var(--r-md);
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); border-left: 3px solid var(--muted); line-height: 1.4; }
+.lg-alert span { color: var(--muted); }
+.lg-alert.bad { border-left-color: #f2786d; }
+.lg-alert.tip { border-left-color: #7fb3ff; }
+.lg-alert.sug { border-left-color: #6fdc8c; cursor: pointer; }
+.lg-alert.sug b { color: #8fe3a8; }
+@media (min-width: 900px) { #tab-league .lg-body > .lg-alert, #tab-league .lg-body > .seg.lg-mode { max-width: 760px; } }
+/* live scores (league.js scoreHead, row): the score big, the expected final and who's left beside it; a player's live
+   points with "proj" (his expected final) or "final" under them */
+.lg-score { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 14px 0 8px; }
+.lg-score > div { display: flex; align-items: baseline; gap: 10px; }
+.lg-score-n { font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; }
+.lg-pts { display: block; font-variant-numeric: tabular-nums; }
+.lg-pts-s { display: block; font-size: var(--fs-xs); color: var(--muted); white-space: nowrap; }
+@media (min-width: 900px) { #tab-league .lg-body > .lg-score { max-width: 760px; } }

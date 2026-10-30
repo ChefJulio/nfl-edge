@@ -22,3 +22,26 @@
 .hm-p b { color: var(--ink); }
 .hm-t { cursor: pointer; }
 .hm-nl { text-decoration: none; font-weight: 600; }
+/* Notable moves (home.js drawNotable): a full-width tile above the others */
+.hm-news { grid-column: 1 / -1; }
+.hm-nv { display: block !important; }
+.hm-nv1 { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.hm-nv1 .hm-nl { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hm-nv2 { margin-top: 2px; color: var(--muted); font-size: var(--fs-sm); line-height: 1.35; }
+.hm-nv2 > span:first-child { font-variant-numeric: tabular-nums; }
+.hm-route { display: inline-flex; align-items: center; gap: 3px; margin-left: auto; flex: none; }
+.hm-arrow { color: var(--muted); }
+.hm-dgw { display: block !important; }
+.hm-dg > summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.hm-dg > summary::-webkit-details-marker { display: none; }
+.hm-dg[open] > summary { margin-bottom: 4px; }
+.hm-dg .hm-l { padding-left: 10px; border-left: 2px solid var(--line); }
+/* Your fantasy team (home.js): league, this week's projected matchup, top projected starters */
+.hm-lg { margin: 0 0 6px; font-weight: 600; color: var(--ink); }
+.hm-vs { display: flex; align-items: flex-end; gap: 14px; margin: 2px 0 8px; }
+.hm-vs > span:not(.hm-vsd) { display: flex; flex-direction: column; min-width: 0; }
+.hm-vs small { color: var(--muted); font-size: var(--fs-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+.hm-vs b { font-size: 26px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.hm-vsd { padding-bottom: 4px; }
+.hm-tag { font-size: var(--fs-xs); font-weight: 700; padding: 0 5px; border-radius: 4px; }
+.hm-tag-Q { background: rgba(240,192,90,.18); color: #f0c05a; } .hm-tag-D, .hm-tag-O { background: rgba(242,120,109,.18); color: #ff9a90; }

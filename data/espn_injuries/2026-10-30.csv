@@ -99,7 +99,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4635008,Keon Coleman,Buffalo Bills,Active,2026-10-19T10:00Z,,,,,,Coleman brought in four of six targets for 59 yards and a touchdown in the Bills' 33-30 win over the Raiders on Sunday.,WR
 4373678,Khalil Shakir,Buffalo Bills,Active,2026-10-19T09:56Z,,,,,,Shakir brought in four of six targets for 34 yards and a touchdown in the Bills' 33-30 win over the Raiders on Sunday.,WR
 3918298,Josh Allen,Buffalo Bills,Active,2026-10-19T07:45Z,,,,,,Allen completed 23 of 33 passes for 255 yards with two touchdowns and no interceptions and rushed five times for one yard in the Bills' 33-30 win over the Raiders on Sunday.,QB
-4576075,Corey Bullock,Carolina Panthers,Questionable,2026-10-30T04:01Z,Quadriceps,,,2026-11-08,QUESTIONABLE,questionable,C
+4695883,Jalen Coker,Carolina Panthers,Active,2026-10-30T04:23Z,,,,,,Coker secured two of five targets for 37 yards and a touchdown in the Panthers' 27-19 loss to the Packers on Thursday. He also lost a fumble.,WR
+4576075,Corey Bullock,Carolina Panthers,Questionable,2026-10-30T04:15Z,Quadriceps,,,2026-11-08,QUESTIONABLE,"Bullock (quadriceps) exited Thursday's 27-19 loss to Green Bay and did not return, Sheena Quick of Fox Sports Radio 1340 reports.",C
+4685720,Bryce Young,Carolina Panthers,Active,2026-10-30T04:10Z,,,,,,Young completed 23 of 41 passes for 209 yards with one touchdown and one interception in the Panthers' 27-19 loss to the Packers on Thursday.,QB
 4241416,Chuba Hubbard,Carolina Panthers,Active,2026-10-30T03:59Z,,,,,,Hubbard rushed 22 times for 81 yards and a touchdown and brought in seven of eight targets for 38 yards in the Panthers' 27-19 loss to the Packers on Thursday.,RB
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-30T03:45Z,,,,,,McMillan brought in six of 11 targets for 57 yards in the Panthers' 27-19 loss to the Packers on Thursday.,WR
 5151083,Will Lee III,Carolina Panthers,Questionable,2026-10-30T01:34Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Lee is dealing with a hamstring injury and is doubtful to return to Thursday's Week 8 matchup against Green Bay, Joe Person of The Athletic reports.",CB
@@ -113,7 +115,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242975,Jaelan Phillips,Carolina Panthers,Out,2026-10-28T23:41Z,Hamstring,Not Specified,Not Specified,2026-11-08,INACTIVE,Phillips (hamstring) has been ruled out ahead of Thursday night's game against the Packers.,LB
 4243256,Devin Lloyd,Carolina Panthers,Active,2026-10-28T00:46Z,,,,,,Lloyd posted four tackles in Sunday's loss to the Buccaneers.,LB
 3117253,Bobby Okereke,Carolina Panthers,Active,2026-10-28T00:39Z,,,,,,Okereke tallied 10 tackles (seven solo) and a defensed pass in Sunday's loss to Tampa Bay.,LB
-4695883,Jalen Coker,Carolina Panthers,Active,2026-10-27T19:23Z,,,,,,"Coker (shoulder) was listed as a full participant in Tuesday's practice, Mike Kaye of ESPN.com reports.",WR
 4567096,John Metchie III,Carolina Panthers,Active,2026-10-27T00:44Z,,,,,,Metchie caught two passes for 20 yards during Sunday's 43-13 defeat versus the Buccaneers.,WR
 4683243,Mitchell Evans,Carolina Panthers,Active,2026-10-27T00:38Z,,,,,,Evans gathered in both targets for 39 yards during Sunday's 43-13 loss versus Tampa Bay.,TE
 4685350,Trevor Etienne,Carolina Panthers,Active,2026-10-27T00:33Z,,,,,,"Etienne posted six carries for eight yards, reeled in both targets for 17 yards and compiled 69 kickoff-return yards during Sunday's 43-13 defeat to the Buccaneers.",RB
@@ -123,7 +124,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4874515,Sam Hecht,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,C
 4034962,Stone Forsythe,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,OT
 4709392,Anthony Tyus III,Carolina Panthers,Active,2026-10-26T01:37Z,,,,,,Tyus rushed three times for 23 yards and a touchdown in Sunday's 43-13 loss to the Bucs.,RB
-4568263,Ryan Fitzgerald,Carolina Panthers,Active,2026-10-26T01:13Z,,,,,,Fitzgerald did not attempt a field goal and went 1-for-2 on extra-point tries during Sunday's 43-13 loss to the Buccaneers.,PK
 4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-30T04:04Z,Undisclosed,Not Specified,Not Specified,2026-11-08,OUT,out,S
 3121544,T.J. Edwards,Chicago Bears,Active,2026-10-30T00:07Z,,,,,,Edwards (hamstring) was considered to be a full participant on the Bears' estimated practice report Thursday.,LB
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-29T20:19Z,Thumb,Sprain,Not Specified,2026-11-02,QUESTIONABLE,Monangai (thumb/toe) did not practice Thursday.,RB
@@ -274,6 +274,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035434,Devin White,Detroit Lions,Injured Reserve,2026-10-17T02:00Z,Forearm,Surgery,Not Specified,2026-11-22,IR,The Lions placed White (forearm) on injured reserve Friday.,LB
 3126997,Tom Kennedy,Detroit Lions,Injured Reserve,2026-10-17T01:51Z,Knee - MCL,Surgery,Right,2027-02-15,IR,The Lions placed Kennedy (knee) on injured reserve Friday.,WR
 4038849,DJ Wonnum,Detroit Lions,Active,2026-10-09T21:36Z,,,,,,,LB
+4036378,Jordan Love,Green Bay Packers,Active,2026-10-30T04:18Z,,,,,,Love completed 30 of 41 passes for 288 yards with three touchdowns and one interception and recovered a fumble in the Packers' 27-19 win over the Panthers on Thursday.,QB
 4248528,Christian Watson,Green Bay Packers,Questionable,2026-10-30T04:06Z,Ribs,Fracture,,2026-11-08,QUESTIONABLE,"Watson said he suffered a broken rib in Thursday night's 27-19 win over the Panthers, Rob Demovsky of ESPN.com reports.",WR
 4572680,Tucker Kraft,Green Bay Packers,Active,2026-10-30T04:03Z,,,,,,Kraft secured all six targets for 53 yards and a touchdown in the Packers' 27-19 win over the Panthers on Thursday.,TE
 4701936,Matthew Golden,Green Bay Packers,Active,2026-10-30T03:52Z,,,,,,Golden brought in seven of 13 targets for 79 yards and a touchdown in the Packers' 27-19 win over the Panthers on Thursday.,WR
@@ -298,7 +299,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4258206,Benjamin St-Juste,Green Bay Packers,Active,2026-10-26T23:15Z,,,,,,"St-Juste (hamstring) was estimated as a full participant on Monday's practice report, Matt Schneidman of The Athletic reports.",CB
 4428037,Jacob Monk,Green Bay Packers,Injured Reserve,2026-10-26T21:52Z,Quadriceps,Not Specified,Not Specified,2026-12-06,IR,The Packers placed Monk (quadriceps) on injured reserve Monday.,C
 4569661,Jager Burton,Green Bay Packers,Active,2026-10-26T18:28Z,,,,,,,C
-14931,Kevin Zeitler,Green Bay Packers,Active,2026-10-26T18:28Z,,,,,,,G
 4586312,Jaylin Noel,Houston Texans,Injured Reserve,2026-10-28T22:30Z,Toe,Surgery,Not Specified,2027-02-15,IR,"Noel, who was placed on injured reserve earlier Wednesday, is expected to require surgery to address his toe injury and will miss the remainder of the season, Jonathan M. Alexander of the Houston Chronicle reports.",WR
 3919117,Azeez Al-Shaair,Houston Texans,Active,2026-10-28T04:10Z,,,,,,Al-Shaair recorded nine tackles (two solo) in a Week 7 overtime loss to the Giants on Sunday.,LB
 4426350,Henry To'oTo'o,Houston Texans,Active,2026-10-28T04:04Z,,,,,,"To'oTo'o notched 10 tackles (three solo), including 0.5 sacks, in Sunday's Week 7 overtime loss to the Giants.",LB
