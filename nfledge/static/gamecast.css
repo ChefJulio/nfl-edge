@@ -465,7 +465,11 @@ svg.wp { display: block; width: 100%; height: 200px; border-radius: var(--r-md);
 #lgBody { max-height: 900px; overflow-y: auto; }
 .dr { margin-bottom: 10px; }
 .dr-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: var(--fs-sm); padding: 6px 8px; border-radius: var(--r-md);
-  background: color-mix(in srgb, var(--tc) 18%, var(--panel2)); border-left: 3px solid var(--tc); }
+  background: color-mix(in srgb, var(--tc) 18%, var(--panel2)); border: 0; border-left: 3px solid var(--tc); }
+/* the header is the drive sheet's button (owner 2026-10-30, Recent folded into the log) */
+button.dr-h { width: 100%; font: inherit; font-size: var(--fs-sm); color: var(--ink); text-align: left; cursor: pointer; }
+.dr-h .dsc { margin-left: auto; }
+.dr > .ds-ps { margin: 4px 0 2px; }
 .dr-res { font-weight: 700; } .dr-res.good { color: var(--good); }
 .pls { list-style: none; margin: 0; padding: 0; }
 .pl { display: grid; grid-template-columns: 62px minmax(0, 1fr) auto; gap: 8px; padding: 7px 4px; border-bottom: 1px solid var(--line); font-size: var(--fs-md); }
@@ -1570,6 +1574,8 @@ table.dst-log b.good { color: #6fdc8c; } table.dst-log b.bad { color: #ff8f84; }
 .lg-bar input { order: 9; flex-basis: 100%; }
 .lg-bar { gap: 6px; } .lg-bar .seg { flex: none; } .lg-bar .seg button { padding: 4px 9px; font-size: 12.5px; }
 .lg-bar input { order: 0; flex: 1 1 90px; min-width: 90px; flex-basis: auto; padding: 4px 9px; font-size: 13px; }
+/* row 1: the order and the search box beside it; row 2: the filter (owner 2026-10-30: four rows down to two) */
+.lg-bar input { min-width: 60px; flex-basis: 60px; }
 .mt-sit { display: inline-flex; align-items: center; gap: 7px; } .mt-sit b { color: var(--ink); } .mt-sit .rp-d { font-size: inherit; }
 .pl-np .pl-txt { text-transform: none; letter-spacing: 0; font-size: 12px; font-style: italic; }
 /* non-plays in three weights (owner 2026-10-28): a TV break, a faint centered hairline; a team's timeout, a row in its
@@ -1704,6 +1710,7 @@ tr.lg-pend td.muted { text-align: left; white-space: nowrap; font-size: 12px; }
 .fs-gain { background: var(--good); } .fs-loss, .fs-to { background: var(--bad); } .fs-pen { background: #f0b545; }
 .fs-st { background: color-mix(in srgb, var(--ink) 40%, transparent); } .fs-zero { background: var(--muted); }
 .fs-dot { width: 2px; top: -2px !important; bottom: -2px !important; margin-left: -1px; border-radius: 1px; background: var(--ink); }  /* the snap */
+.fs .fs-fd { width: 2px; top: -2px; bottom: -2px; margin-left: -1px; border-radius: 1px; background: #f5d020; }  /* the line to gain */
 .fs-seg { min-width: 3px; }
 .pl-what .fs { margin: 6px 0 4px; }
 /* penalty yards tacked on to a play (yellow); striped where they run back over the play's own yards */

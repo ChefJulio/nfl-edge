@@ -765,9 +765,7 @@
   const WPI = new WeakMap();  // sum -> { playId: [win% before, win% after] } (home team's chance)
   const wpAround = (sum, pl) => {
     if (!WPI.has(sum)) {
-      const m = {}, ser = wpSeries(sum);
-      ser.forEach((x, i) => { m[String(x.play.id)] = [i ? ser[i - 1].home : x.home, x.home]; });
-      WPI.set(sum, m);
+      WPI.set(sum, playWp(wpSeries(sum)));
     }
     return WPI.get(sum)[String(pl.id)] || null;
   };
@@ -4252,13 +4250,25 @@
   };
 
   // ------------------------------------------------------------------------------------------------- game page
-  const GP = { sum: null, info: null, g: null, timer: null, view: 'drive', filter: 'all', q: '', sort: 'new', replay: null, tab: null, pane: 'plays', plSub: null, fpAll: false, drvAll: false };
+  const GP = { sum: null, info: null, g: null, timer: null, filter: 'all', q: '', sort: null, replay: null, tab: null, pane: 'plays', fpAll: false, drvAll: false };
   const parseGid = gid => { const m = String(gid || '').match(/^(\d{4})_(\d{2})_([A-Z]{2,3})_([A-Z]{2,3})$/); return m ? { season: +m[1], week: +m[2], away: m[3], home: m[4] } : null; };
   const wpSeries = (sum) => {
     const plays = allPlays(sum).flatMap(d => d.plays || []);
     const byId = Object.fromEntries(plays.map(p => [String(p.id), p]));
     return (sum.winprobability || []).map(w => ({ w, p: byId[String(w.playId)] })).filter(x => x.p)
       .map(x => ({ t: elapsed(x.p), home: x.w.homeWinPercentage, play: x.p }));
+  };
+  // { playId: [win% before, win% after] } (home team's) for real plays only. ESPN sometimes posts a play's new number on
+  // the timeout, quarter end or two-minute warning after it (owner 2026-10-30: a TV timeout listed among the biggest
+  // swings): that change belongs to the play before it, and the non-play gets none
+  const playWp = ser => {
+    const m = {}; let last = null, prev = null;
+    ser.forEach(s => {
+      if (nonPlay(s.play)) { if (last) m[last][1] = s.home; }
+      else { last = String(s.play.id); m[last] = [prev == null ? s.home : prev, s.home]; }
+      prev = s.home;
+    });
+    return m;
   };
   const wpChart = (ser, info, upto) => {
     const pts_ = upto != null ? ser.filter(s => s.t <= upto) : ser;
@@ -4399,10 +4409,52 @@
     return /[Ll]ateral/.test(txt) ? ys.reduce((a, b) => a + b, 0) : Math.max(...ys);  // a fumble returned: the longer run
   };
   // opts overrides the Live tab's controls (the Postgame tab asks for just the top few swings).
+  // The log's order when the viewer hasn't picked one (owner 2026-10-30): a final game opens on its biggest swings, a
+  // live one (or a replay) on the newest play
+  const logSort = () => GP.sort || (GP.info && GP.info.state === 'post' && !GP.replay ? 'impact' : 'new');
+  // What used to be the Recent view, folded into the log's newest-first drives while a game is live or replaying
+  // (owner 2026-10-30: "isn't it just game log sorted by recent?"): the play about to happen, the try or kick after a
+  // score, the new drive the moment the ball changes hands, the drive on now marked Now
+  const liveBits = (st, info) => {
+    const teamOf = id => String(id) === String(info.home.id) ? info.home : String(id) === String(info.away.id) ? info.away : null;
+    const nx = st.live ? nextUp(st, info) : null;
+    const next = nx ? `<ol class="ds-ps"><li class="ds-p ps-next"><span class="ds-w">${esc(`${periodName(info.period)} ${info.clock || ''}`.trim())}</span><span class="ds-h">${nx.head}
+      <span class="ds-sp"><span class="live-dot"></span>Awaiting the ${/try/i.test(nx.head) ? 'try' : 'kick'}&hellip;</span></span></li></ol>` : '';
+    const lastReal = [...st.plays].reverse().find(p => !nonPlay(p));
+    // (owner 2026-10-25: NYG's missed field goal, HOU's 1st & 10 listed under "NYG drive · Now") after a change of
+    // possession ESPN keeps the old drive current until the new team's first snap: the team with the ball leads under
+    // its own header, and the old drive shows how it ended
+    const sit = st.sit || {}, posId = String(sit.possession || (sit.team && sit.team.id) || '');
+    const flip = !!(st.live && !nx && st.cur && posId && st.cur.team && String(st.cur.team.id) !== posId && teamOf(posId));
+    const fresh = flip ? (() => { const tm = teamOf(posId);
+      return `<div class="dr"><div class="dr-h" style="--tc:${esc(tm.color || '#666')}">${tm.logo ? logo(tm.logo, '#111', 16, tm.team) : ''}<b>${esc(tm.team)} drive</b>
+        <span class="rc-now"><span class="live-dot"></span>Now</span>${sit.possessionText ? `<span class="muted">Starts at ${esc(sit.possessionText)}</span>` : ''}</div>
+        <ol class="ds-ps">${presnap(st, info)}</ol></div>`; })() : '';
+    const endedBy = (p, tm) => {
+      const t = `${pType(p)} ${p.text || ''}`, opp = tm.team === info.home.team ? info.away.team : info.home.team;
+      if (/field goal/i.test(t)) return { text: /block/i.test(t) ? `Field goal blocked by ${opp}` : 'Missed field goal', cls: 'bad' };
+      if (/punt/i.test(t)) return { text: 'Punt', cls: '' };
+      if (/intercept/i.test(t)) return { text: `Intercepted by ${opp}`, cls: 'bad' };
+      if (/fumble/i.test(t)) return { text: `Fumble lost to ${opp}`, cls: 'bad' };
+      if (p.start && p.start.down === 4) return { text: 'Turnover on downs', cls: 'bad' };
+      return { text: 'Ended', cls: '' };
+    };
+    const fix = (d, tm, res) => {
+      const has = lastReal && (d.plays || []).includes(lastReal);
+      if (flip && !res.text && has) return endedBy(lastReal, tm);
+      if (nx && !res.text && has) {
+        const t = `${pType(lastReal)} ${lastReal.text || ''}`;
+        if (isTry(lastReal) && !lastReal.scoringPlay) return { text: 'Touchdown', cls: 'good' };
+        return { text: lastReal.scoringPlay ? (/field goal/i.test(t) ? 'Field goal' : /safety/i.test(t) ? 'Safety' : 'Touchdown') : 'Ended', cls: lastReal.scoringPlay ? 'good' : '' };
+      }
+      return res;
+    };
+    return { top: next + fresh, fix, isCur: d => !nx && !flip && !!st.cur && String(st.cur.id) === String(d.id), pre: st.live ? presnap(st, info) : '' };
+  };
   const gameLog = (sum, info, ser, upto, opts) => {
-    const o = Object.assign({ sort: GP.sort, filter: GP.filter, q: GP.q, view: GP.view, limit: 40, note: true }, opts);
+    const o = Object.assign({ sort: logSort(), filter: GP.filter, q: GP.q, limit: 40, note: true, st: null }, opts);
     const drives = allPlays(sum);
-    const wpAfter = {}; ser.forEach((s, i) => { wpAfter[s.play.id] = { now: s.home, prev: i ? ser[i - 1].home : s.home }; });
+    const wpAfter = {}; Object.entries(playWp(ser)).forEach(([id, [prev, now]]) => { wpAfter[id] = { now, prev }; });
     const teamOf = id => String(id) === String(info.home.id) ? info.home : String(id) === String(info.away.id) ? info.away : null;
     const q = o.q.trim().toLowerCase();
     const keep = p => (upto == null || elapsed(p) <= upto) && (o.filter === 'all' || (o.filter === 'score' && p.scoringPlay)
@@ -4448,19 +4500,27 @@
       const pl = drives.flatMap(d => d.plays || []).filter(keep).filter(p => wpAfter[p.id]).sort((a, b) => swingOf(b) - swingOf(a)).slice(0, o.limit);
       html = pl.length ? `${o.note ? `<p class="gcs-note">The ${pl.length} plays that moved ESPN's win probability the most.</p>` : ''}<ol class="pls">${pl.map(playRow).join('')}</ol>`
         : '<p class="muted">No win-probability data for these plays yet.</p>';
-    } else if (o.view === 'every') {
+    } else if (o.filter !== 'all' || q) {
+      // a filter or a search: one flat list (owner 2026-10-30: the By drive / Every play switch went; drive headers
+      // over one or two matching plays were clutter)
       let pl = drives.flatMap(d => d.plays || []).filter(keep);
       if (order) pl = pl.reverse();
       html = pl.length ? `<ol class="pls">${pl.map(playRow).join('')}</ol>` : '<p class="muted">No plays match.</p>';
     } else {
+      // every play under its drive's header; the header opens the drive's sheet and shows the score it put up
+      const inTime = d => ({ ...d, plays: (d.plays || []).filter(p => upto == null || elapsed(p) <= upto) });
+      const timed = drives.map(inTime);
+      const L = o.st && (o.st.live || o.st.replay) && order ? liveBits(o.st, info) : null;
       let ds = drives.map(d => ({ d, plays: (d.plays || []).filter(keep) })).filter(x => x.plays.length);
       if (order) ds = ds.reverse().map(x => ({ d: x.d, plays: [...x.plays].reverse() }));
-      html = ds.map(({ d, plays }) => {
+      html = (L ? L.top : '') + ds.map(({ d, plays }) => {
         const tm = teamOf(d.team && d.team.id) || {};
-        const res = driveResult(d, tm, info, d === sum.drives.current);
-        return `<div class="dr" data-drive-id="${esc(d.id)}"><div class="dr-h" style="--tc:${esc(tm.color || '#666')}"><span class="tm-open dr-tm" data-tm="${esc(tm.team || '')}">${tm.logo ? logo(tm.logo, '#111', 16, tm.team) : ''}<b>${esc(tm.team || '')} drive</b></span>
-          <span class="dr-res ${res.cls}">${esc(res.text)}</span>
-          <span class="muted">${esc(d.description || '')}</span></div><ol class="pls">${plays.map(playRow).join('')}</ol></div>`;
+        const cur = L ? L.isCur(d) : d === sum.drives.current;
+        let res = driveResult(d, tm, info, cur);
+        if (L) res = L.fix(d, tm, res);
+        return `<div class="dr" data-drive-id="${esc(d.id)}"><button type="button" class="dr-h" data-drive="${esc(d.id)}" style="--tc:${esc(tm.color || '#666')}">${tm.logo ? logo(tm.logo, '#111', 16, tm.team) : ''}<b>${esc(tm.team || '')} drive</b>
+          ${L && cur ? '<span class="rc-now"><span class="live-dot"></span>Now</span>' : `<span class="dr-res ${res.cls}">${esc(res.text)}</span>`}
+          <span class="muted">${esc(d.description || '')}</span>${driveScore(inTime(d), info, timed)}</button>${L && cur && L.pre ? `<ol class="ds-ps">${L.pre}</ol>` : ''}<ol class="pls">${plays.map(playRow).join('')}</ol></div>`;
       }).join('') || '<p class="muted">No plays match.</p>';
     }
     return html;
@@ -4740,7 +4800,8 @@
   // player in fantasy points (the Live feed's and drive sheets' look).
   const turningCards = (sum, info, ser, n) => {
     const nm = {}, names = fullNames(sum, nm);
-    const sw = ser.map((x, i) => ({ x, d: i ? x.home - ser[i - 1].home : 0 })).filter(o => !nonPlay(o.x.play))
+    const pw = playWp(ser);
+    const sw = ser.filter(x => pw[String(x.play.id)]).map(x => { const [a, b] = pw[String(x.play.id)]; return { x, d: b - a }; })
       .sort((a, b) => Math.abs(b.d) - Math.abs(a.d)).slice(0, n).sort((a, b) => b.x.t - a.x.t);  // newest first (owner 2026-10-18)
     if (!sw.length) return '<p class="muted">No win-probability data for these plays.</p>';
     return `<ol class="lpf-list">${sw.map(({ x, d }) => {
@@ -5077,6 +5138,8 @@
     const cls = p.isTurnover ? 'to' : p.isPenalty && /no play/i.test(t) ? 'pen' : kick ? 'st' : /field goal/i.test(t) ? (p.scoringPlay ? 'gain' : 'loss')
       : e > s0 ? 'gain' : e < s0 ? 'loss' : 'zero';
     const pc = y => ((10 + Math.max(-10, Math.min(110, y))) / 120 * 100).toFixed(2);
+    // the line to gain in yellow, as on TV (owner 2026-10-30): scrimmage snaps only, none on goal to go
+    const fd = !stPlay(p) && a.down && a.distance && !/goal/i.test(a.text) ? `<i class="fs-fd" style="left:${pc(rel(a.toGo))}%"></i>` : '';
     const off = a.offense, opp = off.team === info.away.team ? info.home : info.away;
     const seg = (x0, x1, c) => { const lo = Math.min(x0, x1), hi = Math.max(x0, x1);
       return hi - lo >= 0.5 ? `<i class="fs-seg fs-${c}" style="left:${pc(lo)}%;width:${(pc(hi) - pc(lo)).toFixed(2)}%"></i>` : ''; };
@@ -5152,7 +5215,7 @@
         if (lost && Math.abs(e - recAt) >= 0.5) ret += `<i class="fs-catch fs-ret" style="left:${pc(e)}%"></i>`;
         if (Math.abs(recAt - fumAt) >= 1) ret = seg(fumAt, recAt, 'loose') + ret;  // the ball loose: where it came out to where it was recovered
         return `<span class="fs fs-pass" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
-          + `${gainBits}${ret}<i class="fs-fum" style="left:${pc(fumAt)}%"></i><i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
+          + `${gainBits}${ret}<i class="fs-fum" style="left:${pc(fumAt)}%"></i>${fd}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
       }
     }
     let bars;
@@ -5198,7 +5261,7 @@
               + (air < -0.5 ? `<path class="back" d="M${x2(s0)},2 L${x2(catchAt)},2"/>` : '') + `<path d="M${x2(start)},2 L${x2(e)},2"/></svg>`
               + `<i class="fs-ring" style="left:${pc(catchAt)}%"></i><i class="fs-catch" style="left:${pc(e)}%"></i>`;
             return `<span class="fs" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
-              + `${arc}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
+              + `${arc}${fd}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
           }
           const A = flyTo - s0, peak = Math.max(2.5, Math.min(MAXH, Math.abs(A) * K / 4 * ANG)), ht = peak + 2;
           const lo = Math.min(s0, flyTo, e), hi = Math.max(s0, flyTo, e), W = Math.max(0.5, hi - lo) * K, x = v => ((v - lo) * K).toFixed(1);
@@ -5223,7 +5286,7 @@
       }
     }
     return `<span class="fs${arc ? ' fs-pass' : ''}" aria-hidden="true" style="--oc:${esc(off.color || '#888')};--dc:${esc(opp.color || '#888')}"><i class="fs-ez fs-l"></i><i class="fs-ez fs-r"></i><i class="fs-50"></i>`
-      + `${bars}${arc}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
+      + `${bars}${arc}${fd}<i class="fs-dot" style="left:${pc(s0)}%"></i></span>`;
   };
   // ---- One anatomy for a play, everywhere (owner 2026-10-20: "are the play rows uniform everywhere they show up? don't
   // want inconsistency"): a meta line (event tags, down -> down, spot -> spot), the headline with its yards chip, the
@@ -5365,57 +5428,12 @@
     return `<li class="ds-p${p === key ? ' key' : ''}"><span class="ds-w">${when(p)}</span><div class="ds-b">${playMeta(p)}`
       + `${playTitle('ds-h', hd, linkNames(esc(hd.h), [info.away.team, info.home.team]), p, info)}${fieldStrip(p, info)}</div></li>`;
   }).join('');
-  // Recent (owner 2026-10-18: "catch up the user on the most recent plays"): the drive on now and the one before it,
-  // newest first, each under its drive's header
   // the play about to happen (owner 2026-10-18: "pre snap - awaiting snap"): the clock, the down and the spot, live only
   const presnap = (st, info) => {
     const sit = st.sit || {}, dd = sit.shortDownDistanceText || '';
     if (!dd) return '';
     return `<li class="ds-p ps-next"><span class="ds-w">${esc(`${periodName(info.period)} ${info.clock || ''}`.trim())}</span><span class="ds-h"><span class="rp-d ${DOWN_CLS(dd)}">${esc(dd)}</span>
       ${sit.possessionText ? `<span class="muted">at ${esc(sit.possessionText)}</span>` : ''}<span class="ds-sp"><span class="live-dot"></span>Awaiting result&hellip;</span></span></li>`;
-  };
-  const recentView = (st, info, sum) => {
-    const ds = st.drives.filter(d => (d.plays || []).length).slice(-2).reverse();
-    if (!ds.length) return '<p class="muted">Plays appear once the game starts.</p>';
-    const names = fullNames(sum);
-    const teamOf = id => String(id) === String(info.home.id) ? info.home : String(id) === String(info.away.id) ? info.away : null;
-    // between plays after a score (ESPN keeps the scoring drive "current" until the kick): that drive is over, and
-    // what's next (the try or the kickoff) leads
-    const nx = st.live ? nextUp(st, info) : null;
-    const next = nx ? `<ol class="ds-ps"><li class="ds-p ps-next"><span class="ds-w">${esc(`${periodName(info.period)} ${info.clock || ''}`.trim())}</span><span class="ds-h">${nx.head}
-      <span class="ds-sp"><span class="live-dot"></span>Awaiting the ${/try/i.test(nx.head) ? 'try' : 'kick'}&hellip;</span></span></li></ol>` : '';
-    const lastReal = [...st.plays].reverse().find(p => !nonPlay(p));
-    // (owner 2026-10-25: NYG's missed field goal, HOU's 1st & 10 listed under "NYG drive · Now") after a change of
-    // possession ESPN keeps the old drive current until the new team's first snap: the team with the ball leads under
-    // its own header, and the old drive shows how it ended
-    const sit = st.sit || {}, posId = String(sit.possession || (sit.team && sit.team.id) || '');
-    const flip = !!(st.live && !nx && st.cur && posId && st.cur.team && String(st.cur.team.id) !== posId && teamOf(posId));
-    const fresh = flip ? (() => { const tm = teamOf(posId);
-      return `<div class="rc-d" style="--tc:${esc(tm.color || '#666')}"><div class="rc-h">${tm.logo ? logo(tm.logo, '#111', 18, tm.team) : ''}<b>${esc(tm.team)} drive</b>
-        <span class="rc-now"><span class="live-dot"></span>Now</span>${sit.possessionText ? `<span class="muted rc-m">Starts at ${esc(sit.possessionText)}</span>` : ''}</div>
-        <ol class="ds-ps">${presnap(st, info)}</ol></div>`; })() : '';
-    const endedBy = (p, tm) => {
-      const t = `${pType(p)} ${p.text || ''}`, opp = tm.team === info.home.team ? info.away.team : info.home.team;
-      if (/field goal/i.test(t)) return { text: /block/i.test(t) ? `Field goal blocked by ${opp}` : 'Missed field goal', cls: 'bad' };
-      if (/punt/i.test(t)) return { text: 'Punt', cls: '' };
-      if (/intercept/i.test(t)) return { text: `Intercepted by ${opp}`, cls: 'bad' };
-      if (/fumble/i.test(t)) return { text: `Fumble lost to ${opp}`, cls: 'bad' };
-      if (p.start && p.start.down === 4) return { text: 'Turnover on downs', cls: 'bad' };
-      return { text: 'Ended', cls: '' };
-    };
-    return next + fresh + ds.map(d => {
-      const tm = teamOf(d.team && d.team.id) || {}, isCur = !nx && !flip && st.cur && String(st.cur.id) === String(d.id) && (st.live || st.replay);
-      let res = driveResult(d, tm, info, !!isCur);
-      if (flip && !res.text && lastReal && (d.plays || []).includes(lastReal)) res = endedBy(lastReal, tm);
-      if (nx && !res.text && lastReal && (d.plays || []).includes(lastReal)) {
-        const t = `${pType(lastReal)} ${lastReal.text || ''}`;
-        res = { text: lastReal.scoringPlay ? (/field goal/i.test(t) ? 'Field goal' : isTry(lastReal) ? 'Touchdown' : /safety/i.test(t) ? 'Safety' : 'Touchdown') : 'Ended', cls: lastReal.scoringPlay ? 'good' : '' };
-        if (isTry(lastReal) && !lastReal.scoringPlay) res = { text: 'Touchdown', cls: 'good' };
-      }
-      return `<div class="rc-d" style="--tc:${esc(tm.color || '#666')}"><button type="button" class="rc-h" data-drive="${esc(d.id)}">${tm.logo ? logo(tm.logo, '#111', 18, tm.team) : ''}<b>${esc(tm.team || '')} drive</b>
-          ${isCur ? '<span class="rc-now"><span class="live-dot"></span>Now</span>' : `<span class="dr-res ${res.cls}">${esc(res.text)}</span>`}<span class="muted rc-m">${esc(d.description || '')}</span>${driveScore(d, info, st.drives)}</button>
-        <ol class="ds-ps">${isCur && st.live ? presnap(st, info) : ''}${playRows([...(d.plays || [])].reverse(), info, names)}</ol></div>`;
-    }).join('');
   };
   // the score before and after a drive, when it changed (owner 2026-10-18): "ARI 15–16 → 18–16"
   const driveScore = (d, info, all) => {
@@ -5516,9 +5534,6 @@
   const renderGame0 = () => {
     const root = document.getElementById('gc'), { sum, info, g } = GP;
     const rp = GP.replay;
-    // Plays opens on the game log once the game is final (owner 2026-10-29: "postgame ... it should open game log, not
-    // recent"), on Recent while it's live or replaying; the viewer's pick sticks
-    const plSub = GP.plSub || (info.state === 'post' && !rp ? 'log' : 'recent');
     const ser = sum ? wpSeries(sum) : [];
     const upto = rp ? rp.t : null;
     // Opens on the tab that fits the game's state; the viewer's pick sticks after that.
@@ -5553,14 +5568,13 @@
       <div class="seg gc-panes" role="tablist">${GPANES.map(([k, l]) => `<button type="button" role="tab" data-pane="${k}" class="${GP.pane === k ? 'on' : ''}">${l}</button>`).join('')}</div>
       ${GP.pane === 'flow' ? (storyCard(st, info) || '<section class="gcs"><p class="muted">The game flow fills in once the game starts.</p></section>')
         + (st.ended && !rp && ser.length >= 2 ? `<section class="gcs"><h3>Turning points</h3><p class="gcs-note">The plays that moved ESPN's win probability the most.</p>${turningCards(sum, info, ser, 6)}</section>` : '')
-      : GP.pane === 'plays' && plSub === 'recent' ? `<section class="gcs" id="gcLog"><div class="seg pl-sub">${[['recent', 'Recent'], ['log', 'Game log']].map(([k, l]) => `<button type="button" data-plsub="${k}" class="${plSub === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-            ${sum ? recentView(st, info, sum) : '<p class="muted">Plays appear once the game starts.</p>'}</section>`
-      : GP.pane === 'plays' ? `<section class="gcs" id="gcLog"><div class="seg pl-sub">${[['recent', 'Recent'], ['log', 'Game log']].map(([k, l]) => `<button type="button" data-plsub="${k}" class="${plSub === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-            <div class="lg-bar"><div class="seg">${[['drive', 'By drive'], ['every', 'Every play']].map(([k, l]) => `<button type="button" data-view="${k}" class="${GP.view === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['new', 'Newest'], ['old', 'Oldest'], ['impact', 'Swings'], ['yards', 'Yards']].map(([k, l]) => `<button type="button" data-sort="${k}" class="${GP.sort === k ? 'on' : ''}">${l}</button>`).join('')}</div><div class="seg">${[['all', 'All'], ['score', 'Scoring'], ['to', 'Turnovers'], ['pen', 'Penalties']].map(([k, l]) => `<button type="button" data-filter="${k}" class="${GP.filter === k ? 'on' : ''}">${l}</button>`).join('')}</div>
-              <input type="search" id="lgQ" placeholder="Player or text" value="${esc(GP.q)}" aria-label="Filter plays"></div>
+      // Plays (owner 2026-10-30): one log, two rows of controls: the order with a search box, then the filter
+      : GP.pane === 'plays' ? `<section class="gcs" id="gcLog">
+            <div class="lg-bar"><div class="seg">${[['new', 'Newest'], ['old', 'Oldest'], ['impact', 'Swings'], ['yards', 'Yards']].map(([k, l]) => `<button type="button" data-sort="${k}" class="${logSort() === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+              <input type="search" id="lgQ" placeholder="Search" value="${esc(GP.q)}" aria-label="Search plays: a player or any text"><div class="seg">${[['all', 'All'], ['score', 'Scoring'], ['to', 'Turnovers'], ['pen', 'Penalties']].map(([k, l]) => `<button type="button" data-filter="${k}" class="${GP.filter === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>
             <div id="lgBody">${!sum ? '<p class="muted">Plays appear once the game starts.</p>'
               : !allPlays(sum).length && info.state === 'post' ? '<p class="muted">ESPN has no play-by-play for this game (games before about 2005 only have box scores).</p>'
-              : gameLog(sum, info, ser, upto)}</div></section>`
+              : gameLog(sum, info, ser, upto, { st })}</div></section>`
       : GP.pane === 'calls' ? callsPane(sum, info)
       : GP.pane === 'team' ? `<section class="gcs" id="gcTeam"><h3>Team stats</h3>${st.replay ? '<p class="gcs-note">As of this play, counted from the play-by-play.</p>' : ''}${sum ? teamStats(sum, info, null, st.replay ? st.tstats : null) || '<p class="muted">Not available yet.</p>' : ''}</section>`
       : playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: st.replay ? 'As of this play, counted from the play-by-play.' : '', lines: st.replay ? st.lines : null, plays: st.replay ? st.plays : null, secs: st.secs, empty: 'The box score fills in once the game starts.' })}`;
@@ -5591,7 +5605,6 @@
     root.querySelectorAll('[data-gtab]').forEach(b => b.onclick = () => { GP.tab = b.dataset.gtab; renderGame(); toBar('.gc-tabs'); });
     // Box score opens on its Fantasy tab (owner 2026-10-18); a team picked there sticks while you stay on Box score
     root.querySelectorAll('[data-pane]').forEach(b => b.onclick = () => { if (b.dataset.pane === 'box' && GP.pane !== 'box') GP.pst = '__fp'; GP.pane = b.dataset.pane; GP.paneSet = true; renderGame(); toBar('.gc-panes'); });
-    root.querySelectorAll('[data-plsub]').forEach(b => b.onclick = () => { GP.plSub = b.dataset.plsub; renderGame(); });
     const toPane = (k, sel) => { GP.pane = k; renderGame(); const e = document.querySelector(sel || '.gc-panes'); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     root.querySelectorAll('[data-pane-go]').forEach(b => b.onclick = () => toPane(b.dataset.paneGo));
     root.querySelectorAll('[data-drive]').forEach(b => b.onclick = () => {
@@ -5600,7 +5613,6 @@
     });
     root.querySelectorAll('[data-fpall]').forEach(b => b.onclick = () => { GP.fpAll = !GP.fpAll; renderGame(); });
     root.querySelectorAll('[data-drvall]').forEach(b => b.onclick = () => { GP.drvAll = !GP.drvAll; renderGame(); });
-    root.querySelectorAll('[data-view]').forEach(b => b.onclick = () => { GP.view = b.dataset.view; renderGame(); });
     root.querySelectorAll('[data-filter]').forEach(b => b.onclick = () => { GP.filter = b.dataset.filter; renderGame(); });
     root.querySelectorAll('[data-sort]').forEach(b => b.onclick = () => { GP.sort = b.dataset.sort; renderGame(); });
     const lq = root.querySelector('#lgQ');
@@ -5666,7 +5678,7 @@
     if (cmd === 'on') {
       const plays = allPlays(GP.sum).flatMap(d => d.plays || []);
       GP.replay = { plays, i: 0, play: plays[0], t: elapsed(plays[0]), timer: null };
-      GP.sort = 'new'; GP.tab = 'live'; renderGame(); scrollTo(0, 0); return;
+      GP.sort = null; GP.filter = 'all'; GP.q = ''; GP.tab = 'live'; renderGame(); scrollTo(0, 0); return;  // the log's live order (logSort)
     }
     const rp = GP.replay; if (!rp) return;
     if (cmd === 'off') { clearInterval(rp.timer); GP.replay = null; renderGame(); return; }
@@ -5743,8 +5755,6 @@
     const pane = pick('pane', GPANES.map(x => x[0])), hi = Q.get('play');
     if (pane || hi) { GP.pane = hi ? 'plays' : pane; GP.paneSet = true; }
     if (Q.get('tab') === 'pre') GP.tab = 'pre';
-    GP.plSub = hi ? 'log' : pick('plsub', ['recent', 'log']) || GP.plSub;
-    GP.view = hi ? 'every' : pick('view', ['drive', 'every']) || GP.view;
     GP.sort = hi ? 'old' : pick('sort', ['new', 'old', 'impact', 'yards']) || GP.sort;
     GP.filter = hi ? 'all' : pick('filter', ['all', 'score', 'to', 'pen']) || GP.filter;
     GP.hiPlay = hi || null;
@@ -5782,9 +5792,8 @@
       if (GP.tab === 'pre') q.set('tab', 'pre');
       q.set('pane', GP.pane);
       if (GP.pane === 'plays') {
-        const sub = GP.plSub || (GP.info && GP.info.state === 'post' ? 'log' : 'recent');
-        q.set('plsub', sub);
-        if (sub === 'log') { q.set('view', GP.view); q.set('sort', GP.sort); if (GP.filter !== 'all') q.set('filter', GP.filter); }
+        q.set('sort', logSort());
+        if (GP.filter !== 'all') q.set('filter', GP.filter);
       }
     }
     u.hash = '';
