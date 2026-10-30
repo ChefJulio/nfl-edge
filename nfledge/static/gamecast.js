@@ -3345,7 +3345,24 @@
     // one entry naming two players ("Signed TE Matt Lauter and DL Jonathan Harris") is a row per player: the counts go
     // by player, the lists show each entry once (owner 2026-10-27 screenshot: every such line twice)
     const once = rows => { const seen = new Set(); return rows.filter(r => { const k = `${r[ix.date]}|${r[ix.text]}`; if (seen.has(k)) return false; seen.add(k); return true; }); };
-    const trades = once(mine.filter(r => r[ix.type] === 'traded' || r[ix.type] === 'acquired'));
+    // ESPN often logs a trade under one club only (owner 2026-10-30: J.J. McCarthy's trade, filed by NYG as "Acquired QB
+    // J.J. McCarthy from Minnesota", missing from MIN's sheet): another club's trade entry naming this one counts too,
+    // unless this club logged the same deal itself (within 3 days, the same player or naming that club)
+    const isTr = r => r[ix.type] === 'traded' || r[ix.type] === 'acquired';
+    const named = t => [...String(t).matchAll(/\b(?:from|to|with)\s+(?:the\s+)?((?:[A-Z][\w.]*|49ers)(?:\s+(?:[A-Z][\w.]*|49ers)){0,2})/g)]
+      .map(m => NFLE.clubOf(m[1])).filter(Boolean);
+    const near = (a, b, d) => Math.abs(Date.parse(a[ix.date]) - Date.parse(b[ix.date])) <= d * 864e5;
+    const byDate = (a, b) => (a[ix.date] < b[ix.date] ? 1 : a[ix.date] > b[ix.date] ? -1 : 0);
+    const ownTr = mine.filter(isTr);
+    const theirs = M.t.rows.filter(r => r[ix.team] !== abbr && isTr(r) && named(r[ix.text]).includes(abbr)
+      && !ownTr.some(o => near(o, r, 3) && named(o[ix.text]).includes(r[ix.team])));
+    // one entry per deal: the clubs' entries can be days apart, and ESPN sometimes logs one club's twice, reworded a
+    // day later (NYG's Dexter Lawrence; DAL's and PIT's Joey Porter Jr., 6 days apart). The same player within 14 days
+    // is the same trade; the newest entry stays, this club's own preferred on a tie.
+    const tr1 = [...ownTr, ...theirs].sort((a, b) => byDate(a, b) || (a[ix.team] === abbr ? -1 : 1));
+    const dedup = tr1.filter((r, i) => !tr1.slice(0, i).some(o => (r[ix.pid] ? o[ix.pid] === r[ix.pid] && near(o, r, 14) : o[ix.text] === r[ix.text])));
+    const theirs1 = dedup.filter(r => r[ix.team] !== abbr), dropped = new Set(tr1.filter(r => !dedup.includes(r)));
+    const trades = once(dedup);
     // released or waived, then back with the team within a week (practice squad, a new contract): a roster shuffle,
     // not a departure (owner 2026-10-27: DeeJay Dallas, released Oct 23 and on MIN's practice squad Oct 24, read as gone)
     const BACK = new Set(['ps_signed', 'signed', 're_signed', 'claimed', 'ps_elevated']);
@@ -3354,11 +3371,14 @@
       return M.t.rows.find(q => q[ix.team] === abbr && q[ix.pid] === r[ix.pid] && BACK.has(q[ix.type])
         && Date.parse(q[ix.date]) >= t0 && Date.parse(q[ix.date]) - t0 <= 7 * 864e5 && q !== r) || null; };
     const nIn = mine.filter(r => MOVE_IN.has(r[ix.type])).length, nOut = mine.filter(r => MOVE_OUT.has(r[ix.type]) && !backOf(r)).length;
-    const last = mine[0], shown = once(mine);
+    const last = mine[0], shown = once([...mine.filter(r => !dropped.has(r)), ...theirs1].sort(byDate));
     const face = `<div class="pc-big">${trades.length} <small>trade${trades.length === 1 ? '' : 's'}</small></div><div class="pc-tapsub">${last ? `${esc(mdate(last[ix.date]))}: ${esc(String(last[ix.text]).split(/[,.;(]/)[0])}` : `${nIn} in · ${nOut} out`}</div>`;
     // his name only when the entry names several players
+    // another club's entry reads from its side: "Giants acquired QB J.J. McCarthy from Minnesota ..."
+    const txt = r => { const t = String(r[ix.text]); if (r[ix.team] === abbr) return esc(t);
+      return `<b>${esc(tInfo(r[ix.team]).nick || r[ix.team])}</b> ${esc(t.charAt(0).toLowerCase() + t.slice(1))}`; };
     const li = r => { const b = backOf(r), who = b && b[ix.name] && /\sand\s|,\s/.test(r[ix.text]) ? `${b[ix.name]} ` : '';
-      return `<li${r[ix.pid] ? ` data-open-pid="${esc(r[ix.pid])}" class="py-tap"` : ''}><span class="mv-d">${esc(mdate(r[ix.date]))}</span> ${esc(r[ix.text])}${
+      return `<li${r[ix.pid] ? ` data-open-pid="${esc(r[ix.pid])}" class="py-tap"` : ''}><span class="mv-d">${esc(mdate(r[ix.date]))}</span> ${txt(r)}${
         b ? ` <span class="muted">&middot; ${esc(who)}back ${b[ix.type].startsWith('ps_') ? 'on the practice squad' : 'on the roster'} ${esc(mdate(b[ix.date]))}</span>` : ''}</li>`; };
     const trBox = `<div class="pc-box"><div class="pc-k">Trades &middot; ${season}</div>${trades.length ? `<ul class="mv-l">${trades.map(li).join('')}</ul>` : '<p class="pc-sub">No trades this season.</p>'}</div>`;
     let drBox = '';
