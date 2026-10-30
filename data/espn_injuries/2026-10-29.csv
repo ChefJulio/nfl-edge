@@ -49,6 +49,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 14012,Andy Dalton,Atlanta Falcons,Active,2026-10-26T17:25Z,,,,,,,QB
 4360248,Kyle Pitts Sr.,Atlanta Falcons,Active,2026-10-25T23:09Z,,,,,,Pitts brought in all five targets for 22 yards and a touchdown in the Falcons' 29-20 win over the 49ers on Sunday.,TE
 4360423,Michael Penix Jr.,Atlanta Falcons,Active,2026-10-25T23:03Z,,,,,,Penix completed 25 of 34 passes for 213 yards with three touchdowns and no interceptions and added five carries for minus-1 yard in the Falcons' 29-20 win over the 49ers on Sunday. He also recovered a fumble.,QB
+4832793,Olaivavega Ioane,Baltimore Ravens,Questionable,2026-10-30T01:31Z,Knee - MCL,Sprain,Right,2026-11-01,QUESTIONABLE,Ioane (knee) was a limited participant at the Ravens' practice Thursday.,G
 4575483,T.J. Tampa,Baltimore Ravens,Injured Reserve,2026-10-30T01:26Z,Knee,Not Specified,Not Specified,2026-11-01,IR-R,Tampa (knee) was a full participant at the Ravens' practice Thursday.,CB
 3915837,Broderick Washington Jr.,Baltimore Ravens,Active,2026-10-30T01:25Z,,,,,,Washington (ankle) logged a full practice Thursday.,DT
 2980153,Ronnie Stanley,Baltimore Ravens,Active,2026-10-30T01:19Z,,,,,,Stanley (toe) practiced in full Thursday.,OT
@@ -57,7 +58,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3916387,Lamar Jackson,Baltimore Ravens,Questionable,2026-10-29T20:55Z,Ankle,Sprain,Left,2026-11-01,QUESTIONABLE,"Jackson (ankle) was a full participant at Thursday's practice, Jeff Zrebiec of The Athletic reports.",QB
 15846,John Jenkins,Baltimore Ravens,Active,2026-10-29T20:41Z,,,,,,,DT
 3858276,Jaylinn Hawkins,Baltimore Ravens,Questionable,2026-10-29T19:53Z,Knee,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Hawkins (knee) was a non-participant in Thursday's practice.,S
-4832793,Olaivavega Ioane,Baltimore Ravens,Questionable,2026-10-29T16:50Z,Knee - MCL,Sprain,Right,2026-11-01,QUESTIONABLE,questionable,G
 4685526,Adam Randall,Baltimore Ravens,Injured Reserve,2026-10-29T01:00Z,Neck,Not Specified,Not Specified,2026-11-01,IR-R,The Ravens opened Randall's (neck) 21-day practice window Wednesday.,RB
 4035479,John Simpson,Baltimore Ravens,Questionable,2026-10-28T21:26Z,Groin,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,G
 4876132,Josh Cuevas,Baltimore Ravens,Active,2026-10-27T01:46Z,,,,,,Cuevas caught two of three targets for 35 yards during the Ravens' 35-13 loss to the Bengals on Sunday.,TE
@@ -99,7 +99,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4635008,Keon Coleman,Buffalo Bills,Active,2026-10-19T10:00Z,,,,,,Coleman brought in four of six targets for 59 yards and a touchdown in the Bills' 33-30 win over the Raiders on Sunday.,WR
 4373678,Khalil Shakir,Buffalo Bills,Active,2026-10-19T09:56Z,,,,,,Shakir brought in four of six targets for 34 yards and a touchdown in the Bills' 33-30 win over the Raiders on Sunday.,WR
 3918298,Josh Allen,Buffalo Bills,Active,2026-10-19T07:45Z,,,,,,Allen completed 23 of 33 passes for 255 yards with two touchdowns and no interceptions and rushed five times for one yard in the Bills' 33-30 win over the Raiders on Sunday.,QB
-5151083,Will Lee III,Carolina Panthers,Questionable,2026-10-30T01:29Z,Hamstring,,,2026-10-29,QUESTIONABLE,questionable,CB
+5151083,Will Lee III,Carolina Panthers,Questionable,2026-10-30T01:34Z,Hamstring,,,2026-10-29,QUESTIONABLE,"Lee is dealing with a hamstring injury and is doubtful to return to Thursday's Week 8 matchup against Green Bay, Joe Person of The Athletic reports.",CB
 4244607,Akayleb Evans,Carolina Panthers,Injured Reserve,2026-10-30T00:13Z,Triceps,Not Specified,Not Specified,2026-11-30,IR,"Evans (triceps) was placed on injured reserve by the Panthers on Thursday, Darin Gantt of the team's official website reports.",CB
 4372518,Bobby Brown III,Carolina Panthers,Out,2026-10-29T23:22Z,Hand,Not Specified,Not Specified,2026-11-08,INACTIVE,"Brown (hand) is inactive for Thursday night's matchup against the Packers, Darin Gantt of the Panthers' official website reports.",DT
 4428993,Haynes King,Carolina Panthers,Out,2026-10-29T23:16Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,"King (coach's decision) is inactive but operating as the Panthers' emergency No. 3 quarterback against the Packers on Thursday night, Darin Gantt of the team's official website reports.",QB
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2576925,Darren Waller,Carolina Panthers,Active,2026-10-26T00:17Z,,,,,,Waller brought in one of two targets for a 50-yard touchdown in the Panthers' 43-13 loss to the Buccaneers on Sunday.,TE
 4685720,Bryce Young,Carolina Panthers,Active,2026-10-26T00:07Z,,,,,,Young completed 14 of 27 passes for 163 yards with one touchdown and two interceptions and added one carry for nine yards in the Panthers' 43-13 loss to the Buccaneers on Sunday.,QB
 4241416,Chuba Hubbard,Carolina Panthers,Active,2026-10-25T22:41Z,,,,,,Hubbard rushed seven times for 33 yards and brought in four of five targets for 27 yards in the Panthers' 43-13 loss to the Buccaneers on Sunday.,RB
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-30T01:23Z,Undisclosed,Not Specified,Not Specified,2026-11-08,IR,ir,S
+4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-30T01:29Z,Undisclosed,Not Specified,Not Specified,2026-11-08,OUT,out,S
 3121544,T.J. Edwards,Chicago Bears,Active,2026-10-30T00:07Z,,,,,,Edwards (hamstring) was considered to be a full participant on the Bears' estimated practice report Thursday.,LB
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-29T20:19Z,Thumb,Sprain,Not Specified,2026-11-02,QUESTIONABLE,Monangai (thumb/toe) did not practice Thursday.,RB
 4241007,D'Marco Jackson,Chicago Bears,Questionable,2026-10-29T20:13Z,Ankle,,,2026-11-02,QUESTIONABLE,questionable,LB
@@ -149,6 +149,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685278,Luther Burden III,Chicago Bears,Active,2026-10-23T03:59Z,,,,,,Burden brought in all four targets for 130 yards and a touchdown and rushed once for seven yards in the Bears' 30-24 win over the Patriots on Thursday.,WR
 4431611,Caleb Williams,Chicago Bears,Active,2026-10-23T03:50Z,,,,,,Williams completed 22 of 33 passes for 308 yards with two touchdowns and no interceptions while rushing five times for 18 yards in the Bears' 30-24 win over the Patriots on Thursday.,QB
 4870953,Malik Muhammad II,Chicago Bears,Questionable,2026-10-23T02:42Z,Toe,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,Muhammad (toe) is doubtful to return to Thursday night's contest against the Patriots.,CB
+4368003,Andrei Iosivas,Cincinnati Bengals,Injured Reserve,2026-10-30T01:48Z,Thumb,Surgery,Not Specified,2026-11-08,IR,"Iosivas (thumb) is making good progress in his rehab, Mike Petraglia of CLNSCincy.com reports.",WR
 4362628,Ja'Marr Chase,Cincinnati Bengals,Active,2026-10-29T20:51Z,,,,,,"Chase (ankle) was a full participant in Thursday's practice, Mike Petraglia of CLNSCincy.com reports.",WR
 3917797,Joe Giles-Harris,Cincinnati Bengals,Questionable,2026-10-28T20:20Z,Calf,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,LB
 4567098,Jordan Battle,Cincinnati Bengals,Questionable,2026-10-28T20:19Z,Hamstring,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,S
@@ -173,7 +174,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3915511,Joe Burrow,Cincinnati Bengals,Active,2026-10-25T21:45Z,,,,,,Burrow completed 22 of 30 passes for 292 yards with four touchdowns and no interceptions while adding two rushes for 12 yards in the Bengals' 35-13 win over the Ravens on Sunday.,QB
 4239993,Tee Higgins,Cincinnati Bengals,Active,2026-10-25T21:30Z,,,,,,Higgins secured six of seven targets for 148 yards and a touchdown in the Bengals' 35-13 win over the Ravens on Sunday.,WR
 5092508,Colbie Young,Cincinnati Bengals,Active,2026-10-22T00:18Z,,,,,,Young (knee) was not listed on the Bengals' injury report Wednesday.,WR
-3050481,Tanner Hudson,Cincinnati Bengals,Injured Reserve,2026-10-19T23:18Z,Pectoral,Strain,Not Specified,2027-02-15,IR,Hudson (pectoral) was placed on injured reserve by the Bengals on Monday.,TE
 5081397,Dylan Sampson,Cleveland Browns,Active,2026-10-29T20:05Z,,,,,,"Sampson (knee) was a full participant in Thursday's practice, Daniel Oyefusi of ESPN.com reports.",RB
 3131498,Tytus Howard,Cleveland Browns,Questionable,2026-10-29T01:18Z,Concussion,Concussion,Not Specified,2026-11-01,QUESTIONABLE,Howard (concussion) didn't participate in Cleveland's practice Wednesday.,OT
 4600415,Mike Hall Jr.,Cleveland Browns,Questionable,2026-10-29T00:33Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Hall (ankle) was a limited participant at practice Wednesday.,DT
@@ -274,7 +274,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035434,Devin White,Detroit Lions,Injured Reserve,2026-10-17T02:00Z,Forearm,Surgery,Not Specified,2026-11-22,IR,The Lions placed White (forearm) on injured reserve Friday.,LB
 3126997,Tom Kennedy,Detroit Lions,Injured Reserve,2026-10-17T01:51Z,Knee - MCL,Surgery,Right,2027-02-15,IR,The Lions placed Kennedy (knee) on injured reserve Friday.,WR
 4038849,DJ Wonnum,Detroit Lions,Active,2026-10-09T21:36Z,,,,,,,LB
-4248528,Christian Watson,Green Bay Packers,Questionable,2026-10-30T01:20Z,Chest,,,2026-10-29,QUESTIONABLE,"Watson (undisclosed) headed to the locker room during the second quarter of Thursday night's game against the Panthers, Dominique Yates reports.",WR
+4248528,Christian Watson,Green Bay Packers,Questionable,2026-10-30T01:25Z,Chest,,,2026-10-29,QUESTIONABLE,"Watson (chest) is questionable to return to Thursday night's game against the Panthers, Ryan Wood of USA Today reports.",WR
 4361791,Devonte Wyatt,Green Bay Packers,Active,2026-10-29T23:26Z,,,,,,"Wyatt (ankle) is active for Thursday's game against the Panthers, Mike Spofford of the team's official site reports.",DT
 4259493,Keisean Nixon,Green Bay Packers,Active,2026-10-29T23:20Z,,,,,,"Nixon (shoulder) is active for Thursday's game against Carolina, Mike Spofford of the team's official site reports.",CB
 4819231,Kaleb Johnson,Green Bay Packers,Out,2026-10-29T23:10Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,"Johnson (coach's decision) is inactive for Thursday's game against the Panthers, Mike Spofford of the team's official site reports.",RB
