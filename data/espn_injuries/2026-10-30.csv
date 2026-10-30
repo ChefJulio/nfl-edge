@@ -1,12 +1,12 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
-4870808,Jeremiyah Love,Arizona Cardinals,Active,2026-10-30T21:13Z,,,,,,"Love (ankle) doesn't have a designation for Sunday's game at Dallas, Josh Weinfuss of ESPN reports.",RB
+4373626,Tyler Allgeier,Arizona Cardinals,Active,2026-10-30T21:28Z,,,,,,"Allgeier (toe) doesn't have a designation for Sunday's contest at Dallas, Josh Weinfuss of ESPN reports.",RB
+4685503,Walter Nolen III,Arizona Cardinals,Out,2026-10-30T21:28Z,Ankle,Not Specified,Not Specified,2026-11-08,OUT,"Nolen (ankle) has been ruled out for Sunday's game against the Cowboys, Theo Mackie of The Arizona Republic reports.",DT
+4360761,Michael Wilson,Arizona Cardinals,Active,2026-10-30T21:23Z,,,,,,"Wilson (ribs) doesn't have a designation for Sunday's game in Dallas, Josh Weinfuss of ESPN.com reports.",WR
+4870808,Jeremiyah Love,Arizona Cardinals,Active,2026-10-30T21:13Z,,,,,,"Love (ankle) doesn't have a designation for Sunday's game at Dallas, Josh Weinfuss of ESPN.com reports.",RB
 3059839,Elijah Wilkinson,Arizona Cardinals,Active,2026-10-30T21:08Z,,,,,,,OT
-4685503,Walter Nolen III,Arizona Cardinals,Out,2026-10-30T18:01Z,Ankle,Not Specified,Not Specified,2026-11-08,OUT,out,DT
 4367199,Jon Gaines II,Arizona Cardinals,Out,2026-10-30T18:01Z,Ankle,Not Specified,Not Specified,2026-11-08,OUT,out,G
-4360761,Michael Wilson,Arizona Cardinals,Active,2026-10-30T17:58Z,,,,,,"Head coach Mike LaFleur said Friday that Wilson (ribs) is expected to play Sunday at Dallas, Theo Mackie of The Arizona Republic reports.",WR
 4040983,Mack Wilson Sr.,Arizona Cardinals,Active,2026-10-30T01:23Z,,,,,,"Wilson (knee) was limited in Thursday's practice, Theo Mackie of The Arizona Republic reports.",LB
 4430841,Carson Beck,Arizona Cardinals,Active,2026-10-30T01:19Z,,,,,,"Beck (back) practiced in full Thursday, Theo Mackie of The Arizona Republic reports.",QB
-4373626,Tyler Allgeier,Arizona Cardinals,Active,2026-10-29T23:17Z,,,,,,"Allgeier (toe) practiced in a limited capacity Thursday, Theo Mackie of The Arizona Republic reports.",RB
 3886633,Hjalte Froholdt,Arizona Cardinals,Questionable,2026-10-29T23:08Z,Knee,,,2026-11-01,QUESTIONABLE,questionable,C
 4426923,Kei'Trel Clark,Arizona Cardinals,Active,2026-10-29T23:08Z,,,,,,,CB
 4244606,Zaven Collins,Arizona Cardinals,Active,2026-10-29T23:08Z,,,,,,,LB
@@ -24,16 +24,16 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2578570,Jacoby Brissett,Arizona Cardinals,Active,2026-10-26T00:51Z,,,,,,Brissett completed 27 of 48 passes for 272 yards and a touchdown while rushing seven times for 16 yards in Sunday's 30-16 loss to the Broncos.,QB
 4363538,Chad Ryland,Arizona Cardinals,Active,2026-10-26T00:09Z,,,,,,Ryland went 3-for-3 on field-goal tries and converted his only extra-point attempt during Sunday's 30-16 loss to Denver.,PK
 4361307,Trey McBride,Arizona Cardinals,Active,2026-10-25T23:39Z,,,,,,McBride caught 10 of 13 targets for 111 yards and a touchdown in Sunday's 30-16 loss to the Broncos.,TE
+4239995,A.J. Terrell Jr.,Atlanta Falcons,Active,2026-10-30T21:26Z,,,,,,"Terrell (groin) does not carry an injury designation into Sunday's game against the Buccaneers, Will McFadden of the Falcons' official site reports.",CB
+4240596,C.J. Henderson,Atlanta Falcons,Active,2026-10-30T21:23Z,,,,,,"Henderson (groin) does not have an injury designation against the Buccaneers on Sunday, Will McFadden of the Falcons' official site reports.",CB
+4595343,Kendal Daniels,Atlanta Falcons,Active,2026-10-30T21:21Z,,,,,,"Daniels (Achilles) does not carry an injury designation into Sunday's game against the Buccaneers, Will McFadden of the Falcons' official site reports.",LB
 4431210,Beaux Collins,Atlanta Falcons,Injured Reserve,2026-10-30T21:18Z,Hip,Not Specified,Not Specified,2026-11-01,IR-R,"Collins (hip) is questionable for Sunday's game against the Buccaneers, Will McFadden of the Falcons' official site reports.",WR
 4037626,Divine Deablo,Atlanta Falcons,Questionable,2026-10-30T21:15Z,Forearm,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Deablo (forearm) is listed as questionable for Sunday's game against the Buccaneers, Will McFadden of the Falcons' official site reports.",LB
 3917914,Olamide Zaccheaus,Atlanta Falcons,Questionable,2026-10-30T21:11Z,Shoulder,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Zaccheaus (shoulder) is listed as questionable for Sunday's game against the Buccaneers, Will McFadden of the Falcons' official site reports.",WR
 4361510,Cameron Thomas,Atlanta Falcons,Active,2026-10-30T17:30Z,,,,,,,DE
 4376288,LaCale London,Atlanta Falcons,Active,2026-10-30T17:29Z,,,,,,,DE
-4240596,C.J. Henderson,Atlanta Falcons,Active,2026-10-30T17:29Z,,,,,,,CB
-4595343,Kendal Daniels,Atlanta Falcons,Active,2026-10-30T17:29Z,,,,,,,LB
 4034961,Jawaan Taylor,Atlanta Falcons,Active,2026-10-30T17:29Z,,,,,,,OT
 4241474,Brian Robinson Jr.,Atlanta Falcons,Out,2026-10-30T17:22Z,Hamstring,Not Specified,Not Specified,2026-11-08,OUT,"Robinson (hamstring) has been ruled out for Sunday's game at Tampa Bay, Will McFadden of the Falcons' official site reports.",RB
-4239995,A.J. Terrell Jr.,Atlanta Falcons,Active,2026-10-29T23:35Z,,,,,,"Terrell (groin) was limited during Thursday's practice, Will McFadden of the team's official site reports.",CB
 4240849,Charles Snowden,Atlanta Falcons,Questionable,2026-10-28T20:01Z,Back,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,LB
 3045527,Samson Ebukam,Atlanta Falcons,Questionable,2026-10-28T20:00Z,Hamstring,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,DE
 4431005,Xavier Watts,Atlanta Falcons,Active,2026-10-28T03:39Z,,,,,,Watts notched seven tackles (three solo) and forced a fumble Sunday in a 29-20 Week 7 victory against the 49ers.,S
@@ -628,7 +628,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241478,DeVonta Smith,Philadelphia Eagles,Out,2026-10-30T20:17Z,Hamstring,Not Specified,Not Specified,2026-11-08,OUT,Smith (hamstring) is listed as out for Sunday night's game against the Commanders.,WR
 4362116,Moro Ojomo,Philadelphia Eagles,Active,2026-10-30T20:03Z,,,,,,,DT
 4571162,Jalyx Hunt,Philadelphia Eagles,Active,2026-10-30T19:59Z,,,,,,,LB
-3929630,Saquon Barkley,Philadelphia Eagles,Active,2026-10-30T19:59Z,,,,,,Barkley (hamstring/back) doesn't have a designation for Sunday's game at Washington.,RB
+3929630,Saquon Barkley,Philadelphia Eagles,Active,2026-10-30T19:59Z,,,,,,Barkley (hamstring/back) doesn't have an injury designation for Sunday's game at Washington.,RB
 3916409,Jonathan Greenard,Philadelphia Eagles,Active,2026-10-30T19:58Z,,,,,,,LB
 4240456,Michael Carter II,Philadelphia Eagles,Active,2026-10-30T19:58Z,,,,,,,CB
 3139368,Marcus Epps,Philadelphia Eagles,Active,2026-10-30T19:58Z,,,,,,,S
