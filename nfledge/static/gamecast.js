@@ -2411,7 +2411,33 @@
       const po = pg.length ? `${sub('Playoffs', ` · ${pg.length} game${pg.length === 1 ? '' : 's'}${keys.length ? ` · ${keys.slice(0, 4).map(k => `${nfmt(pt[k] || 0)} ${cols[k][0]}`).join(', ')}` : ''}`)}${head}${tot(pg)}${[...pg].reverse().map(g => row(g, g.po)).join('')}${S.g.length ? sub('Regular season') : ''}` : '';
       return `<tbody data-season="${S.s}"><tr class="lg-season"><td colspan="${n}"><span class="lg-pin"><b>${S.s}</b> ${tmL(team || (pg[0] && pg[0].t) || '')}${sum}</span></td></tr>${po}${S.g.length ? head + trs : ''}</tbody>`;
     }).join('');
-    return `<div class="lg-scroll"><table class="lg">${body}</table></div>`;
+    const games = `<div class="lg-scroll"><table class="lg">${body}</table></div>`;
+    // Games / Seasons, as the fantasy log has it (owner 2026-10-30: "how come there's no games/seasons selector for
+    // defensive players / non fantasy positions"): a row per regular season (team, games, snaps, for defenders IDP
+    // points, points per game and the season grade, then his kind's totals and returns) under a career row; tap a
+    // season for its games. Same switch and handlers as logHtml (data-lv, data-go-season, showLogView).
+    const carS = seasons.filter(S => S.g.length);
+    if (opts.compact || carS.length < 2) return games;
+    const cRow = (label, team, gs, grd, attrs = '') => {
+      const t = kindTotals(L, gs), p = idp ? gs.reduce((x, g) => x + idpPts(L, g, w), 0) : 0;
+      const sum = i => gs.reduce((a, g) => a + (+((g.r || [])[i]) || 0), 0);
+      return `<tr${attrs}><td>${label}</td><td class="lg-opp">${team}</td><td class="num">${gs.length}</td><td class="num">${t.sn != null ? Math.round(t.sn) : '–'}</td>`
+        + `${idp ? `<td class="num"><b>${f1(p)}</b></td><td class="num">${f1(p / gs.length)}</td><td class="num">${grd}</td>` : ''}`
+        + `${keys.map(k => `<td class="num">${nfmt(t[k] || 0)}</td>`).join('')}${rk.map((k, i) => `<td class="num">${nfmt(sum(i))}</td>`).join('')}</tr>`;
+    };
+    const teamOf = S => S.mv && S.mv.length ? [S.mv[0].f, ...S.mv.map(m => m.t)].map(t => tmL(t)).join('/') : tmL(S.g[S.g.length - 1].t);
+    const cHead = `<tr class="lg-ch"><th>Year</th><th>Team</th><th class="num" title="Games with a stat or a snap">G</th><th class="num" title="Average share of snaps (2013 on)">Snap</th>`
+      + `${idp ? '<th class="num" title="IDP fantasy points, your scoring">Pts</th><th class="num" title="IDP points per game">Pts/G</th><th class="num" title="Season grade (OVR)">Grd</th>' : ''}`
+      + `${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}${rk.map(k => `<th class="num" title="${esc(RET_COLS[k][1])}">${RET_COLS[k][0]}</th>`).join('')}</tr>`;
+    const cn = 4 + (idp ? 3 : 0) + keys.length + rk.length;
+    const career = cRow('Car', `${carS.length} yrs`, carS.flatMap(S => S.g), '', ` class="lg-tot" title="Regular season, ${carS[carS.length - 1].s}-${carS[0].s}"`)
+      + `<tr class="lg-gap"><td colspan="${cn}"></td></tr>`;
+    const rows = carS.map(S => cRow(`<b>${S.s}</b>`, teamOf(S), S.g, idp ? seasonGrdOf(L.pid, S.s) : '', ` class="lg-car" data-go-season="${S.s}" title="Show his ${S.s} games"`)).join('');
+    const view = logView;
+    return `<div class="seg lg-views" role="tablist"><button type="button" data-lv="g" class="${view === 'g' ? 'on' : ''}">Games</button><button type="button" data-lv="s" class="${view === 's' ? 'on' : ''}">Seasons</button></div>
+      <div class="lg-v" data-lv="s"${view === 's' ? '' : ' hidden'}><div class="lg-leg"><span>Regular season · Tap a season for its games</span></div>
+        <div class="lg-scroll"><table class="lg lg-career"><tbody>${cHead}${career}${rows}</tbody></table></div></div>
+      <div class="lg-v" data-lv="g"${view === 'g' ? '' : ' hidden'}>${games}</div>`;
   };
   // career by season: every season he was on an active roster (2002 on) or played, with team, games and totals
   const kindCareer = L => {
