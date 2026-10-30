@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4690179,Tavius Robinson,Baltimore Ravens,Injured Reserve,2026-10-24T20:50Z,Pectoral,Not Specified,Not Specified,2027-02-15,IR,The Ravens placed Robinson (pectoral) on injured reserve Saturday.,LB
 4361178,Cam Jurgens,Baltimore Ravens,Active,2026-10-24T01:48Z,,,,,,Jurgens (concussion) does not have any injury designation ahead of Sunday's game against the Bengals.,C
 4432260,Matt Hibner,Baltimore Ravens,Active,2026-10-23T00:03Z,,,,,,Hibner (hand) was a full participant at practice Thursday.,TE
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-30T02:27Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-30T03:00Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4039303,Ed Oliver,Buffalo Bills,Active,2026-10-30T00:19Z,,,,,,Oliver (knee) was a full participant at the Bills' practice Thursday.,DT
 4385690,Dalton Kincaid,Buffalo Bills,Questionable,2026-10-29T21:00Z,Chest,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Kincaid (chest) was a limited participant in Thursday's practice.,TE
 3915416,DJ Moore,Buffalo Bills,Questionable,2026-10-29T20:56Z,Shoulder - AC Joint,Sprain,Not Specified,2026-11-01,QUESTIONABLE,Moore (shoulder) was a limited participant in Thursday's practice.,WR
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2576925,Darren Waller,Carolina Panthers,Active,2026-10-26T00:17Z,,,,,,Waller brought in one of two targets for a 50-yard touchdown in the Panthers' 43-13 loss to the Buccaneers on Sunday.,TE
 4685720,Bryce Young,Carolina Panthers,Active,2026-10-26T00:07Z,,,,,,Young completed 14 of 27 passes for 163 yards with one touchdown and two interceptions and added one carry for nine yards in the Panthers' 43-13 loss to the Buccaneers on Sunday.,QB
 4241416,Chuba Hubbard,Carolina Panthers,Active,2026-10-25T22:41Z,,,,,,Hubbard rushed seven times for 33 yards and brought in four of five targets for 27 yards in the Panthers' 43-13 loss to the Buccaneers on Sunday.,RB
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-30T02:27Z,Undisclosed,Not Specified,Not Specified,2026-11-08,IR,ir,S
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-30T03:00Z,Undisclosed,Not Specified,Not Specified,2026-11-08,IR,ir,S
 3121544,T.J. Edwards,Chicago Bears,Active,2026-10-30T00:07Z,,,,,,Edwards (hamstring) was considered to be a full participant on the Bears' estimated practice report Thursday.,LB
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-29T20:19Z,Thumb,Sprain,Not Specified,2026-11-02,QUESTIONABLE,Monangai (thumb/toe) did not practice Thursday.,RB
 4241007,D'Marco Jackson,Chicago Bears,Questionable,2026-10-29T20:13Z,Ankle,,,2026-11-02,QUESTIONABLE,questionable,LB
@@ -274,7 +274,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035434,Devin White,Detroit Lions,Injured Reserve,2026-10-17T02:00Z,Forearm,Surgery,Not Specified,2026-11-22,IR,The Lions placed White (forearm) on injured reserve Friday.,LB
 3126997,Tom Kennedy,Detroit Lions,Injured Reserve,2026-10-17T01:51Z,Knee - MCL,Surgery,Right,2027-02-15,IR,The Lions placed Kennedy (knee) on injured reserve Friday.,WR
 4038849,DJ Wonnum,Detroit Lions,Active,2026-10-09T21:36Z,,,,,,,LB
-4248528,Christian Watson,Green Bay Packers,Active,2026-10-30T02:28Z,,,,,,"Watson (chest) returned to Thursday night's game against the Panthers, Matt Schneidman of The Athletic reports.",WR
+4248528,Christian Watson,Green Bay Packers,Active,2026-10-30T01:25Z,,,,,,"Watson (chest) is questionable to return to Thursday night's game against the Panthers, Ryan Wood of USA Today reports.",WR
 4361791,Devonte Wyatt,Green Bay Packers,Active,2026-10-29T23:26Z,,,,,,"Wyatt (ankle) is active for Thursday's game against the Panthers, Mike Spofford of the team's official site reports.",DT
 4259493,Keisean Nixon,Green Bay Packers,Active,2026-10-29T23:20Z,,,,,,"Nixon (shoulder) is active for Thursday's game against Carolina, Mike Spofford of the team's official site reports.",CB
 4819231,Kaleb Johnson,Green Bay Packers,Out,2026-10-29T23:10Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,"Johnson (coach's decision) is inactive for Thursday's game against the Panthers, Mike Spofford of the team's official site reports.",RB
