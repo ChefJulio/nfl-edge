@@ -3212,13 +3212,20 @@
   // The season's schedule sheet (owner 2026-10-17: "not just games yet to be played"): played games with the result,
   // the bye in its week, the rest with the opponent's record and Power rank; strength of schedule below. Opened from
   // the schedule row's header (and the Schedule tile where the Playoffs tile can't show: a past season's page).
+  document.addEventListener('click', e => {  // a schedule sheet's game rows open their gamecast
+    const g = e.target.closest && e.target.closest('.tm-sg.tm-game[data-gid]');
+    if (g) location.href = gcUrl(g.dataset.gid, g.dataset.f || '');
+  });
   const schedSheet = (abbr, d, pw) => {
     const O = oddsData(), sch = O && +O.season === +d.season && O.sched ? O.sched[abbr] : null;
     const pow = Object.fromEntries((d.power || []).map(x => [x.team, x]));
     const weeks = sch ? Array.from({ length: Math.max(18, ...sch.map(g => g[0])) }, (_, i) => sch.find(g => g[0] === i + 1) || i + 1) : [];
     const schRow = g => { if (typeof g === 'number') return `<div class="tm-sg tm-bye"><span class="tm-sw">Wk ${g}</span><span class="muted">Bye</span></div>`;
       const o = pow[g[1]] || {}, done = g[3] != null, r = !done ? '' : g[3] > g[4] ? 'W' : g[3] < g[4] ? 'L' : 'T';
-      return `<div class="tm-sg tm-open${done ? ' tm-done' : ''}" data-tm="${esc(g[1])}"><span class="tm-sw">Wk ${g[0]}</span><span class="tm-sv">${g[2] ? 'vs' : '@'}</span>${tLogo(g[1], 22)}<b>${esc(o.nick || g[1])}</b>`
+      // a row opens that game's gamecast (owner 2026-10-29: "link to the matchup, not the team"): nflverse's game id
+      // (season_week_away_home) and its week file
+      const wk2 = String(g[0]).padStart(2, '0'), gid = `${d.season}_${wk2}_${g[2] ? g[1] : abbr}_${g[2] ? abbr : g[1]}`;
+      return `<div class="tm-sg tm-game${done ? ' tm-done' : ''}" role="link" tabindex="0" data-gid="${esc(gid)}" data-f="${esc(`${d.season}/week-${wk2}.json`)}" title="Open the gamecast"><span class="tm-sw">Wk ${g[0]}</span><span class="tm-sv">${g[2] ? 'vs' : '@'}</span>${tLogo(g[1], 22)}<b>${esc(o.nick || g[1])}</b>`
         + (done ? `<span class="tm-sres r-${r}">${r} ${g[3]}-${g[4]}</span>` : `<span class="muted">${esc(o.record || '')}</span>${rkChip(o.rank, 'Their Power rank')}`) + '</div>'; };
     return `<div class="pc-box"><div class="pc-k">${esc(d.season)} season</div>${weeks.length ? `<div class="tm-sched">${weeks.map(schRow).join('')}</div>` : '<p class="pc-sub">Loading schedule&hellip;</p>'}
       ${pw ? `<p class="pc-sub">Strength of schedule, by the opponents' Power ratings: so far ${ord(pw.sos_past_rk)} hardest, the rest of the way ${ord(pw.sos_next_rk)} hardest (1st = toughest).</p>` : ''}</div>`;

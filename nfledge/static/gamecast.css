@@ -1862,3 +1862,4 @@ tr.lg-tot.lg-tot-pinned { visibility: hidden; }  /* its pinned copy (.lg-fh) sho
 .nv-season, .nv-susp { background: rgba(242,120,109,.16); color: #ff9a90; }
 .pc-nv { border-left: 3px solid var(--muted); } .pc-nv.nv-trade-b { border-left-color: #7fb3ff; } .pc-nv.nv-signing-b, .pc-nv.nv-extension-b { border-left-color: #6fdc8c; }
 .pc-nv.nv-release-b { border-left-color: #f0c05a; } .pc-nv.nv-season-b, .pc-nv.nv-susp-b { border-left-color: #f2786d; }
+.tm-sg.tm-bye { cursor: default; } .tm-sg.tm-bye:hover { background: none; }
