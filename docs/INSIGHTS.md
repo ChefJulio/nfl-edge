@@ -5633,3 +5633,34 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   (tools/experiments.py baseline,return_starters_gs 2012-2019 --history=16 + tools/return_role_eval.py
   --variant=return_starters_gs; hours of compute). Run it if returners' teammates look off, or at season end with
   2026's returns.
+- **PRE-REGISTERED 2026-10-29 (owner: "do what you think right", after the dart families review: "one step back to
+  take two steps forward?"): (DS) ablation of the shipped Matchups win chance.** Every game test so far ADDED a piece
+  on top; none removed one. Production's form: logistic, no intercept, of home + this week's rank gap + Elo gap + the
+  lineup term (offense, on-field values), fit walk-forward, plus the fixed final-week settled offset (-1.1 x settled
+  home - away, week 18 only). Arms: FULL; FULL minus each of home / rank gap / Elo / lineup (refit without it); FULL
+  minus the settled offset. Harness = (BX)'s table (cache/vegas_prior_eval.parquet + lineup_rows.parquet, settled flags
+  from cache/playoff_odds_weekly.parquet as (BT)), walk-forward, scored 2022-25 and 2026 so far. Reported per arm:
+  Brier change vs FULL with the 95% CI (2,000 game resamples), seasons better. DECISION RULE: a piece whose removal
+  LOWERS Brier with the CI upper < 0 and in >= 3 of 4 seasons is cut (a pre-registered removal test of its own before
+  shipping); a piece whose removal costs < 0.0005 with the CI spanning 0 is flagged "carries nothing measurable" (kept;
+  noted). The owner-design pieces (lineup, settled offset) are read the same way: no special pass.
+- **PRE-REGISTERED 2026-10-29: (DT) where the gap to Vegas sits.** Same table, FULL vs Vegas's moneyline (vig removed),
+  games 2022-25: Brier gap by week band (1-4, 5-8, 9-12, 13-17, 18), by Vegas confidence (favorite < 60 / 60-70 /
+  70-80 / 80%+), by our-vs-Vegas disagreement (< 5 / 5-10 / 10+ points), and by whether a team changed starting QB from
+  its previous game. Descriptive only (no gate): it decides where (or whether) to spend the next effort. If the gap is
+  concentrated where news happens (QB changes, big disagreements), the remaining gap is information the play-by-play
+  doesn't carry; if it is spread evenly over quiet games, team-strength estimation is still the lever.
+- **RESULT {#ablation-winchance} (DS) ablation of the shipped Matchups win chance: NOTHING TO CUT; every piece earns
+  its place.** tools/ablation_eval.py, 1,084 games 2022-25, FULL Brier .2199 (Vegas .2105). Removing (vs FULL, 95% CI,
+  seasons better without it): home +0.0011 [-0.0009, +0.0032] 0/4; rank gap +0.0012 [-0.0036, +0.0060] 1/4; Elo +0.0035
+  [+0.0016, +0.0053] 0/4; lineup term +0.0014 [-0.0006, +0.0032] 0/4 (2026 +0.0043); settled offset +0.0014
+  [-0.0008, +0.0036] 0/4, week 18 alone +0.023 on 64 games. Every removal is worse in (nearly) every season; the two
+  owner-design pieces (lineup, settled) included. No "step back" is available: the shipped pieces overlap little.
+- **RESULT {#gap-where} (DT) where the gap to Vegas sits (descriptive).** Same games, gap .0095 Brier. By our-vs-Vegas
+  disagreement: < 5 points 41.5% of games, gap +0.0011 +- 0.0025 (a tie), 4.7% of the total; 5-10 30.1%, +0.0106, 33.7%;
+  10+ 28.4%, +0.0205, 61.6%. QB change (either team's starter differs from its previous game): 25.4% of games, gap
+  +0.0154 vs +0.0075, 41.3% of the total. By week: 1-4 +0.0047, 5-8 +0.0142, 9-12 +0.0057, 13-17 +0.0114, 18 +0.0154
+  (spread out; the early weeks are NOT the weak spot here). By Vegas confidence: flat (+0.007 to +0.015). Reading: in
+  most games we match the market; the gap comes from a minority of games where the line knows something (they show up
+  as big disagreements), and QB changes are the largest identifiable kind. Next lever, if any: how a QB change is valued
+  (a new starter's rating, a backup's, a surprise starter), since the starter is knowable before kickoff.
