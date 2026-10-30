@@ -51,7 +51,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360248,Kyle Pitts Sr.,Atlanta Falcons,Active,2026-10-25T23:09Z,,,,,,Pitts brought in all five targets for 22 yards and a touchdown in the Falcons' 29-20 win over the 49ers on Sunday.,TE
 4035671,Tyler Huntley,Baltimore Ravens,Active,2026-10-30T22:20Z,,,,,,"Huntley will be the backup quarterback against the Bills on Sunday after Lamar Jackson (ankle) was cleared to return from a three-game absence, Ryan Mink of the Ravens' official site reports.",QB
 3858276,Jaylinn Hawkins,Baltimore Ravens,Out,2026-10-30T22:05Z,Knee,Not Specified,Not Specified,2026-11-05,OUT,Hawkins (knee) has been ruled out for Sunday's game against Buffalo.,S
-3915189,Roquan Smith,Baltimore Ravens,Active,2026-10-30T22:01Z,,,,,,Smith (knee) does not have an injury designation for Sunday's game against Buffalo.,LB
 4575517,Kyle Hamilton,Baltimore Ravens,Active,2026-10-30T21:58Z,,,,,,Hamilton (knee) does not have an injury designation for Sunday's game against the Bills.,S
 4035479,John Simpson,Baltimore Ravens,Active,2026-10-30T19:18Z,,,,,,,G
 3916387,Lamar Jackson,Baltimore Ravens,Active,2026-10-30T17:36Z,,,,,,"Ravens coach Jesse Minter confirmed Friday that Jackson (ankle) will play in Sunday's game at Buffalo, Brian Wacker of The Baltimore Sun reports.",QB
@@ -59,6 +58,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4575483,T.J. Tampa,Baltimore Ravens,Injured Reserve,2026-10-30T01:26Z,Knee,Not Specified,Not Specified,2026-11-01,IR-R,Tampa (knee) was a full participant at the Ravens' practice Thursday.,CB
 3915837,Broderick Washington Jr.,Baltimore Ravens,Active,2026-10-30T01:25Z,,,,,,Washington (ankle) logged a full practice Thursday.,DT
 2980153,Ronnie Stanley,Baltimore Ravens,Active,2026-10-30T01:19Z,,,,,,Stanley (toe) practiced in full Thursday.,OT
+3915189,Roquan Smith,Baltimore Ravens,Active,2026-10-30T00:36Z,,,,,,Smith (knee) was limited in Thursday's practice.,LB
 15846,John Jenkins,Baltimore Ravens,Active,2026-10-29T20:41Z,,,,,,,DT
 4685526,Adam Randall,Baltimore Ravens,Injured Reserve,2026-10-29T01:00Z,Neck,Not Specified,Not Specified,2026-11-01,IR-R,The Ravens opened Randall's (neck) 21-day practice window Wednesday.,RB
 4876132,Josh Cuevas,Baltimore Ravens,Active,2026-10-27T01:46Z,,,,,,Cuevas caught two of three targets for 35 yards during the Ravens' 35-13 loss to the Bengals on Sunday.,TE
@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4690179,Tavius Robinson,Baltimore Ravens,Injured Reserve,2026-10-24T20:50Z,Pectoral,Not Specified,Not Specified,2027-02-15,IR,The Ravens placed Robinson (pectoral) on injured reserve Saturday.,LB
 4361178,Cam Jurgens,Baltimore Ravens,Active,2026-10-24T01:48Z,,,,,,Jurgens (concussion) does not have any injury designation ahead of Sunday's game against the Bengals.,C
 4432260,Matt Hibner,Baltimore Ravens,Active,2026-10-23T00:03Z,,,,,,Hibner (hand) was a full participant at practice Thursday.,TE
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-30T22:01Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-30T23:00Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4401823,Dee Alford,Buffalo Bills,Questionable,2026-10-30T21:56Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Alford (ankle) is listed as questionable ahead of Sunday's game against the Ravens.,CB
 4429501,Ray Davis,Buffalo Bills,Active,2026-10-30T19:20Z,,,,,,Davis (illness) doesn't have an injury designation for Sunday's game against the Ravens.,RB
 3127294,Greg Gaines,Buffalo Bills,Questionable,2026-10-30T19:12Z,Calf,,,2026-11-01,QUESTIONABLE,questionable,DT
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431077,TeRah Edwards,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,DT
 4874515,Sam Hecht,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,C
 4034962,Stone Forsythe,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,OT
-4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-30T22:01Z,Undisclosed,Not Specified,Not Specified,2026-11-08,OUT,out,S
+4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-30T23:00Z,Undisclosed,Not Specified,Not Specified,2026-11-08,OUT,out,S
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-30T19:40Z,Thumb,Sprain,Not Specified,2026-11-02,QUESTIONABLE,"Monangai (thumb/toe) was listed as a non-participant for Friday's practice, Kevin Fishbain of The Athletic reports.",RB
 4723086,Colston Loveland,Chicago Bears,Questionable,2026-10-30T19:31Z,Neck,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,"Loveland was limited at Friday's practice due to a neck injury, Kevin Fishbain of The Athletic reports.",TE
 3121544,T.J. Edwards,Chicago Bears,Active,2026-10-30T00:07Z,,,,,,Edwards (hamstring) was considered to be a full participant on the Bears' estimated practice report Thursday.,LB
@@ -424,6 +424,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686658,Mike Washington Jr.,Las Vegas Raiders,Active,2026-10-26T02:32Z,,,,,,Washington rushed six times for 27 yards in Sunday's 35-21 loss to the Rams.,RB
 4890973,Ashton Jeanty,Las Vegas Raiders,Active,2026-10-26T01:14Z,,,,,,Jeanty rushed eight times for 15 yards and brought in all eight targets for 61 yards and a touchdown in the Raiders' 35-21 loss to the Rams on Sunday.,RB
 4260394,Aidan O'Connell,Las Vegas Raiders,Active,2026-10-25T19:24Z,,,,,,O'Connell (coach's decision) is inactive but will serve as the Raiders' emergency third quarterback against the Rams on Sunday.,QB
+4429025,Quentin Johnston,Los Angeles Chargers,Active,2026-10-30T22:53Z,,,,,,"Johnston's role in the passing game will shrink slightly in Week 8 against the Rams given that both Ladd McConkey (concussion) and Tre' Harris (hamstring) have been cleared to play, Eric Smith of the Chargers' official site reports.",WR
 4612826,Ladd McConkey,Los Angeles Chargers,Active,2026-10-30T20:44Z,,,,,,"McConkey (concussion) is off the injury report and will play in Sunday's game against the Rams, Noah Furtado of The Athletic reports.",WR
 4686612,Tre' Harris,Los Angeles Chargers,Active,2026-10-30T20:28Z,,,,,,Harris (hamstring) doesn't have an injury designation for Sunday's game against the Rams.,WR
 4690171,Deane Leonard,Los Angeles Chargers,Out,2026-10-30T20:20Z,Concussion,Concussion,Not Specified,2026-11-08,OUT,out,CB
@@ -440,7 +441,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241263,Charlie Kolar,Los Angeles Chargers,Active,2026-10-20T01:26Z,,,,,,Kolar caught three of six targets for 20 yards during the Chargers' 22-6 loss to the Chiefs on Sunday.,TE
 4430968,Kimani Vidal,Los Angeles Chargers,Active,2026-10-20T01:11Z,,,,,,Vidal turned seven carries into 21 yards and caught three of four passes for 19 yards during the Chargers' 22-6 loss to the Chiefs on Sunday.,RB
 4596334,Keaton Mitchell,Los Angeles Chargers,Active,2026-10-20T00:58Z,,,,,,"Mitchell turned two carries into four yards, failed to haul in his lone target and returned four kickoffs for 87 yards during Sunday's 22-6 loss to the Chiefs.",RB
-4429025,Quentin Johnston,Los Angeles Chargers,Active,2026-10-19T00:51Z,,,,,,Johnston caught one of three targets for 57 yards in Sunday's 22-6 loss to the Chiefs.,WR
 4038941,Justin Herbert,Los Angeles Chargers,Active,2026-10-19T00:49Z,,,,,,"Herbert completed 22 of 37 passes for 204 yards, no touchdowns and one interception in Sunday's 22-6 loss to the Chiefs. He also rushed five times for 26 yards.",QB
 4685382,Omarion Hampton,Los Angeles Chargers,Active,2026-10-19T00:44Z,,,,,,Hampton rushed seven times for 18 yards and caught all four of his targets for 21 yards in Sunday's 22-6 loss to the Chiefs.,RB
 4241597,Daiyan Henley,Los Angeles Chargers,Active,2026-10-18T19:12Z,,,,,,Henley (knee) is active for Sunday's game against the Chiefs.,LB
@@ -499,6 +499,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4249417,Jalen Tolbert,Miami Dolphins,Active,2026-10-26T18:38Z,,,,,,,WR
 4869645,Caleb Douglas,Miami Dolphins,Active,2026-10-25T21:01Z,,,,,,Douglas (ankle) caught two of three targets for 70 yards and two touchdowns in Sunday's 28-25 win over the Jets.,WR
 4242512,Malik Willis,Miami Dolphins,Active,2026-10-25T20:59Z,,,,,,Willis completed 14 of 21 passes for 208 yards and two touchdowns while rushing six times for 39 yards and a touchdown in Sunday's 28-25 win over the Jets.,QB
+4360569,Jordan Mason,Minnesota Vikings,Active,2026-10-30T22:57Z,,,,,,"Mason and Aaron Jones (knee) will co-lead the backfield against the Lions on Sunday after the latter avoided an injury designation for Week 8, Craig Peters of the Vikings' official site reports.",RB
 4568007,Jay Ward,Minnesota Vikings,Questionable,2026-10-30T18:18Z,Knee,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,S
 4708049,Gavin Bartholomew,Minnesota Vikings,Active,2026-10-30T18:18Z,,,,,,,TE
 3042519,Aaron Jones Sr.,Minnesota Vikings,Active,2026-10-30T18:16Z,,,,,,"Jones (knee) doesn't have an injury designation for Sunday's game against the Lions, Dane Mizutani of the St. Paul Pioneer Press reports.",RB
@@ -515,7 +516,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3886598,Jauan Jennings,Minnesota Vikings,Active,2026-10-26T02:51Z,,,,,,Jennings caught two of three targets for 34 yards in Sunday's 16-10 win over the Colts.,WR
 4036133,T.J. Hockenson,Minnesota Vikings,Active,2026-10-25T22:20Z,,,,,,Hockenson caught four of five targets for 35 yards and a touchdown in Sunday's 16-10 win over the Colts.,TE
 4429205,Jordan Addison,Minnesota Vikings,Active,2026-10-25T22:15Z,,,,,,Addison caught two of three targets for 20 yards in Sunday's 16-10 win over the Colts. He added three yards on his lone carry.,WR
-4360569,Jordan Mason,Minnesota Vikings,Active,2026-10-25T22:11Z,,,,,,Mason carried the ball 15 times for 68 yards in Sunday's 16-10 win over the Colts. He failed to catch either of his two targets.,RB
 3917315,Kyler Murray,Minnesota Vikings,Active,2026-10-25T22:02Z,,,,,,Murray completed 14 of 24 passes for 150 yards and a touchdown in Sunday's 16-10 win over the Colts. He added 39 rushing yards on five carries.,QB
 4262921,Justin Jefferson,Minnesota Vikings,Active,2026-10-25T21:47Z,,,,,,Jefferson caught four of seven targets for 44 yards in Sunday's 16-10 win over the Colts.,WR
 4567104,Will Reichard,Minnesota Vikings,Active,2026-10-25T21:44Z,,,,,,Reichard went 3-for-4 on field-goal attempts and made his only PAT during Sunday's 16-10 win over the Colts.,PK
@@ -774,6 +774,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4573318,Dorian Mausi,Tennessee Titans,Injured Reserve,2026-10-22T01:35Z,Foot,Not Specified,Not Specified,2026-11-01,IR-R,"The Titans opened Mausi's 21-day practice window Wednesday, Jim Wyatt of the team's official website reports.",LB
 4369835,Alontae Taylor,Tennessee Titans,Active,2026-10-19T17:18Z,,,,,,,CB
 4917635,Joshua Williams,Tennessee Titans,Active,2026-10-18T02:44Z,,,,,,The Titans activated Williams (pectoral) from reserve/PUP on Saturday.,CB
+3925354,Daron Payne,Washington Commanders,Out,2026-10-30T22:59Z,Foot,Not Specified,Not Specified,2026-12-13,OUT,out,DT
 4259491,Javon Kinlaw,Washington Commanders,Out,2026-10-30T21:07Z,Knee,Not Specified,Not Specified,2026-11-08,OUT,Kinlaw (knee) has been ruled out for Sunday's game against the Eagles.,DT
 4048228,John Bates,Washington Commanders,Questionable,2026-10-30T21:05Z,Shoulder,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Bates (shoulder) is listed as questionable for Sunday's game against the Eagles.,TE
 4567156,Treylon Burks,Washington Commanders,Questionable,2026-10-30T20:21Z,Foot,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Burks (foot) is questionable for Sunday night's game against the Eagles.,WR
@@ -798,4 +799,3 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2971586,Fabian Moreau,Washington Commanders,Active,2026-10-20T16:02Z,,,,,,,CB
 4360635,Chig Okonkwo,Washington Commanders,Active,2026-10-20T04:18Z,,,,,,Okonkwo brought in all seven targets for 69 yards in the Commanders' 23-17 loss to the 49ers on Monday night.,TE
 4697815,Rachaad White,Washington Commanders,Active,2026-10-20T04:13Z,,,,,,White rushed seven times for 27 yards and brought in four of five targets for 30 yards and a touchdown in the Commanders' 23-17 loss to the 49ers on Monday night.,RB
-4426348,Jayden Daniels,Washington Commanders,Active,2026-10-20T04:00Z,,,,,,Daniels completed 29 of 40 passes for 300 yards with two touchdowns and no interceptions while adding four rushes for 10 yards in the Commanders' 23-17 loss to the 49ers on Monday night.,QB
