@@ -215,17 +215,17 @@ def power_md(week: dict, base: str) -> str:
 
 def games_md(week: dict, base: str) -> str:
   out = [f"# NFL Edge games: {week['season']} week {week['week']}", "",
-         "Market chance = from the Vegas spread when posted; our model = this week's rank gap (each team with this week's QB) + Elo + home field "
-         f"(method: {base}model/games.md).", "",
-         "| Kickoff | Game | QBs | Vegas line | Total | Market favorite | Our model | Final |", "|---|---|---|---|---|---|---|---|"]
+         "Win chance = the market's, from the Vegas spread, when a line is posted (the more accurate forecast); before a line "
+         "is posted, our model's (this week's rank gap, each team with this week's QB, + Elo + home field; "
+         f"method: {base}model/games.md).", "",
+         "| Kickoff | Game | QBs | Vegas line | Total | Win chance | Final |", "|---|---|---|---|---|---|---|"]
   for g in week.get("games") or []:
     a, h, f = g.get("away", {}), g.get("home", {}), g.get("fc", {}) or {}
     fin = g.get("final") or {}
     final = f"{a.get('team')} {fin.get('away')} - {h.get('team')} {fin.get('home')}" if fin.get("home") is not None else ""
-    mk = "tossup" if f.get("tossup") else f"{f.get('fav', '')} {f.get('pct', '')}%"
-    md = "tossup" if f.get("model_tossup") else f"{f.get('model_fav', '')} {f.get('model_pct', '')}%"
+    mk = ("tossup" if f.get("tossup") else f"{f.get('fav', '')} {f.get('pct', '')}%") + ("" if f.get("src") == "Vegas" else " (our model; no line yet)")
     out.append(f"| {g.get('kickoff', '')} | {a.get('team')} ({a.get('record', '')}) {'vs' if g.get('neutral') else '@'} {h.get('team')} ({h.get('record', '')}) | "
-               f"{a.get('qb', '')} / {h.get('qb', '')} | {g.get('vegas_line') or ''} | {g.get('vegas_total') or ''} | {mk} | {md} | {final} |")
+               f"{a.get('qb', '')} / {h.get('qb', '')} | {g.get('vegas_line') or ''} | {g.get('vegas_total') or ''} | {mk} | {final} |")
   return "\n".join(out) + "\n"
 
 

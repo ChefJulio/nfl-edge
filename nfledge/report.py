@@ -1310,17 +1310,22 @@ def track_record(schedules: pd.DataFrame, season: int, week: int, tossup: float)
 
 def forecast(g, p_model: float, k_vegas: float, tossup: float, names: dict, ts: "TeamStyle") -> dict:
   """The game's win chances: the market's when a Vegas line exists (it has been the more accurate forecast, and
-  blending the model in never helped), else the model's. Under the tossup line we name no favorite."""
+  blending the model in never helped), else the model's. Under the tossup line we name no favorite. The model's own
+  chance is published only when there is no line (owner 2026-10-29: "just remove it from user facing anywhere if
+  there's a vegas model predicting the same thing"; INSIGHTS (DS)/(DT): the market is the better number everywhere we
+  can measure); it still drives the playoff odds, Power and games without a line."""
   vm = g.spread_line
   p = float(logistic(k_vegas * vm)) if pd.notna(vm) else p_model  # P(home wins)
   fav = g.home_team if p >= .5 else g.away_team
   pct = round(max(p, 1 - p) * 100)
   m_fav = g.home_team if p_model >= .5 else g.away_team
   m_pct = round(max(p_model, 1 - p_model) * 100)
-  return {"src": "Vegas" if pd.notna(vm) else "Model", "fav": fav, "nick": names.get(fav, fav),
-          "logo": ts.logo_img(fav, 24), "pct": pct, "tossup": pct < round(tossup * 100),
-          "p_away": round((1 - p) * 100), "p_home": round(p * 100),
-          "model_fav": m_fav, "model_nick": names.get(m_fav, m_fav), "model_pct": m_pct, "model_tossup": m_pct < round(tossup * 100)}
+  out = {"src": "Vegas" if pd.notna(vm) else "Model", "fav": fav, "nick": names.get(fav, fav),
+         "logo": ts.logo_img(fav, 24), "pct": pct, "tossup": pct < round(tossup * 100),
+         "p_away": round((1 - p) * 100), "p_home": round(p * 100)}
+  if pd.isna(vm):
+    out.update({"model_fav": m_fav, "model_nick": names.get(m_fav, m_fav), "model_pct": m_pct, "model_tossup": m_pct < round(tossup * 100)})
+  return out
 
 
 # where a neutral-site game is played (owner 2026-10-17: "London", not "neutral"): by stadium name, then by the
@@ -1478,9 +1483,10 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
     fc = forecast(g, float(logistic(x)), k_vegas, tossup, names, ts)
     notes = [f"{t} {n}" for t in (g.away_team, g.home_team) if (n := lineup_note(t))]
     rest = [f"{t} has nothing left to play for (starters often rest)" for t in (g.away_team, g.home_team) if settled.get(t)]
-    fc["model_why"] = (f"Our model: this week's rank {g.away_team} {rk_a} vs {g.home_team} {rk_h}, Elo {e_a:.0f} vs "
-                       f"{e_h:.0f}{'' if g.location == 'Neutral' else ', plus home field'}"
-                       f"{'; lineup changes: ' + '; '.join(notes) if notes else ''}{'; ' + '; '.join(rest) if rest else ''}")
+    if fc["src"] == "Model":  # why our chance says what it says: only where it's the number shown
+      fc["model_why"] = (f"Our model: this week's rank {g.away_team} {rk_a} vs {g.home_team} {rk_h}, Elo {e_a:.0f} vs "
+                         f"{e_h:.0f}{'' if g.location == 'Neutral' else ', plus home field'}"
+                         f"{'; lineup changes: ' + '; '.join(notes) if notes else ''}{'; ' + '; '.join(rest) if rest else ''}")
     # Who wins each battle. Every bar is a tug of war, away team on the left and home team on the right. The
     # model margin = both offense-vs-defense matchups + special teams + home field + play volume (never shown).
     vol_of = tp[tp.game_id == g.game_id].set_index("team")

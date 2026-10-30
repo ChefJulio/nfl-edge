@@ -2951,9 +2951,10 @@
       h2h = `<div class="tm-h2h">${tmL(teamOpp, tLogo(teamOpp, 18))} <b>${esc(abbr)} vs ${tmL(teamOpp)} since 1999: ${w}-${l}${t ? `-${t}` : ''}</b> <span class="muted">(${gs.length} games)</span></div>`;
     }
     const oppCell = (o, h, opr, season) => `<td class="lg-opp tm-opp ${opr ? (opr <= 8 ? 'mr-hard' : opr <= 16 ? 'mr-tough' : opr <= 24 ? 'mr-ok' : 'mr-easy') : ''}"><button type="button" class="tm-open" data-tm="${esc(o)}"${opr ? ` title="Their power rank that week: ${ord(opr)}"` : ''}>${h === 0 ? '@' : h === 2 ? 'vs ' : ''}${esc(era(o, season))}</button></td>`;
-    const pct = (v, m) => v == null && m == null ? '–' : `${v != null ? `${v}%` : '–'}<small> / ${m != null ? `${m}%` : '–'}</small>`;
+    // Vegas's pregame chance; ours only for a game with no line (owner 2026-10-29: the market's number where it exists)
+    const pct = (v, m) => v != null ? `${v}%` : m != null ? `${m}%<small> ours</small>` : '–';
     const head = `<tr class="lg-gh"><th colspan="7"></th><th colspan="5" class="lg-grp">Offense</th><th colspan="3" class="lg-grp">Allowed</th><th></th></tr>
-      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th>Result</th><th class="num">Line</th><th class="num" title="Pregame win chance: Vegas / our model (2021 on)">Odds</th><th class="num" title="Our power rank that week">Pwr</th><th class="num" title="Elo going in">Elo</th>
+      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th>Result</th><th class="num">Line</th><th class="num" title="Pregame win chance: Vegas's (ours only where there was no line; 2021 on)">Odds</th><th class="num" title="Our power rank that week">Pwr</th><th class="num" title="Elo going in">Elo</th>
       <th class="num">Yds</th><th class="num">Pass</th><th class="num">Rush</th><th class="num" title="Yards per play">YPP</th><th class="num" title="Turnovers">TO</th>
       <th class="num">Yds</th><th class="num">YPP</th><th class="num" title="Takeaways">TA</th><th></th></tr>`;
     const body = L.seasons.map(S => {
@@ -2990,7 +2991,7 @@
       return `<tbody data-season="${S.s}"><tr class="lg-season"><td colspan="16"><span class="lg-pin"><b>${S.s}</b> ${esc(sumBits)}</span></td></tr>${po}${rows.length ? head + trs : ''}</tbody>`;
     }).join('');
     const legend = `<div class="lg-leg"><span>Opponent color = their power rank that week (2021 on):</span><span class="mr-hard">top 8</span><span class="mr-tough">9-16</span><span class="mr-ok">17-24</span><span class="mr-easy">25-32</span>
-      <span>· Odds = pregame win chance, Vegas / our model · Line = Vegas spread for ${esc(abbr)} (cov = covered) · Tap a game to open its gamecast</span></div>`;
+      <span>· Odds = pregame win chance from the Vegas line (ours where there was none) · Line = Vegas spread for ${esc(abbr)} (cov = covered) · Tap a game to open its gamecast</span></div>`;
     return `<div class="tm-bar">${sel}</div>${h2h}${legend}<div class="lg-scroll"><table class="lg tm-lg">${body}</table></div>`;
   };
   const teamSeasonBox = (L) => {
@@ -4491,9 +4492,8 @@
         <div class="wp-bar" role="img" aria-label="${esc(a.team)} ${f.p_away}%, ${esc(h.team)} ${f.p_home}%"><span class="wp-a" style="width:${f.p_away}%"></span><span class="wp-h"></span>
           <i class="wp-zone" style="left:${100 - tp}%;width:${2 * tp - 100}%"></i></div>
         <div class="wp-ends"><span>${tmL(a.team)} ${f.p_away}%</span><span>${f.p_home}% ${tmL(h.team)}</span></div>
-        ${g.vegas_line ? `<div class="wp-meta"><span>Vegas ${esc(g.vegas_line)}${g.vegas_total ? ` · O/U ${f1(g.vegas_total)}` : ''}</span>
-          <span title="${esc(f.model_why)}">Our model: <b>${f.model_tossup ? 'tossup' : `${tmL(f.model_fav, esc(f.model_nick))} ${f.model_pct}%`}</b>${f.model_tossup ? ` (${tmL(f.model_fav, esc(f.model_nick))} ${f.model_pct}%)` : ''}</span></div>`
-          : `<div class="wp-meta"><span>${esc(f.model_why)}</span></div>`}
+        ${g.vegas_line ? `<div class="wp-meta"><span>Vegas ${esc(g.vegas_line)}${g.vegas_total ? ` · O/U ${f1(g.vegas_total)}` : ''}</span></div>`
+          : f.model_why ? `<div class="wp-meta"><span>${esc(f.model_why)}</span></div>` : ''}
       </div></section>`;
     const battles = `<section class="gcs"><div class="battles" style="${esc(g.bt_style)}">
       <h3>Who wins each battle <span class="bt-unit">EPA per 100 plays</span></h3>
@@ -4721,7 +4721,7 @@
     const a = info.away, h = info.home, winner = a.score > h.score ? a.team : h.score > a.score ? h.team : null;
     const f = g && g.fc;
     const call = f ? `<div class="pg-call">${verdict(f, winner)}
-      <span class="muted">${f.src === 'Vegas' ? `Vegas gave ${f.tossup ? `a tossup (${tmL(f.fav, esc(f.nick))} ${f.pct}%)` : `${tmL(f.fav, esc(f.nick))} ${f.pct}%`}` : 'No Vegas line'} · our model gave ${tmL(f.model_fav, esc(f.model_nick))} ${f.model_pct}%${f.model_tossup ? ' (tossup)' : ''}</span></div>` : '';
+      <span class="muted">${f.src === 'Vegas' ? `Vegas gave ${f.tossup ? `a tossup (${tmL(f.fav, esc(f.nick))} ${f.pct}%)` : `${tmL(f.fav, esc(f.nick))} ${f.pct}%`}` : `No Vegas line · our model gave ${tmL(f.model_fav, esc(f.model_nick))} ${f.model_pct}%${f.model_tossup ? ' (tossup)' : ''}`}</span></div>` : '';
     return `<section class="gcs" data-k="now"><h3>Result</h3><div class="pg-res">
       <span class="tm-open${winner === a.team ? ' won' : ''}" data-tm="${esc(a.team)}">${logo(a.logo, '#111', 26, a.team)}<b>${esc(a.team)}</b> ${a.score}</span><span class="muted">${esc(info.detail || 'Final')}</span>
       <span class="tm-open${winner === h.team ? ' won' : ''}" data-tm="${esc(h.team)}">${h.score} <b>${esc(h.team)}</b>${logo(h.logo, '#111', 26, h.team)}</span></div>${call}
