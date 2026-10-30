@@ -419,6 +419,7 @@ A full bar is the 95th percentile of offense-vs-defense impact across every pair
 
 - **Kept (checked)** - Does any piece of our win chance hurt, so that removing it would make room for something better? - No: taking out home field, the rank gap, Elo, the lineup term or the final-week adjustment each made predictions worse in nearly every season 2022-25 (Elo most); nothing to cut (2026-10). <!-- tried:ablation-winchance -->
 - **Measured** - Where does the market beat us? - In most games we match it: where our chance is within 5 points of Vegas's (about 4 in 10 games) the two are even. Most of the gap comes from the games where we disagree by 10+ points and from games where a team changed quarterback, where the market knows something the play-by-play doesn't (2026-10). <!-- tried:gap-where -->
+- **Rejected (lead)** - Should the win chance correct for the kind of quarterback change (a backup, a new arrival, an inexperienced starter, the starter back)? - Not yet: teams starting a quarterback new to them or an inexperienced one are still rated about 9-10 points of win chance too high, but with about 150 such games of each kind in 2022-25 a correction helped in only 2 of 4 seasons and not in 2026; rechecked at season end (2026-10). <!-- tried:qb-kind-winchance -->
 
 Ideas that sounded right but did not improve out-of-sample accuracy are switched off, not shipped:
 

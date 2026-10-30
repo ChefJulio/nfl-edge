@@ -5664,3 +5664,28 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   most games we match the market; the gap comes from a minority of games where the line knows something (they show up
   as big disagreements), and QB changes are the largest identifiable kind. Next lever, if any: how a QB change is valued
   (a new starter's rating, a backup's, a surprise starter), since the starter is knowable before kickoff.
+- **PRE-REGISTERED 2026-10-29 (owner: "yes", after (DT): QB-change games are 25% of games and 41% of the gap to
+  Vegas): (DU) QB-change kinds in the Matchups win chance.** (BB) found teams starting an experienced backup (+1.7
+  points) or a new arrival (+2.6) rated above the market; the shipped track record ((BC) qbedge) cut those to +0.8 /
+  +1.3 in margin terms, not to zero, and nothing has been tested in the win chance itself. Kinds per team-game as (BB)
+  (tools/qb_swing_eval.team_games: the game's starter vs the team's usual starter this season; backup in = 150+
+  career and 150+ for this team, new arrival = 150+ career and under 150 for this team, inexperienced = under 150
+  career, starter back = the usual starter after missing the previous game). Feature per kind: home flag - away flag.
+  Harness = (DS)'s (production's form: home + rank gap + Elo + lineup, walk-forward, fixed settled offset), scored
+  2022-25, 2026 so far as confirmation. Arms: FULL; QBK = FULL + the four kind features. Reported first (diagnostic):
+  per kind, FULL's mean (chance - result) and (chance - Vegas) from that team's side, with game counts. GATE: on
+  QB-change games (either team not "same"), Brier lower by >= 0.002 with the 95% CI (2,000 game resamples) upper < 0;
+  all games not worse (CI upper < +0.0005); QB-change games better in >= 3 of 4 seasons; 2026 QB-change games same
+  direction. Caveat stated up front: the kind uses the game's actual starter; live, the projected starter (a surprise
+  starter would be misread), so a pass ships with the projected starter's kind and the 2026 check uses the actual.
+- **RESULT {#qb-kind-winchance} (DU) QB-change kinds in the Matchups win chance: FAIL.** tools/qb_kind_eval.py,
+  1,084 games 2022-25, 437 with a QB change (40%: either team). QB-change games FULL .2236, QBK .2214, Vegas .2065:
+  -0.0022 [-0.0122, +0.0079] (size met, CI wide), better 2 of 4 seasons, 2026 (21 games) +0.0114: FAIL; all games
+  -0.0006 [-0.0051, +0.0036]. Diagnostic (FULL, from the team's side, chance - result / chance - Vegas): same QB
+  -0.014 / -0.006 (1,524 team-games); backup in -0.017 / +0.016 (173: (BC)'s track record fixed it); new arrival
+  +0.088 +- 0.072 / +0.037 (156); inexperienced +0.099 +- 0.076 / +0.027 (136); starter back -0.070 +- 0.129 / -0.054
+  (53). Weights (2021-25): new arrival -0.66, inexperienced -0.66 log-odds, backup in -0.10, starter back +0.01. Reading:
+  teams starting a newly arrived or inexperienced QB are still over-rated by ~9-10 points of win chance (about 2 SE
+  each), but ~150 team-games per kind over four seasons is too few for a fitted correction to hold up season to season.
+  Lead, not a fix: check again with 2026's games at season end (both kinds), or on a longer window if the team ratings
+  can be rebuilt before 2021.
