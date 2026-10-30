@@ -499,6 +499,7 @@ For each of this week's unplayed games, the rooting guide asks how much the resu
 ### What we tried
 
 - **Rejected** - Should the playoff simulation rate each remaining game with that week's expected quarterback (an injured starter's chance to be back) instead of one rank for the rest of the season? - No measurable difference: make-playoffs error 0.1372 -> 0.1373, within noise, 2021-25; the record already banked decides most of it. The odds use Power's rest-of-season rank, which scored the same as the old one (2026-10). <!-- tried:odds-weekly-c -->
+- **Rejected** - Should the playoff odds rate games without a Vegas line from the lines that exist (a market rating per team) instead of our rank and Elo? - No: make-playoffs error 0.1381 -> 0.1403, better in only 2 of 5 seasons (2021-25); worse over the first half of the season, a hair better late (2026-10). <!-- tried:odds-market-ratings -->
 - **Shipped** - Should simulated seasons let team strength drift (injuries, trades, form) instead of freezing it? - Yes: without it, teams given 85-95% made the playoffs only 76% of the time; with it, on 2024-25 seasons the fit never saw, make-playoffs error 0.1344 -> 0.1273 (2026-10).
 
 ## Grades, kickers and defenses

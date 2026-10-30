@@ -5689,3 +5689,32 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   each), but ~150 team-games per kind over four seasons is too few for a fitted correction to hold up season to season.
   Lead, not a fix: check again with 2026's games at season end (both kinds), or on a longer window if the team ratings
   can be rebuilt before 2021.
+- **PRE-REGISTERED 2026-10-30 (owner: "yes", after MIN 6-0 read 90.5% to make the playoffs vs scorereport.net's
+  78.9%): (DW) market ratings for the playoff odds' unlined games.** Why: the sim's games without a line use our
+  model (rest-of-season rank gap + Elo + home), whose Elo carried MIN at 1626 (2nd) while Power had them 11th; the two
+  lined games read MIN 53% / 51% in our model vs 40% / 41% in the market. Setting MIN's Elo to ~1506 moved its odds to
+  82 / 42 / 23 (playoffs / division / top seed). Method: a team rating in spread points from every line known at the
+  time, by weighted ridge least squares: spread_line = hfa x (not neutral) + r_home - r_away (hfa shared, unpenalized;
+  ratings penalized toward 0 with lambda = 2 current-week game-equivalents). Lines used: this season's games before the
+  as-of week plus the as-of week's own (the backtest's lines_weeks rule; live: every line on file) and last season's
+  games (regular season and playoffs), each weighted 0.5^(age / 6 weeks), age counted from the as-of week, last season's
+  games 8 offseason weeks further back. Fixed in advance, not tuned. Arm MKT: every game without a line uses
+  P(home) = logistic(k x (hfa x (not neutral) + r_home - r_away)) with the same fitted k as the lined games; the
+  playoff rounds too. Everything else as shipped (lined games, drift 0.9, tiebreakers). BASE = the shipped method.
+  Harness: tools/playoff_odds.py --backtest-market, walk-forward 2021-25, odds as of every week, 1,000 sims, the same
+  random seed for both arms. GATE (adopt MKT): make-playoffs Brier lower pooled 2021-25 AND lower in >= 4 of 5
+  seasons; reported alongside (not gating): division, bye and title Brier, calibration bands, and weeks 1-4 / 5-9 /
+  10-14 / 15-18. Caveats stated up front: a line carries that week's QB news (a backup's line drags a team's rating
+  until it decays); the drift was fit for BASE and is kept as is (refitting it for MKT would be a second test).
+- **RESULT {#odds-market-ratings} (DW) market ratings for the playoff odds' unlined games: FAIL; the shipped method
+  stays.** tools/playoff_odds.py --backtest-market (10 parts, one per arm and season, same seeds), 2,880 team-weeks
+  2021-25; BASE reproduces the committed track record (.1381 vs .1382). Make-playoffs Brier BASE .1381, MKT .1403 (+.0022);
+  by season -.0086 (2021), -.0020, +.0011, +.0147 (2024), +.0057: better in 2 of 5. Division .1182 -> .1191, bye .0383
+  -> .0391, title .0284 -> .0279. By week: MKT worse in weeks 1-4 (.2056 -> .2105) and 5-9 (.1536 -> .1593), a hair
+  better in 10-14 (.1260 -> .1246) and 15-18 (.0665 -> .0661). Calibration: MKT is better at the top (85-95%: 90.3
+  predicted / 90.4 actual vs BASE 90.0 / 87.8) but too generous to long shots (5-15%: 9.5 / 3.4). Reading: lines alone,
+  with this fixed recipe, rate teams worse than Power + Elo over the first half of a season, where most of the
+  playoff-odds error sits; the MIN 2026 case (Elo well above the market) is real for that team but not a pattern that
+  pays on average. Not retuned (the half-life, shrinkage and last-season weight were fixed in advance; picking new ones
+  on these seasons would be fitting the test). Lead, not scheduled: a blend (market rating as a third input next to
+  rank and Elo, fit walk-forward) is a different test.

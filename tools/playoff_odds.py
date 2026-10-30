@@ -39,9 +39,40 @@ def model_p(home: str, away: str, neutral: bool, ranks: dict, elo_now: dict, wm:
   return float(logistic(x))
 
 
+MKT_HALF_LIFE, MKT_OFFSEASON, MKT_LAMBDA = 6.0, 8, 2.0  # (DW) fixed in advance, not tuned
+
+
+def market_ratings(sched, season: int, week: int, lines_weeks=None) -> tuple[dict, float]:
+  """(DW) Every team's rating in spread points from the lines known as of `week`: weighted ridge least squares of
+  spread_line = hfa x (not neutral) + r_home - r_away. This season's lines (games before `week` plus the lines_weeks
+  rule's: None = every line on file) and last season's (playoffs included), each weighted 0.5^(age / MKT_HALF_LIFE
+  weeks); last season's games sit MKT_OFFSEASON weeks further back. Ratings shrink toward 0 with MKT_LAMBDA
+  current-week game-equivalents; hfa is shared and not shrunk. Returns ({team: rating}, hfa)."""
+  s = sched[sched.spread_line.notna() & sched.season.isin([season - 1, season])].copy()
+  s["home_team"], s["away_team"] = s.home_team.replace(RELOCATED), s.away_team.replace(RELOCATED)
+  cur = s.season == season
+  known = (s.week < week) | (s.week.isin(lines_weeks) if lines_weeks is not None else True)
+  s = s[~cur | (known & (s.game_type == "REG"))]
+  cur = (s.season == season).to_numpy()
+  last_prev = int(s.loc[~cur, "week"].max()) if (~cur).any() else 0
+  wk = s.week.to_numpy(float)
+  age = np.where(cur, np.maximum(week - wk, 0), week + MKT_OFFSEASON + last_prev - wk)
+  w = 0.5 ** (age / MKT_HALF_LIFE)
+  tms = sorted(set(s.home_team) | set(s.away_team))
+  ix = {t: i for i, t in enumerate(tms)}
+  rows = np.arange(len(s))
+  X = np.zeros((len(s), len(tms) + 1))
+  X[rows, [ix[t] for t in s.home_team]] = 1
+  X[rows, [ix[t] for t in s.away_team]] = -1
+  X[:, -1] = (s.location != "Neutral").to_numpy(float)
+  pen = np.diag([MKT_LAMBDA] * len(tms) + [0.0])
+  b = np.linalg.solve(X.T @ (X * w[:, None]) + pen, X.T @ (w * s.spread_line.to_numpy(float)))
+  return {t: float(b[ix[t]]) for t in tms}, float(b[-1])
+
+
 def simulate(sched, teams, season: int, week: int, ranks: dict, wm: dict, n: int, rng, lines_weeks=None, drift: float = 0.0,
              keep: bool = False, played_before: int | None = None, ranks_by_week: dict | None = None, jobs: int = 1,
-             elo_also: frozenset = frozenset()) -> dict:
+             elo_also: frozenset = frozenset(), market: bool = False) -> dict:
   """Monte Carlo of the rest of `season` from before `week`'s games. lines_weeks: weeks whose Vegas lines may be used
   (None = every line on file, the live case; the backtest passes {week}: lines known at that time).
   drift: team strength isn't fixed for the rest of the season. Each simulated season gives every team a strength
@@ -57,12 +88,19 @@ def simulate(sched, teams, season: int, week: int, ranks: dict, wm: dict, n: int
   L0 = League.from_schedule(played.assign(game_type="REG"), teams, season)
   elo_now = elo.ratings_before(sched, season, week, wm, elo_also)
   k = vegas_win_k(sched, season, week)
+  # market (INSIGHTS (DW)): games without a line are rated from the lines that exist, through the same k
+  mr, mh = market_ratings(sched, season, week, lines_weeks) if market else ({}, 0.0)
+
+  def base_p(h, a, neutral, rk):
+    if market:
+      return float(logistic(k * (mh * (not neutral) + mr.get(h, 0.0) - mr.get(a, 0.0))))
+    return model_p(h, a, neutral, rk, elo_now, wm)
   p = []
   for g in left.itertuples():
     use_line = pd.notna(g.spread_line) and (lines_weeks is None or g.week in lines_weeks)
     # ranks_by_week (INSIGHTS (N)): each game's own week's ranks (an injured starter's expected return); else `ranks`
     rk_g = ranks_by_week.get(int(g.week), ranks) if ranks_by_week else ranks
-    p.append(float(logistic(k * g.spread_line)) if use_line else model_p(g.home_team, g.away_team, g.location == "Neutral", rk_g, elo_now, wm))
+    p.append(float(logistic(k * g.spread_line)) if use_line else base_p(g.home_team, g.away_team, g.location == "Neutral", rk_g))
   p = np.array(p)
   homes, aways = list(left.home_team), list(left.away_team)
   n_weeks = int(reg.week.max())
@@ -81,7 +119,7 @@ def simulate(sched, teams, season: int, week: int, ranks: dict, wm: dict, n: int
   ps = 1 / (1 + np.exp(-(x0[None, :] + shock[:, hi] - shock[:, ai]))) if len(p) else np.zeros((n, 0))
   hw = rng.random((n, len(p))) < ps  # home wins
   def pm(h, a, neutral=False):
-    x = np.log(1 / model_p(h, a, neutral, ranks, elo_now, wm) - 1) * -1 + cur[idx[h]] - cur[idx[a]]
+    x = np.log(1 / base_p(h, a, neutral, ranks) - 1) * -1 + cur[idx[h]] - cur[idx[a]]
     return 1 / (1 + np.exp(-x))
   # each simulated season's seeding (the tiebreakers: nearly all of this step's time) uses no random draws, so it runs
   # across processes first (jobs); the playoff draws below then use rng in the same order as before
@@ -307,7 +345,8 @@ def week_ranks(site_like: Path, season: int, week: int) -> dict:
   return {RELOCATED.get(r["team"], r["team"]): r["rank"] for r in d.get("power") or []}
 
 
-def backtest_records(sched, teams, wm, sims: int, archive: Path, drift: float, seasons=range(2021, 2026)) -> pd.DataFrame:
+def backtest_records(sched, teams, wm, sims: int, archive: Path, drift: float, seasons=range(2021, 2026),
+                     market: bool = False, jobs: int = 1) -> pd.DataFrame:
   """Odds as of every week of each season (ranks from that week's archived page) next to what happened."""
   rng = np.random.default_rng(7)
   recs = []
@@ -325,7 +364,7 @@ def backtest_records(sched, teams, wm, sims: int, archive: Path, drift: float, s
     n_weeks = int(sched[(sched.season == season) & (sched.game_type == "REG")].week.max())
     for week in range(1, n_weeks + 1):
       ranks = week_ranks(archive, season, week)
-      res = simulate(sched, teams, season, week, ranks, wm, sims, rng, lines_weeks={week}, drift=drift)
+      res = simulate(sched, teams, season, week, ranks, wm, sims, rng, lines_weeks={week}, drift=drift, market=market, jobs=jobs)
       for r in res["rows"]:
         recs.append({"season": season, "week": week, "team": r["team"], "p_playoffs": r["p_playoffs"], "p_div": r["p_div"],
                      "p_bye": r["p_bye"], "p_title": r["p_title"], "y_playoffs": int(r["team"] in made), "y_div": int(r["team"] in divw),
@@ -373,6 +412,35 @@ def main():
     res = summarize(backtest_records(sched, teams, wm, sims, archive, drift), sims, drift)
     bt_path.write_text(json.dumps(res, indent=1), encoding="utf-8")
     print(json.dumps(res, indent=1))
+    return
+  if "--backtest-market" in sys.argv:
+    # (DW) pre-registered: BASE (shipped) vs MKT (market ratings for unlined games), same seed, 2021-25
+    archive = Path(opt.get("archive", ROOT.parent / "nfl-edge-archive"))
+    sims, drift = int(opt.get("sims", 1000)), float(cfg["report"].get("playoff_drift", 0.0))
+    # one (arm, season) per process, single-process each (a process pool per simulated week deadlocked on Windows):
+    # --arm=BASE|MKT --season=Y writes cache/dw_<arm>_<Y>.parquet; with neither, the parts are scored together.
+    # Each part seeds its own season the same way for both arms, so the arms stay paired.
+    part = lambda a, y: ROOT / cfg["data"]["cache_dir"] / f"dw_{a}_{y}.parquet"  # noqa: E731
+    if "arm" in opt:
+      y = int(opt["season"])
+      backtest_records(sched, teams, wm, sims, archive, drift, seasons=[y], market=opt["arm"] == "MKT").to_parquet(part(opt["arm"], y))
+      return
+    arms = {a: pd.concat([pd.read_parquet(part(a, y)) for y in range(2021, 2026)], ignore_index=True) for a in ("BASE", "MKT")}
+    b = lambda x, m: float(((x[f"p_{m}"] - x[f"y_{m}"]) ** 2).mean())  # noqa: E731
+    for m in ("playoffs", "div", "bye", "title"):
+      print(f"{m:9s} BASE {b(arms['BASE'], m):.4f}  MKT {b(arms['MKT'], m):.4f}")
+    per = {s: (b(arms["BASE"][arms["BASE"].season == s], "playoffs"), b(arms["MKT"][arms["MKT"].season == s], "playoffs"))
+           for s in sorted(arms["BASE"].season.unique())}
+    for s, (x, y) in per.items():
+      print(f"  {s} make-playoffs BASE {x:.4f}  MKT {y:.4f}  {y - x:+.4f}")
+    better = sum(y < x for x, y in per.values())
+    for a, d in arms.items():
+      sm = summarize(d.copy(), sims, drift)
+      print(a, "calibration", [(c["bin"], c["predicted"], c["actual"]) for c in sm["calibration"]])
+      print(a, "by week", [(w["weeks"], w["brier"]) for w in sm["by_week"]])
+    ok = b(arms["MKT"], "playoffs") < b(arms["BASE"], "playoffs") and better >= 4
+    print(f"GATE: {'PASS' if ok else 'FAIL'} (seasons better {better}/5)")
+    pd.concat([d.assign(arm=a) for a, d in arms.items()]).to_parquet(ROOT / cfg["data"]["cache_dir"] / "dw_market_backtest.parquet")
     return
   if "--weekly" in sys.argv:
     # (INSIGHTS (L)) every team's odds as of every week (before that week's games), 2019 on, for the late-season stakes
