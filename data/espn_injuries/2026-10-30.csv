@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431077,TeRah Edwards,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,DT
 4874515,Sam Hecht,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,C
 4034962,Stone Forsythe,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,OT
-4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-30T23:00Z,Undisclosed,Not Specified,Not Specified,2026-11-08,OUT,out,S
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-30T23:16Z,Undisclosed,Not Specified,Not Specified,2026-11-08,IR,ir,S
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-30T19:40Z,Thumb,Sprain,Not Specified,2026-11-02,QUESTIONABLE,"Monangai (thumb/toe) was listed as a non-participant for Friday's practice, Kevin Fishbain of The Athletic reports.",RB
 4723086,Colston Loveland,Chicago Bears,Questionable,2026-10-30T19:31Z,Neck,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,"Loveland was limited at Friday's practice due to a neck injury, Kevin Fishbain of The Athletic reports.",TE
 3121544,T.J. Edwards,Chicago Bears,Active,2026-10-30T00:07Z,,,,,,Edwards (hamstring) was considered to be a full participant on the Bears' estimated practice report Thursday.,LB
@@ -199,6 +199,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5083076,Harold Fannin Jr.,Cleveland Browns,Active,2026-10-25T23:18Z,,,,,,Fannin caught six of nine targets for 91 yards in Sunday's 27-24 win over the Titans.,TE
 3122840,Deshaun Watson,Cleveland Browns,Active,2026-10-25T22:46Z,,,,,,Watson completed 25 of 36 passes for 308 yards with an interception in Sunday's 27-24 win over the Titans. He added 19 yards and a touchdown on three carries.,QB
 4870653,KC Concepcion,Cleveland Browns,Active,2026-10-25T22:36Z,,,,,,Concepcion caught eight of 10 targets for 129 yards and added 23 yards on three carries in Sunday's 27-24 win over Tennessee.,WR
+3122752,Kenny Clark,Dallas Cowboys,Questionable,2026-10-30T23:12Z,Back,,,2026-11-01,QUESTIONABLE,questionable,DT
 4426354,George Pickens,Dallas Cowboys,Questionable,2026-10-30T21:18Z,Shoulder,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Pickens (shoulder/hamstring) is listed as questionable for Sunday's game against the Cardinals, Patrik Walker of the Cowboys' official site reports.",WR
 4685554,Drew Shelton,Dallas Cowboys,Active,2026-10-30T21:05Z,,,,,,,OT
 4040982,Quinnen Williams,Dallas Cowboys,Active,2026-10-30T01:10Z,,,,,,"Williams (hamstring) practiced in a limited fashion Thursday, Tommy Yarrish of the Cowboys' official site reports.",DT
@@ -223,7 +224,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428990,Broderick Jones,Dallas Cowboys,Active,2026-10-24T20:37Z,,,,,,,OT
 4609048,Tyler Guyton,Dallas Cowboys,Active,2026-10-23T20:40Z,,,,,,,OT
 4360590,Juanyeh Thomas,Dallas Cowboys,Active,2026-10-20T23:12Z,,,,,,Thomas was signed to the Cowboys' active roster Tuesday.,S
-4240608,James Houston,Dallas Cowboys,Active,2026-10-19T16:31Z,,,,,,,LB
 4241985,J.K. Dobbins,Denver Broncos,Active,2026-10-30T22:38Z,,,,,,"Dobbins and Jonah Coleman will lead the Broncos' backfield against the Chiefs on Sunday due to the absence of RJ Harvey (knee), Eric DiLalla of the Broncos' official site reports.",RB
 4568490,RJ Harvey,Denver Broncos,Out,2026-10-30T22:38Z,Knee,Not Specified,Not Specified,2026-11-08,OUT,"Harvey (knee) is ruled out for Sunday's game against the Chiefs, but his injury isn't considered severe or long term, Sam Jane of The Denver Post reports.",RB
 4702555,Jonah Coleman,Denver Broncos,Active,2026-10-30T22:16Z,,,,,,"Coleman said Friday that he'll be ready for a larger role if that's what the team needs in the absence of RJ Harvey, who has been ruled out for Sunday's game against Kansas City due to a knee injury, Zac Stevens of TheDNVR.com reports.",RB
@@ -701,7 +701,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685623,Mykel Williams,San Francisco 49ers,Active,2026-10-24T01:19Z,,,,,,Williams (knee) does not have any injury designation ahead of Sunday's game against the Falcons.,DE
 4035693,Velus Jones Jr.,Seattle Seahawks,Questionable,2026-10-30T01:10Z,Hamstring,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,Jones (hamstring) did not participate at the Seahawks' practice Thursday.,RB
 3924327,Drew Lock,Seattle Seahawks,Questionable,2026-10-30T01:03Z,Elbow,Not Specified,Right,2026-11-02,QUESTIONABLE,Lock (elbow) was a limited participant at the Seahawks' practice Thursday.,QB
-4428659,Drake Thomas,Seattle Seahawks,Questionable,2026-10-30T01:00Z,Ankle,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,Thomas (ankle) was a limited participant at the Seahawks' practice Thursday.,LB
+4428659,Drake Thomas,Seattle Seahawks,Active,2026-10-30T01:00Z,,,,,,Thomas (ankle) was a limited participant at the Seahawks' practice Thursday.,LB
 4686540,Tyrice Knight,Seattle Seahawks,Questionable,2026-10-30T00:55Z,Hip,,,2026-11-02,QUESTIONABLE,Knight (hip) was a limited participant at the Seahawks' practice Thursday.,LB
 2971622,Leonard Williams,Seattle Seahawks,Questionable,2026-10-30T00:51Z,Achilles,,,2026-11-02,QUESTIONABLE,Williams (Achilles) was a limited participant at the Seahawks' practice Thursday.,DT
 4429211,Anthony Bradford,Seattle Seahawks,Questionable,2026-10-29T23:22Z,Knee,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,questionable,G
