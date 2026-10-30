@@ -4513,7 +4513,11 @@
       const L = o.st && (o.st.live || o.st.replay) && order ? liveBits(o.st, info) : null;
       let ds = drives.map(d => ({ d, plays: (d.plays || []).filter(keep) })).filter(x => x.plays.length);
       if (order) ds = ds.reverse().map(x => ({ d: x.d, plays: [...x.plays].reverse() }));
-      html = (L ? L.top : '') + ds.map(({ d, plays }) => {
+      // a replay's drives as they stood at its play (stateAt): a drive still going has its numbers so far and no result
+      // yet (owner 2026-10-30: the header read "15 plays, 53 yards, 6:21" a few snaps in)
+      const asOf = o.st && o.st.replay ? Object.fromEntries(o.st.drives.map(x => [String(x.id), x])) : null;
+      html = (L ? L.top : '') + ds.map(({ d: d0, plays }) => {
+        const d = (asOf && asOf[String(d0.id)]) || d0;
         const tm = teamOf(d.team && d.team.id) || {};
         const cur = L ? L.isCur(d) : d === sum.drives.current;
         let res = driveResult(d, tm, info, cur);
@@ -5607,16 +5611,20 @@
     root.querySelectorAll('[data-pane]').forEach(b => b.onclick = () => { if (b.dataset.pane === 'box' && GP.pane !== 'box') GP.pst = '__fp'; GP.pane = b.dataset.pane; GP.paneSet = true; renderGame(); toBar('.gc-panes'); });
     const toPane = (k, sel) => { GP.pane = k; renderGame(); const e = document.querySelector(sel || '.gc-panes'); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     root.querySelectorAll('[data-pane-go]').forEach(b => b.onclick = () => toPane(b.dataset.paneGo));
-    root.querySelectorAll('[data-drive]').forEach(b => b.onclick = () => {
-      const st = stateAt(GP.sum, GP.info, GP.replay && GP.replay.play ? GP.replay : null), sh = driveSheet(b.dataset.drive, st, GP.info, GP.sum);
+    const nowSt = () => stateAt(GP.sum, GP.info, GP.replay && GP.replay.play ? GP.replay : null);
+    const bindDrives = el => el.querySelectorAll('[data-drive]').forEach(b => b.onclick = () => {
+      const sh = driveSheet(b.dataset.drive, nowSt(), GP.info, GP.sum);
       if (sh && NFLE.sheet) NFLE.sheet(sh.title, sh.html, b);
     });
+    bindDrives(root);
     root.querySelectorAll('[data-fpall]').forEach(b => b.onclick = () => { GP.fpAll = !GP.fpAll; renderGame(); });
     root.querySelectorAll('[data-drvall]').forEach(b => b.onclick = () => { GP.drvAll = !GP.drvAll; renderGame(); });
     root.querySelectorAll('[data-filter]').forEach(b => b.onclick = () => { GP.filter = b.dataset.filter; renderGame(); });
     root.querySelectorAll('[data-sort]').forEach(b => b.onclick = () => { GP.sort = b.dataset.sort; renderGame(); });
     const lq = root.querySelector('#lgQ');
-    if (lq) lq.oninput = () => { GP.q = lq.value; document.getElementById('lgBody').innerHTML = gameLog(GP.sum, GP.info, wpSeries(GP.sum), GP.replay ? GP.replay.t : null); };
+    // the search redraws only the list: with the same live / replay state as a full draw, and its drive headers rewired
+    if (lq) lq.oninput = () => { GP.q = lq.value; const body = document.getElementById('lgBody');
+      body.innerHTML = gameLog(GP.sum, GP.info, wpSeries(GP.sum), GP.replay ? GP.replay.t : null, { st: nowSt() }); bindDrives(body); };
     root.querySelectorAll('.bx-n[data-pid]').forEach(b => b.onclick = () => openPlayer(b.dataset.pid));
     // win-probability hover: nearest play
     const svg = root.querySelector('svg.wp'), tip = root.querySelector('.wp-tip');
