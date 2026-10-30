@@ -241,6 +241,40 @@ def roster_directory(site: Path, cache, nfl, current: int, espn_of: dict, live_r
   print(f"[depth] roster directory: {len(rows)} players", flush=True)
 
 
+def team_rosters(site: Path, cache, nfl, current: int, espn_of: dict, live_ros=lambda r, s: r):
+  """<site>/data/rosters/<TEAM>.json for the team card's Roster tab (owner 2026-10-29: "a list of the entire team, every
+  single player on the roster, sorted by their jersey number, include their picture, name, age as integer, position"):
+  everyone on the team's latest published roster week (active, inactive, reserve lists, practice squad), with jersey
+  number, birth date, position, NFL.com headshot and ESPN id; tag: "" on the 53, "PS" practice squad, else the reserve
+  list (IR, PUP, NFI, SSPD, HOLD or RES)."""
+  ros = cache.get("rosters", current, lambda: nfl.load_rosters_weekly([current]), stale=cache.age_hours("rosters", current) > 24)
+  if ros is None or not len(ros):
+    return
+  ros = live_ros(ros, current).dropna(subset=["gsis_id"]).copy()  # ESPN's reserve-list moves this week
+  ros["team"] = ros.team.replace({**FRANCHISE, **ROSTER_TEAM})
+  ros = ros[ros.week == ros.groupby("team").week.transform("max")]
+  ros = ros[ros.status.isin(["ACT", "INA", "RES", "DEV"])].drop_duplicates("gsis_id", keep="last")
+  out = site / "data" / "rosters"
+  out.mkdir(parents=True, exist_ok=True)
+  num = lambda v: int(v) if pd.notna(v) and str(v).strip().lstrip("-").replace(".0", "").isdigit() else None  # noqa: E731
+  n = 0
+  for team, g in ros.groupby("team"):
+    rows = []
+    for r in g.itertuples(index=False):
+      tag = "PS" if r.status == "DEV" else ROSTER_TAG.get(r.status_description_abbr, "RES") if r.status == "RES" else ""
+      espn = espn_of.get(r.gsis_id) or (str(int(r.espn_id)) if pd.notna(r.espn_id) else None)
+      born = str(r.birth_date)[:10] if pd.notna(r.birth_date) else None
+      photo = getattr(r, "headshot_url", None)
+      rows.append([r.gsis_id, r.full_name, r.position, num(r.jersey_number), born, espn, photo if isinstance(photo, str) else None, tag])
+    # by number (none last), the 53 before the practice squad and lists on a shared number
+    rows.sort(key=lambda x: (x[3] is None, x[3] or 0, x[7] != "", x[1]))
+    doc = {"v": 1, "season": current, "team": team, "week": int(g.week.max()),
+           "cols": ["pid", "name", "pos", "num", "born", "espn", "photo", "tag"], "rows": rows}
+    (out / f"{team}.json").write_text(json.dumps(doc, separators=(",", ":"), allow_nan=False), encoding="utf-8")
+    n += len(rows)
+  print(f"[depth] team rosters: {n} players on {ros.team.nunique()} teams", flush=True)
+
+
 def main():
   opt = dict(a[2:].split("=", 1) for a in sys.argv[1:] if a.startswith("--") and "=" in a)
   site = Path(opt.get("site", "site"))
@@ -356,6 +390,7 @@ def main():
   (out_root / "index.json").write_text(json.dumps({"v": V, "seasons": seasons, "current": current}), encoding="utf-8")
   (out_root / "latest.json").unlink(missing_ok=True)  # the v1 single snapshot
   roster_directory(site, cache, nfl, current, espn_of, live_ros)
+  team_rosters(site, cache, nfl, current, espn_of, live_ros)
 
 
 if __name__ == "__main__":

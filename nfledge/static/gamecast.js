@@ -2863,15 +2863,19 @@
     };
     const box = (title, rows) => rows && rows.length ? `<div class="pc-box"><div class="pc-k">${esc(title)}</div>
       ${rows.map(([abb, name, pl]) => `<div class="dc-row"><span class="dc-pos" title="${esc(name)}">${esc(abb)}</span><span class="dc-pl">${pl.map((x, i) => who(x, i)).join('')}</span></div>`).join('')}</div>` : '';
-    // by playing time: snap leaders over the team's last 3 games (from its 2nd game on), starters in bold
-    const mode = W.u ? dMode : 'list';
+    // by playing time: snap leaders over the team's last 3 games (from its 2nd game on), starters in bold; the whole
+    // roster (this season only) as a third view
+    const canRoster = sel.s === DIDX.current;
+    const mode = dMode === 'roster' && canRoster ? 'roster' : W.u ? (dMode === 'roster' ? 'use' : dMode) : 'list';
     const ubox = (title, grps) => {
       const rows = (W.u || []).filter(r => grps.includes(r[0]));
       return rows.length ? `<div class="pc-box"><div class="pc-k">${esc(title)}</div>
         ${rows.map(([g, n, pl]) => { const up = pl.filter(x => !x[3]), hurt = pl.filter(x => x[3]);
           return `<div class="dc-row"><span class="dc-pos" title="${esc(GRP_NAME[g] || g)}">${esc(g)}</span><span class="dc-pl">${up.map(([pi, pct, tag], i) => who([pi, 0, tag], i, pct, i < n)).join('')}${hurt.map(([pi, pct, tag], i) => who([pi, 0, tag], i, pct, false, true)).join('')}</span></div>`; }).join('')}</div>` : '';
     };
-    const seg = W.u ? `<div class="seg dc-mode" role="tablist"><button type="button" role="tab" data-dm="use" class="${mode === 'use' ? 'on' : ''}">Playing time</button><button type="button" role="tab" data-dm="list" class="${mode === 'list' ? 'on' : ''}">Listed chart</button></div>` : '';
+    const modes = [...(W.u ? [['use', 'Playing time']] : []), ['list', 'Listed chart'], ...(canRoster ? [['roster', 'Roster']] : [])];
+    const seg = modes.length > 1 ? `<div class="seg dc-mode" role="tablist">${modes.map(([k, l]) => `<button type="button" role="tab" data-dm="${k}" class="${mode === k ? 'on' : ''}">${l}</button>`).join('')}</div>` : '';
+    if (mode === 'roster') return `<div class="pc-wkbar">${seasonSel}</div>${seg}${rosterHtml(abbr)}`;
     const tags = liveWk ? "ESPN's injury list, updated daily" : "that week's injury report (O / D / Q) or reserve list (IR, PUP, NFI, SSPD, HOLD = did not report)";
     const listedName = sel.s >= 2025 ? "ESPN's depth chart" : "The team's depth chart";
     const body = mode === 'use'
@@ -2880,6 +2884,34 @@
       : `${box(`Offense${W.f ? ` · ${W.f}` : ''}`, W.off)}${box(`Defense${W.d ? ` · ${String(W.d).replace(/ D$/, '')}` : ''}`, W.def)}${box('Special teams', W.st)}
         <p class="pc-sub">${listedName} for that week (starters in bold, backups in order)${W.u ? '' : sel.s >= 2012 ? ". A team's first game shows the listed chart: before it has played, the preseason chart beats last season's playing time (83% vs 71% of starters right in 2025-26)" : ''}. Tags: ${tags}. Team depth charts are labeled "unofficial" and can lag reality.</p>`;
     return `<div class="pc-wkbar">${seasonSel}${weekSel}</div>${seg}${body}`;
+  };
+  // The whole roster (owner 2026-10-29: "a list of the entire team, every single player on the roster, sorted by their
+  // jersey number, include their picture, name, age as integer, position"): data/rosters/<TEAM>.json
+  // (tools/depth_build.py team_rosters), the team's latest roster week: the 53, then reserve lists and the practice squad
+  // tagged, all by number
+  const RSTR = {};
+  const rosterHtml = abbr => {
+    if (RSTR[abbr] === undefined) {
+      RSTR[abbr] = null;
+      NFLE.load(`data/rosters/${encodeURIComponent(abbr)}.json`).then(j => { RSTR[abbr] = j; refreshDepth(abbr); }, () => { RSTR[abbr] = false; refreshDepth(abbr); });
+    }
+    const R = RSTR[abbr];
+    if (!R) return `<div class="pc-box"><p class="pc-sub">${R === false ? 'No roster on file.' : 'Loading roster&hellip;'}</p></div>`;
+    const ix = Object.fromEntries(R.cols.map((c, i) => [c, i])), now = Date.now();
+    const age = b => b ? Math.floor((now - Date.parse(`${b}T12:00:00`)) / (365.25 * 864e5)) : null;
+    // NFL.com's headshot, cropped to the face at thumbnail size (as the player card's photo); else ESPN's
+    const pic = r => { const u = r[ix.photo];
+      return u ? u.replace(/\/image\/upload\/(?:[^/]*,[^/]*\/)?/, '/image/upload/c_thumb,g_face,z_0.75,w_96,h_96,f_auto,q_auto/') : NFLE.ui.headshot(r[ix.espn]); };
+    const TAGT = { PS: 'Practice squad', IR: 'Injured reserve', PUP: 'PUP list', NFI: 'Non-football injury list', SSPD: 'Suspended', HOLD: 'Did not report', RES: 'Reserve list' };
+    const cnt = t => R.rows.filter(r => r[ix.tag] === t).length, res = R.rows.filter(r => r[ix.tag] && r[ix.tag] !== 'PS').length;
+    const rows = R.rows.map(r => { const pid = r[ix.pid], a = age(r[ix.born]), t = r[ix.tag], ph = pic(r);
+      return `<div class="rs-row${t ? ' rs-off' : ''}"${pid ? ` data-open-pid="${esc(pid)}"` : ''}><span class="rs-num">${r[ix.num] != null ? r[ix.num] : '&ndash;'}</span>
+        <span class="rs-ph">${ph ? `<img src="${esc(ph)}" alt="" width="34" height="34" loading="lazy" onerror="this.remove()">` : ''}</span>
+        <span class="rs-nm"><b>${esc(r[ix.name])}</b>${t ? ` <span class="dc-tag dt-${t === 'PS' ? 'q' : 'out'}" title="${esc(TAGT[t] || t)}">${esc(t)}</span>` : ''}</span>
+        <span class="posb posb-${esc(r[ix.pos])}">${esc(r[ix.pos])}</span><span class="rs-age">${a != null ? a : ''}</span></div>`; }).join('');
+    return `<div class="pc-box"><div class="pc-k">Roster &middot; ${cnt('')} active${res ? `, ${res} on reserve lists` : ''}${cnt('PS') ? `, ${cnt('PS')} practice squad` : ''}</div>
+      <div class="rs-head"><span>No.</span><span></span><span>Player</span><span>Pos</span><span>Age</span></div>${rows}
+      <p class="pc-sub">The team's roster as of week ${esc(R.week)} (nflverse's weekly rosters, with this week's reserve-list moves from ESPN), by jersey number. Tagged: practice squad (PS) and reserve lists (IR, PUP, NFI, SSPD).</p></div>`;
   };
   // the depth chart lives in the team card's Players sheet (owner 2026-10-17): a .dc-wrap[data-dc] container, drawn
   // and wired when the sheet opens and again whenever a depth / injury file it waits on arrives
