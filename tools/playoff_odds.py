@@ -32,10 +32,12 @@ V = 1
 STAGES = ["playoffs", "div", "bye", "div_round", "conf_game", "sb", "title"]
 
 
-def model_p(home: str, away: str, neutral: bool, ranks: dict, elo_now: dict, wm: dict) -> float:
+def model_p(home: str, away: str, neutral: bool, ranks: dict, elo_now: dict, wm: dict, mr: dict | None = None) -> float:
+  """mr: market ratings (market_ratings), weighted by wm["mkt"] per spread point of gap (INSIGHTS (DX)); absent = 0."""
   ra, rh = ranks.get(away), ranks.get(home)
   x = (wm["home"] * (not neutral) + wm["elo_per_100"] * (elo_now.get(home, elo.MEAN) - elo_now.get(away, elo.MEAN)) / 100
-       + (wm["rank_gap"] * (ra - rh) if ra and rh else 0.0))
+       + (wm["rank_gap"] * (ra - rh) if ra and rh else 0.0)
+       + (wm.get("mkt", 0.0) * (mr.get(home, 0.0) - mr.get(away, 0.0)) if mr else 0.0))
   return float(logistic(x))
 
 
@@ -89,12 +91,13 @@ def simulate(sched, teams, season: int, week: int, ranks: dict, wm: dict, n: int
   elo_now = elo.ratings_before(sched, season, week, wm, elo_also)
   k = vegas_win_k(sched, season, week)
   # market (INSIGHTS (DW)): games without a line are rated from the lines that exist, through the same k
-  mr, mh = market_ratings(sched, season, week, lines_weeks) if market else ({}, 0.0)
+  # (DX) or as one more input next to rank and Elo (wm["mkt"])
+  mr, mh = market_ratings(sched, season, week, lines_weeks) if market or wm.get("mkt") else ({}, 0.0)
 
   def base_p(h, a, neutral, rk):
     if market:
       return float(logistic(k * (mh * (not neutral) + mr.get(h, 0.0) - mr.get(a, 0.0))))
-    return model_p(h, a, neutral, rk, elo_now, wm)
+    return model_p(h, a, neutral, rk, elo_now, wm, mr)
   p = []
   for g in left.itertuples():
     use_line = pd.notna(g.spread_line) and (lines_weeks is None or g.week in lines_weeks)

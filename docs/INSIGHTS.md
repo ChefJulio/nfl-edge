@@ -5718,3 +5718,30 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   pays on average. Not retuned (the half-life, shrinkage and last-season weight were fixed in advance; picking new ones
   on these seasons would be fitting the test). Lead, not scheduled: a blend (market rating as a third input next to
   rank and Elo, fit walk-forward) is a different test.
+- **PRE-REGISTERED 2026-10-30 (owner: "keep drilling", after (DW) FAIL): (DX) the market rating as a third input in
+  the playoff odds' unlined games.** (DW) replaced rank + Elo with the market rating and lost early in the season;
+  late it was a hair better and its top-band calibration was better, so the question is whether it adds information
+  NEXT TO rank + Elo. Game table: every 2021-25 regular-season game at week w with the inputs known before it: Power's
+  rank gap from that week's archived page (week_ranks), the Elo gap before week w, and the market-rating gap
+  (DW's market_ratings with only lines of games before week w, so the game's own line is never an input), plus home
+  (not neutral). Fit: logistic, no intercept, leave-one-season-out (each test season's weights fit on the other four;
+  the archive has ranks only from 2021, so walk-forward would leave 2021-22 with too little). Arms, all through
+  (DW)'s harness (tools/playoff_odds.py, 1,000 sims, odds as of every week, lines known at the time for lined games,
+  drift 0.9, the same seeds per season as (DW)): BASE (shipped weights; (DW)'s parts reused), B3 (home + rank + Elo,
+  refit leave-one-season-out: the like-for-like control, since the shipped weights saw these seasons) and BLEND
+  (B3 + the market gap in spread points). GATE (adopt BLEND): make-playoffs Brier lower than B3 pooled AND in >= 4 of 5
+  seasons, AND lower than BASE pooled. Reported alongside: game-level Brier of the three fits on their held-out
+  seasons, the fitted weights per fold, division / bye / title Brier, by-week and calibration. Ship form if it passes:
+  the market weight fit on all five seasons (config), market ratings computed in the live run.
+- **RESULT {#odds-market-blend} (DX) the market rating as a third input in the playoff odds: FAIL; the shipped method
+  stays.** tools/odds_blend_eval.py. Game level (1,355 games, held-out seasons): BASE .2226, B3 .2234, BLEND .2221;
+  with the market term in, Elo's weight collapses (0.35-0.45 -> -0.07 to +0.20 across folds; the market and Elo gaps
+  correlate 0.86) while the rank gap's holds (~0.02). Playoff odds (2,880 team-weeks, same seeds as (DW)):
+  make-playoffs BASE .1381, B3 .1387, BLEND .1417; BLEND - B3 by season -.0022 (2021), -.0063 (2022), +.0014 (2023),
+  +.0112 (2024), +.0108 (2025): better in 2 of 5. Division .1182 / .1186 / .1184, bye .0383 / .0385 / .0388, title
+  .0284 / .0285 / .0282; BLEND worse in every week band. Reading, with (DW): both market arms help 2021-22 and lose
+  2024-25, at the game level too, so it is not simulation noise. A rating built from PAST lines does not beat Elo at
+  predicting games weeks ahead; the market's edge over us sits in the current week's line (QB news, injuries: (DT)),
+  which is already used wherever it exists and doesn't carry forward. B3 vs BASE (+.0006) also shows the shipped
+  weights are not leaning on having seen these seasons. Close this vein: the remaining gap to other sites' odds for a
+  single team (MIN 2026) is a disagreement about that team, not a measurable method loss.
