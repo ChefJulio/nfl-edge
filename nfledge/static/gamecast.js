@@ -1839,15 +1839,23 @@
   };
   // Grade tile (owner 2026-10-16: OVR moved here from the header, then the Grade tab folded into its sheet): his OVR;
   // the sheet holds the whole grade (gradeTab) from his history shard (GRH, loaded with the page)
+  // The tile always shows for a graded position (owner 2026-10-29, Jalen Redmond: "where are my defensive player grade
+  // tiles?"): it used to vanish while this season's grade file loaded, and for the whole visit if that one fetch
+  // failed. Now: a loading mark until either file is in; this season's file, else his own history file (which also
+  // carries this season); "Not graded" only once both have answered.
   const gradeTile = (pid, L) => {
-    if (GR.cur === undefined || GR.cur === null) return '';
-    let r = GR.cur.players[pid], yr = GR.cur.season, latest = false;
-    // not graded this season (hurt, or too few games yet; owner 2026-10-18, Myles Garrett): his latest graded season
+    const cur = GR.cur && GR.cur.players[pid];
+    let r = cur && cur[0] != null ? cur : null, yr = GR.cur && GR.cur.season, latest = false;
+    // not in this season's file (hurt, too few games yet: owner 2026-10-18, Myles Garrett; or it failed to load): his
+    // latest graded season from his history
     if (!r && GRH[pid]) { const d = GRH[pid].filter(x => x && x.players[pid] && x.players[pid][0] != null).sort((a, b) => b.season - a.season)[0];
-      if (d) { r = d.players[pid]; yr = d.season; latest = true; } }
+      if (d) { r = d.players[pid]; yr = d.season; latest = +d.season !== +((GR.cur && GR.cur.season) || (DATA && DATA.season)); } }
+    const loading = !r && (GRH[pid] == null || !GR.ready);
     const detail = GRH[pid] ? gradeTab(pid, GRH[pid], L) : '<div class="pc-box"><p class="pc-sub">Loading grade&hellip;</p></div>';
     return tapTile('Grade', r ? `<div class="pc-big ${r[9] ? '' : grTone(r[0])}">${ovr(r[0])}${uqMark(r)} <small>OVR</small></div><div class="pc-tapsub">${yr} · ${esc(r[1])}${latest ? ' (latest)' : ''}</div>`
-      : '<div class="pc-big">– <small>OVR</small></div><div class="pc-tapsub">Not graded</div>', 'NFL Edge grade', detail);
+      : loading ? '<div class="pc-big">&hellip; <small>OVR</small></div><div class="pc-tapsub">Loading grade</div>'
+      : !GR.cur && GR.ready ? '<div class="pc-big">&ndash; <small>OVR</small></div><div class="pc-tapsub">Couldn\'t load grades</div>'
+        : '<div class="pc-big">– <small>OVR</small></div><div class="pc-tapsub">Not graded</div>', 'NFL Edge grade', detail);
   };
   // Throws (owner 2026-10-17, from a depth-by-side air-yards graphic): a QB's passes on a field, depth up from the line
   // of scrimmage, left / middle / right across (nflverse's pass_location; each throw nudged sideways within its third by
@@ -1997,7 +2005,7 @@
           // a later week this season (owner 2026-10-22: "how come health tile disappears in future weeks?"): that week's own
           // chance to play (as its projection tile), his injury as of now and the expected return; past weeks: the game log
           : DATA && +d.season === +DATA.season && +d.week > +DATA.week ? healthTile(pid, p, L, p.espn, ` · wk ${d.week}`) : ''}
-        ${GRADED[p.pos] ? gradeTile(pid, L) : ''}${CARD_X}
+        ${isGraded(p.pos, L) ? gradeTile(pid, L) : ''}${CARD_X}
       </div>
       ${g ? `<div class="pc-mt">${NFLE.ui.matchTile(g, gameHref(g, d))}</div>` : ''}`;
     return html;
@@ -2021,7 +2029,7 @@
       : `<div class="pc-big">–</div><div class="pc-tapsub">${h && h.inj ? 'out this week' : 'not projected this week'}</div>`;
     const projTile = goTile('Projection', projBody, 'log', 'g');
     const cur = S ? S.g : [], fpg = cur.length ? cur.reduce((t, x) => t + pts(x.c, weights(), pos), 0) / cur.length : null;
-    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '')}${h ? healthTile(L.pid, null, L, L.espn, fut ? ` · wk ${wk}` : '', fut ? wk : null, bye) : ''}${GRADED[pos] ? gradeTile(L.pid, L) : ''}${CARD_X}</div>` : '';
+    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '')}${h ? healthTile(L.pid, null, L, L.espn, fut ? ` · wk ${wk}` : '', fut ? wk : null, bye) : ''}${isGraded(pos, L) ? gradeTile(L.pid, L) : ''}${CARD_X}</div>` : '';
     return `${played}${tiles}${bye ? '' : `<div class="pc-box"><p class="pc-sub">Not on our ${esc(wkLabel(d).toLowerCase())} board: ruled out, not on a roster yet, or projected too low to list.</p></div>`}`;
   };
   // Header extras from the career log doc (tools/player_logs.py): photo, jersey number, bio, recent snap share and,
@@ -2553,6 +2561,9 @@
   const grIndex = () => GR.ix || (GR.ix = NFLE.load('data/grades/index.json').catch(() => null));
   const grSeason = s => GR.s[s] || (GR.s[s] = NFLE.load(`data/grades/${s}.json`).catch(() => null));
   const GRADED = { QB: 1, RB: 1, WR: 1, TE: 1 };
+  // graded = an offensive skill position or any defender (their grades are IDP-based); one rule for every tile layout
+  // (owner 2026-10-29, Jalen Redmond: "where are my defensive player grade tiles?")
+  const isGraded = (pos, L) => !!GRADED[pos] || !!(L && L.kind === 'def');
   const grTone = g => g >= 80 ? 'good' : g <= 30 ? 'bad' : '';  // by percentile
   // OVR on a 50-99 scale (owner 2026-10-14): only qualified players are graded, so the least of them is a 50, not a
   // 0; linear in his percentile among the qualified. The sentence and the stat bars keep the plain percentile.
@@ -2700,18 +2711,19 @@
     const hasThr = thr && TH[pid] !== false;
     if (cardTab === 'news' && !news) cardTab = 'ov';
     if (cardTab === 'thr' && !hasThr) cardTab = 'ov';
-    const graded = !!GRADED[pos] || !!(L && L.kind === 'def');
+    const graded = isGraded(pos, L);
     if (cardTab === 'gr' || cardTab === 'inj') cardTab = 'ov';  // Grade and Injuries became tile sheets  // the Grade tab became the Grade tile's sheet (a remembered tab may still say gr)
     if (graded && GRH[pid] === undefined) {
       GRH[pid] = null;
       NFLE.load(`data/grades/players/${pid.slice(-2)}.json`).catch(() => null).then(sh => {
+        if (!sh) setTimeout(() => { if (GRH[pid] && !GRH[pid].length) delete GRH[pid]; }, 30000);  // failed: retry on a later open
         GRH[pid] = ((sh || {})[pid] || []).map(([season, basis, rec, labels, nq]) => ({ season, basis, players: { [pid]: rec }, stats: { [rec[1]]: labels }, qualified: { [rec[1]]: nq } }));
         if (cardPid === pid) rerenderCard();
       });
     }
     if (NOTABLE === undefined) { NOTABLE = null; NFLE.notable().then(d => { NOTABLE = d || { items: [] }; if (cardPid && notableBanner(cardPid)) rerenderCard(); }); }
     // the current season's grades drive the header chip; the Grade tab loads every season on first open
-    if (graded && GR.cur === undefined) { GR.cur = null; grIndex().then(ix => ix && grSeason(ix.current)).then(d => { GR.cur = d || null; if (cardPid === pid) rerenderCard(); }); }
+    if (graded) loadGrades();
     const isKind = !!(L && L.kind);  // a non-fantasy page (defense, line, specialists): no week projections
     // retired / off every roster this season and not on the picked week's board: a career overview, no week picker
     const lastPlayed = L ? (L.seasons.find(S => S.g.length) || {}).s : null;
@@ -3223,13 +3235,20 @@
   // both grade files (this season's and two seasons back, for the young-player rule) load as one step and announce
   // once (owner 2026-10-20: two separate arrivals redrew the Rankings table twice on load); NFLE.gradesReady() says
   // whether they're in, so lists show a loading mark in the cell meanwhile
+  // a failed load (a network blip, a fetch mid-deploy) used to leave GR.cur null for the whole visit: no grades
+  // anywhere until a reload. Now it forgets the failed promises and tries again on the next call, at most every 30 s
+  // (the 'nfle-grades' redraw calls back in here, so an offline visit must not spin)
   const loadGrades = () => {
-    if (GR.cur !== undefined) return;
+    if (GR.cur !== undefined || Date.now() < (GR.retryAt || 0)) return;
     GR.cur = null;
     const done = () => { GR.ready = true; rerenderCard(); document.dispatchEvent(new Event('nfle-grades')); };
     grIndex().then(ix => ix && grSeason(ix.current))
       .then(g => { GR.cur = g || null; return GR.cur ? grSeason(GR.cur.season - 2) : null; })
-      .then(x => { GR.old = x || false; done(); }, () => { GR.old = GR.old || false; done(); });
+      .then(x => { GR.old = x || false; }, () => { GR.old = GR.old || false; })
+      .then(() => {
+        if (!GR.cur) { GR.cur = undefined; GR.ix = null; GR.s = {}; GR.retryAt = Date.now() + 30000; }
+        done();
+      });
   };
   const teamGrade = pid => {
     loadGrades();
