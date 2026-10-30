@@ -1493,22 +1493,42 @@
       <div class="pc-k">${esc(k)}</div>${body}</div>`;
   // Last 5 tile: his latest regular-season game's points over his last five, bars against our projection then
   // his last five regular-season games as bar slots (points, our projection then)
-  const last5Slots = (L, pos) => {
+  // The form bars' weeks (owner 2026-10-30: "the literal last 5 complete weeks ... regardless of whether the player
+  // played"): the last n calendar weeks through `through` of `season`, reaching back into the previous regular season's
+  // last weeks early on (never before his first season on record). Each: his game, else the bye, else why he missed it.
+  const lastWeeks = (L, season, through, n = 5) => {
+    const out = [], byS = y => L.seasons.find(x => +x.s === y), byes = logByes(L);
+    let s = +season, wk = +through;
+    while (out.length < n) {
+      if (wk < 1) { s -= 1; wk = regWeeks(s); if (!byS(s)) break; }
+      const X = byS(s), g = X ? X.g.find(x => x.w === wk) || null : null, m = X ? (X.m || []).find(x => x.w === wk) || null : null;
+      out.push({ s, w: wk, g, m, bye: !g && ((m && m.bye) || (+s === +L.cur && byes.has(wk))) });
+      wk -= 1;
+    }
+    return out.reverse();
+  };
+  // the last complete week as of a page: a past week counts itself; this week (or a later one) counts the one before
+  const doneThrough = d => (DATA && (+d.season < +DATA.season || (+d.season === +DATA.season && +d.week < +DATA.week)) ? +d.week : +d.week - 1);
+  // a week he didn't play, as a slot: BYE, or the dash with why in its tooltip
+  const offSlot = x => ({ w: x.w, v: null, bye: x.bye, title: `${x.s} week ${x.w}: ${x.bye ? 'bye' : x.m && x.m.miss ? (MISS_WORD[x.m.miss] || x.m.miss).toLowerCase() : 'did not play'}` });
+  const last5Slots = (L, pos, season, through) => {
     if (!L) return [];
-    const w = weights(), gs = L.seasons.flatMap(S => S.g.map(g => ({ s: S.s, g }))).sort((a, b) => b.s - a.s || b.g.w - a.g.w).slice(0, 5).reverse();
+    const w = weights();
     const built = (DATA && DATA.score && DATA.score.built) || HALF;
     const pj = g => g.pjl ? g.pj * (pts(g.pjl, w, pos) / Math.max(0.1, pts(g.pjl, built, pos))) : null;
-    return gs.map(({ s, g }) => { const v = pts(g.c, w, pos), p = pj(g);
-      return { w: g.w, v, pj: p, title: `${s} week ${g.w}: ${f1(v)} pts${p != null ? ` · we projected ${f1(p)}` : ''}` }; });
+    return lastWeeks(L, season, through).map(x => { if (!x.g) return offSlot(x);
+      const g = x.g, v = pts(g.c, w, pos), p = pj(g);
+      return { w: g.w, v, pj: p, title: `${x.s} week ${g.w}: ${f1(v)} pts${p != null ? ` · we projected ${f1(p)}` : ''}` }; });
   };
   // Form tile (owner 2026-10-17: Season and Last 5 combined): season points per game, the last five games as bars;
   // the season breakdown (with every week's points) in its sheet, else the game log
-  const formTile = (L, pos, fpg, games, title, detail) => {
-    const slots = last5Slots(L, pos);
-    if (fpg == null && !slots.length) return '';
+  const formTile = (L, pos, fpg, games, title, detail, d) => {
+    const slots = last5Slots(L, pos, d.season, doneThrough(d));
+    const lastPlayed = [...slots].reverse().find(s => s.v != null);
+    if (fpg == null && !lastPlayed) return '';
     const bars = slots.length ? `<div class="pc-tapbars">${miniBars(slots, { slotW: 22, H: 40, cls: 'mb-pts mb-sm' })}</div>` : '';
-    const body = fpg != null ? `<div class="pc-big">${f1(fpg)} <small>FP/G</small></div><div class="pc-tapsub">${f0(games)} games · last ${slots.length}</div>${bars}`
-      : `<div class="pc-big">${f1(slots[slots.length - 1].v)} <small>pts</small></div><div class="pc-tapsub">last game · last ${slots.length}</div>${bars}`;
+    const body = fpg != null ? `<div class="pc-big">${f1(fpg)} <small>FP/G</small></div><div class="pc-tapsub">${f0(games)} games · last ${slots.length} weeks</div>${bars}`
+      : `<div class="pc-big">${f1(lastPlayed.v)} <small>pts</small></div><div class="pc-tapsub">week ${lastPlayed.w} · last ${slots.length} weeks</div>${bars}`;
     return fpg != null && detail ? tapTile('Form', body, title, detail) : goTile('Form', body, 'log', 'g');
   };
   // ---- Health (owner 2026-10-17: a tile instead of the Injuries tab, and a briefing that brings you up to speed) ----
@@ -1998,7 +2018,7 @@
       <div class="pc-tiles">
         ${tapTile(actV != null ? 'Points' : 'Projection', projBig, `${wkLabel(d)} ${actV != null ? 'points' : 'projection'}`,
             now + projDetail.replace(rangeSvg(s.q, s.proj), rangeSvg(s.q, s.proj, actV)) + muDetail.replace('<div class="pc-box">', '<div class="pc-box"><div class="pc-k">Matchup effect</div>'))}
-        ${formTile(L, p.pos, fpg, e.games || p.sc.g, `${d.season} season before week ${d.week}`, `<div class="pc-box pc-season">${seasonHtml(p, d, L)}</div>`)}
+        ${formTile(L, p.pos, fpg, e.games || p.sc.g, `${d.season} season before week ${d.week}`, `<div class="pc-box pc-season">${seasonHtml(p, d, L)}</div>`, d)}
         ${d === DATA ? healthTile(pid, p, L, p.espn)
           // a later week this season (owner 2026-10-22: "how come health tile disappears in future weeks?"): that week's own
           // chance to play (as its projection tile), his injury as of now and the expected return; past weeks: the game log
@@ -2027,7 +2047,7 @@
       : `<div class="pc-big">–</div><div class="pc-tapsub">${h && h.inj ? 'out this week' : 'not projected this week'}</div>`;
     const projTile = goTile('Projection', projBody, 'log', 'g');
     const cur = S ? S.g : [], fpg = cur.length ? cur.reduce((t, x) => t + pts(x.c, weights(), pos), 0) / cur.length : null;
-    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '')}${h ? healthTile(L.pid, null, L, L.espn, fut ? ` · wk ${wk}` : '', fut ? wk : null, bye) : ''}${isGraded(pos, L) ? gradeTile(L.pid, L) : ''}${CARD_X}</div>` : '';
+    const tiles = L ? `<div class="pc-tiles">${projTile}${formTile(L, pos, fpg, cur.length, '', '', d)}${h ? healthTile(L.pid, null, L, L.espn, fut ? ` · wk ${wk}` : '', fut ? wk : null, bye) : ''}${isGraded(pos, L) ? gradeTile(L.pid, L) : ''}${CARD_X}</div>` : '';
     return `${played}${tiles}${bye ? '' : `<div class="pc-box"><p class="pc-sub">Not on our ${esc(wkLabel(d).toLowerCase())} board: ruled out, not on a roster yet, or projected too low to list.</p></div>`}`;
   };
   // Header extras from the career log doc (tools/player_logs.py): photo, jersey number, bio, recent snap share and,
@@ -2261,12 +2281,13 @@
     if (!S) return '';
     const pos = DEF_GROUP[L.pos] || 'DB', w = weights(), t = kindTotals(L, S.g), a = advTotals(L, S.g);
     const fpg = S.g.reduce((x, g) => x + idpPts(L, g, w), 0) / S.g.length;
-    const gs = L.seasons.flatMap(x => x.g.map(g => ({ s: x.s, g }))).sort((p1, p2) => p2.s - p1.s || p2.g.w - p1.g.w).slice(0, 5).reverse();
-    const slots = gs.map(({ s: y, g }) => ({ w: g.w, v: idpPts(L, g, w), pj: null, title: `${y} week ${g.w}: ${f1(idpPts(L, g, w))} IDP pts` }));
+    // the last five complete weeks of his latest season (lastWeeks): this season's up to now, an older one's last five
+    const thru = DATA && +S.s === +DATA.season ? +DATA.week - 1 : regWeeks(S.s);
+    const slots = lastWeeks(L, S.s, thru).map(x => x.g ? { w: x.w, v: idpPts(L, x.g, w), pj: null, title: `${x.s} week ${x.w}: ${f1(idpPts(L, x.g, w))} IDP pts` } : offSlot(x));
     const lab = S.s === L.cur ? `${S.s} season` : `${S.s} season (his latest)`;
     const seasonBox = `<div class="pc-box"><div class="pc-k">${lab}</div>${kindGrid(L, t)}${advGrid(L, S.g)}</div>
       <div class="pc-box pc-mini"><div class="pc-k">${S.s} games</div><div class="pc-log">${kindLog(L, [S], { compact: true })}</div></div>`;
-    const form = tapTile('Form', `<div class="pc-big">${f1(fpg)} <small>IDP pts/G</small></div><div class="pc-tapsub">${f0(S.g.length)} game${S.g.length === 1 ? '' : 's'} · last ${slots.length}</div>
+    const form = tapTile('Form', `<div class="pc-big">${f1(fpg)} <small>IDP pts/G</small></div><div class="pc-tapsub">${f0(S.g.length)} game${S.g.length === 1 ? '' : 's'} · last ${slots.length} weeks</div>
       <div class="pc-tapbars">${miniBars(slots, { slotW: 22, H: 40, cls: 'mb-pts mb-sm' })}</div>`, `${S.s} season`, seasonBox);
     const tkl = (t.tk || 0) + (t.ast || 0);
     // a linebacker who rushes the passer (edge OLBs; owner: Micah Parsons) gets the pass-rush tile, by his own stats:
@@ -2313,13 +2334,11 @@
               : `<div class="pc-big">&ndash;</div><div class="pc-tapsub">${game ? `${game.home.team === team ? 'vs' : '@'} ${esc(game.home.team === team ? game.away.team : game.home.team)} · not played yet` : 'no game'}</div>`;
       ptsTile = goTile('Points', body, 'log', 'g');
     }
-    // Form: that season through this week; bars = his last five games up to it
+    // Form: that season through this week; bars = the last five complete weeks (lastWeeks), played or not
     const sofar = S ? S.g.filter(x => x.w <= wk) : [];
-    const upto = L.seasons.flatMap(x => x.g.filter(y => +x.s < +d.season || (+x.s === +d.season && y.w <= wk)).map(y => ({ s: x.s, g: y })))
-      .sort((a, b) => b.s - a.s || b.g.w - a.g.w).slice(0, 5).reverse();
-    const slots = upto.map(({ s: y, g: x }) => ({ w: x.w, v: idpPts(L, x, w), pj: null, title: `${y} week ${x.w}: ${f1(idpPts(L, x, w))} IDP pts` }));
+    const slots = lastWeeks(L, d.season, doneThrough(d)).map(x => x.g ? { w: x.w, v: idpPts(L, x.g, w), pj: null, title: `${x.s} week ${x.w}: ${f1(idpPts(L, x.g, w))} IDP pts` } : offSlot(x));
     const fpg = sofar.length ? sofar.reduce((t, x) => t + idpPts(L, x, w), 0) / sofar.length : null;
-    const formBody = fpg != null ? `<div class="pc-big">${f1(fpg)} <small>pts/G</small></div><div class="pc-tapsub">${sofar.length} game${sofar.length === 1 ? '' : 's'} · last ${slots.length}</div>`
+    const formBody = fpg != null ? `<div class="pc-big">${f1(fpg)} <small>pts/G</small></div><div class="pc-tapsub">${sofar.length} game${sofar.length === 1 ? '' : 's'} · last ${slots.length} weeks</div>`
       : `<div class="pc-big">&ndash;</div><div class="pc-tapsub">no games yet in ${esc(d.season)}</div>`;
     const bars = slots.length ? `<div class="pc-tapbars">${miniBars(slots, { slotW: 22, H: 40, cls: 'mb-pts mb-sm' })}</div>` : '';
     const formSheet = sofar.length ? `<div class="pc-box"><div class="pc-k">${esc(d.season)} through week ${wk}</div>${kindGrid(L, kindTotals(L, sofar))}${advGrid(L, sofar)}</div>` : '';
