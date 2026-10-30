@@ -272,6 +272,8 @@ class Engine:
     return p
 
   def apply_blend(self, p: pd.DataFrame) -> pd.DataFrame:
+    from .player_model import STAT_KEYS
+    pre = p.proj.copy()
     p = self._calibrate(p)
     p["proj_model"] = p.proj
     for pos, m in self.ecr_map.items():
@@ -280,6 +282,15 @@ class Engine:
         p.loc[sel, "ecr_pts"] = m.predict(p[sel].assign(log_ecr=np.log(p.loc[sel, "ecr"])))
         if pos in self.blend:
           p.loc[sel, "proj"] = np.clip(self.blend[pos].predict(p[sel]), 0, None)
+    # The calibration and the expert blend move the points, not the stat line: scale the stat line (and the two-world
+    # numbers) by the same ratio, as the Sleeper blend does, so a league that re-scores the stat line gets this
+    # projection (owner 2026-10-29: Barkley read 6.7 in the Fantasy tab, 7.8 on his card; 79 of 278 players were off by
+    # 0.5+). Projections under half a point keep their line (a tiny base makes the ratio meaningless).
+    ok = pre >= 0.5
+    ratio = (p.proj / pre.where(ok)).where(ok, 1.0).fillna(1.0)
+    for k in STAT_KEYS + [c for c in ("cond_plays", "cond_sits", "cond2_plays", "cond2_sits") if c in p]:
+      if k in p:
+        p[k] = p[k] * ratio
     return p
 
   def games(self, season: int, week: int) -> pd.DataFrame:

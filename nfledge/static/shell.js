@@ -180,6 +180,15 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       // the line in words (owner 2026-10-17): "JAX -2.5" -> "JAX by 2.5", "PK" -> "pick'em"
       const vegas = l => { const m = /^([A-Z]{2,3}) -(\d+(?:\.\d)?)$/.exec(l || '');
         return m ? `<b>${esc(m[1])} by ${+m[2]}</b>` : l === 'PK' ? "<b>pick'em</b>" : `<b>${esc(l)}</b>`; };
+      // the market's implied final score (owner 2026-10-29: "the vegas implied final score ... so like 25-22"): favorite
+      // (total + spread) / 2, underdog (total - spread) / 2, favorite first; one decimal when rounding would read a tie;
+      // the line in words when there's no total
+      const implied = (l, t) => {
+        const m = /^([A-Z]{2,3}) -(\d+(?:\.\d)?)$/.exec(l || ''), s = m ? +m[2] : l === 'PK' ? 0 : null;
+        if (s == null || !(+t > 0)) return vegas(l);
+        const hi = (+t + s) / 2, lo = (+t - s) / 2, r = Math.round(hi) === Math.round(lo) && s > 0 ? 1 : 0;
+        const sc = `${hi.toFixed(r)}-${lo.toFixed(r)}`;
+        return m ? `<b>${esc(m[1])} ${sc}</b>` : `<b>${sc}</b> <span class="muted">pick'em</span>`; };
       // the team name in one scoreboard font (owner 2026-10-18, Barlow Condensed ExtraBold italic, self-hosted, OFL): the
       // official wordmarks are each team's own drawn lettering, so weight, spacing and height never matched; the images
       // stay on All teams (teamgrid.js), the per-mark sizing is in git history (b562159)
@@ -207,7 +216,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       const st = fin ? verdict
         // the Vegas line when there is one (owner 2026-10-17: then no "ours", the big win chances above are ours); before
         // a line is posted, our pick in its place
-        : g.vegas_line ? `<span class="mt-odds">Vegas: ${vegas(g.vegas_line)}</span>`
+        : g.vegas_line ? `<span class="mt-odds" title="Vegas line ${esc(g.vegas_line)}${g.vegas_total ? `, total ${esc(g.vegas_total)}` : ''}">Vegas: ${implied(g.vegas_line, g.vegas_total)}</span>`
           : f.model_fav || f.model_tossup ? `<span class="mt-odds" title="${esc(f.model_why || '')}">No Vegas line yet &middot; ours ${f.model_tossup ? 'tossup' : `<b>${T(f.model_fav)} ${esc(f.model_pct)}%</b>`}</span>` : '';
       return `<a class="mt ${fin ? 'is-final' : 'is-pre'}${f.tossup && !fin ? ' toss' : ''}" data-gid="${esc(g.id)}" href="${esc(href || (NFLE.gameHref ? NFLE.gameHref(g) : '#'))}" style="${esc(g.bt_style || '')}">
         <div class="mt-main"><div class="mt-when">${when}</div>${main}</div><div class="mt-st">${st}</div></a>`;

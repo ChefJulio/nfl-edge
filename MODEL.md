@@ -1,5 +1,5 @@
 ---
-documented_code_hash: b2982fc8f8a654eb
+documented_code_hash: 012ca32bd8afdf47
 ---
 # How the model works
 
@@ -190,7 +190,7 @@ The team's projected dropbacks and rushes then turn shares into opportunities.
 
 **Weather.** Wind above **{{ L.wind_thr }}** mph cuts passing efficiency (pass yards and TDs, catches, receiving yards and TDs) by **{{ L.wind_pen }}** per mph, capped at **{{ L.wind_cap }}**. Domes, closed roofs and neutral sites count as calm. The live week uses the forecast; backtests and archived weeks use the measured game-day wind.
 
-**Expert blend.** RB/WR/TE projections blend in the FantasyPros consensus with learned weights. QBs stay model-only because blending made QB projections worse. The weights were fit on each week's Friday rankings; since 2026-10-27 the blend also uses the consensus as it stands earlier in the week (re-scraped twice a day, from Tuesday), so projections move a little each day instead of jumping on Friday. Early-week rankings come from fewer experts, and whether they help is still being tested (it shipped ahead of that test, at the owner's call). Only rankings scraped before a player's game day are used. Current blends (plus a small fitted intercept, shown in formula 10.5 under Under the hood): {{ L.blend }}.
+**Expert blend.** RB/WR/TE projections blend in the FantasyPros consensus with learned weights. QBs stay model-only because blending made QB projections worse. The weights were fit on each week's Friday rankings; since 2026-10-27 the blend also uses the consensus as it stands earlier in the week (re-scraped twice a day, from Tuesday), so projections move a little each day instead of jumping on Friday. Early-week rankings come from fewer experts, and whether they help is still being tested (it shipped ahead of that test, at the owner's call). Only rankings scraped before a player's game day are used. The blend and the final calibration move a player's points, so his projected stat line is scaled by the same ratio: a league that re-scores the stat line (the Fantasy tab) gets the same projection as his card and Rankings. Current blends (plus a small fitted intercept, shown in formula 10.5 under Under the hood): {{ L.blend }}.
 
 ### Ranges and touchdown odds
 
