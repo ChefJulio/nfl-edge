@@ -293,7 +293,9 @@ def build_page(eng, data, cfg, scoring, season: int, week: int, proj, nav: dict,
     "season": season, "week": week, "pending": data.pending_games, "scoring": scoring.name,
     "n_final": n_final, "n_games": n_games, "has_actuals": n_final > 0, "nav": nav, "archive": archive,
     "lookahead": lookahead, "data_week": int(data.latest_week) if lookahead else week - 1,
-    "generated": time.strftime("%Y-%m-%d %H:%M"), "injury_report": injury_report,
+    # UTC, marked as such (it was the build machine's local time: UTC in CI, Central locally); the page shows it in
+    # the viewer's own time (shell.js)
+    "generated": time.strftime("%Y-%m-%d %H:%MZ", time.gmtime()), "injury_report": injury_report,
     "clock": Clock(data.schedules).to_json(season, week),
     "players": rp.player_rankings(eng, proj, season, week, cfg),
     # every rostered player's official injury tag (InjuryModel.tag_map; owner 2026-10-21): byes and deep backups too

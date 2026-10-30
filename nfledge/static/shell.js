@@ -403,6 +403,14 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     const when = nxt ? new Date(nxt.due).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }) : '';
     return `<span${fin ? '' : ' class="alert"'}>Final injury reports in for <b>${fin} of ${ts.length}</b> teams${when ? ` · next report due ${esc(when)}` : ''}</span>`;
   };
+  // the build's time in the viewer's own zone (owner 2026-10-30): "Oct 30, 1:07 AM CDT". It's written in UTC ("...Z");
+  // older pages have no zone mark and were built in CI, which runs on UTC
+  const builtAt = g => {
+    const m = String(g || '').match(/^(\d{4})-(\d\d)-(\d\d)[ T](\d\d):(\d\d)/);
+    if (!m) return g || '';
+    const t = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]));
+    return t.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+  };
   NFLE.week().then(D => {
     if (!D || !D.head) return;
     const h = D.head, live = !(CFG.archive || CFG.lookahead), pending = live && !h.injury_report && !(D.clock && Object.keys(D.clock.teams || {}).some(t => NFLE.clock.reportsIn(t)));
@@ -415,7 +423,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       h.n_final ? `<span>Week ${esc(D.week)} so far: <b>${h.n_final} of ${h.n_games}</b> games final</span>` : '',
       `<span>Scoring <b id="scoreName">${esc(sc)}</b></span>`,
       live ? repLine(D) : '',
-      `<span>Updated ${esc(D.generated || '')}</span>`].join('');
+      `<span>Updated ${esc(builtAt(D.generated))}</span>`].join('');
     hb.classList.toggle('warn', pending);
     hb.classList.toggle(`is-${cls}`, !!weekNote);
     hw.hidden = false;
