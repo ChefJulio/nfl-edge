@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4690179,Tavius Robinson,Baltimore Ravens,Injured Reserve,2026-10-24T20:50Z,Pectoral,Not Specified,Not Specified,2027-02-15,IR,The Ravens placed Robinson (pectoral) on injured reserve Saturday.,LB
 4361178,Cam Jurgens,Baltimore Ravens,Active,2026-10-24T01:48Z,,,,,,Jurgens (concussion) does not have any injury designation ahead of Sunday's game against the Bengals.,C
 4432260,Matt Hibner,Baltimore Ravens,Active,2026-10-23T00:03Z,,,,,,Hibner (hand) was a full participant at practice Thursday.,TE
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-31T13:01Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-31T16:01Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4030899,Spencer Brown,Buffalo Bills,Questionable,2026-10-31T01:53Z,Back,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Brown (back) is listed as questionable for Sunday's game against the Ravens.,OT
 4401823,Dee Alford,Buffalo Bills,Questionable,2026-10-30T21:56Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Alford (ankle) is listed as questionable ahead of Sunday's game against the Ravens.,CB
 4429501,Ray Davis,Buffalo Bills,Active,2026-10-30T19:20Z,,,,,,Davis (illness) doesn't have an injury designation for Sunday's game against the Ravens.,RB
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431077,TeRah Edwards,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,DT
 4874515,Sam Hecht,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,C
 4034962,Stone Forsythe,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,OT
-4361748,Anthony Johnson Jr.,Chicago Bears,Out,2026-10-31T13:01Z,Undisclosed,Not Specified,Not Specified,2026-11-08,OUT,out,S
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-31T16:01Z,Undisclosed,Not Specified,Not Specified,2026-11-08,IR,ir,S
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-10-30T19:40Z,Thumb,Sprain,Not Specified,2026-11-02,QUESTIONABLE,"Monangai (thumb/toe) was listed as a non-participant for Friday's practice, Kevin Fishbain of The Athletic reports.",RB
 4723086,Colston Loveland,Chicago Bears,Questionable,2026-10-30T19:31Z,Neck,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,"Loveland was limited at Friday's practice due to a neck injury, Kevin Fishbain of The Athletic reports.",TE
 3121544,T.J. Edwards,Chicago Bears,Active,2026-10-30T00:07Z,,,,,,Edwards (hamstring) was considered to be a full participant on the Bears' estimated practice report Thursday.,LB
@@ -274,6 +274,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2580216,DeAndre Carter,Detroit Lions,Active,2026-10-22T21:05Z,,,,,,The Lions signed Carter to the active roster Thursday.,WR
 4611506,Ben Bartch,Detroit Lions,Injured Reserve,2026-10-17T04:09Z,Foot,Not Specified,Not Specified,2026-11-22,IR,The Lions placed Bartch (foot) on injured reserve Friday.,G
 4035434,Devin White,Detroit Lions,Injured Reserve,2026-10-17T02:00Z,Forearm,Surgery,Not Specified,2026-11-22,IR,The Lions placed White (forearm) on injured reserve Friday.,LB
+4361423,Micah Parsons,Green Bay Packers,Out,2026-10-31T14:09Z,Knee - ACL,Surgery,Left,2026-11-25,PUP-R,"Parsons (knee) and the Packers are targeting a return for Week 12 against the Rams on Wednesday, Nov. 25, Ian Rapoport of NFL Network and ESPN reports.",DE
 4429023,MarShawn Lloyd,Green Bay Packers,Active,2026-10-30T04:43Z,,,,,,Lloyd rushed three times for seven yards and brought in his only target for nine yards in the Packers' 27-19 win over the Panthers on Thursday.,RB
 4869461,Trey Smack,Green Bay Packers,Active,2026-10-30T04:34Z,,,,,,Smack converted three of four extra-point tries and didn't attempt a field goal Thursday in a 27-19 win over Carolina.,PK
 4036378,Jordan Love,Green Bay Packers,Active,2026-10-30T04:18Z,,,,,,Love completed 30 of 41 passes for 288 yards with three touchdowns and one interception and recovered a fumble in the Packers' 27-19 win over the Panthers on Thursday.,QB
@@ -291,7 +292,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3124005,Zaire Franklin,Green Bay Packers,Out,2026-10-29T22:54Z,Shin,Fracture,Not Specified,2026-11-08,INACTIVE,inactive,LB
 4887255,Anthony Campbell,Green Bay Packers,Active,2026-10-29T22:54Z,,,,,,,DT
 4361776,Brenton Cox Jr.,Green Bay Packers,Active,2026-10-29T22:54Z,,,,,,,DE
-4361423,Micah Parsons,Green Bay Packers,Out,2026-10-28T23:12Z,Knee - ACL,Surgery,Left,2026-11-08,PUP-R,"Packers head coach Matt LaFleur said Tuesday that Parsons (knee) has ""a chance"" to resume practicing next week, Matt Schneidman of The Athletic reports.",DE
 4242390,Aaron Banks,Green Bay Packers,Active,2026-10-28T19:05Z,,,,,,,G
 4428863,Evan Williams,Green Bay Packers,Active,2026-10-28T00:55Z,,,,,,Williams finished Sunday's 20-17 loss to the Lions with nine tackles (five solo) and one pass defense.,S
 4239947,Isaiah McDuffie,Green Bay Packers,Active,2026-10-28T00:46Z,,,,,,"McDuffie logged 11 tackles (six solo), one fumble and one fumble recovery during the Packers' 20-17 loss to the Lions on Sunday.",LB
@@ -749,6 +749,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3871102,David Sills V,Tampa Bay Buccaneers,Active,2026-10-23T00:24Z,,,,,,"Sills (hamstring) was activated from injured reserve by the Buccaneers on Thursday, Scott Smith of the team's official website reports.",WR
 4427673,Calijah Kancey,Tampa Bay Buccaneers,Active,2026-10-22T19:52Z,,,,,,,DT
 4816107,Benjamin Morrison,Tampa Bay Buccaneers,Active,2026-10-21T23:43Z,,,,,,Morrison (quadriceps) was a full participant in Wednesday's practice.,CB
+4871023,Carnell Tate,Tennessee Titans,Out,2026-10-31T15:10Z,Shoulder,Not Specified,Not Specified,2026-11-15,OUT,"Tate (shoulder) will not play against the Bengals on Sunday but is expected to be back in action following the Titans' bye for Week 10 against the Jaguars on Sunday, Nov. 15, Paul Kuharsky of PaulKuharsky.com reports.",WR
 3915398,Tommy Townsend,Tennessee Titans,Out,2026-10-31T02:12Z,Knee,Not Specified,Left,2026-11-15,OUT,"Townsend (knee) has been ruled out for Sunday's game against the Bengals, Jim Wyatt of the Titans' official site reports.",P
 3120464,John Franklin-Myers,Tennessee Titans,Questionable,2026-10-31T00:01Z,Groin,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Franklin-Myers (groin) is questionable for Sunday's game against the Bengals, Jim Wyatt of the Titans' official site reports.",DE
 3925357,Calvin Ridley,Tennessee Titans,Questionable,2026-10-30T23:34Z,Hip,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Ridley (hip) is officially questionable for Sunday's matchup against Cincinnati.,WR
@@ -756,7 +757,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4569587,Wan'Dale Robinson,Tennessee Titans,Active,2026-10-30T23:10Z,,,,,,"Robinson and the other pass catchers will operate in elevated roles against the Bengals on Sunday due to the absence of rookie fourth overall pick Carnell Tate (shoulder), Jim Wyatt of the Titans' official site reports.",WR
 3916148,Tony Pollard,Tennessee Titans,Active,2026-10-30T23:06Z,,,,,,"Pollard will have a chance to easily pace the Titans backfield against Cincinnati on Sunday due to the absence of Tyjae Spears (knee), Jim Wyatt of the Titans' official site reports.",RB
 4428557,Tyjae Spears,Tennessee Titans,Out,2026-10-30T20:15Z,Knee,Not Specified,Not Specified,2026-11-15,OUT,Spears (knee) has been ruled out for Sunday's game against the Bengals.,RB
-4871023,Carnell Tate,Tennessee Titans,Out,2026-10-30T20:03Z,Shoulder,Not Specified,Not Specified,2026-11-15,OUT,"Tate (shoulder) has been ruled out for Sunday's game against the Bengals, Ben Arthur of FoxSports.com reports.",WR
 4685145,Jaylon Jones,Tennessee Titans,Questionable,2026-10-30T19:50Z,Knee,,,2026-11-01,QUESTIONABLE,questionable,CB
 4373956,Jonah Laulu,Tennessee Titans,Active,2026-10-29T00:34Z,,,,,,"The Titans claimed Laulu off waivers from the Raiders on Wednesday, Jim Wyatt of the Titans' official site reports.",DT
 4036134,Amani Hooker,Tennessee Titans,Active,2026-10-28T01:37Z,,,,,,Hooker posted five tackles (two solo) during Sunday's 27-24 loss to Cleveland.,S
@@ -774,7 +774,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4573318,Dorian Mausi,Tennessee Titans,Injured Reserve,2026-10-22T01:35Z,Foot,Not Specified,Not Specified,2026-11-01,IR-R,"The Titans opened Mausi's 21-day practice window Wednesday, Jim Wyatt of the team's official website reports.",LB
 4369835,Alontae Taylor,Tennessee Titans,Active,2026-10-19T17:18Z,,,,,,,CB
 4917635,Joshua Williams,Tennessee Titans,Active,2026-10-18T02:44Z,,,,,,The Titans activated Williams (pectoral) from reserve/PUP on Saturday.,CB
-3925354,Daron Payne,Washington Commanders,Out,2026-10-31T01:14Z,Foot,Not Specified,Not Specified,2026-12-13,OUT,Payne (foot) has been ruled out for Sunday's game against the Eagles.,DT
+3925354,Daron Payne,Washington Commanders,Out,2026-10-31T01:14Z,Foot,Fracture,Not Specified,2027-02-15,OUT,Payne (foot) has been ruled out for Sunday's game against the Eagles.,DT
 4430560,Jer'Zhan Newton,Washington Commanders,Injured Reserve,2026-10-31T00:25Z,Pectoral,Surgery,Not Specified,2026-11-01,IR-R,Newton (pectoral) is questionable for Sunday's game against the Eagles.,DT
 3115922,Nick Allegretti,Washington Commanders,Active,2026-10-30T23:27Z,,,,,,,G
 4259491,Javon Kinlaw,Washington Commanders,Out,2026-10-30T21:07Z,Knee,Not Specified,Not Specified,2026-11-08,OUT,Kinlaw (knee) has been ruled out for Sunday's game against the Eagles.,DT
