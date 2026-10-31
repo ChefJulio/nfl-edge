@@ -71,6 +71,53 @@ def D_RELOC(t: str) -> str:
   return RELOCATED.get(t, t)
 
 
+TEAMS_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams"
+ROSTER_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams/{id}/roster"
+ESPN_ABBR = {"WSH": "WAS", "LAR": "LA"}  # ESPN's club codes that differ from ours
+
+
+def fetch_team_rosters(timeout: int = 20, max_age_min: float = 20) -> pd.DataFrame:
+  """Every club's current roster from ESPN (nfledge/status.py team_overlay): one row per player, espn_id, team (our
+  code), group (offense / defense / specialTeam / injuredReserveOrOut / suspended / practiceSquad), name. 33 calls,
+  shared through cache/espn_team_rosters.parquet for max_age_min (a build's run.py, player_logs and depth_build all
+  read it). Empty frame when the team list fails; a club that fails is left out (and logged)."""
+  import time
+  from pathlib import Path
+  cf = Path(__file__).resolve().parent.parent / "cache" / "espn_team_rosters.parquet"
+  if cf.exists() and time.time() - cf.stat().st_mtime < max_age_min * 60:
+    return pd.read_parquet(cf)
+  out = _fetch_team_rosters(timeout)
+  if len(out) and out.team.nunique() >= 30:  # only a (nearly) whole league is worth sharing
+    cf.parent.mkdir(exist_ok=True)
+    out.to_parquet(cf, index=False)
+  return out
+
+
+def _fetch_team_rosters(timeout: int) -> pd.DataFrame:
+  def get(url):
+    with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "nfl-edge-site/1.0"}), timeout=timeout) as r:
+      return json.load(r)
+  try:
+    clubs = [t["team"] for t in get(TEAMS_URL)["sports"][0]["leagues"][0]["teams"]]
+  except Exception as e:
+    print(f"[espn] team list unavailable: {e}", flush=True)
+    return pd.DataFrame()
+  rows, failed = [], []
+  for c in clubs:
+    try:
+      d = get(ROSTER_URL.format(id=c["id"]))
+    except Exception:
+      failed.append(c.get("abbreviation", c["id"]))
+      continue
+    t = ESPN_ABBR.get(c["abbreviation"], c["abbreviation"])
+    for grp in d.get("athletes", []):
+      for a in grp.get("items", []):
+        rows.append({"espn_id": str(a.get("id")), "team": t, "group": grp.get("position"), "name": a.get("fullName")})
+  if failed:
+    print(f"[espn] rosters unavailable for {', '.join(map(str, failed))}", flush=True)
+  return pd.DataFrame(rows)
+
+
 def fetch_injuries(timeout: int = 30) -> pd.DataFrame:
   """One row per listed player (empty frame on any failure)."""
   try:

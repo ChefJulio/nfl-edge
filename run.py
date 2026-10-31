@@ -151,6 +151,9 @@ def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict |
     bridge_key += "_l" + hashlib.sha1(json.dumps(sorted((k, list(v)) for k, v in espn_late.items())).encode()).hexdigest()[:8]
   if espn_active:  # tags only, but they're in the cached projections
     bridge_key += "_a" + hashlib.sha1(json.dumps(sorted(espn_active.items())).encode()).hexdigest()[:8]
+  clubs = getattr(data, "team_overlay", None)
+  if clubs:  # ESPN's club moves over the rosters (nfledge/status.py): team context, depth, candidates
+    bridge_key += "_c" + hashlib.sha1(json.dumps(sorted((c["gsis"], c["to"]) for c in clubs)).encode()).hexdigest()[:8]
   moved = getattr(data, "status_overlay", None)
   if moved:  # ESPN's reserve-list moves over the rosters (nfledge/status.py): every list reader sees them
     bridge_key += "_r" + hashlib.sha1(json.dumps(sorted((c["gsis"], c["to"]) for c in moved)).encode()).hexdigest()[:8]
@@ -474,9 +477,17 @@ def main():
     from nfledge.injuries import InjuryModel
     feed = fetch_injuries()
     data.espn_feed = feed  # read by Power's QB availability (powerc._newly: ESPN's IR list)
+    # this week's club moves (trades, claims, signings) from ESPN's team rosters over the weekly rosters, which trail
+    # them up to a week (nfledge/status.py team_overlay; owner 2026-10-31, Buckner): his team context, depth and page
+    # follow him at once. Before the reserve-list layer, so a list move lands on his new club's row.
+    from nfledge.espn import fetch_team_rosters
+    from nfledge.status import apply_espn_reserve, apply_espn_teams
+    clubs = apply_espn_teams(data, fetch_team_rosters(), week)
+    if clubs:
+      print("[run] ESPN club moves the rosters don't show yet: "
+            + ", ".join(f"{c['name']} {c['from']} -> {c['to']}" for c in clubs), flush=True)
     # this week's reserve-list moves from ESPN over the weekly rosters, which trail them a day or more (nfledge/status.py):
     # every reader of a player's list (tags, reserve players' 0%, return model, scratch, lineup) sees the move at once
-    from nfledge.status import apply_espn_reserve
     moved = apply_espn_reserve(data, feed, week)
     if moved:
       print("[run] ESPN reserve-list moves the rosters don't show yet: "

@@ -11,8 +11,11 @@ the return window open) after his team's last game, sets his roster row for the 
 own codes. Rows it writes carry status_src = "espn" for the audit. Activations off a list stay with InjuryModel
 ({#activated}), which reads them against these rows.
 
+The same holds for club moves (owner 2026-10-31: Buckner traded to SF, still a Colt): team_overlay() puts a player on
+the club ESPN's team rosters list him on, applied before the reserve-list layer (team_src = "espn").
+
 Past weeks are never touched: training rows and outcomes stay nflverse's (what happened, not what was known then).
-  run.py                 apply_espn_reserve(data, feed, week): data.rosters, before the model
+  run.py                 apply_espn_teams(data, rosters, week), then apply_espn_reserve(data, feed, week): data.rosters
   tools (player pages,   overlay(rosters, feed, schedules, season, week, players): the same on a roster frame
   depth / directory)
 """
@@ -78,18 +81,7 @@ def overlay(rosters: pd.DataFrame, feed: pd.DataFrame | None, schedules: pd.Data
                     "to": code, "updated": up.isoformat(), "_row": row.team})
   if not changes:
     return rosters, []
-  # A team whose roster for `week` isn't posted yet: its latest roster carried to `week` first (status_src "carried"),
-  # so readers that take each team's latest roster week (engine.candidates, tag_map, returns.window_open, personnel,
-  # report.bye_rows ...) still see the whole team, exactly as when nflverse posts the week
-  s_ = ro[(ro.season == season) & ro.gsis_id.notna()]
-  add = []
-  for t_raw in {c["_row"] for c in changes}:
-    tw = s_[s_.team == t_raw]
-    mx = int(tw.week.max()) if len(tw) else week
-    if mx < week:
-      add.append(tw[tw.week == mx].assign(week=int(week), status_src="carried"))
-  if add:
-    ro = pd.concat([ro] + add, ignore_index=True)
+  ro = _carry(ro, season, week, {c["_row"] for c in changes})
   for c in changes:
     g, code, row_team = c["gsis"], c["to"], c.pop("_row")
     m = (ro.season == season) & (ro.week == week) & (ro.gsis_id == g)
@@ -100,6 +92,90 @@ def overlay(rosters: pd.DataFrame, feed: pd.DataFrame | None, schedules: pd.Data
       m = (ro.season == season) & (ro.week == week) & (ro.gsis_id == g)
     ro.loc[m, "status"], ro.loc[m, "status_description_abbr"], ro.loc[m, "status_src"] = "RES", code, "espn"
   return ro, changes
+
+
+def _carry(ro: pd.DataFrame, season: int, week: int, teams) -> pd.DataFrame:
+  """A team whose roster for `week` isn't posted yet: its latest roster carried to `week` first (status_src "carried"),
+  so readers that take each team's latest roster week (engine.candidates, tag_map, returns.window_open, personnel,
+  report.bye_rows ...) still see the whole team, exactly as when nflverse posts the week."""
+  s_ = ro[(ro.season == season) & ro.gsis_id.notna()]
+  add = []
+  for t_raw in teams:
+    tw = s_[s_.team == t_raw]
+    mx = int(tw.week.max()) if len(tw) else week
+    if mx < week:
+      add.append(tw[tw.week == mx].assign(week=int(week), status_src="carried"))
+  return pd.concat([ro] + add, ignore_index=True) if add else ro
+
+
+# More moves than this in one build means a mapping problem (club codes, ids), not a busy week: the overlay stands down
+TEAM_MOVES_MAX = 40
+
+
+def team_overlay(rosters: pd.DataFrame, espn_ros: pd.DataFrame | None, season: int, week: int,
+                 players: pd.DataFrame | None = None) -> tuple[pd.DataFrame, list[dict]]:
+  """(rosters with ESPN's club moves for `week`, the changes [{gsis, name, week, from, to, group}]) (owner 2026-10-31:
+  DeForest Buckner, traded to SF on Oct 27, still read as a Colt everywhere). The weekly rosters trail trades, claims
+  and signings by up to a week; ESPN's team rosters (fetch_team_rosters, practice squad and reserve lists included)
+  carry them within hours. A player ESPN lists on club U whose latest row this season says another club gets a row
+  for `week` on U (team_src "espn"): status ACT, DEV on U's practice squad, else his latest status. Being missing from
+  ESPN's rosters (a release) is left alone: the rosters catch up. Past weeks are never touched."""
+  if espn_ros is None or not len(espn_ros) or rosters is None or not len(rosters):
+    return rosters, []
+  from .codes import team as team_code
+  from .data import espn_gsis
+  ro = rosters.copy()
+  cur = ro[(ro.season == season) & ro.gsis_id.notna() & (ro.week <= week)].sort_values("week")
+  latest = cur.drop_duplicates("gsis_id", keep="last").set_index("gsis_id")
+  gs = espn_gsis(ro) if "espn_id" in ro else {}
+  if players is not None and "espn_id" in players:
+    for e, g in zip(players.espn_id, players.gsis_id):
+      if pd.notna(e) and isinstance(g, str):
+        gs.setdefault(str(e).replace(".0", ""), g)
+  changes = []
+  for x in espn_ros.itertuples():
+    g = gs.get(str(x.espn_id))
+    if not isinstance(g, str) or g not in latest.index:
+      continue
+    row = latest.loc[g]
+    if team_code(row.team) == x.team:
+      continue
+    changes.append({"gsis": g, "name": x.name, "week": int(week), "from": team_code(row.team), "to": x.team,
+                    "group": x.group, "_row": row.team})
+  if not changes:
+    return rosters, []
+  if len(changes) > TEAM_MOVES_MAX:
+    eg = ", ".join("%s %s->%s" % (c["name"], c["from"], c["to"]) for c in changes[:5])
+    print(f"[status] ESPN team moves skipped: {len(changes)} differences (over {TEAM_MOVES_MAX}: a mapping problem, e.g. {eg})",
+          flush=True)
+    return rosters, []
+  # the new club's codes as the rosters write them (a relocated franchise's old code in an old season stays theirs)
+  raw = {team_code(t): t for t in ro.loc[ro.season == season, "team"].dropna().unique()}
+  ro = _carry(ro, season, week, {c["_row"] for c in changes} | {raw.get(c["to"], c["to"]) for c in changes})
+  for c in changes:
+    g, old = c["gsis"], c.pop("_row")
+    m = (ro.season == season) & (ro.week == week) & (ro.gsis_id == g)
+    if not m.any():  # no row this week (his old club's week is posted without him, or he had no carried row)
+      r_ = latest.loc[g].to_dict()
+      r_.update(gsis_id=g, season=season, week=int(week), team=old)
+      ro = pd.concat([ro, pd.DataFrame([r_])], ignore_index=True)
+      m = (ro.season == season) & (ro.week == week) & (ro.gsis_id == g)
+    ro.loc[m, "team"] = raw.get(c["to"], c["to"])
+    if c["group"] == "practiceSquad":
+      ro.loc[m, "status"] = "DEV"
+    elif c["group"] in ("offense", "defense", "specialTeam"):
+      ro.loc[m, "status"] = "ACT"
+    ro.loc[m, "team_src"] = "espn"
+  return ro, changes
+
+
+def apply_espn_teams(data, rosters_feed: pd.DataFrame | None, week: int) -> list[dict]:
+  """team_overlay() on data.rosters for this season's `week`, in place; the changes also on data.team_overlay (run.py's
+  model cache key)."""
+  data.rosters, changes = team_overlay(data.rosters, rosters_feed, data.current_season, week,
+                                       getattr(data, "players_table", None))
+  data.team_overlay = changes
+  return changes
 
 
 def apply_espn_reserve(data, feed: pd.DataFrame | None, week: int) -> list[dict]:
@@ -121,6 +197,12 @@ def live_overlay(rosters: pd.DataFrame, schedules: pd.DataFrame, season: int, pl
       from .espn import fetch_injuries
       feed = fetch_injuries()
     week = Clock(schedules).current_week(season)
+    # club moves first (trades, claims, signings), so a reserve-list move lands on his new club's row
+    from .espn import fetch_team_rosters
+    rosters, tm = team_overlay(rosters, fetch_team_rosters(), season, week, players)
+    if tm:
+      print(f"[status] ESPN club moves over the rosters (week {week}): "
+            + ", ".join(f"{c['name']} {c['from']} -> {c['to']}" for c in tm), flush=True)
     ro, ch = overlay(rosters, feed, schedules, season, week, players)
     if ch:
       print(f"[status] ESPN reserve-list moves over the rosters (week {week}): "
