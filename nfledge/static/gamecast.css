@@ -1177,8 +1177,13 @@ html.pc-open { overflow: hidden; }
 }
 
 /* the page tabs stay reachable: sticky right under the sticky header (shell.js sets --pchead) */
-.pc-page .pc-tabs { position: sticky; top: calc(var(--navh, 0px) + var(--sat, 0px) + var(--pchead, 0px)); z-index: 5;
-  box-shadow: 0 8px 12px -10px rgba(0,0,0,.7); }
+/* z-index 6, over the game log's pinned season / total rows (.lg-fh, 5): a season's copy slides up under the tabs as
+   its last game passes, not over them (owner 2026-10-31: Buckner's 2025 total row on top of Summary / Game log / News;
+   at 5 each, the later copy won) */
+/* the two side shadows: the card's own background out past the tab bar's ends (the log's tables bleed wider than it,
+   and a sliding pinned row showed beside it); shadows, since the bar's own overflow clips a pseudo-element */
+.pc-page .pc-tabs { position: sticky; top: calc(var(--navh, 0px) + var(--sat, 0px) + var(--pchead, 0px)); z-index: 6;
+  box-shadow: 0 8px 12px -10px rgba(0,0,0,.7), 40px 0 0 0 var(--panel), -40px 0 0 0 var(--panel); }
 /* desktop: tabs as wide as their labels, not five stretched segments */
 @media (min-width: 1100px) { .pc-page .pc-tabs { display: inline-flex; } .pc-page .pc-tabs button { flex: 0 0 auto; padding: 7px 18px; } }
 
