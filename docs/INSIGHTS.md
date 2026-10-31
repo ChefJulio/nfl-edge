@@ -5804,3 +5804,21 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   kickers under the kicker grade average 91.9, 96% above the median (the kicker grade passes the description check its
   forecast gate didn't ask). 2026 so far: Araiza, Dickson, Stout top; Hekker, Riley Dixon bottom. Team coverage per
   season written to data/grades/coverage.json for a team stat (not shown yet: open item).
+- **PRE-REGISTERED 2026-10-31 (owner: "i wanna pin individual grades to OL ... grading the OL as a unit and applying
+  those grades to the OL that were active for those games, that seems fair"): (EA) the offensive-line grade.** Unit
+  value per team-game, in EPA per play against that opponent's norm (its other games that season): pass protection =
+  (opponent's usual pressure rate - this game's) x dropbacks x the league's EPA cost of a sack, pressure = sack + 0.5 x
+  QB hit without a sack; run blocking = (this game's EPA per designed run - what the opponent usually allows) x designed
+  runs, each run's EPA clipped to +-1.5 so a back's breakaway doesn't count as blocking; scrambles, kneels and spikes
+  left out. A lineman's season value = his games' unit values weighted by his offensive snaps; current form over three
+  seasons (1 / 0.6 / 0.3), shrunk by method-of-moments pseudo-games fit on team-games; percentile among qualified
+  linemen (40%+ of his team's offensive snaps over its games), 2012 on (snap counts). Bars: pass protection and run
+  blocking (unit, his games), snap share, and his own penalties per 1,000 snaps (named on the play; shown, not in the
+  OVR). DESCRIPTION CHECK: AP first-team All-Pro linemen (tackles, guards, centers) 2013-2025 average a season grade of
+  70+ and 75%+ sit above the median. A unit grade can't single out one lineman, so the bar is lower than the punters'.
+- **RESULT {#line-grade} (EA) the offensive-line grade: PASS, shipped.** tools/st_grades.py --eval-ol. Shrinkage 411
+  pseudo-plays (team-games), 2,429 qualified lineman-seasons 2013-2026 (~167 a season: five a team). AP first-team
+  All-Pro linemen 2013-2025: 64 graded seasons, average season grade 74.0, 84% above the median. A unit's pass and run
+  parts are shared by its linemen by design (Buffalo 2026: McGovern, Brown, Torrence, Dawkins 98-99). Reading: the
+  unit value per game swings widely (sd 0.089 EPA per play), so the shrinkage matters; a lineman who moves teams carries
+  his old line's games in his three-season form.

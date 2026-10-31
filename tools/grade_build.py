@@ -984,6 +984,8 @@ def main():
   st_grades.build_kickers(out, cur, sched if sched is not None else data.schedules, ROOT / cfg["data"]["cache_dir"])
   # punters (INSIGHTS (DZ)): net yards against the league from the same spot, returns at the league's average
   st_grades.build_punters(out, cur, sched if sched is not None else data.schedules, ROOT / cfg["data"]["cache_dir"])
+  # offensive linemen (INSIGHTS (EA)): the line graded as a unit each game, shared by snaps (2012 on)
+  st_grades.build_line(out, cur, sched if sched is not None else data.schedules, ROOT / cfg["data"]["cache_dir"])
   ix = json.loads((out / "index.json").read_text(encoding="utf-8"))
   ix["seasons"] = sorted(set(old) | set(ix["seasons"]))
   ix["box_before"] = FIRST
