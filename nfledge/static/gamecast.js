@@ -1110,7 +1110,7 @@
     // a live box-score line (boxLines) as a log game: c = the scoring-key stat line, x = completions, attempts, carries, targets
     const liveG = ln => ({ c: ln.line, x: [ln.comp || 0, ln.att || 0, ln.car || 0, ln.tgt || 0] });
     const head = `${grpHead(7)}
-      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num" title="Game grade, on the OVR's 50-99 scale: his fantasy output that game against every game by qualified players at his position that season (early in a season, last season's games fill the weeks not played yet)">Grd</th><th class="num">Snap</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
+      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num" title="Fantasy points, your scoring">FPTS</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num" title="Game grade, on the OVR's 50-99 scale: his fantasy output that game against every game by qualified players at his position that season (early in a season, last season's games fill the weeks not played yet)">Grd</th><th class="num" title="Share of his team's offensive snaps">SNP%</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
     const blank = stat.map((c, i) => `<td class="num${gcl(i)}">–</td>`).join('');
     const body = seasons.map(S => {
       const isCur = S.s === L.cur, rows = S.g.map(g => ({ w: g.w, g }));
@@ -1201,7 +1201,7 @@
         <td class="num">${allG.length}</td><td class="num lg-fp">${f1(ctot)}</td><td class="num">${f1(ctot / allG.length)}</td><td class="num"></td>
         ${stat.map(([, fn, , ex], i) => { const v = fn(CT); return `<td class="num${gcl(i)}">${offRole(v, ex) ?? v}</td>`; }).join('')}</tr><tr class="lg-gap"><td colspan="${6 + stat.length}"></td></tr>` : '';
     const carHead = `${grpHead(6)}
-      <tr class="lg-ch"><th>Year</th><th>Team</th><th class="num" title="Games played">G</th><th class="num">Pts</th><th class="num" title="Fantasy points per game">FP/G</th><th class="num" title="His ${esc(pos)} finish that season">Rk</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
+      <tr class="lg-ch"><th>Year</th><th>Team</th><th class="num" title="Games played">G</th><th class="num" title="Fantasy points, your scoring">FPTS</th><th class="num" title="Fantasy points per game">FP/G</th><th class="num" title="His ${esc(pos)} finish that season">Rk</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
     const view = carS.length > 1 ? logView : 'g';
     const legend = `<div class="lg-leg"><span>Opponent color = our pregame matchup (2021 on): green helped, red hurt, deeper = bigger</span>
       <span>· Rk = his ${esc(pos)} finish that week (green = starter in your league size) · Proj = our projection then (green = beat it) · Tap a game to open its gamecast</span></div>`;
@@ -2382,7 +2382,7 @@
     const rk = hasRet ? (L.ret_keys || []) : [];
     const idp = L.kind === 'def', w = idp ? weights() : null;
     const ak = idp && seasons.some(S => S.g.some(g => g.a)) ? Object.keys(ADV_COLS) : [], akI = k => (L.adv_keys || []).indexOf(k);
-    const head = `<tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Snap</th>${idp ? '<th class="num" title="IDP fantasy points, your scoring">Pts</th><th class="num" title="Game grade, on the OVR\'s 50-99 scale: his IDP points that game against every game by qualified defenders in his group that season">Grd</th>' : ''}${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}${ak.map(k => `<th class="num lg-adv" title="${esc(ADV_COLS[k][1])}">${ADV_COLS[k][0]}</th>`).join('')}${rk.map(k => `<th class="num" title="${esc(RET_COLS[k][1])}">${RET_COLS[k][0]}</th>`).join('')}</tr>`;
+    const head = `<tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num" title="Share of snaps">SNP%</th>${idp ? '<th class="num" title="IDP fantasy points, your scoring">FPTS</th><th class="num" title="Game grade, on the OVR\'s 50-99 scale: his IDP points that game against every game by qualified defenders in his group that season">Grd</th>' : ''}${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}${ak.map(k => `<th class="num lg-adv" title="${esc(ADV_COLS[k][1])}">${ADV_COLS[k][0]}</th>`).join('')}${rk.map(k => `<th class="num" title="${esc(RET_COLS[k][1])}">${RET_COLS[k][0]}</th>`).join('')}</tr>`;
     const n = 3 + (idp ? 2 : 0) + keys.length + ak.length + rk.length;
     const ptsCell = g => idp ? `<td class="num"><b>${f1(idpPts(L, g, w))}</b></td><td class="num">${g.gr != null ? `<span class="lg-rk ${g.gr >= 80 ? 'rk-good' : g.gr <= 30 ? 'rk-bad' : 'rk-mid'}">${ovr(g.gr)}</span>` : '–'}</td>` : '';
     const advCells = g => ak.map(k => `<td class="num lg-adv">${g.a ? nfmt(g.a[akI(k)]) : '–'}</td>`).join('');
@@ -2401,8 +2401,11 @@
       };
       const miss = g => `<tr class="lg-miss"${tileAttrs(g)}><td>${g.w}</td>${g.o ? `<td class="lg-opp tm-opp"><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>` : '<td class="lg-opp">&ndash;</td>'}
         <td class="num">${g.sn != null ? g.sn : missTag(g)}</td>${'<td class="num">&ndash;</td>'.repeat(n - 3)}</tr>`;
-      const trs = tot(S.g, idp ? seasonGrdOf(L.pid, S.s) : '') + [...S.g, ...(opts.compact ? [] : (S.m || []))].sort((a, b) => b.w - a.w)  // newest first, every week
-        .map(g => g.bye ? byeRow(g.w, n - 2) : g.miss != null ? miss(g) : row(g, g.w)).join('');
+      // a mid-season club change between its weeks, as in the fantasy log (owner 2026-10-31: Buckner's trade to SF had no
+      // "Traded to" row: this log never drew them)
+      const mvs = opts.compact ? [] : (S.mv || []).map(m => ({ w: m.w - 0.5, mv: m }));
+      const trs = tot(S.g, idp ? seasonGrdOf(L.pid, S.s) : '') + [...S.g, ...(opts.compact ? [] : (S.m || [])), ...mvs].sort((a, b) => b.w - a.w)  // newest first, every week
+        .map(g => g.mv ? moveRow(g.mv, n) : g.bye ? byeRow(g.w, n - 2) : g.miss != null ? miss(g) : row(g, g.w)).join('');
       const sum = opts.compact ? '' : ` · ${t.g} game${t.g === 1 ? '' : 's'}${keys.length ? ` · ${keys.slice(0, 4).map(k => `${nfmt(t[k] || 0)} ${cols[k][0]}`).join(', ')}` : ''}`;
       // playoffs first, their own block (not in the season totals above)
       const pg = opts.compact ? [] : (S.pg || []);
@@ -2426,8 +2429,8 @@
         + `${keys.map(k => `<td class="num">${nfmt(t[k] || 0)}</td>`).join('')}${rk.map((k, i) => `<td class="num">${nfmt(sum(i))}</td>`).join('')}</tr>`;
     };
     const teamOf = S => S.mv && S.mv.length ? [S.mv[0].f, ...S.mv.map(m => m.t)].map(t => tmL(t)).join('/') : tmL(S.g[S.g.length - 1].t);
-    const cHead = `<tr class="lg-ch"><th>Year</th><th>Team</th><th class="num" title="Games with a stat or a snap">G</th><th class="num" title="Average share of snaps (2013 on)">Snap</th>`
-      + `${idp ? '<th class="num" title="IDP fantasy points, your scoring">Pts</th><th class="num" title="IDP points per game">Pts/G</th><th class="num" title="Season grade (OVR)">Grd</th>' : ''}`
+    const cHead = `<tr class="lg-ch"><th>Year</th><th>Team</th><th class="num" title="Games with a stat or a snap">G</th><th class="num" title="Average share of snaps (2013 on)">SNP%</th>`
+      + `${idp ? '<th class="num" title="IDP fantasy points, your scoring">FPTS</th><th class="num" title="IDP points per game">FP/G</th><th class="num" title="Season grade (OVR)">Grd</th>' : ''}`
       + `${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}${rk.map(k => `<th class="num" title="${esc(RET_COLS[k][1])}">${RET_COLS[k][0]}</th>`).join('')}</tr>`;
     const cn = 4 + (idp ? 3 : 0) + keys.length + rk.length;
     const career = cRow('Car', `${carS.length} yrs`, carS.flatMap(S => S.g), '', ` class="lg-tot" title="Regular season, ${carS[carS.length - 1].s}-${carS[0].s}"`)
@@ -2453,7 +2456,7 @@
         ${keys.map(k => `<td class="num">${t ? nfmt(t[k] || 0) : '–'}</td>`).join('')}</tr>`;
     }).join('');
     return `<div class="lg-scroll"><table class="lg lg-career"><thead><tr class="lg-ch"><th>Season</th><th>Team</th><th class="num" title="Games with a stat or a snap">G</th>
-      <th class="num" title="Weeks on the active roster">Wks</th><th class="num">Snap</th>${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+      <th class="num" title="Weeks on the active roster">Wks</th><th class="num" title="Average share of snaps (2013 on)">SNP%</th>${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
   };
   const kindOverview = (L, espn) => {
     const last = L.seasons.find(S => S.g.length);
@@ -2716,7 +2719,7 @@
         `<div class="tm-sg tm-open" data-tm="${esc(r[1])}"><span class="tm-sw">Wk ${r[0]}</span><span class="tm-sv">${r[2] ? 'vs' : '@'}</span>${tLogo(r[1], 22)}<b>${esc(tInfo(r[1]).nick || r[1])}</b><span class="tm-sres ${v >= 8 ? 'r-W' : v < 5 ? 'r-L' : 'r-T'}">${f1(v)}</span></div>`).join('')}</div>
         <p class="pc-sub">Green = a good week to start (8+), red = one to avoid (under 5).</p></div>`) : '';
     // Game log
-    const logRows = (G && G.seasons || []).map(Sx => `<div class="pc-k dst-ls">${Sx.s}</div><table class="bx dst-log"><thead><tr><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num" title="Sacks">Sck</th><th class="num" title="Interceptions">INT</th><th class="num" title="Fumble recoveries">FR</th><th class="num" title="Defense and return touchdowns">TD</th><th class="num" title="Points allowed">PA</th><th class="num" title="Yards allowed">YA</th></tr></thead><tbody>
+    const logRows = (G && G.seasons || []).map(Sx => `<div class="pc-k dst-ls">${Sx.s}</div><table class="bx dst-log"><thead><tr><th>Wk</th><th>Opp</th><th class="num" title="Fantasy points, your scoring">FPTS</th><th class="num" title="Sacks">Sck</th><th class="num" title="Interceptions">INT</th><th class="num" title="Fumble recoveries">FR</th><th class="num" title="Defense and return touchdowns">TD</th><th class="num" title="Points allowed">PA</th><th class="num" title="Yards allowed">YA</th></tr></thead><tbody>
       ${[...Sx.g].reverse().map(g => { const v = NFLE.kdst.dstScore(actLine(G.keys, g.l), R_.w), L_ = Object.fromEntries(G.keys.map((k, i) => [k, g.l[i]]));
         return `<tr><td>${g.w}</td><td><span class="tm-open" data-tm="${esc(g.o)}">${g.h ? 'vs' : '@'} ${esc(g.o)}</span></td><td class="num"><b class="${v >= 10 ? 'good' : v < 3 ? 'bad' : ''}">${f1(v)}</b></td><td class="num">${L_.sack}</td><td class="num">${L_.int}</td><td class="num">${L_.fum_rec}</td><td class="num">${L_.def_td + L_.st_td}</td><td class="num">${L_.pa}</td><td class="num">${L_.ya}</td></tr>`; }).join('')}</tbody></table>`).join('');
     body.innerHTML = `

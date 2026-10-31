@@ -366,7 +366,8 @@ def main():
       m = missed_weeks(s, gs, ros_w.get(pid, {}), sched_w, n_weeks.get(s, 0), gid_of,
                        byes=s != data.current_season, snap_of=lambda w, s=s: snap.get((s, w, pid)))
       mv = moves(pid, s, [(e["w"], e.get("t")) for e in gs + m]
-                 + ([(e["w"], team) for e in upcoming if not e.get("bye")] if s == data.current_season else []))
+                 + ([(e["w"], team) for e in upcoming if not e.get("bye")] if s == data.current_season else []),
+                 now=team if s == data.current_season else None)
       season_docs.append({"s": s, "g": gs, **({"pg": playoffs[s]} if s in playoffs else {}), **season_rank.get((s, pid), {}),
                           "m": m, **({"mv": mv} if mv else {})})
     doc = {"pid": pid, "name": name, "espn": espn, "pos": pos, "keys": SCORE_KEYS, "cur": data.current_season, "team": team,
@@ -690,9 +691,13 @@ class TeamMoves:
       self.tx[season] = by
     return self.tx[season]
 
-  def __call__(self, pid: str, season: int, weeks) -> list:
-    """weeks: (week, team) for every week he was on a team (games, missed games, this season's upcoming games)."""
+  def __call__(self, pid: str, season: int, weeks, now: str | None = None) -> list:
+    """weeks: (week, team) for every week he was on a team (games, missed games, this season's upcoming games).
+    now: his club today (this season only). A club he hasn't had a week with yet (owner 2026-10-31: Buckner, traded
+    to SF the week of SF's bye, had no SF week, so no divider) starts the week after his last listed one."""
     seq = sorted((w, D.RELOCATED.get(t, t)) for w, t in weeks if t)
+    if now and seq and D.RELOCATED.get(now, now) != seq[-1][1]:
+      seq.append((seq[-1][0] + 1, D.RELOCATED.get(now, now)))
     out = []
     for (w0, t0), (w1, t1) in zip(seq, seq[1:]):
       if t0 == t1:
@@ -908,7 +913,7 @@ def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: 
     for s in sorted(set(seasons) | set(pg), reverse=True):
       gs = seasons.get(s, [])
       m = missed_weeks(s, gs, ros_w.get(pid, {}), sched_w, n_weeks.get(s, 0), gid_of)
-      mv = moves(pid, s, [(e["w"], e.get("t")) for e in gs + m]) if moves else []
+      mv = moves(pid, s, [(e["w"], e.get("t")) for e in gs + m], now=team if s == cur else None) if moves else []
       doc["seasons"].append({"s": s, "g": gs, **({"pg": pg[s]} if s in pg else {}), "m": m, **({"mv": mv} if mv else {})})
     if injuries and pid in injuries:
       doc["inj"] = injuries[pid]["eps"]
