@@ -699,6 +699,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3040151,George Kittle,San Francisco 49ers,Active,2026-10-25T22:55Z,,,,,,Kittle brought in eight of 10 targets for 88 yards and lost a fumble in the 49ers' 29-20 loss to the Falcons on Sunday.,TE
 3057524,Siran Neal,San Francisco 49ers,Active,2026-10-25T15:46Z,,,,,,,S
 4685623,Mykel Williams,San Francisco 49ers,Active,2026-10-24T01:19Z,,,,,,Williams (knee) does not have any injury designation ahead of Sunday's game against the Falcons.,DE
+4686540,Tyrice Knight,Seattle Seahawks,Active,2026-10-31T21:16Z,,,,,,,LB
 4035693,Velus Jones Jr.,Seattle Seahawks,Out,2026-10-31T20:57Z,Hamstring,Not Specified,Not Specified,2026-11-08,OUT,out,RB
 3120358,Uchenna Nwosu,Seattle Seahawks,Doubtful,2026-10-31T20:57Z,Ankle,Not Specified,Not Specified,2026-11-02,DOUBTFUL,doubtful,LB
 4426376,Charles Cross,Seattle Seahawks,Out,2026-10-31T20:56Z,Ankle,Sprain,Not Specified,2026-11-08,OUT,out,OT
@@ -712,7 +713,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2971622,Leonard Williams,Seattle Seahawks,Active,2026-10-31T01:25Z,,,,,,"Williams (Achilles) was a full practice participant Friday, Gregg Bell of Sports Radio 93.3 KJR Seattle reports.",DT
 3924327,Drew Lock,Seattle Seahawks,Questionable,2026-10-31T01:21Z,Elbow,Not Specified,Right,2026-11-02,QUESTIONABLE,"Lock (elbow) was a limited participant in Friday's practice, John Boyle of the Seahawks' official site reports.",QB
 4259651,Brandon Pili,Seattle Seahawks,Questionable,2026-10-30T23:15Z,Back,,,2026-11-01,QUESTIONABLE,questionable,DT
-4686540,Tyrice Knight,Seattle Seahawks,Questionable,2026-10-30T00:55Z,Hip,,,2026-11-02,QUESTIONABLE,Knight (hip) was a limited participant at the Seahawks' practice Thursday.,LB
 4429211,Anthony Bradford,Seattle Seahawks,Questionable,2026-10-29T23:22Z,Knee,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,questionable,G
 4364623,Patrick O'Connell,Seattle Seahawks,Questionable,2026-10-29T22:54Z,Toe,,,2026-11-01,QUESTIONABLE,questionable,LB
 4869523,Nick Emmanwori,Seattle Seahawks,Active,2026-10-28T01:01Z,,,,,,Emmanwori registered four tackles (two solo) Sunday in a 20-3 Week 7 win over the Chiefs.,S
