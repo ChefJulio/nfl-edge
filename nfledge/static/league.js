@@ -485,7 +485,10 @@
     const tagWord = t => ({ IR: 'IR', PUP: 'PUP', Out: 'Out', Doubtful: 'Doubtful', Questionable: 'Questionable', Sus: 'suspended', COV: 'COVID', NA: 'not active', DNR: 'did not report' })[t] || t;
     // a player's rest-of-season value (expected points over the remaining weeks, byes skipped): who to drop
     const rosValue = x => ROS ? rosWeeks().reduce((t, k) => t + ((weekOf(x, k) || {}).exp || 0), 0) : 0;
-    const irChecks = () => {
+    // which (owner 2026-10-31: "keep all suggestion stuff in the suggestion tab"): 'bad' = the roster's state on the
+    // platform (an ineligible player in IR, which locks it), shown on Your lineup; 'tips' = advice (room for IR returns,
+    // an open IR slot), shown on Suggested
+    const irChecks = which => {
       if (!L.reserve || (L.platform === 'sleeper' && !STAGS)) return '';
       const nm = p => p.pid ? `<button type="button" class="nm-link" data-open-pid="${esc(p.pid)}"><b>${esc(p.name)}</b></button>` : `<b>${esc(p.name)}</b>`;
       const res = (mine.res || []).filter(x => mine.ext.includes(x)), taxi = new Set(mine.taxi || []);
@@ -513,20 +516,20 @@
           ? `so ESPN won't process adds and waiver claims can fail ${off}. Fix it before waivers run (${esc(runText())}): ${fix}.`
           : pre ? `so once waivers process (${esc(runText())}) Sleeper won't allow any other roster move (adds, trades, even lineup changes) ${off}. Your waiver claims still go through; after that: ${fix}, before games lock.`
           : `so Sleeper won't allow any other roster move (adds, trades, even lineup changes) ${off}. Fix it now, before any game locks your lineup: ${fix}.`;
-        out.push(`<div class="lg-alert bad">${who} <span>${them ? 'are' : 'is'} in IR but ${platName()} lists ${them ? 'them' : 'him'} as ${esc(tags)}, ${tail}</span></div>`);
+        if (which === 'bad') out.push(`<div class="lg-alert bad">${who} <span>${them ? 'are' : 'is'} in IR but ${platName()} lists ${them ? 'them' : 'him'} as ${esc(tags)}, ${tail}</span></div>`);
       }
       // coming back soon (projected to play this week, or likely back next week) with no room for them yet: the drops a
       // return will force, flagged before the lock hits
       const soon = res.filter(x => irOk(x) && returning(x));
       const badNeed = Math.max(0, bad.length - openBench()), room = Math.max(0, openBench() - bad.length);
-      if (soon.length > room) {
+      if (which === 'tips' && soon.length > room) {
         // the drops after the ones the ineligible players already take
         const need = soon.length - room, drops = dropPicks(badNeed + need, [...bad, ...soon]).slice(badNeed);
         out.push(`<div class="lg-alert tip"><b>Room for ${soon.length > 1 ? 'IR returns' : 'an IR return'}</b> <span>${list(soon.map(x => `${nm(player(x))} (${esc(backWeek(x) || 'projects to play')})`))}: once ${soon.length > 1 ? 'they lose' : 'he loses'} the ${platName()} IR tag ${L.platform === 'sleeper' ? 'your roster locks' : 'your adds stop'} until ${soon.length > 1 ? "they're" : "he's"} off IR, and that takes ${need} drop${need > 1 ? 's' : ''} with your bench full (likely: ${esc(list(drops))}). Worth deciding now.</span></div>`);
       }
       // an open IR slot and an eligible player outside it: a bench spot for free (the one out longest first)
       const open = Math.max(0, (L.reserve.slots || 0) - res.length);
-      if (open) {
+      if (which === 'tips' && open) {
         // a starter only when he scores 0 anyway (ruled out, no projection): moving a game-time call to IR benches him
         const st = new Set(mine.starters), dead = q => q.exp == null || (q.proj != null && 1 - q.inactive < NFLE.health.AVAIL.NIL);
         const can = mine.ext.filter(x => !res.includes(x) && !taxi.has(x) && irOk(x) && (!st.has(x) || dead(player(x)))).map(x => ({ x, p: player(x), t: platTag(x), v: rosValue(x) }))
@@ -588,13 +591,25 @@
     };
     // the slot moves that turn one arrangement into the other (same starters): "Smith to FLEX, Jones to WR"
     const slotMoves = (from, to) => to.map((r, i) => r.p && from[i] && from[i].p && r.p.ext !== from[i].p.ext ? { p: r.p, slot: r.slot } : null).filter(Boolean);
+    // your starters as set, in the league's slot order (IR apart)
+    const setRows = () => { const irSet = new Set(mine.ir || []), ps = mine.ext.filter(x => !irSet.has(x)).map(player);
+      return { ps, rows: L.slots.map((s, i) => ({ slot: s, p: ps.find(p => p.ext === mine.starters[i]) || null })) }; };
+    // the late-game slot order for a lineup, as advice (Suggested)
+    const lateTip = rows => { const late = slotMoves(rows, lateArrange(rows));
+      const nm = p => p.pid ? `<button type="button" class="nm-link" data-open-pid="${esc(p.pid)}"><b>${esc(p.name)}</b></button>` : `<b>${esc(p.name)}</b>`;
+      return late.length ? `<div class="lg-alert tip"><b>Late games in the flex</b> <span>${late.map(m => `${nm(m.p)} to ${esc(m.slot)}${kickTxt(m.p) ? ` (${esc(kickTxt(m.p))})` : ''}`).join(', ')}: the same starters, with the latest game where any eligible player can replace him if he's ruled out.</span></div>` : ''; };
     const lineupView = () => {
-      const sw = `<div class="seg lg-mode" role="tablist">${[['real', 'Your lineup'], ['suggested', 'Suggested']].map(([k, l]) => `<button type="button" role="tab" data-lmode="${k}" class="${lineMode === k ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+      // the Suggested tab carries what it would add (owner 2026-10-31: its banner left Your lineup): "+2.4", or a dot when
+      // it only has advice (IR room, an open IR slot, late games in the flex)
+      const { ps, rows } = setRows();
+      const gain = total(optimize(ps, L.slots, mine.starters.map(x => ps.find(p => p.ext === x)))) - total(rows);
+      const hint = gain >= 0.5 ? ` <b class="lg-mode-gain">+${f1(gain)}</b>` : irChecks('tips') || lateTip(rows) ? ' <i class="lg-mode-dot" aria-label="has suggestions"></i>' : '';
+      const sw = `<div class="seg lg-mode" role="tablist">${[['real', 'Your lineup', ''], ['suggested', 'Suggested', hint]].map(([k, l, h]) => `<button type="button" role="tab" data-lmode="${k}" class="${lineMode === k ? 'on' : ''}">${l}${h}</button>`).join('')}</div>`;
       return sw + (lineMode === 'real' ? realView() : suggestedView());
     };
     // Your lineup as set on Sleeper / ESPN (owner 2026-10-29: "the entire page should mostly read like it would if you
     // were on the native app"): starters in the league's slot order, bench, IR; what needs fixing on top (a starter who
-    // scores 0, an empty slot), the late-game slot order when it differs, and what the suggested lineup would add
+    // scores 0, an empty slot, an ineligible player locking the roster). Advice lives on Suggested (owner 2026-10-31).
     const realView = () => {
       // byes and IR return weeks come from the rest-of-season file (as Suggested's waiver card loads it)
       if (!ROS) NFLE.load('data/ros.json').then(j => { ROS = j; if (view === 'lineup') draw(); }, () => {});
@@ -603,8 +618,6 @@
       const curRows = L.slots.map((s, i) => ({ slot: s, p: ps.find(p => p.ext === mine.starters[i]) || null }));
       const cur = new Set(mine.starters);
       const mm = L.matchup(mine.id), liveRows = curRows.map(r => ({ slot: r.slot, p: inGame(r.p, mm && mm.pp) }));
-      const best = optimize(ps, L.slots, mine.starters.map(x => ps.find(p => p.ext === x))), gain = total(best) - total(curRows);
-      const changes = best.filter(r => r.p && !cur.has(r.p.ext)).length;
       const nm = p => p.pid ? `<button type="button" class="nm-link" data-open-pid="${esc(p.pid)}"><b>${esc(p.name)}</b></button>` : `<b>${esc(p.name)}</b>`;
       // starters who score 0 where they sit: on bye, out, not projected (kickers and defenses on bye included)
       const zero = curRows.filter(r => r.p && !r.p.locked && (r.p.exp == null || (r.p.proj != null && 1 - r.p.inactive < NFLE.health.AVAIL.NIL)));
@@ -613,11 +626,8 @@
         ...zero.map(r => `<div class="lg-alert bad">${nm(r.p)} <span>starts at ${esc(r.slot)} but ${r.p.exp == null ? esc(r.p.why || 'has no projection') : 'is ruled out'}: he scores 0 there.</span></div>`),
         ...empty.map(r => `<div class="lg-alert bad"><b>${esc(r.slot)}</b> <span>is empty.</span></div>`),
       ].join('');
-      const late = slotMoves(curRows, lateArrange(curRows));
-      const lateTip = late.length ? `<div class="lg-alert tip"><b>Late games in the flex</b> <span>${late.map(m => `${nm(m.p)} to ${esc(m.slot)}${kickTxt(m.p) ? ` (${esc(kickTxt(m.p))})` : ''}`).join(', ')}: the same starters, with the latest game where any eligible player can replace him if he's ruled out.</span></div>` : '';
-      const sug = gain >= 0.5 ? `<button type="button" class="lg-alert sug" data-lmode="suggested"><b>Suggested lineup: +${f1(gain)}</b> <span>${changes} change${changes === 1 ? '' : 's'} by our projections &rsaquo;</span></button>` : '';
       const bench = ps.filter(p => !cur.has(p.ext)).sort((a, b) => (b.exp != null) - (a.exp != null) || (b.exp || 0) - (a.exp || 0));
-      return `${alerts}${irChecks()}${lateTip}${sug}
+      return `${alerts}${irChecks('bad')}
         ${scoreHead(liveRows, mm && mm.points ? mm.points[mine.id] : null)}
         ${table(liveRows.map(r => row(r.slot, r.p)).join(''), `<th>Slot</th><th>Player</th><th class="num">${scoreOf(liveRows).started ? 'Pts' : 'Proj'}</th>`)}
         <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') + emptyBench(ps.length) || '<tr><td colspan="3" class="muted">No bench players.</td></tr>')}
@@ -677,7 +687,9 @@
       const unproj = curRows.filter(r => r.p && r.p.exp == null && r.slot !== 'DEF' && r.slot !== 'K').map(r => r.p);
       // players with no projection this week (on bye, out) stay listed, after the projected ones (owner 2026-10-18)
       const bench = ps.filter(p => !bestSet.has(p.ext)).sort((a, b) => (b.exp != null) - (a.exp != null) || (b.exp || 0) - (a.exp || 0));
-      return `${swaps}${unproj.length ? `<p class="muted lg-note">Starting with no projection: ${unproj.map(p => `${p.pid ? `<button type="button" class="nm-link" data-open-pid="${esc(p.pid)}">${esc(p.name)}</button>` : esc(p.name)} (${esc(p.why || 'not projected')})`).join(', ')}.</p>` : ''}
+      // the advice (owner 2026-10-31): IR room / open IR slot, and the late-game slot order when the lineup is otherwise
+      // already the best one (the Best lineup table below already puts late games in the flex)
+      return `${irChecks('tips')}${benchIn.length ? '' : lateTip(curRows)}${swaps}${unproj.length ? `<p class="muted lg-note">Starting with no projection: ${unproj.map(p => `${p.pid ? `<button type="button" class="nm-link" data-open-pid="${esc(p.pid)}">${esc(p.name)}</button>` : esc(p.name)} (${esc(p.why || 'not projected')})`).join(', ')}.</p>` : ''}
         <h3 class="lg-h">Best lineup <span class="muted">${f1(total(best))} expected</span></h3>
         ${table(best.map(r => row(r.slot, r.p)).join(''))}
         <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') + emptyBench(ps.length) || '<tr><td colspan="3" class="muted">No projected bench players.</td></tr>')}
