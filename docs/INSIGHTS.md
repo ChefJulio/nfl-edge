@@ -5745,3 +5745,28 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   which is already used wherever it exists and doesn't carry forward. B3 vs BASE (+.0006) also shows the shipped
   weights are not leaning on having seen these seasons. Close this vein: the remaining gap to other sites' odds for a
   single team (MIN 2026) is a disagreement about that team, not a measurable method loss.
+- **PRE-REGISTERED 2026-10-31 (owner: "kickers ... less concerned with how many kicks they make and more concerned
+  with their made percentage and from what distances their percentages are better or worse compared to the league"):
+  (DY) the kicker grade.** Expected make chance per kick: a logistic fit for each season on that season and its
+  neighbors (+-1), every field goal and extra point (blocked kicks left out: mostly the protection's), inputs distance,
+  distance squared, an extra-point flag, indoors (dome / closed roof), outdoor wind (mph), outdoor cold (under 40 F)
+  and Denver. A kick's value = points over expected: 3 x (made - chance) for a field goal, 1 x (made - chance) for an
+  extra point. A kicker-season's rate = value per attempt. The grade (as the other grades): the rate over this season
+  and the two before (weights 1 / 0.6 / 0.3 by attempts), shrunk toward 0 (the league) by method-of-moments
+  pseudo-attempts fit on qualified kicker-seasons, as a percentile among that season's qualified kickers (field-goal
+  attempts >= 0.75 per team game). Bars (percentile among them): field goals over expected per attempt, and make rate
+  over expected under 40, 40-49 and 50+ yards, extra points over expected (2015 on, the 33-yard try). Kickoffs left
+  out (the 2024 rule change). GATE (does it measure skill better than the plain stat): walk-forward 2005-2025, kickers
+  qualified in back-to-back seasons, the grade's rate this season vs this season's raw field-goal percentage, each
+  rank-correlated with NEXT season's field-goal points over expected per attempt; the grade must correlate higher,
+  pooled bootstrap 95% CI of the difference above 0. Fail = not published as is; reported to the owner with what
+  failed.
+- **RESULT {#kicker-grade} (DY) the kicker grade: FAIL; not published.** tools/st_grades.py --eval, 544 kicker pairs
+  qualified in back-to-back seasons 2005-2025. Rank correlation with next season's field-goal points over expected per
+  attempt: the grade 0.079, raw FG% 0.030; difference +0.048 [-0.016, +0.107], grade better in 14 of 20 seasons. The
+  method-of-moments shrinkage came out at 1,475 pseudo-attempts: kick-to-kick noise swamps the spread in true accuracy
+  between qualified kickers, so a season (~70 kicks) carries about 5% weight and even three seasons under 15%. Reading:
+  accuracy over expected barely carries from one season to the next (as kicking studies have found); the grade beats
+  raw FG% as a measure but neither says much about next year, so an OVR would rank kickers mostly by luck. Built and
+  kept (tools/st_grades.py build_kickers, the card's K sheet) but not wired into the build. Open: publish it as a
+  descriptive "this season over expected" line instead of a grade (owner's call), or test a career-long window.
