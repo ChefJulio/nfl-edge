@@ -2609,7 +2609,8 @@
   const GRADED = { QB: 1, RB: 1, WR: 1, TE: 1 };
   // graded = an offensive skill position or any defender (their grades are IDP-based); one rule for every tile layout
   // (owner 2026-10-29, Jalen Redmond: "where are my defensive player grade tiles?")
-  const isGraded = (pos, L) => !!GRADED[pos] || !!(L && (L.kind === 'def' || L.kind === 'k'));
+  // (kickers have a sheet, gradeTab's isK, but no published grade: INSIGHTS (DY) failed its gate)
+  const isGraded = (pos, L) => !!GRADED[pos] || !!(L && L.kind === 'def');
   const grTone = g => g >= 80 ? 'good' : g <= 30 ? 'bad' : '';  // by percentile
   // OVR on a 50-99 scale (owner 2026-10-14): only qualified players are graded, so the least of them is a 50, not a
   // 0; linear in his percentile among the qualified. The sentence and the stat bars keep the plain percentile.
