@@ -182,8 +182,19 @@ document.addEventListener('touchstart', () => {}, { passive: true });
   const oldTeam = (teams, t) => { const o = OLD[t]; if (!o) return null; const cur = (teams || {})[o.of] || {};  // logo + colors even before the teams map loads
     const { of, ...rest } = o;
     return { ...cur, ...rest, logo: `https://a.espncdn.com/i/teamlogos/nfl/500/${t.toLowerCase()}.png` }; };
+  // a club as ESPN's transaction notes name it ("Houston", "the N.Y. Jets", "San Francisco 49ers") -> its code: the
+  // Moves page's trade sides and the team card's Moves sheet (a trade logged only by the other club)
+  const CITY = [['ARI', /Arizona|Cardinals/], ['ATL', /Atlanta|Falcons/], ['BAL', /Baltimore|Ravens/], ['BUF', /Buffalo|Bills/],
+    ['CAR', /Carolina|Panthers/], ['CHI', /Chicago|Bears/], ['CIN', /Cincinnati|Bengals/], ['CLE', /Cleveland|Browns/],
+    ['DAL', /Dallas|Cowboys/], ['DEN', /Denver|Broncos/], ['DET', /Detroit|Lions/], ['GB', /Green Bay|Packers/],
+    ['HOU', /Houston|Texans/], ['IND', /Indianapolis|Colts/], ['JAX', /Jacksonville|Jaguars/], ['KC', /Kansas City|Chiefs/],
+    ['LV', /Las Vegas|Raiders/], ['LAC', /Chargers/], ['LA', /Rams|Los Angeles/], ['MIA', /Miami|Dolphins/],
+    ['MIN', /Minnesota|Vikings/], ['NE', /New England|Patriots/], ['NO', /New Orleans|Saints/], ['NYG', /Giants/],
+    ['NYJ', /Jets/], ['PHI', /Philadelphia|Eagles/], ['PIT', /Pittsburgh|Steelers/], ['SF', /San Francisco|49ers/],
+    ['SEA', /Seattle|Seahawks/], ['TB', /Tampa Bay|Buccaneers/], ['TEN', /Tennessee|Titans/], ['WAS', /Washington|Commanders/]];
+  NFLE.clubOf = name => (CITY.find(([, rx]) => rx.test(name || '')) || [])[0] || null;
   NFLE.fmt = {
-    signed1: v => `${v >= 0 ? '+' : '-'}${Math.abs(v).toFixed(1)}`,  // a change in points: +0.9 / -0.7
+    signed1: v =>`${v >= 0 ? '+' : '-'}${Math.abs(v).toFixed(1)}`,  // a change in points: +0.9 / -0.7
     // Availability is shown one way everywhere (owner 2026-10-17): his chance to PLAY, "62%"; never the chance to sit
     toPlay: inactive => { const p = 1 - (inactive || 0); return p > 0.995 ? '&gt;99%' : p < 0.005 ? '&lt;1%' : `${Math.round(p * 100)}%`; },
     // kickoff (ms) of a team's game in a week's games: gameday + gametime are Eastern (EDT mid-March to early November)
@@ -482,6 +493,14 @@ document.addEventListener('touchstart', () => {}, { passive: true });
     const when = nxt ? new Date(nxt.due).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }) : '';
     return `<span${fin ? '' : ' class="alert"'}>Final injury reports in for <b>${fin} of ${ts.length}</b> teams${when ? ` · next report due ${esc(when)}` : ''}</span>`;
   };
+  // the build's time in the viewer's own zone (owner 2026-10-30): "Oct 30, 1:07 AM CDT". It's written in UTC ("...Z");
+  // older pages have no zone mark and were built in CI, which runs on UTC
+  const builtAt = g => {
+    const m = String(g || '').match(/^(\d{4})-(\d\d)-(\d\d)[ T](\d\d):(\d\d)/);
+    if (!m) return g || '';
+    const t = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]));
+    return t.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+  };
   NFLE.week().then(D => {
     if (!D || !D.head) return;
     const h = D.head, live = !(CFG.archive || CFG.lookahead), pending = live && !h.injury_report && !(D.clock && Object.keys(D.clock.teams || {}).some(t => NFLE.clock.reportsIn(t)));
@@ -494,7 +513,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
       h.n_final ? `<span>Week ${esc(D.week)} so far: <b>${h.n_final} of ${h.n_games}</b> games final</span>` : '',
       `<span>Scoring <b id="scoreName">${esc(sc)}</b></span>`,
       live ? repLine(D) : '',
-      `<span>Updated ${esc(D.generated || '')}</span>`].join('');
+      `<span>Updated ${esc(builtAt(D.generated))}</span>`].join('');
     hb.classList.toggle('warn', pending);
     hb.classList.toggle(`is-${cls}`, !!weekNote);
     hw.hidden = false;

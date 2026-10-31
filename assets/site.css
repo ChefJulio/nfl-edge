@@ -451,9 +451,12 @@ table.av-spots td.av-off { color: var(--warn); font-weight: 700; }
 /* Sideways scrollers never scroll vertically (owner 2026-10-20: dragging a game-log table moved its rows under fixed
    headers instead of scrolling the page). CSS turns overflow-y: visible into auto whenever overflow-x isn't visible,
    so every sideways wrapper was also a small vertical scroller that iOS rubber-bands on a vertical drag. Hidden
-   hands vertical drags to the page; contain keeps a swipe at a table's edge from becoming the browser's back gesture. */
+   hands vertical drags to the page. overscroll none, not contain (owner 2026-10-30: a game log's rows slid out from
+   under its pinned season / total rows on a diagonal swipe): contain still let iOS rubber-band the box past its edge,
+   and the pinned copies (gamecast.js layHeads) follow scrollLeft, which doesn't move during the bounce; none also
+   keeps a swipe at a table's edge from becoming the browser's back gesture. */
 .scroll, .lg-scroll, .bx-t, .po-body, .rf-scroll, .tr-gwrap, .gg-strip, .md-areas, .lg-switch, .pc .pc-tabs,
-nav.gc-tabs .gc-wrap, .gc-jump, nav.tabs .nav-par, .nav-sub, .doc table { overflow-y: hidden; overscroll-behavior-x: contain; }
+nav.gc-tabs .gc-wrap, .gc-jump, nav.tabs .nav-par, .nav-sub, .doc table { overflow-y: hidden; overscroll-behavior-x: none; }
 /* a cell waiting for its data (Table.refresh fills it in place, e.g. Rankings' Grd while grades load) */
 .cell-load { display: inline-block; width: 24px; height: 12px; border-radius: var(--r-xs, 3px); vertical-align: middle;
   background: linear-gradient(90deg, var(--panel2) 0%, color-mix(in srgb, var(--ink) 9%, var(--panel2)) 50%, var(--panel2) 100%);

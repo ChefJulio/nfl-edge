@@ -132,8 +132,9 @@ table.lg-tbl .nm2 .l1 { white-space: normal; }
 .lg-alert span { color: var(--muted); }
 .lg-alert.bad { border-left-color: #f2786d; }
 .lg-alert.tip { border-left-color: #7fb3ff; }
-.lg-alert.sug { border-left-color: #6fdc8c; cursor: pointer; }
-.lg-alert.sug b { color: #8fe3a8; }
+/* the Suggested tab's hint (owner 2026-10-31, the banner moved into the tab): what it would add, or a dot for advice */
+.lg-mode .lg-mode-gain { margin-left: 5px; color: #8fe3a8; font-weight: 700; }
+.lg-mode .lg-mode-dot { display: inline-block; width: 7px; height: 7px; margin-left: 6px; border-radius: 50%; background: #7fb3ff; vertical-align: middle; }
 @media (min-width: 900px) { #tab-league .lg-body > .lg-alert, #tab-league .lg-body > .seg.lg-mode { max-width: 760px; } }
 /* live scores (league.js scoreHead, row): the score big, the expected final and who's left beside it; a player's live
    points with "proj" (his expected final) or "final" under them */

@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4690179,Tavius Robinson,Baltimore Ravens,Injured Reserve,2026-10-24T20:50Z,Pectoral,Not Specified,Not Specified,2027-02-15,IR,The Ravens placed Robinson (pectoral) on injured reserve Saturday.,LB
 4361178,Cam Jurgens,Baltimore Ravens,Active,2026-10-24T01:48Z,,,,,,Jurgens (concussion) does not have any injury designation ahead of Sunday's game against the Bengals.,C
 4432260,Matt Hibner,Baltimore Ravens,Active,2026-10-23T00:03Z,,,,,,Hibner (hand) was a full participant at practice Thursday.,TE
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-31T19:15Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-31T19:26Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4030899,Spencer Brown,Buffalo Bills,Questionable,2026-10-31T01:53Z,Back,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Brown (back) is listed as questionable for Sunday's game against the Ravens.,OT
 4401823,Dee Alford,Buffalo Bills,Questionable,2026-10-30T21:56Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Alford (ankle) is listed as questionable ahead of Sunday's game against the Ravens.,CB
 4429501,Ray Davis,Buffalo Bills,Active,2026-10-30T19:20Z,,,,,,Davis (illness) doesn't have an injury designation for Sunday's game against the Ravens.,RB
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431077,TeRah Edwards,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,DT
 4874515,Sam Hecht,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,C
 4034962,Stone Forsythe,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,OT
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-31T19:15Z,Undisclosed,Not Specified,Not Specified,2026-11-08,IR,ir,S
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-31T19:26Z,Undisclosed,Not Specified,Not Specified,2026-11-08,IR,ir,S
 4723086,Colston Loveland,Chicago Bears,Active,2026-10-31T18:57Z,,,,,,Loveland (neck) does not carry an injury designation into Monday's game against the Seahawks.,TE
 4608686,Kyle Monangai,Chicago Bears,Out,2026-10-31T16:55Z,Thumb,Sprain,Not Specified,2026-11-08,OUT,"Head coach Ben Johnson told reporters Saturday that Monangai (thumb/toe) will not play against the Seahawks on Monday, Courtney Cronin of ESPN.com reports.",RB
 3121544,T.J. Edwards,Chicago Bears,Active,2026-10-30T00:07Z,,,,,,Edwards (hamstring) was considered to be a full participant on the Bears' estimated practice report Thursday.,LB
@@ -601,7 +601,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4259566,Andrew Thomas,New York Giants,Active,2026-10-24T02:04Z,,,,,,Thomas (groin) does not have an injury designation against the Texans on Sunday.,OT
 4373656,Max Mitchell,New York Jets,Out,2026-10-31T01:58Z,Concussion,Concussion,Not Specified,2026-11-08,OUT,Mitchell (concussion) has been ruled out for Sunday's game against the Raiders.,OT
 4685248,David Bailey,New York Jets,Doubtful,2026-10-30T22:15Z,Groin,Not Specified,Not Specified,2026-11-01,DOUBTFUL,Bailey (groin) is listed as doubtful for Sunday's game against the Raiders.,LB
-4428617,T'Vondre Sweat,New York Jets,Out,2026-10-30T22:12Z,Knee,Not Specified,Not Specified,2026-11-08,OUT,Sweat (knee) has been ruled out for Sunday's game against the Raiders.,DT
+4428617,T'Vondre Sweat,New York Jets,Injured Reserve,2026-10-30T22:12Z,Knee,Not Specified,Not Specified,2026-11-29,IR,Sweat (knee) has been ruled out for Sunday's game against the Raiders.,DT
 4362094,Joseph Ossai,New York Jets,Out,2026-10-30T22:10Z,Ankle,Not Specified,Not Specified,2026-11-08,OUT,Ossai (ankle) has been ruled out for Sunday's game against Las Vegas.,DE
 4427366,Breece Hall,New York Jets,Questionable,2026-10-30T15:12Z,Quadriceps,Not Specified,Right,2026-11-01,QUESTIONABLE,"Hall (quadriceps) is listed as questionable for Sunday's game against the Raiders, Brian Costello of the New York Post reports.",RB
 4685247,Braelon Allen,New York Jets,Active,2026-10-29T20:48Z,,,,,,Allen (ankle) was a full participant at Thursday's practice.,RB

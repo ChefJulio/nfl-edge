@@ -25,16 +25,7 @@
   // and what each side received is read from the notes ("Acquired X from Y for Z": this team gets X, Y gets Z;
   // "Traded X to Y for Z": Y gets X, this team gets Z).
   const ORD = { first: '1st', second: '2nd', third: '3rd', fourth: '4th', fifth: '5th', sixth: '6th', seventh: '7th' };
-  // a club as ESPN's notes name it ("Houston", "the N.Y. Jets", "San Francisco 49ers") -> its code
-  const CITY = [['ARI', /Arizona|Cardinals/], ['ATL', /Atlanta|Falcons/], ['BAL', /Baltimore|Ravens/], ['BUF', /Buffalo|Bills/],
-    ['CAR', /Carolina|Panthers/], ['CHI', /Chicago|Bears/], ['CIN', /Cincinnati|Bengals/], ['CLE', /Cleveland|Browns/],
-    ['DAL', /Dallas|Cowboys/], ['DEN', /Denver|Broncos/], ['DET', /Detroit|Lions/], ['GB', /Green Bay|Packers/],
-    ['HOU', /Houston|Texans/], ['IND', /Indianapolis|Colts/], ['JAX', /Jacksonville|Jaguars/], ['KC', /Kansas City|Chiefs/],
-    ['LV', /Las Vegas|Raiders/], ['LAC', /Chargers/], ['LA', /Rams|Los Angeles/], ['MIA', /Miami|Dolphins/],
-    ['MIN', /Minnesota|Vikings/], ['NE', /New England|Patriots/], ['NO', /New Orleans|Saints/], ['NYG', /Giants/],
-    ['NYJ', /Jets/], ['PHI', /Philadelphia|Eagles/], ['PIT', /Pittsburgh|Steelers/], ['SF', /San Francisco|49ers/],
-    ['SEA', /Seattle|Seahawks/], ['TB', /Tampa Bay|Buccaneers/], ['TEN', /Tennessee|Titans/], ['WAS', /Washington|Commanders/]];
-  const clubOf = name => (CITY.find(([, rx]) => rx.test(name || '')) || [])[0] || null;
+  const clubOf = name => NFLE.clubOf(name);  // shell.js: a club as ESPN's notes name it -> its code
   const tidy = x => x.trim().replace(/^(?:a|an|the)\s+/i, '').replace(/\b(first|second|third|fourth|fifth|sixth|seventh)(?=-| round)/gi, m => ORD[m.toLowerCase()]).replace(/(\d(?:st|nd|rd|th)) round/g, '$1-round')
     .replace(/\s*draft (?:pick|choice)s?\b/i, ' pick').replace(/\s+pick(s?)\b/i, ' pick$1').replace(/\.$/, '').trim();
   const items = s => (s || '').replace(/\s+(?:and|plus)\s+(?=(?:a|an|the|\d{4}|[A-Z]{1,4}\s)\b)/g, ', ').split(/,\s*/).map(tidy).filter(Boolean);
