@@ -5770,3 +5770,11 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   raw FG% as a measure but neither says much about next year, so an OVR would rank kickers mostly by luck. Built and
   kept (tools/st_grades.py build_kickers, the card's K sheet) but not wired into the build. Open: publish it as a
   descriptive "this season over expected" line instead of a grade (owner's call), or test a career-long window.
+- **OWNER RULING 2026-10-31 on {#kicker-grade}: shipped. "Every player gets an EDGE grade"; "grades aren't
+  predictors, they're pure hindsight ... grades aren't prediction models. they're grades."** Standing principle for every
+  Edge grade from here: a grade is judged on how fairly it describes what happened (the right inputs, credit where it
+  belongs, a sample-size pull toward average so a few plays can't make a 99), not on predicting next season. A grade's
+  pre-registered check is a description check (for example, does it rank what it claims to measure, are its parts
+  credited to the right player), not a forecast gate. (DY)'s forecast gate stays on record; the grade shipped as the
+  better of the two measures it compared. Kicker cards show the raw per-attempt value (what he did) while the percentile
+  ranks the shrunk one.

@@ -978,6 +978,10 @@ def main():
   sched = D.Cache(ROOT / cfg["data"]["cache_dir"]).get("schedules", "since1999", None, stale=False)
   old = build_historic(out, FIRST, sched if sched is not None else data.schedules, load_scoring(), ROOT / cfg["data"]["cache_dir"])
   build_defense(out, cur, sched if sched is not None else data.schedules, D.Cache(ROOT / cfg["data"]["cache_dir"]))
+  # kickers (owner 2026-10-31: "every player gets an EDGE grade"; INSIGHTS (DY): shipped on the owner's call after its
+  # gate missed): points over expected per kick, tools/st_grades.py
+  import st_grades
+  st_grades.build_kickers(out, cur, sched if sched is not None else data.schedules, ROOT / cfg["data"]["cache_dir"])
   ix = json.loads((out / "index.json").read_text(encoding="utf-8"))
   ix["seasons"] = sorted(set(old) | set(ix["seasons"]))
   ix["box_before"] = FIRST

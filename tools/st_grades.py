@@ -114,13 +114,13 @@ def kicker_seasons(k: pd.DataFrame, sched: pd.DataFrame) -> pd.DataFrame:
   return t
 
 
-def window(t: pd.DataFrame, s: int, ids, k_prior: float):
-  """(shrunk value per attempt over this season and the two before, weighted attempts)."""
+def window(t: pd.DataFrame, s: int, ids, k_prior: float, raw: bool = False):
+  """(value per attempt over this season and the two before, shrunk unless raw; weighted attempts)."""
   wv, wa = pd.Series(0.0, index=ids), pd.Series(0.0, index=ids)
   for lag, w in enumerate(SEASON_W):
     prev = t[t.season == s - lag].drop_duplicates("gsis_id").set_index("gsis_id").reindex(ids)
     wv, wa = wv + w * prev.val.fillna(0), wa + w * prev.att.fillna(0)
-  return wv / (wa + k_prior), wa
+  return wv / (wa + (0.0 if raw else k_prior)), wa
 
 
 def prior(k: pd.DataFrame, t: pd.DataFrame) -> float:
@@ -135,7 +135,7 @@ def prior(k: pd.DataFrame, t: pd.DataFrame) -> float:
 
 def build_kickers(out: Path, cur: int, sched: pd.DataFrame, cache_dir: Path) -> None:
   """Adds K records (the defenders' layout) to data/grades/<season>.json: [OVR, "K", games, weighted attempts,
-  window value / attempt, [bars], season-only OVR, season value / attempt, games]."""
+  window value / attempt (raw), [bars], season-only OVR, season value / attempt (raw), games, None, {fgm, fga}]."""
   from grade_build import pct
   k = kicks(st_plays(cache_dir, cur))
   t = kicker_seasons(k, sched)
@@ -149,8 +149,10 @@ def build_kickers(out: Path, cur: int, sched: pd.DataFrame, cache_dir: Path) -> 
     if len(ids) < 5:
       continue
     o = one.loc[ids]
+    # the percentiles rank the shrunk rates (a perfect 5 for 5 isn't a 99); the values shown are what he did (raw)
     cur_v, wa = window(t, s, ids, kp)
     sea_v = o.val / (o.att + kp)
+    cur_raw, sea_raw = window(t, s, ids, kp, raw=True)[0], o.val / o.att
     bars = [o.fg_val / o.fga.replace(0, np.nan)] + [o[f"{b}_x"] / (o[f"{b}_n"] + BAND_SHRINK) for b, _, _ in K_BANDS]
     labels = list(K_LABELS[:4])
     if s >= 2015:
@@ -160,8 +162,8 @@ def build_kickers(out: Path, cur: int, sched: pd.DataFrame, cache_dir: Path) -> 
     gp, sg = pct(cur_v), pct(sea_v)
     doc["stats"]["K"], doc["qualified"]["K"] = labels, len(ids)
     for x in ids:
-      doc["players"][x] = [int(gp[x]), "K", int(o.games[x]), int(round(wa[x])), round(float(cur_v[x]), 3), [int(b[x]) for b in bp],
-                           int(sg[x]), round(float(sea_v[x]), 3), int(o.games[x]),
+      doc["players"][x] = [int(gp[x]), "K", int(o.games[x]), int(round(wa[x])), round(float(cur_raw[x]), 4), [int(b[x]) for b in bp],
+                           int(sg[x]), round(float(sea_raw[x]), 4), int(o.games[x]),
                            None, {"fgm": int(o.fgm[x]), "fga": int(o.fga[x])}]
     n_all += len(ids)
     f.write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
