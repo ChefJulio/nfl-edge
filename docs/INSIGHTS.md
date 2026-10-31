@@ -5778,3 +5778,29 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   credited to the right player), not a forecast gate. (DY)'s forecast gate stays on record; the grade shipped as the
   better of the two measures it compared. Kicker cards show the raw per-attempt value (what he did) while the percentile
   ranks the shrunk one.
+- **PRE-REGISTERED 2026-10-31 (owner: punters ... "inside the 20 rate starting from punting at specific areas of the
+  field? touchback rate? total distance when they have enough space ... blame 'returns tend to be high' on the special
+  teams unit more than the punter? is fair catch rate something to consider?"; a grade is hindsight, judged on
+  description, per the ruling above): (DZ) the punter grade.** A punt's punter value = his net yards with the return
+  replaced by the league's average return: touchback = line of scrimmage to the 20; fair catch, downed or out of
+  bounds = the gross distance; returned = gross minus the league's average return yards on returned punts that season
+  (+-1). Expected = the league's average punter value from the same line of scrimmage (5-yard bins, that season +-1).
+  Value = punter value - expected (yards), per punt. Blocked punts left out (protection). Grade: value per punt over
+  this season and the two before (1 / 0.6 / 0.3), shrunk by method-of-moments pseudo-punts, percentile among qualified
+  punters (1.75 punts per team game). Bars: net over expected per punt; gross over expected from his own side (line of
+  scrimmage 60+ yards from the goal: room to kick it far); pinned inside the 20 from midfield in (line 50 or closer):
+  rate over expected; touchbacks from midfield in (fewer = better); no-return rate (fair catch, out of bounds, downed)
+  over expected by spot. Coverage (return yards beyond the league's average on returned punts) is the team's, kept out
+  of the punter's grade and written per team-season for a later team stat. DESCRIPTION CHECKS: (1) AP first-team
+  All-Pro punters 2001-2025 (data/honors.json) average a season grade of 75+ and 80%+ of them sit above the median;
+  (2) the split holds: across punter-seasons, the correlation between his value per punt and his team's coverage
+  (return yards over expected per returned punt) is within +-0.2. Both pass = ships; a miss is reported with what
+  failed. Reported, not gating: the same All-Pro check on the kicker grade.
+- **RESULT {#punter-grade} (DZ) the punter grade: PASS, shipped.** tools/st_grades.py --eval-p. Shrinkage 46
+  pseudo-punts (punting skill shows season to season far more than kicking's 1,475), 907 qualified punter-seasons
+  1999-2026. (1) AP first-team All-Pro punters 2001-2025: 25 graded seasons, average season grade 92.2, 100% above
+  the median. (2) value per punt vs his team's coverage (return yards over expected per returned punt), 811
+  punter-seasons: r = +0.115, inside +-0.2: the return is landing on the coverage unit. Reported: AP first-team
+  kickers under the kicker grade average 91.9, 96% above the median (the kicker grade passes the description check its
+  forecast gate didn't ask). 2026 so far: Araiza, Dickson, Stout top; Hekker, Riley Dixon bottom. Team coverage per
+  season written to data/grades/coverage.json for a team stat (not shown yet: open item).

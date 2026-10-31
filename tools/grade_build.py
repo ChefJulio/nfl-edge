@@ -982,6 +982,8 @@ def main():
   # gate missed): points over expected per kick, tools/st_grades.py
   import st_grades
   st_grades.build_kickers(out, cur, sched if sched is not None else data.schedules, ROOT / cfg["data"]["cache_dir"])
+  # punters (INSIGHTS (DZ)): net yards against the league from the same spot, returns at the league's average
+  st_grades.build_punters(out, cur, sched if sched is not None else data.schedules, ROOT / cfg["data"]["cache_dir"])
   ix = json.loads((out / "index.json").read_text(encoding="utf-8"))
   ix["seasons"] = sorted(set(old) | set(ix["seasons"]))
   ix["box_before"] = FIRST
