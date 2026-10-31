@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4690179,Tavius Robinson,Baltimore Ravens,Injured Reserve,2026-10-24T20:50Z,Pectoral,Not Specified,Not Specified,2027-02-15,IR,The Ravens placed Robinson (pectoral) on injured reserve Saturday.,LB
 4361178,Cam Jurgens,Baltimore Ravens,Active,2026-10-24T01:48Z,,,,,,Jurgens (concussion) does not have any injury designation ahead of Sunday's game against the Bengals.,C
 4432260,Matt Hibner,Baltimore Ravens,Active,2026-10-23T00:03Z,,,,,,Hibner (hand) was a full participant at practice Thursday.,TE
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-31T19:10Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-31T19:15Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4030899,Spencer Brown,Buffalo Bills,Questionable,2026-10-31T01:53Z,Back,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Brown (back) is listed as questionable for Sunday's game against the Ravens.,OT
 4401823,Dee Alford,Buffalo Bills,Questionable,2026-10-30T21:56Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Alford (ankle) is listed as questionable ahead of Sunday's game against the Ravens.,CB
 4429501,Ray Davis,Buffalo Bills,Active,2026-10-30T19:20Z,,,,,,Davis (illness) doesn't have an injury designation for Sunday's game against the Ravens.,RB
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431077,TeRah Edwards,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,DT
 4874515,Sam Hecht,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,C
 4034962,Stone Forsythe,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,OT
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-31T19:00Z,Undisclosed,Not Specified,Not Specified,2026-11-08,IR,ir,S
+4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-31T19:15Z,Undisclosed,Not Specified,Not Specified,2026-11-08,IR,ir,S
 4723086,Colston Loveland,Chicago Bears,Active,2026-10-31T18:57Z,,,,,,Loveland (neck) does not carry an injury designation into Monday's game against the Seahawks.,TE
 4608686,Kyle Monangai,Chicago Bears,Out,2026-10-31T16:55Z,Thumb,Sprain,Not Specified,2026-11-08,OUT,"Head coach Ben Johnson told reporters Saturday that Monangai (thumb/toe) will not play against the Seahawks on Monday, Courtney Cronin of ESPN.com reports.",RB
 3121544,T.J. Edwards,Chicago Bears,Active,2026-10-30T00:07Z,,,,,,Edwards (hamstring) was considered to be a full participant on the Bears' estimated practice report Thursday.,LB
@@ -376,7 +376,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2970716,Eric Murray,Jacksonville Jaguars,Active,2026-10-17T00:55Z,,,,,,Murray (concussion) does not have an injury designation ahead of Sunday's game against the Texans.,S
 4043041,Jaylon Moore,Kansas City Chiefs,Active,2026-10-31T01:48Z,,,,,,Moore (concussion) does not carry an injury designation into Sunday's game against the Broncos.,OT
 4040432,L'Jarius Sneed,Kansas City Chiefs,Injured Reserve,2026-10-30T23:49Z,Knee,Not Specified,Not Specified,2026-11-26,IR,Sneed (knee) is questionable for Sunday's game against Denver.,CB
-4880124,Mansoor Delane,Kansas City Chiefs,Questionable,2026-10-30T23:46Z,Shoulder,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Delane (shoulder) is listed as questionable for Sunday's game against the Broncos.,CB
+4880124,Mansoor Delane,Kansas City Chiefs,Out,2026-10-30T23:46Z,Shoulder,Not Specified,Not Specified,2026-11-08,OUT,Delane (shoulder) is listed as questionable for Sunday's game against the Broncos.,CB
 4683062,Xavier Worthy,Kansas City Chiefs,Active,2026-10-30T22:42Z,,,,,,"Rashee Rice (knee/hamstring) has no injury designation for Sunday's game against the Broncos, so Worthy will move back into his WR2 role for Week 8.",WR
 15847,Travis Kelce,Kansas City Chiefs,Active,2026-10-30T19:18Z,,,,,,Kelce (ankle) doesn't have an injury designation for Sunday's game against the Broncos.,TE
 5081927,R Mason Thomas,Kansas City Chiefs,Questionable,2026-10-30T19:11Z,Personal,,,2026-11-01,QUESTIONABLE,questionable,DE
@@ -774,7 +774,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4573318,Dorian Mausi,Tennessee Titans,Injured Reserve,2026-10-22T01:35Z,Foot,Not Specified,Not Specified,2026-11-15,IR-R,"The Titans opened Mausi's 21-day practice window Wednesday, Jim Wyatt of the team's official website reports.",LB
 4369835,Alontae Taylor,Tennessee Titans,Active,2026-10-19T17:18Z,,,,,,,CB
 4917635,Joshua Williams,Tennessee Titans,Active,2026-10-18T02:44Z,,,,,,The Titans activated Williams (pectoral) from reserve/PUP on Saturday.,CB
-3925354,Daron Payne,Washington Commanders,Out,2026-10-31T01:14Z,Foot,Fracture,Not Specified,2027-02-15,OUT,Payne (foot) has been ruled out for Sunday's game against the Eagles.,DT
+3925354,Daron Payne,Washington Commanders,Out,2026-10-31T01:14Z,Foot,Surgery,Left,2027-02-15,OUT,Payne (foot) has been ruled out for Sunday's game against the Eagles.,DT
 4430560,Jer'Zhan Newton,Washington Commanders,Injured Reserve,2026-10-31T00:25Z,Pectoral,Surgery,Not Specified,2026-11-01,IR-R,Newton (pectoral) is questionable for Sunday's game against the Eagles.,DT
 3115922,Nick Allegretti,Washington Commanders,Active,2026-10-30T23:27Z,,,,,,,G
 4259491,Javon Kinlaw,Washington Commanders,Out,2026-10-30T21:07Z,Knee,Not Specified,Not Specified,2026-11-08,OUT,Kinlaw (knee) has been ruled out for Sunday's game against the Eagles.,DT
