@@ -5822,3 +5822,27 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   parts are shared by its linemen by design (Buffalo 2026: McGovern, Brown, Torrence, Dawkins 98-99). Reading: the
   unit value per game swings widely (sd 0.089 EPA per play), so the shrinkage matters; a lineman who moves teams carries
   his old line's games in his three-season form.
+- **PRE-REGISTERED 2026-10-31 (owner: "do the best OL get graded 99?"; (EA)'s All-Pros averaged 74, only 8 of 64 at
+  99, Joe Thomas 53-69 on bad Browns lines, the 2013 Broncos' backups at 99 behind Manning's quick release): (EB) the
+  line grade v2.** Pass protection, 2018 on: the line's real pressures (PFR times pressured, the QB's view, summed per
+  team-game) minus sacks FTN charts as the QB's fault (2022 on), per dropback, against an expected rate from a
+  dropback-weighted linear fit on that season +-1 with the QB's average time to throw that game (Next Gen Stats), the
+  opponent's pressure rate in its other games and FTN's average pass rushers (2022 on; the league mean before),
+  valued at the league's EPA cost of a pressure (participation 2017-2025: pressured minus clean dropbacks; that
+  average for 2026). Before 2018: (EA)'s sacks + half hits. Run blocking split by side: each designed run's clipped
+  EPA over the opponent's norm credited by its gap (left end: LT; left tackle: LT 1/2, LG 1/2; left guard: LG 1/2,
+  C 1/2; middle: C 1/2, LG 1/4, RG 1/4; mirrored), to the lineman whose slot it is (his most common LT / LG / C / RG /
+  RT starting slot that season on the depth charts), times 5 so the five slots average to the unit; a lineman with
+  no slot keeps the unit's run value. Everything else as (EA). CHECK (same as (EA), so the two compare): AP first-team
+  linemen 2013-2025, season grade average and share above the median; ships if the average beats (EA)'s 74.0 and the
+  share is 75%+. Reported: how many reach 99, Joe Thomas 2013-15, the 2013 Broncos.
+- **RESULT {#line-grade-v2} (EB) the line grade v2: PASS (narrowly), shipped.** tools/st_grades.py --eval-ol.
+  Shrinkage 559 pseudo-plays; slots known for 98% of qualified lineman-seasons; pass basis: real pressures for 4,468
+  team-games (2018 on), sacks + half hits for 3,074. AP first-team linemen 2013-2025: average 74.8 ((EA) 74.0), 84%
+  above the median; 99s 5 (8), 90+ 32, under 75: 9 (10). By era (reported after the fact, not used to choose):
+  2013-17 (side split only) 74.1 -> 77.0, Joe Thomas 59 / 69 / 53 -> 71 / 80 / 56 (2013-15); 2018-25 (pressures + side
+  split) 74.0 -> 73.4. Reading: the run side split separates linemen within a line (the intended effect); the
+  real-pressure pass part didn't raise the All-Pro check, likely because pressures are the QB's view (still the whole
+  line's) and swing more game to game than sacks. Not re-picked on these numbers (that would fit the check). The 2013
+  Broncos' line still grades 96-99 (no time-to-throw before 2016, so Manning's release isn't adjusted there). Open: a
+  pass-protection measure that separates linemen needs charted blocking data, which isn't public.

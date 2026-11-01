@@ -287,23 +287,30 @@ OL_FIRST = 2012  # snap counts
 OL_POS = {"T", "G", "C", "OT", "OG", "OL"}
 OL_QUAL = 0.40  # share of the team's offensive snaps over its games
 RUN_CLIP = 1.5
-OL_LABELS = ["Pass protection (the line, his games)", "Run blocking (the line, his games)", "Snap share",
+OL_LABELS = ["Pass protection (the line, his games)", "Run blocking (his side)", "Snap share",
              "Penalties per 1,000 snaps (his own; fewer is better)"]
-OLCOLS = ["game_id", "season", "week", "season_type", "posteam", "defteam", "play_type", "qb_dropback", "qb_kneel", "qb_spike",
-          "qb_scramble", "rush", "sack", "qb_hit", "epa", "penalty", "penalty_player_id", "penalty_team"]
+OLCOLS = ["game_id", "play_id", "season", "week", "season_type", "posteam", "defteam", "play_type", "qb_dropback", "qb_kneel",
+          "qb_spike", "qb_scramble", "rush", "sack", "qb_hit", "epa", "penalty", "penalty_player_id", "penalty_team",
+          "run_location", "run_gap"]
+SLOTS = ["LT", "LG", "C", "RG", "RT"]
+# a designed run's credit by where it went (owner 2026-10-31, (EB)): the slots whose blocks open that gap
+GAP_CREDIT = {("left", "end"): {"LT": 1.0}, ("left", "tackle"): {"LT": 0.5, "LG": 0.5}, ("left", "guard"): {"LG": 0.5, "C": 0.5},
+              ("middle", None): {"C": 0.5, "LG": 0.25, "RG": 0.25},
+              ("right", "guard"): {"RG": 0.5, "C": 0.5}, ("right", "tackle"): {"RT": 0.5, "RG": 0.5}, ("right", "end"): {"RT": 1.0}}
+PRS_FIRST, FTN_FIRST = 2018, 2022
 
 
 def ol_plays(cache_dir: Path, cur: int) -> pd.DataFrame:
-  """Regular-season scrimmage plays for the line grade (cache/pbpol_<season>.parquet, the current season refetched)."""
+  """Regular-season scrimmage plays for the line grade (cache/pbpol2_<season>.parquet, the current season refetched)."""
   import nflreadpy as nfl
   out = []
   for s in range(OL_FIRST, cur + 1):
-    p = cache_dir / f"pbpol_{s}.parquet"
+    p = cache_dir / f"pbpol2_{s}.parquet"
     if p.exists() and s != cur:
       out.append(pd.read_parquet(p))
       continue
     try:
-      df = nfl.load_pbp([s]).select([c for c in OLCOLS if c]).to_pandas()
+      df = nfl.load_pbp([s]).select(OLCOLS).to_pandas()
       df = df[df.season_type == "REG"]
       df.to_parquet(p, index=False)
       out.append(df)
@@ -314,38 +321,173 @@ def ol_plays(cache_dir: Path, cur: int) -> pd.DataFrame:
   return pd.concat(out, ignore_index=True)
 
 
-def ol_units(pl: pd.DataFrame) -> pd.DataFrame:
-  """One row per team-game: the line's value per play (pass protection + run blocking) against the opponent's norm."""
+def _season_cache(cache_dir: Path, name: str, s: int, cur: int, load):
+  """A per-season frame from nflverse, cached as cache/<name>_<season>.parquet (the current season refetched)."""
+  p = cache_dir / f"{name}_{s}.parquet"
+  if p.exists() and s != cur:
+    return pd.read_parquet(p)
+  try:
+    df = load()
+    df.to_parquet(p, index=False)
+    return df
+  except Exception as e:
+    print(f"[ol] {name} {s}: {type(e).__name__} {str(e)[:80]}", flush=True)
+    return pd.read_parquet(p) if p.exists() else None
+
+
+def pass_inputs(cache_dir: Path, cur: int, pl: pd.DataFrame) -> pd.DataFrame:
+  """Per (season, week, team), 2018 on: the line's pressures (PFR, the QB's view), sacks FTN charts as the QB's fault
+  and FTN's average pass rushers (2022 on), the QBs' time to throw (Next Gen Stats, attempts-weighted)."""
+  import nflreadpy as nfl
+  rows = []
+  for s in range(PRS_FIRST, cur + 1):
+    a = _season_cache(cache_dir, "pfrpass", s, cur, lambda: nfl.load_pfr_advstats([s], stat_type="pass", summary_level="week").to_pandas()[
+      ["season", "week", "game_type", "team", "times_pressured"]])
+    if a is None:
+      continue
+    a = a[a.game_type == "REG"].assign(team=lambda d: d.team.map(lambda t: D.RELOCATED.get(t, t)))
+    x = a.groupby(["season", "week", "team"]).times_pressured.sum().rename("prs").to_frame()
+    n = _season_cache(cache_dir, "ngspass", s, cur, lambda: nfl.load_nextgen_stats([s], stat_type="passing").to_pandas()[
+      ["season", "season_type", "week", "team_abbr", "attempts", "avg_time_to_throw"]])
+    if n is not None and len(n):
+      n = n[(n.season_type == "REG") & (n.week > 0)].assign(team=lambda d: d.team_abbr.map(lambda t: D.RELOCATED.get(t, t)))
+      n = n.assign(w=n.attempts * n.avg_time_to_throw).groupby(["season", "week", "team"])[["w", "attempts"]].sum()
+      x = x.join((n.w / n.attempts.replace(0, np.nan)).rename("ttt"), how="left")
+    if s >= FTN_FIRST:
+      f = _season_cache(cache_dir, "ftn", s, cur, lambda: nfl.load_ftn_charting([s]).to_pandas()[
+        ["nflverse_game_id", "nflverse_play_id", "is_qb_fault_sack", "n_pass_rushers"]])
+      if f is not None and len(f):
+        k = pl[pl.season == s][["game_id", "play_id", "week", "posteam", "qb_dropback"]].copy()
+        f = f.assign(game_id=f.nflverse_game_id, play_id=pd.to_numeric(f.nflverse_play_id, errors="coerce"))
+        k["play_id"] = pd.to_numeric(k.play_id, errors="coerce")
+        m = k.merge(f[["game_id", "play_id", "is_qb_fault_sack", "n_pass_rushers"]], on=["game_id", "play_id"], how="inner")
+        m = m[pd.to_numeric(m.qb_dropback, errors="coerce").fillna(0) == 1].assign(
+          team=lambda d: d.posteam.map(lambda t: D.RELOCATED.get(t, t)), season=s,
+          qbf=lambda d: d.is_qb_fault_sack.astype(float), rush_n=lambda d: pd.to_numeric(d.n_pass_rushers, errors="coerce"))
+        g = m.groupby(["season", "week", "team"]).agg(qbf=("qbf", "sum"), rushers=("rush_n", "mean"))
+        x = x.join(g, how="left")
+    rows.append(x.reset_index())
+  out = pd.concat(rows, ignore_index=True)
+  for c in ("ttt", "qbf", "rushers"):
+    if c not in out:
+      out[c] = np.nan
+  return out
+
+
+def pressure_cost(cache_dir: Path, cur: int, pl: pd.DataFrame) -> dict:
+  """{season: EPA cost of a pressure} = mean EPA of clean dropbacks - pressured ones (participation, 2017-2025);
+  other seasons get the average."""
+  import nflreadpy as nfl
+  cost = {}
+  for s in range(2017, min(cur, 2025) + 1):
+    p = _season_cache(cache_dir, "part", s, -1, lambda: nfl.load_participation([s]).to_pandas()[["nflverse_game_id", "play_id", "was_pressure"]])
+    if p is None or not len(p):
+      continue
+    k = pl[(pl.season == s) & (pd.to_numeric(pl.qb_dropback, errors="coerce").fillna(0) == 1)][["game_id", "play_id", "epa"]].copy()
+    k["play_id"] = pd.to_numeric(k.play_id, errors="coerce")
+    q = p.rename(columns={"nflverse_game_id": "game_id"}).assign(play_id=lambda d: pd.to_numeric(d.play_id, errors="coerce"))
+    m = k.merge(q, on=["game_id", "play_id"]).dropna(subset=["was_pressure", "epa"])
+    if len(m) > 1000:
+      wp = m.was_pressure.astype(bool)
+      cost[s] = float(m.epa[~wp].mean() - m.epa[wp].mean())
+  avg = float(np.mean(list(cost.values()))) if cost else 0.8
+  return {s: cost.get(s, avg) for s in range(OL_FIRST, cur + 1)}
+
+
+def ol_slots(cache_dir: Path, cur: int) -> dict:
+  """(gsis, season) -> his most common starting slot (LT / LG / C / RG / RT) on that season's depth charts."""
+  import nflreadpy as nfl
+  out = {}
+  for s in range(OL_FIRST, cur + 1):
+    d = _season_cache(cache_dir, "dcol", s, cur, lambda: nfl.load_depth_charts([s]).to_pandas())
+    if d is None or not len(d):
+      continue
+    if "pos_abb" in d:  # 2025 on: ESPN's charts (pos_rank 1 = the starter)
+      x = d[(pd.to_numeric(d.pos_rank, errors="coerce") == 1) & d.pos_abb.isin(SLOTS)][["gsis_id", "pos_abb"]].rename(columns={"pos_abb": "slot"})
+    else:
+      x = d[(d.depth_team.astype(str) == "1") & d.depth_position.isin(SLOTS) & (d.game_type == "REG")][["gsis_id", "depth_position"]].rename(
+        columns={"depth_position": "slot"})
+    x = x.dropna(subset=["gsis_id"])
+    for g, sl in x.groupby("gsis_id").slot.agg(lambda v: v.mode().iloc[0]).items():
+      out[(g, s)] = sl
+  return out
+
+
+def ol_units(pl: pd.DataFrame, inputs: pd.DataFrame | None = None, cost: dict | None = None) -> pd.DataFrame:
+  """One row per team-game: the line's value (EPA) against the opponent's norm, pass protection and run blocking, and
+  the run part by slot (run_LT ... run_RT; each run credited by its gap). Pass protection from real pressures (2018 on,
+  inputs) against an expected rate (QB time to throw, opponent, rushers); before 2018 sacks + half hits."""
   f = lambda c: pd.to_numeric(pl[c], errors="coerce").fillna(0)  # noqa: E731
   db = (f("qb_dropback") == 1) & (f("qb_spike") == 0)
   run = (f("rush") == 1) & (f("qb_scramble") == 0) & (f("qb_kneel") == 0)
-  x = pd.DataFrame({"game_id": pl.game_id, "season": pl.season, "team": pl.posteam, "opp": pl.defteam,
-                    "db": db.astype(float), "prs": (db & ((f("sack") == 1) | (f("qb_hit") == 1))).astype(float)
-                    * np.where(f("sack") == 1, 1.0, 0.5), "sack": (db & (f("sack") == 1)).astype(float),
+  x = pd.DataFrame({"game_id": pl.game_id, "season": pl.season, "week": pl.week, "team": pl.posteam, "opp": pl.defteam,
+                    "db": db.astype(float), "prs1": (db & ((f("sack") == 1) | (f("qb_hit") == 1))).astype(float)
+                    * np.where(f("sack") == 1, 1.0, 0.5),
                     "sack_epa": np.where(db & (f("sack") == 1), pd.to_numeric(pl.epa, errors="coerce"), np.nan),
-                    "run": run.astype(float), "run_epa": np.where(run, pd.to_numeric(pl.epa, errors="coerce").clip(-RUN_CLIP, RUN_CLIP), 0.0)})
-  x = x[x.team.notna() & x.opp.notna()]
+                    "run": run.astype(float), "run_epa": np.where(run, pd.to_numeric(pl.epa, errors="coerce").clip(-RUN_CLIP, RUN_CLIP), 0.0),
+                    "loc": pl.run_location, "gap": pl.run_gap})
+  x = x[x.team.notna() & x.opp.notna()].copy()
   for c in ("team", "opp"):
     x[c] = x[c].map(lambda t: D.RELOCATED.get(t, t))
-  g = x.groupby(["season", "game_id", "team", "opp"]).agg(db=("db", "sum"), prs=("prs", "sum"), run=("run", "sum"),
-                                                           run_epa=("run_epa", "sum")).reset_index()
-  sack_cost = x.groupby("season").sack_epa.mean().abs()  # the league's EPA cost of a sack, by season
-  # what each defense allows over its season, this game left out
-  d = g.groupby(["season", "opp"])[["db", "prs", "run", "run_epa"]].sum()
-  k = d.reindex(pd.MultiIndex.from_frame(g[["season", "opp"]])).to_numpy() - g[["db", "prs", "run", "run_epa"]].to_numpy()
-  exp_prs = k[:, 1] / np.maximum(k[:, 0], 1)
-  exp_run = k[:, 3] / np.maximum(k[:, 2], 1)
-  g["pass_v"] = (exp_prs - g.prs / g.db.clip(lower=1)) * g.db * g.season.map(sack_cost).to_numpy()
-  g["run_v"] = g.run_epa - exp_run * g.run
+  g = x.groupby(["season", "week", "game_id", "team", "opp"]).agg(db=("db", "sum"), prs1=("prs1", "sum"), run=("run", "sum"),
+                                                                   run_epa=("run_epa", "sum")).reset_index()
+  sack_cost = x.groupby("season").sack_epa.mean().abs()
+
+  def other_games(df, num, den):  # each defense's rate over its other games that season
+    d = df.groupby(["season", "opp"])[[num, den]].sum()
+    k = d.reindex(pd.MultiIndex.from_frame(df[["season", "opp"]])).to_numpy() - df[[num, den]].to_numpy()
+    return k[:, 0] / np.maximum(k[:, 1], 1)
+  g["exp_run"] = other_games(g, "run_epa", "run")
+  g["run_v"] = g.run_epa - g.exp_run * g.run
+  # sacks + half hits for every season; real pressures replace it from 2018 where the inputs exist
+  g["pass_v"] = (other_games(g, "prs1", "db") - g.prs1 / g.db.clip(lower=1)) * g.db * g.season.map(sack_cost).to_numpy()
+  g["pass_basis"] = "sacks"
+  if inputs is not None and len(inputs):
+    g = g.merge(inputs, on=["season", "week", "team"], how="left")
+    have = (g.prs.notna() & (g.season >= PRS_FIRST)).to_numpy()
+    g["prs2"] = (g.prs - g.qbf.fillna(0)).clip(lower=0)
+    g["rate"] = g.prs2 / g.db.clip(lower=1)
+    g["opp_rate"] = np.nan
+    gg = g[have]
+    g.loc[have, "opp_rate"] = other_games(gg, "prs2", "db")
+    for s in sorted(g.loc[have, "season"].unique()):
+      tr = g[have & g.season.between(s - 1, s + 1).to_numpy()].copy()
+      te = have & (g.season == s).to_numpy()
+      fill = {c: (tr[c].mean() if tr[c].notna().any() else 0.0) for c in ("ttt", "rushers")}
+      tr = tr.fillna(fill)
+      X = lambda d: np.column_stack([np.ones(len(d)), d.ttt, d.opp_rate, d.rushers])  # noqa: E731
+      w = np.sqrt(tr.db.to_numpy())
+      beta = np.linalg.lstsq(X(tr) * w[:, None], tr.rate.to_numpy() * w, rcond=None)[0]
+      t2 = g[te].fillna(fill)
+      exp_rate = X(t2) @ beta
+      g.loc[te, "pass_v"] = (exp_rate - t2.rate.to_numpy()) * t2.db.to_numpy() * (cost or {}).get(int(s), 0.8)
+      g.loc[te, "pass_basis"] = "pressures"
+  # the run part by slot: each run's excess over the opponent's norm, credited by its gap
+  x = x.merge(g[["game_id", "team", "exp_run"]], on=["game_id", "team"], how="left")
+  rx = x[x.run == 1].copy()
+  rx["ex"] = rx.run_epa - rx.exp_run
+  for sl in SLOTS:
+    rx[f"run_{sl}"] = 0.0
+  for (loc, gap), cr in GAP_CREDIT.items():
+    m = (rx["loc"] == loc) & ((rx.gap == gap) if gap else rx.gap.isna())
+    for sl, c in cr.items():
+      rx.loc[m, f"run_{sl}"] += c * rx.loc[m, "ex"]
+  none = ~rx["loc"].isin(["left", "middle", "right"])  # no location recorded: shared evenly
+  for sl in SLOTS:
+    rx.loc[none, f"run_{sl}"] += rx.loc[none, "ex"] / 5
+  slot = rx.groupby(["game_id", "team"])[[f"run_{sl}" for sl in SLOTS]].sum()
+  g = g.join(slot, on=["game_id", "team"])
+  for sl in SLOTS:
+    g[f"run_{sl}"] = g[f"run_{sl}"].fillna(0.0)
   g["plays"] = g.db + g.run
   g["val"] = g.pass_v + g.run_v
   return g
 
 
-def ol_seasons(units: pd.DataFrame, pl: pd.DataFrame, cache_dir: Path, cur: int, sched: pd.DataFrame):
-  """(lineman-game rows with his snaps and the unit's value, lineman-seasons). Snap counts map PFR ids to gsis."""
+def ol_seasons(units: pd.DataFrame, pl: pd.DataFrame, cache_dir: Path, cur: int, sched: pd.DataFrame, slots: dict | None = None):
+  """(lineman-game rows, lineman-seasons). Pass protection is the line's; the run part is his slot's (x 5, so the
+  five slots average to the unit), or the line's when he has no slot. Snap counts map PFR ids to gsis."""
   import nflreadpy as nfl
-  from grade_build import team_games
   players = D.Cache(cache_dir).get("players", "all", lambda: nfl.load_players(), stale=False)
   p2g = players.dropna(subset=["pfr_id", "gsis_id"]).drop_duplicates("pfr_id").set_index("pfr_id").gsis_id
   sn = []
@@ -357,22 +499,29 @@ def ol_seasons(units: pd.DataFrame, pl: pd.DataFrame, cache_dir: Path, cur: int,
   sn = pd.concat(sn, ignore_index=True)
   sn = sn.assign(gsis_id=sn.pfr_player_id.map(p2g), team=sn.team.map(lambda t: D.RELOCATED.get(t, t))).dropna(subset=["gsis_id"])
   sn["snaps"] = pd.to_numeric(sn.offense_snaps, errors="coerce").fillna(0)
-  sn = sn[sn.snaps > 0]
+  sn = sn[sn.snaps > 0].copy()
   u = units.set_index(["game_id", "team"])
   key = pd.MultiIndex.from_arrays([sn.game_id, sn.team])
-  sn["val"], sn["plays"] = u.val.reindex(key).to_numpy(), u.plays.reindex(key).to_numpy()
-  sn["pass_v"], sn["run_v"] = u.pass_v.reindex(key).to_numpy(), u.run_v.reindex(key).to_numpy()
-  sn = sn.dropna(subset=["val"])
-  # his own penalties (named on the play)
+  for c in ["val", "plays", "pass_v", "run_v"] + [f"run_{sl}" for sl in SLOTS]:
+    sn[c] = u[c].reindex(key).to_numpy()
+  sn = sn.dropna(subset=["val"]).copy()
+  slots = slots or {}
+  sn["slot"] = [slots.get((g, int(s))) for g, s in zip(sn.gsis_id, sn.season)]
+  own = np.full(len(sn), np.nan)
+  for sl in SLOTS:
+    m = (sn.slot == sl).to_numpy()
+    own[m] = 5 * sn[f"run_{sl}"].to_numpy()[m]
+  sn["run_own"] = np.where(np.isnan(own), sn.run_v, own)
+  sn["val"] = sn.pass_v + sn.run_own
   pen = pl[pd.to_numeric(pl.penalty, errors="coerce").fillna(0) == 1].groupby(["season", "penalty_player_id"]).size()
-  # team offensive snaps per season (the max lineman snaps per game approximates the team's offensive snaps)
   team_snaps = sn.groupby(["season", "team", "game_id"]).snaps.max().groupby(["season", "team"]).sum()
   w = sn.snaps / sn.plays.clip(lower=1)  # his share of the unit's plays that game
-  sn["wv"], sn["wp"], sn["wr"], sn["wpl"] = sn.val * w, sn.pass_v * w, sn.run_v * w, sn.plays * w
+  sn["wv"], sn["wp"], sn["wr"], sn["wpl"] = sn.val * w, sn.pass_v * w, sn.run_own * w, sn.plays * w
   g = sn.groupby(["gsis_id", "season"])
   t = pd.DataFrame({"val": g.wv.sum(), "att": g.wpl.sum(), "pass_v": g.wp.sum(), "run_v": g.wr.sum(), "snaps": g.snaps.sum(),
                     "games": g.game_id.nunique(), "team": g.team.agg(lambda x: x.mode().iloc[0]),
-                    "pos": g.position.agg(lambda x: x.mode().iloc[0])}).reset_index()
+                    "pos": g.position.agg(lambda x: x.mode().iloc[0]),
+                    "slot": g.slot.agg(lambda x: x.dropna().mode().iloc[0] if x.notna().any() else None)}).reset_index()
   t["tsn"] = [team_snaps.get((int(s), tm), np.nan) for s, tm in zip(t.season, t.team)]
   t["share"] = t.snaps / t.tsn
   t["qual"] = t.share >= OL_QUAL
@@ -380,17 +529,20 @@ def ol_seasons(units: pd.DataFrame, pl: pd.DataFrame, cache_dir: Path, cur: int,
   return sn, t
 
 
+def line_table(cache_dir: Path, cur: int, sched: pd.DataFrame):
+  """(units, lineman-seasons, shrinkage) for the build and the check."""
+  pl = ol_plays(cache_dir, cur)
+  units = ol_units(pl, pass_inputs(cache_dir, cur, pl), pressure_cost(cache_dir, cur, pl))
+  sn, t = ol_seasons(units, pl, cache_dir, cur, sched, ol_slots(cache_dir, cur))
+  r = mom_prior(units.assign(gsis_id=units.team), "val", "plays")
+  return units, t, (r[1] if r else 300.0)
+
+
 def build_line(out: Path, cur: int, sched: pd.DataFrame, cache_dir: Path) -> None:
   """Adds OL records (the kickers' layout) to data/grades/<season>.json, 2012 on: [OVR, "OL", games, weighted plays,
   window value / play (raw), [bars], season-only OVR, season value / play (raw), games, None, {snap, pen, pos}]."""
   from grade_build import pct
-  pl = ol_plays(cache_dir, cur)
-  units = ol_units(pl)
-  sn, t = ol_seasons(units, pl, cache_dir, cur, sched)
-  # shrinkage from team-games (the unit is what's measured)
-  ug = units.assign(gsis_id=units.team)
-  r = mom_prior(ug, "val", "plays")
-  kp = r[1] if r else 300.0
+  units, t, kp = line_table(cache_dir, cur, sched)
   n_all = 0
   for s in sorted(t.season.unique()):
     f = out / f"{int(s)}.json"
@@ -410,7 +562,8 @@ def build_line(out: Path, cur: int, sched: pd.DataFrame, cache_dir: Path) -> Non
     for x in ids:
       doc["players"][x] = [int(gp[x]), "OL", int(o.games[x]), int(round(wa[x])), round(float(cur_raw[x]), 4), [int(b[x]) for b in bp],
                            int(sg[x]), round(float(sea_raw[x]), 4), int(o.games[x]),
-                           None, {"snap": int(round(100 * float(o.share[x]))), "pen": int(o.pen[x]), "pos": str(o.pos[x])}]
+                           None, {"snap": int(round(100 * float(o.share[x]))), "pen": int(o.pen[x]),
+                                  "pos": str(o.slot[x] or o.pos[x])}]
     n_all += len(ids)
     f.write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
   print(f"[grades] offensive line: {n_all} graded lineman-seasons, {int(t.season.min())}-{int(t.season.max())} "
@@ -418,29 +571,34 @@ def build_line(out: Path, cur: int, sched: pd.DataFrame, cache_dir: Path) -> Non
 
 
 def evaluate_line(cache_dir: Path, cur: int, sched: pd.DataFrame) -> None:
-  """(EA) description check: AP first-team linemen grade high."""
+  """(EB) description check: AP first-team linemen grade high (and (EA)'s 74.0 beaten)."""
   from grade_build import pct
+  import nflreadpy as nfl
   hon = _honors()
   ap1 = {(pid, int(c[1])) for pid, hs in hon.items() for c in hs if c[0] == "AP1"}
-  pl = ol_plays(cache_dir, cur)
-  units = ol_units(pl)
-  sn, t = ol_seasons(units, pl, cache_dir, cur, sched)
-  r = mom_prior(units.assign(gsis_id=units.team), "val", "plays")
-  kp = r[1] if r else 300.0
+  units, t, kp = line_table(cache_dir, cur, sched)
   sp = {}
   for s in sorted(t.season.unique()):
     one = t[(t.season == s) & t.qual].drop_duplicates("gsis_id").set_index("gsis_id")
     if len(one) >= 10:
       for pid, v in pct(one.val / (one.att + kp)).items():
         sp[(pid, int(s))] = int(v)
-  hits = [sp[k] for k in ap1 if k in sp and 2013 <= k[1] <= 2025]
-  avg, share = float(np.mean(hits)), float(np.mean(np.array(hits) > 50))
-  print(f"(EA) offensive line: shrinkage {kp:.0f} pseudo-plays; {int(t.qual.sum())} qualified lineman-seasons")
-  print(f"  AP first-team linemen 2013-2025: {len(hits)} graded seasons, average season grade {avg:.1f} (need 70+), "
-        f"{share:.0%} above the median (need 75%+)")
-  print(f"  CHECK: {'PASS' if avg >= 70 and share >= 0.75 else 'FAIL'}")
-  print(f"  (reading) team-game unit value sd per play {units.val.div(units.plays).std():.3f}; "
-        f"pass part {units.pass_v.sum() / units.plays.sum():+.4f}, run part {units.run_v.sum() / units.plays.sum():+.4f} per play")
+  hits = {k: sp[k] for k in ap1 if k in sp and 2013 <= k[1] <= 2025}
+  v = np.array(list(hits.values()))
+  avg, share = float(v.mean()), float(np.mean(v > 50))
+  ovr = lambda p: round(50 + 49 * p / 99)  # noqa: E731
+  names = nfl.load_players().to_pandas().set_index("gsis_id").display_name
+  print(f"(EB) offensive line v2: shrinkage {kp:.0f} pseudo-plays; {int(t.qual.sum())} qualified lineman-seasons; "
+        f"slots known for {t[t.qual].slot.notna().mean():.0%}")
+  print(f"  pass basis: {units.groupby('pass_basis').size().to_dict()}")
+  print(f"  AP first-team linemen 2013-2025: {len(v)} graded seasons, average season grade {avg:.1f} ((EA) 74.0), "
+        f"{share:.0%} above the median (need 75%+); at 99 OVR: {int(sum(ovr(x) >= 99 for x in v))}, "
+        f"90+: {int(sum(ovr(x) >= 90 for x in v))}, under 75: {int(sum(ovr(x) < 75 for x in v))}")
+  print(f"  CHECK: {'PASS' if avg > 74.0 and share >= 0.75 else 'FAIL'}")
+  pid = names[names == "Joe Thomas"].index[0]
+  print("  Joe Thomas: " + ", ".join(f"{y} {ovr(sp[(pid, y)]) if (pid, y) in sp else '-'}" for y in (2013, 2014, 2015)))
+  den = t[(t.season == 2013) & (t.team == "DEN") & t.qual]
+  print("  2013 Broncos: " + ", ".join(f"{names.get(g, g)} {ovr(sp.get((g, 2013), 0))}" for g in den.gsis_id))
 
 
 def _honors() -> dict:
