@@ -5846,3 +5846,12 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   line's) and swing more game to game than sacks. Not re-picked on these numbers (that would fit the check). The 2013
   Broncos' line still grades 96-99 (no time-to-throw before 2016, so Manning's release isn't adjusted there). Open: a
   pass-protection measure that separates linemen needs charted blocking data, which isn't public.
+- **OWNER DESIGN 2026-10-31 (after (EB)): the line's grade is shown as a unit grade.** "present the grade the same way
+  as other positions but for OL show OL Unit grade rather than specific player grades, and indicate that on the tile."
+  tools/st_grades.py build_line: each team's line graded per season ((EB)'s pass protection from real pressures 2018 on
+  and the unit's run blocking, three-season form, shrunk by 559 pseudo-plays, a percentile among the season's lines),
+  and every lineman who played carries his line's grade (the team with the most of his snaps); the tile reads "OL unit
+  grade" with the team's line. (EB)'s side split stays in evaluate_line as the record, not in the build. Also: every
+  grade and stat bar on the sheets shows on the 50-99 scale; every rostered player's card has the same six tiles
+  (kindWeek: defenders, kickers with our projection for upcoming weeks, punters, linemen, long snappers; long snappers'
+  Grade tile reads Not graded).
