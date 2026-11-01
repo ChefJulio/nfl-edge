@@ -49,7 +49,9 @@ compares the live site's `data/complete_build.json` with the latest 2 a.m. Centr
 and does a complete build when either is newer. To ask for one: `python tools/request_complete.py` (commits the
 request and pushes). NEVER `gh workflow run deploy.yml -f mode=complete`: GitHub keeps one waiting run per
 concurrency group, so a waiting dispatch is replaced by the next push and silently dropped (owner 2026-10-31: "make
-that never happen again"); a user-level Claude Code hook (`~/.claude/hooks/no-complete-dispatch.js`) blocks it.
+that never happen again"). deploy.yml doesn't accept that mode (GitHub rejects the dispatch), the news watcher commits
+the request through the API (tools/news_watch.py request_complete), and a user-level Claude Code hook
+(`~/.claude/hooks/no-complete-dispatch.js`) redirects an agent before the error.
 Injury availability, live week: before a team's report, ESPN early-week buckets (`espn_calib`); once it's out, the
 practice model, except a fresh ESPN Out / IR ruling before the final status (`InjuryModel.midweek_ruling`, rates
 in `data/history/espn_midweek.json` from `tools/espn_midweek_eval.py`; INSIGHTS sec. 9).

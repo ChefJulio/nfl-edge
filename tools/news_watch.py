@@ -380,8 +380,32 @@ def check(dry: bool) -> None:
   if dry:
     print(f"[watch] --dry-run: would start a {mode} build")
     return
-  subprocess.run(["gh", "workflow", "run", "deploy.yml", "-f", f"mode={mode}"], check=True)
+  if mode == "complete":
+    # (owner 2026-10-31: builds must never be dropped) a complete build is a durable request in the repo, not a
+    # dispatch: deploy.yml no longer accepts mode=complete (a waiting dispatch was replaced by the next run and lost).
+    # Commit .github/complete_request, then start an ordinary full build as the trigger; if that run is replaced,
+    # whichever run executes sees the request and builds what's owed.
+    request_complete()
+    subprocess.run(["gh", "workflow", "run", "deploy.yml", "-f", "mode=full"], check=True)
+  else:
+    subprocess.run(["gh", "workflow", "run", "deploy.yml", "-f", f"mode={mode}"], check=True)
   print(f"[watch] started a {mode} build")
+
+
+def request_complete() -> None:
+  """Commit the time to .github/complete_request on main (GitHub's contents API; the same file
+  tools/request_complete.py writes), so deploy.yml's plan treats a complete build as owed until one deploys."""
+  import base64
+  repo = os.environ.get("GITHUB_REPOSITORY", "ChefJulio/nfl-edge")
+  at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+  path = f"repos/{repo}/contents/.github/complete_request"
+  sha = subprocess.run(["gh", "api", f"{path}?ref=main", "-q", ".sha"], capture_output=True, text=True).stdout.strip()
+  args = ["gh", "api", "-X", "PUT", path, "-f", f"message=Request a complete build ({at}, news watch)",
+          "-f", f"content={base64.b64encode((at + chr(10)).encode()).decode()}", "-f", "branch=main"]
+  if sha:
+    args += ["-f", f"sha={sha}"]
+  subprocess.run(args, check=True, capture_output=True)
+  print(f"[watch] requested a complete build ({at})")
 
 
 def others_running() -> bool:

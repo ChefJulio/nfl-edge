@@ -29,10 +29,14 @@ on:
       mode:
         # news (owner 2026-10-23: "i hate how we feel 3 hours+ behind sometimes"): the watcher's lane for injury news,
         # reports, inactives and line moves: this week's page only, over the last deployed site, in ~6-8 minutes
-        description: "full (the slow data carried from the last site), complete (everything), news (this week's page)"
+        # no "complete" (owner 2026-10-31: builds must never be dropped): a waiting dispatch is replaced by the next run,
+        # so a complete build is a durable request (.github/complete_request: tools/request_complete.py, or the news
+        # watcher) that every run builds until the live site's data/complete_build.json is newer. GitHub rejects a
+        # dispatch with mode=complete outright instead of letting it be lost.
+        description: "full (the slow data carried from the last site), news (this week's page)"
         default: full
         type: choice
-        options: [full, complete, news]
+        options: [full, news]
 
 permissions:
   contents: write   # commits newly finished weeks to the archive branch
@@ -130,7 +134,6 @@ jobs:
           sch="${{ github.event.schedule }}"
           # the 2 a.m. schedule pair (07:00 / 08:00 UTC for daylight / standard time) is now only a trigger: owed or not
           if [ "$sch" = "0 7 * * *" ] || [ "$sch" = "0 8 * * *" ]; then [ "$complete" = true ] || skip=true; fi
-          if [ "${{ github.event_name }}" = workflow_dispatch ] && [ "${{ inputs.mode }}" = complete ]; then complete=true; fi
           # an owed complete build takes any lane over (a docs-only or UI-only push included)
           if [ "$complete" = true ]; then fast=false; news=false; skip=false; fi
           echo "fast=$fast" >> "$GITHUB_OUTPUT"

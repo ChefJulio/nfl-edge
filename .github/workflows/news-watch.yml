@@ -17,7 +17,7 @@ on:
 
 permissions:
   actions: write    # start deploy.yml (workflow_dispatch) and list its runs
-  contents: read
+  contents: write   # commit .github/complete_request (a complete build is a durable request, not a dispatch)
 
 jobs:
   watch:
