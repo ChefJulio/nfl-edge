@@ -1,4 +1,5 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
+4044144,Kenny Yeboah,Arizona Cardinals,Active,2026-11-01T00:49Z,,,,,,"The Cardinals elevated Yeboah from the practice squad to the active roster Saturday, Darren Urban of the team's official site reports.",TE
 4367199,Jon Gaines II,Arizona Cardinals,Out,2026-10-31T01:30Z,Ankle,Not Specified,Not Specified,2026-11-08,OUT,Gaines (ankle) has been ruled out for Sunday's game against the Cowboys.,G
 4698113,Max Melton,Arizona Cardinals,Questionable,2026-10-31T01:11Z,Knee,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Melton (knee) is questionable for Sunday's game against the Cowboys, Josh Weinfuss of ESPN.com reports.",CB
 3918331,Andrew Wingard,Arizona Cardinals,Questionable,2026-10-31T01:09Z,Knee,Bruise,Not Specified,2026-11-01,QUESTIONABLE,"Wingard (knee) is questionable for Sunday's game against Dallas, Josh Weinfuss of ESPN.com reports.",S
@@ -23,11 +24,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4683506,Albert Reese IV,Arizona Cardinals,Active,2026-10-26T17:23Z,,,,,,,OT
 2578570,Jacoby Brissett,Arizona Cardinals,Active,2026-10-26T00:51Z,,,,,,Brissett completed 27 of 48 passes for 272 yards and a touchdown while rushing seven times for 16 yards in Sunday's 30-16 loss to the Broncos.,QB
 4363538,Chad Ryland,Arizona Cardinals,Active,2026-10-26T00:09Z,,,,,,Ryland went 3-for-3 on field-goal tries and converted his only extra-point attempt during Sunday's 30-16 loss to Denver.,PK
-4361307,Trey McBride,Arizona Cardinals,Active,2026-10-25T23:39Z,,,,,,McBride caught 10 of 13 targets for 111 yards and a touchdown in Sunday's 30-16 loss to the Broncos.,TE
+4431194,Billy Bowman Jr.,Atlanta Falcons,Out,2026-11-01T00:39Z,Hamstring,Not Specified,Not Specified,2026-11-08,OUT,"Bowman (hamstring) has been ruled out for Sunday's game against the Buccaneers, Tori McElhaney of the Falcons' official site reports.",CB
 4037626,Divine Deablo,Atlanta Falcons,Out,2026-11-01T00:36Z,Forearm,Not Specified,Not Specified,2026-11-08,OUT,"Deablo (forearm) has been ruled out for Sunday's game against the Buccaneers, Tori McElhaney of the Falcons' official site reports.",LB
 4431210,Beaux Collins,Atlanta Falcons,Injured Reserve,2026-11-01T00:31Z,Hip,Not Specified,Not Specified,2026-11-08,IR-R,"Collins (hip) has been ruled out for Sundays' game against the Buccaneers and will remain on injured reserve, Tori McElhaney of the Falcons' official site reports.",WR
 4035886,Khalil Herbert,Atlanta Falcons,Active,2026-11-01T00:27Z,,,,,,"The Falcons elevated Herbert from the practice squad to the active roster Saturday, Tori McElhaney of the team's official site reports.",RB
-4431194,Billy Bowman Jr.,Atlanta Falcons,Out,2026-10-31T20:03Z,Hamstring,Not Specified,Not Specified,2026-11-08,OUT,out,CB
 5150660,Anterio Thompson,Atlanta Falcons,Out,2026-10-31T02:43Z,Undisclosed,Not Specified,Not Specified,2027-02-15,NFI-R,"Thompson posted on social media this week that he was diagnosed with a genetic mutation on his spinal cord in early May and indicated that he was told he will ""never play football again,"" Josh Kendall of The Athletic reports.",DT
 4239995,A.J. Terrell Jr.,Atlanta Falcons,Active,2026-10-30T21:26Z,,,,,,"Terrell (groin) does not carry an injury designation into Sunday's game against the Buccaneers, Will McFadden of the Falcons' official site reports.",CB
 4240596,C.J. Henderson,Atlanta Falcons,Active,2026-10-30T21:23Z,,,,,,"Henderson (groin) does not have an injury designation against the Buccaneers on Sunday, Will McFadden of the Falcons' official site reports.",CB
@@ -624,6 +624,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4723820,Omar Cooper Jr.,New York Jets,Active,2026-10-25T20:34Z,,,,,,Cooper caught all five of his targets for 115 yards and a touchdown in Sunday's 28-25 loss to the Dolphins.,WR
 4700136,Kiko Mauigoa,New York Jets,Injured Reserve,2026-10-24T19:22Z,Quadriceps,Not Specified,Not Specified,2026-11-22,IR,"The Jets placed Mauigoa (quadriceps) on injured reserve Saturday, Zack Rosenblatt of The Athletic reports.",LB
 4361767,Will McDonald IV,New York Jets,Active,2026-10-23T20:11Z,,,,,,,DE
+4241555,Elijah Mitchell,Philadelphia Eagles,Active,2026-11-01T00:42Z,,,,,,The Eagles elevated Mitchell from the practice squad to the active roster Saturday.,RB
 4240456,Michael Carter II,Philadelphia Eagles,Active,2026-10-31T02:15Z,,,,,,Carter (abdomen) does not have a game designation for Philadelphia's Week 8 matchup against the Commanders on Sunday.,CB
 4426331,Nolan Smith Jr.,Philadelphia Eagles,Active,2026-10-31T00:19Z,,,,,,Smith (concussion) does not carry an injury designation into Sunday's game against the Commanders.,LB
 4685287,Jihaad Campbell,Philadelphia Eagles,Out,2026-10-31T00:16Z,Hamstring,Not Specified,Not Specified,2026-11-08,OUT,Campbell (hamstring/quadriceps) has been ruled out for Sunday's game against Washington.,LB
@@ -640,7 +641,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685759,Jalen Carter,Philadelphia Eagles,Active,2026-10-29T21:52Z,,,,,,,DT
 4431573,Smael Mondon Jr.,Philadelphia Eagles,Active,2026-10-29T21:44Z,,,,,,,LB
 3050478,Jake Elliott,Philadelphia Eagles,Active,2026-10-29T18:08Z,,,,,,Elliott made all three of his PAT attempts and didn't attempt a field goal in Monday's 38-21 loss to the Cowboys.,PK
-4241555,Elijah Mitchell,Philadelphia Eagles,Active,2026-10-29T00:00Z,,,,,,Mitchell reverted to the Eagles' practice squad Tuesday.,RB
 4685279,Jaydon Blue,Philadelphia Eagles,Active,2026-10-28T21:23Z,,,,,,The Eagles signed Blue from the practice squad to the active roster Wednesday.,RB
 4360238,Dameon Pierce,Philadelphia Eagles,Injured Reserve,2026-10-28T21:17Z,Undisclosed,Not Specified,Not Specified,2026-12-06,IR,The Eagles placed Pierce (undisclosed) on injured reserve Wednesday,RB
 4682618,Cooper DeJean,Philadelphia Eagles,Active,2026-10-28T01:25Z,,,,,,DeJean recorded seven tackles (three solo) during Monday's 38-21 loss versus the Cowboys.,CB
