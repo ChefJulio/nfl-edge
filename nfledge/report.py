@@ -1543,10 +1543,16 @@ def matchups(eng, season: int, week: int, cfg: dict, proj: pd.DataFrame | None =
     # (field position from returns and coverage) is documented on the Model tab, not printed per game.
     st100 = away["st"] - home["st"]
     n_st = float(r.plays_pg.get("st", 11.0))
-    st_row = tug("Special teams", st100, bar_scale, rank_of(a_t, "st_rk"), rank_of(h_t, "st_rk"),
+    st_impact = 2 * c_st * n_st * st100 / 100
+    # shown per 100 of the game's scrimmage plays, as home field is (owner 2026-10-31: "isn't it weird to show ST next
+    # to d/o like that? don't ST have like 10% or so of the plays"): per 100 special-teams plays (~11 a game) read as if
+    # it were on the offense's footing (~60); the bar was already scaled by plays, now the number matches it
+    st_game = st_impact / (b * scrim_plays) * 100 if scrim_plays else 0.0
+    st_row = tug("Special teams", st_game, bar_scale, rank_of(a_t, "st_rk"), rank_of(h_t, "st_rk"),
                  f"{a_t} special teams", f"{h_t} special teams",
                  f"Special teams {a_t} {away['st']:+.1f} vs {h_t} {home['st']:+.1f} EPA per 100 special-teams plays "
-                 f"(about {n_st:.0f} per team per game)", impact=2 * c_st * n_st * st100 / 100)
+                 f"(about {n_st:.0f} per team per game): {st_game:+.2f} per 100 of the game's scrimmage plays",
+                 impact=st_impact)
     home100 = hfa_scrim / (b * scrim_plays) * 100 if scrim_plays else 0.0  # per-play home edge across both offenses
     home_row = tug("Home field", home100, bar_scale, None, None, "", "",
                    "Neutral site: no home field" if g.location == "Neutral" else

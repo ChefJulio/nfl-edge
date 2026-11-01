@@ -4685,7 +4685,8 @@
     if (!g) return '<section class="gcs"><p class="muted">NFL Edge has no pregame numbers for this game (no week page for it).</p></section>';
     const f = g.fc, tp = (DATA && DATA.tossup_pct) || 59, a = g.away, h = g.home;
     const lg = (s, n = 18) => logo(s.logo_url, s.logo_bg, n, s.team);
-    const odds = `<section class="gcs"><h3>Win chances <span class="src us">NFL Edge, before kickoff</span></h3>
+    // the pill names the source shown (owner 2026-10-31 screenshot: "NFL Edge" over Vegas odds)
+    const odds = `<section class="gcs"><h3>Win chances <span class="src${f.src === 'Vegas' ? '' : ' us'}">${f.src === 'Vegas' ? 'Vegas, before kickoff' : 'NFL Edge, before kickoff'}</span></h3>
       <p class="gcs-note">${esc(kickText(g))}${g.neutral ? ` · ${esc(g.site || 'neutral site')}` : ''}</p>
       <div class="wp${f.tossup ? ' toss' : ''}" style="${esc(g.bt_style)}">
         <div class="wp-src">${f.src === 'Vegas' ? 'Vegas odds' : 'Our model · no Vegas line yet'}</div>
