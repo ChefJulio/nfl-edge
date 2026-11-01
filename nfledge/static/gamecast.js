@@ -5713,7 +5713,42 @@
       })()}<b>${esc(status)}</b>${!nx && sp && sit && sit.shortDownDistanceText
         ? `<span class="sb-dd"><span>${esc(sit.shortDownDistanceText)}</span>${sit.possessionText ? `<span class="sb-at">${esc(sit.possessionText)}</span>` : ''}</span>` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}</section>
       ${tab === 'pre' ? preTab(g) : live()}`;
+    // the thin sticky copy of the scoreboard (miniBar): teams, score, clock, down and distance on one line
+    const poss = k => sp && !sp.kick && sp.offense.team === info[k].team ? `<i class="sbm-arr ${k === 'away' ? 'l' : 'r'}"></i>` : '';
+    const dd = !nx && sp && sit && sit.shortDownDistanceText ? `${sit.shortDownDistanceText}${sit.possessionText ? ` · ${sit.possessionText}` : ''}` : '';
+    const tmS = (s, r) => `<span class="sbm-t${r ? ' r' : ''}" style="--tc:${esc(s.color)}">${r ? '' : `<span class="sbm-lg">${logo(s.logo, '#111', 18, s.team)}</span>`}<b>${esc(s.team)}</b>${r ? `<span class="sbm-lg">${logo(s.logo, '#111', 18, s.team)}</span>` : ''}</span>`;
+    miniBar(root.querySelector('section.sb'), `${tmS(info.away)}${poss('away')}<b class="sbm-s">${esc(String(as))}</b>
+      <span class="sbm-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<span class="sbm-c">${esc(status)}</span>${dd ? `<span class="sbm-dd">${esc(dd)}</span>` : ''}</span>
+      <b class="sbm-s">${esc(String(hs))}</b>${poss('home')}${tmS(info.home, true)}`, `--ac:${info.away.color};--hc:${info.home.color}`);
     wireGame();
+  };
+  // Sticky mini scoreboard (owner 2026-11-01: "a thinner sticky bar for the scoreboard that sticks when you scroll
+  // down"): one line that slides in at the top once the big scoreboard has scrolled away; tap it to go back up. It lives
+  // outside #gc (renderGame rebuilds #gc on every update) and is redrawn with it. While it shows, --sbmh moves the
+  // page's sticky rows (the pane tabs, the jump row) down under it.
+  let sbmIO = null;
+  const miniBar = (sb, html, style) => {
+    let bar = document.getElementById('sbm');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'sbm'; bar.className = 'sbm'; bar.setAttribute('role', 'button'); bar.setAttribute('aria-label', 'Back to the scoreboard');
+      bar.onclick = () => scrollTo({ top: 0, behavior: 'smooth' });
+      document.body.appendChild(bar);
+    }
+    bar.style.cssText = style;
+    bar.innerHTML = html;
+    if (sbmIO) sbmIO.disconnect();
+    if (!sb || typeof IntersectionObserver !== 'function') return;
+    // under the site's top nav where it sticks (wide screens); phones have none
+    const nav = document.querySelector('nav.gc-tabs');
+    const top = nav && nav.offsetParent && getComputedStyle(nav).position === 'sticky' ? nav.offsetHeight : 0;
+    bar.style.top = `${top}px`;
+    sbmIO = new IntersectionObserver(([e]) => {
+      const on = !e.isIntersecting && e.boundingClientRect.top < top + 1;
+      bar.classList.toggle('on', on);
+      document.documentElement.style.setProperty('--sbmh', on ? `${bar.offsetHeight}px` : '0px');
+    }, { rootMargin: `-${top}px 0px 0px 0px` });
+    sbmIO.observe(sb);
   };
   // the chart's readout sits under it (owner 2026-10-18: it covered the line when it floated over the chart)
   const TIP_HINT = '<span class="muted">Tap or drag on the chart for any moment of the game</span>';

@@ -433,7 +433,7 @@ nav.gc-tabs a:hover { color: var(--ink); } nav.gc-tabs a.on { color: var(--ink);
 .rp input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: var(--r-xs); background: var(--line); }
 .rp input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); margin-top: -6px; }
 .rp input[type=range] { -webkit-appearance: none; appearance: none; background: transparent; }
-.gc-jump { position: sticky; top: 0; z-index: 5; display: flex; gap: 16px; overflow-x: auto; padding: 10px 2px; margin-top: 6px; background: var(--bg);
+.gc-jump { position: sticky; top: var(--sbmh, 0px); transition: top .18s var(--ease); z-index: 5; display: flex; gap: 16px; overflow-x: auto; padding: 10px 2px; margin-top: 6px; background: var(--bg);
   border-bottom: 1px solid var(--line); scrollbar-width: none; }
 .gc-jump a { flex: none; font-weight: 700; font-size: var(--fs-md); text-decoration: none; color: var(--muted); }
 .gc-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 16px; margin-top: 12px; }
@@ -835,7 +835,7 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .ts-bye { width: 8px; height: 2px; margin: 8px 0 6px; border-radius: 1px; background: var(--faint); }
 
 /* Live tab pane picker (one pane visible at a time) */
-.gc-panes { position: sticky; top: 0; z-index: 5; display: flex; width: 100%; margin: 8px 0 10px; background: var(--panel);
+.gc-panes { position: sticky; top: var(--sbmh, 0px); transition: top .18s var(--ease); z-index: 5; display: flex; width: 100%; margin: 8px 0 10px; background: var(--panel);
   overflow-x: auto; scrollbar-width: none; }  /* five unwrappable labels ran past a phone's edge: the row scrolls, not the page */
 .gc-panes::-webkit-scrollbar { display: none; }
 @media (max-width: 400px) { .gc-panes button { padding-left: 4px; padding-right: 4px; } }
@@ -1901,3 +1901,22 @@ tr.lg-tot.lg-tot-pinned { visibility: hidden; }  /* its pinned copy (.lg-fh) sho
 .rs-age { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
 .rs-row.rs-off .rs-nm b { font-weight: 600; color: var(--muted); }
 .rs-head > span:last-child { text-align: right; }
+
+/* Sticky mini scoreboard (owner 2026-11-01; gamecast.js miniBar): one line in the scoreboard's colors, off screen until
+   the big one scrolls away, then it slides down; the page's sticky rows sit under it (--sbmh) */
+.sbm { position: fixed; left: 0; right: 0; z-index: 9; display: flex; align-items: center; gap: 8px; height: 40px;
+  padding: 0 max(12px, env(safe-area-inset-left)) 0 max(12px, env(safe-area-inset-right)); cursor: pointer;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--ac) 45%, var(--panel)) 0%, var(--panel) 50%, color-mix(in srgb, var(--hc) 45%, var(--panel)) 100%);
+  border-bottom: 1px solid var(--line); box-shadow: 0 4px 14px rgba(0, 0, 0, .35);
+  transform: translateY(-110%); visibility: hidden; transition: transform .18s var(--ease), visibility 0s linear .18s; }
+.sbm.on { transform: none; visibility: visible; transition: transform .18s var(--ease), visibility 0s; }
+.sbm-t { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: var(--ink); }
+.sbm-lg { display: inline-flex; flex: none; }
+.sbm-s { font-family: var(--font-display); font-size: 18px; font-variant-numeric: tabular-nums; min-width: 1.4em; text-align: center; }
+.sbm-mid { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: var(--fs-xs);
+  color: var(--muted); white-space: nowrap; overflow: hidden; }
+.sbm-c { color: var(--ink); font-weight: 700; } .sbm-dd { overflow: hidden; text-overflow: ellipsis; }
+.sbm-arr { width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+.sbm-arr.l { border-right: 7px solid var(--ink); } .sbm-arr.r { border-left: 7px solid var(--ink); }
+@media (min-width: 900px) { .sbm { left: 50%; right: auto; width: min(1100px, 100%); transform: translate(-50%, -110%); }
+  .sbm.on { transform: translateX(-50%); } }
