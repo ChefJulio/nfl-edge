@@ -74,6 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4690179,Tavius Robinson,Baltimore Ravens,Injured Reserve,2026-10-24T20:50Z,Pectoral,Not Specified,Not Specified,2027-02-15,IR,The Ravens placed Robinson (pectoral) on injured reserve Saturday.,LB
 4361178,Cam Jurgens,Baltimore Ravens,Active,2026-10-24T01:48Z,,,,,,Jurgens (concussion) does not have any injury designation ahead of Sunday's game against the Bengals.,C
 4432260,Matt Hibner,Baltimore Ravens,Active,2026-10-23T00:03Z,,,,,,Hibner (hand) was a full participant at practice Thursday.,TE
+3915416,DJ Moore,Buffalo Bills,Questionable,2026-11-01T14:44Z,Shoulder - AC Joint,Sprain,Not Specified,2026-11-01,QUESTIONABLE,"Moore (shoulder) remains listed as questionable for Sunday's game against the Ravens but is expected to play, Adam Schefter of ESPN reports.",WR
 4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-11-01T14:00Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4427348,Te'Cory Couch,Buffalo Bills,Active,2026-10-31T23:57Z,,,,,,The Bills signed Couch (hamstring) off the practice squad to the active roster Saturday.,CB
 4030899,Spencer Brown,Buffalo Bills,Questionable,2026-10-31T01:53Z,Back,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Brown (back) is listed as questionable for Sunday's game against the Ravens.,OT
@@ -83,7 +84,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116733,Bradley Chubb,Buffalo Bills,Active,2026-10-30T19:12Z,,,,,,,LB
 4366349,Joe Andreessen,Buffalo Bills,Active,2026-10-30T19:12Z,,,,,,,LB
 4385690,Dalton Kincaid,Buffalo Bills,Questionable,2026-10-30T17:48Z,Chest,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Kincaid (chest) is listed as questionable for Sunday's game against the Ravens, Katherine Fitzgerald of The Buffalo News reports.",TE
-3915416,DJ Moore,Buffalo Bills,Questionable,2026-10-30T17:46Z,Shoulder - AC Joint,Sprain,Not Specified,2026-11-01,QUESTIONABLE,"Moore (shoulder) is questionable for Sunday's game against the Ravens, Katherine Fitzgerald of The Buffalo News reports.",WR
 4039303,Ed Oliver,Buffalo Bills,Active,2026-10-30T00:19Z,,,,,,Oliver (knee) was a full participant at the Bills' practice Thursday.,DT
 4684527,T.J. Sanders,Buffalo Bills,Active,2026-10-29T20:38Z,,,,,,,DT
 4241476,Tyrell Shavers,Buffalo Bills,Out,2026-10-28T23:45Z,Knee - ACL,Surgery,Not Specified,2026-11-09,PUP-R,"The Bills designated Shavers (knee) to return from the reserve/PUP list Wednesday, but he will not play against the Ravens on Sunday, Cameron Wolfe of NFL Network reports.",WR
@@ -449,6 +449,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360745,Kendall Williamson,Los Angeles Chargers,Active,2026-10-16T20:15Z,,,,,,,S
 4243328,Elijah Molden,Los Angeles Chargers,Active,2026-10-16T20:15Z,,,,,,,CB
 4567138,Justin Eboigbe,Los Angeles Chargers,Active,2026-10-16T20:15Z,,,,,,,DT
+3122132,Myles Garrett,Los Angeles Rams,Injured Reserve,2026-11-01T14:24Z,Knee,Surgery,Left,2026-11-08,IR,"The Rams are optimistic that Garrett (knee) will be able to return to practice Week 9, Ian Rapoport of NFL Network reports.",DE
 4566192,Joshua Karty,Los Angeles Rams,Active,2026-10-31T23:15Z,,,,,,The Rams elevated Karty from the practice squad to the active roster Saturday.,PK
 4243181,Nate Landman,Los Angeles Rams,Active,2026-10-31T00:43Z,,,,,,"Landman (concussion) does not carry an injury designation into Sunday's game against the Chargers, Adam Caplan of SiriusXM NFL Radio reports.",LB
 4426405,Trent McDuffie,Los Angeles Rams,Questionable,2026-10-30T21:40Z,Groin,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"McDuffie (groin) is listed as questionable for Sunday's game against the Chargers, Adam Caplan of SiriusXM NFL Radio reports.",CB
@@ -458,7 +459,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3052180,Coleman Shelton,Los Angeles Rams,Questionable,2026-10-28T23:32Z,Hip,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,C
 4570037,Terrance Ferguson,Los Angeles Rams,Injured Reserve,2026-10-28T21:12Z,Ankle,Sprain,Not Specified,2026-11-08,IR,"Ferguson (ankle) won't return to practice this week, Greg Beacham of the Associated Press reports.",TE
 16800,Davante Adams,Los Angeles Rams,Injured Reserve,2026-10-28T20:59Z,Hamstring,Surgery,Left,2026-11-25,IR,"Head coach Sean McVay said Wednesday that Adams had successful surgery on his left hamstring, and the Rams are hopeful that the wide receiver will be able to return on the early side of his 6-to-10-week recovery timetable, Adam Grosbard of The Orange County Register reports.",WR
-3122132,Myles Garrett,Los Angeles Rams,Injured Reserve,2026-10-28T20:52Z,Knee,Surgery,Left,2026-11-08,IR,"Head coach Sean McVay said Wednesday that the Rams won't open Garrett's (knee) practice window this week, Greg Beacham of the Associated Press reports.",DE
 4242154,Kam Curl,Los Angeles Rams,Active,2026-10-28T02:47Z,,,,,,Curl logged four tackles (two solo) during the Rams' 35-21 win over the Raiders on Sunday.,S
 4249128,Quentin Lake,Los Angeles Rams,Active,2026-10-28T02:38Z,,,,,,Lake finished Sunday's 35-21 win over the Raiders with seven tackles (four solo).,S
 4360797,Tutu Atwell,Los Angeles Rams,Active,2026-10-27T01:47Z,,,,,,Atwell wasn't targeted in Sunday's 35-21 win over the Raiders.,WR
@@ -599,12 +599,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242547,Paulson Adebo,New York Giants,Active,2026-10-25T15:37Z,,,,,,"Adebo (knee) is active Week 7 against the Texans, Dan Salomone of the Giants' official site reports.",CB
 3929950,Tremaine Edmunds,New York Giants,Injured Reserve,2026-10-24T23:28Z,Chest,Not Specified,Left,2027-02-15,IR,"Edmunds (chest) was placed on injured reserve Saturday, Dan Duggan of The Athletic reports.",LB
 4259566,Andrew Thomas,New York Giants,Active,2026-10-24T02:04Z,,,,,,Thomas (groin) does not have an injury designation against the Texans on Sunday.,OT
-4685247,Braelon Allen,New York Jets,Active,2026-11-01T12:29Z,,,,,,"Allen is slated to be the Jets' starting running back Sunday against the Raiders, Ian Rapoport of NFL Network reports.",RB
+4427366,Breece Hall,New York Jets,Questionable,2026-11-01T14:07Z,Quadriceps,Not Specified,Right,2026-11-01,QUESTIONABLE,"Hall (quadriceps), who is listed as questionable for Sunday's game against the Raiders, isn't expected to play, Ian Rapoport of NFL Network reports.",RB
+4685247,Braelon Allen,New York Jets,Active,2026-11-01T12:29Z,,,,,,"Allen is slated to serve as the Jets' starting running back Sunday against the Raiders, Ian Rapoport of NFL Network reports.",RB
 4428617,T'Vondre Sweat,New York Jets,Injured Reserve,2026-10-31T23:39Z,Knee,Not Specified,Not Specified,2026-11-29,IR,"The Jets placed Sweat (knee) on injured reserve Saturday, Jeremy Fowler of ESPN.com reports.",DT
 4373656,Max Mitchell,New York Jets,Out,2026-10-31T01:58Z,Concussion,Concussion,Not Specified,2026-11-08,OUT,Mitchell (concussion) has been ruled out for Sunday's game against the Raiders.,OT
 4685248,David Bailey,New York Jets,Doubtful,2026-10-30T22:15Z,Groin,Not Specified,Not Specified,2026-11-01,DOUBTFUL,Bailey (groin) is listed as doubtful for Sunday's game against the Raiders.,LB
 4362094,Joseph Ossai,New York Jets,Out,2026-10-30T22:10Z,Ankle,Not Specified,Not Specified,2026-11-08,OUT,Ossai (ankle) has been ruled out for Sunday's game against Las Vegas.,DE
-4427366,Breece Hall,New York Jets,Questionable,2026-10-30T15:12Z,Quadriceps,Not Specified,Right,2026-11-01,QUESTIONABLE,"Hall (quadriceps) is listed as questionable for Sunday's game against the Raiders, Brian Costello of the New York Post reports.",RB
 4035537,Kene Nwangwu,New York Jets,Active,2026-10-29T00:29Z,,,,,,Nwangwu was a full participant in Wednesday's practice.,RB
 4569618,Garrett Wilson,New York Jets,Active,2026-10-28T19:40Z,,,,,,"Wilson said Wednesday that he won't ask to be traded from the Jets, Zack Rosenblatt of The Athletic reports.",WR
 14958,Demario Davis,New York Jets,Active,2026-10-28T03:09Z,,,,,,Davis finished Sunday's Week 7 loss to Miami with three tackles (two solo) and one defensed pass.,LB
