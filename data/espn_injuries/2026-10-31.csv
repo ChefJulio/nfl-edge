@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4690179,Tavius Robinson,Baltimore Ravens,Injured Reserve,2026-10-24T20:50Z,Pectoral,Not Specified,Not Specified,2027-02-15,IR,The Ravens placed Robinson (pectoral) on injured reserve Saturday.,LB
 4361178,Cam Jurgens,Baltimore Ravens,Active,2026-10-24T01:48Z,,,,,,Jurgens (concussion) does not have any injury designation ahead of Sunday's game against the Bengals.,C
 4432260,Matt Hibner,Baltimore Ravens,Active,2026-10-23T00:03Z,,,,,,Hibner (hand) was a full participant at practice Thursday.,TE
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-11-01T00:01Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-11-01T01:01Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4427348,Te'Cory Couch,Buffalo Bills,Active,2026-10-31T23:57Z,,,,,,The Bills signed Couch (hamstring) off the practice squad to the active roster Saturday.,CB
 4030899,Spencer Brown,Buffalo Bills,Questionable,2026-10-31T01:53Z,Back,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Brown (back) is listed as questionable for Sunday's game against the Ravens.,OT
 4401823,Dee Alford,Buffalo Bills,Questionable,2026-10-30T21:56Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Alford (ankle) is listed as questionable ahead of Sunday's game against the Ravens.,CB
@@ -124,7 +124,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431077,TeRah Edwards,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,DT
 4874515,Sam Hecht,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,C
 4034962,Stone Forsythe,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,OT
-4361748,Anthony Johnson Jr.,Chicago Bears,Active,2026-10-31T23:49Z,,,,,,,S
 3121544,T.J. Edwards,Chicago Bears,Active,2026-10-31T23:13Z,,,,,,Edwards (hamstring) does not have an injury designation for Monday's tilt against the Seahawks.,LB
 4241007,D'Marco Jackson,Chicago Bears,Questionable,2026-10-31T23:08Z,Ankle,,,2026-11-02,QUESTIONABLE,Jackson (ankle) is questionable to suit up Monday versus Seattle.,LB
 4372576,Jack Sanborn,Chicago Bears,Active,2026-10-31T22:39Z,,,,,,,LB
@@ -149,6 +148,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685278,Luther Burden III,Chicago Bears,Active,2026-10-23T03:59Z,,,,,,Burden brought in all four targets for 130 yards and a touchdown and rushed once for seven yards in the Bears' 30-24 win over the Patriots on Thursday.,WR
 4431611,Caleb Williams,Chicago Bears,Active,2026-10-23T03:50Z,,,,,,Williams completed 22 of 33 passes for 308 yards with two touchdowns and no interceptions while rushing five times for 18 yards in the Bears' 30-24 win over the Patriots on Thursday.,QB
 4870953,Malik Muhammad II,Chicago Bears,Questionable,2026-10-23T02:42Z,Toe,Not Specified,Not Specified,2026-11-02,QUESTIONABLE,Muhammad (toe) is doubtful to return to Thursday night's contest against the Patriots.,CB
+4426374,Tyrique Stevenson Sr.,Chicago Bears,Active,2026-10-22T23:21Z,,,,,,Stevenson (hip) is active for Thursday night's contest against New England.,CB
 4567098,Jordan Battle,Cincinnati Bengals,Active,2026-10-30T20:24Z,,,,,,,S
 4368003,Andrei Iosivas,Cincinnati Bengals,Injured Reserve,2026-10-30T01:48Z,Thumb,Surgery,Left,2026-11-08,IR,"Iosivas (thumb) is making good progress in his rehab, Mike Petraglia of CLNSCincy.com reports.",WR
 4362628,Ja'Marr Chase,Cincinnati Bengals,Active,2026-10-29T20:51Z,,,,,,"Chase (ankle) was a full participant in Thursday's practice, Mike Petraglia of CLNSCincy.com reports.",WR
@@ -774,8 +774,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4045701,Timmy Horne,Tennessee Titans,Active,2026-10-24T19:19Z,,,,,,"The Titans signed Horne from the practice squad to the active roster Saturday, Jim Wyatt of the team's official site reports.",DT
 4573318,Dorian Mausi,Tennessee Titans,Injured Reserve,2026-10-22T01:35Z,Foot,Not Specified,Not Specified,2026-11-15,IR-R,"The Titans opened Mausi's 21-day practice window Wednesday, Jim Wyatt of the team's official website reports.",LB
 4369835,Alontae Taylor,Tennessee Titans,Active,2026-10-19T17:18Z,,,,,,,CB
+4430560,Jer'Zhan Newton,Washington Commanders,Injured Reserve,2026-11-01T00:58Z,Pectoral,Surgery,Not Specified,2026-11-08,IR-R,Newton (pectoral) has been ruled out for Sunday's game against the Eagles.,DT
 3925354,Daron Payne,Washington Commanders,Out,2026-10-31T21:59Z,Foot,Surgery,Left,2027-02-15,OUT,"Payne suffered a season-ending Jones fracture during practice Friday, Adam Schefter of ESPN reports.",DT
-4430560,Jer'Zhan Newton,Washington Commanders,Injured Reserve,2026-10-31T00:25Z,Pectoral,Surgery,Not Specified,2026-11-08,IR-R,Newton (pectoral) is questionable for Sunday's game against the Eagles.,DT
 3115922,Nick Allegretti,Washington Commanders,Active,2026-10-30T23:27Z,,,,,,,G
 4259491,Javon Kinlaw,Washington Commanders,Out,2026-10-30T21:07Z,Knee,Not Specified,Not Specified,2026-11-08,OUT,Kinlaw (knee) has been ruled out for Sunday's game against the Eagles.,DT
 4048228,John Bates,Washington Commanders,Questionable,2026-10-30T21:05Z,Shoulder,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Bates (shoulder) is listed as questionable for Sunday's game against the Eagles.,TE
