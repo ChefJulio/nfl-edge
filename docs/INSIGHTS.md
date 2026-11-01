@@ -5882,3 +5882,19 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   Reading: for linemen the market (which watches the film) carries most of what the consensus sees; the line's play adds
   a quarter. The grade is no longer pure hindsight performance for this one position, by the owner's goal ("accurately
   reflect consensus on good linemen"); the card says so.
+- **PRE-REGISTERED 2026-10-31 (owner: "if you think it'll make the grades look better yeah"; after (EC) graded
+  rookie-deal linemen mostly on draft slot: Colby 51 with 98 / 97 line play, Membou 78 with 59 / 64): (ED) no market
+  part without a market verdict.** A lineman-season whose consensus would come from his draft slot (on a rookie deal,
+  no veteran contract yet) is graded on his line's play alone (w = 1); everyone else as (EC) (w = 0.25). CHECK, 2020-2025:
+  (1) AP first-team and Pro Bowl linemen whose season was on a rookie deal with no verdict yet average higher than
+  under (EC); (2) the AP first-team average overall stays within 1 point of (EC)'s 85.1. Both = ships.
+- **RESULT {#line-grade-rookie} (ED) no market part without a verdict: check (1) EMPTY, shipped on the owner's call.**
+  No AP first-team or Pro Bowl lineman 2020-2025 was in a rookie-deal season without a veteran contract to follow
+  (honored players get extended), so check (1) had nothing to measure (by the rule: FAIL); (2) held: AP first-team
+  average 85.1 -> 85.2. The examples move as intended: Colby 2026 51 -> 98 (98 / 97 line play), McClendon 53 -> 93,
+  McCormick 2025 56 -> 88, Membou 2025 78 -> 52, Zabel 53, Conerly 52. Shipped ("if you think it'll make the grades
+  look better yeah").
+- **OWNER DESIGN 2026-10-31: honors as a floor on the line grade.** "pro bowl, ap, 2ap are all good signals that a
+  lineman is very good." A finished season's honors set a floor on that season's line grade (OVR): first-team All-Pro
+  97, second team 94, Pro Bowl 90; they never lower a grade. With honors as inputs they can't also be the check, so the
+  line grade's All-Pro numbers above are pre-floor. Sewell 2025: 75 -> 97.

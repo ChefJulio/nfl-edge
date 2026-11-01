@@ -289,6 +289,9 @@ OL_QUAL = 0.40  # share of the team's offensive snaps over its games
 RUN_CLIP = 1.5
 OL_LABELS = ["Pass protection (the line)", "Run blocking (the line)", "The market's valuation (his contract)"]
 OL_W = 0.25  # (EC) the line's play vs the market's view: picked on 2013-2019, held on 2020-2025
+# (owner 2026-10-31: "pro bowl, ap, 2ap are all good signals that a lineman is very good") a season's honors set a floor
+# on that season's line grade, as OVR: first-team All-Pro 97, second team 94, Pro Bowl 90 (as percentiles below)
+OL_HONOR_FLOOR = {"AP1": 97, "AP2": 94, "PB": 90}
 OLCOLS = ["game_id", "play_id", "season", "week", "season_type", "posteam", "defteam", "play_type", "qb_dropback", "qb_kneel",
           "qb_spike", "qb_scramble", "rush", "sack", "qb_hit", "epa", "penalty", "penalty_player_id", "penalty_team",
           "run_location", "run_gap"]
@@ -551,6 +554,13 @@ def build_line(out: Path, cur: int, sched: pd.DataFrame, cache_dir: Path) -> Non
   pl = ol_plays(cache_dir, cur)
   units = ol_units(pl, pass_inputs(cache_dir, cur, pl), pressure_cost(cache_dir, cur, pl))
   sn, t = ol_seasons(units, pl, cache_dir, cur, sched, {})  # no slots: the line's run blocking, shared
+  hf = out.parent / "honors.json"  # site/data/honors.json (tools/honors_build.py), else the live site's
+  hp = json.loads(hf.read_text(encoding="utf-8"))["p"] if hf.exists() else _honors()
+  honors = {}
+  for pid, hs in hp.items():
+    for c in hs:
+      if c[0] in OL_HONOR_FLOOR:
+        honors.setdefault((pid, int(c[1])), []).append(c[0])
   r = mom_prior(units.assign(gsis_id=units.team), "val", "plays")
   kp = r[1] if r else 300.0
   n_q = n_u = 0
@@ -570,13 +580,16 @@ def build_line(out: Path, cur: int, sched: pd.DataFrame, cache_dir: Path) -> Non
     pv, rv = o.pass_v / o.att, o.run_v / o.att
     # (EC) the grade blends the line's play (by his snaps) with the market's view of him (owner 2026-10-31: "accurately
     # reflect consensus on good linemen"): OL_W x performance percentile + (1 - OL_W) x consensus percentile, re-ranked
-    cons = ol_consensus(cache_dir, [(x, int(s)) for x in allp])
-    cv = pd.Series([cons.get((x, int(s)), 50.0) for x in allp], index=allp)
+    cons = ol_consensus(cache_dir, [(x, int(s)) for x in allp], verdict_only=True)
+    cv = pd.Series([cons.get((x, int(s)), np.nan) for x in allp], index=allp)
     perf_c = pd.concat([pct(cur_v[q]), pct_vs(cur_v[q], cur_v[uq])])
     perf_s = pd.concat([pct(sea_v[q]), pct_vs(sea_v[q], sea_v[uq])])
-    bl_c, bl_s = OL_W * perf_c + (1 - OL_W) * cv, OL_W * perf_s + (1 - OL_W) * cv
+    # (ED) no market verdict yet (a rookie deal): his line's play alone
+    bl_c, bl_s = (OL_W * perf_c + (1 - OL_W) * cv).fillna(perf_c), (OL_W * perf_s + (1 - OL_W) * cv).fillna(perf_s)
     gp, sg = pd.concat([pct(bl_c[q]), pct_vs(bl_c[q], bl_c[uq])]), pd.concat([pct(bl_s[q]), pct_vs(bl_s[q], bl_s[uq])])
-    bp = [pd.concat([pct(b[q]), pct_vs(b[q], b[uq])]) for b in (pv.fillna(0.0), rv.fillna(0.0))] + [cv.round().astype(int)]
+    floor = pd.Series([max([(OL_HONOR_FLOOR[c] - 50) * 99 / 49 for c in honors.get((x, int(s)), [])] or [0]) for x in allp], index=allp)
+    gp, sg = np.maximum(gp, floor).round().astype(int), np.maximum(sg, floor).round().astype(int)
+    bp = [pd.concat([pct(b[q]), pct_vs(b[q], b[uq])]) for b in (pv.fillna(0.0), rv.fillna(0.0))] + [cv.fillna(-1).round().astype(int)]
     doc["stats"]["OL"], doc["qualified"]["OL"] = OL_LABELS, len(q)
     for x in allp:
       doc["players"][x] = [int(gp[x]), "OL", int(o.games[x]), int(round(wa[x])), round(float(cur_raw[x]), 4), [int(b[x]) for b in bp],
@@ -620,7 +633,7 @@ def evaluate_line(cache_dir: Path, cur: int, sched: pd.DataFrame) -> None:
   print("  2013 Broncos: " + ", ".join(f"{names.get(g, g)} {ovr(sp.get((g, 2013), 0))}" for g in den.gsis_id))
 
 
-def ol_consensus(cache_dir: Path, keys) -> dict:
+def ol_consensus(cache_dir: Path, keys, verdict_only: bool = False) -> dict:
   """(EC) the market's view of a lineman-season, 0-99: the APY of the contract in effect that season ranked among
   linemen's contracts signed the same year; on a rookie deal, his first veteran contract's (signed within five seasons:
   the market's later verdict), else his draft slot among drafted linemen (undrafted, or a rookie deal that ran out with
@@ -677,7 +690,7 @@ def ol_consensus(cache_dir: Path, keys) -> dict:
       out[(g, s)] = float(nxt.p.iloc[0])
     elif a.ys + a.yrs <= s + 1 and s < 2026 - 1:
       out[(g, s)] = 5.0  # his rookie deal ran out and no veteran contract followed
-    else:
+    elif not verdict_only:  # (ED) verdict_only: no market part without a market verdict (graded on play alone)
       d = draft.get(g)
       out[(g, s)] = float(np.clip(99 * (1 - (d - 1) / 262), 0, 99)) if pd.notna(d) else 5.0
   return out
