@@ -5898,3 +5898,24 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   lineman is very good." A finished season's honors set a floor on that season's line grade (OVR): first-team All-Pro
   97, second team 94, Pro Bowl 90; they never lower a grade. With honors as inputs they can't also be the check, so the
   line grade's All-Pro numbers above are pre-floor. Sewell 2025: 75 -> 97.
+- **PRE-REGISTERED 2026-11-01 (owner: "yes", after Breece Hall's 9:07 CT "isn't expected to play" sat behind a 69%
+  chance): (EE) ESPN's game-day notes in the chance to play.** Notes: every ESPN injury-feed row on the archive branch's
+  intraday snapshots (git history of data/espn_injuries/<date>.csv), deduplicated by (player, updated). A case = a
+  player listed Questionable or Doubtful whose latest note before his game's inactives (kickoff - 90 minutes) was
+  posted in the 48 hours before kickoff. Classes by fixed phrases, checked in this order: OUT = "not / isn't / is not /
+  won't / will not ... (expected | going | likely | slated | set) to play", "won't play", "will not play", "ruled out",
+  "unlikely to play", "won't suit up", "will sit"; GTD = "game-time decision"; IN = "(expected | in line | slated | set
+  | on track | poised | plans | expects) to play", "will play", "trending toward playing", "positive direction",
+  "optimistic", "good to go"; else NONE. Outcome: active (nflverse weekly roster status not INA / reserve) that week.
+  Model chance: avail in the last live-inputs snapshot (data/live_inputs/<season>_<week>_<time>.json, archive branch)
+  before inactives. The note-adjusted chance for OUT / GTD / IN = that class's active rate in the OTHER weeks (+1 active,
+  +1 inactive pseudo-counts); NONE keeps the model's. GATE (on OUT / GTD / IN cases, finished games of 2026 weeks 6-8 as
+  of today): Brier lower than the model's, bootstrap 95% CI of the difference below 0, and lower in every week with 5+
+  cases. Stated up front: three weeks is a small sample; whatever the result, re-checked at season end on all weeks.
+- **INTERIM {#game-day-notes} (EE) ESPN's game-day notes: the gate passes on 9 cases; NOT shipped yet.**
+  tools/notes_eval.py, 2026-11-01 morning: 6,403 distinct notes, 522 live-input snapshots (they start in week 6), 34
+  Q / D cases with a note in the 48 hours before kickoff in finished games (week 6: 20, week 7: 13, week 8: 1). OUT 0,
+  GTD 3 (active 0.67, model 0.59), IN 6 (active 1.00, model 0.78; Stefon Diggs at 0.38 after "in line to play"), NONE 25.
+  OUT / GTD / IN: Brier 0.2074 -> 0.1235, -0.084 [-0.178, -0.001], week 6 (the only week with 5+) better: PASS by the
+  letter. Not shipped on nine cases with no OUT case at all (the motivating one, Breece Hall, is in week 8's games, not
+  final yet): re-run tonight once week 8's Sunday games are final (same rules, same phrases), then decide.
