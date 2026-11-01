@@ -74,8 +74,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4690179,Tavius Robinson,Baltimore Ravens,Injured Reserve,2026-10-24T20:50Z,Pectoral,Not Specified,Not Specified,2027-02-15,IR,The Ravens placed Robinson (pectoral) on injured reserve Saturday.,LB
 4361178,Cam Jurgens,Baltimore Ravens,Active,2026-10-24T01:48Z,,,,,,Jurgens (concussion) does not have any injury designation ahead of Sunday's game against the Bengals.,C
 4432260,Matt Hibner,Baltimore Ravens,Active,2026-10-23T00:03Z,,,,,,Hibner (hand) was a full participant at practice Thursday.,TE
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-11-01T15:01Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4385690,Dalton Kincaid,Buffalo Bills,Questionable,2026-11-01T15:00Z,Chest,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"The Bills are optimistic that Kincaid (chest), who is listed as questionable for Sunday's game against the Raiders, will be able to play, Jeremy Fowler of ESPN.com reports.",TE
 3915416,DJ Moore,Buffalo Bills,Questionable,2026-11-01T14:44Z,Shoulder - AC Joint,Sprain,Not Specified,2026-11-01,QUESTIONABLE,"Moore (shoulder) remains listed as questionable for Sunday's game against the Ravens but is expected to play, Adam Schefter of ESPN reports.",WR
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-11-01T14:00Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4427348,Te'Cory Couch,Buffalo Bills,Active,2026-10-31T23:57Z,,,,,,The Bills signed Couch (hamstring) off the practice squad to the active roster Saturday.,CB
 4030899,Spencer Brown,Buffalo Bills,Questionable,2026-10-31T01:53Z,Back,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Brown (back) is listed as questionable for Sunday's game against the Ravens.,OT
 4401823,Dee Alford,Buffalo Bills,Questionable,2026-10-30T21:56Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Alford (ankle) is listed as questionable ahead of Sunday's game against the Ravens.,CB
@@ -83,7 +84,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3127294,Greg Gaines,Buffalo Bills,Questionable,2026-10-30T19:12Z,Calf,,,2026-11-01,QUESTIONABLE,questionable,DT
 3116733,Bradley Chubb,Buffalo Bills,Active,2026-10-30T19:12Z,,,,,,,LB
 4366349,Joe Andreessen,Buffalo Bills,Active,2026-10-30T19:12Z,,,,,,,LB
-4385690,Dalton Kincaid,Buffalo Bills,Questionable,2026-10-30T17:48Z,Chest,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Kincaid (chest) is listed as questionable for Sunday's game against the Ravens, Katherine Fitzgerald of The Buffalo News reports.",TE
 4039303,Ed Oliver,Buffalo Bills,Active,2026-10-30T00:19Z,,,,,,Oliver (knee) was a full participant at the Bills' practice Thursday.,DT
 4684527,T.J. Sanders,Buffalo Bills,Active,2026-10-29T20:38Z,,,,,,,DT
 4241476,Tyrell Shavers,Buffalo Bills,Out,2026-10-28T23:45Z,Knee - ACL,Surgery,Not Specified,2026-11-09,PUP-R,"The Bills designated Shavers (knee) to return from the reserve/PUP list Wednesday, but he will not play against the Ravens on Sunday, Cameron Wolfe of NFL Network reports.",WR
@@ -449,7 +449,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360745,Kendall Williamson,Los Angeles Chargers,Active,2026-10-16T20:15Z,,,,,,,S
 4243328,Elijah Molden,Los Angeles Chargers,Active,2026-10-16T20:15Z,,,,,,,CB
 4567138,Justin Eboigbe,Los Angeles Chargers,Active,2026-10-16T20:15Z,,,,,,,DT
-3122132,Myles Garrett,Los Angeles Rams,Injured Reserve,2026-11-01T14:24Z,Knee,Surgery,Left,2026-11-08,IR,"The Rams are optimistic that Garrett (knee) will be able to return to practice Week 9, Ian Rapoport of NFL Network reports.",DE
+3122132,Myles Garrett,Los Angeles Rams,Injured Reserve,2026-11-01T14:24Z,Knee,Surgery,Left,2026-11-08,IR,"The Rams are optimistic that Garrett (knee) will be able to return to practice in Week 9, Ian Rapoport of NFL Network reports.",DE
 4566192,Joshua Karty,Los Angeles Rams,Active,2026-10-31T23:15Z,,,,,,The Rams elevated Karty from the practice squad to the active roster Saturday.,PK
 4243181,Nate Landman,Los Angeles Rams,Active,2026-10-31T00:43Z,,,,,,"Landman (concussion) does not carry an injury designation into Sunday's game against the Chargers, Adam Caplan of SiriusXM NFL Radio reports.",LB
 4426405,Trent McDuffie,Los Angeles Rams,Questionable,2026-10-30T21:40Z,Groin,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"McDuffie (groin) is listed as questionable for Sunday's game against the Chargers, Adam Caplan of SiriusXM NFL Radio reports.",CB
@@ -706,7 +706,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3924327,Drew Lock,Seattle Seahawks,Questionable,2026-11-01T01:35Z,Elbow,Not Specified,Right,2026-11-02,QUESTIONABLE,"Lock (elbow) is listed as questionable for Monday's game against the Bears, Curtis Crabtree of Fox 13 Seattle reports.",QB
 3120358,Uchenna Nwosu,Seattle Seahawks,Doubtful,2026-10-31T20:57Z,Ankle,Not Specified,Not Specified,2026-11-02,DOUBTFUL,doubtful,LB
 4032473,Rashid Shaheed,Seattle Seahawks,Out,2026-10-31T20:53Z,Knee,Not Specified,Not Specified,2026-11-08,OUT,"Shaheed (knee) has been ruled out for Monday's game against the Bears, Curtis Crabtree of FOX 13 Seattle reports.",WR
-4685512,Jadarian Price,Seattle Seahawks,Injured Reserve,2026-10-31T20:50Z,Chest,Not Specified,Not Specified,2026-11-02,IR-R,"Price (chest) doesn't have a designation for Monday's game against the Bears, but he remains on injured reserve, John Boyle of the Seahawks' official site reports.",RB
+4685512,Jadarian Price,Seattle Seahawks,Injured Reserve,2026-10-31T20:50Z,Chest,Not Specified,Not Specified,2026-11-02,IR-R,"Price (chest) doesn't have a designation for Monday's game against the Bears but remains on injured reserve, John Boyle of the Seahawks' official site reports.",RB
 4426385,Zach Charbonnet,Seattle Seahawks,Active,2026-10-31T20:49Z,,,,,,"Charbonnet (knee) does not carry an injury designation into Monday's game against the Bears, John Boyle of the Seahawks' official site reports.",RB
 4605491,Connor O'Toole,Seattle Seahawks,Active,2026-10-31T02:35Z,,,,,,"O'Toole (hamstring) was a full participant in Friday's practice, Gregg Bell of Sports Radio 93.3 KJR Seattle reports.",LB
 4037521,Chazz Surratt,Seattle Seahawks,Active,2026-10-31T02:31Z,,,,,,"Surratt (calf) was a full participant in Friday's practice, Gregg Bell of Sports Radio 93.3 KJR Seattle reports.",LB
