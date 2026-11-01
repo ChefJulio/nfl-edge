@@ -58,5 +58,135 @@
 "at": "2026-10-29T22:58:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0034827": {
+"name": "DJ Moore",
+"team": "BUF",
+"pos": "WR",
+"pre": 0.7141,
+"ruling": "ACT",
+"at": "2026-11-01T16:26:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0034837": {
+"name": "Calvin Ridley",
+"team": "TEN",
+"pos": "WR",
+"pre": 0.9466,
+"ruling": "ACT",
+"at": "2026-11-01T12:35:00+00:00",
+"post": 0.974,
+"status": "Active (LLF)"
+},
+"00-0034960": {
+"name": "Jakobi Meyers",
+"team": "JAX",
+"pos": "WR",
+"pre": 0.4927,
+"ruling": "ACT",
+"at": "2026-11-01T16:33:00+00:00",
+"post": 0.974,
+"status": "Active (LLD)"
+},
+"00-0036862": {
+"name": "Ben Skowronek",
+"team": "PIT",
+"pos": "WR",
+"pre": 0.5635,
+"ruling": "INA",
+"at": "2026-11-01T16:39:00+00:00",
+"post": 0.0,
+"status": "Inactive (LLL)"
+},
+"00-0037247": {
+"name": "George Pickens",
+"team": "DAL",
+"pos": "WR",
+"pre": 0.7463,
+"ruling": "ACT",
+"at": "2026-11-01T12:39:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0038120": {
+"name": "Breece Hall",
+"team": "NYJ",
+"pos": "RB",
+"pre": 0.6922,
+"ruling": "INA",
+"at": "2026-11-01T14:07:00+00:00",
+"post": 0.0,
+"status": "Inactive (LLL)"
+},
+"00-0038933": {
+"name": "Dalton Kincaid",
+"team": "BUF",
+"pos": "TE",
+"pre": 0.8331,
+"ruling": "ACT",
+"at": "2026-11-01T16:27:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0039373": {
+"name": "Audric Estim\u00e9",
+"team": "CLE",
+"pos": "RB",
+"pre": 0.2848,
+"ruling": "INA",
+"at": "2026-11-01T16:32:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040203": {
+"name": "Will Howard",
+"team": "PIT",
+"pos": "QB",
+"pre": 0.1005,
+"ruling": "INA",
+"at": "2026-11-01T16:41:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040704": {
+"name": "Dillon Gabriel",
+"team": "CLE",
+"pos": "QB",
+"pre": 0.5983,
+"ruling": "INA",
+"at": "2026-11-01T16:32:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041092": {
+"name": "Taylen Green",
+"team": "CLE",
+"pos": "QB",
+"pre": 0.0987,
+"ruling": "INA",
+"at": "2026-11-01T16:32:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041490": {
+"name": "Eli Heidenreich",
+"team": "PIT",
+"pos": "RB",
+"pre": 0.1802,
+"ruling": "INA",
+"at": "2026-11-01T16:41:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041565": {
+"name": "Drew Allar",
+"team": "PIT",
+"pos": "QB",
+"pre": 0.0987,
+"ruling": "INA",
+"at": "2026-11-01T16:41:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
