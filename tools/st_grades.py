@@ -538,48 +538,47 @@ def line_table(cache_dir: Path, cur: int, sched: pd.DataFrame):
 
 
 def build_line(out: Path, cur: int, sched: pd.DataFrame, cache_dir: Path) -> None:
-  """OL unit grades (owner 2026-10-31: "for OL show OL Unit grade rather than specific player grades, and indicate that
-  on the tile"): each team's line graded per season (pass protection from real pressures 2018 on, run blocking, both
-  against the opponents' norms; three-season form 1 / 0.6 / 0.3, shrunk by pseudo-plays, a percentile among the
-  season's lines), and every lineman who played that season carries his line's grade (his team with the most of his
-  snaps). Records in data/grades/<season>.json, the other grades' layout: [OVR, "OL", his games, the line's weighted
-  plays, the line's window value / play (raw), [pass, run percentiles], the line's season-only OVR, season value / play
-  (raw), his games, None, {unit, snap, pen, pos}]."""
-  from grade_build import pct
+  """OL unit grades, by snaps (owner 2026-10-31: "only pin this grade to the linemen who played, weighted by snap
+  share"): each game the line is graded as a unit (pass protection from real pressures 2018 on, run blocking, both
+  against the opponent's norm), and a lineman's grade is those game grades weighted by his snaps in each game, so a
+  backup carries only the stretches he played. Three-season form (1 / 0.6 / 0.3), shrunk by pseudo-plays (a few
+  snaps lean on the league average), a percentile among linemen with 40%+ of their team's offensive snaps; linemen
+  under that with 2+ games get an asterisked grade against them ([9] = 1), not counted in the rankings. Records:
+  [OVR, "OL", games, weighted plays, window value / play (raw), [pass, run percentiles], season-only OVR, season value
+  / play (raw), games, under-qualified flag, {unit, snap, pen, pos}]."""
+  from grade_build import pct, pct_vs
   pl = ol_plays(cache_dir, cur)
   units = ol_units(pl, pass_inputs(cache_dir, cur, pl), pressure_cost(cache_dir, cur, pl))
-  sn, t = ol_seasons(units, pl, cache_dir, cur, sched, {})
+  sn, t = ol_seasons(units, pl, cache_dir, cur, sched, {})  # no slots: the line's run blocking, shared
   r = mom_prior(units.assign(gsis_id=units.team), "val", "plays")
   kp = r[1] if r else 300.0
-  # the lines as "players" (gsis_id = team) so window() and pct() work as for everyone else
-  u = units.groupby(["team", "season"]).agg(val=("val", "sum"), att=("plays", "sum"), pass_v=("pass_v", "sum"),
-                                             run_v=("run_v", "sum")).reset_index().rename(columns={"team": "gsis_id"})
-  home = sn.groupby(["gsis_id", "season", "team"]).snaps.sum().reset_index().sort_values("snaps").drop_duplicates(["gsis_id", "season"], keep="last")
-  n_all = 0
-  for s in sorted(u.season.unique()):
+  n_q = n_u = 0
+  for s in sorted(t.season.unique()):
     f = out / f"{int(s)}.json"
     doc = json.loads(f.read_text(encoding="utf-8")) if f.exists() else {"season": int(s), "stats": {}, "qualified": {}, "players": {}}
-    one = u[u.season == s].set_index("gsis_id")
-    lines = list(one.index)
-    cur_v, wa = window(u, s, lines, kp)
-    sea_v = one.val / (one.att + kp)
-    cur_raw, sea_raw = window(u, s, lines, kp, raw=True)[0], one.val / one.att
-    bp = [pct(one.pass_v / one.att), pct(one.run_v / one.att)]
-    gp, sg = pct(cur_v), pct(sea_v)
-    doc["stats"]["OL"], doc["qualified"]["OL"] = OL_LABELS, len(lines)
-    who = t[t.season == s].set_index("gsis_id")
-    for pid, tm in zip(home[home.season == s].gsis_id, home[home.season == s].team):
-      if tm not in one.index or pid not in who.index:
-        continue
-      o = who.loc[pid]
-      doc["players"][pid] = [int(gp[tm]), "OL", int(o.games), int(round(wa[tm])), round(float(cur_raw[tm]), 4), [int(b[tm]) for b in bp],
-                             int(sg[tm]), round(float(sea_raw[tm]), 4), int(o.games),
-                             None, {"unit": tm, "snap": int(round(100 * float(o.share))) if pd.notna(o.share) else None,
-                                    "pen": int(o.pen), "pos": str(o.pos)}]
-      n_all += 1
+    one = t[t.season == s].drop_duplicates("gsis_id").set_index("gsis_id")
+    q = list(one.index[one.qual])
+    if len(q) < 10:
+      continue
+    uq = list(one.index[~one.qual & (one.games >= 2)])
+    allp = q + uq
+    o = one.loc[allp]
+    cur_v, wa = window(t, s, allp, kp)
+    sea_v = o.val / (o.att + kp)
+    cur_raw, sea_raw = window(t, s, allp, kp, raw=True)[0], o.val / o.att
+    pv, rv = o.pass_v / o.att, o.run_v / o.att
+    gp, sg = pd.concat([pct(cur_v[q]), pct_vs(cur_v[q], cur_v[uq])]), pd.concat([pct(sea_v[q]), pct_vs(sea_v[q], sea_v[uq])])
+    bp = [pd.concat([pct(b[q]), pct_vs(b[q], b[uq])]) for b in (pv.fillna(0.0), rv.fillna(0.0))]
+    doc["stats"]["OL"], doc["qualified"]["OL"] = OL_LABELS, len(q)
+    for x in allp:
+      doc["players"][x] = [int(gp[x]), "OL", int(o.games[x]), int(round(wa[x])), round(float(cur_raw[x]), 4), [int(b[x]) for b in bp],
+                           int(sg[x]), round(float(sea_raw[x]), 4), int(o.games[x]), 1 if x in uq else None,
+                           {"unit": str(o.team[x]), "snap": int(round(100 * float(o.share[x]))) if pd.notna(o.share[x]) else None,
+                            "pen": int(o.pen[x]), "pos": str(o.pos[x])}]
+    n_q, n_u = n_q + len(q), n_u + len(uq)
     f.write_text(json.dumps(doc, separators=(",", ":")), encoding="utf-8")
-  print(f"[grades] offensive line units: {len(u)} team-seasons, {n_all} linemen carrying their line's grade, "
-        f"{int(u.season.min())}-{int(u.season.max())} (shrinkage {kp:.0f} pseudo-plays)", flush=True)
+  print(f"[grades] offensive line (unit, by snaps): {n_q} qualified + {n_u} part-time lineman-seasons, "
+        f"{int(t.season.min())}-{int(t.season.max())} (shrinkage {kp:.0f} pseudo-plays)", flush=True)
 
 
 def evaluate_line(cache_dir: Path, cur: int, sched: pd.DataFrame) -> None:

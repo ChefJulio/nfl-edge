@@ -5855,3 +5855,9 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   grade and stat bar on the sheets shows on the 50-99 scale; every rostered player's card has the same six tiles
   (kindWeek: defenders, kickers with our projection for upcoming weeks, punters, linemen, long snappers; long snappers'
   Grade tile reads Not graded).
+- **OWNER DESIGN 2026-10-31 (same day): the unit grade by snaps.** "only pin this grade to the linemen who played,
+  weighted by snap share." A lineman's grade = his line's game grades weighted by his snaps in each game (a backup
+  carries only his stretches), three-season form, shrunk by 559 pseudo-plays (a few snaps lean on the league), ranked
+  among linemen with 40%+ of the snaps; part-timers with 2+ games get an asterisked grade against them. 2026 Vikings:
+  starters 12-21 (percentile), Van Demark (28% of the snaps, 2 games) an asterisked 75, Tiernan (3%) 53. The tile
+  still reads "OL unit grade". 2,429 qualified + 1,581 part-time lineman-seasons, 2013-2026.
