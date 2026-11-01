@@ -629,7 +629,7 @@
       const bench = ps.filter(p => !cur.has(p.ext)).sort((a, b) => (b.exp != null) - (a.exp != null) || (b.exp || 0) - (a.exp || 0));
       return `${alerts}${irChecks('bad')}
         ${scoreHead(liveRows, mm && mm.points ? mm.points[mine.id] : null)}
-        ${table(liveRows.map(r => row(r.slot, r.p)).join(''), `<th>Slot</th><th>Player</th><th class="num">${scoreOf(liveRows).started ? 'Pts' : 'Proj'}</th>`)}
+        ${table(liveRows.map(r => row(r.slot, r.p)).join(''), `<th>Slot</th><th>Player</th><th class="num">${liveRows.some(r => r.p && r.p.live != null) ? 'Pts' : 'Proj'}</th>`)}
         <h3 class="lg-h">Bench</h3>${table(bench.map(p => row('BN', p)).join('') + emptyBench(ps.length) || '<tr><td colspan="3" class="muted">No bench players.</td></tr>')}
         ${irSection()}
         <p class="muted lg-note">Your lineup as set on ${L.platform === 'sleeper' ? 'Sleeper' : 'ESPN'} when this page loaded. Proj = our projection under your league's scoring if he plays; the total weights each starter by his chance to play.</p>`;
@@ -729,12 +729,16 @@
     };
     // A team's score as the apps show it (owner 2026-10-29: "consideration of how to handle projected/real totals for
     // both players and the whole team"): before kickoff, the projected total; once any starter's game is on, the live
-    // score (the platform's own when it has one) big, the expected final under it, and how many starters are yet to play
+    // score (the platform's own when it has one) big, the expected final under it, and how many starters are yet to play.
+    // Live is the WEEK's state, not a team's (owner 2026-11-01: one side read "102.6 projected" beside the other's live
+    // 14.3 because only the other had a Thursday starter): from the week's first kickoff every team shows its live score,
+    // 0.0 until its players score, as the platforms do.
+    const weekOn = () => (D.games || []).some(g => { const k = NFLE.fmt.kickoff(D.games, g.home.team); return k != null && Date.now() >= k; });
     const scoreOf = (rows, platPts) => {
       const on = rows.filter(r => r.p && r.p.live != null);
       const live = platPts != null && on.length ? +platPts : on.reduce((t, r) => t + r.p.live, 0);
       const left = rows.filter(r => r.p && r.p.exp != null && r.p.live == null).length;
-      return { started: on.length > 0, live, proj: total(rows), left };
+      return { started: on.length > 0 || weekOn(), live, proj: total(rows), left };
     };
     const scoreHead = (rows, platPts) => {
       const sc = scoreOf(rows, platPts);
