@@ -52,6 +52,10 @@ concurrency group, so a waiting dispatch is replaced by the next push and silent
 that never happen again"). deploy.yml doesn't accept that mode (GitHub rejects the dispatch), the news watcher commits
 the request through the API (tools/news_watch.py request_complete), and a user-level Claude Code hook
 (`~/.claude/hooks/no-complete-dispatch.js`) redirects an agent before the error.
+Every other replaced run is INHERITED (owner 2026-11-01, a UI push replaced the watcher's game-day-note build): the
+plan lists runs cancelled since the live site's build started (`deployed.json` "run") and does their work too: a
+news dispatch -> at least the news lane, a scheduled / full dispatch -> full (runs are titled by lane via `run-name`).
+So a push may replace a waiting run: "cancelled" in the Actions list is GitHub's queue, not lost work.
 Injury availability, live week: before a team's report, ESPN early-week buckets (`espn_calib`); once it's out, the
 practice model, except a fresh ESPN Out / IR ruling before the final status (`InjuryModel.midweek_ruling`, rates
 in `data/history/espn_midweek.json` from `tools/espn_midweek_eval.py`; INSIGHTS sec. 9).
