@@ -1,9 +1,9 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
-4870808,Jeremiyah Love,Arizona Cardinals,Out,2026-11-01T21:11Z,Ankle,Not Specified,Right,2026-11-08,OUT,"Love (ankle) was ruled out for Sunday's game against the Cowboys to begin the second half, Alex Weiner of ArizonaSports.com reports.",RB
+4427728,Bam Knight,Arizona Cardinals,Questionable,2026-11-01T22:06Z,Concussion,,Not Specified,2026-11-08,QUESTIONABLE,questionable,RB
+4870808,Jeremiyah Love,Arizona Cardinals,Questionable,2026-11-01T22:06Z,Ankle,Not Specified,Right,2026-11-08,QUESTIONABLE,questionable,RB
+3045523,Kendrick Bourne,Arizona Cardinals,Questionable,2026-11-01T22:06Z,Ankle,Sprain,Right,2026-11-08,QUESTIONABLE,questionable,WR
 4709718,Jayden Williams,Arizona Cardinals,Questionable,2026-11-01T20:46Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Williams (knee) has been ruled out for the rest of Sunday's game against the Cowboys, Darren Urban of the Cardinals' official site reports.",OT
 4360761,Michael Wilson,Arizona Cardinals,Active,2026-11-01T20:28Z,,,,,,"Wilson (undisclosed) returned to Sunday's contest in Dallas, Darren Urban of the Cardinals' officials site reports.",WR
-4427728,Bam Knight,Arizona Cardinals,Out,2026-11-01T20:22Z,Concussion,,Not Specified,2026-11-08,OUT,Knight (concussion) has been ruled out for the rest of Sunday's game against the Cowboys.,RB
-3045523,Kendrick Bourne,Arizona Cardinals,Out,2026-11-01T19:52Z,Ankle,Sprain,Right,2026-11-08,OUT,"Bourne won't return to Sunday's contest at Dallas due to a right high-ankle sprain, Theo Mackie of The Arizona Republic reports.",WR
 4698113,Max Melton,Arizona Cardinals,Active,2026-11-01T17:23Z,,,,,,"Melton (knee) is active for Sunday's game against the Cowboys, Darren Urban of the team's official site reports.",CB
 3918331,Andrew Wingard,Arizona Cardinals,Active,2026-11-01T17:19Z,,,,,,"Wingard (knee) is active for Sunday's game versus the Cowboys, Darren Urban of the team's official site reports.",S
 4430841,Carson Beck,Arizona Cardinals,Out,2026-11-01T17:15Z,Coach's Decision,Not Specified,Right,2026-11-08,INACTIVE,"Beck (coach's decision) is inactive for Sunday's game in Dallas, though he will be available as the team's QB3, Darren Urban of the team's official site reports.",QB
@@ -49,9 +49,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4034961,Jawaan Taylor,Atlanta Falcons,Active,2026-10-30T17:29Z,,,,,,,OT
 4431005,Xavier Watts,Atlanta Falcons,Active,2026-10-28T03:39Z,,,,,,Watts notched seven tackles (three solo) and forced a fumble Sunday in a 29-20 Week 7 victory against the 49ers.,S
 3919512,Jessie Bates III,Atlanta Falcons,Active,2026-10-28T03:31Z,,,,,,"Bates registered nine tackles (two solo), two defensed passes (including an interception) and one forced fumble Sunday in a 29-20 victory over San Francisco.",S
+4035671,Tyler Huntley,Baltimore Ravens,Questionable,2026-11-01T22:03Z,Toe,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,"The status of Huntley (toe) is uncertain ahead of Thursday night's game against the Jaguars , Tom Pelissero of Netflix reports",QB
+3916387,Lamar Jackson,Baltimore Ravens,Out,2026-11-01T21:50Z,Thumb,Not Specified,Right,2026-12-13,OUT,"Jackson is slated to have surgery to address his right thumb injury and will be placed on injured reserve, Brian Wacker of The Baltimore Sun reports.",QB
 4601278,Nate Wiggins,Baltimore Ravens,Questionable,2026-11-01T20:58Z,Neck,Stinger,Not Specified,2026-11-01,QUESTIONABLE,Wiggins (stinger) is being evaluated for a possible concussion and is questionable to return to Sunday's game against the Bills.,CB
-4035671,Tyler Huntley,Baltimore Ravens,Questionable,2026-11-01T20:09Z,Toe,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,Huntley (toe) has been ruled out for the rest of Sunday's game against the Bills.,QB
-3916387,Lamar Jackson,Baltimore Ravens,Out,2026-11-01T18:38Z,Thumb,Not Specified,Right,2026-12-13,OUT,Jackson (right thumb) has been ruled out for the remainder of Sunday's game against the Bills.,QB
 4575483,T.J. Tampa,Baltimore Ravens,Active,2026-11-01T17:31Z,,,,,,Tampa (knee) is active for Sunday's game versus Buffalo.,CB
 4429582,Joe Fagnano,Baltimore Ravens,Out,2026-11-01T17:07Z,Coach's Decision,Not Specified,Not Specified,2026-11-05,INACTIVE,Fagnano (coach's decision) is inactive but will serve as the Ravens' emergency third quarterback Sunday against the Bills.,QB
 4565311,Aeneas Peebles,Baltimore Ravens,Out,2026-11-01T16:34Z,Coach's Decision,Not Specified,Not Specified,2026-11-05,INACTIVE,inactive,DT
@@ -74,8 +74,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4243220,Andrew Vorhees,Baltimore Ravens,Active,2026-10-26T17:29Z,,,,,,,G
 3116365,Mark Andrews,Baltimore Ravens,Active,2026-10-26T02:08Z,,,,,,Andrews caught three of four targets for 23 yards in Sunday's 35-13 loss to the Bengals.,TE
 4697745,Tyler Loop,Baltimore Ravens,Active,2026-10-25T22:33Z,,,,,,Loop went 2-for-2 on field-goal tries and made his only PAT during Sunday's 35-13 loss to the Bengals.,PK
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-11-01T21:50Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
-3915416,DJ Moore,Buffalo Bills,Questionable,2026-11-01T21:17Z,Undisclosed,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Moore (undisclosed) headed to the medical tent during Sunday's game against the Ravens, Katherine Fitzgerald of The Buffalo News reports.",WR
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-11-01T22:07Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+3915416,DJ Moore,Buffalo Bills,Questionable,2026-11-01T21:17Z,Knee,Not Specified,Not Specified,2026-11-09,QUESTIONABLE,"Moore (undisclosed) headed to the medical tent during Sunday's game against the Ravens, Katherine Fitzgerald of The Buffalo News reports.",WR
 4379399,James Cook III,Buffalo Bills,Active,2026-11-01T21:06Z,,,,,,"After being evaluated for a head injury, Cook was cleared to return to Sunday's game against the Ravens.",RB
 4242433,Joshua Palmer,Buffalo Bills,Questionable,2026-11-01T20:28Z,Hamstring,Not Specified,Right,2026-11-09,QUESTIONABLE,Palmer (hamstring) has been ruled out for the rest of Sunday's game against the Ravens.,WR
 4401823,Dee Alford,Buffalo Bills,Out,2026-11-01T19:47Z,Ankle,Not Specified,Not Specified,2026-11-09,INACTIVE,Alford (ankle) is inactive for Sunday's game against Baltimore.,CB
@@ -200,7 +200,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4243541,Kalia Davis,Cleveland Browns,Injured Reserve,2026-10-28T00:26Z,Quadriceps,Not Specified,Not Specified,2027-02-15,IR,"Davis (quadriceps) will spend the rest of the 2026 season on injured reserve after his 21-day practice window expired Tuesday, Aaron Wilson of KPRC 2 Houston reports.",DT
 4722893,Jaleel McLaughlin,Cleveland Browns,Active,2026-10-27T01:10Z,,,,,,McLaughlin turned five kickoff returns into 117 yards during the Browns' 27-24 win over the Titans on Sunday.,RB
 4870706,Caleb Downs,Dallas Cowboys,Questionable,2026-11-01T20:52Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"Downs has been ruled out for the rest of Sunday's game against the Cardinals to be evaluated for a concussion, Jon Machota of The Athletic reports.",S
-4242355,Jake Ferguson,Dallas Cowboys,Out,2026-11-01T19:55Z,Ankle,Not Specified,Not Specified,2026-11-08,OUT,"Ferguson (ankle) won't return to Sunday's game against the Cardinals, Joe Hoyt reports.",TE
+4242355,Jake Ferguson,Dallas Cowboys,Questionable,2026-11-01T19:55Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Ferguson (ankle) won't return to Sunday's game against the Cardinals, Joe Hoyt reports.",TE
 4426506,Joey Porter Jr.,Dallas Cowboys,Active,2026-11-01T19:24Z,,,,,,,CB
 3929850,P.J. Locke,Dallas Cowboys,Active,2026-11-01T17:27Z,,,,,,Locke (foot) is active for Sunday's game against the Cardinals.,S
 3122752,Kenny Clark,Dallas Cowboys,Active,2026-11-01T16:58Z,,,,,,Clark (back) is active for Sunday's game against the Cardinals.,DT
@@ -249,6 +249,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426338,Bo Nix,Denver Broncos,Active,2026-10-26T00:29Z,,,,,,Nix completed 15 of 29 passes for 222 yards and a touchdown while rushing seven times for 73 yards and a touchdown in Sunday's 30-16 win over the Cardinals.,QB
 2985659,Wil Lutz,Denver Broncos,Active,2026-10-26T00:05Z,,,,,,Lutz went 3-for-3 on field-goal tries and made all three of his PATs during Sunday's 30-16 win over Arizona.,PK
 4362748,Tyler Badie,Denver Broncos,Injured Reserve,2026-10-24T23:25Z,Thumb,Fracture,Not Specified,2026-11-27,IR,"The Broncos placed Badie (thumb) on injured reserve Saturday, Aric DiLalla of the team's official site reports.",RB
+4429795,Jahmyr Gibbs,Detroit Lions,Active,2026-11-01T22:01Z,,,,,,Gibbs rushed 23 times for 153 yards and a touchdown while bringing in two of four targets for 15 yards in the Lions' 19-15 win over the Vikings on Sunday.,RB
 4896353,Jimmy Rolder,Detroit Lions,Questionable,2026-11-01T21:13Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Rolder did not return to Sunday's game against the Vikings after sustaining a hamstring injury in the third quarter.,LB
 4361788,Cade Mays,Detroit Lions,Questionable,2026-11-01T21:03Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Mays (ankle) has been ruled out for the rest of Sunday's game against the Vikings, Nolan Bianchi of The Detroit News reports.",C
 3139387,D.J. Reed,Detroit Lions,Questionable,2026-11-01T21:02Z,Hip,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Reed (hip) is questionable to return to Sunday's game against the Dolphins.,CB
@@ -267,7 +268,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360383,Kerby Joseph,Detroit Lions,Out,2026-10-30T23:52Z,Knee,Not Specified,Not Specified,2026-11-08,PUP-R,Joseph (knee) has been ruled out for Sunday's game against the Vikings.,S
 4361529,Isiah Pacheco,Detroit Lions,Injured Reserve,2026-10-30T17:09Z,Back,Not Specified,Not Specified,2026-12-28,IR,"Lions coach Dan Campbell said Friday that Pacheco (back) has a chance to return in late December, Justin Rogers of DetroitFootball.net reports.",RB
 4431615,Tyleik Williams,Detroit Lions,Active,2026-10-29T20:26Z,,,,,,,DT
-4429795,Jahmyr Gibbs,Detroit Lions,Active,2026-10-29T20:14Z,,,,,,Gibbs (shoulder) practiced fully Thursday.,RB
 5123663,Isaac TeSlaa,Detroit Lions,Active,2026-10-27T01:40Z,,,,,,TeSlaa caught one of his two targets for 10 yards in the Lions' 20-17 win over the Packers on Sunday.,WR
 4430027,Sam LaPorta,Detroit Lions,Active,2026-10-26T02:14Z,,,,,,LaPorta caught one of two targets for 18 yards in Sunday's 20-17 win over the Packers.,TE
 4426388,Jameson Williams,Detroit Lions,Active,2026-10-26T02:10Z,,,,,,Williams caught five of nine targets for 91 yards and two touchdowns in Sunday's 20-17 win over Green Bay.,WR
@@ -599,6 +599,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242547,Paulson Adebo,New York Giants,Active,2026-10-25T15:37Z,,,,,,"Adebo (knee) is active Week 7 against the Texans, Dan Salomone of the Giants' official site reports.",CB
 3929950,Tremaine Edmunds,New York Giants,Injured Reserve,2026-10-24T23:28Z,Chest,Not Specified,Left,2027-02-15,IR,"Edmunds (chest) was placed on injured reserve Saturday, Dan Duggan of The Athletic reports.",LB
 4259566,Andrew Thomas,New York Giants,Active,2026-10-24T02:04Z,,,,,,Thomas (groin) does not have an injury designation against the Texans on Sunday.,OT
+4597500,Adonai Mitchell,New York Jets,Active,2026-11-01T22:12Z,,,,,,Mitchell caught seven of nine targets for 142 yards and a touchdown in Sunday's 38-33 loss to the Raiders.,WR
+4569618,Garrett Wilson,New York Jets,Active,2026-11-01T22:10Z,,,,,,Wilson caught six of 12 targets for 83 yards in Sunday's 38-33 loss to the Raiders.,WR
+4685247,Braelon Allen,New York Jets,Active,2026-11-01T22:09Z,,,,,,Allen rushed 21 times for 147 yards and a touchdown while catching both of his targets for six yards in Sunday's 38-33 loss to the Raiders.,RB
 4243375,Dylan Parham,New York Jets,Active,2026-11-01T17:27Z,,,,,,Parham (knee) is active for Sunday's game against Las Vegas.,G
 4685248,David Bailey,New York Jets,Out,2026-11-01T16:51Z,Groin,Not Specified,Not Specified,2026-11-08,INACTIVE,Bailey (groin) is inactive for Sunday's game against Las Vegas.,LB
 3134353,Tim Patrick,New York Jets,Out,2026-11-01T16:48Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,Patrick (coach's decision) is inactive for Sunday's game versus the Raiders.,WR
@@ -607,15 +610,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362094,Joseph Ossai,New York Jets,Out,2026-11-01T16:37Z,Ankle,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,DE
 4373951,Kohl Levao,New York Jets,Out,2026-11-01T16:37Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,G
 4427366,Breece Hall,New York Jets,Out,2026-11-01T16:32Z,Quadriceps,Not Specified,Right,2026-11-08,INACTIVE,Hall (quadriceps) is inactive for Sunday's game against the Raiders.,RB
-4685247,Braelon Allen,New York Jets,Active,2026-11-01T12:29Z,,,,,,"Allen is slated to serve as the Jets' starting running back Sunday against the Raiders, Ian Rapoport of NFL Network reports.",RB
 4428617,T'Vondre Sweat,New York Jets,Injured Reserve,2026-10-31T23:39Z,Knee,Not Specified,Not Specified,2026-11-29,IR,"The Jets placed Sweat (knee) on injured reserve Saturday, Jeremy Fowler of ESPN.com reports.",DT
 4035537,Kene Nwangwu,New York Jets,Active,2026-10-29T00:29Z,,,,,,Nwangwu was a full participant in Wednesday's practice.,RB
-4569618,Garrett Wilson,New York Jets,Active,2026-10-28T19:40Z,,,,,,"Wilson said Wednesday that he won't ask to be traded from the Jets, Zack Rosenblatt of The Athletic reports.",WR
 14958,Demario Davis,New York Jets,Active,2026-10-28T03:09Z,,,,,,Davis finished Sunday's Week 7 loss to Miami with three tackles (two solo) and one defensed pass.,LB
 4361331,Jamien Sherwood,New York Jets,Active,2026-10-28T02:58Z,,,,,,Sherwood totaled eight tackles (four solo) and two defensed passes Sunday in a loss to Miami.,LB
 4426686,Dane Belton,New York Jets,Active,2026-10-28T02:53Z,,,,,,Belton registered nine tackles (six solo) in Sunday's loss to the Dolphins.,S
 3925345,Minkah Fitzpatrick,New York Jets,Active,2026-10-28T02:46Z,,,,,,Fitzpatrick posted 10 tackles (six solo) Sunday in a loss to Miami.,S
-4597500,Adonai Mitchell,New York Jets,Active,2026-10-27T00:24Z,,,,,,Mitchell failed to haul in any of his three targets during the Jets' 28-25 loss to the Dolphins on Sunday.,WR
 4695404,Isaiah Davis,New York Jets,Active,2026-10-27T00:14Z,,,,,,Davis logged a five-yard carry and caught all three of his targets for 49 yards during Sunday's 28-25 loss to Miami. He also added a tackle on special teams.,RB
 4039485,Jack Heflin,New York Jets,Active,2026-10-26T18:43Z,,,,,,,DT
 4426817,Jarvis Brownlee Jr.,New York Jets,Active,2026-10-26T18:43Z,,,,,,,CB
