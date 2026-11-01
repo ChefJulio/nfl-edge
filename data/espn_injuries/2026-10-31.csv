@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4690179,Tavius Robinson,Baltimore Ravens,Injured Reserve,2026-10-24T20:50Z,Pectoral,Not Specified,Not Specified,2027-02-15,IR,The Ravens placed Robinson (pectoral) on injured reserve Saturday.,LB
 4361178,Cam Jurgens,Baltimore Ravens,Active,2026-10-24T01:48Z,,,,,,Jurgens (concussion) does not have any injury designation ahead of Sunday's game against the Bengals.,C
 4432260,Matt Hibner,Baltimore Ravens,Active,2026-10-23T00:03Z,,,,,,Hibner (hand) was a full participant at practice Thursday.,TE
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-31T23:13Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-10-31T23:49Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4427348,Te'Cory Couch,Buffalo Bills,Active,2026-10-31T20:01Z,,,,,,,CB
 4030899,Spencer Brown,Buffalo Bills,Questionable,2026-10-31T01:53Z,Back,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Brown (back) is listed as questionable for Sunday's game against the Ravens.,OT
 4401823,Dee Alford,Buffalo Bills,Questionable,2026-10-30T21:56Z,Ankle,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Alford (ankle) is listed as questionable ahead of Sunday's game against the Ravens.,CB
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431077,TeRah Edwards,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,DT
 4874515,Sam Hecht,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,C
 4034962,Stone Forsythe,Carolina Panthers,Active,2026-10-26T17:32Z,,,,,,,OT
-4361748,Anthony Johnson Jr.,Chicago Bears,Injured Reserve,2026-10-31T23:13Z,Undisclosed,Not Specified,Not Specified,2026-11-08,IR,ir,S
+4361748,Anthony Johnson Jr.,Chicago Bears,Active,2026-10-31T23:49Z,,,,,,,S
 3121544,T.J. Edwards,Chicago Bears,Active,2026-10-31T23:13Z,,,,,,Edwards (hamstring) does not have an injury designation for Monday's tilt against the Seahawks.,LB
 4241007,D'Marco Jackson,Chicago Bears,Questionable,2026-10-31T23:08Z,Ankle,,,2026-11-02,QUESTIONABLE,Jackson (ankle) is questionable to suit up Monday versus Seattle.,LB
 4372576,Jack Sanborn,Chicago Bears,Active,2026-10-31T22:39Z,,,,,,,LB
@@ -649,6 +649,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431574,Eli Stowers,Philadelphia Eagles,Active,2026-10-27T23:12Z,,,,,,Stowers failed to haul in his lone target during Monday's 38-21 loss to Dallas.,TE
 4715355,Darius Cooper,Philadelphia Eagles,Active,2026-10-27T23:06Z,,,,,,Cooper caught one of three passes for 17 yards during the Eagles' 38-21 loss to the Cowboys on Monday.,WR
 4430814,Jake Majors,Philadelphia Eagles,Active,2026-10-27T13:07Z,,,,,,,C
+4035198,Brandon Johnson,Pittsburgh Steelers,Active,2026-10-31T23:47Z,,,,,,"The Steelers elevated Johnson from the practice squad to the active roster Saturday, Teresa Varley of the team's official site reports.",WR
+4240577,Brandon Smith,Pittsburgh Steelers,Active,2026-10-31T23:44Z,,,,,,"The Steelers signed Smith off the practice squad to the active roster Saturday, Teresa Varley of the team's official site reports.",WR
 4692628,Doneiko Slaughter,Pittsburgh Steelers,Out,2026-10-31T01:44Z,Hamstring,Not Specified,Not Specified,2026-11-08,OUT,"Slaughter (hamstring) has been ruled out for Sunday's game against the Browns, Mike DeFabo of The Athletic reports.",CB
 4567979,Brandin Echols,Pittsburgh Steelers,Out,2026-10-31T01:35Z,Hamstring,Not Specified,Not Specified,2026-11-08,OUT,"Echols (hamstring) has been ruled out for Sunday's game against the Browns, Mike DeFabo of The Athletic reports.",CB
 4035656,Ben Skowronek,Pittsburgh Steelers,Questionable,2026-10-30T21:33Z,Calf,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Skowronek (calf) is questionable for Sunday's game against the Browns, Mike DeFabo of The Athletic reports.",WR
@@ -657,7 +659,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361652,Payton Wilson,Pittsburgh Steelers,Active,2026-10-28T01:51Z,,,,,,Wilson totaled six tackles (three solo) and an interception during Pittsburgh's win over the Saints on Sunday.,LB
 4242207,Patrick Queen,Pittsburgh Steelers,Active,2026-10-28T01:33Z,,,,,,"Queen compiled 10 tackles (seven solo), including 1.0 sacks, during Pittsburgh's win over the Saints on Sunday.",LB
 4685261,Germie Bernard,Pittsburgh Steelers,Active,2026-10-26T23:49Z,,,,,,Bernard caught three of five targets for 27 yards in Sunday's 16-10 win over the Saints.,WR
-4240577,Brandon Smith,Pittsburgh Steelers,Active,2026-10-26T23:48Z,,,,,,"Smith reverted to the Steelers' practice squad Monday, per the NFL's transaction log.",WR
 4430802,Darnell Washington,Pittsburgh Steelers,Active,2026-10-26T23:47Z,,,,,,Washington caught his lone target for a four-yard touchdown in Sunday's 16-10 win over the Saints in Paris.,TE
 4429955,Will Howard,Pittsburgh Steelers,Active,2026-10-26T18:54Z,,,,,,,QB
 4714771,Drew Allar,Pittsburgh Steelers,Active,2026-10-26T18:54Z,,,,,,,QB
@@ -673,7 +674,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-10-25T12:26Z,,,,,,"Rudolph is active for Sunday's game against the Saints in Paris, Teresa Varley of the Steelers' official site reports.",QB
 3045282,T.J. Watt,Pittsburgh Steelers,Active,2026-10-23T15:41Z,,,,,,Watt (calf) practiced fully Friday and doesn't carry an injury designation into Sunday's game against the Saints.,LB
 3047495,Sebastian Joseph-Day,Pittsburgh Steelers,Injured Reserve,2026-10-23T00:28Z,Triceps,Not Specified,Not Specified,2026-11-27,IR,"Joseph-Day (triceps) was placed on injured reserve by the Steelers on Thursday, Teresa Varley of the team's official website reports.",DT
-4570044,Jaquan Brisker,Pittsburgh Steelers,Active,2026-10-21T02:36Z,,,,,,Brisker posted seven tackles (four solo) during the Steelers' 26-19 overtime win over the Buccaneers on Sunday.,S
 3916903,Dre Greenlaw,San Francisco 49ers,Active,2026-10-28T03:46Z,,,,,,Greenlaw posted 12 tackles (four solo) in Sunday's loss to the Falcons.,LB
 3138826,Fred Warner,San Francisco 49ers,Active,2026-10-28T03:42Z,,,,,,Warner recorded 13 tackles (six solo) Sunday in a Week 7 loss to Atlanta.,LB
 4693337,Marques Sigle,San Francisco 49ers,Questionable,2026-10-27T13:11Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,S
