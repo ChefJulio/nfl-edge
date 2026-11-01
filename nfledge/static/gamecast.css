@@ -472,8 +472,11 @@ button.dr-h { width: 100%; font: inherit; font-size: var(--fs-sm); color: var(--
 .dr > .ds-ps { margin: 4px 0 2px; }
 .dr-res { font-weight: 700; } .dr-res.good { color: var(--good); }
 .pls { list-style: none; margin: 0; padding: 0; }
-.pl { display: grid; grid-template-columns: 62px minmax(0, 1fr) auto; gap: 8px; padding: 7px 4px; border-bottom: 1px solid var(--line); font-size: var(--fs-md); }
+.pl { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 8px; padding: 7px 4px; border-bottom: 1px solid var(--line); font-size: var(--fs-md); }
 .pl-when { color: var(--muted); font-size: var(--fs-sm); font-weight: 600; white-space: nowrap; }
+/* the play's tags under its clock (owner 2026-11-01): one per line, sized to fit the column (KICKOFF the widest) */
+.pl-when .pl-tags { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 6px; }
+.pl-when .pc-chip { font-size: 10px; padding: 0 5px; }
 .pl-dd { font-size: var(--fs-xs); color: var(--muted); font-weight: 600; } .pl-txt { line-height: 1.38; }
 .pl-side { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
 .pl-wp { font-size: var(--fs-xs); color: var(--muted); white-space: nowrap; } .pl-sc { font-size: var(--fs-sm); white-space: nowrap; }
@@ -496,7 +499,7 @@ button.dr-h { width: 100%; font: inherit; font-size: var(--fs-sm); color: var(--
 .pc-tile { display: inline-flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; }
 .pc-tile:hover b { color: var(--accent); }
 article.game.flash { box-shadow: 0 0 0 3px var(--accent), var(--shadow); transition: box-shadow .3s; }
-@media (max-width: 560px) { .pl { grid-template-columns: 52px minmax(0, 1fr); } .pl-side { grid-column: 2; align-items: flex-start; flex-direction: row; gap: 10px; } }
+@media (max-width: 560px) { .pl { grid-template-columns: 64px minmax(0, 1fr); } .pl-side { grid-column: 2; align-items: flex-start; flex-direction: row; gap: 10px; } }
 /* box score */
 .bx-team { margin-bottom: 14px; } .bx-th { display: flex; align-items: center; gap: 8px; font-size: var(--fs-lg); padding-bottom: 6px; border-bottom: 3px solid var(--tc); margin-bottom: 6px; }
 .bx-t { margin: 8px 0 4px; overflow-x: auto; } .bx-h { font-size: var(--fs-sm); text-transform: none; letter-spacing: 0; color: var(--muted); font-weight: 600; margin-bottom: 2px; }
