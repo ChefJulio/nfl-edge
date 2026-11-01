@@ -111,6 +111,33 @@ def trained_engine(data, cfg, scoring, season: int):
   return eng
 
 
+def _archive_notes(out: Path, data, proj, feed, season: int, week: int) -> None:
+  """(owner 2026-11-01: Breece Hall "isn't expected to play" at 9:07 CT; the model reads no note text) every ESPN note
+  on a player listed this week, kept with its time and status and our chance to play when we saw it: the evidence for a
+  pre-registered test of using notes ("expected to play" / "not expected to play" / game-time decision).
+  data/live_inputs/notes_<season>_<week>.json = {espn_id: {name, team, notes: [[updated, status, comment, avail]]}}"""
+  if feed is None or not len(feed) or "comment" not in feed:
+    return
+  nf = out.parent / "data" / "live_inputs" / f"notes_{season}_{week:02d}.json"
+  log = json.loads(nf.read_text(encoding="utf-8")) if nf.exists() else {}
+  pt = getattr(data, "players_table", None)
+  e2g = ({str(e).replace(".0", ""): g for e, g in zip(pt.espn_id, pt.gsis_id) if pd.notna(e) and isinstance(g, str)}
+         if pt is not None and "espn_id" in pt else {})
+  g2a = dict(zip(proj.gsis_id, proj.avail)) if "gsis_id" in proj and "avail" in proj else {}
+  av = {e: float(g2a[g]) for e, g in e2g.items() if g in g2a and pd.notna(g2a[g])}
+  n_new = 0
+  for x in feed.dropna(subset=["espn_id"]).itertuples():
+    if not x.comment or x.status in (None, "Active"):
+      continue
+    e = log.setdefault(str(x.espn_id), {"name": x.name, "team": x.team, "notes": []})
+    if not any(n[0] == x.updated for n in e["notes"]):
+      e["notes"].append([x.updated, x.status, str(x.comment), round(av[str(x.espn_id)], 4) if str(x.espn_id) in av else None])
+      n_new += 1
+  nf.parent.mkdir(parents=True, exist_ok=True)
+  nf.write_text(json.dumps(log, separators=(",", ":")), encoding="utf-8")
+  print(f"[run] ESPN notes archived: {n_new} new -> {nf.name}", flush=True)
+
+
 def prune(cache_dir: Path, pattern: str, keep: int = 2):
   files = sorted(cache_dir.glob(pattern), key=lambda p: p.stat().st_mtime, reverse=True)
   for f in files[keep:]:
@@ -553,6 +580,10 @@ def main():
           e.update(ruling=gameday[x.gsis_id][0], at=gameday[x.gsis_id][1], post=round(float(x.avail), 4), status=x.status)
       gf.write_text(json.dumps(log, indent=0), encoding="utf-8")
       print(f"[run] game-day overrides archived: {len(log)} -> {gf.name}", flush=True)
+    try:  # every ESPN note this week, for a later test (_archive_notes); evidence only: never let it stop a live build
+      _archive_notes(out, data, proj, feed, season, week)
+    except Exception as e:
+      print(f"[run] ESPN notes not archived: {type(e).__name__}: {e}", flush=True)
     if "pre_up" in proj and proj.pre_up.notna().any():  # {#late-upgrade}, for its audit
       uf = out.parent / "data" / "live_inputs" / f"upgraded_{season}_{week:02d}.json"
       log = json.loads(uf.read_text(encoding="utf-8")) if uf.exists() else {}

@@ -11,6 +11,7 @@ running or queued, or if one started in the last 30 minutes (it will pick the ne
 Standard library only (runs without installing the project). Usage: python tools/news_watch.py [--dry-run]
 """
 import json
+import re
 import os
 import subprocess
 import sys
@@ -26,6 +27,15 @@ SERIOUS = {"Doubtful", "Out", "Injured Reserve", "Physically Unable to Perform",
 # the ESPN Questionable display change, even though the chance to play only moves with the official report
 QUESTION = {"Questionable", "Day-To-Day"}
 LINE_MOVE = 1.0  # points of spread or total since the live site's build that start a build
+# (owner 2026-11-01: Sunday morning's builds were mostly CLE @ PIT's total flapping 38.5 <-> 39.5, six builds) a line
+# only counts as moved when it is LINE_MOVE+ away from every value the site was built with in the last LINE_MEMORY_H
+# hours (this watcher remembers them across its looks), so a bounce back to an earlier line starts nothing
+LINE_MEMORY_H = 6
+LINES_SEEN: dict = {}  # (game_id, "sp" | "tot") -> [(when, value the live site was built with)]
+# (owner 2026-11-01: Breece Hall "isn't expected to play" at 9:07 CT sat unbuilt behind line flaps) on game day a fresh
+# ESPN note on a relevant player who is Questionable or worse, newer than the one the live site was built with, before
+# his kickoff, starts a news build
+NOTE_HOURS = 18  # "game day": his team kicks off within this many hours
 QUIET_MIN = 30
 NEWS_QUIET_MIN = 10  # the news lane (deploy.yml "news", ~6-8 minutes) can follow sooner
 EVERY_MIN = 10   # the relay looks this often
@@ -46,7 +56,8 @@ def espn_now() -> dict:
       href = (a.get("links") or [{}])[0].get("href", "")
       if "/id/" in href:
         out[href.split("/id/")[1].split("/")[0]] = (i.get("status") or "", a.get("displayName") or "",
-                                                    str((i.get("details") or {}).get("returnDate") or "")[:10])
+                                                    str((i.get("details") or {}).get("returnDate") or "")[:10],
+                                                    str(i.get("date") or ""), str(i.get("shortComment") or ""))
   return out
 
 
@@ -54,7 +65,8 @@ def built_from() -> dict:
   """espn_id -> (status, return date or "") in the feed the live site was built with."""
   rows = get(f"{SITE}data/espn_injuries/latest.json?nocache={int(datetime.now().timestamp())}")
   rows = rows if isinstance(rows, list) else rows.get("rows") or rows.get("players") or []
-  return {str(r.get("espn_id")): (r.get("status") or "", str(r.get("return_date") or "")[:10]) for r in rows if r.get("espn_id")}
+  return {str(r.get("espn_id")): (r.get("status") or "", str(r.get("return_date") or "")[:10], str(r.get("updated") or ""))
+          for r in rows if r.get("espn_id")}
 
 
 RET_MOVE_DAYS = 7  # a return date moving this far (about a game) changes what the model does with it
@@ -270,10 +282,18 @@ def lines_moved(d: dict) -> list:
       except ValueError:
         old_sp = None
     old_tot = g.get("vegas_total")
+    now = datetime.now(timezone.utc)
+
+    def far(kind, old, new):  # LINE_MOVE+ from the site's line now and every line it was built with lately
+      seen = LINES_SEEN.setdefault((row["game_id"], kind), [])
+      if old is not None:
+        seen.append((now, float(old)))
+      seen[:] = [(t, v) for t, v in seen if now - t <= timedelta(hours=LINE_MEMORY_H)]
+      return old is None or all(abs(new - v) >= LINE_MOVE for _, v in seen)
     moved = []
-    if old_sp is None or abs(new_sp - old_sp) >= LINE_MOVE:
+    if far("sp", old_sp, new_sp):
       moved.append(f"spread {old_sp if old_sp is not None else 'none'} -> {new_sp:+g} (home)")
-    if new_tot is not None and (old_tot is None or abs(new_tot - float(old_tot)) >= LINE_MOVE):
+    if new_tot is not None and far("tot", old_tot, new_tot):
       moved.append(f"total {old_tot if old_tot is not None else 'none'} -> {new_tot:g}")
     if moved:
       out.append(f"{row['away_team']} @ {row['home_team']}: " + ", ".join(moved))
@@ -355,13 +375,27 @@ def check(dry: bool) -> None:
     print(f"[watch] couldn't read a source ({e}); nothing to do")
     return
   changes = []
+  kicks = {t: x.get("kick") for t, x in ((INDEX.get("d", {}).get("clock") or {}).get("teams") or {}).items() if not x.get("final")}
+  t_now = datetime.now(timezone.utc)
+
+  def game_day(label):  # his team kicks off within NOTE_HOURS and hasn't yet ("Name (POS, TEAM, proj)")
+    m = re.search(r"\(\w+, (\w+),", label)
+    k = kicks.get(m.group(1)) if m else None
+    try:
+      kt = datetime.fromisoformat(k) if k else None
+    except ValueError:
+      return False
+    return bool(kt) and t_now < kt <= t_now + timedelta(hours=NOTE_HOURS)
   for eid, label in who.items():
-    a, ra = then.get(eid, ("", ""))
-    b, rb = now.get(eid, ("", "", ""))[0], now.get(eid, ("", "", ""))[2]
+    a, ra, ua = (then.get(eid, ("", "", "")) + ("",))[:3]
+    cur = now.get(eid, ("", "", "", "", ""))
+    b, rb, ub, note = cur[0], cur[2], cur[3], cur[4]
     if a != b and (a in SERIOUS or b in SERIOUS or a in QUESTION or b in QUESTION):
       changes.append(f"{label}: {a or 'healthy'} -> {b or 'healthy'}")
     elif (a in SERIOUS or b in SERIOUS) and date_moved(ra, rb):
       changes.append(f"{label}: {b} return date {ra or 'none'} -> {rb or 'none'}")
+    elif (b in SERIOUS or b in QUESTION) and ub and ub[:16] > (ua or "")[:16] and game_day(label):
+      changes.append(f"{label}: new note ({b}, {ub[11:16]} UTC): {note[:90]}")
   due = due_events(INDEX.get("d", {}).get("clock") or {}, datetime.now(timezone.utc)) + sunday_pbp_due(INDEX.get("d", {}))     + missing_arrived(INDEX.get("d", {})) + lines_moved(INDEX.get("d", {})) + finals_new(INDEX.get("d", {}))
   if due:
     print("[watch] week clock: " + "; ".join(due))
