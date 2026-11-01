@@ -5919,3 +5919,28 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   OUT / GTD / IN: Brier 0.2074 -> 0.1235, -0.084 [-0.178, -0.001], week 6 (the only week with 5+) better: PASS by the
   letter. Not shipped on nine cases with no OUT case at all (the motivating one, Breece Hall, is in week 8's games, not
   final yet): re-run tonight once week 8's Sunday games are final (same rules, same phrases), then decide.
+- **RESULT {#game-day-notes} 2026-11-01 (EE), interim, corrected parser: GATE FAIL by the letter. DEVIATION: the
+  phrase list replaced by a negation-aware parser; the interim PASS above was partly a parser bug.** Owner, same morning: "make sure the parser correctly handles all potential cases. 'isn't / is not
+  expected' is a lot diff than 'is expected'". The pre-registered list had no notion of negation: "is no longer expected
+  to play", "does not plan to play", "is not on track to play", "is not trending toward playing", "not optimistic" all
+  read IN; "trending toward sitting" read IN; "doesn't expect him to play" matched nothing; hypotheticals ("if he can't
+  go, X will start") counted. It also missed common IN / OUT wording ("in line to play", "likely to suit up", "unlikely
+  to suit up", "is inactive", "downgraded to out"). nfledge/espn_notes.py replaces it: contractions expanded, "not"
+  must govern the phrase (only helper words between: "X, who did not practice, is expected to play" stays IN), clauses
+  about the game he got hurt in ("ruled out for the remainder of Sunday's game", "won't return to"), weeks away ("later
+  this season", "after the bye") and hypotheticals dropped, the note's first sentence with a signal decides.
+  tests/test_espn_notes.py: 66 constructed traps plus 29 real archive notes a first draft misread, all pass; every one
+  of the 1,333 distinct Q / D / Out notes in the archive was re-read under both parsers and the 188 disagreements checked
+  by hand. Same cases, same gate, new parser: 14 OUT / GTD / IN cases (was 9): OUT 1 (Breece Hall, "unlikely to suit
+  up", sat; model 0.53), GTD 3 (active 0.67, model 0.59), IN 10 (active 1.00, model 0.78). Brier 0.1705 -> 0.1125,
+  -0.058 [-0.122, +0.0006]; week 6 (10 cases) 0.153 -> 0.106: **GATE FAIL by the letter** (the CI's top end is just
+  above 0).
+- **OWNER CALL 2026-11-01 {#game-notes}: shipped anyway ("put it in now"), as a stopgap until the (EE) re-run.** Told
+  the gate had flipped to a narrow FAIL with the parser fixed. Shipped form (injuries.NOTE_RATE, availability): a note
+  posted in the 48 hours before kickoff on a player ESPN lists Questionable / Doubtful: IN raises the chance to 0.917
+  (10 of 10, +1 / +1), GTD sets 0.600 (2 of 3, +1 / +1), OUT lowers it to 0.10. Two departures from the tested form,
+  both stated: IN / OUT only move the chance toward their side (max / min: a 94% player with good news isn't cut to
+  92%), and OUT's 0.10 is a judgment, not a measurement (1 case; +1 / +1 would say 0.33, which would RAISE most
+  "won't play" players). Game-day rulings and late downgrades outrank it; pre_note keeps the chance before it. The
+  re-run after week 8's games are final (tools/notes_eval.py; same parser, same gate) decides: measured rates, or the
+  feature comes out.

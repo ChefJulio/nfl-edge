@@ -1,5 +1,5 @@
 ---
-documented_code_hash: 0971d99dcc6289d1
+documented_code_hash: 4e7d7572aa2ba6ef
 ---
 # How the model works
 
@@ -275,6 +275,7 @@ The chance a player plays this week as far as injuries go; it is shown next to t
 - **Traded, claimed or signed before the rosters show it.** The weekly rosters also trail club moves, by up to a week (DeForest Buckner, traded to San Francisco on October 27, still read as a Colt). For the current week, a player ESPN's team rosters list on another club moves to it before anything reads the rosters: his team context in the projections, his depth chart and team roster, his page. A player released and not yet signed elsewhere stays where the weekly rosters have him until they catch up.
 - **Activated off a reserve list.** When a player the weekly rosters still show on injured reserve (or another reserve list) is marked Active by ESPN after his last game, his team has activated him. His tag becomes his official one instead of the reserve code, and once his team's final report is out his chance is the measured rate for players activated that week: 97% when Questionable (of 101, 2019-25), 99% with no tag. A Doubtful or Out tag, or a game-day ruling, keeps its own number. Each activation is archived with the model's chance before it, to check the rule on this season's games.
 - **Designation removed.** The mirror of a late downgrade: a player Questionable or Doubtful on his team's final report whom ESPN marks Active after it has had the designation removed (teams do this on Saturdays). He shows no tag, and his chance is how players with no designation in his spot have played (85.9-98.5%, by whether he missed his last game and his practice days); if he was also activated off a reserve list, 99%. For a player coming off a reserve list, ESPN's Active is the activation itself, so it counts as a removal only when ESPN's note on him says so. Each case is archived to check the rule on this season's games.
+- **Game-day notes from ESPN (stopgap).** In the 48 hours before kickoff, ESPN's note on a Questionable or Doubtful player often says which way it's going ("is expected to play", "isn't expected to play", "a game-time decision"). The note is read with negation in mind ("isn't expected to play" is the opposite of "is expected to play"; notes about the game he got hurt in, about weeks away, or hypotheticals are ignored). "Will play" raises his chance to 92%, a game-time decision sets 60%, "won't play" lowers it to 10%. Game-day rulings and late downgrades outrank it. The first two are 2026 weeks 6-7 play rates; the 10% is a judgment until enough "won't play" notes are measured. It shipped on the owner's call before its test passed (the test fell just short on 14 cases) and is re-tested after week 8.
 
 ### The earlier practice models (now the fallback)
 
@@ -632,6 +633,7 @@ Durability is games missed injured per 1,000 snaps on the field since 2013 (offe
 - **Rejected** - Can we give practice-squad players a chance to play before their elevation is announced (Saturday), from their position room's injuries, their elevations so far and experience? - No: no better than a flat 1.8%; the site adds them once the elevation is announced (2026-10). <!-- tried:ps-stage1 --> <!-- tried:ps-stage1-v2 -->
 - **Adopted** - Each past game counts by its own age (a 32-week half-life, with the offseason adding 8 weeks of distance) instead of every game of a season counting the same: last season's late weeks now matter more than its first weeks, and older seasons fade smoothly. Projections improved at every position and start / sit picks clearly improved (2021-25) (2026-10). <!-- tried:eff-clock -->
 - **Rejected** - Usage shares only from a player's current team; counting playoff games; fading last season by games played this season? - No difference, or slightly worse (2026-10). <!-- tried:share-team --> <!-- tried:playoff-hist --> <!-- tried:prior-fade -->
+- **Shipped (stopgap)** - Should ESPN's game-day notes ("expected to play", "isn't expected to play", "game-time decision") move the chance to play? - Not yet shown: on 14 notes from 2026 weeks 6-7 they improved the chance (Brier 0.171 -> 0.113) but the uncertainty range just touched zero; shipped on the owner's call with a judged 10% for "won't play", re-tested after week 8 (2026-11). <!-- tried:game-day-notes -->
 
 ## Rule changes and scoring eras
 

@@ -37,6 +37,13 @@ OUT_ROSTER = {"RES", "INA", "PUP", "NON", "SUS", "EXE", "CUT", "RET", "TRD", "TR
 _SCORE = {"D": 0.0, "L": 1.0, "F": 2.0}
 GAME_STATUSES = ("None", "QUESTIONABLE", "DOUBTFUL")
 GAMEDAY_ACTIVE = {"questionable": 0.974, "doubtful": 0.286}  # (AU) played rate once declared active, 2019-25 skill players
+# {#game-notes} (EE; owner call 2026-11-01 "put it in now"): ESPN's note on a Questionable / Doubtful player, posted in the
+# NOTE_HOURS before kickoff (espn_notes.classify). The 2026 weeks 6-7 play rates, +1 / +1: IN 10 of 10 -> 0.917, GTD 2 of 3
+# -> 0.600. IN only raises the chance, OUT only lowers it, GTD replaces it.
+# STOPGAP: OUT 0.10 is a judgment, not a measurement (1 case, Breece Hall, sat; +1 / +1 would say 0.33). The (EE) re-run
+# (tools/notes_eval.py, after week 8) replaces all three with the measured rates, or pulls this if the gate fails.
+NOTE_HOURS = 48
+NOTE_RATE = {"IN": 0.917, "GTD": 0.600, "OUT": 0.10}
 
 
 OUT_RET_PRIOR = 0.018  # ESPN Out with a return date past the game: 1.8% played early in the week (n 652, {#tags})
@@ -119,6 +126,14 @@ def cleared_rate(missed: bool, days: str) -> float | None:
 def status_label(r) -> str:
   """The status words for a row of InjuryModel.availability, the one place they're built (owner 2026-10-22 audit:
   consumers read the structured fields, never parse these). r: src, des, days, gd (game-day ruling), espn_q, tlab."""
+  note = NOTE_WORDS.get(str(getattr(r, "note", "") or ""), "")
+  return _status_label(r) + (f" · ESPN: {note}" if note and not r.gd else "")
+
+
+NOTE_WORDS = {"IN": "expected to play", "GTD": "game-time decision", "OUT": "not expected to play"}  # {#game-notes}
+
+
+def _status_label(r) -> str:
   src, des, days = r.src, str(r.des or ""), str(r.days or "")
   dd = f" ({days})" if days else ""
   if r.gd:
@@ -982,6 +997,7 @@ class InjuryModel:
   espn_active: dict | None = None  # gsis_id -> ESPN update time: fresh ESPN "Active" (build_espn_bridge(active=True)), tags only
   espn_late: dict | None = None  # gsis_id -> (Out | Doubtful, ESPN update time): {#late-downgrade} (build_espn_bridge(late=True))
   espn_active_note: dict | None = None  # gsis_id -> ESPN's note on a fresh Active entry (build_espn_bridge(active, notes))
+  espn_notes: dict | None = None  # gsis_id -> (OUT | GTD | IN, ESPN update time): {#game-notes} (build_espn_bridge(gamenotes=True))
   LATE_RATE = {"Out": 0.0, "Doubtful": 0.028}  # {#late-downgrade}: ruled out by his team; the midweek Doubtful rate
   ACT_RATE = {"NONE": 0.99, "QUESTIONABLE": 0.97}  # {#activated}: final status after activation off a reserve list
 
@@ -1237,6 +1253,20 @@ class InjuryModel:
             continue  # Doubtful / Out on the final report: his team's word stands
           p.at[i, "pre_act"], p.at[i, "avail"], p.at[i, "src"] = p.at[i, "avail"], r_, "activated"
           p.at[i, "des"] = off.title() if off != "NONE" else ""
+    # {#game-notes} ESPN's note in the NOTE_HOURS before kickoff, on a player it lists Questionable / Doubtful (owner
+    # 2026-11-01: Breece Hall "unlikely to suit up" Sunday morning while the page kept his Friday Q): IN raises the chance
+    # to NOTE_RATE, OUT lowers it, GTD sets it. Game-day rulings and late downgrades outrank it. pre_note for the audit.
+    p["note"] = ""
+    gn = self.espn_notes or {}
+    if gn:
+      p["pre_note"] = np.nan
+      for i, row in p.iterrows():
+        v = gn.get(row.gsis_id)
+        if not v or p.at[i, "gd"] or p.at[i, "src"] == "espn_late":
+          continue
+        a, r_ = float(p.at[i, "avail"]), NOTE_RATE[v[0]]
+        new = max(a, r_) if v[0] == "IN" else min(a, r_) if v[0] == "OUT" else r_
+        p.at[i, "pre_note"], p.at[i, "avail"], p.at[i, "note"] = a, new, v[0]
     # ESPN's Questionable, shown but not used (owner 2026-10-15: rows showed ESPN's O / D but never its Q): only where
     # there's no designation yet ("" or practice days only) or just last week's; the chance to play is unchanged
     eq = set(self.espn_questionable or {})
@@ -1442,7 +1472,8 @@ class InjuryModel:
 
   @staticmethod
   def build_espn_bridge(data, season: int, week: int, feed: pd.DataFrame, midweek: bool = False,
-                        questionable: bool = False, active: bool = False, late: bool = False, notes: bool = False) -> dict:
+                        questionable: bool = False, active: bool = False, late: bool = False, notes: bool = False,
+                        gamenotes: bool = False) -> dict:
     """Early-week bridge (see espn.py): gsis_id -> ESPN bucket (espn_calib.bucket: Out / Out+ret / Doubtful / IR)
     for players with an ESPN injury status updated on or after their team's last completed game day, for teams
     whose report for `week` is not out. Empty when there is no feed, or once every report for the week is out.
@@ -1453,9 +1484,12 @@ class InjuryModel:
     late=True: ESPN Out / Doubtful, any team, same freshness filter -> (status, update time ISO): {#late-downgrade}
     (availability applies it only to teams whose final report is out, when ESPN's update came after it).
     active=True: ESPN "Active" (cleared), any team, same freshness filter -> its update time (ISO): TAGS only
-    (designations clears a practice-report player's expected tag when it came after his team's latest report)."""
+    (designations clears a practice-report player's expected tag when it came after his team's latest report).
+    gamenotes=True: ESPN Questionable / Doubtful whose note, posted in the NOTE_HOURS before kickoff, says something about
+    this game -> (OUT / GTD / IN, update time ISO): {#game-notes} (espn_notes.classify)."""
     from .espn import STATUS_MAP
     from .espn_calib import MIDWEEK_BUCKETS, bucket
+    from .espn_notes import classify
     if feed is None or feed.empty:
       return {}
     inj = data.injuries
@@ -1473,20 +1507,26 @@ class InjuryModel:
     kick = {t: kickoff(d, tm) for t, d, tm in [*zip(w.home_team, w.gameday, w.gametime), *zip(w.away_team, w.gameday, w.gametime)]}
     out = {}
     for x in feed.itertuples():
-      rep = (("Questionable" if str(x.status) == "Questionable" else None) if questionable
+      rep = ((str(x.status) if str(x.status) in ("Questionable", "Doubtful") else None) if gamenotes
+             else ("Questionable" if str(x.status) == "Questionable" else None) if questionable
              else ("Active" if str(x.status) == "Active" else None) if active
              else (str(x.status) if str(x.status) in ("Out", "Doubtful") else None) if late else STATUS_MAP.get(str(x.status)))
       hit = by_espn.get(str(x.espn_id))
       if rep is None or hit is None:
         continue
       gsis, team = hit
-      if (not questionable and not active and not late and (team in published) != midweek) or team not in last_day.index:
+      if (not questionable and not active and not late and not gamenotes and (team in published) != midweek) or team not in last_day.index:
         continue
       upd = pd.to_datetime(x.updated, utc=True, errors="coerce")
       if pd.isna(upd) or upd.tz_convert("America/New_York").date() < pd.Timestamp(last_day[team]).date():
         continue  # news from before his last game: last week's report already covers it
       if kick.get(team) is not None and upd >= kick[team]:
         continue  # posted after this week's kickoff: about his next game (Terry McLaurin, hurt in 2026 week 6's MNF)
+      if gamenotes:
+        cls = classify(str(getattr(x, "comment", "") or ""))
+        if cls != "NONE" and kick.get(team) is not None and upd >= kick[team] - pd.Timedelta(hours=NOTE_HOURS):
+          out[gsis] = (cls, upd.isoformat())
+        continue
       if questionable:
         out[gsis] = rep
         continue

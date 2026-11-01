@@ -963,15 +963,22 @@
     return { teams: 10, QB: 1, RB: 2, WR: 2, TE: 1 };
   };
   const mrClass = r => !r ? '' : r <= 8 ? 'mr-hard' : r <= 16 ? 'mr-tough' : r <= 24 ? 'mr-ok' : 'mr-easy';
-  // each column: [label, value, index into the game row's weekly position ranks g.r (tools/player_logs.py RANKED), or none]
+  // each column: [label, value, index into the game row's weekly position ranks g.r (tools/player_logs.py RANKED), or none,
+  // options: b = bold values, fum = a fumble count (0 plain, 1+ a red chip), t = the head's tooltip]
+  const LOG_B = { b: 1 };
   const logCols = (pos, rushy) => {
     const c = (g, i) => g.c[i], x = (g, i) => g.x[i];
+    // rushing fumbles, lost ("fm", tools/player_logs.py; owner 2026-11-01): undefined in files built before it (a dash)
+    const fm = (g, i) => g.fm ? g.fm[i] : undefined;
     const ypc = g => x(g, 2) ? (c(g, 3) / x(g, 2)).toFixed(1) : '';
     // every position gets all three groups (owner 2026-10-16), his own first so it's on screen without scrolling
     // sideways; a group outside his role (third element true: a WR's passing) shows its zeros plain, not as red chips
     const pass = ex => ['Passing', [['C/A', g => `${x(g, 0)}/${x(g, 1)}`, 9], ['Yd', g => f0(c(g, 0)), 0], ['TD', g => c(g, 1), 1], ['Int', g => c(g, 2), 2]], ex];
     const rec = ex => ['Receiving', [['Tgt', g => x(g, 3), 12], ['Rec', g => c(g, 5), 5], ['Yd', g => f0(c(g, 6)), 6], ['TD', g => c(g, 7), 7]], ex];
-    const rush = ex => ['Rushing', [['Att', g => x(g, 2), 11], ['Yd', g => f0(c(g, 3)), 3], ...(pos === 'RB' ? [['YPC', ypc]] : []), ['TD', g => c(g, 4), 4]], ex];
+    // Att / Yd bold, plus the fumbles on his runs (owner 2026-11-01)
+    const rush = ex => ['Rushing', [['Att', g => x(g, 2), 11, LOG_B], ['Yd', g => f0(c(g, 3)), 3, LOG_B], ...(pos === 'RB' ? [['YPC', ypc]] : []), ['TD', g => c(g, 4), 4],
+      ['Fmbl', g => fm(g, 0), null, { fum: 1, t: 'Fumbles on his runs (sack and receiving fumbles not counted)' }],
+      ['Lost', g => fm(g, 1), null, { fum: 1, t: 'Of those, fumbles the defense recovered' }]], ex];
     return pos === 'QB' ? [pass(false), rush(false), rec(true)]
       : pos === 'RB' ? [rush(false), rec(false), pass(true)]
       : [rec(false), rush(!rushy), pass(true)];
@@ -1080,7 +1087,7 @@
     }
     const all = L.seasons.flatMap(s => s.g);
     const rushy = pos !== 'QB' && pos !== 'RB' && all.reduce((t, g) => t + g.x[2], 0) >= 8;
-    const groups = logCols(pos, rushy), stat = groups.flatMap(([, cols, ex]) => cols.map(([n, fn, ri]) => [n, fn, ri, ex]));
+    const groups = logCols(pos, rushy), stat = groups.flatMap(([, cols, ex]) => cols.map(([n, fn, ri, o]) => [n, fn, ri, ex, o || {}]));
     // a divider where each stat group starts (owner 2026-10-17: passing ran straight into rushing below the heads)
     const gstart = new Set();
     groups.reduce((k, [, cols], gi) => { if (gi) gstart.add(k); return k + cols.length; }, 0);
@@ -1093,7 +1100,14 @@
     // a value's chip, colored by its finish at his position that week (owner 2026-10-16; Sleeper-style); older files
     // without per-stat ranks get plain chips
     const chip = (v, r) => r == null ? `${v}` : `<span class="sc ${rkClass(r)}">${v}</span>`;
-    const snapTone = s => s == null ? '' : s >= 70 ? 'rk-good' : s >= 40 ? 'rk-mid' : 'rk-bad';
+    // one stat cell, the same rules in every row: games, totals, seasons (owner 2026-11-01): bold columns (Att / Yd)
+    // carry lg-b; a fumble column reads 0 plain and 1+ as a red chip, a dash when the file predates fumbles
+    const sTd = (i, o, inner) => `<td class="num${gcl(i)}${o.b ? ' lg-b' : ''}">${inner}</td>`;
+    const fumCell = v => v == null ? '–' : +v >= 1 ? `<span class="sc rk-bad">${v}</span>` : `${v}`;
+    const sTh = ([n, , , , o], i) => `<th class="num${gcl(i)}"${o.t ? ` title="${esc(o.t)}"` : ''}>${n}</th>`;
+    // a stat line summed over games (totals rows, seasons); fumbles over the games that carry them (none: a dash)
+    const sumOf = gs => { const add = k => gs[0][k].map((_, i) => gs.reduce((t, g) => t + (+g[k][i] || 0), 0)), fg = gs.filter(g => g.fm);
+      return { c: add('c'), x: add('x'), ...(fg.length ? { fm: [0, 1].map(i => fg.reduce((t, g) => t + (+g.fm[i] || 0), 0)) } : {}) }; };
     const projOf = g => g.pjl ? g.pj * (pts(g.pjl, w, pos) / Math.max(0.1, pts(g.pjl, built, pos))) : null;
     // Opponent color: our pregame matchup, green / red when it was one of that week's bigger ones (mu, mh); week
     // files from before 2026-10-14 carry the old 1st-32nd rank (mr) instead.
@@ -1110,8 +1124,8 @@
     // a live box-score line (boxLines) as a log game: c = the scoring-key stat line, x = completions, attempts, carries, targets
     const liveG = ln => ({ c: ln.line, x: [ln.comp || 0, ln.att || 0, ln.car || 0, ln.tgt || 0] });
     const head = `${grpHead(7)}
-      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num" title="Fantasy points, your scoring">FPTS</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num" title="Game grade, on the OVR's 50-99 scale: his fantasy output that game against every game by qualified players at his position that season (early in a season, last season's games fill the weeks not played yet)">Grd</th><th class="num" title="Share of his team's offensive snaps">SNP%</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
-    const blank = stat.map((c, i) => `<td class="num${gcl(i)}">–</td>`).join('');
+      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num" title="Fantasy points, your scoring">FPTS</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num" title="Game grade, on the OVR's 50-99 scale: his fantasy output that game against every game by qualified players at his position that season (early in a season, last season's games fill the weeks not played yet)">Grd</th><th class="num" title="Share of his team's offensive snaps">SNP%</th>${stat.map(sTh).join('')}</tr>`;
+    const blank = stat.map((s, i) => `<td class="num${gcl(i)}">–</td>`).join('');  // dashes stay regular weight
     const body = seasons.map(S => {
       const isCur = S.s === L.cur, rows = S.g.map(g => ({ w: g.w, g }));
       if (isCur) up.forEach(u => rows.push({ w: u.w, u }));
@@ -1139,24 +1153,24 @@
       const played = (g, label) => { const v = pts(g.c, w, pos), pj = projOf(g);
         return `<tr${tileAttrs(g)}><td>${esc(label)}</td>${opp(g)}<td class="num lg-fp">${g.r ? chip(f1(v), g.rk) : f1(v)}</td>
           <td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td>
-          <td class="num"><span class="lg-rk ${rkClass(g.rk)}">${g.rk}</span></td><td class="num">${grdCell(g)}</td><td class="num">${g.sn != null ? (g.r ? `<span class="sc ${snapTone(g.sn)}">${g.sn}</span>` : g.sn) : '–'}</td>
-          ${stat.map(([, fn, ri, ex], i) => { const v = fn(g);
+          <td class="num"><span class="lg-rk ${rkClass(g.rk)}">${g.rk}</span></td><td class="num">${grdCell(g)}</td><td class="num">${g.sn != null ? g.sn : '–'}</td>
+          ${stat.map(([, fn, ri, ex, o], i) => { const v = fn(g);
             // a zero ties most of the position (0 rush TD can "rank" top 10): red (owner 2026-10-16), except Int / fumbles
             // (fewer is better)
             const off = offRole(v, ex);
-            return `<td class="num${gcl(i)}">${off != null ? off : ri != null && g.r ? (+v === 0 && ri !== 2 && ri !== 8 ? `<span class="sc rk-bad">${v}</span>` : chip(v, g.r[ri])) : v}</td>`; }).join('')}</tr>`; };
+            return sTd(i, o, off != null ? off : o.fum ? fumCell(v) : ri != null && g.r ? (+v === 0 && ri !== 2 && ri !== 8 ? `<span class="sc rk-bad">${v}</span>` : chip(v, g.r[ri])) : v); }).join('')}</tr>`; };
       // season totals right under the column heads (owner 2026-10-16): the games summed into one stat line, so every
       // column (C/A, YPC) reads it as it reads a game; Snap = average, Proj = total only when every game had one.
       // Colored by the season total's finish at his position (rk = S.trk / S.tr from tools/player_logs.py; not playoffs)
       const totRow = (gs, rk) => {
         if (gs.length < 2 || opts.last) return '';
-        const add = k => gs[0][k].map((_, i) => gs.reduce((t, g) => t + (+g[k][i] || 0), 0)), T = { c: add('c'), x: add('x') };
+        const T = sumOf(gs);
         const pjs = gs.map(projOf), sn = gs.filter(g => g.sn != null);
         const tc = (v, r) => rk && r != null ? chip(v, r) : v, avgSn = sn.length ? Math.round(sn.reduce((t, g) => t + g.sn, 0) / sn.length) : null;
         return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num lg-fp">${tc(f1(pts(T.c, w, pos)), rk && rk.trk)}</td>
           <td class="num muted">${pjs.every(v => v != null) ? f1(pjs.reduce((a, b) => a + b, 0)) : '–'}</td>
           <td class="num">${rk && rk.trk ? `<span class="lg-rk ${rkClass(rk.trk)}" title="His ${esc(pos)} finish that season (fantasy points, site scoring)">${rk.trk}</span>` : ''}</td><td class="num">${rk ? seasonGrd(rk.s) : ''}</td>
-          <td class="num">${avgSn == null ? '–' : rk ? `<span class="sc ${snapTone(avgSn)}">${avgSn}</span>` : avgSn}</td>${stat.map(([, fn, ri, ex], i) => { const v = fn(T); return `<td class="num${gcl(i)}">${offRole(v, ex) ?? tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null)}</td>`; }).join('')}</tr>
+          <td class="num">${avgSn == null ? '–' : avgSn}</td>${stat.map(([, fn, ri, ex, o], i) => { const v = fn(T); return sTd(i, o, offRole(v, ex) ?? (o.fum ? fumCell(v) : tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null))); }).join('')}</tr>
           <tr class="lg-gap"><td colspan="${7 + stat.length}"></td></tr>`;
       };
       // (its finish chips wait for the rebuilt log)
@@ -1167,7 +1181,7 @@
         // log's own columns, from the polled box score (redrawn each poll); rank, grade and snaps once the log is rebuilt
         if (r.u && r.u.live) { const lg = liveG(r.u.live), v = pts(lg.c, w, pos), pj = p && p.proj != null ? scaled(p).proj : null;
           return `<tr class="lg-pend" title="${r.u.fin ? 'Final' : 'Live'} (rank, grade and snaps once the game's data is published)"><td>${r.u.fin ? r.w : `<span class="live-dot"></span>${r.w}`}</td>${opp(r.u)}<td class="num lg-fp"><b>${f1(v)}</b></td><td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td><td class="num muted">${r.u.fin ? 'final' : 'live'}</td><td class="num muted">–</td><td class="num muted">–</td>
-            ${stat.map(([, fn, , ex], i) => { const x = fn(lg); return `<td class="num${gcl(i)}">${offRole(x, ex) ?? x}</td>`; }).join('')}</tr>`; }
+            ${stat.map(([, fn, , ex, o], i) => { const x = fn(lg); return sTd(i, o, offRole(x, ex) ?? (o.fum ? fumCell(x) : x)); }).join('')}</tr>`; }
         if (r.u && r.u.miss != null) return `<tr class="lg-miss"${tileAttrs(r.u)}><td>${r.w}</td>${r.u.o ? opp(r.u) : '<td class="lg-opp">&ndash;</td>'}<td class="num">${missTag(r.u)}</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">${r.u.sn != null ? r.u.sn : '&ndash;'}</td>${blank}</tr>`;
         if (r.u) {
           const pj = projOf(r.u);
@@ -1187,21 +1201,20 @@
     // game log's own columns and chips (Wk -> season, Opp -> team, Proj -> FP/G); tap a season for its games.
     // Six fixed columns like the game log's (no snap average), so it fits a phone through TD as the log does;
     // a career total row on top (owner 2026-10-16), unchipped since there's no career rank.
-    const sumOf = gs => { const add = k => gs[0][k].map((_, i) => gs.reduce((t, g) => t + (+g[k][i] || 0), 0)); return { c: add('c'), x: add('x') }; };
     const carS = L.seasons.filter(S => S.g.length);
     const car = carS.map(S => {
       const gs = S.g, T = sumOf(gs), rk = S.tr ? S : null, tc = (v, r) => rk && r != null ? chip(v, r) : v, tot = pts(T.c, w, pos);
       return `<tr class="lg-car" data-go-season="${S.s}" title="Show his ${S.s} games"><td><b>${S.s}</b></td><td class="lg-opp">${S.mv && S.mv.length ? [S.mv[0].f, ...S.mv.map(m => m.t)].map(t => tmL(t)).join('/') : tmL(gs[gs.length - 1].t)}</td>
         <td class="num">${gs.length}</td><td class="num lg-fp">${tc(f1(tot), rk && rk.trk)}</td><td class="num">${f1(tot / gs.length)}</td>
         <td class="num">${rk && rk.trk ? `<span class="lg-rk ${rkClass(rk.trk)}">${rk.trk}</span>` : '–'}</td>
-        ${stat.map(([, fn, ri, ex], i) => { const v = fn(T); return `<td class="num${gcl(i)}">${offRole(v, ex) ?? tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null)}</td>`; }).join('')}</tr>`;
+        ${stat.map(([, fn, ri, ex, o], i) => { const v = fn(T); return sTd(i, o, offRole(v, ex) ?? (o.fum ? fumCell(v) : tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null))); }).join('')}</tr>`;
     }).join('');
     const allG = carS.flatMap(S => S.g), CT = allG.length ? sumOf(allG) : null, ctot = CT ? pts(CT.c, w, pos) : 0;
     const carTot = CT && carS.length > 1 ? `<tr class="lg-tot" title="Regular season, ${carS[carS.length - 1].s}-${carS[0].s}"><td>Car</td><td class="lg-opp">${carS.length} yrs</td>
         <td class="num">${allG.length}</td><td class="num lg-fp">${f1(ctot)}</td><td class="num">${f1(ctot / allG.length)}</td><td class="num"></td>
-        ${stat.map(([, fn, , ex], i) => { const v = fn(CT); return `<td class="num${gcl(i)}">${offRole(v, ex) ?? v}</td>`; }).join('')}</tr><tr class="lg-gap"><td colspan="${6 + stat.length}"></td></tr>` : '';
+        ${stat.map(([, fn, , ex, o], i) => { const v = fn(CT); return sTd(i, o, offRole(v, ex) ?? (o.fum ? fumCell(v) : v)); }).join('')}</tr><tr class="lg-gap"><td colspan="${6 + stat.length}"></td></tr>` : '';
     const carHead = `${grpHead(6)}
-      <tr class="lg-ch"><th>Year</th><th>Team</th><th class="num" title="Games played">G</th><th class="num" title="Fantasy points, your scoring">FPTS</th><th class="num" title="Fantasy points per game">FP/G</th><th class="num" title="His ${esc(pos)} finish that season">Rk</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
+      <tr class="lg-ch"><th>Year</th><th>Team</th><th class="num" title="Games played">G</th><th class="num" title="Fantasy points, your scoring">FPTS</th><th class="num" title="Fantasy points per game">FP/G</th><th class="num" title="His ${esc(pos)} finish that season">Rk</th>${stat.map(sTh).join('')}</tr>`;
     const view = carS.length > 1 ? logView : 'g';
     const legend = `<div class="lg-leg"><span>Opponent color = our pregame matchup (2021 on): green helped, red hurt, deeper = bigger</span>
       <span>· Rk = his ${esc(pos)} finish that week (green = starter in your league size) · Proj = our projection then (green = beat it) · Tap a game to open its gamecast</span></div>`;

@@ -152,7 +152,8 @@ def attach_data(eng, data):
 
 def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict | None = None, espn_hist: Path | None = None,
                  espn_midweek: dict | None = None, espn_questionable: dict | None = None, espn_gameday: dict | None = None,
-                 espn_active: dict | None = None, espn_late: dict | None = None, espn_active_note: dict | None = None):
+                 espn_active: dict | None = None, espn_late: dict | None = None, espn_active_note: dict | None = None,
+                 espn_notes: dict | None = None):
   """Trained engine + this week's projections, cached on disk. Presentation-only changes (report.py, the
   template) reuse it, so a re-render takes seconds instead of minutes. espn_bridge (live week only): early-week
   ESPN injury statuses (InjuryModel.build_espn_bridge); part of the cache key, so new ESPN news re-projects.
@@ -176,6 +177,8 @@ def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict |
     bridge_key += "_n" + hashlib.sha1(json.dumps(sorted(espn_active_note.items())).encode()).hexdigest()[:8]
   if espn_late:  # {#late-downgrade}
     bridge_key += "_l" + hashlib.sha1(json.dumps(sorted((k, list(v)) for k, v in espn_late.items())).encode()).hexdigest()[:8]
+  if espn_notes:  # {#game-notes}
+    bridge_key += "_t" + hashlib.sha1(json.dumps(sorted((k, list(v)) for k, v in espn_notes.items())).encode()).hexdigest()[:8]
   if espn_active:  # tags only, but they're in the cached projections
     bridge_key += "_a" + hashlib.sha1(json.dumps(sorted(espn_active.items())).encode()).hexdigest()[:8]
   clubs = getattr(data, "team_overlay", None)
@@ -202,6 +205,8 @@ def cached_model(data, cfg, scoring, season: int, week: int, espn_bridge: dict |
     eng.injury_model.espn_late = espn_late
   if espn_active_note and eng.injury_model is not None:
     eng.injury_model.espn_active_note = espn_active_note
+  if espn_notes and eng.injury_model is not None:
+    eng.injury_model.espn_notes = espn_notes
   if espn_gameday and eng.injury_model is not None:
     eng.injury_model.espn_gameday = espn_gameday
   if espn_bridge and eng.injury_model is not None:
@@ -498,10 +503,10 @@ def main():
   print(f"[run] projecting {season} week {week}", flush=True)
 
   # Early-week bridge (nfledge/espn.py, espn_calib.py): the live week only, never --week rebuilds or backtests.
-  bridge, midweek, quest, feed, gameday, active, late, notes = {}, {}, {}, None, {}, {}, {}, {}
+  bridge, midweek, quest, feed, gameday, active, late, notes, gnotes = {}, {}, {}, None, {}, {}, {}, {}, {}
   if not args.week:
     from nfledge.espn import fetch_injuries
-    from nfledge.injuries import InjuryModel
+    from nfledge.injuries import NOTE_HOURS, InjuryModel
     feed = fetch_injuries()
     data.espn_feed = feed  # read by Power's QB availability (powerc._newly: ESPN's IR list)
     # this week's club moves (trades, claims, signings) from ESPN's team rosters over the weekly rosters, which trail
@@ -534,6 +539,10 @@ def main():
     active = InjuryModel.build_espn_bridge(data, season, week, feed, active=True)  # tags only
     late = InjuryModel.build_espn_bridge(data, season, week, feed, late=True)  # {#late-downgrade}
     notes = InjuryModel.build_espn_bridge(data, season, week, feed, active=True, notes=True)  # {#late-upgrade}
+    gnotes = InjuryModel.build_espn_bridge(data, season, week, feed, gamenotes=True)  # {#game-notes}
+    if gnotes:
+      print(f"[run] ESPN game notes (last {NOTE_HOURS}h before kickoff): "
+            + ", ".join(f"{k} {v[0]}" for k, v in sorted(gnotes.items())), flush=True)
     if midweek:
       print(f"[run] ESPN midweek Out / Doubtful / IR rulings for {len(midweek)} players (report out, no final status yet)", flush=True)
   if not args.week:  # practice-squad elevations announced for this week's games (live only; Engine.candidates)
@@ -544,7 +553,8 @@ def main():
   out_path = Path(args.out) if args.out else ROOT / cfg["report"]["output"].format(week=week)
   eng, proj = cached_model(data, cfg, scoring, season, week, espn_bridge=bridge,
                            espn_hist=out_path.parent / "data" / "espn_injuries", espn_midweek=midweek,
-                           espn_questionable=quest, espn_gameday=gameday, espn_active=active, espn_late=late, espn_active_note=notes)
+                           espn_questionable=quest, espn_gameday=gameday, espn_active=active, espn_late=late, espn_active_note=notes,
+                           espn_notes=gnotes)
 
   ev, bt_seasons, res = None, [], None
   if not args.no_backtest:

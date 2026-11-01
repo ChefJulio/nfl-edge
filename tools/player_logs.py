@@ -194,6 +194,21 @@ def main():
   sn_post["gsis_id"] = sn_post.pfr_player_id.map(pfr)
   snap_post = sn_post.dropna(subset=["gsis_id"]).groupby(["season", "week", "gsis_id"]).offense_pct.max()
   ours, opp_rank, everyone = our_weeks(site)
+  # Rushing fumbles per game (the game log's Fmbl / Lost; owner 2026-11-01), (season, week, gsis) -> [fumbles, lost],
+  # from the full weekly stats (other_logs reads the same frame). A game without an entry gets no "fm": the page shows
+  # a dash, as it does for files built before the field existed.
+  cur_wk = data.stats[data.stats.season == data.current_season].week
+  full = full_stats(cache, nfl, data.current_season, int(cur_wk.max()) if len(cur_wk) else 0)
+  fx = full[["season", "week", "player_id", *FUMBLE_COLS]].dropna(subset=["player_id"]).copy()
+  for c in FUMBLE_COLS:
+    fx[c] = pd.to_numeric(fx[c], errors="coerce").fillna(0).astype(int)
+  fum_known = set(zip(fx.season.astype(int), fx.week.astype(int), fx.player_id))
+  fx = fx[(fx.rushing_fumbles > 0) | (fx.rushing_fumbles_lost > 0)]
+  fum_of = {(int(s), int(w), p): [int(f), int(fl)] for s, w, p, f, fl in fx.itertuples(index=False)}
+
+  def fum(season, week, pid):
+    k = (int(season), int(week), pid)
+    return fum_of.get(k, [0, 0]) if k in fum_known else None
   # Home / away for every past game (the stats feed doesn't say): full schedule history.
   allsched = cache.get("schedules", "since1999", lambda: nfl.load_schedules(list(range(FIRST_SEASON, data.current_season + 1))),
                        stale=cache.age_hours("schedules", "since1999") > 12)
@@ -297,6 +312,9 @@ def main():
         gr = game_grade(r.season, r.position, r.fp)
         if gr is not None:
           game["gr"] = gr
+        fm = fum(r.season, r.week, pid)
+        if fm is not None:
+          game["fm"] = fm  # rushing fumbles, lost
         if sp is not None and not pd.isna(sp):
           game["sn"] = int(round(100 * float(sp)))
         if o.get("mu") is not None:
@@ -324,6 +342,9 @@ def main():
         gr = game_grade(r.season, r.position, r.fp)  # against that season's regular-season pool
         if gr is not None:
           game["gr"] = gr
+        fm = fum(r.season, r.week, pid)
+        if fm is not None:
+          game["fm"] = fm
         sp = snap_post.get((int(r.season), int(r.week), pid))
         if sp is not None and not pd.isna(sp):
           game["sn"] = int(round(100 * float(sp)))
@@ -388,7 +409,7 @@ def main():
   size = sum(f.stat().st_size for f in out_dir.glob("*.json"))
   print(f"[logs] wrote {n} player game logs ({size / 1e6:.1f} MB) to {out_dir}", flush=True)
   other_logs(site, cache, nfl, data.current_season, allsched, pinfo, all_ros, sn, bios, written=set(everyone), injuries=injuries,
-             post_snaps=sn_post, round_of=round_of, prac=prac, prac_hist=prac_hist, moves=moves)
+             post_snaps=sn_post, round_of=round_of, prac=prac, prac_hist=prac_hist, moves=moves, full=full)
   team_logs(site, cfg, data, cache, nfl, allsched, postsched)
   qb_throws(site, cache, nfl, data.pbp, data.current_season)
   dst_logs(site, cache, nfl, data, allsched)
@@ -416,8 +437,29 @@ RANKED = ["pass_yd", "pass_td", "interception", "rush_yd", "rush_td", "reception
           "completions", "attempts", "carries", "targets"]  # = SCORE_KEYS + the game row's x stats, in that order
 FEWER_BETTER = {"interception", "fumble_lost"}
 BLOCKS = ["def_punt_blocks", "def_fg_blocks", "def_pat_blocks"]  # summed into def_blocks (blocked kicks, IDP scoring)
+# the fantasy logs' rushing fumbles (owner 2026-11-01: Fmbl / Lost in the game log's rushing group): fumbles on his runs
+# and the ones the defense recovered; sack and receiving fumbles are separate nflverse columns, not counted here
+FUMBLE_COLS = ["rushing_fumbles", "rushing_fumbles_lost"]
 FULL_COLS = ["player_id", "player_display_name", "position", "season", "week", "season_type", "team", "opponent_team"] + \
-  sorted(({c for v in KIND_STATS.values() for _, c in v} | {c for _, c in RET} | set(BLOCKS)) - {"def_blocks"})
+  sorted(({c for v in KIND_STATS.values() for _, c in v} | {c for _, c in RET} | set(BLOCKS) | set(FUMBLE_COLS)) - {"def_blocks"})
+
+
+def full_stats(cache, nfl, cur: int, latest_week: int = 0) -> pd.DataFrame:
+  """nflverse weekly stats with every column the logs read (FULL_COLS), regular season + playoffs, 1999 on: other_logs'
+  stat lines and the fantasy logs' rushing fumbles. A cached season missing a column refetches (cache.lacks); this
+  season refetches after 6 h, or now when the model's stats already hold a later week than the cached copy
+  (latest_week), so a game in the log doesn't go without its fumbles until the next refresh."""
+  frames = []
+  for s in range(FIRST_SEASON, cur + 1):
+    fetch = lambda s=s: nfl.load_player_stats([s]).select(FULL_COLS).to_pandas()  # noqa: E731
+    x = cache.get("stats_full", s, fetch,
+                  stale=(s == cur and cache.age_hours("stats_full", s) > 6) or cache.lacks("stats_full", s, FULL_COLS))
+    if s == cur and x is not None and len(x) and int(x.week.max()) < latest_week:
+      x = cache.get("stats_full", s, fetch, stale=True)
+    if x is not None and len(x):
+      frames.append(x[x.season_type.isin(["REG", "POST"])])
+  cache.save_meta()
+  return pd.concat(frames, ignore_index=True)
 # PFR's advanced defense per game (2018 on; load_pfr_advstats "def"), the page's "a" array in this order: pressures,
 # hurries, blitzes, coverage targets / completions / yards / TDs allowed, missed tackles (owner 2026-10-18: "complete
 # stats" for individual defenders). Sacks and QB hits come from the box score ("d").
@@ -734,21 +776,14 @@ def rows_by(df: pd.DataFrame | None, key: str) -> dict:
 def other_logs(site: Path, cache, nfl, cur: int, allsched: pd.DataFrame, pinfo: pd.DataFrame, ros: pd.DataFrame,
                snaps: pd.DataFrame, bios: dict, written: set, injuries: dict | None = None,
                post_snaps: pd.DataFrame | None = None, round_of: dict | None = None, prac: dict | None = None,
-               prac_hist: dict | None = None, moves=None):
+               prac_hist: dict | None = None, moves=None, full: pd.DataFrame | None = None):
   """<site>/data/players/<gsis>.json for everyone the fantasy pass didn't write: every player in nflverse's weekly
   stats (1999 on), on a weekly roster (2002 on) or in the snap counts (2012 on). Per game: his kind's stat line
   ("d", in "keys" order), returns ("r") when he had any, his unit's snap share ("sn"). Plus "ros": per season, his
   team(s) and weeks on the active roster (the career table for players without stats, e.g. linemen before 2012).
   Playoff games ("pg" per season, round in "po"), kept apart from the regular season like the fantasy pass."""
   r1 = lambda v: int(v) if float(v).is_integer() else round(float(v), 1)  # noqa: E731
-  frames = []
-  for s in range(FIRST_SEASON, cur + 1):
-    x = cache.get("stats_full", s, lambda: nfl.load_player_stats([s]).select(FULL_COLS).to_pandas(),
-                  stale=(s == cur and cache.age_hours("stats_full", s) > 6) or cache.lacks("stats_full", s, FULL_COLS))
-    if x is not None and len(x):
-      frames.append(x[x.season_type.isin(["REG", "POST"])])
-  cache.save_meta()
-  st = pd.concat(frames, ignore_index=True)
+  st = full if full is not None else full_stats(cache, nfl, cur)
   st = st[~st.player_id.isin(written)].copy()
   for c in FULL_COLS[8:]:
     st[c] = pd.to_numeric(st[c], errors="coerce").fillna(0)

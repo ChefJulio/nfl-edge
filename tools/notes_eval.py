@@ -20,20 +20,14 @@ import pandas as pd  # noqa: E402
 
 REF = "origin/archive"
 SEASON = 2026
-OUT = re.compile(r"\b(?:not|isn't|is not|won't|will not)\s+(?:expected|going|likely|slated|set)\s+to\s+play|won't play|will not play"
-                 r"|ruled out|unlikely to play|won't suit up|will sit\b", re.I)
-GTD = re.compile(r"game-time decision", re.I)
-IN = re.compile(r"\b(?:expected|in line|slated|set|on track|poised|plans|expects)\s+to\s+play|will play\b|trending toward playing"
-                r"|positive direction|optimistic|good to go", re.I)
+# The note parser (nfledge/espn_notes.py, negation-aware) replaced the pre-registered regexes on 2026-11-01 after the
+# interim run (owner: "isn't expected to play" vs "is expected to play"); see the (EE) entry in docs/INSIGHTS.md.
+from nfledge.espn_notes import classify  # noqa: E402
 
 
 def git(*a, text=True):
   return subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=text, encoding="utf-8" if text else None,
                         errors="replace" if text else None).stdout
-
-
-def classify(c: str) -> str:
-  return "OUT" if OUT.search(c) else "GTD" if GTD.search(c) else "IN" if IN.search(c) else "NONE"
 
 
 def notes() -> pd.DataFrame:
