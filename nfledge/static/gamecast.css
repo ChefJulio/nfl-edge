@@ -1033,7 +1033,7 @@ table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; tex
 /* vertical only (owner 2026-10-22: "why am i able to move this sideways"): an edge-to-edge table scroller (.lg-scroll's
    bleed) left the content a few px wider than the sheet, and iOS then pans the whole sheet sideways on diagonal swipes;
    wide tables still scroll sideways inside their own .lg-scroll */
-.sheet { width: 100%; max-height: 86vh; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; background: var(--panel);
+.sheet { width: 100%; max-height: 86vh; overflow-x: hidden; overflow-y: auto; overscroll-behavior: none; background: var(--panel);
   border: 1px solid var(--line); border-bottom: 0; border-radius: var(--r-lg) var(--r-lg) 0 0; box-shadow: var(--e3);
   padding: 0 16px calc(16px + env(safe-area-inset-bottom)); animation: sheet-up .22s var(--ease); }
 .sheet-h { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -1143,7 +1143,11 @@ html.pc-open { overflow: hidden; }
 .pc-card.pc-stacked { background: rgba(5,7,10,.4); }
 @media (min-width: 641px) { .pc-under .pc-wrap { transform: scale(.96) translateY(-18px); } }
 .pc-card .pc-wrap { position: relative; width: min(1100px, 100%); max-height: 94vh; display: flex; }
-.pc-card .pc { width: 100%; max-height: 94vh; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; margin: 0;
+/* overscroll none, not contain (owner 2026-11-01: a game log's rows slid right and down out from under its pinned
+   heads): contain still let iOS rubber-band the CARD on a diagonal swipe, and its sticky parts (header, tabs, the log's
+   pinned season / column copies) hold still while the rest bounces. The table scrollers got the same fix 2026-10-30
+   (site.css); the card's drag-to-close is script, not the native bounce. */
+.pc-card .pc { width: 100%; max-height: 94vh; overflow-y: auto; overflow-x: hidden; overscroll-behavior: none; margin: 0;
   border-radius: var(--r-lg); box-shadow: var(--e3); -webkit-overflow-scrolling: touch; }
 .pc-card .pc-x, .pc-card .pc-share { position: absolute; top: 10px; right: 10px; z-index: 9; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line);
   background: color-mix(in srgb, var(--panel) 85%, transparent); color: var(--ink); font: inherit; font-size: 22px; line-height: 1; cursor: pointer;
