@@ -44,6 +44,12 @@ a rejected idea without new data or a new angle, and do not "fix" a deliberate c
 Python 3.12 venv in `.venv`. Set `PYTHONIOENCODING=utf-8` when printing polars/pandas frames on Windows.
 CI: `.github/workflows/deploy.yml` builds on every push to main and daily (14:00 UTC), plus Wed-Fri 22:15 UTC
 (after practice reports), Sat 21:00 and Sun 16:45 (after 1 PM inactives), caching `cache/`.
+Complete builds (the slow data: game logs, grades, depth charts, rosters) are OWED, not dispatched: every run's plan
+compares the live site's `data/complete_build.json` with the latest 2 a.m. Central and `.github/complete_request`,
+and does a complete build when either is newer. To ask for one: `python tools/request_complete.py` (commits the
+request and pushes). NEVER `gh workflow run deploy.yml -f mode=complete`: GitHub keeps one waiting run per
+concurrency group, so a waiting dispatch is replaced by the next push and silently dropped (owner 2026-10-31: "make
+that never happen again"); a user-level Claude Code hook (`~/.claude/hooks/no-complete-dispatch.js`) blocks it.
 Injury availability, live week: before a team's report, ESPN early-week buckets (`espn_calib`); once it's out, the
 practice model, except a fresh ESPN Out / IR ruling before the final status (`InjuryModel.midweek_ruling`, rates
 in `data/history/espn_midweek.json` from `tools/espn_midweek_eval.py`; INSIGHTS sec. 9).

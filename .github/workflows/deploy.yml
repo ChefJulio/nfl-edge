@@ -99,22 +99,43 @@ jobs:
             fi
           elif [ "${{ github.event_name }}" = workflow_dispatch ] && [ "${{ inputs.mode }}" = news ]; then news=true
           fi
+          # A complete build (the slow data rebuilt) is OWED, not tied to the run that asked for it (owner 2026-10-31: "we
+          # need to stop cancelling builds ... make that never happen again"). GitHub keeps one waiting run per
+          # concurrency group, so a queued complete build (a dispatch, or the 2 a.m. schedule) was replaced by the next
+          # push and silently dropped. Now every run asks the live site when its last complete build ran
+          # (data/complete_build.json) and does one if that's older than the latest 2 a.m. Central or than a request
+          # committed to .github/complete_request (tools/request_complete.py). Whichever run gets to execute does the
+          # owed build; a replaced run loses nothing.
+          comp_at=$(curl -sf "$site/data/complete_build.json?x=$(date +%s)" | python3 -c "import json,sys; print(json.load(sys.stdin).get('at',''))" 2>/dev/null || true)
+          req=$(head -1 .github/complete_request 2>/dev/null || true)
+          owed=$(COMP_AT="$comp_at" REQ="$req" python3 -c '
+          import os, datetime as dt
+          from zoneinfo import ZoneInfo
+          now = dt.datetime.now(ZoneInfo("America/Chicago"))
+          b = now.replace(hour=2, minute=0, second=0, microsecond=0)
+          b = b if now >= b else b - dt.timedelta(days=1)
+          try:
+            last = dt.datetime.fromisoformat(os.environ["COMP_AT"])
+          except Exception:
+            print("true"); raise SystemExit
+          owed = last < b
+          try:
+            r = os.environ.get("REQ", "").strip()
+            owed = owed or (bool(r) and last < dt.datetime.fromisoformat(r))
+          except Exception:
+            pass
+          print("true" if owed else "false")')
+          echo "last complete build ${comp_at:-never}; request ${req:-none}; owed: $owed"
+          complete=$owed
+          sch="${{ github.event.schedule }}"
+          # the 2 a.m. schedule pair (07:00 / 08:00 UTC for daylight / standard time) is now only a trigger: owed or not
+          if [ "$sch" = "0 7 * * *" ] || [ "$sch" = "0 8 * * *" ]; then [ "$complete" = true ] || skip=true; fi
+          if [ "${{ github.event_name }}" = workflow_dispatch ] && [ "${{ inputs.mode }}" = complete ]; then complete=true; fi
+          # an owed complete build takes any lane over (a docs-only or UI-only push included)
+          if [ "$complete" = true ]; then fast=false; news=false; skip=false; fi
           echo "fast=$fast" >> "$GITHUB_OUTPUT"
           echo "skip=$skip" >> "$GITHUB_OUTPUT"
           echo "UI-only fast path: $fast; docs only, no build: $skip"
-          # the nightly complete build (2 a.m. Central) rebuilds everything, the slow data too; the other UTC hour of the
-          # pair is skipped. A dispatched "complete" (the watcher's rollover / Sunday play-by-play) does the same.
-          complete=false
-          sch="${{ github.event.schedule }}"
-          # Which of the pair is 2 a.m. goes by Chicago's offset (CDT -0500 -> 07:00 UTC, CST -0600 -> 08:00), not the
-          # hour the run starts: GitHub fires these 5-6 hours late (2026-10-27/28 at 12:47-14:44 UTC), so "is it 02 in
-          # Chicago now" skipped both every night and the complete build never ran (owner 2026-10-29: practice
-          # timelines a week stale on the player card).
-          if [ "$sch" = "0 7 * * *" ] || [ "$sch" = "0 8 * * *" ]; then
-            want="0 8 * * *"; [ "$(TZ=America/Chicago date +%z)" = "-0500" ] && want="0 7 * * *"
-            if [ "$sch" = "$want" ]; then complete=true; else skip=true; echo "skip=true" >> "$GITHUB_OUTPUT"; fi
-          fi
-          if [ "${{ github.event_name }}" = workflow_dispatch ] && [ "${{ inputs.mode }}" = complete ]; then complete=true; fi
           echo "complete=$complete" >> "$GITHUB_OUTPUT"
           echo "complete build (slow data rebuilt): $complete"
           echo "news=$news" >> "$GITHUB_OUTPUT"
@@ -477,6 +498,10 @@ jobs:
         run: |
           echo "{\"sha\":\"${{ github.sha }}\",\"lane\":\"full\"}" > site/data/deployed.json
           echo "{\"sha\":\"${{ github.sha }}\"}" > site/data/full_build.json
+          # when the last complete build ran (the plan's "owed" check); other lanes carry it with the last site
+          if [ "${{ needs.plan.outputs.complete }}" = "true" ]; then
+            echo "{\"sha\":\"${{ github.sha }}\",\"at\":\"$(date -u +%Y-%m-%dT%H:%M:%S+00:00)\"}" > site/data/complete_build.json
+          fi
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
         with:
