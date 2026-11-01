@@ -588,5 +588,45 @@
 "at": "2026-11-01T19:59:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0036879": {
+"name": "Sam Ehlinger",
+"team": "DEN",
+"pos": "QB",
+"pre": 0.0982,
+"ruling": "INA",
+"at": "2026-11-01T20:01:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0038489": {
+"name": "Ben VanSumeren",
+"team": "KC",
+"pos": "RB",
+"pre": 0.5051,
+"ruling": "INA",
+"at": "2026-11-01T20:06:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040906": {
+"name": "Garrett Nussmeier",
+"team": "KC",
+"pos": "QB",
+"pre": 0.1047,
+"ruling": "INA",
+"at": "2026-11-01T20:06:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041133": {
+"name": "Dallen Bentley",
+"team": "DEN",
+"pos": "TE",
+"pre": 0.1479,
+"ruling": "INA",
+"at": "2026-11-01T20:01:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
