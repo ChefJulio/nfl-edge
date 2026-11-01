@@ -4594,12 +4594,12 @@
       // Tint = the team with the ball; special-teams plays stay neutral. Event types are chips, not row colors.
       const off = st ? null : teamOf(p.start && p.start.team && p.start.team.id);
       const cls = `${p.scoringPlay ? ' pl-score' : ''}${p.isPenalty && !p.scoringPlay ? ' pl-pen' : ''}${st ? ' pl-st' : ''}${GP.hiPlay && String(p.id) === GP.hiPlay ? ' pl-hi' : ''}`;
-      // the play's tags (FG, SACK, FLAG, 1ST) under its clock (owner 2026-11-01), so the downs line starts at the same
-      // spot on every row
-      const tg = playTags(p);
+      // the play's tags (FG, SACK, FLAG, 1ST) and its win-chance swing under its clock (owner 2026-11-01), so the downs
+      // line starts at the same spot on every row
+      const tg = playTags(p) + swing;
       return `<li class="pl${cls}" data-k="p${esc(p.id)}"${off ? ` style="--pt:${esc(off.color)}"` : ''}><div class="pl-when">${when}${tg ? `<div class="pl-tags">${tg}</div>` : ''}</div>
         <div class="pl-what">${playMeta(p, '', '', 'pm', false)}${playTitle('pl-hl', hd, linkNames(esc(hd.h), teams), p, info)}${fieldStrip(p, info)}<div class="pl-txt pl-raw">${linkNames(esc(hd.raw), teams)}</div><button type="button" class="pl-share" data-play="${esc(p.id)}" aria-label="Share this play">${NFLE.shareIcon(14)}<span>Share play</span></button></div>
-        <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${tmL(info.away.team)} ${p.awayScore}–${p.homeScore} ${tmL(info.home.team)}</b>` : ''}${swing}</div></li>`;
+        <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${tmL(info.away.team)} ${p.awayScore}–${p.homeScore} ${tmL(info.home.team)}</b>` : ''}</div></li>`;
     };
     const order = o.sort !== 'old';  // newest first unless asked otherwise
     const swingOf = p => { const w = wpAfter[p.id]; return w ? Math.abs(w.now - w.prev) : 0; };
