@@ -199,6 +199,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4832800,Denzel Boston,Cleveland Browns,Active,2026-10-26T02:23Z,,,,,,Boston caught three of eight targets for 27 yards in Sunday's 27-24 win over the Titans.,WR
 5083076,Harold Fannin Jr.,Cleveland Browns,Active,2026-10-25T23:18Z,,,,,,Fannin caught six of nine targets for 91 yards in Sunday's 27-24 win over the Titans.,TE
 3122840,Deshaun Watson,Cleveland Browns,Active,2026-10-25T22:46Z,,,,,,Watson completed 25 of 36 passes for 308 yards with an interception in Sunday's 27-24 win over the Titans. He added 19 yards and a touchdown on three carries.,QB
+4426354,George Pickens,Dallas Cowboys,Questionable,2026-11-01T12:39Z,Shoulder,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Pickens (shoulder/hamstring) is expected to play Sunday against the Cardinals, Adam Schefter of ESPN reports.",WR
 4361988,James Mitchell,Dallas Cowboys,Active,2026-11-01T02:46Z,,,,,,The Cowboys elevated Mitchell from the practice squad to the active roster Saturday.,TE
 3929850,P.J. Locke,Dallas Cowboys,Questionable,2026-11-01T02:44Z,Foot,Plantar Fasciitis,Right,2026-11-01,QUESTIONABLE,"Locke (foot) was activated from injured reserve Saturday, but he's still listed as questionable for Sunday's game against the Cardinals.",S
 3122752,Kenny Clark,Dallas Cowboys,Questionable,2026-10-31T01:19Z,Back,,,2026-11-01,QUESTIONABLE,Clark (back) is questionable for Sunday's game against the Cardinals.,DT
@@ -206,7 +207,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428914,Dee Winters,Dallas Cowboys,Out,2026-10-31T01:03Z,Calf,Strain,Not Specified,2026-11-08,OUT,"Winters (calf) has been ruled out for Sunday's game against the Cardinals, Tommy Yarrish of the Cowboys' official site reports.",LB
 3676833,KaVontae Turpin,Dallas Cowboys,Out,2026-10-31T01:01Z,Ribs,Not Specified,Not Specified,2026-11-08,OUT,"Turpin (ribs) has been ruled out for Sunday's game against the Cardinals, Tommy Yarrish of the Cowboys' official site reports.",WR
 4870706,Caleb Downs,Dallas Cowboys,Active,2026-10-31T00:58Z,,,,,,"Downs (ankle) has no designation for Sunday's clash against the Cardinals, Tommy Yarrish of the Cowboys' official site reports.",S
-4426354,George Pickens,Dallas Cowboys,Questionable,2026-10-30T21:18Z,Shoulder,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Pickens (shoulder/hamstring) is listed as questionable for Sunday's game against the Cardinals, Patrik Walker of the Cowboys' official site reports.",WR
 4685554,Drew Shelton,Dallas Cowboys,Active,2026-10-30T21:05Z,,,,,,,OT
 2980097,Jonathan Bullard,Dallas Cowboys,Injured Reserve,2026-10-30T00:34Z,Calf,Not Specified,Not Specified,2026-11-01,IR-R,Bullard (calf) was designated to return from injured reserve by the Cowboys on Thursday.,DT
 4372096,Luke Schoonmaker,Dallas Cowboys,Questionable,2026-10-29T21:03Z,Groin,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,TE
@@ -599,12 +599,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242547,Paulson Adebo,New York Giants,Active,2026-10-25T15:37Z,,,,,,"Adebo (knee) is active Week 7 against the Texans, Dan Salomone of the Giants' official site reports.",CB
 3929950,Tremaine Edmunds,New York Giants,Injured Reserve,2026-10-24T23:28Z,Chest,Not Specified,Left,2027-02-15,IR,"Edmunds (chest) was placed on injured reserve Saturday, Dan Duggan of The Athletic reports.",LB
 4259566,Andrew Thomas,New York Giants,Active,2026-10-24T02:04Z,,,,,,Thomas (groin) does not have an injury designation against the Texans on Sunday.,OT
+4685247,Braelon Allen,New York Jets,Active,2026-11-01T12:29Z,,,,,,"Allen is slated to be the Jets' starting running back Sunday against the Raiders, Ian Rapoport of NFL Network reports.",RB
 4428617,T'Vondre Sweat,New York Jets,Injured Reserve,2026-10-31T23:39Z,Knee,Not Specified,Not Specified,2026-11-29,IR,"The Jets placed Sweat (knee) on injured reserve Saturday, Jeremy Fowler of ESPN.com reports.",DT
 4373656,Max Mitchell,New York Jets,Out,2026-10-31T01:58Z,Concussion,Concussion,Not Specified,2026-11-08,OUT,Mitchell (concussion) has been ruled out for Sunday's game against the Raiders.,OT
 4685248,David Bailey,New York Jets,Doubtful,2026-10-30T22:15Z,Groin,Not Specified,Not Specified,2026-11-01,DOUBTFUL,Bailey (groin) is listed as doubtful for Sunday's game against the Raiders.,LB
 4362094,Joseph Ossai,New York Jets,Out,2026-10-30T22:10Z,Ankle,Not Specified,Not Specified,2026-11-08,OUT,Ossai (ankle) has been ruled out for Sunday's game against Las Vegas.,DE
 4427366,Breece Hall,New York Jets,Questionable,2026-10-30T15:12Z,Quadriceps,Not Specified,Right,2026-11-01,QUESTIONABLE,"Hall (quadriceps) is listed as questionable for Sunday's game against the Raiders, Brian Costello of the New York Post reports.",RB
-4685247,Braelon Allen,New York Jets,Active,2026-10-29T20:48Z,,,,,,Allen (ankle) was a full participant at Thursday's practice.,RB
 4035537,Kene Nwangwu,New York Jets,Active,2026-10-29T00:29Z,,,,,,Nwangwu was a full participant in Wednesday's practice.,RB
 4569618,Garrett Wilson,New York Jets,Active,2026-10-28T19:40Z,,,,,,"Wilson said Wednesday that he won't ask to be traded from the Jets, Zack Rosenblatt of The Athletic reports.",WR
 14958,Demario Davis,New York Jets,Active,2026-10-28T03:09Z,,,,,,Davis finished Sunday's Week 7 loss to Miami with three tackles (two solo) and one defensed pass.,LB
@@ -749,13 +749,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3871102,David Sills V,Tampa Bay Buccaneers,Active,2026-10-23T00:24Z,,,,,,"Sills (hamstring) was activated from injured reserve by the Buccaneers on Thursday, Scott Smith of the team's official website reports.",WR
 4427673,Calijah Kancey,Tampa Bay Buccaneers,Active,2026-10-22T19:52Z,,,,,,,DT
 4816107,Benjamin Morrison,Tampa Bay Buccaneers,Active,2026-10-21T23:43Z,,,,,,Morrison (quadriceps) was a full participant in Wednesday's practice.,CB
+3925357,Calvin Ridley,Tennessee Titans,Questionable,2026-11-01T12:35Z,Hip,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Ridley (hip) is in line to play in Sunday's game against the Bengals, Ian Rapoport of NFL Network reports.",WR
 12701,Thomas Morstead,Tennessee Titans,Active,2026-11-01T02:11Z,,,,,,"The Titans elevated Morstead from the practice squad to the active roster Saturday, Jim Wyatt of the team's official site reports.",P
 4573318,Dorian Mausi,Tennessee Titans,Injured Reserve,2026-11-01T02:07Z,Foot,Not Specified,Not Specified,2026-11-15,IR-R,"Mausi (foot) has been ruled out for Sunday's game against the Bengals, Jim Wyatt of the Titans' official site reports.",LB
 4431353,Xavier Restrepo,Tennessee Titans,Active,2026-10-31T22:21Z,,,,,,"The Titans elevated Restrepo from their practice squad to their active roster Saturday, Jim Wyatt of the Titans' official site reports.",WR
 4871023,Carnell Tate,Tennessee Titans,Out,2026-10-31T15:10Z,Shoulder,Not Specified,Not Specified,2026-11-15,OUT,"Tate (shoulder) will not play against the Bengals on Sunday but is expected to be back in action following the Titans' bye for Week 10 against the Jaguars on Sunday, Nov. 15, Paul Kuharsky of PaulKuharsky.com reports.",WR
 3915398,Tommy Townsend,Tennessee Titans,Out,2026-10-31T02:12Z,Knee,Not Specified,Left,2026-11-15,OUT,"Townsend (knee) has been ruled out for Sunday's game against the Bengals, Jim Wyatt of the Titans' official site reports.",P
 3120464,John Franklin-Myers,Tennessee Titans,Questionable,2026-10-31T00:01Z,Groin,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Franklin-Myers (groin) is questionable for Sunday's game against the Bengals, Jim Wyatt of the Titans' official site reports.",DE
-3925357,Calvin Ridley,Tennessee Titans,Questionable,2026-10-30T23:34Z,Hip,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,Ridley (hip) is officially questionable for Sunday's matchup against Cincinnati.,WR
 4883647,Elic Ayomanor,Tennessee Titans,Active,2026-10-30T23:20Z,,,,,,"Carnell Tate (shoulder) has been ruled out for Sunday's game against the Bengals, leaving Ayomanor and Wan'Dale Robinson as the top wide receivers in the passing game, Jim Wyatt of the Titans' official site reports.",WR
 4569587,Wan'Dale Robinson,Tennessee Titans,Active,2026-10-30T23:10Z,,,,,,"Robinson and the other pass catchers will operate in elevated roles against the Bengals on Sunday due to the absence of rookie fourth overall pick Carnell Tate (shoulder), Jim Wyatt of the Titans' official site reports.",WR
 3916148,Tony Pollard,Tennessee Titans,Active,2026-10-30T23:06Z,,,,,,"Pollard will have a chance to easily pace the Titans backfield against Cincinnati on Sunday due to the absence of Tyjae Spears (knee), Jim Wyatt of the Titans' official site reports.",RB
