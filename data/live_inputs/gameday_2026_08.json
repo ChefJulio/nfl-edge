@@ -478,5 +478,25 @@
 "at": "2026-11-01T16:39:00+00:00",
 "post": 0.0,
 "status": "Inactive (LFF)"
+},
+"00-0040311": {
+"name": "Theo Wease Jr.",
+"team": "LAC",
+"pos": "WR",
+"pre": 0.9644,
+"ruling": "INA",
+"at": "2026-11-01T19:40:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041550": {
+"name": "Brenen Thompson",
+"team": "LAC",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-01T19:40:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
 }
 }
