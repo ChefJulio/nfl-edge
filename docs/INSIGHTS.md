@@ -5861,3 +5861,24 @@ Updated 2026-10-26. Injury / return items first (owner 2026-10-18: "the injury/r
   among linemen with 40%+ of the snaps; part-timers with 2+ games get an asterisked grade against them. 2026 Vikings:
   starters 12-21 (percentile), Van Demark (28% of the snaps, 2 games) an asterisked 75, Tiernan (3%) 53. The tile
   still reads "OL unit grade". 2,429 qualified + 1,581 part-time lineman-seasons, 2013-2026.
+- **PRE-REGISTERED 2026-10-31 (owner: the line grade should "accurately reflect consensus on good linemen";
+  Darrisaw graded 56 on the Vikings' pressure numbers): (EC) the line grade with the market's view.** A lineman-season's
+  consensus percentile = the market's valuation of him: the APY of the contract in effect that season, ranked among
+  linemen's contracts signed the same year (inflation-free); on a rookie deal, the APY of his first veteran contract if
+  he signed one within five seasons (the market's later verdict on his rookie-deal play; hindsight, as grades are),
+  ranked the same way, else his draft slot ranked among drafted linemen (undrafted = bottom). Honors are NOT inputs
+  (they are the check). The grade = re-ranked blend w x (performance percentile, (EB) unit by snaps) + (1 - w) x
+  (consensus percentile), w from {0, 0.25, 0.5, 0.75, 1}, picked on 2013-2019 by the AP first-team average, judged on
+  2020-2025. SHIPS if on 2020-2025 the AP first-team average beats the shipped unit-by-snaps grade and 80%+ sit above the
+  median; also reported: Pro Bowl linemen's average, Darrisaw 2023-2026, the 2013 Broncos.
+- **RESULT {#line-grade-consensus} (EC) the line grade with the market's view: PASS, shipped.** tools/st_grades.py
+  --eval-olc. One fix to the pre-registered consensus before shipping, stated here: the pool was "contracts signed the
+  same year", which ranked a $4.27M RFA tender 90th (minimum and tender deals dominate any signing year); it is now every
+  veteran lineman contract IN EFFECT that season (practice-squad deals out), and a rookie's later verdict is his first
+  veteran deal ranked against those in effect when it started. Both runs passed; the fixed one: consensus known for 96%
+  of qualified lineman-seasons; w picked on 2013-2019 = 0.25 (AP1 avg 81.1); 2020-2025 AP1 average 85.1 vs 72.4
+  performance-only, 97% above the median, Pro Bowl average 79.1 vs 64.8 (first pool: 81.4, 93%). Darrisaw 2023 / 2025 /
+  2026: 71 / 86 / 77 (performance only 54 / 70 / 58); the 2013 Broncos' backups Ramirez 74, Clark 73, starters 93-97.
+  Reading: for linemen the market (which watches the film) carries most of what the consensus sees; the line's play adds
+  a quarter. The grade is no longer pure hindsight performance for this one position, by the owner's goal ("accurately
+  reflect consensus on good linemen"); the card says so.

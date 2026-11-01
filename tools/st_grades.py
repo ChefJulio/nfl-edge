@@ -287,7 +287,8 @@ OL_FIRST = 2012  # snap counts
 OL_POS = {"T", "G", "C", "OT", "OG", "OL"}
 OL_QUAL = 0.40  # share of the team's offensive snaps over its games
 RUN_CLIP = 1.5
-OL_LABELS = ["Pass protection (the line)", "Run blocking (the line)"]
+OL_LABELS = ["Pass protection (the line)", "Run blocking (the line)", "The market's valuation (his contract)"]
+OL_W = 0.25  # (EC) the line's play vs the market's view: picked on 2013-2019, held on 2020-2025
 OLCOLS = ["game_id", "play_id", "season", "week", "season_type", "posteam", "defteam", "play_type", "qb_dropback", "qb_kneel",
           "qb_spike", "qb_scramble", "rush", "sack", "qb_hit", "epa", "penalty", "penalty_player_id", "penalty_team",
           "run_location", "run_gap"]
@@ -567,8 +568,15 @@ def build_line(out: Path, cur: int, sched: pd.DataFrame, cache_dir: Path) -> Non
     sea_v = o.val / (o.att + kp)
     cur_raw, sea_raw = window(t, s, allp, kp, raw=True)[0], o.val / o.att
     pv, rv = o.pass_v / o.att, o.run_v / o.att
-    gp, sg = pd.concat([pct(cur_v[q]), pct_vs(cur_v[q], cur_v[uq])]), pd.concat([pct(sea_v[q]), pct_vs(sea_v[q], sea_v[uq])])
-    bp = [pd.concat([pct(b[q]), pct_vs(b[q], b[uq])]) for b in (pv.fillna(0.0), rv.fillna(0.0))]
+    # (EC) the grade blends the line's play (by his snaps) with the market's view of him (owner 2026-10-31: "accurately
+    # reflect consensus on good linemen"): OL_W x performance percentile + (1 - OL_W) x consensus percentile, re-ranked
+    cons = ol_consensus(cache_dir, [(x, int(s)) for x in allp])
+    cv = pd.Series([cons.get((x, int(s)), 50.0) for x in allp], index=allp)
+    perf_c = pd.concat([pct(cur_v[q]), pct_vs(cur_v[q], cur_v[uq])])
+    perf_s = pd.concat([pct(sea_v[q]), pct_vs(sea_v[q], sea_v[uq])])
+    bl_c, bl_s = OL_W * perf_c + (1 - OL_W) * cv, OL_W * perf_s + (1 - OL_W) * cv
+    gp, sg = pd.concat([pct(bl_c[q]), pct_vs(bl_c[q], bl_c[uq])]), pd.concat([pct(bl_s[q]), pct_vs(bl_s[q], bl_s[uq])])
+    bp = [pd.concat([pct(b[q]), pct_vs(b[q], b[uq])]) for b in (pv.fillna(0.0), rv.fillna(0.0))] + [cv.round().astype(int)]
     doc["stats"]["OL"], doc["qualified"]["OL"] = OL_LABELS, len(q)
     for x in allp:
       doc["players"][x] = [int(gp[x]), "OL", int(o.games[x]), int(round(wa[x])), round(float(cur_raw[x]), 4), [int(b[x]) for b in bp],
@@ -610,6 +618,121 @@ def evaluate_line(cache_dir: Path, cur: int, sched: pd.DataFrame) -> None:
   print("  Joe Thomas: " + ", ".join(f"{y} {ovr(sp[(pid, y)]) if (pid, y) in sp else '-'}" for y in (2013, 2014, 2015)))
   den = t[(t.season == 2013) & (t.team == "DEN") & t.qual]
   print("  2013 Broncos: " + ", ".join(f"{names.get(g, g)} {ovr(sp.get((g, 2013), 0))}" for g in den.gsis_id))
+
+
+def ol_consensus(cache_dir: Path, keys) -> dict:
+  """(EC) the market's view of a lineman-season, 0-99: the APY of the contract in effect that season ranked among
+  linemen's contracts signed the same year; on a rookie deal, his first veteran contract's (signed within five seasons:
+  the market's later verdict), else his draft slot among drafted linemen (undrafted, or a rookie deal that ran out with
+  no veteran contract = 5). keys: (gsis, season) pairs. Returns {(gsis, season): percentile}."""
+  import nflreadpy as nfl
+  cache = D.Cache(cache_dir)  # the same caches tools/payroll_build.py and run.py keep (daily)
+  hist = cache.get("contracts_hist", "all", lambda: nfl.load_contracts().select(["gsis_id", "contract_history"]),
+                   stale=cache.age_hours("contracts_hist", "all") > 24)
+  otc = cache.get("contracts_otc", "all", lambda: nfl.load_contracts().select(["otc_id", "gsis_id", "position"]),
+                  stale=cache.age_hours("contracts_otc", "all") > 24)
+  hist = hist.drop_duplicates("gsis_id").set_index("gsis_id").contract_history
+  pos = otc.drop_duplicates("gsis_id").set_index("gsis_id").position
+  dr = nfl.load_players().to_pandas() if not (cache_dir / "players_all.parquet").exists() else pd.read_parquet(cache_dir / "players_all.parquet")
+  draft = dr.dropna(subset=["gsis_id"]).drop_duplicates("gsis_id").set_index("gsis_id").draft_pick if "draft_pick" in dr else pd.Series(dtype=float)
+  ol_ids = set(pos.index[pos.astype(str).str.upper().isin(["LT", "LG", "C", "RG", "RT", "OT", "OG", "T", "G", "OL"])]) | {g for g, _ in keys}
+  rows = []
+  for g in ol_ids:
+    h = hist.get(g)
+    if h is None:
+      continue
+    for c in list(h):
+      if c and c.get("year_signed") is not None and c.get("apy") is not None:
+        rows.append({"gsis_id": g, "ys": int(c["year_signed"]), "yrs": int(c.get("yrs") or 1), "apy": float(c["apy"]),
+                     "rookie": str(c.get("contract_type", "")) == "Drafted", "practice": str(c.get("contract_type", "")) == "Practice"})
+  cs = pd.DataFrame(rows)
+  cs = cs[~cs.practice]  # practice-squad deals aren't the market's view of a lineman
+  vet = cs[~cs.rookie].copy()
+  # (EC, fixed 2026-10-31) the pool is every veteran lineman contract IN EFFECT that season, not those signed that year:
+  # minimum and tender deals signed each year made a $4M tender rank 90th (Van Demark 2026)
+  seasons = range(int(cs.ys.min()), int(cs.ys.max() + cs.yrs.max()) + 1)
+  pool = {y: np.sort(vet[(vet.ys <= y) & (vet.ys + vet.yrs > y)].apy.to_numpy()) for y in seasons}
+
+  def rank_in(apy, y):
+    r = pool.get(y)
+    return float(99 * np.searchsorted(r, apy, "right") / len(r)) if r is not None and len(r) else 50.0
+  vet["p"] = [rank_in(a, y) for a, y in zip(vet.apy, vet.ys)]
+  by = {g: x.sort_values("ys") for g, x in cs.groupby("gsis_id")}
+  vby = {g: x.sort_values("ys") for g, x in vet.groupby("gsis_id")}
+  out = {}
+  for g, s in keys:
+    x = by.get(g)
+    if x is None:
+      continue
+    act = x[(x.ys <= s) & (x.ys + x.yrs > s)]
+    a = act.iloc[-1] if len(act) else x[x.ys <= s].iloc[-1] if (x.ys <= s).any() else None
+    if a is None:
+      continue
+    if not a.rookie:
+      out[(g, s)] = rank_in(float(a.apy), s)  # his deal against the veteran deals in effect this season
+      continue
+    v = vby.get(g)
+    nxt = v[(v.ys > s - 1) & (v.ys <= s + 5)] if v is not None else None
+    if nxt is not None and len(nxt):
+      out[(g, s)] = float(nxt.p.iloc[0])
+    elif a.ys + a.yrs <= s + 1 and s < 2026 - 1:
+      out[(g, s)] = 5.0  # his rookie deal ran out and no veteran contract followed
+    else:
+      d = draft.get(g)
+      out[(g, s)] = float(np.clip(99 * (1 - (d - 1) / 262), 0, 99)) if pd.notna(d) else 5.0
+  return out
+
+
+def evaluate_line_consensus(cache_dir: Path, cur: int, sched: pd.DataFrame) -> None:
+  """(EC): pick the blend weight on 2013-2019 by the AP first-team average, judge it on 2020-2025."""
+  from grade_build import pct
+  import nflreadpy as nfl
+  hon = _honors()
+  ap1 = {(pid, int(c[1])) for pid, hs in hon.items() for c in hs if c[0] == "AP1"}
+  pb = {(pid, int(c[1])) for pid, hs in hon.items() for c in hs if c[0] == "PB"}
+  pl = ol_plays(cache_dir, cur)
+  units = ol_units(pl, pass_inputs(cache_dir, cur, pl), pressure_cost(cache_dir, cur, pl))
+  _, t = ol_seasons(units, pl, cache_dir, cur, sched, {})
+  r = mom_prior(units.assign(gsis_id=units.team), "val", "plays")
+  kp = r[1] if r else 300.0
+  q = t[t.qual].copy()
+  cons = ol_consensus(cache_dir, list(zip(q.gsis_id, q.season.astype(int))))
+  q["cons"] = [cons.get((g, int(s)), np.nan) for g, s in zip(q.gsis_id, q.season)]
+  print(f"(EC) consensus known for {q.cons.notna().mean():.0%} of qualified lineman-seasons")
+  q["cons"] = q.cons.fillna(50.0)
+  q["perf"] = np.nan
+  for s, x in q.groupby("season"):
+    q.loc[x.index, "perf"] = pct(x.val / (x.att + kp)).to_numpy()
+  ovr = lambda p: round(50 + 49 * p / 99)  # noqa: E731
+
+  def grades(w):
+    out = {}
+    for s, x in q.groupby("season"):
+      b = pct(w * x.perf + (1 - w) * x.cons)
+      out.update({(g, int(s)): int(v) for g, v in zip(x.gsis_id, b)})
+    return out
+
+  def report(sp, lo, hi):
+    v = np.array([sp[k] for k in ap1 if k in sp and lo <= k[1] <= hi])
+    p = np.array([sp[k] for k in pb if k in sp and lo <= k[1] <= hi])
+    return v.mean(), np.mean(v > 50), p.mean(), sum(ovr(x) >= 99 for x in v), len(v)
+  res = {w: grades(w) for w in (0.0, 0.25, 0.5, 0.75, 1.0)}
+  for w, sp in res.items():
+    a, sh, p, n99, n = report(sp, 2013, 2019)
+    b, shb, pb2, m99, m = report(sp, 2020, 2025)
+    print(f"  w {w:.2f}: 2013-19 AP1 avg {a:.1f} ({sh:.0%} > median), PB avg {p:.1f} | 2020-25 AP1 avg {b:.1f} "
+          f"({shb:.0%}), PB avg {pb2:.1f}, AP1 at 99: {m99}/{m}")
+  best = max(res, key=lambda w: report(res[w], 2013, 2019)[0])
+  b, shb, _, _, _ = report(res[best], 2020, 2025)
+  base, _, _, _, _ = report(res[1.0], 2020, 2025)
+  print(f"  picked w = {best} on 2013-2019; 2020-2025 AP1 avg {b:.1f} vs performance-only {base:.1f}, {shb:.0%} above the median")
+  print(f"  GATE: {'PASS' if b > base and shb >= 0.8 else 'FAIL'}")
+  names = nfl.load_players().to_pandas().set_index("gsis_id").display_name
+  for who in ("00-0036616",):
+    print(f"  {names.get(who)}: " + ", ".join(f"{y} {ovr(res[best][(who, y)]) if (who, y) in res[best] else '-'}"
+                                             f" (perf-only {ovr(res[1.0][(who, y)]) if (who, y) in res[1.0] else '-'})" for y in (2023, 2025, 2026)))
+  den = q[(q.season == 2013) & (q.team == "DEN")]
+  print("  2013 Broncos: " + ", ".join(f"{names.get(g, g)} {ovr(res[best].get((g, 2013), 0))}" for g in den.gsis_id))
 
 
 def _honors() -> dict:
@@ -705,3 +828,5 @@ if __name__ == "__main__":
     evaluate_punters(cache_dir, cur, sched)
   if "--eval-ol" in sys.argv:
     evaluate_line(cache_dir, cur, sched)
+  if "--eval-olc" in sys.argv:
+    evaluate_line_consensus(cache_dir, cur, sched)
