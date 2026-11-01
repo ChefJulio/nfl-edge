@@ -523,7 +523,9 @@ button.bx-n:hover { color: var(--accent); text-decoration: underline; } .bx-n.pl
 .ts-lg { position: absolute; top: 50%; transform: translate(-50%, -50%); display: flex; line-height: 0; border-radius: 50%;
   box-shadow: 0 0 0 2px var(--panel); }
 /* ---- gamecast tabs: Pregame / Live / Postgame ---- */
-.gc-page .gc-tabs { display: flex; margin-top: 12px; } .gc-page .gc-tabs button { flex: 1; font-size: var(--fs-base); padding: 8px 10px; }
+.gc-page .gc-tabs { display: flex; margin-top: 12px; }
+/* the switch first, the scoreboard under it (owner 2026-11-01) */
+#gc > .seg.gc-tabs:first-child { margin-top: 8px; } #gc > .seg.gc-tabs + .sb { margin-top: 12px; } .gc-page .gc-tabs button { flex: 1; font-size: var(--fs-base); padding: 8px 10px; }
 .gc-tabs .live-dot { width: 7px; height: 7px; margin-right: 6px; }
 .gc-page .rk-b.sm { min-width: 30px; font-size: var(--fs-2xs); line-height: 15px; padding: 0 4px; opacity: .92; }
 .gc-page .gf-pick { font-size: var(--fs-xs); font-weight: 700; padding: 1px 8px; border-radius: 999px; }
