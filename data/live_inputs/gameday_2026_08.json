@@ -558,5 +558,35 @@
 "at": "2026-11-01T19:57:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0036613": {
+"name": "Jaylen Waddle",
+"team": "DEN",
+"pos": "WR",
+"pre": 0.7548,
+"ruling": "ACT",
+"at": "2026-11-01T19:59:00+00:00",
+"post": 0.974,
+"status": "Active (DLL)"
+},
+"00-0038728": {
+"name": "Jared Wayne",
+"team": "MIA",
+"pos": "WR",
+"pre": 0.0963,
+"ruling": "INA",
+"at": "2026-11-01T19:59:00+00:00",
+"post": 0.0,
+"status": "Inactive (LLF)"
+},
+"00-0041077": {
+"name": "Justin Joly",
+"team": "MIA",
+"pos": "TE",
+"pre": 0.5615,
+"ruling": "INA",
+"at": "2026-11-01T19:59:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
