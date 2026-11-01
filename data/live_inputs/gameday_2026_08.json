@@ -498,5 +498,35 @@
 "at": "2026-11-01T19:40:00+00:00",
 "post": 0.0,
 "status": "Inactive (DDD)"
+},
+"00-0036244": {
+"name": "Colby Parkinson",
+"team": "LA",
+"pos": "TE",
+"pre": 0.3221,
+"ruling": "INA",
+"at": "2026-11-01T19:41:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0039751": {
+"name": "Jordan Whittington",
+"team": "LA",
+"pos": "WR",
+"pre": 0.3945,
+"ruling": "ACT",
+"at": "2026-11-01T19:42:00+00:00",
+"post": 0.974,
+"status": "Active (FFD)"
+},
+"00-0041568": {
+"name": "Ty Simpson",
+"team": "LA",
+"pos": "QB",
+"pre": 0.1367,
+"ruling": "INA",
+"at": "2026-11-01T19:41:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
