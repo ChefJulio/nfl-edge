@@ -963,15 +963,22 @@
     return { teams: 10, QB: 1, RB: 2, WR: 2, TE: 1 };
   };
   const mrClass = r => !r ? '' : r <= 8 ? 'mr-hard' : r <= 16 ? 'mr-tough' : r <= 24 ? 'mr-ok' : 'mr-easy';
-  // each column: [label, value, index into the game row's weekly position ranks g.r (tools/player_logs.py RANKED), or none]
+  // each column: [label, value, index into the game row's weekly position ranks g.r (tools/player_logs.py RANKED), or none,
+  // options: b = bold values, fum = a fumble count (0 plain, 1+ a red chip), t = the head's tooltip]
+  const LOG_B = { b: 1 };
   const logCols = (pos, rushy) => {
     const c = (g, i) => g.c[i], x = (g, i) => g.x[i];
+    // rushing fumbles, lost ("fm", tools/player_logs.py; owner 2026-11-01): undefined in files built before it (a dash)
+    const fm = (g, i) => g.fm ? g.fm[i] : undefined;
     const ypc = g => x(g, 2) ? (c(g, 3) / x(g, 2)).toFixed(1) : '';
     // every position gets all three groups (owner 2026-10-16), his own first so it's on screen without scrolling
     // sideways; a group outside his role (third element true: a WR's passing) shows its zeros plain, not as red chips
     const pass = ex => ['Passing', [['C/A', g => `${x(g, 0)}/${x(g, 1)}`, 9], ['Yd', g => f0(c(g, 0)), 0], ['TD', g => c(g, 1), 1], ['Int', g => c(g, 2), 2]], ex];
     const rec = ex => ['Receiving', [['Tgt', g => x(g, 3), 12], ['Rec', g => c(g, 5), 5], ['Yd', g => f0(c(g, 6)), 6], ['TD', g => c(g, 7), 7]], ex];
-    const rush = ex => ['Rushing', [['Att', g => x(g, 2), 11], ['Yd', g => f0(c(g, 3)), 3], ...(pos === 'RB' ? [['YPC', ypc]] : []), ['TD', g => c(g, 4), 4]], ex];
+    // Att / Yd bold, plus the fumbles on his runs (owner 2026-11-01)
+    const rush = ex => ['Rushing', [['Att', g => x(g, 2), 11, LOG_B], ['Yd', g => f0(c(g, 3)), 3, LOG_B], ...(pos === 'RB' ? [['YPC', ypc]] : []), ['TD', g => c(g, 4), 4],
+      ['Fmbl', g => fm(g, 0), null, { fum: 1, t: 'Fumbles on his runs (sack and receiving fumbles not counted)' }],
+      ['Lost', g => fm(g, 1), null, { fum: 1, t: 'Of those, fumbles the defense recovered' }]], ex];
     return pos === 'QB' ? [pass(false), rush(false), rec(true)]
       : pos === 'RB' ? [rush(false), rec(false), pass(true)]
       : [rec(false), rush(!rushy), pass(true)];
@@ -1080,7 +1087,7 @@
     }
     const all = L.seasons.flatMap(s => s.g);
     const rushy = pos !== 'QB' && pos !== 'RB' && all.reduce((t, g) => t + g.x[2], 0) >= 8;
-    const groups = logCols(pos, rushy), stat = groups.flatMap(([, cols, ex]) => cols.map(([n, fn, ri]) => [n, fn, ri, ex]));
+    const groups = logCols(pos, rushy), stat = groups.flatMap(([, cols, ex]) => cols.map(([n, fn, ri, o]) => [n, fn, ri, ex, o || {}]));
     // a divider where each stat group starts (owner 2026-10-17: passing ran straight into rushing below the heads)
     const gstart = new Set();
     groups.reduce((k, [, cols], gi) => { if (gi) gstart.add(k); return k + cols.length; }, 0);
@@ -1093,7 +1100,14 @@
     // a value's chip, colored by its finish at his position that week (owner 2026-10-16; Sleeper-style); older files
     // without per-stat ranks get plain chips
     const chip = (v, r) => r == null ? `${v}` : `<span class="sc ${rkClass(r)}">${v}</span>`;
-    const snapTone = s => s == null ? '' : s >= 70 ? 'rk-good' : s >= 40 ? 'rk-mid' : 'rk-bad';
+    // one stat cell, the same rules in every row: games, totals, seasons (owner 2026-11-01): bold columns (Att / Yd)
+    // carry lg-b; a fumble column reads 0 plain and 1+ as a red chip, a dash when the file predates fumbles
+    const sTd = (i, o, inner) => `<td class="num${gcl(i)}${o.b ? ' lg-b' : ''}">${inner}</td>`;
+    const fumCell = v => v == null ? '–' : +v >= 1 ? `<span class="sc rk-bad">${v}</span>` : `${v}`;
+    const sTh = ([n, , , , o], i) => `<th class="num${gcl(i)}"${o.t ? ` title="${esc(o.t)}"` : ''}>${n}</th>`;
+    // a stat line summed over games (totals rows, seasons); fumbles over the games that carry them (none: a dash)
+    const sumOf = gs => { const add = k => gs[0][k].map((_, i) => gs.reduce((t, g) => t + (+g[k][i] || 0), 0)), fg = gs.filter(g => g.fm);
+      return { c: add('c'), x: add('x'), ...(fg.length ? { fm: [0, 1].map(i => fg.reduce((t, g) => t + (+g.fm[i] || 0), 0)) } : {}) }; };
     const projOf = g => g.pjl ? g.pj * (pts(g.pjl, w, pos) / Math.max(0.1, pts(g.pjl, built, pos))) : null;
     // Opponent color: our pregame matchup, green / red when it was one of that week's bigger ones (mu, mh); week
     // files from before 2026-10-14 carry the old 1st-32nd rank (mr) instead.
@@ -1110,8 +1124,8 @@
     // a live box-score line (boxLines) as a log game: c = the scoring-key stat line, x = completions, attempts, carries, targets
     const liveG = ln => ({ c: ln.line, x: [ln.comp || 0, ln.att || 0, ln.car || 0, ln.tgt || 0] });
     const head = `${grpHead(7)}
-      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num" title="Game grade, on the OVR's 50-99 scale: his fantasy output that game against every game by qualified players at his position that season (early in a season, last season's games fill the weeks not played yet)">Grd</th><th class="num">Snap</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
-    const blank = stat.map((c, i) => `<td class="num${gcl(i)}">–</td>`).join('');
+      <tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num" title="Fantasy points, your scoring">FPTS</th><th class="num">Proj</th><th class="num" title="His finish at his position that week">Rk</th><th class="num" title="Game grade, on the OVR's 50-99 scale: his fantasy output that game against every game by qualified players at his position that season (early in a season, last season's games fill the weeks not played yet)">Grd</th><th class="num" title="Share of his team's offensive snaps">SNP%</th>${stat.map(sTh).join('')}</tr>`;
+    const blank = stat.map((s, i) => `<td class="num${gcl(i)}">–</td>`).join('');  // dashes stay regular weight
     const body = seasons.map(S => {
       const isCur = S.s === L.cur, rows = S.g.map(g => ({ w: g.w, g }));
       if (isCur) up.forEach(u => rows.push({ w: u.w, u }));
@@ -1139,24 +1153,24 @@
       const played = (g, label) => { const v = pts(g.c, w, pos), pj = projOf(g);
         return `<tr${tileAttrs(g)}><td>${esc(label)}</td>${opp(g)}<td class="num lg-fp">${g.r ? chip(f1(v), g.rk) : f1(v)}</td>
           <td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td>
-          <td class="num"><span class="lg-rk ${rkClass(g.rk)}">${g.rk}</span></td><td class="num">${grdCell(g)}</td><td class="num">${g.sn != null ? (g.r ? `<span class="sc ${snapTone(g.sn)}">${g.sn}</span>` : g.sn) : '–'}</td>
-          ${stat.map(([, fn, ri, ex], i) => { const v = fn(g);
+          <td class="num"><span class="lg-rk ${rkClass(g.rk)}">${g.rk}</span></td><td class="num">${grdCell(g)}</td><td class="num">${g.sn != null ? g.sn : '–'}</td>
+          ${stat.map(([, fn, ri, ex, o], i) => { const v = fn(g);
             // a zero ties most of the position (0 rush TD can "rank" top 10): red (owner 2026-10-16), except Int / fumbles
             // (fewer is better)
             const off = offRole(v, ex);
-            return `<td class="num${gcl(i)}">${off != null ? off : ri != null && g.r ? (+v === 0 && ri !== 2 && ri !== 8 ? `<span class="sc rk-bad">${v}</span>` : chip(v, g.r[ri])) : v}</td>`; }).join('')}</tr>`; };
+            return sTd(i, o, off != null ? off : o.fum ? fumCell(v) : ri != null && g.r ? (+v === 0 && ri !== 2 && ri !== 8 ? `<span class="sc rk-bad">${v}</span>` : chip(v, g.r[ri])) : v); }).join('')}</tr>`; };
       // season totals right under the column heads (owner 2026-10-16): the games summed into one stat line, so every
       // column (C/A, YPC) reads it as it reads a game; Snap = average, Proj = total only when every game had one.
       // Colored by the season total's finish at his position (rk = S.trk / S.tr from tools/player_logs.py; not playoffs)
       const totRow = (gs, rk) => {
         if (gs.length < 2 || opts.last) return '';
-        const add = k => gs[0][k].map((_, i) => gs.reduce((t, g) => t + (+g[k][i] || 0), 0)), T = { c: add('c'), x: add('x') };
+        const T = sumOf(gs);
         const pjs = gs.map(projOf), sn = gs.filter(g => g.sn != null);
         const tc = (v, r) => rk && r != null ? chip(v, r) : v, avgSn = sn.length ? Math.round(sn.reduce((t, g) => t + g.sn, 0) / sn.length) : null;
         return `<tr class="lg-tot"><td>Tot</td><td></td><td class="num lg-fp">${tc(f1(pts(T.c, w, pos)), rk && rk.trk)}</td>
           <td class="num muted">${pjs.every(v => v != null) ? f1(pjs.reduce((a, b) => a + b, 0)) : '–'}</td>
           <td class="num">${rk && rk.trk ? `<span class="lg-rk ${rkClass(rk.trk)}" title="His ${esc(pos)} finish that season (fantasy points, site scoring)">${rk.trk}</span>` : ''}</td><td class="num">${rk ? seasonGrd(rk.s) : ''}</td>
-          <td class="num">${avgSn == null ? '–' : rk ? `<span class="sc ${snapTone(avgSn)}">${avgSn}</span>` : avgSn}</td>${stat.map(([, fn, ri, ex], i) => { const v = fn(T); return `<td class="num${gcl(i)}">${offRole(v, ex) ?? tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null)}</td>`; }).join('')}</tr>
+          <td class="num">${avgSn == null ? '–' : avgSn}</td>${stat.map(([, fn, ri, ex, o], i) => { const v = fn(T); return sTd(i, o, offRole(v, ex) ?? (o.fum ? fumCell(v) : tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null))); }).join('')}</tr>
           <tr class="lg-gap"><td colspan="${7 + stat.length}"></td></tr>`;
       };
       // (its finish chips wait for the rebuilt log)
@@ -1167,7 +1181,7 @@
         // log's own columns, from the polled box score (redrawn each poll); rank, grade and snaps once the log is rebuilt
         if (r.u && r.u.live) { const lg = liveG(r.u.live), v = pts(lg.c, w, pos), pj = p && p.proj != null ? scaled(p).proj : null;
           return `<tr class="lg-pend" title="${r.u.fin ? 'Final' : 'Live'} (rank, grade and snaps once the game's data is published)"><td>${r.u.fin ? r.w : `<span class="live-dot"></span>${r.w}`}</td>${opp(r.u)}<td class="num lg-fp"><b>${f1(v)}</b></td><td class="num ${pj == null ? 'muted' : v >= pj ? 'lg-over' : 'lg-under'}">${pj != null ? f1(pj) : '–'}</td><td class="num muted">${r.u.fin ? 'final' : 'live'}</td><td class="num muted">–</td><td class="num muted">–</td>
-            ${stat.map(([, fn, , ex], i) => { const x = fn(lg); return `<td class="num${gcl(i)}">${offRole(x, ex) ?? x}</td>`; }).join('')}</tr>`; }
+            ${stat.map(([, fn, , ex, o], i) => { const x = fn(lg); return sTd(i, o, offRole(x, ex) ?? (o.fum ? fumCell(x) : x)); }).join('')}</tr>`; }
         if (r.u && r.u.miss != null) return `<tr class="lg-miss"${tileAttrs(r.u)}><td>${r.w}</td>${r.u.o ? opp(r.u) : '<td class="lg-opp">&ndash;</td>'}<td class="num">${missTag(r.u)}</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">${r.u.sn != null ? r.u.sn : '&ndash;'}</td>${blank}</tr>`;
         if (r.u) {
           const pj = projOf(r.u);
@@ -1187,21 +1201,20 @@
     // game log's own columns and chips (Wk -> season, Opp -> team, Proj -> FP/G); tap a season for its games.
     // Six fixed columns like the game log's (no snap average), so it fits a phone through TD as the log does;
     // a career total row on top (owner 2026-10-16), unchipped since there's no career rank.
-    const sumOf = gs => { const add = k => gs[0][k].map((_, i) => gs.reduce((t, g) => t + (+g[k][i] || 0), 0)); return { c: add('c'), x: add('x') }; };
     const carS = L.seasons.filter(S => S.g.length);
     const car = carS.map(S => {
       const gs = S.g, T = sumOf(gs), rk = S.tr ? S : null, tc = (v, r) => rk && r != null ? chip(v, r) : v, tot = pts(T.c, w, pos);
       return `<tr class="lg-car" data-go-season="${S.s}" title="Show his ${S.s} games"><td><b>${S.s}</b></td><td class="lg-opp">${S.mv && S.mv.length ? [S.mv[0].f, ...S.mv.map(m => m.t)].map(t => tmL(t)).join('/') : tmL(gs[gs.length - 1].t)}</td>
         <td class="num">${gs.length}</td><td class="num lg-fp">${tc(f1(tot), rk && rk.trk)}</td><td class="num">${f1(tot / gs.length)}</td>
         <td class="num">${rk && rk.trk ? `<span class="lg-rk ${rkClass(rk.trk)}">${rk.trk}</span>` : '–'}</td>
-        ${stat.map(([, fn, ri, ex], i) => { const v = fn(T); return `<td class="num${gcl(i)}">${offRole(v, ex) ?? tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null)}</td>`; }).join('')}</tr>`;
+        ${stat.map(([, fn, ri, ex, o], i) => { const v = fn(T); return sTd(i, o, offRole(v, ex) ?? (o.fum ? fumCell(v) : tc(v, rk && rk.tr && ri != null ? rk.tr[ri] : null))); }).join('')}</tr>`;
     }).join('');
     const allG = carS.flatMap(S => S.g), CT = allG.length ? sumOf(allG) : null, ctot = CT ? pts(CT.c, w, pos) : 0;
     const carTot = CT && carS.length > 1 ? `<tr class="lg-tot" title="Regular season, ${carS[carS.length - 1].s}-${carS[0].s}"><td>Car</td><td class="lg-opp">${carS.length} yrs</td>
         <td class="num">${allG.length}</td><td class="num lg-fp">${f1(ctot)}</td><td class="num">${f1(ctot / allG.length)}</td><td class="num"></td>
-        ${stat.map(([, fn, , ex], i) => { const v = fn(CT); return `<td class="num${gcl(i)}">${offRole(v, ex) ?? v}</td>`; }).join('')}</tr><tr class="lg-gap"><td colspan="${6 + stat.length}"></td></tr>` : '';
+        ${stat.map(([, fn, , ex, o], i) => { const v = fn(CT); return sTd(i, o, offRole(v, ex) ?? (o.fum ? fumCell(v) : v)); }).join('')}</tr><tr class="lg-gap"><td colspan="${6 + stat.length}"></td></tr>` : '';
     const carHead = `${grpHead(6)}
-      <tr class="lg-ch"><th>Year</th><th>Team</th><th class="num" title="Games played">G</th><th class="num">Pts</th><th class="num" title="Fantasy points per game">FP/G</th><th class="num" title="His ${esc(pos)} finish that season">Rk</th>${stat.map(([n], i) => `<th class="num${gcl(i)}">${n}</th>`).join('')}</tr>`;
+      <tr class="lg-ch"><th>Year</th><th>Team</th><th class="num" title="Games played">G</th><th class="num" title="Fantasy points, your scoring">FPTS</th><th class="num" title="Fantasy points per game">FP/G</th><th class="num" title="His ${esc(pos)} finish that season">Rk</th>${stat.map(sTh).join('')}</tr>`;
     const view = carS.length > 1 ? logView : 'g';
     const legend = `<div class="lg-leg"><span>Opponent color = our pregame matchup (2021 on): green helped, red hurt, deeper = bigger</span>
       <span>· Rk = his ${esc(pos)} finish that week (green = starter in your league size) · Proj = our projection then (green = beat it) · Tap a game to open its gamecast</span></div>`;
@@ -1870,7 +1883,9 @@
       if (d) { r = d.players[pid]; yr = d.season; latest = +d.season !== +((GR.cur && GR.cur.season) || (DATA && DATA.season)); } }
     const loading = !r && (GRH[pid] == null || !GR.ready);
     const detail = GRH[pid] ? gradeTab(pid, GRH[pid], L) : '<div class="pc-box"><p class="pc-sub">Loading grade&hellip;</p></div>';
-    return tapTile('Grade', r ? `<div class="pc-big ${r[9] ? '' : grTone(r[0])}">${ovr(r[0])}${uqMark(r)} <small>OVR</small></div><div class="pc-tapsub">${yr} · ${esc(r[1])}${latest ? ' (latest)' : ''}</div>`
+    // an offensive lineman carries his line's grade (owner 2026-10-31: "show OL Unit grade ... indicate that on the tile")
+    const unit = r && r[1] === 'OL' && r[10] && r[10].unit;
+    return tapTile(unit ? 'OL unit grade' : 'Grade', r ? `<div class="pc-big ${r[9] ? '' : grTone(r[0])}">${ovr(r[0])}${uqMark(r)} <small>OVR</small></div><div class="pc-tapsub">${yr} · ${unit ? `${esc(unit)} line` : esc(r[1])}${latest ? ' (latest)' : ''}</div>`
       : loading ? '<div class="pc-big">&hellip; <small>OVR</small></div><div class="pc-tapsub">Loading grade</div>'
       : !GR.cur && GR.ready ? '<div class="pc-big">&ndash; <small>OVR</small></div><div class="pc-tapsub">Couldn\'t load grades</div>'
         : '<div class="pc-big">– <small>OVR</small></div><div class="pc-tapsub">Not graded</div>', 'NFL Edge grade', detail);
@@ -2206,7 +2221,9 @@
   // the two join the card's summary grid (CARD_X, set per render: every week layout's grid ends with it); the career
   // overviews (retired, linemen and specialists) get them as their own row
   let CARD_X = '';
-  const moreTiles = (pid, L) => L ? `<div class="pc-tiles">${honorsTile(pid, L)}${contractTile(pid, L)}</div>` : '';
+  // the career-overview layout's tiles (kickers, punters, linemen, retired players): the Grade tile too when graded
+  // (owner 2026-10-31: "every player gets an EDGE grade")
+  const moreTiles = (pid, L) => L ? `<div class="pc-tiles">${isGraded(L.pos, L) ? gradeTile(pid, L) : ''}${honorsTile(pid, L)}${contractTile(pid, L)}</div>` : '';
   // bare: inside the Draft & contract sheet, which already carries that title
   const profileBox = (L, bare = false) => {
     if (!L || !L.bio) return '';
@@ -2310,8 +2327,34 @@
   const defLine = (L, g) => { const t = kindTotals(L, [g]), bits = [`${f0((t.tk || 0) + (t.ast || 0))} tkl`];
     [['sk', 'sk'], ['tfl', 'TFL'], ['int', 'INT'], ['pd', 'PD'], ['ff', 'FF'], ['td', 'TD']].forEach(([k, l]) => { if (t[k]) bits.push(`${nfmt(t[k])} ${l}`); });
     return bits.join(' · '); };
-  const defWeek = (L, d) => {
-    const wk = +d.week, S = L.seasons.find(x => +x.s === +d.season), w = weights();
+  // Every position's week (owner 2026-10-31: "every player has the same 6 tiles as a fantasy player does, every
+  // position"): the offense card's layout for defenders, kickers, punters, linemen and long snappers. The first tile
+  // is that week's line in the position's own terms (KW: a defender's IDP points, a kicker's points scored, a punter's
+  // net average, a lineman's snap share; a kicker's upcoming week shows our projection), Form = that season through the
+  // week with the last five complete weeks as bars, then Health, Grade, Honors and Contract (CARD_X), then the game.
+  const KW = {
+    def: { title: 'Points', v: (L, g) => idpPts(L, g, weights()), big: v => `${f1(v)} <small>pts</small>`, line: (L, g) => defLine(L, g),
+           form: 'pts/G', season: (L, gs) => gs.reduce((t, x) => t + idpPts(L, x, weights()), 0) / gs.length, tip: v => `${f1(v)} IDP pts`, gr: true },
+    k: { title: 'Points', v: (L, g) => { const t = kindTotals(L, [g]); return 3 * (t.fgm || 0) + (t.xpm || 0); }, big: v => `${f0(v)} <small>pts scored</small>`,
+         line: (L, g) => { const t = kindTotals(L, [g]); return `FG ${f0(t.fgm || 0)}/${f0(t.fga || 0)} · XP ${f0(t.xpm || 0)}/${f0(t.xpa || 0)}`; },
+         form: 'pts/G', season: (L, gs) => gs.reduce((t, x) => { const y = kindTotals(L, [x]); return t + 3 * (y.fgm || 0) + (y.xpm || 0); }, 0) / gs.length,
+         tip: v => `${f0(v)} pts scored` },
+    p: { title: 'Punting', v: (L, g) => { const t = kindTotals(L, [g]); return t.pu ? t.net / t.pu : null; }, big: v => `${f1(v)} <small>net avg</small>`,
+         line: (L, g) => { const t = kindTotals(L, [g]); return `${f0(t.pu || 0)} punt${t.pu === 1 ? '' : 's'} · ${f0(t.i20 || 0)} inside the 20`; },
+         form: 'net avg', season: (L, gs) => { const t = kindTotals(L, gs); return t.pu ? t.net / t.pu : null; }, tip: v => `${f1(v)} net avg` },
+    ol: { title: 'Snaps', v: (L, g) => g.sn, big: v => `${f0(v)}<small>%</small>`, line: () => 'share of the offensive snaps',
+          form: '% snaps', season: (L, gs) => { const s = gs.filter(x => x.sn != null); return s.length ? s.reduce((t, x) => t + x.sn, 0) / s.length : null; },
+          tip: v => `${f0(v)}% of the snaps` },
+  };
+  KW.ls = { ...KW.ol, line: () => 'share of the special-teams snaps', tip: v => `${f0(v)}% of the special-teams snaps` };
+  KW.off = KW.ol;
+  // a kicker's projection for a week (data/kdst.json, standard kicking scoring as Rankings shows it)
+  const kProj = (L, wk) => { kdLoad(); const j = KDJ.d, row = j && j.k && L.team ? j.k[L.team] : null;
+    const w = row && row.pid === L.pid ? row.w.find(x => x[0] === wk) : null;
+    return w ? NFLE.kdst.kScore(j.k_keys, w[2], NFLE.kdst.STD_K) : null; };
+  const kindWeek = (L, d) => {
+    const A = KW[L.kind] || KW.ol;
+    const wk = +d.week, S = L.seasons.find(x => +x.s === +d.season);
     const g = S && S.g.find(x => x.w === wk), m = S && (S.m || []).find(x => x.w === wk);
     // this week and later weeks this season (2026-10-22 audit: as the offense card; a defender's later week had none)
     const fut = !!(DATA && +d.season === +DATA.season && wk > +DATA.week);
@@ -2319,33 +2362,37 @@
     const team = (g && g.t) || L.team, game = team ? teamGame(team, d) : null;
     let ptsTile;
     if (g) {
-      const v = idpPts(L, g, w), tone = g.gr == null ? '' : g.gr >= 80 ? 'good' : g.gr <= 30 ? 'bad' : '';
+      const v = A.v(L, g), tone = A.gr && g.gr != null ? (g.gr >= 80 ? 'good' : g.gr <= 30 ? 'bad' : '') : '';
       const sheet = `<div class="pc-box"><div class="pc-k">Week ${wk} ${g.h === 0 ? '@' : 'vs'} ${esc(g.o)}${g.gid ? ` · <a href="${esc(gcUrl(g.gid, ''))}">Gamecast &rsaquo;</a>` : ''}</div>
-        ${kindGrid(L, kindTotals(L, [g]))}${advGrid(L, [g])}${g.gr != null ? `<p class="pc-sub">Game grade <b>${ovr(g.gr)}</b>: his IDP points against every game by qualified ${esc({ DL: 'defensive linemen', LB: 'linebackers', DB: 'defensive backs' }[DEF_GROUP[L.pos] || 'DB'])} that season.</p>` : ''}</div>`;
-      ptsTile = tapTile('Points', `<div class="pc-big ${tone}"><span class="pv-tag">final</span>${f1(v)} <small>pts</small></div><div class="pc-tapsub">${g.gr != null ? `grd <b>${ovr(g.gr)}</b> · ` : ''}${esc(defLine(L, g))}</div>`, `Week ${wk} points`, sheet);
+        ${kindGrid(L, kindTotals(L, [g]))}${L.kind === 'def' ? advGrid(L, [g]) : ''}${A.gr && g.gr != null ? `<p class="pc-sub">Game grade <b>${ovr(g.gr)}</b>: his IDP points against every game by qualified ${esc({ DL: 'defensive linemen', LB: 'linebackers', DB: 'defensive backs' }[DEF_GROUP[L.pos] || 'DB'])} that season.</p>` : ''}</div>`;
+      ptsTile = tapTile(A.title, `<div class="pc-big ${tone}"><span class="pv-tag">final</span>${v == null ? '&ndash;' : A.big(v)}</div><div class="pc-tapsub">${A.gr && g.gr != null ? `grd <b>${ovr(g.gr)}</b> · ` : ''}${esc(A.line(L, g))}</div>`, `Week ${wk}`, sheet);
     } else {
       const st = game && LIVE.byGame[game.id];
+      const pj = L.kind === 'k' && !(m && (m.bye || m.miss)) ? kProj(L, wk) : null;
       const body = m && m.bye ? '<div class="pc-big">Bye</div><div class="pc-tapsub">no game this week</div>'
         : m && m.miss ? `<div class="pc-big bad">${esc(m.miss === 'DNP' ? 'DNP' : m.miss === 'INA' ? 'Inactive' : m.miss)}</div><div class="pc-tapsub">${esc(MISS_WORD[m.miss] || '')}${m.o ? ` · ${m.h === 0 ? '@' : 'vs'} ${esc(m.o)}` : ''}</div>`
-          : st && st.state === 'in' ? '<div class="pc-big"><span class="live-dot"></span>Live</div><div class="pc-tapsub">IDP points once the game is final</div>'
+          : st && st.state === 'in' ? '<div class="pc-big"><span class="live-dot"></span>Live</div><div class="pc-tapsub">his line once the game is final</div>'
             // the game is over but his line isn't in the log yet (rebuilt from nflverse after the games)
-            : game && (game.final || (st && st.state === 'post')) ? '<div class="pc-big">Final</div><div class="pc-tapsub">his IDP points appear after the next stats update</div>'
+            : game && (game.final || (st && st.state === 'post')) ? '<div class="pc-big">Final</div><div class="pc-tapsub">his line appears after the next stats update</div>'
             : h && h.inj && h.play != null && h.play < H.AVAIL.EVEN ? `<div class="pc-big bad">Out</div><div class="pc-tapsub">${esc(h.what || 'injured')}</div>`
+              : pj != null ? `<div class="pc-big">${f1(pj)} <small>pts</small></div><div class="pc-tapsub">${game ? `${game.home.team === team ? 'vs' : '@'} ${esc(game.home.team === team ? game.away.team : game.home.team)} · ` : ''}our projection (standard kicking scoring)</div>`
               : `<div class="pc-big">&ndash;</div><div class="pc-tapsub">${game ? `${game.home.team === team ? 'vs' : '@'} ${esc(game.home.team === team ? game.away.team : game.home.team)} · not played yet` : 'no game'}</div>`;
-      ptsTile = goTile('Points', body, 'log', 'g');
+      ptsTile = goTile(pj != null ? 'Projection' : A.title, body, 'log', 'g');
     }
     // Form: that season through this week; bars = the last five complete weeks (lastWeeks), played or not
     const sofar = S ? S.g.filter(x => x.w <= wk) : [];
-    const slots = lastWeeks(L, d.season, doneThrough(d)).map(x => x.g ? { w: x.w, v: idpPts(L, x.g, w), pj: null, title: `${x.s} week ${x.w}: ${f1(idpPts(L, x.g, w))} IDP pts` } : offSlot(x));
-    const fpg = sofar.length ? sofar.reduce((t, x) => t + idpPts(L, x, w), 0) / sofar.length : null;
-    const formBody = fpg != null ? `<div class="pc-big">${f1(fpg)} <small>pts/G</small></div><div class="pc-tapsub">${sofar.length} game${sofar.length === 1 ? '' : 's'} · last ${slots.length} weeks</div>`
+    const slots = lastWeeks(L, d.season, doneThrough(d)).map(x => { const v = x.g ? A.v(L, x.g) : null;
+      return x.g && v != null ? { w: x.w, v, pj: null, title: `${x.s} week ${x.w}: ${A.tip(v)}` } : offSlot(x); });
+    const sv = sofar.length ? A.season(L, sofar) : null;
+    const formBody = sv != null ? `<div class="pc-big">${L.kind === 'ol' || L.kind === 'ls' || L.kind === 'off' ? f0(sv) : f1(sv)} <small>${A.form}</small></div><div class="pc-tapsub">${sofar.length} game${sofar.length === 1 ? '' : 's'} · last ${slots.length} weeks</div>`
       : `<div class="pc-big">&ndash;</div><div class="pc-tapsub">no games yet in ${esc(d.season)}</div>`;
-    const bars = slots.length ? `<div class="pc-tapbars">${miniBars(slots, { slotW: 22, H: 40, cls: 'mb-pts mb-sm' })}</div>` : '';
-    const formSheet = sofar.length ? `<div class="pc-box"><div class="pc-k">${esc(d.season)} through week ${wk}</div>${kindGrid(L, kindTotals(L, sofar))}${advGrid(L, sofar)}</div>` : '';
+    const bars = slots.length ? `<div class="pc-tapbars">${miniBars(slots, { slotW: 22, H: 40, cls: 'mb-pts mb-sm', fmt: L.kind === 'p' ? f1 : f0 })}</div>` : '';
+    const formSheet = sofar.length ? `<div class="pc-box"><div class="pc-k">${esc(d.season)} through week ${wk}</div>${kindGrid(L, kindTotals(L, sofar))}${L.kind === 'def' ? advGrid(L, sofar) : ''}</div>` : '';
     const form = formSheet ? tapTile('Form', formBody + bars, `${d.season} season`, formSheet) : goTile('Form', formBody + bars, 'log', 'g');
     return `<div class="pc-tiles">${ptsTile}${form}${h ? healthTile(L.pid, null, L, L.espn, fut ? ` · wk ${wk}` : '', fut ? wk : null, !!(m && m.bye)) : ''}${gradeTile(L.pid, L)}${CARD_X}</div>
       ${game ? `<div class="pc-mt">${NFLE.ui.matchTile(game, gameHref(game, d))}</div>` : ''}`;
   };
+  const defWeek = kindWeek;
   // this season's games under the tiles (as the offense card's), Show more = the full log
   const defMini = L => {
     const S = L.seasons.find(x => x.s === L.cur && x.g.length) || L.seasons.find(x => x.g.length);
@@ -2382,7 +2429,7 @@
     const rk = hasRet ? (L.ret_keys || []) : [];
     const idp = L.kind === 'def', w = idp ? weights() : null;
     const ak = idp && seasons.some(S => S.g.some(g => g.a)) ? Object.keys(ADV_COLS) : [], akI = k => (L.adv_keys || []).indexOf(k);
-    const head = `<tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num">Snap</th>${idp ? '<th class="num" title="IDP fantasy points, your scoring">Pts</th><th class="num" title="Game grade, on the OVR\'s 50-99 scale: his IDP points that game against every game by qualified defenders in his group that season">Grd</th>' : ''}${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}${ak.map(k => `<th class="num lg-adv" title="${esc(ADV_COLS[k][1])}">${ADV_COLS[k][0]}</th>`).join('')}${rk.map(k => `<th class="num" title="${esc(RET_COLS[k][1])}">${RET_COLS[k][0]}</th>`).join('')}</tr>`;
+    const head = `<tr class="lg-ch"><th>Wk</th><th>Opp</th><th class="num" title="Share of snaps">SNP%</th>${idp ? '<th class="num" title="IDP fantasy points, your scoring">FPTS</th><th class="num" title="Game grade, on the OVR\'s 50-99 scale: his IDP points that game against every game by qualified defenders in his group that season">Grd</th>' : ''}${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}${ak.map(k => `<th class="num lg-adv" title="${esc(ADV_COLS[k][1])}">${ADV_COLS[k][0]}</th>`).join('')}${rk.map(k => `<th class="num" title="${esc(RET_COLS[k][1])}">${RET_COLS[k][0]}</th>`).join('')}</tr>`;
     const n = 3 + (idp ? 2 : 0) + keys.length + ak.length + rk.length;
     const ptsCell = g => idp ? `<td class="num"><b>${f1(idpPts(L, g, w))}</b></td><td class="num">${g.gr != null ? `<span class="lg-rk ${g.gr >= 80 ? 'rk-good' : g.gr <= 30 ? 'rk-bad' : 'rk-mid'}">${ovr(g.gr)}</span>` : '–'}</td>` : '';
     const advCells = g => ak.map(k => `<td class="num lg-adv">${g.a ? nfmt(g.a[akI(k)]) : '–'}</td>`).join('');
@@ -2401,8 +2448,11 @@
       };
       const miss = g => `<tr class="lg-miss"${tileAttrs(g)}><td>${g.w}</td>${g.o ? `<td class="lg-opp tm-opp"><button type="button" class="tm-open" data-tm="${esc(g.o)}">${g.h === 0 ? '@' : ''}${esc(g.o)}</button></td>` : '<td class="lg-opp">&ndash;</td>'}
         <td class="num">${g.sn != null ? g.sn : missTag(g)}</td>${'<td class="num">&ndash;</td>'.repeat(n - 3)}</tr>`;
-      const trs = tot(S.g, idp ? seasonGrdOf(L.pid, S.s) : '') + [...S.g, ...(opts.compact ? [] : (S.m || []))].sort((a, b) => b.w - a.w)  // newest first, every week
-        .map(g => g.bye ? byeRow(g.w, n - 2) : g.miss != null ? miss(g) : row(g, g.w)).join('');
+      // a mid-season club change between its weeks, as in the fantasy log (owner 2026-10-31: Buckner's trade to SF had no
+      // "Traded to" row: this log never drew them)
+      const mvs = opts.compact ? [] : (S.mv || []).map(m => ({ w: m.w - 0.5, mv: m }));
+      const trs = tot(S.g, idp ? seasonGrdOf(L.pid, S.s) : '') + [...S.g, ...(opts.compact ? [] : (S.m || [])), ...mvs].sort((a, b) => b.w - a.w)  // newest first, every week
+        .map(g => g.mv ? moveRow(g.mv, n) : g.bye ? byeRow(g.w, n - 2) : g.miss != null ? miss(g) : row(g, g.w)).join('');
       const sum = opts.compact ? '' : ` · ${t.g} game${t.g === 1 ? '' : 's'}${keys.length ? ` · ${keys.slice(0, 4).map(k => `${nfmt(t[k] || 0)} ${cols[k][0]}`).join(', ')}` : ''}`;
       // playoffs first, their own block (not in the season totals above)
       const pg = opts.compact ? [] : (S.pg || []);
@@ -2426,8 +2476,8 @@
         + `${keys.map(k => `<td class="num">${nfmt(t[k] || 0)}</td>`).join('')}${rk.map((k, i) => `<td class="num">${nfmt(sum(i))}</td>`).join('')}</tr>`;
     };
     const teamOf = S => S.mv && S.mv.length ? [S.mv[0].f, ...S.mv.map(m => m.t)].map(t => tmL(t)).join('/') : tmL(S.g[S.g.length - 1].t);
-    const cHead = `<tr class="lg-ch"><th>Year</th><th>Team</th><th class="num" title="Games with a stat or a snap">G</th><th class="num" title="Average share of snaps (2013 on)">Snap</th>`
-      + `${idp ? '<th class="num" title="IDP fantasy points, your scoring">Pts</th><th class="num" title="IDP points per game">Pts/G</th><th class="num" title="Season grade (OVR)">Grd</th>' : ''}`
+    const cHead = `<tr class="lg-ch"><th>Year</th><th>Team</th><th class="num" title="Games with a stat or a snap">G</th><th class="num" title="Average share of snaps (2013 on)">SNP%</th>`
+      + `${idp ? '<th class="num" title="IDP fantasy points, your scoring">FPTS</th><th class="num" title="IDP points per game">FP/G</th><th class="num" title="Season grade (OVR)">Grd</th>' : ''}`
       + `${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}${rk.map(k => `<th class="num" title="${esc(RET_COLS[k][1])}">${RET_COLS[k][0]}</th>`).join('')}</tr>`;
     const cn = 4 + (idp ? 3 : 0) + keys.length + rk.length;
     const career = cRow('Car', `${carS.length} yrs`, carS.flatMap(S => S.g), '', ` class="lg-tot" title="Regular season, ${carS[carS.length - 1].s}-${carS[0].s}"`)
@@ -2453,7 +2503,7 @@
         ${keys.map(k => `<td class="num">${t ? nfmt(t[k] || 0) : '–'}</td>`).join('')}</tr>`;
     }).join('');
     return `<div class="lg-scroll"><table class="lg lg-career"><thead><tr class="lg-ch"><th>Season</th><th>Team</th><th class="num" title="Games with a stat or a snap">G</th>
-      <th class="num" title="Weeks on the active roster">Wks</th><th class="num">Snap</th>${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+      <th class="num" title="Weeks on the active roster">Wks</th><th class="num" title="Average share of snaps (2013 on)">SNP%</th>${keys.map(k => `<th class="num" title="${esc(cols[k][1])}">${cols[k][0]}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
   };
   const kindOverview = (L, espn) => {
     const last = L.seasons.find(S => S.g.length);
@@ -2606,7 +2656,9 @@
   const GRADED = { QB: 1, RB: 1, WR: 1, TE: 1 };
   // graded = an offensive skill position or any defender (their grades are IDP-based); one rule for every tile layout
   // (owner 2026-10-29, Jalen Redmond: "where are my defensive player grade tiles?")
-  const isGraded = (pos, L) => !!GRADED[pos] || !!(L && L.kind === 'def');
+  // every player gets an Edge grade (owner 2026-10-31): kickers too (gradeTab's isK; INSIGHTS (DY))
+  // long snappers have the tile too, ungraded (every card the same six tiles; nothing public measures a snap)
+  const isGraded = (pos, L) => !!GRADED[pos] || !!(L && ['def', 'k', 'p', 'ol', 'ls'].includes(L.kind));
   const grTone = g => g >= 80 ? 'good' : g <= 30 ? 'bad' : '';  // by percentile
   // OVR on a 50-99 scale (owner 2026-10-14): only qualified players are graded, so the least of them is a 50, not a
   // 0; linear in his percentile among the qualified. The sentence and the stat bars keep the plain percentile.
@@ -2625,17 +2677,30 @@
   const gradeTab = (pid, docs, L) => {
     const all = docs.filter(d => d && d.players[pid]).sort((a, b) => b.season - a.season);
     const rows = all.filter(d => d.players[pid][0] != null);  // graded seasons (the rest: played, not graded)
-    if (!rows.length) return L && L.kind === 'def'
+    if (!rows.length) return L && L.kind === 'k'
+      ? '<div class="pc-box"><p class="pc-sub">No grade: kickers are graded from 1999 in seasons with 0.75 or more field-goal attempts per team game.</p></div>'
+      : L && L.kind === 'p'
+      ? '<div class="pc-box"><p class="pc-sub">No grade: punters are graded from 1999 in seasons with 1.75 or more punts per team game.</p></div>'
+      : L && L.kind === 'ls'
+      ? '<div class="pc-box"><p class="pc-sub">Long snappers aren&#39;t graded: the play-by-play doesn&#39;t record how good a snap was, only the rare bad one that ruins a kick.</p></div>'
+      : L && L.kind === 'ol'
+      ? '<div class="pc-box"><p class="pc-sub">No grade: offensive linemen are graded from 2012 (snap counts) in seasons where they played 40% or more of the team&#39;s offensive snaps.</p></div>'
+      : L && L.kind === 'def'
       ? '<div class="pc-box"><p class="pc-sub">No grade: defenders are graded from 1999 when they played a real role in a season (from 2012, 40% of the defensive snaps over the team\'s games; before that, a role in half its games), or started 2+ games.</p></div>'
       : '<div class="pc-box"><p class="pc-sub">No grade: grades cover quarterbacks, running backs, receivers and tight ends since 1999 who met the NFL\'s qualifying minimum in a season (per team game: 14 pass attempts, 6.25 carries, or 1.875 catches).</p></div>';
     const D = rows[0], r = D.players[pid], pos = r[1], labels = D.stats[pos] || [];
-    const isDef = ['DL', 'LB', 'DB'].includes(pos);
-    const posName = { QB: 'quarterbacks', RB: 'running backs', WR: 'wide receivers', TE: 'tight ends', DL: 'defensive linemen', LB: 'linebackers', DB: 'defensive backs' }[pos] || pos;
+    const isDef = ['DL', 'LB', 'DB'].includes(pos), isK = pos === 'K', isP = pos === 'P', isOL = pos === 'OL';
+    const posName = { QB: 'quarterbacks', RB: 'running backs', WR: 'wide receivers', TE: 'tight ends', DL: 'defensive linemen', LB: 'linebackers', DB: 'defensive backs', K: 'kickers', P: 'punters', OL: 'offensive linemen' }[pos] || pos;
+    // kickers (owner 2026-10-31, INSIGHTS (DY)): points over expected per 100 attempts, signed; FG made / attempted
+    const p100 = v => v == null ? '–' : `${v >= 0 ? '+' : '-'}${Math.abs(100 * v).toFixed(1)}`, fgOf = x => x[10] ? `${x[10].fgm}/${x[10].fga}` : '–';
+    // punters (INSIGHTS (DZ)): yards over expected per punt, signed; punts that season
+    const yd1 = v => v == null ? '–' : `${v >= 0 ? '+' : '-'}${Math.abs(v).toFixed(1)}`, puOf = x => x[10] ? String(x[10].punts) : '–', snOf = x => x[10] && x[10].snap != null ? `${x[10].snap}%` : '–';
     const f1 = v => v == null ? '–' : v.toFixed(1), nq = (D.qualified || {})[pos];
     // grade files built before 2026-10-15 label the flipped stats "X rate (lower is better)": plain names now, with one
     // note above the bars that high / green is good for every stat (rates where less is better are flipped)
     const FLIP = { 'Sack rate (lower is better)': 'Sack rate', 'INT rate (lower is better)': 'INT rate', 'Drop rate (lower is better)': 'Drop rate' };
-    const bars = labels.map((l, i) => { const v = r[5][i]; l = FLIP[l] || l; return `<div class="eg-row"><span class="eg-l">${esc(l)}</span><b class="eg-v">${v}</b><span class="eg-bar"><i class="${grTone(v)}" style="width:${Math.max(2, v)}%"></i></span></div>`; }).join('');
+    // a bar with no value (-1: a lineman with no market verdict yet, on his rookie deal) shows a dash
+    const bars = labels.map((l, i) => { const v = r[5][i]; l = FLIP[l] || l; if (v == null || v < 0) return `<div class="eg-row"><span class="eg-l">${esc(l)}${isOL ? ' <small class="muted">(no veteran contract yet: graded on his line&#39;s play)</small>' : ''}</span><b class="eg-v">&ndash;</b><span class="eg-bar"></span></div>`; return `<div class="eg-row"><span class="eg-l">${esc(l)}</span><b class="eg-v">${ovr(v)}</b><span class="eg-bar"><i class="${grTone(v)}" style="width:${Math.max(2, v)}%"></i></span></div>`; }).join('');
     // by season: that season's play only ([6], [7]); older files without it fall back to the window grade
     // every season from his first to his last, none skipped (owner 2026-10-15: a missing year reads as consecutive)
     const have = new Set(all.map(d => d.season)), years = [];
@@ -2643,15 +2708,15 @@
     const dnp = y => `<tr class="muted gr-dnp"><td><b>${y}</b></td><td class="num" colspan="3">Did not play</td></tr>`;
     const hist = years.map(y => have.has(y) ? all.find(d => d.season === y) : y).map(d => { if (typeof d === 'number') return dnp(d);
       const x = d.players[pid], g = x[6] ?? x[0];
-      if (x[0] == null) return `<tr class="muted"><td><b>${d.season}</b></td><td class="num" title="Not graded: too few games with a real role (needs the qualifying minimum, or 2+ games with a starter's workload)">–</td><td class="num">${x[8] ?? '–'}</td><td class="num">${f1(x[7])}</td></tr>`;
-      return `<tr><td><b>${d.season}</b>${d.basis === 'box' ? ' <small class="muted" title="Box-score stats only before 2018: same OVR, simpler stats behind it">box</small>' : ''}</td><td class="num"><span class="eg-chip ${x[9] ? 'eg-uq' : grTone(g)}"><b>${ovr(g)}${uqMark(x)}</b></span></td><td class="num">${x[8] ?? '–'}</td><td class="num">${f1(x[7])}</td></tr>`; }).join('');
+      if (x[0] == null) return `<tr class="muted"><td><b>${d.season}</b></td><td class="num" title="Not graded: too few games with a real role (needs the qualifying minimum, or 2+ games with a starter's workload)">–</td><td class="num">${x[8] ?? '–'}</td><td class="num">${isK || isOL ? p100(x[7]) : isP ? yd1(x[7]) : f1(x[7])}</td></tr>`;
+      return `<tr><td><b>${d.season}</b>${d.basis === 'box' ? ' <small class="muted" title="Box-score stats only before 2018: same OVR, simpler stats behind it">box</small>' : ''}</td><td class="num"><span class="eg-chip ${x[9] ? 'eg-uq' : grTone(g)}"><b>${ovr(g)}${uqMark(x)}</b></span></td><td class="num">${isK ? fgOf(x) : isP ? puOf(x) : isOL ? snOf(x) : (x[8] ?? '–')}</td><td class="num">${isK || isOL ? p100(x[7]) : isP ? yd1(x[7]) : f1(x[7])}</td></tr>`; }).join('');
     return `<div class="pc-box"><div class="pc-k">Current form</div>
         <div class="ij-dur"><div class="pc-big ${r[9] ? '' : grTone(r[0])}">${ovr(r[0])}${uqMark(r)} <small>OVR</small></div>
-          <div class="pc-sub">Over his last three seasons weighted to ${D.season}, he produced <b>${f1(r[4])}</b> ${isDef ? 'IDP ' : ''}fantasy points per game, more than ${r[0]}% of the ${nq ? `${nq} ` : ''}qualified ${posName}${r[9] ? ` (*under the qualifying minimum: graded on his ${r[8]} games with half the snaps or more, not counted in the rankings)` : ''}${r[3] < 8 ? ' (a small sample so far, so it leans on the position average)' : ''}.</div></div></div>
+          <div class="pc-sub">${isOL ? `Linemen are graded on two things: how his line played while he was on the field (a quarter of the grade; each game the ${esc((r[10] && r[10].unit) || '')} line is graded as a unit, weighted by his snaps) and the market's valuation of him (three quarters: his contract among linemen's, or on a rookie deal the veteran contract he signed next; before one, his line's play alone), with a floor from his honors that season (All-Pro 97 / 94, Pro Bowl 90). No public data says which lineman allowed a pressure or opened a hole, and the market, which watches the film, is the best public read of the individual. Better than ${r[0]}% of the ${nq ? `${nq} ` : ''}qualified linemen${r[9] ? ' (*under 40% of the snaps: graded on the games he played, not counted in the rankings)' : ''}; his lines were worth <b>${p100(r[4])}</b> points per 100 plays against their opponents' norms (${r[10] && r[10].snap != null ? `${r[10].snap}% of the offensive snaps` : 'his snaps'} in ${D.season}).` : isP ? `Over his last three seasons weighted to ${D.season}, his punts gained <b>${yd1(r[4])}</b> yards per punt against the league from the same spots, with returns set to the league's average (${r[10] ? `${r[10].punts} punts, ${r[10].net} yards each, ${r[10].in20} inside the 20 in ${D.season}` : ''}), better than` : isK ? `Over his last three seasons weighted to ${D.season}, his kicks were worth <b>${p100(r[4])}</b> points per 100 attempts against a league-average kicker from the same distances and conditions (${esc(fgOf(r))} on field goals in ${D.season}), better than` : `Over his last three seasons weighted to ${D.season}, he produced <b>${f1(r[4])}</b> ${isDef ? 'IDP ' : ''}fantasy points per game, more than`}${isOL ? '' : ` ${r[0]}% of the ${nq ? `${nq} ` : ''}qualified ${posName}${r[9] ? ` (*under the qualifying minimum: graded on his ${r[8]} games with half the snaps or more, not counted in the rankings)` : ''}${r[3] < 8 ? ' (a small sample so far, so it leans on the position average)' : ''}.`}</div></div></div>
       ${gameGrades(L)}
-      <div class="pc-box"><div class="pc-k">The stats behind it · percentile among ${posName}</div><p class="pc-sub">Higher and greener is better for every stat. For rates where less is better (${isDef ? 'yards and rating allowed, missed tackles' : 'drops, sacks, interceptions'}) the percentile is flipped: 99 = fewest.</p><div class="eg-bars">${bars}</div></div>
-      <div class="pc-box pc-logbox"><div class="pc-k">By season · that season only</div><div class="lg-scroll"><table class="lg"><thead><tr class="lg-ch"><th>Season</th><th class="num">OVR</th><th class="num" title="Games played">G</th><th class="num" title="Fantasy points per game (site scoring)">Pts / g</th></tr></thead><tbody>${hist}</tbody></table></div>
-        ${isDef ? `<p class="pc-sub">How it works: the overall measures output: IDP fantasy points per game under Sleeper's default IDP123 scoring (solo tackle and TFL 2, assisted tackle and QB hit 1, forced fumble, fumble recovery and pass defended 3, sack and interception 6, touchdown 6, safety 2, blocked kick 3), pulled toward the position average by an amount measured from game-to-game swings, so a few big games can't make a 99. Groups: defensive linemen (DE, DT, NT), linebackers (inside and outside) and defensive backs, by his listed position. The rankings use defenders with a real role that season: from 2012, 40% or more of the defensive snaps over his team's games; before 2012 (no snap counts), a role (2+ tackles, a sack, interception or pass defended) in half its games. A spot starter (2+ games at half the snaps) gets an asterisked grade from those games. Current form weights his last three seasons 1 / 0.6 / 0.3. OVR runs 50-99, his percentile among the qualified at his group. The stats above: box-score rates, plus pressures, coverage allowed and missed tackles from PFR (2018 on). Stats: nflverse weekly stats and snap counts, PFR advanced defense.</p></div>` : `<p class="pc-sub">How it works: the overall measures output: fantasy points per game in this site's scoring (yards, touchdowns, catches, turnovers), pulled toward the position average by an amount measured from game-to-game swings, so a few big games can't make a 99. The rankings use players who met the NFL's qualifying minimum that season (per team game: 14 pass attempts, 6.25 carries, or 1.875 catches). A player under it who still played half the snaps or more in at least two games (a spot starter) gets an asterisked grade from those games, measured against the qualified players. Current form weights his last three seasons 1 / 0.6 / 0.3; each season in the table uses that season alone. OVR runs 50-99: his percentile among the qualified at his position, scaled so the lowest is a 50. The stats above show how he gets there (efficiency, role, and tracking measures as percentiles). Stats: nflverse play-by-play, Next Gen Stats, PFR advanced stats (2018 on). Seasons before 2018 (marked <i>box</i>) have the same OVR, but the stats behind it are box-score rates, and a spot starter's games are picked by workload instead of snaps. A dash means he played but too little to grade.</p></div>`}`;
+      <div class="pc-box"><div class="pc-k">The stats behind it · graded 50-99 among ${isOL ? 'qualified linemen' : posName}</div><p class="pc-sub">Higher and greener is better for every stat.${isOL ? ' Pass protection and run blocking are his lines&#39; play as a unit, in the games he played, by his snaps; the market&#39;s valuation is his contract among linemen&#39;s.' : isP ? ' Each one compares his punts with the league&#39;s from the same line of scrimmage; touchbacks are flipped (99 = fewest).' : isK ? ' Each one compares his kicks with what a league-average kicker makes from the same spots and conditions.' : ` For rates where less is better (${isDef ? 'yards and rating allowed, missed tackles' : 'drops, sacks, interceptions'}) the percentile is flipped: 99 = fewest.`}</p><div class="eg-bars">${bars}</div></div>
+      <div class="pc-box pc-logbox"><div class="pc-k">By season · that season only</div><div class="lg-scroll"><table class="lg"><thead><tr class="lg-ch"><th>Season</th><th class="num">OVR</th>${isOL ? '<th class="num" title="Share of the offensive snaps">SNP%</th><th class="num" title="The line&#39;s value per 100 plays against its opponents&#39; norm, his games">+/100</th>' : isP ? '<th class="num" title="Punts">Punts</th><th class="num" title="Yards over expected per punt (returns at the league average)">+yds</th>' : isK ? '<th class="num" title="Field goals made / attempted">FG</th><th class="num" title="Points over expected per 100 kicks (field goals and extra points)">+/100</th>' : '<th class="num" title="Games played">G</th><th class="num" title="Fantasy points per game (site scoring)">Pts / g</th>'}</tr></thead><tbody>${hist}</tbody></table></div>
+        ${isOL ? `<p class="pc-sub">How it works: the grade blends two parts, a quarter his line&#39;s play while he was on the field and three quarters the market&#39;s valuation of him. That mix was picked on 2013-2019 seasons by how well it matches AP All-Pro linemen and held on 2020-2025 (All-Pros average a 90, 93% above the median). The market&#39;s part: his contract&#39;s yearly value ranked among linemen&#39;s contracts signed the same year; on a rookie deal, the veteran contract he signed next (the market&#39;s verdict on those years), while a player on his rookie deal hasn&#39;t signed one yet, his grade is his line&#39;s play alone (a draft slot isn&#39;t the market&#39;s verdict on NFL play). Honors set a floor for a finished season: a first-team All-Pro season grades at least 97, second team 94, a Pro Bowl 90. The line&#39;s part: no public data says which lineman allowed a pressure or opened a hole, so each game the line is graded as a unit and every lineman shares the games he played, weighted by his snaps. Each game the line is measured against what that defense usually allowed in its other games. Pass protection: from 2018 its real pressures per dropback, minus sacks charted as the quarterback&#39;s own fault (2022 on), against the rate expected for how long the quarterback held the ball, that defense&#39;s pass rush and how many it sent; before 2018, sacks and half-weighted QB hits. Run blocking: expected points per designed run, each capped so a back&#39;s long breakaway doesn&#39;t count as blocking. His grade weights his last three seasons 1 / 0.6 / 0.3, pulled toward the league by an amount measured from game-to-game swings, so a few snaps can&#39;t make a 99; linemen with 40% or more of their team&#39;s offensive snaps are ranked (50-99), and part-timers with 2+ games get an asterisked grade against them. Stats: nflverse play-by-play and snap counts, Pro Football Reference pressures, Next Gen Stats time to throw, FTN charting.</p></div>` : isP ? `<p class="pc-sub">How it works: each punt is measured by where it leaves the other team, with what the punter controls: a fair catch, a punt out of bounds or downed counts where it ended, a touchback at the 20, and a returned punt as if the return gained the league's average that season (a long return beyond that is the coverage unit's, kept out of his grade). That's compared with the league's average from the same line of scrimmage, so a punt from his own 10 isn't judged like one from midfield: from deep he's measured on distance, from midfield in on pinning it inside the 20 without a touchback. Pulled toward the league by an amount measured from punt-to-punt swings; current form weights his last three seasons 1 / 0.6 / 0.3. Punters with 1.75 or more punts per team game are ranked; blocked punts aren't counted. OVR runs 50-99, his percentile among them. Every AP first-team All-Pro punter since 2001 grades above the median (average 92). Stats: nflverse play-by-play.</p></div>` : isK ? `<p class="pc-sub">How it works: every field goal and extra point gets the chance a league-average kicker makes it, from that season's kicks league-wide (and the seasons either side): distance, extra point or field goal, dome or outdoors, wind, cold and Denver's altitude. A make earns what he beat that chance by, a miss costs the chance he had (times 3 points for a field goal, 1 for an extra point), so a missed 30-yarder costs far more than a missed 58-yarder, and a long make earns the most. How many kicks he gets doesn't count: the grade is per attempt. Pulled toward the league by an amount measured from kick-to-kick swings, so a few lucky kicks can't make a 99. Current form weights his last three seasons 1 / 0.6 / 0.3. Kickers with 0.75 or more field-goal attempts per team game are ranked. Blocked kicks and kickoffs aren't counted. OVR runs 50-99, his percentile among them. Stats: nflverse play-by-play.</p></div>` : isDef ? `<p class="pc-sub">How it works: the overall measures output: IDP fantasy points per game under Sleeper's default IDP123 scoring (solo tackle and TFL 2, assisted tackle and QB hit 1, forced fumble, fumble recovery and pass defended 3, sack and interception 6, touchdown 6, safety 2, blocked kick 3), pulled toward the position average by an amount measured from game-to-game swings, so a few big games can't make a 99. Groups: defensive linemen (DE, DT, NT), linebackers (inside and outside) and defensive backs, by his listed position. The rankings use defenders with a real role that season: from 2012, 40% or more of the defensive snaps over his team's games; before 2012 (no snap counts), a role (2+ tackles, a sack, interception or pass defended) in half its games. A spot starter (2+ games at half the snaps) gets an asterisked grade from those games. Current form weights his last three seasons 1 / 0.6 / 0.3. OVR runs 50-99, his percentile among the qualified at his group. The stats above: box-score rates, plus pressures, coverage allowed and missed tackles from PFR (2018 on). Stats: nflverse weekly stats and snap counts, PFR advanced defense.</p></div>` : `<p class="pc-sub">How it works: the overall measures output: fantasy points per game in this site's scoring (yards, touchdowns, catches, turnovers), pulled toward the position average by an amount measured from game-to-game swings, so a few big games can't make a 99. The rankings use players who met the NFL's qualifying minimum that season (per team game: 14 pass attempts, 6.25 carries, or 1.875 catches). A player under it who still played half the snaps or more in at least two games (a spot starter) gets an asterisked grade from those games, measured against the qualified players. Current form weights his last three seasons 1 / 0.6 / 0.3; each season in the table uses that season alone. OVR runs 50-99: his percentile among the qualified at his position, scaled so the lowest is a 50. The stats above show how he gets there (efficiency, role, and tracking measures as percentiles). Stats: nflverse play-by-play, Next Gen Stats, PFR advanced stats (2018 on). Seasons before 2018 (marked <i>box</i>) have the same OVR, but the stats behind it are box-score rates, and a spot starter's games are picked by workload instead of snaps. A dash means he played but too little to grade.</p></div>`}`;
   };
   // ------------------------------------------------------------------------------------------------ D/ST cards
   // (owner 2026-10-18: "d/st ... don't have cards at all") a team defense opens like a player: id DST-<TEAM>.
@@ -2716,7 +2781,7 @@
         `<div class="tm-sg tm-open" data-tm="${esc(r[1])}"><span class="tm-sw">Wk ${r[0]}</span><span class="tm-sv">${r[2] ? 'vs' : '@'}</span>${tLogo(r[1], 22)}<b>${esc(tInfo(r[1]).nick || r[1])}</b><span class="tm-sres ${v >= 8 ? 'r-W' : v < 5 ? 'r-L' : 'r-T'}">${f1(v)}</span></div>`).join('')}</div>
         <p class="pc-sub">Green = a good week to start (8+), red = one to avoid (under 5).</p></div>`) : '';
     // Game log
-    const logRows = (G && G.seasons || []).map(Sx => `<div class="pc-k dst-ls">${Sx.s}</div><table class="bx dst-log"><thead><tr><th>Wk</th><th>Opp</th><th class="num">Pts</th><th class="num" title="Sacks">Sck</th><th class="num" title="Interceptions">INT</th><th class="num" title="Fumble recoveries">FR</th><th class="num" title="Defense and return touchdowns">TD</th><th class="num" title="Points allowed">PA</th><th class="num" title="Yards allowed">YA</th></tr></thead><tbody>
+    const logRows = (G && G.seasons || []).map(Sx => `<div class="pc-k dst-ls">${Sx.s}</div><table class="bx dst-log"><thead><tr><th>Wk</th><th>Opp</th><th class="num" title="Fantasy points, your scoring">FPTS</th><th class="num" title="Sacks">Sck</th><th class="num" title="Interceptions">INT</th><th class="num" title="Fumble recoveries">FR</th><th class="num" title="Defense and return touchdowns">TD</th><th class="num" title="Points allowed">PA</th><th class="num" title="Yards allowed">YA</th></tr></thead><tbody>
       ${[...Sx.g].reverse().map(g => { const v = NFLE.kdst.dstScore(actLine(G.keys, g.l), R_.w), L_ = Object.fromEntries(G.keys.map((k, i) => [k, g.l[i]]));
         return `<tr><td>${g.w}</td><td><span class="tm-open" data-tm="${esc(g.o)}">${g.h ? 'vs' : '@'} ${esc(g.o)}</span></td><td class="num"><b class="${v >= 10 ? 'good' : v < 3 ? 'bad' : ''}">${f1(v)}</b></td><td class="num">${L_.sack}</td><td class="num">${L_.int}</td><td class="num">${L_.fum_rec}</td><td class="num">${L_.def_td + L_.st_td}</td><td class="num">${L_.pa}</td><td class="num">${L_.ya}</td></tr>`; }).join('')}</tbody></table>`).join('');
     body.innerHTML = `
@@ -2773,7 +2838,9 @@
     const retired = !isKind && !!L && !L.team && !p && !(DATA && DATA.players[pid]) && lastPlayed && lastPlayed < L.cur;
     // a defender on a roster this season: the offense card's week layout (defWeek); other kinds and retired defenders
     // keep the career overview
-    const defCard = !!(L && L.kind === 'def' && L.team);
+    // every position on a roster this season (owner 2026-10-31: "the same 6 tiles as a fantasy player ... every
+    // position"): kickers, punters, linemen and long snappers too, not only defenders (kindWeek)
+    const defCard = !!(L && L.kind && L.team);
     const overview = (isKind && !defCard) || retired;
     // Honors and Draft & contract (owner 2026-10-27): in the week layouts' summary grid (CARD_X), a row of their own on
     // the career overviews
@@ -4631,7 +4698,8 @@
     if (!g) return '<section class="gcs"><p class="muted">NFL Edge has no pregame numbers for this game (no week page for it).</p></section>';
     const f = g.fc, tp = (DATA && DATA.tossup_pct) || 59, a = g.away, h = g.home;
     const lg = (s, n = 18) => logo(s.logo_url, s.logo_bg, n, s.team);
-    const odds = `<section class="gcs"><h3>Win chances <span class="src us">NFL Edge, before kickoff</span></h3>
+    // the pill names the source shown (owner 2026-10-31 screenshot: "NFL Edge" over Vegas odds)
+    const odds = `<section class="gcs"><h3>Win chances <span class="src${f.src === 'Vegas' ? '' : ' us'}">${f.src === 'Vegas' ? 'Vegas, before kickoff' : 'NFL Edge, before kickoff'}</span></h3>
       <p class="gcs-note">${esc(kickText(g))}${g.neutral ? ` · ${esc(g.site || 'neutral site')}` : ''}</p>
       <div class="wp${f.tossup ? ' toss' : ''}" style="${esc(g.bt_style)}">
         <div class="wp-src">${f.src === 'Vegas' ? 'Vegas odds' : 'Our model · no Vegas line yet'}</div>
