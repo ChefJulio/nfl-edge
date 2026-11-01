@@ -24,13 +24,14 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2578570,Jacoby Brissett,Arizona Cardinals,Active,2026-10-26T00:51Z,,,,,,Brissett completed 27 of 48 passes for 272 yards and a touchdown while rushing seven times for 16 yards in Sunday's 30-16 loss to the Broncos.,QB
 4363538,Chad Ryland,Arizona Cardinals,Active,2026-10-26T00:09Z,,,,,,Ryland went 3-for-3 on field-goal tries and converted his only extra-point attempt during Sunday's 30-16 loss to Denver.,PK
 4361307,Trey McBride,Arizona Cardinals,Active,2026-10-25T23:39Z,,,,,,McBride caught 10 of 13 targets for 111 yards and a touchdown in Sunday's 30-16 loss to the Broncos.,TE
+4037626,Divine Deablo,Atlanta Falcons,Out,2026-11-01T00:36Z,Forearm,Not Specified,Not Specified,2026-11-08,OUT,"Deablo (forearm) has been ruled out for Sunday's game against the Buccaneers, Tori McElhaney of the Falcons' official site reports.",LB
+4431210,Beaux Collins,Atlanta Falcons,Injured Reserve,2026-11-01T00:31Z,Hip,Not Specified,Not Specified,2026-11-08,IR-R,"Collins (hip) has been ruled out for Sundays' game against the Buccaneers and will remain on injured reserve, Tori McElhaney of the Falcons' official site reports.",WR
+4035886,Khalil Herbert,Atlanta Falcons,Active,2026-11-01T00:27Z,,,,,,"The Falcons elevated Herbert from the practice squad to the active roster Saturday, Tori McElhaney of the team's official site reports.",RB
 4431194,Billy Bowman Jr.,Atlanta Falcons,Out,2026-10-31T20:03Z,Hamstring,Not Specified,Not Specified,2026-11-08,OUT,out,CB
 5150660,Anterio Thompson,Atlanta Falcons,Out,2026-10-31T02:43Z,Undisclosed,Not Specified,Not Specified,2027-02-15,NFI-R,"Thompson posted on social media this week that he was diagnosed with a genetic mutation on his spinal cord in early May and indicated that he was told he will ""never play football again,"" Josh Kendall of The Athletic reports.",DT
 4239995,A.J. Terrell Jr.,Atlanta Falcons,Active,2026-10-30T21:26Z,,,,,,"Terrell (groin) does not carry an injury designation into Sunday's game against the Buccaneers, Will McFadden of the Falcons' official site reports.",CB
 4240596,C.J. Henderson,Atlanta Falcons,Active,2026-10-30T21:23Z,,,,,,"Henderson (groin) does not have an injury designation against the Buccaneers on Sunday, Will McFadden of the Falcons' official site reports.",CB
 4595343,Kendal Daniels,Atlanta Falcons,Active,2026-10-30T21:21Z,,,,,,"Daniels (Achilles) does not carry an injury designation into Sunday's game against the Buccaneers, Will McFadden of the Falcons' official site reports.",LB
-4431210,Beaux Collins,Atlanta Falcons,Injured Reserve,2026-10-30T21:18Z,Hip,Not Specified,Not Specified,2026-11-08,IR-R,"Collins (hip) is questionable for Sunday's game against the Buccaneers, Will McFadden of the Falcons' official site reports.",WR
-4037626,Divine Deablo,Atlanta Falcons,Out,2026-10-30T21:15Z,Forearm,Not Specified,Not Specified,2026-11-08,OUT,"Deablo (forearm) is listed as questionable for Sunday's game against the Buccaneers, Will McFadden of the Falcons' official site reports.",LB
 3917914,Olamide Zaccheaus,Atlanta Falcons,Questionable,2026-10-30T21:11Z,Shoulder,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Zaccheaus (shoulder) is listed as questionable for Sunday's game against the Buccaneers, Will McFadden of the Falcons' official site reports.",WR
 4361510,Cameron Thomas,Atlanta Falcons,Active,2026-10-30T17:30Z,,,,,,,DE
 4376288,LaCale London,Atlanta Falcons,Active,2026-10-30T17:29Z,,,,,,,DE
@@ -46,7 +47,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3043275,Austin Hooper,Atlanta Falcons,Active,2026-10-27T00:02Z,,,,,,Hooper caught both of his targets for 21 yards in the Falcons' 29-20 win over the 49ers on Sunday.,TE
 4361409,Jahan Dotson,Atlanta Falcons,Active,2026-10-26T23:57Z,,,,,,Dotson caught one pass on three targets for six yards during Sundays' 29-20 win over San Francisco.,WR
 4249624,Nick Muse,Atlanta Falcons,Active,2026-10-26T23:57Z,,,,,,Muse caught both of his targets for two yards and a touchdown in the Falcons' 29-20 win over the 49ers on Sunday.,TE
-4035886,Khalil Herbert,Atlanta Falcons,Active,2026-10-26T23:20Z,,,,,,"Herbert reverted to the Falcons' practice squad Monday, per the NFL's transaction log.",RB
 5344782,Jack Strand,Atlanta Falcons,Active,2026-10-26T17:25Z,,,,,,,QB
 14012,Andy Dalton,Atlanta Falcons,Active,2026-10-26T17:25Z,,,,,,,QB
 4575483,T.J. Tampa,Baltimore Ravens,Questionable,2026-10-31T20:06Z,Knee,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,CB
