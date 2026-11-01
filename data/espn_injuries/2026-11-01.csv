@@ -49,9 +49,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4034961,Jawaan Taylor,Atlanta Falcons,Active,2026-10-30T17:29Z,,,,,,,OT
 4431005,Xavier Watts,Atlanta Falcons,Active,2026-10-28T03:39Z,,,,,,Watts notched seven tackles (three solo) and forced a fumble Sunday in a 29-20 Week 7 victory against the 49ers.,S
 3919512,Jessie Bates III,Atlanta Falcons,Active,2026-10-28T03:31Z,,,,,,"Bates registered nine tackles (two solo), two defensed passes (including an interception) and one forced fumble Sunday in a 29-20 victory over San Francisco.",S
-3916387,Lamar Jackson,Baltimore Ravens,Questionable,2026-11-01T21:32Z,Thumb,Not Specified,Right,2026-11-05,QUESTIONABLE,questionable,QB
 4601278,Nate Wiggins,Baltimore Ravens,Questionable,2026-11-01T20:58Z,Neck,Stinger,Not Specified,2026-11-01,QUESTIONABLE,Wiggins (stinger) is being evaluated for a possible concussion and is questionable to return to Sunday's game against the Bills.,CB
-4035671,Tyler Huntley,Baltimore Ravens,Out,2026-11-01T20:09Z,Toe,Not Specified,Not Specified,2026-11-05,OUT,Huntley (toe) has been ruled out for the rest of Sunday's game against the Bills.,QB
+4035671,Tyler Huntley,Baltimore Ravens,Questionable,2026-11-01T20:09Z,Toe,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,Huntley (toe) has been ruled out for the rest of Sunday's game against the Bills.,QB
+3916387,Lamar Jackson,Baltimore Ravens,Out,2026-11-01T18:38Z,Thumb,Not Specified,Right,2026-12-13,OUT,Jackson (right thumb) has been ruled out for the remainder of Sunday's game against the Bills.,QB
 4575483,T.J. Tampa,Baltimore Ravens,Active,2026-11-01T17:31Z,,,,,,Tampa (knee) is active for Sunday's game versus Buffalo.,CB
 4429582,Joe Fagnano,Baltimore Ravens,Out,2026-11-01T17:07Z,Coach's Decision,Not Specified,Not Specified,2026-11-05,INACTIVE,Fagnano (coach's decision) is inactive but will serve as the Ravens' emergency third quarterback Sunday against the Bills.,QB
 4565311,Aeneas Peebles,Baltimore Ravens,Out,2026-11-01T16:34Z,Coach's Decision,Not Specified,Not Specified,2026-11-05,INACTIVE,inactive,DT
@@ -74,10 +74,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4243220,Andrew Vorhees,Baltimore Ravens,Active,2026-10-26T17:29Z,,,,,,,G
 3116365,Mark Andrews,Baltimore Ravens,Active,2026-10-26T02:08Z,,,,,,Andrews caught three of four targets for 23 yards in Sunday's 35-13 loss to the Bengals.,TE
 4697745,Tyler Loop,Baltimore Ravens,Active,2026-10-25T22:33Z,,,,,,Loop went 2-for-2 on field-goal tries and made his only PAT during Sunday's 35-13 loss to the Bengals.,PK
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-11-01T21:32Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
-3915416,DJ Moore,Buffalo Bills,Active,2026-11-01T21:17Z,,,,,,"Moore (undisclosed) headed to the medical tent during Sunday's game against the Ravens, Katherine Fitzgerald of The Buffalo Newsreports.",WR
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-11-01T21:42Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+3915416,DJ Moore,Buffalo Bills,Questionable,2026-11-01T21:17Z,Undisclosed,,,2026-11-01,QUESTIONABLE,"Moore (undisclosed) headed to the medical tent during Sunday's game against the Ravens, Katherine Fitzgerald of The Buffalo Newsreports.",WR
 4379399,James Cook III,Buffalo Bills,Active,2026-11-01T21:06Z,,,,,,"After being evaluated for a head injury, Cook was cleared to return to Sunday's game against the Ravens.",RB
-4242433,Joshua Palmer,Buffalo Bills,Out,2026-11-01T20:28Z,Hamstring,Not Specified,Right,2026-11-09,OUT,Palmer (hamstring) has been ruled out for the rest of Sunday's game against the Ravens.,WR
+4242433,Joshua Palmer,Buffalo Bills,Questionable,2026-11-01T20:28Z,Hamstring,Not Specified,Right,2026-11-09,QUESTIONABLE,Palmer (hamstring) has been ruled out for the rest of Sunday's game against the Ravens.,WR
 4401823,Dee Alford,Buffalo Bills,Out,2026-11-01T19:47Z,Ankle,Not Specified,Not Specified,2026-11-09,INACTIVE,Alford (ankle) is inactive for Sunday's game against Baltimore.,CB
 3127294,Greg Gaines,Buffalo Bills,Out,2026-11-01T17:33Z,Calf,Not Specified,Not Specified,2026-11-09,INACTIVE,Gaines (calf) is inactive for Sunday's game against the Ravens.,DT
 4030899,Spencer Brown,Buffalo Bills,Out,2026-11-01T17:20Z,Back,Not Specified,Not Specified,2026-11-09,INACTIVE,Brown (back) is inactive for Sunday's game against the Ravens.,OT
@@ -399,6 +399,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4710706,Jadon Canady,Kansas City Chiefs,Active,2026-10-26T18:35Z,,,,,,,CB
 3139477,Patrick Mahomes,Kansas City Chiefs,Active,2026-10-26T03:55Z,,,,,,"Mahomes completed 19 of 33 passes for 165 yards, no touchdowns and one interception in Sunday's 20-3 loss to the Seahawks. He added two rushing attempts for 14 yards.",QB
 4567048,Kenneth Walker III,Kansas City Chiefs,Active,2026-10-26T03:36Z,,,,,,Walker rushed 14 times for 36 yards while catching four of five targets for 21 yards in Sunday's 20-3 loss to the Seahawks.,RB
+4432665,Brock Bowers,Las Vegas Raiders,Active,2026-11-01T21:42Z,,,,,,Bowers caught seven of 10 targets for 92 yards and two touchdowns in Sunday's 38-33 win over the Jets.,TE
+4890973,Ashton Jeanty,Las Vegas Raiders,Active,2026-11-01T21:37Z,,,,,,Jeanty rushed twice for nine yards while catching three of four targets for 64 yards in Sunday's 38-33 win over the Jets.,RB
 4430330,Darien Porter,Las Vegas Raiders,Questionable,2026-11-01T20:32Z,Groin,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Porter (groin) has been ruled out for the rest of Sunday's game against the Jets.,CB
 5150247,Malik Benson,Las Vegas Raiders,Out,2026-11-01T17:12Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,Benson (coach's decision) is inactive for Sunday's game against the Jets.,WR
 4432775,Dont'e Thornton Jr.,Las Vegas Raiders,Out,2026-11-01T17:10Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,Thornton (coach's decision) is inactive for Sunday's game against the Jets.,WR
@@ -415,7 +417,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5155825,Carter Runyon,Las Vegas Raiders,Injured Reserve,2026-10-30T23:56Z,Foot,Not Specified,Not Specified,2026-11-08,IR-R,"Runyon (foot) has been ruled out for Sunday's game against the Jets, Sam Warren of The Athletic reports.",TE
 3045172,Folorunso Fatukasi,Las Vegas Raiders,Active,2026-10-30T19:45Z,,,,,,,DT
 4606683,DJ Glaze,Las Vegas Raiders,Active,2026-10-30T19:45Z,,,,,,,OT
-4432665,Brock Bowers,Las Vegas Raiders,Active,2026-10-29T21:10Z,,,,,,Bowers (calf) was a full practice participant Thursday.,TE
 4379416,Quay Walker,Las Vegas Raiders,Active,2026-10-29T20:44Z,,,,,,,LB
 4043169,Jeremy Chinn,Las Vegas Raiders,Active,2026-10-28T01:34Z,,,,,,Chinn finished Sunday's Week 7 loss to the Rams with seven tackles (three solo). He also recovered a fumble.,S
 4426340,Nakobe Dean,Las Vegas Raiders,Active,2026-10-28T01:09Z,,,,,,Dean produced 12 tackles and an interception in Sunday's loss to the Rams.,LB
@@ -423,7 +424,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4837248,Fernando Mendoza,Las Vegas Raiders,Active,2026-10-27T00:26Z,,,,,,Mendoza did not appear in Sunday's 35-21 loss to the Rams.,QB
 4382466,Jalen Nailor,Las Vegas Raiders,Active,2026-10-27T00:20Z,,,,,,Nailor caught two of five targets for 14 yards during Sunday's 35-21 loss to the Rams.,WR
 14880,Kirk Cousins,Las Vegas Raiders,Active,2026-10-26T19:53Z,,,,,,"Head coach Klint Kubiak said that Cousins will remain the Raiders' starting quarterback heading into Sunday's game against the Jets, Paul Gutierrez of the team's official site reports. ""There is no controversy,"" Kubiak said. ""He is playing at a very high level.""",QB
-4360749,Thomas Booker IV,Las Vegas Raiders,Active,2026-10-26T18:36Z,,,,,,,DT
 4241597,Daiyan Henley,Los Angeles Chargers,Questionable,2026-11-01T21:22Z,Shoulder,,,2026-11-01,QUESTIONABLE,questionable,LB
 4838693,Rodney Shelley,Los Angeles Chargers,Out,2026-11-01T20:13Z,Hamstring,Not Specified,Not Specified,2026-11-08,INACTIVE,Shelley (ankle) is inactive for Sunday's game against the Rams.,CB
 3843769,Donte Jackson,Los Angeles Chargers,Out,2026-11-01T20:09Z,Hamstring,Not Specified,Not Specified,2026-11-08,INACTIVE,Jackson (hamstring) is inactive for Sunday's game against the Rams.,CB
