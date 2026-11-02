@@ -199,6 +199,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4569620,Ronnie Hickman,Cleveland Browns,Active,2026-10-28T01:18Z,,,,,,Hickman registered 10 tackles (six solo) and a fumble recovery during Sundays' 27-24 win over Tennessee.,S
 3110565,Quincy Williams,Cleveland Browns,Active,2026-10-28T01:11Z,,,,,,Williams finished Sunday's 27-24 win over the Titans with 10 tackles (seven solo).,LB
 4243541,Kalia Davis,Cleveland Browns,Injured Reserve,2026-10-28T00:26Z,Quadriceps,Not Specified,Not Specified,2027-02-15,IR,"Davis (quadriceps) will spend the rest of the 2026 season on injured reserve after his 21-day practice window expired Tuesday, Aaron Wilson of KPRC 2 Houston reports.",DT
+4426354,George Pickens,Dallas Cowboys,Active,2026-11-02T00:43Z,,,,,,Pickens tallied two catches (on four targets) for 48 yards during Sunday's 33-30 overtime loss to the Cardinals.,WR
+4361579,Javonte Williams,Dallas Cowboys,Active,2026-11-02T00:35Z,,,,,,Williams churned out 56 yards on 24 carries and notched one catch (on two targets) for one yard during Sunday's 33-30 overtime defeat to the Cardinals.,RB
 4241389,CeeDee Lamb,Dallas Cowboys,Active,2026-11-02T00:27Z,,,,,,Lamb recorded seven catches (on 11 targets) for 58 yards during Sunday's 33-30 overtime loss to the Cardinals.,WR
 4242355,Jake Ferguson,Dallas Cowboys,Questionable,2026-11-02T00:06Z,Ankle,Sprain,Not Specified,2026-11-08,QUESTIONABLE,"Ferguson suffered a low-ankle sprain during Sunday's loss to the Cardinals, Jeremy Fowler of ESPN reports.",TE
 4870706,Caleb Downs,Dallas Cowboys,Questionable,2026-11-01T20:52Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"Downs has been ruled out for the rest of Sunday's game against the Cardinals to be evaluated for a concussion, Jon Machota of The Athletic reports.",S
@@ -211,7 +213,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428914,Dee Winters,Dallas Cowboys,Out,2026-11-01T16:36Z,Calf,Strain,Not Specified,2026-11-08,INACTIVE,inactive,LB
 5095865,Shavon Revel Jr.,Dallas Cowboys,Out,2026-11-01T16:36Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,CB
 4685554,Drew Shelton,Dallas Cowboys,Out,2026-11-01T16:36Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,OT
-4426354,George Pickens,Dallas Cowboys,Active,2026-11-01T16:32Z,,,,,,Pickens (shoulder/hamstring) is listed as active Sunday against the Cardinals.,WR
 4361988,James Mitchell,Dallas Cowboys,Active,2026-11-01T02:46Z,,,,,,The Cowboys elevated Mitchell from the practice squad to the active roster Saturday.,TE
 4040982,Quinnen Williams,Dallas Cowboys,Active,2026-10-31T01:09Z,,,,,,"Williams (hamstring) is set to play Sunday against Arizona, Tommy Yarrish of the Cowboys' official site reports.",DT
 2980097,Jonathan Bullard,Dallas Cowboys,Injured Reserve,2026-10-30T00:34Z,Calf,Not Specified,Not Specified,2026-11-08,IR-R,Bullard (calf) was designated to return from injured reserve by the Cowboys on Thursday.,DT
@@ -220,7 +221,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429676,Tyler Goodson,Dallas Cowboys,Active,2026-10-27T23:28Z,,,,,,Goodson turned 10 carries into 38 yards and returned two kickoffs for 42 yards during the Cowboys' 38-21 win over the Eagles on Monday.,RB
 4360967,Brevyn Spann-Ford,Dallas Cowboys,Active,2026-10-27T14:48Z,,,,,,Spann-Ford finished with two catches for 11 yards on two targets in Monday's 38-21 win over the Eagles.,TE
 5083754,Ryan Flournoy,Dallas Cowboys,Active,2026-10-27T04:19Z,,,,,,Flournoy secured all four targets for 70 yards in the Cowboys' 38-21 win over the Eagles on Monday night.,WR
-4361579,Javonte Williams,Dallas Cowboys,Active,2026-10-27T03:53Z,,,,,,Williams rushed 25 times for 155 yards and a touchdown in the Cowboys' 38-21 win over the Eagles on Monday night.,RB
 2577417,Dak Prescott,Dallas Cowboys,Active,2026-10-27T03:45Z,,,,,,Prescott completed 15 of 27 passes for 212 yards with three touchdowns and no interceptions while adding two rushes for eight yards in the Cowboys' 38-21 win over the Eagles on Monday night. He also had a two-point conversion run.,QB
 4427816,Marist Liufau,Dallas Cowboys,Injured Reserve,2026-10-25T18:30Z,Forearm,Fracture,Left,2026-11-08,IR-R,Liufau (forearm) has been downgraded from questionable to out ahead of Monday night's game against the Eagles.,LB
 4384549,Cobie Durant,Dallas Cowboys,Active,2026-10-24T23:13Z,,,,,,"Durant (hamstring) does not have an injury designation for Monday's game against Philadelphia, Adam Caplan of SiriusXM NFL Radio reports.",CB
@@ -724,13 +724,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5151317,Robert Henry Jr.,Seattle Seahawks,Active,2026-10-26T19:11Z,,,,,,,RB
 2473037,Jason Myers,Seattle Seahawks,Active,2026-10-26T03:53Z,,,,,,Myers went 2-for-2 on field-goal tries and made both of his PATs during Sunday night's 20-3 win over the Chiefs.,PK
 3912547,Sam Darnold,Seattle Seahawks,Active,2026-10-26T03:52Z,,,,,,"Darnold completed 20 of 28 passes for 257 yards, one touchdown and one interception in Sunday's 20-3 win over the Chiefs. He added two rushing attempts for 17 yards.",QB
+4371733,Kenny Gainwell,Tampa Bay Buccaneers,Active,2026-11-02T00:43Z,,,,,,Gainwell rushed 25 times for 140 yards in the Buccaneers' 16-0 win over the Falcons on Sunday.,RB
 4596448,Bucky Irving,Tampa Bay Buccaneers,Active,2026-11-01T22:56Z,,,,,,Irving rushed 27 times for 170 yards and a touchdown in the Buccaneers' 16-0 win over the Falcons on Sunday.,RB
 4686334,Yaya Diaby,Tampa Bay Buccaneers,Questionable,2026-11-01T19:33Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Diaby (knee) won't return to Sunday's game versus the Falcons, Greg Auman of Fox Sports reports.",LB
 4380507,Luke Goedeke,Tampa Bay Buccaneers,Active,2026-11-01T17:30Z,,,,,,"Goedeke (calf) is active for Sunday's game against the Falcons, Scott Smith of the Buccaneers' official site reports.",OT
 4429251,Graham Barton,Tampa Bay Buccaneers,Active,2026-11-01T17:29Z,,,,,,"Barton (illness) is active for Sunday's game against the Falcons, Scott Smith of the Buccaneers' official site reports.",C
 4608810,Tez Johnson,Tampa Bay Buccaneers,Active,2026-11-01T16:57Z,,,,,,"Johnson is in line to see additional snaps and targets in Sunday's Week 8 matchup against the Falcons, as Emeka Egbuka (concussion/foot) remains sidelined for the contest per Scott Smith of the team's official site.",WR
 3116165,Chris Godwin Jr.,Tampa Bay Buccaneers,Active,2026-11-01T16:51Z,,,,,,"Godwin is in line to operate as the Buccaneers de facto No. 1 receiver again in Sunday's Week 8 matchup against the Falcons, as Emeka Egbuka (concussion/foot) is inactive for the contest per Scott Smith of the team's official site.",WR
-4371733,Kenny Gainwell,Tampa Bay Buccaneers,Active,2026-11-01T16:44Z,,,,,,"Gainwell (hip) is active for Sunday's Week 8 matchup against the Falcons, Scott Smith of the team's official site reports.",RB
 4685549,Billy Schrauth,Tampa Bay Buccaneers,Out,2026-11-01T16:37Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,G
 4890885,Ayden Garnes,Tampa Bay Buccaneers,Out,2026-11-01T16:37Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,CB
 4686884,Luke Haggard,Tampa Bay Buccaneers,Out,2026-11-01T16:37Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,G
