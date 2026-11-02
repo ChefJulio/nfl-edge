@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360939,Rashod Bateman,Baltimore Ravens,Active,2026-10-27T00:38Z,,,,,,Bateman caught two of four targets for 33 yards during Sunday's 35-13 loss to the Bengals.,WR
 4243220,Andrew Vorhees,Baltimore Ravens,Active,2026-10-26T17:29Z,,,,,,,G
 3116365,Mark Andrews,Baltimore Ravens,Active,2026-10-26T02:08Z,,,,,,Andrews caught three of four targets for 23 yards in Sunday's 35-13 loss to the Bengals.,TE
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-11-02T00:01Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-11-02T00:15Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4379399,James Cook III,Buffalo Bills,Active,2026-11-01T22:30Z,,,,,,Cook rushed 21 times for 80 yards and a touchdown while catching two of three targets for 21 yards in Sunday's 36-10 win over the Ravens.,RB
 3918298,Josh Allen,Buffalo Bills,Active,2026-11-01T22:28Z,,,,,,"Allen completed 21 of 34 passes for 289 yards, two touchdowns and one interception in Sunday's 36-10 win over the Ravens. He added 30 rushing yards and a rushing touchdown on seven rushing attempts.",QB
 3915416,DJ Moore,Buffalo Bills,Questionable,2026-11-01T22:13Z,Knee,Not Specified,Not Specified,2026-11-09,QUESTIONABLE,"Moore indicated following Sunday's 36-10 win over the Ravens that he's okay in the wake of his late-game exit due to a knee issue, Cameron Wolfe of NFL Network reports.",WR
@@ -199,8 +199,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4569620,Ronnie Hickman,Cleveland Browns,Active,2026-10-28T01:18Z,,,,,,Hickman registered 10 tackles (six solo) and a fumble recovery during Sundays' 27-24 win over Tennessee.,S
 3110565,Quincy Williams,Cleveland Browns,Active,2026-10-28T01:11Z,,,,,,Williams finished Sunday's 27-24 win over the Titans with 10 tackles (seven solo).,LB
 4243541,Kalia Davis,Cleveland Browns,Injured Reserve,2026-10-28T00:26Z,Quadriceps,Not Specified,Not Specified,2027-02-15,IR,"Davis (quadriceps) will spend the rest of the 2026 season on injured reserve after his 21-day practice window expired Tuesday, Aaron Wilson of KPRC 2 Houston reports.",DT
+4242355,Jake Ferguson,Dallas Cowboys,Questionable,2026-11-02T00:06Z,Ankle,Sprain,Not Specified,2026-11-08,QUESTIONABLE,"Ferguson suffered a low-ankle sprain during Sunday's loss to the Cardinals, Jeremy Fowler of ESPN reports.",TE
 4870706,Caleb Downs,Dallas Cowboys,Questionable,2026-11-01T20:52Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"Downs has been ruled out for the rest of Sunday's game against the Cardinals to be evaluated for a concussion, Jon Machota of The Athletic reports.",S
-4242355,Jake Ferguson,Dallas Cowboys,Questionable,2026-11-01T19:55Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Ferguson (ankle) won't return to Sunday's game against the Cardinals, Joe Hoyt reports.",TE
 4426506,Joey Porter Jr.,Dallas Cowboys,Active,2026-11-01T19:24Z,,,,,,,CB
 3929850,P.J. Locke,Dallas Cowboys,Active,2026-11-01T17:27Z,,,,,,Locke (foot) is active for Sunday's game against the Cardinals.,S
 3122752,Kenny Clark,Dallas Cowboys,Active,2026-11-01T16:58Z,,,,,,Clark (back) is active for Sunday's game against the Cardinals.,DT
@@ -450,7 +450,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2979860,Dalvin Tomlinson,Los Angeles Chargers,Active,2026-10-18T19:01Z,,,,,,,DT
 4360745,Kendall Williamson,Los Angeles Chargers,Active,2026-10-16T20:15Z,,,,,,,S
 4426405,Trent McDuffie,Los Angeles Rams,Questionable,2026-11-01T23:28Z,Back,,,2026-11-01,QUESTIONABLE,"McDuffie (back) is questionable to return to Sunday's contest against the Chargers, Stu Jackson of the Rams' official site reports.",CB
-4697639,Jaylen Watson,Los Angeles Rams,Questionable,2026-11-01T23:25Z,Shoulder,,,2026-11-08,QUESTIONABLE,"Watson (shoulder) has been ruled out for the rest of Sunday's contest against the Chargers, Adam Grosbard of The Orange County Register reports.",CB
+4697639,Jaylen Watson,Los Angeles Rams,Questionable,2026-11-01T23:25Z,Shoulder,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Watson (shoulder) has been ruled out for the rest of Sunday's contest against the Chargers, Adam Grosbard of The Orange County Register reports.",CB
 2575907,Joe Cardona,Los Angeles Rams,Out,2026-11-01T20:28Z,Ankle,Not Specified,Not Specified,2026-11-08,INACTIVE,Cardona (ankle) is inactive against the Chargers on Sunday.,LS
 4685522,Ty Simpson,Los Angeles Rams,Out,2026-11-01T19:57Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,Simpson (coach's decision) is inactive for Sunday's game against the Chargers but will serve as the team's emergency quarterback if needed.,QB
 4242557,Colby Parkinson,Los Angeles Rams,Out,2026-11-01T19:50Z,Ribs,Not Specified,Not Specified,2026-11-08,INACTIVE,Parkinson (ribs) is inactive for Sunday's Week 8 matchup against the Chargers.,TE
@@ -524,8 +524,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430656,Myles Price,Minnesota Vikings,Active,2026-10-25T17:49Z,,,,,,"Price (head) was back on the field for the second quarter of Sunday's game against the Colts, Ben Goessling of The Minnesota Star Tribune reports.",WR
 4361985,Christian Darrisaw,Minnesota Vikings,Active,2026-10-24T01:54Z,,,,,,"Darrisaw (concussion) does not have any injury designation ahead of Sunday's game against the Colts, Craig Peters of the Vikings' official site reports.",OT
 4259252,James Pierre,Minnesota Vikings,Active,2026-10-22T21:51Z,,,,,,,CB
+3046439,Hunter Henry,New England Patriots,Out,2026-11-02T00:11Z,Foot,Not Specified,Not Specified,2026-11-08,OUT,Henry (foot) has been ruled out for the rest of Sunday's game at Miami.,TE
 4837244,Gabe Jacas,New England Patriots,Questionable,2026-11-01T23:50Z,Knee,,,2026-11-01,QUESTIONABLE,"Jacas (knee) is questionable to return to Sunday's contest against Miami, Doug Kyed of the Boston Herald reports.",LB
-3046439,Hunter Henry,New England Patriots,Questionable,2026-11-01T22:34Z,Foot,,,2026-11-08,QUESTIONABLE,Henry (foot) is questionable to return to Sunday's game against the Dolphins.,TE
 4431465,Behren Morton,New England Patriots,Out,2026-11-01T20:20Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,Morton (coach's decision) is inactive but will serve as the Patriots' emergency third quarterback against the Dolphins on Sunday.,QB
 4245273,Christian Elliss,New England Patriots,Active,2026-11-01T20:17Z,,,,,,Elliss (chest) is active for Sunday's game against the Dolphins.,LB
 3916923,Carlton Davis III,New England Patriots,Active,2026-11-01T20:14Z,,,,,,Davis (neck) is active against the Dolphins on Sunday.,CB
@@ -774,15 +774,15 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4036134,Amani Hooker,Tennessee Titans,Active,2026-10-28T01:37Z,,,,,,Hooker posted five tackles (two solo) during Sunday's 27-24 loss to Cleveland.,S
 4870805,Anthony Hill Jr.,Tennessee Titans,Active,2026-10-28T01:25Z,,,,,,Hill logged 12 tackles (five solo) and one forced fumble during the Titans' 27-24 loss to the Browns on Sunday.,LB
 4685555,Nicholas Singleton,Tennessee Titans,Active,2026-10-26T19:21Z,,,,,,,RB
+3929865,Charles Omenihu,Washington Commanders,Active,2026-11-02T00:12Z,,,,,,Omenihu (groin/ankle) is active for Sunday night's contest against the Eagles.,DE
+4432722,Athan Kaliakmanis,Washington Commanders,Out,2026-11-02T00:08Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,Kaliakmanis (coach's decision) is inactive but serving as the Commanders' emergency third quarterback Sunday night against the Eagles.,QB
+4048228,John Bates,Washington Commanders,Active,2026-11-02T00:03Z,,,,,,Bates (shoulder) is active for Sunday night's matchup with the Eagles.,TE
 4567156,Treylon Burks,Washington Commanders,Active,2026-11-01T23:57Z,,,,,,Burks (foot) is listed as active Sunday versus the Eagles.,WR
 3122797,Isaac Yiadom,Washington Commanders,Out,2026-11-01T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,CB
 4605488,Tanoa Togiai,Washington Commanders,Out,2026-11-01T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,G
 2971586,Fabian Moreau,Washington Commanders,Out,2026-11-01T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,CB
 3925354,Daron Payne,Washington Commanders,Out,2026-11-01T23:53Z,Foot,Surgery,Left,2027-02-15,INACTIVE,inactive,DT
-4432722,Athan Kaliakmanis,Washington Commanders,Out,2026-11-01T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,QB
 4259491,Javon Kinlaw,Washington Commanders,Out,2026-11-01T23:53Z,Knee,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,DT
-4048228,John Bates,Washington Commanders,Active,2026-11-01T23:53Z,,,,,,,TE
-3929865,Charles Omenihu,Washington Commanders,Active,2026-11-01T23:53Z,,,,,,,DE
 4430560,Jer'Zhan Newton,Washington Commanders,Injured Reserve,2026-11-01T00:58Z,Pectoral,Surgery,Not Specified,2026-11-08,IR-R,Newton (pectoral) has been ruled out for Sunday's game against the Eagles.,DT
 3115922,Nick Allegretti,Washington Commanders,Active,2026-10-30T23:27Z,,,,,,,G
 3121422,Terry McLaurin,Washington Commanders,Injured Reserve,2026-10-30T17:12Z,Knee,Surgery,Left,2027-02-15,IR,"McLaurin (knee) underwent surgery Friday to repair the torn patellar tendon in his left knee, Nicki Jhabvala of The Athletic reports.",WR
