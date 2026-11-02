@@ -74,7 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360939,Rashod Bateman,Baltimore Ravens,Active,2026-10-27T00:38Z,,,,,,Bateman caught two of four targets for 33 yards during Sunday's 35-13 loss to the Bengals.,WR
 4243220,Andrew Vorhees,Baltimore Ravens,Active,2026-10-26T17:29Z,,,,,,,G
 3116365,Mark Andrews,Baltimore Ravens,Active,2026-10-26T02:08Z,,,,,,Andrews caught three of four targets for 23 yards in Sunday's 35-13 loss to the Bengals.,TE
-4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-11-01T23:50Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
+4034953,C.J. Gardner-Johnson,Buffalo Bills,Suspension,2026-11-02T00:01Z,Suspension,Not Specified,Not Specified,2026-11-09,RESERVE-SUS,reserve-sus,S
 4379399,James Cook III,Buffalo Bills,Active,2026-11-01T22:30Z,,,,,,Cook rushed 21 times for 80 yards and a touchdown while catching two of three targets for 21 yards in Sunday's 36-10 win over the Ravens.,RB
 3918298,Josh Allen,Buffalo Bills,Active,2026-11-01T22:28Z,,,,,,"Allen completed 21 of 34 passes for 289 yards, two touchdowns and one interception in Sunday's 36-10 win over the Ravens. He added 30 rushing yards and a rushing touchdown on seven rushing attempts.",QB
 3915416,DJ Moore,Buffalo Bills,Questionable,2026-11-01T22:13Z,Knee,Not Specified,Not Specified,2026-11-09,QUESTIONABLE,"Moore indicated following Sunday's 36-10 win over the Ravens that he's okay in the wake of his late-game exit due to a knee issue, Cameron Wolfe of NFL Network reports.",WR
@@ -374,7 +374,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4912185,Jalen Huskey,Jacksonville Jaguars,Active,2026-10-19T16:43Z,,,,,,,S
 4430539,Brenton Strange,Jacksonville Jaguars,Active,2026-10-19T02:36Z,,,,,,Strange caught five of seven targets for 44 yards during Sunday's 34-31 loss to the Texans.,TE
 4362619,Chris Rodriguez Jr.,Jacksonville Jaguars,Active,2026-10-19T02:07Z,,,,,,Rodriguez rushed 11 times for 55 yards while failing to reel in his only target during Sunday's 34-31 loss to Houston.,RB
-4871063,Peter Woods,Kansas City Chiefs,Questionable,2026-11-01T22:14Z,Neck,,,2026-11-01,QUESTIONABLE,Woods (neck) is questionable to return to Sunday's contest against the Broncos.,DT
+4871063,Peter Woods,Kansas City Chiefs,Questionable,2026-11-01T23:54Z,Neck,,,2026-11-08,QUESTIONABLE,Woods (neck) has been ruled out for the rest of Sunday's contest against the Broncos.,DT
 4567747,Garrett Nussmeier,Kansas City Chiefs,Out,2026-11-01T20:25Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,"Nussmeier (coach's decision) is inactive for Sunday's game against Denver, though he will be available as the team's emergency quarterback.",QB
 4372070,Ben VanSumeren,Kansas City Chiefs,Out,2026-11-01T20:06Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,FB
 4602984,Diego Pounds,Kansas City Chiefs,Out,2026-11-01T20:06Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,OT
@@ -524,7 +524,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430656,Myles Price,Minnesota Vikings,Active,2026-10-25T17:49Z,,,,,,"Price (head) was back on the field for the second quarter of Sunday's game against the Colts, Ben Goessling of The Minnesota Star Tribune reports.",WR
 4361985,Christian Darrisaw,Minnesota Vikings,Active,2026-10-24T01:54Z,,,,,,"Darrisaw (concussion) does not have any injury designation ahead of Sunday's game against the Colts, Craig Peters of the Vikings' official site reports.",OT
 4259252,James Pierre,Minnesota Vikings,Active,2026-10-22T21:51Z,,,,,,,CB
-4837244,Gabe Jacas,New England Patriots,Questionable,2026-11-01T23:42Z,Knee,,,2026-11-01,QUESTIONABLE,questionable,LB
+4837244,Gabe Jacas,New England Patriots,Questionable,2026-11-01T23:50Z,Knee,,,2026-11-01,QUESTIONABLE,"Jacas (knee) is questionable to return to Sunday's contest against Miami, Doug Kyed of the Boston Herald reports.",LB
 3046439,Hunter Henry,New England Patriots,Questionable,2026-11-01T22:34Z,Foot,,,2026-11-08,QUESTIONABLE,Henry (foot) is questionable to return to Sunday's game against the Dolphins.,TE
 4431465,Behren Morton,New England Patriots,Out,2026-11-01T20:20Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,Morton (coach's decision) is inactive but will serve as the Patriots' emergency third quarterback against the Dolphins on Sunday.,QB
 4245273,Christian Elliss,New England Patriots,Active,2026-11-01T20:17Z,,,,,,Elliss (chest) is active for Sunday's game against the Dolphins.,LB
@@ -624,21 +624,22 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3124679,Jason Sanders,New York Jets,Active,2026-10-25T22:53Z,,,,,,Sanders went 1-for-2 on field-goal tries and made both of his extra-point attempts during Sunday's 28-25 loss to Miami.,PK
 4808766,Mason Taylor,New York Jets,Active,2026-10-25T21:27Z,,,,,,Taylor caught all five of his targets for 62 yards and two touchdowns while adding a two-point conversion in Sunday's 28-25 loss to the Dolphins.,TE
 4723820,Omar Cooper Jr.,New York Jets,Active,2026-10-25T20:34Z,,,,,,Cooper caught all five of his targets for 115 yards and a touchdown in Sunday's 28-25 loss to the Dolphins.,WR
+4428850,Dontayvion Wicks,Philadelphia Eagles,Out,2026-11-01T23:55Z,Ankle,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,WR
+4241478,DeVonta Smith,Philadelphia Eagles,Out,2026-11-01T23:55Z,Hamstring,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,WR
+4430814,Jake Majors,Philadelphia Eagles,Out,2026-11-01T23:55Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,C
+2971027,Jonathan Jones,Philadelphia Eagles,Out,2026-11-01T23:55Z,Hamstring,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,CB
+4685287,Jihaad Campbell,Philadelphia Eagles,Out,2026-11-01T23:55Z,Hamstring,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,LB
+3926231,Britain Covey,Philadelphia Eagles,Out,2026-11-01T23:55Z,Knee,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,WR
 3929630,Saquon Barkley,Philadelphia Eagles,Active,2026-11-01T12:48Z,,,,,,"The Eagles aren't expected to move Barkley ahead of the Nov. 10 trade deadline, Mike Garafolo of NFL Network reports.",RB
 4686911,Jakorian Bennett,Philadelphia Eagles,Injured Reserve,2026-11-01T03:12Z,Knee,Not Specified,Not Specified,2026-11-08,IR-R,Bennett (knee) has been ruled out for Sunday's game against the Commanders.,CB
 4241555,Elijah Mitchell,Philadelphia Eagles,Active,2026-11-01T00:42Z,,,,,,The Eagles elevated Mitchell from the practice squad to the active roster Saturday.,RB
 4240456,Michael Carter II,Philadelphia Eagles,Active,2026-10-31T02:15Z,,,,,,Carter (abdomen) does not have a game designation for Philadelphia's Week 8 matchup against the Commanders on Sunday.,CB
 4426331,Nolan Smith Jr.,Philadelphia Eagles,Active,2026-10-31T00:19Z,,,,,,Smith (concussion) does not carry an injury designation into Sunday's game against the Commanders.,LB
-4685287,Jihaad Campbell,Philadelphia Eagles,Out,2026-10-31T00:16Z,Hamstring,Not Specified,Not Specified,2026-11-08,OUT,Campbell (hamstring/quadriceps) has been ruled out for Sunday's game against Washington.,LB
-3926231,Britain Covey,Philadelphia Eagles,Out,2026-10-31T00:11Z,Knee,Not Specified,Not Specified,2026-11-08,OUT,Covey (knee) has been ruled out for Sunday's game against the Commanders.,WR
 4870795,Makai Lemon,Philadelphia Eagles,Active,2026-10-30T22:33Z,,,,,,Lemon will be the Eagles' top wide receiver for a second consecutive game Sunday at Washington due to the absences of both DeVonta Smith (hamstring) and Dontayvion Wicks (ankle).,WR
-4428850,Dontayvion Wicks,Philadelphia Eagles,Out,2026-10-30T20:19Z,Ankle,Not Specified,Not Specified,2026-11-08,OUT,Wicks (ankle) has been ruled out for Sunday night's game against the Commanders.,WR
-4241478,DeVonta Smith,Philadelphia Eagles,Out,2026-10-30T20:17Z,Hamstring,Not Specified,Not Specified,2026-11-08,OUT,Smith (hamstring) is listed as out for Sunday night's game against the Commanders.,WR
 4362116,Moro Ojomo,Philadelphia Eagles,Active,2026-10-30T20:03Z,,,,,,,DT
 4571162,Jalyx Hunt,Philadelphia Eagles,Active,2026-10-30T19:59Z,,,,,,,LB
 3916409,Jonathan Greenard,Philadelphia Eagles,Active,2026-10-30T19:58Z,,,,,,,LB
 3139368,Marcus Epps,Philadelphia Eagles,Active,2026-10-30T19:58Z,,,,,,,S
-2971027,Jonathan Jones,Philadelphia Eagles,Out,2026-10-30T19:55Z,Hamstring,Not Specified,Not Specified,2026-11-08,OUT,out,CB
 4685759,Jalen Carter,Philadelphia Eagles,Active,2026-10-29T21:52Z,,,,,,,DT
 4431573,Smael Mondon Jr.,Philadelphia Eagles,Active,2026-10-29T21:44Z,,,,,,,LB
 3050478,Jake Elliott,Philadelphia Eagles,Active,2026-10-29T18:08Z,,,,,,Elliott made all three of his PAT attempts and didn't attempt a field goal in Monday's 38-21 loss to the Cowboys.,PK
@@ -648,7 +649,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3917657,Zack Baun,Philadelphia Eagles,Active,2026-10-28T01:21Z,,,,,,Baun recorded nine tackles (two solo) and a pass defensed during Monday's 38-21 loss versus the Cowboys.,LB
 4372414,Elijah Moore,Philadelphia Eagles,Active,2026-10-27T23:21Z,,,,,,Moore caught both of his targets for 16 yards during Monday's 38-21 loss to the Cowboys.,WR
 4431574,Eli Stowers,Philadelphia Eagles,Active,2026-10-27T23:12Z,,,,,,Stowers failed to haul in his lone target during Monday's 38-21 loss to Dallas.,TE
-4715355,Darius Cooper,Philadelphia Eagles,Active,2026-10-27T23:06Z,,,,,,Cooper caught one of three passes for 17 yards during the Eagles' 38-21 loss to the Cowboys on Monday.,WR
 4569987,Jaylen Warren,Pittsburgh Steelers,Active,2026-11-01T23:27Z,,,,,,Warren rushed 17 times for 143 yards and a touchdown and brought in one of two targets for no gain in the Steelers' 27-6 win over the Browns on Sunday. He also fumbled once but recovered.,RB
 4429955,Will Howard,Pittsburgh Steelers,Out,2026-11-01T17:13Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,Howard (coach's decision) is inactive but will serve as the Steelers' emergency third quarterback against the Browns on Sunday.,QB
 4035656,Ben Skowronek,Pittsburgh Steelers,Out,2026-11-01T17:04Z,Calf,Not Specified,Not Specified,2026-11-15,INACTIVE,Skowronek (calf) is inactive against the Browns on Sunday.,WR
@@ -774,12 +774,17 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4036134,Amani Hooker,Tennessee Titans,Active,2026-10-28T01:37Z,,,,,,Hooker posted five tackles (two solo) during Sunday's 27-24 loss to Cleveland.,S
 4870805,Anthony Hill Jr.,Tennessee Titans,Active,2026-10-28T01:25Z,,,,,,Hill logged 12 tackles (five solo) and one forced fumble during the Titans' 27-24 loss to the Browns on Sunday.,LB
 4685555,Nicholas Singleton,Tennessee Titans,Active,2026-10-26T19:21Z,,,,,,,RB
-4567156,Treylon Burks,Washington Commanders,Questionable,2026-11-01T13:26Z,Foot,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,"Burks (foot), who is listed as questionable for Sunday's game against the Eagles, is expected to play, Adam Schefter of ESPN reports.",WR
+4567156,Treylon Burks,Washington Commanders,Active,2026-11-01T23:57Z,,,,,,Burks (foot) is listed as active Sunday versus the Eagles.,WR
+3122797,Isaac Yiadom,Washington Commanders,Out,2026-11-01T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,CB
+4605488,Tanoa Togiai,Washington Commanders,Out,2026-11-01T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,G
+2971586,Fabian Moreau,Washington Commanders,Out,2026-11-01T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,CB
+3925354,Daron Payne,Washington Commanders,Out,2026-11-01T23:53Z,Foot,Surgery,Left,2027-02-15,INACTIVE,inactive,DT
+4432722,Athan Kaliakmanis,Washington Commanders,Out,2026-11-01T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,QB
+4259491,Javon Kinlaw,Washington Commanders,Out,2026-11-01T23:53Z,Knee,Not Specified,Not Specified,2026-11-08,INACTIVE,inactive,DT
+4048228,John Bates,Washington Commanders,Active,2026-11-01T23:53Z,,,,,,,TE
+3929865,Charles Omenihu,Washington Commanders,Active,2026-11-01T23:53Z,,,,,,,DE
 4430560,Jer'Zhan Newton,Washington Commanders,Injured Reserve,2026-11-01T00:58Z,Pectoral,Surgery,Not Specified,2026-11-08,IR-R,Newton (pectoral) has been ruled out for Sunday's game against the Eagles.,DT
-3925354,Daron Payne,Washington Commanders,Out,2026-10-31T21:59Z,Foot,Surgery,Left,2027-02-15,OUT,"Payne suffered a season-ending Jones fracture during practice Friday, Adam Schefter of ESPN reports.",DT
 3115922,Nick Allegretti,Washington Commanders,Active,2026-10-30T23:27Z,,,,,,,G
-4259491,Javon Kinlaw,Washington Commanders,Out,2026-10-30T21:07Z,Knee,Not Specified,Not Specified,2026-11-08,INACTIVE,Kinlaw (knee) has been ruled out for Sunday's game against the Eagles.,DT
-4048228,John Bates,Washington Commanders,Questionable,2026-10-30T21:05Z,,,,,,Bates (shoulder) is listed as questionable for Sunday's game against the Eagles.,TE
 3121422,Terry McLaurin,Washington Commanders,Injured Reserve,2026-10-30T17:12Z,Knee,Surgery,Left,2027-02-15,IR,"McLaurin (knee) underwent surgery Friday to repair the torn patellar tendon in his left knee, Nicki Jhabvala of The Athletic reports.",WR
 2976212,Stefon Diggs,Washington Commanders,Active,2026-10-29T21:43Z,,,,,,Diggs (hand/hamstring) was a full practice participant Thursday.,WR
 3051890,Laremy Tunsil,Washington Commanders,Injured Reserve,2026-10-29T01:29Z,Triceps,Surgery,Right,2026-12-20,IR,"Tunsil (triceps) could potentially return late in the season, Nicki Jhabvala of The Athletic reports.",OT
@@ -792,10 +797,5 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3068267,Austin Ekeler,Washington Commanders,Active,2026-10-20T23:14Z,,,,,,Ekeler logged a three-yard carry and caught both of his targets for four yards during the Commanders' 23-17 loss to the 49ers on Monday.,RB
 4361577,Dyami Brown,Washington Commanders,Active,2026-10-20T21:44Z,,,,,,Brown hauled in his only target for six yards during Monday's 23-17 loss versus San Francisco.,WR
 3127586,Jeremy McNichols,Washington Commanders,Active,2026-10-20T21:32Z,,,,,,McNichols accrued five rushes for 13 yards during Monday's 23-17 loss to the 49ers.,RB
-3929865,Charles Omenihu,Washington Commanders,Questionable,2026-10-20T16:10Z,Groin,Not Specified,Not Specified,2026-11-01,QUESTIONABLE,questionable,DE
 5278092,T.J. Maguranyanga,Washington Commanders,Active,2026-10-20T16:02Z,,,,,,,DE
-3122797,Isaac Yiadom,Washington Commanders,Active,2026-10-20T16:02Z,,,,,,,CB
-4605488,Tanoa Togiai,Washington Commanders,Active,2026-10-20T16:02Z,,,,,,,G
-2971586,Fabian Moreau,Washington Commanders,Active,2026-10-20T16:02Z,,,,,,,CB
 4360635,Chig Okonkwo,Washington Commanders,Active,2026-10-20T04:18Z,,,,,,Okonkwo brought in all seven targets for 69 yards in the Commanders' 23-17 loss to the 49ers on Monday night.,TE
-4697815,Rachaad White,Washington Commanders,Active,2026-10-20T04:13Z,,,,,,White rushed seven times for 27 yards and brought in four of five targets for 30 yards and a touchdown in the Commanders' 23-17 loss to the 49ers on Monday night.,RB
