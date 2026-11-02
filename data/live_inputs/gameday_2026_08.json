@@ -688,5 +688,25 @@
 "at": "2026-11-01T23:53:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0028986": {
+"name": "Case Keenum",
+"team": "CHI",
+"pos": "QB",
+"pre": 0.1799,
+"ruling": "INA",
+"at": "2026-11-02T23:47:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040236": {
+"name": "Kyle Monangai",
+"team": "CHI",
+"pos": "RB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-02T23:47:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
 }
 }
