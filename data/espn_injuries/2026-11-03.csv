@@ -56,7 +56,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360939,Rashod Bateman,Baltimore Ravens,Active,2026-11-03T03:26Z,,,,,,Bateman caught one of three targets for 22 yards in Sunday's 36-10 loss to the Bills.,WR
 3858276,Jaylinn Hawkins,Baltimore Ravens,Questionable,2026-11-03T02:15Z,Knee,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,Hawkins (knee) was estimated as a non-participant on Monday's practice reports.,S
 3915189,Roquan Smith,Baltimore Ravens,Questionable,2026-11-03T02:13Z,Foot,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,Smith (foot) was estimated as a limited participant on Monday's practice report.,LB
-4697745,Tyler Loop,Baltimore Ravens,Doubtful,2026-11-03T01:54Z,Groin,Not Specified,Right,2026-11-05,DOUBTFUL,Loop was estimated as a non-participant in Monday's walk-through practice due to a right groin injury.,PK
+4697745,Tyler Loop,Baltimore Ravens,Injured Reserve,2026-11-03T01:54Z,Groin,Not Specified,Right,2026-12-13,IR,Loop was estimated as a non-participant in Monday's walk-through practice due to a right groin injury.,PK
 4038441,Justice Hill,Baltimore Ravens,Questionable,2026-11-03T01:52Z,Groin,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,Hill (groin) was estimated as a limited participant on Monday's practice report.,RB
 4601278,Nate Wiggins,Baltimore Ravens,Active,2026-11-03T01:07Z,,,,,,,CB
 4430876,Roger Rosengarten,Baltimore Ravens,Questionable,2026-11-03T01:05Z,Ankle,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,questionable,OT
@@ -249,10 +249,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686472,Marvin Mims Jr.,Denver Broncos,Active,2026-10-29T22:51Z,,,,,,"Mims (ankle) practiced fully Thursday,Zac Stevens of TheDNVR.com reports.",WR
 4372012,Pat Surtain II,Denver Broncos,Active,2026-10-28T22:42Z,,,,,,"Surtain (ankle) was a full practice participant Wednesday, Aric DiLalla of the Broncos' official site reports.",CB
 2612151,Alex Singleton,Denver Broncos,Active,2026-10-28T00:40Z,,,,,,Singleton recorded 19 tackles (12 solo) including 1.0 sacks during Sunday's 30-16 win at Arizona.,LB
+4896353,Jimmy Rolder,Detroit Lions,Injured Reserve,2026-11-03T21:24Z,Hamstring,Not Specified,Not Specified,2027-02-15,IR,ir,LB
 4689936,Jake Bates,Detroit Lions,Active,2026-11-03T03:07Z,,,,,,Bates made two of his three field-goal attempts and his sole PAT in the Lions' 19-15 win over the Vikings on Sunday.,PK
 3139387,D.J. Reed,Detroit Lions,Questionable,2026-11-03T01:21Z,Hip,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Reed (hip) is not expected to practice Wednesday, Nolan Bianchi of The Detroit News reports.",CB
 4383429,Jacob Saylors,Detroit Lions,Questionable,2026-11-03T01:13Z,Neck,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Saylors (neck) is not expected to practice Wednesday, Nolan Bianchi of The Detroit News reports.",RB
-4896353,Jimmy Rolder,Detroit Lions,Out,2026-11-02T23:23Z,Hamstring,Not Specified,Not Specified,2027-02-15,OUT,"Rolder will miss the remainder of the season due to a hamstring injury, Nolan Bianchi of The Detroit News reports.",LB
 4361788,Cade Mays,Detroit Lions,Questionable,2026-11-02T23:16Z,Ankle,Sprain,Not Specified,2026-11-08,QUESTIONABLE,"Mays sustained a low-ankle sprain during Detroit's win over the Vikings on Sunday, Jeremy Fowler of ESPN reports.",C
 4569465,Jack Campbell,Detroit Lions,Doubtful,2026-11-02T20:33Z,Neck,Not Specified,Not Specified,2026-11-08,DOUBTFUL,"The Lions announced Monday that ""preliminary indications are positive"" for Campbell (neck), who continues to rest and recover at a Detroit-area hospital.",LB
 4602788,Jackson Meeks,Detroit Lions,Active,2026-11-02T18:51Z,,,,,,,WR
@@ -774,11 +774,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4573318,Dorian Mausi,Tennessee Titans,Injured Reserve,2026-11-01T02:07Z,Foot,Not Specified,Not Specified,2026-11-15,IR-R,"Mausi (foot) has been ruled out for Sunday's game against the Bengals, Jim Wyatt of the Titans' official site reports.",LB
 4373956,Jonah Laulu,Tennessee Titans,Active,2026-10-29T00:34Z,,,,,,"The Titans claimed Laulu off waivers from the Raiders on Wednesday, Jim Wyatt of the Titans' official site reports.",DT
 4036134,Amani Hooker,Tennessee Titans,Active,2026-10-28T01:37Z,,,,,,Hooker posted five tackles (two solo) during Sunday's 27-24 loss to Cleveland.,S
-4259491,Javon Kinlaw,Washington Commanders,Questionable,2026-11-03T13:03Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,DT
+4259491,Javon Kinlaw,Washington Commanders,Injured Reserve,2026-11-03T21:33Z,Knee,Not Specified,Not Specified,2026-12-06,IR,ir,DT
+3925354,Daron Payne,Washington Commanders,Injured Reserve,2026-11-03T21:32Z,Foot,Surgery,Left,2027-02-15,IR,ir,DT
+3127586,Jeremy McNichols,Washington Commanders,Injured Reserve,2026-11-03T21:27Z,Foot,Not Specified,Not Specified,2026-12-06,IR,The Commanders placed McNichols (foot) on injured reserve Tuesday.,RB
 5081335,Drew Stevens,Washington Commanders,Active,2026-11-03T01:44Z,,,,,,Stevens made four of his five field-goal attempts and converted his only extra-point try during Sunday's 27-10 win versus the Eagles.,PK
 4360635,Chig Okonkwo,Washington Commanders,Active,2026-11-03T01:22Z,,,,,,Okonkwo tallied two catches (on four targets) for 32 yards during Sunday's 27-10 win versus the Eagles.,TE
-3127586,Jeremy McNichols,Washington Commanders,Doubtful,2026-11-03T00:29Z,Foot,Not Specified,Not Specified,2026-11-08,DOUBTFUL,"McNichols is getting additional opinions on the foot injury that he suffered Sunday against the Eagles, but there's an expectation that he'll miss multiple months, Tashan Reed of The Washington Post reports.",RB
-3925354,Daron Payne,Washington Commanders,Out,2026-11-02T19:26Z,Foot,Surgery,Left,2027-02-15,OUT,out,DT
 3122797,Isaac Yiadom,Washington Commanders,Active,2026-11-02T19:26Z,,,,,,,CB
 4605488,Tanoa Togiai,Washington Commanders,Active,2026-11-02T19:26Z,,,,,,,G
 2971586,Fabian Moreau,Washington Commanders,Active,2026-11-02T19:26Z,,,,,,,CB
