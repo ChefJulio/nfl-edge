@@ -1,5 +1,5 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
-4870808,Jeremiyah Love,Arizona Cardinals,Out,2026-11-03T18:57Z,Ankle,Not Specified,Right,2026-12-06,OUT,"Love was diagnosed Tuesday with a right high-ankle sprain, which is expected to send him to injured reserve and keep him out for 4-to-5 weeks, Ian Rapoport of NFL Network reports.",RB
+4870808,Jeremiyah Love,Arizona Cardinals,Out,2026-11-03T18:57Z,Ankle,Sprain,Right,2026-12-06,OUT,"Love was diagnosed Tuesday with a right high-ankle sprain, which is expected to send him to injured reserve and keep him out for 4-to-5 weeks, Ian Rapoport of NFL Network reports.",RB
 4685503,Walter Nolen III,Arizona Cardinals,Questionable,2026-11-03T13:03Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,DT
 4367199,Jon Gaines II,Arizona Cardinals,Questionable,2026-11-03T13:03Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,G
 4363538,Chad Ryland,Arizona Cardinals,Active,2026-11-03T01:59Z,,,,,,Ryland converted both of his field-goal attempts and three of four PATs in Sunday's 33-30 overtime win over the Cowboys.,PK
@@ -99,6 +99,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4366349,Joe Andreessen,Buffalo Bills,Active,2026-10-30T19:12Z,,,,,,,LB
 4039303,Ed Oliver,Buffalo Bills,Active,2026-10-30T00:19Z,,,,,,Oliver (knee) was a full participant at the Bills' practice Thursday.,DT
 4684527,T.J. Sanders,Buffalo Bills,Active,2026-10-29T20:38Z,,,,,,,DT
+4678008,Jonathon Brooks,Carolina Panthers,Injured Reserve,2026-11-03T19:22Z,Abdomen,Surgery,Not Specified,2026-11-08,IR,"Brooks (core) was seen working off to the side during the Panthers' unofficial practice Tuesday, Joe Person of The Athletic reports.",RB
 4696902,Torricelli Simpkins III,Carolina Panthers,Questionable,2026-11-03T13:03Z,Ankle,Not Specified,Left,2026-11-08,QUESTIONABLE,questionable,G
 4362647,Damien Lewis,Carolina Panthers,Questionable,2026-11-03T13:03Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,G
 4372518,Bobby Brown III,Carolina Panthers,Questionable,2026-11-03T13:03Z,Hand,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,DT
@@ -109,14 +110,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242975,Jaelan Phillips,Carolina Panthers,Questionable,2026-11-03T00:51Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Phillips (hamstring) is considered day-to-day, Joe Person of The Athletic reported Monday.",LB
 2576925,Darren Waller,Carolina Panthers,Active,2026-11-03T00:35Z,,,,,,Waller corralled one of two targets for 11 yards during last Thursday's 27-19 loss at Green Bay.,TE
 4430034,Xavier Legette,Carolina Panthers,Injured Reserve,2026-11-02T19:23Z,Knee,Not Specified,Not Specified,2026-11-08,IR,"Panthers head coach Dave Canales said Monday that Legette (knee) will ""potentially"" be designated for return from injured reserve this week, Joe Person of The Athletic reports.",WR
-4678008,Jonathon Brooks,Carolina Panthers,Injured Reserve,2026-11-02T19:14Z,Abdomen,Surgery,Not Specified,2026-11-08,IR,"Panthers head coach Dave Canales said Monday that Brooks (core) will ""potentially"" be designated for return from injured reserve this week, Joe Person of The Athletic reports.",RB
 4360763,Brycen Tremayne,Carolina Panthers,Active,2026-11-02T15:17Z,,,,,,Tremayne finished with an 11-yard reception on his lone target in Thursday's 27-19 loss to the Packers.,WR
 4567096,John Metchie III,Carolina Panthers,Active,2026-11-02T15:15Z,,,,,,Metchie recorded three receptions for 14 yards on three targets in Thursday's 27-19 loss to the Packers.,WR
 4212909,David Moore,Carolina Panthers,Active,2026-11-02T15:12Z,,,,,,Moore didn't receive any playing time on offense and logged two snaps on special teams in Thursday's 27-19 loss to the Packers.,WR
 4685720,Bryce Young,Carolina Panthers,Active,2026-10-30T16:01Z,,,,,,"Young has been playing through a left knee issue since initially suffering the injury in Week 3 against the Browns, Mike Kaye of ESPN.com reports.",QB
 4568263,Ryan Fitzgerald,Carolina Panthers,Active,2026-10-30T04:39Z,,,,,,Fitzgerald made both field-goal attempts and converted his only extra-point try in Thursday's 27-19 loss to Green Bay.,PK
 4695883,Jalen Coker,Carolina Panthers,Active,2026-10-30T04:23Z,,,,,,Coker secured two of five targets for 37 yards and a touchdown in the Panthers' 27-19 loss to the Packers on Thursday. He also lost a fumble.,WR
-4576075,Corey Bullock,Carolina Panthers,Questionable,2026-10-30T04:15Z,Quadriceps,,,2026-11-08,QUESTIONABLE,"Bullock (quadriceps) exited Thursday's 27-19 loss to Green Bay and did not return, Sheena Quick of Fox Sports Radio 1340 reports.",C
+4576075,Corey Bullock,Carolina Panthers,Questionable,2026-10-30T04:15Z,Quadriceps,Strain,Not Specified,2026-11-08,QUESTIONABLE,"Bullock (quadriceps) exited Thursday's 27-19 loss to Green Bay and did not return, Sheena Quick of Fox Sports Radio 1340 reports.",C
 4241416,Chuba Hubbard,Carolina Panthers,Active,2026-10-30T03:59Z,,,,,,Hubbard rushed 22 times for 81 yards and a touchdown and brought in seven of eight targets for 38 yards in the Panthers' 27-19 loss to the Packers on Thursday.,RB
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-30T03:45Z,,,,,,McMillan brought in six of 11 targets for 57 yards in the Panthers' 27-19 loss to the Packers on Thursday.,WR
 4244607,Akayleb Evans,Carolina Panthers,Injured Reserve,2026-10-30T00:13Z,Triceps,Not Specified,Not Specified,2026-11-30,IR,"Evans (triceps) was placed on injured reserve by the Panthers on Thursday, Darin Gantt of the team's official website reports.",CB
