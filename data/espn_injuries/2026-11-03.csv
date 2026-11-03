@@ -49,6 +49,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431210,Beaux Collins,Atlanta Falcons,Injured Reserve,2026-11-01T00:31Z,Hip,Not Specified,Not Specified,2026-11-08,IR-R,"Collins (hip) has been ruled out for Sunday's game against the Buccaneers and will remain on injured reserve, Tori McElhaney of the Falcons' official site reports.",WR
 5150660,Anterio Thompson,Atlanta Falcons,Out,2026-10-31T02:43Z,Undisclosed,Not Specified,Not Specified,2027-02-15,NFI-R,"Thompson posted on social media this week that he was diagnosed with a genetic mutation on his spinal cord in early May and indicated that he was told he will ""never play football again,"" Josh Kendall of The Athletic reports.",DT
 4239995,A.J. Terrell Jr.,Atlanta Falcons,Active,2026-10-30T21:26Z,,,,,,"Terrell (groin) does not carry an injury designation into Sunday's game against the Buccaneers, Will McFadden of the Falcons' official site reports.",CB
+4035671,Tyler Huntley,Baltimore Ravens,Doubtful,2026-11-03T19:07Z,Toe,Sprain,Right,2026-11-05,DOUBTFUL,"Huntley (toe) wasn't spotted practicing Tuesday, Jamison Hensley of ESPN.com reports.",QB
 4429582,Joe Fagnano,Baltimore Ravens,Questionable,2026-11-03T18:52Z,Ankle,Not Specified,Right,2026-11-05,QUESTIONABLE,"Fagnano practiced Tuesday ""with a significant guard/brace on his right ankle,"" Jeff Zrebiec of The Athletic reports.",QB
 4832793,Olaivavega Ioane,Baltimore Ravens,Questionable,2026-11-03T13:03Z,Knee - MCL,Sprain,Right,2026-11-05,QUESTIONABLE,questionable,G
 4870847,Ja'Kobi Lane,Baltimore Ravens,Active,2026-11-03T03:32Z,,,,,,Lane caught his only target for 13 yards in Sunday's 36-10 loss to the Bills.,WR
@@ -62,7 +63,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035479,John Simpson,Baltimore Ravens,Questionable,2026-11-03T01:05Z,Back,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,questionable,G
 15846,John Jenkins,Baltimore Ravens,Questionable,2026-11-03T01:04Z,Knee,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,questionable,DT
 3052743,Trey Hendrickson,Baltimore Ravens,Questionable,2026-11-03T01:03Z,Finger,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,questionable,LB
-4035671,Tyler Huntley,Baltimore Ravens,Doubtful,2026-11-03T00:02Z,Toe,Sprain,Right,2026-11-05,DOUBTFUL,"Head coach Jesse Minter said Monday that Huntley (toe) ""probably"" won't play Thursday versus the Jaguars, and the Ravens then will ""see how it goes from a long-term standpoint.""",QB
 4372066,Jake Moody,Baltimore Ravens,Active,2026-11-02T23:57Z,,,,,,"Head coach Jesse Minter said Monday that Moody is on track to be elevated from the practice squad to handle kicking duties for the Ravens in Thursday's game against the Jaguars,  Sam Cohn of The Baltimore Sun reports.",PK
 4565311,Aeneas Peebles,Baltimore Ravens,Active,2026-11-02T18:42Z,,,,,,,DT
 4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-11-02T18:42Z,,,,,,,OT
