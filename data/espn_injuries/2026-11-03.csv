@@ -1,4 +1,5 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
+4870808,Jeremiyah Love,Arizona Cardinals,Out,2026-11-03T18:57Z,Ankle,Not Specified,Right,2026-12-06,OUT,"Love was diagnosed Tuesday with a right high-ankle sprain, which is expected to send him to injured reserve and keep him out for 4-to-5 weeks, Ian Rapoport of NFL Network reports.",RB
 4685503,Walter Nolen III,Arizona Cardinals,Questionable,2026-11-03T13:03Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,DT
 4367199,Jon Gaines II,Arizona Cardinals,Questionable,2026-11-03T13:03Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,G
 4363538,Chad Ryland,Arizona Cardinals,Active,2026-11-03T01:59Z,,,,,,Ryland converted both of his field-goal attempts and three of four PATs in Sunday's 33-30 overtime win over the Cowboys.,PK
@@ -6,7 +7,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430841,Carson Beck,Arizona Cardinals,Active,2026-11-02T22:12Z,,,,,,"Head coach Mike LaFleur said that Beck will serve as the Cardinals' No. 2 quarterback behind starter Gardner Minshew in Sunday's game against the Seahawks, Darren Urban of the team's official site reports.",QB
 2578570,Jacoby Brissett,Arizona Cardinals,Active,2026-11-02T22:01Z,,,,,,"Head coach Mike LaFleur said that Brissett will be removed from the starting role and serve as the Cardinals' No. 3 quarterback in Sunday's game in Seattle, Theo Mackie of The Arizona Republic reports.",QB
 4427728,Bam Knight,Arizona Cardinals,Questionable,2026-11-02T21:53Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"Head coach Mike LaFleur revealed Monday that Knight is in the concussion protocol following Sunday's overtime win in Dallas, Josh Weinfuss of ESPN.com reports.",RB
-4870808,Jeremiyah Love,Arizona Cardinals,Questionable,2026-11-02T21:48Z,Ankle,Not Specified,Right,2026-11-08,QUESTIONABLE,"Head coach Mike LaFleur said Monday that Love suffered a ""new"" ankle injury during Sunday's overtime win at Dallas, and that he'll have an update on the running back later this week, Josh Weinfuss of ESPN.com reports.",RB
 4038524,Gardner Minshew II,Arizona Cardinals,Active,2026-11-02T21:46Z,,,,,,"Head coach Mike LaFleur announced that Minshew will step in as the Cardinals' new starting quarterback beginning with Sunday's game at Seattle, Ian Rapoport of NFL Network reports.",QB
 4569609,Evan Hull,Arizona Cardinals,Active,2026-11-02T18:31Z,,,,,,,RB
 4361272,Eku Leota,Arizona Cardinals,Active,2026-11-02T18:31Z,,,,,,,LB
@@ -49,6 +49,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431210,Beaux Collins,Atlanta Falcons,Injured Reserve,2026-11-01T00:31Z,Hip,Not Specified,Not Specified,2026-11-08,IR-R,"Collins (hip) has been ruled out for Sunday's game against the Buccaneers and will remain on injured reserve, Tori McElhaney of the Falcons' official site reports.",WR
 5150660,Anterio Thompson,Atlanta Falcons,Out,2026-10-31T02:43Z,Undisclosed,Not Specified,Not Specified,2027-02-15,NFI-R,"Thompson posted on social media this week that he was diagnosed with a genetic mutation on his spinal cord in early May and indicated that he was told he will ""never play football again,"" Josh Kendall of The Athletic reports.",DT
 4239995,A.J. Terrell Jr.,Atlanta Falcons,Active,2026-10-30T21:26Z,,,,,,"Terrell (groin) does not carry an injury designation into Sunday's game against the Buccaneers, Will McFadden of the Falcons' official site reports.",CB
+4429582,Joe Fagnano,Baltimore Ravens,Questionable,2026-11-03T18:52Z,Ankle,Not Specified,Right,2026-11-05,QUESTIONABLE,"Fagnano practiced Tuesday ""with a significant guard/brace on his right ankle,"" Jeff Zrebiec of The Athletic reports.",QB
 4832793,Olaivavega Ioane,Baltimore Ravens,Questionable,2026-11-03T13:03Z,Knee - MCL,Sprain,Right,2026-11-05,QUESTIONABLE,questionable,G
 4870847,Ja'Kobi Lane,Baltimore Ravens,Active,2026-11-03T03:32Z,,,,,,Lane caught his only target for 13 yards in Sunday's 36-10 loss to the Bills.,WR
 4360939,Rashod Bateman,Baltimore Ravens,Active,2026-11-03T03:26Z,,,,,,Bateman caught one of three targets for 22 yards in Sunday's 36-10 loss to the Bills.,WR
@@ -56,7 +57,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3915189,Roquan Smith,Baltimore Ravens,Questionable,2026-11-03T02:13Z,Foot,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,Smith (foot) was estimated as a limited participant on Monday's practice report.,LB
 4697745,Tyler Loop,Baltimore Ravens,Doubtful,2026-11-03T01:54Z,Groin,Not Specified,Right,2026-11-05,DOUBTFUL,Loop was estimated as a non-participant in Monday's walk-through practice due to a right groin injury.,PK
 4038441,Justice Hill,Baltimore Ravens,Questionable,2026-11-03T01:52Z,Groin,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,Hill (groin) was estimated as a limited participant on Monday's practice report.,RB
-4429582,Joe Fagnano,Baltimore Ravens,Questionable,2026-11-03T01:15Z,Ankle,Not Specified,Right,2026-11-05,QUESTIONABLE,Fagnano was limited at Monday's walkthrough due to an ankle injury.,QB
 4601278,Nate Wiggins,Baltimore Ravens,Active,2026-11-03T01:07Z,,,,,,,CB
 4430876,Roger Rosengarten,Baltimore Ravens,Questionable,2026-11-03T01:05Z,Ankle,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,questionable,OT
 4035479,John Simpson,Baltimore Ravens,Questionable,2026-11-03T01:05Z,Back,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,questionable,G
@@ -699,10 +699,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4696044,Kaelon Black,San Francisco 49ers,Active,2026-10-26T00:29Z,,,,,,Black rushed 12 times for 63 yards and a touchdown and brought in one of three targets for minus-4 yards in the 49ers' 29-20 loss to the Falcons on Sunday. He also lost a fumble and returned one kickoff for 34 yards.,RB
 3040151,George Kittle,San Francisco 49ers,Active,2026-10-25T22:55Z,,,,,,Kittle brought in eight of 10 targets for 88 yards and lost a fumble in the 49ers' 29-20 loss to the Falcons on Sunday.,TE
 3057524,Siran Neal,San Francisco 49ers,Active,2026-10-25T15:46Z,,,,,,,S
+4032473,Rashid Shaheed,Seattle Seahawks,Questionable,2026-11-03T18:55Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Seahawks head coach Mike Macdonald said Tuesday that Shaheed (knee) has a chance to play Sunday against the Cardinals, Brady Henderson of ESPN.com reports.",WR
 4597703,Tory Horton,Seattle Seahawks,Active,2026-11-03T17:16Z,,,,,,Horton recorded three receptions for 26 yards on six targets in Monday's 34-17 loss to the Bears.,WR
 4429835,George Holani,Seattle Seahawks,Active,2026-11-03T16:58Z,,,,,,Holani carried once for nine yards and failed to haul in his lone target in Monday's 34-17 loss to the Bears. He also returned six kickoffs for 144 yards.,RB
 4887558,Emanuel Wilson,Seattle Seahawks,Active,2026-11-03T15:18Z,,,,,,Wilson played just seven snaps -- all on special teams -- in Monday's 34-17 loss to the Bears.,RB
-4032473,Rashid Shaheed,Seattle Seahawks,Questionable,2026-11-03T13:03Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,WR
 4035693,Velus Jones Jr.,Seattle Seahawks,Questionable,2026-11-03T13:03Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,RB
 4426376,Charles Cross,Seattle Seahawks,Questionable,2026-11-03T13:03Z,Ankle,Sprain,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
 4592823,Beau Stephens,Seattle Seahawks,Active,2026-11-03T13:00Z,,,,,,,G
