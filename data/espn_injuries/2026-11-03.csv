@@ -1,9 +1,9 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
-4870808,Jeremiyah Love,Arizona Cardinals,Out,2026-11-03T18:57Z,Ankle,Sprain,Right,2026-12-06,OUT,"Love was diagnosed Tuesday with a right high-ankle sprain, which is expected to send him to injured reserve and keep him out for 4-to-5 weeks, Ian Rapoport of NFL Network reports.",RB
+4870808,Jeremiyah Love,Arizona Cardinals,Injured Reserve,2026-11-03T21:13Z,Ankle,Sprain,Right,2026-12-06,IR,"Arizona placed Love (ankle) on injured reserve Tuesday, Darren Urban of the Cardinals' official site reports.",RB
+3045523,Kendrick Bourne,Arizona Cardinals,Injured Reserve,2026-11-03T21:12Z,Lower Leg,Fracture,Right,2027-02-15,IR,"Arizona placed Bourne (tibia) on injured reserve Tuesday, Darren Urban of the Cardinals' official site reports.",WR
 4685503,Walter Nolen III,Arizona Cardinals,Questionable,2026-11-03T13:03Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,DT
 4367199,Jon Gaines II,Arizona Cardinals,Questionable,2026-11-03T13:03Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,G
 4363538,Chad Ryland,Arizona Cardinals,Active,2026-11-03T01:59Z,,,,,,Ryland converted both of his field-goal attempts and three of four PATs in Sunday's 33-30 overtime win over the Cowboys.,PK
-3045523,Kendrick Bourne,Arizona Cardinals,Out,2026-11-02T22:40Z,Lower Leg,Fracture,Right,2027-02-15,OUT,"Bourne (ankle) is expected to miss the remainder of the season, Jonathan Jones of The Athletic reports.",WR
 4430841,Carson Beck,Arizona Cardinals,Active,2026-11-02T22:12Z,,,,,,"Head coach Mike LaFleur said that Beck will serve as the Cardinals' No. 2 quarterback behind starter Gardner Minshew in Sunday's game against the Seahawks, Darren Urban of the team's official site reports.",QB
 2578570,Jacoby Brissett,Arizona Cardinals,Active,2026-11-02T22:01Z,,,,,,"Head coach Mike LaFleur said that Brissett will be removed from the starting role and serve as the Cardinals' No. 3 quarterback in Sunday's game in Seattle, Theo Mackie of The Arizona Republic reports.",QB
 4427728,Bam Knight,Arizona Cardinals,Questionable,2026-11-02T21:53Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"Head coach Mike LaFleur revealed Monday that Knight is in the concussion protocol following Sunday's overtime win in Dallas, Josh Weinfuss of ESPN.com reports.",RB
@@ -30,7 +30,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 10621,Nick Folk,Atlanta Falcons,Active,2026-11-03T03:53Z,,,,,,Folk went 0-for-1 on field-goal tries and did not attempt an extra point in Sunday's 16-0 loss to the Buccaneers.,PK
 5081394,James Pearce Jr.,Atlanta Falcons,Active,2026-11-03T02:21Z,,,,,,"The NFL reinstated Pearce on Monday after he served his eight-game suspension for violating the league's personal conduct policy, Darius Hayes of Sports Illustrated reports.",LB
 4035886,Khalil Herbert,Atlanta Falcons,Active,2026-11-03T02:20Z,,,,,,"Herbert reverted to the Falcons' practice squad Monday, per the NFL's transaction log.",RB
-3045527,Samson Ebukam,Atlanta Falcons,Out,2026-11-03T00:40Z,Hamstring,Not Specified,Not Specified,2026-11-15,OUT,"Ebukam (hamstring) has been ruled out for Atlanta's Week 9 matchup versus the Bengals, William McFadden of the team's official site reports.",DE
+3045527,Samson Ebukam,Atlanta Falcons,Injured Reserve,2026-11-03T00:40Z,Hamstring,Not Specified,Not Specified,2026-12-13,IR,"Ebukam (hamstring) has been ruled out for Atlanta's Week 9 matchup versus the Bengals, William McFadden of the team's official site reports.",DE
 4870612,Zachariah Branch,Atlanta Falcons,Out,2026-11-02T18:55Z,Hamstring,Not Specified,Not Specified,2026-11-15,OUT,"Coach Kevin Stefanski noted Monday that Branch (hamstring) won't play Sunday against the Bengals, William McFadden of the Falcons' official site reports.",WR
 5344782,Jack Strand,Atlanta Falcons,Active,2026-11-02T18:33Z,,,,,,,QB
 14012,Andy Dalton,Atlanta Falcons,Active,2026-11-02T18:33Z,,,,,,,QB
@@ -49,8 +49,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431210,Beaux Collins,Atlanta Falcons,Injured Reserve,2026-11-01T00:31Z,Hip,Not Specified,Not Specified,2026-11-08,IR-R,"Collins (hip) has been ruled out for Sunday's game against the Buccaneers and will remain on injured reserve, Tori McElhaney of the Falcons' official site reports.",WR
 5150660,Anterio Thompson,Atlanta Falcons,Out,2026-10-31T02:43Z,Undisclosed,Not Specified,Not Specified,2027-02-15,NFI-R,"Thompson posted on social media this week that he was diagnosed with a genetic mutation on his spinal cord in early May and indicated that he was told he will ""never play football again,"" Josh Kendall of The Athletic reports.",DT
 4239995,A.J. Terrell Jr.,Atlanta Falcons,Active,2026-10-30T21:26Z,,,,,,"Terrell (groin) does not carry an injury designation into Sunday's game against the Buccaneers, Will McFadden of the Falcons' official site reports.",CB
-4035671,Tyler Huntley,Baltimore Ravens,Doubtful,2026-11-03T19:07Z,Toe,Sprain,Right,2026-11-05,DOUBTFUL,"Huntley (toe) wasn't spotted practicing Tuesday, Jamison Hensley of ESPN.com reports.",QB
-4429582,Joe Fagnano,Baltimore Ravens,Questionable,2026-11-03T18:52Z,Ankle,Not Specified,Right,2026-11-05,QUESTIONABLE,"Fagnano practiced Tuesday ""with a significant guard/brace on his right ankle,"" Jeff Zrebiec of The Athletic reports.",QB
+4035671,Tyler Huntley,Baltimore Ravens,Doubtful,2026-11-03T20:47Z,Toe,Sprain,Right,2026-11-05,DOUBTFUL,"Ravens head coach Jesse Minter said Tuesday that Huntley (toe) could be a candidate for injured reserve, Sam Cohn of The Baltimore Sunreports.",QB
+4429582,Joe Fagnano,Baltimore Ravens,Questionable,2026-11-03T20:39Z,Ankle,Not Specified,Right,2026-11-05,QUESTIONABLE,"Ravens head coach Jesse Minter confirmed Tuesday that Fagnano (ankle) will start Thursday's game against the Jaguars, Jamison Hensley of ESPN.com reports.",QB
 4832793,Olaivavega Ioane,Baltimore Ravens,Questionable,2026-11-03T13:03Z,Knee - MCL,Sprain,Right,2026-11-05,QUESTIONABLE,questionable,G
 4870847,Ja'Kobi Lane,Baltimore Ravens,Active,2026-11-03T03:32Z,,,,,,Lane caught his only target for 13 yards in Sunday's 36-10 loss to the Bills.,WR
 4360939,Rashod Bateman,Baltimore Ravens,Active,2026-11-03T03:26Z,,,,,,Bateman caught one of three targets for 22 yards in Sunday's 36-10 loss to the Bills.,WR
@@ -107,7 +107,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428993,Haynes King,Carolina Panthers,Active,2026-11-03T12:59Z,,,,,,,QB
 4239934,AJ Dillon,Carolina Panthers,Active,2026-11-03T12:59Z,,,,,,,RB
 5151083,Will Lee III,Carolina Panthers,Questionable,2026-11-03T01:02Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Lee (hamstring) is day to day but should have a chance to ""test"" his injury this week, Joe Person of The Athletic reports.",CB
-4242975,Jaelan Phillips,Carolina Panthers,Questionable,2026-11-03T00:51Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Phillips (hamstring) is considered day-to-day, Joe Person of The Athletic reported Monday.",LB
+4242975,Jaelan Phillips,Carolina Panthers,Questionable,2026-11-03T00:51Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Panthers head coach Dave Canales said Monday that Phillips (hamstring) is trending in the right direction and considered day-to-day heading into Sunday's game against the Broncos, Joe Person of The Athletic reports.",LB
 2576925,Darren Waller,Carolina Panthers,Active,2026-11-03T00:35Z,,,,,,Waller corralled one of two targets for 11 yards during last Thursday's 27-19 loss at Green Bay.,TE
 4430034,Xavier Legette,Carolina Panthers,Injured Reserve,2026-11-02T19:23Z,Knee,Not Specified,Not Specified,2026-11-08,IR,"Panthers head coach Dave Canales said Monday that Legette (knee) will ""potentially"" be designated for return from injured reserve this week, Joe Person of The Athletic reports.",WR
 4360763,Brycen Tremayne,Carolina Panthers,Active,2026-11-02T15:17Z,,,,,,Tremayne finished with an 11-yard reception on his lone target in Thursday's 27-19 loss to the Packers.,WR
@@ -599,7 +599,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242547,Paulson Adebo,New York Giants,Active,2026-10-25T15:37Z,,,,,,"Adebo (knee) is active Week 7 against the Texans, Dan Salomone of the Giants' official site reports.",CB
 3929950,Tremaine Edmunds,New York Giants,Injured Reserve,2026-10-24T23:28Z,Chest,Not Specified,Left,2027-02-15,IR,"Edmunds (chest) was placed on injured reserve Saturday, Dan Duggan of The Athletic reports.",LB
 4259566,Andrew Thomas,New York Giants,Active,2026-10-24T02:04Z,,,,,,Thomas (groin) does not have an injury designation against the Texans on Sunday.,OT
-4373656,Max Mitchell,New York Jets,Questionable,2026-11-03T13:03Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
+4373656,Max Mitchell,New York Jets,Out,2026-11-03T20:55Z,Concussion,Concussion,Not Specified,2026-12-13,OUT,out,OT
 4362094,Joseph Ossai,New York Jets,Questionable,2026-11-03T13:03Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,DE
 4685248,David Bailey,New York Jets,Questionable,2026-11-03T13:03Z,Groin,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,LB
 4695404,Isaiah Davis,New York Jets,Active,2026-11-03T03:01Z,,,,,,Davis rushed five times for 15 yards in Sunday's 38-33 loss to the Raiders.,RB
