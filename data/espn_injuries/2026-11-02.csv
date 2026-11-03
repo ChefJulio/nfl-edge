@@ -1,6 +1,6 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
 4363538,Chad Ryland,Arizona Cardinals,Active,2026-11-03T01:59Z,,,,,,Ryland converted both of his field-goal attempts and three of four PATs in Sunday's 33-30 overtime win over the Cowboys.,PK
-3045523,Kendrick Bourne,Arizona Cardinals,Out,2026-11-02T23:02Z,Lower Leg,Fracture,Right,2027-02-15,OUT,"Bourne suffered a fractured right tibia during Sunday's overtime win at Dallas that won't require surgery but will sideline him for three months, ending his 2026 season, Adam Schefter of ESPN reports.",WR
+3045523,Kendrick Bourne,Arizona Cardinals,Out,2026-11-02T22:40Z,Lower Leg,Fracture,Right,2027-02-15,OUT,"Bourne (ankle) is expected to miss the remainder of the season, Jonathan Jones of The Athletic reports.",WR
 4430841,Carson Beck,Arizona Cardinals,Active,2026-11-02T22:12Z,,,,,,"Head coach Mike LaFleur said that Beck will serve as the Cardinals' No. 2 quarterback behind starter Gardner Minshew in Sunday's game against the Seahawks, Darren Urban of the team's official site reports.",QB
 2578570,Jacoby Brissett,Arizona Cardinals,Active,2026-11-02T22:01Z,,,,,,"Head coach Mike LaFleur said that Brissett will be removed from the starting role and serve as the Cardinals' No. 3 quarterback in Sunday's game in Seattle, Theo Mackie of The Arizona Republic reports.",QB
 4427728,Bam Knight,Arizona Cardinals,Questionable,2026-11-02T21:53Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"Head coach Mike LaFleur revealed Monday that Knight is in the concussion protocol following Sunday's overtime win in Dallas, Josh Weinfuss of ESPN.com reports.",RB
@@ -28,7 +28,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5081394,James Pearce Jr.,Atlanta Falcons,Active,2026-11-03T02:21Z,,,,,,"The NFL reinstated Pearce on Monday after he served his eight-game suspension for violating the league's personal conduct policy, Darius Hayes of Sports Illustrated reports.",LB
 4035886,Khalil Herbert,Atlanta Falcons,Active,2026-11-03T02:20Z,,,,,,"Herbert reverted to the Falcons' practice squad Monday, per the NFL's transaction log.",RB
 3045527,Samson Ebukam,Atlanta Falcons,Out,2026-11-03T00:40Z,Hamstring,Not Specified,Not Specified,2026-11-15,OUT,"Ebukam (hamstring) has been ruled out for Atlanta's Week 9 matchup versus the Bengals, William McFadden of the team's official site reports.",DE
-4870612,Zachariah Branch,Atlanta Falcons,Out,2026-11-02T18:55Z,Hamstring,Not Specified,Not Specified,2026-11-15,OUT,"Coach Kevin Stefanski noted Monday that  Branch (hamstring) won't play Sunday against the Bengals, William McFadden of the Falcons' official site reports.",WR
+4870612,Zachariah Branch,Atlanta Falcons,Out,2026-11-02T18:55Z,Hamstring,Not Specified,Not Specified,2026-11-15,OUT,"Coach Kevin Stefanski noted Monday that Branch (hamstring) won't play Sunday against the Bengals, William McFadden of the Falcons' official site reports.",WR
 4241474,Brian Robinson Jr.,Atlanta Falcons,Out,2026-11-02T18:33Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,out,RB
 4431194,Billy Bowman Jr.,Atlanta Falcons,Out,2026-11-02T18:33Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,out,CB
 4037626,Divine Deablo,Atlanta Falcons,Out,2026-11-02T18:33Z,Forearm,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,out,LB
@@ -124,8 +124,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3117253,Bobby Okereke,Carolina Panthers,Active,2026-10-28T00:39Z,,,,,,Okereke tallied 10 tackles (seven solo) and a defensed pass in Sunday's loss to Tampa Bay.,LB
 4683243,Mitchell Evans,Carolina Panthers,Active,2026-10-27T00:38Z,,,,,,Evans gathered in both targets for 39 yards during Sunday's 43-13 loss versus Tampa Bay.,TE
 4685350,Trevor Etienne,Carolina Panthers,Active,2026-10-27T00:33Z,,,,,,"Etienne posted six carries for eight yards, reeled in both targets for 17 yards and compiled 69 kickoff-return yards during Sunday's 43-13 defeat to the Buccaneers.",RB
-2576492,Grady Jarrett,Chicago Bears,Doubtful,2026-11-03T04:16Z,Groin,,,2026-11-08,QUESTIONABLE,doubtful,DE
-3116726,Kentavius Street,Chicago Bears,Questionable,2026-11-03T04:15Z,Knee,,,2026-11-08,QUESTIONABLE,questionable,DT
+3116726,Kentavius Street,Chicago Bears,Questionable,2026-11-03T04:25Z,Knee,,,2026-11-08,QUESTIONABLE,Street (knee) will not return to Monday night's game against the Seahawks.,DT
+2576492,Grady Jarrett,Chicago Bears,Questionable,2026-11-03T04:23Z,Groin,,,2026-11-08,QUESTIONABLE,Jarrett (groin) is doubtful to return to Monday night's game against the Seahawks.,DE
 4241007,D'Marco Jackson,Chicago Bears,Active,2026-11-03T00:14Z,,,,,,Jackson (ankle) is active for Monday night's game against the Seahawks.,LB
 4870953,Malik Muhammad II,Chicago Bears,Out,2026-11-03T00:11Z,Toe,Not Specified,Not Specified,2026-11-08,INACTIVE,Muhammad (toe) is inactive for Monday's game against the Seahawks.,CB
 15168,Case Keenum,Chicago Bears,Out,2026-11-03T00:07Z,Coach's Decision,Not Specified,Not Specified,2026-11-08,INACTIVE,Keenum (coach's decision) is inactive but will operate as the Bears' emergency third quarterback for Monday night's matchup against the Seahawks.,QB
@@ -530,7 +530,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4688779,Channing Canada,New England Patriots,Active,2026-11-02T19:13Z,,,,,,,CB
 4606666,Karon Prunty,New England Patriots,Active,2026-11-02T19:13Z,,,,,,,CB
 4688366,Elliott Davison,New England Patriots,Active,2026-11-02T19:13Z,,,,,,,S
-2991662,Mack Hollins,New England Patriots,Injured Reserve,2026-11-02T16:55Z,Calf,Not Specified,Not Specified,2026-11-08,IR,"Hollins (calf), who is eligible to be activated from IR this week, per Doug Kyed of the Boston Herald, could return to practice this week, Evan Lazar of the Patriots' official site reports.",WR
+2991662,Mack Hollins,New England Patriots,Injured Reserve,2026-11-02T16:55Z,Calf,Not Specified,Not Specified,2026-11-08,IR,"Hollins (calf), who is eligible to be activated from IR this week, per Doug Kyed of the Boston Herald, could return to practice Wednesday, Evan Lazar of the Patriots' official site reports.",WR
 4047646,A.J. Brown,New England Patriots,Out,2026-11-02T16:43Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"When asked whether Brown (ankle/knee) might practice at some point this week, coach Mike Vrabel said Monday, ""We'll see,"" Doug Kyed of the Boston Herald reports.",WR
 4613202,Kyle Williams,New England Patriots,Active,2026-11-02T04:34Z,,,,,,Williams caught his lone target for a 43-yard touchdown during Sunday's 24-19 win over the Dolphins.,WR
 4427095,DeMario Douglas,New England Patriots,Active,2026-11-02T03:45Z,,,,,,Douglas caught all three of his targets for 76 yards and a touchdown in Sunday's 24-19 win over the Dolphins.,WR
@@ -699,6 +699,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4696044,Kaelon Black,San Francisco 49ers,Active,2026-10-26T00:29Z,,,,,,Black rushed 12 times for 63 yards and a touchdown and brought in one of three targets for minus-4 yards in the 49ers' 29-20 loss to the Falcons on Sunday. He also lost a fumble and returned one kickoff for 34 yards.,RB
 3040151,George Kittle,San Francisco 49ers,Active,2026-10-25T22:55Z,,,,,,Kittle brought in eight of 10 targets for 88 yards and lost a fumble in the 49ers' 29-20 loss to the Falcons on Sunday.,TE
 3057524,Siran Neal,San Francisco 49ers,Active,2026-10-25T15:46Z,,,,,,,S
+4430878,Jaxon Smith-Njigba,Seattle Seahawks,Active,2026-11-03T04:36Z,,,,,,Smith-Njigba brought in six of 11 targets for 118 yards and a touchdown in the Seahawks' 34-17 loss to the Bears on Monday night.,WR
 2971622,Leonard Williams,Seattle Seahawks,Questionable,2026-11-03T03:36Z,Shoulder,Stinger,,2026-11-02,QUESTIONABLE,Williams (shoulder) has a stinger and is questionable to return to Monday's game against the Bears.,DT
 4426385,Zach Charbonnet,Seattle Seahawks,Active,2026-11-03T00:49Z,,,,,,"Charbonnet was ""the first running back getting handoffs"" during warmups before Monday's game against the Bears, Gregg Bell of The Tacoma News Tribune reports.",RB
 4259651,Brandon Pili,Seattle Seahawks,Out,2026-11-03T00:20Z,Back,Not Specified,Not Specified,2026-11-08,INACTIVE,"Pili (back) is inactive for Monday night's game against the Bears, John Boyle of the Seahawks' official site reports.",DT
@@ -723,7 +724,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429835,George Holani,Seattle Seahawks,Active,2026-10-27T01:00Z,,,,,,Holani turned five carries into 11 yards and caught one of two targets for 12 yards during the Seahawks' 20-3 win over the Chiefs on Sunday.,RB
 2977187,Cooper Kupp,Seattle Seahawks,Active,2026-10-27T00:48Z,,,,,,Kupp caught both of his targets for 20 yards in a 20-3 win over the Chiefs on Sunday.,WR
 4597703,Tory Horton,Seattle Seahawks,Active,2026-10-27T00:41Z,,,,,,Horton failed to haul in his lone target and returned two kickoffs for 60 yards during the Seahawks' 20-3 win over the Chiefs on Sunday.,WR
-2473037,Jason Myers,Seattle Seahawks,Active,2026-10-26T03:53Z,,,,,,Myers went 2-for-2 on field-goal tries and made both of his PATs during Sunday night's 20-3 win over the Chiefs.,PK
 5220680,Ted Hurst III,Tampa Bay Buccaneers,Active,2026-11-03T03:22Z,,,,,,Hurst failed to catch his lone target in Sunday's 16-0 win over the Falcons.,WR
 4430871,Sean Tucker,Tampa Bay Buccaneers,Active,2026-11-03T03:20Z,,,,,,Tucker didn't play any offensive snaps in Sunday's 16-0 win over the Falcons.,RB
 4243331,Cade Otton,Tampa Bay Buccaneers,Active,2026-11-03T02:42Z,,,,,,Otton wasn't targeted in Sunday's 16-0 win over the Falcons.,TE
