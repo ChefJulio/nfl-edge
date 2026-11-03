@@ -708,5 +708,35 @@
 "at": "2026-11-02T23:47:00+00:00",
 "post": 0.0,
 "status": "Inactive (DDD)"
+},
+"00-0035704": {
+"name": "Drew Lock",
+"team": "SEA",
+"pos": "QB",
+"pre": 0.3008,
+"ruling": "INA",
+"at": "2026-11-02T23:51:00+00:00",
+"post": 0.0,
+"status": "Inactive (LLL)"
+},
+"00-0037545": {
+"name": "Rashid Shaheed",
+"team": "SEA",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-02T23:51:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0037745": {
+"name": "Velus Jones Jr.",
+"team": "SEA",
+"pos": "RB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-02T23:51:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
 }
 }
