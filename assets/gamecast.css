@@ -433,7 +433,7 @@ nav.gc-tabs a:hover { color: var(--ink); } nav.gc-tabs a.on { color: var(--ink);
 .rp input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: var(--r-xs); background: var(--line); }
 .rp input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); margin-top: -6px; }
 .rp input[type=range] { -webkit-appearance: none; appearance: none; background: transparent; }
-.gc-jump { position: sticky; top: 0; z-index: 5; display: flex; gap: 16px; overflow-x: auto; padding: 10px 2px; margin-top: 6px; background: var(--bg);
+.gc-jump { position: sticky; top: var(--sbmh, 0px); transition: top .18s var(--ease); z-index: 5; display: flex; gap: 16px; overflow-x: auto; padding: 10px 2px; margin-top: 6px; background: var(--bg);
   border-bottom: 1px solid var(--line); scrollbar-width: none; }
 .gc-jump a { flex: none; font-weight: 700; font-size: var(--fs-md); text-decoration: none; color: var(--muted); }
 .gc-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 16px; margin-top: 12px; }
@@ -472,8 +472,12 @@ button.dr-h { width: 100%; font: inherit; font-size: var(--fs-sm); color: var(--
 .dr > .ds-ps { margin: 4px 0 2px; }
 .dr-res { font-weight: 700; } .dr-res.good { color: var(--good); }
 .pls { list-style: none; margin: 0; padding: 0; }
-.pl { display: grid; grid-template-columns: 62px minmax(0, 1fr) auto; gap: 8px; padding: 7px 4px; border-bottom: 1px solid var(--line); font-size: var(--fs-md); }
+.pl { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 8px; padding: 7px 4px; border-bottom: 1px solid var(--line); font-size: var(--fs-md); }
 .pl-when { color: var(--muted); font-size: var(--fs-sm); font-weight: 600; white-space: nowrap; }
+/* the play's tags under its clock (owner 2026-11-01): one per line, sized to fit the column (KICKOFF the widest) */
+.pl-when .pl-tags { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 6px; }
+.pl-when .pc-chip { font-size: 10px; padding: 0 5px; }
+.pl-when .pi-d { margin: 0; font-size: 11px; padding: 1px 5px; white-space: nowrap; }
 .pl-dd { font-size: var(--fs-xs); color: var(--muted); font-weight: 600; } .pl-txt { line-height: 1.38; }
 .pl-side { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
 .pl-wp { font-size: var(--fs-xs); color: var(--muted); white-space: nowrap; } .pl-sc { font-size: var(--fs-sm); white-space: nowrap; }
@@ -496,7 +500,7 @@ button.dr-h { width: 100%; font: inherit; font-size: var(--fs-sm); color: var(--
 .pc-tile { display: inline-flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; }
 .pc-tile:hover b { color: var(--accent); }
 article.game.flash { box-shadow: 0 0 0 3px var(--accent), var(--shadow); transition: box-shadow .3s; }
-@media (max-width: 560px) { .pl { grid-template-columns: 52px minmax(0, 1fr); } .pl-side { grid-column: 2; align-items: flex-start; flex-direction: row; gap: 10px; } }
+@media (max-width: 560px) { .pl { grid-template-columns: 64px minmax(0, 1fr); } .pl-side { grid-column: 2; align-items: flex-start; flex-direction: row; gap: 10px; } }
 /* box score */
 .bx-team { margin-bottom: 14px; } .bx-th { display: flex; align-items: center; gap: 8px; font-size: var(--fs-lg); padding-bottom: 6px; border-bottom: 3px solid var(--tc); margin-bottom: 6px; }
 .bx-t { margin: 8px 0 4px; overflow-x: auto; } .bx-h { font-size: var(--fs-sm); text-transform: none; letter-spacing: 0; color: var(--muted); font-weight: 600; margin-bottom: 2px; }
@@ -519,7 +523,9 @@ button.bx-n:hover { color: var(--accent); text-decoration: underline; } .bx-n.pl
 .ts-lg { position: absolute; top: 50%; transform: translate(-50%, -50%); display: flex; line-height: 0; border-radius: 50%;
   box-shadow: 0 0 0 2px var(--panel); }
 /* ---- gamecast tabs: Pregame / Live / Postgame ---- */
-.gc-page .gc-tabs { display: flex; margin-top: 12px; } .gc-page .gc-tabs button { flex: 1; font-size: var(--fs-base); padding: 8px 10px; }
+.gc-page .gc-tabs { display: flex; margin-top: 12px; }
+/* the switch first, the scoreboard under it (owner 2026-11-01) */
+#gc > .seg.gc-tabs:first-child { margin-top: 8px; } #gc > .seg.gc-tabs + .sb { margin-top: 12px; } .gc-page .gc-tabs button { flex: 1; font-size: var(--fs-base); padding: 8px 10px; }
 .gc-tabs .live-dot { width: 7px; height: 7px; margin-right: 6px; }
 .gc-page .rk-b.sm { min-width: 30px; font-size: var(--fs-2xs); line-height: 15px; padding: 0 4px; opacity: .92; }
 .gc-page .gf-pick { font-size: var(--fs-xs); font-weight: 700; padding: 1px 8px; border-radius: 999px; }
@@ -829,7 +835,7 @@ table.pst-tbl td.pst-who { min-width: 0; max-width: 9.5em; } table.pst-tbl td.ps
 .ts-bye { width: 8px; height: 2px; margin: 8px 0 6px; border-radius: 1px; background: var(--faint); }
 
 /* Live tab pane picker (one pane visible at a time) */
-.gc-panes { position: sticky; top: 0; z-index: 5; display: flex; width: 100%; margin: 8px 0 10px; background: var(--panel);
+.gc-panes { position: sticky; top: var(--sbmh, 0px); transition: top .18s var(--ease); z-index: 5; display: flex; width: 100%; margin: 8px 0 10px; background: var(--panel);
   overflow-x: auto; scrollbar-width: none; }  /* five unwrappable labels ran past a phone's edge: the row scrolls, not the page */
 .gc-panes::-webkit-scrollbar { display: none; }
 @media (max-width: 400px) { .gc-panes button { padding-left: 4px; padding-right: 4px; } }
@@ -1033,7 +1039,7 @@ table.lg td.num > .sc { display: block; width: 100%; box-sizing: border-box; tex
 /* vertical only (owner 2026-10-22: "why am i able to move this sideways"): an edge-to-edge table scroller (.lg-scroll's
    bleed) left the content a few px wider than the sheet, and iOS then pans the whole sheet sideways on diagonal swipes;
    wide tables still scroll sideways inside their own .lg-scroll */
-.sheet { width: 100%; max-height: 86vh; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; background: var(--panel);
+.sheet { width: 100%; max-height: 86vh; overflow-x: hidden; overflow-y: auto; overscroll-behavior: none; background: var(--panel);
   border: 1px solid var(--line); border-bottom: 0; border-radius: var(--r-lg) var(--r-lg) 0 0; box-shadow: var(--e3);
   padding: 0 16px calc(16px + env(safe-area-inset-bottom)); animation: sheet-up .22s var(--ease); }
 .sheet-h { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -1143,7 +1149,11 @@ html.pc-open { overflow: hidden; }
 .pc-card.pc-stacked { background: rgba(5,7,10,.4); }
 @media (min-width: 641px) { .pc-under .pc-wrap { transform: scale(.96) translateY(-18px); } }
 .pc-card .pc-wrap { position: relative; width: min(1100px, 100%); max-height: 94vh; display: flex; }
-.pc-card .pc { width: 100%; max-height: 94vh; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; margin: 0;
+/* overscroll none, not contain (owner 2026-11-01: a game log's rows slid right and down out from under its pinned
+   heads): contain still let iOS rubber-band the CARD on a diagonal swipe, and its sticky parts (header, tabs, the log's
+   pinned season / column copies) hold still while the rest bounces. The table scrollers got the same fix 2026-10-30
+   (site.css); the card's drag-to-close is script, not the native bounce. */
+.pc-card .pc { width: 100%; max-height: 94vh; overflow-y: auto; overflow-x: hidden; overscroll-behavior: none; margin: 0;
   border-radius: var(--r-lg); box-shadow: var(--e3); -webkit-overflow-scrolling: touch; }
 .pc-card .pc-x, .pc-card .pc-share { position: absolute; top: 10px; right: 10px; z-index: 9; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line);
   background: color-mix(in srgb, var(--panel) 85%, transparent); color: var(--ink); font: inherit; font-size: 22px; line-height: 1; cursor: pointer;
@@ -1891,3 +1901,22 @@ tr.lg-tot.lg-tot-pinned { visibility: hidden; }  /* its pinned copy (.lg-fh) sho
 .rs-age { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
 .rs-row.rs-off .rs-nm b { font-weight: 600; color: var(--muted); }
 .rs-head > span:last-child { text-align: right; }
+
+/* Sticky mini scoreboard (owner 2026-11-01; gamecast.js miniBar): one line in the scoreboard's colors, off screen until
+   the big one scrolls away, then it slides down; the page's sticky rows sit under it (--sbmh) */
+.sbm { position: fixed; left: 0; right: 0; z-index: 9; display: flex; align-items: center; gap: 8px; height: 40px;
+  padding: 0 max(12px, env(safe-area-inset-left)) 0 max(12px, env(safe-area-inset-right)); cursor: pointer;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--ac) 45%, var(--panel)) 0%, var(--panel) 50%, color-mix(in srgb, var(--hc) 45%, var(--panel)) 100%);
+  border-bottom: 1px solid var(--line); box-shadow: 0 4px 14px rgba(0, 0, 0, .35);
+  transform: translateY(-110%); visibility: hidden; transition: transform .18s var(--ease), visibility 0s linear .18s; }
+.sbm.on { transform: none; visibility: visible; transition: transform .18s var(--ease), visibility 0s; }
+.sbm-t { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); color: var(--ink); }
+.sbm-lg { display: inline-flex; flex: none; }
+.sbm-s { font-family: var(--font-display); font-size: 18px; font-variant-numeric: tabular-nums; min-width: 1.4em; text-align: center; }
+.sbm-mid { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: var(--fs-xs);
+  color: var(--muted); white-space: nowrap; overflow: hidden; }
+.sbm-c { color: var(--ink); font-weight: 700; } .sbm-dd { overflow: hidden; text-overflow: ellipsis; }
+.sbm-arr { width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+.sbm-arr.l { border-right: 7px solid var(--ink); } .sbm-arr.r { border-left: 7px solid var(--ink); }
+@media (min-width: 900px) { .sbm { left: 50%; right: auto; width: min(1100px, 100%); transform: translate(-50%, -110%); }
+  .sbm.on { transform: translateX(-50%); } }

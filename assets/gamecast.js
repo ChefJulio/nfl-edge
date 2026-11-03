@@ -4594,9 +4594,12 @@
       // Tint = the team with the ball; special-teams plays stay neutral. Event types are chips, not row colors.
       const off = st ? null : teamOf(p.start && p.start.team && p.start.team.id);
       const cls = `${p.scoringPlay ? ' pl-score' : ''}${p.isPenalty && !p.scoringPlay ? ' pl-pen' : ''}${st ? ' pl-st' : ''}${GP.hiPlay && String(p.id) === GP.hiPlay ? ' pl-hi' : ''}`;
-      return `<li class="pl${cls}" data-k="p${esc(p.id)}"${off ? ` style="--pt:${esc(off.color)}"` : ''}><div class="pl-when">${when}</div>
-        <div class="pl-what">${playMeta(p)}${playTitle('pl-hl', hd, linkNames(esc(hd.h), teams), p, info)}${fieldStrip(p, info)}<div class="pl-txt pl-raw">${linkNames(esc(hd.raw), teams)}</div><button type="button" class="pl-share" data-play="${esc(p.id)}" aria-label="Share this play">${NFLE.shareIcon(14)}<span>Share play</span></button></div>
-        <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${tmL(info.away.team)} ${p.awayScore}–${p.homeScore} ${tmL(info.home.team)}</b>` : ''}${swing}</div></li>`;
+      // the play's tags (FG, SACK, FLAG, 1ST) and its win-chance swing under its clock (owner 2026-11-01), so the downs
+      // line starts at the same spot on every row
+      const tg = playTags(p) + swing;
+      return `<li class="pl${cls}" data-k="p${esc(p.id)}"${off ? ` style="--pt:${esc(off.color)}"` : ''}><div class="pl-when">${when}${tg ? `<div class="pl-tags">${tg}</div>` : ''}</div>
+        <div class="pl-what">${playMeta(p, '', '', 'pm', false)}${playTitle('pl-hl', hd, linkNames(esc(hd.h), teams), p, info)}${fieldStrip(p, info)}<div class="pl-txt pl-raw">${linkNames(esc(hd.raw), teams)}</div><button type="button" class="pl-share" data-play="${esc(p.id)}" aria-label="Share this play">${NFLE.shareIcon(14)}<span>Share play</span></button></div>
+        <div class="pl-side">${p.scoringPlay ? `<b class="pl-sc">${tmL(info.away.team)} ${p.awayScore}–${p.homeScore} ${tmL(info.home.team)}</b>` : ''}</div></li>`;
     };
     const order = o.sort !== 'old';  // newest first unless asked otherwise
     const swingOf = p => { const w = wpAfter[p.id]; return w ? Math.abs(w.now - w.prev) : 0; };
@@ -5505,7 +5508,7 @@
     return resChip(`${net > 0 ? '+' : net < 0 ? '&minus;' : ''}${Math.abs(net)} yd`, net > 0 ? 'gain' : net < 0 ? 'loss' : 'zero', 'Yards gained');
   };
   // lead / tail: a view's own items in the line (a card's clock and score)
-  const playMeta = (p, lead = '', tail = '', cls = 'pm') => { const pp = playPairs(p); return `<div class="${cls}">${lead}${playTags(p)}${pp.downs}${pp.spots}${tail}</div>`; };
+  const playMeta = (p, lead = '', tail = '', cls = 'pm', tags = true) => { const pp = playPairs(p); return `<div class="${cls}">${lead}${tags ? playTags(p) : ''}${pp.downs}${pp.spots}${tail}</div>`; };
   const CLIPS = new WeakMap();
   const clipIndex = sum => {
     if (!sum || typeof sum !== 'object') return null;
@@ -5695,7 +5698,9 @@
       : GP.pane === 'calls' ? callsPane(sum, info)
       : GP.pane === 'team' ? `<section class="gcs" id="gcTeam"><h3>Team stats</h3>${st.replay ? '<p class="gcs-note">As of this play, counted from the play-by-play.</p>' : ''}${sum ? teamStats(sum, info, null, st.replay ? st.tstats : null) || '<p class="muted">Not available yet.</p>' : ''}</section>`
       : playerStats(sum, info, { id: 'gcBox', title: 'Box score', note: st.replay ? 'As of this play, counted from the play-by-play.' : '', lines: st.replay ? st.lines : null, plays: st.replay ? st.plays : null, secs: st.secs, empty: 'The box score fills in once the game starts.' })}`;
+    // the Pregame / Live switch above the scoreboard (owner 2026-11-01)
     root.innerHTML = `
+      <div class="seg gc-tabs" role="tablist">${GTABS.map(([k, l]) => `<button type="button" role="tab" data-gtab="${k}" class="${tab === k ? 'on' : ''}">${k === 'live' && info.state === 'in' ? '<span class="live-dot"></span>' : ''}${k === 'live' && info.state === 'post' && !rp ? 'Final' : l}</button>`).join('')}</div>
       <section class="sb" style="--ac:${esc(info.away.color)};--hc:${esc(info.home.color)}">${side(info.away, false)}<div class="sb-mid">${(() => {
         // (owner 2026-10-25: "center the live red dot thing, and place the possession marker on either side of it on
         // that row") the dot centered, the football beside it on the side of the team with the ball
@@ -5707,9 +5712,43 @@
         return dot || has('away') || has('home') ? `<span class="sb-top"><span class="sb-bl">${has('away')}</span>${dot}<span class="sb-br">${has('home')}</span></span>` : '';
       })()}<b>${esc(status)}</b>${!nx && sp && sit && sit.shortDownDistanceText
         ? `<span class="sb-dd"><span>${esc(sit.shortDownDistanceText)}</span>${sit.possessionText ? `<span class="sb-at">${esc(sit.possessionText)}</span>` : ''}</span>` : nx ? `<span class="sb-dd">${nx.sp && nx.sp.kick && !nx.sp.red ? 'Kickoff next' : nx.sp ? 'Try next' : ''}</span>` : ''}</div>${side(info.home, true)}</section>
-      <div class="seg gc-tabs" role="tablist">${GTABS.map(([k, l]) => `<button type="button" role="tab" data-gtab="${k}" class="${tab === k ? 'on' : ''}">${k === 'live' && info.state === 'in' ? '<span class="live-dot"></span>' : ''}${k === 'live' && info.state === 'post' && !rp ? 'Final' : l}</button>`).join('')}</div>
       ${tab === 'pre' ? preTab(g) : live()}`;
+    // the thin sticky copy of the scoreboard (miniBar): teams, score, clock, down and distance on one line
+    const poss = k => sp && !sp.kick && sp.offense.team === info[k].team ? `<i class="sbm-arr ${k === 'away' ? 'l' : 'r'}"></i>` : '';
+    const dd = !nx && sp && sit && sit.shortDownDistanceText ? `${sit.shortDownDistanceText}${sit.possessionText ? ` · ${sit.possessionText}` : ''}` : '';
+    const tmS = (s, r) => `<span class="sbm-t${r ? ' r' : ''}" style="--tc:${esc(s.color)}">${r ? '' : `<span class="sbm-lg">${logo(s.logo, '#111', 18, s.team)}</span>`}<b>${esc(s.team)}</b>${r ? `<span class="sbm-lg">${logo(s.logo, '#111', 18, s.team)}</span>` : ''}</span>`;
+    miniBar(root.querySelector('section.sb'), `${tmS(info.away)}${poss('away')}<b class="sbm-s">${esc(String(as))}</b>
+      <span class="sbm-mid">${info.state === 'in' && !rp ? '<span class="live-dot"></span>' : ''}<span class="sbm-c">${esc(status)}</span>${dd ? `<span class="sbm-dd">${esc(dd)}</span>` : ''}</span>
+      <b class="sbm-s">${esc(String(hs))}</b>${poss('home')}${tmS(info.home, true)}`, `--ac:${info.away.color};--hc:${info.home.color}`);
     wireGame();
+  };
+  // Sticky mini scoreboard (owner 2026-11-01: "a thinner sticky bar for the scoreboard that sticks when you scroll
+  // down"): one line that slides in at the top once the big scoreboard has scrolled away; tap it to go back up. It lives
+  // outside #gc (renderGame rebuilds #gc on every update) and is redrawn with it. While it shows, --sbmh moves the
+  // page's sticky rows (the pane tabs, the jump row) down under it.
+  let sbmIO = null;
+  const miniBar = (sb, html, style) => {
+    let bar = document.getElementById('sbm');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'sbm'; bar.className = 'sbm'; bar.setAttribute('role', 'button'); bar.setAttribute('aria-label', 'Back to the scoreboard');
+      bar.onclick = () => scrollTo({ top: 0, behavior: 'smooth' });
+      document.body.appendChild(bar);
+    }
+    bar.style.cssText = style;
+    bar.innerHTML = html;
+    if (sbmIO) sbmIO.disconnect();
+    if (!sb || typeof IntersectionObserver !== 'function') return;
+    // under the site's top nav where it sticks (wide screens); phones have none
+    const nav = document.querySelector('nav.gc-tabs');
+    const top = nav && nav.offsetParent && getComputedStyle(nav).position === 'sticky' ? nav.offsetHeight : 0;
+    bar.style.top = `${top}px`;
+    sbmIO = new IntersectionObserver(([e]) => {
+      const on = !e.isIntersecting && e.boundingClientRect.top < top + 1;
+      bar.classList.toggle('on', on);
+      document.documentElement.style.setProperty('--sbmh', on ? `${bar.offsetHeight}px` : '0px');
+    }, { rootMargin: `-${top}px 0px 0px 0px` });
+    sbmIO.observe(sb);
   };
   // the chart's readout sits under it (owner 2026-10-18: it covered the line when it floated over the chart)
   const TIP_HINT = '<span class="muted">Tap or drag on the chart for any moment of the game</span>';
