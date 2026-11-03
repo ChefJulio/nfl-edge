@@ -54,6 +54,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360939,Rashod Bateman,Baltimore Ravens,Active,2026-11-03T03:26Z,,,,,,Bateman caught one of three targets for 22 yards in Sunday's 36-10 loss to the Bills.,WR
 3858276,Jaylinn Hawkins,Baltimore Ravens,Questionable,2026-11-03T02:15Z,Knee,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,Hawkins (knee) was estimated as a non-participant on Monday's practice reports.,S
 3915189,Roquan Smith,Baltimore Ravens,Questionable,2026-11-03T02:13Z,Foot,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,Smith (foot) was estimated as a limited participant on Monday's practice report.,LB
+4697745,Tyler Loop,Baltimore Ravens,Doubtful,2026-11-03T01:54Z,Groin,Not Specified,Right,2026-11-05,DOUBTFUL,Loop was estimated as a non-participant in Monday's walk-through practice due to a right groin injury.,PK
 4038441,Justice Hill,Baltimore Ravens,Questionable,2026-11-03T01:52Z,Groin,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,Hill (groin) was estimated as a limited participant on Monday's practice report.,RB
 4429582,Joe Fagnano,Baltimore Ravens,Questionable,2026-11-03T01:15Z,Ankle,Not Specified,Left,2026-11-05,QUESTIONABLE,Fagnano was limited at Monday's walkthrough due to an ankle injury.,QB
 4601278,Nate Wiggins,Baltimore Ravens,Active,2026-11-03T01:07Z,,,,,,,CB
@@ -62,8 +63,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 15846,John Jenkins,Baltimore Ravens,Questionable,2026-11-03T01:04Z,Knee,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,questionable,DT
 3052743,Trey Hendrickson,Baltimore Ravens,Questionable,2026-11-03T01:03Z,Finger,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,questionable,LB
 4035671,Tyler Huntley,Baltimore Ravens,Doubtful,2026-11-03T00:02Z,Toe,Sprain,Right,2026-11-05,DOUBTFUL,"Head coach Jesse Minter said Monday that Huntley (toe) ""probably"" won't play Thursday versus the Jaguars, and the Ravens then will ""see how it goes from a long-term standpoint.""",QB
-4372066,Jake Moody,Baltimore Ravens,Active,2026-11-02T23:57Z,,,,,,"Moody is on track to kick for the Ravens in Thursday night's game against the Jaguars, according to Sam Cohn of the Baltimore Sun.",PK
-4697745,Tyler Loop,Baltimore Ravens,Questionable,2026-11-02T23:50Z,Groin,Not Specified,Right,2026-11-05,QUESTIONABLE,"Loop has been dealing with an unspecified issue and may go on injured reserve, Brian Wacker of the Baltimore Sun reports.",PK
+4372066,Jake Moody,Baltimore Ravens,Active,2026-11-02T23:57Z,,,,,,"Head coach Jesse Minter said Monday that Moody is on track to be elevated from the practice squad to handle kicking duties for the Ravens in Thursday's game against the Jaguars,  Sam Cohn of The Baltimore Sun reports.",PK
 4565311,Aeneas Peebles,Baltimore Ravens,Active,2026-11-02T18:42Z,,,,,,,DT
 4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-11-02T18:42Z,,,,,,,OT
 5088338,Elijah Sarratt,Baltimore Ravens,Active,2026-11-02T18:42Z,,,,,,,WR
@@ -699,6 +699,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4696044,Kaelon Black,San Francisco 49ers,Active,2026-10-26T00:29Z,,,,,,Black rushed 12 times for 63 yards and a touchdown and brought in one of three targets for minus-4 yards in the 49ers' 29-20 loss to the Falcons on Sunday. He also lost a fumble and returned one kickoff for 34 yards.,RB
 3040151,George Kittle,San Francisco 49ers,Active,2026-10-25T22:55Z,,,,,,Kittle brought in eight of 10 targets for 88 yards and lost a fumble in the 49ers' 29-20 loss to the Falcons on Sunday.,TE
 3057524,Siran Neal,San Francisco 49ers,Active,2026-10-25T15:46Z,,,,,,,S
+4429835,George Holani,Seattle Seahawks,Active,2026-11-03T16:58Z,,,,,,Holani carried once for nine yards and failed to haul in his lone target in Monday's 34-17 loss to the Bears. He also returned six kickoffs for 144 yards.,RB
 4887558,Emanuel Wilson,Seattle Seahawks,Active,2026-11-03T15:18Z,,,,,,Wilson played just seven snaps -- all on special teams -- in Monday's 34-17 loss to the Bears.,RB
 4032473,Rashid Shaheed,Seattle Seahawks,Questionable,2026-11-03T13:03Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,WR
 4035693,Velus Jones Jr.,Seattle Seahawks,Questionable,2026-11-03T13:03Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,RB
@@ -723,7 +724,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4605491,Connor O'Toole,Seattle Seahawks,Active,2026-10-31T02:35Z,,,,,,"O'Toole (hamstring) was a full participant in Friday's practice, Gregg Bell of Sports Radio 93.3 KJR Seattle reports.",LB
 4037521,Chazz Surratt,Seattle Seahawks,Active,2026-10-31T02:31Z,,,,,,"Surratt (calf) was a full participant in Friday's practice, Gregg Bell of Sports Radio 93.3 KJR Seattle reports.",LB
 4428659,Drake Thomas,Seattle Seahawks,Active,2026-10-31T01:30Z,,,,,,"Thomas (ankle) practiced in full Friday, Gregg Bell of Sports Radio 93.3 KJR Seattle reports.",LB
-4869523,Nick Emmanwori,Seattle Seahawks,Active,2026-10-28T01:01Z,,,,,,Emmanwori registered four tackles (two solo) Sunday in a 20-3 Week 7 win over the Chiefs.,S
 4567750,Emeka Egbuka,Tampa Bay Buccaneers,Questionable,2026-11-03T13:03Z,Foot,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,WR
 5220680,Ted Hurst III,Tampa Bay Buccaneers,Active,2026-11-03T03:22Z,,,,,,Hurst failed to catch his lone target in Sunday's 16-0 win over the Falcons.,WR
 4430871,Sean Tucker,Tampa Bay Buccaneers,Active,2026-11-03T03:20Z,,,,,,Tucker didn't play any offensive snaps in Sunday's 16-0 win over the Falcons.,RB
