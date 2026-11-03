@@ -531,7 +531,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4606666,Karon Prunty,New England Patriots,Active,2026-11-02T19:13Z,,,,,,,CB
 4688366,Elliott Davison,New England Patriots,Active,2026-11-02T19:13Z,,,,,,,S
 2991662,Mack Hollins,New England Patriots,Injured Reserve,2026-11-02T16:55Z,Calf,Not Specified,Not Specified,2026-11-08,IR,"Hollins (calf), who is eligible to be activated from IR this week, per Doug Kyed of the Boston Herald, could return to practice Wednesday, Evan Lazar of the Patriots' official site reports.",WR
-4047646,A.J. Brown,New England Patriots,Out,2026-11-02T16:43Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"When asked whether Brown (ankle/knee) might practice at some point this week, coach Mike Vrabel said Monday, ""We'll see,"" Doug Kyed of the Boston Herald reports.",WR
+4047646,A.J. Brown,New England Patriots,Questionable,2026-11-02T16:43Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"When asked whether Brown (ankle/knee) might practice at some point this week, coach Mike Vrabel said Monday, ""We'll see,"" Doug Kyed of the Boston Herald reports.",WR
 4613202,Kyle Williams,New England Patriots,Active,2026-11-02T04:34Z,,,,,,Williams caught his lone target for a 43-yard touchdown during Sunday's 24-19 win over the Dolphins.,WR
 4427095,DeMario Douglas,New England Patriots,Active,2026-11-02T03:45Z,,,,,,Douglas caught all three of his targets for 76 yards and a touchdown in Sunday's 24-19 win over the Dolphins.,WR
 4569173,Rhamondre Stevenson,New England Patriots,Active,2026-11-02T03:40Z,,,,,,Stevenson carried the ball 19 times for 82 yards and caught all three of his targets for eight yards in Sunday's 24-19 win over the Dolphins.,RB
@@ -714,7 +714,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4259651,Brandon Pili,Seattle Seahawks,Questionable,2026-11-03T00:20Z,Back,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Pili (back) is inactive for Monday night's game against the Bears, John Boyle of the Seahawks' official site reports.",DT
 3120358,Uchenna Nwosu,Seattle Seahawks,Questionable,2026-11-03T00:16Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Nwosu (ankle) is inactive for Monday's clash with the Bears, John Boyle of the Seahawks' official site reports.",LB
 4600597,Montorie Foster Jr.,Seattle Seahawks,Active,2026-11-03T00:12Z,,,,,,"The Seahawks elevated Foster from their practice squad Monday ahead of the team's matchup versus the Bears, John Boyle of the team's official site reports.",WR
-3924327,Drew Lock,Seattle Seahawks,Out,2026-11-03T00:11Z,Elbow,Not Specified,Right,2026-11-08,QUESTIONABLE,"Lock (coach's decision) is inactive for Monday's matchup with the Bears, John Boyle of the Seahawks' official site reports.",QB
+3924327,Drew Lock,Seattle Seahawks,Questionable,2026-11-03T00:11Z,Elbow,Not Specified,Right,2026-11-08,QUESTIONABLE,"Lock (coach's decision) is inactive for Monday's matchup with the Bears, John Boyle of the Seahawks' official site reports.",QB
 4429211,Anthony Bradford,Seattle Seahawks,Active,2026-11-02T23:51Z,,,,,,,G
 4364623,Patrick O'Connell,Seattle Seahawks,Active,2026-11-02T23:51Z,,,,,,,LB
 4887558,Emanuel Wilson,Seattle Seahawks,Active,2026-11-02T23:10Z,,,,,,"Wilson is welcoming back Zach Charbonnet (knee) and Jadarian Price (chest) to the Seahawks backfield for Monday's game against the Bears, John Boyle of the team's official site reports.",RB
