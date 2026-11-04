@@ -324,6 +324,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4258173,Nico Collins,Houston Texans,Active,2026-10-25T21:20Z,,,,,,Collins caught two of five targets for six yards in Sunday's 27-21 overtime loss to the Giants.,WR
 4362504,Brevin Jordan,Houston Texans,Active,2026-10-24T00:15Z,,,,,,"Jordan (foot) does not have any injury designation ahead of Sunday's game against the Giants, Adam Caplan of SiriusXM NFL Radio reports.",TE
 4360189,Logan Hall,Houston Texans,Active,2026-10-22T20:47Z,,,,,,,DE
+4427635,Adetomiwa Adebawore,Indianapolis Colts,Active,2026-11-03T23:44Z,,,,,,"Adebawore agreed Tuesday with the Colts on a two-year, $35 million contract extension, Tom Pelissero of Netflix reports.",DT
 4682909,Justin Walley,Indianapolis Colts,Questionable,2026-11-03T13:03Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,CB
 4429684,Anthony Gould,Indianapolis Colts,Questionable,2026-11-03T13:03Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,questionable,WR
 5088571,Bryce Boettcher,Indianapolis Colts,Questionable,2026-11-03T13:03Z,Groin,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,LB
@@ -346,9 +347,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4692033,Tim Smith,Indianapolis Colts,Active,2026-10-29T20:02Z,,,,,,,DT
 4870598,CJ Allen,Indianapolis Colts,Active,2026-10-29T00:04Z,,,,,,Allen (ankle) was listed as a full participant in Wednesday's walkthrough.,LB
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Active,2026-10-28T02:42Z,,,,,,Davis-Gaither recorded seven tackles (three solo) in Sunday's loss to Minnesota.,LB
-4427635,Adetomiwa Adebawore,Indianapolis Colts,Active,2026-10-28T02:31Z,,,,,,"Adebawore finished Sunday's loss to Minnesota with five tackles (four solo), including 2.0 sacks, and a defensed pass.",DT
 4905664,A.J. Haulcy,Indianapolis Colts,Active,2026-10-28T02:15Z,,,,,,Haulcy produced nine tackles (five solo) in a loss to the Vikings on Sunday.,S
 4361196,Cam Taylor-Britt,Indianapolis Colts,Injured Reserve,2026-10-27T23:40Z,Groin,Not Specified,Not Specified,2026-11-29,IR,"The Colts placed Taylor-Britt on injured reserve Tuesday due to a groin injury, Nathan Brown of The Indianapolis Star reports.",CB
+4432773,Brian Thomas Jr.,Jacksonville Jaguars,Active,2026-11-03T23:56Z,,,,,,"Thomas ""has been the area of interest for a lot of other teams"" leading up to the Nov. 10 trade deadline, Ian Rapoport of ESPN reports.",WR
 3916433,Jakobi Meyers,Jacksonville Jaguars,Questionable,2026-11-03T21:57Z,Hamstring,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,Meyers (hamstring/ankle) was listed as a limited participant in Tuesday's practice.,WR
 4362619,Chris Rodriguez Jr.,Jacksonville Jaguars,Questionable,2026-11-03T21:54Z,Hand,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,Rodriguez (hand) was listed as a limited participant in Tuesday's practice.,RB
 4882093,Bhayshul Tuten,Jacksonville Jaguars,Questionable,2026-11-03T21:49Z,Ankle,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,The Jaguars listed Tuten (ankle/foot) as a non-participant in Tuesday's practice.,RB
@@ -366,7 +367,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4577494,Alijah Huzzie,Jacksonville Jaguars,Active,2026-11-02T18:53Z,,,,,,,CB
 4430539,Brenton Strange,Jacksonville Jaguars,Active,2026-11-02T05:19Z,,,,,,Strange caught both of his targets for 55 yards during Sunday's 42-7 win over Indianapolis.,TE
 4686248,Nate Boerkircher,Jacksonville Jaguars,Active,2026-11-02T04:46Z,,,,,,Boerkircher caught his lone target for a 31-yard touchdown in Sunday's 42-7 win over the Colts.,TE
-4432773,Brian Thomas Jr.,Jacksonville Jaguars,Active,2026-11-02T02:31Z,,,,,,Thomas caught one of two targets for a 12-yard touchdown in Sunday's 42-7 win over the Colts.,WR
 4360310,Trevor Lawrence,Jacksonville Jaguars,Active,2026-11-02T01:52Z,,,,,,Lawrence completed 10 of 14 passes for 210 yards with three touchdowns and no interceptions while rushing three times for 10 yards in the Jaguars' 42-7 win over the Colts on Sunday.,QB
 4432620,Parker Washington,Jacksonville Jaguars,Active,2026-11-02T01:40Z,,,,,,Washington brought in one of two targets for 16 yards and rushed once for 10 yards in the Jaguars' 42-7 win over the Colts on Sunday.,WR
 4426349,Travon Walker,Jacksonville Jaguars,Questionable,2026-11-01T20:42Z,Ribs,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,Walker (ribs) is questionable to return to Sunday's game against the Colts.,DE
@@ -549,6 +549,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4611993,Joshua Farmer,New England Patriots,Active,2026-10-26T18:40Z,,,,,,,DT
 4241720,Marcus Jones,New England Patriots,Active,2026-10-25T02:25Z,,,,,,"Jones registered nine tackles (five solo), including 1.0 sacks, and returned one punt for 19 yards in Thursday's loss to the Bears.",CB
 4431431,Corey Kiner,New England Patriots,Active,2026-10-24T03:22Z,,,,,,Kiner rushed four times for 13 yards in Thursday's Week 7 loss to Chicago. He also returned four kickoffs for 102 yards.,RB
+4569682,Audric Estime,New Orleans Saints,Active,2026-11-03T23:40Z,,,,,,The Saints claimed Estime off waivers from the Browns on Tuesday.,RB
 4239996,Travis Etienne Jr.,New Orleans Saints,Injured Reserve,2026-11-02T17:20Z,Hamstring,Strain,Left,2026-11-08,IR,"Head coach Kellen Moore said that Etienne (hamstring) will be evaluated Monday before the Saints make a determination whether he practices this week, Ross Jackson of WWL Louisiana reports.",RB
 4880281,Jordyn Tyson,New Orleans Saints,Injured Reserve,2026-11-02T17:14Z,Hamstring,Strain,Right,2026-11-08,IR-R,"Saints head coach Kellen Moore said that the Saints will decide by Wednesday whether to open Tyson's (hamstring) 21-day practice window this week, Nick Underhill of NewOrleans.Football reports.",WR
 3918310,Carl Granderson,New Orleans Saints,Active,2026-10-28T04:47Z,,,,,,"Granderson totaled four tackles, including 1.5 sacks, in Sunday's Week 7 loss to Pittsburgh.",DE
@@ -573,7 +574,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3931399,Justin Reid,New Orleans Saints,Questionable,2026-10-25T15:28Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,Reid (concussion) has been ruled out for the remainder of Sunday's game against the Steelers in Paris.,S
 5081999,CJ Donaldson,New Orleans Saints,Questionable,2026-10-25T14:09Z,Shoulder,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Donaldson (shoulder) is questionable to return to Sunday's game against the Steelers in Paris.,RB
 4426339,Spencer Rattler,New Orleans Saints,Active,2026-10-25T12:45Z,,,,,,"Rattler is active and will remain the Saints' No. 2 quarterback for Sunday's game against the Steelers in Paris, Ross Jackson of WWL Louisiana reports.",QB
-3925350,Anfernee Jennings,New Orleans Saints,Active,2026-10-24T01:27Z,,,,,,Jennings (knee) does not have any injury designation ahead of Sunday's game against the Steelers.,LB
 4361266,Greg Newsome II,New York Giants,Questionable,2026-11-03T22:37Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"The Giants signed Newsome (concussion) to a three-year $46 million extension with $32 million guaranteed, NFL reporter Jordan Schultz.",CB
 4429148,Theo Johnson,New York Giants,Questionable,2026-11-03T01:11Z,Neck,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Johnson (neck) participated during practice Monday, Dan Duggan of The Athletic reports.",TE
 4696981,Cam Skattebo,New York Giants,Questionable,2026-11-02T21:11Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Giants head coach John Harbaugh said that Skattebo (hamstring) is day-to-day and could end up being a game-time decision for Sunday's tilt with the Eagles, Jordan Raanan of ESPN.com reports.",RB
@@ -624,7 +624,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361331,Jamien Sherwood,New York Jets,Active,2026-10-28T02:58Z,,,,,,Sherwood totaled eight tackles (four solo) and two defensed passes Sunday in a loss to Miami.,LB
 4426686,Dane Belton,New York Jets,Active,2026-10-28T02:53Z,,,,,,Belton registered nine tackles (six solo) in Sunday's loss to the Dolphins.,S
 3925345,Minkah Fitzpatrick,New York Jets,Active,2026-10-28T02:46Z,,,,,,Fitzpatrick posted 10 tackles (six solo) Sunday in a loss to Miami.,S
-4686911,Jakorian Bennett,Philadelphia Eagles,Active,2026-11-03T22:18Z,,,,,,,CB
 4428850,Dontayvion Wicks,Philadelphia Eagles,Questionable,2026-11-03T13:03Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,WR
 4241478,DeVonta Smith,Philadelphia Eagles,Questionable,2026-11-03T13:03Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,WR
 2971027,Jonathan Jones,Philadelphia Eagles,Questionable,2026-11-03T13:03Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,CB
@@ -649,6 +648,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431573,Smael Mondon Jr.,Philadelphia Eagles,Active,2026-10-29T21:44Z,,,,,,,LB
 4360238,Dameon Pierce,Philadelphia Eagles,Injured Reserve,2026-10-28T21:17Z,Undisclosed,Not Specified,Not Specified,2026-12-06,IR,The Eagles placed Pierce (undisclosed) on injured reserve Wednesday,RB
 4682618,Cooper DeJean,Philadelphia Eagles,Active,2026-10-28T01:25Z,,,,,,DeJean recorded seven tackles (three solo) during Monday's 38-21 loss versus the Cowboys.,CB
+3917657,Zack Baun,Philadelphia Eagles,Active,2026-10-28T01:21Z,,,,,,Baun recorded nine tackles (two solo) and a pass defensed during Monday's 38-21 loss versus the Cowboys.,LB
 4692628,Doneiko Slaughter,Pittsburgh Steelers,Out,2026-11-03T13:08Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,out,CB
 4035656,Ben Skowronek,Pittsburgh Steelers,Out,2026-11-03T13:07Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,out,WR
 4567979,Brandin Echols,Pittsburgh Steelers,Out,2026-11-03T13:06Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,out,CB
