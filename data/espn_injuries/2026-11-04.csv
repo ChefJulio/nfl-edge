@@ -524,18 +524,17 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4708049,Gavin Bartholomew,Minnesota Vikings,Active,2026-10-30T18:18Z,,,,,,,TE
 3123954,Brian O'Neill,Minnesota Vikings,Active,2026-10-29T21:22Z,,,,,,,OT
 4690210,Joe Huber,Minnesota Vikings,Active,2026-10-29T21:22Z,,,,,,,G
+3046439,Hunter Henry,New England Patriots,Questionable,2026-11-04T19:41Z,Foot,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Henry (foot) wasn't on the field for the media-access portion of Wednesday's practice, Mike Reiss of ESPN.com reports.",TE
 4432710,TreVeyon Henderson,New England Patriots,Questionable,2026-11-04T18:21Z,Illness,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Henderson (illness) won't practice Wednesday, Doug Kyed of the Boston Herald reports.",RB
 4047646,A.J. Brown,New England Patriots,Questionable,2026-11-04T18:13Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Brown (ankle/knee) won't practice Wednesday, Doug Kyed of the Boston Herald reports.",WR
 2991662,Mack Hollins,New England Patriots,Injured Reserve,2026-11-04T14:14Z,Calf,Not Specified,Not Specified,2026-11-08,IR-R,"Hollins (calf) is slated to return to practice Wednesday, Ian Rapoport of NFL Network reports.",WR
 4695193,Efton Chism III,New England Patriots,Active,2026-11-04T02:17Z,,,,,,Chism caught all five of his targets for 37 yards during Sunday's 24-19 win over the Dolphins.,WR
 4431431,Corey Kiner,New England Patriots,Active,2026-11-04T02:12Z,,,,,,Kiner rushed seven times for 38 yards during Sunday's 24-19 win over Miami.,RB
 4565293,Marcus Bryant,New England Patriots,Active,2026-11-04T01:40Z,,,,,,Bryant (ankle) was activated from injured reserve by the Patriots on Tuesday.,OT
-3046439,Hunter Henry,New England Patriots,Questionable,2026-11-03T15:14Z,Foot,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Patriots head coach Mike Vrabel said Monday that he had no update on Henry's (foot) status heading into Sunday's game against the Packers, Karen Guregian of MassLive.com reports. ""I don't have any expectations yet,"" Vrabel said of Henry. ""It's kind of how he responds here. He wasn't able to finish t",TE
 4569923,Andy Borregales,New England Patriots,Active,2026-11-03T03:29Z,,,,,,Borregales made one of his two field goals and all three PATs in the Patriots' 24-19 win over the Dolphins on Sunday.,PK
 4831959,Eli Raridon,New England Patriots,Active,2026-11-03T01:59Z,,,,,,Raridon had one reception for five yards on four targets in New England's 24-19 win over the Dolphins on Sunday.,TE
 4688779,Channing Canada,New England Patriots,Active,2026-11-02T19:13Z,,,,,,,CB
 4606666,Karon Prunty,New England Patriots,Active,2026-11-02T19:13Z,,,,,,,CB
-4688366,Elliott Davison,New England Patriots,Active,2026-11-02T19:13Z,,,,,,,S
 4613202,Kyle Williams,New England Patriots,Active,2026-11-02T04:34Z,,,,,,Williams caught his lone target for a 43-yard touchdown during Sunday's 24-19 win over the Dolphins.,WR
 4427095,DeMario Douglas,New England Patriots,Active,2026-11-02T03:45Z,,,,,,Douglas caught all three of his targets for 76 yards and a touchdown in Sunday's 24-19 win over the Dolphins.,WR
 4569173,Rhamondre Stevenson,New England Patriots,Active,2026-11-02T03:40Z,,,,,,Stevenson carried the ball 19 times for 82 yards and caught all three of his targets for eight yards in Sunday's 24-19 win over the Dolphins.,RB
@@ -549,9 +548,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 16910,DaQuan Jones,New England Patriots,Active,2026-10-30T20:06Z,,,,,,,DT
 16771,Morgan Moses,New England Patriots,Active,2026-10-30T20:06Z,,,,,,,OT
 4611993,Joshua Farmer,New England Patriots,Active,2026-10-26T18:40Z,,,,,,,DT
+4241720,Marcus Jones,New England Patriots,Active,2026-10-25T02:25Z,,,,,,"Jones registered nine tackles (five solo), including 1.0 sacks, and returned one punt for 19 yards in Thursday's loss to the Bears.",CB
 4880281,Jordyn Tyson,New Orleans Saints,Injured Reserve,2026-11-04T16:18Z,Hamstring,Strain,Right,2026-11-08,IR-R,"Tyson (hamstring) is slated to resume practicing with the Saints on Wednesday, Nick Underhill of NewOrleans.Football reports.",WR
 5208518,Charlie Smyth,New Orleans Saints,Active,2026-11-04T00:01Z,,,,,,"The Saints plan to elevate or sign Smyth off their practice squad to handle kicking duties in Sunday's game against the Browns, Ross Jackson of WWL Louisiana reports.",PK
-4569682,Audric Estime,New Orleans Saints,Active,2026-11-03T23:40Z,,,,,,The Saints claimed Estime off waivers from the Browns on Tuesday.,RB
 4239996,Travis Etienne Jr.,New Orleans Saints,Injured Reserve,2026-11-02T17:20Z,Hamstring,Strain,Left,2026-11-08,IR,"Head coach Kellen Moore said that Etienne (hamstring) will be evaluated Monday before the Saints make a determination whether he practices this week, Ross Jackson of WWL Louisiana reports.",RB
 3918310,Carl Granderson,New Orleans Saints,Active,2026-10-28T04:47Z,,,,,,"Granderson totaled four tackles, including 1.5 sacks, in Sunday's Week 7 loss to Pittsburgh.",DE
 4241993,Pete Werner,New Orleans Saints,Active,2026-10-28T04:42Z,,,,,,Werner finished Sunday's loss to the Steelers with eight tackles (three solo).,LB
@@ -574,6 +573,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361370,Chris Olave,New Orleans Saints,Active,2026-10-25T18:10Z,,,,,,Olave caught six of 10 targets for 56 yards in Sunday's 16-10 loss to the Steelers.,WR
 3931399,Justin Reid,New Orleans Saints,Questionable,2026-10-25T15:28Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,Reid (concussion) has been ruled out for the remainder of Sunday's game against the Steelers in Paris.,S
 5081999,CJ Donaldson,New Orleans Saints,Questionable,2026-10-25T14:09Z,Shoulder,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Donaldson (shoulder) is questionable to return to Sunday's game against the Steelers in Paris.,RB
+4426339,Spencer Rattler,New Orleans Saints,Active,2026-10-25T12:45Z,,,,,,"Rattler is active and will remain the Saints' No. 2 quarterback for Sunday's game against the Steelers in Paris, Ross Jackson of WWL Louisiana reports.",QB
 4696981,Cam Skattebo,New York Giants,Questionable,2026-11-04T18:45Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Skattebo (hamstring) didn't take part in Wednesday's practice and instead was seen working with a trainer on the side, Jordan Raanan of ESPN reports.",RB
 4361266,Greg Newsome II,New York Giants,Questionable,2026-11-03T22:37Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"Newsome (concussion) agreed Tuesday with the Giants on a three-year $46 million extension that includes $32 million guaranteed, Adam Schefter of ESPN reports.",CB
 4429148,Theo Johnson,New York Giants,Questionable,2026-11-03T01:11Z,Neck,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Johnson (neck) participated during practice Monday, Dan Duggan of The Athletic reports.",TE
