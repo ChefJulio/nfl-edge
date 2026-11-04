@@ -349,6 +349,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Active,2026-10-28T02:42Z,,,,,,Davis-Gaither recorded seven tackles (three solo) in Sunday's loss to Minnesota.,LB
 4905664,A.J. Haulcy,Indianapolis Colts,Active,2026-10-28T02:15Z,,,,,,Haulcy produced nine tackles (five solo) in a loss to the Vikings on Sunday.,S
 4361196,Cam Taylor-Britt,Indianapolis Colts,Injured Reserve,2026-10-27T23:40Z,Groin,Not Specified,Not Specified,2026-11-29,IR,"The Colts placed Taylor-Britt on injured reserve Tuesday due to a groin injury, Nathan Brown of The Indianapolis Star reports.",CB
+2970716,Eric Murray,Jacksonville Jaguars,Injured Reserve,2026-11-04T01:11Z,Elbow,Not Specified,Not Specified,2027-02-15,IR,The Jaguars placed Murray (elbow) on their injured reserve list Tuesday.,S
+3915520,DaVon Hamilton,Jacksonville Jaguars,Injured Reserve,2026-11-04T01:05Z,Knee,Strain,Right,2027-02-15,IR,The Jaguars placed Hamilton (knee) on their injured reserve list Tuesday.,DT
 4432773,Brian Thomas Jr.,Jacksonville Jaguars,Active,2026-11-03T23:56Z,,,,,,"Thomas ""has been the area of interest for a lot of other teams"" leading up to the Nov. 10 trade deadline, Ian Rapoport of ESPN reports.",WR
 3916433,Jakobi Meyers,Jacksonville Jaguars,Questionable,2026-11-03T21:57Z,Hamstring,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,Meyers (hamstring/ankle) was listed as a limited participant in Tuesday's practice.,WR
 4362619,Chris Rodriguez Jr.,Jacksonville Jaguars,Questionable,2026-11-03T21:54Z,Hand,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,Rodriguez (hand) was listed as a limited participant in Tuesday's practice.,RB
@@ -358,8 +360,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686361,Cam Little,Jacksonville Jaguars,Active,2026-11-03T03:05Z,,,,,,Little nailed all six extra-point attempts in Sunday's 42-7 win over the Colts.,PK
 4572704,Branson Combs,Jacksonville Jaguars,Questionable,2026-11-03T00:59Z,Shoulder,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,questionable,LB
 4426448,Jarrian Jones,Jacksonville Jaguars,Questionable,2026-11-03T00:57Z,Ankle,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,questionable,CB
-2970716,Eric Murray,Jacksonville Jaguars,Injured Reserve,2026-11-03T00:29Z,Elbow,Not Specified,Not Specified,2027-02-15,IR,"Jaguars head coach Liam Coen said Monday that Murray (elbow) will miss the remainder of the season, Demetrius Harvey of The Florida Times-Union reports.",S
-3915520,DaVon Hamilton,Jacksonville Jaguars,Injured Reserve,2026-11-02T22:16Z,Knee,Strain,Right,2027-02-15,IR,"Jaguars coach Liam Coen confirmed Monday that Hamilton will miss the remainder of the season after suffering a torn quadriceps in Sunday's win over the Colts, Ryan O'Halloran of The Florida Times-Union reports.",DT
 5085024,CJ Williams,Jacksonville Jaguars,Active,2026-11-02T18:53Z,,,,,,,WR
 4427479,Jamal Hill,Jacksonville Jaguars,Active,2026-11-02T18:53Z,,,,,,,LB
 4612298,Albert Regis,Jacksonville Jaguars,Active,2026-11-02T18:53Z,,,,,,,DT
