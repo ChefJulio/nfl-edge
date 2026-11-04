@@ -1,5 +1,5 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
-2578570,Jacoby Brissett,Arizona Cardinals,Active,2026-11-04T19:50Z,,,,,,"The Ravens are slated to acquire Brissett from the Cardinals, Adam Schefter of ESPN reports.",QB
+2578570,Jacoby Brissett,Arizona Cardinals,Active,2026-11-04T19:50Z,,,,,,"The Ravens agreed to acquire Brissett from the Cardinals on Wednesday, Adam Schefter of ESPN reports.",QB
 4426844,Elijah Higgins,Arizona Cardinals,Active,2026-11-04T02:55Z,,,,,,Higgins tallied two catches for 10 yards on four targets Sunday in a 33-30 overtime win over Dallas.,TE
 4869132,Reggie Virgil,Arizona Cardinals,Active,2026-11-04T02:35Z,,,,,,Virgil failed to reel in either of his targets during Sunday's 33-30 overtime victory against Dallas.,WR
 4039050,Devin Duvernay,Arizona Cardinals,Active,2026-11-04T02:30Z,,,,,,Duvernay caught both of his targets for 14 yards while also adding 75 yards as a kick returner and 12 punt-return yards during Sunday's 33-30 overtime win against the Cowboys.,WR
@@ -49,6 +49,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685590,Cameron Williams,Atlanta Falcons,Injured Reserve,2026-11-01T03:11Z,Ankle,Not Specified,Not Specified,2026-11-08,IR-R,"Williams (ankle) will remain on injured reserve and has been ruled out for Sunday's game against the Buccaneers, Tori McElhany of the Falcons' official site reports.",OL
 4431210,Beaux Collins,Atlanta Falcons,Injured Reserve,2026-11-01T00:31Z,Hip,Not Specified,Not Specified,2026-11-08,IR-R,"Collins (hip) has been ruled out for Sunday's game against the Buccaneers and will remain on injured reserve, Tori McElhaney of the Falcons' official site reports.",WR
 5150660,Anterio Thompson,Atlanta Falcons,Out,2026-10-31T02:43Z,Undisclosed,Not Specified,Not Specified,2027-02-15,NFI-R,"Thompson posted on social media this week that he was diagnosed with a genetic mutation on his spinal cord in early May and indicated that he was told he will ""never play football again,"" Josh Kendall of The Athletic reports.",DT
+4601278,Nate Wiggins,Baltimore Ravens,Questionable,2026-11-04T20:17Z,Illness,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,questionable,CB
+3858276,Jaylinn Hawkins,Baltimore Ravens,Out,2026-11-04T20:14Z,Knee,Not Specified,Not Specified,2026-11-16,OUT,out,S
 4035671,Tyler Huntley,Baltimore Ravens,Out,2026-11-04T14:00Z,Toe,Sprain,Right,2027-02-15,OUT,"Huntley (toe) has reportedly sustained a season-ending turf toe injury, Adam Schefter of ESPN reports.",QB
 4685530,Malaki Starks,Baltimore Ravens,Active,2026-11-04T03:55Z,,,,,,Starks finished Sunday's loss to Buffalo with 10 tackles (five solo).,S
 4876132,Josh Cuevas,Baltimore Ravens,Active,2026-11-04T02:52Z,,,,,,Cuevas caught one of two targets for 15 yards during Sunday's 36-10 loss at Buffalo.,TE
@@ -61,8 +63,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428512,Kedon Slovis,Baltimore Ravens,Active,2026-11-03T15:05Z,,,,,,"The Ravens signed Slovis off the Packers' practice squad Tuesday, Tom Pelissero of Netflix reports.",QB
 4870847,Ja'Kobi Lane,Baltimore Ravens,Active,2026-11-03T03:32Z,,,,,,Lane caught his only target for 13 yards in Sunday's 36-10 loss to the Bills.,WR
 4360939,Rashod Bateman,Baltimore Ravens,Active,2026-11-03T03:26Z,,,,,,Bateman caught one of three targets for 22 yards in Sunday's 36-10 loss to the Bills.,WR
-3858276,Jaylinn Hawkins,Baltimore Ravens,Questionable,2026-11-03T02:15Z,Knee,Not Specified,Not Specified,2026-11-16,OUT,Hawkins (knee) was estimated as a non-participant on Monday's practice reports.,S
-4601278,Nate Wiggins,Baltimore Ravens,Active,2026-11-03T01:07Z,,,,,,,CB
 4430876,Roger Rosengarten,Baltimore Ravens,Questionable,2026-11-03T01:05Z,Ankle,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,questionable,OT
 4035479,John Simpson,Baltimore Ravens,Questionable,2026-11-03T01:05Z,Back,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,questionable,G
 15846,John Jenkins,Baltimore Ravens,Questionable,2026-11-03T01:04Z,Knee,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,questionable,DT
@@ -349,11 +349,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4692033,Tim Smith,Indianapolis Colts,Active,2026-10-29T20:02Z,,,,,,,DT
 4870598,CJ Allen,Indianapolis Colts,Active,2026-10-29T00:04Z,,,,,,Allen (ankle) was listed as a full participant in Wednesday's walkthrough.,LB
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Active,2026-10-28T02:42Z,,,,,,Davis-Gaither recorded seven tackles (three solo) in Sunday's loss to Minnesota.,LB
+4882093,Bhayshul Tuten,Jacksonville Jaguars,Questionable,2026-11-04T20:07Z,Ankle,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,Tuten (ankle/foot) is listed questionable for Thursday's game against the Ravens.,RB
 4429168,Antonio Johnson,Jacksonville Jaguars,Active,2026-11-04T20:07Z,,,,,,,S
 4426448,Jarrian Jones,Jacksonville Jaguars,Active,2026-11-04T20:06Z,,,,,,,CB
 4572704,Branson Combs,Jacksonville Jaguars,Active,2026-11-04T20:06Z,,,,,,,LB
 4048231,Ezra Cleveland,Jacksonville Jaguars,Active,2026-11-04T20:06Z,,,,,,,G
-4882093,Bhayshul Tuten,Jacksonville Jaguars,Questionable,2026-11-04T15:38Z,Ankle,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,"Jaguars head coach Liam Coen said Wednesday that Tuten (ankle/foot) is feeling better, but the running back's status for Thursday's contest versus the Ravens is expected to come down to a game-time decision, John Shipley of SI.com reports.",RB
 3050073,Foyesade Oluokun,Jacksonville Jaguars,Active,2026-11-04T03:37Z,,,,,,"Oluokun recorded nine total tackles (five solo), including 1.0 sacks, during Sunday's 42-7 win against the Colts.",LB
 4879194,Josh Cameron,Jacksonville Jaguars,Active,2026-11-04T03:37Z,,,,,,Cameron did not catch his lone target in a 42-7 rout of the Colts on Sunday. He returned one punt for six yards and one kickoff for 18 yards.,WR
 4880675,Rayuan Lane III,Jacksonville Jaguars,Active,2026-11-04T03:32Z,,,,,,"Lane recorded four total tackles (one solo) and three passes defensed, including a pick-six, during Sunday's 42-7 win over the Colts.",S
@@ -435,7 +435,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685553,Brenen Thompson,Los Angeles Chargers,Questionable,2026-11-03T02:10Z,Quadriceps,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Thompson (quadriceps/hamstring) is not expected to practice this week, Noah Furtado of The Athletic reports.",WR
 4362081,Cameron Dicker,Los Angeles Chargers,Active,2026-11-03T02:03Z,,,,,,Dicker made all three of his field-goal attempts during Sunday's 24-9 loss against the Rams. He did not kick any extra-point tries.,PK
 4430968,Kimani Vidal,Los Angeles Chargers,Active,2026-11-03T01:50Z,,,,,,Vidal rushed eight times for 23 yards and caught both of his targets for seven yards in Sunday's 24-9 loss to the Rams.,RB
-3123076,David Njoku,Los Angeles Chargers,Injured Reserve,2026-11-02T23:38Z,Lower Leg,Not Specified,Not Specified,2026-11-08,IR,"Coach Jim Harbaugh said Monday that the Chargers likely will open the 21-day window for Njoku (fibula) this week, Alex Insdorf of BoltBeat.com reports.",TE
+3123076,David Njoku,Los Angeles Chargers,Injured Reserve,2026-11-02T23:38Z,Lower Leg,Not Specified,Not Specified,2026-11-08,IR-R,"Coach Jim Harbaugh said Monday that the Chargers likely will open the 21-day window for Njoku (fibula) this week, Alex Insdorf of BoltBeat.com reports.",TE
 4426535,Theo Wease Jr.,Los Angeles Chargers,Active,2026-11-02T19:07Z,,,,,,,WR
 4429025,Quentin Johnston,Los Angeles Chargers,Active,2026-11-02T05:19Z,,,,,,Johnston caught all four of his targets for 37 yards in Sunday's 24-9 loss to the Rams.,WR
 4595342,Oronde Gadsden,Los Angeles Chargers,Active,2026-11-02T05:13Z,,,,,,Gadsden caught all five of his targets for 52 yards during Sunday's 24-9 loss to the Rams.,TE
@@ -445,7 +445,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241597,Daiyan Henley,Los Angeles Chargers,Active,2026-11-01T22:34Z,,,,,,"Henley (shoulder) has returned to Sunday's matchup versus the Rams, David Droegemeier of Locked On Chargers reports.",LB
 3691739,Derwin James Jr.,Los Angeles Chargers,Injured Reserve,2026-11-01T00:11Z,Hamstring,Not Specified,Not Specified,2026-11-29,IR,The Chargers placed James (hamstring) on injured reserve Saturday.,S
 2576702,Bud Dupree,Los Angeles Chargers,Active,2026-10-29T02:02Z,,,,,,Dupree (neck) is off the Chargers' injury report ahead of the team's matchup versus the Rams on Sunday.,LB
-2579621,Denzel Perryman,Los Angeles Chargers,Injured Reserve,2026-10-29T01:38Z,Undisclosed,Not Specified,Not Specified,2026-11-08,IR,"Head coach Jim Harbaugh said Wednesday that Perryman (undisclosed) is ""close"" to returning from injured reserve, Alex Insdorf of BoltBeat.com reports.",LB
+2579621,Denzel Perryman,Los Angeles Chargers,Injured Reserve,2026-10-29T01:38Z,Undisclosed,Not Specified,Not Specified,2026-11-08,IR-R,"Head coach Jim Harbaugh said Wednesday that Perryman (undisclosed) is ""close"" to returning from injured reserve, Alex Insdorf of BoltBeat.com reports.",LB
 4683487,Joe Alt,Los Angeles Chargers,Active,2026-10-29T00:03Z,,,,,,Alt (neck) was not listed on the Chargers' official injury report Wednesday.,OT
 5089178,Jamaree Caldwell,Los Angeles Chargers,Active,2026-10-18T19:01Z,,,,,,,DT
 2979860,Dalvin Tomlinson,Los Angeles Chargers,Active,2026-10-18T19:01Z,,,,,,,DT
@@ -624,6 +624,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426686,Dane Belton,New York Jets,Active,2026-10-28T02:53Z,,,,,,Belton registered nine tackles (six solo) in Sunday's loss to the Dolphins.,S
 3925345,Minkah Fitzpatrick,New York Jets,Active,2026-10-28T02:46Z,,,,,,Fitzpatrick posted 10 tackles (six solo) Sunday in a loss to Miami.,S
 4039485,Jack Heflin,New York Jets,Active,2026-10-26T18:43Z,,,,,,,DT
+3929630,Saquon Barkley,Philadelphia Eagles,Active,2026-11-04T20:28Z,,,,,,"Barkley wasn't present for the media-access portion of Wednesday's practice, Brooks Kubena of The Athletic reports.",RB
 4685201,Tanner McKee,Philadelphia Eagles,Active,2026-11-04T19:24Z,,,,,,"McKee will shift to a backup role for Sunday's game against the Giants with the Eagles set to move forward with Joe Milton as their starting quarterback in Week 9, Adam Schefter of ESPN and Mike Garafolo of NFL Network report.",QB
 4360698,Joe Milton,Philadelphia Eagles,Active,2026-11-04T19:16Z,,,,,,"Milton is set to be the Eagles' starting quarterback Sunday against the Giants, Mike Garafolo of NFL Network reports.",QB
 4372414,Elijah Moore,Philadelphia Eagles,Active,2026-11-04T02:43Z,,,,,,Moore did not garner a target during Sunday night's 27-10 loss to the Commanders.,WR
@@ -639,7 +640,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3050478,Jake Elliott,Philadelphia Eagles,Active,2026-11-03T03:27Z,,,,,,Elliott went 1-for-2 on field-goal tries and hit his only extra-point attempt in Sunday's 27-10 loss to the Commanders.,PK
 4241555,Elijah Mitchell,Philadelphia Eagles,Active,2026-11-03T02:48Z,,,,,,"Mitchell reverted to the Eagles' practice squad Monday, per the NFL's transaction log.",RB
 4430814,Jake Majors,Philadelphia Eagles,Active,2026-11-02T19:19Z,,,,,,,C
-3929630,Saquon Barkley,Philadelphia Eagles,Active,2026-11-02T14:47Z,,,,,,"Barkley said after Sunday's 27-10 loss to the Commanders that he has received assurances from the Eagles front office that he will remain with the team beyond the Nov. 10 trade deadline, Tim McManus of ESPN.com reports. ""The whole time my mindset was, we have a little issue going on right now and I ",RB
 4870795,Makai Lemon,Philadelphia Eagles,Active,2026-11-02T04:53Z,,,,,,Lemon caught six of nine targets for 57 yards in Sunday's 27-10 loss to the Commanders.,WR
 3121023,Dallas Goedert,Philadelphia Eagles,Active,2026-11-02T04:52Z,,,,,,Goedert caught all four of his targets for 30 yards and added a two-yard run in Sunday's 27-10 loss to the Commanders.,TE
 4240456,Michael Carter II,Philadelphia Eagles,Questionable,2026-11-02T04:02Z,Abdomen,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Carter (abdomen) is questionable to return to Sunday night's contest against the Commanders.,CB
