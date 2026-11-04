@@ -174,6 +174,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4247726,Bryan Cook,Cincinnati Bengals,Active,2026-10-28T02:08Z,,,,,,"Cook recorded nine tackles (six solo), including 0.5 sacks, during the Bengals' 35-13 win over the Ravens on Sunday.",S
 4427729,Demetrius Knight Jr.,Cincinnati Bengals,Active,2026-10-28T01:59Z,,,,,,Knight totaled eight tackles (two solo) and an interception during the Bengals' win over the Ravens on Sunday.,LB
 4384852,Dohnte Meyers,Cincinnati Bengals,Active,2026-10-27T01:58Z,,,,,,Meyers failed to catch either of his two targets in Sunday's 35-13 win over the Ravens.,WR
+4685540,Carsen Ryan,Cleveland Browns,Active,2026-11-04T19:29Z,,,,,,The Browns elevated Ryan from the practice squad to the active roster Wednesday.,TE
 3110565,Quincy Williams,Cleveland Browns,Questionable,2026-11-04T17:21Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,LB
 3122840,Deshaun Watson,Cleveland Browns,Questionable,2026-11-04T17:01Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,Mary Kay Cabot of the Cleveland Plain Dealer suggests that Watson may have difficulty clearing the NFL's concussion protocol ahead of Sunday's game against the Saints.,QB
 4432762,Shedeur Sanders,Cleveland Browns,Active,2026-11-04T15:07Z,,,,,,"Sanders could be needed to start Sunday's game at New Orleans after Deshaun Watson was placed in concussion protocol when he experienced symptoms Monday, Mary Kay Cabot of The Cleveland Plain Dealer reports.",QB
@@ -198,7 +199,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4695783,Myles Harden,Cleveland Browns,Active,2026-11-01T16:42Z,,,,,,"Harden (hamstring) is active for Sunday's game against the Steelers, Kelsey Russo of the Browns' official site reports.",CB
 3131498,Tytus Howard,Cleveland Browns,Active,2026-11-01T02:16Z,,,,,,"Howard has cleared the league's concussion protocol and doesn't carry an injury designation into Sunday's game against the Steelers, Chris Easterling of the Akron Beacon Journal reports.",OT
 4600415,Mike Hall Jr.,Cleveland Browns,Active,2026-10-31T01:50Z,,,,,,"Hall (ankle) does not have an injury designation for Sunday's game against the Steelers, Mary Kay Cabot of The Cleveland Plain Dealer reports.",DT
-4578085,Jared Verse,Cleveland Browns,Active,2026-10-30T21:52Z,,,,,,"Verse (knee) does not carry an injury designation into Sunday's game against the Steelers, Mary Kay Cabot of The Cleveland Plain Dealer reports.",DE
 4242355,Jake Ferguson,Dallas Cowboys,Questionable,2026-11-04T18:51Z,Ankle,Sprain,Not Specified,2026-11-08,QUESTIONABLE,"Head coach Brian Schottenheimer said Ferguson (ankle) will work with the Cowboys' training staff during Wednesday's practice, Briana Aldridge of CBS News Texas reports.",TE
 4429676,Tyler Goodson,Dallas Cowboys,Active,2026-11-04T02:19Z,,,,,,Goodson took seven carries for 14 yards and caught both of his two targets for 19 yards during Sunday's 33-30 overtime loss versus the Cardinals.,RB
 4360967,Brevyn Spann-Ford,Dallas Cowboys,Active,2026-11-04T02:10Z,,,,,,Spann-Ford caught four of five targets for 31 yards during Sunday's 33-30 overtime loss versus the Cardinals.,TE
@@ -307,7 +307,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426350,Henry To'oTo'o,Houston Texans,Active,2026-10-28T04:04Z,,,,,,"To'oTo'o notched 10 tackles (three solo), including 0.5 sacks, in Sunday's Week 7 overtime loss to the Giants.",LB
 3116679,M.J. Stewart,Houston Texans,Active,2026-10-28T03:59Z,,,,,,"Stewart finished with 12 tackles (five solo), including 0.5 sacks, and a defensed pass in Sunday's overtime loss to the Giants.",S
 4241223,Jalen Pitre,Houston Texans,Questionable,2026-10-27T13:11Z,Shoulder - AC Joint,Sprain,Left,2026-11-08,QUESTIONABLE,questionable,S
-4432699,Blake Fisher,Houston Texans,Questionable,2026-10-27T13:11Z,Thumb,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
+4432699,Blake Fisher,Houston Texans,Questionable,2026-10-27T13:11Z,Thumb,Surgery,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
 3843945,Foster Moreau,Houston Texans,Active,2026-10-27T02:01Z,,,,,,Moreau played 21 offensive snaps and nine special-teams snaps in the Texans' 27-21 overtime loss to the Giants on Sunday.,TE
 2983509,Dare Ogunbowale,Houston Texans,Active,2026-10-27T01:55Z,,,,,,Ogunbowale didn't record an offensive touch or target in Sunday's 24-21 overtime loss to the Giants.,RB
 4366031,Tank Dell,Houston Texans,Active,2026-10-27T00:50Z,,,,,,Dell caught his only target for 43 yards and added a two-yard rush during Sunday's 27-21 overtime loss to the Giants.,WR
@@ -624,6 +624,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426686,Dane Belton,New York Jets,Active,2026-10-28T02:53Z,,,,,,Belton registered nine tackles (six solo) in Sunday's loss to the Dolphins.,S
 3925345,Minkah Fitzpatrick,New York Jets,Active,2026-10-28T02:46Z,,,,,,Fitzpatrick posted 10 tackles (six solo) Sunday in a loss to Miami.,S
 4039485,Jack Heflin,New York Jets,Active,2026-10-26T18:43Z,,,,,,,DT
+4685201,Tanner McKee,Philadelphia Eagles,Active,2026-11-04T19:24Z,,,,,,"McKee will shift to a backup role for Sunday's game against the Giants with the Eagles set to move forward with Joe Milton as their starting quarterback in Week 9, Adam Schefter of ESPN and Mike Garafolo of NFL Network report.",QB
+4360698,Joe Milton,Philadelphia Eagles,Active,2026-11-04T19:16Z,,,,,,"Milton is set to be the Eagles' starting quarterback Sunday against the Giants, Mike Garafolo of NFL Network reports.",QB
 4372414,Elijah Moore,Philadelphia Eagles,Active,2026-11-04T02:43Z,,,,,,Moore did not garner a target during Sunday night's 27-10 loss to the Commanders.,WR
 4241372,Hollywood Brown,Philadelphia Eagles,Active,2026-11-04T02:36Z,,,,,,Brown finished Sunday's loss to the Commanders with two catches for 17 yards on two targets.,WR
 4715355,Darius Cooper,Philadelphia Eagles,Active,2026-11-04T02:21Z,,,,,,Cooper caught two of six targets for 19 yards Sunday in a Week 8 loss to Washington.,WR
@@ -636,7 +638,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685279,Jaydon Blue,Philadelphia Eagles,Active,2026-11-03T03:45Z,,,,,,Blue caught his lone target for nine yards in Sunday night's 27-10 loss to the Commanders.,RB
 3050478,Jake Elliott,Philadelphia Eagles,Active,2026-11-03T03:27Z,,,,,,Elliott went 1-for-2 on field-goal tries and hit his only extra-point attempt in Sunday's 27-10 loss to the Commanders.,PK
 4241555,Elijah Mitchell,Philadelphia Eagles,Active,2026-11-03T02:48Z,,,,,,"Mitchell reverted to the Eagles' practice squad Monday, per the NFL's transaction log.",RB
-4685201,Tanner McKee,Philadelphia Eagles,Active,2026-11-02T21:37Z,,,,,,"Head coach Nick Sirianni said Monday that McKee will remain the Eagles' starting quarterback, Zach Berman of The Athletic reports. ""Tanner's our guy. We're not making any changes there,"" Sirianni said.",QB
 4430814,Jake Majors,Philadelphia Eagles,Active,2026-11-02T19:19Z,,,,,,,C
 3929630,Saquon Barkley,Philadelphia Eagles,Active,2026-11-02T14:47Z,,,,,,"Barkley said after Sunday's 27-10 loss to the Commanders that he has received assurances from the Eagles front office that he will remain with the team beyond the Nov. 10 trade deadline, Tim McManus of ESPN.com reports. ""The whole time my mindset was, we have a little issue going on right now and I ",RB
 4870795,Makai Lemon,Philadelphia Eagles,Active,2026-11-02T04:53Z,,,,,,Lemon caught six of nine targets for 57 yards in Sunday's 27-10 loss to the Commanders.,WR
@@ -648,7 +649,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3916409,Jonathan Greenard,Philadelphia Eagles,Active,2026-10-30T19:58Z,,,,,,,LB
 3139368,Marcus Epps,Philadelphia Eagles,Active,2026-10-30T19:58Z,,,,,,,S
 4685759,Jalen Carter,Philadelphia Eagles,Active,2026-10-29T21:52Z,,,,,,,DT
-4431573,Smael Mondon Jr.,Philadelphia Eagles,Active,2026-10-29T21:44Z,,,,,,,LB
 4692628,Doneiko Slaughter,Pittsburgh Steelers,Out,2026-11-03T13:08Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,out,CB
 4035656,Ben Skowronek,Pittsburgh Steelers,Out,2026-11-03T13:07Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,out,WR
 4567979,Brandin Echols,Pittsburgh Steelers,Out,2026-11-03T13:06Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,out,CB
@@ -774,7 +774,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4573318,Dorian Mausi,Tennessee Titans,Injured Reserve,2026-11-01T02:07Z,Foot,Not Specified,Not Specified,2026-11-15,IR-R,"Mausi (foot) has been ruled out for Sunday's game against the Bengals, Jim Wyatt of the Titans' official site reports.",LB
 4373956,Jonah Laulu,Tennessee Titans,Active,2026-10-29T00:34Z,,,,,,"The Titans claimed Laulu off waivers from the Raiders on Wednesday, Jim Wyatt of the Titans' official site reports.",DT
 4036134,Amani Hooker,Tennessee Titans,Active,2026-10-28T01:37Z,,,,,,Hooker posted five tackles (two solo) during Sunday's 27-24 loss to Cleveland.,S
-3925354,Daron Payne,Washington Commanders,Injured Reserve,2026-11-04T19:13Z,Foot,Surgery,Left,2027-02-15,IR,"Payne (foot) underwent season-ending surgery Tuesday, Ben Standig of The Team 980 Washington D.C. reports.",DT
+3925354,Daron Payne,Washington Commanders,Injured Reserve,2026-11-04T19:13Z,Foot,Surgery,Left,2027-02-15,IR,"Payne (foot) underwent season-ending surgery Wednesday, Ben Standig of The Team 980 Washington D.C. reports.",DT
 3127586,Jeremy McNichols,Washington Commanders,Injured Reserve,2026-11-04T17:09Z,Foot,Not Specified,Not Specified,2027-02-15,IR,"McNichols, who suffered a foot injury Sunday against the Eagles that may require surgery, is out for the season, Ian Rapoport of NFL Network reports.",RB
 4259491,Javon Kinlaw,Washington Commanders,Injured Reserve,2026-11-04T16:10Z,Knee - MCL,Surgery,Not Specified,2027-02-15,IR,"Kinlaw underwent season-ending surgery Tuesday to repair his MCL, Nicki Jhabvala of The Athletic reports.",DT
 5151317,Robert Henry Jr.,Washington Commanders,Active,2026-11-04T00:06Z,,,,,,The Commanders claimed Henry off waivers from the Seahawks on Tuesday.,RB
