@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360689,Tyler Shough,New Orleans Saints,Active,2026-10-25T18:17Z,,,,,,Shough completed 30 of 38 passes for 278 yards and one touchdown with one interception in Sunday's 16-10 loss to the Steelers. He added seven rushing yards on three carries.,QB
 4361370,Chris Olave,New Orleans Saints,Active,2026-10-25T18:10Z,,,,,,Olave caught six of 10 targets for 56 yards in Sunday's 16-10 loss to the Steelers.,WR
 3931399,Justin Reid,New Orleans Saints,Questionable,2026-10-25T15:28Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,Reid (concussion) has been ruled out for the remainder of Sunday's game against the Steelers in Paris.,S
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-11-04T23:18Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-11-04T23:17Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
 4696981,Cam Skattebo,New York Giants,Questionable,2026-11-04T21:31Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Skattebo (hamstring) did not participate in Wednesday's practice, Dan Salomone of the Giants' official site reports.",RB
 4373809,Jevon Holland,New York Giants,Active,2026-11-04T21:29Z,,,,,,,S
 4259566,Andrew Thomas,New York Giants,Questionable,2026-11-04T21:27Z,Groin,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
@@ -624,12 +624,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 14958,Demario Davis,New York Jets,Active,2026-10-28T03:09Z,,,,,,Davis finished Sunday's Week 7 loss to Miami with three tackles (two solo) and one defensed pass.,LB
 4361331,Jamien Sherwood,New York Jets,Active,2026-10-28T02:58Z,,,,,,Sherwood totaled eight tackles (four solo) and two defensed passes Sunday in a loss to Miami.,LB
 4426686,Dane Belton,New York Jets,Active,2026-10-28T02:53Z,,,,,,Belton registered nine tackles (six solo) in Sunday's loss to the Dolphins.,S
+4428850,Dontayvion Wicks,Philadelphia Eagles,Questionable,2026-11-04T23:29Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Wicks (ankle) was a non-participant at Wednesday's practice.,WR
+4241478,DeVonta Smith,Philadelphia Eagles,Questionable,2026-11-04T23:25Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Smith (hamstring) didn't practice Wednesday.,WR
+3929630,Saquon Barkley,Philadelphia Eagles,Questionable,2026-11-04T23:20Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Barkley (hamstring/back) officially didn't practice Wednesday.,RB
 3916409,Jonathan Greenard,Philadelphia Eagles,Questionable,2026-11-04T23:18Z,Ankle,,,2026-11-08,QUESTIONABLE,questionable,LB
 4571162,Jalyx Hunt,Philadelphia Eagles,Questionable,2026-11-04T23:18Z,Knee,,,2026-11-08,QUESTIONABLE,questionable,LB
 3050478,Jake Elliott,Philadelphia Eagles,Questionable,2026-11-04T23:17Z,Ankle,,,2026-11-08,QUESTIONABLE,questionable,PK
-3929630,Saquon Barkley,Philadelphia Eagles,Questionable,2026-11-04T23:16Z,Hamstring,,,2026-11-08,QUESTIONABLE,questionable,RB
-4428850,Dontayvion Wicks,Philadelphia Eagles,Questionable,2026-11-04T20:43Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Wicks (ankle) wasn't spotted at Wednesday's practice, Brooks Kubena of The Athletic reports.",WR
-4241478,DeVonta Smith,Philadelphia Eagles,Questionable,2026-11-04T20:35Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Smith (hamstring) wasn't spotted at Wednesday's practice, Brooks Kubena of The Athletic reports.",WR
 4685201,Tanner McKee,Philadelphia Eagles,Active,2026-11-04T19:24Z,,,,,,"McKee will shift to a backup role for Sunday's game against the Giants with the Eagles set to move forward with Joe Milton as their starting quarterback in Week 9, Adam Schefter of ESPN and Mike Garafolo of NFL Network report.",QB
 4360698,Joe Milton,Philadelphia Eagles,Active,2026-11-04T19:16Z,,,,,,"Milton is set to be the Eagles' starting quarterback Sunday against the Giants, Mike Garafolo of NFL Network reports.",QB
 4372414,Elijah Moore,Philadelphia Eagles,Active,2026-11-04T02:43Z,,,,,,Moore did not garner a target during Sunday night's 27-10 loss to the Commanders.,WR
@@ -674,6 +674,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-10-25T12:26Z,,,,,,"Rudolph is active for Sunday's game against the Saints in Paris, Teresa Varley of the Steelers' official site reports.",QB
 3045282,T.J. Watt,Pittsburgh Steelers,Active,2026-10-23T15:41Z,,,,,,Watt (calf) practiced fully Friday and doesn't carry an injury designation into Sunday's game against the Saints.,LB
 3047495,Sebastian Joseph-Day,Pittsburgh Steelers,Injured Reserve,2026-10-23T00:28Z,Triceps,Not Specified,Not Specified,2026-11-27,IR,"Joseph-Day (triceps) was placed on injured reserve by the Steelers on Thursday, Teresa Varley of the team's official website reports.",DT
+3057524,Siran Neal,San Francisco 49ers,Questionable,2026-11-04T23:29Z,Knee,,,2026-11-08,QUESTIONABLE,questionable,S
+3895856,Christian Kirk,San Francisco 49ers,Questionable,2026-11-04T23:28Z,Knee,,,2026-11-08,QUESTIONABLE,questionable,WR
 3117251,Christian McCaffrey,San Francisco 49ers,Questionable,2026-11-04T21:57Z,Hamstring,Not Specified,Left,2026-11-08,QUESTIONABLE,"McCaffrey (hamstring) said Wednesday that he has a chance to practice this week and play Sunday against the Raiders, Nick Wagoner of ESPN.com reports.",RB
 3126486,Deebo Samuel Sr.,San Francisco 49ers,Questionable,2026-11-04T20:59Z,Hamstring,Not Specified,Right,2026-11-08,QUESTIONABLE,"Samuel (hamstring) won't take part in practice Wednesday, Cam Inman of The San Jose Mercury News reports.",WR
 16737,Mike Evans,San Francisco 49ers,Questionable,2026-11-04T20:53Z,Achilles,Tendinitis,Right,2026-11-08,QUESTIONABLE,"Head coach Kyle Shanahan said Evans (Achilles) won't practice Wednesday, NFL reporter Andrew Siciliano reports.",WR
@@ -684,7 +686,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4693337,Marques Sigle,San Francisco 49ers,Questionable,2026-10-27T13:11Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,S
 4241807,Garret Wallow,San Francisco 49ers,Questionable,2026-10-27T13:11Z,Hamstring,Strain,Not Specified,2026-11-08,QUESTIONABLE,questionable,LB
 3116097,Luke Gifford,San Francisco 49ers,Questionable,2026-10-27T13:11Z,Groin,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,LB
-3895856,Christian Kirk,San Francisco 49ers,Active,2026-10-26T23:48Z,,,,,,Kirk played 20 snaps on offense but didn't show up in the box score otherwise during Sunday's 29-20 loss to Atlanta.,WR
 16731,Brandin Cooks,San Francisco 49ers,Active,2026-10-26T23:42Z,,,,,,Cooks caught one of three targets for 13 yards during Sunday's 29-20 loss to Atlanta.,WR
 4575665,Jacob Cowing,San Francisco 49ers,Active,2026-10-26T23:36Z,,,,,,"Cowing caught three of five passes for 38 yards, added a 10-yard carry and returned one kickoff for 28 yards during Sunday's 29-20 loss to the Falcons.",WR
 4685397,Jordan James,San Francisco 49ers,Active,2026-10-26T23:14Z,,,,,,"James logged a six-yard carry, turned his lone target into an 11-yard catch and registered 119 yards on four kickoff returns during the 49ers' 29-20 loss to the Falcons on Sunday.",RB
@@ -698,7 +699,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431466,Jordan Watkins,San Francisco 49ers,Active,2026-10-26T00:35Z,,,,,,Watkins brought in three of six targets for 56 yards in the 49ers' 29-20 loss to the Falcons on Sunday.,WR
 4696044,Kaelon Black,San Francisco 49ers,Active,2026-10-26T00:29Z,,,,,,Black rushed 12 times for 63 yards and a touchdown and brought in one of three targets for minus-4 yards in the 49ers' 29-20 loss to the Falcons on Sunday. He also lost a fumble and returned one kickoff for 34 yards.,RB
 3040151,George Kittle,San Francisco 49ers,Active,2026-10-25T22:55Z,,,,,,Kittle brought in eight of 10 targets for 88 yards and lost a fumble in the 49ers' 29-20 loss to the Falcons on Sunday.,TE
-3057524,Siran Neal,San Francisco 49ers,Active,2026-10-25T15:46Z,,,,,,,S
 3924327,Drew Lock,Seattle Seahawks,Questionable,2026-11-04T19:03Z,Elbow,Not Specified,Right,2026-11-08,QUESTIONABLE,"Lock (elbow) is slated to start Sunday's game against the Cardinals, perNFL reporter Andrew Siciliano.",QB
 3912547,Sam Darnold,Seattle Seahawks,Out,2026-11-04T19:02Z,Quadriceps,Not Specified,Not Specified,2026-11-15,OUT,"Head coach Mike Macdonald announced that Darnold won't play Sunday against the Cardinals due to a quadriceps injury, NFL reporter Andrew Siciliano reports.",QB
 4362851,Ernest Jones IV,Seattle Seahawks,Active,2026-11-04T04:32Z,,,,,,Jones recorded 13 tackles and a defensed pass in Monday's Week 8 loss to Chicago.,LB
