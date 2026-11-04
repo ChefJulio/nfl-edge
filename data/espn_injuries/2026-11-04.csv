@@ -274,6 +274,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431615,Tyleik Williams,Detroit Lions,Active,2026-10-29T20:26Z,,,,,,,DT
 5123663,Isaac TeSlaa,Detroit Lions,Active,2026-10-27T01:40Z,,,,,,TeSlaa caught one of his two targets for 10 yards in the Lions' 20-17 win over the Packers on Sunday.,WR
 3910229,Rock Ya-Sin,Detroit Lions,Active,2026-10-24T01:58Z,,,,,,Ya-Sin (hamstring) does not have an injury designation for Sunday's game against the Packers.,CB
+4361423,Micah Parsons,Green Bay Packers,Out,2026-11-04T17:59Z,Knee - ACL,Surgery,Left,2026-11-25,PUP-R,"Packers head coach Matt LaFleur said that Parsons (knee) will be designated for return from the PUP list and will take part in individual work during Wednesday's practice, Matt Schneidman of The Athletic reports.",DE
 4239947,Isaiah McDuffie,Green Bay Packers,Active,2026-11-04T04:19Z,,,,,,McDuffie finished last Thursday's 27-19 win over Carolina with 10 tackles (three solo).,LB
 4567406,Ty'Ron Hopper,Green Bay Packers,Active,2026-11-04T04:09Z,,,,,,"Hopper recorded eight tackles, including 1.0 sacks, and three defensed passes, including an interception, in last Thursday's 27-19 victory over Carolina.",LB
 4428863,Evan Williams,Green Bay Packers,Active,2026-11-04T03:58Z,,,,,,Williams recorded 10 total tackles (seven solo) during Thursday night's 27-19 win over the Panthers.,S
@@ -285,7 +286,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360887,Donovan Jennings,Green Bay Packers,Active,2026-11-03T12:58Z,,,,,,,G
 4248528,Christian Watson,Green Bay Packers,Questionable,2026-11-02T20:13Z,Ribs,Fracture,,2026-11-08,QUESTIONABLE,"Packers passing game coordinator Jason Vrable said Monday that Watson (ribs) is sore but ""doing great,"" Matt Schneidman of The Athletic reports.",WR
 4047365,Josh Jacobs,Green Bay Packers,Active,2026-11-02T19:48Z,,,,,,"Head coach Matt LaFleur said Monday that the Packers are aware of the prior physical abuse allegations involving Jacobs that recently surfaced and ""anticipate him being a member"" of the team moving forward, Ryan Wood of USA Today reports.",RB
-4361423,Micah Parsons,Green Bay Packers,Out,2026-11-02T19:39Z,Knee - ACL,Surgery,Left,2026-11-25,PUP-R,"Head coach Matt LaFleur said Monday that the Packers' ""intention"" is for Parsons (knee) to resume practicing in Week 9, Weston Hodkiewicz of the team's official site reports. ""It's gonna be a process trying to get him back,"" LaFleur said. ""We're hopeful he'll be able to get out there sometime this w",DE
 4429023,MarShawn Lloyd,Green Bay Packers,Active,2026-10-30T04:43Z,,,,,,Lloyd rushed three times for seven yards and brought in his only target for nine yards in the Packers' 27-19 win over the Panthers on Thursday.,RB
 4869461,Trey Smack,Green Bay Packers,Active,2026-10-30T04:34Z,,,,,,Smack converted three of four extra-point tries and didn't attempt a field goal Thursday in a 27-19 win over Carolina.,PK
 4036378,Jordan Love,Green Bay Packers,Active,2026-10-30T04:18Z,,,,,,Love completed 30 of 41 passes for 288 yards with three touchdowns and one interception and recovered a fumble in the Packers' 27-19 win over the Panthers on Thursday.,QB
@@ -324,6 +324,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4258173,Nico Collins,Houston Texans,Active,2026-10-25T21:20Z,,,,,,Collins caught two of five targets for six yards in Sunday's 27-21 overtime loss to the Giants.,WR
 4362504,Brevin Jordan,Houston Texans,Active,2026-10-24T00:15Z,,,,,,"Jordan (foot) does not have any injury designation ahead of Sunday's game against the Giants, Adam Caplan of SiriusXM NFL Radio reports.",TE
 4360189,Logan Hall,Houston Texans,Active,2026-10-22T20:47Z,,,,,,,DE
+4360078,Alec Pierce,Indianapolis Colts,Injured Reserve,2026-11-04T17:54Z,Heel,Not Specified,Left,2026-11-08,IR,"When asked Wednesday when Pierce (heel) might be able to resume to practice, Colts head coach Shane Steichen noted that he ""can't put a timetable on it right now,"" Kevin Bowen of 107.5 The Fan Indianapolis reports.",WR
 3051889,Laquon Treadwell,Indianapolis Colts,Active,2026-11-04T02:56Z,,,,,,Treadwell caught one of two targets for 18 yards during Sunday's 42-7 loss to the Jaguars.,WR
 4427635,Adetomiwa Adebawore,Indianapolis Colts,Active,2026-11-03T23:44Z,,,,,,"Adebawore agreed Tuesday with the Colts on a two-year, $35 million contract extension, Tom Pelissero of Netflix reports.",DT
 4682909,Justin Walley,Indianapolis Colts,Questionable,2026-11-03T13:03Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,CB
@@ -348,7 +349,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4692033,Tim Smith,Indianapolis Colts,Active,2026-10-29T20:02Z,,,,,,,DT
 4870598,CJ Allen,Indianapolis Colts,Active,2026-10-29T00:04Z,,,,,,Allen (ankle) was listed as a full participant in Wednesday's walkthrough.,LB
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Active,2026-10-28T02:42Z,,,,,,Davis-Gaither recorded seven tackles (three solo) in Sunday's loss to Minnesota.,LB
-4905664,A.J. Haulcy,Indianapolis Colts,Active,2026-10-28T02:15Z,,,,,,Haulcy produced nine tackles (five solo) in a loss to the Vikings on Sunday.,S
 4882093,Bhayshul Tuten,Jacksonville Jaguars,Questionable,2026-11-04T15:38Z,Ankle,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,"Jaguars head coach Liam Coen said Wednesday that Tuten (ankle/foot) is feeling better, but the running back's status for Thursday's contest versus the Ravens is expected to come down to a game-time decision, John Shipley of SI.com reports.",RB
 3050073,Foyesade Oluokun,Jacksonville Jaguars,Active,2026-11-04T03:37Z,,,,,,"Oluokun recorded nine total tackles (five solo), including 1.0 sacks, during Sunday's 42-7 win against the Colts.",LB
 4879194,Josh Cameron,Jacksonville Jaguars,Active,2026-11-04T03:37Z,,,,,,Cameron did not catch his lone target in a 42-7 rout of the Colts on Sunday. He returned one punt for six yards and one kickoff for 18 yards.,WR
@@ -388,7 +388,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428331,Rashee Rice,Kansas City Chiefs,Active,2026-11-02T02:30Z,,,,,,Rice caught seven of eight targets for 53 yards and a touchdown in Sunday's 28-24 loss to the Broncos.,WR
 4567048,Kenneth Walker III,Kansas City Chiefs,Active,2026-11-02T02:25Z,,,,,,Walker carried the ball 21 times for 69 yards and caught four of five targets for 15 yards in Sunday's 28-24 loss to the Broncos.,RB
 3139477,Patrick Mahomes,Kansas City Chiefs,Active,2026-11-02T02:15Z,,,,,,Mahomes completed 30 of 41 passes for 321 yards and three touchdowns in Sunday's 28-24 loss to the Broncos. He added six rushing yards on two carries.,QB
-4871063,Peter Woods,Kansas City Chiefs,Questionable,2026-11-01T23:54Z,Neck,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Woods (neck) has been ruled out for the rest of Sunday's contest against the Broncos.,DT
+4871063,Peter Woods,Kansas City Chiefs,Questionable,2026-11-01T23:54Z,Neck,Stinger,Not Specified,2026-11-08,QUESTIONABLE,Woods (neck) has been ruled out for the rest of Sunday's contest against the Broncos.,DT
 4567747,Garrett Nussmeier,Kansas City Chiefs,Active,2026-11-01T20:25Z,,,,,,"Nussmeier (coach's decision) is inactive for Sunday's game against Denver, though he will be available as the team's emergency quarterback.",QB
 5081927,R Mason Thomas,Kansas City Chiefs,Active,2026-10-31T23:13Z,,,,,,,DE
 4040432,L'Jarius Sneed,Kansas City Chiefs,Injured Reserve,2026-10-31T23:04Z,Knee,Not Specified,Not Specified,2026-11-26,IR,The Chiefs placed Sneed (knee) on injured reserve Saturday.,CB
@@ -599,6 +599,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242547,Paulson Adebo,New York Giants,Active,2026-10-25T15:37Z,,,,,,"Adebo (knee) is active Week 7 against the Texans, Dan Salomone of the Giants' official site reports.",CB
 3929950,Tremaine Edmunds,New York Giants,Injured Reserve,2026-10-24T23:28Z,Chest,Not Specified,Left,2027-02-15,IR,"Edmunds (chest) was placed on injured reserve Saturday, Dan Duggan of The Athletic reports.",LB
 4259566,Andrew Thomas,New York Giants,Active,2026-10-24T02:04Z,,,,,,Thomas (groin) does not have an injury designation against the Texans on Sunday.,OT
+4427366,Breece Hall,New York Jets,Questionable,2026-11-04T17:36Z,Quadriceps,Not Specified,Right,2026-11-08,QUESTIONABLE,"Hall (quadriceps) is slated to be limited at practice Wednesday, ack Rosenblatt of The Athletic reports.",RB
 4569618,Garrett Wilson,New York Jets,Questionable,2026-11-04T17:25Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"Wilson, who is in the NFL's concussion protocol, is considered day-to-day,  Zack Rosenblatt of The Athletic reports.",WR
 4373656,Max Mitchell,New York Jets,Injured Reserve,2026-11-04T01:56Z,Concussion,Concussion,Not Specified,2026-12-13,IR,"The Jets placed Mitchell (concussion) on their injured reserve list Tuesday, Amanda Vogt of the team's official site reports.",OT
 4362094,Joseph Ossai,New York Jets,Questionable,2026-11-03T13:03Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,DE
@@ -610,7 +611,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3134353,Tim Patrick,New York Jets,Active,2026-11-02T19:16Z,,,,,,,WR
 4373951,Kohl Levao,New York Jets,Active,2026-11-02T19:16Z,,,,,,,G
 4570470,Nahshon Wright,New York Jets,Active,2026-11-02T19:16Z,,,,,,,CB
-4427366,Breece Hall,New York Jets,Questionable,2026-11-02T15:35Z,Quadriceps,Not Specified,Right,2026-11-08,QUESTIONABLE,"Hall (quadriceps) is considered ""good to go"" and is expected to return to action in next Sunday's game against the Chiefs, Ian Rapoport of NFL Network reports.",RB
 4569371,Isaiah Williams,New York Jets,Active,2026-11-02T04:55Z,,,,,,Williams caught an 18-yard touchdown on his lone target in Sunday's 38-33 loss to the Raiders.,WR
 4723820,Omar Cooper Jr.,New York Jets,Active,2026-11-02T03:19Z,,,,,,Cooper did not garner a target during Sunday's 38-33 loss to the Raiders.,WR
 15864,Geno Smith,New York Jets,Active,2026-11-01T22:50Z,,,,,,"Smith completed 20 of 32 passes for 290 yards, two touchdowns and one interception in Sunday's 38-33 loss to the Raiders. He also rushed once for four yards.",QB
