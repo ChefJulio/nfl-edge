@@ -214,7 +214,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5095865,Shavon Revel Jr.,Dallas Cowboys,Active,2026-11-02T18:50Z,,,,,,,CB
 5083754,Ryan Flournoy,Dallas Cowboys,Active,2026-11-02T04:24Z,,,,,,Flournoy caught three of four targets for 38 yards and a touchdown in Sunday's 33-30 overtime loss to the Cardinals.,WR
 2577417,Dak Prescott,Dallas Cowboys,Active,2026-11-02T00:59Z,,,,,,"Prescott was 19-for-29 passing for 195 yards, one touchdown and no interceptions while rushing seven times for 20 yards and one more TD during Sunday's 33-30 overtime defeat to the Cardinals.",QB
-4426354,George Pickens,Dallas Cowboys,Active,2026-11-02T00:43Z,Hamstring,,,2026-11-08,QUESTIONABLE,Pickens tallied two catches (on four targets) for 48 yards during Sunday's 33-30 overtime loss to the Cardinals.,WR
+4426354,George Pickens,Dallas Cowboys,Active,2026-11-02T00:43Z,,,,,,Pickens tallied two catches (on four targets) for 48 yards during Sunday's 33-30 overtime loss to the Cardinals.,WR
 4361579,Javonte Williams,Dallas Cowboys,Active,2026-11-02T00:35Z,,,,,,Williams churned out 56 yards on 24 carries and notched one catch (on two targets) for one yard during Sunday's 33-30 overtime defeat to the Cardinals.,RB
 4241389,CeeDee Lamb,Dallas Cowboys,Active,2026-11-02T00:27Z,,,,,,Lamb recorded seven catches (on 11 targets) for 58 yards during Sunday's 33-30 overtime loss to the Cardinals.,WR
 4426506,Joey Porter Jr.,Dallas Cowboys,Active,2026-11-01T19:24Z,,,,,,,CB
@@ -295,7 +295,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4259493,Keisean Nixon,Green Bay Packers,Active,2026-10-29T23:20Z,,,,,,"Nixon (shoulder) is active for Thursday's game against Carolina, Mike Spofford of the team's official site reports.",CB
 4887255,Anthony Campbell,Green Bay Packers,Active,2026-10-29T22:54Z,,,,,,,DT
 4361776,Brenton Cox Jr.,Green Bay Packers,Active,2026-10-29T22:54Z,,,,,,,DE
-4242390,Aaron Banks,Green Bay Packers,Active,2026-10-28T19:05Z,,,,,,,G
+4242390,Aaron Banks,Green Bay Packers,Active,2026-10-28T19:05Z,Knee,,,2026-11-08,QUESTIONABLE,,G
 4241470,Xavier McKinney,Green Bay Packers,Active,2026-10-28T00:36Z,,,,,,McKinney posted 10 tackles (four solo) during Sunday's 20-17 loss to the Lions.,S
 4259305,Bo Melton,Green Bay Packers,Active,2026-10-27T01:50Z,,,,,,Melton caught one of his two targets for four yards and logged a 24-yard kickoff return in the Packers' 20-17 loss to the Lions on Sunday.,WR
 4431487,Savion Williams,Green Bay Packers,Active,2026-10-26T23:26Z,,,,,,Williams caught three passes on as many targets for 47 yards and turned two carries into four yards during the Packers' 20-17 loss to the Lions on Sunday.,WR
@@ -374,9 +374,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686248,Nate Boerkircher,Jacksonville Jaguars,Active,2026-11-02T04:46Z,,,,,,Boerkircher caught his lone target for a 31-yard touchdown in Sunday's 42-7 win over the Colts.,TE
 4360310,Trevor Lawrence,Jacksonville Jaguars,Active,2026-11-02T01:52Z,,,,,,Lawrence completed 10 of 14 passes for 210 yards with three touchdowns and no interceptions while rushing three times for 10 yards in the Jaguars' 42-7 win over the Colts on Sunday.,QB
 4432620,Parker Washington,Jacksonville Jaguars,Active,2026-11-02T01:40Z,,,,,,Washington brought in one of two targets for 16 yards and rushed once for 10 yards in the Jaguars' 42-7 win over the Colts on Sunday.,WR
+4428331,Rashee Rice,Kansas City Chiefs,Questionable,2026-11-04T21:47Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Rice (hamstring/knee) was limited in Wednesday's practice.,WR
+15847,Travis Kelce,Kansas City Chiefs,Questionable,2026-11-04T21:41Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Kelce (ankle) was listed as limited in Wednesday's practice.,TE
 4372716,Nikko Remigio,Kansas City Chiefs,Questionable,2026-11-04T21:34Z,Hip,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,WR
-4428331,Rashee Rice,Kansas City Chiefs,Questionable,2026-11-04T21:33Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,WR
-15847,Travis Kelce,Kansas City Chiefs,Questionable,2026-11-04T21:33Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,TE
 3055899,Harrison Butker,Kansas City Chiefs,Active,2026-11-04T18:05Z,,,,,,"Head coach Andy Reid said that Butker will remain the Chiefs' kicker for Sunday's game against the Jets, Nate Taylor of ESPN.com reports.",PK
 4880124,Mansoor Delane,Kansas City Chiefs,Questionable,2026-11-03T13:03Z,Shoulder,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,CB
 4912218,Cyrus Allen,Kansas City Chiefs,Active,2026-11-03T03:41Z,,,,,,Allen caught two of three targets for 20 yards in Sunday's 28-24 loss to the Broncos.,WR
@@ -549,8 +549,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 16910,DaQuan Jones,New England Patriots,Active,2026-10-30T20:06Z,,,,,,,DT
 16771,Morgan Moses,New England Patriots,Active,2026-10-30T20:06Z,,,,,,,OT
 4611993,Joshua Farmer,New England Patriots,Active,2026-10-26T18:40Z,,,,,,,DT
+4880281,Jordyn Tyson,New Orleans Saints,Injured Reserve,2026-11-04T21:41Z,Hamstring,Strain,Right,2026-11-08,IR-R,"Tyson (hamstring) turned in a limited practice Wednesday, Adam Schefter of ESPN reports.",WR
 4239996,Travis Etienne Jr.,New Orleans Saints,Injured Reserve,2026-11-04T21:38Z,Hamstring,Strain,Left,2026-11-08,IR,"Head coach Kellen Moore said Wednesday that the Saints haven't opened Etienne's (hamstring) practice window just yet, Jeff Nowak of WWL Louisiana reports.",RB
-4880281,Jordyn Tyson,New Orleans Saints,Injured Reserve,2026-11-04T16:18Z,Hamstring,Strain,Right,2026-11-08,IR-R,"Tyson (hamstring) is slated to resume practicing with the Saints on Wednesday, Nick Underhill of NewOrleans.Football reports.",WR
 5208518,Charlie Smyth,New Orleans Saints,Active,2026-11-04T00:01Z,,,,,,"The Saints plan to elevate or sign Smyth off their practice squad to handle kicking duties in Sunday's game against the Browns, Ross Jackson of WWL Louisiana reports.",PK
 3918310,Carl Granderson,New Orleans Saints,Active,2026-10-28T04:47Z,,,,,,"Granderson totaled four tackles, including 1.5 sacks, in Sunday's Week 7 loss to Pittsburgh.",DE
 4241993,Pete Werner,New Orleans Saints,Active,2026-10-28T04:42Z,,,,,,Werner finished Sunday's loss to the Steelers with eight tackles (three solo).,LB
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3931399,Justin Reid,New Orleans Saints,Questionable,2026-10-25T15:28Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,Reid (concussion) has been ruled out for the remainder of Sunday's game against the Steelers in Paris.,S
 5081999,CJ Donaldson,New Orleans Saints,Questionable,2026-10-25T14:09Z,Shoulder,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Donaldson (shoulder) is questionable to return to Sunday's game against the Steelers in Paris.,RB
 4426339,Spencer Rattler,New Orleans Saints,Active,2026-10-25T12:45Z,,,,,,"Rattler is active and will remain the Saints' No. 2 quarterback for Sunday's game against the Steelers in Paris, Ross Jackson of WWL Louisiana reports.",QB
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-11-04T21:47Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-11-04T21:50Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
 4696981,Cam Skattebo,New York Giants,Questionable,2026-11-04T21:31Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Skattebo (hamstring) did not participate in Wednesday's practice, Dan Salomone of the Giants' official site reports.",RB
 4373809,Jevon Holland,New York Giants,Active,2026-11-04T21:29Z,,,,,,,S
 4259566,Andrew Thomas,New York Giants,Questionable,2026-11-04T21:27Z,Groin,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
@@ -599,13 +599,15 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361050,Isaiah Likely,New York Giants,Active,2026-10-26T02:03Z,,,,,,Likely caught two of four targets for 12 yards in Sunday's 27-21 overtime win over the Texans.,TE
 4682648,Malachi Fields,New York Giants,Active,2026-10-26T00:00Z,,,,,,Fields caught four of five targets for 83 yards in Sunday's 27-21 overtime win over Houston.,WR
 4433970,J.J. McCarthy,New York Giants,Active,2026-10-25T23:50Z,,,,,,McCarthy completed 20 of 28 passes for 252 yards and no touchdowns or interceptions in Sunday's 27-21 overtime win over the Texans. He added one yard on his only carry.,QB
+4683815,Trevin Wallace,New York Jets,Questionable,2026-11-04T21:47Z,Groin,,,2026-11-08,QUESTIONABLE,questionable,LB
+3117255,Harrison Phillips,New York Jets,Questionable,2026-11-04T21:46Z,Ankle,,,2026-11-08,QUESTIONABLE,questionable,DT
 4685248,David Bailey,New York Jets,Questionable,2026-11-04T20:39Z,Groin,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Bailey (groin) was a limited participant in practice Wednesday, Zack Rosenblatt of The Athletic reports.",LB
 4427366,Breece Hall,New York Jets,Questionable,2026-11-04T17:36Z,Quadriceps,Not Specified,Right,2026-11-08,QUESTIONABLE,"Hall (quadriceps) is slated to be limited at practice Wednesday, ack Rosenblatt of The Athletic reports.",RB
 4569618,Garrett Wilson,New York Jets,Questionable,2026-11-04T17:25Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"Wilson, who is in the NFL's concussion protocol, is considered day-to-day,  Zack Rosenblatt of The Athletic reports.",WR
 4373656,Max Mitchell,New York Jets,Injured Reserve,2026-11-04T01:56Z,Concussion,Concussion,Not Specified,2026-12-13,IR,"The Jets placed Mitchell (concussion) on their injured reserve list Tuesday, Amanda Vogt of the team's official site reports.",OT
 4362094,Joseph Ossai,New York Jets,Questionable,2026-11-03T13:03Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,DE
 4695404,Isaiah Davis,New York Jets,Active,2026-11-03T03:01Z,,,,,,Davis rushed five times for 15 yards in Sunday's 38-33 loss to the Raiders.,RB
-4808766,Mason Taylor,New York Jets,Active,2026-11-03T02:50Z,,,,,,Taylor caught three of five targets for 19 yards in Sunday's 38-33 loss to the Raiders.,TE
+4808766,Mason Taylor,New York Jets,Active,2026-11-03T02:50Z,Back,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Taylor caught three of five targets for 19 yards in Sunday's 38-33 loss to the Raiders.,TE
 5083315,Kenyon Sadiq,New York Jets,Active,2026-11-03T02:48Z,,,,,,Sadiq caught one of two targets for 22 yards in Sunday's 38-33 loss to the Raiders.,TE
 3124679,Jason Sanders,New York Jets,Active,2026-11-03T01:46Z,,,,,,Sanders made all four of his field-goal attempts and three PATs in the Jets' 38-33 loss to the Raiders on Sunday.,PK
 3134353,Tim Patrick,New York Jets,Active,2026-11-02T19:16Z,,,,,,,WR
@@ -622,8 +624,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 14958,Demario Davis,New York Jets,Active,2026-10-28T03:09Z,,,,,,Davis finished Sunday's Week 7 loss to Miami with three tackles (two solo) and one defensed pass.,LB
 4361331,Jamien Sherwood,New York Jets,Active,2026-10-28T02:58Z,,,,,,Sherwood totaled eight tackles (four solo) and two defensed passes Sunday in a loss to Miami.,LB
 4426686,Dane Belton,New York Jets,Active,2026-10-28T02:53Z,,,,,,Belton registered nine tackles (six solo) in Sunday's loss to the Dolphins.,S
-3925345,Minkah Fitzpatrick,New York Jets,Active,2026-10-28T02:46Z,,,,,,Fitzpatrick posted 10 tackles (six solo) Sunday in a loss to Miami.,S
-4039485,Jack Heflin,New York Jets,Active,2026-10-26T18:43Z,,,,,,,DT
 4428850,Dontayvion Wicks,Philadelphia Eagles,Questionable,2026-11-04T20:43Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Wicks (ankle) wasn't spotted at Wednesday's practice, Brooks Kubena of The Athletic reports.",WR
 4241478,DeVonta Smith,Philadelphia Eagles,Questionable,2026-11-04T20:35Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Smith (hamstring) wasn't spotted at Wednesday's practice, Brooks Kubena of The Athletic reports.",WR
 3929630,Saquon Barkley,Philadelphia Eagles,Active,2026-11-04T20:28Z,,,,,,"Barkley wasn't present for the media-access portion of Wednesday's practice, Brooks Kubena of The Athletic reports.",RB
