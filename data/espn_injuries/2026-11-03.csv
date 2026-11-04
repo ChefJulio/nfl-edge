@@ -1,4 +1,7 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
+4360739,Simi Fehoko,Arizona Cardinals,Active,2026-11-04T00:32Z,,,,,,"Fehoko is listed as a starting receiver on the Cardinals' unofficial depth chart heading into Sunday's game at Seattle, Bo Brack of GoPHNX.com reports.",WR
+3045147,James Conner,Arizona Cardinals,Injured Reserve,2026-11-04T00:31Z,Foot,Surgery,Right,2026-11-15,IR-R,"Cardinals head coach Mike LaFleur said Tuesday that Conner (foot) won't return from IR this week, Darren Urban of the team's official site reports.",RB
+4373626,Tyler Allgeier,Arizona Cardinals,Active,2026-11-04T00:17Z,,,,,,"Allgeier is slated to work as Arizona's No. 1 running back for at least the next four weeks after Jeremiyah Love (ankle) was placed on injured reserve Tuesday, Darren Urban of the team's official site reports.",RB
 4699354,Harrison Wallace III,Arizona Cardinals,Active,2026-11-03T22:48Z,,,,,,The Cardinals elevated Wallace to the active roster Tuesday.,WR
 4870808,Jeremiyah Love,Arizona Cardinals,Injured Reserve,2026-11-03T21:13Z,Ankle,Sprain,Right,2026-12-06,IR,"Arizona placed Love (ankle) on injured reserve Tuesday, Darren Urban of the Cardinals' official site reports.",RB
 3045523,Kendrick Bourne,Arizona Cardinals,Injured Reserve,2026-11-03T21:12Z,Lower Leg,Fracture,Right,2027-02-15,IR,"Arizona placed Bourne (tibia) on injured reserve Tuesday, Darren Urban of the Cardinals' official site reports.",WR
@@ -14,7 +17,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4363408,Starling Thomas V,Arizona Cardinals,Active,2026-11-02T18:31Z,,,,,,,CB
 4683506,Albert Reese IV,Arizona Cardinals,Active,2026-11-02T18:31Z,,,,,,,OT
 4361307,Trey McBride,Arizona Cardinals,Active,2026-11-01T23:48Z,,,,,,McBride hauled in seven of eight targets for 72 yards and one touchdown during Sunday's 33-30 overtime victory at Dallas.,TE
-4373626,Tyler Allgeier,Arizona Cardinals,Active,2026-11-01T23:25Z,,,,,,Allgeier reeled off 147 yards and one touchdown on 11 carries and gathered in all five targets for 44 yards and one more TD during Sunday's 33-30 overtime win in Dallas.,RB
 4360761,Michael Wilson,Arizona Cardinals,Questionable,2026-11-01T22:47Z,Ribs,Fracture,Not Specified,2026-11-08,QUESTIONABLE,"Wilson said after Sunday's 33-30 win at Dallas that he suffered two broken ribs during the contest, Josh Weinfuss of ESPN.com reports.",WR
 4709718,Jayden Williams,Arizona Cardinals,Questionable,2026-11-01T20:46Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Williams (knee) has been ruled out for the rest of Sunday's game against the Cowboys, Darren Urban of the Cardinals' official site reports.",OT
 4698113,Max Melton,Arizona Cardinals,Active,2026-11-01T17:23Z,,,,,,"Melton (knee) is active for Sunday's game against the Cowboys, Darren Urban of the team's official site reports.",CB
@@ -22,15 +24,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3886633,Hjalte Froholdt,Arizona Cardinals,Active,2026-11-01T16:39Z,,,,,,,C
 4040983,Mack Wilson Sr.,Arizona Cardinals,Active,2026-10-31T01:05Z,,,,,,"Wilson (knee) does not have an injury designation for Sunday's game against the Cowboys, Josh Weinfuss of ESPN.com reports.",LB
 3059839,Elijah Wilkinson,Arizona Cardinals,Active,2026-10-30T21:08Z,,,,,,,OT
-4426923,Kei'Trel Clark,Arizona Cardinals,Active,2026-10-29T23:08Z,,,,,,,CB
-4244606,Zaven Collins,Arizona Cardinals,Active,2026-10-29T23:08Z,,,,,,,LB
+3045527,Samson Ebukam,Atlanta Falcons,Injured Reserve,2026-11-04T00:37Z,Hamstring,Not Specified,Not Specified,2026-12-13,IR,"Ebukam (hamstring) was placed on injured reserve by the Falcons on Tuesday, Tori McElhaney of the team's official website reports.",DE
 4241474,Brian Robinson Jr.,Atlanta Falcons,Questionable,2026-11-03T13:03Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,RB
 4037626,Divine Deablo,Atlanta Falcons,Questionable,2026-11-03T13:03Z,Forearm,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,LB
 4431194,Billy Bowman Jr.,Atlanta Falcons,Questionable,2026-11-03T13:03Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,CB
 10621,Nick Folk,Atlanta Falcons,Active,2026-11-03T03:53Z,,,,,,Folk went 0-for-1 on field-goal tries and did not attempt an extra point in Sunday's 16-0 loss to the Buccaneers.,PK
 5081394,James Pearce Jr.,Atlanta Falcons,Active,2026-11-03T02:21Z,,,,,,"The NFL reinstated Pearce on Monday after he served his eight-game suspension for violating the league's personal conduct policy, Darius Hayes of Sports Illustrated reports.",LB
 4035886,Khalil Herbert,Atlanta Falcons,Active,2026-11-03T02:20Z,,,,,,"Herbert reverted to the Falcons' practice squad Monday, per the NFL's transaction log.",RB
-3045527,Samson Ebukam,Atlanta Falcons,Injured Reserve,2026-11-03T00:40Z,Hamstring,Not Specified,Not Specified,2026-12-13,IR,"Ebukam (hamstring) has been ruled out for Atlanta's Week 9 matchup versus the Bengals, William McFadden of the team's official site reports.",DE
 4870612,Zachariah Branch,Atlanta Falcons,Out,2026-11-02T18:55Z,Hamstring,Not Specified,Not Specified,2026-11-15,OUT,"Coach Kevin Stefanski noted Monday that Branch (hamstring) won't play Sunday against the Bengals, William McFadden of the Falcons' official site reports.",WR
 5344782,Jack Strand,Atlanta Falcons,Active,2026-11-02T18:33Z,,,,,,,QB
 14012,Andy Dalton,Atlanta Falcons,Active,2026-11-02T18:33Z,,,,,,,QB
@@ -358,7 +358,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686361,Cam Little,Jacksonville Jaguars,Active,2026-11-03T03:05Z,,,,,,Little nailed all six extra-point attempts in Sunday's 42-7 win over the Colts.,PK
 4572704,Branson Combs,Jacksonville Jaguars,Questionable,2026-11-03T00:59Z,Shoulder,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,questionable,LB
 4426448,Jarrian Jones,Jacksonville Jaguars,Questionable,2026-11-03T00:57Z,Ankle,Not Specified,Not Specified,2026-11-05,QUESTIONABLE,questionable,CB
-2970716,Eric Murray,Jacksonville Jaguars,Injured Reserve,2026-11-03T00:29Z,Elbow,Not Specified,Not Specified,2027-02-15,IR,"Murray will miss the remainder of the season due to an elbow injury, Demetrius Harvey of The Florida Times-Union reports.",S
+2970716,Eric Murray,Jacksonville Jaguars,Injured Reserve,2026-11-03T00:29Z,Elbow,Not Specified,Not Specified,2027-02-15,IR,"Jaguars head coach Liam Coen said Monday that Murray (elbow) will miss the remainder of the season, Demetrius Harvey of The Florida Times-Union reports.",S
 3915520,DaVon Hamilton,Jacksonville Jaguars,Injured Reserve,2026-11-02T22:16Z,Knee,Strain,Right,2027-02-15,IR,"Jaguars coach Liam Coen confirmed Monday that Hamilton will miss the remainder of the season after suffering a torn quadriceps in Sunday's win over the Colts, Ryan O'Halloran of The Florida Times-Union reports.",DT
 5085024,CJ Williams,Jacksonville Jaguars,Active,2026-11-02T18:53Z,,,,,,,WR
 4427479,Jamal Hill,Jacksonville Jaguars,Active,2026-11-02T18:53Z,,,,,,,LB
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361370,Chris Olave,New Orleans Saints,Active,2026-10-25T18:10Z,,,,,,Olave caught six of 10 targets for 56 yards in Sunday's 16-10 loss to the Steelers.,WR
 3931399,Justin Reid,New Orleans Saints,Questionable,2026-10-25T15:28Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,Reid (concussion) has been ruled out for the remainder of Sunday's game against the Steelers in Paris.,S
 5081999,CJ Donaldson,New Orleans Saints,Questionable,2026-10-25T14:09Z,Shoulder,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Donaldson (shoulder) is questionable to return to Sunday's game against the Steelers in Paris.,RB
-4361266,Greg Newsome II,New York Giants,Questionable,2026-11-03T22:37Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"The Giants signed Newsome (concussion) to a three-year $46 million extension with $32 million guaranteed, NFL reporter Jordan Schultz.",CB
+4361266,Greg Newsome II,New York Giants,Questionable,2026-11-03T22:37Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"Newsome (concussion) agreed Tuesday with the Giants on a three-year $46 million extension that includes $32 million guaranteed, Adam Schefter of ESPN reports.",CB
 4429148,Theo Johnson,New York Giants,Questionable,2026-11-03T01:11Z,Neck,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Johnson (neck) participated during practice Monday, Dan Duggan of The Athletic reports.",TE
 4696981,Cam Skattebo,New York Giants,Questionable,2026-11-02T21:11Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Giants head coach John Harbaugh said that Skattebo (hamstring) is day-to-day and could end up being a game-time decision for Sunday's tilt with the Eagles, Jordan Raanan of ESPN.com reports.",RB
 4040761,Devin Singletary,New York Giants,Active,2026-10-28T23:13Z,,,,,,"Singletary is expected to handle a bigger role out of the Giants' backfield after Tyrone Tracy (hamstring) was placed on injured reserve Tuesday, Jordan Raanan of ESPN.com reports.",RB
@@ -774,8 +774,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4573318,Dorian Mausi,Tennessee Titans,Injured Reserve,2026-11-01T02:07Z,Foot,Not Specified,Not Specified,2026-11-15,IR-R,"Mausi (foot) has been ruled out for Sunday's game against the Bengals, Jim Wyatt of the Titans' official site reports.",LB
 4373956,Jonah Laulu,Tennessee Titans,Active,2026-10-29T00:34Z,,,,,,"The Titans claimed Laulu off waivers from the Raiders on Wednesday, Jim Wyatt of the Titans' official site reports.",DT
 4036134,Amani Hooker,Tennessee Titans,Active,2026-10-28T01:37Z,,,,,,Hooker posted five tackles (two solo) during Sunday's 27-24 loss to Cleveland.,S
-4259491,Javon Kinlaw,Washington Commanders,Injured Reserve,2026-11-03T21:33Z,Knee,Not Specified,Not Specified,2026-12-06,IR,ir,DT
-3925354,Daron Payne,Washington Commanders,Injured Reserve,2026-11-03T21:32Z,Foot,Surgery,Left,2027-02-15,IR,ir,DT
+3925354,Daron Payne,Washington Commanders,Injured Reserve,2026-11-04T00:17Z,Foot,Surgery,Left,2027-02-15,IR,"Payne (foot) was placed on injured reserve by the Commanders on Tuesday, Tashan Reed of The Washington Post reports.",DT
+4259491,Javon Kinlaw,Washington Commanders,Injured Reserve,2026-11-04T00:13Z,Knee,Not Specified,Not Specified,2026-12-06,IR,Kinlaw (knee) was placed on injured reserve by the Commanders on Tuesday.,DT
 3127586,Jeremy McNichols,Washington Commanders,Injured Reserve,2026-11-03T21:27Z,Foot,Not Specified,Not Specified,2026-12-06,IR,The Commanders placed McNichols (foot) on injured reserve Tuesday.,RB
 5081335,Drew Stevens,Washington Commanders,Active,2026-11-03T01:44Z,,,,,,Stevens made four of his five field-goal attempts and converted his only extra-point try during Sunday's 27-10 win versus the Eagles.,PK
 4360635,Chig Okonkwo,Washington Commanders,Active,2026-11-03T01:22Z,,,,,,Okonkwo tallied two catches (on four targets) for 32 yards during Sunday's 27-10 win versus the Eagles.,TE
