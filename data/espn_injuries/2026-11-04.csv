@@ -399,6 +399,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4610705,Nohl Williams,Kansas City Chiefs,Active,2026-10-28T01:56Z,,,,,,Williams finished Sunday's 20-3 loss to the Seahawks with 10 tackles (four solo) and one interception.,CB
 4362759,Nick Bolton,Kansas City Chiefs,Active,2026-10-28T01:51Z,,,,,,Bolton registered 11 tackles (six solo) during the Chiefs' 20-3 loss to the Seahawks on Sunday.,LB
 3129310,Drue Tranquill,Kansas City Chiefs,Active,2026-10-28T01:45Z,,,,,,Tranquill finished Sunday's 20-3 loss to the Seahawks with 12 tackles (four solo).,LB
+4045305,Ian Thomas,Las Vegas Raiders,Questionable,2026-11-04T23:45Z,Ankle,,,2026-11-08,QUESTIONABLE,questionable,TE
 5155825,Carter Runyon,Las Vegas Raiders,Active,2026-11-04T22:27Z,,,,,,,TE
 4686658,Mike Washington Jr.,Las Vegas Raiders,Active,2026-11-04T22:11Z,,,,,,"Raiders head coach Klint Kubiak said Wednesday that the breakdown in carries between Washington and Ashton Jeanty will be determined on a week-to-week basis, Ryan McFadden of ESPN.com reports.",RB
 4890973,Ashton Jeanty,Las Vegas Raiders,Active,2026-11-04T21:36Z,,,,,,"Raiders head coach Klint Kubiak said Wednesday that the breakdown in carries between Jeanty and Mike Washington will be determined on a week-to-week basis, Ryan McFadden of ESPN.com reports.",RB
@@ -421,7 +422,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4875295,Jackson Powers-Johnson,Las Vegas Raiders,Active,2026-11-01T16:40Z,,,,,,,G
 3916655,Maxx Crosby,Las Vegas Raiders,Active,2026-11-01T15:45Z,,,,,,"The Raiders have no plans on trading Crosby before the Nov. 10 deadline, Adam Schefter of ESPN reports.",DE
 4243916,Patrick Johnson,Las Vegas Raiders,Injured Reserve,2026-11-01T02:52Z,Neck,Stinger,Not Specified,2026-11-29,IR,The Raiders placed Johnson (neck) on injured reserve Saturday.,DE
-4045305,Ian Thomas,Las Vegas Raiders,Active,2026-10-30T23:58Z,,,,,,"Thomas (shoulder) does not have an injury designation for Sunday's game against the Jets, Sam Warren of The Athletic reports.",TE
 3045172,Folorunso Fatukasi,Las Vegas Raiders,Active,2026-10-30T19:45Z,,,,,,,DT
 4606683,DJ Glaze,Las Vegas Raiders,Active,2026-10-30T19:45Z,,,,,,,OT
 4685553,Brenen Thompson,Los Angeles Chargers,Doubtful,2026-11-04T20:38Z,Quadriceps,Not Specified,Not Specified,2026-11-08,DOUBTFUL,doubtful,WR
@@ -444,7 +444,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4038941,Justin Herbert,Los Angeles Chargers,Active,2026-11-02T02:14Z,,,,,,Herbert completed 24 of 32 passes for 257 yards with no touchdowns and two interceptions while rushing four times for 15 yards in the Chargers' 24-9 loss to the Rams on Sunday. He also committed a fumble that remained with the Chargers.,QB
 4241597,Daiyan Henley,Los Angeles Chargers,Active,2026-11-01T22:34Z,,,,,,"Henley (shoulder) has returned to Sunday's matchup versus the Rams, David Droegemeier of Locked On Chargers reports.",LB
 3691739,Derwin James Jr.,Los Angeles Chargers,Injured Reserve,2026-11-01T00:11Z,Hamstring,Not Specified,Not Specified,2026-11-29,IR,The Chargers placed James (hamstring) on injured reserve Saturday.,S
-2576702,Bud Dupree,Los Angeles Chargers,Active,2026-10-29T02:02Z,,,,,,Dupree (neck) is off the Chargers' injury report ahead of the team's matchup versus the Rams on Sunday.,LB
+2576702,Bud Dupree,Los Angeles Chargers,Active,2026-10-29T02:02Z,Illness,,,2026-11-08,QUESTIONABLE,Dupree (neck) is off the Chargers' injury report ahead of the team's matchup versus the Rams on Sunday.,LB
 2579621,Denzel Perryman,Los Angeles Chargers,Injured Reserve,2026-10-29T01:38Z,Undisclosed,Not Specified,Not Specified,2026-11-08,IR-R,"Head coach Jim Harbaugh said Wednesday that Perryman (undisclosed) is ""close"" to returning from injured reserve, Alex Insdorf of BoltBeat.com reports.",LB
 4683487,Joe Alt,Los Angeles Chargers,Active,2026-10-29T00:03Z,,,,,,Alt (neck) was not listed on the Chargers' official injury report Wednesday.,OT
 5089178,Jamaree Caldwell,Los Angeles Chargers,Active,2026-10-18T19:01Z,,,,,,,DT
@@ -574,17 +574,17 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360689,Tyler Shough,New Orleans Saints,Active,2026-10-25T18:17Z,,,,,,Shough completed 30 of 38 passes for 278 yards and one touchdown with one interception in Sunday's 16-10 loss to the Steelers. He added seven rushing yards on three carries.,QB
 4361370,Chris Olave,New Orleans Saints,Active,2026-10-25T18:10Z,,,,,,Olave caught six of 10 targets for 56 yards in Sunday's 16-10 loss to the Steelers.,WR
 3931399,Justin Reid,New Orleans Saints,Questionable,2026-10-25T15:28Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,Reid (concussion) has been ruled out for the remainder of Sunday's game against the Steelers in Paris.,S
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-11-04T23:17Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-11-04T23:48Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
+4361266,Greg Newsome II,New York Giants,Active,2026-11-04T23:38Z,,,,,,,CB
 4696981,Cam Skattebo,New York Giants,Questionable,2026-11-04T21:31Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Skattebo (hamstring) did not participate in Wednesday's practice, Dan Salomone of the Giants' official site reports.",RB
 4373809,Jevon Holland,New York Giants,Active,2026-11-04T21:29Z,,,,,,,S
 4259566,Andrew Thomas,New York Giants,Questionable,2026-11-04T21:27Z,Groin,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
 4040615,Malik Harrison,New York Giants,Questionable,2026-11-04T21:27Z,Groin,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,LB
-4257188,Charlie Jones,New York Giants,Questionable,2026-11-04T21:27Z,Head,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,WR
+4257188,Charlie Jones,New York Giants,Questionable,2026-11-04T21:27Z,Hand,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,WR
 4921249,Colton Hood,New York Giants,Questionable,2026-11-04T21:26Z,Illness,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,CB
 4686362,Marcus Mbow,New York Giants,Active,2026-11-04T21:26Z,,,,,,,OT
 4429148,Theo Johnson,New York Giants,Active,2026-11-04T21:25Z,,,,,,,TE
 4725996,Abdul Carter,New York Giants,Questionable,2026-11-04T21:23Z,Illness,,,2026-11-08,QUESTIONABLE,questionable,LB
-4361266,Greg Newsome II,New York Giants,Questionable,2026-11-03T22:37Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"Newsome (concussion) agreed Tuesday with the Giants on a three-year $46 million extension that includes $32 million guaranteed, Adam Schefter of ESPN reports.",CB
 4040761,Devin Singletary,New York Giants,Active,2026-10-28T23:13Z,,,,,,"Singletary is expected to handle a bigger role out of the Giants' backfield after Tyrone Tracy (hamstring) was placed on injured reserve Tuesday, Jordan Raanan of ESPN.com reports.",RB
 4950400,Arvell Reese,New York Giants,Active,2026-10-28T04:32Z,,,,,,"Reese posted seven tackles (five solo), including 0.5 sacks, in Sunday's 27-21 overtime victory against the Texans.",LB
 4371961,Micah McFadden,New York Giants,Active,2026-10-28T04:16Z,,,,,,McFadden notched 10 tackles (all solo) in Sunday's 27-21 overtime win against the Texans.,LB
@@ -678,7 +678,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3895856,Christian Kirk,San Francisco 49ers,Questionable,2026-11-04T23:28Z,Knee,,,2026-11-08,QUESTIONABLE,questionable,WR
 3117251,Christian McCaffrey,San Francisco 49ers,Questionable,2026-11-04T21:57Z,Hamstring,Not Specified,Left,2026-11-08,QUESTIONABLE,"McCaffrey (hamstring) said Wednesday that he has a chance to practice this week and play Sunday against the Raiders, Nick Wagoner of ESPN.com reports.",RB
 3126486,Deebo Samuel Sr.,San Francisco 49ers,Questionable,2026-11-04T20:59Z,Hamstring,Not Specified,Right,2026-11-08,QUESTIONABLE,"Samuel (hamstring) won't take part in practice Wednesday, Cam Inman of The San Jose Mercury News reports.",WR
-16737,Mike Evans,San Francisco 49ers,Questionable,2026-11-04T20:53Z,Achilles,Tendinitis,Right,2026-11-08,QUESTIONABLE,"Head coach Kyle Shanahan said Evans (Achilles) won't practice Wednesday, NFL reporter Andrew Siciliano reports.",WR
+16737,Mike Evans,San Francisco 49ers,Questionable,2026-11-04T20:53Z,Achilles,Tendinitis,Right,2026-11-08,QUESTIONABLE,"Head coach Kyle Shanahan said Evans (Achilles/ribs) won't practice Wednesday, NFL reporter Andrew Siciliano reports.",WR
 4360438,Brandon Aiyuk,San Francisco 49ers,Out,2026-11-04T14:25Z,Personal,Not Specified,Not Specified,2026-11-15,RESERVE-DNR,"Aiyuk, who who is currently is on the 49ers' Reserve/Left Squad list, has turned in paperwork to be reinstated, Adam Schefter of ESPN reports.",WR
 4710714,De'Zhaun Stribling,San Francisco 49ers,Injured Reserve,2026-11-02T22:05Z,Ankle,Surgery,Left,2026-12-06,IR,"Stribling (ankle) was spotted Monday walking without crutches or a brace on his lower leg, Matt Barrows of The Athletic reports.",WR
 3916903,Dre Greenlaw,San Francisco 49ers,Active,2026-10-28T03:46Z,,,,,,Greenlaw posted 12 tackles (four solo) in Sunday's loss to the Falcons.,LB
@@ -690,7 +690,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4575665,Jacob Cowing,San Francisco 49ers,Active,2026-10-26T23:36Z,,,,,,"Cowing caught three of five passes for 38 yards, added a 10-yard carry and returned one kickoff for 28 yards during Sunday's 29-20 loss to the Falcons.",WR
 4685397,Jordan James,San Francisco 49ers,Active,2026-10-26T23:14Z,,,,,,"James logged a six-yard carry, turned his lone target into an 11-yard catch and registered 119 yards on four kickoff returns during the 49ers' 29-20 loss to the Falcons on Sunday.",RB
 4565200,Upton Stout,San Francisco 49ers,Questionable,2026-10-26T23:07Z,Shoulder - AC Joint,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Stout (shoulder) was only active as an emergency depth option during Sunday's loss to the Falcons, David Lombardi of SFStandard.com reported Monday.",CB
-4040605,Nick Bosa,San Francisco 49ers,Questionable,2026-10-26T23:05Z,Calf,Strain,Left,2026-11-08,QUESTIONABLE,"San Francisco head coach Kyle Shanahan said Monday that Bosa (knee) ""has a chance"" to return to action Nov. 8 versus the Raiders following a Week 8 bye, David Lombardi of SFStandard.com reports.",DE
+4040605,Nick Bosa,San Francisco 49ers,Questionable,2026-10-26T23:05Z,Knee,Strain,Left,2026-11-08,QUESTIONABLE,"San Francisco head coach Kyle Shanahan said Monday that Bosa (knee) ""has a chance"" to return to action Nov. 8 versus the Raiders following a Week 8 bye, David Lombardi of SFStandard.com reports.",DE
 3043116,Demarcus Robinson,San Francisco 49ers,Injured Reserve,2026-10-26T22:25Z,Ankle,Sprain,Right,2026-11-08,IR-R,"49ers coach Kyle Shanahan reiterated Monday that Robinson (ankle) has a chance to return following the team's Week 8 bye, David Lombardi of SFStandard.com reports.",WR
 4430431,Kurtis Rourke,San Francisco 49ers,Active,2026-10-26T19:10Z,,,,,,,QB
 4361741,Brock Purdy,San Francisco 49ers,Active,2026-10-26T01:49Z,,,,,,Purdy completed 27 of 40 passes for 288 yards with one touchdown and two interceptions and added two carries for five yards in the 49ers' 29-20 loss to the Falcons on Sunday.,QB
