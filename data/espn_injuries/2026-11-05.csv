@@ -99,6 +99,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4870886,TJ Parker,Buffalo Bills,Active,2026-11-01T16:33Z,,,,,,,LB
 4427348,Te'Cory Couch,Buffalo Bills,Active,2026-10-31T23:57Z,,,,,,The Bills signed Couch (hamstring) off the practice squad to the active roster Saturday.,CB
 3116733,Bradley Chubb,Buffalo Bills,Active,2026-10-30T19:12Z,,,,,,,LB
+5151083,Will Lee III,Carolina Panthers,Questionable,2026-11-05T23:13Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Lee (hamstring) did not practice Thursday, Steve Reed of the Associated Press reports.",CB
 3117253,Bobby Okereke,Carolina Panthers,Questionable,2026-11-05T23:01Z,Foot,,,2026-11-08,QUESTIONABLE,"Okereke (foot) did not practice Thursday, Steve Reed of the Associated Press reports.",LB
 4576075,Corey Bullock,Carolina Panthers,Active,2026-11-05T22:14Z,,,,,,,C
 4696902,Torricelli Simpkins III,Carolina Panthers,Active,2026-11-05T22:14Z,,,,,,,G
@@ -110,7 +111,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431588,Ja'Tavion Sanders,Carolina Panthers,Active,2026-11-03T12:59Z,,,,,,,TE
 4428993,Haynes King,Carolina Panthers,Active,2026-11-03T12:59Z,,,,,,,QB
 4239934,AJ Dillon,Carolina Panthers,Active,2026-11-03T12:59Z,,,,,,,RB
-5151083,Will Lee III,Carolina Panthers,Questionable,2026-11-03T01:02Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Lee (hamstring) is day to day but should have a chance to ""test"" his injury this week, Joe Person of The Athletic reports.",CB
 4242975,Jaelan Phillips,Carolina Panthers,Questionable,2026-11-03T00:51Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Panthers head coach Dave Canales said Monday that Phillips (hamstring) is trending in the right direction and considered day-to-day heading into Sunday's game against the Broncos, Joe Person of The Athletic reports.",LB
 2576925,Darren Waller,Carolina Panthers,Active,2026-11-03T00:35Z,,,,,,Waller corralled one of two targets for 11 yards during last Thursday's 27-19 loss at Green Bay.,TE
 4430034,Xavier Legette,Carolina Panthers,Injured Reserve,2026-11-02T19:23Z,Knee,Not Specified,Not Specified,2026-11-08,IR,"Panthers head coach Dave Canales said Monday that Legette (knee) will ""potentially"" be designated for return from injured reserve this week, Joe Person of The Athletic reports.",WR
@@ -299,11 +299,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4887255,Anthony Campbell,Green Bay Packers,Active,2026-10-29T22:54Z,,,,,,,DT
 4361776,Brenton Cox Jr.,Green Bay Packers,Active,2026-10-29T22:54Z,,,,,,,DE
 4241470,Xavier McKinney,Green Bay Packers,Active,2026-10-28T00:36Z,,,,,,McKinney posted 10 tackles (four solo) during Sunday's 20-17 loss to the Lions.,S
+3919117,Azeez Al-Shaair,Houston Texans,Active,2026-11-05T23:23Z,,,,,,Al-Shaair (groin) was a full participant in Thursday's practice.,LB
 4362504,Brevin Jordan,Houston Texans,Active,2026-11-05T23:05Z,,,,,,,TE
 3121595,Braden Smith,Houston Texans,Active,2026-11-05T23:04Z,,,,,,,OT
 4432699,Blake Fisher,Houston Texans,Active,2026-11-05T05:02Z,,,,,,Fisher (thumb) was a full participant in Wednesday's practice.,OT
 4243956,Reed Blankenship,Houston Texans,Questionable,2026-11-05T03:08Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,Blankenship (concussion/hand) did not participate at the Texans' practice Wednesday.,S
-3919117,Azeez Al-Shaair,Houston Texans,Active,2026-11-05T02:57Z,,,,,,Al-Shaair (groin) was a limited participant at the Texans' practice Wednesday.,LB
 4241223,Jalen Pitre,Houston Texans,Active,2026-11-05T02:54Z,,,,,,Pitre (shoulder) was a full participant in Houston's practice Wednesday.,S
 4035538,David Montgomery,Houston Texans,Out,2026-11-04T20:52Z,Groin,Not Specified,Not Specified,2026-11-15,OUT,"Texans head coach DeMeco Ryans said Wednesday that Montgomery (groin) has made some progress but is still viewed as week-to-week and will remain out for Sunday's game against the Chargers, Jonathan M. Alexander of the Houston Chronicle reports.",RB
 4046716,Naquan Jones,Houston Texans,Active,2026-11-02T22:58Z,,,,,,The Texans signed Jones on Monday.,DT
@@ -424,9 +424,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3916655,Maxx Crosby,Las Vegas Raiders,Active,2026-11-01T15:45Z,,,,,,"The Raiders have no plans on trading Crosby before the Nov. 10 deadline, Adam Schefter of ESPN reports.",DE
 4243916,Patrick Johnson,Las Vegas Raiders,Injured Reserve,2026-11-01T02:52Z,Neck,Stinger,Not Specified,2026-11-29,IR,The Raiders placed Johnson (neck) on injured reserve Saturday.,DE
 4606683,DJ Glaze,Las Vegas Raiders,Active,2026-10-30T19:45Z,,,,,,,OT
+2576702,Bud Dupree,Los Angeles Chargers,Active,2026-11-05T23:10Z,,,,,,,LB
 4241597,Daiyan Henley,Los Angeles Chargers,Active,2026-11-05T13:54Z,,,,,,Henley (shoulder) was a limited participant in the Chargers' practice Wednesday.,LB
 2579621,Denzel Perryman,Los Angeles Chargers,Injured Reserve,2026-11-05T00:59Z,Undisclosed,Not Specified,Not Specified,2026-11-08,IR-R,"The Chargers designated Perryman (undisclosed) for return to practice from their injured reserve list Wednesday, Noah Furtado of The Athletic reports.",LB
-2576702,Bud Dupree,Los Angeles Chargers,Questionable,2026-11-04T23:48Z,Illness,,,2026-11-08,QUESTIONABLE,questionable,LB
 4360745,Kendall Williamson,Los Angeles Chargers,Questionable,2026-11-04T23:47Z,Calf,,,2026-11-08,QUESTIONABLE,questionable,S
 4685553,Brenen Thompson,Los Angeles Chargers,Doubtful,2026-11-04T20:38Z,Quadriceps,Not Specified,Not Specified,2026-11-08,DOUBTFUL,doubtful,WR
 3123076,David Njoku,Los Angeles Chargers,Injured Reserve,2026-11-04T20:30Z,Lower Leg,Not Specified,Not Specified,2026-11-08,IR-R,"Chargers head coach Jim Harbaugh said Wednesday that Njoku (fibula) has been designated for return from injured reserve, Alex Insdorf of BoltBeat.com reports.",TE
@@ -737,7 +737,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3150744,Chase McLaughlin,Tampa Bay Buccaneers,Active,2026-11-03T01:58Z,,,,,,McLaughlin made all three field-goal attempts and his only extra-point try in Sunday's 16-0 win over the Falcons.,PK
 4686334,Yaya Diaby,Tampa Bay Buccaneers,Out,2026-11-02T20:53Z,Knee - MCL,Sprain,Not Specified,2026-11-22,OUT,"Head coach Todd Bowles said that Diaby (knee) has been diagnosed with an MCL sprain and won't be available for Sunday's game against the Bears, Scott Smith of the Buccaneers' official site reports.",LB
 4890885,Ayden Garnes,Tampa Bay Buccaneers,Active,2026-11-02T19:22Z,,,,,,,CB
-4686884,Luke Haggard,Tampa Bay Buccaneers,Active,2026-11-02T19:22Z,,,,,,,G
 4685549,Billy Schrauth,Tampa Bay Buccaneers,Active,2026-11-02T19:22Z,,,,,,,G
 4429007,DeMonte Capehart,Tampa Bay Buccaneers,Active,2026-11-02T19:22Z,,,,,,,DT
 3052587,Baker Mayfield,Tampa Bay Buccaneers,Active,2026-11-02T02:26Z,,,,,,Mayfield failed to complete any of his three pass attempts in the Buccaneers' 16-0 win over the Falcons on Sunday. He also rushed four times for 14 yards.,QB
@@ -749,6 +748,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4248533,Josh Hayes,Tampa Bay Buccaneers,Injured Reserve,2026-10-29T01:52Z,Knee,Surgery,Not Specified,2026-11-22,IR-R,"Hayes suffered a small setback in his recovery from a knee injury, Greg Auman of Fox Sports reports.",CB
 4034790,Antoine Winfield Jr.,Tampa Bay Buccaneers,Active,2026-10-29T00:12Z,,,,,,"Winfield (ribs) was a full participant in Wednesday's practice, Brianna Dix of the Buccaneers' official site reports.",S
 4596472,Jalon Daniels,Tampa Bay Buccaneers,Active,2026-10-27T01:25Z,,,,,,Daniels was back in his primary reserve role behind Baker Mayfield in Sunday's 43-13 win over the Panthers.,QB
+4250392,Zyon McCollum,Tampa Bay Buccaneers,Active,2026-10-23T22:39Z,,,,,,"McCollum (illness) does not carry an injury designation into Sunday's game against the Panthers, Greg Auman of Fox Sports reports.",CB
 3915398,Tommy Townsend,Tennessee Titans,Out,2026-11-03T13:06Z,Knee,Not Specified,Left,2026-11-15,QUESTIONABLE,out,P
 4428557,Tyjae Spears,Tennessee Titans,Out,2026-11-03T13:04Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,RB
 4871023,Carnell Tate,Tennessee Titans,Out,2026-11-03T13:04Z,Shoulder,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,WR
