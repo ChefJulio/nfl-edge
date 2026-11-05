@@ -1,6 +1,6 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
+4360761,Michael Wilson,Arizona Cardinals,Questionable,2026-11-05T02:25Z,Ribs,Fracture,Not Specified,2026-11-08,QUESTIONABLE,"Wilson (rest/ribs) practiced in a limited capacity Wednesday, Theo Mackie of The Arizona Republic reports.",WR
 4427728,Bam Knight,Arizona Cardinals,Questionable,2026-11-05T00:29Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"Coach Mike LaFleur said Wednesday that the Cardinals planned on Knight (concussion) being one of their top two backs before he and Jeremiyah Love (ankle) suffered injuries in Week 8 against the Cowboys, Theo Mackie of The Arizona Republic reports.",RB
-4360761,Michael Wilson,Arizona Cardinals,Questionable,2026-11-04T22:35Z,Ribs,Fracture,Not Specified,2026-11-08,QUESTIONABLE,"Wilson (ribs) wore a yellow non-contact jersey at Wednesday's practice, Bo Brack of GoPHNX.com reports.",WR
 2578570,Jacoby Brissett,Arizona Cardinals,Active,2026-11-04T19:50Z,,,,,,"The Ravens are finalizing a trade with the Cardinals that will send Brissett to Baltimore, Adam Schefter of ESPN reports. The deal is expected to be completed over the weekend.",QB
 4426844,Elijah Higgins,Arizona Cardinals,Active,2026-11-04T02:55Z,,,,,,Higgins tallied two catches for 10 yards on four targets Sunday in a 33-30 overtime win over Dallas.,TE
 4869132,Reggie Virgil,Arizona Cardinals,Active,2026-11-04T02:35Z,,,,,,Virgil failed to reel in either of his targets during Sunday's 33-30 overtime victory against Dallas.,WR
@@ -124,6 +124,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-30T03:45Z,,,,,,McMillan brought in six of 11 targets for 57 yards in the Panthers' 27-19 loss to the Packers on Thursday.,WR
 4244607,Akayleb Evans,Carolina Panthers,Injured Reserve,2026-10-30T00:13Z,Triceps,Not Specified,Not Specified,2026-11-30,IR,"Evans (triceps) was placed on injured reserve by the Panthers on Thursday, Darin Gantt of the team's official website reports.",CB
 4243256,Devin Lloyd,Carolina Panthers,Active,2026-10-28T00:46Z,,,,,,Lloyd posted four tackles in Sunday's loss to the Buccaneers.,LB
+4257364,Zavier Scott,Chicago Bears,Questionable,2026-11-05T02:28Z,Wrist,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,RB
+5125873,Theo Benedet,Chicago Bears,Questionable,2026-11-05T02:27Z,Shoulder,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
 3948283,Stephen Carlson,Chicago Bears,Active,2026-11-05T02:12Z,,,,,,"Chicago signed Carlson from its practice squad to its 53-man roster Wednesday, Brendan Sugrue of USA Today reports.",TE
 4608686,Kyle Monangai,Chicago Bears,Questionable,2026-11-05T02:02Z,Toe,Sprain,Not Specified,2026-11-08,QUESTIONABLE,Monangai (thumb/toe) didn't participate in Wednesday's walkthrough.,RB
 3116726,Kentavius Street,Chicago Bears,Injured Reserve,2026-11-04T22:35Z,Knee,Not Specified,Left,2027-02-15,IR,ir,DT
@@ -147,8 +149,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3121544,T.J. Edwards,Chicago Bears,Active,2026-10-31T23:13Z,,,,,,Edwards (hamstring) does not have an injury designation for Monday's tilt against the Seahawks.,LB
 4035369,Jeffery Simmons,Chicago Bears,Active,2026-10-29T14:38Z,,,,,,"Simmons was traded to the Bears on Thursday, along with a 2028 fifth-round pick, in exchange for first-round picks in 2027 and 2028, as well as a 2027 fourth-round pick, Adam Schefter of ESPN reports.",DT
 4239094,Coby Bryant,Chicago Bears,Injured Reserve,2026-10-28T23:52Z,Knee,Surgery,Left,2026-12-19,IR,"Coach Ben Johnson said Wednesday that Bryant (knee) will start running again in the ""near future,"" Courtney Cronin of ESPN.com reports.",S
-4257364,Zavier Scott,Chicago Bears,Active,2026-10-27T23:08Z,,,,,,Chicago signed Scott from the practice squad to the active roster Tuesday.,RB
-4361093,Kyler Gordon,Chicago Bears,Active,2026-10-25T02:51Z,,,,,,"Gordon recorded five tackles (three solo), including 1.0 sacks, in Thursday's 30-24 win over the Patriots.",CB
 4567098,Jordan Battle,Cincinnati Bengals,Questionable,2026-11-04T16:32Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,S
 4710752,Cashius Howell,Cincinnati Bengals,Injured Reserve,2026-11-04T01:35Z,Wrist,Surgery,Right,2026-12-06,IR,Howell (wrist) was placed on injured reserve by the Bengals on Tuesday.,DE
 4401811,Kyle Dugger,Cincinnati Bengals,Questionable,2026-11-03T13:03Z,Quadriceps,Not Specified,Left,2026-11-08,QUESTIONABLE,questionable,S
@@ -199,6 +199,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4870653,KC Concepcion,Cleveland Browns,Active,2026-11-02T02:54Z,,,,,,Concepcion caught three of four targets for 37 yards in Sunday's 27-6 loss to the Steelers.,WR
 4685702,Quinshon Judkins,Cleveland Browns,Active,2026-11-02T02:32Z,,,,,,Judkins rushed 11 times for 25 yards and brought in both targets for 24 yards in the Browns' 27-6 loss to the Steelers on Sunday.,RB
 5083076,Harold Fannin Jr.,Cleveland Browns,Active,2026-11-01T23:31Z,,,,,,Fannin brought in 10 of 12 targets for 154 yards in the Browns' 27-6 loss to the Steelers on Sunday. He also lost a fumble.,TE
+4428914,Dee Winters,Dallas Cowboys,Questionable,2026-11-05T02:17Z,Calf,Strain,Not Specified,2026-11-08,QUESTIONABLE,"Winters (calf) was limited in Wednesday's practice, Patrik Walker of the Cowboys' official site reports.",LB
 3676833,KaVontae Turpin,Dallas Cowboys,Questionable,2026-11-05T02:02Z,Ribs,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Turpin (ribs) did not practice Wednesday, Patrik Walker of the Cowboys' official site reports.",WR
 3929850,P.J. Locke,Dallas Cowboys,Questionable,2026-11-05T00:55Z,Concussion,,,2026-11-08,QUESTIONABLE,"Locke was still in concussion protocol Wednesday as the Cowboys began preparing for their Week 9 matchup at Indianapolis, Joe Hoyt of The Dallas Morning News reports.",S
 4870706,Caleb Downs,Dallas Cowboys,Questionable,2026-11-05T00:49Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"Downs remained in concussion protocol Wednesday as the Cowboys began preparing for their Week 9 matchup at Indianapolis, Joe Hoyt of The Dallas Morning News reports.",S
@@ -207,7 +208,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4568652,Tyler Smith,Dallas Cowboys,Questionable,2026-11-04T21:51Z,Ankle,,,2026-11-08,QUESTIONABLE,questionable,G
 4429676,Tyler Goodson,Dallas Cowboys,Active,2026-11-04T02:19Z,,,,,,Goodson took seven carries for 14 yards and caught both of his two targets for 19 yards during Sunday's 33-30 overtime loss versus the Cardinals.,RB
 4360967,Brevyn Spann-Ford,Dallas Cowboys,Active,2026-11-04T02:10Z,,,,,,Spann-Ford caught four of five targets for 31 yards during Sunday's 33-30 overtime loss versus the Cardinals.,TE
-4428914,Dee Winters,Dallas Cowboys,Questionable,2026-11-03T13:03Z,Calf,Strain,Not Specified,2026-11-08,QUESTIONABLE,questionable,LB
 4372096,Luke Schoonmaker,Dallas Cowboys,Questionable,2026-11-03T13:03Z,Groin,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,TE
 4710067,Malachi Lawrence,Dallas Cowboys,Questionable,2026-11-03T04:00Z,Ankle,,,2026-11-08,QUESTIONABLE,"Lawrence suffered an ankle injury in Sunday's 33-30 overtime loss to the Cardinals, Patrik Walker of the Cowboys' official site reports.",LB
 3953687,Brandon Aubrey,Dallas Cowboys,Active,2026-11-03T01:54Z,,,,,,Aubrey made three of his four field-goal attempts and all three PATs in the Cowboys' 33-30 overtime loss to the Cardinals.,PK
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4569559,Devaughn Vele,New Orleans Saints,Active,2026-10-25T18:28Z,,,,,,Vele caught all five of his targets for 54 yards and a touchdown in Sunday's 16-10 loss to the Steelers.,WR
 4360689,Tyler Shough,New Orleans Saints,Active,2026-10-25T18:17Z,,,,,,Shough completed 30 of 38 passes for 278 yards and one touchdown with one interception in Sunday's 16-10 loss to the Steelers. He added seven rushing yards on three carries.,QB
 4361370,Chris Olave,New Orleans Saints,Active,2026-10-25T18:10Z,,,,,,Olave caught six of 10 targets for 56 yards in Sunday's 16-10 loss to the Steelers.,WR
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-11-05T02:11Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-11-05T02:34Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
 4373809,Jevon Holland,New York Giants,Active,2026-11-05T01:39Z,,,,,,"Holland (concussion) was not listed on the Giants' injury report Wednesday, Dan Salomone of the team's official site reports.",S
 4429148,Theo Johnson,New York Giants,Active,2026-11-05T01:35Z,,,,,,"Johnson (neck) was a full participant at the Giants' practice Wednesday, Dan Salomone of the team's official site reports.",TE
 4361266,Greg Newsome II,New York Giants,Active,2026-11-04T23:38Z,,,,,,,CB
@@ -699,11 +699,14 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4034949,Eddy Pineiro,San Francisco 49ers,Active,2026-10-26T00:52Z,,,,,,Pineiro did not attempt a field goal while going 2-for-3 on PATs in Sunday's 26-20 loss to the Falcons.,PK
 4431466,Jordan Watkins,San Francisco 49ers,Active,2026-10-26T00:35Z,,,,,,Watkins brought in three of six targets for 56 yards in the 49ers' 29-20 loss to the Falcons on Sunday.,WR
 4696044,Kaelon Black,San Francisco 49ers,Active,2026-10-26T00:29Z,,,,,,Black rushed 12 times for 63 yards and a touchdown and brought in one of three targets for minus-4 yards in the 49ers' 29-20 loss to the Falcons on Sunday. He also lost a fumble and returned one kickoff for 34 yards.,RB
+4032473,Rashid Shaheed,Seattle Seahawks,Questionable,2026-11-05T02:39Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Shaheed (knee) did not practice Wednesday, John Boyle of the Seahawks' official site reports.",WR
+3129308,Quenton Nelson,Seattle Seahawks,Questionable,2026-11-05T02:35Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,G
+4429211,Anthony Bradford,Seattle Seahawks,Questionable,2026-11-05T02:35Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,G
+4605491,Connor O'Toole,Seattle Seahawks,Questionable,2026-11-05T02:34Z,Foot,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,LB
+3924327,Drew Lock,Seattle Seahawks,Questionable,2026-11-05T02:21Z,Elbow,Not Specified,Right,2026-11-08,QUESTIONABLE,"Lock (right elbow) was limited at Wednesday's walkthrough, John Boyle of the Seahawks' official site reports.",QB
 4432734,Jalen Milroe,Seattle Seahawks,Active,2026-11-05T00:05Z,,,,,,"Milroe will get added reps at practice ahead of Sunday's matchup with the Cardinals, Gregg Bell of Sports Radio 93.3 KJR Seattle reports.",QB
-3924327,Drew Lock,Seattle Seahawks,Questionable,2026-11-04T19:03Z,Elbow,Not Specified,Right,2026-11-08,QUESTIONABLE,"Lock (elbow) is slated to start Sunday's game against the Cardinals, perNFL reporter Andrew Siciliano.",QB
 3912547,Sam Darnold,Seattle Seahawks,Out,2026-11-04T19:02Z,Quadriceps,Not Specified,Not Specified,2026-11-15,OUT,"Head coach Mike Macdonald announced that Darnold won't play Sunday against the Cardinals due to a quadriceps injury, NFL reporter Andrew Siciliano reports.",QB
 4362851,Ernest Jones IV,Seattle Seahawks,Active,2026-11-04T04:32Z,,,,,,Jones recorded 13 tackles and a defensed pass in Monday's Week 8 loss to Chicago.,LB
-4032473,Rashid Shaheed,Seattle Seahawks,Questionable,2026-11-03T18:55Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Seahawks head coach Mike Macdonald said Tuesday that Shaheed (knee) has a chance to play Sunday against the Cardinals, Brady Henderson of ESPN.com reports.",WR
 4597703,Tory Horton,Seattle Seahawks,Active,2026-11-03T17:16Z,,,,,,Horton recorded three receptions for 26 yards on six targets in Monday's 34-17 loss to the Bears.,WR
 4429835,George Holani,Seattle Seahawks,Active,2026-11-03T16:58Z,,,,,,Holani carried once for nine yards and failed to haul in his lone target in Monday's 34-17 loss to the Bears. He also returned six kickoffs for 144 yards.,RB
 4887558,Emanuel Wilson,Seattle Seahawks,Active,2026-11-03T15:18Z,,,,,,Wilson played just seven snaps -- all on special teams -- in Monday's 34-17 loss to the Bears.,RB
@@ -719,11 +722,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2971622,Leonard Williams,Seattle Seahawks,Questionable,2026-11-03T03:36Z,Shoulder,Stinger,Not Specified,2026-11-08,QUESTIONABLE,Williams sustained a stinger during Monday's game against the Bears and is questionable to return.,DT
 4259651,Brandon Pili,Seattle Seahawks,Questionable,2026-11-03T00:20Z,Back,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Pili (back) is inactive for Monday night's game against the Bears, John Boyle of the Seahawks' official site reports.",DT
 3120358,Uchenna Nwosu,Seattle Seahawks,Questionable,2026-11-03T00:16Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Nwosu (ankle) is inactive for Monday's clash with the Bears, John Boyle of the Seahawks' official site reports.",LB
-4429211,Anthony Bradford,Seattle Seahawks,Active,2026-11-02T23:51Z,,,,,,,G
 4364623,Patrick O'Connell,Seattle Seahawks,Active,2026-11-02T23:51Z,,,,,,,LB
 4686540,Tyrice Knight,Seattle Seahawks,Active,2026-11-01T01:55Z,,,,,,"Knight (hip) doesn't have an injury designation for Monday's game against the Bears, John Boyle of the Seahawks' official site reports.",LB
-4570040,Byron Murphy II,Seattle Seahawks,Active,2026-11-01T01:52Z,,,,,,"Murphy (back) does not have an injury designation for Monday's game against the Bears, John Boyle of the Seahawks' official site reports.",DT
-4605491,Connor O'Toole,Seattle Seahawks,Active,2026-10-31T02:35Z,,,,,,"O'Toole (hamstring) was a full participant in Friday's practice, Gregg Bell of Sports Radio 93.3 KJR Seattle reports.",LB
+4428522,Tykee Smith,Tampa Bay Buccaneers,Questionable,2026-11-05T02:30Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,S
 4371733,Kenny Gainwell,Tampa Bay Buccaneers,Questionable,2026-11-05T02:15Z,Hip,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Gainwell (hip) was listed as limited on Wednesday's injury report.,RB
 4890373,Bauer Sharp,Tampa Bay Buccaneers,Active,2026-11-04T19:17Z,,,,,,Sharp went without a target while playing 19 of the Buccaneers' 60 snaps on offense in Sunday's 16-0 win over the Falcons.,TE
 4567750,Emeka Egbuka,Tampa Bay Buccaneers,Questionable,2026-11-04T17:17Z,Foot,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Egbuka (foot) was spotted running on the side with a trainer Wednesday, Greg Auman of Fox Sports reports.",WR
@@ -745,7 +746,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4870998,Josiah Trotter,Tampa Bay Buccaneers,Active,2026-10-29T23:51Z,,,,,,Trotter (illness) was a full participant at the Buccaneers' practice Thursday.,LB
 4248533,Josh Hayes,Tampa Bay Buccaneers,Injured Reserve,2026-10-29T01:52Z,Knee,Surgery,Not Specified,2026-11-22,IR-R,"Hayes suffered a small setback in his recovery from a knee injury, Greg Auman of Fox Sports reports.",CB
 4034790,Antoine Winfield Jr.,Tampa Bay Buccaneers,Active,2026-10-29T00:12Z,,,,,,"Winfield (ribs) was a full participant in Wednesday's practice, Brianna Dix of the Buccaneers' official site reports.",S
-4428522,Tykee Smith,Tampa Bay Buccaneers,Active,2026-10-28T02:11Z,,,,,,"Smith posted seven tackles (one solo), an interception and a blocked extra-point attempt Sunday in a 43-13 Week 7 win against Carolina.",S
 4596472,Jalon Daniels,Tampa Bay Buccaneers,Active,2026-10-27T01:25Z,,,,,,Daniels was back in his primary reserve role behind Baker Mayfield in Sunday's 43-13 win over the Panthers.,QB
 4250392,Zyon McCollum,Tampa Bay Buccaneers,Active,2026-10-23T22:39Z,,,,,,"McCollum (illness) does not carry an injury designation into Sunday's game against the Panthers, Greg Auman of Fox Sports reports.",CB
 3909013,Christian Rozeboom,Tampa Bay Buccaneers,Injured Reserve,2026-10-23T01:43Z,Finger,Not Specified,Not Specified,2026-11-30,IR,"Rozeboom (finger) was placed on injured reserve by the Buccaneers on Thursday, Scott Smith of the team's official website reports.",LB
