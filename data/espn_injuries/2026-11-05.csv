@@ -276,7 +276,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5123663,Isaac TeSlaa,Detroit Lions,Active,2026-10-27T01:40Z,,,,,,TeSlaa caught one of his two targets for 10 yards in the Lions' 20-17 win over the Packers on Sunday.,WR
 4259493,Keisean Nixon,Green Bay Packers,Questionable,2026-11-05T02:35Z,Groin,,,2026-11-08,QUESTIONABLE,Nixon (groin) was a limited participant at the Packers' practice Wednesday.,CB
 3149687,Chris Brooks,Green Bay Packers,Injured Reserve,2026-11-05T02:32Z,Ankle,Not Specified,Not Specified,2026-11-08,IR-R,"Brooks (ankle) was designated to return from injured reserve by the Packers on Wednesday, per the NFL's official transaction log.",RB
-4361423,Micah Parsons,Green Bay Packers,Out,2026-11-04T23:10Z,Knee - ACL,Surgery,Left,2026-11-25,PUP-R,Parson (knee) practiced in a limited fashion Wednesday.,DE
+4361423,Micah Parsons,Green Bay Packers,Out,2026-11-04T23:10Z,Knee - ACL,Surgery,Left,2026-11-25,PUP-R,Parsons (knee) practiced in a limited fashion Wednesday.,DE
 4248528,Christian Watson,Green Bay Packers,Questionable,2026-11-04T22:09Z,Ribs,Fracture,Not Specified,2026-11-08,QUESTIONABLE,"Watson (ribs) practiced in a limited capacity Wednesday, Matt Schneidman of The Athletic reports.",WR
 4360086,Josh Whyle,Green Bay Packers,Questionable,2026-11-04T21:59Z,Concussion,,,2026-11-08,QUESTIONABLE,questionable,TE
 4242390,Aaron Banks,Green Bay Packers,Questionable,2026-11-04T21:59Z,Knee,,,2026-11-08,QUESTIONABLE,questionable,G
@@ -424,9 +424,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4875295,Jackson Powers-Johnson,Las Vegas Raiders,Active,2026-11-01T16:40Z,,,,,,,G
 3916655,Maxx Crosby,Las Vegas Raiders,Active,2026-11-01T15:45Z,,,,,,"The Raiders have no plans on trading Crosby before the Nov. 10 deadline, Adam Schefter of ESPN reports.",DE
 4243916,Patrick Johnson,Las Vegas Raiders,Injured Reserve,2026-11-01T02:52Z,Neck,Stinger,Not Specified,2026-11-29,IR,The Raiders placed Johnson (neck) on injured reserve Saturday.,DE
+4241597,Daiyan Henley,Los Angeles Chargers,Questionable,2026-11-05T13:54Z,Shoulder,,,2026-11-08,QUESTIONABLE,Henley (shoulder) was a limited participant in the Chargers' practice Wednesday.,LB
 2579621,Denzel Perryman,Los Angeles Chargers,Injured Reserve,2026-11-05T00:59Z,Undisclosed,Not Specified,Not Specified,2026-11-08,IR-R,"The Chargers designated Perryman (undisclosed) for return to practice from their injured reserve list Wednesday, Noah Furtado of The Athletic reports.",LB
 2576702,Bud Dupree,Los Angeles Chargers,Questionable,2026-11-04T23:48Z,Illness,,,2026-11-08,QUESTIONABLE,questionable,LB
-4241597,Daiyan Henley,Los Angeles Chargers,Questionable,2026-11-04T23:48Z,Shoulder,,,2026-11-08,QUESTIONABLE,questionable,LB
 4360745,Kendall Williamson,Los Angeles Chargers,Questionable,2026-11-04T23:47Z,Calf,,,2026-11-08,QUESTIONABLE,questionable,S
 4685553,Brenen Thompson,Los Angeles Chargers,Doubtful,2026-11-04T20:38Z,Quadriceps,Not Specified,Not Specified,2026-11-08,DOUBTFUL,doubtful,WR
 3123076,David Njoku,Los Angeles Chargers,Injured Reserve,2026-11-04T20:30Z,Lower Leg,Not Specified,Not Specified,2026-11-08,IR-R,"Chargers head coach Jim Harbaugh said Wednesday that Njoku (fibula) has been designated for return from injured reserve, Alex Insdorf of BoltBeat.com reports.",TE
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361259,Zach Wilson,New Orleans Saints,Active,2026-10-26T18:41Z,,,,,,,QB
 3929645,Juwan Johnson,New Orleans Saints,Active,2026-10-26T02:53Z,,,,,,Johnson caught one of three targets for seven yards during Sunday's 16-10 loss to the Steelers.,TE
 4569559,Devaughn Vele,New Orleans Saints,Active,2026-10-25T18:28Z,,,,,,Vele caught all five of his targets for 54 yards and a touchdown in Sunday's 16-10 loss to the Steelers.,WR
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-11-05T13:01Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-11-05T14:01Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
 4361266,Greg Newsome II,New York Giants,Active,2026-11-05T02:51Z,,,,,,Newsome (concussion) wasn't listed on the Giants' injury report Wednesday.,CB
 4373809,Jevon Holland,New York Giants,Active,2026-11-05T01:39Z,,,,,,"Holland (concussion) was not listed on the Giants' injury report Wednesday, Dan Salomone of the team's official site reports.",S
 4429148,Theo Johnson,New York Giants,Active,2026-11-05T01:35Z,,,,,,"Johnson (neck) was a full participant at the Giants' practice Wednesday, Dan Salomone of the team's official site reports.",TE
