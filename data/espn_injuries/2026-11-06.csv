@@ -274,17 +274,17 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361529,Isiah Pacheco,Detroit Lions,Injured Reserve,2026-10-30T17:09Z,Back,Not Specified,Not Specified,2026-12-28,IR,"Lions coach Dan Campbell said Friday that Pacheco (back) has a chance to return in late December, Justin Rogers of DetroitFootball.net reports.",RB
 4431615,Tyleik Williams,Detroit Lions,Active,2026-10-29T20:26Z,,,,,,,DT
 5123663,Isaac TeSlaa,Detroit Lions,Active,2026-10-27T01:40Z,,,,,,TeSlaa caught one of his two targets for 10 yards in the Lions' 20-17 win over the Packers on Sunday.,WR
+4426411,Sean Rhyan,Green Bay Packers,Out,2026-11-06T21:51Z,Ankle,Sprain,Not Specified,2026-11-15,OUT,out,G
+3124005,Zaire Franklin,Green Bay Packers,Out,2026-11-06T21:51Z,Shin,Fracture,Not Specified,2026-11-15,OUT,out,LB
+4242390,Aaron Banks,Green Bay Packers,Active,2026-11-06T21:51Z,,,,,,,G
+4360086,Josh Whyle,Green Bay Packers,Out,2026-11-06T21:50Z,Concussion,Concussion,Not Specified,2026-11-15,OUT,out,TE
 4429023,MarShawn Lloyd,Green Bay Packers,Questionable,2026-11-06T20:52Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Lloyd (knee) is questionable for Sunday's game against the Patriots.,RB
 4361423,Micah Parsons,Green Bay Packers,Out,2026-11-06T20:48Z,Knee - ACL,Surgery,Left,2026-11-25,PUP-R,Parsons (knee) officially was ruled out for Sunday's contest in New England.,DE
 4248528,Christian Watson,Green Bay Packers,Active,2026-11-06T20:41Z,,,,,,Watson (ribs) doesn't have a designation for Sunday's contest at New England.,WR
 4361904,Travis Glover,Green Bay Packers,Questionable,2026-11-06T01:29Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Glover (knee) did not practice Thursday.,OT
-4426411,Sean Rhyan,Green Bay Packers,Questionable,2026-11-06T01:25Z,Ankle,Sprain,Not Specified,2026-11-08,QUESTIONABLE,Rhyan (ankle) was absent from practice Thursday.,G
-4242390,Aaron Banks,Green Bay Packers,Questionable,2026-11-06T01:20Z,Knee,,,2026-11-08,QUESTIONABLE,Banks (knee) was limited in practice Thursday.,G
 4259493,Keisean Nixon,Green Bay Packers,Questionable,2026-11-05T20:35Z,Groin,,,2026-11-08,QUESTIONABLE,"Nixon (groin) did not practice Thursday, Weston Hodkiewicz of the Packers' official site reports.",CB
 4047365,Josh Jacobs,Green Bay Packers,Active,2026-11-05T15:49Z,,,,,,"Jacobs doesn't anticipate missing any additional game action due to the release of additional allegations of physical and verbal abuse against him, Rob Demovsky of ESPN.com reports.",RB
 3149687,Chris Brooks,Green Bay Packers,Injured Reserve,2026-11-05T02:32Z,Ankle,Not Specified,Not Specified,2026-11-08,IR-R,"Brooks (ankle) was designated to return from injured reserve by the Packers on Wednesday, per the NFL's official transaction log.",RB
-4360086,Josh Whyle,Green Bay Packers,Questionable,2026-11-04T21:59Z,Concussion,,,2026-11-08,QUESTIONABLE,questionable,TE
-3124005,Zaire Franklin,Green Bay Packers,Questionable,2026-11-04T20:59Z,Shin,Fracture,Not Specified,2026-11-08,QUESTIONABLE,"Franklin (shin) did not participate in practice Wednesday, Matt Schneidman of The Athletic reports.",LB
 4239947,Isaiah McDuffie,Green Bay Packers,Active,2026-11-04T04:19Z,,,,,,McDuffie finished last Thursday's 27-19 win over Carolina with 10 tackles (three solo).,LB
 4567406,Ty'Ron Hopper,Green Bay Packers,Active,2026-11-04T04:09Z,,,,,,"Hopper recorded eight tackles, including 1.0 sacks, and three defensed passes, including an interception, in last Thursday's 27-19 victory over Carolina.",LB
 4428863,Evan Williams,Green Bay Packers,Active,2026-11-04T03:58Z,,,,,,Williams recorded 10 total tackles (seven solo) during Thursday night's 27-19 win over the Panthers.,S
@@ -674,9 +674,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-10-25T12:26Z,,,,,,"Rudolph is active for Sunday's game against the Saints in Paris, Teresa Varley of the Steelers' official site reports.",QB
 3045282,T.J. Watt,Pittsburgh Steelers,Active,2026-10-23T15:41Z,,,,,,Watt (calf) practiced fully Friday and doesn't carry an injury designation into Sunday's game against the Saints.,LB
 3047495,Sebastian Joseph-Day,Pittsburgh Steelers,Injured Reserve,2026-10-23T00:28Z,Triceps,Not Specified,Not Specified,2026-11-27,IR,"Joseph-Day (triceps) was placed on injured reserve by the Steelers on Thursday, Teresa Varley of the team's official website reports.",DT
-3126486,Deebo Samuel Sr.,San Francisco 49ers,Questionable,2026-11-06T21:06Z,Hamstring,Not Specified,Right,2026-11-08,QUESTIONABLE,"Samuel (hamstring) didn't participate in the early portion of Friday's practice, Nick Wagoner of ESPN.com reports.",WR
-3117251,Christian McCaffrey,San Francisco 49ers,Questionable,2026-11-06T20:54Z,Hamstring,Not Specified,Left,2026-11-08,QUESTIONABLE,"McCaffrey (hamstring) took part in the open portion of Friday's practice, Nick Wagoner of ESPN reports.",RB
-16737,Mike Evans,San Francisco 49ers,Questionable,2026-11-06T20:50Z,Achilles,Tendinitis,Right,2026-11-08,QUESTIONABLE,"Evans (Achilles) didn't participate in the portion of Friday's practice open to the media, Nick Wagoner of ESPN.com reports.",WR
+3126486,Deebo Samuel Sr.,San Francisco 49ers,Out,2026-11-06T21:06Z,Hamstring,Not Specified,Right,2026-11-15,OUT,"Samuel (hamstring) didn't participate in the early portion of Friday's practice, Nick Wagoner of ESPN.com reports.",WR
+3117251,Christian McCaffrey,San Francisco 49ers,Questionable,2026-11-06T20:54Z,,,,,,"McCaffrey (hamstring) took part in the open portion of Friday's practice, Nick Wagoner of ESPN reports.",RB
+16737,Mike Evans,San Francisco 49ers,Out,2026-11-06T20:50Z,Achilles,Tendinitis,Right,2026-11-15,OUT,"Evans (Achilles) didn't participate in the portion of Friday's practice open to the media, Nick Wagoner of ESPN.com reports.",WR
 4360438,Brandon Aiyuk,San Francisco 49ers,Out,2026-11-06T02:40Z,Personal,Not Specified,Not Specified,2026-11-15,RESERVE-DNR,"Aiyuk's effort to secure his release by reporting to the 49ers' facility Friday could be complicated by roughly $13 million in bonus forfeiture he owes the team, Tom Pelissero of NFL Network reports.",WR
 3043116,Demarcus Robinson,San Francisco 49ers,Injured Reserve,2026-11-05T23:45Z,Ankle,Sprain,Right,2026-11-08,IR-R,Robinson (ankle) practiced on a limited basis Thursday.,WR
 3895856,Christian Kirk,San Francisco 49ers,Questionable,2026-11-05T23:02Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Kirk (knee) didn't practice Thursday, Sam Warren of The Athletic reports.",WR
