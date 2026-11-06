@@ -599,12 +599,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4039243,Josh Sills,New York Giants,Active,2026-10-26T18:42Z,,,,,,,G
 4361050,Isaiah Likely,New York Giants,Active,2026-10-26T02:03Z,,,,,,Likely caught two of four targets for 12 yards in Sunday's 27-21 overtime win over the Texans.,TE
 4682648,Malachi Fields,New York Giants,Active,2026-10-26T00:00Z,,,,,,Fields caught four of five targets for 83 yards in Sunday's 27-21 overtime win over Houston.,WR
+4683815,Trevin Wallace,New York Jets,Out,2026-11-06T20:52Z,Groin,Not Specified,Not Specified,2026-11-15,OUT,Jets head coach Aaron Glenn said Friday that Wallace (Groin) will not play in Sunday's matchup against the Chiefs.,LB
 4685247,Braelon Allen,New York Jets,Active,2026-11-06T20:45Z,,,,,,"Jets coach Aaron Glenn declined to elaborate on the distribution of carries between Allen and Breece Hall, who will return from a five-game absence for Sunday's matchup with Kansas City, ESPN's Rich Cimini reports.",RB
 4597500,Adonai Mitchell,New York Jets,Active,2026-11-06T20:17Z,,,,,,"Mitchell and Omar Cooper will be the Jets' top wide receivers with Garrett Wilson (concussion) unavailable for Sunday's game at Kansas City, ESPN's Rich Cimini reports.",WR
 4570470,Nahshon Wright,New York Jets,Questionable,2026-11-06T20:17Z,Back,,,2026-11-08,QUESTIONABLE,questionable,CB
 4723820,Omar Cooper Jr.,New York Jets,Active,2026-11-06T18:24Z,,,,,,"Cooper and Adonai Mitchell will be the Jets' top wide receivers with Garrett Wilson (concussion) unavailable for Sunday's game at Kansas City, ESPN's Rich Cimini reports.",WR
 4569618,Garrett Wilson,New York Jets,Out,2026-11-06T16:16Z,Concussion,Concussion,Not Specified,2026-11-15,OUT,"Wilson (concussion) is out for Sunday's game against the Chiefs, Brian Costello of the New York Post reports.",WR
-4683815,Trevin Wallace,New York Jets,Out,2026-11-06T15:50Z,Groin,Not Specified,Not Specified,2026-11-15,OUT,out,LB
 4427366,Breece Hall,New York Jets,Active,2026-11-06T14:44Z,,,,,,"Hall (quadriceps) ""has been medically cleared"" and is expected to play Sunday against the Chiefs, Ian Rapoport of NFL Network reports.",RB
 4426686,Dane Belton,New York Jets,Active,2026-11-06T03:45Z,,,,,,Belton recorded 12 total tackles (eight solo) and a pass defensed in Sunday's 38-33 loss to the Raiders.,S
 4361331,Jamien Sherwood,New York Jets,Active,2026-11-06T03:29Z,,,,,,Sherwood recorded 14 total tackles (five solo) during Sunday's 38-33 loss to the Raiders.,LB
@@ -626,7 +626,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035537,Kene Nwangwu,New York Jets,Active,2026-10-29T00:29Z,,,,,,Nwangwu was a full participant in Wednesday's practice.,RB
 3926231,Britain Covey,Philadelphia Eagles,Out,2026-11-06T20:57Z,Knee,Not Specified,Not Specified,2026-11-22,OUT,out,WR
 3929630,Saquon Barkley,Philadelphia Eagles,Active,2026-11-06T20:56Z,,,,,,,RB
-4241478,DeVonta Smith,Philadelphia Eagles,Questionable,2026-11-06T17:32Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Smith (hamstring) was not seen at Friday's practice, Jeff McLane of the Philadelphia Inquirer reports.",WR
+4241478,DeVonta Smith,Philadelphia Eagles,Out,2026-11-06T17:32Z,Hamstring,Not Specified,Not Specified,2026-11-22,OUT,"Smith (hamstring) was not seen at Friday's practice, Jeff McLane of the Philadelphia Inquirer reports.",WR
 4428850,Dontayvion Wicks,Philadelphia Eagles,Questionable,2026-11-06T17:23Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Wicks (ankle) is not practicing Friday, Andrew DiCecco of InsideTheBirds.com reports.",WR
 3050478,Jake Elliott,Philadelphia Eagles,Questionable,2026-11-06T00:22Z,Ankle,,,2026-11-08,QUESTIONABLE,Elliott (ankle) was a limited participant in Thursday's practice.,PK
 4685201,Tanner McKee,Philadelphia Eagles,Questionable,2026-11-05T23:51Z,Ribs,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,McKee (rib) was limited in Thursday's practice.,QB
