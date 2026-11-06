@@ -1,0 +1,42 @@
+{
+"00-0039577": {
+"name": "Kedon Slovis",
+"team": "BAL",
+"pos": "QB",
+"pre": 0.8111,
+"ruling": "INA",
+"at": "2026-11-05T23:53:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040719": {
+"name": "Bhayshul Tuten",
+"team": "JAX",
+"pos": "RB",
+"pre": 0.261,
+"ruling": "ACT",
+"at": "2026-11-05T23:50:00+00:00",
+"post": 0.974,
+"status": "Active (DDD)"
+},
+"00-0040876": {
+"name": "Elijah Sarratt",
+"team": "BAL",
+"pos": "WR",
+"pre": 0.1781,
+"ruling": "INA",
+"at": "2026-11-05T23:53:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041106": {
+"name": "C.J. Williams",
+"team": "JAX",
+"pos": "WR",
+"pre": 0.1813,
+"ruling": "INA",
+"at": "2026-11-05T23:48:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+}
+}
