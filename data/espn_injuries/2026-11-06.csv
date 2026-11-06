@@ -449,6 +449,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3691739,Derwin James Jr.,Los Angeles Chargers,Injured Reserve,2026-11-01T00:11Z,Hamstring,Not Specified,Not Specified,2026-11-29,IR,The Chargers placed James (hamstring) on injured reserve Saturday.,S
 4683487,Joe Alt,Los Angeles Chargers,Active,2026-10-29T00:03Z,,,,,,Alt (neck) was not listed on the Chargers' official injury report Wednesday.,OT
 5089178,Jamaree Caldwell,Los Angeles Chargers,Active,2026-10-18T19:01Z,,,,,,,DT
+2575907,Joe Cardona,Los Angeles Rams,Doubtful,2026-11-06T21:27Z,Ankle,Not Specified,Not Specified,2026-11-08,DOUBTFUL,doubtful,LS
 4242154,Kam Curl,Los Angeles Rams,Questionable,2026-11-06T20:10Z,Foot,,,2026-11-08,QUESTIONABLE,"Curl (foot) is listed as questionable for Sunday's game against the Commanders, Nate Atkins of The Athletic reports.",S
 4426405,Trent McDuffie,Los Angeles Rams,Questionable,2026-11-06T19:57Z,Back,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"McDuffie (back) is listed as questionable for Sunday's game against the Commanders, Nate Atkins of The Athletic reports.",CB
 4570037,Terrance Ferguson,Los Angeles Rams,Injured Reserve,2026-11-06T19:14Z,Ankle,Sprain,Not Specified,2026-11-08,IR-R,"Head coach Sean McVay said Friday that Ferguson (ankle) is expected to play in Sunday's game at Washington, Sarah Barshop of ESPN.com reports.",TE
@@ -463,7 +464,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 12483,Matthew Stafford,Los Angeles Rams,Active,2026-11-05T00:36Z,,,,,,"Stafford (right elbow) was a full participant in Wednesday's practice, Sarah Barshop of ESPN reports.",QB
 2573401,Tyler Higbee,Los Angeles Rams,Active,2026-11-04T03:07Z,,,,,,Higbee caught one of two targets for 14 yards against the Chargers in Sunday's 24-9 victory.,TE
 5082269,Dean Connors,Los Angeles Rams,Injured Reserve,2026-11-04T01:20Z,Hand,Surgery,Not Specified,2026-12-13,IR,"Connors (hand) was placed on IR on Tuesday, Blaine Grisak of SI.com reports.",RB
-2575907,Joe Cardona,Los Angeles Rams,Questionable,2026-11-03T13:03Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,LS
 16339,Brandon McManus,Los Angeles Rams,Active,2026-11-03T03:13Z,,,,,,McManus converted his sole field-goal attempt and all three PATs in the Rams' 24-9 win over the Chargers on Sunday.,PK
 4240255,Grant Stuard,Los Angeles Rams,Questionable,2026-11-02T23:46Z,Hamstring,,,2026-11-08,QUESTIONABLE,"Stuard is battling a hamstring injury, Nate Atkins of The Athletic reports.",LB
 3912189,Bill Murray,Los Angeles Rams,Active,2026-11-02T19:10Z,,,,,,,G
@@ -474,19 +474,19 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430737,Kyren Williams,Los Angeles Rams,Active,2026-11-02T01:33Z,,,,,,Williams rushed 16 times for 56 yards and a touchdown and brought in his sole target for three yards in the Rams' 24-9 win over the Chargers on Sunday.,RB
 4426515,Puka Nacua,Los Angeles Rams,Active,2026-11-02T01:29Z,,,,,,Nacua secured 11 of 12 targets for 80 yards and a touchdown in the Rams' 24-9 win over the Chargers on Sunday.,WR
 3052180,Coleman Shelton,Los Angeles Rams,Active,2026-11-01T19:42Z,,,,,,,C
-4682745,Jaylen Wright,Miami Dolphins,Questionable,2026-11-06T16:13Z,Quadriceps,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Wright (quadriceps) will practice Friday, Barry Jackson of the Miami Herald reports.",RB
+4682745,Jaylen Wright,Miami Dolphins,Questionable,2026-11-06T21:31Z,Quadriceps,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Wright (quad) is listed as questionable for Sunday's game against the Lions, David Furones of the South Florida Sun Sentinel reports.",RB
+4431586,Chop Robinson,Miami Dolphins,Active,2026-11-06T21:19Z,,,,,,,LB
+3057956,Zach Sieler,Miami Dolphins,Active,2026-11-06T21:19Z,,,,,,,DT
+4870976,Kadyn Proctor,Miami Dolphins,Active,2026-11-06T21:19Z,,,,,,,OT
+4880236,Will Kacmarek,Miami Dolphins,Active,2026-11-06T21:19Z,,,,,,,TE
+4880346,Michael Taaffe,Miami Dolphins,Active,2026-11-06T21:19Z,,,,,,,S
+4431664,Dante Trader Jr.,Miami Dolphins,Active,2026-11-06T21:19Z,,,,,,,S
+4685246,Kaytron Allen,Miami Dolphins,Questionable,2026-11-06T21:18Z,Quadriceps,,,2026-11-08,QUESTIONABLE,questionable,RB
+4034729,Tucker Addington,Miami Dolphins,Active,2026-11-06T21:17Z,,,,,,,LS
 4566094,Jacob Rodriguez,Miami Dolphins,Active,2026-11-05T17:29Z,,,,,,Rodriguez notched eight tackles (two solo) and forced a fumble in Sunday's 24-19 loss to the Patriots.,LB
 4043130,Jordyn Brooks,Miami Dolphins,Active,2026-11-05T17:25Z,,,,,,Brooks recorded 11 tackles (six solo) in Sunday's 24-19 loss to the Patriots.,LB
-4870976,Kadyn Proctor,Miami Dolphins,Questionable,2026-11-05T03:55Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,Proctor (concussion) practiced fully Wednesday.,OT
 4259547,Malik Herring,Miami Dolphins,Questionable,2026-11-05T03:53Z,Neck,Stinger,Not Specified,2026-11-08,QUESTIONABLE,Herring (neck) was limited in Wednesday's practice.,DE
-4685246,Kaytron Allen,Miami Dolphins,Questionable,2026-11-05T01:51Z,Quadriceps,,,2026-11-08,QUESTIONABLE,Allen (quadriceps) was a limited participant at the Dolphins' practice Wednesday.,RB
-4880236,Will Kacmarek,Miami Dolphins,Questionable,2026-11-05T01:46Z,,,,,,Kacmarek (hamstring) was a limited participant at the Dolphins' practice Wednesday.,TE
 4036660,Darrell Baker Jr.,Miami Dolphins,Out,2026-11-05T00:35Z,Undisclosed,Not Specified,Not Specified,2026-11-15,PUP-R,"Baker (undisclosed) is not ready to return to practice, David Furones of the South Florida Sun Sentinel reports.",CB
-4880346,Michael Taaffe,Miami Dolphins,Questionable,2026-11-04T21:31Z,Wrist,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,S
-4431664,Dante Trader Jr.,Miami Dolphins,Questionable,2026-11-04T21:31Z,Shoulder,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,S
-3057956,Zach Sieler,Miami Dolphins,Questionable,2026-11-04T21:30Z,Shoulder,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,DT
-4431586,Chop Robinson,Miami Dolphins,Questionable,2026-11-04T21:30Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,LB
-4034729,Tucker Addington,Miami Dolphins,Questionable,2026-11-04T21:30Z,Shoulder,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,LS
 3043234,Zane Gonzalez,Miami Dolphins,Active,2026-11-03T02:35Z,,,,,,"Gonzalez reverted to the Dolphins' practice squad Monday, per the NFL's official transaction log.",PK
 4362135,Christian Haynes,Miami Dolphins,Active,2026-11-02T19:10Z,,,,,,,G
 4567225,Jaylin Simpson,Miami Dolphins,Active,2026-11-02T19:10Z,,,,,,,S
@@ -574,10 +574,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361259,Zach Wilson,New Orleans Saints,Active,2026-10-26T18:41Z,,,,,,,QB
 3929645,Juwan Johnson,New Orleans Saints,Active,2026-10-26T02:53Z,,,,,,Johnson caught one of three targets for seven yards during Sunday's 16-10 loss to the Steelers.,TE
 4569559,Devaughn Vele,New Orleans Saints,Active,2026-10-25T18:28Z,,,,,,Vele caught all five of his targets for 54 yards and a touchdown in Sunday's 16-10 loss to the Steelers.,WR
-3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-11-06T21:17Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
-4595348,Malik Nabers,New York Giants,Questionable,2026-11-06T19:36Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Head coach John Harbaugh said Nabers (knee) ""practiced fully"" Friday and will be ""full go"" for Sunday's game at Philadelphia, Matt Citak of the Giants' official site reports.",WR
+3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-11-06T21:32Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
+4595348,Malik Nabers,New York Giants,Active,2026-11-06T21:24Z,,,,,,Nabers (knee) doesn't have a designation for Sunday's game in Philadelphia.,WR
+4040761,Devin Singletary,New York Giants,Active,2026-11-06T21:19Z,,,,,,"With Cam Skattebo (hamstring) doubtful to play Week 9, Singletary is expected to operate as the Giants' lead back Sunday against the Eagles, Jordan Raanan of ESPN.com reports.",RB
+4696981,Cam Skattebo,New York Giants,Doubtful,2026-11-06T21:18Z,Hamstring,Not Specified,Not Specified,2026-11-08,DOUBTFUL,"Skattebo (hamstring) is listed as doubtful for Sunday's game at Philadelphia, Dan Salomone of the Giants' official site reports.",RB
 4691889,Greg Desrosiers Jr.,New York Giants,Active,2026-11-06T19:10Z,,,,,,"Desrosiers could serve as a potential backup for the Giants on Sunday, Dan Duggan of The Athletic reports.",RB
-4696981,Cam Skattebo,New York Giants,Doubtful,2026-11-06T18:30Z,Hamstring,Not Specified,Not Specified,2026-11-08,DOUBTFUL,"Head coach John Harbaugh said Skattebo (hamstring) didn't practice Friday, but the Giants are ""keeping the door open"" for the running back to play Sunday at Philadelphia, Ryan Dunleavy of the New York Post reports.",RB
 4259566,Andrew Thomas,New York Giants,Questionable,2026-11-06T01:12Z,Groin,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Thomas (groin) was a limited participant at the Giants' practice Thursday.,OT
 4921249,Colton Hood,New York Giants,Active,2026-11-05T22:50Z,,,,,,Hood (illness) was a full participant in Thursday's practice.,CB
 4040615,Malik Harrison,New York Giants,Active,2026-11-05T22:01Z,,,,,,,LB
@@ -588,7 +589,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429148,Theo Johnson,New York Giants,Active,2026-11-05T01:35Z,,,,,,"Johnson (neck) was a full participant at the Giants' practice Wednesday, Dan Salomone of the team's official site reports.",TE
 4257188,Charlie Jones,New York Giants,Questionable,2026-11-04T21:27Z,Hand,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,WR
 4686362,Marcus Mbow,New York Giants,Active,2026-11-04T21:26Z,,,,,,,OT
-4040761,Devin Singletary,New York Giants,Active,2026-10-28T23:13Z,,,,,,"Singletary is expected to handle a bigger role out of the Giants' backfield after Tyrone Tracy (hamstring) was placed on injured reserve Tuesday, Jordan Raanan of ESPN.com reports.",RB
 4950400,Arvell Reese,New York Giants,Active,2026-10-28T04:32Z,,,,,,"Reese posted seven tackles (five solo), including 0.5 sacks, in Sunday's 27-21 overtime victory against the Texans.",LB
 4371961,Micah McFadden,New York Giants,Active,2026-10-28T04:16Z,,,,,,McFadden notched 10 tackles (all solo) in Sunday's 27-21 overtime win against the Texans.,LB
 4360516,Tyrone Tracy Jr.,New York Giants,Injured Reserve,2026-10-27T21:04Z,Hamstring,Strain,Not Specified,2026-12-06,IR,"The Giants placed Tracy (hamstring) on injured reserve Tuesday, Dan Salomone of the team's official site reports.",RB
