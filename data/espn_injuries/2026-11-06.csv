@@ -81,7 +81,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3051324,Dion Dawkins,Buffalo Bills,Questionable,2026-11-05T22:13Z,Ribs,,,2026-11-09,QUESTIONABLE,questionable,OT
 4367203,Alec Anderson,Buffalo Bills,Questionable,2026-11-05T22:12Z,Ankle,,,2026-11-09,QUESTIONABLE,questionable,OT
 4242433,Joshua Palmer,Buffalo Bills,Questionable,2026-11-05T22:11Z,Hamstring,Not Specified,Right,2026-11-09,QUESTIONABLE,Palmer (hamstring) did not practice Thursday.,WR
-3915416,DJ Moore,Buffalo Bills,Questionable,2026-11-05T22:04Z,Knee,Not Specified,Not Specified,2026-11-09,QUESTIONABLE,Moore (knee) was a limited participant in Thursday's practice.,WR
+3915416,DJ Moore,Buffalo Bills,Questionable,2026-11-05T22:04Z,Shoulder,Not Specified,Not Specified,2026-11-09,QUESTIONABLE,Moore (shoulder) was a limited participant in Thursday's practice.,WR
 4596480,Jordan Hancock,Buffalo Bills,Injured Reserve,2026-11-05T03:59Z,Hamstring,Not Specified,Not Specified,2026-11-09,IR-R,"Hancock (hamstring) was designated to return from injured reserve by the Bills on Wednesday, Sal Capaccio of WGR Sports Radio 550 Buffalo reports.",CB
 3127294,Greg Gaines,Buffalo Bills,Questionable,2026-11-03T13:03Z,Calf,Not Specified,Not Specified,2026-11-09,QUESTIONABLE,questionable,DT
 4030899,Spencer Brown,Buffalo Bills,Questionable,2026-11-03T13:03Z,Back,Not Specified,Not Specified,2026-11-09,QUESTIONABLE,questionable,OT
@@ -181,8 +181,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5083076,Harold Fannin Jr.,Cleveland Browns,Active,2026-11-06T18:28Z,,,,,,"Fannin (groin) will play Sunday against the Saints, Daniel Oyefusi of ESPN.com reports.",TE
 3122840,Deshaun Watson,Cleveland Browns,Questionable,2026-11-06T18:27Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"Watson (concussion) is listed as questionable for Sunday's game against the Saints, but Shedeur Sanders will start even if Watson is active Kelsey Russo of the Browns' official site reports.",QB
 4432762,Shedeur Sanders,Cleveland Browns,Active,2026-11-06T18:23Z,,,,,,"Sanders will start at quarterback Sunday against the Saints, Scott Petrak of the Elyria Chronicle-Telegram reports.",QB
-3110565,Quincy Williams,Cleveland Browns,Questionable,2026-11-05T22:33Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Williams (hamstring) was a limited participant in Thursday's practice, Zac Jackson of The Athletic reports.",LB
-4832800,Denzel Boston,Cleveland Browns,Questionable,2026-11-05T21:32Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Boston (calf) remained limited in Thursday's practice, Mary Kay Cabot of The Cleveland Plain Dealer reports.",WR
+3110565,Quincy Williams,Cleveland Browns,Active,2026-11-05T22:33Z,,,,,,"Williams (hamstring) was a limited participant in Thursday's practice, Zac Jackson of The Athletic reports.",LB
+4832800,Denzel Boston,Cleveland Browns,Active,2026-11-05T21:32Z,,,,,,"Boston (calf) remained limited in Thursday's practice, Mary Kay Cabot of The Cleveland Plain Dealer reports.",WR
 3115485,Elgton Jenkins,Cleveland Browns,Active,2026-11-05T21:29Z,,,,,,,C
 4695783,Myles Harden,Cleveland Browns,Active,2026-11-05T21:29Z,,,,,,,CB
 4578085,Jared Verse,Cleveland Browns,Active,2026-11-05T21:28Z,,,,,,,DE
@@ -394,7 +394,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5081927,R Mason Thomas,Kansas City Chiefs,Active,2026-10-31T23:13Z,,,,,,,DE
 4040432,L'Jarius Sneed,Kansas City Chiefs,Injured Reserve,2026-10-31T23:04Z,Knee,Not Specified,Not Specified,2026-11-26,IR,The Chiefs placed Sneed (knee) on injured reserve Saturday.,CB
 4043041,Jaylon Moore,Kansas City Chiefs,Active,2026-10-31T01:48Z,,,,,,Moore (concussion) does not carry an injury designation into Sunday's game against the Broncos.,OT
-4591008,Omarr Norman-Lott,Kansas City Chiefs,Out,2026-10-29T01:48Z,Knee - ACL,Surgery,Right,2026-11-08,PUP-R,The Chiefs designated Norman-Lott (knee) to return from injured reserve Wednesday.,DT
+4591008,Omarr Norman-Lott,Kansas City Chiefs,Out,2026-10-29T01:48Z,Knee - ACL,Surgery,Right,2026-11-15,PUP-R,The Chiefs designated Norman-Lott (knee) to return from injured reserve Wednesday.,DT
 4361964,Chamarri Conner,Kansas City Chiefs,Active,2026-10-28T01:59Z,,,,,,Conner finished Sunday's 20-3 loss to Seattle with seven tackles (two solo).,S
 4610705,Nohl Williams,Kansas City Chiefs,Active,2026-10-28T01:56Z,,,,,,Williams finished Sunday's 20-3 loss to the Seahawks with 10 tackles (four solo) and one interception.,CB
 4362759,Nick Bolton,Kansas City Chiefs,Active,2026-10-28T01:51Z,,,,,,Bolton registered 11 tackles (six solo) during the Chiefs' 20-3 loss to the Seahawks on Sunday.,LB
@@ -577,7 +577,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3115303,Jermaine Eluemunor,New York Giants,Questionable,2026-11-06T19:45Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
 4691889,Greg Desrosiers Jr.,New York Giants,Active,2026-11-06T19:10Z,,,,,,"Desrosiers could serve as a potential backup for the Giants on Sunday, Dan Duggan of The Athletic reports.",RB
 4696981,Cam Skattebo,New York Giants,Questionable,2026-11-06T18:30Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Head coach John Harbaugh said Skattebo (hamstring) didn't practice Friday, but the Giants are ""keeping the door open"" for the running back to play Sunday at Philadelphia, Ryan Dunleavy of the New York Post reports.",RB
-4595348,Malik Nabers,New York Giants,Questionable,2026-11-06T17:19Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Nabers (knee) was catching passes during Friday's walkthrough and ""should be 'good' to go"" For Sunday's game against the Eagles, Ryan Dunleavy of the New York Post reports.",WR
+4595348,Malik Nabers,New York Giants,Questionable,2026-11-06T17:19Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Nabers (knee) was catching passes during Friday's walkthrough and should be ""good"" to go For Sunday's game against the Eagles, Ryan Dunleavy of the New York Post reports.",WR
 4259566,Andrew Thomas,New York Giants,Questionable,2026-11-06T01:12Z,Groin,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Thomas (groin) was a limited participant at the Giants' practice Thursday.,OT
 4921249,Colton Hood,New York Giants,Active,2026-11-05T22:50Z,,,,,,Hood (illness) was a full participant in Thursday's practice.,CB
 4040615,Malik Harrison,New York Giants,Active,2026-11-05T22:01Z,,,,,,,LB
