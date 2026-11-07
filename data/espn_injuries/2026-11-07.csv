@@ -74,9 +74,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685526,Adam Randall,Baltimore Ravens,Injured Reserve,2026-11-05T01:10Z,Neck,Not Specified,Not Specified,2026-11-16,IR-R,"Randall (neck) is officially listed as questionable for Thursday's game versus the Jaguars, Ryan Mink of the Ravens' official site reports.",RB
 4035479,John Simpson,Baltimore Ravens,Active,2026-11-04T20:22Z,,,,,,,G
 4430876,Roger Rosengarten,Baltimore Ravens,Active,2026-11-04T20:22Z,,,,,,,OT
+3915416,DJ Moore,Buffalo Bills,Active,2026-11-07T19:17Z,,,,,,Moore (shoulder) doesn't have a designation for Monday's contest at Minnesota.,WR
+4635008,Keon Coleman,Buffalo Bills,Active,2026-11-07T19:17Z,,,,,,,WR
 4242433,Joshua Palmer,Buffalo Bills,Out,2026-11-07T18:51Z,Hamstring,Not Specified,Right,2026-11-15,OUT,"Palmer (hamstring) has been ruled out for Monday's game in Minnesota, Maddy Glab of the Bills' official site reports.",WR
-3915416,DJ Moore,Buffalo Bills,Questionable,2026-11-07T17:57Z,Shoulder,Not Specified,Not Specified,2026-11-09,QUESTIONABLE,"Moore (shoulder) remained in a red non-contact jersey at Saturday's practice, Katherine Fitzgerald of The Buffalo News reports.",WR
-4635008,Keon Coleman,Buffalo Bills,Questionable,2026-11-06T22:05Z,Shoulder,,,2026-11-09,QUESTIONABLE,Coleman (shoulder) was a limited practice participant Friday.,WR
 3915411,Ty Johnson,Buffalo Bills,Active,2026-11-06T22:03Z,,,,,,Johnson (illness) was a full practice participant Friday.,RB
 4044133,Sam Franklin Jr.,Buffalo Bills,Questionable,2026-11-06T22:01Z,Illness,,,2026-11-09,QUESTIONABLE,questionable,S
 4385690,Dalton Kincaid,Buffalo Bills,Active,2026-11-06T21:59Z,,,,,,Kincaid (chest) was a full participant in Friday's practice.,TE
@@ -499,10 +499,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242512,Malik Willis,Miami Dolphins,Active,2026-11-02T03:52Z,,,,,,Willis completed 21 of 32 passes for 211 yards and two touchdowns with one interception in Sunday's 24-19 loss to New England. He gained two rushing yards on his only carry.,QB
 4869645,Caleb Douglas,Miami Dolphins,Active,2026-11-02T03:41Z,,,,,,Douglas caught four of six targets for 43 yards in Sunday's 24-19 loss to the Patriots.,WR
 4367209,Greg Dulcich,Miami Dolphins,Active,2026-11-02T03:33Z,,,,,,Dulcich caught four of six targets for 43 yards in Sunday's 24-19 loss to the Patriots.,TE
-3917315,Kyler Murray,Minnesota Vikings,Out,2026-11-07T14:40Z,Hamstring,Soreness,Not Specified,2026-11-09,OUT,"Murray (hamstring) is recovering from a Grade 2 strain ""that will keep him out for Monday's game and potentially beyond,"" Tom Pelissero of Netflix reports.",QB
+3917315,Kyler Murray,Minnesota Vikings,Out,2026-11-07T19:12Z,Hamstring,Soreness,Not Specified,2026-11-09,OUT,out,QB
+3886598,Jauan Jennings,Minnesota Vikings,Out,2026-11-07T19:12Z,Calf,Not Specified,Not Specified,2026-11-15,OUT,out,WR
+4832846,Demond Claiborne,Minnesota Vikings,Out,2026-11-07T19:12Z,Knee,Not Specified,Not Specified,2026-11-15,OUT,out,RB
 4361985,Christian Darrisaw,Minnesota Vikings,Active,2026-11-07T04:22Z,,,,,,Darrisaw (shoulder) was a full practice participant Friday.,OT
-4832846,Demond Claiborne,Minnesota Vikings,Out,2026-11-07T02:29Z,Knee,Not Specified,Not Specified,2026-11-15,OUT,Claiborne (knee) did not participate in Friday's practice.,RB
-3886598,Jauan Jennings,Minnesota Vikings,Questionable,2026-11-07T02:23Z,Calf,Not Specified,Not Specified,2026-11-09,QUESTIONABLE,Jennings (calf) did not participate in Friday's practice.,WR
 4044540,Isaiah Rodgers,Minnesota Vikings,Active,2026-11-06T23:19Z,,,,,,,CB
 4877652,Jake Golday,Minnesota Vikings,Active,2026-11-06T23:19Z,,,,,,,LB
 3133487,Andrew Van Ginkel,Minnesota Vikings,Questionable,2026-11-05T23:38Z,Chest,Not Specified,Not Specified,2026-11-09,QUESTIONABLE,Van Ginkel (chest) was limited in Thursday's practice.,LB
