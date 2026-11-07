@@ -549,6 +549,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4613202,Kyle Williams,New England Patriots,Active,2026-11-02T04:34Z,,,,,,Williams caught his lone target for a 43-yard touchdown during Sunday's 24-19 win over the Dolphins.,WR
 4427095,DeMario Douglas,New England Patriots,Active,2026-11-02T03:45Z,,,,,,Douglas caught all three of his targets for 76 yards and a touchdown in Sunday's 24-19 win over the Dolphins.,WR
 4431452,Drake Maye,New England Patriots,Active,2026-11-02T03:30Z,,,,,,Maye completed 16 of 20 passes for 199 yards and two touchdowns in Sunday's 24-19 win over the Dolphins. He added five rushing yards and a TD on eight carries.,QB
+4361777,Zamir White,New Orleans Saints,Active,2026-11-07T23:22Z,,,,,,The Saints elevated White from their practice squad to their active roster Saturday ahead of Sunday's matchup against Cleveland.,RB
+5208518,Charlie Smyth,New Orleans Saints,Active,2026-11-07T23:12Z,,,,,,The Saints elevated Smyth from their practice squad to their active roster Saturday.,PK
 4880281,Jordyn Tyson,New Orleans Saints,Questionable,2026-11-07T21:09Z,Hamstring,Strain,Right,2026-11-08,QUESTIONABLE,"Tyson (hamstring) was activated from injured reserve Saturday, but he remains questionable for Sunday's game against the Browns.",WR
 4685260,Kelvin Banks Jr.,New Orleans Saints,Questionable,2026-11-07T03:01Z,Ankle,Surgery,Not Specified,2026-11-08,QUESTIONABLE,Banks (ankle) is listed as questionable for Sunday's game against the Browns.,OT
 3931399,Justin Reid,New Orleans Saints,Active,2026-11-07T02:42Z,,,,,,Reid (concussion) does not have any injury designation ahead of Sunday's game against the Browns.,S
@@ -558,7 +560,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4258199,Cesar Ruiz,New Orleans Saints,Active,2026-11-05T05:00Z,,,,,,Ruiz (knee) was a full participant in Wednesday's practice.,G
 4076951,Nathan Shepherd,New Orleans Saints,Active,2026-11-05T04:59Z,,,,,,Shepherd (illness) practiced in full Wednesday.,DT
 4430379,Asim Richards,New Orleans Saints,Questionable,2026-11-04T22:03Z,Thumb,Surgery,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
-5208518,Charlie Smyth,New Orleans Saints,Active,2026-11-04T21:51Z,,,,,,"Coach Kellen Moore announced Wednesday that Smyth will be the Saints' kicker in Week 9, Katherine Terrell of ESPN.com reports.",PK
 4239996,Travis Etienne Jr.,New Orleans Saints,Injured Reserve,2026-11-04T21:38Z,Hamstring,Strain,Left,2026-11-08,IR,"Head coach Kellen Moore said Wednesday that the Saints haven't opened Etienne's (hamstring) practice window just yet, Jeff Nowak of WWL Louisiana reports.",RB
 3918310,Carl Granderson,New Orleans Saints,Active,2026-10-28T04:47Z,,,,,,"Granderson totaled four tackles, including 1.5 sacks, in Sunday's Week 7 loss to Pittsburgh.",DE
 4241993,Pete Werner,New Orleans Saints,Active,2026-10-28T04:42Z,,,,,,Werner finished Sunday's loss to the Steelers with eight tackles (three solo).,LB
@@ -573,7 +574,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3929645,Juwan Johnson,New Orleans Saints,Active,2026-10-26T02:53Z,,,,,,Johnson caught one of three targets for seven yards during Sunday's 16-10 loss to the Steelers.,TE
 4569559,Devaughn Vele,New Orleans Saints,Active,2026-10-25T18:28Z,,,,,,Vele caught all five of his targets for 54 yards and a touchdown in Sunday's 16-10 loss to the Steelers.,WR
 4360689,Tyler Shough,New Orleans Saints,Active,2026-10-25T18:17Z,,,,,,Shough completed 30 of 38 passes for 278 yards and one touchdown with one interception in Sunday's 16-10 loss to the Steelers. He added seven rushing yards on three carries.,QB
-4361370,Chris Olave,New Orleans Saints,Active,2026-10-25T18:10Z,,,,,,Olave caught six of 10 targets for 56 yards in Sunday's 16-10 loss to the Steelers.,WR
 4259566,Andrew Thomas,New York Giants,Active,2026-11-07T03:56Z,,,,,,Thomas (groin) does not have a designation for Sunday's matchup in Philadelphia.,OT
 4426542,Darius Alexander,New York Giants,Active,2026-11-06T22:53Z,,,,,,,DT
 3115303,Jermaine Eluemunor,New York Giants,Active,2026-11-06T22:53Z,,,,,,,OT
@@ -679,7 +679,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360438,Brandon Aiyuk,San Francisco 49ers,Out,2026-11-07T16:58Z,Personal,Not Specified,Not Specified,2026-11-15,RESERVE-DNR,"Prior to meeting with 49ers officials Friday, Aiyuk (personal) told assembled media that he's ""feeling great, healthy"" and ""looking to get reinstated to the National Football League,"" Nick Wagoner of ESPN.com reports.",WR
 4241807,Garret Wallow,San Francisco 49ers,Active,2026-11-07T04:37Z,,,,,,Wallow (hamstring) does not have a designation for Sunday's clash against Las Vegas.,LB
 3116097,Luke Gifford,San Francisco 49ers,Active,2026-11-07T04:30Z,,,,,,Gifford (groin) does not have a designation for Sunday's Week 9 tilt against the Raiders.,LB
-4240542,Nate Hobbs,San Francisco 49ers,Injured Reserve,2026-11-07T02:33Z,Groin,Not Specified,Not Specified,2026-11-08,IR-R,Hobbs (groin) is officially listed as questionable for Sunday's game versus the Raiders.,CB
+4240542,Nate Hobbs,San Francisco 49ers,Injured Reserve,2026-11-07T02:33Z,Groin,Not Specified,Not Specified,2026-11-15,IR-R,Hobbs (groin) is officially listed as questionable for Sunday's game versus the Raiders.,CB
 4693337,Marques Sigle,San Francisco 49ers,Active,2026-11-07T02:29Z,,,,,,Sigle (ankle) does not carry an official injury designation ahead of Sunday's game versus the Raiders.,S
 4040605,Nick Bosa,San Francisco 49ers,Active,2026-11-07T02:25Z,,,,,,Bosa (knee) does not carry an official injury designation ahead of Sunday's game versus Las Vegas.,DE
 3117251,Christian McCaffrey,San Francisco 49ers,Active,2026-11-06T22:12Z,,,,,,"McCaffrey (hamstring) doesn't have a designation for Sunday's game versus the Raiders, Nick Wagoner of ESPN.com reports.",RB
@@ -774,7 +774,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4573318,Dorian Mausi,Tennessee Titans,Injured Reserve,2026-11-01T02:07Z,Foot,Not Specified,Not Specified,2026-11-15,IR-R,"Mausi (foot) has been ruled out for Sunday's game against the Bengals, Jim Wyatt of the Titans' official site reports.",LB
 4373956,Jonah Laulu,Tennessee Titans,Active,2026-10-29T00:34Z,,,,,,"The Titans claimed Laulu off waivers from the Raiders on Wednesday, Jim Wyatt of the Titans' official site reports.",DT
 4036134,Amani Hooker,Tennessee Titans,Active,2026-10-28T01:37Z,,,,,,Hooker posted five tackles (two solo) during Sunday's 27-24 loss to Cleveland.,S
-4361577,Dyami Brown,Washington Commanders,Injured Reserve,2026-11-07T21:56Z,Calf,Not Specified,Not Specified,2026-12-06,IR,ir,WR
+4361577,Dyami Brown,Washington Commanders,Injured Reserve,2026-11-07T23:15Z,Calf,Not Specified,Not Specified,2026-12-06,IR,The Commanders placed Brown (calf) on injured reserve Saturday.,WR
 4430560,Jer'Zhan Newton,Washington Commanders,Questionable,2026-11-07T20:53Z,Pectoral,Surgery,Not Specified,2026-11-08,QUESTIONABLE,"The Commanders activated Newton (pectoral) from injured reserve Saturday, Ian Rapoport of NFL Network reports.",DT
 4262199,Sam Cosmi,Washington Commanders,Active,2026-11-06T22:42Z,,,,,,,G
 4048228,John Bates,Washington Commanders,Active,2026-11-06T22:41Z,,,,,,,TE
