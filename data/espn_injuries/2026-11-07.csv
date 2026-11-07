@@ -229,7 +229,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4039059,Brandon Jones,Denver Broncos,Out,2026-11-07T01:00Z,Hamstring,Not Specified,Not Specified,2026-11-22,OUT,Jones (hamstring) is officially listed as out for Sunday's game against the Panthers.,S
 4360853,Talanoa Hufanga,Denver Broncos,Questionable,2026-11-07T00:59Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Hufanga (ankle) is questionable to play against Carolina on Sunday.,S
 5216101,Dondrea Tillman,Denver Broncos,Questionable,2026-11-06T21:44Z,Hip,,,2026-11-08,QUESTIONABLE,questionable,LB
-4600981,Pat Bryant,Denver Broncos,Injured Reserve,2026-11-06T21:41Z,Ankle,Sprain,Right,2026-11-08,IR-R,"Coach Sean Payton said Friday that Bryant (ankle) is in line to play in Sunday's game against the Panthers, Chris Tomasson of the Denver Gazette reports.",WR
+4600981,Pat Bryant,Denver Broncos,Questionable,2026-11-06T21:41Z,Ankle,Sprain,Right,2026-11-08,QUESTIONABLE,"Coach Sean Payton said Friday that Bryant (ankle) is in line to play in Sunday's game against the Panthers, Chris Tomasson of the Denver Gazette reports.",WR
 2612151,Alex Singleton,Denver Broncos,Active,2026-11-04T04:58Z,,,,,,"Singleton notched 14 tackles (six solo), including 1.0 sacks, and defensed a pass in Sunday's 28-24 victory against the Chiefs.",LB
 3051876,Evan Engram,Denver Broncos,Active,2026-11-03T03:39Z,,,,,,Engram failed to catch any of his three targets in Sunday's 28-24 win over the Chiefs.,TE
 2985659,Wil Lutz,Denver Broncos,Active,2026-11-03T02:01Z,,,,,,Lutz made both field-goal attempts and both PATs in Sunday's 28-24 win over the Chiefs.,PK
@@ -524,7 +524,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3042519,Aaron Jones Sr.,Minnesota Vikings,Active,2026-11-02T01:12Z,,,,,,Jones rushed five times for 22 yards and brought in both targets for 18 yards in the Vikings' 19-15 loss to the Lions on Sunday.,RB
 4360569,Jordan Mason,Minnesota Vikings,Active,2026-11-02T01:06Z,,,,,,Mason rushed eight times for 20 yards in the Vikings' 19-15 loss to the Lions on Sunday.,RB
 4262921,Justin Jefferson,Minnesota Vikings,Active,2026-11-01T22:45Z,,,,,,Jefferson brought in five of nine targets for 33 yards and a touchdown in the Vikings' 19-15 loss to the Lions on Sunday.,WR
-2991662,Mack Hollins,New England Patriots,Questionable,2026-11-07T21:19Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,WR
+2991662,Mack Hollins,New England Patriots,Questionable,2026-11-07T21:23Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"The Patriots activated Hollins (calf) from injured reserve Saturday, but he remains questionable for Sunday's game against the Packers.",WR
 4837244,Gabe Jacas,New England Patriots,Active,2026-11-07T03:21Z,,,,,,Jacas (knee) does not have a designation for Sunday's contest versus Green Bay.,LB
 4241720,Marcus Jones,New England Patriots,Active,2026-11-06T20:47Z,,,,,,,CB
 2574056,Kevin Byard,New England Patriots,Active,2026-11-06T20:47Z,,,,,,,S
