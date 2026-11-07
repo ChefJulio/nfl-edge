@@ -1,5 +1,5 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
-5084939,Isaiah Adams,Arizona Cardinals,Injured Reserve,2026-11-07T04:26Z,Ankle,Not Specified,Not Specified,2026-11-08,IR-R,"Adams (ankle) is officially questionable for Sunday's matchup in Seattle, Josh Weinfuss of ESPN.com reports.",G
+5084939,Isaiah Adams,Arizona Cardinals,Questionable,2026-11-07T04:26Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Adams (ankle) is officially questionable for Sunday's matchup in Seattle, Josh Weinfuss of ESPN.com reports.",G
 4367199,Jon Gaines II,Arizona Cardinals,Out,2026-11-07T03:13Z,Ankle,Not Specified,Not Specified,2026-11-15,OUT,"Gaines (ankle) has been ruled out for Sunday's Week 9 matchup versus the Seahawks, Bo Brack of GoPHNX.com reports.",G
 4709718,Jayden Williams,Arizona Cardinals,Out,2026-11-07T03:08Z,Knee,Not Specified,Not Specified,2026-11-15,OUT,"Williams (knee) has been ruled out for Sunday's contest in Seattle, Bo Brack of GoPHNX.com reports.",OT
 4685503,Walter Nolen III,Arizona Cardinals,Questionable,2026-11-07T02:35Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Nolen (ankle) is questionable for Sunday's Week 9 tilt against the Seahawks, Josh Weinfuss of ESPN.com reports.",DT
@@ -24,11 +24,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4683506,Albert Reese IV,Arizona Cardinals,Active,2026-11-02T18:31Z,,,,,,,OT
 4361307,Trey McBride,Arizona Cardinals,Active,2026-11-01T23:48Z,,,,,,McBride hauled in seven of eight targets for 72 yards and one touchdown during Sunday's 33-30 overtime victory at Dallas.,TE
 3918331,Andrew Wingard,Arizona Cardinals,Active,2026-11-01T17:19Z,,,,,,"Wingard (knee) is active for Sunday's game versus the Cowboys, Darren Urban of the team's official site reports.",S
+4360807,Yasir Abdullah,Atlanta Falcons,Questionable,2026-11-07T22:12Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,LB
 4241474,Brian Robinson Jr.,Atlanta Falcons,Injured Reserve,2026-11-07T21:13Z,Hamstring,Not Specified,Not Specified,2026-12-13,IR,"Robinson (hamstring) was placed on injured reserve Saturday, Marc Raimondi of ESPN.com reports.",RB
-4431210,Beaux Collins,Atlanta Falcons,Injured Reserve,2026-11-07T02:36Z,Hip,Not Specified,Not Specified,2026-11-08,IR-R,"Collins (hip) is listed as questionable for Sunday's game against the Bengals in Madrid, Spain,, Tori McElhaney of the Falcons' official site reports.",WR
+4431210,Beaux Collins,Atlanta Falcons,Questionable,2026-11-07T02:36Z,Hip,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Collins (hip) is listed as questionable for Sunday's game against the Bengals in Madrid, Spain,, Tori McElhaney of the Falcons' official site reports.",WR
 5081394,James Pearce Jr.,Atlanta Falcons,Questionable,2026-11-06T17:18Z,Back,,,2026-11-08,QUESTIONABLE,"The Falcons listed Pearce (back) as questionable for Sunday's game against the Bengals, Tori McElhaney of the Falcons' official site reports.",LB
 4037626,Divine Deablo,Atlanta Falcons,Questionable,2026-11-06T17:10Z,Forearm,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"The Falcons listed Deablo (forearm) as questionable for Sunday's game against the Bengals, Tori McElhaney of the Falcons' official site reports.",LB
-4360807,Yasir Abdullah,Atlanta Falcons,Injured Reserve,2026-11-05T02:45Z,Hamstring,Not Specified,Not Specified,2026-11-08,IR-R,Abdullah (hamstring) was a limited participant at practice Wednesday.,LB
 4431194,Billy Bowman Jr.,Atlanta Falcons,Active,2026-11-04T19:48Z,,,,,,Bowman was estimated as a full participant in Wednesday's practice.,CB
 3045527,Samson Ebukam,Atlanta Falcons,Injured Reserve,2026-11-04T00:37Z,Hamstring,Not Specified,Not Specified,2026-12-13,IR,"Ebukam (hamstring) was placed on injured reserve by the Falcons on Tuesday, Tori McElhaney of the team's official website reports.",DE
 10621,Nick Folk,Atlanta Falcons,Active,2026-11-03T03:53Z,,,,,,Folk went 0-for-1 on field-goal tries and did not attempt an extra point in Sunday's 16-0 loss to the Buccaneers.,PK
@@ -249,12 +249,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035662,Garett Bolles,Denver Broncos,Active,2026-11-01T20:01Z,,,,,,,OT
 4039007,Taylor Rapp,Denver Broncos,Active,2026-11-01T03:16Z,,,,,,"The Broncos signed Rapp off the practice squad to the active roster Saturday, Parker Gabriel of The Denver Post reports.",S
 4391845,Cody Schrader,Denver Broncos,Active,2026-11-01T01:24Z,,,,,,"The Broncos elevated Schrader from the practice squad to the active roster Saturday, Zac Stevens of TheDNVR.com reports.",RB
+4569465,Jack Campbell,Detroit Lions,Injured Reserve,2026-11-07T22:18Z,Neck,Not Specified,Not Specified,2026-12-06,IR,The Lions moved Campbell (neck) to injured reserve Saturday.,LB
 4361788,Cade Mays,Detroit Lions,Out,2026-11-07T03:55Z,Ankle,Sprain,Not Specified,2026-11-15,OUT,Mays (ankle) has been ruled out ahead of Sunday's game against the Dolphins.,C
 4038849,DJ Wonnum,Detroit Lions,Out,2026-11-07T02:18Z,Concussion,Concussion,Not Specified,2026-11-15,OUT,Wonnum (concussion) has been ruled out ahead of Sunday's game against the Dolphins.,LB
 3139387,D.J. Reed,Detroit Lions,Out,2026-11-07T02:12Z,Hip,Not Specified,Not Specified,2026-11-15,OUT,Reed (hip) has been ruled out ahead of Sunday's game against the Dolphins.,CB
 4360383,Kerby Joseph,Detroit Lions,Out,2026-11-07T02:10Z,Knee,Not Specified,Not Specified,2026-11-15,PUP-R,Joseph (knee) has been ruled out ahead of Sunday's game against the Dolphins.,S
 4692025,Brian Branch,Detroit Lions,Active,2026-11-07T02:01Z,,,,,,Branch (concussion) does not have any injury designation ahead of Sunday's game against the Dolphins.,S
-4569465,Jack Campbell,Detroit Lions,Injured Reserve,2026-11-07T01:58Z,Neck,Not Specified,Not Specified,2026-12-06,IR,Campbell (neck) has been ruled out ahead of Sunday's game against the Dolphins.,LB
 4383429,Jacob Saylors,Detroit Lions,Questionable,2026-11-07T01:51Z,Neck,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Saylors (neck) is listed as questionable for Sunday's game against the Dolphins.,RB
 4912274,Sione Vaki,Detroit Lions,Questionable,2026-11-07T01:48Z,Ankle,,,2026-11-08,QUESTIONABLE,Vaki (ankle) is listed as questionable for Sunday's game against the Dolphins.,RB
 4374302,Amon-Ra St. Brown,Detroit Lions,Questionable,2026-11-06T21:07Z,Ribs,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"St. Brown (ribs) is questionable for Sunday's game against the Dolphins, Tim Twentyman of the Lions' official site reports.",WR
