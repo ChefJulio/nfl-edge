@@ -174,6 +174,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4247726,Bryan Cook,Cincinnati Bengals,Active,2026-10-28T02:08Z,,,,,,"Cook recorded nine tackles (six solo), including 0.5 sacks, during the Bengals' 35-13 win over the Ravens on Sunday.",S
 4427729,Demetrius Knight Jr.,Cincinnati Bengals,Active,2026-10-28T01:59Z,,,,,,Knight totaled eight tackles (two solo) and an interception during the Bengals' win over the Ravens on Sunday.,LB
 4384852,Dohnte Meyers,Cincinnati Bengals,Active,2026-10-27T01:58Z,,,,,,Meyers failed to catch either of his two targets in Sunday's 35-13 win over the Ravens.,WR
+3122840,Deshaun Watson,Cleveland Browns,Questionable,2026-11-07T18:12Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,Watson (concussion) cleared the concussion protocol Saturday but remains questionable for Sunday's game at New Orleans.,QB
 3110565,Quincy Williams,Cleveland Browns,Active,2026-11-06T20:43Z,,,,,,"Williams has no injury designation ahead of Sunday's game against the Saints, Scott Petrak of the Elyria Chronicle-Telegram reports.",LB
 4832800,Denzel Boston,Cleveland Browns,Active,2026-11-06T19:47Z,,,,,,"Boston (calf) was a full participant in Friday's practice and doesn't have an injury designation for Sunday's game at New Orleans, Chris Easterling of the Akron Beacon Journal reports.",WR
 4876017,Carson Schwesinger,Cleveland Browns,Active,2026-11-06T19:45Z,,,,,,,LB
@@ -181,7 +182,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4597310,Austin Barber,Cleveland Browns,Active,2026-11-06T19:45Z,,,,,,,OT
 3040471,Maliek Collins,Cleveland Browns,Out,2026-11-06T19:45Z,Elbow,,,2026-11-15,OUT,out,DT
 5083076,Harold Fannin Jr.,Cleveland Browns,Active,2026-11-06T18:28Z,,,,,,"Fannin (groin) will play Sunday against the Saints, Daniel Oyefusi of ESPN.com reports.",TE
-3122840,Deshaun Watson,Cleveland Browns,Questionable,2026-11-06T18:27Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"Watson (concussion) is listed as questionable for Sunday's game against the Saints, but Shedeur Sanders will start even if Watson is active Kelsey Russo of the Browns' official site reports.",QB
 4432762,Shedeur Sanders,Cleveland Browns,Active,2026-11-06T18:23Z,,,,,,"Sanders will start at quarterback Sunday against the Saints, Scott Petrak of the Elyria Chronicle-Telegram reports.",QB
 3115485,Elgton Jenkins,Cleveland Browns,Active,2026-11-05T21:29Z,,,,,,,C
 4695783,Myles Harden,Cleveland Browns,Active,2026-11-05T21:29Z,,,,,,,CB
@@ -327,7 +327,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3917792,Daniel Jones,Indianapolis Colts,Active,2026-11-07T17:14Z,,,,,,"The Colts have been contacted by multiple teams regarding the availability of Jones ahead of Tuesday's trade deadline, Ian Rapoport and Adam Schefter of ESPN report.",QB
 4682909,Justin Walley,Indianapolis Colts,Out,2026-11-07T02:55Z,Knee,Not Specified,Not Specified,2026-11-15,OUT,Walley (knee) has been ruled out for Sunday's clash against the Cowboys.,CB
 4429684,Anthony Gould,Indianapolis Colts,Active,2026-11-07T00:43Z,,,,,,Gould (concussion) does not have a designation for Sunday's matchup versus Dallas.,WR
-4905664,A.J. Haulcy,Indianapolis Colts,Questionable,2026-11-07T00:34Z,Ankle,,,2026-11-08,QUESTIONABLE,Haulcy (ankle) is officially listed as questionable for Sunday's game versus the Cowboys.,S
+4905664,A.J. Haulcy,Indianapolis Colts,Out,2026-11-07T00:34Z,Ankle,Not Specified,Not Specified,2026-11-15,OUT,Haulcy (ankle) is officially listed as questionable for Sunday's game versus the Cowboys.,S
 4722908,Drew Ogletree,Indianapolis Colts,Active,2026-11-07T00:29Z,,,,,,Ogletree (knee) does not carry an official injury designation ahead of Sunday's game versus the Cowboys.,TE
 4892240,Jalen Travis,Indianapolis Colts,Questionable,2026-11-06T20:38Z,Thumb,,,2026-11-08,QUESTIONABLE,questionable,OT
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Out,2026-11-06T19:29Z,Knee,Not Specified,Not Specified,2026-11-15,OUT,The Colts have ruled out Davis-Gauthier for Sunday's matchup against the Cowboys.,LB
@@ -549,12 +549,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4613202,Kyle Williams,New England Patriots,Active,2026-11-02T04:34Z,,,,,,Williams caught his lone target for a 43-yard touchdown during Sunday's 24-19 win over the Dolphins.,WR
 4427095,DeMario Douglas,New England Patriots,Active,2026-11-02T03:45Z,,,,,,Douglas caught all three of his targets for 76 yards and a touchdown in Sunday's 24-19 win over the Dolphins.,WR
 4431452,Drake Maye,New England Patriots,Active,2026-11-02T03:30Z,,,,,,Maye completed 16 of 20 passes for 199 yards and two touchdowns in Sunday's 24-19 win over the Dolphins. He added five rushing yards and a TD on eight carries.,QB
+4880281,Jordyn Tyson,New Orleans Saints,Injured Reserve,2026-11-07T18:06Z,Hamstring,Strain,Right,2026-11-08,IR-R,"Tyson (hamstring) intends to make his NFL debut Sunday against the Browns, NFL reporter Jordan Schultz reports.",WR
 4685260,Kelvin Banks Jr.,New Orleans Saints,Injured Reserve,2026-11-07T03:01Z,Ankle,Surgery,Not Specified,2026-11-08,IR-R,Banks (ankle) is listed as questionable for Sunday's game against the Browns.,OT
 3931399,Justin Reid,New Orleans Saints,Active,2026-11-07T02:42Z,,,,,,Reid (concussion) does not have any injury designation ahead of Sunday's game against the Browns.,S
 4429568,Martin Emerson Jr.,New Orleans Saints,Questionable,2026-11-07T00:17Z,Shin,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Emerson (shin) is questionable to suit up for Sunday's Week 9 matchup against the Browns.,CB
 3054850,Alvin Kamara,New Orleans Saints,Active,2026-11-06T20:17Z,,,,,,Kamara (rest/back) doesn't have a designation for Sunday's game versus the Browns.,RB
 5081999,CJ Donaldson,New Orleans Saints,Out,2026-11-06T19:12Z,Shoulder,Not Specified,Not Specified,2026-11-15,OUT,"Donaldson (shoulder/concussion) has been ruled out for Sunday's game against the Browns, Nick Underhill of NewOrleans.Football reports.",RB
-4880281,Jordyn Tyson,New Orleans Saints,Injured Reserve,2026-11-06T19:06Z,Hamstring,Strain,Right,2026-11-08,IR-R,"Tyson (hamstring) is listed as questionable for Sunday's game against the Browns, Katherine Terrell of ESPN.com reports.",WR
 4258199,Cesar Ruiz,New Orleans Saints,Active,2026-11-05T05:00Z,,,,,,Ruiz (knee) was a full participant in Wednesday's practice.,G
 4076951,Nathan Shepherd,New Orleans Saints,Active,2026-11-05T04:59Z,,,,,,Shepherd (illness) practiced in full Wednesday.,DT
 4430379,Asim Richards,New Orleans Saints,Questionable,2026-11-04T22:03Z,Thumb,Surgery,Not Specified,2026-11-08,QUESTIONABLE,questionable,OT
