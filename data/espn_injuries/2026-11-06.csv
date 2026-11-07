@@ -199,6 +199,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5081397,Dylan Sampson,Cleveland Browns,Active,2026-11-02T04:41Z,,,,,,Sampson rushed one time for seven yards and caught six of eight targets for 62 yards in Sunday's 27-6 loss to the Steelers.,RB
 4870653,KC Concepcion,Cleveland Browns,Active,2026-11-02T02:54Z,,,,,,Concepcion caught three of four targets for 37 yards in Sunday's 27-6 loss to the Steelers.,WR
 4685702,Quinshon Judkins,Cleveland Browns,Active,2026-11-02T02:32Z,,,,,,Judkins rushed 11 times for 25 yards and brought in both targets for 24 yards in the Browns' 27-6 loss to the Steelers on Sunday.,RB
+4870706,Caleb Downs,Dallas Cowboys,Active,2026-11-07T00:35Z,,,,,,"Downs (concussion) has no injury designation ahead of Sunday's game against the Colts, Tommy Yarrish of the Cowboys' official site reports.",S
+4362088,DeMarvion Overshown,Dallas Cowboys,Questionable,2026-11-07T00:32Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Overshown (hamstring/back) is listed as questionable for Sunday's game against the Colts, Tommy Yarrish of the Cowboys' official site reports.",LB
 4710067,Malachi Lawrence,Dallas Cowboys,Out,2026-11-07T00:24Z,Ankle,Not Specified,Not Specified,2026-11-08,OUT,"Lawrence (ankle) has been ruled out ahead of Sunday's game against the Colts, Tommy Yarrish of the Cowboys' official site reports.",LB
 3676833,KaVontae Turpin,Dallas Cowboys,Out,2026-11-07T00:19Z,Ribs,Not Specified,Not Specified,2026-11-15,OUT,"Turpin (ribs) has been ruled out ahead of Sunday's game against the Colts, Tommy Yarrish of the Cowboys' official site reports.",WR
 3929850,P.J. Locke,Dallas Cowboys,Active,2026-11-06T20:29Z,,,,,,,S
@@ -206,8 +208,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426354,George Pickens,Dallas Cowboys,Questionable,2026-11-06T20:09Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Pickens (hamstring) is listed as questionable for Sunday's game at Indianapolis, Tommy Yarrish of the Cowboys' official site reports.",WR
 4568652,Tyler Smith,Dallas Cowboys,Active,2026-11-06T01:21Z,,,,,,"Smith (ankle) was limited in Thursday's practice, Todd Archer of ESPN.com reports.",G
 4428914,Dee Winters,Dallas Cowboys,Active,2026-11-05T23:41Z,,,,,,"Winters (calf) was a full participant in practice Thursday, Todd Archer of ESPN.com reports.",LB
-4362088,DeMarvion Overshown,Dallas Cowboys,Questionable,2026-11-05T23:32Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Overshown (hamstring/back) was limited in Thursday's practice, Todd Archer of ESPN.com reports.",LB
-4870706,Caleb Downs,Dallas Cowboys,Active,2026-11-05T23:25Z,,,,,,"Downs (concussion) was limited during Thursday's practice, Todd Archer of ESPN.com reports.",S
 4426506,Joey Porter Jr.,Dallas Cowboys,Questionable,2026-11-05T22:21Z,Ankle,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,questionable,CB
 4685554,Drew Shelton,Dallas Cowboys,Active,2026-11-05T04:53Z,,,,,,"Shelton (hamstring) was a full participant in Wednesday's practice, Patrik Walker of the Cowboys' official site reports.",OT
 4043089,Jalen Thompson,Dallas Cowboys,Injured Reserve,2026-11-05T03:45Z,Hamstring,Not Specified,Not Specified,2026-11-08,IR,"Thompson (hamstring) has not had his 21-day practice window opened yet, Joe Hoyt of The Dallas Morning News reports.",S
@@ -324,10 +324,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4432708,Marvin Harrison Jr.,Houston Texans,Active,2026-10-25T21:25Z,,,,,,Harrison caught one of four targets for a six-yard touchdown in Sunday's 27-21 overtime loss to the Giants.,WR
 4432577,C.J. Stroud,Houston Texans,Active,2026-10-25T21:24Z,,,,,,Stroud completed 17 of 28 passes for 153 yards and two touchdowns in Sunday's 27-21 overtime loss to the Giants. He added two rushing attempts for four yards and threw a successful two-point conversion.,QB
 4258173,Nico Collins,Houston Texans,Active,2026-10-25T21:20Z,,,,,,Collins caught two of five targets for six yards in Sunday's 27-21 overtime loss to the Giants.,WR
+4429684,Anthony Gould,Indianapolis Colts,Active,2026-11-07T00:43Z,,,,,,Gould (concussion) does not have a designation for Sunday's matchup versus Dallas.,WR
+4905664,A.J. Haulcy,Indianapolis Colts,Questionable,2026-11-07T00:34Z,Ankle,,,2026-11-08,QUESTIONABLE,Haulcy (ankle) is officially listed as questionable for Sunday's game versus the Cowboys.,S
 4722908,Drew Ogletree,Indianapolis Colts,Active,2026-11-07T00:29Z,,,,,,Ogletree (knee) does not carry an official injury designation ahead of Sunday's game versus the Cowboys.,TE
 4892240,Jalen Travis,Indianapolis Colts,Questionable,2026-11-06T20:38Z,Thumb,,,2026-11-08,QUESTIONABLE,questionable,OT
-4905664,A.J. Haulcy,Indianapolis Colts,Questionable,2026-11-06T20:38Z,Ankle,,,2026-11-08,QUESTIONABLE,questionable,S
-4429684,Anthony Gould,Indianapolis Colts,Active,2026-11-06T20:37Z,,,,,,,WR
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Out,2026-11-06T19:29Z,Knee,Not Specified,Not Specified,2026-11-15,OUT,Colts' head coach ruled out Davis-Gauthier for Sunday's matchup against the Cowboys.,LB
 4682909,Justin Walley,Indianapolis Colts,Out,2026-11-06T17:54Z,Knee,Not Specified,Not Specified,2026-11-15,OUT,out,CB
 4242335,Jonathan Taylor,Indianapolis Colts,Active,2026-11-05T20:59Z,,,,,,"Taylor was a full participant at Thursday's practice, and Stephen Holder of ESPN.com reports that both Taylor and head coach Shane Steichen have maintained that Taylor will play Sunday against the Cowboys despite ongoing trade rumors surrounding the star running back.",RB
@@ -624,7 +624,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4243375,Dylan Parham,New York Jets,Active,2026-11-01T17:27Z,,,,,,Parham (knee) is active for Sunday's game against Las Vegas.,G
 4428617,T'Vondre Sweat,New York Jets,Injured Reserve,2026-10-31T23:39Z,Knee,Not Specified,Not Specified,2026-11-29,IR,"The Jets placed Sweat (knee) on injured reserve Saturday, Jeremy Fowler of ESPN.com reports.",DT
 4035537,Kene Nwangwu,New York Jets,Active,2026-10-29T00:29Z,,,,,,Nwangwu was a full participant in Wednesday's practice.,RB
-4360238,Dameon Pierce,Philadelphia Eagles,Questionable,2026-11-07T00:29Z,Undisclosed,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,RB
 4715355,Darius Cooper,Philadelphia Eagles,Active,2026-11-07T00:12Z,,,,,,"Cooper and Makai Lemon are positioned to start again Sunday against the Giants, with fellow wideouts DeVonta Smith (hamstring) and Dontayvion Wicks (ankle) ruled out for a third straight game, per PhiladelphiaEagles.com.",WR
 4870795,Makai Lemon,Philadelphia Eagles,Active,2026-11-07T00:02Z,,,,,,"Lemon and Darius Cooper profile as the top wide receivers for QB Joe Milton's first start in an Eagles uniform Sunday against the Giants, per PhiladelphiaEagles.com.",WR
 2971027,Jonathan Jones,Philadelphia Eagles,Out,2026-11-06T22:32Z,Hamstring,Not Specified,Not Specified,2026-11-22,OUT,out,CB
@@ -649,6 +648,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426331,Nolan Smith Jr.,Philadelphia Eagles,Active,2026-10-31T00:19Z,,,,,,Smith (concussion) does not carry an injury designation into Sunday's game against the Commanders.,LB
 4362116,Moro Ojomo,Philadelphia Eagles,Active,2026-10-30T20:03Z,,,,,,,DT
 3139368,Marcus Epps,Philadelphia Eagles,Active,2026-10-30T19:58Z,,,,,,,S
+4685759,Jalen Carter,Philadelphia Eagles,Active,2026-10-29T21:52Z,,,,,,,DT
 4692628,Doneiko Slaughter,Pittsburgh Steelers,Out,2026-11-03T13:08Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,out,CB
 4035656,Ben Skowronek,Pittsburgh Steelers,Out,2026-11-03T13:07Z,Calf,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,out,WR
 4567979,Brandin Echols,Pittsburgh Steelers,Out,2026-11-03T13:06Z,Hamstring,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,out,CB
