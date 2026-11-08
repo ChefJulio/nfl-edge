@@ -38,5 +38,45 @@
 "at": "2026-11-05T23:48:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0027973": {
+"name": "Andy Dalton",
+"team": "ATL",
+"pos": "QB",
+"pre": 0.2353,
+"ruling": "INA",
+"at": "2026-11-08T13:05:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041044": {
+"name": "Zachariah Branch",
+"team": "ATL",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T13:05:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0041194": {
+"name": "Jack Strand",
+"team": "ATL",
+"pos": "QB",
+"pre": 0.1062,
+"ruling": "INA",
+"at": "2026-11-08T13:05:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040432": {
+"name": "Beaux Collins",
+"team": "ATL",
+"pos": "WR",
+"pre": 0.3074,
+"ruling": "ACT",
+"at": "2026-11-08T13:09:00+00:00",
+"post": 0.974,
+"status": "Active (FFF)"
 }
 }
