@@ -202,7 +202,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426485,Jonathan Mingo,Dallas Cowboys,Questionable,2026-11-08T20:48Z,Ankle,Not Specified,,2026-11-08,QUESTIONABLE,"Mingo (ankle) is questionable to return to Sunday's matchup against the Colts, Patrik Walker of the Cowboys' official site reports.",WR
 4429676,Tyler Goodson,Dallas Cowboys,Active,2026-11-08T20:43Z,,,,,,"Goodson (knee) has returned to Sunday's game against the Colts, Mike Chappell of Fox 59 News Indianapolis reports.",RB
 4242355,Jake Ferguson,Dallas Cowboys,Questionable,2026-11-08T20:40Z,Knee,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Ferguson sustained a knee injury during Sunday's game against the Colts, Calvin Watkins of The Dallas Morning News reports.",TE
-4428914,Dee Winters,Dallas Cowboys,Questionable,2026-11-08T20:33Z,Concussion,Concussion,,2026-11-08,QUESTIONABLE,"Winters is being evaluated for a concussion and is questionable to return to Sunday's Week 9 tilt against Indianapolis, Calvin Watkins of The Dallas Morning News reports.",LB
+4428914,Dee Winters,Dallas Cowboys,Active,2026-11-08T20:33Z,,,,,,"Winters is being evaluated for a concussion and is questionable to return to Sunday's Week 9 tilt against Indianapolis, Calvin Watkins of The Dallas Morning News reports.",LB
 4683848,Donovan Ezeiruaku,Dallas Cowboys,Questionable,2026-11-08T19:17Z,Ankle,Not Specified,,2026-11-08,QUESTIONABLE,"Ezeiruaku (ankle) is questionable to return to Sunday's game against the Colts, Tommy Yarrish of the Cowboys' official site reports.",LB
 4427816,Marist Liufau,Dallas Cowboys,Active,2026-11-08T17:41Z,,,,,,Liufau (forearm) is active for Sunday's game against the Colts.,LB
 5083754,Ryan Flournoy,Dallas Cowboys,Active,2026-11-08T17:36Z,,,,,,"With George Pickens (hamstring) inactive, Flournoy is slated to move into the No. 2 WR role opposite CeeDee Lamb in Sunday's game against the Colts, while Jonathan Mingo will be the team's No. 3 receiver, Todd Archer of ESPN reports.",WR
@@ -324,6 +324,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2971573,Ka'imi Fairbairn,Houston Texans,Active,2026-10-25T22:00Z,,,,,,Fairbairn went 2-for-2 on field-goal attempts and converted his only PAT in Sunday's 27-21 overtime loss to the Giants.,PK
 4432708,Marvin Harrison Jr.,Houston Texans,Active,2026-10-25T21:25Z,,,,,,Harrison caught one of four targets for a six-yard touchdown in Sunday's 27-21 overtime loss to the Giants.,WR
 4432577,C.J. Stroud,Houston Texans,Active,2026-10-25T21:24Z,,,,,,Stroud completed 17 of 28 passes for 153 yards and two touchdowns in Sunday's 27-21 overtime loss to the Giants. He added two rushing attempts for four yards and threw a successful two-point conversion.,QB
+2998565,Mo Alie-Cox,Indianapolis Colts,Questionable,2026-11-08T20:58Z,Groin,Not Specified,,2026-11-08,QUESTIONABLE,questionable,TE
 4892240,Jalen Travis,Indianapolis Colts,Questionable,2026-11-08T20:12Z,Knee,,,2026-11-15,QUESTIONABLE,Travis (knee) has been ruled out for the rest of Sunday's clash against the Cowboys.,OT
 4601021,Jaylon Carlies,Indianapolis Colts,Questionable,2026-11-08T20:07Z,Neck,,,2026-11-15,QUESTIONABLE,Carlies (neck) has been ruled out for the remainder of Sunday's game against Dallas.,LB
 4683423,Riley Leonard,Indianapolis Colts,Out,2026-11-08T17:08Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,"Leonard (coach's decision) is inactive for Sunday's game against the Cowboys but is listed as the team's emergency quarterback, Abby Halpin of the team's official site reports.",QB
@@ -348,7 +349,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 15818,Keenan Allen,Indianapolis Colts,Active,2026-11-02T03:53Z,,,,,,Allen caught all seven targets for 67 yards in Sunday's 42-7 loss to the Jaguars.,WR
 4688813,Josh Downs,Indianapolis Colts,Active,2026-11-02T02:53Z,,,,,,Downs caught four of five targets for 23 yards and a touchdown during Sunday's 42-7 loss to the Jaguars.,WR
 4429084,Anthony Richardson Sr.,Indianapolis Colts,Active,2026-11-02T02:01Z,,,,,,Richardson entered the Colts' 42-7 loss to the Jaguars on Sunday for an ineffective Daniel Jones with 11:45 remaining and completed both his pass attempts for eight yards while rushing twice for four yards.,QB
-4431459,Tyler Warren,Indianapolis Colts,Active,2026-11-02T01:47Z,,,,,,Warren secured four of 10 targets for 18 yards in the Colts' 42-7 loss to the Jaguars on Sunday.,TE
 3050073,Foyesade Oluokun,Jacksonville Jaguars,Active,2026-11-08T04:33Z,,,,,,"Oluokun recorded seven tackles (six solo), including 1.0 sacks, in Thursday's 33-10 victory over Baltimore.",LB
 4917427,Tanner Koziol,Jacksonville Jaguars,Active,2026-11-07T04:42Z,,,,,,Koziol finished Thursday's 33-10 win over Baltimore with two catches for 15 yards on two targets.,TE
 4686248,Nate Boerkircher,Jacksonville Jaguars,Active,2026-11-06T18:22Z,,,,,,Boerkircher hauled in two of three targets for 61 yards in Thursday night's 33-10 win over Baltimore.,TE
@@ -374,7 +374,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4048231,Ezra Cleveland,Jacksonville Jaguars,Active,2026-11-04T20:06Z,,,,,,,G
 4880675,Rayuan Lane III,Jacksonville Jaguars,Active,2026-11-04T03:32Z,,,,,,"Lane recorded four total tackles (one solo) and three passes defensed, including a pick-six, during Sunday's 42-7 win over the Colts.",S
 2970716,Eric Murray,Jacksonville Jaguars,Injured Reserve,2026-11-04T01:11Z,Elbow,Not Specified,Not Specified,2027-02-15,IR,The Jaguars placed Murray (elbow) on their injured reserve list Tuesday.,S
-4683062,Xavier Worthy,Kansas City Chiefs,Questionable,2026-11-08T20:55Z,Leg,,,2026-11-08,QUESTIONABLE,questionable,WR
+4683062,Xavier Worthy,Kansas City Chiefs,Out,2026-11-08T20:57Z,Hamstring,,,2026-11-08,OUT,"Worthy left Sunday's game against the Jets with an apparent leg injury, Mike Garafolo of NFL Network reports.",WR
 4043041,Jaylon Moore,Kansas City Chiefs,Questionable,2026-11-08T20:36Z,Ankle,Not Specified,,2026-11-08,QUESTIONABLE,Moore (ankle) is questionable to return to Sunday's game against the Jets.,OT
 4567747,Garrett Nussmeier,Kansas City Chiefs,Out,2026-11-08T17:21Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,Nussmeier is inactive for Sunday's game against the Jets but will serve as the Chiefs' emergency third quarterback.,QB
 4372716,Nikko Remigio,Kansas City Chiefs,Active,2026-11-08T17:02Z,,,,,,Remigio is officially active for Sunday's game against the Jets.,WR
