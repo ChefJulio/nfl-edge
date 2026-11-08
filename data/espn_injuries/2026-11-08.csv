@@ -124,13 +124,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241416,Chuba Hubbard,Carolina Panthers,Active,2026-10-30T03:59Z,,,,,,Hubbard rushed 22 times for 81 yards and a touchdown and brought in seven of eight targets for 38 yards in the Panthers' 27-19 loss to the Packers on Thursday.,RB
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-10-30T03:45Z,,,,,,McMillan brought in six of 11 targets for 57 yards in the Panthers' 27-19 loss to the Packers on Thursday.,WR
 4244607,Akayleb Evans,Carolina Panthers,Injured Reserve,2026-10-30T00:13Z,Triceps,Not Specified,Not Specified,2026-11-30,IR,"Evans (triceps) was placed on injured reserve by the Panthers on Thursday, Darin Gantt of the team's official website reports.",CB
+4426374,Tyrique Stevenson Sr.,Chicago Bears,Questionable,2026-11-08T12:31Z,Thumb,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Stevenson (thumb) ""should be good to go"" for Sunday's game against the Buccaneers, Ian Rapoport of NFL Network reports.",CB
+4870953,Malik Muhammad II,Chicago Bears,Questionable,2026-11-08T12:28Z,Toe,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Muhammad (toe) ""should be good to go"" for Sunday's game against the Buccaneers, Ian Rapoport of NFL Network reports.",CB
+4608686,Kyle Monangai,Chicago Bears,Questionable,2026-11-08T12:25Z,Toe,Sprain,Not Specified,2026-11-08,QUESTIONABLE,"Monangai (thumb/toe) isn't slated to play in Sunday's game against the Buccaneers, but he's expected to return after the Bears' Week 10 bye in a Week 11 matchup with the Saints, Ian Rapoport of NFL Network reports.",RB
 4243315,Salvon Ahmed,Chicago Bears,Active,2026-11-07T23:35Z,,,,,,The Bears elevated Ahmed from their practice squad to the active roster Saturday ahead of Sunday's matchup against the Buccaneers.,RB
 2576492,Grady Jarrett,Chicago Bears,Active,2026-11-07T00:17Z,,,,,,Jarrett (groin) does not carry an official injury designation ahead of Sunday's game versus the Buccaneers.,DE
-4426374,Tyrique Stevenson Sr.,Chicago Bears,Questionable,2026-11-07T00:12Z,Thumb,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Stevenson (thumb) is officially listed as questionable for Sunday's game versus the Buccaneers.,CB
-4870953,Malik Muhammad II,Chicago Bears,Questionable,2026-11-07T00:07Z,Toe,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Muhammad (toe) is officially listed as questionable for Sunday's game versus the Buccaneers.,CB
 5125873,Theo Benedet,Chicago Bears,Active,2026-11-06T20:03Z,,,,,,,OT
 4241007,D'Marco Jackson,Chicago Bears,Active,2026-11-06T20:03Z,,,,,,,LB
-4608686,Kyle Monangai,Chicago Bears,Questionable,2026-11-06T19:58Z,Toe,Sprain,Not Specified,2026-11-08,QUESTIONABLE,Monangai (thumb/toe) is listed as questionable for Sunday's game against the Buccaneers.,RB
 4257364,Zavier Scott,Chicago Bears,Injured Reserve,2026-11-05T21:19Z,Wrist,Not Specified,Not Specified,2026-12-13,IR,The Bears placed Scott (wrist) on injured reserve Thursday.,RB
 3116726,Kentavius Street,Chicago Bears,Injured Reserve,2026-11-05T04:55Z,Knee,Not Specified,Left,2027-02-15,IR,"The Bears placed Street (knee) on injured reserve Wednesday, Adam Jahns of AllCHGO.com reports.",DT
 4251007,Braxton Jones,Chicago Bears,Injured Reserve,2026-11-05T03:40Z,Knee,Surgery,Right,2027-02-15,IR,"Jones (knee) is out for the rest of the season, Brad Biggs of the Chicago Tribune reports.",OT
@@ -174,9 +174,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4247726,Bryan Cook,Cincinnati Bengals,Active,2026-10-28T02:08Z,,,,,,"Cook recorded nine tackles (six solo), including 0.5 sacks, during the Bengals' 35-13 win over the Ravens on Sunday.",S
 4427729,Demetrius Knight Jr.,Cincinnati Bengals,Active,2026-10-28T01:59Z,,,,,,Knight totaled eight tackles (two solo) and an interception during the Bengals' win over the Ravens on Sunday.,LB
 4384852,Dohnte Meyers,Cincinnati Bengals,Active,2026-10-27T01:58Z,,,,,,Meyers failed to catch either of his two targets in Sunday's 35-13 win over the Ravens.,WR
+3122840,Deshaun Watson,Cleveland Browns,Questionable,2026-11-08T12:33Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,"Watson (concussion) is expected to be inactive for Sunday's game at New Orleans, Ian Rapoport of NFL Network reports.",QB
 4427238,Dillon Gabriel,Cleveland Browns,Active,2026-11-08T12:24Z,,,,,,"Gabriel ""will serve as the backup quarterback"" Sunday against the Saints, Jeremy Fowler of ESPN.com reports.",QB
 4685540,Carsen Ryan,Cleveland Browns,Active,2026-11-07T20:45Z,,,,,,The Browns elevated Ryan from the practice squad to the active roster Saturday.,TE
-3122840,Deshaun Watson,Cleveland Browns,Questionable,2026-11-07T18:12Z,Concussion,Concussion,Not Specified,2026-11-08,QUESTIONABLE,Watson cleared the concussion protocol Saturday but remains questionable for Sunday's game at New Orleans.,QB
 3110565,Quincy Williams,Cleveland Browns,Active,2026-11-06T20:43Z,,,,,,"Williams has no injury designation ahead of Sunday's game against the Saints, Scott Petrak of the Elyria Chronicle-Telegram reports.",LB
 4832800,Denzel Boston,Cleveland Browns,Active,2026-11-06T19:47Z,,,,,,"Boston (calf) was a full participant in Friday's practice and doesn't have an injury designation for Sunday's game at New Orleans, Chris Easterling of the Akron Beacon Journal reports.",WR
 4876017,Carson Schwesinger,Cleveland Browns,Active,2026-11-06T19:45Z,,,,,,,LB
@@ -474,13 +474,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430737,Kyren Williams,Los Angeles Rams,Active,2026-11-02T01:33Z,,,,,,Williams rushed 16 times for 56 yards and a touchdown and brought in his sole target for three yards in the Rams' 24-9 win over the Chargers on Sunday.,RB
 4426515,Puka Nacua,Los Angeles Rams,Active,2026-11-02T01:29Z,,,,,,Nacua secured 11 of 12 targets for 80 yards and a touchdown in the Rams' 24-9 win over the Chargers on Sunday.,WR
 3052180,Coleman Shelton,Los Angeles Rams,Active,2026-11-01T19:42Z,,,,,,,C
+4682745,Jaylen Wright,Miami Dolphins,Questionable,2026-11-08T12:39Z,Quadriceps,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Wright (quadriceps) isn't in line to play in Sunday's game against the Lions, Ian Rapoport of NFL Network reports.",RB
 4248425,Carlos Washington Jr.,Miami Dolphins,Active,2026-11-07T23:53Z,,,,,,Miami elevated Washington from the practice squad to the active roster Saturday ahead of Sunday's tilt against Detroit.,RB
 3043234,Zane Gonzalez,Miami Dolphins,Active,2026-11-07T23:37Z,,,,,,The Dolphins elevated Gonzalez from their practice squad to their active roster Saturday.,PK
 4870976,Kadyn Proctor,Miami Dolphins,Active,2026-11-07T03:30Z,,,,,,"Proctor (concussion) does not have a designation for Sunday's Week 9 matchup versus Detroit, David Furones of the South Florida Sun Sentinel reports.",OT
 4259547,Malik Herring,Miami Dolphins,Questionable,2026-11-07T03:23Z,Neck,Stinger,Not Specified,2026-11-08,QUESTIONABLE,"Herring (neck) is listed as questionable for Sunday's game against the Lions, David Furones of the South Florida Sun Sentinel reports.",DE
 4880236,Will Kacmarek,Miami Dolphins,Active,2026-11-07T00:55Z,,,,,,"Kacmarek (hamstring) does not carry an official injury designation ahead of Sunday's game versus the Lions, David Furones of the South Florida Sun Sentinel reports.",TE
 4685246,Kaytron Allen,Miami Dolphins,Questionable,2026-11-07T00:51Z,Quadriceps,,,2026-11-08,QUESTIONABLE,"Allen (quadriceps) is officially listed as questionable for Sunday's game versus the Lions, David Furones of the South Florida Sun Sentinel reports.",RB
-4682745,Jaylen Wright,Miami Dolphins,Questionable,2026-11-06T21:31Z,Quadriceps,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,"Wright (quad) is listed as questionable for Sunday's game against the Lions, David Furones of the South Florida Sun Sentinel reports.",RB
 4431586,Chop Robinson,Miami Dolphins,Active,2026-11-06T21:19Z,,,,,,,LB
 3057956,Zach Sieler,Miami Dolphins,Active,2026-11-06T21:19Z,,,,,,,DT
 4880346,Michael Taaffe,Miami Dolphins,Active,2026-11-06T21:19Z,,,,,,,S
