@@ -468,5 +468,45 @@
 "at": "2026-11-08T16:41:00+00:00",
 "post": 0.974,
 "status": "Active (LLL)"
+},
+"00-0033439": {
+"name": "Pharaoh Brown",
+"team": "IND",
+"pos": "TE",
+"pre": 0.2943,
+"ruling": "INA",
+"at": "2026-11-08T16:50:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0038394": {
+"name": "Will Mallory",
+"team": "IND",
+"pos": "TE",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T16:50:00+00:00",
+"post": 0.0,
+"status": "Inactive (FFD)"
+},
+"00-0039874": {
+"name": "Jaylen Wright",
+"team": "MIA",
+"pos": "RB",
+"pre": 0.6888,
+"ruling": "INA",
+"at": "2026-11-08T16:51:00+00:00",
+"post": 0.0,
+"status": "Inactive (DLL)"
+},
+"00-0040206": {
+"name": "Riley Leonard",
+"team": "IND",
+"pos": "QB",
+"pre": 0.0989,
+"ruling": "INA",
+"at": "2026-11-08T16:50:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
