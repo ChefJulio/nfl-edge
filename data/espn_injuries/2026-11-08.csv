@@ -324,6 +324,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4432708,Marvin Harrison Jr.,Houston Texans,Active,2026-10-25T21:25Z,,,,,,Harrison caught one of four targets for a six-yard touchdown in Sunday's 27-21 overtime loss to the Giants.,WR
 4432577,C.J. Stroud,Houston Texans,Active,2026-10-25T21:24Z,,,,,,Stroud completed 17 of 28 passes for 153 yards and two touchdowns in Sunday's 27-21 overtime loss to the Giants. He added two rushing attempts for four yards and threw a successful two-point conversion.,QB
 4258173,Nico Collins,Houston Texans,Active,2026-10-25T21:20Z,,,,,,Collins caught two of five targets for six yards in Sunday's 27-21 overtime loss to the Giants.,WR
+4242335,Jonathan Taylor,Indianapolis Colts,Active,2026-11-08T13:42Z,,,,,,"The Colts have an offer of ""at least a second-round pick and more"" on the table for Taylor but are ""holding out for more,"" Mike Garafolo of NFL Network reports.",RB
 4905664,A.J. Haulcy,Indianapolis Colts,Out,2026-11-07T20:43Z,Ankle,Not Specified,Not Specified,2026-11-15,OUT,"Haulcy (ankle) has been ruled out ahead of Sunday's game against the Cowboys, James Boyd of The Athletic reports.",S
 3917792,Daniel Jones,Indianapolis Colts,Active,2026-11-07T17:14Z,,,,,,"The Colts have been contacted by multiple teams regarding the availability of Jones ahead of Tuesday's trade deadline, Ian Rapoport and Adam Schefter of ESPN report.",QB
 4682909,Justin Walley,Indianapolis Colts,Out,2026-11-07T02:55Z,Knee,Not Specified,Not Specified,2026-11-15,OUT,Walley (knee) has been ruled out for Sunday's clash against the Cowboys.,CB
@@ -331,7 +332,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4722908,Drew Ogletree,Indianapolis Colts,Active,2026-11-07T00:29Z,,,,,,Ogletree (knee) does not carry an official injury designation ahead of Sunday's game versus the Cowboys.,TE
 4892240,Jalen Travis,Indianapolis Colts,Questionable,2026-11-06T20:38Z,Thumb,,,2026-11-08,QUESTIONABLE,questionable,OT
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Out,2026-11-06T19:29Z,Knee,Not Specified,Not Specified,2026-11-15,OUT,The Colts have ruled out Davis-Gauthier for Sunday's matchup against the Cowboys.,LB
-4242335,Jonathan Taylor,Indianapolis Colts,Active,2026-11-05T20:59Z,,,,,,"Taylor was a full participant at Thursday's practice, and Stephen Holder of ESPN.com reports that both Taylor and head coach Shane Steichen have maintained that Taylor will play Sunday against the Cowboys despite ongoing trade rumors surrounding the star running back.",RB
 5088571,Bryce Boettcher,Indianapolis Colts,Active,2026-11-05T01:13Z,,,,,,Boettcher (groin) was a full participant at the Colts' practice Wednesday.,LB
 4360078,Alec Pierce,Indianapolis Colts,Injured Reserve,2026-11-04T17:54Z,Heel,Not Specified,Left,2026-11-29,IR,"When asked Wednesday when Pierce (heel) might be able to return to practice, Colts head coach Shane Steichen noted that he ""can't put a timetable on it right now,"" Kevin Bowen of 107.5 The Fan Indianapolis reports.",WR
 3051889,Laquon Treadwell,Indianapolis Colts,Active,2026-11-04T02:56Z,,,,,,Treadwell caught one of two targets for 18 yards during Sunday's 42-7 loss to the Jaguars.,WR
@@ -674,6 +674,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-10-25T12:26Z,,,,,,"Rudolph is active for Sunday's game against the Saints in Paris, Teresa Varley of the Steelers' official site reports.",QB
 3045282,T.J. Watt,Pittsburgh Steelers,Active,2026-10-23T15:41Z,,,,,,Watt (calf) practiced fully Friday and doesn't carry an injury designation into Sunday's game against the Saints.,LB
 3047495,Sebastian Joseph-Day,Pittsburgh Steelers,Injured Reserve,2026-10-23T00:28Z,Triceps,Not Specified,Not Specified,2026-11-27,IR,"Joseph-Day (triceps) was placed on injured reserve by the Steelers on Thursday, Teresa Varley of the team's official website reports.",DT
+3117251,Christian McCaffrey,San Francisco 49ers,Active,2026-11-08T13:34Z,,,,,,"McCaffrey is expected to take on a full workload Sunday against the Raiders, Mike Garafolo of NFL Network reports.",RB
 16737,Mike Evans,San Francisco 49ers,Out,2026-11-08T13:26Z,Achilles,Tendinitis,Right,2026-11-15,OUT,"Evans (Achilles), who won't play in Sunday's game against the Raiders, appears to be ""questionable at best"" for next Sunday's road matchup with the Cowboys, Mike Garafolo of NFL Network reports.",WR
 4240542,Nate Hobbs,San Francisco 49ers,Injured Reserve,2026-11-08T01:27Z,Groin,Not Specified,Not Specified,2026-11-15,IR-R,"San Francisco didn't activate Hobbs (groin) from injured reserve Saturday, David Lombardi of SFStandard.com reports.",CB
 3047876,KhaDarel Hodge,San Francisco 49ers,Active,2026-11-08T01:20Z,,,,,,The 49ers elevated Hodge from their practice squad to their active roster Saturday.,WR
@@ -684,7 +685,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116097,Luke Gifford,San Francisco 49ers,Active,2026-11-07T04:30Z,,,,,,Gifford (groin) does not have a designation for Sunday's Week 9 tilt against the Raiders.,LB
 4693337,Marques Sigle,San Francisco 49ers,Active,2026-11-07T02:29Z,,,,,,Sigle (ankle) does not carry an official injury designation ahead of Sunday's game versus the Raiders.,S
 4040605,Nick Bosa,San Francisco 49ers,Active,2026-11-07T02:25Z,,,,,,Bosa (knee) does not carry an official injury designation ahead of Sunday's game versus Las Vegas.,DE
-3117251,Christian McCaffrey,San Francisco 49ers,Active,2026-11-06T22:12Z,,,,,,"McCaffrey (hamstring) doesn't have a designation for Sunday's game versus the Raiders, Nick Wagoner of ESPN.com reports.",RB
 3126486,Deebo Samuel Sr.,San Francisco 49ers,Out,2026-11-06T21:06Z,Hamstring,Not Specified,Right,2026-11-15,OUT,"Samuel (hamstring) didn't participate in the early portion of Friday's practice, Nick Wagoner of ESPN.com reports.",WR
 3057524,Siran Neal,San Francisco 49ers,Questionable,2026-11-04T23:29Z,Knee,,,2026-11-08,QUESTIONABLE,questionable,S
 4710714,De'Zhaun Stribling,San Francisco 49ers,Injured Reserve,2026-11-02T22:05Z,Ankle,Surgery,Left,2026-12-06,IR,"Stribling (ankle) was spotted Monday walking without crutches or a brace on his lower leg, Matt Barrows of The Athletic reports.",WR
