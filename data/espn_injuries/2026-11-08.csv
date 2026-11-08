@@ -274,6 +274,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4566092,Ennis Rakestraw Jr.,Detroit Lions,Active,2026-10-31T02:09Z,,,,,,Rakestraw (ankle) does not have a game designation for Sunday's Week 8 tilt versus the Vikings.,CB
 4361529,Isiah Pacheco,Detroit Lions,Injured Reserve,2026-10-30T17:09Z,Back,Not Specified,Not Specified,2026-12-28,IR,"Lions coach Dan Campbell said Friday that Pacheco (back) has a chance to return in late December, Justin Rogers of DetroitFootball.net reports.",RB
 4431615,Tyleik Williams,Detroit Lions,Active,2026-10-29T20:26Z,,,,,,,DT
+4047365,Josh Jacobs,Green Bay Packers,Questionable,2026-11-08T22:03Z,Hand,,,2026-11-08,QUESTIONABLE,questionable,RB
 4567406,Ty'Ron Hopper,Green Bay Packers,Questionable,2026-11-08T21:42Z,Chest,Not Specified,,2026-11-08,QUESTIONABLE,Hopper (chest) is questionable to return to Sunday's Week 9 game against New England.,LB
 4259493,Keisean Nixon,Green Bay Packers,Active,2026-11-08T20:16Z,,,,,,"Nixon (groin) is active for Sunday's game against the Patriots, Mike Spofford of the Packers' official site reports.",CB
 4429023,MarShawn Lloyd,Green Bay Packers,Out,2026-11-08T20:07Z,Knee,Not Specified,Not Specified,2026-11-15,INACTIVE,"Lloyd (knee) is listed as inactive Sunday at New England, Mike Spofford of the Packers' official site reports.",RB
@@ -287,7 +288,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429466,Drake Dabney,Green Bay Packers,Active,2026-11-07T21:05Z,,,,,,The Packers elevated Dabney from the practice squad to the active roster Saturday.,TE
 4242390,Aaron Banks,Green Bay Packers,Active,2026-11-07T03:34Z,,,,,,"Banks (knee) does not have any injury designation ahead of Sunday's game against the Patriots, Wes Hodkiewicz of the Packers' official site reports.",G
 4361423,Micah Parsons,Green Bay Packers,Out,2026-11-06T20:48Z,Knee - ACL,Surgery,Left,2026-11-25,PUP-R,Parsons (knee) officially was ruled out for Sunday's contest in New England.,DE
-4047365,Josh Jacobs,Green Bay Packers,Active,2026-11-05T15:49Z,,,,,,"Jacobs doesn't anticipate missing any additional game action due to the release of additional allegations of physical and verbal abuse against him, Rob Demovsky of ESPN.com reports.",RB
 4239947,Isaiah McDuffie,Green Bay Packers,Active,2026-11-04T04:19Z,,,,,,McDuffie finished last Thursday's 27-19 win over Carolina with 10 tackles (three solo).,LB
 4428863,Evan Williams,Green Bay Packers,Active,2026-11-04T03:58Z,,,,,,Williams recorded 10 total tackles (seven solo) during Thursday night's 27-19 win over the Panthers.,S
 4819231,Kaleb Johnson,Green Bay Packers,Active,2026-11-03T12:58Z,,,,,,,RB
@@ -374,7 +374,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4048231,Ezra Cleveland,Jacksonville Jaguars,Active,2026-11-04T20:06Z,,,,,,,G
 4880675,Rayuan Lane III,Jacksonville Jaguars,Active,2026-11-04T03:32Z,,,,,,"Lane recorded four total tackles (one solo) and three passes defensed, including a pick-six, during Sunday's 42-7 win over the Colts.",S
 2970716,Eric Murray,Jacksonville Jaguars,Injured Reserve,2026-11-04T01:11Z,Elbow,Not Specified,Not Specified,2027-02-15,IR,The Jaguars placed Murray (elbow) on their injured reserve list Tuesday.,S
-3139477,Patrick Mahomes,Kansas City Chiefs,Questionable,2026-11-08T21:45Z,Elbow,,,2026-11-15,QUESTIONABLE,questionable,QB
+3139477,Patrick Mahomes,Kansas City Chiefs,Questionable,2026-11-08T21:55Z,Elbow,,,2026-11-15,QUESTIONABLE,"Coach Andy Reid acknowledged after Sunday's 35-12 win over the Jets that Mahomes will likely be sore Monday after suffering an apparent elbow injury during the contest, Lindsey Thiry of ESPN reports.",QB
 4683062,Xavier Worthy,Kansas City Chiefs,Questionable,2026-11-08T21:11Z,Hamstring,,,2026-11-15,QUESTIONABLE,questionable,WR
 4043041,Jaylon Moore,Kansas City Chiefs,Questionable,2026-11-08T20:36Z,Ankle,Not Specified,,2026-11-08,QUESTIONABLE,Moore (ankle) is questionable to return to Sunday's game against the Jets.,OT
 4567747,Garrett Nussmeier,Kansas City Chiefs,Out,2026-11-08T17:21Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,Nussmeier is inactive for Sunday's game against the Jets but will serve as the Chiefs' emergency third quarterback.,QB
@@ -424,8 +424,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 14880,Kirk Cousins,Las Vegas Raiders,Active,2026-11-01T21:44Z,,,,,,Cousins completed 19 of 26 passes for 247 yards and three touchdowns in Sunday's 38-33 win over the Jets. He added five rushing attempts for three yards and a rushing touchdown.,QB
 4432665,Brock Bowers,Las Vegas Raiders,Active,2026-11-01T21:42Z,,,,,,Bowers caught seven of 10 targets for 92 yards and two touchdowns in Sunday's 38-33 win over the Jets.,TE
 4875295,Jackson Powers-Johnson,Las Vegas Raiders,Active,2026-11-01T16:40Z,,,,,,,G
-4574105,Isas Waxter,Los Angeles Chargers,Questionable,2026-11-08T21:46Z,Ankle,Not Specified,,2026-11-08,QUESTIONABLE,questionable,CB
-4567138,Justin Eboigbe,Los Angeles Chargers,Questionable,2026-11-08T21:46Z,Ankle,Not Specified,,2026-11-08,QUESTIONABLE,questionable,DT
+4574105,Isas Waxter,Los Angeles Chargers,Questionable,2026-11-08T21:52Z,Ankle,Not Specified,,2026-11-08,QUESTIONABLE,Waxter (ankle) is questionable to return  to Sunday's game against the Texans.,CB
+4567138,Justin Eboigbe,Los Angeles Chargers,Questionable,2026-11-08T21:50Z,Ankle,Not Specified,,2026-11-08,QUESTIONABLE,"Eboigbe is questionable to return to Sunday's game against Houston due to an ankle injury, Noah Furtado of The Athletic reports.",DT
 4612826,Ladd McConkey,Los Angeles Chargers,Questionable,2026-11-08T21:23Z,Back,,,2026-11-08,QUESTIONABLE,McConkey (back) is questionable to return to Sunday's game against the Texans.,WR
 4040842,Kayode Awosika,Los Angeles Chargers,Out,2026-11-08T19:43Z,Lower Leg,Not Specified,Not Specified,2026-11-08,INACTIVE,Awosika (lower leg) is inactive for Sunday's game against the Texans.,G
 4685553,Brenen Thompson,Los Angeles Chargers,Out,2026-11-08T19:43Z,Quadriceps,Not Specified,Not Specified,2026-11-16,INACTIVE,Thompson (quadriceps/hamstring) is inactive against Houston on Sunday.,WR
@@ -574,6 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241993,Pete Werner,New Orleans Saints,Active,2026-10-28T04:42Z,,,,,,Werner finished Sunday's loss to the Steelers with eight tackles (three solo).,LB
 4683813,Jonas Sanker,New Orleans Saints,Active,2026-10-28T04:36Z,,,,,,Sanker posted nine tackles (seven solo) in Sunday's Week 7 loss to Pittsburgh.,S
 4036131,Noah Fant,New Orleans Saints,Active,2026-10-27T00:11Z,,,,,,Fant gathered in all two targets for 11 yards during Sunday's 16-10 defeat against Pittsburgh.,TE
+4595348,Malik Nabers,New York Giants,Active,2026-11-08T21:54Z,,,,,,Nabers caught five of eight targets for 43 yards in Sunday's 19-11 win over the Eagles.,WR
 4433970,J.J. McCarthy,New York Giants,Active,2026-11-08T20:30Z,,,,,,"McCarthy (hip) returned to Sunday's contest at Philadelphia, Connor Hughes of SNY.tv reports.",QB
 4257188,Charlie Jones,New York Giants,Active,2026-11-08T17:18Z,,,,,,"Jones (hand) is active for Sunday's game against the Eagles, Dan Duggan of The Athletic reports.",WR
 4590292,Thomas Fidone II,New York Giants,Out,2026-11-08T16:57Z,Coach's Decision,Not Specified,Not Specified,2026-11-12,INACTIVE,"Fidone (coach's decision) is inactive for Sunday's contest in Philadelphia, Dan Salomone of the Giants' official site reports.",TE
@@ -588,7 +589,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4259566,Andrew Thomas,New York Giants,Active,2026-11-07T03:56Z,,,,,,Thomas (groin) does not have a designation for Sunday's matchup in Philadelphia.,OT
 4426542,Darius Alexander,New York Giants,Active,2026-11-06T22:53Z,,,,,,,DT
 3115303,Jermaine Eluemunor,New York Giants,Active,2026-11-06T22:53Z,,,,,,,OT
-4595348,Malik Nabers,New York Giants,Active,2026-11-06T21:24Z,,,,,,Nabers (knee) doesn't have a designation for Sunday's game in Philadelphia.,WR
 4040761,Devin Singletary,New York Giants,Active,2026-11-06T21:19Z,,,,,,"With Cam Skattebo (hamstring) doubtful to play Week 9, Singletary is expected to operate as the Giants' lead back Sunday against the Eagles, Jordan Raanan of ESPN.com reports.",RB
 4691889,Greg Desrosiers Jr.,New York Giants,Active,2026-11-06T19:10Z,,,,,,"Desrosiers could serve as a backup for the Giants on Sunday, Dan Duggan of The Athletic reports.",RB
 4040615,Malik Harrison,New York Giants,Active,2026-11-05T22:01Z,,,,,,,LB
