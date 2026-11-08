@@ -24,6 +24,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361272,Eku Leota,Arizona Cardinals,Active,2026-11-02T18:31Z,,,,,,,LB
 4363408,Starling Thomas V,Arizona Cardinals,Active,2026-11-02T18:31Z,,,,,,,CB
 4683506,Albert Reese IV,Arizona Cardinals,Active,2026-11-02T18:31Z,,,,,,,OT
+4431194,Billy Bowman Jr.,Atlanta Falcons,Out,2026-11-08T13:33Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,Bowman is inactive for Sunday's game against the Bengals.,CB
+14012,Andy Dalton,Atlanta Falcons,Out,2026-11-08T13:31Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,Dalton is inactive for Sunday's game against the Bengals but was designated as his team's emergency third quarterback.,QB
 4360807,Yasir Abdullah,Atlanta Falcons,Active,2026-11-08T13:13Z,,,,,,"Abdullah (hamstring) is active for Sunday's game versus the Bengals in Madrid, Will McFadden of the Falcons' official site reports.",LB
 5081394,James Pearce Jr.,Atlanta Falcons,Active,2026-11-08T13:12Z,,,,,,"Pearce (back) is listed as active Sunday versus the Bengals in Madrid, Will McFadden of the Falcons' official site reports.",LB
 4037626,Divine Deablo,Atlanta Falcons,Active,2026-11-08T13:10Z,,,,,,"Deablo (forearm) is active for Sunday's game against the Bengals in Madrid, Will McFadden of the Falcons; official site reports.",LB
@@ -31,9 +33,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5344782,Jack Strand,Atlanta Falcons,Out,2026-11-08T13:05Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,QB
 4569511,Drake Jackson,Atlanta Falcons,Out,2026-11-08T13:05Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,DE
 4575860,Robert Longerbeam,Atlanta Falcons,Out,2026-11-08T13:05Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,CB
-4431194,Billy Bowman Jr.,Atlanta Falcons,Out,2026-11-08T13:05Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,CB
 4870612,Zachariah Branch,Atlanta Falcons,Out,2026-11-08T13:05Z,Hamstring,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,WR
-14012,Andy Dalton,Atlanta Falcons,Out,2026-11-08T13:05Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,QB
 4685590,Cameron Williams,Atlanta Falcons,Injured Reserve,2026-11-08T03:27Z,Ankle,Not Specified,Not Specified,2026-11-15,IR-R,"Williams (ankle), who remains on IR, has been ruled out for Sunday's clash against Cincinnati, Will McFadden of Atlanta's official site reports.",OL
 4035886,Khalil Herbert,Atlanta Falcons,Active,2026-11-08T00:19Z,,,,,,The Falcons signed Herbert from their practice squad to their active roster Saturday.,RB
 4241474,Brian Robinson Jr.,Atlanta Falcons,Injured Reserve,2026-11-07T21:13Z,Hamstring,Not Specified,Not Specified,2026-12-13,IR,"Robinson (hamstring) was placed on injured reserve Saturday, Marc Raimondi of ESPN.com reports.",RB
@@ -674,6 +674,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-10-25T12:26Z,,,,,,"Rudolph is active for Sunday's game against the Saints in Paris, Teresa Varley of the Steelers' official site reports.",QB
 3045282,T.J. Watt,Pittsburgh Steelers,Active,2026-10-23T15:41Z,,,,,,Watt (calf) practiced fully Friday and doesn't carry an injury designation into Sunday's game against the Saints.,LB
 3047495,Sebastian Joseph-Day,Pittsburgh Steelers,Injured Reserve,2026-10-23T00:28Z,Triceps,Not Specified,Not Specified,2026-11-27,IR,"Joseph-Day (triceps) was placed on injured reserve by the Steelers on Thursday, Teresa Varley of the team's official website reports.",DT
+16737,Mike Evans,San Francisco 49ers,Out,2026-11-08T13:26Z,Achilles,Tendinitis,Right,2026-11-15,OUT,"Evans (Achilles), who won't play in Sunday's game against the Raiders, appears to be ""questionable at best"" for next Sunday's road matchup with the Cowboys, Mike Garafolo of NFL Network reports.",WR
 4240542,Nate Hobbs,San Francisco 49ers,Injured Reserve,2026-11-08T01:27Z,Groin,Not Specified,Not Specified,2026-11-15,IR-R,"San Francisco didn't activate Hobbs (groin) from injured reserve Saturday, David Lombardi of SFStandard.com reports.",CB
 3047876,KhaDarel Hodge,San Francisco 49ers,Active,2026-11-08T01:20Z,,,,,,The 49ers elevated Hodge from their practice squad to their active roster Saturday.,WR
 3895856,Christian Kirk,San Francisco 49ers,Injured Reserve,2026-11-07T21:50Z,Knee - Meniscus,Not Specified,Not Specified,2026-12-06,IR,The 49ers placed Kirk (knee) on injured reserve Saturday.,WR
@@ -684,7 +685,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4693337,Marques Sigle,San Francisco 49ers,Active,2026-11-07T02:29Z,,,,,,Sigle (ankle) does not carry an official injury designation ahead of Sunday's game versus the Raiders.,S
 4040605,Nick Bosa,San Francisco 49ers,Active,2026-11-07T02:25Z,,,,,,Bosa (knee) does not carry an official injury designation ahead of Sunday's game versus Las Vegas.,DE
 3117251,Christian McCaffrey,San Francisco 49ers,Active,2026-11-06T22:12Z,,,,,,"McCaffrey (hamstring) doesn't have a designation for Sunday's game versus the Raiders, Nick Wagoner of ESPN.com reports.",RB
-16737,Mike Evans,San Francisco 49ers,Out,2026-11-06T22:05Z,Achilles,Tendinitis,Right,2026-11-15,OUT,"Evans (Achilles) has been ruled out for Sunday's game against the Raiders, Nick Wagoner of ESPN reports.",WR
 3126486,Deebo Samuel Sr.,San Francisco 49ers,Out,2026-11-06T21:06Z,Hamstring,Not Specified,Right,2026-11-15,OUT,"Samuel (hamstring) didn't participate in the early portion of Friday's practice, Nick Wagoner of ESPN.com reports.",WR
 3057524,Siran Neal,San Francisco 49ers,Questionable,2026-11-04T23:29Z,Knee,,,2026-11-08,QUESTIONABLE,questionable,S
 4710714,De'Zhaun Stribling,San Francisco 49ers,Injured Reserve,2026-11-02T22:05Z,Ankle,Surgery,Left,2026-12-06,IR,"Stribling (ankle) was spotted Monday walking without crutches or a brace on his lower leg, Matt Barrows of The Athletic reports.",WR
