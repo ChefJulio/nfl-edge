@@ -78,5 +78,225 @@
 "at": "2026-11-08T13:09:00+00:00",
 "post": 0.974,
 "status": "Active (FFF)"
+},
+"00-0033375": {
+"name": "Tim Patrick",
+"team": "NYJ",
+"pos": "WR",
+"pre": 0.6744,
+"ruling": "INA",
+"at": "2026-11-08T16:39:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0033537": {
+"name": "Deshaun Watson",
+"team": "CLE",
+"pos": "QB",
+"pre": 0.7202,
+"ruling": "INA",
+"at": "2026-11-08T16:38:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDL)"
+},
+"00-0035406": {
+"name": "Lil'Jordan Humphrey",
+"team": "DEN",
+"pos": "WR",
+"pre": 0.9203,
+"ruling": "INA",
+"at": "2026-11-08T16:36:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0036244": {
+"name": "Colby Parkinson",
+"team": "LA",
+"pos": "TE",
+"pre": 0.5051,
+"ruling": "ACT",
+"at": "2026-11-08T16:40:00+00:00",
+"post": 0.974,
+"status": "Active (DDL)"
+},
+"00-0036265": {
+"name": "AJ Dillon",
+"team": "CAR",
+"pos": "RB",
+"pre": 0.668,
+"ruling": "INA",
+"at": "2026-11-08T16:38:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0036879": {
+"name": "Sam Ehlinger",
+"team": "DEN",
+"pos": "QB",
+"pre": 0.0955,
+"ruling": "INA",
+"at": "2026-11-08T16:36:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0036963": {
+"name": "Amon-Ra St. Brown",
+"team": "DET",
+"pos": "WR",
+"pre": 0.8694,
+"ruling": "ACT",
+"at": "2026-11-08T16:39:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0037013": {
+"name": "Zach Wilson",
+"team": "NO",
+"pos": "QB",
+"pre": 0.1007,
+"ruling": "INA",
+"at": "2026-11-08T16:35:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0037247": {
+"name": "George Pickens",
+"team": "DAL",
+"pos": "WR",
+"pre": 0.8543,
+"ruling": "INA",
+"at": "2026-11-08T16:35:00+00:00",
+"post": 0.0,
+"status": "Inactive (LLL)"
+},
+"00-0037740": {
+"name": "Garrett Wilson",
+"team": "NYJ",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T16:39:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0037742": {
+"name": "Treylon Burks",
+"team": "WAS",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T16:37:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0038041": {
+"name": "Jake Ferguson",
+"team": "DAL",
+"pos": "TE",
+"pre": 0.6039,
+"ruling": "ACT",
+"at": "2026-11-08T16:42:00+00:00",
+"post": 0.974,
+"status": "Active (DDL)"
+},
+"00-0038576": {
+"name": "Charlie Jones",
+"team": "NYG",
+"pos": "WR",
+"pre": 0.7908,
+"ruling": "ACT",
+"at": "2026-11-08T16:39:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0039751": {
+"name": "Jordan Whittington",
+"team": "LA",
+"pos": "WR",
+"pre": 0.8373,
+"ruling": "ACT",
+"at": "2026-11-08T16:40:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0040225": {
+"name": "Thomas Fidone II",
+"team": "NYG",
+"pos": "TE",
+"pre": 0.0963,
+"ruling": "INA",
+"at": "2026-11-08T16:39:00+00:00",
+"post": 0.0,
+"status": "Inactive (FFF)"
+},
+"00-0040715": {
+"name": "Cam Skattebo",
+"team": "NYG",
+"pos": "RB",
+"pre": 0.0459,
+"ruling": "INA",
+"at": "2026-11-08T15:26:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDL)"
+},
+"00-0041092": {
+"name": "Taylen Green",
+"team": "CLE",
+"pos": "QB",
+"pre": 0.0949,
+"ruling": "INA",
+"at": "2026-11-08T16:34:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041117": {
+"name": "Athan Kaliakmanis",
+"team": "WAS",
+"pos": "QB",
+"pre": 0.2098,
+"ruling": "INA",
+"at": "2026-11-08T16:37:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041133": {
+"name": "Dallen Bentley",
+"team": "DEN",
+"pos": "TE",
+"pre": 0.1505,
+"ruling": "INA",
+"at": "2026-11-08T16:36:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041149": {
+"name": "Haynes King",
+"team": "CAR",
+"pos": "QB",
+"pre": 0.0947,
+"ruling": "INA",
+"at": "2026-11-08T16:38:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041326": {
+"name": "CJ Donaldson",
+"team": "NO",
+"pos": "RB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T16:35:00+00:00",
+"post": 0.0,
+"status": "Inactive (LDD)"
+},
+"00-0041568": {
+"name": "Ty Simpson",
+"team": "LA",
+"pos": "QB",
+"pre": 0.1328,
+"ruling": "INA",
+"at": "2026-11-08T16:40:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
