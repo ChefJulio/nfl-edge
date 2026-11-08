@@ -548,5 +548,165 @@
 "at": "2026-11-08T19:39:00+00:00",
 "post": 0.0,
 "status": "Inactive (DDD)"
+},
+"00-0031408": {
+"name": "Mike Evans",
+"team": "SF",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T13:26:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0033090": {
+"name": "Hunter Henry",
+"team": "NE",
+"pos": "TE",
+"pre": 0.4473,
+"ruling": "ACT",
+"at": "2026-11-08T20:01:00+00:00",
+"post": 0.974,
+"status": "Active (DDL)"
+},
+"00-0034869": {
+"name": "Sam Darnold",
+"team": "SEA",
+"pos": "QB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T12:19:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0035676": {
+"name": "A.J. Brown",
+"team": "NE",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T19:59:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0035719": {
+"name": "Deebo Samuel Sr.",
+"team": "SF",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T20:01:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0037157": {
+"name": "Bam Knight",
+"team": "ARI",
+"pos": "RB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T20:02:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0037545": {
+"name": "Rashid Shaheed",
+"team": "SEA",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T20:03:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0038579": {
+"name": "Aidan O'Connell",
+"team": "LV",
+"pos": "QB",
+"pre": 0.1029,
+"ruling": "INA",
+"at": "2026-11-08T19:59:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0038589": {
+"name": "Josh Whyle",
+"team": "GB",
+"pos": "TE",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T19:58:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0039811": {
+"name": "MarShawn Lloyd",
+"team": "GB",
+"pos": "RB",
+"pre": 0.7131,
+"ruling": "INA",
+"at": "2026-11-08T20:07:00+00:00",
+"post": 0.0,
+"status": "Inactive (FLL)"
+},
+"00-0040581": {
+"name": "Dont'e Thornton Jr.",
+"team": "LV",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T19:59:00+00:00",
+"post": 0.0,
+"status": "Inactive (FLF)"
+},
+"00-0040589": {
+"name": "Kurtis Rourke",
+"team": "SF",
+"pos": "QB",
+"pre": 0.0955,
+"ruling": "INA",
+"at": "2026-11-08T20:01:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040734": {
+"name": "TreVeyon Henderson",
+"team": "NE",
+"pos": "RB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T19:59:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0040894": {
+"name": "Malik Benson",
+"team": "LV",
+"pos": "WR",
+"pre": 0.4824,
+"ruling": "INA",
+"at": "2026-11-08T19:59:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041123": {
+"name": "Behren Morton",
+"team": "NE",
+"pos": "QB",
+"pre": 0.0955,
+"ruling": "INA",
+"at": "2026-11-08T19:59:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0033555": {
+"name": "Mack Hollins",
+"team": "NE",
+"pos": "WR",
+"pre": 0.6472,
+"ruling": "ACT",
+"at": "2026-11-08T20:03:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
 }
 }
