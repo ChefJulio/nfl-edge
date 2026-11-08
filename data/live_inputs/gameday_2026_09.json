@@ -508,5 +508,45 @@
 "at": "2026-11-08T16:50:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0035685": {
+"name": "David Montgomery",
+"team": "HOU",
+"pos": "RB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T19:37:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0039359": {
+"name": "Cade Stover",
+"team": "HOU",
+"pos": "TE",
+"pre": 0.9726,
+"ruling": "INA",
+"at": "2026-11-08T19:37:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040311": {
+"name": "Theo Wease Jr.",
+"team": "LAC",
+"pos": "WR",
+"pre": 0.3356,
+"ruling": "INA",
+"at": "2026-11-08T19:39:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041550": {
+"name": "Brenen Thompson",
+"team": "LAC",
+"pos": "WR",
+"pre": 0.01,
+"ruling": "INA",
+"at": "2026-11-08T19:39:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
 }
 }
