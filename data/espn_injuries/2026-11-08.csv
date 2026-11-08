@@ -174,7 +174,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4247726,Bryan Cook,Cincinnati Bengals,Active,2026-10-28T02:08Z,,,,,,"Cook recorded nine tackles (six solo), including 0.5 sacks, during the Bengals' 35-13 win over the Ravens on Sunday.",S
 4427729,Demetrius Knight Jr.,Cincinnati Bengals,Active,2026-10-28T01:59Z,,,,,,Knight totaled eight tackles (two solo) and an interception during the Bengals' win over the Ravens on Sunday.,LB
 4384852,Dohnte Meyers,Cincinnati Bengals,Active,2026-10-27T01:58Z,,,,,,Meyers failed to catch either of his two targets in Sunday's 35-13 win over the Ravens.,WR
-2515270,Michael Burton,Cleveland Browns,Questionable,2026-11-08T18:32Z,Calf,,,2026-11-08,QUESTIONABLE,questionable,FB
+2515270,Michael Burton,Cleveland Browns,Questionable,2026-11-08T18:42Z,Calf,,,2026-11-08,QUESTIONABLE,"Burton (calf) is questionable to return to Sunday's game against the Saints, Daniel Oyefusi of ESPN.com reports.",FB
 4431325,Taylen Green,Cleveland Browns,Out,2026-11-08T17:14Z,Coach's Decision,,,2026-11-15,INACTIVE,"Green (coach's decision) is inactive but will serve as the emergency third quarterback Sunday against the Saints, Kelsey Russo of the Browns' official site reports.",QB
 3122840,Deshaun Watson,Cleveland Browns,Out,2026-11-08T16:38Z,Concussion,Concussion,Not Specified,2026-11-15,INACTIVE,"Watson (concussion) is inactive for Sunday's game against the Saints, Daniel Oyefusi of ESPN.com reports.",QB
 4242516,Noah Igbinoghene,Cleveland Browns,Out,2026-11-08T16:34Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,CB
@@ -224,6 +224,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3953687,Brandon Aubrey,Dallas Cowboys,Active,2026-11-03T01:54Z,,,,,,Aubrey made three of his four field-goal attempts and all three PATs in the Cowboys' 33-30 overtime loss to the Cardinals.,PK
 5095865,Shavon Revel Jr.,Dallas Cowboys,Active,2026-11-02T18:50Z,,,,,,,CB
 2577417,Dak Prescott,Dallas Cowboys,Active,2026-11-02T00:59Z,,,,,,"Prescott was 19-for-29 passing for 195 yards, one touchdown and no interceptions while rushing seven times for 20 yards and one more TD during Sunday's 33-30 overtime defeat to the Cardinals.",QB
+4372016,Jaylen Waddle,Denver Broncos,Questionable,2026-11-08T18:49Z,Head,,,2026-11-08,QUESTIONABLE,questionable,WR
 4702555,Jonah Coleman,Denver Broncos,Active,2026-11-08T17:52Z,,,,,,"Coleman received the first rep with the starters during warmups before Sunday's game against the Panthers, Parker Gabriel of The Denver Post reports.",RB
 5216101,Dondrea Tillman,Denver Broncos,Active,2026-11-08T17:02Z,,,,,,"Tillman is active for Sunday's game against the Panthers, Aric DiLalla of the team's official site reports.",LB
 4039057,Lil'Jordan Humphrey,Denver Broncos,Out,2026-11-08T16:57Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,"Humphrey (coach's decision) is inactive for Sunday's game versus the Panthers, Aric DiLalla of the team's official site reports.",WR
@@ -243,7 +244,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4261090,Jordan Jackson,Denver Broncos,Active,2026-11-02T18:50Z,,,,,,,DT
 4683535,Tyler Onyedim,Denver Broncos,Active,2026-11-02T18:50Z,,,,,,,DT
 4383440,Nate Adkins,Denver Broncos,Active,2026-11-02T05:15Z,,,,,,Adkins caught both of his targets for four yards and a touchdown in Sunday's 28-24 win over the Chiefs.,TE
-4372016,Jaylen Waddle,Denver Broncos,Active,2026-11-02T03:20Z,,,,,,Waddle caught three of six targets for 39 yards and a touchdown and added a two-point conversion in Sunday's 28-24 win over Kansas City.,WR
 4241985,J.K. Dobbins,Denver Broncos,Active,2026-11-02T03:16Z,,,,,,Dobbins carried the ball seven times for 13 yards in Sunday's 28-24 win over Kansas City.,RB
 4426338,Bo Nix,Denver Broncos,Active,2026-11-02T02:58Z,,,,,,Nix completed 20 of 32 passes for 222 yards and two touchdowns in Sunday's 28-24 win over Kansas City. He added four rushing yards on three carries and threw a two-point conversion to Jaylen Waddle.,QB
 3128429,Courtland Sutton,Denver Broncos,Active,2026-11-01T22:58Z,,,,,,"Sutton (undisclosed) briefly left Sunday's game against the Chiefs, Zac Stevens of TheDNVR.com reports.",WR
@@ -324,6 +324,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4432708,Marvin Harrison Jr.,Houston Texans,Active,2026-10-25T21:25Z,,,,,,Harrison caught one of four targets for a six-yard touchdown in Sunday's 27-21 overtime loss to the Giants.,WR
 4432577,C.J. Stroud,Houston Texans,Active,2026-10-25T21:24Z,,,,,,Stroud completed 17 of 28 passes for 153 yards and two touchdowns in Sunday's 27-21 overtime loss to the Giants. He added two rushing attempts for four yards and threw a successful two-point conversion.,QB
 4258173,Nico Collins,Houston Texans,Active,2026-10-25T21:20Z,,,,,,Collins caught two of five targets for six yards in Sunday's 27-21 overtime loss to the Giants.,WR
+4601021,Jaylon Carlies,Indianapolis Colts,Questionable,2026-11-08T18:53Z,Neck,,,2026-11-08,QUESTIONABLE,"Carlies (neck) is questionable to return to Sunday's game against the Cowboys, Jake Arthur of Roundtable.io reports.",LB
 4683423,Riley Leonard,Indianapolis Colts,Out,2026-11-08T17:08Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,"Leonard (coach's decision) is inactive for Sunday's game against the Cowboys but is listed as the team's emergency quarterback, Abby Halpin of the team's official site reports.",QB
 4682909,Justin Walley,Indianapolis Colts,Out,2026-11-08T16:50Z,Knee,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,CB
 4362523,Will Mallory,Indianapolis Colts,Out,2026-11-08T16:50Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,TE
@@ -348,7 +349,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4688813,Josh Downs,Indianapolis Colts,Active,2026-11-02T02:53Z,,,,,,Downs caught four of five targets for 23 yards and a touchdown during Sunday's 42-7 loss to the Jaguars.,WR
 4429084,Anthony Richardson Sr.,Indianapolis Colts,Active,2026-11-02T02:01Z,,,,,,Richardson entered the Colts' 42-7 loss to the Jaguars on Sunday for an ineffective Daniel Jones with 11:45 remaining and completed both his pass attempts for eight yards while rushing twice for four yards.,QB
 4431459,Tyler Warren,Indianapolis Colts,Active,2026-11-02T01:47Z,,,,,,Warren secured four of 10 targets for 18 yards in the Colts' 42-7 loss to the Jaguars on Sunday.,TE
-4427250,Sauce Gardner,Indianapolis Colts,Active,2026-10-29T23:49Z,,,,,,Gardner (calf) practiced in full Thursday.,CB
 3050073,Foyesade Oluokun,Jacksonville Jaguars,Active,2026-11-08T04:33Z,,,,,,"Oluokun recorded seven tackles (six solo), including 1.0 sacks, in Thursday's 33-10 victory over Baltimore.",LB
 4917427,Tanner Koziol,Jacksonville Jaguars,Active,2026-11-07T04:42Z,,,,,,Koziol finished Thursday's 33-10 win over Baltimore with two catches for 15 yards on two targets.,TE
 4686248,Nate Boerkircher,Jacksonville Jaguars,Active,2026-11-06T18:22Z,,,,,,Boerkircher hauled in two of three targets for 61 yards in Thursday night's 33-10 win over Baltimore.,TE
@@ -425,7 +425,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4432665,Brock Bowers,Las Vegas Raiders,Active,2026-11-01T21:42Z,,,,,,Bowers caught seven of 10 targets for 92 yards and two touchdowns in Sunday's 38-33 win over the Jets.,TE
 4875295,Jackson Powers-Johnson,Las Vegas Raiders,Active,2026-11-01T16:40Z,,,,,,,G
 4838693,Rodney Shelley,Los Angeles Chargers,Active,2026-11-07T03:47Z,,,,,,Shelley (ankle) has no designation for Sunday's tilt against the Texans.,CB
-2579621,Denzel Perryman,Los Angeles Chargers,Injured Reserve,2026-11-07T03:42Z,Undisclosed,Not Specified,Not Specified,2026-11-08,IR-R,Perryman (undisclosed) has been deemed doubtful to suit up against Houston on Sunday.,LB
+2579621,Denzel Perryman,Los Angeles Chargers,Injured Reserve,2026-11-07T03:42Z,Undisclosed,Not Specified,Not Specified,2026-11-16,IR-R,Perryman (undisclosed) has been deemed doubtful to suit up against Houston on Sunday.,LB
 4360745,Kendall Williamson,Los Angeles Chargers,Out,2026-11-07T03:39Z,Calf,,,2026-11-16,OUT,Williamson (calf) has been ruled out for Sunday's matchup versus the Texans.,S
 4690171,Deane Leonard,Los Angeles Chargers,Out,2026-11-07T03:36Z,Concussion,Concussion,Not Specified,2026-11-16,OUT,Leonard (concussion) has been ruled out for Sunday's Week 9 clash against Houston.,CB
 3843769,Donte Jackson,Los Angeles Chargers,Active,2026-11-07T01:23Z,,,,,,Jackson (hamstring) does not have a designation for Sunday's tilt against the Texans.,CB
