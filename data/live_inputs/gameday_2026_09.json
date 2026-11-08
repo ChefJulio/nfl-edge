@@ -298,5 +298,175 @@
 "at": "2026-11-08T16:40:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0036912": {
+"name": "DeVonta Smith",
+"team": "PHI",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T16:45:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0037132": {
+"name": "Britain Covey",
+"team": "PHI",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T16:45:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0037666": {
+"name": "Jalen Tolbert",
+"team": "MIA",
+"pos": "WR",
+"pre": 0.805,
+"ruling": "INA",
+"at": "2026-11-08T16:48:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0037801": {
+"name": "KaVontae Turpin",
+"team": "DAL",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T16:47:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0038393": {
+"name": "Dontayvion Wicks",
+"team": "PHI",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-08T16:45:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0038400": {
+"name": "Tanner McKee",
+"team": "PHI",
+"pos": "QB",
+"pre": 0.5291,
+"ruling": "ACT",
+"at": "2026-11-08T12:17:00+00:00",
+"post": 0.974,
+"status": "Active (FLL)"
+},
+"00-0038489": {
+"name": "Ben VanSumeren",
+"team": "KC",
+"pos": "RB",
+"pre": 0.2817,
+"ruling": "INA",
+"at": "2026-11-08T16:44:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0038519": {
+"name": "Nikko Remigio",
+"team": "KC",
+"pos": "WR",
+"pre": 0.9315,
+"ruling": "ACT",
+"at": "2026-11-08T16:45:00+00:00",
+"post": 0.974,
+"status": "Active (LFF)"
+},
+"00-0038547": {
+"name": "Luke Schoonmaker",
+"team": "DAL",
+"pos": "TE",
+"pre": 0.5514,
+"ruling": "INA",
+"at": "2026-11-08T16:47:00+00:00",
+"post": 0.0,
+"status": "Inactive (LLL)"
+},
+"00-0038896": {
+"name": "Jacob Saylors",
+"team": "DET",
+"pos": "RB",
+"pre": 0.8092,
+"ruling": "INA",
+"at": "2026-11-08T16:45:00+00:00",
+"post": 0.0,
+"status": "Inactive (LLL)"
+},
+"00-0039364": {
+"name": "Sione Vaki",
+"team": "DET",
+"pos": "RB",
+"pre": 0.4238,
+"ruling": "ACT",
+"at": "2026-11-08T16:45:00+00:00",
+"post": 0.974,
+"status": "Active (FFD)"
+},
+"00-0040390": {
+"name": "Jackson Meeks",
+"team": "DET",
+"pos": "TE",
+"pre": 0.2039,
+"ruling": "INA",
+"at": "2026-11-08T16:45:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040906": {
+"name": "Garrett Nussmeier",
+"team": "KC",
+"pos": "QB",
+"pre": 0.0955,
+"ruling": "INA",
+"at": "2026-11-08T16:44:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041077": {
+"name": "Justin Joly",
+"team": "MIA",
+"pos": "TE",
+"pre": 0.1862,
+"ruling": "INA",
+"at": "2026-11-08T16:48:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041096": {
+"name": "Kaytron Allen",
+"team": "MIA",
+"pos": "RB",
+"pre": 0.8667,
+"ruling": "ACT",
+"at": "2026-11-08T16:48:00+00:00",
+"post": 0.974,
+"status": "Active (LLF)"
+},
+"00-0040134": {
+"name": "Pat Bryant",
+"team": "DEN",
+"pos": "WR",
+"pre": 0.8476,
+"ruling": "ACT",
+"at": "2026-11-08T16:46:00+00:00",
+"post": 0.974,
+"status": "Active (FFF)"
+},
+"00-0041029": {
+"name": "Jordyn Tyson",
+"team": "NO",
+"pos": "WR",
+"pre": 0.2455,
+"ruling": "ACT",
+"at": "2026-11-08T16:41:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
 }
 }
