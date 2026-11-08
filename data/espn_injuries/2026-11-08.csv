@@ -549,6 +549,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4688779,Channing Canada,New England Patriots,Active,2026-11-02T19:13Z,,,,,,,CB
 4606666,Karon Prunty,New England Patriots,Active,2026-11-02T19:13Z,,,,,,,CB
 4688366,Elliott Davison,New England Patriots,Active,2026-11-02T19:13Z,,,,,,,S
+3917331,Erik McCoy,New Orleans Saints,Questionable,2026-11-08T21:18Z,Biceps,Not Specified,,2026-11-08,QUESTIONABLE,McCoy (biceps) is questionable to return to Sunday's game against the Browns.,C
 4685260,Kelvin Banks Jr.,New Orleans Saints,Active,2026-11-08T17:34Z,,,,,,Banks (ankle) is active for Sunday's game against the Browns.,OT
 4361259,Zach Wilson,New Orleans Saints,Out,2026-11-08T17:24Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,Wilson (coach's decision) is inactive but will serve as the Saints' emergency third quarterback against the Browns on Sunday.,QB
 4360689,Tyler Shough,New Orleans Saints,Active,2026-11-08T17:23Z,,,,,,"Shough was still wearing a glove on his left hand during pregame warmups ahead of Sunday's game against the Browns, according to Luke Johnson of The New Orleans Times-Picayune.",QB
@@ -573,7 +574,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241993,Pete Werner,New Orleans Saints,Active,2026-10-28T04:42Z,,,,,,Werner finished Sunday's loss to the Steelers with eight tackles (three solo).,LB
 4683813,Jonas Sanker,New Orleans Saints,Active,2026-10-28T04:36Z,,,,,,Sanker posted nine tackles (seven solo) in Sunday's Week 7 loss to Pittsburgh.,S
 4036131,Noah Fant,New Orleans Saints,Active,2026-10-27T00:11Z,,,,,,Fant gathered in all two targets for 11 yards during Sunday's 16-10 defeat against Pittsburgh.,TE
-4879276,Bryce Lance,New Orleans Saints,Active,2026-10-26T23:55Z,,,,,,Lance reeled in all two targets for 12 yards during Sunday's 16-10 loss to Pittsburgh.,WR
 4433970,J.J. McCarthy,New York Giants,Active,2026-11-08T20:30Z,,,,,,"McCarthy (hip) returned to Sunday's contest at Philadelphia, Connor Hughes of SNY.tv reports.",QB
 4257188,Charlie Jones,New York Giants,Active,2026-11-08T17:18Z,,,,,,"Jones (hand) is active for Sunday's game against the Eagles, Dan Duggan of The Athletic reports.",WR
 4590292,Thomas Fidone II,New York Giants,Out,2026-11-08T16:57Z,Coach's Decision,Not Specified,Not Specified,2026-11-12,INACTIVE,"Fidone (coach's decision) is inactive for Sunday's contest in Philadelphia, Dan Salomone of the Giants' official site reports.",TE
@@ -599,7 +599,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4950400,Arvell Reese,New York Giants,Active,2026-10-28T04:32Z,,,,,,"Reese posted seven tackles (five solo), including 0.5 sacks, in Sunday's 27-21 overtime victory against the Texans.",LB
 4371961,Micah McFadden,New York Giants,Active,2026-10-28T04:16Z,,,,,,McFadden notched 10 tackles (all solo) in Sunday's 27-21 overtime win against the Texans.,LB
 4360516,Tyrone Tracy Jr.,New York Giants,Injured Reserve,2026-10-27T21:04Z,Hamstring,Strain,Not Specified,2026-12-06,IR,"The Giants placed Tracy (hamstring) on injured reserve Tuesday, Dan Salomone of the team's official site reports.",RB
-4427366,Breece Hall,New York Jets,Active,2026-11-08T17:46Z,,,,,,"Based on pregame warmups, Zack Rosenblatt of The Athletic suggests that it seems like Hall will start at RB for the Jets in Sunday's game against the Chiefs.",RB
+4427366,Breece Hall,New York Jets,Active,2026-11-08T21:31Z,,,,,,Hall (quadriceps) rushed 15 times for 61 yards and caught three of four targets for 26 yards in Sunday's 35-12 loss to the Chiefs.,RB
 3134353,Tim Patrick,New York Jets,Out,2026-11-08T17:12Z,Coach's Decision,,,2026-11-15,INACTIVE,Patrick is inactive (coach's decision) for Sunday's game against the Chiefs.,WR
 3117255,Harrison Phillips,New York Jets,Active,2026-11-08T16:40Z,,,,,,,DT
 4683815,Trevin Wallace,New York Jets,Out,2026-11-08T16:39Z,Groin,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,LB
