@@ -728,5 +728,15 @@
 "at": "2026-11-08T12:25:00+00:00",
 "post": 0.0,
 "status": "Inactive (DDL)"
+},
+"00-0028986": {
+"name": "Case Keenum",
+"team": "CHI",
+"pos": "QB",
+"pre": 0.1493,
+"ruling": "INA",
+"at": "2026-11-09T00:04:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
