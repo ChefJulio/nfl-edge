@@ -738,5 +738,25 @@
 "at": "2026-11-09T00:04:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0035228": {
+"name": "Kyler Murray",
+"team": "MIN",
+"pos": "QB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-09T23:49:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0036259": {
+"name": "Jauan Jennings",
+"team": "MIN",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-09T23:49:00+00:00",
+"post": 0.0,
+"status": "Inactive (LDD)"
 }
 }

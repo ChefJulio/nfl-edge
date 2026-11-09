@@ -85,7 +85,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3915411,Ty Johnson,Buffalo Bills,Active,2026-11-06T22:03Z,,,,,,Johnson (illness) was a full practice participant Friday.,RB
 4385690,Dalton Kincaid,Buffalo Bills,Active,2026-11-06T21:59Z,,,,,,Kincaid (chest) was a full participant in Friday's practice.,TE
 4401823,Dee Alford,Buffalo Bills,Active,2026-11-05T22:45Z,,,,,,Alford (ankle) was a full participant in Thursday's practice.,CB
-4596480,Jordan Hancock,Buffalo Bills,Injured Reserve,2026-11-05T03:59Z,Hamstring,Not Specified,Not Specified,2026-11-09,IR-R,"Hancock (hamstring) was designated to return from injured reserve by the Bills on Wednesday, Sal Capaccio of WGR Sports Radio 550 Buffalo reports.",CB
+4596480,Jordan Hancock,Buffalo Bills,Injured Reserve,2026-11-05T03:59Z,Hamstring,Not Specified,Not Specified,2026-11-15,IR-R,"Hancock (hamstring) was designated to return from injured reserve by the Bills on Wednesday, Sal Capaccio of WGR Sports Radio 550 Buffalo reports.",CB
 3127294,Greg Gaines,Buffalo Bills,Questionable,2026-11-03T13:03Z,Calf,Not Specified,Not Specified,2026-11-09,QUESTIONABLE,questionable,DT
 3930086,Dawson Knox,Buffalo Bills,Active,2026-11-03T03:28Z,,,,,,Knox caught one of two targets for six yards in Sunday's 36-10 win over the Ravens.,TE
 4429501,Ray Davis,Buffalo Bills,Active,2026-11-03T02:33Z,,,,,,Davis rushed six times for 30 yards in Sunday's 36-10 win over the Ravens.,RB
@@ -499,15 +499,19 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4034729,Tucker Addington,Miami Dolphins,Active,2026-11-06T21:17Z,,,,,,,LS
 4566094,Jacob Rodriguez,Miami Dolphins,Active,2026-11-05T17:29Z,,,,,,Rodriguez notched eight tackles (two solo) and forced a fumble in Sunday's 24-19 loss to the Patriots.,LB
 4043130,Jordyn Brooks,Miami Dolphins,Active,2026-11-05T17:25Z,,,,,,Brooks recorded 11 tackles (six solo) in Sunday's 24-19 loss to the Patriots.,LB
+16733,Odell Beckham Jr.,Minnesota Vikings,Active,2026-11-09T23:49Z,,,,,,"Beckham is active for Monday's game against the Bills, Ben Goessling of The Minnesota Star Tribune reports.",WR
+4710865,Jakobe Thomas,Minnesota Vikings,Out,2026-11-09T23:49Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,S
+3917315,Kyler Murray,Minnesota Vikings,Out,2026-11-09T23:49Z,Hamstring,Strain,Not Specified,2026-11-15,INACTIVE,inactive,QB
+5091793,Charles Demmings,Minnesota Vikings,Out,2026-11-09T23:49Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,CB
+3886598,Jauan Jennings,Minnesota Vikings,Out,2026-11-09T23:49Z,Calf,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,WR
+4568007,Jay Ward,Minnesota Vikings,Active,2026-11-09T23:49Z,,,,,,,S
+4242436,Theo Jackson,Minnesota Vikings,Active,2026-11-09T23:49Z,,,,,,,S
+4602019,Caleb Banks,Minnesota Vikings,Out,2026-11-09T23:49Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,DT
 4832846,Demond Claiborne,Minnesota Vikings,Injured Reserve,2026-11-09T22:03Z,Knee,Not Specified,Not Specified,2026-12-06,IR,ir,RB
-16733,Odell Beckham Jr.,Minnesota Vikings,Active,2026-11-08T16:15Z,,,,,,"The Vikings are signing Beckham from the practice squad to the active roster, Tom Pelissero of NFL Network reports.",WR
 3133487,Andrew Van Ginkel,Minnesota Vikings,Active,2026-11-07T23:02Z,,,,,,"Van Ginkel (chest) doesn't have a designation for Monday's matchup against the Bills, Craig Peters of the Vikings' official site reports.",LB
-3886598,Jauan Jennings,Minnesota Vikings,Out,2026-11-07T19:34Z,Calf,Not Specified,Not Specified,2026-11-15,OUT,Jennings (calf) has been ruled out for Monday's contest versus the Bills.,WR
-3917315,Kyler Murray,Minnesota Vikings,Out,2026-11-07T19:24Z,Hamstring,Strain,Not Specified,2026-11-15,OUT,Head coach Kevin O'Connell said Saturday that Murray (hamstring) has been ruled out for Monday's game versus the Bills.,QB
 4361985,Christian Darrisaw,Minnesota Vikings,Active,2026-11-07T04:22Z,,,,,,Darrisaw (shoulder) was a full practice participant Friday.,OT
 4044540,Isaiah Rodgers,Minnesota Vikings,Active,2026-11-06T23:19Z,,,,,,,CB
 4877652,Jake Golday,Minnesota Vikings,Active,2026-11-06T23:19Z,,,,,,,LB
-4568007,Jay Ward,Minnesota Vikings,Questionable,2026-11-05T22:32Z,Knee,Not Specified,Not Specified,2026-11-09,QUESTIONABLE,questionable,S
 4573398,Max Brosmer,Minnesota Vikings,Active,2026-11-05T18:49Z,,,,,,"Brosmer is set to back up Carson Wentz against the Bills on Monday, as Kyler Murray (hamstring) won't play, Alec Lewis of The Athletic reports.",QB
 2573079,Carson Wentz,Minnesota Vikings,Active,2026-11-05T18:30Z,,,,,,"Wentz is stated to start Monday night's game against the Bills, Ian Rapoport of NFL Network reports.",QB
 4240631,DeeJay Dallas,Minnesota Vikings,Active,2026-11-05T02:13Z,,,,,,"Dallas was signed to the Vikings' active roster Wednesday, Craig Peters of the team's official website reports.",RB
@@ -518,12 +522,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4567104,Will Reichard,Minnesota Vikings,Active,2026-11-03T03:50Z,,,,,,Reichard missed his sole field-goal attempt and made his sole PAT in the Vikings' 19-15 loss to the Lions on Sunday.,PK
 4696782,Elijah Williams,Minnesota Vikings,Active,2026-11-02T19:12Z,,,,,,,DE
 4592836,Caleb Tiernan,Minnesota Vikings,Active,2026-11-02T19:12Z,,,,,,,OT
-5091793,Charles Demmings,Minnesota Vikings,Active,2026-11-02T19:12Z,,,,,,,CB
-4710865,Jakobe Thomas,Minnesota Vikings,Active,2026-11-02T19:12Z,,,,,,,S
 4036133,T.J. Hockenson,Minnesota Vikings,Active,2026-11-02T03:25Z,,,,,,Hockenson caught four of five targets for 58 yards and a touchdown in Sunday's 19-15 loss to the Lions.,TE
 4429205,Jordan Addison,Minnesota Vikings,Active,2026-11-02T02:41Z,,,,,,Addison caught three of eight targets for 66 yards in Sunday's 19-15 loss to the Lions.,WR
-3042519,Aaron Jones Sr.,Minnesota Vikings,Active,2026-11-02T01:12Z,,,,,,Jones rushed five times for 22 yards and brought in both targets for 18 yards in the Vikings' 19-15 loss to the Lions on Sunday.,RB
-4360569,Jordan Mason,Minnesota Vikings,Active,2026-11-02T01:06Z,,,,,,Mason rushed eight times for 20 yards in the Vikings' 19-15 loss to the Lions on Sunday.,RB
 4047646,A.J. Brown,New England Patriots,Out,2026-11-09T21:29Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,WR
 4368113,Charles Woods,New England Patriots,Out,2026-11-09T21:28Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,CB
 4432710,TreVeyon Henderson,New England Patriots,Out,2026-11-09T21:28Z,Illness,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,RB
@@ -674,8 +674,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-10-25T12:26Z,,,,,,"Rudolph is active for Sunday's game against the Saints in Paris, Teresa Varley of the Steelers' official site reports.",QB
 3045282,T.J. Watt,Pittsburgh Steelers,Active,2026-10-23T15:41Z,,,,,,Watt (calf) practiced fully Friday and doesn't carry an injury designation into Sunday's game against the Saints.,LB
 3047495,Sebastian Joseph-Day,Pittsburgh Steelers,Injured Reserve,2026-10-23T00:28Z,Triceps,Not Specified,Not Specified,2026-11-27,IR,"Joseph-Day (triceps) was placed on injured reserve by the Steelers on Thursday, Teresa Varley of the team's official website reports.",DT
-3126486,Deebo Samuel Sr.,San Francisco 49ers,Out,2026-11-09T23:07Z,Hamstring,Not Specified,Right,2026-11-15,QUESTIONABLE,"Samuel (hamstring) is on track to return to practice Wednesday, David Lombardi of SFStandard.com reports.",WR
-16737,Mike Evans,San Francisco 49ers,Out,2026-11-09T22:58Z,Achilles,Tendinitis,Right,2026-11-15,QUESTIONABLE,"Evans (Achilles) is unlikely to participate in practice Wednesday, Nick Wagoner of ESPN reports.",WR
+3126486,Deebo Samuel Sr.,San Francisco 49ers,Out,2026-11-09T23:49Z,Hamstring,Not Specified,Right,2026-11-15,QUESTIONABLE,out,WR
+16737,Mike Evans,San Francisco 49ers,Out,2026-11-09T23:49Z,Achilles,Tendinitis,Right,2026-11-15,QUESTIONABLE,out,WR
 4360438,Brandon Aiyuk,San Francisco 49ers,Out,2026-11-09T22:31Z,Personal,Not Specified,Not Specified,2026-11-29,RESERVE-EX,"The 49ers reinstated Aiyuk (personal) from the reserve/left squad list Monday and were granted a two-week roster exemption for the wide receiver, Tom Pelissero of Netflix reports.",WR
 4039029,Khalid Kareem,San Francisco 49ers,Active,2026-11-09T21:33Z,,,,,,,DE
 4426698,Tatum Bethune,San Francisco 49ers,Active,2026-11-09T21:33Z,,,,,,,LB
