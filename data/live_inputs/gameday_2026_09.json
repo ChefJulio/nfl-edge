@@ -708,5 +708,25 @@
 "at": "2026-11-08T20:03:00+00:00",
 "post": 0.974,
 "status": "Active (LLL)"
+},
+"00-0040129": {
+"name": "Emeka Egbuka",
+"team": "TB",
+"pos": "WR",
+"pre": 0.8184,
+"ruling": "ACT",
+"at": "2026-11-08T23:59:00+00:00",
+"post": 0.974,
+"status": "Active (DFF)"
+},
+"00-0040236": {
+"name": "Kyle Monangai",
+"team": "CHI",
+"pos": "RB",
+"pre": 0.1554,
+"ruling": "INA",
+"at": "2026-11-08T12:25:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDL)"
 }
 }
