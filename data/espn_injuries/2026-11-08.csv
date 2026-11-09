@@ -174,9 +174,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4247726,Bryan Cook,Cincinnati Bengals,Active,2026-10-28T02:08Z,,,,,,"Cook recorded nine tackles (six solo), including 0.5 sacks, during the Bengals' 35-13 win over the Ravens on Sunday.",S
 4427729,Demetrius Knight Jr.,Cincinnati Bengals,Active,2026-10-28T01:59Z,,,,,,Knight totaled eight tackles (two solo) and an interception during the Bengals' win over the Ravens on Sunday.,LB
 4384852,Dohnte Meyers,Cincinnati Bengals,Active,2026-10-27T01:58Z,,,,,,Meyers failed to catch either of his two targets in Sunday's 35-13 win over the Ravens.,WR
+4870653,KC Concepcion,Cleveland Browns,Active,2026-11-09T00:48Z,,,,,,Concepcion caught four of six targets for 85 yards and a touchdown in Sunday's 23-22 overtime loss to the Saints. He added three yards on his only carry.,WR
+4832800,Denzel Boston,Cleveland Browns,Active,2026-11-09T00:42Z,,,,,,Boston caught six of seven targets for 98 yards in Sunday's 23-22 overtime loss to the Saints.,WR
 4685702,Quinshon Judkins,Cleveland Browns,Active,2026-11-09T00:36Z,,,,,,Judkins carried the ball 15 times for 43 yards and caught his only target for two yards in Sunday's 23-22 overtime loss to the Saints.,RB
 4432762,Shedeur Sanders,Cleveland Browns,Active,2026-11-09T00:30Z,,,,,,Sanders completed 19 of 31 passes for 297 yards and two touchdowns in Sunday's 23-22 overtime loss to the Saints. He added 28 yards on 10 carries.,QB
-4870653,KC Concepcion,Cleveland Browns,Active,2026-11-08T20:37Z,,,,,,"Concepcion returned to Sunday's game against the Saints after previously appearing to injure his right leg, Mary Kay Cabot of The Cleveland Plain Dealer reports.",WR
 2515270,Michael Burton,Cleveland Browns,Active,2026-11-08T19:09Z,,,,,,"Burton (calf) has returned to Sunday's matchup against New Orleans, Daniel Oyefusi of ESPN.com reports.",FB
 4431325,Taylen Green,Cleveland Browns,Out,2026-11-08T17:14Z,Coach's Decision,,,2026-11-15,INACTIVE,"Green (coach's decision) is inactive but will serve as the emergency third quarterback Sunday against the Saints, Kelsey Russo of the Browns' official site reports.",QB
 3122840,Deshaun Watson,Cleveland Browns,Out,2026-11-08T16:38Z,Concussion,Concussion,Not Specified,2026-11-15,INACTIVE,"Watson (concussion) is inactive for Sunday's game against the Saints, Daniel Oyefusi of ESPN.com reports.",QB
@@ -187,7 +188,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4427238,Dillon Gabriel,Cleveland Browns,Active,2026-11-08T12:24Z,,,,,,"Gabriel ""will serve as the backup quarterback"" Sunday against the Saints, Jeremy Fowler of ESPN.com reports.",QB
 4685540,Carsen Ryan,Cleveland Browns,Active,2026-11-07T20:45Z,,,,,,The Browns elevated Ryan from the practice squad to the active roster Saturday.,TE
 3110565,Quincy Williams,Cleveland Browns,Active,2026-11-06T20:43Z,,,,,,"Williams has no injury designation ahead of Sunday's game against the Saints, Scott Petrak of the Elyria Chronicle-Telegram reports.",LB
-4832800,Denzel Boston,Cleveland Browns,Active,2026-11-06T19:47Z,,,,,,"Boston (calf) was a full participant in Friday's practice and doesn't have an injury designation for Sunday's game at New Orleans, Chris Easterling of the Akron Beacon Journal reports.",WR
 4876017,Carson Schwesinger,Cleveland Browns,Active,2026-11-06T19:45Z,,,,,,,LB
 4837186,Emmanuel McNeil-Warren,Cleveland Browns,Active,2026-11-06T19:45Z,,,,,,,S
 4597310,Austin Barber,Cleveland Browns,Active,2026-11-06T19:45Z,,,,,,,OT
@@ -474,6 +474,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2573401,Tyler Higbee,Los Angeles Rams,Active,2026-11-04T03:07Z,,,,,,Higbee caught one of two targets for 14 yards against the Chargers in Sunday's 24-9 victory.,TE
 5082269,Dean Connors,Los Angeles Rams,Injured Reserve,2026-11-04T01:20Z,Hand,Surgery,Not Specified,2026-12-13,IR,"Connors (hand) was placed on IR on Tuesday, Blaine Grisak of SI.com reports.",RB
 16339,Brandon McManus,Los Angeles Rams,Active,2026-11-03T03:13Z,,,,,,McManus converted his sole field-goal attempt and all three PATs in the Rams' 24-9 win over the Chargers on Sunday.,PK
+4869645,Caleb Douglas,Miami Dolphins,Active,2026-11-09T00:49Z,,,,,,Douglas secured six of eight targets for 70 yards in the Dolphins' 19-9 loss to the Lions on Sunday.,WR
 4242512,Malik Willis,Miami Dolphins,Active,2026-11-08T23:46Z,,,,,,Willis completed 13 of 25 passes for 128 yards with no touchdowns and one interception and added two rushes for seven yards in the Dolphins' 19-9 loss to the Lions on Sunday.,QB
 4711533,Ollie Gordon II,Miami Dolphins,Active,2026-11-08T23:11Z,,,,,,Gordon rushed 16 times for 55 yards and brought in his only target for nine yards in the Dolphins' 19-9 loss to the Lions on Sunday.,RB
 4880236,Will Kacmarek,Miami Dolphins,Questionable,2026-11-08T20:00Z,Quadriceps,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Kacmarek is dealing with a quad injury and is questionable to return to Sunday's clash against Detroit.,TE
@@ -498,7 +499,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4043130,Jordyn Brooks,Miami Dolphins,Active,2026-11-05T17:25Z,,,,,,Brooks recorded 11 tackles (six solo) in Sunday's 24-19 loss to the Patriots.,LB
 4036660,Darrell Baker Jr.,Miami Dolphins,Out,2026-11-05T00:35Z,Undisclosed,Not Specified,Not Specified,2026-11-15,PUP-R,"Baker (undisclosed) is not ready to return to practice, David Furones of the South Florida Sun Sentinel reports.",CB
 4567225,Jaylin Simpson,Miami Dolphins,Active,2026-11-02T19:10Z,,,,,,,S
-4372463,Jamree Kromah,Miami Dolphins,Active,2026-11-02T19:10Z,,,,,,,DE
 16733,Odell Beckham Jr.,Minnesota Vikings,Active,2026-11-08T16:15Z,,,,,,"The Vikings are signing Beckham from the practice squad to the active roster, Tom Pelissero of NFL Network reports.",WR
 3133487,Andrew Van Ginkel,Minnesota Vikings,Active,2026-11-07T23:02Z,,,,,,"Van Ginkel (chest) doesn't have a designation for Monday's matchup against the Bills, Craig Peters of the Vikings' official site reports.",LB
 4832846,Demond Claiborne,Minnesota Vikings,Out,2026-11-07T22:56Z,Knee,Not Specified,Not Specified,2026-11-15,OUT,"Claiborne (knee) has been ruled out for Monday's battle against Buffalo, Craig Peters of the Vikings' official site reports.",RB
@@ -699,6 +699,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 16731,Brandin Cooks,San Francisco 49ers,Active,2026-10-26T23:42Z,,,,,,Cooks caught one of three targets for 13 yards during Sunday's 29-20 loss to Atlanta.,WR
 4575665,Jacob Cowing,San Francisco 49ers,Active,2026-10-26T23:36Z,,,,,,"Cowing caught three of five passes for 38 yards, added a 10-yard carry and returned one kickoff for 28 yards during Sunday's 29-20 loss to the Falcons.",WR
 4685397,Jordan James,San Francisco 49ers,Active,2026-10-26T23:14Z,,,,,,"James logged a six-yard carry, turned his lone target into an 11-yard catch and registered 119 yards on four kickoff returns during the 49ers' 29-20 loss to the Falcons on Sunday.",RB
+3924327,Drew Lock,Seattle Seahawks,Questionable,2026-11-09T00:55Z,Oblique,,,2026-11-15,QUESTIONABLE,questionable,QB
 2971622,Leonard Williams,Seattle Seahawks,Out,2026-11-08T20:03Z,Shoulder,Stinger,Not Specified,2026-11-15,INACTIVE,inactive,DT
 3129308,Quenton Nelson,Seattle Seahawks,Out,2026-11-08T20:03Z,Knee,Surgery,Not Specified,2026-11-15,INACTIVE,inactive,G
 3120358,Uchenna Nwosu,Seattle Seahawks,Out,2026-11-08T20:03Z,Ankle,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,LB
@@ -710,7 +711,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4600597,Montorie Foster Jr.,Seattle Seahawks,Active,2026-11-08T00:45Z,,,,,,"The Seahawks elevated Foster from their practice squad to their active roster Saturday, John Boyle of the team's official site reports.",WR
 4362851,Ernest Jones IV,Seattle Seahawks,Active,2026-11-07T01:58Z,,,,,,"Jones (ankle) does not carry an official injury designation ahead of Sunday's game versus Arizona, John Boyle of the Seahawks' official site reports.",LB
 4567226,Derick Hall,Seattle Seahawks,Active,2026-11-06T23:14Z,,,,,,,LB
-3924327,Drew Lock,Seattle Seahawks,Active,2026-11-06T22:26Z,,,,,,"Lock (right elbow) doesn't have a designation for Sunday's contest against the Cardinals, John Boyle of the Seahawks' official site reports.",QB
 4429211,Anthony Bradford,Seattle Seahawks,Active,2026-11-06T00:33Z,,,,,,,G
 4432734,Jalen Milroe,Seattle Seahawks,Active,2026-11-05T00:05Z,,,,,,"Milroe will get added reps at practice ahead of Sunday's matchup with the Cardinals, Gregg Bell of Sports Radio 93.3 KJR Seattle reports.",QB
 4597703,Tory Horton,Seattle Seahawks,Active,2026-11-03T17:16Z,,,,,,Horton recorded three receptions for 26 yards on six targets in Monday's 34-17 loss to the Bears.,WR
