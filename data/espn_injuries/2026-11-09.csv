@@ -1,6 +1,6 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
+4038524,Gardner Minshew II,Arizona Cardinals,Doubtful,2026-11-09T22:51Z,Elbow,Not Specified,Right,2026-11-15,DOUBTFUL,"Per Adam Schefter of ESPN,  Minshew (elbow) is reportedly seeking additional medical opinions to confirm that he likely will require season-ending surgery to address a torn UCL.",QB
 3886633,Hjalte Froholdt,Arizona Cardinals,Questionable,2026-11-09T22:07Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,questionable,C
-4038524,Gardner Minshew II,Arizona Cardinals,Questionable,2026-11-09T21:53Z,Elbow,Not Specified,Right,2026-11-15,QUESTIONABLE,"Minshew is slated undergo testing on his right elbow/arm in the wake of Sunday's loss to the Seahawks, according to Darren Urban of the Cardinals' official site.",QB
 4360761,Michael Wilson,Arizona Cardinals,Out,2026-11-09T21:39Z,Neck,Fracture,Not Specified,2027-02-15,OUT,"Coach Mike LaFleur revealed Monday that Wilson is out for the season due to a fracture in his neck, Josh Weinfuss of ESPN.com reports.",WR
 4709718,Jayden Williams,Arizona Cardinals,Out,2026-11-09T20:45Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,OT
 4427728,Bam Knight,Arizona Cardinals,Out,2026-11-09T20:45Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,out,RB
@@ -99,6 +99,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4379399,James Cook III,Buffalo Bills,Active,2026-11-01T22:30Z,,,,,,Cook rushed 21 times for 80 yards and a touchdown while catching two of three targets for 21 yards in Sunday's 36-10 win over the Ravens.,RB
 3918298,Josh Allen,Buffalo Bills,Active,2026-11-01T22:28Z,,,,,,"Allen completed 21 of 34 passes for 289 yards, two touchdowns and one interception in Sunday's 36-10 win over the Ravens. He added 30 rushing yards and a rushing touchdown on seven rushing attempts.",QB
 4870886,TJ Parker,Buffalo Bills,Active,2026-11-01T16:33Z,,,,,,,LB
+4431588,Ja'Tavion Sanders,Carolina Panthers,Active,2026-11-09T22:44Z,,,,,,Sanders recorded zero targets during Sunday's 26-21 loss to the Broncos.,TE
 4242975,Jaelan Phillips,Carolina Panthers,Out,2026-11-09T20:56Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,LB
 5151083,Will Lee III,Carolina Panthers,Out,2026-11-09T20:56Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,CB
 4362647,Damien Lewis,Carolina Panthers,Out,2026-11-09T20:56Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,G
@@ -115,7 +116,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241416,Chuba Hubbard,Carolina Panthers,Active,2026-11-09T00:12Z,,,,,,Hubbard carried the ball 16 times for 79 yards and caught four of five targets for 17 yards in Sunday's 26-21 loss to Denver.,RB
 4685720,Bryce Young,Carolina Panthers,Active,2026-11-09T00:07Z,,,,,,Young completed 28 of 39 passes for 276 yards and three touchdowns with one interception in Sunday's 26-21 loss to the Broncos. He added 13 yards on his only carry and lost a fumble.,QB
 4696902,Torricelli Simpkins III,Carolina Panthers,Active,2026-11-08T17:34Z,,,,,,"Simpkins (ankle) is available for Sunday's game against Denver, Darin Gantt of the team's official site reports.",G
-4431588,Ja'Tavion Sanders,Carolina Panthers,Active,2026-11-08T17:30Z,,,,,,"Sanders is listed as active for Sunday's matchup against the Broncos, Joe Person of The Athletic reports.",TE
 4576075,Corey Bullock,Carolina Panthers,Active,2026-11-08T17:30Z,,,,,,"Bullock (quadriceps) is active for Sunday's game versus Denver, Darin Gantt of the team's official site reports.",C
 4256062,Brady Christensen,Carolina Panthers,Injured Reserve,2026-11-08T03:32Z,Hamstring,Not Specified,Not Specified,2026-11-15,IR-R,"Christensen (hamstring), who is on IR, has been ruled out for Sunday's battle against the Broncos, Darin Gantt of the Panthers' official site reports.",G
 4240595,Marco Wilson,Carolina Panthers,Active,2026-11-08T00:38Z,,,,,,"The Panthers elevated Wilson from their practice squad to their active roster Saturday, Darin Gantt of the team's official site reports.",CB
