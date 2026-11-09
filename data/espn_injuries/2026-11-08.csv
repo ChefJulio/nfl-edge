@@ -99,6 +99,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4379399,James Cook III,Buffalo Bills,Active,2026-11-01T22:30Z,,,,,,Cook rushed 21 times for 80 yards and a touchdown while catching two of three targets for 21 yards in Sunday's 36-10 win over the Ravens.,RB
 3918298,Josh Allen,Buffalo Bills,Active,2026-11-01T22:28Z,,,,,,"Allen completed 21 of 34 passes for 289 yards, two touchdowns and one interception in Sunday's 36-10 win over the Ravens. He added 30 rushing yards and a rushing touchdown on seven rushing attempts.",QB
 4870886,TJ Parker,Buffalo Bills,Active,2026-11-01T16:33Z,,,,,,,LB
+2576925,Darren Waller,Carolina Panthers,Active,2026-11-09T00:21Z,,,,,,Waller caught eight of 10 targets for 90 yards and a touchdown in Sunday's 26-21 loss to the Broncos.,TE
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-11-09T00:16Z,,,,,,McMillan caught four of six targets for 56 yards and a touchdown in Sunday's 26-21 loss to the Broncos.,WR
 4241416,Chuba Hubbard,Carolina Panthers,Active,2026-11-09T00:12Z,,,,,,Hubbard carried the ball 16 times for 79 yards and caught four of five targets for 17 yards in Sunday's 26-21 loss to Denver.,RB
 4685720,Bryce Young,Carolina Panthers,Active,2026-11-09T00:07Z,,,,,,Young completed 28 of 39 passes for 276 yards and three touchdowns with one interception in Sunday's 26-21 loss to the Broncos. He added 13 yards on his only carry and lost a fumble.,QB
@@ -117,7 +118,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4372518,Bobby Brown III,Carolina Panthers,Active,2026-11-05T04:57Z,,,,,,Brown (hand) practiced fully Wednesday.,DT
 4566384,Zakee Wheatley,Carolina Panthers,Active,2026-11-04T03:49Z,,,,,,Wheatley recorded seven total tackles (four solo) and an interception during Thursday night's 27-19 loss to the Packers.,S
 4678008,Jonathon Brooks,Carolina Panthers,Injured Reserve,2026-11-03T19:22Z,Abdomen,Surgery,Not Specified,2026-11-15,IR,"Brooks (core) was seen working off to the side during the Panthers' unofficial practice Tuesday, Joe Person of The Athletic reports.",RB
-2576925,Darren Waller,Carolina Panthers,Active,2026-11-03T00:35Z,,,,,,Waller corralled one of two targets for 11 yards during last Thursday's 27-19 loss at Green Bay.,TE
 4430034,Xavier Legette,Carolina Panthers,Injured Reserve,2026-11-02T19:23Z,Knee,Not Specified,Not Specified,2026-11-15,IR,"Panthers head coach Dave Canales said Monday that Legette (knee) will ""potentially"" be designated for return from injured reserve this week, Joe Person of The Athletic reports.",WR
 4360763,Brycen Tremayne,Carolina Panthers,Active,2026-11-02T15:17Z,,,,,,Tremayne finished with an 11-yard reception on his lone target in Thursday's 27-19 loss to the Packers.,WR
 4567096,John Metchie III,Carolina Panthers,Active,2026-11-02T15:15Z,,,,,,Metchie recorded three receptions for 14 yards on three targets in Thursday's 27-19 loss to the Packers.,WR
@@ -524,8 +524,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429205,Jordan Addison,Minnesota Vikings,Active,2026-11-02T02:41Z,,,,,,Addison caught three of eight targets for 66 yards in Sunday's 19-15 loss to the Lions.,WR
 3042519,Aaron Jones Sr.,Minnesota Vikings,Active,2026-11-02T01:12Z,,,,,,Jones rushed five times for 22 yards and brought in both targets for 18 yards in the Vikings' 19-15 loss to the Lions on Sunday.,RB
 4360569,Jordan Mason,Minnesota Vikings,Active,2026-11-02T01:06Z,,,,,,Mason rushed eight times for 20 yards in the Vikings' 19-15 loss to the Lions on Sunday.,RB
-4569173,Rhamondre Stevenson,New England Patriots,Out,2026-11-09T00:19Z,Knee,,,2026-11-15,OUT,"Stevenson (knee) won't return to Sunday's game against the Packers, Mark Daniels of MassLive.com reports.",RB
-4047941,Brenden Schooler,New England Patriots,Questionable,2026-11-08T23:48Z,Hamstring,,,2026-11-08,QUESTIONABLE,"Schooler (hamstring) is questionable to return to New England's matchup versus the Packers on Sunday, Mike Reiss of ESPN.com reports.",S
+4569173,Rhamondre Stevenson,New England Patriots,Out,2026-11-09T00:19Z,Knee,Not Specified,Not Specified,2026-11-15,OUT,"Stevenson (knee) won't return to Sunday's game against the Packers, Mark Daniels of MassLive.com reports.",RB
+4047941,Brenden Schooler,New England Patriots,Questionable,2026-11-08T23:48Z,Hamstring,,,2026-11-15,QUESTIONABLE,"Schooler (hamstring) is questionable to return to New England's matchup versus the Packers on Sunday, Mike Reiss of ESPN.com reports.",S
 3916923,Carlton Davis III,New England Patriots,Questionable,2026-11-08T23:29Z,Knee,,,2026-11-08,QUESTIONABLE,Davis (knee) is questionable to return to New England's matchup Sunday versus the Packers.,CB
 4362890,Ben Brown,New England Patriots,Questionable,2026-11-08T23:29Z,Knee,,,2026-11-08,QUESTIONABLE,"Brown (knee) is questionable to return to Sunday's contest against the Packers, Mark Daniels of MassLive.com reports.",C
 4431465,Behren Morton,New England Patriots,Out,2026-11-08T20:19Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,Morton (coach's decision) is inactive but will serve as the Patriots' emergency third quarterback against the Packers on Sunday.,QB
@@ -599,6 +599,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4950400,Arvell Reese,New York Giants,Active,2026-10-28T04:32Z,,,,,,"Reese posted seven tackles (five solo), including 0.5 sacks, in Sunday's 27-21 overtime victory against the Texans.",LB
 4371961,Micah McFadden,New York Giants,Active,2026-10-28T04:16Z,,,,,,McFadden notched 10 tackles (all solo) in Sunday's 27-21 overtime win against the Texans.,LB
 4360516,Tyrone Tracy Jr.,New York Giants,Injured Reserve,2026-10-27T21:04Z,Hamstring,Strain,Not Specified,2026-12-06,IR,"The Giants placed Tracy (hamstring) on injured reserve Tuesday, Dan Salomone of the team's official site reports.",RB
+4723820,Omar Cooper Jr.,New York Jets,Active,2026-11-09T00:27Z,,,,,,Cooper caught eight of 11 targets for 58 yards in Sunday's 35-12 loss to the Chiefs.,WR
+15864,Geno Smith,New York Jets,Active,2026-11-09T00:26Z,,,,,,"Smith completed 18 of 32 passes for 165 yards, no touchdowns and no interceptions in Sunday's 35-12 loss to the Chiefs. He also rushed once for eight yards.",QB
+4685247,Braelon Allen,New York Jets,Active,2026-11-09T00:26Z,,,,,,"Allen rushed eight times for 33 yards, caught both of his targets for 21 yards and lost a fumble in Sunday's 35-12 loss to the Chiefs.",RB
 4427366,Breece Hall,New York Jets,Active,2026-11-08T21:31Z,,,,,,Hall (quadriceps) rushed 15 times for 61 yards and caught three of four targets for 26 yards in Sunday's 35-12 loss to the Chiefs.,RB
 3134353,Tim Patrick,New York Jets,Out,2026-11-08T17:12Z,Coach's Decision,,,2026-11-15,INACTIVE,Patrick is inactive (coach's decision) for Sunday's game against the Chiefs.,WR
 3117255,Harrison Phillips,New York Jets,Active,2026-11-08T16:40Z,,,,,,,DT
@@ -609,9 +612,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4837388,VJ Payne,New York Jets,Injured Reserve,2026-11-08T01:56Z,Knee,Bruise,Not Specified,2026-11-15,IR-R,Payne (knee) has been ruled out for Sunday's Week 9 clash against Kansas City.,S
 4570470,Nahshon Wright,New York Jets,Out,2026-11-08T01:51Z,Back,Not Specified,Not Specified,2026-11-15,INACTIVE,Wright (back) won't suit up Sunday against Kansas City.,CB
 4362094,Joseph Ossai,New York Jets,Out,2026-11-08T01:45Z,Ankle,Not Specified,Not Specified,2026-11-15,INACTIVE,Ossai (ankle) has been ruled out for Sunday's contest against the Chiefs.,DE
-4685247,Braelon Allen,New York Jets,Active,2026-11-06T20:45Z,,,,,,"Jets coach Aaron Glenn declined to elaborate on the distribution of carries between Allen and Breece Hall, who will return from a five-game absence for Sunday's matchup with Kansas City, ESPN's Rich Cimini reports.",RB
 4597500,Adonai Mitchell,New York Jets,Active,2026-11-06T20:17Z,,,,,,"Mitchell and Omar Cooper will be the Jets' top wide receivers with Garrett Wilson (concussion) unavailable for Sunday's game at Kansas City, ESPN's Rich Cimini reports.",WR
-4723820,Omar Cooper Jr.,New York Jets,Active,2026-11-06T18:24Z,,,,,,"Cooper and Adonai Mitchell will be the Jets' top wide receivers with Garrett Wilson (concussion) unavailable for Sunday's game at Kansas City, ESPN's Rich Cimini reports.",WR
 4426686,Dane Belton,New York Jets,Active,2026-11-06T03:45Z,,,,,,Belton recorded 12 total tackles (eight solo) and a pass defensed in Sunday's 38-33 loss to the Raiders.,S
 4361331,Jamien Sherwood,New York Jets,Active,2026-11-06T03:29Z,,,,,,Sherwood recorded 14 total tackles (five solo) during Sunday's 38-33 loss to the Raiders.,LB
 4685248,David Bailey,New York Jets,Active,2026-11-05T21:58Z,,,,,,Bailey (groin) was a full participant in Thursday's practice.,LB
@@ -621,7 +622,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5083315,Kenyon Sadiq,New York Jets,Active,2026-11-03T02:48Z,,,,,,Sadiq caught one of two targets for 22 yards in Sunday's 38-33 loss to the Raiders.,TE
 3124679,Jason Sanders,New York Jets,Active,2026-11-03T01:46Z,,,,,,Sanders made all four of his field-goal attempts and three PATs in the Jets' 38-33 loss to the Raiders on Sunday.,PK
 4569371,Isaiah Williams,New York Jets,Active,2026-11-02T04:55Z,,,,,,Williams caught an 18-yard touchdown on his lone target in Sunday's 38-33 loss to the Raiders.,WR
-15864,Geno Smith,New York Jets,Active,2026-11-01T22:50Z,,,,,,"Smith completed 20 of 32 passes for 290 yards, two touchdowns and one interception in Sunday's 38-33 loss to the Raiders. He also rushed once for four yards.",QB
 4243375,Dylan Parham,New York Jets,Active,2026-11-01T17:27Z,,,,,,Parham (knee) is active for Sunday's game against Las Vegas.,G
 4428617,T'Vondre Sweat,New York Jets,Injured Reserve,2026-10-31T23:39Z,Knee,Not Specified,Not Specified,2026-11-29,IR,"The Jets placed Sweat (knee) on injured reserve Saturday, Jeremy Fowler of ESPN.com reports.",DT
 4360698,Joe Milton,Philadelphia Eagles,Active,2026-11-08T23:50Z,,,,,,"Milton completed 18 of 34 passes for 169 yards, no touchdowns and no interceptions in Sunday's 19-11 loss to the Giants. He also rushed nine times for 64 yards, ran in a two-point conversion and lost a fumble.",QB
@@ -674,6 +674,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-10-25T12:26Z,,,,,,"Rudolph is active for Sunday's game against the Saints in Paris, Teresa Varley of the Steelers' official site reports.",QB
 3045282,T.J. Watt,Pittsburgh Steelers,Active,2026-10-23T15:41Z,,,,,,Watt (calf) practiced fully Friday and doesn't carry an injury designation into Sunday's game against the Saints.,LB
 3047495,Sebastian Joseph-Day,Pittsburgh Steelers,Injured Reserve,2026-10-23T00:28Z,Triceps,Not Specified,Not Specified,2026-11-27,IR,"Joseph-Day (triceps) was placed on injured reserve by the Steelers on Thursday, Teresa Varley of the team's official website reports.",DT
+4685369,Gracen Halton,San Francisco 49ers,Questionable,2026-11-09T00:23Z,Lower Leg,,,2026-11-15,QUESTIONABLE,questionable,DT
 4430431,Kurtis Rourke,San Francisco 49ers,Out,2026-11-08T20:01Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,QB
 3126486,Deebo Samuel Sr.,San Francisco 49ers,Out,2026-11-08T20:01Z,Hamstring,Not Specified,Right,2026-11-15,INACTIVE,inactive,WR
 4039029,Khalid Kareem,San Francisco 49ers,Out,2026-11-08T20:01Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,DE
@@ -698,7 +699,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 16731,Brandin Cooks,San Francisco 49ers,Active,2026-10-26T23:42Z,,,,,,Cooks caught one of three targets for 13 yards during Sunday's 29-20 loss to Atlanta.,WR
 4575665,Jacob Cowing,San Francisco 49ers,Active,2026-10-26T23:36Z,,,,,,"Cowing caught three of five passes for 38 yards, added a 10-yard carry and returned one kickoff for 28 yards during Sunday's 29-20 loss to the Falcons.",WR
 4685397,Jordan James,San Francisco 49ers,Active,2026-10-26T23:14Z,,,,,,"James logged a six-yard carry, turned his lone target into an 11-yard catch and registered 119 yards on four kickoff returns during the 49ers' 29-20 loss to the Falcons on Sunday.",RB
-4361741,Brock Purdy,San Francisco 49ers,Active,2026-10-26T01:49Z,,,,,,Purdy completed 27 of 40 passes for 288 yards with one touchdown and two interceptions and added two carries for five yards in the 49ers' 29-20 loss to the Falcons on Sunday.,QB
 2971622,Leonard Williams,Seattle Seahawks,Out,2026-11-08T20:03Z,Shoulder,Stinger,Not Specified,2026-11-15,INACTIVE,inactive,DT
 3129308,Quenton Nelson,Seattle Seahawks,Out,2026-11-08T20:03Z,Knee,Surgery,Not Specified,2026-11-15,INACTIVE,inactive,G
 3120358,Uchenna Nwosu,Seattle Seahawks,Out,2026-11-08T20:03Z,Ankle,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,LB
