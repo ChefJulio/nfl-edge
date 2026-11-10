@@ -324,10 +324,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116679,M.J. Stewart,Houston Texans,Active,2026-10-28T03:59Z,,,,,,"Stewart finished with 12 tackles (five solo), including 0.5 sacks, and a defensed pass in Sunday's overtime loss to the Giants.",S
 3843945,Foster Moreau,Houston Texans,Active,2026-10-27T02:01Z,,,,,,Moreau played 21 offensive snaps and nine special-teams snaps in the Texans' 27-21 overtime loss to the Giants on Sunday.,TE
 2983509,Dare Ogunbowale,Houston Texans,Active,2026-10-27T01:55Z,,,,,,Ogunbowale didn't record an offensive touch or target in Sunday's 24-21 overtime loss to the Giants.,RB
+4892240,Jalen Travis,Indianapolis Colts,Doubtful,2026-11-10T19:02Z,Knee,Not Specified,Not Specified,2026-11-29,DOUBTFUL,doubtful,OT
 4682909,Justin Walley,Indianapolis Colts,Questionable,2026-11-10T15:44Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,CB
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Questionable,2026-11-10T15:44Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,LB
 4905664,A.J. Haulcy,Indianapolis Colts,Questionable,2026-11-10T15:44Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,S
-4892240,Jalen Travis,Indianapolis Colts,Questionable,2026-11-10T02:30Z,Knee,Not Specified,Not Specified,2026-11-29,DOUBTFUL,"Travis (knee) is expected to be sidelined 2-4 weeks, Matt Zenitz of CBSSports.com reports.",OT
 4874509,DJ Giddens,Indianapolis Colts,Active,2026-11-10T01:08Z,,,,,,Giddens was active but didn't play in Sunday's 27-23 loss to the Cowboys.,RB
 4683423,Riley Leonard,Indianapolis Colts,Active,2026-11-09T21:15Z,,,,,,,QB
 3895840,Charlie Heck,Indianapolis Colts,Active,2026-11-09T21:15Z,,,,,,,OT
@@ -477,7 +477,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3057956,Zach Sieler,Miami Dolphins,Out,2026-11-10T16:27Z,Biceps,Surgery,Not Specified,2027-02-15,OUT,"Sieler ruptured his biceps during Sunday's 19-9 loss to the Lions and will require season-ending surgery, Adam Schefter of ESPN reports.",DT
 4682745,Jaylen Wright,Miami Dolphins,Questionable,2026-11-10T15:44Z,Quadriceps,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,RB
 3043234,Zane Gonzalez,Miami Dolphins,Active,2026-11-10T04:42Z,,,,,,"Gonzalez reverted to the Dolphins' practice squad Monday, per the NFL's transaction log.",PK
-4685246,Kaytron Allen,Miami Dolphins,Active,2026-11-10T03:56Z,,,,,,Allen caught a 46-yard pass in Sunday's 19-9 loss to the Lions. He rushed one time for minus-one yards.,RB
+4685246,Kaytron Allen,Miami Dolphins,Active,2026-11-10T03:56Z,,,,,,Allen caught a 46-yard pass in Sunday's 19-9 loss to the Lions. He rushed one time for minus-1 yard.,RB
 4362135,Christian Haynes,Miami Dolphins,Active,2026-11-09T21:26Z,,,,,,,G
 4371946,Reese Taylor,Miami Dolphins,Active,2026-11-09T21:26Z,,,,,,,CB
 4875079,Marcellas Dial Jr.,Miami Dolphins,Active,2026-11-09T21:26Z,,,,,,,CB
@@ -574,8 +574,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4076951,Nathan Shepherd,New Orleans Saints,Active,2026-11-05T04:59Z,,,,,,Shepherd (illness) practiced in full Wednesday.,DT
 4239996,Travis Etienne Jr.,New Orleans Saints,Injured Reserve,2026-11-04T21:38Z,Hamstring,Strain,Left,2026-11-15,IR,"Head coach Kellen Moore said Wednesday that the Saints haven't opened Etienne's (hamstring) practice window just yet, Jeff Nowak of WWL Louisiana reports.",RB
 3918310,Carl Granderson,New Orleans Saints,Active,2026-10-28T04:47Z,,,,,,"Granderson totaled four tackles, including 1.5 sacks, in Sunday's Week 7 loss to Pittsburgh.",DE
+4696981,Cam Skattebo,New York Giants,Questionable,2026-11-10T19:02Z,Hamstring,Not Specified,Not Specified,2026-11-12,QUESTIONABLE,questionable,RB
 4433970,J.J. McCarthy,New York Giants,Questionable,2026-11-10T18:38Z,Hip,Bruise,Not Specified,2026-11-12,QUESTIONABLE,"McCarthy (hip) was spotted on the field for the media-access portion of Tuesday's practice, Art Stapleton of The Bergen Record reports.",QB
-4696981,Cam Skattebo,New York Giants,Out,2026-11-10T18:34Z,Hamstring,Not Specified,Not Specified,2026-11-12,QUESTIONABLE,"Skattebo (hamstring) was spotted on the field for the media-access portion of Tuesday's practice, Art Stapleton of The Bergen Record reports.",RB
 4682648,Malachi Fields,New York Giants,Active,2026-11-10T04:13Z,,,,,,Fields caught three of five targets for 40 yards in Sunday's 19-11 win over the Eagles.,WR
 4040655,Darnell Mooney,New York Giants,Questionable,2026-11-10T00:30Z,Chest,,,2026-11-12,QUESTIONABLE,"Mooney (chest) was estimated to be a limited participant at the Giants' walkthrough practice Monday, Dan Salomone of the team's official site reports.",WR
 4257188,Charlie Jones,New York Giants,Questionable,2026-11-10T00:09Z,Thumb,,,2026-11-12,QUESTIONABLE,questionable,WR
