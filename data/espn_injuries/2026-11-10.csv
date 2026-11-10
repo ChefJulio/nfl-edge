@@ -199,6 +199,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4578085,Jared Verse,Cleveland Browns,Active,2026-11-05T21:28Z,,,,,,,DE
 4613104,Malachi Corley,Cleveland Browns,Active,2026-11-02T16:04Z,,,,,,Corley went untargeted while playing 13 of 70 snaps on offense Sunday in the Browns' 27-6 loss to the Steelers. He returned one kickoff for 26 yards.,WR
 4241424,Tylan Wallace,Cleveland Browns,Active,2026-11-02T16:00Z,,,,,,Wallace recorded a three-yard reception on his lone target in Sunday's 27-6 loss to the Steelers.,WR
+4429676,Tyler Goodson,Dallas Cowboys,Out,2026-11-10T15:05Z,Knee,Sprain,Not Specified,2026-11-22,OUT,"Goodson sustained ACL and MCL sprains in his knee during Sunday's 27-23 win over the Colts, a source tells Todd Archer of ESPN.com.",RB
 5083754,Ryan Flournoy,Dallas Cowboys,Active,2026-11-10T02:15Z,,,,,,Flournoy caught two of three targets for 53 yards during Sunday's 27-23 win over the Colts.,WR
 4242355,Jake Ferguson,Dallas Cowboys,Out,2026-11-10T01:39Z,Knee,Not Specified,Not Specified,2026-11-22,OUT,out,TE
 4683848,Donovan Ezeiruaku,Dallas Cowboys,Questionable,2026-11-10T01:11Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Ezeiruaku (ankle) is considered day-to-day, Nick Harris of the Fort Worth Star-Telegram reports.",LB
@@ -206,7 +207,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426506,Joey Porter Jr.,Dallas Cowboys,Out,2026-11-10T01:01Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Porter ""will go through the same process as last week"" before a decision is made regarding his availability for Week 10 against San Francisco, Jon Machota of The Athletic reports.",CB
 4360967,Brevyn Spann-Ford,Dallas Cowboys,Active,2026-11-10T01:01Z,,,,,,Spann-Ford caught two of three targets for 20 yards during Sunday's 27-23 win versus the Colts.,TE
 4426354,George Pickens,Dallas Cowboys,Out,2026-11-10T00:16Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Pickens (hamstring) has a chance to play Sunday against San Francisco, but his practice reps will likely again be capped this week, Jon Machota of The Athletic reports.",WR
-4429676,Tyler Goodson,Dallas Cowboys,Out,2026-11-09T22:39Z,Knee,Sprain,Not Specified,2026-11-22,OUT,"Cowboys head coach Brian Schottenheimer said Monday that Goodson will miss ""multiple weeks"" after spraining his knee in Sunday's 27-23 win over the Colts, Todd Archer of ESPN.com reports.",RB
 3676833,KaVontae Turpin,Dallas Cowboys,Out,2026-11-09T20:59Z,Ribs,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,WR
 4362088,DeMarvion Overshown,Dallas Cowboys,Out,2026-11-09T20:59Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,LB
 4372096,Luke Schoonmaker,Dallas Cowboys,Out,2026-11-09T20:59Z,Groin,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,TE
