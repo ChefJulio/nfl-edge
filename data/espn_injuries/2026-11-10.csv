@@ -1,9 +1,11 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
+5151948,Joey Aguilar,Arizona Cardinals,Active,2026-11-10T16:14Z,,,,,,"The Cardinals signed Aguilar off the Jaguars' practice squad Tuesday, Jeremy Fowler of ESPN.com reports.",QB
 4709718,Jayden Williams,Arizona Cardinals,Questionable,2026-11-10T15:44Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,OT
 4427728,Bam Knight,Arizona Cardinals,Questionable,2026-11-10T15:44Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,questionable,RB
 4367199,Jon Gaines II,Arizona Cardinals,Questionable,2026-11-10T15:44Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,G
 4363538,Chad Ryland,Arizona Cardinals,Active,2026-11-10T03:11Z,,,,,,Ryland made his lone field-goal attempt during Arizona's loss versus the Seahawks on Sunday.,PK
 3886633,Hjalte Froholdt,Arizona Cardinals,Questionable,2026-11-10T02:08Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,"Froholdt is in league concussion protocol Monday, Darren Urban of the Cardinals' official site reports.",C
+11394,Josh Johnson,Arizona Cardinals,Active,2026-11-10T00:34Z,,,,,,"Johnson was signed by the Cardinals off Cincinnati's practice squad Monday, Adam Schefter of ESPN reports.",QB
 4430841,Carson Beck,Arizona Cardinals,Active,2026-11-10T00:25Z,,,,,,"Beck is expected to start Sunday's contest against the Rams, Josh Weinfuss of ESPN.com reports.",QB
 4038524,Gardner Minshew II,Arizona Cardinals,Doubtful,2026-11-09T22:51Z,Elbow,Not Specified,Right,2026-11-15,DOUBTFUL,"Per Adam Schefter of ESPN, Minshew (elbow) is reportedly seeking additional medical opinions to confirm that he likely will require season-ending surgery to address a torn UCL.",QB
 4360761,Michael Wilson,Arizona Cardinals,Out,2026-11-09T21:39Z,Neck,Fracture,Not Specified,2027-02-15,OUT,"Coach Mike LaFleur revealed Monday that Wilson is out for the season due to a fracture in his neck, Josh Weinfuss of ESPN.com reports.",WR
@@ -22,8 +24,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360739,Simi Fehoko,Arizona Cardinals,Active,2026-11-04T00:32Z,,,,,,"Fehoko is listed as a starting receiver on the Cardinals' unofficial depth chart heading into Sunday's game at Seattle, Bo Brack of GoPHNX.com reports.",WR
 3045147,James Conner,Arizona Cardinals,Injured Reserve,2026-11-04T00:31Z,Foot,Surgery,Right,2026-11-15,IR-R,"Cardinals head coach Mike LaFleur said Tuesday that Conner (foot) won't return from IR this week, Darren Urban of the team's official site reports.",RB
 4699354,Harrison Wallace III,Arizona Cardinals,Active,2026-11-03T22:48Z,,,,,,The Cardinals signed Wallace from the practice squad to the active roster Tuesday.,WR
-4870808,Jeremiyah Love,Arizona Cardinals,Injured Reserve,2026-11-03T21:13Z,Ankle,Sprain,Right,2026-12-06,IR,"Arizona placed Love (ankle) on injured reserve Tuesday, Darren Urban of the Cardinals' official site reports.",RB
-3045523,Kendrick Bourne,Arizona Cardinals,Injured Reserve,2026-11-03T21:12Z,Lower Leg,Fracture,Right,2027-02-15,IR,"Arizona placed Bourne (tibia) on injured reserve Tuesday, Darren Urban of the Cardinals' official site reports.",WR
 4870612,Zachariah Branch,Atlanta Falcons,Doubtful,2026-11-10T15:44Z,Hamstring,Not Specified,Not Specified,2026-11-15,DOUBTFUL,doubtful,WR
 5344782,Jack Strand,Atlanta Falcons,Active,2026-11-09T20:54Z,,,,,,,QB
 14012,Andy Dalton,Atlanta Falcons,Active,2026-11-09T20:54Z,,,,,,,QB
@@ -399,7 +399,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4610705,Nohl Williams,Kansas City Chiefs,Active,2026-10-28T01:56Z,,,,,,Williams finished Sunday's 20-3 loss to the Seahawks with 10 tackles (four solo) and one interception.,CB
 4362759,Nick Bolton,Kansas City Chiefs,Active,2026-10-28T01:51Z,,,,,,Bolton registered 11 tackles (six solo) during the Chiefs' 20-3 loss to the Seahawks on Sunday.,LB
 3129310,Drue Tranquill,Kansas City Chiefs,Active,2026-10-28T01:45Z,,,,,,Tranquill finished Sunday's 20-3 loss to the Seahawks with 12 tackles (four solo).,LB
-14880,Kirk Cousins,Las Vegas Raiders,Active,2026-11-10T19:02Z,,,,,,"The Vikings have identified Cousins as a ""prime trade candidate"" ahead of Tuesday's trade deadline, Adam Schefter of ESPN reports.",QB
 4360749,Thomas Booker IV,Las Vegas Raiders,Questionable,2026-11-10T15:44Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,DT
 4249087,Matt Gay,Las Vegas Raiders,Active,2026-11-10T02:59Z,,,,,,Gay converted his only field-goal attempt and both of his extra-point tries during Las Vegas' loss to the 49ers on Sunday.,PK
 4260394,Aidan O'Connell,Las Vegas Raiders,Active,2026-11-09T21:19Z,,,,,,,QB
@@ -424,6 +423,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4837248,Fernando Mendoza,Las Vegas Raiders,Active,2026-11-03T02:56Z,,,,,,Mendoza didn't play in Sunday's 38-33 win over the Jets.,QB
 4430896,JJ Pegues,Las Vegas Raiders,Active,2026-11-02T19:05Z,,,,,,,DT
 4250393,Tristin McCollum,Las Vegas Raiders,Active,2026-11-02T19:05Z,,,,,,,S
+4875295,Jackson Powers-Johnson,Las Vegas Raiders,Active,2026-11-01T16:40Z,,,,,,,G
 4038941,Justin Herbert,Los Angeles Chargers,Questionable,2026-11-10T16:00Z,Finger,Not Specified,Left,2026-11-16,QUESTIONABLE,"Chargers head coach Jim Harbaugh said that Herbert ""should be good to go"" for Monday's game at Baltimore after imaging on the quarterback's injured left middle finger returned negative for a fracture, ESPN.com reports.",QB
 4360745,Kendall Williamson,Los Angeles Chargers,Questionable,2026-11-10T15:44Z,Calf,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,questionable,S
 4685553,Brenen Thompson,Los Angeles Chargers,Questionable,2026-11-10T15:44Z,Quadriceps,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,questionable,WR
@@ -674,7 +674,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-10-25T12:26Z,,,,,,"Rudolph is active for Sunday's game against the Saints in Paris, Teresa Varley of the Steelers' official site reports.",QB
 3045282,T.J. Watt,Pittsburgh Steelers,Active,2026-10-23T15:41Z,,,,,,Watt (calf) practiced fully Friday and doesn't carry an injury designation into Sunday's game against the Saints.,LB
 3047495,Sebastian Joseph-Day,Pittsburgh Steelers,Injured Reserve,2026-10-23T00:28Z,Triceps,Not Specified,Not Specified,2026-11-27,IR,"Joseph-Day (triceps) was placed on injured reserve by the Steelers on Thursday, Teresa Varley of the team's official website reports.",DT
-4241464,Mac Jones,San Francisco 49ers,Active,2026-11-10T19:09Z,,,,,,"The 49ers fielded trade interest in Jones from the Vikings leading up to Tuesday's deadline, but the quarterback is expected to remain in San Francisco, Dianna Russini of BetUS TV reports.",QB
+4241464,Mac Jones,San Francisco 49ers,Active,2026-11-10T19:09Z,,,,,,"The 49ers fielded trade inquiries in Jones from the Vikings leading up to Tuesday's deadline, but the quarterback is expected to remain in San Francisco, Dianna Russini of BetUS TV reports.",QB
 16737,Mike Evans,San Francisco 49ers,Questionable,2026-11-10T16:28Z,Achilles,Tendinitis,Right,2026-11-15,QUESTIONABLE,questionable,WR
 3126486,Deebo Samuel Sr.,San Francisco 49ers,Questionable,2026-11-10T15:44Z,Hamstring,Not Specified,Right,2026-11-15,QUESTIONABLE,questionable,WR
 4685397,Jordan James,San Francisco 49ers,Active,2026-11-10T04:41Z,,,,,,James rushed three times for 11 yards and returned two kickoffs for 31 yards Sunday in a 38-17 victory versus Las Vegas.,RB
