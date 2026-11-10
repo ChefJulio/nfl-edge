@@ -499,6 +499,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4566094,Jacob Rodriguez,Miami Dolphins,Active,2026-11-05T17:29Z,,,,,,Rodriguez notched eight tackles (two solo) and forced a fumble in Sunday's 24-19 loss to the Patriots.,LB
 4043130,Jordyn Brooks,Miami Dolphins,Active,2026-11-05T17:25Z,,,,,,Brooks recorded 11 tackles (six solo) in Sunday's 24-19 loss to the Patriots.,LB
 4036660,Darrell Baker Jr.,Miami Dolphins,Out,2026-11-05T00:35Z,Undisclosed,Not Specified,Not Specified,2026-11-15,PUP-R,"Baker (undisclosed) is not ready to return to practice, David Furones of the South Florida Sun Sentinel reports.",CB
+16733,Odell Beckham Jr.,Minnesota Vikings,Active,2026-11-10T21:47Z,,,,,,"The Vikings released Beckham on Tuesday, Craig Peters of the team's official site reports.",WR
 3917315,Kyler Murray,Minnesota Vikings,Doubtful,2026-11-10T20:55Z,Hamstring,Strain,Not Specified,2026-11-15,DOUBTFUL,doubtful,QB
 3886598,Jauan Jennings,Minnesota Vikings,Questionable,2026-11-10T15:44Z,Calf,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,WR
 4602019,Caleb Banks,Minnesota Vikings,Active,2026-11-10T15:44Z,,,,,,,DT
@@ -514,7 +515,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 16772,Kyle Van Noy,Minnesota Vikings,Active,2026-11-10T01:48Z,,,,,,"Van Noy (calf) has returned to Monday night's matchup with Buffalo, Kevin Seifert of ESPN.com reports.",LB
 4832846,Demond Claiborne,Minnesota Vikings,Injured Reserve,2026-11-10T01:02Z,Knee,Not Specified,Not Specified,2026-12-06,IR,ir,RB
 4242436,Theo Jackson,Minnesota Vikings,Questionable,2026-11-09T23:54Z,,,,,,"Jackson (quadriceps) is active for Monday's game against Buffalo, Craig Peters of the team's official site reports.",S
-16733,Odell Beckham Jr.,Minnesota Vikings,Active,2026-11-09T23:49Z,,,,,,"Beckham is active for Monday's game against the Bills, Ben Goessling of The Minnesota Star Tribune reports.",WR
 4568007,Jay Ward,Minnesota Vikings,Active,2026-11-09T23:49Z,,,,,,,S
 3133487,Andrew Van Ginkel,Minnesota Vikings,Active,2026-11-07T23:02Z,,,,,,"Van Ginkel (chest) doesn't have a designation for Monday's matchup against the Bills, Craig Peters of the Vikings' official site reports.",LB
 4361985,Christian Darrisaw,Minnesota Vikings,Active,2026-11-07T04:22Z,,,,,,Darrisaw (shoulder) was a full practice participant Friday.,OT
@@ -574,8 +574,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4076951,Nathan Shepherd,New Orleans Saints,Active,2026-11-05T04:59Z,,,,,,Shepherd (illness) practiced in full Wednesday.,DT
 4239996,Travis Etienne Jr.,New Orleans Saints,Injured Reserve,2026-11-04T21:38Z,Hamstring,Strain,Left,2026-11-15,IR,"Head coach Kellen Moore said Wednesday that the Saints haven't opened Etienne's (hamstring) practice window just yet, Jeff Nowak of WWL Louisiana reports.",RB
 3918310,Carl Granderson,New Orleans Saints,Active,2026-10-28T04:47Z,,,,,,"Granderson totaled four tackles, including 1.5 sacks, in Sunday's Week 7 loss to Pittsburgh.",DE
-4433970,J.J. McCarthy,New York Giants,Active,2026-11-10T21:40Z,,,,,,,QB
-4696981,Cam Skattebo,New York Giants,Active,2026-11-10T21:39Z,,,,,,,RB
+4433970,J.J. McCarthy,New York Giants,Questionable,2026-11-10T21:39Z,,,,,,"McCarthy (hip) was listed as a full participant in Tuesday's practice, Dan Salomone of the Giants' official site reports.",QB
+4696981,Cam Skattebo,New York Giants,Out,2026-11-10T21:38Z,,,,,,"Skattebo (hamstring) was listed as a full participant in Tuesday's practice, Dan Salomone of the Giants' official site reports.",RB
 4682648,Malachi Fields,New York Giants,Active,2026-11-10T04:13Z,,,,,,Fields caught three of five targets for 40 yards in Sunday's 19-11 win over the Eagles.,WR
 4040655,Darnell Mooney,New York Giants,Questionable,2026-11-10T00:30Z,Chest,,,2026-11-12,QUESTIONABLE,"Mooney (chest) was estimated to be a limited participant at the Giants' walkthrough practice Monday, Dan Salomone of the team's official site reports.",WR
 4257188,Charlie Jones,New York Giants,Questionable,2026-11-10T00:09Z,Thumb,,,2026-11-12,QUESTIONABLE,questionable,WR
