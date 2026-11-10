@@ -27,7 +27,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4870612,Zachariah Branch,Atlanta Falcons,Doubtful,2026-11-10T15:44Z,Hamstring,Not Specified,Not Specified,2026-11-15,DOUBTFUL,doubtful,WR
 5344782,Jack Strand,Atlanta Falcons,Active,2026-11-09T20:54Z,,,,,,,QB
 14012,Andy Dalton,Atlanta Falcons,Active,2026-11-09T20:54Z,,,,,,,QB
-4569511,Drake Jackson,Atlanta Falcons,Active,2026-11-09T20:54Z,,,,,,,DE
 4575860,Robert Longerbeam,Atlanta Falcons,Active,2026-11-09T20:54Z,,,,,,,CB
 4431194,Billy Bowman Jr.,Atlanta Falcons,Active,2026-11-09T20:54Z,,,,,,,CB
 4360248,Kyle Pitts Sr.,Atlanta Falcons,Active,2026-11-08T20:01Z,,,,,,Pitts caught three of five targets for 23 yards in Sunday's 34-17 loss to the Bengals.,TE
@@ -49,6 +48,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4240849,Charles Snowden,Atlanta Falcons,Active,2026-11-01T16:35Z,,,,,,,LB
 5150660,Anterio Thompson,Atlanta Falcons,Out,2026-10-31T02:43Z,Undisclosed,Not Specified,Not Specified,2027-02-15,NFI-R,"Thompson posted on social media this week that he was diagnosed with a genetic mutation on his spinal cord in early May and indicated that he was told he will ""never play football again,"" Josh Kendall of The Athletic reports.",DT
 4239995,A.J. Terrell Jr.,Atlanta Falcons,Active,2026-10-30T21:26Z,,,,,,"Terrell (groin) does not carry an injury designation into Sunday's game against the Buccaneers, Will McFadden of the Falcons' official site reports.",CB
+4240596,C.J. Henderson,Atlanta Falcons,Active,2026-10-30T21:23Z,,,,,,"Henderson (groin) does not have an injury designation against the Buccaneers on Sunday, Will McFadden of the Falcons' official site reports.",CB
 4601278,Nate Wiggins,Baltimore Ravens,Questionable,2026-11-10T15:44Z,Illness,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,questionable,CB
 3858276,Jaylinn Hawkins,Baltimore Ravens,Questionable,2026-11-10T15:44Z,Knee,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,questionable,S
 4565311,Aeneas Peebles,Baltimore Ravens,Active,2026-11-09T20:55Z,,,,,,,DT
@@ -450,7 +450,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241263,Charlie Kolar,Los Angeles Chargers,Active,2026-11-03T03:18Z,,,,,,Kolar caught one of four targets for 20 yards in Sunday's 24-9 loss to the Rams.,TE
 4430968,Kimani Vidal,Los Angeles Chargers,Active,2026-11-03T01:50Z,,,,,,Vidal rushed eight times for 23 yards and caught both of his targets for seven yards in Sunday's 24-9 loss to the Rams.,RB
 4426515,Puka Nacua,Los Angeles Rams,Doubtful,2026-11-10T20:08Z,Knee - MCL,Sprain,Right,2026-11-15,DOUBTFUL,doubtful,WR
-4569382,Jordan Whittington,Los Angeles Rams,Questionable,2026-11-10T15:44Z,Back,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,WR
+4569382,Jordan Whittington,Los Angeles Rams,Questionable,2026-11-10T15:44Z,Back,Not Specified,Not Specified,2026-12-20,IR,questionable,WR
 4426405,Trent McDuffie,Los Angeles Rams,Questionable,2026-11-10T15:44Z,Back,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,CB
 2575907,Joe Cardona,Los Angeles Rams,Questionable,2026-11-10T15:44Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,LS
 4570037,Terrance Ferguson,Los Angeles Rams,Injured Reserve,2026-11-10T15:34Z,Hamstring,Strain,Not Specified,2026-11-25,IR-R,"Rams head coach Sean McVay acknowledged Monday during his appearance on the ""Coach McVay Show"" that he remains hopeful Ferguson (hamstring/ankle) will return from injured reserve this season, though he was unwilling to guarantee that the tight end will be activated by the time his 21-day evaluation ",TE
@@ -475,7 +475,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2573401,Tyler Higbee,Los Angeles Rams,Active,2026-11-04T03:07Z,,,,,,Higbee caught one of two targets for 14 yards against the Chargers in Sunday's 24-9 victory.,TE
 5082269,Dean Connors,Los Angeles Rams,Injured Reserve,2026-11-04T01:20Z,Hand,Surgery,Not Specified,2026-12-13,IR,"Connors (hand) was placed on IR on Tuesday, Blaine Grisak of SI.com reports.",RB
 4242512,Malik Willis,Miami Dolphins,Questionable,2026-11-10T20:58Z,Groin,Not Specified,Not Specified,2026-12-13,IR,"The Dolphins are expected to place Willis on injured reserve after an MRI on Monday revealed a core-muscle injury, Tom Pelissero of Netflix reports.",QB
-3057956,Zach Sieler,Miami Dolphins,Out,2026-11-10T16:27Z,Biceps,Surgery,Not Specified,2027-02-15,IR,"Sieler ruptured his biceps during Sunday's 19-9 loss to the Lions and will require season-ending surgery, Adam Schefter of ESPN reports.",DT
+3057956,Zach Sieler,Miami Dolphins,Injured Reserve,2026-11-10T16:27Z,Biceps,Surgery,Not Specified,2027-02-15,IR,"Sieler ruptured his biceps during Sunday's 19-9 loss to the Lions and will require season-ending surgery, Adam Schefter of ESPN reports.",DT
 4682745,Jaylen Wright,Miami Dolphins,Questionable,2026-11-10T15:44Z,Quadriceps,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,RB
 3043234,Zane Gonzalez,Miami Dolphins,Active,2026-11-10T04:42Z,,,,,,"Gonzalez reverted to the Dolphins' practice squad Monday, per the NFL's transaction log.",PK
 4685246,Kaytron Allen,Miami Dolphins,Active,2026-11-10T03:56Z,,,,,,Allen caught a 46-yard pass in Sunday's 19-9 loss to the Lions. He rushed one time for minus-1 yard.,RB
