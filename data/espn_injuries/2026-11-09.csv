@@ -1,6 +1,6 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
 4430841,Carson Beck,Arizona Cardinals,Active,2026-11-10T00:25Z,,,,,,"Beck is expected to start Sunday's contest against the Rams, Josh Weinfuss of ESPN.com reports.",QB
-4038524,Gardner Minshew II,Arizona Cardinals,Doubtful,2026-11-09T22:51Z,Elbow,Not Specified,Right,2026-11-15,DOUBTFUL,"Per Adam Schefter of ESPN,  Minshew (elbow) is reportedly seeking additional medical opinions to confirm that he likely will require season-ending surgery to address a torn UCL.",QB
+4038524,Gardner Minshew II,Arizona Cardinals,Doubtful,2026-11-09T22:51Z,Elbow,Not Specified,Right,2026-11-15,DOUBTFUL,"Per Adam Schefter of ESPN, Minshew (elbow) is reportedly seeking additional medical opinions to confirm that he likely will require season-ending surgery to address a torn UCL.",QB
 3886633,Hjalte Froholdt,Arizona Cardinals,Questionable,2026-11-09T22:07Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,questionable,C
 4360761,Michael Wilson,Arizona Cardinals,Out,2026-11-09T21:39Z,Neck,Fracture,Not Specified,2027-02-15,OUT,"Coach Mike LaFleur revealed Monday that Wilson is out for the season due to a fracture in his neck, Josh Weinfuss of ESPN.com reports.",WR
 4709718,Jayden Williams,Arizona Cardinals,Out,2026-11-09T20:45Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,OT
@@ -49,7 +49,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4870988,Avieon Terrell,Atlanta Falcons,Active,2026-11-01T17:02Z,,,,,,Terrell (back/illness) is active for Sunday's game against Tampa Bay.,CB
 4240849,Charles Snowden,Atlanta Falcons,Active,2026-11-01T16:35Z,,,,,,,LB
 5150660,Anterio Thompson,Atlanta Falcons,Out,2026-10-31T02:43Z,Undisclosed,Not Specified,Not Specified,2027-02-15,NFI-R,"Thompson posted on social media this week that he was diagnosed with a genetic mutation on his spinal cord in early May and indicated that he was told he will ""never play football again,"" Josh Kendall of The Athletic reports.",DT
-3858276,Jaylinn Hawkins,Baltimore Ravens,Out,2026-11-10T00:18Z,Knee,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,"Head coach Jesse Minter is ""optimistic"" Hawkins (knee) will return to practice this week, Jonas Shaffer of TheBaltimoreBanner.com reports.",S
+3858276,Jaylinn Hawkins,Baltimore Ravens,Out,2026-11-10T01:02Z,Knee,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,out,S
 4601278,Nate Wiggins,Baltimore Ravens,Out,2026-11-09T20:55Z,Illness,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,out,CB
 4565311,Aeneas Peebles,Baltimore Ravens,Active,2026-11-09T20:55Z,,,,,,,DT
 4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-11-09T20:55Z,,,,,,,OT
@@ -74,9 +74,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426372,Adisa Isaac,Baltimore Ravens,Questionable,2026-11-06T03:14Z,Hamstring,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,Isaac (hamstring) is questionable to return to Thursday night's contest against the Jaguars.,LB
 4035671,Tyler Huntley,Baltimore Ravens,Injured Reserve,2026-11-05T21:20Z,Toe,Sprain,Right,2027-02-15,IR,Huntley (toe) was placed on injured reserve Thursday.,QB
 4685526,Adam Randall,Baltimore Ravens,Injured Reserve,2026-11-05T01:10Z,Neck,Not Specified,Not Specified,2026-11-16,IR-R,"Randall (neck) is officially listed as questionable for Thursday's game versus the Jaguars, Ryan Mink of the Ravens' official site reports.",RB
-3127294,Greg Gaines,Buffalo Bills,Questionable,2026-11-10T00:31Z,Calf,Not Specified,Not Specified,2026-11-15,INACTIVE,Gaines (calf) is inactive for Monday's game versus Minnesota.,DT
-4367203,Alec Anderson,Buffalo Bills,Questionable,2026-11-10T00:27Z,Ankle,Not Specified,Not Specified,2026-11-15,INACTIVE,Anderson (ankle) is inactive for Monday's matchup against Minnesota.,OT
-3051324,Dion Dawkins,Buffalo Bills,Questionable,2026-11-10T00:24Z,Ribs,Not Specified,Not Specified,2026-11-15,INACTIVE,Dawkins (ribs) is inactive for Monday's game against the Vikings.,OT
+3051324,Dion Dawkins,Buffalo Bills,Out,2026-11-10T01:02Z,Ribs,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,OT
+3127294,Greg Gaines,Buffalo Bills,Out,2026-11-10T01:02Z,Calf,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,DT
+4367203,Alec Anderson,Buffalo Bills,Out,2026-11-10T01:02Z,Ankle,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,OT
 4241476,Tyrell Shavers,Buffalo Bills,Out,2026-11-10T00:13Z,Knee - ACL,Surgery,Not Specified,2026-11-15,PUP-R,"Shavers (knee) was not activated from the reserve/PUP list ahead of Monday night's matchup with Minnesota, per the NFL's official transaction log.",WR
 5076951,Jalon Kilgore,Buffalo Bills,Out,2026-11-09T23:51Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,S
 3915487,Mike Danna,Buffalo Bills,Out,2026-11-09T23:51Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,DE
@@ -499,7 +499,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4034729,Tucker Addington,Miami Dolphins,Active,2026-11-06T21:17Z,,,,,,,LS
 4566094,Jacob Rodriguez,Miami Dolphins,Active,2026-11-05T17:29Z,,,,,,Rodriguez notched eight tackles (two solo) and forced a fumble in Sunday's 24-19 loss to the Patriots.,LB
 4043130,Jordyn Brooks,Miami Dolphins,Active,2026-11-05T17:25Z,,,,,,Brooks recorded 11 tackles (six solo) in Sunday's 24-19 loss to the Patriots.,LB
-4832846,Demond Claiborne,Minnesota Vikings,Out,2026-11-10T00:10Z,Knee,Not Specified,Not Specified,2026-12-06,IR,The Vikings placed Claiborne (knee) on injured reserve Monday.,RB
+4832846,Demond Claiborne,Minnesota Vikings,Injured Reserve,2026-11-10T01:02Z,Knee,Not Specified,Not Specified,2026-12-06,IR,ir,RB
 4242436,Theo Jackson,Minnesota Vikings,Questionable,2026-11-09T23:54Z,,,,,,"Jackson (quadriceps) is active for Monday's game against Buffalo, Craig Peters of the team's official site reports.",S
 16733,Odell Beckham Jr.,Minnesota Vikings,Active,2026-11-09T23:49Z,,,,,,"Beckham is active for Monday's game against the Bills, Ben Goessling of The Minnesota Star Tribune reports.",WR
 4710865,Jakobe Thomas,Minnesota Vikings,Out,2026-11-09T23:49Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,S
@@ -699,7 +699,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116097,Luke Gifford,San Francisco 49ers,Active,2026-11-07T04:30Z,,,,,,Gifford (groin) does not have a designation for Sunday's Week 9 tilt against the Raiders.,LB
 4693337,Marques Sigle,San Francisco 49ers,Active,2026-11-07T02:29Z,,,,,,Sigle (ankle) does not carry an official injury designation ahead of Sunday's game versus the Raiders.,S
 4040605,Nick Bosa,San Francisco 49ers,Active,2026-11-07T02:25Z,,,,,,Bosa (knee) does not carry an official injury designation ahead of Sunday's game versus Las Vegas.,DE
-3912547,Sam Darnold,Seattle Seahawks,Out,2026-11-10T00:15Z,Quadriceps,Not Specified,Not Specified,2026-11-29,OUT,"Darnold (quadriceps), who won't play this coming Sunday at Las Vegas, is expected to return in Week 12 at San Francisco on Sunday, Nov. 29 after a Week 11 bye, Gregg Bell of Sports Radio 93.3 KJR Seattle reports.",QB
+3912547,Sam Darnold,Seattle Seahawks,Out,2026-11-10T01:02Z,Quadriceps,Not Specified,Not Specified,2026-11-29,OUT,out,QB
 2971622,Leonard Williams,Seattle Seahawks,Out,2026-11-09T21:35Z,Shoulder,Stinger,Not Specified,2026-11-15,QUESTIONABLE,out,DT
 4259651,Brandon Pili,Seattle Seahawks,Out,2026-11-09T21:35Z,Back,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,DT
 4032473,Rashid Shaheed,Seattle Seahawks,Out,2026-11-09T21:35Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,WR
@@ -774,8 +774,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3120464,John Franklin-Myers,Tennessee Titans,Active,2026-11-01T16:44Z,,,,,,"Franklin-Myers (groin) is active for Sunday's game against the Bengals, Jim Wyatt of the Titans' official site reports.",DE
 12701,Thomas Morstead,Tennessee Titans,Active,2026-11-01T02:11Z,,,,,,"The Titans elevated Morstead from the practice squad to the active roster Saturday, Jim Wyatt of the team's official site reports.",P
 4373956,Jonah Laulu,Tennessee Titans,Active,2026-10-29T00:34Z,,,,,,"The Titans claimed Laulu off waivers from the Raiders on Wednesday, Jim Wyatt of the Titans' official site reports.",DT
+4567156,Treylon Burks,Washington Commanders,Out,2026-11-10T01:02Z,Foot,Not Specified,Not Specified,2026-11-12,QUESTIONABLE,out,WR
 4360635,Chig Okonkwo,Washington Commanders,Questionable,2026-11-10T00:36Z,Hip,,,2026-11-12,QUESTIONABLE,"Okonkwo was deemed a limited participant on Washington's estimated practice report Monday due to a hip injury, John Keim of ESPN.com reports.",TE
-4567156,Treylon Burks,Washington Commanders,Out,2026-11-10T00:22Z,Foot,Not Specified,Not Specified,2026-11-12,QUESTIONABLE,"Burks (foot) was deemed a non-participant on the Commanders' practice report Monday, John Keim of ESPN.com reports.",WR
 3886601,Shy Tuttle,Washington Commanders,Questionable,2026-11-09T22:44Z,Shoulder,,,2026-11-12,QUESTIONABLE,questionable,DT
 4361088,Colson Yankoff,Washington Commanders,Questionable,2026-11-09T22:43Z,Knee,,,2026-11-12,QUESTIONABLE,questionable,TE
 3122797,Isaac Yiadom,Washington Commanders,Active,2026-11-09T21:36Z,,,,,,,CB
