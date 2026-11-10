@@ -226,7 +226,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685554,Drew Shelton,Dallas Cowboys,Active,2026-11-05T04:53Z,,,,,,"Shelton (hamstring) was a full participant in Wednesday's practice, Patrik Walker of the Cowboys' official site reports.",OT
 4241597,Daiyan Henley,Denver Broncos,Active,2026-11-10T20:31Z,,,,,,"The Broncos acquired Henley from the Chargers on Tuesday in exchange for a 2027 fourth-round pick and a 2028 fifth-round pick, Adam Schefter of ESPN reports.",LB
 3051876,Evan Engram,Denver Broncos,Active,2026-11-10T03:26Z,,,,,,Engram caught four of five targets for 33 yards in Sunday's 26-21 win over the Panthers.,TE
-2985659,Wil Lutz,Denver Broncos,Active,2026-11-10T02:43Z,,,,,,Lutz went two-for-two on both his field-goal attempts and extra-point tries during Denver's win over Carolina on Sunday.,PK
+2985659,Wil Lutz,Denver Broncos,Active,2026-11-10T02:43Z,,,,,,Lutz went 2-for-2 on both his field-goal attempts and extra-point tries during Denver's win over Carolina on Sunday.,PK
 4039059,Brandon Jones,Denver Broncos,Out,2026-11-09T21:04Z,Hamstring,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,out,S
 4360853,Talanoa Hufanga,Denver Broncos,Out,2026-11-09T21:04Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,out,S
 4039057,Lil'Jordan Humphrey,Denver Broncos,Active,2026-11-09T21:04Z,,,,,,,WR
@@ -449,8 +449,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430870,KeAndre Lambert-Smith,Los Angeles Chargers,Active,2026-11-04T03:16Z,,,,,,Lambert-Smith did not garner a target during Sunday's 24-9 loss to the Rams.,WR
 4241263,Charlie Kolar,Los Angeles Chargers,Active,2026-11-03T03:18Z,,,,,,Kolar caught one of four targets for 20 yards in Sunday's 24-9 loss to the Rams.,TE
 4430968,Kimani Vidal,Los Angeles Chargers,Active,2026-11-03T01:50Z,,,,,,Vidal rushed eight times for 23 yards and caught both of his targets for seven yards in Sunday's 24-9 loss to the Rams.,RB
+4569382,Jordan Whittington,Los Angeles Rams,Injured Reserve,2026-11-10T21:29Z,Back,Not Specified,Not Specified,2026-12-20,IR,ir,WR
 4426515,Puka Nacua,Los Angeles Rams,Doubtful,2026-11-10T20:08Z,Knee - MCL,Sprain,Right,2026-11-15,DOUBTFUL,doubtful,WR
-4569382,Jordan Whittington,Los Angeles Rams,Questionable,2026-11-10T15:44Z,Back,Not Specified,Not Specified,2026-12-20,IR,questionable,WR
 4426405,Trent McDuffie,Los Angeles Rams,Questionable,2026-11-10T15:44Z,Back,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,CB
 2575907,Joe Cardona,Los Angeles Rams,Questionable,2026-11-10T15:44Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,LS
 4570037,Terrance Ferguson,Los Angeles Rams,Injured Reserve,2026-11-10T15:34Z,Hamstring,Strain,Not Specified,2026-11-25,IR-R,"Rams head coach Sean McVay acknowledged Monday during his appearance on the ""Coach McVay Show"" that he remains hopeful Ferguson (hamstring/ankle) will return from injured reserve this season, though he was unwilling to guarantee that the tight end will be activated by the time his 21-day evaluation ",TE
@@ -474,7 +474,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4566192,Joshua Karty,Los Angeles Rams,Active,2026-11-05T17:48Z,,,,,,The Rams signed Karty to their active roster Thursday.,PK
 2573401,Tyler Higbee,Los Angeles Rams,Active,2026-11-04T03:07Z,,,,,,Higbee caught one of two targets for 14 yards against the Chargers in Sunday's 24-9 victory.,TE
 5082269,Dean Connors,Los Angeles Rams,Injured Reserve,2026-11-04T01:20Z,Hand,Surgery,Not Specified,2026-12-13,IR,"Connors (hand) was placed on IR on Tuesday, Blaine Grisak of SI.com reports.",RB
-4242512,Malik Willis,Miami Dolphins,Questionable,2026-11-10T20:58Z,Groin,Not Specified,Not Specified,2026-12-13,IR,"The Dolphins are expected to place Willis on injured reserve after an MRI on Monday revealed a core-muscle injury, Tom Pelissero of Netflix reports.",QB
+4242512,Malik Willis,Miami Dolphins,Injured Reserve,2026-11-10T21:39Z,Groin,Not Specified,Not Specified,2026-12-13,IR,ir,QB
 3057956,Zach Sieler,Miami Dolphins,Injured Reserve,2026-11-10T16:27Z,Biceps,Surgery,Not Specified,2027-02-15,IR,"Sieler ruptured his biceps during Sunday's 19-9 loss to the Lions and will require season-ending surgery, Adam Schefter of ESPN reports.",DT
 4682745,Jaylen Wright,Miami Dolphins,Questionable,2026-11-10T15:44Z,Quadriceps,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,RB
 3043234,Zane Gonzalez,Miami Dolphins,Active,2026-11-10T04:42Z,,,,,,"Gonzalez reverted to the Dolphins' practice squad Monday, per the NFL's transaction log.",PK
@@ -574,8 +574,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4076951,Nathan Shepherd,New Orleans Saints,Active,2026-11-05T04:59Z,,,,,,Shepherd (illness) practiced in full Wednesday.,DT
 4239996,Travis Etienne Jr.,New Orleans Saints,Injured Reserve,2026-11-04T21:38Z,Hamstring,Strain,Left,2026-11-15,IR,"Head coach Kellen Moore said Wednesday that the Saints haven't opened Etienne's (hamstring) practice window just yet, Jeff Nowak of WWL Louisiana reports.",RB
 3918310,Carl Granderson,New Orleans Saints,Active,2026-10-28T04:47Z,,,,,,"Granderson totaled four tackles, including 1.5 sacks, in Sunday's Week 7 loss to Pittsburgh.",DE
-4696981,Cam Skattebo,New York Giants,Questionable,2026-11-10T19:02Z,Hamstring,Not Specified,Not Specified,2026-11-12,QUESTIONABLE,questionable,RB
-4433970,J.J. McCarthy,New York Giants,Questionable,2026-11-10T18:38Z,Hip,Bruise,Not Specified,2026-11-12,QUESTIONABLE,"McCarthy (hip) was spotted on the field for the media-access portion of Tuesday's practice, Art Stapleton of The Bergen Record reports.",QB
+4433970,J.J. McCarthy,New York Giants,Active,2026-11-10T21:40Z,,,,,,,QB
+4696981,Cam Skattebo,New York Giants,Active,2026-11-10T21:39Z,,,,,,,RB
 4682648,Malachi Fields,New York Giants,Active,2026-11-10T04:13Z,,,,,,Fields caught three of five targets for 40 yards in Sunday's 19-11 win over the Eagles.,WR
 4040655,Darnell Mooney,New York Giants,Questionable,2026-11-10T00:30Z,Chest,,,2026-11-12,QUESTIONABLE,"Mooney (chest) was estimated to be a limited participant at the Giants' walkthrough practice Monday, Dan Salomone of the team's official site reports.",WR
 4257188,Charlie Jones,New York Giants,Questionable,2026-11-10T00:09Z,Thumb,,,2026-11-12,QUESTIONABLE,questionable,WR
