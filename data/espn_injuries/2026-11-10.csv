@@ -224,6 +224,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4568652,Tyler Smith,Dallas Cowboys,Active,2026-11-07T03:12Z,,,,,,"Smith (ankle) does not have any injury designation ahead of Sunday's game against the Colts, Tommy Yarrish of the Cowboys' official site reports.",G
 4870706,Caleb Downs,Dallas Cowboys,Active,2026-11-07T00:35Z,,,,,,"Downs (concussion) has no injury designation ahead of Sunday's game against the Colts, Tommy Yarrish of the Cowboys' official site reports.",S
 4685554,Drew Shelton,Dallas Cowboys,Active,2026-11-05T04:53Z,,,,,,"Shelton (hamstring) was a full participant in Wednesday's practice, Patrik Walker of the Cowboys' official site reports.",OT
+4241597,Daiyan Henley,Denver Broncos,Active,2026-11-10T20:31Z,,,,,,"The Broncos acquired Henley from the Chargers on Tuesday in exchange for a 2027 fourth-round pick and a 2028 fifth-round pick, Adam Schefter of ESPN reports.",LB
 3051876,Evan Engram,Denver Broncos,Active,2026-11-10T03:26Z,,,,,,Engram caught four of five targets for 33 yards in Sunday's 26-21 win over the Panthers.,TE
 2985659,Wil Lutz,Denver Broncos,Active,2026-11-10T02:43Z,,,,,,Lutz went two-for-two on both his field-goal attempts and extra-point tries during Denver's win over Carolina on Sunday.,PK
 4039059,Brandon Jones,Denver Broncos,Out,2026-11-09T21:04Z,Hamstring,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,out,S
@@ -248,7 +249,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4683535,Tyler Onyedim,Denver Broncos,Active,2026-11-02T18:50Z,,,,,,,DT
 4383440,Nate Adkins,Denver Broncos,Active,2026-11-02T05:15Z,,,,,,Adkins caught both of his targets for four yards and a touchdown in Sunday's 28-24 win over the Chiefs.,TE
 3915282,Zach Allen,Denver Broncos,Active,2026-11-01T20:27Z,,,,,,"Allen (hamstring) is active for Sunday's game against the Chiefs, Aric DiLalla of the Broncos' official site reports.",DE
-4035662,Garett Bolles,Denver Broncos,Active,2026-11-01T20:01Z,,,,,,,OT
 4430027,Sam LaPorta,Detroit Lions,Active,2026-11-10T16:05Z,,,,,,"The Lions have received trade calls on LaPorta leading up to Tuesday's deadline, but the team prefers to keep him with the hope of signing the tight end to a long-term deal, Jeremy Fowler of ESPN.com reports.",TE
 4038849,DJ Wonnum,Detroit Lions,Questionable,2026-11-10T15:44Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,questionable,LB
 3139387,D.J. Reed,Detroit Lions,Questionable,2026-11-10T15:44Z,Hip,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,CB
@@ -324,6 +324,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116679,M.J. Stewart,Houston Texans,Active,2026-10-28T03:59Z,,,,,,"Stewart finished with 12 tackles (five solo), including 0.5 sacks, and a defensed pass in Sunday's overtime loss to the Giants.",S
 3843945,Foster Moreau,Houston Texans,Active,2026-10-27T02:01Z,,,,,,Moreau played 21 offensive snaps and nine special-teams snaps in the Texans' 27-21 overtime loss to the Giants on Sunday.,TE
 2983509,Dare Ogunbowale,Houston Texans,Active,2026-10-27T01:55Z,,,,,,Ogunbowale didn't record an offensive touch or target in Sunday's 24-21 overtime loss to the Giants.,RB
+4242335,Jonathan Taylor,Indianapolis Colts,Active,2026-11-10T20:21Z,,,,,,"The Colts informed Taylor that he won't be traded before Tuesday's deadline, Tom Pelissero of Netflix reports.",RB
 4892240,Jalen Travis,Indianapolis Colts,Doubtful,2026-11-10T19:02Z,Knee,Not Specified,Not Specified,2026-11-29,DOUBTFUL,doubtful,OT
 4682909,Justin Walley,Indianapolis Colts,Questionable,2026-11-10T15:44Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,CB
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Questionable,2026-11-10T15:44Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,LB
@@ -339,7 +340,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686468,Seth McGowan,Indianapolis Colts,Active,2026-11-09T01:04Z,,,,,,McGowan rushed six times for 45 yards and a touchdown and brought in his only target for minus-3 yards in the Colts' 27-23 loss to the Cowboys on Sunday.,RB
 3917792,Daniel Jones,Indianapolis Colts,Active,2026-11-09T01:00Z,,,,,,"Jones will remain with the Colts through Tuesday's trade deadline after the team informed him Saturday that he won't be moved, Tom Pelissero of The Ringer reports.",QB
 4431459,Tyler Warren,Indianapolis Colts,Active,2026-11-09T00:26Z,,,,,,Warren brought in four of seven targets for 44 yards in the Colts' 27-23 loss to the Cowboys on Sunday.,TE
-4242335,Jonathan Taylor,Indianapolis Colts,Active,2026-11-08T22:58Z,,,,,,Taylor rushed 13 times for 46 yards and brought in all five targets for 18 yards in the Colts' 27-23 loss to the Cowboys on Sunday. He also lost a fumble.,RB
 2998565,Mo Alie-Cox,Indianapolis Colts,Questionable,2026-11-08T21:11Z,Groin,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Alie-Cox is questionable to return to Sunday's game against Dallas due to a groin injury.,TE
 4601021,Jaylon Carlies,Indianapolis Colts,Questionable,2026-11-08T20:07Z,Neck,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Carlies (neck) has been ruled out for the remainder of Sunday's game against Dallas.,LB
 4429684,Anthony Gould,Indianapolis Colts,Active,2026-11-07T00:43Z,,,,,,Gould (concussion) does not have a designation for Sunday's matchup versus Dallas.,WR
