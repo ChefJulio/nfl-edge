@@ -99,6 +99,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4596480,Jordan Hancock,Buffalo Bills,Injured Reserve,2026-11-05T03:59Z,Hamstring,Not Specified,Not Specified,2026-11-15,IR-R,"Hancock (hamstring) was designated to return from injured reserve by the Bills on Wednesday, Sal Capaccio of WGR Sports Radio 550 Buffalo reports.",CB
 3930086,Dawson Knox,Buffalo Bills,Active,2026-11-03T03:28Z,,,,,,Knox caught one of two targets for six yards in Sunday's 36-10 win over the Ravens.,TE
 3917232,Tyler Bass,Buffalo Bills,Active,2026-11-03T01:37Z,,,,,,Bass made all three of his field-goal attempts as well as three PATs in the Bills' 36-10 win over the Ravens on Sunday.,PK
+4240573,Ihmir Smith-Marsette,Carolina Panthers,Out,2026-11-10T20:18Z,Undisclosed,Not Specified,Not Specified,2026-12-13,OUT,out,WR
 4242975,Jaelan Phillips,Carolina Panthers,Questionable,2026-11-10T15:44Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,LB
 5151083,Will Lee III,Carolina Panthers,Questionable,2026-11-10T15:44Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,CB
 4362647,Damien Lewis,Carolina Panthers,Questionable,2026-11-10T15:44Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,G
@@ -123,7 +124,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4256062,Brady Christensen,Carolina Panthers,Injured Reserve,2026-11-08T03:32Z,Hamstring,Not Specified,Not Specified,2026-11-15,IR-R,"Christensen (hamstring), who is on IR, has been ruled out for Sunday's battle against the Broncos, Darin Gantt of the Panthers' official site reports.",G
 4240595,Marco Wilson,Carolina Panthers,Active,2026-11-08T00:38Z,,,,,,"The Panthers elevated Wilson from their practice squad to their active roster Saturday, Darin Gantt of the team's official site reports.",CB
 4372518,Bobby Brown III,Carolina Panthers,Active,2026-11-05T04:57Z,,,,,,Brown (hand) practiced fully Wednesday.,DT
-4566384,Zakee Wheatley,Carolina Panthers,Active,2026-11-04T03:49Z,,,,,,Wheatley recorded seven total tackles (four solo) and an interception during Thursday night's 27-19 loss to the Packers.,S
 17427,Cairo Santos,Chicago Bears,Active,2026-11-10T02:46Z,,,,,,Santos made both of his two field-goal attempts and converted all three of his extra-point tries during Sunday's 27-24 win versus the Buccaneers.,PK
 4608686,Kyle Monangai,Chicago Bears,Out,2026-11-09T20:59Z,Toe,Sprain,Not Specified,2026-11-22,QUESTIONABLE,out,RB
 4870953,Malik Muhammad II,Chicago Bears,Out,2026-11-09T20:59Z,Toe,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,out,CB
@@ -445,10 +445,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3123076,David Njoku,Los Angeles Chargers,Injured Reserve,2026-11-08T19:01Z,Lower Leg,Not Specified,Not Specified,2026-11-16,IR-R,"Njoku (fibula) wasn't activated from IR-designated to return ahead of Sunday's game against the Texans, per the NFL's official transaction log.",TE
 4838693,Rodney Shelley,Los Angeles Chargers,Active,2026-11-07T03:47Z,,,,,,Shelley (ankle) has no designation for Sunday's tilt against the Texans.,CB
 3843769,Donte Jackson,Los Angeles Chargers,Active,2026-11-07T01:23Z,,,,,,Jackson (hamstring) does not have a designation for Sunday's tilt against the Texans.,CB
-4241597,Daiyan Henley,Los Angeles Chargers,Active,2026-11-05T23:47Z,,,,,,"Henley (shoulder) was a full participant in Thursday's practice, Adam Caplan of SiriusXM NFL Radio reports.",LB
 2576702,Bud Dupree,Los Angeles Chargers,Active,2026-11-05T23:10Z,,,,,,,LB
 4430870,KeAndre Lambert-Smith,Los Angeles Chargers,Active,2026-11-04T03:16Z,,,,,,Lambert-Smith did not garner a target during Sunday's 24-9 loss to the Rams.,WR
 4241263,Charlie Kolar,Los Angeles Chargers,Active,2026-11-03T03:18Z,,,,,,Kolar caught one of four targets for 20 yards in Sunday's 24-9 loss to the Rams.,TE
+4430968,Kimani Vidal,Los Angeles Chargers,Active,2026-11-03T01:50Z,,,,,,Vidal rushed eight times for 23 yards and caught both of his targets for seven yards in Sunday's 24-9 loss to the Rams.,RB
 4426515,Puka Nacua,Los Angeles Rams,Doubtful,2026-11-10T20:08Z,Knee - MCL,Sprain,Right,2026-11-15,DOUBTFUL,doubtful,WR
 4569382,Jordan Whittington,Los Angeles Rams,Questionable,2026-11-10T15:44Z,Back,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,WR
 4426405,Trent McDuffie,Los Angeles Rams,Questionable,2026-11-10T15:44Z,Back,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,CB
