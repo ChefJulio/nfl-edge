@@ -324,6 +324,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116679,M.J. Stewart,Houston Texans,Active,2026-10-28T03:59Z,,,,,,"Stewart finished with 12 tackles (five solo), including 0.5 sacks, and a defensed pass in Sunday's overtime loss to the Giants.",S
 3843945,Foster Moreau,Houston Texans,Active,2026-10-27T02:01Z,,,,,,Moreau played 21 offensive snaps and nine special-teams snaps in the Texans' 27-21 overtime loss to the Giants on Sunday.,TE
 2983509,Dare Ogunbowale,Houston Texans,Active,2026-10-27T01:55Z,,,,,,Ogunbowale didn't record an offensive touch or target in Sunday's 24-21 overtime loss to the Giants.,RB
+3929785,Nick Westbrook-Ikhine,Indianapolis Colts,Active,2026-11-10T20:38Z,,,,,,The Colts signed Westbrook-Ikhine off their practice squad Tuesday.,WR
 4242335,Jonathan Taylor,Indianapolis Colts,Active,2026-11-10T20:21Z,,,,,,"The Colts informed Taylor that he won't be traded before Tuesday's deadline, Tom Pelissero of Netflix reports.",RB
 4892240,Jalen Travis,Indianapolis Colts,Doubtful,2026-11-10T19:02Z,Knee,Not Specified,Not Specified,2026-11-29,DOUBTFUL,doubtful,OT
 4682909,Justin Walley,Indianapolis Colts,Questionable,2026-11-10T15:44Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,CB
@@ -335,7 +336,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2971281,Pharaoh Brown,Indianapolis Colts,Active,2026-11-09T21:15Z,,,,,,,TE
 4362523,Will Mallory,Indianapolis Colts,Active,2026-11-09T21:15Z,,,,,,,TE
 4571557,Spencer Shrader,Indianapolis Colts,Active,2026-11-09T04:19Z,,,,,,Shrader went 3-for-3 on field-goal tries and made both of his PATs during Sunday's 27-23 loss to the Cowboys.,PK
-4688813,Josh Downs,Indianapolis Colts,Active,2026-11-09T02:53Z,,,,,,Downs caught three of six targets for 24 yards in Sunday's 27-23 loss to the Cowboys.,WR
 4061956,Ashton Dulin,Indianapolis Colts,Active,2026-11-09T01:46Z,,,,,,Dulin caught one of two targets for a 55-yard touchdown in Sunday's 27-23 loss to the Cowboys. He added three rushing yards on one attempt.,WR
 4686468,Seth McGowan,Indianapolis Colts,Active,2026-11-09T01:04Z,,,,,,McGowan rushed six times for 45 yards and a touchdown and brought in his only target for minus-3 yards in the Colts' 27-23 loss to the Cowboys on Sunday.,RB
 3917792,Daniel Jones,Indianapolis Colts,Active,2026-11-09T01:00Z,,,,,,"Jones will remain with the Colts through Tuesday's trade deadline after the team informed him Saturday that he won't be moved, Tom Pelissero of The Ringer reports.",QB
@@ -474,6 +474,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4566192,Joshua Karty,Los Angeles Rams,Active,2026-11-05T17:48Z,,,,,,The Rams signed Karty to their active roster Thursday.,PK
 2573401,Tyler Higbee,Los Angeles Rams,Active,2026-11-04T03:07Z,,,,,,Higbee caught one of two targets for 14 yards against the Chargers in Sunday's 24-9 victory.,TE
 5082269,Dean Connors,Los Angeles Rams,Injured Reserve,2026-11-04T01:20Z,Hand,Surgery,Not Specified,2026-12-13,IR,"Connors (hand) was placed on IR on Tuesday, Blaine Grisak of SI.com reports.",RB
+4242512,Malik Willis,Miami Dolphins,Doubtful,2026-11-10T20:55Z,Groin,Not Specified,Not Specified,2026-11-15,DOUBTFUL,doubtful,QB
 3057956,Zach Sieler,Miami Dolphins,Out,2026-11-10T16:27Z,Biceps,Surgery,Not Specified,2027-02-15,OUT,"Sieler ruptured his biceps during Sunday's 19-9 loss to the Lions and will require season-ending surgery, Adam Schefter of ESPN reports.",DT
 4682745,Jaylen Wright,Miami Dolphins,Questionable,2026-11-10T15:44Z,Quadriceps,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,RB
 3043234,Zane Gonzalez,Miami Dolphins,Active,2026-11-10T04:42Z,,,,,,"Gonzalez reverted to the Dolphins' practice squad Monday, per the NFL's transaction log.",PK
@@ -487,7 +488,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4367209,Greg Dulcich,Miami Dolphins,Active,2026-11-09T03:40Z,,,,,,Dulcich caught two of four targets for 14 yards in Sunday's 19-9 loss to the Lions.,TE
 4569603,Malik Washington,Miami Dolphins,Active,2026-11-09T03:29Z,,,,,,Washington caught two of three targets for 21 yards during Sunday's 19-9 loss to the Lions.,WR
 4869645,Caleb Douglas,Miami Dolphins,Active,2026-11-09T00:49Z,,,,,,Douglas secured six of eight targets for 70 yards in the Dolphins' 19-9 loss to the Lions on Sunday.,WR
-4242512,Malik Willis,Miami Dolphins,Questionable,2026-11-08T23:46Z,Groin,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Willis completed 13 of 25 passes for 128 yards with no touchdowns and one interception and added two rushes for seven yards in the Dolphins' 19-9 loss to the Lions on Sunday.,QB
 4711533,Ollie Gordon II,Miami Dolphins,Active,2026-11-08T23:11Z,,,,,,Gordon rushed 16 times for 55 yards and brought in his only target for nine yards in the Dolphins' 19-9 loss to the Lions on Sunday.,RB
 4880236,Will Kacmarek,Miami Dolphins,Questionable,2026-11-08T20:00Z,Quadriceps,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Kacmarek is dealing with a quad injury and is questionable to return to Sunday's clash against Detroit.,TE
 4259547,Malik Herring,Miami Dolphins,Active,2026-11-08T17:39Z,,,,,,Herring (neck) is active for Sunday's game against the Lions.,DE
@@ -499,7 +499,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4566094,Jacob Rodriguez,Miami Dolphins,Active,2026-11-05T17:29Z,,,,,,Rodriguez notched eight tackles (two solo) and forced a fumble in Sunday's 24-19 loss to the Patriots.,LB
 4043130,Jordyn Brooks,Miami Dolphins,Active,2026-11-05T17:25Z,,,,,,Brooks recorded 11 tackles (six solo) in Sunday's 24-19 loss to the Patriots.,LB
 4036660,Darrell Baker Jr.,Miami Dolphins,Out,2026-11-05T00:35Z,Undisclosed,Not Specified,Not Specified,2026-11-15,PUP-R,"Baker (undisclosed) is not ready to return to practice, David Furones of the South Florida Sun Sentinel reports.",CB
-3917315,Kyler Murray,Minnesota Vikings,Out,2026-11-10T20:13Z,Hamstring,Strain,Not Specified,2026-11-15,DOUBTFUL,"Murray is considered week-to-week due to a Grade 2 hamstring strain and isn't expected to be available for Sunday's game against the Packers, James Palmer of Bleacher Report reports.",QB
+3917315,Kyler Murray,Minnesota Vikings,Doubtful,2026-11-10T20:55Z,Hamstring,Strain,Not Specified,2026-11-15,DOUBTFUL,doubtful,QB
 3886598,Jauan Jennings,Minnesota Vikings,Questionable,2026-11-10T15:44Z,Calf,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,WR
 4602019,Caleb Banks,Minnesota Vikings,Active,2026-11-10T15:44Z,,,,,,,DT
 5091793,Charles Demmings,Minnesota Vikings,Active,2026-11-10T15:44Z,,,,,,,CB
@@ -747,8 +747,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4890373,Bauer Sharp,Tampa Bay Buccaneers,Active,2026-11-04T19:17Z,,,,,,Sharp went without a target while playing 19 of the Buccaneers' 60 snaps on offense in Sunday's 16-0 win over the Falcons.,TE
 4608810,Tez Johnson,Tampa Bay Buccaneers,Active,2026-11-04T03:07Z,,,,,,Johnson did not garner a target during Sunday's 16-0 win over the Falcons.,WR
 5220680,Ted Hurst III,Tampa Bay Buccaneers,Active,2026-11-03T03:22Z,,,,,,Hurst failed to catch his lone target in Sunday's 16-0 win over the Falcons.,WR
+4686884,Luke Haggard,Tampa Bay Buccaneers,Active,2026-11-02T19:22Z,,,,,,,G
 4380507,Luke Goedeke,Tampa Bay Buccaneers,Active,2026-11-01T17:30Z,,,,,,"Goedeke (calf) is active for Sunday's game against the Falcons, Scott Smith of the Buccaneers' official site reports.",OT
-4429251,Graham Barton,Tampa Bay Buccaneers,Active,2026-11-01T17:29Z,,,,,,"Barton (illness) is active for Sunday's game against the Falcons, Scott Smith of the Buccaneers' official site reports.",C
 4431613,James Williams Sr.,Tennessee Titans,Injured Reserve,2026-11-10T15:44Z,Groin,Not Specified,Not Specified,2026-12-13,IR,ir,LB
 4428557,Tyjae Spears,Tennessee Titans,Questionable,2026-11-10T15:44Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,RB
 4871023,Carnell Tate,Tennessee Titans,Questionable,2026-11-10T15:44Z,Shoulder,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,WR
