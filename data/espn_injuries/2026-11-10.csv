@@ -474,7 +474,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4566192,Joshua Karty,Los Angeles Rams,Active,2026-11-05T17:48Z,,,,,,The Rams signed Karty to their active roster Thursday.,PK
 2573401,Tyler Higbee,Los Angeles Rams,Active,2026-11-04T03:07Z,,,,,,Higbee caught one of two targets for 14 yards against the Chargers in Sunday's 24-9 victory.,TE
 5082269,Dean Connors,Los Angeles Rams,Injured Reserve,2026-11-04T01:20Z,Hand,Surgery,Not Specified,2026-12-13,IR,"Connors (hand) was placed on IR on Tuesday, Blaine Grisak of SI.com reports.",RB
-3057956,Zach Sieler,Miami Dolphins,Out,2026-11-10T16:09Z,Biceps,,,2027-02-15,OUT,out,DT
 4682745,Jaylen Wright,Miami Dolphins,Questionable,2026-11-10T15:44Z,Quadriceps,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,RB
 3043234,Zane Gonzalez,Miami Dolphins,Active,2026-11-10T04:42Z,,,,,,"Gonzalez reverted to the Dolphins' practice squad Monday, per the NFL's transaction log.",PK
 4685246,Kaytron Allen,Miami Dolphins,Active,2026-11-10T03:56Z,,,,,,Allen caught a 46-yard pass in Sunday's 19-9 loss to the Lions. He rushed one time for minus-one yards.,RB
@@ -493,6 +492,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4259547,Malik Herring,Miami Dolphins,Active,2026-11-08T17:39Z,,,,,,Herring (neck) is active for Sunday's game against the Lions.,DE
 4870976,Kadyn Proctor,Miami Dolphins,Active,2026-11-07T03:30Z,,,,,,"Proctor (concussion) does not have a designation for Sunday's Week 9 matchup versus Detroit, David Furones of the South Florida Sun Sentinel reports.",OT
 4431586,Chop Robinson,Miami Dolphins,Active,2026-11-06T21:19Z,,,,,,,LB
+3057956,Zach Sieler,Miami Dolphins,Active,2026-11-06T21:19Z,Biceps,,,2027-02-15,OUT,,DT
 4880346,Michael Taaffe,Miami Dolphins,Active,2026-11-06T21:19Z,,,,,,,S
 4431664,Dante Trader Jr.,Miami Dolphins,Active,2026-11-06T21:19Z,,,,,,,S
 4034729,Tucker Addington,Miami Dolphins,Active,2026-11-06T21:17Z,,,,,,,LS
