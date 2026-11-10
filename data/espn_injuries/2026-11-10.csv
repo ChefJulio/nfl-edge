@@ -499,6 +499,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4566094,Jacob Rodriguez,Miami Dolphins,Active,2026-11-05T17:29Z,,,,,,Rodriguez notched eight tackles (two solo) and forced a fumble in Sunday's 24-19 loss to the Patriots.,LB
 4043130,Jordyn Brooks,Miami Dolphins,Active,2026-11-05T17:25Z,,,,,,Brooks recorded 11 tackles (six solo) in Sunday's 24-19 loss to the Patriots.,LB
 4036660,Darrell Baker Jr.,Miami Dolphins,Out,2026-11-05T00:35Z,Undisclosed,Not Specified,Not Specified,2026-11-15,PUP-R,"Baker (undisclosed) is not ready to return to practice, David Furones of the South Florida Sun Sentinel reports.",CB
+4429205,Jordan Addison,Minnesota Vikings,Active,2026-11-10T06:10Z,,,,,,Addison secured two of three targets for 28 yards in the Vikings' 23-6 loss to the Bills on Monday night.,WR
 3042519,Aaron Jones Sr.,Minnesota Vikings,Active,2026-11-10T05:28Z,,,,,,Jones rushed five times for 16 yards and brought in his only target for five yards in the Vikings' 23-6 loss to the Bills on Monday night.,RB
 4360569,Jordan Mason,Minnesota Vikings,Active,2026-11-10T05:17Z,,,,,,Mason rushed six times for 35 yards and brought in two of three targets for seven yards in the Vikings' 23-6 loss to the Bills on Monday night.,RB
 4036133,T.J. Hockenson,Minnesota Vikings,Active,2026-11-10T05:14Z,,,,,,Hockenson recorded four catches for 33 yards on seven targets in a loss to Buffalo on Monday.,TE
@@ -523,9 +524,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4240631,DeeJay Dallas,Minnesota Vikings,Active,2026-11-05T02:13Z,,,,,,"Dallas was signed to the Vikings' active roster Wednesday, Craig Peters of the team's official website reports.",RB
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-11-04T05:53Z,,,,,,"Wilson registered 11 tackles, including 1.0 sacks, in Sunday's loss to Detroit.",LB
 4046537,Joshua Metellus,Minnesota Vikings,Active,2026-11-04T05:28Z,,,,,,Metellus recorded 13 tackles (six solo) and a defensed pass in a Week 8 defeat against Detroit.,S
-4038999,Byron Murphy Jr.,Minnesota Vikings,Active,2026-11-04T05:19Z,,,,,,Murphy registered 10 tackles (eight solo) in a loss to the Lions on Sunday.,CB
 4569923,Andy Borregales,New England Patriots,Active,2026-11-10T03:00Z,,,,,,Borregales made all three of his PATs in Sunday's 45-27 loss to the Packers.,PK
-4569173,Rhamondre Stevenson,New England Patriots,Questionable,2026-11-10T02:32Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Stevenson (knee) is dealing with a knee tendon issue that isn't slated to require surgery but may require him to miss ""a short period of time,"" Adam Schefter of ESPN reports.",RB
+4569173,Rhamondre Stevenson,New England Patriots,Questionable,2026-11-10T02:32Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Stevenson is dealing with a knee tendon issue that isn't slated to require surgery but may require him to miss ""a short period of time,"" Adam Schefter of ESPN reports.",RB
 4362890,Ben Brown,New England Patriots,Doubtful,2026-11-10T01:39Z,Knee,Not Specified,Not Specified,2026-11-15,DOUBTFUL,doubtful,C
 4047646,A.J. Brown,New England Patriots,Out,2026-11-09T21:29Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,WR
 4368113,Charles Woods,New England Patriots,Out,2026-11-09T21:28Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,CB
