@@ -1,5 +1,6 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
 4360761,Michael Wilson,Arizona Cardinals,Injured Reserve,2026-11-10T22:14Z,Neck,Fracture,Not Specified,2027-02-15,IR,ir,WR
+4038524,Gardner Minshew II,Arizona Cardinals,Injured Reserve,2026-11-10T22:13Z,Elbow,Not Specified,Right,2026-12-20,IR,"The Cardinals placed Minshew (elbow) on injured reserve Tuesday, Darren Urban of the team's official site reports.",QB
 5151948,Joey Aguilar,Arizona Cardinals,Active,2026-11-10T16:14Z,,,,,,"The Cardinals signed Aguilar off the Jaguars' practice squad Tuesday, Jeremy Fowler of ESPN.com reports.",QB
 4709718,Jayden Williams,Arizona Cardinals,Questionable,2026-11-10T15:44Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,OT
 4427728,Bam Knight,Arizona Cardinals,Questionable,2026-11-10T15:44Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,questionable,RB
@@ -8,7 +9,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3886633,Hjalte Froholdt,Arizona Cardinals,Questionable,2026-11-10T02:08Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,"Froholdt is in league concussion protocol Monday, Darren Urban of the Cardinals' official site reports.",C
 11394,Josh Johnson,Arizona Cardinals,Active,2026-11-10T00:34Z,,,,,,"Johnson was signed by the Cardinals off Cincinnati's practice squad Monday, Adam Schefter of ESPN reports.",QB
 4430841,Carson Beck,Arizona Cardinals,Active,2026-11-10T00:25Z,,,,,,"Beck is expected to start Sunday's contest against the Rams, Josh Weinfuss of ESPN.com reports.",QB
-4038524,Gardner Minshew II,Arizona Cardinals,Injured Reserve,2026-11-09T22:51Z,Elbow,Not Specified,Right,2026-12-20,IR,"Per Adam Schefter of ESPN, Minshew (elbow) is reportedly seeking additional medical opinions to confirm that he likely will require season-ending surgery to address a torn UCL.",QB
 4361272,Eku Leota,Arizona Cardinals,Active,2026-11-09T20:45Z,,,,,,,LB
 4363408,Starling Thomas V,Arizona Cardinals,Active,2026-11-09T20:45Z,,,,,,,CB
 4683506,Albert Reese IV,Arizona Cardinals,Active,2026-11-09T20:45Z,,,,,,,OT
@@ -399,6 +399,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4610705,Nohl Williams,Kansas City Chiefs,Active,2026-10-28T01:56Z,,,,,,Williams finished Sunday's 20-3 loss to the Seahawks with 10 tackles (four solo) and one interception.,CB
 4362759,Nick Bolton,Kansas City Chiefs,Active,2026-10-28T01:51Z,,,,,,Bolton registered 11 tackles (six solo) during the Chiefs' 20-3 loss to the Seahawks on Sunday.,LB
 3129310,Drue Tranquill,Kansas City Chiefs,Active,2026-10-28T01:45Z,,,,,,Tranquill finished Sunday's 20-3 loss to the Seahawks with 12 tackles (four solo).,LB
+4565908,Tyler Scott,Las Vegas Raiders,Active,2026-11-10T22:21Z,,,,,,,WR
 4837248,Fernando Mendoza,Las Vegas Raiders,Active,2026-11-10T19:57Z,,,,,,"Mendoza will take over as the Raiders' new starting quarterback beginning with Sunday's game versus the Seahawks after Las Vegas traded Kirk Cousins to Minnesota on Tuesday, Adam Schefter of ESPN reports.",QB
 4360749,Thomas Booker IV,Las Vegas Raiders,Questionable,2026-11-10T15:44Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,DT
 4249087,Matt Gay,Las Vegas Raiders,Active,2026-11-10T02:59Z,,,,,,Gay converted his only field-goal attempt and both of his extra-point tries during Las Vegas' loss to the 49ers on Sunday.,PK
@@ -423,7 +424,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4603186,Jack Bech,Las Vegas Raiders,Active,2026-11-04T03:21Z,,,,,,Bech finished without a target or touch in Sunday's 38-33 Week 8 win over the Jets.,WR
 4430896,JJ Pegues,Las Vegas Raiders,Active,2026-11-02T19:05Z,,,,,,,DT
 4250393,Tristin McCollum,Las Vegas Raiders,Active,2026-11-02T19:05Z,,,,,,,S
-4875295,Jackson Powers-Johnson,Las Vegas Raiders,Active,2026-11-01T16:40Z,,,,,,,G
 4038941,Justin Herbert,Los Angeles Chargers,Questionable,2026-11-10T16:00Z,Finger,Not Specified,Left,2026-11-16,QUESTIONABLE,"Chargers head coach Jim Harbaugh said that Herbert ""should be good to go"" for Monday's game at Baltimore after imaging on the quarterback's injured left middle finger returned negative for a fracture, ESPN.com reports.",QB
 4360745,Kendall Williamson,Los Angeles Chargers,Questionable,2026-11-10T15:44Z,Calf,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,questionable,S
 4685553,Brenen Thompson,Los Angeles Chargers,Questionable,2026-11-10T15:44Z,Quadriceps,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,questionable,WR
