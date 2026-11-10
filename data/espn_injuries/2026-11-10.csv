@@ -449,10 +449,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2576702,Bud Dupree,Los Angeles Chargers,Active,2026-11-05T23:10Z,,,,,,,LB
 4430870,KeAndre Lambert-Smith,Los Angeles Chargers,Active,2026-11-04T03:16Z,,,,,,Lambert-Smith did not garner a target during Sunday's 24-9 loss to the Rams.,WR
 4241263,Charlie Kolar,Los Angeles Chargers,Active,2026-11-03T03:18Z,,,,,,Kolar caught one of four targets for 20 yards in Sunday's 24-9 loss to the Rams.,TE
+4426515,Puka Nacua,Los Angeles Rams,Questionable,2026-11-10T15:19Z,Knee,Not Specified,Not Specified,2026-11-15,DOUBTFUL,"The Rams are expected to place Nacua (knee/toe) on injured reserve in the coming days due to injuries that will likely sideline him for at least one month, Sarah Barshop of ESPN.com reports.",WR
+4569382,Jordan Whittington,Los Angeles Rams,Active,2026-11-10T15:13Z,,,,,,"Rams head coach Sean McVay said Monday during his appearance on the ""Coach McVay Show"" that Whittington is a candidate for injured reserve due to a lingering back issue.",WR
 4242557,Colby Parkinson,Los Angeles Rams,Active,2026-11-10T04:29Z,,,,,,Parkinson notched four catches for 13 yards on four targets in a 20-13 win over Washington on Sunday.,TE
 16339,Brandon McManus,Los Angeles Rams,Active,2026-11-10T02:54Z,,,,,,McManus made both of his field-goal tries and both PATs in Sunday's 20-13 win over the Commanders.,PK
 4362474,Steve Avila,Los Angeles Rams,Questionable,2026-11-10T02:19Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Coach Sean McVay said Monday that the Rams haven't decided whether Avila will go to injured reserve with the hamstring injury he suffered during Sunday's game at Washington, Greg Beacham of the Associated Press reports.",G
-4426515,Puka Nacua,Los Angeles Rams,Doubtful,2026-11-09T22:19Z,Knee,Not Specified,Not Specified,2026-11-15,DOUBTFUL,doubtful,WR
 4426405,Trent McDuffie,Los Angeles Rams,Out,2026-11-09T21:25Z,Back,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,CB
 2575907,Joe Cardona,Los Angeles Rams,Out,2026-11-09T21:25Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,out,LS
 4598574,Darryl Peterson III,Los Angeles Rams,Active,2026-11-09T21:25Z,,,,,,,LB
@@ -467,7 +468,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4570037,Terrance Ferguson,Los Angeles Rams,Injured Reserve,2026-11-08T22:20Z,Hamstring,Not Specified,Not Specified,2026-11-25,IR-R,"Coach Sean McVay noted Sunday that Ferguson pulled his hamstring during Friday's practice and will likely be sidelined for another couple of weeks, Sarah Barshop of ESPN.com reports.",TE
 4240255,Grant Stuard,Los Angeles Rams,Active,2026-11-08T17:37Z,,,,,,Stuard is listed as active for Sunday's matchup against the Commanders.,LB
 4242154,Kam Curl,Los Angeles Rams,Active,2026-11-08T16:56Z,,,,,,Curl (foot) is active for Sunday's game against the Commanders.,S
-4569382,Jordan Whittington,Los Angeles Rams,Active,2026-11-08T16:46Z,,,,,,Whittington (back) is active for Sunday's game against the Commanders.,WR
 4697639,Jaylen Watson,Los Angeles Rams,Injured Reserve,2026-11-07T20:38Z,Shoulder,Surgery,Not Specified,2027-02-15,IR,The Rams placed Watson (shoulder) on injured reserve Saturday.,CB
 4243003,Ronnie Rivers,Los Angeles Rams,Active,2026-11-07T20:35Z,,,,,,The Rams activated Rivers (calf) from injured reserve Saturday.,RB
 4249128,Quentin Lake,Los Angeles Rams,Active,2026-11-06T03:59Z,,,,,,"Lake recorded seven total tackles (two solo) and two passes defensed, including an interception, during Sunday's 24-9 win over the Chargers.",S
