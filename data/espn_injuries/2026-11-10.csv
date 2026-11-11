@@ -449,6 +449,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3123076,David Njoku,Los Angeles Chargers,Injured Reserve,2026-11-08T19:01Z,Lower Leg,Not Specified,Not Specified,2026-11-16,IR-R,"Njoku (fibula) wasn't activated from IR-designated to return ahead of Sunday's game against the Texans, per the NFL's official transaction log.",TE
 4838693,Rodney Shelley,Los Angeles Chargers,Active,2026-11-07T03:47Z,,,,,,Shelley (ankle) has no designation for Sunday's tilt against the Texans.,CB
 3843769,Donte Jackson,Los Angeles Chargers,Active,2026-11-07T01:23Z,,,,,,Jackson (hamstring) does not have a designation for Sunday's tilt against the Texans.,CB
+4360797,Tutu Atwell,Los Angeles Rams,Active,2026-11-11T00:54Z,,,,,,Atwell recorded two catches on five targets for 16 yards during the Rams' 20-13 win over the Commanders on Sunday.,WR
 4710855,Konata Mumpfield,Los Angeles Rams,Active,2026-11-11T00:50Z,,,,,,Mumpfield caught both of his targets for 20 yards during Sunday's 20-13 win over the Commanders.,WR
 4569382,Jordan Whittington,Los Angeles Rams,Injured Reserve,2026-11-11T00:38Z,Back,Not Specified,Not Specified,2026-12-20,IR,Whittington (back) was placed on injured reserve Tuesday.,WR
 4386544,Xavier Smith,Los Angeles Rams,Active,2026-11-11T00:32Z,,,,,,The Rams signed Smith off the 49ers' practice squad Tuesday.,WR
@@ -473,7 +474,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4697639,Jaylen Watson,Los Angeles Rams,Injured Reserve,2026-11-07T20:38Z,Shoulder,Surgery,Not Specified,2027-02-15,IR,The Rams placed Watson (shoulder) on injured reserve Saturday.,CB
 4243003,Ronnie Rivers,Los Angeles Rams,Active,2026-11-07T20:35Z,,,,,,The Rams activated Rivers (calf) from injured reserve Saturday.,RB
 4249128,Quentin Lake,Los Angeles Rams,Active,2026-11-06T03:59Z,,,,,,"Lake recorded seven total tackles (two solo) and two passes defensed, including an interception, during Sunday's 24-9 win over the Chargers.",S
-4566192,Joshua Karty,Los Angeles Rams,Active,2026-11-05T17:48Z,,,,,,The Rams signed Karty to their active roster Thursday.,PK
 3057956,Zach Sieler,Miami Dolphins,Injured Reserve,2026-11-11T00:23Z,Biceps,Surgery,Not Specified,2027-02-15,IR,The Dolphins placed Sieler (biceps) on injured reserve Tuesday.,DT
 4433971,Kyle McCord,Miami Dolphins,Active,2026-11-10T22:08Z,,,,,,"McCord will step in as the Dolphins' starting quarterback beginning with Sunday's game at Indianapolis after Miami placed Malik Willis (core) on injured reserve Tuesday, Cameron Wolfe of NFL Network reports.",QB
 4242512,Malik Willis,Miami Dolphins,Questionable,2026-11-10T21:32Z,Groin,Not Specified,Not Specified,2026-12-13,IR,The Dolphins placed Willis (groin) on injured reserve Tuesday.,QB
@@ -524,6 +524,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4240631,DeeJay Dallas,Minnesota Vikings,Active,2026-11-05T02:13Z,,,,,,"Dallas was signed to the Vikings' active roster Wednesday, Craig Peters of the team's official website reports.",RB
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-11-04T05:53Z,,,,,,"Wilson registered 11 tackles, including 1.0 sacks, in Sunday's loss to Detroit.",LB
 4046537,Joshua Metellus,Minnesota Vikings,Active,2026-11-04T05:28Z,,,,,,Metellus recorded 13 tackles (six solo) and a defensed pass in a Week 8 defeat against Detroit.,S
+4698253,Lan Larison,New England Patriots,Active,2026-11-11T01:04Z,,,,,,Larison recorded a four-yard rush and failed to haul in his lone target during the Patriots' 45-27 loss to the Packers on Sunday. He also recorded two tackles (one solo) on special teams.,RB
+4613202,Kyle Williams,New England Patriots,Active,2026-11-11T01:03Z,,,,,,Williams failed to catch either of his two targets in Sunday's 45-27 loss to the Packers.,WR
+4831959,Eli Raridon,New England Patriots,Active,2026-11-11T00:55Z,,,,,,Raridon caught three passes for 52 yards on six targets in Sunday's 45-27 loss to the Packers.,TE
 4569173,Rhamondre Stevenson,New England Patriots,Doubtful,2026-11-10T16:01Z,Knee,Not Specified,Not Specified,2026-11-15,DOUBTFUL,doubtful,RB
 4368113,Charles Woods,New England Patriots,Questionable,2026-11-10T15:44Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,CB
 4432710,TreVeyon Henderson,New England Patriots,Questionable,2026-11-10T15:44Z,Illness,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,RB
@@ -546,9 +549,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4837244,Gabe Jacas,New England Patriots,Active,2026-11-07T03:21Z,,,,,,Jacas (knee) does not have a designation for Sunday's contest versus Green Bay.,LB
 4241720,Marcus Jones,New England Patriots,Active,2026-11-06T20:47Z,,,,,,,CB
 2574056,Kevin Byard,New England Patriots,Active,2026-11-06T20:47Z,,,,,,,S
-3915525,Dre'Mont Jones,New England Patriots,Active,2026-11-06T20:46Z,,,,,,,DE
-4372030,Christian Barmore,New England Patriots,Active,2026-11-05T21:47Z,,,,,,,DT
-4565293,Marcus Bryant,New England Patriots,Active,2026-11-04T01:40Z,,,,,,Bryant (ankle) was activated from injured reserve by the Patriots on Tuesday.,OT
 4879276,Bryce Lance,New Orleans Saints,Active,2026-11-11T00:46Z,,,,,,Lance failed to catch his only target in Sunday's 23-22 overtime win over the Browns.,WR
 4239996,Travis Etienne Jr.,New Orleans Saints,Injured Reserve,2026-11-11T00:05Z,Hamstring,Strain,Left,2026-11-15,IR,"Head coach Kellen Moore said Monday that the Saints haven't yet determined whether Etienne (hamstring) will return from injured reserve ahead of Sunday's game against the Panthers, Luke Johnson of The New Orleans Times-Picayune reports. ""We'll see,"" Moore said. ""He's progressing well. We'll gather s",RB
 4250764,Stone Smartt,New Orleans Saints,Out,2026-11-10T23:25Z,Undisclosed,Not Specified,Not Specified,2026-12-13,OUT,out,TE
@@ -724,6 +724,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2977187,Cooper Kupp,Seattle Seahawks,Active,2026-11-03T05:18Z,,,,,,Kupp caught one of three targets for a seven-yard touchdown Monday in a loss to the Bears.,WR
 4364623,Patrick O'Connell,Seattle Seahawks,Active,2026-11-02T23:51Z,,,,,,,LB
 4686540,Tyrice Knight,Seattle Seahawks,Active,2026-11-01T01:55Z,,,,,,"Knight (hip) doesn't have an injury designation for Monday's game against the Bears, John Boyle of the Seahawks' official site reports.",LB
+4608810,Tez Johnson,Tampa Bay Buccaneers,Active,2026-11-11T00:51Z,,,,,,Johnson caught two passes for 76 yards on five targets in Sunday night's 27-24 loss to the Bears.,WR
 4430871,Sean Tucker,Tampa Bay Buccaneers,Active,2026-11-10T05:51Z,,,,,,Tucker didn't log any offensive snaps in a loss to the Bears on Sunday. He returned four kickoffs for 92 yards.,RB
 3150744,Chase McLaughlin,Tampa Bay Buccaneers,Active,2026-11-10T02:37Z,,,,,,McLaughlin converted all three of his field-goal attempts and both of his extra-point tries during Tampa Bay's loss to the Bears on Sunday.,PK
 4243331,Cade Otton,Tampa Bay Buccaneers,Active,2026-11-10T02:15Z,,,,,,Otton caught four of eight targets for 25 yards in Sunday night's 27-24 loss to the Bears.,TE
@@ -745,7 +746,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4912847,Jacob Parrish,Tampa Bay Buccaneers,Active,2026-11-06T03:08Z,,,,,,"Parrish registered seven total tackles (four solo) and two passes defensed, including an interception, during Sunday's 16-0 win over Atlanta.",CB
 3043107,Alex Anzalone,Tampa Bay Buccaneers,Active,2026-11-06T02:57Z,,,,,,Anzalone recorded six total tackles (three solo) and two interceptions in Sunday's 16-0 win over the Falcons.,LB
 4890373,Bauer Sharp,Tampa Bay Buccaneers,Active,2026-11-04T19:17Z,,,,,,Sharp went without a target while playing 19 of the Buccaneers' 60 snaps on offense in Sunday's 16-0 win over the Falcons.,TE
-4608810,Tez Johnson,Tampa Bay Buccaneers,Active,2026-11-04T03:07Z,,,,,,Johnson did not garner a target during Sunday's 16-0 win over the Falcons.,WR
 5220680,Ted Hurst III,Tampa Bay Buccaneers,Active,2026-11-03T03:22Z,,,,,,Hurst failed to catch his lone target in Sunday's 16-0 win over the Falcons.,WR
 4686884,Luke Haggard,Tampa Bay Buccaneers,Active,2026-11-02T19:22Z,,,,,,,G
 4380507,Luke Goedeke,Tampa Bay Buccaneers,Active,2026-11-01T17:30Z,,,,,,"Goedeke (calf) is active for Sunday's game against the Falcons, Scott Smith of the Buccaneers' official site reports.",OT
