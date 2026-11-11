@@ -138,7 +138,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4259545,D'Andre Swift,Chicago Bears,Active,2026-11-09T05:17Z,,,,,,Swift rushed 12 times for 31 yards and didn't catch his lone target in Sunday's 27-24 win over the Buccaneers.,RB
 4431611,Caleb Williams,Chicago Bears,Active,2026-11-09T05:17Z,,,,,,"Williams completed 22 of 37 passes for 279 yards, two touchdowns and four interceptions in Sunday's 27-24 win over the Buccaneers. He also rushed five times for 16 yards.",QB
 4685278,Luther Burden III,Chicago Bears,Questionable,2026-11-09T05:13Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,"Burden has a concussion, head coach Ben Johnson revealed after Sunday's 27-24 win over the Buccaneers, Courtney Cronin of ESPN.com reports.",WR
-4426374,Tyrique Stevenson Sr.,Chicago Bears,Questionable,2026-11-09T03:13Z,Hand,Not Specified,Not Specified,2026-11-08,QUESTIONABLE,Stevenson exited Sunday night's game against the Bucs with a hand injury and is questionable to return.,CB
+4426374,Tyrique Stevenson Sr.,Chicago Bears,Questionable,2026-11-09T03:13Z,Hand,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Stevenson exited Sunday night's game against the Bucs with a hand injury and is questionable to return.,CB
 15168,Case Keenum,Chicago Bears,Out,2026-11-09T00:04Z,,,,,,Keenum (coach's decision) is inactive but serving as the Bears' emergency No. 3 quarterback for Sunday Night Football versus the Buccaneers.,QB
 2576492,Grady Jarrett,Chicago Bears,Active,2026-11-07T00:17Z,,,,,,Jarrett (groin) does not carry an official injury designation ahead of Sunday's game versus the Buccaneers.,DE
 5125873,Theo Benedet,Chicago Bears,Active,2026-11-06T20:03Z,,,,,,,OT
@@ -174,7 +174,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4240754,Boye Mafe,Cincinnati Bengals,Active,2026-10-28T02:16Z,,,,,,"Mafe finished Sunday's 35-13 win over the Ravens with five tackles (three solo), including 1.5 sacks.",DE
 4247726,Bryan Cook,Cincinnati Bengals,Active,2026-10-28T02:08Z,,,,,,"Cook recorded nine tackles (six solo), including 0.5 sacks, during the Bengals' 35-13 win over the Ravens on Sunday.",S
 4427729,Demetrius Knight Jr.,Cincinnati Bengals,Active,2026-10-28T01:59Z,,,,,,Knight totaled eight tackles (two solo) and an interception during the Bengals' win over the Ravens on Sunday.,LB
-3122840,Deshaun Watson,Cleveland Browns,Active,2026-11-11T14:34Z,,,,,,,QB
+4432762,Shedeur Sanders,Cleveland Browns,Active,2026-11-11T14:44Z,,,,,,"Sanders will return to a backup role for Sunday's game against the Texans after the Browns announced Wednesday that Deshaun Watson (concussion) will draw the Week 10 start, Kelsey Russo of the team's official site reports.",QB
+3122840,Deshaun Watson,Cleveland Browns,Out,2026-11-11T14:38Z,,,,,,"The Browns announced Wednesday that Watson (concussion) will start Sunday's game against the Texans, Kelsey Russo of the team's official site reports.",QB
 3040471,Maliek Collins,Cleveland Browns,Questionable,2026-11-10T15:44Z,Elbow,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,DT
 4242516,Noah Igbinoghene,Cleveland Browns,Active,2026-11-09T20:59Z,,,,,,,CB
 4431325,Taylen Green,Cleveland Browns,Active,2026-11-09T20:59Z,,,,,,,QB
@@ -187,7 +188,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4870653,KC Concepcion,Cleveland Browns,Active,2026-11-09T00:48Z,,,,,,Concepcion caught four of six targets for 85 yards and a touchdown in Sunday's 23-22 overtime loss to the Saints. He added three yards on his only carry.,WR
 4832800,Denzel Boston,Cleveland Browns,Active,2026-11-09T00:42Z,,,,,,Boston caught six of seven targets for 98 yards in Sunday's 23-22 overtime loss to the Saints.,WR
 4685702,Quinshon Judkins,Cleveland Browns,Active,2026-11-09T00:36Z,,,,,,Judkins carried the ball 15 times for 43 yards and caught his only target for two yards in Sunday's 23-22 overtime loss to the Saints.,RB
-4432762,Shedeur Sanders,Cleveland Browns,Active,2026-11-09T00:30Z,,,,,,Sanders completed 19 of 31 passes for 297 yards and two touchdowns in Sunday's 23-22 overtime loss to the Saints. He added 28 yards on 10 carries.,QB
 2515270,Michael Burton,Cleveland Browns,Active,2026-11-08T19:09Z,,,,,,"Burton (calf) has returned to Sunday's matchup against New Orleans, Daniel Oyefusi of ESPN.com reports.",FB
 4427238,Dillon Gabriel,Cleveland Browns,Active,2026-11-08T12:24Z,,,,,,"Gabriel ""will serve as the backup quarterback"" Sunday against the Saints, Jeremy Fowler of ESPN.com reports.",QB
 3110565,Quincy Williams,Cleveland Browns,Active,2026-11-06T20:43Z,,,,,,"Williams has no injury designation ahead of Sunday's game against the Saints, Scott Petrak of the Elyria Chronicle-Telegram reports.",LB
@@ -774,9 +774,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3120464,John Franklin-Myers,Tennessee Titans,Active,2026-11-01T16:44Z,,,,,,"Franklin-Myers (groin) is active for Sunday's game against the Bengals, Jim Wyatt of the Titans' official site reports.",DE
 12701,Thomas Morstead,Tennessee Titans,Active,2026-11-01T02:11Z,,,,,,"The Titans elevated Morstead from the practice squad to the active roster Saturday, Jim Wyatt of the team's official site reports.",P
 4373956,Jonah Laulu,Tennessee Titans,Active,2026-10-29T00:34Z,,,,,,"The Titans claimed Laulu off waivers from the Raiders on Wednesday, Jim Wyatt of the Titans' official site reports.",DT
+4567156,Treylon Burks,Washington Commanders,Questionable,2026-11-11T14:59Z,Foot,Not Specified,Not Specified,2026-11-12,QUESTIONABLE,questionable,WR
 4361088,Colson Yankoff,Washington Commanders,Questionable,2026-11-11T01:42Z,Knee,Not Specified,Not Specified,2026-11-12,QUESTIONABLE,Yankoff (knee) did not participate in Tuesday's walkthrough practice.,TE
-4567156,Treylon Burks,Washington Commanders,Questionable,2026-11-11T01:01Z,Foot,Not Specified,Not Specified,2026-11-12,QUESTIONABLE,questionable,WR
-4360635,Chig Okonkwo,Washington Commanders,Active,2026-11-10T23:56Z,,,,,,Okonkwo (hip) was a full participant in Tuesday's practice.,TE
+4360635,Chig Okonkwo,Washington Commanders,Active,2026-11-10T23:56Z,,,,,,Okonkwo (hip) was a full participant in Tuesday's walkthrough practice.,TE
 3886601,Shy Tuttle,Washington Commanders,Active,2026-11-10T23:18Z,,,,,,,DT
 2576736,Lucas Patrick,Washington Commanders,Doubtful,2026-11-10T16:38Z,Concussion,Concussion,Not Specified,2026-11-12,DOUBTFUL,doubtful,G
 5081432,Antonio Williams,Washington Commanders,Active,2026-11-10T04:32Z,,,,,,Williams caught three passes for 25 yards on six targets in Sunday's 20-13 loss to the Rams.,WR
