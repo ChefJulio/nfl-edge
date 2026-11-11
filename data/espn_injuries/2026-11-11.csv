@@ -174,7 +174,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4240754,Boye Mafe,Cincinnati Bengals,Active,2026-10-28T02:16Z,,,,,,"Mafe finished Sunday's 35-13 win over the Ravens with five tackles (three solo), including 1.5 sacks.",DE
 4247726,Bryan Cook,Cincinnati Bengals,Active,2026-10-28T02:08Z,,,,,,"Cook recorded nine tackles (six solo), including 0.5 sacks, during the Bengals' 35-13 win over the Ravens on Sunday.",S
 4427729,Demetrius Knight Jr.,Cincinnati Bengals,Active,2026-10-28T01:59Z,,,,,,Knight totaled eight tackles (two solo) and an interception during the Bengals' win over the Ravens on Sunday.,LB
-3122840,Deshaun Watson,Cleveland Browns,Questionable,2026-11-10T15:44Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,questionable,QB
+3122840,Deshaun Watson,Cleveland Browns,Active,2026-11-11T14:34Z,,,,,,,QB
 3040471,Maliek Collins,Cleveland Browns,Questionable,2026-11-10T15:44Z,Elbow,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,DT
 4242516,Noah Igbinoghene,Cleveland Browns,Active,2026-11-09T20:59Z,,,,,,,CB
 4431325,Taylen Green,Cleveland Browns,Active,2026-11-09T20:59Z,,,,,,,QB
@@ -250,7 +250,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5085625,Gavin Ortega,Denver Broncos,Active,2026-11-02T18:50Z,,,,,,,OT
 4261090,Jordan Jackson,Denver Broncos,Active,2026-11-02T18:50Z,,,,,,,DT
 5123663,Isaac TeSlaa,Detroit Lions,Active,2026-11-11T03:18Z,,,,,,TeSlaa registered one catch for nine yards on two targets in Sunday's 19-9 win over Miami.,WR
-4912274,Sione Vaki,Detroit Lions,Active,2026-11-11T02:03Z,,,,,,Vaki turned three carries into 14 yards and hauled in both of his targets for seven yards during the Lions',RB
+4912274,Sione Vaki,Detroit Lions,Active,2026-11-11T02:03Z,,,,,,Vaki turned three carries into 14 yards and hauled in both of his targets for seven yards during the Lions' Week 9 game at Miami.,RB
 4360383,Kerby Joseph,Detroit Lions,Out,2026-11-10T22:50Z,Knee,Not Specified,Not Specified,2026-11-22,PUP-R,"Lions head coach Dan Campbell ruled Joseph (knee) out for Sunday's game against the Patriots, Nolan Bianchi of The Detroit News reports.",S
 4430027,Sam LaPorta,Detroit Lions,Active,2026-11-10T16:05Z,,,,,,"The Lions have received trade calls on LaPorta leading up to Tuesday's deadline, but the team prefers to keep him with the hope of signing the tight end to a long-term deal, Jeremy Fowler of ESPN.com reports.",TE
 4038849,DJ Wonnum,Detroit Lions,Questionable,2026-11-10T15:44Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,questionable,LB
@@ -449,7 +449,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3123076,David Njoku,Los Angeles Chargers,Injured Reserve,2026-11-08T19:01Z,Lower Leg,Not Specified,Not Specified,2026-11-16,IR-R,"Njoku (fibula) wasn't activated from IR-designated to return ahead of Sunday's game against the Texans, per the NFL's official transaction log.",TE
 4838693,Rodney Shelley,Los Angeles Chargers,Active,2026-11-07T03:47Z,,,,,,Shelley (ankle) has no designation for Sunday's tilt against the Texans.,CB
 3843769,Donte Jackson,Los Angeles Chargers,Active,2026-11-07T01:23Z,,,,,,Jackson (hamstring) does not have a designation for Sunday's tilt against the Texans.,CB
-4426515,Puka Nacua,Los Angeles Rams,Questionable,2026-11-11T14:11Z,Knee - MCL,Sprain,Right,2026-11-15,DOUBTFUL,"The Rams remain optimistic that Nacua (knee/toe) will be able to return to action Week 14 versus the 49ers or Week 15 versus the Cowboys, Dan Graziano of ESPN.com reports.",WR
+4426515,Puka Nacua,Los Angeles Rams,Doubtful,2026-11-11T14:34Z,Knee - MCL,Sprain,Right,2026-11-15,DOUBTFUL,doubtful,WR
 2573401,Tyler Higbee,Los Angeles Rams,Active,2026-11-11T00:58Z,,,,,,Higbee caught one of five targets for 13 yards during Sunday's 20-13 win over the Commanders.,TE
 4360797,Tutu Atwell,Los Angeles Rams,Active,2026-11-11T00:54Z,,,,,,Atwell recorded two catches on five targets for 16 yards during the Rams' 20-13 win over the Commanders on Sunday.,WR
 4710855,Konata Mumpfield,Los Angeles Rams,Active,2026-11-11T00:50Z,,,,,,Mumpfield caught both of his targets for 20 yards during Sunday's 20-13 win over the Commanders.,WR
