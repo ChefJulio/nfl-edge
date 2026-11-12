@@ -25,7 +25,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4683506,Albert Reese IV,Arizona Cardinals,Active,2026-11-09T20:45Z,,,,,,,OT
 4373626,Tyler Allgeier,Arizona Cardinals,Active,2026-11-09T03:30Z,,,,,,Allgeier compiled 17 carries for 46 yards and caught two of three targets for no yards during Sunday's 17-3 defeat at Seattle.,RB
 4361510,Cameron Thomas,Atlanta Falcons,Questionable,2026-11-12T20:36Z,Groin,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,DE
-4595343,Kendal Daniels,Atlanta Falcons,Active,2026-11-12T02:32Z,Achilles,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Daniels logged eight tackles (four solo) during Atlanta's loss to the Bengals on Sunday.,LB
+4595343,Kendal Daniels,Atlanta Falcons,Questionable,2026-11-12T02:32Z,Achilles,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Daniels logged eight tackles (four solo) during Atlanta's loss to the Bengals on Sunday.,LB
 4685590,Cameron Williams,Atlanta Falcons,Injured Reserve,2026-11-12T00:59Z,,,,,,"The Falcons activated Williams (ankle) from injured reserve Wednesday, Tori McElhaney of the team's official site reports.",OL
 4870612,Zachariah Branch,Atlanta Falcons,Doubtful,2026-11-11T23:30Z,Hamstring,Not Specified,Not Specified,2026-11-15,DOUBTFUL,doubtful,WR
 3128303,Josh Woods,Atlanta Falcons,Questionable,2026-11-11T23:19Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,LB
@@ -99,9 +99,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242433,Joshua Palmer,Buffalo Bills,Injured Reserve,2026-11-10T01:39Z,Hamstring,Not Specified,Right,2026-12-06,IR,ir,WR
 4367203,Alec Anderson,Buffalo Bills,Questionable,2026-11-10T00:27Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Anderson (ankle) is inactive for Monday's matchup against Minnesota.,OT
 4241476,Tyrell Shavers,Buffalo Bills,Out,2026-11-10T00:13Z,Knee - ACL,Surgery,Not Specified,2026-11-15,PUP-R,"Shavers (knee) was not activated from the reserve/PUP list ahead of Monday night's matchup with Minnesota, per the NFL's official transaction log.",WR
+3117253,Bobby Okereke,Carolina Panthers,Questionable,2026-11-12T20:44Z,Foot,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,LB
 4243256,Devin Lloyd,Carolina Panthers,Active,2026-11-12T03:06Z,,,,,,Lloyd posted eight tackles (five solo) and one pass defense during the Panthers' 26-21 loss to the Broncos in Week 9.,LB
 4362647,Damien Lewis,Carolina Panthers,Out,2026-11-12T01:23Z,,,,,,Lewis (knee) was a full participant in Wednesday's walkthrough practice.,G
-3117253,Bobby Okereke,Carolina Panthers,Questionable,2026-11-11T23:01Z,Foot,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,LB
 5151083,Will Lee III,Carolina Panthers,Out,2026-11-11T22:54Z,,,,,,Lee (hamstring) was estimated as a full participant on Wednesday's practice report.,CB
 4242975,Jaelan Phillips,Carolina Panthers,Out,2026-11-11T22:52Z,,,,,,Phillips (hamstring) was estimated as a full participant on Wednesday's practice report.,LB
 4678008,Jonathon Brooks,Carolina Panthers,Injured Reserve,2026-11-11T19:59Z,Groin,Surgery,Not Specified,2026-11-15,IR-R,Brooks (groin) was listed as a full participant on Wednesday's estimated injury report.,RB
@@ -324,11 +324,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686422,Xavier Hutchinson,Houston Texans,Active,2026-11-09T02:07Z,,,,,,Hutchinson caught three of five targets for 29 yards and a touchdown and  added a 28-yard kick return during Sunday's 44-22 win against the Chargers.,WR
 4258173,Nico Collins,Houston Texans,Active,2026-11-09T01:54Z,,,,,,Collins corralled all four of his targets for 55 yards and one touchdown during Sunday's 44-22 victory at the Chargers.,WR
 4432577,C.J. Stroud,Houston Texans,Active,2026-11-09T01:30Z,,,,,,"Stroud completed 21 of 35 passes for 384 yards, five touchdowns and one interception and recorded two carries for 20 yards during Sunday's 44-22 win at the Chargers.",QB
+3863182,Jerry Tillery,Indianapolis Colts,Questionable,2026-11-12T20:44Z,Calf,,,2026-11-15,QUESTIONABLE,questionable,DT
 4870598,CJ Allen,Indianapolis Colts,Active,2026-11-12T03:35Z,,,,,,Allen recorded 10 tackles (three solo) and a pass breakup in Sunday's 27-23 loss to the Cowboys.,LB
 5088571,Bryce Boettcher,Indianapolis Colts,Active,2026-11-12T03:32Z,,,,,,Boettcher recorded 12 tackles (four solo) in Sunday's 27-23 loss to the Cowboys.,LB
 4432789,Hunter Wohler,Indianapolis Colts,Active,2026-11-12T03:30Z,,,,,,Wohler recorded 16 tackles (six solo) in Sunday's 27-23 loss to the Cowboys.,S
-4905664,A.J. Haulcy,Indianapolis Colts,Questionable,2026-11-12T02:02Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,S
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Questionable,2026-11-11T23:28Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,LB
+4905664,A.J. Haulcy,Indianapolis Colts,Out,2026-11-11T23:21Z,,,,,,Haulcy (ankle) did not practice Wednesday.,S
 2998565,Mo Alie-Cox,Indianapolis Colts,Questionable,2026-11-11T23:17Z,Groin,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Alie-Cox (groin) did not practice Wednesday.,TE
 4682909,Justin Walley,Indianapolis Colts,Out,2026-11-11T23:15Z,,,,,,Walley (knee) was a full participant in Wednesday's practice.,CB
 4431459,Tyler Warren,Indianapolis Colts,Active,2026-11-11T21:10Z,,,,,,"Warren may see more targets after the Colts traded wideouts Josh Downs and Keenan Allen on Tuesday, Chris Bumbaca of ColtsWire reports.",TE
@@ -348,7 +349,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2971281,Pharaoh Brown,Indianapolis Colts,Active,2026-11-09T21:15Z,,,,,,,TE
 4362523,Will Mallory,Indianapolis Colts,Active,2026-11-09T21:15Z,,,,,,,TE
 4571557,Spencer Shrader,Indianapolis Colts,Active,2026-11-09T04:19Z,,,,,,Shrader went 3-for-3 on field-goal tries and made both of his PATs during Sunday's 27-23 loss to the Cowboys.,PK
-4686468,Seth McGowan,Indianapolis Colts,Active,2026-11-09T01:04Z,,,,,,McGowan rushed six times for 45 yards and a touchdown and brought in his only target for minus-3 yards in the Colts' 27-23 loss to the Cowboys on Sunday.,RB
 4882093,Bhayshul Tuten,Jacksonville Jaguars,Questionable,2026-11-12T17:19Z,Ankle,,,2026-11-15,QUESTIONABLE,"Tuten (ankle) was the Jaguars' only player without a helmet during the initial portion of Thursday's practice, Ryan O'Halloran of The Florida Times-Union reports.",RB
 4875266,B.J. Green II,Jacksonville Jaguars,Injured Reserve,2026-11-12T00:57Z,Elbow,Not Specified,Not Specified,2026-11-15,IR-R,The Jaguars designated Green (elbow) to return from injured reserve Wednesday.,DE
 4426349,Travon Walker,Jacksonville Jaguars,Questionable,2026-11-11T22:59Z,Ribs,,,2026-11-15,QUESTIONABLE,"Walker (ribs) did not practice Wednesday, Michael DiRocco of ESPN.com reports.",DE
