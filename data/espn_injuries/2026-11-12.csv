@@ -274,7 +274,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4371973,Roger McCreary,Detroit Lions,Active,2026-11-01T16:42Z,,,,,,McCreary (foot) is active for Sunday's game against the Vikings.,CB
 4566092,Ennis Rakestraw Jr.,Detroit Lions,Active,2026-10-31T02:09Z,,,,,,Rakestraw (ankle) does not have a game designation for Sunday's Week 8 tilt versus the Vikings.,CB
 4361529,Isiah Pacheco,Detroit Lions,Injured Reserve,2026-10-30T17:09Z,Back,Not Specified,Not Specified,2026-12-28,IR,"Lions coach Dan Campbell said Friday that Pacheco (back) has a chance to return in late December, Justin Rogers of DetroitFootball.net reports.",RB
-4047365,Josh Jacobs,Green Bay Packers,Questionable,2026-11-12T17:02Z,Finger,Surgery,Right,2026-11-25,OUT,"Jacobs (finger) will undergo surgery Friday, and the Packers will have a better sense of his recovery timetable afterward, Matt Schneidman of The Athletic reports.",RB
+4047365,Josh Jacobs,Green Bay Packers,Questionable,2026-11-12T17:02Z,Finger,Surgery,Right,2026-11-25,OUT,"Jacobs will undergo finger surgery Friday, and the Packers will have a better sense of his recovery timetable afterward, Matt Schneidman of The Athletic reports.",RB
 4869461,Trey Smack,Green Bay Packers,Questionable,2026-11-12T16:56Z,Calf,Not Specified,Right,2026-11-15,QUESTIONABLE,"Head coach Matt LaFleur said he expects Smack (calf) to practice without limitations Thursday, Matt Schneidman of The Athletic reports.",PK
 4428863,Evan Williams,Green Bay Packers,Active,2026-11-12T02:55Z,,,,,,Williams logged five tackles (four solo) and one interception during the Packers' 45-27 win over the Patriots in Week 9.,S
 4241470,Xavier McKinney,Green Bay Packers,Active,2026-11-12T02:52Z,,,,,,McKinney posted four tackles (two solo) and two interceptions during the Packers' 45-27 win over the Patriots in Week 9.,S
@@ -299,17 +299,17 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361904,Travis Glover,Green Bay Packers,Questionable,2026-11-10T15:44Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,OT
 4360887,Donovan Jennings,Green Bay Packers,Active,2026-11-09T21:12Z,,,,,,,G
 4572680,Tucker Kraft,Green Bay Packers,Active,2026-11-09T03:48Z,,,,,,Kraft brought in one of three targets for one yard and rushed twice for eight yards in the Packers' 45-27 win over the Patriots on Sunday.,TE
+4429059,Woody Marks,Houston Texans,Questionable,2026-11-12T17:32Z,Knee,,,2026-11-15,QUESTIONABLE,"Marks (knee) wasn't spotted during the portion of Thursday's practice session open to reporters, Aaron Wilson of KPRC 2 Houston reports.",RB
+4035538,David Montgomery,Houston Texans,Out,2026-11-12T17:28Z,Groin,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Montgomery (groin) was present for practice Thursday, Jonathan M. Alexander of the Houston Chronicle reports.",RB
 4685724,Will Anderson Jr.,Houston Texans,Active,2026-11-12T03:23Z,,,,,,"Anderson logged two tackles (two solo), including 2.0 sacks, during Houston's win over the Chargers on Sunday.",DE
 4594277,Jaylin Smith,Houston Texans,Injured Reserve,2026-11-12T01:15Z,Hamstring,Strain,Not Specified,2026-11-15,IR-R,The Texans designated Smith (hamstring) to return from injured reserve Wednesday.,CB
 4241250,Jake Hummel,Houston Texans,Injured Reserve,2026-11-12T01:09Z,Groin,Surgery,Not Specified,2026-11-15,IR-R,The Texans opened Hummel's (groin) 21-day practice window Wednesday.,LB
-4035538,David Montgomery,Houston Texans,Questionable,2026-11-12T00:14Z,Groin,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,RB
 3919117,Azeez Al-Shaair,Houston Texans,Questionable,2026-11-12T00:02Z,Groin,,,2026-11-15,QUESTIONABLE,"Al-Shaair (groin/personal) was listed as a DNP on Wednesday's injury report, Jonathan M. Alexander of the Houston Chronicle reports.",LB
 4362504,Brevin Jordan,Houston Texans,Questionable,2026-11-12T00:01Z,Finger,,,2026-11-15,QUESTIONABLE,"Jordan (finger) did not practice Wednesday, Jonathan M. Alexander of the Houston Chronicle reports.",TE
 4432708,Marvin Harrison Jr.,Houston Texans,Questionable,2026-11-11T22:45Z,Hamstring,,,2026-11-15,QUESTIONABLE,"Harrison (hamstring) was limited in Wednesday's practice, Jonathan M. Alexander of the Houston Chronicle reports.",WR
 4839498,Keylan Rutledge,Houston Texans,Questionable,2026-11-11T22:43Z,Neck,,,2026-11-15,QUESTIONABLE,questionable,G
 3045474,Wyatt Teller,Houston Texans,Questionable,2026-11-11T22:43Z,Illness,,,2026-11-15,QUESTIONABLE,questionable,G
 4366031,Tank Dell,Houston Texans,Questionable,2026-11-11T22:42Z,Hand,,,2026-11-15,QUESTIONABLE,"Dell (hand) was limited in Wednesday's practice, Mary Kay Cabot of The Cleveland Plain Dealer reports.",WR
-4429059,Woody Marks,Houston Texans,Questionable,2026-11-11T22:39Z,Knee,,,2026-11-15,QUESTIONABLE,"Marks (knee) was a limited participant in Wednesday's practice, Chris Easterling of the Akron Beacon Journal reports.",RB
 4242546,Davis Mills,Houston Texans,Active,2026-11-11T15:48Z,,,,,,Mills completed one of two pass attempts for seven yards and lost two yards on two carries in Sunday's 44-22 win over the Chargers.,QB
 4426496,Cade Stover,Houston Texans,Out,2026-11-11T15:42Z,,,,,,Stover was a healthy inactive for Sunday's 44-22 win over the Chargers.,TE
 3843945,Foster Moreau,Houston Texans,Active,2026-11-11T04:28Z,,,,,,Moreau didn't log any targets or touches Sunday in a 44-22 win against the Chargers.,TE
@@ -349,6 +349,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362523,Will Mallory,Indianapolis Colts,Active,2026-11-09T21:15Z,,,,,,,TE
 4571557,Spencer Shrader,Indianapolis Colts,Active,2026-11-09T04:19Z,,,,,,Shrader went 3-for-3 on field-goal tries and made both of his PATs during Sunday's 27-23 loss to the Cowboys.,PK
 4686468,Seth McGowan,Indianapolis Colts,Active,2026-11-09T01:04Z,,,,,,McGowan rushed six times for 45 yards and a touchdown and brought in his only target for minus-3 yards in the Colts' 27-23 loss to the Cowboys on Sunday.,RB
+4882093,Bhayshul Tuten,Jacksonville Jaguars,Questionable,2026-11-12T17:19Z,Ankle,,,2026-11-15,QUESTIONABLE,"Tuten (ankle) was the Jaguars' only player without a helmet during the initial portion of Thursday's practice, Ryan O'Halloran of The Florida Times-Union reports.",RB
 4875266,B.J. Green II,Jacksonville Jaguars,Injured Reserve,2026-11-12T00:57Z,Elbow,Not Specified,Not Specified,2026-11-15,IR-R,The Jaguars designated Green (elbow) to return from injured reserve Wednesday.,DE
 4426349,Travon Walker,Jacksonville Jaguars,Questionable,2026-11-11T22:59Z,Ribs,,,2026-11-15,QUESTIONABLE,"Walker (ribs) did not practice Wednesday, Michael DiRocco of ESPN.com reports.",DE
 4429168,Antonio Johnson,Jacksonville Jaguars,Questionable,2026-11-11T21:25Z,Ankle,,,2026-11-15,QUESTIONABLE,questionable,S
@@ -357,7 +358,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4048231,Ezra Cleveland,Jacksonville Jaguars,Questionable,2026-11-11T21:24Z,Knee,,,2026-11-15,QUESTIONABLE,questionable,G
 4362619,Chris Rodriguez Jr.,Jacksonville Jaguars,Questionable,2026-11-11T21:20Z,Hand,,,2026-11-15,QUESTIONABLE,"Rodriguez (hand) was listed as limited in Wednesday's practice, Ryan O'Halloran of The Florida Times-Union reports.",RB
 3916433,Jakobi Meyers,Jacksonville Jaguars,Questionable,2026-11-11T21:16Z,Ankle,Not Specified,,2026-11-15,QUESTIONABLE,"Meyers (ankle) did not participate in Wednesday's practice, Ryan O'Halloran of The Florida Times-Union reports.",WR
-4882093,Bhayshul Tuten,Jacksonville Jaguars,Questionable,2026-11-11T21:14Z,Ankle,,,2026-11-15,QUESTIONABLE,"Tuten (ankle/foot) was listed as a non-participant in practice Wednesday, Ryan O'Halloran of The Florida Times-Union reports.",RB
 4432773,Brian Thomas Jr.,Jacksonville Jaguars,Active,2026-11-10T15:38Z,,,,,,"The Jaguars have relayed to inquiring teams that they intend to keep Thomas through Tuesday's trade deadline, Jeremy Fowler of ESPN.com reports.",WR
 3115383,Davon Godchaux,Jacksonville Jaguars,Active,2026-11-09T22:15Z,,,,,,"The Jaguars acquired Godchaux from the Saints on Monday in exchange for a 2028 sixth-round pick, though the selection could turn into a 2027 sixth-round pick if ""conditions are met,"" Jonathan Jones of The Athletic of The Athletic reports.",DT
 5085024,CJ Williams,Jacksonville Jaguars,Active,2026-11-09T21:16Z,,,,,,,WR
