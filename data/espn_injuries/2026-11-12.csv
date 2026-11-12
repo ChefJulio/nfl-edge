@@ -457,7 +457,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3122132,Myles Garrett,Los Angeles Rams,Questionable,2026-11-12T00:32Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Garrett (knee) was limited at Wednesday's walkthrough, Sarah Barshop of ESPN.com reports.",DE
 4426553,Davis Allen,Los Angeles Rams,Questionable,2026-11-12T00:30Z,Oblique,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,TE
 4242557,Colby Parkinson,Los Angeles Rams,Questionable,2026-11-12T00:08Z,Ribs,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Parkinson (ribs) was limited in Wednesday's practice, Sarah Barshop of ESPN.com reports.",TE
-16800,Davante Adams,Los Angeles Rams,Injured Reserve,2026-11-11T21:05Z,Hamstring,Surgery,Left,2026-11-25,IR,"Coach Sean McVay noted of Adams (hamstring) on Wednesday that he thinks a return to action by the wideout on Nov. 25 against the Packers ""is a realistic timeline for us,"" Greg Beacham of the Associated Press reports.",WR
+16800,Davante Adams,Los Angeles Rams,Injured Reserve,2026-11-11T21:05Z,Hamstring,Surgery,Left,2026-11-25,IR,"Head coach Sean McVay said Wednesday that Adams (hamstring) returning after the Nov. 25 against the Packers ""is a realistic timeline for us,"" Greg Beacham of the Associated Press reports.",WR
 2573401,Tyler Higbee,Los Angeles Rams,Active,2026-11-11T00:58Z,,,,,,Higbee caught one of five targets for 13 yards during Sunday's 20-13 win over the Commanders.,TE
 4360797,Tutu Atwell,Los Angeles Rams,Active,2026-11-11T00:54Z,,,,,,Atwell recorded two catches on five targets for 16 yards during the Rams' 20-13 win over the Commanders on Sunday.,WR
 4710855,Konata Mumpfield,Los Angeles Rams,Active,2026-11-11T00:50Z,,,,,,Mumpfield caught both of his targets for 20 yards during Sunday's 20-13 win over the Commanders.,WR
@@ -502,8 +502,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-11-12T03:38Z,,,,,,Wilson recorded nine tackles (three solo) in Monday night's 23-6 loss to the Bills.,LB
 16772,Kyle Van Noy,Minnesota Vikings,Questionable,2026-11-11T23:03Z,Calf,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,LB
 4568007,Jay Ward,Minnesota Vikings,Questionable,2026-11-11T23:02Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,S
-3886598,Jauan Jennings,Minnesota Vikings,Questionable,2026-11-11T22:32Z,Calf,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,WR
 3728281,Blake Cashman,Minnesota Vikings,Questionable,2026-11-11T22:27Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,"Vikings coach Kevin O'Connell said Wednesday that Cashman is in concussion protocol, Kevin Seifert of ESPN.com reports.",LB
+3886598,Jauan Jennings,Minnesota Vikings,Out,2026-11-11T22:08Z,Calf,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Jennings (calf) was estimated as DNP on Wednesday's practice report.,WR
 4036133,T.J. Hockenson,Minnesota Vikings,Questionable,2026-11-11T21:31Z,Wrist,,,2026-11-15,QUESTIONABLE,Hockenson (wrist/chest) is listed as a non-participant on Wednesday's estimated practice report.,TE
 2573079,Carson Wentz,Minnesota Vikings,Questionable,2026-11-11T20:57Z,Ankle,,,2026-11-15,QUESTIONABLE,"Wentz (ankle) is listed as limited on Wednesday's estimated practice report, Ben Goessling of The Minnesota Star Tribune reports.",QB
 3917315,Kyler Murray,Minnesota Vikings,Doubtful,2026-11-11T20:01Z,Hamstring,Strain,Not Specified,2026-11-15,DOUBTFUL,doubtful,QB
