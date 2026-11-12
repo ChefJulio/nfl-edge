@@ -524,6 +524,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4832846,Demond Claiborne,Minnesota Vikings,Injured Reserve,2026-11-10T01:02Z,Knee,Not Specified,Not Specified,2026-12-06,IR,ir,RB
 4242436,Theo Jackson,Minnesota Vikings,Questionable,2026-11-09T23:54Z,,,,,,"Jackson (quadriceps) is active for Monday's game against Buffalo, Craig Peters of the team's official site reports.",S
 3133487,Andrew Van Ginkel,Minnesota Vikings,Active,2026-11-07T23:02Z,,,,,,"Van Ginkel (chest) doesn't have a designation for Monday's matchup against the Bills, Craig Peters of the Vikings' official site reports.",LB
+4432710,TreVeyon Henderson,New England Patriots,Out,2026-11-12T10:01Z,Illness,Not Specified,Not Specified,2026-11-29,OUT,out,RB
+4047646,A.J. Brown,New England Patriots,Questionable,2026-11-12T10:01Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,WR
 4686772,Christian Gonzalez,New England Patriots,Active,2026-11-12T03:01Z,,,,,,Gonzalez logged 10 tackles (nine solo) and one pass defense during the Patriots' 45-27 loss to the Packers in Week 9.,CB
 4368113,Charles Woods,New England Patriots,Questionable,2026-11-12T02:02Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,CB
 4362890,Ben Brown,New England Patriots,Out,2026-11-12T02:02Z,Knee,Not Specified,Not Specified,2026-11-29,OUT,out,C
@@ -533,9 +535,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 16771,Morgan Moses,New England Patriots,Questionable,2026-11-11T23:14Z,Foot,,,2026-11-15,QUESTIONABLE,questionable,OT
 4428394,Walter Rouse,New England Patriots,Questionable,2026-11-11T23:13Z,Concussion,,,2026-11-15,QUESTIONABLE,questionable,OL
 4372026,Cameron Latu,New England Patriots,Questionable,2026-11-11T23:13Z,Back,,,2026-11-15,QUESTIONABLE,questionable,TE
-4432710,TreVeyon Henderson,New England Patriots,Out,2026-11-11T23:13Z,Illness,Not Specified,Not Specified,2026-11-29,OUT,out,RB
 3046439,Hunter Henry,New England Patriots,Questionable,2026-11-11T22:56Z,Foot,,,2026-11-15,QUESTIONABLE,Henry (foot) was limited in Wednesday's practice.,TE
-4047646,A.J. Brown,New England Patriots,Out,2026-11-11T22:50Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Brown (knee/ankle) was a limited participant in Wednesday's practice.,WR
 4039505,Reggie Gilliam,New England Patriots,Injured Reserve,2026-11-11T22:36Z,Ankle,Not Specified,Not Specified,2026-11-15,IR-R,"Gilliam (ankle) was designated for return from injured reserve Wednesday, Mike Reiss of ESPN.com reports.",FB
 4569173,Rhamondre Stevenson,New England Patriots,Doubtful,2026-11-11T21:30Z,Knee,Not Specified,Not Specified,2026-11-15,DOUBTFUL,doubtful,RB
 4698253,Lan Larison,New England Patriots,Active,2026-11-11T01:04Z,,,,,,Larison recorded a four-yard rush and failed to haul in his lone target during the Patriots' 45-27 loss to the Packers on Sunday. He also recorded two tackles (one solo) on special teams.,RB
