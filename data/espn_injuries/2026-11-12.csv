@@ -74,13 +74,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429582,Joe Fagnano,Baltimore Ravens,Active,2026-11-06T05:23Z,,,,,,Fagnano completed 10 of 18 passes for 60 yards with no touchdowns and two interceptions while adding three rushes for 13 yards in the Ravens' 33-10 loss to the Jaguars on Thursday night.,QB
 4429615,Zay Flowers,Baltimore Ravens,Active,2026-11-06T05:03Z,,,,,,Flowers brought in three of six targets for six yards and rushed three times for 17 yards in the Ravens' 33-10 loss to the Jaguars on Thursday night.,WR
 4426372,Adisa Isaac,Baltimore Ravens,Questionable,2026-11-06T03:14Z,Hamstring,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,Isaac (hamstring) is questionable to return to Thursday night's contest against the Jaguars.,LB
+4385690,Dalton Kincaid,Buffalo Bills,Questionable,2026-11-12T21:24Z,Ankle,,,2026-11-15,QUESTIONABLE,Kincaid (ankle) was a limited participant at Thursday's practice.,TE
 4259166,Terrel Bernard,Buffalo Bills,Active,2026-11-12T03:43Z,,,,,,"Bernard recorded six tackles (two solo) and a pair of pass breakups, including an interception, in Monday night's 23-6 win over the Vikings.",LB
 3051324,Dion Dawkins,Buffalo Bills,Questionable,2026-11-12T01:34Z,Ribs,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Dawkins (ribs) was a limited participant in Wednesday's walkthrough practice.,OT
 3127294,Greg Gaines,Buffalo Bills,Questionable,2026-11-12T01:32Z,,,,,,Gaines (calf) was a full participant in Wednesday's walkthrough practice.,DT
 4379778,Christian Benford,Buffalo Bills,Questionable,2026-11-11T23:32Z,Wrist,,,2026-11-15,QUESTIONABLE,Benford (wrist) was limited in Wednesday's walkthrough practice.,CB
 4030899,Spencer Brown,Buffalo Bills,Questionable,2026-11-11T22:01Z,Ankle,,,2026-11-15,QUESTIONABLE,questionable,OT
 4033748,Connor McGovern,Buffalo Bills,Questionable,2026-11-11T22:00Z,Neck,,,2026-11-15,QUESTIONABLE,questionable,C
-4385690,Dalton Kincaid,Buffalo Bills,Questionable,2026-11-11T21:57Z,Ankle,,,2026-11-15,QUESTIONABLE,Kincaid (ankle) was listed as a limited participant in Wednesday's walk-through.,TE
 4688552,Keleki Latu,Buffalo Bills,Active,2026-11-11T02:14Z,,,,,,Latu caught his lone target for a 25-yard touchdown Monday in a 23-6 win against the Vikings.,TE
 4573699,Jackson Hawes,Buffalo Bills,Active,2026-11-11T02:10Z,,,,,,Hawes caught his lone target for eight yards during Buffalo's win over the Vikings on Monday.,TE
 3917232,Tyler Bass,Buffalo Bills,Active,2026-11-11T01:47Z,,,,,,Bass connected on all three of his field-goal attempts and made both of his extra-point tries during the Bills' 23-6 win over the Vikings on Monday.,PK
@@ -549,7 +549,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431452,Drake Maye,New England Patriots,Active,2026-11-09T03:16Z,,,,,,Maye completed 21 of 38 passes for 299 yards with three touchdowns and three interceptions while adding one rush for three yards in the Patriots' 45-27 loss to the Packers on Sunday.,QB
 2991662,Mack Hollins,New England Patriots,Active,2026-11-09T01:54Z,,,,,,Hollins caught three of six targets for 36 yards and a touchdown in Sunday's 45-27 loss to the Patriots.,WR
 4695193,Efton Chism III,New England Patriots,Active,2026-11-09T01:46Z,,,,,,Chism caught all five of his targets for 49 yards and a touchdown during Sunday's 45-27 loss to the Packers.,WR
-3054850,Alvin Kamara,New Orleans Saints,Questionable,2026-11-12T21:02Z,Back,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Kamara (back) returned to practice Thursday, Mike Triplett of NewOrleans.Football reports.",RB
+3054850,Alvin Kamara,New Orleans Saints,Active,2026-11-12T21:25Z,,,,,,,RB
 4241993,Pete Werner,New Orleans Saints,Active,2026-11-12T03:27Z,,,,,,Werner registered 11 tackles (three solo) during the Saints' 23-22 overtime win over the Browns in Week 9.,LB
 3918310,Carl Granderson,New Orleans Saints,Active,2026-11-12T03:23Z,,,,,,"Granderson recorded seven tackles (five solo), including 2.0 sacks, and one pass defense during the Saints' 23-22 overtime win over the Browns in Week 9.",DE
 3124890,Kaden Elliss,New Orleans Saints,Active,2026-11-12T03:18Z,,,,,,"Elliss recorded 11 tackles (eight solo), including 1.0 sacks, during the Saints' 23-22 overtime victory over the Browns in Week 9.",LB
@@ -674,6 +674,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360935,Terell Smith,Pittsburgh Steelers,Active,2026-10-26T18:54Z,,,,,,,CB
 3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-10-25T12:26Z,,,,,,"Rudolph is active for Sunday's game against the Saints in Paris, Teresa Varley of the Steelers' official site reports.",QB
 3045282,T.J. Watt,Pittsburgh Steelers,Active,2026-10-23T15:41Z,,,,,,Watt (calf) practiced fully Friday and doesn't carry an injury designation into Sunday's game against the Saints.,LB
+16737,Mike Evans,San Francisco 49ers,Questionable,2026-11-12T21:17Z,Achilles,Tendinitis,Right,2026-11-15,QUESTIONABLE,questionable,WR
 5086161,Jaden Dugger,San Francisco 49ers,Active,2026-11-12T02:24Z,,,,,,Dugger recorded six solo tackles and a pick-six during the 49ers' 38-17 win over the Raiders in Week 9.,LB
 3916903,Dre Greenlaw,San Francisco 49ers,Active,2026-11-12T02:20Z,,,,,,Greenlaw registered eight tackles (five solo) and one fumble recovery during the 49ers' 38-17 win over the Raiders in Week 9.,LB
 3138826,Fred Warner,San Francisco 49ers,Active,2026-11-12T02:17Z,,,,,,"Warner logged five tackles (three solo), one forced fumble and one fumble recovery during the 49ers' 38-17 win over the Raiders in Week 9.",LB
@@ -681,7 +682,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242488,Deommodore Lenoir,San Francisco 49ers,Questionable,2026-11-12T00:45Z,Foot,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Lenoir (foot) did not participate in Wednesday's practice, Matt Barrows of The Athletic reports.",CB
 4427325,Renardo Green,San Francisco 49ers,Questionable,2026-11-12T00:43Z,Back,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Green (back) did not practice Wednesday, Matt Barrows of The Athletic reports.",CB
 3126486,Deebo Samuel Sr.,San Francisco 49ers,Questionable,2026-11-12T00:24Z,Hamstring,Not Specified,Right,2026-11-15,QUESTIONABLE,questionable,WR
-16737,Mike Evans,San Francisco 49ers,Questionable,2026-11-12T00:24Z,Achilles,Tendinitis,Right,2026-11-15,QUESTIONABLE,questionable,WR
 4565200,Upton Stout,San Francisco 49ers,Questionable,2026-11-12T00:19Z,Shoulder,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,CB
 3057524,Siran Neal,San Francisco 49ers,Questionable,2026-11-12T00:19Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,S
 4685369,Gracen Halton,San Francisco 49ers,Injured Reserve,2026-11-11T02:01Z,Ankle,Surgery,Left,2027-02-15,IR,ir,DT
