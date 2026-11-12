@@ -1,5 +1,5 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
-4427728,Bam Knight,Arizona Cardinals,Out,2026-11-12T20:12Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,"Knight (concussion) practiced Thursday without a yellow non-contact jersey, Dani Sureck of the Cardinals' official site reports.",RB
+4427728,Bam Knight,Arizona Cardinals,Questionable,2026-11-12T20:36Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,questionable,RB
 3127287,Budda Baker,Arizona Cardinals,Active,2026-11-12T03:26Z,,,,,,Baker recorded 11 tackles (three solo) in Sunday's 17-3 loss to the Cardinals.,S
 4240619,Zachary Carter,Arizona Cardinals,Injured Reserve,2026-11-12T01:19Z,Knee,Not Specified,Not Specified,2026-11-15,IR-R,The Cardinals designated Carter (knee) to return from injured reserve Wednesday.,DT
 3918331,Andrew Wingard,Arizona Cardinals,Questionable,2026-11-12T00:39Z,Groin,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Wingard (groin) was a limited participant in Wednesday's practice, Theo Mackie of The Arizona Republic reports.",S
@@ -24,7 +24,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4363408,Starling Thomas V,Arizona Cardinals,Active,2026-11-09T20:45Z,,,,,,,CB
 4683506,Albert Reese IV,Arizona Cardinals,Active,2026-11-09T20:45Z,,,,,,,OT
 4373626,Tyler Allgeier,Arizona Cardinals,Active,2026-11-09T03:30Z,,,,,,Allgeier compiled 17 carries for 46 yards and caught two of three targets for no yards during Sunday's 17-3 defeat at Seattle.,RB
-4595343,Kendal Daniels,Atlanta Falcons,Active,2026-11-12T02:32Z,,,,,,Daniels logged eight tackles (four solo) during Atlanta's loss to the Bengals on Sunday.,LB
+4361510,Cameron Thomas,Atlanta Falcons,Questionable,2026-11-12T20:36Z,Groin,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,DE
+4595343,Kendal Daniels,Atlanta Falcons,Active,2026-11-12T02:32Z,Achilles,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Daniels logged eight tackles (four solo) during Atlanta's loss to the Bengals on Sunday.,LB
 4685590,Cameron Williams,Atlanta Falcons,Injured Reserve,2026-11-12T00:59Z,,,,,,"The Falcons activated Williams (ankle) from injured reserve Wednesday, Tori McElhaney of the team's official site reports.",OL
 4870612,Zachariah Branch,Atlanta Falcons,Doubtful,2026-11-11T23:30Z,Hamstring,Not Specified,Not Specified,2026-11-15,DOUBTFUL,doubtful,WR
 3128303,Josh Woods,Atlanta Falcons,Questionable,2026-11-11T23:19Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,LB
@@ -48,7 +49,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241474,Brian Robinson Jr.,Atlanta Falcons,Injured Reserve,2026-11-07T21:13Z,Hamstring,Not Specified,Not Specified,2026-12-13,IR,"Robinson (hamstring) was placed on injured reserve Saturday, Marc Raimondi of ESPN.com reports.",RB
 3045527,Samson Ebukam,Atlanta Falcons,Injured Reserve,2026-11-04T00:37Z,Hamstring,Not Specified,Not Specified,2026-12-13,IR,"Ebukam (hamstring) was placed on injured reserve by the Falcons on Tuesday, Tori McElhaney of the team's official website reports.",DE
 4369886,Chris Blair,Atlanta Falcons,Active,2026-11-02T15:02Z,,,,,,Blair went without a target while playing nine of the Falcons' 53 offensive snaps in Sunday's 16-0 loss to the Buccaneers.,WR
-4870988,Avieon Terrell,Atlanta Falcons,Active,2026-11-01T17:02Z,,,,,,Terrell (back/illness) is active for Sunday's game against Tampa Bay.,CB
 4686768,Gerad Lichtenhan,Baltimore Ravens,Out,2026-11-12T18:43Z,Undisclosed,,,2026-12-13,OUT,out,OT
 4243371,Riley Patterson,Baltimore Ravens,Active,2026-11-12T17:15Z,,,,,,"Patterson will be the Ravens' kicker for Monday night's game against the Chargers, Jamison Hensley of ESPN.com reports.",PK
 4036444,Ryan Neuzil,Baltimore Ravens,Active,2026-11-11T00:36Z,,,,,,"The Ravens acquired Neuzil from the Falcons on Tuesday in exchange for guard Andrew Vorhees and a conditional 2028 sixth-round pick, Jamison Hensley of ESPN.com reports.",C
@@ -362,6 +362,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3115383,Davon Godchaux,Jacksonville Jaguars,Active,2026-11-09T22:15Z,,,,,,"The Jaguars acquired Godchaux from the Saints on Monday in exchange for a 2028 sixth-round pick, though the selection could turn into a 2027 sixth-round pick if ""conditions are met,"" Jonathan Jones of The Athletic of The Athletic reports.",DT
 5085024,CJ Williams,Jacksonville Jaguars,Active,2026-11-09T21:16Z,,,,,,,WR
 4832922,Wesley Williams,Jacksonville Jaguars,Active,2026-11-09T21:16Z,,,,,,,DE
+4577494,Alijah Huzzie,Jacksonville Jaguars,Active,2026-11-09T21:16Z,,,,,,,CB
 3050073,Foyesade Oluokun,Jacksonville Jaguars,Active,2026-11-08T04:33Z,,,,,,"Oluokun recorded seven tackles (six solo), including 1.0 sacks, in Thursday's 33-10 victory over Baltimore.",LB
 4917427,Tanner Koziol,Jacksonville Jaguars,Active,2026-11-07T04:42Z,,,,,,Koziol finished Thursday's 33-10 win over Baltimore with two catches for 15 yards on two targets.,TE
 4686248,Nate Boerkircher,Jacksonville Jaguars,Active,2026-11-06T18:22Z,,,,,,Boerkircher hauled in two of three targets for 61 yards in Thursday night's 33-10 win over Baltimore.,TE
@@ -373,7 +374,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360310,Trevor Lawrence,Jacksonville Jaguars,Active,2026-11-06T05:09Z,,,,,,Lawrence completed 16 of 26 passes for 242 yards with a touchdown and no interceptions while rushing once for minus-1 yard in the Jaguars' 33-16 win over the Ravens on Thursday night.,QB
 4432620,Parker Washington,Jacksonville Jaguars,Active,2026-11-06T04:55Z,,,,,,Washington secured two of seven targets for 61 yards and a touchdown in the Jaguars' 33-10 win over the Ravens on Thursday night. He also returned one punt for 11 yards.,WR
 4877475,Cam'Ron Silmon-Craig,Jacksonville Jaguars,Out,2026-11-05T23:48Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,S
-4426448,Jarrian Jones,Jacksonville Jaguars,Active,2026-11-04T20:06Z,,,,,,,CB
 3044859,Chris Jones,Kansas City Chiefs,Active,2026-11-12T03:14Z,,,,,,"Jones recorded four tackles (two solo), including 2.0 sacks, and a pass breakup in Sunday's 35-12 win over the Jets.",DT
 4426659,George Karlaftis,Kansas City Chiefs,Active,2026-11-12T03:10Z,,,,,,"Karlaftis recorded six tackles (four solo), including 2.0 sacks, and a pass breakup in Sunday's 35-12 win over the Jets.",DE
 4362759,Nick Bolton,Kansas City Chiefs,Active,2026-11-12T03:06Z,,,,,,Bolton recorded 12 tackles (five solo) and a forced fumble in Sunday's 35-12 win over the Jets.,LB
@@ -749,7 +749,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4240589,Tristan Wirfs,Tampa Bay Buccaneers,Active,2026-11-07T03:18Z,,,,,,Wirfs (toe) does not have any injury designation ahead of Sunday's game against the Bears.,OT
 4912847,Jacob Parrish,Tampa Bay Buccaneers,Active,2026-11-06T03:08Z,,,,,,"Parrish registered seven total tackles (four solo) and two passes defensed, including an interception, during Sunday's 16-0 win over Atlanta.",CB
 4890373,Bauer Sharp,Tampa Bay Buccaneers,Active,2026-11-04T19:17Z,,,,,,Sharp went without a target while playing 19 of the Buccaneers' 60 snaps on offense in Sunday's 16-0 win over the Falcons.,TE
-4871023,Carnell Tate,Tennessee Titans,Out,2026-11-12T20:08Z,Shoulder,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Tate (shoulder) was spotted doing work on the side with the Titans' training staff during Thursday's practice, Turron Davenport of ESPN.com reports.",WR
+4871023,Carnell Tate,Tennessee Titans,Questionable,2026-11-12T20:36Z,Shoulder,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,WR
 4431437,JC Latham,Tennessee Titans,Questionable,2026-11-12T01:30Z,,,,,,"Latham (finger) practiced in full Wednesday, Jim Wyatt of the Titans' official site reports.",OT
 3915398,Tommy Townsend,Tennessee Titans,Out,2026-11-12T01:26Z,,,,,,"Townsend (knee) was a full participant at practice Wednesday, Jim Wyatt of the Titans' official site reports.",P
 4685145,Jaylon Jones,Tennessee Titans,Out,2026-11-12T01:26Z,,,,,,"Jones (knee) was a full participant in Wednesday's practice, Jim Wyatt of the Titans' official site reports.",CB
