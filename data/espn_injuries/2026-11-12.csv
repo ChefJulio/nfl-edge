@@ -1,10 +1,10 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
+4427728,Bam Knight,Arizona Cardinals,Out,2026-11-12T20:12Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,"Knight (concussion) practiced Thursday without a yellow non-contact jersey, Dani Sureck of the Cardinals' official site reports.",RB
 3127287,Budda Baker,Arizona Cardinals,Active,2026-11-12T03:26Z,,,,,,Baker recorded 11 tackles (three solo) in Sunday's 17-3 loss to the Cardinals.,S
 4240619,Zachary Carter,Arizona Cardinals,Injured Reserve,2026-11-12T01:19Z,Knee,Not Specified,Not Specified,2026-11-15,IR-R,The Cardinals designated Carter (knee) to return from injured reserve Wednesday.,DT
 3918331,Andrew Wingard,Arizona Cardinals,Questionable,2026-11-12T00:39Z,Groin,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Wingard (groin) was a limited participant in Wednesday's practice, Theo Mackie of The Arizona Republic reports.",S
 4362225,Dante Stills,Arizona Cardinals,Questionable,2026-11-12T00:14Z,Shoulder,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,DT
 4698113,Max Melton,Arizona Cardinals,Questionable,2026-11-12T00:14Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,CB
-4427728,Bam Knight,Arizona Cardinals,Questionable,2026-11-11T23:56Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,questionable,RB
 4239944,Hunter Long,Arizona Cardinals,Injured Reserve,2026-11-11T22:25Z,Knee,Not Specified,Not Specified,2026-11-15,IR-R,The Cardinals designated Long (knee) for return from injured reserve Wednesday.,TE
 4430841,Carson Beck,Arizona Cardinals,Active,2026-11-11T20:35Z,,,,,,"Head coach Mike LaFleur said Wednesday that Beck will start Sunday's game against the Rams, Darren Urban of the Cardinals' official site reports.",QB
 4038524,Gardner Minshew II,Arizona Cardinals,Injured Reserve,2026-11-11T20:33Z,Elbow,Not Specified,Right,2027-02-15,IR,"Minshew (elbow) will undergo UCL surgery and is out for the season, Theo Mackie of AzCentral reports.",QB
@@ -199,7 +199,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685702,Quinshon Judkins,Cleveland Browns,Active,2026-11-09T00:36Z,,,,,,Judkins carried the ball 15 times for 43 yards and caught his only target for two yards in Sunday's 23-22 overtime loss to the Saints.,RB
 4427238,Dillon Gabriel,Cleveland Browns,Active,2026-11-08T12:24Z,,,,,,"Gabriel ""will serve as the backup quarterback"" Sunday against the Saints, Jeremy Fowler of ESPN.com reports.",QB
 4837186,Emmanuel McNeil-Warren,Cleveland Browns,Active,2026-11-06T19:45Z,,,,,,,S
-4426354,George Pickens,Dallas Cowboys,Out,2026-11-12T19:20Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Pickens (hamstring) was in uniform and taking part in individual drills during Thursday's practice, Nick Harris of the Fort Worth Star-Telegram reports.",WR
+4426354,George Pickens,Dallas Cowboys,Questionable,2026-11-12T20:02Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,WR
 4870706,Caleb Downs,Dallas Cowboys,Active,2026-11-12T03:47Z,,,,,,"Downs recorded three tackles (two solo), including 1.0 sacks, and two pass breakups, including an interception, in Sunday's 27-23 win over the Colts.",S
 4426506,Joey Porter Jr.,Dallas Cowboys,Questionable,2026-11-12T00:01Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,CB
 4362088,DeMarvion Overshown,Dallas Cowboys,Questionable,2026-11-11T23:56Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,LB
@@ -274,8 +274,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4371973,Roger McCreary,Detroit Lions,Active,2026-11-01T16:42Z,,,,,,McCreary (foot) is active for Sunday's game against the Vikings.,CB
 4566092,Ennis Rakestraw Jr.,Detroit Lions,Active,2026-10-31T02:09Z,,,,,,Rakestraw (ankle) does not have a game designation for Sunday's Week 8 tilt versus the Vikings.,CB
 4361529,Isiah Pacheco,Detroit Lions,Injured Reserve,2026-10-30T17:09Z,Back,Not Specified,Not Specified,2026-12-28,IR,"Lions coach Dan Campbell said Friday that Pacheco (back) has a chance to return in late December, Justin Rogers of DetroitFootball.net reports.",RB
-4360086,Josh Whyle,Green Bay Packers,Out,2026-11-12T19:34Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,"Whyle (concussion) remained sidelined at practice Thursday, Dominique Yates of the Milwaukee Journal Sentinel reports.",TE
-3124005,Zaire Franklin,Green Bay Packers,Out,2026-11-12T19:32Z,Shin,Fracture,Not Specified,2026-11-15,DOUBTFUL,"Franklin (shin) remained sidelined at practice Thursday, Dominique Yates of the Milwaukee Journal Sentinel reports.",LB
+4360086,Josh Whyle,Green Bay Packers,Questionable,2026-11-12T20:02Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,questionable,TE
+3124005,Zaire Franklin,Green Bay Packers,Doubtful,2026-11-12T20:02Z,Shin,Fracture,Not Specified,2026-11-15,DOUBTFUL,doubtful,LB
 4047365,Josh Jacobs,Green Bay Packers,Out,2026-11-12T18:01Z,Finger,Surgery,Right,2026-11-25,OUT,out,RB
 4869461,Trey Smack,Green Bay Packers,Questionable,2026-11-12T16:56Z,Calf,Not Specified,Right,2026-11-15,QUESTIONABLE,"Head coach Matt LaFleur said he expects Smack (calf) to practice without limitations Thursday, Matt Schneidman of The Athletic reports.",PK
 4428863,Evan Williams,Green Bay Packers,Active,2026-11-12T02:55Z,,,,,,Williams logged five tackles (four solo) and one interception during the Packers' 45-27 win over the Patriots in Week 9.,S
@@ -524,8 +524,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4832846,Demond Claiborne,Minnesota Vikings,Injured Reserve,2026-11-10T01:02Z,Knee,Not Specified,Not Specified,2026-12-06,IR,ir,RB
 4242436,Theo Jackson,Minnesota Vikings,Questionable,2026-11-09T23:54Z,,,,,,"Jackson (quadriceps) is active for Monday's game against Buffalo, Craig Peters of the team's official site reports.",S
 3133487,Andrew Van Ginkel,Minnesota Vikings,Active,2026-11-07T23:02Z,,,,,,"Van Ginkel (chest) doesn't have a designation for Monday's matchup against the Bills, Craig Peters of the Vikings' official site reports.",LB
+4569173,Rhamondre Stevenson,New England Patriots,Doubtful,2026-11-12T20:02Z,Knee,Not Specified,Not Specified,2026-11-15,DOUBTFUL,doubtful,RB
 4047646,A.J. Brown,New England Patriots,Questionable,2026-11-12T16:37Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,WR
-4569173,Rhamondre Stevenson,New England Patriots,Questionable,2026-11-12T16:10Z,Knee,Not Specified,Not Specified,2026-11-15,DOUBTFUL,"Stevenson (knee) was working off to the side at the start of Thursday's practice, Mark Daniels of MassLive.com reports.",RB
 4432710,TreVeyon Henderson,New England Patriots,Out,2026-11-12T10:01Z,Illness,Not Specified,Not Specified,2026-11-29,OUT,out,RB
 4686772,Christian Gonzalez,New England Patriots,Active,2026-11-12T03:01Z,,,,,,Gonzalez logged 10 tackles (nine solo) and one pass defense during the Patriots' 45-27 loss to the Packers in Week 9.,CB
 4368113,Charles Woods,New England Patriots,Questionable,2026-11-12T02:02Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,CB
