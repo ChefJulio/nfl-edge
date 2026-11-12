@@ -50,7 +50,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3045527,Samson Ebukam,Atlanta Falcons,Injured Reserve,2026-11-04T00:37Z,Hamstring,Not Specified,Not Specified,2026-12-13,IR,"Ebukam (hamstring) was placed on injured reserve by the Falcons on Tuesday, Tori McElhaney of the team's official website reports.",DE
 4369886,Chris Blair,Atlanta Falcons,Active,2026-11-02T15:02Z,,,,,,Blair went without a target while playing nine of the Falcons' 53 offensive snaps in Sunday's 16-0 loss to the Buccaneers.,WR
 4686768,Gerad Lichtenhan,Baltimore Ravens,Out,2026-11-12T18:43Z,Undisclosed,,,2026-12-13,OUT,out,OT
-4243371,Riley Patterson,Baltimore Ravens,Active,2026-11-12T17:15Z,,,,,,"Patterson will be the Ravens' kicker for Monday night's game against the Chargers, Jamison Hensley of ESPN.com reports.",PK
+4243371,Riley Patterson,Baltimore Ravens,Active,2026-11-11T23:24Z,,,,,,"Following a Wednesday workout, Patterson is slated to sign with Ravens, putting him on track to kick for the team Monday night against the Chargers, Mike Garafolo of NFL Network reports.",PK
 4036444,Ryan Neuzil,Baltimore Ravens,Active,2026-11-11T00:36Z,,,,,,"The Ravens acquired Neuzil from the Falcons on Tuesday in exchange for guard Andrew Vorhees and a conditional 2028 sixth-round pick, Jamison Hensley of ESPN.com reports.",C
 4575517,Kyle Hamilton,Baltimore Ravens,Questionable,2026-11-11T00:15Z,Hip,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,"Ravens head coach Jesse Minter said Monday that Hamilton, who couldn't finish last Thursday's loss to Jacksonville due to a hip injury, ""looks fairly good,"" Jonas Shaffer of TheBaltimoreBanner.com reports.",S
 4601278,Nate Wiggins,Baltimore Ravens,Questionable,2026-11-10T15:44Z,Illness,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,questionable,CB
@@ -250,7 +250,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4261090,Jordan Jackson,Denver Broncos,Active,2026-11-02T18:50Z,,,,,,,DT
 4683535,Tyler Onyedim,Denver Broncos,Active,2026-11-02T18:50Z,,,,,,,DT
 4038849,DJ Wonnum,Detroit Lions,Questionable,2026-11-12T22:47Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,Wonnum (concussion) was a full participant in practice Thursday.,LB
-4692025,Brian Branch,Detroit Lions,Active,2026-11-12T22:37Z,,,,,,Branch was a full participant in practice Thursday.,S
+4692025,Brian Branch,Detroit Lions,Active,2026-11-12T22:37Z,,,,,,Branch (hip) was a full participant in practice Thursday.,S
 3139387,D.J. Reed,Detroit Lions,Out,2026-11-12T22:25Z,Hip,Not Specified,Not Specified,2026-11-22,OUT,Reed (hip) did not travel to Munich with the Lions and is ruled out for Sunday's matchup against the Patriots.,CB
 4360383,Kerby Joseph,Detroit Lions,Out,2026-11-12T22:13Z,Knee,Not Specified,Not Specified,2026-11-22,PUP-R,Joseph (knee) did not travel to Munich with the Lions and is ruled out for Sunday's matchup against the Patriots.,S
 4912274,Sione Vaki,Detroit Lions,Questionable,2026-11-12T22:03Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Vaki (ankle) did not participate in practice Thursday.,RB
@@ -274,6 +274,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4371973,Roger McCreary,Detroit Lions,Active,2026-11-01T16:42Z,,,,,,McCreary (foot) is active for Sunday's game against the Vikings.,CB
 4566092,Ennis Rakestraw Jr.,Detroit Lions,Active,2026-10-31T02:09Z,,,,,,Rakestraw (ankle) does not have a game designation for Sunday's Week 8 tilt versus the Vikings.,CB
 4361529,Isiah Pacheco,Detroit Lions,Injured Reserve,2026-10-30T17:09Z,Back,Not Specified,Not Specified,2026-12-28,IR,"Lions coach Dan Campbell said Friday that Pacheco (back) has a chance to return in late December, Justin Rogers of DetroitFootball.net reports.",RB
+3124005,Zaire Franklin,Green Bay Packers,Doubtful,2026-11-12T23:09Z,Shin,Fracture,Not Specified,2026-11-15,DOUBTFUL,Franklin (shin) did not practice Thursday.,LB
 4430191,Skyy Moore,Green Bay Packers,Injured Reserve,2026-11-12T23:03Z,Ankle,Not Specified,Left,2026-11-15,IR-R,Moore (ankle) was a limited participant in Thursday's practice.,WR
 3149687,Chris Brooks,Green Bay Packers,Injured Reserve,2026-11-12T22:58Z,Ankle,Not Specified,Not Specified,2026-11-15,IR-R,Brooks (ankle) was a limited participant in Thursday's practice.,RB
 4259305,Bo Melton,Green Bay Packers,Active,2026-11-12T22:48Z,,,,,,"Melton (head) was removed from the injury report ahead of Sunday's game against Minnesota, Weston Hodkiewicz of the Packers' official site reports.",WR
@@ -281,7 +282,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431487,Savion Williams,Green Bay Packers,Questionable,2026-11-12T22:29Z,Groin,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Williams (groin) was a limited practice participant Thursday.,WR
 4361423,Micah Parsons,Green Bay Packers,Out,2026-11-12T22:20Z,Knee - ACL,Surgery,Left,2026-11-25,PUP-R,Parsons (knee/illness) practiced on a limited basis Thursday.,DE
 4360086,Josh Whyle,Green Bay Packers,Questionable,2026-11-12T19:34Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,"Whyle (concussion) remained sidelined at practice Thursday, Dominique Yates of the Milwaukee Journal Sentinel reports.",TE
-3124005,Zaire Franklin,Green Bay Packers,Doubtful,2026-11-12T19:32Z,Shin,Fracture,Not Specified,2026-11-15,DOUBTFUL,"Franklin (shin) remained sidelined at practice Thursday, Dominique Yates of the Milwaukee Journal Sentinel reports.",LB
 4047365,Josh Jacobs,Green Bay Packers,Out,2026-11-12T17:02Z,Finger,Surgery,Right,2026-11-25,OUT,"Jacobs will undergo finger surgery Friday, and the Packers will have a better sense of his recovery timetable afterward, Matt Schneidman of The Athletic reports.",RB
 4428863,Evan Williams,Green Bay Packers,Active,2026-11-12T02:55Z,,,,,,Williams logged five tackles (four solo) and one interception during the Packers' 45-27 win over the Patriots in Week 9.,S
 4241470,Xavier McKinney,Green Bay Packers,Active,2026-11-12T02:52Z,,,,,,McKinney posted four tackles (two solo) and two interceptions during the Packers' 45-27 win over the Patriots in Week 9.,S
