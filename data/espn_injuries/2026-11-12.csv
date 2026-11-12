@@ -149,6 +149,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4257364,Zavier Scott,Chicago Bears,Injured Reserve,2026-11-05T21:19Z,Wrist,Not Specified,Not Specified,2026-12-13,IR,The Bears placed Scott (wrist) on injured reserve Thursday.,RB
 3116726,Kentavius Street,Chicago Bears,Injured Reserve,2026-11-05T04:55Z,Knee,Not Specified,Left,2027-02-15,IR,"The Bears placed Street (knee) on injured reserve Wednesday, Adam Jahns of AllCHGO.com reports.",DT
 4251007,Braxton Jones,Chicago Bears,Injured Reserve,2026-11-05T03:40Z,Knee,Surgery,Right,2027-02-15,IR,"Jones (knee) is out for the rest of the season, Brad Biggs of the Chicago Tribune reports.",OT
+4368003,Andrei Iosivas,Cincinnati Bengals,Injured Reserve,2026-11-12T16:43Z,Thumb,Surgery,Left,2026-11-15,IR-R,Iosivas (thumb) was cleared to return to practice Thursday.,WR
 4247726,Bryan Cook,Cincinnati Bengals,Active,2026-11-12T03:04Z,,,,,,Cook registered 10 tackles (five solo) during the Bengals' win over the Falcons on Sunday.,S
 4431519,Barrett Carter,Cincinnati Bengals,Active,2026-11-12T02:56Z,,,,,,"Carter compiled 10 tackles (two solo), an interception and a pass deflection during Cincinnati's win over the Falcons on Sunday.",LB
 4401811,Kyle Dugger,Cincinnati Bengals,Questionable,2026-11-12T02:02Z,Quadriceps,Not Specified,Left,2026-11-15,QUESTIONABLE,questionable,S
@@ -159,7 +160,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429000,Myles Hinton,Cincinnati Bengals,Active,2026-11-09T20:58Z,,,,,,,OT
 4870866,Connor Lew,Cincinnati Bengals,Active,2026-11-09T20:58Z,,,,,,,C
 5081542,Landon Robinson,Cincinnati Bengals,Active,2026-11-09T20:58Z,,,,,,,DT
-4368003,Andrei Iosivas,Cincinnati Bengals,Injured Reserve,2026-11-09T19:43Z,Thumb,Surgery,Left,2026-11-15,IR,"Head coach Zac Taylor said Monday that Iosivas is doing well in his recovery from left thumb surgery, and the Bengals will ""continue to work through this week"" to determine when the receiver might return from injured reserve, Laurel Pfahler of the Dayton Daily News reports.",WR
 4360234,Evan McPherson,Cincinnati Bengals,Active,2026-11-09T04:59Z,,,,,,McPherson went 2-for-2 on field-goal attempts while making all four of his extra-point tries during Sunday's 34-17 win over the Falcons.,PK
 3116164,Mike Gesicki,Cincinnati Bengals,Active,2026-11-09T03:01Z,,,,,,Gesicki caught both of his targets for 11 yards during Sunday's 34-17 win versus Atlanta.,TE
 4362238,Chase Brown,Cincinnati Bengals,Active,2026-11-08T19:20Z,,,,,,Brown carried the ball nine times for 57 yards and caught all three of his targets for 18 yards in Sunday's 34-17 win over the Falcons.,RB
@@ -174,6 +174,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3917797,Joe Giles-Harris,Cincinnati Bengals,Active,2026-11-01T16:40Z,,,,,,,LB
 4427834,Erick All Jr.,Cincinnati Bengals,Injured Reserve,2026-10-28T19:05Z,Knee - ACL,Surgery,Right,2027-02-15,IR,"Bengals head coach Zac Taylor confirmed Wednesday that All has been diagnosed with a torn ACL in his right knee and will require season-ending surgery, Jay Morrison of SI.com reports.",TE
 4240754,Boye Mafe,Cincinnati Bengals,Active,2026-10-28T02:16Z,,,,,,"Mafe finished Sunday's 35-13 win over the Ravens with five tackles (three solo), including 1.5 sacks.",DE
+4832800,Denzel Boston,Cleveland Browns,Questionable,2026-11-12T16:47Z,Toe,,,2026-11-15,QUESTIONABLE,"Boston (toe) said Thursday that he's hoping to return to practice and ""definitely feel(s) better"" after sitting out Wednesday's practice, Zac Jackson of The Athletic reports.",WR
 4695783,Myles Harden,Cleveland Browns,Active,2026-11-12T03:32Z,,,,,,"Harden recorded five tackles (four solo), including 2.0 sacks, and one pass defense during the Browns' 23-22 overtime loss to the Saints in Week 9.",CB
 4876017,Carson Schwesinger,Cleveland Browns,Questionable,2026-11-12T01:56Z,Wrist,,,2026-11-15,QUESTIONABLE,"Schwesinger (wrist) was a limited participant in Wednesday's practice, Mary Kay Cabot of The Cleveland Plain Dealer reports.",LB
 3915535,Denzel Ward,Cleveland Browns,Questionable,2026-11-12T01:54Z,Quadriceps,,,2026-11-15,QUESTIONABLE,"Ward (quadriceps) was a limited participant at practice Wednesday, Mary Kay Cabot of The Cleveland Plain Dealer reports.",CB
@@ -184,7 +185,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4597310,Austin Barber,Cleveland Browns,Questionable,2026-11-11T23:35Z,Calf,,,2026-11-15,QUESTIONABLE,questionable,OT
 5083076,Harold Fannin Jr.,Cleveland Browns,Questionable,2026-11-11T22:39Z,Groin,,,2026-11-15,QUESTIONABLE,"Fannin (groin) was limited in Wednesday's practice, Mary Kay Cabot of The Cleveland Plain Dealer reports.",TE
 4569620,Ronnie Hickman,Cleveland Browns,Questionable,2026-11-11T20:37Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,"Browns head coach Todd Monken said Wednesday that Hickman is in concussion protocol, Daniel Oyefusi of ESPN.com reports.",S
-4832800,Denzel Boston,Cleveland Browns,Questionable,2026-11-11T17:12Z,Toe,,,2026-11-15,QUESTIONABLE,"Boston isn't slated to practice Wednesday due to a toe injury, Daniel Oyefusi of ESPN reports.",WR
 4432762,Shedeur Sanders,Cleveland Browns,Active,2026-11-11T14:44Z,,,,,,"Sanders will return to a backup role for Sunday's game against the Texans after the Browns announced Wednesday that Deshaun Watson (concussion) will draw the Week 10 start, Kelsey Russo of the team's official site reports.",QB
 3122840,Deshaun Watson,Cleveland Browns,Out,2026-11-11T14:38Z,,,,,,"The Browns announced Wednesday that Watson (concussion) will start Sunday's game against the Texans, Kelsey Russo of the team's official site reports.",QB
 3040471,Maliek Collins,Cleveland Browns,Questionable,2026-11-10T15:44Z,Elbow,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,DT
@@ -524,8 +524,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4832846,Demond Claiborne,Minnesota Vikings,Injured Reserve,2026-11-10T01:02Z,Knee,Not Specified,Not Specified,2026-12-06,IR,ir,RB
 4242436,Theo Jackson,Minnesota Vikings,Questionable,2026-11-09T23:54Z,,,,,,"Jackson (quadriceps) is active for Monday's game against Buffalo, Craig Peters of the team's official site reports.",S
 3133487,Andrew Van Ginkel,Minnesota Vikings,Active,2026-11-07T23:02Z,,,,,,"Van Ginkel (chest) doesn't have a designation for Monday's matchup against the Bills, Craig Peters of the Vikings' official site reports.",LB
-4047646,A.J. Brown,New England Patriots,Out,2026-11-12T16:12Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Brown (knee/ankle) is taking part in Thursday's walkthrough, Evan Lazar of the Patriots' official site reports.",WR
-4569173,Rhamondre Stevenson,New England Patriots,Questionable,2026-11-12T16:10Z,Knee,Not Specified,Not Specified,2026-11-15,DOUBTFUL,"Stevenson (knee) was working off to the side at the start of Thursday's practice, Mark Daniels of MassLive.com reports.",RB
+4569173,Rhamondre Stevenson,New England Patriots,Doubtful,2026-11-12T16:37Z,Knee,Not Specified,Not Specified,2026-11-15,DOUBTFUL,doubtful,RB
+4047646,A.J. Brown,New England Patriots,Questionable,2026-11-12T16:37Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,WR
 4432710,TreVeyon Henderson,New England Patriots,Out,2026-11-12T10:01Z,Illness,Not Specified,Not Specified,2026-11-29,OUT,out,RB
 4686772,Christian Gonzalez,New England Patriots,Active,2026-11-12T03:01Z,,,,,,Gonzalez logged 10 tackles (nine solo) and one pass defense during the Patriots' 45-27 loss to the Packers in Week 9.,CB
 4368113,Charles Woods,New England Patriots,Questionable,2026-11-12T02:02Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,CB
