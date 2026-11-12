@@ -50,7 +50,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3045527,Samson Ebukam,Atlanta Falcons,Injured Reserve,2026-11-04T00:37Z,Hamstring,Not Specified,Not Specified,2026-12-13,IR,"Ebukam (hamstring) was placed on injured reserve by the Falcons on Tuesday, Tori McElhaney of the team's official website reports.",DE
 4369886,Chris Blair,Atlanta Falcons,Active,2026-11-02T15:02Z,,,,,,Blair went without a target while playing nine of the Falcons' 53 offensive snaps in Sunday's 16-0 loss to the Buccaneers.,WR
 4686768,Gerad Lichtenhan,Baltimore Ravens,Out,2026-11-12T18:43Z,Undisclosed,,,2026-12-13,OUT,out,OT
-4243371,Riley Patterson,Baltimore Ravens,Active,2026-11-11T23:24Z,,,,,,"Following a Wednesday workout, Patterson is slated to sign with Ravens, putting him on track to kick for the team Monday night against the Chargers, Mike Garafolo of NFL Network reports.",PK
+4243371,Riley Patterson,Baltimore Ravens,Active,2026-11-12T17:15Z,,,,,,"Patterson will be the Ravens' kicker for Monday night's game against the Chargers, Jamison Hensley of ESPN.com reports.",PK
 4036444,Ryan Neuzil,Baltimore Ravens,Active,2026-11-11T00:36Z,,,,,,"The Ravens acquired Neuzil from the Falcons on Tuesday in exchange for guard Andrew Vorhees and a conditional 2028 sixth-round pick, Jamison Hensley of ESPN.com reports.",C
 4575517,Kyle Hamilton,Baltimore Ravens,Questionable,2026-11-11T00:15Z,Hip,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,"Ravens head coach Jesse Minter said Monday that Hamilton, who couldn't finish last Thursday's loss to Jacksonville due to a hip injury, ""looks fairly good,"" Jonas Shaffer of TheBaltimoreBanner.com reports.",S
 4601278,Nate Wiggins,Baltimore Ravens,Questionable,2026-11-10T15:44Z,Illness,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,questionable,CB
@@ -276,7 +276,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361529,Isiah Pacheco,Detroit Lions,Injured Reserve,2026-10-30T17:09Z,Back,Not Specified,Not Specified,2026-12-28,IR,"Lions coach Dan Campbell said Friday that Pacheco (back) has a chance to return in late December, Justin Rogers of DetroitFootball.net reports.",RB
 3124005,Zaire Franklin,Green Bay Packers,Doubtful,2026-11-12T23:09Z,Shin,Fracture,Not Specified,2026-11-15,DOUBTFUL,Franklin (shin) did not practice Thursday.,LB
 4430191,Skyy Moore,Green Bay Packers,Injured Reserve,2026-11-12T23:03Z,Ankle,Not Specified,Left,2026-11-15,IR-R,Moore (ankle) was a limited participant in Thursday's practice.,WR
-3149687,Chris Brooks,Green Bay Packers,Injured Reserve,2026-11-12T22:58Z,Ankle,Not Specified,Not Specified,2026-11-15,IR-R,Brooks (ankle) was a limited participant in Thursday's practice.,RB
+3149687,Chris Brooks,Green Bay Packers,Injured Reserve,2026-11-12T22:58Z,Ankle,Not Specified,Not Specified,2026-11-15,IR-R,"Brooks (IR, ankle) was a limited participant in Thursday's practice.",RB
 4259305,Bo Melton,Green Bay Packers,Active,2026-11-12T22:48Z,,,,,,"Melton (head) was removed from the injury report ahead of Sunday's game against Minnesota, Weston Hodkiewicz of the Packers' official site reports.",WR
 4869461,Trey Smack,Green Bay Packers,Active,2026-11-12T22:39Z,,,,,,"Smack (calf) was a full participant in Thursday's practice, Weston Hodkiewicz of the Packers' official site reports.",PK
 4431487,Savion Williams,Green Bay Packers,Questionable,2026-11-12T22:29Z,Groin,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Williams (groin) was a limited practice participant Thursday.,WR
@@ -299,13 +299,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361904,Travis Glover,Green Bay Packers,Questionable,2026-11-10T15:44Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,OT
 4360887,Donovan Jennings,Green Bay Packers,Active,2026-11-09T21:12Z,,,,,,,G
 4572680,Tucker Kraft,Green Bay Packers,Active,2026-11-09T03:48Z,,,,,,Kraft brought in one of three targets for one yard and rushed twice for eight yards in the Packers' 45-27 win over the Patriots on Sunday.,TE
+4685724,Will Anderson Jr.,Houston Texans,Questionable,2026-11-12T23:23Z,Ankle,,,2026-11-15,QUESTIONABLE,"Anderson (ankle) was a limited participant in Thursday's practice, Mary Kay Cabot of The Cleveland Plain Dealer reports.",DE
 4432708,Marvin Harrison Jr.,Houston Texans,Questionable,2026-11-12T22:50Z,Hamstring,,,2026-11-15,QUESTIONABLE,"Harrison (hamstring) didn't practice Thursday, Chris Easterling of the Akron Beacon Journal reports.",WR
 2976560,Danielle Hunter,Houston Texans,Questionable,2026-11-12T22:33Z,Hamstring,,,2026-11-15,QUESTIONABLE,questionable,DE
 4429059,Woody Marks,Houston Texans,Questionable,2026-11-12T22:32Z,Knee,,,2026-11-15,QUESTIONABLE,"Marks (knee) didn't practice Thursday, Chris Easterling of the Akron Beacon Journal reports.",RB
 4035538,David Montgomery,Houston Texans,Questionable,2026-11-12T22:25Z,Groin,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Montgomery (groin) was limited at practice Thursday, Chris Easterling of the Akron Beacon Journal reports.",RB
 3045474,Wyatt Teller,Houston Texans,Active,2026-11-12T22:18Z,,,,,,,G
 3919117,Azeez Al-Shaair,Houston Texans,Questionable,2026-11-12T19:20Z,Groin,,,2026-11-15,QUESTIONABLE,"Al-Shaair (groin/personal) remained absent from practice Thursday, Aaron Wilson of KPRC 2 Houston reports.",LB
-4685724,Will Anderson Jr.,Houston Texans,Questionable,2026-11-12T03:23Z,Ankle,,,2026-11-15,QUESTIONABLE,"Anderson logged two tackles (two solo), including 2.0 sacks, during Houston's win over the Chargers on Sunday.",DE
 4594277,Jaylin Smith,Houston Texans,Injured Reserve,2026-11-12T01:15Z,Hamstring,Strain,Not Specified,2026-11-15,IR-R,The Texans designated Smith (hamstring) to return from injured reserve Wednesday.,CB
 4241250,Jake Hummel,Houston Texans,Injured Reserve,2026-11-12T01:09Z,Groin,Surgery,Not Specified,2026-11-15,IR-R,The Texans opened Hummel's (groin) 21-day practice window Wednesday.,LB
 4362504,Brevin Jordan,Houston Texans,Questionable,2026-11-12T00:01Z,Finger,,,2026-11-15,QUESTIONABLE,"Jordan (finger) did not practice Wednesday, Jonathan M. Alexander of the Houston Chronicle reports.",TE
@@ -429,7 +429,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430968,Kimani Vidal,Los Angeles Chargers,Active,2026-11-11T00:29Z,,,,,,Vidal rushed seven times for 30 yards in Sunday's 44-22 loss to the Texans. He added one catch for six yards on three targets.,RB
 4595342,Oronde Gadsden,Los Angeles Chargers,Active,2026-11-11T00:14Z,,,,,,Gadsden caught two of three targets for 17 yards during the Chargers' 44-22 loss to the Texans on Sunday.,TE
 4241263,Charlie Kolar,Los Angeles Chargers,Active,2026-11-11T00:08Z,,,,,,Kolar brought in all three of his targets for 31 yards in a 44-22 loss to the Texans on Sunday.,TE
-4038941,Justin Herbert,Los Angeles Chargers,Questionable,2026-11-10T16:00Z,Finger,Not Specified,Left,2026-11-16,QUESTIONABLE,"Chargers head coach Jim Harbaugh said that Herbert ""should be good to go"" for Monday's game at Baltimore after imaging on the quarterback's injured left middle finger returned negative for a fracture, ESPN.com reports.",QB
+4038941,Justin Herbert,Los Angeles Chargers,Questionable,2026-11-10T16:00Z,,,,,,"Chargers head coach Jim Harbaugh said that Herbert ""should be good to go"" for Monday's game at Baltimore after imaging on the quarterback's injured left middle finger returned negative for a fracture, ESPN.com reports.",QB
 4360745,Kendall Williamson,Los Angeles Chargers,Questionable,2026-11-10T15:44Z,Calf,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,questionable,S
 4685553,Brenen Thompson,Los Angeles Chargers,Questionable,2026-11-10T15:44Z,Quadriceps,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,questionable,WR
 4690171,Deane Leonard,Los Angeles Chargers,Questionable,2026-11-10T15:44Z,Concussion,Concussion,Not Specified,2026-11-16,QUESTIONABLE,questionable,CB
