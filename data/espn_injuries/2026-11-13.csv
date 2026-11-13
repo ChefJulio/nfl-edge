@@ -74,8 +74,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429582,Joe Fagnano,Baltimore Ravens,Active,2026-11-06T05:23Z,,,,,,Fagnano completed 10 of 18 passes for 60 yards with no touchdowns and two interceptions while adding three rushes for 13 yards in the Ravens' 33-10 loss to the Jaguars on Thursday night.,QB
 4429615,Zay Flowers,Baltimore Ravens,Active,2026-11-06T05:03Z,,,,,,Flowers brought in three of six targets for six yards and rushed three times for 17 yards in the Ravens' 33-10 loss to the Jaguars on Thursday night.,WR
 4426372,Adisa Isaac,Baltimore Ravens,Questionable,2026-11-06T03:14Z,Hamstring,Not Specified,Not Specified,2026-11-16,QUESTIONABLE,Isaac (hamstring) is questionable to return to Thursday night's contest against the Jaguars.,LB
+4385690,Dalton Kincaid,Buffalo Bills,Active,2026-11-13T21:15Z,,,,,,Kincaid (ankle) doesn't have an injury designation for Sunday's game against the Jets.,TE
 4044133,Sam Franklin Jr.,Buffalo Bills,Questionable,2026-11-12T21:30Z,Shoulder,,,2026-11-15,QUESTIONABLE,questionable,S
-4385690,Dalton Kincaid,Buffalo Bills,Questionable,2026-11-12T21:24Z,Ankle,,,2026-11-15,QUESTIONABLE,Kincaid (ankle) was a limited participant at Thursday's practice.,TE
 4259166,Terrel Bernard,Buffalo Bills,Active,2026-11-12T03:43Z,,,,,,"Bernard recorded six tackles (two solo) and a pair of pass breakups, including an interception, in Monday night's 23-6 win over the Vikings.",LB
 3051324,Dion Dawkins,Buffalo Bills,Questionable,2026-11-12T01:34Z,Ribs,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Dawkins (ribs) was a limited participant in Wednesday's walkthrough practice.,OT
 3127294,Greg Gaines,Buffalo Bills,Active,2026-11-12T01:32Z,,,,,,Gaines (calf) was a full participant in Wednesday's walkthrough practice.,DT
@@ -299,11 +299,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4249836,Pierre Strong Jr.,Green Bay Packers,Active,2026-11-11T00:49Z,,,,,,Strong rushed eight times for 22 yards in Sunday's 45-27 win over the Patriots. He added two catches for 11 yards on two targets.,RB
 4819231,Kaleb Johnson,Green Bay Packers,Active,2026-11-10T16:24Z,,,,,,"Johnson could serve as the Packers' lead option on the ground in Sunday's game against the Vikings with Josh Jacobs (finger) expected to miss multiple weeks and with the status of MarShawn Lloyd (knee) uncertain, Matt Schneidman of The Athletic reports.",RB
 4360887,Donovan Jennings,Green Bay Packers,Active,2026-11-09T21:12Z,,,,,,,G
+4432708,Marvin Harrison Jr.,Houston Texans,Out,2026-11-13T21:13Z,Hamstring,,,2026-11-19,OUT,Harrison (hamstring) is ruled out for Sunday's game against the Browns.,WR
+4429059,Woody Marks,Houston Texans,Active,2026-11-13T21:10Z,,,,,,"Following a full practice Friday, Marks (knee) doesn't carry an injury designation for Sunday's game against the Browns.",RB
+4035538,David Montgomery,Houston Texans,Questionable,2026-11-13T21:08Z,Groin,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Montgomery (groin) is listed as questionable for Sunday's game against the Browns, while Woody Marks (knee) doesn't have an injury designation.",RB
 4362504,Brevin Jordan,Houston Texans,Out,2026-11-13T21:00Z,Finger,,,2026-11-19,OUT,out,TE
 3919117,Azeez Al-Shaair,Houston Texans,Out,2026-11-13T21:00Z,Groin,,,2026-11-19,OUT,out,LB
-4432708,Marvin Harrison Jr.,Houston Texans,Out,2026-11-13T17:28Z,Hamstring,,,2026-11-19,OUT,"Harrison (hamstring) wasn't spotted during the portion of Friday's practice open to the media, Aaron Wilson of KPRC 2 Houston reports.",WR
-4035538,David Montgomery,Houston Texans,Questionable,2026-11-13T17:04Z,Groin,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Montgomery (groin) practiced for a second straight day Friday after missing the past month, Aaron Wilson of KPRC 2 Houston reports.",RB
-4429059,Woody Marks,Houston Texans,Active,2026-11-13T16:56Z,,,,,,"Marks (knee) was back at practice Friday, Aaron Wilson of KPRC 2 Houston reports.",RB
 4243956,Reed Blankenship,Houston Texans,Questionable,2026-11-12T23:37Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,"Blankenship (concussion/hand) was a full participant in Thursday's practice, Mary Kay Cabot of The Cleveland Plain Dealer reports.",S
 2976560,Danielle Hunter,Houston Texans,Out,2026-11-12T23:31Z,Hamstring,,,2026-11-19,OUT,"Hunter (hamstring) was limited in Thursday's practice, Mary Kay Cabot of The Cleveland Plain Dealer reports.",DE
 4685724,Will Anderson Jr.,Houston Texans,Questionable,2026-11-12T23:23Z,Ankle,,,2026-11-15,QUESTIONABLE,"Anderson (ankle) was a limited participant in Thursday's practice, Mary Kay Cabot of The Cleveland Plain Dealer reports.",DE
@@ -315,7 +315,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242546,Davis Mills,Houston Texans,Active,2026-11-11T15:48Z,,,,,,Mills completed one of two pass attempts for seven yards and lost two yards on two carries in Sunday's 44-22 win over the Chargers.,QB
 4426496,Cade Stover,Houston Texans,Active,2026-11-11T15:42Z,,,,,,Stover was a healthy inactive for Sunday's 44-22 win over the Chargers.,TE
 3843945,Foster Moreau,Houston Texans,Active,2026-11-11T04:28Z,,,,,,Moreau didn't log any targets or touches Sunday in a 44-22 win against the Chargers.,TE
-2983509,Dare Ogunbowale,Houston Texans,Active,2026-11-11T04:20Z,,,,,,Ogunbowale caught his only target for a three-yard gain Sunday in a 44-22 win over the Chargers.,RB
 4428656,Nate Thomas,Houston Texans,Active,2026-11-09T21:14Z,,,,,,,OT
 3121595,Braden Smith,Houston Texans,Active,2026-11-09T21:14Z,,,,,,,OT
 4880873,Febechi Nwaiwu,Houston Texans,Active,2026-11-09T21:14Z,,,,,,,G
@@ -324,6 +323,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429022,Kayshon Boutte,Houston Texans,Active,2026-11-09T02:08Z,,,,,,Boutte erupted for four catches (on five targets) for 125 yards and two touchdowns during Sunday's 44-22 road win against the Chargers.,WR
 4686422,Xavier Hutchinson,Houston Texans,Active,2026-11-09T02:07Z,,,,,,Hutchinson caught three of five targets for 29 yards and a touchdown and  added a 28-yard kick return during Sunday's 44-22 win against the Chargers.,WR
 4258173,Nico Collins,Houston Texans,Active,2026-11-09T01:54Z,,,,,,Collins corralled all four of his targets for 55 yards and one touchdown during Sunday's 44-22 victory at the Chargers.,WR
+4432577,C.J. Stroud,Houston Texans,Active,2026-11-09T01:30Z,,,,,,"Stroud completed 21 of 35 passes for 384 yards, five touchdowns and one interception and recorded two carries for 20 yards during Sunday's 44-22 win at the Chargers.",QB
 4892240,Jalen Travis,Indianapolis Colts,Out,2026-11-13T18:14Z,Knee,Not Specified,Not Specified,2026-11-19,OUT,out,OT
 2566045,Luke Rhodes,Indianapolis Colts,Out,2026-11-13T18:14Z,Hamstring,,,2026-11-19,OUT,out,LS
 3863182,Jerry Tillery,Indianapolis Colts,Out,2026-11-13T18:14Z,Calf,,,2026-11-19,OUT,out,DT
@@ -499,14 +499,15 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4569603,Malik Washington,Miami Dolphins,Active,2026-11-09T03:29Z,,,,,,Washington caught two of three targets for 21 yards during Sunday's 19-9 loss to the Lions.,WR
 4869645,Caleb Douglas,Miami Dolphins,Active,2026-11-09T00:49Z,,,,,,Douglas secured six of eight targets for 70 yards in the Dolphins' 19-9 loss to the Lions on Sunday.,WR
 4711533,Ollie Gordon II,Miami Dolphins,Active,2026-11-08T23:11Z,,,,,,Gordon rushed 16 times for 55 yards and brought in his only target for nine yards in the Dolphins' 19-9 loss to the Lions on Sunday.,RB
-4036133,T.J. Hockenson,Minnesota Vikings,Questionable,2026-11-13T19:53Z,Wrist,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Hockenson (wrist/chest) wasn't seen during the portion of Friday's practice open to the media, Kevin Seifert of ESPN.com reports.",TE
+3917315,Kyler Murray,Minnesota Vikings,Out,2026-11-13T21:11Z,Hamstring,Strain,Not Specified,2026-11-22,OUT,out,QB
+4429205,Jordan Addison,Minnesota Vikings,Questionable,2026-11-13T21:10Z,Thumb,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,WR
+4036133,T.J. Hockenson,Minnesota Vikings,Out,2026-11-13T19:53Z,Wrist,Not Specified,Not Specified,2026-11-22,OUT,"Hockenson (wrist/chest) wasn't seen during the portion of Friday's practice open to the media, Kevin Seifert of ESPN.com reports.",TE
 14880,Kirk Cousins,Minnesota Vikings,Active,2026-11-13T13:52Z,,,,,,"Cousins is expected to start Sunday's game against the Packers, Ian Rapoport of NFL Network reports.",QB
 3728281,Blake Cashman,Minnesota Vikings,Questionable,2026-11-13T00:28Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,Cashman (concussion) did not practice Thursday.,LB
-3886598,Jauan Jennings,Minnesota Vikings,Questionable,2026-11-13T00:15Z,Calf,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Jennings (calf) did not participate at practice Thursday.,WR
+3886598,Jauan Jennings,Minnesota Vikings,Out,2026-11-13T00:15Z,Calf,Not Specified,Not Specified,2026-11-22,OUT,Jennings (calf) did not participate at practice Thursday.,WR
 2573079,Carson Wentz,Minnesota Vikings,Questionable,2026-11-12T23:28Z,Ankle,Not Specified,Left,2026-11-15,QUESTIONABLE,Wentz (ankle) practiced in a limited capacity Thursday.,QB
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-11-12T03:38Z,,,,,,Wilson recorded nine tackles (three solo) in Monday night's 23-6 loss to the Bills.,LB
 4568007,Jay Ward,Minnesota Vikings,Questionable,2026-11-11T23:02Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,questionable,S
-3917315,Kyler Murray,Minnesota Vikings,Doubtful,2026-11-11T19:37Z,Hamstring,Strain,Not Specified,2026-11-22,OUT,"Coach Kevin O'Connell said Wednesday that Murray (hamstring) remains week-to-week, Kevin Seifert of ESPN reports.",QB
 4262921,Justin Jefferson,Minnesota Vikings,Active,2026-11-11T17:13Z,,,,,,"Jefferson stands to benefit from Tuesday's acquisition of Kirk Cousins, who is expected to take over as the Vikings' starting quarterback beginning with Sunday's game against the Packers, Michael F. Florio of ESPN.com reports.",WR
 4565185,Tai Felton,Minnesota Vikings,Active,2026-11-11T15:31Z,,,,,,Felton went without a target while playing six of the Vikings' 48 offensive snaps in Monday's 23-6 loss to the Bills.,WR
 4240631,DeeJay Dallas,Minnesota Vikings,Active,2026-11-11T03:56Z,,,,,,Dallas caught his only target for a two-yard gain in Monday's Week 9 loss to the Bills.,RB
@@ -516,7 +517,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4602019,Caleb Banks,Minnesota Vikings,Active,2026-11-10T15:44Z,,,,,,,DT
 5091793,Charles Demmings,Minnesota Vikings,Active,2026-11-10T15:44Z,,,,,,,CB
 4710865,Jakobe Thomas,Minnesota Vikings,Active,2026-11-10T15:44Z,,,,,,,S
-4429205,Jordan Addison,Minnesota Vikings,Active,2026-11-10T06:10Z,,,,,,Addison secured two of three targets for 28 yards in the Vikings' 23-6 loss to the Bills on Monday night.,WR
 3042519,Aaron Jones Sr.,Minnesota Vikings,Active,2026-11-10T05:28Z,,,,,,Jones rushed five times for 16 yards and brought in his only target for five yards in the Vikings' 23-6 loss to the Bills on Monday night.,RB
 4360569,Jordan Mason,Minnesota Vikings,Active,2026-11-10T05:17Z,,,,,,Mason rushed six times for 35 yards and brought in two of three targets for seven yards in the Vikings' 23-6 loss to the Bills on Monday night.,RB
 4629149,Tyrion Ingram-Dawkins,Minnesota Vikings,Questionable,2026-11-10T04:02Z,Ankle,,,2026-11-15,QUESTIONABLE,Ingram-Dawkins exited Monday night's game against the Bills with an ankle injury and is questionable to return.,DE
@@ -599,7 +599,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4257188,Charlie Jones,New York Giants,Active,2026-11-10T23:03Z,,,,,,,WR
 4686362,Marcus Mbow,New York Giants,Active,2026-11-09T21:30Z,,,,,,,OT
 5082424,Dominic Zvada,New York Giants,Active,2026-11-09T04:01Z,,,,,,Zvada made all four of his field-goal attempts and his lone PAT in Sunday's 19-11 win over the Eagles.,PK
-4723820,Omar Cooper Jr.,New York Jets,Active,2026-11-13T16:14Z,,,,,,"Cooper (ankle) will be a full practice participant Friday, Eric Allen of the Jets' official site reports.",WR
+4597500,Adonai Mitchell,New York Jets,Questionable,2026-11-13T21:14Z,Knee,,,2026-11-15,QUESTIONABLE,questionable,WR
+4723820,Omar Cooper Jr.,New York Jets,Active,2026-11-13T16:14Z,Ankle,,,2026-11-15,QUESTIONABLE,"Cooper (ankle) will be a full practice participant Friday, Eric Allen of the Jets' official site reports.",WR
 4569618,Garrett Wilson,New York Jets,Questionable,2026-11-13T16:11Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,"Wilson (concussion) has one more step to complete in concussion protocol, and Jets coach Aaron Glenn believes that will happen before Sunday's game against the Bills, Brian Costello of the New York Post reports.",WR
 4683815,Trevin Wallace,New York Jets,Out,2026-11-13T15:43Z,Groin,Not Specified,Not Specified,2026-11-22,OUT,out,LB
 4685248,David Bailey,New York Jets,Active,2026-11-12T02:45Z,,,,,,"Bailey tallied nine tackles (five solo), including 2.0 sacks, and two forced fumbles during the Jets' loss to the Chiefs on Sunday.",LB
@@ -615,7 +616,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4373951,Kohl Levao,New York Jets,Active,2026-11-09T21:31Z,,,,,,,G
 4361767,Will McDonald IV,New York Jets,Active,2026-11-09T15:02Z,,,,,,"McDonald put in a request for the Jets to trade him ahead of Tuesday's deadline, Ian Rapoport and Rich Cimini of ESPN report.",DE
 3124679,Jason Sanders,New York Jets,Active,2026-11-09T04:48Z,,,,,,Sanders went 4-for-5 on field-goal tries during Sunday's 35-12 loss to the Chiefs.,PK
-4597500,Adonai Mitchell,New York Jets,Active,2026-11-09T03:53Z,,,,,,Mitchell failed to reel in any of his seven targets during Sunday's 35-12 loss to the Chiefs.,WR
 5083315,Kenyon Sadiq,New York Jets,Active,2026-11-09T03:49Z,,,,,,Sadiq caught all four of his targets for 49 yards in Sunday's 35-12 loss to the Chiefs.,TE
 15864,Geno Smith,New York Jets,Active,2026-11-09T00:26Z,,,,,,"Smith completed 18 of 32 passes for 165 yards, no touchdowns and no interceptions in Sunday's 35-12 loss to the Chiefs. He also rushed once for eight yards.",QB
 4685247,Braelon Allen,New York Jets,Active,2026-11-09T00:26Z,,,,,,"Allen rushed eight times for 33 yards, caught both of his targets for 21 yards and lost a fumble in Sunday's 35-12 loss to the Chiefs.",RB
