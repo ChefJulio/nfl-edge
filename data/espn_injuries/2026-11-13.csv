@@ -249,6 +249,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5085625,Gavin Ortega,Denver Broncos,Active,2026-11-02T18:50Z,,,,,,,OT
 4261090,Jordan Jackson,Denver Broncos,Active,2026-11-02T18:50Z,,,,,,,DT
 4683535,Tyler Onyedim,Denver Broncos,Active,2026-11-02T18:50Z,,,,,,,DT
+4374302,Amon-Ra St. Brown,Detroit Lions,Questionable,2026-11-13T16:45Z,Ribs,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"St. Brown (ribs) was a limited participant in Friday's practice and is listed as questionable for Sunday's game against the Patriots, Tim Twentyman of the Lions' official site reports.",WR
 4361788,Cade Mays,Detroit Lions,Out,2026-11-13T01:26Z,Ankle,Sprain,Not Specified,2026-11-22,OUT,Mays (ankle) is not traveling with the Lions to Munich ahead of their Week 10 matchup against the Patriots.,C
 4038849,DJ Wonnum,Detroit Lions,Questionable,2026-11-12T22:47Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,Wonnum (concussion) was a full participant in practice Thursday.,LB
 4692025,Brian Branch,Detroit Lions,Active,2026-11-12T22:37Z,,,,,,Branch (hip) was a full participant in practice Thursday.,S
@@ -256,7 +257,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360383,Kerby Joseph,Detroit Lions,Out,2026-11-12T22:13Z,Knee,Not Specified,Not Specified,2026-11-22,PUP-R,Joseph (knee) did not travel to Munich with the Lions and is ruled out for Sunday's matchup against the Patriots.,S
 4912274,Sione Vaki,Detroit Lions,Questionable,2026-11-12T22:03Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Vaki (ankle) did not participate in practice Thursday.,RB
 3046779,Jared Goff,Detroit Lions,Active,2026-11-12T21:18Z,,,,,,Goff (chest) practiced fully Thursday.,QB
-4374302,Amon-Ra St. Brown,Detroit Lions,Questionable,2026-11-12T21:12Z,Ribs,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,St. Brown (ribs) was a limited practice participant Thursday.,WR
 3045463,Chuck Clark,Detroit Lions,Active,2026-11-12T03:37Z,,,,,,Clark registered five tackles (three solo) and one interception during the Lions' 19-9 win over the Dolphins in Week 9.,S
 4383429,Jacob Saylors,Detroit Lions,Active,2026-11-12T00:10Z,,,,,,Saylors (neck) was a full participant at practice Wednesday.,RB
 5123663,Isaac TeSlaa,Detroit Lions,Active,2026-11-11T03:18Z,,,,,,TeSlaa registered one catch for nine yards on two targets in Sunday's 19-9 win over Miami.,WR
@@ -349,6 +349,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2971281,Pharaoh Brown,Indianapolis Colts,Active,2026-11-09T21:15Z,,,,,,,TE
 4362523,Will Mallory,Indianapolis Colts,Active,2026-11-09T21:15Z,,,,,,,TE
 4571557,Spencer Shrader,Indianapolis Colts,Active,2026-11-09T04:19Z,,,,,,Shrader went 3-for-3 on field-goal tries and made both of his PATs during Sunday's 27-23 loss to the Cowboys.,PK
+3919512,Jessie Bates III,Jacksonville Jaguars,Out,2026-11-13T16:23Z,Coach's Decision,,,2026-11-22,OUT,"Jaguars coach Liam Coen said Friday that Bates and DT Jordan Davis will not play in Sunday's game at Tennessee, Ryan O'Halloran of The Florida Times-Union reports.",S
 4882093,Bhayshul Tuten,Jacksonville Jaguars,Questionable,2026-11-13T15:51Z,Ankle,,,2026-11-15,QUESTIONABLE,"Tuten (ankle/foot) will practice Friday, Ryan O'Halloran of The Florida Times-Union reports.",RB
 4426349,Travon Walker,Jacksonville Jaguars,Questionable,2026-11-12T21:43Z,Ribs,,,2026-11-15,QUESTIONABLE,Walker (ribs) was a limited participant in practice Thursday.,DE
 3916433,Jakobi Meyers,Jacksonville Jaguars,Questionable,2026-11-12T21:39Z,Ankle,Not Specified,,2026-11-15,QUESTIONABLE,Meyers (ankle) was a limited participant in Thursday's practice.,WR
@@ -373,7 +374,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686361,Cam Little,Jacksonville Jaguars,Active,2026-11-06T05:28Z,,,,,,Little made all four of his field-goal attempts and all three of his extra-point tries in a 33-10 win over Baltimore on Thursday.,PK
 4360310,Trevor Lawrence,Jacksonville Jaguars,Active,2026-11-06T05:09Z,,,,,,Lawrence completed 16 of 26 passes for 242 yards with a touchdown and no interceptions while rushing once for minus-1 yard in the Jaguars' 33-16 win over the Ravens on Thursday night.,QB
 4432620,Parker Washington,Jacksonville Jaguars,Active,2026-11-06T04:55Z,,,,,,Washington secured two of seven targets for 61 yards and a touchdown in the Jaguars' 33-10 win over the Ravens on Thursday night. He also returned one punt for 11 yards.,WR
-4877475,Cam'Ron Silmon-Craig,Jacksonville Jaguars,Out,2026-11-05T23:48Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,S
 3139477,Patrick Mahomes,Kansas City Chiefs,Active,2026-11-13T14:05Z,,,,,,"Mahomes (elbow/knee) has had ""limited swelling"" and ""limited pain"" in his right (throwing) elbow in recent days, and he is in line to start Sunday's game against the Falcons, Ian Rapoport of ESPN and NFL Network reports.",QB
 4685489,Jaydn Ott,Kansas City Chiefs,Questionable,2026-11-12T21:39Z,Hamstring,,,2026-11-15,QUESTIONABLE,questionable,RB
 3044859,Chris Jones,Kansas City Chiefs,Active,2026-11-12T03:14Z,,,,,,"Jones recorded four tackles (two solo), including 2.0 sacks, and a pass breakup in Sunday's 35-12 win over the Jets.",DT
@@ -474,7 +474,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362294,Desjuan Johnson,Los Angeles Rams,Active,2026-11-09T21:25Z,,,,,,,DE
 4575003,Keagen Trost,Los Angeles Rams,Active,2026-11-09T21:25Z,,,,,,,OT
 4429096,Blake Corum,Los Angeles Rams,Active,2026-11-08T22:52Z,,,,,,Corum carried the ball 11 times for 58 yards and a touchdown and failed to catch either of his two targets in Sunday's 20-13 win over the Commanders.,RB
-4869961,Chris Bell,Miami Dolphins,Doubtful,2026-11-13T15:38Z,Knee,,,2026-11-15,DOUBTFUL,doubtful,WR
+4869961,Chris Bell,Miami Dolphins,Doubtful,2026-11-13T16:36Z,Knee,,,2026-11-15,DOUBTFUL,"Bell (knee) is unlikely to play in Sunday's game against the Colts, but his injury isn't considered long-term and isn't related to the ACL repair surgery he had last December, Barry Jackson of the Miami Herald reports.",WR
 4040537,Aaron Brewer,Miami Dolphins,Out,2026-11-13T15:38Z,Concussion,,,2026-11-22,OUT,out,C
 4430681,Jared Wayne,Miami Dolphins,Questionable,2026-11-12T21:33Z,Quadriceps,,,2026-11-15,QUESTIONABLE,questionable,WR
 4043130,Jordyn Brooks,Miami Dolphins,Active,2026-11-12T02:48Z,,,,,,Brooks recorded 12 tackles (four solo) during Sunday's 19-9 loss versus the Lions.,LB
@@ -751,7 +751,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4890373,Bauer Sharp,Tampa Bay Buccaneers,Active,2026-11-04T19:17Z,,,,,,Sharp went without a target while playing 19 of the Buccaneers' 60 snaps on offense in Sunday's 16-0 win over the Falcons.,TE
 4428557,Tyjae Spears,Tennessee Titans,Questionable,2026-11-12T21:21Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Spears (knee) was a limited participant at practice Thursday, Jim Wyatt of the Titans' official site reports.",RB
 3916148,Tony Pollard,Tennessee Titans,Questionable,2026-11-12T21:16Z,Finger,,,2026-11-15,QUESTIONABLE,"Pollard (finger/rest) didn't practice Thursday, Jim Wyatt of the Titans' official site reports.",RB
-4871023,Carnell Tate,Tennessee Titans,Questionable,2026-11-12T21:09Z,Shoulder,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Tate (shoulder) didn't practice Thursday.,WR
+4871023,Carnell Tate,Tennessee Titans,Out,2026-11-12T21:09Z,Shoulder,Not Specified,Not Specified,2026-11-22,OUT,Tate (shoulder) didn't practice Thursday.,WR
 4685617,Kevin Winston Jr.,Tennessee Titans,Questionable,2026-11-12T21:03Z,Shoulder,,,2026-11-15,QUESTIONABLE,questionable,S
 4431437,JC Latham,Tennessee Titans,Active,2026-11-12T01:30Z,,,,,,"Latham (finger) practiced in full Wednesday, Jim Wyatt of the Titans' official site reports.",OT
 3915398,Tommy Townsend,Tennessee Titans,Active,2026-11-12T01:26Z,,,,,,"Townsend (knee) was a full participant at practice Wednesday, Jim Wyatt of the Titans' official site reports.",P
