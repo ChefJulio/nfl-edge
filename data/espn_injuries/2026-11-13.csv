@@ -452,7 +452,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431342,Brennan Presley,Los Angeles Rams,Active,2026-11-13T01:22Z,,,,,,"The Rams signed Presley to the 53-man roster Thursday, Aaron Wilson of KPRC 2 Houston reports.",WR
 4426405,Trent McDuffie,Los Angeles Rams,Questionable,2026-11-13T01:01Z,Back,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"McDuffie (back) did not participate at practice Thursday, Adam Caplan of SiriusXM NFL Radio reports.",CB
 4426553,Davis Allen,Los Angeles Rams,Questionable,2026-11-13T00:55Z,Oblique,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Allen (oblique) did not participate at practice Thursday, Adam Caplan of SiriusXM NFL Radio reports.",TE
-4426515,Puka Nacua,Los Angeles Rams,Injured Reserve,2026-11-13T00:39Z,Knee - MCL,Sprain,Right,2026-12-20,IR,"The Rams placed Nacua (knee) on injured reserve Thursday, Greg Beacham of the Associated Press reports.",WR
+4426515,Puka Nacua,Los Angeles Rams,Injured Reserve,2026-11-13T00:39Z,Knee - MCL,Sprain,Right,2026-12-20,IR,The Rams placed Nacua (knee) on injured reserve Thursday.,WR
 4242557,Colby Parkinson,Los Angeles Rams,Questionable,2026-11-13T00:22Z,Ribs,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Parkinson (ribs) was limited at Thursday's practice, Adam Caplan of SiriusXM NFL Radio reports.",TE
 2573401,Tyler Higbee,Los Angeles Rams,Questionable,2026-11-13T00:18Z,Illness,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Higbee didn't practice Wednesday due to an illness, Adam Caplan of SiriusXM NFL Radio reports.",TE
 3122132,Myles Garrett,Los Angeles Rams,Questionable,2026-11-13T00:15Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Garrett (knee) practiced in a limited fashion Thursday, Adam Caplan of SiriusXM NFL Radio reports.",DE
@@ -524,9 +524,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4832846,Demond Claiborne,Minnesota Vikings,Injured Reserve,2026-11-10T00:10Z,Knee,Not Specified,Not Specified,2026-12-06,IR,The Vikings placed Claiborne (knee) on injured reserve Monday.,RB
 4242436,Theo Jackson,Minnesota Vikings,Active,2026-11-09T23:54Z,,,,,,"Jackson (quadriceps) is active for Monday's game against Buffalo, Craig Peters of the team's official site reports.",S
 3133487,Andrew Van Ginkel,Minnesota Vikings,Active,2026-11-07T23:02Z,,,,,,"Van Ginkel (chest) doesn't have a designation for Monday's matchup against the Bills, Craig Peters of the Vikings' official site reports.",LB
+4432710,TreVeyon Henderson,New England Patriots,Out,2026-11-13T13:18Z,Illness,Not Specified,Not Specified,2026-11-29,OUT,"Coach Mike Vrabel said Friday that Henderson (illness) is working hard to get back, while acknowledging that he doesn't have a timetable for when that may occur, Mark Daniels of MassLive.com reports.",RB
+4047646,A.J. Brown,New England Patriots,Questionable,2026-11-13T13:12Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Brown (ankle/knee) practiced Friday for a third straight day, Mike Reiss of ESPN.com reports.",WR
 3046439,Hunter Henry,New England Patriots,Questionable,2026-11-12T21:26Z,Foot,,,2026-11-15,QUESTIONABLE,Henry (foot) was a limited practice participant Thursday.,TE
 4569173,Rhamondre Stevenson,New England Patriots,Questionable,2026-11-12T21:17Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Stevenson (knee) returned to practice Thursday as a limited participant.,RB
-4047646,A.J. Brown,New England Patriots,Questionable,2026-11-12T21:10Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Brown (knee/ankle) was a limited participant at Thursday's practice.,WR
 4686772,Christian Gonzalez,New England Patriots,Active,2026-11-12T03:01Z,,,,,,Gonzalez logged 10 tackles (nine solo) and one pass defense during the Patriots' 45-27 loss to the Packers in Week 9.,CB
 4685298,Will Campbell,New England Patriots,Active,2026-11-12T01:44Z,,,,,,Campbell (knee) was a full participant in Wednesday's practice.,OT
 4368113,Charles Woods,New England Patriots,Questionable,2026-11-12T01:40Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Woods (hamstring) was a limited practice participant Wednesday.,CB
@@ -536,7 +537,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 16771,Morgan Moses,New England Patriots,Questionable,2026-11-11T23:14Z,Foot,,,2026-11-15,QUESTIONABLE,questionable,OT
 4428394,Walter Rouse,New England Patriots,Questionable,2026-11-11T23:13Z,Concussion,,,2026-11-15,QUESTIONABLE,questionable,OL
 4372026,Cameron Latu,New England Patriots,Questionable,2026-11-11T23:13Z,Back,,,2026-11-15,QUESTIONABLE,questionable,TE
-4432710,TreVeyon Henderson,New England Patriots,Out,2026-11-11T23:01Z,Illness,Not Specified,Not Specified,2026-11-29,OUT,Henderson (illness) didn't practice Wednesday and is listed as out for Sunday's game against the Lions in Munich.,RB
 4039505,Reggie Gilliam,New England Patriots,Injured Reserve,2026-11-11T22:36Z,Ankle,Not Specified,Not Specified,2026-11-15,IR-R,"Gilliam (ankle) was designated for return from injured reserve Wednesday, Mike Reiss of ESPN.com reports.",FB
 4698253,Lan Larison,New England Patriots,Active,2026-11-11T01:04Z,,,,,,Larison recorded a four-yard rush and failed to haul in his lone target during the Patriots' 45-27 loss to the Packers on Sunday. He also recorded two tackles (one solo) on special teams.,RB
 4613202,Kyle Williams,New England Patriots,Active,2026-11-11T01:03Z,,,,,,Williams failed to catch either of his two targets in Sunday's 45-27 loss to the Packers.,WR
