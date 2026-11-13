@@ -349,10 +349,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2971281,Pharaoh Brown,Indianapolis Colts,Active,2026-11-09T21:15Z,,,,,,,TE
 4362523,Will Mallory,Indianapolis Colts,Active,2026-11-09T21:15Z,,,,,,,TE
 4571557,Spencer Shrader,Indianapolis Colts,Active,2026-11-09T04:19Z,,,,,,Shrader went 3-for-3 on field-goal tries and made both of his PATs during Sunday's 27-23 loss to the Cowboys.,PK
+4882093,Bhayshul Tuten,Jacksonville Jaguars,Questionable,2026-11-13T15:51Z,Ankle,,,2026-11-15,QUESTIONABLE,"Tuten (ankle/foot) will practice Friday, Ryan O'Halloran of The Florida Times-Union reports.",RB
 4426349,Travon Walker,Jacksonville Jaguars,Questionable,2026-11-12T21:43Z,Ribs,,,2026-11-15,QUESTIONABLE,Walker (ribs) was a limited participant in practice Thursday.,DE
 3916433,Jakobi Meyers,Jacksonville Jaguars,Questionable,2026-11-12T21:39Z,Ankle,Not Specified,,2026-11-15,QUESTIONABLE,Meyers (ankle) was a limited participant in Thursday's practice.,WR
 4362619,Chris Rodriguez Jr.,Jacksonville Jaguars,Questionable,2026-11-12T21:38Z,Hand,,,2026-11-15,QUESTIONABLE,"Rodriguez (hand) was a limited practice participant Thursday, while Bhayshul Tuten (ankle/foot) didn't participate.",RB
-4882093,Bhayshul Tuten,Jacksonville Jaguars,Questionable,2026-11-12T21:23Z,Ankle,,,2026-11-15,QUESTIONABLE,Tuten (ankle/foot) didn't practice Thursday.,RB
 4875266,B.J. Green II,Jacksonville Jaguars,Injured Reserve,2026-11-12T00:57Z,Elbow,Not Specified,Not Specified,2026-11-15,IR-R,The Jaguars designated Green (elbow) to return from injured reserve Wednesday.,DE
 4429168,Antonio Johnson,Jacksonville Jaguars,Questionable,2026-11-11T21:25Z,Ankle,,,2026-11-15,QUESTIONABLE,questionable,S
 4572704,Branson Combs,Jacksonville Jaguars,Questionable,2026-11-11T21:25Z,Shoulder,,,2026-11-15,QUESTIONABLE,questionable,LB
@@ -374,7 +374,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360310,Trevor Lawrence,Jacksonville Jaguars,Active,2026-11-06T05:09Z,,,,,,Lawrence completed 16 of 26 passes for 242 yards with a touchdown and no interceptions while rushing once for minus-1 yard in the Jaguars' 33-16 win over the Ravens on Thursday night.,QB
 4432620,Parker Washington,Jacksonville Jaguars,Active,2026-11-06T04:55Z,,,,,,Washington secured two of seven targets for 61 yards and a touchdown in the Jaguars' 33-10 win over the Ravens on Thursday night. He also returned one punt for 11 yards.,WR
 4877475,Cam'Ron Silmon-Craig,Jacksonville Jaguars,Out,2026-11-05T23:48Z,Coach's Decision,Not Specified,Not Specified,2026-11-15,INACTIVE,inactive,S
-3139477,Patrick Mahomes,Kansas City Chiefs,Active,2026-11-13T14:05Z,,,,,,"Mahomes (elbow/knee) has had ""limited swelling"" and ""limited pain"" in his right (throwing) elbow in recent days, and is in line to start Sunday's game against the Falcons, Ian Rapoport of ESPN and NFL Network reports.",QB
+3139477,Patrick Mahomes,Kansas City Chiefs,Active,2026-11-13T14:05Z,,,,,,"Mahomes (elbow/knee) has had ""limited swelling"" and ""limited pain"" in his right (throwing) elbow in recent days, and he is in line to start Sunday's game against the Falcons, Ian Rapoport of ESPN and NFL Network reports.",QB
 4685489,Jaydn Ott,Kansas City Chiefs,Questionable,2026-11-12T21:39Z,Hamstring,,,2026-11-15,QUESTIONABLE,questionable,RB
 3044859,Chris Jones,Kansas City Chiefs,Active,2026-11-12T03:14Z,,,,,,"Jones recorded four tackles (two solo), including 2.0 sacks, and a pass breakup in Sunday's 35-12 win over the Jets.",DT
 4426659,George Karlaftis,Kansas City Chiefs,Active,2026-11-12T03:10Z,,,,,,"Karlaftis recorded six tackles (four solo), including 2.0 sacks, and a pass breakup in Sunday's 35-12 win over the Jets.",DE
@@ -599,13 +599,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4257188,Charlie Jones,New York Giants,Active,2026-11-10T23:03Z,,,,,,,WR
 4686362,Marcus Mbow,New York Giants,Active,2026-11-09T21:30Z,,,,,,,OT
 5082424,Dominic Zvada,New York Giants,Active,2026-11-09T04:01Z,,,,,,Zvada made all four of his field-goal attempts and his lone PAT in Sunday's 19-11 win over the Eagles.,PK
+4683815,Trevin Wallace,New York Jets,Out,2026-11-13T15:43Z,Groin,Not Specified,Not Specified,2026-11-22,OUT,out,LB
 4569618,Garrett Wilson,New York Jets,Questionable,2026-11-12T21:48Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,Wilson (concussion) was a limited participant at Thursday's practice.,WR
 4723820,Omar Cooper Jr.,New York Jets,Questionable,2026-11-12T21:45Z,Ankle,,,2026-11-15,QUESTIONABLE,Cooper (ankle) was a limited participant at Thursday's practice.,WR
 4685248,David Bailey,New York Jets,Active,2026-11-12T02:45Z,,,,,,"Bailey tallied nine tackles (five solo), including 2.0 sacks, and two forced fumbles during the Jets' loss to the Chiefs on Sunday.",LB
 3117255,Harrison Phillips,New York Jets,Questionable,2026-11-12T02:01Z,Ankle,,,2026-11-15,QUESTIONABLE,Phillips (ankle) was estimated as a nonparticipant on the Jets' official injury report Wednesday.,DT
 4570470,Nahshon Wright,New York Jets,Questionable,2026-11-12T01:40Z,Back,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Wright (back) was estimated as a limited participant on the Jets' official injury report Wednesday.,CB
 4362094,Joseph Ossai,New York Jets,Questionable,2026-11-12T01:37Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Ossai (ankle) was a limited participant in Wednesday's practice.,DE
-4683815,Trevin Wallace,New York Jets,Questionable,2026-11-11T23:41Z,Groin,Not Specified,Not Specified,2026-11-22,OUT,Wallace (groin) was estimated to be a nonparticipant on Wednesday.,LB
 4569371,Isaiah Williams,New York Jets,Active,2026-11-11T03:29Z,,,,,,"Williams did not draw a target in Sunday's Week 9 loss to Kansas City. However, he rushed once for four yards, returned one punt for 18 yards and returned two kickoffs for 55 yards.",WR
 4808766,Mason Taylor,New York Jets,Active,2026-11-10T02:36Z,,,,,,Taylor recorded one catch for 11 yards on two targets in Sunday's 35-12 loss to the Chiefs.,TE
 4695404,Isaiah Davis,New York Jets,Active,2026-11-10T02:23Z,,,,,,Davis didn't play any offensive snaps in Sunday's 35-12 loss to the Chiefs.,RB
