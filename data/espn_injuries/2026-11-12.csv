@@ -574,6 +574,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4248047,John Ridgeway III,New Orleans Saints,Active,2026-11-09T21:29Z,,,,,,,DT
 4361259,Zach Wilson,New Orleans Saints,Active,2026-11-09T21:29Z,,,,,,,QB
 3929645,Juwan Johnson,New Orleans Saints,Active,2026-11-09T02:00Z,,,,,,Johnson caught both of his targets for 34 yards and a touchdown in Sunday's 23-22 overtime win over the Browns.,TE
+4426489,Bryan Hudson,New York Giants,Active,2026-11-13T03:22Z,,,,,,,C
+4240706,Jason Pinnock,New York Giants,Questionable,2026-11-13T03:10Z,Back,,,2026-11-12,QUESTIONABLE,"Pinnock (back) is questionable to return to Thursday night's contest against the Commanders, Dan Duggan of The Athletic reports.",S
 4040615,Malik Harrison,New York Giants,Out,2026-11-13T00:04Z,Groin,Not Specified,Not Specified,2026-11-22,INACTIVE,"Harrison (groin) is inactive for Thursday's game against Washington, Dan Salomone of the Giants' official site reports.",LB
 4691043,Nikko Reed,New York Giants,Out,2026-11-12T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,CB
 4039243,Josh Sills,New York Giants,Out,2026-11-12T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,G
@@ -597,8 +599,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5082424,Dominic Zvada,New York Giants,Active,2026-11-09T04:01Z,,,,,,Zvada made all four of his field-goal attempts and his lone PAT in Sunday's 19-11 win over the Eagles.,PK
 4361050,Isaiah Likely,New York Giants,Active,2026-11-09T02:32Z,,,,,,Likely caught five of six targets for 53 yards and a touchdown in Sunday's 19-11 win over the Eagles.,TE
 4595348,Malik Nabers,New York Giants,Active,2026-11-08T21:54Z,,,,,,Nabers caught five of eight targets for 43 yards in Sunday's 19-11 win over the Eagles.,WR
-4692590,Jalin Hyatt,New York Giants,Active,2026-11-08T00:59Z,,,,,,"The Giants signed Hyatt from their practice squad to their active roster Saturday, Dan Salomone of the team's official site reports.",WR
-4259566,Andrew Thomas,New York Giants,Active,2026-11-07T03:56Z,,,,,,Thomas (groin) does not have a designation for Sunday's matchup in Philadelphia.,OT
 4569618,Garrett Wilson,New York Jets,Questionable,2026-11-12T21:48Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,Wilson (concussion) was a limited participant at Thursday's practice.,WR
 4723820,Omar Cooper Jr.,New York Jets,Questionable,2026-11-12T21:45Z,Ankle,,,2026-11-15,QUESTIONABLE,Cooper (ankle) was a limited participant at Thursday's practice.,WR
 4685248,David Bailey,New York Jets,Active,2026-11-12T02:45Z,,,,,,"Bailey tallied nine tackles (five solo), including 2.0 sacks, and two forced fumbles during the Jets' loss to the Chiefs on Sunday.",LB
@@ -626,7 +626,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4373656,Max Mitchell,New York Jets,Injured Reserve,2026-11-04T01:56Z,Concussion,Concussion,Not Specified,2026-12-13,IR,"The Jets placed Mitchell (concussion) on their injured reserve list Tuesday, Amanda Vogt of the team's official site reports.",OT
 4432777,Jeremiah Trotter Jr.,Philadelphia Eagles,Active,2026-11-12T02:12Z,,,,,,Trotter recorded 11 tackles (five solo) and one forced fumble during the Eagles' 19-11 loss to the Giants in Week 9.,LB
 4372414,Elijah Moore,Philadelphia Eagles,Active,2026-11-11T02:24Z,,,,,,Moore caught one of two targets for minus-3 yards during the Eagles' 19-11 loss to the Giants on Sunday.,WR
-4241372,Hollywood Brown,Philadelphia Eagles,Active,2026-11-11T02:23Z,,,,,,Brown recorded one catch for 16 yards on one target Sunday in a loss to the Giants.,WR
 4715355,Darius Cooper,Philadelphia Eagles,Active,2026-11-11T01:14Z,,,,,,Cooper caught just two of eight targets for 25 yards in Sunday's 19-11 loss to the Giants.,WR
 4257591,Arnold Ebiketie,Philadelphia Eagles,Active,2026-11-10T17:26Z,,,,,,"Ebiketie will remain with the Eagles after his reported trade to the Bengals on Tuesday fell through and won't be completed, according to NFL reporter Jordan Schultz.",LB
 4241555,Elijah Mitchell,Philadelphia Eagles,Active,2026-11-10T04:53Z,,,,,,Mitchell reverted to the Eagles' practice squad Monday.,RB
@@ -649,6 +648,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430814,Jake Majors,Philadelphia Eagles,Active,2026-11-02T19:19Z,,,,,,,C
 4426331,Nolan Smith Jr.,Philadelphia Eagles,Active,2026-10-31T00:19Z,,,,,,Smith (concussion) does not carry an injury designation into Sunday's game against the Commanders.,LB
 4362116,Moro Ojomo,Philadelphia Eagles,Active,2026-10-30T20:03Z,,,,,,,DT
+3139368,Marcus Epps,Philadelphia Eagles,Active,2026-10-30T19:58Z,,,,,,,S
 3929846,DeShon Elliott,Pittsburgh Steelers,Active,2026-11-12T21:14Z,,,,,,"Elliott was a full participant in practice Thursday, Mike DeFabo of The Athletic reports.",S
 4035687,Michael Pittman Jr.,Pittsburgh Steelers,Injured Reserve,2026-11-12T18:08Z,Foot,Plantar Fasciitis,Left,2026-11-22,IR,"Pittman (foot) is warmed up with his teammates Thursday, though he remains on IR and wasn't wearing a helmet, Nick Farabaugh of PennLive.com reports.",WR
 4567979,Brandin Echols,Pittsburgh Steelers,Active,2026-11-12T01:50Z,,,,,,"Echols (hamstring) was a full participant at practice Wednesday, Teresa Varley of the Steelers' official site reports.",CB
@@ -774,7 +774,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4688380,Cam Ward,Tennessee Titans,Active,2026-11-01T22:40Z,,,,,,"Ward completed 26 of 40 passes for 304 yards and two touchdowns in Sunday's 43-36 overtime loss to the Bengals. He added seven rushing attempts for 41 yards, lost a fumble, ran in a two-point conversion and threw a successful two-point conversion.",QB
 4429100,Peter Skoronski,Tennessee Titans,Questionable,2026-11-01T21:14Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Skoronski (hamstring) is questionable to return to Sunday's game against the Bengals.,G
 3120464,John Franklin-Myers,Tennessee Titans,Active,2026-11-01T16:44Z,,,,,,"Franklin-Myers (groin) is active for Sunday's game against the Bengals, Jim Wyatt of the Titans' official site reports.",DE
-4360635,Chig Okonkwo,Washington Commanders,Questionable,2026-11-13T02:10Z,Back,,,2026-11-12,QUESTIONABLE,"Okonkwo (back) is questionable to return to Thursday's game against the Giants, Ralph Vacchiano of FoxSports.com reports.",TE
+4360635,Chig Okonkwo,Washington Commanders,Active,2026-11-13T04:38Z,,,,,,"Okonkwo (back) returned to Thursday's eventual 24-21 win at the Giants, finishing with four catches (on eight targets) for 24 yards.",TE
 4432722,Athan Kaliakmanis,Washington Commanders,Out,2026-11-12T23:59Z,Coach's Decision,Not Specified,Not Specified,2026-11-23,INACTIVE,Kaliakmanis (coach's decision) is inactive for Thursday's game against the Giants but will serve as the team's emergency quarterback.,QB
 3122797,Isaac Yiadom,Washington Commanders,Out,2026-11-12T23:47Z,Coach's Decision,Not Specified,Not Specified,2026-11-23,INACTIVE,inactive,CB
 4605488,Tanoa Togiai,Washington Commanders,Out,2026-11-12T23:47Z,Coach's Decision,Not Specified,Not Specified,2026-11-23,INACTIVE,inactive,G
