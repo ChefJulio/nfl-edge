@@ -474,8 +474,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362294,Desjuan Johnson,Los Angeles Rams,Active,2026-11-09T21:25Z,,,,,,,DE
 4575003,Keagen Trost,Los Angeles Rams,Active,2026-11-09T21:25Z,,,,,,,OT
 4429096,Blake Corum,Los Angeles Rams,Active,2026-11-08T22:52Z,,,,,,Corum carried the ball 11 times for 58 yards and a touchdown and failed to catch either of his two targets in Sunday's 20-13 win over the Commanders.,RB
+4869961,Chris Bell,Miami Dolphins,Doubtful,2026-11-13T15:38Z,Knee,,,2026-11-15,DOUBTFUL,doubtful,WR
+4040537,Aaron Brewer,Miami Dolphins,Out,2026-11-13T15:38Z,Concussion,,,2026-11-22,OUT,out,C
 4430681,Jared Wayne,Miami Dolphins,Questionable,2026-11-12T21:33Z,Quadriceps,,,2026-11-15,QUESTIONABLE,questionable,WR
-4869961,Chris Bell,Miami Dolphins,Questionable,2026-11-12T18:32Z,Knee,,,2026-11-15,QUESTIONABLE,"Bell (knee) wasn't spotted at practice Thursday, David Furones of the South Florida Sun Sentinel reports.",WR
 4043130,Jordyn Brooks,Miami Dolphins,Active,2026-11-12T02:48Z,,,,,,Brooks recorded 12 tackles (four solo) during Sunday's 19-9 loss versus the Lions.,LB
 4566094,Jacob Rodriguez,Miami Dolphins,Active,2026-11-12T02:44Z,,,,,,Rodriguez recorded 10 tackles (seven solo) including 1.0 sacks during Sunday's 19-9 loss versus the Lions.,LB
 4036660,Darrell Baker Jr.,Miami Dolphins,Out,2026-11-12T01:05Z,Knee,Not Specified,Not Specified,2026-11-15,PUP-R,"The Dolphins designated Baker (knee) for return to practice from the reserve/PUP list Wednesday, Barry Jackson of the Miami Herald reports.",CB
@@ -483,7 +484,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4682745,Jaylen Wright,Miami Dolphins,Active,2026-11-11T23:26Z,,,,,,"Wright (quadriceps) was a full participant in Wednesday's practice, C. Isaiah Smalls II of the Miami Herald reports.",RB
 4259547,Malik Herring,Miami Dolphins,Questionable,2026-11-11T21:38Z,Neck,,,2026-11-15,QUESTIONABLE,questionable,DE
 4034729,Tucker Addington,Miami Dolphins,Questionable,2026-11-11T21:38Z,Shoulder,,,2026-11-15,QUESTIONABLE,questionable,LS
-4040537,Aaron Brewer,Miami Dolphins,Questionable,2026-11-11T21:38Z,Concussion,,,2026-11-15,QUESTIONABLE,questionable,C
 4242512,Malik Willis,Miami Dolphins,Injured Reserve,2026-11-11T20:15Z,Abdomen,Not Specified,Not Specified,2026-12-13,IR,"The Dolphins hope Willis (abdomen) will return this year but haven't ruled out season-ending surgery, Joe Schad of The Palm Beach Post reports.",QB
 4685307,Kevin Coleman Jr.,Miami Dolphins,Active,2026-11-11T01:23Z,,,,,,Coleman wasn't targeted in Sunday's 19-9 loss to the Lions. He rushed one time for 16 yards.,WR
 3057956,Zach Sieler,Miami Dolphins,Injured Reserve,2026-11-11T00:23Z,Biceps,Surgery,Not Specified,2027-02-15,IR,The Dolphins placed Sieler (biceps) on injured reserve Tuesday.,DT
@@ -605,7 +605,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3117255,Harrison Phillips,New York Jets,Questionable,2026-11-12T02:01Z,Ankle,,,2026-11-15,QUESTIONABLE,Phillips (ankle) was estimated as a nonparticipant on the Jets' official injury report Wednesday.,DT
 4570470,Nahshon Wright,New York Jets,Questionable,2026-11-12T01:40Z,Back,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Wright (back) was estimated as a limited participant on the Jets' official injury report Wednesday.,CB
 4362094,Joseph Ossai,New York Jets,Questionable,2026-11-12T01:37Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Ossai (ankle) was a limited participant in Wednesday's practice.,DE
-4683815,Trevin Wallace,New York Jets,Questionable,2026-11-11T23:41Z,Groin,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Wallace (groin) was estimated to be a nonparticipant on Wednesday.,LB
+4683815,Trevin Wallace,New York Jets,Questionable,2026-11-11T23:41Z,Groin,Not Specified,Not Specified,2026-11-22,OUT,Wallace (groin) was estimated to be a nonparticipant on Wednesday.,LB
 4569371,Isaiah Williams,New York Jets,Active,2026-11-11T03:29Z,,,,,,"Williams did not draw a target in Sunday's Week 9 loss to Kansas City. However, he rushed once for four yards, returned one punt for 18 yards and returned two kickoffs for 55 yards.",WR
 4808766,Mason Taylor,New York Jets,Active,2026-11-10T02:36Z,,,,,,Taylor recorded one catch for 11 yards on two targets in Sunday's 35-12 loss to the Chiefs.,TE
 4695404,Isaiah Davis,New York Jets,Active,2026-11-10T02:23Z,,,,,,Davis didn't play any offensive snaps in Sunday's 35-12 loss to the Chiefs.,RB
