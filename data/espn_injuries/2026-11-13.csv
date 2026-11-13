@@ -574,6 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4248047,John Ridgeway III,New Orleans Saints,Active,2026-11-09T21:29Z,,,,,,,DT
 4361259,Zach Wilson,New Orleans Saints,Active,2026-11-09T21:29Z,,,,,,,QB
 3929645,Juwan Johnson,New Orleans Saints,Active,2026-11-09T02:00Z,,,,,,Johnson caught both of his targets for 34 yards and a touchdown in Sunday's 23-22 overtime win over the Browns.,TE
+4433970,J.J. McCarthy,New York Giants,Active,2026-11-13T05:11Z,,,,,,McCarthy completed 23 of 36 passes for 293 yards with a touchdown and an interception while adding six rushes for 34 yards in the Giants' 24-21 loss to the Commanders on Thursday.,QB
 4595348,Malik Nabers,New York Giants,Active,2026-11-13T04:48Z,,,,,,Nabers secured five of seven targets for 44 yards and lost a fumble in the Giants' 24-21 loss to the Commanders on Thursday.,WR
 4361050,Isaiah Likely,New York Giants,Active,2026-11-13T04:43Z,,,,,,Likely brought in nine of 11 targets for 127 yards and a touchdown and fumbled once but recovered in the Giants' 24-21 loss to the Commanders on Thursday.,TE
 4696981,Cam Skattebo,New York Giants,Active,2026-11-13T04:38Z,,,,,,Skattebo rushed 18 times for 78 yards and two touchdowns and brought in three of four targets for 44 yards in the Giants' 24-21 loss to the Commanders on Thursday.,RB
@@ -586,7 +587,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5082353,J.C. Davis,New York Giants,Out,2026-11-12T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,OT
 4590292,Thomas Fidone II,New York Giants,Out,2026-11-12T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,TE
 4242547,Paulson Adebo,New York Giants,Out,2026-11-12T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,CB
-4433970,J.J. McCarthy,New York Giants,Active,2026-11-12T22:09Z,,,,,,"McCarthy (hip pointer) is ""good to go"" and isn't expected to be limited for Thursday's game against the Commanders, James Palmer of NFL Network reports.",QB
 4040761,Devin Singletary,New York Giants,Active,2026-11-12T18:45Z,,,,,,"Singletary is expected to return to a change-of-pace role Thursday against the Commanders, as Cam Skattebo (hamstring) doesn't have an injury designation.",RB
 4371961,Micah McFadden,New York Giants,Active,2026-11-12T02:10Z,,,,,,"McFadden recorded nine tackles (five solo), including 1.0 sacks, and one fumble recovery during the Giants' 19-11 win over the Eagles in Week 9.",LB
 4950400,Arvell Reese,New York Giants,Active,2026-11-12T02:07Z,,,,,,"Reese recorded 12 tackles (10 solo), including 3.0 sacks, and one forced fumble during the Giants' 19-11 win over the Eagles in Week 9.",LB
@@ -774,6 +774,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4688380,Cam Ward,Tennessee Titans,Active,2026-11-01T22:40Z,,,,,,"Ward completed 26 of 40 passes for 304 yards and two touchdowns in Sunday's 43-36 overtime loss to the Bengals. He added seven rushing attempts for 41 yards, lost a fumble, ran in a two-point conversion and threw a successful two-point conversion.",QB
 4429100,Peter Skoronski,Tennessee Titans,Questionable,2026-11-01T21:14Z,Hamstring,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Skoronski (hamstring) is questionable to return to Sunday's game against the Bengals.,G
 3120464,John Franklin-Myers,Tennessee Titans,Active,2026-11-01T16:44Z,,,,,,"Franklin-Myers (groin) is active for Sunday's game against the Bengals, Jim Wyatt of the Titans' official site reports.",DE
+3068267,Austin Ekeler,Washington Commanders,Active,2026-11-13T05:24Z,,,,,,Ekeler rushed nine times for 26 yards and brought in all four targets for 26 yards in the Commanders' 24-21 win over the Giants on Thursday.,RB
+4697815,Rachaad White,Washington Commanders,Active,2026-11-13T05:17Z,,,,,,White rushed 11 times for 47 yards and brought in one of two targets for five yards in the Commanders' 24-21 win over the Giants on Thursday.,RB
+2976212,Stefon Diggs,Washington Commanders,Active,2026-11-13T05:01Z,,,,,,Diggs secured six of 10 targets for 83 yards and a touchdown in the Commanders' 24-21 win over the Giants on Thursday.,WR
 4426348,Jayden Daniels,Washington Commanders,Active,2026-11-13T04:56Z,,,,,,Daniels completed 23 of 33 passes for 249 yards with three touchdowns and two interceptions and rushed 11 times for 28 yards in the Commanders' 24-21 win over the Giants on Thursday.,QB
 4360635,Chig Okonkwo,Washington Commanders,Active,2026-11-13T04:38Z,,,,,,"Okonkwo (back) returned to Thursday's eventual 24-21 win at the Giants, finishing with four catches (on eight targets) for 24 yards.",TE
 4432722,Athan Kaliakmanis,Washington Commanders,Out,2026-11-12T23:59Z,Coach's Decision,Not Specified,Not Specified,2026-11-23,INACTIVE,Kaliakmanis (coach's decision) is inactive for Thursday's game against the Giants but will serve as the team's emergency quarterback.,QB
@@ -789,11 +792,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3886601,Shy Tuttle,Washington Commanders,Active,2026-11-10T23:18Z,,,,,,,DT
 5081432,Antonio Williams,Washington Commanders,Active,2026-11-10T04:32Z,,,,,,Williams caught three passes for 25 yards on six targets in Sunday's 20-13 loss to the Rams.,WR
 5081335,Drew Stevens,Washington Commanders,Active,2026-11-10T02:51Z,,,,,,Stevens made both of his field-goal attempts and his only PAT during Sunday's 20-13 loss to the Rams.,PK
-3068267,Austin Ekeler,Washington Commanders,Active,2026-11-10T02:02Z,,,,,,Ekeler rushed eight times for 16 yards and caught two of three targets for 18 yards during Sunday's 20-13 loss to the Rams.,RB
 2971586,Fabian Moreau,Washington Commanders,Active,2026-11-09T21:36Z,,,,,,,CB
 3930066,Van Jefferson,Washington Commanders,Active,2026-11-09T01:39Z,,,,,,Jefferson caught five of seven targets for 58 yards and a touchdown in Sunday's 20-13 loss to the Rams.,WR
-2976212,Stefon Diggs,Washington Commanders,Active,2026-11-08T23:20Z,,,,,,Diggs caught three of five targets for 51 yards in Sunday's 20-13 loss to the Rams.,WR
-4697815,Rachaad White,Washington Commanders,Active,2026-11-08T23:17Z,,,,,,White carried the ball seven times for 28 yards and caught two of three targets for 41 yards in Sunday's 20-13 loss to the Rams.,RB
 4430560,Jer'Zhan Newton,Washington Commanders,Active,2026-11-08T17:15Z,,,,,,Newton (pectoral) is active for Sunday's game against the Rams.,DT
 4361577,Dyami Brown,Washington Commanders,Injured Reserve,2026-11-07T23:15Z,Calf,Not Specified,Not Specified,2026-12-06,IR,The Commanders placed Brown (calf) on injured reserve Saturday.,WR
 4262199,Sam Cosmi,Washington Commanders,Active,2026-11-06T22:42Z,,,,,,,G
