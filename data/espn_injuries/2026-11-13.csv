@@ -149,12 +149,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4257364,Zavier Scott,Chicago Bears,Injured Reserve,2026-11-05T21:19Z,Wrist,Not Specified,Not Specified,2026-12-13,IR,The Bears placed Scott (wrist) on injured reserve Thursday.,RB
 3116726,Kentavius Street,Chicago Bears,Injured Reserve,2026-11-05T04:55Z,Knee,Not Specified,Left,2027-02-15,IR,"The Bears placed Street (knee) on injured reserve Wednesday, Adam Jahns of AllCHGO.com reports.",DT
 4251007,Braxton Jones,Chicago Bears,Injured Reserve,2026-11-05T03:40Z,Knee,Surgery,Right,2027-02-15,IR,"Jones (knee) is out for the rest of the season, Brad Biggs of the Chicago Tribune reports.",OT
+4368003,Andrei Iosivas,Cincinnati Bengals,Injured Reserve,2026-11-13T20:33Z,Thumb,Surgery,Left,2026-11-15,IR-R,Iosivas (thumb) is listed as doubtful for Sunday's game against Pittsburgh.,WR
 4401811,Kyle Dugger,Cincinnati Bengals,Out,2026-11-13T20:24Z,Quadriceps,Not Specified,Left,2026-11-22,OUT,out,S
 4572036,DJ Turner II,Cincinnati Bengals,Active,2026-11-13T00:49Z,,,,,,Turner (ankle) was a full participant at practice Thursday.,CB
 4689117,Brian Parker II,Cincinnati Bengals,Injured Reserve,2026-11-12T22:57Z,Undisclosed,Not Specified,Not Specified,2026-11-15,IR-R,The Bengals opened Parker's (undisclosed) 21-day practice window Thursday.,OT
 4646773,Dylan Fairchild,Cincinnati Bengals,Active,2026-11-12T21:31Z,,,,,,,G
 3125356,Jalen Davis,Cincinnati Bengals,Injured Reserve,2026-11-12T21:30Z,Hamstring,Not Specified,Left,2026-11-15,IR-R,The Bengals designated Davis (hamstring) to return from injured reserve Thursday.,CB
-4368003,Andrei Iosivas,Cincinnati Bengals,Injured Reserve,2026-11-12T16:43Z,Thumb,Surgery,Left,2026-11-15,IR-R,Iosivas (thumb) was cleared to return to practice Thursday.,WR
 4247726,Bryan Cook,Cincinnati Bengals,Active,2026-11-12T03:04Z,,,,,,Cook registered 10 tackles (five solo) during the Bengals' win over the Falcons on Sunday.,S
 4431519,Barrett Carter,Cincinnati Bengals,Active,2026-11-12T02:56Z,,,,,,"Carter compiled 10 tackles (two solo), an interception and a pass deflection during Cincinnati's win over the Falcons on Sunday.",LB
 4384852,Dohnte Meyers,Cincinnati Bengals,Active,2026-11-11T00:43Z,,,,,,Meyers caught two passes for 47 yards on three targets in Sunday's 34-17 win over the Falcons.,WR
@@ -749,14 +749,14 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4240589,Tristan Wirfs,Tampa Bay Buccaneers,Active,2026-11-07T03:18Z,,,,,,Wirfs (toe) does not have any injury designation ahead of Sunday's game against the Bears.,OT
 4912847,Jacob Parrish,Tampa Bay Buccaneers,Active,2026-11-06T03:08Z,,,,,,"Parrish registered seven total tackles (four solo) and two passes defensed, including an interception, during Sunday's 16-0 win over Atlanta.",CB
 4890373,Bauer Sharp,Tampa Bay Buccaneers,Active,2026-11-04T19:17Z,,,,,,Sharp went without a target while playing 19 of the Buccaneers' 60 snaps on offense in Sunday's 16-0 win over the Falcons.,TE
+4685617,Kevin Winston Jr.,Tennessee Titans,Active,2026-11-13T20:48Z,,,,,,,S
+3916148,Tony Pollard,Tennessee Titans,Active,2026-11-13T20:45Z,,,,,,"Pollard (finger/rest) was a full participant in Friday's practice and doesn't carry an injury designation ahead of Sunday's game against the Jaguars, Jim Wyatt of the Titans' official site reports.",RB
+4428557,Tyjae Spears,Tennessee Titans,Questionable,2026-11-13T20:43Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Spears (knee) is listed as questionable for Sunday's game against the Jaguars after upgrading to full practice participation Friday, Jim Wyatt of the Titans' official site reports.",RB
 3915398,Tommy Townsend,Tennessee Titans,Out,2026-11-13T17:35Z,Knee,,,2026-11-22,OUT,out,P
 4870805,Anthony Hill Jr.,Tennessee Titans,Out,2026-11-13T17:35Z,Neck,,,2026-11-22,OUT,out,LB
 3926229,Cody Barton,Tennessee Titans,Out,2026-11-13T17:35Z,Concussion,,,2026-11-22,OUT,out,LB
 4429100,Peter Skoronski,Tennessee Titans,Out,2026-11-13T17:33Z,Hamstring,Not Specified,Not Specified,2026-11-22,OUT,out,G
 4871023,Carnell Tate,Tennessee Titans,Out,2026-11-13T16:41Z,Shoulder,Not Specified,Not Specified,2026-11-22,OUT,"Tate (shoulder) has been ruled out for Sunday's game against the Jaguars, Jim Wyatt of the Titans' official site reports.",WR
-4428557,Tyjae Spears,Tennessee Titans,Questionable,2026-11-12T21:21Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Spears (knee) was a limited participant at practice Thursday, Jim Wyatt of the Titans' official site reports.",RB
-3916148,Tony Pollard,Tennessee Titans,Questionable,2026-11-12T21:16Z,Finger,,,2026-11-15,QUESTIONABLE,"Pollard (finger/rest) didn't practice Thursday, Jim Wyatt of the Titans' official site reports.",RB
-4685617,Kevin Winston Jr.,Tennessee Titans,Questionable,2026-11-12T21:03Z,Shoulder,,,2026-11-15,QUESTIONABLE,questionable,S
 4431437,JC Latham,Tennessee Titans,Active,2026-11-12T01:30Z,,,,,,"Latham (finger) practiced in full Wednesday, Jim Wyatt of the Titans' official site reports.",OT
 4685145,Jaylon Jones,Tennessee Titans,Active,2026-11-12T01:26Z,,,,,,"Jones (knee) was a full participant in Wednesday's practice, Jim Wyatt of the Titans' official site reports.",CB
 4570469,Marcus Harris,Tennessee Titans,Active,2026-11-11T23:07Z,,,,,,Harris (ankle) practiced in full Wednesday.,CB
