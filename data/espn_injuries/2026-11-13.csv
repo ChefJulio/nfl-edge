@@ -574,12 +574,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4248047,John Ridgeway III,New Orleans Saints,Active,2026-11-09T21:29Z,,,,,,,DT
 4361259,Zach Wilson,New Orleans Saints,Active,2026-11-09T21:29Z,,,,,,,QB
 3929645,Juwan Johnson,New Orleans Saints,Active,2026-11-09T02:00Z,,,,,,Johnson caught both of his targets for 34 yards and a touchdown in Sunday's 23-22 overtime win over the Browns.,TE
+4682648,Malachi Fields,New York Giants,Active,2026-11-13T06:19Z,,,,,,Fields brought in three of four targets for 62 yards in the Giants' 24-21 loss to the Commanders on Thursday.,WR
 4433970,J.J. McCarthy,New York Giants,Active,2026-11-13T05:11Z,,,,,,McCarthy completed 23 of 36 passes for 293 yards with a touchdown and an interception while adding six rushes for 34 yards in the Giants' 24-21 loss to the Commanders on Thursday.,QB
 4595348,Malik Nabers,New York Giants,Active,2026-11-13T04:48Z,,,,,,Nabers secured five of seven targets for 44 yards and lost a fumble in the Giants' 24-21 loss to the Commanders on Thursday.,WR
 4361050,Isaiah Likely,New York Giants,Active,2026-11-13T04:43Z,,,,,,Likely brought in nine of 11 targets for 127 yards and a touchdown and fumbled once but recovered in the Giants' 24-21 loss to the Commanders on Thursday.,TE
 4696981,Cam Skattebo,New York Giants,Active,2026-11-13T04:38Z,,,,,,Skattebo rushed 18 times for 78 yards and two touchdowns and brought in three of four targets for 44 yards in the Giants' 24-21 loss to the Commanders on Thursday.,RB
 4426489,Bryan Hudson,New York Giants,Active,2026-11-13T03:22Z,,,,,,,C
-4240706,Jason Pinnock,New York Giants,Questionable,2026-11-13T03:10Z,Back,,,2026-11-12,QUESTIONABLE,"Pinnock (back) is questionable to return to Thursday night's contest against the Commanders, Dan Duggan of The Athletic reports.",S
+4240706,Jason Pinnock,New York Giants,Questionable,2026-11-13T03:10Z,Back,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Pinnock (back) is questionable to return to Thursday night's contest against the Commanders, Dan Duggan of The Athletic reports.",S
 4040615,Malik Harrison,New York Giants,Out,2026-11-13T00:04Z,Groin,Not Specified,Not Specified,2026-11-22,INACTIVE,"Harrison (groin) is inactive for Thursday's game against Washington, Dan Salomone of the Giants' official site reports.",LB
 4691043,Nikko Reed,New York Giants,Out,2026-11-12T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,CB
 4039243,Josh Sills,New York Giants,Out,2026-11-12T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,G
@@ -596,7 +597,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429148,Theo Johnson,New York Giants,Active,2026-11-11T00:23Z,,,,,,Johnson wasn't targeted in Sunday's 19-11 win over the Eagles.,TE
 4040655,Darnell Mooney,New York Giants,Active,2026-11-10T23:27Z,,,,,,"Mooney (chest) was a full participant in Tuesday's practice, Dan Salomone of the Giants' official site reports.",WR
 4257188,Charlie Jones,New York Giants,Active,2026-11-10T23:03Z,,,,,,,WR
-4682648,Malachi Fields,New York Giants,Active,2026-11-10T04:13Z,,,,,,Fields caught three of five targets for 40 yards in Sunday's 19-11 win over the Eagles.,WR
 4686362,Marcus Mbow,New York Giants,Active,2026-11-09T21:30Z,,,,,,,OT
 5082424,Dominic Zvada,New York Giants,Active,2026-11-09T04:01Z,,,,,,Zvada made all four of his field-goal attempts and his lone PAT in Sunday's 19-11 win over the Eagles.,PK
 4569618,Garrett Wilson,New York Jets,Questionable,2026-11-12T21:48Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,Wilson (concussion) was a limited participant at Thursday's practice.,WR
@@ -779,7 +779,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4697815,Rachaad White,Washington Commanders,Active,2026-11-13T05:17Z,,,,,,White rushed 11 times for 47 yards and brought in one of two targets for five yards in the Commanders' 24-21 win over the Giants on Thursday.,RB
 2976212,Stefon Diggs,Washington Commanders,Active,2026-11-13T05:01Z,,,,,,Diggs secured six of 10 targets for 83 yards and a touchdown in the Commanders' 24-21 win over the Giants on Thursday.,WR
 4426348,Jayden Daniels,Washington Commanders,Active,2026-11-13T04:56Z,,,,,,Daniels completed 23 of 33 passes for 249 yards with three touchdowns and two interceptions and rushed 11 times for 28 yards in the Commanders' 24-21 win over the Giants on Thursday.,QB
-4360635,Chig Okonkwo,Washington Commanders,Active,2026-11-13T04:38Z,,,,,,"Okonkwo (back) returned to Thursday's eventual 24-21 win at the Giants, finishing with four catches (on eight targets) for 24 yards.",TE
+4360635,Chig Okonkwo,Washington Commanders,Active,2026-11-13T02:10Z,,,,,,"Okonkwo (back) is questionable to return to Thursday's game against the Giants, Ralph Vacchiano of FoxSports.com reports.",TE
 4432722,Athan Kaliakmanis,Washington Commanders,Out,2026-11-12T23:59Z,Coach's Decision,Not Specified,Not Specified,2026-11-23,INACTIVE,Kaliakmanis (coach's decision) is inactive for Thursday's game against the Giants but will serve as the team's emergency quarterback.,QB
 3122797,Isaac Yiadom,Washington Commanders,Out,2026-11-12T23:47Z,Coach's Decision,Not Specified,Not Specified,2026-11-23,INACTIVE,inactive,CB
 4605488,Tanoa Togiai,Washington Commanders,Out,2026-11-12T23:47Z,Coach's Decision,Not Specified,Not Specified,2026-11-23,INACTIVE,inactive,G
