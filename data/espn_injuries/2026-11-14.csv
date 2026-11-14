@@ -150,9 +150,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116726,Kentavius Street,Chicago Bears,Injured Reserve,2026-11-05T04:55Z,Knee,Not Specified,Left,2027-02-15,IR,"The Bears placed Street (knee) on injured reserve Wednesday, Adam Jahns of AllCHGO.com reports.",DT
 4251007,Braxton Jones,Chicago Bears,Injured Reserve,2026-11-05T03:40Z,Knee,Surgery,Right,2027-02-15,IR,"Jones (knee) is out for the rest of the season, Brad Biggs of the Chicago Tribune reports.",OT
 4401811,Kyle Dugger,Cincinnati Bengals,Out,2026-11-14T01:56Z,Quadriceps,Not Specified,Left,2026-11-22,OUT,Dugger (quadriceps) has been ruled out ahead of Sunday's game against the Steelers.,S
-4368003,Andrei Iosivas,Cincinnati Bengals,Injured Reserve,2026-11-13T20:33Z,Thumb,Surgery,Left,2026-11-15,IR-R,Iosivas (thumb) is listed as doubtful for Sunday's game against Pittsburgh.,WR
+4368003,Andrei Iosivas,Cincinnati Bengals,Injured Reserve,2026-11-13T20:33Z,Thumb,Surgery,Left,2026-11-23,IR-R,Iosivas (thumb) is listed as doubtful for Sunday's game against Pittsburgh.,WR
 4572036,DJ Turner II,Cincinnati Bengals,Active,2026-11-13T00:49Z,,,,,,Turner (ankle) was a full participant at practice Thursday.,CB
-4689117,Brian Parker II,Cincinnati Bengals,Injured Reserve,2026-11-12T22:57Z,Knee,Not Specified,Not Specified,2026-11-15,IR-R,The Bengals opened Parker's (undisclosed) 21-day practice window Thursday.,OT
+4689117,Brian Parker II,Cincinnati Bengals,Injured Reserve,2026-11-12T22:57Z,Knee,Not Specified,Not Specified,2026-11-23,IR-R,The Bengals opened Parker's (undisclosed) 21-day practice window Thursday.,OT
 4646773,Dylan Fairchild,Cincinnati Bengals,Active,2026-11-12T21:31Z,,,,,,,G
 3125356,Jalen Davis,Cincinnati Bengals,Injured Reserve,2026-11-12T21:30Z,Hamstring,Not Specified,Left,2026-11-23,IR-R,The Bengals designated Davis (hamstring) to return from injured reserve Thursday.,CB
 4247726,Bryan Cook,Cincinnati Bengals,Active,2026-11-12T03:04Z,,,,,,Cook registered 10 tackles (five solo) during the Bengals' win over the Falcons on Sunday.,S
@@ -499,13 +499,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5144457,Chukwuebuka Godrick,Miami Dolphins,Active,2026-11-09T21:26Z,,,,,,,OT
 4367209,Greg Dulcich,Miami Dolphins,Active,2026-11-09T03:40Z,,,,,,Dulcich caught two of four targets for 14 yards in Sunday's 19-9 loss to the Lions.,TE
 4569603,Malik Washington,Miami Dolphins,Active,2026-11-09T03:29Z,,,,,,Washington caught two of three targets for 21 yards during Sunday's 19-9 loss to the Lions.,WR
+3917315,Kyler Murray,Minnesota Vikings,Out,2026-11-14T19:54Z,Hamstring,Strain,Not Specified,2026-11-29,OUT,"The Vikings are targeting Week 12 against the Falcons on Sunday, Nov. 29, for a return for Murray (hamstring), Tom Pelissero of Netflix reports.",QB
 4629149,Tyrion Ingram-Dawkins,Minnesota Vikings,Out,2026-11-14T02:28Z,Ankle,Not Specified,Not Specified,2026-11-22,OUT,"Ingram-Dawkins (ankle) has been ruled out for Sunday's game against the Packers, Ben Goessling of The Minnesota Star Tribune reports.",DE
 4046537,Joshua Metellus,Minnesota Vikings,Questionable,2026-11-14T00:33Z,Shoulder,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Metellus (shoulder) is listed as questionable for Sunday's game against Green Bay, Ben Goessling of The Minnesota Star Tribune reports.",S
 3728281,Blake Cashman,Minnesota Vikings,Out,2026-11-14T00:30Z,Concussion,Concussion,Not Specified,2026-11-22,OUT,"Cashman (concussion) has been ruled out for Sunday's game against the Packers, Ben Goessling of The Minnesota Star Tribune reports.",LB
 4568007,Jay Ward,Minnesota Vikings,Active,2026-11-13T22:38Z,,,,,,,S
 2573079,Carson Wentz,Minnesota Vikings,Active,2026-11-13T22:03Z,,,,,,"Wentz (ankle) doesn't have an injury designation for Sunday's game at Green Bay, but Kirk Cousins will be Minnesota's starting quarterback.",QB
 3886598,Jauan Jennings,Minnesota Vikings,Out,2026-11-13T21:30Z,Calf,Not Specified,Not Specified,2026-11-22,OUT,Jennings (calf) has been ruled out for Sunday's game at Green Bay.,WR
-3917315,Kyler Murray,Minnesota Vikings,Out,2026-11-13T21:27Z,Hamstring,Strain,Not Specified,2026-11-29,OUT,Murray (hamstring) was ruled out for Sunday's contest in Green Bay.,QB
 14880,Kirk Cousins,Minnesota Vikings,Active,2026-11-13T21:20Z,,,,,,Head coach Kevin O'Connell announced Friday that Cousins will start Sunday's contest at Green Bay.,QB
 4429205,Jordan Addison,Minnesota Vikings,Questionable,2026-11-13T21:17Z,Thumb,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Addison is listed as questionable for Sunday's game in Green Bay due to a thumb injury.,WR
 4036133,T.J. Hockenson,Minnesota Vikings,Out,2026-11-13T21:14Z,Wrist,Not Specified,Not Specified,2026-11-22,OUT,Hockenson (wrist) has been ruled out for Sunday's game at Green Bay.,TE
