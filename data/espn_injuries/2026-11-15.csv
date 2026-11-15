@@ -174,6 +174,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4710752,Cashius Howell,Cincinnati Bengals,Injured Reserve,2026-11-04T01:35Z,Wrist,Surgery,Right,2026-12-06,IR,Howell (wrist) was placed on injured reserve by the Bengals on Tuesday.,DE
 4690070,Mitchell Tinsley,Cincinnati Bengals,Active,2026-11-02T18:48Z,,,,,,,WR
 5092508,Colbie Young,Cincinnati Bengals,Active,2026-11-02T15:53Z,,,,,,Young went without a target while playing 19 of the Bengals' 74 snaps on offense in Sunday's 43-36 overtime win over the Titans.,WR
+3115336,Derek Barnett,Cleveland Browns,Questionable,2026-11-15T18:21Z,Hamstring,,,2026-11-15,QUESTIONABLE,questionable,DE
 4427238,Dillon Gabriel,Cleveland Browns,Out,2026-11-15T16:38Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Gabriel (coach's decision) is inactive for Sunday's game against the Texans but will serve as the Browns' emergency third quarterback.,QB
 4832800,Denzel Boston,Cleveland Browns,Active,2026-11-15T16:34Z,,,,,,"Boston (toe) is listed as active for Sunday's game against the Texans, Kelsey Russo of The Athletic reports.",WR
 4569620,Ronnie Hickman,Cleveland Browns,Out,2026-11-15T16:32Z,Concussion,Concussion,Not Specified,2026-11-29,INACTIVE,inactive,S
@@ -198,7 +199,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3122840,Deshaun Watson,Cleveland Browns,Active,2026-11-11T14:38Z,,,,,,"The Browns announced Wednesday that Watson (concussion) will start Sunday's game against the Texans, Kelsey Russo of the team's official site reports.",QB
 4258620,Andre Szmyt,Cleveland Browns,Active,2026-11-09T05:08Z,,,,,,Szmyt went 3-for-3 on field-goal attempts and made his only PAT during Sunday's 23-22 overtime loss to New Orleans.,PK
 4241463,Jerry Jeudy,Cleveland Browns,Active,2026-11-09T03:31Z,,,,,,Jeudy caught two of four targets for 37 yards in Sunday's 23-22 overtime loss to the Saints.,WR
-5081397,Dylan Sampson,Cleveland Browns,Active,2026-11-09T03:11Z,,,,,,Sampson rushed eight times for 21 yards while catching three of six targets for 27 yards during Sunday's 23-22 overtime loss against the Saints.,RB
 4426506,Joey Porter Jr.,Dallas Cowboys,Questionable,2026-11-15T14:13Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Porter (ankle) is listed as questionable but is expected to play Sunday against the 49ers, Ian Rapoport of NFL Network reports.",CB
 4248911,DaRon Bland,Dallas Cowboys,Questionable,2026-11-15T13:55Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Bland (ankle), who is listed as questionable for Sunday's game against the 49ers, is expected to play, Ian Rapoport of NFL Network reports.",CB
 2980097,Jonathan Bullard,Dallas Cowboys,Questionable,2026-11-14T19:35Z,Calf,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,The Cowboys activated Bullard (calf) from injured reserve Saturday.,DT
@@ -499,6 +499,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4249417,Jalen Tolbert,Miami Dolphins,Active,2026-11-09T21:26Z,,,,,,,WR
 5144457,Chukwuebuka Godrick,Miami Dolphins,Active,2026-11-09T21:26Z,,,,,,,OT
 4367209,Greg Dulcich,Miami Dolphins,Active,2026-11-09T03:40Z,,,,,,Dulcich caught two of four targets for 14 yards in Sunday's 19-9 loss to the Lions.,TE
+4875564,Bo Richter,Minnesota Vikings,Questionable,2026-11-15T18:20Z,Foot,Not Specified,,2026-11-15,QUESTIONABLE,Richter (foot) is questionable to return to Sunday's game against the Packers.,LB
 16772,Kyle Van Noy,Minnesota Vikings,Active,2026-11-15T17:36Z,,,,,,Van Noy (calf) is active for Sunday's game against the Packers.,LB
 4573398,Max Brosmer,Minnesota Vikings,Out,2026-11-15T17:05Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,Brosmer (coach's decision) is inactive but will serve as the Vikings' emergency third quarterback against the Packers on Sunday.,QB
 4046537,Joshua Metellus,Minnesota Vikings,Active,2026-11-15T17:03Z,,,,,,Metellus (shoulder) is active for Sunday's game against the Packers.,S
@@ -523,7 +524,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5091793,Charles Demmings,Minnesota Vikings,Active,2026-11-10T15:44Z,,,,,,,CB
 4710865,Jakobe Thomas,Minnesota Vikings,Active,2026-11-10T15:44Z,,,,,,,S
 3042519,Aaron Jones Sr.,Minnesota Vikings,Active,2026-11-10T05:28Z,,,,,,Jones rushed five times for 16 yards and brought in his only target for five yards in the Vikings' 23-6 loss to the Bills on Monday night.,RB
-4360569,Jordan Mason,Minnesota Vikings,Active,2026-11-10T05:17Z,,,,,,Mason rushed six times for 35 yards and brought in two of three targets for seven yards in the Vikings' 23-6 loss to the Bills on Monday night.,RB
 4431452,Drake Maye,New England Patriots,Questionable,2026-11-15T17:54Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Following Sunday's 35-10 loss to the Lions, coach Mike Vrabel said that Maye will need additional testing to determine the severity of the ankle injury he suffered during the contest, Doug Kyed of the Boston Herald.",QB
 3915525,Dre'Mont Jones,New England Patriots,Questionable,2026-11-15T17:32Z,Undisclosed,Cramps,Not Specified,2026-11-15,QUESTIONABLE,Jones (cramps) is questionable to return to Sunday's game against the Lions in Munich.,DE
 4047646,A.J. Brown,New England Patriots,Questionable,2026-11-15T17:21Z,Hamstring,,Not Specified,2026-11-29,QUESTIONABLE,"Brown (hamstring) won't return to Sunday's game against the Lions, Doug Kyed of the Boston Herald reports.",WR
