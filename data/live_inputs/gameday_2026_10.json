@@ -538,5 +538,75 @@
 "at": "2026-11-15T19:44:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0031236": {
+"name": "Brandin Cooks",
+"team": "SF",
+"pos": "WR",
+"pre": 0.9667,
+"ruling": "INA",
+"at": "2026-11-15T20:00:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0031408": {
+"name": "Mike Evans",
+"team": "SF",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-15T18:01:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0038041": {
+"name": "Jake Ferguson",
+"team": "DAL",
+"pos": "TE",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-15T20:04:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0039062": {
+"name": "Jonathan Mingo",
+"team": "DAL",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-15T20:04:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0040581": {
+"name": "Dont'e Thornton Jr.",
+"team": "LV",
+"pos": "WR",
+"pre": 0.131,
+"ruling": "INA",
+"at": "2026-11-15T19:48:00+00:00",
+"post": 0.0,
+"status": "Inactive (FFD)"
+},
+"00-0040589": {
+"name": "Kurtis Rourke",
+"team": "SF",
+"pos": "QB",
+"pre": 0.1027,
+"ruling": "INA",
+"at": "2026-11-15T20:00:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040894": {
+"name": "Malik Benson",
+"team": "LV",
+"pos": "WR",
+"pre": 0.2434,
+"ruling": "INA",
+"at": "2026-11-15T19:45:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
