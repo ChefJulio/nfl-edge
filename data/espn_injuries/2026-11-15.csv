@@ -374,6 +374,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430539,Brenton Strange,Jacksonville Jaguars,Active,2026-11-06T17:07Z,,,,,,Strange caught both of his targets for 22 yards in Thursday night's 33-10 win over the Ravens.,TE
 4685415,Travis Hunter,Jacksonville Jaguars,Active,2026-11-06T17:05Z,,,,,,Hunter caught his only target for minus-1 yard and lost a fumble in Thursday night's 33-10 win over the Ravens.,WR
 4686361,Cam Little,Jacksonville Jaguars,Active,2026-11-06T05:28Z,,,,,,Little made all four of his field-goal attempts and all three of his extra-point tries in a 33-10 win over Baltimore on Thursday.,PK
+3139477,Patrick Mahomes,Kansas City Chiefs,Active,2026-11-15T22:08Z,,,,,,Mahomes completed 22 of 35 passes for 348 yards with five touchdowns and no interceptions while adding two rushes for 15 yards in the Chiefs' 35-13 win over the Falcons on Sunday.,QB
 4430723,Jared Wiley,Kansas City Chiefs,Out,2026-11-15T21:50Z,Ankle,Fracture,Right,2026-12-13,OUT,"Wiley suffered a fractured ankle in the Chiefs' 35-13 victory over the Falcons on Sunday, Matt Derrick of ChiefsDigest.com reports.",TE
 15847,Travis Kelce,Kansas City Chiefs,Active,2026-11-15T19:11Z,,,,,,"Kelce (ankle) has returned to Sunday's game against the Falcons, Matt McMullen of the team's official site reports.",TE
 4242459,Trey Smith,Kansas City Chiefs,Questionable,2026-11-15T19:05Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,Smith (concussion) has been ruled out for the remainder of Sunday's game against the Falcons.,G
@@ -386,7 +387,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4043041,Jaylon Moore,Kansas City Chiefs,Out,2026-11-15T16:46Z,Ankle,Not Specified,Right,2026-11-22,INACTIVE,inactive,OT
 5278708,Melvin Smith Jr.,Kansas City Chiefs,Out,2026-11-15T16:46Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,CB
 4567048,Kenneth Walker III,Kansas City Chiefs,Out,2026-11-15T16:21Z,Groin,Not Specified,Not Specified,2026-11-22,INACTIVE,"Walker (groin), who won't play Sunday in Atlanta, is expected to ""be able to go"" next Sunday against the Cardinals, Ian Rapoport of NFL Network reports.",RB
-3139477,Patrick Mahomes,Kansas City Chiefs,Active,2026-11-15T13:25Z,,,,,,"In addition to the Chiefs team doctors reviewing Mahomes' (throwing) elbow scans, the team sought further feedback from renowned doctors from the Kansas City Royals and Texas Rangers, Adam Schefter of ESPN reports.",QB
 5155179,Jacob De Jesus,Kansas City Chiefs,Active,2026-11-14T17:30Z,,,,,,The Chiefs elevated De Jesus from the practice squad to the active roster Saturday.,WR
 4605841,Nate Carter,Kansas City Chiefs,Active,2026-11-14T17:28Z,,,,,,The Chiefs elevated Carter from the practice squad to the active roster Saturday.,RB
 4832955,Emmett Johnson,Kansas City Chiefs,Active,2026-11-14T16:37Z,,,,,,"Johnson will be the Chiefs' top running back for Week 10 after Kenneth Walker (groin) was ruled out for Sunday's game against the Falcons, Adam Schefter of ESPN reports.",RB
@@ -399,7 +399,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362887,Justin Fields,Kansas City Chiefs,Active,2026-11-11T15:55Z,,,,,,Fields carried twice for minus-one yard and lost a fumble while logging five snaps on offense in Sunday's 35-12 win over the Jets.,QB
 5082630,Jalen Royals,Kansas City Chiefs,Active,2026-11-11T03:01Z,,,,,,Royals caught both of his targets for 18 yards Sunday in a 35-12 rout of the Jets.,WR
 4240472,Noah Gray,Kansas City Chiefs,Active,2026-11-10T05:57Z,,,,,,Gray caught his only target for 11 yards Sunday in a 35-12 win against the Jets.,TE
-4432665,Brock Bowers,Las Vegas Raiders,Questionable,2026-11-15T22:02Z,Ankle,,,2026-11-15,QUESTIONABLE,questionable,TE
+4432665,Brock Bowers,Las Vegas Raiders,Questionable,2026-11-15T22:08Z,Ankle,,,2026-11-15,QUESTIONABLE,"Bowers headed to the locker room during Sunday's game against the Seahawks due to an ankle issue, Adam Schefter of ESPN reports.",TE
 5150247,Malik Benson,Las Vegas Raiders,Out,2026-11-15T19:59Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,Benson (coach's decision) is inactive for Sunday's game against the Seahawks.,WR
 4360749,Thomas Booker IV,Las Vegas Raiders,Out,2026-11-15T19:50Z,Ankle,Not Specified,Not Specified,2026-11-22,INACTIVE,Booker (ankle) is inactive for Sunday's game against the Seahawks.,DT
 4432775,Dont'e Thornton Jr.,Las Vegas Raiders,Out,2026-11-15T19:48Z,Back,Not Specified,Not Specified,2026-11-22,INACTIVE,Thornton (back) is inactive for Sunday's game against the Seahawks.,WR
@@ -599,6 +599,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4725996,Abdul Carter,New York Giants,Active,2026-11-11T23:30Z,,,,,,Carter (knee/back) doesn't have an injury designation for Thursday night's game against the Commanders.,LB
 4691889,Greg Desrosiers Jr.,New York Giants,Active,2026-11-11T02:56Z,,,,,,Desrosiers carried the ball three times for 20 yards during the Giants' win over the Eagles on Sunday.,RB
 4921249,Colton Hood,New York Giants,Active,2026-11-11T01:35Z,,,,,,"Head coach John Harbaugh told reporters that Hood dislocated his finger during Tuesday's practice, Ryan Dunleavy of the New York Post reports.",CB
+4427366,Breece Hall,New York Jets,Active,2026-11-15T22:06Z,,,,,,Hall rushed 11 times for 41 yards and caught all four of his targets for 67 yards in Sunday's 31-12 loss to the Bills.,RB
+4569618,Garrett Wilson,New York Jets,Active,2026-11-15T22:05Z,,,,,,Wilson (concussion) caught seven of 14 targets for 106 yards and lost a fumble in Sunday's 31-12 loss to the Bills.,WR
 15864,Geno Smith,New York Jets,Questionable,2026-11-15T20:55Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Smith (ankle) has been ruled out for the remainder of Sunday's game against the Bills, Brian Costello of the New York Post reports.",QB
 4723820,Omar Cooper Jr.,New York Jets,Questionable,2026-11-15T19:57Z,Ankle,Not Specified,Right,2026-11-22,QUESTIONABLE,"Cooper (ankle) won't return to Sunday's game against the Bills, Zack Rosenblatt of The Athletic reports.",WR
 4243375,Dylan Parham,New York Jets,Questionable,2026-11-15T19:02Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Parham (knee) is questionable to return to Sunday's game against the Bills.,G
@@ -609,7 +611,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426817,Jarvis Brownlee Jr.,New York Jets,Out,2026-11-15T17:09Z,Illness,Not Specified,Not Specified,2026-11-22,INACTIVE,Brownlee (illness) is inactive for Sunday's game against the Bills.,CB
 3134353,Tim Patrick,New York Jets,Out,2026-11-15T17:07Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,Patrick (coach's decision) is inactive for Sunday's game against the Bills.,WR
 4597500,Adonai Mitchell,New York Jets,Active,2026-11-15T16:39Z,,,,,,Mitchell (knee) is listed as active Sunday versus the Bills.,WR
-4569618,Garrett Wilson,New York Jets,Active,2026-11-15T16:37Z,,,,,,Wilson (concussion) is listed as active Sunday against the Bills.,WR
 4241410,Jelani Woods,New York Jets,Out,2026-11-15T16:36Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,TE
 4683815,Trevin Wallace,New York Jets,Out,2026-11-15T16:36Z,Groin,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,LB
 4574142,Nate Lynn,New York Jets,Out,2026-11-15T16:36Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,DE
@@ -623,7 +624,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3124679,Jason Sanders,New York Jets,Active,2026-11-09T04:48Z,,,,,,Sanders went 4-for-5 on field-goal tries during Sunday's 35-12 loss to the Chiefs.,PK
 5083315,Kenyon Sadiq,New York Jets,Active,2026-11-09T03:49Z,,,,,,Sadiq caught all four of his targets for 49 yards in Sunday's 35-12 loss to the Chiefs.,TE
 4685247,Braelon Allen,New York Jets,Active,2026-11-09T00:26Z,,,,,,"Allen rushed eight times for 33 yards, caught both of his targets for 21 yards and lost a fumble in Sunday's 35-12 loss to the Chiefs.",RB
-4427366,Breece Hall,New York Jets,Active,2026-11-08T21:31Z,,,,,,Hall (quadriceps) rushed 15 times for 61 yards and caught three of four targets for 26 yards in Sunday's 35-12 loss to the Chiefs.,RB
 4432777,Jeremiah Trotter Jr.,Philadelphia Eagles,Active,2026-11-12T02:12Z,,,,,,Trotter recorded 11 tackles (five solo) and one forced fumble during the Eagles' 19-11 loss to the Giants in Week 9.,LB
 4372414,Elijah Moore,Philadelphia Eagles,Active,2026-11-11T02:24Z,,,,,,Moore caught one of two targets for minus-3 yards during the Eagles' 19-11 loss to the Giants on Sunday.,WR
 4715355,Darius Cooper,Philadelphia Eagles,Active,2026-11-11T01:14Z,,,,,,Cooper caught just two of eight targets for 25 yards in Sunday's 19-11 loss to the Giants.,WR
@@ -699,7 +699,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360438,Brandon Aiyuk,San Francisco 49ers,Out,2026-11-09T22:31Z,Personal,Not Specified,Not Specified,2026-11-29,RESERVE-EX,"The 49ers reinstated Aiyuk (personal) from the reserve/left squad list Monday and were granted a two-week roster exemption for the wide receiver, Tom Pelissero of Netflix reports.",WR
 4039029,Khalid Kareem,San Francisco 49ers,Active,2026-11-09T21:33Z,,,,,,,DE
 4696044,Kaelon Black,San Francisco 49ers,Active,2026-11-09T02:45Z,,,,,,Black rushed 11 times for 70 yards but wasn't targeted in Sunday's 38-17 win over the Raiders.,RB
-4245171,Abraham Lucas,Seattle Seahawks,Questionable,2026-11-15T22:00Z,Ankle,Not Specified,,2026-11-15,QUESTIONABLE,questionable,OT
+3115312,Jarran Reed,Seattle Seahawks,Questionable,2026-11-15T22:11Z,Toe,Not Specified,,2026-11-15,QUESTIONABLE,questionable,DT
+4245171,Abraham Lucas,Seattle Seahawks,Questionable,2026-11-15T22:03Z,Ankle,Not Specified,,2026-11-15,QUESTIONABLE,Lucas (ankle) is doubtful to return to Sunday's game against the Raiders.,OT
 4429835,George Holani,Seattle Seahawks,Questionable,2026-11-15T21:28Z,Knee,,,2026-11-15,QUESTIONABLE,Holani (knee) is doubtful to return to Sunday's game against the Raiders.,RB
 4887558,Emanuel Wilson,Seattle Seahawks,Out,2026-11-15T19:55Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Wilson (coach's decision) is inactive for Sunday's game at Arizona.,RB
 2971622,Leonard Williams,Seattle Seahawks,Out,2026-11-15T19:39Z,Shoulder,Stinger,Not Specified,2026-11-29,INACTIVE,inactive,DT
@@ -723,7 +724,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685512,Jadarian Price,Seattle Seahawks,Active,2026-11-09T02:51Z,,,,,,Price posted nine carries for 24 yards and secured all four targets for 54 yards during Sunday's 17-3 victory versus the Cardinals.,RB
 4426385,Zach Charbonnet,Seattle Seahawks,Active,2026-11-09T02:39Z,,,,,,Charbonnet took 16 carries for 77 yards and tallied one catch (on two targets) for nine yards during Sunday's 17-3 win versus the Cardinals.,RB
 4576297,AJ Barner,Seattle Seahawks,Active,2026-11-09T01:42Z,,,,,,Barner caught two of four targets for seven yards and a touchdown in Sunday's 17-3 win over the Cardinals. He added three carries for three yards and an additional touchdown.,TE
-4430878,Jaxon Smith-Njigba,Seattle Seahawks,Active,2026-11-09T01:39Z,,,,,,Smith-Njigba reeled in seven of 10 targets for 51 yards during Sunday's 17-3 win against the Cardinals.,WR
 3052587,Baker Mayfield,Tampa Bay Buccaneers,Questionable,2026-11-15T16:19Z,Lower Leg,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Mayfield's availability for next Sunday's game against the Lions is in question due to an injury he sustained to his foot and ankle area during the Buccaneers' Week 9 loss to the Bears, Mike Garafolo of NFL Network reports.",QB
 4428522,Tykee Smith,Tampa Bay Buccaneers,Active,2026-11-12T04:07Z,,,,,,Smith recorded seven tackles (four solo) and an interception in Sunday night's 27-24 loss to the Bears.,S
 4250392,Zyon McCollum,Tampa Bay Buccaneers,Active,2026-11-12T04:05Z,,,,,,McCollum recorded five tackles (four solo) and two interceptions in Sunday night's 27-24 loss to the Bears.,CB
