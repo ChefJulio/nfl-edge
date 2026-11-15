@@ -24,6 +24,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4569609,Evan Hull,Arizona Cardinals,Active,2026-11-11T02:09Z,,,,,,Hull failed to haul in his lone target during the Cardinals' 17-3 loss to the Seahawks on Sunday.,RB
 4039050,Devin Duvernay,Arizona Cardinals,Active,2026-11-11T00:27Z,,,,,,"Duvernay registered two catches for eight yards on two targets, returned three kickoffs for 64 yards and brought back two punts for 21 yards in Sunday's 17-3 loss to the Seahawks.",WR
 4360761,Michael Wilson,Arizona Cardinals,Injured Reserve,2026-11-10T22:53Z,Neck,Fracture,Not Specified,2027-02-15,IR,The Cardinals placed Wilson (neck) on injured reserve Tuesday.,WR
+4360248,Kyle Pitts Sr.,Atlanta Falcons,Active,2026-11-15T23:02Z,,,,,,Pitts brought in four of five targets for 50 yards in the Falcons' 35-13 loss to the Chiefs on Sunday. He also lost a fumble.,TE
 4430807,Bijan Robinson,Atlanta Falcons,Active,2026-11-15T22:00Z,,,,,,Robinson rushed 16 times for 71 yards and a touchdown and brought in four of five targets for six yards in the Chiefs' 35-13 win over the Falcons on Sunday.,RB
 4426502,Drake London,Atlanta Falcons,Questionable,2026-11-15T21:04Z,Concussion,Concussion,Not Specified,2026-11-15,QUESTIONABLE,"London is being evaluated for a possible concussion during Sunday's game against the Chiefs, Tori McElhaney of the Falcons' official site reports.",WR
 14012,Andy Dalton,Atlanta Falcons,Out,2026-11-15T16:45Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Dalton is inactive for Sunday's game against the Chiefs but was designated as his team's emergency third quarterback.,QB
@@ -44,7 +45,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361409,Jahan Dotson,Atlanta Falcons,Active,2026-11-11T01:10Z,,,,,,Dotson caught two passes for 16 yards on two targets in Sunday's 34-17 loss to the Bengals.,WR
 4243220,Andrew Vorhees,Atlanta Falcons,Active,2026-11-11T00:29Z,,,,,,"The Ravens traded Vorhees and a conditional 2028 sixth-round pick to the Falcons on Tuesday in exchange for Ryan Neuzil, Jamison Hensley of ESPN.com reports.",G
 4431194,Billy Bowman Jr.,Atlanta Falcons,Active,2026-11-09T20:54Z,,,,,,,CB
-4360248,Kyle Pitts Sr.,Atlanta Falcons,Active,2026-11-08T20:01Z,,,,,,Pitts caught three of five targets for 23 yards in Sunday's 34-17 loss to the Bengals.,TE
 4360423,Michael Penix Jr.,Atlanta Falcons,Active,2026-11-08T19:58Z,,,,,,Penix completed 20 of 31 passes for 162 yards and a touchdown with an interception in Sunday's 34-17 loss to Cincinnati. He added 50 rushing yards on three carries.,QB
 4360807,Yasir Abdullah,Atlanta Falcons,Active,2026-11-08T13:13Z,,,,,,"Abdullah (hamstring) is active for Sunday's game versus the Bengals in Madrid, Will McFadden of the Falcons' official site reports.",LB
 4431210,Beaux Collins,Atlanta Falcons,Active,2026-11-08T13:09Z,,,,,,"Collins (hip) is listed as active Sunday against the Bengals in Madrid, Will McFadden of the Falcons' official site reports.",WR
@@ -301,7 +301,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429023,MarShawn Lloyd,Green Bay Packers,Active,2026-11-11T22:13Z,,,,,,Lloyd (knee) is not listed on the Packers' injury report Wednesday.,RB
 4258173,Nico Collins,Houston Texans,Active,2026-11-15T22:17Z,,,,,,Collins secured nine of 16 targets for 94 yards and a touchdown in the Texans' 27-24 loss to the Browns on Sunday.,WR
 4686422,Xavier Hutchinson,Houston Texans,Active,2026-11-15T20:58Z,,,,,,"Hutchinson (head) returned to Sunday's contest at Cleveland, Aaron WIlson of KPRC 2 Houston reports.",WR
-4429059,Woody Marks,Houston Texans,Questionable,2026-11-15T20:25Z,Concussion,Concussion,Not Specified,2026-11-19,QUESTIONABLE,Marks (concussion) has been downgraded to out for the remainder of Sunday's game against the Browns.,RB
+4429059,Woody Marks,Houston Texans,Doubtful,2026-11-15T20:25Z,Concussion,Concussion,Not Specified,2026-11-19,DOUBTFUL,Marks (concussion) has been downgraded to out for the remainder of Sunday's game against the Browns.,RB
 4241250,Jake Hummel,Houston Texans,Active,2026-11-15T17:33Z,,,,,,Hummel (groin) is active  for Sunday's game against the Vikings.,LB
 3121595,Braden Smith,Houston Texans,Active,2026-11-15T17:28Z,,,,,,Smith (illness) is active for Sunday's game against the Browns.,OT
 3045474,Wyatt Teller,Houston Texans,Out,2026-11-15T17:26Z,Illness,Not Specified,Not Specified,2026-11-19,INACTIVE,Teller (illness) is inactive for Sunday's game against the Browns.,G
@@ -699,9 +699,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360438,Brandon Aiyuk,San Francisco 49ers,Out,2026-11-09T22:31Z,Personal,Not Specified,Not Specified,2026-11-29,RESERVE-EX,"The 49ers reinstated Aiyuk (personal) from the reserve/left squad list Monday and were granted a two-week roster exemption for the wide receiver, Tom Pelissero of Netflix reports.",WR
 4039029,Khalid Kareem,San Francisco 49ers,Active,2026-11-09T21:33Z,,,,,,,DE
 4696044,Kaelon Black,San Francisco 49ers,Active,2026-11-09T02:45Z,,,,,,Black rushed 11 times for 70 yards but wasn't targeted in Sunday's 38-17 win over the Raiders.,RB
+4429835,George Holani,Seattle Seahawks,Out,2026-11-15T22:58Z,Knee,,,2026-11-15,OUT,Holani (knee) has been ruled out for the remainder of Sunday's game against the Seahawks.,RB
 3115312,Jarran Reed,Seattle Seahawks,Questionable,2026-11-15T22:20Z,Toe,Not Specified,,2026-11-15,QUESTIONABLE,Reed is doubtful to return to Sunday's game against Las Vegas due to a toe injury.,DT
 4245171,Abraham Lucas,Seattle Seahawks,Questionable,2026-11-15T22:03Z,Ankle,Not Specified,,2026-11-29,QUESTIONABLE,Lucas (ankle) is doubtful to return to Sunday's game against the Raiders.,OT
-4429835,George Holani,Seattle Seahawks,Out,2026-11-15T21:28Z,Knee,,,2026-11-15,OUT,Holani (knee) is doubtful to return to Sunday's game against the Raiders.,RB
 4887558,Emanuel Wilson,Seattle Seahawks,Out,2026-11-15T19:55Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Wilson (coach's decision) is inactive for Sunday's game at Arizona.,RB
 2971622,Leonard Williams,Seattle Seahawks,Out,2026-11-15T19:39Z,Shoulder,Stinger,Not Specified,2026-11-29,INACTIVE,inactive,DT
 3129308,Quenton Nelson,Seattle Seahawks,Out,2026-11-15T19:39Z,Knee,Surgery,Not Specified,2026-11-29,INACTIVE,inactive,G
