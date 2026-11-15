@@ -88,5 +88,25 @@
 "at": "2026-11-15T13:14:00+00:00",
 "post": 0.974,
 "status": "Active (LLL)"
+},
+"00-0040886": {
+"name": "Nicholas Singleton",
+"team": "TEN",
+"pos": "RB",
+"pre": 0.8139,
+"ruling": "INA",
+"at": "2026-11-15T16:34:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041438": {
+"name": "Carnell Tate",
+"team": "TEN",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-15T16:34:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
 }
 }
