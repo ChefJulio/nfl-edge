@@ -68,5 +68,25 @@
 "at": "2026-11-15T13:03:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0039364": {
+"name": "Sione Vaki",
+"team": "DET",
+"pos": "RB",
+"pre": 0.8788,
+"ruling": "ACT",
+"at": "2026-11-15T13:08:00+00:00",
+"post": 0.974,
+"status": "Active (DDL)"
+},
+"00-0036187": {
+"name": "Reggie Gilliam",
+"team": "NE",
+"pos": "RB",
+"pre": 0.5548,
+"ruling": "ACT",
+"at": "2026-11-15T13:14:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
 }
 }
