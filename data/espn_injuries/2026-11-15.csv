@@ -174,6 +174,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4690070,Mitchell Tinsley,Cincinnati Bengals,Active,2026-11-02T18:48Z,,,,,,,WR
 5092508,Colbie Young,Cincinnati Bengals,Active,2026-11-02T15:53Z,,,,,,Young went without a target while playing 19 of the Bengals' 74 snaps on offense in Sunday's 43-36 overtime win over the Titans.,WR
 3917797,Joe Giles-Harris,Cincinnati Bengals,Active,2026-11-01T16:40Z,,,,,,,LB
+4832800,Denzel Boston,Cleveland Browns,Questionable,2026-11-15T12:12Z,Toe,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Boston (toe), who is listed as questionable for Sunday's game against the Texans, is expected to play barring a surprise, Jeremy Fowler of ESPN reports.",WR
 4685702,Quinshon Judkins,Cleveland Browns,Active,2026-11-14T19:50Z,,,,,,"Running backs coach Duce Staley said Saturday that Judkins' lower snap count against the Saints in Week 9 was ""situational football,"" Mary Kay Cabot of The Cleveland Plain Dealer reports.",RB
 2515270,Michael Burton,Cleveland Browns,Injured Reserve,2026-11-14T18:01Z,Calf,Not Specified,Not Specified,2026-12-20,IR,"The Browns placed Burton (calf) on injured reserve Saturday, Chris Easterling of the Akron Beacon Journal reports.",FB
 4876006,Zaire Mitchell-Paden,Cleveland Browns,Active,2026-11-14T17:58Z,,,,,,"The Browns elevated Mitchell-Paden from the practice squad to the active roster Saturday, Chris Easterling of the Akron Beacon Journal reports.",TE
@@ -187,7 +188,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3040471,Maliek Collins,Cleveland Browns,Active,2026-11-13T21:38Z,,,,,,,DT
 4597310,Austin Barber,Cleveland Browns,Active,2026-11-13T21:38Z,,,,,,,OT
 5083076,Harold Fannin Jr.,Cleveland Browns,Active,2026-11-13T21:33Z,,,,,,"Fannin (groin) was a full participant in Friday's practice and doesn't have an injury designation for Sunday's game against the Texans, Chris Easterling of the Akron Beacon Journal reports.",TE
-4832800,Denzel Boston,Cleveland Browns,Questionable,2026-11-13T18:34Z,Toe,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Boston (toe), who is listed as questionable for Sunday's game against the Texans, per Daniel Oyefusi of ESPN,  is trending in the right direction ahead of the contest.",WR
 4695783,Myles Harden,Cleveland Browns,Active,2026-11-12T03:32Z,,,,,,"Harden recorded five tackles (four solo), including 2.0 sacks, and one pass defense during the Browns' 23-22 overtime loss to the Saints in Week 9.",CB
 4432762,Shedeur Sanders,Cleveland Browns,Active,2026-11-11T14:44Z,,,,,,"Sanders will return to a backup role for Sunday's game against the Texans after the Browns announced Wednesday that Deshaun Watson (concussion) will draw the Week 10 start, Kelsey Russo of the team's official site reports.",QB
 3122840,Deshaun Watson,Cleveland Browns,Active,2026-11-11T14:38Z,,,,,,"The Browns announced Wednesday that Watson (concussion) will start Sunday's game against the Texans, Kelsey Russo of the team's official site reports.",QB
@@ -249,9 +249,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5085625,Gavin Ortega,Denver Broncos,Active,2026-11-02T18:50Z,,,,,,,OT
 4261090,Jordan Jackson,Denver Broncos,Active,2026-11-02T18:50Z,,,,,,,DT
 4683535,Tyler Onyedim,Denver Broncos,Active,2026-11-02T18:50Z,,,,,,,DT
+4374302,Amon-Ra St. Brown,Detroit Lions,Questionable,2026-11-15T12:05Z,Ribs,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"St. Brown (ribs), who is listed as questionable for Sunday's game against the Patriots in Munich, is expected to play, Ian Rapoport of NFL Network reports.",WR
 4038849,DJ Wonnum,Detroit Lions,Active,2026-11-13T22:22Z,,,,,,"Wonnum (concussion) does not carry an injury designation into Sunday's game against the Patriots in Munich, Nolan Bianchi of The Detroit News reports.",LB
 4912274,Sione Vaki,Detroit Lions,Questionable,2026-11-13T17:45Z,Ankle,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Vaki (ankle) is listed as questionable for Sunday's game against the Patriots in Munich, Nolan Bianchi of The Detroit News reports.",RB
-4374302,Amon-Ra St. Brown,Detroit Lions,Questionable,2026-11-13T16:45Z,Ribs,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"St. Brown (ribs) was a limited participant in Friday's practice and is listed as questionable for Sunday's game against the Patriots in Munich, Germany, Tim Twentyman of the Lions' official site reports.",WR
 4361788,Cade Mays,Detroit Lions,Out,2026-11-13T01:26Z,Ankle,Sprain,Not Specified,2026-11-22,OUT,Mays (ankle) is not traveling with the Lions to Munich ahead of their Week 10 matchup against the Patriots.,C
 4692025,Brian Branch,Detroit Lions,Active,2026-11-12T22:37Z,,,,,,Branch (hip) was a full participant in practice Thursday.,S
 3139387,D.J. Reed,Detroit Lions,Out,2026-11-12T22:25Z,Hip,Not Specified,Not Specified,2026-11-22,OUT,Reed (hip) did not travel to Munich with the Lions and is ruled out for Sunday's matchup against the Patriots.,CB
@@ -499,6 +499,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5144457,Chukwuebuka Godrick,Miami Dolphins,Active,2026-11-09T21:26Z,,,,,,,OT
 4367209,Greg Dulcich,Miami Dolphins,Active,2026-11-09T03:40Z,,,,,,Dulcich caught two of four targets for 14 yards in Sunday's 19-9 loss to the Lions.,TE
 4569603,Malik Washington,Miami Dolphins,Active,2026-11-09T03:29Z,,,,,,Washington caught two of three targets for 21 yards during Sunday's 19-9 loss to the Lions.,WR
+4429205,Jordan Addison,Minnesota Vikings,Questionable,2026-11-15T12:10Z,Thumb,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Addison (thumb), who listed is questionable for Sunday's contest at Green Bay, is in line to be a game-time decision, Ian Rapoport of NFL Network reports.",WR
 4361112,Devin Culp,Minnesota Vikings,Active,2026-11-15T00:20Z,,,,,,Culp was elevated from the Vikings' practice squad to their active roster Saturday.,TE
 4360637,Jeshaun Jones,Minnesota Vikings,Active,2026-11-15T00:12Z,,,,,,The Vikings elevated Jones from their practice squad to their active roster Saturday.,WR
 3917315,Kyler Murray,Minnesota Vikings,Out,2026-11-14T19:54Z,Hamstring,Strain,Not Specified,2026-11-29,OUT,"The Vikings are targeting Week 12 against the Falcons on Sunday, Nov. 29, for a return for Murray (hamstring), Tom Pelissero of Netflix reports.",QB
@@ -509,7 +510,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2573079,Carson Wentz,Minnesota Vikings,Active,2026-11-13T22:03Z,,,,,,"Wentz (ankle) doesn't have an injury designation for Sunday's game at Green Bay, but Kirk Cousins will be Minnesota's starting quarterback.",QB
 3886598,Jauan Jennings,Minnesota Vikings,Out,2026-11-13T21:30Z,Calf,Not Specified,Not Specified,2026-11-22,OUT,Jennings (calf) has been ruled out for Sunday's game at Green Bay.,WR
 14880,Kirk Cousins,Minnesota Vikings,Active,2026-11-13T21:20Z,,,,,,Head coach Kevin O'Connell announced Friday that Cousins will start Sunday's contest at Green Bay.,QB
-4429205,Jordan Addison,Minnesota Vikings,Questionable,2026-11-13T21:17Z,Thumb,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Addison is listed as questionable for Sunday's game in Green Bay due to a thumb injury.,WR
 4036133,T.J. Hockenson,Minnesota Vikings,Out,2026-11-13T21:14Z,Wrist,Not Specified,Not Specified,2026-11-22,OUT,Hockenson (wrist) has been ruled out for Sunday's game at Green Bay.,TE
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-11-12T03:38Z,,,,,,Wilson recorded nine tackles (three solo) in Monday night's 23-6 loss to the Bills.,LB
 4262921,Justin Jefferson,Minnesota Vikings,Active,2026-11-11T17:13Z,,,,,,"Jefferson stands to benefit from Tuesday's acquisition of Kirk Cousins, who is expected to take over as the Vikings' starting quarterback beginning with Sunday's game against the Packers, Michael F. Florio of ESPN.com reports.",WR
