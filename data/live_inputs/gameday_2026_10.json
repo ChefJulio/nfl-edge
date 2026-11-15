@@ -488,5 +488,55 @@
 "at": "2026-11-15T17:04:00+00:00",
 "post": 0.974,
 "status": "Active (FFF)"
+},
+"00-0034869": {
+"name": "Sam Darnold",
+"team": "SEA",
+"pos": "QB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-15T19:39:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0038797": {
+"name": "Emanuel Wilson",
+"team": "SEA",
+"pos": "RB",
+"pre": 0.9677,
+"ruling": "INA",
+"at": "2026-11-15T19:39:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0039074": {
+"name": "Davis Allen",
+"team": "LA",
+"pos": "TE",
+"pre": 0.8802,
+"ruling": "ACT",
+"at": "2026-11-15T19:44:00+00:00",
+"post": 0.974,
+"status": "Active (LDL)"
+},
+"00-0041203": {
+"name": "Joey Aguilar",
+"team": "ARI",
+"pos": "QB",
+"pre": 0.7564,
+"ruling": "INA",
+"at": "2026-11-15T19:37:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041568": {
+"name": "Ty Simpson",
+"team": "LA",
+"pos": "QB",
+"pre": 0.1336,
+"ruling": "INA",
+"at": "2026-11-15T19:44:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
