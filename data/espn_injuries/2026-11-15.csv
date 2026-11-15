@@ -314,6 +314,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035538,David Montgomery,Houston Texans,Out,2026-11-14T18:18Z,Groin,Not Specified,Not Specified,2026-11-19,INACTIVE,Montgomery (groin) has been downgraded from questionable to out for Sunday's game against the Browns.,RB
 4243956,Reed Blankenship,Houston Texans,Active,2026-11-13T23:47Z,,,,,,Blankenship (concussion/hand) does not carry an injury designation into Sunday's game against the Browns.,S
 4366031,Tank Dell,Houston Texans,Active,2026-11-13T22:53Z,,,,,,"Dell (hand) doesn't have an injury designation for Sunday's game against the Browns, while teammate Marvin Harrison (hamstring) has been ruled out.",WR
+4372716,Nikko Remigio,Houston Texans,Active,2026-11-13T22:17Z,,,,,,The Texans claimed Remigio off waivers from the Chiefs on Thursday.,WR
 4594277,Jaylin Smith,Houston Texans,Injured Reserve,2026-11-12T01:15Z,Hamstring,Strain,Not Specified,2026-11-19,IR-R,The Texans designated Smith (hamstring) to return from injured reserve Wednesday.,CB
 4242546,Davis Mills,Houston Texans,Active,2026-11-11T15:48Z,,,,,,Mills completed one of two pass attempts for seven yards and lost two yards on two carries in Sunday's 44-22 win over the Chargers.,QB
 4426496,Cade Stover,Houston Texans,Active,2026-11-11T15:42Z,,,,,,Stover was a healthy inactive for Sunday's 44-22 win over the Chargers.,TE
@@ -323,7 +324,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4880873,Febechi Nwaiwu,Houston Texans,Active,2026-11-09T21:14Z,,,,,,,G
 2971573,Ka'imi Fairbairn,Houston Texans,Active,2026-11-09T03:59Z,,,,,,Fairbairn went 3-for-3 on field-goal tries and made all five of his PATs during Sunday's 44-22 win over the Chargers.,PK
 3117256,Dalton Schultz,Houston Texans,Active,2026-11-09T03:11Z,,,,,,Schultz caught two of four targets for 42 yards in Sunday's 44-22 win over the Chargers.,TE
-4429022,Kayshon Boutte,Houston Texans,Active,2026-11-09T02:08Z,,,,,,Boutte erupted for four catches (on five targets) for 125 yards and two touchdowns during Sunday's 44-22 road win against the Chargers.,WR
 4683423,Riley Leonard,Indianapolis Colts,Out,2026-11-15T16:46Z,Coach's Decision,Not Specified,Not Specified,2026-11-19,INACTIVE,Leonard (coach's decision) is inactive but will serve as the Colts' emergency third quarterback against the Dolphins on Sunday.,QB
 2566045,Luke Rhodes,Indianapolis Colts,Out,2026-11-15T16:36Z,Hamstring,Not Specified,Not Specified,2026-11-19,INACTIVE,inactive,LS
 3863182,Jerry Tillery,Indianapolis Colts,Out,2026-11-15T16:36Z,Calf,Not Specified,Not Specified,2026-11-19,INACTIVE,inactive,DT
@@ -524,10 +524,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4710865,Jakobe Thomas,Minnesota Vikings,Active,2026-11-10T15:44Z,,,,,,,S
 3042519,Aaron Jones Sr.,Minnesota Vikings,Active,2026-11-10T05:28Z,,,,,,Jones rushed five times for 16 yards and brought in his only target for five yards in the Vikings' 23-6 loss to the Bills on Monday night.,RB
 4360569,Jordan Mason,Minnesota Vikings,Active,2026-11-10T05:17Z,,,,,,Mason rushed six times for 35 yards and brought in two of three targets for seven yards in the Vikings' 23-6 loss to the Bills on Monday night.,RB
+4431452,Drake Maye,New England Patriots,Questionable,2026-11-15T17:54Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Following Sunday's 35-10 loss to the Lions, coach Mike Vrabel said that Maye will need additional testing to determine the severity of the ankle injury he suffered during the contest, Doug Kyed of the Boston Herald.",QB
 3915525,Dre'Mont Jones,New England Patriots,Questionable,2026-11-15T17:32Z,Undisclosed,Cramps,Not Specified,2026-11-15,QUESTIONABLE,Jones (cramps) is questionable to return to Sunday's game against the Lions in Munich.,DE
 4047646,A.J. Brown,New England Patriots,Questionable,2026-11-15T17:21Z,Hamstring,,Not Specified,2026-11-29,QUESTIONABLE,"Brown (hamstring) won't return to Sunday's game against the Lions, Doug Kyed of the Boston Herald reports.",WR
 3129446,Robert Spillane,New England Patriots,Questionable,2026-11-15T17:18Z,Illness,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Spillane (illness) is questionable to return to Sunday's game against the Lions in Munich.,LB
-4431452,Drake Maye,New England Patriots,Questionable,2026-11-15T15:43Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Maye (ankle) has been ruled out for the remainder of Sunday's game against the Lions, Doug Kyed of the Boston Herald reports.",QB
 16771,Morgan Moses,New England Patriots,Active,2026-11-15T15:32Z,,,,,,"Moses (knee) has returned to Sunday's game against the Lions in Munich, Mike Reiss of ESPN.com reports.",OT
 15718,Greg Van Roten,New England Patriots,Active,2026-11-15T13:23Z,,,,,,Van Roten (hamstring) is active for Sunday's game against the Lions in Munich.,G
 4047941,Brenden Schooler,New England Patriots,Out,2026-11-15T13:23Z,Hamstring,Not Specified,Not Specified,2026-11-29,INACTIVE,Schooler (hamstring) is inactive for Sunday's contest against the Patriots in Munich.,S
@@ -674,6 +674,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-10-25T12:26Z,,,,,,"Rudolph is active for Sunday's game against the Saints in Paris, Teresa Varley of the Steelers' official site reports.",QB
 3045282,T.J. Watt,Pittsburgh Steelers,Active,2026-10-23T15:41Z,,,,,,Watt (calf) practiced fully Friday and doesn't carry an injury designation into Sunday's game against the Saints.,LB
 3047495,Sebastian Joseph-Day,Pittsburgh Steelers,Injured Reserve,2026-10-23T00:28Z,Triceps,Not Specified,Not Specified,2026-11-27,IR,"Joseph-Day (triceps) was placed on injured reserve by the Steelers on Thursday, Teresa Varley of the team's official website reports.",DT
+16737,Mike Evans,San Francisco 49ers,Out,2026-11-15T18:01Z,Achilles,Tendinitis,Right,2026-11-22,OUT,"Evans (Achilles) has a chance to return to action next Sunday against the Vikings, Mike Garafolo of NFL Network reports.",WR
 13241,Trent Williams,San Francisco 49ers,Questionable,2026-11-15T14:19Z,Shoulder,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,"Williams (shoulder), who is listed as questionable for Sunday's game against the Cowboys, is expected to play, Adam Schefter of ESPN reports.",OT
 4686308,C.J. West,San Francisco 49ers,Injured Reserve,2026-11-15T00:05Z,Knee,Not Specified,Not Specified,2026-11-22,IR-R,"West (knee) won't be activated from IR ahead of Sunday's Week 10 clash against the Cowboys, David Lombardi of SFStandard.com reports.",DT
 4240542,Nate Hobbs,San Francisco 49ers,Injured Reserve,2026-11-15T00:02Z,Groin,Not Specified,Not Specified,2026-11-22,IR-R,"The 49ers aren't activating Hobbs (adductor) ahead of Sunday's tilt against Dallas, David Lombardi of SFStandard.com reports.",CB
@@ -683,7 +684,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3916903,Dre Greenlaw,San Francisco 49ers,Questionable,2026-11-14T01:04Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Greenlaw (knee) is questionable for Sunday's game against the Cowboys.,LB
 3057524,Siran Neal,San Francisco 49ers,Active,2026-11-13T23:04Z,,,,,,,S
 3126486,Deebo Samuel Sr.,San Francisco 49ers,Active,2026-11-13T22:12Z,,,,,,"Samuel (hamstring) doesn't have a designation for Sunday's game in Dallas, Nick Wagoner of ESPN reports.",WR
-16737,Mike Evans,San Francisco 49ers,Out,2026-11-13T22:08Z,Achilles,Tendinitis,Right,2026-11-22,OUT,"Evans (Achilles) has been ruled out for Sunday's game at Dallas, Nick Wagoner of ESPN reports.",WR
 15818,Keenan Allen,San Francisco 49ers,Active,2026-11-13T22:06Z,,,,,,"Allen will play for the 49ers in Sunday's game at Dallas after being acquired in a trade earlier this week, David Lombardi of SFStandard.com reports.",WR
 5086161,Jaden Dugger,San Francisco 49ers,Active,2026-11-12T02:24Z,,,,,,Dugger recorded six solo tackles and a pick-six during the 49ers' 38-17 win over the Raiders in Week 9.,LB
 3138826,Fred Warner,San Francisco 49ers,Active,2026-11-12T02:17Z,,,,,,"Warner logged five tackles (three solo), one forced fumble and one fumble recovery during the 49ers' 38-17 win over the Raiders in Week 9.",LB
