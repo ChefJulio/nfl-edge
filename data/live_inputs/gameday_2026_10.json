@@ -608,5 +608,15 @@
 "at": "2026-11-15T19:45:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0037004": {
+"name": "Hunter Long",
+"team": "ARI",
+"pos": "TE",
+"pre": 0.5047,
+"ruling": "ACT",
+"at": "2026-11-15T20:00:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
 }
 }
