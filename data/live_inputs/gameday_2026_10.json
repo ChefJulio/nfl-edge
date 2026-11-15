@@ -458,5 +458,35 @@
 "at": "2026-11-15T16:41:00+00:00",
 "post": 0.0,
 "status": "Inactive (LDD)"
+},
+"00-0038090": {
+"name": "Skyy Moore",
+"team": "GB",
+"pos": "WR",
+"pre": 0.4993,
+"ruling": "ACT",
+"at": "2026-11-15T16:45:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0038685": {
+"name": "Chris Brooks",
+"team": "GB",
+"pos": "RB",
+"pre": 0.5212,
+"ruling": "ACT",
+"at": "2026-11-15T16:47:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0039342": {
+"name": "Xavier Legette",
+"team": "CAR",
+"pos": "WR",
+"pre": 0.7696,
+"ruling": "ACT",
+"at": "2026-11-15T17:04:00+00:00",
+"post": 0.974,
+"status": "Active (FFF)"
 }
 }
