@@ -1,5 +1,5 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
-4428996,Jordan Burch,Arizona Cardinals,Questionable,2026-11-15T21:26Z,Knee,Not Specified,,2026-11-15,QUESTIONABLE,questionable,LB
+4428996,Jordan Burch,Arizona Cardinals,Questionable,2026-11-15T21:32Z,Knee,Not Specified,Left,2026-11-15,QUESTIONABLE,"Burch (knee) is questionable to return to Sunday's Week 10 game against the Rams, Darren Urban of the Cardinals' official site reports.",LB
 4709718,Jayden Williams,Arizona Cardinals,Out,2026-11-15T20:26Z,Knee,Not Specified,Not Specified,2026-11-22,INACTIVE,"Williams (knee) has been ruled out for Sunday's game against the Rams, Darren Urban of the Cardinals' official site reports.",OT
 4040805,Roy Lopez,Arizona Cardinals,Active,2026-11-15T20:04Z,,,,,,"Lopez (toe/ankle) is active for Sunday's game against the Rams, Darren Urban of the Cardinals' official site reports.",DT
 3918331,Andrew Wingard,Arizona Cardinals,Active,2026-11-15T20:02Z,,,,,,"Wingard (groin) is active for Sunday's game against the Rams, Darren Urban of the Cardinals' official site reports.",S
@@ -399,7 +399,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362887,Justin Fields,Kansas City Chiefs,Active,2026-11-11T15:55Z,,,,,,Fields carried twice for minus-one yard and lost a fumble while logging five snaps on offense in Sunday's 35-12 win over the Jets.,QB
 5082630,Jalen Royals,Kansas City Chiefs,Active,2026-11-11T03:01Z,,,,,,Royals caught both of his targets for 18 yards Sunday in a 35-12 rout of the Jets.,WR
 4240472,Noah Gray,Kansas City Chiefs,Active,2026-11-10T05:57Z,,,,,,Gray caught his only target for 11 yards Sunday in a 35-12 win against the Jets.,TE
-4432665,Brock Bowers,Las Vegas Raiders,Questionable,2026-11-15T21:23Z,Undisclosed,,,2026-11-15,QUESTIONABLE,"Following a brief exit, Bowers (undisclosed) returned to Sunday's game against the Seahawks, Ryan McFadden of ESPN reports.",TE
+4432665,Brock Bowers,Las Vegas Raiders,Active,2026-11-15T21:37Z,,,,,,"Bowers (ankle) is questionable to return to Sunday's game against the Seahawks, Paul Gutierrez reports.",TE
 5150247,Malik Benson,Las Vegas Raiders,Out,2026-11-15T19:59Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,Benson (coach's decision) is inactive for Sunday's game against the Seahawks.,WR
 4360749,Thomas Booker IV,Las Vegas Raiders,Out,2026-11-15T19:50Z,Ankle,Not Specified,Not Specified,2026-11-22,INACTIVE,Booker (ankle) is inactive for Sunday's game against the Seahawks.,DT
 4432775,Dont'e Thornton Jr.,Las Vegas Raiders,Out,2026-11-15T19:48Z,Back,Not Specified,Not Specified,2026-11-22,INACTIVE,Thornton (back) is inactive for Sunday's game against the Seahawks.,WR
@@ -699,7 +699,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360438,Brandon Aiyuk,San Francisco 49ers,Out,2026-11-09T22:31Z,Personal,Not Specified,Not Specified,2026-11-29,RESERVE-EX,"The 49ers reinstated Aiyuk (personal) from the reserve/left squad list Monday and were granted a two-week roster exemption for the wide receiver, Tom Pelissero of Netflix reports.",WR
 4039029,Khalid Kareem,San Francisco 49ers,Active,2026-11-09T21:33Z,,,,,,,DE
 4696044,Kaelon Black,San Francisco 49ers,Active,2026-11-09T02:45Z,,,,,,Black rushed 11 times for 70 yards but wasn't targeted in Sunday's 38-17 win over the Raiders.,RB
-4429835,George Holani,Seattle Seahawks,Questionable,2026-11-15T21:25Z,Knee,,,2026-11-15,QUESTIONABLE,questionable,RB
+4429835,George Holani,Seattle Seahawks,Questionable,2026-11-15T21:28Z,Knee,,,2026-11-15,QUESTIONABLE,Holani (knee) is doubtful to return to Sunday's game against the Raiders.,RB
 4887558,Emanuel Wilson,Seattle Seahawks,Out,2026-11-15T19:55Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Wilson (coach's decision) is inactive for Sunday's game at Arizona.,RB
 2971622,Leonard Williams,Seattle Seahawks,Out,2026-11-15T19:39Z,Shoulder,Stinger,Not Specified,2026-11-29,INACTIVE,inactive,DT
 3129308,Quenton Nelson,Seattle Seahawks,Out,2026-11-15T19:39Z,Knee,Surgery,Not Specified,2026-11-29,INACTIVE,inactive,G
