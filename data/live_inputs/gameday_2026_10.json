@@ -18,5 +18,55 @@
 "at": "2026-11-12T23:47:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0035676": {
+"name": "A.J. Brown",
+"team": "NE",
+"pos": "WR",
+"pre": 0.7234,
+"ruling": "ACT",
+"at": "2026-11-15T11:10:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0036875": {
+"name": "Rhamondre Stevenson",
+"team": "NE",
+"pos": "RB",
+"pre": 0.7767,
+"ruling": "ACT",
+"at": "2026-11-15T11:14:00+00:00",
+"post": 0.974,
+"status": "Active (DLL)"
+},
+"00-0036963": {
+"name": "Amon-Ra St. Brown",
+"team": "DET",
+"pos": "WR",
+"pre": 0.9493,
+"ruling": "ACT",
+"at": "2026-11-15T12:05:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0038564": {
+"name": "Cameron Latu",
+"team": "NE",
+"pos": "TE",
+"pre": 0.861,
+"ruling": "ACT",
+"at": "2026-11-15T13:03:00+00:00",
+"post": 0.974,
+"status": "Active (DLL)"
+},
+"00-0041123": {
+"name": "Behren Morton",
+"team": "NE",
+"pos": "QB",
+"pre": 0.0952,
+"ruling": "INA",
+"at": "2026-11-15T13:03:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
