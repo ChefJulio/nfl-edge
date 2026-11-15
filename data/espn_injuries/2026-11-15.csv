@@ -274,6 +274,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4896353,Jimmy Rolder,Detroit Lions,Injured Reserve,2026-11-04T02:07Z,Hamstring,Not Specified,Not Specified,2027-02-15,IR,Rolder (hamstring) was placed on injured reserve Tuesday.,LB
 4429187,Seth McLaughlin,Detroit Lions,Active,2026-11-02T18:51Z,,,,,,,C
 4371973,Roger McCreary,Detroit Lions,Active,2026-11-01T16:42Z,,,,,,McCreary (foot) is active for Sunday's game against the Vikings.,CB
+14931,Kevin Zeitler,Green Bay Packers,Out,2026-11-15T17:31Z,Ankle,Not Specified,Not Specified,2026-11-25,INACTIVE,"Zeitler (ankle/triceps) is inactive for Sunday's game against the Vikings, Mike Spofford of the Packers' official site reports.",G
+4361904,Travis Glover,Green Bay Packers,Active,2026-11-15T17:29Z,,,,,,"Glover (knee) is active for Sunday's game against the Vikings, Mike Spofford of the Packers' official site reports.",OT
 4686906,Lukas Van Ness,Green Bay Packers,Active,2026-11-15T17:18Z,,,,,,Van Ness (back) is active for Sunday's game against the Vikings.,DE
 4688930,Javon Bullard,Green Bay Packers,Active,2026-11-15T17:12Z,,,,,,Bullard (ankle) is active for Sunday's game against the Vikings.,S
 4241470,Xavier McKinney,Green Bay Packers,Active,2026-11-15T17:08Z,,,,,,McKinney (foot) is active for Sunday's game against the Vikings.,S
@@ -281,11 +283,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4249836,Pierre Strong Jr.,Green Bay Packers,Out,2026-11-15T16:56Z,Coach's Decision,Not Specified,Not Specified,2026-11-25,INACTIVE,Strong (coach's decision) is inactive for Sunday's game against the Vikings.,RB
 3149687,Chris Brooks,Green Bay Packers,Active,2026-11-15T16:47Z,,,,,,"Brooks (ankle) is active for Sunday's game versus the Vikings, Mike Spofford of the Packers' official site reports.",RB
 4430191,Skyy Moore,Green Bay Packers,Active,2026-11-15T16:45Z,,,,,,"Moore (ankle) is listed as active Sunday versus the Vikings, Mike Spofford of the Packers' official site reports.",WR
-14931,Kevin Zeitler,Green Bay Packers,Out,2026-11-15T16:34Z,Ankle,Not Specified,Not Specified,2026-11-25,INACTIVE,inactive,G
 4426411,Sean Rhyan,Green Bay Packers,Out,2026-11-15T16:34Z,Ankle,Sprain,Not Specified,2026-11-25,INACTIVE,inactive,G
 4047365,Josh Jacobs,Green Bay Packers,Out,2026-11-15T16:34Z,Finger,Surgery,Right,2026-11-25,INACTIVE,inactive,RB
 4360887,Donovan Jennings,Green Bay Packers,Out,2026-11-15T16:34Z,Coach's Decision,Not Specified,Not Specified,2026-11-25,INACTIVE,inactive,G
-4361904,Travis Glover,Green Bay Packers,Active,2026-11-15T16:34Z,,,,,,,OT
 4429466,Drake Dabney,Green Bay Packers,Active,2026-11-14T22:39Z,,,,,,The Packers elevated Dabney from their practice squad to their active roster Saturday.,TE
 4360086,Josh Whyle,Green Bay Packers,Injured Reserve,2026-11-14T22:35Z,Concussion,Concussion,Not Specified,2026-12-20,IR,Green Bay placed Whyle (concussion) on injured reserve Saturday.,TE
 4242390,Aaron Banks,Green Bay Packers,Active,2026-11-14T02:19Z,,,,,,"Banks (knee/hip) does not have an injury designation for Sunday's game against the Vikings, Wes Hodkiewicz of the Packers' official site reports.",G
@@ -527,7 +527,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3915525,Dre'Mont Jones,New England Patriots,Questionable,2026-11-15T17:32Z,Undisclosed,Cramps,Not Specified,2026-11-15,QUESTIONABLE,Jones (cramps) is questionable to return to Sunday's game against the Lions in Munich.,DE
 4047646,A.J. Brown,New England Patriots,Questionable,2026-11-15T17:21Z,Hamstring,,Not Specified,2026-11-29,QUESTIONABLE,"Brown (hamstring) won't return to Sunday's game against the Lions, Doug Kyed of the Boston Herald reports.",WR
 3129446,Robert Spillane,New England Patriots,Questionable,2026-11-15T17:18Z,Illness,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Spillane (illness) is questionable to return to Sunday's game against the Lions in Munich.,LB
-4431452,Drake Maye,New England Patriots,Out,2026-11-15T15:43Z,Ankle,Not Specified,Not Specified,2026-11-29,OUT,"Maye (ankle) has been ruled out for the remainder of Sunday's game against the Lions, Doug Kyed of the Boston Herald reports.",QB
+4431452,Drake Maye,New England Patriots,Questionable,2026-11-15T15:43Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Maye (ankle) has been ruled out for the remainder of Sunday's game against the Lions, Doug Kyed of the Boston Herald reports.",QB
 16771,Morgan Moses,New England Patriots,Active,2026-11-15T15:32Z,,,,,,"Moses (knee) has returned to Sunday's game against the Lions in Munich, Mike Reiss of ESPN.com reports.",OT
 15718,Greg Van Roten,New England Patriots,Active,2026-11-15T13:23Z,,,,,,Van Roten (hamstring) is active for Sunday's game against the Lions in Munich.,G
 4047941,Brenden Schooler,New England Patriots,Out,2026-11-15T13:23Z,Hamstring,Not Specified,Not Specified,2026-11-29,INACTIVE,Schooler (hamstring) is inactive for Sunday's contest against the Patriots in Munich.,S
@@ -549,6 +549,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4698253,Lan Larison,New England Patriots,Active,2026-11-11T01:04Z,,,,,,Larison recorded a four-yard rush and failed to haul in his lone target during the Patriots' 45-27 loss to the Packers on Sunday. He also recorded two tackles (one solo) on special teams.,RB
 4613202,Kyle Williams,New England Patriots,Active,2026-11-11T01:03Z,,,,,,Williams failed to catch either of his two targets in Sunday's 45-27 loss to the Packers.,WR
 4831959,Eli Raridon,New England Patriots,Active,2026-11-11T00:55Z,,,,,,Raridon caught three passes for 52 yards on six targets in Sunday's 45-27 loss to the Packers.,TE
+4880281,Jordyn Tyson,New Orleans Saints,Active,2026-11-15T17:34Z,,,,,,"Tyson was working with the Saints' first-team offense pregame ahead of Sunday's matchup with the Panthers, Nick Underhill of NewOrleans.Football reports.",WR
 4361259,Zach Wilson,New Orleans Saints,Out,2026-11-15T17:21Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,Wilson (coach's decision) is inactive but will serve as the Saints' emergency third quarterback against the Panthers on Sunday.,QB
 4569682,Audric Estime,New Orleans Saints,Active,2026-11-15T17:12Z,,,,,,Estime's role in the backfield will likely be diminished after Travis Etienne (hamstring) was cleared to return for Sunday's game against the Panthers.,RB
 4429568,Martin Emerson Jr.,New Orleans Saints,Active,2026-11-15T16:56Z,,,,,,Emerson (shin) is active for Sunday's game against the Panthers.,CB
@@ -568,7 +569,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241993,Pete Werner,New Orleans Saints,Active,2026-11-12T03:27Z,,,,,,Werner registered 11 tackles (three solo) during the Saints' 23-22 overtime win over the Browns in Week 9.,LB
 3918310,Carl Granderson,New Orleans Saints,Active,2026-11-12T03:23Z,,,,,,"Granderson recorded seven tackles (five solo), including 2.0 sacks, and one pass defense during the Saints' 23-22 overtime win over the Browns in Week 9.",DE
 3124890,Kaden Elliss,New Orleans Saints,Active,2026-11-12T03:18Z,,,,,,"Elliss recorded 11 tackles (eight solo), including 1.0 sacks, during the Saints' 23-22 overtime victory over the Browns in Week 9.",LB
-4880281,Jordyn Tyson,New Orleans Saints,Active,2026-11-11T21:55Z,,,,,,"Saints coach Kellen Moore said Wednesday that Tyson should get ""a healthy dose more"" of snaps in Sunday's game against the Panthers, Jeff Nowak of WWL Radio reports.",WR
 4698597,Barion Brown,New Orleans Saints,Active,2026-11-11T02:09Z,,,,,,Brown caught his only target for 52 yards during Sunday's 23-22 overtime win versus the Browns. He also lost a fumble on a punt return.,WR
 4879276,Bryce Lance,New Orleans Saints,Active,2026-11-11T00:46Z,,,,,,Lance failed to catch his only target in Sunday's 23-22 overtime win over the Browns.,WR
 4569559,Devaughn Vele,New Orleans Saints,Active,2026-11-10T03:51Z,,,,,,Vele caught two passes for 17 yards on four targets in Sunday's 23-22 overtime win over the Browns.,WR
