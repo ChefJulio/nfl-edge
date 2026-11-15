@@ -449,8 +449,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426535,Theo Wease Jr.,Los Angeles Chargers,Active,2026-11-09T21:23Z,,,,,,,WR
 4362081,Cameron Dicker,Los Angeles Chargers,Active,2026-11-09T04:55Z,,,,,,Dicker went 3-for-3 on field-goal attempts and made his only PAT during Sunday's 44-22 loss to Houston.,PK
 4429020,DJ Uiagalelei,Los Angeles Chargers,Active,2026-11-09T03:04Z,,,,,,"Uiagalelei completed two of seven passes for 27 yards and a touchdown after replacing Justin Herbert (finger) in the fourth quarter of Sunday's 44-22 loss to the Texans, and head coach Jim Harbaugh said after the game that Herbert could have a fractured finger, Alex Insdorf of BoltBeat.com reports.",QB
-4430155,Dylan McMahon,Los Angeles Rams,Questionable,2026-11-15T22:18Z,Knee,Not Specified,,2026-11-25,QUESTIONABLE,McMahon (knee) is doubtful to return to Sunday's game against the Cardinals.,C
-3052180,Coleman Shelton,Los Angeles Rams,Questionable,2026-11-15T22:06Z,Hamstring,Not Specified,,2026-11-25,QUESTIONABLE,Shelton (hamstring) is doubtful to return to Sunday's game against the Cardinals.,C
+3052180,Coleman Shelton,Los Angeles Rams,Questionable,2026-11-15T22:54Z,Hamstring,Not Specified,,2026-11-25,QUESTIONABLE,Shelton (hamstring) has been ruled out for the remainder of Sunday's game against the Cardinals.,C
+4430155,Dylan McMahon,Los Angeles Rams,Questionable,2026-11-15T22:52Z,Knee,Not Specified,,2026-11-25,QUESTIONABLE,McMahon (knee) has been ruled out for the remainder of Sunday's game against the Cardinals.,C
 2575907,Joe Cardona,Los Angeles Rams,Out,2026-11-15T20:29Z,Ankle,Not Specified,Not Specified,2026-11-25,INACTIVE,Cardona (ankle) is inactive for Sunday's game against Arizona.,LS
 4426405,Trent McDuffie,Los Angeles Rams,Active,2026-11-15T20:21Z,,,,,,McDuffie (back) is active for Sunday's game against the Cardinals.,CB
 4242154,Kam Curl,Los Angeles Rams,Active,2026-11-15T20:11Z,,,,,,Curl (toe) is active for Sunday's game against the Cardinals.,S
@@ -701,7 +701,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4696044,Kaelon Black,San Francisco 49ers,Active,2026-11-09T02:45Z,,,,,,Black rushed 11 times for 70 yards but wasn't targeted in Sunday's 38-17 win over the Raiders.,RB
 3115312,Jarran Reed,Seattle Seahawks,Questionable,2026-11-15T22:20Z,Toe,Not Specified,,2026-11-15,QUESTIONABLE,Reed is doubtful to return to Sunday's game against Las Vegas due to a toe injury.,DT
 4245171,Abraham Lucas,Seattle Seahawks,Questionable,2026-11-15T22:03Z,Ankle,Not Specified,,2026-11-29,QUESTIONABLE,Lucas (ankle) is doubtful to return to Sunday's game against the Raiders.,OT
-4429835,George Holani,Seattle Seahawks,Questionable,2026-11-15T21:28Z,Knee,,,2026-11-15,OUT,Holani (knee) is doubtful to return to Sunday's game against the Raiders.,RB
+4429835,George Holani,Seattle Seahawks,Out,2026-11-15T21:28Z,Knee,,,2026-11-15,OUT,Holani (knee) is doubtful to return to Sunday's game against the Raiders.,RB
 4887558,Emanuel Wilson,Seattle Seahawks,Out,2026-11-15T19:55Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Wilson (coach's decision) is inactive for Sunday's game at Arizona.,RB
 2971622,Leonard Williams,Seattle Seahawks,Out,2026-11-15T19:39Z,Shoulder,Stinger,Not Specified,2026-11-29,INACTIVE,inactive,DT
 3129308,Quenton Nelson,Seattle Seahawks,Out,2026-11-15T19:39Z,Knee,Surgery,Not Specified,2026-11-29,INACTIVE,inactive,G
